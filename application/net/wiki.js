@@ -576,6 +576,7 @@ function module_code(library_namespace) {
 		incubator : true,
 		phabricator : true,
 		wikitech : true,
+		// mul : true,
 
 		releases : true
 	}
@@ -1006,7 +1007,9 @@ function module_code(library_namespace) {
 		if (!page_name || typeof page_name !== 'string')
 			return page_name;
 
-		page_name = page_name.trimEnd().replace(/^[\s:]+/, '');
+		page_name = page_name.trimEnd().replace(/^[\s:]+/, '')
+		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
+		.replace(/([ _]){2,}/g, '$1');
 
 		page_name = use_underline
 		// ' ' → '_': 在 URL 上可更簡潔。
@@ -1364,17 +1367,17 @@ function module_code(library_namespace) {
 			wikitext.options = options;
 		}
 		// copy prototype methods
-		Object.assign(wikitext, page_parser.paser_prototype);
+		Object.assign(wikitext, page_parser.parser_prototype);
 		set_wiki_type(wikitext, 'plain');
 		return wikitext;
 	}
 
-	/** {Object}prototype of {wiki page parser}, CeL.wiki.parser.paser_prototype */
-	page_parser.paser_prototype = {
+	/** {Object}prototype of {wiki page parser}, CeL.wiki.parser.parser_prototype */
+	page_parser.parser_prototype = {
 		each_section : for_each_section,
 
 		// for_token
-		// CeL.wiki.parser.paser_prototype.each.call(token_list,...)
+		// CeL.wiki.parser.parser_prototype.each.call(token_list,...)
 		// 在執行 .each() 之前，應該先執行 .parse()。
 		each : for_each_token,
 		parse : parse_page,
@@ -1796,7 +1799,7 @@ function module_code(library_namespace) {
 		// 有多個完全相同的anchor時，後面的會加上"_2", "_3",...。
 		// 這個部分的處理請見 function for_each_section()
 		anchor = section_link_escape(id
-		// 長度相同的情況下，盡可能保留原貌。
+		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1').replace(/&/g, '&amp;'), true);
 
 		// console.log(parsed_title);
@@ -1952,7 +1955,7 @@ function module_code(library_namespace) {
 	/**
 	 * 為每一個章節(討論串)執行特定作業 for_section(section)
 	 * 
-	 * CeL.wiki.parser.paser_prototype.each_section
+	 * CeL.wiki.parser.parser_prototype.each_section
 	 * 
 	 * @example <code>
 	parser = CeL.wiki.parser(page_data);
@@ -2131,7 +2134,7 @@ function module_code(library_namespace) {
 	}
 
 	// var section_index_filter =
-	// CeL.wiki.parser.paser_prototype.each_section.index_filter;
+	// CeL.wiki.parser.parser_prototype.each_section.index_filter;
 	for_each_section.index_filter = function filter_users_of_section(section,
 			filter, type) {
 		// filter: user_name_filter
@@ -3146,6 +3149,9 @@ function module_code(library_namespace) {
 		// wikilink
 		// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
 		// [[~:~|~]], [[~:~:~|~]]
+
+		// TODO: bug: 正常情況下 "[[ ]]" 不會被 parse，但是本函數還是會 parse 成 link。
+
 		wikitext = wikitext.replace_till_stable(
 		// or use ((PATTERN_link))
 		PATTERN_wikilink_g, function(all_link, page_and_section, page_name,
@@ -4843,12 +4849,17 @@ function module_code(library_namespace) {
 	 * @returns {String|Undefined}content of page, maybe undefined.
 	 */
 	function get_page_content(page_data, flow_view) {
+		if (!page_data) {
+			// e.g., page_data === undefined
+			return page_data;
+		}
+
 		// for flow page: 因為 page_data 可能符合一般頁面標準，
 		// 此時會先得到 {"flow-workflow":""} 之類的內容，
 		// 因此必須在檢測一般頁面之前先檢測 flow page。
 		// page_data.header: 在 Flow_page() 中設定。
 		// page_data.revision: 由 Flow_page() 取得。
-		var content = page_data &&
+		var content =
 		// page_data.is_Flow &&
 		(page_data[flow_view] || page_data['header'] || page_data).revision;
 		if (content && (content = content.content)) {
@@ -4903,8 +4914,7 @@ function module_code(library_namespace) {
 		// ('missing' in page_data): 此頁面不存在/已刪除。
 		// e.g., { ns: 0, title: 'title', missing: '' }
 		// TODO: 提供此頁面的刪除和移動日誌以便參考。
-		return page_data && ('missing' in page_data) ? undefined
-				: String(page_data || '');
+		return ('missing' in page_data) ? undefined : String(page_data || '');
 	}
 
 	/**
@@ -6557,6 +6567,7 @@ function module_code(library_namespace) {
 						// 取得頁面內容。
 						// console.log(page);
 						this.page(page, function(page_data, error) {
+							// TODO: if (error) {...}
 							// console.log([ page_data, config.page_options ]);
 							each.call(this, page_data, messages, config);
 							if (messages.quit_operation) {
@@ -8102,6 +8113,10 @@ function module_code(library_namespace) {
 					if (original_title in order_hash) {
 						ordered_list[order_hash[original_title]] = page_data;
 					} else {
+						console.log(page_data);
+						console.log('-'.repeat(70)
+						//
+						+ '\nPage list:\n' + title[1].join('\n'));
 						throw 'wiki_API.page: 取得了未指定的頁面: '
 						//
 						+ get_page_title_link(original_title);

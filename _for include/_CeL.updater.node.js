@@ -1,16 +1,16 @@
 /**
- * @name 自動配置好最新版本 CeJS 的工具。
- * @fileoverview 將會自動取得並解開 GitHub 最新版本壓縮檔案。
- *
+ * @name Auto update CeJS via GitHub. 自動配置好最新版本 CeJS 的工具。
+ * @fileoverview 將會自動取得並解開 GitHub 最新版本壓縮檔案至當前工作目錄下。
+ * 
  * @example<code>
 
-node _CeL.updater.node.js
+# node _CeL.updater.node.js
 
 TODO:
 use Zlib
 
  </code>
- *
+ * 
  * @since 2017/3/13 14:39:41
  */
 
@@ -21,9 +21,11 @@ use Zlib
 
 var p7zip_path = [ '7z',
 // e.g., install p7zip package via yum
-'7za', 'unzip', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
+'7za', 'unzip', '"C:\\Program Files\\7-Zip\\7z.exe"' ], user_name = 'kanasimi',
+/** {String}Repository name */
+repository = 'CeJS', branch = 'master',
 // const 下載之後將壓縮檔存成這個檔名。
-target_file = 'CeJS-master.zip',
+target_file = repository + '-' + branch + '.zip',
 //
 latest_version_file = target_file.replace(/[^.]+$/g, 'version');
 
@@ -51,7 +53,9 @@ function try_path_file() {
 	CeL_path_list.split(CeL_path_list.includes('\n') ? /\r?\n/ : '|')
 	// 載入CeJS基礎泛用之功能。（如非特殊目的使用的載入功能）
 	.some(function(path) {
-		if (path.charAt(0) === '#' && path.endsWith('CeJS-master')) {
+		if (path.charAt(0) === '#'
+		//
+		&& path.endsWith(repository + '-' + branch)) {
 			// path is comments
 			return;
 		}
@@ -79,12 +83,13 @@ function check_update() {
 	} catch (e) {
 	}
 
+	console.log('Get the infomation of latest version of '
 	// 取得 GitHub 最新版本infomation。
-	console.log('Get the infomation of latest version of CeJS...');
+	+ repository + '...');
 	node_https.get({
 		// https://api.github.com/repos/kanasimi/CeJS/commits/master
 		host : 'api.github.com',
-		path : '/repos/kanasimi/CeJS/commits/master',
+		path : '/repos/' + user_name + '/' + repository + '/commits/' + branch,
 		// https://developer.github.com/v3/#user-agent-required
 		headers : {
 			'user-agent' : 'CeL_updater/2.0'
@@ -111,7 +116,7 @@ function check_update() {
 				console.info('Update: ' + (have_version
 				//
 				? have_version + '\n     → ' : 'to ') + latest_version);
-				do_update(latest_version);
+				update_via_7zip(latest_version);
 			}
 		});
 	})
@@ -126,11 +131,12 @@ function check_update() {
 
 // --------------------------------------------------------------------------------------------
 
-function do_update(latest_version) {
+function update_via_7zip(latest_version) {
 	// Check 7z
 	if (!Array.isArray(p7zip_path)) {
 		p7zip_path = [ p7zip_path ];
 	}
+	// 若是$PATH中有7-zip的可執行檔，應該在這邊就能夠被偵測出來。
 	if (!p7zip_path.some(function(path) {
 		// mute stderr
 		var stderr = process.stderr.write;
@@ -154,7 +160,7 @@ function do_update(latest_version) {
 	// --------------------------------------------------------------------------------------------
 
 	try {
-		// 清理戰場。 TODO: backup
+		// 清理戰場。
 		node_fs.unlinkSync(target_file);
 	} catch (e) {
 	}
@@ -187,9 +193,9 @@ function do_update(latest_version) {
 		});
 	}
 
+	node_https.get('https://codeload.github.com/'
 	// 取得 GitHub 最新版本壓縮檔案。
-	node_https.get('https://codeload.github.com/kanasimi/CeJS/zip/master',
-			on_response)
+	+ user_name + '/' + repository + '/zip/' + branch, on_response)
 	//
 	.on('error', function(e) {
 		// network error?
@@ -235,6 +241,12 @@ function do_update(latest_version) {
 
 		if (latest_version) {
 			node_fs.writeFileSync(latest_version_file, latest_version);
+
+			try {
+				// 解壓縮完成之後，可以不必留著程式碼檔案。 TODO: backup
+				node_fs.unlinkSync(target_file);
+			} catch (e) {
+			}
 		}
 
 		// throw 'Some error occurred! Bad archive?';
