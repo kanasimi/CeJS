@@ -2786,12 +2786,13 @@ function module_code(library_namespace) {
 
 	var PATTERN_ISO_8601_durations = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/,
 	// 日期及時間 由小到大排列。
-	PATTERN_time_units = [ [ '(?:ms|milliseconds?|毫秒)', 1 ],
+	PATTERN_time_units = [ [ '(?:ms|milliseconds?|毫秒|ミリ秒)', 1 ],
 			[ '(?:s(?:ec)?|秒[鐘钟]?)', 1000 ], [ '(?:m(?:in)?|分[鐘钟]?)', 60 ],
-			[ '(?:h(?:r|ours?)?|小?[時时])', 60 ],
+			[ '(?:h(?:r|ours?)?|小?[時时]|時間)', 60 ],
 			// T: for ISO 8601 Durations. e.g., 'P21DT3H'
 			[ '(?:d(?:ays?|T)?|[日天])', 24 ],
-			// 僅僅給出約略大小。
+			[ '(?:w(?:eeks?)?|週|星期|禮拜)', 7, true ],
+			// 以下僅僅給出約略大小。
 			[ '(?:mon(?:ths?)?|月)', 30 ], [ '(?:y(?:r|ears?)?|年)', 12 ] ];
 
 	(function() {
@@ -2799,7 +2800,7 @@ function module_code(library_namespace) {
 		var ms = 1, template = /(\d+(?:\.\d+)?|\.\d+) ?UNIT(?:[^a-z]|$)/.source;
 		PATTERN_time_units = PATTERN_time_units.map(function(pair) {
 			return [ new RegExp(template.replace('UNIT', pair[0]), 'i'),
-					ms *= pair[1] ];
+					pair[2] ? ms * pair[1] : ms *= pair[1] ];
 		});
 	})();
 

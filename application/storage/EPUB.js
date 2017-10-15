@@ -206,10 +206,10 @@ function module_code(library_namespace) {
 		// 注意: 為了方便使用，這邊的 this.directory 都必須添加 url 用的 path separator: '/'。
 		for ( var d in this.directory) {
 			var _d = this.directory[d];
-			if (_d)
-				this.directory[d] = (PATTERN_NEED_ENCODE_FILE_NAME.test(_d) ? encode_identifier(
-						_d, this)
-						: _d).replace(/[\\\/]*$/, path_separator);
+			if (_d) {
+				this.directory[d] = encode_file_name(_d, this).replace(
+						/[\\\/]*$/, path_separator);
+			}
 		}
 		// absolute directory path
 		this.path = {
@@ -776,8 +776,6 @@ function module_code(library_namespace) {
 		return this.add(item, contents);
 	}
 
-	var PATTERN_NEED_ENCODE_ID = /^[^a-z]|[^a-z\d\-]/i, PATTERN_NEED_ENCODE_FILE_NAME = /[^a-z\d\-.]/i;
-
 	/**
 	 * encode to XML identifier.
 	 * 
@@ -819,7 +817,21 @@ function module_code(library_namespace) {
 		}).replace(/%/g, '_');
 	}
 
+	var PATTERN_NEED_ENCODE_ID = /^[^a-z]|[^a-z\d\-]/i, PATTERN_NEED_ENCODE_FILE_NAME = /[^a-z\d\-.]/i;
+	// EpubCheck 不可使用/不接受中文日文檔名。
+	function encode_file_name(file_name, _this) {
+		if (PATTERN_NEED_ENCODE_FILE_NAME.test(file_name)) {
+			// need encode
+			return encode_identifier(file_name, _this);
+		}
+		return file_name;
+	}
+
 	function decode_identifier(identifier, _this) {
+		if (!identifier.startsWith(_this.id_prefix)) {
+			return identifier;
+		}
+
 		identifier = identifier.slice(_this.id_prefix.length)
 				.replace(/_/g, '%');
 		try {
@@ -942,11 +954,7 @@ function module_code(library_namespace) {
 		}
 
 		href = href.replace(/[^\\\/]+$/, function(file_name) {
-			// EpubCheck 不可使用/不接受中文日文檔名。
-			if (PATTERN_NEED_ENCODE_FILE_NAME.test(file_name)) {
-				// need encode
-				file_name = encode_identifier(file_name, _this);
-			}
+			file_name = encode_file_name(file_name, _this);
 
 			// 截斷trim主檔名，限制在 80字元。
 			// WARNING: assert: 截斷後的主檔名不會重複，否則會被覆蓋!
@@ -1306,10 +1314,13 @@ function module_code(library_namespace) {
 								+ '\n of ' + item_data.file);
 						return all;
 					}
-					var href = _this.directory.media + matched[2];
+					var file_name = matched[2],
+					// links.push的href檔名在之後add_chapter()時可能會被改變。因此在xhtml文件中必須要先編碼一次。
+					href = _this.directory.media
+							+ encode_file_name(file_name, _this);
 					links.push({
 						url : url,
-						href : href,
+						href : _this.directory.media + file_name,
 						get_URL_options : item_data.get_URL_options
 					});
 					return matched ? ' title="' + url + '" ' + attribute_name

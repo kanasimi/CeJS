@@ -247,6 +247,8 @@ function update_via_7zip(latest_version) {
 				node_fs.unlinkSync(target_file);
 			} catch (e) {
 			}
+
+			// TODO: update the tool itself
 		}
 
 		// throw 'Some error occurred! Bad archive?';

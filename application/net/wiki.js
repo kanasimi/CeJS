@@ -1770,7 +1770,7 @@ function module_code(library_namespace) {
 	 * </code>
 	 * 
 	 * @param {String}section_title
-	 *            section title in wikitext. 章節標題。
+	 *            section title in wikitext. 章節標題。 節のタイトル。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
