@@ -1673,6 +1673,7 @@ function module_code(library_namespace) {
 			// TODO: 採用 parse 或 expandtemplates
 			return token;
 		}
+
 		if (token.type === 'external_link') {
 			// escape external link
 			// console.log('>> ' + token);
@@ -2475,8 +2476,7 @@ function module_code(library_namespace) {
 	 */
 	var wiki_toString = {
 		// internal/interwiki link : language links : category links, file,
-		// subst,
-		// ... : title
+		// subst 替換引用, ... : title
 		// e.g., [[m:en:Help:Parser function]], [[m:Help:Interwiki linking]],
 		// [[:File:image.png]], [[wikt:en:Wiktionary:A]],
 		// [[:en:Template:Editnotices/Group/Wikipedia:Miscellany for deletion]]
@@ -5642,8 +5642,7 @@ function module_code(library_namespace) {
 			if (library_namespace.is_Object(next[2]) && !next[3]) {
 				// 未設定/不設定 callback
 				// shift arguments
-				next[3] = next[2];
-				next[2] = undefined;
+				next.splice(2, 0, undefined);
 			}
 
 			// 因為wiki_API.cache(list)會使用到wiki_API.prototype[method]；
@@ -5925,9 +5924,11 @@ function module_code(library_namespace) {
 		// administrator functions
 
 		case 'remove':
-			if (next[1] === 'remove')
+			// wiki.page(title).remove(options, callback)
+			if (type === 'remove') {
 				// 正名。
-				next[1] === 'delete';
+				type = 'delete';
+			}
 		case 'delete':
 			// wiki.page(title).delete(options, callback)
 
@@ -5937,9 +5938,21 @@ function module_code(library_namespace) {
 		case 'rollback':
 			// wiki.page(title).rollback(options, callback)
 
+			// 這些控制用的功能，不必須取得頁面內容。
+			if (typeof next[1] === 'string') {
+				// 輸入的第一個參數是頁面標題。
+				// e.g.,
+				// wiki.remove(title, options, callback)
+				this.last_page = {
+					title : next[1]
+				};
+				// shift arguments
+				next.splice(1, 1);
+			}
+
 			if (typeof next[1] === 'function') {
-				next[2] = next[1];
-				next[1] = undefined;
+				// shift arguments
+				next.splice(1, 0, undefined);
 			}
 			if (!next[1]) {
 				// initialize options
@@ -5949,7 +5962,7 @@ function module_code(library_namespace) {
 			if (this.stopped && !next[1].skip_stopped) {
 				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 '
 				//
-				+ type + '[['
+				+ type + ' [['
 				//
 				+ (next[1].title || next[1].pageid || this.last_page
 				//
@@ -6007,7 +6020,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/** {RegExp}pattern to test if is a robot name. CeL.wiki.PATTERN_BOT_NAME */
-	var PATTERN_BOT_NAME = /bot|[機机][器械]人|ボット/i;
+	var PATTERN_BOT_NAME = /bot$|[機机][器械]人|ボット$/i;
 
 	/**
 	 * default date format. 預設的日期格式
