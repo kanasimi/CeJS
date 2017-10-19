@@ -14420,6 +14420,7 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/w/api.php?action=help&modules=flow
 
 	// https://zh.wikipedia.org/w/api.php?action=query&prop=flowinfo&titles=Wikipedia_talk:Flow_tests
+	// https://zh.wikipedia.org/w/api.php?action=query&prop=info&titles=Wikipedia_talk:Flow_tests
 	// https://zh.wikipedia.org/w/api.php?action=flow&submodule=view-topiclist&page=Wikipedia_talk:Flow_tests&vtlformat=wikitext&utf8=1
 	// .roots[0]
 	// https://zh.wikipedia.org/w/api.php?action=flow&submodule=view-topic&page=Topic:sqs6skdav48d3xzn&vtformat=wikitext&utf8=1
@@ -14445,7 +14446,10 @@ function module_code(library_namespace) {
 			throw 'Flow_info: Invalid title: ' + get_page_title_link(title);
 		}
 
-		action[1] = 'query&prop=flowinfo&' + action[1];
+		// [[mw:Extension:StructuredDiscussions/API#Detection]]
+		// 'prop=flowinfo' is deprecated. use 'query&prop=info'.
+		// The content model will be 'flow-board' if it's enabled.
+		action[1] = 'query&prop=info&' + action[1];
 		if (!action[0])
 			action = action[1];
 
@@ -14490,6 +14494,8 @@ function module_code(library_namespace) {
 				callback();
 				return;
 			}
+
+			// TODO: data.query.normalized=[{from:'',to:''},...]
 
 			data = data.query.pages;
 			var pages = [];
@@ -14537,12 +14543,20 @@ function module_code(library_namespace) {
 	 * @returns {Boolean}是否為 Flow 討論頁面。
 	 */
 	function is_Flow(page_data) {
+		if ('contentmodel' in page_data) {
+			// used in prop=info
+			return page_data.contentmodel === 'flow-board';
+		}
+
 		var flowinfo = page_data &&
 		// get_page_content.is_page_data(page_data) &&
 		page_data.flowinfo;
-		if (flowinfo)
+		if (flowinfo) {
+			// used in prop=flowinfo (deprecated)
 			// flowinfo:{flow:{enabled:''}}
 			return flowinfo.flow && ('enabled' in flowinfo.flow);
+		}
+
 		// e.g., 從 wiki_API.page 得到的 page_data
 		if (page_data = get_page_content.revision(page_data))
 			return page_data.contentmodel === 'flow-board';
@@ -14550,8 +14564,10 @@ function module_code(library_namespace) {
 
 	/** {Object}abbreviation 縮寫 */
 	var Flow_abbreviation = {
+		// https://www.mediawiki.org/w/api.php?action=help&modules=flow%2Bview-header
 		// 關於討論板的描述。
 		header : 'h',
+		// https://www.mediawiki.org/w/api.php?action=help&modules=flow%2Bview-topiclist
 		// 討論板話題列表。
 		topiclist : 'tl'
 	};
