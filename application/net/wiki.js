@@ -13833,7 +13833,14 @@ function module_code(library_namespace) {
 			}
 		},
 		write : function(cache_file_path, callback) {
-			// node_fs.writeFileSync()
+			node_fs.writeFileSync(cache_file_path || this.file, JSON
+					.stringify(this[this.KEY_DATA]), this.encoding);
+			library_namespace.debug('Write to cache file: done.', 1,
+					'revision_cacher.write');
+			if (typeof callback === 'function')
+				callback(error);
+			return;
+
 			node_fs.writeFile(cache_file_path || this.file, JSON
 					.stringify(this[this.KEY_DATA]), this.encoding, function(
 					error) {
