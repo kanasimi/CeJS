@@ -6020,7 +6020,8 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/** {RegExp}pattern to test if is a robot name. CeL.wiki.PATTERN_BOT_NAME */
-	var PATTERN_BOT_NAME = /bot$|[機机][器械]人|ボット$/i;
+	var PATTERN_BOT_NAME = /bot(?:$|[^a-z])|[機机][器械]人|ボット(?:$|[^a-z])/i;
+	// ↑ /(?:$|[^a-z])/: e.g., PxBot~testwiki
 
 	/**
 	 * default date format. 預設的日期格式
@@ -8306,8 +8307,8 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// 強制更新/清除緩存並重新載入/重新整理/刷新頁面。
-	// 極端做法：re-edit the same contents
 	// @see https://www.mediawiki.org/w/api.php?action=help&modules=purge
+	// 極端做法：[[WP:NULL|Null edit]], re-edit the same contents
 	wiki_API.purge = function(title, callback, options) {
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
@@ -12531,15 +12532,17 @@ function module_code(library_namespace) {
 			});
 		}
 
+		var public_dumps_directory = '/public/dumps/public/',
 		// search the latest file in the local directory.
 		// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#Dumps
 		// 可在 /public/dumps/public/zhwiki/ 找到舊 dumps。 (using `df -BT`)
 		// e.g.,
 		// /public/dumps/public/zhwiki/20160203/zhwiki-20160203-pages-articles.xml.bz2
-		var source_directory, archive = options.archive || filename + '.bz2';
+		source_directory, archive = options.archive || filename + '.bz2';
 
 		if (wmflabs) {
-			source_directory = '/public/dumps/public/' + wiki_site_name + '/'
+
+			source_directory = public_dumps_directory + wiki_site_name + '/'
 					+ latest + '/';
 			library_namespace.debug('Check if public dump archive exists: ['
 					+ source_directory + archive + ']', 1, 'get_latest_dump');
@@ -16275,7 +16278,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// is Q4167410: Wikimedia disambiguation page 維基媒體消歧義頁
+	// test if is Q4167410: Wikimedia disambiguation page 維基媒體消歧義頁
 	// [[Special:链接到消歧义页的页面]]: 頁面內容含有 __DISAMBIG__ (或別名) 標籤會被作為消歧義頁面。
 	// CeL.wiki.data.is_DAB(entity)
 	function is_DAB(entity, callback) {
@@ -16283,9 +16286,9 @@ function module_code(library_namespace) {
 		if (property && wikidata_datavalue(property) === 'Q4167410') {
 			if (callback) {
 				callback(true, entity);
-			} else {
-				return true;
+				return;
 			}
+			return true;
 		}
 		if (!callback) {
 			return;
@@ -19549,6 +19552,7 @@ function module_code(library_namespace) {
 			quit : true
 		},
 
+		is_wiki_API : is_wiki_API,
 		is_page_data : get_page_content.is_page_data,
 		is_entity : is_entity,
 
