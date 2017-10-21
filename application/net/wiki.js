@@ -10974,11 +10974,18 @@ function module_code(library_namespace) {
 		// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
 		library_namespace.warn('無 node.js 之 fs，因此不具備 cache 或 SQL 功能。');
 		node_fs = {
-			readFile : function(file_name, encoding, callback) {
+			readFile : function(file_path, options, callback) {
+				library_namespace.error('Can not read file ' + file_path);
 				if (typeof callback === 'function')
 					callback(true);
 			},
-			writeFile : library_namespace.null_function
+			writeFile : function(file_path, data, options, callback) {
+				library_namespace.error('Can not write to file ' + file_path);
+				if (typeof options === 'function' && !callback)
+					callback = options;
+				if (typeof callback === 'function')
+					callback(true);
+			}
 		};
 	}
 
@@ -13825,13 +13832,16 @@ function module_code(library_namespace) {
 				this[this.KEY_DATA] = cached_data;
 			}
 		},
-		write : function(cache_file_path) {
+		write : function(cache_file_path, callback) {
 			// node_fs.writeFileSync()
 			node_fs.writeFile(cache_file_path || this.file, JSON
-					.stringify(this[this.KEY_DATA]), this.encoding, function() {
+					.stringify(this[this.KEY_DATA]), this.encoding, function(
+					error) {
 				// 因為此動作一般說來不會影響到後續操作，因此採用同時執行。
 				library_namespace.debug('Write to cache file: done.', 1,
 						'revision_cacher.write');
+				if (typeof callback === 'function')
+					callback(error);
 			});
 		},
 
