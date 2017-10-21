@@ -1305,11 +1305,14 @@ function module_code(library_namespace) {
 			if (item_data.internalize_media) {
 				// include images / 自動載入內含資源, 將外部media內部化
 				var links = [];
-				contents = contents.replace(/ (src|href)="([^"]+)"/g, function(
-						all, attribute_name, url) {
+				contents = contents.replace(/ (src|href)="([^"]+)"/ig,
+				//
+				function(all, attribute_name, url) {
 					// [ url, path, file_name, is_directory ]
 					var matched = url.match(/^([\s\S]*\/)([^\/]+)(\/)?$/);
-					if (!matched || matched[3] && attribute_name !== 'src') {
+					if (!matched || attribute_name.toLowerCase() !== 'src'
+					// skip web page, do not modify the link of web pages
+					&& (matched[3] || /\.html?$/i.test(matched[2]))) {
 						library_namespace.log('Skip resource: ' + url
 								+ '\n of ' + item_data.file);
 						return all;
