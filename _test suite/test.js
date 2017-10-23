@@ -2961,9 +2961,9 @@ function test_wiki() {
 		assert([ undefined, CeL.wiki.parser(wikitext).parse().each_section().sections[0].section_title ], 'wiki.parser.each_section #3-2: 正常文章');
 		assert([ '==t1==', CeL.wiki.parser(wikitext).parse().each_section().sections[1].section_title.toString() ], 'wiki.parser.each_section #3-3: 正常文章');
 
-		// [[n:zh:Special:Permalink/120753]]
-		wikitext = " <> >< <title> '''<试>'''  ''ii'' <i>iii</i> <b>bbb</b>   [[File:YesCheck_BlueLinear.svg|20px]]  & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos; <nowiki>  & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos;  '''bbb''' <b>bbb</b> <i>iii</i> <ref /> {{VOA}} {{tl|VOA}}</nowiki> '''[[abc]]'''  <b>[[w:abc]]</b>  '''<i>[[w :  123   #  cba]]</i>''' [[ABC|ab'c]] [[ABC|ab''c'']] __NOINDEX__ ____  ___ __ __  _ {{tl|VOA}} [[template:VOA]] [https://zh.wikipedia.org zh''wiki''] __TOC__ -{}- C-{樂}-D A-{  这  }-B  '''<nowiki>''< nowiki>''</nowiki>'''  <span style=\"color:green\">green</span> ";
-		assert([ "[[#%3c> >%3c %3ctitle> %3c试> ii iii bbb &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; '''bbb''' %3cb>bbb%3c/b> %3ci>iii%3c/i> %3cref /> %7b%7bVOA%7d%7d %7b%7btl%7cVOA%7d%7d abc w:abc w : 123 # cba ab'c abc %7b%7bVOA%7d%7d template:VOA zhwiki -%7b%7d- C-%7b樂%7d-D A-%7b 这 %7d-B ''%3c nowiki>'' green|&#60;> >&#60; &#60;title> &#60;试> ii iii bbb &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &apos;&apos;&apos;bbb&apos;&apos;&apos; &#60;b>bbb&#60;/b> &#60;i>iii&#60;/i> &#60;ref /> &#123;&#123;VOA}} &#123;&#123;tl&#124;VOA}} abc w:abc w : 123 # cba ab&apos;c abc ____ ___ __ __ _ &#123;&#123;VOA}} template:VOA zhwiki -{}- C-{樂}-D A-{ 这 }-B &apos;&apos;&#60; nowiki>&apos;&apos; green]]", CeL.wiki.section_link(wikitext).toString() ], 'wiki.section_link #1-1');
+		// [[n:zh:Special:Permalink/121433]]
+		wikitext = " <> >< <title> '''<试>'''  ''ii'' <i>iii</i> <b>bbb</b>   [[File:YesCheck_BlueLinear.svg|20px]] [[:Category:中国]] & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos; <nowiki>  & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos;  '''bbb''' <b>bbb</b> <i>iii</i> <ref /> {{VOA}} {{tl|VOA}}</nowiki> '''[[abc]]'''  <b>[[w:abc]]</b>  '''<i>[[w :  123   #  cba]]</i>''' [[ABC|ab'c]] [[ABC|ab''c'']] __NOINDEX__ ____  ___ __ __  _ {{tl|VOA}} [[template:VOA]] [https://zh.wikipedia.org zh''wiki''] __TOC__ -{}- C-{樂}-D A-{  这  }-B  '''<nowiki>''< nowiki>''</nowiki>'''  <span style=\"color:green\">green</span> ";
+		assert([ "[[#%3c> >%3c %3ctitle> %3c试> ii iii bbb Category:中国 &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; '''bbb''' %3cb>bbb%3c/b> %3ci>iii%3c/i> %3cref /> %7b%7bVOA%7d%7d %7b%7btl%7cVOA%7d%7d abc w:abc w : 123 # cba ab'c abc %7b%7bVOA%7d%7d template:VOA zhwiki -%7b%7d- C-%7b樂%7d-D A-%7b 这 %7d-B ''%3c nowiki>'' green|&#60;> >&#60; &#60;title> &#60;试> ii iii bbb Category:中国 &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &apos;&apos;&apos;bbb&apos;&apos;&apos; &#60;b>bbb&#60;/b> &#60;i>iii&#60;/i> &#60;ref /> &#123;&#123;VOA}} &#123;&#123;tl&#124;VOA}} abc w:abc w : 123 # cba ab&apos;c abc ____ ___ __ __ _ &#123;&#123;VOA}} template:VOA zhwiki -{}- C-{樂}-D A-{ 这 }-B &apos;&apos;&#60; nowiki>&apos;&apos; green]]", CeL.wiki.section_link(wikitext).toString() ], 'wiki.section_link #1-1');
 	});
 
 
@@ -3403,7 +3403,7 @@ function finish_test(type) {
 		delete still_running[type];
 		--still_running.left_count;
 	}
-	if (still_running.left_count) {
+	if (!still_running.all_setted || still_running.left_count !== 0) {
 		return;
 	}
 
@@ -3476,7 +3476,10 @@ function do_test() {
 	//
 	'data.date.era', test_era,
 	//
-	finish_test);
+	function() {
+		still_running.all_setted = true;
+		CeL.info('所有測試設定完畢。Waiting for asynchronous tests...');
+	});
 }
 
 CeL.env.no_catch = true;

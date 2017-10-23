@@ -6332,6 +6332,7 @@ function module_code(library_namespace) {
 						origin = true;
 						紀年_list = date[0];
 						tmp = 0;
+						// 明年
 						if (/[明隔]/.test(年))
 							tmp = 1;
 						else if (/[去]/.test(年))
@@ -7436,7 +7437,9 @@ function module_code(library_namespace) {
 					// console.log(era);
 
 					// 去除(干支_PATTERN): 預防"丁未"被 parse 成丁朝之類的意外。
-					date = !干支_PATTERN.test(era) && to_era_Date(era, {
+					date = !干支_PATTERN.test(era)
+					// 預防被解析為明朝的年份。
+					&& era !== '明年' && to_era_Date(era, {
 						parse_only : true
 					});
 
@@ -7473,7 +7476,9 @@ function module_code(library_namespace) {
 			// console.log([ 'era:', era ]);
 
 			// 去除(干支_PATTERN): 預防"丁未"被 parse 成丁朝之類的意外。
-			date = !干支_PATTERN.test(era) && to_era_Date(era, {
+			date = !干支_PATTERN.test(era)
+			// 預防被解析為明朝的年份。
+			&& era !== '明年' && to_era_Date(era, {
 				parse_only : true
 			});
 

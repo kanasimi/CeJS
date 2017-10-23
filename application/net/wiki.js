@@ -574,10 +574,12 @@ function module_code(library_namespace) {
 		commons : true,
 		species : true,
 		incubator : true,
+
+		// mul : true,
 		phabricator : true,
 		wikitech : true,
-		// mul : true,
-
+		// https://quarry.wmflabs.org/
+		quarry : true,
 		releases : true
 	}
 	// shortcut, namespace aliases.
@@ -1655,8 +1657,8 @@ function module_code(library_namespace) {
 			// escape wikilink
 			// return displayed_text
 			token = token[2] ? preprocess_section_link_tokens(token[2])
-			// @see wiki_toString
-			: token[0].toString() + token[1];
+			// 去掉最前頭的 ":"。 @see wiki_toString
+			: token[0].toString().replace(/^ *:?/, '') + token[1];
 			// console.log(token);
 			return token;
 		}
@@ -6020,8 +6022,11 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/** {RegExp}pattern to test if is a robot name. CeL.wiki.PATTERN_BOT_NAME */
-	var PATTERN_BOT_NAME = /bot(?:$|[^a-z])|[機机][器械]人|ボット(?:$|[^a-z])/i;
-	// ↑ /(?:$|[^a-z])/: e.g., PxBot~testwiki
+	var PATTERN_BOT_NAME = /bot(?:$|[^a-z])|[機机][器械]人|ボット(?:$|[^a-z])|봇$/i;
+	// ↑ /(?:$|[^a-z])/: e.g., PxBot~testwiki, [[ko:User:2147483647 (bot)]],
+	// a_bot2, "DynBot Srv2", "Kwjbot II", "Purbo T"
+	// TODO: [[User:CommonsDelinker]], BotMultichill, "Flow talk page manager",
+	// "Maintenance script", "MediaWiki default", "MediaWiki message delivery"
 
 	/**
 	 * default date format. 預設的日期格式
@@ -6382,9 +6387,9 @@ function module_code(library_namespace) {
 		var main_work = (function(data) {
 			if (!Array.isArray(data)) {
 				if (!data && this_slice_size === 0) {
-					library_namespace.info(
-					//
-					'wiki_API.work: ' + config.summary + ': 未取得或設定任何頁面。已完成？');
+					library_namespace.info('wiki_API.work: ' + config.summary
+					// 任務/工作
+					+ ': 未取得或設定任何頁面。這個部份的任務已完成？');
 					data = [];
 				} else {
 					// 可能是 page data 或 title。
@@ -13833,14 +13838,6 @@ function module_code(library_namespace) {
 			}
 		},
 		write : function(cache_file_path, callback) {
-			node_fs.writeFileSync(cache_file_path || this.file, JSON
-					.stringify(this[this.KEY_DATA]), this.encoding);
-			library_namespace.debug('Write to cache file: done.', 1,
-					'revision_cacher.write');
-			if (typeof callback === 'function')
-				callback(error);
-			return;
-
 			node_fs.writeFile(cache_file_path || this.file, JSON
 					.stringify(this[this.KEY_DATA]), this.encoding, function(
 					error) {
@@ -13850,6 +13847,14 @@ function module_code(library_namespace) {
 				if (typeof callback === 'function')
 					callback(error);
 			});
+			return;
+
+			node_fs.writeFileSync(cache_file_path || this.file, JSON
+					.stringify(this[this.KEY_DATA]), this.encoding);
+			library_namespace.debug('Write to cache file: done.', 1,
+					'revision_cacher.write');
+			if (typeof callback === 'function')
+				callback(error);
 		},
 
 		// 注意: 若未 return true，則表示 page_data 為正規且 cache 中沒有，或較 cache 新的頁面資料。
