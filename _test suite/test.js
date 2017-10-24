@@ -3031,11 +3031,38 @@ function test_wiki() {
 			_finish_test(test_name);
 		});
 
-		_setup_test('wiki: CeL.wiki.data()');
+		_setup_test('wiki: CeL.wiki.data(basic)');
 		CeL.wiki.data('宇宙', '形狀', function(data) {
-			var test_name = 'wiki: CeL.wiki.data()';
+			var test_name = 'wiki: CeL.wiki.data(basic)';
 			assert([ '宇宙的形狀', data ], test_name);
 			_finish_test(test_name);
+		});
+
+		_setup_test('wiki: CeL.wiki.data(get value)');
+		CeL.wiki.data.search.use_cache('性質', function(id_list) {
+			// Get the id of property '性質' first.
+			// and here we get the id of '性質': "P31"
+			var test_name = 'wiki: CeL.wiki.data(get value)';
+			assert([ 'P31', id_list ], 'get data id of 性質');
+			wiki.data('維基數據沙盒', function(data_JSON) {
+				CeL.wiki.data.search.use_cache('性質', function(id_list) {
+					data_JSON.value('性質', {
+						// resolve wikibase-item
+						resolve_item : true
+					}, function(entity) {
+						// get "Wikidata Sandbox"
+						assert(/Sandbox/i.test(entity.value('label', 'en')), 'get 性質 id of 維基數據沙盒');
+						_finish_test(test_name);
+					});
+				}, {
+					must_callback : true,
+					type : 'property'
+				});
+			});
+			// 執行剩下的程序. run rest codes.
+		}, {
+			must_callback : true,
+			type : 'property'
 		});
 
 	}, function(recorder, _error_count, test_name) {
@@ -3051,7 +3078,7 @@ function test_wiki() {
 	// for debug: 'interact.DOM', 'application.debug',
 	//CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
 
-	var wiki = CeL.wiki.login('', '')
+	var wiki = CeL.wiki.login('', '', 'zh')
 	// Select page and get the content of page.
 	.page('Wikipedia:沙盒', function(page_data) {
 		CeL.info(CeL.wiki.title_of(page_data));

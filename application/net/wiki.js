@@ -5740,9 +5740,13 @@ function module_code(library_namespace) {
 					key : next[1],
 					error : error
 				};
-				library_namespace.debug('設定 entity data: '
-						+ JSON.stringify(_this.last_data), 3,
-						'wiki_API.prototype.next.data');
+				if (false) {
+					// 因為在wikidata_entity()裡面設定了[KEY_SESSION]，因此JSON.stringify()會造成:
+					// TypeError: Converting circular structure to JSON
+					library_namespace.debug('設定 entity data: '
+							+ JSON.stringify(_this.last_data), 3,
+							'wiki_API.prototype.next.data');
+				}
 				// next[3] : callback
 				if (typeof next[3] === 'function') {
 					next[3].call(this, data, error);
@@ -15129,7 +15133,7 @@ function module_code(library_namespace) {
 				//
 				+ normalize_wikidata_key(key[1]);
 			} else {
-				// 處理取得多keys之id的情況。
+				// 處理取得多 keys 之 id 的情況。
 				var index = 0,
 				//
 				cache_next_key = function() {
@@ -15199,10 +15203,13 @@ function module_code(library_namespace) {
 		if (!options || library_namespace.is_empty_object(options)) {
 			options = Object.clone(wikidata_search.use_cache.default_options);
 		} else if (!options.get_id) {
-			library_namespace.warn('wikidata_search.use_cache: 當把實體名稱 ['
-					+ language_and_key
-					+ '] 轉換成 id 時，應設定 options.get_id。 options: '
-					+ JSON.stringify(options));
+			if (!options.must_callback) {
+				// 在僅設定 .must_callback 時，不顯示警告而自動補上應有的設定。
+				library_namespace.warn('wikidata_search.use_cache: 當把實體名稱 ['
+						+ language_and_key
+						+ '] 轉換成 id 時，應設定 options.get_id。 options: '
+						+ JSON.stringify(options));
+			}
 			options = Object.assign({
 				get_id : true
 			}, options);
@@ -15820,6 +15827,9 @@ function module_code(library_namespace) {
 	 * @inner 現階段屬於內部成員。未來可能會改變。
 	 */
 	function wikidata_get_site(options, get_language) {
+		if (typeof options === 'string') {
+			return PATTERN_PROJECT_CODE.test(options) && options;
+		}
 		var session = options && options[KEY_SESSION],
 		// options.language 較 session 的設定優先。
 		language = options && options.language;
@@ -16219,10 +16229,15 @@ function module_code(library_namespace) {
 									'wikidata_entity');
 							data[KEY_CORRESPOND_PAGE] = key;
 						}
-						// assert: KEY_get_entity_value is NOT in data
+						// assert: KEY_get_entity_value, KEY_SESSION
+						// is NOT in data
 						Object.defineProperty(data, KEY_get_entity_value, {
 							value : wikidata_entity_value
 						});
+						if (options && options[KEY_SESSION]) {
+							// for .resolve_item
+							data[KEY_SESSION] = options[KEY_SESSION];
+						}
 					}
 				}
 			}
@@ -16240,6 +16255,20 @@ function module_code(library_namespace) {
 		}, null, options);
 	}
 
+	/**
+	 * 取得特定屬性值。
+	 * 
+	 * @param {String}[property]
+	 *            取得特定屬性值。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * @param {Function}[callback]
+	 *            回調函數。 callback(轉成JavaScript的值)
+	 * 
+	 * @returns 屬性的值
+	 * 
+	 * @inner
+	 */
 	function wikidata_entity_value(property, options, callback) {
 		if (Array.isArray(property)) {
 			// e.g., entity.value(['property','property'])
@@ -16286,13 +16315,22 @@ function module_code(library_namespace) {
 			value = this.sitelinks && this.sitelinks[language];
 		} else if (typeof property === 'number') {
 			value = this.claims && this.claims['P' + property];
-		} else if (value = wikidata_search.use_cache(property, options)) {
+		} else if (value = wikidata_search.use_cache(property, Object.assign({
+			type : 'property'
+		}, options))) {
+			// 一般 property
 			value = this.claims && this.claims[value];
 		} else {
 			library_namespace
 					.error('wikidata_entity_value: Can not deal with property ['
 							+ property + ']');
 			return;
+		}
+
+		if (options && options.resolve_item) {
+			value = wikidata_datavalue(value);
+			this[KEY_SESSION].host.data(value, callback);
+			return value;
 		}
 
 		return wikidata_datavalue(value, callback, options);
@@ -17903,9 +17941,137 @@ function module_code(library_namespace) {
 	if (false) {
 		// examples
 
+		// Cache the id of "性質" first. 先快取必要的屬性id值。
+		CeL.wiki.data.search.use_cache('性質', function(id_list) {
+			// Get the id of property '性質' first.
+			// and here we get the id of '性質': "P31"
+			CeL.log(id_list);
+			// 執行剩下的程序. run rest codes.
+		}, {
+			must_callback : true,
+			type : 'property'
+		});
+
+		// ----------------------------
+		// rest codes:
+
+		// Set up the wiki instance.
+		var wiki = CeL.wiki.login(user_name, password, 'zh');
+
+		wiki.data('維基數據沙盒2', function(data_JSON) {
+			CeL.wiki.data.search.use_cache('性質', function(id_list) {
+				data_JSON.value('性質', {
+					// resolve wikibase-item
+					resolve_item : true
+				}, function(entity) {
+					// get "Wikidata Sandbox"
+					CeL.log(entity.value('label', 'en'));
+				});
+			}, {
+				must_callback : true,
+				type : 'property'
+			});
+		});
+
+		// If we have run CeL.wiki.data.search.use_cache('性質')
+		// first or inside it...
+		wiki.data('維基數據沙盒2', function(data_JSON) {
+			data_JSON.value('性質', {
+				// resolve wikibase-item
+				resolve_item : true
+			}, function(entity) {
+				// get "Wikidata Sandbox"
+				CeL.log(entity.value('label', 'en'));
+			});
+		});
+
+		// Old style. The same effect as codes above.
+		wiki.data('維基數據沙盒2', function(data_JSON) {
+			// Here we are running the callback.
+			CeL.wiki.data.search.use_cache('性質', function(id_list) {
+				wiki.data(data_JSON.value('性質'), function(entity) {
+					// via wikidata_entity_value()
+					// get "维基数据测试沙盒"
+					CeL.log(entity.value('label'));
+				});
+			}, {
+				must_callback : true,
+				type : 'property'
+			});
+		});
+
+		wiki.data('維基數據沙盒2', function(data_JSON) {
+			wiki.data(data_JSON.value('性質'), function(entity) {
+				// via wikidata_entity_value()
+				// get "维基数据测试沙盒"
+				CeL.log(entity.value('label'));
+			});
+		});
+
+		// edit properties
+		wiki.edit_data(function(entity) {
+			// add new / set single value with references
+			return {
+				生物俗名 : '維基數據沙盒2',
+				language : 'zh-tw',
+				references : {
+					臺灣物種名錄物種編號 : 123456,
+					// [[d:Special:AbuseFilter/54]]
+					// 導入自 : 'zhwiki',
+					載於 : '臺灣物種名錄物種',
+					來源網址 : 'https://www.wikidata.org/',
+					檢索日期 : new Date
+				}
+			};
+
+			// set multiple values
+			return {
+				labels : {
+					ja : 'ウィキデータ・サンドボックス2',
+					'zh-tw' : [ '維基數據沙盒2', '維基數據沙盒#2', '維基數據沙盒-2' ]
+				},
+				descriptions : {
+					'zh-tw' : '作為沙盒以供測試功能'
+				},
+				claims : [ {
+					生物俗名 : [ 'SB2#1', 'SB2#2', 'SB2#3' ],
+					multi : true,
+					language : 'zh-tw',
+					references : {
+						臺灣物種名錄物種編號 : 123456
+					}
+				}, {
+					読み仮名 : 'かな',
+					language : 'ja',
+					references : {
+						imported_from : 'jawiki'
+					}
+				} ]
+			};
+
+			// remove specified value 生物俗名=SB2
+			return {
+				生物俗名 : 'SB2',
+				language : 'zh-tw',
+				remove : true
+			};
+
+			// to remove ALL "生物俗名"
+			return {
+				生物俗名 : CeL.wiki.edit_data.remove_all,
+				language : 'zh-tw'
+			};
+
+		}, {
+			bot : 1,
+			summary : 'bot test: edit properties'
+		});
+
+		// ----------------------------
+
 		// add property/claim to Q13406268
-		wiki.data('維基數據沙盒2', function(data) {
-			result = data;
+		wiki.data('維基數據沙盒2', function(data_JSON) {
+			data_JSON;
 		}).edit_data(function(entity) {
 			return {
 				生物俗名 : '維基數據沙盒2',
@@ -17917,8 +18083,8 @@ function module_code(library_namespace) {
 		});
 
 		// delete property/claim (all 生物俗名)
-		wiki.data('維基數據沙盒2', function(data) {
-			result = data;
+		wiki.data('維基數據沙盒2', function(data_JSON) {
+			data_JSON;
 		}).edit_data(function(entity) {
 			return {
 				生物俗名 : CeL.wiki.edit_data.remove_all,
@@ -17930,8 +18096,8 @@ function module_code(library_namespace) {
 		});
 
 		// delete property/claim (生物俗名=維基數據沙盒2)
-		wiki.data('維基數據沙盒2', function(data) {
-			result = data;
+		wiki.data('維基數據沙盒2', function(data_JSON) {
+			data_JSON;
 		}).edit_data(function(entity) {
 			return {
 				生物俗名 : '維基數據沙盒2',
@@ -17943,8 +18109,8 @@ function module_code(library_namespace) {
 			summary : 'bot test: edit property'
 		});
 
-		wiki.data('維基數據沙盒2', function(data) {
-			result = data;
+		wiki.data('維基數據沙盒2', function(data_JSON) {
+			data_JSON;
 		}).edit_data(function(entity) {
 			return {
 				生物俗名 : '維基數據沙盒2',
@@ -19021,6 +19187,7 @@ function module_code(library_namespace) {
 
 	// 測試是否包含等價或延伸（而不僅僅是完全相同的） label。
 	// 複雜版 original.includes(label_to_test)
+	// TODO: 可省略 /[,;.!]/
 	function include_label(original, label_to_test) {
 		// 沒東西要測試，表示也毋須作進一步處理。
 		if (!label_to_test) {
