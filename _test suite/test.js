@@ -3038,20 +3038,23 @@ function test_wiki() {
 			_finish_test(test_name);
 		});
 
-		_setup_test('wiki: CeL.wiki.data(get value)');
-		CeL.wiki.data.search.use_cache('性質', function(id_list) {
+		_setup_test('wiki: CeL.wiki.data(get property of item)');
+		var test_property_name = '性質';
+		CeL.wiki.data.search.use_cache(test_property_name, function(id_list) {
 			// Get the id of property '性質' first.
 			// and here we get the id of '性質': "P31"
-			var test_name = 'wiki: CeL.wiki.data(get value)';
+			var test_name = 'wiki: CeL.wiki.data(get property of item)';
 			assert([ 'P31', id_list ], 'get data id of 性質');
-			wiki.data('維基數據沙盒', function(data_JSON) {
-				CeL.wiki.data.search.use_cache('性質', function(id_list) {
-					data_JSON.value('性質', {
+
+			// 執行剩下的程序. run rest codes.
+			var wiki = CeL.wiki.login(null, null, 'zh');
+			wiki.data('孔子', function(data_JSON) {
+				CeL.wiki.data.search.use_cache(test_property_name, function(id_list) {
+					data_JSON.value(test_property_name, {
 						// resolve wikibase-item
 						resolve_item : true
 					}, function(entity) {
-						// get "Wikidata Sandbox"
-						assert(/Sandbox/i.test(entity.value('label', 'en')), 'get 性質 id of 維基數據沙盒');
+						assert(/human|person/i.test(entity.value('label', 'en')), 'get "' + test_property_name + '" id of 孔子');
 						_finish_test(test_name);
 					});
 				}, {
@@ -3059,7 +3062,7 @@ function test_wiki() {
 					type : 'property'
 				});
 			});
-			// 執行剩下的程序. run rest codes.
+
 		}, {
 			must_callback : true,
 			type : 'property'
