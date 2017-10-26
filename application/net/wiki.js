@@ -5094,7 +5094,7 @@ function module_code(library_namespace) {
 			setup_data_session(this /* session */,
 			// 確保 data_session login 了才執行下一步。
 			function() {
-				// next[1] : callback
+				// next[1] : callback of set_data
 				if (typeof next[1] === 'function')
 					next[1].call(_this);
 				_this.next();
@@ -5717,11 +5717,15 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof next[1] === 'function') {
-				// 直接輸入 callback。
+				library_namespace.debug('直接將last_data輸入 callback: ' + next[1], 3,
+						'wiki_API.prototype.next.data');
 				if (last_data_is_usable(this)) {
-					next[1](this.last_data);
+					next[1].call(this, this.last_data);
+					this.next();
 					break;
 				} else {
+					library_namespace.debug('last data 不能用。', 3,
+							'wiki_API.prototype.next.data');
 					// delete this.last_data;
 					if (!this.last_page) {
 						next[1].call(this, undefined, {
@@ -6029,7 +6033,8 @@ function module_code(library_namespace) {
 
 		// 再設定一次，預防有執行期中間再執行的情況。
 		// e.g., wiki.query_api(action,function(){wiki.page();})
-		this.running = 0 < this.actions.length;
+		// 注意: 這動作應該放在callback()執行完後設定，而不是在這邊!
+		// this.running = 0 < this.actions.length;
 	};
 
 	/**
@@ -9300,6 +9305,7 @@ function module_code(library_namespace) {
 		} ]
 	};
 
+	// setup wiki_API.prototype.methods
 	(function wiki_API_prototype_methods() {
 		// 登記 methods。
 		var methods = wiki_API.prototype.next.methods;
@@ -9326,7 +9332,8 @@ function module_code(library_namespace) {
 					// TODO: handle exception
 				}
 				this.actions.push(args);
-				// 不應該僅以this.running判定，因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
+				// TODO: 不應該僅以this.running判定，
+				// 因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
 				if (!this.running
 				// 當只剩下剛剛.push()進的operation時，表示已經不會再執行，則還是實行this.next()。
 				// TODO: 若是其他執行序會操作this.actions、主動執行this.next()，
@@ -9338,7 +9345,6 @@ function module_code(library_namespace) {
 				} else {
 					library_namespace.debug('正在執行中，直接跳出。', 6,
 							'wiki_API.prototype.' + method);
-					// console.log(this);
 				}
 				return this;
 			};
@@ -14884,7 +14890,7 @@ function module_code(library_namespace) {
 		}
 
 		if (session.data_session) {
-			// 直接清空佇列。
+			library_namespace.debug('直接清空佇列。', 2, 'setup_data_session');
 			// TODO: 強制中斷所有正在執行之任務。
 			session.data_session.actions.clear();
 		}
@@ -14909,8 +14915,11 @@ function module_code(library_namespace) {
 					data_config[2]);
 		}
 
-		// setup 宿主 host session.
+		library_namespace.debug('setup 宿主 host session.', 2,
+				'setup_data_session');
 		session.data_session[KEY_HOST_SESSION] = session;
+		library_namespace.debug('run callback: ' + callback, 2,
+				'setup_data_session');
 		session.data_session.run(callback);
 	}
 
