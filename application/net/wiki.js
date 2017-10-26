@@ -5121,6 +5121,11 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 		// page access
 
+		case 'query':
+			console.trace('use query');
+			throw 'Please use .query_api() instead of only .query()!';
+			library_namespace
+					.error('Please use .query_api() instead of only .query()!');
 		case 'query_api':
 			// wiki_API.query(action, callback, post_data, options)
 			wiki_API.query(next[1], next[2], next[3],
@@ -5924,7 +5929,6 @@ function module_code(library_namespace) {
 			});
 			break;
 
-		case 'query':
 		case 'query_data':
 			// wdq, query data
 			// wikidata_query(query, callback, options)
