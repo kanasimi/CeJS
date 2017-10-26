@@ -3508,7 +3508,7 @@ function do_test() {
 	//
 	function() {
 		still_running.all_setted = true;
-		CeL.info('所有測試設定完畢。Waiting for asynchronous tests...');
+		CeL.info('所有測試設定完畢。 Waiting for asynchronous tests...');
 	});
 }
 

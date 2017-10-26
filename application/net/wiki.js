@@ -5121,6 +5121,16 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 		// page access
 
+		case 'query_api':
+			// wiki_API.query(action, callback, post_data, options)
+			wiki_API.query(next[1], next[2], next[3],
+			// next[4] : options
+			Object.assign({
+				// [KEY_SESSION]
+				session : this
+			}, next[4]));
+			break;
+
 		case 'page':
 			// this.page(page data, callback, options);
 			if (library_namespace.is_Object(next[2]) && !next[3])
@@ -5915,7 +5925,8 @@ function module_code(library_namespace) {
 			break;
 
 		case 'query':
-			// wdq
+		case 'query_data':
+			// wdq, query data
 			// wikidata_query(query, callback, options)
 			wikidata_query(next[1], function(data) {
 				_this.last_list = Array.isArray(data) ? data : null;
@@ -6011,6 +6022,10 @@ function module_code(library_namespace) {
 			this.next();
 			break;
 		}
+
+		// 再設定一次，預防有執行期中間再執行的情況。
+		// e.g., wiki.query_api(action,function(){wiki.page();})
+		this.running = 0 < this.actions.length;
 	};
 
 	/**
@@ -6020,8 +6035,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,parse,redirect_to,purge,check,copy_from,edit,upload,cache,listen,search,remove,delete,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
-			.split(',');
+	wiki_API.prototype.next.methods = 'query_api|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|search|remove|delete|protect|rollback|logout|run|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+			.split('|');
 
 	// ------------------------------------------------------------------------
 
@@ -9319,6 +9334,7 @@ function module_code(library_namespace) {
 				} else {
 					library_namespace.debug('正在執行中，直接跳出。', 6,
 							'wiki_API.prototype.' + method);
+					// console.log(this);
 				}
 				return this;
 			};
