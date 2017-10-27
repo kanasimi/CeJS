@@ -1649,11 +1649,15 @@ function module_code(library_namespace) {
 			// reduce HTML tags.
 			return preprocess_section_link_tokens(token[1] || '');
 		}
-		if (token.type === 'file') {
+		if (token.type === 'file'
+		// e.g., token[0][0].trim() === "File"
+		&& token[0][0].trim() !== '') {
 			// 顯示時，TOC 中的圖片會被消掉，在內文中才會顯現。
 			return '';
 		}
-		if (token.type === 'link' || token.type === 'category') {
+		if (token.type === 'link' || token.type === 'category'
+		// e.g., [[:File:file name.jpg]]
+		|| token.type === 'file') {
 			// escape wikilink
 			// return displayed_text
 			token = token[2] ? preprocess_section_link_tokens(token[2])
@@ -1796,7 +1800,7 @@ function module_code(library_namespace) {
 		}
 
 		var parsed_title = preprocess_section_link_tokens(parse_wikitext(section_title)),
-		//
+		// 注意: 當這空白字園出現在功能性token中時，可能會出錯。
 		id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
 		// anchor: 可以直接拿來做 wikilink anchor 的章節標題。
 		// 有多個完全相同的anchor時，後面的會加上"_2", "_3",...。
@@ -5717,8 +5721,8 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof next[1] === 'function') {
-				library_namespace.debug('直接將last_data輸入 callback: ' + next[1], 3,
-						'wiki_API.prototype.next.data');
+				library_namespace.debug('直接將last_data輸入 callback: ' + next[1],
+						3, 'wiki_API.prototype.next.data');
 				if (last_data_is_usable(this)) {
 					next[1].call(this, this.last_data);
 					this.next();
