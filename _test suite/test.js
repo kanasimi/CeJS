@@ -2763,13 +2763,13 @@ function test_wiki() {
 		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ]);
 		wikitext = 'a[[l]]b';
 		assert([ 'a{{t}}b', CeL.wiki.parser(wikitext).parse().each('link', function(token, parent, index){return '{{t}}';}, true).toString() ]);
-		wikitext = '[[Image:a.svg|b{{c|d[[e]]f}}|g]]';
+		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]';
 		assert([ 'file', CeL.wiki.parser(wikitext).parse()[0].type ]);
 		assert([ 'A.svg', CeL.wiki.parser(wikitext).parse()[0].name ]);
-		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).parse()[0][2][1].toString() ]);
+		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).parse()[0][4][1].toString() ]);
 		wikitext = '{{c|d[[e]]f}}';
-		assert([ '{{c|df}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true).toString() ]);
-		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true, 1).toString() ]);
+		assert([ '{{c|df}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true).toString() ], 'search all links');
+		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true, 1).toString() ], 'only links of level 1');
 		assert([ 'file', CeL.wiki.parse('[[FiLe:a]]').type ]);
 		assert([ 'Ab', CeL.wiki.parse('[[FiLe:ab]]').name ]);
 		// TODO: 當前解析為 'link', 應為 'text'

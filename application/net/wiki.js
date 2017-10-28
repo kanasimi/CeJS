@@ -1659,11 +1659,18 @@ function module_code(library_namespace) {
 		|| token.type === 'file') {
 			// escape wikilink
 			// return displayed_text
-			token = token.length > 2 ? preprocess_section_link_tokens(token
-			// @see wiki_toString.file
-			.slice(2).join('|'))
-			// 去掉最前頭的 ":"。 @see wiki_toString
-			: token[0].toString().replace(/^ *:?/, '') + token[1];
+			if (token.length > 2) {
+				token = token.slice(2);
+				token.type = 'plain';
+				// @see wiki_toString.file, for token.length > 2
+				token.toString = function() {
+					return this.join('|')
+				};
+				token = preprocess_section_link_tokens(token);
+			} else {
+				// 去掉最前頭的 ":"。 @see wiki_toString
+				token = token[0].toString().replace(/^ *:?/, '') + token[1];
+			}
 			// console.log(token);
 			return token;
 		}
@@ -3280,12 +3287,13 @@ function module_code(library_namespace) {
 					// parameters 1, parameters 2, parameters..., caption ]
 					var matched, last_index,
 					// parameters 有分大小寫，並且各種類會以首先符合的為主。
-					PATTERN = /([^|]*)\|/ig, file_option;
-					while (matched = PATTERN.exec(displayed_text)) {
+					PATTERN = /([\s\S]*?)([^|{}\[\]]*)\|/ig, file_option;
+					while ((matched = PATTERN.exec(displayed_text))
+							&& !matched[1]) {
 						last_index = PATTERN.lastIndex;
 						file_option = parse_wikitext(
 						// 這些 token 不應包含功能性代碼。
-						matched[1], options, queue).toString();
+						matched[2], options, queue);
 						parameters.push(file_option);
 						if (file_option in file_options) {
 							parameters[file_options[file_option]]
@@ -3299,12 +3307,12 @@ function module_code(library_namespace) {
 						// DjVuファイルの場合、 page="ページ番号"で開始ページを指定できます。
 						.match(/^ *(link|alt|lang|page)=(.*)$/)) {
 							// 會以後到的為準。
-							parameters[matched[1]] = matched[2].trim();
+							parameters[matched[2]] = matched[3].trim();
 						} else if (matched = file_option
 								.match(/^ *(thumb|thumbnail|upright)=(.*)$/)) {
 							// 會以後到的為準。
-							parameters[file_options[matched[1]]] = matched[1];
-							parameters[matched[1]] = matched[2].trim();
+							parameters[file_options[matched[2]]] = matched[2];
+							parameters[matched[2]] = matched[3].trim();
 						}
 					}
 					if (last_index > 0) {
