@@ -4112,7 +4112,7 @@ function module_code(library_namespace) {
 			// 依該年之月分資料，找出此時間點相應之月分、日碼(date of month)。
 
 			// Object.seal(紀年);
-			// date_index.name = this.name.slice();
+			// date_index.name = this.name.slice(0, 4);
 			date_index.name = this.name;
 
 			date_index.紀年名 = this.toString();

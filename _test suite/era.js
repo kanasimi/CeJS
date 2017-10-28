@@ -2166,19 +2166,20 @@ function translate_era(era) {
 			T : '注'
 		} ]);
 
-		if (Array.isArray(date.name))
+		if (Array.isArray(date.name)) {
 			add_注('紀年線圖', {
 				a : [ '📊', {
 					T : '展示線圖'
 				} ],
 				D : {
-					hierarchy : date.name.slice().reverse().slice(0, -1).join(
-							'/')
+					hierarchy : date.name.slice(0, 4).reverse().slice(0, -1)
+							.join('/')
 				},
 				href : '#',
 				onclick : draw_era.click_Period,
 				S : 'cursor:pointer;background-color:#ffa;color:#a26;'
 			}, true);
+		}
 
 		if (date.準 || date.精) {
 			if (!Array.isArray(output))

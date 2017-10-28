@@ -843,12 +843,16 @@ function module_code(library_namespace) {
 				// console.log(XMLHttp.responseText);
 				id_data = _this.parse_search_result(XMLHttp.responseText,
 						get_label, work_title);
+				if (id_data === undefined) {
+					throw undefined;
+				}
 				if (!id_data) {
 					throw 'get_work.parse_search_result:'
 							+ ' 作品網址解析函數 parse_search_result 未回傳正規結果！';
 				}
 			} catch (e) {
-				console.trace(e);
+				if (e)
+					console.trace(e);
 				library_namespace
 						.error('get_work.parse_search_result: 無法解析搜尋作品['
 								+ work_title + ']之結果！');

@@ -48,8 +48,8 @@ $ npm install cejs
 
 不囉嗦，已經做過的步驟可以跳過：
 1. 請先安裝 [node.js](https://nodejs.org/) 與 [7-Zip](https://en.wikipedia.org/wiki/7-Zip)
-2. 下載安裝檔 [_CeL.updater.node.js](https://raw.githubusercontent.com/kanasimi/CeJS/master/_for%20include/_CeL.updater.node.js)
-3. 進到安裝檔所在的目錄，在命令行界面下執行：
+2. 下載 CeJS 安裝檔 [_CeL.updater.node.js](https://raw.githubusercontent.com/kanasimi/CeJS/master/_for%20include/_CeL.updater.node.js)
+3. 進到 CeJS 安裝檔所在的目錄，在命令行界面下執行：
 
    ``` cmd
    PROMPT> node _CeL.updater.node.js

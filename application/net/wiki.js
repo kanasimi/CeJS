@@ -930,7 +930,7 @@ function module_code(library_namespace) {
 		// 警告：應處理 "[[ [[link]] ]]" → "[[ link ]]" 之特殊情況
 		// 警告：應處理 "[[text | [[ link ]] ]]", "[[ link | a[1] ]]" 之特殊情況
 		.replace(
-				PATTERN_wikilink_g,
+				PATTERN_wikilink_global,
 				function(all_link, page_and_section, page_name, section_title,
 						displayed_text) {
 					return displayed_text || page_and_section;
@@ -1132,7 +1132,7 @@ function module_code(library_namespace) {
 	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/settings/zhwiki-configuration.xml
 	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/scala/org/dbpedia/extraction/wikiparser/impl/wikipedia/Namespaces.scala
 	/** {RegExp}檔案的匹配模式 for parser。 */
-	var PATTERN_file_prefix = 'File|Image|Media|檔案|档案|圖像|图像|文件|媒[體体](?:文件)?';
+	var PATTERN_file_prefix = 'File|檔案|档案|文件|ファイル|Image|圖像|图像|画像|Media|媒[體体](?:文件)?';
 
 	file_pattern.source =
 	// 不允許 [\s\n]，僅允許 ' '。
@@ -1649,10 +1649,9 @@ function module_code(library_namespace) {
 			// reduce HTML tags.
 			return preprocess_section_link_tokens(token[1] || '');
 		}
-		if (token.type === 'file'
-		// e.g., token[0][0].trim() === "File"
-		&& token[0][0].trim() !== '') {
-			// 顯示時，TOC 中的圖片會被消掉，在內文中才會顯現。
+		if ((token.type === 'file' || token.type === 'category')
+				&& !token.is_link) {
+			// 顯示時，TOC 中的圖片、分類會被消掉，圖片在內文中才會顯現。
 			return '';
 		}
 		if (token.type === 'link' || token.type === 'category'
@@ -1660,7 +1659,9 @@ function module_code(library_namespace) {
 		|| token.type === 'file') {
 			// escape wikilink
 			// return displayed_text
-			token = token[2] ? preprocess_section_link_tokens(token[2])
+			token = token.length > 2 ? preprocess_section_link_tokens(token
+			// @see wiki_toString.file
+			.slice(2).join('|'))
 			// 去掉最前頭的 ":"。 @see wiki_toString
 			: token[0].toString().replace(/^ *:?/, '') + token[1];
 			// console.log(token);
@@ -2423,10 +2424,16 @@ function module_code(library_namespace) {
 	var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
 	/** {RegExp}wikilink內部連結的匹配模式。 */
 	PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
-	/** {RegExp}wikilink內部連結的匹配模式v2，[all_link,page_and_section,page_name,section_title,displayed_text]。頁面標題不可包含無效的字元：[\n\[\]{}]，經測試anchor亦不可包含[\n\[\]{}] */
-	PATTERN_wikilink = /\[\[(([^\[\]{}\n\|#]+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([^\n]+?))?\]\]/,
+	/**
+	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_section, page_name,
+	 * section_title, displayed_text ]
+	 * 
+	 * 頁面標題不可包含無效的字元：[\n\[\]{}]，經測試 anchor 亦不可包含[\n\[\]{}]，但 display text 可以包含
+	 * [\n]
+	 */
+	PATTERN_wikilink = /\[\[(([^\[\]{}\n\|#]+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([\s\S]+?))?\]\]/,
 	//
-	PATTERN_wikilink_g = new RegExp(PATTERN_wikilink.source, 'g'),
+	PATTERN_wikilink_global = new RegExp(PATTERN_wikilink.source, 'g'),
 	/**
 	 * Wikimedia projects 的 external link 匹配模式。
 	 * 
@@ -2508,13 +2515,13 @@ function module_code(library_namespace) {
 		file : function() {
 			return '[[' + this[0] + this[1]
 			//
-			+ (this.length > 2 ? '|' + this[2] : '') + ']]';
+			+ (this.length > 2 ? '|' + this.slice(2).join('|') : '') + ']]';
 		},
 		// link 的變體。但可採用 .name 取得 category name。
 		category : function() {
 			return '[[' + this[0] + this[1]
 			//
-			+ (this.length > 2 ? '|' + this[2] : '') + ']]';
+			+ (this.length > 2 ? '|' + this.slice(2).join('|') : '') + ']]';
 		},
 		// 內部連結 (wikilink / internal link) + interwiki link
 		link : function() {
@@ -2640,6 +2647,39 @@ function module_code(library_namespace) {
 	// 狀態開關: [[mw:Help:Magic words#Behavior switches]]
 	PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
 	PATTERN_BEHAVIOR_SWITCH = /__(NOTOC|FORCETOC|TOC|NOEDITSECTION|NEWSECTIONLINK|NONEWSECTIONLINK|NOGALLERY|HIDDENCAT|NOCONTENTCONVERT|NOCC|NOTITLECONVERT|NOTC|INDEX|NOINDEX|STATICREDIRECT|NOGLOBAL)__/g;
+
+	// [[w:en:Wikipedia:Extended image syntax]]
+	var file_options = {
+		// Type
+		thumb : 'file_type',
+		thumbnail : 'file_type',
+		frame : 'file_type',
+		framed : 'file_type',
+		frameless : 'file_type',
+		// Border
+		border : 'border',
+		// Location
+		right : 'location',
+		left : 'location',
+		center : 'location',
+		none : 'location',
+		// Alignment
+		baseline : 'alignment',
+		middle : 'alignment',
+		sub : 'alignment',
+		'super' : 'alignment',
+		'text-top' : 'alignment',
+		'text-bottom' : 'alignment',
+		top : 'alignment',
+		bottom : 'alignment',
+
+		// link : 'link ',
+		// alt : 'alt ',
+		// lang : 'lang',
+
+		// Size
+		upright : 'size'
+	};
 
 	/**
 	 * parse The MediaWiki markup language (wikitext).
@@ -3153,15 +3193,22 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// wikilink
-		// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
 		// [[~:~|~]], [[~:~:~|~]]
+
+		// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
+
+		// 注意: [[p|{{tl|t}}]] 不會被解析成 wikilink，因此 wikilink 應該要擺在 transclusion
+		// 前面檢查，或是使 displayed_text 不包含 {{}}。
+
+		// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
+		// 可以解析成圖片, Caption: "{{tl|t}}"
 
 		// TODO: bug: 正常情況下 "[[ ]]" 不會被 parse，但是本函數還是會 parse 成 link。
 
 		wikitext = wikitext.replace_till_stable(
 		// or use ((PATTERN_link))
-		PATTERN_wikilink_g, function(all_link, page_and_section, page_name,
-				section_title, displayed_text) {
+		PATTERN_wikilink_global, function(all_link, page_and_section,
+				page_name, section_title, displayed_text) {
 			// 自 end_mark 向前回溯。
 			var previous;
 			if (displayed_text && displayed_text.includes('[[')) {
@@ -3228,16 +3275,61 @@ function module_code(library_namespace) {
 
 			// assert: 'a'.match(/(b)?/)[1]===undefined
 			if (typeof displayed_text === 'string') {
-				parameters.push(
+				if (file_matched) {
+					// [ file namespace, section_title,
+					// parameters 1, parameters 2, parameters..., caption ]
+					var matched, last_index,
+					// parameters 有分大小寫，並且各種類會以首先符合的為主。
+					PATTERN = /([^|]*)\|/ig, file_option;
+					while (matched = PATTERN.exec(displayed_text)) {
+						last_index = PATTERN.lastIndex;
+						file_option = parse_wikitext(
+						// 這些 token 不應包含功能性代碼。
+						matched[1], options, queue).toString();
+						parameters.push(file_option);
+						if (file_option in file_options) {
+							parameters[file_options[file_option]]
+							//
+							= file_option;
+						} else if (matched = file_option
+								.match(/^ *(?:(?:\d+)?x)?\d+ *px *$/)) {
+							// 會以後到的為準。
+							parameters.size = file_option.trim();
+						} else if (matched = file_option
+						// DjVuファイルの場合、 page="ページ番号"で開始ページを指定できます。
+						.match(/^ *(link|alt|lang|page)=(.*)$/)) {
+							// 會以後到的為準。
+							parameters[matched[1]] = matched[2].trim();
+						} else if (matched = file_option
+								.match(/^ *(thumb|thumbnail|upright)=(.*)$/)) {
+							// 會以後到的為準。
+							parameters[file_options[matched[1]]] = matched[1];
+							parameters[matched[1]] = matched[2].trim();
+						}
+					}
+					if (last_index > 0) {
+						displayed_text = displayed_text.slice(last_index);
+					}
+				}
 				// 需再進一步處理 {{}}, -{}- 之類。
-				parse_wikitext(displayed_text, options, queue));
+				parameters.caption = parse_wikitext(displayed_text, options,
+						queue);
+				parameters.push(parameters.caption);
 			}
-			if (file_matched) {
-				// File name
-				parameters.name = normalize_page_name(file_matched[1]);
-			} else if (category_matched) {
-				// Category name
-				parameters.name = normalize_page_name(category_matched[1]);
+			if (file_matched || category_matched) {
+				// shown by link
+				// e.g., token[0][0].trim() === "File"; token[0]: namespace
+				parameters.is_link = page_name[0].trim() === '';
+
+				if (file_matched) {
+					// set File name
+					parameters.name = normalize_page_name(file_matched[1]);
+				} else if (category_matched) {
+					// set Category name
+					parameters.name = normalize_page_name(category_matched[1]);
+				}
+			} else {
+				parameters.is_link = true;
 			}
 			// TODO: [[Special:]]
 			_set_wiki_type(parameters, file_matched ? 'file'
@@ -5035,6 +5127,8 @@ function module_code(library_namespace) {
 	/**
 	 * 設定工作/添加新的工作。
 	 * 
+	 * 注意: 每個 callback 皆應在最後執行 session.next()。
+	 * 
 	 * 警告: 若 callback throw，可能導致工作中斷，不會自動復原，得要以 wiki.next() 重起工作。
 	 * 
 	 * 工作原理: 每個實體會hold住一個queue ({Array}this.actions)。 當設定工作時，就把工作推入佇列中。
@@ -5127,12 +5221,21 @@ function module_code(library_namespace) {
 
 		case 'query':
 			console.trace('use query');
-			throw 'Please use .query_api() instead of only .query()!';
+			throw 'Please use .query_API() instead of only .query()!';
 			library_namespace
-					.error('Please use .query_api() instead of only .query()!');
-		case 'query_api':
+					.error('Please use .query_API() instead of only .query()!');
+		case 'query_API':
 			// wiki_API.query(action, callback, post_data, options)
-			wiki_API.query(next[1], next[2], next[3],
+			wiki_API.query(next[1], function query_API_callback(data, error) {
+				if (typeof next[2] === 'function') {
+					// next[2] : callback
+					next[2].call(_this, data, error);
+				}
+				// 再設定一次，預防有執行期中間再執行的情況。
+				// e.g., wiki.query_api(action,function(){wiki.page();})
+				// 注意: 這動作應該放在callback()執行完後設定。
+				_this.next();
+			}, next[3],
 			// next[4] : options
 			Object.assign({
 				// [KEY_SESSION]
@@ -5157,7 +5260,7 @@ function module_code(library_namespace) {
 						2, 'wiki_API.prototype.next');
 				this.last_page = next[1];
 				if (typeof next[2] === 'function') {
-					// next[1] : callback
+					// next[2] : callback
 					next[2].call(this, next[1]);
 				}
 				this.next();
@@ -5813,12 +5916,15 @@ function module_code(library_namespace) {
 
 					// next = [ 'edit_data', data, options[, callback] ]
 
-					library_namespace.debug('this.last_data: '
-							+ JSON.stringify(this.last_data), 6,
-							'wiki_API.next.edit_data');
-					library_namespace.debug('this.last_page: '
-							+ JSON.stringify(this.last_page), 6,
-							'wiki_API.next.edit_data');
+					if (false) {
+						// TypeError: Converting circular structure to JSON
+						library_namespace.debug('this.last_data: '
+								+ JSON.stringify(this.last_data), 6,
+								'wiki_API.next.edit_data');
+						library_namespace.debug('this.last_page: '
+								+ JSON.stringify(this.last_page), 6,
+								'wiki_API.next.edit_data');
+					}
 					if (last_data_is_usable(this)) {
 						// shift arguments
 						next.splice(1, 0, this.last_data);
@@ -6035,10 +6141,6 @@ function module_code(library_namespace) {
 			break;
 		}
 
-		// 再設定一次，預防有執行期中間再執行的情況。
-		// e.g., wiki.query_api(action,function(){wiki.page();})
-		// 注意: 這動作應該放在callback()執行完後設定，而不是在這邊!
-		// this.running = 0 < this.actions.length;
 	};
 
 	/**
@@ -6048,7 +6150,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'query_api|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|search|remove|delete|protect|rollback|logout|run|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+	wiki_API.prototype.next.methods = 'query_API|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|search|remove|delete|protect|rollback|logout|run|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------
@@ -19766,6 +19868,8 @@ function module_code(library_namespace) {
 
 		parse : parse_wikitext,
 		parser : page_parser,
+		// {Object} file option hash
+		file_options : file_options,
 		HTML_to_wikitext : HTML_to_wikitext,
 
 		/** constant 中途跳出作業用。 */
