@@ -2764,9 +2764,16 @@ function test_wiki() {
 		wikitext = 'a[[l]]b';
 		assert([ 'a{{t}}b', CeL.wiki.parser(wikitext).parse().each('link', function(token, parent, index){return '{{t}}';}, true).toString() ]);
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]';
-		assert([ 'file', CeL.wiki.parser(wikitext).parse()[0].type ]);
-		assert([ 'A.svg', CeL.wiki.parser(wikitext).parse()[0].name ]);
-		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).parse()[0][4][1].toString() ]);
+		assert([ 'file', CeL.wiki.parser(wikitext).parse()[0].type ], 'wiki.parse.file #1-1');
+		assert([ 'A.svg', CeL.wiki.parser(wikitext).parse()[0].name ], 'wiki.parse.file #1-2');
+		assert([ 'b{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).parse()[0][4].toString() ], 'wiki.parse.file #1-3');
+		wikitext = "[[File:a.svg|alt= alt_of_{{tl|t}} |  !!{{tl|t}}| 654px|thumb  ]]";
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'wiki.parse.file #2-1');
+		assert([ '!!{{tl|t}}', CeL.wiki.parse(wikitext).caption.toString() ], 'wiki.parse.file #2-2');
+		assert([ '{{tl|t}}', CeL.wiki.parse(wikitext).caption[1].toString() ], 'wiki.parse.file #2-3');
+		assert([ '654px', CeL.wiki.parse(wikitext).size ], 'wiki.parse.file #2-4');
+		assert([ 'alt_of_{{tl|t}}', CeL.wiki.parse(wikitext).alt.toString() ], 'wiki.parse.file #2-5');
+		assert([ 'thumb', CeL.wiki.parse(wikitext).format ], 'wiki.parse.file #2-6');
 		wikitext = '{{c|d[[e]]f}}';
 		assert([ '{{c|df}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true).toString() ], 'search all links');
 		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true, 1).toString() ], 'only links of level 1');
@@ -2967,6 +2974,7 @@ function test_wiki() {
 		// [[w:zh:Special:Permalink/46747219]]
 		wikitext = " [[:File:title.jpg]] [[:File:title.jpg|abc]] [[:File:title.jpg| 20px |def]]";
 		assert([ "[[#File:title.jpg abc 20px %7cdef|File:title.jpg abc 20px &#124;def]]", CeL.wiki.section_link(wikitext).toString() ], 'wiki.section_link #2-1');
+
 	});
 
 

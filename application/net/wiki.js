@@ -2656,21 +2656,27 @@ function module_code(library_namespace) {
 	PATTERN_BEHAVIOR_SWITCH = /__(NOTOC|FORCETOC|TOC|NOEDITSECTION|NEWSECTIONLINK|NONEWSECTIONLINK|NOGALLERY|HIDDENCAT|NOCONTENTCONVERT|NOCC|NOTITLECONVERT|NOTC|INDEX|NOINDEX|STATICREDIRECT|NOGLOBAL)__/g;
 
 	// [[w:en:Wikipedia:Extended image syntax]]
+	// [[mw:Help:Images]]
 	var file_options = {
-		// Type
-		thumb : 'file_type',
-		thumbnail : 'file_type',
-		frame : 'file_type',
-		framed : 'file_type',
-		frameless : 'file_type',
+		// Type, display format
+		thumb : 'format',
+		thumbnail : 'format',
+		frame : 'format',
+		framed : 'format',
+		frameless : 'format',
+
 		// Border
 		border : 'border',
-		// Location
+
+		// Location, Horizontal alignment option
 		right : 'location',
 		left : 'location',
+		// 居中, 不浮動
 		center : 'location',
+		// 不浮動
 		none : 'location',
-		// Alignment
+
+		// Vertical alignment option
 		baseline : 'alignment',
 		middle : 'alignment',
 		sub : 'alignment',
@@ -2680,11 +2686,21 @@ function module_code(library_namespace) {
 		top : 'alignment',
 		bottom : 'alignment',
 
+		// Link option
 		// link : 'link ',
-		// alt : 'alt ',
-		// lang : 'lang',
 
-		// Size
+		// alt : 'alt ',
+		// lang : 'language',
+
+		// https://en.wikipedia.org/wiki/Wikipedia:Creation_and_usage_of_media_files#Setting_a_video_thumbnail_image
+		// thumbtime : 'video_thumbtime',
+		// start : 'video_start',
+		// end : 'video_end',
+
+		// page : 'book_page',
+		// 'class' : 'CSS_class',
+
+		// Size, Resizing option
 		upright : 'size'
 	};
 
@@ -2787,7 +2803,12 @@ function module_code(library_namespace) {
 		/** {Boolean}是否順便作正規化。預設不會規範頁面內容。 */
 		normalize = options && options.normalize,
 		/** {Array}是否需要初始化。 [ {String}prefix added, {String}postfix added ] */
-		initialized_fix = !queue && [ '', '' ];
+		initialized_fix = !queue && [ '', '' ],
+		// 這項設定不應被繼承。
+		no_resolve = options && options.no_resolve;
+		if (no_resolve) {
+			delete options.no_resolve;
+		}
 
 		if (/\d/.test(end_mark) || include_mark.includes(end_mark))
 			throw new Error('Error end of include_mark!');
@@ -3283,49 +3304,140 @@ function module_code(library_namespace) {
 			// assert: 'a'.match(/(b)?/)[1]===undefined
 			if (typeof displayed_text === 'string') {
 				if (file_matched) {
+					// caption 可以放在中間，但即使是空白也會被認作是 caption:
+					// ;;; [[File:a.svg|caption|thumb]]
+					// === [[File:a.svg|thumb|caption]]
+					// !== [[File:a.svg|NG caption|thumb|]]
+					// === [[File:a.svg|thumb|NG caption|]]
+
+					// 先處理掉裏面的功能性代碼。 e.g.,
+					// [[File:a.svg|alt=alt_of_{{tl|t}}|NG_caption|gykvg=56789{{tl|t}}|{{#ifexist:abc|alt|link}}=abc|{{#ifexist:abc|left|456}}|{{#expr:100+300}}px|thumb]]
+					// e.g., [[File:a.svg|''a''|caption]]
+					displayed_text = parse_wikitext(displayed_text, {
+						no_resolve : true
+					}, queue);
+
 					// [ file namespace, section_title,
 					// parameters 1, parameters 2, parameters..., caption ]
-					var matched, last_index,
+					var token,
 					// parameters 有分大小寫，並且各種類會以首先符合的為主。
-					PATTERN = /([\s\S]*?)([^|{}\[\]]*)\|/ig, file_option;
-					while ((matched = PATTERN.exec(displayed_text))
-							&& !matched[1]) {
-						last_index = PATTERN.lastIndex;
-						file_option = parse_wikitext(
-						// 這些 token 不應包含功能性代碼。
-						matched[2], options, queue);
-						parameters.push(file_option);
-						if (file_option in file_options) {
-							parameters[file_options[file_option]]
+					PATTERN = /([^\|]*?)(\||$)/ig, file_option;
+					// assert: 這會將剩下來的全部分完。
+					while (token = PATTERN.exec(displayed_text)) {
+						var matched = token[1].match(
+						// [ all, head space, option name or value, undefined,
+						// undefined, tail space ]
+						// or
+						// [ all, head space, option name, "="+space, value,
+						// tail space ]
+						/^([\s\n]*)([^={}\[\]<>\s\n][^={}\[\]<>]*?)(?:(=[\s\n]*)([\s\S]*?))?([\s\n]*)$/
+						// 經測試，等號前方不可有空格。
+						// 檔案選項名稱可以在地化，不一定都是 [a-z]。
+						);
+						if (!matched) {
+							parameters.push(parse_wikitext(token[1], options,
+									queue));
+							continue;
+						}
+
+						// 除了 alt, caption 外，這些 option tokens 不應包含功能性代碼。
+
+						matched[2]
+						//
+						= parse_wikitext(matched[2], options, queue);
+
+						// has equal sign "="
+						var has_equal = typeof matched[4] === 'string';
+						if (has_equal) {
+							// e.g., |alt=text|
+							matched[4] = parse_wikitext(matched[4], options,
+									queue);
+							// [ head space, option name, "="+space, value,
+							// tail space ]
+							file_option = matched.slice(1);
+						} else {
+							// e.g., |right|
+							// [ head space, option name or value, tail space ]
+							file_option = [ matched[1],
 							//
-							= file_option;
-						} else if (matched = file_option
-								.match(/^ *(?:(?:\d+)?x)?\d+ *px *$/)) {
-							// 會以後到的為準。
-							parameters.size = file_option.trim();
-						} else if (matched = file_option
-						// DjVuファイルの場合、 page="ページ番号"で開始ページを指定できます。
-						.match(/^ *(link|alt|lang|page)=(.*)$/)) {
-							// 會以後到的為準。
-							parameters[matched[2]] = matched[3].trim();
-						} else if (matched = file_option
-								.match(/^ *(thumb|thumbnail|upright)=(.*)$/)) {
-							// 會以後到的為準。
-							parameters[file_options[matched[2]]] = matched[2];
-							parameters[matched[2]] = matched[3].trim();
+							matched[2], matched[5] ];
+						}
+						file_option = _set_wiki_type(file_option, 'plain');
+						// console.log('-'.repeat(80)+64545646);
+						// console.log(has_equal);
+						// console.log(file_option);
+						parameters.push(file_option);
+
+						// 'right' of |right|, 'alt' of |alt=foo|
+						var option_name = file_option[1];
+
+						// 各參數設定。
+						if (!has_equal && (option_name in file_options)) {
+							if (!parameters[file_options[option_name]]
+							// 'location' 等先到先得。
+							|| file_options[option_name] !== 'location'
+							// Type, display format
+							&& file_options[option_name] !== 'format') {
+								parameters[file_options[option_name]]
+								//
+								= option_name;
+							}
+
+						} else if (!has_equal
+						//
+						&& /^(?:(?:\d+)?x)?\d+ *px$/.test(option_name)) {
+							// 以後到的為準。
+							parameters.size = option_name;
+
+						} else if (has_equal
+								&&
+								// page: DjVuファイルの場合、 page="ページ番号"で開始ページを指定できます。
+								/^(?:link|alt|lang|page|thumbtime|start|end|class)$/
+										.test(option_name)
+						// 經測試，等號前方不可有空格。
+						) {
+							// 以後到的為準。
+							parameters[option_name] = file_option[3];
+
+						} else if (has_equal
+								&& /^(?:thumb|thumbnail|upright)$/
+										.test(option_name)) {
+							// 以後到的為準。
+							// upright=1 →
+							// parameters.size='upright'
+							// parameters.upright='1'
+							parameters[file_options
+							//
+							[option_name]] = option_name;
+							parameters[option_name] = file_option[3];
+
+						} else if (has_equal) {
+							// 即使是空白也會被認作是 caption。
+							// 相當於 .trim()
+							parameters.caption = file_option.slice(1, -1);
+							parameters.caption
+							//
+							.toString = file_option.toString;
+
+						} else {
+							// 相當於 .trim()
+							parameters.caption = option_name;
+						}
+
+						if (!token[2]) {
+							break;
 						}
 					}
-					if (last_index > 0) {
-						displayed_text = displayed_text.slice(last_index);
-					}
+
+				} else {
+					// 需再進一步處理 {{}}, -{}- 之類。
+					parameters.caption = parse_wikitext(displayed_text,
+							options, queue);
+					parameters.push(parameters.caption);
 				}
-				// 需再進一步處理 {{}}, -{}- 之類。
-				parameters.caption = parse_wikitext(displayed_text, options,
-						queue);
-				parameters.push(parameters.caption);
 			}
 			if (file_matched || category_matched) {
-				// shown by link
+				// shown by link, is a linking to a file
 				// e.g., token[0][0].trim() === "File"; token[0]: namespace
 				parameters.is_link = page_name[0].trim() === '';
 
@@ -3340,6 +3452,7 @@ function module_code(library_namespace) {
 				parameters.is_link = true;
 			}
 			// TODO: [[Special:]]
+			// TODO: [[Media:]]: 連結到圖片但不顯示圖片
 			_set_wiki_type(parameters, file_matched ? 'file'
 					: category_matched ? 'category' : 'link');
 			// [ page_name, section_title, displayed_text without '|' ]
@@ -3379,12 +3492,12 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// {{{...}}} 需在 {{...}} 之前解析。
-		// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
+		// [[w:zh:Help:模板]]
 		// 在模板頁面中，用三個大括弧可以讀取參數。
 		// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
 		wikitext = wikitext.replace_till_stable(
 		//
-		/{{{([^{}][\s\S]*?)}}}/g, function(all, parameters) {
+		/{{{([^{}][\s\S]*?)}}}/g, function parse_parameters(all, parameters) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('{{{'), previous;
 			if (index > 0) {
@@ -3822,6 +3935,11 @@ function module_code(library_namespace) {
 				queue.push(all);
 				return include_mark + (queue.length - 1) + end_mark;
 			});
+		}
+
+		// console.log(wikitext);
+		if (no_resolve) {
+			return wikitext;
 		}
 
 		// console.log('16: ' + JSON.stringify(wikitext));
@@ -14734,10 +14852,10 @@ function module_code(library_namespace) {
 	/** {Object}abbreviation 縮寫 */
 	var Flow_abbreviation = {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=flow%2Bview-header
-		// 關於討論板的描述。
+		// 關於討論板的描述。使用 .revision
 		header : 'h',
 		// https://www.mediawiki.org/w/api.php?action=help&modules=flow%2Bview-topiclist
-		// 討論板話題列表。
+		// 討論板話題列表。使用 .revisions
 		topiclist : 'tl'
 	};
 
