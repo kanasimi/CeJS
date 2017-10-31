@@ -1131,8 +1131,11 @@ function module_code(library_namespace) {
 	// [[Media:image.png]]：產生一個指向檔案本身的連結
 	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/settings/zhwiki-configuration.xml
 	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/scala/org/dbpedia/extraction/wikiparser/impl/wikipedia/Namespaces.scala
+	//
+	// Fichier:
+	// https://fr.wikipedia.org/wiki/Aide:Ins%C3%A9rer_une_image_(wikicode,_avanc%C3%A9)
 	/** {RegExp}檔案的匹配模式 for parser。 */
-	var PATTERN_file_prefix = 'File|檔案|档案|文件|ファイル|Image|圖像|图像|画像|Media|媒[體体](?:文件)?';
+	var PATTERN_file_prefix = 'File|Fichier|檔案|档案|文件|ファイル|Image|圖像|图像|画像|Media|媒[體体](?:文件)?';
 
 	file_pattern.source =
 	// 不允許 [\s\n]，僅允許 ' '。
@@ -3319,9 +3322,9 @@ function module_code(library_namespace) {
 
 					// [ file namespace, section_title,
 					// parameters 1, parameters 2, parameters..., caption ]
-					var token,
+					var token, file_option,
 					// parameters 有分大小寫，並且各種類會以首先符合的為主。
-					PATTERN = /([^\|]*?)(\||$)/ig, file_option;
+					PATTERN = /([^\|]*?)(\||$)/ig;
 					// assert: 這會將剩下來的全部分完。
 					while (token = PATTERN.exec(displayed_text)) {
 						var matched = token[1].match(
@@ -3331,12 +3334,35 @@ function module_code(library_namespace) {
 						// [ all, head space, option name, "="+space, value,
 						// tail space ]
 						/^([\s\n]*)([^={}\[\]<>\s\n][^={}\[\]<>]*?)(?:(=[\s\n]*)([\s\S]*?))?([\s\n]*)$/
-						// 經測試，等號前方不可有空格。
+						// TODO: 經測試，link等號前方不可有空格，alt等號前方可有空格。
+						// 現在的處理方法只允許等號前面不可有空格。
 						// 檔案選項名稱可以在地化，不一定都是 [a-z]。
 						);
 						if (!matched) {
-							parameters.push(parse_wikitext(token[1], options,
-									queue));
+							// e.g., " a<br/>b "
+							matched = token[1]
+									.match(/^([\s\n]*)([\s\S]*?)([\s\n]*)$/);
+							if (matched[1] || matched[3]) {
+								parameters.caption
+								// 相當於 .trim()
+								= matched[2] = parse_wikitext(matched[2],
+										options, queue);
+								if (!matched[3])
+									matched.pop();
+								matched.shift();
+								if (!matched[0])
+									matched.shift();
+								_set_wiki_type(matched, 'plain');
+							} else {
+								parameters.caption
+								// assert: 前後都沒有空白。
+								= matched = parse_wikitext(token[1], options,
+										queue);
+							}
+							parameters.push(matched);
+							if (!token[2]) {
+								break;
+							}
 							continue;
 						}
 
@@ -3363,13 +3389,27 @@ function module_code(library_namespace) {
 							matched[2], matched[5] ];
 						}
 						file_option = _set_wiki_type(file_option, 'plain');
+
+						// 'right' of |right|, 'alt' of |alt=foo|
+						var option_name = file_option[1],
+						//
+						option_value = has_equal && file_option[3];
+
+						// reduce
+						while (!file_option[0]) {
+							file_option.shift();
+						}
+						while (!file_option[file_option.length - 1]) {
+							file_option.pop();
+						}
+						if (file_option.length === 1) {
+							file_option = file_option[0];
+						}
+
 						// console.log('-'.repeat(80)+64545646);
 						// console.log(has_equal);
 						// console.log(file_option);
 						parameters.push(file_option);
-
-						// 'right' of |right|, 'alt' of |alt=foo|
-						var option_name = file_option[1];
 
 						// 各參數設定。
 						if (!has_equal && (option_name in file_options)) {
@@ -3390,14 +3430,13 @@ function module_code(library_namespace) {
 							parameters.size = option_name;
 
 						} else if (has_equal
+								// 這些選項必須有 "="。無 "=" 的話，會被當作 caption。
 								&&
 								// page: DjVuファイルの場合、 page="ページ番号"で開始ページを指定できます。
 								/^(?:link|alt|lang|page|thumbtime|start|end|class)$/
-										.test(option_name)
-						// 經測試，等號前方不可有空格。
-						) {
+										.test(option_name)) {
 							// 以後到的為準。
-							parameters[option_name] = file_option[3];
+							parameters[option_name] = option_value;
 
 						} else if (has_equal
 								&& /^(?:thumb|thumbnail|upright)$/
@@ -3409,15 +3448,22 @@ function module_code(library_namespace) {
 							parameters[file_options
 							//
 							[option_name]] = option_name;
-							parameters[option_name] = file_option[3];
+							parameters[option_name] = option_value;
 
 						} else if (has_equal) {
 							// 即使是空白也會被認作是 caption。
 							// 相當於 .trim()
-							parameters.caption = file_option.slice(1, -1);
-							parameters.caption
-							//
-							.toString = file_option.toString;
+							if (typeof option_name === 'string'
+									&& typeof option_value === 'string') {
+								parameters.caption = option_name + '='
+										+ option_value;
+							} else {
+								parameters.caption = [ option_name, '=',
+										option_value ];
+								parameters.caption
+								//
+								.toString = file_option.toString;
+							}
 
 						} else {
 							// 相當於 .trim()
@@ -5658,7 +5704,7 @@ function module_code(library_namespace) {
 							.warn('wiki_API.prototype.next: The page to edit is Flow. I can not edit it directly.');
 					// next[3] : callback
 					if (typeof next[3] === 'function') {
-						// 2017/9/18 Flow已被重新定義為結構化討論（Structured Discussions）。
+						// 2017/9/18 Flow已被重新定義為結構化討論 / 結構式討論。
 						// is [[mw:Structured Discussions]].
 						next[3].call(this, this.last_page.title, 'is Flow');
 					}
