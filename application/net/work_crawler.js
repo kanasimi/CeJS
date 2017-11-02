@@ -1958,7 +1958,12 @@ function module_code(library_namespace) {
 					+ '/' + _this.MAX_ERROR + '...');
 			_this.get_images(image_data, callback);
 
-		}, 'binary', null, this.get_URL_options);
+		}, 'binary', null, Object.assign({
+			// incase "MaxListenersExceededWarning: Possible EventEmitter memory
+			// leak detected. 11 connect listeners added. Use
+			// emitter.setMaxListeners() to increase limit"
+			max_listeners : 300
+		}, this.get_URL_options));
 	}
 
 	// --------------------------------------------------------------------------------------------

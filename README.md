@@ -30,7 +30,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 ### Installation via npm
 <!-- NodeICO badges -->
 [![NPM](https://nodei.co/npm/cejs.png)](https://nodei.co/npm/cejs/)
-[![NPM](https://nodei.co/npm-dl/cejs.png)](https://nodei.co/npm/cejs/)
+<!-- [![NPM](https://nodei.co/npm-dl/cejs.png)](https://nodei.co/npm/cejs/) -->
 
 First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and [install the node.js package](https://nodejs.org/en/download/package-manager/).
 請先安裝 [node.js](https://nodejs.org/)。

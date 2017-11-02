@@ -456,7 +456,7 @@ function show_calendar(era_name) {
 		if (Array.isArray(i))
 			i = i[0];
 		main_date.共存紀年.forEach(function(era_name) {
-			if (era_name.startsWith(i))
+			if (era_name.toString().startsWith(i))
 				add_traversal(era_name, {
 					span : '↔',
 					R : 'contemporary'

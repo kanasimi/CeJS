@@ -2300,9 +2300,9 @@ function module_code(library_namespace) {
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 	NOT_FOUND = ''.indexOf('_'),
-	// 10 天干. celestial stem, Heavenly Stem
+	// 10 天干. celestial stem, Heavenly Stem.
 	STEM_LIST = '甲乙丙丁戊己庚辛壬癸',
-	// 12 地支. Earthly Branches
+	// 12 地支. Earthly Branches. TODO: 異體字如"夘"
 	BRANCH_LIST = '子丑寅卯辰巳午未申酉戌亥',
 	// 60: lcm(STEM_LIST.length, BRANCH_LIST.length);
 	SEXAGENARY_CYCLE_LENGTH = 60,

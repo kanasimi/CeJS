@@ -1822,6 +1822,13 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		if (options.max_listeners >= 0) {
+			// incase "MaxListenersExceededWarning: Possible EventEmitter memory
+			// leak detected. 11 connect listeners added. Use
+			// emitter.setMaxListeners() to increase limit"
+			request.setMaxListeners(options.max_listeners);
+		}
+
 		if (post_data) {
 			// console.log(post_data);
 			if (options.form_data) {

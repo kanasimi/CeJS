@@ -5844,18 +5844,24 @@ function module_code(library_namespace) {
 						date_index = numeralize_date_format(date_index,
 								options.numeral);
 
-					var name = era.toString();
+					var name = [ era ];
+					name.toString = function() {
+						return this.join('');
+					};
+					// add properties needed.
+					if (era.疑)
+						name.疑 = era.疑;
 					// 為需要以 space 間隔之紀元名添加 space。
 					if (NEED_SPLIT_POSTFIX.test(name))
-						name += ' ';
-					name += date_index[0] + '年';
+						name.push(' ');
+					name.push(date_index[0] + '年');
 					if (era.精 !== '年') {
-						name += date_index[1] + '月';
+						name.push(date_index[1] + '月');
 						if (era.精 !== '月')
-							name += date_index[2]
+							name.push(date_index[2]
 									+ (options.numeral === 'Chinese'
 									//
-									? '' : '日');
+									? '' : '日'));
 					}
 					if (options.add_country)
 						name = [ era.name[紀年名稱索引值.國家], name ];
@@ -7656,10 +7662,18 @@ function module_code(library_namespace) {
 
 		tmp = [ era, date, tmp ];
 		if (era_date.共存紀年) {
-			// ☼
+			// old: ☼
 			date = '<br />⏳ ';
 			tmp.push('<hr />' + library_namespace.gettext('共存紀年') + '：' + date
-					+ era_date.共存紀年.join(date));
+			//
+			+ era_date.共存紀年.map(function(era_date) {
+				var era_string = era_date.toString();
+				if (era_date.疑)
+					return '<span style="color:#888;">'
+					// 特別標示存在疑問、不準確的紀年。
+					+ era_string.toString() + ' (疑)</span>';
+				return era_string;
+			}).join(date));
 		}
 
 		return tmp;
@@ -7906,6 +7920,7 @@ function module_code(library_namespace) {
 		// TODO: 地皇三年，天鳳六年改為地皇。
 		// e.g., 以建平二年為太初元年, 一年中地再動, 大酺五日, 乃元康四年嘉谷, （玄宗開元）十年
 		// TODO: 未及一年, [去明]年, 是[年月日], 《清華大學藏戰國竹簡（貳）·繫年》周惠王立十又七年
+		// TODO: 排除 /干支[年歲嵗]/
 		return 史籍紀年_PATTERN = generate_pattern('(^|[^為酺乃])((?:' + 紀年
 				+ ')*(?:）\0|\\))?' + 年 + '(?:' + 月 + 日 + '?)?|(?:' + 月 + ')?'
 				+ 日 + '|' + 月 + ')([^中]|$)', false, 'g');

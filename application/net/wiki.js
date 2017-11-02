@@ -3160,6 +3160,11 @@ function module_code(library_namespace) {
 
 			// console.log(parameters);
 
+			// language fallback :[[mw:Localisation statistics]]
+			// (zh-hk, zh-mo, zh-tw) → zh-hant (→ zh?)
+			// (zh-cn, zh-sg) → zh-hans (→ zh?)
+			// no zh-my?
+
 			var conversion = library_namespace.null_Object(),
 			// [, last conversion, this language token, this language code ]
 			PATTERN = /(^|.*?);(\s*(zh-(?:cn|tw|hk|mo|sg|hant|hans)):\s*)/g,
@@ -3816,6 +3821,9 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// parse_wikitext.section_title
+
+		// TODO: 經測試，"\n== <code>code<code> =="會被當作title，但採用本函數將會解析錯誤。
+		// [[w:zh:Special:Diff/46814116]]
 
 		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
 		wikitext = wikitext.replace_till_stable(
