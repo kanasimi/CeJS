@@ -7439,7 +7439,7 @@ function module_code(library_namespace) {
 					// 去除(干支_PATTERN): 預防"丁未"被 parse 成丁朝之類的意外。
 					date = !干支_PATTERN.test(era)
 					// 預防被解析為明朝的年份。
-					&& era.startsWith('明年') && to_era_Date(era, {
+					&& !era.startsWith('明年') && to_era_Date(era, {
 						parse_only : true
 					});
 
@@ -7478,7 +7478,7 @@ function module_code(library_namespace) {
 			// 去除(干支_PATTERN): 預防"丁未"被 parse 成丁朝之類的意外。
 			date = !干支_PATTERN.test(era)
 			// 預防被解析為明朝的年份。
-			&& era.startsWith('明年') && to_era_Date(era, {
+			&& !era.startsWith('明年') && to_era_Date(era, {
 				parse_only : true
 			});
 
