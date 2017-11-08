@@ -1823,9 +1823,11 @@ function module_code(library_namespace) {
 		}
 
 		if (options.max_listeners >= 0) {
-			// incase "MaxListenersExceededWarning: Possible EventEmitter memory
-			// leak detected. 11 connect listeners added. Use
-			// emitter.setMaxListeners() to increase limit"
+			/**
+			 * 最多平行取得檔案的數量。 <code>
+			incase "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added. Use emitter.setMaxListeners() to increase limit"
+			</code>
+			 */
 			request.setMaxListeners(options.max_listeners);
 		}
 

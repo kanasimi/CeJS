@@ -1276,7 +1276,16 @@ function module_code(library_namespace) {
 				charset : file_type === 'text' && item_data.charset
 				//
 				|| 'binary',
-				get_URL_options : item_data.get_URL_options
+				get_URL_options : Object.assign({
+					/**
+					 * 每個頁面最多應該不到50張圖片或者其他媒體。
+					 * 
+					 * 最多平行取得檔案的數量。 <code>
+					incase "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added. Use emitter.setMaxListeners() to increase limit"
+					</code>
+					 */
+					max_listeners : 50
+				}, item_data.get_URL_options)
 			});
 			return item;
 		}

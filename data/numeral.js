@@ -151,6 +151,8 @@ function module_code(library_namespace) {
 		// Firefox/3.0.19 無法 parse '䦉': 錯誤: invalid property id
 		'䦉' : '肆',
 
+		// 俗亦以「什」代拾，然易竄為「仟」。
+
 		// 念圓 : '貳拾圓',
 		// 念 : '貳拾',
 		廿 : '二十',
@@ -161,8 +163,12 @@ function module_code(library_namespace) {
 		丗 : '三十',
 		// e.g., 卌又三年
 		卌 : '四十',
+		// 罕作「圩」
+		// 圩 : '五十',
 		皕 : '二百',
+		// 古亦作「陌」。
 		陌 : '百',
+		// 古亦作「阡」。
 		阡 : '仟',
 		萬萬 : '億',
 		// 太常使用。
@@ -603,7 +609,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 將阿拉伯數字轉為中文數字<b>下數系統</b>大寫(Long scale)、小寫(Short scale)兩種表示法/讀法<br />
+	 * 將阿拉伯數字轉為中文數字<b>下數系統</b>大寫(Long scale)、小寫(Short scale)兩種表示法/中文數字讀法<br />
 	 * 處理1-99999的數,尚有bug。
 	 */
 	function to_Chinese_numeral_Low_scale(number_String, formal) {

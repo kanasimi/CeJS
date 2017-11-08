@@ -2788,12 +2788,12 @@ function module_code(library_namespace) {
 	// 日期及時間 由小到大排列。
 	PATTERN_time_units = [ [ '(?:ms|milliseconds?|毫秒|ミリ秒)', 1 ],
 			[ '(?:s(?:ec)?|秒[鐘钟]?)', 1000 ], [ '(?:m(?:in)?|分[鐘钟]?)', 60 ],
-			[ '(?:h(?:r|ours?)?|小?[時时]|時間)', 60 ],
+			[ '(?:h(?:r|ours?)?|[個个]?小?[時时]|[個个]?時間)', 60 ],
 			// T: for ISO 8601 Durations. e.g., 'P21DT3H'
 			[ '(?:d(?:ays?|T)?|[日天])', 24 ],
-			[ '(?:w(?:eeks?)?|週|星期|禮拜)', 7, true ],
+			[ '(?:w(?:eeks?)?|週|[個个]?星期|個?禮拜|个?礼拜)', 7, true ],
 			// 以下僅僅給出約略大小。
-			[ '(?:mon(?:ths?)?|月)', 30 ], [ '(?:y(?:r|ears?)?|年)', 12 ] ];
+			[ '(?:mon(?:ths?)?|[個个ヶ]?月)', 30 ], [ '(?:y(?:r|ears?)?|年)', 12 ] ];
 
 	(function() {
 		// [ all, amount ]
@@ -2805,6 +2805,7 @@ function module_code(library_namespace) {
 	})();
 
 	// parser time interval to timevalue (get how many millisecond)
+	// TODO: 半小時
 	function time_interval_to_millisecond(interval) {
 		if (interval > 0) {
 			return +interval;

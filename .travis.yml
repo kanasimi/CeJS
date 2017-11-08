@@ -23,9 +23,10 @@ node_js:
 # 2016/10/23: Travis CI failed on node.js 0.11
 #  - "0.11"
 #  - "0.12"
-  - "6"
-# 2017/6/1
+# 2017/11/2 LTS
   - "8"
+# 2017/11/2 Current
+  - "9"
 
 install:
   - npm install

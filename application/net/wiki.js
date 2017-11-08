@@ -1975,6 +1975,8 @@ function module_code(library_namespace) {
 	 * 
 	 * CeL.wiki.parser.parser_prototype.each_section
 	 * 
+	 * TODO: 這會漏算沒有日期標示的簽名
+	 * 
 	 * @example <code>
 	parser = CeL.wiki.parser(page_data);
 	parser.each_section(function(section, index) {
@@ -3339,7 +3341,7 @@ function module_code(library_namespace) {
 						// [ all, head space, option name, "="+space, value,
 						// tail space ]
 						/^([\s\n]*)([^={}\[\]<>\s\n][^={}\[\]<>]*?)(?:(=[\s\n]*)([\s\S]*?))?([\s\n]*)$/
-						// TODO: 經測試，link等號前方不可有空格，alt等號前方可有空格。
+						// TODO: 經測試，link等號前方不可有空格，alt等號前方可有空格。必須用小寫的"alt"。
 						// 現在的處理方法只允許等號前面不可有空格。
 						// 檔案選項名稱可以在地化，不一定都是 [a-z]。
 						);
@@ -6335,6 +6337,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// 或者還可以去除 "MediaWiki message delivery" 這些系統預設的非人類發布者。
 	/** {RegExp}pattern to test if is a robot name. CeL.wiki.PATTERN_BOT_NAME */
 	var PATTERN_BOT_NAME = /bot(?:$|[^a-z])|[機机][器械]人|ボット(?:$|[^a-z])|봇$/i;
 	// ↑ /(?:$|[^a-z])/: e.g., PxBot~testwiki, [[ko:User:2147483647 (bot)]],

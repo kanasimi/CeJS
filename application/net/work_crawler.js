@@ -360,6 +360,7 @@ function module_code(library_namespace) {
 		if (typeof server_URL === 'function') {
 			server_URL = server_URL.call(this);
 		}
+		server_URL = this.full_URL(server_URL);
 
 		var _this = this;
 
@@ -1959,9 +1960,13 @@ function module_code(library_namespace) {
 			_this.get_images(image_data, callback);
 
 		}, 'binary', null, Object.assign({
-			// incase "MaxListenersExceededWarning: Possible EventEmitter memory
-			// leak detected. 11 connect listeners added. Use
-			// emitter.setMaxListeners() to increase limit"
+			/**
+			 * 最多平行取得檔案(圖片)的數量。
+			 * 
+			 * 最多平行取得檔案的數量。 <code>
+			incase "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added. Use emitter.setMaxListeners() to increase limit"
+			</code>
+			 */
 			max_listeners : 300
 		}, this.get_URL_options));
 	}

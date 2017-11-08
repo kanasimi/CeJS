@@ -1473,7 +1473,9 @@ function module_code(library_namespace) {
 	REDUCE_PATTERN = new RegExp('([^' + NEED_SPLIT_CHARS + ']) ([^'
 			+ NEED_SPLIT_CHARS.replace('\\d', '') + '])', 'g');
 
+	// 把紀年名稱與日期連接起來，並且在有需要的時候添加上空格。
 	// 警告: 會改變 name_with_date_Array!
+	// @return {String}
 	function concat_era_name(name_with_date_Array) {
 		name_with_date_Array.forEach(function(slice, index) {
 			var _slice = String(slice).trim();
@@ -5844,13 +5846,16 @@ function module_code(library_namespace) {
 						date_index = numeralize_date_format(date_index,
 								options.numeral);
 
+					// [ era, 年, 月, 日 ]
 					var name = [ era ];
 					name.toString = function() {
 						return this.join('');
 					};
 					// add properties needed.
-					if (era.疑)
+					if (era.疑) {
+						// 特別標示存在疑問、不準確的紀年。
 						name.疑 = era.疑;
+					}
 					// 為需要以 space 間隔之紀元名添加 space。
 					if (NEED_SPLIT_POSTFIX.test(name))
 						name.push(' ');
@@ -7137,6 +7142,7 @@ function module_code(library_namespace) {
 
 			if (0 < year_index)
 				// 紀錄前一年段的索引。
+				// TODO: 添加多個紀年之日期。
 				date_list.previous = concat_era_name([
 						era,
 						era.歲名(year_index < year_left ? 0 : year_index
@@ -7668,10 +7674,11 @@ function module_code(library_namespace) {
 			//
 			+ era_date.共存紀年.map(function(era_date) {
 				var era_string = era_date.toString();
-				if (era_date.疑)
-					return '<span style="color:#888;">'
+				if (era_date.疑) {
+					return '<span style="color:#888;" title="存在疑問、不準確的紀年">'
 					// 特別標示存在疑問、不準確的紀年。
-					+ era_string.toString() + ' (疑)</span>';
+					+ era_string.toString() + '<sub>(疑)</sub></span>';
+				}
 				return era_string;
 			}).join(date));
 		}

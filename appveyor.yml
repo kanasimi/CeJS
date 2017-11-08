@@ -8,8 +8,10 @@ environment:
 # FreeBSD ports node-devel
     - nodejs_version: "0.11"
 #    - nodejs_version: "0.12"
-    - nodejs_version: "6"
+# 2017/11/2 LTS
     - nodejs_version: "8"
+# 2017/11/2 Current
+    - nodejs_version: "9"
 
 # Install scripts. (runs after repo cloning)
 install:

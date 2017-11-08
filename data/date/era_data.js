@@ -1697,8 +1697,8 @@ CeL.era.pass_on = {
 		'/皇統|1141/2/9~|5es 4ac 3nt050a 3mnf4zv 3s9 3z4o4i0',
 		'/海陵王/天德|1150/1/1~|12=35s 5ew 4ih052s 4qo|君主=廢帝;海陵王|諡=海陵煬王;海陵庶人|君主名=完顏亮|表字=元功|生=1122年2月24日|卒=1161年12月15日|在位=1150年1月9日~1161年12月15日',
 		'/貞元|1153/3/27~|3=31p83mi 56z 35s',
-		'/正隆|1156/2/23~|2=3qju5u9 4i9 3eom3u1 3ow',
-		'/世宗/大定|1161/10/21~|10=35x 380i3oa 4o1759g 5uq 40874ic 48a 3a91439 42y 4o0x5d0 57d55uw 5as 3reu50q 505 3psj47e 4sh75e1 4a0 4pp33q1 3fw 4g4l|君主=光天興運文德武功聖明仁孝皇帝|君主名=完顏雍|生=1123年3月29日|卒=1189年1月20日|在位=1161年10月27日~1189年1月20日',
+		'/正隆|1156/2/23~|2=3qju5u9 4i9 3eom3u1 3p1',
+		'/世宗/大定|1161/10/28~|10=3p1 380i3oa 4o1759g 5uq 40874ic 48a 3a91439 42y 4o0x5d0 57d55uw 5as 3reu50q 505 3psj47e 4sh75e1 4a0 4pp33q1 3fw 4g4l|君主=光天興運文德武功聖明仁孝皇帝|君主名=完顏雍|生=1123年3月29日|卒=1189年1月20日|在位=1161年10月27日~1189年1月20日|注=金史/卷6:十月辛丑...丙午，慶雲見，官屬諸軍勸進，固讓良久，於是親告天太祖廟，還禦宣政殿，即皇帝位。...丁未大赦，改元大定。',
 		'/章宗/明昌|1190/2/7~|579 4ei 4sgy5e9 3t4a4aa 3q0|君主=憲天光運仁文義武神聖英孝皇帝|君主名=完顏璟|生=1168年8月31日（农历七月二十七）|卒=1208年12月29日|在位=1189年1月20日~1208年12月29日',
 		'/承安|1196/11/22~|11=35t 3a1y42z 3o5 4nyq',
 		'/泰和|1201/2/5~|4gy 4t3g5es 4ac 3qyw50a 46l 3mhw',
@@ -3037,7 +3037,7 @@ CeL.era.pass_on = {
 		'/พระบาทสมเด็จพระปรมินทรมหาภูมิพลอดุลยเดช|1946/6/9~|:CE|君主=ภูมิพลอดุลยเดช;สมเด็จพระภัทรมหาราช;รัชกาลที่ 9;Maha Bhumibol Adulyadej;the Great;Rama IX;Somdet Phra Phatthara Maharat|生=1927/12/5|卒=2016/10/13|關係=Younger brother of Rama VIII;Grandson of Rama V by Mahidol Adulyadej',
 		'/สมเด็จพระเจ้าอยู่หัวมหาวชิราลงกรณ บดินทรเทพยวรางกูร|2016/10/13~'
 				+ CeL.era.pass_on.last_day
-				+ '|:CE|君主=มหาวชิราลงกรณ;รัชกาลที่ 10;Somdet Phra Chao Yu Hua;Maha Vajiralongkorn;Bodindradebayavarangkun;Rama X|生=1952/7/28|關係=Only son of Rama IX and Queen Sirikit;2nd child of Rama IX'
+				+ '|:CE|君主=มหาวชิราลงกรณ;รัชกาลที่ 10;Somdet Phra Chao Yu Hua;Maha Vajiralongkorn;Bodindradebayavarangkun;Rama X|生=1952/7/28|關係=Only son of Rama IX and Queen Sirikit;2nd child of Rama IX|注=2016年10月13日 拉瑪九世 蒲美蓬·阿杜德過世；2016年12月1日 拉瑪十世 瑪哈·哇集拉隆功 正式加冕及登基'
 
 ]).minute_offset = 7 * 60;
 

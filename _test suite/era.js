@@ -437,8 +437,8 @@ function show_calendar(era_name) {
 						span : '🔼',
 						R : '↑previous'
 					}, ' ', {
-						a : name,
-						title : name,
+						a : name.toString(),
+						title : name.toString(),
 						href : '#',
 						target : '_self',
 						onclick : click_title_as_era
@@ -470,21 +470,21 @@ function show_calendar(era_name) {
 			//
 			: /[\/年]/.test(era_name) ? date.紀年 : era_name;
 
-		var tmp, matched, list = [], list2 = [];
+		var tmp, matched, list = [], list_同國 = [];
 		if (date.共存紀年) {
 			tmp = date.國家;
 			date.共存紀年.forEach(function(era, index) {
 				list.push('[' + (index + 1) + ']', add_contemporary(era,
 						output_numeral));
 				if (tmp === era[0])
-					list2.push('[' + ((list2.length / 2 | 0) + 1) + ']',
+					list_同國.push('[' + ((list_同國.length / 2 | 0) + 1) + ']',
 							add_contemporary(era, output_numeral));
 			});
 			date.共存紀年 = list;
-			date.同國共存紀年 = list2;
+			date.同國共存紀年 = list_同國;
 			// reset
 			list = [];
-			list2 = [];
+			list_同國 = [];
 		}
 
 		if (tmp = date.精 === '年')
@@ -1883,25 +1883,32 @@ var 準確程度_MESSAGE = {
 	country_PATTERN = new RegExp('(' + country_PATTERN.join('|') + ')', 'i');
 })();
 
+// 添加共存紀年。
 function add_contemporary(era, output_numeral) {
 	if (!Array.isArray(era))
 		era = [ , era ];
-	var o = {
-		a : output_numeral === 'Chinese' ? CeL.to_Chinese_numeral(era[1])
-				: era[1],
-		title : era[1],
+	var matched, node = output_numeral === 'Chinese' ? CeL
+			.to_Chinese_numeral(era[1].toString()) : era[1].toString();
+	node = {
+		a : era[1].疑 ? {
+			span : node + '<sub>(疑)</sub>',
+			R : '存在疑問、不準確的紀年',
+			S : 'color: #777;'
+		} : node,
+		title : era[1].toString(),
 		href : '#',
 		target : '_self',
 		onclick : click_title_as_era,
-		C : '共存紀年'
-	}, matched;
+		C : '共存紀年',
+	};
 	if (era[0] in country_color)
 		matched = era[0];
 	else if (false && (matched = era[1].match(country_PATTERN)))
 		matched = matched[1];
-	if (matched)
-		o.S = 'background-color: ' + country_color[matched] + ';';
-	return o;
+	if (matched) {
+		node.S = 'background-color: ' + country_color[matched] + ';';
+	}
+	return node;
 }
 
 // 國旗
@@ -4226,6 +4233,7 @@ function affairs() {
 		曆注 : '具注曆日/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
 		// TODO: 八魁、天李、入官忌、日忌和歸忌
+		// TODO: [[數九]]: 從冬至開始每過九天記為一九，共記九九
 		// 後漢書註 蘇竟楊厚列傳 「八魁」注稱:「春三月己巳、丁丑,夏三月甲申、壬辰,秋三月己亥、丁未,冬三月甲寅、壬戌,爲八魁。」
 		// see 欽定協紀辨方書
 		// http://www.cfarmcale2100.com.tw/
