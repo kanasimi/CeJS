@@ -7824,6 +7824,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------
 
 	// 辨識史籍(historical book)紀年用之 pattern。
+	// [ all, head, era, tail ]
 	var 史籍紀年_PATTERN, ERA_ONLY_PATTERN,
 	//
 	朔干支_PATTERN = generate_pattern('(朔<\\/' + set_up_era_nodes.default_tag
@@ -7899,7 +7900,7 @@ function module_code(library_namespace) {
 	/**
 	 * 建構辨識史籍紀年用之 pattern。
 	 */
-	era_text_to_HTML.build_pattern = function() {
+	era_text_to_HTML.build_pattern = function(options) {
 		var 紀年 = [];
 		create_era_search_pattern().forEach(function(key) {
 			var matched = key.match(/^(.+)(?:天皇|皇后)$/);
@@ -7922,15 +7923,32 @@ function module_code(library_namespace) {
 		日 = '(?:(?:(?:干支)?(?:初[' + 日 + ']日?|(?:' + 日
 		// "元日":正月初一，常具文意而不表示日期，剔除之。
 		+ '|(?:[一二三]?十|[廿卅])[有又]?[' + 日 + ']?|[' + 日
-				+ '])日)|干支日?)[朔晦望]?旦?|[朔晦望]日?)';
+				+ '])日)|干支日?)[朔晦望]?旦?|[朔晦望]日'
+				// 朔晦望有其他含義，誤標率較高。
+				+ (options && options.add_望 ? '?' : '') + ')';
+
+		// 建構 史籍紀年_PATTERN
 
 		// TODO: 地皇三年，天鳳六年改為地皇。
 		// e.g., 以建平二年為太初元年, 一年中地再動, 大酺五日, 乃元康四年嘉谷, （玄宗開元）十年
 		// TODO: 未及一年, [去明]年, 是[年月日], 《清華大學藏戰國竹簡（貳）·繫年》周惠王立十又七年
 		// TODO: 排除 /干支[年歲嵗]/
-		return 史籍紀年_PATTERN = generate_pattern('(^|[^為酺乃])((?:' + 紀年
-				+ ')*(?:）\0|\\))?' + 年 + '(?:' + 月 + 日 + '?)?|(?:' + 月 + ')?'
-				+ 日 + '|' + 月 + ')([^中]|$)', false, 'g');
+		史籍紀年_PATTERN = [
+		// 識別干支紀年「年號+干支」。
+		'(?:' + 紀年 + ')干支',
+		// 一般紀年
+		'(?:' + 紀年 + ')*(?:）\0|\\))?' + 年 + '(?:' + 月 + 日 + '?)?',
+				'(?:' + 月 + ')?' + 日, 月 ];
+		// console.log(史籍紀年_PATTERN);
+		史籍紀年_PATTERN = generate_pattern(
+		// head
+		'(^|[^為酺乃])'
+		// era
+		+ '(' + 史籍紀年_PATTERN.join('|') + ')'
+		// tail
+		+ '([^中]|$)', false, 'g');
+		// console.log(史籍紀年_PATTERN);
+		return 史籍紀年_PATTERN;
 	};
 
 	/**

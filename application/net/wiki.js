@@ -2663,17 +2663,17 @@ function module_code(library_namespace) {
 	// [[w:en:Wikipedia:Extended image syntax]]
 	// [[mw:Help:Images]]
 	var file_options = {
-		// Type, display format
+		// Type, display format, 表示形式
 		thumb : 'format',
 		thumbnail : 'format',
 		frame : 'format',
 		framed : 'format',
 		frameless : 'format',
 
-		// Border
+		// Border, 外枠, 縁取る, 境界
 		border : 'border',
 
-		// Location, Horizontal alignment option
+		// Location, Horizontal alignment option, 配置位置
 		right : 'location',
 		left : 'location',
 		// 居中, 不浮動
@@ -2681,7 +2681,7 @@ function module_code(library_namespace) {
 		// 不浮動
 		none : 'location',
 
-		// Vertical alignment option
+		// Vertical alignment option, 垂直方向の位置
 		baseline : 'alignment',
 		middle : 'alignment',
 		sub : 'alignment',
@@ -2692,9 +2692,9 @@ function module_code(library_namespace) {
 		bottom : 'alignment',
 
 		// Link option
-		// link : 'link ',
+		// link : 'link',
 
-		// alt : 'alt ',
+		// alt : 'alt',
 		// lang : 'language',
 
 		// https://en.wikipedia.org/wiki/Wikipedia:Creation_and_usage_of_media_files#Setting_a_video_thumbnail_image
@@ -2706,6 +2706,7 @@ function module_code(library_namespace) {
 		// 'class' : 'CSS_class',
 
 		// Size, Resizing option
+		// 放大倍數
 		upright : 'size'
 	};
 
@@ -9411,7 +9412,9 @@ function module_code(library_namespace) {
 					// 必須重複手動呼叫。
 				}
 
-			} else if (data && ('batchcomplete' in data) && continue_session) {
+			} else if (library_namespace.is_Object(data)
+			// ↑ 在503的時候data可能是字串。
+			&& ('batchcomplete' in data) && continue_session) {
 				// ↑ check "batchcomplete"
 				var keyword_continue = get_list.type[type];
 				if (keyword_continue) {
@@ -12318,7 +12321,8 @@ function module_code(library_namespace) {
 			library_namespace.debug('Get recent change from '
 					+ (library_namespace.is_Date(last_query_time)
 							&& last_query_time.getTime() ? last_query_time
-							.toISOString() : last_query_time), 1,
+							.toISOString() : last_query_time)
+					+ ', last_query_revid=' + last_query_revid, 1,
 					'add_listener.receive');
 
 			// 根據不同的實現方法採用不一樣的因應方式。
@@ -12356,6 +12360,12 @@ function module_code(library_namespace) {
 			}
 
 			get_recent(function(rows) {
+				if (!rows) {
+					library_namespace.warn((new Date).toISOString()
+							+ ': No rows get.');
+					return;
+				}
+
 				if (false) {
 					library_namespace.log(recent_options.parameters
 							|| recent_options.SQL_options);
@@ -12446,6 +12456,7 @@ function module_code(library_namespace) {
 							+ rows.map(function(row) {
 								return row.revid;
 							}), 2, 'add_listener');
+					// console.log([ row.title, options.filter ]);
 				}
 
 				var exit;
@@ -14569,6 +14580,7 @@ function module_code(library_namespace) {
 									CeL.wiki.edit.cancel,
 									'No contents: '
 											+ CeL.wiki.title_link_of(page_data)
+											// or: 此頁面不存在/已刪除。
 											+ '! 沒有頁面內容！' ];
 						}
 
