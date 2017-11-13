@@ -4235,6 +4235,9 @@ function module_code(library_namespace) {
 	// = [ {RegExp}PATTERN, {Function}parser({Array}matched) : return {String},
 	// {Function}to_String({Date}date) : return {String} ]
 	//
+	// 可使用parse API來做測試。
+	// https://www.mediawiki.org/w/api.php?action=help&modules=parse
+	//
 	// to_String: 日期的模式, should match "~~~~~".
 	var date_parser_config = {
 		en : [
@@ -10734,6 +10737,7 @@ function module_code(library_namespace) {
 	};
 
 	wiki_API.search.default_parameters = {
+		// |portal
 		srnamespace : get_namespace('module|template|category|main'),
 
 		srprop : 'redirecttitle',

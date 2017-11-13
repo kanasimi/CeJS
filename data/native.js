@@ -911,17 +911,35 @@ function module_code(library_namespace) {
 
 	// string & Number 處理 -----------------------------------------------
 
-	// String.covers()
+	var PATTERN_SPACES = /[ _]+/g,
+	// Punctuation marks 無實際意義的標點符號
+	PUNCTUATION_MARKS = /[ _,.;:?'"`~!@#$%^&*()\/\-\[\]<>]+/g;
+
+	// String.covers(string_1, string_2, options)
+	// string_1.covers(string_2, options)
 	// @see Knuth–Morris–Pratt algorithm
 	/**
 	 * @return true: 兩者相同, false: 兩者等長但不相同,<br />
 	 *         1: str2為str1之擴展 (str2涵蓋str1), -1: str1為str2之擴展, 2: 兩者等價, 0: 皆非
 	 */
 	function String_covers(string_1, string_2, options) {
+		// 前置作業。
+		options = library_namespace.setup_options(options);
+
 		// 預先處理函數. e.g., 是否忽略大小寫
 		if (options && typeof options.preprocessor === 'function') {
 			string_1 = options.preprocessor(string_1);
 			string_2 = options.preprocessor(string_2);
+		}
+
+		// ignore punctuation marks
+		if (options.ignore_marks) {
+			string_1 = string_1.replace(PATTERN_PUNCTUATION_MARKS, '');
+			string_2 = string_2.replace(PATTERN_PUNCTUATION_MARKS, '');
+		} else if (options.ignore_spaces) {
+			// assert: PATTERN_PUNCTUATION_MARKS including PATTERN_SPACES
+			string_1 = string_1.replace(PATTERN_SPACES, '');
+			string_2 = string_2.replace(PATTERN_SPACES, '');
 		}
 
 		if (string_1.length === string_2.length) {

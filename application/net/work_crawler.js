@@ -17,7 +17,7 @@
 // finish_up()
 
 TODO:
-下載完畢後自動產生壓縮檔+自動刪除原始圖檔
+對於漫畫，下載完畢後以章節為單位自動產生壓縮檔+自動刪除原始圖檔。每次下載前自動讀取壓縮檔資料。
 預設介面語言繁體中文+...
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
 parse 圖像
@@ -202,9 +202,11 @@ function module_code(library_namespace) {
 		// 最小容許圖案檔案大小 (bytes)。
 		// 對於極少出現錯誤的網站，可以設定一個比較小的數值，並且設定.allow_EOI_error=false。因為這類型的網站要不是無法取得檔案，要不就是能夠取得完整的檔案；要取得破損檔案，並且已通過EOI測試的機會比較少。
 		// MIN_LENGTH : 4e3,
+		// 對於有些圖片只有一條細橫桿的情況。
+		// MIN_LENGTH : 150,
 
 		// 預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
-		MIN_CHAPTER_LENGTH : 200,
+		MIN_CHAPTER_SIZE : 200,
 
 		// 仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無
 		MESSAGE_RE_DOWNLOAD : '神仙打鼓有時錯，腳步踏差誰人無。下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
@@ -1644,6 +1646,7 @@ function module_code(library_namespace) {
 								.is_Object(work_data.chapter_list[chapter - 1])) {
 					chapter_data.title = work_data.chapter_list[chapter - 1].title;
 				}
+				// TODO: 自動填補 chapter_data.url。
 
 				if (typeof _this.pre_get_images === 'function') {
 					_this.pre_get_images(XMLHttp, work_data, chapter_data,
@@ -2116,7 +2119,7 @@ function module_code(library_namespace) {
 							work_data);
 				}
 
-				if (contents.length < _this.MIN_CHAPTER_LENGTH) {
+				if (contents.length < _this.MIN_CHAPTER_SIZE) {
 					set_work_status(work_data, '#'
 							+ chapter
 							+ ': '
