@@ -1677,12 +1677,13 @@ function module_code(library_namespace) {
 			// console.log(token);
 			return token;
 		}
+		// 模板這個部分除了解析模板之外沒有好的方法。
 		// 這邊僅處理常用模板。需要先保證這些模板存在，並且具有預期的功能。
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {
-			// template-linking templates: tl, tlx, tls, ...
-			if (/^T[ln][a-z]{0,3}[23]?$/.test(token.name)) {
+			// template-linking templates: tl, tlx, tls, t1, ...
+			if (/^T[l1n][a-z]{0,3}[23]?$/.test(token.name)) {
 				token.shift();
 				return token;
 			}
