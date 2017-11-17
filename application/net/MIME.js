@@ -124,11 +124,12 @@ function module_code(library_namespace) {
 		case 'txt':
 			return 'text/plain';
 
-		case 'html':
+		case 'htm':
 			extension = 'html';
+		case 'html':
+			//
 		case 'css':
 		case 'csv':
-		case 'html':
 			return 'text/' + extension;
 
 		case 'svg':

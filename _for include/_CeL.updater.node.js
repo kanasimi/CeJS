@@ -1,6 +1,6 @@
 /**
- * @name Auto update CeJS via GitHub. 自動配置好最新版本 CeJS 的工具。
- * @fileoverview 將會自動取得並解開 GitHub 最新版本壓縮檔案至當前工作目錄下。
+ * @name Auto update CeJS via GitHub. 自動配置好最新版本 CeJS 程式庫的工具。
+ * @fileoverview 將會自動取得並解開 GitHub 最新版本壓縮檔案至當前工作目錄下的 ./CeJS-master。
  * 
  * @example<code>
 
@@ -77,13 +77,13 @@ function check_update() {
 
 	var have_version, latest_commit;
 
-	console.log('Read ' + latest_version_file);
+	console.info('Read ' + latest_version_file);
 	try {
 		have_version = node_fs.readFileSync(latest_version_file).toString();
 	} catch (e) {
 	}
 
-	console.log('Get the infomation of latest version of '
+	console.info('Get the infomation of latest version of '
 	// 取得 GitHub 最新版本infomation。
 	+ repository + '...');
 	node_https.get({
@@ -109,7 +109,7 @@ function check_update() {
 			//
 			latest_version = latest_commit.commit.author.date;
 			if (have_version === latest_version) {
-				console.log('Already have the latest version: '
+				console.info('Already have the latest version: '
 				//
 				+ have_version);
 			} else {
@@ -188,8 +188,6 @@ function update_via_7zip(latest_version) {
 			write_stream.write(Buffer.concat(buffer_array, sum_size));
 			// flush data
 			write_stream.end();
-			// release file handler
-			write_stream.close();
 		});
 	}
 
@@ -206,7 +204,7 @@ function update_via_7zip(latest_version) {
 	// ---------------------------
 
 	write_stream.on('close', function() {
-		console.log(target_file + ': ' + sum_size
+		console.info(target_file + ': ' + sum_size
 				+ ' bytes done. Extracting files to ' + process.cwd() + '...');
 
 		// check file size
@@ -248,7 +246,32 @@ function update_via_7zip(latest_version) {
 			} catch (e) {
 			}
 
-			// TODO: update the tool itself
+			// 更新工具相對於 CeJS 根目錄的路徑。
+			var update_script_directory = 'CeJS-master/_for include/';
+			function copy_file(source_name, taregt_name) {
+				try {
+					node_fs.unlinkSync(source_name);
+				} catch (e) {
+					// TODO: handle exception
+				}
+				node_fs.renameSync(update_script_directory + source_name,
+						taregt_name || source_name);
+			}
+
+			console.info('Update the tool itself...');
+			copy_file('_CeL.updater.node.js');
+
+			console.info('Setup basic execution environment...');
+			copy_file('_CeL.loader.nodejs.js');
+			try {
+				// Do not overwrite
+				node_fs.renameSync(update_script_directory
+						+ '_CeL.path.sample.txt', '_CeL.path.txt');
+			} catch (e) {
+				// TODO: handle exception
+			}
+
+			console.info('Done.');
 		}
 
 		// throw 'Some error occurred! Bad archive?';

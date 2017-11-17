@@ -49,7 +49,7 @@ $ npm install cejs
 不囉嗦，已經做過的步驟可以跳過：
 1. 請先安裝 [node.js](https://nodejs.org/) 與 [7-Zip](https://en.wikipedia.org/wiki/7-Zip)
 2. 下載 CeJS 安裝檔 [_CeL.updater.node.js](https://raw.githubusercontent.com/kanasimi/CeJS/master/_for%20include/_CeL.updater.node.js)
-3. 進到 CeJS 安裝檔所在的目錄，在命令行界面下執行：
+3. 進到 CeJS 安裝檔(<code>_CeL.updater.node.js</code>)所在的目錄，在命令行界面下執行：
 
    ``` cmd
    PROMPT> node _CeL.updater.node.js
@@ -59,12 +59,13 @@ $ npm install cejs
 
    ``` cmd
    PROMPT> node
-   > require('./CeJS-master/_for include/node.loader.js');
+   <!-- > require('./CeJS-master/_for include/node.loader.js'); -->
+   > require('./_CeL.loader.nodejs.js');
    > CeL.run('data.math');
-   > CeL.GCD(4, 6);
+   > console.assert(CeL.GCD(4, 6) === 2);
    ```
 
-5. 每次要取得最新程式庫時，重新執行一次安裝檔。
+5. 每次要更新到最新 CeJS 程式庫時，只要重新執行一次 CeJS 安裝檔即可。
 
 ### Installation via GitHub latest version 一般正常安裝方法
 鑒於更新頻繁，有些功能可能最新版本才具備；若是執行了採用新功能的程式，將會發生嚴重錯誤。因此強烈建議直接到 GitHub 下載最新版本壓縮檔，解開後配置。
@@ -89,6 +90,17 @@ Since the frequent updates of the code, some features may work at the latest ver
    ```
 
 3. See [_CeL.updater.node.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.updater.node.js) for automatic updating configuration.
+
+<!--
+Using git:
+git clone --single-branch --depth 1 https://github.com/kanasimi/CeJS.git
+# for update:
+# https://stackoverflow.com/questions/2866358/git-checkout-only-files-without-repository
+# https://stackoverflow.com/questions/6941889/is-it-safe-to-shallow-clone-with-depth-1-create-commits-and-pull-updates-aga
+# https://stackoverflow.com/questions/41075972/how-to-update-a-git-shallow-clone
+git fetch --depth 1; git reset --hard origin/master
+git clean -dfx
+-->
 
 #### To setup the loader as a split file:
 1. Copy the loader file, [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the target directory (e.g., the same as the script file).

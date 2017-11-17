@@ -1682,7 +1682,7 @@ function module_code(library_namespace) {
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {
-			// template-linking templates: tl, tlx, tls, t1, ...
+			// template-linking templates: Tl, Tlx, Tls, T1, ...
 			if (/^T[l1n][a-z]{0,3}[23]?$/.test(token.name)) {
 				token.shift();
 				return token;
@@ -13253,9 +13253,9 @@ function module_code(library_namespace) {
 			callback(page_data, bytes, page_anchor/* , file_status */)) {
 				// console.log(file_stream);
 				library_namespace.info('read_dump: Quit operation, 中途跳出作業...');
-				file_stream.close();
+				file_stream.end();
 				// free RAM.
-				buffer = '';
+				buffer = null;
 				run_last(true);
 				return;
 			}

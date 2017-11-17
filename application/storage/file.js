@@ -705,6 +705,11 @@ function module_code(library_namespace) {
 
 	// Magic_number[type]={Object}data
 	var Magic_number = {
+		html : {
+			// other file extensions
+			extension : [ 'htm', 'shtml' ],
+			min_size : 52
+		},
 		gif : {
 			// Header: GIF89a
 			magic : '47 49 46 38 39 61',
@@ -741,6 +746,7 @@ function module_code(library_namespace) {
 	Object.entries(Magic_number).forEach(function(type) {
 		var magic_data = type[1];
 		if (typeof magic_data === 'string') {
+			// e.g., jpg:'FF D8 FF'
 			magic_data = {
 				magic : magic_data
 			};
@@ -754,10 +760,16 @@ function module_code(library_namespace) {
 				magic_data.extension = [ magic_data.extension ];
 			}
 			if (!magic_data.extension.includes(type)) {
+				// 以 type name 為主
 				magic_data.extension.unshift(type);
 			}
 		} else {
 			magic_data.extension = [ type ];
+		}
+
+		if (!magic_data.magic) {
+			// 不採用 Magic number 測試
+			return;
 		}
 
 		magic_data.magic = magic_data.magic.replace(/[ ,]+/g, '');
@@ -821,6 +833,15 @@ function module_code(library_namespace) {
 				break;
 			}
 		}
+		if (!magic_data) {
+			var contents_String = file_contents.toString();
+			if (contents_String.trimStart().startsWith('<!DOCTYPE html>')
+			// TODO: 此處為太過簡陋的測試
+			|| /<html[ a-z\d-="']*>/i.test(contents_String)) {
+				magic_data = Magic_number.html;
+			}
+		}
+
 		if (!magic_data) {
 			// 無法判別。
 			if (options.type in Magic_number) {
