@@ -59,6 +59,8 @@ $ npm install cejs
 
    ``` cmd
    PROMPT> node
+   ```
+   ``` JavaScript
    > // or: require('./CeJS-master/_for include/node.loader.js');
    > require('./_CeL.loader.nodejs.js');
    > CeL.run('data.math');

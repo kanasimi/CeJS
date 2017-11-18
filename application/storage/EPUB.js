@@ -41,6 +41,7 @@ http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm
  *      https://www.w3.org/Submission/2017/SUBM-epub-packages-20170125/
  *      http://epubzone.org/news/epub-3-validation http://validator.idpf.org/
  *      http://imagedrive.github.io/spec/epub30-publications.xhtml
+ *      https://github.com/futurepress/epub.js
  */
 
 'use strict';

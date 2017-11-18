@@ -511,6 +511,43 @@ function test_native() {
 		assert([ '黑白字翻訳翻译写'.length * 2, '黑白字翻訳翻译写'.display_width() ], 'display_width() #2');
 		assert([ '_<>Pf'.length + '石墨대한민국'.length * 2, '_<石墨>P대한민국f'.display_width() ], 'display_width() #3');
 		assert([ 'Title:title\n    →1234', CeL.display_align({'Title:':'title','→':1234}) ], 'display_align() #4');
+
+		// ----------------------------------------------------------------------------------------
+
+		var KEY_reference = '__REF__', a = [ 1, 2, 'REF_|1', 'REF_|2' ], b = {
+			_a : 'REF_|1',
+			_b : 'REF_|2',
+			a : a,
+			c : 'REF_|0',
+			d : 'REF_|1',
+			e : 321
+		};
+		a.push(a, b, 'REF_|0', 'REF_|1');
+		b.b = b;
+		/*
+		console.log('> ' + JSON.stringify_circular(a));
+		console.log(JSON.parse_circular(JSON.stringify_circular(a)));
+		console.log('>>> '
+				+ JSON.stringify_circular(JSON.parse_circular(JSON
+						.stringify_circular(a))));
+		*/
+		assert([ JSON.stringify_circular(a), JSON.stringify_circular(JSON
+				.parse_circular(JSON.stringify_circular(a))) ], 'JSON.stringify_circular(a)');
+
+		/*
+		console.log('> ' + JSON.stringify_circular(b));
+		console.log(JSON.parse_circular(JSON.stringify_circular(b)));
+		console.log('>>> '
+				+ JSON.stringify_circular(JSON.parse_circular(JSON
+						.stringify_circular(b))));
+		*/
+		assert([ JSON.stringify_circular(b), JSON.stringify_circular(JSON
+				.parse_circular(JSON.stringify_circular(b))) ], 'JSON.stringify_circular(b)');
+
+		var c = JSON.parse_circular(JSON.stringify_circular(b));
+		assert([ c.a[4], c.a ], 'JSON.parse_circular(): c.a');
+		assert([ c.a[5], c.b ], 'JSON.parse_circular(): c.b');
+
 	});
 
 	error_count += CeL.test('edit distance & LCS', function(assert) {

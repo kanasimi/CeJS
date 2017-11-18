@@ -1919,9 +1919,7 @@ function module_code(library_namespace) {
 			// console.log([ this, key, value ]);
 
 			// only objects may circular
-			if (typeof value === 'object'
-			// e.g., [1,2,'REF|0']
-			|| !recover_value && (value in reference_hash)) {
+			if (typeof value === 'object') {
 				// return a reference to the value if it had beed processed
 				if (reference_map.has(value))
 					return reference_map.get(value);
@@ -1930,28 +1928,29 @@ function module_code(library_namespace) {
 
 				// find a key that is not in reference_hash or we will be
 				// confused if there are duplicate keys
-				while ((key = KEY_reference + index++) in reference_hash)
-					if (recover_value)
-						// should not occur
-						throw 'create_reference_map: Invalid index';
+				while ((key = KEY_reference + index++) in reference_hash) {
+					if (recover_value) {
+						throw 'create_reference_map: Invalid index ' + key
+								+ '. It should not happen.';
+					}
+				}
 				// assert: typeof key!=='object', or will be traversed by
 				// JSON.stringify()
 
 				reference_hash[key] = value;
 				reference_map.set(value, key);
-				if (typeof value !== 'object' && (value in reference_hash)) {
-					// alternate the value (e.g., 'REF|0') from this on
-					return key;
-				}
-			} else if (typeof value !== 'object' && recover_value) {
-				if (value in reference_hash) {
-					// recover value
-					this[key] = reference_hash[value];
-				} else if (value === KEY_reference + index) {
-					;
-				} else {
-					console.log([ this, key, value, index ]);
-				}
+
+			} else if (typeof value !== 'object' && recover_value
+					&& (value in reference_hash)) {
+				// recover value
+				this[key] = reference_hash[value];
+			} else if (typeof value === 'string' && !recover_value
+					&& value.startsWith(KEY_reference)) {
+				throw 'create_reference_map: '
+				//
+				+ 'You should specify another KEY_reference instead of '
+						+ JSON.stringify(KEY_reference) + '. Confused value: '
+						+ value;
 			}
 			return value;
 		});
@@ -1959,38 +1958,16 @@ function module_code(library_namespace) {
 	}
 
 	// KEY_reference: Any value of object wont starts with KEY_reference
-	JSON.stringify_circular = function(object, KEY_reference) {
+	JSON.stringify_circular = function stringify_circular(object, KEY_reference) {
 		return create_reference_map(object, false, KEY_reference);
 	};
 
-	JSON.parse_circular = function(json_string, KEY_reference) {
+	JSON.parse_circular = function parse_circular(json_string, KEY_reference) {
 		var parsed = JSON.parse(json_string);
-		// stringify again, using the same algorithm.
+		// stringify again, using the same algorithm as JSON.stringify() in
+		// JSON.stringify_circular().
 		create_reference_map(parsed, true, KEY_reference);
-		if (0) {
-			var reference_map = create_reference_map(parsed, true);
-			var reference_list = reference_map[1];
-			reference_map = reference_map[0];
-			function replace_references(object) {
-				for ( var key in object) {
-					var value = object[key], index;
-					if (typeof value === 'object') {
-						replace_references(value);
-					} else if (typeof value === 'string'
-							&& value.startsWith(KEY_reference)
-							&& ((index = +value.slice(KEY_reference.length)) in reference_list)) {
-						object[key] = value = reference_list[index];
-						if (typeof value === 'object') {
-							replace_references(value);
-						}
-					}
-				}
-			}
-			// assert: (typeof [] === 'object')
-			if (typeof parsed === 'object') {
-				replace_references(parsed);
-			}
-		}
+
 		return parsed;
 	};
 
