@@ -59,10 +59,10 @@ $ npm install cejs
 
    ``` cmd
    PROMPT> node
-   <!-- > require('./CeJS-master/_for include/node.loader.js'); -->
+   > // or: require('./CeJS-master/_for include/node.loader.js');
    > require('./_CeL.loader.nodejs.js');
    > CeL.run('data.math');
-   > console.assert(CeL.GCD(4, 6) === 2);
+   > CeL.assert(CeL.GCD(4, 6) === 2);
    ```
 
 5. 每次要更新到最新 CeJS 程式庫時，只要重新執行一次 CeJS 安裝檔即可。

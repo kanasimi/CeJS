@@ -1896,6 +1896,106 @@ function module_code(library_namespace) {
 		return q + s + q;
 	}
 
+	// ----------------------------------------------------
+
+	// 盡量找不會用到，又不包含特殊字元的字串作為識別碼。
+	var default_KEY_reference = 'REF|';
+
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+	// https://github.com/WebReflection/circular-json/blob/master/src/circular-json.js
+
+	// https://stackoverflow.com/questions/11616630/json-stringify-avoid-typeerror-converting-circular-structure-to-json
+	function create_reference_map(object, recover_value, KEY_reference) {
+		if (KEY_reference === undefined) {
+			KEY_reference = default_KEY_reference;
+		}
+
+		// e.g., reference_map[{k:0}] = 'REF|0'
+		// reference_list = [ {k:0}, ... ]
+		var reference_map = new Map, reference_hash = library_namespace
+				.null_Object(), index = 0;
+
+		var stringify = JSON.stringify(object, function(key, value) {
+			// console.log([ this, key, value ]);
+
+			// only objects may circular
+			if (typeof value === 'object'
+			// e.g., [1,2,'REF|0']
+			|| !recover_value && (value in reference_hash)) {
+				// return a reference to the value if it had beed processed
+				if (reference_map.has(value))
+					return reference_map.get(value);
+
+				// record the value
+
+				// find a key that is not in reference_hash or we will be
+				// confused if there are duplicate keys
+				while ((key = KEY_reference + index++) in reference_hash)
+					if (recover_value)
+						// should not occur
+						throw 'create_reference_map: Invalid index';
+				// assert: typeof key!=='object', or will be traversed by
+				// JSON.stringify()
+
+				reference_hash[key] = value;
+				reference_map.set(value, key);
+				if (typeof value !== 'object' && (value in reference_hash)) {
+					// alternate the value (e.g., 'REF|0') from this on
+					return key;
+				}
+			} else if (typeof value !== 'object' && recover_value) {
+				if (value in reference_hash) {
+					// recover value
+					this[key] = reference_hash[value];
+				} else if (value === KEY_reference + index) {
+					;
+				} else {
+					console.log([ this, key, value, index ]);
+				}
+			}
+			return value;
+		});
+		return stringify;
+	}
+
+	// KEY_reference: Any value of object wont starts with KEY_reference
+	JSON.stringify_circular = function(object, KEY_reference) {
+		return create_reference_map(object, false, KEY_reference);
+	};
+
+	JSON.parse_circular = function(json_string, KEY_reference) {
+		var parsed = JSON.parse(json_string);
+		// stringify again, using the same algorithm.
+		create_reference_map(parsed, true, KEY_reference);
+		if (0) {
+			var reference_map = create_reference_map(parsed, true);
+			var reference_list = reference_map[1];
+			reference_map = reference_map[0];
+			function replace_references(object) {
+				for ( var key in object) {
+					var value = object[key], index;
+					if (typeof value === 'object') {
+						replace_references(value);
+					} else if (typeof value === 'string'
+							&& value.startsWith(KEY_reference)
+							&& ((index = +value.slice(KEY_reference.length)) in reference_list)) {
+						object[key] = value = reference_list[index];
+						if (typeof value === 'object') {
+							replace_references(value);
+						}
+					}
+				}
+			}
+			// assert: (typeof [] === 'object')
+			if (typeof parsed === 'object') {
+				replace_references(parsed);
+			}
+		}
+		return parsed;
+	};
+
+	// ----------------------------------------------------
+
 	_// JSDT:_module_
 	.
 	/**
