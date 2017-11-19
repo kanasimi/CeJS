@@ -4274,6 +4274,7 @@ function module_code(library_namespace) {
 			生肖 : note_生肖,
 			五行 : note_五行,
 			繞迥 : note_繞迥,
+			// 紫白飛星
 			年九星 : note_年九星,
 			月九星 : note_月九星,
 			日家九星 : note_日家九星,

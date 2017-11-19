@@ -22,6 +22,14 @@ The project aims to develop a JavaScript module framework that is simple to use 
 ```
 
 ``` JavaScript
+// Insert from browser console
+var cejs_node = document.createElement("script");
+cejs_node.setAttribute('src', 'https://kanasimi.github.io/CeJS/ce.js');
+cejs_node.setAttribute('type', 'text/javascript');
+document.head.appendChild(cejs_node);
+```
+
+``` JavaScript
 CeL.run( 'module.name', function callback() { /* ... */ } );
 ```
 
@@ -49,22 +57,22 @@ $ npm install cejs
 不囉嗦，已經做過的步驟可以跳過：
 1. 請先安裝 [node.js](https://nodejs.org/) 與 [7-Zip](https://en.wikipedia.org/wiki/7-Zip)
 2. 下載 CeJS 安裝檔 [_CeL.updater.node.js](https://raw.githubusercontent.com/kanasimi/CeJS/master/_for%20include/_CeL.updater.node.js)
-3. 進到 CeJS 安裝檔(<code>_CeL.updater.node.js</code>)所在的目錄，在命令行界面下執行：
+3. 在[命令行界面](https://zh.wikipedia.org/wiki/%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%95%8C%E9%9D%A2)下，進到 CeJS 安裝檔(<code>_CeL.updater.node.js</code>)所在的目錄，執行命令以下載 CeJS 程式庫：
 
-   ``` cmd
-   PROMPT> node _CeL.updater.node.js
+   ``` sh
+   node _CeL.updater.node.js
    ```
 
 4. CeJS 程式庫應該已經解壓縮，並且放在安裝檔所在目錄的 CeJS-master 目錄下，可以開始試用：
 
-   ``` cmd
-   PROMPT> node
+   ``` sh
+   node
    ```
    ``` JavaScript
-   > // or: require('./CeJS-master/_for include/node.loader.js');
-   > require('./_CeL.loader.nodejs.js');
-   > CeL.run('data.math');
-   > CeL.assert(CeL.GCD(4, 6) === 2);
+   // or: require('./CeJS-master/_for include/node.loader.js');
+   require('./_CeL.loader.nodejs.js');
+   CeL.run('data.math');
+   CeL.assert(CeL.GCD(4, 6) === 2);
    ```
 
 5. 每次要更新到最新 CeJS 程式庫時，只要重新執行一次 CeJS 安裝檔即可。

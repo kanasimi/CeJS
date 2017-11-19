@@ -108,6 +108,7 @@ function module_code(library_namespace) {
 		var node_fs = require('fs');
 
 		// 警告: 此函數之API尚未規範。
+		// .file_stats()
 		// Not exist: will return false.
 		_.fso_status = storage_module.fs_status;
 

@@ -1897,6 +1897,7 @@ function module_code(library_namespace) {
 	}
 
 	// ----------------------------------------------------
+	// 可以處理 circular 的 JSON.stringify()，以及可以復原的 JSON.parse()。
 
 	// 盡量找不會用到，又不包含特殊字元的字串作為識別碼。
 	var default_KEY_reference = 'REF|';
@@ -1915,7 +1916,7 @@ function module_code(library_namespace) {
 		var reference_map = new Map, reference_hash = library_namespace
 				.null_Object(), index = 0;
 
-		var stringify = JSON.stringify(object, function(key, value) {
+		return JSON.stringify(object, function(key, value) {
 			// console.log([ this, key, value ]);
 
 			// only objects may circular
@@ -1944,6 +1945,7 @@ function module_code(library_namespace) {
 					&& (value in reference_hash)) {
 				// recover value
 				this[key] = reference_hash[value];
+
 			} else if (typeof value === 'string' && !recover_value
 					&& value.startsWith(KEY_reference)) {
 				throw 'create_reference_map: '
@@ -1952,24 +1954,33 @@ function module_code(library_namespace) {
 						+ JSON.stringify(KEY_reference) + '. Confused value: '
 						+ value;
 			}
+
 			return value;
 		});
-		return stringify;
 	}
 
 	// KEY_reference: Any value of object wont starts with KEY_reference
-	JSON.stringify_circular = function stringify_circular(object, KEY_reference) {
+	// 若是有任何一個value包含了 default_KEY_reference + 數字的格式，則需要另外指定 KEY_reference。
+	function stringify_circular(object, KEY_reference) {
 		return create_reference_map(object, false, KEY_reference);
-	};
+	}
 
-	JSON.parse_circular = function parse_circular(json_string, KEY_reference) {
+	function parse_circular(json_string, KEY_reference) {
 		var parsed = JSON.parse(json_string);
 		// stringify again, using the same algorithm as JSON.stringify() in
 		// JSON.stringify_circular().
 		create_reference_map(parsed, true, KEY_reference);
 
 		return parsed;
-	};
+	}
+
+	// old JScript engine do not have JSON
+	if (typeof JSON === 'object' && typeof JSON.parse === 'function') {
+		set_method(JSON, {
+			stringify_circular : stringify_circular,
+			parse_circular : parse_circular
+		});
+	}
 
 	// ----------------------------------------------------
 

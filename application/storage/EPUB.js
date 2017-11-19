@@ -1315,6 +1315,7 @@ function module_code(library_namespace) {
 			if (item_data.internalize_media) {
 				// include images / 自動載入內含資源, 將外部media內部化
 				var links = [];
+				// TODO: <object data=""></object>
 				contents = contents.replace(/ (src|href)="([^"]+)"/ig,
 				//
 				function(all, attribute_name, url) {

@@ -1,7 +1,7 @@
 {
 	"name" : "cejs",
 	"title" : "CeJS",
-	"version" : "2.0.20171103",
+	"version" : "2.0.20171119",
 	"description" : "A JavaScript module framework that is simple to use.",
 	"main" : "index.js",
 	"dependencies" : {},
