@@ -970,7 +970,8 @@ function module_code(library_namespace) {
 			var key = get_label(matched[1]).replace(/[:：︰\s]+$/, ''), value;
 			// default: do not overwrite
 			if (key && (overwrite || !work_data[key])
-					&& (value = get_label(matched[2]))) {
+			//
+			&& (value = get_label(matched[2]).replace(/^[:：︰\s]+/, '').trim())) {
 				work_data[key] = value;
 			}
 		}
@@ -1506,9 +1507,19 @@ function module_code(library_namespace) {
 					// http://stackoverflow.com/questions/245840/rename-files-in-sub-directories
 					// for /r %x in (*.jfif) do ren "%x" *.jpg
 
-					// file_path
-					image_data.file = chapter_directory + work_data.id + '-'
-							+ chapter + '-' + (index + 1).pad(3) + '.jpg';
+					// image_data.file: 指定圖片要儲存檔的檔名與路徑file_path。
+					if (typeof image_data.file === 'function') {
+						// return file name
+						image_data.file = image_data.file(work_data, chapter,
+								index);
+					}
+					if (image_data.file) {
+						image_data.file = chapter_directory + image_data.file;
+					} else {
+						image_data.file = chapter_directory + work_data.id
+								+ '-' + chapter + '-' + (index + 1).pad(3)
+								+ '.jpg';
+					}
 					if (!_this.one_by_one) {
 						_this.get_images(image_data, check_if_done);
 					}
@@ -1538,6 +1549,7 @@ function module_code(library_namespace) {
 			}
 
 			function process_chapter_data(XMLHttp) {
+				XMLHttp = XMLHttp || this;
 				var html = XMLHttp.responseText;
 				if (!html) {
 					library_namespace.error('Failed to get chapter data of '
@@ -1595,6 +1607,8 @@ function module_code(library_namespace) {
 				}
 
 				try {
+					// image_data.url 的正確設定方法:
+					// = base_URL + encodeURI(CeL.HTML_to_Unicode(url))
 					chapter_data = _this.parse_chapter_data(html, work_data,
 							get_label, chapter);
 				} catch (e) {
@@ -1661,9 +1675,10 @@ function module_code(library_namespace) {
 
 			function pre_parse_chapter_data(XMLHttp) {
 				if (typeof _this.pre_parse_chapter_data === 'function') {
-					_this.pre_parse_chapter_data(XMLHttp, work_data, chapter,
-					// pre_parse_chapter_data:function(XMLHttp,work_data,chapter,callback){;callback();},
-					process_chapter_data.bind(XMLHttp));
+					// 執行在解析章節資料process_chapter_data()之前的作業(async)。
+					_this.pre_parse_chapter_data(XMLHttp, work_data,
+					// pre_parse_chapter_data:function(XMLHttp,work_data,callback,chapter){;callback();},
+					process_chapter_data.bind(XMLHttp), chapter);
 				} else {
 					process_chapter_data(XMLHttp);
 				}

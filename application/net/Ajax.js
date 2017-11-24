@@ -2140,13 +2140,15 @@ function module_code(library_namespace) {
 				 * 若出現錯誤，則不寫入cache。
 				 */
 				if (data && /[^\\\/]$/.test(file_name)) {
-					library_namespace.info(
-					//
-					'get_URL_cache_node.cache: Write cache data to ['
-							+ file_name + '].');
-					library_namespace.debug('Cache data: '
-							+ (data && JSON.stringify(data).slice(0, 190))
-							+ '...', 3, 'get_URL_cache_node');
+					if (!options.no_write_info) {
+						library_namespace.info(
+						//
+						'get_URL_cache_node.cache: Write cache data to ['
+								+ file_name + '].');
+						library_namespace.debug('Cache data: '
+								+ (data && JSON.stringify(data).slice(0, 190))
+								+ '...', 3, 'get_URL_cache_node');
+					}
 					node_fs.writeFileSync(file_name, data, encoding);
 				}
 				onload(data, undefined, XMLHttp);

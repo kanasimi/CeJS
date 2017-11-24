@@ -4007,6 +4007,8 @@ function module_code(library_namespace) {
 	/**
 	 * 日時九星推法
 	 * 
+	 * cf. "太乙數"
+	 * 
 	 * 注意:<br />
 	 * 請先載入 application.astronomy<br />
 	 */
