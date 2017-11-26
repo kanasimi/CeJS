@@ -60,7 +60,9 @@ if (!_.new_COM) {
 	if (false && !library_namespace.env.ignore_COM_error)
 		library_namespace.warn('new_COM: no <a href="http://en.wikipedia.org/wiki/Component_Object_Model" target="_blank">Component Object Model</a> support!');
 
+	// CeL.application.OS.Windows.no_COM
 	(_.new_COM = function(id) {
+		// 忽略沒有 Windows Component Object Model 的錯誤。
 		if (!library_namespace.env.ignore_COM_error)
 			throw new Error('new_COM: No method to get Microsoft <a href="http://en.wikipedia.org/wiki/Component_Object_Model" target="_blank">Component Object Model</a> (COM): [' + id + ']!');
 	}).no_COM = true;

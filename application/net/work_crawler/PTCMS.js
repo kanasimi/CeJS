@@ -59,15 +59,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	var PATTERN_url_for_baidu = /([\d_]+)(?:\.html|\/(?:index\.html)?)?$/;
-	if (library_namespace.is_debug()) {
-		[ 'http://www.host/0/123/', 'http://www.host/123/index.html',
-				'http://www.host/123.html' ].forEach(function(url) {
-			console.assert('123' === 'http://www.host/123/'
-					.match(PATTERN_url_for_baidu)[1]);
-		});
-	}
-
 	var default_configuration = {
 
 		// auto_create_ebook, automatic create ebook
@@ -84,28 +75,7 @@ function module_code(library_namespace) {
 		// search_URL : '',
 
 		// for 百度站内搜索工具。非百度搜索系統得要自己撰寫。
-		parse_search_result : function(html, get_label) {
-			// console.log(html);
-			var id_data = [],
-			// {Array}id_list = [id,id,...]
-			id_list = [], get_next_between = html.find_between(
-					'<a cpos="title" href="', '</a>'), text;
-
-			while ((text = get_next_between()) !== undefined) {
-				// console.log(text);
-				// 從URL網址中解析出作品id。
-				var matched = text.between(null, '"').match(
-						PATTERN_url_for_baidu);
-				// console.log(matched);
-				id_list.push(matched[1]);
-				// 從URL網址中解析出作品title。
-				matched = text.match(/ title="([^"]+)"/);
-				id_data.push(get_label(matched[1]));
-			}
-
-			// console.log([ id_list, id_data ]);
-			return [ id_list, id_data ];
-		},
+		parse_search_result : 'baidu',
 
 		// 取得作品的章節資料。 get_work_data()
 		// work_URL : function(work_id) { return work_id + '/'; },

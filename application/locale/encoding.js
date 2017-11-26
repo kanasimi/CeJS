@@ -336,7 +336,7 @@ function guess_encoding(file_path, is_HTML, options) {
 };
 
 //	default code
-guess_encoding.unknown_encoding = 0;
+guess_encoding.unknown_encoding = undefined;
 
 guess_encoding.max_length_to_test = 1e8;
 

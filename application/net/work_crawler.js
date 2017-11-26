@@ -44,42 +44,47 @@ proxy
 
 // --------------------------------------------------------------------------------------------
 
-// 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
-typeof CeL === 'function' && CeL.run({
-	// module name
-	name : 'application.net.work_crawler',
+if (typeof CeL === 'function') {
+	// 忽略沒有 Windows Component Object Model 的錯誤。
+	CeL.env.ignore_COM_error = true
 
-	// .includes() @ CeL.data.code.compatibility
-	require : 'data.code.compatibility.'
-	// .between() @ CeL.data.native
-	// .append() @ CeL.data.native
-	// .pad() @ CeL.data.native
-	// display_align() @ CeL.data.native
-	+ '|data.native.'
-	// for CeL.to_file_name()
-	+ '|application.net.'
-	//
-	+ '|application.net.Ajax.get_URL'
-	// for CeL.env.arg_hash, CeL.fs_read()
-	+ '|application.platform.nodejs.|application.storage.'
-	// for CeL.storage.file.file_type()
-	+ '|application.storage.file.'
-	// for HTML_to_Unicode()
-	+ '|interact.DOM.'
-	// for Date.prototype.format()
-	+ '|data.date.'
-	// CeL.character.load(), 僅在有需要設定this.charset時才需要載入。
-	+ '|data.character.'
-	// for .detect_HTML_language(), .time_zone_of_language()
-	// + '|application.locale.'
-	,
+	CeL.run({
+		// module name
+		name : 'application.net.work_crawler',
 
-	// 設定不匯出的子函式。
-	no_extend : '*',
+		// .includes() @ CeL.data.code.compatibility
+		require : 'data.code.compatibility.'
+		// .between() @ CeL.data.native
+		// .append() @ CeL.data.native
+		// .pad() @ CeL.data.native
+		// display_align() @ CeL.data.native
+		+ '|data.native.'
+		// for CeL.to_file_name()
+		+ '|application.net.'
+		//
+		+ '|application.net.Ajax.get_URL'
+		// for CeL.env.arg_hash, CeL.fs_read()
+		+ '|application.platform.nodejs.|application.storage.'
+		// for CeL.storage.file.file_type()
+		+ '|application.storage.file.'
+		// for HTML_to_Unicode()
+		+ '|interact.DOM.'
+		// for Date.prototype.format()
+		+ '|data.date.'
+		// CeL.character.load(), 僅在有需要設定this.charset時才需要載入。
+		+ '|data.character.'
+		// for .detect_HTML_language(), .time_zone_of_language()
+		+ '|application.locale.'
+		// guess_text_language()
+		+ '|application.locale.encoding.',
 
-	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
-	code : module_code
-});
+		// 設定不匯出的子函式。
+		no_extend : '*',
+
+		// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
+		code : module_code
+	});
+}
 
 function module_code(library_namespace) {
 
@@ -137,6 +142,16 @@ function module_code(library_namespace) {
 			}
 		}
 		process.title = 'Starting ' + this.id;
+
+		if (typeof this.parse_search_result === 'string') {
+			if (parse_search_result_set[this.parse_search_result]) {
+				this.parse_search_result = parse_search_result_set[this.parse_search_result];
+			} else {
+				throw 'Work_crawler: No this parse_search_result: '
+						+ this.parse_search_result;
+			}
+		}
+
 		if (!configurations.MESSAGE_RE_DOWNLOAD) {
 			this.MESSAGE_RE_DOWNLOAD = this.id + ': '
 					+ this.MESSAGE_RE_DOWNLOAD;
@@ -149,6 +164,7 @@ function module_code(library_namespace) {
 
 		this.get_URL_options = {
 			// start_time : Date.now(),
+			no_protocol_warn : true,
 			timeout : Work_crawler.timeout,
 			headers : Object.assign({
 				'User-Agent' : this.user_agent,
@@ -666,6 +682,57 @@ function module_code(library_namespace) {
 			typeof callback === 'function' && callback(all_work_status);
 		}, this);
 	}
+
+	// ----------------------------------------------------------------------------
+
+	var PATTERN_url_for_baidu = /([\d_]+)(?:\.html|\/(?:index\.html)?)?$/;
+	if (library_namespace.is_debug()) {
+		[ 'http://www.host/0/123/', 'http://www.host/123/index.html',
+				'http://www.host/123.html' ].forEach(function(url) {
+			console.assert('123' === 'http://www.host/123/'
+					.match(PATTERN_url_for_baidu)[1]);
+		});
+	}
+
+	var parse_search_result_set = {
+		// baidu cse
+		baidu : function(html, get_label) {
+			// console.log(html);
+			var id_data = [],
+			// {Array}id_list = [id,id,...]
+			id_list = [], get_next_between = html.find_between(
+					' cpos="title" href="', '</a>'), text;
+
+			while ((text = get_next_between()) !== undefined) {
+				// console.log(text);
+				// 從URL網址中解析出作品id。
+				var matched = text.between(null, '"').match(
+						PATTERN_url_for_baidu);
+				// console.log(matched);
+				id_list.push(matched[1]);
+				// 從URL網址中解析出作品title。
+				matched = text.match(/ title="([^"]+)"/);
+				if (matched) {
+					matched = matched[1];
+				} else {
+					matched = text.between('<em>', '</em>');
+				}
+				// console.log(matched);
+				if (matched && (matched = get_label(matched))) {
+					if (!id_data.includes(matched)) {
+						// 只取第一個符合的。
+						// 避免如 http://host/123/, http://host/123/456.htm
+						id_data.push(matched);
+					}
+				} else {
+					id_list.pop();
+				}
+			}
+
+			// console.log([ id_list, id_data ]);
+			return [ id_list, id_data ];
+		}
+	};
 
 	// ----------------------------------------------------------------------------
 
@@ -1189,11 +1256,13 @@ function module_code(library_namespace) {
 			if (true || _this.need_create_ebook) {
 				// 提供給 this.get_chapter_count() 使用。
 				// e.g., 'ja-JP'
-				// TODO: calibre 不認得 "cmn-Hant-TW"
+				// TODO: calibre 不認得/讀不懂 "cmn-Hant-TW" 這樣子的語言代碼。
 				if (!('language' in work_data)) {
 					work_data.language
 					// CeL.application.locale.detect_HTML_language()
-					= library_namespace.detect_HTML_language(html);
+					= library_namespace.detect_HTML_language(html)
+					// CeL.application.locale.encoding.guess_text_language()
+					|| library_namespace.guess_text_language(html);
 				}
 				if (!('time_zone' in work_data)) {
 					// e.g., 9
@@ -1674,6 +1743,7 @@ function module_code(library_namespace) {
 			}
 
 			function pre_parse_chapter_data(XMLHttp) {
+				// 對於每一張圖片都得要從載入的頁面獲得資訊的情況，可以參考hhcool.js。
 				if (typeof _this.pre_parse_chapter_data === 'function') {
 					// 執行在解析章節資料process_chapter_data()之前的作業(async)。
 					_this.pre_parse_chapter_data(XMLHttp, work_data,

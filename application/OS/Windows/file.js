@@ -2666,8 +2666,15 @@ library_namespace.set_method(cacher.prototype, {
 _.cacher = cacher;
 
 
-// ------------------------------------------------------------------------- //
+// ---------------------------------------------------------------------//
+// export.
 
+// 在沒有COM的情況下，預設不匯出這些有問題的函數，否則可能會取代可能沒有問題的函數。
+// @see CeL.application.storage
+if (!library_namespace.application.OS.Windows.no_COM) {
+	// 設定不匯出的子函式。
+	this.no_extend = 'move_file,move_1_file,is_file,is_folder,get_file_details,create_shortcut,open_file,read_file,write_file,iconv,show_path,cacher';
+}
 
 return (
 	_// JSDT:_module_

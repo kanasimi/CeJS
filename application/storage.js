@@ -102,6 +102,7 @@ function module_code(library_namespace) {
 	var storage_module;
 
 	if (library_namespace.platform.nodejs) {
+		library_namespace.debug('application.storage: use node.js functions.');
 		storage_module = library_namespace.application.platform.nodejs;
 
 		/** node.js file system module */

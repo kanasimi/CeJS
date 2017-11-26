@@ -1335,9 +1335,11 @@ function module_code(library_namespace) {
 			} else if (agent.protocol
 			// agent.protocol 可能是 undefined。
 			&& agent.protocol !== _URL.protocol) {
-				library_namespace
-						.warn('get_URL_node: 自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
-								+ agent.protocol + ' !== ' + _URL.protocol);
+				if (!options.no_protocol_warn) {
+					library_namespace
+							.warn('get_URL_node: 自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
+									+ agent.protocol + ' !== ' + _URL.protocol);
+				}
 				// use new agent. default: https://
 				agent = _URL.protocol === 'http:' ? new node_http.Agent
 						: new node_https.Agent;
