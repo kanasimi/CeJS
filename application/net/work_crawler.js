@@ -390,12 +390,17 @@ function module_code(library_namespace) {
 			.filter(function(server) {
 				return !!server;
 			}).unique();
-			library_namespace.log('Get ' + _this.server_list.length
-					+ ' servers from [' + server_URL + ']: '
-					+ _this.server_list.join(', '));
-			if (server_file) {
-				node_fs.writeFileSync(server_file, JSON
-						.stringify(_this.server_list));
+			if (_this.server_list.length > 0) {
+				library_namespace.log('Get ' + _this.server_list.length
+						+ ' servers from [' + server_URL + ']: '
+						+ _this.server_list.join(', '));
+				if (server_file) {
+					node_fs.writeFileSync(server_file, JSON
+							.stringify(_this.server_list));
+				}
+			} else {
+				library_namespace.error('set_server_list: No server get from ['
+						+ server_URL + ']!');
 			}
 
 			typeof callback === 'function' && callback();
@@ -718,12 +723,11 @@ function module_code(library_namespace) {
 					matched = text.between('<em>', '</em>');
 				}
 				// console.log(matched);
-				if (matched && (matched = get_label(matched))) {
-					if (!id_data.includes(matched)) {
-						// 只取第一個符合的。
-						// 避免如 http://host/123/, http://host/123/456.htm
-						id_data.push(matched);
-					}
+				if (matched && (matched = get_label(matched))
+				// 只取第一個符合的。
+				// 避免如 http://host/123/, http://host/123/456.htm
+				&& !id_data.includes(matched)) {
+					id_data.push(matched);
 				} else {
 					id_list.pop();
 				}
@@ -1256,13 +1260,16 @@ function module_code(library_namespace) {
 			if (true || _this.need_create_ebook) {
 				// 提供給 this.get_chapter_count() 使用。
 				// e.g., 'ja-JP'
-				// TODO: calibre 不認得/讀不懂 "cmn-Hant-TW" 這樣子的語言代碼。
 				if (!('language' in work_data)) {
 					work_data.language
 					// CeL.application.locale.detect_HTML_language()
 					= library_namespace.detect_HTML_language(html)
 					// CeL.application.locale.encoding.guess_text_language()
 					|| library_namespace.guess_text_language(html);
+				}
+				if (work_data.language && work_data.language.startsWith('cmn')) {
+					// calibre 不認得/讀不懂 "cmn-Hant-TW" 這樣子的語言代碼。
+					work_data.language = 'zh-' + work_data.language;
 				}
 				if (!('time_zone' in work_data)) {
 					// e.g., 9

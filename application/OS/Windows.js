@@ -56,17 +56,18 @@ new_COM = typeof WScript === 'object' ? function(id) {
 	return Server.CreateObject(id);
 };
 
-if (!_.new_COM) {
+// CeL.application.OS.Windows.no_COM
+if (_.no_COM = !_.new_COM) {
 	if (false && !library_namespace.env.ignore_COM_error)
 		library_namespace.warn('new_COM: no <a href="http://en.wikipedia.org/wiki/Component_Object_Model" target="_blank">Component Object Model</a> support!');
 
-	// CeL.application.OS.Windows.no_COM
 	(_.new_COM = function(id) {
 		// 忽略沒有 Windows Component Object Model 的錯誤。
 		if (!library_namespace.env.ignore_COM_error)
 			throw new Error('new_COM: No method to get Microsoft <a href="http://en.wikipedia.org/wiki/Component_Object_Model" target="_blank">Component Object Model</a> (COM): [' + id + ']!');
-	}).no_COM = true;
+	});
 }
+// WScript.Echo((_.no_COM? '沒' : '') + '有 Windows Component Object Model。');
 
 
 /**
