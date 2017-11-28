@@ -1679,6 +1679,7 @@ function module_code(library_namespace) {
 		}
 		// 模板這個部分除了解析模板之外沒有好的方法。
 		// 這邊僅處理常用模板。需要先保證這些模板存在，並且具有預期的功能。
+		// TODO: [[Template:疑問]], [[Template:Block]]
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {

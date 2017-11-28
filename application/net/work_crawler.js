@@ -295,6 +295,9 @@ function module_code(library_namespace) {
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
 		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。否則只會自上次下載過的章節接續下載。
 		// recheck : true,
+		// 明確指定自上次下載過的章節接續下載。
+		// recheck : false,
+		//
 		// 當無法取得chapter資料時，直接嘗試下一章節。在手動+監視下recheck時可併用此項。default:false
 		// skip_chapter_data_error : true,
 
@@ -1155,6 +1158,22 @@ function module_code(library_namespace) {
 			}
 			// assert: typeof work_data.status === 'string'
 
+			// 主要提供給 this.get_chapter_count() 使用。
+			// e.g., 'ja-JP'
+			if (!('language' in work_data)) {
+				work_data.language
+				// CeL.application.locale.detect_HTML_language()
+				= library_namespace.detect_HTML_language(html)
+				// CeL.application.locale.encoding.guess_text_language()
+				|| library_namespace.guess_text_language(html);
+			}
+			// normalize work_data.language
+			if (work_data.language && work_data.language.startsWith('cmn')) {
+				// calibre 不認得/讀不懂 "cmn-Hant-TW" 這樣子的語言代碼，
+				// 但是讀得懂 "zh-cmn-Hant-TW"。
+				work_data.language = 'zh-' + work_data.language;
+			}
+
 			if (false && _this.is_finished(work_data)) {
 				// 注意: 這時可能尚未建立 work_data.directory。
 				// TODO: skip finished + no update works
@@ -1259,18 +1278,6 @@ function module_code(library_namespace) {
 
 			if (true || _this.need_create_ebook) {
 				// 提供給 this.get_chapter_count() 使用。
-				// e.g., 'ja-JP'
-				if (!('language' in work_data)) {
-					work_data.language
-					// CeL.application.locale.detect_HTML_language()
-					= library_namespace.detect_HTML_language(html)
-					// CeL.application.locale.encoding.guess_text_language()
-					|| library_namespace.guess_text_language(html);
-				}
-				if (work_data.language && work_data.language.startsWith('cmn')) {
-					// calibre 不認得/讀不懂 "cmn-Hant-TW" 這樣子的語言代碼。
-					work_data.language = 'zh-' + work_data.language;
-				}
 				if (!('time_zone' in work_data)) {
 					// e.g., 9
 					work_data.time_zone

@@ -3368,15 +3368,15 @@ function module_code(library_namespace) {
 			 * @type {Boolean}
 			 */
 			閏月後,
-			//
+			// 如果不是從當月1號開始，那麼就找下一個月來測試。
 			ST本月起始日 = isNaN(this.歲首序) ? START_DATE_KEY in 曆數 ? 1 : 0 : -1;
 			for (月序 = [ 0, 0 ];;)
 				if (this.shift_month(ST本月起始日, 月序)) {
-					// 標準時間(如UTC+8) 本月月初起始日
+					// 標準時間ST(Standard Time) (如公曆UTC+8)之 本月月初起始日
 					ST本月起始日 = this.date_index_to_Date(月序[1], 月序[0]);
-					// 標準時間(如UTC+8) 本月中氣起始日
+					// 標準時間ST(Standard Time) (如公曆UTC+8)之 本月中氣起始日
 					ST本月中氣起始日 = 中氣日[ST月序 = ST本月起始日.getMonth()];
-					// 中氣起始日與本月月初起始日之差距日數日數
+					// 中氣起始日與本月月初起始日之差距日數。
 					中氣差距日數 = ST本月中氣起始日 - ST本月起始日.getDate();
 					// 下個月月初起始日，與本月月初起始日之差距日數。
 					// 即本月之日數。
@@ -3458,8 +3458,8 @@ function module_code(library_namespace) {
 						}
 
 						this.歲首月建序 = ST月序 - 月序[0]
-						// 歲首月建序=(ST月序+(is
-						// leap?2:1)-月序[0]-(曆數[月序[1]][START_KEY]-START_MONTH))%LUNISOLAR_MONTH_COUNT
+						// 歲首月建序=(ST月序+(is leap?2:1)-月序[0]
+						// -(曆數[月序[1]][START_KEY]-START_MONTH))%LUNISOLAR_MONTH_COUNT
 						- (START_KEY in 曆數[月序[1]]
 						//
 						? 曆數[月序[1]][START_KEY] - START_MONTH : 0)
@@ -3483,7 +3483,7 @@ function module_code(library_namespace) {
 
 					// 其他預設甲子年正月(月序0):
 					// 丙寅月，月建序(index)=2+月序。
-					ST月序 = this.歲首月建序 + (曆數[0] && START_KEY in 曆數[0]
+					ST月序 = this.歲首月建序 + (曆數[0] && (START_KEY in 曆數[0])
 					//
 					? 曆數[0][START_KEY] - START_MONTH : 0);
 					break;
@@ -3491,13 +3491,30 @@ function module_code(library_namespace) {
 
 			this.歲首月建序 = this.歲首月建序.mod(library_namespace.BRANCH_LIST.length);
 
-			// 取得月干支。
-			this.起始月干支序 = 起始月干支
-			// 月干支每5年一循環。
+			// 對於像是"西晉武帝泰始1年12月"這種特殊日期，元年12月1日起始，但是卻包含有平常的一月中氣(雨水)，這種情況就得要手動設定建正。
+			if (this.建正) {
+				var 建正序 = library_namespace.BRANCH_LIST.indexOf(this.建正);
+				if (建正序 === NOT_FOUND) {
+					library_namespace.error(this + ': 建正非地支之一: ' + this.建正);
+				} else if (建正序 !== this.歲首月建序) {
+					// (建正序 - this.歲首月建序): 需要手動橫移的序數。
+					ST月序 += 建正序 - this.歲首月建序;
+					this.歲首月建序 = 建正序;
+				}
+			}
+
+			// 取得月干支。月干支每5年一循環。
+			起始月干支 = this.get_year_stem_branch_index()
+			// + 月序[1]??
+			;
+			// 對11,12月，必須要算是下一年的。
+			if (ST月序 === 0 || ST月序 === 1) {
+				起始月干支++;
+			}
 			// (ST月序):紀年首月之月建序差距。
-			= ((this.get_year_stem_branch_index() + 月序[1])
-					* LUNISOLAR_MONTH_COUNT + ST月序)
+			起始月干支 = (起始月干支 * LUNISOLAR_MONTH_COUNT + ST月序)
 					.mod(library_namespace.SEXAGENARY_CYCLE_LENGTH);
+			this.起始月干支序 = 起始月干支;
 		}
 
 		if (月干支 && isNaN(月干支))

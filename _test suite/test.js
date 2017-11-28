@@ -3368,6 +3368,8 @@ function test_era() {
 		[["甲寅年正月初一", '2034年2月19日'.to_Date().format('Chinese')], '2034年正月初一'],
 		[["癸丑年閏11月1日", '2033年12月22日'.to_Date().format({parser:'Chinese',numeral:null,format:'%歲次年%月月%日日'})], '2033年閏十一月初一'],
 		[["癸丑年閏11月1日", '2033年12月22日'.to_Date().format({parser:'era',era:'中曆',format:'%歲次年%月月%日日',locale:'cmn-Hant-TW'})], '2033年閏十一月初一'],
+		[[CeL.era('南梁敬帝太平1年12月').月干支, CeL.era('北齊文宣帝天保7年12月').月干支]],
+		[[CeL.era('西晉武帝泰始1年12月').月干支, CeL.era('吳末帝甘露1年12月').月干支]],
 		[[undefined, CeL.era('2200/1/1').共存紀年]],
 		[[undefined, CeL.era('-4000/1/1').共存紀年]],
 		[[0, CeL.era('明年',{base:'嘉靖元年'}) - CeL.era('二年',{base:'嘉靖元年'})], '明年'],
