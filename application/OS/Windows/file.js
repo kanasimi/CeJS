@@ -2674,7 +2674,7 @@ _.cacher = cacher;
 if (library_namespace.application.OS.Windows.no_COM) {
 	// WScript.Echo('設定不匯出的子函式。');
 	// 設定不匯出的子函式。
-	this.no_extend = 'move_file,move_1_file,is_file,is_folder,get_file_details,create_shortcut,open_file,read_file,write_file,iconv,show_path,cacher';
+	this.no_extend = 'move_file,move_1_file,is_file,is_folder,get_file_details,create_shortcut,open_file,read_file,write_file,traverse_file_system,iconv,show_path,cacher';
 }
 
 return (

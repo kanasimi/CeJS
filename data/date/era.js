@@ -425,6 +425,10 @@ function module_code(library_namespace) {
 	// 年分名稱。
 	+ /([前\-−‐]?\d{1,4}|干支|前?數{1,4})[\/.\-年]?()()/.source + 後置_SOURCE),
 
+	// 中文月分名稱。
+	// matched: [ , , , month, date ]
+	ERA_DATE_PATTERN_MONTH = generate_pattern('()()([^\s\/.\-年月日]{1,20})月(干支)?()'),
+
 	// 用來測試如 "一八八〇"
 	POSITIONAL_DATE_NAME_PATTERN = new RegExp('^['
 			+ library_namespace.positional_Chinese_numerals_digits + ']{1,4}$'),
@@ -2277,13 +2281,22 @@ function module_code(library_namespace) {
 										: '888;">間隔 ' + tmp)
 										+ '日';
 							}
-							library_namespace.debug(
+							library_namespace.debug([
+									'測試  / 餘 ',
+									era_Array.length,
+									': ' + era,
+									' (<span style="color:#'
+									//
+									+ tmp + '</span>)',
+									' (',
 									[
-											'測試  / 餘 ',
-											era_Array.length,
-											': ' + era,
-											' (<span style="color:#' + tmp
-													+ '</span>)' ], 2,
+											(era.疑 ? '存在疑問、不準確的紀年' : ''),
+											(era.參照曆法 ? '參照曆法: ' + era.參照曆法
+													: ''),
+											(era.參照紀年 ? '參照紀年: ' + era.參照紀年
+													: '') ].filter(function(m) {
+										return m;
+									}).join(', '), ')' ], 2,
 									'initialize_era_date');
 						}
 
@@ -2421,14 +2434,12 @@ function module_code(library_namespace) {
 					era_year_data = era.calendar[年序];
 
 					if (library_namespace.is_debug())
-						library_namespace.info([
-								'initialize_era_date: ',
-								start_time
-								//
-								.format(standard_time_format),
-								' 接續參照：',
-								is_正統(era, 曆法) ? '<em>[' + 曆法 + '] 正統</em> '
-										: '', era.toString(WITH_PERIOD) ]);
+						library_namespace.info([ 'initialize_era_date: ',
+								start_time.format(standard_time_format),
+								' 接續參照：', is_正統(era, 曆法) ? '<em>['
+								// 曆法.name.join('/')
+								+ 曆法 + '] 正統</em> ' : '',
+								era.toString(WITH_PERIOD) ]);
 
 					copy_important_properties(era, this);
 
@@ -3507,11 +3518,11 @@ function module_code(library_namespace) {
 			起始月干支 = this.get_year_stem_branch_index()
 			// + 月序[1]??
 			;
+			// (ST月序):紀年首月之月建序差距。
 			// 對11,12月，必須要算是下一年的。
 			if (ST月序 === 0 || ST月序 === 1) {
 				起始月干支++;
 			}
-			// (ST月序):紀年首月之月建序差距。
 			起始月干支 = (起始月干支 * LUNISOLAR_MONTH_COUNT + ST月序)
 					.mod(library_namespace.SEXAGENARY_CYCLE_LENGTH);
 			this.起始月干支序 = 起始月干支;
@@ -6185,8 +6196,17 @@ function module_code(library_namespace) {
 			// 前置, 後置 改成 Array (紀年指示詞偵測集)，統一處理。
 			if (tmp = numeralized.match(ERA_DATE_PATTERN)
 					|| (tmp2 = numeralized.match(ERA_DATE_PATTERN_NO_DATE))
+					// 解析如"正月乙巳"，
+					// 防止 CeL.era('正月乙巳',{base:'建隆元年'}) 被解析成[紀年:正月,日期:乙巳]
+					|| (月 = numeralized.match(ERA_DATE_PATTERN_MONTH))
 					|| (matched = numeralized.match(ERA_DATE_PATTERN_YEAR))) {
-				library_namespace.debug('辨識出紀年+日期之樣式 [' + tmp + ']', 2,
+				library_namespace.debug('辨識出紀年+日期之樣式 ['
+						+ tmp
+						+ '] ('
+						+ (tmp2 ? 'ERA_DATE_PATTERN_NO_DATE'
+								: 月 ? 'ERA_DATE_PATTERN_MONTH'
+										: matched ? 'ERA_DATE_PATTERN_YEAR'
+												: 'ERA_DATE_PATTERN') + ')', 2,
 						'to_era_Date');
 
 				// 中間多為日期，前後為紀年。
@@ -7566,9 +7586,8 @@ function module_code(library_namespace) {
 			var era_list = date.shift();
 			if (era_list && era_list.size > 1) {
 				library_namespace.warn('calculate_node_era: [' + era
-						+ ']: 共取得 '
-						//
-						+ era_list.size + ' 個可能的紀年名稱: '
+				//
+				+ ']: 共取得 ' + era_list.size + ' 個可能的紀年名稱: '
 						+ Array.from(era_list).join(', '));
 			} else {
 				era_list = null;

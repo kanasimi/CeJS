@@ -20043,6 +20043,19 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	var user_language;
+	if (typeof mediaWiki === "object" && typeof mw === "object"
+			&& mediaWiki === mw) {
+		// mw.config
+		user_language = mediaWiki.config.get('wgPreferredVariant')
+		// || mediaWiki.config.get('wgUserVariant')
+		// || mediaWiki.config.get('wgUserLanguage')
+		// || mediaWiki.config.get('wgPageContentLanguage')
+		;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 	Object.assign(wiki_API, {
 		api_URL : api_URL,
