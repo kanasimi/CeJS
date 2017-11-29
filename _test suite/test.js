@@ -3368,8 +3368,6 @@ function test_era() {
 		[["甲寅年正月初一", '2034年2月19日'.to_Date().format('Chinese')], '2034年正月初一'],
 		[["癸丑年閏11月1日", '2033年12月22日'.to_Date().format({parser:'Chinese',numeral:null,format:'%歲次年%月月%日日'})], '2033年閏十一月初一'],
 		[["癸丑年閏11月1日", '2033年12月22日'.to_Date().format({parser:'era',era:'中曆',format:'%歲次年%月月%日日',locale:'cmn-Hant-TW'})], '2033年閏十一月初一'],
-		[[CeL.era('南梁敬帝太平1年12月').月干支, CeL.era('北齊文宣帝天保7年12月').月干支]],
-		[[CeL.era('西晉武帝泰始1年12月').月干支, CeL.era('吳末帝甘露1年12月').月干支]],
 		[[undefined, CeL.era('2200/1/1').共存紀年]],
 		[[undefined, CeL.era('-4000/1/1').共存紀年]],
 		[[0, CeL.era('明年',{base:'嘉靖元年'}) - CeL.era('二年',{base:'嘉靖元年'})], '明年'],
@@ -3382,6 +3380,9 @@ function test_era() {
 		[[undefined, CeL.era('三月庚子日')], 'NG: 三月庚子日'],
 		[[0, CeL.era('庚子三月') - CeL.era('西涼太祖庚子三月')], '庚子三月'],
 		[[0, CeL.era('庚子二年二月庚子') - CeL.era('西涼太祖庚子二年二月庚子')], '庚子二年二月庚子'],
+		[CeL.era('正月乙巳',{base:'建隆元年',parse_only:true}).slice(1).join().includes('建隆,元,正,乙巳'), '標注文本 "建隆元年  正月乙巳大赦" bug'],
+		[[CeL.era('南梁敬帝太平1年12月').月干支, CeL.era('北齊文宣帝天保7年12月').月干支]],
+		[[CeL.era('西晉武帝泰始1年12月').月干支, CeL.era('吳末帝甘露1年12月').月干支], '西晉武帝泰始月建有誤'],
 
 		[['412/3/29', CeL.era.中曆(412,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 412 年, 中曆 3/1 之 CE Date。'],
 		[['2016/3/11', CeL.era.中曆(2016,2,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 2016 年, 中曆 2/3 之 CE Date。'],

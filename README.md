@@ -35,24 +35,8 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 
 ## Node.js usage
 
-### Installation via npm
-<!-- NodeICO badges -->
-[![NPM](https://nodei.co/npm/cejs.png)](https://nodei.co/npm/cejs/)
-<!-- [![NPM](https://nodei.co/npm-dl/cejs.png)](https://nodei.co/npm/cejs/) -->
-
-First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and [install the node.js package](https://nodejs.org/en/download/package-manager/).
-請先安裝 [node.js](https://nodejs.org/)。
-
-Then, install the CeJS library:
-接著安裝 CeJS library:
-``` sh
-$ npm install cejs
-```
-
-* 請注意：採用 <code>npm</code> 安裝的可能不是最新版，尚未加入最新功能。建議下載最新版本壓縮檔，解開後配置；而不是直接執行舊版的 npm install。
-
 ### Node.js lazy installation 最新版本懶人配置法
-<code>npm</code> 安裝的可能不是最新版本，這裡示範的是最新版本的安裝方法。
+<code>[npm](https://www.npmjs.com/package/cejs)</code> 安裝的可能不是最新版本，這裡示範的是最新版本的安裝方法。
 
 不囉嗦，已經做過的步驟可以跳過：
 1. 請先安裝 [node.js](https://nodejs.org/) 與 [7-Zip](https://en.wikipedia.org/wiki/7-Zip)
@@ -76,6 +60,18 @@ $ npm install cejs
    ```
 
 5. 每次要更新到最新 CeJS 程式庫時，只要重新執行一次 CeJS 安裝檔即可。
+
+### Installation via npm
+<!-- NodeICO badges -->
+[![NPM](https://nodei.co/npm/cejs.png)](https://nodei.co/npm/cejs/)
+<!-- [![NPM](https://nodei.co/npm-dl/cejs.png)](https://nodei.co/npm/cejs/) -->
+
+1. First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and [install the node.js package](https://nodejs.org/en/download/package-manager/). 請先安裝 [node.js](https://nodejs.org/)。
+2. Then, install the CeJS library: 接著安裝 CeJS library:
+   ``` sh
+   $ npm install cejs
+   ```
+* 請注意：採用 <code>npm</code> 安裝的可能不是最新版，尚未加入最新功能。建議下載最新版本壓縮檔，解開後配置；而不是直接執行舊版的 npm install。
 
 ### Installation via GitHub latest version 一般正常安裝方法
 鑒於更新頻繁，有些功能可能最新版本才具備；若是執行了採用新功能的程式，將會發生嚴重錯誤。因此強烈建議直接到 GitHub 下載最新版本壓縮檔，解開後配置。

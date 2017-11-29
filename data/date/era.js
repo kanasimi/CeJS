@@ -425,7 +425,7 @@ function module_code(library_namespace) {
 	// 年分名稱。
 	+ /([前\-−‐]?\d{1,4}|干支|前?數{1,4})[\/.\-年]?()()/.source + 後置_SOURCE),
 
-	// 中文月分名稱。
+	// 用來測試如中文月分名稱 "三月庚子"
 	// matched: [ , , , month, date ]
 	ERA_DATE_PATTERN_MONTH = generate_pattern('()()([^\s\/.\-年月日]{1,20})月(干支)?()'),
 
@@ -6193,13 +6193,19 @@ function module_code(library_namespace) {
 				}
 			};
 
+			// --------------------------------------------
+			// 開始解析。
+
 			// 前置, 後置 改成 Array (紀年指示詞偵測集)，統一處理。
 			if (tmp = numeralized.match(ERA_DATE_PATTERN)
-					|| (tmp2 = numeralized.match(ERA_DATE_PATTERN_NO_DATE))
-					// 解析如"正月乙巳"，
-					// 防止 CeL.era('正月乙巳',{base:'建隆元年'}) 被解析成[紀年:正月,日期:乙巳]
-					|| (月 = numeralized.match(ERA_DATE_PATTERN_MONTH))
-					|| (matched = numeralized.match(ERA_DATE_PATTERN_YEAR))) {
+			// 僅在應解析，但是沒解析出來的時候才增加新的pattern。
+			// 若是能解析出固定錯誤模式，那麼應該要在下面 "if (tmp2)", "if (matched)" 這地方做修正。
+			|| (tmp2 = numeralized.match(ERA_DATE_PATTERN_NO_DATE))
+			// 解析如"正月乙巳", "三月庚子"
+			// 防止 CeL.era('正月乙巳',{base:'建隆元年',parse_only:true})
+			// 被解析成 前置:正月,年:乙巳
+			// || (月 = numeralized.match(ERA_DATE_PATTERN_MONTH))
+			|| (matched = numeralized.match(ERA_DATE_PATTERN_YEAR))) {
 				library_namespace.debug('辨識出紀年+日期之樣式 ['
 						+ tmp
 						+ '] ('
@@ -6233,20 +6239,28 @@ function module_code(library_namespace) {
 						}
 
 				} else if (matched) {
+					if (matched = tmp[5].match(/^月(?:([^日]{1,3})日?)?/)
 					// .match(ERA_DATE_PATTERN_YEAR)
 					// 減縮版 ERA_DATE_PATTERN: parse 年分 only。
-					if (matched = tmp[5].match(/^月(?:([^日]{1,3})日?)?/))
+					) {
 						// e.g., '三月一日'
-						月 = 年, 年 = null, 日 = matched[1];
+						月 = 年;
+						年 = null;
+						日 = matched[1];
+					} else if (tmp[5].charAt(0) === '日'
 					// e.g., '一日'
-					else if (tmp[5].charAt(0) === '日'
 					// 僅輸入單一干支，當作日干支而非年干支。
 					// e.g.,
 					// ('丁亥朔', {base : '寶應二年春正月'})
-					|| options.base && 年.length === 2
-							&& !isNaN(library_namespace.stem_branch_index(年)))
-						日 = 年, 年 = null;
-					else if (!月 && !日) {
+					|| options.base
+					// 排除如"正月乙巳": 因為應該.match(ERA_DATE_PATTERN_MONTH)，已經被排除。
+					&& !/^(.+)月\s*$/.test(tmp[1])
+					// 干支_PATTERN.test(年) 即: (( 年.length === 2 &&
+					// !isNaN(library_namespace.stem_branch_index(年)) ))
+					&& 干支_PATTERN.test(年)) {
+						日 = 年;
+						年 = null;
+					} else if (!月 && !日) {
 						if ((tmp[1] || tmp[5])
 						// 此處((年))應該是年號中間的文字，只是被篩選到了。
 						&& 單數字_PATTERN.test(年)) {
@@ -6256,8 +6270,22 @@ function module_code(library_namespace) {
 						} else if (tmp[5]
 						// 修正僅有年分時出現之問題。
 						// e.g., '五千六百七十八', '前五千六百七十八'
-						&& !isNaN(numeralize_date_name(tmp[5])))
-							年 += tmp[5], tmp[5] = '';
+						&& !isNaN(numeralize_date_name(tmp[5]))) {
+							年 += tmp[5];
+							tmp[5] = '';
+						} else if (/* false && */干支_PATTERN.test(年)
+						// ↑false: 因為應該.match(ERA_DATE_PATTERN_MONTH)，這邊不應該有功效。
+						&& (matched = tmp[1].match(/^(.+)月\s*$/))) {
+							// 解析中文月分名稱如"正月乙巳"，
+							// 防止 CeL.era('正月乙巳',{base:'建隆元年',parse_only:true})
+							// 被解析成 前置:正月,年:乙巳
+							日 = 年;
+							月 = matched[1].trim();
+							年 = null;
+							tmp[1] = '';
+							//
+							date = null;
+						}
 					}
 
 					// 預防萬一，將 date 資料偵測一次。
