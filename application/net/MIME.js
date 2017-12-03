@@ -75,12 +75,13 @@ function module_code(library_namespace) {
 	_.file_name_extension_of = extension_of;
 
 	// 由 file name extension or url 簡易判別，可能出錯。
-	function MIME_type_of_extension(url) {
+	function MIME_type_of_extension(url, options) {
 		var extension = extension_of(url);
 		if (!extension) {
 			return;
 		}
 
+		// no .trim()
 		extension = extension.toLowerCase();
 
 		// common MIME types
@@ -91,9 +92,9 @@ function module_code(library_namespace) {
 		case 'jpg':
 			extension = 'jpeg';
 		case 'jpeg':
-		case 'bmp':
-		case 'gif':
 		case 'png':
+		case 'gif':
+		case 'bmp':
 			// png → image/png
 			return 'image/' + extension;
 

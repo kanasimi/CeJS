@@ -26,11 +26,13 @@ parse 圖像
 檢核章節內容。
 proxy
 清除暫存檔
+漫畫圖片數統計
 
 </code>
  * 
- * @see https://github.com/abcfy2/getComic,
+ * @see https://github.com/abcfy2/getComic
  *      https://github.com/wellwind/8ComicDownloaderElectron
+ *      https://github.com/Arachnid-27/Cimoc
  * 
  * @since 2016/10/30 21:40:6
  * @since 2016/11/1 23:15:16 正式運用：批量下載腾讯漫画 qq。
@@ -303,9 +305,10 @@ function module_code(library_namespace) {
 
 		image_types : {
 			jpg : true,
+			jpeg : true,
 			// 抓取到非JPG圖片
-			gif : true,
 			png : true,
+			gif : true,
 			bmp : true
 		},
 

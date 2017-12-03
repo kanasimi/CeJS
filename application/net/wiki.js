@@ -4296,7 +4296,13 @@ function module_code(library_namespace) {
 				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日一二三四五六])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
 				function(matched) {
 					return matched[1] + '/' + matched[2] + '/' + matched[3]
-							+ matched[5] + ' ' + (matched[6] || 'UTC+8');
+					//
+					+ matched[5] + ' '
+					// new Date('2017/12/1 0:0 CST') !==
+					// new Date('2017/12/1 0:0 UTC+8')
+					+ (!matched[6] || matched[6] === 'CST' ? 'UTC+8'
+					//
+					: matched[6]);
 				}, {
 					format : '%Y年%m月%d日 (%a) %2H:%2M (UTC)',
 					// use UTC
@@ -5975,7 +5981,7 @@ function module_code(library_namespace) {
 			Object.assign({
 				// default options === this
 
-				// including File, Template, Category
+				// including main, File, Template, Category
 				// namespace : '0|6|10|14',
 
 				// title_prefix : 'Template:',
@@ -19118,8 +19124,11 @@ function module_code(library_namespace) {
 				data = data.call(options, id);
 
 			} else {
-				library_namespace.debug('Get id from ' + JSON.stringify(id), 3,
-						'wikidata_edit');
+				if (false) {
+					library_namespace.debug(
+					// TypeError: Converting circular structure to JSON
+					'Get id from ' + JSON.stringify(id), 3, 'wikidata_edit');
+				}
 				wikidata_entity(id, options.props, function(entity, error) {
 					if (error) {
 						library_namespace.debug('Get error '

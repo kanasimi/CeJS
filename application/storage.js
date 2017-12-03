@@ -81,9 +81,9 @@ function module_code(library_namespace) {
 	CeL.storage.copy_file(copy_from_path, copy_to_path)
 
 	CeL.storage.directory_exists(directory_path)
-	// get the file and sub-directory list of the directory.
-	CeL.storage.read_directory(directory_path)
-	// CeL.storage.directory_is_empty(directory_path)
+	// get the fso list (file and sub-directory list) of the directory.
+	CeL.storage.read_directory(directory_path, options)
+	CeL.storage.directory_is_empty(directory_path, options)
 	// alias: mkdir
 	CeL.storage.create_directory(directory_path / directory_path_list)
 	// alias: delete.
@@ -139,6 +139,11 @@ function module_code(library_namespace) {
 				library_namespace.debug('Error to read directory: '
 						+ directory_path);
 			}
+		};
+
+		_.directory_is_empty = function(directory_path, options) {
+			var fso_name_list = _.read_directory(directory_path, options);
+			return Array.isArray(fso_name_list) && fso_name_list.length === 0;
 		};
 
 		_.create_directory = storage_module.fs_mkdir;

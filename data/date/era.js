@@ -5532,6 +5532,10 @@ function module_code(library_namespace) {
 					add_attribute(last_era_data, i, j);
 			}
 
+			// era.精=:歷史上這個時期曆法與公元的對照本來就無法追溯得精準至日，甚至曆法本身就不夠精準。
+			// era.準=:歷史上這個時期曆法與公元的對照應該非常精準，但是本數據庫的資料準確程度不足。
+			// era.疑=:歷史上這個時期曆法與公元的對照應該非常精準，本數據庫的資料尺度標示也很精準，但是本數據庫的資料實際上存在疑問、可能不準確。
+
 			// 處理 accuracy/準度/誤差/正確度。
 			if (!last_era_data.準)
 				for (i in 準確程度_ENUM)
@@ -5744,12 +5748,12 @@ function module_code(library_namespace) {
 		//
 		紀年 = era_list[era_index];
 
-		if ((紀年.精 || 紀年.準) && (tmp = options && options.尋精準)) {
+		if ((紀年.精 || 紀年.準 || 紀年.疑) && (tmp = options && options.尋精準)) {
 			tmp = Math.max(era_index - Math.max(2, tmp | 0), 0);
 			for (date_index = era_index; date_index > tmp
 			// 使用這方法不能保證無漏失，應該使用 (紀年.contemporary)。
 			&& (共存紀年 = era_list[--date_index]).end - date > 0;)
-				if (!共存紀年.精 && !共存紀年.準
+				if (!共存紀年.精 && !共存紀年.準 && !共存紀年.疑
 				// 盡可能向前找到精密暨準確的紀年。
 				&& 共存紀年.Date_to_date_index(date)) {
 					era_index = date_index;
@@ -7733,6 +7737,8 @@ function module_code(library_namespace) {
 			date += '起';
 
 		tmp = [ era, date, tmp ];
+		// TODO: era_date.精;
+		// TODO: era_date.準;
 		if (era_date.共存紀年) {
 			// old: ☼
 			date = '<br />⏳ ';

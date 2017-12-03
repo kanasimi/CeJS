@@ -1441,10 +1441,14 @@ function module_code(library_namespace) {
 			if (!options.no_warning
 			// 應已在 _ontimeout 出過警告訊息。
 			&& error.code !== 'TIMEOUT') {
-				console.error('get_URL_node: Get error when retrieving [' + URL
-						+ ']:');
-				// 這裡用太多並列處理，會造成 error.code "EMFILE"。
-				console.error(error);
+				if (error.code === 'ENOTFOUND') {
+					CeL.error('get_URL_node: Not found: [' + URL + ']');
+				} else {
+					CeL.error('get_URL_node: Get error when retrieving [' + URL
+							+ ']:');
+					// 這裡用太多並列處理，會造成 error.code "EMFILE"。
+					console.error(error);
+				}
 			}
 			// 在出現錯誤時，將 onload 當作 callback。並要確保 {Object}response
 			// 因此應該要先檢查error再處理response
