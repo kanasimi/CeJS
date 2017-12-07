@@ -413,9 +413,10 @@ function module_code(library_namespace) {
 	ERA_DATE_PATTERN = generate_pattern(前置_SOURCE + 年_SOURCE + 季_SOURCE
 			+ 月_SOURCE + 日_SOURCE + 後置_SOURCE),
 
-	// 減縮版 ERA_DATE_PATTERN: 省略日期，或亦省略月分。
+	// 減縮版 ERA_DATE_PATTERN: 省略日期，或亦省略月分。 ERA_DATE_PATTERN_NO_DATE
+	ERA_DATE_PATTERN_ERA_ONLY
 	// matched: [ , prefix, year, numeral month, month, suffix ]
-	ERA_DATE_PATTERN_NO_DATE = generate_pattern(前置_SOURCE + 年_SOURCE + 季_SOURCE
+	= generate_pattern(前置_SOURCE + 年_SOURCE + 季_SOURCE
 	// 月分名稱。參考 (月_SOURCE)。
 	+ /\s*(?:([01]?\d)|([^\s\/.\-年月日]{1,20})月)?/.source + 後置_SOURCE),
 
@@ -6032,6 +6033,7 @@ function module_code(library_namespace) {
 	 *            {Boolean}.era_only: 僅回傳所解析出之共存紀年 list: {Array}。<br />
 	 *            {Boolean}.parse_only: 僅回傳所解析出之紀年資訊: [ 紀年_list, 紀年, 年, 月, 日 ]<br />
 	 *            {Boolean}.is_era: 找不到可用之紀年時，直接 abort 跳出，回傳 undefined。<br />
+	 *            {Boolean}.date_only: 僅回傳所解析出之{Date}紀年日期，不包括附加資訊。<br />
 	 * 
 	 * @returns {Date} 解析出之日期
 	 */
@@ -6200,15 +6202,15 @@ function module_code(library_namespace) {
 			if (tmp = numeralized.match(ERA_DATE_PATTERN)
 			// 僅在應解析，但是沒解析出來的時候才增加新的pattern。
 			// 若是能解析出固定錯誤模式，那麼應該要在下面 "if (tmp2)", "if (matched)" 這地方做修正。
-			|| (tmp2 = numeralized.match(ERA_DATE_PATTERN_NO_DATE))
+			|| (tmp2 = numeralized.match(ERA_DATE_PATTERN_ERA_ONLY))
 					|| (matched = numeralized.match(ERA_DATE_PATTERN_YEAR))) {
-				library_namespace.debug('辨識出紀年+日期之樣式 ['
-						+ tmp
-						+ '] ('
-						+ (tmp2 ? 'ERA_DATE_PATTERN_NO_DATE'
-								: matched ? 'ERA_DATE_PATTERN_YEAR'
-										: 'ERA_DATE_PATTERN') + ')', 2,
-						'to_era_Date');
+				library_namespace.debug('辨識出紀年+日期之樣式 [' + tmp + '] ('
+				//
+				+ (tmp2 ? 'ERA_DATE_PATTERN_ERA_ONLY'
+				//
+				: matched ? 'ERA_DATE_PATTERN_YEAR'
+				//
+				: 'ERA_DATE_PATTERN') + ')', 2, 'to_era_Date');
 
 				// 中間多為日期，前後為紀年。
 				年 = tmp[2];
@@ -6216,7 +6218,7 @@ function module_code(library_namespace) {
 				日 = tmp[4];
 
 				if (tmp2) {
-					// .match(ERA_DATE_PATTERN_NO_DATE)
+					// .match(ERA_DATE_PATTERN_ERA_ONLY)
 					// 減縮版 ERA_DATE_PATTERN: 省略日期，或亦省略月分。
 					if (!月)
 						if (日) {
@@ -6427,38 +6429,65 @@ function module_code(library_namespace) {
 					}
 
 				} else if (date && !isNaN(date.getTime())) {
-					// e.g.,
-					// ('庚辰年庚辰月庚辰日庚辰時', {base : '1850年'})
-
-					// 針對歲次特別做修正。
-					// 注意:非泛用方法。
-					if (紀年 = library_namespace.stem_branch_index(年)) {
-						tmp
-						//
-						= library_namespace.SEXAGENARY_CYCLE_LENGTH;
-						// 計算差距年數。
-						if (紀年 = (紀年 - (date.getFullYear()
-						//
-						- library_namespace.YEAR_STEM_BRANCH_OFFSET)) % tmp) {
-							if (紀年 < 0)
-								紀年 += tmp;
-							if (紀年 > tmp >> 1)
-								紀年 -= tmp;
-							// 重設年分。
-							date.setFullYear(年 = date.getFullYear() + 紀年);
+					if (紀年_list && 紀年_list.size > 0) {
+						if (紀年_list.size > 1) {
+							// e.g.,
+							// CeL.era('建武二年',{parse_only:true,base:CeL.era('大明八年',{date_only:true})})
+							tmp = date.getTime();
+							matched = Array.from(紀年_list).map(function(era) {
+								var distance = tmp < era.start.getTime()
+								// 取得與基準日期的距離。
+								? era.start.getTime() - tmp
+								//
+								: era.end.getTime() < tmp
+								//
+								? tmp - era.end.getTime() : 0;
+								return [ era, distance ];
+							}).sort(function(_e1, _e2) {
+								return _e1[1] - _e2[1];
+							});
+							紀年_list = new Set;
+							// 選取與基準日期date最接近的候選紀年。
+							// 每一個候選紀年與基準日期date的差距不可太大。
+							matched.some(function(_e) {
+								紀年_list.add(_e[0]);
+								// 這邊可以控制想要篩選的最低數量。
+								return _e[1] > 0;
+							});
 						}
-					}
 
-					// 注意:這邊採用的方法並不完備。
-					紀年 = era_list.search_sorted({
-						start : date
-					}, {
-						comparator : compare_start_date,
-						found : era_list
-					});
-					if (紀年)
-						紀年_list = library_namespace
-								.Set_from_Array(紀年.contemporary.concat(紀年));
+					} else {
+						// e.g.,
+						// ('庚辰年庚辰月庚辰日庚辰時', {base : '1850年'})
+
+						// 針對歲次特別做修正。
+						// 注意:非泛用方法。
+						if (紀年 = library_namespace.stem_branch_index(年)) {
+							tmp = library_namespace.SEXAGENARY_CYCLE_LENGTH;
+							// 計算差距年數。
+							if (紀年 = (紀年 - (date.getFullYear() - library_namespace.YEAR_STEM_BRANCH_OFFSET))
+									% tmp) {
+								if (紀年 < 0)
+									紀年 += tmp;
+								if (紀年 > tmp >> 1)
+									紀年 -= tmp;
+								// 重設年分。
+								date.setFullYear(年 = date.getFullYear() + 紀年);
+							}
+						}
+
+						// 找出最接近date的日期。
+						// 注意:這邊採用的方法並不完備。
+						紀年 = era_list.search_sorted({
+							start : date
+						}, {
+							comparator : compare_start_date,
+							found : era_list
+						});
+						if (紀年)
+							紀年_list = library_namespace
+									.Set_from_Array(紀年.contemporary.concat(紀年));
+					}
 				}
 			}
 
@@ -6503,14 +6532,21 @@ function module_code(library_namespace) {
 							tmp.push(era);
 					});
 					// tmp = Array.from(紀年_list).unique()
-					if (tmp.length > 1)
+					if (tmp.length > 1) {
 						// 有超過1個紀年。
-						if (options.pick)
+						if (options.pick) {
 							tmp = options.pick(tmp) || tmp;
-						else if (library_namespace.is_debug())
-							library_namespace.warn('to_era_Date: 共取得 '
-									+ tmp.length + ' 個可能的紀年名稱！ ['
-									+ tmp.join(', ') + ']');
+						} else {
+							if (false && options.base) {
+								library_namespace.log('base: ' + options.base);
+							}
+							if (library_namespace.is_debug()) {
+								library_namespace.warn('to_era_Date: 共取得 '
+										+ tmp.length + ' 個可能的紀年名稱！ ['
+										+ tmp.join(', ') + ']');
+							}
+						}
+					}
 				}
 
 			} else if (tmp = numeralized.match(
@@ -7565,10 +7601,10 @@ function module_code(library_namespace) {
 				parse_only : true
 			});
 
-			// date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
-			if (!date || !date[1]) {
+			var previous_date = undefined,
+			//
+			get_previous_date = function() {
 				var node_queue = [];
-				var previous_date = undefined;
 				// 自身不完整。溯前尋找 base。
 				var node_to_test = node;
 				while (node_to_test = library_namespace
@@ -7578,8 +7614,16 @@ function module_code(library_namespace) {
 							'String'))
 						break;
 				}
-				if (!previous_date)
+				return previous_date;
+			};
+
+			// date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
+			if (!date || !date[1]) {
+				if (!get_previous_date()
+				// && (!date || !date[1])
+				) {
 					return;
+				}
 
 				original_era = date = to_era_Date(era, {
 					parse_without_check : true
@@ -7616,10 +7660,32 @@ function module_code(library_namespace) {
 
 			var era_list = date.shift();
 			if (era_list && era_list.size > 1) {
-				library_namespace.warn('calculate_node_era: [' + era
-				//
-				+ ']: 共取得 ' + era_list.size + ' 個可能的紀年名稱: '
-						+ Array.from(era_list).join(', '));
+				// 當存在有多個可能的紀年時，應該從前文來篩選出比較可能的一個。
+				if (previous_date || get_previous_date()) {
+					// console.log(previous_date);
+					// console.log(era);
+					date = to_era_Date(era, {
+						parse_only : true,
+						base : to_era_Date(previous_date, {
+							date_only : true
+						})
+					});
+					// console.log(date);
+					date.shift();
+					// assert: 必然會選出最接近的一個紀年。
+					era_list = null;
+
+				} else {
+					library_namespace.warn('calculate_node_era: [' + era
+					//
+					+ ']: 共取得 ' + era_list.size + ' 個可能的紀年名稱: '
+					//
+					+ Array.from(era_list).map(function(era) {
+						// 大約年份
+						return era + ' (' + era.start.format('%Y') + ')';
+					}).join(', '));
+				}
+
 			} else {
 				era_list = null;
 			}

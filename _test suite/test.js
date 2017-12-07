@@ -3386,6 +3386,7 @@ function test_era() {
 		[[',,乙巳,正,二',CeL.era('乙巳正月二日',{parse_only:true}).join()], '農曆年月日'],
 		[[CeL.era('南梁敬帝太平1年12月').月干支, CeL.era('北齊文宣帝天保7年12月').月干支]],
 		[[CeL.era('西晉武帝泰始1年12月').月干支, CeL.era('吳末帝甘露1年12月').月干支], '西晉武帝泰始月建有誤'],
+		[["南齊明帝建武", CeL.era('建武二年',{parse_only:true,base:CeL.era('劉宋孝武帝大明八年',{date_only:true})})[1].toString()], '標注文本 大明八年...建武二年'],
 
 		[['412/3/29', CeL.era.中曆(412,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 412 年, 中曆 3/1 之 CE Date。'],
 		[['2016/3/11', CeL.era.中曆(2016,2,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 2016 年, 中曆 2/3 之 CE Date。'],

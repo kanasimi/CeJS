@@ -48,7 +48,7 @@ proxy
 
 if (typeof CeL === 'function') {
 	// 忽略沒有 Windows Component Object Model 的錯誤。
-	CeL.env.ignore_COM_error = true
+	CeL.env.ignore_COM_error = true;
 
 	CeL.run({
 		// module name

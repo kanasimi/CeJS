@@ -35,7 +35,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 
 ## Node.js usage
 
-### Node.js lazy installation 最新版本懶人配置法
+### Node.js lazy installation Node.js環境最新版本懶人配置法
 <code>[npm](https://www.npmjs.com/package/cejs)</code> 安裝的可能不是最新版本，這裡示範的是最新版本的安裝方法。
 
 不囉嗦，已經做過的步驟可以跳過：
