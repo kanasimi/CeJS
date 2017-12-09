@@ -617,10 +617,21 @@ function module_code(library_namespace) {
 				this.get_work(work_title, function(work_data) {
 					var work_status = set_work_status(work_data);
 					if (work_status) {
-						// assert: typeof work_status === 'object'
-						if (work_data.id)
+						// 把需要報告的狀態export到{Array}work_status。
+						// assert: {Array}work_status
+						if (work_data.id) {
 							work_status.id = work_data.id;
+							work_status.url = this.full_URL(this.work_URL,
+									work_data.id);
+						}
 						work_status.title = work_data.title || work_title;
+						var last_update = [];
+						if (work_data.last_update_chapter)
+							last_update.push(work_data.last_update_chapter);
+						if (work_data.last_update)
+							last_update.push(work_data.last_update);
+						work_status.last_update = last_update.join(', ');
+						// console.log(work_status);
 						all_work_status[work_status.title] = work_status;
 					}
 					get_next_work();
@@ -646,8 +657,8 @@ function module_code(library_namespace) {
 					// TODO: handle exception
 				}
 
-				var report_file = this.main_directory + this.log_directory_name
-						+ this.report_file,
+				var _this = this, report_file = this.main_directory
+						+ this.log_directory_name + this.report_file,
 				// 產生網頁形式的報告檔。
 				reports = [ '<html>', '<head>',
 				// http://mdn.beonex.com/en/Web_development/Historical_artifacts_to_avoid.html
@@ -659,26 +670,49 @@ function module_code(library_namespace) {
 						'<a href="' + this.base_URL + '">',
 						this.site_name || this.id, '</a>', '</h2>', '<table>',
 						'<tr><th>#</th><th>id</th>',
-						'<th>title</th><th>status</th></tr>' ];
+						'<th>title</th><th>status</th>',
+						'<th>last update</th></tr>' ];
 				library_namespace.info(this.id + ': '
 				//
 				+ work_status_titles.length + ' notes: ' + report_file);
 				work_status_titles.forEach(function(work_title, index) {
 					var work_status = all_work_status[work_title];
-					library_namespace.info(work_title
-							+ ': '
-							+ (Array.isArray(work_status) ? work_status
-									.join(', ') : work_status));
+					// assert: {Array}work_status
+					library_namespace.info(work_title + ': '
+							+ work_status.join(', '));
+					var work_status_report = work_status.map(function(status) {
+						switch (status) {
+						case 'not found':
+							status = '<b style="color:#f44;">' + status
+									+ '</b>';
+							break;
+
+						case 'limited':
+							status = '<b style="color:#bb0;">' + status
+									+ '</b>';
+							break;
+
+						case 'finished':
+							status = '<b style="color:#88f;">' + status
+									+ '</b>';
+							break;
+
+						default:
+							break;
+						}
+
+						return status;
+					});
 					reports.push('<tr><td>'
 							+ (index + 1)
 							+ '</td><td>'
 							+ (work_status.id || '')
 							+ '</td><td>'
-							+ work_status.title
-							+ '</td><td>'
-							+ (Array.isArray(work_status) ? work_status
-									.join('<br />') : work_status)
-							+ '</td></tr>');
+							+ (work_status.url ? '<a href="' + work_status.url
+									+ '">' + work_status.title + '</a>'
+									: work_status.title) + '</td><td>'
+							+ work_status_report.join('<br />') + '</td><td>'
+							+ work_status.last_update + '</td></tr>');
 				});
 				reports.push('</table>', '</body></html>');
 				try {
@@ -1189,6 +1223,7 @@ function module_code(library_namespace) {
 					process_status : _this.recheck,
 					words_so_far : true,
 					last_download : true,
+					book_chapter_count : true,
 					chapter_count : true
 				};
 				// recall old work_data
@@ -1260,14 +1295,36 @@ function module_code(library_namespace) {
 					// 已經改成產生報告檔。
 					+ 'finished.txt', work_data.status);
 				}
-				set_work_status(work_data, 'finished');
+				if (work_data.process_status) {
+					work_data.process_status = work_data.process_status
+							.unique();
+					var has_last_saved_date;
+					work_data.process_status = work_data.process_status
+					// 之前每次都會添加新的資訊...
+					.filter(function(status) {
+						if (!String(status).startsWith('last saved date: ')) {
+							return true;
+						}
+						if (has_last_saved_date)
+							return false;
+						has_last_saved_date = true;
+						return true;
+					});
+				}
+				if (!work_data.process_status
+						|| !work_data.process_status.includes('finished'))
+					set_work_status(work_data, 'finished');
 				// cf. work_data.latest_chapter 最新章節,
 				// work_data.latest_chapter_url
 				if (work_data.last_update) {
 					set_work_status(work_data, 'last updated date: '
 							+ work_data.last_update);
 				}
-				if (work_data.last_saved) {
+				if (work_data.last_saved
+				// 已完結的時間報告只記錄一次就夠了。
+				&& work_data.process_status.every(function(status) {
+					return !String(status).startsWith('last saved date: ');
+				})) {
 					set_work_status(
 							work_data,
 							'last saved date: '
