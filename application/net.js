@@ -164,20 +164,22 @@ URI, IRI, XRI
 */
 /**
  * Parses URI.
- *
+ * 
  * @example <code>
  * alert(parse_URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23#hhh').hostname);
  * </code>
- *
+ * 
  * @param {String}URI
  *            URI to parse
- *
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
+ * 
  * @return parsed object
- *
+ * 
  * @since 2010/4/13 23:53:14 from parseURI+parseURL
- *
+ * 
  * @_memberOf _module_
- *
+ * 
  * @see RFC 1738, RFC 2396, RFC 3986, Uniform Resource Identifier (URI): Generic
  *      Syntax, http://tools.ietf.org/html/rfc3987,
  *      http://flanders.co.nz/2009/11/08/a-good-url-regular-expression-repost/,
@@ -185,29 +187,33 @@ URI, IRI, XRI
  *      https://developer.mozilla.org/en/DOM/window.location, also see
  *      batURL.htm
  */
-function parse_URI(URI) {
-	var matched, tmp, href = URI, path;
-	if (!href
-			||
-		// 不能用 instanceof String!
-			typeof href !== 'string'
-			|| !(matched = href.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Z]:|[^\/#?&\s:]+)([^\s:]*)$/i)))
+function parse_URI(URI, options) {
+	if (!URI
+	// 不能用 instanceof String!
+	|| typeof URI !== 'string')
 		return;
-	library_namespace.debug('parse [' + URI + ']: ' + matched.join('<br />\n'), 2);
+	var href = URI, matched = href
+			.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Z]:|[^\/#?&\s:]+)([^\s:]*)$/i), tmp, path;
+	if (!matched)
+		return;
+
+	library_namespace.debug('parse [' + URI + ']: ' + matched.join('<br />\n'),
+			2);
 
 	URI = library_namespace.is_WWW() ? {
 		// protocol包含最後的':',search包含'?',hash包含'#'.
 		// file|telnet|ftp|https
-		protocol: location.protocol,
-		hostname: location.hostname,
-		port: location.port,
-		host: location.host,
+		protocol : location.protocol,
+		hostname : location.hostname,
+		port : location.port,
+		host : location.host,
 		// local file @ IE: C:\xx\xx\ff, others: /C:/xx/xx/ff
-		pathname: location.pathname
+		pathname : location.pathname
 	} : library_namespace.null_Object();
 	URI.URI = href;
 
-	if (tmp = matched[1])
+	tmp = matched[1] || options && options.protocol;
+	if (tmp)
 		URI.protocol = tmp;
 	URI._protocol = URI.protocol.slice(0, -1);
 	library_namespace.debug('protocol [' + URI._protocol + ']', 2);
@@ -215,10 +221,10 @@ function parse_URI(URI) {
 	/**
 	 * ** filename 可能歸至m[4]!<br />
 	 * 判斷準則:<br />
-	 * gsh.sdf.df#dhfjk	filename|hostname<br />
-	 * gsh.sdf.df/dhfjk	hostname<br />
-	 * gsh.sdf.df?dhfjk	filename<br />
-	 * gsh.sdf.df		filename<br />
+	 * gsh.sdf.df#dhfjk filename|hostname<br />
+	 * gsh.sdf.df/dhfjk hostname<br />
+	 * gsh.sdf.df?dhfjk filename<br />
+	 * gsh.sdf.df filename<br />
 	 */
 	href = matched[3];
 	path = matched[4];
@@ -242,8 +248,8 @@ function parse_URI(URI) {
 			if (matched[3])
 				URI.port = parseInt(matched[3], 10);
 			else if (tmp = {
-					http: 80,
-					ftp: 21
+				http : 80,
+				ftp : 21
 			}[URI._protocol])
 				URI.host += ':' + (URI.port = tmp);
 		} else
@@ -262,11 +268,14 @@ function parse_URI(URI) {
 		library_namespace.warn('encoding error: [' + path + ']');
 
 	library_namespace.debug('parse path: [' + path + ']', 2);
-	if (path && (matched = path.match(/^((.*\/)?([^\/#?]*))?(\?([^#]*))?(#(.*))?$/))) {
+	if (path
+			&& (matched = path
+					.match(/^((.*\/)?([^\/#?]*))?(\?([^#]*))?(#(.*))?$/))) {
 		// pathname={path}filename
 		library_namespace.debug('pathname: [' + matched + ']', 2);
 		// .path 會隨不同 OS 之 local file 表示法作變動!
-		URI.path = /^\/[A-Z]:/i.test(URI.pathname = matched[1]) ? matched[2].slice(1).replace(/\//g, '\\') : matched[2];
+		URI.path = /^\/[A-Z]:/i.test(URI.pathname = matched[1]) ? matched[2]
+				.slice(1).replace(/\//g, '\\') : matched[2];
 		URI.filename = matched[3];
 		URI.search = matched[4];
 		URI._search = parse_URI.parse_search(matched[5]);
@@ -1416,7 +1425,9 @@ function FindProxyForURL(url, host) {	//	url: 完整的URL字串, host: 在 URL�
 //setupCuteFTPSite[generateCode.dLK]='parse_URI';
 function setupCuteFTPSite(targetS, site) {
 	if (typeof targetS === 'string')
-		targetS = parse_URI(targetS, 'ftp:');
+		targetS = parse_URI(targetS, {
+			protocol : 'ftp:'
+		});
 	if (!targetS)
 		return;
 
@@ -1477,7 +1488,9 @@ function transferURL(from_URI, to_URI) {
 		// local to local?
 		return;
 	lF = parsePath(isD ? to_URI : from_URI);
-	CuteFTPSite = setupCuteFTPSite(rP = parse_URI(isD ? from_URI : to_URI, 'ftp:'));
+	CuteFTPSite = setupCuteFTPSite(rP = parse_URI(isD ? from_URI : to_URI, {
+		protocol : 'ftp:'
+	}));
 	if (!CuteFTPSite || !CuteFTPSite.IsConnected)
 		return;
 

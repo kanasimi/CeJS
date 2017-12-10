@@ -751,61 +751,93 @@ remove_all_child = _.replace_HTML;
 
 /**
  * set/get/remove attribute of a element<br />
- * in IE: setAttribute does not work when used with the style attribute (or with event handlers, for that matter).
- * @param _e	element
- * @param propertyO	attributes object (array if you just want to get)
+ * in IE: setAttribute does not work when used with the style attribute (or with
+ * event handlers, for that matter).
+ * 
+ * @param _e
+ *            element
+ * @param propertyO
+ *            attributes object (array if you just want to get)
  * @return
- * @requires	split_String_to_Object
- * @see
- * setAttribute,getAttribute,removeAttribute
- * http://www.quirksmode.org/blog/archives/2006/04/ie_7_and_javasc.html
- * @since	2006/12/10 21:25 分離 separate from XML_node()
- * @_memberOf	_module_
+ * @requires split_String_to_Object
+ * @see setAttribute,getAttribute,removeAttribute
+ *      http://www.quirksmode.org/blog/archives/2006/04/ie_7_and_javasc.html
+ * @since 2006/12/10 21:25 分離 separate from XML_node()
+ * @_memberOf _module_
  */
 function set_attribute(_e, propertyO, ns) {
-	if (!(_e = get_element(_e)) || !propertyO/* ||_e.nodeType===3/* TEXT_NODE */)
+	_e = get_element(_e);
+	if (!_e || !propertyO
+	// || _e.nodeType === 3 /* TEXT_NODE */
+	) {
 		return;
+	}
 
- var _l,_m,_g,
-	//	Namespaces:SVG,MathML,XHTML,XLink
- _N=new_node.ns;
- if (typeof propertyO === 'string')
-	 propertyO = /[=:]/.test(propertyO) ? split_String_to_Object(propertyO)
-			 : propertyO.split(',');
-	 if (Array.isArray(propertyO))
-		 _g = propertyO.length === 1 ? propertyO[0] : 1,
-				 propertyO = split_String_to_Object(propertyO.join(','));
+	var matched, _g,
+	// Namespaces: SVG,MathML,XHTML,XLink
+	_N = new_node.ns;
+	if (typeof propertyO === 'string') {
+		propertyO = /[=:]/.test(propertyO) ? split_String_to_Object(propertyO)
+				: propertyO.split(',');
+	}
+	if (Array.isArray(propertyO)) {
+		_g = propertyO.length === 1 ? propertyO[0] : 1;
+		propertyO = split_String_to_Object(propertyO.join(','));
+	}
 
-		 for (_l in propertyO) {
-			 if (_l === 'class' && !propertyO['className'])
-				 propertyO[_l = 'className'] = propertyO['class'];
-			 if (_g || (_l in propertyO) && propertyO[_l] != null)
-   if(_l=='className'||typeof propertyO[_l]=='function')if(_g)propertyO[_l]=_e[_l];else _e[_l]=propertyO[_l];//_l=='id'||
-	/*
-		XML 中id不能以setAttribute設定。
-		class不能以setAttribute設定@IE。
-		http://www.quirksmode.org/bugreports/archives/2005/03/setAttribute_does_not_work_in_IE_when_used_with_th.html
-		IE ignores the "class" setting, and Mozilla will have both a "class" and "className" attribute defined
-	*/
-   else if (_e.setAttributeNS
-		   && (_m = _l.match(/^(.+):([^:]+)$/))) {
-	   _m = _m[1];
-	   if (_m.indexOf('://') == -1 && _N[_m.toLowerCase()])
-		   _m = W3C_BASE + _N[_m.toLowerCase()];
-	   if (_g)
-		   propertyO[_l] = _e.getAttributeNS(_m, _l);
-	   else
-		   _e.setAttributeNS(_m, _l, propertyO[_l]);// try{_e.setAttributeNS(_m,_l,propertyO[_l]);}catch(e){alert('set_attribute:
-	   // Error!');}
-   } else if (_g)
-	   propertyO[_l] = _e.getAttribute(_l);
-   else
-	   //TODO: _e.setAttribute(), _e.style.setProperty()
-	   _e.setAttribute(_l, propertyO[_l]);// _e.setAttributeNS?_e.setAttributeNS(null,_l,propertyO[_l]):_e.setAttribute(_l,propertyO[_l]);
- }
+	for ( var _l in propertyO) {
+		if (_l === 'class' && !propertyO['className']) {
+			propertyO[_l = 'className'] = propertyO['class'];
+		}
+		if (_g || (_l in propertyO) && propertyO[_l] != null) {
+			/**
+			 * <code>
+			XML 中id不能以setAttribute設定。
+			class不能以setAttribute設定@IE。
+			http://www.quirksmode.org/bugreports/archives/2005/03/setAttribute_does_not_work_in_IE_when_used_with_th.html
+			IE ignores the "class" setting, and Mozilla will have both a "class" and "className" attribute defined
+			</code>
+			 */
+			if ( // _l == 'id' ||
+			_l == 'className' || typeof propertyO[_l] == 'function') {
+				if (_g) {
+					propertyO[_l] = _e[_l];
+				} else {
+					_e[_l] = propertyO[_l];
+				}
 
- return typeof _g == 'string' ? propertyO[_g] : propertyO;
+			} else if (_e.setAttributeNS && (matched = _l.match(/^(.+):([^:]+)$/))) {
+				matched = matched[1];
+				if (matched.indexOf('://') == -1 && _N[matched.toLowerCase()]) {
+					matched = W3C_BASE + _N[matched.toLowerCase()];
+				}
+				if (_g) {
+					propertyO[_l] = _e.getAttributeNS(matched, _l);
+				} else {
+					_e.setAttributeNS(matched, _l, propertyO[_l]);
+					if (false) {
+						try {
+							_e.setAttributeNS(matched, _l, propertyO[_l]);
+						} catch (e) {
+							alert('set_attribute: Error!');
+						}
+					}
+				}
+
+			} else if (_g) {
+				propertyO[_l] = _e.getAttribute(_l);
+			} else if (false && _e.setAttributeNS) {
+				// TODO: _e.setAttribute(), _e.style.setProperty()
+				_e.setAttributeNS(null, _l, propertyO[_l]);
+			} else {
+				_e.setAttribute(_l, propertyO[_l]);
+			}
+		}
+	}
+
+	return typeof _g == 'string' ? propertyO[_g] : propertyO;
 }
+
 _// JSDT:_module_
 .
 set_attribute = set_attribute;
@@ -1022,15 +1054,12 @@ fill_form = function fill_form(pair, config) {
 	},
 	//	模擬鍵盤輸入事件發生。
 	event_sequence = function(node, value) {
-		fire_event('onfocus')
-		('onclick')('oninput');
+		fire_event('onfocus') ('onclick')('oninput');
 
 		library_namespace.debug('Set [' + name + '] = (' + (typeof value) + ') [' + value + ']', 2, 'fill_form.event_sequence');
 		_.node_value(node, value);
 
-		fire_event('onpropertychange')
-		('onchange')
-		('onblur');
+		fire_event('onpropertychange') ('onchange') ('onblur');
 	};
 
 	if (library_namespace.is_Object(config)) {
@@ -3934,7 +3963,7 @@ function doAlertAccess(n){
  if(oBg)oBg.style.display='none';o.style.display='none';
  disableKM(0);
  window.onresize=window.Oonresize||null;
- if(doAlertOldScrollLocation)scrollTo(doAlertOldScrollLocation,0,1);
+ if(doAlertOldScrollLocation)scrollTo(doAlertOldScrollLocation);
  doAlertScroll(1);
 }
 //	icon div的捲動：置於右上角

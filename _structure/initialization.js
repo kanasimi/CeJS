@@ -69,40 +69,43 @@ if (typeof CeL === 'function' && !CeL.no_initialization) {
 				// alert('Get arguments ['+args.length+']\n'+args.join('\n'));
 				if (args.length) {
 					var i = 0, p, enc, f, backupDir = dBasePath('kanashimi\\www\\cgi-bin\\program\\log\\');
-					if (!fso.FolderExists(backupDir))
+					if (!fso.FolderExists(backupDir)) {
 						try {
 							fso.CreateFolder(backupDir);
 						} catch (e) {
 							backupDir = dBasePath('kanashimi\\www\\cgi-bin\\game\\log\\');
 						}
-						if (!fso.FolderExists(backupDir))
-							try {
-								fso.CreateFolder(backupDir);
-							} catch (e) {
-								if (2 === alert('無法建立備份資料夾[' + backupDir
-										+ ']！\n接下來的操作將不會備份！', 0, 0, 1 + 48))
-									WScript.Quit();
-								backupDir = '';
+					}
+					if (!fso.FolderExists(backupDir)) {
+						try {
+							fso.CreateFolder(backupDir);
+						} catch (e) {
+							if (2 === alert('無法建立備份資料夾[' + backupDir
+									+ ']！\n接下來的操作將不會備份！', 0, 0, 1 + 48))
+								WScript.Quit();
+							backupDir = '';
+						}
+					}
+					// addCode.report=true; // 是否加入報告
+					for (; i < args.length; i++) {
+						if ((f = parse_shortcut(args[i], 1))
+								.match(/\.(js|vbs|hta|[xs]?html?|txt|wsf|pac)$/i)
+								&& isFile(f)) {
+							p = alert(
+									'是否以預設編碼['
+									+ ((enc = autodetectEncode(f)) == simpleFileDformat ? '內定語系('
+											+ simpleFileDformat + ')'
+											: enc) + ']處理下面檔案？\n' + f,
+											0, 0, 3 + 32);
+							if (p === 2)
+								break;
+							else if (p === 6) {
+								if (backupDir)
+									fso.CopyFile(f, backupDir + getFN(f), true);
+								addCode(f);
 							}
-							// addCode.report=true; // 是否加入報告
-							for (; i < args.length; i++)
-								if ((f = parse_shortcut(args[i], 1))
-										.match(/\.(js|vbs|hta|[xs]?html?|txt|wsf|pac)$/i)
-										&& isFile(f)) {
-									p = alert(
-											'是否以預設編碼['
-											+ ((enc = autodetectEncode(f)) == simpleFileDformat ? '內定語系('
-													+ simpleFileDformat + ')'
-													: enc) + ']處理下面檔案？\n' + f,
-													0, 0, 3 + 32);
-									if (p === 2)
-										break;
-									else if (p === 6) {
-										if (backupDir)
-											fso.CopyFile(f, backupDir + getFN(f), true);
-										addCode(f);
-									}
-								}
+						}
+					}
 				} else if (1 === alert('We will generate a reduced ['
 						+ _.env.script_name + ']\n  to [' + _.env.script_name
 						+ '.reduced.js].\nBut it takes several time.', 0, 0,

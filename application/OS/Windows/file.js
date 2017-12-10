@@ -1208,7 +1208,7 @@ readData : function(len) {
 read : function(len) {
 	var charArray = new Array(len = this.testLen(len)), _i = 0;
 	this.readData(len);
-	for (; _i < len; _i++)
+	for (; _i < len; _i++) {
 		try {
 			charArray.push(String.fromCharCode(parseInt(this.bt
 					.substr(2 * _i, 2), 16)));
@@ -1216,20 +1216,22 @@ read : function(len) {
 		} catch (e) {
 			this.retErr(e);
 		}
-		return charArray.join('');
+	}
+	return charArray.join('');
 },
 readNum : function(len) {
 	len = this.testLen(len);
 	this.readData(len);
 	var val = 0, _i = len;
-	for (; _i > 0;)
+	for (; _i > 0;) {
 		try {
 			val = 0x100 * val
 			+ parseInt(this.bt.substr(2 * (--_i), 2), 16);
 		} catch (e) {
 			this.retErr(e);
 		}
-		return val;
+	}
+	return val;
 },
 readHEX : function(len) {
 	len = this.testLen(len);

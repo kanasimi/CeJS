@@ -3132,6 +3132,7 @@ if (typeof CeL === 'function')
 			// https://en.wikipedia.org/wiki/Logarithm#Power_series
 			function Integer_LN2(precision) {
 				return summation('LN2', function (LN2) {
+					// TODO: no clone
 					var index = 1, d = LN2.clone(), addend;
 					while (!(addend = (d = d.division(9)).clone().division(index += 2)).is_0())
 						LN2.add(addend);
@@ -3145,7 +3146,7 @@ if (typeof CeL === 'function')
 					for (var index = 1, d = LN10.clone(), addend;
 						!(addend = (d = d.division(81)).clone().division(index += 2)).is_0() ;)
 						LN10.add(addend);
-					return LN10.division(9).add(Integer_LN2(precision + 1, true).multiply(3));
+					return LN10.division(9).add(Integer_LN2(precision + 1).multiply(3));
 				}, precision, 2);
 			}
 

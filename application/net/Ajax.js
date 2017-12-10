@@ -38,8 +38,8 @@ function module_code(library_namespace) {
 			+ '.character.encode_URI_component', 1, library_namespace.Class
 			// module name
 			+ 'application.net.Ajax');
-			return (encode_URI_component = library_namespace.character.encode_URI_component)
-					(string, encoding);
+			encode_URI_component = library_namespace.character.encode_URI_component;
+			return encode_URI_component(string, encoding);
 		}
 		return encodeURIComponent(string);
 	};

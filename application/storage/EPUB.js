@@ -1531,7 +1531,7 @@ function module_code(library_namespace) {
 				// 寫入檔案。
 				library_namespace.write_file(this.path.text + item.href,
 						contents);
-			} else if (text) {
+			} else {
 				library_namespace.debug('僅設定 item data，未自動寫入 file ['
 						+ this.path.text + item.href + ']，您需要自己完成這動作。');
 			}

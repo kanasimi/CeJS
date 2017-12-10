@@ -259,7 +259,10 @@ function module_code(library_namespace) {
 		// 移動完之後這個值會被設定為空，以防被覆寫。
 		error_log_file_backup : 'error_files.'
 				+ (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.txt',
-		// 記錄報告。
+		// 這些值會被複製到記錄報告中。
+		last_update_status_keys : 'last_update_chapter,latest_chapter,latest_chapter_name,latest_chapter_url,last_update'
+				.split(','),
+		// 記錄報告檔案。
 		report_file : 'report.' + (new Date).format('%Y%2m%2dT%2H%2M%2S')
 				+ '.htm',
 		report_file_JSON : 'report.json',
@@ -499,8 +502,8 @@ function module_code(library_namespace) {
 			+ '.character.encode_URI_component', 1, library_namespace.Class
 			// module name
 			+ 'application.net.work_crawler');
-			return (encode_URI_component = library_namespace.character.encode_URI_component)
-					(string, encoding);
+			encode_URI_component = library_namespace.character.encode_URI_component;
+			return encode_URI_component(string, encoding);
 		}
 		return encodeURIComponent(string);
 	};
@@ -626,11 +629,12 @@ function module_code(library_namespace) {
 						}
 						work_status.title = work_data.title || work_title;
 						var last_update = [];
-						if (work_data.last_update_chapter)
-							last_update.push(work_data.last_update_chapter);
-						if (work_data.last_update)
-							last_update.push(work_data.last_update);
-						work_status.last_update = last_update.join(', ');
+						this.last_update_status_keys.forEach(function(key) {
+							if (work_data[key])
+								last_update.push(key + ': ' + work_data[key]);
+						});
+						work_status.last_update = last_update.unique().join(
+								', ');
 						// console.log(work_status);
 						all_work_status[work_status.title] = work_status;
 					}

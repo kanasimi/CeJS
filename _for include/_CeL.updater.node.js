@@ -24,7 +24,11 @@ var p7zip_path = [ '7z',
 '7za', 'unzip', '"C:\\Program Files\\7-Zip\\7z.exe"' ], user_name = 'kanasimi',
 /** {String}Repository name */
 repository = 'CeJS', branch = 'master',
-// const 下載之後將壓縮檔存成這個檔名。
+/** {String}更新工具相對於 CeJS 根目錄的路徑。e.g., "CeJS-master/_for include/" */
+update_script_directory = repository + '-' + branch + '/_for include/',
+/** {String}目標目錄位置。將會解壓縮成這個目錄底下的 "CeJS-master/"。 const */
+target_directory,
+/** {String}下載之後將壓縮檔存成這個檔名。 const */
 target_file = repository + '-' + branch + '.zip',
 //
 latest_version_file = target_file.replace(/[^.]+$/g, 'version');
@@ -131,6 +135,16 @@ function check_update() {
 
 // --------------------------------------------------------------------------------------------
 
+function copy_file(source_name, taregt_name) {
+	try {
+		node_fs.unlinkSync(source_name);
+	} catch (e) {
+		// TODO: handle exception
+	}
+	node_fs.renameSync(update_script_directory + source_name, taregt_name
+			|| source_name);
+}
+
 function update_via_7zip(latest_version) {
 	// Check 7z
 	if (!Array.isArray(p7zip_path)) {
@@ -154,8 +168,9 @@ function update_via_7zip(latest_version) {
 		p7zip_path = null;
 	}
 
-	// 目標目錄位置。將會解壓縮成這個目錄底下的 "CeJS-master/"
-	// process.chdir('D:\\');
+	if (target_directory) {
+		process.chdir(target_directory);
+	}
 
 	// --------------------------------------------------------------------------------------------
 
@@ -244,18 +259,6 @@ function update_via_7zip(latest_version) {
 				// 解壓縮完成之後，可以不必留著程式碼檔案。 TODO: backup
 				node_fs.unlinkSync(target_file);
 			} catch (e) {
-			}
-
-			// 更新工具相對於 CeJS 根目錄的路徑。
-			var update_script_directory = 'CeJS-master/_for include/';
-			function copy_file(source_name, taregt_name) {
-				try {
-					node_fs.unlinkSync(source_name);
-				} catch (e) {
-					// TODO: handle exception
-				}
-				node_fs.renameSync(update_script_directory + source_name,
-						taregt_name || source_name);
 			}
 
 			console.info('Update the tool itself...');
