@@ -773,22 +773,22 @@ _a='((|[^"\''+_f.fd+'\\n][^'+_f.fd+'\\n]*|"((""|[^"]|\\n)*)"|\'((\'\'|[^\']|\\n)
 */
 	//alert( 'now:\n' + new RegExp(_m,'g').source + '\n\nfull:\n' + /((|[^'",;\t\n$][^,;\t\n$]*|'((''|[^']|\n)*)'|"((""|[^"]|\n)*)")[,;\t\n$])/.source);
 	if (doCheck
-			&& !new RegExp('^(' + _m + ')+$').test(_t.slice(-1) == '\n' ? _t
+			&& !new RegExp('^(' + _m + ')+$').test(_t.slice(-1) === '\n' ? _t
 					: _t + '\n'))
 		throw new Error(1, "parse_CSV(): Can't parse data!\npattern: /^" + _m
 				+ "$/g");
 
-	for (_a = [], _i = 0, _m = (_t.slice(-1) == '\n' ? _t : _t + '\n')
+	for (_a = [], _i = 0, _m = (_t.slice(-1) === '\n' ? _t : _t + '\n')
 			.match(new RegExp(_m, 'g')); _i < _m.length; _i++) {
 		_a.push(_b[_t = _m[_i].charAt(0)] ? _m[_i].slice(1, -2).replace(_b[_t],
 				_t) : _m[_i].slice(0, -1));
 		//alert('['+_i+'] '+_m[_i]+'|\n'+_a.slice(-1));
-		if (_m[_i].slice(-1) == '\n')
+		if (_m[_i].slice(-1) === '\n')
 			_r.push(_a), _a = [];
 	}
 	//if(_a.length)_r.push(_a);
 
-	if (typeof has_title == 'undefined')
+	if (typeof has_title === 'undefined')
 		has_title = _f.has_title === null ? 0 : _f.has_title;
 	if (has_title) {
 		// ignored title array
@@ -870,8 +870,8 @@ function readCSVdata(FP,FD,text_qualifier,has_title,enc){
 */
  if(!text_qualifier){
   l=t.indexOf('\n');
-  if(l==-1)t.indexOf('\r');
-  l=(l==-1?t:t.slice(0,l));
+  if(l===-1)t.indexOf('\r');
+  l=(l===-1?t:t.slice(0,l));
   if(!l.replace(reg['"'],''))text_qualifier='"';
   else if(!l.replace(reg["'"],''))text_qualifier="'";
   else return;

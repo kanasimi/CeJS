@@ -326,10 +326,10 @@ show : function(_v) {
 	var _d = this.div;
 	if (this.svg)
 		if (_d) {// _s.parentNode
-			_d.style.display = typeof _v == 'undefined' ? _d.style.display === 'none' ? 'block'
+			_d.style.display = typeof _v === 'undefined' ? _d.style.display === 'none' ? 'block'
 					: 'none'
 						: _v ? 'block' : 'none'; // block怪怪的
-		} else if (_v || typeof _v == 'undefined')
+		} else if (_v || typeof _v === 'undefined')
 			this.div = XML_node('div', 0, [ document.body ],
 					this.svg);
 	return this;
@@ -564,7 +564,7 @@ addDefs : function(_n) {
 addUse : function(_i, _a) {
 	var _s = this.svg, _o = _.createNode('use', _a);
 	if (_o && _s && _i) {
-		if (typeof _i == 'object')
+		if (typeof _i === 'object')
 			_i = _.setRandomID(_i);
 		set_attribute(_o, {
 			'xlink:href' : '#' + _i

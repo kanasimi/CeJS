@@ -274,7 +274,7 @@ function update_via_7zip(latest_version) {
 				// TODO: handle exception
 			}
 
-			console.info('Done.');
+			console.info('Done.\n\n' + 'Installation completed successfully.');
 		}
 
 		// throw 'Some error occurred! Bad archive?';

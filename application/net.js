@@ -100,11 +100,11 @@ function gethost(host) {
 		WshShell.Run(c + 'ipconfig > ' + (cmd ? '""' + f + '"" "' : p + f), 0, true);	//	winipcfg
 		if (t = simpleRead(f = p + f)) {
 			// TODO: use t.between()
-			if (i = t.indexOf('PPP adapter'), i != NOT_FOUND)
+			if ((i = t.indexOf('PPP adapter')) !== NOT_FOUND)
 				t = t.slice(i);
-			else if (i = t.indexOf('Ethernet adapter'), i != NOT_FOUND)
+			else if ((i = t.indexOf('Ethernet adapter')) !== NOT_FOUND)
 				t = t.slice(i);
-			if (i = t.indexOf('IP Address'), i != NOT_FOUND)
+			if ((i = t.indexOf('IP Address')) !== NOT_FOUND)
 				t = t.slice(i);
 			if (t.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/))
 				IP = RegExp.$1;

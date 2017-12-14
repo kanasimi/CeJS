@@ -103,7 +103,7 @@ function module_code(library_namespace) {
 			// 'application/xml'
 			'text/xml');
 			if (!dom.documentElement
-					|| dom.documentElement.tagName == 'parsererror') {
+					|| dom.documentElement.tagName === 'parsererror') {
 				throw new Error(
 						dom.documentElement.firstChild.data
 								+ '\n'

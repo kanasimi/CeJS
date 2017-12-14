@@ -1417,7 +1417,7 @@ function module_code(library_namespace) {
 							library_namespace
 									.warn('既然設定了 .recheck，則把 .reget_chapter 設定為 ['
 											+ _this.reget_chapter
-											+ '] 將無作用！將自動把 .reget_chapter 轉為 true，明確指定 .reget_chapter 以重新取得章節內容。。');
+											+ '] 將無作用！將自動把 .reget_chapter 轉為 true，明確指定 reget_chapter 以重新取得章節內容。。');
 						}
 						_this.reget_chapter = true;
 					}
@@ -2106,13 +2106,13 @@ function module_code(library_namespace) {
 				// console.log('error count: ' + image_data.error_count);
 				if (!_this.skip_error) {
 					library_namespace
-							.info('若錯誤持續發生，您可以設定 .skip_error=true 來忽略圖像錯誤。');
+							.info('若錯誤持續發生，您可以設定 skip_error=true 來忽略圖像錯誤。');
 				}
 				if (contents && contents.length < _this.MIN_LENGTH
 				// 檔案有驗證過，只是太小時，應該不是 false。
 				&& verified_image !== false) {
 					library_namespace.warn('或許圖像是完整的，只是過小而未達標，例如幾乎為空白之圖像。'
-							+ '您可先設定 .skip_error=true 來忽略圖像錯誤，'
+							+ '您可先設定 skip_error=true 來忽略圖像錯誤，'
 							+ '待取得檔案後，自行更改檔名，去掉錯誤檔名後綴'
 							+ JSON.stringify(_this.EOI_error_postfix)
 							+ '以跳過此錯誤。');

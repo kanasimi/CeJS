@@ -267,10 +267,10 @@ function addUser(name,pw,group,computer){
   o={};
   //	http://msdn2.microsoft.com/en-us/library/aa746343.aspx
   //	對所有的oIADs，通常有Name,Description
-  for(var i,j,a,b,p='Name,AccountDisabled,Description,FullName,HomeDirectory,IsAccountLocked,LastLogin,LoginHours,LoginScript,MaxStorage,PasswordExpirationDate,PasswordMinimumLength,PasswordRequired,Profile'.split(',');!oIADs.atEnd();oIADs.moveNext())if(typeof oIADs.item().AccountDisabled=='boolean'){
+  for(var i,j,a,b,p='Name,AccountDisabled,Description,FullName,HomeDirectory,IsAccountLocked,LastLogin,LoginHours,LoginScript,MaxStorage,PasswordExpirationDate,PasswordMinimumLength,PasswordRequired,Profile'.split(',');!oIADs.atEnd();oIADs.moveNext())if(typeof oIADs.item().AccountDisabled==='boolean'){
    for(i=oIADs.item(),j=0,a={};j<p.length;j++)if(b=p[j])try{
     a[b]=i[b];
-    if(typeof a[b]=='date')a[b]=new Date(a[b]);
+    if(typeof a[b]==='date')a[b]=new Date(a[b]);
    }catch(e){
     //alert('addUser():\n['+i.name+'] does not has:\n'+b);
     //	刪掉沒有的屬性。但僅少數不具有，所以不能全刪。XP中沒有(?):,AccountExpirationDate,BadLoginAddress,BadLoginCount,Department,Division,EmailAddress,EmployeeID,FaxNumber,FirstName,GraceLoginsAllowed,GraceLoginsRemaining,HomePage,Languages,LastFailedLogin,LastLogoff,LastName,LoginWorkstations,Manager,MaxLogins,NamePrefix,NameSuffix,OfficeLocations,OtherName,PasswordLastChanged,Picture,PostalAddresses,PostalCodes,RequireUniquePassword,SeeAlso,TelephoneHome,TelephoneMobile,TelephoneNumber,TelephonePager,Title
@@ -309,7 +309,7 @@ if(0){
 var WinEnvironment,SpecialFolder,Network,NetDrive,NetPrinter;
 //getEnvironment[generateCode.dLK]='WinEnvironment,SpecialFolder,Network,NetDrive,NetPrinter,*getEnvironment();';
 function getEnvironment(){
- if(typeof WshShell!='object'||typeof SpecialFolder=='object')return;
+ if(typeof WshShell!=='object'||typeof SpecialFolder==='object')return;
 
  WinEnvironment={},Network={},NetDrive={},NetPrinter={};
  var i,j,k,o=new Enumerator(WshShell.Environment("Process"));/*	Win9x、NT（Administratorもしくはほかのユーザー）の区別なく、すべての場合でエラーが発生しないようにするには、strTypeに"PROCESS"を指定するとよいでしょう。
@@ -468,7 +468,7 @@ var DoNothing = DoEvents;
 function Sleep(_sec) {
 	if (isNaN(_sec) || _sec < 0)
 		_sec = 0;
-	if (typeof WScript == 'object')
+	if (typeof WScript === 'object')
 		try {
 			// Win98的JScript沒有WScript.Sleep
 			WScript.Sleep(_sec * 1e3);
@@ -500,7 +500,7 @@ function Sleep(_sec) {
 var SendKeysU;
 //SendKeys[generateCode.dLK]='Sleep';
 function SendKeys(keys,appTitle,timeOut,timeInterval){
- if(typeof WshShell!='object'||typeof WshShell!='object'&&typeof(WshShell=new_COM("WScript.Shell"))!='object')return 1;
+ if(typeof WshShell!=='object'||typeof WshShell!=='object'&&typeof(WshShell=new_COM("WScript.Shell"))!=='object')return 1;
  if(isNaN(timeInterval)||timeInterval<1)timeInterval=100;	//	時間間隔
  timeOut=timeOut?timeOut<0?-1:Math.floor(timeOut/timeInterval)+1:0;
  if(appTitle)

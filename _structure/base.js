@@ -992,13 +992,13 @@ function (global) {
 		// CeL.platform(name, version, exactly);
 		tmp = platform.browser;
 		if (tmp && tmp.toLowerCase() === key
-				&& (!version || (exactly ? platform.version == version
+				&& (!version || (exactly ? platform.version === version
 						: platform.version >= version)))
 			return true;
 	
 		tmp = platform.engine;
 		if (tmp && tmp.toLowerCase() === key
-				&& (!version || (exactly ? platform.engine_version == version
+				&& (!version || (exactly ? platform.engine_version === version
 						: platform.engine_version >= version)))
 			return true;
 	
@@ -1074,7 +1074,7 @@ function (global) {
 	script_host = !is_WWW && typeof WScript === 'object';
 
 	// for JScript: 在 IE8, IE9 中，get_object_type(WScript) 為 '[object Object]' !!
-	if (script_host = script_host && (!_.is_Object(WScript) || String(WScript) == 'Windows Script Host') && WScript.FullName) {
+	if (script_host = script_host && (!_.is_Object(WScript) || String(WScript) === 'Windows Script Host') && WScript.FullName) {
 		_// JSDT:_module_
 		.
 		/**
@@ -1183,7 +1183,7 @@ function (global) {
 			if (script_host) {
 				n = WScript.ScriptName;
 				i = n.lastIndexOf('.');
-				return i == -1 ? n : n.slice(0, i);
+				return i === -1 ? n : n.slice(0, i);
 			}
 
 			if (is_WWW) {
@@ -1406,7 +1406,11 @@ OS='UNIX'; // unknown
 				// 假如未設定則由 path 判斷。
 				|| (_.get_script_full_name().indexOf('\\') !== -1 ? 'Windows' : 'UNIX');
 
-		var is_UNIX = env.OS === 'UNIX' || env.OS.toLowerCase() === 'linux';
+		var is_UNIX = env.OS.toLowerCase() in {
+			linux : true,
+			freebsd : true,
+			unix : true
+		};
 
 		/**
 		 * 文件預設 line separator / NewLine / line delimiter。<br />
@@ -1775,7 +1779,7 @@ OS='UNIX'; // unknown
 			}
 		};
 		// TODO
-		if (typeof RegExp != 'object')
+		if (typeof RegExp !== 'object')
 			global.RegExp = function () { };
 	}
 

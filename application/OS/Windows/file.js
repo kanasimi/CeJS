@@ -243,7 +243,7 @@ move_file = function move_file(from, to, base_path, flag, filter) {
 
 	if ((base_path = '' + base_path).slice(
 			// -1, or try: base_path.length-path_separator.length
-			-1) != path_separator)
+			-1) !== path_separator)
 		base_path += path_separator;
 
 	/*
@@ -283,7 +283,7 @@ move_file = function move_file(from, to, base_path, flag, filter) {
 				&& from.test(i.Name)) {
 			report.list.push(i.Name);
 
-			if (typeof filter == 'function' && !filter(i.Name))
+			if (typeof filter === 'function' && !filter(i.Name))
 				continue;
 			t = func === 'copy' || func === 'move' ? i.Name.replace(from,
 					typeof to === 'object' ? to.source : to) : '';
@@ -489,7 +489,7 @@ _// JSDT:_module_
 get_file_details = function(fileObj, parentDirObj) {
 	var i, n, r;
 	// WinShell=new ActiveXObject("Shell.Application");
-	if (typeof WinShell == 'undefined' || !fileObj)
+	if (typeof WinShell === 'undefined' || !fileObj)
 		return;
 
 	// deal with fileObj & parentDirObj
@@ -498,7 +498,7 @@ get_file_details = function(fileObj, parentDirObj) {
 	// else n='';
 	if (!parentDirObj) {
 		// fileObj is path
-		if (typeof fileObj != 'string')
+		if (typeof fileObj !== 'string')
 			return;
 		if (i = fileObj.lastIndexOf('/') + 1)
 			parentDirObj = fileObj.slice(0, i - 1), fileObj = fileObj
@@ -506,7 +506,7 @@ get_file_details = function(fileObj, parentDirObj) {
 		else
 			return;
 	}
-	if (typeof parentDirObj == 'string')
+	if (typeof parentDirObj === 'string')
 		parentDirObj = WinShell.NameSpace(parentDirObj);
 	if (typeof fileObj == 'string' && fileObj)
 		fileObj = parentDirObj.ParseName(fileObj);
@@ -515,7 +515,7 @@ get_file_details = function(fileObj, parentDirObj) {
 		return [ parentDirObj, fileObj ];
 
 	// get item name
-	if (typeof get_file_details_items != 'object') {
+	if (typeof get_file_details_items !== 'object') {
 		get_file_details_items = [];
 		for (i = 0, j; i < 99; i++)
 			// scan cols
@@ -646,9 +646,9 @@ change_attributes = function(F, A) {
 
 	if (typeof A === 'undefined')
 		A = a;
-	else if (A === '' || A == 'Archive')
+	else if (A === '' || A === 'Archive')
 		A = 32;
-	else if (A == 'Normal')
+	else if (A === 'Normal')
 		A = 0;
 	else if (isNaN(A))
 		if (A.charAt(0) === 'x' || A.charAt(0) === '-')
@@ -656,12 +656,12 @@ change_attributes = function(F, A) {
 				A = a + A;
 			else
 				A = a;
-		else if (A = _.FSO_attributes[A], A && a % (A << 2) == 0)
+		else if (A = _.FSO_attributes[A], A && a % (A << 2) === 0)
 			A = a + A;
 		else
 			A = a;
 	else if (_.FSO_attributes_reverse[A])
-		if (a % (A << 2) == 0)
+		if (a % (A << 2) === 0)
 			A = a + A;
 		else
 			A = a;
@@ -671,14 +671,14 @@ change_attributes = function(F, A) {
 		else
 			A = a;
 
-	if (a != A)
+	if (a !== A)
 		try {
 			F.Attributes = A;
 		} catch (e) {
 			//popErr(e);
 			library_namespace.error(e);
 			//	70：防寫（沒有使用權限）
-			return 70 == (e.number & 0xFFFF) ? -8 : -9;
+			return 70 === (e.number & 0xFFFF) ? -8 : -9;
 		}
 	return F.Attributes;
 };
@@ -713,16 +713,16 @@ openDataTest = function(FN, NOTexist, IO_mode) {
 			break;
 		} catch (e) {
 			// 對執行時檔案已經開啟之處理
-			//if(typeof e=='object'&&e.number&&(e.number&0xFFFF)==70)
-			if ((e.number & 0xFFFF) != 70) {
+			//if(typeof e==='object'&&e.number&&(e.number&0xFFFF)===70)
+			if ((e.number & 0xFFFF) !== 70) {
 				return pErr(e, 0,
 						'開啟資料檔 [<green>' + FN + '<\/>] 時發生錯誤！'),
-						6 == alert(
+						6 === alert(
 								'開啟資料檔 [' + FN + ']時發生不明錯誤，\n	是否中止執行？',
 								0, ScriptName + ' 測試是否已開啟資料檔：發生不明錯誤！',
 								4 + 48) ? 1 : 0;
 			}
-			if (2 == WshShell.Popup(
+			if (2 === WshShell.Popup(
 					'★資料檔：\n\	' + FN + '\n	無法寫入！\n\n可能原因與解決方法：\n	①資料檔已被開啟。執行程式前請勿以其他程式開啟資料檔！\n	②資料檔被設成唯讀，請取消唯讀屬性。',
 					0, ScriptName + '：資料檔開啟發生錯誤！', 5 + 48))
 				return 2;
@@ -789,7 +789,7 @@ open_template = function(file_path, format, IO_mode) {
 function openOut(file_path,IO_mode,format){
  var OUT,OUTs,_f=openOut.f;
  if(!IO_mode)IO_mode=_.IO_mode.ForWriting;
- if(!format)format=_f=='string'&&_f?_f:_.open_format.TristateUseDefault;
+ if(!format)format=_f==='string'&&_f?_f:_.open_format.TristateUseDefault;
  try{
   OUT=FSO.GetFile(file_path);
  }
@@ -832,11 +832,11 @@ _.create_shortcut = create_shortcut;
 var p;
 //parse_shortcut[generateCode.dLK]='initialization_WScript_Objects';//,parseINI
 function parse_shortcut(path,rtPath){
- if(typeof path!='string')path='';
+ if(typeof path!=='string')path='';
  else if(/\.(lnk|url)$/i.test(path)){
   var sc=WshShell.CreateShortcut(path),p=sc.TargetPath,_i;
   //	檔名有可能是不被容許的字元（不一定總是有'?'），這時只有.url以文字儲存還讀得到。
-  if(/*(''+sc).indexOf('?')!=-1*/!p&&/\.url$/i.test(path)&&typeof parseINI=='function'){
+  if(/*(''+sc).indexOf('?')!=-1*/!p&&/\.url$/i.test(path)&&typeof parseINI==='function'){
    p=parseINI(path,0,1);
    sc={_emu:p};
    sc.TargetPath=(p=p.InternetShortcut).URL;
@@ -983,20 +983,20 @@ is_folder = is_folder;
  * @returns
  */
 function get_folder(folder_path, mode) {
-	if (typeof folder_path == 'object' && typeof folder_path.Path == 'string')
-		if (typeof folder_path.IsRootFolder != 'undefined')
+	if (typeof folder_path === 'object' && typeof folder_path.Path === 'string')
+		if (typeof folder_path.IsRootFolder !== 'undefined')
 			return folder_path.Path;
 		else
 			folder_path = folder_path.Path;
-	if (typeof folder_path != 'string')
+	if (typeof folder_path !== 'string')
 		return '';
 	//else if(/^[a-z]$/i.test(folder_path))folder_path+=':\\';
 
 	// if(folder_path.slice(-1)!='\\')folder_path+='\\';
 	var i = folder_path.lastIndexOf('\\');
-	if (i == -1)
+	if (i === -1)
 		i = folder_path.lastIndexOf('/');
-	return i == -1 ? folder_path : mode ? folder_path.substr(i + 1) : folder_path.slice(0, i + 1);
+	return i === -1 ? folder_path : mode ? folder_path.substr(i + 1) : folder_path.slice(0, i + 1);
 };
 
 
@@ -1438,10 +1438,10 @@ function open_file(file_path, format, IO_mode) {
 			}
 		}
 
-		if (IO_mode == _.IO_mode.ForAppending && !FSO.FileExists(file_path))
+		if (IO_mode === _.IO_mode.ForAppending && !FSO.FileExists(file_path))
 			// 無此檔時改 writing。
 			IO_mode = _.IO_mode.ForWriting;
-		if (false && IO_mode == _.IO_mode.ForWriting)
+		if (false && IO_mode === _.IO_mode.ForWriting)
 			// truncate file
 			file_stream.SetEOS();
 
@@ -1461,7 +1461,7 @@ function open_file(file_path, format, IO_mode) {
 				return e;
 			}
 
-		if (IO_mode == _.IO_mode.ForAppending)
+		if (IO_mode === _.IO_mode.ForAppending)
 			// 因為 appending，將指標設至檔尾。
 			file_stream.Position = file_stream.Size;
 		// else: assert: file_stream.Position === 0
@@ -1472,16 +1472,16 @@ function open_file(file_path, format, IO_mode) {
 
 		// 使用某些防毒軟體(如諾頓 Norton)時，.OpenTextFile() 可能會被攔截，因而延宕。
 		try {
-			if (IO_mode == _.IO_mode.ForAppending && !FSO.FileExists(file_path))
+			if (IO_mode === _.IO_mode.ForAppending && !FSO.FileExists(file_path))
 				// 無此檔時改 writing.
 				IO_mode = _.IO_mode.ForWriting;
 
 			file_stream = FSO.OpenTextFile(file_path, IO_mode
 					|| _.IO_mode.ForReading,
 			// writing 則自動 create.
-			IO_mode == _.IO_mode.ForWriting,
-					format == _.open_format.TristateTrue
-							|| format == _.open_format.TristateFalse ? format
+			IO_mode === _.IO_mode.ForWriting,
+					format === _.open_format.TristateTrue
+							|| format === _.open_format.TristateFalse ? format
 							: _.open_format.TristateUseDefault);
 		} catch (e) {
 			library_namespace.error(e);
@@ -1710,7 +1710,7 @@ translated=turnBinStr();	//	delete temp file
 */
 turnBinStr.temp_file = 'turnBinStr.tmp'; // temp file name
 function turnBinStr(t, _enc) {
-	if (typeof t != 'undefined') {
+	if (typeof t !== 'undefined') {
 		if (!turnBinStr.tmpF)
 			turnBinStr.tmpF = library_namespace.get_file_path(turnBinStr.temp_file, 1);
 
@@ -1807,7 +1807,7 @@ iconv = function(text, toCode, encodeFunction) {
 			ADO_Stream.Position = 0;
 			ADO_Stream.WriteText(charToSet);
 			ADO_Stream.Position = 0;
-			t += charToSet == ADO_Stream.ReadText(AdoEnums.adReadAll) ? charToSet
+			t += charToSet === ADO_Stream.ReadText(AdoEnums.adReadAll) ? charToSet
 					: encodeFunction(charToSet);
 		} catch (e) {
 			t += encodeFunction(charToSet);
@@ -1986,7 +1986,7 @@ function traverse_file_system(FS_function_array, path, filter, flag) {
 					: typeof path.IsRootFolder !== 'undefined' ? _f.folder
 							: typeof path.Path !== 'undefined' ? _f.file
 									: _f.NULL;
-			if (_f.NULL != -1)
+			if (_f.NULL !== -1)
 				objBuf.push(path), typeBuf.push(item);
 		}
 	else {
@@ -2018,7 +2018,7 @@ function traverse_file_system(FS_function_array, path, filter, flag) {
 			} catch (e) {
 			}
 	}
-	if (flag == _f.get_object)
+	if (flag === _f.get_object)
 		return objBuf[0] ? [ objBuf[0], typeBuf[0] ] : 0;
 
 	// FS_function_array.length=_f.func_length;

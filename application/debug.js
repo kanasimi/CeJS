@@ -87,12 +87,12 @@ function popErr(e,t,f){	//	error object, title, additional text(etc. function na
  //alert((T=='object')+','+(e.constructor)+','+(Error)+','+(e instanceof Error))
  //	這裡e instanceof Error若是T=='object'&&e.constructor==Error有時不能達到效果！
  //	use: for(i in e)
- T=e instanceof Error?'Error '+(e.number&0xFFFF)+(e.name?' ['+e.name+']':'')+' (facility code '+(e.number>>16&0x1FFF)+'):\n'+e.description+(!e.message||e.message==e.description?'':'\n\n'+e.message):!e||T=='string'?e:'('+T+')'+e;
+ T=e instanceof Error?'Error '+(e.number&0xFFFF)+(e.name?' ['+e.name+']':'')+' (facility code '+(e.number>>16&0x1FFF)+'):\n'+e.description+(!e.message||e.message===e.description?'':'\n\n'+e.message):!e||T==='string'?e:'('+T+')'+e;
  f=f?(''+f).replace(/\0/g,'\\0')+'\n\n'+T:T;
  //	.caller只在執行期間有效。_function_self_.caller可用 arguments.callee.caller 代替，卻不能用arguments.caller
  //	arguments.callee.caller 被取消了。	http://www.opera.com/docs/specs/js/ecma/	http://bytes.com/forum/thread761008.html	http://www.javaeye.com/post/602661	http://groups.google.com/group/comp.lang.javascript/browse_thread/thread/cd3d6d6abcdd048b
- if(typeof WshShell=='object')
-  WshShell.Popup(f,0,t||'Error '+(arguments.callee.caller==null?'from the top level':'on '+(typeof parse_Function=='function'?parse_Function(arguments.callee.caller).funcName:'function'))+' of '+ScriptName,16);
+ if(typeof WshShell==='object')
+  WshShell.Popup(f,0,t||'Error '+(arguments.callee.caller===null?'from the top level':'on '+(typeof parse_Function=='function'?parse_Function(arguments.callee.caller).funcName:'function'))+' of '+ScriptName,16);
  else alert(f);
  return T;
 }

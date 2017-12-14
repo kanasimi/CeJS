@@ -821,7 +821,7 @@ function module_code(library_namespace) {
 	// method,sendDoc,asyncFlag,userName,password
 	function deprecated_get_URL(f) {
 		var _f = arguments.callee;
-		if (typeof _f.XMLHttp == 'object') {
+		if (typeof _f.XMLHttp === 'object') {
 			// try{_f.XMLHttp.abort();}catch(e){}
 			// 此時可能衝突或lose?!
 			_f.XMLHttp = null;
@@ -844,21 +844,21 @@ function module_code(library_namespace) {
 			return;
 
 		// try{_f.XMLHttp.overrideMimeType('text/xml');}catch(e){}
-		if (typeof f.async != 'boolean')
+		if (typeof f.async !== 'boolean')
 			// 設定f.async
 			f.async = f.fn ? true : false;
 		else if (!f.async)
 			f.fn = null;
 		else if (!f.fn)
-			if (typeof _f.HandleStateChange != 'function'
-					|| typeof _f.HandleContent != 'function')
+			if (typeof _f.HandleStateChange !== 'function'
+					|| typeof _f.HandleContent !== 'function')
 				// 沒有能處理的function
 				// throw
 				return;
 			else
 				// =null;
 				f.fn = _f.HandleContent;
-		if (/* typeof _f.multi_request!='undefined'&& */_f.multi_request) {
+		if (/* typeof _f.multi_request!=='undefined'&& */_f.multi_request) {
 			if (!_f.q)
 				// queue
 				_f.i = {}, _f.q = [];
@@ -870,18 +870,18 @@ function module_code(library_namespace) {
 				func : f.fn,
 				start : _f.startTime = new Date
 			});
-		} else if (_f.q && typeof _f.clean == 'function')
+		} else if (_f.q && typeof _f.clean === 'function')
 			_f.clean();
 
 		// for Gecko Error: uncaught exception: Permission denied to call method
 		// XMLHttpRequest.open
-		if (f.URL.indexOf('://') != -1 && typeof netscape == 'object')
+		if (f.URL.indexOf('://') !== -1 && typeof netscape === 'object')
 			if (_f.asked > 2) {
 				_f.clean(f.URL);
 				return;
 			} else
 				try {
-					if (typeof _f.asked == 'undefined') {
+					if (typeof _f.asked === 'undefined') {
 						_f.asked = 0;
 						alert('我們需要一點權限來使用 XMLHttpRequest.open。\n* 請勾選記住這項設定的方格。');
 					}
@@ -910,7 +910,7 @@ function module_code(library_namespace) {
 			if (false)
 				_f.XMLHttp.setRequestHeader("If-Modified-Since",
 						"Thu, 01 Jan 1970 00:00:00 GMT");
-			if (f.method == 'POST'
+			if (f.method === 'POST'
 			// &&_f.XMLHttp.setRequestHeader
 			) {
 				// use .getAttribute('method') to get 長度不一定如此
@@ -946,7 +946,7 @@ function module_code(library_namespace) {
 			 */
 			if (f.async) {
 				_f.doing = (_f.doing || 0) + 1;
-				_f.XMLHttp.onreadystatechange = typeof f.fn == 'function'
+				_f.XMLHttp.onreadystatechange = typeof f.fn === 'function'
 				//
 				? f.fn : function(e) {
 					_f.HandleStateChange(e, f.URL, f.fn);
@@ -973,9 +973,9 @@ function module_code(library_namespace) {
 				return _f.XMLHttp.responseText;
 			}
 		} catch (e) {
-			if (typeof f.fn == 'function')
+			if (typeof f.fn === 'function')
 				f.fn(e);
-			else if (typeof window == 'object')
+			else if (typeof window === 'object')
 				window.status = e.message;
 			return e;
 		}
@@ -999,28 +999,28 @@ function module_code(library_namespace) {
 			_oXMLH = deprecated_get_URL.XMLHttp;
 		if (Array.isArray(handle_function))
 			_t = handle_function[1], handle_function = handle_function[0];
-		if (!handle_function || typeof handle_function != 'function') {
+		if (!handle_function || typeof handle_function !== 'function') {
 			deprecated_get_URL.doing--;
 			deprecated_get_URL.clean(URL);
 			return;
 		}
 		// http://big5.chinaz.com:88/book.chinaz.com/others/web/web/xml/index1/21.htm
 		if (!e)
-			if (typeof _oXMLH == 'object' && _oXMLH) {
+			if (typeof _oXMLH === 'object' && _oXMLH) {
 				if (_oXMLH.parseError
-						&& _oXMLH/* .responseXML */.parseError.errorCode != 0)
+						&& _oXMLH/* .responseXML */.parseError.errorCode !== 0)
 					e = _oXMLH.parseError, e = new Error(e.errorCode, e.reason);
-				else if (_oXMLH.readyState == 4) {
+				else if (_oXMLH.readyState === 4) {
 					// only if XMLHttp shows "loaded"
 
 					// condition is OK?
 					isOKc = _oXMLH.status;
 					isOKc = isOKc >= 200
 							&& isOKc < 300
-							|| isOKc == 304
+							|| isOKc === 304
 							|| !isOKc
-							&& (location.protocol == "file:" || location.protocol == "chrome:");
-					if (handle_function == deprecated_get_URL.HandleContent)
+							&& (location.protocol === "file:" || location.protocol === "chrome:");
+					if (handle_function === deprecated_get_URL.HandleContent)
 						// handle_function.apply()
 						handle_function(0, isOKc, _oXMLH, URL);
 					else {
@@ -1028,11 +1028,11 @@ function module_code(library_namespace) {
 						handle_function(isOKc ? _t ? _oXMLH.responseXML
 								// JKL.ParseXML: Safari and Konqueror cannot
 								// understand the encoding of text files.
-								: typeof window == 'object'
+								: typeof window === 'object'
 										&& window.navigator.appVersion
-												.indexOf("KHTML") != -1
+												.indexOf("KHTML") !== -1
 										&& !(e = escape(_oXMLH.responseText))
-												.indexOf("%u") != -1 ? e
+												.indexOf("%u") !== -1 ? e
 										: _oXMLH.responseText : 0,
 						//
 						isOKc ? _oXMLH.getAllResponseHeaders() : 0, _oXMLH, URL);
@@ -1074,10 +1074,10 @@ function module_code(library_namespace) {
 			// test時，可用deprecated_get_URL.XMLHttp.open("HEAD","_URL_",true);，deprecated_get_URL(url,handle_function,'HEAD',true)。
 			if (content instanceof Error)
 				alert('Error occured!\n'
-						+ (typeof e == 'object' && e.number ? e.number + ':'
+						+ (typeof e === 'object' && e.number ? e.number + ':'
 								+ e.message : e || ''));
-			else if (typeof _oXMLHttp == 'object' && _oXMLHttp)
-				alert((_oXMLHttp.status == 404 ? "URL doesn't exist!"
+			else if (typeof _oXMLHttp === 'object' && _oXMLHttp)
+				alert((_oXMLHttp.status === 404 ? "URL doesn't exist!"
 						: 'Error occured!')
 						+ '\n\nStatus: '
 						+ _oXMLHttp.status
@@ -1102,7 +1102,7 @@ function module_code(library_namespace) {
 				// =null
 				= 0;
 			} else if (!isNaN(i)
-					|| !isNaN(i = deprecated_get_URL.i[typeof i == 'object' ? i.uri
+					|| !isNaN(i = deprecated_get_URL.i[typeof i === 'object' ? i.uri
 							: i])) {
 				try {
 					deprecated_get_URL.q[i].XMLHttp.abort();

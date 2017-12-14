@@ -93,7 +93,7 @@ if (typeof CeL === 'function' && !CeL.no_initialization) {
 								&& isFile(f)) {
 							p = alert(
 									'是否以預設編碼['
-									+ ((enc = autodetectEncode(f)) == simpleFileDformat ? '內定語系('
+									+ ((enc = autodetectEncode(f)) === simpleFileDformat ? '內定語系('
 											+ simpleFileDformat + ')'
 											: enc) + ']處理下面檔案？\n' + f,
 											0, 0, 3 + 32);

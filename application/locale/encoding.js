@@ -891,7 +891,7 @@ var guess_encodingSP = [];
  * @deprecated
  */
 function guess_String_language(str) {
- if(typeof str!='string'||!(str=str.replace(/\s+/g,'')))return str;
+ if(typeof str!=='string'||!(str=str.replace(/\s+/g,'')))return str;
  var len=str.length,i=0,c,a,kana=0,jianhuazi=0,halfwidthKatakana=0,Hangul=0,ascii=0,asciiHigh=0,kanji=0,kokuji=0,symbol=0,unknown=0;
  //if(len>9000)len=9000;
  //var unknownC='';
@@ -901,19 +901,19 @@ function guess_String_language(str) {
   if(c=str.charCodeAt(i),c<0x80)ascii++;
   else if(c<0x100)asciiHigh++;
   else if(c>0x3040&&c<0x30ff)kana++;
-  else if(c==0x30fb||c>0xff65&&c<0xff9e)halfwidthKatakana++;
+  else if(c===0x30fb||c>0xff65&&c<0xff9e)halfwidthKatakana++;
   else if(c>=0x1100&&c<0x11fa||c>=0xac00&&c<0xad00||c>=0xd700&&c<0xd7a4)Hangul++;
-  else if(c>0x4dff&&c<0x9fa6){kanji++,a=guess_encodingSP[c];if(a=='C')jianhuazi++;else if(a=='J')kokuji++;}
-  else if(c>0xfa00&&c<0xfa6b){if(guess_encodingSP[c]=='J')kokuji++;}
+  else if(c>0x4dff&&c<0x9fa6){kanji++,a=guess_encodingSP[c];if(a==='C')jianhuazi++;else if(a==='J')kokuji++;}
+  else if(c>0xfa00&&c<0xfa6b){if(guess_encodingSP[c]==='J')kokuji++;}
   else if(c>0x2010&&c<0x2610||c>=0xfe30&&c<0xfe70||c>0xff00&&c<0xff5f)symbol++;
   else if(c>=0x3000&&c<0x3400||c>0x33ff&&c<0x4db6)
-   if(guess_encodingSP[c]=='J')kokuji++;else symbol++;
+   if(guess_encodingSP[c]==='J')kokuji++;else symbol++;
   else unknown++;//,unknownC+=str.charAt(i);
 
  //alert('len='+len+'\nkana='+kana+'\nkokuji='+kokuji+'\njianhuazi='+jianhuazi+'\nhalfwidthKatakana='+halfwidthKatakana+'\nHangul='+Hangul+'\nascii='+ascii+'\nasciiHigh='+asciiHigh+'\nkanji='+kanji+'\nsymbol='+symbol+'\nunknown='+unknown);
  //if(unknownC)alert('unknown:\n'+unknownC.slice(0,200));//alert(unknownC.slice(0,200)+'\n'+str.slice(0,1000));
  //	依各種常用字母之條件判別
- return ascii+asciiHigh==len?binary_charset
+ return ascii+asciiHigh===len?binary_charset
 	:unknown>.05*(len-ascii)?''//unicode	//	unknown不能太多
 	:kana>.2*len&&kanji+kana+symbol>3*halfwidthKatakana?'Shift_JIS'
 	:kanji+symbol>.7*(len-ascii)&&kana<.05*(len-ascii)?	jianhuazi>.1*kanji?'GB 2312':'Big5'

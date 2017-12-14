@@ -136,17 +136,17 @@ function compressF(fO) {
 	// 參數檢查: 未完全
 	if (!fO)
 		fO = {};
-	if (typeof fO != 'object')
+	if (typeof fO !== 'object')
 		return;
 	if (!fO.tool)
 		fO.tool = 'WinRAR';
 	// method
 	if (false && !fO.m)
 		fO.m = 'c';
-	if (!fO.m || !fO.archive && (fO.m != 'c' || fO.m == 'c' && !fO.files))
+	if (!fO.m || !fO.archive && (fO.m !== 'c' || fO.m === 'c' && !fO.files))
 		return;
-	if (fO.m == 'c') {
-		if (typeof fO.files != 'object')
+	if (fO.m === 'c') {
+		if (typeof fO.files !== 'object')
 			fO.files = fO.files ? [ fO.files ] : fO.archive.replace(/\...+$/,
 					'');
 		if (!fO.archive)
@@ -172,20 +172,20 @@ function compressF(fO) {
 		// rebuild command line arguments
 		_c = _m.cL.replace(/\$path/, _t.path);
 		for (i in _m)
-			if (typeof fO[i] == 'undefined')
+			if (typeof fO[i] === 'undefined')
 				_c = _c.replace(new RegExp('\\$' + i),
-						typeof _m[i] == 'function' ? _m[i](fO) : _m[i] || '');
+						typeof _m[i] === 'function' ? _m[i](fO) : _m[i] || '');
 		_m._cL = _c;
 		library_namespace.debug(_c, 2, 'compressF');
 	}
 	for (i in fO)
 		_c = _c.replace(new RegExp('\\$' + i), fO[i] || '');
-	if (_c.indexOf('$') != -1) {
+	if (_c.indexOf('$') !== -1) {
 		library_namespace.debug('compressF() error:\n' + _c);
 		return;
 	}
 	library_namespace.debug('compressF() '
-			+ (_c.indexOf('$') == -1 ? 'run' : 'error') + ':\n' + _c);
+			+ (_c.indexOf('$') === -1 ? 'run' : 'error') + ':\n' + _c);
 
 	// run
 	return WshShell.Run(_c, 0, true);
@@ -230,7 +230,7 @@ _.compress = compress;
 function uncompress(archive, eTo, flag) {
 	if (!flag)
 		flag = {};
-	else if (typeof flag != 'object')
+	else if (typeof flag !== 'object')
 		return;
 
 	if (!flag.m)

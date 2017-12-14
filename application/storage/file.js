@@ -79,7 +79,7 @@ function module_code(library_namespace) {
 			path = t[1];
 
 		// Windows environment variables 在真實 path 前,尚未測試！
-		if (typeof WinEnvironment == 'object' && (t = path.match(/%(.+)%/g)))
+		if (typeof WinEnvironment === 'object' && (t = path.match(/%(.+)%/g)))
 			for (i in t)
 				if (WinEnvironment[i])
 					path.replace(new RegExp(i, "ig"), WinEnvironment[i]);
@@ -88,11 +88,11 @@ function module_code(library_namespace) {
 		//
 		path_separator_pattern = library_namespace.env.path_separator_pattern;
 
-		path = path.replace(new RegExp(path_separator == '/' ? '\\\\' : '/',
+		path = path.replace(new RegExp(path_separator === '/' ? '\\\\' : '/',
 				"g"), path_separator);
 
-		if (mode && (t = path.lastIndexOf(path_separator)) != -1
-				&& t + 1 != path.length)
+		if (mode && (t = path.lastIndexOf(path_separator)) !== -1
+				&& t + 1 !== path.length)
 			// 去除檔名：假如輸入sss/ddd，會把ddd除去！需輸入sss/ddd/以標示ddd為目錄.
 			path = path.slice(0, t + 1);
 
@@ -129,36 +129,36 @@ function module_code(library_namespace) {
 	function deprecated_getPathOnly(p) {
 		// discard hash & search
 		var i = p.lastIndexOf('?'), j = p.lastIndexOf('#'), dirSpL = library_namespace.env.path_separator.length;
-		if (i == -1)
+		if (i === -1)
 			i = j;
-		else if (j != -1 && i > j)
+		else if (j !== -1 && i > j)
 			i = j;
-		if (i != -1)
+		if (i !== -1)
 			p = p.slice(0, i);
 		// 去除http://hostname/等
-		if (p.slice(0, 5) == 'file:///')
+		if (p.slice(0, 5) === 'file:///')
 			// 對file:///特別處理！
 			p = p.substr('file:///'.length);
 		else if ((i = p.indexOf(':' + library_namespace.env.path_separator
 		//
-		+ library_namespace.env.path_separator)) != -1
+		+ library_namespace.env.path_separator)) !== -1
 		//
 		&& (i = p.indexOf(library_namespace.env.path_separator, i + (':'
 		//
 		+ library_namespace.env.path_separator
 		//
-		+ library_namespace.env.path_separator).length)) != -1)
+		+ library_namespace.env.path_separator).length)) !== -1)
 			// http://hostname/path→path
 			p = p.substr(i + dirSpL);
-		else if (p.slice(0, dirSpL) == library_namespace.env.path_separator)
+		else if (p.slice(0, dirSpL) === library_namespace.env.path_separator)
 			// /usr/local/→usr/local/
-			if (p.substr(dirSpL, dirSpL) != library_namespace.env.path_separator)
+			if (p.substr(dirSpL, dirSpL) !== library_namespace.env.path_separator)
 				p = p.substr(dirSpL);
 			else if ((i = p.indexOf(library_namespace.env.path_separator,
 					dirSpL + dirSpL)) > dirSpL + dirSpL)
 				// 去除\\hostname\
 				p = p.substr(i + dirSpL);
-			else if (i != -1)
+			else if (i !== -1)
 				// \\\zzzz的情形：不合法的路徑
 				throw new Error(1, 'illegal path:' + p);
 		return p;
@@ -169,33 +169,33 @@ function module_code(library_namespace) {
 	function getPathOnly(p) {
 		// discard hash & search
 		var i = p.lastIndexOf('?'), j = p.lastIndexOf('#');
-		if (i == -1)
+		if (i === -1)
 			i = j;
-		else if (j != -1 && i > j)
+		else if (j !== -1 && i > j)
 			i = j;
-		if (i != -1)
+		if (i !== -1)
 			p = p.slice(0, i);
 		// 去除http://hostname/等
-		if (p.slice(0, 8) == 'file:///')
+		if (p.slice(0, 8) === 'file:///')
 			// 對file:///（應該是file:）特別處理！
 			p = p.substr(8);
 		else if ((i = p.indexOf(':' + library_namespace.env.path_separator
-				+ library_namespace.env.path_separator)) != -1
-				&& (i = p.indexOf(library_namespace.env.path_separator, i + 3) != -1))
+				+ library_namespace.env.path_separator)) !== -1
+				&& (i = p.indexOf(library_namespace.env.path_separator, i + 3) !== -1))
 			// http://hostname/path→path
 			p = p.substr(i + 1);
-		else if (p.charAt(0) == library_namespace.env.path_separator)
+		else if (p.charAt(0) === library_namespace.env.path_separator)
 			// /usr/local/→usr/local/
-			if (p.charAt(1) != library_namespace.env.path_separator)
+			if (p.charAt(1) !== library_namespace.env.path_separator)
 				p = p.substr(1);
 			else if ((i = p.indexOf(library_namespace.env.path_separator, 2)) > 2)
 				// 去除\\hostname\ 不去除：.replace(/[^\\]+$/,'')
 				p = p.substr(i + 1);
-			else if (i != -1)
+			else if (i !== -1)
 				// \\\zzzz的情形：不合法的路徑
 				throw new Error(1, 'illegal path:' + p);
 		// !isWeb()&&~
-		if (typeof isFile == 'function' && isFile(p))
+		if (typeof isFile === 'function' && isFile(p))
 			p = p.replace(new RegExp(
 					library_namespace.env.path_separator_pattern + '[^'
 							+ library_namespace.env.path_separator_pattern
@@ -484,26 +484,26 @@ function module_code(library_namespace) {
 
 		// old, deprecated:
 		if (false)
-			return (path.lastIndexOf('\\') == -1 && path.lastIndexOf('/') == -1 ?
+			return (path.lastIndexOf('\\') === -1
+					&& path.lastIndexOf('/') === -1 ?
 			// get_file_object
-			getFolder(getScriptFullName())
-					: '')
+			getFolder(getScriptFullName()) : '')
 					+ path;
 
 		var matched;
-		if (path.charAt(0) == '\\'
+		if (path.charAt(0) === '\\'
 				&& (matched = get_relative_path(base_path).match(
 						/^(\\\\|[A-Z]:)/i)))
 			path = matched[1] + path;
 
 		path = reduce_path(path);
-		if (mode == 1) {
+		if (mode === 1) {
 			// 當為相對路徑時前置 base path。
 			if (!is_absolute_path(path))
 				path = reduce_path((base_path ? getPathOnly(base_path)
 						: get_relative_path())
 						+ path);
-		} else if (mode == 2 && is_absolute_path(path))
+		} else if (mode === 2 && is_absolute_path(path))
 			path = get_relative_path(base_path, path, 1);
 
 		return path;
@@ -555,7 +555,7 @@ function module_code(library_namespace) {
 			return isFile(p = parse_shortcut(get_file_path(p, m, bp), 1)) ? fso
 					.GetFile(p) : fso.GetFolder(p);
 		} catch (e) {
-			return p.indexOf(library_namespace.env.path_separator) == -1 ? get_file_object(
+			return p.indexOf(library_namespace.env.path_separator) === -1 ? get_file_object(
 					getFolder(WScript.ScriptFullName) + p, m, bp)
 					: null;
 		}

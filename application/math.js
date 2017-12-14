@@ -94,7 +94,7 @@ function draw_short_division(naturals, layer, GCD_only) {
 	library_namespace.debug(length + ' Naturals: '+natural_Array+'.',2);
 	if (GCD) {
 		// assert: _GCD > 1
-		if (_GCD != (divisor = GCD.toString(true)))
+		if (_GCD !== (divisor = GCD.toString(true)))
 			_GCD += ' = ' + divisor;
 
 		// phase 1: 處理 GCD 部分。
@@ -568,7 +568,7 @@ convert_MathML.handler = {
 				// 去除括號 "()"。
 				// "7^(2/3)" → "<msup>7 2/3</msup>"
 				operand_2 = convert_MathML.parse_scalar(operand_2.mfenced);
-			if (Array.isArray(operand_2.mfrac) && operand_2.mfrac[0].mn == 1) {
+			if (Array.isArray(operand_2.mfrac) && operand_2.mfrac[0].mn === 1) {
 				// 去除 operand_1 之括號 "()"。
 				if (operand_1.mfenced)
 					operand_1 = convert_MathML.parse_scalar(operand_1.mfenced);

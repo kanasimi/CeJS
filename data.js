@@ -160,19 +160,19 @@ function sortValue(a, mode) {
 	for (i in a)
 		if ((b = isNaN(i) ? i : parseFloat(i)),
 		//
-		typeof s[j = isNaN(j = a[i]) ? j : parseFloat(j)] == 'undefined')
+		typeof s[j = isNaN(j = a[i]) ? j : parseFloat(j)] === 'undefined')
 			k.push(j), s[j] = b;
-		else if (typeof s[j] == 'object')
+		else if (typeof s[j] === 'object')
 			s[j].push(b);
 		else
 			s[j] = [ s[j], b ];
 	// 注意：sort 方法會在原地排序 Array 物件。
 	for (i = 0, k.sort(library_namespace.ascending); i < k.length; i++)
-		if (typeof (b = s[k[i]]) == 'object')
-			if (mode == 1)
+		if (typeof (b = s[k[i]]) === 'object')
+			if (mode === 1)
 				// b.join(',')與''+b效能相同
 				r.push(b.join(','));
-			else if (mode == 2)
+			else if (mode === 2)
 				r.push(b);
 			else
 				for (j in b)
@@ -207,7 +207,7 @@ function sortByIndex(a, b) {
 	// alert(a+'\n'+b);
 	for (var i = 0, n; i < sortByIndex_I.length; i++)
 		if (sortByIndex_Datatype[n = sortByIndex_I[i]]) {
-			if (typeof sortByIndex_Datatype[n] == 'function') {
+			if (typeof sortByIndex_Datatype[n] === 'function') {
 				if (n = sortByIndex_Datatype[n](a[n], b[n]))
 					return n;
 			} else if (n = a[n] - b[n])
@@ -237,19 +237,19 @@ alert(array.join('\n'));	//	已被 separator 分割！
 function getIndexSortByIndex(array, separator, indexArray, isNumberIndex) {
 	//	判定與事前準備(設定sortByIndex_I,sortByIndex_Datatype)
 	if (typeof indexArray === 'number') sortByIndex_I = [indexArray];
-	else if (typeof indexArray !== 'object' || indexArray.constructor != Array) sortByIndex_I = [0];
+	else if (typeof indexArray !== 'object' || indexArray.constructor !== Array) sortByIndex_I = [0];
 	else sortByIndex_I = indexArray;
 	var i, sortByIndex_A = [];
 	sortByIndex_Datatype = library_namespace.null_Object();
-	if (typeof isNumberIndex == 'object') {
-		if (isNumberIndex.constructor == Array) {
+	if (typeof isNumberIndex === 'object') {
+		if (isNumberIndex.constructor === Array) {
 			sortByIndex_Datatype = library_namespace.null_Object();
 			for (i = 0; i < isNumberIndex.length; i++) sortByIndex_Datatype[isNumberIndex[i]] = 1;
 		} else sortByIndex_Datatype = isNumberIndex;
 		for (i in sortByIndex_Datatype)
-			if (isNaN(sortByIndex_Datatype[i]) || parseInt(sortByIndex_Datatype[i]) != sortByIndex_Datatype[i]) delete sortByIndex_Datatype[i];
+			if (isNaN(sortByIndex_Datatype[i]) || parseInt(sortByIndex_Datatype[i]) !== sortByIndex_Datatype[i]) delete sortByIndex_Datatype[i];
 	}
-	if (typeof array != 'object') return;
+	if (typeof array !== 'object') return;
 
 	//	main work: 可以不用重造 array 資料的話..
 	for (i in array) {
@@ -496,7 +496,7 @@ set_Object_value = function(obj, value, type, mode) {
 			type = .1;
 		else if (isNaN(type))
 			type = 0;
-		else if (type == parseInt(type))
+		else if (type === parseInt(type))
 			type = parseInt(type), Tint = true;
 		else
 			type = parseFloat(type); // t被設成累加數
@@ -941,12 +941,12 @@ library_namespace.set_initializor(to_1024_prefix);
 //	<a href="http://msdn.microsoft.com/en-us/library/s4esdbwz%28v=VS.85%29.aspx" accessdate="2010/4/16 20:4">Version Information (Windows Scripting - JScript)</a>
 function StringToArray(s, mode) {
 	var a = [], last = 0, i;
-	while ((i = s.indexOf(sp, last)) != NOT_FOUND) {
-		if (mode == 0 || last != i)
+	while ((i = s.indexOf(sp, last)) !== NOT_FOUND) {
+		if (mode === 0 || last !== i)
 			a[a.length] = s.slice(last, i);
 		last = i + 1;
 	}
-	if (mode == 0 || last != s.length)
+	if (mode === 0 || last !== s.length)
 		a[a.length] = s.slice(last);
 	return a;
 }
@@ -955,7 +955,7 @@ function StringToArray(s, mode) {
 function disposeSpace(s) {
 	if (!s) return s;
 	var r = "", i, last;
-	while ((i = s.indexOf(' ', last)) != NOT_FOUND)
+	while ((i = s.indexOf(' ', last)) !== NOT_FOUND)
 		r += s.slice(last, i), last = i + 1;
 	r += s.slice(last);
 	return r;

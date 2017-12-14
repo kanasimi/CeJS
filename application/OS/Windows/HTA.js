@@ -115,7 +115,7 @@ _.IEA.prototype = {
 	 */
 	OK : function(w) {
 		try {
-			if (w ? typeof this.app.Visible == 'boolean'
+			if (w ? typeof this.app.Visible === 'boolean'
 					: this.doc().body.innerHTML)
 				return this.app;
 		} catch (e) {
@@ -225,7 +225,7 @@ instead of onload
 				IEA_instance.quit();
 		}
 
-		if (typeof CollectGarbage == 'function')
+		if (typeof CollectGarbage === 'function')
 			//	CollectGarbage(): undocumented IE javascript method: 先置為 null 再 CollectGarbage(); 設置為null,它會斷開對象的引用，但是IE為了節省資源（經常釋放內存也會佔系統資源），因此採用的是延遲釋放策略，你調用CollectGarbage函數，就會強制立即釋放。
 			//	http://www.cnblogs.com/stupidliao/articles/797659.html
 			setTimeout(function() {
@@ -475,7 +475,7 @@ reload:function(){
 				for (j = 0, i = library_namespace.get_tag_list(i); j < i.length; j++)
 					if (i[j].name in n)
 						s(i[j], parameter[i[j].name]);
-					else if (submit_id && typeof submit_id != 'object' && submit_id == i[j].name)
+					else if (submit_id && typeof submit_id !== 'object' && submit_id === i[j].name)
 						submit_id = i[j];
 			// if(i[j].name in pm)s(i[j],pm[i[j].name]);
 			if (submit_id) {

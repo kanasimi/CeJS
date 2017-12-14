@@ -169,7 +169,7 @@ do_save_log = function(m, id, force) {
 		return;
 
 	if (m)
-		_p.sbuf.push(m = (_t.save_date && typeof gDate == 'function' ? _t.save_line_separator
+		_p.sbuf.push(m = (_t.save_date && typeof gDate === 'function' ? _t.save_line_separator
 				+ gDate() + _t.save_line_separator
 				: '')
 				+ m);
@@ -1444,6 +1444,7 @@ if (!CeL.Log) {
 			} else {
 				exactly = equal = Object.is(condition[0], condition[1]);
 				if (!exactly) {
+					// Do not use ===
 					equal = condition[0] == condition[1];
 				}
 			}

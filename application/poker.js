@@ -111,7 +111,7 @@ if (typeof CeL === 'function')
 					hand.forEach(function(card) {
 						parse(card, values, suits);
 					});
-				} else if (typeof hand == 'string') {
+				} else if (typeof hand === 'string') {
 					parse(hand, values, suits);
 				}
 			}
