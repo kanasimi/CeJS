@@ -3501,6 +3501,7 @@ function finish_test(type) {
 	}
 
 	if (error_count === 0) {
+		// console.trace(still_running);
 		node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg',
 		// Takes ? ms
 		' Takes ' + (new Date - test_start) / 1000 + ' s.' ]);
@@ -3524,6 +3525,8 @@ function do_test() {
 	// 即時顯示，不延遲顯示
 	CeL.Log.interval = 0;
 	CeL.run(
+/*
+*/
 	// 測試期間時需要用到的功能先作測試。這些不可 comment out。
 	'interact.console', test_console,
 	//

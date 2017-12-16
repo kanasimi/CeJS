@@ -117,10 +117,30 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (typeof module === 'object') {
+			var _module = module;
+			while (_module = _module.parent) {
+				// console.log(_module.filename);
+				// 在 electron 中可能會是 index.html 之類的。
+				if (/\.js/i.test(_module.filename)) {
+					this.main_script = _module.filename;
+				}
+			}
+		}
+
+		// this.id 之後將提供給 this.site_id 使用。
 		if (!this.id) {
-			// this.id 之後將提供給 this.site_id 使用。
-			this.id = this.main_directory.replace(/\.*[\\\/]+$/, '')
-			//
+			this.id = this.main_script
+			// **1** require.main.filename: 如 require('./site_id.js')
+			// **2** 如 node site_id.js work_id
+			&& this.main_script
+			// 去掉 path
+			.replace(/^[\s\S]*[\\\/]([^\\\/]+)$/, '$1')
+			// 去掉 file extension
+			.replace(/\.*[^.]+$/, '')
+			// NOT require('./site_id.js'). 如 node site_id.js work_id
+			|| this.main_directory.replace(/\.*[\\\/]+$/, '')
+			// **3** others: unnormal
 			|| this.base_URL.match(/\/\/([^\/]+)/)[1].toLowerCase().split('.')
 			//
 			.reverse().some(function(token, index) {
@@ -136,9 +156,7 @@ function module_code(library_namespace) {
 					return true;
 				}
 			}, this);
-			if (this.id) {
-				this.id = this.id.match(/[^\\\/]+$/)[0];
-			} else {
+			if (!this.id && !(this.id = this.id.match(/[^\\\/]*$/)[0])) {
 				library_namespace.error('Can not detect .id from '
 						+ this.base_URL);
 			}
@@ -433,7 +451,8 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.log(this.id + ': Strating ' + work_id);
+		library_namespace.log(this.id + ': Starting ' + work_id + ', 儲存至 '
+				+ this.main_directory);
 		// prepare work directory.
 		library_namespace.create_directory(this.main_directory);
 
@@ -913,8 +932,9 @@ function module_code(library_namespace) {
 		if (!url || typeof this.parse_search_result !== 'function') {
 			url = library_namespace.null_Object();
 			url[work_title] = '';
-			throw '請手動設定/輸入 [' + work_title + '] 之 id 於 ' + search_result_file
-					+ '\n (e.g., ' + JSON.stringify(url) + ')';
+			throw '本線上作品模組未提供搜尋功能。請手動設定/輸入 [' + work_title + '] 之 id 於 '
+					+ search_result_file + '\n (e.g., ' + JSON.stringify(url)
+					+ ')';
 		}
 		if (typeof url === 'function') {
 			// url = url.call(this, work_title);
@@ -2257,9 +2277,9 @@ function module_code(library_namespace) {
 		},
 		//
 		item = ebook.add(item_data, {
-			// part_title 卷/集
+			// part_title 卷/集/幕
 			title : get_label(data.title || ''),
-			// chapter_title 章節
+			// chapter_title 章節/回节折篇話话
 			sub_title : get_label(data.sub_title || ''),
 			text : data.text,
 			post_processor : function(contents) {
@@ -2302,6 +2322,7 @@ function module_code(library_namespace) {
 		return item;
 	}
 
+	// 話: 日文
 	var PATTERN_epub_file = /^\(一般小説\) \[([^\[\]]+)\] ([^\[\]]+) \[(.*?) (\d{8})(?: (\d{1,4})話)?\]\.(.+)\.epub$/i;
 	function parse_epub_name(file_name) {
 		var matched = typeof file_name === 'string'

@@ -3717,15 +3717,30 @@ if (typeof CeL === 'function')
 							library_namespace.env.main_script_name,
 							library_namespace.env.registry_path ]);
 				}
-				library_base_path = library_namespace.env.script_name !== library_namespace.env.main_script_name
-						// 否則先嘗試存放在 registry 中的 path。
-						&& library_namespace.env.registry_path
-						// 盡可能先檢查較具特徵、比較長的名稱: "ce.js"→"ce"。
-						|| library_namespace
-								.get_script_base_path(library_namespace.env.main_script)
-						|| library_namespace
-								.get_script_base_path(library_namespace.env.main_script_name)
-						|| library_namespace.get_script_base_path();
+
+				var old_namespace = library_namespace.get_old_namespace();
+				// 採用已經特別指定的路徑。
+				if (old_namespace && old_namespace.library_path) {
+					// e.g., require() from electron
+					library_base_path = library_namespace.simplify_path(
+							old_namespace.library_path)
+							.replace(/[^\\\/]*$/, '');
+				}
+
+				// 否則先嘗試存放在 registry 中的 path。
+				if (!library_base_path
+						&& library_namespace.env.script_name !== library_namespace.env.main_script_name) {
+					library_base_path = library_namespace.env.registry_path;
+				}
+
+				// 盡可能先檢查較具特徵、比較長的名稱: "ce.js"→"ce"。
+				if (!library_base_path) {
+					library_base_path = library_namespace
+							.get_script_base_path(library_namespace.env.main_script)
+							|| library_namespace
+									.get_script_base_path(library_namespace.env.main_script_name)
+							|| library_namespace.get_script_base_path();
+				}
 
 				if (!library_base_path
 						&& library_namespace.is_Object(library_namespace
@@ -3754,9 +3769,10 @@ if (typeof CeL === 'function')
 							+ encodeURI(library_base_path) + '">'
 							+ library_base_path + '</a>]', 2,
 							'setup_library_base_path');
-				} else
+				} else {
 					library_namespace
 							.warn('setup_library_base_path: Cannot detect the library base path!');
+				}
 			}
 
 			// console.log(library_base_path);

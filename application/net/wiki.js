@@ -16671,6 +16671,10 @@ function module_code(library_namespace) {
 
 		if (options && options.resolve_item) {
 			value = wikidata_datavalue(value);
+			if (Array.isArray(value)) {
+				// 有的時候因為操作錯誤，所以會有相同的屬性值。但是這一種情況應該要更正原資料。
+				// value = value.unique();
+			}
 			this[KEY_SESSION].host.data(value, callback);
 			return value;
 		}

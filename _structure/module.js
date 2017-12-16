@@ -383,7 +383,11 @@ if (false) {
 	//	http://www.bindows.net/
 	//	http://www.java2s.com/Code/JavaScriptReference/Javascript-Properties/XMLDocument.htm
 
-	if (_.new_XMLHttp) {
+	if (_.new_XMLHttp
+	// https://github.com/electron/electron/issues/2288
+	// How to detect if running in electron?
+	// https://github.com/cheton/is-electron/blob/master/index.js
+	&& (typeof process !== 'object' || typeof process.versions !== 'object' || !process.versions.electron)) {
 
 	} else if (
 	// typeof global === 'object' &&
@@ -394,8 +398,8 @@ if (false) {
 	&& typeof process === 'object' && typeof process.versions === 'object' && process.versions.node
 	//
 	&& typeof console === 'object' && typeof console.log === 'function') {
-		_.platform.browser = 'node';
-		_.platform.version =
+		_.platform.browser = process.versions.electron ? 'electron' : 'node';
+		_.platform.version = process.versions.electron || process.versions.node;
 		/**
 		 * shortcut for node.js: nodejs version.<br />
 		 * Node.js 有比較特殊的 global scope 處理方法。<br />
@@ -943,6 +947,21 @@ if (false) {
 					//	用在把檔案拉到此檔上時不方便
 					//: typeof WshShell === 'object' ? WshShell.CurrentDirectory
 					: '').replace(/[^\\\/]+$/, '');
+		}
+
+		if (typeof module === 'object') {
+			var _module = module;
+			while (_module) {
+				var filename = _module.filename;
+				// console.log('get_script_base_path: ' + JSFN + ' @ ' + filename);
+				if (filename
+				// 在 electron 中可能會是 index.html 之類的。
+				// && /\.js/i.test(filename)
+				&& filename.indexOf(JSFN) !== -1) {
+					return filename;
+				}
+				_module = _module.parent;
+			}
 		}
 
 		//	We don't use is_Object or so.

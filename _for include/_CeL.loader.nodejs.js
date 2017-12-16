@@ -48,6 +48,15 @@ typeof CeL !== 'function' && (function() {
 			} else if (!node_fs.existsSync(path)) {
 				throw 'ENOENT';
 			}
+
+			if (!/[^\\\/]$/.test(path)) {
+				path += require('path').sep;
+			}
+			if (typeof global.CeL !== 'object') {
+				global.CeL = {};
+			}
+			CeL.library_path = path + 'ce.js';
+
 			var loader = '/_for include/node.loader.js';
 			loader = path + (path.indexOf('/') !== -1 ? loader
 			//

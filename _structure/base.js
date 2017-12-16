@@ -1407,6 +1407,8 @@ OS='UNIX'; // unknown
 				|| (_.get_script_full_name().indexOf('\\') !== -1 ? 'Windows' : 'UNIX');
 
 		var is_UNIX = env.OS.toLowerCase() in {
+			// Mac OS X @ node.js
+			darwin : true,
 			linux : true,
 			freebsd : true,
 			unix : true
@@ -1430,9 +1432,12 @@ OS='UNIX'; // unknown
 		 * 
 		 * @name CeL.env.path_separator
 		 * @type {String}
+		 * 
+		 * @see https://stackoverflow.com/questions/125813/how-to-determine-the-os-path-separator-in-javascript
 		 */
 		env.path_separator =
-				is_UNIX ? '/' : '\\';
+			typeof require === 'function' && require('path') && require('path').sep
+			|| (is_UNIX ? '/' : '\\');
 
 		/**
 		 * library 之外部檔案 (external source files) 放置地。 純目錄名，不加目錄分隔。
@@ -2023,10 +2028,13 @@ OS='UNIX'; // unknown
 	};
 
 
-	if (using_style === undefined && typeof process === 'object' && process.versions) {
-		// 若為 nodejs，預設使用 style 紀錄。
-		// using_style = _.platform.nodejs
-		using_style = process.versions.node;
+	if (typeof process === 'object' && process.versions) {
+		process.versions[library_name.toLowerCase()] = library_version;
+		if (using_style === undefined) {
+			// 若為 nodejs，預設使用 style 紀錄。
+			// using_style = _.platform.nodejs
+			using_style = process.versions.node;
+		}
 	}
 
 	/**
