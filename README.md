@@ -67,7 +67,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 <!-- [![NPM](https://nodei.co/npm-dl/cejs.png)](https://nodei.co/npm/cejs/) -->
 
 1. First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and [install the node.js package](https://nodejs.org/en/download/package-manager/). 請先安裝 [node.js](https://nodejs.org/)。
-2. Then, install the CeJS library: 接著安裝 CeJS library:<!-- --save-dev --save-exact -->
+2. Then, install the CeJS library: 接著安裝 CeJS library:
    ``` sh
    $ npm install cejs
    ```

@@ -117,10 +117,11 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// 在crawler=new CeL.work_crawler({})的情況下可能沒辦法得到準確的檔案路徑，因此這個路徑僅供參考。
 		if (typeof module === 'object') {
 			var _module = module;
 			while (_module = _module.parent) {
-				// console.log(_module.filename);
+				// console.log('Work_crawler: ' + _module.filename);
 				// 在 electron 中可能會是 index.html 之類的。
 				if (/\.js/i.test(_module.filename)) {
 					this.main_script = _module.filename;
@@ -129,6 +130,7 @@ function module_code(library_namespace) {
 		}
 
 		// this.id 之後將提供給 this.site_id 使用。
+		// 在使用gui_electron含入檔案的情況下，this.id應該稍後在設定。
 		if (!this.id) {
 			this.id = this.main_script
 			// **1** require.main.filename: 如 require('./site_id.js')
@@ -170,11 +172,6 @@ function module_code(library_namespace) {
 				throw 'Work_crawler: No this parse_search_result: '
 						+ this.parse_search_result;
 			}
-		}
-
-		if (!configurations.MESSAGE_RE_DOWNLOAD) {
-			this.MESSAGE_RE_DOWNLOAD = this.id + ': '
-					+ this.MESSAGE_RE_DOWNLOAD;
 		}
 
 		if (!(this.MIN_LENGTH >= 0)) {
@@ -307,7 +304,7 @@ function module_code(library_namespace) {
 		pack_ebook : pack_ebook,
 		/** 若需要留下/重複利用media如images，請勿remove。 */
 		// remove_ebook_directory : true,
-		/** 章節數量無變化時依舊利用 cache 重建資料(如ebook) */
+		/** 章節數量無變化時依舊利用 cache 重建資料(如ebook)。 */
 		// regenerate : true,
 		/** 進一步處理書籍之章節內容。例如繁簡轉換、錯別字修正、裁剪廣告。 */
 		contents_post_processor : function(contents, work_data) {
@@ -932,9 +929,9 @@ function module_code(library_namespace) {
 		if (!url || typeof this.parse_search_result !== 'function') {
 			url = library_namespace.null_Object();
 			url[work_title] = '';
-			throw '本線上作品模組未提供搜尋功能。請手動設定/輸入 [' + work_title + '] 之 id 於 '
-					+ search_result_file + '\n (e.g., ' + JSON.stringify(url)
-					+ ')';
+			throw '本線上作品網站 ' + this.id + ' 的模組未提供搜尋功能。請手動設定/輸入 [' + work_title
+					+ '] 之 id 於 ' + search_result_file + '\n (e.g., '
+					+ JSON.stringify(url) + ')';
 		}
 		if (typeof url === 'function') {
 			// url = url.call(this, work_title);
@@ -1133,7 +1130,7 @@ function module_code(library_namespace) {
 				library_namespace
 						.error('Failed to get work data of ' + work_id);
 				if (error_count === _this.MAX_ERROR) {
-					throw _this.MESSAGE_RE_DOWNLOAD;
+					throw _this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD;
 				}
 				error_count = (error_count | 0) + 1;
 				library_namespace.log('process_work_data: Retry ' + error_count
@@ -1729,7 +1726,7 @@ function module_code(library_namespace) {
 							check_if_done();
 							return;
 						}
-						throw _this.MESSAGE_RE_DOWNLOAD;
+						throw _this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD;
 					}
 					get_data.error_count = (get_data.error_count | 0) + 1;
 					library_namespace.log('process_chapter_data: Retry '
@@ -2121,8 +2118,9 @@ function module_code(library_namespace) {
 			+ '): Failed to get ') + url + '\n→ ' + image_data.file);
 			if (image_data.error_count === _this.MAX_ERROR) {
 				image_data.has_error = true;
-				// throw new Error(_this.MESSAGE_RE_DOWNLOAD);
-				library_namespace.log(_this.MESSAGE_RE_DOWNLOAD);
+				// throw new Error(_this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD);
+				library_namespace.log(_this.id + ': '
+						+ _this.MESSAGE_RE_DOWNLOAD);
 				// console.log('error count: ' + image_data.error_count);
 				if (!_this.skip_error) {
 					library_namespace

@@ -218,7 +218,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	function PTCMS_novels(configuration) {
+	function new_PTCMS_novels_crawler(configuration) {
 		configuration = configuration ? Object.assign(library_namespace
 				.null_Object(), default_configuration, configuration)
 				: default_configuration;
@@ -237,5 +237,5 @@ function module_code(library_namespace) {
 		return new library_namespace.work_crawler(configuration);
 	}
 
-	return PTCMS_novels;
+	return new_PTCMS_novels_crawler;
 }

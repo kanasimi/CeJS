@@ -251,7 +251,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	function syosetu(configuration) {
+	function new_syosetu_crawler(configuration) {
 		configuration = configuration ? Object.assign(library_namespace
 				.null_Object(), default_configuration, configuration)
 				: default_configuration;
@@ -259,5 +259,5 @@ function module_code(library_namespace) {
 		return new library_namespace.work_crawler(configuration);
 	}
 
-	return syosetu;
+	return new_syosetu_crawler;
 }
