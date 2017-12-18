@@ -284,7 +284,7 @@ function module_code(library_namespace) {
 
 		// default start chapter index
 		start_chapter : 1,
-		// 是否重新取得每個章節內容chapter_page。
+		// 是否重新取得每個所檢測的章節內容 chapter_page。
 		// 警告: reget_chapter=false 僅適用於小說之類不取得圖片的情形，
 		// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL取得名稱的於目錄中。
 		reget_chapter : true,
@@ -318,7 +318,7 @@ function module_code(library_namespace) {
 		// 明確指定自上次下載過的章節接續下載。
 		// recheck : false,
 		//
-		// 當無法取得chapter資料時，直接嘗試下一章節。在手動+監視下recheck時可併用此項。default:false
+		// 當無法取得 chapter 資料時，直接嘗試下一章節。在手動+監視下 recheck 時可併用此項。 default:false
 		// skip_chapter_data_error : true,
 
 		image_types : {
@@ -378,6 +378,10 @@ function module_code(library_namespace) {
 
 		set_agent : set_agent,
 		data_of : start_get_data_of,
+
+		stop_task : stop_task,
+		continue_task : continue_task,
+
 		start : start_downloading,
 		set_server_list : set_server_list,
 		parse_work_id : parse_work_id,
@@ -836,6 +840,7 @@ function module_code(library_namespace) {
 	}
 
 	function get_work(work_title, callback) {
+		this.running = true;
 		var _this = this;
 
 		// 執行順序: finish() → finish_up()
@@ -874,6 +879,7 @@ function module_code(library_namespace) {
 				_this.finish_up(work_data);
 			}
 			typeof callback === 'function' && callback.call(_this, work_data);
+			_this.running = false;
 		}
 		if (callback && callback.options) {
 			// e.g., for .get_data_only
@@ -919,7 +925,7 @@ function module_code(library_namespace) {
 
 		// assert: work_title前後不應包含space
 		if (search_result[work_title = work_title.trim()]) {
-			library_namespace.log('Find cache: ' + work_title + '→'
+			library_namespace.log(this.id + ': Find cache: ' + work_title + '→'
 					+ JSON.stringify(search_result[work_title]));
 			finish(true);
 			return;
@@ -1586,7 +1592,68 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------------------------------
 
+	var QUIT_TASK = {
+		quit : true
+	};
+
+	function stop_task(quit) {
+		if (!this.running) {
+			return;
+		}
+
+		if (!this.continue_arguments) {
+			library_namespace.info(this.id + ': 準備設定' + (quit ? '取消' : '暫停')
+					+ '下載作業');
+			return this.continue_arguments = quit ? QUIT_TASK : true;
+		}
+
+		// 暫停中取消作業
+		if (quit && this.continue_arguments !== QUIT_TASK) {
+			var _arguments = this.continue_arguments;
+			this.continue_arguments = QUIT_TASK;
+			pre_get_chapter_data.apply(this, _arguments);
+			return QUIT_TASK;
+		}
+	}
+
+	function continue_task() {
+		if (!Array.isArray(this.continue_arguments)) {
+			return;
+		}
+
+		var _arguments = this.continue_arguments, work_data = _arguments[0];
+		delete this.continue_arguments;
+		// 繼續下載作業
+		library_namespace.info(this.id + ': 繼續下載 ['
+				+ (work_data.title || work_data.id) + ']');
+		pre_get_chapter_data.apply(this, _arguments);
+	}
+
 	function pre_get_chapter_data(work_data, chapter, callback) {
+		if (this.continue_arguments) {
+			library_namespace.warn(this.id + ': '
+			// 暫停下載作業, 取消下載作業機制
+			+ (this.continue_arguments === QUIT_TASK ? '取消' : '暫停') + '下載 ['
+					+ (work_data.title || work_data.id) + ']');
+			if (this.continue_arguments === QUIT_TASK) {
+				// reset flag
+				delete this.continue_arguments;
+				if (typeof callback === 'function') {
+					callback(work_data);
+				}
+				return;
+			}
+
+			if (this.continue_arguments === true) {
+				this.continue_arguments
+				// = arguments
+				= [ work_data, chapter, callback ];
+				this.running = 'stopped';
+			}
+			// waiting for this.continue_task()
+			return;
+		}
+
 		var _this = this;
 		function next() {
 			_this.get_chapter_data(work_data, chapter, callback);

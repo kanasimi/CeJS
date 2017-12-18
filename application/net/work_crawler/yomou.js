@@ -60,8 +60,8 @@ function module_code(library_namespace) {
 		recheck : 'changed',
 
 		site_name : '小説を読もう！',
-		base_URL : 'http://yomou.syosetu.com/',
-		novel_base_URL : 'http://ncode.syosetu.com/',
+		base_URL : 'https://yomou.syosetu.com/',
+		novel_base_URL : 'https://ncode.syosetu.com/',
 
 		// 解析 作品名稱 → 作品id get_work()
 		search_URL : 'search.php?order=hyoka&word=',
@@ -198,8 +198,8 @@ function module_code(library_namespace) {
 
 			text.each_between('<a ', '</a>', function(text) {
 				var matched = text.match(/(?:^| )href="([^"<>]+)"/);
-				// @see http://ncode.syosetu.com/n8611bv/49/
-				// e.g., <a href="http://11578.mitemin.net/i00000/"
+				// @see https://ncode.syosetu.com/n8611bv/49/
+				// e.g., <a href="https://11578.mitemin.net/i00000/"
 				if (matched && matched[1].includes('.mitemin.net')) {
 					// 下載mitemin.net的圖片
 					links.push(matched[1]);
