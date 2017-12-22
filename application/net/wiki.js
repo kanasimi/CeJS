@@ -14905,6 +14905,8 @@ function module_code(library_namespace) {
 	/**
 	 * 檢測 page_data 是否為 Flow 討論頁面系統。
 	 * 
+	 * other contentmodel: "MassMessageListContent"
+	 * 
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
 	 * 

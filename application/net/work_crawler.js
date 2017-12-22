@@ -1479,7 +1479,8 @@ function module_code(library_namespace) {
 						work_data.reget_chapter = false;
 					}
 					library_namespace
-							.log('章節數量'
+							.log(_this.id
+									+ ': 章節數量'
 									+ (chapter_added === 0 ? '無變化，皆為 '
 											+ work_data.chapter_count : '變化過小('
 											+ chapter_added + ')因此不重新下載')

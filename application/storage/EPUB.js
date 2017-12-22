@@ -805,7 +805,7 @@ function module_code(library_namespace) {
 		}
 
 		// 皆加上id_prefix，之後的便以接續字元看待，不必多作處理。
-		return _this.id_prefix + encodeURIComponent(string)
+		var id = _this.id_prefix + encodeURIComponent(string)
 		// escape other invalid characters
 		// 把"_"用來做hex辨識符。
 		.replace(/[_!~*'()]/g, function($0) {
@@ -816,6 +816,22 @@ function module_code(library_namespace) {
 			// return hex.replace(/([\s\S]{2})/g, '_$1');
 			return '%' + hex;
 		}).replace(/%/g, '_');
+
+		if (id.length > _this.MAX_ID_LENGTH) {
+			id = id.replace(/^([\s\S]+)(\.[^.]+)$/, function(all, name,
+					extension) {
+				if (extension.length < 10) {
+					return name
+							.slice(0, _this.MAX_ID_LENGTH - extension.length)
+							+ extension;
+				}
+				return all.slice(0, _this.MAX_ID_LENGTH);
+			});
+			if (id.length > _this.MAX_ID_LENGTH) {
+				id = id.slice(0, _this.MAX_ID_LENGTH);
+			}
+		}
+		return id;
 	}
 
 	var PATTERN_NEED_ENCODE_ID = /^[^a-z]|[^a-z\d\-]/i, PATTERN_NEED_ENCODE_FILE_NAME = /[^a-z\d\-.]/i;
@@ -823,6 +839,7 @@ function module_code(library_namespace) {
 	function encode_file_name(file_name, _this) {
 		if (PATTERN_NEED_ENCODE_FILE_NAME.test(file_name)) {
 			// need encode
+			// TODO: limit length
 			return encode_identifier(file_name, _this);
 		}
 		return file_name;
@@ -2020,6 +2037,8 @@ function module_code(library_namespace) {
 
 		// 應該用[A-Za-z]起始，但光單一字母不容易辨識。
 		id_prefix : 'i',
+		// 限制id與檔案長度，以預防寫入的時候出現錯誤。
+		MAX_ID_LENGTH : 80,
 
 		setup_container : setup_container,
 		initialize : initialize,
