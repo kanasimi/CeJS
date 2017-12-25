@@ -1649,7 +1649,7 @@ function module_code(library_namespace) {
 				return preprocess_section_link_token(token[1] ? token[1]
 						.toString() : '');
 			}
-			// reduce HTML tags.
+			// reduce HTML tags. e.g., <b>, <sub>, <sup>
 			return preprocess_section_link_tokens(token[1] || '');
 		}
 		if ((token.type === 'file' || token.type === 'category')

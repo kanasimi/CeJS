@@ -17,9 +17,13 @@
 		"url" : "git+https://github.com/kanasimi/CeJS.git"
 	},
 	"keywords" : [ "arbitrary-precision", "arithmetic", "numerals",
-			"Chinese era", "calendar", "character encoding",
-			"address input", "internationalization" ],
-	"author" : "vimunci",
+			"Chinese era", "calendar", "character encoding", "address input",
+			"internationalization" ],
+	"author" : {
+		"name" : "vimunci",
+		"email" : "vimunci@gmail.com",
+		"url" : "https://github.com/kanasimi/CeJS"
+	},
 	"contributors" : "vimunci",
 	"license" : "BSD-3-Clause",
 	"bugs" : {

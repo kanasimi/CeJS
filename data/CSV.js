@@ -924,6 +924,7 @@ _// JSDT:_module_
  * config = {field_delimiter:',',title_array:[],text_qualifier:'"',force_text_qualifier:true}
  */
 to_CSV = function(csv_object, config) {
+	config = library_namespace.setup_options(config);
 	var CSV = [], i = 0,
 	text_qualifier = config.text_qualifier || '"',
 	force_add_text_qualifier = config.force_add_text_qualifier && text_qualifier,
@@ -935,18 +936,24 @@ to_CSV = function(csv_object, config) {
 	add_line = function(line_array) {
 		var i = 0, field = [];
 		if (force_add_text_qualifier) {
-			for (; i < line_array.length; i++)
-				field.push(line_array[i].replace(text_qualifier_RegExp,
+			for (; i < line_array.length; i++) {
+				// 預防 cell 為 null, undefined 等。
+				var cell = line_array[i] && String(line_array[i]) || '';
+				field.push(cell.replace(text_qualifier_RegExp,
 						text_qualifier_replace));
+			}
 			CSV.push(text_qualifier
 					+ field.join(text_qualifier + field_delimiter + text_qualifier)
 					+ text_qualifier);
 		} else {
-			for (; i < line_array.length; i++)
+			for (; i < line_array.length; i++) {
+				// 預防 cell 為 null, undefined 等。
+				var cell = line_array[i] && String(line_array[i]) || '';
 				field.push(
-					text_qualifier_tester && line_array[i].indexOf(text_qualifier_tester) !== -1 ?
-						text_qualifier + line_array[i].replace(text_qualifier_RegExp, text_qualifier_replace) + text_qualifier
-						: line_array[i]);
+						text_qualifier_tester && cell.indexOf(text_qualifier_tester) !== -1 ?
+							text_qualifier + cell.replace(text_qualifier_RegExp, text_qualifier_replace) + text_qualifier
+							: cell);
+			}
 			CSV.push(field.join(field_delimiter));
 		}
 	};
