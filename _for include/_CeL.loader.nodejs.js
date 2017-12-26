@@ -85,7 +85,7 @@ typeof CeL !== 'function' && (function() {
 		try {
 			// 若有CeJS則用之。
 			require('cejs');
-			console.log('Load cejs module, require("cejs") instead!');
+			console.log('cejs loader: Load module, require("cejs") instead!');
 			return;
 
 		} catch (e) {

@@ -3720,11 +3720,21 @@ if (typeof CeL === 'function')
 
 				var old_namespace = library_namespace.get_old_namespace();
 				// 採用已經特別指定的路徑。
-				if (old_namespace && old_namespace.library_path) {
+				if (library_namespace.is_Object(old_namespace)
+						&& (library_base_path = old_namespace.library_path)) {
 					// e.g., require() from electron
+					// /path
+					// C:\path
+					if (!/^([A-Z]:)?[\\\/]/i.test(library_base_path)) {
+						// assert: library_base_path is relative path
+						// library_namespace.debug(library_namespace.get_script_full_name());
+						library_base_path = library_namespace
+								.simplify_path(library_namespace
+										.get_script_full_name().replace(
+												/[^\\\/]*$/, library_base_path));
+					}
 					library_base_path = library_namespace.simplify_path(
-							old_namespace.library_path)
-							.replace(/[^\\\/]*$/, '');
+							library_base_path).replace(/[^\\\/]*$/, '');
 				}
 
 				// 否則先嘗試存放在 registry 中的 path。
@@ -3740,25 +3750,6 @@ if (typeof CeL === 'function')
 							|| library_namespace
 									.get_script_base_path(library_namespace.env.main_script_name)
 							|| library_namespace.get_script_base_path();
-				}
-
-				if (!library_base_path
-						&& library_namespace.is_Object(library_namespace
-								.get_old_namespace())
-						&& (library_base_path = library_namespace
-								.get_old_namespace().library_path)) {
-					// /path
-					// C:\path
-					if (!/^([A-Z]:)?[\\\/]/i.test(library_base_path)) {
-						// assert: library_base_path is relative path
-						// library_namespace.debug(library_namespace.get_script_full_name());
-						library_base_path = library_namespace
-								.simplify_path(library_namespace
-										.get_script_full_name().replace(
-												/[^\\\/]*$/, library_base_path));
-					}
-					library_base_path = library_namespace.simplify_path(
-							library_base_path).replace(/[^\\\/]*$/, '');
 				}
 
 				if (library_base_path) {
