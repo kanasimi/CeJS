@@ -23,6 +23,8 @@ node_js:
 # 2016/10/23: Travis CI failed on node.js 0.11
 #  - "0.11"
 #  - "0.12"
+# sudo apt-get install nodejs @ Ubuntu-16.04.3
+#  - "4.2.6"
 # 2017/11/2 LTS
   - "8"
 # 2017/11/2 Current

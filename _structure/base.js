@@ -1066,7 +1066,6 @@ function (global) {
 
 	_.platform = platform;
 
-
 	// ------------------------------------------------------------------------
 
 	var
@@ -2711,6 +2710,13 @@ OS='UNIX'; // unknown
 	 * @ignore
 	 */
 	global[library_name] = _;
+	if (typeof module === 'object'
+	// NG if we have specified module.exports: ((module.exports === exports))
+	// http://weizhifeng.net/node-js-exports-vs-module-exports.html
+	// 如果module.exports當前沒有任何屬性的話，exports會把這些屬性賦予module.exports。
+	&& typeof module.exports === 'object') {
+		module.exports = _;
+	}
 
 	// test global.
 	try {

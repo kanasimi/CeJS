@@ -1251,7 +1251,8 @@ function module_code(library_namespace) {
 					words_so_far : true,
 					last_download : true,
 					book_chapter_count : true,
-					chapter_count : true
+					chapter_count : true,
+					image_count : true
 				};
 				// recall old work_data
 				// 基本上以新資料為準，除非無法取得新資料，才改用舊資料。
@@ -1528,6 +1529,12 @@ function module_code(library_namespace) {
 				}
 				work_data.reget_chapter = true;
 				work_data.last_download.chapter = _this.start_chapter;
+			}
+
+			if (work_data.last_download.chapter === _this.start_chapter) {
+				work_data.image_count = 0;
+			} else {
+				delete work_data.image_count;
 			}
 
 			_this.save_work_data(work_data);
@@ -1883,11 +1890,13 @@ function module_code(library_namespace) {
 						left = image_list.length;
 					}
 				}
+				if (work_data.image_count >= 0) {
+					work_data.image_count += left;
+				}
 
 				// 自動填補。
 				if (!chapter_data.title
 						&& Array.isArray(work_data.chapter_list)
-						//
 						&& library_namespace
 								.is_Object(work_data.chapter_list[chapter - 1])) {
 					chapter_data.title = work_data.chapter_list[chapter - 1].title;
@@ -2015,8 +2024,13 @@ function module_code(library_namespace) {
 			// 紀錄已下載完之 chapter。
 			_this.save_work_data(work_data);
 			if (++chapter > work_data.chapter_count) {
-				library_namespace.log(work_data.directory_name + ': '
-						+ work_data.chapter_count + ' chapters done.');
+				library_namespace.log(work_data.directory_name
+				// 增加章節數量的訊息。
+				+ ': ' + work_data.chapter_count + ' chapters'
+				// 增加圖片數量的訊息。
+				+ (work_data.image_count > 0 ? ', '
+				//
+				+ work_data.image_count + ' images' : '') + ' done.');
 				if (typeof callback === 'function') {
 					callback(work_data);
 				}

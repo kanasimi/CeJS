@@ -157,7 +157,7 @@ function update_via_7zip(latest_version) {
 		process.stderr.write = function() {
 		};
 		try {
-			child_process.execSync(path + ' -h', 'ignore');
+			child_process.execSync(path + ' -h');
 		} catch (e) {
 			path = null;
 		}
