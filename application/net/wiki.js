@@ -1748,9 +1748,10 @@ function module_code(library_namespace) {
 	function section_link_escape(text, uri) {
 		// escape control characters, including language conversion -{}-
 		if (true) {
+			text = text.replace(
 			// 盡可能減少字元的使用量，因此僅處理開頭，不處理結尾。
-			text = text.replace(uri ? /[\|<{}]/g : /[\|<>{}]/g && /[\|<{]/g,
-			// 經測試anchor亦不可包含[\n\[\]{}]。
+			uri ? /[\|{}\[\]<]/g : /[\|{}<>]/g && /[\|{<]/g,
+			// 經測試 anchor 亦不可包含[{}\[\]\n]。
 			function(character) {
 				if (uri) {
 					return '%' + character.charCodeAt(0).toString(16);
