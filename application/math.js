@@ -353,11 +353,18 @@ z = 5/4
 <math>1+(b^2-4a c)^(1/5)</math>
 <math>x=(-b±√(b^2-4a c))/2a</math>
 
+<math>(^2)Fe</math>
+<math>(^12)C</math>
+<math>(_6^12)C</math>
+<math>(_6)C</math>
+<math>(_2^1)x_4^3</math>
+<math>(_2^1)x_4</math>
+
+
+
 // TODO:
 <math>x_y^2 x^2 2^(1/3)^8 4^(1/7)^6</math>
 <math>(_(a+b))x</math>
-<math>(_2^4)x</math>
-<math>(_2^4)x_2^4</math>
 
 munderover
 <math>∫_2^4 dy/dx</math>
@@ -379,7 +386,8 @@ function convert_MathML(handler) {
 	// assert: library_namespace.DOM is loaded.
 	if (!_.support_MathML) {
 		library_namespace.warn('The browser does not support MathML!');
-		return;
+		if (!library_namespace.is_WWW(true))
+			return;
 	}
 
 	// MathML nodes
@@ -392,7 +400,15 @@ function convert_MathML(handler) {
 
 	for (; i < length; i++) {
 		node = nodes[i];
-		if (!node.getAttribute)
+		if (!_.support_MathML) {
+			if (!node.title && node.getAttribute(convert_MathML.default_attribute)) {
+				// useless...
+				node.setAttribute('title', node.getAttribute(convert_MathML.default_attribute));
+			}
+			continue;
+		}
+
+		if (false && typeof node.getAttribute !== 'function')
 			return;
 
 		var text;
@@ -402,7 +418,7 @@ function convert_MathML(handler) {
 				|| !(text = node.firstChild.nodeValue.trim()))
 			continue;
 		// temporary usage.
-		var attribute = 'alt',
+		var attribute = convert_MathML.default_attribute,
 		//
 		structure = node.getAttribute(attribute) || node.getAttribute(attribute = 'title');
 		if (structure) {
@@ -443,6 +459,8 @@ function convert_MathML(handler) {
 }
 
 _.convert_MathML = convert_MathML;
+
+convert_MathML.default_attribute = 'alt';
 
 convert_MathML.handler = {
 	// toString()
@@ -575,11 +593,14 @@ convert_MathML.handler = {
 				// (operand_1) 的 (operand_2.mfrac[1]) 次方根。
 				// "7^(1/3)" → "<mroot> 7 3 </mroot>"
 				return {
-					mroot : [ operand_1, operand_2.mfrac[1] ]
+					mroot : operand_1 ? [ operand_1, operand_2.mfrac[1] ] : operand_2.mfrac[1]
 				};
 			}
 			return {
-				msup : [ operand_1, operand_2 ]
+				// 依照規定必須要有<mi>，不可以省略。 e.g., (^12)C
+				msup : [ operand_1 || {
+					none : null
+				}, operand_2 ]
 			};
 
 		case '√':
@@ -632,7 +653,7 @@ convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-±' + convert
 	return [ '[]', $1 ];
 } ],
 // exponents.
-[ /(\S+)\^([+\-±]?\S+)/, function($0, $1, $2) {
+[ /(\S*)\^([+\-±]?\S+)/, function($0, $1, $2) {
 	// [ , base, power ]
 	return [ '^', $1, $2 ];
 } ], [ /([√∛])([+\-±]?\S+)/, function($0, $1, $2) {
@@ -676,8 +697,7 @@ convert_MathML.RELATIONSHIP_PATTERN = new RegExp('^[' + convert_MathML.RELATIONS
 
 
 convert_MathML.process = function(text, order, queue) {
-	// library_namespace.debug('convert_MathML.process: [' + text + '] (' + order
-	// + ')');
+	library_namespace.debug('[' + text + '] (' + order + ')', 3, 'convert_MathML.process');
 	var changed, operator;
 	while (true) {
 		if (changed)
@@ -685,8 +705,7 @@ convert_MathML.process = function(text, order, queue) {
 		else if (!(operator = convert_MathML.operator[order++]))
 			break;
 		else {
-			// library_namespace.debug('convert_MathML.process: shift to ' +
-			// operator[0]);
+			library_namespace.debug('shift to ' + operator[0], 3, 'convert_MathML.process');
 		}
 
 		text = text.trim()
@@ -720,9 +739,9 @@ convert_MathML.process = function(text, order, queue) {
 				// + queue.separator
 				);
 			});
-		// library_namespace.debug('convert_MathML.process: → [' + text + ']');
+		library_namespace.debug('→ [' + text + ']', 3, 'convert_MathML.process');
 	}
-	// library_namespace.debug('convert_MathML.process: return [' + text + ']');
+	library_namespace.debug('return [' + text + ']', 3, 'convert_MathML.process');
 	return text;
 };
 
@@ -753,7 +772,7 @@ convert_MathML.parse = function(text, queue) {
 
 	// 前期處理。
 	// TODO: °º⁺⁻⁼ ⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾ ±♥´ ₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ ₐₑₒₓₔ½ ⅓⅔ ¼¾ ⅕⅖⅗⅘ ⅙⅚ ⅛⅜⅝⅞
-	text = text.replace(/!=/g, '≠').replace(/>=/g, '≥').replace(/<=/g, '≤').replace(/⅟/g, '1⁄');
+	text = text.replace(/!=|<>/g, '≠').replace(/>=/g, '≥').replace(/<=/g, '≤').replace(/⅟/g, '1⁄');
 
 	// TODO: &InvisibleTimes; 用於表示乘法運算中被省略的乘號。
 	// https://zh.wikipedia.org/wiki/%E6%95%B0%E5%AD%A6%E7%BD%AE%E6%A0%87%E8%AF%AD%E8%A8%80#Presentation_MathML
@@ -875,11 +894,14 @@ convert_MathML.parse_scalar = function(text, no_MathML) {
 		}, convert_MathML.parse_scalar(is_numeric[2]) ];
 
 	// 下標。e.g., "log_2"
-	if (is_numeric = text.match(/^([^_]+)_([^_]+)$/))
+	if (is_numeric = text.match(/^([^_]*)_([^_]+)$/))
 		// <msub><mi>x</mi><mi>y</mi></msub>
 		return {
-			msub : [ convert_MathML.parse_scalar(is_numeric[1]),
-					convert_MathML.parse_scalar(is_numeric[2]) ]
+			// 依照規定必須要有<mi>，不可以省略。 e.g., (_6)C
+			msub : [ convert_MathML.parse_scalar(is_numeric[1]) || {
+				// TODO: should use <none />
+				none : null
+			}, convert_MathML.parse_scalar(is_numeric[2]) ]
 		};
 
 	if (library_namespace.is_debug() &&
@@ -899,6 +921,66 @@ convert_MathML.parse_scalar = function(text, no_MathML) {
 
 // 將 convert_MathML.parse() 之結果，reduce 成所須的格式。
 convert_MathML.reduce = function(structure, node, handler) {
+	function process_mprescripts(structure, postsuperscript) {
+		if (!structure[0]
+		&& Array.isArray(structure[1])
+		&& structure[1][0] === '()'
+		&& structure[2]
+		// e.g., (_2), (_2^1), (_(a+b)), (_(a+b)^(c+d))
+		&& (Array.isArray(matched = structure[1][1]) ? /^[^_]$/.test(matched[0]) && (!matched[1] || /^_/.test(matched[1])) : !matched || /^_/.test(matched))
+		) {
+			// <mprescripts />
+			// https://developer.mozilla.org/zh-TW/docs/Web/MathML/Element/mmultiscripts
+			// e.g., (_2^1)x, (_2^1)x_4^3, (_2^1)x_4^(3)
+			var mmultiscripts = convert_MathML.reduce(structure[2], node, handler);
+			if (!Array.isArray(mmultiscripts)) {
+				if (mmultiscripts && Array.isArray(mmultiscripts.msub)) {
+					mmultiscripts = mmultiscripts.msub;
+					mmultiscripts.push(postsuperscript && {
+						mi : postsuperscript
+					} || {
+						none : null
+					});
+				} else {
+					mmultiscripts = [ mmultiscripts, {
+						none : null
+					}, {
+						none : null
+					} ];
+				}
+			}
+			mmultiscripts.push({
+				mprescripts : null
+			});
+			structure = structure[1][1];
+			if (!Array.isArray(structure)) {
+				structure = convert_MathML.reduce(structure, node, handler);
+				if (structure && Array.isArray(structure.msub)) {
+					structure = [ , structure.msub[1], structure.msub[0] ];
+				}
+			}
+
+			// presubscript
+			matched = convert_MathML.reduce(structure[1], node, handler);
+			if (!matched) {
+				matched = {
+						none : null
+				};
+			} else if (Array.isArray(matched.msub) && matched.msub.length === 2 && ('none' in matched.msub[0])) {
+				matched = matched.msub[1];
+			}
+
+			mmultiscripts.push(
+			// presubscript
+			matched,
+			// presuperscript
+			convert_MathML.reduce(structure[2], node, handler));
+			return {
+				mmultiscripts : mmultiscripts
+			};
+		}
+	}
+
 	// library_namespace.debug(structure);
 	if (!Array.isArray(structure))
 		return handler(structure);
@@ -958,6 +1040,10 @@ convert_MathML.reduce = function(structure, node, handler) {
 	var matched;
 
 	if (structure[0] === '^') {
+		if (matched = process_mprescripts(structure[1], structure[2])) {
+			return matched;
+		}
+
 		// e.g., sin^-1(2π)
 		if (Array.isArray(structure[2]) && structure[2].length === 3
 				&& !structure[2][0]) {
@@ -972,18 +1058,11 @@ convert_MathML.reduce = function(structure, node, handler) {
 			structure = [ , structure, matched[2] ];
 		}
 
-	} else if (!structure[0]
-			&& Array.isArray(structure[1])
-			&& structure[1][0] === '()'
-			// e.g., (_2), (_2^4), (_(a+b)), (_(a+b)^(c+d))
-			&& (Array.isArray(matched = structure[1][1]) ? /^_/
-					.test(matched[1]) : /^_/.test(matched))) {
-		// e.g., (_2^4)x, (_2^4)x_2^4, (_2^4)x_2^(4)
-
-		// TODO: <mprescripts/>
+	} else if (matched = process_mprescripts(structure)) {
+		return matched;
 	}
 
-	// TODO: <munderover/>, <math>∫_2^4 dy/dx</math>
+	// TODO: <munderover />, <math>∫_2^4 dy/dx</math>
 
 	structure.forEach(function(operand, index) {
 		if (index > 0)
