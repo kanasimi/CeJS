@@ -1428,7 +1428,7 @@ function module_code(library_namespace) {
 				// 設定item_data.url可以在閱讀電子書時，直接點選標題就跳到網路上的來源。
 				var url_header = item_data.url
 						&& ('<a href="' + item_data.url + '">'), title_layer = [];
-				// 卷標題
+				// 卷標題 part/episode > chapter > section
 				if (contents.title) {
 					title_layer
 							.push('<h2>', url_header ? url_header

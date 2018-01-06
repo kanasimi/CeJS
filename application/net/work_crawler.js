@@ -17,7 +17,7 @@
 // finish_up()
 
 TODO:
-對於漫畫，下載完畢後以章節為單位自動產生壓縮檔+自動刪除原始圖檔。每次下載前自動讀取壓縮檔資料。
+對於漫畫，下載完畢後以章節為單位自動產生壓縮檔並自動刪除下載目錄原始圖檔。每次下載前自動讀取壓縮檔資料。
 預設介面語言繁體中文+...
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
 parse 圖像
@@ -107,12 +107,24 @@ function module_code(library_namespace) {
 		if (library_namespace.env.arg_hash) {
 			for ( var key in this.import_arg_hash) {
 				if (key in library_namespace.env.arg_hash) {
+					var value = library_namespace.env.arg_hash[key];
 					library_namespace.log(library_namespace.display_align([
 					//
 					[ key + ': ', this[key] ],
 					//
-					[ '由命令列 → ', library_namespace.env.arg_hash[key] ] ]));
-					this[key] = library_namespace.env.arg_hash[key];
+					[ '由命令列 → ', value ] ]));
+					if (this.import_arg_hash[key] === 'number') {
+						try {
+							// this[key] = +value;
+							// 這樣可以處理如"1e3"
+							this[key] = JSON.parse(value);
+						} catch (e) {
+							library_namespace.error('Can not parse ' + key
+									+ '=' + value);
+						}
+					} else {
+						this[key] = value;
+					}
 				}
 			}
 		}
@@ -208,13 +220,13 @@ function module_code(library_namespace) {
 
 	/** {Natural}下載失敗時重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
 	Work_crawler.MAX_ERROR = 4;
-	/** {Natural}timeout in ms for get_URL() 逾時ms數。若逾時時間太小（如10秒），下載大檔案容易失敗。 */
+	/** {Natural}timeout in ms for get_URL() 下載圖片的逾時ms數。若逾時時間太小（如10秒），下載大檔案容易失敗。 */
 	Work_crawler.timeout = 30 * 1000;
 
 	Work_crawler.prototype = {
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
-		// 儲存路徑。圖片檔+紀錄檔下載位置。
+		// 下載檔案儲存目錄路徑。圖片檔+紀錄檔下載位置。
 		main_directory : (library_namespace.platform.nodejs
 				&& process.mainModule ? process.mainModule.filename
 				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '') : '.')
@@ -277,7 +289,7 @@ function module_code(library_namespace) {
 		// 這些值會被複製到記錄報告中。
 		last_update_status_keys : 'last_update_chapter,latest_chapter,latest_chapter_name,latest_chapter_url,last_update'
 				.split(','),
-		// 記錄報告檔案。
+		// 記錄報告檔案/日誌的路徑。
 		report_file : 'report.' + (new Date).format('%Y%2m%2dT%2H%2M%2S')
 				+ '.htm',
 		report_file_JSON : 'report.json',
@@ -362,18 +374,20 @@ function module_code(library_namespace) {
 		// 命令列可以設定的選項。通常僅做測試微調用。
 		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
 		import_arg_hash : {
-			main_directory : true,
-			user_agent : true,
-			one_by_one : true,
+			main_directory : 'string',
+			user_agent : 'string',
+			one_by_one : 'boolean',
+			MIN_LENGTH : 'number',
 			// 容許錯誤用的相關操作設定。
-			MAX_ERROR : true,
-			allow_EOI_error : true,
-			skip_error : true,
-			skip_chapter_data_error : true,
+			MAX_ERROR : 'number',
+			allow_EOI_error : 'boolean',
+			skip_error : 'boolean',
+			skip_chapter_data_error : 'boolean',
 			// 重新擷取用的相關操作設定。
-			regenerate : true,
-			reget_chapter : true,
-			recheck : true
+			regenerate : 'boolean',
+			reget_chapter : 'boolean',
+			recheck : 'boolean|string',
+			research : 'boolean'
 		},
 
 		set_agent : set_agent,
@@ -924,7 +938,11 @@ function module_code(library_namespace) {
 		// console.log(search_result);
 
 		// assert: work_title前後不應包含space
-		if (search_result[work_title = work_title.trim()]) {
+		work_title = work_title.trim();
+		if (this.research) {
+			library_namespace.log(this.id + ': Re-search title: [' + work_title
+					+ ']');
+		} else if (search_result[work_title]) {
 			library_namespace.log(this.id + ': Find cache: ' + work_title + '→'
 					+ JSON.stringify(search_result[work_title]));
 			finish(true);
