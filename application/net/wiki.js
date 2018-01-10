@@ -12442,7 +12442,7 @@ function module_code(library_namespace) {
 				if (options.filter && rows.length > 0) {
 					// TODO: 把篩選功能放到get_recent()，減少資料處理的成本。
 					rows = rows.filter(
-					// 篩選函數。
+					// 篩選函數。rcprop必須加上篩選函數需要的資料，例如編輯摘要。
 					typeof options.filter === 'function' ? options.filter
 					// 篩選標題。警告:從API取得的標題不包括"/"之後的文字，因此最好還是等到之後listener處理的時候，才來對標題篩選。
 					: library_namespace.is_RegExp(options.filter)

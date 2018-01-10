@@ -333,6 +333,9 @@ function module_code(library_namespace) {
 		// 當無法取得 chapter 資料時，直接嘗試下一章節。在手動+監視下 recheck 時可併用此項。 default:false
 		// skip_chapter_data_error : true,
 
+		// 重新搜尋。default:false
+		// research : false,
+
 		image_types : {
 			jpg : true,
 			jpeg : true,
