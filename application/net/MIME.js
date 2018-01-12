@@ -21,6 +21,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name.
 	name : 'application.net.MIME',
 
+	// 可以參考 CeL.application.storage.file
 	require : '',
 
 	// 設定不匯出的子函式。

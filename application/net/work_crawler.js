@@ -218,8 +218,8 @@ function module_code(library_namespace) {
 		return this.get_URL_options.agent = agent;
 	}
 
-	/** {Natural}下載失敗時重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
-	Work_crawler.MAX_ERROR = 4;
+	/** {Natural}下載失敗時最多重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
+	Work_crawler.MAX_ERROR_RETRY = 4;
 	/** {Natural}timeout in ms for get_URL() 下載圖片的逾時ms數。若逾時時間太小（如10秒），下載大檔案容易失敗。 */
 	Work_crawler.timeout = 30 * 1000;
 
@@ -241,9 +241,9 @@ function module_code(library_namespace) {
 		// 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)',
 		// 可容許的錯誤次數。
-		MAX_ERROR : Work_crawler.MAX_ERROR,
+		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
 		// 可容許的 EOI (end of image) 錯誤次數。
-		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR),
+		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR_RETRY),
 		// 最小容許圖案檔案大小 (bytes)。
 		// 對於極少出現錯誤的網站，可以設定一個比較小的數值，並且設定.allow_EOI_error=false。因為這類型的網站要不是無法取得檔案，要不就是能夠取得完整的檔案；要取得破損檔案，並且已通過EOI測試的機會比較少。
 		// MIN_LENGTH : 4e3,
@@ -382,7 +382,7 @@ function module_code(library_namespace) {
 			one_by_one : 'boolean',
 			MIN_LENGTH : 'number',
 			// 容許錯誤用的相關操作設定。
-			MAX_ERROR : 'number',
+			MAX_ERROR_RETRY : 'number',
 			allow_EOI_error : 'boolean',
 			skip_error : 'boolean',
 			skip_chapter_data_error : 'boolean',
@@ -450,7 +450,7 @@ function module_code(library_namespace) {
 
 			typeof callback === 'function' && callback();
 		}, this.charset, null, Object.assign({
-			error_retry : this.MAX_ERROR
+			error_retry : this.MAX_ERROR_RETRY
 		}, this.get_URL_options));
 	}
 
@@ -1101,7 +1101,7 @@ function module_code(library_namespace) {
 			}
 
 		}, url.charset || this.charset, post_data, Object.assign({
-			error_retry : this.MAX_ERROR
+			error_retry : this.MAX_ERROR_RETRY
 		}, this.get_URL_options));
 	}
 
@@ -1156,12 +1156,12 @@ function module_code(library_namespace) {
 			if (!html) {
 				library_namespace
 						.error('Failed to get work data of ' + work_id);
-				if (error_count === _this.MAX_ERROR) {
+				if (error_count === _this.MAX_ERROR_RETRY) {
 					throw _this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD;
 				}
 				error_count = (error_count | 0) + 1;
 				library_namespace.log('process_work_data: Retry ' + error_count
-						+ '/' + _this.MAX_ERROR + '...');
+						+ '/' + _this.MAX_ERROR_RETRY + '...');
 				_this.get_work_data({
 					// 书号
 					id : work_id,
@@ -1307,7 +1307,7 @@ function module_code(library_namespace) {
 				= work_URL = _this.full_URL(_this.chapter_list_URL, work_id);
 				get_URL(work_URL, process_chapter_list_data, _this.charset,
 						null, Object.assign({
-							error_retry : _this.MAX_ERROR
+							error_retry : _this.MAX_ERROR_RETRY
 						}, _this.get_URL_options));
 			} else {
 				process_chapter_list_data(XMLHttp);
@@ -1814,7 +1814,7 @@ function module_code(library_namespace) {
 				if (!html) {
 					library_namespace.error('Failed to get chapter data of '
 							+ work_data.directory + chapter);
-					if (get_data.error_count === _this.MAX_ERROR) {
+					if (get_data.error_count === _this.MAX_ERROR_RETRY) {
 						if (_this.skip_chapter_data_error) {
 							// Skip this chapter if do not throw
 							library_namespace.warn('Skip ' + work_data.title
@@ -1826,8 +1826,8 @@ function module_code(library_namespace) {
 					}
 					get_data.error_count = (get_data.error_count | 0) + 1;
 					library_namespace.log('process_chapter_data: Retry '
-							+ get_data.error_count + '/' + _this.MAX_ERROR
-							+ '...');
+							+ get_data.error_count + '/'
+							+ _this.MAX_ERROR_RETRY + '...');
 					if (!work_data.reget_chapter) {
 						library_namespace
 								.warn('因cache file壞了(例如為空)，將重新取得chapter_URL，設定.reget_chapter。');
@@ -1950,7 +1950,7 @@ function module_code(library_namespace) {
 			if (work_data.reget_chapter) {
 				get_URL(chapter_URL, pre_parse_chapter_data, _this.charset,
 						null, Object.assign({
-							error_retry : _this.MAX_ERROR
+							error_retry : _this.MAX_ERROR_RETRY
 						}, _this.get_URL_options));
 
 			} else {
@@ -2136,13 +2136,13 @@ function module_code(library_namespace) {
 			// has_error則必然(!!verified_image===false)
 
 			if (false) {
-				console.log(_this.skip_error + ',' + _this.MAX_ERROR + ','
-						+ has_error);
+				console.log(_this.skip_error + ',' + _this.MAX_ERROR_RETRY
+						+ ',' + has_error);
 				console.log('error count: ' + image_data.error_count);
 			}
 			if (verified_image || _this.skip_error
 			// 有出問題的話，最起碼都需retry足夠次數。
-			&& image_data.error_count === _this.MAX_ERROR
+			&& image_data.error_count === _this.MAX_ERROR_RETRY
 			//
 			|| _this.allow_EOI_error
 			//
@@ -2219,7 +2219,7 @@ function module_code(library_namespace) {
 			+ (contents.length >= _this.MIN_LENGTH ? '' : ', too small'))
 			//
 			+ '): Failed to get ') + url + '\n→ ' + image_data.file);
-			if (image_data.error_count === _this.MAX_ERROR) {
+			if (image_data.error_count === _this.MAX_ERROR_RETRY) {
 				image_data.has_error = true;
 				// throw new Error(_this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD);
 				library_namespace.log(_this.id + ': '
@@ -2243,7 +2243,7 @@ function module_code(library_namespace) {
 
 			image_data.error_count = (image_data.error_count | 0) + 1;
 			library_namespace.log('get_images: Retry ' + image_data.error_count
-					+ '/' + _this.MAX_ERROR + '...');
+					+ '/' + _this.MAX_ERROR_RETRY + '...');
 			_this.get_images(image_data, callback);
 
 		}, 'binary', null, Object.assign({
@@ -2372,7 +2372,7 @@ function module_code(library_namespace) {
 					|| this.full_URL(this.chapter_URL(work_data, chapter)),
 			// pass Referer, User-Agent
 			get_URL_options : Object.assign({
-				error_retry : this.MAX_ERROR
+				error_retry : this.MAX_ERROR_RETRY
 			}, this.get_URL_options),
 			words_so_far : work_data.words_so_far
 		},

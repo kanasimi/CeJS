@@ -702,6 +702,8 @@ function module_code(library_namespace) {
 	cache_file.encoding = library_namespace.platform.nodejs ? 'utf8' : 'UTF-8';
 
 	// ---------------------------------------------------------------
+	// 可以參考 CeL.application.net.MIME
+	// https://github.com/sindresorhus/file-type/blob/master/index.js
 
 	// Magic_number[type]={Object}data
 	var Magic_number = {
