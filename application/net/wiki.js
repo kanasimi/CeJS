@@ -1134,6 +1134,9 @@ function module_code(library_namespace) {
 	//
 	// Fichier:
 	// https://fr.wikipedia.org/wiki/Aide:Ins%C3%A9rer_une_image_(wikicode,_avanc%C3%A9)
+	//
+	// https://zh.wikipedia.org/wiki/Wikipedia:互助客栈/其他#增设空间“U：”、“UT：”作为“User：”、“User_talk：”的Alias
+	// 提議增加F、FT指向File、File Talk
 	/** {RegExp}檔案的匹配模式 for parser。 */
 	var PATTERN_file_prefix = 'File|Fichier|檔案|档案|文件|ファイル|Image|圖像|图像|画像|Media|媒[體体](?:文件)?';
 
@@ -4426,7 +4429,12 @@ function module_code(library_namespace) {
 	var PATTERN_user_link =
 	// "\/": e.g., [[user talk:user_name/Flow]]
 	// 大小寫無差，但NG: "\n\t"
-	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]{}\/]+)/i,
+	//
+	// https://zh.wikipedia.org/wiki/Wikipedia:互助客栈/其他#增设空间“U：”、“UT：”作为“User：”、“User_talk：”的Alias
+	// https://phabricator.wikimedia.org/T183711
+	// Doesn't conflict with any language code or other interwiki link.
+	// https://gerrit.wikimedia.org/r/#/c/400267/4/wmf-config/InitialiseSettings.php
+	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *([^#\|\[\]{}\/]+)/i,
 	// [[特殊:功績]]: zh-classical
 	// matched: [ all, " user name " ]
 	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録|功績)\/([^#\|\[\]{}\/]+)/i,
@@ -9825,7 +9833,7 @@ function module_code(library_namespace) {
 					// login error
 					if (!(session.login_failed_count > 0)) {
 						session.login_failed_count = 1;
-					} else if (++session.login_failed_count > wiki_API.login.MAX_ERROR) {
+					} else if (++session.login_failed_count > wiki_API.login.MAX_ERROR_RETRY) {
 						// 連續登入失敗太多次就跳出程序。
 						throw 'wiki_API.login: Login failed '
 								+ session.login_failed_count + ' times! Exit!';
@@ -9842,8 +9850,8 @@ function module_code(library_namespace) {
 					library_namespace.error('wiki_API.login: login ['
 							+ session.token.lgname + '] failed '
 							+ session.login_failed_count + '/'
-							+ wiki_API.login.MAX_ERROR + ': [' + data.result
-							+ '] ' + data.reason);
+							+ wiki_API.login.MAX_ERROR_RETRY + ': ['
+							+ data.result + '] ' + data.reason);
 					if (data.result !== 'Failed' || data.result !== 'NeedToken') {
 						// Unknown result
 					}
@@ -9939,7 +9947,8 @@ function module_code(library_namespace) {
 		return session;
 	};
 
-	wiki_API.login.MAX_ERROR = 8;
+	/** {Natural}登入失敗時最多重新嘗試下載的次數。 */
+	wiki_API.login.MAX_ERROR_RETRY = 8;
 
 	/** {Array}欲 copy 至 session.token 之 keys。 */
 	wiki_API.login.copy_keys = 'lguserid,lgtoken,cookieprefix,sessionid'
