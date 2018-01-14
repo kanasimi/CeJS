@@ -4421,6 +4421,8 @@ function module_code(library_namespace) {
 	 * 
 	 * user_name = matched[1].trim()
 	 * 
+	 * match: [[:language_code:user_talk:user_name]]
+	 * 
 	 * @type {RegExp}
 	 * 
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics&utf8
@@ -4448,6 +4450,8 @@ function module_code(library_namespace) {
 	 * @example <code>
 	if (CeL.wiki.parse.user(CeL.wiki.title_link_of(title), user)) {}
 	 * </code>
+	 * 
+	 * TODO: 應該按照不同的維基項目來做篩選。
 	 * 
 	 * @param {String}wikitext
 	 *            wikitext to parse

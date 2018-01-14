@@ -2052,6 +2052,10 @@ function module_code(library_namespace) {
 				+ (work_data.image_count > 0 ? ', '
 				//
 				+ work_data.image_count + ' images' : '') + ' done.');
+				if (error_file_logs.length > 0) {
+					library_namespace.error(error_file_logs.length
+							+ ' images download error.');
+				}
 				if (typeof callback === 'function') {
 					callback(work_data);
 				}
