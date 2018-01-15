@@ -1272,6 +1272,7 @@ function module_code(library_namespace) {
 					words_so_far : true,
 					last_download : true,
 					book_chapter_count : true,
+					error_images : true,
 					chapter_count : true,
 					image_count : true
 				};
@@ -1552,6 +1553,7 @@ function module_code(library_namespace) {
 				work_data.last_download.chapter = _this.start_chapter;
 			}
 
+			work_data.error_images = 0;
 			if (work_data.last_download.chapter === _this.start_chapter) {
 				work_data.image_count = 0;
 			} else {
@@ -2007,6 +2009,8 @@ function module_code(library_namespace) {
 				log_prefix = (new Date).format('%4Y%2m%2d') + '	';
 				image_list.forEach(function(image_data, index) {
 					if (image_data.has_error) {
+						// 記錄下載錯誤的檔案數量。
+						work_data.error_images++;
 						error_file_logs.push(log_prefix + image_data.file + '	'
 								+ image_data.parsed_url);
 					}
@@ -2052,8 +2056,9 @@ function module_code(library_namespace) {
 				+ (work_data.image_count > 0 ? ', '
 				//
 				+ work_data.image_count + ' images' : '') + ' done.');
-				if (error_file_logs.length > 0) {
-					library_namespace.error(error_file_logs.length
+				if (work_data.error_images > 0) {
+					library_namespace.error(work_data.directory_name + ': '
+							+ work_data.error_images
 							+ ' images download error.');
 				}
 				if (typeof callback === 'function') {
