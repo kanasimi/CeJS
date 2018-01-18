@@ -380,6 +380,7 @@ function module_code(library_namespace) {
 			main_directory : 'string',
 			user_agent : 'string',
 			one_by_one : 'boolean',
+			start_chapter : 'number',
 			MIN_LENGTH : 'number',
 			// 容許錯誤用的相關操作設定。
 			MAX_ERROR_RETRY : 'number',
@@ -2059,7 +2060,7 @@ function module_code(library_namespace) {
 				if (work_data.error_images > 0) {
 					library_namespace.error(work_data.directory_name + ': '
 							+ work_data.error_images
-							+ ' images download error.');
+							+ ' images download error this time.');
 				}
 				if (typeof callback === 'function') {
 					callback(work_data);
@@ -2242,7 +2243,8 @@ function module_code(library_namespace) {
 				// 檔案有驗證過，只是太小時，應該不是 false。
 				&& verified_image !== false) {
 					library_namespace.warn('或許圖像是完整的，只是過小而未達標，例如幾乎為空白之圖像。'
-							+ '您可先設定 skip_error=true 來忽略圖像錯誤，'
+							+ '您可設定 MIN_LENGTH 如 MIN_LENGTH=2000；'
+							+ '或者先設定 skip_error=true 來忽略圖像錯誤，'
 							+ '待取得檔案後，自行更改檔名，去掉錯誤檔名後綴'
 							+ JSON.stringify(_this.EOI_error_postfix)
 							+ '以跳過此錯誤。');
