@@ -1757,6 +1757,20 @@ function module_code(library_namespace) {
 		};
 
 		_URL.headers = Object.assign({
+			// 乾脆模擬得更真實一點。
+			// Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
+			// + 'image/webp,image/apng,*/*;q=0.8',
+
+			// 為了防止 Cloudflare bot protection(?) 阻擋，必須加上 Accept-Language。
+			// TODO: get language from system infomation
+			'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
+
+			// 'Cache-Control' : 'no-cache',
+			// Connection : 'keep-alive',
+			// DNT : 1,
+			// Host : _URL.host,
+			// 'Upgrade-Insecure-Requests' : 1,
+
 			// User Agent
 			'User-Agent' : get_URL_node.default_user_agent
 		}, options.headers);

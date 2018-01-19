@@ -1156,7 +1156,11 @@ function module_code(library_namespace) {
 			var html = XMLHttp.responseText;
 			if (!html) {
 				library_namespace
-						.error('Failed to get work data of ' + work_id);
+						.error('Failed to get work data of '
+								+ work_id
+								+ (XMLHttp.buffer
+										&& XMLHttp.buffer.length === 0 ? ': Nothing get'
+										: ''));
 				if (error_count === _this.MAX_ERROR_RETRY) {
 					throw _this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD;
 				}
