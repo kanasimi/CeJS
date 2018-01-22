@@ -1067,7 +1067,7 @@ function module_code(library_namespace) {
 				&& item1.href === item2.href;
 	}
 
-	// 正規化XHTML書籍章節內容。
+	// 正規化 XHTML 書籍章節內容。
 	function normailize_contents(contents) {
 		library_namespace.debug('正規化XHTML書籍章節內容: ' + contents, 6);
 		contents = contents.replace(/\r\n?/g, '\n')

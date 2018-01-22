@@ -2336,7 +2336,7 @@ function module_code(library_namespace) {
 
 	// 找出段落開頭。
 	// '&nbsp;' 已經被 normailize_contents() @CeL.EPUB 轉換為 '&#160;'
-	var PATTERN_PARAGRAPH_START_CMN = /(^|\n|<br[^<>]*>|<\/?p[^<>]*>)(?:&#160;|\s){4,}([^\s\n&])/ig,
+	var PATTERN_PARAGRAPH_START_CMN = /(^|\n|<\/?(?:br|p)(?:[^a-z][^<>]*)?>)(?:&#160;|\s){4,}([^\s\n&])/ig,
 	//
 	PATTERN_PARAGRAPH_START_JP = new RegExp(PATTERN_PARAGRAPH_START_CMN.source
 			.replace('{4,}', '{2,}'), PATTERN_PARAGRAPH_START_CMN.flags);
@@ -2393,7 +2393,7 @@ function module_code(library_namespace) {
 		},
 		//
 		item = ebook.add(item_data, {
-			// part_title 卷/集/幕
+			// part_title 卷/集/幕/部
 			title : get_label(data.title || ''),
 			// chapter_title 章節/回节折篇話话
 			sub_title : get_label(data.sub_title || ''),

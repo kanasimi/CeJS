@@ -144,6 +144,7 @@ function module_code(library_namespace) {
 	//
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 	// site: e.g., 'zhwiki'
+	// @see wikidatawiki_p.wb_items_per_site.ips_site_id
 	//
 	// [[en:Help:Interwikimedia_links]]
 	// https://zh.wikipedia.org/wiki/Special:GoToInterwiki/testwiki:
@@ -1970,8 +1971,8 @@ function module_code(library_namespace) {
 		if (false && wikitext !== section_list.toString()) {
 			// debug 用. check parser, test if parser working properly.
 			throw new Error('get_sections: Parser error'
-			// may use get_page_title_link()
-			+ (page_data ? ': [[' + page_data.title + ']]' : ''));
+			//
+			+ (page_data ? ': ' + get_page_title_link(page_data) : ''));
 		}
 		return section_list;
 	}
@@ -4694,8 +4695,7 @@ function module_code(library_namespace) {
 				} else {
 					// 當作正常內部連結 wikilink / internal link。
 					// e.g., 'ABC (disambiguation)|ABC'
-					// may use get_page_title_link()
-					URL = '[[' + URL + ']]';
+					URL = get_page_title_link(URL);
 				}
 			}
 			if (callback) {
@@ -4743,8 +4743,7 @@ function module_code(library_namespace) {
 			? '|' + title.replace(/\s*\([^()]+\)$/, '') : '');
 
 			if (add_quote) {
-				// may use get_page_title_link()
-				link = '[[' + link + ']]';
+				link = get_page_title_link(link);
 			}
 
 			return link;
@@ -5128,8 +5127,7 @@ function module_code(library_namespace) {
 		if (need_escape) {
 			title = ':' + title;
 		}
-		// TODO: for template, use {{title}}
-		// may use get_page_title_link()
+		// TODO: for template transclusion, use {{title}}
 		return '[['
 				+ title
 				+ (display_text && display_text !== title ? '|' + display_text
@@ -5724,8 +5722,8 @@ function module_code(library_namespace) {
 				this.actions.unshift([ 'check' ], next);
 				this.next();
 			} else if (this.stopped && !next[2].skip_stopped) {
-				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯[['
-						+ (this.last_page && this.last_page.title) + ']]！');
+				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯'
+						+ get_page_title_link(this.last_page) + '！');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(this, this.last_page.title, '已停止作業');
@@ -5770,9 +5768,8 @@ function module_code(library_namespace) {
 					// 採用 this.last_page 的方法，
 					// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 					library_namespace
-							.warn('wiki_API.prototype.next: Denied to edit flow [['
-									// may use get_page_title_link()
-									+ this.last_page.title + ']]');
+							.warn('wiki_API.prototype.next: Denied to edit flow '
+									+ get_page_title_link(this.last_page));
 					// next[3] : callback
 					if (typeof next[3] === 'function')
 						next[3].call(this, this.last_page.title, 'denied');
@@ -5817,9 +5814,8 @@ function module_code(library_namespace) {
 				// 採用 this.last_page 的方法，
 				// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 				library_namespace
-						.warn('wiki_API.prototype.next: Denied to edit [['
-						// may use get_page_title_link()
-						+ this.last_page.title + ']]');
+						.warn('wiki_API.prototype.next: Denied to edit '
+								+ get_page_title_link(this.last_page));
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(this, this.last_page.title, 'denied');
@@ -6854,11 +6850,14 @@ function module_code(library_namespace) {
 					}
 
 					// assert: 0 < effect_length < pages.length
-					library_namespace.debug('一次取得大量頁面時，回傳內容過長而被截斷。將回退 '
-							+ (pages.length - effect_length) + '頁，下次將自 '
-							+ effect_length + '/' + pages.length + ' [['
-							+ pages[effect_length].title + ']] id '
-							+ continue_id + ' 開始。', 1, 'wiki_API.work');
+					library_namespace
+							.debug('一次取得大量頁面時，回傳內容過長而被截斷。將回退 '
+									+ (pages.length - effect_length)
+									+ '頁，下次將自 ' + effect_length + '/'
+									+ pages.length + ' '
+									+ get_page_title_link(pages[effect_length])
+									+ ' id ' + continue_id + ' 開始。', 1,
+									'wiki_API.work');
 					pages = pages.slice(0, effect_length);
 
 				} else {
@@ -6881,10 +6880,10 @@ function module_code(library_namespace) {
 						+ (pages.length - pages.OK_length)
 						+ '頁'
 						+ (pages[pages.OK_length] ? '，下次將自 ' + pages.OK_length
-								+ '/' + pages.length + ' [['
-								+ pages[pages.OK_length].title + ']] id '
-								+ pages[pages.OK_length].pageid + ' 開始' : '')
-						+ '。', 1, 'wiki_API.work');
+								+ '/' + pages.length + ' '
+								+ get_page_title_link(pages[pages.OK_length])
+								+ ' id ' + pages[pages.OK_length].pageid
+								+ ' 開始' : '') + '。', 1, 'wiki_API.work');
 				pages = pages.slice(0, pages.OK_length);
 			}
 
@@ -8335,10 +8334,10 @@ function module_code(library_namespace) {
 						+ ('missing' in page_data
 						// e.g., 'wiki_API.page: Not exists: [[title]]'
 						? 'Not exists' : 'No contents')
-						// may use get_page_title_link()
+						//
 						+ ': ' + (page_data.title
 						//
-						? '[[' + page_data.title + ']]'
+						? get_page_title_link(page_data)
 						//
 						: 'id ' + page_data.pageid));
 					}
@@ -8984,9 +8983,8 @@ function module_code(library_namespace) {
 				library_namespace.warn(
 				//
 				'wiki_API.langlinks.parse: No langlinks exists?'
-						+ (langlinks && langlinks.title ? ' [['
-						// may use get_page_title_link()
-						+ langlinks.title + ']]' : ''));
+						+ (langlinks && langlinks.title ? ' '
+								+ get_page_title_link(langlinks) : ''));
 				if (library_namespace.is_debug(2)
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
@@ -10286,12 +10284,12 @@ function module_code(library_namespace) {
 				 * 
 				 * 須注意是否有其他競相編輯的 bots。
 				 */
-				library_namespace.warn('wiki_API.edit: Error to edit [['
-						+ get_page_title(title) + ']]: ' + error);
+				library_namespace.warn('wiki_API.edit: Error to edit '
+						+ get_page_title_link(title) + ': ' + error);
 			} else if (data.edit && ('nochange' in data.edit)) {
 				// 在極少的情況下，data.edit === undefined。
-				library_namespace.info('wiki_API.edit: ['
-						+ get_page_title(title) + ']: no change');
+				library_namespace.info('wiki_API.edit: '
+						+ get_page_title_link(title) + ': no change');
 			}
 			if (typeof callback === 'function') {
 				// title.title === get_page_title(title)
@@ -10871,8 +10869,8 @@ function module_code(library_namespace) {
 					library_namespace.warn(
 					//
 					'wiki_API.redirects: Not exists: '
-					// may use get_page_title_link()
-					+ (page.title ? '[[' + page.title + ']]'
+					//
+					+ (page.title ? get_page_title_link(page)
 					//
 					: ' id ' + page.pageid));
 				}
@@ -13934,8 +13932,8 @@ function module_code(library_namespace) {
 			case 'page':
 				// get page contents 頁面內容。
 				to_get_data = function(title, callback) {
-					library_namespace.log('wiki_API.cache: Get content of [['
-							+ get_page_title(title) + ']].');
+					library_namespace.log('wiki_API.cache: Get content of '
+							+ get_page_title_link(title));
 					wiki_API.page(title, function(page_data) {
 						callback(page_data);
 					}, library_namespace.new_options(_this, operation));
@@ -13949,9 +13947,9 @@ function module_code(library_namespace) {
 							redirect_list) {
 						library_namespace.log(
 						//
-						'redirects (alias) of [['
+						'redirects (alias) of '
 						//
-						+ get_page_title(title) + ']]: ('
+						+ get_page_title_link(title) + ': ('
 						//
 						+ redirect_list.length + ') ['
 						//
@@ -13978,8 +13976,7 @@ function module_code(library_namespace) {
 					wiki_API.list(title, function(pages) {
 						library_namespace.log(list_type
 						// allpages 不具有 title。
-						// may use get_page_title_link()
-						+ (title ? ' [[' + get_page_title(title) + ']]' : '')
+						+ (title ? ' ' + get_page_title_link(title) : '')
 						//
 						+ ': ' + pages.length + ' page(s).');
 						// page list, title page_data
@@ -14010,8 +14007,8 @@ function module_code(library_namespace) {
 			var title = list;
 			if (typeof title === 'string' && _this.title_prefix)
 				title = _this.title_prefix + title;
-			library_namespace.debug('處理單一項作業: [[' + get_page_title(title)
-					+ ']]。', 3, 'wiki_API.cache');
+			library_namespace.debug('處理單一項作業: ' + get_page_title_link(title)
+					+ '。', 3, 'wiki_API.cache');
 			to_get_data(title, write_cache);
 		});
 	};
@@ -14553,8 +14550,8 @@ function module_code(library_namespace) {
 						count + ' ('
 						//
 						+ (100 * position / file_size | 0) + '%): '
-						// may use get_page_title_link()
-						+ speed + ' [[' + page_data.title + ']]');
+						//
+						+ speed + ' ' + get_page_title_link(page_data));
 					}
 
 					// ----------------------------
@@ -14570,9 +14567,9 @@ function module_code(library_namespace) {
 							return [ CeL.wiki.edit.cancel,
 							//
 							'本作業僅處理條目命名空間或模板或 Category' ];
-							throw '非條目:[[' + page_data.title
+							throw '非條目:' + get_page_title_link(page_data)
 							//
-							+ ']]! 照理來說不應該出現有 ns !== 0 的情況。';
+							+ '! 照理來說不應該出現有 ns !== 0 的情況。';
 						}
 
 						/** {Object}revision data. 修訂版本資料。 */
