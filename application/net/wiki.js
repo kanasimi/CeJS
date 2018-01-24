@@ -11355,8 +11355,8 @@ function module_code(library_namespace) {
 	user_name,
 	/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
 	wmflabs,
-	/** mysql handler */
-	mysql,
+	/** node mysql handler */
+	node_mysql,
 	/** {Object}default SQL configurations */
 	SQL_config;
 
@@ -11521,7 +11521,7 @@ function module_code(library_namespace) {
 		// delete CeL.wiki.use_Varnish;
 
 		try {
-			if (mysql = require('mysql')) {
+			if (node_mysql = require('mysql')) {
 				SQL_config = parse_SQL_config(home_directory
 				// The production replicas.
 				// https://wikitech.wikimedia.org/wiki/Help:Toolforge#The_databases
@@ -11554,6 +11554,11 @@ function module_code(library_namespace) {
 	 *          TODO: https://github.com/sidorares/node-mysql2
 	 */
 	function run_SQL(SQL, callback, config) {
+		function _callback(error, results, fields) {
+			connection.release();
+			callback(error, results, fields);
+		}
+
 		// TypeError: Converting circular structure to JSON
 		// library_namespace.debug(JSON.stringify(config), 3, 'run_SQL');
 		if (!config && !(config = SQL_config)) {
@@ -11567,12 +11572,14 @@ function module_code(library_namespace) {
 
 		library_namespace.debug(String(SQL), 3, 'run_SQL');
 		// console.log(JSON.stringify(config));
-		var connection = mysql.createConnection(config);
+		var connection = node_mysql.createConnection(config);
 		connection.connect();
 		if (Array.isArray(SQL)) {
-			connection.query(SQL[0], SQL[1], callback);
+			// ("SQL", [values], callback)
+			connection.query(SQL[0], SQL[1], _callback);
 		} else {
-			connection.query(SQL, callback);
+			// ("SQL", callback)
+			connection.query(SQL, _callback);
 		}
 		connection.end();
 	}
@@ -11658,9 +11665,22 @@ function module_code(library_namespace) {
 	 * SQL 查詢功能之前端。
 	 * 
 	 * @example <code>
-	 * // change language (and database/host).
-	 * //CeL.wiki.SQL.config.set_language('en');
-	 * CeL.wiki.SQL(SQL, function callback(error, rows, fields) { if(error) console.error(error); }, 'en');
+
+	// change language (and database/host).
+	//CeL.wiki.SQL.config.set_language('en');
+	CeL.wiki.SQL(SQL, function callback(error, rows, fields) { if(error) console.error(error); else console.log(rows); }, 'en');
+
+	// get sitelink count of wikidata items
+	// https://www.mediawiki.org/wiki/Wikibase/Schema/wb_items_per_site
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbsetsitelink
+	var SQL_get_sitelink_count = 'SELECT ips_item_id, COUNT(*) AS `link_count` FROM wb_items_per_site GROUP BY ips_item_id LIMIT 10';
+	function callback(error, rows, fields) { if(error) console.error(error); else console.log(rows); }
+	var SQL_session = new CeL.wiki.SQL(function(error){}, 'wikidata');
+	SQL_session.SQL(SQL_get_sitelink_count, callback);
+
+	// one-time method
+	CeL.wiki.SQL(SQL_get_sitelink_count, callback, 'wikidata');
+
 	 * </code>
 	 * 
 	 * @example <code>
@@ -11684,7 +11704,7 @@ function module_code(library_namespace) {
 	 * @param {String}[dbname]
 	 *            database name.
 	 * @param {Function}callback
-	 *            回調函數。
+	 *            回調函數。 callback(error)
 	 * @param {String}[language]
 	 *            database language (and database/host). default host: TOOLSDB.<br />
 	 *            e.g., 'en', 'commons', 'wikidata', 'meta'.
@@ -11793,7 +11813,7 @@ function module_code(library_namespace) {
 		}
 		// 需要重新設定 this.connection，否則會出現:
 		// Error: Cannot enqueue Handshake after invoking quit.
-		this.connection = mysql.createConnection(this.config);
+		this.connection = node_mysql.createConnection(this.config);
 		this.connection.connect(callback);
 		return this;
 	};
