@@ -291,6 +291,7 @@ CeL.era.pass_on = {
 		 * 曲循經傳曆日
 		 * 
 		 * @see https://zh.wikipedia.org/wiki/%E9%B2%81%E5%9B%BD
+		 *      http://blog.sina.com.cn/s/blog_bdbfa6720102wm31.html
 		 * @seealso 杜預《春秋長曆》，原書已佚，今本是清四庫館臣從《永樂大典》中輯出的，附於杜預《春秋釋例》之後。按此書主要以《乾度曆》推算朔閏，凡與經傳不符者則附以作者考證
 		 */
 		'魯春秋|-722/1/16~-479/12/19|-722/=591 3qsc49u 4i9 3gb048a 3a8s445 3mn046i 5d1 49u 4pl85as 3rf052k 505 3pt847e 5e1 3st84i0 4t983q1 3os 505 4fvg576 5s9 3sws4a9 3ep83u2 3ot 3me 4m7058y 55bg5uq 40984ic 3rd850a 46l 3poc47d 5ac 57d85uw 5as 48a 3mwc505 46i 4of05ag 57h84a0 4plo3px 3my 4mgc591 3sd84gy 5e9 4a9 3px 3my 4g4s579 47e 4sh84sp85es 3t584ac 446 42y 4o185d1 3z4s4h4 5es 48k 44a 3mng3mng4zu 5sa 4h0 5es 3t7052s 4wq 4bzg4f3g56y 554c5sh 4i9 3ep83u2 3p1 380s42e 58z 3qrw5uq 5ea 3eq448a 3p1 380s42y 4o1859e 5us 40b05as 3rd850q 4z9 3pss47e 5ah 3sws4a0 4ppo3q1 3fu 505 3pss47m 4soc5ea 4aa 3q1 325o3n1 37wc3o5 4gi 4sp84sr05ec 4ac 44a 3mp842z 3mi45s9 4h0 4t585ew 59w 4g9o3fe 4yz 3prg5s9 3z8c4i9 3u1 3hx 31p83mi 571 3ql83qrw5uq 4ia 3eq448a 3p1 381842y 4o1859h 49w 5as 3rd848c 3mwc4z9 46i 4ofg5e1 4a0 4pl85ax 32583n0 505 47e 4ros5e9 3sx84aa 3q1 325o3ot 37wc3o5 4gi 4sp85es 4ac 3qz03nt850a 4yz 42t 4h0 4sr04sr05ew 52s 50a 4bzg4z1 3prw47d 4i0 4t983u1 33xo3p1 3mi 4mgc591 47m 408c4ia 3eq448a 439 3knw42y 59h 3sd849w 5as 3rd8|參照用',
@@ -322,6 +323,7 @@ CeL.era.pass_on = {
 		'/哀公|魯春秋-494~-479/12/19|:魯春秋|準=2日|君主名=姬將;姬蔣|卒=前468年|在位=前494年~前468年',
 		'/哀公|-478~-467|17/=:CE|精=年|卒=前468年|在位=前494年~前468年|注=魯哀公27年，魯哀公通過邾國逃到越國。《左傳·哀公二十七年》：公患三桓之侈也，欲以諸侯去之。|注=此後《史記》與楊寬《戰國史料編年輯證》有出入。',
 		// 之後的 楊寬《戰國史料編年輯證》與 史記 不同
+		// http://blog.sina.com.cn/s/blog_bdbfa6720102w5zz.html
 
 		// 資料出處: 《史記·蔡世家》
 		// https://zh.wikipedia.org/wiki/%E6%9B%B9%E5%9C%8B
@@ -361,6 +363,7 @@ CeL.era.pass_on = {
 
 		// 《清華大學藏戰國竹簡（貳）·繫年》
 		// https://zh.wikipedia.org/wiki/%E6%A5%9A%E5%9B%BD
+		// http://blog.sina.com.cn/s/blog_b7e66ce701016a9y.html
 		'楚國/熊勇|-847~||精=年|時期=周諸侯國',
 		'/熊嚴|-837~||精=年',
 		'/熊霜|-827~||精=年',
@@ -390,7 +393,7 @@ CeL.era.pass_on = {
 		'/宣王|-369~||精=年|卒=前340年',
 		'/威王|-339~||精=年|卒=前329年|在位=前339年~前329年',
 		'/懷王|-328~||精=年|卒=前299年|在位=前328年~前299年',
-		'/頃王|-298~||精=年',
+		'/頃王|-298~||精=年|君主=楚頃襄王',
 		'/考烈王|-262~||精=年|卒=前238年',
 		'/幽王|-237~||精=年',
 		'/哀王|-228~||精=年|注=未改元',

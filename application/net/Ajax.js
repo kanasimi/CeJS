@@ -1,6 +1,6 @@
 /**
  * @name CeL function for Ajax (Asynchronous JavaScript and XML)
- * @fileoverview 本檔案包含了 Ajax 用的 functions。
+ * @fileoverview 本檔案包含了模擬WWW客戶端發送HTTP/HTTPS請求用的 functions。
  * @since 2015/1/1
  */
 
@@ -1759,15 +1759,17 @@ function module_code(library_namespace) {
 		_URL.headers = Object.assign({
 			// 乾脆模擬得更真實一點。
 			// Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
-			// + 'image/webp,image/apng,*/*;q=0.8',
+			// + 'image/webp,image/apng,image/*,*/*;q=0.8',
 
 			// 為了防止 Cloudflare bot protection(?) 阻擋，必須加上 Accept-Language。
 			// TODO: get language from system infomation
 			'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
 
 			// 'Cache-Control' : 'no-cache',
+			// Pragma : 'no-cache',
 			// Connection : 'keep-alive',
 			// DNT : 1,
+			// 網站的主機名稱。
 			// Host : _URL.host,
 			// 'Upgrade-Insecure-Requests' : 1,
 

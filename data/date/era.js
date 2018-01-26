@@ -567,6 +567,9 @@ function module_code(library_namespace) {
 	//
 	WITH_PERIOD = 'period', WITH_COUNTRY = 'country',
 
+	// 年名後綴
+	POSTFIX_年名稱 = '年',
+
 	// 十二生肖，或屬相。
 	// Chinese Zodiac
 	十二生肖_LIST = '鼠牛虎兔龍蛇馬羊猴雞狗豬'.split(''),
@@ -4211,6 +4214,10 @@ function module_code(library_namespace) {
 				date.月 = tmp[1];
 				date.日 = tmp[2];
 
+				if (this.年名) {
+					date.年名稱 = this.年名;
+				}
+
 				if (this.參照曆法)
 					date.參照曆法 = this.參照曆法;
 
@@ -5891,7 +5898,9 @@ function module_code(library_namespace) {
 					// 為需要以 space 間隔之紀元名添加 space。
 					if (NEED_SPLIT_POSTFIX.test(name))
 						name.push(' ');
-					name.push(date_index[0] + '年');
+					name.push(date_index[0] + (
+					// era.年名 ||
+					POSTFIX_年名稱));
 					if (era.精 !== '年') {
 						name.push(date_index[1] + '月');
 						if (era.精 !== '月')
@@ -6635,7 +6644,7 @@ function module_code(library_namespace) {
 
 			} else if (年 && !isNaN(年 = numeralize_date_name(年))) {
 				// 視為標準紀年時間（如公元），嘗試以日期解析器解析
-				date = ((年 < 0 ? 年 : 年.pad(4)) + '年'
+				date = ((年 < 0 ? 年 : 年.pad(4)) + POSTFIX_年名稱
 				//
 				+ (月 ? (numeralize_date_name(月) || START_MONTH) + '月'
 				//
@@ -6940,8 +6949,9 @@ function module_code(library_namespace) {
 					return false;
 				var date_index = era.Date_to_date_index(date);
 				if (date_index) {
-					date_index = era.toString() + era.歲名(date_index[0]) + '年'
-							+ 月 + '月' + 日 + '日';
+					date_index = era.toString() + era.歲名(date_index[0]) + (
+					// era.年名 ||
+					POSTFIX_年名稱) + 月 + '月' + 日 + '日';
 					candidate = to_era_Date(date_index, {
 						date_only : true
 					});
@@ -7254,7 +7264,9 @@ function module_code(library_namespace) {
 						era,
 						era.歲名(year_index < year_left ? 0 : year_index
 								- year_left)
-								+ '年' ]);
+								+ (
+								// era.年名 ||
+								POSTFIX_年名稱) ]);
 
 			for (year_left = Math.min(year_left, calendar.length - year_index); 0 < year_left--; year_index++) {
 				start_time = era.year_start[year_index];
@@ -7268,8 +7280,9 @@ function module_code(library_namespace) {
 			date_list.type = 1;
 			if (year_index < calendar.length)
 				// 紀錄後一年段的索引。
-				date_list.next = concat_era_name([ era,
-						era.歲名(year_index) + '年' ]);
+				date_list.next = concat_era_name([ era, era.歲名(year_index) + (
+				// era.年名 ||
+				POSTFIX_年名稱) ]);
 			return date_list;
 		}
 
@@ -7299,11 +7312,14 @@ function module_code(library_namespace) {
 			// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
 			if (i = era.日名(0, date[1] - 1, date[0]))
 				// 紀錄前一個月的索引。
-				date_list.previous = concat_era_name([ era,
-						i[2] + '年' + i[1] + '月' ]);
+				date_list.previous = concat_era_name([ era, i[2] + (
+				// era.年名 ||
+				POSTFIX_年名稱) + i[1] + '月' ]);
 			if (start_time < era.end && (i = era.日名(0, date[1] + 1, date[0])))
 				// 紀錄後一個月的索引。
-				date_list.next = concat_era_name([ era, i[2] + '年' + i[1] + '月' ]);
+				date_list.next = concat_era_name([ era, i[2] + (
+				// era.年名 ||
+				POSTFIX_年名稱) + i[1] + '月' ]);
 			return date_list;
 		}
 
@@ -7334,7 +7350,11 @@ function module_code(library_namespace) {
 				//
 				+ l + '個年分！您可嘗試縮小範圍、加注年分 (如輸入 "'
 				//
-				+ concat_era_name([ era, era.歲名(0) + '年' ]) + '")，或', {
+				+ concat_era_name([ era,
+				//
+				era.歲名(0) + (
+				// era.年名 ||
+				POSTFIX_年名稱) ]) + '")，或', {
 					a : {
 						// Cancel the restriction
 						T : '取消限制'
@@ -7705,7 +7725,9 @@ function module_code(library_namespace) {
 			// console.log([ 'date:', date.join(', '), 'era:', era ]);
 			var date_name = date.shift();
 			if (date_name) {
-				var tmp = date_name + '年';
+				var tmp = date_name + (
+				// original_era && original_era.年名 ||
+				POSTFIX_年名稱);
 				era += tmp;
 				if (original_era)
 					original_era += tmp;
