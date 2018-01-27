@@ -11550,12 +11550,18 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://wikitech.wikimedia.org/wiki/Help:Toolforge/Database
 	 * 
-	 * @require https://github.com/felixge/node-mysql<br />
+	 * @require https://github.com/mysqljs/mysql<br />
 	 *          TODO: https://github.com/sidorares/node-mysql2
 	 */
 	function run_SQL(SQL, callback, config) {
 		function _callback(error, results, fields) {
-			connection.release();
+			// the connection will return to the pool, ready to be used again by
+			// someone else.
+			// connection.release();
+
+			// close the connection and remove it from the pool
+			// connection.destroy();
+
 			callback(error, results, fields);
 		}
 
@@ -11674,8 +11680,8 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/wiki/Wikibase/Schema/wb_items_per_site
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbsetsitelink
 	var SQL_get_sitelink_count = 'SELECT ips_item_id, COUNT(*) AS `link_count` FROM wb_items_per_site GROUP BY ips_item_id LIMIT 10';
-	function callback(error, rows, fields) { if(error) console.error(error); else console.log(rows); }
 	var SQL_session = new CeL.wiki.SQL(function(error){}, 'wikidata');
+	function callback(error, rows, fields) { if(error) console.error(error); else console.log(rows); SQL_session.connection.destroy(); }
 	SQL_session.SQL(SQL_get_sitelink_count, callback);
 
 	// one-time method
@@ -11698,6 +11704,8 @@ function module_code(library_namespace) {
 	new CeL.wiki.SQL('mydb', function callback(error, rows, fields) { if(error) console.error(error); } )
 	// run SQL query
 	.SQL(SQL, function callback(error, rows, fields) { if(error) console.error(error); } );
+
+	SQL_session.connection.destroy();
 
 	 * </code>
 	 * 

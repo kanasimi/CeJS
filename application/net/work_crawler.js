@@ -5,13 +5,13 @@
  * 
  * <code>
 
-流程:
+下載作業流程:
 
 // 取得伺服器列表。 start_downloading()
 // 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list()
 // 解析 作品名稱 → 作品id get_work()
 // 取得作品資訊與各章節資料。 get_work_data()
-// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。 get_work_data()
+// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data()
 // 取得每一個章節的內容與各個影像資料。 get_chapter_data()
 // 取得各個章節的每一個影像內容。 get_images()
 // finish_up()
@@ -294,7 +294,7 @@ function module_code(library_namespace) {
 				+ '.htm',
 		report_file_JSON : 'report.json',
 
-		// default start chapter index
+		// default start chapter index.
 		start_chapter : 1,
 		// 是否重新取得每個所檢測的章節內容 chapter_page。
 		// 警告: reget_chapter=false 僅適用於小說之類不取得圖片的情形，
@@ -362,7 +362,7 @@ function module_code(library_namespace) {
 			|| status.includes('全文完'));
 		},
 		pre_get_chapter_data : pre_get_chapter_data,
-		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。
+		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。
 		// chapter_list_URL : '',
 		// 當有設定work_data.chapter_list的時候的預設函數，由this.get_chapter_data()呼叫。
 		chapter_URL : function(work_data, chapter) {
@@ -380,6 +380,7 @@ function module_code(library_namespace) {
 			main_directory : 'string',
 			user_agent : 'string',
 			one_by_one : 'boolean',
+			// 將開始/接續下載的章節編號。必須要配合 .recheck。
 			start_chapter : 'number',
 			MIN_LENGTH : 'number',
 			// 容許錯誤用的相關操作設定。
@@ -682,7 +683,7 @@ function module_code(library_namespace) {
 
 		}, function all_work_done() {
 			library_namespace.log(this.id + ': All ' + work_list.length
-					+ ' works done.');
+					+ ' works done. 下載作業結束.');
 			var work_status_titles = Object.keys(all_work_status);
 			if (work_status_titles.length > 0) {
 				library_namespace.create_directory(
@@ -1302,7 +1303,7 @@ function module_code(library_namespace) {
 				}
 				matched = matched.last_download.chapter;
 				if (matched > _this.start_chapter) {
-					// 將開始/接續下載的start_chapter章节
+					// 將開始/接續下載的章節編號。必須要配合 .recheck。
 					work_data.last_download.chapter = matched;
 				}
 			}
@@ -2060,7 +2061,7 @@ function module_code(library_namespace) {
 				// 增加圖片數量的訊息。
 				+ (work_data.image_count > 0 ? ', '
 				//
-				+ work_data.image_count + ' images' : '') + ' done.');
+				+ work_data.image_count + ' images' : '') + ' done. 下載作業結束.');
 				if (work_data.error_images > 0) {
 					library_namespace.error(work_data.directory_name + ': '
 							+ work_data.error_images
@@ -2103,7 +2104,9 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var _this = this, url = image_data.url, server = this.server_list;
+		var _this = this,
+		// 漫畫圖片的 URL。
+		url = image_data.url, server = this.server_list;
 		if (server) {
 			server = server[server.length * Math.random() | 0];
 			url = this.image_path_to_url(url, server, image_data);
@@ -2122,6 +2125,7 @@ function module_code(library_namespace) {
 
 		get_URL(url, function(XMLHttp) {
 			// console.log(XMLHttp);
+			// 圖片數據的內容。
 			var contents = XMLHttp.responseText,
 			// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
 			// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。
@@ -2207,6 +2211,7 @@ function module_code(library_namespace) {
 					if (!old_file_status
 					// 得到更大的檔案，寫入更大的檔案。
 					|| old_file_status.size < contents.length) {
+						// 保存圖片數據到HDD上。
 						// TODO: 檢查舊的檔案是不是文字檔。例如有沒有包含HTML標籤。
 						node_fs.writeFileSync(image_data.file, contents);
 					} else if (old_file_status
