@@ -120,7 +120,7 @@ function module_code(library_namespace) {
 				AS.Charset = charset;
 			// 將物件內的文字讀出
 			X = AS.ReadText();
-			// free
+			// Release memory. 釋放被占用的記憶體.
 			AS = null;
 			return X;
 		} catch (e) {
@@ -246,7 +246,7 @@ function module_code(library_namespace) {
 						library_namespace.debug('[' + URL
 								+ ']: callback 完自動移除 .js。', 2, 'get_URL');
 						document_head.removeChild(node);
-						// release
+						// Release memory. 釋放被占用的記憶體.
 						node = null;
 						delete library_namespace[callback_name];
 						onload[callback_param](data);
@@ -1658,7 +1658,7 @@ function module_code(library_namespace) {
 								'get_URL_node: Error: node_zlib.gunzipSync()');
 								console.error(e.stack);
 							}
-							// free
+							// Release memory. 釋放被占用的記憶體.
 							data = null;
 							_onfail(e);
 							return;
@@ -1749,7 +1749,7 @@ function module_code(library_namespace) {
 				if (typeof onload === 'function') {
 					onload(result_Object, !data && !options.allow_empty);
 				}
-				// free
+				// Release memory. 釋放被占用的記憶體.
 				data = null;
 				// node_fs.appendFileSync('get_URL_node.data', '\n');
 			});

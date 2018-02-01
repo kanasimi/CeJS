@@ -828,7 +828,9 @@ function module_code(library_namespace) {
 		help_talk : 13,
 		category : 14,
 		category_talk : 15,
+		// 主題/主題首頁
 		portal : 100,
+		// 主題討論
 		portal_talk : 101,
 		book : 108,
 		book_talk : 109,
@@ -841,6 +843,7 @@ function module_code(library_namespace) {
 		// 模块 模塊 模組
 		module : 828,
 		module_talk : 829,
+		// 話題
 		topic : 2600
 	};
 
@@ -2476,6 +2479,7 @@ function module_code(library_namespace) {
 	// self-closing: void elements + foreign elements
 	// https://www.w3.org/TR/html5/syntax.html#void-elements
 	// @see [[phab:T134423]]
+	// https://www.mediawiki.org/wiki/Manual:OutputPage.php
 	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr',
 	/** {RegExp}HTML tags 的匹配模式。 */
 	PATTERN_WIKI_TAG = new RegExp('<(' + markup_tags
@@ -4019,7 +4023,7 @@ function module_code(library_namespace) {
 		if (initialized_fix && queue.switches) {
 			wikitext.switches = queue.switches;
 		}
-		// free
+		// Release memory. 釋放被占用的記憶體.
 		queue = null;
 		// console.log(wikitext);
 
@@ -12733,7 +12737,7 @@ function module_code(library_namespace) {
 								Object.assign(row, page_id_hash[row.pageid]);
 								listener.call(options, row, index, rows);
 							});
-							// free memory
+							// Release memory. 釋放被占用的記憶體.
 							page_id_hash = page_list = null;
 							if (!exit) {
 								receive_next();
@@ -13301,7 +13305,7 @@ function module_code(library_namespace) {
 				// console.log(file_stream);
 				library_namespace.info('read_dump: Quit operation, 中途跳出作業...');
 				file_stream.end();
-				// free RAM.
+				// Release memory. 釋放被占用的記憶體.
 				buffer = null;
 				run_last(true);
 				return;
@@ -14550,7 +14554,7 @@ function module_code(library_namespace) {
 					rev_of_id[id] = rev_list[index];
 				});
 
-				// release
+				// Release memory. 釋放被占用的記憶體.
 				id_list = rev_list = null;
 
 				if (dump_file === true) {
@@ -14732,7 +14736,7 @@ function module_code(library_namespace) {
 						for ( var id in rev_of_id)
 							if (rev_of_id[id] !== null)
 								need_API.push(id);
-						// release
+						// Release memory. 釋放被占用的記憶體.
 						rev_of_id = null;
 
 						// library_namespace.set_debug(3);
@@ -17556,7 +17560,7 @@ function module_code(library_namespace) {
 		// console.log('-'.repeat(60));
 		// console.log(properties);
 
-		// free
+		// Release memory. 釋放被占用的記憶體.
 		old_properties = null;
 
 		// --------------------------------------

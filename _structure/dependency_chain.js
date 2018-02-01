@@ -2006,7 +2006,7 @@ if (typeof CeL === 'function')
 					}
 				}
 
-				// release. 早點 delete 以釋放記憶體空間/資源。
+				// Release memory. 釋放被占用的記憶體. 早點 delete 以釋放記憶體空間/資源。
 				// assert: declaration.error_handler 為 Set。
 				declaration.error_handler.clear();
 
@@ -2354,7 +2354,7 @@ if (typeof CeL === 'function')
 									// eval @ global. 這邊可能會出現 security 問題。
 									// TODO: do not use eval. 以其他方法取代 eval 的使用。
 									library_namespace.eval_code(file_contents);
-								// release. 早點 delete 以釋放記憶體空間/資源。
+								// Release memory. 釋放被占用的記憶體.
 								file_contents = !!file_contents;
 								if (!declaration.module)
 									declaration.included = true;
@@ -2864,7 +2864,7 @@ if (typeof CeL === 'function')
 					library_namespace.debug('[' + id
 							+ '] 之善後/收尾工作函式已執行完畢，清除 cache/stack…', 5,
 							'load_named');
-				// release. delete cache, 早點 delete 以釋放記憶體空間/資源。
+				// Release memory. 釋放被占用的記憶體. delete cache, 早點 delete 以釋放記憶體空間/資源。
 				// 預防出現問題，如 memory leak 等。
 				delete declaration.code;
 				delete declaration.finish;
@@ -3054,7 +3054,7 @@ if (typeof CeL === 'function')
 			//
 			// 載入 module 之方法。
 			code.call(module_declaration);
-			// release. 早點 delete 以釋放記憶體空間/資源。
+			// Release memory. 釋放被占用的記憶體. 早點 delete 以釋放記憶體空間/資源。
 			// 預防出現問題，如 memory leak 等。
 			delete module_declaration.code;
 			delete module_declaration.finish;

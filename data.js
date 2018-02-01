@@ -1344,7 +1344,7 @@ library_namespace.set_method(Pair.prototype, {
 			}
 		}, ']' ]);
 
-		// release memory.
+		// Release memory. 釋放被占用的記憶體.
 		data = null;
 		return this;
 	},

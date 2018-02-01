@@ -2754,7 +2754,7 @@ function Array_from_table(table_element, options) {
 		if (/<table\s/i.test(table_element)) {
 			var data = table_element;
 			(table_element = document.createElement('div')).innerHTML = data;
-			// release memory
+			// Release memory. 釋放被占用的記憶體.
 			data = null;
 		} else
 			table_element = document.getElementById(table_element);
@@ -7405,7 +7405,7 @@ function auto_TOC(content_node, level, force) {
 	} else
 		library_namespace.warn('auto_TOC: No ' + level + ' found.');
 
-	// release memory.
+	// Release memory. 釋放被占用的記憶體.
 	head_array = list_array = null;
 }
 

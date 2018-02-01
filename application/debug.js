@@ -257,7 +257,7 @@ function show_value_single(key, value, filter, key_is_name) {
 	try {
 		return nodes;
 	} finally {
-		// free
+		// Release memory. 釋放被占用的記憶體.
 		key = name = value_String = no_more = nodes = null;
 	}
 }
