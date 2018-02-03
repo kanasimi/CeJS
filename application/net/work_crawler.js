@@ -19,6 +19,7 @@
 TODO:
 對於漫畫，下載完畢後以章節為單位自動產生壓縮檔並自動刪除下載目錄原始圖檔。每次下載前自動讀取壓縮檔資料。
 預設介面語言繁體中文+...
+下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
 parse 圖像
 自動搜尋不同的網站並選擇下載作品。
@@ -306,6 +307,9 @@ function module_code(library_namespace) {
 		// 是否保留 cache
 		// preserve_cache : true,
 
+		// 在取得小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
+		check_next_chapter : check_next_chapter,
+
 		// for CeL.application.storage.EPUB
 		// auto_create_ebook, automatic create ebook
 		// MUST includes CeL.application.locale!
@@ -364,7 +368,7 @@ function module_code(library_namespace) {
 		pre_get_chapter_data : pre_get_chapter_data,
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。
 		// chapter_list_URL : '',
-		// 當有設定work_data.chapter_list的時候的預設函數，由this.get_chapter_data()呼叫。
+		// 當有設定work_data.chapter_list的時候的預設函數，由 this.get_chapter_data() 呼叫。
 		chapter_URL : function(work_data, chapter) {
 			// chapter starts from 1
 			// console.log(work_data.chapter_list);
@@ -683,7 +687,7 @@ function module_code(library_namespace) {
 
 		}, function all_work_done() {
 			library_namespace.log(this.id + ': All ' + work_list.length
-					+ ' works done. 下載作業結束.');
+					+ ' works done. 所有作品下載作業結束.');
 			var work_status_titles = Object.keys(all_work_status);
 			if (work_status_titles.length > 0) {
 				library_namespace.create_directory(
@@ -2058,10 +2062,16 @@ function module_code(library_namespace) {
 				library_namespace.log(work_data.directory_name
 				// 增加章節數量的訊息。
 				+ ': ' + work_data.chapter_count + ' chapters'
-				// 增加圖片數量的訊息。
-				+ (work_data.image_count > 0 ? ', '
+				// 增加字數統計的訊息。
+				+ (work_data.words_so_far > 0 ?
 				//
-				+ work_data.image_count + ' images' : '') + ' done. 下載作業結束.');
+				' (' + work_data.words_so_far + ' words)' : '')
+				// 增加圖片數量的訊息。
+				+ (work_data.image_count > 0 ?
+				//
+				', ' + work_data.image_count + ' images' : '')
+				//
+				+ ' done. 本作品下載作業結束.');
 				if (work_data.error_images > 0) {
 					library_namespace.error(work_data.directory_name + ': '
 							+ work_data.error_images
@@ -2279,6 +2289,79 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// 在取得小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
+
+	// 通常應該會被 parse_chapter_data() 呼叫。
+	function check_next_chapter(work_data, chapter, html, PATTERN_next_chapter) {
+		var next_chapter = work_data.chapter_list[chapter],
+		// chapter_data.url
+		next_chapter_url = next_chapter && next_chapter.url,
+		// /下一[章页][：: →]*<a [^<>]*?href="([^"]+.html)"[^<>]*>/
+		next_url = html.match(PATTERN_next_chapter ||
+		// PTCMS default. e.g., "下一章 →"
+		// PATTERN_next_chapter: [ all, next chapter url ]
+		/ href="([^"]+.html)"[^<>]*>下一[章页]/);
+		// console.log(chapter + ': ' + next_url[1]);
+
+		if (next_chapter && next_url
+
+		&& (next_url = next_url[1].replace(/^(\.\/)+/,
+		// 去掉開頭的 "./"。
+		this.chapter_URL(work_data, chapter).replace(/[^\/]+$/, '')))
+
+		// 有些在目錄上面的章節連結到了錯誤的頁面，只能靠下一頁來取得正確頁面。
+		&& next_url !== next_chapter_url
+		// 許多網站會把最新章節的下一頁設成章節列表，因此必須排除章節列表的網址。
+		&& next_url !== work_data.url
+		// && next_url !== './'
+		&& next_url !== 'index.html'
+
+		// 符合這些條件的，依然是相同的網址。
+		// 照理來說.startsWith()本陳述應該皆為真。
+		&& !(next_url.startsWith(work_data.base_url)
+		// 檢查正規化規範連結之後是否與本章節相同。
+		? (next_url.length < next_chapter_url.length
+		//
+		? next_url === next_chapter_url.slice(work_data.base_url.length)
+		//
+		: next_chapter_url === next_url.slice(work_data.base_url.length))
+		//
+		: (next_url.length < next_chapter_url.length
+		//
+		? next_chapter_url.endsWith(next_url)
+		// 
+		: next_url.endsWith(next_chapter_url)))
+
+		) {
+
+			if (false) {
+				// 不採用插入的方法，直接改掉下一個章節。
+				library_namespace.info(library_namespace.display_align([
+						[ 'chapter ' + chapter + ': ', next_chapter_url ],
+						[ '→ ', next_url ] ]));
+				next_chapter.url = next_url;
+			}
+
+			var message = 'check_next_chapter: Insert a chapter url after chapter '
+					+ chapter + ': ' + next_url
+					// 原先下一個章節的URL被往後移一個。
+					+ (next_chapter_url ? '→' + next_chapter_url : '');
+			if (next_chapter_url) {
+				// Insert a chapter url
+				library_namespace.log(message);
+			} else {
+				// Append a chapter url at last
+				library_namespace.debug(message);
+			}
+
+			work_data.chapter_list.splice(chapter, 0, {
+				// title : '',
+				url : next_url
+			});
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// 本段功能須配合 CeL.application.storage.EPUB 並且做好事前設定。
 	// 可參照 https://github.com/kanasimi/work_crawler
 
@@ -2346,7 +2429,7 @@ function module_code(library_namespace) {
 	PATTERN_PARAGRAPH_START_JP = new RegExp(PATTERN_PARAGRAPH_START_CMN.source
 			.replace('{4,}', '{2,}'), PATTERN_PARAGRAPH_START_CMN.flags);
 
-	// 通常應該會被parse_chapter_data()呼叫
+	// 通常應該會被 parse_chapter_data() 呼叫。
 	function add_ebook_chapter(work_data, chapter, data) {
 		var ebook = work_data && work_data[this.KEY_EBOOK];
 		if (!ebook) {
@@ -2373,12 +2456,23 @@ function module_code(library_namespace) {
 		var language = work_data.language
 		// e.g., 'cmn-Hans-CN'
 		&& work_data.language.match(/^(ja|cmn)(?:$|[^a-z])/);
-		if (language)
+		if (language) {
 			language = language[1];
+		}
 
-		var _this = this, file_title = chapter.pad(3) + ' '
-				+ (data.title ? data.title + ' - ' : '')
-				+ (data.sub_title || ''),
+		var _this = this,
+		//
+		chapter_data = work_data.chapter_list
+				&& work_data.chapter_list[chapter - 1],
+		// 卷/集/幕/部
+		part_title = data.title || chapter_data && chapter_data.part_title,
+		// 章節/回节折篇話话
+		chapter_title = data.sub_title || chapter_data
+				&& (chapter_data.chapter_title || chapter_data.title),
+		//
+		file_title = chapter.pad(3) + ' '
+				+ (part_title ? part_title + ' - ' : '')
+				+ (chapter_title || ''),
 		//
 		item_data = {
 			title : file_title,
@@ -2386,7 +2480,7 @@ function module_code(library_namespace) {
 			internalize_media : true,
 			file : library_namespace.to_file_name(file_title + '.xhtml'),
 			// 一般說來必須設定 work_data.chapter_list。
-			date : data.date || work_data.chapter_list[chapter - 1].date,
+			date : data.date || chapter_data && chapter_data.date,
 			// 設定item_data.url可以在閱讀電子書時，直接點選標題就跳到網路上的來源。
 			url : data.url
 					|| this.full_URL(this.chapter_URL(work_data, chapter)),
@@ -2397,11 +2491,9 @@ function module_code(library_namespace) {
 			words_so_far : work_data.words_so_far
 		},
 		//
-		item = ebook.add(item_data, {
-			// part_title 卷/集/幕/部
-			title : get_label(data.title || ''),
-			// chapter_title 章節/回节折篇話话
-			sub_title : get_label(data.sub_title || ''),
+		item = {
+			title : get_label(part_title || ''),
+			sub_title : get_label(chapter_title || ''),
 			text : data.text,
 			post_processor : function(contents) {
 				// 正規化小說章節文字。
@@ -2411,6 +2503,7 @@ function module_code(library_namespace) {
 					'$1　$2');
 				} else if (language) {
 					// assert: language: 中文
+					// TODO: 作繁簡轉換。
 					contents = contents.replace(PATTERN_PARAGRAPH_START_CMN,
 					// 中文每段落開頭空兩個字。
 					'$1　　$2');
@@ -2432,7 +2525,9 @@ function module_code(library_namespace) {
 				}
 				return contents;
 			}
-		});
+		};
+
+		item = ebook.add(item_data, item);
 
 		// 登記本作品到本章節總計的字數。
 		if (item && !item.error && item_data.word_count > 0) {

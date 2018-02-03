@@ -172,40 +172,10 @@ function module_code(library_namespace) {
 			return url.startsWith('/') ? url : work_data.base_url + url;
 		},
 		parse_chapter_data : function(html, work_data, get_label, chapter) {
-			var
-			// e.g., 下一章 →
-			next_url = html.match(/ href="([^"]+.html)"[^<>]*>下一[章页]/),
-			//
-			next_chapter = work_data.chapter_list[chapter];
-			// console.log(chapter + ': ' + next_url[1]);
+			// 在取得小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
+			this.check_next_chapter(work_data, chapter, html,
+					this.PATTERN_next_chapter);
 
-			if (next_chapter && next_url
-			//
-			&& (next_url = next_url[1].replace(/^\.\//,
-			// 去掉開頭的 "./"
-			this.chapter_URL(work_data, chapter).replace(/[^\/]+$/, '')))
-			// 有些在目錄上面的章節連結到了錯誤的頁面，只能靠下一頁來取得正確頁面。
-			&& (next_chapter.url !== next_url)
-			// 許多網站會把最新章節的下一頁設成章節列表，因此必須排除章節列表的網址。
-			&& next_url !== work_data.url
-			// && next_url !== './' && next_url !== 'index.html'
-			// 照理來說本陳述應該皆為真。
-			&& (!next_url.startsWith(work_data.base_url)
-			// 檢查正規化規範連結之後是否與本章節相同。
-			// !next_url.endsWith(next_chapter.url)
-			|| next_chapter.url !== next_url.slice(work_data.base_url.length))) {
-				if (false) {
-					library_namespace.info(library_namespace.display_align([
-							[ 'chapter ' + chapter + ': ', next_chapter.url ],
-							[ '→ ', next_url ] ]));
-					next_chapter.url = next_url;
-				}
-				// insert a url
-				work_data.chapter_list.splice(chapter, 0, {
-					// title : '',
-					url : next_url
-				});
-			}
 			this.add_ebook_chapter(work_data, chapter, {
 				sub_title : get_label(html.between('<h1>', '</h1>')),
 				text : (html.between('<div id="content">', '</div>')

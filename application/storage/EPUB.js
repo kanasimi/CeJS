@@ -1417,6 +1417,7 @@ function module_code(library_namespace) {
 				// content="text/html; charset=UTF-8" />
 				'<meta charset="UTF-8" />' ];
 
+				// console.log([ contents.title, contents.sub_title ]);
 				html.push('<title>', [ contents.title, contents.sub_title ]
 				//
 				.filter(function(title) {
@@ -1444,6 +1445,7 @@ function module_code(library_namespace) {
 					library_namespace.warn('add_chapter: 未設定標題: '
 							+ String(contents.text).slice(0, 200) + '...');
 				}
+				// console.log(title_layer);
 
 				// ------------------------------
 
