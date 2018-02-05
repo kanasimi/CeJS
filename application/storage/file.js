@@ -705,6 +705,19 @@ function module_code(library_namespace) {
 	// 可以參考 CeL.application.net.MIME
 	// https://github.com/sindresorhus/file-type/blob/master/index.js
 
+	function to_magic_array(header) {
+		return header.split('').map(function(char) {
+			return char.charCodeAt(0).toString(16);
+		}).join('');
+	}
+
+	function uint32_from_buffer(buffer, byteOffset) {
+		// NG: (new Uint32Array(buffer, 4, 4))[0]
+		byteOffset |= 0;
+		return (((buffer[byteOffset + 3] * 256) + buffer[byteOffset + 2]) * 256 + buffer[byteOffset + 1])
+				* 256 + buffer[byteOffset];
+	}
+
 	// Magic_number[type]={Object}data
 	var Magic_number = {
 		html : {
@@ -714,7 +727,7 @@ function module_code(library_namespace) {
 		},
 		gif : {
 			// Header: GIF89a
-			magic : '47 49 46 38 39 61',
+			magic : to_magic_array('GIF89a'),
 			// end of image data + GIF file terminator
 			eof : '00 3B',
 			min_size : 800
@@ -739,7 +752,20 @@ function module_code(library_namespace) {
 			// other file extensions
 			extension : [ 'jpeg' ],
 			min_size : 3e3
+		},
+
+		// RIFF types
+		webp : {
+			min_size : 100,
+			verify : function(file_contents) {
+				// https://developers.google.com/speed/webp/docs/riff_container#webp_file_header
+				// https://en.wikipedia.org/wiki/WebP
+				// "WEBPVP8 " for lossy images,
+				// and "WEBPVP8L" for lossless images.
+				return file_contents.slice(8, 15).toString() === 'WEBPVP8';
+			}
 		}
+
 	},
 	// Magic_number_data[byte count]=[{Natural}Magic_number:{Object}data]
 	Magic_number_data = [], MAX_magic_byte_count = Math
@@ -826,7 +852,7 @@ function module_code(library_namespace) {
 			options = library_namespace.setup_options(options);
 		}
 
-		var magic_data;
+		var magic_data, damaged;
 		for (var i = 0, magic_number = 0; i < Math.min(
 				Magic_number_data.length, MAX_magic_byte_count);) {
 			magic_number = magic_number * 0x100 + file_contents[i];
@@ -835,6 +861,28 @@ function module_code(library_namespace) {
 				break;
 			}
 		}
+
+		if (!magic_data && file_contents.slice(0, 4).toString() === 'RIFF') {
+			// https://en.wikipedia.org/wiki/Resource_Interchange_File_Format
+			// https://en.wikipedia.org/wiki/WebP
+			var RIFF_type = file_contents.slice(8, 12).toString(),
+			// an unsigned, little-endian 32-bit integer with the length of
+			// this chunk (except this field itself and the chunk
+			// identifier).
+			chunk_size = uint32_from_buffer(file_contents, 4);
+			library_namespace.debug('verify_file_type: RIFF type: ' + RIFF_type
+					+ ', ' + chunk_size + ' bytes, stream length: '
+					+ file_contents.length);
+			// console.log(file_contents.slice(0, 24));
+			magic_data = Magic_number[RIFF_type.toLowerCase()];
+			if (file_contents.length - chunk_size !== 8) {
+				// file damaged
+				damaged = true;
+			} else if (magic_data && (typeof magic_data.verify === 'function')) {
+				damaged = !magic_data.verify(file_contents);
+			}
+		}
+
 		if (!magic_data) {
 			var contents_String = file_contents.toString();
 			if (contents_String.trimStart().startsWith('<!DOCTYPE html>')
@@ -857,10 +905,18 @@ function module_code(library_namespace) {
 		var result = {
 			type : magic_data.type,
 			// 副檔名。
-			extension : magic_data.extension[0],
-			too_small : file_contents.length < magic_data.min_size
+			extension : magic_data.extension[0]
 		};
-		if (magic_data.reversed_eof_bytes) {
+
+		if (magic_data.min_size > 0) {
+			result.too_small = file_contents.length < magic_data.min_size;
+		}
+
+		if (damaged) {
+			// file damaged
+			result.damaged = true;
+
+		} else if (magic_data.reversed_eof_bytes) {
 			// verify 檔案損毀
 			var file_index = file_contents.length;
 			if (magic_data.reversed_eof_bytes.some(function(byte, index) {

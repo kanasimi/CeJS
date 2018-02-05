@@ -254,6 +254,9 @@ function module_code(library_namespace) {
 		// 預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_SIZE : 200,
 
+		// 預設的圖片延伸檔名/副檔名。
+		default_image_extension : 'jpg',
+
 		// 仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無
 		MESSAGE_RE_DOWNLOAD : '神仙打鼓有時錯，腳步踏差誰人無。下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
 		// 當圖像不存在 EOI (end of image) 標記，或是被偵測出非圖像時，依舊強制儲存檔案。
@@ -346,6 +349,7 @@ function module_code(library_namespace) {
 			// 抓取到非JPG圖片
 			png : true,
 			gif : true,
+			webp : true,
 			bmp : true
 		},
 
@@ -1790,7 +1794,8 @@ function module_code(library_namespace) {
 					} else {
 						image_data.file = chapter_directory + work_data.id
 								+ '-' + chapter + '-' + (index + 1).pad(3)
-								+ '.jpg';
+								// 採用預設的圖片延伸檔名。
+								+ '.' + _this.default_image_extension;
 					}
 					if (!_this.one_by_one) {
 						_this.get_images(image_data, check_if_done);
@@ -2148,14 +2153,17 @@ function module_code(library_namespace) {
 				if (verified_image) {
 					if (!(file_type.type in _this.image_types)) {
 						library_namespace.warn('The file type ['
-								+ file_type.type + '] is not image!\n'
+								+ file_type.type
+								+ '] is not image types accepted!\n'
 								+ image_data.file);
 					}
 					if (!image_data.file.endsWith('.' + file_type.extension)) {
 						// 依照所驗證的檔案格式改變副檔名。
-						// e.g. .png
 						image_data.file = image_data.file.replace(/[^.]+$/,
-								file_type.extension);
+						// e.g. .png
+						file_type.extension
+						// 若是沒有辦法判別延伸檔名，那麼就採用預設的圖片延伸檔名。
+						|| _this.default_image_extension);
 					}
 				}
 			}
@@ -2238,8 +2246,8 @@ function module_code(library_namespace) {
 
 			// 有錯誤。下載錯誤時報錯。
 			library_namespace.error(
-			//
-			(verified_image === false ? 'Do not has EOI: '
+			// 圖檔損壞: e.g., Do not has EOI
+			(verified_image === false ? 'Image damaged: '
 			//
 			: (XMLHttp.status ? XMLHttp.status + ' ' : '')
 			//

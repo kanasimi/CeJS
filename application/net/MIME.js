@@ -95,6 +95,7 @@ function module_code(library_namespace) {
 		case 'jpeg':
 		case 'png':
 		case 'gif':
+		case 'webp': // https://en.wikipedia.org/wiki/WebP
 		case 'bmp':
 			// png → image/png
 			return 'image/' + extension;
