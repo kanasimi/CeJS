@@ -254,7 +254,7 @@ function module_code(library_namespace) {
 		// 預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_SIZE : 200,
 
-		// 預設的圖片延伸檔名/副檔名。
+		// 預設的圖片延伸檔名/副檔名/filename extension。
 		default_image_extension : 'jpg',
 
 		// 仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無

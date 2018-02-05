@@ -146,24 +146,44 @@ function module_code(library_namespace) {
 						.slice(this.base_URL.length - 1);
 			}
 
-			work_data.chapter_list = [];
 			if (this.get_chapter_count_contents) {
 				html = this.get_chapter_count_contents(html);
 			}
-			// 分隔符號
-			var separator = html.includes('</dd>') ? [ '<dd>', '</dd>' ] : [
-					'<li>', '</li>' ];
-			html.each_between(separator, function(text) {
+
+			work_data.chapter_list = [];
+			var part_title, matched,
+			// 章節以及篇章連結的模式。
+			// [ all, tag name, attributes, 連結內容 HTML ]
+			PATTERN_chapter = /<(li|dd|dt)([^<>]*)>(.*?)<\/\1>/g;
+			while (matched = PATTERN_chapter.exec(html)) {
+				if (matched[1] === 'dt' ||
+				// e.g., 88dushu
+				matched[1] === 'li' && matched[2].includes('class="fj"')) {
+					part_title = get_label(matched[3]);
+					if (part_title.includes('最新章节') && part_title.length > 20) {
+						// e.g., 《...》最新章节（提示：已启用缓存技术，最新章节可能会延时显示，登录书架即可实时查看。）
+						// e.g., ...最新章节列表 (本页已经缓存，请加入书架查看...最新章节)
+						part_title = 'pass';
+					} else if (part_title.includes('正文')) {
+						// e.g., 《...》正文卷, 《...》正文
+						part_title = '';
+					}
+					// console.log(part_title);
+
+				} else if (part_title !== 'pass'
 				// 取得連結內容。
-				text = text.between('<a ', '</a>');
-				work_data.chapter_list.push({
-					// 從href取得章節的網址。
-					url : text.between('href="', '"'),
-					// 從title/顯示的文字取得章節的標題。
-					title : text.between('title="', '"')
-							|| get_label(text.between('>'))
-				});
-			});
+				&& (matched = matched[3].between('<a ', '</a>'))) {
+					var chapter_data = {
+						// 從href取得章節的網址。
+						url : matched.between('href="', '"'),
+						part_title : part_title,
+						// 從title/顯示的文字取得章節的標題。
+						title : matched.between('title="', '"')
+								|| get_label(matched.between('>'))
+					};
+					work_data.chapter_list.push(chapter_data);
+				}
+			}
 		},
 
 		// 取得每一個章節的內容與各個影像資料。 get_chapter_data()
@@ -176,9 +196,15 @@ function module_code(library_namespace) {
 			this.check_next_chapter(work_data, chapter, html,
 					this.PATTERN_next_chapter);
 
+			var chapter_data = work_data.chapter_list[chapter - 1];
 			this.add_ebook_chapter(work_data, chapter, {
-				sub_title : get_label(html.between('<h1>', '</h1>')),
+				title : chapter_data.part_title,
+				sub_title : get_label(html.between('<h1>', '</h1>'))
+				// || get_label(html.between('<H1>', '</H1>'))
+				// || chapter_data.title
+				,
 				text : (html.between('<div id="content">', '</div>')
+				// 去除掉廣告。
 				// e.g., 88dushu
 				|| html.between('<div class="yd_text2">', '</div>')).replace(
 						/<script[^<>]*>[^<>]*<\/script>/g, '')
