@@ -369,6 +369,10 @@ function module_code(library_namespace) {
 			// ck101
 			|| status.includes('全文完'));
 		},
+		work_URL : function(work_id) {
+			// default work_URL: this.base_URL + work_id
+			return work_id;
+		},
 		pre_get_chapter_data : pre_get_chapter_data,
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。
 		// chapter_list_URL : '',
@@ -971,8 +975,9 @@ function module_code(library_namespace) {
 					+ JSON.stringify(url) + ')';
 		}
 		if (typeof url === 'function') {
-			// url = url.call(this, work_title);
-			url = this.search_URL(work_title);
+			// url = url.call(this, work_title, get_label);
+			// return [ url, POST data ]
+			url = this.search_URL(work_title, get_label);
 			if (Array.isArray(url)) {
 				// use POST method
 				post_data = url[1];
@@ -1118,7 +1123,9 @@ function module_code(library_namespace) {
 	function get_label(html) {
 		if (html) {
 			return library_namespace.HTML_to_Unicode(
-					html.replace(/<[^<>]+>/g, '')).trim();
+					html.replace(/<[^<>]+>/g, '')).trim()
+			// .replace(/\s+/g, ' ')
+			;
 		}
 	}
 
@@ -1740,8 +1747,9 @@ function module_code(library_namespace) {
 					+ work_data.directory_name + ' ' + chapter.pad(3) + '.htm';
 
 			function process_images(chapter_data, XMLHttp) {
+				// get chapter directory
 				chapter_label = chapter_data.title;
-				// 檔名NO的基本長度（不足補零）
+				// 檔名 NO 的基本長度（不足補零）。
 				chapter_label = chapter.pad(4) + (chapter_label ? ' '
 				//
 				+ library_namespace.to_file_name(
@@ -1751,6 +1759,7 @@ function module_code(library_namespace) {
 				// 若是以 "." 結尾，在 Windows 7 中會出現問題，無法移動或刪除。
 				.replace(/\.$/, '._') + path_separator;
 				library_namespace.create_directory(chapter_directory);
+
 				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
 				if (work_data.reget_chapter && _this.preserve_chapter_page) {
 					node_fs.writeFileSync(chapter_directory
@@ -1792,6 +1801,7 @@ function module_code(library_namespace) {
 					if (image_data.file) {
 						image_data.file = chapter_directory + image_data.file;
 					} else {
+						// set image file path
 						image_data.file = chapter_directory + work_data.id
 								+ '-' + chapter + '-' + (index + 1).pad(3)
 								// 採用預設的圖片延伸檔名。
@@ -1847,7 +1857,7 @@ function module_code(library_namespace) {
 							+ _this.MAX_ERROR_RETRY + '...');
 					if (!work_data.reget_chapter) {
 						library_namespace
-								.warn('因cache file壞了(例如為空)，將重新取得chapter_URL，設定.reget_chapter。');
+								.warn('因 cache file 壞了(例如為空)，將重新取得 chapter_URL，設定 .reget_chapter。');
 						work_data.reget_chapter = true;
 					}
 					get_data();
@@ -1953,7 +1963,7 @@ function module_code(library_namespace) {
 			}
 
 			function pre_parse_chapter_data(XMLHttp) {
-				// 對於每一張圖片都得要從載入的頁面獲得資訊的情況，可以參考hhcool.js。
+				// 對於每一張圖片都得要從載入的頁面獲得資訊的情況，可以參考 hhcool.js, dm5.js。
 				if (typeof _this.pre_parse_chapter_data === 'function') {
 					// 執行在解析章節資料process_chapter_data()之前的作業(async)。
 					_this.pre_parse_chapter_data(XMLHttp, work_data,

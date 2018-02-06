@@ -9584,6 +9584,7 @@ function module_code(library_namespace) {
 
 		// 列出在指定分類中的所有頁面。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bcategorymembers
+		// @see [[mw:Help:Tracking categories|追蹤分類]]
 		categorymembers : [ 'cm', , function(title_parameter) {
 			// 要列舉的分類（必需）。必須包括Category:前綴。不能與cmpageid一起使用。
 			if (/^&cmtitle=[Cc]ategory%3A/.test(title_parameter))
