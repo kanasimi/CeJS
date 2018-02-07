@@ -381,14 +381,17 @@ function module_code(library_namespace) {
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。
 		// chapter_list_URL : '',
 		// 當有設定work_data.chapter_list的時候的預設函數，由 this.get_chapter_data() 呼叫。
-		chapter_URL : function(work_data, chapter) {
-			// chapter starts from 1
+		chapter_URL : function(work_data, chapter_NO) {
+			// chapter_NO starts from 1
 			// console.log(work_data.chapter_list);
 
 			// e.g., work_data.chapter_list = [ chapter_data,
 			// chapter_data={url:'',title:'',date:new Date}, ... ]
-			return work_data.chapter_list[chapter - 1].url;
+			return work_data.chapter_list[chapter_NO - 1].url;
 		},
+		set_part : set_part_title,
+		add_chapter : add_chapter_data,
+		reverse_chapter_list_order : reverse_chapter_list_order,
 		get_chapter_directory_name : get_chapter_directory_name,
 
 		// 命令列可以設定的選項。通常僅做測試微調用。
@@ -1438,6 +1441,10 @@ function module_code(library_namespace) {
 					typeof callback === 'function' && callback(work_data);
 					return;
 				}
+				if (work_data.inverted_order) {
+					_this.reverse_chapter_list_order(work_data);
+					delete work_data.inverted_order;
+				}
 			}
 			// 之前已設定 work_data.chapter_count=0
 			if (!work_data.chapter_count
@@ -1691,7 +1698,7 @@ function module_code(library_namespace) {
 		pre_get_chapter_data.apply(this, _arguments);
 	}
 
-	function pre_get_chapter_data(work_data, chapter, callback) {
+	function pre_get_chapter_data(work_data, chapter_NO, callback) {
 		if (this.continue_arguments) {
 			library_namespace.warn(this.id + ': '
 			// 暫停下載作業, 取消下載作業機制
@@ -1709,7 +1716,7 @@ function module_code(library_namespace) {
 			if (this.continue_arguments === true) {
 				this.continue_arguments
 				// = arguments
-				= [ work_data, chapter, callback ];
+				= [ work_data, chapter_NO, callback ];
 				this.running = 'stopped';
 			}
 			// waiting for this.continue_task()
@@ -1718,12 +1725,12 @@ function module_code(library_namespace) {
 
 		var _this = this;
 		function next() {
-			_this.get_chapter_data(work_data, chapter, callback);
+			_this.get_chapter_data(work_data, chapter_NO, callback);
 		}
 
 		if (this.chapter_filter) {
 			if (work_data.chapter_list
-					&& chapter === work_data.chapter_list.length) {
+					&& chapter_NO === work_data.chapter_list.length) {
 				// 無物可篩。
 				// TODO: 當最後一個章節不符合資格的時候，會會造成一些最後結尾的動作被忽略掉就直接callback()
 				callback();
@@ -1731,7 +1738,7 @@ function module_code(library_namespace) {
 			}
 
 			var chapter_data = work_data.chapter_list
-					&& work_data.chapter_list[chapter - 1];
+					&& work_data.chapter_list[chapter_NO - 1];
 
 			// console.log(chapter_data);
 
@@ -1742,18 +1749,19 @@ function module_code(library_namespace) {
 						+ chapter_data.title + ']: 不在 chapter_filter 所篩範圍內。');
 
 				setImmediate(pre_get_chapter_data.bind(this, work_data,
-						chapter + 1, callback));
+						chapter_NO + 1, callback));
 				return;
 			}
 		}
 
 		if (typeof this.pre_chapter_URL === 'function') {
-			// 在this.chapter_URL()之前執行this.pre_chapter_URL()，主要用途在取得chapter_URL之資料。
+			// 在 this.chapter_URL() 之前執行 this.pre_chapter_URL()，
+			// 主要用途在取得 chapter_URL 之資料。
 			try {
-				this.pre_chapter_URL(work_data, chapter, next);
+				this.pre_chapter_URL(work_data, chapter_NO, next);
 			} catch (e) {
 				library_namespace.error(this.id + ': ' + work_data.title
-						+ ': Error on chapter ' + chapter);
+						+ ': Error on chapter ' + chapter_NO);
 				throw e;
 			}
 		} else {
@@ -1761,17 +1769,141 @@ function module_code(library_namespace) {
 		}
 	}
 
-	function get_chapter_directory_name(chapter_title, chapter_NO) {
-		var chapter_directory_name = library_namespace.is_Object(chapter_title)
-		// treat chapter_title as chapter_data.
-		? chapter_title.title : chapter_title;
+	// @see dm5.js for sample of this.get_chapter_count()
+	// e.g., work_data.chapter_list = [ chapter_data,
+	// chapter_data={url:'',title:'',date:new Date}, ... ]
+	function setup_chapter_list(work_data) {
+		var chapter_list = work_data.chapter_list;
+		if (!chapter_list) {
+			work_data.chapter_list = chapter_list = [];
+		}
+		return chapter_list;
+	}
+	// should called by this.get_chapter_count()
+	// this.set_part(work_data, 'part_title');
+	function set_part_title(work_data, part_title, part_NO) {
+		var chapter_list = setup_chapter_list(work_data);
 
-		chapter_directory_name = library_namespace.to_file_name(
+		// reset last NO in part
+		delete chapter_list.NO_in_part;
+
+		if (part_title) {
+			chapter_list.part_title = get_label(part_title);
+			// last part NO. part_NO starts from 1
+			chapter_list.part_NO = part_NO || (chapter_list.part_NO | 0) + 1;
+		} else {
+			// reset
+			// delete chapter_list.part_NO;
+			delete chapter_list.part_title;
+		}
+	}
+	// should called by this.get_chapter_count()
+	// this.add_chapter(work_data, chapter_data);
+	function add_chapter_data(work_data, chapter_data) {
+		var chapter_list = setup_chapter_list(work_data);
+		if (typeof chapter_data === 'string') {
+			// treat as chapter_URL
+			chapter_data = {
+				url : chapter_data
+			};
+		}
+		if (chapter_list.part_title) {
+			chapter_data.part_NO = chapter_list.part_NO;
+			chapter_data.part_title = chapter_list.part_title;
+			chapter_list.NO_in_part |= 0;
+			// NO_in_part, NO in part starts from 1
+			chapter_data.NO_in_part = ++chapter_list.NO_in_part;
+		}
+		if (false) {
+			console.log(chapter_list.length + ': '
+					+ JSON.stringify(chapter_data));
+		}
+		chapter_list.push(chapter_data);
+	}
+	// this.reverse_chapter_list_order(work_data);
+	function reverse_chapter_list_order(work_data) {
+		var chapter_list = work_data.chapter_list;
+		if (!Array.isArray(chapter_list) || chapter_list.length === 0) {
+			return;
+		}
+
+		// 轉成由舊至新之順序。
+		chapter_list.reverse();
+
+		if (work_data.chapter_list.part_NO >= 1) {
+			// 調整 NO
+			var part_title_now, parts_count_plus_1 = work_data.chapter_list.part_NO + 1, chapters_count_plus_1;
+			work_data.chapter_list.forEach(function(chapter_data, index) {
+				if (!(chapter_data.NO_in_part >= 1)) {
+					throw 'reverse_chapter_list_order: '
+					//
+					+ 'Invalid NO_in_part: chapter_list[' + index + ']: '
+							+ JSON.stringify(chapter_data);
+				}
+
+				if (part_title_now !== chapter_data.part_title
+						|| !chapters_count_plus_1) {
+					part_title_now = chapter_data.part_title;
+					chapters_count_plus_1 = chapter_data.NO_in_part + 1;
+				}
+
+				chapter_data.NO_in_part = chapters_count_plus_1
+						- chapter_data.NO_in_part;
+
+				if (chapter_data.part_NO >= 1) {
+					chapter_data.part_NO = parts_count_plus_1
+							- chapter_data.part_NO;
+				}
+				// console.log(JSON.stringify(chapter_data));
+			});
+		}
+	}
+	// should called by get_data() or this.pre_parse_chapter_data()
+	// this.get_chapter_directory_name(work_data, chapter_NO);
+	// this.get_chapter_directory_name(chapter_data, chapter_NO);
+	// this.get_chapter_directory_name(chapter_title, chapter_NO);
+	function get_chapter_directory_name(work_data, chapter_NO, no_part) {
+		var part, chapter_title;
+
+		if (typeof work_data === 'string') {
+			// treat chapter_data as chapter_title.
+			chapter_title = work_data;
+
+		} else if (library_namespace.is_Object(work_data)) {
+			var chapter_data = work_data.chapter_list ? work_data.chapter_list[chapter_NO - 1]
+					: work_data;
+			if (!chapter_data) {
+				throw 'get_chapter_directory_name: Invalid chapter_data: '
+						+ work_data;
+			}
+			if (!no_part && chapter_data.part_title && (work_data.chapter_list
+			// 當只有一個 part 的時候，預設不會添上 part 標題。
+			&& work_data.chapter_list.part_NO > 1 || this.add_part)) {
+				part = chapter_data.NO_in_part | 0;
+				if (part >= 1) {
+					chapter_NO = part;
+				}
+
+				part = (chapter_data.part_NO >= 1
+				//
+				? chapter_data.part_NO.pad(2) + ' ' : '')
+				//
+				+ chapter_data.part_title + ' ';
+			}
+			chapter_title = chapter_data.chapter_title || chapter_data.title;
+
+		} else {
+			throw 'get_chapter_directory_name: Invalid work_data: ' + work_data;
+		}
+
+		var chapter_directory_name = (part || '')
 		// 檔名 NO 的基本長度（不足補零）。
-		chapter_NO.pad(4) + (chapter_directory_name ? ' '
-		// 把網頁編碼還原成看得懂的文字。
-		+ library_namespace.HTML_to_Unicode(chapter_directory_name) : ''));
+		+ chapter_NO.pad(4) + (chapter_title ? ' '
+		// 把網頁編碼還原成看得懂的文字。 get_label()
+		+ library_namespace.HTML_to_Unicode(chapter_title) : '');
 
+		chapter_directory_name = library_namespace
+				.to_file_name(chapter_directory_name);
 		return chapter_directory_name;
 	}
 
@@ -1786,6 +1918,24 @@ function module_code(library_namespace) {
 				+ chapter + '/' + work_data.chapter_count + ': ' + chapter_URL);
 		process.title = chapter + ' @ ' + work_data.title + ' @ ' + this.id;
 
+		// --------------------------------------
+
+		// 若是已經有下載好的舊目錄風格檔案，就把它轉成新的目錄風格，避免需要重複下載。
+		// 過渡時期的措施: 當所有目錄都改成新風格就應該關掉。
+		if (false && Array.isArray(work_data.chapter_list)
+				&& work_data.chapter_list.part_NO > 1 && !this.add_part) {
+			var old_style_directory_path = work_data.directory
+					+ this.get_chapter_directory_name(work_data, chapter, true);
+			if (library_namespace.directory_exists(old_style_directory_path)) {
+				library_namespace.move_fso(old_style_directory_path,
+						work_data.directory
+								+ this.get_chapter_directory_name(work_data,
+										chapter));
+			}
+		}
+
+		// --------------------------------------
+
 		function get_data() {
 			process.stdout.write('Get data of chapter ' + chapter
 			//
@@ -1793,7 +1943,7 @@ function module_code(library_namespace) {
 			//
 			: '/' + work_data.chapter_count) + '...\r');
 
-			// default: 置於 work_data.directory 下
+			// default: 置於 work_data.directory 下。
 			var chapter_file_name = work_data.directory
 					+ work_data.directory_name + ' ' + chapter.pad(3) + '.htm';
 
@@ -2012,6 +2162,7 @@ function module_code(library_namespace) {
 
 			function pre_parse_chapter_data(XMLHttp) {
 				// 對於每一張圖片都得要從載入的頁面獲得資訊的情況，可以參考 hhcool.js, dm5.js。
+
 				if (typeof _this.pre_parse_chapter_data === 'function') {
 					// 執行在解析章節資料process_chapter_data()之前的作業(async)。
 					_this.pre_parse_chapter_data(XMLHttp, work_data,
