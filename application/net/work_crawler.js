@@ -354,6 +354,7 @@ function module_code(library_namespace) {
 		},
 
 		image_path_to_url : image_path_to_url,
+		// 回傳引數為作品ID 的 pattern。
 		is_work_id : function(work_id) {
 			return work_id > 0;
 		},
@@ -385,6 +386,7 @@ function module_code(library_namespace) {
 			// chapter_data={url:'',title:'',date:new Date}, ... ]
 			return work_data.chapter_list[chapter - 1].url;
 		},
+		get_chapter_directory_name : get_chapter_directory_name,
 
 		// 命令列可以設定的選項。通常僅做測試微調用。
 		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
@@ -392,6 +394,8 @@ function module_code(library_namespace) {
 			main_directory : 'string',
 			user_agent : 'string',
 			one_by_one : 'boolean',
+			// 篩選想要下載的章節標題。
+			chapter_filter : 'string',
 			// 將開始/接續下載的章節編號。必須要配合 .recheck。
 			start_chapter : 'number',
 			MIN_LENGTH : 'number',
@@ -1710,18 +1714,59 @@ function module_code(library_namespace) {
 		function next() {
 			_this.get_chapter_data(work_data, chapter, callback);
 		}
+
+		if (this.chapter_filter) {
+			if (work_data.chapter_list
+					&& chapter === work_data.chapter_list.length) {
+				// 無物可篩。
+				// TODO: 當最後一個章節不符合資格的時候，會會造成一些最後結尾的動作被忽略掉就直接callback()
+				callback();
+				return;
+			}
+
+			var chapter_data = work_data.chapter_list
+					&& work_data.chapter_list[chapter - 1];
+
+			// console.log(chapter_data);
+
+			if (chapter_data && chapter_data.title
+			//
+			&& !chapter_data.title.includes(this.chapter_filter)) {
+				library_namespace.debug('pre_get_chapter_data: Skip ['
+						+ chapter_data.title + ']: 不在 chapter_filter 所篩範圍內。');
+
+				setImmediate(pre_get_chapter_data.bind(this, work_data,
+						chapter + 1, callback));
+				return;
+			}
+		}
+
 		if (typeof this.pre_chapter_URL === 'function') {
 			// 在this.chapter_URL()之前執行this.pre_chapter_URL()，主要用途在取得chapter_URL之資料。
 			try {
 				this.pre_chapter_URL(work_data, chapter, next);
 			} catch (e) {
-				library_namespace.error(_this.id + ': ' + work_data.title
+				library_namespace.error(this.id + ': ' + work_data.title
 						+ ': Error on chapter ' + chapter);
 				throw e;
 			}
 		} else {
 			next();
 		}
+	}
+
+	function get_chapter_directory_name(chapter_title, chapter_NO) {
+		var chapter_directory_name = library_namespace.is_Object(chapter_title)
+		// treat chapter_title as chapter_data.
+		? chapter_title.title : chapter_title;
+
+		chapter_directory_name = library_namespace.to_file_name(
+		// 檔名 NO 的基本長度（不足補零）。
+		chapter_NO.pad(4) + (chapter_directory_name ? ' '
+		// 把網頁編碼還原成看得懂的文字。
+		+ library_namespace.HTML_to_Unicode(chapter_directory_name) : ''));
+
+		return chapter_directory_name;
 	}
 
 	function get_chapter_data(work_data, chapter, callback) {
@@ -1747,17 +1792,11 @@ function module_code(library_namespace) {
 					+ work_data.directory_name + ' ' + chapter.pad(3) + '.htm';
 
 			function process_images(chapter_data, XMLHttp) {
-				// get chapter directory
-				chapter_label = chapter_data.title;
-				// 檔名 NO 的基本長度（不足補零）。
-				chapter_label = chapter.pad(4) + (chapter_label ? ' '
-				//
-				+ library_namespace.to_file_name(
-				//
-				library_namespace.HTML_to_Unicode(chapter_label)) : '');
+				// get chapter label, will used as chapter directory name.
+				chapter_label = _this.get_chapter_directory_name(chapter_data,
+						chapter);
 				var chapter_directory = work_data.directory + chapter_label
-				// 若是以 "." 結尾，在 Windows 7 中會出現問題，無法移動或刪除。
-				.replace(/\.$/, '._') + path_separator;
+						+ path_separator;
 				library_namespace.create_directory(chapter_directory);
 
 				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
@@ -1911,7 +1950,9 @@ function module_code(library_namespace) {
 				&& !((left = image_list.length) >= 1)) {
 					if (!_this.need_create_ebook
 					// 雖然是漫畫，但是本章節沒有獲取到任何圖片。
-					&& (!chapter_data || !chapter_data.limited)) {
+					&& (!chapter_data || !chapter_data.limited
+					// 圖片檔案會用其他方式手動下載。
+					&& !chapter_data.images_downloaded)) {
 						library_namespace.debug(work_data.directory_name + ' #'
 								+ chapter + '/' + work_data.chapter_count
 								+ ': No image get.');
@@ -1930,6 +1971,7 @@ function module_code(library_namespace) {
 					check_if_done();
 					return;
 				}
+
 				// console.log(chapter_data);
 				if (left !== image_list.length) {
 					library_namespace.error('所登記的圖形數量' + left + '與有資料的圖形數量'

@@ -387,8 +387,9 @@ function to_file_name(file_name, do_escape) {
 		else if (4 < l && l < 8)
 			c = '000'.slice(l - 5) + c;
 		return '＼' + (c.length === 2 ? 'x' : 'u') + c;
-	})
+	});
 
+	file_name = file_name
 	// functional characters in RegExp.
 	.replace(/[\\\/|?*]/g, function($0) {
 		return {
@@ -400,12 +401,19 @@ function to_file_name(file_name, do_escape) {
 			'?' : '？',
 			'*' : '＊'
 		}[$0];
-	})
+	});
 
+	file_name = file_name
 	// normalize string.
 	// 全寬引號（fullwidth quotation mark）[＂]
 	.replace(/"([^"'“”＂]+)"/g, '“$1”').replace(/"/g, '”').replace(/:/g, '：')
 			.replace(/</g, '＜').replace(/>/g, '＞');
+
+	if (library_namespace.platform.is_Windows()) {
+		file_name = file_name
+		// 若是以 "." 結尾，在 Windows 7 中會出現問題，無法移動或刪除。
+		.replace(/(.)\.$/, '$1._');
+	}
 
 	// 限制長度.
 	// http://en.wikipedia.org/wiki/Filename#Length_restrictions
@@ -415,6 +423,7 @@ function to_file_name(file_name, do_escape) {
 				+ file_name.length + '] [' + file_name + ']');
 		file_name = file_name.slice(0, 255);
 	}
+
 	return file_name;
 }
 
