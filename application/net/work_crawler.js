@@ -31,7 +31,9 @@ proxy
 
 </code>
  * 
- * @see https://github.com/abcfy2/getComic
+ * @see https://github.com/abc9070410/JComicDownloader
+ *      https://github.com/eight04/ComicCrawler
+ *      https://github.com/abcfy2/getComic
  *      https://github.com/wellwind/8ComicDownloaderElectron
  *      https://github.com/Arachnid-27/Cimoc
  * 
@@ -357,6 +359,7 @@ function module_code(library_namespace) {
 		// 回傳引數為作品ID 的 pattern。
 		is_work_id : function(work_id) {
 			return work_id > 0;
+			return /^[a-z\-\d]+$/.test(work_id);
 		},
 		is_finished : function(work_data) {
 			var status = work_data.status;
@@ -979,6 +982,7 @@ function module_code(library_namespace) {
 					+ JSON.stringify(url) + ')';
 		}
 		if (typeof url === 'function') {
+			// 通過關鍵詞搜索作品。 解析 作品名稱 → 作品id
 			// url = url.call(this, work_title, get_label);
 			// return [ url, POST data ]
 			url = this.search_URL(work_title, get_label);
@@ -1009,7 +1013,7 @@ function module_code(library_namespace) {
 			_this.set_agent();
 			if (!XMLHttp.responseText) {
 				library_namespace.error(
-				//
+				// 沒有搜索結果。
 				'get_work: Nothing got for searching [' + work_title + ']');
 				finish_up('Nothing got for searching');
 				return;
@@ -1196,6 +1200,7 @@ function module_code(library_namespace) {
 			}
 
 			try {
+				// 作品詳情。
 				work_data = _this.parse_work_data(html, get_label,
 						exact_work_data);
 			} catch (e) {
@@ -1422,6 +1427,7 @@ function module_code(library_namespace) {
 				}
 			}
 
+			// TODO: rename to get_chapter_list
 			if (typeof _this.get_chapter_count === 'function') {
 				try {
 					_this.get_chapter_count(work_data, html, get_label);
@@ -1730,7 +1736,7 @@ function module_code(library_namespace) {
 			// console.log(chapter_data);
 
 			if (chapter_data && chapter_data.title
-			//
+			// 篩選想要下載的章節標題。
 			&& !chapter_data.title.includes(this.chapter_filter)) {
 				library_namespace.debug('pre_get_chapter_data: Skip ['
 						+ chapter_data.title + ']: 不在 chapter_filter 所篩範圍內。');
@@ -1813,7 +1819,7 @@ function module_code(library_namespace) {
 				//
 				' [', chapter_label, '] ', left, ' images.',
 				// 例如需要收費的章節。
-				chapter_data.limited ? ' (limited)' : '' ].join('');
+				chapter_data.limited ? ' (limited: 本章為需要付費的章節)' : '' ].join('');
 				if (chapter_data.limited) {
 					// 針對特殊狀況提醒。
 					library_namespace.info(message);
@@ -1984,7 +1990,7 @@ function module_code(library_namespace) {
 					work_data.image_count += left;
 				}
 
-				// 自動填補。
+				// 自動填補章節名稱。
 				if (!chapter_data.title
 						&& Array.isArray(work_data.chapter_list)
 						&& library_namespace
@@ -2466,7 +2472,7 @@ function module_code(library_namespace) {
 			creator : work_data.author,
 			// 🏷標籤, ジャンル, タグ, キーワード
 			subject : work_data.genre || work_data.status,
-			// あらすじ
+			// あらすじ, 簡介
 			description : get_label(work_data.description
 			// .description 中不可存在 tag。
 			.replace(/\n*<br[^<>]+>\n*/ig, '\n')),
@@ -2526,7 +2532,7 @@ function module_code(library_namespace) {
 				&& work_data.chapter_list[chapter - 1],
 		// 卷/集/幕/部
 		part_title = data.title || chapter_data && chapter_data.part_title,
-		// 章節/回节折篇話话
+		// 章節名稱 / 章節回节折篇話话
 		chapter_title = data.sub_title || chapter_data
 				&& (chapter_data.chapter_title || chapter_data.title),
 		//
