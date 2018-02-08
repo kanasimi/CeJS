@@ -35,7 +35,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 
 ## Node.js usage
 
-### Node.js lazy installation Node.js環境最新版本懶人配置法
+### Node.js lazy installation. Node.js 環境最新版本懶人配置法
 <code>[npm](https://www.npmjs.com/package/cejs)</code> 安裝的可能不是最新版本，這裡示範的是最新版本的安裝方法。
 
 不囉嗦，已經做過的步驟可以跳過：
@@ -111,10 +111,9 @@ git clean -dfx
 
 #### To setup the loader as a split file:
 1. Copy the loader file, [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the target directory (e.g., the same as the script file).
-2. Set <code>_CeL.loader.nodejs.js</code> read-only. This part is not nessasarally, just in case we modify the script accidentally.
-3. Create the CeL_path_file, [_CeL.path.txt](https://github.com/kanasimi/CeJS/blob/master/_for%20include/_CeL.path.sample.txt) in the same directory.
-4. Set the path list to search the library base: Write to the CeL_path_file (<code>_CeL.path.txt</code>), one path per line.
-5. to use in a script file:
+2. Create the CeL_path_file, [_CeL.path.txt](https://github.com/kanasimi/CeJS/blob/master/_for%20include/_CeL.path.sample.txt) in the same directory.
+3. Set the path list to search the library base: Write to the CeL_path_file (<code>_CeL.path.txt</code>), one path per line.
+4. to use in a script file:
 
    ``` JavaScript
    //global.use_cejs_mudule = true;

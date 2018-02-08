@@ -36,13 +36,14 @@ latest_version_file = target_file.replace(/[^.]+$/g, 'version');
 // --------------------------------------------------------------------------------------------
 
 // const
-var node_https = require('https'), node_fs = require('fs'), child_process = require('child_process');
+var node_https = require('https'), node_fs = require('fs'), child_process = require('child_process'),
+// modify from _CeL.loader.nodejs.js
+CeL_path_file = './_CeL.path.txt';
 
 // --------------------------------------------------------------------------------------------
 
 function try_path_file() {
-	// modify from _CeL.loader.nodejs.js
-	var CeL_path_file = './_CeL.path.txt', CeL_path_list;
+	var CeL_path_list;
 
 	try {
 		CeL_path_list = node_fs.readFileSync(CeL_path_file).toString();
@@ -54,6 +55,7 @@ function try_path_file() {
 		return;
 	}
 
+	// modify from _CeL.loader.nodejs.js
 	CeL_path_list.split(CeL_path_list.includes('\n') ? /\r?\n/ : '|')
 	// 載入CeJS基礎泛用之功能。（如非特殊目的使用的載入功能）
 	.some(function(path) {
@@ -267,11 +269,15 @@ function update_via_7zip(latest_version) {
 			console.info('Setup basic execution environment...');
 			copy_file('_CeL.loader.nodejs.js');
 			try {
-				// Do not overwrite
-				node_fs.renameSync(update_script_directory
-						+ '_CeL.path.sample.txt', '_CeL.path.txt');
+				// Do not overwrite CeL_path_file.
+				node_fs.accessSync(CeL_path_file, node_fs.constants.R_OK);
 			} catch (e) {
-				// TODO: handle exception
+				try {
+					node_fs.renameSync(update_script_directory
+							+ '_CeL.path.sample.txt', CeL_path_file);
+				} catch (e) {
+					// TODO: handle exception
+				}
 			}
 
 			console.info('Done.\n\n' + 'Installation completed successfully.');

@@ -78,7 +78,8 @@ function module_code(library_namespace) {
 		parse_search_result : 'baidu',
 
 		// 取得作品的章節資料。 get_work_data()
-		// work_URL : function(work_id) { return work_id + '/'; },
+		// work_URL : function(work_id) {
+		// /** @see this.work_URL in CeL.application.net.work_crawler */ },
 		parse_work_data : function(html, get_label, exact_work_data) {
 			// console.log(html);
 			// 由 meta data 取得作品資訊。

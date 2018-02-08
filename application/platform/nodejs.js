@@ -416,6 +416,9 @@ function module_code(library_namespace) {
 	/**
 	 * move file, fs.renameSync() without throw.
 	 * 
+	 * WARNING: If the target path already exists, it will be overriden.
+	 * https://linux.die.net/man/2/rename
+	 * 
 	 * @param {String}move_from_path
 	 *            old file path.
 	 * @param {String}move_to_path
