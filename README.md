@@ -75,7 +75,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 * 請注意：採用 <code>npm</code> 安裝的可能不是最新版，尚未加入最新功能。建議下載最新版本壓縮檔，解開後配置；而不是直接執行 <code>npm install</code> 安裝舊版的程式庫。
 
 ### Installation via GitHub latest version 一般正常安裝方法
-鑒於更新頻繁，有些功能可能最新版本才具備；若是執行了採用新功能的程式，將會發生嚴重錯誤。因此強烈建議直接到 GitHub 下載最新版本壓縮檔，解開後配置。
+鑒於更新頻繁，有些功能可能最新版本才具備；若是執行的程式採用了新功能，將會發生嚴重錯誤。因此強烈建議直接到 GitHub 下載最新版本壓縮檔，解開後配置。
 
 Since the frequent updates of the code, some features may work at the latest version only; it's recommended download the latest version at GitHub, and then configure.
 

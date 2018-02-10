@@ -1588,6 +1588,13 @@ function module_code(library_namespace) {
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
 
+				if (result.statusCode === 503
+						&& data.toString().includes(' id="jschl-answer"')) {
+					library_namespace.error(
+					//
+					'You need to bypass the DDoS protection by Cloudflare');
+				}
+
 				// 基本檢測。
 
 				if (!/^2/.test(result.statusCode) && options.error_retry >= 1

@@ -164,8 +164,8 @@ function module_code(library_namespace) {
 		},
 
 		// 取得每一個章節的各個影像內容資料。 get_chapter_data()
-		chapter_URL : function(work_data, chapter) {
-			var url = work_data.chapter_list[chapter - 1].url;
+		chapter_URL : function(work_data, chapter_NO) {
+			var url = work_data.chapter_list[chapter_NO - 1].url;
 			if (url.includes('://')) {
 				// e.g., 短編小説
 				return url;
@@ -174,7 +174,7 @@ function module_code(library_namespace) {
 		},
 		// 檢測所取得內容的章節編號是否相符。
 		check_chapter_NO : [ '<div id="novel_no">', '/' ],
-		parse_chapter_data : function(html, work_data, get_label, chapter) {
+		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
 			var
 			/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 			NOT_FOUND = ''.indexOf('_'),
@@ -237,7 +237,7 @@ function module_code(library_namespace) {
 					content : series_title = get_label(series_title)
 				} ]);
 			}
-			this.add_ebook_chapter(work_data, chapter, {
+			this.add_ebook_chapter(work_data, chapter_NO, {
 				title : html.between('<p class="chapter_title">', '</p>')
 				// 短編小説
 				|| series_title,

@@ -188,17 +188,17 @@ function module_code(library_namespace) {
 		},
 
 		// 取得每一個章節的內容與各個影像資料。 get_chapter_data()
-		chapter_URL : function(work_data, chapter) {
-			var url = work_data.chapter_list[chapter - 1].url;
+		chapter_URL : function(work_data, chapter_NO) {
+			var url = work_data.chapter_list[chapter_NO - 1].url;
 			return url.startsWith('/') ? url : work_data.base_url + url;
 		},
-		parse_chapter_data : function(html, work_data, get_label, chapter) {
+		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
 			// 在取得小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
-			this.check_next_chapter(work_data, chapter, html,
+			this.check_next_chapter(work_data, chapter_NO, html,
 					this.PATTERN_next_chapter);
 
-			var chapter_data = work_data.chapter_list[chapter - 1];
-			this.add_ebook_chapter(work_data, chapter, {
+			var chapter_data = work_data.chapter_list[chapter_NO - 1];
+			this.add_ebook_chapter(work_data, chapter_NO, {
 				title : chapter_data.part_title,
 				sub_title : get_label(html.between('<h1>', '</h1>'))
 				// || get_label(html.between('<H1>', '</H1>'))

@@ -1302,7 +1302,8 @@ function module_code(library_namespace) {
 					incase "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added. Use emitter.setMaxListeners() to increase limit"
 					</code>
 					 */
-					max_listeners : 50
+					max_listeners : 50,
+					error_retry : 4
 				}, item_data.get_URL_options)
 			});
 			return item;
@@ -1352,7 +1353,9 @@ function module_code(library_namespace) {
 					links.push({
 						url : url,
 						href : _this.directory.media + file_name,
-						get_URL_options : item_data.get_URL_options
+						get_URL_options : Object.assign({
+							error_retry : 4
+						}, item_data.get_URL_options)
 					});
 					return matched ? ' title="' + url + '" ' + attribute_name
 							+ '="' + href + '"' : all;
