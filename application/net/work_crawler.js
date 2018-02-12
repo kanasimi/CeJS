@@ -1238,10 +1238,13 @@ function module_code(library_namespace) {
 			&& !/[a-z]+ [a-z\d&]/i.test(work_data.title)
 			// e.g., "Eje(c)t"
 			&& !/[()]/.test(work_data.title)
+			// e.g., "H-Mate"
+			&& !/[a-z\-][A-Z]/.test(work_data.title)
 			// .title: 必要屬性：須配合網站平台更改。
 			&& PATTERN_non_CJK.test(work_id)) {
-				library_namespace.error('Did not set work title: ' + work_id
-						+ ' (' + work_data.title + ')');
+				library_namespace
+						.error('process_work_data: Did not set work title: '
+								+ work_id + ' (' + work_data.title + ')');
 			}
 
 			// 自動添加之作業用屬性：
