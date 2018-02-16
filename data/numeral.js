@@ -489,6 +489,8 @@ function module_code(library_namespace) {
 		number_String = Chinese_numerals_Formal_to_Normal(
 		//
 		normalize_Chinese_numeral('' + number_String));
+		// console.log(Chinese_numerals_Normal_pattern);
+		// console.log(JSON.stringify(number_String));
 
 		if (!Chinese_numerals_Normal_Full_matched.test(number_String)) {
 			// 部分符合，僅針對符合部分處理。
@@ -496,14 +498,22 @@ function module_code(library_namespace) {
 			return number_String.replace(
 			//
 			Chinese_numerals_Normal_pattern, function($0) {
-				var digit = $0.charAt(0);
-				return '負十'.includes(digit)
+				// console.log('-- ' + JSON.stringify($0));
+				// 避免前後空格被吃掉。
+				var token = $0.match(/^(\s*)([^\s].*?)(\s*)$/);
+				if (!token) {
+					// 可能會是" "
+					return $0;
+				}
+				var digit = token[2].charAt(0);
+				token[2] = ('負十'.includes(digit)
 						|| positional_Chinese_numerals_digits.includes(digit)
-						|| (digit = $0.charAt(1)) && ('十'.includes(digit)
+						|| (digit = token[2].charAt(1)) && ('十'.includes(digit)
 						//
 						|| positional_Chinese_numerals_digits.includes(digit))
 				// 不處理過大的位值，例如 "正"。
-				? from_Chinese_numeral($0) : $0;
+				? from_Chinese_numeral(token[2]) : token[2]);
+				return token[1] + token[2] + token[3];
 			});
 		}
 
@@ -663,15 +673,27 @@ function module_code(library_namespace) {
 		//
 		? number.toString(10)
 		//
-		: '' + number).replace(/[,\s]/g, '');
+		: '' + number)
+		// 避免前後空格被吃掉。
+		// .replace(/[,\s]/g, '')
+		;
 
-		if (!/^[+\-]?(?:\d+(?:\.\d*)?|(?:\d*\.)?\d+)$/.test(number))
+		if (!/^[+\-]?(?:\d+(?:\.\d*)?|(?:\d*\.)?\d+)$/.test(number)) {
 			// 非數值
 			return number.replace(
 			//
 			/[+\-]?(?:\d+(?:\.\d*)?|(?:\d*\.)?\d+)/g, function($0) {
-				return to_Chinese_numeral($0, formal);
+				// 避免前後空格被吃掉。
+				var token = $0.match(/^(\s*)([^\s].*?)(\s*)$/);
+				if (!token) {
+					// 可能會是" "
+					return $0;
+				}
+				// console.log(token);
+				return token[1] + to_Chinese_numeral(token[2], formal)
+						+ token[3];
 			});
+		}
 
 		var j,
 		// i:integer,整數;
