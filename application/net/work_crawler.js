@@ -331,6 +331,9 @@ function module_code(library_namespace) {
 		contents_post_processor : function(contents, work_data) {
 			return contents;
 		} && null,
+		// 話: 日文
+		chapter_unit : '話',
+		parse_ebook_name : parse_ebook_name,
 
 		full_URL : full_URL_of_path,
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
@@ -654,6 +657,7 @@ function module_code(library_namespace) {
 		// assert: Array.isArray(work_list)
 		work_list.run_async(function for_each_title(get_next_work, work_title,
 				this_index) {
+			// 解開/插入作品
 			function insert_id(id_list) {
 				if (Array.isArray(id_list) && id_list.length > 0) {
 					// 插入list。
@@ -1141,8 +1145,11 @@ function module_code(library_namespace) {
 	function get_label(html) {
 		if (html) {
 			return library_namespace.HTML_to_Unicode(
-					html.replace(/<[^<>]+>/g, '')).trim()
-			// .replace(/\s+/g, ' ')
+					html.replace(/\s*<br(?:\/| [^<>]*)?>/ig, '\n').replace(
+							/<[^<>]+>/g, '')
+					// 起点中文网 以"\r"為主。
+					.replace(/\r\n?/g, '\n')).trim()
+			// .replace(/\s+/g, ' ').replace(/\s?\n+/g, '\n')
 			;
 		}
 	}
@@ -1302,6 +1309,8 @@ function module_code(library_namespace) {
 				// calibre 不認得/讀不懂 "cmn-Hant-TW" 這樣子的語言代碼，
 				// 但是讀得懂 "zh-cmn-Hant-TW"。
 				work_data.language = 'zh-' + work_data.language;
+				if (!work_data.chapter_unit)
+					work_data.chapter_unit = '章';
 			}
 
 			if (false && _this.is_finished(work_data)) {
@@ -1470,10 +1479,10 @@ function module_code(library_namespace) {
 
 			if (!(work_data.chapter_count >= 1)) {
 				// console.log(work_data);
-				library_namespace
-						.error(work_id
-								+ (work_data.title ? ' ' + work_data.title : '')
-								+ ': Can not get chapter count! (Did not set work_data.chapter_count)');
+				library_namespace.error(work_id
+						+ (work_data.title ? ' ' + work_data.title : '')
+						// (Did not set work_data.chapter_count)
+						+ ': Can not get chapter count!');
 
 				// 無任何章節可供下載。刪掉前面預建的目錄。
 				// 注意：僅能刪除本次操作所添加/改變的檔案。因此必須先確認裡面是空的。不能使用{library_namespace.fs_remove(work_data.directory,,true);}。
@@ -1556,8 +1565,14 @@ function module_code(library_namespace) {
 							.log(_this.id
 									+ ': 章節數量'
 									+ (chapter_added === 0 ? '無變化，皆為 '
-											+ work_data.chapter_count : '變化過小('
-											+ chapter_added + ')因此不重新下載')
+											+ work_data.chapter_count
+											+ ' '
+											+ (work_data.chapter_unit || _this.chapter_unit)
+											: '變化過小('
+													+ chapter_added
+													+ ' '
+													+ (work_data.chapter_unit || _this.chapter_unit)
+													+ ')因此不重新下載')
 									+ '，'
 									+ (work_data.reget_chapter ? '但已設定下載所有章節內容。'
 											: _this.regenerate ? '僅利用 cache 重建資料(如ebook)，不重新下載所有章節內容。'
@@ -1651,7 +1666,9 @@ function module_code(library_namespace) {
 					// assert: if chapter count unknown, typeof
 					// _this.pre_chapter_URL === 'function'
 					? work_data.chapter_count : 'Unknown',
-					' chapters.',
+					' ',
+					work_data.chapter_unit || _this.chapter_unit,
+					'.',
 					work_data.status ? ' ' + work_data.status : '',
 					work_data.last_download.chapter > _this.start_chapter
 					//
@@ -1838,7 +1855,7 @@ function module_code(library_namespace) {
 
 		if (work_data.chapter_list.part_NO >= 1) {
 			// 調整 NO
-			var part_title_now, parts_count_plus_1 = work_data.chapter_list.part_NO + 1, chapters_count_plus_1;
+			var part_title_now, parts_count_plus_1 = work_data.chapter_list.part_NO + 1, chapter_count_plus_1;
 			work_data.chapter_list.forEach(function(chapter_data, index) {
 				if (!(chapter_data.NO_in_part >= 1)) {
 					throw 'reverse_chapter_list_order: '
@@ -1848,12 +1865,12 @@ function module_code(library_namespace) {
 				}
 
 				if (part_title_now !== chapter_data.part_title
-						|| !chapters_count_plus_1) {
+						|| !chapter_count_plus_1) {
 					part_title_now = chapter_data.part_title;
-					chapters_count_plus_1 = chapter_data.NO_in_part + 1;
+					chapter_count_plus_1 = chapter_data.NO_in_part + 1;
 				}
 
-				chapter_data.NO_in_part = chapters_count_plus_1
+				chapter_data.NO_in_part = chapter_count_plus_1
 						- chapter_data.NO_in_part;
 
 				if (chapter_data.part_NO >= 1) {
@@ -2301,7 +2318,9 @@ function module_code(library_namespace) {
 		if (++chapter_NO > work_data.chapter_count) {
 			library_namespace.log(work_data.directory_name
 			// 增加章節數量的訊息。
-			+ ': ' + work_data.chapter_count + ' chapters'
+			+ ': ' + work_data.chapter_count
+			//
+			+ ' ' + (work_data.chapter_unit || this.chapter_unit)
 			// 增加字數統計的訊息。
 			+ (work_data.words_so_far > 0 ?
 			//
@@ -2546,13 +2565,15 @@ function module_code(library_namespace) {
 		next_url = html.match(PATTERN_next_chapter ||
 		// PTCMS default. e.g., "下一章 →"
 		// PATTERN_next_chapter: [ all, next chapter url ]
-		/ href="([^"]+.html)"[^<>]*>下一[章页]/);
+		// e.g., <a href="//read.qidian.com/chapter/abc123">下一章</a>
+		/ href="([^<>"]+)"[^<>]*>下一[章页]/);
 		// console.log(chapter_NO + ': ' + next_url[1]);
 
 		if (next_chapter && next_url
 
-		&& (next_url = next_url[1].replace(/^(\.\/)+/,
 		// 去掉開頭的 "./"。
+		&& (next_url = next_url[1].replace(/^(\.\/)+/,
+		//
 		this.chapter_URL(work_data, chapter_NO).replace(/[^\/]+$/, '')))
 
 		// 有些在目錄上面的章節連結到了錯誤的頁面，只能靠下一頁來取得正確頁面。
@@ -2710,9 +2731,9 @@ function module_code(library_namespace) {
 		//
 		chapter_data = work_data.chapter_list
 				&& work_data.chapter_list[chapter_NO - 1],
-		// 卷/集/幕/部
+		// 卷/集/幕/部/volume/part/book
 		part_title = data.title || chapter_data && chapter_data.part_title,
-		// 章節名稱 / 章節回节折篇話话
+		// 章節名稱 / 章節节回折篇話话頁页/chapter
 		chapter_title = data.sub_title || chapter_data
 				&& (chapter_data.chapter_title || chapter_data.title),
 		//
@@ -2784,11 +2805,14 @@ function module_code(library_namespace) {
 		return item;
 	}
 
-	// 話: 日文
-	var PATTERN_epub_file = /^\(一般小説\) \[([^\[\]]+)\] ([^\[\]]+) \[(.*?) (\d{8})(?: (\d{1,4})話)?\]\.(.+)\.epub$/i;
-	function parse_epub_name(file_name) {
+	// 一般小説, 長篇小說
+	// @see .chapter_unit
+	// [ all, author, title, site name, date, chapter count, work id ]
+	var PATTERN_ebook_file = /^\((?:一般|長篇|短篇|言情|日系)?小[說説]\) \[([^\[\]]+)\] ([^\[\]]+) \[(.*?) (\d{8})(?: (\d{1,4})[章節节回折篇話话頁页])?\]\.(.+)\.epub$/i;
+	function parse_ebook_name(file_name) {
+		library_namespace.debug(file_name, 3, 'parse_ebook_name');
 		var matched = typeof file_name === 'string'
-				&& file_name.match(PATTERN_epub_file);
+				&& file_name.match(PATTERN_ebook_file);
 		if (matched) {
 			return {
 				file_name : file_name,
@@ -2811,11 +2835,14 @@ function module_code(library_namespace) {
 		return status;
 	}
 
+	// @inner
 	// remove duplicate title ebooks.
 	// 封存舊的ebooks，移除較小的舊檔案。
 	function remove_old_ebooks(only_id) {
-		if (only_id) {
-			var _only_id = parse_epub_name(only_id);
+		if (only_id !== undefined) {
+			// assert: {String|Number}only_id
+			only_id = only_id.toString();
+			var _only_id = this.parse_ebook_name(only_id);
 			if (_only_id)
 				only_id = _only_id.id;
 		}
@@ -2846,8 +2873,8 @@ function module_code(library_namespace) {
 			}
 
 			ebooks
-			// assert: 依id舊至新排列
-			.sort().map(parse_epub_name)
+			// assert: 依 id 舊至新排列
+			.sort().map(_this.parse_ebook_name.bind(_this))
 			//
 			.forEach(function(data) {
 				if (!data
@@ -2904,7 +2931,7 @@ function module_code(library_namespace) {
 			? _this.milestone_extension : '.milestone') + '$1',
 			// 舊檔比較大!!將之標註成里程碑紀念/紀錄。
 			rename_to = last_file.replace(/(.[a-z\d\-]+)$/i, extension);
-			// assert: PATTERN_epub_file.test(rename_to) === false
+			// assert: PATTERN_ebook_file.test(rename_to) === false
 			// 不應再被納入檢測。
 			library_namespace.log(last_file + '\n→ ' + rename_to);
 			library_namespace.move_file(last_file, rename_to);
@@ -2944,11 +2971,13 @@ function module_code(library_namespace) {
 					work_data.last_update_Date.format('%Y%2m%2d'),
 					work_data.chapter_count >= 1
 					//
-					? ' ' + work_data.chapter_count + '話' : '', '].',
+					? ' ' + work_data.chapter_count
+					//
+					+ (work_data.chapter_unit || this.chapter_unit) : '', '].',
 					work_data.id, '.epub' ].join('');
 		}
 		file_name = library_namespace.to_file_name(file_name);
-		// assert: PATTERN_epub_file.test(file_name) === true
+		// assert: PATTERN_ebook_file.test(file_name) === true
 
 		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
 		library_namespace.debug('打包 epub: ' + file_name);
