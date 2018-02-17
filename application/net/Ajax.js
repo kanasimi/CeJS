@@ -1149,31 +1149,45 @@ function module_code(library_namespace) {
 
 		// remove duplicate cookie
 
-		if (!agent.last_cookie_hash)
-			agent.last_cookie_hash = library_namespace.null_Object();
-		// key_hash[key] = index of agent.last_cookie
-		var key_hash = agent.last_cookie_hash;
+		if (!agent.cookie_hash) {
+			agent.cookie_hash = library_namespace.null_Object();
+		}
+		if (!agent.cookie_index)
+			agent.cookie_index = library_namespace.null_Object();
+		// cookie_index[key] = index of agent.last_cookie
+		var cookie_index = agent.cookie_index;
 
 		cookie.forEach(function(piece) {
-			var matched = piece.match(/^[^=;]+/);
+			var matched = piece.match(/^([^=;]+)(?:=([^;]+))?/);
+			library_namespace.debug(agent.last_cookie, 3, 'merge_cookie');
 			if (!matched) {
 				library_namespace.warn('merge_cookie: Invalid cookie? ['
 						+ piece + ']');
 				agent.last_cookie.push(piece);
-			} else if (matched[0] in key_hash) {
-				library_namespace.debug('duplicated cookie! 以後來/新出現者為準。 ['
-						+ agent.last_cookie[key_hash[matched[0]]] + ']→['
-						+ piece + ']', 3, 'merge_cookie');
-				agent.last_cookie[key_hash[matched[0]]] = piece;
+			} else if (matched[1] in cookie_index) {
+				library_namespace.debug(
+						'merge_cookie: duplicated cookie! 以後來/新出現者為準。 ['
+								+ agent.last_cookie[cookie_index[matched[1]]]
+								+ ']→[' + piece + ']', 3, 'merge_cookie');
+				agent.cookie_hash[matched[1]] = matched[2];
+				// 直接取代。
+				agent.last_cookie[cookie_index[matched[1]]] = piece;
 			} else {
 				// 正常情況。
 				// 登記已存在之cookie。
-				key_hash[matched[0]] = agent.last_cookie.length;
+				agent.cookie_hash[matched[1]] = matched[2];
+				cookie_index[matched[1]] = agent.last_cookie.length;
 				agent.last_cookie.push(piece);
 			}
 		});
 
-		// console.log(agent.last_cookie);
+		// read-only
+		// Object.freeze(agent.cookie_hash);
+		// Object.freeze(agent.cookie_index);
+
+		library_namespace.debug(agent.last_cookie, 3, 'merge_cookie');
+		library_namespace.debug(JSON.stringify(agent.cookie_hash), 3,
+				'merge_cookie');
 		return agent.last_cookie;
 	}
 
