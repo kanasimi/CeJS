@@ -183,7 +183,7 @@ Contact us at [Google+](https://plus.google.com/101633590909790225455) or [githu
 
 (This document is written by [GitHub Flavored Markdown](https://help.github.com/categories/writing-on-github/).)
 
-[![logo](_test suite/misc/logo.png)](http://lyrics.meicho.com.tw/)
+[![logo](/_test suite/misc/logo.png)](http://lyrics.meicho.com.tw/)
 
 <!--
 Markdown comment: need check under github and npmjs

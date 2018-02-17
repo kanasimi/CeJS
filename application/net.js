@@ -264,7 +264,10 @@ function parse_URI(URI, options) {
 		library_namespace.warn('將 [' + path + '] 當作 pathname!');
 	library_namespace.debug('local file: [' + location.pathname + ']', 2);
 
-	if (!/^([^%]+|%[a-f\d]{2})+$/i.test(path))
+	// NG: /^([^%]+|%[a-f\d]{2})+$/
+	// prevent catastrophic backtracking. e.g., '.'.repeat(300)+'%'
+	// Thanks for James Davis
+	if (!/^(?:[^%]|%[a-f\d]{2})+$/i.test(path))
 		library_namespace.warn('encoding error: [' + path + ']');
 
 	library_namespace.debug('parse path: [' + path + ']', 2);

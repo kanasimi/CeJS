@@ -144,8 +144,9 @@ function module_code(library_namespace) {
 			});
 		};
 
-		if (0 && !problem_pattern
-				.match(/^((\?*|0)\.\?+|\?+|[+\-*\/]|\s+){3,}$/))
+		if (false && !problem_pattern
+		//
+		.match(/^(((\?*|0)\.)?\?+|[+\-*\/]|\s){3,}$/))
 			library_namespace.debug('No match: ' + problem_pattern);
 
 		problem_pattern = problem_pattern.replace(/\[((\d\-\d|\d+)+)\]/g,

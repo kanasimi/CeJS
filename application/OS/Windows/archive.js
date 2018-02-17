@@ -2,7 +2,7 @@
 /**
  * @name	CeL function for archive file.
  * @fileoverview
- * 本檔案包含了壓縮 / archive file 的 functions。
+ * 本檔案包含了壓縮 compress / archive file 的 functions。
  * @since	
  */
 

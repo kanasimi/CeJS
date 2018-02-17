@@ -873,6 +873,7 @@ function test_numeral() {
 		[['正常情況下:40379字', CeL.from_Chinese_numeral('正常情況下:四萬〇三百七十九字')]],
 		[['第1234章', CeL.from_Chinese_numeral('第一二三四章')]],
 		[['第123456章', CeL.from_Chinese_numeral('第一二三四五六章')]],
+		[['卷 二  第一章', CeL.to_Chinese_numeral(CeL.from_Chinese_numeral('卷 二  第一章'))]],
 		[[4.5, CeL.from_Chinese_numeral('2分之九')]],
 		[["1974年", CeL.from_positional_Chinese_numeral('一九七四年')]],
 		[["一九七四年", CeL.to_positional_Chinese_numeral('1974年')]],
