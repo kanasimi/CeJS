@@ -755,19 +755,26 @@ function module_code(library_namespace) {
 		if (!item_data) {
 			return;
 		}
-		if (typeof item_data === 'string' && item_data.includes('://')) {
-			var matched;
-			item_data = {
-				url : item_data,
-				file : library_namespace.MIME_of(item_data)
-				//
-				&& item_data.match(/[^\\\/]+$/i)[0]
-				//
-				|| 'cover.' + (item_data.type && (matched = item_data.type
-				//
-				.match(/^image\/([a-z\d]+)$/)) ? matched[1] : 'jpg')
-			};
+
+		if (typeof item_data === 'string') {
+			if (item_data.startsWith('//')) {
+				item_data = 'https:' + item_data;
+			}
+			if (item_data.includes('://')) {
+				var matched;
+				item_data = {
+					url : item_data,
+					file : library_namespace.MIME_of(item_data)
+					//
+					&& item_data.match(/[^\\\/]+$/i)[0]
+					//
+					|| 'cover.' + (item_data.type && (matched = item_data.type
+					//
+					.match(/^image\/([a-z\d]+)$/)) ? matched[1] : 'jpg')
+				};
+			}
 		}
+
 		var item = normalize_item(item_data, this);
 		// <item id="cover-image" href="cover.jpg" media-type="image/jpeg" />
 		item.id = 'cover-image';
@@ -1709,6 +1716,11 @@ function module_code(library_namespace) {
 						return value;
 					});
 				}
+			} else if (key === 'description') {
+				values = values.map(function(value) {
+					// 作品介紹可以換行。
+					return value.replace(/\n/g, '<br />');
+				});
 			}
 
 			TOC_html.push('<dt>', _(key), '</dt>',
@@ -1787,11 +1799,11 @@ function module_code(library_namespace) {
 	}
 
 	function write_chapters(callback) {
-		// 對media過多者，可能到此尚未下載完。
+		// 對 media 過多者，可能到此尚未下載完。
 		if (!library_namespace.is_empty_object(this.downloading)) {
 			if (this.on_all_downloaded) {
 				library_namespace.warn(
-				// 棄置
+				// 棄置。
 				'There is already callback .on_all_downloaded exists! I will discard it: '
 						+ this.on_all_downloaded);
 			}
@@ -1820,7 +1832,7 @@ function module_code(library_namespace) {
 		this.initialize();
 
 		var meta = this.metadata.meta, link = this.metadata.link;
-		// sort: 將meta,link至於末尾。
+		// sort: 將 meta, link 置於末尾。
 		delete this.metadata.meta;
 		delete this.metadata.link;
 		this.metadata.meta = meta;
