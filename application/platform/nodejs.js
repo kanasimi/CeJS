@@ -87,6 +87,7 @@ function module_code(library_namespace) {
 	function copy_attributes(source, target) {
 		var file_status;
 		try {
+			// TODO: fs.stat can not read a filename includes U+FBC6 "?"
 			file_status = node_fs.statSync(source);
 			node_fs.utimesSync(target, file_status.atime, file_status.mtime);
 		} catch (e) {

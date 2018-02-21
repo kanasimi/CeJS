@@ -37,7 +37,7 @@ typeof CeL !== 'function' && (function() {
 			// path is comments
 			return;
 		}
-		// console.error('Try path: ' + path);
+		// console.log('Try path: ' + path);
 		try {
 			// old node.js has no method 'accessSync'.
 			// accessSync added in: v0.11.15
@@ -61,16 +61,17 @@ typeof CeL !== 'function' && (function() {
 			loader = path + (path.indexOf('/') !== -1 ? loader
 			//
 			: loader.replace(/\//g, '\\'));
-			// console.error('Try loader path: ' + loader);
+			// console.log('Try loader path: ' + loader);
 			require(loader);
-			return true;
+			return CeL.version;
 		} catch (e) {
 			// console.error(e);
 			// try next path
 		}
+
 		// Try the file below loader for relative path.
 		if (full_root && !/^(?:\/|[A-Z]:\\)/i.test(path)) {
-			check_path(full_root + path);
+			return check_path(full_root + path);
 		}
 	}
 
@@ -83,7 +84,7 @@ typeof CeL !== 'function' && (function() {
 	// Set "global.use_cejs_mudule = true;" if you need to do so anyway.
 	&& use_cejs_mudule && typeof CeL !== 'function') {
 		try {
-			// 若有CeJS則用之。
+			// 若有 CeJS 則用之。
 			require('cejs');
 			console.log('cejs loader: use npm, not the latest version!');
 			return;
