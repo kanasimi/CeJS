@@ -4845,7 +4845,7 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.HTML_to_wikitext(HTML)
 	// TODO: 應該 parse HTML。
-	function HTML_to_wikitext(HTML) {
+	function HTML_to_wikitext(HTML, options) {
 		return HTML
 		//
 		.replace(/<\/i><i>/g, '').replace(/<\/b><b>/g, '').replace(
@@ -4865,7 +4865,8 @@ function module_code(library_namespace) {
 		})
 		//
 		.replace(/<br(?: [^<>]*)?>\n*/ig, '\n').replace(/<p ?\/>\n*/ig, '\n\n')
-		//
+		// ignore style, remove <p style="...">...</p>
+		// .replace(/<p[^<>]*>([^<>]*)<\/p>[\s\n]*/g, '$1\n\n')
 		.replace(/<p>([\s\S]+?)<\/p>\n*/g, '$1\n\n')
 		//
 		.replace(/\r?\n/g, '\n').replace(/\n{3,}/g, '\n\n');

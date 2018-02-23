@@ -610,7 +610,7 @@ function module_code(library_namespace) {
 	function parse_work_id(work_id, callback) {
 		work_id = String(work_id);
 
-		if (this.convert_id && typeof this.convert_id[work_id] === 'function') {
+		if (this.convert_id && this.convert_id[work_id]) {
 			// 因為 convert_id[work_id]() 可能回傳 list，因此需要以 get_work_list() 特別處理。
 			this.get_work_list([ work_id ], callback);
 
@@ -657,10 +657,12 @@ function module_code(library_namespace) {
 		// assert: Array.isArray(work_list)
 		work_list.run_async(function for_each_title(get_next_work, work_title,
 				this_index) {
-			// 解開/插入作品
-			function insert_id(id_list) {
+			// 解開/插入作品。
+			function insert_id_list(id_list) {
 				if (Array.isArray(id_list) && id_list.length > 0) {
+					library_namespace.info('get_work_list: ' + work_title
 					// 插入list。
+					+ ' → ' + id_list.join(', '));
 					id_list.unshift(this_index, 0);
 					Array.prototype.splice.apply(work_list, id_list);
 				}
@@ -673,45 +675,70 @@ function module_code(library_namespace) {
 			if (!work_title) {
 				// 直接進入下一個 work_title。
 				get_next_work();
+				return;
+			}
 
-			} else if (this.convert_id
-			// convert special work id: function(get_next_work, type)
-			// 警告: 需要自行呼叫 get_next_work(id_list);
-			&& typeof this.convert_id[work_title] === 'function') {
-				// 提供異序(asynchronously,不同時)使用。
+			var id_converter = this.convert_id && this.convert_id[work_title];
+
+			if (typeof id_converter === 'function') {
 				library_namespace.debug('Using convert_id[' + work_title + ']',
 						3, 'get_work_list');
-				this.convert_id[work_title].call(this, insert_id, work_title);
-
-			} else {
-				work_count++;
-				library_namespace.log('Download ' + work_count
-						+ (work_count === this_index ? '' : '/' + this_index)
-						+ '/' + work_list.length + ': ' + work_title);
-				this.get_work(work_title, function(work_data) {
-					var work_status = set_work_status(work_data);
-					if (work_status) {
-						// 把需要報告的狀態export到{Array}work_status。
-						// assert: {Array}work_status
-						if (work_data.id) {
-							work_status.id = work_data.id;
-							work_status.url = this.full_URL(this.work_URL,
-									work_data.id);
-						}
-						work_status.title = work_data.title || work_title;
-						var last_update = [];
-						this.last_update_status_keys.forEach(function(key) {
-							if (work_data[key])
-								last_update.push(key + ': ' + work_data[key]);
-						});
-						work_status.last_update = last_update.unique().join(
-								', ');
-						// console.log(work_status);
-						all_work_status[work_status.title] = work_status;
-					}
-					get_next_work();
-				});
+				// convert special work id:
+				// convert_id:{id_type:function(insert_id_list, get_label){...}}
+				// insert_id_list: 提供異序(asynchronously,不同時)使用。
+				// 警告: 需要自行呼叫 insert_id_list(id_list);
+				id_converter.call(this, insert_id_list, get_label);
+				return;
 			}
+
+			if (library_namespace.is_Object(id_converter) && id_converter.url
+					&& typeof id_converter.parser === 'function') {
+				library_namespace.debug(
+				// 從指定網址 id_converter.url 得到網頁內容後，
+				// 丟給解析器 id_converter.parser 解析出作品列表。
+				'Using convert_id[' + work_title + '] via url: '
+						+ id_converter.url, 3, 'get_work_list');
+				// convert_id:{id_type:{url:'',parser:function(html,get_label){...}}}
+				get_URL(this.full_URL(id_converter.url), function(XMLHttp) {
+					var id_list = id_converter.parser.call(this,
+							XMLHttp.responseText, get_label);
+					insert_id_list(id_list);
+				}, this.charset, null, Object.assign({
+					error_retry : this.MAX_ERROR_RETRY
+				}, this.get_URL_options));
+				return;
+			}
+
+			if (id_converter) {
+				throw 'get_work_list: Invalid id converter for ' + work_title;
+			}
+
+			work_count++;
+			library_namespace.log('Download ' + work_count
+					+ (work_count === this_index ? '' : '/' + this_index) + '/'
+					+ work_list.length + ': ' + work_title);
+			this.get_work(work_title, function(work_data) {
+				var work_status = set_work_status(work_data);
+				if (work_status) {
+					// 把需要報告的狀態export到{Array}work_status。
+					// assert: {Array}work_status
+					if (work_data.id) {
+						work_status.id = work_data.id;
+						work_status.url = this.full_URL(this.work_URL,
+								work_data.id);
+					}
+					work_status.title = work_data.title || work_title;
+					var last_update = [];
+					this.last_update_status_keys.forEach(function(key) {
+						if (work_data[key])
+							last_update.push(key + ': ' + work_data[key]);
+					});
+					work_status.last_update = last_update.unique().join(', ');
+					// console.log(work_status);
+					all_work_status[work_status.title] = work_status;
+				}
+				get_next_work();
+			});
 
 		}, function all_work_done() {
 			library_namespace.log(this.id + ': All ' + work_list.length
