@@ -337,7 +337,7 @@ function module_code(library_namespace) {
 						//
 						|| options.id || new Date().toISOString(),
 						id : options.id_type,
-					// ** 以下非必要，例如供calibre使用。
+					// ** 以下非必要，供如 calibre 使用。
 					// http://www.idpf.org/epub/31/spec/epub-packages.html#attrdef-identifier-scheme
 					// 'opf:scheme' : options.id_type
 					}, {
@@ -346,7 +346,7 @@ function module_code(library_namespace) {
 						// TODO: calibre 不認得 "cmn-Hant-TW"
 						'dc:language' : options.language || 'en'
 					}, {
-						// epub發行時間應用dc:date。
+						// epub 發行時間應用 dc:date。
 						// the publication date of the EPUB Publication.
 						'dc:date' : date_to_String()
 					}, {
@@ -357,11 +357,11 @@ function module_code(library_namespace) {
 						property : "dcterms:modified"
 					} ],
 					'xmlns:dc' : "http://purl.org/dc/elements/1.1/",
-					// ** 以下非必要，例如供calibre使用。
+					// ** 以下非必要，供如 calibre 使用。
 					'xmlns:opf' : "http://www.idpf.org/2007/opf",
 					'xmlns:dcterms' : "http://purl.org/dc/terms/",
 					'xmlns:xsi' : "http://www.w3.org/2001/XMLSchema-instance",
-					// ** 以下非必要，僅供calibre使用。
+					// ** 以下非必要，僅供 calibre 使用。
 					'xmlns:calibre' :
 					// raw_data.package[0]['xmlns:calibre']
 					"http://calibre.kovidgoyal.net/2009/metadata"
@@ -981,11 +981,12 @@ function module_code(library_namespace) {
 		href = href.replace(/[^\\\/]+$/, function(file_name) {
 			file_name = encode_file_name(file_name, _this);
 
-			// 截斷trim主檔名，限制在 80字元。
+			// 截斷 trim 主檔名，限制在 this.MAX_ID_LENGTH 字元。
 			// WARNING: assert: 截斷後的主檔名不會重複，否則會被覆蓋!
 			return file_name.replace(/^(.*)(\.[^.]+)$/, function(all, main,
 					extension) {
-				return main.slice(0, 80 - extension.length) + extension;
+				return main.slice(0, _this.MAX_ID_LENGTH - extension.length)
+						+ extension;
 			})
 		});
 
@@ -1145,6 +1146,7 @@ function module_code(library_namespace) {
 		// assert: library_namespace.is_Object(item_data)
 		// console.log(item_data);
 		// console.log(item);
+		// console.trace(item);
 
 		rebuild_index_of_id.call(this);
 		rebuild_index_of_id.call(this, true);
@@ -2055,7 +2057,13 @@ function module_code(library_namespace) {
 
 		// 應該用[A-Za-z]起始，但光單一字母不容易辨識。
 		id_prefix : 'i',
-		// 限制id與檔案長度，以預防寫入的時候出現錯誤。
+		/**
+		 * {Natural}id 與檔案名稱最大長度。
+		 * 
+		 * calibre 會把電子書解開，放在如
+		 * C:\Users\user\AppData\Local\calibre-cache\ev\tmpunbkaj\a\
+		 * 目錄底下。這個數值可以限制 id 與檔案名稱最大長度，預防寫入的時候出現錯誤。
+		 */
 		MAX_ID_LENGTH : 80,
 
 		setup_container : setup_container,

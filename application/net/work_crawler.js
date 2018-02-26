@@ -1293,11 +1293,24 @@ function module_code(library_namespace) {
 			process.title = '下載' + work_data.title + ' - 目次 @ ' + _this.id;
 			work_data.directory_name = library_namespace.to_file_name(
 			// 允許自訂作品目錄名/命名資料夾。
-			work_data.directory_name || work_data.id + ' ' + work_data.title);
-			// 允許自訂作品目錄，但須自行escape並添加path_separator。
-			// @see qq.js
+			work_data.directory_name || work_data.id + ' ' + work_data.title
+			// e.g., '.' + (new Date).format('%Y%2m%2d')
+			+ (work_data.directory_name_extension || ''));
+			// full directory path of the work.
 			if (!work_data.directory) {
-				work_data.directory = _this.main_directory
+				var work_base_directory = _this.main_directory;
+				if (work_data.base_directory_name) {
+					// 允許自訂作品目錄，將作品移至特殊目錄下。
+					// @see qq.js, qidian.js
+					// set base directory name below this.main_directory
+					work_base_directory += work_data.base_directory_name
+							+ path_separator;
+					// 特殊目錄可能還不存在。
+					library_namespace.create_directory(work_base_directory);
+					if (_this.need_create_ebook)
+						work_data.ebook_directory = work_base_directory;
+				}
+				work_data.directory = work_base_directory
 						+ work_data.directory_name + path_separator;
 			}
 			work_data.data_file = work_data.directory
@@ -1349,10 +1362,11 @@ function module_code(library_namespace) {
 			if (matched) {
 				// properties to reset
 				var skip_cache = {
-					process_status : _this.recheck,
-					words_so_far : true,
 					last_download : true,
-					book_chapter_count : true,
+					process_status : _this.recheck,
+					ebook_directory : _this.need_create_ebook,
+					words_so_far : _this.need_create_ebook,
+					book_chapter_count : _this.need_create_ebook,
 					error_images : true,
 					chapter_count : true,
 					image_count : true
@@ -1680,6 +1694,8 @@ function module_code(library_namespace) {
 			}
 
 			if (_this.need_create_ebook) {
+				// console.log(work_data);
+				// console.log(JSON.stringify(work_data));
 				create_ebook.call(_this, work_data);
 			}
 
@@ -3010,8 +3026,8 @@ function module_code(library_namespace) {
 		library_namespace.debug('打包 epub: ' + file_name);
 
 		// this: this_site
-		ebook.pack([ this.main_directory, file_name ],
-				this.remove_ebook_directory);
+		ebook.pack([ work_data.ebook_directory || this.main_directory,
+				file_name ], this.remove_ebook_directory);
 
 		remove_old_ebooks.call(this, work_data.id);
 	}
