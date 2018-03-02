@@ -7,17 +7,17 @@
 
 下載作業流程:
 
-// 取得伺服器列表。 start_downloading()
-// 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list()
-// 解析 作品名稱 → 作品id get_work()
-// 取得作品資訊與各章節資料。 get_work_data()
-// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data()
-// 取得每一個章節的內容與各個影像資料。 get_chapter_data()
-// 取得各個章節的每一個影像內容。 get_images()
-// finish_up()
+# 取得伺服器列表。 start_downloading()
+# 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list()
+# 解析 作品名稱 → 作品id get_work()
+# 取得作品資訊與各章節資料。 get_work_data()
+# 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data()
+# 取得每一個章節的內容與各個影像資料。 get_chapter_data()
+# 取得各個章節的每一個影像內容。 get_images()
+# finish_up()
 
 TODO:
-對於漫畫，下載完畢後以章節為單位自動產生壓縮檔並自動刪除下載目錄原始圖檔。每次下載前自動讀取壓縮檔資料。
+對於漫畫，下載完畢後以章節為單位自動產生壓縮檔並自動刪除下載目錄原始圖檔/清除暫存檔。每次下載前自動讀取壓縮檔資料。
 預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
@@ -26,8 +26,6 @@ parse 圖像
 從其他的資料來源網站尋找取得作品以及章節的資訊。
 檢核章節內容。
 proxy
-清除暫存檔
-漫畫圖片數統計
 Runs untrusted code securely https://github.com/patriksimek/vm2
 
 </code>
@@ -530,7 +528,8 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * front end #2: start get work information operation.
+	 * front end #2: start get work information operation. e.g., search only, no
+	 * download.
 	 * 
 	 * @param {String}work_title
 	 *            作品標題/作品名稱
@@ -2368,7 +2367,7 @@ function module_code(library_namespace) {
 			+ (work_data.words_so_far > 0 ?
 			//
 			' (' + work_data.words_so_far + ' words)' : '')
-			// 增加圖片數量的訊息。
+			// 增加漫畫圖片數量的統計訊息。
 			+ (work_data.image_count > 0 ?
 			//
 			', ' + work_data.image_count + ' images' : '')

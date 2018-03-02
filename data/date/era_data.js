@@ -11,7 +11,8 @@ TODO:
 
 
 https://en.wikipedia.org/wiki/Lists_of_ancient_kings
-
+https://en.wikipedia.org/wiki/Middle_chronology
+https://en.wikipedia.org/wiki/Chronology_of_the_ancient_Near_East
 
 
 中國君主列表 (地方政權)
