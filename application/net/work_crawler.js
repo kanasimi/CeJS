@@ -330,6 +330,7 @@ function module_code(library_namespace) {
 			return contents;
 		} && null,
 		// 話: 日文
+		// 「卷」為漫畫單行本，「話」為雜誌上的連載，「卷」包含了以往雜誌上所有發行的「話」
 		chapter_unit : '話',
 		parse_ebook_name : parse_ebook_name,
 
@@ -366,15 +367,27 @@ function module_code(library_namespace) {
 		},
 		is_finished : function(work_data) {
 			var status = work_data.status;
-			return status
+			if (!status) {
+				return status;
+			}
+
 			// e.g., 连载中, 連載中, 已完结, 已完成
-			&& (/(^|已)完[結结成]/.test(status) || status.includes('完結済')
+			var matched = status.match(/(?:^|已)完[結结成]/);
+			if (matched)
+				return matched[0];
+
+			if (status.includes(matched = '完結済'))
+				return matched;
+
 			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
-			|| /^\(?完[結结成]?\)?$/.test(status)
+			if (/^\(?完[結结成]?\)?$/.test(status))
+				return status;
+
 			// http://book.qidian.com/
-			|| status.includes('完本')
+			if (status.includes(matched = '完本')
 			// ck101
-			|| status.includes('全文完'));
+			|| status.includes(matched = '全文完'))
+				return matched;
 		},
 		work_URL : function(work_id) {
 			// default work_URL: this.base_URL + work_id + '/'
@@ -2051,26 +2064,56 @@ function module_code(library_namespace) {
 				}
 
 				// console.log(image_list);
-				// TODO: 當某 chapter 檔案過多，將一次 request 過多 connects 而造成問題。
+				// TODO: 當某 chapter 檔案過多(如1000)，將一次 request 過多 connects 而造成問題。
 				image_list.forEach(function(image_data, index) {
 					// http://stackoverflow.com/questions/245840/rename-files-in-sub-directories
 					// for /r %x in (*.jfif) do ren "%x" *.jpg
 
-					// image_data.file: 指定圖片要儲存檔的檔名與路徑file_path。
-					if (typeof image_data.file === 'function') {
-						// return file name
-						image_data.file = image_data.file(work_data,
-								chapter_NO, index);
-					}
 					if (image_data.file) {
-						image_data.file = chapter_directory + image_data.file;
+						// image_data.file: 指定圖片要儲存檔的檔名與路徑 file_path。
+
 					} else {
-						// set image file path
-						image_data.file = chapter_directory + work_data.id
-								+ '-' + chapter_NO + '-' + (index + 1).pad(3)
+						if (typeof image_data.file_name === 'function') {
+							// return {String}file name
+							image_data.file_name = image_data.file_name(
+									work_data, chapter_NO, index);
+						}
+						if (image_data.file_name) {
+							image_data.file = chapter_directory
+									+ image_data.file_name;
+						} else {
+							var file_extension = image_data.file_extension
+									|| work_data.image_extension;
+							if (!file_extension && image_data.url) {
+								// 由圖片的網址來判別可能的延伸檔名。
+								var matched = image_data.url.replace(/[?#].*$/,
+										'');
+								matched = matched.match(/\.([a-z]+)$/);
+								if (matched) {
+									matched = matched[1].toLowerCase();
+									if (matched in _this.image_types) {
+										// e.g., manhuagui.js
+										library_namespace.debug(
+												'file extension: .' + matched
+														+ ' ← '
+														+ image_data.url, 3,
+												'get_data');
+										file_extension = matched;
+									}
+								}
+							}
+							if (!file_extension) {
 								// 採用預設的圖片延伸檔名。
-								+ '.' + _this.default_image_extension;
+								file_extension = _this.default_image_extension;
+							}
+							// set image file path
+							image_data.file = chapter_directory + work_data.id
+							//
+							+ '-' + chapter_NO + '-' + (index + 1).pad(3) + '.'
+									+ file_extension;
+						}
 					}
+
 					if (!_this.one_by_one) {
 						_this.get_images(image_data, check_if_done);
 					}
