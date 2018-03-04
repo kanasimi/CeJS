@@ -18,6 +18,8 @@
 
 TODO:
 對於漫畫，下載完畢後以章節為單位自動產生壓縮檔並自動刪除下載目錄原始圖檔/清除暫存檔。每次下載前自動讀取壓縮檔資料。
+	"C:\Program Files\7-Zip\7z.exe" a -tzip -mx -slt -ssc -sccUTF-8 -scsUTF-8 "chapter.zip" "chapter"
+	"C:\Program Files\7-Zip\7z.exe" l -slt -ssc -sccUTF-8 -scsUTF-8 "chapter.zip"
 預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
@@ -178,6 +180,22 @@ function module_code(library_namespace) {
 		}
 		process.title = 'Starting ' + this.id;
 
+		if (library_namespace.is_digits(this.baidu_cse)) {
+			if (!this.parse_search_result) {
+				// for 百度站内搜索工具。非百度搜索系統得要自己撰寫。
+				this.parse_search_result = 'baidu';
+			}
+			// baidu cse id 百度站内搜索工具。
+			if (!this.search_URL) {
+				this.search_URL = {
+					URL : 'http://zhannei.baidu.com/cse/search?s='
+					// &ie=utf-8 &isNeedCheckDomain=1&jump=1 &entry=1
+					+ this.baidu_cse + '&q=',
+					charset : 'UTF-8'
+				};
+			}
+		}
+
 		if (typeof this.parse_search_result === 'string') {
 			if (parse_search_result_set[this.parse_search_result]) {
 				this.parse_search_result = parse_search_result_set[this.parse_search_result];
@@ -223,6 +241,8 @@ function module_code(library_namespace) {
 	Work_crawler.MAX_ERROR_RETRY = 4;
 	/** {Natural}timeout in ms for get_URL() 下載圖片的逾時ms數。若逾時時間太小（如10秒），下載大檔案容易失敗。 */
 	Work_crawler.timeout = 30 * 1000;
+
+	Work_crawler.HTML_extension = 'htm';
 
 	Work_crawler.prototype = {
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
@@ -294,8 +314,8 @@ function module_code(library_namespace) {
 		last_update_status_keys : 'last_update_chapter,latest_chapter,latest_chapter_name,latest_chapter_url,last_update'
 				.split(','),
 		// 記錄報告檔案/日誌的路徑。
-		report_file : 'report.' + (new Date).format('%Y%2m%2dT%2H%2M%2S')
-				+ '.htm',
+		report_file : 'report.' + (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.'
+				+ Work_crawler.HTML_extension,
 		report_file_JSON : 'report.json',
 
 		// default start chapter index.
@@ -365,29 +385,46 @@ function module_code(library_namespace) {
 					&& work_information;
 			return /^[a-z_\-\d]+$/.test(work_information) && work_information;
 		},
-		is_finished : function(work_data) {
-			var status = work_data.status;
-			if (!status) {
+		// 取得用在作品完結的措辭。
+		finished_words : function finished_words(status) {
+			status = String(status);
+
+			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
+			if (/^\(?完[結结成]?\)?$/.test(status))
 				return status;
-			}
 
 			// e.g., 连载中, 連載中, 已完结, 已完成
 			var matched = status.match(/(?:^|已)完[結结成]/);
 			if (matched)
 				return matched[0];
 
-			if (status.includes(matched = '完結済'))
-				return matched;
-
-			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
-			if (/^\(?完[結结成]?\)?$/.test(status))
-				return status;
-
+			if (status.includes(matched = '完結済')
 			// http://book.qidian.com/
-			if (status.includes(matched = '完本')
+			|| status.includes(matched = '完本')
 			// ck101
-			|| status.includes(matched = '全文完'))
+			|| status.includes(matched = '全文完')) {
 				return matched;
+			}
+		},
+		is_finished : function(work_data) {
+			var status_list = library_namespace.is_Object(work_data) ? work_data.status
+					// treat work_data as status
+					: work_data;
+			if (!status_list) {
+				return status_list;
+			}
+			// {String|Array}status_list
+
+			if (!Array.isArray(status_list)) {
+				return this.finished_words(status_list);
+			}
+
+			var finished, _this = this;
+			if (status_list.some(function(status) {
+				return finished = _this.finished_words(status);
+			})) {
+				return finished;
+			}
 		},
 		work_URL : function(work_id) {
 			// default work_URL: this.base_URL + work_id + '/'
@@ -868,13 +905,18 @@ function module_code(library_namespace) {
 				var matched = text.between(null, '"').match(
 						PATTERN_url_for_baidu);
 				// console.log(matched);
+				if (!matched)
+					continue;
 				id_list.push(matched[1]);
 				// 從URL網址中解析出作品title。
 				matched = text.match(/ title="([^"]+)"/);
 				if (matched) {
 					matched = matched[1];
 				} else {
-					matched = text.between('<em>', '</em>');
+					// e.g., omanhua.js: <em>择</em><em>天</em><em>记</em>
+					matched = text.between('<em>', {
+						tail : '</em>'
+					});
 				}
 				// console.log(matched);
 				if (matched && (matched = get_label(matched))
@@ -1332,8 +1374,8 @@ function module_code(library_namespace) {
 			var directory = _this.main_directory + _this.cache_directory_name;
 			library_namespace.create_directory(directory);
 			// .data.htm
-			node_fs.writeFileSync(
-					directory + work_data.directory_name + '.htm', html);
+			node_fs.writeFileSync(directory + work_data.directory_name + '.'
+					+ Work_crawler.HTML_extension, html);
 
 			// .status 選擇性屬性：須配合網站平台更改。
 			// ja:種別,状態
@@ -1550,7 +1592,7 @@ function module_code(library_namespace) {
 				//
 				+ _this.cache_directory_name + work_data.directory_name
 				// .TOC.htm
-				+ '.list.htm', html);
+				+ '.list.' + Work_crawler.HTML_extension, html);
 			}
 
 			// 章節的增加數量: 新-舊, 當前-上一次的
@@ -2026,8 +2068,8 @@ function module_code(library_namespace) {
 
 			// default: 置於 work_data.directory 下。
 			var chapter_file_name = work_data.directory
-					+ work_data.directory_name + ' ' + chapter_NO.pad(3)
-					+ '.htm';
+					+ work_data.directory_name + ' ' + chapter_NO.pad(3) + '.'
+					+ Work_crawler.HTML_extension;
 
 			function process_images(chapter_data, XMLHttp) {
 				// get chapter label, will used as chapter directory name.
@@ -2040,8 +2082,9 @@ function module_code(library_namespace) {
 				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
 				if (work_data.reget_chapter && _this.preserve_chapter_page) {
 					node_fs.writeFileSync(chapter_directory
-							+ work_data.directory_name + '-' + chapter_label
-							+ '.htm', XMLHttp.buffer);
+					//
+					+ work_data.directory_name + '-' + chapter_label + '.'
+							+ Work_crawler.HTML_extension, XMLHttp.buffer);
 				}
 				var message = [ chapter_NO,
 				//

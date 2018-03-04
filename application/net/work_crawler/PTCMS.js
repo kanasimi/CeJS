@@ -74,9 +74,6 @@ function module_code(library_namespace) {
 		// 解析 作品名稱 → 作品id get_work()
 		// search_URL : '',
 
-		// for 百度站内搜索工具。非百度搜索系統得要自己撰寫。
-		parse_search_result : 'baidu',
-
 		// 取得作品的章節資料。 get_work_data()
 		// work_URL : function(work_id) {
 		// /** @see this.work_URL in CeL.application.net.work_crawler */ },
@@ -219,16 +216,6 @@ function module_code(library_namespace) {
 		configuration = configuration ? Object.assign(library_namespace
 				.null_Object(), default_configuration, configuration)
 				: default_configuration;
-
-		if (!configuration.search_URL && configuration.baidu_cse) {
-			// baidu cse id 百度站内搜索工具。
-			configuration.search_URL = {
-				URL : 'http://zhannei.baidu.com/cse/search?s='
-				// &isNeedCheckDomain=1&jump=1 &entry=1
-				+ configuration.baidu_cse + '&q=',
-				charset : 'UTF-8'
-			};
-		}
 
 		// 每次呼叫皆創建一個新的實體。
 		return new library_namespace.work_crawler(configuration);
