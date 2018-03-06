@@ -1999,7 +1999,7 @@ function module_code(library_namespace) {
 				'%P7Z% a -tzip -mx=0 -- %BOOKNAME% mimetype',
 				// 請注意： rn 必須先安裝 7-Zip **16.04 以上的版本**。
 				'%P7Z% rn -- %BOOKNAME% mimetype !imetype',
-				// archive others
+				// archive others.
 				'%P7Z% a -tzip -mx=9 -r -- %BOOKNAME% META-INF EPUB',
 				'%P7Z% rn -- %BOOKNAME% !imetype mimetype' ].join('\r\n'));
 		var command = 'cd /d "' + this.path.root + '" && ' + command_file_name;

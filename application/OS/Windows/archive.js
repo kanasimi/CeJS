@@ -384,6 +384,10 @@ function module_code(library_namespace) {
 
 	_.archive_data = archive_data;
 
+	// --------------------------------------------------------------------------------------------
+
+	// export 導出.
+
 	return (_// JSDT:_module_
 	);
 }

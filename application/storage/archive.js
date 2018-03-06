@@ -12,12 +12,12 @@ archive_file = new CeL.application.storage.archive.file('file.7z',
 archive_file = new CeL.application.storage.archive.file('file.rar',
 		callback);
 
+// file list get from archive_file.list()
 // archive_file.FSO_list = [ {FSO data}, ... ]
 archive_file.FSO_list = [];
-archive_file.to_compress = [];
-archive_file.to_delete = [];
 // default switches
 archive_file.switches = {
+	// command : { switches }
 	list : {},
 	verify : {},
 	extract : {},
@@ -25,7 +25,7 @@ archive_file.switches = {
 };
 
 // {String}
-archive_file.executable_file = executable_file_path['7z'];
+archive_file.program = executable_file_path['7z'];
 archive_file.execute(callback, options);
 
 // list FSOs
@@ -48,7 +48,13 @@ archive_file.extract(target_directory, callback, options);
 archive_file.update(callback, [ to_compress ], options);
 // to compress & update use archive_file.to_compress and
 // archive_file.to_delete
-archive_file.update(callback, options);
+archive_file.update([ file/folder list to add/compress ], options, callback);
+archive_file.update([ file/folder list to add/compress ], {
+	type : 'zip',
+	// level of compression, compression method
+	// '' as -mx
+	level : '',
+}, callback);
 
  </code>
  * 
@@ -69,7 +75,9 @@ if (typeof CeL === 'function') {
 		name : 'application.storage.archive',
 
 		// .includes() @ CeL.data.code.compatibility
-		require : 'data.code.compatibility.',
+		require : 'data.code.compatibility.'
+		// executable_file_path() @ CeL.application.platform.nodejs
+		+ '|application.platform.nodejs.',
 
 		// 設定不匯出的子函式。
 		no_extend : '*',
@@ -83,6 +91,23 @@ function module_code(library_namespace) {
 
 	// requiring
 	var path_separator = library_namespace.env.path_separator;
+	var execSync = require('child_process').execSync;
+
+	/**
+	 * null module constructor
+	 * 
+	 * @class executing program 的 functions
+	 */
+	var _// JSDT:_module_
+	= function() {
+		// null module constructor
+	};
+
+	/**
+	 * for JSDT: 有 prototype 才會將之當作 Class
+	 */
+	_// JSDT:_module_
+	.prototype = {};
 
 	// --------------------------------------------------------------------------------------------
 
@@ -90,10 +115,135 @@ function module_code(library_namespace) {
 	// @see CeL.application.platform.nodejs.executable_file_path
 	// search executable file path / 執行檔, `which`
 	var executable_file_path = {
+		// filename extension : executable file path
 		'7z' : CeL.application.platform.execute.search([ '7z', 'p7z' ], '-h')
+	}, default_program_type = Object.keys(executable_file_path)[0];
+
+	function Archive_file(archive_file_path, options, callback) {
+		if (!callback && typeof options === 'function') {
+			// shift arguments.
+			callback = options;
+			options = null;
+		}
+
+		options = options = library_namespace.setup_options(options);
+		this.archive_file_path = archive_file_path;
+		this.archive_type = options.type;
+		if (!this.archive_type) {
+			var matched = archive_file_path.match(/\.([a-z\d\-_]+)$/i);
+			if (matched)
+				this.archive_type = matched[1].toLowerCase();
+		}
+		this.program_type = options.program_type || this.archive_type;
+		if (!(this.program_type in executable_file_path)) {
+			this.program_type = default_program_type;
+		}
+		this.program = executable_file_path[this.program_type];
+
+		callback(this);
+	}
+
+	_.file = Archive_file;
+
+	var switches_7z = {
+		update : 'u -tzip -mx=9 -r -sccUTF-8 -scsUTF-8 --',
+		extract : 'e',
+		remove : 'd',
+		list : 'l -slt -sccUTF-8 --',
+		// test
+		verify : 't',
+	}, switches_rar = {};
+
+	Archive_file.prototype = {
+		// default switches
+		switches : {
+			rar : switches_rar,
+			'7z' : switches_7z
+		},
+		update : archive_file_update,
+		extract : archive_file_extract,
+		remove : archive_file_remove,
+		list : archive_file_list,
+		verify : archive_file_verify,
+		execute : archive_file_execute
 	};
 
-	function Archive_file(archive_file_path, callback, options) {
+	function archive_file_execute(switches, callback, FSO_list) {
+		var command = [ this.program ];
+		if (Array.isArray(switches)) {
+			command.push(switches.join(' '));
+		} else {
+			command.push(switches);
+		}
+
+		if (this.program_type === '7z') {
+			command.push('--');
+		}
+
+		command.push(this.archive_file_path);
+
+		if (FSO_list) {
+			command.push(FSO_list.map(function(FSO) {
+				return /^".*"$/.tset(FSO) ? FSO : '"' + FSO + '"';
+			}).join(' '));
+		}
+
+		command = command.join(' ');
+		try {
+			var output = execSync(command);
+			callback(output);
+		} catch (e) {
+			callback(null, e);
+		}
+	}
+
+	function archive_file_update(compress_list, options, callback) {
+		if (!callback && typeof options === 'function') {
+			// shift arguments.
+			callback = options;
+			options = null;
+		}
+
+		;
+	}
+
+	function archive_file_extract(options, callback) {
+		if (!callback && typeof options === 'function') {
+			// shift arguments.
+			callback = options;
+			options = null;
+		}
+
+		;
+	}
+
+	function archive_file_remove(compress_list, options, callback) {
+		if (!callback && typeof options === 'function') {
+			// shift arguments.
+			callback = options;
+			options = null;
+		}
+
+		;
+	}
+
+	function archive_file_list(options, callback) {
+		if (!callback && typeof options === 'function') {
+			// shift arguments.
+			callback = options;
+			options = null;
+		}
+
+		;
+	}
+
+	function archive_file_verify(options, callback) {
+		if (!callback && typeof options === 'function') {
+			// shift arguments.
+			callback = options;
+			options = null;
+		}
+
 		;
 	}
 
@@ -104,4 +254,10 @@ function module_code(library_namespace) {
 	// @see CeL.application.OS.Windows.archive
 	var archive_file;
 
+	// --------------------------------------------------------------------------------------------
+
+	// export 導出.
+
+	return (_// JSDT:_module_
+	);
 }

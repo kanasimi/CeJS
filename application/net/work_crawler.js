@@ -18,8 +18,9 @@
 
 TODO:
 對於漫畫，下載完畢後以章節為單位自動產生壓縮檔並自動刪除下載目錄原始圖檔/清除暫存檔。每次下載前自動讀取壓縮檔資料。
-	"C:\Program Files\7-Zip\7z.exe" a -tzip -mx -slt -ssc -sccUTF-8 -scsUTF-8 "chapter.zip" "chapter"
-	"C:\Program Files\7-Zip\7z.exe" l -slt -ssc -sccUTF-8 -scsUTF-8 "chapter.zip"
+	// -wc:\temp
+	"C:\Program Files\7-Zip\7z.exe" u -tzip -mx=9 -r -sccUTF-8 -scsUTF-8 -- "chapter.zip" "chapter"
+	"C:\Program Files\7-Zip\7z.exe" l -slt -sccUTF-8 -- "chapter.zip"
 預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
@@ -2131,7 +2132,7 @@ function module_code(library_namespace) {
 								// 由圖片的網址來判別可能的延伸檔名。
 								var matched = image_data.url.replace(/[?#].*$/,
 										'');
-								matched = matched.match(/\.([a-z]+)$/);
+								matched = matched.match(/\.([a-z\d\-_]+)$/i);
 								if (matched) {
 									matched = matched[1].toLowerCase();
 									if (matched in _this.image_types) {
@@ -2819,7 +2820,7 @@ function module_code(library_namespace) {
 
 	// 找出段落開頭。
 	// '&nbsp;' 已經被 normailize_contents() @CeL.EPUB 轉換為 '&#160;'
-	var PATTERN_PARAGRAPH_START_CMN = /(^|\n|<\/?(?:br|p)(?:[^a-z][^<>]*)?>)(?:&#160;|\s){4,}([^\s\n&])/ig,
+	var PATTERN_PARAGRAPH_START_CMN = /(^|\n|<\/?(?:br|p)(?:[^a-z][^<>]*)?>)(?:&#160;|[\s　]){4,}([^\s　\n&])/ig,
 	//
 	PATTERN_PARAGRAPH_START_JP = new RegExp(PATTERN_PARAGRAPH_START_CMN.source
 			.replace('{4,}', '{2,}'), PATTERN_PARAGRAPH_START_CMN.flags);
