@@ -2981,8 +2981,16 @@ function module_code(library_namespace) {
 
 			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
 			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
+			parameters = parameters.split('|');
+			if (parameters[0].includes(include_mark)
+			// if not [[w:en:Help:Conditional expressions]]
+			&& !/^[\s\n]*#[a-z]+:/.test(parameters[0])) {
+				// e.g., {{ {{tl|t}} | p }}
+				return all;
+			}
+
 			index = 1;
-			parameters = parameters.split('|').map(function(token, _index) {
+			parameters = parameters.map(function(token, _index) {
 				if (_index === 0
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 				// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
@@ -3574,7 +3582,8 @@ function module_code(library_namespace) {
 			library_namespace.debug(previous + ' + ' + parameters, 4,
 					'parse_wikitext.parameter');
 
-			parameters = parameters.split('|').map(function(token, index) {
+			parameters = parameters.split('|');
+			parameters = parameters.map(function(token, index) {
 				return index === 0
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 				&& !token.includes(include_mark)

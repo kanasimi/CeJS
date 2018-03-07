@@ -2834,6 +2834,11 @@ function test_wiki() {
 		// assert([ 'text', CeL.wiki.parse('[[Category:]]').type ]);
 		assert([ 'link', CeL.wiki.parse('[[Category]]').type ]);
 		// CeL.wiki.parser('[[Category:a]]').each('category', function(token) {console.log(token);});0;
+		wikitext = '{{ {{tl|a}} | bb }}';
+		assert([ 'plain', CeL.wiki.parse(wikitext).type ]);
+		assert([ 'transclusion', CeL.wiki.parse(wikitext)[1].type ]);
+		wikitext = '{{#ifexpr: {{{1}}} > 0 and {{{1}}} < 1.0 or {{#ifeq:{{{decimal}}}| yes}} |is decimal |not decimal}}';
+		assert([ 'transclusion', CeL.wiki.parse(wikitext).type ]);
 
 		wikitext = 'a[[link]]b';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);

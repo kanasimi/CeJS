@@ -145,34 +145,20 @@ function module_code(library_namespace) {
 
 	_.file = Archive_file;
 
-	var switches_7z = {
-		update : 'u -tzip -mx=9 -r -sccUTF-8 -scsUTF-8 --',
-		extract : 'e',
-		remove : 'd',
-		list : 'l -slt -sccUTF-8 --',
-		// test
-		verify : 't',
-	}, switches_rar = {};
-
-	Archive_file.prototype = {
-		// default switches
-		switches : {
-			rar : switches_rar,
-			'7z' : switches_7z
-		},
-		update : archive_file_update,
-		extract : archive_file_extract,
-		remove : archive_file_remove,
-		list : archive_file_list,
-		verify : archive_file_verify,
-		execute : archive_file_execute
-	};
+	// --------------------------------------------------------------
 
 	function archive_file_execute(switches, callback, FSO_list) {
 		var command = [ this.program ];
 		if (Array.isArray(switches)) {
 			command.push(switches.join(' '));
+		} else if (library_namespace.is_Object(switches)) {
+			for ( var switch_name in switches) {
+				var value = switches[switch_name];
+				if (value !== undefined && value !== null)
+					command.push(value);
+			}
 		} else {
+			// assert: String|Number
 			command.push(switches);
 		}
 
@@ -191,68 +177,154 @@ function module_code(library_namespace) {
 		command = command.join(' ');
 		try {
 			var output = execSync(command);
-			callback(output);
+			if (typeof callback === 'function')
+				callback(output);
+			return output;
 		} catch (e) {
-			callback(null, e);
+			if (typeof callback === 'function')
+				callback(null, e);
 		}
 	}
 
-	function archive_file_update(compress_list, options, callback) {
+	// --------------------------------------------------------------
+
+	var FSO_list_operations = [ 'update', 'extract', 'remove' ],
+	//
+	default_switches = {
+		'7z' : {
+			// add
+			update : {
+				command : 'u -sccUTF-8 -scsUTF-8',
+				type : '-t7z',
+				level : '-mx=9',
+				recurse : '-r'
+			},
+			extract : {
+				command : 'e'
+			},
+			remove : {
+				command : 'd'
+			},
+			list : {
+				command : 'l -slt -sccUTF-8'
+			},
+			// test
+			verify : {
+				command : 't'
+			},
+		},
+		rar : {
+		// TODO
+		}
+	};
+
+	var apply_switches_handler = {
+		'7z' : {
+			type : function(value) {
+				return '-t' + value;
+			},
+			level : function(value) {
+				if (value === '')
+					return '-mx';
+				if (value >= 0)
+					return '-mx=' + value;
+				return;
+			}
+		},
+		rar : {}
+	};
+
+	var apply_switches = {
+		rar : null,
+		'7z' : null
+	};
+
+	Object.keys(apply_switches).forEach(function(program_type) {
+		if (apply_switches[program_type])
+			return;
+
+		apply_switches[program_type]
+		// apply_switches_handler
+		= function(options) {
+			var is_original = true,
+			//
+			switches = default_switches[program_type];
+
+			if (options) {
+				for ( var switch_name
+
+				in apply_switches_7z.handler) {
+					if (switch_name in options) {
+						if (is_original) {
+							is_original = false;
+							switches = Object.assign(
+							//
+							library_namespace.null_Object(), switches);
+						}
+						switches[switch_name]
+						//
+						= apply_switches_7z.handler[switch_name]
+						//
+						(options[switch_name]);
+					}
+				}
+			}
+
+			return switches;
+		};
+	});
+
+	// --------------------------------------------------------------
+
+	function archive_file_operation(operation, options, callback, compress_list) {
 		if (!callback && typeof options === 'function') {
 			// shift arguments.
 			callback = options;
 			options = null;
 		}
 
-		;
+		var switches = apply_switches[this.program_type](options);
+		this.execute(switches, callback, compress_list);
 	}
 
-	function archive_file_extract(options, callback) {
-		if (!callback && typeof options === 'function') {
-			// shift arguments.
-			callback = options;
-			options = null;
+	function archive_file_wrapper(options, callback) {
+		archive_file_operation.call(this, operation, options, callback);
+	}
+
+	function archive_file_wrapper_with_FSO_list(FSO_list, options, callback) {
+		archive_file_operation.call(this, operation, options, callback,
+				compress_list);
+	}
+
+	Archive_file.prototype = {
+		// default switches
+		switches : {
+			rar : switches_rar,
+			'7z' : switches_7z
+		},
+		execute : archive_file_execute
+	};
+
+	Object.keys(default_switches['7z']).forEach(function(operation) {
+		if (!Archive_file.prototype[operation]) {
+			Archive_file.prototype[operation]
+			//
+			= FSO_list_operations.includes(operation)
+			//
+			? archive_file_wrapper_with_FSO_list
+			//
+			: archive_file_wrapper;
 		}
+	});
 
-		;
-	}
-
-	function archive_file_remove(compress_list, options, callback) {
-		if (!callback && typeof options === 'function') {
-			// shift arguments.
-			callback = options;
-			options = null;
-		}
-
-		;
-	}
-
-	function archive_file_list(options, callback) {
-		if (!callback && typeof options === 'function') {
-			// shift arguments.
-			callback = options;
-			options = null;
-		}
-
-		;
-	}
-
-	function archive_file_verify(options, callback) {
-		if (!callback && typeof options === 'function') {
-			// shift arguments.
-			callback = options;
-			options = null;
-		}
-
-		;
-	}
+	// --------------------------------------------------------------
 
 	// setup executable file path + default switches
 	// CeL.application.storage.archive.WinRAR
 	// CeL.application.storage.archive.7_zip
 
 	// @see CeL.application.OS.Windows.archive
-	var archive_file;
+	// var archive_file;
 
 	// --------------------------------------------------------------------------------------------
 
