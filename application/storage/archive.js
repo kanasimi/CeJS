@@ -5,11 +5,11 @@
  * <code>
 
 // {Object|String}options.switches: additional command line switches to list
-archive_file = new CeL.application.storage.archive.file('file.zip',
+archive_file = new CeL.application.storage.archive('file.zip',
 		callback);
-archive_file = new CeL.application.storage.archive.file('file.7z',
+archive_file = new CeL.application.storage.archive('file.7z',
 		callback, options);
-archive_file = new CeL.application.storage.archive.file('file.rar',
+archive_file = new CeL.application.storage.archive('file.rar',
 		callback);
 
 // file list get from archive_file.list()
@@ -26,26 +26,26 @@ archive_file.switches = {
 
 // {String}
 archive_file.program = executable_file_path['7z'];
-archive_file.execute(callback, options);
+archive_file.execute(switches, callback);
 
 // list FSOs
 // callback({fso_stat});
 // fso_stat = {path:'',name:'',size:0,modify:{Date},create:{Date}}
-archive_file.list(callback, options);
+archive_file.list(options, callback);
 
 // test archive_file
 // {Object|String}options.switches: additional command line switches
 // {String}options.switches.password: password
-archive_file.verify(callback, options);
+archive_file.verify(options, callback);
 
 // {Object|String}options.index: index of archive_file.FSO_list
 // {String}options.FSOs: FSO name to extract
 // {Object|String}options.switches: additional command line switches
-archive_file.extract(target_directory, callback, options);
+archive_file.extract(target_directory, options, callback);
 
 // add new FSOs to archive_file
 // {Object|String}options.switches: additional command line switches
-archive_file.update(callback, [ to_compress ], options);
+archive_file.update([ to_compress ], options, callback);
 // to compress & update use archive_file.to_compress and
 // archive_file.to_delete
 archive_file.update([ file/folder list to add/compress ], options, callback);
@@ -59,6 +59,7 @@ archive_file.update([ file/folder list to add/compress ], {
  </code>
  * 
  * @since 2018/3/4 13:57:28
+ * @since 2018/3/8 19:59:47 初步可用
  */
 
 'use strict';
@@ -93,22 +94,6 @@ function module_code(library_namespace) {
 	var path_separator = library_namespace.env.path_separator;
 	var execSync = require('child_process').execSync;
 
-	/**
-	 * null module constructor
-	 * 
-	 * @class executing program 的 functions
-	 */
-	var _// JSDT:_module_
-	= function() {
-		// null module constructor
-	};
-
-	/**
-	 * for JSDT: 有 prototype 才會將之當作 Class
-	 */
-	_// JSDT:_module_
-	.prototype = {};
-
 	// --------------------------------------------------------------------------------------------
 
 	// @see CeL.application.OS.Windows.execute
@@ -116,7 +101,11 @@ function module_code(library_namespace) {
 	// search executable file path / 執行檔, `which`
 	var executable_file_path = {
 		// filename extension : executable file path
-		'7z' : CeL.application.platform.execute.search([ '7z', 'p7z' ], '-h')
+		// library_namespace.application.platform.execute.search([ '7z', 'p7z'
+		// ], '-h')
+		'7z' : '"' + (library_namespace.executable_file_path([ '7z', 'p7z' ])
+		//
+		|| '%ProgramFiles%\\7-Zip\\7z.exe') + '"'
 	}, default_program_type = Object.keys(executable_file_path)[0];
 
 	function Archive_file(archive_file_path, options, callback) {
@@ -126,7 +115,7 @@ function module_code(library_namespace) {
 			options = null;
 		}
 
-		options = options = library_namespace.setup_options(options);
+		options = library_namespace.setup_options(options);
 		this.archive_file_path = archive_file_path;
 		this.archive_type = options.type;
 		if (!this.archive_type) {
@@ -140,10 +129,9 @@ function module_code(library_namespace) {
 		}
 		this.program = executable_file_path[this.program_type];
 
-		callback(this);
+		if (typeof callback === 'function')
+			callback(this);
 	}
-
-	_.file = Archive_file;
 
 	// --------------------------------------------------------------
 
@@ -152,6 +140,7 @@ function module_code(library_namespace) {
 		if (Array.isArray(switches)) {
 			command.push(switches.join(' '));
 		} else if (library_namespace.is_Object(switches)) {
+			// console.log(switches);
 			for ( var switch_name in switches) {
 				var value = switches[switch_name];
 				if (value !== undefined && value !== null)
@@ -169,14 +158,19 @@ function module_code(library_namespace) {
 		command.push(this.archive_file_path);
 
 		if (FSO_list) {
+			if (!Array.isArray(FSO_list)) {
+				FSO_list = [ FSO_list ];
+			}
 			command.push(FSO_list.map(function(FSO) {
-				return /^".*"$/.tset(FSO) ? FSO : '"' + FSO + '"';
+				return /^".*"$/.test(FSO) ? FSO : '"' + FSO + '"';
 			}).join(' '));
 		}
 
 		command = command.join(' ');
+		library_namespace.debug(command, 1, 'archive_file_execute');
 		try {
 			var output = execSync(command);
+			// console.log(output.toString());
 			if (typeof callback === 'function')
 				callback(output);
 			return output;
@@ -192,12 +186,12 @@ function module_code(library_namespace) {
 	//
 	default_switches = {
 		'7z' : {
-			// add
+			// add compress_list
 			update : {
 				command : 'u -sccUTF-8 -scsUTF-8',
 				type : '-t7z',
-				level : '-mx=9',
-				recurse : '-r'
+				// recurse : '-r',
+				level : '-mx=9'
 			},
 			extract : {
 				command : 'e'
@@ -205,6 +199,7 @@ function module_code(library_namespace) {
 			remove : {
 				command : 'd'
 			},
+			// get archive information
 			list : {
 				command : 'l -slt -sccUTF-8'
 			},
@@ -229,9 +224,15 @@ function module_code(library_namespace) {
 				if (value >= 0)
 					return '-mx=' + value;
 				return;
+			},
+			recurse : function(value) {
+				if (value)
+					return '-r' + (value === true ? '' : value);
 			}
 		},
-		rar : {}
+		rar : {
+		// TODO
+		}
 	};
 
 	var apply_switches = {
@@ -245,15 +246,13 @@ function module_code(library_namespace) {
 
 		apply_switches[program_type]
 		// apply_switches_handler
-		= function(options) {
+		= function(operation, options) {
 			var is_original = true,
 			//
-			switches = default_switches[program_type];
+			switches = default_switches[program_type][operation];
 
 			if (options) {
-				for ( var switch_name
-
-				in apply_switches_7z.handler) {
+				for ( var switch_name in apply_switches_handler[program_type]) {
 					if (switch_name in options) {
 						if (is_original) {
 							is_original = false;
@@ -263,7 +262,7 @@ function module_code(library_namespace) {
 						}
 						switches[switch_name]
 						//
-						= apply_switches_7z.handler[switch_name]
+						= apply_switches_handler[program_type][switch_name]
 						//
 						(options[switch_name]);
 					}
@@ -276,32 +275,70 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------
 
-	function archive_file_operation(operation, options, callback, compress_list) {
+	function parse_7z_list_output(output) {
+		// console.log(output.toString());
+		var archive_data = {
+			hash : library_namespace.null_Object()
+		};
+
+		if (output && (output = output.toString())) {
+			// console.log(JSON.stringify(output));
+			// console.log(JSON.stringify(output.split(/\r?\n\r?\n/)));
+			output.split(/\r?\n\r?\n/).forEach(function(FSO_data_lines) {
+				// console.log(JSON.stringify(FSO_data_lines));
+				var FSO_data = library_namespace.null_Object();
+				FSO_data_lines.split(/\r?\n|\r/).forEach(function(line) {
+					var matched = line.match(/^([a-z\s]+)=(.*)$/i);
+					if (matched) {
+						FSO_data[matched[1].trim()] = matched[2].trim();
+					}
+				});
+				// console.log(FSO_data);
+				if (FSO_data.Path) {
+					if (archive_data.data)
+						archive_data.hash[FSO_data.Path] = FSO_data;
+					else
+						archive_data.data = FSO_data;
+				}
+			});
+		}
+
+		return archive_data;
+	}
+
+	var postfix = {
+		'7z' : {
+			list : parse_7z_list_output
+		}
+	}
+
+	// --------------------------------------------------------------
+
+	function archive_file_operation(operation, options, callback, FSO_list) {
 		if (!callback && typeof options === 'function') {
 			// shift arguments.
 			callback = options;
 			options = null;
 		}
 
-		var switches = apply_switches[this.program_type](options);
-		this.execute(switches, callback, compress_list);
-	}
+		var switches = apply_switches[this.program_type](operation, options),
+		//
+		_postfix = postfix[this.program_type]
+				&& postfix[this.program_type][operation],
+		//
+		output = this.execute(switches,
+		//
+		callback && _postfix ? function(output) {
+			// console.log(output.toString());
+			callback(_postfix(output));
+		} : callback, FSO_list);
 
-	function archive_file_wrapper(options, callback) {
-		archive_file_operation.call(this, operation, options, callback);
-	}
-
-	function archive_file_wrapper_with_FSO_list(FSO_list, options, callback) {
-		archive_file_operation.call(this, operation, options, callback,
-				compress_list);
+		return _postfix ? _postfix(output) : output;
 	}
 
 	Archive_file.prototype = {
 		// default switches
-		switches : {
-			rar : switches_rar,
-			'7z' : switches_7z
-		},
+		switches : default_switches,
 		execute : archive_file_execute
 	};
 
@@ -310,10 +347,18 @@ function module_code(library_namespace) {
 			Archive_file.prototype[operation]
 			//
 			= FSO_list_operations.includes(operation)
+			// archive_file_wrapper_with_FSO_list
+			? function(FSO_list, options, callback) {
+				return archive_file_operation.call(this, operation,
+				//
+				library_namespace.setup_options(options), callback, FSO_list);
+			}
 			//
-			? archive_file_wrapper_with_FSO_list
-			//
-			: archive_file_wrapper;
+			: function archive_file_wrapper(options, callback) {
+				return archive_file_operation.call(this, operation,
+				//
+				options, callback);
+			};
 		}
 	});
 
@@ -330,6 +375,5 @@ function module_code(library_namespace) {
 
 	// export 導出.
 
-	return (_// JSDT:_module_
-	);
+	return Archive_file;
 }

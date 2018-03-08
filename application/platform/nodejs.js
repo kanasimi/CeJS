@@ -614,6 +614,14 @@ function module_code(library_namespace) {
 	 * @see _CeL.updater.node.js
 	 */
 	function executable_file_path(file_name, search_path_list) {
+		if (Array.isArray(file_name)) {
+			file_name.some(function(_file_name) {
+				return file_name = executable_file_path(_file_name,
+						search_path_list);
+			})
+			return file_name;
+		}
+
 		if (!Array.isArray(search_path_list)) {
 			search_path_list = String(search_path_list
 			// Unix: process.env.PATH, Windows: process.env.Path
@@ -625,7 +633,7 @@ function module_code(library_namespace) {
 		}
 
 		if (library_namespace.platform('windows')
-				&& !/\.(?:exe|com|bat)$/i.test(file_name)) {
+				&& !/\.(?:exe|com|bat|cmd)$/i.test(file_name)) {
 			file_name += '.exe';
 		}
 

@@ -289,7 +289,7 @@ function module_code(library_namespace) {
 		// 若已經存在壞掉的圖片，就不再嘗試下載圖片。default:false
 		// skip_existed_bad_file : true,
 		//
-		// 循序逐個、一個個下載圖像。僅對漫畫有用，對小說無用。 Download images one by one.
+		// 循序逐個、一個個下載圖像。僅對漫畫有用，對小說無用。小說章節皆為逐個下載。 Download images one by one.
 		// default: 同時下載本章節中所有圖像。 Download ALL images at the same time.
 		// one_by_one : true,
 		//
