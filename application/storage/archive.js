@@ -12,49 +12,42 @@ archive_file = new CeL.application.storage.archive('file.7z',
 archive_file = new CeL.application.storage.archive('file.rar',
 		callback);
 
-// file list get from archive_file.list()
-// archive_file.FSO_list = [ {FSO data}, ... ]
-archive_file.FSO_list = [];
-// default switches
-archive_file.switches = {
-	// command : { switches }
-	list : {},
-	verify : {},
-	extract : {},
-	update : {}
-};
-
 // {String}
 archive_file.program = executable_file_path['7z'];
 archive_file.execute(switches, callback);
 
-// list FSOs
-// callback({fso_stat});
-// fso_stat = {path:'',name:'',size:0,modify:{Date},create:{Date}}
-archive_file.list(options, callback);
+//  FSO status hash get from archive_file.info()
+archive_file.hash = { FSO path : {FSO data}, ... }
+archive_file.information = { archive information }
+
+// list FSOs, get FSO status hash
+// callback({fso_status});
+// fso_status = {path:'',name:'',size:0,modify:{Date},create:{Date}}
+archive_file.info(options, callback);
+archive_file.info(options, callback);
+
+// add new FSOs to archive_file
+// {Object|String}options.switches: additional command line switches
+archive_file.update([ file/folder list to compress, add, update ], options, callback);
+archive_file.update([ file/folder list to compress, add, update ], {
+	type : 'zip',
+	// level of compression, compression method
+	// '' as -mx
+	level : '',
+}, callback);
+
+TODO:
 
 // test archive_file
 // {Object|String}options.switches: additional command line switches
 // {String}options.switches.password: password
 archive_file.verify(options, callback);
 
-// {Object|String}options.index: index of archive_file.FSO_list
-// {String}options.FSOs: FSO name to extract
+// {Array|String}options.list: FSO path list to extract
 // {Object|String}options.switches: additional command line switches
 archive_file.extract(target_directory, options, callback);
 
-// add new FSOs to archive_file
-// {Object|String}options.switches: additional command line switches
-archive_file.update([ to_compress ], options, callback);
-// to compress & update use archive_file.to_compress and
-// archive_file.to_delete
-archive_file.update([ file/folder list to add/compress ], options, callback);
-archive_file.update([ file/folder list to add/compress ], {
-	type : 'zip',
-	// level of compression, compression method
-	// '' as -mx
-	level : '',
-}, callback);
+archive_file.remove([ to_delete ], options, callback);
 
  </code>
  * 
@@ -105,7 +98,10 @@ function module_code(library_namespace) {
 		// ], '-h')
 		'7z' : '"' + (library_namespace.executable_file_path([ '7z', 'p7z' ])
 		//
-		|| '%ProgramFiles%\\7-Zip\\7z.exe') + '"'
+		|| '%ProgramFiles%\\7-Zip\\7z.exe') + '"',
+		rar : '"' + (library_namespace.executable_file_path('rar')
+		// WinRAR.exe
+		|| '%ProgramFiles%\\WinRAR\\rar.exe') + '"'
 	}, default_program_type = Object.keys(executable_file_path)[0];
 
 	function Archive_file(archive_file_path, options, callback) {
@@ -127,6 +123,7 @@ function module_code(library_namespace) {
 		if (!(this.program_type in executable_file_path)) {
 			this.program_type = default_program_type;
 		}
+		// {String}
 		this.program = executable_file_path[this.program_type];
 
 		if (typeof callback === 'function')
@@ -183,12 +180,13 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------
 
 	var FSO_list_operations = [ 'update', 'extract', 'remove' ],
-	//
+	// program_type: { command : { switches } }
 	default_switches = {
 		'7z' : {
 			// add compress_list
 			update : {
-				command : 'u -sccUTF-8 -scsUTF-8',
+				// use "a" to allow -sdel switch
+				command : 'a -sccUTF-8 -scsUTF-8',
 				type : '-t7z',
 				// recurse : '-r',
 				level : '-mx=9'
@@ -196,17 +194,18 @@ function module_code(library_namespace) {
 			extract : {
 				command : 'e'
 			},
+			// delete
 			remove : {
 				command : 'd'
 			},
 			// get archive information
-			list : {
+			info : {
 				command : 'l -slt -sccUTF-8'
 			},
 			// test
 			verify : {
 				command : 't'
-			},
+			}
 		},
 		rar : {
 		// TODO
@@ -228,10 +227,31 @@ function module_code(library_namespace) {
 			recurse : function(value) {
 				if (value)
 					return '-r' + (value === true ? '' : value);
+			},
+			// delete files after compression
+			remove : function(value) {
+				if (value)
+					return '-sdel';
+			},
+			// destination directory path, output directory
+			output : function(value) {
+				if (value)
+					return '"-o' + value + '"';
+			},
+			// additional switches
+			extra : function(value) {
+				if (value)
+					return value;
 			}
 		},
 		rar : {
-		// TODO
+			// TODO
+
+			// additional switches
+			extra : function(value) {
+				if (value)
+					return value;
+			}
 		}
 	};
 
@@ -275,51 +295,64 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------
 
-	function parse_7z_list_output(output) {
+	function parse_7z_info_output(output) {
 		// console.log(output.toString());
-		var archive_data = {
-			hash : library_namespace.null_Object()
-		};
 
-		if (output && (output = output.toString())) {
-			// console.log(JSON.stringify(output));
-			// console.log(JSON.stringify(output.split(/\r?\n\r?\n/)));
-			output.split(/\r?\n\r?\n/).forEach(function(FSO_data_lines) {
-				// console.log(JSON.stringify(FSO_data_lines));
-				var FSO_data = library_namespace.null_Object();
-				FSO_data_lines.split(/\r?\n|\r/).forEach(function(line) {
-					var matched = line.match(/^([a-z\s]+)=(.*)$/i);
-					if (matched) {
-						FSO_data[matched[1].trim()] = matched[2].trim();
-					}
-				});
-				// console.log(FSO_data);
-				if (FSO_data.Path) {
-					if (archive_data.data)
-						archive_data.hash[FSO_data.Path] = FSO_data;
-					else
-						archive_data.data = FSO_data;
-				}
-			});
+		if (!output || !(output = output.toString())) {
+			return output;
 		}
 
-		return archive_data;
+		this.hash = library_namespace.null_Object();
+		// console.log(JSON.stringify(output));
+		// console.log(JSON.stringify(output.split(/\r?\n\r?\n/)));
+		output.split(/\r?\n\r?\n/).forEach(function(FSO_data_lines) {
+			// console.log(JSON.stringify(FSO_data_lines));
+			var FSO_data = library_namespace.null_Object();
+			FSO_data_lines.split(/\r?\n|\r/).forEach(function(line) {
+				var matched = line.match(/^([a-z\s]+)=(.*)$/i);
+				if (matched) {
+					FSO_data[matched[1].trim().toLowerCase()]
+					//
+					= matched[2].trim();
+				}
+			});
+			// console.log(FSO_data);
+			if (!FSO_data.path) {
+				;
+
+			} else if (this.information) {
+				// FSO status hash get from archive_file.info()
+				// archive_file.hash = { FSO path : {FSO data}, ... }
+				this.hash[FSO_data.path] = FSO_data;
+			} else {
+				// assert: the first item is the archive file itself
+				// archive_file.information = { archive information }
+				this.information = FSO_data;
+			}
+		}, this);
+
+		return this.hash;
 	}
 
 	var postfix = {
 		'7z' : {
-			list : parse_7z_list_output
+			info : parse_7z_info_output
 		}
 	}
 
 	// --------------------------------------------------------------
 
+	/**
+	 * @inner
+	 */
 	function archive_file_operation(operation, options, callback, FSO_list) {
 		if (!callback && typeof options === 'function') {
 			// shift arguments.
 			callback = options;
 			options = null;
 		}
+
+		options = library_namespace.setup_options(options);
 
 		var switches = apply_switches[this.program_type](operation, options),
 		//
@@ -333,7 +366,7 @@ function module_code(library_namespace) {
 			callback(_postfix(output));
 		} : callback, FSO_list);
 
-		return _postfix ? _postfix(output) : output;
+		return _postfix ? _postfix.call(this, output) : output;
 	}
 
 	Archive_file.prototype = {
@@ -349,9 +382,15 @@ function module_code(library_namespace) {
 			= FSO_list_operations.includes(operation)
 			// archive_file_wrapper_with_FSO_list
 			? function(FSO_list, options, callback) {
+				if (library_namespace.is_Object(FSO_list)) {
+					// shift arguments.
+					callback = options;
+					options = FSO_list;
+					FSO_list = null;
+				}
 				return archive_file_operation.call(this, operation,
 				//
-				library_namespace.setup_options(options), callback, FSO_list);
+				options, callback, FSO_list);
 			}
 			//
 			: function archive_file_wrapper(options, callback) {

@@ -420,10 +420,10 @@ function module_code(library_namespace) {
 				return this.finished_words(status_list);
 			}
 
-			var finished, _this = this;
+			var finished;
 			if (status_list.some(function(status) {
-				return finished = _this.finished_words(status);
-			})) {
+				return finished = this.finished_words(status);
+			}, this)) {
 				return finished;
 			}
 		},
@@ -551,8 +551,8 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.log(this.id + ': Starting ' + work_id + ', 儲存至 '
-				+ this.main_directory);
+		library_namespace.log(this.id + ': ' + (new Date).toISOString()
+				+ ' Starting ' + work_id + ', 儲存至 ' + this.main_directory);
 		// prepare work directory.
 		library_namespace.create_directory(this.main_directory);
 
@@ -809,8 +809,8 @@ function module_code(library_namespace) {
 					// TODO: handle exception
 				}
 
-				var _this = this, report_file = this.main_directory
-						+ this.log_directory_name + this.report_file,
+				var report_file = this.main_directory + this.log_directory_name
+						+ this.report_file,
 				// 產生網頁形式的報告檔。
 				reports = [ '<html>', '<head>',
 				// http://mdn.beonex.com/en/Web_development/Historical_artifacts_to_avoid.html
@@ -1037,10 +1037,13 @@ function module_code(library_namespace) {
 						.stringify(search_result));
 			}
 			search_result = search_result[work_title];
-			var p = _this.id_of_search_result;
-			if (p) {
-				search_result = typeof p === 'function' ? p(search_result)
-						: search_result ? search_result[p] : search_result;
+			var search_result_id = _this.id_of_search_result;
+			if (search_result_id) {
+				search_result = typeof search_result_id === 'function'
+				//
+				? search_result_id(search_result)
+						: search_result ? search_result[search_result_id]
+								: search_result;
 			}
 			_this.get_work_data({
 				id : search_result,
@@ -1168,10 +1171,12 @@ function module_code(library_namespace) {
 					title = id_data[id] || id_data[index];
 				}
 
-				var p = _this.title_of_search_result;
-				if (p) {
-					title = typeof p === 'function' ? p(title)
-							: title ? title[p] : title;
+				var search_result_id = _this.title_of_search_result;
+				if (search_result_id) {
+					title = typeof search_result_id === 'function'
+					//
+					? search_result_id(title) : title ? title[search_result_id]
+							: title;
 				}
 				title = title.trim();
 				// console.log([ 'compare', title, work_title ]);
@@ -1852,9 +1857,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var _this = this,
-		//
-		next = get_chapter_data.bind(_this, work_data, chapter_NO, callback);
+		var next = get_chapter_data.bind(this, work_data, chapter_NO, callback);
 
 		if (this.chapter_filter) {
 			var chapter_data = work_data.chapter_list
@@ -2076,8 +2079,8 @@ function module_code(library_namespace) {
 				// get chapter label, will used as chapter directory name.
 				chapter_label = _this.get_chapter_directory_name(chapter_data,
 						chapter_NO);
-				var chapter_directory = work_data.directory + chapter_label
-						+ path_separator;
+				var chapter_directory = chapter_data.directory = work_data.directory
+						+ chapter_label + path_separator;
 				library_namespace.create_directory(chapter_directory);
 
 				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
@@ -2382,6 +2385,9 @@ function module_code(library_namespace) {
 
 			// 已下載完本 chapter。
 
+			// 紀錄最後下載的章節計數。
+			work_data.last_download.chapter = chapter_NO;
+
 			// 記錄下載錯誤的檔案。
 			// TODO: add timestamp, work/chapter/NO, {Array}error code
 			// TODO: 若錯誤次數少於限度，則從頭擷取work。
@@ -2425,8 +2431,25 @@ function module_code(library_namespace) {
 				}
 			}
 
-			// 紀錄最後下載的章節計數。
-			work_data.last_download.chapter = chapter_NO;
+			if (_this.archive_images && Array.isArray(image_list)
+			// 完全沒有出現錯誤才壓縮圖像檔案。
+			&& (!_this.archive_all_good_images_only
+			//
+			|| !image_list.some(function(image_data) {
+				return image_data.has_error;
+			}))) {
+				var chapter_data = work_data.chapter_list
+						&& work_data.chapter_list[chapter_NO - 1],
+				//
+				chapter_directory = chapter_data.directory
+				//
+				images_archive = new library_namespace.storage.archive(
+						chapter_directory + '.zip');
+				images_archive.update(chapter_directory, {
+					recurse : true,
+					remove : true
+				});
+			}
 
 			continue_next_chapter.call(_this, work_data, chapter_NO, callback);
 		}
