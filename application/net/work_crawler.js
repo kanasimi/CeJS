@@ -82,7 +82,9 @@ if (typeof CeL === 'function') {
 		// for .detect_HTML_language(), .time_zone_of_language()
 		+ '|application.locale.'
 		// guess_text_language()
-		+ '|application.locale.encoding.',
+		+ '|application.locale.encoding.'
+		// storage.archive()
+		+ '|application.storage.archive.',
 
 		// 設定不匯出的子函式。
 		no_extend : '*',
@@ -378,6 +380,9 @@ function module_code(library_namespace) {
 			bmp : true
 		},
 
+		// 壓縮圖像檔案之後，刪掉原先的圖像檔案。
+		remove_images_after_archive : true,
+
 		image_path_to_url : image_path_to_url,
 		// 提取出引數（如 URL）中的作品ID 以回傳。
 		extract_work_id : function(work_information) {
@@ -469,6 +474,14 @@ function module_code(library_namespace) {
 			allow_EOI_error : 'boolean',
 			skip_error : 'boolean',
 			skip_chapter_data_error : 'boolean',
+
+			// 漫畫下載完畢後壓縮圖像檔案。
+			archive_images : 'boolean',
+			// 完全沒有出現錯誤才壓縮圖像檔案。
+			archive_all_good_images_only : 'boolean',
+			// 壓縮圖像檔案之後，刪掉原先的圖像檔案。
+			remove_images_after_archive : 'boolean',
+
 			// 重新擷取用的相關操作設定。
 			regenerate : 'boolean',
 			reget_chapter : 'boolean',
@@ -2035,7 +2048,7 @@ function module_code(library_namespace) {
 	function get_chapter_data(work_data, chapter_NO, callback) {
 		var _this = this,
 		// remaining
-		left, image_list, waiting, chapter_label,
+		left, image_list, waiting, chapter_label, chapter_directory, images_archive,
 		//
 		chapter_URL = this.chapter_URL(work_data, chapter_NO);
 		chapter_URL = this.full_URL(chapter_URL);
@@ -2079,9 +2092,14 @@ function module_code(library_namespace) {
 				// get chapter label, will used as chapter directory name.
 				chapter_label = _this.get_chapter_directory_name(chapter_data,
 						chapter_NO);
-				var chapter_directory = chapter_data.directory = work_data.directory
-						+ chapter_label + path_separator;
+				chapter_directory = work_data.directory + chapter_label;
 				library_namespace.create_directory(chapter_directory);
+
+				images_archive = new library_namespace.storage.archive(
+						chapter_directory + '.zip');
+				if (node_fs.existsSync(images_archive.archive_file_path))
+					images_archive.info();
+				chapter_directory += path_separator;
 
 				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
 				if (work_data.reget_chapter && _this.preserve_chapter_page) {
@@ -2162,7 +2180,8 @@ function module_code(library_namespace) {
 					}
 
 					if (!_this.one_by_one) {
-						_this.get_images(image_data, check_if_done);
+						_this.get_images(image_data, check_if_done,
+								images_archive);
 					}
 				});
 				library_namespace.debug(chapter_label + ': 已派發完工作，開始等待。', 3,
@@ -2183,7 +2202,7 @@ function module_code(library_namespace) {
 							+ image_list.length + '...\r');
 					if (image_list.index < image_list.length) {
 						_this.get_images(image_list[image_list.index],
-								get_next_image);
+								get_next_image, images_archive);
 					}
 				};
 				get_next_image(true);
@@ -2438,16 +2457,11 @@ function module_code(library_namespace) {
 			|| !image_list.some(function(image_data) {
 				return image_data.has_error;
 			}))) {
-				var chapter_data = work_data.chapter_list
-						&& work_data.chapter_list[chapter_NO - 1],
-				//
-				chapter_directory = chapter_data.directory
-				//
-				images_archive = new library_namespace.storage.archive(
-						chapter_directory + '.zip');
+				// 漫畫下載完畢後壓縮圖像檔案。
 				images_archive.update(chapter_directory, {
-					recurse : true,
-					remove : true
+					// 壓縮圖像檔案之後，刪掉原先的圖像檔案。
+					remove : _this.remove_images_after_archive,
+					recurse : true
 				});
 			}
 
@@ -2517,7 +2531,7 @@ function module_code(library_namespace) {
 		+ '$1');
 	}
 
-	function get_images(image_data, callback) {
+	function get_images(image_data, callback, images_archive) {
 		// console.log(image_data);
 		if (node_fs.existsSync(image_data.file) || this.skip_existed_bad_file
 		// 檢查是否已具有server上本身就已經出錯的檔案。
@@ -2525,6 +2539,10 @@ function module_code(library_namespace) {
 			image_data.done = true;
 			typeof callback === 'function' && callback();
 			return;
+		}
+
+		if (images_archive) {
+			;
 		}
 
 		var _this = this,
@@ -2690,13 +2708,13 @@ function module_code(library_namespace) {
 			image_data.error_count = (image_data.error_count | 0) + 1;
 			library_namespace.log('get_images: Retry ' + image_data.error_count
 					+ '/' + _this.MAX_ERROR_RETRY + '...');
-			_this.get_images(image_data, callback);
+			_this.get_images(image_data, callback, images_archive);
 
 		}, 'binary', null, Object.assign({
 			/**
 			 * 最多平行取得檔案(圖片)的數量。
 			 * 
-			 * 最多平行取得檔案的數量。 <code>
+			 * <code>
 			incase "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added. Use emitter.setMaxListeners() to increase limit"
 			</code>
 			 */

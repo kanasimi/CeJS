@@ -96,9 +96,10 @@ function module_code(library_namespace) {
 		// filename extension : executable file path
 		// library_namespace.application.platform.execute.search([ '7z', 'p7z'
 		// ], '-h')
-		'7z' : '"' + (library_namespace.executable_file_path([ '7z', 'p7z' ])
+		'7z' : add_quote((library_namespace
+				.executable_file_path([ '7z', 'p7z' ])
 		//
-		|| '%ProgramFiles%\\7-Zip\\7z.exe') + '"',
+		|| '%ProgramFiles%\\7-Zip\\7z.exe')),
 		rar : '"' + (library_namespace.executable_file_path('rar')
 		// WinRAR.exe
 		|| '%ProgramFiles%\\WinRAR\\rar.exe') + '"'
@@ -132,6 +133,10 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------
 
+	function add_quote(arg) {
+		return /^".*"$/.test(arg) ? arg : '"' + arg + '"';
+	}
+
 	function archive_file_execute(switches, callback, FSO_list) {
 		var command = [ this.program ];
 		if (Array.isArray(switches)) {
@@ -152,15 +157,13 @@ function module_code(library_namespace) {
 			command.push('--');
 		}
 
-		command.push(this.archive_file_path);
+		command.push(add_quote(this.archive_file_path));
 
 		if (FSO_list) {
 			if (!Array.isArray(FSO_list)) {
 				FSO_list = [ FSO_list ];
 			}
-			command.push(FSO_list.map(function(FSO) {
-				return /^".*"$/.test(FSO) ? FSO : '"' + FSO + '"';
-			}).join(' '));
+			command.push(FSO_list.map(add_quote).join(' '));
 		}
 
 		command = command.join(' ');
@@ -187,7 +190,6 @@ function module_code(library_namespace) {
 			update : {
 				// use "a" to allow -sdel switch
 				command : 'a -sccUTF-8 -scsUTF-8',
-				type : '-t7z',
 				// recurse : '-r',
 				level : '-mx=9'
 			},
@@ -236,7 +238,7 @@ function module_code(library_namespace) {
 			// destination directory path, output directory
 			output : function(value) {
 				if (value)
-					return '"-o' + value + '"';
+					return add_quote('-o' + value);
 			},
 			// additional switches
 			extra : function(value) {
