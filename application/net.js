@@ -1145,7 +1145,7 @@ function get_video(video_url, download_to, options) {
 }
 
 get_video.getter_setting = {
-	additional_options: '--location',
+	//additional_options: '--location',
 	// 2014/12/6 對於 "150 這部影片無法在您的國家/地區播放。"，需要是自己的影片，有 cookies 才行。
 	cookie : "",
 	cookie_file : './youtube.cookie.txt',

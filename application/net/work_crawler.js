@@ -382,6 +382,7 @@ function module_code(library_namespace) {
 
 		// 壓縮圖像檔案之後，刪掉原先的圖像檔案。
 		remove_images_after_archive : true,
+		images_archive_extension : 'zip',
 
 		image_path_to_url : image_path_to_url,
 		// 提取出引數（如 URL）中的作品ID 以回傳。
@@ -2096,9 +2097,18 @@ function module_code(library_namespace) {
 				library_namespace.create_directory(chapter_directory);
 
 				images_archive = new library_namespace.storage.archive(
-						chapter_directory + '.zip');
-				if (node_fs.existsSync(images_archive.archive_file_path))
+						work_data.directory + chapter_label + '.'
+								+ _this.images_archive_extension);
+				// cache
+				images_archive.base_directory = work_data.directory;
+				images_archive.file_name = chapter_label + '.'
+						+ _this.images_archive_extension;
+				images_archive.work_directory = work_data.directory;
+				if (node_fs.existsSync(images_archive.archive_file_path)) {
+					process.stdout.write('Reading ' + images_archive.file_name
+							+ '...\r');
 					images_archive.info();
+				}
 				chapter_directory += path_separator;
 
 				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
@@ -2533,17 +2543,32 @@ function module_code(library_namespace) {
 
 	function get_images(image_data, callback, images_archive) {
 		// console.log(image_data);
-		if (node_fs.existsSync(image_data.file) || this.skip_existed_bad_file
-		// 檢查是否已具有server上本身就已經出錯的檔案。
-		&& node_fs.existsSync(this.EOI_error_path(image_data.file))) {
+
+		var image_downloaded = node_fs.existsSync(image_data.file)
+				|| this.skip_existed_bad_file
+				// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
+				&& node_fs.existsSync(this.EOI_error_path(image_data.file));
+
+		if (!image_downloaded && images_archive && images_archive.hash
+		// 檢查壓縮檔，看是否已經存在圖像檔案。
+		&& image_data.file.startsWith(images_archive.work_directory)) {
+			var relative_image_path = image_data.file
+					.slice(images_archive.work_directory.length);
+
+			image_downloaded = images_archive.hash[relative_image_path]
+					|| this.skip_existed_bad_file
+					// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
+					&& images_archive.hash[this
+							.EOI_error_path(relative_image_path)];
+		}
+
+		if (image_downloaded) {
 			image_data.done = true;
 			typeof callback === 'function' && callback();
 			return;
 		}
 
-		if (images_archive) {
-			;
-		}
+		// --------------------------------------
 
 		var _this = this,
 		// 漫畫圖片的 URL。
