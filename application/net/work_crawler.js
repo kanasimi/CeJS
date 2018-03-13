@@ -17,10 +17,6 @@
 # finish_up()
 
 TODO:
-對於漫畫，下載完畢後以章節為單位自動產生壓縮檔並自動刪除下載目錄原始圖檔/清除暫存檔。每次下載前自動讀取壓縮檔資料。
-	// -wc:\temp
-	"C:\Program Files\7-Zip\7z.exe" u -tzip -mx=9 -r -sccUTF-8 -scsUTF-8 -- "chapter.zip" "chapter"
-	"C:\Program Files\7-Zip\7z.exe" l -slt -sccUTF-8 -- "chapter.zip"
 預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
@@ -2100,10 +2096,13 @@ function module_code(library_namespace) {
 						work_data.directory + chapter_label + '.'
 								+ _this.images_archive_extension);
 				// cache
-				images_archive.base_directory = work_data.directory;
-				images_archive.file_name = chapter_label + '.'
-						+ _this.images_archive_extension;
-				images_archive.work_directory = work_data.directory;
+				Object.assign(images_archive, {
+					base_directory : work_data.directory,
+					file_name : chapter_label + '.'
+							+ _this.images_archive_extension,
+					work_directory : work_data.directory,
+					to_remove : []
+				});
 				if (node_fs.existsSync(images_archive.archive_file_path)) {
 					process.stdout.write('Reading ' + images_archive.file_name
 							+ '...\r');
@@ -2467,6 +2466,10 @@ function module_code(library_namespace) {
 			|| !image_list.some(function(image_data) {
 				return image_data.has_error;
 			}))) {
+				if (images_archive.to_remove.length > 0) {
+					images_archive.remove(images_archive.to_remove.unique());
+				}
+
 				// 漫畫下載完畢後壓縮圖像檔案。
 				images_archive.update(chapter_directory, {
 					// 壓縮圖像檔案之後，刪掉原先的圖像檔案。
@@ -2549,20 +2552,27 @@ function module_code(library_namespace) {
 				// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
 				&& node_fs.existsSync(this.EOI_error_path(image_data.file));
 
-		if (!image_downloaded && images_archive && images_archive.hash
+		var image_archived, bad_image_archived;
+		if (images_archive && images_archive.hash
 		// 檢查壓縮檔，看是否已經存在圖像檔案。
 		&& image_data.file.startsWith(images_archive.work_directory)) {
-			var relative_image_path = image_data.file
+			image_archived = image_data.file
 					.slice(images_archive.work_directory.length);
+			bad_image_archived = images_archive.hash[this
+					.EOI_error_path(image_archived)];
+			if (image_archived && bad_image_archived) {
+				images_archive.to_remove.push(bad_image_archived);
+			}
 
-			image_downloaded = images_archive.hash[relative_image_path]
+			image_downloaded = image_downloaded
+					|| images_archive.hash[image_archived]
 					|| this.skip_existed_bad_file
 					// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
-					&& images_archive.hash[this
-							.EOI_error_path(relative_image_path)];
+					&& bad_image_archived;
 		}
 
 		if (image_downloaded) {
+			// console.log('get_images: Skip ' + image_data.file);
 			image_data.done = true;
 			typeof callback === 'function' && callback();
 			return;
@@ -2666,21 +2676,47 @@ function module_code(library_namespace) {
 						|| (XMLHttp.status / 100 | 0) === 4) {
 							contents = '';
 						}
-					} else if (node_fs.existsSync(bad_file_path)) {
-						library_namespace.info('刪除損壞的舊檔：' + bad_file_path);
-						library_namespace.fs_remove(bad_file_path);
+					} else {
+						if (node_fs.existsSync(bad_file_path)) {
+							library_namespace.info('刪除損壞的舊檔：' + bad_file_path);
+							library_namespace.fs_remove(bad_file_path);
+						}
+						if (bad_image_archived) {
+							// 登記壓縮檔內可以刪除的損壞圖檔。
+							images_archive.to_remove.push(bad_image_archived);
+						}
 					}
 
-					var old_file_status;
+					var old_file_status, old_archived_file =
+					// image_data.has_error?bad_image_archived:image_archived
+					image_archived || bad_image_archived;
 					try {
 						old_file_status = node_fs.statSync(image_data.file);
 					} catch (e) {
 						// old/bad file not exist
 					}
+
+					if (old_archived_file && (!old_file_status
+					//
+					|| old_archived_file.size > old_file_status.size)) {
+						// 壓縮檔內的圖像質量更好的情況，那就採用壓縮檔的。
+						if (old_file_status
+								&& old_archived_file.size < contents.length) {
+							library_namespace.warn('壓縮檔內的圖像質量比目錄中的更好'
+							//
+							+ (_this.archive_images ? '，但在下載完後將可能在壓縮作業時被覆蓋'
+							//
+							: '') + '： ' + old_archived_file.path);
+						}
+
+						old_file_status = old_archived_file;
+					}
+
 					if (!old_file_status
 					// 得到更大的檔案，寫入更大的檔案。
-					|| old_file_status.size < contents.length) {
-						// 保存圖片數據到HDD上。
+					|| !(old_file_status.size >= contents.length)) {
+						library_namespace.debug('保存圖片數據到HDD上: '
+								+ image_data.file, 1, 'get_images');
 						// TODO: 檢查舊的檔案是不是文字檔。例如有沒有包含HTML標籤。
 						node_fs.writeFileSync(image_data.file, contents);
 					} else if (old_file_status

@@ -134,6 +134,9 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------
 
 	function add_quote(arg) {
+		if (library_namespace.is_Object(arg) && arg.path) {
+			arg = arg.path;
+		}
 		return /^".*"$/.test(arg) ? arg : '"' + arg + '"';
 	}
 
@@ -145,6 +148,9 @@ function module_code(library_namespace) {
 			// console.log(switches);
 			for ( var switch_name in switches) {
 				var value = switches[switch_name];
+				if (typeof value === 'function') {
+					value = value.call(this);
+				}
 				if (value !== undefined && value !== null)
 					command.push(value);
 			}
@@ -190,6 +196,9 @@ function module_code(library_namespace) {
 			update : {
 				// use "a" to allow -sdel switch
 				command : 'a -sccUTF-8 -scsUTF-8',
+				type : function() {
+					return '-t' + this.archive_type;
+				},
 				// recurse : '-r',
 				level : '-mx=9'
 			},
@@ -286,7 +295,7 @@ function module_code(library_namespace) {
 						//
 						= apply_switches_handler[program_type][switch_name]
 						//
-						(options[switch_name]);
+						.call(this, options[switch_name]);
 					}
 				}
 			}
@@ -356,7 +365,8 @@ function module_code(library_namespace) {
 
 		options = library_namespace.setup_options(options);
 
-		var switches = apply_switches[this.program_type](operation, options),
+		var switches = apply_switches[this.program_type].call(this, operation,
+				options),
 		//
 		_postfix = postfix[this.program_type]
 				&& postfix[this.program_type][operation],
