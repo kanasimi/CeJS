@@ -36,18 +36,20 @@ archive_file.update([ file/folder list to compress, add, update ], {
 	level : '',
 }, callback);
 
+archive_file.remove([ to_delete ]);
+archive_file.remove([ to_delete ], options, callback);
+
+// {Array|String}options.list: FSO path list to extract
+// {Object|String}options.switches: additional command line switches
+archive_file.extract({output : target_directory}, callback);
+archive_file.extract([ files to extract ], {output : target_directory, other options}, callback);
+
 TODO:
 
 // test archive_file
 // {Object|String}options.switches: additional command line switches
 // {String}options.switches.password: password
 archive_file.verify(options, callback);
-
-// {Array|String}options.list: FSO path list to extract
-// {Object|String}options.switches: additional command line switches
-archive_file.extract(target_directory, options, callback);
-
-archive_file.remove([ to_delete ], options, callback);
 
  </code>
  * 
@@ -188,7 +190,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------
 
-	var FSO_list_operations = [ 'update', 'extract', 'remove' ],
+	var FSO_list_operations = [ 'update', 'extract', 'remove', 'verify' ],
 	// program_type: { command : { switches } }
 	default_switches = {
 		'7z' : {
@@ -203,7 +205,7 @@ function module_code(library_namespace) {
 				level : '-mx=9'
 			},
 			extract : {
-				command : 'e'
+				command : 'x'
 			},
 			// delete
 			remove : {
@@ -239,7 +241,7 @@ function module_code(library_namespace) {
 				if (value)
 					return '-r' + (value === true ? '' : value);
 			},
-			// delete files after compression
+			// delete files after compression: for 7-Zip > 18.01?
 			remove : function(value) {
 				if (value)
 					return '-sdel';

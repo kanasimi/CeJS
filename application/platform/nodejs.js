@@ -234,7 +234,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @inner
 	 */
-	function remove_fso_list(list, parent, recurse) {
+	function remove_fso_list(list, recurse, parent) {
 		if (parent && !/[\\\/]$/.test(parent)) {
 			parent += path_separator;
 		}
@@ -262,9 +262,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://github.com/isaacs/rimraf/blob/master/rimraf.js
 	 */
-	function remove_fso(path, recurse, force) {
+	function remove_fso(path, recurse) {
 		if (Array.isArray(path)) {
-			return remove_fso_list(path);
+			return remove_fso_list(path, recurse);
 		}
 
 		try {
@@ -284,13 +284,13 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// 設定recurse時才會recurse操作。
+			// 設定recurse/force時才會recurse操作。
 			if (recurse) {
 				library_namespace.debug('recurse remove sub-fso of ' + path, 2,
 						'remove_fso');
 				var error
 				// recurse, iterative method
-				= remove_fso_list(node_fs.readdirSync(path), path, recurse);
+				= remove_fso_list(node_fs.readdirSync(path), recurse, path);
 				if (error) {
 					return error;
 				}

@@ -122,10 +122,9 @@ function module_code(library_namespace) {
 
 		_.copy_file = storage_module.fs_copySync;
 
-		_.remove_file = function(path, force) {
-			storage_module.fs_remove(path, false, force);
+		_.remove_file = _.remove_directory = function(path, recurse) {
+			return storage_module.fs_remove(path, recurse);
 		};
-		_.remove_directory = storage_module.fs_remove;
 
 		_.move_directory = _.move_file =
 		//

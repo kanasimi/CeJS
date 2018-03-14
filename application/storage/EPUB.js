@@ -1992,15 +1992,16 @@ function module_code(library_namespace) {
 		// 生成 .bat，作業完畢之後就會自動刪除 .bat。
 		// 注意: 這需要先安裝 7z.exe 程式。
 		library_namespace.write_file(this.path.root + command_file_name, [
-		// @see create_ebook.bat
-		'SET P7Z="' + p7zip_path + '"',
+				// @see create_ebook.bat
+				'SET P7Z="' + p7zip_path + '"',
 				'SET BOOKNAME="' + ebook_file_name + '"',
 				// store mimetype first
 				'%P7Z% a -tzip -mx=0 -- %BOOKNAME% mimetype',
 				// 請注意： rn 必須先安裝 7-Zip **16.04 以上的版本**。
 				'%P7Z% rn -- %BOOKNAME% mimetype !imetype',
 				// archive others.
-				'%P7Z% a -tzip -mx=9 -r -- %BOOKNAME% META-INF EPUB',
+				'%P7Z% a -tzip -mx=9 -r ' + (remove ? '-sdel ' : '')
+						+ '-- %BOOKNAME% META-INF EPUB',
 				'%P7Z% rn -- %BOOKNAME% !imetype mimetype' ].join('\r\n'));
 		var command = 'cd /d "' + this.path.root + '" && ' + command_file_name;
 		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
@@ -2025,8 +2026,9 @@ function module_code(library_namespace) {
 		// 若需要留下/重複利用media如images，請勿remove。
 		if (remove) {
 			// rd /s /q this.path.root
-			// 這會刪除整個目錄，包括未被index的檔案。
-			var error = library_namespace.remove_directory(this.path.root);
+			// 這會刪除整個目錄，包括未被 index 的檔案。
+			var error = library_namespace
+					.remove_directory(this.path.root, true);
 			if (error) {
 				// the operatoin failed
 				library_namespace.error(error);
