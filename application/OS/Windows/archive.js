@@ -1,6 +1,9 @@
 /**
  * @name CeL function for archive file.
  * @fileoverview 本檔案包含了壓縮 compress / archive file 的 functions。
+ * 
+ * @see CeL.application.storage.archive
+ * 
  * @since
  */
 

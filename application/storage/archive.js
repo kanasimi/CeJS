@@ -53,6 +53,8 @@ archive_file.verify(options, callback);
 
  </code>
  * 
+ * @see CeL.application.OS.Windows.archive
+ * 
  * @since 2018/3/4 13:57:28
  * @since 2018/3/8 19:59:47 初步可用
  */

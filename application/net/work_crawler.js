@@ -323,8 +323,8 @@ function module_code(library_namespace) {
 		// 警告: reget_chapter=false 僅適用於小說之類不取得圖片的情形，
 		// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL取得名稱的於目錄中。
 		reget_chapter : true,
-		// 是否保留chapter page
-		// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
+		// 是否保留 chapter page。false: 明確指定不保留，將刪除已存在的 chapter page。
+		// 注意: 若是沒有 reget_chapter，則 preserve_chapter_page 不應發生效用。
 		preserve_chapter_page : false,
 		// 是否保留作品資料 cache 於 this.cache_directory_name 下。
 		preserve_work_page : false,
@@ -2122,12 +2122,18 @@ function module_code(library_namespace) {
 				}
 				chapter_directory += path_separator;
 
-				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
+				chapter_page_file_name = work_data.directory_name + '-'
+						+ chapter_label + '.' + Work_crawler.HTML_extension;
+				// 注意: 若是沒有 reget_chapter，則 preserve_chapter_page 不應發生效用。
 				if (work_data.reget_chapter && _this.preserve_chapter_page) {
-					chapter_page_file_name = work_data.directory_name + '-'
-							+ chapter_label + '.' + Work_crawler.HTML_extension;
 					node_fs.writeFileSync(chapter_directory
 							+ chapter_page_file_name, XMLHttp.buffer);
+				} else if (_this.preserve_chapter_page === false) {
+					// 明確指定不保留，將刪除已存在的 chapter page。
+					library_namespace.debug('Romove ' + chapter_page_file_name,
+							1, 'process_images');
+					library_namespace.remove_file(chapter_directory
+							+ chapter_page_file_name);
 				}
 				var message = [ chapter_NO,
 				//
@@ -2316,11 +2322,16 @@ function module_code(library_namespace) {
 						set_work_status(work_data, '#' + chapter_NO
 								+ ': no image get.');
 					}
-					// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
+					// 注意: 若是沒有 reget_chapter，則 preserve_chapter_page 不應發生效用。
 					if (work_data.reget_chapter && _this.preserve_chapter_page) {
 						node_fs.writeFileSync(
 						// 依然儲存cache。例如小說網站，只有章節文字內容，沒有圖檔。
 						chapter_file_name, XMLHttp.buffer);
+					} else if (_this.preserve_chapter_page === false) {
+						// 明確指定不保留，將刪除已存在的 chapter page。
+						library_namespace.debug('Romove ' + chapter_file_name,
+								1, 'process_chapter_data');
+						library_namespace.remove_file(chapter_file_name);
 					}
 
 					// 模擬已經下載完最後一張圖。
@@ -2488,13 +2499,18 @@ function module_code(library_namespace) {
 					images_archive.remove(images_archive.to_remove.unique());
 				}
 
-				var chapter_files = chapter_page_file_name
-						&& library_namespace.read_directory(chapter_directory);
-				if (chapter_files && chapter_files.length === 1
+				var chapter_files = library_namespace
+						.read_directory(chapter_directory);
+				if (!chapter_files) {
+					// e.g., 未設定 this.preserve_chapter_page
+				} else if (chapter_files.length === 0
+						|| chapter_files.length === 1
 						&& chapter_files[0] === chapter_page_file_name) {
 					// 只剩下 chapter_page 的時候不再 update，避免磁碟作無用讀取。
-					library_namespace.remove_file(chapter_directory
-							+ chapter_page_file_name);
+					if (chapter_files.length === 1) {
+						library_namespace.remove_file(chapter_directory
+								+ chapter_page_file_name);
+					}
 					library_namespace.remove_directory(chapter_directory);
 				} else {
 					// 漫畫下載完畢後壓縮圖像檔案。
@@ -3050,7 +3066,7 @@ function module_code(library_namespace) {
 					'$1　$2');
 				} else if (language) {
 					// assert: language: 中文
-					// TODO: 作繁簡轉換。
+					// TODO: 下載完畢後作繁簡轉換。
 					contents = contents.replace(PATTERN_PARAGRAPH_START_CMN,
 					// 中文每段落開頭空兩個字。
 					'$1　　$2');
