@@ -1392,15 +1392,20 @@ function module_code(library_namespace) {
 			work_data.data_file = work_data.directory
 					+ work_data.directory_name + '.json';
 
+			var work_cache_directory = _this.main_directory
+					+ _this.cache_directory_name,
+			// .data.htm
+			work_page_path = work_cache_directory + work_data.directory_name
+					+ '.' + Work_crawler.HTML_extension, html;
 			if (_this.preserve_work_page) {
 				// 先寫入作品資料 cache。
-				var work_cache_directory = _this.main_directory
-						+ _this.cache_directory_name;
 				library_namespace.create_directory(work_cache_directory);
-				// .data.htm
-				node_fs.writeFileSync(work_cache_directory
-						+ work_data.directory_name + '.'
-						+ Work_crawler.HTML_extension, html);
+				node_fs.writeFileSync(work_page_path);
+			} else if (_this.preserve_work_page === false) {
+				// 明確指定不保留，將刪除已存在的作品資料 cache。
+				library_namespace.debug('Romove ' + work_page_path, 1,
+						'process_work_data');
+				library_namespace.remove_file(work_page_path);
 			}
 
 			// .status 選擇性屬性：須配合網站平台更改。
@@ -1550,13 +1555,11 @@ function module_code(library_namespace) {
 				&& work_data.process_status.every(function(status) {
 					return !String(status).startsWith('last saved date: ');
 				})) {
-					set_work_status(
-							work_data,
-							'last saved date: '
-									+ (library_namespace
-											.is_Date(work_data.last_saved) ? work_data.last_saved
-											.format('%Y/%m/%d')
-											: work_data.last_saved));
+					set_work_status(work_data, 'last saved date: '
+							+ (library_namespace.is_Date(work_data.last_saved)
+							//
+							? work_data.last_saved.format('%Y/%m/%d')
+									: work_data.last_saved));
 				}
 				// TODO: skip finished + no update works
 			}
@@ -1613,12 +1616,23 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			var chapter_list_path = _this.main_directory
+			//
+			+ _this.cache_directory_name + work_data.directory_name
+			// .TOC.htm
+			+ '.list.' + Work_crawler.HTML_extension;
 			if (_this.preserve_work_page && _this.chapter_list_URL) {
-				node_fs.writeFileSync(_this.main_directory
-				//
-				+ _this.cache_directory_name + work_data.directory_name
-				// .TOC.htm
-				+ '.list.' + Work_crawler.HTML_extension, html);
+				// 所在目錄應該已經在上一個 _this.preserve_work_page 那個時候建造完畢。
+				node_fs.writeFileSync(chapter_list_path, html);
+			} else if (_this.preserve_work_page === false) {
+				// 明確指定不保留，將刪除已存在的 chapter list page。
+				library_namespace.debug('Romove ' + chapter_list_path, 1,
+						'process_chapter_list_data');
+				library_namespace.remove_file(chapter_list_path);
+				if (false) {
+					library_namespace.fs_remove(_this.main_directory
+							+ _this.cache_directory_name);
+				}
 			}
 
 			// 章節的增加數量: 新-舊, 當前-上一次的
@@ -2495,7 +2509,8 @@ function module_code(library_namespace) {
 					process.stdout.write('Remove '
 							+ images_archive.to_remove.length
 							+ ' files from archive: ['
-							+ images_archive.archive_file_path + ']...\r');
+							// images_archive.archive_file_path
+							+ images_archive.file_name + ']...\r');
 					images_archive.remove(images_archive.to_remove.unique());
 				}
 
@@ -2513,9 +2528,10 @@ function module_code(library_namespace) {
 					}
 					library_namespace.remove_directory(chapter_directory);
 				} else {
-					// 漫畫下載完畢後壓縮圖像檔案。
-					process.stdout.write('Update image archive: ['
-							+ images_archive.archive_file_path + ']...\r');
+					// Update image archive: 漫畫下載完畢後壓縮圖像檔案。
+					process.stdout.write('Update ['
+					// images_archive.archive_file_path
+					+ images_archive.file_name + ']...\r');
 					images_archive.update(chapter_directory, {
 						// 壓縮圖像檔案之後，刪掉原先的圖像檔案。
 						remove : _this.remove_images_after_archive,
@@ -2930,16 +2946,18 @@ function module_code(library_namespace) {
 		, ebook_files = library_namespace.read_directory(ebook_directory),
 		//
 		ebook_file_path = ebook_path.call(this, work_data);
-		ebook_file_path = ebook_file_path[0] + ebook_file_path[1];
+		// ebook_file_path = ebook_file_path[0] + ebook_file_path[1];
 
 		if ((!Array.isArray(ebook_files) || !ebook_files.includes('mimetype'))
-		// 若是沒有cache，但是有舊的epub檔，那麼就將之解壓縮。
-		// 其用意是為了保留媒體檔案與好的舊章節，預防已經無法取得。
-		&& library_namespace.file_exists(ebook_file_path)) {
+				// 若是沒有cache，但是有舊的epub檔，那麼就將之解壓縮。
+				// 其用意是為了保留媒體檔案與好的舊章節，預防已經無法取得。
+				&& library_namespace.file_exists(ebook_file_path[0]
+						+ ebook_file_path[1])) {
 			var ebook_archive = new library_namespace.storage.archive(
-					ebook_file_path);
+					ebook_file_path[0] + ebook_file_path[1]);
 			process.stdout.write('Extract ebook as cache: ['
-					+ ebook_archive.archive_file_path + ']...\r');
+			// ebook_archive.archive_file_path
+			+ ebook_file_path[1] + ']...\r');
 			ebook_archive.extract({
 				output : ebook_directory
 			});
@@ -3286,9 +3304,10 @@ function module_code(library_namespace) {
 		library_namespace.debug('打包 epub: ' + file_path[1]);
 
 		// this: this_site
-		ebook.pack(file_path, this.remove_ebook_directory);
-
-		remove_old_ebooks.call(this, work_data.id);
+		var _this = this;
+		ebook.pack(file_path, this.remove_ebook_directory, function() {
+			remove_old_ebooks.call(_this, work_data.id);
+		});
 	}
 
 	// --------------------------------------------------------------------------------------------
