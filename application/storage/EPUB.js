@@ -5,20 +5,20 @@
  * @example<code>
 
 
- var ebook = new CeL.EPUB(package_base_directory);
- // initialize
+var ebook = new CeL.EPUB(package_base_directory);
+// initialize
 
- // append chapter
- ebook.add({title:,file:,media:},{String}text);
- // {Array}ebook.chapters. 每次手動改變.chapters，最後必須執行.arrange()整理。
- ebook.chapters.splice(0,1,{title:,file:,media:[]});ebook.arrange();
- ebook.flush(): write TOC, contents
- ebook.check(): 確認檔案都在
+// append chapter
+ebook.add({title:,file:,media:},{String}text);
+// {Array}ebook.chapters. 每次手動改變.chapters，最後必須執行.arrange()整理。
+ebook.chapters.splice(0,1,{title:,file:,media:[]});ebook.arrange();
+ebook.flush(): write TOC, contents
+ebook.check(): 確認檔案都在
 
- {String}ebook.directory.book
- {String}ebook.directory.text + .xhtml
- {String}ebook.directory.style + .css
- {String}ebook.directory.media + .jpg, .png, .mp3
+{String}ebook.directory.book
+{String}ebook.directory.text + .xhtml
+{String}ebook.directory.style + .css
+{String}ebook.directory.media + .jpg, .png, .mp3
 
 
 依照檢核結果修改以符合標準: EpubCheck
@@ -1126,6 +1126,19 @@ function module_code(library_namespace) {
 		return contents;
 	}
 
+	// 註冊 callback
+	function add_listener(event, listener) {
+		event = 'on_' + event;
+		if (listener) {
+			if (this[event]) {
+				this[event].push(listener);
+			} else {
+				this[event] = [ listener ];
+			}
+		}
+		return this[event];
+	}
+
 	// item data / config
 	function add_chapter(item_data, contents) {
 		if (!item_data) {
@@ -1287,12 +1300,20 @@ function module_code(library_namespace) {
 
 				// 註銷.downloading登記。
 				delete _this.downloading[item_data.file_path];
-				if (_this.on_all_downloaded
+				if (_this.add_listener('all_downloaded')
 				// 在事後檢查.on_all_downloaded，看是不是有callback。
 				&& library_namespace.is_empty_object(_this.downloading)) {
-					_this.on_all_downloaded();
+					library_namespace.debug('Start to run '
+							+ _this.add_listener('all_downloaded').length
+							+ ' callbacks of on_all_downloaded.', 0,
+							'add_chapter');
+					_this.add_listener('all_downloaded').forEach(
+					//
+					function(listener) {
+						listener.call(_this);
+					});
 					// 註銷登記。
-					delete _this.on_all_downloaded;
+					delete _this['on_all_downloaded'];
 				}
 			}, {
 				file_name : item_data.file_path,
@@ -1803,18 +1824,15 @@ function module_code(library_namespace) {
 	function write_chapters(callback) {
 		// 對 media 過多者，可能到此尚未下載完。
 		if (!library_namespace.is_empty_object(this.downloading)) {
-			if (this.on_all_downloaded) {
-				library_namespace.warn(
-				// 棄置。
-				'There is already callback .on_all_downloaded exists! I will discard it: '
-						+ this.on_all_downloaded);
-			}
-			// 註冊callback
-			this.on_all_downloaded = write_chapters.bind(this, callback);
-			library_namespace.debug('Waiting for all resources loaded...');
+			// 註冊 callback，等所有媒體檔案下載完再收尾。
+			this.add_listener('all_downloaded', write_chapters.bind(this,
+					callback));
+			library_namespace.debug('Waiting for all resources loaded...', 0,
+					'write_chapters');
 			return;
 		}
 
+		library_namespace.debug('Starting...', 0, 'write_chapters');
 		'identifier,title,language,dcterms:modified'.split(',')
 		// little check
 		.forEach(function(item) {
@@ -1935,7 +1953,17 @@ function module_code(library_namespace) {
 			|| '%ProgramFiles%\\7-Zip\\7z.exe';
 
 	// package, bale packing 打包 epub
-	function archive_to_ZIP(target_file, remove) {
+	function archive_to_ZIP(target_file, remove, callback) {
+		if (!library_namespace.is_empty_object(this.downloading)) {
+			// 註冊 callback，等所有媒體檔案下載完再收尾。
+			this.add_listener('all_downloaded', archive_to_ZIP.bind(this,
+					target_file, remove, callback));
+			library_namespace.debug('Waiting for all resources loaded...', 0,
+					'archive_to_ZIP');
+			return;
+		}
+
+		library_namespace.debug('Starting...', 0, 'archive_to_ZIP');
 		// check arguments
 		if (Array.isArray(target_file) && target_file.length === 2) {
 			// [ target_directory, target_file_name ]
@@ -2083,6 +2111,8 @@ function module_code(library_namespace) {
 		add : add_chapter,
 		remove : remove_chapter,
 
+		add_listener : add_listener,
+
 		generate_TOC : generate_TOC,
 		flush : write_chapters,
 		archive : archive_to_ZIP,
@@ -2090,8 +2120,7 @@ function module_code(library_namespace) {
 		preserve_attributes : 'meta,url,file,type,date,word_count'.split(','),
 		pack : function(target_file, remove, callback) {
 			this.flush(function() {
-				this.archive(target_file, remove);
-				typeof callback === 'function' && callback();
+				this.archive(target_file, remove, callback);
 			}.bind(this));
 		}
 	};
