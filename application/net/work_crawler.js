@@ -584,7 +584,7 @@ function module_code(library_namespace) {
 		if (this.use_server_cache
 		// host_list
 		&& (this.server_list = library_namespace.get_JSON(server_file))) {
-			// use cache of host list
+			// use cache of host list. 不每一次重新取得取得伺服器列表。
 			this.parse_work_id(work_id, callback);
 			return;
 		}
@@ -669,6 +669,8 @@ function module_code(library_namespace) {
 				library_namespace.warn('full_URL_of_path: Invalid url: ' + url);
 			}
 			url = this.base_URL + url;
+		} else if (url.URL) {
+			url.URL = this.full_URL(url.URL);
 		}
 		return url;
 	}
@@ -1141,6 +1143,7 @@ function module_code(library_namespace) {
 			var id_data;
 			try {
 				// console.log(XMLHttp.responseText);
+				// console.log(XMLHttp.buffer.toString(_this.charset));
 				id_data = _this.parse_search_result(XMLHttp.responseText,
 						get_label, work_title);
 				if (id_data === undefined) {
@@ -1297,6 +1300,8 @@ function module_code(library_namespace) {
 		get_URL(work_URL, process_work_data, this.charset, null,
 				this.get_URL_options);
 
+		// ----------------------------------------------------------
+
 		function process_work_data(XMLHttp) {
 			// console.log(XMLHttp);
 			var html = XMLHttp.responseText;
@@ -1420,7 +1425,7 @@ function module_code(library_namespace) {
 			}
 			// assert: typeof work_data.status === 'string'
 
-			// 主要提供給 this.get_chapter_count() 使用。
+			// 主要提供給 this.get_chapter_list() 使用。
 			// e.g., 'ja-JP'
 			if (!('language' in work_data)) {
 				work_data.language
@@ -1486,17 +1491,18 @@ function module_code(library_namespace) {
 				work_data.chapter_list_URL
 				// this.chapter_list_URL(work_id, work_data);
 				= work_URL = _this.full_URL(_this.chapter_list_URL, work_id);
-				get_URL(work_URL, process_chapter_list_data, _this.charset,
+				get_URL(work_URL, pre_process_chapter_list_data, _this.charset,
 						null, Object.assign({
 							error_retry : _this.MAX_ERROR_RETRY
 						}, _this.get_URL_options));
 			} else {
-				process_chapter_list_data(XMLHttp);
+				pre_process_chapter_list_data(XMLHttp);
 			}
 		}
 
-		// get 目次/完整目錄列表/章節列表
-		function process_chapter_list_data(XMLHttp) {
+		// ----------------------------------------------------------
+
+		function pre_process_chapter_list_data(XMLHttp) {
 			var html = XMLHttp.responseText;
 			if (!html) {
 				var message = _this.id + ': Can not get chapter list page!';
@@ -1513,7 +1519,7 @@ function module_code(library_namespace) {
 			}
 
 			// 注意: 這時可能尚未建立 work_data.directory。
-			// 但this.get_chapter_count()若用到work_data[this.KEY_EBOOK].set_cover()，則會造成沒有建立基礎目錄的錯誤。
+			// 但this.get_chapter_list()若用到work_data[this.KEY_EBOOK].set_cover()，則會造成沒有建立基礎目錄的錯誤。
 			library_namespace.debug('Create work_data.directory: '
 					+ work_data.directory);
 			// 預防(work_data.directory)不存在。
@@ -1565,7 +1571,7 @@ function module_code(library_namespace) {
 			}
 
 			if (true || _this.need_create_ebook) {
-				// 提供給 this.get_chapter_count() 使用。
+				// 提供給 this.get_chapter_list() 使用。
 				if (!('time_zone' in work_data)) {
 					// e.g., 9
 					work_data.time_zone
@@ -1575,13 +1581,29 @@ function module_code(library_namespace) {
 				}
 			}
 
-			// TODO: rename to get_chapter_list
-			if (typeof _this.get_chapter_count === 'function') {
+			if (typeof _this.pre_get_chapter_list === 'function') {
+				// 處理章節列表分散在多個檔案時的情況。
+				// e.g., dajiaochong.js
+				_this.pre_get_chapter_list(
+				// callback
+				process_chapter_list_data.bind(_this, html), work_data, html,
+						get_label);
+			} else {
+				process_chapter_list_data(html);
+			}
+		}
+
+		// ----------------------------------------------------------
+
+		// get 目次/完整目錄列表/章節列表
+		function process_chapter_list_data(html) {
+			// old name: this.get_chapter_count()
+			if (typeof _this.get_chapter_list === 'function') {
 				try {
-					_this.get_chapter_count(work_data, html, get_label);
+					_this.get_chapter_list(work_data, html, get_label);
 				} catch (e) {
 					library_namespace.error(_this.id
-							+ ': .get_chapter_count() throw error');
+							+ ': .get_chapter_list() throw error');
 					throw e;
 					typeof callback === 'function' && callback(work_data);
 					return;
@@ -1590,7 +1612,9 @@ function module_code(library_namespace) {
 					_this.reverse_chapter_list_order(work_data);
 					delete work_data.inverted_order;
 				}
+
 			}
+
 			// 之前已設定 work_data.chapter_count=0
 			if (!work_data.chapter_count
 			// work_data.chapter_list 為非正規之 chapter data list。
@@ -1640,7 +1664,7 @@ function module_code(library_namespace) {
 					- work_data.last_download.chapter;
 
 			if (_this.recheck
-			// _this.get_chapter_count() 中
+			// _this.get_chapter_list() 中
 			// 可能重新設定過 work_data.last_download.chapter。
 			&& work_data.last_download.chapter !== _this.start_chapter) {
 				library_namespace.debug('已設定 this.recheck + 作品曾有內容 / 並非空作品');
@@ -1927,7 +1951,7 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// @see dm5.js for sample of this.get_chapter_count()
+	// @see dm5.js for sample of this.get_chapter_list()
 	// e.g., work_data.chapter_list = [ chapter_data,
 	// chapter_data={url:'',title:'',date:new Date}, ... ]
 	function setup_chapter_list(work_data) {
@@ -1937,7 +1961,7 @@ function module_code(library_namespace) {
 		}
 		return chapter_list;
 	}
-	// should called by this.get_chapter_count()
+	// should called by this.get_chapter_list()
 	// this.set_part(work_data, 'part_title');
 	function set_part_title(work_data, part_title, part_NO) {
 		var chapter_list = setup_chapter_list(work_data);
@@ -1955,7 +1979,7 @@ function module_code(library_namespace) {
 			delete chapter_list.part_title;
 		}
 	}
-	// should called by this.get_chapter_count()
+	// should called by this.get_chapter_list()
 	// this.add_chapter(work_data, chapter_data);
 	function add_chapter_data(work_data, chapter_data) {
 		var chapter_list = setup_chapter_list(work_data);

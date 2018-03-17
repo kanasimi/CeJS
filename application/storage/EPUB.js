@@ -1305,7 +1305,7 @@ function module_code(library_namespace) {
 				&& library_namespace.is_empty_object(_this.downloading)) {
 					library_namespace.debug('Start to run '
 							+ _this.add_listener('all_downloaded').length
-							+ ' callbacks of on_all_downloaded.', 0,
+							+ ' callbacks of on_all_downloaded.', 2,
 							'add_chapter');
 					_this.add_listener('all_downloaded').forEach(
 					//
@@ -1832,7 +1832,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.debug('Starting...', 0, 'write_chapters');
+		library_namespace.debug('Starting...', 2, 'write_chapters');
 		'identifier,title,language,dcterms:modified'.split(',')
 		// little check
 		.forEach(function(item) {
@@ -1963,7 +1963,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.debug('Starting...', 0, 'archive_to_ZIP');
+		library_namespace.debug('Starting...', 2, 'archive_to_ZIP');
 		// check arguments
 		if (Array.isArray(target_file) && target_file.length === 2) {
 			// [ target_directory, target_file_name ]

@@ -115,7 +115,7 @@ function module_code(library_namespace) {
 		chapter_list_URL : function(work_id) {
 			return this.novel_base_URL + work_id + '/';
 		},
-		get_chapter_count : function(work_data, html) {
+		get_chapter_list : function(work_data, html) {
 			// TODO: 對於單話，可能無目次。
 			work_data.chapter_list = [];
 			html.between('<div class="index_box">', '<div id="novel_footer">')

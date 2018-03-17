@@ -134,8 +134,8 @@ function module_code(library_namespace) {
 			return work_data;
 		},
 		// 取得包含章節列表的文字範圍。
-		// get_chapter_count_contents : function(html) {return html.between();},
-		get_chapter_count : function(work_data, html, get_label) {
+		// get_chapter_list_contents : function(html) {return html.between();},
+		get_chapter_list : function(work_data, html, get_label) {
 			// determine base directory of work
 			work_data.base_url = work_data.url.endsWith('/') ? work_data.url
 					: work_data.url.replace(/\.[^.]+$/, '/');
@@ -144,8 +144,8 @@ function module_code(library_namespace) {
 						.slice(this.base_URL.length - 1);
 			}
 
-			if (this.get_chapter_count_contents) {
-				html = this.get_chapter_count_contents(html);
+			if (this.get_chapter_list_contents) {
+				html = this.get_chapter_list_contents(html);
 			}
 
 			work_data.chapter_list = [];
