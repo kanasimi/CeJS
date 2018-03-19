@@ -2531,8 +2531,7 @@ function module_code(library_namespace) {
 			}))) {
 				if (images_archive.to_remove.length > 0) {
 					process.stdout.write('Remove '
-							+ images_archive.to_remove.length
-							+ ' files from archive: ['
+							+ images_archive.to_remove.length + ' files from ['
 							// images_archive.archive_file_path
 							+ images_archive.file_name + ']...\r');
 					images_archive.remove(images_archive.to_remove.unique());

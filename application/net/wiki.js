@@ -2103,9 +2103,13 @@ function module_code(library_namespace) {
 						if (user_list.length === 1) {
 							this_user = user_list[0];
 						} else {
+							// console.log(token);
+							// console.log(token.length);
 							if (user_list.length > 0
 							// 若是有其他非字串的token介於名稱與日期中間，代表這個名稱可能並不是發言者，那麼就重設名稱。
-							|| token.length > 255 - '[[U:n]]'.length) {
+							// 但是應該包含像[[zh:Special:Diff/48714597]]的簽名，因此長度最少應當允許252。
+							// 簽名長度不應超過255位元組。
+							|| token.length > 255 /* - '[[U:n]]'.length */) {
 								this_user = undefined;
 							}
 							if (!this_user) {
@@ -4536,10 +4540,12 @@ function module_code(library_namespace) {
 			// reset PATTERN index
 			PATTERN_all.lastIndex = 0;
 			var matched;
+			library_namespace.debug(PATTERN_all, 3, 'parse_all_user_links');
 			while (matched = PATTERN_all.exec(wikitext)) {
 				// 用戶名正規化
 				var name = normalize_page_name(matched[1]);
 				if (!user_name || user_name === name) {
+					// console.log(name);
 					if (name in user_hash) {
 						user_hash[name]++;
 					} else {
@@ -4549,14 +4555,18 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (user_name) {
-			user_name = normalize_page_name(user_name);
-		}
-
 		var user_hash = library_namespace.null_Object();
 
 		if (!wikitext) {
 			return user_name ? 0 : user_hash;
+		}
+
+		library_namespace.debug(wikitext, 3, 'parse_all_user_links');
+		library_namespace.debug('user name: ' + user_name, 3,
+				'parse_all_user_links');
+
+		if (user_name) {
+			user_name = normalize_page_name(user_name);
 		}
 
 		check_pattern(PATTERN_user_link_all);
