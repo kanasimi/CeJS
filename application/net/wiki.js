@@ -2099,17 +2099,19 @@ function module_code(library_namespace) {
 						// 因此等到出現日期的時候再來處理。
 						var user_list = Object
 								.keys(parse_all_user_links(token));
-						// 因為現在有個性化簽名，需要因應之。
+						// console.log(user_list);
+						// 因為現在有個性化簽名，需要因應之。應該包含像[[zh:Special:Diff/48714597]]的簽名。
 						if (user_list.length === 1) {
 							this_user = user_list[0];
 						} else {
+							// 同一個token卻沒有找到，或找到兩個以上簽名，因此沒有辦法準確判別到底哪一個才是真正的留言者。
 							// console.log(token);
 							// console.log(token.length);
+							// console.log(this_user);
 							if (user_list.length > 0
 							// 若是有其他非字串的token介於名稱與日期中間，代表這個名稱可能並不是發言者，那麼就重設名稱。
-							// 但是應該包含像[[zh:Special:Diff/48714597]]的簽名，因此長度最少應當允許252。
 							// 簽名長度不應超過255位元組。
-							|| token.length > 255 /* - '[[U:n]]'.length */) {
+							|| token.length > 255 - '[[U:n]]'.length) {
 								this_user = undefined;
 							}
 							if (!this_user) {
