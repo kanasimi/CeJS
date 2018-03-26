@@ -900,6 +900,7 @@ function module_code(library_namespace) {
 		// [\-–－—~～〜至]
 		'~', new Date(object.end
 		// 向前一天以取得最後一日。
+		// 並非萬全之法?
 		- ONE_DAY_LENGTH_VALUE).format(format), ')');
 	}
 
@@ -4468,9 +4469,10 @@ function module_code(library_namespace) {
 				}, {
 					date_only : true
 				});
-				if (period_end)
-					// 警告:取後一日:並非萬全之法!
+				if (period_end) {
+					// 警告:取後一日,並非萬全之法!
 					date.setDate(date.getDate() + 1);
+				}
 
 			} else if ((/^-?\d{1,4}$/.test(string = String(date).trim())
 			// 因為 String_to_Date 不好設定僅 parse ('80') 成
@@ -4492,27 +4494,30 @@ function module_code(library_namespace) {
 						period_end : period_end,
 						// 於 CE 可避免 80 被 parse 成 1980。
 						year_padding : 0
-					})))
+					}))) {
 				date = parser;
 
-			else {
+			} else {
 				// e.g., 魯春秋-722, 秦漢歷-246
 				period_end && to_period_end();
 				date = to_era_Date(string, {
 					date_only : true
 				});
-				if (period_end)
-					// 警告:取後一日:並非萬全之法!
+				if (period_end) {
+					// 警告:取後一日,並非萬全之法!
 					date.setDate(date.getDate() + 1);
+				}
 			}
+		} else {
+			// 已經處理過了?
 		}
-		// else: 已經處理過了?
 
 		if (is_Date(date)) {
-			if (get_date)
+			if (get_date) {
 				return date;
-			else if (typeof date.format === 'function')
+			} else if (typeof date.format === 'function') {
 				return date.format(DATE_NAME_FORMAT);
+			}
 		}
 
 		library_namespace.error('normalize_date: 無法解析 [' + date + ']！');
@@ -5256,16 +5261,15 @@ function module_code(library_namespace) {
 					Array.prototype.unshift.apply(紀年, 前一紀年名稱.slice(0,
 							tmp > 1 ? tmp : 1));
 				}
-				紀年
-						.forEach(function(name, index) {
-							if (name === parse_era.inherit) {
-								if (!前一紀年名稱[index])
-									library_namespace.error('parse_era: 前一紀年 ['
-											+ 前一紀年名稱 + '] 並未設定 index [' + index
-											+ ']！');
-								紀年[index] = 前一紀年名稱[index] || '';
-							}
-						});
+				紀年.forEach(function(name, index) {
+					if (name === parse_era.inherit) {
+						if (!前一紀年名稱[index])
+							library_namespace.error('parse_era: 前一紀年 ['
+							//
+							+ 前一紀年名稱 + '] 並未設定 index [' + index + ']！');
+						紀年[index] = 前一紀年名稱[index] || '';
+					}
+				});
 
 				// do clone
 				前一紀年名稱 = 紀年.slice();

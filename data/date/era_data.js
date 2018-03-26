@@ -9,10 +9,13 @@ TODO:
 
 任意線圖階層，不只(紀年名稱索引值)所示。
 
+http://www.aina.org/aol/kinglist
+
 
 https://en.wikipedia.org/wiki/Lists_of_ancient_kings
 https://en.wikipedia.org/wiki/Middle_chronology
 https://en.wikipedia.org/wiki/Chronology_of_the_ancient_Near_East
+https://zh.wikipedia.org/wiki/%E5%80%AD%E9%A9%AC%E4%BA%9A%E7%8E%8B%E6%9C%9D
 
 
 中國君主列表 (地方政權)
@@ -3583,7 +3586,7 @@ CeL.era.pass_on = {
 		'/Nabu-suma-ukin II|-732~|:CE|精=年|準=年|ruler=Nabû-šuma-ukîn II|注=king of Babylon for one month and two days during 732 BC before he was swept aside by his successor, Nabû-mukin-zēri.',
 		'/Nabu-mukin-zeri|-732/2~-729|:CE|精=年|準=年|ruler=Nabû-mukin-zēri',
 
-		// Neo-Assyrian Empire
+		// Neo-Assyrian Empire 新亞述帝國
 		// https://en.wikipedia.org/wiki/Neo-Assyrian_Empire
 		// https://en.wikipedia.org/wiki/List_of_Assyrian_kings#Neo-Assyrian_Period
 		'Neo-Assyrian/Adad-nirari II|-911~|:CE|精=年|準=年|時期=Babylon',
@@ -3622,6 +3625,15 @@ CeL.era.pass_on = {
 				// the intercalary month was named Araḫ Ulūlu.
 				// @see https://en.wikipedia.org/wiki/Iranian_calendars
 				+ "|參照用|曆法=Babylonian calendar|據=Parker & Dubberstein (1971)|月名=Nisānu;Āru;Simanu;Dumuzu;Abu;Ulūlu;Tišritum;Samna;Kislimu;Ṭebētum;Šabaṭu;Addaru;Makaruša Addari",
+
+		// Median dynasty, Medes, 米底王國
+		// https://en.wikipedia.org/wiki/List_of_rulers_of_the_pre-Achaemenid_kingdoms_of_Iran#Median_dynasty,_726%E2%80%93521_BC
+		'Median/Deioces|-727~|:CE|疑|精=年|準=年|ruler=Dia—oku;Dēiokēs Δηιόκης|注=可疑',
+		'/Xšaθrita I|-675~|:CE|疑|精=年|準=年|ruler=Phraortes;𐎳𐎼𐎺𐎼𐎫𐎡𐏁;Φραόρτης|注=君主姓名可疑',
+		'/Madius|-628~|:CE|疑|精=年|準=年|ruler=Madyes;Madya|注=斯基泰人統治時期 Scythian rule',
+		'/Cyaxares|-625~|:CE|疑|精=年|準=年|ruler=𐎢𐎺𐎧𐏁𐎫𐎼',
+		'/Astyages|-585~-550|:CE|疑|精=年|準=年|ruler=Ἀστυάγης|注=把女兒下嫁給當時隸屬於米底的波斯部落的阿契美尼德家族的岡比西斯一世，後來生下王子 Cyrus II；前553年—前550年，Cyrus II 起兵反叛米底，在帕薩爾加德戰役打敗自己的外公 Astyages，建立阿契美尼德王朝，米底王國結束。',
+		'/Cyaxares II|-549~-521/5|:CE|疑|精=年|準=年|注=希臘歷史學家色諾芬描述的米底王國君主。沒在希羅多德和凱蒂西亞的歷史中提到，許多學者懷疑他存在。',
 
 		'Neo-Assyrian/Sin-shar-ishkun|Babylonian-626~|:Babylonian|疑|準=年|ruler=Sinsharishkun',
 		'/Ashur-uballit II|Babylonian-612~Babylonian-608|:Babylonian|疑|準=年',

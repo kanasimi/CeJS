@@ -8,6 +8,7 @@
 
 wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
 wiki_API.page() 整合各 action=query 至單一公用 function。
+[[mw:Manual:Pywikibot/zh]]
 
 parser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
 parser 所有子頁面加入白名單 white-list
@@ -18,6 +19,7 @@ https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
 https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
+
 
 Wikimedia REST API
 https://www.mediawiki.org/wiki/RESTBase

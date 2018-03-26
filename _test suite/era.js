@@ -1676,6 +1676,7 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era, count_layers) {
 					onclick : draw_era.click_navigation_date
 				}, {
 					span : '–',
+					// e.g., 國祚
 					title : name.start.to_Date({
 						parser : 'CE',
 						year_padding : 0
