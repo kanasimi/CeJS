@@ -1581,6 +1581,7 @@ function module_code(library_namespace) {
 				// 需要先準備好目錄結構。
 				this.initialize();
 				// 寫入檔案。
+				// TODO: 若檔案已存在，可能是因為有重複的標題，這時應發出警告。
 				library_namespace.write_file(this.path.text + item.href,
 						contents);
 			} else {
@@ -1942,7 +1943,7 @@ function module_code(library_namespace) {
 
 		library_namespace.write_file(this.path.book
 				+ this.package_document_name,
-		//
+		// 寫入電子書封包資料。
 		JSON.to_XML(this.raw_data, this.to_XML_options));
 
 		typeof callback === 'function' && callback();
@@ -2073,6 +2074,7 @@ function module_code(library_namespace) {
 		// @see [[Open eBook]]
 		// http://www.idpf.org/epub/31/spec/epub-ocf.html#gloss-ocf-root-directory
 		root_directory_name : 'EPUB',
+		// 開放包裹格式 Open Packaging Format metadata file
 		// http://www.idpf.org/epub/31/spec/epub-spec.html#gloss-package-document
 		// e.g., EPUB/content.opf
 		package_document_name : 'content.opf',
@@ -2093,8 +2095,12 @@ function module_code(library_namespace) {
 		 * calibre 會把電子書解開，放在如
 		 * C:\Users\user\AppData\Local\calibre-cache\ev\tmpunbkaj\a\
 		 * 目錄底下。這個數值可以限制 id 與檔案名稱最大長度，預防寫入的時候出現錯誤。
+		 * 
+		 * 因為有以下情況，因此80還不夠:<br />
+		 * 第五十六章 守夜人 https://ck101.com/thread-2676074-6-1.html#post_88380114
+		 * 第五十六章 守夜人的惶恐 https://ck101.com/thread-2676074-74-1.html#post_91512116
 		 */
-		MAX_ID_LENGTH : 80,
+		MAX_ID_LENGTH : 100,
 
 		setup_container : setup_container,
 		initialize : initialize,
