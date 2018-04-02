@@ -476,6 +476,8 @@ function module_code(library_namespace) {
 			skip_error : 'boolean',
 			skip_chapter_data_error : 'boolean',
 
+			preserve_work_page : 'boolean',
+			preserve_chapter_page : 'boolean',
 			remove_ebook_directory : 'boolean',
 
 			// 漫畫下載完畢後壓縮圖像檔案。
@@ -2180,8 +2182,8 @@ function module_code(library_namespace) {
 				: '/' + work_data.chapter_count,
 				//
 				' [', chapter_label, '] ', left, ' images.',
-				// 例如需要收費的章節。
-				chapter_data.limited ? ' (limited: 本章為需要付費的章節)' : '' ].join('');
+				// 例如需要收費/被鎖住的章節。 locked
+				chapter_data.limited ? ' (本章為需要付費/被鎖住的章節)' : '' ].join('');
 				if (chapter_data.limited) {
 					// 針對特殊狀況提醒。
 					library_namespace.info(message);
@@ -2551,7 +2553,7 @@ function module_code(library_namespace) {
 					}
 					library_namespace.remove_directory(chapter_directory);
 				} else {
-					// Update image archive: 漫畫下載完畢後壓縮圖像檔案。
+					// create/update image archive: 漫畫下載完畢後壓縮圖像檔案。
 					process.stdout.write('Update ['
 					// images_archive.archive_file_path
 					+ images_archive.file_name + ']...\r');
