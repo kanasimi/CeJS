@@ -1971,15 +1971,15 @@ function module_code(library_namespace) {
 				// 可能是本紀年自己的，可能是從其他參照紀年獲得的。
 				if (to_era[property] !== value
 						&& important_properties[property]) {
-					library_namespace.warn([ 'copy_important_properties: ',
-							'紀年 [' + to_era, '] 原有重要屬性 [' + property + '] 為"',
-							to_era[property], '"，與所參照紀年 [' + from_era,
-							'] 之屬性值"', value, '" 不同！' ]);
+					library_namespace.warn('copy_important_properties: '
+							+ '紀年 [' + to_era + '] 原有重要屬性 [' + property
+							+ '] 為"' + to_era[property] + '"，與所參照紀年 ['
+							+ from_era + '] 之屬性值"' + value + '" 不同！');
 				}
 				continue;
 			}
-			library_namespace.debug([ '複製當前參照紀年之重要屬性 [', property, '] = ',
-					value ], 1, 'copy_important_properties');
+			library_namespace.debug('複製當前參照紀年之重要屬性 [' + property + '] = '
+					+ value, 1, 'copy_important_properties');
 			to_era[property] = value;
 		}
 	}

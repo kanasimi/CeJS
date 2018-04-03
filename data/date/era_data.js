@@ -728,7 +728,7 @@ CeL.era.pass_on = {
 		// 魏晉南北朝,三國兩晉南北朝/三國時期
 
 		// 晉書/卷017: 黃初三年十一月二十九日庚申加時西南維日蝕 疑應為"三十日"
-		'魏/文帝/黃初|220/11/13~|10=35u 505 3ql247m 59m 4g4j591|廟號=世祖|君主名=曹丕|表字=子桓|朝代=曹魏|時期=三國|生=187年|卒=226年6月29日|在位=220年11月25日~226年6月29日|注=七年五月魏明帝曹叡即位沿用',
+		'魏/文帝/黃初|220/11/13~|10=35u 505 3ql247m 59m 4g4j591|廟號=世祖|君主名=曹丕|表字=子桓|朝代=曹魏|時期=三國|生=187年|卒=226年6月29日|在位=220年11月25日~226年6月29日|注=七年五月魏明帝曹叡即位沿用|注=魏武王曹操子',
 		'/明帝/太和|227/2/4~|3qsc47p 3oq 4mg959h 47p 35s|廟號=烈祖|君主名=曹叡;曹睿|表字=元仲|正統=中國|生=206年|卒=239年1月22日|在位=226年~239年',
 		'/青龍|233/2/27~|2=39zp42y 59h 3qtt3y8|正統=中國',
 		// https://zh.wikisource.org/wiki/%E5%85%A8%E4%B8%89%E5%9C%8B%E6%96%87/%E5%8D%B711#.E5.BE.A9.E7.94.A8.E5.A4.8F.E6.AD.A3.E8.A9.94
@@ -3438,7 +3438,7 @@ CeL.era.pass_on = {
 
 		// Haryanka dynasty (Middle of 6th century BCE–413 BCE) 訶黎王朝
 		// Bhattiya
-		'Haryanka/Bimbisara|-544~||疑|準=年|生=558|卒=491|時期=मगध|君主名=頻毗娑羅',
+		'Haryanka/Bimbisara|-544~||疑|準=年|生=558|卒=491|時期=मगध|君主名=頻毘娑羅;बिम्बिसारः',
 		'/Ajātasattu|-492~||疑|準=年|君主名=Ajātaśatru;Ajatasatru',
 		'/Udayin|-460~-440||疑|準=年|君主名=Udayabhadra',
 		// Anuruddha
@@ -3584,17 +3584,18 @@ CeL.era.pass_on = {
 		'/Shu-Sin|-2037~|:CE|疑|精=年|準=年',
 		'/Ibbi-Sin|-2028~-2004/12/31|:CE|疑|精=年|準=年',
 
-		// Old Assyrian Empire
+		// https://en.wikipedia.org/wiki/Timeline_of_the_Assyrian_Empire
+		// Old Assyrian Empire, 古亞述時期
 		// https://en.wikipedia.org/wiki/Old_Assyrian_Empire
-		'Old Assyrian/Erishum II|-1920~-1900/12/31|:CE|疑|精=年|準=年',
+		'Old Assyrian/Erishum II|-1920~-1900/12/31|:CE|疑|精=年|準=年|時期=Assyrian',
 		'/Shamshi-Adad I|-1813~|:CE|疑|精=年|準=年|注=Unites all independent Assyrian city-states',
 		'/Ishme-Dagan I|-1780~-1741|:CE|疑|精=年|準=年|注=Contemporary with Hammurabi of Babylon',
 		//
 		'/Ashur-Bel-Nisheshu|-1417~-1409/12/31|:CE|疑|精=年|準=年',
 
-		// Middle Assyrian Empire
+		// Middle Assyrian Empire, 中亞述帝國
 		// https://en.wikipedia.org/wiki/Middle_Assyrian_Empire
-		'Middle Assyrian/Ashur-Uballit I|-1363~|:CE|疑|精=年|準=年|注=Gains Assyrian Independecne from Mittani',
+		'Middle Assyrian/Ashur-Uballit I|-1363~|:CE|疑|精=年|準=年|注=Gains Assyrian Independecne from Mittani|時期=Assyrian',
 		'/Enlil-Nirari|-1327~|:CE|疑|精=年|準=年',
 		'/Arik-Den-Ili|-1317~|:CE|疑|精=年|準=年',
 		'/Adad-Nirari I|-1305~|:CE|疑|精=年|準=年|注=Mittani falls to Assyria',
@@ -3620,9 +3621,10 @@ CeL.era.pass_on = {
 		'/Ashur-Dan II|-934~|:CE|疑|精=年|準=年',
 
 		// Neo-Assyrian Empire, 新亞述帝國
+		// 亞述人統治巴比倫時期
 		// https://en.wikipedia.org/wiki/Neo-Assyrian_Empire
 		// https://en.wikipedia.org/wiki/List_of_Assyrian_kings#Neo-Assyrian_Period
-		'Neo-Assyrian/Adad-nirari II|-911~|:CE|精=年|準=年|時期=Babylon',
+		'Neo-Assyrian/Adad-nirari II|-911~|:CE|精=年|準=年|時期=Assyrian',
 		'/Tukulti-Ninurta II|-891~|:CE|精=年|準=年',
 		'/Ashur-nasir-pal II|-883~|:CE|精=年|準=年|ruler=Ashurnasirpal II',
 		'/Shalmaneser III|-859~|:CE|精=年|準=年',
