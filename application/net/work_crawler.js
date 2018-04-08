@@ -3152,6 +3152,7 @@ function module_code(library_namespace) {
 		library_namespace.debug(file_name, 3, 'parse_ebook_name');
 		var matched = typeof file_name === 'string'
 				&& file_name.match(PATTERN_ebook_file);
+		// console.log(matched);
 		if (matched) {
 			return {
 				file_name : file_name,
@@ -3178,6 +3179,7 @@ function module_code(library_namespace) {
 	// remove duplicate title ebooks.
 	// 封存舊的ebooks，移除較小的舊檔案。
 	function remove_old_ebooks(only_id) {
+		// only_id = undefined;
 		if (only_id !== undefined) {
 			// assert: {String|Number}only_id
 			only_id = only_id.toString();
@@ -3203,6 +3205,7 @@ function module_code(library_namespace) {
 			var last_id, last_file,
 			//
 			ebooks = library_namespace.read_directory(directory);
+			// console.log(ebooks);
 
 			if (!ebooks) {
 				// 照理來說應該在之前已經創建出來了。
@@ -3326,13 +3329,11 @@ function module_code(library_namespace) {
 		var file_path = ebook_path.call(this, work_data, file_name);
 
 		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
-		library_namespace.debug('打包 epub: ' + file_path[1]);
+		library_namespace.debug('打包 epub: ' + file_path[1], 1, 'pack_ebook');
 
 		// this: this_site
-		var _this = this;
-		ebook.pack(file_path, this.remove_ebook_directory, function() {
-			remove_old_ebooks.call(_this, work_data.id);
-		});
+		ebook.pack(file_path, this.remove_ebook_directory, remove_old_ebooks
+				.bind(this, work_data.id));
 	}
 
 	// --------------------------------------------------------------------------------------------

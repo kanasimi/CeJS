@@ -2039,6 +2039,7 @@ function module_code(library_namespace) {
 			execSync(command);
 		} catch (e) {
 			library_namespace.error(e);
+			typeof callback === 'function' && callback();
 			return;
 		}
 		library_namespace.debug('create ebook by 7z: ' + ebook_file_name
@@ -2066,6 +2067,7 @@ function module_code(library_namespace) {
 			// 最起碼 command_file_name 已經不需要存在。
 			library_namespace.remove_file(this.path.root + command_file_name);
 		}
+		typeof callback === 'function' && callback();
 	}
 
 	Ebook.prototype = {
