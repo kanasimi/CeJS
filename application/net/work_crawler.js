@@ -273,6 +273,11 @@ function module_code(library_namespace) {
 		// 預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_SIZE : 200,
 
+		// 需要重新讀取頁面的時候使用。
+		REGET_PAGE : {
+			REGET_PAGE : true
+		},
+
 		// 預設的圖片延伸檔名/副檔名/filename extension。
 		default_image_extension : 'jpg',
 
@@ -1299,10 +1304,14 @@ function module_code(library_namespace) {
 		var _this = this, work_URL = this.full_URL(this.work_URL, work_id), work_data;
 		library_namespace.debug('work_URL: ' + work_URL, 2, 'get_work_data');
 
-		get_URL(work_URL, process_work_data, this.charset, null,
-				this.get_URL_options);
+		get_work_page();
 
 		// ----------------------------------------------------------
+
+		function get_work_page() {
+			get_URL(work_URL, process_work_data, _this.charset, null,
+					_this.get_URL_options);
+		}
 
 		function process_work_data(XMLHttp) {
 			// console.log(XMLHttp);
@@ -1332,6 +1341,13 @@ function module_code(library_namespace) {
 				// 作品詳情。
 				work_data = _this.parse_work_data(html, get_label,
 						exact_work_data);
+				if (work_data === _this.REGET_PAGE) {
+					// 需要重新讀取頁面。
+					library_namespace.log('process_work_data: Reget page...');
+					get_work_page();
+					return;
+				}
+
 			} catch (e) {
 				library_namespace.error(work_title + ': ' + e);
 				typeof callback === 'function' && callback({
