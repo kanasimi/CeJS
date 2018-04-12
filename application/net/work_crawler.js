@@ -273,6 +273,9 @@ function module_code(library_namespace) {
 		// 預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_SIZE : 200,
 
+		// 當網站不允許太過頻繁的訪問/access時，可以設定下載章節資訊前的等待時間(ms)。
+		// chapter_time_interval : 1 * 1000,
+
 		// 需要重新讀取頁面的時候使用。
 		REGET_PAGE : {
 			REGET_PAGE : true
@@ -1901,7 +1904,7 @@ function module_code(library_namespace) {
 
 		var _arguments = this.continue_arguments, work_data = _arguments[0];
 		delete this.continue_arguments;
-		// 繼續下載作業
+		// 繼續下載作業。
 		library_namespace.info(this.id + ': 繼續下載 ['
 				+ (work_data.title || work_data.id) + ']');
 		pre_get_chapter_data.apply(this, _arguments);
@@ -1933,7 +1936,16 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var next = get_chapter_data.bind(this, work_data, chapter_NO, callback);
+		var actual_operation = get_chapter_data.bind(this, work_data,
+				chapter_NO, callback),
+		// this.chapter_time_interval: 下載章節資訊前的等待時間(ms)。
+		next = this.chapter_time_interval > 0 ? (function() {
+			process.stdout.write(this.id + ': ' + work_data.title
+					+ ': 下載章節資訊前先等待 '
+					+ library_namespace.age_of(0, this.chapter_time_interval)
+					+ '...\r');
+			setTimeout(actual_operation, this.chapter_time_interval);
+		}).bind(this) : actual_operation;
 
 		if (this.chapter_filter) {
 			var chapter_data = work_data.chapter_list
@@ -3291,7 +3303,10 @@ function module_code(library_namespace) {
 			rename_to = last_file.replace(/(.[a-z\d\-]+)$/i, extension);
 			// assert: PATTERN_ebook_file.test(rename_to) === false
 			// 不應再被納入檢測。
-			library_namespace.log(last_file + '\n→ ' + rename_to);
+			library_namespace.log(library_namespace.display_align({
+				'Set milestone:' : last_file,
+				'→' : rename_to
+			}));
 			library_namespace.move_file(last_file, rename_to);
 		});
 
