@@ -3554,9 +3554,20 @@ CeL.era.pass_on = {
 
 (CeL.era.pass_on.countries.Mesopotamian = [
 
-		// 3rd Dynasty of Uruk, 烏魯克第三王朝
+		// Fourth dynasty of Kish, 基什第三王朝
+		// https://en.wikipedia.org/wiki/Sumerian_King_List#Fourth_dynasty_of_Kish
+		// http://www.historyfiles.co.uk/KingListsMiddEast/MesopotamiaKish.htm
+		/**
+		 * <code>
+		'Kish IV/Nanniya|-2366~|:CE|疑|精=年|準=年|注=He ruled in Kish for 7 years. Then Kish was defeated and the kingship was taken to Unug (Uruk).',
+		</code>
+		 */
+
+		// ------------------------------------------------
+		// 精準至百年。
+		// 3rd Dynasty of Uruk, Third dynasty of Uruk, 烏魯克第三王朝
 		// https://en.wikipedia.org/wiki/Uruk#Early_dynastic,_Akkadian,_and_Neo-Sumerian_rulers
-		'Uruk III/Lugalzagesi|-2359~|:CE|疑|精=年|準=年|ruler=Lugal-zage-si|注=c. 2294 - 2270 BC short chronology',
+		'Uruk III/Lugalzagesi|-2359~|:CE|疑|精=年|準=年|傳說|ruler=Lugal-zage-si|注=c. 2294 - 2270 BC short chronology|注=Then Unug was defeated and the kingship was taken to Agade (Akkad).',
 
 		// ------------------------------------------------
 		// http://www.aina.org/aol/kinglist
@@ -3565,60 +3576,60 @@ CeL.era.pass_on = {
 
 		// Akkadian Empire, 阿卡德帝國
 		// https://en.wikipedia.org/wiki/Akkadian_Empire
-		'Akkadian/Sargon I|-2334~|:CE|疑|精=年|準=年|ruler=Sargon of Akkad|注=United Mesopotamia (Sumer & Akkad)',
-		'/Rimush|-2278~|:CE|疑|精=年|準=年|注=Conquers Elam and Marhashi (Central Iran)',
-		'/Manishtushu|-2269~|:CE|疑|精=年|準=年|注=Renovates Temple of Ishtar',
-		'/Naram-Sin|-2254~|:CE|疑|精=年|準=年|注=Arrogates god-like status to himself',
-		'/Shar-Kali-Shari|-2217~|:CE|疑|精=年|準=年|注=Akkadian kingship begins to weaken',
-		'/Igigi|-2192~-2192|:CE|疑|精=年|準=年',
-		'/Nanium|-2192~|:CE|疑|精=年|準=年',
-		'/Imi|-2191~|:CE|疑|精=年|準=年',
-		'/Elul-dan|-2190~|:CE|疑|精=年|準=年',
-		'/Dudu|-2189~|:CE|疑|精=年|準=年',
-		'/Shu-Turul|-2168~-2154|:CE|疑|精=年|準=年',
+		'Akkadian/Sargon I|-2334~|:CE|疑|精=年|準=年|傳說|ruler=Sargon of Akkad|注=United Mesopotamia (Sumer & Akkad)',
+		'/Rimush|-2278~|:CE|疑|精=年|準=年|傳說|注=Conquers Elam and Marhashi (Central Iran)',
+		'/Manishtushu|-2269~|:CE|疑|精=年|準=年|傳說|注=Renovates Temple of Ishtar',
+		'/Naram-Sin|-2254~|:CE|疑|精=年|準=年|傳說|注=Arrogates god-like status to himself',
+		'/Shar-Kali-Shari|-2217~|:CE|疑|精=年|準=年|傳說|注=Akkadian kingship begins to weaken',
+		'/Igigi|-2192~-2192|:CE|疑|精=年|準=年|傳說',
+		'/Nanium|-2192~|:CE|疑|精=年|準=年|傳說',
+		'/Imi|-2191~|:CE|疑|精=年|準=年|傳說',
+		'/Elul-dan|-2190~|:CE|疑|精=年|準=年|傳說',
+		'/Dudu|-2189~|:CE|疑|精=年|準=年|傳說',
+		'/Shu-Turul|-2168~-2154|:CE|疑|精=年|準=年|傳說',
 
 		// The Third Dynasty of Ur, the Neo-Sumerian Empire, 烏爾第三王朝
-		'Neo-Sumerian/Ur-Nammu|-2112~|:CE|疑|精=年|準=年|注=Establishes the Third Dynasty of Ur',
-		"/Shulgi|-2094~|:CE|疑|精=年|準=年|注=Extends father's empire to all of Assyria",
-		'/Amar-Sin|-2046~|:CE|疑|精=年|準=年',
-		'/Shu-Sin|-2037~|:CE|疑|精=年|準=年',
-		'/Ibbi-Sin|-2028~-2004/12/31|:CE|疑|精=年|準=年',
+		'Neo-Sumerian/Ur-Nammu|-2112~|:CE|疑|精=年|準=年|傳說|注=Establishes the Third Dynasty of Ur',
+		"/Shulgi|-2094~|:CE|疑|精=年|準=年|傳說|注=Extends father's empire to all of Assyria",
+		'/Amar-Sin|-2046~|:CE|疑|精=年|準=年|傳說',
+		'/Shu-Sin|-2037~|:CE|疑|精=年|準=年|傳說',
+		'/Ibbi-Sin|-2028~-2004/12/31|:CE|疑|精=年|準=年|傳說',
 
 		// https://en.wikipedia.org/wiki/Timeline_of_the_Assyrian_Empire
 		// Old Assyrian Empire, 古亞述時期
 		// https://en.wikipedia.org/wiki/Old_Assyrian_Empire
-		'Old Assyrian/Erishum II|-1920~-1900/12/31|:CE|疑|精=年|準=年|時期=Assyrian',
-		'/Shamshi-Adad I|-1813~|:CE|疑|精=年|準=年|注=Unites all independent Assyrian city-states',
-		'/Ishme-Dagan I|-1780~-1741|:CE|疑|精=年|準=年|注=Contemporary with Hammurabi of Babylon',
+		'Old Assyrian/Erishum II|-1920~-1900/12/31|:CE|疑|精=年|準=年|傳說|時期=Assyrian',
+		'/Shamshi-Adad I|-1813~|:CE|疑|精=年|準=年|傳說|注=Unites all independent Assyrian city-states',
+		'/Ishme-Dagan I|-1780~-1741|:CE|疑|精=年|準=年|傳說|注=Contemporary with Hammurabi of Babylon',
 		//
-		'/Ashur-Bel-Nisheshu|-1417~-1409/12/31|:CE|疑|精=年|準=年',
+		'/Ashur-Bel-Nisheshu|-1417~-1409/12/31|:CE|疑|精=年|準=年|傳說',
 
 		// Middle Assyrian Empire, 中亞述帝國
 		// https://en.wikipedia.org/wiki/Middle_Assyrian_Empire
-		'Middle Assyrian/Ashur-Uballit I|-1363~|:CE|疑|精=年|準=年|注=Gains Assyrian Independecne from Mittani|時期=Assyrian',
-		'/Enlil-Nirari|-1327~|:CE|疑|精=年|準=年',
-		'/Arik-Den-Ili|-1317~|:CE|疑|精=年|準=年',
-		'/Adad-Nirari I|-1305~|:CE|疑|精=年|準=年|注=Mittani falls to Assyria',
-		'/Shalmaneser I|-1273~|:CE|疑|精=年|準=年|注=Urarti falls to Assyria',
-		'/Tukulti-Ninurta I|-1243~|:CE|疑|精=年|準=年|注=Sacks Babylon, killed by his own son',
-		'/Ashur-Nadin-Apli|-1206~|:CE|疑|精=年|準=年|注=Assyrin power is weakened',
-		'/Ashur-Nirari III|-1202~|:CE|疑|精=年|準=年',
-		'/Enlil-Kudurri-Usur|-1196~|:CE|疑|精=年|準=年',
-		'/Ninurta-Apal-Ekur|-1191~|:CE|疑|精=年|準=年',
-		'/Ashur-Dan I|-1178~|:CE|疑|精=年|準=年|注=Elam captures Babylonia',
-		'/Ashur-Resha-Ishi I|-1132~|:CE|疑|精=年|準=年|注=Nebuchadnezzar I of Babylon captures Elam',
-		'/Ninurta-Tukulti-Ashur|-1115~-1114|:CE|疑|精=年|準=年',
-		'/Mutakkil-Nusku|-1115~|:CE|疑|精=年|準=年',
-		'/Tiglath-Pileser I|-1114~-1076|:CE|疑|精=年|準=年|注=In defending Assyria, defeats Nebuchadnezzar',
+		'Middle Assyrian/Ashur-Uballit I|-1363~|:CE|疑|精=年|準=年|傳說|注=Gains Assyrian Independecne from Mittani|時期=Assyrian',
+		'/Enlil-Nirari|-1327~|:CE|疑|精=年|準=年|傳說',
+		'/Arik-Den-Ili|-1317~|:CE|疑|精=年|準=年|傳說',
+		'/Adad-Nirari I|-1305~|:CE|疑|精=年|準=年|傳說|注=Mittani falls to Assyria',
+		'/Shalmaneser I|-1273~|:CE|疑|精=年|準=年|傳說|注=Urarti falls to Assyria',
+		'/Tukulti-Ninurta I|-1243~|:CE|疑|精=年|準=年|傳說|注=Sacks Babylon, killed by his own son',
+		'/Ashur-Nadin-Apli|-1206~|:CE|疑|精=年|準=年|傳說|注=Assyrin power is weakened',
+		'/Ashur-Nirari III|-1202~|:CE|疑|精=年|準=年|傳說',
+		'/Enlil-Kudurri-Usur|-1196~|:CE|疑|精=年|準=年|傳說',
+		'/Ninurta-Apal-Ekur|-1191~|:CE|疑|精=年|準=年|傳說',
+		'/Ashur-Dan I|-1178~|:CE|疑|精=年|準=年|傳說|注=Elam captures Babylonia',
+		'/Ashur-Resha-Ishi I|-1132~|:CE|疑|精=年|準=年|傳說|注=Nebuchadnezzar I of Babylon captures Elam',
+		'/Ninurta-Tukulti-Ashur|-1115~-1114|:CE|疑|精=年|準=年|傳說',
+		'/Mutakkil-Nusku|-1115~|:CE|疑|精=年|準=年|傳說',
+		'/Tiglath-Pileser I|-1114~-1076|:CE|疑|精=年|準=年|傳說|注=In defending Assyria, defeats Nebuchadnezzar',
 		// Asharid-Pal-Ekur II: Limited to Nineveh,Irbil, & Ashur province
-		'/Ashur-Bel-Kala|-1076~-1057|:CE|疑|精=年|準=年',
+		'/Ashur-Bel-Kala|-1076~-1057|:CE|疑|精=年|準=年|傳說',
 		//
-		'/Shamshi-Adad IV|-1053~-1049|:CE|疑|精=年|準=年',
+		'/Shamshi-Adad IV|-1053~-1049|:CE|疑|精=年|準=年|傳說',
 		// 5 Unknown Rulers: Reigned 39 years
-		'/Ashur-Rabi II|-1010~|:CE|疑|精=年|準=年|注=Isreal & Judah under David & Solomon',
-		'/Ashur-Resh-Ishi II|-969~|:CE|疑|精=年|準=年',
-		'/Tiglath-Pilasar II|-966~|:CE|疑|精=年|準=年',
-		'/Ashur-Dan II|-934~|:CE|疑|精=年|準=年',
+		'/Ashur-Rabi II|-1010~|:CE|疑|精=年|準=年|傳說|注=Isreal & Judah under David & Solomon',
+		'/Ashur-Resh-Ishi II|-969~|:CE|疑|精=年|準=年|傳說',
+		'/Tiglath-Pilasar II|-966~|:CE|疑|精=年|準=年|傳說',
+		'/Ashur-Dan II|-934~|:CE|疑|精=年|準=年|傳說',
 
 		// Neo-Assyrian Empire, 新亞述帝國
 		// 亞述人統治巴比倫時期
