@@ -3304,7 +3304,7 @@ function module_code(library_namespace) {
 			rename_to = last_file.replace(/(.[a-z\d\-]+)$/i, extension);
 			// assert: PATTERN_ebook_file.test(rename_to) === false
 			// 不應再被納入檢測。
-			library_namespace.log(library_namespace.display_align({
+			library_namespace.info(library_namespace.display_align({
 				'Set milestone:' : last_file,
 				'→' : rename_to
 			}));

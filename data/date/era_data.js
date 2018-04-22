@@ -4156,6 +4156,28 @@ CeL.era.pass_on = {
 ]).minute_offset = 1 * 60;
 
 // ---------------------------------------------------------------------//
+// 英國君主列表
+// https://en.wikipedia.org/wiki/List_of_British_monarchs
+
+(CeL.era.pass_on.countries.British = [
+
+		'House of Stuart/Anne|1707/5/1~|:CE|配偶=1683/7/28 George of Denmark',
+		'House of Hanover/George I|1714/8/1~|:CE|配偶=1682/11/21 Sophia Dorothea of Celle',
+		'/George II|1727/6/11~|:CE|配偶=1705/8/22 Caroline of Ansbach',
+		'/George III|1760/10/25~|:CE|配偶=1761/9/8 Charlotte of Mecklenburg-Strelitz',
+		'/George IV|1820/1/29~|:CE|配偶=1785/9/15 Maria Fitzherbert;1795/4/8 Caroline of Brunswick',
+		'/William IV|1830/6/26~|:CE|配偶=1818/7/13 Adelaide of Saxe-Meiningen',
+		'/Victoria|1837/6/20~|:CE|配偶=1840/2/10 Albert, Prince Consort',
+		'Houses of Saxe-Coburg and Gotha/Edward VII|1901/1/22~|:CE|配偶=1863/3/10 Alexandra of Denmark',
+		'House of Windsor/George V|1910/5/6~|:CE|配偶=1893/7/6 Mary of Teck|注=House of Windsor since 1917',
+		'/Edward VIII|1936/1/20~|:CE|配偶=1937/6/3 Wallis Simpson',
+		'/George VI|1936/12/11~|:CE|配偶=1923/4/26 Queen Elizabeth The Queen Mother',
+		'/Elizabeth II|1952/2/6~' + CeL.era.pass_on.last_day
+				+ '|:CE|配偶=1947/11/20 Prince Philip, Duke of Edinburgh'
+
+]).minute_offset = 0 * 60;
+
+// ---------------------------------------------------------------------//
 // 西班牙君主列表
 // https://es.wikipedia.org/wiki/Anexo:Reyes_de_Espa%C3%B1a
 

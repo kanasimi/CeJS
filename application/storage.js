@@ -71,7 +71,7 @@ function module_code(library_namespace) {
 	CeL.storage.fso_exists(file_path)
 	CeL.storage.file_exists(file_path)
 	// get the contents of file
-	CeL.storage.read_file(file_path, character_encoding = 'UTF-8')
+	CeL.storage.read_file(file_path, character_encoding = 'UTF-8').toString()
 	CeL.storage.write_file(file_path, contents, character_encoding = 'UTF-8')
 	CeL.storage.append_file(file_path, contents, character_encoding = 'UTF-8')
 	// alias: delete

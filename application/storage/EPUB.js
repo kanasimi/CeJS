@@ -25,11 +25,11 @@ ebook.check(): 確認檔案都在
 https://github.com/IDPF/epubcheck
 java -jar epubcheck.jar *.epub
 
+http://www.idpf.org/epub/31/spec/epub-changes.html
+The EPUB 2 NCX file for navigation is now marked for removal in EPUB 3.1.
+
 
 TODO:
-the NCX
-http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm
-
 スタイル設定
 
 
