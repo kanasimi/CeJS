@@ -1006,11 +1006,18 @@ function module_code(library_namespace) {
 		}
 		while (id in this.chapter_index_of_id) {
 			var index = this.chapter_index_of_id[id], previous_data = this.chapters[index][KEY_DATA];
+			if (item_data.title && item_data.title === previous_data.title
+			// 測試新舊章節兩者是否實質相同。若是相同的話就直接覆蓋。
+			&& (!item_data.url || item_data.url === previous_data.url)) {
+				break;
+			}
+
 			library_namespace.info(
 			// 若 id / href 已存在，可能是因為有重複的標題，這時應發出警告。
 			'normalize_item: 先前已經存在相同 id 之章節，將更改後者之 id。\n	'
 					+ previous_data.title + '	' + (previous_data.url || '')
 					+ '\n	' + item_data.title + '	' + (item_data.url || ''));
+			// console.error(index+'/'+this.chapters.length);
 			// console.error(this.chapters[index]);
 			// console.error(item_data);
 			var NO;
@@ -1407,7 +1414,7 @@ function module_code(library_namespace) {
 					if (!matched || attribute_name.toLowerCase() !== 'src'
 					// skip web page, do not modify the link of web pages
 					&& (matched[3] || /\.html?$/i.test(matched[2]))) {
-						library_namespace.log('Skip resource: ' + url
+						library_namespace.log('check_text: Skip web-page resource: ' + url
 								+ '\n of ' + item_data.file);
 						return all;
 					}
