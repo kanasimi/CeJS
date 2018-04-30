@@ -10280,9 +10280,17 @@ function module_code(library_namespace) {
 			? '[' + data.error.code + '] ' + data.error.info : data.edit
 					&& data.edit.result !== 'Success'
 					&& ('[' + data.edit.result + '] '
-					// 新用戶要輸入過多或特定內容如URL，可能遇到:<br />
+					// 新用戶要輸入過多或特定內容如 URL，可能遇到:<br />
 					// [Failure] 必需輸入驗證碼
-					+ (data.edit.info || data.edit.captcha && '必需輸入驗證碼'));
+					+ (data.edit.info || data.edit.captcha && '必需輸入驗證碼'
+					// 垃圾連結 [[MediaWiki:Abusefilter-warning-link-spam]]
+					// e.g., youtu.be, bit.ly
+					// @see 20170708.import_VOA.js
+					|| data.edit.spamblacklist
+							&& 'Contains spam link 包含被列入黑名單的連結: '
+							+ data.edit.spamblacklist
+					// || JSON.stringify(data.edit)
+					));
 			if (error) {
 				/**
 				 * <code>
