@@ -16,6 +16,7 @@ https://en.wikipedia.org/wiki/Chronology_of_the_ancient_Near_East
 https://zh.wikipedia.org/wiki/%E5%80%AD%E9%A9%AC%E4%BA%9A%E7%8E%8B%E6%9C%9D
 
 
+
 中國君主列表 (地方政權)
 https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9C%8B%E5%90%9B%E4%B8%BB%E5%88%97%E8%A1%A8_%28%E5%9C%B0%E6%96%B9%E6%94%BF%E6%AC%8A%29
 
@@ -3429,6 +3430,7 @@ CeL.era.pass_on = {
 
 // ---------------------------------------------------------------------//
 // 印度年表, ancient India
+// https://en.wikipedia.org/wiki/List_of_Indian_monarchs
 
 (CeL.era.pass_on.countries.India = [
 
@@ -3852,6 +3854,8 @@ CeL.era.pass_on = {
 // ---------------------------------------------------------------------//
 // Egypt
 // https://en.wikipedia.org/wiki/Ancient_Egypt
+// https://en.wikipedia.org/wiki/List_of_ancient_Egyptian_dynasties
+// https://en.wikipedia.org/wiki/Egyptian_chronology
 // https://en.wikipedia.org/wiki/List_of_pharaohs
 
 /**
@@ -3863,6 +3867,229 @@ CeL.era.pass_on = {
 
 (CeL.era.pass_on.countries.Egypt = [
 
+		// Joann Fletcher. (2016).
+		// The Story of Egypt: The Civilization that Shaped the World
+		// (Pegasus Books)
+
+		// 1st Dynasty
+		'Dynasty I/Narmer|-3100~|:CE|疑|精=年|準=年|時期=Early Dynastic',
+		'/Aha|-3085~|:CE|疑|精=年|準=年',
+		'/Djer|-3040~|:CE|疑|精=年|準=年',
+		'/Djet|-2990~|:CE|疑|精=年|準=年',
+		'/Merneith|-2965~|:CE|疑|精=年|準=年',
+		'/Den|-2960~|:CE|疑|精=年|準=年',
+		'/Anedjib|-2925~|:CE|疑|精=年|準=年',
+		'/Semerkhet|-2900~|:CE|疑|精=年|準=年',
+		'/Qaa|-2890~|:CE|疑|精=年|準=年',
+
+		// 2nd Dynasty
+		'Dynasty II/Hetepsekhemwy|-2890~|:CE|疑|精=年|準=年|時期=Early Dynastic',
+		'/Nebra|-2865~|:CE|疑|精=年|準=年',
+		'/Peribsen|-2700~|:CE|疑|精=年|準=年',
+		'/Khasekhemwy|-2686~|:CE|疑|精=年|準=年',
+
+		// 3rd Dynasty
+		'Dynasty III/Nebka|-2686~|:CE|疑|精=年|準=年|時期=Old Kingdom',
+		'/Djoser|-2667~|:CE|疑|精=年|準=年',
+		'/Sekhemkhet|-2648~|:CE|疑|精=年|準=年',
+		'/Khaba|-2640~|:CE|疑|精=年|準=年',
+		'/Huni|-2637~|:CE|疑|精=年|準=年',
+
+		// 4th Dynasty
+		'Dynasty IV/Snefru|-2613~|:CE|疑|精=年|準=年|時期=Old Kingdom',
+		'/Khufu|-2589~|:CE|疑|精=年|準=年',
+		'/Djedefra|-2566~|:CE|疑|精=年|準=年',
+		'/Khafra|-2558~|:CE|疑|精=年|準=年',
+		'/Menkaura|-2532~|:CE|疑|精=年|準=年',
+		'/Khentkawes I|-2503~|:CE|疑|精=年|準=年',
+		'/Shepseskaf|-2503~-2498|:CE|疑|精=年|準=年',
+
+		// 5th Dynasty
+		'Dynasty V/Userkaf|-2494~|:CE|疑|精=年|準=年|時期=Old Kingdom',
+		'/Sahura|-2487~|:CE|疑|精=年|準=年',
+		'/Neferirkara|-2475~|:CE|疑|精=年|準=年',
+		'/Khentkawes II|-2455~|:CE|疑|精=年|準=年',
+		'/Shepseskara|-2455~|:CE|疑|精=年|準=年',
+		'/Raneferef|-2448~|:CE|疑|精=年|準=年',
+		'/Niuserra|-2445~|:CE|疑|精=年|準=年',
+		'/Menkauhor|-2421~|:CE|疑|精=年|準=年',
+		'/Djedkara|-2414~|:CE|疑|精=年|準=年',
+		'/Unas|-2375~|:CE|疑|精=年|準=年',
+
+		// 6th Dynasty
+		'Dynasty VI/Teti|-2345~|:CE|疑|精=年|準=年|時期=Old Kingdom',
+		'/Userkara|-2323~|:CE|疑|精=年|準=年',
+		'/Pepi I|-2321~|:CE|疑|精=年|準=年',
+		'/Merenra|-2287~|:CE|疑|精=年|準=年',
+		'/Pepy II|-2278~|:CE|疑|精=年|準=年',
+		'/Nerntyemsaf|-2184~|:CE|疑|精=年|準=年',
+		'/Neitikrety|-2184~-2181|:CE|疑|精=年|準=年',
+
+		// 11th Dynasty (Thebes)
+		'Dynasty XI/Intef I|-2125~|:CE|疑|精=年|準=年|時期=First Intermediate',
+		'/Intef II|-2112~|:CE|疑|精=年|準=年',
+		'/Intef III|-2063~|:CE|疑|精=年|準=年',
+		// 11th Dynasty (all Egypt)
+		'/Montuhotep II|-2055~|:CE|疑|精=年|準=年',
+		'/Sankhkara|-2004~|:CE|疑|精=年|準=年|ruler=Montuhotep III',
+		'/Montuhotep IV|-1992~|:CE|疑|精=年|準=年',
+
+		// 12th Dynasty
+		'Dynasty XII/Amenemhat I|-1985~-1955|:CE|疑|精=年|準=年|時期=Middle Kingdom',
+		'/Sesostris I|-1965~-1921|:CE|疑|精=年|準=年',
+		'/Amenemhat II|-1922~-1878|:CE|疑|精=年|準=年',
+		'/Sesostris II|-1880~|:CE|疑|精=年|準=年',
+		'/Sesostris III|-1874~|:CE|疑|精=年|準=年',
+		'/Amenemhat III|-1855~|:CE|疑|精=年|準=年',
+		'/Amenemhat IV|-1808~|:CE|疑|精=年|準=年',
+		'/Sobeknefru|-1799~-1795|:CE|疑|精=年|準=年',
+
+		// 17th Dynasty
+		'Dynasty XVII/Sobekemsaf|-1570~|:CE|疑|精=年|準=年|時期=Second Intermediate',
+		// Intef VI
+		// Tao I
+		'/Seqenra|-1560~|:CE|疑|精=年|準=年|ruler=Tao II',
+		'/Kamose|-1555~|:CE|疑|精=年|準=年',
+
+		// 18th Dynasty
+		'Dynasty XVIII/Ahmose I|-1550~|:CE|疑|精=年|準=年|時期=New Kingdom',
+		'/Amenhotep I|-1525~|:CE|疑|精=年|準=年',
+		'/Tuthmosis I|-1504~|:CE|疑|精=年|準=年',
+		'/Tuthmosis II|-1492~|:CE|疑|精=年|準=年',
+		'/Tuthmosis III|-1479~-1425|:CE|疑|精=年|準=年',
+		'/Hatshepsut|-1473~-1458|:CE|疑|精=年|準=年',
+		'/Amenhotep II|-1427~|:CE|疑|精=年|準=年',
+		'/Tuthmosis IV|-1400~|:CE|疑|精=年|準=年',
+		'/Amenhotep III|-1390~|:CE|疑|精=年|準=年',
+		'/Amenhotep IV/Akhenaten|-1352~-1336|:CE|疑|精=年|準=年',
+		'/(Nefernefruaten) Smenkhkara|-1338~|:CE|疑|精=年|準=年',
+		'/Tutankhamen|-1336~|:CE|疑|精=年|準=年',
+		'/Ay|-1327~|:CE|疑|精=年|準=年',
+		'/Horemheb|-1323~|:CE|疑|精=年|準=年',
+
+		// 19th Dynasty
+		'Dynasty XIX/Ramses I|-1295~|:CE|疑|精=年|準=年|時期=New Kingdom',
+		'/Seti I|-1294~|:CE|疑|精=年|準=年',
+		'/Ramses II|-1279~|:CE|疑|精=年|準=年',
+		'/Merenptah|-1213~|:CE|疑|精=年|準=年',
+		'/Amenmesse|-1203~|:CE|疑|精=年|準=年',
+		'/Seti II|-1200~|:CE|疑|精=年|準=年',
+		'/Siptah|-1194~|:CE|疑|精=年|準=年',
+		'/Tawosret|-1188~|:CE|疑|精=年|準=年',
+
+		// 20th Dynasty
+		'Dynasty XX/Sethnakht|-1186~|:CE|疑|精=年|準=年|時期=New Kingdom',
+		'/Ramses III|-1184~|:CE|疑|精=年|準=年',
+		'/Ramses IV|-1153~|:CE|疑|精=年|準=年',
+		'/Ramses V|-1147~|:CE|疑|精=年|準=年',
+		'/Ramses VI|-1143~|:CE|疑|精=年|準=年',
+		'/Ramses VII|-1136~|:CE|疑|精=年|準=年',
+		'/Ramses VIII|-1129~|:CE|疑|精=年|準=年',
+		'/Ramses IX|-1126~|:CE|疑|精=年|準=年',
+		'/Ramses X|-1108~|:CE|疑|精=年|準=年',
+		'/Ramses XI|-1099~|:CE|疑|精=年|準=年',
+
+		// 21st Dynasty (Tanis)
+		'Dynasty XXI/Smendes|-1069~|:CE|疑|精=年|準=年|時期=Third Intermediate',
+		'/Amenemnisu|-1043~|:CE|疑|精=年|準=年',
+		'/Psusennes I|-1039~-991|:CE|疑|精=年|準=年',
+		'/Amenemope|-993~|:CE|疑|精=年|準=年',
+		'/Osorkon the Elder|-984~|:CE|疑|精=年|準=年',
+		'/Siamen|-978~|:CE|疑|精=年|準=年',
+		'/Psusennes II|-959~|:CE|疑|精=年|準=年',
+
+		// 22nd Dynasty (Bubastite/Libyan)
+		'Dynasty XXII/Sheshonq I|-945~|:CE|疑|精=年|準=年|時期=Third Intermediate',
+		'/Osorkon I|-924~-889|:CE|疑|精=年|準=年',
+		'/Sheshonq II|-890~|:CE|疑|精=年|準=年',
+		'/Takeloth I|-889~|:CE|疑|精=年|準=年',
+		'/Osorkon II|-874~|:CE|疑|精=年|準=年',
+		'/Takelot III|-850~|:CE|疑|精=年|準=年',
+		'/Sheshonq III|-825~|:CE|疑|精=年|準=年',
+		'/Pimay|-773~|:CE|疑|精=年|準=年',
+		'/Sheshonq V|-767~|:CE|疑|精=年|準=年',
+		'/Osorkon IV|-730~-715|:CE|疑|精=年|準=年',
+
+		// 23rd Dynasty (Tanite/Libyan)
+		'Dynasty XXIII/Pedubastis I|-818~-793|:CE|疑|精=年|準=年|時期=Third Intermediate',
+		'/Sheshonq IV|-780~|:CE|疑|精=年|準=年',
+		'/Osorkon III|-777~-749|:CE|疑|精=年|準=年',
+
+		// 24th Dynasty
+		'Dynasty XXIV/Bakenrenef|-727~-715|:CE|疑|精=年|準=年|時期=Third Intermediate',
+
+		/**
+		 * <code>
+
+		'25th Dynasty (Kushite)/Piye|-747~|:CE|疑|精=年|準=年|時期=Late Period',
+		'/Shabaqa|-716~|:CE|疑|精=年|準=年',
+		'/Shabitqa|-702~|:CE|疑|精=年|準=年',
+		'/Taharqa|-690~|:CE|疑|精=年|準=年',
+		'/Tantamen|-664~-656|:CE|疑|精=年|準=年',
+
+		'26th Dynasty (Saite)/Necho I|-672~|:CE|疑|精=年|準=年|時期=Late Period',
+		'/Psammetichus I|-664~|:CE|疑|精=年|準=年',
+		'/Necho II|-610~|:CE|疑|精=年|準=年',
+		'/Psammetichus II|-595~|:CE|疑|精=年|準=年',
+		'/Apries|-589~|:CE|疑|精=年|準=年',
+		'/Ahmose II|-570~|:CE|疑|精=年|準=年',
+		'/Psammetichus III|-526~|:CE|疑|精=年|準=年',
+
+		'27th Dynasty (First Persian Period)/Cambyses|-525~|:CE|疑|精=年|準=年|時期=Late Period',
+		'/Darius I|-522~|:CE|疑|精=年|準=年',
+		'/Xerxes I|-486~|:CE|疑|精=年|準=年',
+		'/Artaxerxes I|-465~|:CE|疑|精=年|準=年',
+		'/Darius II|-424~|:CE|疑|精=年|準=年',
+		'/Artaxerxes II|-405~-359|:CE|疑|精=年|準=年',
+
+		'28th Dynasty/Amyrtaios|-404~|:CE|疑|精=年|準=年|時期=Late Period',
+
+		'29th Dynasty/Nepherites I|-399~|:CE|疑|精=年|準=年|時期=Late Period',
+		'/Hakor|-393~|:CE|疑|精=年|準=年',
+		'/Nepherites II|-380~|:CE|疑|精=年|準=年',
+
+		'30th Dynasty/Nectanebo I|-380~|:CE|疑|精=年|準=年|時期=Late Period',
+		'/Teos|-362~|:CE|疑|精=年|準=年',
+		'/Nectanebo II|-360~|:CE|疑|精=年|準=年',
+
+		'Second Persian Period/Artaxerxes III|-343~|:CE|疑|精=年|準=年|時期=Late Period',
+		'/Arses|-338~|:CE|疑|精=年|準=年',
+		'/Darius III|-336~|:CE|疑|精=年|準=年',
+
+		'Macedonian Dynasty/Alexander the Great|-332~|:CE|疑|精=年|準=年|時期=Ptolemaic Period',
+		'/Philip Arrhidaios|-323~-317|:CE|疑|精=年|準=年',
+		'/Alexander IV|-323~-310|:CE|疑|精=年|準=年',
+
+		'Ptolemaic Dynasty/Ptolemy I|-305~-282|:CE|疑|精=年|準=年|時期=Ptolemaic Period',
+		'/Ptolemy II|-285~-246|:CE|疑|精=年|準=年',
+		'/Arsinoe II|-275~-268|:CE|疑|精=年|準=年',
+		'/Ptolemy III|-246~-222|:CE|疑|精=年|準=年',
+		'/Berenike II|-246~|:CE|疑|精=年|準=年',
+		'/Ptolemy IV|-221~|:CE|疑|精=年|準=年',
+		'/Ptolemy V|-205~-180|:CE|疑|精=年|準=年',
+		'/Kleopatra I|-194~-176|:CE|疑|精=年|準=年',
+		'/Ptolemy VI|-180~-145|:CE|疑|精=年|準=年',
+		'/Kleopatra II|-176~-116|:CE|疑|精=年|準=年',
+		'/Ptolemy VII|-145~|:CE|疑|精=年|準=年',
+		'/Ptolemy VIII|-145~-116|:CE|疑|精=年|準=年',
+		'/Kleopatra III|-142~-101|:CE|疑|精=年|準=年',
+		'/Ptolemy IX|-116~|:CE|疑|精=年|準=年',
+		'/Ptolemy X|-107~-88|:CE|疑|精=年|準=年',
+		'/Berenike III|-101~-80|:CE|疑|精=年|準=年',
+		'/Ptolemy IX|-88~|:CE|疑|精=年|準=年',
+		'/Ptolemy XI|-80~|:CE|疑|精=年|準=年',
+		'/Ptolemy XII (Auletes)|-80~|:CE|疑|精=年|準=年',
+		'/Kleopatra V|-58~-57|:CE|疑|精=年|準=年',
+		'/Berenike IV|-58~|:CE|疑|精=年|準=年',
+		'/Ptolemy XII (Auletes)|-55~|:CE|疑|精=年|準=年',
+		'/Kleopatra VII|-51~-30|:CE|疑|精=年|準=年',
+		'/Ptolemy XIII|-51~|:CE|疑|精=年|準=年',
+		'/Ptolemy XIV|-47~|:CE|疑|精=年|準=年',
+		'/Ptolemy XV (Caesarion)|-44~-30|:CE|疑|精=年|準=年',
+
+		 */
+
+		// ----------------------------------//
 		(function() {
 			// Egyptian year (has year 0) = -26
 			var epochal_year = CeL.Egyptian_Date.reform_epochal_year - 1,
@@ -3886,9 +4113,9 @@ CeL.era.pass_on = {
 			// +1: period_end
 			String(end_year + 1).to_Date('Egyptian') ],
 			//
-			start_year + '/=' + month_days.join('	'),
-			//
-			'參照用', '曆法=Egyptian calendar',
+			start_year + '/=' + month_days.join('	'), '參照用',
+			// Egyptian calendar
+			'曆法=Egyptian',
 			//
 			'月名=' + CeL.Egyptian_Date.month_name.Greek.slice(1).join(';') ];
 		})(),
@@ -4044,6 +4271,57 @@ CeL.era.pass_on = {
 
 // ---------------------------------------------------------------------//
 
+(CeL.era.pass_on.countries.Hittite = [
+
+		// Trevor Bryce. (2002).
+		// Life and society in the Hittite world. OUP Oxford.
+		// page. xi : List of Hittite Kings
+
+		// 西臺君主列表 https://en.wikipedia.org/wiki/List_of_Hittite_kings
+		// https://web.archive.org/web/20130729215948/http://www.hittites.info/history.aspx?text=history%2FMiddle+Empire.htm
+
+		// 舊王國 (西臺)（Old Hittite Kingdom）哈圖沙成為首都。
+		'Old Kingdom/Hattusili I|-1650~|:CE|疑|精=年|準=年',
+		'/Mursili I|-1620~|:CE|疑|精=年|準=年|關係=grandson, adopted son',
+		'/Hantili I|-1590~|:CE|疑|精=年|準=年|關係=brother-in-law|ruler=Ḫattušili I',
+		'/Zidanta I|-1560~|:CE|疑|精=年|準=年|關係=son-in-law',
+		'/Ammuna|-1550~|:CE|疑|精=年|準=年|關係=son',
+		'/Huzziya I|-1530~|:CE|疑|精=年|準=年|關係=brother of Ammuna’s daughter in-law',
+		'/Telipinu|-1525~-1500/1/1|:CE|疑|精=年|準=年|關係=brother-in-law',
+
+		// 中王國 (西臺)（Middle Hittite Kingdom）
+		// 關於中王國，沒有任何資料保存下來。但有的研究者將古王國的最後6位君主列為中王國時期的統治者。
+		// 有些研究者認為並無以下6人。
+		// 'Middle Kingdom/Alluwamna|-1500~|:CE|疑|精=年|準=年|關係=son-in-law',
+		// '/Tahurwaili|-~|:CE|疑|精=年|準=年|關係=interloper',
+		// '/Hantili II|-~|:CE|疑|精=年|準=年|關係=son of Alluwamna?',
+		// '/Zidanta II|-1480~|:CE|疑|精=年|準=年|關係=son?',
+		// '/Huzziya II|-~-1450|:CE|疑|精=年|準=年|關係=son?',
+		// '/Muwatalli I|-~|:CE|疑|精=年|準=年|關係=interloper',
+
+		// 新王國 (西臺)（New Hittite Kingdom）
+		// 蘇皮盧利烏瑪斯一世征服敘利亞、穆瓦塔利（Muwatalli）進攻埃及卡疊石（Kadesh）。
+		// https://en.wikipedia.org/wiki/Short_chronology
+		'New Kingdom/Tudḫaliya II|-1400~|:CE|疑|精=年|準=年|關係=grandson of Huzziya II?|注=Includes period of coregency',
+		'/Arnuwanda I|-1380~|:CE|疑|精=年|準=年|關係=son-in-law, adopted son',
+		'/Hattusili II|-1370~|:CE|疑|精=年|準=年|關係=son?|注=Hattusili II?',
+		'/Tudhaliya III|-1360~|:CE|疑|精=年|準=年|關係=son?',
+		'/Suppiluliuma I|-1344~|:CE|疑|精=年|準=年|關係=son',
+		'/Arnuwanda II|-1322~|:CE|疑|精=年|準=年|關係=son',
+		'/Mursili II|-1321~|:CE|疑|精=年|準=年|關係=brother',
+		'/Muwatalli II|-1295~|:CE|疑|精=年|準=年|關係=son',
+		'/Urhi-Tesub|-1272~|:CE|疑|精=年|準=年|關係=son|ruler=Mursili III',
+		'/Hattusili III|-1267~|:CE|疑|精=年|準=年|關係=uncle',
+		'/Tudhaliya IV|-1237~|:CE|疑|精=年|準=年|關係=son',
+		'/Kurunta|-1228|:CE|疑|精=年|準=年|關係=cousin',
+		'/Tudhaliya IV|-1227~|:CE|疑|精=年|準=年|關係=cousin|注=2nd period as king',
+		'/Arnuwanda III|-1209~|:CE|疑|精=年|準=年|關係=son',
+		'/Suppiluliuma II|-1207~-1178|:CE|疑|精=年|準=年|關係=brother',
+
+]).minute_offset = 2 * 60;
+
+// ---------------------------------------------------------------------//
+
 // 法國皇室 法國君主列表
 // https://fr.wikipedia.org/wiki/Liste_des_monarques_de_France
 // https://www.timetoast.com/timelines/les-monarques-de-france
@@ -4189,9 +4467,9 @@ CeL.era.pass_on = {
 		'/Juana I de Castilla|1504/11/26~1555/4/12|:CE|Sobrenombre=la Loca|配偶=Felipe I de Castilla',
 		'/Felipe I de Castilla|1506/7/12~1506/9/25|:CE|Sobrenombre=el Hermoso',
 		'Casa de Austria/Carlos I|1516/3/14~|:CE|Sobrenombre=el César|配偶=Isabel de Portugal',
-		'/Felipe II|1556/1/16~|:CE|Sobrenombre=el Prudente|配偶=María I de Inglaterra;Isabel de Valois (1546-1568)|Isabel de Valois;Ana de Austria (1549-1580)|Ana de Austria',
-		'/Felipe III|1598/9/13~|:CE|Sobrenombre=el Piadoso|配偶=Margarita de Austria-Estiria|Margarita de Austria',
-		'/Felipe IV|1621/3/31~|:CE|Sobrenombre=el Grande;el Rey Planeta|配偶=Isabel de Borbón (reina de España)|Isabel de Borbón;Mariana de Austria',
+		'/Felipe II|1556/1/16~|:CE|Sobrenombre=el Prudente|配偶=María I de Inglaterra;Isabel de Valois (1546-1568);Ana de Austria (1549-1580)',
+		'/Felipe III|1598/9/13~|:CE|Sobrenombre=el Piadoso|配偶=Margarita de Austria-Estiria;Margarita de Austria',
+		'/Felipe IV|1621/3/31~|:CE|Sobrenombre=el Grande;el Rey Planeta|配偶=Isabel de Borbón (reina de España);Isabel de Borbón;Mariana de Austria',
 		'/Carlos II|1665/9/17~1700/11/1|:CE|Sobrenombre=el Hechizado|配偶=María Luisa de Orleans;Mariana de Neoburgo',
 		'/Archiduque Carlos|1703/9/12~1715/7/2|:CE|配偶=Isabel Cristina de Brunswick-Wolfenbüttel',
 		// 卡佩王朝波旁分支
