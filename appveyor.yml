@@ -11,7 +11,9 @@ environment:
 # 2017/11/2 LTS
     - nodejs_version: "8"
 # 2017/11/2 Current
-    - nodejs_version: "9"
+#    - nodejs_version: "9"
+# 2018-04-24, Version 10.0.0 (Current)
+    - nodejs_version: "10"
 
 # Install scripts. (runs after repo cloning)
 install:
