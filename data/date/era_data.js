@@ -10,11 +10,14 @@ TODO:
 任意線圖階層，不只(紀年名稱索引值)所示。
 
 
+https://en.wikipedia.org/wiki/Lists_of_rulers_of_Greece
+
+https://en.wikipedia.org/wiki/Ancient_history
 https://en.wikipedia.org/wiki/Lists_of_ancient_kings
 https://en.wikipedia.org/wiki/Middle_chronology
 https://en.wikipedia.org/wiki/Chronology_of_the_ancient_Near_East
 https://zh.wikipedia.org/wiki/%E5%80%AD%E9%A9%AC%E4%BA%9A%E7%8E%8B%E6%9C%9D
-
+https://zh.wikipedia.org/wiki/%E7%8E%B0%E4%BB%BB%E4%B8%BB%E6%9D%83%E5%9B%BD%E5%AE%B6%E5%90%9B%E4%B8%BB%E5%88%97%E8%A1%A8
 
 
 中國君主列表 (地方政權)
@@ -611,7 +614,7 @@ CeL.era.pass_on = {
 		'/惠帝|秦漢歷-194~|:秦漢歷|君主名=劉盈|生=前211年|卒=前188年9月26日|在位=前195年6月23日~前188年9月26日',
 		'/高后|秦漢歷-187~-180/11/14|:秦漢歷|君主=呂后|君主名=呂雉|表字=娥姁|生=前241年|卒=前180年8月18日|在位=改订西汉新莽纪年表：西漢惠帝7年8月呂后親政',
 		'/前少帝|秦漢歷-187~|:秦漢歷|君主名=劉恭|生=前199年7月|卒=前184年6月15日|在位=前188年九月~前184年八月|注=名不詳，錢穆《國史大綱》作劉恭',
-		'/後少帝|秦漢歷-183~|:秦漢歷|君主名=劉弘|生=前195年3月|卒=前180年11月14日|在位=前184年八月~前180年九月|注=',
+		'/後少帝|秦漢歷-183~|:秦漢歷|君主名=劉弘|生=前195年3月|卒=前180年11月14日|在位=前184年八月~前180年九月',
 		'/文帝/前元|秦漢歷-179~|:秦漢歷|廟號=太宗|君主名=劉恆|生=前203年|卒=前157年7月6日|在位=前180年11月14日~前157年7月6日|注=當時未用年號，年號為後世史籍追記。',
 		'/後元|秦漢歷-163~|:秦漢歷|注=孝文本紀:	十七年，得玉杯，刻曰「人主延壽」。於是天子始更為元年，令天下大酺。|注=重谈中国古代以年号纪年的启用时间: 當時未用年號，僅稱改元。目的可能是圖重啟國祚、延年益壽。年號為後世史籍追記。',
 		'/景帝/前元|秦漢歷-156~|:秦漢歷|君主名=劉啟|生=前188年|卒=前141年3月9日|在位=前157年7月14日~前141年3月9日|注=當時未用年號，年號為後世史籍追記。',
@@ -2077,32 +2080,32 @@ CeL.era.pass_on = {
 
 		// http://www.kunaicho.go.jp/ryobo/successive_list.html
 
-		'縄文時代/神武天皇|日本書紀-660~|:日本書紀|時期=神話時代|読み=じんむてんのう|諡=神武天皇|生=庚午年1月1日 (-711/2/13, 平朔儀鳳暦, 魯桓公1年2月1日)|注=辛酉年春正月庚辰朔。天皇即帝位於橿原宮。...七十有六年春三月甲午朔甲辰。天皇崩于橿原宮。',
-		'/綏靖天皇|日本書紀-581~|:日本書紀|読み=すいぜいてんのう|諡=綏靖天皇',
-		'/安寧天皇|日本書紀-548~|:日本書紀|読み=あんねいてんのう',
-		'/懿德天皇|日本書紀-510~|:日本書紀|読み=いとくてんのう|諡=懿徳天皇',
-		'弥生時代/孝昭天皇|日本書紀-475~|:日本書紀|時期=神話時代|読み=こうしょうてんのう',
-		'/孝安天皇|日本書紀-392~|:日本書紀|読み=こうあんてんのう',
-		'/孝靈天皇|日本書紀-290~|:日本書紀|読み=こうれいてんのう|諡=孝霊天皇',
-		'/孝元天皇|日本書紀-214~|:日本書紀|読み=こうげんてんのう',
-		'/開化天皇|日本書紀-157~|:日本書紀|読み=かいかてんのう',
-		'/崇神天皇|日本書紀-97~|:日本書紀|読み=すじんてんのう|諡=崇神天皇',
-		'/垂仁天皇|日本書紀-29~|:日本書紀|読み=すいにんてんのう',
-		'/景行天皇|日本書紀71~|:日本書紀|読み=けいこうてんのう',
-		'/成務天皇|日本書紀131~|:日本書紀|読み=せいむてんのう',
-		'/仲哀天皇|日本書紀192~|:日本書紀|読み=ちゅうあいてんのう',
-		'/神功皇后|日本書紀201~|:日本書紀|女性|読み=じんぐうこうごう|諡=神功皇后|注=日本書紀: 神功皇后摂政(じんぐうこうごうせっしょう)',
-		'古墳時代/應神天皇|日本書紀270~|:日本書紀|読み=おうじんてんのう|諡=応神天皇;應神天皇',
-		'/仁德天皇|日本書紀313~|:日本書紀|読み=にんとくてんのう;仁徳天皇',
-		'/履中天皇|日本書紀400~|:日本書紀|読み=りちゅうてんのう',
-		'/反正天皇|日本書紀406~|:日本書紀|読み=はんぜいてんのう',
-		'/允恭天皇|日本書紀412~|:日本書紀|読み=いんぎょうてんのう',
-		'/安康天皇|日本書紀454~|:日本書紀|読み=あんこうてんのう',
-		'/雄略天皇|日本書紀457~|:日本書紀|読み=ゆうりゃくてんのう',
-		'/清寧天皇|日本書紀480~|:日本書紀|読み=せいねいてんのう|諡=淸寧天皇',
-		'/顯宗天皇|日本書紀485~|:日本書紀|読み=けんぞうてんのう|諡=顕宗天皇',
-		'/仁賢天皇|日本書紀488~|:日本書紀|読み=にんけんてんのう',
-		'/武烈天皇|日本書紀499~|:日本書紀|読み=ぶれつてんのう',
+		'縄文時代/神武天皇|日本書紀-660~|:日本書紀|傳說|時期=神話時代|読み=じんむてんのう|諡=神武天皇|生=庚午年1月1日 (-711/2/13, 平朔儀鳳暦, 魯桓公1年2月1日)|注=辛酉年春正月庚辰朔。天皇即帝位於橿原宮。...七十有六年春三月甲午朔甲辰。天皇崩于橿原宮。',
+		'/綏靖天皇|日本書紀-581~|:日本書紀|傳說|読み=すいぜいてんのう|諡=綏靖天皇',
+		'/安寧天皇|日本書紀-548~|:日本書紀|傳說|読み=あんねいてんのう',
+		'/懿德天皇|日本書紀-510~|:日本書紀|傳說|読み=いとくてんのう|諡=懿徳天皇',
+		'弥生時代/孝昭天皇|日本書紀-475~|:日本書紀|傳說|時期=神話時代|読み=こうしょうてんのう',
+		'/孝安天皇|日本書紀-392~|:日本書紀|傳說|読み=こうあんてんのう',
+		'/孝靈天皇|日本書紀-290~|:日本書紀|傳說|読み=こうれいてんのう|諡=孝霊天皇',
+		'/孝元天皇|日本書紀-214~|:日本書紀|傳說|読み=こうげんてんのう',
+		'/開化天皇|日本書紀-157~|:日本書紀|傳說|読み=かいかてんのう',
+		'/崇神天皇|日本書紀-97~|:日本書紀|傳說|読み=すじんてんのう|諡=崇神天皇',
+		'/垂仁天皇|日本書紀-29~|:日本書紀|傳說|読み=すいにんてんのう',
+		'/景行天皇|日本書紀71~|:日本書紀|傳說|読み=けいこうてんのう',
+		'/成務天皇|日本書紀131~|:日本書紀|傳說|読み=せいむてんのう',
+		'/仲哀天皇|日本書紀192~|:日本書紀|傳說|読み=ちゅうあいてんのう',
+		'/神功皇后|日本書紀201~|:日本書紀|傳說|女性|読み=じんぐうこうごう|諡=神功皇后|注=日本書紀: 神功皇后摂政(じんぐうこうごうせっしょう)',
+		'古墳時代/應神天皇|日本書紀270~|:日本書紀|傳說|読み=おうじんてんのう|諡=応神天皇;應神天皇',
+		'/仁德天皇|日本書紀313~|:日本書紀|傳說|読み=にんとくてんのう;仁徳天皇',
+		'/履中天皇|日本書紀400~|:日本書紀|傳說|読み=りちゅうてんのう',
+		'/反正天皇|日本書紀406~|:日本書紀|傳說|読み=はんぜいてんのう',
+		'/允恭天皇|日本書紀412~|:日本書紀|傳說|読み=いんぎょうてんのう',
+		'/安康天皇|日本書紀454~|:日本書紀|傳說|読み=あんこうてんのう',
+		'/雄略天皇|日本書紀457~|:日本書紀|傳說|読み=ゆうりゃくてんのう',
+		'/清寧天皇|日本書紀480~|:日本書紀|傳說|読み=せいねいてんのう|諡=淸寧天皇',
+		'/顯宗天皇|日本書紀485~|:日本書紀|傳說|読み=けんぞうてんのう|諡=顕宗天皇',
+		'/仁賢天皇|日本書紀488~|:日本書紀|傳說|読み=にんけんてんのう',
+		'/武烈天皇|日本書紀499~|:日本書紀|傳說|読み=ぶれつてんのう',
 
 		// <a
 		// href="https://ja.wikipedia.org/wiki/%E5%9B%BD%E5%8F%B7#.E6.97.A5.E6.9C.AC.E3.81.AE.E5.9B.BD.E5.8F.B7"
@@ -3556,6 +3559,10 @@ CeL.era.pass_on = {
 
 (CeL.era.pass_on.countries.Mesopotamian = [
 
+		// https://en.wikipedia.org/wiki/Early_Dynastic_Period_(Mesopotamia)
+
+		// ------------------------------------------------
+
 		// Fourth dynasty of Kish, 基什第三王朝
 		// https://en.wikipedia.org/wiki/Sumerian_King_List#Fourth_dynasty_of_Kish
 		// http://www.historyfiles.co.uk/KingListsMiddEast/MesopotamiaKish.htm
@@ -3667,6 +3674,7 @@ CeL.era.pass_on = {
 		// ------------------------------------------------
 
 		// Urartu (Akkadian Uraštu; Hebrew Ararat; Kingdom of Van; Biainele)
+		// 古代美索不達米亞 烏拉爾圖
 		// https://en.wikipedia.org/wiki/List_of_kings_of_Urartu
 		'Urartu/Arame|-858~|:CE|精=年|準=年|ruler=Aramu;Արամե',
 		'/Lutipri|-844~|:CE|精=年|準=年',
@@ -3847,7 +3855,155 @@ CeL.era.pass_on = {
 		'/Antiochus XII|-87~|:Babylonian|疑|準=年|ruler=Antiochus XII Dionysus (Epiphanes/Philopator/Callinicus)',
 		'/Seleucus VII|Babylonian-83~|:Babylonian|疑|準=年|ruler=Seleucus VII Philometor;Σέλευκος Ζ΄;Tigranes the Great;Tigranes II of Armenia',
 		'/Antiochus XIII|Babylonian-69~|:Babylonian|疑|準=年|ruler=Antiochus XIII Philadelphus;Asiaticus',
-		'/Philip II|Babylonian-65~-63|:Babylonian|疑|準=年|ruler=Philip II Philorhomaeus;Φίλιππος Β΄ ὁ Φιλορωμαῖος;Barypous'
+		'/Philip II|Babylonian-65~-63|:Babylonian|疑|準=年|ruler=Philip II Philorhomaeus;Φίλιππος Β΄ ὁ Φιλορωμαῖος;Barypous',
+
+		// ------------------------------------------------
+
+		// https://en.wikipedia.org/wiki/List_of_rulers_of_Elam
+		// Neo-Elamite Period, 新埃蘭時期
+		// Humban-Tahrid (Neo-Elamite) dynasty
+		'Elam/Humban-Tahrah I|-821~|:CE|疑|精=年|準=年|title=king of Elam',
+		'/Humban-Nikash I|-743~|:CE|疑|精=年|準=年|title=king of Elam|關係=son of Humban-Tahrah I',
+		'/Shutur-Nahhunte II|-717~|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son (Ruhushak) of Humban-Nikash I',
+		'/Hallushu-Inshushinak|-699~|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=brother of Shutur-Nahhunte II',
+		'/Kutir-Nahhunte III|-693/10~|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Hallushu-Inshushinak',
+		'/Humban-Numena III|-692/7~|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Hallushu-Inshushinak',
+		'/Humban-Haltash I|-688/2~|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Humban-Numena III (?)',
+		'/Humban-Haltash II|-681/10~|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Humban-Haltash I',
+		'/Urtak|-675/9~|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=brother of Humban-Haltash II',
+		'/Teumman|-663~|:CE|疑|精=年|準=年|title=king of Anshan & Susa',
+		'/Humban-Nikash II|-653/9~|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Urtak',
+		'/Tammaritu II|-652~|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Humban-Hapua son of Urtak',
+		'/Indabibi|-649~|:CE|疑|精=年|準=年|title=king of Anshan & Susa',
+		'/Humban-Haltash III|-648/7~-644|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Atta-hamiti-Inshushinak',
+		'/Tammaritu II|-647~-647|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Humban-Hapua son of Urtak',
+		'/Humban-Nikash III|-647~-647|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Atta-Merra-Halki',
+		'/Umhuluma|-647~-647|:CE|疑|精=年|準=年|title=king of Anshan & Susa',
+		'/Indattu-Inshushinak IV|-647~-646/10|:CE|疑|精=年|準=年|title=king of Anshan & Susa',
+		'/Humban-Hapua|-647~-647|:CE|疑|精=年|準=年|title=king of Anshan & Susa',
+		"/Pa'e|-646/8~-644|:CE|疑|精=年|準=年|title=king of Anshan & Susa",
+		'/Shutur-Nahhunte III|-646/8~-600/12|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Indattu-Inshushinak IV',
+		'/Açina|-522/10~|:CE|疑|精=年|準=年|title=king of Elam|關係=son of Upadrama',
+		'/Ummanunu II|-522/12/10~|:CE|疑|精=年|準=年|title=king of Elam|注=Ummanunu II or Humban-Nikash IV (Ummaniš)',
+		'/Atta-hamiti-Inshushinak|-521/2~-519|:CE|疑|精=年|準=年|title=king of Anshan & Susa|關係=son of Hutran-Temti',
+
+]).minute_offset = 3 * 60;
+
+// ---------------------------------------------------------------------//
+
+// Ancient Greek: Athens
+
+(CeL.era.pass_on.countries.Ἀθῆναι = [
+
+		// https://en.wikipedia.org/wiki/List_of_kings_of_Athens
+
+		// Erechtheid dynasty
+		'Erechtheid/Cecrops I|-1556~|:CE|傳說|精=年|準=年',
+		'/Cranaus|-1506~|:CE|傳說|精=年|準=年',
+		'/Amphictyon|-1497~|:CE|傳說|精=年|準=年',
+		'/Erichthonius|-1487~|:CE|傳說|精=年|準=年',
+		'/Pandion I|-1437~|:CE|傳說|精=年|準=年',
+		'/Erechtheus|-1397~|:CE|傳說|精=年|準=年',
+		"/Cecrops II|-1347~|:CE|傳說|精=年|準=年|注=Omitted in Heraclides' epitome of Aristotle's Constitution of the Athenians",
+		'/Pandion II|-1307~|:CE|傳說|精=年|準=年',
+		'/Aegeus|-1282~|:CE|傳說|精=年|準=年|注=Construction of Trojan Walls by Poseidon, Apollo and the mortal Aeacus (c. 1282 BC)',
+		'/Theseus|-1234~|:CE|傳說|精=年|準=年',
+		'/Menestheus|-1205~|:CE|傳說|精=年|準=年|注=Trojan War and the Sack of Troy (c. 1183 BC)',
+		'/Demophon|-1183~|:CE|傳說|精=年|準=年', '/Oxyntes|-1150~|:CE|傳說|精=年|準=年',
+		'/Apheidas|-1136~|:CE|傳說|精=年|準=年',
+		'/Thymoetes|-1135~-1127|:CE|傳說|精=年|準=年',
+
+		// Melanthid dynasty
+		'Melanthid/Melanthus|-1126~|:CE|傳說|精=年|準=年',
+		'/Codrus|-1089~-1068|:CE|傳說|精=年|準=年',
+
+]).minute_offset = 3 * 60;
+
+// ---------------------------------------------------------------------//
+
+// Ancient Greek: Sparta
+
+(CeL.era.pass_on.countries.Σπάρτη = [
+
+		// https://en.wikipedia.org/wiki/List_of_kings_of_Sparta
+		// Agiad dynasty
+		'Agiad/Eurysthenes|-930~|:CE|傳說|精=年|準=年|注=Return of the Heracleidae',
+		'/Agis I|-930~|:CE|傳說|精=年|準=年|注=Subjugated the Helots',
+		'/Echestratus|-900~|:CE|傳說|精=年|準=年|注=Expelled the Cynurensians[n 4] that were in power.',
+		'/Labotas[n 5]|-870~|:CE|傳說|精=年|準=年',
+		'/Doryssus|-840~|:CE|傳說|精=年|準=年',
+		'/Agesilaus I|-820~|:CE|傳說|精=年|準=年',
+		'/Archelaus|-790~|:CE|傳說|精=年|準=年',
+		'/Teleclus|-760~|:CE|傳說|精=年|準=年|注=Killed by the Messenians',
+		'/Alcamenes|-758~|:CE|傳說|精=年|準=年|注=First Messenian War begins',
+		'/Polydorus|-741~|:CE|傳說|精=年|準=年|注=Second Messenian War begins; Killed by Athenian Archon Polemarchus[5]',
+		'/Eurycrates|-665~|:CE|傳說|精=年|準=年',
+		'/Anaxander|-640~|:CE|傳說|精=年|準=年',
+		'/Eurycratides|-615~|:CE|傳說|精=年|準=年',
+		'/Leon|-590~|:CE|傳說|精=年|準=年',
+		'/Anaxandridas II|-560~|:CE|傳說|精=年|準=年|注=Battle of the Fetters',
+		'/Cleomenes I|-520~|:CE|傳說|精=年|準=年|注=Greco-Persian Wars begins',
+		'/Leonidas I|-490~|:CE|傳說|精=年|準=年|注=Battle of Thermopylae',
+		'/Pleistarchus|-480~|:CE|傳說|精=年|準=年|注=First Peloponnesian War begins',
+		'/Pleistoanax|-459~|:CE|傳說|精=年|準=年|注=Second Peloponnesian War begins',
+		'/Pausanias|-409~|:CE|傳說|精=年|準=年|注=Helped restore democracy in Athens; Spartan hegemony',
+		'/Agesipolis I|-395~|:CE|傳說|精=年|準=年|注=Corinthian War begins',
+		'/Cleombrotus I|-380~|:CE|傳說|精=年|準=年',
+		'/Agesipolis II[n 6]|-371~|:CE|傳說|精=年|準=年',
+		'/Cleomenes II|-369~|:CE|傳說|精=年|準=年|注=Third Sacred War begins',
+		'/Areus I|-309~|:CE|傳說|精=年|準=年|注=Killed in battle against Aristodemus, the tyrant of Megalopolis',
+		'/Acrotatus II|-265~|:CE|傳說|精=年|準=年',
+		'/Areus II[6]|-262~|:CE|傳說|精=年|準=年',
+		'/Leonidas II|-254~|:CE|傳說|精=年|準=年|注=Briefly deposed while in exile avoiding trial',
+		'/Cleombrotus II|-242~|:CE|傳說|精=年|準=年',
+		'/Leonidas II|-241~|:CE|傳說|精=年|準=年',
+		'/Cleomenes III|-235~-222|:CE|傳說|精=年|準=年',
+
+		// Eurypontid dynasty
+		'Eurypontid/Procles|-930~|:CE|傳說|精=年|準=年|注=Return of the Heracleidae',
+		'/Soos[n 7][7]|-890~|:CE|傳說|精=年|準=年|注=Son of Procles and father of Eurypon.',
+		'/Eurypon|-890~|:CE|傳說|精=年|準=年',
+		'/Prytanis|-860~|:CE|傳說|精=年|準=年',
+		'/Polydectes|-830~|:CE|傳說|精=年|準=年',
+		'/Eunomus|-800~|:CE|傳說|精=年|準=年',
+		'/Charilaus|-780~|:CE|傳說|精=年|準=年|注=Ward, pupil, and nephew of the Spartan reformer Lycurgus; War with the Argives and destroyed the border-town of Aegys; Battle of Tegea.',
+		'/Nicander|-750~|:CE|傳說|精=年|準=年|注=First Messenian War begins.',
+		'/Theopompus|-725~|:CE|傳說|精=年|準=年|注=Second Messenian War begins.',
+		// Currently known two lists of kings
+		'/Anaxandridas I|-675~|:CE|傳說|精=年|準=年',
+		'/Zeuxidamus|-645~|:CE|傳說|精=年|準=年',
+		'/Anaxidamus|-625~|:CE|傳說|精=年|準=年',
+		'/Archidamus I|-600~|:CE|傳說|精=年|準=年',
+		'/Agasicles|-575~|:CE|傳說|精=年|準=年|注=Contemporary with Leonidas I; End of the Messenian Wars.',
+		// ↑ Currently known two lists of kings
+		'/Ariston|-550~|:CE|傳說|精=年|準=年|注=Battle of the Fetters.',
+		'/Demaratus|-515~|:CE|傳說|精=年|準=年|注=Greco-Persian Wars begins.',
+		'/Leotychidas|-491~|:CE|傳說|精=年|準=年',
+		'/Archidamus II|-469~|:CE|傳說|精=年|準=年|注=First Peloponnesian War; Second Peloponnesian War begins',
+		'/Agis II|-427~|:CE|傳說|精=年|準=年|注=Spartan hegemony; Attacked Epidaurus, Leuctra,[n 9] Caryao, Orchomenos, and Mantinela; Invaded the Argolis; Council of war[n 10] formed to check his powers.',
+		'/Agesilaus II|-401~|:CE|傳說|精=年|準=年|注=Corinthian War begins',
+		'/Archidamus III|-360~|:CE|傳說|精=年|準=年|注=Third Sacred War begins',
+		'/Agis III|-338~|:CE|傳說|精=年|準=年',
+		'/Eudamidas I|-331~|:CE|傳說|精=年|準=年',
+		'/Archidamus IV|-305~|:CE|傳說|精=年|準=年',
+		'/Eudamidas II|-275~|:CE|傳說|精=年|準=年',
+		'/Agis IV|-245~|:CE|傳說|精=年|準=年',
+		'/Eudamidas III|-241~|:CE|傳說|精=年|準=年',
+		'/Archidamus V|-228~|:CE|傳說|精=年|準=年',
+		'/Eucleidas|-227~-221|:CE|傳說|精=年|準=年|注=Actually an Agiad; installed by Cleomenes III[n 11] in place of Archidamus V.',
+
+		// Republic monarchy
+		// Sparta was a republic from 221 to 219 BC.
+		// The dual monarchy was restored in 219 BC.
+		'Republic Sparta/Agesipolis III|-219~-215|:CE|傳說|精=年|準=年|注=last Agiad, deposed by Lycurgus',
+		'/Lycurgus|-219~|:CE|傳說|精=年|準=年',
+		'/Pelops|-210~-206|:CE|傳說|精=年|準=年|注=son of Lycurgus and last king from either of the old dynasties',
+
+		// Tyrants
+		'Tyrants Sparta/Machanidas|-210~-207|:CE|傳說|精=年|準=年|注=regent for Pelops',
+		'/Nabis|-206~|:CE|傳說|精=年|準=年|注=first regent for Pelops, then usurper, claiming descent from the Eurypontid king Demaratus',
+		'/Laconicus|-192~|:CE|傳說|精=年|準=年|注=last known king of Sparta from Heraclid dynasty',
+// The Achaean League annexed Sparta in 192 BC.
 
 ]).minute_offset = 3 * 60;
 
@@ -4313,8 +4469,8 @@ CeL.era.pass_on = {
 		'/Urhi-Tesub|-1272~|:CE|疑|精=年|準=年|關係=son|ruler=Mursili III',
 		'/Hattusili III|-1267~|:CE|疑|精=年|準=年|關係=uncle',
 		'/Tudhaliya IV|-1237~|:CE|疑|精=年|準=年|關係=son',
-		'/Kurunta|-1228|:CE|疑|精=年|準=年|關係=cousin',
-		'/Tudhaliya IV|-1227~|:CE|疑|精=年|準=年|關係=cousin|注=2nd period as king',
+		'/Kurunta|-1228~|:CE|疑|精=年|準=年|關係=cousin',
+		'/Tudhaliya IV|-1227~|:CE|疑|精=年|準=年|關係=cousin|注=2nd period as king 復位',
 		'/Arnuwanda III|-1209~|:CE|疑|精=年|準=年|關係=son',
 		'/Suppiluliuma II|-1207~-1178|:CE|疑|精=年|準=年|關係=brother',
 
