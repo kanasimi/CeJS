@@ -3890,15 +3890,16 @@ CeL.era.pass_on = {
 ]).minute_offset = 3 * 60;
 
 // ---------------------------------------------------------------------//
+// Ancient Greece 古希臘
+// https://en.wikipedia.org/wiki/Lists_of_rulers_of_Greece
 
-// Ancient Greek: Athens
+(CeL.era.pass_on.countries.Greece = [
 
-(CeL.era.pass_on.countries.Ἀθῆναι = [
-
+		// Ancient Greek: Athens
 		// https://en.wikipedia.org/wiki/List_of_kings_of_Athens
 
 		// Erechtheid dynasty
-		'Erechtheid/Cecrops I|-1556~|:CE|傳說|精=年|準=年',
+		'Erechtheid/Cecrops I|-1556~|:CE|傳說|精=年|準=年|時期=Ἀθῆναι',
 		'/Cranaus|-1506~|:CE|傳說|精=年|準=年',
 		'/Amphictyon|-1497~|:CE|傳說|精=年|準=年',
 		'/Erichthonius|-1487~|:CE|傳說|精=年|準=年',
@@ -3909,25 +3910,21 @@ CeL.era.pass_on = {
 		'/Aegeus|-1282~|:CE|傳說|精=年|準=年|注=Construction of Trojan Walls by Poseidon, Apollo and the mortal Aeacus (c. 1282 BC)',
 		'/Theseus|-1234~|:CE|傳說|精=年|準=年',
 		'/Menestheus|-1205~|:CE|傳說|精=年|準=年|注=Trojan War and the Sack of Troy (c. 1183 BC)',
-		'/Demophon|-1183~|:CE|傳說|精=年|準=年', '/Oxyntes|-1150~|:CE|傳說|精=年|準=年',
+		'/Demophon|-1183~|:CE|傳說|精=年|準=年',
+		'/Oxyntes|-1150~|:CE|傳說|精=年|準=年',
 		'/Apheidas|-1136~|:CE|傳說|精=年|準=年',
 		'/Thymoetes|-1135~-1127|:CE|傳說|精=年|準=年',
 
 		// Melanthid dynasty
-		'Melanthid/Melanthus|-1126~|:CE|傳說|精=年|準=年',
+		'Melanthid/Melanthus|-1126~|:CE|傳說|精=年|準=年|時期=Ἀθῆναι',
 		'/Codrus|-1089~-1068|:CE|傳說|精=年|準=年',
 
-]).minute_offset = 3 * 60;
+		// ------------------------------------------------
 
-// ---------------------------------------------------------------------//
-
-// Ancient Greek: Sparta
-
-(CeL.era.pass_on.countries.Σπάρτη = [
-
+		// Ancient Greek: Sparta
 		// https://en.wikipedia.org/wiki/List_of_kings_of_Sparta
 		// Agiad dynasty
-		'Agiad/Eurysthenes|-930~|:CE|傳說|精=年|準=年|注=Return of the Heracleidae',
+		'Agiad/Eurysthenes|-930~|:CE|傳說|精=年|準=年|時期=Σπάρτη|注=Return of the Heracleidae',
 		'/Agis I|-930~|:CE|傳說|精=年|準=年|注=Subjugated the Helots',
 		'/Echestratus|-900~|:CE|傳說|精=年|準=年|注=Expelled the Cynurensians[n 4] that were in power.',
 		'/Labotas[n 5]|-870~|:CE|傳說|精=年|準=年',
@@ -3960,7 +3957,7 @@ CeL.era.pass_on = {
 		'/Cleomenes III|-235~-222|:CE|傳說|精=年|準=年',
 
 		// Eurypontid dynasty
-		'Eurypontid/Procles|-930~|:CE|傳說|精=年|準=年|注=Return of the Heracleidae',
+		'Eurypontid/Procles|-930~|:CE|傳說|精=年|準=年|時期=Σπάρτη|注=Return of the Heracleidae',
 		'/Soos[n 7][7]|-890~|:CE|傳說|精=年|準=年|注=Son of Procles and father of Eurypon.',
 		'/Eurypon|-890~|:CE|傳說|精=年|準=年',
 		'/Prytanis|-860~|:CE|傳說|精=年|準=年',
@@ -3995,15 +3992,17 @@ CeL.era.pass_on = {
 		// Republic monarchy
 		// Sparta was a republic from 221 to 219 BC.
 		// The dual monarchy was restored in 219 BC.
-		'Republic Sparta/Agesipolis III|-219~-215|:CE|傳說|精=年|準=年|注=last Agiad, deposed by Lycurgus',
+		'Republic Sparta/Agesipolis III|-219~-215|:CE|傳說|精=年|準=年|時期=Σπάρτη|注=last Agiad, deposed by Lycurgus',
 		'/Lycurgus|-219~|:CE|傳說|精=年|準=年',
 		'/Pelops|-210~-206|:CE|傳說|精=年|準=年|注=son of Lycurgus and last king from either of the old dynasties',
 
 		// Tyrants
-		'Tyrants Sparta/Machanidas|-210~-207|:CE|傳說|精=年|準=年|注=regent for Pelops',
+		'Tyrants Sparta/Machanidas|-210~-207|:CE|傳說|精=年|準=年|時期=Σπάρτη|注=regent for Pelops',
 		'/Nabis|-206~|:CE|傳說|精=年|準=年|注=first regent for Pelops, then usurper, claiming descent from the Eurypontid king Demaratus',
 		'/Laconicus|-192~|:CE|傳說|精=年|準=年|注=last known king of Sparta from Heraclid dynasty',
 // The Achaean League annexed Sparta in 192 BC.
+
+// ------------------------------------------------
 
 ]).minute_offset = 3 * 60;
 
