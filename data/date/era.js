@@ -441,7 +441,7 @@ function module_code(library_namespace) {
 	// [ 紀年曆數, 起始日期名, 所參照之紀年或國家 ]
 	參照_PATTERN = /^(?:(.*?)=)?:(.+)$/,
 
-	// 可指示尚存疑/爭議資料，例如傳說時代之資料。
+	// 可指示尚存疑/爭議資料，例如傳說時代/神話之資料。
 	// https://en.wikipedia.org/wiki/Circa
 	// c., ca or ca. (also circ. or cca.), means "approximately" in
 	// several European languages including English, usually in
@@ -450,8 +450,9 @@ function module_code(library_namespace) {
 	// r. can be used to designate the ruling period of a person in
 	// dynastic power, to distinguish from his or her lifespan.
 	準確程度_ENUM = {
+		// 資料尚存有爭議或疑點
 		疑 : '尚存疑',
-		// 為傳說時代之資料
+		// 為傳說時代/神話之資料
 		傳說 : '傳說時代'
 	},
 
@@ -1988,7 +1989,11 @@ function module_code(library_namespace) {
 	// initialize era date.
 	function initialize_era_date() {
 		// IE 需要 .getTime()：IE8 以 new Date(Date object) 會得到 NaN！
-		var days, start_time = this.start.getTime(),
+		var days,
+		/**
+		 * {Date}本紀年的起始時間。
+		 */
+		start_time = this.start.getTime(),
 		// 當前年分之各月資料 cache。calendar_data[this year]。
 		this_year_data,
 		//
@@ -4127,6 +4132,7 @@ function module_code(library_namespace) {
 		var date_index = this.notes, tmp, tmp2;
 
 		if (!date_index) {
+			// 初始化 era.notes
 			date_index = this.notes
 			// do cache.
 			= library_namespace.null_Object();
@@ -4199,9 +4205,9 @@ function module_code(library_namespace) {
 			date.歲次 = library_namespace.to_stem_branch(tmp);
 
 			// 精密度至年。
-			if (this.精 && (date.精 = this.精) === '年')
+			if (this.精 && (date.精 = this.精) === '年') {
 				date.年 = this.歲名(date_index[0]);
-			else {
+			} else {
 				// 日本の暦注。
 
 				// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
@@ -4300,8 +4306,9 @@ function module_code(library_namespace) {
 
 	Object.assign(sign_note, {
 		// 預設會 copy 的紀年曆注。
+		// "精"會特別處理。
 		// 據: 根據/出典/原始參考文獻/資料引用來源/典拠。
-		copy_attributes : '據,準,曆法,君主名,表字,君主號,諱,諡,廟號,生,卒,在位,年號'.split(','),
+		copy_attributes : '據,準,疑,傳說,曆法,君主名,表字,君主號,諱,諡,廟號,生,卒,在位,年號'.split(','),
 		// 曆注, note
 		// 減輕負擔:要這些曆注的自己算。
 		notes : {
@@ -4392,7 +4399,8 @@ function module_code(library_namespace) {
 			return date;
 		}
 
-		library_namespace.error('parse_duration: 無法判別 [' + era + '] 之起訖時間！');
+		library_namespace.error('parse_duration: 無法判別 [' + era.toString()
+				+ '] 之起訖時間！');
 		// return date;
 	}
 
@@ -5365,7 +5373,8 @@ function module_code(library_namespace) {
 			} else if (options.extract_only)
 				起訖[1] = new Date(0);
 			else {
-				library_namespace.error('parse_era: 無法求得紀年[' + 紀年 + ']之結束時間！');
+				library_namespace.error('parse_era: 無法求得紀年[' + 紀年.toString()
+						+ ']之結束時間！');
 				return;
 			}
 
@@ -5549,6 +5558,7 @@ function module_code(library_namespace) {
 			// era.精=:歷史上這個時期曆法與公元的對照本來就無法追溯得精準至日，甚至曆法本身就不夠精準。
 			// era.準=:歷史上這個時期曆法與公元的對照應該非常精準，但是本數據庫的資料準確程度不足。
 			// era.疑=:歷史上這個時期曆法與公元的對照應該非常精準，本數據庫的資料尺度標示也很精準，但是本數據庫的資料實際上存在疑問、可能不準確。
+			// era.傳說=:為傳說時代/神話之資料
 
 			// 處理 accuracy/準度/誤差/正確度。
 			if (!last_era_data.準)
@@ -5762,7 +5772,9 @@ function module_code(library_namespace) {
 		//
 		紀年 = era_list[era_index];
 
-		if ((紀年.精 || 紀年.準 || 紀年.疑) && (tmp = options && options.尋精準)) {
+		if ((紀年.精 || 紀年.準
+		// 準確程度_ENUM
+		|| 紀年.疑 || 紀年.傳說) && (tmp = options && options.尋精準)) {
 			tmp = Math.max(era_index - Math.max(2, tmp | 0), 0);
 			for (date_index = era_index; date_index > tmp
 			// 使用這方法不能保證無漏失，應該使用 (紀年.contemporary)。
@@ -5897,9 +5909,11 @@ function module_code(library_namespace) {
 						return this.join('');
 					};
 					// add properties needed.
-					if (era.疑) {
-						// 特別標示存在疑問、不準確的紀年。
-						name.疑 = era.疑;
+					for ( var 準確程度 in 準確程度_ENUM) {
+						if (era[準確程度]) {
+							// 特別標示存在疑問、不準確的紀年。
+							name[準確程度] = era[準確程度];
+						}
 					}
 					// 為需要以 space 間隔之紀元名添加 space。
 					if (NEED_SPLIT_POSTFIX.test(name))
@@ -7840,10 +7854,13 @@ function module_code(library_namespace) {
 			//
 			+ era_date.共存紀年.map(function(era_date) {
 				var era_string = era_date.toString();
-				if (era_date.疑) {
+				// 準確程度_ENUM
+				if (era_date.疑 || era_date.傳說) {
 					return '<span style="color:#888;" title="存在疑問、不準確的紀年">'
+					//
+					+ era_string.toString() + '<sub>('
 					// 特別標示存在疑問、不準確的紀年。
-					+ era_string.toString() + '<sub>(疑)</sub></span>';
+					+ (era_date.疑 ? '疑' : '傳說') + ')</sub></span>';
 				}
 				return era_string;
 			}).join(date));
