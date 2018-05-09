@@ -33,6 +33,7 @@ Runs untrusted code securely https://github.com/patriksimek/vm2
  *      https://github.com/eight04/ComicCrawler
  *      https://github.com/wellwind/8ComicDownloaderElectron
  *      https://github.com/Arachnid-27/Cimoc
+ *      https://github.com/qq573011406/KindleHelper
  * 
  * @since 2016/10/30 21:40:6
  * @since 2016/11/1 23:15:16 正式運用：批量下載腾讯漫画 qq。
@@ -376,6 +377,7 @@ function module_code(library_namespace) {
 		// 重新搜尋。default:false
 		// research : false,
 
+		// TODO: .heif
 		image_types : {
 			jpg : true,
 			jpeg : true,
@@ -420,6 +422,8 @@ function module_code(library_namespace) {
 			|| status.includes(matched = '全文完')) {
 				return matched;
 			}
+
+			// 已停更
 		},
 		is_finished : function(work_data) {
 			var status_list = library_namespace.is_Object(work_data) ? work_data.status
@@ -2032,6 +2036,7 @@ function module_code(library_namespace) {
 		}
 		chapter_list.push(chapter_data);
 	}
+	// set work_data.inverted_order = true;
 	// this.reverse_chapter_list_order(work_data);
 	function reverse_chapter_list_order(work_data) {
 		var chapter_list = work_data.chapter_list;
@@ -2039,8 +2044,10 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// 轉成由舊至新之順序。
-		chapter_list.reverse();
+		if (chapter_list.length > 1) {
+			// 轉成由舊至新之順序。
+			chapter_list.reverse();
+		}
 
 		if (work_data.chapter_list.part_NO >= 1) {
 			// 調整 NO
@@ -2184,6 +2191,8 @@ function module_code(library_namespace) {
 					to_remove : []
 				});
 				if (node_fs.existsSync(images_archive.archive_file_path)) {
+					// detect if images archive file has existed.
+					images_archive.file_existed = true;
 					process.stdout.write('Reading ' + images_archive.file_name
 							+ '...\r');
 					images_archive.info();
@@ -2581,8 +2590,9 @@ function module_code(library_namespace) {
 					}
 					library_namespace.remove_directory(chapter_directory);
 				} else {
+					process.stdout.write(
 					// create/update image archive: 漫畫下載完畢後壓縮圖像檔案。
-					process.stdout.write('Update ['
+					(images_archive.file_existed ? 'Update' : 'Create') + ' ['
 					// images_archive.archive_file_path
 					+ images_archive.file_name + ']...\r');
 					images_archive.update(chapter_directory, {
@@ -3005,6 +3015,7 @@ function module_code(library_namespace) {
 		if ((!Array.isArray(ebook_files) || !ebook_files.includes('mimetype'))
 				// 若是沒有cache，但是有舊的epub檔，那麼就將之解壓縮。
 				// 其用意是為了保留媒體檔案與好的舊章節，預防已經無法取得。
+				// 由於這個動作，當舊的電子書存在時將不會清場。若有必要清場（如太多冗贅），須自行將舊電子書刪除。
 				&& library_namespace.file_exists(ebook_file_path[0]
 						+ ebook_file_path[1])) {
 			var ebook_archive = new library_namespace.storage.archive(
@@ -3161,6 +3172,7 @@ function module_code(library_namespace) {
 				return contents;
 			}
 		};
+		// library_namespace.log('file_title: ' + file_title);
 
 		item = ebook.add(item_data, item);
 
