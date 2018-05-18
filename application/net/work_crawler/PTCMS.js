@@ -120,6 +120,11 @@ function module_code(library_namespace) {
 			// 由 meta data 取得作品資訊。
 			exact_work_data(work_data, html);
 
+			// 有時會502，需要重新再擷取一次。
+			if (work_data.title === '502 Bad Gateway') {
+				return this.REGET_PAGE;
+			}
+
 			if (/^\d{1,2}-\d{1,2}$/.test(work_data.last_update)) {
 				// e.g., 07-01 → 2017-07-01
 				work_data.last_update = (new Date).getFullYear() + '-'
@@ -194,13 +199,21 @@ function module_code(library_namespace) {
 			this.check_next_chapter(work_data, chapter_NO, html,
 					this.PATTERN_next_chapter);
 
-			var chapter_data = work_data.chapter_list[chapter_NO - 1];
+			var chapter_data = work_data.chapter_list[chapter_NO - 1],
+			//
+			sub_title = get_label(html.between('<h1>', '</h1>'))
+			// || get_label(html.between('<H1>', '</H1>'))
+			// || chapter_data.title
+			;
+
+			// 88dus 有時會502，需要重新再擷取一次。
+			if (sub_title === '502 Bad Gateway') {
+				return this.REGET_PAGE;
+			}
+
 			this.add_ebook_chapter(work_data, chapter_NO, {
 				title : chapter_data.part_title,
-				sub_title : get_label(html.between('<h1>', '</h1>'))
-				// || get_label(html.between('<H1>', '</H1>'))
-				// || chapter_data.title
-				,
+				sub_title : sub_title,
 				text : (html.between('<div id="content">', '</div>')
 				// 去除掉廣告。
 				// e.g., 88dushu

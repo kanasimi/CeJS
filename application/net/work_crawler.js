@@ -74,7 +74,7 @@ if (typeof CeL === 'function') {
 		+ '|interact.DOM.'
 		// for Date.prototype.format()
 		+ '|data.date.'
-		// CeL.character.load(), 僅在有需要設定this.charset時才需要載入。
+		// CeL.character.load(), 僅在要設定 this.charset 時才需要載入。
 		+ '|data.character.'
 		// for .detect_HTML_language(), .time_zone_of_language()
 		+ '|application.locale.'
@@ -658,15 +658,16 @@ function module_code(library_namespace) {
 		return encodeURIComponent(string);
 	};
 
-	function full_URL_of_path(url, data) {
+	function full_URL_of_path(url, base_data) {
 		if (typeof url === 'function') {
-			url = url.call(this, data);
-		} else if (data) {
-			data = encode_URI_component(data, url.charset || this.charset);
+			url = url.call(this, base_data);
+		} else if (base_data) {
+			base_data = encode_URI_component(base_data, url.charset
+					|| this.charset);
 			if (url.URL) {
-				url.URL += data
+				url.URL += base_data
 			} else {
-				url += data;
+				url += base_data;
 			}
 		}
 		if (typeof url === 'string' && !url.includes('://')) {
@@ -1267,9 +1268,9 @@ function module_code(library_namespace) {
 			return library_namespace.HTML_to_Unicode(
 					html.replace(/\s*<br(?:\/| [^<>]*)?>/ig, '\n').replace(
 							/<[^<>]+>/g, '')
-					// 起点中文网 以"\r"為主。
+					// incase 以"\r"為主。 e.g., 起点中文网
 					.replace(/\r\n?/g, '\n')).trim()
-			// .replace(/\s+/g, ' ').replace(/\s?\n+/g, '\n')
+			// .replace(/\s{2,}/g, ' ').replace(/\s?\n+/g, '\n')
 			;
 		}
 	}
@@ -1349,7 +1350,7 @@ function module_code(library_namespace) {
 				work_data = _this.parse_work_data(html, get_label,
 						exact_work_data);
 				if (work_data === _this.REGET_PAGE) {
-					// 需要重新讀取頁面。
+					// 需要重新讀取頁面。e.g., 502
 					library_namespace.log('process_work_data: Reget page...');
 					get_work_page();
 					return;
@@ -2377,6 +2378,14 @@ function module_code(library_namespace) {
 					// = base_URL + encodeURI(CeL.HTML_to_Unicode(url))
 					chapter_data = _this.parse_chapter_data(html, work_data,
 							get_label, chapter_NO);
+					if (chapter_data === _this.REGET_PAGE) {
+						// 需要重新讀取頁面。e.g., 502
+						library_namespace
+								.log('process_chapter_data: Reget page...');
+						reget_chapter_data();
+						return;
+					}
+
 				} catch (e) {
 					library_namespace.error(_this.id
 							+ ': Error on chapter url: ' + chapter_URL);
@@ -2462,11 +2471,15 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (work_data.reget_chapter) {
+			function reget_chapter_data() {
 				get_URL(chapter_URL, pre_parse_chapter_data, _this.charset,
 						null, Object.assign({
 							error_retry : _this.MAX_ERROR_RETRY
 						}, _this.get_URL_options));
+			}
+
+			if (work_data.reget_chapter) {
+				reget_chapter_data();
 
 			} else {
 				// 警告: reget_chapter=false 僅適用於小說之類不取得圖片的情形，
