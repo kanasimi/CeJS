@@ -1399,6 +1399,30 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// modify from CeL.application.net.work_crawler
+		function full_URL_of_path(url, base_URL) {
+			if (!url.includes('://')) {
+				if (url.startsWith('/')) {
+					if (url.startsWith('//')) {
+						// 借用 base_URL 之 protocol。
+						return base_URL.match(/^(https?:)\/\//)[1] + url;
+					}
+					// url = url.replace(/^[\\\/]+/g, '');
+					// 只留存 base_URL 之網域名稱。
+					return base_URL.match(/^https?:\/\/[^\/]+/)[0] + url;
+				} else {
+					// 去掉開頭的 "./"
+					url = url.replace(/^\.\//, '');
+				}
+				if (url.startsWith('.')) {
+					library_namespace.warn('full_URL_of_path: Invalid url: '
+							+ url);
+				}
+				url = base_URL + url;
+			}
+			return url;
+		}
+
 		function check_text(contents) {
 			contents = normailize_contents(contents);
 
@@ -1414,14 +1438,17 @@ function module_code(library_namespace) {
 					if (!matched || attribute_name.toLowerCase() !== 'src'
 					// skip web page, do not modify the link of web pages
 					&& (matched[3] || /\.html?$/i.test(matched[2]))) {
-						library_namespace.log('check_text: Skip web-page resource: ' + url
-								+ '\n of ' + item_data.file);
+						library_namespace
+								.log('check_text: Skip web-page resource: '
+										+ url + '\n of ' + item_data.file);
 						return all;
 					}
 					var file_name = matched[2],
 					// links.push的href檔名在之後add_chapter()時可能會被改變。因此在xhtml文件中必須要先編碼一次。
 					href = _this.directory.media
 							+ encode_file_name.call(_this, file_name);
+					url = full_URL_of_path(url, item_data.base_URL
+							|| item_data.url);
 					links.push({
 						url : url,
 						href : _this.directory.media + file_name,
