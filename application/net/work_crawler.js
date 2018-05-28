@@ -417,10 +417,13 @@ function module_code(library_namespace) {
 
 			if (status.includes(matched = '完結済')
 			// http://book.qidian.com/
-			|| status.includes(matched = '完本')
-			// ck101
-			|| status.includes(matched = '全文完')) {
+			|| status.includes(matched = '完本')) {
 				return matched;
+			}
+
+			// ck101: 全文完, 全書完
+			if (/全[文書]完/.test(status)) {
+				return status;
 			}
 
 			// 已停更
@@ -673,9 +676,12 @@ function module_code(library_namespace) {
 		if (typeof url === 'string' && !url.includes('://')) {
 			if (url.startsWith('/')) {
 				if (url.startsWith('//')) {
+					// 借用 base_URL 之 protocol。
 					return this.base_URL.match(/^(https?:)\/\//)[1] + url;
 				}
-				url = url.replace(/^[\\\/]+/g, '');
+				// url = url.replace(/^[\\\/]+/g, '');
+				// 只留存 base_URL 之網域名稱。
+				return this.base_URL.match(/^https?:\/\/[^\/]+/)[0] + url;
 			} else {
 				// 去掉開頭的 "./"
 				url = url.replace(/^\.\//, '');
@@ -1266,7 +1272,8 @@ function module_code(library_namespace) {
 	function get_label(html) {
 		if (html) {
 			return library_namespace.HTML_to_Unicode(
-					html.replace(/\s*<br(?:\/| [^<>]*)?>/ig, '\n').replace(
+					html.replace(/<!--[\s\S]*?-->/g, '').replace(
+							/\s*<br(?:\/| [^<>]*)?>/ig, '\n').replace(
 							/<[^<>]+>/g, '')
 					// incase 以"\r"為主。 e.g., 起点中文网
 					.replace(/\r\n?/g, '\n')).trim()
@@ -1291,7 +1298,9 @@ function module_code(library_namespace) {
 		var matched;
 		// matched: [ all, key, value ]
 		while (matched = PATTERN_work_data.exec(html)) {
-			var key = get_label(matched[1]).replace(/[:：︰\s]+$/, ''), value;
+			// delete matched.input;
+			// console.log(matched);
+			var key = get_label(matched[1]).replace(/[:：︰\s]+$/, '').trim(), value;
 			// default: do not overwrite
 			if (key && (overwrite || !work_data[key])
 			//
@@ -1723,7 +1732,8 @@ function module_code(library_namespace) {
 				|| chapter_added >= _this.recheck
 				// assert: _this.recheck === 'changed'
 				: chapter_added !== 0
-				// TODO: check .last_update
+				// TODO: check .last_update , .latest_chapter
+				// 檢查上一次下載的章節名稱而不只是章節數量。
 				) {
 					library_namespace.debug('作品變更過 / midified，且符合需要更新的條件。');
 					library_namespace
@@ -1749,7 +1759,7 @@ function module_code(library_namespace) {
 					library_namespace
 							.log(_this.id
 									+ ': 章節數量'
-									+ (chapter_added === 0 ? '無變化，皆為 '
+									+ (chapter_added === 0 ? '無變化，共 '
 											+ work_data.chapter_count
 											+ ' '
 											+ (work_data.chapter_unit || _this.chapter_unit)
