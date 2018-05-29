@@ -3175,6 +3175,7 @@ function module_code(library_namespace) {
 		// language conversion -{}- 以後來使用的為主。
 		// [[w:zh:H:Convert]], [[mw:Help:Magic words]]
 		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
+		// TODO: <source></source>內之-{}-無效。
 		wikitext = wikitext.replace_till_stable(/-{(.*?)}-/g, function(all,
 				parameters) {
 			// -{...}- 自 end_mark 向前回溯。
@@ -3192,12 +3193,12 @@ function module_code(library_namespace) {
 
 			// language fallback :[[mw:Localisation statistics]]
 			// (zh-hk, zh-mo, zh-tw) → zh-hant (→ zh?)
-			// (zh-cn, zh-sg) → zh-hans (→ zh?)
-			// no zh-my?
+			// (zh-cn, zh-sg, zh-my) → zh-hans (→ zh?)
+			// [[Wikipedia_talk:地区词处理#zh-my|馬來西亞簡體華語]]
 
 			var conversion = library_namespace.null_Object(),
 			// [, last conversion, this language token, this language code ]
-			PATTERN = /(^|.*?);(\s*(zh-(?:cn|tw|hk|mo|sg|hant|hans)):\s*)/g,
+			PATTERN = /(^|.*?);(\s*(zh-(?:cn|tw|hk|mo|sg|my|hant|hans)):\s*)/g,
 			//
 			matched, last_matched, last_index = 0,
 			//
@@ -9914,7 +9915,7 @@ function module_code(library_namespace) {
 		}
 		if (!name || !password) {
 			library_namespace
-					.warn('wiki_API.login: User name or password not setted. Stop login.');
+					.warn('wiki_API.login: The user name or password is not provided. Abort login.');
 			// console.trace('Stop login');
 			return session;
 		}
@@ -10713,6 +10714,10 @@ function module_code(library_namespace) {
 	 * full text search<br />
 	 * search wikitext: using prefix "insource:". e.g.,
 	 * https://www.mediawiki.org/w/api.php?action=query&list=search&srwhat=text&srsearch=insource:abc+def
+	 * 
+	 * TODO: [[:en:Template:Regex]] "hastemplate:", "incategory:", "intitle:",
+	 * "linksto:", "morelike:", "prefer-recent:", "boost-templates:",
+	 * "namespace:"
 	 * 
 	 * @example <code>
 
