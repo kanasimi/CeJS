@@ -207,7 +207,9 @@ function module_code(library_namespace) {
 			;
 
 			// 88dus 有時會502，需要重新再擷取一次。
-			if (sub_title === '502 Bad Gateway') {
+			if (sub_title === '502 Bad Gateway'
+			// 630book 有時會503，需要重新再擷取一次。
+			|| sub_title === '503 Service Unavailable') {
 				return this.REGET_PAGE;
 			}
 
