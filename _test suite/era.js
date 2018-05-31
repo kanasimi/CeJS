@@ -1847,7 +1847,6 @@ function input_era(key) {
 }
 
 var 準確程度_MESSAGE = {
-	疑 : '尚存疑',
 	傳說 : '為傳說時代之資料'
 }, J_translate = {
 	H : '平成',
@@ -1891,8 +1890,10 @@ function add_contemporary(era, output_numeral) {
 	var matched, node = output_numeral === 'Chinese' ? CeL
 			.to_Chinese_numeral(era[1].toString()) : era[1].toString();
 	node = {
-		a : era[1].疑 ? {
-			span : node + '<sub>(疑)</sub>',
+		a : era[1].疑 || era[1].傳說 ? {
+			span : node + '<sub>('
+			// 特別標示存在疑問、不準確的紀年。
+			+ (era[1].疑 ? '疑' : '傳說') + ')</sub>',
 			R : '存在疑問、不準確的紀年',
 			S : 'color: #777;'
 		} : node,
@@ -2189,11 +2190,13 @@ function translate_era(era) {
 			}, true);
 		}
 
-		if (date.準 || date.精) {
+		if (date.準 || date.精 || date.傳說) {
 			if (!Array.isArray(output))
 				output = [ output ];
 			output.unshift({
-				em : [ '此輸出值', 準確程度_MESSAGE[date.準] || '僅約略準確至'
+				em : [ '此輸出值', date.疑 ? '尚存有爭議或疑點，' : '',
+				//
+				date.傳說 ? 準確程度_MESSAGE['傳說'] : '僅約略準確至'
 				//
 				+ (date.準 || date.精)
 				//
@@ -4098,7 +4101,7 @@ function affairs() {
 			a : {
 				T : '古埃及曆'
 			},
-			R : 'Ancient civil Egyptian calendar.'
+			R : 'Ancient civil Egyptian calendar. 每年皆為準確的365日。'
 			//
 			+ '\nThe first 6th epagomenal day is 22/8/29 BCE.'
 			//
