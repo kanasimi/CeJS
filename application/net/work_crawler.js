@@ -368,7 +368,7 @@ function module_code(library_namespace) {
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
 		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。否則只會自上次下載過的章節接續下載。
 		// recheck : true,
-		// 明確指定自上次下載過的章節接續下載。
+		// recheck=false:明確指定自上次下載過的章節接續下載。
 		// recheck : false,
 		//
 		// 當無法取得 chapter 資料時，直接嘗試下一章節。在手動+監視下 recheck 時可併用此項。 default:false
@@ -506,7 +506,11 @@ function module_code(library_namespace) {
 			regenerate : 'boolean',
 			reget_chapter : 'boolean',
 			recheck : 'boolean|string',
-			research : 'boolean'
+			research : 'boolean',
+
+			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
+			// 一般僅使用於命令列設定。default:1
+			start_index : 'number'
 		},
 
 		set_agent : set_agent,
@@ -761,8 +765,10 @@ function module_code(library_namespace) {
 			// convert to next index
 			this_index++;
 			work_title = work_title.trim();
-			if (!work_title) {
-				// 直接進入下一個 work_title。
+			if (!work_title
+			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
+			|| this.start_index > 0 && this_index < this.start_index) {
+				// 直接進入下一個作品 work_title。
 				get_next_work();
 				return;
 			}
@@ -1360,8 +1366,17 @@ function module_code(library_namespace) {
 						exact_work_data);
 				if (work_data === _this.REGET_PAGE) {
 					// 需要重新讀取頁面。e.g., 502
-					library_namespace.log('process_work_data: Reget page...');
-					get_work_page();
+					process.stdout.write('process_work_data: '
+							+ (_this.chapter_time_interval > 0 ? 'Wait '
+									+ library_namespace.age_of(0,
+											_this.chapter_time_interval)
+									+ ' to ' : '') + 'reget page [' + work_URL
+							+ ']...\r');
+					if (_this.chapter_time_interval > 0) {
+						setTimeout(get_work_page, _this.chapter_time_interval);
+					} else {
+						get_work_page();
+					}
 					return;
 				}
 
@@ -2390,9 +2405,18 @@ function module_code(library_namespace) {
 							get_label, chapter_NO);
 					if (chapter_data === _this.REGET_PAGE) {
 						// 需要重新讀取頁面。e.g., 502
-						library_namespace
-								.log('process_chapter_data: Reget page...');
-						reget_chapter_data();
+						process.stdout.write('process_chapter_data: '
+								+ (_this.chapter_time_interval > 0 ? 'Wait '
+										+ library_namespace.age_of(0,
+												_this.chapter_time_interval)
+										+ ' to ' : '') + 'reget page ['
+								+ chapter_URL + ']...\r');
+						if (_this.chapter_time_interval > 0) {
+							setTimeout(reget_chapter_data,
+									_this.chapter_time_interval);
+						} else {
+							reget_chapter_data();
+						}
 						return;
 					}
 
