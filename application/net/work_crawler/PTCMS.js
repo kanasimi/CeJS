@@ -120,8 +120,12 @@ function module_code(library_namespace) {
 			// 由 meta data 取得作品資訊。
 			exact_work_data(work_data, html);
 
-			// 有時會502，需要重新再擷取一次。
-			if (work_data.title === '502 Bad Gateway') {
+			// 有時會 502，需要重新再擷取一次。
+			if (work_data.title === '502 Bad Gateway'
+			// 630book 有時會 503，需要重新再擷取一次。
+			|| work_data.title === '503 Service Unavailable'
+			// 630book 有時會 "500 - 内部服务器错误。"
+			|| work_data.title === '服务器错误') {
 				return this.REGET_PAGE;
 			}
 
@@ -204,23 +208,41 @@ function module_code(library_namespace) {
 			sub_title = get_label(html.between('<h1>', '</h1>'))
 			// || get_label(html.between('<H1>', '</H1>'))
 			// || chapter_data.title
-			;
+			, text = (html.between('<div id="content">', '</div>')
+			// 去除掉廣告。
+			// e.g., 88dushu
+			|| html.between('<div class="yd_text2">', '</div>')).replace(
+					/<script[^<>]*>[^<>]*<\/script>/g, ''),
+			//
+			KEY_interval_cache = 'original_chapter_time_interval';
 
-			// 88dus 有時會502，需要重新再擷取一次。
+			// TODO: 81xsw 有時會 403，需要重新再擷取一次。
+
+			// 88dus 有時會 502，需要重新再擷取一次。
 			if (sub_title === '502 Bad Gateway'
-			// 630book 有時會503，需要重新再擷取一次。
-			|| sub_title === '503 Service Unavailable') {
+			// 630book 有時會 503，需要重新再擷取一次。
+			|| sub_title === '503 Service Unavailable'
+			// 630book 有時會 "500 - 内部服务器错误。"
+			|| sub_title === '服务器错误' && text.length < 2000) {
+				this[KEY_interval_cache] = this.chapter_time_interval;
+				// 當網站不允許太過頻繁的訪問/access時，可以設定下載之前的等待時間(ms)。
+				this.chapter_time_interval = 10 * 1000;
 				return this.REGET_PAGE;
+			}
+			if (KEY_interval_cache in this) {
+				// recover time interval
+				if (this[KEY_interval_cache] > 0) {
+					this.chapter_time_interval = this[KEY_interval_cache];
+				} else {
+					delete this.chapter_time_interval;
+				}
+				delete this[KEY_interval_cache];
 			}
 
 			this.add_ebook_chapter(work_data, chapter_NO, {
 				title : chapter_data.part_title,
 				sub_title : sub_title,
-				text : (html.between('<div id="content">', '</div>')
-				// 去除掉廣告。
-				// e.g., 88dushu
-				|| html.between('<div class="yd_text2">', '</div>')).replace(
-						/<script[^<>]*>[^<>]*<\/script>/g, '')
+				text : text
 			});
 		}
 	};

@@ -3999,7 +3999,7 @@ CeL.era.pass_on = {
 		// Tyrants
 		'Tyrants Sparta/Machanidas|-210~-207|:CE|傳說|精=年|準=年|時期=Σπάρτη|注=regent for Pelops',
 		'/Nabis|-206~|:CE|傳說|精=年|準=年|注=first regent for Pelops, then usurper, claiming descent from the Eurypontid king Demaratus',
-		'/Laconicus|-192~|:CE|傳說|精=年|準=年|注=last known king of Sparta from Heraclid dynasty',
+		'/Laconicus|-192~-192|:CE|傳說|精=年|準=年|注=last known king of Sparta from Heraclid dynasty',
 // The Achaean League annexed Sparta in 192 BC.
 
 // ------------------------------------------------
