@@ -777,7 +777,9 @@ function module_code(library_namespace) {
 
 		amount = to_Chinese_numeral(amount, true)
 		// 銀行習慣用法，零可以不用寫。
-		.replace(/([仟萬億兆京垓秭穰溝澗正載極])零/g, '$1');
+		.replace(/([仟萬億兆京垓秭穰溝澗正載極])零/g, '$1')
+		// 100000 → 壹拾萬圓整
+		.replace(/^拾/, '壹拾');
 
 		return '新臺幣' + (amount.includes('點') ? amount.replace(
 		//
@@ -785,7 +787,9 @@ function module_code(library_namespace) {
 			return '圓' + $1 + '角'
 			//
 			+ ($2 ? $2 + '分' + ($3 ? $3 + '文' : '') : '');
-		}) : amount + '圓整');
+		}) :
+		// 在“元”(或“圓”)之後、應寫“整”(或“正”)字
+		amount + '圓整');
 	}
 
 	_// JSDT:_module_
