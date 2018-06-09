@@ -395,7 +395,7 @@ function module_code(library_namespace) {
 		images_archive_extension : 'zip',
 
 		image_path_to_url : image_path_to_url,
-		// 提取出引數（如 URL）中的作品ID 以回傳。
+		// 規範 work id 的正規模式；提取出引數（如 URL）中的作品id 以回傳。
 		extract_work_id : function(work_information) {
 			// default: accept numerals only
 			return library_namespace.is_digits(work_information)
@@ -484,6 +484,9 @@ function module_code(library_namespace) {
 			chapter_filter : 'string',
 			// 將開始/接續下載的章節編號。必須要配合 .recheck。
 			start_chapter : 'number',
+			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
+			// 一般僅使用於命令列設定。default:1
+			start_index : 'number',
 			MIN_LENGTH : 'number',
 			// 容許錯誤用的相關操作設定。
 			MAX_ERROR_RETRY : 'number',
@@ -506,11 +509,7 @@ function module_code(library_namespace) {
 			regenerate : 'boolean',
 			reget_chapter : 'boolean',
 			recheck : 'boolean|string',
-			research : 'boolean',
-
-			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
-			// 一般僅使用於命令列設定。default:1
-			start_index : 'number'
+			research : 'boolean'
 		},
 
 		set_agent : set_agent,
@@ -1275,6 +1274,7 @@ function module_code(library_namespace) {
 		}, this.get_URL_options));
 	}
 
+	// node.innerText
 	function get_label(html) {
 		if (html) {
 			return library_namespace.HTML_to_Unicode(
@@ -1363,7 +1363,9 @@ function module_code(library_namespace) {
 			try {
 				// 作品詳情。
 				work_data = _this.parse_work_data(html, get_label,
-						exact_work_data);
+						exact_work_data
+				// , { id : work_id, title : work_title, url : work_URL }
+				);
 				if (work_data === _this.REGET_PAGE) {
 					// 需要重新讀取頁面。e.g., 502
 					process.stdout.write('process_work_data: '
@@ -1424,7 +1426,13 @@ function module_code(library_namespace) {
 			process.title = '下載' + work_data.title + ' - 目次 @ ' + _this.id;
 			work_data.directory_name = library_namespace.to_file_name(
 			// 允許自訂作品目錄名/命名資料夾。
-			work_data.directory_name || work_data.id + ' ' + work_data.title
+			work_data.directory_name
+			// default 作品目錄名/命名資料夾。
+			|| (typeof work_data.directory_id === 'function'
+			// 自行指定作品放置目錄與 ebook 用的 work id。
+			&& work_data.directory_id() || work_data.id)
+			//
+			+ ' ' + work_data.title
 			// e.g., '.' + (new Date).format('%Y%2m%2d')
 			+ (work_data.directory_name_extension || ''));
 			// full directory path of the work.
@@ -1798,6 +1806,9 @@ function module_code(library_namespace) {
 					}
 
 				}
+
+			} else if (_this.start_chapter > Work_crawler.prototype.start_chapter) {
+				library_namespace.warn('設定 start_chapter 時，必須同時指定 recheck！');
 			}
 
 			if (!('reget_chapter' in work_data)) {
@@ -2970,7 +2981,7 @@ function module_code(library_namespace) {
 		// PTCMS default. e.g., "下一章 →"
 		// PATTERN_next_chapter: [ all, next chapter url ]
 		// e.g., <a href="//read.qidian.com/chapter/abc123">下一章</a>
-		/ href="([^<>"]+)"[^<>]*>下一[章页]/);
+		/ href=["']([^<>"']+)["'][^<>]*>下一[章页]/);
 		// console.log(chapter_NO + ': ' + next_url[1]);
 
 		if (next_chapter && next_url
@@ -3148,9 +3159,9 @@ function module_code(library_namespace) {
 
 		var language = work_data.language
 		// e.g., 'cmn-Hans-CN'
-		&& work_data.language.match(/^(ja|cmn)(?:$|[^a-z])/);
+		&& work_data.language.match(/^(ja|(?:zh-)?cmn)(?:$|[^a-z])/);
 		if (language) {
-			language = language[1];
+			language = language[1].replace(/^zh-cmn/, 'cmn');
 		}
 
 		var _this = this,
@@ -3195,7 +3206,7 @@ function module_code(library_namespace) {
 					// 日本語では行頭から一文字の字下げをする。
 					'$1　$2');
 				} else if (language) {
-					// assert: language: 中文
+					// assert: language: "cmn" (中文)
 					// TODO: 下載完畢後作繁簡轉換。
 					contents = contents.replace(PATTERN_PARAGRAPH_START_CMN,
 					// 中文每段落開頭空兩個字。
@@ -3400,7 +3411,10 @@ function module_code(library_namespace) {
 					? ' ' + work_data.chapter_count
 					//
 					+ (work_data.chapter_unit || this.chapter_unit) : '', '].',
-					work_data.id, '.epub' ].join('');
+					typeof work_data.directory_id === 'function'
+					// 自行指定作品放置目錄與 ebook 用的 work id。
+					&& work_data.directory_id() || work_data.id, '.epub' ]
+					.join('');
 		}
 		file_name = library_namespace.to_file_name(file_name);
 		// assert: PATTERN_ebook_file.test(file_name) === true
