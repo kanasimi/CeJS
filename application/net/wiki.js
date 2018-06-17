@@ -1514,8 +1514,15 @@ function module_code(library_namespace) {
 		// 遍歷 tokens
 		function traversal_tokens(_this, depth) {
 			function for_token(token, index) {
-				// console.log('token depth ' + depth + '/' + max_depth + ':');
-				// console.log(token);
+				if (false) {
+					console.log('token depth ' + depth + '/' + max_depth
+							+ (exit ? ' (exit)' : '') + ':');
+					console.log(token);
+				}
+				if (exit) {
+					// 直接跳出。
+					return true;
+				}
 
 				if (!type
 				// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
@@ -1566,6 +1573,10 @@ function module_code(library_namespace) {
 				// && type !== 'comment'
 				&& (!max_depth || depth < max_depth)) {
 					traversal_tokens(token, depth + 1);
+					if (exit) {
+						// 直接跳出。
+						return true;
+					}
 				}
 			}
 
@@ -1577,7 +1588,7 @@ function module_code(library_namespace) {
 					if (for_token(_this[index], index))
 						break;
 				}
-			} else if (!exit) {
+			} else {
 				// console.log(_this);
 				_this.some(for_token);
 			}
@@ -1589,6 +1600,7 @@ function module_code(library_namespace) {
 		return this;
 	}
 
+	// 直接跳出。
 	for_each_token.exit = [ 'for_each_token.exit: abort the operation' ];
 
 	// ------------------------------------------------------------------------
