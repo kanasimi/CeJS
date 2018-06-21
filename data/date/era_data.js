@@ -4480,16 +4480,17 @@ CeL.era.pass_on = {
 // 法國皇室 法國君主列表
 // https://fr.wikipedia.org/wiki/Liste_des_monarques_de_France
 // https://www.timetoast.com/timelines/les-monarques-de-france
+// https://fr.wikipedia.org/wiki/Liste_des_reines_et_imp%C3%A9ratrices_de_France
 
 // https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts
 // https://github.com/gtoubiana/acte
-// Clovis Iᵉʳ ˢᵗ
 (CeL.era.pass_on.countries.France = [
 
-		'Mérovingiens/Clovis Ier|481/6/26~|:CE|ruler=Clovis Iᵉʳ|朝代=Dynastie Mérovingienne;Merovingian dynasty',
+		// Clovis Iᵉʳ ˢᵗ
+		'Mérovingiens/Clovis Ier|481~|:CE|ruler=Clovis Iᵉʳ|朝代=Dynastie Mérovingienne;Merovingian dynasty',
 		// TODO: 資料還存有錯誤
-		'/Clodomir|511/11/27~|:CE',
-		'/Thierry Ier|524/6/25~|:CE|準=年',
+		'/Clodomir|511/11/27~524/6/25|:CE',
+		'/Thierry Ier|511/11/27~|:CE|準=年|ruler=Theuderic I',
 		'/Thibert Ier|534~|:CE|準=年',
 		'/Thibaut|548~555|:CE|準=年',
 		'/Childebert Ier|511~558/12/12|:CE|準=年',
@@ -4590,19 +4591,21 @@ CeL.era.pass_on = {
 
 // ---------------------------------------------------------------------//
 // 英國君主列表
-// https://en.wikipedia.org/wiki/List_of_British_monarchs
 
 (CeL.era.pass_on.countries.British = [
+		// TODO: https://en.wikipedia.org/wiki/List_of_English_monarchs
+		// TODO: https://en.wikipedia.org/wiki/List_of_Scottish_monarchs
 
-		'House of Stuart/Anne|1707/5/1~|:CE|配偶=1683/7/28 George of Denmark',
-		'House of Hanover/George I|1714/8/1~|:CE|配偶=1682/11/21 Sophia Dorothea of Celle',
+		// https://en.wikipedia.org/wiki/List_of_British_monarchs
+		'House of Stuart/Anne|1707/5/1~|:CE|配偶=1683/7/28 George of Denmark|時期=British',
+		'House of Hanover/George I|1714/8/1~|:CE|配偶=1682/11/21 Sophia Dorothea of Celle|時期=British',
 		'/George II|1727/6/11~|:CE|配偶=1705/8/22 Caroline of Ansbach',
 		'/George III|1760/10/25~|:CE|配偶=1761/9/8 Charlotte of Mecklenburg-Strelitz',
 		'/George IV|1820/1/29~|:CE|配偶=1785/9/15 Maria Fitzherbert;1795/4/8 Caroline of Brunswick',
 		'/William IV|1830/6/26~|:CE|配偶=1818/7/13 Adelaide of Saxe-Meiningen',
 		'/Victoria|1837/6/20~|:CE|配偶=1840/2/10 Albert, Prince Consort',
-		'Houses of Saxe-Coburg and Gotha/Edward VII|1901/1/22~|:CE|配偶=1863/3/10 Alexandra of Denmark',
-		'House of Windsor/George V|1910/5/6~|:CE|配偶=1893/7/6 Mary of Teck|注=House of Windsor since 1917',
+		'Houses of Saxe-Coburg and Gotha/Edward VII|1901/1/22~|:CE|配偶=1863/3/10 Alexandra of Denmark|時期=British',
+		'House of Windsor/George V|1910/5/6~|:CE|配偶=1893/7/6 Mary of Teck|注=House of Windsor since 1917|時期=British',
 		'/Edward VIII|1936/1/20~|:CE|配偶=1937/6/3 Wallis Simpson',
 		'/George VI|1936/12/11~|:CE|配偶=1923/4/26 Queen Elizabeth The Queen Mother',
 		'/Elizabeth II|1952/2/6~' + CeL.era.pass_on.last_day

@@ -6674,6 +6674,7 @@ function module_code(library_namespace) {
 					if (error === 'nochange') {
 						done++;
 						// 未經過 wiki 操作，於 wiki_API.edit 發現為[[WP:NULLEDIT|無改變]]的。
+						// 無更動 沒有變更 No modification made
 						nochange_count++;
 						error = gettext('no change');
 						result = 'nochange';
