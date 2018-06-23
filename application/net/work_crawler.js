@@ -2932,10 +2932,6 @@ function module_code(library_namespace) {
 				library_namespace.log(_this.id + ': '
 						+ _this.MESSAGE_RE_DOWNLOAD);
 				// console.log('error count: ' + image_data.error_count);
-				if (!_this.skip_error) {
-					library_namespace
-							.info('若錯誤持續發生，您可以設定 skip_error=true 來忽略圖像錯誤。');
-				}
 				if (contents && contents.length < _this.MIN_LENGTH
 				// 檔案有驗證過，只是太小時，應該不是 false。
 				&& verified_image !== false) {
@@ -2946,6 +2942,9 @@ function module_code(library_namespace) {
 							+ '待取得檔案後，自行更改檔名，去掉錯誤檔名後綴'
 							+ JSON.stringify(_this.EOI_error_postfix)
 							+ '以跳過此錯誤。');
+				} else if (!_this.skip_error) {
+					library_namespace
+							.info('若錯誤持續發生，您可以設定 skip_error=true 來忽略圖像錯誤。');
 				}
 				process.exit(1);
 			}
