@@ -18,12 +18,12 @@ parser [[WP:維基化]]
 https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
 https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
-https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 
+[[mw:Help:OAuth]]
+https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 
 Wikimedia REST API
 https://www.mediawiki.org/wiki/RESTBase
-
 
 https://zh.wikipedia.org/w/index.php?title=title&action=history&hilight=123,456
 
