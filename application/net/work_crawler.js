@@ -3167,7 +3167,7 @@ function module_code(library_namespace) {
 		//
 		chapter_data = work_data.chapter_list
 				&& work_data.chapter_list[chapter_NO - 1],
-		// 卷/集/幕/部/volume/part/book
+		// 卷篇集幕部/volume/part/book
 		part_title = data.title || chapter_data && chapter_data.part_title,
 		// 章節名稱 / 章節节回折篇話话頁页/chapter
 		chapter_title = data.sub_title || chapter_data
