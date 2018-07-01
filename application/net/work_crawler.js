@@ -326,7 +326,8 @@ function module_code(library_namespace) {
 				+ Work_crawler.HTML_extension,
 		report_file_JSON : 'report.json',
 
-		// default start chapter index.
+		// default start chapter index: 1.
+		// 將開始/接續下載的章節編號。必須要配合 .recheck。
 		start_chapter : 1,
 		// 是否重新取得每個所檢測的章節內容 chapter_page。
 		// 警告: reget_chapter=false 僅適用於小說之類不取得圖片的情形，
@@ -486,7 +487,7 @@ function module_code(library_namespace) {
 			start_chapter : 'number',
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
 			// 一般僅使用於命令列設定。default:1
-			start_index : 'number',
+			start_list_serial : 'number',
 			MIN_LENGTH : 'number',
 			// 容許錯誤用的相關操作設定。
 			MAX_ERROR_RETRY : 'number',
@@ -766,7 +767,8 @@ function module_code(library_namespace) {
 			work_title = work_title.trim();
 			if (!work_title
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
-			|| this.start_index > 0 && this_index < this.start_index) {
+			|| this.start_list_serial > 0
+					&& this_index < this.start_list_serial) {
 				// 直接進入下一個作品 work_title。
 				get_next_work();
 				return;
