@@ -2237,10 +2237,10 @@ TIMEZONE_OFFSET_VALUE = String_to_Date.default_offset * (ONE_DAY_LENGTH_VALUE / 
 //	full_moon: time value of full moon day of watat year
 // }
 Myanmar_cache = [ [], [] ],
-// Myanmar_month_days[ type : 0, 1, 2 ]
+// Myanmar_month_days[ watat : 0, 1, 2 ]
 // = [ days of month 1 (Tagu), days of month 2, ... ]
 Myanmar_month_days = [],
-// Myanmar_month_days_count[ type : 0, 1, 2 ]
+// Myanmar_month_days_count[ watat : 0, 1, 2 ]
 // = [ accumulated days of month 1 (Tagu), accumulated days of month 2, ... ]
 Myanmar_month_days_count = [],
 
@@ -2248,32 +2248,39 @@ Myanmar_month_days_count = [],
 // 1060: beginning of well-known (historical) Myanmar year
 // well-known exceptions
 Myanmar_adjust_watat = {
+	// Thandeikta (ME 1100 - 1216)
 	1201 : true,
 	1202 : false,
 
+	// The second era (the era under British colony: 1217 ME - 1311 ME)
 	1263 : true,
 	1264 : false,
 
+	// The third era (the era after Independence	1312 ME and after)
 	1344 : true,
 	1345 : false
 },
 // well-known exceptions
 Myanmar_adjust_fullmoon = {
+	// Thandeikta (ME 1100 - 1216)
 	1120 : 1,
 	1126 : -1,
 	1150 : 1,
 	1172 : -1,
 	1207 : 1,
 
+	// The second era (the era under British colony: 1217 ME - 1311 ME)
 	1234 : 1,
 	1261 : -1,
 
+	// The third era (the era after Independence	1312 ME and after)
 	1377 : 1
 },
 // for fullmoon: Cool Emerald - Based on various evidence such as inscriptions, books, etc...
 // Cool Emerald(2015/11)
 // got modified dates based on feedback from U Aung Zeya who referred to multiple resources such as Mhan Nan Yar Za Win, Mahar Yar Za Win, J. C. Eade, and inscriptions etc...
 Myanmar_adjust_CE = {
+	// Makaranta system 1 (ME 0 - 797)
 	205 : 1,
 	246 : 1,
 	471 : 1,
@@ -2285,6 +2292,7 @@ Myanmar_adjust_CE = {
 	729 : 1,
 	767 : -1,
 
+	// Makaranta system 2 (ME 798 - 1099)
 	813 : -1,
 	849 : -1,
 	851 : -1,
@@ -2325,8 +2333,11 @@ if (false)
 // Cool Emerald(2015/5)
 // ME 1377 (my=1377) Myanmar calendar says new year time is 2015-Apr-16 20:35:57
 // = 638/3/22 13:12:53.880 local time	(new Date(CeL.Myanmar_Date.epoch).format('CE'))
-Myanmar_Date.epoch = new Date(2015, 4 - 1, 16, 20, 35, 57) - 1377 * Myanmar_YEAR_LENGTH_VALUE;
+// Myanmar_Date.epoch = new Date(2015, 4 - 1, 16, 20, 35, 57) - 1377 * Myanmar_YEAR_LENGTH_VALUE;
 
+// Cool Emerald(2018/7)
+// beginning of 0 ME: MO is estimated as Julian Date 1954168.050623.
+Myanmar_Date.epoch = library_namespace.JD_to_Date(1954168.050623).getTime();
 
 // 'နှောင်း': Hnaung (e.g., Hnaung Tagu, Late Tagu)
 Myanmar_Date.month_name = 'ဦးတပေါင်း|တန်ခူး|ကဆုန်|နယုန်|ဝါဆို|ဝါခေါင်|တော်သလင်း|သီတင်းကျွတ်|တန်ဆောင်မုန်း|နတ်တော်|ပြာသို|တပို့တွဲ|တပေါင်း|နှောင်းတန်ခူး|နှောင်းကဆုန်'
@@ -2354,11 +2365,13 @@ Myanmar_Date.month_name.en.waso = [ 'First Waso', 'Second Waso' ];
 		.forEach(function(value, index) {
 			m[value] = index;
 		});
+
 		(m.en = month_name.en.slice())
 		// reverse index
 		.forEach(function(value, index) {
 			m[value] = index;
 		});
+
 		queue.month = m;
 		Myanmar_month_days_count.push(queue);
 	}
@@ -2390,7 +2403,7 @@ Myanmar_Date.month_name.en.waso = [ 'First Waso', 'Second Waso' ];
 	// adapt intercalary month name.
 	m = Myanmar_Date.month_name.waso;
 	month_name.splice(5 - 1, 1, m[0], m[1]);
-	m = Myanmar_Date.month_name.en;
+	m = Myanmar_Date.month_name.en.waso;
 	month_name.en.splice(5 - 1, 1, m[0], m[1]);
 
 	// add accumulated days to all months after 2nd Waso
@@ -2531,7 +2544,7 @@ Myanmar_Date.watat_data = function(year, reference) {
 	// the full moon day of Second Waso only needs to reckon in the watat year.
 	if (!watat)
 		return cache[year] = {
-			type : 0
+			watat : 0
 		};
 
 	// reckon the full moon day of second Waso
@@ -2563,7 +2576,7 @@ Myanmar_Date.watat_data = function(year, reference) {
 
 	return cache[year] = {
 		// is watat year
-		type : true,
+		watat : true,
 		// to get local midnight of specified date.
 		fullmoon : fullmoon * ONE_DAY_LENGTH_VALUE - TIMEZONE_OFFSET_VALUE
 	};
@@ -2598,11 +2611,11 @@ Myanmar_Date.year_data = function(year, options) {
 	var last_watat_year = year, last_watat_data;
 	while (0 === (last_watat_data
 	// find the lastest watat year before this year.
-	= Myanmar_Date.watat_data(--last_watat_year, reference)).type);
+	= Myanmar_Date.watat_data(--last_watat_year, reference)).watat);
 
-	if (year_data.type)
+	if (year_data.watat)
 		// This year is a watat year, and test if it is a big watat year.
-		year_data.type
+		year_data.watat
 		// assert: (... % 354) should be 30 or 31.
 		= (year_data.fullmoon - last_watat_data.fullmoon) / ONE_DAY_LENGTH_VALUE
 		// 354: common year days.
@@ -2637,7 +2650,7 @@ Myanmar_Date.month_days = function(year, options) {
 		format : 'serial'
 	}),
 	//
-	month_days = Myanmar_month_days[year_data.type].slice(0, date[1] - 1);
+	month_days = Myanmar_month_days[year_data.watat].slice(0, date[1] - 1);
 	month_days.end = end;
 	month_days.end_date = date;
 	month_days.push(date[2]);
@@ -2688,7 +2701,7 @@ function Myanmar_Date(year, month, date, options) {
 		date = 1;
 
 	// reckon days count from Tagu 1
-	var month_days = Myanmar_month_days_count[year_data.type];
+	var month_days = Myanmar_month_days_count[year_data.watat];
 	if (isNaN(month))
 		// e.g., CeL.Myanmar_Date(1370,'Tawthalin',18).format()
 		// @see 'reverse index' of push_queue()
@@ -2738,7 +2751,7 @@ function Date_to_Myanmar(date, options) {
 	// for notes
 	weekday = options.notes && date.getDay(),
 	//
-	accumulated_days = Myanmar_month_days_count[year_data.type];
+	accumulated_days = Myanmar_month_days_count[year_data.watat];
 
 	// Test next month, or should be this month.
 	var Myanmar_date = days - accumulated_days[month + 1];
@@ -2836,7 +2849,7 @@ function Date_to_Myanmar(date, options) {
 		if (month_index < 0)
 			// assert: month_index === -1 (Early Tabaung)
 			month_index = 11;
-		else if (year_data.type && month > 3)
+		else if (year_data.watat && month > 3)
 			// month after First Waso.
 			month_index--;
 
@@ -2999,7 +3012,7 @@ var nagahle_direction = 'အနောက်,မြောက်,အရှေ့,�
 // confirm
 CeL.run('https://googledrive.com/host/0B7WW8_JrpDFXTHRHbUJkV0FBdFU/mc.js');
 
-for(var y=-100;y<2000;y++){var d=chk_my(y);CeL.assert([d.myt,CeL.Myanmar_Date.year_data(y).type],'t'+y);d=j2w(d.tg1,1);CeL.assert([d.y+'/'+d.m+'/'+d.d,CeL.Myanmar_Date(y).format('%Y/%m/%d')],y);}
+for(var y=-100;y<2000;y++){var d=chk_my(y);CeL.assert([d.myt,CeL.Myanmar_Date.year_data(y).watat],'t'+y);d=j2w(d.tg1,1);CeL.assert([d.y+'/'+d.m+'/'+d.d,CeL.Myanmar_Date(y).format('%Y/%m/%d')],y);}
 // true
 
 
