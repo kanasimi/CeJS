@@ -3283,6 +3283,7 @@ function module_code(library_namespace) {
 		// 可以解析成圖片, Caption: "{{tl|t}}"
 
 		// TODO: bug: 正常情況下 "[[ ]]" 不會被 parse，但是本函數還是會 parse 成 link。
+		// TODO: [[::zh:title]] would be rendered as plaintext
 
 		wikitext = wikitext.replace_till_stable(
 		// or use ((PATTERN_link))

@@ -259,7 +259,7 @@ function module_code(library_namespace) {
 		// base_URL : '',
 		// charset : 'GBK',
 
-		// 腾讯TT浏览器
+		// 瀏覽器識別: 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)',
 		// 可容許的錯誤次數。
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
@@ -477,6 +477,7 @@ function module_code(library_namespace) {
 
 		// 命令列可以設定的選項。通常僅做測試微調用。
 		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
+		// @see work_crawler/gui_electron/gui_electron_functions.js
 		import_arg_hash : {
 			main_directory : 'string',
 			user_agent : 'string',

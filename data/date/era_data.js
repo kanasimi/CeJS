@@ -19,6 +19,8 @@ https://en.wikipedia.org/wiki/Chronology_of_the_ancient_Near_East
 https://zh.wikipedia.org/wiki/%E5%80%AD%E9%A9%AC%E4%BA%9A%E7%8E%8B%E6%9C%9D
 https://zh.wikipedia.org/wiki/%E7%8E%B0%E4%BB%BB%E4%B8%BB%E6%9D%83%E5%9B%BD%E5%AE%B6%E5%90%9B%E4%B8%BB%E5%88%97%E8%A1%A8
 
+https://en.wikipedia.org/wiki/List_of_kings_of_Axum
+
 
 中國君主列表 (地方政權)
 https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9C%8B%E5%90%9B%E4%B8%BB%E5%88%97%E8%A1%A8_%28%E5%9C%B0%E6%96%B9%E6%94%BF%E6%AC%8A%29

@@ -2861,7 +2861,7 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
-	// parse Durations
+	// parse durations. period 是比較久的時間
 	function parse_period(period) {
 		var matched = period.match(parse_period.PATTERN);
 		if (matched && (!/[日時]/.test(matched[2])
