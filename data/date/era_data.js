@@ -4617,40 +4617,45 @@ CeL.era.pass_on = {
 
 // ---------------------------------------------------------------------//
 // 西班牙君主列表
-// https://es.wikipedia.org/wiki/Anexo:Reyes_de_Espa%C3%B1a
 
 (CeL.era.pass_on.countries.España = [
+		// TODO:
+		// https://es.wikipedia.org/wiki/Anexo:Monarcas_de_Arag%C3%B3n
+		// https://es.wikipedia.org/wiki/Anexo:Monarcas_de_Castilla
+		// https://es.wikipedia.org/wiki/Anexo:Monarcas_de_Le%C3%B3n
+		// https://es.wikipedia.org/wiki/Anexo:Monarcas_de_Asturias
 
+		// https://es.wikipedia.org/wiki/Anexo:Reyes_de_Espa%C3%B1a
 		// Sobrenombre 綽號
-		'Casa de Trastámara/Isabel I de Castilla|1474/12/13~1504/11/25|:CE|Sobrenombre=la Católica',
+		'Casa de Trastámara/Isabel I de Castilla|1474/12/13~1504/11/25|:CE|Sobrenombre=la Católica|時期=España',
 		'/Fernando II de Aragón|1475/1/15~|:CE|Sobrenombre=el Católico|配偶=Isabel I de Castilla',
 		'/Juana I de Castilla|1504/11/26~1555/4/12|:CE|Sobrenombre=la Loca|配偶=Felipe I de Castilla',
 		'/Felipe I de Castilla|1506/7/12~1506/9/25|:CE|Sobrenombre=el Hermoso',
-		'Casa de Austria/Carlos I|1516/3/14~|:CE|Sobrenombre=el César|配偶=Isabel de Portugal',
+		'Casa de Austria/Carlos I|1516/3/14~|:CE|Sobrenombre=el César|配偶=Isabel de Portugal|時期=España',
 		'/Felipe II|1556/1/16~|:CE|Sobrenombre=el Prudente|配偶=María I de Inglaterra;Isabel de Valois (1546-1568);Ana de Austria (1549-1580)',
 		'/Felipe III|1598/9/13~|:CE|Sobrenombre=el Piadoso|配偶=Margarita de Austria-Estiria;Margarita de Austria',
 		'/Felipe IV|1621/3/31~|:CE|Sobrenombre=el Grande;el Rey Planeta|配偶=Isabel de Borbón (reina de España);Isabel de Borbón;Mariana de Austria',
 		'/Carlos II|1665/9/17~1700/11/1|:CE|Sobrenombre=el Hechizado|配偶=María Luisa de Orleans;Mariana de Neoburgo',
 		'/Archiduque Carlos|1703/9/12~1715/7/2|:CE|配偶=Isabel Cristina de Brunswick-Wolfenbüttel',
 		// 卡佩王朝波旁分支
-		'Casa de Borbón/Felipe V|1700/11/16~|:CE|Sobrenombre=el Animoso|配偶=María Luisa Gabriela de Saboya;Isabel de Farnesio',
+		'Casa de Borbón/Felipe V|1700/11/16~|:CE|Sobrenombre=el Animoso|配偶=María Luisa Gabriela de Saboya;Isabel de Farnesio|時期=España',
 		'/Luis I|1724/1/15~1724/8/31|:CE|Sobrenombre=el Bien Amado;el Liberal|配偶=Luisa Isabel de Orleans',
 		'/Felipe V|1724/9/6~|:CE|Sobrenombre=el Animoso|配偶=Isabel de Farnesio',
 		'/Fernando VI|1746/7/9~|:CE|Sobrenombre=el Prudente;el Justo|配偶=Bárbara de Braganza',
 		'/Carlos III|1759/8/10~|:CE|Sobrenombre=el Político;el Mejor Alcalde de Madrid|配偶=María Amalia de Sajonia',
 		'/Carlos IV|1788/12/14~|:CE|Sobrenombre=el Cazador|配偶=María Luisa de Parma',
 		'/Fernando VII|1808/3/19~1808/5/6|:CE|Sobrenombre=el Deseado;el Rey Felón',
-		'Casa de Bonaparte/José I|1808/6/6~1813/12/11|:CE|Sobrenombre=Pepe Botella;Pepe Plazuelas|配偶=Julia Clary',
+		'Casa de Bonaparte/José I|1808/6/6~1813/12/11|:CE|Sobrenombre=Pepe Botella;Pepe Plazuelas|配偶=Julia Clary|時期=España',
 		// primera restauración
-		'Casa de Borbón/Fernando VII|1808/3/19~1808/5/6|:CE|Sobrenombre=el Deseado;el Rey Felón|配偶=María Isabel de Braganza;María Josefa de Sajonia;María Cristina de Borbón',
+		'Casa de Borbón/Fernando VII|1808/3/19~1808/5/6|:CE|Sobrenombre=el Deseado;el Rey Felón|配偶=María Isabel de Braganza;María Josefa de Sajonia;María Cristina de Borbón|時期=España',
 		'/Fernando VII|1814/5/4~|:CE|Sobrenombre=el Deseado;el Rey Felón|配偶=María Isabel de Braganza;María Josefa de Sajonia;María Cristina de Borbón',
 		'/Isabel II|1833/9/29~1868/9/30|:CE|Sobrenombre=la de los Tristes Destinos;la Reina Castiza|配偶=Francisco de Asís de Borbón',
-		'Casa de Saboya/Amadeo I|1870/11/16~1873/2/11|:CE|Sobrenombre=el Rey Caballero;el Electo|配偶=María Victoria dal Pozzo',
+		'Casa de Saboya/Amadeo I|1870/11/16~1873/2/11|:CE|Sobrenombre=el Rey Caballero;el Electo|配偶=María Victoria dal Pozzo|時期=España',
 		// segunda restauración
-		'Casa de Borbón/Alfonso XII|1874/12/29~1885/11/25|:CE|Sobrenombre=el Pacificador|配偶=María de las Mercedes de Orleans;María Cristina de Habsburgo-Lorena',
+		'Casa de Borbón/Alfonso XII|1874/12/29~1885/11/25|:CE|Sobrenombre=el Pacificador|配偶=María de las Mercedes de Orleans;María Cristina de Habsburgo-Lorena|時期=España',
 		'/Alfonso XIII|1886/5/17~1931/4/13|:CE|Sobrenombre=el Africano|配偶=Victoria Eugenia de Battenberg',
 		// tercera restauración
-		'Casa de Borbón/Juan Carlos I|1975/11/22~|:CE|配偶=Sofía de Grecia',
+		'Casa de Borbón/Juan Carlos I|1975/11/22~|:CE|配偶=Sofía de Grecia|時期=España',
 		'/Felipe VI|2014/6/19~' + CeL.era.pass_on.last_day
 				+ '|:CE|配偶=Letizia Ortiz'
 
