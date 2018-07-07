@@ -5035,6 +5035,13 @@ function affairs() {
 
 	// -----------------------------
 
+	var batch_prefix_span = new CeL.select_input(0, Object
+			.keys(auto_add_column));
+	batch_prefix_span.attach('batch_prefix');
+	batch_prefix_span.setSearch('includeKeyWC');
+
+	// -----------------------------
+
 	/**
 	 * @memo <code>
 

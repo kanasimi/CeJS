@@ -4143,7 +4143,7 @@ function module_code(library_namespace) {
 			}, this);
 
 			date_index.注 = Array.isArray(tmp = this.注) ? tmp
-			//
+			// 備考
 			: tmp ? [ tmp ] : [];
 
 			// 查詢某時間點（時刻）的日期資訊，如月干支等：
