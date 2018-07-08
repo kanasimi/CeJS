@@ -4694,8 +4694,10 @@ CeL.era.pass_on = {
 // 英國君主列表
 
 (CeL.era.pass_on.countries.British = [
-		// TODO: https://en.wikipedia.org/wiki/List_of_English_monarchs
-		// TODO: https://en.wikipedia.org/wiki/List_of_Scottish_monarchs
+		// TODO
+		// https://en.wikipedia.org/wiki/List_of_English_monarchs
+		// https://en.wikipedia.org/wiki/List_of_Scottish_monarchs
+		// https://en.wikipedia.org/wiki/Monarchy_of_Ireland
 
 		// https://en.wikipedia.org/wiki/List_of_British_monarchs
 		'House of Stuart/Anne|1707/5/1~|:CE|配偶=1683/7/28 George of Denmark|時期=British',
@@ -4720,6 +4722,7 @@ CeL.era.pass_on = {
 (CeL.era.pass_on.countries.España = [
 		// TODO:
 		// https://es.wikipedia.org/wiki/Anexo:Monarcas_de_Arag%C3%B3n
+		// https://en.wikipedia.org/wiki/List_of_Aragonese_monarchs
 		// https://es.wikipedia.org/wiki/Anexo:Monarcas_de_Castilla
 		// https://es.wikipedia.org/wiki/Anexo:Monarcas_de_Le%C3%B3n
 		// https://es.wikipedia.org/wiki/Anexo:Monarcas_de_Asturias
