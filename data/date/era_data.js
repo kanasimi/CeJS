@@ -4694,6 +4694,40 @@ CeL.era.pass_on = {
 // 英國君主列表
 
 (CeL.era.pass_on.countries.British = [
+		// https://en.wikipedia.org/wiki/List_of_monarchs_of_Wessex
+		// The Kingdom of the Gewissae
+		'Cerdicing dynasty/Cerdic|519~|:CE|時期=Wessex|注=Possibly Celtic, Brythonic, name.',
+		'/Cynric|534~|:CE|注=Son, or according to some sources grandson, of Cerdic.',
+		'/Ceawlin|560~|:CE|注=Son of Cynric. Possibly Celtic, Brythonic, name.',
+		'/Ceol|591~|:CE|注=Nephew of Ceawlin, grandson of Cynric.',
+		'/Ceolwulf|597~|:CE|注=Brother of Ceol, grandson of Cynric.',
+		'/Cynegils|611~|:CE|注=Sources derive him from Cynric, but name different dynasty members as his father. Possibly Celtic, Brythonic, name',
+		'/Cenwalh|642~|:CE|注=Son of Cynegils. Possibly Celtic, Brythonic, name; Deposed',
+		'Mercian dynasty/Penda|645~|:CE|時期=Wessex|注=King of Mercia, expelled Cenwalh.',
+		'Cerdicing dynasty/Cenwalh|648~674|:CE|時期=Wessex|注=Restored; reigned jointly with his wife Queen Seaxburh 672 to 674.',
+		'/Seaxburh|672~|:CE|注=Reigned jointly with her husband Cenwalh until his death 674',
+		'/Æscwine|674~|:CE|注=Son of Cenfus.',
+		'/Centwine|676~|:CE|注=Traditionally son of Cynegils, but this is disputed. Deposed by Cædwalla',
+		'/Cædwalla|685~|:CE|注=Perhaps descendant of Ceawlin. Usurper; abdicated, possibly of British origin.',
+		'/Ine|688~|:CE|注=Descendant of Ceawlin. Abdicated',
+		'/Æthelheard|726~|:CE|注=Perhaps brother-in-law of Ine.',
+		'/Cuthred|740~|:CE|注=Relative, possibly brother, of Æthelheard.',
+		'/Sigeberht|756~|:CE|注=Distant relative of Cuthred. Deposed (and killed?) by Cynewulf',
+		'/Cynewulf|757~|:CE|注=Assassinated by Cyneheard, brother of Sigeberht',
+		'/Beorhtric|786~|:CE|注=',
+		"/Ecgberht|802~|:CE|注=Descendant of Ine's brother.",
+		'/Æthelwulf|839~|:CE|注=Son of Ecgberht.',
+		'/Æthelbald|858~|:CE|注=Son of Æthelwulf.',
+		'/Æthelberht|860~|:CE|注=Son of Æthelwulf.',
+		'/Æthelred|865~|:CE|注=Son of Æthelwulf.',
+		'/Alfred the Great|871/4/23~|:CE|注=Son of Æthelwulf. The only Anglo-Saxon monarch to be given the epithet "the Great".',
+		'/Edward the Elder|899/10/26~|:CE|注=Son of Alfred. Died 17 July 924',
+		'/Ælfweard|924/7/17~924/8/2|:CE|疑|注=Second son of Edward the Elder. Died 2 August 924, only 16 days after his father. Only referred to as king in late sources.',
+		'/Æthelstan|925~927|:CE|注=First son of Edward the Elder. Became King of the English in 927 when the Northumbrians accepted his lordship.',
+		//
+		'/Cwichelm|626~636|:CE|疑|注=Co-ruler with Cynegils, perhaps his son of this name.',
+		'/Cenfus|674~674|:CE|疑|注=(Disputed) Perhaps reigned between Seaxburh and his son Æscwine. Given a remote descent from Cynric.',
+
 		// TODO
 		// https://en.wikipedia.org/wiki/List_of_English_monarchs
 		// https://en.wikipedia.org/wiki/List_of_Scottish_monarchs

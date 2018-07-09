@@ -1606,7 +1606,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 快速取得 lead section 文字用。
+	 * 快速取得 lead section / first section / 導入文 文字用。
 	 * 
 	 * @example <code>
 	CeL.wiki.lead_text(content);
@@ -9929,7 +9929,7 @@ function module_code(library_namespace) {
 		}
 		if (!name || !password) {
 			library_namespace
-					.warn('wiki_API.login: The user name or password is not provided. Abort login.');
+					.warn('wiki_API.login: The user name or password is not provided. Abandon login attempt.');
 			// console.trace('Stop login');
 			return session;
 		}
