@@ -200,8 +200,9 @@ function module_code(library_namespace) {
 			if (parse_search_result_set[this.parse_search_result]) {
 				this.parse_search_result = parse_search_result_set[this.parse_search_result];
 			} else {
-				throw 'Work_crawler: No this parse_search_result: '
-						+ this.parse_search_result;
+				this.onerror('Work_crawler: No this parse_search_result: '
+						+ this.parse_search_result, work_data);
+				return Work_crawler.THROWED;
 			}
 		}
 
@@ -243,6 +244,11 @@ function module_code(library_namespace) {
 	Work_crawler.timeout = 30 * 1000;
 
 	Work_crawler.HTML_extension = 'htm';
+
+	// fatal error throwed
+	Work_crawler.THROWED = {
+		throwed : true
+	};
 
 	Work_crawler.prototype = {
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
@@ -325,6 +331,12 @@ function module_code(library_namespace) {
 		report_file : 'report.' + (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.'
 				+ Work_crawler.HTML_extension,
 		report_file_JSON : 'report.json',
+
+		// for uncaught error
+		onerror : function onerror(error, work_data) {
+			throw error;
+			return Work_crawler.THROWED;
+		},
 
 		// default start chapter index: 1.
 		// 將開始/接續下載的章節編號。必須要配合 .recheck。
@@ -807,7 +819,9 @@ function module_code(library_namespace) {
 			}
 
 			if (id_converter) {
-				throw 'get_work_list: Invalid id converter for ' + work_title;
+				this.onerror('get_work_list: Invalid id converter for '
+						+ work_title, work_title);
+				return Work_crawler.THROWED;
 			}
 
 			work_count++;
@@ -1123,9 +1137,10 @@ function module_code(library_namespace) {
 		if (!url || typeof this.parse_search_result !== 'function') {
 			url = library_namespace.null_Object();
 			url[work_title] = '';
-			throw '本線上作品網站 ' + this.id + ' 的模組未提供搜尋功能。請手動設定/輸入 [' + work_title
-					+ '] 之 id 於 ' + search_result_file + '\n (e.g., '
-					+ JSON.stringify(url) + ')';
+			this.onerror('本線上作品網站 ' + this.id + ' 的模組未提供搜尋功能。請手動設定/輸入 ['
+					+ work_title + '] 之 id 於 ' + search_result_file
+					+ '\n (e.g., ' + JSON.stringify(url) + ')', work_title);
+			return Work_crawler.THROWED;
 		}
 		if (typeof url === 'function') {
 			// 通過關鍵詞搜索作品。 解析 作品名稱 → 作品id
@@ -1176,11 +1191,16 @@ function module_code(library_namespace) {
 				id_data = _this.parse_search_result(XMLHttp.responseText,
 						get_label, work_title);
 				if (id_data === undefined) {
-					throw undefined;
+					this.onerror('get_work.parse_search_result:'
+							+ ' 作品網址解析函數 parse_search_result 未回傳結果！',
+							work_title);
+					return Work_crawler.THROWED;
 				}
 				if (!id_data) {
-					throw 'get_work.parse_search_result:'
-							+ ' 作品網址解析函數 parse_search_result 未回傳正規結果！';
+					this.onerror('get_work.parse_search_result:'
+							+ ' 作品網址解析函數 parse_search_result 未回傳正規結果！',
+							work_title);
+					return Work_crawler.THROWED;
 				}
 			} catch (e) {
 				if (e)
@@ -1350,7 +1370,9 @@ function module_code(library_namespace) {
 										&& XMLHttp.buffer.length === 0 ? ': Nothing get'
 										: ''));
 				if (error_count === _this.MAX_ERROR_RETRY) {
-					throw _this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD;
+					_this.onerror(_this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD,
+							_this.id);
+					return Work_crawler.THROWED;
 				}
 				error_count = (error_count | 0) + 1;
 				library_namespace.log('process_work_data: Retry ' + error_count
@@ -1549,9 +1571,12 @@ function module_code(library_namespace) {
 			}
 
 			if (_this.chapter_list_URL) {
-				work_data.chapter_list_URL
-				// this.chapter_list_URL(work_id, work_data);
-				= work_URL = _this.full_URL(_this.chapter_list_URL, work_id);
+				var chapter_list_URL = typeof _this.chapter_list_URL === 'function'
+				// _this.chapter_list_URL 不回傳函數就會在後面加上 work_id。
+				? _this.chapter_list_URL(work_id, work_data)
+						: _this.chapter_list_URL;
+				work_data.chapter_list_URL = work_URL = _this.full_URL(
+						chapter_list_URL, work_id);
 				get_URL(work_URL, pre_process_chapter_list_data, _this.charset,
 						null, Object.assign({
 							error_retry : _this.MAX_ERROR_RETRY
@@ -1568,7 +1593,8 @@ function module_code(library_namespace) {
 			if (!html) {
 				var message = _this.id + ': Can not get chapter list page!';
 				library_namespace.error(message);
-				throw message;
+				_this.onerror(message);
+				return Work_crawler.THROWED;
 			}
 
 			if (false) {
@@ -1665,7 +1691,8 @@ function module_code(library_namespace) {
 				} catch (e) {
 					library_namespace.error(_this.id
 							+ ': .get_chapter_list() throw error');
-					throw e;
+					_this.onerror(e, work_data);
+					return Work_crawler.THROWED;
 					typeof callback === 'function' && callback(work_data);
 					return;
 				}
@@ -2018,7 +2045,8 @@ function module_code(library_namespace) {
 			} catch (e) {
 				library_namespace.error(this.id + ': ' + work_data.title
 						+ ': Error on chapter ' + chapter_NO);
-				throw e;
+				this.onerror(e);
+				return Work_crawler.THROWED;
 			}
 		} else {
 			next();
@@ -2094,10 +2122,11 @@ function module_code(library_namespace) {
 			var part_title_now, parts_count_plus_1 = work_data.chapter_list.part_NO + 1, chapter_count_plus_1;
 			work_data.chapter_list.forEach(function(chapter_data, index) {
 				if (!(chapter_data.NO_in_part >= 1)) {
-					throw 'reverse_chapter_list_order: '
+					this.onerror('reverse_chapter_list_order: '
 					//
 					+ 'Invalid NO_in_part: chapter_list[' + index + ']: '
-							+ JSON.stringify(chapter_data);
+							+ JSON.stringify(chapter_data), work_data);
+					return Work_crawler.THROWED;
 				}
 
 				if (part_title_now !== chapter_data.part_title
@@ -2132,8 +2161,10 @@ function module_code(library_namespace) {
 			var chapter_data = work_data.chapter_list ? work_data.chapter_list[chapter_NO - 1]
 					: work_data;
 			if (!chapter_data) {
-				throw 'get_chapter_directory_name: Invalid chapter_data: '
-						+ work_data;
+				this.onerror(
+						'get_chapter_directory_name: Invalid chapter_data: '
+								+ work_data, work_data);
+				return Work_crawler.THROWED;
 			}
 			if (!no_part && chapter_data.part_title && (work_data.chapter_list
 			// 當只有一個 part 的時候，預設不會添上 part 標題。
@@ -2152,7 +2183,9 @@ function module_code(library_namespace) {
 			chapter_title = chapter_data.chapter_title || chapter_data.title;
 
 		} else {
-			throw 'get_chapter_directory_name: Invalid work_data: ' + work_data;
+			this.onerror('get_chapter_directory_name: Invalid work_data: '
+					+ work_data, work_data);
+			return Work_crawler.THROWED;
 		}
 
 		var chapter_directory_name = (part || '')
@@ -2368,7 +2401,9 @@ function module_code(library_namespace) {
 							check_if_done();
 							return;
 						}
-						throw _this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD;
+						_this.onerror(_this.id + ': '
+								+ _this.MESSAGE_RE_DOWNLOAD, work_data);
+						return Work_crawler.THROWED;
 					}
 					get_data.error_count = (get_data.error_count | 0) + 1;
 					library_namespace.log('process_chapter_data: Retry '
@@ -2403,12 +2438,13 @@ function module_code(library_namespace) {
 					if (!chapter_data) {
 						// library_namespace.warn(html);
 						library_namespace.warn(work_data.status);
-						throw new Error(_this.id
+						_this.onerror(new Error(_this.id
 								+ ': Bad chapter NO: Should be '
 								+ chapter_NO
 								+ (chapter_NO_text === null ? '' : ', but get '
 										+ JSON.stringify(chapter_NO_text))
-								+ ' inside contents.');
+								+ ' inside contents.'), work_data);
+						return Work_crawler.THROWED;
 					}
 				}
 
@@ -2437,7 +2473,8 @@ function module_code(library_namespace) {
 				} catch (e) {
 					library_namespace.error(_this.id
 							+ ': Error on chapter url: ' + chapter_URL);
-					throw e;
+					_this.onerror(e, work_data);
+					return Work_crawler.THROWED;
 				}
 				// console.log(JSON.stringify(chapter_data));
 				if (!chapter_data || !(image_list = chapter_data.image_list)
@@ -2949,7 +2986,10 @@ function module_code(library_namespace) {
 					library_namespace
 							.info('若錯誤持續發生，您可以設定 skip_error=true 來忽略圖像錯誤。');
 				}
-				process.exit(1);
+				_this.onerror('圖像下載錯誤', image_data);
+				return Work_crawler.THROWED;
+				// 網頁介面不可使用process.exit()，會造成白屏
+				// process.exit(1);
 			}
 
 			image_data.error_count = (image_data.error_count | 0) + 1;

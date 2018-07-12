@@ -2778,6 +2778,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Array}parsed data
 	 * 
+	 * @see https://blog.wikimedia.org/2013/03/04/parsoid-how-wikipedia-catches-up-with-the-web/
+	 *      https://phabricator.wikimedia.org/diffusion/GPAR/
+	 * 
 	 * @see [[w:en:Help:Wikitext]], [[Wiki標記式語言]]
 	 *      https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
 	 *      https://www.mediawiki.org/wiki/Markup_spec/BNF/Inline_text
