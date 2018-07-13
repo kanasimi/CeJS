@@ -15,6 +15,10 @@
 
 /*
 TODO:
+https://developers.google.com/web/tools/chrome-devtools/console/console-write#styling_console_output_with_css
+console.log("%c", 將 CSS 樣式規則應用到第二個參數指定的輸出字符串)
+
+
 emergency/urgent situation alert
 會盡量以網頁上方/頂部黄色的導航條/警告條展示
 「不再顯示」功能

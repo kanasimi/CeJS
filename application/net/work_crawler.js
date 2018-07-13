@@ -678,9 +678,9 @@ function module_code(library_namespace) {
 		return encodeURIComponent(string);
 	};
 
-	function full_URL_of_path(url, base_data) {
+	function full_URL_of_path(url, base_data, base_data_2) {
 		if (typeof url === 'function') {
-			url = url.call(this, base_data);
+			url = url.call(this, base_data, base_data_2);
 		} else if (base_data) {
 			base_data = encode_URI_component(base_data, url.charset
 					|| this.charset);
@@ -1305,7 +1305,8 @@ function module_code(library_namespace) {
 							/\s*<br(?:\/| [^<>]*)?>/ig, '\n').replace(
 							/<[^<>]+>/g, '')
 					// incase 以"\r"為主。 e.g., 起点中文网
-					.replace(/\r\n?/g, '\n')).trim()
+					.replace(/\r\n?/g, '\n')).trim().replace(
+					/[\s\u200B]+$|^[\s\u200B]+/g, '')
 			// .replace(/\s{2,}/g, ' ').replace(/\s?\n+/g, '\n')
 			;
 		}
@@ -1504,9 +1505,11 @@ function module_code(library_namespace) {
 					return !!item;
 				})
 				// .sort()
-				.join(', ');
+				// .join(', ')
+				;
 			}
 			// assert: typeof work_data.status === 'string'
+			// || Array.isArray(work_data.status)
 
 			// 主要提供給 this.get_chapter_list() 使用。
 			// e.g., 'ja-JP'
@@ -1571,12 +1574,8 @@ function module_code(library_namespace) {
 			}
 
 			if (_this.chapter_list_URL) {
-				var chapter_list_URL = typeof _this.chapter_list_URL === 'function'
-				// _this.chapter_list_URL 不回傳函數就會在後面加上 work_id。
-				? _this.chapter_list_URL(work_id, work_data)
-						: _this.chapter_list_URL;
 				work_data.chapter_list_URL = work_URL = _this.full_URL(
-						chapter_list_URL, work_id);
+						_this.chapter_list_URL, work_id, work_data);
 				get_URL(work_URL, pre_process_chapter_list_data, _this.charset,
 						null, Object.assign({
 							error_retry : _this.MAX_ERROR_RETRY
