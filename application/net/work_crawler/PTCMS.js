@@ -77,7 +77,7 @@ function module_code(library_namespace) {
 		// 取得作品的章節資料。 get_work_data()
 		// work_URL : function(work_id) {
 		// /** @see this.work_URL in CeL.application.net.work_crawler */ },
-		parse_work_data : function(html, get_label, exact_work_data) {
+		parse_work_data : function(html, get_label, extract_work_data) {
 			// console.log(html);
 			// 由 meta data 取得作品資訊。
 			var work_data = {
@@ -118,7 +118,7 @@ function module_code(library_namespace) {
 				|| html.between('<strong class="logo">', '</strong>'))
 			};
 			// 由 meta data 取得作品資訊。
-			exact_work_data(work_data, html);
+			extract_work_data(work_data, html);
 
 			// 有時會 502，需要重新再擷取一次。
 			if (work_data.title === '502 Bad Gateway'

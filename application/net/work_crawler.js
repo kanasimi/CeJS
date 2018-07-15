@@ -728,13 +728,21 @@ function module_code(library_namespace) {
 			if (work_id.startsWith('l=')) {
 				work_id = work_id.slice('l='.length);
 			}
-			var work_list = (library_namespace.fs_read(work_id).toString() || '')
-			//
-			.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
-			// 去掉BOM (byte order mark)
-			.trim()
-			// TODO: 處理title中包含"#"的作品
-			.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/).unique();
+			var work_list = library_namespace.fs_read(work_id);
+			if (!work_list) {
+				// 若是檔案不存在，.fs_read() 可能會回傳 undefined。
+				library_namespace.warn(this.id + ': 無法讀取列表檔案 ' + work_id);
+				work_list = [];
+			} else {
+				work_list = (work_list.toString() || '')
+				//
+				.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+				// 去掉BOM (byte order mark)
+				.trim()
+				// TODO: 處理title中包含"#"的作品
+				.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/)
+						.unique();
+			}
 			this.get_work_list(work_list, callback);
 
 		} else if (work_id
@@ -1312,7 +1320,7 @@ function module_code(library_namespace) {
 		}
 	}
 
-	function exact_work_data(work_data, html, PATTERN_work_data, overwrite) {
+	function extract_work_data(work_data, html, PATTERN_work_data, overwrite) {
 		if (!PATTERN_work_data) {
 			PATTERN_work_data =
 			// 由 meta data 取得作品資訊。 e.g.,
@@ -1389,7 +1397,7 @@ function module_code(library_namespace) {
 			try {
 				// 作品詳情。
 				work_data = _this.parse_work_data(html, get_label,
-						exact_work_data
+						extract_work_data
 				// , { id : work_id, title : work_title, url : work_URL }
 				);
 				if (work_data === _this.REGET_PAGE) {
@@ -2518,6 +2526,11 @@ function module_code(library_namespace) {
 						left = image_list.length;
 					}
 				}
+				if (false) {
+					// 當一次下載上百張相片的時候，就改成一個個下載圖像。
+					_this.one_by_one = left > 100;
+				}
+
 				if (work_data.image_count >= 0) {
 					work_data.image_count += left;
 				}
@@ -2731,7 +2744,7 @@ function module_code(library_namespace) {
 			//
 			', ' + work_data.image_count + ' images' : '')
 			//
-			+ ' done. 本作品下載作業結束.');
+			+ ' done. ' + (new Date).toISOString() + ' 本作品下載作業結束.');
 			if (work_data.error_images > 0) {
 				library_namespace.error(work_data.directory_name + ': '
 						+ work_data.error_images
