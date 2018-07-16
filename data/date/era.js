@@ -5561,12 +5561,15 @@ function module_code(library_namespace) {
 			// era.傳說=:為傳說時代/神話之資料
 
 			// 處理 accuracy/準度/誤差/正確度。
-			if (!last_era_data.準)
-				for (i in 準確程度_ENUM)
+			if (!last_era_data.準) {
+				for (i in 準確程度_ENUM) {
+					// 這裡會設定如 era.準 = "疑"
 					if (last_era_data[i]) {
 						last_era_data.準 = i;
 						break;
 					}
+				}
+			}
 			// check 準度。
 			if (i = last_era_data.準) {
 				if (!/^\d*[年月日]$/.test(i) && !(i in 準確程度_ENUM))

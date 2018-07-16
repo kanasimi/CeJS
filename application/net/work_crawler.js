@@ -420,7 +420,7 @@ function module_code(library_namespace) {
 			status = String(status);
 
 			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
-			if (/^\(?完[結结成]?\)?$/.test(status))
+			if (/^\(?(?:完[結结成]?|Completed)\)?$/i.test(status))
 				return status;
 
 			// e.g., 连载中, 連載中, 已完结, 已完成
