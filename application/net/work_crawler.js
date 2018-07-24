@@ -334,7 +334,8 @@ function module_code(library_namespace) {
 
 		// for uncaught error
 		onerror : function onerror(error, work_data) {
-			throw error;
+			throw typeof error === 'object' ? error : (new Date).toISOString()
+					+ ' ' + error;
 			return Work_crawler.THROWED;
 		},
 
@@ -2194,6 +2195,9 @@ function module_code(library_namespace) {
 					+ work_data, work_data);
 			return Work_crawler.THROWED;
 		}
+
+		// assert: !!chapter_data.title === true
+		chapter_title = chapter_title.trim();
 
 		var chapter_directory_name = (part || '')
 		// 檔名 NO 的基本長度（不足補零）。

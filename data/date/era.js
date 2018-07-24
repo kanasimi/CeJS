@@ -4367,7 +4367,7 @@ function module_code(library_namespace) {
 	// ---------------------------------------------------------------------//
 
 	// private 工具函數：分割資料檔使用之日期(起訖時間)。
-	// return [ 起始時間, 訖, parser ]
+	// return [ {String}起始時間, {String}訖, parser ]
 	function parse_duration(date, era) {
 		var tmp;
 		if (typeof date === 'string' && (tmp = date.match(

@@ -474,9 +474,16 @@ function module_code(library_namespace) {
 		// [ -4713, 11, 24 ]
 		JD0 = Julian_day.to_YMD(0, true);
 		// set the date value of Julian date 0
+		date.setUTCHours(12, 0, 0, 0);
 		date.setUTCFullYear(JD0[0] | 0, (JD0[1] | 0) - 1, JD0[2] | 0);
-		date.setUTCHours(12);
 		Julian_day.epoch = date.getTime();
+		// Julian_day.epoch = -210866760000000;
+
+		// new Date(-1e13) 會使 Chrome 69.0.3493.3
+		// 把台北標準時間從 GMT+0800 改成 GMT+0806。
+		// firefox 無此問題。 bug?
+		// assert:
+		// new Date(-1e13).getTimezoneOffset()===new Date().getTimezoneOffset()
 	})();
 
 	/**
@@ -2593,7 +2600,7 @@ function module_code(library_namespace) {
 	// timevalue → {String}日期及時間表達式
 
 	/**
-	 * 計算大略的時間間隔，以適當的單位簡略顯示。 count roughly duration, count date.<br />
+	 * 計算大略的時間間隔，以適當的時間單位縮寫簡略顯示。 count roughly duration, count date.<br />
 	 * CeL.age_of(new Date(0, 0, 0), new Date(0, 0, 0, 0, 0, 8)) === '8s'
 	 * 
 	 * TODO: locale
@@ -2629,6 +2636,7 @@ function module_code(library_namespace) {
 			if (options && options.月) {
 				diff += 'Y' + Math.round(diff2) + 'M';
 			} else {
+				// SI symbol: a (for Latin annus)
 				diff = difference.to_fixed(1) + 'Y';
 			}
 			if (options && options.歲) {
@@ -2663,14 +2671,14 @@ function module_code(library_namespace) {
 		}
 
 		if ((difference /= 60) < 60) {
-			return difference.to_fixed(1) + 'm';
+			return difference.to_fixed(1) + 'min';
 		}
 
 		if ((difference /= 60) < 24) {
-			return difference.to_fixed(1) + 'h';
+			return difference.to_fixed(1) + 'hr';
 		}
 
-		return (difference / 24).to_fixed(1) + 'D';
+		return (difference / 24).to_fixed(1) + 'd';
 	}
 
 	// 將在 data.date.era 更正。

@@ -54,6 +54,9 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	/**
+	 * @see 用 CeL.application.storage.file verify_file_type() 可以驗證檔案格式。
+	 */
 	function extension_of(url) {
 		if (!url) {
 			return;

@@ -148,7 +148,7 @@ function module_code(library_namespace) {
 	// site: e.g., 'zhwiki'
 	// @see wikidatawiki_p.wb_items_per_site.ips_site_id
 	//
-	// [[en:Help:Interwikimedia_links]]
+	// [[en:Help:Interwikimedia_links]] [[en:Special:Interwiki]]
 	// https://zh.wikipedia.org/wiki/Special:GoToInterwiki/testwiki:
 	// link prefix: e.g., 'zh:n:' for zh.wikinews
 	//
