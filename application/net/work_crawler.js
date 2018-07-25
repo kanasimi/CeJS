@@ -266,7 +266,7 @@ function module_code(library_namespace) {
 		// charset : 'GBK',
 
 		// 瀏覽器識別: 腾讯TT浏览器
-		user_agent : 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)',
+		user_agent : 'Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.1; SV1; TencentTraveler 4.0)',
 		// 可容許的錯誤次數。
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
 		// 可容許的 EOI (end of image) 錯誤次數。
@@ -334,8 +334,12 @@ function module_code(library_namespace) {
 
 		// for uncaught error
 		onerror : function onerror(error, work_data) {
-			throw typeof error === 'object' ? error : (new Date).toISOString()
-					+ ' ' + error;
+			if (typeof error === 'object') {
+				throw error;
+			} else {
+				console.trace(error);
+				throw (new Date).toISOString() + ' ' + error;
+			}
 			return Work_crawler.THROWED;
 		},
 
@@ -404,6 +408,8 @@ function module_code(library_namespace) {
 
 		// 漫畫下載完畢後壓縮每個章節的圖像檔案。
 		archive_images : true,
+		// 完全沒有出現錯誤才壓縮圖像檔案。
+		archive_all_good_images_only : false,
 		// 壓縮圖像檔案之後，刪掉原先的圖像檔案。 請注意： 必須先安裝 7-Zip **18.01 以上的版本**。
 		remove_images_after_archive : true,
 		images_archive_extension : 'zip',
@@ -1344,7 +1350,7 @@ function module_code(library_namespace) {
 			if (key && (overwrite || !work_data[key])
 			//
 			&& (value = get_label(matched[2]).replace(/^[:：︰\s]+/, '').trim())) {
-				work_data[key] = value;
+				work_data[key] = value.replace(/\s{2,}/g, ' ');
 			}
 		}
 	}
@@ -2734,6 +2740,12 @@ function module_code(library_namespace) {
 
 		// 增加章節計數，準備下載下一個章節。
 		if (++chapter_NO > work_data.chapter_count) {
+			if (Array.isArray(work_data.chapter_list)
+					&& work_data.chapter_list.length === work_data.chapter_count + 1) {
+				library_namespace
+						.warn('若欲動態增加章節，必須手動增加章節數量: work_data.chapter_count++！');
+			}
+
 			library_namespace.log(work_data.directory_name
 			// 增加章節數量的訊息。
 			+ ': ' + work_data.chapter_count
@@ -3002,6 +3014,7 @@ function module_code(library_namespace) {
 					library_namespace
 							.info('若錯誤持續發生，您可以設定 skip_error=true 來忽略圖像錯誤。');
 				}
+
 				_this.onerror('圖像下載錯誤', image_data);
 				return Work_crawler.THROWED;
 				// 網頁介面不可使用process.exit()，會造成白屏
