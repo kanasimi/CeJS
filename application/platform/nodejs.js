@@ -659,13 +659,31 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
+	// encode: ASCII string → Base64
+	// https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/btoa
+	// https://gist.github.com/jmshal/b14199f7402c8f3a4568733d8bed0f25
+	// btoa 僅支持 ASCII
+	function btoa(stringToEncode) {
+		return new Buffer(stringToEncode).toString('base64');
+	}
+
+	// decode :Base64 → ASCII string
+	// https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/atob
+	function atob(encodedData) {
+		return new Buffer.from(encodedData, 'base64').toString('binary');
+	}
+
+	// --------------------------------------------
+
 	// TODO:
 	// Buffer.prototype.indexOf()
 	// https://github.com/nodejs/node/blob/master/lib/buffer.js#L578
 
 	function export_function() {
-		node_fs.copy = fs_copy;
-		node_fs.copySync = fs_copySync;
+		library_namespace.set_method(node_fs, {
+			copy : fs_copy,
+			copySync : fs_copySync
+		}, null);
 	}
 	_['export'] = export_function;
 
@@ -673,6 +691,11 @@ function module_code(library_namespace) {
 	if (node_fs === require('fs')) {
 		export_function();
 	}
+
+	library_namespace.set_method(library_namespace.env.global, {
+		btoa : btoa,
+		atob : atob
+	}, null);
 
 	return (_// JSDT:_module_
 	);

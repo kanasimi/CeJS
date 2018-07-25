@@ -2524,7 +2524,7 @@ OS='UNIX'; // unknown
 
 		function setter() {
 			// !_.is_Function()
-			var value = filter;
+			var value = filter, not_native_keyword = _.env('not_native_keyword') || KEY_not_native;
 			if (_.is_Object(filter))
 				if (key in properties)
 					value = filter[key];
@@ -2549,7 +2549,9 @@ OS='UNIX'; // unknown
 					_.warn('set_method.setter: Unknown filter: [' + value + ']');
 			else if (value !== false)
 				// undefined, null, NaN
-				value = typeof name_space[key] === typeof properties[key];
+				value = typeof name_space[key] === typeof properties[key]
+				// 假如原先有的並非原生函數，應該是有比較好、針對性的實作方法，那麼就用新的覆蓋舊的。
+				&& !name_space[key][not_native_keyword];
 
 			if (value)
 				return;
@@ -2569,11 +2571,11 @@ OS='UNIX'; // unknown
 				try {
 					Object.defineProperty(value,
 					// 設定非 native 之 flag.
-					_.env('not_native_keyword') || KEY_not_native, {
+					not_native_keyword, {
 						value : true
 					});
 				} catch (e) {
-					value[_.env('not_native_keyword') || KEY_not_native] = true;
+					value[not_native_keyword] = true;
 				}
 
 			// Warning: 由於執行時可能處於 log() stack 中，若 log() 會用到 set_method()，這邊又
