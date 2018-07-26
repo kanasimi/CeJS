@@ -409,7 +409,7 @@ function module_code(library_namespace) {
 		// 漫畫下載完畢後壓縮每個章節的圖像檔案。
 		archive_images : true,
 		// 完全沒有出現錯誤才壓縮圖像檔案。
-		archive_all_good_images_only : false,
+		// archive_all_good_images_only : true,
 		// 壓縮圖像檔案之後，刪掉原先的圖像檔案。 請注意： 必須先安裝 7-Zip **18.01 以上的版本**。
 		remove_images_after_archive : true,
 		images_archive_extension : 'zip',
@@ -508,6 +508,7 @@ function module_code(library_namespace) {
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
 			// 一般僅使用於命令列設定。default:1
 			start_list_serial : 'number',
+			chapter_time_interval : 'number',
 			MIN_LENGTH : 'number',
 			// 容許錯誤用的相關操作設定。
 			MAX_ERROR_RETRY : 'number',
@@ -625,7 +626,7 @@ function module_code(library_namespace) {
 		if (this.use_server_cache
 		// host_list
 		&& (this.server_list = library_namespace.get_JSON(server_file))) {
-			// use cache of host list. 不每一次重新取得取得伺服器列表。
+			// use cache of host list. 不每一次重新取得伺服器列表。
 			this.parse_work_id(work_id, callback);
 			return;
 		}
@@ -1350,7 +1351,7 @@ function module_code(library_namespace) {
 			if (key && (overwrite || !work_data[key])
 			//
 			&& (value = get_label(matched[2]).replace(/^[:：︰\s]+/, '').trim())) {
-				work_data[key] = value.replace(/\s{2,}/g, ' ');
+				work_data[key] = value.replace(/ {3,}/g, '  ');
 			}
 		}
 	}
