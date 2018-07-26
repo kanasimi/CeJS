@@ -1433,6 +1433,14 @@ function module_code(library_namespace) {
 				contents = contents.replace(/ (src|href)="([^"]+)"/ig,
 				//
 				function(all, attribute_name, url) {
+					if (/^\s*data:/.test(url)) {
+						library_namespace
+						// https://en.wikipedia.org/wiki/Data_URI_scheme
+						.log('check_text: Skip data URI scheme: ' + url
+								+ '\n of ' + item_data.file);
+						return all;
+					}
+
 					// [ url, path, file_name, is_directory ]
 					var matched = url.match(/^([\s\S]*\/)([^\/]+)(\/)?$/);
 					if (!matched || attribute_name.toLowerCase() !== 'src'
@@ -1443,6 +1451,7 @@ function module_code(library_namespace) {
 										+ url + '\n of ' + item_data.file);
 						return all;
 					}
+
 					var file_name = matched[2],
 					// links.push的href檔名在之後add_chapter()時可能會被改變。因此在xhtml文件中必須要先編碼一次。
 					href = _this.directory.media

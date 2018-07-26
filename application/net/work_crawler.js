@@ -266,7 +266,7 @@ function module_code(library_namespace) {
 		// charset : 'GBK',
 
 		// 瀏覽器識別: 腾讯TT浏览器
-		user_agent : 'Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.1; SV1; TencentTraveler 4.0)',
+		user_agent : 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; SV1; TencentTraveler 4.0)',
 		// 可容許的錯誤次數。
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
 		// 可容許的 EOI (end of image) 錯誤次數。
@@ -1687,7 +1687,7 @@ function module_code(library_namespace) {
 				// 處理章節列表分散在多個檔案時的情況。
 				// e.g., dajiaochong.js
 				_this.pre_get_chapter_list(
-				// callback
+				// function(callback, work_data, html, get_label)
 				process_chapter_list_data.bind(_this, html), work_data, html,
 						get_label);
 			} else {
@@ -1866,6 +1866,7 @@ function module_code(library_namespace) {
 			if (work_data.last_download.chapter > work_data.chapter_count) {
 				library_namespace.warn('章節數量 ' + work_data.chapter_count
 						+ ' 比將開始/接續之下載章節編號 ' + work_data.last_download.chapter
+						// or: 對於被屏蔽的作品，將會每次都從頭檢查。
 						+ ' 還少，或許因為章節有經過重整。');
 				if (_this.move_when_chapter_count_error) {
 					var move_to = work_data.directory
@@ -3511,6 +3512,7 @@ function module_code(library_namespace) {
 		// this: this_site
 		ebook.pack(file_path, this.remove_ebook_directory, remove_old_ebooks
 				.bind(this, work_data.id));
+		// 等待打包...
 	}
 
 	// --------------------------------------------------------------------------------------------

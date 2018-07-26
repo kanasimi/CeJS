@@ -9,11 +9,9 @@
 
  </code>
  * 
- * TODO: 去掉前後網站廣告
- * 
  * @see https://cms.shenl.com/sinmh/
  * 
- * @since 模組化。
+ * @since 2018/7/26 11:9:53 模組化。
  */
 
 // More examples:
@@ -50,14 +48,9 @@ function module_code(library_namespace) {
 
 	var default_configuration = {
 
-		// 本站常常無法取得圖片，因此得多重新檢查。
-		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。
-		// recheck : true,
-		// one_by_one : true,
-
 		// 嘗試取得被屏蔽的作品。
-		// 對於被屏蔽的作品，將會每次都從頭檢查。若連內容被屏蔽，就可能從頭檢查到尾都沒有成果。
-		try_to_get_blocked_work : false,
+		// 對於被屏蔽的作品，將會每次都從頭檢查。
+		try_to_get_blocked_work : true,
 
 		// allow .jpg without EOI mark.
 		// allow_EOI_error : true,
@@ -87,9 +80,9 @@ function module_code(library_namespace) {
 		},
 
 		// 解析 作品名稱 → 作品id get_work()
-		// 1. 使用網頁取得搜尋所得的作品資料。
+		// 1. 使用網頁取得搜尋所得的作品資料。 (default)
 		search_URL : 'search/?keywords=',
-		// 2. 使用API取得搜尋所得的作品資料。
+		// 2. 使用API取得搜尋所得的作品資料。 (set search_URL:'API')
 		search_URL_API : function(work_title) {
 			// SinConf.apiHost
 			var apiHost = this.base_URL.replace(/\/\/[a-z]+/, '//api');
@@ -225,12 +218,12 @@ function module_code(library_namespace) {
 
 		// 取得每一個章節的各個影像內容資料。 get_chapter_data()
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
-			if (work_data.filtered) {
+			if (work_data.filtered && !work_data.chapter_filtered) {
 				var next_chapter_data = html.between('nextChapterData =', ';');
 				// console.log(next_chapter_data || html);
 				if ((next_chapter_data = JSON.parse(next_chapter_data))
 						&& next_chapter_data.id > 0) {
-					library_namespace.log('add chapter: '
+					library_namespace.debug('add chapter: '
 							+ next_chapter_data.id);
 					next_chapter_data.url = this.work_URL(work_data.id)
 							+ next_chapter_data.id + '.html';
@@ -265,6 +258,17 @@ function module_code(library_namespace) {
 					url : /^https?:\/\//.test(url) ? url : path + url
 				}
 			});
+
+			if (chapter_data.image_list.length === 0
+					&& (html = html.between('class="ip-notice">', '<'))) {
+				// 避免若連內容被屏蔽，會從頭檢查到尾都沒有成果。
+				work_data.chapter_filtered = true;
+				if (work_data.filtered) {
+					library_namespace.info('因為本章節內容也被屏蔽，因此不再嘗試解析其他章節。');
+				} else {
+					library_namespace.warn(get_label(html));
+				}
+			}
 
 			return chapter_data;
 		}
