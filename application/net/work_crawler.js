@@ -3109,10 +3109,13 @@ function module_code(library_namespace) {
 				library_namespace.debug(message);
 			}
 
+			// 動態增加章節。
 			work_data.chapter_list.splice(chapter_NO, 0, {
 				// title : '',
 				url : next_url
 			});
+			// 重新設定章節數量。
+			work_data.chapter_count = work_data.chapter_list.length;
 		}
 	}
 
