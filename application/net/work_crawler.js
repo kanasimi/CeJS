@@ -267,15 +267,15 @@ function module_code(library_namespace) {
 
 		// 瀏覽器識別: 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; SV1; TencentTraveler 4.0)',
-		// 可容許的錯誤次數。
+		// 出錯時重新嘗試的次數。
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
-		// 可容許的 EOI (end of image) 錯誤次數。
+		// 圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。
 		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR_RETRY),
 		// 最小容許圖案檔案大小 (bytes)。
 		// 對於極少出現錯誤的網站，可以設定一個比較小的數值，並且設定.allow_EOI_error=false。因為這類型的網站要不是無法取得檔案，要不就是能夠取得完整的檔案；要取得破損檔案，並且已通過EOI測試的機會比較少。
 		// MIN_LENGTH : 4e3,
 		// 對於有些圖片只有一條細橫桿的情況。
-		// MIN_LENGTH : 150,
+		// MIN_LENGTH : 140,
 
 		// 預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_SIZE : 200,
@@ -334,6 +334,7 @@ function module_code(library_namespace) {
 
 		// for uncaught error
 		onerror : function onerror(error, work_data) {
+			process.title = 'Error: ' + error;
 			if (typeof error === 'object') {
 				throw error;
 			} else {
@@ -344,7 +345,10 @@ function module_code(library_namespace) {
 		},
 
 		// default start chapter index: 1.
-		// 將開始/接續下載的章節編號。必須要配合 .recheck。
+		// 將開始/接續下載的章節編號。對已下載過的章節，必須配合 .recheck。
+		// 若是 start_chapter 在之前下載過的最後一個章節之前的話，那麼就必須要設定 recheck 才會有效。
+		// 之前下載到第8章且未設定 recheck，則指定 start_chapter=9 **有**效。
+		// 之前下載到第8章且未設定 recheck，則指定 start_chapter=7 **無**效。必須設定 recheck。
 		start_chapter : 1,
 		// 是否重新取得每個所檢測的章節內容 chapter_page。
 		// 警告: reget_chapter=false 僅適用於小說之類不取得圖片的情形，
@@ -501,9 +505,9 @@ function module_code(library_namespace) {
 			main_directory : 'string',
 			user_agent : 'string',
 			one_by_one : 'boolean',
-			// 篩選想要下載的章節標題。
+			// 篩選想要下載的章節標題關鍵字。例如"單行本"。
 			chapter_filter : 'string',
-			// 將開始/接續下載的章節編號。必須要配合 .recheck。
+			// 將開始/接續下載的章節編號。對已下載過的章節，必須配合 .recheck。
 			start_chapter : 'number',
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
 			// 一般僅使用於命令列設定。default:1
@@ -869,7 +873,8 @@ function module_code(library_namespace) {
 
 		}, function all_work_done() {
 			library_namespace.log(this.id + ': All ' + work_list.length
-					+ ' works done. 所有作品下載作業結束.');
+					+ ' works done. ' + (new Date).toISOString()
+					+ ' 所有作品下載作業結束.');
 			var work_status_titles = Object.keys(all_work_status);
 			if (work_status_titles.length > 0) {
 				library_namespace.create_directory(
@@ -1410,14 +1415,19 @@ function module_code(library_namespace) {
 				);
 				if (work_data === _this.REGET_PAGE) {
 					// 需要重新讀取頁面。e.g., 502
+					var chapter_time_interval = _this.chapter_time_interval;
+					if (typeof chapter_time_interval === 'function') {
+						chapter_time_interval = _this
+								.chapter_time_interval(work_URL);
+					}
 					process.stdout.write('process_work_data: '
-							+ (_this.chapter_time_interval > 0 ? 'Wait '
+							+ (chapter_time_interval > 0 ? 'Wait '
 									+ library_namespace.age_of(0,
-											_this.chapter_time_interval)
-									+ ' to ' : '') + 'reget page [' + work_URL
+											chapter_time_interval) + ' to '
+									: '') + 'reget page [' + work_URL
 							+ ']...\r');
-					if (_this.chapter_time_interval > 0) {
-						setTimeout(get_work_page, _this.chapter_time_interval);
+					if (chapter_time_interval > 0) {
+						setTimeout(get_work_page, chapter_time_interval);
 					} else {
 						get_work_page();
 					}
@@ -1584,7 +1594,7 @@ function module_code(library_namespace) {
 				}
 				matched = matched.last_download.chapter;
 				if (matched > _this.start_chapter) {
-					// 將開始/接續下載的章節編號。必須要配合 .recheck。
+					// 將開始/接續下載的章節編號。對已下載過的章節，必須配合 .recheck。
 					work_data.last_download.chapter = matched;
 				}
 			}
@@ -1853,7 +1863,8 @@ function module_code(library_namespace) {
 				}
 
 			} else if (_this.start_chapter > Work_crawler.prototype.start_chapter) {
-				library_namespace.warn('設定 start_chapter 時，必須同時指定 recheck！');
+				library_namespace
+						.warn('若之前已經下載到最新章節，則指定 start_chapter 時，必須同時設定 recheck！');
 			}
 
 			if (!('reget_chapter' in work_data)) {
@@ -2026,12 +2037,18 @@ function module_code(library_namespace) {
 		var actual_operation = get_chapter_data.bind(this, work_data,
 				chapter_NO, callback),
 		// this.chapter_time_interval: 下載章節資訊前的等待時間(ms)。
-		next = this.chapter_time_interval > 0 ? (function() {
+		chapter_time_interval = this.chapter_time_interval;
+		if (typeof chapter_time_interval === 'function') {
+			chapter_time_interval = this.chapter_time_interval(chapter_NO,
+					work_data);
+		}
+
+		var next = chapter_time_interval > 0 ? (function() {
 			process.stdout.write(this.id + ': ' + work_data.title
 					+ ': 下載章節資訊前先等待 '
-					+ library_namespace.age_of(0, this.chapter_time_interval)
+					+ library_namespace.age_of(0, chapter_time_interval)
 					+ '...\r');
-			setTimeout(actual_operation, this.chapter_time_interval);
+			setTimeout(actual_operation, chapter_time_interval);
 		}).bind(this) : actual_operation;
 
 		if (this.chapter_filter) {
@@ -2041,10 +2058,13 @@ function module_code(library_namespace) {
 			// console.log(chapter_data);
 
 			if (chapter_data && chapter_data.title
-			// 篩選想要下載的章節標題。
-			&& !chapter_data.title.includes(this.chapter_filter)) {
+			// 篩選想要下載的章節標題關鍵字。例如"單行本"。
+			&& !chapter_data.title.toLowerCase().includes(
+			// 不區分大小寫。
+			String(this.chapter_filter).toLowerCase())) {
 				library_namespace.debug('pre_get_chapter_data: Skip ['
-						+ chapter_data.title + ']: 不在 chapter_filter 所篩範圍內。');
+						+ chapter_data.title
+						+ ']: 不在 chapter_filter 所篩範圍內。跳過本章節不下載。');
 
 				// 執行一些最後結尾的動作。
 				continue_next_chapter.call(this, work_data, chapter_NO,
@@ -2474,15 +2494,21 @@ function module_code(library_namespace) {
 							get_label, chapter_NO);
 					if (chapter_data === _this.REGET_PAGE) {
 						// 需要重新讀取頁面。e.g., 502
+						var chapter_time_interval = _this.chapter_time_interval;
+						if (typeof chapter_time_interval === 'function') {
+							chapter_time_interval = _this
+									.chapter_time_interval(chapter_URL,
+											work_data);
+						}
 						process.stdout.write('process_chapter_data: '
-								+ (_this.chapter_time_interval > 0 ? 'Wait '
+								+ (chapter_time_interval > 0 ? 'Wait '
 										+ library_namespace.age_of(0,
-												_this.chapter_time_interval)
-										+ ' to ' : '') + 'reget page ['
-								+ chapter_URL + ']...\r');
-						if (_this.chapter_time_interval > 0) {
+												chapter_time_interval) + ' to '
+										: '') + 'reget page [' + chapter_URL
+								+ ']...\r');
+						if (chapter_time_interval > 0) {
 							setTimeout(reget_chapter_data,
-									_this.chapter_time_interval);
+									chapter_time_interval);
 						} else {
 							reget_chapter_data();
 						}
@@ -3097,9 +3123,16 @@ function module_code(library_namespace) {
 				next_chapter.url = next_url;
 			}
 
+			if (work_data.chapter_list.some(function(chapter_data) {
+				return chapter_data.url === next_url;
+			})) {
+				// url 已經在 chapter_list 裡面。
+				return;
+			}
+
 			var message = 'check_next_chapter: Insert a chapter url after chapter '
 					+ chapter_NO + ': ' + next_url
-					// 原先下一個章節的URL被往後移一個。
+					// 原先下一個章節的 URL 被往後移一個。
 					+ (next_chapter_url ? '→' + next_chapter_url : '');
 			if (next_chapter_url) {
 				// Insert a chapter url
@@ -3244,7 +3277,7 @@ function module_code(library_namespace) {
 		//
 		chapter_data = work_data.chapter_list
 				&& work_data.chapter_list[chapter_NO - 1],
-		// 卷篇集幕部/volume/part/book
+		// 卷篇集幕部冊册/volume/part/book
 		part_title = data.title || chapter_data && chapter_data.part_title,
 		// 章節名稱 / 章節节回折篇話话頁页/chapter
 		chapter_title = data.sub_title || chapter_data
