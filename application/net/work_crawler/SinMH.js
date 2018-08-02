@@ -67,7 +67,8 @@ function module_code(library_namespace) {
 		server_URL : 'js/config.js',
 		parse_server_list : function(html) {
 			var server_list = [], SinConf;
-			eval(html.replace('var ', '').replace(/(}\(\))[\s\S]*/, '$1'));
+			html = html.replace('var ', '').replace(/(}\(\))[\s\S]*/, '$1');
+			eval(html);
 			SinConf.resHost.map(function(data) {
 				server_list.append(data.domain.map(function(host) {
 					return host.endsWith('/') ? host : host + '/';

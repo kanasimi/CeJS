@@ -30,7 +30,7 @@ Runs untrusted code securely https://github.com/patriksimek/vm2
 </code>
  * 
  * @see https://github.com/abc9070410/JComicDownloader
- *      https://github.com/eight04/ComicCrawler
+ *      https://github.com/eight04/ComicCrawler https://github.com/riderkick/FMD
  *      https://github.com/wellwind/8ComicDownloaderElectron
  *      https://github.com/Arachnid-27/Cimoc
  *      https://github.com/qq573011406/KindleHelper
@@ -339,7 +339,7 @@ function module_code(library_namespace) {
 				throw error;
 			} else {
 				console.trace(error);
-				throw (new Date).toISOString() + ' ' + error;
+				throw this.id + ': ' + (new Date).toISOString() + ' ' + error;
 			}
 			return Work_crawler.THROWED;
 		},

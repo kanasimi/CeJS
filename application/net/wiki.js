@@ -19240,8 +19240,11 @@ function module_code(library_namespace) {
 						callback(undefined, error);
 						return;
 					}
-					library_namespace.debug('Get entity '
-							+ JSON.stringify(entity), 3, 'wikidata_edit');
+					if (false) {
+						// TypeError: Converting circular structure to JSON
+						library_namespace.debug('Get entity '
+								+ JSON.stringify(entity), 3, 'wikidata_edit');
+					}
 					if (!entity || ('missing' in entity)) {
 						// TODO: e.g., 此頁面不存在/已刪除。
 						// return;

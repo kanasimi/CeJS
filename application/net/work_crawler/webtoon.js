@@ -51,7 +51,8 @@ function module_code(library_namespace) {
 		base_URL : 'https://www.webtoons.com/',
 
 		// 最小容許圖案檔案大小 (bytes)。
-		MIN_LENGTH : 300,
+		// 對於有些圖片只有一條細橫桿的情況。
+		MIN_LENGTH : 140,
 
 		// 解析 作品名稱 → 作品id get_work()
 		search_URL : function(work_title) {

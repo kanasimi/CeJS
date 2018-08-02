@@ -12,7 +12,7 @@
  * TODO: 去掉前後網站廣告
  * 
  * @see https://www.ptcms.com/
- * @see http://down.chinaz.com/test/201210/2252_1.htm 杰奇小说连载系统,
+ * @see http://down.chinaz.com/test/201210/2252_1.htm 杰奇小说连载系统 杰奇原创文学系统,
  *      https://zhidao.baidu.com/question/518711125119801445.html 奇文网络小说管理系统
  *      终点小说网站管理系统 露天中文小说网站管理系统 https://zhidao.baidu.com/question/474414436.html
  *      https://www.ptcms.com/ 关关采集器
