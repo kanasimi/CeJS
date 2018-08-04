@@ -2881,10 +2881,16 @@ function module_code(library_namespace) {
 		get_URL(url, function(XMLHttp) {
 			// console.log(XMLHttp);
 			// 圖片數據的內容。
-			var contents = XMLHttp.responseText,
+			var contents = XMLHttp.responseText;
+			if (_this.image_pre_process) {
+				// 圖片前處理程序 image pre-processing
+				contents = _this.image_pre_process(contents, image_data)
+						|| contents;
+			}
+
 			// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
 			// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。
-			has_error = !contents || !(contents.length >= _this.MIN_LENGTH)
+			var has_error = !contents || !(contents.length >= _this.MIN_LENGTH)
 					|| (XMLHttp.status / 100 | 0) !== 2, verified_image;
 			if (!has_error) {
 				image_data.file_length.push(contents.length);
@@ -2933,7 +2939,7 @@ function module_code(library_namespace) {
 				&& (_this.skip_error || _this.allow_EOI_error
 				//
 				&& image_data.file_length.length > _this.MAX_EOI_ERROR)) {
-					// pass, 過關了。
+					// 圖片下載過程結束，不再嘗試下載圖片:要不是過關，要不就是錯誤太多次了。
 					var bad_file_path = _this.EOI_error_path(image_data.file,
 							XMLHttp);
 					if (has_error || verified_image === false) {
@@ -2956,6 +2962,7 @@ function module_code(library_namespace) {
 							contents = '';
 						}
 					} else {
+						// pass, 過關了。
 						if (node_fs.existsSync(bad_file_path)) {
 							library_namespace.info('刪除損壞的舊檔：' + bad_file_path);
 							library_namespace.fs_remove(bad_file_path);
@@ -2994,6 +3001,16 @@ function module_code(library_namespace) {
 					if (!old_file_status
 					// 得到更大的檔案，寫入更大的檔案。
 					|| !(old_file_status.size >= contents.length)) {
+						// _this.image_post_processor()
+						if (_this.image_post_process) {
+							// 圖片後處理程序 image post-processing
+							contents = _this.image_post_process(contents,
+									image_data
+							// , images_archive
+							)
+									|| contents;
+						}
+
 						library_namespace.debug('保存圖片數據到HDD上: '
 								+ image_data.file, 1, 'get_images');
 						// TODO: 檢查舊的檔案是不是文字檔。例如有沒有包含HTML標籤。
