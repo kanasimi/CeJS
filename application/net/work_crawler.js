@@ -30,7 +30,8 @@ Runs untrusted code securely https://github.com/patriksimek/vm2
 </code>
  * 
  * @see https://github.com/abc9070410/JComicDownloader
- *      https://github.com/eight04/ComicCrawler https://github.com/riderkick/FMD
+ *      https://github.com/eight04/ComicCrawler
+ *      https://github.com/yuru-yuri/manga-dl https://github.com/riderkick/FMD
  *      https://github.com/wellwind/8ComicDownloaderElectron
  *      https://github.com/Arachnid-27/Cimoc
  *      https://github.com/qq573011406/KindleHelper
@@ -496,6 +497,7 @@ function module_code(library_namespace) {
 		set_part : set_part_title,
 		add_chapter : add_chapter_data,
 		reverse_chapter_list_order : reverse_chapter_list_order,
+		set_chapter_NO_via_title : set_chapter_NO_via_title,
 		get_chapter_directory_name : get_chapter_directory_name,
 
 		// 命令列可以設定的選項。通常僅做測試微調用。
@@ -2182,6 +2184,16 @@ function module_code(library_namespace) {
 			});
 		}
 	}
+	// 依章節標題來定章節編號。
+	function set_chapter_NO_via_title(chapter_data) {
+		var matched = chapter_data.title.match(
+		// 因為中間的章節可能已經被下架，因此依章節標題來定章節編號。
+		/第 ?(\d{1,3}(?:\.\d)?) ?話/);
+		if (matched) {
+			// 可能有第0話。
+			chapter_data.chapter_NO = matched[1];
+		}
+	}
 	// should called by get_data() or this.pre_parse_chapter_data()
 	// this.get_chapter_directory_name(work_data, chapter_NO);
 	// this.get_chapter_directory_name(chapter_data, chapter_NO);
@@ -2228,8 +2240,8 @@ function module_code(library_namespace) {
 		chapter_title = chapter_title.trim();
 
 		var chapter_directory_name = (part || '')
-		// 檔名 NO 的基本長度（不足補零）。
-		+ chapter_NO.pad(4) + (chapter_title ? ' '
+		// 檔名 NO 的基本長度（不足補零）。以 chapter_data.chapter_NO 可自定章節編號。
+		+ (chapter_data.chapter_NO || chapter_NO).pad(4) + (chapter_title ? ' '
 		// 把網頁編碼還原成看得懂的文字。 get_label()
 		+ library_namespace.HTML_to_Unicode(chapter_title) : '');
 

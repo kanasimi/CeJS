@@ -52,7 +52,8 @@ if (typeof CeL === 'function')
 			// using BYVoid / OpenCC 開放中文轉換 (Open Chinese Convert) table.
 			// https://github.com/BYVoid/OpenCC/tree/master/data/dictionary
 			dictionary_base = library_namespace.get_module_path(this.id,
-					'OpenCC/');
+					'OpenCC' + library_namespace.env.path_separator);
+			// console.log('dictionary_base: ' + dictionary_base);
 
 			function CN_to_TW(text, options) {
 				if (!CN_to_TW_conversions) {
@@ -77,7 +78,7 @@ if (typeof CeL === 'function')
 
 					// 手動修正表。
 					CN_to_TW_conversions.push(new pair(null, {
-						path : dictionary_base.replace(/[^\/]+\/$/,
+						path : dictionary_base.replace(/[^\\\/]+[\\\/]$/,
 								'corrections.txt'),
 						remove_comments : true
 					}));

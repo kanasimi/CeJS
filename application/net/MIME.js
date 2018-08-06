@@ -10,6 +10,7 @@
  * @since 2017/1/27 7:55:6
  * @see https://en.wikipedia.org/wiki/Media_type
  *      https://www.iana.org/assignments/media-types/media-types.xhtml
+ *      https://github.com/jshttp/mime-types
  */
 
 'use strict';

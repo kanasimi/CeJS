@@ -213,7 +213,7 @@ function module_code(library_namespace) {
 			remove : {
 				command : 'd'
 			},
-			// get archive information
+			// get archive information / status
 			info : {
 				command : 'l -slt -sccUTF-8'
 			},
@@ -311,12 +311,15 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------
 
 	function parse_7z_info_output(output) {
-		// console.log(output.toString());
+		// console.log(output && output.toString());
+		// console.log(output && output.toString());
 
 		if (!output || !(output = output.toString())) {
 			return output;
 		}
+		// console.log(output);
 
+		// console.trace(this);
 		this.hash = library_namespace.null_Object();
 		// console.log(JSON.stringify(output));
 		// console.log(JSON.stringify(output.split(/\r?\n\r?\n/)));
@@ -369,7 +372,7 @@ function module_code(library_namespace) {
 
 		options = library_namespace.setup_options(options);
 
-		var switches = apply_switches[this.program_type].call(this, operation,
+		var _this = this, switches = apply_switches[this.program_type].call(this, operation,
 				options),
 		//
 		_postfix = postfix[this.program_type]
@@ -379,7 +382,7 @@ function module_code(library_namespace) {
 		//
 		callback && _postfix ? function(output) {
 			// console.log(output.toString());
-			callback(_postfix(output));
+			callback(_postfix.call(_this, output));
 		} : callback, FSO_list);
 
 		return _postfix ? _postfix.call(this, output) : output;

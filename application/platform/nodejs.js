@@ -469,9 +469,8 @@ function module_code(library_namespace) {
 		if (isNaN(depth)) {
 			depth = Infinity;
 		} else if (!(depth >= 1)) {
-			depth = options.depth;
+			depth = options.depth | 0;
 		}
-		depth |= 0;
 		if (!(depth-- >= 1)) {
 			// depth === 1: 僅到本層為止。
 			return;
@@ -488,10 +487,12 @@ function module_code(library_namespace) {
 			return;
 		}
 		if (!/[\\\/]$/.test(path)) {
+			// treat path as directory
 			path += path_separator;
 		}
 
 		// console.log([ depth, filter ]);
+		// console.log(list);
 
 		list.forEach(function(fso_name) {
 			try {
@@ -667,10 +668,14 @@ function module_code(library_namespace) {
 		return new Buffer(stringToEncode).toString('base64');
 	}
 
-	// decode :Base64 → ASCII string
+	// decode: Base64 → ASCII string
 	// https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/atob
 	function atob(encodedData) {
-		return new Buffer.from(encodedData, 'base64').toString('binary');
+		if (typeof Buffer.from === 'function')
+			return new Buffer.from(encodedData, 'base64').toString('binary');
+
+		// For Node.js v5.11.1 and below
+		return new Buffer(encodedData, 'base64');
 	}
 
 	// --------------------------------------------
