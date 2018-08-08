@@ -211,7 +211,7 @@ function module_code(library_namespace) {
 	 * @param {String}attributes
 	 *            attributes to set
 	 * @param {Function}[numeralize]
-	 *            only need if you want to numeralize the properties
+	 *            only needed if you want to numeralize the properties
 	 * 
 	 * @inner
 	 */
@@ -285,7 +285,7 @@ function module_code(library_namespace) {
 	 *            XML text
 	 * @param {Object}[options]
 	 *            options<br />
-	 *            {Boolean|Function}options.numeralize(text): only need if you
+	 *            {Boolean|Function}options.numeralize(text): only needed if you
 	 *            want to numeralize the properties
 	 * 
 	 * @returns {Array|Object|String} XML nodes
@@ -308,7 +308,9 @@ function module_code(library_namespace) {
 
 		var nodes = [ XML ],
 		//
-		numeralize = options.numeralize;
+		numeralize = options.numeralize,
+		//
+		skip_spaces = options.skip_spaces;
 
 		if (numeralize && typeof numeralize !== 'function') {
 			numeralize = function(string) {
@@ -415,6 +417,10 @@ function module_code(library_namespace) {
 						}
 
 						// setup tag name & children
+						if (skip_spaces) {
+							tag_matched[2] = tag_matched[2].trim();
+							matched[1] = matched[1].trim();
+						}
 						if (tag_matched[2]) {
 							// add first children @ last of head srction
 							children
@@ -443,7 +449,13 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (nodes.length === 0)
+	if (skip_spaces && nodes.length > 0
+	&& typeof nodes[nodes.length - 1] === 'string'
+	&& !(nodes[nodes.length - 1] = nodes[nodes.length - 1].trim())) {
+		// 最後一個 node 為 spaces。
+		nodes.pop();
+	}
+	if (nodes.length === 0)
 			nodes = null;
 		else if (nodes.length === 1)
 			nodes = numeralize ? numeralize(nodes[0]) : nodes[0];

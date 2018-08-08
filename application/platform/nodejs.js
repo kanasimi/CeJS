@@ -530,6 +530,8 @@ function module_code(library_namespace) {
 				}
 			}
 		});
+
+		library_namespace.debug('處理完畢: ' + path, 2, 'traverse_file_system');
 	}
 
 	_.traverse_file_system = traverse_file_system;

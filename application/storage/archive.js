@@ -182,7 +182,12 @@ function module_code(library_namespace) {
 			var output = execSync(command);
 			// console.log(output.toString());
 			if (typeof callback === 'function')
-				callback(output);
+				try {
+					// 預防 callback throw
+					callback(output);
+				} catch (e) {
+					library_namespace.error(e);
+				}
 			return output;
 		} catch (e) {
 			if (typeof callback === 'function')
@@ -204,7 +209,7 @@ function module_code(library_namespace) {
 					return '-t' + this.archive_type;
 				},
 				// recurse : '-r',
-				level : '-mx=9'
+				level : '-mx=9',
 			},
 			extract : {
 				command : 'x'
@@ -252,6 +257,10 @@ function module_code(library_namespace) {
 			output : function(value) {
 				if (value)
 					return add_quote('-o' + value);
+			},
+			// temp directory 設置臨時工作目錄。
+			work_directory : function(value) {
+				return add_quote('-w' + value);
 			},
 			// additional switches
 			extra : function(value) {

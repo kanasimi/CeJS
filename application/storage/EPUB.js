@@ -110,8 +110,12 @@ function module_code(library_namespace) {
 		var rootfile_path = (this.root_directory_name
 		//
 		? this.root_directory_name + '/' : '') + this.package_document_name;
+		// console.log(this.container.toString());
 		if (this.container
-				&& (this.container = JSON.from_XML(this.container.toString()))) {
+				&& (this.container = JSON.from_XML(this.container.toString(), {
+					skip_spaces : true
+				}))) {
+			// console.log(this.container);
 			// parse container
 			var rootfile = this.container.container.rootfiles;
 			if (Array.isArray(rootfile)) {
@@ -2117,6 +2121,7 @@ function module_code(library_namespace) {
 		try {
 			execSync(command);
 		} catch (e) {
+			library_namespace.error('archive_to_ZIP: execution error!');
 			library_namespace.error(e);
 			typeof callback === 'function' && callback();
 			return;
