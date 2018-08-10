@@ -1617,7 +1617,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String}lead section wikitext 文字
 	 * 
-	 * @see 文章的開頭部分[[WP:LEAD|導言章節]] (lead section, introduction)
+	 * @see 文章的開頭部分[[WP:LEAD|導言章節]] (lead section, introduction),
+	 *      [[en:Wikipedia:Hatnote]] 頂註
 	 */
 	function lead_text(wikitext) {
 		var page_data;

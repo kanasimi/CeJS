@@ -925,7 +925,7 @@ get_URI = get_URI;
  *        2009/10/20 22:40:33	to function<br />
  *        2012/3/31 21:19:52	refactoring 重構. get more data of video.
  *
- * @see <a href="http://kej.tw/flvretriever/youtube.php" accessdate="2012/3/31 17:10">Kej's FLV Retriever</a>,
+ * @see https://github.com/rg3/youtube-dl , https://github.com/levinit/bye-flash-hello-html5 , <a href="http://kej.tw/flvretriever/youtube.php" accessdate="2012/3/31 17:10">Kej's FLV Retriever</a>,
  *      <a href="http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/10404/youtube-blocked-httpyoutubecomgetvideo" accessdate="2012/3/31 21:20">Youtube blocked http://youtube.com/get_video | LongTail Video | Home of the JW Player</a>,
  *      <a href="http://userscripts.org/scripts/review/109103" accessdate="2012/3/31 21:21" title="Source for &quot;Download YouTube Videos as MP4 (Patch)&quot; - Userscripts.org">Source for &quot;Download YouTube Videos as MP4 (Patch)&quot; - Userscripts.org</a>,
  *      <a href="http://tubewall.googlecode.com/svn-history/r2/trunk/demo/get_video_info.txt" accessdate="2012/3/31 21:21" title="猜测get_video_info返回参数的含义">猜測get_video_info返回參數的含義</a>,

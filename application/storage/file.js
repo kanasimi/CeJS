@@ -720,11 +720,18 @@ function module_code(library_namespace) {
 
 	// Magic_number[type]={Object}data
 	var Magic_number = {
+		// text
 		html : {
 			// other file extensions
 			extension : [ 'htm', 'shtml' ],
 			min_size : 52
 		},
+		pdf : {
+			magic : to_magic_array('%PDF'),
+			min_size : 800
+		},
+
+		// image
 		gif : {
 			// Header: GIF89a
 			magic : to_magic_array('GIF89a'),
@@ -737,35 +744,103 @@ function module_code(library_namespace) {
 		// https://en.wikipedia.org/wiki/PNG
 		// https://en.wikipedia.org/wiki/APNG
 		png : {
-			// IHDR數據塊:
+			// IHDR數據塊: ‰PNG....
 			magic : '89 50 4E 47 0D 0A 1A 0A',
-			// IEND數據塊:
 			// http://blog.xuite.net/tzeng015/twblog/113272013-5.2.3+分析PNG圖像文件結構（6）
+			// IEND數據塊: IEND®B`‚...
 			eof : '00 00 00 00 49 45 4E 44 AE 42 60 82',
 			min_size : 100
 		},
 		jpg : {
+			// ÿØ
 			magic : 'FF D8 FF',
-			// check EOI, End Of Image mark of .jpeg
 			// http://stackoverflow.com/questions/4585527/detect-eof-for-jpg-images
+			// check EOI, End Of Image mark of .jpeg: ÿÙ
 			eof : 'FF D9',
 			// other file extensions
 			extension : [ 'jpeg' ],
 			min_size : 3e3
 		},
+		tif : {
+			// II*.
+			magic : '49 49 2A 00',
+			// other file extensions
+			extension : [ 'tiff' ],
+			min_size : 3e3
+		},
+		ico : {
+			magic : '00 00 01 00',
+			min_size : 50
+		},
 
-		// RIFF types
-		webp : {
+		// https://www.garykessler.net/library/file_sigs.html
+		// archives
+		zip : {
+			// PK..
+			magic : '50 4B 03 04',
+			min_size : 100
+		},
+		'7z' : {
+			// 7z¼¯'.
+			magic : '37 7A BC AF 27 1C',
+			min_size : 100
+		},
+		rar : {
+			// Rar!...
+			magic : '52 61 72 21 1A 07 00',
+			min_size : 100
+		},
+		rar5 : {
+			// Rar!....
+			magic : '52 61 72 21 1A 07 01 00',
+			min_size : 100
+		},
+
+		// sound
+		mp3 : {
+			// 49 44 33 04 00
+			magic : to_magic_array('ID3'),
+			min_size : 100
+		},
+
+		// video
+		mpg : {
+			// 00 00 01 Bx
+			magic : '00 00 01',
+			eof : '00 00 01 B7',
+			extension : [ 'mpeg' ],
+			min_size : 1e3
+		},
+
+		// RIFF types: 會自動判別RIFF標頭，不用特別指定。
+		wav : {
 			min_size : 100,
 			verify : function(file_contents) {
-				// https://developers.google.com/speed/webp/docs/riff_container#webp_file_header
-				// https://en.wikipedia.org/wiki/WebP
+				// TODO: file_contents.slice(4, 8): File Size (little endian)
+
+				return file_contents.slice(8, 15).toString() === 'WAVEfmt';
+			}
+		},
+		avi : {
+			min_size : 100,
+			verify : function(file_contents) {
+				// TODO: file_contents.slice(4, 8): File Size (little endian)
+
+				return file_contents.slice(8, 16).toString() === 'AVI LIST';
+			}
+		},
+		webp : {
+			min_size : 100,
+			// https://developers.google.com/speed/webp/docs/riff_container#webp_file_header
+			// https://en.wikipedia.org/wiki/WebP
+			verify : function(file_contents) {
+				// TODO: file_contents.slice(4, 8): File Size (little endian)
+
 				// "WEBPVP8 " for lossy images,
-				// and "WEBPVP8L" for lossless images.
+				// "WEBPVP8L" for lossless images.
 				return file_contents.slice(8, 15).toString() === 'WEBPVP8';
 			}
 		}
-
 	},
 	// Magic_number_data[byte count]=[{Natural}Magic_number:{Object}data]
 	Magic_number_data = [], MAX_magic_byte_count = Math
@@ -803,7 +878,7 @@ function module_code(library_namespace) {
 		magic_data.magic = magic_data.magic.replace(/[ ,]+/g, '');
 		var magic_byte_count = magic_data.magic_byte_count
 		//
-		= magic_data.magic.length / 2, magic;
+		= magic_data.magic.length / 2 | 0, magic;
 		if (magic_byte_count > MAX_magic_byte_count) {
 			magic_byte_count = MAX_magic_byte_count;
 			magic = magic_data.magic.slice(0, magic_byte_count * 2);
