@@ -215,7 +215,7 @@ function module_code(library_namespace) {
 		this.get_URL_options = {
 			// start_time : Date.now(),
 			no_protocol_warn : true,
-			timeout : Work_crawler.timeout,
+			timeout : this.timeout,
 			headers : Object.assign({
 				'User-Agent' : this.user_agent,
 				Referer : this.base_URL
@@ -241,8 +241,6 @@ function module_code(library_namespace) {
 
 	/** {Natural}下載失敗時最多重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
 	Work_crawler.MAX_ERROR_RETRY = 4;
-	/** {Natural}timeout in ms for get_URL() 下載圖片的逾時ms數。若逾時時間太小（如10秒），下載大檔案容易失敗。 */
-	Work_crawler.timeout = 30 * 1000;
 
 	Work_crawler.HTML_extension = 'htm';
 
@@ -268,6 +266,14 @@ function module_code(library_namespace) {
 
 		// 瀏覽器識別: 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; SV1; TencentTraveler 4.0)',
+		/**
+		 * {Natural}timeout in ms for get_URL()
+		 * 下載圖片的逾時ms數。若逾時時間太小（如10秒），下載大檔案容易失敗。
+		 * 
+		 * 注意: 因為 this.get_URL_options 在 constructor 中建構完畢，因此 timeout
+		 * 必須在一開始就設定。之後設定沒有效果。
+		 */
+		timeout : 30 * 1000,
 		// 出錯時重新嘗試的次數。
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
 		// 圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。
@@ -326,7 +332,7 @@ function module_code(library_namespace) {
 		error_log_file_backup : 'error_files.'
 				+ (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.txt',
 		// 這些值會被複製到記錄報告中。
-		last_update_status_keys : 'last_update_chapter,latest_chapter,latest_chapter_name,latest_chapter_url,last_update'
+		last_update_status_keys : 'last_update_chapter,latest_chapter,latest_chapter_name,latest_chapter_url,last_update,update_time'
 				.split(','),
 		// 記錄報告檔案/日誌的路徑。
 		report_file : 'report.' + (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.'
@@ -486,6 +492,7 @@ function module_code(library_namespace) {
 		chapter_URL : function(work_data, chapter_NO) {
 			// chapter_NO starts from 1
 			// console.log(work_data.chapter_list);
+			// console.log(work_data.chapter_list[chapter_NO - 1]);
 
 			// e.g., work_data.chapter_list = [ chapter_data,
 			// chapter_data={url:'',title:'',date:new Date}, ... ]
@@ -2426,7 +2433,7 @@ function module_code(library_namespace) {
 						++image_list.index;
 						check_if_done();
 					}
-					process.stdout.write(image_list.index + '/'
+					process.stdout.write('圖 ' + image_list.index + '/'
 							+ image_list.length + '...\r');
 					if (image_list.index < image_list.length) {
 						_this.get_images(image_list[image_list.index],
@@ -2650,7 +2657,7 @@ function module_code(library_namespace) {
 			--left;
 			// console.log('check_if_done: left: ' + left);
 			if (Array.isArray(image_list) && image_list.length > 1) {
-				process.stdout.write(left + ' left...\r');
+				process.stdout.write('圖 ' + left + ' left...\r');
 				library_namespace.debug(chapter_label + ': ' + left + ' left',
 						3, 'check_if_done');
 			}
@@ -3248,7 +3255,7 @@ function module_code(library_namespace) {
 			creator : work_data.author,
 			// 🏷標籤, ジャンル, タグ, キーワード
 			subject : work_data.genre || work_data.status,
-			// あらすじ, 簡介
+			// 作品描述: 劇情簡介, synopsis, あらすじ
 			description : get_label(work_data.description
 			// .description 中不可存在 tag。
 			.replace(/\n*<br[^<>]+>\n*/ig, '\n')),

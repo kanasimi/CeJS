@@ -458,7 +458,12 @@ function module_code(library_namespace) {
 				&& library_namespace.is_Object(resources[--index])) {
 					try {
 						// 以非正規方法存取資訊。
-						resources[index][KEY_DATA] = JSON.parse(matched[1]);
+						resources[index][KEY_DATA] = JSON.parse(matched[1]
+						// @see write_chapters()
+						// 在 HTML 注釋中不能包含 "--"。
+						.replace(/(?:%2D){2,}/g, function($0) {
+							return '-'.repeat($0.length / 3);
+						}));
 					} catch (e) {
 						// TODO: handle exception
 					}
@@ -2007,9 +2012,19 @@ function module_code(library_namespace) {
 					}
 				});
 				if (setted) {
+					info = JSON.stringify(info);
+					if (info.includes('%2D%2D')) {
+						library_namespace.error('所欲封入注釋的詮釋資料本身含有 "%2D%2D"，'
+						//
+						+ '將造成解碼時出現錯誤！');
+						library_namespace.info(info);
+					}
 					this.raw_data_ptr.manifest.push('<!-- '
-					//
-					+ JSON.stringify(info) + ' -->');
+					// The string "--" is not permitted within comments.
+					// 在 HTML 注釋中不能包含 "--"。
+					+ info.replace(/-{2,}/g, function($0) {
+						return '%2D'.repeat($0.length);
+					}) + ' -->');
 				}
 			}
 		}, this);
