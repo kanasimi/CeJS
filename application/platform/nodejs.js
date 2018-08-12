@@ -628,11 +628,14 @@ function module_code(library_namespace) {
 		if (!Array.isArray(search_path_list)) {
 			search_path_list = String(search_path_list
 			// Unix: process.env.PATH, Windows: process.env.Path
-			|| process.env.PATH || '');
+			|| process.env.PATH
+			// /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:.
+			|| '');
 
 			// Unix: ':', Windows: ';'
 			search_path_list = search_path_list.split(search_path_list
-					.includes(':\\') ? ';' : ':');
+			// e.g., "C:\"
+			.includes(':\\') ? ';' : ':');
 		}
 
 		if (library_namespace.platform('windows')

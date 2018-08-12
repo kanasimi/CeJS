@@ -54,6 +54,8 @@ archive_file.verify(options, callback);
  </code>
  * 
  * @see CeL.application.OS.Windows.archive
+ * @see https://github.com/quentinrossetti/node-7z
+ *      https://github.com/fritx/win-7zip
  * 
  * @since 2018/3/4 13:57:28
  * @since 2018/3/8 19:59:47 初步可用
@@ -381,8 +383,8 @@ function module_code(library_namespace) {
 
 		options = library_namespace.setup_options(options);
 
-		var _this = this, switches = apply_switches[this.program_type].call(this, operation,
-				options),
+		var _this = this, switches = apply_switches[this.program_type].call(
+				this, operation, options),
 		//
 		_postfix = postfix[this.program_type]
 				&& postfix[this.program_type][operation],

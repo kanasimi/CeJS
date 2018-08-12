@@ -1174,7 +1174,7 @@ function module_code(library_namespace) {
 				agent.last_cookie[cookie_index[matched[1]]] = piece;
 			} else {
 				// 正常情況。
-				// 登記已存在之cookie。
+				// 登記已存在之 cookie。
 				agent.cookie_hash[matched[1]] = matched[2];
 				cookie_index[matched[1]] = agent.last_cookie.length;
 				agent.last_cookie.push(piece);
@@ -1185,9 +1185,10 @@ function module_code(library_namespace) {
 		// Object.freeze(agent.cookie_hash);
 		// Object.freeze(agent.cookie_index);
 
-		library_namespace.debug(agent.last_cookie, 3, 'merge_cookie');
-		library_namespace.debug(JSON.stringify(agent.cookie_hash), 3,
-				'merge_cookie');
+		library_namespace.debug('array: ' + JSON.stringify(agent.last_cookie),
+				3, 'merge_cookie');
+		library_namespace.debug('hash: ' + JSON.stringify(agent.cookie_hash),
+				3, 'merge_cookie');
 		return agent.last_cookie;
 	}
 
@@ -1349,27 +1350,36 @@ function module_code(library_namespace) {
 			} else if (agent.protocol
 			// agent.protocol 可能是 undefined。
 			&& agent.protocol !== _URL.protocol) {
-				if (!options.no_protocol_warn) {
+				if (options.no_protocol_warn) {
+					library_namespace.debug(
+							'自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
+									+ agent.protocol + ' !== ' + _URL.protocol,
+							3, 'get_URL_node');
+				} else {
 					library_namespace
 							.warn('get_URL_node: 自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
 									+ agent.protocol + ' !== ' + _URL.protocol);
 				}
 				// use new agent. default: https://
+				// assert: options.agent === agent
 				agent = _URL.protocol === 'http:' ? new node_http.Agent
 						: new node_https.Agent;
+				// 複製必要的舊屬性。
 				if (options.agent.last_cookie) {
-					// 佈置原agent的設定。
+					// 複製原agent的cookie設定。 @see merge_cookie()
 					agent.last_cookie = options.agent.last_cookie;
 				}
 			}
 		} else {
-			// 採用泛用的agent。 default: https://
+			library_namespace.debug('採用泛用的 agent。', 6, 'get_URL_node');
 			agent = _URL.protocol === 'http:' ? node_http_agent
-					: node_https_agent;
+			// default: https://
+			: node_https_agent;
 		}
 
 		if (options.cookie && !agent.last_cookie) {
-			// reset cookie?
+			library_namespace.debug('reset cookie to: ' + options.cookie, 3,
+					'get_URL_node');
 			agent.last_cookie = options.cookie;
 		}
 
@@ -1561,7 +1571,9 @@ function module_code(library_namespace) {
 				}).trim();
 			}
 
-			merge_cookie(agent, result.headers['set-cookie']);
+			// 若原先有agent，應該合併到原先的agent，而非可能為暫時性/泛用的agent。
+			merge_cookie(options.agent || agent, result.headers['set-cookie']);
+
 			// 為預防字元編碼破碎，因此不能設定 result.setEncoding()？
 			// 但經測試，Wikipedia 有時似乎會有回傳字元錯位之情形？
 			// 2016/4/9 9:9:7 藉由 delete wiki_API.use_Varnish 似可解決。
@@ -1838,6 +1850,7 @@ function module_code(library_namespace) {
 		// console.trace('agent.last_cookie:');
 		// console.log(agent.last_cookie);
 		if (agent.last_cookie) {
+			// 使用 cookie
 			library_namespace.debug('Set cookie: '
 					+ JSON.stringify(agent.last_cookie), 3, 'get_URL_node');
 			_URL.headers.Cookie = (_URL.headers.Cookie ? _URL.headers.Cookie
