@@ -20,7 +20,8 @@ TODO:
 預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
-parse 圖像
+parse 圖像。
+拼接長圖。
 自動搜尋不同的網站並選擇下載作品。
 從其他的資料來源網站尋找取得作品以及章節的資訊。
 檢核章節內容。
@@ -395,6 +396,7 @@ function module_code(library_namespace) {
 
 		full_URL : full_URL_of_path,
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
+		// 每次預設會從上一次中斷的章節接續下載，不用特地指定 recheck。
 		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。否則只會自上次下載過的章節接續下載。
 		// recheck : true,
 		// recheck=false:明確指定自上次下載過的章節接續下載。
@@ -441,7 +443,7 @@ function module_code(library_namespace) {
 			if (/^\(?(?:完[結结成]?|Completed)\)?$/i.test(status))
 				return status;
 
-			// e.g., 连载中, 連載中, 已完结, 已完成
+			// e.g., 连载中, 連載中, 已完结, 已完成, 完結作品
 			var matched = status.match(/(?:^|已)完[結结成]/);
 			if (matched)
 				return matched[0];
@@ -500,6 +502,10 @@ function module_code(library_namespace) {
 
 			return this.work_URL(work_data.id)
 					+ work_data.chapter_list[chapter_NO - 1].url;
+		},
+		get_URL : function(url, callback, post_data) {
+			get_URL(this.full_URL(url), callback, this.charset, post_data,
+					this.get_URL_options);
 		},
 		set_part : set_part_title,
 		add_chapter : add_chapter_data,
@@ -822,7 +828,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('Using convert_id[' + work_title + ']',
 						3, 'get_work_list');
 				// convert special work id:
-				// convert_id:{id_type:function(insert_id_list, get_label){...}}
+				// convert_id:{id_type:function(insert_id_list,get_label){;insert_id_list(id_list);}}
 				// insert_id_list: 提供異序(asynchronously,不同時)使用。
 				// 警告: 需要自行呼叫 insert_id_list(id_list);
 				id_converter.call(this, insert_id_list, get_label);
@@ -1573,6 +1579,8 @@ function module_code(library_namespace) {
 			if (matched) {
 				// properties to reset
 				var skip_cache = {
+					// work_data.recheck
+					recheck : true,
 					last_download : true,
 					process_status : _this.recheck,
 					ebook_directory : _this.need_create_ebook,
@@ -1611,8 +1619,18 @@ function module_code(library_namespace) {
 			if (_this.chapter_list_URL) {
 				work_data.chapter_list_URL = work_URL = _this.full_URL(
 						_this.chapter_list_URL, work_id, work_data);
+				var post_data = null;
+				if (Array.isArray(work_URL)) {
+					/**
+					 * e.g., <code>
+					chapter_list_URL : function(work_id, work_data) { return [ 'url', { post_data } ]; },
+					 </code>
+					 */
+					post_data = work_URL[1];
+					work_URL = _this.full_URL(work_URL[0]);
+				}
 				get_URL(work_URL, pre_process_chapter_list_data, _this.charset,
-						null, Object.assign({
+						post_data, Object.assign({
 							error_retry : _this.MAX_ERROR_RETRY
 						}, _this.get_URL_options));
 			} else {
@@ -1781,23 +1799,26 @@ function module_code(library_namespace) {
 				}
 			}
 
+			var recheck_flag = _this.recheck
+			// work_data.recheck 可能是程式自行判別的。
+			|| work_data.recheck,
 			// 章節的增加數量: 新-舊, 當前-上一次的
-			var chapter_added = work_data.chapter_count
+			chapter_added = work_data.chapter_count
 					- work_data.last_download.chapter;
 
-			if (_this.recheck
+			if (recheck_flag
 			// _this.get_chapter_list() 中
 			// 可能重新設定過 work_data.last_download.chapter。
 			&& work_data.last_download.chapter !== _this.start_chapter) {
-				library_namespace.debug('已設定 this.recheck + 作品曾有內容 / 並非空作品');
+				library_namespace.debug('已設定 .recheck + 作品曾有內容 / 並非空作品。');
 
-				if (_this.recheck !== 'changed'
-						&& typeof _this.recheck !== 'number') {
+				if (recheck_flag !== 'changed'
+						&& typeof recheck_flag !== 'number') {
 					// 強制重新更新文件。
-					// _this.recheck should be true
-					if (typeof _this.recheck !== 'boolean') {
+					// recheck_flag should be true
+					if (typeof recheck_flag !== 'boolean') {
 						library_namespace.warn('Unknown .recheck: '
-								+ _this.recheck);
+								+ recheck_flag);
 					}
 					if (!_this.reget_chapter) {
 						if (_this.hasOwnProperty('reget_chapter')) {
@@ -1813,11 +1834,11 @@ function module_code(library_namespace) {
 					work_data.last_download.chapter = _this.start_chapter;
 
 				} else if ( // 依變更判定是否重新更新文件。
-				// for: {Natural}_this.recheck
-				_this.recheck > 0 ? chapter_added < 0
+				// for: {Natural}recheck_flag
+				recheck_flag > 0 ? chapter_added < 0
 				// .recheck 採用一個較大的數字可避免太過經常更新。
-				|| chapter_added >= _this.recheck
-				// assert: _this.recheck === 'changed'
+				|| chapter_added >= recheck_flag
+				// assert: recheck_flag === 'changed'
 				: chapter_added !== 0
 				// TODO: check .last_update , .latest_chapter
 				// 檢查上一次下載的章節名稱而不只是章節數量。
@@ -1958,7 +1979,11 @@ function module_code(library_namespace) {
 					' ',
 					work_data.chapter_unit || _this.chapter_unit,
 					'.',
-					work_data.status ? ' ' + work_data.status : '',
+					work_data.status ? ' '
+							+ (library_namespace.is_Object(work_data.status) ? JSON
+									.stringify(work_data.status)
+									: work_data.status)
+							: '',
 					work_data.last_download.chapter > _this.start_chapter
 					//
 					? ' 自章節編號第 ' + work_data.last_download.chapter + ' 接續下載。'
@@ -2350,7 +2375,7 @@ function module_code(library_namespace) {
 				: '/' + work_data.chapter_count,
 				//
 				' [', chapter_label, '] ', left, ' images.',
-				// 例如需要收費/被鎖住的章節。 locked
+				// 例如需要收費/被鎖住的章節。 .locked
 				chapter_data.limited ? ' (本章為需要付費/被鎖住的章節)' : '' ].join('');
 				if (chapter_data.limited) {
 					// 針對特殊狀況提醒。
