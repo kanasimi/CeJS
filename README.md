@@ -1,13 +1,14 @@
 ﻿<!--
 http://stackshare.io/continuous-integration
 -->
-[![npm version](https://badge.fury.io/js/cejs.svg)](https://badge.fury.io/js/cejs)
-![npm](https://img.shields.io/npm/dm/cejs.svg)
+[![npm version](https://badge.fury.io/js/cejs.svg)](https://www.npmjs.com/package/cejs)
+[![npm downloads](https://img.shields.io/npm/dm/cejs.svg)](https://www.npmjs.com/package/cejs)
 [![Build Status](https://travis-ci.org/kanasimi/CeJS.svg?branch=master)](https://travis-ci.org/kanasimi/CeJS)
 [![Build status](https://ci.appveyor.com/api/projects/status/ny0vr4x2uesiumm0?svg=true)](https://ci.appveyor.com/project/kanasimi/cejs)
 [![CircleCI](https://circleci.com/gh/kanasimi/CeJS.svg?style=svg)](https://circleci.com/gh/kanasimi/CeJS)
-[![Known Vulnerabilities](https://snyk.io/test/npm/cejs/badge.svg)](https://snyk.io/test/npm/cejs)
+[![Known Vulnerabilities](https://snyk.io/test/github/kanasimi/CeJS/badge.svg?targetFile=package.json)](https://snyk.io/test/github/kanasimi/CeJS?targetFile=package.json)
 <!--
+[![Known Vulnerabilities](https://snyk.io/test/npm/cejs/badge.svg)](https://snyk.io/test/npm/cejs)
 [![Dependency Status](https://david-dm.org/kanasimi/CeJS.svg)](https://david-dm.org/kanasimi/CeJS)
 -->
 
@@ -189,6 +190,7 @@ Contact us at [Google+](https://plus.google.com/101633590909790225455) or [githu
 <!--
 Markdown comment: need check under github and npmjs
 http://stackoverflow.com/questions/4823468/comments-in-markdown
+https://github.com/tiimgreen/github-cheat-sheet/blob/master/README.zh-tw.md
 
 try: README.wiki
 -->

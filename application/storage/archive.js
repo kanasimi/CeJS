@@ -46,6 +46,10 @@ archive_file.extract([ files to extract ], {output : target_directory, other opt
 
 TODO:
 
+// {Object}pairs={from:to,from:to}
+// {Array}pairs=[from,to,from,to]
+archive_file.rename(pairs, callback);
+
 // test archive_file
 // {Object|String}options.switches: additional command line switches
 // {String}options.switches.password: password
@@ -55,7 +59,6 @@ archive_file.verify(options, callback);
  * 
  * @see CeL.application.OS.Windows.archive
  * @see https://github.com/quentinrossetti/node-7z
- *      https://github.com/fritx/win-7zip
  * 
  * @since 2018/3/4 13:57:28
  * @since 2018/3/8 19:59:47 初步可用
@@ -100,8 +103,11 @@ function module_code(library_namespace) {
 	// search executable file path / 執行檔, `which`
 	var executable_file_path = {
 		// filename extension : executable file path
-		// library_namespace.application.platform.execute.search([ '7z', 'p7z'
-		// ], '-h')
+
+		// wrapper for 7-Zip
+		// cache the path of p7z executable file
+		// library_namespace.application.platform
+		// .execute.search([ '7z', 'p7z' ], '-h')
 		'7z' : add_quote((library_namespace
 				.executable_file_path([ '7z', 'p7z' ])
 		//
@@ -119,7 +125,8 @@ function module_code(library_namespace) {
 		}
 
 		options = library_namespace.setup_options(options);
-		this.archive_file_path = archive_file_path;
+		// 即使在 Windows 下，採用 "\" 作路徑分隔，卻可能造成"系統找不到指定的檔案"錯誤。
+		this.archive_file_path = archive_file_path.replace(/\\/g, '/');
 		this.archive_type = options.type;
 		if (!this.archive_type) {
 			var matched = archive_file_path.match(/\.([a-z\d\-_]+)$/i);
@@ -179,6 +186,9 @@ function module_code(library_namespace) {
 		}
 
 		command = command.join(' ');
+		library_namespace.debug('working directory: '
+				+ library_namespace.storage.working_directory(), 1,
+				'archive_file_execute');
 		library_namespace.debug(command, 1, 'archive_file_execute');
 		try {
 			var output = execSync(command);
@@ -199,7 +209,8 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------
 
-	var FSO_list_operations = [ 'update', 'extract', 'remove', 'verify' ],
+	var FSO_list_operations = [ 'update', 'extract', 'remove', 'rename',
+			'verify' ],
 	// program_type: { command : { switches } }
 	default_switches = {
 		'7z' : {
@@ -223,6 +234,9 @@ function module_code(library_namespace) {
 			// get archive information / status
 			info : {
 				command : 'l -slt -sccUTF-8'
+			},
+			rename : {
+				command : 'rn'
 			},
 			// test
 			verify : {
@@ -430,6 +444,53 @@ function module_code(library_namespace) {
 			};
 		}
 	});
+
+	// --------------------------------------------------------------
+
+	// is relative path 為相對路徑
+	function is_relative_path(path) {
+		// e.g., '/usr'
+		return !path.startsWith('/')
+		// e.g., 'C:\\'
+		&& !path.includes(':\\')
+		// e.g., 'C:'
+		&& !path.endsWith(':');
+	}
+
+	// 進到指定目錄下壓縮檔案。這個方法可以可以避免壓縮檔包含目錄 prefix。
+	// 注意: 這個方法會改變工作目錄! 因此不能用非同步 async 的方法。
+	function archive_under(source_directory, archive_file_path, options) {
+		if (typeof options === 'string') {
+			options = {
+				// type : 'zip',
+				files : options
+			};
+		}
+
+		// https://www.7-zip.org/faq.html
+		// 7-Zip stores only relative paths of files without drive letter prefix
+
+		var current_working_directory = library_namespace.storage
+				.working_directory();
+		// 注意: source_directory 前後有空白時會出問題。
+		library_namespace.storage.working_directory(source_directory);
+
+		if (is_relative_path(archive_file_path)) {
+			// archive_file_path 為相對 current_working_directory 之 path。
+			// 因為工作目錄已經改變，必須將 archive_file_path 改成絕對目錄。
+			archive_file_path = library_namespace.append_path_separator(
+					current_working_directory, archive_file_path);
+		}
+
+		var archive_file = new Archive_file(archive_file_path, options),
+		//
+		files_to_archive = options && options.files || '.';
+		archive_file.update(files_to_archive);
+		// recover working directory.
+		library_namespace.storage.working_directory(current_working_directory);
+	}
+
+	Archive_file.archive_under = archive_under;
 
 	// --------------------------------------------------------------
 
