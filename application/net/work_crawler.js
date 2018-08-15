@@ -265,7 +265,7 @@ function module_code(library_namespace) {
 		// base_URL : '',
 		// charset : 'GBK',
 
-		// 瀏覽器識別: 腾讯TT浏览器
+		// {String}瀏覽器識別: 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; SV1; TencentTraveler 4.0)',
 		/**
 		 * {Natural}timeout in ms for get_URL()
@@ -275,20 +275,20 @@ function module_code(library_namespace) {
 		 * 必須在一開始就設定。之後設定沒有效果。
 		 */
 		timeout : 30 * 1000,
-		// 出錯時重新嘗試的次數。
+		// {Natural}出錯時重新嘗試的次數。
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
-		// 圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。
+		// {Natural}圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。
 		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR_RETRY),
-		// 最小容許圖案檔案大小 (bytes)。
+		// {Natural}最小容許圖案檔案大小 (bytes)。
 		// 對於極少出現錯誤的網站，可以設定一個比較小的數值，並且設定.allow_EOI_error=false。因為這類型的網站要不是無法取得檔案，要不就是能夠取得完整的檔案；要取得破損檔案，並且已通過EOI測試的機會比較少。
 		// MIN_LENGTH : 4e3,
 		// 對於有些圖片只有一條細橫桿的情況。
 		// MIN_LENGTH : 140,
 
-		// 預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
+		// {Natural}預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_SIZE : 200,
 
-		// 當網站不允許太過頻繁的訪問/access時，可以設定下載章節資訊前的等待時間(ms)。
+		// {Natural}當網站不允許太過頻繁的訪問/access時，可以設定下載章節資訊前的等待時間(ms)。
 		// chapter_time_interval : 1 * 1000,
 
 		// 需要重新讀取頁面的時候使用。
@@ -296,10 +296,10 @@ function module_code(library_namespace) {
 			REGET_PAGE : true
 		},
 
-		// 預設的圖片延伸檔名/副檔名/filename extension。
+		// {String}預設的圖片延伸檔名/副檔名/filename extension。
 		default_image_extension : 'jpg',
 
-		// 仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無
+		// {String}仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無
 		MESSAGE_RE_DOWNLOAD : '神仙打鼓有時錯，腳步踏差誰人無。下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
 		// 當圖像不存在 EOI (end of image) 標記，或是被偵測出非圖像時，依舊強制儲存檔案。
 		// allow image without EOI (end of image) mark. default:false
@@ -2810,8 +2810,18 @@ function module_code(library_namespace) {
 		// 紀錄已下載完之 chapter。
 		this.save_work_data(work_data);
 
-		// 增加章節計數，準備下載下一個章節。
-		if (++chapter_NO > work_data.chapter_count) {
+		if (work_data.jump_to_chapter > 0) {
+			// work_data.jump_to_chapter 可用來手動設定下一個要取得的章節號碼。
+			library_namespace.info(work_data.title + ': jump to chapter '
+					+ work_data.jump_to_chapter + ' ← ' + chapter_NO);
+			chapter_NO = work_data.jump_to_chapter;
+			delete work_data.jump_to_chapter;
+		} else {
+			// 增加章節計數，準備下載下一個章節。
+			++chapter_NO;
+		}
+
+		if (chapter_NO > work_data.chapter_count) {
 			if (Array.isArray(work_data.chapter_list)
 					&& work_data.chapter_list.length === work_data.chapter_count + 1) {
 				library_namespace

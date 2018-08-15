@@ -109,7 +109,9 @@ function module_code(library_namespace) {
 		// library_namespace.application.platform
 		// .execute.search([ '7z', 'p7z' ], '-h')
 		'7z' : add_quote((library_namespace
-				.executable_file_path([ '7z', 'p7z' ])
+				.executable_file_path([ '7z', 'p7z',
+				// e.g., install p7zip package via yum
+				'7za' ])
 		//
 		|| '%ProgramFiles%\\7-Zip\\7z.exe')),
 		rar : '"' + (library_namespace.executable_file_path('rar')
@@ -457,7 +459,7 @@ function module_code(library_namespace) {
 		&& !path.endsWith(':');
 	}
 
-	// 進到指定目錄下壓縮檔案。這個方法可以可以避免壓縮檔包含目錄 prefix。
+	// 進到指定目錄下壓縮檔案。這個方法可以可以避免壓縮檔包含目錄前綴 prefix。
 	// 注意: 這個方法會改變工作目錄! 因此不能用非同步 async 的方法。
 	function archive_under(source_directory, archive_file_path, options) {
 		if (typeof options === 'string') {

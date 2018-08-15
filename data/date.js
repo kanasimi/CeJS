@@ -621,7 +621,7 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 	// ISO 8601
-	var PATTERN_ISO_DATE = /^-?\d{4,8}-[01]\d-[0-3]\d(T[012]\d:[0-5]\d:[0-6]\d(\.\d{3})?(Z|[+\-][012]\d:\d{2}))?$/;
+	var PATTERN_ISO_DATE = /^-?\d{4,8}-[01]\d-[0-3]\d(T[012]\d:[0-6]\d:[0-6]\d(\.\d{3})?(Z|[+\-][012]\d:\d{2}))?$/;
 
 	/**
 	 * convert the string to Date object.
@@ -811,8 +811,8 @@ function module_code(library_namespace) {
 		// pattern of date. 當今會準確使用的時間，
 		// 為 -47xx BCE (Julian day 0) 至 2xxx CE。
 		date_pattern = /(?:([\-−‐前]?(?:[0-4]?\d{3}|\d{1,3}))[\/.\-年 ])?\s*([01]?\d)(?:[\/.\-月 ]\s*([0-3]?\d)日?)?/.source,
-		// pattern of time.
-		time_pattern = /([0-2]?\d)[:時时]\s*(?:([0-5]?\d)[:分]?\s*(?:([0-5]?\d)(?:\.(\d+))?)?)?秒?\s*(?:([PA])M)?/i.source;
+		// pattern of time. [0-6]: 支持閏秒
+		time_pattern = /([0-2]?\d)[:時时]\s*(?:([0-6]?\d)[:分]?\s*(?:([0-6]?\d)(?:\.(\d+))?)?)?秒?\s*(?:([PA])M)?/i.source;
 
 		// 日期先: date [time]
 		String_to_Date_default_parser.date_first = new RegExp(start_pattern
