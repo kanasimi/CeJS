@@ -67,6 +67,9 @@ function module_code(library_namespace) {
 	/**
 	 * 公用API: 有些尚未完備，需要先確認。<code>
 
+	// set/get current working directory. 設定/取得目前工作目錄。
+	CeL.storage.working_directory([change_to_directory])
+
 	CeL.storage.fso_status(fso_path)
 	CeL.storage.fso_exists(file_path)
 	CeL.storage.file_exists(file_path)
@@ -107,6 +110,8 @@ function module_code(library_namespace) {
 
 		/** node.js file system module */
 		var node_fs = require('fs');
+
+		_.working_directory = storage_module.working_directory;
 
 		// 警告: 此函數之API尚未規範。
 		// .file_stats()
@@ -151,6 +156,8 @@ function module_code(library_namespace) {
 
 	} else if (this.has_ActiveX) {
 		storage_module = library_namespace.application.OS.Windows.file;
+
+		_.working_directory = storage_module.working_directory;
 
 		_.read_file = storage_module.read_file;
 

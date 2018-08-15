@@ -56,6 +56,14 @@ function module_code(library_namespace) {
 	_// JSDT:_module_
 	.prototype = {};
 
+	// set/get current working directory. 設定/取得目前工作目錄。
+	function working_directory(change_to_directory) {
+		if (change_to_directory)
+			process.chdir(change_to_directory);
+		return process.cwd();
+	}
+	_.working_directory = working_directory;
+
 	/** node.js file system module */
 	var node_fs = require('fs');
 
@@ -593,10 +601,24 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
-	function append_path_separator(directory_name) {
-		return /[\\\/]$/.test(directory_name) ? directory_name : directory_name
-				+ library_namespace.env.path_separator;
+	// join path
+	function append_path_separator(directory_path, file_name) {
+		if (!/[\\\/]$/.test(directory_path)) {
+			directory_path +=
+			// 所添加的路徑分隔，以路徑本身的路徑分隔為主。
+			directory_path.includes('/') ? '/'
+			//
+			: directory_path.includes('\\')
+			// e.g., 'C:'
+			|| directory_path.endsWith(':') ? '\\'
+			//
+			: path_separator;
+		}
+		// library_namespace.simplify_path()
+		return file_name ? directory_path + file_name : directory_path;
 	}
+
+	_.append_path_separator = append_path_separator;
 
 	/**
 	 * search $PATH, 搜尋可執行檔案的完整路徑。
@@ -649,12 +671,13 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			directory = append_path_separator(directory || '.');
-			// console.log('Test: ' + (directory + file_name));
-			var fso_status = fs_status(directory + file_name);
+			var exec_file_path = append_path_separator(directory || '.',
+					file_name);
+			// console.log('Test: ' + exec_file_path);
+			var fso_status = fs_status(exec_file_path);
+			// TODO: 應該測試是否可以執行。
 			if (fso_status) {
-				file_name = directory + file_name;
-				return file_name;
+				return file_name = exec_file_path;
 			}
 		})) {
 			return file_name;

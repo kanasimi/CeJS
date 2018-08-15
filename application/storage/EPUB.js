@@ -457,7 +457,7 @@ function module_code(library_namespace) {
 				//
 				&& library_namespace.is_Object(resources[--index])) {
 					try {
-						// 以非正規方法存取資訊。
+						// 以非正規方法存取資訊:封入注釋的詮釋資料。
 						resources[index][KEY_DATA] = JSON.parse(matched[1]
 						// @see write_chapters()
 						// 在 HTML 注釋中不能包含 "--"。
@@ -2013,15 +2013,16 @@ function module_code(library_namespace) {
 				});
 				if (setted) {
 					info = JSON.stringify(info);
-					if (info.includes('%2D%2D')) {
-						library_namespace.error('所欲封入注釋的詮釋資料本身含有 "%2D%2D"，'
+					if (/%2D(?:-|%2D)|-%2D/.test(info)) {
+						library_namespace.error('所欲封入注釋的詮釋資料本身含有'
 						//
-						+ '將造成解碼時出現錯誤！');
+						+ ' "%2D%2D" 或 "%2D-" 之類，將造成解碼時出現錯誤！');
 						library_namespace.info(info);
 					}
 					this.raw_data_ptr.manifest.push('<!-- '
 					// The string "--" is not permitted within comments.
 					// 在 HTML 注釋中不能包含 "--"。
+					// TODO: 還沒排除 "%2D--" 之類問題。
 					+ info.replace(/-{2,}/g, function($0) {
 						return '%2D'.repeat($0.length);
 					}) + ' -->');
@@ -2109,8 +2110,8 @@ function module_code(library_namespace) {
 
 		library_namespace.debug('bale packing: Not Yet Implemented.');
 
-		// TODO: use application.OS.Windows.archive,
-		// application.OS.execute instead
+		// TODO: use application.storage.archive,
+		// application.OS.Windows.archive instead
 		/** node.js: run OS command */
 		var execSync = require('child_process').execSync;
 
@@ -2125,6 +2126,7 @@ function module_code(library_namespace) {
 				// store mimetype first
 				'%P7Z% a -tzip -mx=0 -- %BOOKNAME% mimetype',
 				// 請注意： rn 必須先安裝 7-Zip **16.04 以上的版本**。
+				// 確保 mimetype 這個檔在第一順位。
 				'%P7Z% rn -- %BOOKNAME% mimetype !imetype',
 				// archive others.
 				'%P7Z% a -tzip -mx=9 -r ' + (remove ? '-sdel ' : '')

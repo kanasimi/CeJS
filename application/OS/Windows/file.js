@@ -163,6 +163,14 @@ WinShell // initialization_WScript_Objects
 */
 
 
+// set/get current working directory. 設定/取得目前工作目錄。
+function working_directory(change_to_directory) {
+	if (change_to_directory)
+		WshShell.CurrentDirectory = change_to_directory;
+	return WshShell.CurrentDirectory;
+}
+
+_.working_directory = working_directory;
 
 
 /*
