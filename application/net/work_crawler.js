@@ -503,9 +503,16 @@ function module_code(library_namespace) {
 			return this.work_URL(work_data.id)
 					+ work_data.chapter_list[chapter_NO - 1].url;
 		},
-		get_URL : function(url, callback, post_data) {
+		// this.get_URL()
+		get_URL : function(url, callback, post_data, options) {
+			if (options === true) {
+				options = {
+					error_retry : this.MAX_ERROR_RETRY
+				};
+			}
 			get_URL(this.full_URL(url), callback, this.charset, post_data,
-					this.get_URL_options);
+					options ? Object.assign(options, this.get_URL_options)
+							: this.get_URL_options);
 		},
 		set_part : set_part_title,
 		add_chapter : add_chapter_data,
@@ -1335,17 +1342,15 @@ function module_code(library_namespace) {
 
 	// node.innerText
 	function get_label(html) {
-		if (html) {
-			return library_namespace.HTML_to_Unicode(
-					html.replace(/<!--[\s\S]*?-->/g, '').replace(
-							/\s*<br(?:\/| [^<>]*)?>/ig, '\n').replace(
-							/<[^<>]+>/g, '')
-					// incase 以"\r"為主。 e.g., 起点中文网
-					.replace(/\r\n?/g, '\n')).trim().replace(
-					/[\s\u200B]+$|^[\s\u200B]+/g, '')
-			// .replace(/\s{2,}/g, ' ').replace(/\s?\n+/g, '\n')
-			;
-		}
+		return html ? library_namespace.HTML_to_Unicode(
+				html.replace(/<!--[\s\S]*?-->/g, '').replace(
+						/\s*<br(?:\/| [^<>]*)?>/ig, '\n').replace(/<[^<>]+>/g,
+						'')
+				// incase 以"\r"為主。 e.g., 起点中文网
+				.replace(/\r\n?/g, '\n')).trim().replace(
+				/[\s\u200B]+$|^[\s\u200B]+/g, '')
+		// .replace(/\s{2,}/g, ' ').replace(/\s?\n+/g, '\n')
+		: '';
 	}
 
 	function extract_work_data(work_data, html, PATTERN_work_data, overwrite) {
