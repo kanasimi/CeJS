@@ -1866,6 +1866,8 @@ function module_code(library_namespace) {
 			console.log(_URL.headers);
 		}
 		try {
+			// from node.js 10.9.0
+			// http.request(url[, options][, callback])
 			request = _URL.protocol === 'http:' ? node_http.request(_URL,
 					_onload) : node_https.request(_URL, _onload);
 		} catch (e) {

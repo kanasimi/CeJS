@@ -1913,7 +1913,7 @@ function module_code(library_namespace) {
 				library_namespace.warn('章節數量 ' + work_data.chapter_count
 						+ ' 比將開始/接續之下載章節編號 ' + work_data.last_download.chapter
 						// or: 對於被屏蔽的作品，將會每次都從頭檢查。
-						+ ' 還少，或許因為章節有經過重整。');
+						+ ' 還少，或許因為章節有經過重整，或者上次下載時中途增刪過章節。');
 				if (_this.move_when_chapter_count_error) {
 					var move_to = work_data.directory
 					// 先搬移原目錄。
@@ -2357,6 +2357,8 @@ function module_code(library_namespace) {
 					process.stdout.write('Reading ' + images_archive.file_name
 							+ '...\r');
 					images_archive.info();
+					if (false && typeof _this.check_images_archive === 'function')
+						_this.check_images_archive(images_archive);
 				}
 				chapter_directory += path_separator;
 
@@ -2977,8 +2979,10 @@ function module_code(library_namespace) {
 			// has_error則必然(!!verified_image===false)
 
 			if (false) {
-				console.log(_this.skip_error + ',' + _this.MAX_ERROR_RETRY
-						+ ',' + has_error);
+				console.log([ _this.skip_error, _this.MAX_ERROR_RETRY,
+						has_error, _this.skip_error
+						//
+						&& image_data.error_count === _this.MAX_ERROR_RETRY ]);
 				console.log('error count: ' + image_data.error_count);
 			}
 			if (verified_image || _this.skip_error
@@ -2990,8 +2994,8 @@ function module_code(library_namespace) {
 			&& image_data.file_length.length > _this.MAX_EOI_ERROR) {
 				// console.log(image_data.file_length);
 				if (verified_image || _this.skip_error
-				// skip error 的話，就算沒有取得過檔案(如404圖像不存在)，依然 pass。
-				&& image_data.file_length.length === 0
+				// skip error 的話，不管有沒有取得過檔案(包括404圖像不存在)，依然 pass。
+				// && image_data.file_length.length === 0
 				//
 				|| image_data.file_length.cardinal_1()
 				// ↑ 若是每次都得到相同的檔案長度，那就當作來源檔案本來就有問題。
@@ -3114,6 +3118,15 @@ function module_code(library_namespace) {
 							+ '待取得檔案後，自行更改檔名，去掉錯誤檔名後綴'
 							+ JSON.stringify(_this.EOI_error_postfix)
 							+ '以跳過此錯誤。');
+
+				} else if (image_data.file_length.length > 1
+						&& !image_data.file_length.cardinal_1()) {
+					library_namespace.warn('下載所得的圖像大小不同: '
+							+ image_data.file_length + '。若非因網站提早截斷連線，'
+							+ '那麼您或許需要增長 timeout 來提供足夠的時間下載圖片？');
+					// TODO: 提供續傳功能。
+					// e.g., for 9mdm.js 魔剑王 第59话 4392-59-011.jpg
+
 				} else if (!_this.skip_error) {
 					library_namespace
 							.info('若錯誤持續發生，您可以設定 skip_error=true 來忽略圖像錯誤。');
