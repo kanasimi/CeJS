@@ -13,18 +13,21 @@ typeof CeL !== 'function' && (function() {
 	var full_root = module.filename
 	//
 	&& module.filename.replace(/[^\\\/]+$/, ''),
-	// WARNING: CeL_path_file should be an absolute path in some environment.
-	CeL_path_file = (full_root || './') + '_CeL.path.txt',
+	// WARNING: repository_path_list_file should be an absolute path in some
+	// environment.
+	repository_path_list_file
+	//
+	= (full_root || './') + '_repository_path_list.txt',
 	//
 	node_fs = require('fs'),
 	//
-	CeL_path_list = node_fs.readFileSync(CeL_path_file);
+	CeL_path_list = node_fs.readFileSync(repository_path_list_file);
 	if (!CeL_path_list || !(CeL_path_list = CeL_path_list.toString())) {
 		console.error(
 		//
 		'Please set the absolute path list of CeL library in the file ['
 		//
-		+ CeL_path_file + ']!');
+		+ repository_path_list_file + ']!');
 		return;
 	}
 
@@ -40,7 +43,7 @@ typeof CeL !== 'function' && (function() {
 		// console.log('Try path: ' + path);
 		try {
 			// old node.js has no method 'accessSync'.
-			// accessSync added in: v0.11.15
+			// accessSync() added in: v0.11.15
 			if (node_fs.accessSync) {
 				// accessSync() throws if any accessibility checks fail,
 				// and does nothing otherwise.
