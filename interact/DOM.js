@@ -1238,7 +1238,7 @@ node_value = function node_value(node, value, base_space) {
 						//else node.onchange && node.onchange();
 					}
 				} else if (value !== undefined && value !== null) {
-					//	IE9 的相容Quirks模式中使用 'maxLength'.
+					//	IE9 的相容Quirks模式中長度使用 'maxLength'.
 					var kw = 'maxLength';
 					if (!(kw in node))
 						kw = 'maxlength';
@@ -1247,7 +1247,8 @@ node_value = function node_value(node, value, base_space) {
 					value = String(value);
 					//library_namespace.debug('測試是否須截斷過長之設定值 of [' + kw + ']。', 1, 'node_value');
 					if (!isNaN(node[kw])
-							&& value.length > node[kw]) {
+						// Chrome/68.0.3440.106: document.createElement('input').maxLength 預設為 -1
+						&& node[kw] >= 0 && value.length > node[kw]) {
 						library_namespace.warn('The length of value [' + value + ']: ' + value.length + ' > limit ' + node[kw]
 								+ ' ! I will fill the first ' + node[kw] + ' characters!');
 						value = value.slice(0, node[kw]);
