@@ -1,6 +1,8 @@
 /**
- * @name Auto update CeJS via GitHub. 自動配置好最新版本 CeJS 程式庫的工具。
- * @fileoverview 將會自動取得並解開 GitHub 最新版本壓縮檔案至當前工作目錄下的 ./CeJS-master。
+ * @name GitHub repository auto-updater, and auto-update CeJS via GitHub. GitHub
+ *       repository 自動更新工具 / 自動配置好最新版本 CeJS 程式庫的工具。
+ * @fileoverview 將會採用系統已有的 7-Zip 程式，自動取得並解開 GitHub 最新版本 repository zip
+ *               壓縮檔案至當前工作目錄下 (e.g., ./CeJS-master)。
  * 
  * @example<code>
 
@@ -11,7 +13,9 @@ use Zlib
 
  </code>
  * 
- * @since 2017/3/13 14:39:41
+ * @since 2017/3/13 14:39:41 初版<br />
+ *        2018/8/20 12:52:34 改寫成 GitHub 泛用的更新工具，並將 _CeL.path.txt →
+ *        _repository_path_list.txt
  */
 
 'use strict';
@@ -21,37 +25,34 @@ use Zlib
 
 var p7zip_path = [ '7z',
 // e.g., install p7zip package via yum
-'7za', 'unzip', '"C:\\Program Files\\7-Zip\\7z.exe"' ], user_name = 'kanasimi',
-/** {String}Repository name */
-repository = 'CeJS', branch = 'master',
+'7za', 'unzip', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
 /** {String}更新工具相對於 CeJS 根目錄的路徑。e.g., "CeJS-master/_for include/" */
-update_script_directory = repository + '-' + branch + '/_for include/',
+update_script_directory,
 /** {String}目標目錄位置。將會解壓縮成這個目錄底下的 "CeJS-master/"。 const */
 target_directory,
 /** {String}下載之後將壓縮檔存成這個檔名。 const */
-target_file = repository + '-' + branch + '.zip',
-//
-latest_version_file = target_file.replace(/[^.]+$/g, 'version');
+target_file, latest_version_file, PATTERN_repository_path = /([^\/]+)\/(.+?)(?:-([^-].*))?$/;
 
 // --------------------------------------------------------------------------------------------
 
 // const
 var node_https = require('https'), node_fs = require('fs'), child_process = require('child_process'),
 // modify from _CeL.loader.nodejs.js
-CeL_path_file = './_CeL.path.txt';
+repository_path_list_file = './_repository_path_list.txt';
 
 // --------------------------------------------------------------------------------------------
 
-function try_path_file() {
+function detect_base_path(repository, branch) {
 	var CeL_path_list;
 
 	try {
-		CeL_path_list = node_fs.readFileSync(CeL_path_file).toString();
+		CeL_path_list = node_fs.readFileSync(repository_path_list_file)
+				.toString();
 	} catch (e) {
 	}
 
 	if (!CeL_path_list) {
-		// ignore CeL_path_file
+		// ignore repository_path_list_file
 		return;
 	}
 
@@ -79,11 +80,26 @@ function try_path_file() {
 
 // --------------------------------------------------------------------------------------------
 
-function check_update() {
+function check_update(repository_path, post_install) {
+	/** {String}Repository name */
+	var repository = repository_path.trim().match(PATTERN_repository_path),
+	//
+	user_name = repository[1], branch = repository[3] || 'master';
+	repository = repository[2];
 
-	var have_version, latest_commit;
+	detect_base_path(repository, branch);
+
+	if (!update_script_directory)
+		update_script_directory = repository + '-' + branch + '/_for include/';
+
+	if (!target_file)
+		target_file = repository + '-' + branch + '.zip';
+
+	if (!latest_version_file)
+		latest_version_file = target_file.replace(/[^.]+$/g, 'version');
 
 	console.info('Read ' + latest_version_file);
+	var have_version;
 	try {
 		have_version = node_fs.readFileSync(latest_version_file).toString();
 	} catch (e) {
@@ -109,9 +125,9 @@ function check_update() {
 		});
 
 		response.on('end', function(e) {
-			var latest_commit = JSON.parse(
+			var contents = Buffer.concat(buffer_array, sum_size).toString(),
 			//
-			Buffer.concat(buffer_array, sum_size).toString()),
+			latest_commit = JSON.parse(contents),
 			//
 			latest_version = latest_commit.commit.author.date;
 			if (have_version === latest_version) {
@@ -119,10 +135,13 @@ function check_update() {
 				//
 				+ have_version);
 			} else {
+				process.title = 'Update ' + repository_path;
 				console.info('Update: ' + (have_version
 				//
 				? have_version + '\n     → ' : 'to ') + latest_version);
-				update_via_7zip(latest_version);
+				update_via_7zip(latest_version,
+				//
+				user_name, repository, branch, post_install);
 			}
 		});
 	})
@@ -147,8 +166,9 @@ function copy_file(source_name, taregt_name) {
 			|| source_name);
 }
 
-function update_via_7zip(latest_version) {
-	// Check 7z
+function update_via_7zip(latest_version, user_name, repository, branch,
+		post_install) {
+	// detect 7z path
 	if (!Array.isArray(p7zip_path)) {
 		p7zip_path = [ p7zip_path ];
 	}
@@ -237,15 +257,15 @@ function update_via_7zip(latest_version) {
 
 		var command,
 		//
-		q_target_file = '"' + target_file + '"';
+		quoted_target_file = '"' + target_file + '"';
 		if (p7zip_path.includes('unzip')) {
-			command = p7zip_path + ' -t ' + q_target_file + ' && '
+			command = p7zip_path + ' -t ' + quoted_target_file + ' && '
 			// 解開 GitHub 最新版本壓縮檔案 by unzip。
-			+ p7zip_path + ' -x -o ' + q_target_file;
+			+ p7zip_path + ' -x -o ' + quoted_target_file;
 		} else {
-			command = p7zip_path + ' t ' + q_target_file + ' && '
+			command = p7zip_path + ' t ' + quoted_target_file + ' && '
 			// 解開 GitHub 最新版本壓縮檔案 by 7z。
-			+ p7zip_path + ' x -y ' + q_target_file;
+			+ p7zip_path + ' x -y ' + quoted_target_file;
 		}
 
 		child_process.execSync(command, {
@@ -263,22 +283,7 @@ function update_via_7zip(latest_version) {
 			} catch (e) {
 			}
 
-			console.info('Update the tool itself...');
-			copy_file('_CeL.updater.node.js');
-
-			console.info('Setup basic execution environment...');
-			copy_file('_CeL.loader.nodejs.js');
-			try {
-				// Do not overwrite CeL_path_file.
-				node_fs.accessSync(CeL_path_file, node_fs.constants.R_OK);
-			} catch (e) {
-				try {
-					node_fs.renameSync(update_script_directory
-							+ '_CeL.path.sample.txt', CeL_path_file);
-				} catch (e) {
-					// TODO: handle exception
-				}
-			}
+			typeof post_install === 'function' && post_install();
 
 			console.info('Done.\n\n' + 'Installation completed successfully.');
 		}
@@ -290,6 +295,41 @@ function update_via_7zip(latest_version) {
 
 // --------------------------------------------------------------------------------------------
 
-try_path_file();
+var repository_path = process.argv[2], default_repository_path = 'kanasimi/CeJS';
+if (PATTERN_repository_path.test(repository_path)) {
+	// GitHub 泛用的更新工具。
+	check_update(repository_path, default_post_install_for_all);
 
-check_update();
+} else if (repository_path) {
+
+	console.log('Usage:\n	node ' + process.argv[1]
+			+ ' "repository path"\n\ndefault repository path: ',
+			default_repository_path);
+
+} else {
+	// default action
+	check_update(default_repository_path, default_post_install);
+}
+
+function default_post_install_for_all() {
+}
+
+function default_post_install() {
+	console.info('Update the tool itself...');
+	copy_file('_CeL.updater.node.js');
+
+	console.info('Setup basic execution environment...');
+	copy_file('_CeL.loader.nodejs.js');
+	try {
+		// Do not overwrite repository_path_list_file.
+		node_fs.accessSync(repository_path_list_file, node_fs.constants.R_OK);
+	} catch (e) {
+		try {
+			node_fs.renameSync(update_script_directory
+					+ '_repository_path_list.sample.txt',
+					repository_path_list_file);
+		} catch (e) {
+			// TODO: handle exception
+		}
+	}
+}
