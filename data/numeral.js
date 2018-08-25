@@ -1081,15 +1081,16 @@ function module_code(library_namespace) {
 	var Roman_numeral_alternative = {
 		'ↅ' : 'VI',
 		'ↆ' : 'L',
-		Ⅼ : 'L',
-		Ⅽ : 'C',
-		Ⅾ : 'D',
-		Ⅿ : 'M',
-		ⅼ : 'L',
-		ⅽ : 'C',
-		ⅾ : 'D',
-		ⅿ : 'M',
-		ↀ : 'M'
+		// Safari 11: Invalid character
+		'Ⅼ' : 'L',
+		'Ⅽ' : 'C',
+		'Ⅾ' : 'D',
+		'Ⅿ' : 'M',
+		'ⅼ' : 'L',
+		'ⅽ' : 'C',
+		'ⅾ' : 'D',
+		'ⅿ' : 'M',
+		'ↀ' : 'M'
 	}, PATTERN_Roman_numeral_alternative,
 	//
 	Roman_numeral_pair = {},

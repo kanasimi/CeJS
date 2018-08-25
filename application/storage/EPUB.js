@@ -1,6 +1,6 @@
 /**
  * @name CeL function for Electronic Publication (EPUB)
- * @fileoverview 本檔案包含了解析與創建 EPUB file 的 functions。
+ * @fileoverview 本檔案包含了解析與創建 EPUB file 電子書的 functions。
  * 
  * @example<code>
 
@@ -71,6 +71,9 @@ typeof CeL === 'function' && CeL.run({
 	// + '|application.net.'
 	// for .gettext
 	// + '|application.locale.'
+	// for .storage.archive.archive_under()
+	+ '|application.storage.archive.'
+	//
 	,
 
 	// 設定不匯出的子函式。
@@ -82,7 +85,7 @@ typeof CeL === 'function' && CeL.run({
 
 function module_code(library_namespace) {
 
-	var
+	var mimetype_filename = 'mimetype',
 	// http://www.idpf.org/epub/31/spec/epub-ocf.html#sec-container-metainf
 	// All OCF Abstract Containers must include a directory called META-INF
 	// in their Root Directory.
@@ -147,7 +150,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (rootfile['full-path'] !== rootfile_path) {
+			if (false && rootfile['full-path'] !== rootfile_path) {
 				library_namespace.info('rootfile path: '
 						+ rootfile['full-path'] + '→' + rootfile_path);
 				// TODO: remove directories+files
@@ -274,7 +277,7 @@ function module_code(library_namespace) {
 		.sort());
 
 		// create structure
-		library_namespace.write_file(this.path.root + 'mimetype',
+		library_namespace.write_file(this.path.root + mimetype_filename,
 		/**
 		 * The mimetype file must be an ASCII file that contains the string
 		 * application/epub+zip. It must be unencrypted, and the first file in
@@ -312,7 +315,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.debug('重建 index_of_id...');
+		library_namespace.debug('重建 index_of_id...', 1, 'rebuild_index_of_id');
 		list.forEach(function(item, index) {
 			if (item.id) {
 				index_of_id[item.id] = index;
@@ -2048,18 +2051,14 @@ function module_code(library_namespace) {
 		typeof callback === 'function' && callback();
 	}
 
-	// cache the path of p7z executable file
-	var p7zip_path = library_namespace.executable_file_path('7z')
-			|| '%ProgramFiles%\\7-Zip\\7z.exe';
-
 	// package, bale packing 打包 epub
-	function archive_to_ZIP(target_file, remove, callback) {
+	function archive_to_ZIP(target_file, remove, callback, file_list) {
 		if (!library_namespace.is_empty_object(this.downloading)) {
 			// 註冊 callback，等所有媒體檔案下載完再收尾。
 			this.add_listener('all_downloaded', archive_to_ZIP.bind(this,
 					target_file, remove, callback));
-			library_namespace.debug('Waiting for all resources loaded...', 0,
-					'archive_to_ZIP');
+			library_namespace
+					.info('archive_to_ZIP: Waiting for all resources loaded...');
 			return;
 		}
 
@@ -2103,56 +2102,52 @@ function module_code(library_namespace) {
 			if (!fso_list || fso_list.length === 0) {
 				library_namespace.debug(
 				//
-				'remove empty directory: ' + directory);
+				'remove empty directory: ' + directory, 1, 'archive_to_ZIP');
 				library_namespace.remove_directory(directory);
 			}
 		}, this);
 
-		library_namespace.debug('bale packing: Not Yet Implemented.');
+		// 先刪除舊的電子書檔案以防干擾。
+		library_namespace.remove_file(target_file);
 
-		// TODO: use application.storage.archive,
-		// application.OS.Windows.archive instead
-		/** node.js: run OS command */
-		var execSync = require('child_process').execSync;
+		library_namespace.debug('create ebook using 7z: ' + target_file, 1,
+				'archive_to_ZIP');
 
-		var command_file_name = 'create.bat', ebook_file_name = 'book.epub';
-		library_namespace.remove_file(this.path.root + ebook_file_name);
-		// 生成 .bat，作業完畢之後就會自動刪除 .bat。
+		var archive_file = library_namespace.storage.archive.archive_under(
 		// 注意: 這需要先安裝 7z.exe 程式。
-		library_namespace.write_file(this.path.root + command_file_name, [
-				// @see create_ebook.bat
-				'SET P7Z="' + p7zip_path + '"',
-				'SET BOOKNAME="' + ebook_file_name + '"',
-				// store mimetype first
-				'%P7Z% a -tzip -mx=0 -- %BOOKNAME% mimetype',
-				// 請注意： rn 必須先安裝 7-Zip **16.04 以上的版本**。
-				// 確保 mimetype 這個檔在第一順位。
-				'%P7Z% rn -- %BOOKNAME% mimetype !imetype',
-				// archive others.
-				'%P7Z% a -tzip -mx=9 -r ' + (remove ? '-sdel ' : '')
-						+ '-- %BOOKNAME% META-INF EPUB',
-				'%P7Z% rn -- %BOOKNAME% !imetype mimetype' ].join('\r\n'));
-		var command = 'cd /d "' + this.path.root + '" && ' + command_file_name;
-		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
-		library_namespace.debug('create ebook by 7z: ' + ebook_file_name);
-		try {
-			execSync(command);
-		} catch (e) {
-			library_namespace.error('archive_to_ZIP: execution error!');
-			library_namespace.error(e);
-			typeof callback === 'function' && callback();
-			return;
-		}
-		library_namespace.debug('create ebook by 7z: ' + ebook_file_name
-				+ ': Done.');
+		this.path.root,
+		// 確保 mimetype 這個檔在第一順位。
+		target_file, {
+			level : 0,
+			files : [ mimetype_filename ],
+			type : 'zip'
+		}),
+		// 改變後的檔案長度必須要和原先的相同，這樣比較保險，不會更改到檔案結構。
+		mimetype_first_order_name = mimetype_filename.replace(/^./, '!');
 
-		// book.epub → *.epub
-		var error = library_namespace.move_file(this.path.root
-				+ ebook_file_name, target_file);
-		if (error) {
-			// the operatoin failed
-			library_namespace.error(error);
-		}
+		// assert: mimetype_filename.length===mimetype_first_order_name.length
+
+		// 請注意： rename 必須先安裝 7-Zip **16.04 以上的版本**。
+		archive_file.rename([ mimetype_filename, mimetype_first_order_name ]);
+
+		library_namespace.storage.archive.archive_under(this.path.root,
+		// archive others.
+		archive_file, {
+			// set MAX lavel
+			level : 9,
+			files : file_list
+					|| [ container_directory_name,
+							Ebook.prototype.root_directory_name ],
+			recurse : true,
+			extra : (remove ? '-sdel ' : ''),
+			type : 'zip'
+		});
+
+		// recover mimetype
+		archive_file.rename([ mimetype_first_order_name, mimetype_filename ]);
+
+		library_namespace.debug('create ebook using 7z: ' + target_file
+				+ ': Done.', 1, 'archive_to_ZIP');
 
 		// 若需要留下/重複利用media如images，請勿remove。
 		if (remove) {

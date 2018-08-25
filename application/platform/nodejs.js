@@ -639,14 +639,6 @@ function module_code(library_namespace) {
 	 * @see _CeL.updater.node.js
 	 */
 	function executable_file_path(file_name, search_path_list) {
-		if (Array.isArray(file_name)) {
-			file_name.some(function(_file_name) {
-				return file_name = executable_file_path(_file_name,
-						search_path_list);
-			})
-			return file_name;
-		}
-
 		if (!Array.isArray(search_path_list)) {
 			search_path_list = String(search_path_list
 			// Unix: process.env.PATH, Windows: process.env.Path
@@ -660,9 +652,23 @@ function module_code(library_namespace) {
 			.includes(':\\') ? ';' : ':');
 		}
 
-		if (library_namespace.platform('windows')
-				&& !/\.(?:exe|com|bat|cmd)$/i.test(file_name)) {
-			file_name += '.exe';
+		if (Array.isArray(file_name)) {
+			file_name.some(function(_file_name) {
+				return file_name = executable_file_path(_file_name,
+						search_path_list);
+			})
+			return file_name;
+		}
+
+		// assert: {String}file_name
+		if (library_namespace.platform('windows')) {
+			if (/%[a-z_]%/i.test(file_name)) {
+				// e.g., '%ProgramFiles%\\7-Zip\\7z.exe'
+				throw 'Can not handle ' + file_name;
+			}
+
+			if (!/\.(?:exe|com|bat|cmd)$/i.test(file_name))
+				file_name += '.exe';
 		}
 
 		// console.log(search_path_list);

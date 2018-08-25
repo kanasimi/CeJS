@@ -1,6 +1,8 @@
 /**
  * @name CeL functions for archive file.
- * @fileoverview 本檔案包含了壓縮 compress / archive file 的 functions。
+ * @fileoverview 本檔案包含了壓縮封裝/抽取抽出 compress / extract archive file 的 functions。
+ * 
+ * 注意: 這需要先安裝 7z.exe 程式。
  * 
  * <code>
 
@@ -44,16 +46,19 @@ archive_file.remove([ to_delete ], options, callback);
 archive_file.extract({output : target_directory}, callback);
 archive_file.extract([ files to extract ], {output : target_directory, other options}, callback);
 
-TODO:
-
-// {Object}pairs={from:to,from:to}
+// 請注意： rename 必須先安裝 7-Zip **16.04 以上的版本**。
 // {Array}pairs=[from,to,from,to]
+// TODO: {Object}pairs={from:to,from:to}
 archive_file.rename(pairs, callback);
+
+TODO:
 
 // test archive_file
 // {Object|String}options.switches: additional command line switches
 // {String}options.switches.password: password
 archive_file.verify(options, callback);
+
+// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
 
  </code>
  * 
@@ -108,16 +113,32 @@ function module_code(library_namespace) {
 		// cache the path of p7z executable file
 		// library_namespace.application.platform
 		// .execute.search([ '7z', 'p7z' ], '-h')
-		'7z' : add_quote((library_namespace
-				.executable_file_path([ '7z', 'p7z',
-				// e.g., install p7zip package via yum
-				'7za' ])
-		//
-		|| '%ProgramFiles%\\7-Zip\\7z.exe')),
-		rar : '"' + (library_namespace.executable_file_path('rar')
+		'7z' : library_namespace.executable_file_path([ '7z', 'p7z',
+		// e.g., install p7zip package via yum
+		'7za' ]) || library_namespace.platform('windows')
+				&& '%ProgramFiles%\\7-Zip\\7z.exe',
+
+		// TODO: /usr/bin/zip Info-ZIP
+
+		rar : library_namespace.executable_file_path([ 'rar' ])
 		// WinRAR.exe
-		|| '%ProgramFiles%\\WinRAR\\rar.exe') + '"'
-	}, default_program_type = Object.keys(executable_file_path)[0];
+		|| library_namespace.platform('windows')
+				&& '%ProgramFiles%\\WinRAR\\rar.exe'
+	},
+	// 預設的壓縮程式。
+	default_program_type;
+
+	Object.keys(executable_file_path).forEach(function(program_type) {
+		var program_path = executable_file_path[program_type];
+		// console.log(program_type + ': ' + program_path);
+		if (program_path) {
+			executable_file_path[program_type] = add_quote(program_path);
+			if (!default_program_type) {
+				// 挑選第一個可用的壓縮程式。
+				default_program_type = program_type;
+			}
+		}
+	});
 
 	function Archive_file(archive_file_path, options, callback) {
 		if (!callback && typeof options === 'function') {
@@ -136,15 +157,23 @@ function module_code(library_namespace) {
 				this.archive_type = matched[1].toLowerCase();
 		}
 		this.program_type = options.program_type || this.archive_type;
-		if (!(this.program_type in executable_file_path)) {
+		if (!executable_file_path[this.program_type]) {
 			this.program_type = default_program_type;
 		}
 		// {String}
 		this.program = executable_file_path[this.program_type];
+		// for is_Archive_file()
+		// this.constructor = Archive_file;
 
 		if (typeof callback === 'function')
 			callback(this);
 	}
+
+	function is_Archive_file(value) {
+		// return value && value.constructor === Archive_file;
+		return value instanceof Archive_file;
+	}
+	Archive_file.is_Archive_file = is_Archive_file;
 
 	// --------------------------------------------------------------
 
@@ -200,12 +229,18 @@ function module_code(library_namespace) {
 					// 預防 callback throw
 					callback(output);
 				} catch (e) {
+					console
+							.trace('archive_file_execute: callback execution error!');
 					library_namespace.error(e);
 				}
 			return output;
 		} catch (e) {
+			console.trace('archive_file_execute: ' + this.program_type
+					+ ' execution error!');
+			library_namespace.error(e);
 			if (typeof callback === 'function')
 				callback(null, e);
+			return;
 		}
 	}
 
@@ -237,6 +272,7 @@ function module_code(library_namespace) {
 			info : {
 				command : 'l -slt -sccUTF-8'
 			},
+			// 請注意： rename 必須先安裝 7-Zip **16.04 以上的版本**。
 			rename : {
 				command : 'rn'
 			},
@@ -428,7 +464,9 @@ function module_code(library_namespace) {
 			= FSO_list_operations.includes(operation)
 			// archive_file_wrapper_with_FSO_list
 			? function(FSO_list, options, callback) {
-				if (library_namespace.is_Object(FSO_list)) {
+				if (library_namespace.is_Object(FSO_list)
+				// treat FSO_list as options
+				&& !library_namespace.is_Object(options)) {
 					// shift arguments.
 					callback = options;
 					options = FSO_list;
@@ -477,19 +515,22 @@ function module_code(library_namespace) {
 		// 注意: source_directory 前後有空白時會出問題。
 		library_namespace.storage.working_directory(source_directory);
 
-		if (is_relative_path(archive_file_path)) {
+		if (typeof archive_file_path === 'string'
+				&& is_relative_path(archive_file_path)) {
 			// archive_file_path 為相對 current_working_directory 之 path。
 			// 因為工作目錄已經改變，必須將 archive_file_path 改成絕對目錄。
 			archive_file_path = library_namespace.append_path_separator(
 					current_working_directory, archive_file_path);
 		}
 
-		var archive_file = new Archive_file(archive_file_path, options),
+		var archive_file = is_Archive_file(archive_file_path) ? archive_file_path
+				: new Archive_file(archive_file_path, options),
 		//
 		files_to_archive = options && options.files || '.';
-		archive_file.update(files_to_archive);
+		archive_file.update(files_to_archive, options);
 		// recover working directory.
 		library_namespace.storage.working_directory(current_working_directory);
+		return archive_file;
 	}
 
 	Archive_file.archive_under = archive_under;
