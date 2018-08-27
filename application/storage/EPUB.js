@@ -2051,15 +2051,26 @@ function module_code(library_namespace) {
 		typeof callback === 'function' && callback();
 	}
 
-	// package, bale packing 打包 epub
+	// package, bale packing 打包 epub。
 	function archive_to_ZIP(target_file, remove, callback, file_list) {
 		if (!library_namespace.is_empty_object(this.downloading)) {
 			// 註冊 callback，等所有媒體檔案下載完再收尾。
 			this.add_listener('all_downloaded', archive_to_ZIP.bind(this,
-					target_file, remove, callback));
+					target_file, remove, callback, file_list));
 			library_namespace
 					.info('archive_to_ZIP: Waiting for all resources loaded...');
 			return;
+		}
+
+		if (Array.isArray(callback) && !file_list) {
+			file_list = callback;
+			callback = null;
+		}
+		if (false && Array.isArray(file_list)) {
+			// 警告: 必須自行先排除 mimetype 這個檔案。
+			file_list = file_list.filter(function(path) {
+				return path !== mimetype_filename;
+			});
 		}
 
 		library_namespace.debug('Starting...', 2, 'archive_to_ZIP');

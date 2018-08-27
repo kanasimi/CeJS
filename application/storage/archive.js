@@ -115,18 +115,26 @@ function module_code(library_namespace) {
 		// .execute.search([ '7z', 'p7z' ], '-h')
 		'7z' : library_namespace.executable_file_path([ '7z', 'p7z',
 		// e.g., install p7zip package via yum
-		'7za' ]) || library_namespace.platform('windows')
+		'7za',
+		// keka @ Mac OS X
+		'/Applications/Keka.app/Contents/Resources/keka7z' ])
+				|| library_namespace.platform('windows')
 				&& '%ProgramFiles%\\7-Zip\\7z.exe',
 
-		// TODO: /usr/bin/zip Info-ZIP
-
-		rar : library_namespace.executable_file_path([ 'rar' ])
+		rar : library_namespace.executable_file_path('rar')
 		// WinRAR.exe
 		|| library_namespace.platform('windows')
 				&& '%ProgramFiles%\\WinRAR\\rar.exe'
 	},
 	// 預設的壓縮程式。
 	default_program_type;
+
+	if (!executable_file_path['7z']) {
+		// e.g., /usr/bin/zip Info-ZIP @ Mac OS X
+		// but Info-ZIP has NO rename function!
+		executable_file_path.zip = library_namespace
+				.executable_file_path('zip');
+	}
 
 	Object.keys(executable_file_path).forEach(function(program_type) {
 		var program_path = executable_file_path[program_type];
@@ -148,8 +156,7 @@ function module_code(library_namespace) {
 		}
 
 		options = library_namespace.setup_options(options);
-		// 即使在 Windows 下，採用 "\" 作路徑分隔，卻可能造成"系統找不到指定的檔案"錯誤。
-		this.archive_file_path = archive_file_path.replace(/\\/g, '/');
+
 		this.archive_type = options.type;
 		if (!this.archive_type) {
 			var matched = archive_file_path.match(/\.([a-z\d\-_]+)$/i);
@@ -160,8 +167,13 @@ function module_code(library_namespace) {
 		if (!executable_file_path[this.program_type]) {
 			this.program_type = default_program_type;
 		}
-		// {String}
+		// {String}this.program
 		this.program = executable_file_path[this.program_type];
+		if (this.program_type === '7z') {
+			// 即使在 Windows 下，採用 "\" 作路徑分隔可能造成 7-Zip "系統找不到指定的檔案"錯誤。
+			this.archive_file_path = archive_file_path.replace(/\\/g, '/');
+		}
+
 		// for is_Archive_file()
 		// this.constructor = Archive_file;
 
@@ -213,7 +225,12 @@ function module_code(library_namespace) {
 			if (!Array.isArray(FSO_list)) {
 				FSO_list = [ FSO_list ];
 			}
-			command.push(FSO_list.map(add_quote).join(' '));
+			FSO_list = FSO_list.map(add_quote).join(' ');
+			if (this.program_type === '7z') {
+				// 即使在 Windows 下，採用 "\" 作路徑分隔可能造成 7-Zip "系統找不到指定的檔案"錯誤。
+				FSO_list = FSO_list.replace(/\\/g, '/');
+			}
+			command.push(FSO_list);
 		}
 
 		command = command.join(' ');

@@ -669,6 +669,10 @@ function module_code(library_namespace) {
 
 			if (!/\.(?:exe|com|bat|cmd)$/i.test(file_name))
 				file_name += '.exe';
+
+		} else if (file_name.startsWith('/')) {
+			// is absolute path
+			return fs_status(file_name) && file_name;
 		}
 
 		// console.log(search_path_list);
