@@ -2955,6 +2955,8 @@ function module_code(library_namespace) {
 					|| (XMLHttp.status / 100 | 0) !== 2, verified_image;
 			if (!has_error) {
 				image_data.file_length.push(contents.length);
+				library_namespace.debug('測試圖像是否完整: ' + image_data.file, 2,
+						'get_images');
 				var file_type = library_namespace.file_type(contents);
 				verified_image = file_type && !file_type.damaged;
 				if (verified_image) {

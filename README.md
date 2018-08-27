@@ -29,6 +29,8 @@ var cejs_node = document.createElement("script");
 cejs_node.setAttribute('src', 'https://kanasimi.github.io/CeJS/ce.js');
 cejs_node.setAttribute('type', 'text/javascript');
 document.head.appendChild(cejs_node);
+window.CeL = { initializer : function() { CeL.run('interact.DOM', initialization); } };
+function initialization() {}
 ```
 
 ``` JavaScript

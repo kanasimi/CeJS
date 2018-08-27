@@ -4065,6 +4065,15 @@ if (typeof CeL === 'function')
 				library_namespace.log('library_initializer: 已處理完畢。');
 			};
 
+			// use CeL={initializer:function(){}}; as callback
+			var old_namespace = library_namespace.get_old_namespace();
+			if (old_namespace.initializer) {
+				if (Array.isArray(old_namespace.initializer))
+					Array.prototype.push.call(queue, old_namespace.initializer);
+				else
+					queue.push(old_namespace.initializer);
+			}
+
 			// 處理積存工作。
 			// export .run().
 			return (library_namespace.run = normal_run)(queue);
