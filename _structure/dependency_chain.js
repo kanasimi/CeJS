@@ -2864,7 +2864,8 @@ if (typeof CeL === 'function')
 					library_namespace.debug('[' + id
 							+ '] 之善後/收尾工作函式已執行完畢，清除 cache/stack…', 5,
 							'load_named');
-				// Release memory. 釋放被占用的記憶體. delete cache, 早點 delete 以釋放記憶體空間/資源。
+				// Release memory. 釋放被占用的記憶體. delete cache, 早點 delete
+				// 以釋放記憶體空間/資源。
 				// 預防出現問題，如 memory leak 等。
 				delete declaration.code;
 				delete declaration.finish;
@@ -4067,7 +4068,7 @@ if (typeof CeL === 'function')
 
 			// use CeL={initializer:function(){}}; as callback
 			var old_namespace = library_namespace.get_old_namespace();
-			if (old_namespace.initializer) {
+			if (old_namespace && old_namespace.initializer) {
 				if (Array.isArray(old_namespace.initializer))
 					Array.prototype.push.call(queue, old_namespace.initializer);
 				else
