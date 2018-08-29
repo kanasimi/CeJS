@@ -2,10 +2,10 @@
 # This file is private.
 #/path/to/library_root
 
-# Node.js lazy installation, exact from https://github.com/kanasimi/work_crawler/archive/master.zip
+# Node.js lazy installation, extract from https://github.com/kanasimi/work_crawler/
 ./CeJS-master
 
-# exact from `git clone --single-branch --depth 1 https://github.com/kanasimi/CeJS.git`
+# extract from `git clone --single-branch --depth 1 https://github.com/kanasimi/CeJS.git`
 ./CeJS
 
 # `npm install` 可能將 cejs 安裝在此目錄下之 node_modules/cejs 目錄內

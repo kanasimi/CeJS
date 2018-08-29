@@ -762,6 +762,18 @@ function module_code(library_namespace) {
 			if (work_id.startsWith('l=')) {
 				work_id = work_id.slice('l='.length);
 			}
+			if (/\.js$/i.test(work_id)) {
+				library_namespace.warn(this.id + ': 您可能錯把下載工具檔當作了列表檔案: '
+						+ work_id);
+				[ '.lst', '.txt' ].some(function(extension) {
+					var work_list_file = work_id.replace(/\.js$/i, extension);
+					if (library_namespace.storage.file_exists(work_list_file)) {
+						library_namespace.info('改採用列表檔案: ' + work_list_file);
+						work_id = work_list_file;
+						return true;
+					}
+				});
+			}
 			var work_list = library_namespace.fs_read(work_id);
 			if (!work_list) {
 				// 若是檔案不存在，.fs_read() 可能會回傳 undefined。
@@ -2817,15 +2829,17 @@ function module_code(library_namespace) {
 		// 紀錄已下載完之 chapter。
 		this.save_work_data(work_data);
 
-		if (work_data.jump_to_chapter > 0) {
-			// work_data.jump_to_chapter 可用來手動設定下一個要取得的章節號碼。
-			library_namespace.info(work_data.title + ': jump to chapter '
-					+ work_data.jump_to_chapter + ' ← ' + chapter_NO);
-			chapter_NO = work_data.jump_to_chapter;
+		// 增加章節計數，準備下載下一個章節。
+		++chapter_NO;
+
+		if ('jump_to_chapter' in work_data) {
+			if (work_data.jump_to_chapter !== chapter_NO) {
+				// work_data.jump_to_chapter 可用來手動設定下一個要取得的章節號碼。
+				library_namespace.info(work_data.title + ': jump to chapter '
+						+ work_data.jump_to_chapter + ' ← ' + chapter_NO);
+				chapter_NO = work_data.jump_to_chapter;
+			}
 			delete work_data.jump_to_chapter;
-		} else {
-			// 增加章節計數，準備下載下一個章節。
-			++chapter_NO;
 		}
 
 		if (chapter_NO > work_data.chapter_count) {
@@ -2887,11 +2901,34 @@ function module_code(library_namespace) {
 	function get_images(image_data, callback, images_archive) {
 		// console.log(image_data);
 
+		// 檢查實際存在的圖片檔案。
 		var image_downloaded = node_fs.existsSync(image_data.file)
 				|| this.skip_existed_bad_file
 				// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
 				&& node_fs.existsSync(this.EOI_error_path(image_data.file));
 
+		if (image_data.acceptable_types === 'images') {
+			// 將會測試是否已經下載過一切可接受的檔案類別。
+			image_data.acceptable_types = Object.keys(this.image_types);
+		}
+
+		if (!image_downloaded
+		// 可以接受的副檔名/檔案類別 acceptable file extensions
+		// e.g., acceptable_types : [ 'png' ]
+		// 當之前下載時發現檔案類別並非預設的、例如JPG檔案時，會將副檔名改為認證的副檔名。但是這樣一來可能就會找不到了。因此需要設定acceptable_types。
+		&& Array.isArray(image_data.acceptable_types)) {
+			image_downloaded = image_data.acceptable_types.some(function(
+					extension) {
+				var alternative_filename = image_data.file.replace(
+						/\.[a-z\d]+$/, '.' + extension);
+				if (node_fs.existsSync(alternative_filename)) {
+					image_data.file = alternative_filename;
+					return true;
+				}
+			});
+		}
+
+		// 檢查壓縮檔裡面的圖片檔案。
 		var image_archived, bad_image_archived;
 		if (images_archive && images_archive.hash
 		// 檢查壓縮檔，看是否已經存在圖像檔案。
@@ -2909,6 +2946,17 @@ function module_code(library_namespace) {
 					|| this.skip_existed_bad_file
 					// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
 					&& bad_image_archived;
+
+			if (!image_downloaded
+			// 可以接受的副檔名/檔案類別 acceptable file extensions
+			&& Array.isArray(image_data.acceptable_types)) {
+				image_downloaded = image_data.acceptable_types.some(function(
+						extension) {
+					var alternative_filename = image_archived.replace(
+							/\.[a-z\d]+$/, '.' + extension);
+					return images_archive.hash[alternative_filename];
+				});
+			}
 		}
 
 		if (image_downloaded) {
@@ -3112,7 +3160,9 @@ function module_code(library_namespace) {
 				// console.log('error count: ' + image_data.error_count);
 				if (contents && contents.length < _this.MIN_LENGTH
 				// 檔案有驗證過，只是太小時，應該不是 false。
-				&& verified_image !== false) {
+				&& verified_image !== false
+				// 就算圖像是完整的，只是比較小，HTTP status code 也應該是 2xx。
+				&& (XMLHttp.status / 100 | 0) === 2) {
 					library_namespace.warn('或許圖像是完整的，只是過小而未達標，例如幾乎為空白之圖像。'
 							+ '您可設定 MIN_LENGTH，如 MIN_LENGTH=' + contents.length
 							+ ' 表示允許最小為 ' + contents.length + ' bytes 的圖像；'
