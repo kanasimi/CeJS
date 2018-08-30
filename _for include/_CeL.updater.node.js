@@ -6,16 +6,18 @@
  * 
  * @example<code>
 
-# node _CeL.updater.node.js
+# node _CeL.updater.node.js user/repository-branch target_directory
 
 TODO:
+加上下載進度
 use Zlib
 
  </code>
  * 
  * @since 2017/3/13 14:39:41 初版<br />
  *        2018/8/20 12:52:34 改寫成 GitHub 泛用的更新工具，並將 _CeL.path.txt →
- *        _repository_path_list.txt
+ *        _repository_path_list.txt<br />
+ *        2018/8/30 20:17:7 增加 target_directory 功能。
  */
 
 'use strict';
@@ -28,15 +30,13 @@ var p7zip_path = [ '7z',
 '7za', 'unzip', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
 /** {String}更新工具相對於 CeJS 根目錄的路徑。e.g., "CeJS-master/_for include/" */
 update_script_directory,
-/** {String}目標目錄位置。將會解壓縮成這個目錄底下的 "CeJS-master/"。 const */
-target_directory,
 /** {String}下載之後將壓縮檔存成這個檔名。 const */
 target_file, latest_version_file, PATTERN_repository_path = /([^\/]+)\/(.+?)(?:-([^-].*))?$/;
 
 // --------------------------------------------------------------------------------------------
 
 // const
-var node_https = require('https'), node_fs = require('fs'), child_process = require('child_process'),
+var node_https = require('https'), node_fs = require('fs'), child_process = require('child_process'), path_separator = require('path').sep,
 // modify from _CeL.loader.nodejs.js
 repository_path_list_file = './_repository_path_list.txt';
 
@@ -56,10 +56,14 @@ function detect_base_path(repository, branch) {
 		return;
 	}
 
+	var target_directory;
+
 	// modify from _CeL.loader.nodejs.js
-	CeL_path_list.split(CeL_path_list.includes('\n') ? /\r?\n/ : '|')
-	// 載入CeJS基礎泛用之功能。（如非特殊目的使用的載入功能）
-	.some(function(path) {
+	CeL_path_list = CeL_path_list.split(CeL_path_list.includes('\n') ? /\r?\n/
+			: '|');
+	CeL_path_list.unshift('./' + repository + '-' + branch);
+	// 載入 CeJS 基礎泛用之功能。（非特殊目的使用的載入功能）
+	CeL_path_list.some(function(path) {
 		if (path.charAt(0) === '#'
 		//
 		&& path.endsWith(repository + '-' + branch)) {
@@ -67,15 +71,29 @@ function detect_base_path(repository, branch) {
 			return;
 		}
 
+		var matched = path
+				.match(/(?:^|[\\\/])([a-z_\d]+)-([a-z_\d]+)[\\\/]?$/i);
+		if (matched && (matched[1] !== repository || matched[2] !== branch)) {
+			// 是其他 repository 的 path。
+			return;
+		}
+
 		try {
-			// 到path的上一層。
-			process.chdir(path.replace(/[^\\\/]+[\\\/]?$/, ''));
-			console.info('Use base path: ' + path);
-			return true;
+			var fso_status = node_fs.lstatSync(path);
+			if (fso_status.isDirectory()) {
+				if (/^\.\.(?:$|[\\\/])/.test(path)
+						&& !node_fs.existsSync('../ce.js'))
+					return;
+				target_directory = path;
+				// console.info('detect_base_path: Use base path: ' + path);
+				return true;
+			}
 		} catch (e) {
 			// try next path
 		}
 	});
+
+	return target_directory;
 }
 
 // --------------------------------------------------------------------------------------------
@@ -83,11 +101,24 @@ function detect_base_path(repository, branch) {
 function check_update(repository_path, post_install) {
 	/** {String}Repository name */
 	var repository = repository_path.trim().match(PATTERN_repository_path),
+	/** const {String}目標目錄位置。將會解壓縮至這個目錄底下。 default: repository_path/ */
+	target_directory = process.argv[3], original_work_directory,
 	//
 	user_name = repository[1], branch = repository[3] || 'master';
 	repository = repository[2];
 
-	detect_base_path(repository, branch);
+	if (!target_directory) {
+		target_directory = detect_base_path(repository, branch);
+	} else if (!node_fs.existsSync(target_directory)) {
+		node_fs.mkdirSync(target_directory);
+	}
+	if (target_directory
+			&& (target_directory.endsWith('/' + repository + '-' + branch) || target_directory
+					.endsWith('\\' + repository + '-' + branch))) {
+		original_work_directory = process.cwd();
+		process.chdir(target_directory.slice(0,
+				-('/' + repository + '-' + branch).length));
+	}
 
 	if (!update_script_directory)
 		update_script_directory = repository + '-' + branch + '/_for include/';
@@ -141,7 +172,12 @@ function check_update(repository_path, post_install) {
 				? have_version + '\n     → ' : 'to ') + latest_version);
 				update_via_7zip(latest_version,
 				//
-				user_name, repository, branch, post_install);
+				user_name, repository, branch, function() {
+					if (typeof post_install === 'function')
+						post_install(target_directory || '');
+					if (original_work_directory)
+						process.chdir(original_work_directory);
+				}, target_directory);
 			}
 		});
 	})
@@ -156,18 +192,8 @@ function check_update(repository_path, post_install) {
 
 // --------------------------------------------------------------------------------------------
 
-function copy_file(source_name, taregt_name) {
-	try {
-		node_fs.unlinkSync(source_name);
-	} catch (e) {
-		// TODO: handle exception
-	}
-	node_fs.renameSync(update_script_directory + source_name, taregt_name
-			|| source_name);
-}
-
 function update_via_7zip(latest_version, user_name, repository, branch,
-		post_install) {
+		post_install, target_directory) {
 	// detect 7z path
 	if (!Array.isArray(p7zip_path)) {
 		p7zip_path = [ p7zip_path ];
@@ -188,10 +214,6 @@ function update_via_7zip(latest_version, user_name, repository, branch,
 	})) {
 		console.error('Please set up the p7zip_path first!');
 		p7zip_path = null;
-	}
-
-	if (target_directory) {
-		process.chdir(target_directory);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -216,6 +238,7 @@ function update_via_7zip(latest_version, user_name, repository, branch,
 		response.on('data', function(data) {
 			sum_size += data.length;
 			buffer_array.push(data);
+			// 00% of 0.00MiB
 			process.stdout.write(target_file + ': ' + sum_size + ' bytes ('
 					+ (sum_size / 1.024 / (Date.now() - start_time)).toFixed(2)
 					+ ' KiB/s)...\r');
@@ -260,11 +283,11 @@ function update_via_7zip(latest_version, user_name, repository, branch,
 		quoted_target_file = '"' + target_file + '"';
 		if (p7zip_path.includes('unzip')) {
 			command = p7zip_path + ' -t ' + quoted_target_file + ' && '
-			// 解開 GitHub 最新版本壓縮檔案 by unzip。
+			// 解開 GitHub 最新版本壓縮檔案 via unzip。
 			+ p7zip_path + ' -x -o ' + quoted_target_file;
 		} else {
 			command = p7zip_path + ' t ' + quoted_target_file + ' && '
-			// 解開 GitHub 最新版本壓縮檔案 by 7z。
+			// 解開 GitHub 最新版本壓縮檔案 via 7z。
 			+ p7zip_path + ' x -y ' + quoted_target_file;
 		}
 
@@ -283,7 +306,10 @@ function update_via_7zip(latest_version, user_name, repository, branch,
 			} catch (e) {
 			}
 
-			typeof post_install === 'function' && post_install();
+			move_all_files_under_directory(repository + '-' + branch,
+					target_directory, true);
+			typeof post_install === 'function'
+					&& post_install(target_directory || '');
 
 			console.info('Done.\n\n' + 'Installation completed successfully.');
 		}
@@ -291,6 +317,54 @@ function update_via_7zip(latest_version, user_name, repository, branch,
 		// throw 'Some error occurred! Bad archive?';
 	});
 
+}
+
+// 把 source_directory 下面的檔案全部搬移到 target_directory 下面去。
+function move_all_files_under_directory(source_directory, target_directory,
+		overwrite, create_empty_directory) {
+	if (!target_directory)
+		return;
+
+	function move(_source, _target) {
+		var fso_list = node_fs.readdirSync(_source);
+		if (!node_fs.existsSync(_target)
+		// 對於空目錄看看是否要創建一個。
+		&& (fso_list.length > 0 || create_empty_directory)) {
+			node_fs.mkdirSync(_target);
+		}
+		_source += '/';
+		_target += '/';
+		fso_list.forEach(function(fso_name) {
+			var fso_status = node_fs.lstatSync(_source + fso_name);
+			if (fso_status.isDirectory()) {
+				move(_source + fso_name, _target + fso_name);
+			} else {
+				if (node_fs.existsSync(_target + fso_name)) {
+					if (overwrite)
+						node_fs.unlinkSync(_target + fso_name);
+					else
+						return;
+				}
+				// console.log(_source + fso_name+'→'+ _target + fso_name);
+				node_fs.renameSync(_source + fso_name, _target + fso_name);
+			}
+		});
+		node_fs.rmdirSync(_source);
+	}
+
+	source_directory = source_directory.replace(/[\\\/]+$/, '').replace(
+			/^(?:\.\/)+/, '');
+	if (!source_directory) {
+		source_directory = '/';
+	}
+	target_directory = target_directory.replace(/[\\\/]+$/, '').replace(
+			/^(?:\.\/)+/, '');
+	if (!target_directory) {
+		target_directory = '/';
+	}
+	console.log(source_directory + '→' + target_directory);
+	if (source_directory !== target_directory)
+		move(source_directory, target_directory);
 }
 
 // --------------------------------------------------------------------------------------------
@@ -311,25 +385,37 @@ if (PATTERN_repository_path.test(repository_path)) {
 	check_update(default_repository_path, default_post_install);
 }
 
-function default_post_install_for_all() {
+function default_post_install_for_all(base_directory) {
 }
 
-function default_post_install() {
+function default_post_install(base_directory) {
 	console.info('Update the tool itself...');
-	copy_file('_CeL.updater.node.js');
+	copy_file('_CeL.updater.node.js', null, base_directory);
 
 	console.info('Setup basic execution environment...');
-	copy_file('_CeL.loader.nodejs.js');
+	copy_file('_CeL.loader.nodejs.js', null, base_directory);
 	try {
 		// Do not overwrite repository_path_list_file.
-		node_fs.accessSync(repository_path_list_file, node_fs.constants.R_OK);
+		node_fs.accessSync(base_directory + repository_path_list_file,
+				node_fs.constants.R_OK);
 	} catch (e) {
 		try {
 			node_fs.renameSync(update_script_directory
-					+ '_repository_path_list.sample.txt',
-					repository_path_list_file);
+					+ repository_path_list_file.replace(/(\.[^.]+)$/,
+							'.sample$1'), base_directory
+					+ repository_path_list_file);
 		} catch (e) {
 			// TODO: handle exception
 		}
 	}
+}
+
+function copy_file(source_name, taregt_name, base_directory) {
+	try {
+		node_fs.unlinkSync(source_name);
+	} catch (e) {
+		// TODO: handle exception
+	}
+	node_fs.renameSync(update_script_directory + source_name, base_directory
+			+ (taregt_name || source_name));
 }
