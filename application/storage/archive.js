@@ -112,19 +112,30 @@ function module_code(library_namespace) {
 		// wrapper for 7-Zip
 		// cache the path of p7z executable file
 		// library_namespace.application.platform
-		// .execute.search([ '7z', 'p7z' ], '-h')
-		'7z' : library_namespace.executable_file_path([ '7z', 'p7z',
-		// e.g., install p7zip package via yum
-		'7za',
-		// keka @ Mac OS X
-		'/Applications/Keka.app/Contents/Resources/keka7z' ])
-				|| library_namespace.platform('windows')
-				&& '%ProgramFiles%\\7-Zip\\7z.exe',
+		// .execute.search([ "7z", "p7z" ], "-h")
+		'7z' : library_namespace.executable_file_path([ "7z", "p7z",
+		/**
+		 * <code>
+		e.g., install p7zip package via yum:
+		# sudo yum install epel-release
+		# sudo yum install p7zip p7zip-plugins
 
-		rar : library_namespace.executable_file_path('rar')
+		At Debian, Ubuntu, Linux Mint:
+		# sudo apt-get install p7zip-full p7zip-rar
+
+		At Mac OS X: install https://www.keka.io/
+		</code>
+		 */
+		"7za",
+		// keka @ Mac OS X
+		"/Applications/Keka.app/Contents/Resources/keka7z" ])
+				|| library_namespace.platform('windows')
+				&& "%ProgramFiles%\\7-Zip\\7z.exe",
+
+		rar : library_namespace.executable_file_path("rar")
 		// WinRAR.exe
 		|| library_namespace.platform('windows')
-				&& '%ProgramFiles%\\WinRAR\\rar.exe'
+				&& "%ProgramFiles%\\WinRAR\\rar.exe"
 	},
 	// 預設的壓縮程式。
 	default_program_type;
@@ -167,6 +178,13 @@ function module_code(library_namespace) {
 		if (!executable_file_path[this.program_type]) {
 			this.program_type = default_program_type;
 		}
+		if (!apply_switches[this.program_type]) {
+			this.unknown_type = true;
+			library_namespace.error('Archive_file: Unknown type: '
+					+ this.program_type + ', please install '
+					+ default_program_type);
+		}
+
 		// {String}this.program
 		this.program = executable_file_path[this.program_type];
 		if (this.program_type === '7z') {
@@ -178,7 +196,7 @@ function module_code(library_namespace) {
 		// this.constructor = Archive_file;
 
 		if (typeof callback === 'function')
-			callback(this);
+			callback(this, this.unknown_type && new Error('UNKNOWN_TYPE'));
 	}
 
 	function is_Archive_file(value) {

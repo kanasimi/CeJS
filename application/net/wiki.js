@@ -1268,6 +1268,7 @@ function module_code(library_namespace) {
 	 */
 	var atom_type = {
 		namespace : true,
+		// https://phabricator.wikimedia.org/T173889
 		page_title : true,
 		// external_link : true,
 		url : true,

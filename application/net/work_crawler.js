@@ -17,6 +17,8 @@
 # finish_up()
 
 TODO:
+支援 Mac OS X
+支援自動更新, read .version.json
 預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
@@ -2670,6 +2672,9 @@ function module_code(library_namespace) {
 			}
 
 			function reget_chapter_data() {
+				if (false && typeof chapter_URL !== 'string') {
+					console.log(chapter_URL);
+				}
 				get_URL(chapter_URL, pre_parse_chapter_data, _this.charset,
 						null, Object.assign({
 							error_retry : _this.MAX_ERROR_RETRY

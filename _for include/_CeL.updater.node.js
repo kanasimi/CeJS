@@ -112,6 +112,7 @@ function check_update(repository_path, post_install) {
 	} else if (!node_fs.existsSync(target_directory)) {
 		node_fs.mkdirSync(target_directory);
 	}
+	// console.log(target_directory);
 	if (target_directory
 			&& (target_directory.endsWith('/' + repository + '-' + branch) || target_directory
 					.endsWith('\\' + repository + '-' + branch))) {
@@ -127,12 +128,14 @@ function check_update(repository_path, post_install) {
 		target_file = repository + '-' + branch + '.zip';
 
 	if (!latest_version_file)
-		latest_version_file = target_file.replace(/[^.]+$/g, 'version');
+		// repository-branch.version.json
+		latest_version_file = target_file.replace(/[^.]+$/g, 'version.json');
 
 	console.info('Read ' + latest_version_file);
 	var have_version;
 	try {
-		have_version = node_fs.readFileSync(latest_version_file).toString();
+		have_version = JSON.parse(node_fs.readFileSync(latest_version_file)
+				.toString()).version;
 	} catch (e) {
 	}
 
@@ -298,7 +301,10 @@ function update_via_7zip(latest_version, user_name, repository, branch,
 		});
 
 		if (latest_version) {
-			node_fs.writeFileSync(latest_version_file, latest_version);
+			node_fs.writeFileSync(latest_version_file, JSON.stringify({
+				check_date : new Date(),
+				version : latest_version
+			}));
 
 			try {
 				// 解壓縮完成之後，可以不必留著程式碼檔案。 TODO: backup
