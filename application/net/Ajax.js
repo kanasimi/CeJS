@@ -1202,6 +1202,9 @@ function module_code(library_namespace) {
 	// 所有 requests
 	get_URL_node_requests = 0;
 
+	// 強制使用POST傳送。
+	var FORCE_POST = {};
+
 	/**
 	 * 讀取 URL via node http/https。<br />
 	 * assert: arguments 必須與 get_URL() 相容！
@@ -1312,7 +1315,8 @@ function module_code(library_namespace) {
 		}
 
 		if (post_data && !options.form_data) {
-			post_data = get_URL.parameters_to_String(post_data, charset);
+			post_data = get_URL.parameters_to_String(post_data, charset)
+					|| FORCE_POST;
 		}
 
 		if (!onload && typeof options.onchange === 'function') {
@@ -1818,12 +1822,19 @@ function module_code(library_namespace) {
 			_URL.headers['Accept-Encoding'] = 'gzip,deflate';
 		}
 
+		if (false)
+			// @see jQuery
+			if (!options.crossDomain && !headers["X-Requested-With"]) {
+				headers["X-Requested-With"] = "XMLHttpRequest";
+			}
+
 		if (post_data) {
 			_URL.method = 'POST';
+			var _post_data = post_data === FORCE_POST ? '' : post_data;
 			if (0 && options.form_data) {
 				console.log('-'.repeat(79));
-				console.log(post_data.to_Array().content_length);
-				console.log(post_data);
+				console.log(_post_data.to_Array().content_length);
+				console.log(_post_data);
 				throw 1;
 			}
 			Object.assign(_URL.headers, {
@@ -1831,14 +1842,14 @@ function module_code(library_namespace) {
 				//
 				? 'multipart/form-data; boundary='
 				// boundary 存入→ post_data.boundary
-				+ post_data.boundary : 'application/x-www-form-urlencoded',
+				+ _post_data.boundary : 'application/x-www-form-urlencoded',
 				// prevent HTTP 411 錯誤 – 需要內容長度頭 (411 Length Required)
 				'Content-Length' : options.form_data
 				//
-				? post_data.to_Array().content_length
-				// NG: post_data.length
-				: charset ? Buffer.byteLength(post_data, charset) : Buffer
-						.byteLength(post_data)
+				? _post_data.to_Array().content_length
+				// NG: _post_data.length
+				: charset ? Buffer.byteLength(_post_data, charset) : Buffer
+						.byteLength(_post_data)
 			});
 		}
 		if (options.method) {
@@ -1890,7 +1901,8 @@ function module_code(library_namespace) {
 		}
 
 		if (post_data) {
-			// console.log(post_data);
+			var _post_data = post_data === FORCE_POST ? '' : post_data;
+			// console.log(_post_data);
 			if (options.form_data) {
 				(function write_to_request(data) {
 					if (Array.isArray(data)) {
@@ -1900,13 +1912,13 @@ function module_code(library_namespace) {
 					} else {
 						request.write(data);
 					}
-				})(post_data.to_Array());
-			} else if (typeof post_data === 'string') {
+				})(_post_data.to_Array());
+			} else if (typeof _post_data === 'string') {
 				library_namespace.debug('set post data: length '
-						+ post_data.length, 3, 'get_URL_node');
-				library_namespace.debug('set post data: ' + post_data, 6,
+						+ _post_data.length, 3, 'get_URL_node');
+				library_namespace.debug('set post data: ' + _post_data, 6,
 						'get_URL_node');
-				request.write(post_data);
+				request.write(_post_data);
 			} else {
 				library_namespace.error('Invalid POST data: '
 						+ JSON.stringify(post_data));
