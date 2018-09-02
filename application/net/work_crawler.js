@@ -19,6 +19,8 @@
 TODO:
 支援 Mac OS X
 支援自動更新, read .version.json
+CLI progress bar
+
 預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
@@ -76,7 +78,7 @@ if (typeof CeL === 'function') {
 		+ '|application.storage.file.'
 		// for HTML_to_Unicode()
 		+ '|interact.DOM.'
-		// for Date.prototype.format()
+		// for Date.prototype.format(), String.prototype.to_Date()
 		+ '|data.date.'
 		// CeL.character.load(), 僅在要設定 this.charset 時才需要載入。
 		+ '|data.character.'
@@ -112,8 +114,8 @@ function module_code(library_namespace) {
 		Object.assign(this, configurations);
 		// 從命令列引數來的設定，優先等級比起作品預設設定更高。
 		if (library_namespace.env.arg_hash) {
-			for ( var key in this.import_arg_hash) {
-				if (key in library_namespace.env.arg_hash) {
+			for ( var key in library_namespace.env.arg_hash) {
+				if ((key in this.import_arg_hash) || (key in this)) {
 					var value = library_namespace.env.arg_hash[key];
 					library_namespace.log(library_namespace.display_align([
 					//
@@ -468,6 +470,17 @@ function module_code(library_namespace) {
 					// treat work_data as status
 					: work_data;
 			if (!status_list) {
+				if (library_namespace.is_Object(work_data)
+						&& (Date.now() - set_last_update_Date(work_data))
+						// 因為沒有明確記載作品是否完結，10年沒更新就不再檢查。
+						/ (24 * 60 * 60 * 1000) > (work_data.recheck_days || 10 * 366)) {
+					library_namespace.info('is_finished: 本作品已經 '
+							+ library_namespace
+									.age_of(set_last_update_Date(work_data))
+							+ ' 沒有更新因此不再檢查: ' + work_data.title);
+					work_data.recheck = 'changed';
+				}
+
 				return status_list;
 			}
 			// {String|Array}status_list
@@ -513,7 +526,8 @@ function module_code(library_namespace) {
 				};
 			}
 			get_URL(this.full_URL(url), callback, this.charset, post_data,
-					options ? Object.assign(options, this.get_URL_options)
+					options ? Object.assign(library_namespace.null_Object(),
+							this.get_URL_options, options)
 							: this.get_URL_options);
 		},
 		set_part : set_part_title,
@@ -1818,9 +1832,9 @@ function module_code(library_namespace) {
 				}
 			}
 
-			var recheck_flag = _this.recheck
+			var recheck_flag = 'recheck' in work_data ? work_data.recheck
 			// work_data.recheck 可能是程式自行判別的。
-			|| work_data.recheck,
+			: _this.recheck,
 			// 章節的增加數量: 新-舊, 當前-上一次的
 			chapter_added = work_data.chapter_count
 					- work_data.last_download.chapter;
@@ -2236,14 +2250,51 @@ function module_code(library_namespace) {
 		}
 	}
 	// 依章節標題來定章節編號。
-	function set_chapter_NO_via_title(chapter_data) {
-		var matched = chapter_data.title.match(
+	// @see parse_chapter_data() @ ck101.js
+	function set_chapter_NO_via_title(chapter_data, default_NO) {
+		if (Array.isArray(chapter_data.chapter_list)) {
+			// input sorted work_data, use work_data.chapter_list
+			// last_chapter_NO, start NO
+			default_NO |= 0;
+			chapter_data.chapter_list.forEach(function(chapter_data) {
+				var chapter_NO = this.set_chapter_NO_via_title(chapter_data,
+						++default_NO);
+				// + 1: 可能有 1 → 1.5
+				if (default_NO > chapter_NO + 1) {
+					library_namespace
+							.warn('出現章節編號逆轉的情況: ' + chapter_data.title);
+				}
+				default_NO = chapter_NO;
+			}, this);
+			return;
+		}
+
+		// console.log(chapter_data);
+		var title = library_namespace.is_Object(chapter_data) ? chapter_data.title
+				: title;
+		if (library_namespace.from_Chinese_numeral)
+			title = library_namespace.from_Chinese_numeral(title);
+		var matched = title.match(/(?:^|第 ?)(\d{1,3}(?:\.\d)?) ?話/) || title
 		// 因為中間的章節可能已經被下架，因此依章節標題來定章節編號。
-		/第 ?(\d{1,3}(?:\.\d)?) ?話/);
+		.match(/^(?:[＃#] *|(?:Episode|act)[ .:]*)?(\d{1,3})(?:$|[ .\-])/i)
+		// 章節編號有prefix，或放在末尾。 e.g., 乙ゲーにトリップした俺♂, たすけてまおうさま @ pixivコミック
+		// e.g., へるぷ22, チャプター24後編
+		|| title.match(/^[^\d]+(\d{1,2})(?:$|[^\d])/);
 		if (matched) {
 			// 可能有第0話。
-			chapter_data.chapter_NO = matched[1];
+			if (library_namespace.is_Object(chapter_data))
+				chapter_data.chapter_NO = default_NO = matched[1] | 0;
+			return default_NO;
 		}
+
+		// TODO: 神落しの鬼 @ pixivコミック: ニノ巻
+
+		library_namespace.warn('Can not determine chapter NO from title: '
+				+ (title || JSON.stringify(chapter_data))
+				+ (default_NO >= 0 ? ' (Set as ' + default_NO + ')' : ''));
+		if (library_namespace.is_Object(chapter_data) && default_NO >= 0)
+			chapter_data.chapter_NO = default_NO;
+		return default_NO;
 	}
 	// should called by get_data() or this.pre_parse_chapter_data()
 	// this.get_chapter_directory_name(work_data, chapter_NO);
@@ -2834,6 +2885,10 @@ function module_code(library_namespace) {
 		// 紀錄已下載完之 chapter。
 		this.save_work_data(work_data);
 
+		if (typeof this.after_download_chapter === 'function') {
+			this.after_download_chapter(work_data, chapter_NO);
+		}
+
 		// 增加章節計數，準備下載下一個章節。
 		++chapter_NO;
 
@@ -3302,21 +3357,29 @@ function module_code(library_namespace) {
 	// 本段功能須配合 CeL.application.storage.EPUB 並且做好事前設定。
 	// 可參照 https://github.com/kanasimi/work_crawler
 
+	function set_last_update_Date(work_data, force) {
+		if (!library_namespace.is_Date(work_data.last_update_Date)
+				&& typeof work_data.last_update === 'string'
+				&& work_data.last_update) {
+			var last_update_Date = work_data.last_update;
+			// assert: typeof last_update_Date === 'string'
+			last_update_Date = last_update_Date.to_Date({
+				// 注意: 若此時尚未設定 work_data.time_zone，可能會獲得錯誤的結果。
+				zone : work_data.time_zone
+			});
+			// 注意：不使用 cache。
+			if (force || ('time_zone' in work_data))
+				work_data.last_update_Date = last_update_Date;
+		}
+		return work_data.last_update_Date;
+	}
+
 	function create_ebook(work_data) {
 		if (!this.site_id) {
 			this.site_id = this.id;
 		}
 
-		if (!library_namespace.is_Date(work_data.last_update_Date)
-				&& work_data.last_update) {
-			var last_update_Date = work_data.last_update;
-			// assert: typeof last_update_Date === 'string'
-			last_update_Date = last_update_Date.to_Date({
-				zone : work_data.time_zone
-			});
-			// 注意：不使用 cache。
-			work_data.last_update_Date = last_update_Date;
-		}
+		set_last_update_Date(work_data, true);
 
 		var ebook_directory = work_data.directory + work_data.directory_name
 		// + ' ebook'
