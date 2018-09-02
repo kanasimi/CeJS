@@ -400,6 +400,12 @@ function module_code(library_namespace) {
 						+ ': Can not parse data! 網頁改版? 不能解析!';
 			}
 
+			if (cmnData.url) {
+				// e.g., http://plus.comico.jp/manga/24529/13/
+				// 預防 chapter_data.url 被污染。
+				cmnData._url = cmnData.url;
+				delete cmnData.url;
+			}
 			// console.log(chapter_data);
 			// console.log(cmnData);
 
