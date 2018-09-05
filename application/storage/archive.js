@@ -145,6 +145,8 @@ function module_code(library_namespace) {
 		// but Info-ZIP has NO rename function!
 		executable_file_path.zip = library_namespace
 				.executable_file_path('zip');
+		executable_file_path.unzip = library_namespace
+				.executable_file_path('unzip');
 	}
 
 	Object.keys(executable_file_path).forEach(function(program_type) {
@@ -187,10 +189,10 @@ function module_code(library_namespace) {
 
 		// {String}this.program
 		this.program = executable_file_path[this.program_type];
-		if (this.program_type === '7z') {
-			// 即使在 Windows 下，採用 "\" 作路徑分隔可能造成 7-Zip "系統找不到指定的檔案"錯誤。
-			this.archive_file_path = archive_file_path.replace(/\\/g, '/');
-		}
+
+		this.archive_file_path = this.program_type === '7z'
+		// 即使在 Windows 下，採用 "\" 作路徑分隔可能造成 7-Zip "系統找不到指定的檔案"錯誤。
+		? archive_file_path.replace(/\\/g, '/') : archive_file_path;
 
 		// for is_Archive_file()
 		// this.constructor = Archive_file;
@@ -225,7 +227,9 @@ function module_code(library_namespace) {
 				if (typeof value === 'function') {
 					value = value.call(this);
 				}
-				if (value !== undefined && value !== null)
+				if (switch_name === 'program_path')
+					command[0] = value;
+				else if (value !== undefined && value !== null)
 					command.push(value);
 			}
 		} else {
@@ -316,6 +320,20 @@ function module_code(library_namespace) {
 				command : 't'
 			}
 		},
+		// Info-ZIP http://infozip.sourceforge.net/
+		zip : {
+			update : {
+				// recurse : '-r',
+				level : '-9',
+			},
+			// delete
+			remove : {
+				command : '-d'
+			},
+			extract : {
+				program_path : executable_file_path.unzip
+			}
+		},
 		rar : {
 		// TODO
 		}
@@ -333,6 +351,7 @@ function module_code(library_namespace) {
 					return '-mx=' + value;
 				return;
 			},
+			// Recurse subdirectories
 			recurse : function(value) {
 				if (value)
 					return '-r' + (value === true ? '' : value);
@@ -357,6 +376,18 @@ function module_code(library_namespace) {
 					return value;
 			}
 		},
+		zip : {
+			// delete files after compression
+			remove : function(value) {
+				if (value)
+					return '-m';
+			},
+			// Recurse subdirectories
+			recurse : function(value) {
+				if (value)
+					return '-r';
+			}
+		},
 		rar : {
 			// TODO
 
@@ -370,7 +401,8 @@ function module_code(library_namespace) {
 
 	var apply_switches = {
 		rar : null,
-		'7z' : null
+		'7z' : null,
+		zip : null
 	};
 
 	Object.keys(apply_switches).forEach(function(program_type) {
