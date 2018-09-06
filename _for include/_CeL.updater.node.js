@@ -28,7 +28,7 @@ var p7zip_path = [ '7z',
 // e.g., install p7zip package via yum
 '7za', 'unzip', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
 /** {String}更新工具相對於 CeJS 根目錄的路徑。e.g., "CeJS-master/_for include/" */
-update_script_directory,
+update_script_directory = '/_for include/',
 /** {String}下載之後將壓縮檔存成這個檔名。 const */
 target_file, latest_version_file, PATTERN_repository_path = /([^\/]+)\/(.+?)(?:-([^-].*))?$/;
 
@@ -114,16 +114,14 @@ function check_update(repository_path, post_install) {
 	target_directory = target_directory.replace(/[\\\/]+$/, '');
 	// console.log(target_directory);
 	if (target_directory
-			&& (target_directory.endsWith('/' + repository + '-' + branch) || target_directory
-					.endsWith('\\' + repository + '-' + branch))) {
+			&& (target_directory.endsWith(path_separator + repository + '-'
+					+ branch) || target_directory.endsWith('\\' + repository
+					+ '-' + branch))) {
 		original_work_directory = process.cwd();
-		process.chdir(target_directory.slice(0,
-				-('/' + repository + '-' + branch).length));
+		process.chdir(target_directory.slice(0, -(path_separator + repository
+				+ '-' + branch).length));
 	}
-	target_directory += require('path').sep;
-
-	if (!update_script_directory)
-		update_script_directory = repository + '-' + branch + '/_for include/';
+	target_directory += path_separator;
 
 	if (!target_file)
 		target_file = repository + '-' + branch + '.zip';
@@ -325,6 +323,9 @@ function update_via_7zip(latest_version, user_name, repository, branch,
 
 			move_all_files_under_directory(repository + '-' + branch,
 					target_directory, true);
+			update_script_directory = (target_directory || repository + '-'
+					+ branch).replace(/[\\\/]+$/, '')
+					+ path_separator + update_script_directory;
 			typeof post_install === 'function'
 					&& post_install(target_directory || '');
 
@@ -336,11 +337,15 @@ function update_via_7zip(latest_version, user_name, repository, branch,
 
 }
 
+function simplify_path(path) {
+	return path.replace(/[\\\/]+$/, '').replace(/^(?:\.\/)+/, '') || '.';
+}
+
 // 把 source_directory 下面的檔案全部搬移到 target_directory 下面去。
 function move_all_files_under_directory(source_directory, target_directory,
 		overwrite, create_empty_directory) {
 	if (!target_directory)
-		return;
+		return 'NEEDLESS';
 
 	function move(_source, _target) {
 		var fso_list = node_fs.readdirSync(_source);
@@ -349,8 +354,8 @@ function move_all_files_under_directory(source_directory, target_directory,
 		&& (fso_list.length > 0 || create_empty_directory)) {
 			node_fs.mkdirSync(_target);
 		}
-		_source += '/';
-		_target += '/';
+		_source += path_separator;
+		_target += path_separator;
 		fso_list.forEach(function(fso_name) {
 			var fso_status = node_fs.lstatSync(_source + fso_name);
 			if (fso_status.isDirectory()) {
@@ -369,16 +374,8 @@ function move_all_files_under_directory(source_directory, target_directory,
 		node_fs.rmdirSync(_source);
 	}
 
-	source_directory = source_directory.replace(/[\\\/]+$/, '').replace(
-			/^(?:\.\/)+/, '');
-	if (!source_directory) {
-		source_directory = '/';
-	}
-	target_directory = target_directory.replace(/[\\\/]+$/, '').replace(
-			/^(?:\.\/)+/, '');
-	if (!target_directory) {
-		target_directory = '/';
-	}
+	source_directory = simplify_path(source_directory);
+	target_directory = simplify_path(target_directory);
 	console.log(source_directory + '→' + target_directory);
 	if (source_directory !== target_directory)
 		move(source_directory, target_directory);
@@ -428,11 +425,11 @@ function default_post_install(base_directory) {
 }
 
 function copy_file(source_name, taregt_name, base_directory) {
+	var taregt_path = base_directory + (taregt_name || source_name);
 	try {
-		node_fs.unlinkSync(source_name);
+		node_fs.unlinkSync(taregt_path);
 	} catch (e) {
 		// TODO: handle exception
 	}
-	node_fs.renameSync(update_script_directory + source_name, base_directory
-			+ (taregt_name || source_name));
+	node_fs.renameSync(update_script_directory + source_name, taregt_path);
 }
