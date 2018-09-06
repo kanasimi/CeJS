@@ -9,7 +9,6 @@
 # node _CeL.updater.node.js user/repository-branch target_directory
 
 TODO:
-加上下載進度
 use Zlib
 
  </code>
@@ -112,6 +111,7 @@ function check_update(repository_path, post_install) {
 	} else if (!node_fs.existsSync(target_directory)) {
 		node_fs.mkdirSync(target_directory);
 	}
+	target_directory = target_directory.replace(/[\\\/]+$/, '');
 	// console.log(target_directory);
 	if (target_directory
 			&& (target_directory.endsWith('/' + repository + '-' + branch) || target_directory
@@ -120,6 +120,7 @@ function check_update(repository_path, post_install) {
 		process.chdir(target_directory.slice(0,
 				-('/' + repository + '-' + branch).length));
 	}
+	target_directory += require('path').sep;
 
 	if (!update_script_directory)
 		update_script_directory = repository + '-' + branch + '/_for include/';
@@ -128,7 +129,7 @@ function check_update(repository_path, post_install) {
 		target_file = repository + '-' + branch + '.zip';
 
 	if (!latest_version_file)
-		// repository-branch.version.json
+		// read repository-branch.version.json
 		latest_version_file = target_file.replace(/[^.]+$/g, 'version.json');
 
 	console.info('Read ' + latest_version_file);
@@ -140,7 +141,7 @@ function check_update(repository_path, post_install) {
 	}
 
 	console.info('Get the infomation of latest version of '
-	// 取得 GitHub 最新版本infomation。
+	// 取得 GitHub 最新版本 infomation。
 	+ repository + '...');
 	node_https.get({
 		// https://api.github.com/repos/kanasimi/CeJS/commits/master
@@ -201,7 +202,7 @@ function update_via_7zip(latest_version, user_name, repository, branch,
 	if (!Array.isArray(p7zip_path)) {
 		p7zip_path = [ p7zip_path ];
 	}
-	// 若是$PATH中有7-zip的可執行檔，應該在這邊就能夠被偵測出來。
+	// 若是 $PATH 中有 7-zip 的可執行檔，應該在這邊就能夠被偵測出來。
 	if (!p7zip_path.some(function(path) {
 		// mute stderr
 		var stderr = process.stderr.write;
@@ -230,24 +231,34 @@ function update_via_7zip(latest_version, user_name, repository, branch,
 	// 先確認/轉到目標目錄，才能 open file。
 	var write_stream = node_fs.createWriteStream(target_file),
 	// 已經取得的檔案大小
-	sum_size = 0, start_time = Date.now();
+	sum_size = 0, start_time = Date.now(), total_size;
 
 	function on_response(response) {
 		// 採用這種方法容易漏失資料。 @ node.js v7.7.3
 		// response.pipe(write_stream);
 
+		// 可惜 GitHub 沒有提供 Content-Length，無法加上下載進度。
+		total_size = +response.headers['content-length'];
 		var buffer_array = [];
 
 		response.on('data', function(data) {
 			sum_size += data.length;
 			buffer_array.push(data);
+			process.stdout.write(target_file + ': ' + sum_size
+			//
+			+ (total_size ? '/' + total_size : '') + ' bytes ('
 			// 00% of 0.00MiB
-			process.stdout.write(target_file + ': ' + sum_size + ' bytes ('
-					+ (sum_size / 1.024 / (Date.now() - start_time)).toFixed(2)
+			+ (total_size ? (100 * sum_size / total_size | 0) + '%, ' : '')
+			//
+			+ (sum_size / 1.024 / (Date.now() - start_time)).toFixed(2)
 					+ ' KiB/s)...\r');
 		});
 
 		response.on('end', function(e) {
+			if (total_size && sum_size !== total_size) {
+				console.error('Expected ' + total_size + ' bytes, but get '
+						+ sum_size + ' bytes!');
+			}
 			write_stream.write(Buffer.concat(buffer_array, sum_size));
 			// flush data
 			write_stream.end();
