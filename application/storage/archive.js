@@ -321,10 +321,12 @@ function module_code(library_namespace) {
 			}
 		},
 		// Info-ZIP http://infozip.sourceforge.net/
+		// https://linux.die.net/man/1/zip
 		zip : {
 			update : {
+				unicode : '-UN=UTF8',
 				// recurse : '-r',
-				level : '-9',
+				level : '-9'
 			},
 			// delete
 			remove : {
@@ -332,7 +334,15 @@ function module_code(library_namespace) {
 			},
 			extract : {
 				program_path : executable_file_path.unzip
-			}
+			},
+			// test
+			verify : {
+				command : '-T'
+			},
+			info : {
+				program_path : executable_file_path.unzip,
+				command : '-l'
+			},
 		},
 		rar : {
 		// TODO
@@ -347,6 +357,8 @@ function module_code(library_namespace) {
 			level : function(value) {
 				if (value === '')
 					return '-mx';
+				if (value === 'max')
+					value = 9;
 				if (value >= 0)
 					return '-mx=' + value;
 				return;
@@ -380,10 +392,19 @@ function module_code(library_namespace) {
 			// delete files after compression
 			remove : function(value) {
 				if (value)
+					// move into zipfile (delete files)
 					return '-m';
+			},
+			level : function(value) {
+				if (value === 'max')
+					value = 9;
+				if (value >= 0)
+					return '-' + value;
+				return;
 			},
 			// Recurse subdirectories
 			recurse : function(value) {
+				// recurse into directories
 				if (value)
 					return '-r';
 			}
@@ -442,7 +463,6 @@ function module_code(library_namespace) {
 
 	function parse_7z_info_output(output) {
 		// console.log(output && output.toString());
-		// console.log(output && output.toString());
 
 		if (!output || !(output = output.toString())) {
 			return output;
@@ -482,9 +502,17 @@ function module_code(library_namespace) {
 		return this.hash;
 	}
 
+	function parse_zip_info_output(output) {
+		// TODO
+		console.log(output && output.toString());
+	}
+
 	var postfix = {
 		'7z' : {
 			info : parse_7z_info_output
+		},
+		zip : {
+			info : parse_zip_info_output
 		}
 	}
 
