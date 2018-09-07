@@ -376,9 +376,11 @@ function move_all_files_under_directory(source_directory, target_directory,
 
 	source_directory = simplify_path(source_directory);
 	target_directory = simplify_path(target_directory);
-	console.log(source_directory + '→' + target_directory);
-	if (source_directory !== target_directory)
+	if (source_directory !== target_directory) {
+		console.log('move_all_files_under_directory [' + source_directory
+				+ ']→[' + target_directory + ']');
 		move(source_directory, target_directory);
+	}
 }
 
 // --------------------------------------------------------------------------------------------

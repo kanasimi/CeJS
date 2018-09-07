@@ -650,6 +650,10 @@ function module_code(library_namespace) {
 			search_path_list = search_path_list.split(search_path_list
 			// e.g., "C:\"
 			.includes(':\\') ? ';' : ':');
+			if (library_namespace.platform('windows')) {
+				// windows 會自動搜尋當前目錄 ".\\" 下的執行檔。
+				search_path_list.push('');
+			}
 		}
 
 		if (Array.isArray(file_name)) {
@@ -667,17 +671,17 @@ function module_code(library_namespace) {
 				throw 'Can not handle ' + file_name;
 			}
 
-			if (!/\.(?:exe|com|bat|cmd)$/i.test(file_name))
-				file_name += '.exe';
-
 		} else if (file_name.startsWith('/')) {
 			// is absolute path
 			return fs_status(file_name) && file_name;
 		}
 
 		// console.log(search_path_list);
-		if (search_path_list.some(function(directory) {
-			if (!directory_exists(directory)) {
+		if (search_path_list
+		// .unique()
+		.some(function(directory) {
+			// directory === '': './'
+			if (directory && !directory_exists(directory)) {
 				return;
 			}
 
@@ -685,9 +689,15 @@ function module_code(library_namespace) {
 					file_name);
 			// console.log('Test: ' + exec_file_path);
 			var fso_status = fs_status(exec_file_path);
+			if (!fso_status && library_namespace.platform('windows')
+					&& !/\.(?:exe|com|bat|cmd)$/i.test(exec_file_path)) {
+				fso_status = fs_status(exec_file_path + '.exe')
+						|| fs_status(exec_file_path + '.com');
+			}
 			// TODO: 應該測試是否可以執行。
 			if (fso_status) {
-				return file_name = exec_file_path;
+				file_name = exec_file_path;
+				return true;
 			}
 		})) {
 			return file_name;

@@ -140,15 +140,6 @@ function module_code(library_namespace) {
 	// 預設的壓縮程式。
 	default_program_type;
 
-	if (!executable_file_path['7z']) {
-		// e.g., /usr/bin/zip Info-ZIP @ Mac OS X
-		// but Info-ZIP has NO rename function!
-		executable_file_path.zip = library_namespace
-				.executable_file_path('zip');
-		executable_file_path.unzip = library_namespace
-				.executable_file_path('unzip');
-	}
-
 	Object.keys(executable_file_path).forEach(function(program_type) {
 		var program_path = executable_file_path[program_type];
 		// console.log(program_type + ': ' + program_path);
@@ -160,6 +151,17 @@ function module_code(library_namespace) {
 			}
 		}
 	});
+
+	if (!executable_file_path['7z']
+	// && !executable_file_path.rar
+	) {
+		// e.g., /usr/bin/zip Info-ZIP @ Mac OS X
+		// but Info-ZIP has NO rename function!
+		executable_file_path.zip = library_namespace
+				.executable_file_path('zip');
+		executable_file_path.unzip = library_namespace
+				.executable_file_path('unzip');
+	}
 
 	function Archive_file(archive_file_path, options, callback) {
 		if (!callback && typeof options === 'function') {
