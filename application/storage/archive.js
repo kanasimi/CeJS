@@ -469,6 +469,9 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------
 
+	// .info() 共同可用的屬性:
+	// path size modified method
+
 	function parse_7z_info_output(output) {
 		// console.log(output && output.toString());
 
@@ -585,6 +588,11 @@ function module_code(library_namespace) {
 		}
 
 		options = library_namespace.setup_options(options);
+
+		if (!default_switches[this.program_type][operation]) {
+			return new Error(this.program_type + ' has no operation: '
+					+ operation);
+		}
 
 		var _this = this, switches = apply_switches[this.program_type].call(
 				this, operation, options),
