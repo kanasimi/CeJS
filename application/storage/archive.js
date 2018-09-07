@@ -240,7 +240,8 @@ function module_code(library_namespace) {
 			command.push(switches);
 		}
 
-		if (this.program_type === '7z') {
+		if (this.program_type === '7z' || this.program_type === 'rar') {
+			// Stop switches parsing, stop switches scanning
 			command.push('--');
 		}
 
@@ -326,6 +327,8 @@ function module_code(library_namespace) {
 		// Info-ZIP http://infozip.sourceforge.net/
 		// https://linux.die.net/man/1/zip
 		zip : {
+			// TODO: By default, zip will store the full path (relative to the
+			// current directory).
 			update : {
 				// @ macOS
 				// zip error:
@@ -587,12 +590,15 @@ function module_code(library_namespace) {
 			options = null;
 		}
 
-		options = library_namespace.setup_options(options);
-
 		if (!default_switches[this.program_type][operation]) {
-			return new Error(this.program_type + ' has no operation: '
-					+ operation);
+			var error = this.program_type + ' has no operation: ' + operation;
+			library_namespace.debug(error, 1, 'archive_file_operation');
+			error = new Error(error);
+			callback && callback(error);
+			return error;
 		}
+
+		options = library_namespace.setup_options(options);
 
 		var _this = this, switches = apply_switches[this.program_type].call(
 				this, operation, options),

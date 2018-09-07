@@ -17,8 +17,6 @@
 # finish_up()
 
 TODO:
-支援 Mac OS X
-支援自動更新, read .version.json
 CLI progress bar
 
 預設介面語言繁體中文+...
@@ -30,6 +28,7 @@ parse 圖像。
 從其他的資料來源網站尋找取得作品以及章節的資訊。
 檢核章節內容。
 proxy
+GUI 支援自動更新
 Runs untrusted code securely https://github.com/patriksimek/vm2
 
 </code>
@@ -40,6 +39,8 @@ Runs untrusted code securely https://github.com/patriksimek/vm2
  *      https://github.com/wellwind/8ComicDownloaderElectron
  *      https://github.com/Arachnid-27/Cimoc
  *      https://github.com/qq573011406/KindleHelper
+ * 
+ * @see 爬蟲框架 https://scrapy.org/
  * 
  * @since 2016/10/30 21:40:6
  * @since 2016/11/1 23:15:16 正式運用：批量下載腾讯漫画 qq。
@@ -721,7 +722,7 @@ function module_code(library_namespace) {
 			// 有則用之。 use CeL.data.character.encode_URI_component()
 			+ '.character.encode_URI_component', 1, library_namespace.Class
 			// module name
-			+ 'application.net.work_crawler');
+			+ '.application.net.work_crawler');
 			encode_URI_component = library_namespace.character.encode_URI_component;
 			return encode_URI_component(string, encoding);
 		}
@@ -2288,6 +2289,7 @@ function module_code(library_namespace) {
 		}
 
 		// TODO: 神落しの鬼 @ pixivコミック: ニノ巻
+		// TODO: 特別編その2
 
 		library_namespace.warn('Can not determine chapter NO from title: '
 				+ (title || JSON.stringify(chapter_data))
