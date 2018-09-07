@@ -61,6 +61,7 @@ function detect_base_path(repository, branch) {
 	CeL_path_list = CeL_path_list.split(CeL_path_list.includes('\n') ? /\r?\n/
 			: '|');
 	CeL_path_list.unshift('./' + repository + '-' + branch);
+	// console.log(CeL_path_list);
 	// 載入 CeJS 基礎泛用之功能。（非特殊目的使用的載入功能）
 	CeL_path_list.some(function(path) {
 		if (path.charAt(0) === '#'
@@ -112,7 +113,7 @@ function check_update(repository_path, post_install) {
 		node_fs.mkdirSync(target_directory);
 	}
 	target_directory = target_directory.replace(/[\\\/]+$/, '');
-	// console.log(target_directory);
+	// console.log('target_directory: ' + target_directory);
 	if (target_directory
 			&& (target_directory.endsWith(path_separator + repository + '-'
 					+ branch) || target_directory.endsWith('\\' + repository
@@ -385,16 +386,16 @@ function move_all_files_under_directory(source_directory, target_directory,
 
 // --------------------------------------------------------------------------------------------
 
+// {String}repository path
 var repository_path = process.argv[2], default_repository_path = 'kanasimi/CeJS';
 if (PATTERN_repository_path.test(repository_path)) {
 	// GitHub 泛用的更新工具。
 	check_update(repository_path, default_post_install_for_all);
 
 } else if (repository_path) {
-
 	console.log('Usage:\n	node ' + process.argv[1]
-			+ ' "repository path"\n\ndefault repository path: ',
-			default_repository_path);
+			+ ' "user/repository-branch" "target_directory"'
+			+ '\n\ndefault repository path: ', default_repository_path);
 
 } else {
 	// default action
@@ -433,5 +434,8 @@ function copy_file(source_name, taregt_name, base_directory) {
 	} catch (e) {
 		// TODO: handle exception
 	}
+	if (false)
+		console.log('copy_file [' + update_script_directory + source_name
+				+ ']→[' + taregt_path + ']');
 	node_fs.renameSync(update_script_directory + source_name, taregt_path);
 }
