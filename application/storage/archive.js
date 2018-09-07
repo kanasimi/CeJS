@@ -245,7 +245,14 @@ function module_code(library_namespace) {
 			command.push('--');
 		}
 
-		command.push(add_quote(this.archive_file_path));
+		if (this.program_type === 'zip' && operation === 'update') {
+			if (Array.isArray(FSO_list)) {
+				FSO_list = [ this.archive_file_path ].append(FSO_list);
+			} else {
+				FSO_list = [ this.archive_file_path, FSO_list ];
+			}
+		} else
+			command.push(add_quote(this.archive_file_path));
 
 		var original_working_directory, use_working_directory;
 		if (FSO_list) {
@@ -263,10 +270,19 @@ function module_code(library_namespace) {
 						.longest_common_starting_length(FSO_list);
 				if (LCL > 0) {
 					use_working_directory = FSO_list[0];
+					var starts_with_quote = use_working_directory
+							.startsWith('"');
 					use_working_directory = use_working_directory.slice(
-							use_working_directory.startsWith('"') ? 1 : 0, LCL)
-							.replace(/[^\\\/]+$/, '');
+							starts_with_quote ? 1 : 0, LCL).replace(
+							/[^\\\/]+$/, '');
 					if (use_working_directory) {
+						LCL = use_working_directory.length;
+						FSO_list = FSO_list.map(function(path) {
+							path = path.slice(LCL);
+							if (starts_with_quote)
+								path = '"' + path;
+							return path;
+						});
 						original_working_directory = process.cwd();
 						process.chdir(use_working_directory);
 					}

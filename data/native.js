@@ -3566,6 +3566,8 @@ function module_code(library_namespace) {
 	/**
 	 * Find the longest common starting substring in a set of strings
 	 * 
+	 * TODO: 可以嘗試先分割words整個字比對
+	 * 
 	 * @param {Array}string_list
 	 *            array of strings
 	 * @returns {ℕ⁰:Natural+0} longest common starting substring length
