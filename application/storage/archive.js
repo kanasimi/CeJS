@@ -349,7 +349,7 @@ function module_code(library_namespace) {
 			},
 			info : {
 				program_path : executable_file_path.unzip,
-				command : '-l'
+				command : '-l -v'
 			},
 		},
 		rar : {
@@ -511,8 +511,50 @@ function module_code(library_namespace) {
 	}
 
 	function parse_zip_info_output(output) {
-		// TODO
-		console.log(output && output.toString());
+		// console.log(output && output.toString());
+
+		if (!output || !(output = output.toString())) {
+			return output;
+		}
+		// console.log(output);
+
+		// console.trace(this);
+		this.hash = library_namespace.null_Object();
+		// console.log(JSON.stringify(output));
+		// console.log(JSON.stringify(output.split(/\r?\n\r?\n/)));
+		output = output.split(/\r?\n/);
+		// "Archive: zipfile.zip"
+		output.shift();
+		// " Length Method Size Ratio Date Time CRC-32 Name"
+		var headers = output.shift().toLowerCase().split(/\s+/),
+		//
+		PATTERN = new RegExp('^\\s*'
+				+ '([^\\s]+)\\s+'.repeat(headers.length - 1) + '(.+)$');
+		output.forEach(function(FSO_data_line) {
+			// console.log(JSON.stringify(FSO_data_line));
+			if (matched.startsWith('--'))
+				return;
+			var matched = FSO_data_line.match(PATTERN);
+			if (!matched)
+				return;
+
+			matched.forEach(function(data, index) {
+				FSO_data[headers[index]] = data;
+			});
+			FSO_data.modified = FSO_data.date + ' ' + FSO_data.time;
+
+			// console.log(FSO_data);
+			if (!FSO_data.path) {
+				;
+
+			} else {
+				// FSO status hash get from archive_file.info()
+				// archive_file.hash = { FSO path : {FSO data}, ... }
+				this.hash[FSO_data.path] = FSO_data;
+			}
+		}, this);
+
+		return this.hash;
 	}
 
 	var postfix = {
