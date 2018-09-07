@@ -153,14 +153,15 @@ function module_code(library_namespace) {
 	});
 
 	if (!executable_file_path['7z']
-	// && !executable_file_path.rar
-	) {
+			// && !executable_file_path.rar
+			&& (executable_file_path.zip = library_namespace
+					.executable_file_path('zip'))
+			&& (executable_file_path.unzip = library_namespace
+					.executable_file_path('unzip'))) {
 		// e.g., /usr/bin/zip Info-ZIP @ Mac OS X
 		// but Info-ZIP has NO rename function!
-		executable_file_path.zip = library_namespace
-				.executable_file_path('zip');
-		executable_file_path.unzip = library_namespace
-				.executable_file_path('unzip');
+		executable_file_path.zip = add_quote(executable_file_path.zip);
+		executable_file_path.unzip = add_quote(executable_file_path.unzip);
 	}
 
 	function Archive_file(archive_file_path, options, callback) {
@@ -326,7 +327,12 @@ function module_code(library_namespace) {
 		// https://linux.die.net/man/1/zip
 		zip : {
 			update : {
-				unicode : '-UN=UTF8',
+				// @ macOS
+				// zip error:
+				// Invalid command arguments (short option 'N' not supported)
+				// (long option 'unicode' not supported)
+				// unicode : '-UN=UTF8',
+
 				// recurse : '-r',
 				level : '-9'
 			},
