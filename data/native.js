@@ -3071,6 +3071,8 @@ function module_code(library_namespace) {
 	/**
 	 * Get LCS / diff
 	 * 
+	 * Longest Common Subsequence 最長公共子序列
+	 * 
 	 * @param {Array|String}from
 	 *            from text
 	 * @param {Array|String}to
@@ -3558,6 +3560,32 @@ function module_code(library_namespace) {
 		return diff_with_Array.call((this || '').split('\n'),
 				Array.isArray(to) ? to : (to || '').split('\n'), options);
 	}
+
+	// ---------------------------------------------------------------------//
+
+	/**
+	 * Find the longest common starting substring in a set of strings
+	 * 
+	 * @param {Array}string_list
+	 *            array of strings
+	 * @returns {ℕ⁰:Natural+0} longest common starting substring length
+	 * 
+	 * @see https://stackoverflow.com/questions/1916218/find-the-longest-common-starting-substring-in-a-set-of-strings/1917041#1917041
+	 */
+	function longest_common_starting_length(string_list) {
+		var char_index = 0;
+		for (var last = string_list[0].length; char_index < last; char_index++) {
+			var char_now = string_list[0].charAt(char_index);
+			for (var index = 1; index < string_list.length; index++) {
+				if (char_now !== string_list[index].charAt(char_index)) {
+					return char_index;
+				}
+			}
+		}
+		return char_index;
+	}
+
+	_.longest_common_starting_length = longest_common_starting_length;
 
 	// ---------------------------------------------------------------------//
 	// https://en.wikipedia.org/wiki/Letter_case#Headings_and_publication_titles

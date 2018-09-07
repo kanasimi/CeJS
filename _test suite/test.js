@@ -591,6 +591,20 @@ function test_native() {
 		assert([ ',b0;a,', CeL.LCS('0a', 'b00', 'diff').join(';') ], 'LCS() #24');
 
 		assert([ 'ccdd,ffee', 'aabb\nbbcc\nccdd'.diff_with('bbcc\nffee\naabb').join(',') ], '.diff_with()');
+
+		assert([ 4, CeL.longest_common_starting_length(['1234','1234']) ], 'longest_common_starting_length() #1');
+		assert([ 3, CeL.longest_common_starting_length(['123','123','123']) ], 'longest_common_starting_length() #2');
+		assert([ 3, CeL.longest_common_starting_length(['123','1234','123']) ], 'longest_common_starting_length() #3');
+		assert([ 0, CeL.longest_common_starting_length(['','']) ], 'longest_common_starting_length() #4');
+		assert([ 0, CeL.longest_common_starting_length(['','','']) ], 'longest_common_starting_length() #5');
+		assert([ 0, CeL.longest_common_starting_length(['123','','']) ], 'longest_common_starting_length() #6');
+		assert([ 0, CeL.longest_common_starting_length(['','','123']) ], 'longest_common_starting_length() #7');
+		assert([ 0, CeL.longest_common_starting_length(['','','123']) ], 'longest_common_starting_length() #8');
+		assert([ 0, CeL.longest_common_starting_length(['123','123','']) ], 'longest_common_starting_length() #9');
+		assert([ 0, CeL.longest_common_starting_length(['','','123']) ], 'longest_common_starting_length() #10');
+		assert([ 2, CeL.longest_common_starting_length(['123','124','125']) ], 'longest_common_starting_length() #11');
+		assert([ 1, CeL.longest_common_starting_length(['123','124','100']) ], 'longest_common_starting_length() #12');
+		assert([ 3, CeL.longest_common_starting_length(['1234','123','123']) ], 'longest_common_starting_length() #13');
 	});
 
 }

@@ -28,7 +28,7 @@ archive_file.information = { archive information }
 archive_file.info(options, callback);
 archive_file.info(options, callback);
 
-// add new FSOs to archive_file
+// compress / add new FSOs to archive_file
 // {Object|String}options.switches: additional command line switches
 archive_file.update([ file/folder list to compress, add, update ], options, callback);
 archive_file.update([ file/folder list to compress, add, update ], {
@@ -219,7 +219,7 @@ function module_code(library_namespace) {
 		return /^".*"$/.test(arg) ? arg : '"' + arg + '"';
 	}
 
-	function archive_file_execute(switches, callback, FSO_list) {
+	function archive_file_execute(switches, callback, FSO_list, operation) {
 		var command = [ this.program ];
 		if (Array.isArray(switches)) {
 			command.push(switches.join(' '));
@@ -247,9 +247,30 @@ function module_code(library_namespace) {
 
 		command.push(add_quote(this.archive_file_path));
 
+		var original_working_directory, use_working_directory;
 		if (FSO_list) {
 			if (!Array.isArray(FSO_list)) {
 				FSO_list = [ FSO_list ];
+			} else if (this.program_type === 'zip' && operation === 'update') {
+				// By default, zip will store the full path (relative to the
+				// current directory).
+
+				// 這裡的處置可以使壓縮檔案時:
+				// zip a/b/zipfile.zip a/b/c/files
+				// 讓 zipfile 中的路徑(path,name)只有 "c/files"
+				// 這樣可使壓縮行為和7z相同。
+				var LCL = library_namespace
+						.longest_common_starting_length(FSO_list);
+				if (LCL > 0) {
+					use_working_directory = FSO_list[0];
+					use_working_directory = use_working_directory.slice(
+							use_working_directory.startsWith('"') ? 1 : 0, LCL)
+							.replace(/[^\\\/]+$/, '');
+					if (use_working_directory) {
+						original_working_directory = process.cwd();
+						process.chdir(use_working_directory);
+					}
+				}
 			}
 			FSO_list = FSO_list.map(add_quote).join(' ');
 			if (this.program_type === '7z') {
@@ -266,6 +287,9 @@ function module_code(library_namespace) {
 		library_namespace.debug(command, 1, 'archive_file_execute');
 		try {
 			var output = execSync(command);
+			// recover working directory
+			original_working_directory
+					&& process.chdir(original_working_directory);
 			// console.log(output.toString());
 			if (typeof callback === 'function')
 				try {
@@ -278,6 +302,9 @@ function module_code(library_namespace) {
 				}
 			return output;
 		} catch (e) {
+			// recover working directory
+			original_working_directory
+					&& process.chdir(original_working_directory);
 			console.trace('archive_file_execute: ' + this.program_type
 					+ ' execution error!');
 			library_namespace.error(e);
@@ -327,8 +354,6 @@ function module_code(library_namespace) {
 		// Info-ZIP http://infozip.sourceforge.net/
 		// https://linux.die.net/man/1/zip
 		zip : {
-			// TODO: By default, zip will store the full path (relative to the
-			// current directory).
 			update : {
 				// @ macOS
 				// zip error:
@@ -337,23 +362,28 @@ function module_code(library_namespace) {
 				// unicode : '-UN=UTF8',
 
 				// recurse : '-r',
+
+				// Do not save extra file attributes such as “_MACOSX” or
+				// “._Filename” and .ds store files.
+				// 'no-extra' : '-X',
+
 				level : '-9'
+			},
+			extract : {
+				program_path : executable_file_path.unzip
 			},
 			// delete
 			remove : {
 				command : '-d'
 			},
-			extract : {
-				program_path : executable_file_path.unzip
-			},
-			// test
-			verify : {
-				command : '-T'
-			},
 			info : {
 				program_path : executable_file_path.unzip,
 				command : '-l -v'
 			},
+			// test
+			verify : {
+				command : '-T'
+			}
 		},
 		rar : {
 		// TODO
@@ -592,7 +622,11 @@ function module_code(library_namespace) {
 
 		if (!default_switches[this.program_type][operation]) {
 			var error = this.program_type + ' has no operation: ' + operation;
-			library_namespace.debug(error, 1, 'archive_file_operation');
+			if (operation !== 'rename') {
+				library_namespace.error(error);
+			} else {
+				library_namespace.debug(error, 1, 'archive_file_operation');
+			}
 			error = new Error(error);
 			callback && callback(error);
 			return error;
@@ -611,7 +645,7 @@ function module_code(library_namespace) {
 		callback && _postfix ? function(output) {
 			// console.log(output.toString());
 			callback(_postfix.call(_this, output));
-		} : callback, FSO_list);
+		} : callback, FSO_list, operation);
 
 		return _postfix ? _postfix.call(this, output) : output;
 	}
