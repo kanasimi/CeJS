@@ -247,9 +247,10 @@ function module_code(library_namespace) {
 
 		if (this.program_type === 'zip' && operation === 'update') {
 			if (Array.isArray(FSO_list)) {
-				FSO_list = [ this.archive_file_path ].append(FSO_list);
+				FSO_list = FSO_list.map(add_quote);
+				FSO_list.unshift(add_quote(this.archive_file_path));
 			} else {
-				FSO_list = [ this.archive_file_path, FSO_list ];
+				FSO_list = [ this.archive_file_path, FSO_list ].map(add_quote);
 			}
 		} else
 			command.push(add_quote(this.archive_file_path));
@@ -268,20 +269,15 @@ function module_code(library_namespace) {
 				// 這樣可使壓縮行為和7z相同。
 				var LCL = library_namespace
 						.longest_common_starting_length(FSO_list);
-				if (LCL > 0) {
-					use_working_directory = FSO_list[0];
-					var starts_with_quote = use_working_directory
-							.startsWith('"');
-					use_working_directory = use_working_directory.slice(
-							starts_with_quote ? 1 : 0, LCL).replace(
-							/[^\\\/]+$/, '');
-					if (use_working_directory) {
-						LCL = use_working_directory.length;
+				if (LCL > 1) {
+					use_working_directory = FSO_list[0].slice(0, LCL)
+					// assert: path of FSO_list starts with quote
+					.replace(/[^\\\/]+$/, '') + '"';
+					if (use_working_directory !== '""') {
+						// - 1: 去掉最後的 quote '"'
+						LCL = use_working_directory.length - 1;
 						FSO_list = FSO_list.map(function(path) {
-							path = path.slice(LCL);
-							if (starts_with_quote)
-								path = '"' + path;
-							return path;
+							return '"' + path.slice(LCL);
 						});
 						original_working_directory = process.cwd();
 						process.chdir(use_working_directory);
