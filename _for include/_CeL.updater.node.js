@@ -112,17 +112,19 @@ function check_update(repository_path, post_install) {
 	} else if (!node_fs.existsSync(target_directory)) {
 		node_fs.mkdirSync(target_directory);
 	}
-	target_directory = target_directory.replace(/[\\\/]+$/, '');
-	// console.log('target_directory: ' + target_directory);
-	if (target_directory
-			&& (target_directory.endsWith(path_separator + repository + '-'
-					+ branch) || target_directory.endsWith('\\' + repository
-					+ '-' + branch))) {
-		original_work_directory = process.cwd();
-		process.chdir(target_directory.slice(0, -(path_separator + repository
-				+ '-' + branch).length));
+	if (target_directory) {
+		// console.log('target_directory: ' + target_directory);
+		target_directory = target_directory.replace(/[\\\/]+$/, '');
+		if (target_directory
+				&& (target_directory.endsWith(path_separator + repository + '-'
+						+ branch) || target_directory.endsWith('\\'
+						+ repository + '-' + branch))) {
+			original_work_directory = process.cwd();
+			process.chdir(target_directory.slice(0, -(path_separator
+					+ repository + '-' + branch).length));
+		}
+		target_directory += path_separator;
 	}
-	target_directory += path_separator;
 
 	if (!target_file)
 		target_file = repository + '-' + branch + '.zip';
