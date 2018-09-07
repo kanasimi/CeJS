@@ -526,18 +526,24 @@ function module_code(library_namespace) {
 		// "Archive: zipfile.zip"
 		output.shift();
 		// " Length Method Size Ratio Date Time CRC-32 Name"
-		var headers = output.shift().toLowerCase().split(/\s+/),
+		var headers = output.shift().trim().toLowerCase().split(/\s+/),
 		//
 		PATTERN = new RegExp('^\\s*'
 				+ '([^\\s]+)\\s+'.repeat(headers.length - 1) + '(.+)$');
+		if (headers[headers.length - 1] === 'name') {
+			// 這邊應該會被執行到，否則恐怕是不一樣版本的zip，無法解析。
+			headers[headers.length - 1] = 'path';
+		}
 		output.forEach(function(FSO_data_line) {
 			// console.log(JSON.stringify(FSO_data_line));
-			if (matched.startsWith('--'))
+			if (FSO_data_line.startsWith('--'))
 				return;
 			var matched = FSO_data_line.match(PATTERN);
 			if (!matched)
 				return;
 
+			var FSO_data = library_namespace.null_Object();
+			matched.shift();
 			matched.forEach(function(data, index) {
 				FSO_data[headers[index]] = data;
 			});
