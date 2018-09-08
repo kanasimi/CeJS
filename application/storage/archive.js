@@ -229,7 +229,8 @@ function module_code(library_namespace) {
 		return /^".*"$/.test(arg) ? arg.slice(1, -1) : arg;
 	}
 
-	function archive_file_execute(switches, callback, FSO_list, operation) {
+	function archive_file_execute(switches, callback, FSO_list, operation,
+			options) {
 		var command = [ this.program ];
 		if (Array.isArray(switches)) {
 			command.push(switches.join(' '));
@@ -574,6 +575,7 @@ function module_code(library_namespace) {
 
 	// TODO: 警告: macOS 底下，無法讀取非latin字元!
 	// https://github.com/nodejs/node/issues/2165
+	// https://marcosc.com/2008/12/zip-files-and-encoding-i-hate-you/
 	// Mac OS HFS+ use UTF-8 NFD, UTF-8-MAC
 	// Windows or Linux will preserve and return NFC or NFD
 	// 採用 output.normalize('NFD') 這個方法無效。
@@ -668,17 +670,21 @@ function module_code(library_namespace) {
 		var original_working_directory;
 		if (options.cwd) {
 			// change working directory. e.g., 進入到壓縮檔所在的目錄來解壓縮。
-			var using_working_directory = options.cwd;
+			var using_working_directory = options.cwd, using_archive_file;
 			if (is_Archive_file(using_working_directory)) {
 				library_namespace.debug('在壓縮檔所在目錄下操作 ' + operation + '。', 1,
 						'archive_file_operation');
+				using_archive_file = using_working_directory;
 				using_working_directory = using_working_directory.archive_file_path
 						.replace(/[^\\\/]+$/, '');
 			}
 			using_working_directory = using_working_directory.replace(
-					/[\\\/]+$/, '');
+					/^(\.[\\\/])+/, '').replace(/[\\\/]+$/, '');
 
-			if (library_namespace.directory_exists(using_working_directory)) {
+			if (using_working_directory
+					&& using_working_directory !== '.'
+					&& library_namespace
+							.directory_exists(using_working_directory)) {
 				original_working_directory = process.cwd();
 				if (original_working_directory === using_working_directory) {
 					original_working_directory = null;
@@ -690,6 +696,15 @@ function module_code(library_namespace) {
 					process.chdir(using_working_directory);
 				}
 			}
+			if (using_archive_file) {
+				if (original_working_directory) {
+					using_archive_file.original_archive_file_path = using_archive_file.archive_file_path;
+					using_archive_file.archive_file_path = using_archive_file.archive_file_path
+							.match(/[^\\\/]+$/)[0];
+				} else {
+					using_archive_file = null;
+				}
+			}
 		}
 
 		var _this = this, switches = apply_switches[this.program_type].call(
@@ -697,17 +712,19 @@ function module_code(library_namespace) {
 		//
 		_postfix = postfix[this.program_type]
 				&& postfix[this.program_type][operation],
-		//
+		// @see archive_file_execute()
 		output = this.execute(switches,
 		//
 		callback && _postfix ? function(output) {
 			// console.log(output.toString());
 			callback(_postfix.call(_this, output));
-		} : callback, FSO_list, operation);
+		} : callback, FSO_list, operation, options);
 
-		original_working_directory
-		// recover working directory.
-		&& process.chdir(original_working_directory);
+		if (original_working_directory) {
+			// recover working directory.
+			process.chdir(original_working_directory);
+			using_archive_file.archive_file_path = using_archive_file.original_archive_file_path;
+		}
 
 		return _postfix ? _postfix.call(this, output) : output;
 	}
