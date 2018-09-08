@@ -183,7 +183,7 @@ See [compatibility.js](https://github.com/kanasimi/CeJS/blob/master/data/code/co
 詳細請參閱[概念介紹頁](http://lyrics.meicho.com.tw/game/game.pl?seg=CeJS)。
 
 ## Contact 聯絡我們
-Contact us at [Google+](https://plus.google.com/101633590909790225455) or [github](https://github.com/kanasimi/CeJS/issues).
+Contact us at [Google+](https://plus.google.com/101633590909790225455) or [GitHub](https://github.com/kanasimi/CeJS/issues).
 
 (This document is written by [GitHub Flavored Markdown](https://help.github.com/categories/writing-on-github/).)
 

@@ -4,6 +4,8 @@
  * 
  * 注意: 這需要先安裝 7z.exe 程式。
  * 
+ * 注意: macOS 下似乎可用 / 與 \ 作目錄名稱?
+ * 
  * <code>
 
 // {Object|String}options.switches: additional command line switches to list
@@ -120,14 +122,14 @@ function module_code(library_namespace) {
 		# sudo yum install epel-release
 		# sudo yum install p7zip p7zip-plugins
 
-		At Debian, Ubuntu, Linux Mint:
+		In Debian, Ubuntu, Linux Mint:
 		# sudo apt-get install p7zip-full p7zip-rar
 
-		At Mac OS X: install https://www.keka.io/
+		In macOS: install https://www.keka.io/
 		</code>
 		 */
 		"7za",
-		// keka @ Mac OS X
+		// keka @ macOS
 		"/Applications/Keka.app/Contents/Resources/keka7z" ])
 				|| library_namespace.platform('windows')
 				&& "%ProgramFiles%\\7-Zip\\7z.exe",
@@ -158,7 +160,7 @@ function module_code(library_namespace) {
 					.executable_file_path('zip'))
 			&& (executable_file_path.unzip = library_namespace
 					.executable_file_path('unzip'))) {
-		// e.g., /usr/bin/zip Info-ZIP @ Mac OS X
+		// e.g., /usr/bin/zip Info-ZIP @ macOS
 		// but Info-ZIP has NO rename function!
 		executable_file_path.zip = add_quote(executable_file_path.zip);
 		executable_file_path.unzip = add_quote(executable_file_path.unzip);
@@ -253,7 +255,9 @@ function module_code(library_namespace) {
 			command.push('--');
 		}
 
-		if (this.program_type === 'zip' && operation === 'update') {
+		var operation_need_chdir = this.program_type === 'zip'
+				&& operation === 'update';
+		if (operation_need_chdir) {
 			if (Array.isArray(FSO_list)) {
 				FSO_list = FSO_list.map(remove_quote);
 				FSO_list.unshift(remove_quote(this.archive_file_path));
@@ -268,7 +272,7 @@ function module_code(library_namespace) {
 		if (FSO_list) {
 			if (!Array.isArray(FSO_list)) {
 				FSO_list = [ FSO_list ];
-			} else if (this.program_type === 'zip' && operation === 'update') {
+			} else if (operation_need_chdir) {
 				// By default, zip will store the full path (relative to the
 				// current directory).
 
@@ -288,7 +292,6 @@ function module_code(library_namespace) {
 							return path.slice(LCL);
 						});
 						original_working_directory = process.cwd();
-						// 注意: macOS X 下似乎可用 / 與 \ 作目錄名稱?
 						process.chdir(use_working_directory);
 					}
 				}
@@ -339,6 +342,7 @@ function module_code(library_namespace) {
 
 	var FSO_list_operations = [ 'update', 'extract', 'remove', 'rename',
 			'verify' ],
+	// default switches, modifiers
 	// program_type: { command : { switches } }
 	default_switches = {
 		'7z' : {
@@ -398,6 +402,7 @@ function module_code(library_namespace) {
 				command : '-d'
 			},
 			info : {
+				// TODO: zipinfo
 				program_path : executable_file_path.unzip,
 				command : '-l -v'
 			},
@@ -567,7 +572,10 @@ function module_code(library_namespace) {
 		return this.hash;
 	}
 
-	// TODO: 警告: Mac OS X 底下，無法讀取非latin字元!
+	// TODO: 警告: macOS 底下，無法讀取非latin字元!
+	// https://github.com/nodejs/node/issues/2165
+	// Mac OS HFS+ use UTF-8 NFD, UTF-8-MAC
+	// Windows or Linux will preserve and return NFC or NFD
 	function parse_zip_info_output(output) {
 		// console.log(output && output.toString());
 
