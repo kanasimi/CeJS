@@ -37,7 +37,7 @@ function module_code(library_namespace) {
 			// 有則用之。 use CeL.data.character.encode_URI_component()
 			+ '.character.encode_URI_component', 1, library_namespace.Class
 			// module name
-			+ 'application.net.Ajax');
+			+ '.application.net.Ajax');
 			encode_URI_component = library_namespace.character.encode_URI_component;
 			return encode_URI_component(string, encoding);
 		}
@@ -1744,7 +1744,7 @@ function module_code(library_namespace) {
 					try {
 						var fd = node_fs.openSync(file_path, 'w');
 						// TODO: use response.pipe(write_stream);
-						// @see _CeL.updater.node.js
+						// @see GitHub.updater.node.js
 						node_fs.writeSync(fd, data, 0, data.length, null);
 						node_fs.closeSync(fd);
 					} catch (e) {

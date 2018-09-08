@@ -1221,13 +1221,12 @@ function (global) {
 			// return;
 			return undefined;
 
-		var _s = env, v = _s[name];
+		// typeof value !== 'undefined'
+		if (arguments.length > 1)
+			env[name] = value;
 
-		if (arguments.length > 1) _s[name] = value;
-		// if (typeof value !== 'undefined') _s[name] = value;
-
-		// return isNaN(v) ? String(v) : v;
-		return v;
+		// isNaN(env[name]) ? String(env[name]) : +env[name];
+		return env[name];
 	};
 
 
@@ -1306,7 +1305,7 @@ function (global) {
 
 		/**
 		 * 本 library source 檔案使用之 encoding。<br />
-		 * 不使用會產生語法錯誤!
+		 * Windows 中不使用會產生語法錯誤!
 		 * 
 		 * @name CeL.env.source_encoding
 		 * @type {String}
@@ -1366,10 +1365,29 @@ function (global) {
 			;
 			// this.debug(env.registry_path);
 
+			// @see getEnvironment() @ CeL.application.OS.Windows
+			var WshEnvironment = WshShell.Environment("Process");
+			env.home = WshEnvironment('HOMEPATH');
+
 		} catch (e) {
 			// this.warn(e.message);
 		}
 
+		if (typeof process === 'object' && process.env) {
+			// 環境變數 in node.js
+			var env_keys = 'PROMPT|HOME|PUBLIC|SESSIONNAME|LOCALAPPDATA|OS|Path|PROCESSOR_IDENTIFIER|SystemDrive|SystemRoot|TEMP|TMP|USERNAME|USERPROFILE|ProgramData|ProgramFiles|ProgramFiles(x86)|ProgramW6432|windir'.split('|');
+			for (var index = 0; index < env_keys.length; index++) {
+				var value = process.env[env_keys[index]];
+				if (value)
+					env.prompt = value;
+			}
+			
+			if (!env.home && !(env.home = process.env.USERPROFILE)
+			//
+			&& process.env.HOMEDRIVE && process.env.HOMEPATH) {
+				env.home = process.env.HOMEDRIVE + process.env.HOMEPATH;
+			}
+		}
 
 		// 條件式編譯(条件コンパイル) for version>=4, 用 /*@ and @*/ to 判別。
 		// http://msdn.microsoft.com/en-us/library/ie/8ka90k2e(v=vs.94).aspx
@@ -1403,10 +1421,12 @@ OS='UNIX'; // unknown
 				//
 				|| typeof process === 'object' && process.platform
 				// 假如未設定則由 path 判斷。
-				|| (_.get_script_full_name().indexOf('\\') !== -1 ? 'Windows' : 'UNIX');
+				|| (_.get_script_full_name().indexOf('\\') !== -1 ? 'Windows' : 'UNIX')
+				//
+				|| env.OS;
 
 		var is_UNIX = env.OS.toLowerCase() in {
-			// Mac OS X @ node.js
+			// macOS @ node.js
 			darwin : true,
 			linux : true,
 			freebsd : true,
@@ -1531,7 +1551,9 @@ OS='UNIX'; // unknown
 		// test for-of statement (IterationStatement)
 		try {
 			eval('for(var i of [7])env.has_for_of=i===7;');
-		} catch (e) { }
+		} catch (e) {
+			// TODO: handle exception
+		}
 
 		// ** 亦即，所有預先設定 (configuration) 應該放置於 CeL.env 之下。
 		// 把 old_namespace.env 下原先的環境設定 copy 過來。

@@ -636,7 +636,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String}可執行檔案的完整路徑。
 	 * 
-	 * @see _CeL.updater.node.js
+	 * @see GitHub.updater.node.js
 	 */
 	function executable_file_path(file_name, search_path_list) {
 		if (!Array.isArray(search_path_list)) {
@@ -690,7 +690,8 @@ function module_code(library_namespace) {
 			// console.log('Test: ' + exec_file_path);
 			var fso_status = fs_status(exec_file_path);
 			if (!fso_status && library_namespace.platform('windows')
-					&& !/\.(?:exe|com|bat|cmd)$/i.test(exec_file_path)) {
+			// env.PATHEXT @ Windows: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+			&& !/\.(?:exe|com|bat|cmd)$/i.test(exec_file_path)) {
 				fso_status = fs_status(exec_file_path + '.exe')
 						|| fs_status(exec_file_path + '.com');
 			}

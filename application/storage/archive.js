@@ -312,9 +312,9 @@ function module_code(library_namespace) {
 		library_namespace.debug(command, 1, 'archive_file_execute');
 		try {
 			var output = execSync(command);
-			original_working_directory
-			// recover working directory.
-			&& process.chdir(original_working_directory);
+			if (original_working_directory)
+				// recover working directory.
+				process.chdir(original_working_directory);
 			// console.log(output.toString());
 			if (typeof callback === 'function')
 				try {
@@ -327,9 +327,9 @@ function module_code(library_namespace) {
 				}
 			return output;
 		} catch (e) {
-			original_working_directory
-			// recover working directory.
-			&& process.chdir(original_working_directory);
+			if (original_working_directory)
+				// recover working directory.
+				process.chdir(original_working_directory);
 			console.trace('archive_file_execute: ' + this.program_type
 					+ ' execution error!');
 			library_namespace.error(e);
@@ -667,7 +667,7 @@ function module_code(library_namespace) {
 
 		options = library_namespace.setup_options(options);
 
-		var original_working_directory;
+		var original_working_directory, original_archive_file_path;
 		if (options.cwd) {
 			// change working directory. e.g., 進入到壓縮檔所在的目錄來解壓縮。
 			var using_working_directory = options.cwd, using_archive_file;
@@ -698,7 +698,7 @@ function module_code(library_namespace) {
 			}
 			if (using_archive_file) {
 				if (original_working_directory) {
-					using_archive_file.original_archive_file_path = using_archive_file.archive_file_path;
+					original_archive_file_path = using_archive_file.archive_file_path;
 					using_archive_file.archive_file_path = using_archive_file.archive_file_path
 							.match(/[^\\\/]+$/)[0];
 				} else {
@@ -723,7 +723,7 @@ function module_code(library_namespace) {
 		if (original_working_directory) {
 			// recover working directory.
 			process.chdir(original_working_directory);
-			using_archive_file.archive_file_path = using_archive_file.original_archive_file_path;
+			using_archive_file.archive_file_path = original_archive_file_path;
 		}
 
 		return _postfix ? _postfix.call(this, output) : output;
@@ -788,17 +788,17 @@ function module_code(library_namespace) {
 		// https://www.7-zip.org/faq.html
 		// 7-Zip stores only relative paths of files without drive letter prefix
 
-		var current_working_directory = library_namespace.storage
+		var original_working_directory = library_namespace.storage
 				.working_directory();
 		// 注意: source_directory 前後有空白時會出問題。
 		library_namespace.storage.working_directory(source_directory);
 
 		if (typeof archive_file_path === 'string'
 				&& is_relative_path(archive_file_path)) {
-			// archive_file_path 為相對 current_working_directory 之 path。
+			// archive_file_path 為相對 original_working_directory 之 path。
 			// 因為工作目錄已經改變，必須將 archive_file_path 改成絕對目錄。
 			archive_file_path = library_namespace.append_path_separator(
-					current_working_directory, archive_file_path);
+					original_working_directory, archive_file_path);
 		}
 
 		var archive_file = is_Archive_file(archive_file_path) ? archive_file_path
@@ -807,7 +807,7 @@ function module_code(library_namespace) {
 		files_to_archive = options && options.files || '.';
 		archive_file.update(files_to_archive, options);
 		// recover working directory.
-		library_namespace.storage.working_directory(current_working_directory);
+		library_namespace.storage.working_directory(original_working_directory);
 		return archive_file;
 	}
 

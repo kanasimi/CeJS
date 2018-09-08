@@ -261,7 +261,8 @@ function module_code(library_namespace) {
 		// 下載檔案儲存目錄路徑。圖片檔+紀錄檔下載位置。
 		main_directory : (library_namespace.platform.nodejs
 				&& process.mainModule ? process.mainModule.filename
-				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '') : '.')
+				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '') : process.cwd()
+				|| library_namespace.env('home') || '.')
 				// main_directory 必須以 path separator 作結。
 				+ path_separator,
 
@@ -2422,17 +2423,20 @@ function module_code(library_namespace) {
 					if (library_namespace.platform.OS === 'darwin'
 							&& images_archive.program_type === 'zip') {
 						// In Max OS: 直接解開圖片壓縮檔以避免麻煩。
+						process.stdout.write('Extract image files: '
+								+ images_archive.file_name + '...\r');
 						images_archive.extract({
 							cwd : images_archive
 						});
+					} else {
+						// detect if images archive file has existed.
+						images_archive.file_existed = true;
+						process.stdout.write('Reading '
+								+ images_archive.file_name + '...\r');
+						images_archive.info();
+						if (false && typeof _this.check_images_archive === 'function')
+							_this.check_images_archive(images_archive);
 					}
-					// detect if images archive file has existed.
-					images_archive.file_existed = true;
-					process.stdout.write('Reading ' + images_archive.file_name
-							+ '...\r');
-					images_archive.info();
-					if (false && typeof _this.check_images_archive === 'function')
-						_this.check_images_archive(images_archive);
 				}
 				chapter_directory += path_separator;
 

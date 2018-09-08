@@ -311,7 +311,10 @@ var WinEnvironment,SpecialFolder,Network,NetDrive,NetPrinter;
 function getEnvironment(){
  if(typeof WshShell!=='object'||typeof SpecialFolder==='object')return;
 
+ // http://www.robvanderwoude.com/vbstech_data_environment.php
+ // https://msdn.microsoft.com/ja-jp/library/cc364502.aspx
  WinEnvironment={},Network={},NetDrive={},NetPrinter={};
+ // Windows 95/98/Me の場合、使用できる strType は Process に限定されます。
  var i,j,k,o=new Enumerator(WshShell.Environment("Process"));/*	Win9x、NT（Administratorもしくはほかのユーザー）の区別なく、すべての場合でエラーが発生しないようにするには、strTypeに"PROCESS"を指定するとよいでしょう。
 	機器上所有已定義的環境變數Windows environment variables	http://msdn2.microsoft.com/en-us/library/fd7hxfdd(VS.85).aspx	http://www.roy.hi-ho.ne.jp/mutaguchi/wsh/refer/lesson11.htm	http://nacelle.info/wsh/03001.php	http://www.cs.odu.edu/~wild/windowsNT/Spring00/wsh.htm
 	usual:	ALLUSERSPROFILE,APPDATA,BLASTER,CLASSPATH,CLIENTNAME,CommonProgramFiles,COMPUTERNAME,ComSpec,DEVMGR_SHOW_NONPRESENT_DEVICES,HOMEDRIVE,HOMEPATH,INCLUDE,LIB,LOGONSERVER,NUMBER_OF_PROCESSORS,OS,Os2LibPath,Path,PATHEXT,PROCESSOR_ARCHITECTURE,PROCESSOR_IDENTIFIER,PROCESSOR_LEVEL,PROCESSOR_REVISION,ProgramFiles,PROMPT,QTJAVA,SESSIONNAME,SystemDrive,SystemRoot,TEMP,TMP,USERDOMAIN,USERNAME,USERPROFILE,VS71COMNTOOLS,VSCOMNTOOLS,windir,winbootdir
