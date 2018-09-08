@@ -212,11 +212,19 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------
 
+	// 注意: 這邊添加引號的目的主要只是escape空白字元space " "，不能偵測原先輸入中的引號!
 	function add_quote(arg) {
 		if (library_namespace.is_Object(arg) && arg.path) {
 			arg = arg.path;
 		}
 		return /^".*"$/.test(arg) ? arg : '"' + arg + '"';
+	}
+
+	function remove_quote(arg) {
+		if (library_namespace.is_Object(arg) && arg.path) {
+			arg = arg.path;
+		}
+		return /^".*"$/.test(arg) ? arg.slice(1, -1) : arg;
 	}
 
 	function archive_file_execute(switches, callback, FSO_list, operation) {
@@ -280,7 +288,8 @@ function module_code(library_namespace) {
 							return '"' + path.slice(LCL);
 						});
 						original_working_directory = process.cwd();
-						process.chdir(use_working_directory);
+						// 注意: macOS X 下可用 / 與 \ 作目錄名稱!
+						process.chdir(remove_quote(use_working_directory));
 					}
 				}
 			}
