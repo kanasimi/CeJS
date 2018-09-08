@@ -16,7 +16,7 @@ http://stackshare.io/continuous-integration
 The project aims to develop a JavaScript module framework that is simple to use with some interesting features.
 本計畫希望能建立一個能簡單上手的 JavaScript 程式庫架構。<!-- toolkit -->
 
-## Web page usage 
+## Web page usage / browser 運行方式
 ``` HTML
 <script type="text/JavaScript" src="path/to/ce.js">
 	// { "run" : "module name or callback" }
@@ -37,18 +37,18 @@ function initialization() {}
 CeL.run( 'module.name', function callback() { /* ... */ } );
 ```
 
-## Node.js usage
+## Node.js usage / node.js 運行方式
 
 ### Node.js lazy installation. Node.js 環境最新版本懶人配置法
 <code>[npm](https://www.npmjs.com/package/cejs)</code> 安裝的可能不是最新版本，這裡示範的是最新版本的安裝方法。
 
 不囉嗦，已經做過的步驟可以跳過：
 1. 請先安裝 [node.js](https://nodejs.org/) 與 [7-Zip](https://en.wikipedia.org/wiki/7-Zip)
-2. 下載 CeJS 安裝檔 [_CeL.updater.node.js](https://raw.githubusercontent.com/kanasimi/CeJS/master/_for%20include/_CeL.updater.node.js)
-3. 在[命令行界面](https://zh.wikipedia.org/wiki/%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%95%8C%E9%9D%A2)下，進到 CeJS 安裝檔(<code>_CeL.updater.node.js</code>)所在的目錄，執行命令以下載 CeJS 程式庫：
+2. 下載 GitHub repository 安裝檔 [GitHub.updater.node.js](https://raw.githubusercontent.com/kanasimi/gh-updater/master/GitHub.updater.node.js)
+3. 在[命令行界面](https://zh.wikipedia.org/wiki/%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%95%8C%E9%9D%A2)下，進到 GitHub repository 安裝檔(<code>GitHub.updater.node.js</code>)所在的目錄，執行命令以下載 CeJS 程式庫：
 
    ``` sh
-   node _CeL.updater.node.js
+   node GitHub.updater.node.js
    ```
 
 4. CeJS 程式庫應該已經解壓縮，並且放在安裝檔所在目錄的 CeJS-master 目錄下，可以開始試用：
@@ -64,7 +64,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
    CeL.assert([ CeL.GCD(4, 6), 2 ]);
    ```
 
-5. 每次要更新到最新 CeJS 程式庫時，只要重新執行一次 CeJS 安裝檔即可。
+5. 每次要更新到最新 CeJS 程式庫時，只要重新執行一次 GitHub repository 安裝檔即可。
 
 ### Installation via npm
 <!-- NodeICO badges -->
@@ -95,12 +95,12 @@ Since the frequent updates of the code, some features may work at the latest ver
    ``` bash
    cd /tmp
    mkdir CeJS && cd CeJS
-   wget "https://github.com/kanasimi/CeJS/raw/master/_for%20include/_CeL.updater.node.js"
+   wget "https://raw.githubusercontent.com/kanasimi/gh-updater/master/GitHub.updater.node.js" || curl -O https://raw.githubusercontent.com/kanasimi/gh-updater/master/GitHub.updater.node.js
    # This script will download + extract CeJS library at ./CeJS-master.
-   node _CeL.updater.node.js
+   node GitHub.updater.node.js
    ```
 
-3. See [_CeL.updater.node.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.updater.node.js) for automatic updating configuration.
+3. See [GitHub.updater.node.js](https://raw.githubusercontent.com/kanasimi/gh-updater/master/GitHub.updater.node.js) for automatic updating configuration.
 
 <!--
 Using git:
@@ -183,7 +183,7 @@ See [compatibility.js](https://github.com/kanasimi/CeJS/blob/master/data/code/co
 詳細請參閱[概念介紹頁](http://lyrics.meicho.com.tw/game/game.pl?seg=CeJS)。
 
 ## Contact 聯絡我們
-Contact us at [Google+](https://plus.google.com/101633590909790225455) or [GitHub](https://github.com/kanasimi/CeJS/issues).
+Contact us at [GitHub](https://github.com/kanasimi/CeJS/issues).
 
 (This document is written by [GitHub Flavored Markdown](https://help.github.com/categories/writing-on-github/).)
 
