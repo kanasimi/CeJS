@@ -2421,13 +2421,10 @@ function module_code(library_namespace) {
 				if (node_fs.existsSync(images_archive.archive_file_path)) {
 					if (library_namespace.platform.OS === 'darwin'
 							&& images_archive.program_type === 'zip') {
-						var original_working_directory = process.cwd();
-						// 進入到壓縮檔所在的目錄來解壓縮。
-						process.chdir(images_archive.archive_file_path.replace(
-								/[^\\\/]+$/, ''));
 						// In Max OS: 直接解開圖片壓縮檔以避免麻煩。
-						images_archive.extract();
-						process.chdir(original_working_directory);
+						images_archive.extract({
+							cwd : images_archive
+						});
 					}
 					// detect if images archive file has existed.
 					images_archive.file_existed = true;

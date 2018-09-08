@@ -268,7 +268,7 @@ function module_code(library_namespace) {
 		} else
 			command.push(add_quote(this.archive_file_path));
 
-		var original_working_directory, use_working_directory;
+		var original_working_directory, using_working_directory;
 		if (FSO_list) {
 			if (!Array.isArray(FSO_list)) {
 				FSO_list = [ FSO_list ];
@@ -283,16 +283,16 @@ function module_code(library_namespace) {
 				var LCL = library_namespace
 						.longest_common_starting_length(FSO_list);
 				if (LCL > 0) {
-					use_working_directory = FSO_list[0].slice(0, LCL)
+					using_working_directory = FSO_list[0].slice(0, LCL)
 					// assert: paths of FSO_list are not quoted
 					.replace(/[^\\\/]+$/, '');
-					if (use_working_directory) {
-						LCL = use_working_directory.length;
+					if (using_working_directory) {
+						LCL = using_working_directory.length;
 						FSO_list = FSO_list.map(function(path) {
 							return path.slice(LCL);
 						});
 						original_working_directory = process.cwd();
-						process.chdir(use_working_directory);
+						process.chdir(using_working_directory);
 					}
 				}
 			}
@@ -311,9 +311,9 @@ function module_code(library_namespace) {
 		library_namespace.debug(command, 1, 'archive_file_execute');
 		try {
 			var output = execSync(command);
-			// recover working directory
 			original_working_directory
-					&& process.chdir(original_working_directory);
+			// recover working directory.
+			&& process.chdir(original_working_directory);
 			// console.log(output.toString());
 			if (typeof callback === 'function')
 				try {
@@ -326,9 +326,9 @@ function module_code(library_namespace) {
 				}
 			return output;
 		} catch (e) {
-			// recover working directory
 			original_working_directory
-					&& process.chdir(original_working_directory);
+			// recover working directory.
+			&& process.chdir(original_working_directory);
 			console.trace('archive_file_execute: ' + this.program_type
 					+ ' execution error!');
 			library_namespace.error(e);
@@ -576,6 +576,7 @@ function module_code(library_namespace) {
 	// https://github.com/nodejs/node/issues/2165
 	// Mac OS HFS+ use UTF-8 NFD, UTF-8-MAC
 	// Windows or Linux will preserve and return NFC or NFD
+	// 採用 output.normalize('NFD') 這個方法無效。
 	function parse_zip_info_output(output) {
 		// console.log(output && output.toString());
 
@@ -664,6 +665,33 @@ function module_code(library_namespace) {
 
 		options = library_namespace.setup_options(options);
 
+		var original_working_directory;
+		if (options.cwd) {
+			// change working directory. e.g., 進入到壓縮檔所在的目錄來解壓縮。
+			var using_working_directory = options.cwd;
+			if (is_Archive_file(using_working_directory)) {
+				library_namespace.debug('在壓縮檔所在目錄下操作 ' + operation + '。', 1,
+						'archive_file_operation');
+				using_working_directory = using_working_directory.archive_file_path
+						.replace(/[^\\\/]+$/, '');
+			}
+			using_working_directory = using_working_directory.replace(
+					/[\\\/]+$/, '');
+
+			if (library_namespace.directory_exists(using_working_directory)) {
+				original_working_directory = process.cwd();
+				if (original_working_directory === using_working_directory) {
+					original_working_directory = null;
+				} else {
+					library_namespace.debug('change working directory: ['
+							+ original_working_directory + ']→['
+							+ using_working_directory + ']', 1,
+							'archive_file_operation');
+					process.chdir(using_working_directory);
+				}
+			}
+		}
+
 		var _this = this, switches = apply_switches[this.program_type].call(
 				this, operation, options),
 		//
@@ -676,6 +704,10 @@ function module_code(library_namespace) {
 			// console.log(output.toString());
 			callback(_postfix.call(_this, output));
 		} : callback, FSO_list, operation);
+
+		original_working_directory
+		// recover working directory.
+		&& process.chdir(original_working_directory);
 
 		return _postfix ? _postfix.call(this, output) : output;
 	}
