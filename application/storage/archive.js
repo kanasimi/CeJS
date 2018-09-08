@@ -255,10 +255,11 @@ function module_code(library_namespace) {
 
 		if (this.program_type === 'zip' && operation === 'update') {
 			if (Array.isArray(FSO_list)) {
-				FSO_list = FSO_list.map(add_quote);
-				FSO_list.unshift(add_quote(this.archive_file_path));
+				FSO_list = FSO_list.map(remove_quote);
+				FSO_list.unshift(remove_quote(this.archive_file_path));
 			} else {
-				FSO_list = [ this.archive_file_path, FSO_list ].map(add_quote);
+				FSO_list = [ this.archive_file_path, FSO_list ]
+						.map(remove_quote);
 			}
 		} else
 			command.push(add_quote(this.archive_file_path));
@@ -277,19 +278,18 @@ function module_code(library_namespace) {
 				// 這樣可使壓縮行為和7z相同。
 				var LCL = library_namespace
 						.longest_common_starting_length(FSO_list);
-				if (LCL > 1) {
+				if (LCL > 0) {
 					use_working_directory = FSO_list[0].slice(0, LCL)
-					// assert: path of FSO_list starts with quote
-					.replace(/[^\\\/]+$/, '') + '"';
-					if (use_working_directory !== '""') {
-						// - 1: 去掉最後的 quote '"'
-						LCL = use_working_directory.length - 1;
+					// assert: paths of FSO_list are not quoted
+					.replace(/[^\\\/]+$/, '');
+					if (use_working_directory) {
+						LCL = use_working_directory.length;
 						FSO_list = FSO_list.map(function(path) {
-							return '"' + path.slice(LCL);
+							return path.slice(LCL);
 						});
 						original_working_directory = process.cwd();
-						// 注意: macOS X 下可用 / 與 \ 作目錄名稱!
-						process.chdir(remove_quote(use_working_directory));
+						// 注意: macOS X 下似乎可用 / 與 \ 作目錄名稱?
+						process.chdir(use_working_directory);
 					}
 				}
 			}
@@ -567,6 +567,7 @@ function module_code(library_namespace) {
 		return this.hash;
 	}
 
+	// TODO: 警告: Mac OS X 底下，無法讀取非latin字元!
 	function parse_zip_info_output(output) {
 		// console.log(output && output.toString());
 
