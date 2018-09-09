@@ -262,8 +262,8 @@ function module_code(library_namespace) {
 		main_directory : (library_namespace.platform.nodejs
 				&& process.mainModule ? process.mainModule.filename
 				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '') : process.cwd()
-				.replace(/[\\\/]+$/, '')
-				|| library_namespace.env('home') || '.')
+		// 避免 "/". e.g., macOS APP 中
+		.replace(/[\\\/]+$/, '') || library_namespace.env('home') || '.')
 				// main_directory 必須以 path separator 作結。
 				+ path_separator,
 

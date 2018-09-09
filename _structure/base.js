@@ -1368,6 +1368,7 @@ function (global) {
 			// @see getEnvironment() @ CeL.application.OS.Windows
 			var WshEnvironment = WshShell.Environment("Process");
 			env.home = WshEnvironment('HOMEPATH');
+			env.user = WshEnvironment('USERNAME');
 
 		} catch (e) {
 			// this.warn(e.message);
@@ -1386,6 +1387,11 @@ function (global) {
 			//
 			&& process.env.HOMEDRIVE && process.env.HOMEPATH) {
 				env.home = process.env.HOMEDRIVE + process.env.HOMEPATH;
+			}
+
+			if (!env.user && !(env.home = process.env.USERNAME)) {
+				// e.g., macOS
+				env.user = process.env.LOGNAME;
 			}
 		}
 
