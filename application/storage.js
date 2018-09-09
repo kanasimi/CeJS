@@ -83,6 +83,7 @@ function module_code(library_namespace) {
 	CeL.storage.move_file(move_from_path, move_to_path)
 	CeL.storage.copy_file(copy_from_path, copy_to_path)
 
+	// .folder_exists()
 	CeL.storage.directory_exists(directory_path)
 	// get the fso list (file and sub-directory list) of the directory.
 	CeL.storage.read_directory(directory_path, options)

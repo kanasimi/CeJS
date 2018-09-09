@@ -267,20 +267,52 @@ function module_code(library_namespace) {
 
 	Work_crawler.set_main_directory = set_main_directory;
 
+	var default_main_directory;
+	// 決定預設的主要下載目錄。
+	function determin_default_main_directory() {
+		if (library_namespace.platform.nodejs && process.mainModule
+		// macOS APP 中: gui_electron.html
+		&& !/\.html?$/i.test(process.mainModule.filename)) {
+			default_main_directory = process.mainModule.filename
+					.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '');
+
+		} else if (!(default_main_directory
+		// 先嘗試下載於當前目錄下。
+		= process.cwd().replace(/[\\\/]+$/, ''))) {
+
+			// 避免 "/". e.g., macOS APP 中 process.cwd() === '/'
+			if (default_main_directory = library_namespace.env('home')) {
+				var download_directory = default_main_directory
+						+ path_separator + 'Downloads';
+				if (library_namespace.storage
+						.directory_exists(download_directory)) {
+					library_namespace.info('預設的主要下載目錄設置於用戶預設下載目錄下: '
+							+ download_directory);
+					default_main_directory = download_directory;
+				} else {
+					library_namespace
+							.info('預設的主要下載目錄設置於個人文件夾  home directory 下: '
+									+ default_main_directory);
+				}
+			} else {
+				// 應該不會到這邊來。
+				library_namespace
+						.error('determin_default_main_directory: Can not determin main download directory!');
+				default_main_directory = '.';
+			}
+		}
+		// main_directory 必須以 path separator 作結。
+		default_main_directory += path_separator;
+		library_namespace.info('預設的主要下載目錄: ' + download_directory);
+	}
+
+	determin_default_main_directory();
+
 	Work_crawler.prototype = {
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
 		// 下載檔案儲存目錄路徑。圖片檔+紀錄檔下載位置。
-		main_directory : (library_namespace.platform.nodejs
-				&& process.mainModule
-				// macOS APP 中: gui_electron.html
-				&& !/\.html?$/i.test(process.mainModule.filename) ? process.mainModule.filename
-				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '')
-				// 避免 "/". e.g., macOS APP 中
-				: process.cwd().replace(/[\\\/]+$/, '')
-						|| library_namespace.env('home') || '.')
-				// main_directory 必須以 path separator 作結。
-				+ path_separator,
+		main_directory : default_main_directory,
 
 		// id : '',
 		// site_id : '',

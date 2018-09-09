@@ -1248,7 +1248,7 @@ function (global) {
 
 		var OS, env = this.env, is_node = typeof process === 'object' && process.env,
 		//
-		win_env_keys = 'PROMPT|HOME|PUBLIC|SESSIONNAME|LOCALAPPDATA|OS|Path|PROCESSOR_IDENTIFIER|SystemDrive|SystemRoot|TEMP|TMP|USER|USERNAME|USERPROFILE|ProgramData|ProgramFiles|ProgramFiles(x86)|ProgramW6432|windir'.split('|');
+		win_env_keys = 'PROMPT|HOME|PUBLIC|SESSIONNAME|LOCALAPPDATA|OS|Path|PROCESSOR_IDENTIFIER|SystemDrive|SystemRoot|TEMP|TMP|USERNAME|USERPROFILE|ProgramData|ProgramFiles|ProgramFiles(x86)|ProgramW6432|windir'.split('|');
 
 		/**
 		 * library main file base name
@@ -1387,15 +1387,16 @@ function (global) {
 					env[key] = value;
 			}
 
-			if (!env.home && !(env.home = process.env.USERPROFILE)
-			//
+			if (!env.home && !(env.home = process.env.HOME || process.env.USERPROFILE)
+			// e.g., Windows 10
 			&& process.env.HOMEDRIVE && process.env.HOMEPATH) {
 				env.home = process.env.HOMEDRIVE + process.env.HOMEPATH;
 			}
 
-			if (!env.user && !(env.home = process.env.USERNAME)) {
+			if (!env.user) {
+				env.user = process.env.USER || process.env.USERNAME
 				// e.g., macOS
-				env.user = process.env.LOGNAME;
+				|| process.env.LOGNAME;
 			}
 		}
 
