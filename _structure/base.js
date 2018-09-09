@@ -1246,7 +1246,9 @@ function (global) {
 		if (reset)
 			this.env = null_Object();
 
-		var OS, env = this.env;
+		var OS, env = this.env, is_node = typeof process === 'object' && process.env,
+		//
+		win_env_keys = 'PROMPT|HOME|PUBLIC|SESSIONNAME|LOCALAPPDATA|OS|Path|PROCESSOR_IDENTIFIER|SystemDrive|SystemRoot|TEMP|TMP|USER|USERNAME|USERPROFILE|ProgramData|ProgramFiles|ProgramFiles(x86)|ProgramW6432|windir'.split('|');
 
 		/**
 		 * library main file base name
@@ -1367,22 +1369,24 @@ function (global) {
 
 			// @see getEnvironment() @ CeL.application.OS.Windows
 			var WshEnvironment = WshShell.Environment("Process");
-			env.home = WshEnvironment('HOMEPATH');
-			env.user = WshEnvironment('USERNAME');
+			for (var index = 0; index < win_env_keys.length; index++) {
+				var key = win_env_keys[index], value = WshEnvironment(key);
+				if (value)
+					env[key] = value;
+			}
 
 		} catch (e) {
 			// this.warn(e.message);
 		}
 
-		if (typeof process === 'object' && process.env) {
+		if (is_node) {
 			// 環境變數 in node.js
-			var env_keys = 'PROMPT|HOME|PUBLIC|SESSIONNAME|LOCALAPPDATA|OS|Path|PROCESSOR_IDENTIFIER|SystemDrive|SystemRoot|TEMP|TMP|USERNAME|USERPROFILE|ProgramData|ProgramFiles|ProgramFiles(x86)|ProgramW6432|windir'.split('|');
-			for (var index = 0; index < env_keys.length; index++) {
-				var value = process.env[env_keys[index]];
+			for (var index = 0; index < win_env_keys.length; index++) {
+				var key = win_env_keys[index], value = process.env[key];
 				if (value)
-					env.prompt = value;
+					env[key] = value;
 			}
-			
+
 			if (!env.home && !(env.home = process.env.USERPROFILE)
 			//
 			&& process.env.HOMEDRIVE && process.env.HOMEPATH) {
