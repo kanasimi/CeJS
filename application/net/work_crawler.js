@@ -268,7 +268,8 @@ function module_code(library_namespace) {
 	Work_crawler.set_main_directory = set_main_directory;
 
 	var default_main_directory;
-	// 決定預設的主要下載目錄。
+	// 決定預設的主要下載目錄。這個目錄會在 work_crawler_loder.js 裡面被 setup_crawler() 之
+	// data_directory 覆寫。
 	function determin_default_main_directory() {
 		if (library_namespace.platform.nodejs && process.mainModule
 		// macOS APP 中: gui_electron.html
@@ -282,17 +283,19 @@ function module_code(library_namespace) {
 
 			// 避免 "/". e.g., macOS APP 中 process.cwd() === '/'
 			if (default_main_directory = library_namespace.env('home')) {
-				var download_directory = default_main_directory
+				var user_download_directory = default_main_directory
 						+ path_separator + 'Downloads';
 				if (library_namespace.storage
-						.directory_exists(download_directory)) {
-					library_namespace.info('預設的主要下載目錄設置於用戶預設下載目錄下: '
-							+ download_directory);
-					default_main_directory = download_directory;
+						.directory_exists(user_download_directory)) {
+					library_namespace.debug('預設的主要下載目錄設置於用戶預設之下載目錄下: '
+							+ user_download_directory, 1,
+							'determin_default_main_directory');
+					default_main_directory = user_download_directory;
 				} else {
-					library_namespace
-							.info('預設的主要下載目錄設置於個人文件夾  home directory 下: '
-									+ default_main_directory);
+					library_namespace.debug(
+							'預設的主要下載目錄設置於用戶個人文件夾  home directory 下: '
+									+ default_main_directory, 1,
+							'determin_default_main_directory');
 				}
 			} else {
 				// 應該不會到這邊來。
@@ -303,7 +306,8 @@ function module_code(library_namespace) {
 		}
 		// main_directory 必須以 path separator 作結。
 		default_main_directory += path_separator;
-		library_namespace.info('預設的主要下載目錄: ' + download_directory);
+		library_namespace.debug('預設的主要下載目錄: ' + default_main_directory, 1,
+				'determin_default_main_directory');
 	}
 
 	determin_default_main_directory();
