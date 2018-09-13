@@ -1770,7 +1770,432 @@ if (library_namespace.platform.nodejs) {
 
 
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+/**<code>
+
+https://babeljs.io/repl
+
+var v='';(p=new Promise(function(r,R){r(1);throw '0'}))
+.then(function(x){v+=x;return 2})
+.then(function(x){v+=x;return 3})
+.then(function(x){v+=x;throw '4'},function(y){v+=y;return 0})
+.then(function(x){v+=x;throw 0},function(y){v+=y;return 5})
+.then(function(x){v+=x;return 6})
+.then(function(x){v+=x;console.log(v==="_123456")});v='_';
+
+
+var v='';(p=new Promise(function(r,R){R(1);r(0)}))
+.then(function(x){v+=x;return 0})
+.then(function(x){v+=x;return 0})
+.then(function(x){v+=x;throw '0'},function(y){v+=y;return 2})
+.then(function(x){v+=x;throw '3'},function(y){v+=y;return 0})
+.then(function(x){v+=x;return 0})
+.then(function(x){v+=x;},function(x){v+=x;console.log(v==="_123")});v='_';
+
+
+var q=null,r='';Promise.resolve()
+.then(function(x){r+=x;return 1})
+.then(function(x){r+=x;q=new Promise((r,R)=>{setTimeout(r,8)});return q})
+.then(function(x){r+=x;return 2})
+.then(function(x){r+=x;
+	q
+	.then(function(x){r+=x;return 3})
+	.then(function(x){r+=x;return 5})
+	.then(function(x){r+=x;return 7})
+	.then(function(x){r+=x;});
+	return '_'})
+.then(function(x){r+=x;return 4})
+.then(function(x){r+=x;return 6})
+.then(function(x){r+=x;return 8})
+.then(function(x){r+=x;console.log(r==="undefined1undefined2undefined_345678")})
+
+
+var q=null,r='';Promise.resolve()
+.then(function(x){r+='_';return 1})
+.then(function(x){r+=x;q=new Promise((r,R)=>{setTimeout(function(){R(2)},8)});q.then(function(x){r+=x;return 0},function(y){r+=2&&y;});return q})
+.then(function(x){r+=x;return 0})
+.then(function(x){r+=x;
+	q
+	.then(function(x){r+=x;return 0},function(y){r+=y;return 0})
+	.then(function(x){r+=x;return 0})
+	.then(function(x){r+=x;return 0})
+	.then(function(x){r+=x;});
+	return 0})
+.then(function(x){r+=x;return 0},function(y){r+=3;return 4})
+.then(function(x){r+=x;return 5})
+.then(function(x){r+=x;return 6})
+.then(function(x){r+=x;console.log(r==="_123456")})
+
+
+var q=null,r='';Promise.resolve()
+.then(function(x){r+='_';return 1})
+.then(function(x){r+=x;q=new Promise((r,R)=>{setTimeout(function(){R(2)},8)});q.then(function(x){r+=x;return 0},function(y){r+=2&&y;});return q})
+.then(function(x){r+=x;return 0},function(y){r+=3;return 4})
+//.then(function(x){r+='^^^';return 4})
+.then(function(x){r+=4&&x;
+	console.log(q)
+	q // Promise {<rejected>: 2}
+	.then(function(x){r+=x;return 0},function(y){r+=5;return 7})
+	.then(function(x){r+=x;return 9})
+	.then(function(x){r+=x;return 'b'})
+	.then(function(x){r+=x;});
+	return 6})
+.then(function(x){r+=6&&x;return 8},function(y){r+=y;return 0})
+.then(function(x){r+=x;return 'a'})
+.then(function(x){r+=x;return 'c'})
+.then(function(x){r+=x;console.log(r==="_123456789abc")})
+
+
+
+
+r='';(q=new Promise((r,R)=>{setTimeout(function(){R(1)},5000)}))
+.then(function(x){r+=x;return 0},function(y){r+=1&&y;return 2})
+.then(function(x){r+=2&&x;return 3})
+.then(function(x){r+=3&&x;console.log(r==='123')})
+
+r='';(q=new  url.includes('://'): url.includes('://'):
+.then(function(x){r+=x;return 0},function(y){r+=1&&y;return 2})
+.then(function(x){r+=2&&x;return 3})
+//another:
+q.then(function(x){r+=3&&x;console.log(r==='123')})
+//Uncaught (in promise) 1
+
+
+
+q=new Promise((r,R)=>{setTimeout(R,8)})
+s=q.then(function(x){},function(y){})
+console.log([s!==q,s,q])
+// s: resolved, q: rejected. then方法執行完會另外產生一個新的promise物件。
+// https://eyesofkids.gitbooks.io/javascript-start-es6-promise/content/contents/then_adv.html
+
+
+
+
+</code>
+ */
+
+
+// 標準定義
+// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise-objects
+// https://promisesaplus.com/
+// https://github.com/promises-aplus/promises-spec
+// https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate
+
+// 實作
+// https://github.com/stefanpenner/es6-promise/tree/master/lib/es6-promise
+// https://github.com/taylorhakes/promise-polyfill/blob/master/dist/polyfill.js
+
+// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-enqueuejob
+var EnqueueJob = library_namespace.platform.nodejs
+// https://github.com/stefanpenner/es6-promise/blob/master/lib/es6-promise/asap.js
+// node version 0.10.x displays a deprecation warning when nextTick is used recursively
+// see https://github.com/cujojs/when/issues/410 for details
+? function () { return process.nextTick(f); }
+// https://github.com/cssmagic/ChangeLog/issues/3
+// setImmediate() 會調度宏微任務而不是微任務，可能導致不一樣的調度結果。
+: typeof setImmediate === 'function' ? setImmediate : function(f) {setTimeout(f, 0);},
+//
+PromiseState_pending = 0, PromiseState_fulfilled = 1, PromiseState_rejected = -1,
+//
+KEY_STATE = '_state', KEY_VALUE = '_value';
+
+// @private
+// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-triggerpromisereactions
+function TriggerPromiseReactions(promise) {
+	var value = promise[KEY_VALUE], rejected = promise[KEY_STATE] === PromiseState_rejected,
+	reactions = rejected ? promise.reject_reactions : promise.fulfill_reactions;
+	delete promise.fulfill_reactions;
+	delete promise.reject_reactions;
+
+	if (rejected && reactions.length === 0) {
+		// TODO: NG
+		// Promise.reject(2).then(function(v){}).catch(function(v){})
+		// HostPromiseRejectionTracker ( promise, operation )
+		// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-host-promise-rejection-tracker
+		throw new Error('Uncaught (in promise): ' + reason);
+	}
+
+	if (reactions.length > 0) {
+		EnqueueJob(function() {
+			// PromiseReactionJob ( reaction, argument )
+			// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promisereactionjob
+			reactions.forEach(rejected ? function(_promise) {
+				RejectPromise(promise, value);
+			} : function(_promise) {
+				FulfillPromise(promise, value);
+			});
+		});
+	}
+}
+
+// Promise Resolve Functions, resolve promise
+// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise-resolve-functions
+// https://promisesaplus.com/#the-promise-resolution-procedure
+function FulfillPromise(promise, result) {
+	// test if promise is settled / alreadyResolved
+	if (promise[KEY_STATE] !== PromiseState_pending) {
+		// p=new Promise(function(r,R){setTimeout(function(){r(1);r(p)},1)})
+		return;
+	}
+
+	try {
+		if (promise === result) {
+			// selfResolutionError
+			// p=new Promise(function(r,R){setTimeout(function(){r(p)},1)})
+			// Chaining cycle detected for promise #<Promise>
+			throw new TypeError('A promise cannot be resolved with itself.');
+		}
+
+		var then = get_then_of_thenable(result);
+		if (!then) {
+			// p=new Promise(function(r,R){r({then:2})})
+			promise[KEY_STATE] = PromiseState_fulfilled;
+			promise[KEY_VALUE] = result;
+
+		} else if (IsPromise(result)) {
+			// TODO: EnqueueJob
+
+			// p=new Promise(function(r){setTimeout(function(){r(Promise.resolve(2))},1)})
+			if (result[KEY_STATE] === PromiseState_pending) {
+				result.fulfill_reactions.push(promise);
+			} else {
+				promise[KEY_STATE] = result[KEY_STATE];
+				promise[KEY_VALUE] = result[KEY_VALUE];
+			}
+
+		} else {
+			// TODO: EnqueueJob
+
+			// is_thenable(result)
+			// p=new Promise(function(r,R){r({then:function(){}})})
+			// t={};t.then=function(r){r(2)};p=new Promise(function(r,R){r(t)})
+			// t=function(){};t.then=function(r){r(2)};p=new Promise(function(r,R){r(t)})
+			then.call(result, FulfillPromise.bind(promise), RejectPromise.bind(promise));
+		}
+
+	} catch (e) {
+		RejectPromise(promise, e);
+	}
+
+	if (promise[KEY_STATE] !== PromiseState_pending) {
+		TriggerPromiseReactions(promise, value);
+	}
+}
+
+// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise-reject-functions
+function RejectPromise(promise, reason) {
+	// test if promise is settled / alreadyResolved
+	if (promise[KEY_STATE] !== PromiseState_pending) {
+		return;
+	}
+
+	// TODO: https://www.ecma-international.org/ecma-262/9.0/index.html#sec-rejectpromise
+
+	// p=new Promise(function(r,R){setTimeout(function(){R(p)},1)})
+	// p=new Promise(function(r,R){R(function(){throw p})})
+	// p=new Promise(function(r,R){R({then:function(){throw p}})})
+	promise[KEY_STATE] = PromiseState_rejected;
+	promise[KEY_VALUE] = reason;
+	TriggerPromiseReactions(promise, value);
+}
+
+// --------------------------------------------------------
+
+// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise-executor
+function Promise(executor) {
+	if (!(this instanceof Promise))
+		// calling a builtin Promise constructor without new is forbidden
+		throw new TypeError((typeof this) + ' is not a promise');
+
+	if (typeof executor !== 'function')
+		// calling a builtin Promise constructor without new is forbidden
+		throw new TypeError('Promise resolver ' + executor + ' is not a function');
+
+	// private:
+
+	// [[PromiseState]]
+	this[KEY_STATE] = PromiseState_pending;
+
+	// [[PromiseResult]]
+	// this[KEY_VALUE] = undefined;
+
+	// 因為本promise擱置而擱置的函數。
+	// subscribers, deferreds
+
+	// [[PromiseFulfillReactions]] queue
+	this.fulfill_reactions = [];
+	// [[PromiseRejectReactions]] queue
+	this.reject_reactions = [];
+
+	// [[PromiseIsHandled]]
+	// this.handled = false;
+
+	if (executor === library_namespace.null_function)
+		// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-newpromisecapability
+		return;
+
+	try {
+		executor(FulfillPromise.bind(this), RejectPromise.bind(this));
+	} catch (e) {
+		// Promise {<rejected>: 2}
+		// (p=new Promise(function(a){throw 2})).catch(function(){});console.log(p)
+		RejectPromise(this, e);
+	}
+}
+
+
+// is thenable object, thenable物件
+function get_then_of_thenable(value) {
+	if (typeof value === 'function' || typeof value === 'object') {
+		var then = value.then;
+		return typeof then === 'function' && then;
+	}
+}
+// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-ispromise
+// Promise物件
+function IsPromise(value) {
+	// value.constructor === Promise
+	return value instanceof Promise;
+
+	var then = get_then_of_thenable(value), constructor;
+	return then
+	&& typeof (constructor = value.constructor) === 'function'
+	&& typeof constructor.resolve === 'function'
+	&& typeof constructor.reject === 'function'
+	// ECMA-262, 9th edition 標準
+	// && typeof constructor.all === 'function'
+	// && typeof constructor.race === 'function'
+	&& then;
+}
+
+
+// p=Promise.resolve(1);(q=Promise.reject(p)).catch(function(){});p!==q
+// (p=Promise.reject(1)).catch(function(){});(q=Promise.reject(p)).catch(function(){});p!==q
+// TODO:
+// Promise.resolve(promise);
+// Promise.resolve(thenable);
+Promise.resolve = function resolve(result) {
+	if (IsPromise(result) && result[KEY_STATE] === PromiseState_fulfilled)
+		// p=Promise.resolve(1);q=Promise.resolve(p);p===q
+		return result;
+
+	// TODO:
+	// p={b:2,then:r=>{console.log(this);r(2)}};q=Promise.resolve(p);p===q
+	// p={b:2,then:r=>{console.log(this);throw 2}};q=Promise.resolve(p);p===q
+
+	// NewPromiseCapability(C)
+	var promise = new this(library_namespace.null_function);
+	FulfillPromise(promise, result);
+	return promise;
+};
+
+Promise.reject = function reject(reason) {
+	// NewPromiseCapability(C)
+	var promise = new this(library_namespace.null_function);
+	RejectPromise(promise, reason);
+	return promise;
+};
+
+
+// caught, ['catch']
+function _catch(onRejected) {
+	return this.then(undefined, onRejected);
+}
+
+// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise.prototype.then
+// .then()會另外產生一個新的promise物件。 NewPromiseCapability()
+function then(onFulfilled, onRejected) {
+	if (this[KEY_STATE] === PromiseState_pending) {
+/**<code>
+
+p=new Promise((r,R)=>{setTimeout(function(){r(9)},8)});
+p.then(a=>r+=1);
+p.then(a=>r+=2);
+p.then(a=>r+=3);
+console.log(p);r='';
+//
+r==='123'
+
+p=new Promise((r,R)=>{setTimeout(function(){R(9)},8)});
+p.catch(a=>r+=1);
+p.catch(a=>r+=2);
+p.catch(a=>r+=3);
+console.log(p);r='';
+//
+r==='123'
+
+
+p=new Promise((r,R)=>{setTimeout(function(){r(9)},8)});p.then(123);
+
+
+
+</code>
+ */
+
+		// 等待本promise解決了再處理
+		this.fulfill_reactions.push(onFulfilled);
+		this.reject_reactions.push(onRejected);
+		return new Promise(library_namespace.null_function);
+	}
+
+	// `this` promise is settled, solved.
+	var value = this[KEY_VALUE], operator = this[KEY_STATE] === PromiseState_fulfilled ? onFulfilled : onRejected;
+	if (typeof operator !== 'function')
+		return this[KEY_STATE] === PromiseState_fulfilled ? Promise.resolve(value) : Promise.reject(value);
+	try {
+		value = operator(value);
+	} catch (e) {
+		return Promise.reject(e);
+	}
+	if (!get_then_of_thenable(value)) {
+		// p=Promise.resolve().then(function(){})
+		// p=Promise.resolve().then(a=>{return {a:1,b:2}})
+		// p=Promise.resolve().then(a=>{return a=>a})
+		// q={b:2,then:5};p=Promise.resolve(2).then(a=>{return q});console.log(p);
+		// TODO: async
+		return Promise.resolve(value);
+	}
+
+	if (IsPromise(value)) {
+		// (p=Promise.reject(2)).catch(a=>0);(q=Promise.resolve(1).then(a=>p)).catch(a=>0);p!==q
+		// q=new Promise(r=>setTimeout(r,500));p=Promise.resolve(2).then(a=>{return q});console.log(p);
+		// p=new Promise((r,R)=>{setTimeout(function(){r(9)},8)});p.then(p);p.then(p);
+		// TODO: async
+		// TODO: 回傳另一個被擱置的 promise 物件
+		var promise = new Promise(library_namespace.null_function);
+		promise[KEY_STATE] = value[KEY_STATE];
+		promise[KEY_VALUE] = value[KEY_VALUE];
+		return promise;
+	}
+	// value is thenable object / function
+	// q={then:r=>r(1)};p=Promise.resolve(2).then(a=>{return q})
+	// q={b:2,then:r=>{console.log(this);r(this.b)}};p=Promise.resolve(2).then(a=>{return q});console.log(p);
+	// TODO: async
+	return new Promise(value.then);
+}
+
+
+// https://eyesofkids.gitbooks.io/javascript-start-es6-promise/content/contents/promise_all_n_race.html
+// Promises/A+並沒有關於Promise.reject或Promise.resolve的定義，它們是ES6 Promise標準中的實作。
+Promise.all = function all(iterable) {
+	if (!Array.isArray(iterable))
+		// e.g., {String}
+		iterable = Array.from(iterable);
+};
+// Promise.race (iterable)
+
+Promise.prototype = {
+	then : then,
+	'catch' : _catch
+};
+
+
+set_method(library_namespace.env.global, {
+	Promise : Promise
+}, 'function');
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 
 return (
