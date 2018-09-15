@@ -1827,6 +1827,12 @@ promise: pending, fulfilled, rejected
 			Promise {<pending>}
 		Promise.resolve().then(function(){return Promise.reject(3)}).then(null,function(){});console.log(p)
 			Promise {<pending>}
+		p=Promise.resolve().then(function(){return new Promise(function(r){setTimeout(function(){console.log(4);r(4)},500)}).then(function(v){console.log(++v);return v})}).then(function(v){console.log(++v);return v},function(){});console.log(p)
+			Promise {<pending>}
+			4
+			5
+			6
+			p → Promise {<resolved>: 6}
 	r_ retrun thenable	p→thenable→returned
 		p=Promise.resolve(2).then(function(){return {then:function(r,R){r(4)}}});console.log(p)
 			p: Promise {<pending>}
@@ -1913,13 +1919,21 @@ Promise.race ( iterable )
 		Promise.race([new Promise(function(r,R){setTimeout(function(){console.log(500);r(3)},500)}),new Promise(function(r,R){setTimeout(function(){console.log(5);r(1)},5)}),Promise.resolve(6),new Promise(function(r,R){setTimeout(function(){console.log(400);r(7)},400)})]).then(function(r){console.log('** '+r)})
 			** 6
 
-promise.finally()	Promise_finally()
+TODO
+promise.finally(onFinally)	Promise_finally(onFinally)
+	onFinally: value
+		p=Promise.resolve(2)['finally'](3).then(function(v){console.log(v);return 4});console.log(p)
+			2
+			p: Promise {<pending>}
+			→ Promise {<resolved>: 4}
+	onFinally: function return value
 		p=Promise.resolve(2).then(function(v){console.log(v);return 3})['finally'](function(v){console.log('**'+v);return 4}).then(function(v){console.log(v);return 5});console.log(p)
 			p: Promise {<pending>}
 			2
 			undefined
 			3
 		p=Promise.reject(2).then(function(v){console.log(v);return 3})['finally'](function(v){console.log(v);return 4}).then(function(v){console.log(v);return 5}).then(null,function(v){console.log(v);});console.log(p)
+	onFinally: function return promise, thenable:
 
 // --------------------------------------------------------------------------------------
 
@@ -2192,7 +2206,7 @@ function FulfillPromise(promise, result, no_enqueue) {
 			}
 
 			job = function() {
-				// old environment may not has Function.prototype.bind(), so we use anonymous functions instead of FulfillPromise.bind() to improve performance.
+				// old runtime environment may not has Function.prototype.bind(), so we use anonymous functions instead of FulfillPromise.bind() to improve performance.
 				function onFulfilled(value) {
 					if (!called) {
 						called = true;
@@ -2462,25 +2476,25 @@ function GetIterator(iterable) {
 // Promises/A+並沒有關於Promise.reject或Promise.resolve的定義，它們是ES6 Promise標準中的實作。
 Promise.all = function all(iterable) {
 	return new this(function(onFulfilled, onRejected) {
-		// -iterable.length: be sure left is negative before iterable.forEach() completed
-		var left = -iterable.length, result_list = [];
+		// -iterable.length: be sure `remaining` is negative before iterable.forEach() completed
+		var remaining = -iterable.length, result_list = [];
 
 		GetIterator(iterable).forEach(function(item, index) {
 			var then = get_then_of_thenable(item);
 			if (then) {
 				then.call(item, function(result) {
 					result_list[index] = result;
-					if(--left === 0) {
+					if(--remaining === 0) {
 						onFulfilled(result_list);
 					}
 				}, onRejected);
-				left++;
+				remaining++;
 			} else {
 				result_list[index] = item;
 			}
 		});
 
-		if((left += iterable.length) === 0) {
+		if((remaining += iterable.length) === 0) {
 			onFulfilled(result_list);
 		}
 	});
@@ -2489,7 +2503,7 @@ Promise.all = function all(iterable) {
 Promise.race = function race(iterable) {
 	return new this(function(onFulfilled, onRejected) {
 		GetIterator(iterable)
-		// won't skip anyone
+		// won't skip anyone. Using forEach for sparse array
 		.forEach(function(item) {
 			var then = get_then_of_thenable(item);
 			if (then) {
@@ -2506,16 +2520,28 @@ Promise.race = function race(iterable) {
 
 // https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally
 function Promise_finally(onFinally) {
-	var constructor = this.constructor, step = constructor.resolve(function() {
+	if (typeof onFinally !== 'function')
+		// p=Promise.resolve(2)['finally'](3).then(function(v){console.log(v)});console.log(p)
+		return this.then();
+
+	// library_namespace.debug('creating onFinally step: ' + onFinally, 0, 'Promise_finally');
+	var constructor = this.constructor, step = new constructor(function(resolve) {
+		// Using anonymous function, to defer execution and incase onFinally throw.
+		// library_namespace.debug('executing onFinally: ' + onFinally, 0, 'Promise_finally');
 		onFinally();
+		resolve();
 	});
 	return this.then(function(value) {
+		// console.log('Promise_finally: onFulfilled');
+		// console.log(step);
 		return step.then(function() {
 			return value;
 		});
 	}, function(value) {
-		return step.then(function(value) {
-			return constructor.reject(value);
+		// console.log('Promise_finally: onRejected');
+		// console.log(step);
+		return step.then(function() {
+			throw value;
 		});
 	});
 }
