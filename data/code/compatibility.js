@@ -1792,6 +1792,9 @@ p=new Promise(function(r,R){r()})
 			2
 			p: Promise {<pending>}
 			→ Promise {<rejected>: 2}
+		p=new Promise(function(r,R){r(Promise.resolve(1));throw 2});console.log(p)
+			p: Promise {<pending>}
+			→ Promise {<resolved>: 1}
 	r(thenable)	thenable→p
 		(p=new Promise(function(r,R){r({then:function(r,R){r(4)}})}));console.log(p)
 			Promise {<pending>}
@@ -1849,33 +1852,81 @@ p: pending, fulfilled, rejected
 
 
 Promise.resolve(v)
+	v: value: tested above
+		p=Promise.resolve('v');console.log(p)
+	v: promise
+		(q=Promise.resolve(2)).then(null,function(){});p=Promise.resolve(q);console.log(p)
+			Promise {<resolved>: 2}
+		(q=Promise.reject(2)).then(null,function(){});p=Promise.resolve(q);console.log(p)
+			Promise {<rejected>: 2}
+	v: thenable
+		q={then:function(r,R){r(2)}};p=Promise.resolve(q);console.log(p)
+			p: Promise {<pending>}
+			→ Promise {<resolved>: 2}
+		q={then:function(r,R){R(2)}};(p=Promise.resolve(q)).then(null,function(){});console.log(p)
+			p: Promise {<pending>}
+			→ Promise {<rejected>: 2}
+		q={b:2,then:function(r){console.log(this.b);r(2)}};p=Promise.resolve(q);console.log(p)
+		q={b:2,then:function(r){console.log(this.b);throw 2}};(p=Promise.resolve(q)).then(null,function(){});console.log(p)
+
+
 Promise.reject(v)
+	v: value: tested above
+		(p=Promise.reject('v')).then(null,function(){});console.log(p)
+		p=Promise.resolve(1);console.log(p);(q=Promise.reject(p)).then(null,function(){});console.log(p!==q)
+			Promise {<resolved>: 1}
+			console.log(p!==q): true
+		(p=Promise.reject(1)).then(null,function(){});(q=Promise.reject(p)).then(null,function(){});console.log(p!==q)
+			console.log(p!==q): true
+	v: promise
+		(p=Promise.reject(Promise.resolve(2))).then(null,function(){});console.log(p)
+			Promise {<rejected>: Promise}
+		(q=Promise.resolve(2)).then(null,function(){});(p=Promise.reject(q)).then(null,function(){});console.log(p)
+			Promise {<rejected>: Promise}
+		(q=Promise.reject(2)).then(null,function(){});(p=Promise.reject(q)).then(null,function(){});console.log(p)
+			Promise {<rejected>: Promise}
+	v: thenable
+		q={then:function(r,R){R(2)}};(p=Promise.reject(q)).then(null,function(){});console.log(p)
+			Promise {<rejected>: {…}}
 
 
 // --------------------------------------------------------------------------------------
 
-(p=new Promise(function(r,R){r(1);throw '0'}))
-.then(function(x){v+=x;return 2})
+var v='';(p=new Promise(function(r,R){r(1);throw '0'}))
+.then(function(x){v+=x;console.log(v);return 2})
 .then(function(x){v+=x;return 3})
 .then(function(x){v+=x;throw '4'},function(y){v+=y;return 0})
 .then(function(x){v+=x;throw 0},function(y){v+=y;return 5})
 .then(function(x){v+=x;return 6})
-.then(function(x){v+=x;console.log(v==="_123456")});v='_';
+.then(function(x){v+=x;console.log(v==="_123456")});v='_';console.log(p)
+console.log(v)
+
+var v='';(p=new Promise(function(r,R){r(Promise.resolve(1));r(0);throw '2'}))
+.then(function(x){v+=x;console.log(v);return 2})
+.then(function(x){v+=x;return 3})
+.then(function(x){v+=x;throw '4'},function(y){v+=y;return 0})
+.then(function(x){v+=x;throw 0},function(y){v+=y;return 5})
+.then(function(x){v+=x;return 6})
+.then(function(x){v+=x;console.log(v==="_123456")});v='_';console.log(p)
 console.log(v)
 
 
+(q=Promise.reject(2).then(function(){})).then(function(){},function(y){})
+// console.log(q): Promise {<rejected>: 2}
+
+
 var v='';(p=new Promise(function(r,R){R(1);r(0)}))
+.then(function(x){v+=x;console.log('!!');return 0})
 .then(function(x){v+=x;return 0})
-.then(function(x){v+=x;return 0})
-.then(function(x){v+=x;throw '0'},function(y){v+=y;return 2})
+.then(function(x){v+=x;throw '0'},function(y){console.log('y='+y);v+=y;return 2})
 .then(function(x){v+=x;throw '3'},function(y){v+=y;return 0})
 .then(function(x){v+=x;return 0})
-.then(function(x){v+=x;},function(x){v+=x;console.log(v==="_123")});v='_';
+.then(function(x){v+=x;},function(x){v+=x;console.log(v);console.log(v==="_123")});v='_';
 
 
 var q=null,r='';Promise.resolve()
 .then(function(x){r+=x;return 1})
-.then(function(x){r+=x;q=new Promise((r,R)=>{setTimeout(r,8)});return q})
+.then(function(x){r+=x;q=new Promise(function(r,R){setTimeout(r,8)});return q})
 .then(function(x){r+=x;return 2})
 .then(function(x){r+=x;
 	q
@@ -1892,7 +1943,7 @@ var q=null,r='';Promise.resolve()
 
 var q=null,r='';Promise.resolve()
 .then(function(x){r+='_';return 1})
-.then(function(x){r+=x;q=new Promise((r,R)=>{setTimeout(function(){R(2)},8)});q.then(function(x){r+=x;return 0},function(y){r+=2&&y;});return q})
+.then(function(x){r+=x;q=new Promise(function(r,R){setTimeout(function(){R(2)},8)});q.then(function(x){r+=x;return 0},function(y){r+=2&&y;});return q})
 .then(function(x){r+=x;return 0})
 .then(function(x){r+=x;
 	q
@@ -1909,7 +1960,7 @@ var q=null,r='';Promise.resolve()
 
 var q=null,r='';Promise.resolve()
 .then(function(x){r+='_';return 1})
-.then(function(x){r+=x;q=new Promise((r,R)=>{setTimeout(function(){R(2)},8)});q.then(function(x){r+=x;return 0},function(y){r+=2&&y;});return q})
+.then(function(x){r+=x;q=new Promise(function(r,R){setTimeout(function(){R(2)},8)});q.then(function(x){r+=x;return 0},function(y){r+=2&&y;});return q})
 .then(function(x){r+=x;return 0},function(y){r+=3;return 4})
 //.then(function(x){r+='^^^';return 4})
 .then(function(x){r+=4&&x;
@@ -1928,17 +1979,20 @@ var q=null,r='';Promise.resolve()
 
 
 
-r='';(q=new Promise((r,R)=>{setTimeout(function(){R(1)},5000)}))
+r='';(q=new Promise(function(r,R){setTimeout(function(){R(1)},5000)}))
 .then(function(x){r+=x;return 0},function(y){r+=1&&y;return 2})
 .then(function(x){r+=2&&x;return 3})
 .then(function(x){r+=3&&x;console.log(r==='123')})
 
-r='';(q=new  url.includes('://'): url.includes('://'):
+r='';(q=new Promise(function(r,R){setTimeout(function(){R(1)},50)}))
 .then(function(x){r+=x;return 0},function(y){r+=1&&y;return 2})
 .then(function(x){r+=2&&x;return 3})
-//another:
+//console.log(r): '12'
+//
+// another:
 q.then(function(x){r+=3&&x;console.log(r==='123')})
-//Uncaught (in promise) 1
+// Uncaught (in promise) 1
+// r==='12'
 
 
 
@@ -1949,6 +2003,27 @@ console.log([s!==q,s,q])
 // https://eyesofkids.gitbooks.io/javascript-start-es6-promise/content/contents/then_adv.html
 
 
+
+test of Promise.prototype.then(): this[KEY_STATE] === PromiseState_pending
+
+p=new Promise(function(r,R){setTimeout(function(){r(9)},8)});
+p.then(function(a){r+=1});
+p.then(function(a){r+=2});
+p.then(function(a){r+=3});
+console.log(p);r='';
+//
+console.log(r==='123');
+
+p=new Promise(function(r,R){setTimeout(function(){R(9)},8)});
+p.then(null,function(a){r+=1});
+p.then(null,function(a){r+=2});
+p.then(null,function(a){r+=3});
+console.log(p);r='';
+//
+console.log(r==='123');
+
+
+p=new Promise(function(r,R){setTimeout(function(){r(9)},8)});p.then(123).then(function(x){console.log(x===9);});
 
 
 </code>
@@ -1977,13 +2052,16 @@ var EnqueueJob = library_namespace.platform.nodejs && process.nextTick
 // const
 PromiseState_pending = 0, PromiseState_fulfilled = 1, PromiseState_rejected = -1,
 // const
-KEY_STATE = '_state', KEY_VALUE = '_value', KEY_HANDLED = '_handled', KEY_REACTIONS = '_reactions', KEY_DEPEND_ON = '_depend_on';
+KEY_STATE = '_state', KEY_VALUE = '_value', KEY_HANDLED = '_handled', KEY_REACTIONS = '_reactions',
+// KEY_DEPEND_ON = KEY_VALUE
+KEY_DEPEND_ON = '_depend_on';
 
 
 // @private
+// assert: won't throw
 function PerformPromiseThen(promise, reaction, rejected, value) {
 	if (typeof reaction !== 'function') {
-		(rejected ? RejectPromise : FulfillPromise)(promise);
+		(rejected ? RejectPromise : FulfillPromise)(promise, value);
 		return;
 	}
 
@@ -1991,22 +2069,31 @@ function PerformPromiseThen(promise, reaction, rejected, value) {
 	//	Promise {<pending>}
 	//	→ Promise {<resolved>: 2}
 	try {
-		FulfillPromise(promise, reaction(value));
+		value = reaction(value);
+		FulfillPromise(promise, value);
 	} catch (e) {
 		RejectPromise(promise, e);
 	}
 }
 
 // @private
+// assert: won't throw
 // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-triggerpromisereactions
 function TriggerPromiseReactions(promise) {
 	var value = promise[KEY_VALUE],
 	rejected = promise[KEY_STATE] === PromiseState_rejected,
 	reactions = promise[KEY_REACTIONS];
+	if (!reactions) {
+		// already TriggerPromiseReactions()
+		// p=new Promise(function(r,R){r(Promise.resolve(1));throw 2});console.log(p)
+		return;
+	}
+
 	// free
 	delete promise[KEY_REACTIONS];
 	delete promise[KEY_DEPEND_ON];
 
+	// assert: (`value` is not thenable || rejected) === true
 	EnqueueJob(function() {
 		if (rejected && !promise[KEY_HANDLED]) {
 			// assert: no onRejected reaction
@@ -2033,6 +2120,8 @@ function TriggerPromiseReactions(promise) {
 	});
 }
 
+// @private
+// assert: won't throw
 // Promise Resolve Functions, resolve `promise` with `result`.
 // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise-resolve-functions
 // https://promisesaplus.com/#the-promise-resolution-procedure
@@ -2043,6 +2132,7 @@ function FulfillPromise(promise, result, no_enqueue) {
 		return;
 	}
 
+	var then, job;
 	try {
 		if (promise === result) {
 			// selfResolutionError
@@ -2051,35 +2141,53 @@ function FulfillPromise(promise, result, no_enqueue) {
 			throw new TypeError('A promise cannot be resolved with itself.');
 		}
 
-		var then = get_then_of_thenable(result);
+		then = get_then_of_thenable(result);
 		if (!then) {
 			// p=new Promise(function(r,R){r({then:2})})
 			promise[KEY_STATE] = PromiseState_fulfilled;
 			promise[KEY_VALUE] = result;
 	
-			if (promise[KEY_STATE] !== PromiseState_pending) {
-				TriggerPromiseReactions(promise);
-			}
+			TriggerPromiseReactions(promise);
 
 		} else {
 			if (IsPromise(result)) {
+				// won't throw HostPromiseRejectionTracker:
 				// (p=new Promise(function(r,R){r( Promise.reject(2) )})).then(null,function(){});console.log(p)
+				// q=Promise.reject(2);(p=new Promise(function(r,R){r( q )})).then(null,function(){});console.log(p)
 				// Promise.resolve().then(function(){return Promise.reject(3)}).then(null,function(){});
+				// Promise.resolve().then(function(){return new Promise(function(r,R){R(3)})}).then(null,function(){});
 				library_namespace.debug('handled: ' + result, 8, 'FulfillPromise');
 				result[KEY_HANDLED] = true;
 			}
 
-			function job() {
+			job = function() {
+				// old environment may not has Function.prototype.bind(), so we use anonymous functions instead of FulfillPromise.bind() to improve performance.
+				function onFulfilled(value) {
+					if (!called) {
+						called = true;
+						FulfillPromise(promise, value, no_enqueue);
+					}
+				}
+				function onRejected(value) {
+					if (!called) {
+						called = true;
+						RejectPromise(promise, value);
+					}
+				}
+				var called;
 				try {
 					if (IsPromise(result)) {
 						// p=new Promise(function(r){setTimeout(function(){r(Promise.resolve(2))},1)})
 						if (result[KEY_STATE] === PromiseState_pending) {
 							promise[KEY_DEPEND_ON] = result;
 							result[KEY_REACTIONS].push(promise);
+
 						} else {
+							// copy result → promise
 							promise[KEY_STATE] = result[KEY_STATE];
 							promise[KEY_VALUE] = result[KEY_VALUE];
 
+							// assert: promise[KEY_STATE] !== PromiseState_pending
 							TriggerPromiseReactions(promise);
 						}
 	
@@ -2088,10 +2196,11 @@ function FulfillPromise(promise, result, no_enqueue) {
 						// p=new Promise(function(r,R){r({then:function(){}})})
 						// t={};t.then=function(r){r(2)};p=new Promise(function(r,R){r(t)})
 						// t=function(){};t.then=function(r){r(2)};p=new Promise(function(r,R){r(t)})
-						then.call(result, FulfillPromise.bind(null, promise), RejectPromise.bind(null, promise));
+
+						then.call(result, onFulfilled, onRejected);
 					}
 				} catch (e) {
-					RejectPromise(promise, e);
+					onRejected(e);
 				}
 			}
 			if (no_enqueue)
@@ -2101,10 +2210,18 @@ function FulfillPromise(promise, result, no_enqueue) {
 		}
 
 	} catch (e) {
-		RejectPromise(promise, e);
+		job = function() {
+			RejectPromise(promise, e);
+		};
+		if (no_enqueue)
+			job();
+		else
+			EnqueueJob(job);
 	}
 }
 
+// @private
+// assert: won't throw
 // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise-reject-functions
 function RejectPromise(promise, reason) {
 	// test if promise is settled / alreadyResolved
@@ -2112,7 +2229,7 @@ function RejectPromise(promise, reason) {
 		return;
 	}
 
-	// TODO: https://www.ecma-international.org/ecma-262/9.0/index.html#sec-rejectpromise
+	// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-rejectpromise
 
 	// p=new Promise(function(r,R){setTimeout(function(){R(p)},1)})
 	// p=new Promise(function(r,R){R(function(){throw p})})
@@ -2123,6 +2240,35 @@ function RejectPromise(promise, reason) {
 		// (q=(p=Promise.reject(2)).then(3,4)).then(null,function(){});console.log(p);console.log(q);
 		TriggerPromiseReactions(promise);
 	});
+}
+
+// @private
+// is thenable object, thenable物件
+function get_then_of_thenable(value) {
+	if (typeof value === 'function' || typeof value === 'object') {
+		var then = value.then;
+		return typeof then === 'function' && then;
+	}
+}
+
+// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-ispromise
+// Promise物件
+function IsPromise(value) {
+	// value.constructor === Promise
+	return value instanceof Promise;
+
+	// assert: Should NOT access value.then
+	// https://promisesaplus.com/#point-75
+
+	var then = get_then_of_thenable(value), constructor;
+	return then
+	&& typeof (constructor = value.constructor) === 'function'
+	&& typeof constructor.resolve === 'function'
+	&& typeof constructor.reject === 'function'
+	// ECMA-262, 9th edition 標準
+	// && typeof constructor.all === 'function'
+	// && typeof constructor.race === 'function'
+	&& then;
 }
 
 // --------------------------------------------------------
@@ -2158,67 +2304,8 @@ function Promise(executor) {
 	// forced to convert to thenable
 	FulfillPromise(promise, 'then' in executor ? executor : {
 		then : executor
-	}, !('then' in executor));
+	}, /* no_enqueue */ !('then' in executor));
 }
-
-
-// is thenable object, thenable物件
-function get_then_of_thenable(value) {
-	if (typeof value === 'function' || typeof value === 'object') {
-		var then = value.then;
-		return typeof then === 'function' && then;
-	}
-}
-// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-ispromise
-// Promise物件
-function IsPromise(value) {
-	// value.constructor === Promise
-	return value instanceof Promise;
-
-	// assert: Should NOT access value.then
-	// https://promisesaplus.com/#point-75
-
-	var then = get_then_of_thenable(value), constructor;
-	return then
-	&& typeof (constructor = value.constructor) === 'function'
-	&& typeof constructor.resolve === 'function'
-	&& typeof constructor.reject === 'function'
-	// ECMA-262, 9th edition 標準
-	// && typeof constructor.all === 'function'
-	// && typeof constructor.race === 'function'
-	&& then;
-}
-
-
-// p=Promise.resolve(1);console.log(p);(q=Promise.reject(p)).then(null,function(){});p!==q
-// (p=Promise.reject(1)).then(null,function(){});(q=Promise.reject(p)).then(null,function(){});p!==q
-// TODO:
-// Promise.resolve(promise);
-// Promise.resolve(thenable);
-Promise.resolve = function resolve(result) {
-	if (IsPromise(result) && result[KEY_STATE] === PromiseState_fulfilled)
-		// p=Promise.resolve(1);q=Promise.resolve(p);p===q
-		return result;
-
-	// TODO:
-	// p={b:2,then:r=>{console.log(this);r(2)}};q=Promise.resolve(p);p===q
-	// p={b:2,then:r=>{console.log(this);throw 2}};q=Promise.resolve(p);p===q
-
-	// NewPromiseCapability(C)
-	// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-newpromisecapability
-	var promise = new this(library_namespace.null_function);
-	FulfillPromise(promise, result);
-	return promise;
-};
-
-Promise.reject = function reject(reason) {
-	// NewPromiseCapability(C)
-	var promise = new this(library_namespace.null_function);
-	// (p=Promise.reject(Promise.resolve(2))).then(null,function(){});console.log(p)
-	//	Promise {<rejected>: Promise}
-	RejectPromise(promise, reason);
-	return promise;
-};
 
 
 // caught, ['catch']
@@ -2238,39 +2325,19 @@ function then(onFulfilled, onRejected) {
 	if (onRejected) {
 		var promise = this;
 		do {
+			// if promise[KEY_HANDLED] is already `true`, it means there are more than one handler.
+			// e.g., (q=Promise.reject(2)).then(null,function h1(){});q.then(null,function h2(){});
 			promise[KEY_HANDLED] = true;
 		} while(IsPromise(promise = promise[KEY_DEPEND_ON]));
 	}
 
-	var promise = new Promise(library_namespace.null_function);
+	// 回傳另一個被擱置的 promise 物件
+	// NewPromiseCapability(C)
+	var promise = new this.constructor(library_namespace.null_function);
 	promise[KEY_DEPEND_ON] = this;
 
 	if (this[KEY_STATE] === PromiseState_pending) {
-/**<code>
-
-p=new Promise((r,R)=>{setTimeout(function(){r(9)},8)});
-p.then(a=>r+=1);
-p.then(a=>r+=2);
-p.then(a=>r+=3);
-console.log(p);r='';
-//
-r==='123'
-
-p=new Promise((r,R)=>{setTimeout(function(){R(9)},8)});
-p.catch(a=>r+=1);
-p.catch(a=>r+=2);
-p.catch(a=>r+=3);
-console.log(p);r='';
-//
-r==='123'
-
-
-p=new Promise((r,R)=>{setTimeout(function(){r(9)},8)});p.then(123);
-
-
-
-</code>
- */
+		// test case: see "test of Promise.prototype.then()" above
 
 		// 等待本promise解決了再處理
 		// p=Promise.resolve(2);q=p.then();p!==q
@@ -2282,28 +2349,71 @@ p=new Promise((r,R)=>{setTimeout(function(){r(9)},8)});p.then(123);
 		// assert: `this` promise is settled, solved.
 
 		// p=Promise.resolve().then(function(){})
-		// p=Promise.resolve().then(a=>{return {a:1,b:2}})
-		// p=Promise.resolve().then(a=>{return a=>a})
+		// p=Promise.resolve().then(function(a){return {a:1,b:2}})
+		// p=Promise.resolve().then(function(a){return function(a){return a}})
 		// q={b:2,then:5};p=Promise.resolve(2).then(a=>{return q});console.log(p);
 
 		// (p=Promise.reject(2)).catch(a=>0);(q=Promise.resolve(1).then(a=>p)).catch(a=>0);p!==q
 		// q=new Promise(r=>setTimeout(r,500));p=Promise.resolve(2).then(a=>{return q});console.log(p);
 		// p=new Promise((r,R)=>{setTimeout(function(){r(9)},8)});p.then(p);p.then(p);
-		// TODO: async
-		// TODO: 回傳另一個被擱置的 promise 物件
 
 		// value is thenable object / function
 		// q={then:r=>r(1)};p=Promise.resolve(2).then(a=>{return q})
 		// q={b:2,then:r=>{console.log(this);r(this.b)}};p=Promise.resolve(2).then(a=>{return q});console.log(p);
 
 		// (q=(p=Promise.reject(2)).then(3,4)).then(null,function(){});console.log(p);console.log(q);
-		var rejected = this[KEY_STATE] === PromiseState_rejected,
-		reaction = rejected ? onRejected : onFulfilled;
-		PerformPromiseThen(promise, reaction, rejected, this[KEY_VALUE]);
+		// (q=Promise.reject(2).then(function(){})).then(function(){},function(y){})
+		var rejected = this[KEY_STATE] === PromiseState_rejected, value = this[KEY_VALUE];
+		EnqueueJob(function() {
+			PerformPromiseThen(promise, rejected ? onRejected : onFulfilled, rejected, value);
+		});
 	}
 
 	return promise;
 }
+
+
+//--------------------------------------------------------
+
+Promise.resolve = function resolve(result) {
+	if (IsPromise(result) && result[KEY_STATE] === PromiseState_fulfilled)
+		// p=Promise.resolve(1);q=Promise.resolve(p);console.log(p===q)
+		return result;
+
+	// NewPromiseCapability(C)
+	// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-newpromisecapability
+	var promise = new this(library_namespace.null_function);
+
+	// (q=new Promise(function(r,R){setTimeout(function(){R(2)},80)}));(p=Promise.resolve(q)).then(function(x){console.log('*'+x)},function(y){console.log('_'+y)});console.log(p)
+	if (IsPromise(result) && result[KEY_STATE] !== PromiseState_pending) {
+		// Promise.resolve() 基本上盡可能早點得到一個確定的Promise物件，並且不會改變傳入的引數。
+		// copy result → promise
+		promise[KEY_STATE] = result[KEY_STATE];
+		promise[KEY_VALUE] = result[KEY_VALUE];
+
+		// won't throw HostPromiseRejectionTracker:
+		// (q=Promise.reject(2)).then(null,function(){});p=Promise.resolve(q);console.log(p)
+		// (q=new Promise(function(r,R){R(2)})).then(null,function(){});p=Promise.resolve(q);console.log(p)
+
+		// will throw HostPromiseRejectionTracker:
+		// Promise.resolve(Promise.reject(2))
+		// (q=Promise.reject(2));/* ← throw */console.log(q);p=Promise.resolve(q);console.log(p)
+		// (q=new Promise(function(r,R){R(2)})).then(null,function(){});/* throw → */p=new Promise(function(r){r(q)});console.log(p)
+		// (q=Promise.reject(2));/* ← throw + throw → */console.log(q);p=new Promise(function(r,R){r(q)});console.log(p)
+		promise[KEY_HANDLED] = true;
+	} else {
+		FulfillPromise(promise, result);
+	}
+
+	return promise;
+};
+
+Promise.reject = function reject(reason) {
+	// NewPromiseCapability(C)
+	var promise = new this(library_namespace.null_function);
+	RejectPromise(promise, reason);
+	return promise;
+};
 
 
 // https://eyesofkids.gitbooks.io/javascript-start-es6-promise/content/contents/promise_all_n_race.html
@@ -2312,15 +2422,24 @@ Promise.all = function all(iterable) {
 	if (!Array.isArray(iterable))
 		// e.g., {String}
 		iterable = Array.from(iterable);
+	// TODO
 };
-// Promise.race (iterable)
+
+Promise.race = function race(iterable) {
+	if (!Array.isArray(iterable))
+		// e.g., {String}
+		iterable = Array.from(iterable);
+	// TODO
+};
 
 function Promise_toString() {
 	return 'Promise {<i style="color:#43e">[' + (this[KEY_STATE] === PromiseState_pending ? 'pending' : this[KEY_STATE] === PromiseState_rejected ? 'rejected' : 'fulfilled') + ']</i>: ' + this[KEY_VALUE] + '}';
 }
 
 Promise.prototype = {
+	// for debug only
 	toString : Promise_toString,
+
 	then : then,
 	'catch' : _catch
 };
