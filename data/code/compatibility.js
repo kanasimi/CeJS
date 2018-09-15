@@ -1776,13 +1776,92 @@ if (library_namespace.platform.nodejs) {
 
 https://babeljs.io/repl
 
-var v='';(p=new Promise(function(r,R){r(1);throw '0'}))
+
+p=new Promise(function(r,R){r()})
+	r(value)	fulfilled
+		(p=new Promise(function(r,R){r( 2 )}));console.log(p)
+			Promise {<resolved>: 2}
+	r(promise)	promise→p
+		(p=new Promise(function(r,R){r( Promise.resolve(2) )}));console.log(p)
+			p: Promise {<pending>}
+			→ Promise {<resolved>: 2}
+		(p=new Promise(function(r,R){r( Promise.reject(2) )})).then(null,function(){});console.log(p)
+			p: Promise {<pending>}
+			→ Promise {<rejected>: 2}
+		(q=(p=new Promise(function(r,R){r( Promise.reject(2) )})).then(3,4)).then(5,function(v){console.log(v)});console.log(p);console.log(q)
+			2
+			p: Promise {<pending>}
+			→ Promise {<rejected>: 2}
+	r(thenable)	thenable→p
+		(p=new Promise(function(r,R){r({then:function(r,R){r(4)}})}));console.log(p)
+			Promise {<pending>}
+			→ Promise {<resolved>: 4}
+		(p=new Promise(function(r,R){r({then:function(r,R){console.log(this);R(4)}})})).then(null,function(){});
+			this: {then: ƒ}
+			p → Promise {<rejected>: 4}
+	R(value)	rejected
+	R(promise)
+		(p=new Promise(function(r,R){R( Promise.resolve(2) )})).then(null,function(){});console.log(p)
+			Promise {<rejected>: Promise}
+	R(thenable)
+
+p.then(r_,R_)
+p: pending, fulfilled, rejected
+	r_ retrun value	value→return
+		(p=new Promise(function(r){throw 2})).then(null,function(){});console.log(p)
+			Promise {<rejected>: 2}
+	r_ retrun promise	p→promise→return
+		p=Promise.resolve(2).then(function(){return Promise.resolve(4)});console.log(p)
+			p: Promise {<pending>}
+			→ Promise {<resolved>: 4}
+		(p=Promise.reject(3)).then(null,function(){});(q=Promise.resolve(2).then(function(){return p})).then(null,function(){});console.log(p);console.log(q)
+			Promise {<rejected>: 3} ; Promise {<pending>}
+			→ Promise {<rejected>: 3} ; Promise {<rejected>: 3}
+		p=Promise.resolve(2).then(function(){return new Promise(function(r){setTimeout(function(){r(4)},2);})});console.log(p)
+			p: Promise {<pending>}
+			→ Promise {<resolved>: 4}
+		p=Promise.resolve(2).then(function(){return new Promise(function(){})});console.log(p)
+			Promise {<pending>}
+		Promise.resolve().then(function(){return Promise.reject(3)}).then(null,function(){});console.log(p)
+			Promise {<pending>}
+	r_ retrun thenable	p→thenable→returned
+		p=Promise.resolve(2).then(function(){return {then:function(r,R){r(4)}}});console.log(p)
+			p: Promise {<pending>}
+			→ Promise {<resolved>: 4}
+		(p=Promise.resolve(2).then(function(){return {then:function(r,R){R(4)}}})).then(null,function(){});
+			chrome: Promise {<resolved>: undefined}	or	firefox: Promise { <state>: "pending" }
+			p: Promise {<pending>}
+			→ Promise {<rejected>: 4}
+		p=Promise.resolve(2).then(function(){return {then:function(r,R){setTimeout(function(){r(4)},2);}}});console.log(p)
+			p: Promise {<pending>}
+			→ Promise {<resolved>: 4}
+	R_ retrun value
+		(p=new Promise(function(r,R){R(2)})).then(null,function(){});console.log(p)
+			Promise {<rejected>: 2}
+	R_ retrun promise
+		(p=new Promise(function(r,R){R(Promise.resolve(2))})).then(null,function(){});console.log(p)
+			Promise {<rejected>: Promise}
+		(q=Promise.reject(2)).then(null,function(){});(p=new Promise(function(r,R){R(q)})).then(null,function(){});console.log(p)
+			Promise {<rejected>: Promise}
+	R_ retrun thenable
+		(p=new Promise(function(r,R){R({then:function(r,R){R(2)}})})).then(null,function(){});console.log(p)
+			Promise {<rejected>: {…}}
+
+
+Promise.resolve(v)
+Promise.reject(v)
+
+
+// --------------------------------------------------------------------------------------
+
+(p=new Promise(function(r,R){r(1);throw '0'}))
 .then(function(x){v+=x;return 2})
 .then(function(x){v+=x;return 3})
 .then(function(x){v+=x;throw '4'},function(y){v+=y;return 0})
 .then(function(x){v+=x;throw 0},function(y){v+=y;return 5})
 .then(function(x){v+=x;return 6})
 .then(function(x){v+=x;console.log(v==="_123456")});v='_';
+console.log(v)
 
 
 var v='';(p=new Promise(function(r,R){R(1);r(0)}))
@@ -1863,7 +1942,7 @@ q.then(function(x){r+=3&&x;console.log(r==='123')})
 
 
 
-q=new Promise((r,R)=>{setTimeout(R,8)})
+q=new Promise(function(r,R){setTimeout(R,8)})
 s=q.then(function(x){},function(y){})
 console.log([s!==q,s,q])
 // s: resolved, q: rejected. then方法執行完會另外產生一個新的promise物件。
@@ -1887,52 +1966,77 @@ console.log([s!==q,s,q])
 // https://github.com/taylorhakes/promise-polyfill/blob/master/dist/polyfill.js
 
 // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-enqueuejob
-var EnqueueJob = library_namespace.platform.nodejs
+var EnqueueJob = library_namespace.platform.nodejs && process.nextTick
 // https://github.com/stefanpenner/es6-promise/blob/master/lib/es6-promise/asap.js
 // node version 0.10.x displays a deprecation warning when nextTick is used recursively
 // see https://github.com/cujojs/when/issues/410 for details
-? function () { return process.nextTick(f); }
+? function (f) { return process.nextTick(f); }
 // https://github.com/cssmagic/ChangeLog/issues/3
 // setImmediate() 會調度宏微任務而不是微任務，可能導致不一樣的調度結果。
 : typeof setImmediate === 'function' ? setImmediate : function(f) {setTimeout(f, 0);},
-//
+// const
 PromiseState_pending = 0, PromiseState_fulfilled = 1, PromiseState_rejected = -1,
-//
-KEY_STATE = '_state', KEY_VALUE = '_value';
+// const
+KEY_STATE = '_state', KEY_VALUE = '_value', KEY_HANDLED = '_handled', KEY_REACTIONS = '_reactions', KEY_DEPEND_ON = '_depend_on';
+
+
+// @private
+function PerformPromiseThen(promise, reaction, rejected, value) {
+	if (typeof reaction !== 'function') {
+		(rejected ? RejectPromise : FulfillPromise)(promise);
+		return;
+	}
+
+	// (p=Promise.reject(2).then(function(){},function(v){return Promise.resolve(2)})).then(null,function(){});
+	//	Promise {<pending>}
+	//	→ Promise {<resolved>: 2}
+	try {
+		FulfillPromise(promise, reaction(value));
+	} catch (e) {
+		RejectPromise(promise, e);
+	}
+}
 
 // @private
 // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-triggerpromisereactions
 function TriggerPromiseReactions(promise) {
-	var value = promise[KEY_VALUE], rejected = promise[KEY_STATE] === PromiseState_rejected,
-	reactions = rejected ? promise.reject_reactions : promise.fulfill_reactions;
-	delete promise.fulfill_reactions;
-	delete promise.reject_reactions;
+	var value = promise[KEY_VALUE],
+	rejected = promise[KEY_STATE] === PromiseState_rejected,
+	reactions = promise[KEY_REACTIONS];
+	// free
+	delete promise[KEY_REACTIONS];
+	delete promise[KEY_DEPEND_ON];
 
-	if (rejected && reactions.length === 0) {
-		// TODO: NG
-		// Promise.reject(2).then(function(v){}).catch(function(v){})
-		// HostPromiseRejectionTracker ( promise, operation )
-		// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-host-promise-rejection-tracker
-		throw new Error('Uncaught (in promise): ' + reason);
-	}
+	EnqueueJob(function() {
+		if (rejected && !promise[KEY_HANDLED]) {
+			// assert: no onRejected reaction
 
-	if (reactions.length > 0) {
-		EnqueueJob(function() {
-			// PromiseReactionJob ( reaction, argument )
-			// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promisereactionjob
-			reactions.forEach(rejected ? function(_promise) {
-				RejectPromise(promise, value);
-			} : function(_promise) {
-				FulfillPromise(promise, value);
-			});
+			// Promise.reject(2).then(function(v){}).catch(function(v){})
+
+			// HostPromiseRejectionTracker ( promise, operation )
+			// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-host-promise-rejection-tracker
+			throw new Error('Uncaught (in promise): ' + value);
+		}
+
+		library_namespace.debug('reactions of ' + promise + ': ' + reactions.join(';'), 8, 'TriggerPromiseReactions');
+		// PromiseReactionJob ( reaction, argument )
+		// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promisereactionjob
+		reactions.forEach(function(reaction) {
+			if (Array.isArray(reaction)) {
+				// reaction = [ promise, onFulfilled, onRejected ]
+				PerformPromiseThen(reaction[0], reaction[rejected ? 2 : 1], rejected, value);
+			} else {
+				// assert: IsPromise(reaction)
+				(rejected ? RejectPromise : FulfillPromise)(reaction, value);
+			}
 		});
-	}
+	});
 }
 
-// Promise Resolve Functions, resolve promise
+// Promise Resolve Functions, resolve `promise` with `result`.
 // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise-resolve-functions
 // https://promisesaplus.com/#the-promise-resolution-procedure
-function FulfillPromise(promise, result) {
+function FulfillPromise(promise, result, no_enqueue) {
 	// test if promise is settled / alreadyResolved
 	if (promise[KEY_STATE] !== PromiseState_pending) {
 		// p=new Promise(function(r,R){setTimeout(function(){r(1);r(p)},1)})
@@ -1942,7 +2046,7 @@ function FulfillPromise(promise, result) {
 	try {
 		if (promise === result) {
 			// selfResolutionError
-			// p=new Promise(function(r,R){setTimeout(function(){r(p)},1)})
+			// (p=new Promise(function(r,R){setTimeout(function(){r(p)},1)})).then(null,function(){})
 			// Chaining cycle detected for promise #<Promise>
 			throw new TypeError('A promise cannot be resolved with itself.');
 		}
@@ -1952,34 +2056,52 @@ function FulfillPromise(promise, result) {
 			// p=new Promise(function(r,R){r({then:2})})
 			promise[KEY_STATE] = PromiseState_fulfilled;
 			promise[KEY_VALUE] = result;
-
-		} else if (IsPromise(result)) {
-			// TODO: EnqueueJob
-
-			// p=new Promise(function(r){setTimeout(function(){r(Promise.resolve(2))},1)})
-			if (result[KEY_STATE] === PromiseState_pending) {
-				result.fulfill_reactions.push(promise);
-			} else {
-				promise[KEY_STATE] = result[KEY_STATE];
-				promise[KEY_VALUE] = result[KEY_VALUE];
+	
+			if (promise[KEY_STATE] !== PromiseState_pending) {
+				TriggerPromiseReactions(promise);
 			}
 
 		} else {
-			// TODO: EnqueueJob
+			if (IsPromise(result)) {
+				// (p=new Promise(function(r,R){r( Promise.reject(2) )})).then(null,function(){});console.log(p)
+				// Promise.resolve().then(function(){return Promise.reject(3)}).then(null,function(){});
+				library_namespace.debug('handled: ' + result, 8, 'FulfillPromise');
+				result[KEY_HANDLED] = true;
+			}
 
-			// is_thenable(result)
-			// p=new Promise(function(r,R){r({then:function(){}})})
-			// t={};t.then=function(r){r(2)};p=new Promise(function(r,R){r(t)})
-			// t=function(){};t.then=function(r){r(2)};p=new Promise(function(r,R){r(t)})
-			then.call(result, FulfillPromise.bind(promise), RejectPromise.bind(promise));
+			function job() {
+				try {
+					if (IsPromise(result)) {
+						// p=new Promise(function(r){setTimeout(function(){r(Promise.resolve(2))},1)})
+						if (result[KEY_STATE] === PromiseState_pending) {
+							promise[KEY_DEPEND_ON] = result;
+							result[KEY_REACTIONS].push(promise);
+						} else {
+							promise[KEY_STATE] = result[KEY_STATE];
+							promise[KEY_VALUE] = result[KEY_VALUE];
+
+							TriggerPromiseReactions(promise);
+						}
+	
+					} else {
+						// is_thenable(result)
+						// p=new Promise(function(r,R){r({then:function(){}})})
+						// t={};t.then=function(r){r(2)};p=new Promise(function(r,R){r(t)})
+						// t=function(){};t.then=function(r){r(2)};p=new Promise(function(r,R){r(t)})
+						then.call(result, FulfillPromise.bind(null, promise), RejectPromise.bind(null, promise));
+					}
+				} catch (e) {
+					RejectPromise(promise, e);
+				}
+			}
+			if (no_enqueue)
+				job();
+			else
+				EnqueueJob(job);
 		}
 
 	} catch (e) {
 		RejectPromise(promise, e);
-	}
-
-	if (promise[KEY_STATE] !== PromiseState_pending) {
-		TriggerPromiseReactions(promise, value);
 	}
 }
 
@@ -1997,7 +2119,10 @@ function RejectPromise(promise, reason) {
 	// p=new Promise(function(r,R){R({then:function(){throw p}})})
 	promise[KEY_STATE] = PromiseState_rejected;
 	promise[KEY_VALUE] = reason;
-	TriggerPromiseReactions(promise, value);
+	EnqueueJob(function() {
+		// (q=(p=Promise.reject(2)).then(3,4)).then(null,function(){});console.log(p);console.log(q);
+		TriggerPromiseReactions(promise);
+	});
 }
 
 // --------------------------------------------------------
@@ -2020,28 +2145,20 @@ function Promise(executor) {
 	// [[PromiseResult]]
 	// this[KEY_VALUE] = undefined;
 
-	// 因為本promise擱置而擱置的函數。
-	// subscribers, deferreds
-
-	// [[PromiseFulfillReactions]] queue
-	this.fulfill_reactions = [];
-	// [[PromiseRejectReactions]] queue
-	this.reject_reactions = [];
-
 	// [[PromiseIsHandled]]
-	// this.handled = false;
+	// this[KEY_HANDLED] = false;
 
-	if (executor === library_namespace.null_function)
-		// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-newpromisecapability
-		return;
+	// 因為本promise擱置而擱置的{Promise} or 函數。
+	// subscribers, deferreds
+	// [[PromiseFulfillReactions]] queue
+	// [[PromiseRejectReactions]] queue
+	this[KEY_REACTIONS] = [];
 
-	try {
-		executor(FulfillPromise.bind(this), RejectPromise.bind(this));
-	} catch (e) {
-		// Promise {<rejected>: 2}
-		// (p=new Promise(function(a){throw 2})).catch(function(){});console.log(p)
-		RejectPromise(this, e);
-	}
+	var promise = this;
+	// forced to convert to thenable
+	FulfillPromise(promise, 'then' in executor ? executor : {
+		then : executor
+	}, !('then' in executor));
 }
 
 
@@ -2058,6 +2175,9 @@ function IsPromise(value) {
 	// value.constructor === Promise
 	return value instanceof Promise;
 
+	// assert: Should NOT access value.then
+	// https://promisesaplus.com/#point-75
+
 	var then = get_then_of_thenable(value), constructor;
 	return then
 	&& typeof (constructor = value.constructor) === 'function'
@@ -2070,8 +2190,8 @@ function IsPromise(value) {
 }
 
 
-// p=Promise.resolve(1);(q=Promise.reject(p)).catch(function(){});p!==q
-// (p=Promise.reject(1)).catch(function(){});(q=Promise.reject(p)).catch(function(){});p!==q
+// p=Promise.resolve(1);console.log(p);(q=Promise.reject(p)).then(null,function(){});p!==q
+// (p=Promise.reject(1)).then(null,function(){});(q=Promise.reject(p)).then(null,function(){});p!==q
 // TODO:
 // Promise.resolve(promise);
 // Promise.resolve(thenable);
@@ -2085,6 +2205,7 @@ Promise.resolve = function resolve(result) {
 	// p={b:2,then:r=>{console.log(this);throw 2}};q=Promise.resolve(p);p===q
 
 	// NewPromiseCapability(C)
+	// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-newpromisecapability
 	var promise = new this(library_namespace.null_function);
 	FulfillPromise(promise, result);
 	return promise;
@@ -2093,6 +2214,8 @@ Promise.resolve = function resolve(result) {
 Promise.reject = function reject(reason) {
 	// NewPromiseCapability(C)
 	var promise = new this(library_namespace.null_function);
+	// (p=Promise.reject(Promise.resolve(2))).then(null,function(){});console.log(p)
+	//	Promise {<rejected>: Promise}
 	RejectPromise(promise, reason);
 	return promise;
 };
@@ -2106,6 +2229,22 @@ function _catch(onRejected) {
 // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise.prototype.then
 // .then()會另外產生一個新的promise物件。 NewPromiseCapability()
 function then(onFulfilled, onRejected) {
+	// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-performpromisethen
+	if (typeof onFulfilled !== 'function')
+		onFulfilled = undefined;
+	if (typeof onRejected !== 'function')
+		onRejected = undefined;
+
+	if (onRejected) {
+		var promise = this;
+		do {
+			promise[KEY_HANDLED] = true;
+		} while(IsPromise(promise = promise[KEY_DEPEND_ON]));
+	}
+
+	var promise = new Promise(library_namespace.null_function);
+	promise[KEY_DEPEND_ON] = this;
+
 	if (this[KEY_STATE] === PromiseState_pending) {
 /**<code>
 
@@ -2134,45 +2273,36 @@ p=new Promise((r,R)=>{setTimeout(function(){r(9)},8)});p.then(123);
  */
 
 		// 等待本promise解決了再處理
-		this.fulfill_reactions.push(onFulfilled);
-		this.reject_reactions.push(onRejected);
-		return new Promise(library_namespace.null_function);
-	}
+		// p=Promise.resolve(2);q=p.then();p!==q
+		this[KEY_REACTIONS].push(onFulfilled || onRejected
+		// reaction = [ promise, onFulfilled, onRejected ]
+		? [ promise, onFulfilled, onRejected ] : promise);
 
-	// `this` promise is settled, solved.
-	var value = this[KEY_VALUE], operator = this[KEY_STATE] === PromiseState_fulfilled ? onFulfilled : onRejected;
-	if (typeof operator !== 'function')
-		return this[KEY_STATE] === PromiseState_fulfilled ? Promise.resolve(value) : Promise.reject(value);
-	try {
-		value = operator(value);
-	} catch (e) {
-		return Promise.reject(e);
-	}
-	if (!get_then_of_thenable(value)) {
+	} else {
+		// assert: `this` promise is settled, solved.
+
 		// p=Promise.resolve().then(function(){})
 		// p=Promise.resolve().then(a=>{return {a:1,b:2}})
 		// p=Promise.resolve().then(a=>{return a=>a})
 		// q={b:2,then:5};p=Promise.resolve(2).then(a=>{return q});console.log(p);
-		// TODO: async
-		return Promise.resolve(value);
-	}
 
-	if (IsPromise(value)) {
 		// (p=Promise.reject(2)).catch(a=>0);(q=Promise.resolve(1).then(a=>p)).catch(a=>0);p!==q
 		// q=new Promise(r=>setTimeout(r,500));p=Promise.resolve(2).then(a=>{return q});console.log(p);
 		// p=new Promise((r,R)=>{setTimeout(function(){r(9)},8)});p.then(p);p.then(p);
 		// TODO: async
 		// TODO: 回傳另一個被擱置的 promise 物件
-		var promise = new Promise(library_namespace.null_function);
-		promise[KEY_STATE] = value[KEY_STATE];
-		promise[KEY_VALUE] = value[KEY_VALUE];
-		return promise;
+
+		// value is thenable object / function
+		// q={then:r=>r(1)};p=Promise.resolve(2).then(a=>{return q})
+		// q={b:2,then:r=>{console.log(this);r(this.b)}};p=Promise.resolve(2).then(a=>{return q});console.log(p);
+
+		// (q=(p=Promise.reject(2)).then(3,4)).then(null,function(){});console.log(p);console.log(q);
+		var rejected = this[KEY_STATE] === PromiseState_rejected,
+		reaction = rejected ? onRejected : onFulfilled;
+		PerformPromiseThen(promise, reaction, rejected, this[KEY_VALUE]);
 	}
-	// value is thenable object / function
-	// q={then:r=>r(1)};p=Promise.resolve(2).then(a=>{return q})
-	// q={b:2,then:r=>{console.log(this);r(this.b)}};p=Promise.resolve(2).then(a=>{return q});console.log(p);
-	// TODO: async
-	return new Promise(value.then);
+
+	return promise;
 }
 
 
@@ -2185,7 +2315,12 @@ Promise.all = function all(iterable) {
 };
 // Promise.race (iterable)
 
+function Promise_toString() {
+	return 'Promise {<i style="color:#43e">[' + (this[KEY_STATE] === PromiseState_pending ? 'pending' : this[KEY_STATE] === PromiseState_rejected ? 'rejected' : 'fulfilled') + ']</i>: ' + this[KEY_VALUE] + '}';
+}
+
 Promise.prototype = {
+	toString : Promise_toString,
 	then : then,
 	'catch' : _catch
 };
