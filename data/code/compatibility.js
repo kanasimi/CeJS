@@ -1777,7 +1777,7 @@ if (library_namespace.platform.nodejs) {
 https://babeljs.io/repl
 
 
-p=new Promise(function(r,R){r()})
+promise = new Promise(function(r,R){r()})
 	r(value)	fulfilled
 		(p=new Promise(function(r,R){r( 2 )}));console.log(p)
 			Promise {<resolved>: 2}
@@ -1808,8 +1808,8 @@ p=new Promise(function(r,R){r()})
 			Promise {<rejected>: Promise}
 	R(thenable)
 
-p.then(r_,R_)
-p: pending, fulfilled, rejected
+promise.then(r_,R_)
+promise: pending, fulfilled, rejected
 	r_ retrun value	value→return
 		(p=new Promise(function(r){throw 2})).then(null,function(){});console.log(p)
 			Promise {<rejected>: 2}
@@ -1854,6 +1854,10 @@ p: pending, fulfilled, rejected
 Promise.resolve(v)
 	v: value: tested above
 		p=Promise.resolve('v');console.log(p)
+		p=Promise.resolve(2).then(function(v){console.log(v);return 3}).then(function(v){console.log(v);return 3});console.log(p)
+			Promise {<pending>}
+			2
+			3
 	v: promise
 		(q=Promise.resolve(2)).then(null,function(){});p=Promise.resolve(q);console.log(p)
 			Promise {<resolved>: 2}
@@ -1889,6 +1893,33 @@ Promise.reject(v)
 		q={then:function(r,R){R(2)}};(p=Promise.reject(q)).then(null,function(){});console.log(p)
 			Promise {<rejected>: {…}}
 
+
+Promise.all ( iterable )
+	iterable: value:
+		(p=Promise.all([])).then(function(L){console.log(Array.isArray(L)+','+L.length)});console.log(p)
+			p: Promise {<resolved>: Array(0)}
+			true,0
+		Promise.all(1).then(function(L){console.log('_'+L)},function(x){console.log('!'+x.message)})
+			x: TypeError: number 1 is not iterable (cannot read property Symbol(Symbol.iterator))
+	iterable: promise, thenable:
+		Promise.all([2,1,Promise.reject(8)]).then(function(){},function(R){console.log(R)})
+			8
+		l=[3,'a',new Promise(function(r,R){setTimeout(function(){r(4)},8)}),9,{then:3},{then:function(r,R){return r(7)}},Promise.resolve(3),[2,3],null,undefined];Promise.all(l).then(function(L){console.log(L);})
+			Promise {<pending>}
+			(10) [3, "a", 4, 9, {…}, 7, 3, Array(2), null, undefined]
+
+
+Promise.race ( iterable )
+		Promise.race([new Promise(function(r,R){setTimeout(function(){console.log(500);r(3)},500)}),new Promise(function(r,R){setTimeout(function(){console.log(5);r(1)},5)}),Promise.resolve(6),new Promise(function(r,R){setTimeout(function(){console.log(400);r(7)},400)})]).then(function(r){console.log('** '+r)})
+			** 6
+
+promise.finally()	Promise_finally()
+		p=Promise.resolve(2).then(function(v){console.log(v);return 3})['finally'](function(v){console.log('**'+v);return 4}).then(function(v){console.log(v);return 5});console.log(p)
+			p: Promise {<pending>}
+			2
+			undefined
+			3
+		p=Promise.reject(2).then(function(v){console.log(v);return 3})['finally'](function(v){console.log(v);return 4}).then(function(v){console.log(v);return 5}).then(null,function(v){console.log(v);});console.log(p)
 
 // --------------------------------------------------------------------------------------
 
@@ -2245,7 +2276,8 @@ function RejectPromise(promise, reason) {
 // @private
 // is thenable object, thenable物件
 function get_then_of_thenable(value) {
-	if (typeof value === 'function' || typeof value === 'object') {
+	// `value &&`: for null
+	if (value && (typeof value === 'function' || typeof value === 'object')) {
 		var then = value.then;
 		return typeof then === 'function' && then;
 	}
@@ -2260,6 +2292,7 @@ function IsPromise(value) {
 	// assert: Should NOT access value.then
 	// https://promisesaplus.com/#point-75
 
+	// NG:
 	var then = get_then_of_thenable(value), constructor;
 	return then
 	&& typeof (constructor = value.constructor) === 'function'
@@ -2307,11 +2340,6 @@ function Promise(executor) {
 	}, /* no_enqueue */ !('then' in executor));
 }
 
-
-// caught, ['catch']
-function _catch(onRejected) {
-	return this.then(undefined, onRejected);
-}
 
 // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise.prototype.then
 // .then()會另外產生一個新的promise物件。 NewPromiseCapability()
@@ -2416,37 +2444,111 @@ Promise.reject = function reject(reason) {
 };
 
 
+// @private
+function GetIterator(iterable) {
+	if (typeof iterable === 'string') {
+		return Array.from(iterable);
+	}
+
+	if (!Array.isArray(iterable)) {
+		// e.g., {Number|Object|Function|Null|Undefined}
+		throw new TypeError('Argument of Promise.all: {' + (typeof iterable) + '} ' + iterable + ' is not iterable');
+	}
+
+	return iterable;
+}
+
 // https://eyesofkids.gitbooks.io/javascript-start-es6-promise/content/contents/promise_all_n_race.html
 // Promises/A+並沒有關於Promise.reject或Promise.resolve的定義，它們是ES6 Promise標準中的實作。
 Promise.all = function all(iterable) {
-	if (!Array.isArray(iterable))
-		// e.g., {String}
-		iterable = Array.from(iterable);
-	// TODO
+	return new this(function(onFulfilled, onRejected) {
+		// -iterable.length: be sure left is negative before iterable.forEach() completed
+		var left = -iterable.length, result_list = [];
+
+		GetIterator(iterable).forEach(function(item, index) {
+			var then = get_then_of_thenable(item);
+			if (then) {
+				then.call(item, function(result) {
+					result_list[index] = result;
+					if(--left === 0) {
+						onFulfilled(result_list);
+					}
+				}, onRejected);
+				left++;
+			} else {
+				result_list[index] = item;
+			}
+		});
+
+		if((left += iterable.length) === 0) {
+			onFulfilled(result_list);
+		}
+	});
 };
 
 Promise.race = function race(iterable) {
-	if (!Array.isArray(iterable))
-		// e.g., {String}
-		iterable = Array.from(iterable);
-	// TODO
+	return new this(function(onFulfilled, onRejected) {
+		GetIterator(iterable)
+		// won't skip anyone
+		.forEach(function(item) {
+			var then = get_then_of_thenable(item);
+			if (then) {
+				then.call(item, onFulfilled, onRejected);
+			} else {
+				onFulfilled(item);
+			}
+		});
+	});
 };
+
+
+//--------------------------------------------------------
+
+// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally
+function Promise_finally(onFinally) {
+	var constructor = this.constructor, step = constructor.resolve(function() {
+		onFinally();
+	});
+	return this.then(function(value) {
+		return step.then(function() {
+			return value;
+		});
+	}, function(value) {
+		return step.then(function(value) {
+			return constructor.reject(value);
+		});
+	});
+}
+
+
+//--------------------------------------------------------
 
 function Promise_toString() {
 	return 'Promise {<i style="color:#43e">[' + (this[KEY_STATE] === PromiseState_pending ? 'pending' : this[KEY_STATE] === PromiseState_rejected ? 'rejected' : 'fulfilled') + ']</i>: ' + this[KEY_VALUE] + '}';
 }
 
-Promise.prototype = {
+// Do not set `Promise.prototype={...}`, so we can use `new this.constructor()`
+Object.assign(Promise.prototype, {
 	// for debug only
 	toString : Promise_toString,
 
 	then : then,
-	'catch' : _catch
-};
+	// caught
+	'catch' : function Promise_catch(onRejected) {
+		return this.then(undefined, onRejected);
+	},
+
+	// finale
+	'finally' : Promise_finally
+});
 
 
 set_method(library_namespace.env.global, {
 	Promise : Promise
+}, 'function');
+
+set_method(library_namespace.env.global.Promise.prototype, {
+	'finally' : Promise_finally
 }, 'function');
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
