@@ -1677,7 +1677,7 @@ function new_node(nodes, layer, ns) {
 		node = nodes;
 
 
-	// layer 處理: 插入document中: 0<layer>1..2</layer>3。default: 2.
+	// layer 處理: 插入document中: 0<layer>1...2</layer>3。default: 2.
 	if (typeof layer !== 'undefined' && layer !== null) {
 		// 正規化 layer
 		// for_each: type→handle function
@@ -1686,6 +1686,18 @@ function new_node(nodes, layer, ns) {
 		else {
 			if (Array.isArray(layer))
 				for_each = layer[1], layer = layer[0];
+			// symbols
+			parent = {
+				before : 0,
+				// insert as the first children of the HTML Element
+				first : 1,
+				last : 2,
+				after : 3,
+				// clean inner first
+				clean : null
+			};
+			if (for_each in parent)
+				for_each = parent[for_each];
 
 			if (layer === 0)
 				layer = document.body;
@@ -1702,7 +1714,7 @@ function new_node(nodes, layer, ns) {
 				// 1: add as firstChild of layer
 				for_each = handler[1];
 
-			else if (for_each >= 0 && for_each !== 2 && for_each < 5) {
+			else if (for_each >= 0 && for_each !== 2 && for_each < 5 && for_each !== null) {
 				if (parent = layer.parentNode) {
 					// 0: add as priviusSibling of layer.
 					// 3: add as nextSibling of layer.
