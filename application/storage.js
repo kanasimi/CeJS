@@ -112,6 +112,7 @@ function module_code(library_namespace) {
 		/** node.js file system module */
 		var node_fs = require('fs');
 
+		// _.current_directory()
 		_.working_directory = storage_module.working_directory;
 
 		// 警告: 此函數之API尚未規範。
@@ -228,6 +229,75 @@ function module_code(library_namespace) {
 	};
 
 	// -------------------------------------------------------------------------
+
+	var path_separator = library_namespace.env.path_separator;
+
+	// 決定預設的主要下載目錄。
+	// macOS dmg APP 中無法將檔案儲存在APP目錄下。
+	// 另外安裝包也比較適合放在 home directory 之下。
+	// test_current_directory: 先嘗試下載於當前目錄下。
+	function determin_download_directory(test_current_directory) {
+		var download_directory = test_current_directory
+				&& library_namespace.platform.nodejs && process.mainModule
+				&& process.mainModule.filename;
+		if (download_directory
+		// macOS dmg electron APP 中: process.mainModule.filename 例如為
+		// /Applications/work_crawler.app/Contents/Resources/app.asar/gui_electron/gui_electron.html
+		//
+		// Linux Mint 中 AppImage: process.mainModule.filename 例如為
+		// /tmp/.mount_work_cWtD4AY/resources/app.asar/gui_electron/gui_electron.html
+		//
+		// Linux Mint 中 electron: process.mainModule.filename 例如為
+		// .../work_crawler-master/gui_electron/gui_electron.html
+		//
+		// Windows 10 中 electron: process.mainModule.filename 例如為
+		// ...\work_crawler\gui_electron\gui_electron.html
+		&& !/\.html?$/i.test(download_directory)) {
+			download_directory = download_directory.match(/[^\\\/]+$/)[0]
+					.replace(/\.js$/i, '');
+
+		} else if (test_current_directory && (download_directory =
+		// 避免 "/". e.g., macOS dmg APP 中 process.cwd() === '/'
+		_.working_directory().replace(/[\\\/]+$/, ''))) {
+			;
+
+		} else if (download_directory = library_namespace.env('home')) {
+			if ([ 'Downloads', '下載' ]
+			// '下載': Linux Mint
+			.some(function(user_download_directory) {
+				user_download_directory = download_directory + path_separator
+						+ user_download_directory;
+				if (_.directory_exists(user_download_directory)) {
+					download_directory = user_download_directory;
+					return true;
+				}
+			})) {
+				library_namespace.debug('預設的主要下載目錄設置於用戶預設之下載目錄下: '
+						+ user_download_directory, 1,
+						'determin_download_directory');
+
+			} else {
+				library_namespace.debug(
+				// 家目錄
+				'預設的主要下載目錄設置於用戶個人文件夾  home directory 下: ' + download_directory,
+						1, 'determin_download_directory');
+			}
+
+		} else {
+			// 應該不會到這邊來。
+			library_namespace
+					.warn('determin_download_directory: Can not determin main download directory!');
+			download_directory = '.';
+		}
+
+		// main_directory 必須以 path separator 作結。
+		download_directory += path_separator;
+		library_namespace.debug('預設的主要下載目錄: ' + download_directory, 1,
+				'determin_download_directory');
+		return download_directory;
+	}
+
+	_.determin_download_directory = determin_download_directory;
 
 	return (_// JSDT:_module_
 	);
