@@ -690,7 +690,8 @@ function module_code(library_namespace) {
 			// console.log('Test: ' + exec_file_path);
 			var fso_status = fs_status(exec_file_path);
 			if (!fso_status && library_namespace.platform('windows')
-			// env.PATHEXT @ Windows: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+			// env.PATHEXT @ Windows:
+			// .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 			&& !/\.(?:exe|com|bat|cmd)$/i.test(exec_file_path)) {
 				fso_status = fs_status(exec_file_path + '.exe')
 						|| fs_status(exec_file_path + '.com');
@@ -726,6 +727,18 @@ function module_code(library_namespace) {
 		// For Node.js v5.11.1 and below
 		return new Buffer(encodedData, 'base64');
 	}
+
+	// --------------------------------------------
+
+	// 為 electron-builder 安裝包
+	var is_installation_package = process.env.Apple_PubSub_Socket_Render
+			// @ Windows, Linux Mint
+			|| process.mainModule.filename.replace(/[\\\/]app\.asar.+/, '') === process.resourcesPath
+			&& library_namespace.platform.OS;
+
+	_.is_installation_package = function() {
+		return is_installation_package;
+	};
 
 	// --------------------------------------------
 
