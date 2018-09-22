@@ -646,7 +646,7 @@ replace_HTML = function(o, html) {
 	// _.is_ELEMENT_NODE(<math>) === false ("[object Element]" @ Firefox/37.0)
 	//if (!_.is_ELEMENT_NODE(o)) return;
 	if (!o || !o.innerHTML)
-		return;
+		return o;
 
 	try {
 		/*@cc_on	// Pure innerHTML is slightly faster in IE
