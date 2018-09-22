@@ -79,7 +79,8 @@ if (typeof CeL === 'function') {
 		+ '|application.storage.file.'
 		// for HTML_to_Unicode()
 		+ '|interact.DOM.'
-		// for Date.prototype.format(), String.prototype.to_Date()
+		// for Date.prototype.format(), String.prototype.to_Date(),
+		// .to_millisecond()
 		+ '|data.date.'
 		// CeL.character.load(), 僅在要設定 this.charset 時才需要載入。
 		+ '|data.character.'
@@ -221,7 +222,7 @@ function module_code(library_namespace) {
 		this.get_URL_options = {
 			// start_time : Date.now(),
 			no_protocol_warn : true,
-			timeout : this.timeout,
+			timeout : library_namespace.to_millisecond(this.timeout),
 			headers : Object.assign({
 				'User-Agent' : this.user_agent,
 				Referer : this.base_URL
@@ -267,56 +268,14 @@ function module_code(library_namespace) {
 
 	Work_crawler.set_main_directory = set_main_directory;
 
-	var default_main_directory;
-	// 決定預設的主要下載目錄。這個目錄會在 work_crawler_loder.js 裡面被 setup_crawler() 之
-	// data_directory 覆寫。
-	function determin_default_main_directory() {
-		if (library_namespace.platform.nodejs && process.mainModule
-		// macOS APP 中: gui_electron.html
-		&& !/\.html?$/i.test(process.mainModule.filename)) {
-			default_main_directory = process.mainModule.filename
-					.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '');
-
-		} else if (!(default_main_directory
-		// 先嘗試下載於當前目錄下。
-		= process.cwd().replace(/[\\\/]+$/, ''))) {
-
-			// 避免 "/". e.g., macOS APP 中 process.cwd() === '/'
-			if (default_main_directory = library_namespace.env('home')) {
-				var user_download_directory = default_main_directory
-						+ path_separator + 'Downloads';
-				if (library_namespace.storage
-						.directory_exists(user_download_directory)) {
-					library_namespace.debug('預設的主要下載目錄設置於用戶預設之下載目錄下: '
-							+ user_download_directory, 1,
-							'determin_default_main_directory');
-					default_main_directory = user_download_directory;
-				} else {
-					library_namespace.debug(
-							'預設的主要下載目錄設置於用戶個人文件夾  home directory 下: '
-									+ default_main_directory, 1,
-							'determin_default_main_directory');
-				}
-			} else {
-				// 應該不會到這邊來。
-				library_namespace
-						.error('determin_default_main_directory: Can not determin main download directory!');
-				default_main_directory = '.';
-			}
-		}
-		// main_directory 必須以 path separator 作結。
-		default_main_directory += path_separator;
-		library_namespace.debug('預設的主要下載目錄: ' + default_main_directory, 1,
-				'determin_default_main_directory');
-	}
-
-	determin_default_main_directory();
-
-	Work_crawler.prototype = {
+	var Work_crawler_prototype = {
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
 		// 下載檔案儲存目錄路徑。圖片檔+紀錄檔下載位置。
-		main_directory : default_main_directory,
+		// 這個目錄會在 work_crawler_loder.js 裡面被 setup_crawler() 之 data_directory 覆寫。
+		main_directory : library_namespace.storage
+		// 決定預設的主要下載目錄 default_main_directory。
+		.determin_download_directory(true),
 
 		// id : '',
 		// site_id : '',
@@ -326,13 +285,13 @@ function module_code(library_namespace) {
 		// {String}瀏覽器識別: 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; SV1; TencentTraveler 4.0)',
 		/**
-		 * {Natural}timeout in ms for get_URL()
-		 * 下載圖片的逾時ms數。若逾時時間太小（如10秒），下載大檔案容易失敗。
+		 * {Natural|String}timeout for get_URL()
+		 * 下載圖片的逾時等待時間。若逾時時間太小（如10秒），下載大檔案容易失敗。
 		 * 
 		 * 注意: 因為 this.get_URL_options 在 constructor 中建構完畢，因此 timeout
 		 * 必須在一開始就設定。之後設定沒有效果。
 		 */
-		timeout : 30 * 1000,
+		timeout : '30s',
 		// {Natural}出錯時重新嘗試的次數。
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
 		// {Natural}圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。
@@ -346,8 +305,9 @@ function module_code(library_namespace) {
 		// {Natural}預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_SIZE : 200,
 
-		// {Natural}當網站不允許太過頻繁的訪問/access時，可以設定下載章節資訊前的等待時間(ms)。
-		// chapter_time_interval : 1 * 1000,
+		// retry delay
+		// {Natural|String|Function}當網站不允許太過頻繁的訪問/access時，可以設定下載章節資訊前的等待時間。
+		// chapter_time_interval : '1s',
 
 		// 需要重新讀取頁面的時候使用。
 		REGET_PAGE : {
@@ -407,6 +367,7 @@ function module_code(library_namespace) {
 				console.trace(error);
 				throw this.id + ': ' + (new Date).toISOString() + ' ' + error;
 			}
+			// return CeL.work_crawler.THROWED;
 			return Work_crawler.THROWED;
 		},
 
@@ -527,7 +488,7 @@ function module_code(library_namespace) {
 				if (library_namespace.is_Object(work_data)
 						&& (Date.now() - set_last_update_Date(work_data))
 						// 因為沒有明確記載作品是否完結，10年沒更新就不再檢查。
-						/ (24 * 60 * 60 * 1000) > (work_data.recheck_days || 10 * 366)) {
+						/ library_namespace.to_millisecond('1D') > (work_data.recheck_days || 10 * 366)) {
 					library_namespace.info('is_finished: 本作品已經 '
 							+ library_namespace
 									.age_of(set_last_update_Date(work_data))
@@ -633,6 +594,7 @@ function module_code(library_namespace) {
 		set_agent : set_agent,
 		data_of : start_get_data_of,
 
+		is_stopping_now : is_stopping_now,
 		stop_task : stop_task,
 		continue_task : continue_task,
 
@@ -644,7 +606,9 @@ function module_code(library_namespace) {
 		get_work_data : get_work_data,
 		save_work_data : save_work_data_file,
 		get_images : get_images
-	};
+	}
+
+	Object.assign(Work_crawler.prototype, Work_crawler_prototype);
 
 	// --------------------------------------------------------------------------------------------
 
@@ -691,6 +655,7 @@ function module_code(library_namespace) {
 	}
 
 	// front end #1: start downloading operation
+	// callback(work_data)
 	function start_downloading(work_id, callback) {
 		if (!work_id) {
 			library_namespace.log(this.id + ': 沒有輸入 work_id！');
@@ -945,6 +910,7 @@ function module_code(library_namespace) {
 			if (id_converter) {
 				this.onerror('get_work_list: Invalid id converter for '
 						+ work_title, work_title);
+				typeof callback === 'function' && callback(all_work_status);
 				return Work_crawler.THROWED;
 			}
 
@@ -1265,6 +1231,7 @@ function module_code(library_namespace) {
 			this.onerror('本線上作品網站 ' + this.id + ' 的模組未提供搜尋功能。請手動設定/輸入 ['
 					+ work_title + '] 之 id 於 ' + search_result_file
 					+ '\n (e.g., ' + JSON.stringify(url) + ')', work_title);
+			finish(true);
 			return Work_crawler.THROWED;
 		}
 		if (typeof url === 'function') {
@@ -1319,12 +1286,14 @@ function module_code(library_namespace) {
 					this.onerror('get_work.parse_search_result:'
 							+ ' 作品網址解析函數 parse_search_result 未回傳結果！',
 							work_title);
+					finish_up('作品網址解析函數 parse_search_result 未回傳結果！');
 					return Work_crawler.THROWED;
 				}
 				if (!id_data) {
 					this.onerror('get_work.parse_search_result:'
 							+ ' 作品網址解析函數 parse_search_result 未回傳正規結果！',
 							work_title);
+					finish_up('作品網址解析函數 parse_search_result 未回傳正規結果！');
 					return Work_crawler.THROWED;
 				}
 			} catch (e) {
@@ -1496,6 +1465,9 @@ function module_code(library_namespace) {
 				if (error_count === _this.MAX_ERROR_RETRY) {
 					_this.onerror(_this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD,
 							_this.id);
+					typeof callback === 'function' && callback({
+						title : work_title
+					});
 					return Work_crawler.THROWED;
 				}
 				error_count = (error_count | 0) + 1;
@@ -1517,7 +1489,8 @@ function module_code(library_namespace) {
 				);
 				if (work_data === _this.REGET_PAGE) {
 					// 需要重新讀取頁面。e.g., 502
-					var chapter_time_interval = _this.chapter_time_interval;
+					var chapter_time_interval = library_namespace
+							.to_millisecond(_this.chapter_time_interval);
 					if (typeof chapter_time_interval === 'function') {
 						chapter_time_interval = _this
 								.chapter_time_interval(work_URL);
@@ -1733,6 +1706,7 @@ function module_code(library_namespace) {
 				var message = _this.id + ': Can not get chapter list page!';
 				library_namespace.error(message);
 				_this.onerror(message);
+				typeof callback === 'function' && callback(work_data);
 				return Work_crawler.THROWED;
 			}
 
@@ -1831,9 +1805,8 @@ function module_code(library_namespace) {
 					library_namespace.error(_this.id
 							+ ': .get_chapter_list() throw error');
 					_this.onerror(e, work_data);
-					return Work_crawler.THROWED;
 					typeof callback === 'function' && callback(work_data);
-					return;
+					return Work_crawler.THROWED;
 				}
 				if (work_data.inverted_order) {
 					_this.reverse_chapter_list_order(work_data);
@@ -2092,38 +2065,98 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------------------------------
 
-	var QUIT_TASK = {
+	// const
+	var STOP_TASK = {
+		stop : true
+	},
+	// cancel task
+	QUIT_TASK = {
 		quit : true
 	};
 
-	function stop_task(quit) {
+	// this.continue_arguments =
+	// undefined : 沒有設定特殊控制作業，正常執行或沒有作業執行中。
+	// [ STOP_TASK, callback_after_stopped ] : 等待作業暫停中
+	// [ QUIT_TASK, callback_after_quitted ] : 等待作業取消中
+	// [ work_data, chapter_NO, callback ] : 作業已經暫停，等待重啟中
+
+	function is_stopping_now(quit) {
+		return Array.isArray(this.continue_arguments)
+				&& this.continue_arguments[0] === (quit ? QUIT_TASK : STOP_TASK);
+	}
+
+	// callback: 暫停/取消作業之後執行
+	function stop_task(quit, callback) {
 		if (!this.running) {
 			return;
 		}
 
 		if (!this.continue_arguments) {
+			// set flag to pause / cancel task
 			library_namespace.info(this.id + ': 準備設定' + (quit ? '取消' : '暫停')
 					+ '下載作業');
-			return this.continue_arguments = quit ? QUIT_TASK : true;
+			this.continue_arguments = [ quit ? QUIT_TASK : STOP_TASK ];
+			if (callback) {
+				this.continue_arguments.push(callback);
+			}
+			// return this.continue_arguments[0];
 		}
 
-		// 暫停中取消作業
-		if (quit && this.continue_arguments !== QUIT_TASK) {
+		if (this.is_stopping_now() || this.is_stopping_now(true)) {
+			// 等待作業暫停/取消中，改變作業流程控制設定。
 			var _arguments = this.continue_arguments;
-			this.continue_arguments = QUIT_TASK;
-			pre_get_chapter_data.apply(this, _arguments);
-			return QUIT_TASK;
-		}
-	}
-
-	function continue_task() {
-		if (!Array.isArray(this.continue_arguments)) {
+			_arguments[0] = quit ? QUIT_TASK : STOP_TASK;
+			if (callback) {
+				_arguments.push(callback);
+			}
+			// return _arguments[0];
 			return;
 		}
 
+		// assert: 作業暫停中， is stopped now
+		// assert: this.continue_arguments
+		// === [ work_data, chapter_NO, callback ]
+
+		if (!quit) {
+			callback && callback();
+			// return STOP_TASK;
+			return;
+		}
+
+		// 作業暫停中，取消作業。必須重啟作業。
+		var _arguments = this.continue_arguments;
+		this.continue_arguments = [ QUIT_TASK, callback ];
+		pre_get_chapter_data.apply(this, _arguments);
+		// return QUIT_TASK;
+	}
+
+	// resume
+	function continue_task(callback) {
+		if (!this.continue_arguments) {
+			callback && callback(this.running);
+			return;
+		}
+
+		if (this.is_stopping_now() || this.is_stopping_now(true)) {
+			// 等待作業暫停/取消中，改變作業流程控制設定。改成繼續下載作業。
+			callback && callback(null, this.continue_arguments);
+			this.continue_arguments.forEach(function(callback, index) {
+				index > 0 && callback && callback('continue');
+			});
+			// reset flow control flag
+			delete this.continue_arguments;
+			return;
+		}
+
+		// assert: 作業暫停中， is stopped now
+		// assert: this.continue_arguments
+		// === [ work_data, chapter_NO, callback ]
+
+		// 作業暫停中，重啟作業。繼續下載作業。
 		var _arguments = this.continue_arguments, work_data = _arguments[0];
+		// reset flow control flag
 		delete this.continue_arguments;
-		// 繼續下載作業。
+		callback && callback(work_data);
 		library_namespace.info(this.id + ': 繼續下載 ['
 				+ (work_data.title || work_data.id) + ']');
 		pre_get_chapter_data.apply(this, _arguments);
@@ -2132,33 +2165,51 @@ function module_code(library_namespace) {
 	// @inner
 	function pre_get_chapter_data(work_data, chapter_NO, callback) {
 		if (this.continue_arguments) {
+			// assert: this.is_stopping_now()
+			// || this.is_stopping_now(true)
+
+			// console.log(this.continue_arguments);
+			var is_quitting = this.is_stopping_now(true);
+
+			if (!is_quitting && !this.is_stopping_now()) {
+				// 照理來說不應該會到這邊!
+				retrurn;
+			}
+
 			library_namespace.warn(this.id + ': '
 			// 暫停下載作業, 取消下載作業機制
-			+ (this.continue_arguments === QUIT_TASK ? '取消' : '暫停') + '下載 ['
+			+ (is_quitting ? '取消' : '暫停') + '下載 ['
 					+ (work_data.title || work_data.id) + ']');
-			if (this.continue_arguments === QUIT_TASK) {
-				// reset flag
-				delete this.continue_arguments;
+
+			this.continue_arguments.forEach(function(callback, index) {
+				index > 0 && callback && callback(is_quitting);
+			});
+
+			// reset flow control flag
+			delete this.continue_arguments;
+
+			if (is_quitting) {
+				this.running = false;
 				if (typeof callback === 'function') {
 					callback(work_data);
 				}
-				return;
-			}
 
-			if (this.continue_arguments === true) {
+			} else {
+				// stop task
 				this.continue_arguments
 				// = arguments
 				= [ work_data, chapter_NO, callback ];
 				this.running = 'stopped';
+				// waiting for this.continue_task()
 			}
-			// waiting for this.continue_task()
 			return;
 		}
 
 		var actual_operation = get_chapter_data.bind(this, work_data,
 				chapter_NO, callback),
-		// this.chapter_time_interval: 下載章節資訊前的等待時間(ms)。
-		chapter_time_interval = this.chapter_time_interval;
+		// this.chapter_time_interval: 下載章節資訊前的等待時間。
+		chapter_time_interval = library_namespace
+				.to_millisecond(this.chapter_time_interval);
 		if (typeof chapter_time_interval === 'function') {
 			chapter_time_interval = this.chapter_time_interval(chapter_NO,
 					work_data);
@@ -2203,6 +2254,7 @@ function module_code(library_namespace) {
 				library_namespace.error(this.id + ': ' + work_data.title
 						+ ': Error on chapter ' + chapter_NO);
 				this.onerror(e);
+				typeof callback === 'function' && callback(work_data);
 				return Work_crawler.THROWED;
 			}
 		} else {
@@ -2283,6 +2335,7 @@ function module_code(library_namespace) {
 					//
 					+ 'Invalid NO_in_part: chapter_list[' + index + ']: '
 							+ JSON.stringify(chapter_data), work_data);
+					typeof callback === 'function' && callback(work_data);
 					return Work_crawler.THROWED;
 				}
 
@@ -2369,6 +2422,7 @@ function module_code(library_namespace) {
 				this.onerror(
 						'get_chapter_directory_name: Invalid chapter_data: '
 								+ work_data, work_data);
+				typeof callback === 'function' && callback(work_data);
 				return Work_crawler.THROWED;
 			}
 			if (!no_part && chapter_data.part_title && (work_data.chapter_list
@@ -2390,6 +2444,7 @@ function module_code(library_namespace) {
 		} else {
 			this.onerror('get_chapter_directory_name: Invalid work_data: '
 					+ work_data, work_data);
+			typeof callback === 'function' && callback(work_data);
 			return Work_crawler.THROWED;
 		}
 
@@ -2410,7 +2465,7 @@ function module_code(library_namespace) {
 	// @inner
 	function get_chapter_data(work_data, chapter_NO, callback) {
 		var _this = this,
-		// remaining
+		// left: remaining chapter count
 		left, image_list, waiting, chapter_label,
 		//
 		chapter_directory, images_archive, chapter_page_file_name,
@@ -2623,6 +2678,7 @@ function module_code(library_namespace) {
 						}
 						_this.onerror(_this.id + ': '
 								+ _this.MESSAGE_RE_DOWNLOAD, work_data);
+						typeof callback === 'function' && callback(work_data);
 						return Work_crawler.THROWED;
 					}
 					get_data.error_count = (get_data.error_count | 0) + 1;
@@ -2664,6 +2720,7 @@ function module_code(library_namespace) {
 								+ (chapter_NO_text === null ? '' : ', but get '
 										+ JSON.stringify(chapter_NO_text))
 								+ ' inside contents.'), work_data);
+						typeof callback === 'function' && callback(work_data);
 						return Work_crawler.THROWED;
 					}
 				}
@@ -2675,7 +2732,8 @@ function module_code(library_namespace) {
 							get_label, chapter_NO);
 					if (chapter_data === _this.REGET_PAGE) {
 						// 需要重新讀取頁面。e.g., 502
-						var chapter_time_interval = _this.chapter_time_interval;
+						var chapter_time_interval = library_namespace
+								.to_millisecond(_this.chapter_time_interval);
 						if (typeof chapter_time_interval === 'function') {
 							chapter_time_interval = _this
 									.chapter_time_interval(chapter_URL,
@@ -2700,6 +2758,7 @@ function module_code(library_namespace) {
 					library_namespace.error(_this.id
 							+ ': Error on chapter url: ' + chapter_URL);
 					_this.onerror(e, work_data);
+					typeof callback === 'function' && callback(work_data);
 					return Work_crawler.THROWED;
 				}
 				// console.log(JSON.stringify(chapter_data));
@@ -3310,6 +3369,8 @@ function module_code(library_namespace) {
 				}
 
 				_this.onerror('圖像下載錯誤', image_data);
+				// image_data.done = false;
+				typeof callback === 'function' && callback();
 				return Work_crawler.THROWED;
 				// 網頁介面不可使用process.exit()，會造成白屏
 				// process.exit(1);
