@@ -273,8 +273,7 @@ function module_code(library_namespace) {
 				}
 			})) {
 				library_namespace.debug('預設的主要下載目錄設置於用戶預設之下載目錄下: '
-						+ user_download_directory, 1,
-						'determin_download_directory');
+						+ download_directory, 1, 'determin_download_directory');
 
 			} else {
 				library_namespace.debug(
