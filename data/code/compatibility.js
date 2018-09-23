@@ -270,13 +270,25 @@ function getPropertyNames() {
 
 
 function getOwnPropertyDescriptor(object, property) {
-	if (property in object)
+	if (property in object) {
 		return {
 			configurable : true,
 			enumerable : true,
 			value : object[property],
 			writable : true
 		};
+	}
+}
+
+function getOwnPropertyDescriptors(object) {
+	var descriptors = library_namespace.null_Object();
+	// for...in 循環也枚舉原型鏈中的屬性
+	for (var property in object) {
+		var descriptor = Object.getOwnPropertyDescriptor(object, property);
+		if (descriptor)
+			descriptors[property] = descriptor;
+	}
+	return descriptors;
 }
 
 
@@ -359,9 +371,10 @@ set_method(Object, {
 		: value1 !== value1 && value2 !== value2;
 	},
 
-	// TODO: Object.getOwnPropertyDescriptors()
 	// Object.getOwnPropertyDescriptor()
 	getOwnPropertyDescriptor : getOwnPropertyDescriptor,
+	// Object.getOwnPropertyDescriptors()
+	getOwnPropertyDescriptors : getOwnPropertyDescriptors,
 	// Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or non-enumerable)
 	getOwnPropertyNames : Object_keys,
 
@@ -481,6 +494,11 @@ function copyWithin(target, start, end) {
 	}
 	return this;
 }
+
+
+// TODO: Array.prototype.{flat,flatMap}
+// https://github.com/tc39/proposal-flatMap
+
 
 set_method(Array.prototype, {
 	// Array.prototype.copyWithin(target, start[, end = this.length])
@@ -1270,13 +1288,13 @@ function trim() {
 }
 
 
-// String.prototype.trimStart()
+// String.prototype.trimStart(), String.prototype.trimLeft()
 var trimStart = String.prototype.trimLeft
 || function trimStart() {
 	return String(this).replace(/^[\s\n]+/, '');
 };
 
-// String.prototype.trimEnd()
+// String.prototype.trimEnd(), String.prototype.trimRight()
 var trimEnd = String.prototype.trimRight
 || function trimEnd() {
 	return String(this).replace(/[\s\n]+$/, '');
@@ -1772,10 +1790,14 @@ if (library_namespace.platform.nodejs) {
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
-/**<code>
+/**
+ * Promise polyfill
+ * 
+ * <code>
 
 https://babeljs.io/repl
 
+Promise test cases:
 
 promise = new Promise(function(r,R){r()})
 	r(value)	fulfilled
@@ -1828,7 +1850,7 @@ promise: pending, fulfilled, rejected
 		Promise.resolve().then(function(){return Promise.reject(3)}).then(null,function(){});console.log(p)
 			Promise {<pending>}
 		p=Promise.resolve().then(function(){return new Promise(function(r){setTimeout(function(){console.log(4);r(4)},500)}).then(function(v){console.log(++v);return v})}).then(function(v){console.log(++v);return v},function(){});console.log(p)
-			Promise {<pending>}
+			p: Promise {<pending>}
 			4
 			5
 			6
@@ -1919,7 +1941,6 @@ Promise.race ( iterable )
 		Promise.race([new Promise(function(r,R){setTimeout(function(){console.log(500);r(3)},500)}),new Promise(function(r,R){setTimeout(function(){console.log(5);r(1)},5)}),Promise.resolve(6),new Promise(function(r,R){setTimeout(function(){console.log(400);r(7)},400)})]).then(function(r){console.log('** '+r)})
 			** 6
 
-TODO
 promise.finally(onFinally)	Promise_finally(onFinally)
 	onFinally: value
 		p=Promise.resolve(2)['finally'](3).then(function(v){console.log(v);return 4});console.log(p)
@@ -1927,13 +1948,24 @@ promise.finally(onFinally)	Promise_finally(onFinally)
 			p: Promise {<pending>}
 			→ Promise {<resolved>: 4}
 	onFinally: function return value
-		p=Promise.resolve(2).then(function(v){console.log(v);return 3})['finally'](function(v){console.log('**'+v);return 4}).then(function(v){console.log(v);return 5});console.log(p)
+		p=Promise.resolve(2).then(function(v){console.log(v);return 3})['finally'](function(v){console.log('*'+v);return 4}).then(function(v){console.log(v);return 5});console.log(p)
 			p: Promise {<pending>}
 			2
-			undefined
+			*undefined
 			3
-		p=Promise.reject(2).then(function(v){console.log(v);return 3})['finally'](function(v){console.log(v);return 4}).then(function(v){console.log(v);return 5}).then(null,function(v){console.log(v);});console.log(p)
+			p → Promise {<resolved>: 5}
+		p=Promise.reject(2).then(function(v){console.log(v);return 3})['finally'](function(v){console.log('*'+v);return 4}).then(function(v){console.log(v);return 5}).then(null,function(v){console.log(v);return 6});console.log(p)
+			p: Promise {<pending>}
+			*undefined
+			2
+			p → Promise {<resolved>: 6}
 	onFinally: function return promise, thenable:
+		p=Promise.resolve(2).then(function(v){console.log(v);return 3})['finally'](function(v){console.log('*'+v);return Promise.resolve(3)}).then(function(v){console.log(v);return 5});console.log(p)
+			p: Promise {<pending>}
+			2
+			*undefined
+			3
+			p → Promise {<resolved>: 5}
 
 // --------------------------------------------------------------------------------------
 
@@ -2044,7 +2076,7 @@ q.then(function(x){r+=3&&x;console.log(r==='123')})
 q=new Promise(function(r,R){setTimeout(R,8)})
 s=q.then(function(x){},function(y){})
 console.log([s!==q,s,q])
-// s: resolved, q: rejected. then方法執行完會另外產生一個新的promise物件。
+// s: resolved, q: rejected. then方法執行完會另外產生一個新的 Promise 物件。
 // https://eyesofkids.gitbooks.io/javascript-start-es6-promise/content/contents/then_adv.html
 
 
@@ -2072,16 +2104,19 @@ p=new Promise(function(r,R){setTimeout(function(){r(9)},8)});p.then(123).then(fu
 
 
 </code>
+
+@since 2018/9/16 7:37:10
  */
 
 
-// 標準定義
+// Promise 標準規格書/定義
 // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promise-objects
 // https://promisesaplus.com/
 // https://github.com/promises-aplus/promises-spec
 // https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate
+// http://azu.github.io/promises-book/
 
-// 實作
+// 實作 Promise polyfill
 // https://github.com/stefanpenner/es6-promise/tree/master/lib/es6-promise
 // https://github.com/taylorhakes/promise-polyfill/blob/master/dist/polyfill.js
 
@@ -2090,16 +2125,16 @@ var EnqueueJob = library_namespace.platform.nodejs && process.nextTick
 // https://github.com/stefanpenner/es6-promise/blob/master/lib/es6-promise/asap.js
 // node version 0.10.x displays a deprecation warning when nextTick is used recursively
 // see https://github.com/cujojs/when/issues/410 for details
-? function (f) { return process.nextTick(f); }
+? function(job) { return process.nextTick(job); }
 // https://github.com/cssmagic/ChangeLog/issues/3
 // setImmediate() 會調度宏微任務而不是微任務，可能導致不一樣的調度結果。
-: typeof setImmediate === 'function' ? setImmediate : function(f) {setTimeout(f, 0);},
-// const
+: typeof setImmediate === 'function' ? setImmediate : function(job) { setTimeout(job, 1); },
+// const https://www.ecma-international.org/ecma-262/9.0/index.html#sec-properties-of-promise-instances
 PromiseState_pending = 0, PromiseState_fulfilled = 1, PromiseState_rejected = -1,
 // const
 KEY_STATE = '_state', KEY_VALUE = '_value', KEY_HANDLED = '_handled', KEY_REACTIONS = '_reactions',
-// KEY_DEPEND_ON = KEY_VALUE
-KEY_DEPEND_ON = '_depend_on';
+// KEY_DEPEND_ON = KEY_VALUE; 因為沒有衝突，可重複利用 KEY_VALUE。應對: @see TriggerPromiseReactions(promise)
+KEY_DEPEND_ON = '_depend_on' && KEY_VALUE;
 
 
 // @private
@@ -2129,14 +2164,15 @@ function TriggerPromiseReactions(promise) {
 	rejected = promise[KEY_STATE] === PromiseState_rejected,
 	reactions = promise[KEY_REACTIONS];
 	if (!reactions) {
-		// already TriggerPromiseReactions()
+		// TriggerPromiseReactions() already executed
 		// p=new Promise(function(r,R){r(Promise.resolve(1));throw 2});console.log(p)
 		return;
 	}
 
 	// free
 	delete promise[KEY_REACTIONS];
-	delete promise[KEY_DEPEND_ON];
+	if (false && KEY_VALUE !== KEY_DEPEND_ON)
+		delete promise[KEY_DEPEND_ON];
 
 	// assert: (`value` is not thenable || rejected) === true
 	EnqueueJob(function() {
@@ -2155,6 +2191,7 @@ function TriggerPromiseReactions(promise) {
 		// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promisereactionjob
 		reactions.forEach(function(reaction) {
 			if (Array.isArray(reaction)) {
+				// @see https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promisereaction-records
 				// reaction = [ promise, onFulfilled, onRejected ]
 				PerformPromiseThen(reaction[0], reaction[rejected ? 2 : 1], rejected, value);
 			} else {
@@ -2177,7 +2214,14 @@ function FulfillPromise(promise, result, no_enqueue) {
 		return;
 	}
 
-	var then, job;
+	function executing_job(job) {
+		if (no_enqueue)
+			job();
+		else
+			EnqueueJob(job);
+	}
+
+	var then;
 	try {
 		if (promise === result) {
 			// selfResolutionError
@@ -2205,7 +2249,7 @@ function FulfillPromise(promise, result, no_enqueue) {
 				result[KEY_HANDLED] = true;
 			}
 
-			job = function() {
+			executing_job(function() {
 				// old runtime environment may not has Function.prototype.bind(), so we use anonymous functions instead of FulfillPromise.bind() to improve performance.
 				function onFulfilled(value) {
 					if (!called) {
@@ -2247,21 +2291,13 @@ function FulfillPromise(promise, result, no_enqueue) {
 				} catch (e) {
 					onRejected(e);
 				}
-			}
-			if (no_enqueue)
-				job();
-			else
-				EnqueueJob(job);
+			});
 		}
 
 	} catch (e) {
-		job = function() {
+		executing_job(function() {
 			RejectPromise(promise, e);
-		};
-		if (no_enqueue)
-			job();
-		else
-			EnqueueJob(job);
+		});
 	}
 }
 
@@ -2298,7 +2334,7 @@ function get_then_of_thenable(value) {
 }
 
 // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-ispromise
-// Promise物件
+// Promise 物件
 function IsPromise(value) {
 	// value.constructor === Promise
 	return value instanceof Promise;
@@ -2373,7 +2409,7 @@ function then(onFulfilled, onRejected) {
 		} while(IsPromise(promise = promise[KEY_DEPEND_ON]));
 	}
 
-	// 回傳另一個被擱置的 promise 物件
+	// 回傳另一個被擱置的 Promise 物件
 	// NewPromiseCapability(C)
 	var promise = new this.constructor(library_namespace.null_function);
 	promise[KEY_DEPEND_ON] = this;
@@ -2383,6 +2419,7 @@ function then(onFulfilled, onRejected) {
 
 		// 等待本promise解決了再處理
 		// p=Promise.resolve(2);q=p.then();p!==q
+		// @see https://www.ecma-international.org/ecma-262/9.0/index.html#sec-promisereaction-records
 		this[KEY_REACTIONS].push(onFulfilled || onRejected
 		// reaction = [ promise, onFulfilled, onRejected ]
 		? [ promise, onFulfilled, onRejected ] : promise);
@@ -2428,7 +2465,7 @@ Promise.resolve = function resolve(result) {
 
 	// (q=new Promise(function(r,R){setTimeout(function(){R(2)},80)}));(p=Promise.resolve(q)).then(function(x){console.log('*'+x)},function(y){console.log('_'+y)});console.log(p)
 	if (IsPromise(result) && result[KEY_STATE] !== PromiseState_pending) {
-		// Promise.resolve() 基本上盡可能早點得到一個確定的Promise物件，並且不會改變傳入的引數。
+		// Promise.resolve() 基本上盡可能早點得到一個確定的 Promise 物件，並且不會改變傳入的引數。
 		// copy result → promise
 		promise[KEY_STATE] = result[KEY_STATE];
 		promise[KEY_VALUE] = result[KEY_VALUE];
@@ -2461,7 +2498,8 @@ Promise.reject = function reject(reason) {
 // @private
 function GetIterator(iterable) {
 	if (typeof iterable === 'string') {
-		return Array.from(iterable);
+		// return Array.from(iterable);
+		return iterable.split('');
 	}
 
 	if (!Array.isArray(iterable)) {
@@ -2525,27 +2563,29 @@ function Promise_finally(onFinally) {
 		return this.then();
 
 	// library_namespace.debug('creating onFinally step: ' + onFinally, 0, 'Promise_finally');
-	var constructor = this.constructor, step = new constructor(function(resolve) {
-		// Using anonymous function, to defer execution and incase onFinally throw.
-		// library_namespace.debug('executing onFinally: ' + onFinally, 0, 'Promise_finally');
-		onFinally();
-		resolve();
-	});
+	var constructor = this.constructor;
+	// onFinally won't get any arguments
 	return this.then(function(value) {
-		// console.log('Promise_finally: onFulfilled');
-		// console.log(step);
-		return step.then(function() {
+		return constructor.resolve(onFinally()).then(function() {
+			// inherit value
 			return value;
 		});
 	}, function(value) {
-		// console.log('Promise_finally: onRejected');
-		// console.log(step);
-		return step.then(function() {
+		return constructor.resolve(onFinally()).then(function() {
+			// return constructor.reject(value);
 			throw value;
 		});
 	});
 }
 
+
+// https://github.com/tc39/proposal-promise-try
+// a syntactic sugar
+function Promise_try(executor) {
+	return new this(function(resolve) {
+		return resolve(executor());
+	});
+}
 
 //--------------------------------------------------------
 
@@ -2556,13 +2596,16 @@ function Promise_toString() {
 // Do not set `Promise.prototype={...}`, so we can use `new this.constructor()`
 Object.assign(Promise.prototype, {
 	// for debug only
-	toString : Promise_toString,
+	//toString : Promise_toString,
 
 	then : then,
+	// a syntactic sugar
 	// caught
 	'catch' : function Promise_catch(onRejected) {
 		return this.then(undefined, onRejected);
 	},
+
+	//'try' : Promise_try,
 
 	// finale
 	'finally' : Promise_finally
