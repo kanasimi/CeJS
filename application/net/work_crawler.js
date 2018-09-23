@@ -358,6 +358,9 @@ function module_code(library_namespace) {
 				+ Work_crawler.HTML_extension,
 		report_file_JSON : 'report.json',
 
+		onwarning : function onerror(warning) {
+			;
+		},
 		// for uncaught error
 		onerror : function onerror(error, work_data) {
 			process.title = 'Error: ' + error;
@@ -1434,6 +1437,8 @@ function module_code(library_namespace) {
 
 	function get_work_data(work_id, callback, error_count) {
 		var work_title;
+		// 預防並列執行的時候出現交叉干擾。
+		this.running = true;
 		if (library_namespace.is_Object(work_id)) {
 			work_title = work_id.title;
 			work_id = work_id.id;
@@ -1510,7 +1515,9 @@ function module_code(library_namespace) {
 				}
 
 			} catch (e) {
-				library_namespace.error(work_title + ': ' + e);
+				var warning = 'process_work_data: ' + work_title + ': ' + e;
+				library_namespace.error(warning);
+				_this.onwarning(warning);
 				typeof callback === 'function' && callback({
 					title : work_title
 				});
@@ -2204,6 +2211,9 @@ function module_code(library_namespace) {
 			}
 			return;
 		}
+
+		// 預防並列執行的時候出現交叉干擾。
+		this.running = true;
 
 		var actual_operation = get_chapter_data.bind(this, work_data,
 				chapter_NO, callback),
