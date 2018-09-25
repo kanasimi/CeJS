@@ -282,8 +282,13 @@ function module_code(library_namespace) {
 		// base_URL : '',
 		// charset : 'GBK',
 
-		// {String}瀏覽器識別: 腾讯TT浏览器
-		user_agent : 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; SV1; TencentTraveler 4.0)',
+		// {String}瀏覽器識別 navigator.userAgent 模擬 Chrome。
+		user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
+		// 並且每次更改不同的 user agent。
+		.replace(/( Chrome\/\d+\.\d+\.)(\d+)/, function($0, $1, $2) {
+			return $1 + (Math.random() * 1e4 | 0);
+		}),
+
 		/**
 		 * {Natural|String}timeout for get_URL()
 		 * 下載圖片的逾時等待時間。若逾時時間太小（如10秒），下載大檔案容易失敗。
@@ -292,7 +297,7 @@ function module_code(library_namespace) {
 		 * 必須在一開始就設定。之後設定沒有效果。
 		 */
 		timeout : '30s',
-		// {Natural}出錯時重新嘗試的次數。
+		// {Natural}出錯時重新嘗試的次數。若值太小，傳輸到一半壞掉的圖片可能被當作正常圖片而不會出現錯誤。
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
 		// {Natural}圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。
 		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR_RETRY),
@@ -305,7 +310,7 @@ function module_code(library_namespace) {
 		// {Natural}預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_SIZE : 200,
 
-		// retry delay
+		// retry delay. cf. one_by_one
 		// {Natural|String|Function}當網站不允許太過頻繁的訪問/access時，可以設定下載章節資訊前的等待時間。
 		// chapter_time_interval : '1s',
 
@@ -330,6 +335,8 @@ function module_code(library_namespace) {
 		//
 		// 循序逐個、一個個下載圖像。僅對漫畫有用，對小說無用。小說章節皆為逐個下載。 Download images one by one.
 		// default: 同時下載本章節中所有圖像。 Download ALL images at the same time.
+		// 若設成{Natural}大於零的數字(ms)或{String}時間長度，那會當成下載每張圖片之時間間隔 time_interval。
+		// cf. chapter_time_interval
 		// one_by_one : true,
 		//
 		// e.g., '2-1.jpg' → '2-1 bad.jpg'
@@ -365,6 +372,7 @@ function module_code(library_namespace) {
 		onerror : function onerror(error, work_data) {
 			process.title = 'Error: ' + error;
 			if (typeof error === 'object') {
+				// 丟出異常錯誤。
 				throw error;
 			} else {
 				console.trace(error);
@@ -2035,6 +2043,7 @@ function module_code(library_namespace) {
 
 			var message = [
 					work_data.id,
+					// TODO: {Object}work_data.author
 					work_data.author ? ' [' + work_data.author + ']' : '',
 					' ',
 					work_data.title,
@@ -2655,19 +2664,37 @@ function module_code(library_namespace) {
 
 				_this.get_URL_options.headers.Referer = chapter_URL;
 				image_list.index = 0;
-				var get_next_image = function(first) {
-					if (!first) {
+				var time_interval = _this.one_by_one !== true
+						&& library_namespace.to_millisecond(_this.one_by_one),
+				//
+				get_next_image = function(status) {
+					if (status !== 'first') {
 						++image_list.index;
 						check_if_done();
 					}
 					process.stdout.write('圖 ' + image_list.index + '/'
 							+ image_list.length + '...\r');
 					if (image_list.index < image_list.length) {
+						if (time_interval > 0)
+							image_list[image_list.index].time_interval = time_interval;
 						_this.get_images(image_list[image_list.index],
-								get_next_image, images_archive);
+						//
+						time_interval > 0 ? function(status) {
+							if (status === 'image_downloaded') {
+								// 沒有實際下載動作時，就不用等待了。
+								get_next_image();
+								return;
+							}
+							process.stdout.write('process_images: Wait '
+									+ library_namespace
+											.age_of(0, time_interval)
+									+ ' to get image ' + image_list.index + '/'
+									+ image_list.length + '...\r');
+							setTimeout(get_next_image, time_interval);
+						} : get_next_image, images_archive);
 					}
 				};
-				get_next_image(true);
+				get_next_image('first');
 			}
 
 			function process_chapter_data(XMLHttp) {
@@ -2814,7 +2841,7 @@ function module_code(library_namespace) {
 						left = image_list.length;
 					}
 				}
-				if (false) {
+				if (false && !_this.one_by_one) {
 					// 當一次下載上百張相片的時候，就改成一個個下載圖像。
 					_this.one_by_one = left > 100;
 				}
@@ -2848,6 +2875,7 @@ function module_code(library_namespace) {
 
 				if (typeof _this.pre_parse_chapter_data === 'function') {
 					// 執行在解析章節資料 process_chapter_data() 之前的作業 (async)。
+					// 必須自行保證不丟出異常。
 					_this.pre_parse_chapter_data(XMLHttp, work_data,
 					// pre_parse_chapter_data:function(XMLHttp,work_data,callback,chapter_NO){;callback();},
 					process_chapter_data.bind(XMLHttp), chapter_NO);
@@ -3156,7 +3184,7 @@ function module_code(library_namespace) {
 		if (image_downloaded) {
 			// console.log('get_images: Skip ' + image_data.file);
 			image_data.done = true;
-			typeof callback === 'function' && callback();
+			typeof callback === 'function' && callback('image_downloaded');
 			return;
 		}
 
@@ -3389,7 +3417,16 @@ function module_code(library_namespace) {
 			image_data.error_count = (image_data.error_count | 0) + 1;
 			library_namespace.log('get_images: Retry ' + image_data.error_count
 					+ '/' + _this.MAX_ERROR_RETRY + '...');
-			_this.get_images(image_data, callback, images_archive);
+			var get_image_again = function() {
+				_this.get_images(image_data, callback, images_archive);
+			}
+			if (image_data.time_interval > 0) {
+				process.stdout.write('get_images: Wait '
+						+ library_namespace.age_of(0, image_data.time_interval)
+						+ ' to retry image [' + image_data.url + ']...\r');
+				setTimeout(get_image_again, image_data.time_interval);
+			} else
+				get_image_again();
 
 		}, 'binary', null, Object.assign({
 			/**
