@@ -345,8 +345,34 @@ function module_code(library_namespace) {
 	 * @returns {Undefined}error occurred
 	 */
 	function fs_readFileSync(file_path, options) {
+		// auto detect encoding
+		var auto_detect_encoding;
+		if (options === 'auto') {
+			options = null;
+			auto_detect_encoding = true;
+		} else if (options && options.encoding === 'auto') {
+			options.encoding = null;
+			auto_detect_encoding = true;
+		}
 		try {
-			return node_fs.readFileSync(file_path, options);
+			// TODO:
+			// https://github.com/sonicdoe/detect-character-encoding
+			var buffer = node_fs.readFileSync(file_path, options);
+			if (auto_detect_encoding) {
+				var BOM = buffer.slice(0, 3).toString('hex');
+				if (BOM.startsWith('fffe')) {
+					// e.g., Excel 將活頁簿儲存成 "Unicode 文字"時的正常編碼為 UTF-16LE
+					buffer = buffer.toString('utf16le');
+				} else if (BOM.startsWith('feff')) {
+					buffer = buffer.toString('utf16be');
+				} else if (BOM.startsWith('efbbbf')) {
+					buffer = buffer.toString('utf8');
+				} else {
+					// TODO: more detecting
+					buffer = buffer.toString();
+				}
+			}
+			return buffer;
 		} catch (e) {
 			if (library_namespace.is_debug()) {
 				library_namespace.error(e);
