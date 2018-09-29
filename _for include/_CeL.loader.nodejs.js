@@ -22,7 +22,17 @@ typeof CeL !== 'function' && (function() {
 	node_fs = require('fs'),
 	//
 	CeL_path_list = node_fs.readFileSync(repository_path_list_file);
-	if (!CeL_path_list || !(CeL_path_list = CeL_path_list.toString())) {
+	if (CeL_path_list) {
+		CeL_path_list = CeL_path_list.toString();
+		var matched = full_root.match(/^(.+?[\\\/])_for include[\\\/]$/);
+		if (matched) {
+			// 直接 require 函式庫下面的本檔案。 e.g.,
+			// require('path\\JS\\_for include\\_CeL.loader.nodejs.js');
+			// 如此可以不依靠 '_repository_path_list.txt'。
+			CeL_path_list += '\n' + matched[1];
+		}
+	}
+	if (!CeL_path_list) {
 		console.error(
 		//
 		'Please set the absolute path list of CeL library in the file ['
@@ -36,11 +46,12 @@ typeof CeL !== 'function' && (function() {
 	// Copy/modified from "/_for include/_CeL.loader.nodejs.js".
 
 	function check_path(path) {
+		path = path.trim();
 		if (!path || path.charAt(0) === '#') {
 			// path is comments
 			return;
 		}
-		// console.log('Try path: ' + path);
+		// console.log('Try path: ' + JSON.stringify(path));
 		try {
 			// old node.js has no method 'accessSync'.
 			// accessSync() added in: v0.11.15
