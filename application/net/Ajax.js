@@ -44,6 +44,10 @@ function module_code(library_namespace) {
 		return encodeURIComponent(string);
 	};
 
+	var
+	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
+	NOT_FOUND = ''.indexOf('_');
+
 	/**
 	 * null module constructor
 	 * 
@@ -260,7 +264,7 @@ function module_code(library_namespace) {
 					return;
 				}
 			}
-			library_namespace.debug('Skip JSONP. No callback setted.', 3,
+			library_namespace.debug('Skip JSONP. No callback specified.', 3,
 					'get_URL');
 		}
 
@@ -290,7 +294,11 @@ function module_code(library_namespace) {
 			XMLHttp.open(options.method || (post_data ? 'POST' : 'GET'), URL,
 					!!onload, options.user || '', options.password || '');
 
+			// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/response
+			// XMLHttp.responseType = 'blob';
+
 			if (options.timeout > 0 && !onload) {
+				// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/timeout
 				XMLHttp.timeout = options.timeout;
 				if (typeof options.onfail === 'function')
 					XMLHttp.ontimeout = function(e) {
@@ -342,6 +350,7 @@ function module_code(library_namespace) {
 			XMLHttp.send(post_data || null);
 
 			if (!onload) {
+				// XMLHttp.response blob
 				// XMLHttp.responseText 會把傳回值當字串用
 				// XMLHttp.responseXML 會把傳回值視為 XMLDocument 物件，而後可用 JavaScript
 				// DOM 相關函式處理
@@ -420,8 +429,7 @@ function module_code(library_namespace) {
 
 		parameters.forEach(function(parameter) {
 			var index = parameter.indexOf('=');
-			// -1: NOT_FOUND
-			if (index === -1) {
+			if (index === NOT_FOUND) {
 				// e.g., key1&key2&key3
 				// → key1=&key2=&key3=
 				hash[parameter] = '';
@@ -673,10 +681,9 @@ function module_code(library_namespace) {
 				// console.log('-'.repeat(79));
 				// console.log(value);
 				library_namespace.debug('fetch URL [' + value + ']: '
-						+ XMLHttp.responseText.length + ' bytes', 1,
-						'to_form_data');
-				push_and_callback(XMLHttp.type, XMLHttp.responseText);
-			}, 'binary');
+						+ XMLHttp.buffer.length + ' bytes', 1, 'to_form_data');
+				push_and_callback(XMLHttp.type, XMLHttp.buffer);
+			}, 'buffer');
 		}
 
 		parameters = get_URL.parse_parameters(parameters);
@@ -875,7 +882,7 @@ function module_code(library_namespace) {
 
 		// for Gecko Error: uncaught exception: Permission denied to call method
 		// XMLHttpRequest.open
-		if (f.URL.indexOf('://') !== -1 && typeof netscape === 'object')
+		if (f.URL.indexOf('://') !== NOT_FOUND && typeof netscape === 'object')
 			if (_f.asked > 2) {
 				_f.clean(f.URL);
 				return;
@@ -899,7 +906,7 @@ function module_code(library_namespace) {
 			// IE:404會throw error, timeout除了throw error, 還會readystatechange;
 			// Gecko亦會throw error
 			try {
-				_f.XMLHttp.setRequestHeader("Accept-Encoding", "gzip,deflate");
+				_f.XMLHttp.setRequestHeader("Accept-Encoding", "gzip, deflate");
 			} catch (e) {
 			}
 			// Set header so the called script knows that it's an XMLHttpRequest
@@ -923,7 +930,7 @@ function module_code(library_namespace) {
 				// for posted XML data to be interpreted on the server.
 				_f.XMLHttp.setRequestHeader('Content-Type', Array.isArray(f.fn)
 						&& f.fn[1] ? 'text/xml'
-				// application/x-www-form-urlencoded;charset=utf-8
+				// application/x-www-form-urlencoded; charset=utf-8
 				: 'application/x-www-form-urlencoded');
 			}
 			_f.XMLHttp.abort();
@@ -1030,10 +1037,11 @@ function module_code(library_namespace) {
 								// understand the encoding of text files.
 								: typeof window === 'object'
 										&& window.navigator.appVersion
-												.indexOf("KHTML") !== -1
+												.indexOf("KHTML") !== NOT_FOUND
 										&& !(e = escape(_oXMLH.responseText))
-												.indexOf("%u") !== -1 ? e
-										: _oXMLH.responseText : 0,
+												.indexOf("%u") !== NOT_FOUND
+								//
+								? e : _oXMLH.responseText : 0,
 						//
 						isOKc ? _oXMLH.getAllResponseHeaders() : 0, _oXMLH, URL);
 					}
@@ -1388,13 +1396,19 @@ function module_code(library_namespace) {
 		}
 
 		var request, finished,
-		// result_Object模擬 XMLHttp。
+		// result_Object 模擬 XMLHttp response。
 		result_Object = {
 			// node_agent : agent,
+
 			// for debug
 			// url : _URL,
+
+			// deprecated: XMLHttp.URL
+			// URL : URL,
+
 			// 因為可能 redirecting 過，這邊列出的才是最終 URL。
-			URL : URL
+			// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseURL
+			responseURL : URL
 		},
 		// assert: 必定從 _onfail 或 _onload 作結，以確保會註銷登記。
 		// 本函數unregister()應該放在所有本執行緒會執行到onload的程式碼中。
@@ -1621,7 +1635,7 @@ function module_code(library_namespace) {
 				if (result.statusCode === 503
 						&& data.toString().includes(' id="jschl-answer"')) {
 					library_namespace.error(
-					//
+					// TODO: https://github.com/codemanki/cloudscraper
 					'You need to bypass the DDoS protection by Cloudflare');
 				}
 
@@ -1747,6 +1761,24 @@ function module_code(library_namespace) {
 						// @see GitHub.updater.node.js
 						node_fs.writeSync(fd, data, 0, data.length, null);
 						node_fs.closeSync(fd);
+
+						// set file modify date
+						// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Date
+						// https://tools.ietf.org/html/rfc7231#section-7.1.1.2
+						if (result.headers['date']) {
+							try {
+								// The "Date" header field represents the date
+								// and time at which the message was originated
+
+								// fs.utimesSync(path, atime, mtime)
+								// atime: the last time this file was accessed
+								node_fs.utimesSync(file_path, new Date,
+								// mtime: the last time this file was modified
+								result.headers['date']);
+							} catch (e) {
+								// TODO: handle exception
+							}
+						}
 					} catch (e) {
 						library_namespace.error('get_URL_node: Error to write '
 								+ data.length + ' B to [' + file_path + ']: '
@@ -1755,17 +1787,20 @@ function module_code(library_namespace) {
 					}
 				}
 
-				if (typeof options.constent_processor === 'function') {
-					options.constent_processor(
+				if (typeof options.content_processor === 'function') {
+					options.content_processor(
 					// ({Buffer}contains, URL, status)
 					data, URL, result.statusCode);
 				}
 
-				// 設定 charset = 'binary' 的話，將回傳 Buffer。
 				result_Object.buffer = data;
-				if (charset !== 'binary') {
+				// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/response
+				result_Object.response = data;
+				// non-standard 非標準: 設定 charset = 'buffer' 的話，將回傳 {Buffer}。
+				if (charset !== 'buffer') {
 					// 未設定 charset 的話，default charset: UTF-8.
-					data = data.toString(charset || 'utf8');
+					// buffer.toString(null) will throw!
+					data = data.toString(charset || undefined/* || 'utf8' */);
 				}
 
 				if (library_namespace.is_debug(4))
@@ -1819,13 +1854,13 @@ function module_code(library_namespace) {
 		) {
 			// 早期 node v0.10.25 無 zlib.gunzipSync。Added in: v0.11.12
 			// 'gzip, deflate, *'
-			_URL.headers['Accept-Encoding'] = 'gzip,deflate';
+			_URL.headers['Accept-Encoding'] = 'gzip, deflate';
 		}
 
 		if (false)
 			// @see jQuery
-			if (!options.crossDomain && !headers["X-Requested-With"]) {
-				headers["X-Requested-With"] = "XMLHttpRequest";
+			if (!options.crossDomain && !_URL.headers["X-Requested-With"]) {
+				_URL.headers["X-Requested-With"] = "XMLHttpRequest";
 			}
 
 		if (post_data) {
@@ -1862,20 +1897,27 @@ function module_code(library_namespace) {
 		// console.log(agent.last_cookie);
 		if (agent.last_cookie) {
 			// 使用 cookie
-			library_namespace.debug('Set cookie: '
+			library_namespace.debug('agent.last_cookie: '
 					+ JSON.stringify(agent.last_cookie), 3, 'get_URL_node');
+			library_namespace.debug('agent.cookie_hash: '
+					+ JSON.stringify(agent.cookie_hash), 3, 'get_URL_node');
 			_URL.headers.Cookie = (_URL.headers.Cookie ? _URL.headers.Cookie
 					+ ';' : '')
 					// cookie is Array @ Wikipedia
 					+ (Array.isArray(agent.last_cookie) ? agent.last_cookie
-							.join(';') : agent.last_cookie);
-			// console.log(_URL.headers.Cookie);
+					// 去掉 expires=...; path=/; domain=...; HttpOnly
+					// 這個動作不做也可以，不影響結果。
+					.map(function(cookie) {
+						return cookie.replace(/;.*/, '');
+					}).join('; ') : agent.last_cookie);
 		}
-		library_namespace.debug('set protocol: ' + _URL.protocol, 3,
+		library_namespace.debug('Set cookie: '
+				+ JSON.stringify(_URL.headers.Cookie), 3, 'get_URL_node');
+		library_namespace.debug('Set protocol: ' + _URL.protocol, 3,
 				'get_URL_node');
-		if (library_namespace.is_debug(6)) {
-			console.log(_URL.headers);
-		}
+		library_namespace.debug('Set headers: ' + JSON.stringify(_URL.headers),
+				3, 'get_URL_node');
+
 		try {
 			// from node.js 10.9.0
 			// http.request(url[, options][, callback])
@@ -2141,7 +2183,7 @@ function module_code(library_namespace) {
 			file_name = file_name[0];
 		}
 		if (!file_name) {
-			onload(undefined, new Error('No file name setted.'));
+			onload(undefined, new Error('No file name specified.'));
 			return;
 		}
 
@@ -2183,7 +2225,8 @@ function module_code(library_namespace) {
 				}
 
 				// .buffer: node only.
-				data = !encoding && XMLHttp.buffer || XMLHttp.responseText;
+				data = !encoding && XMLHttp.buffer || XMLHttp.response
+						|| XMLHttp.responseText;
 				// 資料事後處理程序 (post-processor):
 				// 將以 .postprocessor() 的回傳作為要處理的資料。
 				if (typeof options.postprocessor === 'function') {
@@ -2221,7 +2264,26 @@ function module_code(library_namespace) {
 					}
 					node_fs.writeFileSync(file_name, data, encoding);
 				}
-				onload(data, undefined, XMLHttp);
+
+				// set file modify date
+				// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Date
+				// https://tools.ietf.org/html/rfc7231#section-7.1.1.2
+				if (XMLHttp.headers['date']) {
+					try {
+						// The "Date" header field represents the date
+						// and time at which the message was originated
+
+						// fs.utimesSync(path, atime, mtime)
+						// atime: the last time this file was accessed
+						node_fs.utimesSync(file_name, new Date,
+						// mtime: the last time this file was modified
+						XMLHttp.headers['date']);
+					} catch (e) {
+						// TODO: handle exception
+					}
+				}
+
+				onload(XMLHttp.responseText, undefined, XMLHttp);
 			},
 			// character encoding of HTML web page
 			// is different from the file we want to save to
