@@ -16,7 +16,7 @@ typeof CeL === 'function' && CeL.run({
 	name : 'application.OS.Windows.Excel',
 
 	require : 'data.code.compatibility.|data.native.'
-	//
+	// library_namespace.parse_CSV()
 	+ '|data.CSV.|application.storage.',
 
 	// 設定不匯出的子函式。
@@ -46,41 +46,112 @@ function module_code(library_namespace) {
 	_// JSDT:_module_
 	.prototype = {};
 
+	// const: node.js only
 	var execSync = require('child_process').execSync;
 
 	// read .XLSX file → {Array}data list
+	// 轉成 tsv 再做處理用的 wrapper 函數。
 	// 必須先安裝 Excel
 	function read_Excel_file(Excel_file_path, options) {
-		var text_file_path = Excel_file_path.replace(/(?:\.[^.]+)?$/, '.txt');
+		if (typeof options === 'string') {
+			options = {
+				sheet_name : options
+			};
+		} else
+			options = library_namespace.setup_options(options);
 
-		// check if updated
+		// default: save to "%HOMEPATH%\Documents"
+		if (!Excel_file_path.includes(':\\')
+				&& !/^[\\\/]/.test(Excel_file_path))
+			Excel_file_path = library_namespace.working_directory()
+					+ Excel_file_path;
 
-		// 將 Microsoft Office spreadsheets (Excel .XLSX 檔)匯出成 Unicode 文字檔，
+		var sheet_name = options.sheet_name, text_file_path = options.save_to
+				|| Excel_file_path.replace(/(?:\.[^.]+)?$/, (sheet_name ? '#'
+						+ sheet_name : '')
+						+ '.tsv');
 
+		if (!text_file_path.includes(':\\') && !/^[\\\/]/.test(text_file_path))
+			text_file_path = library_namespace.working_directory()
+					+ text_file_path;
+
+		// 先將 Microsoft Office spreadsheets (Excel .XLSX 檔)匯出成 Unicode 文字檔。
 		// CScript.exe: Microsoft ® Console Based Script Host
 		// WScript.exe: Microsoft ® Windows Based Script Host
-		execSync('WScript.exe //Nologo //B "'
+		// WScript.exe 會直接跳出，因此必須使用 CScript.exe。
+		var command = 'CScript.exe //Nologo //B "'
 				+ library_namespace.get_module_path(module_name,
-						'Excel_to_Unicode.js') + '" "' + Excel_file_path
-				+ '" "' + text_file_path + '"');
+						'Excel_to_text.js') + '" "' + Excel_file_path + '" "'
+				+ (sheet_name || '') + '" "' + text_file_path + '"';
 
-		// 轉成 csv 再做處理用的 wrapper 函數。
-		var array = library_namespace.parse_CSV(library_namespace.read_file(
-				text_file_path, 'auto')
-		// Excel 將活頁簿儲存成 "Unicode 文字"時的正常編碼為 UTF-16LE
-		.trim().replace(/\r?\n\t*(\r?\n)+/g, '$1'), Object.assign({
+		// check if updated: 若是沒有更新過，那麼用舊的文字檔案就可以。
+		var text_status = library_namespace.fso_status(text_file_path);
+		if (text_status) {
+			var Excel_status = library_namespace.fso_status(Excel_file_path);
+			if (Date.parse(text_status.mtime) - Date.parse(Excel_status.mtime) > 0)
+				command = null;
+		}
+
+		if (command) {
+			library_namespace.debug('Execute command: ' + command, 1,
+					'read_Excel_file');
+			execSync(command);
+		} else {
+			library_namespace.debug('Using cache file: ' + text_file_path, 1,
+					'read_Excel_file');
+		}
+
+		// 'auto': Excel 將活頁簿儲存成 "Unicode 文字"時的正常編碼為 UTF-16LE
+		var content = library_namespace.read_file(text_file_path, 'auto');
+		// console.log(content);
+
+		if (typeof options.content_processor === 'function') {
+			content = options.content_processor(content);
+		}
+
+		if (!options.preserve_blank_line) {
+			// 去除空白列。
+			content = content.trim().replace(/\r?\n\t*(\r?\n)+/g, '$1');
+		}
+
+		var remove_title_line = options.remove_title_line;
+		if (remove_title_line === undefined) {
+			// auto detect title line
+			var matched = content.trim().match(/^([^\n]*)\n([^\n]*)/);
+			if (matched && !matched[1].trim().includes('\t')
+			// 第一行單純只有一個標題 cell。
+			&& matched[2].trim().includes('\t')) {
+				remove_title_line = true;
+			}
+		}
+		if (remove_title_line) {
+			content = content.replace(/^([^\n]*)\n/,
+			//
+			function(line, table_title) {
+				remove_title_line = table_title;
+				return '';
+			});
+		}
+
+		var table = library_namespace.parse_CSV(content, Object.assign({
 			has_title : true,
 			field_delimiter : '\t'
 		}, options));
 
-		return array;
+		if (remove_title_line) {
+			library_namespace.debug('remove title line: ' + remove_title_line,
+					1, 'read_Excel_file');
+			table.table_title = remove_title_line;
+		}
+
+		return table;
 	}
 
 	_.read_Excel_file = read_Excel_file;
 
-	function write_Excel_file(file_path, contents, options) {
+	function write_Excel_file(file_path, content, options) {
 		library_namespace.write_file(file_path, library_namespace
-				.to_CSV_String(contents, Object.assign({
+				.to_CSV_String(content, Object.assign({
 					field_delimiter : '\t',
 					line_separator : '\r\n'
 				}, options)));
