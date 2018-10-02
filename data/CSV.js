@@ -1,8 +1,8 @@
 
 /**
- * @name	CeL function for Comma-separated values data
+ * @name	CeL function for Comma-separated values (CSV) and tab-separated values (TSV) data
  * @fileoverview
- * 本檔案包含了處理 CSV data 的 functions。
+ * 本檔案包含了處理 CSV, TSV data 的 functions。
  * TODO:
  * delimiter-separated values (DSV)
  * @since	
@@ -163,7 +163,7 @@ function parse_CSV(data, config) {
 		return;
 
 	var tmp, table = [], row = [], matched, value,
-	max_column, min_column,
+	max_column_count, min_column_count,
 	//	自訂設定
 	config = new library_namespace.setting_pair({}, parse_CSV.config, config),
 	//	cache
@@ -190,6 +190,7 @@ function parse_CSV(data, config) {
 	handle_array = config('handle_array'),
 	handle_row = config('handle_row'),
 	has_title = config('has_title'),
+	preserve_blank_row = config('preserve_blank_row'),
 	// 設定 title.
 	set_title = function (row) {
 		if (has_title && row
@@ -216,12 +217,13 @@ function parse_CSV(data, config) {
 
 		if (title_passed || !has_title || !config('skip_title')) {
 			if (isNaN(to_Object)) {
-				//	去除空白行，包括檔尾。
-				if (column_count) {
+				//	去除空白列，包括檔尾。
+				if (column_count > 0 || preserve_blank_row) {
 					table.push(use_row);
 					row_count++;
 				} else if (library_namespace.is_debug()) {
-					library_namespace.warn('parse_CSV: 空白行 @ record ' + row_count + '(' + library_namespace.is_type(row) + ')');
+
+					library_namespace.warn('parse_CSV: 空白列 @ record ' + row_count + '(' + library_namespace.is_type(row) + ')');
 				}
 			} else if (title_row_for_Object) {
 				var column_index = title_row_for_Object[to_Object];
@@ -375,15 +377,15 @@ function parse_CSV(data, config) {
 			library_namespace.debug('已到行末。', 4, 'parse_CSV');
 			if (title_passed) {
 				library_namespace.debug('紀錄資料欄數 ' + column_count + '。', 4, 'parse_CSV');
-				if (max_column < column_count) {
-					max_column = column_count;
-				} else if (min_column > column_count) {
-					min_column = column_count;
+				if (max_column_count < column_count) {
+					max_column_count = column_count;
+				} else if (min_column_count > column_count) {
+					min_column_count = column_count;
 				}
 
 			} else {
 				library_namespace.debug('初始化資料欄數紀錄 ' + column_count + '。', 4, 'parse_CSV');
-				min_column = max_column = column_count;
+				min_column_count = max_column_count = column_count;
 
 				if (select_column && !title_row_for_Object) {
 					set_title(title_row_for_Object = row);
@@ -419,13 +421,22 @@ function parse_CSV(data, config) {
 				+ (data_length - last_index_of_data) + ')<br />\n['
 				+ data.slice(last_index_of_data) + ']');
 	}
-	if (library_namespace.is_debug() && min_column !== max_column) {
-		library_namespace.warn('parse_CSV: 資料欄數不同: range: ' + min_column + '－' + max_column);
+	if (library_namespace.is_debug() && min_column_count !== max_column_count) {
+		library_namespace.warn('parse_CSV: 資料欄數不同: range: ' + min_column_count + '－' + max_column_count);
 	}
 
 	if (set_title) {
 		// TODO: 自動判別是否有 title。
 		set_title(title_passed || row);
+	}
+	table.max_column_count = max_column_count;
+
+	if (has_title) {
+		Object.assign(table, {
+			each : each_record,
+			map_key : map_key,
+			merge : merge_table
+		});
 	}
 
 	return table;
@@ -436,6 +447,113 @@ parse_CSV.config = default_config;
 _// JSDT:_module_
 .
 parse_CSV = parse_CSV;
+
+
+/**
+ * <code>
+
+var table = CeL.parse_CSV(
+'t1	t2'
++'v11	v12'
++'v21	v22',{
+	has_title: true
+});
+
+table.each(function(get, record, index) {
+	console.log(get('t2') + get('t1'));
+});
+// v12v11
+// v22v21
+
+
+console.log(table.map_key(function(get) {
+	return get('t2') + get('t1');
+}, true));
+// table.key_to_index={v12v11:1, v22v21:2}
+
+
+
+table.map_key(function(get) {});
+table2.map_key(function(get) {});
+table.merge_table(table2);
+
+
+ </code>
+ */
+
+
+// type : forEach, some, every, map, ...
+// processor(get_field_value, record, index)
+function each_record(processor, _this, type) {
+	var table = this, table_index = this.index, is_set_value = type === true;
+	return table[!is_set_value && type || 'forEach'](function(record, index) {
+		if (/* table.has_title && */ index === 0)
+			return type === 'every' ? true : undefined;
+
+		return processor(is_set_value ? function set_field_value(title, value) {
+			record[table_index[title]] = value;
+		} : function get_field_value(title, allow_undefined) {
+			var value = record[table_index[title]];
+			return allow_undefined ? value : value || '';
+		}, record, index);
+	}, _this);
+}
+
+
+function map_key(key_mapper, using_index) {
+	var key_to_record = {};
+	this.each(function(get_field_value, record, index) {
+		var key = key_mapper(get_field_value, record, index);
+		if (key in key_to_record) {
+			library_namespace.error('map_key: Duplicate key [' + key + ']:\n' + key_to_record[key] + '\n→\n' + record);
+		}
+
+		// cache key
+		record.key = key;
+		// record.index = index;
+		key_to_record[key] = using_index ? index : record;
+	});
+
+	this[using_index ? 'key_to_record' : 'key_to_index'] = key_to_record;
+	return key_to_record;
+}
+
+
+// 依照欄位標題, key 合併兩資料表格. title_mapper 可選
+// title_mapper[ title of table ] = title of this_table
+// table1.map_key(key_mapper);table2.map_key(key_mapper);table1.merge(table2);
+function merge_table(table, title_mapper, merge_title_list) {
+	var this_table = this;
+	// assert: table.has_title && this_table.has_title
+	if (!merge_title_list)
+		merge_title_list = table.title;
+
+	// merge_title_list: 僅合併這些標題
+	merge_title_list.forEach(function(title) {
+		if (!(title in this_table.index)) {
+			this_table.index[title] = table.max_column_count;
+			this_table.title[table.max_column_count++] = title;
+		}
+	});
+
+	table.each(function(get_field_value, record, index) {
+		var key = record.key;
+		var this_record = this_table.key_to_record[key];
+		merge_title_list.forEach(function(title) {
+			var value = get_field_value(title, true);
+			if (value === undefined)
+				return;
+
+			var this_index = this_table.index[title_mapper[title]] || this_table.index[title], old_value = this_record[this_index];
+			if (old_value !== undefined && old_value !== value) {
+				library_namespace.error('merge_table: "' + key + '"[' + title + ']: [' + old_value + '] → [' + value + ']');
+			}
+			this_record[this_index] = value;
+		});
+	});
+}
+
+
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -924,6 +1042,7 @@ _// JSDT:_module_
  * config = {field_delimiter:',',title_array:[],text_qualifier:'"',force_text_qualifier:true}
  */
 to_CSV = function(csv_object, config) {
+	library_namespace.warn('to_CSV is deprecated. Please using to_CSV_String.');
 	config = library_namespace.setup_options(config);
 	var CSV = [], i = 0,
 	text_qualifier = config.text_qualifier || '"',
