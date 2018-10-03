@@ -3212,7 +3212,7 @@ function module_code(library_namespace) {
 		get_URL(url, function(XMLHttp) {
 			// console.log(XMLHttp);
 			// 圖片數據的內容。
-			var contents = XMLHttp.responseText;
+			var contents = XMLHttp.buffer;
 			if (_this.image_pre_process) {
 				// 圖片前處理程序 image pre-processing
 				contents = _this.image_pre_process(contents, image_data)
@@ -3428,7 +3428,7 @@ function module_code(library_namespace) {
 			} else
 				get_image_again();
 
-		}, 'binary', null, Object.assign({
+		}, 'buffer', null, Object.assign({
 			/**
 			 * 最多平行取得檔案(圖片)的數量。
 			 * 
@@ -3437,7 +3437,8 @@ function module_code(library_namespace) {
 			</code>
 			 */
 			max_listeners : 300
-		}, this.get_URL_options));
+		}, image_data.reset_get_URL_options ? null : this.get_URL_options,
+				image_data.get_URL_options));
 	}
 
 	// --------------------------------------------------------------------------------------------
