@@ -290,6 +290,18 @@ function module_code(library_namespace) {
 					+ chapter_data.title);
 			var _this = this, html = XMLHttp.responseText;
 			this.get_URL(this.consume_url, function(XMLHttp) {
+				// console.log(XMLHttp.responseText);
+
+				var matched = XMLHttp.responseText && XMLHttp.responseText
+				// var msg = '很抱歉，帳號需要通過電話認證才可購買。';
+				.match(/[\s;]msg *= *'([^']+)/);
+				if (matched) {
+					library_namespace
+							.error(work_data.title + ': ' + matched[1]);
+					// 歸零。
+					work_data.ticket_left = 1;
+				}
+
 				if (--work_data.ticket_left === 0
 				// 僅僅下載有閱讀券的章節，然後就回到最後讀取的章節。
 				&& work_data.last_checked > 0) {
@@ -299,6 +311,7 @@ function module_code(library_namespace) {
 				}
 				// XMLHttp 只是一個轉址網頁，必須重新擷取網頁。
 				_this.get_URL(chapter_data.url, callback);
+
 			}, {
 				titleNo : work_data.id,
 				articleNo : chapter_data.articleNo,
@@ -471,38 +484,47 @@ function module_code(library_namespace) {
 			// https://id.comico.jp/login/login.nhn
 			'https://id.');
 
-			crawler.get_URL(account_api_host + 'login/login.nhn', function(
-					XMLHttp) {
-				// XMLHttp 只是一個轉址網頁。
+			crawler.get_URL(account_api_host + 'login/login.nhn', after_login,
+					{
+						autoLoginChk : 'Y',
+						loginid : crawler.loginid,
+						password : crawler.password,
+						nexturl : ''
+					});
+
+		} else {
+			callback(crawler);
+		}
+
+		function after_login(XMLHttp) {
+			// XMLHttp 只是一個轉址網頁。
+
+			// 必須先進入收件箱才能取得所有"有期限的物品"
+			crawler.get_URL(
+			// https://id.comico.com.tw/settings/inbox/
+			account_api_host + 'settings/inbox/', function to_inbox(XMLHttp) {
 
 				// 收件箱: 全部接收 有期限的物品
 				// 受け取りBOX: すべて受け取る
 				crawler.get_URL(
 				// https://id.comico.com.tw/api/incentiveall/index.nhn
-				account_api_host + 'api/incentiveall/index.nhn', function(
-						XMLHttp) {
-					// e.g., XMLHttp.responseText ===
-					// '{"result":[121703625,121703626,121703627,121703628]}'
-					var item_list = JSON.parse(XMLHttp.responseText).result;
-					if (item_list.length > 0) {
-						library_namespace.info('已收到' + item_list.length
-								+ '項有期限的物品。');
-					}
+				account_api_host + 'api/incentiveall/index.nhn', get_ticket);
 
-					// 最新消息
-					// http://www.comico.com.tw/notice/
-
-					callback(crawler);
-				});
-
-			}, {
-				autoLoginChk : 'Y',
-				loginid : crawler.loginid,
-				password : crawler.password,
-				nexturl : ''
 			});
+		}
 
-		} else {
+		function get_ticket(XMLHttp) {
+			// e.g., XMLHttp.responseText ===
+			// '{"result":[121703625,121703626,121703627,121703628]}'
+			// console.log(XMLHttp.responseText);
+			var item_list = JSON.parse(XMLHttp.responseText).result;
+			if (item_list.length > 0) {
+				library_namespace.info('已收到' + item_list.length + '項有期限的物品。');
+			}
+
+			// 最新消息
+			// http://www.comico.com.tw/notice/
+
 			callback(crawler);
 		}
 
