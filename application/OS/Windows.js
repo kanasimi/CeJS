@@ -57,7 +57,7 @@ new_COM = typeof WScript === 'object' ? function(id) {
 };
 
 // CeL.application.OS.Windows.no_COM
-if (_.no_COM = !_.new_COM) {
+if (_.no_COM = !_.new_COM && 'No Component Object Model support!') {
 	if (false && !library_namespace.env.ignore_COM_error)
 		library_namespace.warn('new_COM: no <a href="http://en.wikipedia.org/wiki/Component_Object_Model" target="_blank">Component Object Model</a> support!');
 
@@ -66,6 +66,8 @@ if (_.no_COM = !_.new_COM) {
 		if (!library_namespace.env.ignore_COM_error)
 			throw new Error('new_COM: No method to get Microsoft <a href="http://en.wikipedia.org/wiki/Component_Object_Model" target="_blank">Component Object Model</a> (COM): [' + id + ']!');
 	});
+
+	return _;
 }
 // WScript.Echo((_.no_COM? '沒' : '') + '有 Windows Component Object Model。');
 
@@ -107,6 +109,9 @@ function is_COM(object) {
 _// JSDT:_module_
 .
 is_COM = is_COM;
+
+
+
 
 
 
@@ -159,6 +164,8 @@ function parse_command_line(command_line, no_command_name){
 //get_WScript_object[generateCode.dLK]='is_WWW,get_HTA,WSH,dirSp'.split(',');
 //get_WScript_object[generateCode.dLK].push('*var args,WshShell,WinShell,WinShell,fso;get_WScript_object();');
 var WSH, WshShell = "WScript.Shell", WinShell = "Shell.Application", FSO = "Scripting.FileSystemObject", args;
+
+var log_message;
 
 /**
 * 
@@ -215,6 +222,25 @@ function get_WScript_object(HTML_only) {
 		setTimeout(function() {
 			get_WScript_object(HTML_only);
 		}, 100);
+
+
+	try {
+		// CScript.exe only
+		// var stdout = FSO.GetStandardStream(1);
+		// var stderr = FSO.GetStandardStream(2);
+		log_message = function(message) {
+			// stdout.WriteLine(message);
+			// WScript.StdOut.Write(message);
+			WScript.StdOut.WriteLine(message);
+		};
+	} catch (e) {
+		// using WScript.exe
+		log_message = function(message) {
+			WScript.Echo(message);
+		};
+	}
+
+	// WScript.StdIn.ReadLine()
 
 
 /*
