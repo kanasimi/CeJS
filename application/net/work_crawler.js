@@ -3214,7 +3214,7 @@ function module_code(library_namespace) {
 			// 圖片數據的內容。
 			var contents = XMLHttp.buffer;
 			if (_this.image_preprocessor) {
-				// 圖片前處理程序 image pre-processing
+				// 圖片前處理程序 預處理器 image pre-processing
 				contents = _this.image_preprocessor(contents, image_data)
 						|| contents;
 			}
@@ -3252,12 +3252,13 @@ function module_code(library_namespace) {
 
 			if (false) {
 				console.log([ _this.skip_error, _this.MAX_ERROR_RETRY,
-						has_error, _this.skip_error
-						//
-						&& image_data.error_count === _this.MAX_ERROR_RETRY ]);
+				//
+				has_error, _this.skip_error
+				//
+				&& image_data.error_count === _this.MAX_ERROR_RETRY ]);
 				console.log('error count: ' + image_data.error_count);
 			}
-			if (verified_image || _this.skip_error
+			if (verified_image || image_data.is_bad || _this.skip_error
 			// 有出問題的話，最起碼都需retry足夠次數。
 			&& image_data.error_count === _this.MAX_ERROR_RETRY
 			//
@@ -3265,7 +3266,7 @@ function module_code(library_namespace) {
 			//
 			&& image_data.file_length.length > _this.MAX_EOI_ERROR) {
 				// console.log(image_data.file_length);
-				if (verified_image || _this.skip_error
+				if (verified_image || image_data.is_bad || _this.skip_error
 				// skip error 的話，不管有沒有取得過檔案(包括404圖像不存在)，依然 pass。
 				// && image_data.file_length.length === 0
 				//
@@ -3277,17 +3278,24 @@ function module_code(library_namespace) {
 					// 圖片下載過程結束，不再嘗試下載圖片:要不是過關，要不就是錯誤太多次了。
 					var bad_file_path = _this.EOI_error_path(image_data.file,
 							XMLHttp);
-					if (has_error || verified_image === false) {
+					if (has_error || image_data.is_bad
+							|| verified_image === false) {
 						image_data.file = bad_file_path;
 						image_data.has_error = true;
 						library_namespace.warn('Force saving '
 								+ (has_error ? (contents ? 'bad' : 'empty')
-										+ ' file (as image)'
+										+ ' file as image'
 								// assert: (!!verified_image===false)
 								// 圖檔損壞: e.g., Do not has EOI
 								: 'bad image')
-								+ (XMLHttp.status ? ' (status '
-										+ XMLHttp.status + ')' : '')
+								+ (XMLHttp.status
+								// 狀態碼正常就不顯示
+								&& (XMLHttp.status / 100 | 0) !== 2
+								//
+								? ' (status ' + XMLHttp.status + ')' : '')
+								// 顯示crawler程式指定的錯誤
+								+ (image_data.is_bad ? ' (error: '
+										+ image_data.is_bad + ')' : '')
 								+ (contents ? ' ' + contents.length + ' bytes'
 										: '') + ': ' + image_data.file + '\n← '
 								+ url);
