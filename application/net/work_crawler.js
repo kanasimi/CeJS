@@ -3213,9 +3213,9 @@ function module_code(library_namespace) {
 			// console.log(XMLHttp);
 			// 圖片數據的內容。
 			var contents = XMLHttp.buffer;
-			if (_this.image_pre_process) {
+			if (_this.image_preprocessor) {
 				// 圖片前處理程序 image pre-processing
-				contents = _this.image_pre_process(contents, image_data)
+				contents = _this.image_preprocessor(contents, image_data)
 						|| contents;
 			}
 
@@ -3380,7 +3380,9 @@ function module_code(library_namespace) {
 				library_namespace.log(_this.id + ': '
 						+ _this.MESSAGE_RE_DOWNLOAD);
 				// console.log('error count: ' + image_data.error_count);
-				if (contents && contents.length < _this.MIN_LENGTH
+				if (contents && contents.length > 10
+				//
+				&& contents.length < _this.MIN_LENGTH
 				// 檔案有驗證過，只是太小時，應該不是 false。
 				&& verified_image !== false
 				// 就算圖像是完整的，只是比較小，HTTP status code 也應該是 2xx。
