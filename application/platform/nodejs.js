@@ -56,11 +56,14 @@ function module_code(library_namespace) {
 	_// JSDT:_module_
 	.prototype = {};
 
+	/** {String}path separator. e.g., '/', '\' */
+	var path_separator = library_namespace.env.path_separator;
+
 	// set/get current working directory. 設定/取得目前工作目錄。
 	function working_directory(change_to_directory) {
 		if (change_to_directory)
 			process.chdir(change_to_directory);
-		return process.cwd();
+		return process.cwd() + path_separator;
 	}
 	_.working_directory = working_directory;
 
@@ -228,8 +231,6 @@ function module_code(library_namespace) {
 	}
 	_.fs_mkdir = create_directory;
 
-	/** {String}path separator. e.g., '/', '\' */
-	var path_separator = library_namespace.env.path_separator;
 	/**
 	 * remove path list.
 	 * 
@@ -333,6 +334,7 @@ function module_code(library_namespace) {
 	// _.fs_delete, _.fs_rmdir
 	_.fs_remove = remove_fso;
 
+	var KEY_auto_detect_encoding = 'auto';
 	/**
 	 * fs.readFileSync() without throw.
 	 * 
@@ -347,10 +349,11 @@ function module_code(library_namespace) {
 	function fs_readFileSync(file_path, options) {
 		// auto detect encoding
 		var auto_detect_encoding;
-		if (options === 'auto') {
+		if (options === KEY_auto_detect_encoding) {
 			options = null;
 			auto_detect_encoding = true;
-		} else if (options && options.encoding === 'auto') {
+		} else if (options && options.encoding === KEY_auto_detect_encoding) {
+			// delete options.encoding
 			options.encoding = null;
 			auto_detect_encoding = true;
 		}
@@ -364,11 +367,15 @@ function module_code(library_namespace) {
 					// e.g., Excel 將活頁簿儲存成 "Unicode 文字"時的正常編碼為 UTF-16LE
 					buffer = buffer.toString('utf16le');
 				} else if (BOM.startsWith('feff')) {
+					// byte order mark (BOM) of UTF-16BE Unicode Big-endian
 					buffer = buffer.toString('utf16be');
 				} else if (BOM.startsWith('efbbbf')) {
+					// byte order mark (BOM) of UTF-8: 0xEF,0xBB,0xBF
 					buffer = buffer.toString('utf8');
 				} else {
-					// TODO: more detecting
+					// https://en.wikipedia.org/wiki/Byte_order_mark#Byte_order_marks_by_encoding
+					// TODO: more detecting, @see guess_encoding()
+					// "binary", "iso2022", "iso88591", "usascii", "utf7"
 					buffer = buffer.toString();
 				}
 			}
