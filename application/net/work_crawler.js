@@ -365,10 +365,10 @@ function module_code(library_namespace) {
 				+ Work_crawler.HTML_extension,
 		report_file_JSON : 'report.json',
 
-		onwarning : function onerror(warning) {
+		onwarning : function onwarning(warning) {
 			;
 		},
-		// for uncaught error
+		// for uncaught error. work_data 可能為 undefined/image_data
 		onerror : function onerror(error, work_data) {
 			process.title = 'Error: ' + error;
 			if (typeof error === 'object') {
@@ -1406,8 +1406,8 @@ function module_code(library_namespace) {
 	function get_label(html) {
 		return html ? library_namespace.HTML_to_Unicode(
 				html.replace(/<!--[\s\S]*?-->/g, '').replace(
-						/\s*<br(?:\/| [^<>]*)?>/ig, '\n').replace(/<[^<>]+>/g,
-						'')
+						/\s*<br(?:\/| [^<>]*)?>/ig, '\n').replace(
+						/<\/?[a-z][^<>]*>/g, '')
 				// incase 以"\r"為主。 e.g., 起点中文网
 				.replace(/\r\n?/g, '\n')).trim().replace(
 				/[\s\u200B]+$|^[\s\u200B]+/g, '')
@@ -1720,7 +1720,7 @@ function module_code(library_namespace) {
 			if (!html) {
 				var message = _this.id + ': Can not get chapter list page!';
 				library_namespace.error(message);
-				_this.onerror(message);
+				_this.onerror(message, work_data);
 				typeof callback === 'function' && callback(work_data);
 				return Work_crawler.THROWED;
 			}
@@ -2272,7 +2272,7 @@ function module_code(library_namespace) {
 			} catch (e) {
 				library_namespace.error(this.id + ': ' + work_data.title
 						+ ': Error on chapter ' + chapter_NO);
-				this.onerror(e);
+				this.onerror(e, work_data);
 				typeof callback === 'function' && callback(work_data);
 				return Work_crawler.THROWED;
 			}
@@ -3289,11 +3289,11 @@ function module_code(library_namespace) {
 								// 圖檔損壞: e.g., Do not has EOI
 								: 'bad image')
 								+ (XMLHttp.status
-								// 狀態碼正常就不顯示
+								// 狀態碼正常就不顯示。
 								&& (XMLHttp.status / 100 | 0) !== 2
 								//
 								? ' (status ' + XMLHttp.status + ')' : '')
-								// 顯示crawler程式指定的錯誤
+								// 顯示 crawler 程式指定的錯誤。
 								+ (image_data.is_bad ? ' (error: '
 										+ image_data.is_bad + ')' : '')
 								+ (contents ? ' ' + contents.length + ' bytes'
