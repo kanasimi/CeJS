@@ -100,7 +100,7 @@ function module_code(library_namespace) {
 				// https://www.webtoons.com/challenge/episodeList?titleNo=
 				return matched[1] + '/episodeList?titleNo=' + matched[2];
 			}
-			return 'episodeList?titleNo=';
+			return 'episodeList?titleNo=' + work_id;
 		},
 		parse_work_data : function(html, get_label, extract_work_data) {
 			var matched = html
