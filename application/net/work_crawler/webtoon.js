@@ -65,7 +65,7 @@ function module_code(library_namespace) {
 					+ Date.now() + '&_=' + Date.now();
 		},
 		parse_search_result : function(html) {
-			var id_list = [], id_data = [];
+			// console.log(html);
 			if (html.startsWith('{')) {
 				html = JSON.parse(html);
 			} else {
@@ -75,19 +75,33 @@ function module_code(library_namespace) {
 				}) + ')');
 			}
 
-			html.items[0].forEach(function(work_data) {
-				// console.log(work_data);
-				if (work_data[1][0] === 'TITLE') {
-					id_list.push(+work_data[3][0]);
-					id_data.push(work_data[0][0]);
-				}
-			});
+			var id_list = [], id_data = [];
+			html = html.items[0];
+			if (html) {
+				// assert: Array.isArray(html)
+				html.forEach(function(work_data) {
+					// console.log(work_data);
+					if (work_data[1][0] === 'TITLE') {
+						id_list.push(+work_data[3][0]);
+						id_data.push(work_data[0][0]);
+					}
+				});
+			}
 
 			return [ id_list, id_data ];
 		},
 
 		// 取得作品的章節資料。 get_work_data()
-		work_URL : 'episodeList?titleNo=',
+		work_URL : function(work_id) {
+			var matched = typeof work_id === 'string'
+					&& work_id.match(/^([a-z]+)_(\d+)$/);
+			if (matched) {
+				// e.g., 投稿新星專區作品
+				// https://www.webtoons.com/challenge/episodeList?titleNo=
+				return matched[1] + '/episodeList?titleNo=' + matched[2];
+			}
+			return 'episodeList?titleNo=';
+		},
 		parse_work_data : function(html, get_label, extract_work_data) {
 			var matched = html
 					.match(/<a href="([^<>"]+)"[^<>]+id="_btnEpisode">/),
