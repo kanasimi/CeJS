@@ -1618,12 +1618,12 @@ draw_era.get_date = function(date, period_end) {
 
 // click and change the option of this.title
 draw_era.change_option = function() {
-	var option = this.title.replace(/\s[\s\S]*/, ''), setted = draw_era.options[option];
+	var option = this.title.replace(/\s[\s\S]*/, ''), configured = draw_era.options[option];
 	// reset option status
-	CeL.set_class(this, 'setted', {
-		remove : setted
+	CeL.set_class(this, 'configured', {
+		remove : configured
 	});
-	draw_era.options[option] = !setted;
+	draw_era.options[option] = !configured;
 	draw_era.redraw();
 	return false;
 };
@@ -2792,26 +2792,26 @@ function affairs() {
 			T : '標記正處理的紀年',
 			R : 'Markup current era. 標記當下正在處理的紀年。',
 			onclick : function() {
-				var setted = translate_era.draw_recent_era;
+				var configured = translate_era.draw_recent_era;
 				// reset option status
-				CeL.set_class(this, 'setted', {
-					remove : setted
+				CeL.set_class(this, 'configured', {
+					remove : configured
 				});
-				translate_era.draw_recent_era = !setted;
+				translate_era.draw_recent_era = !configured;
 				draw_era.redraw();
 				return false;
 			},
-			C : 'option' + (translate_era.draw_recent_era ? ' setted' : '')
+			C : 'option' + (translate_era.draw_recent_era ? ' configured' : '')
 		}, {
 			T : '合併歷史時期',
 			R : 'merge_periods\ne.g., 三國兩晉南北朝, 五代十國',
 			onclick : draw_era.change_option,
-			C : 'option' + (draw_era.options.merge_periods ? ' setted' : '')
+			C : 'option' + (draw_era.options.merge_periods ? ' configured' : '')
 		}, {
 			T : '擴張範圍至君主在世時段',
 			R : 'adapt_lifetime',
 			onclick : draw_era.change_option,
-			C : 'option' + (draw_era.options.adapt_lifetime ? ' setted' : '')
+			C : 'option' + (draw_era.options.adapt_lifetime ? ' configured' : '')
 		} ], 'era_graph_options');
 
 		// 資料圖層
