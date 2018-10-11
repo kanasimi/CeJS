@@ -334,7 +334,24 @@ function module_code(library_namespace) {
 	// _.fs_delete, _.fs_rmdir
 	_.fs_remove = remove_fso;
 
-	var KEY_auto_detect_encoding = 'auto';
+	var KEY_auto_detect_encoding = 'auto',
+	// https://en.wikipedia.org/wiki/Byte_order_mark#Byte_order_marks_by_encoding
+	// TODO: more detecting, @see guess_encoding()
+	// "binary", "iso2022", "iso88591", "usascii", "utf7"
+	BOM_to_encoding = {
+		// e.g., Excel 將活頁簿儲存成 "Unicode 文字"時的正常編碼為 UTF-16LE
+		fffe : 'utf16le',
+		// byte order mark (BOM) of UTF-16BE Unicode Big-endian
+		feff : 'utf16be',
+		// byte order mark (BOM) of UTF-8: 0xEF,0xBB,0xBF
+		efbbbf : 'utf8'
+	}, BOM_list = Object.keys(BOM_to_encoding),
+	//
+	max_BOM_length = BOM_list.reduce(function(length, BOM) {
+		// assert: BOM.length / 2 | 0 === BOM.length / 2
+		return Math.max(length, Math.ceil(BOM.length / 2));
+	}, 0);
+
 	/**
 	 * fs.readFileSync() without throw.
 	 * 
@@ -362,20 +379,15 @@ function module_code(library_namespace) {
 			// https://github.com/sonicdoe/detect-character-encoding
 			var buffer = node_fs.readFileSync(file_path, options);
 			if (auto_detect_encoding) {
-				var BOM = buffer.slice(0, 3).toString('hex');
-				if (BOM.startsWith('fffe')) {
-					// e.g., Excel 將活頁簿儲存成 "Unicode 文字"時的正常編碼為 UTF-16LE
-					buffer = buffer.toString('utf16le');
-				} else if (BOM.startsWith('feff')) {
-					// byte order mark (BOM) of UTF-16BE Unicode Big-endian
-					buffer = buffer.toString('utf16be');
-				} else if (BOM.startsWith('efbbbf')) {
-					// byte order mark (BOM) of UTF-8: 0xEF,0xBB,0xBF
-					buffer = buffer.toString('utf8');
-				} else {
-					// https://en.wikipedia.org/wiki/Byte_order_mark#Byte_order_marks_by_encoding
-					// TODO: more detecting, @see guess_encoding()
-					// "binary", "iso2022", "iso88591", "usascii", "utf7"
+				var BOM = buffer.slice(0, max_BOM_length).toString('hex');
+				if (BOM_list.every(function(BOM_key) {
+					if (!BOM.startsWith(BOM_key))
+						return true;
+					// 去掉 BOM
+					// assert: BOM.length / 2 | 0 === BOM.length / 2
+					buffer = buffer.slice(BOM_key.length / 2).toString(
+							BOM_to_encoding[BOM_key]);
+				})) {
 					buffer = buffer.toString();
 				}
 			}
@@ -596,6 +608,10 @@ function module_code(library_namespace) {
 
 	/**
 	 * command line arguments 指令列參數
+	 * 
+	 * https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V10.md#10.12.0
+	 * The options parser now normalizes "_" to "-"; --no_warnings has the same
+	 * effect as --no-warnings
 	 * 
 	 * test code: <code>
 	 * '-h|--help|-f=|--file=|-f=File|--file=File|File|file=File'.split('|').forEach(function(arg) { console.log(arg.match(/^(-{0,2})([^=]+?)(=(.*))?$/)); });
