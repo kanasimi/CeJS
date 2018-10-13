@@ -2381,9 +2381,7 @@ function module_code(library_namespace) {
 					// 僅存在月名稱不同，但日名稱相同，或可銜接之紀元列表。
 					if (年序.length === 0) {
 						if (月序.length === 0) {
-							// 因為本函數中應初始化本紀年曆數，否則之後的運算皆會出問題；
-							// 因此若無法初始化，則 throw。
-							throw new Error(
+							var message =
 							//
 							'initialize_era_date: [' + this + ']: '
 							//
@@ -2393,7 +2391,22 @@ function module_code(library_namespace) {
 							//
 							+ ']，中間存在有未能尋得曆數之時間段！'
 							//
-							: '已遍歷所有 [' + 曆法 + ']紀年，至結尾無可供參照之紀年！'));
+							: '已遍歷所有 [' + 曆法 + ']紀年，至結尾無可供參照之紀年！');
+							// 因為本函數中應初始化本紀年曆數，否則之後的運算皆會出問題；
+							// 因此若無法初始化，則 throw。
+
+							if (false && era_Array.length > 0)
+								throw new Error(message);
+
+							library_namespace.error(message);
+							library_namespace.error('改採用標準曆法: '
+									+ standard_time_parser_name + '，但這將導致['
+									+ this + ']解析出錯誤的日期！');
+
+							this.calendar = this.calendar.replace(/:.+/g, ':'
+									+ standard_time_parser);
+							this.initialize();
+							return;
 						}
 						年序 = 月序;
 					}
@@ -3160,9 +3173,7 @@ function module_code(library_namespace) {
 									&& !(START_KEY in this_year_data)))
 								if (LEAP_MONTH_KEY in this_year_data)
 									library_namespace
-											.warn(
-											//
-											'initialize_era_date: '
+											.warn('initialize_era_date: '
 													+ '本年有超過1個閏月！將忽略之。');
 								else {
 									this_year_data[LEAP_MONTH_KEY]
@@ -5022,9 +5033,9 @@ function module_code(library_namespace) {
 	// private 工具函數。
 
 	// set time zone / time offset (UTC offset by minutes)
-	function set_minute_offset(date, minute_offset, detect_if_setted) {
+	function set_minute_offset(date, minute_offset, detect_if_configured) {
 		// 偵測/預防重複設定。
-		if (detect_if_setted)
+		if (detect_if_configured)
 			if ('minute_offset' in date) {
 				// 已設定過。
 				if (date.minute_offset !== minute_offset)
