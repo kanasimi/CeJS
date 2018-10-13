@@ -39,6 +39,7 @@ Runs untrusted code securely https://github.com/patriksimek/vm2
  *      https://github.com/wellwind/8ComicDownloaderElectron
  *      https://github.com/Arachnid-27/Cimoc
  *      https://github.com/qq573011406/KindleHelper
+ *      https://github.com/InzGIBA/manga
  * 
  * @see 爬蟲框架 https://scrapy.org/
  * 
@@ -1294,14 +1295,14 @@ function module_code(library_namespace) {
 				id_data = _this.parse_search_result(XMLHttp.responseText,
 						get_label, work_title);
 				if (id_data === undefined) {
-					this.onerror('get_work.parse_search_result:'
+					_this.onerror('get_work.parse_search_result:'
 							+ ' 作品網址解析函數 parse_search_result 未回傳結果！',
 							work_title);
 					finish_up('作品網址解析函數 parse_search_result 未回傳結果！');
 					return Work_crawler.THROWED;
 				}
 				if (!id_data) {
-					this.onerror('get_work.parse_search_result:'
+					_this.onerror('get_work.parse_search_result:'
 							+ ' 作品網址解析函數 parse_search_result 未回傳正規結果！',
 							work_title);
 					finish_up('作品網址解析函數 parse_search_result 未回傳正規結果！');
@@ -1369,6 +1370,7 @@ function module_code(library_namespace) {
 					// failed: not only one
 					(approximate_title.length === 0 ? '未找到' : '找到'
 							+ approximate_title.length + '個')
+							// 相匹配
 							+ '與[' + work_title + ']相符者。');
 					finish_up(approximate_title.length > 0 && {
 						titles : approximate_title
@@ -1541,7 +1543,7 @@ function module_code(library_namespace) {
 			} else if (_this.site_name) {
 				work_data.site_name = _this.site_name;
 			}
-			// 基本檢測。
+			// 基本檢測。 e.g., "NOT FOUND"
 			if (PATTERN_non_CJK.test(work_data.title)
 			// e.g., "THE NEW GATE", "Knight's & Magic"
 			&& !/[a-z]+ [a-z\d&]/i.test(work_data.title)
@@ -1551,9 +1553,8 @@ function module_code(library_namespace) {
 			&& !/[a-z\-][A-Z]/.test(work_data.title)
 			// .title: 必要屬性：須配合網站平台更改。
 			&& PATTERN_non_CJK.test(work_id)) {
-				library_namespace
-						.error('process_work_data: Did not set work title: '
-								+ work_id + ' (' + work_data.title + ')');
+				library_namespace.warn('process_work_data: 非中日文作品標題: '
+						+ work_data.title + ' (id: ' + work_id + ')');
 			}
 
 			// 自動添加之作業用屬性：
@@ -2549,13 +2550,15 @@ function module_code(library_namespace) {
 					if (library_namespace.platform.OS === 'darwin'
 							&& images_archive.program_type === 'zip') {
 						// In Max OS: 直接解開圖片壓縮檔以避免麻煩。
+						// Max OS 中，壓縮檔內的檔案路徑包括了目錄名稱，行為表現與其他的應用程式不一致，因此不容易判別。
+						// 另外 Max OS 中的壓縮程式缺乏了某些功能。
 						process.stdout.write('Extract image files: '
 								+ images_archive.file_name + '...\r');
 						images_archive.extract({
 							cwd : images_archive
 						});
 					} else {
-						// detect if images archive file has existed.
+						// detect if images archive file is existed.
 						images_archive.file_existed = true;
 						process.stdout.write('Reading '
 								+ images_archive.file_name + '...\r');
