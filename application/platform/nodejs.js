@@ -672,6 +672,9 @@ function module_code(library_namespace) {
 	 * @see GitHub.updater.node.js
 	 */
 	function executable_file_path(file_name, search_path_list) {
+		if (!file_name)
+			return;
+
 		if (!Array.isArray(search_path_list)) {
 			search_path_list = String(search_path_list
 			// Unix: process.env.PATH, Windows: process.env.Path
@@ -701,10 +704,19 @@ function module_code(library_namespace) {
 		if (library_namespace.platform('windows')) {
 			// 直接給予包括 %environment variable% 的路徑名稱，在 Windows 下不用
 			// WshShell.ExpandEnvironmentStrings() 解析，亦可正常執行。
-			if (false && /%[a-z_]%/i.test(file_name)) {
+			if (/%[a-z_]+%/i.test(file_name)) {
 				// e.g., "%ProgramFiles%\\7-Zip\\7z.exe"
 				// TODO: using process.env.ProgramFiles
-				throw 'Can not handle ' + file_name;
+				if (library_namespace.is_debug())
+					library_namespace
+							.warn('executable_file_path: Can not handle '
+									+ file_name);
+				return file_name;
+			}
+
+			if (/^[a-z]:\\/i.test(file_name)) {
+				// is absolute path
+				return fs_status(file_name) && file_name;
 			}
 
 		} else if (file_name.startsWith('/')) {
@@ -795,9 +807,10 @@ function module_code(library_namespace) {
 		}
 
 		var script_file = append_path_separator(library_namespace.env.TEMP
-				|| library_namespace.env.TMP, 'run_JSctipt.' + Math.rand()
+				|| library_namespace.env.TMP, 'run_JSctipt.' + Math.random()
 				+ '.js');
-		fs_writeFileSync(script_file, code);
+		// console.log('script_file: ' + script_file);
+		fs_writeFileSync(script_file, code, 'utf16le');
 		try {
 			child_process.execSync('CScript.exe "' + script_file + '"', {
 				stdio : 'ignore'
@@ -806,14 +819,16 @@ function module_code(library_namespace) {
 			// TODO: handle exception
 		}
 		// 去掉暫存檔(執行檔)
-		remove_fso(script_file);
+		// remove_fso(script_file);
 
 		var result_file_name = options.result_file_name;
 		if (result_file_name) {
+			// console.log('result_file_name: ' + result_file_name);
 			var result = /\.json$/i.test(result_file_name) ? get_JSON_file(
 					result_file_name, 'auto') : fs_readFileSync(
 					result_file_name, 'auto');
-			remove_fso(result_file_name);
+			// remove_fso(result_file_name);
+			// console.log(result);
 			return result;
 		}
 	}

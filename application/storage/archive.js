@@ -156,17 +156,19 @@ function module_code(library_namespace) {
 								// https://msdn.microsoft.com/ja-jp/library/cc364502.aspx
 								+ "var fso=WScript.CreateObject('Scripting.FileSystemObject'),WshProcessEnv=WshShell.Environment('Process'),file=WshProcessEnv('TEMP')||WshProcessEnv('TMP');"
 								// WshShell.ExpandEnvironmentStrings('%TEMP%\\\\7z_path.txt')
-								+ "file=fso.OpenTextFile(file+'\\\\7z_path.txt'),2,-1);"
+								+ "file=fso.OpenTextFile(file+'\\\\7z_path.txt',2,-1);"
 								+ "file.Write(p7z_path||'');file.Close();",
 						(library_namespace.env.TEMP || library_namespace.env.TMP)
 								+ path_separator + '7z_path.txt');
-		// console.log(extract_program_path);
+		// console.log(executable_file_path['7z']);
 
 		executable_file_path['7z'] = library_namespace
 				.executable_file_path(executable_file_path['7z'].trim()
 						+ '7z.exe');
+		// console.log(executable_file_path['7z']);
 		if (executable_file_path['7z'])
 			executable_file_path['7z'] = add_quote(executable_file_path['7z']);
+		// console.log(executable_file_path['7z']);
 	}
 
 	Object.keys(executable_file_path).forEach(function(program_type) {
