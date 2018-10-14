@@ -86,6 +86,7 @@ if (typeof CeL === 'function') {
 
 		// .includes() @ CeL.data.code.compatibility
 		require : 'data.code.compatibility.'
+		// run_JSctipt() @ CeL.application.platform.nodejs
 		// executable_file_path() @ CeL.application.platform.nodejs
 		+ '|application.platform.nodejs.',
 
@@ -130,17 +131,43 @@ function module_code(library_namespace) {
 		 */
 		"7za",
 		// keka @ macOS
-		"/Applications/Keka.app/Contents/Resources/keka7z" ])
-				|| library_namespace.platform('windows')
-				&& "%ProgramFiles%\\7-Zip\\7z.exe",
+		"/Applications/Keka.app/Contents/Resources/keka7z",
+				library_namespace.platform('windows')
+				// '"' + (process.env.ProgramFiles || 'C:\\Program Files') +
+				// '\\7-Zip\\7z.exe' + '"'
+				&& "%ProgramFiles%\\7-Zip\\7z.exe" ]),
 
-		rar : library_namespace.executable_file_path("rar")
-		// WinRAR.exe
-		|| library_namespace.platform('windows')
-				&& "%ProgramFiles%\\WinRAR\\rar.exe"
+		rar : library_namespace.executable_file_path([ "rar",
+				library_namespace.platform('windows')
+				// WinRAR.exe
+				&& "%ProgramFiles%\\WinRAR\\rar.exe" ])
 	},
 	// 預設的壓縮程式。
 	default_program_type;
+
+	if (!executable_file_path['7z'] && library_namespace.platform('windows')) {
+		// @see GitHub.updater.node.js
+		// try to read 7z program path from Windows registry
+		executable_file_path['7z'] = library_namespace
+				.run_JSctipt(
+						"var WshShell=WScript.CreateObject('WScript.Shell'),p7z_path;"
+								+ "try{p7z_path=WshShell.RegRead('HKCU\\\\Software\\\\7-Zip\\\\Path64');}catch(e){}"
+								+ "try{p7z_path=WshShell.RegRead('HKCU\\\\Software\\\\7-Zip\\\\Path');}catch(e){}"
+								// https://msdn.microsoft.com/ja-jp/library/cc364502.aspx
+								+ "var fso=WScript.CreateObject('Scripting.FileSystemObject'),WshProcessEnv=WshShell.Environment('Process'),file=WshProcessEnv('TEMP')||WshProcessEnv('TMP');"
+								// WshShell.ExpandEnvironmentStrings('%TEMP%\\\\7z_path.txt')
+								+ "file=fso.OpenTextFile(file+'\\\\7z_path.txt'),2,-1);"
+								+ "file.Write(p7z_path||'');file.Close();",
+						(library_namespace.env.TEMP || library_namespace.env.TMP)
+								+ path_separator + '7z_path.txt');
+		// console.log(extract_program_path);
+
+		executable_file_path['7z'] = library_namespace
+				.executable_file_path(executable_file_path['7z'].trim()
+						+ '7z.exe');
+		if (executable_file_path['7z'])
+			executable_file_path['7z'] = add_quote(executable_file_path['7z']);
+	}
 
 	Object.keys(executable_file_path).forEach(function(program_type) {
 		var program_path = executable_file_path[program_type];

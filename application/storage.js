@@ -68,6 +68,7 @@ function module_code(library_namespace) {
 	 * 公用API: 有些尚未完備，需要先確認。<code>
 
 	// set/get current working directory. 設定/取得目前工作目錄。
+	// current_directory() ends with path_separator
 	CeL.storage.working_directory([change_to_directory])
 
 	CeL.storage.fso_status(fso_path)
@@ -229,8 +230,30 @@ function module_code(library_namespace) {
 	};
 
 	// -------------------------------------------------------------------------
+	// 一些與平台無關，且常用的檔案操作函數。或者簡單並且依賴於上面所列出操作的函數。
+	// platform-independent model (PIM)
+	// https://en.wikipedia.org/wiki/Platform-independent_model
 
 	var path_separator = library_namespace.env.path_separator;
+
+	// join path
+	function append_path_separator(directory_path, file_name) {
+		if (directory_path && !/[\\\/]$/.test(directory_path)) {
+			directory_path +=
+			// 所添加的路徑分隔，以路徑本身的路徑分隔為主。
+			directory_path.includes('/') ? '/'
+			//
+			: directory_path.includes('\\')
+			// e.g., 'C:'
+			|| directory_path.endsWith(':') ? '\\'
+			//
+			: path_separator;
+		}
+		// library_namespace.simplify_path()
+		return file_name ? directory_path + file_name : directory_path;
+	}
+
+	_.append_path_separator = append_path_separator;
 
 	// 決定預設的主要下載目錄。
 	// macOS dmg APP 中無法將檔案儲存在APP目錄下。
@@ -265,8 +288,8 @@ function module_code(library_namespace) {
 			if ([ 'Downloads', '下載' ]
 			// '下載': Linux Mint
 			.some(function(user_download_directory) {
-				user_download_directory = download_directory + path_separator
-						+ user_download_directory;
+				user_download_directory = append_path_separator(
+						download_directory, user_download_directory);
 				if (_.directory_exists(user_download_directory)) {
 					download_directory = user_download_directory;
 					return true;
@@ -290,7 +313,7 @@ function module_code(library_namespace) {
 		}
 
 		// main_directory 必須以 path separator 作結。
-		download_directory += path_separator;
+		download_directory = append_path_separator(download_directory);
 		library_namespace.debug('預設的主要下載目錄: ' + download_directory, 1,
 				'determin_download_directory');
 		return download_directory;

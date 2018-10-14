@@ -57,18 +57,25 @@ function module_code(library_namespace) {
 	.prototype = {};
 
 	/** {String}path separator. e.g., '/', '\' */
-	var path_separator = library_namespace.env.path_separator;
+	var path_separator = library_namespace.env.path_separator,
+	// placeholder for library_namespace.storage.append_path_separator()
+	append_path_separator = function(directory_path, file_name) {
+		if (library_namespace.append_path_separator)
+			return (append_path_separator = library_namespace.append_path_separator)
+					.apply(null, arguments);
+		return directory_path + path_separator + (file_name || '');
+	};
 
 	// set/get current working directory. 設定/取得目前工作目錄。
 	function working_directory(change_to_directory) {
 		if (change_to_directory)
 			process.chdir(change_to_directory);
-		return process.cwd() + path_separator;
+		return append_path_separator(process.cwd());
 	}
 	_.working_directory = working_directory;
 
-	/** node.js file system module */
-	var node_fs = require('fs');
+	/** const node.js file system module */
+	var node_fs = require('fs'), child_process = require('child_process');
 
 	// TODO: 規範化
 	function fs_status(file_path, with_error) {
@@ -244,8 +251,8 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function remove_fso_list(list, recurse, parent) {
-		if (parent && !/[\\\/]$/.test(parent)) {
-			parent += path_separator;
+		if (parent) {
+			parent = append_path_separator(parent);
 		}
 
 		var error;
@@ -482,9 +489,7 @@ function module_code(library_namespace) {
 	 */
 	function fs_renameSync(move_from_path, move_to_path, base_path) {
 		if (base_path) {
-			if (!/[\\\/]$/.test(base_path)) {
-				base_path += path_separator;
-			}
+			base_path = append_path_separator(base_path);
 			move_from_path = base_path + move_from_path;
 			move_to_path = base_path + move_to_path;
 		}
@@ -539,10 +544,8 @@ function module_code(library_namespace) {
 			library_namespace.debug('Not exists: ' + path);
 			return;
 		}
-		if (!/[\\\/]$/.test(path)) {
-			// treat path as directory
-			path += path_separator;
-		}
+		// treat path as directory
+		path = append_path_separator(path);
 
 		// console.log([ depth, filter ]);
 		// console.log(list);
@@ -650,25 +653,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
-	// join path
-	function append_path_separator(directory_path, file_name) {
-		if (!/[\\\/]$/.test(directory_path)) {
-			directory_path +=
-			// 所添加的路徑分隔，以路徑本身的路徑分隔為主。
-			directory_path.includes('/') ? '/'
-			//
-			: directory_path.includes('\\')
-			// e.g., 'C:'
-			|| directory_path.endsWith(':') ? '\\'
-			//
-			: path_separator;
-		}
-		// library_namespace.simplify_path()
-		return file_name ? directory_path + file_name : directory_path;
-	}
-
-	_.append_path_separator = append_path_separator;
-
 	/**
 	 * search $PATH, 搜尋可執行檔案的完整路徑。
 	 * 
@@ -715,8 +699,11 @@ function module_code(library_namespace) {
 
 		// assert: {String}file_name
 		if (library_namespace.platform('windows')) {
-			if (/%[a-z_]%/i.test(file_name)) {
-				// e.g., '%ProgramFiles%\\7-Zip\\7z.exe'
+			// 直接給予包括 %environment variable% 的路徑名稱，在 Windows 下不用
+			// WshShell.ExpandEnvironmentStrings() 解析，亦可正常執行。
+			if (false && /%[a-z_]%/i.test(file_name)) {
+				// e.g., "%ProgramFiles%\\7-Zip\\7z.exe"
+				// TODO: using process.env.ProgramFiles
 				throw 'Can not handle ' + file_name;
 			}
 
@@ -790,6 +777,50 @@ function module_code(library_namespace) {
 	};
 
 	// --------------------------------------------
+
+	function run_JSctipt(code, options) {
+		if (!library_namespace.platform('windows')) {
+			library_namespace
+					.error('run_JSctipt: Only executing under Windows!');
+			return;
+		}
+
+		// 前置處理。
+		if (typeof options === 'string') {
+			options = {
+				result_file_name : options
+			};
+		} else {
+			options = library_namespace.setup_options();
+		}
+
+		var script_file = append_path_separator(library_namespace.env.TEMP
+				|| library_namespace.env.TMP, 'run_JSctipt.' + Math.rand()
+				+ '.js');
+		fs_writeFileSync(script_file, code);
+		try {
+			child_process.execSync('CScript.exe "' + script_file + '"', {
+				stdio : 'ignore'
+			});
+		} catch (e) {
+			// TODO: handle exception
+		}
+		// 去掉暫存檔(執行檔)
+		remove_fso(script_file);
+
+		var result_file_name = options.result_file_name;
+		if (result_file_name) {
+			var result = /\.json$/i.test(result_file_name) ? get_JSON_file(
+					result_file_name, 'auto') : fs_readFileSync(
+					result_file_name, 'auto');
+			remove_fso(result_file_name);
+			return result;
+		}
+	}
+
+	_.run_JSctipt = run_JSctipt;
+
+	// --------------------------------------------------------
 
 	// TODO:
 	// Buffer.prototype.indexOf()
