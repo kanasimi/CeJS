@@ -14,8 +14,10 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.Ajax',
 
+	// Promise for fetch()
+	require : 'data.code.compatibility.'
 	// MIME_of()
-	require : 'application.net.MIME.'
+	+ '|application.net.MIME.'
 	// for CeL.to_file_name()
 	+ '|application.net.',
 
@@ -971,7 +973,7 @@ function module_code(library_namespace) {
 			_f.XMLHttp.send(f.sendDoc || null);
 			if (!f.fn) {
 				/**
-				 * 非async(異步的)能在此就得到response。Safari and Konqueror cannot
+				 * 非async(異步的)能在此就得到 response。Safari and Konqueror cannot
 				 * understand the encoding of text files!
 				 * 
 				 * @see http://www.kawa.net/works/js/jkl/parsexml.html
@@ -1400,11 +1402,15 @@ function module_code(library_namespace) {
 		result_Object = {
 			// node_agent : agent,
 
-			// for debug
-			// url : _URL,
+			// .url @ fetch()
+			// url : URL,
 
 			// deprecated: XMLHttp.URL
-			// URL : URL,
+			// URL : _URL,
+
+			// https://developer.mozilla.org/zh-TW/docs/Web/API/Response
+			// .useFinalURL @ fetch()
+			// useFinalURL : URL,
 
 			// 因為可能 redirecting 過，這邊列出的才是最終 URL。
 			// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseURL
@@ -1493,19 +1499,19 @@ function module_code(library_namespace) {
 				}
 			}
 			// 在出現錯誤時，將 onload 當作 callback。並要確保 {Object}response
-			// 因此應該要先檢查error再處理response
+			// 因此應該要先檢查 error 再處理 response
 			typeof onload === 'function' && onload(result_Object, error);
 		},
 		// on success
-		_onload = function(result) {
+		_onload = function(response) {
 			// 在這邊不過剛開始從伺服器得到資料，因此還不可執行unregister()，否則依然可能遇到timeout。
 			if (finished) {
 				return;
 			}
 
-			if (/^3/.test(result.statusCode)
+			if ((response.statusCode / 100 | 0) === 3
 			//
-			&& result.headers.location && result.headers.location !== URL
+			&& response.headers.location && response.headers.location !== URL
 			//
 			&& !options.no_redirect) {
 				if (unregister()) {
@@ -1524,41 +1530,42 @@ function module_code(library_namespace) {
 					options = Object.clone(options);
 					options.get_URL_cloned = true;
 				}
-				options.URL = node_url.resolve(URL, result.headers.location);
-				library_namespace.debug(result.statusCode + ' Redirecting to ['
-						+ options.URL + '] ← [' + URL + ']', 1, 'get_URL_node');
+				options.URL = node_url.resolve(URL, response.headers.location);
+				library_namespace.debug(response.statusCode
+						+ ' Redirecting to [' + options.URL + '] ← [' + URL
+						+ ']', 1, 'get_URL_node');
 				get_URL_node(options, onload, charset, post_data);
 				return;
 			}
 
-			// {Number}result.statusCode
+			// {Number}response.statusCode
 			// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
-			result_Object.status = result.statusCode;
+			result_Object.status = response.statusCode;
 			// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
-			if (options.onfail || /^2/.test(result.statusCode)) {
-				library_namespace.debug('STATUS: ' + result.statusCode + ' '
+			if (options.onfail || (response.statusCode / 100 | 0) === 2) {
+				library_namespace.debug('STATUS: ' + response.statusCode + ' '
 						+ URL, 2, 'get_URL_node');
 			} else if (!options.no_warning) {
 				library_namespace.warn('get_URL_node: [' + URL + ']: status '
-						+ result.statusCode);
+						+ response.statusCode);
 			}
 
-			library_namespace
-					.debug('result HEADERS: ' + JSON.stringify(result.headers),
-							4, 'get_URL_node._onload');
+			library_namespace.debug('response HEADERS: '
+					+ JSON.stringify(response.headers), 4,
+					'get_URL_node._onload');
 			// XMLHttp.headers['content-type']==='text/html; charset=utf-8'
-			result_Object.headers = result.headers;
+			result_Object.headers = response.headers;
 
 			// node.js會自動把headers轉成小寫。
 			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition
-			if (result.headers['content-disposition']) {
+			if (response.headers['content-disposition']) {
 				// 從Content-Disposition中抽取出檔名。
 				// ext-value = charset "'" [ language ] "'" value-chars
-				var matched = result.headers['content-disposition']
+				var matched = response.headers['content-disposition']
 						.match(/ filename\*\s*=\s*([^';]+)'([^';]*)'([^';]+)/);
 				if (matched) {
 					matched = matched[3];
-				} else if (matched = result.headers['content-disposition']
+				} else if (matched = response.headers['content-disposition']
 						.match(/ filename\s*=\s*([^';]+)/)) {
 					matched = matched[1];
 				}
@@ -1575,10 +1582,10 @@ function module_code(library_namespace) {
 				}
 			}
 
-			// 在503之類的情況下。可能沒"Content-Type:"。這時result將無.type。
-			if (result.headers['content-type']) {
+			// 在503之類的情況下。可能沒"Content-Type:"。這時 response 將無.type。
+			if (response.headers['content-type']) {
 				// MIME type, media-type: XMLHttp.type
-				result_Object.type = result.headers['content-type']
+				result_Object.type = response.headers['content-type']
 				// charset: XMLHttp.charset
 				.replace(/;(.*)$/, function($0, $1) {
 					var matched = $1.match(/[; ]charset=([^;]+)/i);
@@ -1590,9 +1597,9 @@ function module_code(library_namespace) {
 			}
 
 			// 若原先有agent，應該合併到原先的agent，而非可能為暫時性/泛用的agent。
-			merge_cookie(options.agent || agent, result.headers['set-cookie']);
+			merge_cookie(options.agent || agent, response.headers['set-cookie']);
 
-			// 為預防字元編碼破碎，因此不能設定 result.setEncoding()？
+			// 為預防字元編碼破碎，因此不能設定 response.setEncoding()？
 			// 但經測試，Wikipedia 有時似乎會有回傳字元錯位之情形？
 			// 2016/4/9 9:9:7 藉由 delete wiki_API.use_Varnish 似可解決。
 
@@ -1604,7 +1611,7 @@ function module_code(library_namespace) {
 				unregister();
 				library_namespace.warn('got [' + URL
 						+ '], but there is no listener!', 1, 'get_URL_node');
-				// console.log(result);
+				// console.log(response);
 				return;
 			}
 
@@ -1612,7 +1619,7 @@ function module_code(library_namespace) {
 					'get_URL_node');
 			/** {Array} [ {Buffer}, {Buffer}, ... ] */
 			var data = [], length = 0;
-			result.on('data', function(chunk) {
+			response.on('data', function(chunk) {
 				// {Buffer}chunk
 				length += chunk.length;
 				library_namespace.debug('receive BODY.length: ' + chunk.length
@@ -1622,7 +1629,7 @@ function module_code(library_namespace) {
 			});
 
 			// https://iojs.org/api/http.html#http_http_request_options_callback
-			result.on('end', function() {
+			response.on('end', function() {
 				library_namespace.debug('end(): ' + URL, 2, 'get_URL_node');
 
 				// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
@@ -1632,7 +1639,7 @@ function module_code(library_namespace) {
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
 
-				if (result.statusCode === 503
+				if (response.statusCode === 503
 						&& data.toString().includes(' id="jschl-answer"')) {
 					library_namespace.error(
 					// TODO: https://github.com/codemanki/cloudscraper
@@ -1641,9 +1648,10 @@ function module_code(library_namespace) {
 
 				// 基本檢測。
 
-				if (!/^2/.test(result.statusCode) && options.error_retry >= 1
-				// 例如當遇到404或502時，再多嘗試一下。
-				&& !(options.error_retry <= options.error_count)) {
+				if ((response.statusCode / 100 | 0) !== 2
+						&& options.error_retry >= 1
+						// 例如當遇到404或502時，再多嘗試一下。
+						&& !(options.error_retry <= options.error_count)) {
 					_onfail('BAD STATUS');
 					return;
 				}
@@ -1673,7 +1681,7 @@ function module_code(library_namespace) {
 					}
 				}
 
-				var encoding = result.headers['content-encoding'];
+				var encoding = response.headers['content-encoding'];
 				// https://nodejs.org/docs/latest/api/zlib.html
 				// https://gist.github.com/narqo/5265413
 				// https://github.com/request/request/blob/master/request.js
@@ -1765,7 +1773,7 @@ function module_code(library_namespace) {
 						// set file modify date
 						// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Date
 						// https://tools.ietf.org/html/rfc7231#section-7.1.1.2
-						if (result.headers['date']) {
+						if (response.headers['date']) {
 							try {
 								// The "Date" header field represents the date
 								// and time at which the message was originated
@@ -1774,7 +1782,7 @@ function module_code(library_namespace) {
 								// atime: the last time this file was accessed
 								node_fs.utimesSync(file_path, new Date,
 								// mtime: the last time this file was modified
-								result.headers['date']);
+								response.headers['date']);
 							} catch (e) {
 								// TODO: handle exception
 							}
@@ -1790,7 +1798,7 @@ function module_code(library_namespace) {
 				if (typeof options.content_processor === 'function') {
 					options.content_processor(
 					// ({Buffer}contains, URL, status)
-					data, URL, result.statusCode);
+					data, URL, response.statusCode);
 				}
 
 				result_Object.buffer = data;
@@ -2296,6 +2304,110 @@ function module_code(library_namespace) {
 
 	if (is_nodejs) {
 		_.get_URL_cache = get_URL_cache_node;
+	}
+
+	// ---------------------------------------------------------------------//
+
+	// simple polyfill for fetch API
+	// @since 2018/10/16 17:47:12
+	// https://fetch.spec.whatwg.org/#fetch-method
+	// https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API
+	// TODO: fetch 預設上不傳送或接收任何 cookies，如果網站依賴 session 會導致請求回傳未經認證，需要使用 cookies
+	// 必須額外設定 credentials。
+	/* async */function fetch_node(input, init) {
+		// TODO: input is a Request object.
+
+		var url = node_url.parse(input), options = library_namespace
+				.new_options(init);
+
+		function executor(resolve, reject) {
+			function callback(response) {
+				if ((response.statusCode / 100 | 0) === 3
+						&& response.headers.location
+						&& response.headers.location !== url.format()) {
+					try {
+						request.abort();
+					} catch (e) {
+					}
+
+					Object.assign(options, {
+						redirected : true,
+						initial_URL : options.initial_URL || input
+					});
+
+					url = node_url.resolve(url, response.headers.location);
+					library_namespace.debug(
+							response.statusCode + ' Redirecting to [' + url
+									+ '] ← [' + input + ']', 1, 'fetch');
+					fetch(url, options);
+					return;
+				}
+
+				/** {Array} [ {Buffer}, {Buffer}, ... ] */
+				var data = [], length = 0;
+				response.on('data', function(chunk) {
+					// {Buffer}chunk
+					length += chunk.length;
+					library_namespace.debug('receive BODY.length: '
+					//
+					+ chunk.length + '/' + length + ': ' + url.format(), 4,
+							'fetch');
+					data.push(chunk);
+				});
+
+				response.on('end', function() {
+					library_namespace.debug('end(): ' + url.format(), 2,
+							'fetch');
+
+					// console.log('No more data in response: ' + url.format());
+					// it is faster to provide the length explicitly.
+					data = Buffer.concat(data, length);
+
+					var result_Object = {
+						// https://developer.mozilla.org/zh-TW/docs/Web/API/Response
+						// https://nodejs.org/api/http.html#http_http_get_options_callback
+						url : options.initial_URL || input,
+						headers : response.headers,
+						status : response.statusCode,
+						statusText : response.statusMessage,
+						ok : (response.statusCode / 100 | 0) === 2,
+						redirected : !!options.redirected,
+						useFinalURL : url.format(),
+
+						body : data,
+
+						// methods of
+						// https://developer.mozilla.org/en-US/docs/Web/API/Body
+						text : function text() {
+							return Promise.resolve(this.body.toString());
+						},
+						json : function json() {
+							return this.text().then(JSON.parse);
+						},
+						arrayBuffer : function arrayBuffer() {
+							return Promise.resolve(this.body.buffer);
+						}
+					};
+
+					resolve(result_Object);
+				});
+			}
+
+			// https://nodejs.org/api/http.html
+			var request = url.protocol === 'http:' ? node_http.request(url
+					.format(), options, callback) : node_https.request(url
+					.format(), options, callback);
+			request.on('error', reject);
+			if (options.body)
+				request.write(options.body);
+			request.end();
+		}
+
+		return new Promise(executor);
+	}
+
+	if (is_nodejs) {
+		_.fetch = fetch_node;
 	}
 
 	// ---------------------------------------------------------------------//
