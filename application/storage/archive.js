@@ -150,20 +150,24 @@ function module_code(library_namespace) {
 		// try to read 7z program path from Windows registry
 		executable_file_path['7z'] = library_namespace
 				.run_JSctipt(
-						"var WshShell=WScript.CreateObject('WScript.Shell'),p7z_path;"
-								+ "try{p7z_path=WshShell.RegRead('HKCU\\\\Software\\\\7-Zip\\\\Path64');}catch(e){}"
-								+ "try{p7z_path=WshShell.RegRead('HKCU\\\\Software\\\\7-Zip\\\\Path');}catch(e){}"
-								// https://msdn.microsoft.com/ja-jp/library/cc364502.aspx
-								+ "var fso=WScript.CreateObject('Scripting.FileSystemObject'),WshProcessEnv=WshShell.Environment('Process'),file=WshProcessEnv('TEMP')||WshProcessEnv('TMP');"
-								// WshShell.ExpandEnvironmentStrings('%TEMP%\\\\7z_path.txt')
-								+ "file=fso.OpenTextFile(file+'\\\\7z_path.txt',2,-1);"
-								+ "file.Write(p7z_path||'');file.Close();",
-						(library_namespace.env.TEMP || library_namespace.env.TMP)
-								+ path_separator + '7z_path.txt');
-		// console.log(executable_file_path['7z']);
+						"var p7z_path='HKCU\\\\Software\\\\7-Zip\\\\Path';"
+								// use stdout
+								+ "console.log(add_quote(RegRead(p7z_path+64)||RegRead(p7z_path)));",
+						{
+							attach_library : true
+						});
+		if (false) {
+			console.log('stdout: '
+					+ executable_file_path['7z'].stdout.toString());
+			console.log('stdout: '
+					+ JSON.parse(executable_file_path['7z'].stdout.toString()));
+			console.log('stderr: '
+					+ executable_file_path['7z'].stderr.toString());
+		}
 
 		executable_file_path['7z'] = library_namespace
-				.executable_file_path(executable_file_path['7z'].trim()
+				.executable_file_path(JSON.parse(
+						executable_file_path['7z'].stdout.toString()).trim()
 						+ '7z.exe');
 		// console.log(executable_file_path['7z']);
 		if (executable_file_path['7z'])

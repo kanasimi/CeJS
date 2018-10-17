@@ -653,6 +653,14 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
+	// WshShell.ExpandEnvironmentStrings()
+	function ExpandEnvironmentStrings(string) {
+		return string.replace(/%([a-z_]+)%/ig, function(all, variable) {
+			return process.env.variable === undefined ? all
+					: process.env.variable;
+		});
+	}
+
 	/**
 	 * search $PATH, 搜尋可執行檔案的完整路徑。
 	 * 
@@ -700,12 +708,15 @@ function module_code(library_namespace) {
 			return file_name;
 		}
 
+		// is absolute path
+		var is_absolute_path;
+
 		// assert: {String}file_name
 		if (library_namespace.platform('windows')) {
 			// 直接給予包括 %environment variable% 的路徑名稱，在 Windows 下不用
-			// WshShell.ExpandEnvironmentStrings() 解析，亦可正常執行。
-			if (/%[a-z_]+%/i.test(file_name)) {
-				// e.g., "%ProgramFiles%\\7-Zip\\7z.exe"
+			// WshShell.ExpandEnvironmentStrings() 解析，亦可正常 **執行**。
+			// 但是採用 fs_status() 無法正常作動。
+			if (false && /%[a-z_]+%/i.test(file_name)) {
 				// TODO: using process.env.ProgramFiles
 				if (library_namespace.is_debug())
 					library_namespace
@@ -713,16 +724,19 @@ function module_code(library_namespace) {
 									+ file_name);
 				return file_name;
 			}
+			// e.g., "%ProgramFiles%\\7-Zip\\7z.exe"
+			file_name = ExpandEnvironmentStrings(file_name);
 
 			if (/^[a-z]:\\/i.test(file_name)) {
-				// is absolute path
-				return fs_status(file_name) && file_name;
+				is_absolute_path = true;
 			}
 
 		} else if (file_name.startsWith('/')) {
-			// is absolute path
-			return fs_status(file_name) && file_name;
+			is_absolute_path = true;
 		}
+
+		if (is_absolute_path)
+			return fs_status(file_name) && file_name;
 
 		// console.log(search_path_list);
 		if (search_path_list
@@ -781,7 +795,8 @@ function module_code(library_namespace) {
 	// 為 electron-builder 安裝包
 	var is_installation_package = process.env.Apple_PubSub_Socket_Render
 			// @ Windows, Linux Mint
-			|| process.mainModule.filename.replace(/[\\\/]app\.asar.+/, '') === process.resourcesPath
+			|| process.mainModule
+			&& process.mainModule.filename.replace(/[\\\/]app\.asar.+/, '') === process.resourcesPath
 			&& library_namespace.platform.OS;
 
 	_.is_installation_package = function() {
@@ -803,37 +818,66 @@ function module_code(library_namespace) {
 				result_file_name : options
 			};
 		} else {
-			options = library_namespace.setup_options();
+			options = library_namespace.setup_options(options);
 		}
 
 		var script_file = append_path_separator(library_namespace.env.TEMP
-				|| library_namespace.env.TMP, 'run_JSctipt.' + Math.random()
-				+ '.js');
+				|| library_namespace.env.TMP || '.', 'run_JSctipt.'
+				+ Math.random() + '.js');
 		// console.log('script_file: ' + script_file);
-		fs_writeFileSync(script_file, code, 'utf16le');
+		remove_fso(script_file);
+		if (options.attach_library) {
+			// console.log('attach library code: ' + run_JSctipt.library_code);
+			code = run_JSctipt.library_code + code;
+		}
+		var BOM = Buffer.from('fffe', 'hex');
+		code = Buffer.from(code, 'utf16le');
+		fs_writeFileSync(script_file, Buffer.concat([ BOM, code ], BOM.length
+				+ code.length));
+
+		var result, result_file_name = options.result_file_name;
+		if (result_file_name) {
+			remove_fso(result_file_name);
+		}
+
 		try {
-			child_process.execSync('CScript.exe "' + script_file + '"', {
-				stdio : 'ignore'
-			});
+			result = child_process.spawnSync('CScript.exe', [ '//Nologo',
+					script_file ]);
 		} catch (e) {
 			// TODO: handle exception
 		}
 		// 去掉暫存檔(執行檔)
-		// remove_fso(script_file);
+		remove_fso(script_file);
 
-		var result_file_name = options.result_file_name;
 		if (result_file_name) {
 			// console.log('result_file_name: ' + result_file_name);
 			var result = /\.json$/i.test(result_file_name) ? get_JSON_file(
 					result_file_name, 'auto') : fs_readFileSync(
 					result_file_name, 'auto');
-			// remove_fso(result_file_name);
+			remove_fso(result_file_name);
 			// console.log(result);
 			return result;
 		}
+
+		return result;
 	}
 
 	_.run_JSctipt = run_JSctipt;
+
+	// 常用函數集。
+	run_JSctipt.library_code = "var WshShell=WScript.CreateObject('WScript.Shell'),FSO=WScript.CreateObject('Scripting.FileSystemObject'),WshProcessEnv=WshShell.Environment('Process'),"
+			// https://msdn.microsoft.com/ja-jp/library/cc364502.aspx
+			+ "tmp_dir=(WshProcessEnv('TEMP')||WshProcessEnv('TMP'))+'\\\\',"
+			// https://stackoverflow.com/questions/4388879/vbscript-output-to-console
+			+ "console={_stdout:FSO.GetStandardStream(1),_stderr:FSO.GetStandardStream(2),"
+			// + "log:function(m){console._stdout.WriteLine(m);},"
+			+ "log:function(m){WScript.Echo(m);},"
+			+ "error:function(m){console._stderr.WriteLine(m);}};"
+			+ "function add_quote(text){return '\"'+text.replace(/([\"\\\\])/g,'\\\\$1').replace(/[^\u0020-\u007e]/g,function($){$=$.charCodeAt(0).toString(16);return '\\\\u0000'.slice(0,-$.length)+$;})+'\"';}"
+			+ "function RegRead(key){try{return WshShell.RegRead(key);}catch(e){}}"
+			// WshShell.ExpandEnvironmentStrings('%TEMP%\\\\file_name')
+			// 2: ForWriting, -1: TristateTrue (Opens the file as Unicode)
+			+ "function write_file(file_name,content){var file=FSO.OpenTextFile(file_name,2,-1);content&&file.Write(content);file.Close();}";
 
 	// --------------------------------------------------------
 
