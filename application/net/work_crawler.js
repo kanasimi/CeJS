@@ -13,12 +13,11 @@
 # 取得作品資訊與各章節資料。 get_work_data()
 # 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data()
 # 取得每一個章節的內容與各個影像資料。 get_chapter_data()
-# 取得各個章節的每一個影像內容。 get_images()
+# 取得各個章節的每一個影像內容。 get_images(), .image_post_process(), .after_get_image()
 # finish_up()
 
 TODO:
 CLI progress bar
-
 預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
@@ -28,7 +27,6 @@ parse 圖像。
 從其他的資料來源網站尋找取得作品以及章節的資訊。
 檢核章節內容。
 proxy
-GUI 支援自動更新
 Runs untrusted code securely https://github.com/patriksimek/vm2
 
 </code>
@@ -302,7 +300,10 @@ function module_code(library_namespace) {
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
 		// {Natural}圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。
 		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR_RETRY),
-		// {Natural}最小容許圖案檔案大小 (bytes)。
+		// {Natural}MIN_LENGTH:最小容許圖案檔案大小 (bytes)。
+		// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
+		// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。
+		//
 		// 對於極少出現錯誤的網站，可以設定一個比較小的數值，並且設定.allow_EOI_error=false。因為這類型的網站要不是無法取得檔案，要不就是能夠取得完整的檔案；要取得破損檔案，並且已通過EOI測試的機會比較少。
 		// MIN_LENGTH : 4e3,
 		// 對於有些圖片只有一條細橫桿的情況。
@@ -462,9 +463,40 @@ function module_code(library_namespace) {
 		// 規範 work id 的正規模式；提取出引數（如 URL）中的作品id 以回傳。
 		extract_work_id : function(work_information) {
 			// default: accept numerals only
-			return library_namespace.is_digits(work_information)
-					&& work_information;
-			return /^[a-z_\-\d]+$/.test(work_information) && work_information;
+			if (library_namespace.is_digits(work_information)
+			// || /^[a-z_\-\d]+$/.test(work_information)
+			)
+				return work_information;
+
+			// 自作品網址提取出 work id。
+			if (typeof work_information === 'string'
+					&& /^https?:\/\//.test(work_information)) {
+				var PATTERN_work_id_of_url = this.PATTERN_work_id_of_url;
+				if (!PATTERN_work_id_of_url) {
+					PATTERN_work_id_of_url = this.full_URL(this.work_URL,
+							'work_id');
+					if (PATTERN_work_id_of_url.endsWith('work_id/'))
+						PATTERN_work_id_of_url = PATTERN_work_id_of_url.slice(
+								0, -1);
+					PATTERN_work_id_of_url = this.PATTERN_work_id_of_url
+					// assert:
+					// 'work_id'===library_namespace.to_RegExp_pattern('work_id')
+					= new RegExp('^'
+							+ library_namespace.to_RegExp_pattern(
+									PATTERN_work_id_of_url).replace('work_id',
+									'([^\/]+)'));
+				}
+				var matched = work_information.match(PATTERN_work_id_of_url);
+				if (matched) {
+					matched = matched[1];
+					library_namespace
+							.info('extract_work_id: 自作品網址提取出 work id: '
+									+ matched);
+					return matched;
+				}
+				library_namespace.warn('extract_work_id: 無法自作品網址提取出 work id！ '
+						+ work_information);
+			}
 		},
 		// 取得用在作品完結的措辭。
 		finished_words : function finished_words(status) {
@@ -542,7 +574,7 @@ function module_code(library_namespace) {
 			// chapter_data={url:'',title:'',date:new Date}, ... ]
 			return work_data.chapter_list[chapter_NO - 1].url;
 
-			return this.work_URL(work_data.id)
+			return this.full_URL(this.work_URL, work_data.id)
 					+ work_data.chapter_list[chapter_NO - 1].url;
 		},
 		// this.get_URL()
@@ -1543,7 +1575,7 @@ function module_code(library_namespace) {
 			} else if (_this.site_name) {
 				work_data.site_name = _this.site_name;
 			}
-			// 基本檢測。 e.g., "NOT FOUND"
+			// 基本檢測。 e.g., "NOT FOUND", undefined
 			if (PATTERN_non_CJK.test(work_data.title)
 			// e.g., "THE NEW GATE", "Knight's & Magic"
 			&& !/[a-z]+ [a-z\d&]/i.test(work_data.title)
@@ -2093,10 +2125,11 @@ function module_code(library_namespace) {
 
 	// this.continue_arguments =
 	// undefined : 沒有設定特殊控制作業，正常執行或沒有作業執行中。
-	// [ STOP_TASK, callback_after_stopped ] : 等待作業暫停中
-	// [ QUIT_TASK, callback_after_quitted ] : 等待作業取消中
-	// [ work_data, chapter_NO, callback ] : 作業已經暫停，等待重啟中
+	// [ STOP_TASK, callback_after_stopped ] : 等待作業暫停中。
+	// [ QUIT_TASK, callback_after_quitted ] : 等待作業取消中。
+	// [ work_data, chapter_NO, callback ] : 作業已經暫停，等待重啟中。
 
+	// 🛑 Stop Sign
 	function is_stopping_now(quit) {
 		return Array.isArray(this.continue_arguments)
 				&& this.continue_arguments[0] === (quit ? QUIT_TASK : STOP_TASK);
@@ -2388,8 +2421,9 @@ function module_code(library_namespace) {
 						++default_NO);
 				// + 1: 可能有 1 → 1.5
 				if (default_NO > chapter_NO + 1) {
-					library_namespace
-							.warn('出現章節編號逆轉的情況: ' + chapter_data.title);
+					library_namespace.warn('出現章節編號倒置的情況, ' + default_NO + ' → '
+					// 逆轉 回退倒置 倒退
+					+ chapter_NO + ': ' + chapter_data.title);
 				}
 				default_NO = chapter_NO;
 			}, this);
@@ -2920,6 +2954,17 @@ function module_code(library_namespace) {
 
 		function check_if_done() {
 			--left;
+
+			if (typeof _this.after_get_image === 'function') {
+				_this.after_get_image(image_list, work_data, chapter_NO);
+			}
+
+			// this.dynamical_count_images: 動態改變章節中的圖片數量。
+			// Dynamically change the number of pictures in the chapter.
+			// 只在設定了.one_by_one的時候才有作用，否則就算改變image_list也已經來不及處理。
+			if (_this.one_by_one && _this.dynamical_count_images)
+				left = image_list.length - image_list.index;
+
 			// console.log('check_if_done: left: ' + left);
 			if (Array.isArray(image_list) && image_list.length > 1) {
 				process.stdout.write('圖 ' + left + ' left...\r');
@@ -3222,8 +3267,6 @@ function module_code(library_namespace) {
 						|| contents;
 			}
 
-			// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
-			// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。
 			var has_error = !contents || !(contents.length >= _this.MIN_LENGTH)
 					|| (XMLHttp.status / 100 | 0) !== 2, verified_image;
 			if (!has_error) {
