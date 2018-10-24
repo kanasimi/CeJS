@@ -192,6 +192,18 @@ function test_compatibility() {
 		assert([ Array.from(s).join(), "1,2,3,4" ], 'Array.from(Set)');
 		assert([ Array.from(m).join(), "5,2,7,1,3,1" ], 'Array.from(Map)');
 		assert([ Array.from(m.keys()).join(), "5,7,3" ], 'Array.from(map.keys())');
+
+		/*
+		a=[1,[2,[3,4],5],6];
+		a[7]='t';
+		assert([ "1;2,3,4,5;6;;;;;t", a.join(';') ], 'array.join()');
+		assert([ "1;2;3,4;5;6;t", a.flat().join(';') ], 'array.flat()');
+		assert([ "1;2,3,4,5;6;t", a.flat(0).join(';') ], 'array.flat(0)');
+		assert([ "1;2;3,4;5;6;t", a.flat(1).join(';') ], 'array.flat(1)');
+		assert([ "1;2;3;4;5;6;t", a.flat(2).join(';') ], 'array.flat(2)');
+		assert([ "2;2,3,4,51;7;t1", a.flatMap(function(i){return i+1;}).join(';') ], 'array.flatMap()');
+		assert([ "1;2,3,4,5;6;t", a.flatMap(function(i){return i+'';}).join(';') ], 'array.flatMap()');
+		*/
 	});
 
 	// ----------------------------------------------------
@@ -3523,7 +3535,7 @@ function finish_test(type) {
 		delete still_running[type];
 		--still_running.left_count;
 	}
-	if (!still_running.all_setted || still_running.left_count !== 0) {
+	if (!still_running.all_configured || still_running.left_count !== 0) {
 		return;
 	}
 
@@ -3600,7 +3612,7 @@ function do_test() {
 	'data.date.era', test_era,
 	//
 	function() {
-		still_running.all_setted = true;
+		still_running.all_configured = true;
 		CeL.info('所有測試設定完畢。 Waiting for asynchronous tests...');
 	});
 }

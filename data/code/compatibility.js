@@ -162,7 +162,7 @@ function module_code(library_namespace) {
 		isNaN : function(value) {
 			// parseFloat(value)
 			// var a = typeof value == 'number' ? value : parseInt(value);
-			// alert(typeof a+','+a+','+(a===a));
+			// alert(typeof a + ',' + a + ',' + (a === a));
 
 			/**
 			 * 變數可以與其本身比較。如果比較結果不相等，則它會是 NaN。原因是 NaN 是唯一與其本身不相等的值。
@@ -171,7 +171,7 @@ function module_code(library_namespace) {
 			 * is an expression of the form X !== X. The result will be true if
 			 * and only if X is a NaN.
 			 */
-			// return /*typeof value=='number'&&*/a != a;
+			// return /* typeof value=='number'&& */a != a;
 			value = Number(value);
 			return value !== value;
 		},
@@ -378,6 +378,7 @@ function module_code(library_namespace) {
 		},
 		// Object.isFrozen()
 		isFrozen : function isFrozen(object) {
+			// 無法以舊的語法實現。
 			return false;
 		},
 
@@ -387,19 +388,11 @@ function module_code(library_namespace) {
 			return value1 === value2 ? value1 !== 0
 			// check +0 and -0
 			|| 1 / value1
-			// 為JSDoc換行。
+			// 為 JsDoc 換行。
 			=== 1 / value2
 			// check NaN. May use Number.isNaN() as well.
 			: value1 !== value1 && value2 !== value2;
 		},
-
-		// Object.getOwnPropertyDescriptor()
-		getOwnPropertyDescriptor : getOwnPropertyDescriptor,
-		// Object.getOwnPropertyDescriptors()
-		getOwnPropertyDescriptors : getOwnPropertyDescriptors,
-		// Object.getOwnPropertyNames()
-		// 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or non-enumerable)
-		getOwnPropertyNames : Object_keys,
 
 		// Object.fromEntries()
 		fromEntries : fromEntries,
@@ -407,7 +400,15 @@ function module_code(library_namespace) {
 		// Object.keys(): get Object keys, 列出對象中所有可以枚舉的屬性 (enumerable only)
 		keys : Object_keys,
 		values : Object_values,
-		entries : Object_entries
+		entries : Object_entries,
+
+		// Object.getOwnPropertyDescriptor()
+		getOwnPropertyDescriptor : getOwnPropertyDescriptor,
+		// Object.getOwnPropertyDescriptors()
+		getOwnPropertyDescriptors : getOwnPropertyDescriptors,
+		// Object.getOwnPropertyNames()
+		// 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or non-enumerable)
+		getOwnPropertyNames : Object_keys
 	});
 
 	function copy_properties(from, to) {
@@ -825,8 +826,7 @@ function module_code(library_namespace) {
 	}
 
 	// cf. Math.floor()
-	// ((Number.MAX_SAFE_INTEGER / 4) | 0) < 0,
-	// 0 < ((Number.MAX_SAFE_INTEGER / 5) | 0)
+	/** <code>((Number.MAX_SAFE_INTEGER / 4) | 0) < 0, 0 < ((Number.MAX_SAFE_INTEGER / 5) | 0)</code> */
 	function ToInteger(value) {
 		// return value >> 0;
 		// http://wiki.ecmascript.org/doku.php?id=harmony:number.tointeger&s=number+tointeger
@@ -889,36 +889,47 @@ function module_code(library_namespace) {
 	}
 
 	set_method(Number, {
-		// The value of Number.MAX_SAFE_INTEGER is the largest integer value
-		// that can be represented as a Number value without losing precision,
-		// which is 9007199254740991 (2^53-1).
+		/**
+		 * The value of Number.MAX_SAFE_INTEGER is the largest integer value
+		 * that can be represented as a Number value without losing precision,
+		 * which is 9007199254740991 (2^53-1).
+		 */
 		MAX_SAFE_INTEGER : MAX_SAFE_INTEGER,
-		// The value of Number.MIN_SAFE_INTEGER is -9007199254740991
-		// (-(2^53-1)).
+		/**
+		 * The value of Number.MIN_SAFE_INTEGER is -9007199254740991
+		 * (-(2^53-1)).
+		 */
 		MIN_SAFE_INTEGER : -MAX_SAFE_INTEGER,
-		// The value of Number.EPSILON is the difference between 1 and the
-		// smallest value greater than 1 that is representable as a Number
-		// value,
-		// which is approximately 2.2204460492503130808472633361816 x 10-16.
+		/**
+		 * The value of Number.EPSILON is the difference between 1 and the
+		 * smallest value greater than 1 that is representable as a Number
+		 * value, which is approximately 2.2204460492503130808472633361816 x
+		 * 10-16.
+		 */
 		EPSILON : dividable_minimum(0, 1)
 	}, 'number');
 
 	set_method(Number, {
 		isSafeInteger : isSafeInteger,
-		// Number.toInteger() is obsolete.
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toInteger
-		// Number.toInteger was part of the draft ECMAScript 6 specification,
-		// but has been removed on August 23, 2013 in Draft Rev 17.
+		/**
+		 * Number.toInteger() is obsolete.
+		 * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toInteger
+		 * Number.toInteger was part of the draft ECMAScript 6 specification,
+		 * but has been removed on August 23, 2013 in Draft Rev 17.
+		 */
 		// toInteger: ToInteger,
-
-		// Number.isInteger()
-		// cf. .is_digits()
+		/**
+		 * Number.isInteger()<br />
+		 * cf. .is_digits()
+		 */
 		isInteger : function isInteger(number) {
 			return typeof number === 'number' && ToInteger(number) === number;
 		},
 		parseFloat : parseFloat,
 		parseInt : parseInt,
-		// Number.isNaN()
+		/**
+		 * Number.isNaN()
+		 */
 		isNaN : is_NaN,
 		isFinite : function(value) {
 			return typeof value === 'number' && isFinite(value);
@@ -1075,7 +1086,7 @@ function module_code(library_namespace) {
 		atanh : function atanh(value) {
 			// If x is −0, the result is −0.
 			return value ? Math.log((1 + value) /
-			// 為JSDoc換行。
+			// 為 JsDoc 換行。
 			(1 - value)) / 2 : value;
 		},
 
@@ -1258,10 +1269,12 @@ function module_code(library_namespace) {
 	// http://wiki.ecmascript.org/doku.php?id=harmony:string.prototype.repeat
 	function repeat(count) {
 		var result = [],
-		// The repeat function is intentionally generic
-		// https://mail.mozilla.org/pipermail/es-discuss/2011-January/012538.html
-		// Trivia: ""+obj is not the same thing as ToString(obj).
-		// They differ if obj has a .valueOf method.
+		/**
+		 * The repeat function is intentionally generic
+		 * https://mail.mozilla.org/pipermail/es-discuss/2011-January/012538.html
+		 * Trivia: ""+obj is not the same thing as ToString(obj). They differ if
+		 * obj has a .valueOf method.
+		 */
 		piece = '' + this;
 
 		if (!piece || isNaN(count) || (count = Math.floor(count)) < 1)
