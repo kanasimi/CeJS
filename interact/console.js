@@ -116,7 +116,7 @@ function module_code(library_namespace) {
 					&& SGR_code.style_data[style_name][style_value ? 0 : 1] === undefined) {
 				library_namespace.warn('Invalid value [' + style_value
 						+ '] of style: [' + style_name
-						+ ']: boolean value not setted.');
+						+ ']: Can not set boolean value.');
 				return;
 			}
 			return style_value;
@@ -792,6 +792,102 @@ function module_code(library_namespace) {
 
 	// export
 	_.SGR = SGR_code;
+
+	// ----------------------------------------------------------------------------------------------------------------
+
+	function console_status() {
+		return {
+			// size. 注意: 這兩個值可能會被覆寫。
+			width : process.stdout.columns || 80,
+			height : process.stdout.rows || 25
+		};
+	}
+
+	_.console_status = console_status;
+
+	// ----------------------------------------------------------------------------------------------------------------
+	// CLI progress bar
+
+	// https://github.com/visionmedia/node-progress
+	// https://github.com/bubkoo/ascii-progress
+	// https://github.com/AndiDittrich/Node.CLI-Progress
+	function Progress_bar(max_value, options) {
+		if (max_value > 0)
+			this.max_value = max_value;
+		this.start_time = Date.now();
+		if (options) {
+			Object.assign(this, options);
+			if (this.rtl && !options.start_quote && !options.end_quote) {
+				var quote = this.end_quote;
+				this.end_quote = this.start_quote;
+				this.start_quote = quote;
+			}
+		}
+	}
+
+	_.Progress_bar = Progress_bar;
+
+	Progress_bar.prototype = {
+		progress_value : 0,
+		max_value : 1,
+		// 方向 direction
+		rtl : false,
+
+		start_quote : ' [',
+		end_quote : '] ',
+		use_quote : true,
+
+		// single character
+		filled : '=',
+		blank : ' ',
+		show : show_progress,
+		tick : tick_progress,
+
+		// schema. TODO
+		format : '\r%{pre_text}%{start_quote}%{bar}%{end_quote}%{post_text}'
+	}
+
+	function show_progress(progress_value, post_text, pre_text) {
+		var max_dots = this.bar_width;
+		if (!max_dots) {
+			// - 1: 預防顯示到最後一個字元，會自動跳行。
+			max_dots = console_status().width - 1;
+		}
+		max_dots |= 0;
+		if (this.pre_text)
+			max_dots -= this.pre_text.length;
+		if (this.post_text)
+			max_dots -= this.post_text.length;
+		if (this.use_quote) {
+			max_dots -= this.left_quote.length + this.right_quote.length;
+		}
+
+		// current progress value
+		this.progress_value = +progress_value || 0;
+		this.percentage = Math
+				.round(100 * this.progress_value / this.max_value)
+				+ '%';
+		// TODO: .eta
+		this.completed = this.progress_value >= this.max_value;
+		var progress_dots = Math.round(max_dots * this.progress_value
+				/ this.max_value);
+
+		var bar_text = [ this.pre_text || '',
+				this.use_quote && this.start_quote || '',
+				this.filled.repeat(progress_dots),
+				this.blank.repeat(max_dots - progress_dots),
+				this.use_quote && this.end_quote || '',
+				// suffix
+				this.post_text || '' ];
+		if (this.rtl) {
+			bar_text.reverse();
+		}
+		process.stdout.write('\r' + bar_text.join('\n'));
+	}
+
+	function tick_progress(delta, post_text, pre_text) {
+		this.show(this.progress_value + delta, post_text, pre_text);
+	}
 
 	return (_// JSDT:_module_
 	);
