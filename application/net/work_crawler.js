@@ -8,13 +8,14 @@
 下載作業流程:
 
 # 取得伺服器列表。 start_downloading()
-# 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list()
-# 解析 作品名稱 → 作品id get_work()
-# 取得作品資訊與各章節資料。 get_work_data()
-# 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data()
-# 取得每一個章節的內容與各個影像資料。 get_chapter_data()
-# 取得各個章節的每一個影像內容。 get_images(), .image_post_process(), .after_get_image()
-# finish_up()
+# 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list(), .base_URL, .extract_work_id()
+# 特別處理特定id。	.convert_id()
+# 解析 作品名稱 → 作品id	get_work(), .search_URL, .parse_search_result()
+# 取得作品資訊與各章節資料。 get_work_data(), pre_process_chapter_list_data(), process_chapter_list_data()
+# 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data(), .work_URL, .parse_work_data(), chapter_list_URL, .get_chapter_list()
+# 取得每一個章節的內容與各個影像資料。 pre_get_chapter_data(), .chapter_URL, get_chapter_data(), .pre_parse_chapter_data(), .parse_chapter_data()
+# 取得各個章節的每一個影像內容。 get_images(), .image_preprocessor(), .image_post_processor(), .after_get_images()
+# finish_up(), .after_download_chapter(), .after_download_work()
 
 TODO:
 CLI progress bar
@@ -227,6 +228,7 @@ function module_code(library_namespace) {
 				Referer : this.base_URL
 			}, this.headers)
 		};
+		// console.log(this.get_URL_options);
 		this.default_agent = this.set_agent();
 	}
 
@@ -399,6 +401,8 @@ function module_code(library_namespace) {
 		preserve_chapter_page : false,
 		// 是否保留作品資料 cache 於 this.cache_directory_name 下。
 		preserve_work_page : false,
+		// 是否保留損壞圖檔。
+		preserve_bad_image : true,
 		// 是否保留 cache
 		// preserve_cache : true,
 
@@ -920,6 +924,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			// 特別處理特定id。
 			var id_converter = this.convert_id && this.convert_id[work_title];
 
 			if (typeof id_converter === 'function') {
@@ -1268,45 +1273,49 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var url = this.search_URL, URL, post_data;
-		if (!url || typeof this.parse_search_result !== 'function') {
-			url = library_namespace.null_Object();
-			url[work_title] = '';
+		var search_url_data = this.search_URL, search_URL_string, post_data;
+		if (!search_url_data || typeof this.parse_search_result !== 'function') {
+			search_url_data = library_namespace.null_Object();
+			search_url_data[work_title] = '';
 			this.onerror('本線上作品網站 ' + this.id + ' 的模組未提供搜尋功能。請手動設定/輸入 ['
 					+ work_title + '] 之 id 於 ' + search_result_file
-					+ '\n (e.g., ' + JSON.stringify(url) + ')', work_title);
+					+ '\n (e.g., ' + JSON.stringify(search_url_data) + ')',
+					work_title);
 			finish(true);
 			return Work_crawler.THROWED;
 		}
-		if (typeof url === 'function') {
+		if (typeof search_url_data === 'function') {
 			// 通過關鍵詞搜索作品。 解析 作品名稱 → 作品id
-			// url = url.call(this, work_title, get_label);
-			// return [ url, POST data ]
-			url = this.search_URL(work_title, get_label);
-			if (Array.isArray(url)) {
+			// search_url_data = search_url_data.call(this, work_title,
+			// get_label);
+			// return [ search_url_data, POST data ]
+			search_url_data = this.search_URL(work_title, get_label);
+			if (Array.isArray(search_url_data)) {
 				// use POST method
-				post_data = url[1];
-				url = url[0];
+				post_data = search_url_data[1];
+				search_url_data = search_url_data[0];
 			}
-			url = this.full_URL(url);
-			URL = url.URL || url;
+			search_url_data = this.full_URL(search_url_data);
+			search_URL_string = search_url_data.URL || search_url_data;
 		} else {
 			// default:
-			// assert: typeof url==='string' || url==={URL:'',charset:''}
+			// assert: typeof search_url_data==='string'
+			// || search_url_data==={URL:'',charset:''}
 			// TODO: .replace(/%t/g, work_title)
-			url = this.full_URL(url);
-			// 對 {Object}url，不可動到 url。
-			URL = (url.URL || url) + encode_URI_component(
-			// e.g., 找不到"隔离带 2"，須找"隔离带"。
-			work_title.replace(/\s+\d{1,2}$/, '')
-			// e.g., "Knight's & Magic" @ 小説を読もう！ || 小説検索
-			.replace(/&/g, ''), url.charset || this.charset);
+			search_url_data = this.full_URL(search_url_data);
+			// 對 {Object}search_url_data，不可動到 search_url_data。
+			search_URL_string = (search_url_data.URL || search_url_data)
+					+ encode_URI_component(
+					// e.g., 找不到"隔离带 2"，須找"隔离带"。
+					work_title.replace(/\s+\d{1,2}$/, '')
+					// e.g., "Knight's & Magic" @ 小説を読もう！ || 小説検索
+					.replace(/&/g, ''), search_url_data.charset || this.charset);
 		}
 
-		// console.log(url);
-		this.set_agent(URL);
+		// console.log(search_url_data);
+		this.set_agent(search_URL_string);
 		// console.log(this.get_URL_options);
-		get_URL(URL, function(XMLHttp) {
+		get_URL(search_URL_string, function(XMLHttp) {
 			_this.set_agent();
 			if (!XMLHttp.responseText) {
 				library_namespace.error(
@@ -1431,7 +1440,7 @@ function module_code(library_namespace) {
 				finish();
 			}
 
-		}, url.charset || this.charset, post_data, Object.assign({
+		}, search_url_data.charset || this.charset, post_data, Object.assign({
 			error_retry : this.MAX_ERROR_RETRY
 		}, this.get_URL_options));
 	}
@@ -1477,6 +1486,10 @@ function module_code(library_namespace) {
 		}
 	}
 
+	var null_XMLHttp = {
+		responseText : ''
+	};
+
 	function get_work_data(work_id, callback, error_count) {
 		var work_title;
 		// 預防並列執行的時候出現交叉干擾。
@@ -1495,6 +1508,10 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------------
 
 		function get_work_page() {
+			if (_this.skip_get_work_page) {
+				process_work_data(null_XMLHttp);
+				return;
+			}
 			get_URL(work_URL, process_work_data, _this.charset, null,
 					_this.get_URL_options);
 		}
@@ -1502,7 +1519,7 @@ function module_code(library_namespace) {
 		function process_work_data(XMLHttp) {
 			// console.log(XMLHttp);
 			var html = XMLHttp.responseText;
-			if (!html) {
+			if (!html && !_this.skip_get_work_page) {
 				library_namespace
 						.error('Failed to get work data of '
 								+ work_id
@@ -1585,8 +1602,11 @@ function module_code(library_namespace) {
 			&& !/[a-z\-][A-Z]/.test(work_data.title)
 			// .title: 必要屬性：須配合網站平台更改。
 			&& PATTERN_non_CJK.test(work_id)) {
-				library_namespace.warn('process_work_data: 非中日文作品標題: '
-						+ work_data.title + ' (id: ' + work_id + ')');
+				if (!_this.skip_get_work_page || work_data.title)
+					library_namespace.warn('process_work_data: '
+							+ (work_data.title ? '非中日文' : '無法取得/未設定')
+							+ '作品標題: ' + work_data.title + ' (id: ' + work_id
+							+ ')');
 			}
 
 			// 自動添加之作業用屬性：
@@ -1606,8 +1626,8 @@ function module_code(library_namespace) {
 			|| (typeof work_data.directory_id === 'function'
 			// 自行指定作品放置目錄與 ebook 用的 work id。
 			&& work_data.directory_id() || work_data.id)
-			//
-			+ ' ' + work_data.title
+			// this.skip_get_work_page 時， work_data.title === undefined
+			+ (work_data.title ? ' ' + work_data.title : '')
 			// e.g., '.' + (new Date).format('%Y%2m%2d')
 			+ (work_data.directory_name_extension || ''));
 			// full directory path of the work.
@@ -1750,7 +1770,7 @@ function module_code(library_namespace) {
 
 		function pre_process_chapter_list_data(XMLHttp) {
 			var html = XMLHttp.responseText;
-			if (!html) {
+			if (!html && !_this.skip_get_work_page) {
 				var message = _this.id + ': Can not get chapter list page!';
 				library_namespace.error(message);
 				_this.onerror(message, work_data);
@@ -2104,7 +2124,8 @@ function module_code(library_namespace) {
 				library_namespace.log(message);
 			}
 
-			_this.get_URL_options.headers.Referer = work_URL;
+			if (work_URL)
+				_this.get_URL_options.headers.Referer = work_URL;
 			// 開始下載chapter。
 			pre_get_chapter_data.call(_this, work_data,
 					work_data.last_download.chapter, callback);
@@ -2503,7 +2524,7 @@ function module_code(library_namespace) {
 		}
 
 		// assert: !!chapter_data.title === true
-		chapter_title = chapter_title.trim();
+		chapter_title = chapter_title ? chapter_title.trim() : '';
 
 		var chapter_directory_name = (part || '')
 		// 檔名 NO 的基本長度（不足補零）。以 chapter_data.chapter_NO 可自定章節編號。
@@ -2525,7 +2546,8 @@ function module_code(library_namespace) {
 		chapter_directory, images_archive, chapter_page_file_name,
 		//
 		chapter_URL = this.chapter_URL(work_data, chapter_NO);
-		chapter_URL = this.full_URL(chapter_URL);
+		// console.log(chapter_URL);
+		chapter_URL = chapter_URL && this.full_URL(chapter_URL);
 		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
 				+ chapter_NO + '/' + work_data.chapter_count + ': '
 				+ chapter_URL);
@@ -2636,12 +2658,15 @@ function module_code(library_namespace) {
 					library_namespace.log(message);
 				}
 
-				// console.log(image_list);
-				// TODO: 當某 chapter 檔案過多(如1000)，將一次 request 過多 connects 而造成問題。
-				image_list.forEach(function(image_data, index) {
-					// http://stackoverflow.com/questions/245840/rename-files-in-sub-directories
-					// for /r %x in (*.jfif) do ren "%x" *.jpg
+				if (chapter_URL)
+					_this.get_URL_options.headers.Referer = chapter_URL;
 
+				// 正規化/初始化圖像資料
+				// http://stackoverflow.com/questions/245840/rename-files-in-sub-directories
+				// for /r %x in (*.jfif) do ren "%x" *.jpg
+				function normalize_image_data(image_data, index) {
+					library_namespace.debug(chapter_label + ': ' + index + '/'
+							+ image_list.length, 6, 'normalize_image_data');
 					if (image_data.file) {
 						// image_data.file: 指定圖片要儲存檔的檔名與路徑 file_path。
 
@@ -2686,59 +2711,67 @@ function module_code(library_namespace) {
 									+ file_extension;
 						}
 					}
+				}
 
-					if (!_this.one_by_one) {
+				// console.log(image_list);
+				// TODO: 當某 chapter 檔案過多(如1000)，將一次 request 過多 connects 而造成問題。
+				if (!_this.one_by_one) {
+					image_list.forEach(function(image_data, index) {
+						normalize_image_data(image_data, index);
 						_this.get_images(image_data, check_if_done,
 								images_archive);
-					}
-				});
-				library_namespace.debug(chapter_label + ': 已派發完工作，開始等待。', 3,
-						'get_data');
-				waiting = true;
-				if (!_this.one_by_one) {
+					});
+					library_namespace.debug(chapter_label + ': 已派發完工作，開始等待。',
+							3, 'get_data');
+					waiting = true;
 					return;
 				}
 
-				_this.get_URL_options.headers.Referer = chapter_URL;
+				// 只有在 this.one_by_one===true 這個時候才會設定 image_list.index
 				image_list.index = 0;
 				var time_interval = _this.one_by_one !== true
 						&& library_namespace.to_millisecond(_this.one_by_one),
 				//
-				get_next_image = function(status) {
-					if (status !== 'first') {
-						++image_list.index;
+				get_next_image = function() {
+					// assert: image_list.index < image_list.length
+					process.stdout.write('圖 '
+							+ (image_list.index + 1)
+							+ (_this.dynamical_count_images ? '' : '/'
+									+ image_list.length) + '...\r');
+					var image_data = image_list[image_list.index];
+					normalize_image_data(image_data, image_list.index);
+					if (time_interval > 0)
+						image_data.time_interval = time_interval;
+					_this.get_images(image_data, function(status) {
 						check_if_done();
-					}
-					process.stdout.write('圖 ' + image_list.index + '/'
-							+ image_list.length + '...\r');
-					if (image_list.index < image_list.length) {
-						if (time_interval > 0)
-							image_list[image_list.index].time_interval = time_interval;
-						_this.get_images(image_list[image_list.index],
-						//
-						time_interval > 0 ? function(status) {
-							if (status === 'image_downloaded') {
-								// 沒有實際下載動作時，就不用等待了。
-								get_next_image();
-								return;
-							}
-							process.stdout.write('process_images: Wait '
-									+ library_namespace
-											.age_of(0, time_interval)
-									+ ' to get image ' + image_list.index + '/'
-									+ image_list.length + '...\r');
-							setTimeout(get_next_image, time_interval);
-						} : get_next_image, images_archive);
-					}
+
+						// 添加計數器
+						if (!(++image_list.index < image_list.length)) {
+							return;
+						}
+
+						if (!(time_interval > 0)
+						// 沒有實際下載動作時，就不用等待了。
+						|| status === 'image_downloaded') {
+							get_next_image();
+							return;
+						}
+
+						process.stdout.write('process_images: Wait '
+								+ library_namespace.age_of(0, time_interval)
+								+ ' to get image ' + image_list.index + '/'
+								+ image_list.length + '...\r');
+						setTimeout(get_next_image, time_interval);
+					}, images_archive);
 				};
-				get_next_image('first');
+				get_next_image();
 			}
 
 			function process_chapter_data(XMLHttp) {
 				XMLHttp = XMLHttp || this;
 				var html = XMLHttp.responseText;
-				if (!html) {
-					library_namespace.error(work_data.title
+				if (!html && !_this.skip_get_chapter_page) {
+					library_namespace.error((work_data.title || work_data.id)
 							+ ': Failed to get data of chapter ' + chapter_NO);
 					if (get_data.error_count === _this.MAX_ERROR_RETRY) {
 						if (_this.skip_chapter_data_error) {
@@ -2925,6 +2958,10 @@ function module_code(library_namespace) {
 				if (false && typeof chapter_URL !== 'string') {
 					console.log(chapter_URL);
 				}
+				if (_this.skip_get_chapter_page) {
+					pre_parse_chapter_data(null_XMLHttp);
+					return;
+				}
 				get_URL(chapter_URL, pre_parse_chapter_data, _this.charset,
 						null, Object.assign({
 							error_retry : _this.MAX_ERROR_RETRY
@@ -2955,22 +2992,24 @@ function module_code(library_namespace) {
 		function check_if_done() {
 			--left;
 
-			if (typeof _this.after_get_image === 'function') {
-				_this.after_get_image(image_list, work_data, chapter_NO);
+			if (typeof _this.after_get_images === 'function') {
+				// var latest_image_data = image_list[image_list.index];
+				_this.after_get_images(image_list, work_data, chapter_NO);
 			}
 
 			// this.dynamical_count_images: 動態改變章節中的圖片數量。
 			// Dynamically change the number of pictures in the chapter.
-			// 只在設定了.one_by_one的時候才有作用，否則就算改變image_list也已經來不及處理。
-			if (_this.one_by_one && _this.dynamical_count_images)
-				left = image_list.length - image_list.index;
-
-			// console.log('check_if_done: left: ' + left);
-			if (Array.isArray(image_list) && image_list.length > 1) {
+			// 只有在 this.one_by_one===true 這個時候才會設定 image_list.index，
+			// 因此只在設定了.one_by_one 的時候才有作用，否則就算改變 image_list 也已經來不及處理。
+			if (_this.one_by_one && _this.dynamical_count_images) {
+				left = image_list.length - image_list.index - 1;
+			} else if (Array.isArray(image_list) && image_list.length > 1) {
 				process.stdout.write('圖 ' + left + ' left...\r');
 				library_namespace.debug(chapter_label + ': ' + left + ' left',
 						3, 'check_if_done');
 			}
+			// console.log('check_if_done: left: ' + left);
+
 			// 須注意若是最後一張圖get_images()直接 return 了，
 			// 此時尚未設定 waiting，因此此處不可以 waiting 判斷！
 			if (left > 0) {
@@ -3240,24 +3279,24 @@ function module_code(library_namespace) {
 
 		var _this = this,
 		// 漫畫圖片的 URL。
-		url = image_data.url, server = this.server_list;
+		image_url = image_data.url, server = this.server_list;
 		if (server) {
 			server = server[server.length * Math.random() | 0];
-			url = this.image_path_to_url(url, server, image_data);
+			image_url = this.image_path_to_url(image_url, server, image_data);
 		} else {
-			url = this.full_URL(url);
+			image_url = this.full_URL(image_url);
 		}
-		image_data.parsed_url = url;
-		if (!PATTERN_non_CJK.test(url)) {
-			library_namespace.warn('Need encodeURI: ' + url);
-			// url = encodeURI(url);
+		image_data.parsed_url = image_url;
+		if (!PATTERN_non_CJK.test(image_url)) {
+			library_namespace.warn('Need encodeURI: ' + image_url);
+			// image_url = encodeURI(image_url);
 		}
 
 		if (!image_data.file_length) {
 			image_data.file_length = [];
 		}
 
-		get_URL(url, function(XMLHttp) {
+		get_URL(image_url, function(XMLHttp) {
 			// console.log(XMLHttp);
 			// 圖片數據的內容。
 			var contents = XMLHttp.buffer;
@@ -3344,7 +3383,7 @@ function module_code(library_namespace) {
 										+ image_data.is_bad + ')' : '')
 								+ (contents ? ' ' + contents.length + ' bytes'
 										: '') + ': ' + image_data.file + '\n← '
-								+ url);
+								+ image_url);
 						if (!contents
 						// 404之類，就算有內容，也不過是錯誤訊息頁面。
 						|| (XMLHttp.status / 100 | 0) === 4) {
@@ -3353,7 +3392,8 @@ function module_code(library_namespace) {
 					} else {
 						// pass, 過關了。
 						if (node_fs.existsSync(bad_file_path)) {
-							library_namespace.info('刪除損壞的舊檔：' + bad_file_path);
+							library_namespace
+									.info('刪除損壞的舊圖片檔：' + bad_file_path);
 							library_namespace.fs_remove(bad_file_path);
 						}
 						if (bad_image_archived) {
@@ -3390,20 +3430,21 @@ function module_code(library_namespace) {
 					if (!old_file_status
 					// 得到更大的檔案，寫入更大的檔案。
 					|| !(old_file_status.size >= contents.length)) {
-						// _this.image_post_processor()
-						if (_this.image_post_process) {
+						if (_this.image_post_processor) {
 							// 圖片後處理程序 image post-processing
-							contents = _this.image_post_process(contents,
+							contents = _this.image_post_processor(contents,
 									image_data
 							// , images_archive
 							)
 									|| contents;
 						}
 
-						library_namespace.debug('保存圖片數據到HDD上: '
-								+ image_data.file, 1, 'get_images');
-						// TODO: 檢查舊的檔案是不是文字檔。例如有沒有包含HTML標籤。
-						node_fs.writeFileSync(image_data.file, contents);
+						if (!image_data.has_error || _this.preserve_bad_image) {
+							library_namespace.debug('保存圖片數據到 HDD 上: '
+									+ image_data.file, 1, 'get_images');
+							// TODO: 檢查舊的檔案是不是文字檔。例如有沒有包含 HTML 標籤。
+							node_fs.writeFileSync(image_data.file, contents);
+						}
 					} else if (old_file_status
 							&& old_file_status.size > contents.length) {
 						library_namespace.log('存在較大的舊檔 ('
@@ -3427,7 +3468,7 @@ function module_code(library_namespace) {
 			//
 			+ (contents.length >= _this.MIN_LENGTH ? '' : ', too small'))
 			//
-			+ '): Failed to get ') + url + '\n→ ' + image_data.file);
+			+ '): Failed to get ') + image_url + '\n→ ' + image_data.file);
 			if (image_data.error_count === _this.MAX_ERROR_RETRY) {
 				image_data.has_error = true;
 				// throw new Error(_this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD);
