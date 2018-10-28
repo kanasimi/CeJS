@@ -464,15 +464,16 @@ function module_code(library_namespace) {
 		images_archive_extension : 'zip',
 
 		image_path_to_url : image_path_to_url,
-		// 規範 work id 的正規模式；提取出引數（如 URL）中的作品id 以回傳。
+		// 規範 work id 的正規模式；提取出引數中的作品id 以回傳。
 		extract_work_id : function(work_information) {
 			// default: accept numerals only
 			if (library_namespace.is_digits(work_information)
 			// || /^[a-z_\-\d]+$/.test(work_information)
 			)
 				return work_information;
-
-			// 自作品網址提取出 work id。
+		},
+		// 自作品網址 URL 提取出 work id。
+		extract_work_id_from_URL : function(work_information) {
 			if (typeof work_information === 'string'
 					&& /^https?:\/\//.test(work_information)) {
 				var PATTERN_work_id_of_url = this.PATTERN_work_id_of_url;
@@ -490,16 +491,18 @@ function module_code(library_namespace) {
 									PATTERN_work_id_of_url).replace('work_id',
 									'([^\/]+)'));
 				}
+
 				var matched = work_information.match(PATTERN_work_id_of_url);
 				if (matched) {
 					matched = matched[1];
 					library_namespace
-							.info('extract_work_id: 自作品網址提取出 work id: '
+							.info('extract_work_id_from_URL: 自作品網址提取出 work id: '
 									+ matched);
-					return matched;
+					return /* this.extract_work_id(matched) && */matched;
 				}
-				library_namespace.warn('extract_work_id: 無法自作品網址提取出 work id！ '
-						+ work_information);
+				library_namespace
+						.warn('extract_work_id_from_URL: 無法自作品網址提取出 work id！ '
+								+ work_information);
 			}
 		},
 		// 取得用在作品完結的措辭。
@@ -598,6 +601,17 @@ function module_code(library_namespace) {
 		reverse_chapter_list_order : reverse_chapter_list_order,
 		set_chapter_NO_via_title : set_chapter_NO_via_title,
 		get_chapter_directory_name : get_chapter_directory_name,
+
+		// work_data properties to reset
+		reset_work_data_properties : {
+			// work_data.recheck
+			recheck : true,
+			last_download : true,
+
+			error_images : true,
+			chapter_count : true,
+			image_count : true
+		},
 
 		// 命令列可以設定的選項。通常僅做測試微調用。
 		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
@@ -1223,7 +1237,8 @@ function module_code(library_namespace) {
 		// --------------------------------------
 
 		// 先試試看能否取得 work id。
-		var work_id = this.extract_work_id(work_title);
+		var work_id = this.extract_work_id(work_title)
+				|| this.extract_work_id_from_URL(work_title);
 		if (work_id) {
 			this.get_work_data(work_id, finish_up);
 			return;
@@ -1705,19 +1720,14 @@ function module_code(library_namespace) {
 
 			var matched = library_namespace.get_JSON(work_data.data_file);
 			if (matched) {
-				// properties to reset
-				var skip_cache = {
-					// work_data.recheck
-					recheck : true,
-					last_download : true,
+				// work_data properties to reset
+				var skip_cache = Object.assign({
 					process_status : _this.recheck,
+
 					ebook_directory : _this.need_create_ebook,
 					words_so_far : _this.need_create_ebook,
-					book_chapter_count : _this.need_create_ebook,
-					error_images : true,
-					chapter_count : true,
-					image_count : true
-				};
+					book_chapter_count : _this.need_create_ebook
+				}, _this.reset_work_data_properties);
 				// recall old work_data
 				// 基本上以新資料為準，除非無法取得新資料，才改用舊資料。
 				for ( var key in matched) {
@@ -2665,8 +2675,20 @@ function module_code(library_namespace) {
 				// http://stackoverflow.com/questions/245840/rename-files-in-sub-directories
 				// for /r %x in (*.jfif) do ren "%x" *.jpg
 				function normalize_image_data(image_data, index) {
-					library_namespace.debug(chapter_label + ': ' + index + '/'
-							+ image_list.length, 6, 'normalize_image_data');
+					library_namespace.debug(chapter_label + ': ' + (index + 1)
+							+ '/' + image_list.length, 6,
+							'normalize_image_data');
+					// console.log(image_data);
+
+					if (typeof image_data === 'string') {
+						// image_data 會被用來記錄一些重要的資訊。
+						// 若是沒回寫到原先的image_list，那麼將會失去這些資訊。
+						image_list[index] = image_data = {
+							url : image_data
+						};
+
+					}
+
 					if (image_data.file) {
 						// image_data.file: 指定圖片要儲存檔的檔名與路徑 file_path。
 
@@ -2711,13 +2733,15 @@ function module_code(library_namespace) {
 									+ file_extension;
 						}
 					}
+
+					return image_data;
 				}
 
 				// console.log(image_list);
 				// TODO: 當某 chapter 檔案過多(如1000)，將一次 request 過多 connects 而造成問題。
 				if (!_this.one_by_one) {
 					image_list.forEach(function(image_data, index) {
-						normalize_image_data(image_data, index);
+						image_data = normalize_image_data(image_data, index);
 						_this.get_images(image_data, check_if_done,
 								images_archive);
 					});
@@ -2738,8 +2762,8 @@ function module_code(library_namespace) {
 							+ (image_list.index + 1)
 							+ (_this.dynamical_count_images ? '' : '/'
 									+ image_list.length) + '...\r');
-					var image_data = image_list[image_list.index];
-					normalize_image_data(image_data, image_list.index);
+					var image_data = normalize_image_data(
+							image_list[image_list.index], image_list.index);
 					if (time_interval > 0)
 						image_data.time_interval = time_interval;
 					_this.get_images(image_data, function(status) {
