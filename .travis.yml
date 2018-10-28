@@ -27,10 +27,8 @@ node_js:
 #  - "4.2.6"
 # 2017/11/2 LTS
   - "8"
-# 2017/11/2 Current
-#  - "9"
-# 2018-04-24, nodejs version 10.0.0 (Current)
-  - "10"
+# 2018-10-23, Version 11.0.0 (Current), @jasnell
+  - "11"
 
 install:
   - npm install
