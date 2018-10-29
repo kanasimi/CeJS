@@ -520,7 +520,7 @@ function module_code(library_namespace) {
 				// chunk = chunk.to_Array(true);
 				if (!chunk.content_length) {
 					console.log(chunk);
-					throw 3;
+					throw 'chunk do not has regular .content_length!';
 				}
 				content_length += chunk.content_length;
 			} else {
@@ -553,8 +553,9 @@ function module_code(library_namespace) {
 	// 選出 data.generated 不包含之 string
 	function give_boundary(data_Array) {
 		function not_includes_in(item) {
+			// console.log(item);
 			return Array.isArray(item) ? item.every(not_includes_in)
-			// item: {String} or {Buffer}
+			// item: Should be {String} or {Buffer}
 			: !item.includes(boundary);
 		}
 
@@ -696,15 +697,19 @@ function module_code(library_namespace) {
 		// console.log(keys);
 		// 因為在遇到fetch url時需要等待，因此採用async。
 		function process_next() {
-			// console.log('-'.repeat(60));
-			// console.log(index + '/' + keys.length);
+			if (false) {
+				console.log('-'.repeat(60));
+				console.log('process_next: ' + index + '/' + keys.length);
+				console.log(root_data);
+			}
+
 			if (index === keys.length) {
 				// 決定 boundary
 				give_boundary(root_data);
 				// WARNING: 先結束作業: 生成 .to_Array()，
 				// 才能得到 root_data.to_Array().content_length。
 				root_data.to_Array();
-				if (0) {
+				if (false) {
 					console.log('-'.repeat(79));
 					console.log(root_data);
 					console.log('-'.repeat(79));
@@ -750,10 +755,15 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			// 預防有{Number}之類。
+			if (typeof value === 'number')
+				value = String(value);
+
 			// 非檔案，屬於普通的表單資料。
 			if (!key) {
 				throw 'No key for value: ' + value;
 			}
+
 			// @see function push_and_callback(MIME_type, content)
 			var headers = 'Content-Disposition: form-data; name="' + key + '"'
 					+ form_data_new_line + form_data_new_line,
@@ -1926,6 +1936,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('Set headers: ' + JSON.stringify(_URL.headers),
 				3, 'get_URL_node');
 
+		// console.log(_URL);
 		try {
 			// from node.js 10.9.0
 			// http.request(url[, options][, callback])
@@ -2307,6 +2318,9 @@ function module_code(library_namespace) {
 	}
 
 	// ---------------------------------------------------------------------//
+
+	// var fetch = CeL.fetch;
+	// @see 20181016.import_earthquake_shakemap.js
 
 	// simple polyfill for fetch API
 	// @since 2018/10/16 17:47:12
