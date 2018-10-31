@@ -1552,7 +1552,7 @@ function module_code(library_namespace) {
 	// 月次，歲次或名稱與序號 (index) 之互換。
 
 	// 歲序(index: start from 0)
-	// →歲次(ordinal/serial: start with START_YEAR)
+	// →歲次(ordinal/serial/NO: start with START_YEAR)
 	// →歲名(name)
 	function year_index_to_name(歲序) {
 		var 歲名 = this.calendar[NAME_KEY];
@@ -1567,7 +1567,7 @@ function module_code(library_namespace) {
 	}
 
 	// (歲名 name→)
-	// 歲次(ordinal/serial: start with START_YEAR)
+	// 歲次(ordinal/serial/NO: start with START_YEAR)
 	// →歲序(index of year[]: start from 0)
 	function year_name_to_index(歲名) {
 		if (!歲名)
@@ -1599,7 +1599,7 @@ function module_code(library_namespace) {
 	}
 
 	// 月序(index: start from 0)
-	// →月次(ordinal/serial: start with START_MONTH)
+	// →月次(ordinal/serial/NO: start with START_MONTH)
 	// →月名(name)
 	function month_index_to_name(月序, 歲序) {
 		歲序 = this.calendar[歲序];
@@ -1628,7 +1628,7 @@ function module_code(library_namespace) {
 	}
 
 	// (月名 name→)
-	// 月次(ordinal/serial: start with START_MONTH)
+	// 月次(ordinal/serial/NO: start with START_MONTH)
 	// →月序(index of month[]: start from 0)
 	function month_name_to_index(月名, 歲序) {
 		if (!月名 || !(歲序 in this.calendar))
@@ -2402,6 +2402,10 @@ function module_code(library_namespace) {
 							library_namespace.error('改採用標準曆法: '
 									+ standard_time_parser_name + '，但這將導致['
 									+ this + ']解析出錯誤的日期！');
+
+							message = '因參照紀年[' + this.參照紀年
+									+ ']錯誤，本紀年顯示的是錯誤的日期！';
+							add_attribute(this, '注', message, true);
 
 							this.calendar = this.calendar.replace(/:.+/g, ':'
 									+ standard_time_parser);
@@ -3604,7 +3608,7 @@ function module_code(library_namespace) {
 	}
 
 	// date name of era → Date
-	// 年, 月, 日 次/序(ordinal/serial)
+	// 年, 月, 日 次/序(ordinal/serial/NO)
 	// (start from START_YEAR, START_MONTH, START_DATE)
 	// or 年, 月, 日 名(name)
 	// or 年, 月, 日 干支
@@ -5084,22 +5088,23 @@ function module_code(library_namespace) {
 		return era_1.start - era_2.start;
 	}
 
-	// 避免重複設定或覆蓋原有值。
+	// 避免重複設定或覆蓋原有值。 set_attribute()
 	// object[key] = value
 	// TODO: {Array}value
-	function add_attribute(object, key, value, shift) {
+	function add_attribute(object, key, value, prepend) {
 		if (key in object) {
 			// 有衝突。
 			var values = object[key];
 			if (Array.isArray(values)) {
 				// 不重複設定。
 				if (!values.includes(value))
-					if (shift)
-						values.shift(value);
+					// prepend or append
+					if (prepend)
+						values.unshift(value);
 					else
 						values.push(value);
 			} else if (values !== value)
-				object[key] = shift ? [ value, values ] : [ values, value ];
+				object[key] = prepend ? [ value, values ] : [ values, value ];
 		} else {
 			// 一般情況。
 			object[key] = value;
