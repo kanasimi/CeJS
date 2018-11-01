@@ -974,13 +974,13 @@ _// JSDT:_module_
  * 自動填寫表單
  * TODO:
  * cache name if need.
- * @param {Object}pair
- *            設定 pair: {id/name: value}
+ * @param {Object}pairs
+ *            設定 pairs: {id/name: value}
  * @param {HTMLElement|Object|Integer}config
  *            submit button/form id, {submit: submit button/form id, base: base space id}.
  *            use {} to ignore this argument.
  */
-fill_form = function fill_form(pair, config) {
+fill_form = function fill_form(pairs, config) {
 	var name, node, base, submit, event_object, window_object = typeof window === 'object' && window || {},
 	//	這種 node 需要用到 list 的方法。e.g., checkbox or radio.
 	use_list = function(node) {
@@ -1054,12 +1054,16 @@ fill_form = function fill_form(pair, config) {
 	},
 	//	模擬鍵盤輸入事件發生。
 	event_sequence = function(node, value) {
-		fire_event('onfocus') ('onclick')('oninput');
+		fire_event('onfocus')('onclick')
+		// ('onkeydown')('onkeypress')
+		('oninput')
+		// ('onkeyup')
+		;
 
 		library_namespace.debug('Set [' + name + '] = (' + (typeof value) + ') [' + value + ']', 2, 'fill_form.event_sequence');
 		_.node_value(node, value);
 
-		fire_event('onpropertychange') ('onchange') ('onblur');
+		fire_event('onpropertychange')('onchange')('onblur');
 	};
 
 	if (library_namespace.is_Object(config)) {
@@ -1090,13 +1094,13 @@ fill_form = function fill_form(pair, config) {
 		show_node(base);
 	}
 
-	if (library_namespace.is_Object(pair)) {
-		for (name in pair) {
+	if (library_namespace.is_Object(pairs)) {
+		for (name in pairs) {
 			if (_.is_ELEMENT_NODE(set_node(name))) {
-				event_sequence(node, pair[name]);
+				event_sequence(node, pairs[name]);
 			} else if (_.is_NodeList(node)) {
 				//	<input type="radio|checkbox" value="~" />
-				for ( var i = 0, l = node.length, n, vl = pair[name], v; i < l; i++) {
+				for ( var i = 0, l = node.length, n, vl = pairs[name], v; i < l; i++) {
 					n = node[i];
 					// TODO: 若是輸入數字，則有時會強制當作index？
 					v = library_namespace.is_Object(vl)? vl[n.value] :
@@ -1126,6 +1130,10 @@ fill_form = function fill_form(pair, config) {
 	} else if (!isNaN(submit)
 			&& _.is_ELEMENT_NODE(node = window_object.document.forms[submit])) {
 		fire_event('submit');
+	}
+
+	if (typeof config.callback === 'function') {
+		config.callback();
 	}
 };
 
@@ -1216,27 +1224,32 @@ node_value = function node_value(node, value, base_space) {
 			//library_namespace.debug('Use default method to set value.', 1, 'node_value');
 			if ('value' in node) {
 				if (tag_name === 'select') {
-					if (!isNaN(value) && value >= 0 && value < node.options.length) {
-						//	.options[i].value===value
-						//	.selectedIndex= 的設定有些情況下會失效
-						if (node.selectedIndex != value) {
-							node.selectedIndex = value;
-							// node.onchange && node.onchange();
-						}
-					} else {
-						if (value !== undefined && node.value != value)
-							node.value = value;
-						//	check
-						if (node.value != value) {
-							//	未設定成功: 沒有此 options.value?
-							for ( var i = 0, options = node.options, l = options.length, v = String(value).trim(); i < l; i++)
-								if (v == options[i].innerHTML.trim()) {
-									node.value = options[i].value;
-									break;
-								}
-						}
-						//else node.onchange && node.onchange();
+					// select_node.value → select_node.innerText → select_node.selectedIndex
+					if (value !== undefined && node.value != value) {
+						node.value = value;
 					}
+					//	check
+					if (node.value != value) {
+						//	未設定成功: 沒有此 options.value?
+						var OK;
+						for ( var i = 0, options = node.options, l = options.length, v = String(value).trim(); i < l; i++)
+							if (v == options[i].innerHTML.trim()) {
+								node.value = options[i].value;
+								OK = true;
+								break;
+							}
+						if (!OK && !isNaN(value) && value >= 0 && value < node.options.length) {
+							//	.options[i].value === value
+							//	.selectedIndex= 的設定有些情況下會失效
+							if (node.selectedIndex != value) {
+								node.selectedIndex = value;
+								// node.onchange && node.onchange();
+							}
+						}
+						// TODO: alert
+					}
+					//else node.onchange && node.onchange();
+
 				} else if (value !== undefined && value !== null) {
 					//	IE9 的相容Quirks模式中長度使用 'maxLength'.
 					var kw = 'maxLength';
@@ -1641,6 +1654,8 @@ function new_node(nodes, layer, ns) {
 					children = o;
 				}
 			}
+			// https://html.spec.whatwg.org/#the-dl-element
+			// TODO: {dl: { title: description, title: description, ... } }
 
 
 			// attributes
@@ -4569,8 +4584,8 @@ function openAtInit(){
   //	http://developer.mozilla.org/en/docs/DOM:element.addEventListener	http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-Event
   if(Event.mousedown)window.captureEvents(Event.mousedown);
   if(Event.keydown)window.captureEvents(Event.keydown);
-  window.onmousedown=window.onkeydown=function(e){
-	 captureE=e;//alert('openAtInit: '+e.target.tagName);
+  window.onmousedown=window.onkeydown=function(_event){
+	 captureE=_event;//alert('openAtInit: '+_event.target.tagName);
 	};
  }
  for(var i,a=library_namespace.get_tag_list('a');i<a.length;i++)
@@ -5880,6 +5895,7 @@ add_listener = function add_listener(type, listener, target_element, p_first) {
 
 		//	使 listener 能以 this 取得 target_element
 		i = function(e) {
+			// this_event
 			if(!e)
 				e = window.event;
 
@@ -6025,9 +6041,9 @@ add_listener.default_adder = function(type, listener, p_first, target_element) {
 				old.call(target_element, e);
 			}
 		:
-			function(e) {
+			function(this_event) {
 				//library_namespace.debug('fire ' + type, 0, 'add_listener.default_adder');
-				listener.call(target_element, e || window.event);
+				listener.call(target_element, this_event || window.event);
 			}
 		;
 };
@@ -6289,7 +6305,7 @@ _// JSDT:_module_
  */
 deal_with_barcode = function (callback) {
 	var k, lt = 0, st = 0;
-	document.onkeypress = function(e) {
+	document.onkeypress = function(this_event) {
 		var c = new Date();
 		if (
 				// 前後不超過 800，
@@ -6300,12 +6316,12 @@ deal_with_barcode = function (callback) {
 			k = "";
 		}
 		lt = c;
-		c = e || window.event;
+		c = this_event || window.event;
 		c = c.keyCode || c.which || c.charCode;
 		if (c > 32 && c < 120)
 			k += String.fromCharCode(c);
 		else if (c == 13)
-			callback(k, e);
+			callback(k, this_event);
 	};
 
 };
@@ -6314,7 +6330,8 @@ deal_with_barcode = function (callback) {
 
 //	https://addons.mozilla.org/js/search-plugin.js
 //	TODO, & Chrome
-function add_engine(){
+function add_engine() {
+	// NYI
 	throw 'TODO';
 }
 
