@@ -10,8 +10,8 @@ environment:
 #    - nodejs_version: "0.12"
 # 2017/11/2 LTS
     - nodejs_version: "8"
-# 2018-10-23, Version 11.0.0 (Current), @jasnell
-    - nodejs_version: "11"
+# AppVeyor do not using x64, and for node 11, "node  x86 package not found".
+    - nodejs_version: "10"
 
 # Install scripts. (runs after repo cloning)
 install:
