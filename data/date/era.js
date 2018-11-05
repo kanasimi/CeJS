@@ -496,6 +496,8 @@ function module_code(library_namespace) {
 		// 童名 : 1,
 		神號 : 1,
 
+		君主性別 : 1,
+
 		// dynasty
 		朝代 : 2,
 		政權 : 2,
@@ -4323,7 +4325,8 @@ function module_code(library_namespace) {
 		// 預設會 copy 的紀年曆注。
 		// "精"會特別處理。
 		// 據: 根據/出典/原始參考文獻/資料引用來源/典拠。
-		copy_attributes : '據,準,疑,傳說,曆法,君主名,表字,君主號,諱,諡,廟號,生,卒,在位,年號'.split(','),
+		copy_attributes : '據,準,疑,傳說,曆法,君主名,表字,君主號,諱,諡,廟號,生,卒,君主性別,在位,年號'
+				.split(','),
 		// 曆注, note
 		// 減輕負擔:要這些曆注的自己算。
 		notes : {
