@@ -27,7 +27,6 @@ parse 圖像。
 自動搜尋不同的網站並選擇下載作品。
 從其他的資料來源網站尋找取得作品以及章節的資訊。
 檢核章節內容。
-proxy
 Runs untrusted code securely https://github.com/patriksimek/vm2
 
 </code>
@@ -228,6 +227,12 @@ function module_code(library_namespace) {
 				Referer : this.base_URL
 			}, this.headers)
 		};
+		if (this.proxy) {
+			// 代理伺服器 proxy_server
+			library_namespace.info('Using proxy server: ' + this.proxy);
+			this.get_URL_options.proxy = this.proxy;
+		}
+
 		// console.log(this.get_URL_options);
 		this.default_agent = this.set_agent();
 	}
@@ -638,6 +643,9 @@ function module_code(library_namespace) {
 			preserve_work_page : 'boolean',
 			preserve_chapter_page : 'boolean',
 			remove_ebook_directory : 'boolean',
+
+			// 代理伺服器 proxy_server: "username:password@hostname:port"
+			proxy : 'string',
 
 			// 漫畫下載完畢後壓縮圖像檔案。
 			archive_images : 'boolean',
@@ -3263,19 +3271,19 @@ function module_code(library_namespace) {
 
 		// 檢查壓縮檔裡面的圖片檔案。
 		var image_archived, bad_image_archived;
-		if (images_archive && images_archive.hash
+		if (images_archive && images_archive.fso_path_hash
 		// 檢查壓縮檔，看是否已經存在圖像檔案。
 		&& image_data.file.startsWith(images_archive.work_directory)) {
 			image_archived = image_data.file
 					.slice(images_archive.work_directory.length);
-			bad_image_archived = images_archive.hash[this
+			bad_image_archived = images_archive.fso_path_hash[this
 					.EOI_error_path(image_archived)];
 			if (image_archived && bad_image_archived) {
 				images_archive.to_remove.push(bad_image_archived);
 			}
 
 			image_downloaded = image_downloaded
-					|| images_archive.hash[image_archived]
+					|| images_archive.fso_path_hash[image_archived]
 					|| this.skip_existed_bad_file
 					// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
 					&& bad_image_archived;
@@ -3287,7 +3295,7 @@ function module_code(library_namespace) {
 						extension) {
 					var alternative_filename = image_archived.replace(
 							/\.[a-z\d]+$/, '.' + extension);
-					return images_archive.hash[alternative_filename];
+					return images_archive.fso_path_hash[alternative_filename];
 				});
 			}
 		}

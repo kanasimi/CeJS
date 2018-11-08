@@ -197,7 +197,7 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * TODO: 代理伺服器 using proxy sever
+	 * TODO: 代理伺服器 using proxy server
 	 * 
 	 * @see https://developer.mozilla.org/zh-TW/docs/DOM/XMLHttpRequest
 	 *      http://msdn.microsoft.com/en-us/library/ie/ms535874.aspx
@@ -1317,9 +1317,10 @@ function module_code(library_namespace) {
 		// https://docs.oracle.com/cd/E56344_01/html/E54018/gmgas.html
 		// https://stackoverflow.com/questions/32824819/difference-between-http-proxy-https-proxy-and-proxy
 		|| /^https:/i.test(URL_to_fetch) && library_namespace.env.HTTPS_PROXY
-				|| library_namespace.env.http_proxy;
+		// process.env.http_proxy
+		|| library_namespace.env.http_proxy;
 		if (using_proxy && (using_proxy = using_proxy
-		// "username:password@hostname:port"
+		// 代理伺服器 proxy_server: "username:password@hostname:port"
 		// [ all, username, password, hostname, port ]
 		.match(/^(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/))) {
 			// https://www.proxynova.com/proxy-server-list/country-tw/
@@ -1373,18 +1374,67 @@ function module_code(library_namespace) {
 		URL_to_fetch.startsWith('//') ? (agent && agent.protocol || 'https:')
 				+ URL_to_fetch : URL_to_fetch) : URL_to_fetch;
 
+		/**
+		 * <code>
+
+		// https://www.proxynova.com/proxy-server-list/country-tw/
+		var http = require("http");
+		var options = {
+			host: "211.22.233.69",
+			port: 3128,
+			path: "http://dict.revised.moe.edu.tw/",
+			//method: 'GET',
+			headers: {
+				Host: "dict.revised.moe.edu.tw"
+			}
+		};
+		var request=http.request(options, function(response) {
+			console.log(response.statusCode);
+			console.log(response.headers);
+			var data = [], length = 0;
+			response.on('data', function(chunk) {length += chunk.length;data.push(chunk);});
+			response.on('end', function() {data = Buffer.concat(data, length);console.log(data+'')});
+		});
+		request.end();
+
+
+
+
+
+		require('./work_crawler_loder.js');
+		var PROXY='localhost:8080';
+
+		CeL.get_URL('https://nodejs.org/en/',function(X){console.log(X.responseText)},null,null,{proxy:PROXY})
+		CeL.get_URL('https://nodejs.org/en/',function(X){console.log(X.responseText)})
+
+
+		CeL.get_URL('http://dict.revised.moe.edu.tw/',function(X){console.log(X.responseText)},null,null,{proxy:PROXY})
+		CeL.get_URL('http://dict.revised.moe.edu.tw/',function(X){console.log(X.responseText)})
+
+
+		</code>
+		 */
+
 		if (using_proxy) {
-			// 代理伺服器 using proxy sever
+			// 代理伺服器 using proxy server
 			// https://stackoverflow.com/questions/3862813/how-can-i-use-an-http-proxy-with-node-js-http-client
 			// https://cnodejs.org/topic/530f41e75adfcd9c0f1c8c16
 
+			// TODO: get https:// through proxy
+			// https://www.vanamco.com/2014/06/24/proxy-requests-in-node-js/
+			// https://gist.github.com/matthias-christen/6beb3b4dda26bd6a221d
+			// http://luoxia.me/code/2017/07/16/%E8%81%8A%E8%81%8AAgent&Proxy/
+			// https://github.com/TooTallNate/node-https-proxy-agent
+
 			_URL = {
 				host : using_proxy[3],
-				port : +using_proxy[4],
+				port : +using_proxy[4]
+						|| (_URL.protocol === 'https:' ? 443 : 80),
 				path : URL_to_fetch,
+				protocol : _URL.protocol,
 				// method: 'GET',
 				headers : {
-					Host : node_url.parse(URL_to_fetch).host
+					Host : _URL.host
 				}
 			};
 
@@ -1392,12 +1442,15 @@ function module_code(library_namespace) {
 				// https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Authentication
 				// https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Headers/Proxy-Authorization
 				_URL.headers['Proxy-Authorization'] = 'Basic '
+						// proxy.auth
 						+ new Buffer(using_proxy[1] + ':'
 								+ (using_proxy[2] || '')).toString('base64')
 			}
-		} else if (!_URL.protocol) {
+		}
+		if (!_URL.protocol) {
+			_URL.protocol = agent && agent.protocol
 			// 直接設定。 default: https://
-			_URL.protocol = agent && agent.protocol || 'https:';
+			|| (using_proxy ? 'http:' : 'https:');
 		}
 
 		if (agent) {
@@ -1405,11 +1458,11 @@ function module_code(library_namespace) {
 					+ ' agent。', 6, 'get_URL_node');
 			if (agent === true) {
 				// use new agent. default: https://
-				agent = _URL.protocol === 'http:' || using_proxy ? new node_http.Agent
+				agent = _URL.protocol === 'http:' ? new node_http.Agent
 						: new node_https.Agent;
 			} else if (agent.protocol
 			// agent.protocol 可能是 undefined。
-			&& agent.protocol !== (using_proxy ? 'http:' : _URL.protocol)) {
+			&& agent.protocol !== _URL.protocol) {
 				if (options.no_protocol_warn) {
 					library_namespace.debug(
 							'自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
@@ -1422,7 +1475,7 @@ function module_code(library_namespace) {
 				}
 				// use new agent. default: https://
 				// assert: options.agent === agent
-				agent = _URL.protocol === 'http:' || using_proxy ? new node_http.Agent
+				agent = _URL.protocol === 'http:' ? new node_http.Agent
 						: new node_https.Agent;
 				// 複製必要的舊屬性。
 				if (options.agent.last_cookie) {
@@ -1432,7 +1485,7 @@ function module_code(library_namespace) {
 			}
 		} else {
 			library_namespace.debug('採用泛用的 agent。', 6, 'get_URL_node');
-			agent = _URL.protocol === 'http:' || using_proxy ? node_http_agent
+			agent = _URL.protocol === 'http:' ? node_http_agent
 			// default: https://
 			: node_https_agent;
 		}
@@ -1978,12 +2031,22 @@ function module_code(library_namespace) {
 		library_namespace.debug('Set headers: ' + JSON.stringify(_URL.headers),
 				3, 'get_URL_node');
 
+		if (using_proxy && _URL.protocol === 'https:') {
+			if (!('ALPNProtocols' in _URL)) {
+				_URL.ALPNProtocols = [ 'http 1.1' ];
+			}
+
+			agent.callback = function(req, opts, fn) {
+				console.log('callback: ' + using_proxy);
+			};
+		}
+
 		// console.log(_URL);
 		try {
 			// from node.js 10.9.0
 			// http.request(url[, options][, callback])
-			request = _URL.protocol === 'http:' || using_proxy ? node_http
-					.request(_URL, _onload) : node_https.request(_URL, _onload);
+			request = _URL.protocol === 'http:' ? node_http.request(_URL,
+					_onload) : node_https.request(_URL, _onload);
 		} catch (e) {
 			// e.g., _http_client.js:52
 			if (0) {
