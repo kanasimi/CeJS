@@ -197,7 +197,7 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * TODO: 代理伺服器 proxy sever
+	 * TODO: 代理伺服器 using proxy sever
 	 * 
 	 * @see https://developer.mozilla.org/zh-TW/docs/DOM/XMLHttpRequest
 	 *      http://msdn.microsoft.com/en-us/library/ie/ms535874.aspx
@@ -1229,7 +1229,7 @@ function module_code(library_namespace) {
 	 * 讀取 URL via node http/https。<br />
 	 * assert: arguments 必須與 get_URL() 相容！
 	 * 
-	 * @param {String|Object}URL
+	 * @param {String|Object}URL_to_fetch
 	 *            欲請求之目的 URL or options
 	 * @param {Function}[onload]
 	 *            callback when successful loaded. For failure handling, using
@@ -1247,13 +1247,13 @@ function module_code(library_namespace) {
 	 * 
 	 * @since 2015/1/13 23:23:38
 	 */
-	function get_URL_node(URL, onload, charset, post_data, options) {
+	function get_URL_node(URL_to_fetch, onload, charset, post_data, options) {
 		get_URL_node_requests++;
 		if (get_URL_node_connections >= get_URL_node.connects_limit) {
 			library_namespace.debug('Waiting ' + get_URL_node_connections
 			// 避免同時開過多 connections 的機制。
 			+ '/' + get_URL_node_requests + ' connections: '
-					+ JSON.stringify(URL), 3, 'get_URL_node');
+					+ JSON.stringify(URL_to_fetch), 3, 'get_URL_node');
 			var _arguments = arguments;
 			setTimeout(function() {
 				get_URL_node_requests--;
@@ -1282,33 +1282,49 @@ function module_code(library_namespace) {
 				// console.log('>> ' + data.toString().slice(-200));
 				// throw 3;
 				options.form_data = to_form_data_generated;
-				get_URL_node(URL, onload, charset, data, options);
+				get_URL_node(URL_to_fetch, onload, charset, data, options);
 			}, options.form_data);
 			return;
 		}
 
-		if (library_namespace.is_Object(URL) && URL.URL) {
-			Object.assign(options, URL);
+		if (library_namespace.is_Object(URL_to_fetch) && URL_to_fetch.URL) {
+			Object.assign(options, URL_to_fetch);
 			onload = options.onload || onload;
 			post_data = options.post || post_data;
 			charset = options.charset || charset;
-			URL = options.URL;
+			URL_to_fetch = options.URL;
 		}
 
 		// https://developer.mozilla.org/en-US/docs/Web/API/URL
 		// [ origin + pathname, search, hash ]
 		// hrer = [].join('')
-		if (Array.isArray(URL)) {
-			URL = get_URL.add_parameter(URL[0], URL[1], URL[2], charset);
+		if (Array.isArray(URL_to_fetch)) {
+			URL_to_fetch = get_URL.add_parameter(URL_to_fetch[0],
+					URL_to_fetch[1], URL_to_fetch[2], charset);
 		}
 
 		if (options.search || options.hash) {
-			URL = get_URL.add_parameter(URL, options.search, options.hash,
-					charset);
+			URL_to_fetch = get_URL.add_parameter(URL_to_fetch, options.search,
+					options.hash, charset);
 		}
 
-		library_namespace.debug('URL: (' + (typeof URL) + ') [' + URL + ']', 1,
-				'get_URL_node');
+		library_namespace.debug('URL: (' + (typeof URL_to_fetch) + ') ['
+				+ URL_to_fetch + ']', 1, 'get_URL_node');
+
+		var using_proxy = options.proxy
+		// https://curl.haxx.se/docs/manpage.html
+		// https://superuser.com/questions/876100/https-proxy-vs-https-proxy
+		// https://docs.oracle.com/cd/E56344_01/html/E54018/gmgas.html
+		// https://stackoverflow.com/questions/32824819/difference-between-http-proxy-https-proxy-and-proxy
+		|| /^https:/i.test(URL_to_fetch) && library_namespace.env.HTTPS_PROXY
+				|| library_namespace.env.http_proxy;
+		if (using_proxy && (using_proxy = using_proxy
+		// "username:password@hostname:port"
+		// [ all, username, password, hostname, port ]
+		.match(/^(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/))) {
+			// https://www.proxynova.com/proxy-server-list/country-tw/
+			// using_proxy.URL_to_fetch = URL_to_fetch;
+		}
 
 		if (typeof onload === 'object') {
 			// use JSONP.
@@ -1317,7 +1333,7 @@ function module_code(library_namespace) {
 				if (callback_param
 						&& typeof onload[callback_param] === 'function') {
 					// 模擬 callback。
-					URL += '&' + callback_param + '=cb';
+					URL_to_fetch += '&' + callback_param + '=cb';
 					onload = onload[callback_param];
 					break;
 				}
@@ -1326,11 +1342,11 @@ function module_code(library_namespace) {
 
 		// assert: 自此開始不會改變 URL，也不會中途 exit 本函數。
 		if (false) {
-			if (get_URL_node_connection_Set.has(URL)) {
-				library_namespace.warn('get_URL_node: Already has [' + URL
-						+ ']. 同時間重複請求？');
+			if (get_URL_node_connection_Set.has(URL_to_fetch)) {
+				library_namespace.warn('get_URL_node: Already has ['
+						+ URL_to_fetch + ']. 同時間重複請求？');
 			} else {
-				get_URL_node_connection_Set.add(URL);
+				get_URL_node_connection_Set.add(URL_to_fetch);
 			}
 		}
 
@@ -1349,19 +1365,39 @@ function module_code(library_namespace) {
 			onload = false;
 		}
 
-		var _URL = node_url.parse(URL),
 		// 不改到 options。
-		agent = options.agent;
+		var agent = options.agent;
 
+		var _URL = typeof URL_to_fetch === 'string' ? node_url.parse(
 		// 處理 '//domain.org/path' 的情況。
-		if (!_URL.protocol) {
-			if (typeof URL === 'string' && URL.startsWith('//')) {
-				_URL = node_url.parse((agent && agent.protocol || 'https:')
-						+ URL);
-			} else {
-				// 直接設定。 default: https://
-				_URL.protocol = agent && agent.protocol || 'https:';
+		URL_to_fetch.startsWith('//') ? (agent && agent.protocol || 'https:')
+				+ URL_to_fetch : URL_to_fetch) : URL_to_fetch;
+
+		if (using_proxy) {
+			// 代理伺服器 using proxy sever
+			// https://stackoverflow.com/questions/3862813/how-can-i-use-an-http-proxy-with-node-js-http-client
+			// https://cnodejs.org/topic/530f41e75adfcd9c0f1c8c16
+
+			_URL = {
+				host : using_proxy[3],
+				port : +using_proxy[4],
+				path : URL_to_fetch,
+				// method: 'GET',
+				headers : {
+					Host : node_url.parse(URL_to_fetch).host
+				}
+			};
+
+			if (using_proxy[1]) {
+				// https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Authentication
+				// https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Headers/Proxy-Authorization
+				_URL.headers['Proxy-Authorization'] = 'Basic '
+						+ new Buffer(using_proxy[1] + ':'
+								+ (using_proxy[2] || '')).toString('base64')
 			}
+		} else if (!_URL.protocol) {
+			// 直接設定。 default: https://
+			_URL.protocol = agent && agent.protocol || 'https:';
 		}
 
 		if (agent) {
@@ -1369,11 +1405,11 @@ function module_code(library_namespace) {
 					+ ' agent。', 6, 'get_URL_node');
 			if (agent === true) {
 				// use new agent. default: https://
-				agent = _URL.protocol === 'http:' ? new node_http.Agent
+				agent = _URL.protocol === 'http:' || using_proxy ? new node_http.Agent
 						: new node_https.Agent;
 			} else if (agent.protocol
 			// agent.protocol 可能是 undefined。
-			&& agent.protocol !== _URL.protocol) {
+			&& agent.protocol !== (using_proxy ? 'http:' : _URL.protocol)) {
 				if (options.no_protocol_warn) {
 					library_namespace.debug(
 							'自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
@@ -1386,7 +1422,7 @@ function module_code(library_namespace) {
 				}
 				// use new agent. default: https://
 				// assert: options.agent === agent
-				agent = _URL.protocol === 'http:' ? new node_http.Agent
+				agent = _URL.protocol === 'http:' || using_proxy ? new node_http.Agent
 						: new node_https.Agent;
 				// 複製必要的舊屬性。
 				if (options.agent.last_cookie) {
@@ -1396,7 +1432,7 @@ function module_code(library_namespace) {
 			}
 		} else {
 			library_namespace.debug('採用泛用的 agent。', 6, 'get_URL_node');
-			agent = _URL.protocol === 'http:' ? node_http_agent
+			agent = _URL.protocol === 'http:' || using_proxy ? node_http_agent
 			// default: https://
 			: node_https_agent;
 		}
@@ -1413,24 +1449,24 @@ function module_code(library_namespace) {
 			// node_agent : agent,
 
 			// .url @ fetch()
-			// url : URL,
+			// url : URL_to_fetch,
 
 			// deprecated: XMLHttp.URL
 			// URL : _URL,
 
 			// https://developer.mozilla.org/zh-TW/docs/Web/API/Response
 			// .useFinalURL @ fetch()
-			// useFinalURL : URL,
+			// useFinalURL : URL_to_fetch,
 
 			// 因為可能 redirecting 過，這邊列出的才是最終 URL。
 			// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseURL
-			responseURL : URL
+			responseURL : URL_to_fetch
 		},
 		// assert: 必定從 _onfail 或 _onload 作結，以確保會註銷登記。
 		// 本函數unregister()應該放在所有本執行緒會執行到onload的程式碼中。
 		unregister = function() {
 			if (false) {
-				library_namespace.info('unregister [' + URL + ']'
+				library_namespace.info('unregister [' + URL_to_fetch + ']'
 						+ (finished ? ': had done!' : '') + ' '
 						+ get_URL_node_requests + ' requests left.');
 			}
@@ -1453,13 +1489,13 @@ function module_code(library_namespace) {
 			get_URL_node_connections--;
 			if (timeout_id) {
 				library_namespace.debug('clear timeout ' + (timeout / 1000)
-						+ 's [' + URL + ']', 3, 'get_URL_node');
-				// console.trace('clear timeout ' + URL);
+						+ 's [' + URL_to_fetch + ']', 3, 'get_URL_node');
+				// console.trace('clear timeout ' + URL_to_fetch);
 				clearTimeout(timeout_id);
 			}
-			if (false && !get_URL_node_connection_Set['delete'](URL)) {
+			if (false && !get_URL_node_connection_Set['delete'](URL_to_fetch)) {
 				library_namespace.warn('get_URL_node: URL not exists in Set: ['
-						+ URL + ']. 之前同時間重複請求？');
+						+ URL_to_fetch + ']. 之前同時間重複請求？');
 			}
 		},
 		// on failed
@@ -1482,8 +1518,8 @@ function module_code(library_namespace) {
 				} else {
 					options.error_count = 1;
 				}
-				options.URL = URL;
-				// Failed to get [' + URL + '].
+				options.URL = URL_to_fetch;
+				// Failed to get [' + URL_to_fetch + '].
 				library_namespace.log('get_URL_node: Retry '
 						+ options.error_count + '/' + options.error_retry
 						+ ': ' + error);
@@ -1500,10 +1536,12 @@ function module_code(library_namespace) {
 			// 應已在 _ontimeout 出過警告訊息。
 			&& error.code !== 'TIMEOUT') {
 				if (error.code === 'ENOTFOUND') {
-					CeL.error('get_URL_node: Not found: [' + URL + ']');
+					CeL
+							.error('get_URL_node: Not found: [' + URL_to_fetch
+									+ ']');
 				} else {
-					CeL.error('get_URL_node: Get error when retrieving [' + URL
-							+ ']:');
+					CeL.error('get_URL_node: Get error when retrieving ['
+							+ URL_to_fetch + ']:');
 					// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 					console.error(error);
 				}
@@ -1520,10 +1558,9 @@ function module_code(library_namespace) {
 			}
 
 			if ((response.statusCode / 100 | 0) === 3
-			//
-			&& response.headers.location && response.headers.location !== URL
-			//
-			&& !options.no_redirect) {
+					&& response.headers.location
+					&& response.headers.location !== URL_to_fetch
+					&& !options.no_redirect) {
 				if (unregister()) {
 					// 預防 timeout 時重複執行。
 					return;
@@ -1540,10 +1577,11 @@ function module_code(library_namespace) {
 					options = Object.clone(options);
 					options.get_URL_cloned = true;
 				}
-				options.URL = node_url.resolve(URL, response.headers.location);
+				options.URL = node_url.resolve(URL_to_fetch,
+						response.headers.location);
 				library_namespace.debug(response.statusCode
-						+ ' Redirecting to [' + options.URL + '] ← [' + URL
-						+ ']', 1, 'get_URL_node');
+						+ ' Redirecting to [' + options.URL + '] ← ['
+						+ URL_to_fetch + ']', 1, 'get_URL_node');
 				get_URL_node(options, onload, charset, post_data);
 				return;
 			}
@@ -1554,10 +1592,10 @@ function module_code(library_namespace) {
 			// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
 			if (options.onfail || (response.statusCode / 100 | 0) === 2) {
 				library_namespace.debug('STATUS: ' + response.statusCode + ' '
-						+ URL, 2, 'get_URL_node');
+						+ URL_to_fetch, 2, 'get_URL_node');
 			} else if (!options.no_warning) {
-				library_namespace.warn('get_URL_node: [' + URL + ']: status '
-						+ response.statusCode);
+				library_namespace.warn('get_URL_node: [' + URL_to_fetch
+						+ ']: status ' + response.statusCode);
 			}
 
 			library_namespace.debug('response HEADERS: '
@@ -1619,33 +1657,36 @@ function module_code(library_namespace) {
 			&& !options.write_to && !options.write_to_directory) {
 				// 照理unregister()應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				unregister();
-				library_namespace.warn('got [' + URL
+				library_namespace.warn('got [' + URL_to_fetch
 						+ '], but there is no listener!', 1, 'get_URL_node');
 				// console.log(response);
 				return;
 			}
 
-			library_namespace.debug('[' + URL + '] loading...', 3,
+			library_namespace.debug('[' + URL_to_fetch + '] loading...', 3,
 					'get_URL_node');
 			/** {Array} [ {Buffer}, {Buffer}, ... ] */
 			var data = [], length = 0;
 			response.on('data', function(chunk) {
 				// {Buffer}chunk
 				length += chunk.length;
-				library_namespace.debug('receive BODY.length: ' + chunk.length
-						+ '/' + length + ': ' + URL, 4, 'get_URL_node');
+				library_namespace
+						.debug('receive BODY.length: ' + chunk.length + '/'
+								+ length + ': ' + URL_to_fetch, 4,
+								'get_URL_node');
 				data.push(chunk);
 				// node_fs.appendFileSync('get_URL_node.data', chunk);
 			});
 
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			response.on('end', function() {
-				library_namespace.debug('end(): ' + URL, 2, 'get_URL_node');
+				library_namespace.debug('end(): ' + URL_to_fetch, 2,
+						'get_URL_node');
 
 				// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				// unregister();
 
-				// console.log('No more data in response: ' + URL);
+				// console.log('No more data in response: ' + URL_to_fetch);
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
 
@@ -1716,7 +1757,7 @@ function module_code(library_namespace) {
 							library_namespace.error(
 							//
 							'get_URL_node: Error: node_zlib.gunzipSync(): ' + e
-									+ ' [' + URL + ']');
+									+ ' [' + URL_to_fetch + ']');
 							if (false) {
 								console.log(e);
 								console.log(_URL);
@@ -1758,20 +1799,21 @@ function module_code(library_namespace) {
 				// .save_to
 				if (options.write_to || options.write_to_directory) {
 					var file_path = options.write_to
-					// save to: 設定寫入目標。
-					|| (options.write_to_directory
-					//
-					+ library_namespace.env.path_separator
-					//
-					+ library_namespace.to_file_name(
-					//
-					URL.replace(/#.*/g, '').replace(/[\\\/:*?"<>|]/g, '_')))
-					// 避免 Error: ENAMETOOLONG: name too long
-					.slice(0, 256);
+							// save to: 設定寫入目標。
+							|| (options.write_to_directory
+							//
+							+ library_namespace.env.path_separator
+							//
+							+ library_namespace.to_file_name(
+							//
+							URL_to_fetch.replace(/#.*/g, '').replace(
+									/[\\\/:*?"<>|]/g, '_')))
+							// 避免 Error: ENAMETOOLONG: name too long
+							.slice(0, 256);
 					if (!options.no_warning) {
 						library_namespace.info('get_URL_node: Write '
 								+ data.length + ' B to [' + file_path + ']: '
-								+ URL);
+								+ URL_to_fetch);
 					}
 					try {
 						var fd = node_fs.openSync(file_path, 'w');
@@ -1800,7 +1842,7 @@ function module_code(library_namespace) {
 					} catch (e) {
 						library_namespace.error('get_URL_node: Error to write '
 								+ data.length + ' B to [' + file_path + ']: '
-								+ URL);
+								+ URL_to_fetch);
 						console.error(e);
 					}
 				}
@@ -1808,7 +1850,7 @@ function module_code(library_namespace) {
 				if (typeof options.content_processor === 'function') {
 					options.content_processor(
 					// ({Buffer}contains, URL, status)
-					data, URL, response.statusCode);
+					data, URL_to_fetch, response.statusCode);
 				}
 
 				result_Object.buffer = data;
@@ -1831,7 +1873,7 @@ function module_code(library_namespace) {
 				if (typeof options.check_reget === 'function'
 				// check_reget(XMLHttp)
 				&& options.check_reget(result_Object, options)) {
-					options.URL = URL;
+					options.URL = URL_to_fetch;
 					get_URL_node(options, onload, charset, post_data);
 					return;
 				}
@@ -1865,7 +1907,7 @@ function module_code(library_namespace) {
 
 			// User Agent
 			'User-Agent' : get_URL_node.default_user_agent
-		}, options.headers);
+		}, options.headers, _URL.headers);
 
 		if (node_zlib.gunzipSync
 		// && node_zlib.deflateSync
@@ -1940,8 +1982,8 @@ function module_code(library_namespace) {
 		try {
 			// from node.js 10.9.0
 			// http.request(url[, options][, callback])
-			request = _URL.protocol === 'http:' ? node_http.request(_URL,
-					_onload) : node_https.request(_URL, _onload);
+			request = _URL.protocol === 'http:' || using_proxy ? node_http
+					.request(_URL, _onload) : node_https.request(_URL, _onload);
 		} catch (e) {
 			// e.g., _http_client.js:52
 			if (0) {
@@ -2005,12 +2047,12 @@ function module_code(library_namespace) {
 			}
 			if (!options.no_warning) {
 				library_namespace.info('get_URL_node: timeout '
-						+ (timeout / 1000) + 's [' + URL + ']');
+						+ (timeout / 1000) + 's [' + URL_to_fetch + ']');
 			}
 			if (!e) {
 				e = new Error('Timeout '
 						+ (timeout % 1000 === 0 ? timeout / 1000 + 's'
-								: timeout + 'ms') + ': ' + URL);
+								: timeout + 'ms') + ': ' + URL_to_fetch);
 				e.code = 'TIMEOUT';
 			}
 
@@ -2029,7 +2071,7 @@ function module_code(library_namespace) {
 			// {Object}timeout_id @ node.js
 			timeout_id = setTimeout(_ontimeout, timeout);
 			library_namespace.debug('add timeout ' + (timeout / 1000) + 's ['
-					+ URL + ']', 2, 'get_URL_node');
+					+ URL_to_fetch + ']', 2, 'get_URL_node');
 		}
 
 		library_namespace.debug('set onerror: '
