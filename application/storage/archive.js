@@ -21,7 +21,7 @@ archive_file.program = executable_file_path['7z'];
 archive_file.execute(switches, callback);
 
 //  FSO status hash get from archive_file.info()
-archive_file.hash = { FSO path : {FSO data}, ... }
+archive_file.fso_path_hash = { FSO path : {FSO data}, ... }
 archive_file.information = { archive information }
 
 // list FSOs, get FSO status hash
@@ -147,6 +147,7 @@ function module_code(library_namespace) {
 
 	if (!executable_file_path['7z'] && library_namespace.platform('windows')) {
 		// @see GitHub.updater.node.js
+		// 嘗試取得7-Zip的執行路徑
 		// try to read 7z program path from Windows registry
 		executable_file_path['7z'] = library_namespace
 				.run_JSctipt(
@@ -565,6 +566,7 @@ function module_code(library_namespace) {
 	// .info() 共同可用的屬性:
 	// path size modified method
 
+	// Lists contents of archive.
 	function parse_7z_info_output(output) {
 		// console.log(output && output.toString());
 
@@ -574,7 +576,14 @@ function module_code(library_namespace) {
 		// console.log(output);
 
 		// console.trace(this);
-		this.hash = library_namespace.null_Object();
+
+		// initialization
+		this.information = undefined;
+		// fso path hash
+		this.fso_path_hash = library_namespace.null_Object();
+		// fso_status_list, files of archive
+		this.fso_status_list = [];
+
 		// console.log(JSON.stringify(output));
 		// console.log(JSON.stringify(output.split(/\r?\n\r?\n/)));
 		output.split(/\r?\n\r?\n/).forEach(function(FSO_data_lines) {
@@ -593,17 +602,26 @@ function module_code(library_namespace) {
 				;
 
 			} else if (this.information) {
+				this.fso_status_list.push(FSO_data);
+				if (this.fso_path_hash[FSO_data.path]) {
+					CeL.warn('Duplicate FSO path: ' + FSO_data.path);
+				}
 				// FSO status hash get from archive_file.info()
-				// archive_file.hash = { FSO path : {FSO data}, ... }
-				this.hash[FSO_data.path] = FSO_data;
+				// archive_file.fso_path_hash = { FSO path : {FSO data}, ... }
+				this.fso_path_hash[FSO_data.path] = FSO_data;
+
 			} else {
 				// assert: the first item is the archive file itself
 				// archive_file.information = { archive information }
 				this.information = FSO_data;
+
+				// 對於壓縮檔案應該有的大小 'physical size' 不同於真正大小的情況，
+				// 'tail size' 會記錄著壓縮檔案之後的尾端大小，
+				// ['physical size']+.offset+['tail size']=壓縮檔案真正的大小。
 			}
 		}, this);
 
-		return this.hash;
+		return this.fso_path_hash;
 	}
 
 	// TODO: 警告: macOS 底下，無法讀取非latin字元!
@@ -621,7 +639,14 @@ function module_code(library_namespace) {
 		// console.log(output);
 
 		// console.trace(this);
-		this.hash = library_namespace.null_Object();
+
+		// initialization
+		this.information = undefined;
+		// fso path hash
+		this.fso_path_hash = library_namespace.null_Object();
+		// fso_status_list, files of archive
+		this.fso_status_list = [];
+
 		// console.log(JSON.stringify(output));
 		// console.log(JSON.stringify(output.split(/\r?\n\r?\n/)));
 		output = output.split(/\r?\n/);
@@ -656,13 +681,17 @@ function module_code(library_namespace) {
 				;
 
 			} else {
+				this.fso_status_list.push(FSO_data);
+				if (this.fso_path_hash[FSO_data.path]) {
+					CeL.warn('Duplicate FSO path: ' + FSO_data.path);
+				}
 				// FSO status hash get from archive_file.info()
-				// archive_file.hash = { FSO path : {FSO data}, ... }
-				this.hash[FSO_data.path] = FSO_data;
+				// archive_file.fso_path_hash = { FSO path : {FSO data}, ... }
+				this.fso_path_hash[FSO_data.path] = FSO_data;
 			}
 		}, this);
 
-		return this.hash;
+		return this.fso_path_hash;
 	}
 
 	var postfix = {
