@@ -1214,6 +1214,41 @@ function module_code(library_namespace) {
 
 	_.merge_cookie = merge_cookie;
 
+	function set_cookie_to_URL_object(URL_object_to_fetch, agent) {
+		// console.trace('agent.last_cookie:');
+		// console.log(agent.last_cookie);
+		if (agent.last_cookie) {
+			// 使用 cookie
+			library_namespace.debug('agent.last_cookie: '
+					+ JSON.stringify(agent.last_cookie), 3,
+					'set_cookie_to_URL_object');
+			library_namespace.debug('agent.cookie_hash: '
+					+ JSON.stringify(agent.cookie_hash), 3,
+					'set_cookie_to_URL_object');
+			URL_object_to_fetch.headers.Cookie = (URL_object_to_fetch.headers.Cookie ? URL_object_to_fetch.headers.Cookie
+					+ ';'
+					: '')
+					// cookie is Array @ Wikipedia
+					+ (Array.isArray(agent.last_cookie) ? agent.last_cookie
+					// 去掉 expires=...; path=/; domain=...; HttpOnly
+					// 這個動作不做也可以，不影響結果。
+					.map(function(cookie) {
+						return cookie.replace(/;.*/, '');
+					}).join('; ') : agent.last_cookie);
+		}
+		library_namespace.debug('Set cookie: '
+				+ JSON.stringify(URL_object_to_fetch.headers.Cookie), 3,
+				'set_cookie_to_URL_object');
+		library_namespace.debug(
+				'Set protocol: ' + URL_object_to_fetch.protocol, 3,
+				'set_cookie_to_URL_object');
+		library_namespace.debug('Set headers: '
+				+ JSON.stringify(URL_object_to_fetch.headers), 3,
+				'set_cookie_to_URL_object');
+	}
+
+	// ---------------------------------------------------------------------//
+
 	// 正處理中之 connections
 	// var get_URL_node_connection_Set = new Set;
 
@@ -1311,22 +1346,6 @@ function module_code(library_namespace) {
 		library_namespace.debug('URL: (' + (typeof URL_to_fetch) + ') ['
 				+ URL_to_fetch + ']', 1, 'get_URL_node');
 
-		var using_proxy = options.proxy
-		// https://curl.haxx.se/docs/manpage.html
-		// https://superuser.com/questions/876100/https-proxy-vs-https-proxy
-		// https://docs.oracle.com/cd/E56344_01/html/E54018/gmgas.html
-		// https://stackoverflow.com/questions/32824819/difference-between-http-proxy-https-proxy-and-proxy
-		|| /^https:/i.test(URL_to_fetch) && library_namespace.env.HTTPS_PROXY
-		// process.env.http_proxy
-		|| library_namespace.env.http_proxy;
-		if (using_proxy && (using_proxy = using_proxy
-		// 代理伺服器 proxy_server: "username:password@hostname:port"
-		// [ all, username, password, hostname, port ]
-		.match(/^(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/))) {
-			// https://www.proxynova.com/proxy-server-list/country-tw/
-			// using_proxy.URL_to_fetch = URL_to_fetch;
-		}
-
 		if (typeof onload === 'object') {
 			// use JSONP.
 			// need callback.
@@ -1369,20 +1388,32 @@ function module_code(library_namespace) {
 		// 不改到 options。
 		var agent = options.agent;
 
-		var _URL = typeof URL_to_fetch === 'string' ? node_url.parse(
-		// 處理 '//domain.org/path' 的情況。
-		URL_to_fetch.startsWith('//') ? (agent && agent.protocol || 'https:')
-				+ URL_to_fetch : URL_to_fetch) : URL_to_fetch;
+		if (false && (typeof URL_to_fetch === 'string')
+		// https://github.com/kevva/url-regex/blob/master/index.js
+		// https://perishablepress.com/stop-using-unsafe-characters-in-urls/
+		&& /[^0-9a-zA-Z$\-_.+!*'();\/?:@=&]/.test(source_data.url)) {
+			URL_to_fetch = encodeURI(URL_to_fetch);
+		}
+
+		var URL_object_to_fetch = typeof URL_to_fetch === 'string' ? node_url
+				.parse(
+				// 處理 '//domain.org/path' 的情況。
+				URL_to_fetch.startsWith('//') ? (agent && agent.protocol || 'https:')
+						+ URL_to_fetch
+						: URL_to_fetch)
+				: URL_to_fetch;
+		var URL_is_https = /^https:?$/i.test(URL_object_to_fetch.protocol);
 
 		/**
 		 * <code>
 
+		// http://anonproxyserver.sourceforge.net/
 		// https://www.proxynova.com/proxy-server-list/country-tw/
 		var http = require("http");
 		var options = {
 			host: "211.22.233.69",
 			port: 3128,
-			path: "http://dict.revised.moe.edu.tw/",
+			path: "http://dict.revised.moe.edu.tw/cgi-bin/cbdic/gsweb.cgi?ccd=9gW4am&o=e0&sec=sec11&option=linkout001&actice=layout",
 			//method: 'GET',
 			headers: {
 				Host: "dict.revised.moe.edu.tw"
@@ -1399,84 +1430,108 @@ function module_code(library_namespace) {
 
 
 
+		require('./work_crawler_loder.js'); var PROXY='localhost:8080';
 
+		CeL.get_URL('https://zh.wikipedia.org/wiki/Special:%E6%9C%80%E8%BF%91%E6%9B%B4%E6%94%B9',function(X){console.log(X.responseText)},null,null,{proxy:PROXY});
+		CeL.get_URL('https://zh.wikipedia.org/wiki/Special:%E6%9C%80%E8%BF%91%E6%9B%B4%E6%94%B9',function(X){console.log(X.responseText)});
 
-		require('./work_crawler_loder.js');
-		var PROXY='localhost:8080';
+		CeL.get_URL('http://dict.revised.moe.edu.tw/cgi-bin/cbdic/gsweb.cgi?ccd=9gW4am&o=e0&sec=sec11&option=linkout001&actice=layout',function(X){console.log(X.responseText)},null,null,{proxy:PROXY});
+		CeL.get_URL('http://dict.revised.moe.edu.tw/cgi-bin/cbdic/gsweb.cgi?ccd=9gW4am&o=e0&sec=sec11&option=linkout001&actice=layout',function(X){console.log(X.responseText)});
 
-		CeL.get_URL('https://nodejs.org/en/',function(X){console.log(X.responseText)},null,null,{proxy:PROXY})
-		CeL.get_URL('https://nodejs.org/en/',function(X){console.log(X.responseText)})
-
-
-		CeL.get_URL('http://dict.revised.moe.edu.tw/',function(X){console.log(X.responseText)},null,null,{proxy:PROXY})
-		CeL.get_URL('http://dict.revised.moe.edu.tw/',function(X){console.log(X.responseText)})
-
+		// TODO: test agent, cookie
 
 		</code>
 		 */
 
-		if (using_proxy) {
+		var proxy_original_agent,
+		// using_proxy_server
+		proxy_server = parse_proxy_server(options.proxy
+		// https://curl.haxx.se/docs/manpage.html
+		// https://superuser.com/questions/876100/https-proxy-vs-https-proxy
+		// https://docs.oracle.com/cd/E56344_01/html/E54018/gmgas.html
+		// https://stackoverflow.com/questions/32824819/difference-between-http-proxy-https-proxy-and-proxy
+		|| /^https:/i.test(URL_to_fetch) && library_namespace.env.HTTPS_PROXY
+		// process.env.http_proxy
+		|| library_namespace.env.http_proxy);
+
+		if (!proxy_server) {
+			;
+
+		} else if (URL_is_https) {
+			// ... just add the special agent:
+			proxy_original_agent = proxy_server.agent = agent;
+			agent = new HttpsProxyAgent(proxy_server);
+			// 複製必要的舊屬性。
+			if (proxy_original_agent && proxy_original_agent.last_cookie) {
+				// 複製原agent的cookie設定。 @see merge_cookie()
+				agent.last_cookie = proxy_original_agent.last_cookie;
+			}
+			// https://github.com/TooTallNate/node-https-proxy-agent/blob/master/index.js
+			// ALPN is supported by Node.js >= v5.
+			// attempt to negotiate http/1.1 for proxy servers that support
+			// http/2
+			if (!('ALPNProtocols' in URL_object_to_fetch)) {
+				URL_object_to_fetch.ALPNProtocols = [ 'http 1.1' ];
+			}
+
+		} else {
+			// https://www.proxynova.com/proxy-server-list/country-tw/
+			// proxy_server.URL_to_fetch = URL_to_fetch;
+
 			// 代理伺服器 using proxy server
 			// https://stackoverflow.com/questions/3862813/how-can-i-use-an-http-proxy-with-node-js-http-client
 			// https://cnodejs.org/topic/530f41e75adfcd9c0f1c8c16
 
-			// TODO: get https:// through proxy
-			// https://www.vanamco.com/2014/06/24/proxy-requests-in-node-js/
-			// https://gist.github.com/matthias-christen/6beb3b4dda26bd6a221d
-			// http://luoxia.me/code/2017/07/16/%E8%81%8A%E8%81%8AAgent&Proxy/
-			// https://github.com/TooTallNate/node-https-proxy-agent
-
-			_URL = {
-				host : using_proxy[3],
-				port : +using_proxy[4]
-						|| (_URL.protocol === 'https:' ? 443 : 80),
-				path : URL_to_fetch,
-				protocol : _URL.protocol,
-				// method: 'GET',
-				headers : {
-					Host : _URL.host
-				}
-			};
-
-			if (using_proxy[1]) {
-				// https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Authentication
-				// https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Headers/Proxy-Authorization
-				_URL.headers['Proxy-Authorization'] = 'Basic '
-						// proxy.auth
-						+ new Buffer(using_proxy[1] + ':'
-								+ (using_proxy[2] || '')).toString('base64')
-			}
+			URL_object_to_fetch = get_proxy_URL(proxy_server,
+					URL_object_to_fetch, URL_to_fetch);
 		}
-		if (!_URL.protocol) {
-			_URL.protocol = agent && agent.protocol
+		if (false && proxy_server && URL_object_to_fetch.host
+				&& URL_object_to_fetch.path) {
+			// https://github.com/TooTallNate/node-https-proxy-agent/blob/master/index.js
+			/**
+			 * if both a `host` and `path` are specified then it's most likely
+			 * the result of a `url.parse()` call... we need to remove the
+			 * `path` portion so that `net.connect()` doesn't attempt to open
+			 * that as a unix socket file.
+			 */
+			delete URL_object_to_fetch.path;
+			delete URL_object_to_fetch.pathname;
+		}
+
+		if (!URL_object_to_fetch.protocol) {
+			URL_object_to_fetch.protocol = agent && agent.protocol
 			// 直接設定。 default: https://
-			|| (using_proxy ? 'http:' : 'https:');
+			|| (proxy_server ? 'http:' : 'https:');
+			URL_is_https = URL_object_to_fetch.protocol === 'https:';
 		}
 
 		if (agent) {
 			library_namespace.debug('使用' + (agent === true ? '新' : '自定義')
 					+ ' agent。', 6, 'get_URL_node');
 			if (agent === true) {
-				// use new agent. default: https://
-				agent = _URL.protocol === 'http:' ? new node_http.Agent
-						: new node_https.Agent;
+				// use new agent.
+				agent = URL_is_https ? new node_https.Agent
+						: new node_http.Agent;
 			} else if (agent.protocol
 			// agent.protocol 可能是 undefined。
-			&& agent.protocol !== _URL.protocol) {
+			&& agent.protocol !== URL_object_to_fetch.protocol) {
 				if (options.no_protocol_warn) {
 					library_namespace.debug(
 							'自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
-									+ agent.protocol + ' !== ' + _URL.protocol,
-							3, 'get_URL_node');
+									+ agent.protocol + ' !== '
+									+ URL_object_to_fetch.protocol, 3,
+							'get_URL_node');
 				} else {
 					library_namespace
 							.warn('get_URL_node: 自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
-									+ agent.protocol + ' !== ' + _URL.protocol);
+									+ agent.protocol
+									+ ' !== '
+									+ URL_object_to_fetch.protocol);
 				}
-				// use new agent. default: https://
+				// use new agent.
 				// assert: options.agent === agent
-				agent = _URL.protocol === 'http:' ? new node_http.Agent
-						: new node_https.Agent;
+				agent = URL_is_https ? new node_https.Agent
+						: new node_http.Agent;
 				// 複製必要的舊屬性。
 				if (options.agent.last_cookie) {
 					// 複製原agent的cookie設定。 @see merge_cookie()
@@ -1485,9 +1540,7 @@ function module_code(library_namespace) {
 			}
 		} else {
 			library_namespace.debug('採用泛用的 agent。', 6, 'get_URL_node');
-			agent = _URL.protocol === 'http:' ? node_http_agent
-			// default: https://
-			: node_https_agent;
+			agent = URL_is_https ? node_https_agent : node_http_agent;
 		}
 
 		if (options.cookie && !agent.last_cookie) {
@@ -1505,7 +1558,7 @@ function module_code(library_namespace) {
 			// url : URL_to_fetch,
 
 			// deprecated: XMLHttp.URL
-			// URL : _URL,
+			// URL : URL_object_to_fetch,
 
 			// https://developer.mozilla.org/zh-TW/docs/Web/API/Response
 			// .useFinalURL @ fetch()
@@ -1538,6 +1591,10 @@ function module_code(library_namespace) {
 			}
 			// 註銷登記。
 			finished = true;
+
+			timeout > 0 && request.removeListener('timeout', _ontimeout);
+			request.removeListener('error', _onfail);
+
 			get_URL_node_requests--;
 			get_URL_node_connections--;
 			if (timeout_id) {
@@ -1743,6 +1800,11 @@ function module_code(library_namespace) {
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
 
+				if (proxy_original_agent) {
+					// recover properties
+					proxy_original_agent.last_cookie = agent.last_cookie;
+				}
+
 				if (response.statusCode === 503
 						&& data.toString().includes(' id="jschl-answer"')) {
 					library_namespace.error(
@@ -1813,7 +1875,7 @@ function module_code(library_namespace) {
 									+ ' [' + URL_to_fetch + ']');
 							if (false) {
 								console.log(e);
-								console.log(_URL);
+								console.log(URL_object_to_fetch);
 								console.log(node_zlib);
 								console.log(data);
 								console.trace(
@@ -1941,7 +2003,7 @@ function module_code(library_namespace) {
 
 		};
 
-		_URL.headers = Object.assign({
+		URL_object_to_fetch.headers = Object.assign({
 			// 乾脆模擬得更真實一點。
 			// Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
 			// + 'image/webp,image/apng,image/*,*/*;q=0.8',
@@ -1955,29 +2017,30 @@ function module_code(library_namespace) {
 			// Connection : 'keep-alive',
 			// DNT : 1,
 			// 網站的主機名稱。
-			// Host : _URL.host,
+			// Host : URL_object_to_fetch.host,
 			// 'Upgrade-Insecure-Requests' : 1,
 
 			// User Agent
 			'User-Agent' : get_URL_node.default_user_agent
-		}, options.headers, _URL.headers);
+		}, options.headers, URL_object_to_fetch.headers);
 
 		if (node_zlib.gunzipSync
 		// && node_zlib.deflateSync
 		) {
 			// 早期 node v0.10.25 無 zlib.gunzipSync。Added in: v0.11.12
 			// 'gzip, deflate, *'
-			_URL.headers['Accept-Encoding'] = 'gzip, deflate';
+			URL_object_to_fetch.headers['Accept-Encoding'] = 'gzip, deflate';
 		}
 
 		if (false)
 			// @see jQuery
-			if (!options.crossDomain && !_URL.headers["X-Requested-With"]) {
-				_URL.headers["X-Requested-With"] = "XMLHttpRequest";
+			if (!options.crossDomain
+					&& !URL_object_to_fetch.headers["X-Requested-With"]) {
+				URL_object_to_fetch.headers["X-Requested-With"] = "XMLHttpRequest";
 			}
 
 		if (post_data) {
-			_URL.method = 'POST';
+			URL_object_to_fetch.method = 'POST';
 			var _post_data = post_data === FORCE_POST ? '' : post_data;
 			if (0 && options.form_data) {
 				console.log('-'.repeat(79));
@@ -1985,7 +2048,7 @@ function module_code(library_namespace) {
 				console.log(_post_data);
 				throw 1;
 			}
-			Object.assign(_URL.headers, {
+			Object.assign(URL_object_to_fetch.headers, {
 				'Content-Type' : options.form_data
 				//
 				? 'multipart/form-data; boundary='
@@ -2002,51 +2065,18 @@ function module_code(library_namespace) {
 		}
 		if (options.method) {
 			// e.g., 'HEAD'
-			_URL.method = options.method;
+			URL_object_to_fetch.method = options.method;
 		}
 
-		_URL.agent = agent;
-		// console.trace('agent.last_cookie:');
-		// console.log(agent.last_cookie);
-		if (agent.last_cookie) {
-			// 使用 cookie
-			library_namespace.debug('agent.last_cookie: '
-					+ JSON.stringify(agent.last_cookie), 3, 'get_URL_node');
-			library_namespace.debug('agent.cookie_hash: '
-					+ JSON.stringify(agent.cookie_hash), 3, 'get_URL_node');
-			_URL.headers.Cookie = (_URL.headers.Cookie ? _URL.headers.Cookie
-					+ ';' : '')
-					// cookie is Array @ Wikipedia
-					+ (Array.isArray(agent.last_cookie) ? agent.last_cookie
-					// 去掉 expires=...; path=/; domain=...; HttpOnly
-					// 這個動作不做也可以，不影響結果。
-					.map(function(cookie) {
-						return cookie.replace(/;.*/, '');
-					}).join('; ') : agent.last_cookie);
-		}
-		library_namespace.debug('Set cookie: '
-				+ JSON.stringify(_URL.headers.Cookie), 3, 'get_URL_node');
-		library_namespace.debug('Set protocol: ' + _URL.protocol, 3,
-				'get_URL_node');
-		library_namespace.debug('Set headers: ' + JSON.stringify(_URL.headers),
-				3, 'get_URL_node');
+		URL_object_to_fetch.agent = agent;
+		set_cookie_to_URL_object(URL_object_to_fetch, agent);
 
-		if (using_proxy && _URL.protocol === 'https:') {
-			if (!('ALPNProtocols' in _URL)) {
-				_URL.ALPNProtocols = [ 'http 1.1' ];
-			}
-
-			agent.callback = function(req, opts, fn) {
-				console.log('callback: ' + using_proxy);
-			};
-		}
-
-		// console.log(_URL);
+		// console.log(URL_object_to_fetch);
 		try {
 			// from node.js 10.9.0
 			// http.request(url[, options][, callback])
-			request = _URL.protocol === 'http:' ? node_http.request(_URL,
-					_onload) : node_https.request(_URL, _onload);
+			request = URL_is_https ? node_https.request(URL_object_to_fetch,
+					_onload) : node_http.request(URL_object_to_fetch, _onload);
 		} catch (e) {
 			// e.g., _http_client.js:52
 			if (0) {
@@ -2227,6 +2257,262 @@ function module_code(library_namespace) {
 	// CeL.application.net.Ajax.setup_node_net();
 	// library_namespace.application.net.Ajax.setup_node_net();
 	setup_node();
+
+	// ---------------------------------------------------------------------//
+
+	function parse_proxy_server(proxy_server) {
+		if (typeof proxy_server === 'string' && (proxy_server = proxy_server
+		// 代理伺服器 proxy_server: "username:password@hostname:port"
+		// [ all, username, password, hostname, port ]
+		.match(/^(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/))) {
+			proxy_server = {
+				proxy : proxy_server[0],
+				username : proxy_server[1],
+				password : proxy_server[2],
+				hostname : proxy_server[3],
+				port : +proxy_server[4]
+			};
+		}
+
+		return proxy_server;
+	}
+
+	function get_proxy_URL(proxy_server, URL_object_to_fetch, URL_to_fetch) {
+		var proxy_URL = {
+			host : proxy_server.hostname,
+			port : proxy_server.port
+					|| (URL_object_to_fetch.protocol === 'https:' ? 443 : 80),
+			path : URL_to_fetch,
+			protocol : URL_object_to_fetch.protocol,
+			// method: 'GET',
+			headers : {
+				Host : URL_object_to_fetch.host
+			}
+		};
+		if (proxy_server.agent) {
+			proxy_URL.agent = proxy_server.agent;
+		}
+		if (proxy_server.username) {
+			// https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Authentication
+			// https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Headers/Proxy-Authorization
+			proxy_URL.headers['Proxy-Authorization'] = 'Basic ' + Buffer.from(
+			// proxy.auth
+			proxy_server.username + ':' + (proxy_server.password || '')
+			//
+			).toString('base64');
+		}
+
+		return proxy_URL;
+	}
+
+	// http://luoxia.me/code/2017/07/16/%E8%81%8A%E8%81%8AAgent&Proxy/
+	// https://github.com/TooTallNate/node-https-proxy-agent
+	/**
+	 * get https:// through proxy 用於取得https網站。
+	 * 
+	 * @see https://www.vanamco.com/2014/06/24/proxy-requests-in-node-js/
+	 *      https://gist.github.com/matthias-christen/6beb3b4dda26bd6a221d
+	 * 
+	 * modify from:
+	 * 
+	 * HTTPS Agent for node.js HTTPS requests via a proxy.
+	 * blog.vanamco.com/connecting-via-proxy-node-js/
+	 */
+	function HttpsProxyAgent(proxy_server, options) {
+		if (!(this instanceof HttpsProxyAgent))
+			return new HttpsProxyAgent(proxy_server, options);
+
+		node_https.Agent.call(this, options || {});
+
+		this.options = Object.assign({}, options);
+
+		proxy_server = parse_proxy_server(proxy_server);
+		if (!proxy_server) {
+			throw new Error('Must specify proxy server: hostname:port')
+		}
+		this.proxy_server = proxy_server;
+
+		// https://github.com/nodejs/node/blob/master/lib/net.js
+		// function connect(...args) { }
+		this.createConnection = function connect_proxy_server(options, callback) {
+			// do a CONNECT request
+			var request = Object.assign(get_proxy_URL(proxy_server, options,
+					options.host + ':' + options.port), {
+				method : 'CONNECT'
+			});
+			delete request.protocol;
+			if (proxy_server.agent)
+				set_cookie_to_URL_object(request, proxy_server.agent);
+
+			library_namespace.debug('Connect to ' + request.path, 2,
+					'HttpsProxyAgent.createConnection');
+			request = node_http.request(request);
+
+			request.on('connect', function(response, socket, head) {
+				// a tls.TLSSocket object
+				var tls_socket = require('tls').connect({
+					host : options.host,
+					socket : socket
+				}, function() {
+					callback(null, tls_socket);
+				});
+			});
+
+			request.on('error', callback);
+
+			request.end();
+		}
+	}
+
+	/**
+	 * <code>
+	node_https.request({
+		// like you'd do it usually...
+		host : 'twitter.com',
+		port : 443,
+		method : 'GET',
+		path : '/',
+	
+		// set proxy
+		agent : new CeL.HttpsProxyAgent('localhost:8080')
+	}, function(resonse) {
+		resonse.on('data', function(data) {
+			console.log(data.toString());
+		});
+	}).end();
+
+	</code>
+	 */
+	_.HttpsProxyAgent = HttpsProxyAgent;
+
+	var node_util = require('util');
+	node_util.inherits(HttpsProxyAgent, node_https.Agent);
+
+	// https://github.com/nodejs/node/blob/master/lib/_http_agent.js
+	HttpsProxyAgent.prototype.getName = function getName(options) {
+		var name = (options.host || 'localhost') + ':'
+		//
+		+ (options.port || '') + ':' + (options.path || '');
+		return name;
+	};
+
+	// Almost verbatim copy of http.Agent.addRequest
+	// https://github.com/nodejs/node/blob/master/lib/_http_agent.js
+	// Agent.prototype.addRequest = function addRequest(req, options
+	HttpsProxyAgent.prototype.addRequest = function addRequest(request, options) {
+		// Get the key for a given set of request options
+		// Agent.prototype.getName
+		var name = this.getName(options);
+
+		if (!this.sockets[name])
+			this.sockets[name] = [];
+
+		// Do not use this.freeSockets
+
+		if (this.sockets[name].length < this.maxSockets) {
+			options.request = request;
+			// If we are under maxSockets create a new one.
+
+			this.createSocket(name, options, function(error, tls_socket) {
+				if (error) {
+					process.nextTick(function emitErrorNT(emitter, error) {
+						emitter.emit('error', error);
+					}, request, error);
+					return;
+				}
+				// setRequestSocket(agent, request, socket);
+				request.onSocket(tls_socket);
+				// TODO: set this_agent.options.timeout
+			});
+		} else {
+			// We are over limit so we'll add it to the queue.
+			if (!this.requests[name])
+				this.requests[name] = [];
+			this.requests[name].push(request);
+			// lost options???
+		}
+	};
+
+	// Almost verbatim copy of http.Agent.createSocket
+	// https://github.com/nodejs/node/blob/master/lib/_http_agent.js
+	// Agent.prototype.createSocket
+	HttpsProxyAgent.prototype.createSocket = function createSocket(name,
+			options, callback) {
+		var this_agent = this;
+		options = Object.assign({}, options, this.options);
+
+		options.servername = options.host;
+		if (options.request) {
+			var hostHeader = options.request.getHeader('host');
+			if (hostHeader)
+				options.servername = hostHeader.replace(/:.*$/, '');
+		}
+
+		var called = false;
+		function oncreate(error, tls_socket) {
+			if (called)
+				return;
+			called = true;
+			if (error) {
+				error.message += ' while connecting to HTTP(S) proxy server '
+						+ this_agent.hostname + ':' + this_agent.port;
+
+				if (options.request)
+					options.request.emit('error', error);
+				else
+					throw error;
+
+				return;
+			}
+
+			var name = this_agent.getName(options);
+			if (!this_agent.sockets[name])
+				this_agent.sockets[name] = [];
+
+			this_agent.sockets[name].push(tls_socket);
+
+			// ------------------------
+			// function installListeners(agent, socket, options)
+			var onFree = function onFree() {
+				this_agent.emit('free', tls_socket, options);
+			};
+
+			var onClose = function onClose(error) {
+				/**
+				 * This is the only place where sockets get removed from the
+				 * Agent.
+				 * 
+				 * If you want to remove a socket from the pool, just close it.
+				 * 
+				 * All socket errors end in a close event anyway.
+				 */
+				this_agent.removeSocket(tls_socket, options);
+			};
+
+			var onRemove = function onRemove() {
+				/**
+				 * We need this function for cases like HTTP 'upgrade' (defined
+				 * by WebSockets) where we need to remove a socket from the pool
+				 * because it'll be locked up indefinitely
+				 */
+				this_agent.removeSocket(tls_socket, options);
+				tls_socket.removeListener('close', onClose);
+				tls_socket.removeListener('free', onFree);
+				tls_socket.removeListener('agentRemove', onRemove);
+			};
+
+			tls_socket.on('free', onFree);
+			tls_socket.on('close', onClose);
+			tls_socket.on('agentRemove', onRemove);
+			// ------------------------
+
+			// assert: error === null
+			callback(error, tls_socket);
+		}
+
+		// call connect_proxy_server()
+		this_agent.createConnection(options, oncreate);
+	};
 
 	// ---------------------------------------------------------------------//
 	// TODO: for non-nodejs
@@ -2424,8 +2710,27 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
-	// var fetch = CeL.fetch;
-	// @see 20181016.import_earthquake_shakemap.js
+	/**
+	 * <code>
+	
+	var fetch = CeL.fetch;
+
+	fetch(url).then(function(response) {
+		return response.json();
+	}).then(function(json) {
+		console.log(json);
+	});
+
+	fetch(url).then(function(response) {
+		return response.text();
+	}).then(function(html) {
+		console.log(html);
+	});
+
+	</code>
+	 * 
+	 * @see 20181016.import_earthquake_shakemap.js
+	 */
 
 	// simple polyfill for fetch API
 	// @since 2018/10/16 17:47:12
