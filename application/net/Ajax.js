@@ -212,7 +212,9 @@ function module_code(library_namespace) {
 		options = library_namespace.new_options(options);
 		if (library_namespace.is_Object(URL) && URL.URL) {
 			Object.assign(options, URL);
-			onload = options.onload || onload;
+			// 注意: options.onload 另有用途!
+			// https://xhr.spec.whatwg.org/#handler-xhr-onloadstart
+			// onload = options.onload || onload;
 			post_data = options.post || post_data;
 			charset = options.charset || charset;
 			URL = options.URL;
@@ -1324,7 +1326,9 @@ function module_code(library_namespace) {
 
 		if (library_namespace.is_Object(URL_to_fetch) && URL_to_fetch.URL) {
 			Object.assign(options, URL_to_fetch);
-			onload = options.onload || onload;
+			// 注意: options.onload 另有用途!
+			// https://xhr.spec.whatwg.org/#handler-xhr-onloadstart
+			// onload = options.onload || onload;
 			post_data = options.post || post_data;
 			charset = options.charset || charset;
 			URL_to_fetch = options.URL;
@@ -1592,8 +1596,12 @@ function module_code(library_namespace) {
 			// 註銷登記。
 			finished = true;
 
-			timeout > 0 && request.removeListener('timeout', _ontimeout);
-			request.removeListener('error', _onfail);
+			// 有時還需要處理 'error' event，因此不可 .removeListener()
+			if (false && request) {
+				// Sometimes request === undefined
+				timeout > 0 && request.removeListener('timeout', _ontimeout);
+				request.removeListener('error', _onfail);
+			}
 
 			get_URL_node_requests--;
 			get_URL_node_connections--;
@@ -1662,9 +1670,19 @@ function module_code(library_namespace) {
 		},
 		// on success
 		_onload = function(response) {
+			// response object: Class: http.IncomingMessage
+
 			// 在這邊不過剛開始從伺服器得到資料，因此還不可執行unregister()，否則依然可能遇到timeout。
 			if (finished) {
 				return;
+			}
+
+			if (options.onresponse) {
+				options.onresponse(response);
+			}
+			// https://xhr.spec.whatwg.org/#handler-xhr-onloadstart
+			if (false && options.onloadstart) {
+				options.onloadstart();
 			}
 
 			if ((response.statusCode / 100 | 0) === 3
@@ -1716,29 +1734,6 @@ function module_code(library_namespace) {
 
 			// node.js會自動把headers轉成小寫。
 			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition
-			if (response.headers['content-disposition']) {
-				// 從Content-Disposition中抽取出檔名。
-				// ext-value = charset "'" [ language ] "'" value-chars
-				var matched = response.headers['content-disposition']
-						.match(/ filename\*\s*=\s*([^';]+)'([^';]*)'([^';]+)/);
-				if (matched) {
-					matched = matched[3];
-				} else if (matched = response.headers['content-disposition']
-						.match(/ filename\s*=\s*([^';]+)/)) {
-					matched = matched[1];
-				}
-				if (matched && (matched = matched.trim())) {
-					matched = (matched.match(/^"(.*)"$/)
-							|| matched.match(/^'(.*)'$/) || [ , matched ])[1];
-					try {
-						matched = decodeURIComponent(matched);
-					} catch (e) {
-						// TODO: handle exception
-					}
-					result_Object.filename = library_namespace
-							.to_file_name(matched);
-				}
-			}
 
 			// 在503之類的情況下。可能沒"Content-Type:"。這時 response 將無.type。
 			if (response.headers['content-type']) {
@@ -1752,6 +1747,47 @@ function module_code(library_namespace) {
 					}
 					return '';
 				}).trim();
+			}
+
+			if (response.headers['content-disposition']) {
+				// 從 Content-Disposition 中抽取出檔名。
+				// ext-value = charset "'" [ language ] "'" value-chars
+				var matched = response.headers['content-disposition']
+						.match(/ filename\*\s*=\s*([^';]+)'([^';]*)'([^';]+)/);
+				if (matched) {
+					matched = matched[3];
+				} else if (matched = response.headers['content-disposition']
+						.match(/ filename\s*=\s*([^';]+)/)) {
+					matched = matched[1];
+				}
+				if (matched && (matched = matched.trim())) {
+					matched = (matched.match(/^"(.*)"$/)
+							|| matched.match(/^'(.*)'$/) || [ , matched ])[1];
+					if (false) {
+						console.log([ matched, result_Object.charset, charset,
+								!!library_namespace.decode_URI_component ]);
+					}
+					try {
+						if (!/%[\da-f]{2}/.test(matched)) {
+							// 有一些網站經過這個轉換似乎就能夠獲得正確的檔案名稱。
+							matched = escape(matched);
+						}
+						if (false && (result_Object.charset || charset)
+								&& library_namespace.decode_URI_component) {
+							// 現在沒有實例需要用到這個部分。
+							matched = library_namespace.decode_URI_component(
+									matched, result_Object.charset || charset);
+						} else {
+							matched = decodeURIComponent(matched);
+						}
+						library_namespace.debug('檔案名稱: ' + matched, 3,
+								'get_URL_node');
+					} catch (e) {
+						// TODO: handle exception
+					}
+					result_Object.filename = library_namespace
+							.to_file_name(matched);
+				}
 			}
 
 			// 若原先有agent，應該合併到原先的agent，而非可能為暫時性/泛用的agent。
@@ -1775,8 +1811,29 @@ function module_code(library_namespace) {
 
 			library_namespace.debug('[' + URL_to_fetch + '] loading...', 3,
 					'get_URL_node');
+
+			var flow_encoding = response.headers['content-encoding'];
+			flow_encoding = flow_encoding && flow_encoding.trim().toLowerCase();
+			if (false) {
+				var pipe = response;
+				if (flow_encoding === 'gzip')
+					pipe = pipe.pipe(node_zlib.createGunzip());
+				else if (flow_encoding === 'deflate')
+					pipe = pipe.pipe(node_zlib.createInflate());
+				pipe = pipe.pipe(node_fs.createWriteStream(file_path));
+			}
+
+			// 準備開始接收資料
+			// options.ondatastart: 非正規標準
+			if (options.ondatastart) {
+				options.ondatastart(response);
+			}
+			// options.onload https://xhr.spec.whatwg.org/#handler-xhr-onload
+
 			/** {Array} [ {Buffer}, {Buffer}, ... ] */
-			var data = [], length = 0;
+			var data = [], length = 0,
+			// https://xhr.spec.whatwg.org/#progressevent
+			total_length = +response.headers['content-length'], lengthComputable = total_length >= 0;
 			response.on('data', function(chunk) {
 				// {Buffer}chunk
 				length += chunk.length;
@@ -1784,8 +1841,23 @@ function module_code(library_namespace) {
 						.debug('receive BODY.length: ' + chunk.length + '/'
 								+ length + ': ' + URL_to_fetch, 4,
 								'get_URL_node');
-				data.push(chunk);
+				if (length > options.MAX_BUFFER_SIZE) {
+					if (data)
+						data = null;
+				} else {
+					data.push(chunk);
+				}
+
 				// node_fs.appendFileSync('get_URL_node.data', chunk);
+
+				if (options.ondata) {
+					// 注意: 這邊的 chunk 可能是 gzip 之後的資料!
+					options.ondata(chunk);
+				}
+				// https://xhr.spec.whatwg.org/#handler-xhr-onprogress
+				if (false && options.onprogress) {
+					options.onprogress(lengthComputable, length, total_length);
+				}
 			});
 
 			// https://iojs.org/api/http.html#http_http_request_options_callback
@@ -1796,16 +1868,20 @@ function module_code(library_namespace) {
 				// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				// unregister();
 
+				options.onend && options.onend();
+
 				// console.log('No more data in response: ' + URL_to_fetch);
 				// it is faster to provide the length explicitly.
-				data = Buffer.concat(data, length);
+				data = data && Buffer.concat(data, length);
+				// console.log(data.slice(0, 200));
+				// console.log(data.slice(0, 200).toString());
 
 				if (proxy_original_agent) {
 					// recover properties
 					proxy_original_agent.last_cookie = agent.last_cookie;
 				}
 
-				if (response.statusCode === 503
+				if (response.statusCode === 503 && data
 						&& data.toString().includes(' id="jschl-answer"')) {
 					library_namespace.error(
 					// TODO: https://github.com/codemanki/cloudscraper
@@ -1822,7 +1898,9 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				if (options.verify) {
+				if (!data) {
+					;
+				} else if (options.verify) {
 					// test: invalid content type
 					if (typeof options.verify === 'function') {
 						if (!options.verify(data)) {
@@ -1847,16 +1925,16 @@ function module_code(library_namespace) {
 					}
 				}
 
-				var encoding = response.headers['content-encoding'];
+				// https://github.com/nodejs/node/blob/master/doc/api/zlib.md#compressing-http-requests-and-responses
 				// https://nodejs.org/docs/latest/api/zlib.html
 				// https://gist.github.com/narqo/5265413
 				// https://github.com/request/request/blob/master/request.js
 				// http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression
 				// http://nickfishman.com/post/49533681471/nodejs-http-requests-with-gzip-deflate-compression
-				if (encoding) {
-					library_namespace.debug('content-encoding: ' + encoding, 5,
-							'get_URL_node');
-					switch (encoding && encoding.trim().toLowerCase()) {
+				if (flow_encoding && data) {
+					library_namespace.debug('content-encoding: '
+							+ flow_encoding, 5, 'get_URL_node');
+					switch (flow_encoding) {
 					case 'gzip':
 						library_namespace.debug('gunzip ' + data.length
 								+ ' bytes data ...', 2, 'get_URL_node');
@@ -1897,7 +1975,7 @@ function module_code(library_namespace) {
 					default:
 						library_namespace
 								.warn('get_URL_node: Unknown encoding: ['
-										+ encoding + ']');
+										+ flow_encoding + ']');
 						break;
 					}
 				}
@@ -1912,7 +1990,7 @@ function module_code(library_namespace) {
 
 				// TODO: 確保資料完整，例如檢查結尾碼。
 				// .save_to
-				if (options.write_to || options.write_to_directory) {
+				if (data && (options.write_to || options.write_to_directory)) {
 					var file_path = options.write_to
 							// save to: 設定寫入目標。
 							|| (options.write_to_directory
@@ -1972,16 +2050,17 @@ function module_code(library_namespace) {
 				// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/response
 				result_Object.response = data;
 				// non-standard 非標準: 設定 charset = 'buffer' 的話，將回傳 {Buffer}。
-				if (charset !== 'buffer') {
+				if (data && charset !== 'buffer') {
 					// 未設定 charset 的話，default charset: UTF-8.
 					// buffer.toString(null) will throw!
 					data = data.toString(charset || undefined/* || 'utf8' */);
 				}
 
-				if (library_namespace.is_debug(4))
+				if (library_namespace.is_debug(4)) {
 					library_namespace.debug(
 					//
 					'BODY: ' + data, 1, 'get_URL_node');
+				}
 				// result_Object模擬 XMLHttp。
 				result_Object.responseText = data;
 
@@ -2075,6 +2154,7 @@ function module_code(library_namespace) {
 		try {
 			// from node.js 10.9.0
 			// http.request(url[, options][, callback])
+			// request: Class: http.ClientRequest
 			request = URL_is_https ? node_https.request(URL_object_to_fetch,
 					_onload) : node_http.request(URL_object_to_fetch, _onload);
 		} catch (e) {
@@ -2165,6 +2245,8 @@ function module_code(library_namespace) {
 			timeout_id = setTimeout(_ontimeout, timeout);
 			library_namespace.debug('add timeout ' + (timeout / 1000) + 's ['
 					+ URL_to_fetch + ']', 2, 'get_URL_node');
+		} else if (timeout) {
+			library_namespace.warn('get_URL_node: Invalid timeout: ' + timeout);
 		}
 
 		library_namespace.debug('set onerror: '
@@ -2562,7 +2644,8 @@ function module_code(library_namespace) {
 	 * @param {String|Object}URL
 	 *            欲請求之目的 URL or options
 	 * @param {Function}[onload]
-	 *            callback when successful loaded. onload(data, error/is_cached)
+	 *            callback when successful loaded. onload(data, error/is_cached,
+	 *            XMLHttp)
 	 * @param {Object}[options]
 	 *            附加參數/設定特殊功能與選項
 	 */
@@ -2588,9 +2671,13 @@ function module_code(library_namespace) {
 		encoding = 'encoding' in options ? options.encoding
 				: get_URL_cache_node.encoding;
 
-		if (!file_name && (file_name = URL.match(/[^\/]+$/))) {
-			// 自URL取得檔名。
+		if (!file_name && (file_name = decodeURI(URL).match(/[^\/]+$/))) {
 			file_name = file_name[0];
+			library_namespace.debug('自URL取得檔名: ' + URL + '\n→ ' + file_name, 1,
+					'get_URL_cache_node');
+		}
+		if (options.file_name_processor) {
+			file_name = options.file_name_processor(file_name);
 		}
 		if (!file_name) {
 			onload(undefined, new Error('No file name specified.'));
@@ -2642,7 +2729,12 @@ function module_code(library_namespace) {
 				if (typeof options.postprocessor === 'function') {
 					data = options.postprocessor(data, XMLHttp);
 				}
-				if (XMLHttp.filename) {
+
+				if (options.file_name_processor) {
+					file_name = options.file_name_processor(file_name,
+					// header_filename
+					XMLHttp.filename);
+				} else if (XMLHttp.filename) {
 					if (false) {
 						console.log([ options.directory, options.file_name,
 								XMLHttp.filename ]);
@@ -2652,11 +2744,20 @@ function module_code(library_namespace) {
 						file_name = (options.directory || '')
 						// 若是沒有特別設置檔名，則改採用header裡面的檔名。
 						+ XMLHttp.filename;
+						library_namespace.info(
+						//
+						'get_URL_cache_node: Get file name from header: '
+						//
+						+ XMLHttp.filename);
 					} else if (!options.file_name.endsWith(XMLHttp.filename)) {
-						library_namespace.info('get_URL_cache_node: '
-								+ XMLHttp.filename + ' → ' + options.file_name)
+						library_namespace.info(
+						//
+						'get_URL_cache_node: file name from header: '
+						//
+						+ XMLHttp.filename + ' → ' + options.file_name);
 					}
 				}
+
 				/**
 				 * 寫入cache。
 				 * 
