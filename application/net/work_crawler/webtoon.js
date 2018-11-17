@@ -9,7 +9,7 @@
 
  </code>
  * 
- * @see https://www.webtoons.com/
+ * @see https://www.webtoons.com/ https://github.com/Fastcampus-WPS-9th/Webtoon
  * 
  * @since 2018/7/27 18:16:19 模組化。
  */
@@ -56,6 +56,7 @@ function module_code(library_namespace) {
 
 		// 解析 作品名稱 → 作品id get_work()
 		search_URL : function(work_title) {
+			// 預設方法(callback var API)
 			return 'https://ac.webtoons.com/ac?q='
 					+ (this.language_code ? this.language_code + '%11' : '')
 					+ encodeURIComponent(work_title)
@@ -104,7 +105,12 @@ function module_code(library_namespace) {
 		},
 		parse_work_data : function(html, get_label, extract_work_data) {
 			var matched = html
-					.match(/<a href="([^<>"]+)"[^<>]+id="_btnEpisode">/),
+			/**
+			 * 咚漫 2018/10/27? 改版 <code>
+			<a  data-buried-obj="1" data-sc-name="PC_detail-page_read-first-btn"  href="//www.dongmanmanhua.cn/fantasy/zhexianlu/%E7%AC%AC%E9%9B%B6%E8%AF%9D-1/viewer?title_no=1307&episode_no=1" class="btn_type7 NPI=a:gofirst,g:zh_CN_zh-hans" id="_btnEpisode">阅读第一话<span class="ico_arr21"></span></a>
+			</code>
+			 */
+			.match(/<a [^<>]+?href="([^<>"]+)"[^<>]+id="_btnEpisode">/),
 			//
 			text = html.between('<div class="info">', '</div>'),
 			//
@@ -138,8 +144,12 @@ function module_code(library_namespace) {
 		},
 		get_chapter_list : function(work_data, html) {
 			var data = html.between('<div class="episode_lst">', '</ul>'), matched,
-			//
-			PATTERN_chapter = /<li[^<>]*>[\s\S]*?<a href="([^"<>]+)"[^<>]*>[\s\S]*?<span class="subj">([^<>]*)<\/span>[\s\S]*?<\/li>/g;
+			/**
+			 * 咚漫 2018/10/27? 改版 <code>
+			<a data-sc-event-parameter="{ title_title:'谪仙录',titleNo:'1307',genre:FANTASY,subcategory_"0":DRAMAsubcategory_"1":FANTASY,picAuthor:泼克文化,wriAuthor:泼克文化,update_day:,serial_status:SERIES,reader_gender:男,episode_name:第零话 1,episodeNo:1,change_mode:'',is_read_complete:'',change_episode_direction:''}" data-sc-event-name="TitleReadChangeEpisode" data-buried-obj="1" data-sc-name="PC_read-page_image-episode-btn"  href="//www.dongmanmanhua.cn/fantasy/zhexianlu/%E7%AC%AC%E9%9B%B6%E8%AF%9D-1/viewer?title_no=1307&episode_no=1" class="on  N=a:vtw.llist,g:zh_CN_zh-hans">
+			</code>
+			 */
+			PATTERN_chapter = /<li[^<>]*>[\s\S]*?<a [^<>]+?href="([^"<>]+)"[^<>]*>[\s\S]*?<span class="subj">([^<>]*)<\/span>[\s\S]*?<\/li>/g;
 
 			work_data.chapter_list = [];
 			while (matched = PATTERN_chapter.exec(data)) {
