@@ -1074,6 +1074,8 @@ function module_code(library_namespace) {
 		return page_name.join(':');
 	}
 
+	wiki_API.normalize_page_name = normalize_page_name;
+
 	// @see wiki_toString
 	function normalize_name_pattern(file_name, add_group, remove_namespace) {
 		if (get_page_content.is_page_data(file_name))
@@ -1115,6 +1117,8 @@ function module_code(library_namespace) {
 
 		return file_name;
 	}
+
+	wiki_API.normalize_name_pattern = normalize_name_pattern;
 
 	/**
 	 * 創建匹配 [[File:file_name]] 之 pattern。
@@ -5048,8 +5052,8 @@ function module_code(library_namespace) {
 
 		// output file. e.g., page_data.title + '.csv.txt'
 		if (options && options.file) {
-			if (library_namespace.fs_write && library_namespace.to_CSV_String) {
-				library_namespace.fs_write(options.file,
+			if (library_namespace.write_file && library_namespace.to_CSV_String) {
+				library_namespace.write_file(options.file,
 				// 存成 .txt，並用 "\t" 分隔，可方便 Excel 匯入。
 				library_namespace.to_CSV_String(array, {
 					field_delimiter : '\t'
@@ -5536,7 +5540,7 @@ function module_code(library_namespace) {
 						this.API_URL, next[1] ],
 				//
 				function wiki_API_next_page_callback(page_data, error) {
-					// assert: 當錯誤發生，例如頁面不存在，依然需要模擬出 page_data。
+					// assert: 當錯誤發生，例如頁面不存在/已刪除，依然需要模擬出 page_data。
 					// 如此才能執行 .page().edit()。
 					_this.last_page
 					// 正常情況。確保this.last_page為單頁面。需要使用callback以取得result。
@@ -6588,7 +6592,7 @@ function module_code(library_namespace) {
 		// options 在此暫時作為 default options。
 		options = config.options || {
 			// Throw an error if the page doesn't exist.
-			// 若頁面不存在，則產生錯誤。
+			// 若頁面不存在/已刪除，則產生錯誤。
 			// 要取消這項，須注意在重定向頁之對話頁操作之可能。
 			nocreate : 1,
 			// 該編輯是一個小修訂 (minor edit)。
@@ -7143,7 +7147,7 @@ function module_code(library_namespace) {
 					//
 					+ config.summary + count_summary,
 					// Throw an error if the page doesn't exist.
-					// 若頁面不存在，則產生錯誤。
+					// 若頁面不存在/已刪除，則產生錯誤。
 					nocreate : 1,
 					// 標記此編輯為機器人編輯。
 					bot : 1,
@@ -7634,7 +7638,7 @@ function module_code(library_namespace) {
 				// @see wiki_API.upload()
 				library_namespace.debug('Set form_data', 6);
 				// throw 'Set form_data';
-				// options.form_data會被當作傳入to_form_data()之options。
+				// options.form_data 會被當作傳入 to_form_data() 之 options。
 				get_URL_options.form_data = options.form_data;
 			}
 
@@ -9016,7 +9020,7 @@ function module_code(library_namespace) {
 					//
 					? '所欲求語言[' + to_lang + ']之' : '其他語言')
 					//
-					+ '連結' : '不存在此頁面') + ': [' + pages[0].title + ']');
+					+ '連結' : '不存在/已刪除此頁面') + ': [' + pages[0].title + ']');
 					// library_namespace.show_value(pages);
 				}
 				pages = pages[0].langlinks;
@@ -9240,7 +9244,9 @@ function module_code(library_namespace) {
 				+ (title ? ' ' + get_page_title_link(title) : '')
 				+ ', callback: ' + callback, 3, 'get_list');
 
-		var parameter, title_preprocessor,
+		var parameter,
+		// 預處理器
+		title_preprocessor,
 		/** {String} 前置字首。 */
 		prefix = get_list.type[type];
 		library_namespace.debug('parameters: ' + JSON.stringify(prefix), 3,
@@ -10632,14 +10638,19 @@ function module_code(library_namespace) {
 			comment : undefined,
 			// must be set to reupload
 			ignorewarnings : undefined,
+			// 無此標籤的話可能會造成 [tags-apply-not-allowed-one]
+			// The tag "..." is not allowed to be manually applied.
 			tags : undefined,
+			// 如果設置，服務器將臨時藏匿文件而不是加入存儲庫。
 			stash : undefined,
+			// 在可能的情況下讓潛在的大型檔案非同步處理。
 			async : undefined,
 			checkstatus : undefined,
 
 			// Upload the file in pieces
 			filesize : undefined,
 			// leavemessage : undefined,
+			// 只檢索指定文件密鑰的上傳狀態。
 			chunk : undefined,
 			offset : undefined,
 			// Complete an earlier upload
@@ -10690,10 +10701,10 @@ function module_code(library_namespace) {
 			}
 			// Uploads by URL are not allowed from this domain.
 		} else {
-			// 自動先下載fetch再上傳。
+			// 自動先下載 fetch 再上傳。
 			// file: 必須使用 multipart/form-data 以檔案上傳的方式傳送。
 			if (!options.form_data) {
-				// options.form_data會被當作傳入to_form_data()之options。
+				// options.form_data 會被當作傳入 to_form_data() 之 options。
 				options.form_data = true;
 			}
 			post_data.file = file_path.includes('://') ? {
@@ -10711,6 +10722,11 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/Manual:$wgFileExtensions
 		}
 
+		if (session && session.API_URL && options.check_media) {
+			// TODO: Skip exists file
+			// @see 20181016.import_earthquake_shakemap.js
+		}
+
 		action = 'upload';
 		if (session && session.API_URL) {
 			action = [ session.API_URL, action ];
@@ -10718,13 +10734,21 @@ function module_code(library_namespace) {
 
 		wiki_API.query(action, function(data, error) {
 			if (error || !data || (error = data.error)
-			// {upload:{result:'Warning',warnings:{exists:'file_name',nochange:{}},filekey:'',sessionkey:''}}
-			// {upload:{result:'Success',filename:'',imageinfo:{}}}
+			/**
+			 * <code>
+			{upload:{result:'Warning',warnings:{exists:'file_name',nochange:{}},filekey:'',sessionkey:''}}
+			{upload:{result:'Warning',warnings:{"duplicate":["file_name"]}}
+			{upload:{result:'Warning',warnings:{"was-deleted":"file_name","duplicate-archive":"file_name"}}
+			{upload:{result:'Success',filename:'',imageinfo:{}}}
+
+			{"error":{"code":"fileexists-no-change","info":"The upload is an exact duplicate of the current version of [[:File:name.jpg]].","stasherrors":[{"message":"uploadstash-exception","params":["UploadStashBadPathException","Path doesn't exist."],"code":"uploadstash-exception","type":"error"}],"*":"See https://test.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1279"}
+			</code>
+			 */
 			|| !(data = data.upload) || data.result !== 'Success') {
 				// console.error(error);
-				callback
-						&& callback(data, error || data && data.result
-								|| 'Error on uploading');
+				if (typeof callback === 'function')
+					callback(data, error || data && data.result
+							|| 'Error on uploading');
 				return;
 			}
 
@@ -11079,7 +11103,7 @@ function module_code(library_namespace) {
 		}
 
 		var session = options[KEY_SESSION];
-		// TODO: 若是頁面不存在，那就直接跳出。
+		// TODO: 若是頁面不存在/已刪除，那就直接跳出。
 
 		var action = 'action=' + action,
 		//
@@ -12944,12 +12968,12 @@ function module_code(library_namespace) {
 		</code>
 		 */
 
-		// 若是目標目錄不存在則嘗試創建之。
+		// 若是目標目錄不存在/已刪除則嘗試創建之。
 		try {
 			node_fs.statSync(directory);
 		} catch (e) {
 			library_namespace.info('get_latest_dump: 存放 dump file 的目錄['
-					+ directory + ']不存在，嘗試創建之。');
+					+ directory + ']不存在/已刪除，嘗試創建之。');
 			node_fs.mkdirSync(directory, parseInt('777', 8));
 			node_fs.writeFileSync(directory
 					+ '_FEEL_FREE_TO_REMOVE_THIS_DIRECTORY_ANYTIME', '');
@@ -14655,7 +14679,7 @@ function module_code(library_namespace) {
 					if (false) {
 						if (!page_data || ('missing' in page_data)) {
 							// error? 此頁面不存在/已刪除。
-							return [ CeL.wiki.edit.cancel, '條目已不存在或被刪除' ];
+							return [ CeL.wiki.edit.cancel, '條目不存在或已被刪除' ];
 						}
 						if (page_data.ns !== 0) {
 							// 記事だけを編集する
@@ -16547,8 +16571,9 @@ function module_code(library_namespace) {
 
 							library_namespace.error(
 							//
-							'wikidata_entity: Wikidata 不存在 [[:' + key.join(':')
-									+ ']] 之數據，' + (content ? '但' : '且無法取得/不')
+							'wikidata_entity: Wikidata 不存在/已刪除 [[:'
+									+ key.join(':') + ']] 之數據，'
+									+ (content ? '但' : '且無法取得/不')
 									+ '存在此 Wikipedia 頁面。無法處理此 Wikidata 數據要求。');
 							callback(undefined, 'no_key');
 						});
