@@ -25,8 +25,8 @@ node_js:
 #  - "0.12"
 # sudo apt-get install nodejs @ Ubuntu-16.04.3
 #  - "4.2.6"
-# 2017/11/2 LTS
-  - "8"
+# 2018-10-30, Version 10.13.0 'Dubnium' (LTS), @MylesBorins
+  - "10"
 # 2018-10-23, Version 11.0.0 (Current), @jasnell
   - "11"
 
