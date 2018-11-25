@@ -43,7 +43,7 @@ try {
 		main_lib_binary = fs.readFileSync(CeL.library_path
 		// The encoding can be 'utf8', 'ascii', or 'base64'.
 		// http://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
-		// , 'binary'
+		// , 'utf8'
 		),
 		// pass the first 2 bytes (BOM)
 		i = 2, l =

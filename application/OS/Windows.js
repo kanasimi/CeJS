@@ -32,6 +32,8 @@ _// JSDT:_module_
 
 
 
+// --------------------------------------------------------
+
 
 // 在 .hta 中, typeof WScript==='undefined'.
 // http://msdn.microsoft.com/library/en-us/shellcc/platform/shell/reference/objects/shell/application.asp
@@ -339,6 +341,7 @@ function getEnvironment(){
 
  // http://www.robvanderwoude.com/vbstech_data_environment.php
  // https://msdn.microsoft.com/ja-jp/library/cc364502.aspx
+ // WshShell.ExpandEnvironmentStrings('%TEMP%'), WshShell.ExpandEnvironmentStrings('%ProgramFiles%')
  WinEnvironment={},Network={},NetDrive={},NetPrinter={};
  // Windows 95/98/Me の場合、使用できる strType は Process に限定されます。
  var i,j,k,o=new Enumerator(WshShell.Environment("Process"));/*	Win9x、NT（Administratorもしくはほかのユーザー）の区別なく、すべての場合でエラーが発生しないようにするには、strTypeに"PROCESS"を指定するとよいでしょう。

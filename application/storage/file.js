@@ -776,7 +776,7 @@ function module_code(library_namespace) {
 		// https://www.garykessler.net/library/file_sigs.html
 		// archives
 		zip : {
-			// PK..
+			// PK.. PKZIP壓縮軟體的發明者 Phil Katz，ZIP原名Deflate
 			magic : '50 4B 03 04',
 			min_size : 100
 		},

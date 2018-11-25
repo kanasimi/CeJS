@@ -448,6 +448,8 @@ function module_code(library_namespace) {
 	 * (?:(^|\s*\|)\s*(!)?(\/(?:[^\/]+|\\\/)(\/([a-z]*))?|\\([^\s]+)|[^\s]+))+<br />
 	 * {Object|Array}preprocessor<br />
 	 * 
+	 * cf. CeL.to_RegExp_pattern()
+	 * 
 	 * @param {String}pattern
 	 *            欲轉換成 RegExp 的 pattern text。
 	 * @param {Function|String}[unknown_handler]
@@ -1110,6 +1112,8 @@ function module_code(library_namespace) {
 
 	var PATTERN_char, PATTERN_char_with_combined, split_by_code_point;
 	try {
+		// using [\s\S] or [^] or /./s
+		// @see https://github.com/tc39/proposal-regexp-dotall-flag
 		// tested @ Edge/12.10240
 		PATTERN_char = new RegExp(/[\s\S]/.source, 'ug');
 		// 注意:因為/./u會切分[[en:Combining character#Unicode ranges]]，
@@ -1394,14 +1398,23 @@ function module_code(library_namespace) {
 	// 沒有輸入foot的話，則會把head拿來當作foot。
 	// TODO: {RegExp}head, foot
 	function each_between(head, foot, callback, thisArg, index) {
-		// for head: [head, foot]
 		if (Array.isArray(head) && typeof foot === 'function') {
 			// shift arguments.
 			index = thisArg;
 			thisArg = callback;
 			callback = foot;
-			foot = head[1];
-			head = head[0];
+			// for head: [head, foot]
+			if (Array.isArray(head) && head.length === 2) {
+				foot = head[1];
+				head = head[0];
+			} else {
+				if (typeof head === 'string') {
+					// 每個head切一段?
+					library_namespace
+							.error('If you needs cut string into small pieces, please using string.split().slice(1).forEach() !');
+				}
+				throw new TypeError('Invalid head type');
+			}
 		}
 
 		// this.all_between(head, foot, index).forEach(callback, thisArg);
@@ -1565,10 +1578,10 @@ function module_code(library_namespace) {
 
 	// @see cardinal_1()
 	function unique_sorted_Array() {
-		var setted, value, array = [];
+		var is_sorted, value, array = [];
 		this.forEach(function(element) {
-			if (!setted) {
-				setted = true;
+			if (!is_sorted) {
+				is_sorted = true;
 				array.push(value = element);
 			} else if (!Object.is(value, element)) {
 				array.push(value = element);
@@ -2101,6 +2114,9 @@ function module_code(library_namespace) {
 	 * @returns {Object}cloned object
 	 * 
 	 * @see clone() @ CeL.data
+	 * @see https://www.bram.us/2018/01/10/javascript-removing-a-property-from-an-object-immutably-by-destructuring-it/
+	 * @see `return {...object}` :
+	 *      https://juejin.im/post/5b2a186cf265da596d04a648
 	 */
 	function Object_clone(object, deep) {
 		if (!object || typeof object !== 'object') {
@@ -4109,15 +4125,15 @@ function module_code(library_namespace) {
 		// Check if there is only one unique/single value in the array.
 		// 集合中包含不重複的元素的個數=1
 		cardinal_1 : function cardinal_1() {
-			var setted, value;
+			var configured, value;
 			value = this.every(function(element) {
-				if (setted) {
+				if (configured) {
 					return Object.is(element, value);
 				}
 				value = element;
-				return setted = true;
+				return configured = true;
 			});
-			return !!(setted && value);
+			return !!(configured && value);
 		},
 		// Array.prototype.search_sorted
 		search_sorted : set_bind(search_sorted_Array, true),

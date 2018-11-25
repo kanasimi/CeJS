@@ -162,7 +162,7 @@ function module_code(library_namespace) {
 		// https://github.com/coderaiser/fs-copy-file/blob/master/lib/fs-copy-file.js
 		var buffer_length = 1 * 1024 * 1024,
 		//
-		buffer = new Buffer(buffer_length),
+		buffer = Buffer.allocUnsafe(buffer_length),
 		//
 		source_descriptor = node_fs.openSync(source, 'r'),
 		//
@@ -777,17 +777,13 @@ function module_code(library_namespace) {
 	// https://gist.github.com/jmshal/b14199f7402c8f3a4568733d8bed0f25
 	// btoa 僅支持 ASCII
 	function btoa(stringToEncode) {
-		return new Buffer(stringToEncode).toString('base64');
+		return Buffer.from(stringToEncode).toString('base64');
 	}
 
 	// decode: Base64 → ASCII string
 	// https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/atob
 	function atob(encodedData) {
-		if (typeof Buffer.from === 'function')
-			return new Buffer.from(encodedData, 'base64').toString('binary');
-
-		// For Node.js v5.11.1 and below
-		return new Buffer(encodedData, 'base64');
+		return Buffer.from(encodedData, 'base64').toString('binary');
 	}
 
 	// --------------------------------------------

@@ -1376,7 +1376,7 @@ function module_code(library_namespace) {
 				encoding : undefined,
 				charset : file_type === 'text' && item_data.charset
 				//
-				|| 'binary',
+				|| 'buffer',
 				get_URL_options : Object.assign({
 					/**
 					 * 每個頁面最多應該不到50張圖片或者其他媒體。
@@ -2007,14 +2007,14 @@ function module_code(library_namespace) {
 			// 再做一次檢查，預防被外部touch過。
 			normalize_item.call(this, resource, true));
 			if (resource[KEY_DATA]) {
-				var info = library_namespace.null_Object(), setted;
+				var info = library_namespace.null_Object(), configured;
 				this.preserve_attributes.forEach(function(name) {
 					if (resource[KEY_DATA][name]) {
-						setted = true;
+						configured = true;
 						info[name] = resource[KEY_DATA][name];
 					}
 				});
-				if (setted) {
+				if (configured) {
 					info = JSON.stringify(info);
 					if (/%2D(?:-|%2D)|-%2D/.test(info)) {
 						library_namespace.error('所欲封入注釋的詮釋資料本身含有'

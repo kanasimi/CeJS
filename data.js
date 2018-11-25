@@ -686,74 +686,63 @@ function module_code(library_namespace) {
 	
 	下面是快到慢：
 	
-	//	long,short
-	var contain_substring=[
-	function(l,s){
-	 var a=0==l.indexOf(s);
-	 return a;
-	}
-	,function(l,s){
-	 return 0==l.indexOf(s);
-	}
-	,function(l,s){
-	 return s==l.slice(0,s.length);
-	}
-	,function(l,s){
-	 return l.match(s);
-	}
-	,function(l,s){
-	 for(var i=0;i<s.length;i++)
-	  if(s.charAt(i)!=l.charAt(i))return 0;
-	 return 1;
-	}
-	];
-	
-	function test_contain_substring(){
-	 for(var i=0;i<contain_substring.length;i++){
-	  var t=new Date;
-	  for(var j=0;j<50000;j++){
-	   contain_substring[i]('sdfgjk;sh*dn\\fj;kgsamnd nwgu!eoh;nfgsj;g','sdfgjk;sh*dn\\fj;kgsamnd nwgu!');
-	   contain_substring[i]('sdbf6a89* /23hsauru','sdbf6a89* /23');
-	  }
-	  sl(i+': '+(new Date-t));
-	 }
+	//	long, short
+	var contain_substring = [ function(l, s) {
+		var a = 0 == l.indexOf(s);
+		return a;
+	}, function(l, s) {
+		return 0 == l.indexOf(s);
+	}, function(l, s) {
+		return s == l.slice(0, s.length);
+	}, function(l, s) {
+		return l.match(s);
+	}, function(l, s) {
+		for (var i = 0; i < s.length; i++)
+			if (s.charAt(i) != l.charAt(i))
+				return 0;
+		return 1;
+	} ];
+
+	function test_contain_substring() {
+		for (var i = 0; i < contain_substring.length; i++) {
+			var t = new Date;
+			for (var j = 0; j < 50000; j++) {
+				contain_substring[i]('sdfgjk;sh*dn\\fj;kgsamnd nwgu!eoh;nfgsj;g',
+						'sdfgjk;sh*dn\\fj;kgsamnd nwgu!');
+				contain_substring[i]('sdbf6a89* /23hsauru', 'sdbf6a89* /23');
+			}
+			sl(i + ': ' + (new Date - t));
+		}
 	}
 	
 	
 	//	極小常數的情況:
 	//	long,short
-	var contain_substring=[
-	function(l,s){
-	 var a=0==l.indexOf(s);
-	 return a;
-	}
-	,function(l,s){
-	 return 0==l.indexOf(s);
-	}
-	,function(l,s){
-	 return s==l.slice(0,1);
-	}
-	,function(l,s){
-	 return s.charAt(0)==l.charAt(0);
-	}
-	,function(l,s){
-	 return l.match(/^\//);
-	}
-	];
-	
-	function test_contain_substring(){
-	 for(var i=0;i<contain_substring.length;i++){
-	  var t=new Date;
-	  for(var j=0;j<50000;j++){
-	   contain_substring[i]('a:\\sdfg.dfg\\dsfg\\dsfg','/');
-	   contain_substring[i]('/dsfg/adfg/sadfsdf','/');
-	  }
-	  sl(i+': '+(new Date-t));
-	 }
-	}
-	
+	var contain_substring = [ function(l, s) {
+		var a = 0 == l.indexOf(s);
+		return a;
+	}, function(l, s) {
+		return 0 == l.indexOf(s);
+	}, function(l, s) {
+		return s == l.slice(0, 1);
+	}, function(l, s) {
+		return s.charAt(0) == l.charAt(0);
+	}, function(l, s) {
+		return l.match(/^\//);
+	} ];
 
-	 </code>
+	function test_contain_substring() {
+		for (var i = 0; i < contain_substring.length; i++) {
+			var t = new Date;
+			for (var j = 0; j < 50000; j++) {
+				contain_substring[i]('a:\\sdfg.dfg\\dsfg\\dsfg', '/');
+				contain_substring[i]('/dsfg/adfg/sadfsdf', '/');
+			}
+			sl(i + ': ' + (new Date - t));
+		}
+	}
+
+	</code>
 	 */
 
 	_// JSDT:_module_
@@ -939,7 +928,6 @@ function module_code(library_namespace) {
 					+ symbol[i];
 		});
 	}
-	;
 
 	/**
 	 * 將數字轉為 K, M, G 等 metric prefix / SI prefix 表示方式，例如 6458 轉成 6.31 K。
@@ -983,7 +971,7 @@ function module_code(library_namespace) {
 				' ');
 	}
 
-	// 不可以 `byte` 為變數名: JSDoc 會失會失效。
+	// 不可以 `byte` 為變數名: JsDoc 會失會失效。
 	function show_KiB(bytes, type, use_KB) {
 		var expression = use_KB ? library_namespace.to_1000_prefix
 				: library_namespace.to_1024_prefix, b = bytes + ' byte'

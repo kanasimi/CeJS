@@ -160,6 +160,7 @@ eURI : /^((file|telnet|ftp|https?)\:\/\/|~?\/)?(\w+(:\w+)?@)?(([-\w]+\.)+([a-z]{
 
 TODO:
 URI, IRI, XRI
+WHATWG URL parser
 
 */
 /**

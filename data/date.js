@@ -2792,6 +2792,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------
 	// {String}日期及時間表達式 → {Natural}timevalue in milliseconds
 
+	// https://en.wikipedia.org/wiki/ISO_8601#Durations
 	var PATTERN_ISO_8601_durations = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/,
 	// 日期及時間 由小到大排列。
 	PATTERN_time_units = [ [ '(?:ms|milliseconds?|毫秒|ミリ秒)', 1 ],
@@ -2815,12 +2816,9 @@ function module_code(library_namespace) {
 	// parser time interval to timevalue (get how many millisecond)
 	// TODO: 半小時
 	function time_interval_to_millisecond(interval) {
-		if (interval > 0) {
-			return +interval;
-		}
-
 		if (typeof interval !== 'string') {
-			return;
+			// 允許函數之類其他種類的設定，需要呼叫端進一步處理。
+			return interval > 0 ? +interval : interval || 0;
 		}
 
 		var timevalue = 0, has_matched, matched = interval

@@ -1453,6 +1453,7 @@ function module_code(library_namespace) {
 	// String.prototype.matchAll()
 	// http://2ality.com/2018/02/string-prototype-matchall.html
 	// https://tc39.github.io/proposal-string-matchall/
+	// let all_matched = [...string.matchAll(regExp)];
 	function matchAll(regexp) {
 		regexp = library_namespace.is_RegExp(regexp)
 		// do NOT chancg regex.lastIndex
@@ -1839,6 +1840,7 @@ function module_code(library_namespace) {
 
 	if (library_namespace.platform.nodejs) {
 		if (!Buffer.from) {
+			// For Node.js v5.11.1 and below
 			// e.g., node.js v0.10.25
 			Buffer.from = Buffer_from
 		}

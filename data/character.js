@@ -56,7 +56,7 @@ function module_code(library_namespace) {
 	function Base64(text) {
 		var index = 0, length = text.length, result = [];
 		for (; index < length; index++) {
-			// new Buffer('編碼');
+			// Buffer.from('編碼');
 		}
 		return result.join('');
 	}
@@ -357,6 +357,7 @@ function module_code(library_namespace) {
 		// 把 Buffer 物件的內容當作是 encoding 編碼，並解析成 {String}UTF-8 string。
 		Buffer.prototype.toString = function Buffer_toString(encoding, options) {
 			try {
+				// buffer.toString(null) will throw!
 				return this.native_toString(encoding);
 			} catch (e) {
 			}
@@ -384,9 +385,11 @@ function module_code(library_namespace) {
 		encoding = normalize_encoding_name(encoding);
 		var code_map = map_set[encoding];
 		if (!code_map) {
+			// Unknown encoding: e.
+			// You may need to run CeL.data.character.load("e") first?
 			throw new Error('Unknown encoding: ' + encoding
-					+ '. You may need to ' + module_name + '.load("' + encoding
-					+ '") first?');
+					+ '. You may need to run ' + module_name + '.load("'
+					+ encoding + '") first?');
 		}
 		// console.log(code_map);
 

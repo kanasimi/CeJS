@@ -54,7 +54,6 @@ _// JSDT:_module_
 };
 
 
-
 /*
 	JScript only	-------------------------------------------------------
 */
@@ -162,12 +161,11 @@ WinShell // initialization_WScript_Objects
 /*	↑JScript only	-------------------------------------------------------
 */
 
-
 // set/get current working directory. 設定/取得目前工作目錄。
 function working_directory(change_to_directory) {
 	if (change_to_directory)
 		WshShell.CurrentDirectory = change_to_directory;
-	return WshShell.CurrentDirectory;
+	return WshShell.CurrentDirectory + path_separator;
 }
 
 _.working_directory = working_directory;
@@ -2177,7 +2175,7 @@ show_in_file_manager = function(path) {
 };
 
 
-//	配合 new_node() 使用。
+//	配合 CeL.DOM.new_node() 使用。
 function path_tag(path, handler) {
 	if (typeof path === 'string' && path) {
 		var tag = {
@@ -2684,7 +2682,7 @@ _.cacher = cacher;
 if (library_namespace.application.OS.Windows.no_COM) {
 	// WScript.Echo('設定不匯出的子函式。');
 	// 設定不匯出的子函式。
-	this.no_extend = 'move_file,move_1_file,is_file,is_folder,get_file_details,create_shortcut,open_file,read_file,write_file,traverse_file_system,iconv,show_path,cacher';
+	this.no_extend = 'working_directory,move_file,move_1_file,is_file,is_folder,get_file_details,create_shortcut,open_file,read_file,write_file,traverse_file_system,iconv,show_path,cacher';
 }
 
 return (

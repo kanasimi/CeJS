@@ -96,9 +96,10 @@ function module_code(library_namespace) {
 	// alias: rename
 	CeL.storage.move_directory(move_from_path, move_to_path)
 	CeL.storage.copy_directory(copy_from_path, copy_to_path)
-	
+
+	// 遍歷檔案系統，對每個 FSO 執行指定的動作。
 	// TODO: 以 data.file.file_system_structure 代替 traverse_file_system()
-	CeL.storage.traverse_file_system(directory_path, handler)
+	CeL.storage.traverse_file_system(directory_path, handler, filter or options)
 
 	</code>
 	 */

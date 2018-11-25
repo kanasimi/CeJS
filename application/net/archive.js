@@ -306,8 +306,8 @@ function module_code(library_namespace) {
 
 			}
 
-			if (false && typeof options.constent_processor === 'function') {
-				options.constent_processor(
+			if (false && typeof options.content_processor === 'function') {
+				options.content_processor(
 				// (contains, URL, status)
 				data.responseText, URL, data.status);
 			}
@@ -323,7 +323,7 @@ function module_code(library_namespace) {
 			}
 
 		}, null, null, {
-			constent_processor : options.constent_processor,
+			content_processor : options.content_processor,
 			write_to_directory : options.write_to_directory,
 			// use new agent
 			agent : true,

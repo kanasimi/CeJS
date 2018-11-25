@@ -19,19 +19,24 @@ typeof CeL !== 'function' && (function() {
 	//
 	= (full_root || './') + '_repository_path_list.txt',
 	//
+	matched = full_root.match(/^(.+?[\\\/])_for include[\\\/]$/),
+	//
 	node_fs = require('fs'),
 	//
 	CeL_path_list = node_fs.readFileSync(repository_path_list_file);
-	if (CeL_path_list) {
-		CeL_path_list = CeL_path_list.toString();
-		var matched = full_root.match(/^(.+?[\\\/])_for include[\\\/]$/);
-		if (matched) {
-			// 直接 require 函式庫下面的本檔案。 e.g.,
-			// require('path\\JS\\_for include\\_CeL.loader.nodejs.js');
-			// 如此可以不依靠 '_repository_path_list.txt'。
-			CeL_path_list += '\n' + matched[1];
-		}
+	CeL_path_list = CeL_path_list && CeL_path_list.toString() || '';
+
+	if (matched) {
+		// `CeL_path_list` should not be "" here,
+		// but it doesn’t matter.
+
+		// 直接 require 函式庫下面的本檔案。 e.g.,
+		// require('path\\JS\\_for include\\_CeL.loader.nodejs.js');
+		// 如此可以不依靠 repository_path_list_file。
+		// ** 這時應該採用: require('path/to/node.loader.js');
+		CeL_path_list += '\n' + matched[1];
 	}
+
 	if (!CeL_path_list) {
 		console.error(
 		//
@@ -48,7 +53,7 @@ typeof CeL !== 'function' && (function() {
 	function check_path(path) {
 		path = path.trim();
 		if (!path || path.charAt(0) === '#') {
-			// path is comments
+			// path is comments or blank line
 			return;
 		}
 		// console.log('Try path: ' + JSON.stringify(path));
@@ -107,7 +112,9 @@ typeof CeL !== 'function' && (function() {
 		}
 
 		console.error('Failed to load CeJS library!\n');
-		console.info('請先安裝 CeJS library:\nnpm install cejs\n\n'
+		console.info('Please install CeJS library first.'
+		//
+		+ ' 請先安裝 CeJS library:\n' + 'npm install cejs\n\n'
 		//
 		+ 'Or you may trying the latest version:\n'
 		//
@@ -118,7 +125,9 @@ typeof CeL !== 'function' && (function() {
 	if (typeof CeL !== 'function') {
 		console.error('Failed to load CeL!');
 		console.error('current working directory: ' + process.cwd());
-		console.error('main script: ' + process.mainModule.filename);
+		console.error('main script: ' + (process.mainModule
+		//
+		&& process.mainModule.filename));
 		console.error('loader path: ' + module.filename);
 	}
 

@@ -1132,7 +1132,7 @@ fill_form = function fill_form(pairs, config) {
 		fire_event('submit');
 	}
 
-	if (typeof config.callback === 'function') {
+	if (config && typeof config.callback === 'function') {
 		config.callback();
 	}
 };

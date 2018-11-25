@@ -109,26 +109,21 @@ function module_code(library_namespace) {
 			content = options.content_processor(content);
 		}
 
-		if (!options.preserve_blank_line) {
-			// 去除空白列。
-			content = content.trim().replace(/\r?\n\t*(\r?\n)+/g, '$1');
-		}
-
-		var remove_title_line = options.remove_title_line;
-		if (remove_title_line === undefined) {
+		var remove_title_row = options.remove_title_row;
+		if (remove_title_row === undefined) {
 			// auto detect title line
 			var matched = content.trim().match(/^([^\n]*)\n([^\n]*)/);
 			if (matched && !matched[1].trim().includes('\t')
 			// 第一行單純只有一個標題 cell。
 			&& matched[2].trim().includes('\t')) {
-				remove_title_line = true;
+				remove_title_row = true;
 			}
 		}
-		if (remove_title_line) {
+		if (remove_title_row) {
 			content = content.replace(/^([^\n]*)\n/,
 			//
 			function(line, table_title) {
-				remove_title_line = table_title;
+				remove_title_row = table_title;
 				return '';
 			});
 		}
@@ -138,10 +133,10 @@ function module_code(library_namespace) {
 			field_delimiter : '\t'
 		}, options));
 
-		if (remove_title_line) {
-			library_namespace.debug('remove title line: ' + remove_title_line,
+		if (remove_title_row) {
+			library_namespace.debug('remove title line: ' + remove_title_row,
 					1, 'read_Excel_file');
-			table.table_title = remove_title_line;
+			table.table_title = remove_title_row;
 		}
 
 		return table;

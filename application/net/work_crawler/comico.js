@@ -247,6 +247,7 @@ function module_code(library_namespace) {
 			if (!skip_chapter
 					&& work_data.downloaded_chapter_list[chapter_NO - 1]) {
 				// TODO: 應該檢查是不是真的有圖片檔案存在。若有檔案不見，
+				// 或者有損壞檔案，
 				// 那麼就把 work_data.downloaded_chapter_list[index] 設成 false。
 				skip_chapter = '之前已下載過 ' + chapter_data.title + '，不再重新購買。';
 			}
@@ -446,7 +447,8 @@ function module_code(library_namespace) {
 			return chapter_data;
 		},
 
-		after_download : function() {
+		// @see work_crawler_loder.js
+		after_download_list : function() {
 			// logout
 		}
 
@@ -519,6 +521,7 @@ function module_code(library_namespace) {
 			// console.log(XMLHttp.responseText);
 			var item_list = JSON.parse(XMLHttp.responseText).result;
 			if (item_list.length > 0) {
+				// TODO: 顯示物品的資訊。
 				library_namespace.info('已收到' + item_list.length + '項有期限的物品。');
 			}
 

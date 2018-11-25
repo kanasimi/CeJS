@@ -412,7 +412,7 @@ function (global) {
 
 
 	/**
-	 * 取得裸 Object (naked Object)。<br />
+	 * 取得裸 Object (naked Object)。Object prototype may only be an Object or null<br />
 	 * 預防 Object.prototype 有東西，並消除 .toString() 之類。<br />
 	 * 
 	 * 注意: '' + Object.create(null) 會 throw TypeError: Cannot convert object to
@@ -590,6 +590,8 @@ function (global) {
 	 * 
 	 * @since 2010/1/1 18:11:40
 	 * @note 'namespace' 是 JScript.NET 的保留字。
+	 * 
+	 * @see https://github.com/tc39/proposal-optional-chaining
 	 */
 	value_of = function (variable_name, modify_function, name_space, value) {
 		var variable_name_array;
@@ -1561,7 +1563,25 @@ OS='UNIX'; // unknown
 
 		// test for-of statement (IterationStatement)
 		try {
-			eval('for(var i of [7])env.has_for_of=i===7;');
+			env.has_for_of = new Function('for(var i of [7])return i===7;')();
+		} catch (e) {
+			// TODO: handle exception
+		}
+
+		// arrow function
+		try {
+			env.has_arrow_function = new Function('a','return((a)=>a+1)(a);')(2) === 3;
+		} catch (e) {
+			// TODO: handle exception
+		}
+
+		// RegExp lookbehind assertions from ECMA-262, 9th edition, ECMAScript
+		// 2018
+		try {
+			env.has_RegExp_lookbehind = '$12.34'.match(new RegExp('(?<=\\D)\\d+'))[0] === '12'
+				// http://2ality.com/2017/05/regexp-lookbehind-assertions.html
+				&& 'a1ba2ba3b'.match(new RegExp('(?<=b)a.b', 'g')).join(',') === 'a2b,a3b'
+				&& '0b11b22b33b4'.match(new RegExp('(?<!1)b\\d', 'g')).join(',') === 'b1,b3,b4';
 		} catch (e) {
 			// TODO: handle exception
 		}
@@ -1934,6 +1954,7 @@ OS='UNIX'; // unknown
 	get_function_name = get_function_name;
 
 
+	// noop
 	_// JSDT:_module_
 	.
 	null_function =
@@ -2417,7 +2438,7 @@ OS='UNIX'; // unknown
 
 	_.is_native_Function = function(variable) {
 		return typeof variable === 'function'
-		//
+		// is a builtin function
 		&& native_pattern.test(Function.prototype.toString.call(variable));
 	};
 
@@ -2783,10 +2804,11 @@ OS='UNIX'; // unknown
 	|| typeof self !== 'undefined' && self
 
 	// e.g., node.js
-	|| typeof global === 'object' && global && global.Array === Array && global
+	|| typeof global === 'object' && global.Array === Array && global
 	// http://nodejs.org/api/globals.html
 	// node.js requires this method to setup REALLY global various:
 	// require isn't actually a global but rather local to each module.
+	// However, this causes CSP violations in Chrome apps.
 	|| Function('return this')()
 )
 // ) // void(

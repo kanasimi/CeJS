@@ -654,7 +654,7 @@ if (typeof CeL === 'function')
 				toString: toString
 			});
 
-			// setup Integer constructor after Integer.prototype setted.
+			// setup Integer constructor after Integer.prototype configured.
 			var new_instance = Array.derive(Integer, array_type);
 
 			//	class public interface	---------------------------

@@ -40,7 +40,7 @@ if (typeof CeL === 'function')
 		 * 不直接用 value undefined: for JS5.
 		 * 
 		 * 傳回某物件的方法，以另一個物件取代目前的物件。
-		 * apply是將現在正在執行的function其this改成apply的引數。所有函數內部的this指針都會被賦值為oThis，這可實現將函數作為另外一個對象的方法運行的目的.
+		 * apply是將現在正在執行的function其this改成apply的引數。所有函數內部的this指針都會被賦值為oThis，這可實現將函數作為另外一個對象的方法運行的標的.
 		 * xxx.apply(oThis,arrayArgs): 執行xxx，執行時以 oThis 作為 this，arrayArgs作為
 		 * arguments.
 		 * 
@@ -1910,7 +1910,7 @@ if (typeof CeL === 'function')
 		 *          PROCESSED: done.<br />
 		 *          INCLUDE_FAILED: error occurred. fault.<br />
 		 *          INCLUDING: loading asynchronously,
-		 *          以異序(asynchronously,不同時)的方式並行載入。<br />
+		 *          以異序(asynchronously,不同時)的方式並行載入(in parallel with)。<br />
 		 */
 		function load_named(item, options, caller) {
 			var id = typeof item === 'string' ? item : is_controller(item)
@@ -2131,7 +2131,7 @@ if (typeof CeL === 'function')
 						// 載入 module 時執行 extend 工作。
 						var no_extend,
 						/**
-						 * 擴充目的基底。extend to what name-space。<br />
+						 * 擴充標的基底。extend to what name-space。<br />
 						 * Extend to specified name-space that you can use
 						 * [name_space]._func_ to run it.
 						 */
@@ -2182,13 +2182,13 @@ if (typeof CeL === 'function')
 								no_extend[i] = 1;
 
 							if (!('this' in no_extend)) {
-								library_namespace.debug('擴充 module 本身到目的基底下。',
+								library_namespace.debug('擴充 module 本身到標的基底下。',
 										2, 'load_named');
 								l = extend_to[name];
 								// 只處理雙方皆為 Object 的情況。
 								if (typeof l === 'object'
 										&& typeof initializator === 'object') {
-									library_namespace.debug('目的基底 [' + l.Class
+									library_namespace.debug('標的基底 [' + l.Class
 											+ '] 已有 [' + name + ']，將合併/搬移成員。',
 											1, 'load_named');
 									// 若沒有重新架構，之後的搬移動作可能汙染原先之 name-space!
@@ -2200,7 +2200,7 @@ if (typeof CeL === 'function')
 										if (i in l)
 											library_namespace.debug(
 											//
-											'目的基底 [' + name + '] 已有 [' + i
+											'標的基底 [' + name + '] 已有 [' + i
 													+ ']，將取代之。', 1,
 													'load_named');
 										l[i] = initializator[i];
@@ -2210,11 +2210,11 @@ if (typeof CeL === 'function')
 									if (l && l.Class
 											&& library_namespace.is_debug())
 										library_namespace.warn(
-										// 目的基底已有 (l)，將直接以新的 module (id) 取代之。
+										// 標的基底已有 (l)，將直接以新的 module (id) 取代之。
 										'load_named: 將以 ('
 										// 未來 extend_to[name] 將代表 (id).
 										+ (typeof initializator) + ') [' + id
-												+ '] 取代擴充目的基底之同名 module ('
+												+ '] 取代擴充標的基底之同名 module ('
 												+ (typeof l) + ') ['
 												+ (l.Class || name) + ']。');
 									extend_to[name] = initializator;
@@ -2233,7 +2233,7 @@ if (typeof CeL === 'function')
 										//
 										'load_named: 將以 [' + id + '.' + i
 										//
-										+ '] 取代擴充目的基底之同名 property'
+										+ '] 取代擴充標的基底之同名 property'
 										//
 										+ (library_namespace.is_debug(2) ? ' ['
 										//
@@ -2941,7 +2941,7 @@ if (typeof CeL === 'function')
 			 */
 			// error_handler : function(error_Object) { this === declaration; },
 			/**
-			 * 擴充目的基底。extend to what name-space。<br />
+			 * 擴充標的基底。extend to what name-space。<br />
 			 * 預設 extend 到哪個 name space。<br />
 			 * 
 			 * 若有設定，但不為真值，則完全不 extend。
@@ -3581,6 +3581,7 @@ if (typeof CeL === 'function')
 							//
 							'check_and_run.run: Error to run function: '
 									+ e.message);
+							// console.trace(e);
 							library_namespace.debug('<code>'
 									+ ('' + item).replace(/</g, '&lt;')
 											.replace(/\n/g, '<br />')

@@ -5137,6 +5137,7 @@ function module_code(library_namespace) {
 	// 'n:title'→'[[:n:title]]'
 	// 'Category:category'→'[[:Category:category]]'
 	// TODO: 與 URL_to_wiki_link() 整合。
+	// TODO: #section name
 	function get_page_title_link(page_data, session, display_text) {
 		var title,
 		// e.g., is_category

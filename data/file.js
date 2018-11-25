@@ -1496,7 +1496,7 @@ function module_code(library_namespace) {
 		else
 			library_namespace.warn(
 			//
-			'Files_encode: Target encoding does not setted.');
+			'Files_encode: Target encoding does not specified.');
 
 		return this;
 	}
@@ -1512,7 +1512,7 @@ function module_code(library_namespace) {
 	function Files_merge(target, options) {
 		if (!target)
 			// TODO: auto detect.
-			throw new Error('Files_merge: No target setted!');
+			throw new Error('Files_merge: No target specified!');
 
 		target = decide_target(target, options);
 		if (!target)

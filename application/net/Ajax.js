@@ -1779,6 +1779,8 @@ function module_code(library_namespace) {
 									matched, result_Object.charset || charset);
 						} else {
 							matched = decodeURIComponent(matched);
+							// 有的時候還需要這一項。
+							// matched = unescape(matched);
 						}
 						library_namespace.debug('檔案名稱: ' + matched, 3,
 								'get_URL_node');
