@@ -122,13 +122,11 @@ if (typeof CeL === 'function' && !CeL.no_initialization) {
 		})(CeL);
 }
 
-/**
- * <code>
-
-	//test WinShell	http://msdn.microsoft.com/en-us/library/bb787810(VS.85).aspx
-	if (false) {
+// test WinShell
+// http://msdn.microsoft.com/en-us/library/bb787810(VS.85).aspx
+if (false) {
 	alert(WinShell.Windows().Item(0).FullName);
-	
+
 	var i, cmd, t = '', objFolder = WinShell.NameSpace(0xa), objFolderItem = objFolder
 			.Items().Item(), colVerbs = objFolderItem.Verbs(); // 假如出意外，objFolder==null
 	for (i = 0; i < colVerbs.Count; i++) {
@@ -138,23 +136,23 @@ if (typeof CeL === 'function' && !CeL.no_initialization) {
 	}
 	objFolderItem.InvokeVerb('' + cmd);
 	alert('Commands:\n' + t);
-	
+
 	// objShell.NameSpace(FolderFrom).CopyHere(FolderTo,0); // copy folder
 	// objFolderItem=objShell.NameSpace(FolderFrom).ParseName("clock.avi");objFolderItem.Items().Item().InvokeVerb([動作]);
 	// objShell.NameSpace(FolderFromPath).Items.Item(mName).InvokeVerb();
-	
+
 	// Sets or gets the date and time that a file was last modified.
 	// http://msdn.microsoft.com/en-us/library/bb787825(VS.85).aspx
 	// objFolderItem.ModifyDate = "01/01/1900 6:05:00 PM";
 	// objShell.NameSpace("C:\Temp").ParseName("Test.Txt").ModifyDate =
 	// DateAdd("d", -1, Now()) CDate("19 October 2007")
-	
-	// Touch displays or sets the created, access, and modified times of one or
-	// more files. http://www.stevemiller.net/apps/
-	}
-	
-	//測試可寫入的字元:0-128,最好用1-127，因為許多編輯器會將\0轉成' '，\128又不確定
-	if (false) {
+
+	// Touch displays or sets the created, access, and modified times of one
+	// or more files. http://www.stevemiller.net/apps/
+}
+
+// 測試可寫入的字元:0-128,最好用1-127，因為許多編輯器會將\0轉成' '，\128又不確定
+if (false) {
 	var t = '', f = 'try.js', i = 0;
 	for (; i < 128; i++)
 		t += String.fromCharCode(i);
@@ -168,8 +166,4 @@ if (typeof CeL === 'function' && !CeL.no_initialization) {
 		alert('eval內容不同!');
 	else
 		alert('OK!');
-	}
-
- </code>
- */
-
+}

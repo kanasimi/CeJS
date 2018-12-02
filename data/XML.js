@@ -449,13 +449,13 @@ function module_code(library_namespace) {
 			}
 		}
 
-	if (skip_spaces && nodes.length > 0
-	&& typeof nodes[nodes.length - 1] === 'string'
-	&& !(nodes[nodes.length - 1] = nodes[nodes.length - 1].trim())) {
-		// 最後一個 node 為 spaces。
-		nodes.pop();
-	}
-	if (nodes.length === 0)
+		if (skip_spaces && nodes.length > 0
+				&& typeof nodes[nodes.length - 1] === 'string'
+				&& !(nodes[nodes.length - 1] = nodes[nodes.length - 1].trim())) {
+			// 最後一個 node 為 spaces。
+			nodes.pop();
+		}
+		if (nodes.length === 0)
 			nodes = null;
 		else if (nodes.length === 1)
 			nodes = numeralize ? numeralize(nodes[0]) : nodes[0];

@@ -2346,6 +2346,7 @@ function module_code(library_namespace) {
 
 	function parse_proxy_server(proxy_server) {
 		if (typeof proxy_server === 'string' && (proxy_server = proxy_server
+		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
 		// 代理伺服器 proxy_server: "username:password@hostname:port"
 		// [ all, username, password, hostname, port ]
 		.match(/^(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/))) {

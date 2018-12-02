@@ -7,17 +7,17 @@
  * 
  * @fileoverview 本檔案包含了繁體/簡體中文轉換的 functions。
  * @example <code>
- * // 在非 Windows 平台上避免 fatal 錯誤。
- * CeL.env.ignore_COM_error = true;
- * // load module for CeL.CN_to_TW('简体')
- * CeL.run('extension.zh_conversion',function () {
- *  // 事前事後轉換表須事先設定。
- *  //CeL.CN_to_TW.pre = {};
- *  //CeL.CN_to_TW.post = {};
- *  var text = CeL.CN_to_TW('简体中文文字');
- * 	CeL.CN_to_TW.file('from.htm', 'to.htm', 'utf-8');
- * });
- * </code>
+	// 在非 Windows 平台上避免 fatal 錯誤。
+	CeL.env.ignore_COM_error = true;
+	// load module for CeL.CN_to_TW('简体')
+	CeL.run('extension.zh_conversion',function () {
+		// 事前事後轉換表須事先設定。
+		//CeL.CN_to_TW.pre = {};
+		//CeL.CN_to_TW.post = {};
+		var text = CeL.CN_to_TW('简体中文文字');
+		CeL.CN_to_TW.file('from.htm', 'to.htm', 'utf-8');
+	});
+ </code>
  * @see
  * @since 2014/6/17 22:39:16
  */

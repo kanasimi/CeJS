@@ -485,9 +485,11 @@ function module_code(library_namespace) {
 				if (!PATTERN_work_id_of_url) {
 					PATTERN_work_id_of_url = this.full_URL(this.work_URL,
 							'work_id');
-					if (PATTERN_work_id_of_url.endsWith('work_id/'))
+					if (PATTERN_work_id_of_url.endsWith('work_id/')) {
+						// 允許不用"/"結尾。
 						PATTERN_work_id_of_url = PATTERN_work_id_of_url.slice(
 								0, -1);
+					}
 					PATTERN_work_id_of_url = this.PATTERN_work_id_of_url
 					// assert:
 					// 'work_id'===library_namespace.to_RegExp_pattern('work_id')
@@ -2608,11 +2610,12 @@ function module_code(library_namespace) {
 		chapter_directory, images_archive, chapter_page_file_name,
 		//
 		chapter_URL = this.chapter_URL(work_data, chapter_NO);
+		// console.log(work_data);
 		// console.log(chapter_URL);
 		chapter_URL = chapter_URL && this.full_URL(chapter_URL);
 		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
 				+ chapter_NO + '/' + work_data.chapter_count + ': '
-				+ chapter_URL);
+				+ chapter_URL, 1, 'get_chapter_data');
 		process.title = chapter_NO + ' @ ' + (work_data.title || work_data.id)
 				+ ' @ ' + this.id;
 
@@ -3039,6 +3042,7 @@ function module_code(library_namespace) {
 					pre_parse_chapter_data(null_XMLHttp);
 					return;
 				}
+				// library_namespace.info('reget_chapter_data: ' + chapter_URL);
 				get_URL(chapter_URL, pre_parse_chapter_data, _this.charset,
 						null, Object.assign({
 							error_retry : _this.MAX_ERROR_RETRY

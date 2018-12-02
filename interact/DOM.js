@@ -3,44 +3,58 @@
  * @name	CeL function for World Wide Web (www, W3)
  * @fileoverview
  * 本檔案包含了 www 的 functions。
+
+<code>
+	http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K902.aspx
+	http://www.nczonline.net/blog/2010/01/12/history-of-the-user-agent-string/
+	當 IE 初次推出它們的 User Agent 標誌的時候，是這個樣子：
+	MSIE/3.0 (Win95; U)
+
+	TODO:
+	don't use .innerHTML
+	通盤確認所有 HTMLElement 變數已經設成 null
+
+
+	功能探測 vs 瀏覽器探測
+	http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K987.aspx
+	Mark Pilgrim 有一個清單，它可以讓你探測任何功能。
+	http://diveintohtml5.org/everything.html
+
+
+	JQuery LazyLoad實現圖片延遲加載-探究 - jackchain - 博客園
+	http://www.cnblogs.com/qidian10/archive/2011/08/17/2143081.html
+	JavaScript & images LazyLoad 图片延迟加载(伪lazyload) - I'm qiqiboy !
+	http://www.qiqiboy.com/2011/04/12/javascript-and-images-lazyload.html
+	改造jQuery lazyLoad插件_ 前端開發_ JavaScript
+	http://www.popo4j.com/qianduan/transformation_jquery_lazyload_plug.html
+	在圖片尺寸比較大的情況下，圖片加載較慢，因此請求會被攔截，並且保留客戶端數據，在下次Img標籤加載Load方法的時候，可以繼續請求圖片數據
+</code>
+ * 
  * @since	
  */
 
-/*
-http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K902.aspx
-http://www.nczonline.net/blog/2010/01/12/history-of-the-user-agent-string/
-當 IE 初次推出它們的 User Agent 標誌的時候，是這個樣子：
-MSIE/3.0 (Win95; U)
-
-TODO:
-don't use .innerHTML
-通盤確認所有 HTMLElement 變數已經設成 null
-
-
-功能探測 vs 瀏覽器探測
-http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K987.aspx
-Mark Pilgrim 有一個清單，它可以讓你探測任何功能。
-http://diveintohtml5.org/everything.html
-
-
-JQuery LazyLoad實現圖片延遲加載-探究 - jackchain - 博客園
-http://www.cnblogs.com/qidian10/archive/2011/08/17/2143081.html
-JavaScript & images LazyLoad 图片延迟加载(伪lazyload) - I'm qiqiboy !
-http://www.qiqiboy.com/2011/04/12/javascript-and-images-lazyload.html
-改造jQuery lazyLoad插件_ 前端開發_ JavaScript
-http://www.popo4j.com/qianduan/transformation_jquery_lazyload_plug.html
-在圖片尺寸比較大的情況下，圖片加載較慢，因此請求會被攔截，並且保留客戶端數據，在下次Img標籤加載Load方法的時候，可以繼續請求圖片數據
-
-*/
-
 'use strict';
-if (typeof CeL === 'function')
-CeL.run(
-{
-name : 'interact.DOM',
-//data.code.compatibility.trim
-require : 'data.code.compatibility.|data.code.|data.native.|data.split_String_to_Object|application.locale.gettext',
-code : function(library_namespace) {
+// 'use asm';
+
+// --------------------------------------------------------------------------------------------
+
+// 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
+typeof CeL === 'function' && CeL.run({
+	// module name
+	name : 'interact.DOM',
+
+	//data.code.compatibility.trim
+	require : 'data.code.compatibility.|data.code.|data.native.|data.split_String_to_Object|application.locale.gettext',
+
+	// 設定不匯出的子函式。
+	// no_extend : '*',
+
+	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
+	code : module_code
+});
+
+
+function module_code(library_namespace) {
 
 var module_name = this.id,
 //	requiring
@@ -98,12 +112,13 @@ if(library_namespace.is_WWW(true) &&
 //	w3.org namespaces base
 var W3C_BASE = 'http://www.w3.org/';
 if (!W3C_BASE.startsWith('http'))
-	// 修改以適應 web.archive.org. Under archive.org, it'll change to something like '/web/20140814093917/http://www.w3.org/'.
+	/** 修改以適應 web.archive.org. Under archive.org, it'll change to something like '/web/20140814093917/http://www.w3.org/'. */
 	W3C_BASE = W3C_BASE.slice(W3C_BASE.indexOf('http'));
 
 
 //	IE 中 Object.prototype.toString.call(HTML Element)==='[object Object]', 得用 ''+node
 var get_object_type = Object.prototype.toString,
+//
 element_pattern = /^\[object HTML([A-U][A-Za-z]{1,15})?Element\]$/;
 
 
@@ -186,7 +201,7 @@ _// JSDT:_module_
  * http://www.w3.org/DOM/
  */
 is_ELEMENT_NODE = function(object) {
-	//library_namespace.debug('Test '+get_object_type.call(object)+' '+((typeof object==='object'||typeof object==='function')&&object.nodeType||'')+': '+element_pattern.test(get_object_type.call(object))+','+(object.nodeType === 1));
+	if(false)library_namespace.debug('Test '+get_object_type.call(object)+' '+((typeof object==='object'||typeof object==='function')&&object.nodeType||'')+': '+element_pattern.test(get_object_type.call(object))+','+(object.nodeType === 1));
 	return element_pattern.test(get_object_type.call(object)) && object.nodeType === ELEMENT_NODE;
 };
 
@@ -197,7 +212,8 @@ _// JSDT:_module_
 is_DOCUMENT_NODE = function(object) {
 	//element_pattern 不能用在 DOCUMENT_NODE。
 	//return _.is_HTML_element_type(object, DOCUMENT_NODE);
-	//if (object) library_namespace.debug('type: '+get_object_type.call(object)+', nodeType='+object.nodeType);
+	
+	if(false)if (object) library_namespace.debug('type: '+get_object_type.call(object)+', nodeType='+object.nodeType);
 	return get_object_type.call(object) === DOCUMENT_TYPE && object.nodeType === DOCUMENT_NODE;
 };
 
@@ -231,7 +247,7 @@ _.NBSP = NBSP;
 if (false)
 	string = string.replace(/ /g, CeL.DOM.NBSP);
 
-/*
+/**<code>
 debug 用。
 
 IE5DOM @ IE9 test:
@@ -247,11 +263,11 @@ IE8:
 node <A>: type object, toString.call: [object Object], ""+node: , nodeType: 1:
 node <OBJECT>: type object, toString.call: [object Object], ""+node: [object], nodeType: 1:
 
-*/
+</code>*/
 function show_node(node) {
 	var type = get_object_type.call(node);
 	if (_.is_NodeList(node)) {
-		library_namespace.debug(node.length + ' node list ' + type + ': ' + node[0] + '..', 1, 'show_node');
+		library_namespace.debug(node.length + ' node list ' + type + ': ' + node[0] + '...', 1, 'show_node');
 	} else if(_.is_ELEMENT_NODE(node)) {
 		library_namespace.debug('node'
 				+ (node.tagName ? ' &lt;' + node.tagName
@@ -297,8 +313,7 @@ try {
 							//	function or object
 							&& typeof object.item !== 'undefined'
 							&& !isNaN(object.length)
-							// use NodeList(index), may throw.
-							//&& (object.length > 0 ? _.is_HTML_element(object(0)) : object(0) === null)
+							// use NodeList(index), e.g., `object(0)`, may throw.
 							&& (object.length > 0 ? _.is_HTML_element(object[0]) : object[0] === null)
 							;
 				} catch (e) {
@@ -330,7 +345,7 @@ try {
 					&& object
 					&& typeof object.nodeType === 'number';
 			};
-			//	bug fix/workaround for IE8: IE8 中 is_Object(ELEMENT_NODE) === true！
+			//	bug fix/workaround for IE8: IE8 中 CeL.is_Object(ELEMENT_NODE) === true！
 			_.is_Object = function(object) {
 				return get_object_type.call(object) === '[object Object]'
 					// object !== null, undefined
@@ -359,36 +374,37 @@ try {
 
 
 
-/*	test if can use flash
+/*<code>
+	test if can use flash
 
 	better use SWFObject:
 	http://code.google.com/p/swfobject/
 
 	Browser detect:	http://www.quirksmode.org/js/detect.html
-var plugin=(window.navigator.mimeTypes && window.navigator.mimeTypes["application/x-shockwave-flash"]) ? window.navigator.mimeTypes["application/x-shockwave-flash"].enabledPlugin : 0;
-if ( plugin ) {
-        plugin=parseInt(plugin.description.substring(plugin.description.indexOf(".")-1)) >= 3;
-}
-else if (window.navigator.userAgent && window.navigator.userAgent.indexOf("MSIE")>=0 && window.navigator.userAgent.indexOf("Windows")>=0) {
-        document.write('<SCRIPT LANGUAGE=VBScript\> \n');
-        document.write('on error resume next \n');
-        document.write('plugin=( IsObject(CreateObject("ShockwaveFlash.ShockwaveFlash.6")))\n');
-        document.write('<\/SCRIPT\> \n');
-}
-if ( plugin ) {
-        document.write('<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"');
-        document.write('  codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0" ');
-        document.write(' ID=flash5clickTAG WIDTH='+n_width+' HEIGHT='+n_height+'>');
-        document.write(' <PARAM NAME=movie VALUE="'+ n_flashfile +'"><param name=wmode value=opaque><PARAM NAME=loop VALUE=true><PARAM NAME=quality VALUE=high>  ');
-        document.write(' <EMBED src="'+ n_flashfile +'" loop=true wmode=opaque quality=high  ');
-        document.write(' swLiveConnect=FALSE WIDTH='+n_width+' HEIGHT='+n_height+'');
-        document.write(' TYPE="application/x-shockwave-flash" PLUGINSPAGE="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash">');
-        document.write(' <\/EMBED>');
-        document.write(' <\/OBJECT>');
-} else if (!(window.navigator.appName && window.navigator.appName.indexOf("Netscape")>=0 && window.navigator.appVersion.indexOf("2.")>=0)){
-        document.write('<A HREF="'+ n_altURL +'" target="'+n_target+'"><IMG SRC="'+ n_altimg +'" WIDTH='+n_width+' HEIGHT='+n_height+' BORDER=0><\/A>');
-}
-*/
+	var plugin=(window.navigator.mimeTypes && window.navigator.mimeTypes["application/x-shockwave-flash"]) ? window.navigator.mimeTypes["application/x-shockwave-flash"].enabledPlugin : 0;
+	if ( plugin ) {
+	        plugin=parseInt(plugin.description.substring(plugin.description.indexOf(".")-1)) >= 3;
+	}
+	else if (window.navigator.userAgent && window.navigator.userAgent.indexOf("MSIE")>=0 && window.navigator.userAgent.indexOf("Windows")>=0) {
+	        document.write('<SCRIPT LANGUAGE=VBScript\> \n');
+	        document.write('on error resume next \n');
+	        document.write('plugin=( IsObject(CreateObject("ShockwaveFlash.ShockwaveFlash.6")))\n');
+	        document.write('<\/SCRIPT\> \n');
+	}
+	if ( plugin ) {
+	        document.write('<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"');
+	        document.write('  codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0" ');
+	        document.write(' ID=flash5clickTAG WIDTH='+n_width+' HEIGHT='+n_height+'>');
+	        document.write(' <PARAM NAME=movie VALUE="'+ n_flashfile +'"><param name=wmode value=opaque><PARAM NAME=loop VALUE=true><PARAM NAME=quality VALUE=high>  ');
+	        document.write(' <EMBED src="'+ n_flashfile +'" loop=true wmode=opaque quality=high  ');
+	        document.write(' swLiveConnect=FALSE WIDTH='+n_width+' HEIGHT='+n_height+'');
+	        document.write(' TYPE="application/x-shockwave-flash" PLUGINSPAGE="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash">');
+	        document.write(' <\/EMBED>');
+	        document.write(' <\/OBJECT>');
+	} else if (!(window.navigator.appName && window.navigator.appName.indexOf("Netscape")>=0 && window.navigator.appVersion.indexOf("2.")>=0)){
+	        document.write('<A HREF="'+ n_altURL +'" target="'+n_target+'"><IMG SRC="'+ n_altimg +'" WIDTH='+n_width+' HEIGHT='+n_height+' BORDER=0><\/A>');
+	}
+</code>*/
 
 //	copy from base.js
 //window.onerror=HandleError;
@@ -401,26 +417,29 @@ function HandleError(message, url, line) {
 		// document.location.href="javascript:";
 		window.navigate('javascript:');
 
-	//return message;	'Warning: function HandleError does not always return a value' in some Firebird with	user_pref("javascript.options.strict", true);	@ prefs.js
+	/**<code>'Warning: function HandleError does not always return a value' in some Firebird with	user_pref("javascript.options.strict", true);	@ prefs.js</code>*/
+	//return message;
 }
 
-//window.onresize=OnResize;	//	預防(舊版)NS resize時版面亂掉
+//預防(舊版)NS resize時版面亂掉
+//window.onresize=OnResize;
 function OnResize() {
 	//	回上一頁	history.go(-1),history.back()/history.forward()	this.location.replace(document.referrer)
+
 	//	Opera's document.referrer returns only null if referrer logging is disabled
 	//location.replace(),location.reload()
 	history.go(0);
 }
 
-/*
+/**<code>
 IE only!!
 	http://blog.livedoor.jp/dankogai/archives/50952477.html	DOM時代のdocument.write()
 
 if (typeof document == 'object')
 	write = document.write;
-*/
+</code>*/
 
-/*
+/**<code>
 http://blog.taragana.com/index.php/archive/how-to-enable-windowstatus-in-firefox/
 window.status在firefox下默認是不能修改的。
 可以通過工具->選項->網頁特性->啟用javascript->高級->把修改狀態欄文本打上勾就好了。
@@ -429,7 +448,7 @@ Open about:config in browser and search for dom.disable_window_status_change. Ch
 Additionally in Firefox v1.0, this can be changed via "Tools → Options → Web Features → Enable JavaScript / Advanced → Allow scripts to change status bar text"
 In Firefox v1.5, this can be changed via "Tools → Options → Content → Enable JavaScript / Advanced → Allow scripts to change status bar text"
 via MozillaZine; learnt the hard way. 
-*/
+</code>*/
 /**
  * 滾動 window.status
  * @param message
@@ -462,7 +481,7 @@ function roll_status(message, speed, from, roll_status_length) {
 		message += s + message;
 	window.status = message.slice(++from);
 	roll_statusS = window.setTimeout('roll_status("' + message + '",' + speed + ',' + from + ',' + roll_status_length + ');', speed);
-	// roll_statusS=window.setInterval('roll_status("'+message+'",'+speed+','+from+')',speed)
+	if(false) roll_statusS=window.setInterval('roll_status("'+message+'",'+speed+','+from+')',speed);
 }
 
 //	↑copy from base.js
@@ -470,18 +489,19 @@ function roll_status(message, speed, from, roll_status_length) {
 
 /*	預防hack：禁止鍵盤keyboard&滑鼠mouse輸入,可以再加上一層div於最上方以防止copy
 	下面一行調到檔案頭
-var disabledKM=0;
+var disabledKM = 0;
 */
-//disableKM[generateCode.dLK]='disabledKM';
-function disableKM(s,m){	//	s=1:回復,s=2:使螢幕亦無法捲動(對NS無效),m:message,輸入時發出警告
- /*
- window.onerror=function(){return ture;};
- //	定義亦可用 function document.onmousedown(){..}
- document.onmousedown=document.oncontextmenu=document.onselectstart=document.ondragstart=function(e){return false;};
- //	印刷を禁止して
- window.onbeforeprint=function(){for(i=0;i<document.all.length;i++){if(document.all[i].style.visibility!="hidden"){document.all[i].style.visibility="hidden";document.all[i].id="elmid";}}};
- window.onafterprint=function(){for(i=0;i<document.all.length;i++){if(document.all[i].id=="elmid"){document.all[i].style.visibility="";}}};
- */
+//disableKM[generateCode.dLK] = 'disabledKM';
+//s=1:回復,s=2:使螢幕亦無法捲動(對NS無效),m:message,輸入時發出警告
+function disableKM(s,m){
+ if(false){
+	 window.onerror=function(){return ture;};
+	 //	定義亦可用 function document.onmousedown(){...}
+	 document.onmousedown=document.oncontextmenu=document.onselectstart=document.ondragstart=function(e){return false;};
+	 //	印刷を禁止して
+	 window.onbeforeprint=function(){for(i=0;i<document.all.length;i++){if(document.all[i].style.visibility!="hidden"){document.all[i].style.visibility="hidden";document.all[i].id="elmid";}}};
+	 window.onafterprint=function(){for(i=0;i<document.all.length;i++){if(document.all[i].id=="elmid"){document.all[i].style.visibility="";}}};
+ }
  if(!document.body)return;
  if(typeof s=='undefined')s=1;
  if(typeof disabledKM=='undefined')disabledKM=0;
@@ -508,9 +528,12 @@ if(disabledKM){
 }else{
 //	<body oncontextmenu="return false" ondragstart="return false" onselectstart="return false">
  //	預防hack
-  //leftMargin=topMargin=rightMargin=bottomMargin=0;	//	使body填滿視窗
+//	使body填滿視窗
+  //leftMargin=topMargin=rightMargin=bottomMargin=0;
   document.body.Ooverflow=document.body.style.overflow;
-  if(s==2)document.body.style.overflow='hidden';	//	使螢幕亦無法捲動
+  if(s==2)
+		//	使螢幕亦無法捲動
+	  document.body.style.overflow='hidden';
   if(typeof window.onselectstart!='undefined')document.body.Oonselectstart=window.onselectstart;
   if(typeof window.oncontextmenu!='undefined')document.body.Ooncontextmenu=window.oncontextmenu;
   if(typeof window.ondragstart!='undefined')document.body.Oondragstart=window.ondragstart;
@@ -529,14 +552,12 @@ if(disabledKM){
 	=new Function('e',
 			'if(window.navigator.appName=="Microsoft Internet Explorer"&&event.button!=1||window.navigator.appName=="Netscape"&&e.which!=1){'
 			+(m?'alert('+dQuote(m)+');':'')+'return false;}');
-/*
-			'if(window.navigator.appName=="Microsoft Internet Explorer"\
-			&&event.button!=1||window.navigator.appName=="Netscape"&&e.which!=1){'+(m?'alert('+dQuote(m)+');':'')+'return false;}');
-*/
 
- //	window.captureEvents(Event.MOUSEUP|Event.MOUSEDOWN);
- //	window.onmousedown=function(e){if(e.which==1){window.captureEvents(Event.MOUSEMOVE);window.onmousemove=rf;}};
- //	window.onmouseup=function(e){if(e.which==1){window.releaseEvents(Event.MOUSEMOVE);window.onmousemove=null;}};
+ if(false){
+		window.captureEvents(Event.MOUSEUP|Event.MOUSEDOWN);
+		window.onmousedown=function(e){if(e.which==1){window.captureEvents(Event.MOUSEMOVE);window.onmousemove=rf;}};
+		window.onmouseup=function(e){if(e.which==1){window.releaseEvents(Event.MOUSEMOVE);window.onmousemove=null;}};
+ }
  //	Navigator 4.0x
  //	http://topic.csdn.net/t/20020125/13/498661.html
  if(!disabledKM && window.Event && window.captureEvents)
@@ -545,6 +566,12 @@ if(disabledKM){
 
  disabledKM=s;
 };
+
+
+if(false){
+	simpleWrite('a.txt',reduce_code([f,toggle,library_namespace.set_Object_value]));
+	for(var i in style)tt+=i+'='+document.getElementById("others").style[i]+"<br />";document.write(tt);
+}
 
 
 /**
@@ -597,7 +624,7 @@ function toggle_display(element, type){
 	library_namespace.debug('type: '+type, 2, 'toggle_display');
 	//	test .innerHTML
 
-	//library_namespace.debug('set display style of &lt;' + tagName + '&gt; to [' + type + ']');
+	if(false)library_namespace.debug('set display style of &lt;' + tagName + '&gt; to [' + type + ']');
 	if (style)
 		style[type in v_value ? 'visibility'
 				: 'display'] = type;
@@ -609,60 +636,63 @@ function toggle_display(element, type){
 		return;
 
 	return type;
-};
-//simpleWrite('a.txt',reduce_code([f,toggle,library_namespace.set_Object_value]));
-//for(var i in style)tt+=i+'='+document.getElementById("others").style[i]+"<br />";document.write(tt);
+}
+
 _// JSDT:_module_
 .
 toggle_display = toggle_display;
 
 
 
-_// JSDT:_module_
-.
-/*	http://blog.stevenlevithan.com/archives/faster-than-innerhtml
-You can use the above as el = replace_HTML(el, newHtml) instead of el.innerHTML = newHtml.
-
-.innerHTML=,document.createElement(→XML_node()
-.innerHTML='' → remove_all_child
-
-
-http://forum.moztw.org/viewtopic.php?t=17984&postdays=0&postorder=asc&start=15
-adoptNode() 會把現有的節點拿去用，ownerDocument 會被變更，被 adopt 的節點會從原來的 document 消失。
-importNode() 比較像是 cloneNode() 加上變更 ownerDocument。
-以前因為 Gecko 沒有太嚴格，所以可以用 Ajax 取回一個 XML 文件並直接透過 responseXML 把裡面的節點當 HTML 節點一樣的插入現有的網頁。
-*/
 /**
  * replace HTML
- * @param o
+ * @param node
  * @param html
  * @return
+
+<code>
+	http://blog.stevenlevithan.com/archives/faster-than-innerhtml
+	You can use the above as el = replace_HTML(el, newHtml) instead of el.innerHTML = newHtml.
+
+	.innerHTML=,document.createElement(→XML_node()
+	.innerHTML='' → remove_all_child
+
+
+	http://forum.moztw.org/viewtopic.php?t=17984&postdays=0&postorder=asc&start=15
+	adoptNode() 會把現有的節點拿去用，ownerDocument 會被變更，被 adopt 的節點會從原來的 document 消失。
+	importNode() 比較像是 cloneNode() 加上變更 ownerDocument。
+	以前因為 Gecko 沒有太嚴格，所以可以用 Ajax 取回一個 XML 文件並直接透過 responseXML 把裡面的節點當 HTML 節點一樣的插入現有的網頁。
+</code>
+
  * @_memberOf	_module_
  */
-replace_HTML = function(o, html) {
-	if (o && typeof o === 'string')
-		o = document.getElementById(o);
+function replace_HTML(node, html) {
+	if (node && typeof node === 'string')
+		node = document.getElementById(node);
 
 	// _.is_ELEMENT_NODE(<math>) === false ("[object Element]" @ Firefox/37.0)
-	//if (!_.is_ELEMENT_NODE(o)) return;
-	if (!o || !o.innerHTML)
-		return o;
+	if(false)if (!_.is_ELEMENT_NODE(node)) return;
+	if (!node || !node.innerHTML)
+		return node;
 
 	try {
-		/*@cc_on	// Pure innerHTML is slightly faster in IE
-		 o.innerHTML=html||'';
-		 return o;
+		/*@cc_on
+			// Pure innerHTML is slightly faster in IE
+			node.innerHTML = html || '';
+			return node;
 		@*/
 
-		//var n = o.cloneNode(false);
-		//n.innerHTML = html || '';
-		//o.parentNode.replaceChild(n, o);
+		if(false){
+			var clone = node.cloneNode(false);
+			clone.innerHTML = html || '';
+			node.parentNode.replaceChild(clone, node);
+		}
 
 		// 預防之後不知道的 code 還是使用之前的 reference。
-		o.innerHTML = html || '';
+		node.innerHTML = html || '';
 
 	} catch (e) {
-		/*
+		/**
 		http://msdn.microsoft.com/en-us/library/ms532998.aspx#TOM_Create
 		the innerText and innerHTML properties of the table and tr objects are read-only.
 		*/
@@ -671,32 +701,36 @@ replace_HTML = function(o, html) {
 	}
 
 	// Since we just removed the old element from the DOM, return a reference to the new element, which can be used to restore variable references.
-	return o;
-};
-
-/*
-使用.firstChild或.lastChild須注意此node可能是text node，不能appendChild。須以.nodeType判別。
-
-http://msdn2.microsoft.com/zh-tw/library/system.xml.xmlnode.removechild(VS.80).aspx
-繼承者注意事項 在衍生類別中覆寫 RemoveChild 時，為了要正確引發事件，您必須呼叫基底類別的 RemoveChild 方法。
-
-removeAllChild[generateCode.dLK]='replace_HTML';
-function removeAllChild(o){
- //return removeNode(o,1);
-
- //	http://blog.stevenlevithan.com/archives/faster-than-innerhtml
- if(typeof o=='string')o=document.getElementById(o);
- if(!o||typeof o!='object')return;
- o.parentNode.replaceChild(o.cloneNode(false),o);
- return o;
+	return node;
 }
 
-http://www.webreference.com/js/column43/replace.html
-The replaceNode method is much more intuitive than the removeNode method. While the removeNode method just removes the specified element and makes its descendents children of their grandfather, the replaceNode method deletes the whole subtree that is rooted at the specified element, and substitutes it with a new element.
-node_want_to_replace.removeNode(new_node)
-*/
 _// JSDT:_module_
 .
+replace_HTML = replace_HTML;
+
+
+/**<code>
+	使用.firstChild或.lastChild須注意此node可能是text node，不能appendChild。須以.nodeType判別。
+
+	http://msdn2.microsoft.com/zh-tw/library/system.xml.xmlnode.removechild(VS.80).aspx
+	繼承者注意事項 在衍生類別中覆寫 RemoveChild 時，為了要正確引發事件，您必須呼叫基底類別的 RemoveChild 方法。
+
+	removeAllChild[generateCode.dLK]='replace_HTML';
+	function removeAllChild(o){
+	 //return removeNode(o,1);
+
+	 //	http://blog.stevenlevithan.com/archives/faster-than-innerhtml
+	 if(typeof o=='string')o=document.getElementById(o);
+	 if(!o||typeof o!='object')return;
+	 o.parentNode.replaceChild(o.cloneNode(false),o);
+	 return o;
+	}
+
+	http://www.webreference.com/js/column43/replace.html
+	The replaceNode method is much more intuitive than the removeNode method. While the removeNode method just removes the specified element and makes its descendents children of their grandfather, the replaceNode method deletes the whole subtree that is rooted at the specified element, and substitutes it with a new element.
+	node_want_to_replace.removeNode(new_node)
+</code>*/
+
 /**
  * 移除 node.
  * TODO:
@@ -706,7 +740,7 @@ _// JSDT:_module_
  * @return
  * @_memberOf	_module_
  */
-remove_node = function remove_node(o, tag) {
+ function remove_node(o, tag) {
 	var _f = remove_node, i;
 	if (typeof o === 'string')
 		o = document.getElementById(o);
@@ -735,11 +769,15 @@ remove_node = function remove_node(o, tag) {
 	// remove self
 	//	測試 o.parentNode: 預防輸入的o為create出來的
 	return tag || !(i = o.parentNode) ? o : i.removeChild(o);
-};
+}
+
+_// JSDT:_module_
+.
+remove_node=remove_node;
 
 
-/*
-empty node
+/**
+empty node. remove_all_children
 */
 _// JSDT:_module_
 .
@@ -768,7 +806,7 @@ remove_all_child = _.replace_HTML;
 function set_attribute(_e, propertyO, ns) {
 	_e = get_element(_e);
 	if (!_e || !propertyO
-	// || _e.nodeType === 3 /* TEXT_NODE */
+	// || _e.nodeType === TEXT_NODE 
 	) {
 		return;
 	}
@@ -843,8 +881,6 @@ _// JSDT:_module_
 set_attribute = set_attribute;
 
 
-_// JSDT:_module_
-.
 /**
  * append children node to specified element
  * @param node	node / node id
@@ -853,7 +889,7 @@ _// JSDT:_module_
  * @since	2007/1/20 14:12
  * @_memberOf	_module_
  */
-add_node = function add_node(node, child_list) {
+function add_node(node, child_list) {
 	var _s = add_node;
 	if ((node = get_element(node)) && arguments.length > 2) {
 		for ( var _j = 1, l = arguments.length; _j < l; _j++)
@@ -862,7 +898,7 @@ add_node = function add_node(node, child_list) {
 	}
 
 	if (!node || !child_list
-			// || node.nodeType === 3/* TEXT_NODE */
+			// || node.nodeType === TEXT_NODE
 		)
 		return;
 
@@ -893,10 +929,14 @@ add_node = function add_node(node, child_list) {
 
 	if (typeof child_list === 'string'
 		|| typeof child_list === 'number' && !isNaN(child_list)) {
-		// child_list=child_list.toString();
+		// child_list = child_list.toString();
 		_.node_value(node, child_list);
 	}
-};
+}
+
+_// JSDT:_module_
+.
+add_node = add_node;
 
 
 // IE 8 中，使用 (element[p] = text) 無效果，需要使用 (document.title) 設定。
@@ -906,7 +946,7 @@ set_text.need_check_title = need_check_title = need_check_title
 		&& need_check_title[1] < 9;
 
 /**
- * 設定 HTML element 的 text。
+ * 設定/取得 HTML element 的 text。
  * 對付IE與Moz不同的text取得方法。現階段不應用innerText，應該用此函數來取得或設定內部text。
  * @param element	HTML element
  * @param {String} text	the text to be set
@@ -926,7 +966,7 @@ function set_text(element, text) {
 		= typeof document.body.textContent === 'string' ? 'textContent'
 		// e.g., IE
 		: typeof document.body.innerText === 'string' ? 'innerText'
-		// older browser
+		// old browsers
 		: 'innerHTML';
 
 	var p = typeof element.value === 'string' ? 'value' : text_p;
@@ -955,7 +995,7 @@ function set_text(element, text) {
 	var text = element[p];
 	if (p === 'innerHTML') {
 		// 分斷行 2003/1/25 22:40
-		// html→text
+		// html → text
 		// <.+?> <[^>]+> <\s*\/?\s*[a-zA-Z](.*?)> <! 過慢?
 		text = text.replace(/<s>[^<]*<\/s>/gi, '').replace(/<w?br[^>]*>/gi,
 				'\n').replace(/<\/?[A-Za-z][^>]*>/g, '');
@@ -966,6 +1006,9 @@ function set_text(element, text) {
 _// JSDT:_module_
 .
 set_text = set_text;
+_// JSDT:_module_
+.
+get_node_text = set_text;
 
 
 _// JSDT:_module_
@@ -1169,7 +1212,7 @@ node_value = function node_value(node, value, base_space) {
 				typeof node === 'string' ? (node = select_node(node, base_space) || get_element(node))
 					: node)) {
 		if (_.is_NodeList(node) && node.length && 'checked' in node[0]) {
-			//library_namespace.debug('Nodes &lt;' + node[0].tagName + '&gt;[' + node[0].name + '] = ' + value, 1, 'node_value');
+			if(false)library_namespace.debug('Nodes &lt;' + node[0].tagName + '&gt;[' + node[0].name + '] = ' + value, 1, 'node_value');
 			//	/checkbox|radio/
 			//var type = node[i].type;
 			for ( var i = 0, l = node.length, v = set_value_list(value); i < l; i++) {
@@ -1183,7 +1226,7 @@ node_value = function node_value(node, value, base_space) {
 	}
 
 	var tag_name = _.is_ELEMENT_NODE(node) ? node.tagName.toLowerCase() : '', type;
-	//library_namespace.debug('Node &lt;' + tag_name + '&gt;', 1, 'node_value');
+	if(false)library_namespace.debug('Node &lt;' + tag_name + '&gt;', 1, 'node_value');
 	if ((tag_name in {
 			textarea : 1,
 			select : 1,
@@ -1221,7 +1264,7 @@ node_value = function node_value(node, value, base_space) {
 			break;
 		//case 'select-one':
 		default:
-			//library_namespace.debug('Use default method to set value.', 1, 'node_value');
+			if(false)library_namespace.debug('Use default method to set value.', 1, 'node_value');
 			if ('value' in node) {
 				if (tag_name === 'select') {
 					// select_node.value → select_node.innerText → select_node.selectedIndex
@@ -1248,7 +1291,9 @@ node_value = function node_value(node, value, base_space) {
 						}
 						// TODO: alert
 					}
-					//else node.onchange && node.onchange();
+					else {
+						//node.onchange && node.onchange();
+					}
 
 				} else if (value !== undefined && value !== null) {
 					//	IE9 的相容Quirks模式中長度使用 'maxLength'.
@@ -1258,7 +1303,7 @@ node_value = function node_value(node, value, base_space) {
 					// 因 (''==0)，因此若 (value === 0 && node.value === '') 會出問題。
 					// 需要先把 value 轉成 string。
 					value = String(value);
-					//library_namespace.debug('測試是否須截斷過長之設定值 of [' + kw + ']。', 1, 'node_value');
+					if(false)library_namespace.debug('測試是否須截斷過長之設定值 of [' + kw + ']。', 1, 'node_value');
 					if (!isNaN(node[kw])
 						// Chrome/68.0.3440.106: document.createElement('input').maxLength 預設為 -1
 						&& node[kw] >= 0 && value.length > node[kw]) {
@@ -1267,7 +1312,7 @@ node_value = function node_value(node, value, base_space) {
 						value = value.slice(0, node[kw]);
 					}
 					if (node.value != value) {
-						//library_namespace.debug('Set &lt;' + tag_name + '&gt; = [' + value + ']', 1, 'node_value');
+						if(false)library_namespace.debug('Set &lt;' + tag_name + '&gt; = [' + value + ']', 1, 'node_value');
 						node.value = value;
 						// node.onchange && node.onchange();
 					}
@@ -1291,10 +1336,10 @@ node_value = function node_value(node, value, base_space) {
 	} else if (typeof value === 'string'
 		&& value.indexOf('<') !== -1) {
 		// may cause error: -2146827687 未知的執行階段錯誤 e.g.,
-		// XML_node('a',0,0,[XML_node('a'),'<br />']);
+		// XML_node('a', 0, 0, [XML_node('a'), '<br />']);
 		// try{
 		value = node.innerHTML = value;
-		// }catch(e){node.appendChild(XML_node('span',0,0,value));}
+		// } catch(e) { node.appendChild(XML_node('span', 0, 0, value)); }
 	}
 
 	else if (typeof value === 'string'
@@ -1303,15 +1348,16 @@ node_value = function node_value(node, value, base_space) {
 		// try{
 		node.appendChild(document.createTextNode(value));
 		value = node.innerHTML;
-		// }catch(e){alert(e.description);}
-	} else
+		// } catch(e) { alert(e.description); }
+	} else{
+		if(false) alert('node_value: Error insert contents:\n[' + value + ']');
 		value = node.innerHTML;
-
-	// else alert('node_value: Error insert contents:\n['+value+']');
+	 }
 	return value;
 };
 
-/*
+
+/**<code>
 
 var alias={
 	//	'child' || 'c' || '$' || '0' || ..
@@ -1355,7 +1401,7 @@ insertSetting:
 	[refO,0-4]	0:appendChild (add as lastChild), 1: add as firstChild, 2: add as nextSibling, 3: add as priviusSibling, 4: add as parent
 
 
-*/
+</code>*/
 //[{tag1:{attb:attb_val,child:[inner objects]}}, {tag2:{}}, 'br'];
 
 
@@ -1383,19 +1429,19 @@ function new_node(nodes, layer, ns) {
 	children,
 	handler = new_node.handler;
 
-	/*
-	if (!library_namespace.is_WWW(true)
-		//&& !document.createElementNS
-		) {
-		library_namespace.warn('new_node: DOM error? Cannot create node [' + nodes + '].');
-		return;
-	}
+	if(false){
+		if (!library_namespace.is_WWW(true)
+				//&& !document.createElementNS
+				) {
+				library_namespace.warn('new_node: DOM error? Cannot create node [' + nodes + '].');
+				return;
+			}
 
-	if (node === null || ((typeof nodes) in {number:1, boolean:1,undefined:1}))
-		//.toString();
-		nodes = //'(' + typeof nodes + ') '
-			String(nodes);
-	*/
+			if (node === null || ((typeof nodes) in {number:1, boolean:1,undefined:1}))
+				//.toString();
+				nodes = //'(' + typeof nodes + ') '
+					String(nodes);
+	}
 
 	//	造出 node.
 	if (node === null || ((typeof nodes) in {
@@ -1464,9 +1510,9 @@ function new_node(nodes, layer, ns) {
 		} else {
 			//	初始轉換。
 			if (tag === 'T') {
-				//	{ T : [ gettext id, ..] }
+				//	{ T : [ gettext id, ...] }
 				//	→
-				//	{ 基本 text node : null, T : [ gettext id, ..] }
+				//	{ 基本 text node : null, T : [ gettext id, ...] }
 				tag_key = tag = 'span';
 			}
 
@@ -1526,12 +1572,12 @@ function new_node(nodes, layer, ns) {
 
 			//	對常用的特別處理
 			// class name
-			/*
+			/**<code>
 				XML 中id不能以setAttribute設定。
 				class不能以setAttribute設定@IE。
 				http://www.quirksmode.org/bugreports/archives/2005/03/setAttribute_does_not_work_in_IE_when_used_with_th.html
 				IE ignores the "class" setting, and Mozilla will have both a "class" and "className" attribute defined
-			 */
+			</code>*/
 			if ((n in nodes) || ((n = 'class') in nodes) || ((n = 'C') in nodes))
 				ignore[n] = null,
 				node.className = nodes[n];
@@ -1670,9 +1716,9 @@ function new_node(nodes, layer, ns) {
 
 			for (n in nodes)
 				if (!(n in ignore)){
-					//library_namespace.debug('new_node: set attribute ['+n+'] = ['+nodes[n]+']'),
+					if(false)library_namespace.debug('new_node: set attribute ['+n+'] = ['+nodes[n]+']'),
 					s(n, nodes[n]);
-					//library_namespace.debug('new_node: get attribute ['+n+'] = ['+node.getAttribute(n)+']');
+					if(false)library_namespace.debug('new_node: get attribute ['+n+'] = ['+node.getAttribute(n)+']');
 				}
 		} else if(tag && !_.is_HTML_element(node))
 			show_node(node),
@@ -1720,10 +1766,11 @@ function new_node(nodes, layer, ns) {
 				layer = get_element(layer);
 			//	[object HTMLLIElement]
 			//	注意: layer 可能是.. e.g., "[object SVGTitleElement]"
-			if (library_namespace.is_debug() && !_.is_DOM_NODE(layer))
-				//library_namespace.warn('is_ELEMENT_NODE: ' + _.is_ELEMENT_NODE),
-				show_node(layer),
+			if (library_namespace.is_debug() && !_.is_DOM_NODE(layer)){
+				if(false)library_namespace.warn('is_ELEMENT_NODE: ' + _.is_ELEMENT_NODE);
+				show_node(layer);
 				library_namespace.warn('new_node: layer is not a HTML Element!');
+			}
 
 			if (for_each == 1 && (parent = layer.firstChild))
 				// 1: add as firstChild of layer
@@ -1763,28 +1810,30 @@ function new_node(nodes, layer, ns) {
 		//	不宜個個重新呼叫是為了效能。
 		for ( var i = 0, l = nodes.length, n, _l = layer, _p = parent,
 				f = for_each && function(n) {
-					//console.log('new_node.Array.for_each: '+[n,_l,_p].join(', '));
+			if(false)console.log('new_node.Array.for_each: '+[n,_l,_p].join(', '));
 					for_each(n, _l, _p);
 				} || null
 				; i < l; i++) {
-			//alert('node['+i+']\n'+nodes[i]);
+			if(false)alert('node['+i+']\n'+nodes[i]);
 			node.push(n = new_node(nodes[i], f, ns));
-			/*
-			node.push(n = new_node(nodes[i], for_each));
-			if (for_each)
-				try {
-					for_each(n, layer, parent);
-				} catch (e) {
-					library_namespace.error(e);
-					library_namespace.error('new_node: handle function execution error for node Array['+i+'/'+l+']!<br />' + for_each);
-				}
-			*/
+			if(false){
+				node.push(n = new_node(nodes[i], for_each));
+				if (for_each)
+					try {
+						for_each(n, layer, parent);
+					} catch (e) {
+						library_namespace.error(e);
+						library_namespace.error('new_node: handle function execution error for node Array['+i+'/'+l+']!<br />' + for_each);
+					}
+			}
 		}
 
 	} else {
 		//	預防 ['<a></a>','~~'] 之類。
-		//if (typeof node === 'string' && for_each !== handler[0])
-		//	node = document.createTextNode(nodes);
+		if(false){
+			if (typeof node === 'string' && for_each !== handler[0])
+				node = document.createTextNode(nodes);
+		}
 
 		if (for_each)
 			try {
@@ -1881,10 +1930,10 @@ new_node.handler = [
 					library_namespace.warn('new_node.handler[2]: error: .appendChild('+n+')');
 					library_namespace.error(e);
 				}
-				/*
+				if(false)
 				if (t === l.innerHTML)
 					library_namespace.warn('new_node.handler[2]: The addition does not change the layer!');
-				*/
+				
 			} else {
 				library_namespace.warn('new_node.handler[2]: 類型不相符! (['+(typeof n)+'] '+n+')');
 			}
@@ -1926,7 +1975,7 @@ new_node = new_node;
 
 
 
-/*
+/**<code>
 XML_node('div','id:idName');	doesn't insert, just return the object
 XML_node('div',{'id':null});	won't set id
 XML_node('div',{'id':undefined});	won't set id
@@ -1972,7 +2021,7 @@ TODO:
 XML 中 insertBefore(),appendChild()似乎無反應？	http://developer.mozilla.org/en/docs/SVG:Namespaces_Crash_Course
 insertAfter
 
-*/
+</code>*/
 _// JSDT:_module_
 .
 /**
@@ -1991,7 +2040,7 @@ _// JSDT:_module_
  */
 XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 	//	XML 中沒有document.body！
-	//if(typeof document.body=='undefined')document.body=document.getElementsByTagName('body')[0];
+	if(false)if(typeof document.body=='undefined')document.body=document.getElementsByTagName('body')[0];
 
 	if (typeof document !== 'object'
 			|| (!document.createElement && !document.createElementNS)
@@ -2008,17 +2057,20 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 	_DOM2 = document.createElementNS ? 1 : 0,
 	_e;
 
-	/*
-	//	依styleO指定 Namespace
-	if (typeof styleO === 'string') {
-		if (styleO.indexOf('://') != -1)
-			_NS = styleO, styleO = 0;
-		else if (_i[styleO])
-			_NS = W3C_BASE + _i[styleO], styleO = 0;
-	} else
-		// buggy now.
-		_DOM2 = 0;//_NS = styleO === null ? null : W3C_BASE + _i['XHTML'];//undefined==null
-	*/
+	if(false){
+		//	依styleO指定 Namespace
+		if (typeof styleO === 'string') {
+			if (styleO.indexOf('://') != -1)
+				_NS = styleO, styleO = 0;
+			else if (_i[styleO])
+				_NS = W3C_BASE + _i[styleO], styleO = 0;
+		} else{
+			// buggy now.
+			//undefined == null
+			//_NS = styleO === null ? null : W3C_BASE + _i['XHTML'];
+			_DOM2 = 0;
+		}
+	}
 
 	//	指定 Namespace
 	if (tag)
@@ -2027,15 +2079,15 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 			_NS = _NS[1];
 			if (_NS.indexOf('://') === -1 && (_i = _i[_NS.toLowerCase()]))
 				_NS = W3C_BASE + _i;
-			// library_namespace.warn('XML_node: Add ['+tag+'] of\n'+_NS);
+			if(false) library_namespace.warn('XML_node: Add ['+tag+'] of\n'+_NS);
 		}
 
-	/*
+	/**<code>
 		for MathML:
 			IE: document.createElement('m:'+tag)
 				(surely 'mml:', but 'm:' is default of MathPlayer, so now <html> works without the xmlns attribute)
 			NS: document.createElementNS('http://www.w3.org/1998/Math/MathML', tag)
-	*/
+	</code>*/
 	try {
 		_e = tag ? _DOM2 && _NS ? document.createElementNS(_NS, tag)
 				: document.createElement(tag/* .replace(/[<>\/]/g,'') */)
@@ -2055,7 +2107,7 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 			for (_i in styleO)
 				//	is_IE?"styleFloat":"cssFloat"
 				_e.style[_i === 'float' ? 'cssFloat' in _e.style ? 'cssFloat' : 'styleFloat' : _i] = styleO[_i];
-	//else library_namespace.warn('XML_node: Error set style:\n[' + styleO + ']');
+	else if(false)library_namespace.warn('XML_node: Error set style:\n[' + styleO + ']');
 
 
 	//	插入document中。先插入document而後設定childNodes是因為IE有Cross-Page Leaks
@@ -2066,14 +2118,14 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 			return typeof _o == 'string' && (_i = document.getElementById(_o)) ? _i
 					: _o;
 		}, iO = tO(insertBeforeO);
-		// Opera9 need .constructor===Array
+		// Opera9 need {Array}iO
 		if (Array.isArray(iO) && iO.length)
 			// 在disable CSS時可能會 Warning: reference to undefined property iO[1]
 			// rO: referrer object,
 			// 以此決定以appendChild()或insertBefore()的形式插入
 			rO = iO.length > 1 && tO(iO[1]) || 0, iO = tO(iO[0]);
 
-		//if(typeof iO !== 'object' && (iO = document.body, typeof rO === 'undefined')) rO = 0;
+			if(false)if(typeof iO !== 'object' && (iO = document.body, typeof rO === 'undefined')) rO = 0;
 		if (typeof iO !== 'object') {
 			iO = document.body;
 			if (typeof rO === 'undefined')
@@ -2101,29 +2153,29 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 	//	設定 childNodes
 	if (tag)
 		_.add_node(_e, innerObj);
-	/*
-	 if (tag && innerObj)
-		(_i = function(_o) {
-			if (typeof _o == 'object') {
-				if (_o)
-					if (Array.isArray(_o))// &&_o.length
-						for ( var _j = 0; _j < _o.length; _j++)
-							_i(_o[_j]);
-					else
-						_e.appendChild(_o);
-				return;
-			}
-			if (typeof _o == 'number' && !isNaN(_o))
-				// _o+='';
-				_o = _o.toString();
-			if (typeof _o == 'string')
-				if (_o.indexOf('<') != -1)
-					_e.innerHTML += _o;
-				else
-					_e.appendChild(document.createTextNode(_o));
-			//else library_namespace.warn('XML_node: Error insert contents:\n[' + _o + ']');
-		})(innerObj);
-	*/
+	if(false){
+		 if (tag && innerObj)
+				(_i = function(_o) {
+					if (typeof _o == 'object') {
+						if (_o)
+							if (Array.isArray(_o))// && _o.length > 0
+								for ( var _j = 0; _j < _o.length; _j++)
+									_i(_o[_j]);
+							else
+								_e.appendChild(_o);
+						return;
+					}
+					if (typeof _o == 'number' && !isNaN(_o))
+						// _o+='';
+						_o = _o.toString();
+					if (typeof _o == 'string')
+						if (_o.indexOf('<') != -1)
+							_e.innerHTML += _o;
+						else
+							_e.appendChild(document.createTextNode(_o));
+					else if(false)library_namespace.warn('XML_node: Error insert contents:\n[' + _o + ']');
+				})(innerObj);
+	}
 
 	//	this helps to fix the memory leak issue
 	//	http://www.hedgerwow.com/360/dhtml/ie6_memory_leak_fix/
@@ -2191,9 +2243,10 @@ function select_node(selector, base_space, options) {
 
 		result = base_space;
 		var tmp_node, tag_name, identifier, part,
-		//	CSS selector match pattern<br />
-		//	http://www.w3.org/TR/selectors/<br />
-		//	[selector flagment, combinator, tagName/type ONLY or all pattern, tagName/type, selector notation, identifier/class name/pseudo-element, attribute selector]
+		/**	CSS selector match pattern<br />
+			http://www.w3.org/TR/selectors/<br />
+			[selector flagment, combinator, tagName/type ONLY or all pattern, tagName/type, selector notation, identifier/class name/pseudo-element, attribute selector]
+			*/
 		pattern = /\s*([>+~])?\s*(([^#.$\[:>+~\s]*)(?:(::?|[#.$])([^#.$\[:>+~\s]+)|\[([^\]]+)\])|[^#.$\[:>+~\s]+)/g,
 		//	.getElementById()
 		get_id = function(id) {
@@ -2210,17 +2263,17 @@ function select_node(selector, base_space, options) {
 			}
 			return node;
 		};
-		/*
-		//	for test
-		pattern = /\s*([>+~])?\s*(([^#.\[:>+~\s]*)(?:(::?|[#.])([^#.\[:>+~\s]+)|\[([^\]]+)\])|[^#.\[:>+~\s]+)/g;
-		selector = 'node #id > node#id .class +node.class :pseudo~ node:pseudo [attr] node[attr]';
-		while (part = pattern.exec(selector)) {
-			if (typeof CeL === 'function')
-				CeL.log(part.join('<em>|</em>'));
-			else
-				console.log(part.join('|') + '\n');
+		if(false){
+			//	for test
+			pattern = /\s*([>+~])?\s*(([^#.\[:>+~\s]*)(?:(::?|[#.])([^#.\[:>+~\s]+)|\[([^\]]+)\])|[^#.\[:>+~\s]+)/g;
+			selector = 'node #id > node#id .class +node.class :pseudo~ node:pseudo [attr] node[attr]';
+			while (part = pattern.exec(selector)) {
+				if (typeof CeL === 'function')
+					CeL.log(part.join('<em>|</em>'));
+				else
+					console.log(part.join('|') + '\n');
+			}
 		}
-		*/
 
 		// parse selector
 		//pattern.exec('');
@@ -2450,10 +2503,12 @@ for_nodes = for_nodes;
 // 在全局遍歷中，可用來代替 from_node.nextSibling
 function next_node_of(from_node) {
 	var next_node = from_node.firstChild;
-	// console.log([ 'firstChild', next_node ]);
+	if(false) console.log([ 'firstChild', next_node ]);
 	if (!next_node) {
-		// console.log([ 'nextSibling', from_node.nextSibling ]);
-		// console.log([ 'parentNode', from_node.parentNode ]);
+		if(false){
+			 console.log([ 'nextSibling', from_node.nextSibling ]);
+			 console.log([ 'parentNode', from_node.parentNode ]);
+		}
 		while (!(next_node = from_node.nextSibling)
 		//
 		&& (from_node = from_node.parentNode) && from_node !== document.body) {
@@ -2584,38 +2639,49 @@ for_attributes = for_attributes;
 
 
 
-/*	用在top的index.htm中，當setTopP()後指定特殊頁面	2005/1/26 21:46
+/**<code>
+	用在top的index.htm中，當setTopP()後指定特殊頁面	2005/1/26 21:46
 set:	window.onload=setFrame;
 	var setFrameTarget='MAIN',setFrameTargetSet={'menu.htm':'MENU','all.htm':'MENU','midi.htm':'MIDI'};
 
-** xhtml1-frameset.dtd中<script>只能放在<head>
-*/
+xhtml1-frameset.dtd中<script>只能放在<head>
+</code>*/
 var setFrameTarget,setFrameTargetSet;	//	預設target, 轉頁的target lists
 //setFrame[generateCode.dLK]='setFrameTarget,setFrameTargetSet';
 function setFrame(){
- //alert(window.name);
- //for(var i=0;i<window.frames.length;i++)alert(window.frames[i].name);
- //alert(top.location.href+'\n'+location.href+'\n'+(top.location.href!=location.href)+'\n'+(window.top!=window.window));
- if(window.top!=window.window){//top.location.href!=location.href
+	if(false){
+		 alert(window.name);
+		 for(var i=0;i<window.frames.length;i++)alert(window.frames[i].name);
+		 alert(top.location.href+'\n'+location.href+'\n'+(top.location.href!=location.href)+'\n'+(window.top!=window.window));
+	}
+ if(//top.location.href!==location.href
+		 window.top!==window.window){
   window.top.location.replace(location.href);
   return;
  }
  var l,f;
- try{l=location.hash.slice(1);}catch(e){return;}	//	IE在about:blank的情況下呼叫網頁，網頁完全載入前location無法呼叫。例如從FireFox拉進IE時使用location.*有可能'沒有使用權限'，reload即可。
+	//	IE在about:blank的情況下呼叫網頁，網頁完全載入前location無法呼叫。例如從FireFox拉進IE時使用location.*有可能'沒有使用權限'，reload即可。
+ try{l=location.hash.slice(1);}catch(e){return;}
  if(typeof setFrameTargetSet!='object')setFrameTargetSet=library_namespace.null_Object();
  if(l)try{l=decodeURIComponent(l);}catch(e){l=unescape(l);}
- //location.hash='';	//	這一項會reload
- if( l && (f=(f=l.match(/([^\/]+)$/)?RegExp.$1:l)&&(f=f.match(/^([^?#]+)/)?RegExp.$1:f)&&(l in setFrameTargetSet)?setFrameTargetSet[f]:setFrameTarget) && f!=window.name && window.frames[f] && window.frames[f].location.href!=l )
-  //alert(l+'\n==>\n'+f),
-  window.open(l,f);//if((l=window.open(l,f).top).focus(),alert(l!=self.top),l!=self.top)self.top.close();//alert(l+'\n'+f),	//	moz需要等到frame load之後才能得到window.frames[f].location.href==l的結果，所以可以考慮作setTimeout的延遲。但是假如真的不是預設的page，這樣會造成多load一遍。
- //setTimeout('alert(window.frames["'+f+'"].location.href);',900);
+	//	這一項會reload
+ //location.hash='';
+ if( l && (f=(f=l.match(/([^\/]+)$/)?RegExp.$1:l)&&(f=f.match(/^([^?#]+)/)?RegExp.$1:f)&&(l in setFrameTargetSet)?setFrameTargetSet[f]:setFrameTarget) && f!=window.name && window.frames[f] && window.frames[f].location.href!=l ){
+	  if(false)alert(l+'\n==>\n'+f);
+	  window.open(l,f);//if((l=window.open(l,f).top).focus(),alert(l!=self.top),l!=self.top)self.top.close();//alert(l+'\n'+f),	//	moz需要等到frame load之後才能得到window.frames[f].location.href==l的結果，所以可以考慮作setTimeout的延遲。但是假如真的不是預設的page，這樣會造成多load一遍。
+ }
+ if(false)setTimeout('alert(window.frames["'+f+'"].location.href);',900);
 }
-/*
+/**
 	set window.top page to certain location
-	setTopP(location,search)
-	search===setTopP_doTest: do a test, return window.top不為指定頁?1:0
+
+	setTopP(location, search)
+
+	search === setTopP_doTest: do a test, return window.top不為指定頁?1:0
 */
-var setTopPDTopP,setTopP_doTest=.234372464;	//	default top page(file) path
+var setTopPDTopP,
+//default top page(file) path
+setTopP_doTest=.234372464;	
 //setTopP[generateCode.dLK]='dBasePath,getFN,setTopPDTopP,setTopP_doTest';
 function setTopP(l, s) {
 	if (!setTopPDTopP)
@@ -2639,7 +2705,7 @@ function setTopP(l, s) {
 	} catch (e) {
 		t = '';
 	}
-	// alert(t+'\n'+l+'\n'+(t!=l));
+	if(false) alert(t+'\n'+l+'\n'+(t!=l));
 	if (t != l && !(r.test(l) && ri.test(t)) && !(ri.test(l) && r.test(t)))
 		if (s === setTopP_doTest)
 			return 1;
@@ -2653,11 +2719,12 @@ function setTopP(l, s) {
 
 
 //	設在body.onload，改變IE中所有<a>在滑鼠移入移出時的 window.status
-var setAstatusOS;	//	old status,也可設定event.srcElement.ostatus等等，但考慮到將造成記憶體浪費…
+//old status,也可設定event.srcElement.ostatus等等，但考慮到將造成記憶體浪費…
+var setAstatusOS;
 //setAstatus[generateCode.dLK]='setAstatusOver,setAstatusOut';
 function setAstatus() {
 	if (library_namespace.is_WWW() && typeof window.event !== 'undefined' && typeof window.status === 'string'
-			//||typeof event.srcElement=='undefined'
+			//||typeof event.srcElement === 'undefined'
 		)
 		// 預防版本過低(4以下)的瀏覽器出現錯誤：event至IE4才出現
 		for_nodes(function(o) {
@@ -2675,7 +2742,9 @@ function setAstatusOver() {
 	}
 };
 function setAstatusOut() {
-	//var o=event.srcElement;if(typeof o.ostatus!='undefined'){window.status=o.ostatus;return true;}
+	if(false){
+		var o=event.srcElement;if(typeof o.ostatus!='undefined'){window.status=o.ostatus;return true;}
+	}
 	window.status = setAstatusOS;
 	return true;
 };
@@ -2719,17 +2788,17 @@ function table_list(data, table_element, header, do_clean) {
 	if (typeof table_element === 'string')
 		table_element = document.getElementById(table_element);
 
-	/*
-	//	in  Chrome/5.0.342.9 @ Ubuntu, 加了會出問題。
-	try{
-		if(l=table_element.getElementsByTagName('tbody'))
-			table_element=l[0];
-	}catch(e){}
-	*/
+	if(false){
+		//	in  Chrome/5.0.342.9 @ Ubuntu, 加了會出問題。
+		try{
+			if(l=table_element.getElementsByTagName('tbody'))
+				table_element=l[0];
+		}catch(e){}
+	}
 
 	if (do_clean)
 		_.remove_all_child(table_element);
-		/*
+	if(false){
 		try {
 			// moz
 			table_element.innerHTML = '';
@@ -2742,7 +2811,7 @@ function table_list(data, table_element, header, do_clean) {
 			} catch (e) {
 			}
 		}
-		*/
+	}
 
 	if (header)
 		add_list(header, 'th');
@@ -2768,7 +2837,7 @@ _// JSDT:_module_
 table_list = table_list;
 
 
-/*
+if(false){
 
 Array.from_table(CeL.get_file(file_name))
 //
@@ -2776,7 +2845,8 @@ Array.from_table(CeL.get_file(file_name))
 	// field === [ tr ];
 });
 
-*/
+}
+
 function Array_from_table(table_element, options) {
 	if (typeof table_element === 'string')
 		if (/<table\s/i.test(table_element)) {
@@ -2847,7 +2917,7 @@ library_namespace.set_method(Array, {
 });
 
 
-/*	Copy id(or object) to user's clipboard or Paste clipboard to id(or object).
+/**<code>	Copy id(or object) to user's clipboard or Paste clipboard to id(or object).
 
 	return the value set to clipboard
 	http://msdn.microsoft.com/workshop/author/dhtml/reference/objects/obj_textrange.asp
@@ -2860,24 +2930,32 @@ library_namespace.set_method(Array, {
 	clipboardFunction(1,'divObj name')	Copy divObj to clipboard/set clipboard
 	clipboardFunction(2,'dcfvdf')	set clipboard by string
 	clipboardFunction(3,divObj)	Copies divObj to the clipboard/set clipboard and then deletes it. *return the value set to clipboard
-*/
+</code>*/
 var clipboardFunctionObj = 'clipboardFunctionDiv';
 //clipboardFunction[generateCode.dLK]='clipboardFunctionObj';
-function clipboardFunction(m,o){	//	method,object/(string)set value
+//	method,object/(string)set value
+function clipboardFunction(m,o){
 if(window.navigator.appName=="Microsoft Internet Explorer"){
  var t,O,tN;
  if(m==2)t=o,o='';else if(typeof o=='string')o=document.getElementById(o);
  //	try .nodeName instead of .tagName	http://twpug.net/modules/smartsection/item.php?itemid=35
- if((typeof o!='object'||!o||(tN=(o.tagName||'').toLowerCase())!='textarea'&&tN!='select'&&tN!='option'&&(tN!='input'||o.type!='text')&&(O=o))&&!(o=document.getElementById(clipboardFunctionObj)))	//	textarea,select,option,input需使用.value!	o.type!='INPUT'||o.type!='text'：這樣大概也沒copy的價值了吧，應該會出現錯誤。
-  try{document.body.appendChild(o=document.createElement('textarea')),o.id=clipboardFunctionObj;}catch(e){return;}	//	只對IE5.5之後有用
- //var t=document.body.createTextRange();t.moveToElementText(o);
+ if((typeof o!='object'||!o||(tN=(o.tagName||'').toLowerCase())!='textarea'&&tN!='select'&&tN!='option'&&(tN!='input'||o.type!='text')&&(O=o))&&!(o=document.getElementById(clipboardFunctionObj)))
+		//	textarea,select,option,input需使用.value!	o.type!='INPUT'||o.type!='text'：這樣大概也沒copy的價值了吧，應該會出現錯誤。
+  try{
+		//	只對IE5.5之後有用
+	  document.body.appendChild(o=document.createElement('textarea')),o.id=clipboardFunctionObj;}catch(e){return;}
+ //var t=document.body.createTextRange(); t.moveToElementText(o);
  if(m==2)o.value=t;else{if(O)o.value=O.innerText;if(m==3)t=o.value;}
- if(o.id==clipboardFunctionObj)o.style.display='block';	//	得出現才能execCommand()
+ if(o.id==clipboardFunctionObj)
+		//	得出現才能execCommand()
+	 o.style.display='block';
  o.createTextRange()//TextRange Object
 	.execCommand(m?m==3?"Cut":"Copy":"Paste");
  if(o.id==clipboardFunctionObj)o.style.display='none';
- //t.execCommand("ForeColor","false","plum"),t.execCommand("BackColor","false","glay");
- //alert(o.tagName+'\n'+o.id+'\n['+o.innerText+']\n'+(m?m==3?"Cut":"Copy":"Paste"));
+ if(false){
+	 t.execCommand("ForeColor","false","plum"),t.execCommand("BackColor","false","glay");
+	 alert(o.tagName+'\n'+o.id+'\n['+o.innerText+']\n'+(m?m==3?"Cut":"Copy":"Paste"));
+ }
  if(m!=3)t=o.value;
  if(O)O.innerText=o.value;
  return t;
@@ -2888,40 +2966,42 @@ if(window.navigator.appName=="Microsoft Internet Explorer"){
 //	http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/06/21/4850.aspx
 //	http://www.webdeveloper.com/forum/archive/index.php/t-170520.html
 //	http://forum.moztw.org/viewtopic.php?p=131407
-/*
-if(window.navigator.appName=="Netscape"){	//	…不能用！
- if(typeof o=='string')o=document.getElementById(o);
- if(m==2||!o||o.tagName!='TEXTAREA'&&o.tagName!='SELECT'&&o.tagName!='OPTION'&&(o.tagName!='INPUT'||o.type!='text'))return;	//	無法設定
+if(false){
+	//	…不能用！
+	if(window.navigator.appName=="Netscape"){
+		 if(typeof o=='string')o=document.getElementById(o);
+		 if(m==2||!o||o.tagName!='TEXTAREA'&&o.tagName!='SELECT'&&o.tagName!='OPTION'&&(o.tagName!='INPUT'||o.type!='text'))return;	//	無法設定
 
- if(!Zwischenablage){	//	初始設定
-  netscape.security.PrivilegeManager.enablePrivilege("UniversalSystemClipboardAccess");
-  //var fr=new java.awt.Frame();
-  Zwischenablage=new java.awt.Frame().getToolkit().getSystemClipboard();
- }
+		 if(!Zwischenablage){
+			 //	初始設定
+		  netscape.security.PrivilegeManager.enablePrivilege("UniversalSystemClipboardAccess");
+		  //var fr = new java.awt.Frame();
+		  Zwischenablage=new java.awt.Frame().getToolkit().getSystemClipboard();
+		 }
 
- if(m==0){
-  var Inhalt=Zwischenablage.getContents(null);
-  if(Inhalt!=null)o.value=Inhalt.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor);
- }
- else{	//	m=1,3
-  o.select();
-  Zwischenablage.setContents(new java.awt.datatransfer.StringSelection(o.value),null);
- }
+		 if(m==0){
+		  var Inhalt=Zwischenablage.getContents(null);
+		  if(Inhalt!=null)o.value=Inhalt.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor);
+		 }
+		 else{
+			 //	m=1,3
+		  o.select();
+		  Zwischenablage.setContents(new java.awt.datatransfer.StringSelection(o.value),null);
+		 }
 
- return o.value;
+		 return o.value;
+		}
 }
-*/
 }	//	clipboardFunction()
 
 
 
 _// JSDT:_module_
 .
-Clipboard = function() {
+Clipboard = Clipboard;
+function Clipboard() {
 };
 
-_// JSDT:_module_
-.
 Clipboard.get = function() {
 	var clip;
 	if (clip = window.clipboardData) {
@@ -2930,8 +3010,6 @@ Clipboard.get = function() {
 };
 
 
-_// JSDT:_module_
-.
 //	2010/1/15 00:17:38
 //	IE, FF only
 //	http://www.jeffothy.com/weblog/clipboard-copy/
@@ -2957,8 +3035,9 @@ Clipboard.set = function(text) {
 					.copyString(text);
 		});
 	}
-	//else if (navigator.userAgent.indexOf("Opera") != -1)
-	//	window.location = text;
+	else if (navigator.userAgent.indexOf("Opera") != /*NOT_FOUND*/-1){
+		//	window.location = text;
+	}
 };
 
 
@@ -2974,7 +3053,7 @@ clipB.start_op = function() {
 		document.body.appendChild(o = document.createElement('div'));
 		// for modify
 		o.contentEditable = true;
-		// o.style.height=0;o.style.width=0;
+		// o.style.height = o.style.width = 0;
 		this.temp_obj = o;
 	}
 
@@ -3086,7 +3165,7 @@ set_cookie = function (name, value, config) {
 		//	預設傳到 default
 		config = _s.c;
 	else if (!library_namespace.is_Object(config))
-		//	document.cookie 不須每次詳細設定，但這樣可以選擇 {} / {..} / true
+		//	document.cookie 不須每次詳細設定，但這樣可以選擇 {} / {...} / true
 		config = Object.assign(library_namespace.null_Object(), _s.c);
 
 	if (library_namespace.is_Object(name)) {
@@ -3096,8 +3175,9 @@ set_cookie = function (name, value, config) {
 	}
 
 	try {
-		//	This will cause error in Phoenix 0.1:
-		// Error: uncaught exception: [Exception... "Component returned failure code: 0x8000ffff (NS_ERROR_UNEXPECTED) [nsIDOMNavigator.cookieEnabled]"  nsresult: "0x8000ffff (NS_ERROR_UNEXPECTED)"  location: "JS frame :: http://lyrics.meicho.com.tw/game/game.js :: set_cookie :: line 737"  data: no]
+		/**<code>	This will cause error in Phoenix 0.1:
+		Error: uncaught exception: [Exception... "Component returned failure code: 0x8000ffff (NS_ERROR_UNEXPECTED) [nsIDOMNavigator.cookieEnabled]"  nsresult: "0x8000ffff (NS_ERROR_UNEXPECTED)"  location: "JS frame :: http://lyrics.meicho.com.tw/game/game.js :: set_cookie :: line 737"  data: no]
+		</code>*/
 		if (window.navigator && !window.navigator.cookieEnabled)
 			throw 1;
 	} catch (e) {
@@ -3105,32 +3185,40 @@ set_cookie = function (name, value, config) {
 		return;
 	}
 
-	//library_namespace.debug('set_cookie: ' + name + ' = [' + value + ']', 1);
-	if (name === flag.set_root)
+	if(false)library_namespace.debug('set_cookie: ' + name + ' = [' + value + ']', 1);
+	if (name === flag.set_root){
 		// 設給本 host 全部使用
-		name = 'path', value = '/';
-	else if (name === flag.use_domain)
+		name = 'path'; value = '/';
+	}
+	else if (name === flag.use_domain){
 		// 設給本 domain 使用，尚不是很好的判別法。
-		name = 'domain', value = location.hostname.replace(/^[^.]+\./, '.');
-	else if (name === flag.forever)
+		name = 'domain'; value = location.hostname.replace(/^[^.]+\./, '.');
+	}
+	else if (name === flag.forever){
 		// 永久儲存，date之time值不能>1e16
-		name = 'expires', value = 1e14;
-	else if (name === flag.moment)
+		name = 'expires'; value = 1e14;
+	}
+	else if (name === flag.moment){
 		// 準確設定這之後只在這次瀏覽使用這些cookie
-		name = 'expires', value = -1;
+		name = 'expires'; value = -1;
+	}
 
-	// detect special config / 特殊設定
 	if (typeof name === 'string'
+		// detect special config / 特殊設定
 			&& (m = name.match(/^(expires|path|domain|secure)$/i))) {
 		name = m[1];
 		if (name === 'expires' && typeof value === 'number' && value) {
-			//if(value<8000)value*=86400000;//幾日，86400000=1000*60*60*24
-			//value=(new Date(value<3e13?(new Date).getTime()+value:1e14)).toUTCString();	//	3e13~千年
+			if(false){
+				//幾日，86400000=1000*60*60*24
+				if(value<8000)value*=86400000;
+				//	3e13~千年
+				value=(new Date(value<3e13?(new Date).getTime()+value:1e14)).toUTCString();
+			}
 			value = (new Date(value < 1e14 ? value < 0 ? 0 : (new Date).getTime()
 					+ (value < 8e3 ? value * 86400000 : value) : 1e14)).toUTCString();
 		}
 		config[name] = value;
-		//library_namespace.debug('set_cookie: ' + name + ' = [' + value + ']', 1);
+		if(false)library_namespace.debug('set_cookie: ' + name + ' = [' + value + ']', 1);
 		return name + '=' + value + ';';
 
 	} else {
@@ -3142,27 +3230,31 @@ set_cookie = function (name, value, config) {
 				+ (config.secure ? 'secure;' : '');
 
 		if (name === flag.delete_all || name === flag.delete_all_root) {
-			/*
-			   var c=document.cookie;
-			   while(c.match(/([^=;]+)(=[^;]{0,})?/)){
-			    c=c.substr(RegExp.lastIndex);
-			    if(!/expires/i.test(RegExp.$1))document.cookie=RegExp.$1+'=;'+set;
-			   }
-			*/
+			if(false){
+				   var c=document.cookie;
+				   while(c.match(/([^=;]+)(=[^;]{0,})?/)){
+				    c=c.substr(RegExp.lastIndex);
+				    if(!/expires/i.test(RegExp.$1))document.cookie=RegExp.$1+'=;'+set;
+				   }
+			}
 			for ( var p = document.cookie.split(';'), n, l = p.length, i = 0; i < l; i++)
 				if (!/^\s*expires\s*$/i.test(n = c[i].split('=')[0]))
 					document.cookie = n + '=;' + set;
 			return document.cookie;
 
 		} else {
+			if(false){
 			//	可用escape(value)/unescape()來設定，速度會比較快，但佔空間。
-			//value=name+'='+(typeof value=='undefined'?'':dQuote(''+value).replace(/([\01-\11\13-\14\16-\40=;])/g,function($0,$1){var c=$1.charCodeAt(0),d=c.toString(16);return'\\x'+(c<16?'0':'')+d;}))+';'+set;
+			value=name+'='+(typeof value=='undefined'?'':dQuote(''+value).replace(/([\01-\11\13-\14\16-\40=;])/g,function($0,$1){var c=$1.charCodeAt(0),d=c.toString(16);return'\\x'+(c<16?'0':'')+d;}))+';'+set;
+			}
 			//	2004/11/23 21:11	因為cookie儲存成中文時會fault,所以只好還是使用escape()
 			value = escape(name) + '='
 					+ (typeof value == 'undefined' ? '' : escape(value)) + ';'
 					+ set;
-			//library_namespace.debug('set_cookie: [' + value + ']', 1);
-			//library_namespace.debug('set_cookie: [' + document.cookie + ']', 1);
+			if(false){
+			library_namespace.debug('set_cookie: [' + value + ']', 1);
+			library_namespace.debug('set_cookie: [' + document.cookie + ']', 1);
+			}
 			// 長度過長時（約4KB）會清空，連原先的值都不復存在！
 			return value.length < 4096 && (document.cookie = value) ? value
 					: -1;
@@ -3192,7 +3284,7 @@ set_cookie.c = {
 		secure : 0
 };
 
-/*
+/**<code>
 flag=0: only get the lastest matched value;
 flag=1: only get all matched in a array;
 other flag: auto detect by name
@@ -3205,7 +3297,7 @@ get_cookie('nn[^=]*');
 get_cookie();
 
 因為 cookie 較容易遭到竄改或是出問題，建議設定 verify。
-*/
+</code>*/
 /**
  * 取得document.cookie中所需之值。<br />
  * 只能取得相同domain，有設定的path之cookie。
@@ -3246,7 +3338,7 @@ function get_cookie(name, flag, verify) {
 
 		if (false) {
 			if ((m = c[2])
-			// 將值為".."或'..'轉為引號中表示之值
+			// 將值為"..."或'...'轉為引號中表示之值
 			&& ((c = m.charAt(0)) === '"' || c === "'") && c === m.slice(-1))
 				try {
 					library_namespace.debug(
@@ -3319,15 +3411,15 @@ function get_comments(node, level, return_type) {
 	node = node.childNodes;
 	for (; i < node.length; i++) {
 		d = node[i];
-		//if(d.nodeType==8)alert(d.tagName+'\n'+d.nodeName+'\n'+d.nodeType+(d.nodeValue?'\n'+d.nodeValue.slice(0,30):''));
+		if(false)if(d.nodeType==8)alert(d.tagName+'\n'+d.nodeName+'\n'+d.nodeType+(d.nodeValue?'\n'+d.nodeValue.slice(0,30):''));
 		if (d.tagName && d.tagName === '!'){
 			_f.a.push(return_type ? d : d.text.replace(/^<!(--)?/, '').replace(
 					/(--)?>$/, ''));
-			//alert(d.tagName+'\n'+d.text.slice(0,30));
+			if(false)alert(d.tagName+'\n'+d.text.slice(0,30));
 		}
 		else if (d.nodeType == 8){
 			_f.a.push(return_type ? d : d.nodeValue);
-			//alert('*	'+_f.a.length+'\n'+d.nodeValue.slice(0,30));
+			if(false)alert('*	'+_f.a.length+'\n'+d.nodeValue.slice(0,30));
 			//	NS	http://allabout.co.jp/career/javascript/closeup/CU20040307/index.htm?FM=cukj&GS=javascript
 		}
 		//	http://www.w3.org/TR/DOM-Level-2-Core/core.html
@@ -3337,14 +3429,14 @@ function get_comments(node, level, return_type) {
 	}
 	return _f.a;
 }
-//window.onload=function(){get_comments();alert(get_comments.a.length);for(var i=0;i<get_comments.a.length;i++)alert('['+get_comments.a[i]+']');};
+if(false){window.onload=function(){get_comments();alert(get_comments.a.length);for(var i=0;i<get_comments.a.length;i++)alert('['+get_comments.a[i]+']');};}
 
 
 
 
 
 
-/*	background image load
+/**<code>	background image load
 	**	本函數會倒著load！請將優先度高的排後面！
 
 new Image看起來不是個好方法…
@@ -3370,23 +3462,23 @@ Javascript uses automatic garbage collection. Set to [null] as well.	http://www.
 http://laurens.vd.oever.nl/weblog/items2005/closures/	http://www.blogjava.net/tim-wu/archive/2006/05/29/48729.html
 IE 6對於純粹的Script Objects間的Circular References是可以正確處理的，可惜它處理不了的是JScript與Native Object(例如Dom、ActiveX Object)之間的Circular References。
 P.S. 2007/11/11 似乎已修正？
-*/
+</code>*/
 
-/*	bgLoadImg() Cookie版	2006/3/3 20:08
+/**<code>	bgLoadImg() Cookie版	2006/3/3 20:08
 	**	本函數正著load！請將優先度高的排前面！
 
 	To use:
 	,set_cookie,get_cookie,bgLoadImgId,bgLoadImgI,bgLoadImg
-	bgLoadImgId='id_of_this_session',bgLoadImgA='img_url1,img_url2,..';	//	** MUST string!
+	bgLoadImgId='id_of_this_session',bgLoadImgA='img_url1,img_url2,...';	//	** MUST string!
 	function getObjURL(bgLoadImgA_element){return the real URL of bgLoadImgA_element;}
 	window.onload="bgLoadImg();"
 
 var bgLoadImgId='bg',bgLoadImgI;	//	loaded index
-*/
+</code>*/
 //bgLoadImg[generateCode.dLK]='bgLoadImgId,bgLoadImgI';
 function bgLoadImg(i) {
 	var bgLoadImgM = 'bgLoadImgOK_' + bgLoadImgId;
-	// alert('_'+bgLoadImgM+','+bgLoadImgI)
+	if(false) alert('_'+bgLoadImgM+','+bgLoadImgI);
 	if (typeof bgLoadImgA != 'object') {
 		// needless
 		if (!bgLoadImgA || location.protocol === 'file:')
@@ -3400,7 +3492,8 @@ function bgLoadImg(i) {
 		// initialization
 		bgLoadImgA = bgLoadImgA.replace(/,\s*,/g, ',').split(',');
 		if (typeof get_cookie != 'function'
-			|| get_cookie(bgLoadImgM) != bgLoadImgA.length) { // 全部OK後就別再來了。
+			 // 全部OK後就別再來了。
+			|| get_cookie(bgLoadImgM) != bgLoadImgA.length) {
 			if (isNaN(bgLoadImgI))
 				bgLoadImgI = 0;
 			if (typeof r != 'string') {
@@ -3411,29 +3504,35 @@ function bgLoadImg(i) {
 			return;
 	}
 
- //if(!isNaN(i)&&!bgLoadImgA[i].complete);	//	timeout
- if(!isNaN(i)&&i<bgLoadImgI-1)return;	//	防止timeout的備援
+	//	timeout
+ if(false)if(!isNaN(i)&&!bgLoadImgA[i].complete);
+	//	防止timeout的備援
+ if(!isNaN(i)&&i<bgLoadImgI-1)return;
 
  //	標記已load counter
  //	假如一個圖一個圖標記，set_cookie在超過二十個之後好像就沒效了…被限制？
  _.set_cookie(bgLoadImgM,bgLoadImgI);
 
- if(bgLoadImgI==bgLoadImgA.length)bgLoadImgI++,setTimeout('bgLoadImg();',500);	//	馬上進入判別，最後一個尚未complete
+ if(bgLoadImgI==bgLoadImgA.length){
+		//	馬上進入判別，最後一個尚未complete
+	 bgLoadImgI++;setTimeout('bgLoadImg();',500);
+ }
  else if(bgLoadImgI<bgLoadImgA.length){
   var bgLoadImgURL=typeof getObjURL=='function'?getObjURL(bgLoadImgA[bgLoadImgI]):bgLoadImgA[bgLoadImgI];
-  //setTimeout('bgLoadImg('+bgLoadImgI+')',5e3);	//	set timeout
+	//	set timeout
+  if(false)setTimeout('bgLoadImg('+bgLoadImgI+')',5e3);
   bgLoadImgA[bgLoadImgI++]=i=new Image(1,1);
 	//	這是個多執行緒技巧：假如使用onload=bgLoadImg，有可能在下一指令碼前就已onload，這樣會造成Stack overflow
 	i.onload=function(){setTimeout('bgLoadImg();',0);},
 	i.src=bgLoadImgURL;
-  window.status='bgLoadImg ['+bgLoadImgURL+']: '+bgLoadImgI+' / '+bgLoadImgA.length+'..';
+  window.status='bgLoadImg ['+bgLoadImgURL+']: '+bgLoadImgI+' / '+bgLoadImgA.length+'...';
  }else{
-/*
-  var f=[];
-  for(i=0;i<bgLoadImgA.length;i++)if(!bgLoadImgA[i].complete)f.push(bgLoadImgA[i].src);
-  if(f.length)_.set_cookie(bgLoadImgM,0);
-  window.status='bgLoadImg '+(f.length?'end: failed '+f.length+' / '+bgLoadImgA.length+' ('+f+')':'complete!'),bgLoadImgA=0;
-*/
+	 if(false){
+		  var f=[];
+		  for(i=0;i<bgLoadImgA.length;i++)if(!bgLoadImgA[i].complete)f.push(bgLoadImgA[i].src);
+		  if(f.length)_.set_cookie(bgLoadImgM,0);
+		  window.status='bgLoadImg '+(f.length?'end: failed '+f.length+' / '+bgLoadImgA.length+' ('+f+')':'complete!'),bgLoadImgA=0;
+	 }
 	 var f = 0;
 	 for (i = 0; i < bgLoadImgA.length; i++)
 		 if (!bgLoadImgA[i].complete)
@@ -3448,7 +3547,7 @@ function bgLoadImg(i) {
 
 
 
-/*	儲存/回存使用者輸入之form資料用。	2004/11/23 21:38
+/**<code>	儲存/回存使用者輸入之form資料用。	2004/11/23 21:38
 		*已測試過text(select-one,textarea,password,hidden)/radio/checkbox/select-multiple
 	formIdA:	form id or id array.不輸入或輸入'',0等表示所有的form
 	expires:	不輸入或輸入''表示回存，輸入0會以預設days代替，輸入<0會刪除掉cookie中這項設定。
@@ -3465,7 +3564,7 @@ cookieForm(0,-1);	消除所有*版面上現有form*之紀錄
 TODO:
 排除名單
 對於較多的entries,也許需要使用到Object[key]來代替String.indexOf(key)
-*/
+</code>*/
 //cookieForm[generateCode.dLK]='get_cookie,set_cookie';
 function cookieForm(formIdA, expires, targetItemA) {
 	if (typeof document !== 'object')
@@ -3480,18 +3579,19 @@ function cookieForm(formIdA, expires, targetItemA) {
 		for ( var j = 0, c = o.childNodes, sp = ';', e, cn, cv, tp; j < c.length; j++) {
 			if ((e = c[j]).hasChildNodes)
 				handle_Object(e);
-			if (	//cv=e.tagName=='TEXTAREA'?e.innerHTML:e.value
+			if (	//cv=e.tagName==='TEXTAREA'?e.innerHTML:e.value
 					//	TEXTAREA,SELECT,OPTION,INPUT需使用.value!
 					e.name && typeof e.value != 'undefined') {
-				// if(!e.value&&e.text)e.value=e.text; // 假如沒有.value,利用.text代替
+				 // 假如沒有.value,利用.text代替
+				if(false) if(!e.value&&e.text)e.value=e.text;
 				if (targetItemA)
 					if (targetItemA.unselect && targetItemA[e.name]
 							|| !targetItemA.unselect && !targetItemA[e.name])
 						continue;
-				// alert((isNaN(expires)?'load':'save')+'\n'+n+'::'+e.name+'['+e.type+']='+e.value);
+				if(false) alert((isNaN(expires)?'load':'save')+'\n'+n+'::'+e.name+'['+e.type+']='+e.value);
 				cn = 'cookieForm_' + n + '_' + e.name;
 				cv = e.value;
-				// e.tagName=='INPUT'?e.type.toLowerCase():'';
+				if(false) e.tagName=='INPUT'?e.type.toLowerCase():'';
 				tp = e.type.toLowerCase();
 				if (isNaN(expires)) {
 					if (typeof (cn = get_cookie(cn)) !== 'undefined') {
@@ -3514,13 +3614,15 @@ function cookieForm(formIdA, expires, targetItemA) {
 							continue;
 					} else if (tp == 'checkbox')
 						if (cv.indexOf(sp) != -1)
-							//	value不能包含sp	checkbox之cookie形式:[;value1;;value2;value3;;value4;]:value1,3:checked
+							//	value不能包含sp
+							//	checkbox之cookie形式:[;value1;;value2;value3;;value4;]:value1,3:checked
 							continue;
 						else
 							cv = ((tp = get_cookie(cn))
 									&& tp.indexOf(sp + cv + sp) == -1 ? tp : sp)
 									+ cv + sp + (e.checked ? sp : '');
-					//else if(tp=='select-one')cv=e.options[e.selectedIndex].value;	//	可省略!	用.selectedIndex會比較快，但更改原文件可能會造成index錯誤
+//					可省略!	用.selectedIndex會比較快，但更改原文件可能會造成index錯誤
+					//else if(tp=='select-one')cv=e.options[e.selectedIndex].value;	
 					else if (tp == 'select-multiple') {
 						cv = sp + cv + sp;
 						for ( var i = e.selectedIndex + 1; i < e.options.length; i++)
@@ -3598,7 +3700,7 @@ function loginFTP(name, password, path, hostname) {
 			;
 
 	// 用location.href不能進入資料夾檢視功能.
-	// location.href=password;
+	// location.href = password;
 	window.open(password, 'ftpW');
 }
 
@@ -3671,7 +3773,7 @@ _// JSDT:_module_
 get_element = get_element;
 
 
-/*	以外掛的reference page配置data object	2004/6/25 21:01
+/**<code>	以外掛的reference page配置data object	2004/6/25 21:01
 
 	toUse:
 	準備好reference.htm
@@ -3680,58 +3782,94 @@ get_element = get_element;
 	function setupPageR()	initial after load of reference page
 
 	如上，再使用 get_element() 即可得到 reference.htm 中的 obj
-*/
-var referenceDoc,loadReferenceDone;//,loadReferenceCount;
+</code>*/
+var referenceDoc,loadReferenceDone
+//,loadReferenceCount
+;
 //loadReference[generateCode.dLK]='get_element,referenceDoc,loadReferenceDone,parseFunction';
 function loadReference(referenceURL,iframeId){
  if(loadReferenceDone||typeof location!='object'||!location.protocol||location.protocol=='https:')return;	//	https會拒絕存取，所以直接放棄。
- //if(loadReferenceDone)return;	//	https會拒絕存取，所以直接放棄。
+ if(loadReferenceDone){
+		//	https會拒絕存取，所以直接放棄。
+	 return;
+ }
  var o=get_element(iframeId||'reference');
  if(typeof referenceDoc=='object' && typeof referenceDoc.document=='object' && referenceDoc.document){	//	referenceDoc is still contentWindow here.	typeof referenceDoc.document:預防使用https時產生不能讀取的權限問題。
-  referenceDoc=o.contentWindow.document;//referenceDoc.document;	//	遺憾：在舊版IE不能用後者。也許是因為舊版IE連contentWindow都會重造。
-  o=referenceDoc.body;//alert(o.innerHTML.length+'\n'+o.innerHTML);
+		//	遺憾：在舊版IE不能用後者。也許是因為舊版IE連contentWindow都會重造。
+	 referenceDoc=
+		//referenceDoc.document;
+		 o.contentWindow.document;
+  o=referenceDoc.body;
+  if(false)alert(o.innerHTML.length+'\n'+o.innerHTML);
   if(o/*&&referenceDoc.body.innerHTML=='string'*/&&o.innerHTML.length){
-   //alert(typeof o+','+(o?typeof o.innerHTML+'('+o.innerHTML.length+')\n'+o.innerHTML.slice(0,200):'(null)'));
+	  if(false)alert(typeof o+','+(o?typeof o.innerHTML+'('+o.innerHTML.length+')\n'+o.innerHTML.slice(0,200):'(null)'));
    //	before IE5, the first argument must be a string.
    //	setTimeout(function_handler,..) 不一定代表setTimeout('function_handler();',..)，可能會傳入奇異的引數！
    if(typeof setupPageR=='function')setTimeout(setupPageR,9);
-   loadReferenceDone=1;//window.status='reference page load OK!';alert(window.status);
+   loadReferenceDone=1;if(false){window.status='reference page load OK!';alert(window.status);}
   }else{
-   //try{window.status='Wait while reference page loading..3',alert(window.status+'\nURL:'+o.contentWindow.document.src+'\ncontent('+o.contentWindow.document.body.innerHTML.length+'):\n'+o.contentWindow.document.body.innerHTML);}catch(e){}
-   //if(!--loadReferenceCount)history.go(0);
-   setTimeout(function(){loadReference();},200);
+	  if(false){try{window.status='Wait while reference page loading..3',alert(window.status+'\nURL:'+o.contentWindow.document.src+'\ncontent('+o.contentWindow.document.body.innerHTML.length+'):\n'+o.contentWindow.document.body.innerHTML);}catch(e){}
+   if(!--loadReferenceCount)history.go(0);
+	  }
+	  setTimeout(function(){loadReference();},200);
   }
   return;
  }
- if(typeof document!='object'||!document.body){	//	document尚未load
+ if(typeof document!='object'||!document.body){
+	 //	document尚未load
   setTimeout(function(){loadReference();},90);
   return 1;
  }
- //o=get_element(iframeId||'reference');	//	原來把設定放在這，不過反正都要在前面用到…
- if(!o||(o.tagName||'').toLowerCase()!='iframe'){loadReferenceDone=2;return;}	//	iframe不存在
- if(!o.src)o.style.display='none',//'block',//
-  o.src=referenceURL;	//	for game.js: typeof relatePath=='function'?relatePath(0,'cgi-bin/game/data/reference.htm'):'data/reference.htm'
-
- if(typeof o.contentWindow=='object'&&typeof o.contentWindow.document=='object'){	//	typeof o.contentWindow=='object'&&: for JS5	應該不能用o.contentWindow吧？怕o.contentWindow就算沒能載入文件，也會被定義
+	//	原來把設定放在這，不過反正都要在前面用到…
+ //o=get_element(iframeId||'reference');
+ if(!o||(o.tagName||'').toLowerCase()!='iframe'){
+		//	iframe不存在
+	 loadReferenceDone=2;return;}
+ if(!o.src){o.style.display=
+	//'block'
+	 'none';
+ if(false){
+		//	for game.js:
+typeof relatePath=='function'?relatePath(0,'cgi-bin/game/data/reference.htm'):'data/reference.htm'
+ }
+  o.src=referenceURL;
+ }
+ 
+ if(
+		 //	 for JS5	應該不能用o.contentWindow吧？怕o.contentWindow就算沒能載入文件，也會被定義
+		 typeof o.contentWindow=='object'&&typeof o.contentWindow.document=='object'){
   //	Martin Honnen wrote: If you load a new document then certainly the browser has to create a new document object.
-  referenceDoc=o.contentWindow;//.document;	o.contentWindow.document still index to a blank window here, when new document load, this point to document won't work.
+	  //o.contentWindow.document still index to a blank window here, when new document load, this point to o.document won't work.
+  referenceDoc=
+	  o.contentWindow;
 
-  //window.status='Wait while reference page loading..2';alert(window.status+'\nURL:'+o.src);
-  setTimeout(function(){loadReference();},20);//loadReferenceCount=9;
+  if(false){window.status='Wait while reference page loading..2';alert(window.status+'\nURL:'+o.src);}
+  setTimeout(function(){
+	//loadReferenceCount=9;
+	  loadReference();},20);
  }else{
-  //if(location.protocol=='https:')return;	//	https會拒絕存取，所以直接放棄。最晚在這就得判別
-  if(!referenceDoc)referenceDoc=40;	//	尚未load完成時作倒數計時..假如加上if(o.contentWindow)，這方法正確嗎?
-  //else if(isNaN(referenceDoc))return 3;	//	異常(for https):不能用else if(isNaN(referenceDoc))
+	 if(false){
+			//	https會拒絕存取，所以直接放棄。最晚在這就得判別
+		  if(location.protocol=='https:')return;
+	 }
+  if(!referenceDoc)
+		//	尚未load完成時作倒數計時..假如加上if(o.contentWindow)，這方法正確嗎?
+	  referenceDoc=40;
+  else if(false){
+	 //	異常(for https):不能用else if(isNaN(referenceDoc))
+	  if(isNaN(referenceDoc))return 3;	
+  }
   try{
    if(referenceDoc--){
-    //window.status='Wait while reference page loading..';alert(window.status);
+    if(false){window.status='Wait while reference page loading...';alert(window.status);}
     setTimeout(function(){loadReference();},300);return 2;
    }else{
-    //window.status='reference page load FAILED!';alert(window.status);
+	   if(false){window.status='reference page load FAILED!';alert(window.status);}
     return 4;
    }
   }catch(e){
-   return 5;	//	Error: uncaught exception: Permission denied to get property HTMLDocument.document
+		//	Error: uncaught exception: Permission denied to get property HTMLDocument.document
+   return 5;
   }
  }
 }
@@ -3744,20 +3882,23 @@ function transRefObj(id,id2,force){
  if( o && (force||!o.innerHTML)
 	&& (p=typeof id2=='object'?id2:get_element(id2,get_element.f.refOnly)) && (force||p.innerHTML) )
   try{
-	//alert('transRefObj: DO '+id2+' -> '+id+'('+(force?'':'not ')+'force)\n');
+	  if(false){alert('transRefObj: DO '+id2+' -> '+id+'('+(force?'':'not ')+'force)\n');}
 	o.appendChild(p.cloneNode(true));
   }catch(e){
-/*
+/**<code>
    try{
 	//alert('transRefObj: try2');
 	var i=0;while(i<p.childNodes.length)o.appendChild(p.childNodes[i++].cloneNode(true));
    }catch(e){
-*/
+</code>*/
 	//alert('transRefObj: try3');
-	o.innerHTML=p.innerHTML;//p.cloneNode(true);	//serialize(p)	serialize方法把一个node串行化成字符串。在ie环境的具体实现上，对于XmlDocument，使用node.xml，对于HtmlDocument，使用node.outerHTML。	http://my.opera.com/gisor/blog/index.dml/tag/SVG
-/*
-   }
-*/
+		//serialize(p)
+	  //serialize方法把一个node串行化成字符串。在ie环境的具体实现上，对于XmlDocument，使用node.xml，对于HtmlDocument，使用node.outerHTML。	http://my.opera.com/gisor/blog/index.dml/tag/SVG
+	  //p.cloneNode(true);
+	  o.innerHTML=p.innerHTML;
+/**<code>
+   } // try{try2}catch(e){}
+</code>*/
   }
  return o;
 }
@@ -3801,17 +3942,20 @@ function setAutoScroll(interval, force) {
 		if (setAutoScrollTimer)
 			return;
 		setAutoScrollTimer = window.setInterval(
-				//window.scrollTo(0,document.body.scrollTop+1);
-				'window.scrollBy(0,1);',
+				function() {
+					if(false)window.scrollTo(0,document.body.scrollTop+1);
+					window.scrollBy(0,1);					
+				}
+,
 				setAutoScrollInterval);
 	};
 }
 
 
-/*	捲到設定的定點，因為某些多工慢速環境中只設定一次沒有用，所以…
+/**<code>	捲到設定的定點，因為某些多工慢速環境中只設定一次沒有用，所以…
 	下面一行調到檔案頭
 var scrollToXY,scrollToInterval,scrollToOK;
-*/
+</code>*/
 //scrollTo[generateCode.dLK]='scrollToXY,scrollToInterval,scrollToOK,get_window_status';
 function scrollTo(y, x) {
 	// initial
@@ -3844,19 +3988,20 @@ function scrollTo(y, x) {
 						scrollToXY.y);
 			}, 9);
 	var _w = get_window_status();
-	// status=scrollToInterval+','+scrollToOK+';'+_w.scrollLeft+','+scrollToXY.x+';'+_w.scrollTop+','+scrollToXY.y;
+	if(false) status=scrollToInterval+','+scrollToOK+';'+_w.scrollLeft+','+scrollToXY.x+';'+_w.scrollTop+','+scrollToXY.y;
 	if (_w.scrollLeft == scrollToXY.x
 			&& _w.scrollTop == scrollToXY.y) {
 		if (!--scrollToOK && scrollToInterval)
 			window.clearInterval(scrollToInterval),
 			scrollToInterval = 0;
-	} else if (!scrollToInterval)
+	} else if (!scrollToInterval){
 		//	預防萬一：總會跳回原處
 		scrollToInterval = window.setInterval(
-				scrollTo, 90), scrollToOK = 3;
+				scrollTo, 90); scrollToOK = 3;
+	}
 }
 
-/*	doAlert() & doAlertAccess：彈出使用注意事項視窗
+/**<code>	doAlert() & doAlertAccess：彈出使用注意事項視窗
 	下面一行調到檔案頭
 var doAlertDivName,doAlertOldScrollLocation;
 
@@ -3901,7 +4046,7 @@ function init(){doAlertInit('kousi');}
 正文
 
 </body>
-*/
+</code>*/
 //確保置中
 function doAlertResize() {
 	if (typeof doAlertDivName != 'string' || !doAlertDivName
@@ -3961,28 +4106,41 @@ function doAlertInit(n) {
 }
 //	出現警告
 //doAlert[generateCode.dLK]='doAlertInit,doAlertResize,doAlertAccess,doAlertScroll,doAlertDivName,doAlertOldScrollLocation,get_cookie,get_window_status';
-function doAlert(n,m,iconContent){	//	n:name,m:mode=1:use alert(),icon div的文字內容
+//	n:name,m:mode=1:use alert(),icon div的文字內容
+function doAlert(n,m,iconContent){
  if(!n&&typeof doAlertDivName=='string'&&doAlertDivName)n=doAlertDivName;
  var o=document.getElementById(n),oBg=document.getElementById(n+'Bg'),oI=document.getElementById(n+'I');
  if(!document.body||!o||m&&!alert(o.innerHTML))return;	//	alert()會return undefined
  if(!oI)try{
-  o.parentNode.insertBefore(oI=document.createElement('div'),o);//document.body.insertBefore();
+		//	只對IE5.5之後有用
+	//document.body.insertBefore();
+  o.parentNode.insertBefore(oI=document.createElement('div'),o);
   oI.id=n+'I';oI.onclick=function(){doAlertInit();doAlert();};oI.title="注意事項";
   oI.innerHTML=iconContent||'別忘了';oI.doAlertScrollT=oI.doAlertScrollL=0;
- }catch(e){return;}	//	只對IE5.5之後有用
- if(!oBg)try{o.parentNode.insertBefore(oBg=document.createElement('div'),o);oBg.id=n+'Bg';}catch(e){return;}	//	只對IE5.5之後有用
- //if(!oI||!oBg)alert('No index or bg div!');
- disableKM(2);doAlertResize();window.Oonresize=window.onresize,window.onresize=doAlertResize;
- oI.style.display='none',oI.style.position='absolute',oI.style.right='.1em',oI.style.top='.1em';
- oBg.style.position='absolute',oBg.style.left=-parseInt(document.body.leftMargin),oBg.style.top=-parseInt(document.body.topMargin),oBg.style.width=height='110%',oBg.style.display='inline';	//	offset*:唯讀
- if(o.filters)o.filters.alpha.opacity=85;//try{o.filters.alpha.opacity=85;}catch(e){}
+ }catch(e){return;}
+ if(!oBg)try{
+		//	只對IE5.5之後有用
+	 o.parentNode.insertBefore(oBg=document.createElement('div'),o);oBg.id=n+'Bg';}catch(e){return;}
+ if(false)if(!oI||!oBg)alert('No index or bg div!');
+ disableKM(2);doAlertResize();window.Oonresize=window.onresize;window.onresize=doAlertResize;
+ oI.style.display='none';oI.style.position='absolute';oI.style.right='.1em';oI.style.top='.1em';
+	//	offset*:唯讀
+ oBg.style.position='absolute';oBg.style.left=-parseInt(document.body.leftMargin);oBg.style.top=-parseInt(document.body.topMargin);oBg.style.width=height='110%';oBg.style.display='inline';
+ if(o.filters){
+	//try{}catch(e){}
+	 o.filters.alpha.opacity=85;
+ }
  if(oBg.filters)try{oBg.filters.alpha.opacity=30;}catch(e){}
- else{	//	for Moz
+ else{
+	 //	for Moz
   o.style.position='fixed';
-  oBg.style.position='fixed',oBg.style.opacity=oBg.style['-moz-opacity']=.3,oBg.style.left=oBg.style.top=0,oBg.style.width=oBg.style.height='100%';
+  oBg.style.position='fixed';oBg.style.opacity=oBg.style['-moz-opacity']=.3;oBg.style.left=oBg.style.top=0;oBg.style.width=oBg.style.height='100%';
  }
  if(get_cookie('doAlert')==n)doAlertAccess(n);
- else o=get_window_status(),doAlertOldScrollLocation=[o.scrollLeft,o.scrollTop],setTimeout('scrollTo(0,0);',0);	//	奇怪的是，直接執行scrollTo(0,0)沒啥用。
+ else {
+		//	奇怪的是，直接執行scrollTo(0,0)沒啥用。
+	 o=get_window_status();doAlertOldScrollLocation=[o.scrollLeft,o.scrollTop];setTimeout('scrollTo(0,0);',0);
+ }
 }
 //	pass
 function doAlertAccess(n){
@@ -4001,23 +4159,27 @@ function doAlertScroll(m){var oI;
  if(typeof m!='undefined'){
   oI.style.display=m?'block':'none';
   oI.doAlertScrollL=oI.offsetWidth+(m||0);
-  if(oI.currentStyle){	//	IE
+  if(oI.currentStyle){
+	  //	IE
    if(m=parseInt(oI.currentStyle.paddingTop))oI.doAlertScrollT=m;
    m=parseInt(oI.currentStyle.paddingLeft);
    if(m=parseInt(oI.currentStyle.paddingRight))oI.doAlertScrollL+=m;
   }else{
    oI.style.position='fixed';
-/*	//	Moz..but no use
+if(false){	//	Moz...but useless
    if(m=oI.offsetTop)oI.doAlertScrollT=m;
    m=oI.offsetLeft;
    if(m=oI.offsetRight)oI.doAlertScrollL+=m;
-*/
+}
   }
  }
- //window.status=m=window.scrollX+','+window.scrollY+','+window.innerWidth+','+window.innerHeight+';'+document.body.scrollLeft+','+document.body.scrollTop+','+document.body.offsetWidth+','+document.body.clientWidth+','+oI.offsetWidth+','+document.body.scrollWidth;alert(m);
+ if(false){window.status=m=window.scrollX+','+window.scrollY+','+window.innerWidth+','+window.innerHeight+';'+document.body.scrollLeft+','+document.body.scrollTop+','+document.body.offsetWidth+','+document.body.clientWidth+','+oI.offsetWidth+','+document.body.scrollWidth;alert(m);}
  m=get_window_status();
- oI.style.left=m.scrollLeft+m.windowW-oI.doAlertScrollL+'px';//-document.body.leftMargin-document.body.rightMargin
- oI.style.top=m.scrollTop-oI.doAlertScrollT+'px';	//	只有在padding用px時有效！
+ oI.style.left=
+	//-document.body.leftMargin-document.body.rightMargin
+	 m.scrollLeft+m.windowW-oI.doAlertScrollL+'px';
+	//	只有在padding用px時有效！
+ oI.style.top=m.scrollTop-oI.doAlertScrollT+'px';
 }
 
 
@@ -4065,7 +4227,7 @@ function set_class(element, class_name, options) {
 			return;
 	}
 
-	//library_namespace.debug('set_class: remove [' + class_name + '] from [' + o.className + ']');
+	if(false)library_namespace.debug('set_class: remove [' + class_name + '] from [' + o.className + ']');
 	c = element.className.split(/\s+/);
 	var r = library_namespace.null_Object(), i, changed = options.reset;
 
@@ -4103,7 +4265,7 @@ function set_class(element, class_name, options) {
 			if (r[i])
 				c.push(i);
 		element.className = c.join(' ').trim();
-		// library_namespace.debug('set_class: → ['+element.className+']');
+		if(false) library_namespace.debug('set_class: → ['+element.className+']');
 	}
 
 	return r;
@@ -4156,7 +4318,7 @@ _// JSDT:_module_
 /**
  * If HTML element has specified class
  * @param {HTMLElement}element	HTML elements
- * @param {String} class_name	class_name_1[ class_name_2 ..]
+ * @param {String} class_name	class_name_1[ class_name_2 ...]
  * @return	{Boolean}
  */
 has_class = has_class;
@@ -4192,7 +4354,7 @@ function find_class(class_name, parent_node, tag_name, selector, options) {
 _// JSDT:_module_
 .
 /**
- * @param {String} class_name	class_name_1[ class_name_2 ..]
+ * @param {String} class_name	class_name_1[ class_name_2 ...]
  * @param {HTMLElement}element	HTML elements
  * @param {HTMLElement} parent_node	parent node
  * @param {String} tag_name	tag name
@@ -4208,18 +4370,18 @@ _// JSDT:_module_
 find_class = find_class;
 
 
-/*	處理 popup 用。
+/**<code>	處理 popup 用。
 	對className的tag作popup處理。
 	window.onload="set_up_popup()";
 	<b title="注釋">正文</b>
-*/
+</code>*/
 //set_up_popup[generateCode.dLK]='sPop,has_class';
 function set_up_popup(tag,classN,func){
 	if (!tag)
 		// 'span'
 		tag = 'b';
 
-/*
+/**<code>
 	http://enable.nat.gov.tw/document/4_2.jsp
 	http://ccca.nctu.edu.tw/~hlb/tavi/ABBRorACRONYM
 	應該用abbr(abbreviation/abbrevitated form/簡稱)
@@ -4228,7 +4390,7 @@ function set_up_popup(tag,classN,func){
 	XHTML2.0把acronym移掉了，只剩下abbr標籤。
 	http://www.sovavsiti.cz/css/abbr.html
 	if(!!document.all)document.body.innerHTML=document.body.innerHTML.replace(/<\s*(\/?)\s*abbr([>\s])/gi,'<$1span$2');
-*/
+</code>*/
 
 	var i, j, o = library_namespace.get_tag_list(tag), tp;
 	set_up_popup.list = [];
@@ -4245,18 +4407,19 @@ function set_up_popup(tag,classN,func){
 				}
 			//	有的話設定event
 			if( tp && (tp=sPop(o[i],sPopF[tp]|sPopF.nopop)) ){
-				//o[i].innerHTML+='<b style="color:peru">['+sPopP.types[tp]+']<\/b>';
+				if(false)o[i].innerHTML+='<b style="color:peru">['+sPopP.types[tp]+']<\/b>';
 
 				set_up_popup.list.push(o[i]);
 				if(tp==sPopF.window){
 					if(!o[i].onclick)o[i].onclick=new Function('sPop(this,'+tp+');'),o[i].style.cursor='pointer';
 				}else if(tp==sPopF.popup){
-					if(!o[i].onmouseover){//o[i].ruby=o[i].popup='',
+					if(!o[i].onmouseover){
+						//o[i].ruby=o[i].popup='';
 						o[i].onmouseover=new Function('sPop(this,'+tp+');');
 						if(!o[i].onmouseout)o[i].onmouseout=new Function('sPop(this,sPopF.clearPop);');
 						if(!o[i].onclick)o[i].onclick=new Function('this.onmouseout=null;sPop(this,'+tp+');'),o[i].style.cursor='pointer';
 					}
-					//else alert(tp+'\n'+sPopF[tp]+'\n'+typeof o[i].onmouseover+'\n'+o[i].onmouseover);
+					else if(false)alert(tp+'\n'+sPopF[tp]+'\n'+typeof o[i].onmouseover+'\n'+o[i].onmouseover);
 				}
 			}
 		}
@@ -4266,7 +4429,7 @@ _.set_up_popup = set_up_popup;
 
 
 
-/*	注釋(reference) / show popup-window or ruby	2004/4/3 17:20
+/**<code>	注釋(reference) / show popup-window or ruby	2004/4/3 17:20
 	http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K742.aspx
 
 example:
@@ -4317,10 +4480,11 @@ move/resize/最小化: popup dialog
 key (Esc)
 time limit
 
-*/
-var sPopP=library_namespace.null_Object()	//	sPop properties object
+</code>*/
+//	sPop properties object
+var sPopP,
 	//	flag
-	,sPopF = {
+	sPopF = {
 		title:0,
 		auto:0,
 		nopop:8,
@@ -4332,8 +4496,13 @@ var sPopP=library_namespace.null_Object()	//	sPop properties object
 	sPopError;
 
 //	初始值設定 & 設定flag
-//if(sPopP)alert('sPopP 已被佔用！');else
 function sPopInit() {
+	if(/*global.*/sPopP){
+		alert('sPopP 已被佔用！');
+		return;
+	}
+
+	sPopP=library_namespace.null_Object();
 	// 預設style class name:(null:used last time),ruby,popup,window
 	sPopP.DclassName = ',popupedTxt_ruby,popupedTxt,popupedTxt'.split(',');
 	// 已登記的背景style,請在CSS中加入[sPopC]_[body class name]
@@ -4347,9 +4516,13 @@ function sPopInit() {
 	// popup window style
 	sPopP.popupS = "color:blue;padding:.5em;overflow:auto;position:absolute;top:0;left:0;width:100%;height:100%;scrollbar-face-color:khaki;scrollbar-arrow-color:teal;border:1px solid green;font:normal 10pt tahoma;filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#ffd700, EndColorStr=#ffffff);";
 	// chars to repeat(for ruby)
-	sPopP.RepeatC = '‧．。ヽ○●◎☆★※＊＃▽▼△▲◆◇□■↓↑';// .turnU();
+	sPopP.RepeatC = '‧．。ヽ○●◎☆★※＊＃▽▼△▲◆◇□■↓↑'
+		// .turnU()
+		;
 	// types:auto,這些attribute可被處理，且將被視為自動選取type。
-	sPopP.autoTypes = 'title,_sPop';// +',_'+sPopP.functionName
+	sPopP.autoTypes = 'title,_sPop'
+		// +',_'+sPopP.functionName
+		;
 	// types,最多七種
 	// +div(參考showLinkPopup() @ link.js)
 	sPopP.types = 'ruby,popup,window';
@@ -4357,7 +4530,7 @@ function sPopInit() {
 	sPopP.allTypes = (sPopP.autoTypes + ',' + sPopP.types).split(',');
 	// function name
 	sPopP.functionName = '';
-	// sPopP.functionName=library_namespace.parse_function().funcName;
+	if(false) sPopP.functionName=library_namespace.parse_function().funcName;
 	// popup window(for popup)
 	if (library_namespace.is_WWW() && typeof window.createPopup != 'undefined')
 		sPopP.window = window.createPopup();
@@ -4365,11 +4538,11 @@ function sPopInit() {
 		var i = 0, t = sPopP.types.split(','), T = '';
 		for (; i < t.length;)
 			sPopF[t[i]] = ++i;
-		// sPopF['_'+sPopP.functionName]=0
+		if(false) sPopF['_'+sPopP.functionName]=0;
 	}
-	// sPopP.types[index]=type name
+	// sPopP.types[index] = type name
 	sPopP.types = (
-	// '_'+sPopP.functionName+
+	// '_' + sPopP.functionName +
 	',' + sPopP.types).split(',');
 	// 註解
 	sPopP.commentTitle = 'Comment';
@@ -4390,7 +4563,7 @@ var has_ruby_tag = library_namespace.platform({ie:5,firefox:38,chrome:5,safari:5
 //	主object(正文或主object，會從之取得正文與注釋)[, flag, text string or object(注釋,會蓋過從主object取得之text), 使用的class name]
 //sPop[generateCode.dLK]='sPopP,sPopF,sPopInit,*sPopInit();';
 function sPop(oPos,flag,oTxt,classN){
- //if(flag&sPopF.clearPop){if(sPopP.window)sPopP.window.hide();return;}
+ if(false)if(flag&sPopF.clearPop){if(sPopP.window)sPopP.window.hide();return;}
 
  //	input value test & 修正
  if(!oPos&&!oTxt)return;
@@ -4406,24 +4579,36 @@ function sPop(oPos,flag,oTxt,classN){
  	sPopP.functionName='';
 
  var repopMark='repop',repop=oPos===repopMark,nopop=flag&sPopF.nopop,tp=flag&7
-	,useAttbTxt=false,brReg=/\r*\n/g,brT='<br />\n';	//	轉成br用
+	,useAttbTxt=false,
+	//	轉成br用
+	brReg=/\r*\n/g,brT='<br />\n';
 
 if(repop){
   if( !sPopP.popObj || typeof sPopP.popObj!='object' || typeof sPopP.popObj.innerHTML!='string' || !sPopP.popObj.innerHTML )return;
-  oPos=sPopP.popObj,tp=sPopF.popup;	//	重pop時不作其他判別處置
+	//	重pop時不作其他判別處置
+  oPos=sPopP.popObj;tp=sPopF.popup;
 }else{
 
  //	處理object
  if( typeof oPos=='string' && oPos )
-  if( oPos.length<32 && document.getElementById(oPos) )
-   oPos=document.getElementById(oPos);	//	輸入object name時轉成object
-  else if(!oTxt)oTxt=oPos	//	若只輸入oPos，將之當作注釋(oTxt)。
-	//,oPos=typeof null=='object'?0:null;
-	,oPos=0;	//	若是typeof null=='object',請設成false
+  if( oPos.length<32 && document.getElementById(oPos) ){
+		//	輸入object name時轉成object
+	   oPos=document.getElementById(oPos);
+  }
+  else if(!oTxt){
+		//	若只輸入oPos，將之當作注釋(oTxt)。
+	  oTxt=oPos;
+		if(false)oPos=typeof null=='object'?0:null;
+		//	若是typeof null=='object',請設成false
+		oPos=0;
+  }
 
  //	設定oTxt 1/4
  if( typeof oTxt=='object' && oTxt.innerHTML )oTxt=oTxt.innerHTML;
- else if(oTxt)oTxt+='';	//	轉成string
+ else if(oTxt){
+		//	轉成string
+	 oTxt+='';
+ }
 
  //	(自動)判別使用的type
  var useAutoTxt;
@@ -4431,13 +4616,21 @@ if(repop){
   //	設定oTxt 2/4 : 知道是自動判別後先設定
   if( typeof oPos=='object' && (!oTxt||oTxt==0) )
    if(oPos[sPopP.types[0]])oTxt=oPos[sPopP.types[0]],useAutoTxt=true;
-   else if(oPos.title)oTxt=oPos.title,useAutoTxt=true;	//	以<b title="~">的用法來說，這是最常經過的path
+   else if(oPos.title){
+		//	以<b title="~">的用法來說，這是最常經過的path
+	   oTxt=oPos.title;useAutoTxt=true;
+   }
 
   //	假如沒有oTxt.gText()，改成oTxt.replace(/<[^>]*>/g,'')之即可。這是為了預防HTML的情形。
-  var len=typeof oTxt=='string'?oTxt.length:0;//typeof oTxt=='string'?oTxt.length:typeof oTxt=='object'&&oTxt.innerHTML?oTxt.innerHTML.length:0;
-  //alert(len+','+(len*.7)+','+oPos.innerHTML.length);
-  if( typeof oPos=='object' && ( oPos.doneRuby || !oPos.innerHTML.match(/<\s*ruby/i) && (len<60&&len*.7-9<(typeof oPos.innerText=='string'?oPos.innerText:oPos.innerHTML).length) ) )
-   tp='ruby';	//	ruby的條件
+  var len=
+	  typeof oTxt=='string'?oTxt.length
+				//:typeof oTxt=='object'&&oTxt.innerHTML?oTxt.innerHTML.length
+			  :0;
+  if(false)alert(len+','+(len*.7)+','+oPos.innerHTML.length);
+  if( typeof oPos=='object' && ( oPos.doneRuby || !oPos.innerHTML.match(/<\s*ruby/i) && (len<60&&len*.7-9<(typeof oPos.innerText=='string'?oPos.innerText:oPos.innerHTML).length) ) ){
+		//	ruby的條件
+	  tp='ruby';
+  }
   else if(sPopP.window&&len<300){
    tp='popup';
    if(typeof oPos=='object'&&oPos.title===oTxt)oPos[sPopP.types[0]]=oTxt,oPos.title='';
@@ -4455,7 +4648,8 @@ if(repop){
   if( (oTxt=oPos[sPopP.types[tp]]) || (oTxt=oPos[sPopP.types[0]]) || (oTxt=oPos.title) )useAutoTxt=true;else return;
 
  //	設定className與position
- sPopP.left=0,sPopP.top=20;	//	popup left,popup top初始值
+	//	popup left,popup top初始值
+ sPopP.left=0,sPopP.top=20;
  if( !oPos || typeof oPos!='object')
   //	popup 在滑鼠指標處
   //	see: add_listener()	
@@ -4463,20 +4657,27 @@ if(repop){
  else if( !oPos.className && sPopP.DclassName[tp] ){
   if(!classN&&(classN=document.body.className)&&!sPopP.bgS[classN])classN=0;
   oPos.className=sPopP.DclassName[tp]+(classN?'_'+classN:'');
-  var w,s=oPos.style;if(!s.fontWeight&&(w=oPos.parentNode.style.fontWeight))s.fontWeight=w;	//	除非有明確設定font-weight，否則通常不會有效
+  var w,s=oPos.style;if(!s.fontWeight&&(w=oPos.parentNode.style.fontWeight))
+		//	除非有明確設定font-weight，否則通常不會有效
+	  s.fontWeight=w;
  }
 }
 
  //	修正
  if( tp==sPopF.popup && !sPopP.window && !(flag&sPopF.force) )
-  tp=sPopF.window;	//	Mozilla中無法顯示popup
+		//	Mozilla中無法顯示popup
+  tp=sPopF.window;
 
 
- //alert(sPopP.types[tp]+','+( sPopP.window || flag&sPopF.force )+','+oTxt);
+ if(false)alert(sPopP.types[tp]+','+( sPopP.window || flag&sPopF.force )+','+oTxt);
  //	處理pop
  if(tp==sPopF.ruby){
-  if(typeof oPos!='object'||!oPos.innerHTML)return;	//	oPop非HTML element就return
-  if(oPos.doneRuby)return tp;	//	已經處理過<ruby>就pass
+  if(typeof oPos!='object'||!oPos.innerHTML)
+		//	oPop非HTML element就return
+	  return;
+  if(oPos.doneRuby)
+		//	已經處理過<ruby>就pass
+	  return tp;
   //	處理repeat
   if( flag&sPopF.repeat || sPopP.RepeatC.indexOf(oTxt)!==-1 ) {
    oPos.title='';
@@ -4505,17 +4706,20 @@ if(repop){
    sPopP.window.document.body.innerHTML=//oTxt=
 	'<div style="'+sPopP.popupS+'" onblur="parent.sPopP.window.hide();" title="reference">[<b style="color:peru;cursor:pointer;" onclick="parent.sPopP.window.hide();">'+sPopP.closeMessage+'<\/b>] [<b style="color:green;cursor:pointer;" onclick="parent.sPopP.width+=100,parent.sPopP.height+=50,parent.'
 	+sPopP.functionName+'(\''+repopMark+'\');">'+sPopP.biggerM+'<\/b>] [<b style="color:orange;cursor:pointer;" onclick="parent.sPopP.width=parent.sPopP.height=0,parent.'+sPopP.functionName+'(\''+repopMark+'\');">'+sPopP.resetM+'<\/b>]<hr style="color:purple;height:1px" />'+oTxt.replace(/'/g,'&#39;')+'<\/div>';
-   sPopP.popObj=oPos||document.body;	//	object handling now(for popup:repop)
-   //if(typeof oPos.onmouseout!='undefined')oPos.onmouseout=function(){sPopP.window.hide();};
+	//	object handling now(for popup:repop)
+   sPopP.popObj=oPos||document.body;
+   if(false)if(typeof oPos.onmouseout!='undefined')oPos.onmouseout=function(){sPopP.window.hide();};
   }
-  //alert(sPopP.width+','+sPopP.height);
+  if(false)alert(sPopP.width+','+sPopP.height);
   if(flag&sPopF.clearPop)sPopP.window.hide();
   else sPopP.window.show(sPopP.left,sPopP.top,sPopP.width,sPopP.height,oPos||document.body);
 
  }else if(tp==sPopF.window){
   if(nopop)return tp;
-  //if(typeof netscape=='object')netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserWrite");	//	創造無邊框視窗:titlebar=no	dependent:ns only	全螢幕：channelmode	带有收藏链接工具栏的窗口：directories	网页对话框：'dialogWidth:400px;dialogHeight:300px;dialogLeft:200px;dialogTop:150px;center:yes;help:yes;resizable:yes;status:yes'
-/*
+  if(false)if(typeof netscape=='object')
+		//	創造無邊框視窗:titlebar=no	dependent:ns only	全螢幕：channelmode	带有收藏链接工具栏的窗口：directories	网页对话框：'dialogWidth:400px;dialogHeight:300px;dialogLeft:200px;dialogTop:150px;center:yes;help:yes;resizable:yes;status:yes'
+	  netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserWrite");
+/**<code>
 dialogHeight: iHeight 设置对话框窗口的高度。
 dialogWidth: iWidth 设置对话框窗口的宽度。 　　
 dialogLeft: iXPos 设置对话框窗口相对于桌面左上角的left位置。
@@ -4526,30 +4730,42 @@ resizable: {yes | no | 1 | 0 } 指定是否对话框窗口大小可变。默认�
 status: {yes | no | 1 | 0 } 指定对话框窗口是否显示状态栏。对于非模式对话框窗口，默认值是“yes”；对于模式对话框窗口，默认值是 “no”。
 
 window.showModalDialog(), window.showModelessDialog(): IE only. 不如用Ajax
-*/
+</code>*/
   var w=window.open('','comment','titlebar=no,dependent,resizable=1,menubar=0,toolbar=0,location=0,scrollbars=1,width=550,height=400'/*,fullscreen*/,false)
-	,t=sPopP.commentTitle,_t=oPos.innerHTML&&oPos.innerHTML.length<9?sPopP.commentTitlePattern.replace(/%s/,oPos.innerHTML):t;	//	head, document.title
-  //if(typeof netscape=='object')netscape.security.PrivilegeManager.disablePrivilege("UniversalBrowserWrite");
+	,
+//	head
+	t=sPopP.commentTitle,
+// document.title
+	_t=oPos.innerHTML&&oPos.innerHTML.length<9?sPopP.commentTitlePattern.replace(/%s/,oPos.innerHTML):t;
+	if(false)if(typeof netscape=='object')netscape.security.PrivilegeManager.disablePrivilege("UniversalBrowserWrite");
   if(document.title)t+=' @ ['+document.title+']',_t+=' @ '+document.title;
-  //else t+=' @ [<a href="'+location.href+'">'+location.pathname+'<\/a>]';
-  w.document.open(),
+  else if(false)t+=' @ [<a href="'+location.href+'">'+location.pathname+'<\/a>]';
+  w.document.open();
   w.document.write(
-	//'<?xml version="1.1" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="content-type" content="text/html;charset=utf-8" /><title>'
-	//+_t+'<\/title><script type="text/javascript">window.onblur=function(){window.close();};<\/script><\/head><body><b style="color:#11f;">'+t+':<\/b>'
+	/**<code>'<?xml version="1.1" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="content-type" content="text/html;charset=utf-8" /><title>'
+	+ _t + '<\/title><script type="text/javascript">window.onblur=function(){window.close();};<\/script><\/head><body><b style="color:#11f;">' + t + ':<\/b>'
+	</code>*/
 	'<script type="text/javascript">window.onblur=function(){window.close();};<\/script><b style="color:#11f;">'+t+':<\/b>'
-	+(oPos.innerHTML?'<div id="s" style="color:#488;background-color:#FF8;">\n'+oPos.innerHTML.replace(/\n/g,'<br />').replace(/ /g,'&nbsp;')+'\n<\/div><hr />':'')	//;white-space:normal;width:500px:useless	** 這邊會對<b title="..等造成影響！
-	+'<div id="c" style="color:#404;background-color:#8FF;">\n'+oTxt.replace(/\n/g,'<br />').replace(/ /g,'&nbsp;')	//	以不換行(pre)的方式顯示.patch
-	+'\n<\/div><hr />[ <b style="cursor:pointer;color:#40f;" onclick="javascript:opener.focus();self.close();">'+sPopP.closeMessage+'<\/b> ]')//+'</body></html>'
-   ,w.document.close(),w.document.title=_t;
+	//"white-space:normal;width:500px;" :useless	** 這邊會對<b title="..等造成影響！
+	+(oPos.innerHTML?'<div id="s" style="color:#488;background-color:#FF8;">\n'+oPos.innerHTML.replace(/\n/g,'<br />').replace(/ /g,'&nbsp;')+'\n<\/div><hr />':'')
+	+'<div id="c" style="color:#404;background-color:#8FF;">\n'+oTxt.replace(/\n/g,'<br />')
+		//	以不換行(pre)的方式顯示.patch
+	.replace(/ /g,'&nbsp;')
+	+'\n<\/div><hr />[ <b style="cursor:pointer;color:#40f;" onclick="javascript:opener.focus();self.close();">'+sPopP.closeMessage+'<\/b> ]'
+	//+ '</body></html>'
+  )
+   ;w.document.close();w.document.title=_t;
   w.focus();
-  w=null;	//	open出來的窗口即使close了，它的window對象還是存在的，要記得刪除引用	http://www.blogjava.net/tim-wu/archive/2006/05/29/48729.html
- }//else alert('type error: '+tp+'!');
+	//	open出來的窗口即使close了，它的window對象還是存在的，要記得刪除引用	http://www.blogjava.net/tim-wu/archive/2006/05/29/48729.html
+  w=null;
+ }else if(false) alert('type error: '+tp+'!');
 
- return tp;	//	回傳決定的type
+	//	回傳決定的type
+ return tp;
 }
 
 
-/*	開啟連結於 target
+/**<code>	開啟連結於 target
 	**	最好將openAtInit();設在onload
 	JScript solution for attribute 'target' @ XHTML1.1	<a target="tag">之取代策略
 	way 1:	,captureE,openAtInit,"openAtInit();",openAt
@@ -4575,17 +4791,19 @@ http://blog.fanstown.net/blogs/jerry/archive/2007/04/04/HTML_8476_rel_5E5C2760E6
 **	應該 binding a.onclick 或 a.keypress
 rel是relationship的英文縮寫.rel與rev具有互補的作用,rel指定了向前鏈接的關係,rev指定了反向鏈接的關係.
 
-*/
+</code>*/
 var captureE;
 //	初始化設定
 //openAtInit[generateCode.dLK]='captureE';
 function openAtInit(){
- if(typeof captureE!='object'&&(typeof Event=='object'||typeof Event=='function')){	//	for moz
+ if(typeof captureE!='object'&&(typeof Event=='object'||typeof Event=='function')){
+	 //	for moz
   //	http://developer.mozilla.org/en/docs/DOM:element.addEventListener	http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-Event
   if(Event.mousedown)window.captureEvents(Event.mousedown);
   if(Event.keydown)window.captureEvents(Event.keydown);
   window.onmousedown=window.onkeydown=function(_event){
-	 captureE=_event;//alert('openAtInit: '+_event.target.tagName);
+	//alert('openAtInit: '+_event.target.tagName);
+	  captureE=_event;
 	};
  }
  for(var i,a=library_namespace.get_tag_list('a');i<a.length;i++)
@@ -4594,7 +4812,8 @@ function openAtInit(){
 //	open h(ref) in tag(et)
 //openAt[generateCode.dLK]='captureE,openAtInit';
 function openAt(tag,h){
- if(!tag)tag='_blank';//typeof tag=='undefined'||
+ if(//typeof tag=='undefined'||
+		 !tag)tag='_blank';
  else if(tag===1)tag='_self';
  var t;
  if(!h&&typeof event=='object')h=event.srcElement.href;
@@ -4606,12 +4825,14 @@ function openAt(tag,h){
   while(!(h=t.href)&&(t=t.parentNode));
  }
 
- //alert(h+','+tag+'\n'+captureE.target.parentNode.tagName+":");//+captureE.target.parentElement().tagName
+ if(false)alert(h+','+tag+'\n'+captureE.target.parentNode.tagName+":"
+		//+captureE.target.parentElement().tagName
+		 );
  if(h)window.open(h,tag).focus();
  return false;
 }
 
-/*	display mark to valid document
+/**<code>	display mark to valid document
 	<div id="valid">&nbsp;</div>
 	window.onload="addValid()";
 	搞定之後把自己網站提交到W3C Sites收錄。	http://www.w3csites.com/
@@ -4619,17 +4840,23 @@ function openAt(tag,h){
 	for RSS:
 	http://rss.scripting.com/?url=http%3A%2F%2Flyrics.meicho.com.tw%2Fgame%2Frss.xml
 	http://feedvalidator.org/check.cgi?url=http%3A%2F%2Flyrics.meicho.com.tw%2Fgame%2Frss.xml
-*/
-function addValid(v,tf){	//	object to insert valid, target window/frame
+</code>*/
+//	object to insert valid, target window/frame
+function addValid(v,tf){
  if(location.protocol=='file:')return;
  if(!v)v='valid';if(typeof v!='object')v=document.getElementById(v);
  if(!v)return 1;if(v.innerHTML.replace(/&nbsp;/g,'').replace(/\s+/g,''))return 2;
 
- if(typeof tf==='undefined')tf='valid_window';//tf=dQuote(tf);//tf?' target="'+tf+'"':'';
+ if(typeof tf==='undefined'){
+	//tf = dQuote(tf);
+	 //tf = tf ? ' target="' + tf + '"' : '';
+	 tf='valid_window';
+ }
  var i=0,t='',d,addValidData=[
 	'Valid XHTML 1.1! by W3C	http://validator.w3.org/check?uri=referer	http://www.w3.org/Icons/valid-xhtml11'
 	//,'Valid XML 1.0! by W3C	'
-	,'Valid CSS! by W3C	http://jigsaw.w3.org/css-validator/check/referer	http://jigsaw.w3.org/css-validator/images/vcss'	//	http://jigsaw.w3.org/css-validator/validator?uri=~
+		//	http://jigsaw.w3.org/css-validator/validator?uri=~
+	,'Valid CSS! by W3C	http://jigsaw.w3.org/css-validator/check/referer	http://jigsaw.w3.org/css-validator/images/vcss'
 	,'Validome Validation Services	http://www.validome.org/referer	http://www.validome.org/images/valid/set2/valid_xhtml_1_1.png'
 	,'Another HTML-lint check	http://openlab.ring.gr.jp/k16/htmllint/htmllint.cgi?ViewSource=o	http://openlab.ring.gr.jp/k16/images/ahl-blue.gif'
 	,'Bobby WAI-AAA Approved by bobby@watchfire.com	http://bobby.watchfire.com/bobby/bobbyServlet?URL=~&output=Submit&gl=wcag1-aaa	http://bobby.watchfire.com/bobby/html/en/images/approved_aaa.gif'
@@ -4639,7 +4866,9 @@ function addValid(v,tf){	//	object to insert valid, target window/frame
  for(;i<addValidData.length;i++)
   if(d=addValidData[i].split('	'),d[1])t+=' <a title="'+d[0]+'" href="'+d[1].replace(/~/g,encodeURI(location.href))
 	+'" target="'+tf+'">'
-	+(d[2]?'<img style="display:inline;width:88px;" alt="'//'" onclick="return openAt(\''+tf+'\');"><img style="display:inline;" alt="'	IE不通
+	+(d[2]?'<img style="display:inline;width:88px;" alt="'
+			//	IE不通
+			//'" onclick="return openAt(\''+tf+'\');"><img style="display:inline;" alt="'
 		+d[0]+'" src="'+d[2]+'" />':d[0])
 	+'<\/a>';	//	tf.focus()
   else alert('Validate data defined error!');
@@ -4649,13 +4878,13 @@ function addValid(v,tf){	//	object to insert valid, target window/frame
 }
 
 
-/*	延遲執行: 加強版的 setTimeout?
+/**<code>	延遲執行: 加強版的 setTimeout?
 
 id=delayRun(function[,ms=0])
 
 id=delayRun([function,[args],this] [,ms=0])
 
-*/
+</code>*/
 function delayRun(f, ms) {
 	var _f = delayRun, i;
 	if (!_f.fL)
@@ -4685,7 +4914,7 @@ delayRun.run = function(i) {
 
 
 
-/*	MsgBox, InputBox Titlebars Prefixed with 'VBScript'	http://support.microsoft.com/default.aspx?scid=kb;en-us;234742
+/**<code>	MsgBox, InputBox Titlebars Prefixed with 'VBScript'	http://support.microsoft.com/default.aspx?scid=kb;en-us;234742
 	http://asp.programmershelp.co.uk/vbscriptmsgbox.php
 	http://17.webmasters.com/caspdoc/html/vbscript_msgbox_function.htm
 請加入下面一段中介function
@@ -4697,17 +4926,22 @@ End Function
 
 or use:
 window.execScript( sExpression, sLanguage );
-*/
-//var VBalert_f;VBalert();	//	init
+</code>*/
+//	init
+//var VBalert_f;VBalert();
 function VBalert(prompt,buttons,title,helpfile,context){
  if(typeof VBalert_f!='object')VBalert_f=library_namespace.null_Object(),library_namespace.set_Object_value('VBalert_f','ret=0,'
 	//	http://msdn.microsoft.com/library/en-us/script56/html/vsfctmsgbox.asp
 	+'vbOK=1,vbCancel=2,vbAbort=3,vbRetry=4,vbIgnore=5,vbYes=6,vbNo=7,'
 	+'vbOKOnly=0,vbOKCancel=1,vbAbortRetryIgnore=2,vbYesNoCancel=3,vbYesNo=4,vbRetryCancel=5,'
-	+'vbCritical=16,'	//	Critical Message icon	(x)
-	+'vbQuestion=32,'	//	Warning Query icon	(?)
-	+'vbExclamation=48,'	//	Warning Message icon	(!)
-	+'vbInformation=64,'	//	Information Message icon(i)
+	//	Critical Message icon	(x)
+	+'vbCritical=16,'
+	//	Warning Query icon	(?)
+	+'vbQuestion=32,'
+	//	Warning Message icon	(!)
+	+'vbExclamation=48,'
+	//	Information Message icon(i)
+	+'vbInformation=64,'
 	+'vbDefaultButton1=0,vbDefaultButton2=256,vbDefaultButton3=512,vbDefaultButton4=768,vbApplicationModal=0,vbSystemModal=4096','int');
  if(typeof prompt=='undefined')return;
  VBalert_f.prompt=prompt||'',VBalert_f.buttons=buttons||0,VBalert_f.title=title||'';
@@ -4717,17 +4951,17 @@ function VBalert(prompt,buttons,title,helpfile,context){
   VBScript:VBalert_vbf();
   return VBalert_f.ret;
  }catch(e){
-  //alert('VBalert error:'+e.message);
+  //alert('VBalert error:' + e.message);
   alert(VBalert_f.prompt);
  }
 }
-//alert(VBalert('12',VBalert_f.vbInformation+VBalert_f.vbDefaultButton3));
+if(false)alert(VBalert('12',VBalert_f.vbInformation+VBalert_f.vbDefaultButton3));
 
 
 
 // TODO: get_size(node = window) = library_namespace.null_Object();
 
-/*	get window status	取得視窗可利用的size。現在還得用種方法，真是羞恥。	2005/1/13 20:0
+/**<code>	get window status	取得視窗可利用的size。現在還得用種方法，真是羞恥。	2005/1/13 20:0
 	get_window_status(event object)
 	http://www.mozilla.org/docs/dom/domref/dom_window_ref.html
 	http://msdn.microsoft.com/workshop/author/dhtml/reference/objects/body.asp
@@ -4738,7 +4972,7 @@ function VBalert(prompt,buttons,title,helpfile,context){
 
 ** untested !!
 
-*/
+</code>*/
 
 var event_Object;
 /**
@@ -4774,13 +5008,15 @@ function get_window_status(node) {
 			&& typeof document.body.clientWidth != 'undefined' ? document.body.clientWidth
 					: document.documentElement
 					&& !isNaN(document.documentElement.clientWidth) ? document.documentElement.clientWidth
-							: null;// +offsetLeft
+							// +offsetLeft
+							: null;
 	r.windowH = typeof window.innerHeight != 'undefined' ? window.innerHeight
 			: /* typeof offsetHeight!='undefined'?offsetHeight: */!NewIE
 			&& typeof document.body.clientHeight != 'undefined' ? document.body.clientHeight
 					: document.documentElement
 					&& !isNaN(document.documentElement.clientHeight) ? document.documentElement.clientHeight
-							: null;// +offsetTop
+							// +offsetTop
+							: null;
 
 	var noEmu;
 	if (!node)
@@ -4809,7 +5045,7 @@ function get_window_status(node) {
 					'clientX' : node.clientX,
 					'clientY' : node.clientY
 			};
-			// alert(r.scrollLeft+','+r.scrollTop+'\n'+o.clientX+','+o.clientY);
+			if(false) alert(r.scrollLeft+','+r.scrollTop+'\n'+o.clientX+','+o.clientY);
 	}
 
 	return r;
@@ -4842,7 +5078,7 @@ get_window_status.scroll = function (node) {
 	//	因為大多有 ownerDocument，所以預設編入。
 	//	新的 browser，od 與 dv 皆應有設定。
 
-/*
+/**<code>
 
 Firefox/3.6.6: ownerDocument: [object HTMLDocument], defaultView: [object Window], box_model: true, pageXOffset: 0, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: 0
 Chrome/6.0.453.1 Safari/534.2: ownerDocument: [object HTMLDocument], defaultView: [object DOMWindow], box_model: true, pageXOffset: 0, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: 0
@@ -4856,7 +5092,7 @@ MSIE 7.0 @ MSIE 9.0 test: ownerDocument: [object], defaultView: undefined, box_m
 MSIE 8.0: ownerDocument: [object HTMLDocument], defaultView: undefined, box_model: true, pageXOffset: undefined, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: undefined
 MSIE 9.0 test: ownerDocument: [object HTMLDocument], defaultView: [object Window], box_model: true, pageXOffset: 0, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: undefined
 
-*/
+</code>*/
 	//	IE5-8: od: true, dv: false
 
 	var doc = node && od || window.document,
@@ -4947,9 +5183,11 @@ get_style = function(element, name, not_computed) {
 	var value, style_interface, e;
 	name = name.toLowerCase();
 	//	IE: element.style.styleFloat, firefox, chorme, safari: element.style.cssFloat
-	//if (name === 'float') name = 'cssFloat' in element.style ? 'cssFloat' : 'styleFloat';
+	if(false)if (name === 'float') name = 'cssFloat' in element.style ? 'cssFloat' : 'styleFloat';
 
-	if (style_interface = document.defaultView)	//	window.getComputedStyle
+	if (style_interface =
+		//	window.getComputedStyle
+		document.defaultView){
 		try {
 			if ((value = element.ownerDocument) && (value = value.defaultView))
 				style_interface = value;
@@ -4958,7 +5196,7 @@ get_style = function(element, name, not_computed) {
 				library_namespace.debug('Can not get .ownerDocument.defaultView of '
 						+ (library_namespace.node_description ? library_namespace.node_description(element) : 'node') + ' !');
 
-			//if (/[A-Z]/.test(name)) name = name.replace(/([A-Z])/g, '-$1').toLowerCase();
+			if(false)if (/[A-Z]/.test(name)) name = name.replace(/([A-Z])/g, '-$1').toLowerCase();
 			//	width 之類可能 === "auto"!!
 			value = style_interface.getComputedStyle(element, null)
 					// [name]
@@ -4972,18 +5210,20 @@ get_style = function(element, name, not_computed) {
 			library_namespace.error(e);
 		}
 
-	//	IE 5-8
-	else if (style_interface = element.currentStyle)
+	}else if (style_interface = element.currentStyle){
+		//	IE 5-8
 		//	IE: \w+\W\w+ (e.g., margin-bottom), firefox, chorme, safari: \w+-\w+
 		//	IE8 中 width 之類可能 === "auto"!!
 		value = style_interface[name === 'float' ? 'styleFloat' : name.replace(/-([a-z])/g, function($0, $1) { return $1.toUpperCase(); })];
 		//	Dean Edwards（Base2類庫的作者）的hack	http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
 
-	else if((style_interface = element.style) && (name in style_interface))
+	}else if((style_interface = element.style) && (name in style_interface)){
 		value = style_interface[name];
 
-	//	we should directly get it from element itself
-	//else if (!(value = element['offset' + name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()])) value = '';
+	}else {
+		//	we should directly get it from element itself
+		if (!(value = element['offset' + name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()])) value = '';
+	}
 
 	//	處理 px, pt, em, ..
 
@@ -5081,47 +5321,59 @@ function get_node_offset(node) {
 		};
 
 	} else if (_.is_HTML_element(node)) {
-		//alert(node.id+':'+node.offsetLeft+','+node.offsetTop+';'+node.offsetWidth+','+node.offsetHeight);
+		if(false)alert(node.id+':'+node.offsetLeft+','+node.offsetTop+';'+node.offsetWidth+','+node.offsetHeight);
 		var l = 0, t = 0, p;
-			// n,countH=window.navigator.userAgent.indexOf("MSIE")>=0,add=1,outsideBLOCK=1,
-		if(0)
+			//var n, countH = window.navigator.userAgent.indexOf("MSIE") >= 0, add = 1, outsideBLOCK = 1;
+		if(false)
 		if (typeof node.offsetWidth !== 'undefined') {
-			var _w = node.offsetWidth, _h = node.offsetHeight
-				// ,_o=window.getComputedStyle?document.defaultView.getComputedStyle(node,null):null
-				;
-			//	http://www.quirksmode.org/dom/getstyles.html
-			/*
-			   if(_o)	//	moz未包含margin+border+padding	這些值可能會有'em'等等的出現，不一定都是px！
-				//alert(_o.getPropertyValue('border-left-width')+','+_o.getPropertyValue('border-right-width')),
-				_w+=parseInt(_o.getPropertyValue('border-left-width'))+parseInt(_o.getPropertyValue('border-right-width')),
-				_h+=parseInt(_o.getPropertyValue('border-top-width'))+parseInt(_o.getPropertyValue('border-bottom-width'));
-			   else if(_o=node.currentStyle)	//	IE
-				//	IE的offset已經包含margin+border+padding的部份??另，這些值可能會有'em'等等的出現，不一定都是px。
-				_w+=parseInt(_o['borderLeftWidth'])+parseInt(_o['borderRightWidth']),
-				_h+=parseInt(_o['borderTopWidth'])+parseInt(_o['borderBottomWidt都是px;
-			*/
-			r.width = _w,
+			var _w = node.offsetWidth, _h = node.offsetHeight;
+				// var _o = window.getComputedStyle ? document.defaultView.getComputedStyle(node, null) : null;
+				
+			if(false){
+				//	http://www.quirksmode.org/dom/getstyles.html
+				   if(_o){
+					   //	moz未包含margin+border+padding	這些值可能會有'em'等等的出現，不一定都是px！
+						if(false)alert(_o.getPropertyValue('border-left-width')+','+_o.getPropertyValue('border-right-width')),
+						_w+=parseInt(_o.getPropertyValue('border-left-width'))+parseInt(_o.getPropertyValue('border-right-width')),
+						_h+=parseInt(_o.getPropertyValue('border-top-width'))+parseInt(_o.getPropertyValue('border-bottom-width'));
+				   }
+				   else if(_o=node.currentStyle){
+						//	IE
+						//	IE的offset已經包含margin+border+padding的部份??另，這些值可能會有'em'等等的出現，不一定都是px。
+						_w+=parseInt(_o['borderLeftWidth'])+parseInt(_o['borderRightWidth']);
+						_h+=parseInt(_o['borderTopWidth'])+parseInt(_o['borderBottomWidt']);
+				   }
+			}
+			r.width = _w;
 			r.height = _h;
 		}
 
 		//	下面這段依瀏覽器而有不同 (-_-)!!
 		//	position:absolute
-		//var tt='';	//	for debug
+
+			//	for debug
+			//var tt='';
 		//	2006/2/14: 經由 offset 一個個溯源
 		var _o = node;
-		while(_o&&!isNaN(_o.offsetLeft)){	//	IE在用style:class時會出現誤差。
-			/*
-			   n=_o.tagName;
-			   //if( !/^T(ABLE|BODY|R)$/.test(n=_o.tagName) && (countH||!/^H\d$/.test(n)) )l+=_o.offsetLeft,t+=_o.offsetTop;
-			   if(n=='DIV')add=outsideBLOCK;
-			   else if(n=='TD' || countH&&/^H\d$/.test(n))add=1;
-			   outsideBLOCK= n=='TABLE'||n=='DIV';	//	_o.style.display
-			   tt+=(add?'':'#')+n+(_o.style.display?'('+_o.style.display+')':'')+':'+_o.offsetLeft+','+_o.offsetTop+(outsideBLOCK?', outside BLOCK':'')+'\n';
-			   if(add)add=0,l+=_o.offsetLeft,t+=_o.offsetTop;
-			*/
+		while(_o&&!isNaN(_o.offsetLeft)){
+			//	IE在用style:class時會出現誤差。
+
+			if(false){
+				   n=_o.tagName;
+				   if(false)if( !/^T(ABLE|BODY|R)$/.test(n=_o.tagName) && (countH||!/^H\d$/.test(n)) )l+=_o.offsetLeft,t+=_o.offsetTop;
+				   if(n=='DIV')add=outsideBLOCK;
+				   else if(n=='TD' || countH&&/^H\d$/.test(n))add=1;
+				   outsideBLOCK=
+						//	_o.style.display
+					   n=='TABLE'||n=='DIV';
+				   tt+=(add?'':'#')+n+(_o.style.display?'('+_o.style.display+')':'')+':'+_o.offsetLeft+','+_o.offsetTop+(outsideBLOCK?', outside BLOCK':'')+'\n';
+				   if(add)add=0,l+=_o.offsetLeft,t+=_o.offsetTop;
+			}
 
 			l += _o.offsetLeft || 0, t += _o.offsetTop || 0;
-			_o = _o.offsetParent;//.parentNode
+			_o =
+				//.parentNode
+				_o.offsetParent;
 		}
 
 		//		有些會用到overflow，影響位置。	2008/5/31 0:10:7
@@ -5130,7 +5382,7 @@ function get_node_offset(node) {
 			l -= _o.scrollLeft || 0, t -= _o.scrollTop || 0;
 
 		//		need to enable definition of tt above
-		//alert('l '+l+',t '+t+',w '+r.w+',h '+r.h+(typeof tt=='string'?'\n'+tt:''));
+		if(false)alert('l '+l+',t '+t+',w '+r.w+',h '+r.h+(typeof tt=='string'?'\n'+tt:''));
 
 		offset.left = l;
 		offset.top = t;
@@ -5143,7 +5395,7 @@ _// JSDT:_module_
 .
 get_node_offset = get_node_offset;
 
-/*
+/**<code>
 //	get the [left,top,width,height] of obj
 function get_node_offset2(obj){
  if(typeof obj=='string'){var o=document.getElementById(obj);if(o)obj=o;}	//	若loc為id
@@ -5169,9 +5421,9 @@ function get_node_offset2(obj){
   return r;
  }
 }
-*/
+</code>*/
 
-/*	locate a object(obj/div, dialogue box, popup dialog) on where we want followed window location	2005/1/12 19:-13 21:22
+/**<code>	locate a object(obj/div, dialogue box, popup dialog) on where we want followed window location	2005/1/12 19:-13 21:22
 	此函數會盡量不使obj超出window範圍的大小，除非設定了noResize/noMove或發生錯誤。若moveable+resizable(default)，會嘗試先move再resize。
 obj:
 	node or id.
@@ -5215,7 +5467,7 @@ locate_nodeClip=[l,t,w,h]:	resizable時將obj限制在這個範圍內
 to top:
 var locate_node_flag;
 library_namespace.set_Object_value('locate_node_flag','resizable=0,moveable=0,autoLocate=0,auto=0,absolute=1,abs=1,relative=2,rel=2,asDialog=3,dialog=3,modeFlag=3,dialogDown=3,dialogUp=7,dialogRight=11,dialogLeft=15,dialogFlag=15,dialogForce=16,noResize=32,noMove=64,keepDisplay=128,create=256',1);	//	revise
-*/
+</code>*/
 var locate_node_flag = {
 		resizable : 0,
 		moveable : 0,
@@ -5343,7 +5595,7 @@ function locate_node(obj, loc, margin, flag) {
 	//	得設定obj之display，因為不這樣不能定offset。但可不顯現出來…只是好像沒啥效果。
 	obj.style.display = 'block';
 
-	// if(dialog!=locate_node_flag.dialogDown&&dialog!=locate_node_flag.dialogUp)dialog=0;
+	if(false) if(dialog!=locate_node_flag.dialogDown&&dialog!=locate_node_flag.dialogUp)dialog=0;
 	// setup loc#1: handle dialog
 	if (typeof loc == 'string') {
 		// 若loc為id
@@ -5354,24 +5606,36 @@ function locate_node(obj, loc, margin, flag) {
 	if (typeof loc == 'object' && typeof loc.offsetLeft != 'undefined') {
 		//	若loc為Document Object
 
-		/*
-		  //alert(loc.id+':'+loc.offsetLeft+','+loc.offsetTop+';'+loc.offsetWidth+','+loc.offsetHeight);
-		  var l=loc.offsetLeft,t=loc.offsetTop,w,h,n,add,outsideBLOCK,countH=window.navigator.userAgent.indexOf("MSIE")>=0;	//	真妙..moz表示在<H\d>中的obj時不把H\d當作parent算進去
-		  if(typeof loc.offsetWidth!='undefined')w=loc.offsetWidth,h=loc.offsetHeight;	//	loc.offsetWidth可能未定義？
-		  //var tt=loc.tagName+':'+loc.offsetLeft+','+loc.offsetTop+'\n';	//	for debug
-		  //	下面這段依瀏覽器而有不同 (-_-)!!
-		  while(isNaN((loc=loc.parentNode).offsetLeft)){	//	IE在用style:class時會出現誤差。
-		   n=loc.tagName;
-		   //if( !/^T(ABLE|BODY|R)$/.test(n=loc.tagName) && (countH||!/^H\d$/.test(n)) )l+=loc.offsetLeft,t+=loc.offsetTop;
-		   if(n=='DIV')add=outsideBLOCK;
-		   else if(n=='TD' || countH&&/^H\d$/.test(n))add=1;
-		   outsideBLOCK= n=='TABLE'||n=='DIV';	//	loc.style.display
-		   //tt+=(add?'':'#')+n+(loc.style.display?'('+loc.style.display+')':'')+':'+loc.offsetLeft+','+loc.offsetTop+(outsideBLOCK?', outside BLOCK':'')+'\n';
-		   if(add)add=0,l+=loc.offsetLeft,t+=loc.offsetTop;
-		  }
-		  //alert(l+','+t+'\n'+tt);	//	need to enable definition of tt above
-		  loc={'left':l,'top':t,'width':w,'height':h};
-		*/
+		if(false){
+			if(false)alert(loc.id+':'+loc.offsetLeft+','+loc.offsetTop+';'+loc.offsetWidth+','+loc.offsetHeight);
+			  var l=loc.offsetLeft,t=loc.offsetTop,w,h,n,add,outsideBLOCK,
+				//	真妙...moz表示在<H\d>中的obj時不把H\d當作parent算進去
+			  countH=window.navigator.userAgent.indexOf("MSIE")>=0;
+			  if(typeof loc.offsetWidth!='undefined'){
+					//	loc.offsetWidth可能未定義？
+				  w=loc.offsetWidth;h=loc.offsetHeight;
+			  }
+				//	for debug
+			  //var tt = loc.tagName + ':' + loc.offsetLeft + ',' + loc.offsetTop + '\n';
+			  //	下面這段依瀏覽器而有不同 (-_-)!!
+			  while(isNaN((loc=loc.parentNode).offsetLeft)){
+				  //	IE在用style:class時會出現誤差。
+			   n=loc.tagName;
+			   if(false)if( !/^T(ABLE|BODY|R)$/.test(n=loc.tagName) && (countH||!/^H\d$/.test(n)) )l+=loc.offsetLeft,t+=loc.offsetTop;
+			   if(n=='DIV')add=outsideBLOCK;
+			   else if(n=='TD' || countH&&/^H\d$/.test(n))add=1;
+			   outsideBLOCK= n=='TABLE'||n=='DIV';
+			   //	loc.style.display
+			   if(false){tt+=(add?'':'#')+n+(loc.style.display?'('+loc.style.display+')':'')+':'+loc.offsetLeft+','+loc.offsetTop+(outsideBLOCK?', outside BLOCK':'')+'\n';}
+			   if(add)add=0,l+=loc.offsetLeft,t+=loc.offsetTop;
+			  }
+			  if(false){
+					//	need to enable definition of tt above
+				  alert(l+','+t+'\n'+tt);
+			  }
+			  loc={'left':l,'top':t,'width':w,'height':h};
+		}
+
 		loc = get_node_offset(loc);
 		if ((flag & locate_node_flag.modeFlag) == locate_node_flag.auto)
 			flag += locate_node_flag.dialog - locate_node_flag.auto, dialog = locate_node_flag.dialog;
@@ -5381,7 +5645,7 @@ function locate_node(obj, loc, margin, flag) {
 	win = get_window_status();
 	if (!margin)
 		margin =
-			// dialog?dMargin:{'X':0,'Y':0};
+			// dialog ? dMargin : {'X' : 0, 'Y' : 0};
 			dMargin;
 	else
 		handle_percent(margin, 1);
@@ -5398,7 +5662,7 @@ function locate_node(obj, loc, margin, flag) {
 			flag += locate_node_flag.rel - locate_node_flag.auto;
 		handle_percent(loc);
 	}
-	// alert(loc.left+','+loc.top+';'+margin.X+','+margin.Y);
+	if(false) alert(loc.left+','+loc.top+';'+margin.X+','+margin.Y);
 	if ((flag & locate_node_flag.modeFlag) == locate_node_flag.auto)
 		// 到這裡還沒決定就很奇怪了
 		flag += locate_node_flag[loc.width && loc.height && loc.top < win.windowH
@@ -5407,14 +5671,18 @@ function locate_node(obj, loc, margin, flag) {
 				- locate_node_flag.auto;
 
 	// 調整與判別
-	// alert(loc.left+','+loc.top+';'+margin.X+','+margin.Y);
-	// alert(loc.left+margin.X+','+(loc.top+margin.Y));
-	// alert('dialog:'+dialog);
+	if(false){
+		 alert(loc.left+','+loc.top+';'+margin.X+','+margin.Y);
+		 alert(loc.left+margin.X+','+(loc.top+margin.Y));
+		 alert('dialog:'+dialog);
+	}
 
-	if ((flag & locate_node_flag.modeFlag) == locate_node_flag.rel)
+	if ((flag & locate_node_flag.modeFlag) == locate_node_flag.rel){
 		// 改成絕對座標。此後僅存abs/dialog
-		flag += locate_node_flag.abs - locate_node_flag.rel// -(flag&locate_node_flag.modeFlag)
-		, loc.left += win.scrollLeft, loc.top += win.scrollTop;
+		flag += locate_node_flag.abs - locate_node_flag.rel
+		// - (flag & locate_node_flag.modeFlag)
+		; loc.left += win.scrollLeft; loc.top += win.scrollTop;
+	}
 
 	// 最後要設定的值
 	var resizable = !(flag & locate_node_flag.noResize), boxL = loc.left, boxT = loc.top, boxW = -1, boxH = -1;
@@ -5447,7 +5715,7 @@ function locate_node(obj, loc, margin, flag) {
 			if (!loc.height)
 				loc.height = 0;
 		} else
-			// abs時,相當於dialog在(0,0)大小(0,0)
+			// abs時, 相當於dialog在(0,0)大小(0,0)
 			loc = {
 				'left' : win.scrollLeft,
 				'top' : win.scrollTop,
@@ -5466,9 +5734,9 @@ function locate_node(obj, loc, margin, flag) {
 				m3 = win.scrollLeft + win.windowW, m4 = win.scrollTop + win.windowH
 				// move kind set use locate_node_flag.dialog~ flag
 				, movekind;
-		// alert(lA+','+lB+','+lC+','+lD+'\n'+obj.offsetWidth+','+obj.offsetHeight);
+		if(false) alert(lA+','+lB+','+lC+','+lD+'\n'+obj.offsetWidth+','+obj.offsetHeight);
 
-	/*
+	/**<code>
 		+---------------------+
 		|        ^            |
 		|        | lB         |	<--screen (active frame)
@@ -5479,7 +5747,7 @@ function locate_node(obj, loc, margin, flag) {
 		|        | lA         |
 		|        |            |
 		+---------------------+
-	*/
+	</code>*/
 		// 決定 mode
 		if (dialog && (flag & locate_node_flag.dialogForce))
 			movekind = dialog;
@@ -5502,7 +5770,7 @@ function locate_node(obj, loc, margin, flag) {
 				movekind =
 					// 以較大、可視的為準
 					dialog != locate_node_flag.dialogRight && dialog != locate_node_flag.dialogLeft ?
-						// 沒考慮假如lA<5時..
+						// 沒考慮假如lA<5時...
 						lA < lB && resizable ? locate_node_flag.dialogUp : locate_node_flag.dialogDown :
 						//
 						lC < lD && resizable ? locate_node_flag.dialogLeft : locate_node_flag.dialogRight;
@@ -5540,7 +5808,7 @@ function locate_node(obj, loc, margin, flag) {
 			m3 += obj.offsetWidth, m4 += obj.offsetHeight;
 		}
 		// 奇怪的是，alert(obj.offsetWidth)後obj.offsetWidth就變成0了。可能因為這值需要出函數之後再改。
-		// alert(resizable+'\n'+m1+','+m2+','+m3+','+m4+','+movekind+'\n'+obj.offsetWidth+','+obj.offsetHeight);
+		if(false) alert(resizable+'\n'+m1+','+m2+','+m3+','+m4+','+movekind+'\n'+obj.offsetWidth+','+obj.offsetHeight);
 		makeFit(m1, m2, m3, m4, movekind == locate_node_flag.dialogRight
 				|| movekind == locate_node_flag.dialogLeft ? loc.top : 0);
 	}
@@ -5548,13 +5816,13 @@ function locate_node(obj, loc, margin, flag) {
 	// 需要設在如 auto_TOC() layer 之上。
 	obj.style.zIndex = 100;
 	// 設定位置
-	// alert(boxL+','+boxT+','+boxW+','+boxH+','+Display);
+	if(false) alert(boxL+','+boxT+','+boxW+','+boxH+','+Display);
 	obj.style.position = 'absolute';
 	obj.style.left = boxL + 'px';
 	obj.style.top = boxT + 'px';
 	if (boxW >= 0 || boxH >= 0) {
 		obj.style.overflow = 'auto';
-		//alert(obj.style.width+','+obj.style.height+'\n'+typeof obj.style.width+'\n->w,h:'+boxW+','+boxH);
+		if(false)alert(obj.style.width+','+obj.style.height+'\n'+typeof obj.style.width+'\n->w,h:'+boxW+','+boxH);
 		if (boxW >= 0)
 			obj.style.width = boxW + 'px';
 		if (boxH >= 0)
@@ -5563,7 +5831,7 @@ function locate_node(obj, loc, margin, flag) {
 	obj.style.display = Display;
 	obj.style.visibility = Visibility;
 
-	// alert(obj.style.width+','+obj.style.height+'\n'+obj.offsetWidth+','+obj.offsetHeight);
+	if(false) alert(obj.style.width+','+obj.style.height+'\n'+obj.offsetWidth+','+obj.offsetHeight);
 	return obj;
 };
 
@@ -5581,28 +5849,31 @@ _.locate_node = locate_node;
 function Punycode() {
 }
 
-Punycode.map='abcdefghijklmnopqrstuvwxyz0123456789',
-Punycode.Dmap=0,
-Punycode.base=36,//Punycode.map.length
-Punycode.tmin=1,
-Punycode.tmax=26,
-Punycode.skew=38,
-Punycode.damp=700,
-Punycode.initial_bias=72,//偏移
-Punycode.initial_n=0x80,//128
-Punycode.prefix="xn--",//the default ACE prefix
+Punycode.map='abcdefghijklmnopqrstuvwxyz0123456789';
+Punycode.Dmap=0;
+Punycode.base=Punycode.map.length;
+Punycode.tmin=1;
+Punycode.tmax=26;
+Punycode.skew=38;
+Punycode.damp=700;
+//偏移
+Punycode.initial_bias=72;
+//128
+Punycode.initial_n=0x80;
+//the default ACE prefix
+Punycode.prefix="xn--";
 Punycode.delimiter='-';
-Punycode._b=Punycode.base-Punycode.tmin,
-//Punycode._t=(Punycode._b*Punycode.tmax)>>1,
+Punycode._b=Punycode.base-Punycode.tmin;
+//Punycode._t = (Punycode._b * Punycode.tmax) >> 1;
 Punycode._t=Math.floor(Punycode._b*Punycode.tmax/2);
 
 //	IDNA ToASCII
 Punycode.encodeDomain=function(UURL){
  var m=UURL.match(/^([\w\d\-]+:\/\/)?([^\/]+)/),UDomain=m?m[2]:'',i=(m=UDomain)?UURL.indexOf(m):0;
-	//document.write('<hr />Punycode.encodeDomain UDomain: ['+i+']['+m+']<br />');
+	if(false)document.write('<hr />Punycode.encodeDomain UDomain: ['+i+']['+m+']<br />');
  if(m&&m.replace(/[\x01-\x7f]+/g,''))
   m=m.replace(/([^.]+)\./g,function($0,$1){
-	//document.write($1+'→'+encode($1)+'<br />');
+	  if(false)document.write($1+'→'+encode($1)+'<br />');
 	 return Punycode.prefix+Punycode.encode($1)+'.';
 	}),UURL=encodeURI(UURL.slice(0,i)+m+UURL.slice(i+UDomain.length));
  return UURL;
@@ -5611,10 +5882,10 @@ Punycode.encodeDomain=function(UURL){
 //	IDNA ToUnicode
 Punycode.decodeDomain=function(PURL){
  var m=PURL.match(/^([\w\d\-]+:\/\/)?([^\/]+)/),PDomain=m?m[2]:'',i=(m=PDomain)?PURL.indexOf(m):0;
-	//document.write('<hr />Punycode.decodeDomain PDomain: ['+i+']['+m+']<br />');
+ if(false)document.write('<hr />Punycode.decodeDomain PDomain: ['+i+']['+m+']<br />');
  if(m){
   m=m.replace(new RegExp(Punycode.prefix+'([^.]+)\\.','g'),function($0,$1){
-	//document.write($1+'→'+Punycode.decode($1)+'<br />');
+	  if(false)document.write($1+'→'+Punycode.decode($1)+'<br />');
 	 return Punycode.decode($1)+'.';
 	});
   if(m!=PDomain){
@@ -5627,8 +5898,10 @@ Punycode.decodeDomain=function(PURL){
 
 
 Punycode.adapt=function(delta,numpoints,firsttime){
-	//document.write('*adapt: '+delta+', '+numpoints+', '+firsttime+', _b='+_b+', _t='+_t+'<br />');
- delta=firsttime?Math.floor(delta/Punycode.damp):delta>>1;//Math.floor(delta/(firsttime?damp:2));
+	if(false)document.write('*adapt: '+delta+', '+numpoints+', '+firsttime+', _b='+_b+', _t='+_t+'<br />');
+ delta=
+	//Math.floor(delta/(firsttime?damp:2));
+	 firsttime?Math.floor(delta/Punycode.damp):delta>>1;
  delta+=Math.floor(delta/numpoints);
  var k=0;
  for(;delta>_t;k+=Punycode.base)delta=Math.floor(delta/Punycode._b);
@@ -5638,7 +5911,7 @@ Punycode.adapt=function(delta,numpoints,firsttime){
 Punycode.encode=function(UString){
  var n=Punycode.initial_n,cA=[],m,mA=[],i=0,c
 	,q,delta=0,bias=Punycode.initial_bias,output=UString.replace(/[^\x01-\x7f]+/g,''),h=output.length,b=h;
-	//document.write('<hr />Punycode.encode begin: ['+output+']<br />');
+ if(false)document.write('<hr />Punycode.encode begin: ['+output+']<br />');
  if(b)output+=Punycode.delimiter;
 
  for(;i<UString.length;i++){
@@ -5648,82 +5921,94 @@ Punycode.encode=function(UString){
  mA.sort(library_namespace.descending);
 
  while(h<cA.length){
-  do{c=mA.pop();}while(m==c);	//	預防重複
+		//	預防重複
+  do{c=mA.pop();}while(m==c);
   m=c;
-  //if(m-n>(Number.MAX_VALUE-delta)/(h+1)){alert('Punycode: overflow');return;}
-  delta+=(m-n)*(h+1);//	should test overflow
+  if(false)if(m-n>(Number.MAX_VALUE-delta)/(h+1)){alert('Punycode: overflow');return;}
+//	should test overflow
+  delta+=(m-n)*(h+1);
   n=m;
   for(i=0;i<cA.length;i++){
-   if(c=cA[i],c<n)++delta;//if(c=cA[i],c<n&&!++delta){alert('Punycode: overflow');return;}//	fail on overflow
-	//document.write('<b>'+UString.charAt(i)+' '+(c.toString(16)+','+n.toString(16)).toUpperCase()+'</b><br />');
+//		fail on overflow
+	  if(false)if(c=cA[i],c<n&&!++delta){alert('Punycode: overflow');return;}
+   if(c=cA[i],c<n)++delta;
+	if(false)document.write('<b>'+UString.charAt(i)+' '+(c.toString(16)+','+n.toString(16)).toUpperCase()+'</b><br />');
    if(c==n){
     for(q=delta,k=Punycode.base;;k+=Punycode.base){
      t=k<=bias/* +Punycode.tmin: not needed */?Punycode.tmin:k>=bias+tmax?Punycode.tmax:k-bias;
      if(q<t)break;
      output+=Punycode.map.charAt(t+(q-t)%(Punycode.base-t));
-	//document.write('<b>'+output+'</b><br />');
+     if(false)document.write('<b>'+output+'</b><br />');
      q=Math.floor((q-t)/(base-t));
     }
     output+=Punycode.map.charAt(q);
     bias=Punycode.adapt(delta,h+1,h==b);
-	//document.write('h='+h+'/'+cA.length+', bias='+bias+', '+output+'<br />');
+    if(false)document.write('h='+h+'/'+cA.length+', bias='+bias+', '+output+'<br />');
     delta=0,h++;
    }
   }
   delta++,n++;
  }
-	//document.write(UString+'→'+output+'<br />');
+ if(false)document.write(UString+'→'+output+'<br />');
  return output;
 };
 
 Punycode.decode=function(PCode){
  var n=Punycode.initial_n,i=0,p=PCode.lastIndexOf(Punycode.delimiter),bias=Punycode.initial_bias,output=p==-1?'':PCode.slice(0,p)
 	,oldi,w,digit,l;
-	//document.write('<hr />Punycode.decode begin: ['+output+']<br />');
- if(!Punycode.Dmap)for(w=0,Punycode.Dmap={};w<Punycode.map.length;w++)Punycode.Dmap[Punycode.map.charAt(w)]=w;//,document.write('Punycode.Dmap['+Punycode.map.charAt(w)+']='+w+'<br />');
+ if(false)document.write('<hr />Punycode.decode begin: ['+output+']<br />');
+ if(!Punycode.Dmap)for(w=0,Punycode.Dmap={};w<Punycode.map.length;w++){
+	 Punycode.Dmap[Punycode.map.charAt(w)]=w;
+	 if(false)document.write('Punycode.Dmap['+Punycode.map.charAt(w)+']='+w+'<br />');
+ }
  while(p<PCode.length-1){
   for(oldi=i,w=1,k=Punycode.base;;k+=Punycode.base){
    if(++p>=PCode.length){alert('Punycode: invalid input: out of range');return PCode;}
-	//document.write('PCode.charAt('+p+')'+' = '+PCode.charAt(p)+' → '+Punycode.Dmap[PCode.charAt(p)]+'<br />');
+   if(false)document.write('PCode.charAt('+p+')'+' = '+PCode.charAt(p)+' → '+Punycode.Dmap[PCode.charAt(p)]+'<br />');
    if(isNaN(digit=Dmap[PCode.charAt(p)])){alert('Punycode: invalid input');return PCode;}
-   //if(digit>(Number.MAX_VALUE-i)/w){alert('Punycode: overflow');return;}
+   if(false)if(digit>(Number.MAX_VALUE-i)/w){alert('Punycode: overflow');return;}
    i+=digit*w;
    t=k<=bias/* +Punycode.tmin: not needed */?Punycode.tmin:k>=bias+Punycode.tmax?Punycode.tmax:k-bias;
-	//document.write('i='+i+', t='+t+', digit='+digit+', k='+k+'<br />');
+   if(false)document.write('i='+i+', t='+t+', digit='+digit+', k='+k+'<br />');
    if(digit<t)break;
-   //if(w>Number.MAX_VALUE/(base-t)){alert('Punycode: overflow');return;}
+   if(false)if(w>Number.MAX_VALUE/(base-t)){alert('Punycode: overflow');return;}
    w*=Punycode.base-t;
   }
   bias=Punycode.adapt(i-oldi,l=output.length+1,oldi==0);
-	//document.write('bias='+bias+', n='+n+', i='+i+', l='+l+'<br />');
-  //if(i/l>Number.MAX_VALUE-n){alert('Punycode: overflow');return;}
+  if(false)document.write('bias='+bias+', n='+n+', i='+i+', l='+l+'<br />');
+  if(false)if(i/l>Number.MAX_VALUE-n){alert('Punycode: overflow');return;}
   n+=Math.floor(i/l);
   i%=l;
-	//document.write('['+output.length+']'+output+'+'+n+'(0x'+n.toString(16).toUpperCase()+')@'+i+'→');
+  if(false)document.write('['+output.length+']'+output+'+'+n+'(0x'+n.toString(16).toUpperCase()+')@'+i+'→');
   output=output.slice(0,i)+String.fromCharCode(n)+output.slice(i);
-	//document.write('['+output.length+']'+output+'<br />');
+  if(false)document.write('['+output.length+']'+output+'<br />');
   i++;
  }
-	//document.write(PCode+'→'+output+'<br />');
+ if(false)document.write(PCode+'→'+output+'<br />');
  return output;
 };
 
 
-/*
-var testC='Hello-Another-Way--fc4qua05auwb3674vfr0b',rC;
-document.write('<hr />'+
-//Punycode.encodeDomain('http://國際.計畫.org/國際.計畫.htm')
-Punycode.decodeDomain('http://xn--9cs229l.xn--gpyr35b.org/%E5%9C%8B%E9%9A%9B.%E8%A8%88%E7%95%AB.htm')
-//Punycode.encode('463578')
-//Punycode.decode('ihqwcrb4cv8a8dqg056pqjye')+'<hr />'+Punycode.encode('他们为什么不说中文')
-//Punycode.decode('ihqwctvzc91f659drss3x8bo0yb')+'<hr />'+Punycode.encode('他們爲什麽不說中文')
-//(rC=Punycode.decode(testC))+'<hr />'+(rC=Punycode.encode(rC))+'<hr />'+(testC==rC?'OK':'<b style="color:red">FAILED</b>:<br />'+testC+'<br />'+rC)
-);
-*/
+if(false){
+	var testC='Hello-Another-Way--fc4qua05auwb3674vfr0b',rC;
+	document.write('<hr />'+
+	//Punycode.encodeDomain('http://國際.計畫.org/國際.計畫.htm')
+	Punycode.decodeDomain('http://xn--9cs229l.xn--gpyr35b.org/%E5%9C%8B%E9%9A%9B.%E8%A8%88%E7%95%AB.htm')
+	//Punycode.encode('463578')
+	
+	+Punycode.decode('ihqwcrb4cv8a8dqg056pqjye')
+	+'<hr />'+Punycode.encode('他们为什么不说中文')
+	
+	+Punycode.decode('ihqwctvzc91f659drss3x8bo0yb')+'<hr />'+Punycode.encode('他們爲什麽不說中文')
+	
+	+'<hr />'+
+	(rC=Punycode.decode(testC))+'<hr />'+(rC=Punycode.encode(rC))+'<hr />'+(testC==rC?'OK':'<b style="color:red">FAILED</b>:<br />'+testC+'<br />'+rC)
+	);
+}
 
 
 
-/*	一個非常不好的 handle onload 方法。只在onload不具有arguments時有用，應該亦可用setTimeout('~',0)
+/**<code>	一個非常不好的 handle onload 方法。只在onload不具有arguments時有用，應該亦可用setTimeout('~',0)
 	where	0:back,1:front
 
 for IE:
@@ -5735,19 +6020,19 @@ c.f.	http://www.brothercake.com/	http://simonwillison.net/2004/May/26/addLoadEve
 	GO1.1 Generic onload by Brothercake
 	window.addEventListener,document.addEventListener,typeof window.attachEvent
 c.f.	setTimeout('~',0);	不過這不能確定已經load好
-*/
-/*
-function addonload(s,where){
- if(!s||typeof window!='object')return 1;
- if(typeof s=='function'){
-  s=library_namespace.parse_function(s);
-  if(!s||!s.funcName)return 2;
-  s=s.funcName+'()';
- }
- var o=window.onload?typeof window.onload=='string'?window.onload:library_namespace.parse_function(window.onload).contents:'';
- window.onload=new Function(where?s+';\n'+o:o+';\n'+s);
+</code>*/
+if(false){
+	var addonload=function (s,where){
+		 if(!s||typeof window!='object')return 1;
+		 if(typeof s=='function'){
+		  s=library_namespace.parse_function(s);
+		  if(!s||!s.funcName)return 2;
+		  s=s.funcName+'()';
+		 }
+		 var o=window.onload?typeof window.onload=='string'?window.onload:library_namespace.parse_function(window.onload).contents:'';
+		 window.onload=new Function(where?s+';\n'+o:o+';\n'+s);
+		}
 }
-*/
 
 
 _// JSDT:_module_
@@ -5765,12 +6050,12 @@ DOM_loaded = function() {
 };
 
 
-/*
+if(false){
 // The DOM ready check for Internet Explorer
 try{document.documentElement.doScroll('left');}
 catch(e){setTimeout(arguments.callee, 50);return;}
+}
 
-*/
 _// JSDT:_module_
 .
 /**
@@ -5873,17 +6158,20 @@ add_listener = function add_listener(type, listener, target_element, p_first) {
 		p_first = typeof p_first === 'undefined' ? _s.p_first : !!p_first;
 
 	//	listener is Array or Object.
-	if (library_namespace.is_Object(listener) || Array.isArray(listener))
+	if (library_namespace.is_Object(listener) || Array.isArray(listener)){
 		// usage: add_listener('unload',{true:Unload1});
 		// usage: add_listener('unload',[Unload1,Unload2]);
 		// 因為 Array 會從最小的開始照順序出，所以這邊不再判別是否為 Array。
-		for (i in listener)
-			// if(isNaN(f))sl('add_listener: to '+i),_s.p_first=i==='true';//||i==1||i===true
+		for (i in listener){
+			if(false) if(isNaN(f)
+					//||i==1||i===true
+					){sl('add_listener: to '+i);_s.p_first=i==='true';}
 			_s(type, listener[i], target_element,
-					i === 'true' || (i === 'false' ? false : undefined));// ,sl((typeof i)+' ['+i+'] '+_s.p_first)
+					i === 'true' || (i === 'false' ? false : undefined));if(false) sl((typeof i)+' ['+i+'] '+_s.p_first);
+		}
 
-	else if(library_namespace.is_Function(listener)){
-		/*
+	}else if(library_namespace.is_Function(listener)){
+		/**
 		 * 先設定好 native listener adding function
 		 */
 		if (target_element)
@@ -5899,7 +6187,7 @@ add_listener = function add_listener(type, listener, target_element, p_first) {
 			if(!e)
 				e = window.event;
 
-			//library_namespace.debug('fire ' + type, 0, 'add_listener');
+			if(false)library_namespace.debug('fire ' + type, 0, 'add_listener');
 
 			//	正規化 <a href="http://www.w3.org/TR/2009/WD-DOM-Level-3-Events-20090908/#interface-Event">Document Object Model (DOM) Level 3 Events</a>.
 			//	這邊的附加設定應盡量只添上 native object, 預防 memory leak.
@@ -5911,7 +6199,7 @@ add_listener = function add_listener(type, listener, target_element, p_first) {
 			//	from fix in jQuery
 
 			// check if target is a textnode (safari)
-			if ( e.target && e.target.nodeType === 3 )
+			if ( e.target && e.target.nodeType === TEXT_NODE )
 				e.target = e.target.parentNode;
 
 			// Add relatedTarget, if necessary
@@ -5933,7 +6221,7 @@ add_listener = function add_listener(type, listener, target_element, p_first) {
 
 		// 主要核心動作設定之處理
 		//	TODO: 在 onload 時使 target_element = null
-		// sl(type+' ('+((typeof p_first=='undefined'?_s.p_first:!!p_first)?'p_first':'run first')+'): '+listener);
+		if(false) sl(type+' ('+((typeof p_first=='undefined'?_s.p_first:!!p_first)?'p_first':'run first')+'): '+listener);
 		if(adder){
 			try{
 				//	直接用 target_element.addEventListener 不會有問題。
@@ -5948,7 +6236,7 @@ add_listener = function add_listener(type, listener, target_element, p_first) {
 		}
 
 		if(target_element){
-			//library_namespace.warn('add_listener: Can not get element.addEventListener! element.attachEvent: ' + target_element.attachEvent);
+			if(false)library_namespace.warn('add_listener: Can not get element.addEventListener! element.attachEvent: ' + target_element.attachEvent);
 		}
 		return target_element && (adder = target_element.attachEvent) ?
 			// http://msdn.microsoft.com/en-us/library/ms536343(VS.85).aspx
@@ -5986,18 +6274,18 @@ add_listener.get_adder = function() {
 	 * <a href="http://simonwillison.net/2004/May/26/addLoadEvent/" accessdate="2010/4/16 22:36">Executing JavaScript on page load</a>
 	 */
 	return window.addEventListener
-	/*
+	/**
 	 * opera 7.50, ie5.0w, ie5.5w, ie6w: window.attachEvent
 	 * opera 7.50: document.attachEvent
 	 */
 	|| typeof window.attachEvent === 'function' && function(type, listener) {
 		window.attachEvent('on' + type, listener);
 	}
-	/*
+	/**
 	 * MSN/OSX, opera 7.50, safari 1.2, ow5b6.1: document.addEventListener
 	 */
 	|| document.addEventListener
-	/*
+	/**
 	 * ie5m, MSN/OSX, ie5.0w, ie5.5w ie6w: document.onreadystatechange
 	 */
 	|| null;
@@ -6022,27 +6310,27 @@ add_listener.default_adder = function(type, listener, p_first, target_element) {
 		target_element = window;
 
 	var old = target_element[type = 'on' + type];
-	//library_namespace.debug('adder ' + type + (old?' with old listener: '+old:''), 0, 'add_listener.default_adder');
+	if(false)library_namespace.debug('adder ' + type + (old?' with old listener: '+old:''), 0, 'add_listener.default_adder');
 
 	return target_element[type] =
 		old ?
-			//	TODO: typeof old==='string'
+			//	TODO: typeof old === 'string'
 			p_first ? function(e) {
 				if(!e)
 					e = window.event;
-				//library_namespace.debug('fire ' + type + ' (parentNode first)', 0, 'add_listener.default_adder');
+				if(false)library_namespace.debug('fire ' + type + ' (parentNode first)', 0, 'add_listener.default_adder');
 				old.call(target_element, e);
 				listener.call(target_element, e);
 			} : function(e) {
 				if(!e)
 					e = window.event;
-				//library_namespace.debug('fire ' + type + ' (parentNode latter)', 0, 'add_listener.default_adder');
+				if(false)library_namespace.debug('fire ' + type + ' (parentNode latter)', 0, 'add_listener.default_adder');
 				listener.call(target_element, e);
 				old.call(target_element, e);
 			}
 		:
 			function(this_event) {
-				//library_namespace.debug('fire ' + type, 0, 'add_listener.default_adder');
+			if(false)library_namespace.debug('fire ' + type, 0, 'add_listener.default_adder');
 				listener.call(target_element, this_event || window.event);
 			}
 		;
@@ -6133,7 +6421,7 @@ _// JSDT:_module_
  * 獲取頁面上選中的選取區資訊。
  * 
  * @example <code>
- * CeL.add_listener('mouseup', function (e) { var s = CeL.get_selection(); if (s && s.text) CeL.debug('select @' + this + '(' + s.element + ')' + ' (' + s.left + '+' + s.width + ',' + s.top + '+' + s.height + '), (' + e.pageX + ',' + e.pageY + '): ' + s.text); }, target_element);
+	CeL.add_listener('mouseup', function (e) { var s = CeL.get_selection(); if (s && s.text) CeL.debug('select @' + this + '(' + s.element + ')' + ' (' + s.left + '+' + s.width + ',' + s.top + '+' + s.height + '), (' + e.pageX + ',' + e.pageY + '): ' + s.text); }, target_element);
  * </code>
  * 
  * @param	{Number} [index]	TODO: 第幾選取區, default: all or 0 if there's only ONE/ZERO selection
@@ -6185,7 +6473,7 @@ try{
 			//	Gecko: https://developer.mozilla.org/en/DOM/range
 			//	除了 Gecko 外，都有 s.getBoundingClientRect 但無 s.endContainer.getBoundingClientRect。
 			//	Gecko 可以取 mouse event 作 workaround
-			//library_namespace.debug(s.endContainer.parentNode);
+			if(false)library_namespace.debug(s.endContainer.parentNode);
 			var offset = _.get_node_offset(
 					s.getBoundingClientRect ? s : s.endContainer.parentNode
 				);
@@ -6202,7 +6490,9 @@ try{
 				text : tag === 'textarea' || tag === 'input' || tag === 'select'
 						? e.value.substring(e.selectionStart, e.selectionEnd)
 						: s.toString(),
-				element: s,//s.endContainer,
+				element: 
+					//s.endContainer
+					s,
 				selection: s
 			};
 	
@@ -6247,30 +6537,26 @@ try{
 	// TODO: handle exception
 }
 
-/*
-	↑HTML only	-------------------------------------------------------
-*/
+// ↑HTML only	-------------------------------------------------------
 
 
 
 var is_IE=/*@cc_on!@*/!true;
 
-/*
-http://www.real-blog.com/programming/259
-http://fettig.net/weblog/2006/10/09/detecting-ie7-in-javascript/
-
+//http://www.real-blog.com/programming/259
+//http://fettig.net/weblog/2006/10/09/detecting-ie7-in-javascript/
+if(false)
 if(typeof window.XMLHttpRequest!="undefined"){
  // IE 7, mozilla, safari, opera 9
 }else{
- // IE6, older browsers
+ // IE6, old browsers
 }
-*/
 
 
 
 
 
-/*
+/**<code>
 http://www.cnlei.org/blog/article.asp?id=337
 在IE下：
 >> 支持keyCode
@@ -6284,7 +6570,7 @@ http://www.cnlei.org/blog/article.asp?id=337
 >> 支持keyCode和which，二者的值相同
 >> 不支持charCode，值為 undefined
 
-*/
+</code>*/
 _// JSDT:_module_
 .
 /**
@@ -6342,23 +6628,41 @@ function add_engine() {
 //	此函數只能用一次，為輸入資料良好之情況下使用。完整版： HTML_to_Unicode
 //turnUnicode[generateCode.dLK]='setTool,getText';
 function turnUnicode(b){
- //s=s.replace(/&#(\d+);/g,String.fromCharCode("$1"));//行不通
+ if(false){
+		//行不通
+	 s=s.replace(/&#(\d+);/g,String.fromCharCode("$1"));
+ }
  var s=this.valueOf().replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'"),m,t;
 
  //舊版本
- //if(m=s.match(/&#(\d{2,7});/g))for(var i=0;i<m.length;i++)s=s.replace(m[i],String.fromCharCode(parseInt(m[i].slice(2,-1))));
+ if(false){
+	 if(m=s.match(/&#(\d{2,7});/g))for(var i=0;i<m.length;i++)s=s.replace(m[i],String.fromCharCode(parseInt(m[i].slice(2,-1))));
+ }
 
- s=s	//.replace(/&#(0*38|[xX]0*26);/g,"\0")	//預防&#38;：&#38;=&
- //	.replace(/&#0*38;([^\d;]|$)/g,"\0$1").replace(/&#[xX]0*26;?([^a-fA-F\d;]|$)/g,"\0$1")
+ if(false){
+		//預防&#38;：&#38;=&
+ s=s
+ .replace(/&#(0*38|[xX]0*26);/g, "\0")
+ 
+ 	.replace(/&#0*38;([^\d;]|$)/g, "\0$1")
+ .replace(/&#[xX]0*26;?([^a-fA-F\d;]|$)/g, "\0$1");
+ }
+ 
+	//JScript 5.5~
+ s=s.replace(/&#0*(\d{2,7});/g,function($0,$1){return String.fromCharCode($1);});
+ 	//預防error之版本,~10FFFF=1114111
+ if(false){
+	 s=s	.replace(/&#0*(\d{2,7});/g, function($0,$1){return $1>1114111?$0:String.fromCharCode($1);});
+	 
+	 if(mode=='x')
+	 	//$x111;之版本
+	  s=s.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g,function($0,$1){return String.fromCharCode(parseInt($1,16));});
+	 s=s	.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g,function($0,$1){var t=parseInt($1,16);return t>1114111?$0:String.fromCharCode(t);});
+ }
 
- .replace(/&#0*(\d{2,7});/g,function($0,$1){return String.fromCharCode($1);})	//JScript 5.5~
- //	.replace(/&#0*(\d{2,7});/g,function($0,$1){return $1>1114111?$0:String.fromCharCode($1);})	//預防error之版本,~10FFFF=1114111
 
- //if(mode=='x')
- //.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})	//$x111;之版本
- //	.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g,function($0,$1){var t=parseInt($1,16);return t>1114111?$0:String.fromCharCode(t);})
-
- //.replace(/\0/g,"&")	//預防&#38;回復
+ 	//預防&#38;回復
+ s=s.replace(/\0/g, "&")
  ;
  if(b)s=s.gText();
  return s;
@@ -6745,11 +7049,15 @@ Unicode_to_HTML = function(text, flags, ignore_tags) {
 
 	text = text.replace(/ /g, '&nbsp;');
 
-	//if(!f)f=0;
+	//if (!f) f = 0;
 	if (flags & 1)
 		text = text.replace(/	/g, '<span style="margin-left:3em;">&nbsp;</span>');
 	if (!(flags & 2))
-		text = text.replace(/(\r?\n)/g, '<br />$1'); //+'<br />\n';
+		{
+		text = text.replace(/(\r?\n)/g, '<br />$1')
+		 //+'<br />\n'
+		;
+		}
 	return text;
 };
 
@@ -6757,18 +7065,18 @@ Unicode_to_HTML = function(text, flags, ignore_tags) {
 _// JSDT:_module_
 .
 Unicode_unescape = function(U) {
-	var T = U.replace(/\\\\|\\u005[cC]|\\x5[cC]|\\134/g, "\0")
-		/*
-		//way 1
-		.replace(/\\u([a-fA-F\d]{4})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
-		.replace(/\\x([a-fA-F\d]{2})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
-		.replace(/\\([0-7]{1,3})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
-		//way 2
-		.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2})/g,function($0,$1){return String.fromCharCode(parseInt($1.substr(1),16));})
-		.replace(/\\([0-7]{1,3})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
-		*/
+	var T = U.replace(/\\\\|\\u005[cC]|\\x5[cC]|\\134/g, "\0");
+		if(false){
+			//way 1
+			T=T.replace(/\\u([a-fA-F\d]{4})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
+			.replace(/\\x([a-fA-F\d]{2})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
+			.replace(/\\([0-7]{1,3})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));});
+			//way 2
+			T=T.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2})/g,function($0,$1){return String.fromCharCode(parseInt($1.substr(1),16));})
+			.replace(/\\([0-7]{1,3})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));});
+		}
 		//way 3
-		.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2}|[0-7]{1,3})/g, function ($0, $1) { var t = $1.charAt(0); return String.fromCharCode(parseInt(t == 'u' || t == 'x' ? $1.substr(1) : $1, 16)); })
+		T=T.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2}|[0-7]{1,3})/g, function ($0, $1) { var t = $1.charAt(0); return String.fromCharCode(parseInt(t == 'u' || t == 'x' ? $1.substr(1) : $1, 16)); })
 		;
 
 	if (T.indexOf("\\") != -1)
@@ -6808,9 +7116,11 @@ function TxtToCSS(T, r, sp) {
 	var i = 0, C = '', t, p = r && r > 3 && r < 9 ? '0'.repeat(r - 1) : '';
 	if (!sp) sp = ''; sp += '\\';
 
-	for (; i < T.length; i++)
-		t = T.charCodeAt(i).toString(16)
-		, C += sp + p.substr(0, r - t.length) + t; //(p&&r>t.length?p.substr(0,r-t.length):''):如果length是0或負值，會傳回空字串。
+	for (; i < T.length; i++){
+		t = T.charCodeAt(i).toString(16);
+		 //(p&&r>t.length?p.substr(0,r-t.length):''):如果length是0或負值，會傳回空字串。
+		 C += sp + p.substr(0, r - t.length) + t;
+	}
 	return C.slice(sp.length - 1);
 }
 
@@ -6830,7 +7140,9 @@ _// JSDT:_module_
 get_query = function(query_string, add_to) {
 	if (!query_string)
 		query_string = window/* self */.location.search.slice(1);
-	// else if(typeof query_string!=='string')..
+	 else if(typeof query_string!=='string'){
+		 //TODO
+	 }
 
 	var i, q = query_string.replace(/\+/g, ' ').split('&'), p, s = add_to || library_namespace.null_Object(), k, v;
 	for (i in q)
@@ -6877,9 +7189,11 @@ to_query_string = function(query_Object) {
 	return query_list.join('&');
 };
 
-/*	簡化 HTML (word)
-	simplify HTML
+/**	簡化 HTML (word)。
+	simplify HTML.
+
 	目標：剩下語意部分，去掉 style。
+	
 TODO:
 保留 b, em
 */
@@ -6892,7 +7206,7 @@ try {
 }
 
 //	保留 color: return style string to add
-//reduce_HTML.keep_color=
+//reduce_HTML.keep_color =
 reduce_HTML._keep_color = function (c) {
 	if (c !== 'black')
 		return c;
@@ -6909,7 +7223,7 @@ reduce_HTML.file = function (FP, enc) {
 	t = this(t);
 
 	FP = FP.replace(/\.[xs]?html?$/i, function ($0) { return '.reduced' + $0; });
-	//sl('reduce_HTML: ' + l + '→' + t.length + ' (' + parseInt(100 * t.length / l) + '%)' + ', save to [<a href="' + encodeURI(FP) + '">' + FP + '</a>].');
+	if(false)sl('reduce_HTML: ' + l + '→' + t.length + ' (' + parseInt(100 * t.length / l) + '%)' + ', save to [<a href="' + encodeURI(FP) + '">' + FP + '</a>].');
 	simpleWrite(FP, t, 'utf-8');
 };
 function reduce_HTML(t) {
@@ -6922,8 +7236,10 @@ function reduce_HTML(t) {
 			head : 1
 		}) ? $0 : '';
 	};
-	//if(m=t.match(/<!--\[if [^\]]+\]>[\s\S]*?<!\[endif\]-->/))sl(m[0].replace(/</g,'&lt;'));
-	//if(m=t.match(/<!\[if !vml\]>[\s\S]*?<!\[endif\]>/))sl(m[0]);
+	if(false){
+		if(m=t.match(/<!--\[if [^\]]+\]>[\s\S]*?<!\[endif\]-->/))sl(m[0].replace(/</g,'&lt;'));
+		if(m=t.match(/<!\[if !vml\]>[\s\S]*?<!\[endif\]>/))sl(m[0]);
+	}
 
 	t = t
 		.replace(/[\s\n]*<(t[dh])([^>]+)>[\s\n]*/ig, function ($0, $1, $2) { var a = $2.match(/[\s\n](col|row)span=['"]?\d{1,3}['"]?/ig); return '<' + $1 + (a ? a.join('') : '') + '>'; })
@@ -6944,20 +7260,24 @@ function reduce_HTML(t) {
 			return t + (s ? ' style="' + s + '"' : '') + '>';
 		})
 		.replace(/<(tr|table)[\s\n]+([^>]*)>/ig, '<$1>')
-		.replace(/<span>([\s\S]*?)<\/span>/ig, '$1')	//	不能用 .+|\n ，IE8 sometimes crash
-		.replace(/<span>([\s\S]*?)<\/span>/ig, '$1')	//	need several times
+			//	不能用 .+|\n ，IE8 sometimes crash
+		.replace(/<span>([\s\S]*?)<\/span>/ig, '$1')
+			//	need several times
+		.replace(/<span>([\s\S]*?)<\/span>/ig, '$1')
 		.replace(/<font>([\s\S]*?)<\/font>/ig, '$1')
+			//	2 times
 		.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig, f)
-		.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig, f)	//	2 times
+		.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig, f)
+		
 		.replace(/<o:p>([\s\S]*?)<\/o:p>/ig, '$1')
 		.replace(/<st1:[^>]+>([\s\S]*?)<\/st1:[^>]+>/ig, '$1')
 		.replace(/<!\[if !vml\]>([\s\S]*?)<!\[endif\]>/ig, '$1')
 		.replace(/<o:SmartTagType [^>]+\/>/ig, '')
-		/*
+		/**<code>
 		<td>
 		<p>&nbsp;</p>
 		</td>
-		*/
+		</code>*/
 		.replace(/<(span|p|div|t[dr])([^>]*>)<(span|p)>(([\s\n]+|&nbsp;)*?)<\/(span|p)><\/(span|p|div|t[dr])>/ig, '<$1$2$4</$7>')
 		.replace(/[\s\n]*<\/p>([\s\n]*<br\s*\/?>)*[\s\n]*<p[^>]*>/ig, '<br />\n')
 		.replace(/<link rel=(File-List|colorSchemeMapping|themeData|Edit-Time-Data)[^>]+>/ig, '')
@@ -6968,7 +7288,8 @@ function reduce_HTML(t) {
 		.replace(/[\s\n]*<\meta[\s\n][^>]+>[\s\n]*/ig, '')
 	
 		//	from HTML_to_Unicode()
-		.replace(/&#0*(\d{2,7});/ig, function ($0, $1) { return $1 > 1114111 ? $0 : String.fromCharCode($1); })	//預防error之版本,~10FFFF=1114111
+			//預防error之版本,~10FFFF=1114111
+		.replace(/&#0*(\d{2,7});/ig, function ($0, $1) { return $1 > 1114111 ? $0 : String.fromCharCode($1); })
 		.replace(/([\s\n]+|&nbsp;)+$|^([\s\n]+|&nbsp;)+/g, '')
 		;
 
@@ -7122,16 +7443,16 @@ function dataset_synchronize(node, from_attributes) {
 				})] = value;
 		});
 
-		/*
-		for ( var i = 0, attributes = node.attributes, length = attributes.length, attribute; i < length; i++) {
-			//library_namespace.debug('attribute → dataset: test [' + i + '][' + attributes[i].name + '].', 2, 'dataset_synchronize');
-			if (name = (attribute = attributes[i].name).match(/^data-([^A-Z]+)$/)) {
-				d[name[1].replace(/-([a-z])/g, function($0, $1) {
-					return $1.toUpperCase();
-				})] = node.getAttribute(attribute);
+		if(false){
+			for ( var i = 0, attributes = node.attributes, length = attributes.length, attribute; i < length; i++) {
+				if(false)library_namespace.debug('attribute → dataset: test [' + i + '][' + attributes[i].name + '].', 2, 'dataset_synchronize');
+				if (name = (attribute = attributes[i].name).match(/^data-([^A-Z]+)$/)) {
+					d[name[1].replace(/-([a-z])/g, function($0, $1) {
+						return $1.toUpperCase();
+					})] = node.getAttribute(attribute);
+				}
 			}
 		}
-		*/
 
 	}
 
@@ -7562,7 +7883,4 @@ return (
 	_// JSDT:_module_
 );
 }
-
-
-});
 

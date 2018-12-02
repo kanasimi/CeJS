@@ -19,7 +19,7 @@ CeL.run(
 name : 'application.math',
 // includes() @ data.code.compatibility.
 require : 'data.code.compatibility.|data.math.',
-code : function(library_namespace) {
+code : function module_code(library_namespace) {
 
 
 /**
