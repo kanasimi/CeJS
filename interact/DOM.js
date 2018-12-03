@@ -374,7 +374,7 @@ try {
 
 
 
-/*<code>
+/**<code>
 	test if can use flash
 
 	better use SWFObject:
@@ -1466,7 +1466,7 @@ function new_node(nodes, layer, ns) {
 			$ : null,
 			// attrib
 			A : null
-/*
+/**<code>
 			// namespace
 			NS : null,
 			// class
@@ -1479,7 +1479,7 @@ function new_node(nodes, layer, ns) {
 			T : {},
 			//	reference, usually using <title>
 			R : ''
-*/
+</code>*/
 		};
 
 		if (typeof tag === 'undefined') {
@@ -1716,7 +1716,7 @@ function new_node(nodes, layer, ns) {
 
 			for (n in nodes)
 				if (!(n in ignore)){
-					if(false)library_namespace.debug('new_node: set attribute ['+n+'] = ['+nodes[n]+']'),
+					if(false)library_namespace.debug('new_node: set attribute ['+n+'] = ['+nodes[n]+']');
 					s(n, nodes[n]);
 					if(false)library_namespace.debug('new_node: get attribute ['+n+'] = ['+node.getAttribute(n)+']');
 				}
@@ -2306,9 +2306,9 @@ function select_node(selector, base_space, options) {
 				iframe : 1
 			})) {
 				library_namespace.debug('Reset context for &lt;' + tag_name + '>.', 2, 'select_node');
-				base_space = tmp_node = /**
+				base_space = tmp_node =
+				/**
 				 * @author CE
-				 *
 				 */
 				tmp_node.contentWindow.document;
 			}
@@ -2668,17 +2668,25 @@ function setFrame(){
  //location.hash='';
  if( l && (f=(f=l.match(/([^\/]+)$/)?RegExp.$1:l)&&(f=f.match(/^([^?#]+)/)?RegExp.$1:f)&&(l in setFrameTargetSet)?setFrameTargetSet[f]:setFrameTarget) && f!=window.name && window.frames[f] && window.frames[f].location.href!=l ){
 	  if(false)alert(l+'\n==>\n'+f);
-	  window.open(l,f);//if((l=window.open(l,f).top).focus(),alert(l!=self.top),l!=self.top)self.top.close();//alert(l+'\n'+f),	//	moz需要等到frame load之後才能得到window.frames[f].location.href==l的結果，所以可以考慮作setTimeout的延遲。但是假如真的不是預設的page，這樣會造成多load一遍。
+	  window.open(l,f);
+	  if(false){
+		  l=window.open(l,f).top;
+		  l.focus();
+		  alert(l!=self.top);
+		  alert(l+'\n'+f);
+			//	moz需要等到frame load之後才能得到window.frames[f].location.href==l的結果，所以可以考慮作setTimeout的延遲。但是假如真的不是預設的page，這樣會造成多load一遍。
+		  if(l!=self.top)self.top.close();
+	  }
  }
  if(false)setTimeout('alert(window.frames["'+f+'"].location.href);',900);
 }
-/**
+/**<code>
 	set window.top page to certain location
 
 	setTopP(location, search)
 
 	search === setTopP_doTest: do a test, return window.top不為指定頁?1:0
-*/
+</code>*/
 var setTopPDTopP,
 //default top page(file) path
 setTopP_doTest=.234372464;	
@@ -2761,11 +2769,11 @@ function setAstatusOut() {
  * @param {Array} header	header list
  * @return
  * @example <code>
- * table_list([list1],[list2],..)
- * e.g.,	table_list([1,2,3,4],[4,5,3,4]);
- * table_list([[list1],[list2],..])
- * e.g.,	table_list( [ [1,2,3,4],[4,5,3,4] ] );
- * </code>
+	table_list([list1],[list2],..)
+	e.g.,	table_list([1,2,3,4],[4,5,3,4]);
+	table_list([[list1],[list2],..])
+	e.g.,	table_list( [ [1,2,3,4],[4,5,3,4] ] );
+ </code>
  * @since	2010/05/03 14:13:18
  * @_memberOf	_module_
  * @see
@@ -3788,13 +3796,17 @@ var referenceDoc,loadReferenceDone
 ;
 //loadReference[generateCode.dLK]='get_element,referenceDoc,loadReferenceDone,parseFunction';
 function loadReference(referenceURL,iframeId){
- if(loadReferenceDone||typeof location!='object'||!location.protocol||location.protocol=='https:')return;	//	https會拒絕存取，所以直接放棄。
+ if(loadReferenceDone||typeof location!='object'||!location.protocol||location.protocol=='https:'){
+		//	https會拒絕存取，所以直接放棄。
+	 return;
+ }
  if(loadReferenceDone){
 		//	https會拒絕存取，所以直接放棄。
 	 return;
  }
  var o=get_element(iframeId||'reference');
- if(typeof referenceDoc=='object' && typeof referenceDoc.document=='object' && referenceDoc.document){	//	referenceDoc is still contentWindow here.	typeof referenceDoc.document:預防使用https時產生不能讀取的權限問題。
+	//	referenceDoc is still contentWindow here.	typeof referenceDoc.document:預防使用https時產生不能讀取的權限問題。
+ if(typeof referenceDoc=='object' && typeof referenceDoc.document=='object' && referenceDoc.document){
 		//	遺憾：在舊版IE不能用後者。也許是因為舊版IE連contentWindow都會重造。
 	 referenceDoc=
 		//referenceDoc.document;
@@ -3839,7 +3851,8 @@ typeof relatePath=='function'?relatePath(0,'cgi-bin/game/data/reference.htm'):'d
 		 //	 for JS5	應該不能用o.contentWindow吧？怕o.contentWindow就算沒能載入文件，也會被定義
 		 typeof o.contentWindow=='object'&&typeof o.contentWindow.document=='object'){
   //	Martin Honnen wrote: If you load a new document then certainly the browser has to create a new document object.
-	  //o.contentWindow.document still index to a blank window here, when new document load, this point to o.document won't work.
+
+	 //o.contentWindow.document still index to a blank window here, when new document load, this point to o.document won't work.
   referenceDoc=
 	  o.contentWindow;
 
@@ -3878,7 +3891,7 @@ typeof relatePath=='function'?relatePath(0,'cgi-bin/game/data/reference.htm'):'d
 function transRefObj(id,id2,force){
  if(typeof id2!='string'&&typeof id2!='object')force=id2,id2=typeof id=='object'?id.id:id;
  var o=typeof id=='object'?id:get_element(id,get_element.f.self),p;
- //alert('transRefObj: '+id2+' -> '+id+'('+(force?'':'not ')+'force)\n'+o+'\ntarget:'+(o.innerHTML?'\n'+o.innerHTML.slice(0,200):' (null)'));
+ if(false)alert('transRefObj: '+id2+' -> '+id+'('+(force?'':'not ')+'force)\n'+o+'\ntarget:'+(o.innerHTML?'\n'+o.innerHTML.slice(0,200):' (null)'));
  if( o && (force||!o.innerHTML)
 	&& (p=typeof id2=='object'?id2:get_element(id2,get_element.f.refOnly)) && (force||p.innerHTML) )
   try{
@@ -4110,7 +4123,10 @@ function doAlertInit(n) {
 function doAlert(n,m,iconContent){
  if(!n&&typeof doAlertDivName=='string'&&doAlertDivName)n=doAlertDivName;
  var o=document.getElementById(n),oBg=document.getElementById(n+'Bg'),oI=document.getElementById(n+'I');
- if(!document.body||!o||m&&!alert(o.innerHTML))return;	//	alert()會return undefined
+ if(!document.body||!o||m&&!alert(o.innerHTML)){
+		//	alert()會return undefined
+	 return;
+ }
  if(!oI)try{
 		//	只對IE5.5之後有用
 	//document.body.insertBefore();
