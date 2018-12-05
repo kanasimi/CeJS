@@ -1035,7 +1035,7 @@ if (!CeL.Log) {
 	});
 
 	//	log 支援 gettext.
-	CeL.Log.message_prefix = function(level){
+	CeL.Log.message_prefix = function(level) {
 		if (level in log_icon) {
 			return {
 				img : null,

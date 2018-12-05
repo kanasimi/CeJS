@@ -1,10 +1,8 @@
-
 /**
- * @name	CeL function for World Wide Web (www, W3)
- * @fileoverview
- * 本檔案包含了 www 的 functions。
-
-<code>
+ * @name CeL function for World Wide Web (www, W3)
+ * @fileoverview 本檔案包含了 www 的 functions。
+ * 
+ * <code>
 	http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K902.aspx
 	http://www.nczonline.net/blog/2010/01/12/history-of-the-user-agent-string/
 	當 IE 初次推出它們的 User Agent 標誌的時候，是這個樣子：
@@ -28,9 +26,9 @@
 	改造jQuery lazyLoad插件_ 前端開發_ JavaScript
 	http://www.popo4j.com/qianduan/transformation_jquery_lazyload_plug.html
 	在圖片尺寸比較大的情況下，圖片加載較慢，因此請求會被攔截，並且保留客戶端數據，在下次Img標籤加載Load方法的時候，可以繼續請求圖片數據
-</code>
+	</code>
  * 
- * @since	
+ * @since
  */
 
 'use strict';
@@ -43,8 +41,12 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'interact.DOM',
 
-	//data.code.compatibility.trim
-	require : 'data.code.compatibility.|data.code.|data.native.|data.split_String_to_Object|application.locale.gettext',
+	// data.code.compatibility.trim
+	require : 'data.code.compatibility.' + '|data.code.|data.native.'
+	//
+	+ '|data.split_String_to_Object'
+	//
+	+ '|application.locale.gettext',
 
 	// 設定不匯出的子函式。
 	// no_extend : '*',
@@ -53,241 +55,271 @@ typeof CeL === 'function' && CeL.run({
 	code : module_code
 });
 
-
 function module_code(library_namespace) {
 
-var module_name = this.id,
-//	requiring
-split_String_to_Object = this.r('split_String_to_Object'),
-gettext = this.r('gettext');
+	var module_name = this.id,
+	// requiring
+	split_String_to_Object = this.r('split_String_to_Object'), gettext = this
+			.r('gettext');
 
+	/**
+	 * null module constructor
+	 * 
+	 * @class web 的 functions
+	 */
+	var _// JSDT:_module_
+	= function() {
+		// null module constructor
+	};
 
-/**
- * null module constructor
- * @class	web 的 functions
- */
-var _// JSDT:_module_
-= function() {
-	//	null module constructor
-};
+	/**
+	 * for JSDT: 有 prototype 才會將之當作 Class
+	 */
+	_// JSDT:_module_
+	.prototype = {};
 
-/**
- * for JSDT: 有 prototype 才會將之當作 Class
- */
-_// JSDT:_module_
-.prototype = {
-};
+	// HTML only -------------------------------------------------------
 
+	/**
+	 * NodeType: const unsigned short.
+	 * 
+	 * @see http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-1950641247
+	 *      http://www.w3.org/TR/DOM-Level-2-Core/core.html
+	 *      ELEMENT_NODE,ATTRIBUTE_NODE,TEXT_NODE,CDATA_SECTION_NODE,ENTITY_REFERENCE_NODE,ENTITY_NODE,PROCESSING_INSTRUCTION_NODE,COMMENT_NODE,DOCUMENT_NODE,DOCUMENT_TYPE_NODE,DOCUMENT_FRAGMENT_NODE,NOTATION_NODE
+	 * @inner
+	 */
+	var ELEMENT_NODE = 1,
+	//
+	TEXT_NODE = 3,
+	//
+	DOCUMENT_NODE = 9;
 
+	if (library_namespace.is_WWW(true) &&
+	// IE8: undefined
+	!isNaN(document.ELEMENT_NODE))
+		ELEMENT_NODE = document.ELEMENT_NODE, TEXT_NODE = document.TEXT_NODE,
+				DOCUMENT_NODE = document.DOCUMENT_NODE;
 
+	// w3.org namespaces base
+	var W3C_BASE = 'http://www.w3.org/';
+	if (!W3C_BASE.startsWith('http')) {
+		/**
+		 * 修改以適應 web.archive.org. Under archive.org, it will change to something
+		 * like '/web/20140814093917/http://www.w3.org/'.
+		 */
+		W3C_BASE = W3C_BASE.slice(W3C_BASE.indexOf('http'));
+	}
 
+	// IE 中 Object.prototype.toString.call(HTML Element)==='[object Object]', 得用
+	// ''+node
+	var get_object_type = Object.prototype.toString,
+	//
+	element_pattern = /^\[object HTML([A-U][A-Za-z]{1,15})?Element\]$/;
 
+	_// JSDT:_module_
+	.
+	/**
+	 * 判斷是否為 HTML 之 element，包括一般 ELEMENT_NODE 以及 TEXT_NODE。 e.g., object
+	 * instanceof HTMLLIElement
+	 * 
+	 * @param object
+	 *            object to test
+	 * @returns {Boolean} object is HTML Element
+	 * @since 2010/6/23 02:32:41
+	 * @_memberOf _module_
+	 * @see http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
+	 *      http://www.w3.org/DOM/
+	 */
+	is_HTML_element = function(object) {
+		var type = get_object_type.call(object);
+		// return type.indexOf('[object HTML') === 0;
+		return element_pattern.test(type) || '[object Text]' === type
+				&& object.nodeType === TEXT_NODE;
+	};
 
-/*
-	HTML only	-------------------------------------------------------
-*/
+	_// JSDT:_module_
+	.
+	/**
+	 * 判斷為指定 nodeType 之 HTML Element。
+	 * 
+	 * @param object
+	 *            object to test
+	 * @param test_type
+	 *            type to test
+	 * @returns {Boolean} object is the type of HTML Element
+	 * @since 2010/6/23 02:32:41
+	 * @_memberOf _module_
+	 * @see http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
+	 *      http://www.w3.org/DOM/
+	 */
+	is_HTML_element_type = function(object, test_type) {
+		var type = get_object_type.call(object);
+		return test_type === TEXT_NODE ? '[object Text]' === type
+				&& object.nodeType === TEXT_NODE
+				: object.nodeType === test_type
+						&& (test_type === DOCUMENT_NODE || element_pattern
+								.test(type));
+	};
 
-/**
- * NodeType: const unsigned short.
- * @see
- * http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-1950641247
- * http://www.w3.org/TR/DOM-Level-2-Core/core.html
- * ELEMENT_NODE,ATTRIBUTE_NODE,TEXT_NODE,CDATA_SECTION_NODE,ENTITY_REFERENCE_NODE,ENTITY_NODE,PROCESSING_INSTRUCTION_NODE,COMMENT_NODE,DOCUMENT_NODE,DOCUMENT_TYPE_NODE,DOCUMENT_FRAGMENT_NODE,NOTATION_NODE
- * @inner
- */
-var	ELEMENT_NODE = 1,
-//
-TEXT_NODE = 3,
-//
-DOCUMENT_NODE = 9;
+	_// JSDT:_module_
+	.
+	/**
+	 * 判斷是否為 DOM node。<br />
+	 * 包含 TEXT_NODE, DOCUMENT_NODE, SVG element 等。
+	 * 
+	 * @param object
+	 *            object to test
+	 * @returns {Boolean} object is DOM node
+	 * @since 2014/11/4 18:40:30
+	 * @_memberOf _module_
+	 * @see http://www.w3.org/DOM/
+	 */
+	is_DOM_NODE = function(object) {
+		return object
+		// && object.nodeType > 0
+		&& object.nodeType === (object.nodeType | 0)
+		// SVG element 無 .getElementById()，有 .getElementsByTagName()。
+		// IE8 無 .getElementsByTagName()。
+		// && typeof object.getElementsByTagName === 'function';
+		&& ('nextSibling' in object);
+	};
 
-if(library_namespace.is_WWW(true) &&
-		//	IE8: undefined
-		!isNaN(document.ELEMENT_NODE))
-	ELEMENT_NODE = document.ELEMENT_NODE,
-	TEXT_NODE = document.TEXT_NODE,
-	DOCUMENT_NODE = document.DOCUMENT_NODE;
+	_// JSDT:_module_
+	.
+	/**
+	 * 判斷是否為 <a
+	 * href="http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#Node-ELEMENT_NODE">ELEMENT_NODE</a>。<br />
+	 * 不包含 TEXT_NODE, DOCUMENT_NODE 等。
+	 * 
+	 * @param object
+	 *            object to test
+	 * @returns {Boolean} object is HTML Element
+	 * @since 2010/6/23 02:32:41
+	 * @_memberOf _module_
+	 * @see http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
+	 *      http://www.w3.org/DOM/
+	 */
+	is_ELEMENT_NODE = function(object) {
+		if (false)
+			library_namespace
+					.debug('Test '
+							+ get_object_type.call(object)
+							+ ' '
+							+ ((typeof object === 'object' || typeof object === 'function')
+									&& object.nodeType || '')
+							+ ': '
+							+ element_pattern
+									.test(get_object_type.call(object)) + ','
+							+ (object.nodeType === 1));
+		return element_pattern.test(get_object_type.call(object))
+				&& object.nodeType === ELEMENT_NODE;
+	};
 
+	// IE8: [object Object]
+	var DOCUMENT_TYPE = library_namespace.is_WWW()
+			&& get_object_type.call(document) || '[object HTMLDocument]';
+	_// JSDT:_module_
+	.is_DOCUMENT_NODE = function(object) {
+		// element_pattern 不能用在 DOCUMENT_NODE。
+		// return _.is_HTML_element_type(object, DOCUMENT_NODE);
 
-//	w3.org namespaces base
-var W3C_BASE = 'http://www.w3.org/';
-if (!W3C_BASE.startsWith('http'))
-	/** 修改以適應 web.archive.org. Under archive.org, it'll change to something like '/web/20140814093917/http://www.w3.org/'. */
-	W3C_BASE = W3C_BASE.slice(W3C_BASE.indexOf('http'));
+		if (false)
+			if (object)
+				library_namespace.debug('type: ' + get_object_type.call(object)
+						+ ', nodeType=' + object.nodeType);
+		return get_object_type.call(object) === DOCUMENT_TYPE
+				&& object.nodeType === DOCUMENT_NODE;
+	};
 
-
-//	IE 中 Object.prototype.toString.call(HTML Element)==='[object Object]', 得用 ''+node
-var get_object_type = Object.prototype.toString,
-//
-element_pattern = /^\[object HTML([A-U][A-Za-z]{1,15})?Element\]$/;
-
-
-
-_// JSDT:_module_
-.
-/**
- * 判斷是否為 HTML 之 element，包括一般 ELEMENT_NODE 以及 TEXT_NODE。
- * e.g.,
- * object instanceof HTMLLIElement
- * @param	object	object to test
- * @returns	{Boolean}	object is HTML Element
- * @since	2010/6/23 02:32:41
- * @_memberOf	_module_
- * @see
- * http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
- * http://www.w3.org/DOM/
- */
-is_HTML_element = function(object) {
-	var type = get_object_type.call(object);
-	// return type.indexOf('[object HTML') === 0;
-	return element_pattern.test(type)
-		|| '[object Text]' === type
-		&& object.nodeType === TEXT_NODE;
-};
-
-_// JSDT:_module_
-.
-/**
- * 判斷為指定 nodeType 之 HTML Element。
- * @param	object	object to test
- * @param	test_type	type to test
- * @returns	{Boolean}	object is the type of HTML Element
- * @since	2010/6/23 02:32:41
- * @_memberOf	_module_
- * @see
- * http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
- * http://www.w3.org/DOM/
- */
-is_HTML_element_type = function(object, test_type) {
-	var type = get_object_type.call(object);
-	return test_type === TEXT_NODE ?
-			'[object Text]' === type && object.nodeType === TEXT_NODE
-			: object.nodeType === test_type && (test_type === DOCUMENT_NODE || element_pattern.test(type));
-};
-
-_// JSDT:_module_
-.
-/**
- * 判斷是否為 DOM node。<br />
- * 包含 TEXT_NODE, DOCUMENT_NODE, SVG element 等。
- * @param	object	object to test
- * @returns	{Boolean}	object is DOM node
- * @since	2014/11/4 18:40:30
- * @_memberOf	_module_
- * @see
- * http://www.w3.org/DOM/
- */
-is_DOM_NODE = function(object) {
-	return object
-	//&& object.nodeType > 0
-	&& object.nodeType === (object.nodeType | 0)
-	// SVG element 無 .getElementById()，有 .getElementsByTagName()。
-	// IE8 無 .getElementsByTagName()。
-	//&& typeof object.getElementsByTagName === 'function';
-	&& ('nextSibling' in object);
-};
-
-_// JSDT:_module_
-.
-/**
- * 判斷是否為 <a href="http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#Node-ELEMENT_NODE">ELEMENT_NODE</a>。<br />
- * 不包含 TEXT_NODE, DOCUMENT_NODE 等。
- * @param	object	object to test
- * @returns	{Boolean}	object is HTML Element
- * @since	2010/6/23 02:32:41
- * @_memberOf	_module_
- * @see
- * http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
- * http://www.w3.org/DOM/
- */
-is_ELEMENT_NODE = function(object) {
-	if(false)library_namespace.debug('Test '+get_object_type.call(object)+' '+((typeof object==='object'||typeof object==='function')&&object.nodeType||'')+': '+element_pattern.test(get_object_type.call(object))+','+(object.nodeType === 1));
-	return element_pattern.test(get_object_type.call(object)) && object.nodeType === ELEMENT_NODE;
-};
-
-// IE8: [object Object]
-var DOCUMENT_TYPE = library_namespace.is_WWW() && get_object_type.call(document) || '[object HTMLDocument]';
-_// JSDT:_module_
-.
-is_DOCUMENT_NODE = function(object) {
-	//element_pattern 不能用在 DOCUMENT_NODE。
-	//return _.is_HTML_element_type(object, DOCUMENT_NODE);
-	
-	if(false)if (object) library_namespace.debug('type: '+get_object_type.call(object)+', nodeType='+object.nodeType);
-	return get_object_type.call(object) === DOCUMENT_TYPE && object.nodeType === DOCUMENT_NODE;
-};
-
-_// JSDT:_module_
-.
-/**
- * 判斷是否為 <a href="http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-536297177">NodeList</a>。<br>
- * @param	object	object to test
- * @returns	{Boolean}	if is NodeList
- * @since	2012/3/4
- * @_memberOf	_module_
- * @see
- * http://stackoverflow.com/questions/7238177/detect-htmlcollection-nodelist-in-javascript<br />
- * http://www.webdeveloper.com/forum/showthread.php?t=239887
- */
-is_NodeList = function(object) {
-	var type = get_object_type.call(object);
-	return type === '[object NodeList]'
-		//	依2012現行實作，部分 browser 對 .getElementsByTagName() 之類所得為 NodeList。
-		//	https://developer.mozilla.org/en-US/docs/DOM/element.getElementsByTagName
-		//	http://www.w3.org/TR/domcore/#dom-document-getelementsbytagname
+	_// JSDT:_module_
+	.
+	/**
+	 * 判斷是否為 <a
+	 * href="http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-536297177">NodeList</a>。<br>
+	 * 
+	 * @param object
+	 *            object to test
+	 * @returns {Boolean} if is NodeList
+	 * @since 2012/3/4
+	 * @_memberOf _module_
+	 * @see http://stackoverflow.com/questions/7238177/detect-htmlcollection-nodelist-in-javascript<br />
+	 *      http://www.webdeveloper.com/forum/showthread.php?t=239887
+	 */
+	is_NodeList = function(object) {
+		var type = get_object_type.call(object);
+		return type === '[object NodeList]'
+		// 依2012現行實作，部分 browser 對 .getElementsByTagName() 之類所得為 NodeList。
+		// https://developer.mozilla.org/en-US/docs/DOM/element.getElementsByTagName
+		// http://www.w3.org/TR/domcore/#dom-document-getelementsbytagname
 		|| type === '[object HTMLCollection]';
-};
+	};
 
+	// &nbsp;
+	var NBSP = '\u00a0';
 
-// &nbsp;
-var NBSP = '\u00a0';
+	_.NBSP = NBSP;
 
-_.NBSP = NBSP;
+	if (false)
+		string = string.replace(/ /g, CeL.DOM.NBSP);
 
-if (false)
-	string = string.replace(/ /g, CeL.DOM.NBSP);
+	/**
+	 * <code>
+	 debug 用。
 
-/**<code>
-debug 用。
+	 IE5DOM @ IE9 test:
+	 IE7DOM @ IE9 test:
+	 node <DIV>: type object, toString.call: [object Object], ""+node: [object], nodeType: 1:
 
-IE5DOM @ IE9 test:
-IE7DOM @ IE9 test:
-node <DIV>: type object, toString.call: [object Object], ""+node: [object], nodeType: 1:
+	 IE8:
+	 IE8DOM @ IE9 test:
+	 IE9DOM @ IE9 test:
+	 node <DIV>: type object, toString.call: [object Object], ""+node: [object HTMLDivElement], nodeType: 1:
 
-IE8:
-IE8DOM @ IE9 test:
-IE9DOM @ IE9 test:
-node <DIV>: type object, toString.call: [object Object], ""+node: [object HTMLDivElement], nodeType: 1:
+	 IE8:
+	 node <A>: type object, toString.call: [object Object], ""+node: , nodeType: 1:
+	 node <OBJECT>: type object, toString.call: [object Object], ""+node: [object], nodeType: 1:
 
-IE8:
-node <A>: type object, toString.call: [object Object], ""+node: , nodeType: 1:
-node <OBJECT>: type object, toString.call: [object Object], ""+node: [object], nodeType: 1:
-
-</code>*/
-function show_node(node) {
-	var type = get_object_type.call(node);
-	if (_.is_NodeList(node)) {
-		library_namespace.debug(node.length + ' node list ' + type + ': ' + node[0] + '...', 1, 'show_node');
-	} else if(_.is_ELEMENT_NODE(node)) {
-		library_namespace.debug('node'
-				+ (node.tagName ? ' &lt;' + node.tagName
-						+ (node.id ? '#' + node.id : '') + '&gt;' : '') + ': type '
-				+ typeof node + ', toString.call: ' + type
-				+ ', ""+node: ' + ('' + node) + ', nodeType: ' + node.nodeType
-				+ ('outerHTML' in node ? ': ' + node.outerHTML
-						: 'innerHTML' in node ? ': ' + node.innerHTML : ''),
-				1, 'show_node');
-	} else {
-		library_namespace.debug(type
-				+ (node && typeof node === 'object' ? '.nodeType = ' + node.nodeType
-						+ (node.nodeType === DOCUMENT_NODE ? ' (DOCUMENT_NODE)' : '') : ''), 1,
-				'show_node');
-		if (node.nodeType === DOCUMENT_NODE) {
-			library_namespace.debug('wondow.document.body: ['
-					+ node.body.innerHTML.replace(/</g, '&lt;') + ']', 3, 'show_node');
+	 </code>
+	 */
+	function show_node(node) {
+		var type = get_object_type.call(node);
+		if (_.is_NodeList(node)) {
+			library_namespace.debug(node.length + ' node list ' + type + ': '
+					+ node[0] + '...', 1, 'show_node');
+		} else if (_.is_ELEMENT_NODE(node)) {
+			library_namespace.debug(
+					'node'
+							+ (node.tagName ? ' &lt;' + node.tagName
+									+ (node.id ? '#' + node.id : '') + '&gt;'
+									: '')
+							+ ': type '
+							+ typeof node
+							+ ', toString.call: '
+							+ type
+							+ ', ""+node: '
+							+ ('' + node)
+							+ ', nodeType: '
+							+ node.nodeType
+							+ ('outerHTML' in node ? ': ' + node.outerHTML
+									: 'innerHTML' in node ? ': '
+											+ node.innerHTML : ''), 1,
+					'show_node');
+		} else {
+			library_namespace
+					.debug(
+							type
+									+ (node && typeof node === 'object' ? '.nodeType = '
+											+ node.nodeType
+											+ (node.nodeType === DOCUMENT_NODE ? ' (DOCUMENT_NODE)'
+													: '')
+											: ''), 1, 'show_node');
+			if (node.nodeType === DOCUMENT_NODE) {
+				library_namespace.debug('wondow.document.body: ['
+						+ node.body.innerHTML.replace(/</g, '&lt;') + ']', 3,
+						'show_node');
+			}
 		}
 	}
-}
 
 (function() {
 try {
@@ -2061,9 +2093,9 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 		//	依styleO指定 Namespace
 		if (typeof styleO === 'string') {
 			if (styleO.indexOf('://') != -1)
-				_NS = styleO, styleO = 0;
+				{_NS = styleO; styleO = 0;}
 			else if (_i[styleO])
-				_NS = W3C_BASE + _i[styleO], styleO = 0;
+				{_NS = W3C_BASE + _i[styleO]; styleO = 0;}
 		} else{
 			// buggy now.
 			//undefined == null
@@ -2119,13 +2151,16 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 					: _o;
 		}, iO = tO(insertBeforeO);
 		// Opera9 need {Array}iO
-		if (Array.isArray(iO) && iO.length)
+		if (Array.isArray(iO) && iO.length){
 			// 在disable CSS時可能會 Warning: reference to undefined property iO[1]
 			// rO: referrer object,
 			// 以此決定以appendChild()或insertBefore()的形式插入
-			rO = iO.length > 1 && tO(iO[1]) || 0, iO = tO(iO[0]);
+			rO = iO.length > 1 && tO(iO[1]) || 0; iO = tO(iO[0]);
+		}
 
-			if(false)if(typeof iO !== 'object' && (iO = document.body, typeof rO === 'undefined')) rO = 0;
+			if(false){
+				if(typeof iO !== 'object'){iO = document.body; if (typeof rO === 'undefined') rO = 0;}
+			}
 		if (typeof iO !== 'object') {
 			iO = document.body;
 			if (typeof rO === 'undefined')
@@ -2133,7 +2168,7 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 		}
 
 		if (typeof rO === 'undefined')
-			iO = (rO = iO).parentNode;
+			{rO = iO; iO = iO.parentNode;}
 		if (iO)
 			// 預防輸入的rO為create出來的
 			if (rO)
