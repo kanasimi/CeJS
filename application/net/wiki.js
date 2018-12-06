@@ -4681,6 +4681,84 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	/**
+	 * wikitext configuration → JSON
+	 * 
+	 * @example <code>
+		configuration = CeL.wiki.parse_configuration(page_data);
+		value = configuration[variable_name];
+	</code>
+	 * 
+	 * @see [[w:zh:User:Cewbot/規範多個問題模板設定]]
+	 * @see [[w:zh:Template:Easy_Archive]]
+	 */
+	function parse_configuration(wikitext) {
+		if (get_page_content.is_page_data(wikitext)) {
+			wikitext = get_page_content(wikitext);
+		}
+
+		var configuration = library_namespace.null_Object(),
+		// 變數名稱
+		variable_name,
+		// 變數的值
+		value;
+
+		function normalize_value(value) {
+			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
+			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
+			// <source lang="cpp">
+			return value.trim().replace(/<\/?(?:nowiki|code)>/g, '');
+		}
+
+		function reset_variable(var_name) {
+			if (variable_name)
+				configuration[variable_name] = value;
+			// reset
+			variable_name = var_name && normalize_value(var_name) || undefined;
+			value = undefined;
+		}
+
+		wikitext.split('\n').forEach(function(line) {
+			// console.log(line);
+			var matched = line.match(/^;([^:]+)(?::(.*))?/);
+			// console.log(matched);
+			if (matched) {
+				reset_variable(matched[1]);
+				value = normalize_value(matched[2]);
+				return;
+			}
+
+			matched = line.match(/^(==+)(.+?)(\1)$/);
+			if (matched) {
+				reset_variable(matched[2]);
+				return;
+			}
+
+			if (variable_name
+			// 列表形式的資料。
+			&& (matched = line.match(/^[:*#]+(.*)/))) {
+				matched = normalize_value(matched[1]);
+				if (value === undefined)
+					value = matched;
+				else if (Array.isArray(value))
+					value.push(matched);
+				else
+					value = [ value, matched ];
+				return;
+			}
+
+			reset_variable();
+		});
+
+		reset_variable();
+
+		return configuration;
+	}
+
+	wiki_API.parse_configuration = parse_configuration;
+
+	// ----------------------------------------------------
+
 	// https://zh.wikipedia.org/wiki/條目#hash 說明
 	// https://zh.wikipedia.org/zh-tw/條目#hash 說明
 	// https://zh.wikipedia.org/zh-hans/條目#hash 說明
@@ -13542,10 +13620,9 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * cache 作業操作之輔助套裝函數。<br />
-	 * only for node.js.
+	 * cache 作業操作之輔助套裝函數。
 	 * 
-	 * 注意: 必須自行 include 'application.platform.nodejs'。 <code>
+	 * 注意: only for node.js. 必須自行 include 'application.platform.nodejs'。 <code>
 	   CeL.run('application.platform.nodejs');
 	 * </code><br />
 	 * 注意: 需要自行先創建各 type 之次目錄，如 page, redirects, embeddedin, ...<br />
@@ -13554,7 +13631,7 @@ function module_code(library_namespace) {
 	 * 連續作業: 依照 _this 設定 {Object}default options，即傳遞於各 operator 間的 ((this))。<br />
 	 * 依照 operation 順序個別執行單一項作業。
 	 * 
-	 * 單一項作業:<br />
+	 * 單一項作業流程:<br />
 	 * 設定檔名。<br />
 	 * 若不存在此檔，則:<br />
 	 * >>> 依照 operation.type 與 operation.list 取得資料。<br />
@@ -13691,9 +13768,10 @@ function module_code(library_namespace) {
 		if (!file_name) {
 			// 若自行設定了檔名，則慢點執行 list()，先讀讀 cache。因為 list() 可能會頗耗時間。
 			// 基本上，設定 this.* 應該在 operation.operator() 中，而不是在 operation.list() 中。
-			if (typeof list === 'function')
+			if (typeof list === 'function') {
 				// TODO: 允許非同步方法。
 				list = list.call(_this, last_data_got, operation);
+			}
 
 			if (!operation.postfix)
 				if (type === 'file')
@@ -14051,6 +14129,7 @@ function module_code(library_namespace) {
 
 			case 'page':
 				// get page contents 頁面內容。
+				// title=(operation.title_prefix||_this.title_prefix)+operation.list
 				to_get_data = function(title, callback) {
 					library_namespace.log('wiki_API.cache: Get content of '
 							+ get_page_title_link(title));
@@ -14125,8 +14204,15 @@ function module_code(library_namespace) {
 			// if (list_type) type = list_type;
 
 			var title = list;
-			if (typeof title === 'string' && _this.title_prefix)
-				title = _this.title_prefix + title;
+
+			if (typeof title === 'string') {
+				// 可以用 operation.title_prefix 覆蓋 _this.title_prefix
+				if ('title_prefix' in operation) {
+					if (operation.title_prefix)
+						title = operation.title_prefix + title;
+				} else if (_this.title_prefix)
+					title = _this.title_prefix + title;
+			}
 			library_namespace.debug('處理單一項作業: ' + get_page_title_link(title)
 					+ '。', 3, 'wiki_API.cache');
 			to_get_data(title, write_cache);
