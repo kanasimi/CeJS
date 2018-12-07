@@ -541,6 +541,7 @@ function module_code(library_namespace) {
 
 	// era data refrence 對應
 	// sorted by: start Date 標準時間(如UTC+8) → parse_era() 插入順序.
+	/** {Array}按照起始時間排列的所有紀年列表 */
 	era_list = [],
 
 	// era tree.
@@ -3739,14 +3740,16 @@ function module_code(library_namespace) {
 		if (!month_data) {
 			if (accept_end && 日序 === 0)
 				// 剛好在邊界上，越過年。
-				// assert: date-this.end === 0 – ONE_DAY_LENGTH_VALUE
+				// assert: date - this.end === 0 – ONE_DAY_LENGTH_VALUE
 				return [ 歲序 - 1, 0, 0 ];
 
 			// 可能只是 to_era_Date() 在作測試，看是否能成功解析。
 			if (library_namespace.is_debug())
-				library_namespace.error([ 'Date_to_date_index: 日期[',
-						date.format(standard_time_format), '] 並不在紀年 [' + this,
-						'] 時段內！' ]);
+				library_namespace.error([
+						'Date_to_date_index: 日期[',
+						(is_Date(date) ? date : new Date(date))
+								.format(standard_time_format),
+						'] 並不在紀年 [' + this, '] 時段內！' ]);
 			return;
 		}
 
@@ -4603,7 +4606,7 @@ function module_code(library_namespace) {
 
 		if (Array.isArray(plain_era_data)) {
 			var last_era = [],
-			// 上一紀年結束日期。
+			/** {Date}上一紀年結束日期。 */
 			last_end_date, era_list = [];
 
 			plain_era_data.forEach(function(era) {
@@ -5669,6 +5672,7 @@ function module_code(library_namespace) {
 					start : 0
 				});
 
+			// 這一段其實可以不要。下一段while()可以補充這一段的功能。但是使用`.start_JDN`應該會比`.start`快一點點。
 			while (i < era_list.length && era_list[i].start_JDN < start_JDN) {
 				i++;
 			}
@@ -5696,21 +5700,26 @@ function module_code(library_namespace) {
 			// 將所有紀年E 之後(其開始時間 >= 紀年E 開始時間)，
 			// 所有開始時間在其結束時間前的紀年，
 			// 插入紀年E 於"共存紀年" list。
-			for (k = 起訖[1],
+			for (k = last_era_data.end_JDN,
 			// 從本紀年E 之下個紀年起。
-			j = i + 1; j < era_list.length; j++)
-				if ((tmp = era_list[j]).start - k < 0) {
-					(tmp = tmp.contemporary).push(last_era_data);
-					if (tmp.length > 1)
+			j = i + 1; j < era_list.length; j++) {
+				// next {Era}
+				tmp = era_list[j];
+				if (tmp.start_JDN < k) {
+					tmp = tmp.contemporary;
+					tmp.push(last_era_data);
+					if (tmp.length > 1) {
 						// 不能保證依照 紀年開始時間 時序，應該插入在最後。
 						tmp.sort(compare_start_date);
+					}
 				} else
 					break;
+			}
 
-			// 處理同時開始之"共存紀年" list：
+			// 處理與`last_era_data`同時開始之`.共存紀年` list：
 			j = [];
-			while (i > 0 && (tmp = era_list[--i]).start - start === 0) {
-				// 同時開始。
+			while (i > 0 && (tmp = era_list[--i]).start_JDN === start_JDN) {
+				// tmp: 與`last_era_data`同時開始的紀年。
 				j.unshift(tmp);
 				tmp.contemporary.push(last_era_data);
 			}
@@ -5792,7 +5801,7 @@ function module_code(library_namespace) {
 	 * @returns {Array} 共存紀年
 	 */
 	function add_contemporary(date, 指定紀年, options) {
-		var tmp, date_index,
+		var tmp, date_index, time_offset = date.getTimezoneOffset() * 60 * 1000,
 		// 以當日為單位而非採用精準時間
 		use_whole_day = options && ('use_whole_day' in options)
 		//
@@ -5800,7 +5809,7 @@ function module_code(library_namespace) {
 		//
 		: 'precision' in date ? date.precision === 'day'
 		//
-		: date % ONE_DAY_LENGTH_VALUE === date.getTimezoneOffset() * 60 * 1000,
+		: date % ONE_DAY_LENGTH_VALUE === time_offset,
 		// 沒意外的話，共存紀年應該會照紀年初始時間排序。
 		// 共存紀年.start <= date < 共存紀年.end
 		共存紀年,
@@ -5833,7 +5842,7 @@ function module_code(library_namespace) {
 				}
 		}
 
-		if (era_index === 0 && date < 紀年.start) {
+		if (era_index === 0 && date - 紀年.start < 0) {
 			if (library_namespace.is_debug())
 				library_namespace.warn('add_contemporary: 日期 ['
 						+ date.format(standard_time_format) + '] 在所有已知紀年之前！');
@@ -5850,7 +5859,7 @@ function module_code(library_namespace) {
 		.forEach(function(era) {
 			// 檢查其"共存紀年" list，
 			// 找出所有(所求時間 < 其結束時間 period_end)之紀年，即為所求紀年。
-			if (date < era.end && (!era.參照用 || options.含參照用))
+			if (date - era.end < 0 && (!era.參照用 || options.含參照用))
 				共存紀年.push(era);
 		});
 
@@ -5860,9 +5869,9 @@ function module_code(library_namespace) {
 		//
 		date_index < era_list.length; date_index++) {
 			tmp = era_list[date_index];
-			if (date < tmp.start)
+			if (date - tmp.start < 0)
 				break;
-			else if (date < tmp.end && (!tmp.參照用 || options.含參照用))
+			else if (date - tmp.end < 0 && (!tmp.參照用 || options.含參照用))
 				共存紀年.push(tmp);
 		}
 
@@ -5895,7 +5904,7 @@ function module_code(library_namespace) {
 		// 取未交疊的相同國家紀年作為前後紀年。
 		tmp = era_index;
 		while (0 < tmp--)
-			if (era_list[tmp].end <= 紀年.start
+			if (era_list[tmp].end - 紀年.start <= 0
 			// 相同國家
 			&& era_list[tmp].name[3] === 紀年.name[3]) {
 				date.前紀年 = era_list[tmp].toString();
@@ -5904,7 +5913,7 @@ function module_code(library_namespace) {
 
 		tmp = era_index;
 		while (++tmp < era_list.length)
-			if (紀年.end <= era_list[tmp].start
+			if (紀年.end - era_list[tmp].start <= 0
 			// 相同國家
 			&& era_list[tmp].name[3] === 紀年.name[3]) {
 				date.後紀年 = era_list[tmp].toString();
@@ -5912,7 +5921,7 @@ function module_code(library_namespace) {
 			}
 
 		// 作結尾檢測 (bounds check)。
-		if (紀年.end <= date) {
+		if (紀年.end - date <= 0) {
 			if (指定紀年) {
 				if (library_namespace.is_debug())
 					library_namespace.warn(
@@ -5940,7 +5949,9 @@ function module_code(library_namespace) {
 				共存紀年 = 共存紀年.filter(options.contemporary_filter);
 			tmp = [];
 			共存紀年.forEach(function(era) {
-				if (date_index = era.Date_to_date_index(date)) {
+				if (date_index = era.Date_to_date_index(date
+				// 轉成目標共存紀年的當日零時。
+				- time_offset + (era[MINUTE_OFFSET_KEY] || 0) * 60 * 1000)) {
 					// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
 					date_index = era.日名(date_index[2], date_index[1],
 							date_index[0]).reverse();
