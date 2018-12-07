@@ -178,7 +178,11 @@ function module_code(library_namespace) {
 
 	var is_Date = library_namespace.is_Date,
 
-	// or try Array.prototype.splice()
+	/**
+	 * 把第2個引數陣列添加到第1個引數陣列後面
+	 * 
+	 * or try Array.prototype.splice()
+	 */
 	Array_push = Array.prototype.push.apply.bind(Array.prototype.push),
 
 	Date_to_String_parser = library_namespace.Date_to_String.parser,
@@ -5236,7 +5240,7 @@ function module_code(library_namespace) {
 		var 前一紀年名稱 = [],
 		//
 		國家 = options.國家 || parse_era.default_country,
-		// 上一紀年資料 @ era_list。
+		/** {Era}上一紀年資料 @ era_list。 */
 		last_era_data,
 		// 紀元所使用的當地之 time zone / time offset (UTC offset by minutes)。
 		// e.g., UTC+8: 8 * 60 = 480
@@ -5254,7 +5258,9 @@ function module_code(library_namespace) {
 
 			var tmp, i, j, k,
 			// 紀年:紀年名稱
-			紀年 = era_data[0], 起訖 = era_data[1],
+			紀年 = era_data[0],
+			/** {Array}起訖日期 [ {Date}起, {Date}訖, parser ] */
+			起訖 = era_data[1],
 			//
 			曆數 = era_data[2], 附加屬性 = era_data[3];
 
@@ -5406,15 +5412,17 @@ function module_code(library_namespace) {
 				// 訖時間 "–y/m/d"
 				起訖[1] = normalize_date(起訖[1], 起訖[2], tmp, true);
 
-			tmp = {
+			last_era_data = {
 				// 紀年名稱資訊（範疇小→大）
 				// [ 紀年, 君主(帝王), 朝代, 國家, 其他搜尋 keys ]
 				name : 紀年,
 
 				// {Date}起 標準時間(如UTC+8),開始時間.
 				start : 起訖[0],
+				start_JDN : library_namespace.date.Date_to_JDN(起訖[0]),
 				// {Date}訖 標準時間(如UTC+8), 結束時間.
 				end : 起訖[1],
+				end_JDN : library_namespace.date.Date_to_JDN(起訖[1]),
 
 				// 共存紀年/同時存在紀年 []:
 				// 在本紀年開始時尚未結束的紀年 list,
@@ -5434,7 +5442,7 @@ function module_code(library_namespace) {
 			// 處理 time zone / time offset (UTC offset by minutes)
 			if (!isNaN(minute_offset)) {
 				// 注意:這邊不設定真正的 date value，使得所得出的值為「把本地當作紀元所使用的當地」所得出之值。
-				tmp[MINUTE_OFFSET_KEY] = minute_offset;
+				last_era_data[MINUTE_OFFSET_KEY] = minute_offset;
 				// set_minute_offset(起訖[0], minute_offset, true);
 				// set_minute_offset(起訖[1], minute_offset, true);
 			}
@@ -5442,7 +5450,7 @@ function module_code(library_namespace) {
 			// assert: 至此
 			// 起訖 = [ 起 Date, 訖 Date, parser ]
 
-			last_era_data = new Era(tmp);
+			last_era_data = new Era(last_era_data);
 
 			library_namespace.debug('add period [' + 紀年 + ']。', 2);
 
@@ -5643,7 +5651,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			var start = 起訖[0],
+			var start = 起訖[0], start_JDN = last_era_data.start_JDN,
 			//
 			contemporary = last_era_data.contemporary;
 
@@ -5654,14 +5662,19 @@ function module_code(library_namespace) {
 			// 因此可以先檢查最後幾筆資料，以加快速度。
 			if (i < 9)
 				i = 0;
-			else if (start < era_list[i].start)
+			else if (0 < era_list[i].start - start)
 				i = era_list.search_sorted(last_era_data, {
 					comparator : compare_start_date,
 					found : true,
 					start : 0
 				});
 
-			while (i < era_list.length && era_list[i].start <= start)
+			while (i < era_list.length && era_list[i].start_JDN < start_JDN) {
+				i++;
+			}
+			// assert: era_list[i].start_JDN >= start_JDN
+
+			while (i < era_list.length && era_list[i].start - start <= 0) {
 				// 預防本紀年實為開始時間最早者，
 				// 因此在這邊才處理是否該插入在下一 index。
 
@@ -5669,8 +5682,10 @@ function module_code(library_namespace) {
 				// 會回傳 <= 的值，
 				// 因此應插入在下一 index。
 
-				// 這方法還會跳過相同時間的。
+				// 這方法還會跳過相同時間的紀年，將本紀年插入在相同時間的紀念群最後面，成為最後一個。
+				// 需要注意: [MINUTE_OFFSET_KEY]將會有作用，會按照時區排列。
 				i++;
+			}
 
 			// 以 Array.prototype.splice(插入點 index, 0, 紀年) 插入紀年E，
 			// 使本紀年E 之 index 為 (插入點 index)。
@@ -5684,7 +5699,7 @@ function module_code(library_namespace) {
 			for (k = 起訖[1],
 			// 從本紀年E 之下個紀年起。
 			j = i + 1; j < era_list.length; j++)
-				if ((tmp = era_list[j]).start < k) {
+				if ((tmp = era_list[j]).start - k < 0) {
 					(tmp = tmp.contemporary).push(last_era_data);
 					if (tmp.length > 1)
 						// 不能保證依照 紀年開始時間 時序，應該插入在最後。
@@ -5694,7 +5709,7 @@ function module_code(library_namespace) {
 
 			// 處理同時開始之"共存紀年" list：
 			j = [];
-			while (i > 0 && (tmp = era_list[--i]).start === start) {
+			while (i > 0 && (tmp = era_list[--i]).start - start === 0) {
 				// 同時開始。
 				j.unshift(tmp);
 				tmp.contemporary.push(last_era_data);
@@ -5707,7 +5722,7 @@ function module_code(library_namespace) {
 			// 將之插入紀年E 之"共存紀年" list。
 			tmp = era_list[i];
 			tmp.contemporary.concat(tmp).forEach(function(era) {
-				if (era.end > start)
+				if (era.end - start > 0)
 					contemporary.push(era);
 			});
 			// 為了按照 紀年開始時間 順序排列。
@@ -5778,6 +5793,14 @@ function module_code(library_namespace) {
 	 */
 	function add_contemporary(date, 指定紀年, options) {
 		var tmp, date_index,
+		// 以當日為單位而非採用精準時間
+		use_whole_day = options && ('use_whole_day' in options)
+		//
+		? options.use_whole_day
+		//
+		: 'precision' in date ? date.precision === 'day'
+		//
+		: date % ONE_DAY_LENGTH_VALUE === date.getTimezoneOffset() * 60 * 1000,
 		// 沒意外的話，共存紀年應該會照紀年初始時間排序。
 		// 共存紀年.start <= date < 共存紀年.end
 		共存紀年,
@@ -6003,7 +6026,7 @@ function module_code(library_namespace) {
 			// 則得使用 date.adapt_offset()。
 			// 再使用 date.adapt_offset('')，
 			// 或 date.adapt_offset(-5*60)，
-			// 或 date.adapt_offset(-(new Date).getTimezoneOffset())，
+			// 或 date.adapt_offset(-date.getTimezoneOffset())，
 			// 可以還原 local 之時間。
 			if (false)
 				date.adapt_offset = adapt_minute_offset;

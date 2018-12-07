@@ -1166,9 +1166,9 @@ function module_code(library_namespace) {
 	// 分類名稱重複時，排序索引以後出現者為主。
 	var
 	// [ all_category_text, category_name, sort_order, post_space ]
-	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ) *: *([^\|\[\]]+)(?:\s*\|\s*([^\|\[\]]*))?\]\](\s*\n?)/ig,
+	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ) *: *([^\[\]\|{}\n]+)(?:\s*\|\s*([^\[\]\|]*))?\]\](\s*\n?)/ig,
 	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
-	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ) *: *([^\|\[\]]+)/i;
+	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ) *: *([^\[\]\|{}\n]+)/i;
 
 	// ------------------------------------------------------------------------
 
@@ -2479,7 +2479,7 @@ function module_code(library_namespace) {
 	 * 頁面標題不可包含無效的字元：[\n\[\]{}]，經測試 anchor 亦不可包含[\n\[\]{}]，但 display text 可以包含
 	 * [\n]
 	 */
-	PATTERN_wikilink = /\[\[(([^\[\]{}\n\|#]+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([\s\S]+?))?\]\]/,
+	PATTERN_wikilink = /\[\[(([^\[\]\|{}\n#]+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([\s\S]+?))?\]\]/,
 	//
 	PATTERN_wikilink_global = new RegExp(PATTERN_wikilink.source, 'g'),
 	/**
@@ -3926,7 +3926,7 @@ function module_code(library_namespace) {
 			matched = pattern.exec(wikitext);
 			end_index = wikitext.indexOf('}}', pattern.lastIndex);
 
-			/\[\[([^\[\]\|{}]+)/g;
+			PATTERN_wikilink;
 		}
 
 		// ----------------------------------------------------
@@ -4487,10 +4487,10 @@ function module_code(library_namespace) {
 	// https://phabricator.wikimedia.org/T183711
 	// Doesn't conflict with any language code or other interwiki link.
 	// https://gerrit.wikimedia.org/r/#/c/400267/4/wmf-config/InitialiseSettings.php
-	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *([^#\|\[\]{}\/]+)/i,
+	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *([^\[\]\|{}\n#\/]+)/i,
 	// [[特殊:功績]]: zh-classical
 	// matched: [ all, " user name " ]
-	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録|功績)\/([^#\|\[\]{}\/]+)/i,
+	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録|功績)\/([^\[\]\|{}\n#\/]+)/i,
 	//
 	PATTERN_user_link_all = new RegExp(PATTERN_user_link.source, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
 			PATTERN_user_contributions_link.source, 'ig');
@@ -4641,7 +4641,7 @@ function module_code(library_namespace) {
 	 *      https://en.wikipedia.org/wiki/Help:Redirect
 	 *      https://phabricator.wikimedia.org/T68974
 	 */
-	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^\[\]{}\n\|]+)(?:\|[^\[\]{}]+?)?\]\]/i;
+	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^\[\]\|{}\n]+)(?:\|[^\[\]{}]+?)?\]\]/i;
 
 	/**
 	 * parse redirect page. 解析重定向資訊。 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名:
@@ -4682,11 +4682,14 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	/**
-	 * wikitext configuration → JSON
+	 * 解析設定參數 wikitext configuration → JSON
 	 * 
 	 * @example <code>
-		configuration = CeL.wiki.parse_configuration(page_data);
-		value = configuration[variable_name];
+
+	var configuration = CeL.wiki.parse_configuration(page_data);
+
+	value = configuration[variable_name];
+
 	</code>
 	 * 
 	 * @see [[w:zh:User:Cewbot/規範多個問題模板設定]]
@@ -4704,10 +4707,13 @@ function module_code(library_namespace) {
 		value;
 
 		function normalize_value(value) {
+			return value.trim()
 			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
 			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
 			// <source lang="cpp">
-			return value.trim().replace(/<\/?(?:nowiki|code)>/g, '');
+			.replace(/<\/?(?:nowiki|code)>/g, '')
+			// link → page title
+			.replace(/^\[\[([^\[\]\|{}\n]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1');
 		}
 
 		function reset_variable(var_name) {
@@ -6535,8 +6541,8 @@ function module_code(library_namespace) {
 			this.push((use_ordered_list ? '# ' : '* ')
 					+ (title && (title = get_page_title_link(title))
 					// 對於非條目作特殊處理。
-					? /^\[\[[^:]+:/.test(title) ? "'''" + title + "''' "
-							: title + ' ' : '') + message);
+					? /^\[\[[^\[\]\|{}\n#:]+:/.test(title) ? "'''" + title
+							+ "''' " : title + ' ' : '') + message);
 		}
 	}
 
@@ -20251,7 +20257,7 @@ function module_code(library_namespace) {
 			PATTERN =
 			// [ all, title, sitelink, miscellaneous ]
 			// TODO: use PATTERN_wikilink
-			/\n\|\s*\[\[([^\[\]{}\n\|]+)\|([^\[\]\n]*?)\]\]\s*\|\|([^\n]+)/g;
+			/\n\|\s*\[\[([^\[\]\|{}\n]+)\|([^\[\]\n]*?)\]\]\s*\|\|([^\n]+)/g;
 			while (matched = PATTERN.exec(data)) {
 				var miscellaneous = matched[3].split(/\s*\|\|\s*/),
 				//
@@ -20268,7 +20274,7 @@ function module_code(library_namespace) {
 				}
 				if ((matched = miscellaneous[4])
 				//
-				&& (matched = matched.match(/\[\[:d:([^\[\]\|]+)/))) {
+				&& (matched = matched.match(/\[\[:d:([^\[\]\|{}\n#:]+)/))) {
 					item.wikidata = matched[1];
 				}
 				items.push(item);

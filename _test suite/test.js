@@ -3407,6 +3407,7 @@ function test_era() {
 		[["甲寅年正月初一", '2034年2月19日'.to_Date().format('Chinese')], '2034年正月初一'],
 		[["癸丑年閏11月1日", '2033年12月22日'.to_Date().format({parser:'Chinese',numeral:null,format:'%歲次年%月月%日日'})], '2033年閏十一月初一'],
 		[["癸丑年閏11月1日", '2033年12月22日'.to_Date().format({parser:'era',era:'中曆',format:'%歲次年%月月%日日',locale:'cmn-Hant-TW'})], '2033年閏十一月初一'],
+		[CeL.era('公元1895年4月17日').共存紀年.join().includes('光緒21年3月23日'), '馬關條約公元 日期.共存紀年 包含光緒日期'],
 		[[undefined, CeL.era('2200/1/1').共存紀年]],
 		[[undefined, CeL.era('-4000/1/1').共存紀年]],
 		[[0, CeL.era('明年',{base:'嘉靖元年'}) - CeL.era('二年',{base:'嘉靖元年'})], '明年'],

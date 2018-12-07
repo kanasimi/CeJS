@@ -2634,10 +2634,11 @@ function module_code(library_namespace) {
 			difference = diff + diff2 / 12;
 			// diff = {String} format to show
 			if (options && options.月) {
-				diff += 'Y' + Math.round(diff2) + 'M';
+				diff += ' Y ' + Math.round(diff2) + ' M';
 			} else {
+				// years
 				// SI symbol: a (for Latin annus)
-				diff = difference.to_fixed(1) + 'Y';
+				diff = difference.to_fixed(1) + ' Y';
 			}
 			if (options && options.歲) {
 				// 計算年齡(虛歲)幾歲。
@@ -2659,26 +2660,28 @@ function module_code(library_namespace) {
 		}
 
 		if (diff2 >= 1) {
-			return diff2.to_fixed(1) + 'M';
+			// month
+			return diff2.to_fixed(1) + ' M';
 		}
 
 		if (difference < 1000) {
-			return difference + 'ms';
+			return difference + ' ms';
 		}
 
 		if ((difference /= 1000) < 60) {
-			return difference.to_fixed(1) + 's';
+			return difference.to_fixed(1) + ' s';
 		}
 
 		if ((difference /= 60) < 60) {
-			return difference.to_fixed(1) + 'min';
+			return difference.to_fixed(1) + ' min';
 		}
 
 		if ((difference /= 60) < 24) {
-			return difference.to_fixed(1) + 'hr';
+			return difference.to_fixed(1) + ' hr';
 		}
 
-		return (difference / 24).to_fixed(1) + 'd';
+		// day
+		return (difference / 24).to_fixed(1) + ' d';
 	}
 
 	// 將在 data.date.era 更正。
