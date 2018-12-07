@@ -610,13 +610,19 @@ function show_calendar(era_name) {
 		}
 
 		tmp = [];
-		if (main_date_value
-		//
-		&& main_date_value === date.getTime())
-			tmp.push('selected'), main_date_value = null;
-		if (date.準 || date.精)
+		if (main_date_value) {
+			// 把`date`作和`main_date_value`相同的操作。
+			date.setHours(0, 0, 0, 0);
+			// 假如主要的日期正是這一天，那麼就著上特別的顏色。
+			if (main_date_value === date.getTime()) {
+				tmp.push('selected');
+				main_date_value = null;
+			}
+		}
+		if (date.準 || date.精) {
 			// 不確定之數值
 			tmp.push('uncertain');
+		}
 
 		output.push({
 			tr : list,
