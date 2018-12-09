@@ -2467,6 +2467,7 @@ function module_code(library_namespace) {
 
 	// 經測試發現 {{...}} 名稱中不可有 [{}<>\[\]]
 	// while(/{{{[^{}\[\]]+}}}/g.exec(wikitext));
+	// 但允許 "{{\n name}}"
 	// 模板名#後的內容會忽略。
 	/** {RegExp}模板的匹配模式。 */
 	var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
@@ -4684,6 +4685,8 @@ function module_code(library_namespace) {
 	/**
 	 * 解析設定參數 wikitext configuration → JSON
 	 * 
+	 * 當解析發生錯誤的時候，應該要在設定頁面的討論頁顯示錯誤訊息。
+	 * 
 	 * @example <code>
 
 	var configuration = CeL.wiki.parse_configuration(page_data);
@@ -4704,7 +4707,9 @@ function module_code(library_namespace) {
 		// 變數名稱
 		variable_name,
 		// 變數的值
-		value;
+		value,
+		// 已經增加過說明。
+		had_add_comments;
 
 		function normalize_value(value) {
 			return value.trim()
@@ -4722,6 +4727,7 @@ function module_code(library_namespace) {
 			// reset
 			variable_name = var_name && normalize_value(var_name) || undefined;
 			value = undefined;
+			had_add_comments = false;
 		}
 
 		wikitext.split('\n').forEach(function(line) {
@@ -4750,6 +4756,12 @@ function module_code(library_namespace) {
 					value.push(matched);
 				else
 					value = [ value, matched ];
+				return;
+			}
+
+			if (variable_name && value && !had_add_comments) {
+				// 這一行 value 當作是說明。
+				had_add_comments = true;
 				return;
 			}
 
@@ -5252,16 +5264,22 @@ function module_code(library_namespace) {
 		if (!title) {
 			return '';
 		}
-		if (session && session.language && !project_prefixed) {
-			// e.g., [[w:zh:title]]
-			title = session.language + ':' + title;
-			if (session.family
-					&& (session.family in api_URL.shortcut_of_project)) {
-				title = api_URL.shortcut_of_project[session.family] + ':'
-						+ title;
-			} else {
-				need_escape = true;
+		if (is_wiki_API(session)) {
+			if (session.language && !project_prefixed) {
+				// e.g., [[w:zh:title]]
+				title = session.language + ':' + title;
+				if (session.family
+						&& (session.family in api_URL.shortcut_of_project)) {
+					title = api_URL.shortcut_of_project[session.family] + ':'
+							+ title;
+				} else {
+					need_escape = true;
+				}
 			}
+		} else if (session) {
+			// e.g., `CeL.wiki.title_link_of(page_data, display_text)`
+			// shift arguments
+			display_text = session;
 		}
 
 		// TODO: [[s:zh:title]] instead of [[:zh:title]]
