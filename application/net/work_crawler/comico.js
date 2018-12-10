@@ -1,7 +1,7 @@
 ﻿/**
  * @name CeL function for downloading comico comics.
  * 
- * @fileoverview 本檔案包含了解析並處理、批量下載 韓國 NHN comico 漫畫 的工具。
+ * @fileoverview 本檔案包含了解析並處理、批量下載 韓國 NHN comico Corp. 漫畫 的工具。
  * 
  * <code>
 
@@ -113,10 +113,12 @@ function module_code(library_namespace) {
 		parse_search_result : function(html, get_label) {
 			// console.log(html);
 			html = html.between(' id="officialList">') || html;
+			// console.log(html);
 			var _this = this, id_list = [], id_data = [];
 			html.each_between(this.search_head_token, '</li>', function(token) {
 				// console.log(token);
 				var matched = token.match(_this.PATTERN_search);
+				// console.log(matched);
 				if (matched) {
 					// コミコ有些整本賣的作品，而非一話一話。
 					id_list.push(matched[1]);
@@ -133,9 +135,12 @@ function module_code(library_namespace) {
 		},
 		parse_work_data : function(html, get_label, extract_work_data) {
 			// console.log(html);
+
 			var work_data = {
 				// 必要屬性：須配合網站平台更改。
-				title : get_label(html.between('<h1', '</h1>').between('>'))
+				// <h1 class="article-hero05__ttl">美麗的代價</h1>
+				title : get_label((html.between('<h1 class="article', '</h1>') || html
+						.between('<h1', '</h1>')).between('>'))
 			// 選擇性屬性：須配合網站平台更改。
 			}, cmnData = html.between('var cmnData =', '</script>'), matched;
 
