@@ -339,7 +339,7 @@ function show_calendar(era_name) {
 	main_date = CeL.era(era_name), main_date_value,
 	// 取得指定紀年之文字式曆譜:年曆,朔閏表,曆日譜。
 	dates = CeL.era.dates(era_name, {
-		含參照用 : /明治|大正|昭和|明仁/.test(era_name),
+		含參照用 : PATTERN_J_translate.test(era_name),
 		add_country : true
 	}), is_年譜, i, j, matched, hidden_column = [], group;
 
@@ -1469,6 +1469,9 @@ function draw_era(hierarchy) {
 							color : '#f42'
 						});
 
+			// TODO:
+			// https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/SVG_Image_Tag
+
 			style = {
 				color : 存疑資料 ? '#444' : layer_count === 1 ? '#15a' : '#a2e',
 				cursor : 'pointer',
@@ -1860,12 +1863,22 @@ function input_era(key) {
 
 var 準確程度_MESSAGE = {
 	傳說 : '為傳說時代之資料'
-}, J_translate = {
+},
+// Japan convert
+J_translate = {
 	H : '平成',
 	S : '昭和',
 	T : '大正',
 	M : '明治'
-}, country_color = {
+}, PATTERN_J_translate = new RegExp(Object.values(J_translate).join('|')),
+// http://maechan.net/kanreki/index.php
+// 和暦入力時の元号は、『明治』『大正』『昭和』『平成』に限り、各々『M』『T』『S』『H』の頭文字でも入力できます。
+// e.g., "H30.4.30"
+// [ all, イニシャル/略号, year, left ]
+PATTERN_J_prefix = new RegExp('^([' + Object.keys(J_translate).join('')
+		+ '])\\s*(\\d{1,2})(\\D.*)?$', 'i'),
+//
+country_color = {
 	中國 : '#dd0',
 
 	日本 : '#9cf',
@@ -2013,9 +2026,7 @@ function translate_era(era) {
 
 	// 前置處理。
 
-	// http://maechan.net/kanreki/index.php
-	// 和暦入力時の元号は、『明治』『大正』『昭和』『平成』に限り、各々『M』『T』『S』『H』の頭文字でも入力できます。
-	if (date = era.match(/^([HSTM])\s*(\d+)(\D.*)?$/i))
+	if (date = era.match(PATTERN_J_prefix))
 		era = J_translate[date[1]] + date[2] + (date[3] || '年');
 
 	date = CeL.era(era, {
