@@ -139,7 +139,10 @@ function module_code(library_namespace) {
 	/** {Number}一分鐘的 time 值。should be 60 * 1000 = 60000. */
 	ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
 	/** {Number}一整時辰的 time 值。should be 2 * 60 * 60 * 1000 = 7200000. */
-	ONE_時辰_LENGTH_VALUE = new Date(0, 0, 0, 2) - new Date(0, 0, 0, 0);
+	ONE_時辰_LENGTH_VALUE = new Date(0, 0, 0, 2) - new Date(0, 0, 0, 0),
+
+	// e.g., UTC+8: -8 * 60 = -480
+	nowaday_local_minute_offset = (new Date).getTimezoneOffset() || 0;
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// for Julian date. 期能不使用內建 Date 以快速計算日期。
@@ -465,7 +468,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Integer}
 	 */
-	Julian_day.default_offset = (new Date).getTimezoneOffset()
+	Julian_day.default_offset = nowaday_local_minute_offset
 			* ONE_MINTE_LENGTH_VALUE;
 
 	// Get the epoch of Julian date, i.e., -4713/11/24 12:0
@@ -478,12 +481,6 @@ function module_code(library_namespace) {
 		date.setUTCFullYear(JD0[0] | 0, (JD0[1] | 0) - 1, JD0[2] | 0);
 		Julian_day.epoch = date.getTime();
 		// Julian_day.epoch = -210866760000000;
-
-		// new Date(-1e13) 會使 Chrome 69.0.3493.3
-		// 把台北標準時間從 GMT+0800 改成 GMT+0806。
-		// firefox 無此問題。 bug?
-		// assert:
-		// new Date(-1e13).getTimezoneOffset()===new Date().getTimezoneOffset()
 	})();
 
 	/**
@@ -779,7 +776,7 @@ function module_code(library_namespace) {
 	// e.g., UTC-5: -5 * 60
 	// 亦為 Date.parse(date_string) 與 new Date() 會自動附上的當地時間差距。
 	// assert: String_to_Date.default_offset 為整數。
-	String_to_Date.default_offset = -(new Date).getTimezoneOffset() || 0;
+	String_to_Date.default_offset = -nowaday_local_minute_offset;
 
 	/**
 	 * <code>
@@ -1514,6 +1511,7 @@ function module_code(library_namespace) {
 		return parse_escape(format || strftime.default_format, convertor);
 	}
 
+	// .toISOString(): '%4Y-%2m-%2dT%2H:%2M:%2S.%fZ'
 	strftime.default_format = '%Y/%m/%d %H:%M:%S.%f';
 
 	/**
@@ -3001,8 +2999,7 @@ function module_code(library_namespace) {
 				// input UTC 時之差距(milliseconds)
 				// .getTimezoneOffset() is in minute.
 				// 60*1000(milliseconds)=6e4(milliseconds)
-				a = format_date.UTC_offset = 6e4 * (new Date)
-						.getTimezoneOffset();
+				a = format_date.UTC_offset = 6e4 * nowaday_local_minute_offset;
 			}
 
 			// 值過小時當作時間: d < 90000000 ≈ 24*60*60*1000，判別為當天，只顯示時間。不允許 d < 0！

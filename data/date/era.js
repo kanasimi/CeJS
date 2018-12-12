@@ -56,6 +56,13 @@ CeL.log(['今天是農曆: ', 今天的農曆日期]);
 // 取得公元 415年, 中曆 三月 之 CE Date。
 CeL.era.中曆('415年三月');
 
+// CeL.era('') 相當於:
+// https://docs.microsoft.com/zh-tw/dotnet/api/system.datetime.parse
+// DateTime.Parse("")
+// https://support.office.com/en-us/article/datevalue-function-df8b07d4-7761-4a93-bc33-b7471bbff252?omkt=en-US&ui=en-US&rs=en-US&ad=US
+// Excel: =DATEVALUE("")
+
+
 
 CeL.run('data.date.era', test_era_data);
 
@@ -5998,21 +6005,23 @@ function module_code(library_namespace) {
 	}
 
 	// e.g., UTC+8: -8 * 60 = -480
-	var local_minute_offset = (new Date).getTimezoneOffset() || 0,
+	var nowaday_local_minute_offset = (new Date).getTimezoneOffset() || 0,
 	//
 	ONE_MINUTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 1) - new Date(0, 0, 1, 0, 0);
 
 	function offseted_value(minute_offset) {
 		if (minute_offset === undefined)
 			minute_offset = this[MINUTE_OFFSET_KEY];
-		else if (minute_offset === '')
+		else if (minute_offset === '') {
 			// 可用來還原 local 之時間。
-			minute_offset = -local_minute_offset;
+			minute_offset = -this.getTimezoneOffset() || 0;
+		}
 
 		if (!isNaN(minute_offset)) {
 			if (isNaN(this.original_value))
 				this.original_value = this.getTime();
-			return this.original_value - (minute_offset + local_minute_offset)
+			return this.original_value
+					- (minute_offset + (this.getTimezoneOffset() || 0))
 					* ONE_MINUTE_LENGTH_VALUE;
 		}
 	}
@@ -6099,6 +6108,24 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 	// 應用功能。
+
+	/**
+	 * date.getTimezoneOffset() 這個數字會隨著夏令時間、各個歷史時代而作調整，不一定和當前的時區相同。<br />
+	 * `new Date(-1e13)` 會使 Chrome 69.0.3493.3 把台北標準時間從 GMT+0800 改成 GMT+0806。<br />
+	 * new Date(-1e13).getTimezoneOffset()!==new Date().getTimezoneOffset()
+	 * 因此利用UTC、Julian_day得出的時間，在`d.getMinutes()`的時候會產生誤差。此時需要做調整。
+	 * 
+	 * 注意: 這個調整最多只能做一次，之後若要演算也必須把時間調回來。
+	 * 
+	 * @param {Date}date
+	 */
+	function correct_timezone_offset(date) {
+		var timezone_offset_min = date.getTimezoneOffset()
+				- nowaday_local_minute_offset;
+		if (timezone_offset_min !== 0) {
+			date.setMinutes(date.getMinutes() + timezone_offset_min);
+		}
+	}
 
 	/**
 	 * 傳入完整紀年日期，將之轉成具有紀年附加屬性的 Date。
@@ -6672,6 +6699,7 @@ function module_code(library_namespace) {
 					// shift microseconds
 					tmp2 = typeof options.get_range === 'boolean' ? 0
 							: options.get_range | 0;
+
 					if (!年 || isNaN(年 = numeralize_date_name(年)))
 						tmp = new Date(紀年.end.getTime() + tmp2);
 					else {
@@ -6695,7 +6723,10 @@ function module_code(library_namespace) {
 					if (!tmp2)
 						return [ date, tmp ];
 
-					// options.get_range_String as format
+					correct_timezone_offset(date);
+					correct_timezone_offset(tmp);
+
+					// treat options.get_range_String as format
 					date = date.format(tmp2);
 					tmp = tmp.format(tmp2);
 					if (date !== tmp) {
@@ -7950,15 +7981,16 @@ function module_code(library_namespace) {
 
 		} else if (era = calculate_node_era(this)) {
 			if (date = this.add_date) {
-				// maybe ((undefined))
-				date = to_era_Date(calculate_node_era(this, 'String'), {
+				date = {
 					get_range_String : {
 						parser : standard_time_parser,
 						format : String(date) === 'true'
 						//
 						? popup_era_dialog.format : date
 					}
-				});
+				};
+				date = to_era_Date(calculate_node_era(this, 'String'), date);
+				// `date` maybe `undefined`
 			}
 			if (date) {
 				date = '（' + date + '）';
