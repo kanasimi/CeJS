@@ -2426,7 +2426,7 @@ function module_code(library_namespace) {
 				method : 'CONNECT'
 			});
 			// console.log(request);
-			// 此時若有agent，會是https。但是待會要用http connect。
+			// 此時若有 agent，會是 https。但是待會要用 http connect。
 			delete request.agent;
 			delete request.protocol;
 			if (proxy_server.agent)

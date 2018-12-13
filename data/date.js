@@ -119,7 +119,9 @@ function module_code(library_namespace) {
 	// isNaN(CeL.null_Object()) will throw @ Chrome/36
 	// (Cannot convert object to primitive value),
 	// therefore we can't use library_namespace.null_Object() here.
-	DEFAULT_TIME_ZONE = {};
+	DEFAULT_TIME_ZONE = {
+		DEFAULT_TIME_ZONE : true
+	};
 
 	// 嘗試 UTC+08:00 之類的標準表示法。
 	function get_minute_offset(date_string) {
@@ -677,7 +679,7 @@ function module_code(library_namespace) {
 			return new Date(date_string);
 		}
 
-		var tmp, minute_offset;
+		var tmp, matched, minute_offset;
 
 		if (library_namespace.is_RegExp(options)) {
 			// 將 options 當作 pattern。
@@ -702,21 +704,21 @@ function module_code(library_namespace) {
 
 		if (library_namespace.is_RegExp(options.pattern)
 		//
-		&& (tmp = date_string.match(options.pattern))) {
+		&& (matched = date_string.match(options.pattern))) {
 			// 依照 matched 匹配的來正規化/設定年月日。
 			// e.g., new Date('1234/5/6')
 			// === '1234年5月6日'.to_Date(/(\d+)年(\d+)月(\d+)日/)
 			// ===
 			// '5/6/1234'.to_Date({pattern:/(\d+)\/(\d+)\/(\d+)/,pattern_matched:[3,1,2]})
-			minute_offset = Array.isArray(options.pattern_matched) ? options.pattern_matched
+			tmp = Array.isArray(options.pattern_matched) ? options.pattern_matched
 					: [ 1, 2, 3 ];
-			date_string = minute_offset.map(function(processor) {
+			date_string = tmp.map(function(processor) {
 				return typeof processor === 'function'
 				//
-				? processor(matched) : tmp[processor];
+				? processor(matched) : matched[processor];
 			}).join(
 			// 長度3時當作年月日，否則當作自訂處理。
-			minute_offset.length === 3 ? '/' : '');
+			tmp.length === 3 ? '/' : '');
 		}
 
 		// 設定指定 time zone 之 offset in minutes.
@@ -763,7 +765,7 @@ function module_code(library_namespace) {
 			// TODO: period_end 無效。
 			// native parser 會處理 time zone offset.
 			tmp = new Date(tmp);
-			if (minute_offset !== DEFAULT_TIME_ZONE) {
+			if (!isNaN(minute_offset) && minute_offset !== DEFAULT_TIME_ZONE) {
 				tmp.setMinutes(tmp.getMinutes() - tmp.getTimezoneOffset()
 						- minute_offset);
 			}
@@ -865,7 +867,7 @@ function module_code(library_namespace) {
 		// 精密度
 		precision, period_end = options.period_end,
 		// matched string
-		matched,
+		matched, tmp,
 		//
 		no_year_0 = 'no_year_0' in options ? options.no_year_0
 				: String_to_Date.no_year_0;
@@ -873,13 +875,11 @@ function module_code(library_namespace) {
 		date_string = date_string.trim()
 		// 注意:"紀"會轉換成結束時間。
 		.replace(/世[紀纪]/g, '百年').replace(/千[紀纪]/g, '千年');
-		if (isNaN(minute_offset)) {
-			if (isNaN(minute_offset = get_minute_offset(date_string))) {
-				minute_offset = String_to_Date.default_offset;
-			} else {
-				// 留下此 pattern 在 match 時會出錯。
-				date_string = date_string.replace(UTC_PATTERN, '').trim();
-			}
+		if (isNaN(minute_offset)
+				&& !isNaN(tmp = get_minute_offset(date_string))) {
+			minute_offset = tmp;
+			// 留下此 pattern 在 match 時會出錯。
+			date_string = date_string.replace(UTC_PATTERN, '').trim();
 		}
 
 		if (matched = date_string.match(PATTERN_YEAR_ONLY)) {
@@ -974,7 +974,8 @@ function module_code(library_namespace) {
 		library_namespace.debug(date_data.join('<br />'), 2,
 				'String_to_Date_default_parser');
 
-		var year, tmp = date_data.length === 8 && date_data.pop();
+		var year;
+		tmp = date_data.length === 8 && date_data.pop();
 
 		if (tmp === 'P' || tmp === 'p') {
 			// is PM (else: AM or 24-hour format)
@@ -1036,9 +1037,15 @@ function module_code(library_namespace) {
 
 		year = +year || 0;
 		// time zone.
-		tmp = (+date_data[4] || 0)
-		// 若是未設定，則當作 local zone。
-		+ String_to_Date.default_offset - (+minute_offset || 0);
+		tmp = +date_data[4] || 0;
+		var base_on_UTC = !isNaN(minute_offset)
+				&& minute_offset !== DEFAULT_TIME_ZONE;
+		// 若是未設定，則當作 local time zone。
+		if (base_on_UTC) {
+			// 否則轉成基於 UTC 之 `minute_offset`
+			// local time + .getTimezoneOffset() = UTC
+			tmp -= nowaday_local_minute_offset + minute_offset;
+		}
 
 		var date_value;
 		if (year < 100 && year >= 0) {
@@ -1062,15 +1069,12 @@ function module_code(library_namespace) {
 					date_data[2], +date_data[3] || 0, tmp, +date_data[5] || 0,
 					+date_data[6] || 0);
 		}
-		if (date_value.getTimezoneOffset() !== -String_to_Date.default_offset) {
+		if (base_on_UTC
+				&& date_value.getTimezoneOffset() !== nowaday_local_minute_offset) {
+			// 設定時間後才調整 time zone。
 			date_value.setMinutes(date_value.getMinutes()
-					- date_value.getTimezoneOffset()
-					- String_to_Date.default_offset);
-		}
-		if (false) {
-			// 設定時間後才設定 time zone。
-			date_value.setMinutes((+date_data[4] || 0)
-					+ String_to_Date.default_offset - (+minute_offset || 0));
+					+ nowaday_local_minute_offset
+					- date_value.getTimezoneOffset());
 		}
 
 		// 測試僅輸入時刻的情況。e.g., '7時'
