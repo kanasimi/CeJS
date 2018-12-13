@@ -764,9 +764,8 @@ function module_code(library_namespace) {
 			// native parser 會處理 time zone offset.
 			tmp = new Date(tmp);
 			if (minute_offset !== DEFAULT_TIME_ZONE) {
-				tmp.setMinutes(tmp.getMinutes()
-				// should be: - tmp.getTimezoneOffset()
-				+ String_to_Date.default_offset - minute_offset);
+				tmp.setMinutes(tmp.getMinutes() - tmp.getTimezoneOffset()
+						- minute_offset);
 			}
 			return tmp;
 		}
@@ -1063,7 +1062,7 @@ function module_code(library_namespace) {
 					date_data[2], +date_data[3] || 0, tmp, +date_data[5] || 0,
 					+date_data[6] || 0);
 		}
-		if (false && date_value.getTimezoneOffset() !== -String_to_Date.default_offset) {
+		if (date_value.getTimezoneOffset() !== -String_to_Date.default_offset) {
 			date_value.setMinutes(date_value.getMinutes()
 					- date_value.getTimezoneOffset()
 					- String_to_Date.default_offset);
