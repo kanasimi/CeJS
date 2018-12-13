@@ -1988,8 +1988,8 @@ function test_date() {
 		[[0,'2千紀'.to_Date({zone:0})-'2000/1/1 UTC'.to_Date()], '.to_Date(): 理應可 parse 的值'],
 		[[0,'1千年'.to_Date({zone:0})-'1000/1/1 UTC'.to_Date()], '.to_Date(): 理應可 parse 的值'],
 
-		[[0,new Date('1234/5/6') - '1234年5月6日'.to_Date(/(\d+)年(\d+)月(\d+)日/)], '.to_Date(): 自訂 pattern'],
-		[[0,new Date('1234/5/6') - '5/6/1234'.to_Date({pattern:/(\d+)\/(\d+)\/(\d+)/,pattern_matched:[3,1,2]})], '.to_Date(): 自訂 pattern'],
+		[[0,new Date('1234/5/6') - '1234年5月6日'.to_Date(/(\d+)年(\d+)月(\d+)日/)], '.to_Date(): 自訂 pattern #1'],
+		[[0,new Date('1234/5/6') - '5/6/1234'.to_Date({pattern:/(\d+)\/(\d+)\/(\d+)/,pattern_matched:[3,1,2]})], '.to_Date(): 自訂 pattern #2'],
 
 		[[ 'microsecond', '2543年2月1日 1:2:3.45'.to_Date().precision ], '.to_Date(): precision #1'],
 		[[ 'second', '2543年2月1日 1:2:3'.to_Date().precision ], '.to_Date(): precision #2'],
@@ -2138,14 +2138,20 @@ function test_date() {
 	});
 
 	error_count += CeL.test('date Basic tests', function(assert) {
+		// e.g., UTC+8: -8 * 60 = -480
+		var nowaday_local_minute_offset = (new Date).getTimezoneOffset() || 0;
 		//year = -2010
 		for(var year=-500;year<2010;year++)if(year){
-			assert([year+"/1/1 0:0:0.000",(year.pad(4)+'/1/1').to_Date('CE').format('CE')]);
-			assert([year+"/2/28 0:0:0.000",(year.pad(4)+'/2/28').to_Date('CE').format('CE')]);
+			assert([year+'/1/1 0:0:0.000',(year.pad(4)+'/1/1').to_Date('CE').format('CE')], 'date Basic tests: '+year+'/1/1');
+			assert([year+'/2/28 0:0:0.000',(year.pad(4)+'/2/28').to_Date('CE').format('CE')], 'date Basic tests: '+year+'/2/28');
 			if (year<=1582&&year%4===(year<0?-1:0))
-				assert([year+"/2/29 0:0:0.000",(year.pad(4)+'/2/29').to_Date('CE').format('CE')]);
-			assert([year+"/3/1 0:0:0.000",(year.pad(4)+'/3/1').to_Date('CE').format('CE')]);
-			assert([year+"/12/31 0:0:0.000",(year.pad(4)+'/12/31').to_Date('CE').format('CE')]);
+				assert([year+'/2/29 0:0:0.000',(year.pad(4)+'/2/29').to_Date('CE').format('CE')], 'date Basic tests: '+year+'/2/29');
+			var date = (year.pad(4)+'/3/1').to_Date('CE');
+			if (date.getTimezoneOffset() === nowaday_local_minute_offset) {
+				// for 1952/3/1 @ 台北標準時間
+				assert([year+'/3/1 0:0:0.000',date.format('CE')], 'date Basic tests: '+year+'/3/1');
+			}
+			assert([year+'/12/31 0:0:0.000',(year.pad(4)+'/12/31').to_Date('CE').format('CE')], 'date Basic tests: '+year+'/12/31');
 		}
 	});
 
@@ -2183,9 +2189,9 @@ function test_date() {
 
 
 	error_count += CeL.test('Date_to_JD', [
-		[[2451545, CeL.Date_to_JD(new Date(Date.parse('1 January 2000 12:00 UTC')))],'標準曆元 J2000.0'],
-		[[2451545, CeL.Date_to_JDN(new Date(Date.parse('1 January 2000 UTC')))],'標準曆元 J2000.0'],
-		[[2456413, CeL.Date_to_JD(new Date(Date.parse('2013/4/30 12:00 UTC')))]],
+		[[2451545, CeL.Date_to_JD(new Date(Date.parse('1 January 2000 12:00 UTC')))],'Date_to_JD: 標準曆元 J2000.0 #1'],
+		[[2451545, CeL.Date_to_JDN(new Date(Date.parse('1 January 2000 UTC')))],'Date_to_JD: 標準曆元 J2000.0 #2'],
+		[[2456413, CeL.Date_to_JD(new Date(Date.parse('2013/4/30 12:00 UTC')))],'Date_to_JD: 2013/4/30'],
 	]);
 
 
@@ -2217,7 +2223,7 @@ function test_date() {
 		[[2299159.5,	CeL.Date_to_JD('1582/10/4 0:0'.to_Date({parser:'CE',zone:0}))],'before reform'],
 		[[2299160.5,	CeL.Date_to_JD('1582/10/15 0:0'.to_Date({parser:'CE',zone:0}))],'after reform'],
 
-		[[2451545,	CeL.Date_to_JD('2000/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'標準曆元 J2000.0'],
+		[[2451545,	CeL.Date_to_JD('2000/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'date: .to_Date(CE): 標準曆元 J2000.0'],
 
 
 		[[2451545, CeL.Date_to_JD('2000/1/1 12:'.to_Date({zone:0}))],'J2000.0 fault'],

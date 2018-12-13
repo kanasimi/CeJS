@@ -764,8 +764,9 @@ function module_code(library_namespace) {
 			// native parser 會處理 time zone offset.
 			tmp = new Date(tmp);
 			if (minute_offset !== DEFAULT_TIME_ZONE) {
-				tmp.setMinutes(tmp.getMinutes() + String_to_Date.default_offset
-						- minute_offset);
+				tmp.setMinutes(tmp.getMinutes()
+				// should be: - tmp.getTimezoneOffset()
+				+ String_to_Date.default_offset - minute_offset);
 			}
 			return tmp;
 		}
@@ -1061,6 +1062,11 @@ function module_code(library_namespace) {
 			date_value = new Date(year, date_data[1] ? date_data[1] - 1 : 0,
 					date_data[2], +date_data[3] || 0, tmp, +date_data[5] || 0,
 					+date_data[6] || 0);
+		}
+		if (false && date_value.getTimezoneOffset() !== -String_to_Date.default_offset) {
+			date_value.setMinutes(date_value.getMinutes()
+					- date_value.getTimezoneOffset()
+					- String_to_Date.default_offset);
 		}
 		if (false) {
 			// 設定時間後才設定 time zone。
@@ -1878,13 +1884,9 @@ function module_code(library_namespace) {
 		// e.g., 子正初刻
 		// 隋後普遍行百刻制，每天100刻。至順治二年（公元1645年）頒行時憲曆後，改為日96刻，每時辰八刻（初初刻、初一刻、初二刻、初三刻、正初刻、正一刻、正二刻、正三刻）[7,13,14]。自此每刻15分，無「四刻」之名。
 		時刻 : function(date_value, options) {
-			if (options && options.original_Date) {
-				date_value = options.original_Date;
-			}
+			var diff = Math.floor(hour_stem_branch_index(date_value, options))
 			// 12: BRANCH_LIST.length
-			var diff = Math.floor(
-					(date_value - HOUR_STEM_BRANCH_OFFSET)
-							/ ONE_時辰_LENGTH_VALUE).mod(12);
+			.mod(12);
 			return BRANCH_LIST.charAt(diff) + (diff % 2 ? '正' : '初')
 					+ '初一二三'.charAt(date_value.getMinutes() / 4 | 0) + '刻';
 		}
@@ -2181,7 +2183,7 @@ function module_code(library_namespace) {
 	// <a href="http://aa.usno.navy.mil/data/docs/JulianDate.php"
 	// accessdate="2013/2/11 9:10">Julian Date Converter</a>
 	function Date_to_JD(date_value, options) {
-		date_value = ((options && options.original_Date || date_value) - Julian_Date_offset)
+		date_value = ((options && options.original_Date || date_value) - Julian_Date_epoch)
 				/ ONE_DAY_LENGTH_VALUE;
 		if (options && options.as_UTC_time) {
 			date_value += Julian_Date_local_offset;
@@ -2201,7 +2203,7 @@ function module_code(library_namespace) {
 	function JD_to_Date(JD) {
 		// 注意：此輸出常顯示為系統之 proleptic Gregorian calendar，
 		// 而一般天文計算使用 proleptic Julian calendar！
-		return new Date(Julian_Date_offset + ONE_DAY_LENGTH_VALUE * JD);
+		return new Date(Julian_Date_epoch + ONE_DAY_LENGTH_VALUE * JD);
 	}
 
 	_.Date_to_JD = Date_to_JD;
@@ -2216,10 +2218,17 @@ function module_code(library_namespace) {
 	// 原點實際設在 -004713-11-24T12:00:00.000Z。
 	// http://www.tondering.dk/claus/cal/julperiod.php
 	// http://aa.usno.navy.mil/data/docs/JulianDate.php
-	var Julian_Date_offset = String_to_Date('-4713/1/1 12:0', {
-		parser : 'Julian',
-		zone : 0
-	}).getTime();
+	var Julian_Date_epoch = Date.parse('-004713-11-24T12:00:00.000Z');
+	if (!Julian_Date_epoch) {
+		// 替代方法. 慢.
+		Julian_Date_epoch = String_to_Date('-4713/1/1 12:0', {
+			parser : 'Julian',
+			zone : 0
+		});
+		Julian_Date_epoch = Julian_Date_epoch.getTime()
+				+ (nowaday_local_minute_offset - (Julian_Date_epoch
+						.getTimezoneOffset() || 0)) * ONE_MINTE_LENGTH_VALUE;
+	}
 
 	// 預設的 Gregorian calendar 改曆日期:
 	// Julian calendar → Gregorian calendar.
@@ -2315,20 +2324,26 @@ function module_code(library_namespace) {
 	// 當考慮以 CST，或以當地時間為準。
 	// 因為八字與經度，以及該經度與太陽的日照相對夾角有關，因此採當地時間為準。
 
-	// CE YEAR_STEM_BRANCH_OFFSET 3-12月為甲子年。
+	// CE YEAR_STEM_BRANCH_EPOCH 3-12月為甲子年。
 	// 以此計算 new Date(0) 之 offset。
 	// 黃帝紀元元年 (year -2696 in proleptic Gregorian calendar) 為甲子年。
-	YEAR_STEM_BRANCH_OFFSET = -2696,
-	// 1984/3/31 0:0 (甲子年丁卯月)甲子日始: 以此計算 new Date(0) 之 offset。
-	DATE_STEM_BRANCH_OFFSET = new Date(1984, 3 - 1, 31),
-	// 1984/3/31 23:0 (甲子年丁卯月)甲子日甲子時始: 以此計算 new Date(0) 之 offset。
-	HOUR_STEM_BRANCH_OFFSET = new Date(1984, 3 - 1, 30, 23);
+	YEAR_STEM_BRANCH_EPOCH = -2696,
+	// 1984/3/31 0:0 (甲子年丁卯月)甲子日始: 以此基準點計算 new Date(0) 之 offset。
+	DATE_STEM_BRANCH_EPOCH = new Date(1984, 3 - 1, 31),
+	//
+	DATE_STEM_BRANCH_minute_offset = DATE_STEM_BRANCH_EPOCH.getTimezoneOffset() || 0,
+	// 1984/3/31 23:0 (甲子年丁卯月)甲子日甲子時始: 以此基準點計算 new Date(0) 之 offset。
+	HOUR_STEM_BRANCH_epoch = new Date(1984, 3 - 1, 30, 23),
+	//
+	HOUR_STEM_BRANCH_minute_offset = HOUR_STEM_BRANCH_epoch.getTimezoneOffset() || 0;
+	DATE_STEM_BRANCH_EPOCH = DATE_STEM_BRANCH_EPOCH.getTime();
+	HOUR_STEM_BRANCH_epoch = HOUR_STEM_BRANCH_epoch.getTime();
 
 	_.STEM_LIST = STEM_LIST;
 	_.BRANCH_LIST = BRANCH_LIST;
 	_.SEXAGENARY_CYCLE_LENGTH = SEXAGENARY_CYCLE_LENGTH;
 
-	_.YEAR_STEM_BRANCH_OFFSET = YEAR_STEM_BRANCH_OFFSET;
+	_.YEAR_STEM_BRANCH_EPOCH = YEAR_STEM_BRANCH_EPOCH;
 
 	// 日干支序。
 	// 注意：此處"序"指的是 Array index，從 0 開始。
@@ -2336,7 +2351,10 @@ function module_code(library_namespace) {
 		if (options && options.original_Date) {
 			date_value = options.original_Date;
 		}
-		var index = Math.floor((date_value - DATE_STEM_BRANCH_OFFSET)
+		var index = Math.floor((date_value - DATE_STEM_BRANCH_EPOCH
+		// 修正不同年代時刻間的時區差。
+		- (date_value.getTimezoneOffset() - DATE_STEM_BRANCH_minute_offset)
+				* ONE_MINTE_LENGTH_VALUE)
 				/ ONE_DAY_LENGTH_VALUE);
 		// 針對需要子初分日者特別處理:直接算入下一天。
 		if (Date_to_String['子初分日'] && date_value.getHours() === 23) {
@@ -2351,8 +2369,12 @@ function module_code(library_namespace) {
 	// 時干支序。
 	// 注意：此處"序"指的是 Array index，從 0 開始。
 	function hour_stem_branch_index(date_value, options) {
-		return ((options && options.original_Date || date_value) - HOUR_STEM_BRANCH_OFFSET)
-				/ ONE_時辰_LENGTH_VALUE;
+		date_value = options && options.original_Date || date_value;
+		date_value = date_value - HOUR_STEM_BRANCH_epoch
+		// 修正不同年代時刻間的時區差。
+		- (date_value.getTimezoneOffset() - HOUR_STEM_BRANCH_minute_offset)
+				* ONE_MINTE_LENGTH_VALUE;
+		return date_value / ONE_時辰_LENGTH_VALUE;
 	}
 
 	// 極大程度依賴 date_pattern 的寫法！
@@ -2553,7 +2575,7 @@ function module_code(library_namespace) {
 			month = 7;
 		}
 
-		year -= YEAR_STEM_BRANCH_OFFSET;
+		year -= YEAR_STEM_BRANCH_EPOCH;
 
 		if (month < 2)
 			// 正月初一的日期落在大寒至雨水

@@ -3361,11 +3361,10 @@ function module_code(library_namespace) {
 				if (起始月分)
 					年干支.setMonth(年干支.getMonth() + START_MONTH - 起始月分);
 			}
-			年干支 = (年干支.getFullYear()
-					- library_namespace.YEAR_STEM_BRANCH_OFFSET
-					// 中曆年起始於CE年末，則應算作下一年之
-					// YEAR_STEM_BRANCH_OFFSET。
-					+ (年干支.getMonth() > 9 ? 1 : 0) - (offset ? 1 : 0))
+			年干支 = (年干支.getFullYear() - library_namespace.YEAR_STEM_BRANCH_EPOCH
+			// 中曆年起始於CE年末，則應算作下一年之
+			// YEAR_STEM_BRANCH_EPOCH。
+			+ (年干支.getMonth() > 9 ? 1 : 0) - (offset ? 1 : 0))
 					.mod(library_namespace.SEXAGENARY_CYCLE_LENGTH);
 			this.起始年干支序 = 年干支;
 		}
@@ -6577,7 +6576,7 @@ function module_code(library_namespace) {
 						if (紀年 = library_namespace.stem_branch_index(年)) {
 							tmp = library_namespace.SEXAGENARY_CYCLE_LENGTH;
 							// 計算差距年數。
-							if (紀年 = (紀年 - (date.getFullYear() - library_namespace.YEAR_STEM_BRANCH_OFFSET))
+							if (紀年 = (紀年 - (date.getFullYear() - library_namespace.YEAR_STEM_BRANCH_EPOCH))
 									% tmp) {
 								if (紀年 < 0)
 									紀年 += tmp;
@@ -8170,6 +8169,8 @@ function module_code(library_namespace) {
 
 	/**
 	 * 建構辨識史籍紀年用之 pattern。
+	 * 
+	 * TODO: "改齊中興二年爲天監元年"
 	 */
 	era_text_to_HTML.build_pattern = function(options) {
 		var 紀年 = [];
