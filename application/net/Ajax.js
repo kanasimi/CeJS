@@ -2425,6 +2425,9 @@ function module_code(library_namespace) {
 					options.host + ':' + options.port), {
 				method : 'CONNECT'
 			});
+			// console.log(request);
+			// 此時若有agent，會是https。但是待會要用http connect。
+			delete request.agent;
 			delete request.protocol;
 			if (proxy_server.agent)
 				set_cookie_to_URL_object(request, proxy_server.agent);
