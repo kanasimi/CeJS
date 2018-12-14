@@ -8119,16 +8119,26 @@ function module_code(library_namespace) {
 		if (!史籍紀年_PATTERN)
 			era_text_to_HTML.build_pattern();
 
-		if (typeof text === 'string')
-			text = text
-			// 因為 史籍紀年_PATTERN 於會利用到 pattern 前後，這部分會被吃掉，
-			// 像 "十年，七月庚辰" 就會在 match 了 "十年，" 後，無法 match 到 "七月"。
-			// 因此先將可能出現問題的做處理，多墊個字元以備不時之需。
-			.replace(/([，。；！）])/g, '$1\0')
+		if (typeof text === 'string') {
 			// search
-			.replace(史籍紀年_PATTERN, REPLACED_data_era)
+			// 預防 `史籍紀年_PATTERN` 於利用到 pattern 前後，這部分被吃掉。
+			// 像 "十年，七月庚辰" 就會在 match 了 "十年，" 後，無法 match 到 "七月"。
+			var matched, list = [], last_index = 0;
+			while (matched = 史籍紀年_PATTERN.exec(text)) {
+				// @see REPLACED_data_era
+				list.push(text.slice(last_index, matched.index
+						+ matched[1].length), '<'
+						+ set_up_era_nodes.default_tag + ' data-era="~">'
+						+ matched[2] + '</' + set_up_era_nodes.default_tag
+						+ '>');
+				史籍紀年_PATTERN.lastIndex -= matched[3].length;
+				last_index = 史籍紀年_PATTERN.lastIndex;
+			}
+			list.push(text.slice(last_index));
+			text = list.join('');
+
 			// search for 僅紀年亦轉換的情況。 e.g., '天皇'.
-			.replace(ERA_ONLY_PATTERN, REPLACED_data_era)
+			text = text.replace(ERA_ONLY_PATTERN, REPLACED_data_era)
 			//
 			.replace(朔干支_PATTERN, REPLACED_data_era)
 			//
@@ -8151,10 +8161,9 @@ function module_code(library_namespace) {
 				//
 				+ $0 + '</' + set_up_era_nodes.default_tag + '>';
 			})
-			// 回復
-			.replace(/([，。；！）])\0/g, '$1')
 			// format
 			.replace(/\n/g, '<br />');
+		}
 
 		if (node) {
 			if (typeof node === 'string')
@@ -8169,8 +8178,6 @@ function module_code(library_namespace) {
 
 	/**
 	 * 建構辨識史籍紀年用之 pattern。
-	 * 
-	 * TODO: "改齊中興二年爲天監元年"
 	 */
 	era_text_to_HTML.build_pattern = function(options) {
 		var 紀年 = [];
@@ -8200,24 +8207,42 @@ function module_code(library_namespace) {
 
 		// 建構 史籍紀年_PATTERN
 
-		// TODO: 地皇三年，天鳳六年改為地皇。
-		// e.g., 以建平二年為太初元年, 一年中地再動, 大酺五日, 乃元康四年嘉谷, （玄宗開元）十年
-		// TODO: 未及一年, [去明]年, 是[年月日], 《清華大學藏戰國竹簡（貳）·繫年》周惠王立十又七年
-		// TODO: "歲 次丙子四月丁卯"
+		/**
+		 * <code>
+
+		// test cases:
+
+		地皇三年，天鳳六年改為地皇。
+		改齊中興二年爲天監元年
+		以建平二年為太初元年
+		一年中地再動
+		大酺五日
+		乃元康四年嘉谷
+		（玄宗開元）十年
+
+		未及一年
+		去年
+		明年
+		是[年月日]
+		《清華大學藏戰國竹簡（貳）·繫年》周惠王立十又七年
+		歲 次丙子四月丁卯
+
+		</code>
+		 */
 		// TODO: 排除 /干支[年歲嵗]/
 		史籍紀年_PATTERN = [
-		// 識別干支紀年「年號+干支」。
-		'(?:' + 紀年 + ')干支',
-		// 一般紀年
-		'(?:' + 紀年 + ')*(?:）\0|\\))?' + 年 + '(?:' + 月 + 日 + '?)?',
+		// 識別干支紀年「年號+干支(年)」。
+		'(?:' + 紀年 + ')+干支年?',
+		// 一般紀年. 立: 周惠王立十又七年, [)]: （玄宗開元）十年
+		'(?:' + 紀年 + ')*(?:）|\\)|立)?' + 年 + '(?:' + 月 + 日 + '?)?',
 				'(?:' + 月 + ')?' + 日, 月 ];
 		// console.log(史籍紀年_PATTERN);
 		史籍紀年_PATTERN = generate_pattern(
-		// head
-		'(^|[^為酺乃])'
-		// era
+		// 0: head 為爲乃
+		'(^|[^酺])'
+		// 1: era
 		+ '(' + 史籍紀年_PATTERN.join('|') + ')'
-		// tail
+		// 2: tail
 		+ '([^中]|$)', false, 'g');
 		// console.log(史籍紀年_PATTERN);
 		return 史籍紀年_PATTERN;

@@ -120,7 +120,7 @@ function module_code(library_namespace) {
 	// (Cannot convert object to primitive value),
 	// therefore we can't use library_namespace.null_Object() here.
 	DEFAULT_TIME_ZONE = {
-		DEFAULT_TIME_ZONE : true
+		timezone : 'default'
 	};
 
 	// 嘗試 UTC+08:00 之類的標準表示法。
@@ -974,15 +974,14 @@ function module_code(library_namespace) {
 		library_namespace.debug(date_data.join('<br />'), 2,
 				'String_to_Date_default_parser');
 
-		var year;
 		tmp = date_data.length === 8 && date_data.pop();
-
 		if (tmp === 'P' || tmp === 'p') {
 			// is PM (else: AM or 24-hour format)
 			date_data[3] = 12 + (date_data[3] | 0);
 		}
 
-		if (isNaN(year = +date_data[0]) && /^前/.test(date_data[0])) {
+		var year = +date_data[0];
+		if (isNaN(year) && /^前/.test(date_data[0])) {
 			year = -date_data[0].slice(1);
 		}
 		// fix browser Date.parse() bug for BCE date.
