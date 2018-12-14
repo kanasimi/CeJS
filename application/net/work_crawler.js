@@ -375,7 +375,7 @@ function module_code(library_namespace) {
 		report_file_JSON : 'report.json',
 
 		onwarning : function onwarning(warning) {
-			;
+			library_namespace.error(warning);
 		},
 		// for uncaught error. work_data 可能為 undefined/image_data
 		onerror : function onerror(error, work_data) {
@@ -1615,7 +1615,6 @@ function module_code(library_namespace) {
 			} catch (e) {
 				var warning = 'process_work_data: ' + (work_title || work_id)
 						+ ': ' + e;
-				library_namespace.error(warning);
 				_this.onwarning(warning);
 				typeof callback === 'function' && callback({
 					title : work_title
@@ -1936,20 +1935,21 @@ function module_code(library_namespace) {
 
 			} else {
 				// console.log(work_data);
+				var warning;
 				if (work_data.removed) {
-					library_namespace.error(work_id
+					warning = work_id
 							+ (work_data.title ? ' ' + work_data.title : '')
-							+ ': ' + (work_data.removed || '作品不存在/已被刪除'));
+							+ ': ' + (work_data.removed || '作品不存在/已被刪除');
 				} else {
-					// _this.onerror(, work_data)
-					library_namespace.error(work_id
+					warning = work_id
 							+ (work_data.title ? ' ' + work_data.title : '')
 							// (Did not set work_data.chapter_count)
 							// No chapter got! 若是作品不存在就不會跑到這邊了
 							+ ': Can not get chapter count! 或許作品已被刪除'
 							+ (_this.got_chapter_count ? '' : '或者網站改版')
-							+ '了? (' + _this.id + ')');
+							+ '了? (' + _this.id + ')';
 				}
+				_this.onwarning(warning);
 
 				// 無任何章節可供下載。刪掉前面預建的目錄。
 				// 注意：僅能刪除本次操作所添加/改變的檔案。因此必須先確認裡面是空的。不能使用{library_namespace.fs_remove(work_data.directory,,true);}。
