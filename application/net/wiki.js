@@ -1400,6 +1400,7 @@ function module_code(library_namespace) {
 		// 在執行 .each() 之前，應該先執行 .parse()。
 		each : for_each_token,
 		parse : parse_page,
+		parse_references : parse_references,
 		insert_before : insert_before
 	};
 
@@ -2286,6 +2287,47 @@ function module_code(library_namespace) {
 		return this;
 	}
 
+	// parse <ref> of page
+	// TODO: <ref> in template
+	function parse_references(options) {
+		if (this.reference_list)
+			return this.reference_list;
+
+		/** {Array}參考文獻列表, starts from No. 1 */
+		var reference_list = new Array(1);
+
+		this.each(function(token) {
+			if (!token.tag || token.tag.toLowerCase() !== 'ref')
+				return;
+
+			if (token.attributes && ('name' in token.attributes)) {
+				var attribute_name = token.attributes.name,
+				// <ref>: name 屬性不能使用數字，請使用可描述內容的標題
+				list = reference_list[attribute_name];
+				if (list) {
+					list.push(token);
+					// 已存在相同的名稱，不添加到 reference_list 以增加 NO。
+				} else {
+					list = [ token ];
+					reference_list[attribute_name] = list;
+					reference_list.push(list);
+				}
+				if (!list.main && token.type === 'tag'
+				// 會採用第一個有內容的。
+				&& token[1].toString().trim()) {
+					list.main = token;
+				}
+
+			} else {
+				reference_list.push(token);
+			}
+
+		}, false, Infinity);
+
+		this.reference_list = reference_list;
+		return reference_list;
+	}
+
 	// {{*Navigation templates}} (footer navboxes)
 	// {{Coord}} or {{coord missing}}
 	// {{Authority control}}
@@ -2661,7 +2703,7 @@ function module_code(library_namespace) {
 			return this.join('');
 		},
 		tag_inner : function() {
-			return this.join('');
+			return this.join('').toString();
 		},
 		tag_single : function() {
 			// this: [ {String}attributes ].tag
@@ -2856,8 +2898,6 @@ function module_code(library_namespace) {
 		normalize = options && options.normalize,
 		/** {Array}是否需要初始化。 [ {String}prefix added, {String}postfix added ] */
 		initialized_fix = !queue && [ '', '' ],
-		/** {Array}參考文獻列表, starts from No. 1 */
-		reference_list = new Array(1),
 		// 這項設定不應被繼承。
 		no_resolve = options && options.no_resolve;
 		if (no_resolve) {
@@ -2980,20 +3020,6 @@ function module_code(library_namespace) {
 			// {String}Element.tagName
 			// all.tagName = tag.toLowerCase();
 
-			// parse <ref>
-			// TODO: <ref> in template
-			if (tag.toLowerCase() === 'ref') {
-				var attribute_name = attributes.attributes.name;
-				if (attribute_name) {
-					// <ref>: name 屬性不能使用數字，請使用可描述內容的標題
-					if (reference_list[attribute_name])
-						reference_list[attribute_name].push(all);
-					else
-						reference_list[attribute_name] = [ all ];
-				}
-				reference_list.push(all);
-			}
-
 			_set_wiki_type(all, 'tag');
 			if (attributes && attributes.attributes) {
 				all.attributes = attributes.attributes;
@@ -3031,20 +3057,6 @@ function module_code(library_namespace) {
 			all.tag = tag;
 			// {String}Element.tagName
 			// all.tagName = tag.toLowerCase();
-
-			// parse <ref>
-			// TODO: <ref> in template
-			if (tag.toLowerCase() === 'ref' && attributes.attributes) {
-				var attribute_name = attributes.attributes.name;
-				if (attribute_name) {
-					// <ref>: name 屬性不能使用數字，請使用可描述內容的標題
-					if (reference_list[attribute_name])
-						reference_list[attribute_name].push(all);
-					else
-						reference_list[attribute_name] = [ all ];
-				}
-				// 沒有內容，不添加到 reference_list。
-			}
 
 			_set_wiki_type(all, 'tag_single');
 			if (attributes && attributes.attributes) {
@@ -4148,12 +4160,6 @@ function module_code(library_namespace) {
 
 		// Release memory. 釋放被占用的記憶體.
 		queue = null;
-
-		if (initialized_fix
-		// for '~~', typeof wikitext === 'string'
-		&& (typeof wikitext === 'object')) {
-			wikitext.reference = reference_list;
-		}
 
 		if (initialized_fix && (!options || !options.parse_paragraph)
 		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
