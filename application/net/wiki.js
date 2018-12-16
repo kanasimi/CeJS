@@ -2966,7 +2966,7 @@ function module_code(library_namespace) {
 			if (typeof attributes === 'string') {
 				var attributes_list = [], matched,
 				// [ all, front, all attributes, name, value, unquoted value ]
-				PATTERN_attribute = /(.+?)($|([^\s]+)=("[^"]*"|'[^']*'|([^\s]*)))/g;
+				PATTERN_attribute = /([\s\S]+?)($|([^\s]+)=("[^"]*"|'[^']*'|([^\s]*)))/g;
 				while (matched = PATTERN_attribute.exec(attributes)) {
 					// console.log(matched);
 					attributes_list.push(matched[1]);
@@ -6762,7 +6762,7 @@ function module_code(library_namespace) {
 	});
 
 	/**
-	 * robot 作業操作之輔助套裝函數。<br />
+	 * robot 作業操作之輔助套裝函數。此函數可一次取得50至300個頁面內容再批次處理。<br />
 	 * 不會推入 this.actions queue，即時執行。因此需要先 get list！
 	 * 
 	 * @param {Object}config
