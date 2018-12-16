@@ -1442,7 +1442,8 @@ function module_code(library_namespace) {
 	 *            未指定: 處理所有節點。
 	 * @param {Function}processor
 	 *            執行特定作業: processor({Array|String|undefined}inside token list,
-	 *            {ℕ⁰:Natural+0}index of token, {Array}parent of token) {<br />
+	 *            {ℕ⁰:Natural+0}index of token, {Array}parent of token,
+	 *            {ℕ⁰:Natural+0}depth) {<br />
 	 *            return {String}wikitext or {Object}element;}
 	 * @param {Boolean}[modify_this]
 	 *            若 processor 的回傳值為{String}wikitext，則將指定類型節點替換/replace作此回傳值。
@@ -1536,6 +1537,7 @@ function module_code(library_namespace) {
 					if (options.add_index && typeof token !== 'string') {
 						// 假如需要自動設定 .parent, .index 則必須特別指定。
 						// token.parent[token.index] === token
+						// .index_of_parent
 						token.index = index;
 						token.parent = _this;
 					}
@@ -1608,6 +1610,18 @@ function module_code(library_namespace) {
 
 	// 直接跳出。
 	for_each_token.exit = [ 'for_each_token.exit: abort the operation' ];
+
+	// 兩 token 都必須先有 .index, .parent!
+	// token.parent[token.index] === token
+	// @see options.add_index @ function for_each_token()
+	// 注意: 這個交換純粹只操作於 page_data.parsed 上面，
+	// 不會改變其他參照，例如 page_data.parsed.reference_list!
+	// 通常一個頁面只能夠交換一次，交換兩次以上可能就會出現問題!
+	function switch_token(token_1, token_2) {
+		// console.log([ token_1, token_2 ]);
+		token_1.parent[token_1.index] = token_2;
+		token_2.parent[token_2.index] = token_1;
+	}
 
 	// ------------------------------------------------------------------------
 
@@ -2293,6 +2307,12 @@ function module_code(library_namespace) {
 		if (this.reference_list)
 			return this.reference_list;
 
+		if (typeof options === 'function') {
+			options = {
+				processor : options
+			};
+		}
+
 		/** {Array}參考文獻列表, starts from No. 1 */
 		var reference_list = new Array(1);
 
@@ -2300,14 +2320,21 @@ function module_code(library_namespace) {
 			if (!token.tag || token.tag.toLowerCase() !== 'ref')
 				return;
 
+			if (typeof options.processor === 'function') {
+				options.processor.apply(null, arguments);
+			}
+
 			if (token.attributes && ('name' in token.attributes)) {
 				var attribute_name = token.attributes.name,
 				// <ref>: name 屬性不能使用數字，請使用可描述內容的標題
 				list = reference_list[attribute_name];
 				if (list) {
+					// index with the same name
+					token.reference_index = list.length;
 					list.push(token);
 					// 已存在相同的名稱，不添加到 reference_list 以增加 NO。
 				} else {
+					token.reference_index = 0;
 					list = [ token ];
 					reference_list[attribute_name] = list;
 					reference_list.push(list);
@@ -2703,7 +2730,7 @@ function module_code(library_namespace) {
 			return this.join('');
 		},
 		tag_inner : function() {
-			return this.join('') + '';
+			return this.join('');
 		},
 		tag_single : function() {
 			// this: [ {String}attributes ].tag
@@ -20418,6 +20445,8 @@ function module_code(library_namespace) {
 		namespace : get_namespace,
 		remove_namespace : remove_namespace,
 		is_talk_namespace : is_talk_namespace,
+
+		switch_token : switch_token,
 
 		file_pattern : file_pattern,
 		lead_text : lead_text,
