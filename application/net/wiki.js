@@ -2857,6 +2857,8 @@ function module_code(library_namespace) {
 		normalize = options && options.normalize,
 		/** {Array}是否需要初始化。 [ {String}prefix added, {String}postfix added ] */
 		initialized_fix = !queue && [ '', '' ],
+		/** {Array}參考文獻列表, starts from No. 1 */
+		reference_list = new Array(1),
 		// 這項設定不應被繼承。
 		no_resolve = options && options.no_resolve;
 		if (no_resolve) {
@@ -2891,6 +2893,28 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------------------------------
 		// parse functions
+
+		// parse attributes
+		function parse_tag_attributes(attributes) {
+			var attribute_hash = library_namespace.null_Object();
+			if (typeof attributes === 'string') {
+				var attributes_list = [], matched,
+				// [ all, front, all attributes, name, value, unquoted value ]
+				PATTERN_attribute = /(.+?)($|([^\s]+)=("[^"]*"|'[^']*'|([^\s]*)))/g;
+				while (matched = PATTERN_attribute.exec(attributes)) {
+					// console.log(matched);
+					attributes_list.push(matched[1]);
+					if (matched[2])
+						attributes_list.push(matched[2]);
+					attribute_hash[matched[3]] = matched[5] || matched[4]
+							&& JSON.parse(matched[4]);
+				}
+				attributes = attributes_list;
+			}
+			attributes = _set_wiki_type(attributes || '', 'tag_attributes');
+			attributes.attributes = attribute_hash;
+			return attributes;
+		}
 
 		function parse_HTML_tag(all, tag, attributes, inner, end_tag) {
 			// console.log('queue start:');
@@ -2928,9 +2952,10 @@ function module_code(library_namespace) {
 			// 經過改變，需再進一步處理。
 			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
 					'parse_wikitext.tag');
+			attributes = parse_tag_attributes(
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
-			attributes = parse_wikitext(attributes, options, queue);
+			parse_wikitext(attributes, options, queue));
 			inner = parse_wikitext(inner, options, queue);
 			// 若為 <pre> 之內，則不再變換。
 			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
@@ -2939,9 +2964,7 @@ function module_code(library_namespace) {
 			if (false && !no_parse_tag) {
 				inner = inner.toString();
 			}
-			attributes
-			// TODO: parse attributes
-			= _set_wiki_type(attributes || '', 'tag_attributes');
+
 			// [ ... ]: 在 inner 為 Template 之類時，
 			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
 			// 但仍需要設定 type=tag_inner 以應 for_each_token 之需，因此多層[]包覆。
@@ -2957,7 +2980,22 @@ function module_code(library_namespace) {
 			// {String}Element.tagName
 			// all.tagName = tag.toLowerCase();
 
+			// parse <ref>
+			// TODO: <ref> in template
+			if (tag.toLowerCase() === 'ref') {
+				var attribute_name = attributes.attributes.name;
+				if (attribute_name) {
+					// <ref>: name 屬性不能使用數字，請使用可描述內容的標題
+					if (reference_list[attribute_name])
+						reference_list[attribute_name].push(all);
+					else
+						reference_list[attribute_name] = [ all ];
+				}
+				reference_list.push(all);
+			}
+
 			_set_wiki_type(all, 'tag');
+			all.attributes = attributes.attributes;
 			queue.push(all);
 			// console.log('queue end:');
 			// console.log(queue);
@@ -2969,10 +3007,15 @@ function module_code(library_namespace) {
 				if (normalize) {
 					attributes = attributes.replace(/[\s\/]*$/, ' /');
 				}
+				attributes = parse_tag_attributes(
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				all = parse_wikitext(attributes, options, queue);
-				if (all.type !== 'plain')
-					all = [ all ];
+				// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
+				parse_wikitext(attributes, options, queue));
+				if (false && attributes.type === 'plain') {
+					// assert: 經過 parse_tag_attributes(), 應該不會到這邊。
+					all = attributes;
+				} else
+					all = [ attributes ];
 			} else {
 				// use '' as attributes in case
 				// the .join() in .toString() doesn't work.
@@ -2985,6 +3028,20 @@ function module_code(library_namespace) {
 			all.tag = tag;
 			// {String}Element.tagName
 			// all.tagName = tag.toLowerCase();
+
+			// parse <ref>
+			// TODO: <ref> in template
+			if (tag.toLowerCase() === 'ref' && attributes.attributes) {
+				var attribute_name = attributes.attributes.name;
+				if (attribute_name) {
+					// <ref>: name 屬性不能使用數字，請使用可描述內容的標題
+					if (reference_list[attribute_name])
+						reference_list[attribute_name].push(all);
+					else
+						reference_list[attribute_name] = [ all ];
+				}
+				// 沒有內容，不添加到 reference_list。
+			}
 
 			_set_wiki_type(all, 'tag_single');
 			queue.push(all);
@@ -4069,6 +4126,11 @@ function module_code(library_namespace) {
 		wikitext = queue[queue.length - 1];
 		if (initialized_fix && queue.switches) {
 			wikitext.switches = queue.switches;
+		}
+		if (initialized_fix
+		// for '~~', typeof wikitext === 'string'
+		&& (typeof wikitext === 'object')) {
+			wikitext.reference = reference_list;
 		}
 		// Release memory. 釋放被占用的記憶體.
 		queue = null;
@@ -13661,7 +13723,7 @@ function module_code(library_namespace) {
 	 * >>> 依照 operation.type 與 operation.list 取得資料。<br />
 	 * >>> 若 Array.isArray(operation.list) 則處理多項列表作業:<br />
 	 * >>>>>> 個別處理單一項作業，每次執行 operation.each() || operation.each_retrieve()。<br />
-	 * >>> 執行 data = operation.retrieve()，以其回傳作為將要 cache 之 data。<br />
+	 * >>> 執行 data = operation.retrieve(data)，以其回傳作為將要 cache 之 data。<br />
 	 * >>> 寫入cache。<br />
 	 * 執行 operation.operator(data)
 	 * 
@@ -14793,9 +14855,8 @@ function module_code(library_namespace) {
 							return [ CeL.wiki.edit.cancel, '條目不存在或已被刪除' ];
 						}
 						if (page_data.ns !== 0) {
-							// 記事だけを編集する
 							return [ CeL.wiki.edit.cancel,
-							//
+							// 本作業は記事だけを編集する
 							'本作業僅處理條目命名空間或模板或 Category' ];
 							throw '非條目:' + get_page_title_link(page_data)
 							//
