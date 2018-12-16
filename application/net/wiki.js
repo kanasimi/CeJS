@@ -2272,13 +2272,26 @@ function module_code(library_namespace) {
 		// re-parse
 		|| options && (options.reparse || options.wikitext)) {
 			// assert: this = [ {String} ]
-			var parsed = parse_wikitext(options && options.wikitext || this[0],
-					Object.assign(library_namespace.null_Object(),
-							this.options, options));
+			var parsed = options && options.wikitext || this[0];
+			parsed = parse_wikitext(parsed, Object.assign(library_namespace
+					.null_Object(), this.options, options));
 			// library_namespace.log(parsed);
 			if (Array.isArray(parsed) && parsed.type === 'plain') {
-				this.pop();
+				// assert: this.length === 1
+				// @see function page_parser(wikitext, options)
+				// this.pop();
+				this.truncate();
+
+				// copy parsed to `this`
 				Array.prototype.push.apply(this, parsed);
+				// 複製必要的屬性。
+				for ( var name in {
+					switches : true,
+					reference : true
+				}) {
+					if (parsed[name])
+						this[name] = parsed[name];
+				}
 			} else {
 				this[0] = parsed;
 			}
@@ -2906,8 +2919,9 @@ function module_code(library_namespace) {
 					attributes_list.push(matched[1]);
 					if (matched[2])
 						attributes_list.push(matched[2]);
-					attribute_hash[matched[3]] = matched[5] || matched[4]
-							&& JSON.parse(matched[4]);
+					if (matched[3])
+						attribute_hash[matched[3]] = matched[5] || matched[4]
+								&& JSON.parse(matched[4]);
 				}
 				attributes = attributes_list;
 			}
@@ -2995,7 +3009,10 @@ function module_code(library_namespace) {
 			}
 
 			_set_wiki_type(all, 'tag');
-			all.attributes = attributes.attributes;
+			if (attributes && attributes.attributes) {
+				all.attributes = attributes.attributes;
+				delete attributes.attributes;
+			}
 			queue.push(all);
 			// console.log('queue end:');
 			// console.log(queue);
@@ -3044,6 +3061,10 @@ function module_code(library_namespace) {
 			}
 
 			_set_wiki_type(all, 'tag_single');
+			if (attributes && attributes.attributes) {
+				all.attributes = attributes.attributes;
+				delete attributes.attributes;
+			}
 			queue.push(all);
 			return include_mark + (queue.length - 1) + end_mark;
 		}
@@ -4124,6 +4145,10 @@ function module_code(library_namespace) {
 		resolve_escaped(queue, include_mark, end_mark);
 
 		wikitext = queue[queue.length - 1];
+		if (options && Array.isArray(options.page_data)) {
+			// @see
+			;
+		}
 		if (initialized_fix && queue.switches) {
 			wikitext.switches = queue.switches;
 		}
@@ -14854,7 +14879,8 @@ function module_code(library_namespace) {
 							// error? 此頁面不存在/已刪除。
 							return [ CeL.wiki.edit.cancel, '條目不存在或已被刪除' ];
 						}
-						if (page_data.ns !== 0) {
+						if (page_data.ns !== 0
+								&& page_data.title !== 'Wikipedia:サンドボックス') {
 							return [ CeL.wiki.edit.cancel,
 							// 本作業は記事だけを編集する
 							'本作業僅處理條目命名空間或模板或 Category' ];
