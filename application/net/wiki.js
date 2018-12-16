@@ -2272,27 +2272,13 @@ function module_code(library_namespace) {
 		// re-parse
 		|| options && (options.reparse || options.wikitext)) {
 			// assert: this = [ {String} ]
+			// @see function page_parser(wikitext, options)
 			var parsed = options && options.wikitext || this[0];
-			parsed = parse_wikitext(parsed, Object.assign(library_namespace
-					.null_Object(), this.options, options));
+			parsed = parse_wikitext(parsed, Object.assign({
+				target_array : this
+			}, this.options, options));
 			// library_namespace.log(parsed);
-			if (Array.isArray(parsed) && parsed.type === 'plain') {
-				// assert: this.length === 1
-				// @see function page_parser(wikitext, options)
-				// this.pop();
-				this.truncate();
-
-				// copy parsed to `this`
-				Array.prototype.push.apply(this, parsed);
-				// 複製必要的屬性。
-				for ( var name in {
-					switches : true,
-					reference : true
-				}) {
-					if (parsed[name])
-						this[name] = parsed[name];
-				}
-			} else {
+			if (!Array.isArray(parsed) || parsed.type !== 'plain') {
 				this[0] = parsed;
 			}
 			this.parsed = true;
@@ -4145,21 +4131,29 @@ function module_code(library_namespace) {
 		resolve_escaped(queue, include_mark, end_mark);
 
 		wikitext = queue[queue.length - 1];
-		if (options && Array.isArray(options.page_data)) {
-			// @see
-			;
+		// console.log(wikitext);
+		if (initialized_fix && options && Array.isArray(options.target_array)
+				&& Array.isArray(wikitext) && wikitext.type === 'plain') {
+			// 可藉以複製必要的屬性。
+			// @see function parse_page(options)
+			options.target_array.truncate();
+			// copy parsed data to .target_array
+			Array.prototype.push.apply(options.target_array, wikitext);
+			wikitext = options.target_array;
 		}
+
 		if (initialized_fix && queue.switches) {
 			wikitext.switches = queue.switches;
 		}
+
+		// Release memory. 釋放被占用的記憶體.
+		queue = null;
+
 		if (initialized_fix
 		// for '~~', typeof wikitext === 'string'
 		&& (typeof wikitext === 'object')) {
 			wikitext.reference = reference_list;
 		}
-		// Release memory. 釋放被占用的記憶體.
-		queue = null;
-		// console.log(wikitext);
 
 		if (initialized_fix && (!options || !options.parse_paragraph)
 		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
