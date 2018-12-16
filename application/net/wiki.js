@@ -2703,7 +2703,7 @@ function module_code(library_namespace) {
 			return this.join('');
 		},
 		tag_inner : function() {
-			return this.join('').toString();
+			return this.join('') + '';
 		},
 		tag_single : function() {
 			// this: [ {String}attributes ].tag

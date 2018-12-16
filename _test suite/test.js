@@ -2146,7 +2146,7 @@ function test_date() {
 
 	error_count += CeL.test('date Basic tests', function(assert) {
 		// e.g., UTC+8: -8 * 60 = -480
-		var nowaday_local_minute_offset = (new Date).getTimezoneOffset() || 0;
+		var present_local_minute_offset = (new Date).getTimezoneOffset() || 0;
 		//year = -2010
 		for(var year=-500;year<2010;year++)if(year){
 			assert([year+'/1/1 0:0:0.000',(year.pad(4)+'/1/1').to_Date('CE').format('CE')], 'date Basic tests: '+year+'/1/1');
@@ -2154,8 +2154,9 @@ function test_date() {
 			if (year<=1582&&year%4===(year<0?-1:0))
 				assert([year+'/2/29 0:0:0.000',(year.pad(4)+'/2/29').to_Date('CE').format('CE')], 'date Basic tests: '+year+'/2/29');
 			var date = (year.pad(4)+'/3/1').to_Date('CE');
-			if (date.getTimezoneOffset() === nowaday_local_minute_offset) {
-				// for 1952/3/1 @ 台北標準時間
+			if (date.getTimezoneOffset() === present_local_minute_offset) {
+				// for 1952/3/1 @ 台北標準時間: 實施日光節約時間
+				// https://blog.yorkxin.org/2014/07/11/dst-in-taiwan-study.html
 				assert([year+'/3/1 0:0:0.000',date.format('CE')], 'date Basic tests: '+year+'/3/1');
 			}
 			assert([year+'/12/31 0:0:0.000',(year.pad(4)+'/12/31').to_Date('CE').format('CE')], 'date Basic tests: '+year+'/12/31');
@@ -3000,17 +3001,19 @@ function test_wiki() {
 		wikitext = '1<br clear="all">2';
 		assert([ 'tag_single', CeL.wiki.parser(wikitext).parse()[1].type ], 'wiki.parse: HTML single tag #3');
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML single tag #4');
-		assert([ ' clear="all"', CeL.wiki.parser(wikitext).parse()[1][0] ], 'wiki.parse: HTML single tag #5');
+		console.log(CeL.wiki.parser(wikitext).parse()[1][0].toString + '');
+		console.log(CeL.wiki.parser(wikitext).parse()[1][0].toString());
+		assert([ ' clear="all"', CeL.wiki.parser(wikitext).parse()[1][0].toString() ], 'wiki.parse: HTML single tag #5');
 
 		wikitext = '1<b>a</b>2';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML tag #1');
 		assert([ 'b', CeL.wiki.parser(wikitext).parse()[1].tag ], 'wiki.parse: HTML tag #2');
-		wikitext = '1<b style="color:#000" >{{a}}{{c}}</b>2';
+		wikitext = '1<b style="color:#000"  >{{a}}{{c}}</b>2';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML tag #3');
 		assert([ 'b', CeL.wiki.parser(wikitext).parse()[1].tag ], 'wiki.parse: HTML tag #4');
-		assert([ ' style="color:#000" ', String(CeL.wiki.parser(wikitext).parse()[1][0]) ], 'wiki.parse: HTML tag #5: tag attributes');
+		assert([ ' style="color:#000"  ', String(CeL.wiki.parser(wikitext).parse()[1][0]).toString() ], 'wiki.parse: HTML tag #5: tag attributes');
 		assert([ 'tag_inner', CeL.wiki.parser(wikitext).parse()[1][1].type ], 'wiki.parse: HTML tag #6');
-		assert([ '1<b style="color:#000" ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function(token, parent, index){return '';}, true).toString() ], 'wiki.parse: HTML tag #7');
+		assert([ '1<b style="color:#000"  ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function(token, parent, index){return '';}, true).toString() ], 'wiki.parse: HTML tag #7');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML tag pre #1');
@@ -3064,6 +3067,9 @@ function test_wiki() {
 		assert([ 'cde\n|\nabc\n123\n|\n456', CeL.wiki.parser(wikitext).parse().each_section().sections.join('|') ], 'wiki.parser.each_section #3-1: 正常文章');
 		assert([ undefined, CeL.wiki.parser(wikitext).parse().each_section().sections[0].section_title ], 'wiki.parser.each_section #3-2: 正常文章');
 		assert([ '==t1==', CeL.wiki.parser(wikitext).parse().each_section().sections[1].section_title.toString() ], 'wiki.parser.each_section #3-3: 正常文章');
+		wikitext = 'aaa<ref>a[[b]]c</ref>bbb<ref name="r2">111</ref>ccc<ref name="r2" />';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parser.ref #1');
+		assert([ 'r2', CeL.wiki.parser(wikitext).parse()[3].attributes.name ], 'wiki.parser.ref #2: .name');
 
 		// [[n:zh:Special:Permalink/121433]]
 		wikitext = " <> >< <title> '''<试>'''  ''ii'' <i>iii</i> <b>bbb</b>   [[File:YesCheck_BlueLinear.svg|20px]] [[:Category:中国]] & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos; <nowiki>  & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos;  '''bbb''' <b>bbb</b> <i>iii</i> <ref /> {{VOA}} {{tl|VOA}}</nowiki> '''[[abc]]'''  <b>[[w:abc]]</b>  '''<i>[[w :  123   #  cba]]</i>''' [[ABC|ab'c]] [[ABC|ab''c'']] __NOINDEX__ ____  ___ __ __  _ {{tl|VOA}} [[template:VOA]] [https://zh.wikipedia.org zh''wiki''] __TOC__ -{}- C-{樂}-D A-{  这  }-B  '''<nowiki>''< nowiki>''</nowiki>'''  <span style=\"color:green\">green</span> ";
