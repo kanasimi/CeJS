@@ -532,7 +532,8 @@ function module_code(library_namespace) {
 			}
 
 			// ck101: 全文完, 全書完
-			if (/全[文書]完/.test(status)) {
+			// MAGCOMI: 連載終了作品
+			if (/全[文書]完|終了/.test(status)) {
 				return status;
 			}
 
