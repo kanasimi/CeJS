@@ -2972,9 +2972,11 @@ function module_code(library_namespace) {
 					attributes_list.push(matched[1]);
 					if (matched[2])
 						attributes_list.push(matched[2]);
-					if (matched[3])
+					if (matched[3]) {
 						attribute_hash[matched[3]] = matched[5] || matched[4]
-								&& JSON.parse(matched[4]);
+						// or use JSON.parse()
+						&& matched[4].slice(1, -1).replace(/\\(.)/g, '$1');
+					}
 				}
 				attributes = attributes_list;
 			}
