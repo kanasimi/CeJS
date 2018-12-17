@@ -374,7 +374,7 @@ function module_code(library_namespace) {
 				+ Work_crawler.HTML_extension,
 		report_file_JSON : 'report.json',
 
-		onwarning : function onwarning(warning) {
+		onwarning : function onwarning(warning, work_data) {
 			library_namespace.error(warning);
 		},
 		// for uncaught error. work_data 可能為 undefined/image_data
@@ -1950,7 +1950,7 @@ function module_code(library_namespace) {
 							+ (_this.got_chapter_count ? '' : '或者網站改版')
 							+ '了? (' + _this.id + ')';
 				}
-				_this.onwarning(warning);
+				_this.onwarning(warning, work_data);
 
 				// 無任何章節可供下載。刪掉前面預建的目錄。
 				// 注意：僅能刪除本次操作所添加/改變的檔案。因此必須先確認裡面是空的。不能使用{library_namespace.fs_remove(work_data.directory,,true);}。
@@ -2355,12 +2355,19 @@ function module_code(library_namespace) {
 
 			// console.log(chapter_data);
 
+			// 不區分大小寫。
+			var chapter_filter = String(this.chapter_filter).toLowerCase();
+
 			if (chapter_data && chapter_data.title
 			// 篩選想要下載的章節標題關鍵字。例如"單行本"。
-			&& !chapter_data.title.toLowerCase().includes(
-			// 不區分大小寫。
-			String(this.chapter_filter).toLowerCase())) {
-				library_namespace.debug('pre_get_chapter_data: Skip ['
+			&& !chapter_data.title.toLowerCase().includes(chapter_filter)
+			//
+			&& (!chapter_data.part_title
+			// 亦篩選部冊標題。
+			|| !chapter_data.part_title.toLowerCase().includes(chapter_filter))) {
+				library_namespace.debug('pre_get_chapter_data: Skip '
+						+ (chapter_data.part_title ? '['
+								+ chapter_data.part_title + '] ' : '') + '['
 						+ chapter_data.title
 						+ ']: 不在 chapter_filter 所篩範圍內。跳過本章節不下載。');
 
@@ -2578,6 +2585,7 @@ function module_code(library_namespace) {
 				? chapter_data.part_NO.pad(2) + ' ' : '')
 				//
 				+ chapter_data.part_title + ' ';
+				part = part.trimStart();
 			}
 			chapter_title = chapter_data.chapter_title || chapter_data.title;
 
@@ -3026,7 +3034,7 @@ function module_code(library_namespace) {
 
 				if (typeof _this.pre_parse_chapter_data === 'function') {
 					// 執行在解析章節資料 process_chapter_data() 之前的作業 (async)。
-					// 必須自行保證不丟出異常。
+					// 必須自行保證執行 callback()，不丟出異常、中斷。
 					_this.pre_parse_chapter_data(XMLHttp, work_data,
 					// pre_parse_chapter_data:function(XMLHttp,work_data,callback,chapter_NO){;callback();},
 					process_chapter_data.bind(XMLHttp), chapter_NO);
