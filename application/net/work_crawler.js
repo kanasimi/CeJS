@@ -875,7 +875,9 @@ function module_code(library_namespace) {
 			// 因為 convert_id[work_id]() 可能回傳 list，因此需要以 get_work_list() 特別處理。
 			this.get_work_list([ work_id ], callback);
 
-		} else if (work_id.startsWith('l=') || node_fs.existsSync(work_id)) {
+		} else if (work_id
+		// list=filename
+		.startsWith('l=') || node_fs.existsSync(work_id)) {
 			// e.g.,
 			// node 各漫畫網站工具檔.js l=各漫畫網站工具檔.txt
 			// node 各漫畫網站工具檔.js 各漫畫網站工具檔.txt
@@ -908,7 +910,8 @@ function module_code(library_namespace) {
 				.trim()
 				// TODO: 處理title中包含"#"的作品
 				.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/)
-						.unique();
+				// 避免同一次作業中重複下載相同的作品。
+				.unique();
 			}
 			this.get_work_list(work_list, callback);
 
@@ -1197,16 +1200,22 @@ function module_code(library_namespace) {
 		// 為了預防 TypeError: Converting circular structure to JSON
 		// ebook 結構中可能會有 circular。
 		delete work_data[this.KEY_EBOOK];
+		// 避免當 work_data 過大而出現崩潰的情況，造成資料檔案被清空。因此先試試 JSON.stringify()。
+		var data_to_write = Buffer.from(JSON.stringify(work_data));
+		if (this.bakeup_work_data) {
+			var bakeup_file = work_data.data_file + '.bak';
+			library_namespace.remove_file(bakeup_file);
+			library_namespace.move_fso(work_data.data_file, bakeup_file);
+		}
 		try {
-			node_fs.writeFileSync(work_data.data_file, JSON
-					.stringify(work_data));
+			node_fs.writeFileSync(work_data.data_file, data_to_write);
 		} catch (e) {
 			library_namespace
 					.error('save_work_data_file: Can not save work data of '
 							+ (work_data.title || work_data.id) + '!');
 			library_namespace.error(e);
 		}
-		// recover
+		// revert
 		if (ebook)
 			work_data[this.KEY_EBOOK] = ebook;
 	}
