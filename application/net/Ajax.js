@@ -1547,6 +1547,7 @@ function module_code(library_namespace) {
 			agent = URL_is_https ? node_https_agent : node_http_agent;
 		}
 
+		// console.log([ options.cookie, agent.last_cookie ]);
 		if (options.cookie && !agent.last_cookie) {
 			library_namespace.debug('reset cookie to: ' + options.cookie, 3,
 					'get_URL_node');
@@ -2800,7 +2801,7 @@ function module_code(library_namespace) {
 					}
 				}
 
-				onload(XMLHttp.responseText, undefined, XMLHttp);
+				onload(data.toString(), undefined, XMLHttp);
 			},
 			// character encoding of HTML web page
 			// is different from the file we want to save to
