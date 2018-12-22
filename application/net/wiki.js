@@ -1621,6 +1621,14 @@ function module_code(library_namespace) {
 		// console.log([ token_1, token_2 ]);
 		token_1.parent[token_1.index] = token_2;
 		token_2.parent[token_2.index] = token_1;
+
+		var index_1 = token_1.index;
+		token_1.index = token_2.index;
+		token_2.index = index_1;
+
+		var parent_1 = token_1.parent;
+		token_1.parent = token_2.parent;
+		token_2.parent = parent_1;
 	}
 
 	// ------------------------------------------------------------------------
@@ -1655,7 +1663,7 @@ function module_code(library_namespace) {
 			wikitext = wikitext.slice(0, matched);
 		}
 
-		// match/去除一開始的維護模板。
+		// match/去除一開始的維護模板/通知模板。
 		// <s>[[File:file|[[link]]...]] 因為不容易除盡，放棄處理。</s>
 		while (matched = wikitext.match(/^[\s\n]*({{|\[\[)/)) {
 			// 注意: 此處的 {{ / [[ 可能為中間的 token，而非最前面的一個。但若是沒有中間的 token，則一定是第一個。
@@ -1691,7 +1699,24 @@ function module_code(library_namespace) {
 				return preprocess_section_link_token(token[1] ? token[1]
 						.toString() : '');
 			}
-			// reduce HTML tags. e.g., <b>, <sub>, <sup>
+
+			if (false && token.tag in {
+				b : true,
+				i : true,
+				sub : true,
+				sup : true,
+				span : true
+			}) {
+				// reduce HTML tags. e.g., <b>, <sub>, <sup>, <span>
+				token.tag_attributes = token.shift();
+				token.original_type = token.type;
+				token.type = 'plain';
+				token.toString = wiki_toString[token.type];
+				return token;
+			}
+
+			// reduce HTML tags. e.g., <ref>
+			// console.log(token);
 			return preprocess_section_link_tokens(token[1] || '');
 		}
 		if ((token.type === 'file' || token.type === 'category')
@@ -1751,8 +1776,9 @@ function module_code(library_namespace) {
 		}
 		if (token.type === 'bold' || token.type === 'italic') {
 			// 去除粗體與斜體。
+			token.original_type = token.type;
 			token.type = 'plain';
-			token.toString = wiki_toString.plain;
+			token.toString = wiki_toString[token.type];
 			return token;
 		}
 		if (typeof token === 'string') {
@@ -1769,6 +1795,7 @@ function module_code(library_namespace) {
 				// 避免被進一步的處理，例如"&amp;amp;"。
 				token = [ token ];
 				token.is_atom = true;
+				token.is_plain = true;
 			}
 			return token;
 		}
@@ -1826,7 +1853,7 @@ function module_code(library_namespace) {
 	/**
 	 * 從話題/議題/章節標題產生連結到章節標題的wikilink。
 	 * 
-	 * TODO: 保留 display_text 中的 ''','' 屬性。
+	 * TODO: 保留 display_text 中的 <b>, <i>, <span> 屬性。
 	 * 
 	 * @example <code>
 	CeL.wiki.section_link(section_title)
@@ -1837,7 +1864,7 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * @returns {Array}link object
+	 * @returns {Array}link object (see below)
 	 * 
 	 * @see [[H:MW]], {{anchorencode:章節標題}}, [[Template:井戸端から誘導の使用]], escapeId()
 	 * @see https://phabricator.wikimedia.org/T152540
@@ -1874,19 +1901,34 @@ function module_code(library_namespace) {
 					return section_link_START_CONVERT + this.join(';')
 							+ section_link_END_CONVERT;
 				};
+			} else if (token.original_type) {
+				// revert type
+				token.type = token.original_type;
+				token.toString = wiki_toString[token.type];
+				if (false && token.type === 'tag') {
+					token.unshift(token.tag_attributes);
+				}
+			} else if (token.is_plain) {
+				token[0] = token[0]// .replace(/</g, "&lt;")
+				//
+				.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g,
+						"&apos;");
 			}
 		}, true);
+		// console.log(parsed_title);
 
 		// display_text 應該是對已經正規化的 section_title 再做的變化。
 		var display_text = section_link_escape(parsed_title.toString().trim()
 		// @see use library_namespace.DOM.Unicode_to_HTML()
-		.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, "&apos;"))
+		// .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g,
+		// "&apos;")
+		)
 		// recover language conversion -{}-
 		.replace(section_link_START_CONVERT_reg, '-{').replace(
 				section_link_END_CONVERT_reg, '}-');
 
-		// link = [ page title 頁面標題, anchor 章節標題,
-		// display_text 要顯示的連結文字 default: section_title ]
+		// link = [ page title 頁面標題, anchor / section title 章節標題,
+		// display_text / label 要顯示的連結文字 default: section_title ]
 		var link = [ options && options.page_title, anchor, display_text ];
 		Object.assign(link, {
 			// link.id = {String}id
@@ -2040,7 +2082,7 @@ function module_code(library_namespace) {
 		options = library_namespace.setup_options(options);
 
 		var _this = this, page_title = this.page && this.page.title,
-		// sections[0]: 常常是設定與公告區，或者放置維護模板。
+		// sections[0]: 常常是設定與公告區，或者放置維護模板/通知模板。
 		section_list = this.sections = [],
 		// section_title_hash[section link anchor] = {Natural}count
 		section_title_hash = library_namespace.null_Object();
@@ -2302,6 +2344,7 @@ function module_code(library_namespace) {
 	}
 
 	// parse <ref> of page
+	// TODO: <ref group="">
 	// TODO: <ref> in template
 	function parse_references(options) {
 		if (this.reference_list)
