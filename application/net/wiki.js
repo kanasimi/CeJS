@@ -1694,13 +1694,15 @@ function module_code(library_namespace) {
 	// @inner
 	function preprocess_section_link_token(token) {
 		if (token.type === 'tag') {
+			// token: [ tag_attributes, tag_inner ]
 			if (token.tag === 'nowiki') {
 				// escape characters inside <nowiki>
 				return preprocess_section_link_token(token[1] ? token[1]
 						.toString() : '');
 			}
 
-			if (false && token.tag in {
+			// 容許一些特定標籤能夠顯示格式
+			if (token.tag in {
 				b : true,
 				i : true,
 				sub : true,
@@ -1717,7 +1719,9 @@ function module_code(library_namespace) {
 
 			// reduce HTML tags. e.g., <ref>
 			// console.log(token);
-			return preprocess_section_link_tokens(token[1] || '');
+			var new_token = preprocess_section_link_tokens(token[1] || '');
+			new_token.tag = token.tag;
+			return new_token;
 		}
 		if ((token.type === 'file' || token.type === 'category')
 				&& !token.is_link) {
@@ -1819,7 +1823,9 @@ function module_code(library_namespace) {
 		if (true) {
 			text = text.replace(
 			// 盡可能減少字元的使用量，因此僅處理開頭，不處理結尾。
-			uri ? /[\|{}\[\]<]/g : /[\|{}<>]/g && /[\|{<]/g,
+			uri ? /[\|{}\[\]<]/g
+			// 為了容許一些特定標籤能夠顯示格式，"<>"已經在preprocess_section_link_token(),section_link()裡面處理過了。
+			: /[\|{}<>]/g && /[\|{]/g,
 			// 經測試 anchor 亦不可包含[{}\[\]\n]。
 			function(character) {
 				if (uri) {
@@ -1852,8 +1858,6 @@ function module_code(library_namespace) {
 
 	/**
 	 * 從話題/議題/章節標題產生連結到章節標題的wikilink。
-	 * 
-	 * TODO: 保留 display_text 中的 <b>, <i>, <span> 屬性。
 	 * 
 	 * @example <code>
 	CeL.wiki.section_link(section_title)
@@ -1893,7 +1897,7 @@ function module_code(library_namespace) {
 		.replace(/([ _]){2,}/g, '$1').replace(/&/g, '&amp;'), true);
 
 		// console.log(parsed_title);
-		for_each_token.call(parsed_title, function(token) {
+		for_each_token.call(parsed_title, function(token, index, parent) {
 			if (token.type === 'convert') {
 				// @see wiki_toString.convert
 				// return token.join(';');
@@ -1905,24 +1909,27 @@ function module_code(library_namespace) {
 				// revert type
 				token.type = token.original_type;
 				token.toString = wiki_toString[token.type];
-				if (false && token.type === 'tag') {
+				// 保留 display_text 中的 ''', '', <b>, <i>, <span> 屬性。
+				if (token.type === 'tag') {
+					// 容許一些特定標籤能夠顯示格式: 會到這裡的應該都是一些被允許顯示格式的特定標籤。
 					token.unshift(token.tag_attributes);
 				}
+			} else if (token.type === 'tag' || token.type === 'tag_single') {
+				parent[index] = token.toString().replace(/</g, '&lt;');
+
 			} else if (token.is_plain) {
-				token[0] = token[0]// .replace(/</g, "&lt;")
-				//
-				.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g,
+				// @see use library_namespace.DOM.Unicode_to_HTML()
+				token[0] = token[0].replace(/&/g, '&amp;')
+				// 這邊也必須 escape "<>"
+				.replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g,
 						"&apos;");
 			}
 		}, true);
 		// console.log(parsed_title);
+		// console.log(parsed_title.toString().trim());
 
 		// display_text 應該是對已經正規化的 section_title 再做的變化。
-		var display_text = section_link_escape(parsed_title.toString().trim()
-		// @see use library_namespace.DOM.Unicode_to_HTML()
-		// .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g,
-		// "&apos;")
-		)
+		var display_text = section_link_escape(parsed_title.toString().trim())
 		// recover language conversion -{}-
 		.replace(section_link_START_CONVERT_reg, '-{').replace(
 				section_link_END_CONVERT_reg, '}-');
