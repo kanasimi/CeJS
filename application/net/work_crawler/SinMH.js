@@ -59,7 +59,9 @@ function module_code(library_namespace) {
 
 		// 提取出引數（如 URL）中的作品ID 以回傳。
 		extract_work_id : function(work_information) {
-			return /^[a-z]+$/.test(work_information) && work_information;
+			// e.g,
+			// https://www.36mh.com/manhua/IDOLiSH7ouxiangxingyuanxiangliuxingxuyuan/
+			return /^[a-z\d]+$/i.test(work_information) && work_information;
 		},
 
 		// 取得伺服器列表。
@@ -192,7 +194,8 @@ function module_code(library_namespace) {
 		},
 
 		pre_parse_chapter_data
-		// 執行在解析章節資料process_chapter_data()之前的作業(async)。
+		// 執行在解析章節資料 process_chapter_data() 之前的作業 (async)。
+		// 必須自行保證執行 callback()，不丟出異常、中斷。
 		: function(XMLHttp, work_data, callback, chapter_NO) {
 			if (work_data.filtered && chapter_NO === 1) {
 				var html = XMLHttp.responseText, first_chapter_id = html
