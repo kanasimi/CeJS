@@ -14,7 +14,7 @@
 # 取得作品資訊與各章節資料。 get_work_data(), pre_process_chapter_list_data(), process_chapter_list_data()
 # 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data(), .work_URL, .parse_work_data(), chapter_list_URL, .get_chapter_list()
 # 取得每一個章節的內容與各個影像資料。 pre_get_chapter_data(), .chapter_URL, get_chapter_data(), .pre_parse_chapter_data(), .parse_chapter_data()
-# 取得各個章節的每一個影像內容。 get_images(), .image_preprocessor(), .image_post_processor(), .after_get_images()
+# 取得各個章節的每一個影像內容。 get_image(), .image_preprocessor(), .image_post_processor(), .after_get_image()
 # finish_up(), .after_download_chapter(), .after_download_work()
 
 TODO:
@@ -688,7 +688,7 @@ function module_code(library_namespace) {
 		get_work : get_work,
 		get_work_data : get_work_data,
 		save_work_data : save_work_data_file,
-		get_images : get_images
+		get_image : get_image
 	}
 
 	Object.assign(Work_crawler.prototype, Work_crawler_prototype);
@@ -2757,8 +2757,14 @@ function module_code(library_namespace) {
 							+ '/' + image_list.length, 6,
 							'normalize_image_data');
 					// console.log(image_data);
-					if (!image_data)
-						return image_data;
+					if (!image_data) {
+						// 若是沒有設定image_data，那麼就明確的給一個表示有錯誤的。
+						return image_list[index] = {
+						// 這兩個會在 function get_image() 裡面設定。
+						// has_error : true,
+						// done : true
+						};
+					}
 
 					if (typeof image_data === 'string') {
 						// image_data 會被用來記錄一些重要的資訊。
@@ -2821,15 +2827,8 @@ function module_code(library_namespace) {
 				// TODO: 當某 chapter 檔案過多(如1000)，將一次 request 過多 connects 而造成問題。
 				if (!_this.one_by_one) {
 					image_list.forEach(function(image_data, index) {
-						if (!image_data && _this.skip_error) {
-							image_list[index] = {
-								has_error : true
-							};
-							check_if_done();
-							return;
-						}
 						image_data = normalize_image_data(image_data, index);
-						_this.get_images(image_data, check_if_done,
+						_this.get_image(image_data, check_if_done,
 								images_archive);
 					});
 					library_namespace.debug(chapter_label + ': 已派發完工作，開始等待。',
@@ -2851,21 +2850,9 @@ function module_code(library_namespace) {
 									+ image_list.length) + '...\r');
 					var image_data = normalize_image_data(
 							image_list[image_list.index], image_list.index);
-					if (!image_data && _this.skip_error) {
-						image_list[image_list.index] = {
-							has_error : true
-						};
-						check_if_done();
-						// 添加計數器
-						if (++image_list.index < image_list.length) {
-							get_next_image();
-						}
-						return;
-					}
-
 					if (time_interval > 0)
 						image_data.time_interval = time_interval;
-					_this.get_images(image_data, function(status) {
+					_this.get_image(image_data, function(status) {
 						check_if_done();
 
 						// 添加計數器
@@ -2875,7 +2862,8 @@ function module_code(library_namespace) {
 
 						if (!(time_interval > 0)
 						// 沒有實際下載動作時，就不用等待了。
-						|| status === 'image_downloaded') {
+						|| status === 'image_downloaded'
+								|| status === 'invalid_data') {
 							get_next_image();
 							return;
 						}
@@ -3034,7 +3022,7 @@ function module_code(library_namespace) {
 
 				// console.log(chapter_data);
 				if (left !== image_list.length) {
-					library_namespace.error('所登記的圖形數量' + left + '與有資料的圖形數量'
+					library_namespace.error('所登記的圖形數量' + left + '與有圖形列表長度'
 							+ image_list.length + '不同！');
 					if (left > image_list.length) {
 						left = image_list.length;
@@ -3122,9 +3110,10 @@ function module_code(library_namespace) {
 		function check_if_done() {
 			--left;
 
-			if (typeof _this.after_get_images === 'function') {
+			if (typeof _this.after_get_image === 'function') {
+				// 每個圖片下載結束都會執行一次。
 				// var latest_image_data = image_list[image_list.index];
-				_this.after_get_images(image_list, work_data, chapter_NO);
+				_this.after_get_image(image_list, work_data, chapter_NO);
 			}
 
 			// this.dynamical_count_images: 動態改變章節中的圖片數量。
@@ -3140,7 +3129,7 @@ function module_code(library_namespace) {
 			}
 			// console.log('check_if_done: left: ' + left);
 
-			// 須注意若是最後一張圖get_images()直接 return 了，
+			// 須注意若是最後一張圖 get_image()直接 return 了，
 			// 此時尚未設定 waiting，因此此處不可以 waiting 判斷！
 			if (left > 0) {
 				// 還有尚未取得的檔案。
@@ -3337,10 +3326,15 @@ function module_code(library_namespace) {
 		+ '$1');
 	}
 
-	function get_images(image_data, callback, images_archive) {
+	// 下載單一個圖片。
+	function get_image(image_data, callback, images_archive) {
 		// console.log(image_data);
-		if (!image_data) {
-			typeof callback === 'function' && callback();
+		if (!image_data || !image_data.file || !image_data.url) {
+			if (image_data) {
+				image_data.has_error = true;
+				image_data.done = true;
+			}
+			typeof callback === 'function' && callback('invalid_data');
 			return;
 		}
 
@@ -3403,7 +3397,7 @@ function module_code(library_namespace) {
 		}
 
 		if (image_downloaded) {
-			// console.log('get_images: Skip ' + image_data.file);
+			// console.log('get_image: Skip ' + image_data.file);
 			image_data.done = true;
 			typeof callback === 'function' && callback('image_downloaded');
 			return;
@@ -3445,7 +3439,7 @@ function module_code(library_namespace) {
 			if (!has_error) {
 				image_data.file_length.push(contents.length);
 				library_namespace.debug('測試圖像是否完整: ' + image_data.file, 2,
-						'get_images');
+						'get_image');
 				var file_type = library_namespace.file_type(contents);
 				verified_image = file_type && !file_type.damaged;
 				if (verified_image) {
@@ -3575,7 +3569,7 @@ function module_code(library_namespace) {
 
 						if (!image_data.has_error || _this.preserve_bad_image) {
 							library_namespace.debug('保存圖片數據到 HDD 上: '
-									+ image_data.file, 1, 'get_images');
+									+ image_data.file, 1, 'get_image');
 							// TODO: 檢查舊的檔案是不是文字檔。例如有沒有包含 HTML 標籤。
 							node_fs.writeFileSync(image_data.file, contents);
 						}
@@ -3592,7 +3586,7 @@ function module_code(library_namespace) {
 			}
 
 			// 有錯誤。下載錯誤時報錯。
-			library_namespace.error(
+			library_namespace.warn(
 			// 圖檔損壞: e.g., Do not has EOI
 			(verified_image === false ? 'Image damaged: '
 			//
@@ -3646,13 +3640,13 @@ function module_code(library_namespace) {
 			}
 
 			image_data.error_count = (image_data.error_count | 0) + 1;
-			library_namespace.log('get_images: Retry ' + image_data.error_count
+			library_namespace.log('get_image: Retry ' + image_data.error_count
 					+ '/' + _this.MAX_ERROR_RETRY + '...');
 			var get_image_again = function() {
-				_this.get_images(image_data, callback, images_archive);
+				_this.get_image(image_data, callback, images_archive);
 			}
 			if (image_data.time_interval > 0) {
-				process.stdout.write('get_images: Wait '
+				process.stdout.write('get_image: Wait '
 						+ library_namespace.age_of(0, image_data.time_interval)
 						+ ' to retry image [' + image_data.url + ']...\r');
 				setTimeout(get_image_again, image_data.time_interval);
