@@ -3339,6 +3339,10 @@ function module_code(library_namespace) {
 
 	function get_images(image_data, callback, images_archive) {
 		// console.log(image_data);
+		if (!image_data) {
+			typeof callback === 'function' && callback();
+			return;
+		}
 
 		// 檢查實際存在的圖片檔案。
 		var image_downloaded = node_fs.existsSync(image_data.file)
@@ -3887,7 +3891,7 @@ function module_code(library_namespace) {
 		//
 		chapter_data = work_data.chapter_list
 				&& work_data.chapter_list[chapter_NO - 1],
-		// 卷篇集幕部冊册/volume/part/book
+		// 卷篇集幕部冊册本/volume/part/book
 		part_title = data.title || chapter_data && chapter_data.part_title,
 		// 章節名稱 / 章節节回折篇話话頁页/chapter
 		chapter_title = data.sub_title || chapter_data
