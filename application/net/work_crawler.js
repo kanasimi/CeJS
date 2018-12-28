@@ -3334,6 +3334,8 @@ function module_code(library_namespace) {
 				image_data.has_error = true;
 				image_data.done = true;
 			}
+			// 注意: 此時 image_data 可能是 undefined
+			_this.onerror('未指定圖像資料', image_data);
 			typeof callback === 'function' && callback('invalid_data');
 			return;
 		}
