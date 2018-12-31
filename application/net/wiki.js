@@ -1230,6 +1230,20 @@ function module_code(library_namespace) {
 		return '{{' + this.join(separator || '|') + '}}';
 	}
 
+	// escape wikitext control characters
+	// escape 掉會造成問題之 characters。
+	// @see function section_link_escape(text, is_uri)
+	function escape_wikitext(wikitext, is_uri) {
+		return wikitext.replace(/[\|{}\[\]<>]/g,
+		// 經測試 anchor 亦不可包含[{}\[\]\n]。
+		function(character) {
+			if (is_uri) {
+				return '%' + character.charCodeAt(0).toString(16);
+			}
+			return '&#' + character.charCodeAt(0) + ';';
+		});
+	}
+
 	// 2017/1/18 18:46:2
 	// TODO: escape special characters
 	function to_template_wikitext(parameters, options) {
@@ -1701,7 +1715,7 @@ function module_code(library_namespace) {
 						.toString() : '');
 			}
 
-			// 容許一些特定標籤能夠顯示格式
+			// 容許一些特定標籤能夠顯示格式。以繼承原標題的粗體斜體和顏色等等格式。
 			if (token.tag in {
 				b : true,
 				i : true,
@@ -1818,17 +1832,18 @@ function module_code(library_namespace) {
 		return preprocess_section_link_token(tokens);
 	}
 
-	function section_link_escape(text, uri) {
-		// escape control characters, including language conversion -{}-
+	function section_link_escape(text, is_uri) {
+		// escape wikitext control characters,
+		// including language conversion -{}-
 		if (true) {
 			text = text.replace(
 			// 盡可能減少字元的使用量，因此僅處理開頭，不處理結尾。
-			uri ? /[\|{}\[\]<]/g
+			is_uri ? /[\|{}\[\]<]/g
 			// 為了容許一些特定標籤能夠顯示格式，"<>"已經在preprocess_section_link_token(),section_link()裡面處理過了。
 			: /[\|{}<>]/g && /[\|{]/g,
 			// 經測試 anchor 亦不可包含[{}\[\]\n]。
 			function(character) {
-				if (uri) {
+				if (is_uri) {
 					return '%' + character.charCodeAt(0).toString(16);
 				}
 				return '&#' + character.charCodeAt(0) + ';';
@@ -2988,7 +3003,7 @@ function module_code(library_namespace) {
 			// 初始化。
 			// console.log(wikitext);
 			wikitext = wikitext.replace(/\r\n/g, '\n').replace(
-			// 先 escape 掉會造成問題之 chars。
+			// 先 escape 掉會造成問題之 characters。
 			new RegExp(include_mark.replace(/([\s\S])/g, '\\$1'), 'g'),
 					include_mark + end_mark);
 			if (!wikitext.startsWith('\n') &&
@@ -4146,6 +4161,8 @@ function module_code(library_namespace) {
 			wikitext = wikitext.replace(/(?:(?:^|\n)[*][^\n]*)+/g, handle_list);
 			wikitext = wikitext.replace(/(?:(?:^|\n)[#][^\n]*)+/g, handle_list);
 
+			// TODO: <dl>, 重新規劃列表的資料結構
+
 			// TODO: 處理多層選單。
 			// * level 1
 			// ** level 2
@@ -4853,11 +4870,39 @@ function module_code(library_namespace) {
 	 * 
 	 * 當解析發生錯誤的時候，應該要在設定頁面的討論頁顯示錯誤訊息。
 	 * 
+	 * TODO: using parser
+	 * 
+	 * TODO: parse table
+	 * 
 	 * @example <code>
 
 	var configuration = CeL.wiki.parse_configuration(page_data);
 
 	value = configuration[variable_name];
+
+	</code>
+	 * 
+	 * 允許使用的設定格式: <code>
+
+	(頁面開頭)
+	註解說明(可省略)
+
+	; 單一值變數名1: 變數值
+	; 單一值變數名2: 變數值
+
+	; 列表變數名1
+	: 變數值1
+	: 變數值2
+
+	 == 列表變數名2 ==
+	 註解說明(可省略)
+	 * 變數值1
+	 * <nowiki>變數值2</nowiki>
+
+	== 列表變數名3 ==
+	註解說明(可省略)
+	# 變數值1
+	# <nowiki>變數值2</nowiki>
 
 	</code>
 	 * 
@@ -5400,6 +5445,7 @@ function module_code(library_namespace) {
 	// 'Category:category'→'[[:Category:category]]'
 	// TODO: 與 URL_to_wiki_link() 整合。
 	// TODO: #section name
+	// TODO: 複製到非維基項目外的私人維基，例如moegirl時，可能需要用到[[zhwiki:]]這樣的prefix。
 	function get_page_title_link(page_data, session, display_text) {
 		var title,
 		// e.g., is_category
@@ -7404,7 +7450,7 @@ function module_code(library_namespace) {
 				options = {
 					// new section. append 章節/段落 after all, at bottom.
 					section : 'new',
-					// 章節標題。
+					// 新章節的標題。
 					sectiontitle : '['
 							+ (new Date).format(config.date_format
 									|| this.date_format) + ']' + count_summary,
@@ -7643,7 +7689,8 @@ function module_code(library_namespace) {
 			}
 			if (!options.summary) {
 				options.summary = 'Copy from '
-						+ get_page_title_link(title, copy_from_wiki) + '.';
+				// TODO: 複製到非維基項目外的私人維基，例如moegirl時，可能需要用到[[zhwiki:]]這樣的prefix。
+				+ get_page_title_link(title, copy_from_wiki) + '.';
 			}
 			_this.actions.unshift(
 			// wiki.edit(page, options, callback)
@@ -10150,6 +10197,11 @@ function module_code(library_namespace) {
 				delete session.token.lgpassword;
 			}
 
+			// console.log(JSON.stringify(data));
+			if (data && data.warnings) {
+				// console.log(JSON.stringify(data.warnings));
+			}
+
 			if (data && (data = data.login)) {
 				if (data.result === 'Success') {
 					wiki_API.login.copy_keys.forEach(function(key) {
@@ -10176,14 +10228,19 @@ function module_code(library_namespace) {
 					 * 當沒有登入成功時的處理以及警訊。
 					 * 
 					 * e.g., data = <code>
-					 * {"login":{"result":"Failed","reason":"Incorrect password entered.\nPlease try again."}}
+					{"login":{"result":"Failed","reason":"Incorrect password entered.\nPlease try again."}}
+
+					{"login":{"result":"Failed","reason":"You have made too many recent login attempts. Please wait 5 minutes before trying again."}}
+
+					{"warnings":{"main":{"*":"Subscribe to the mediawiki-api-announce mailing list at <https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce> for notice of API deprecations and breaking changes."},"login":{"*":"Main-account login via \"action=login\" is deprecated and may stop working without warning. To continue login with \"action=login\", see [[Special:BotPasswords]]. To safely continue using main-account login, see \"action=clientlogin\"."}},"login":{"result":"Success","lguserid":263674,"lgusername":"Cewbot"}}
 					 * </code>
 					 */
 					library_namespace.error('wiki_API.login: login ['
 							+ session.token.lgname + '] failed '
 							+ session.login_failed_count + '/'
 							+ wiki_API.login.MAX_ERROR_RETRY + ': ['
-							+ data.result + '] ' + data.reason);
+							+ data.result + '] ' + data.reason + ' ('
+							+ session.API_URL + ')');
 					if (data.result !== 'Failed' || data.result !== 'NeedToken') {
 						// Unknown result
 					}
@@ -10596,6 +10653,7 @@ function module_code(library_namespace) {
 				/**
 				 * <code>
 				   wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
+				   wiki_API.edit: Error to edit [[Wikiversity:互助客栈/topic list]]: [tags-apply-not-allowed-one] The tag "Bot" is not allowed to be manually applied.
 				 * </code>
 				 * 
 				 * @see https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
@@ -12783,7 +12841,7 @@ function module_code(library_namespace) {
 							|| recent_options.SQL_options);
 				}
 
-				if (0) {
+				if (false) {
 					library_namespace.log('去除掉重複的紀錄之前 last_query_revid: '
 							+ last_query_revid + ', ' + rows.length
 							+ ' records:');
@@ -12817,7 +12875,7 @@ function module_code(library_namespace) {
 					}
 
 					// 預設全部都處理完，因此先登記。假如僅處理其中的一部分，屆時再特別登記。
-					if (0) {
+					if (false) {
 						library_namespace.log('The lastest record: '
 								+ JSON.stringify(last_query_time));
 					}
@@ -12829,7 +12887,7 @@ function module_code(library_namespace) {
 					// last_query_time = new Date(last_query_time.timestamp);
 					last_query_time = last_query_time.timestamp;
 				}
-				if (0) {
+				if (false) {
 					library_namespace.log('去除掉重複的紀錄之後 last_query_revid: '
 							+ last_query_revid + ', ' + rows.length
 							+ ' records left:');
@@ -20507,6 +20565,8 @@ function module_code(library_namespace) {
 		plain_text : wikitext_to_plain_text,
 
 		template_text : to_template_wikitext,
+
+		escape_wikitext : escape_wikitext,
 
 		parse : parse_wikitext,
 		parser : page_parser,
