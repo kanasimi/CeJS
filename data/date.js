@@ -138,13 +138,13 @@ function module_code(library_namespace) {
 	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 	// ONE_DAY_LENGTH_VALUE = CeL.date.to_millisecond('1D')
 
-	/** {Number}一分鐘的 time 值。should be 60 * 1000 = 60000. */
+	/** {Number}一分鐘的 time 值(in milliseconds)。should be 60 * 1000 = 60000. */
 	ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
 	/** {Number}一整時辰的 time 值。should be 2 * 60 * 60 * 1000 = 7200000. */
 	ONE_時辰_LENGTH_VALUE = new Date(0, 0, 0, 2) - new Date(0, 0, 0, 0),
 
 	// e.g., UTC+8: -8 * 60 = -480
-	nowaday_local_minute_offset = (new Date).getTimezoneOffset() || 0;
+	present_local_minute_offset = (new Date).getTimezoneOffset() || 0;
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// for Julian date. 期能不使用內建 Date 以快速計算日期。
@@ -470,7 +470,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Integer}
 	 */
-	Julian_day.default_offset = nowaday_local_minute_offset
+	Julian_day.default_offset = present_local_minute_offset
 			* ONE_MINTE_LENGTH_VALUE;
 
 	// Get the epoch of Julian date, i.e., -4713/11/24 12:0
@@ -652,6 +652,7 @@ function module_code(library_namespace) {
 	 * @since 2012/3/22 23:58:38 重構並測試。
 	 * @see <a href="http://msdn.microsoft.com/zh-tw/library/t5580e8h.aspx"
 	 *      accessdate="2012/3/23 23:26">JScript Date 物件</a>
+	 * @see wikitext: {{#time:Y年n月j日|+1 day}}
 	 */
 	function String_to_Date(date_string, options) {
 		// 檢測輸入引數(arguments)，將之正規化(normalization)，處理、轉換為規範之標準型態。
@@ -778,7 +779,7 @@ function module_code(library_namespace) {
 	// e.g., UTC-5: -5 * 60
 	// 亦為 Date.parse(date_string) 與 new Date() 會自動附上的當地時間差距。
 	// assert: String_to_Date.default_offset 為整數。
-	String_to_Date.default_offset = -nowaday_local_minute_offset;
+	String_to_Date.default_offset = -present_local_minute_offset;
 
 	/**
 	 * <code>
@@ -1041,9 +1042,9 @@ function module_code(library_namespace) {
 				&& minute_offset !== DEFAULT_TIME_ZONE;
 		// 若是未設定，則當作 local time zone。
 		if (base_on_UTC) {
-			// 否則轉成基於 UTC 之 `minute_offset`
+			// 否則基於本機當前的時區來調整成基於 UTC 之 `minute_offset`
 			// local time + .getTimezoneOffset() = UTC
-			tmp -= nowaday_local_minute_offset + minute_offset;
+			tmp -= present_local_minute_offset + minute_offset;
 		}
 
 		var date_value;
@@ -1069,10 +1070,14 @@ function module_code(library_namespace) {
 					+date_data[6] || 0);
 		}
 		if (base_on_UTC
-				&& date_value.getTimezoneOffset() !== nowaday_local_minute_offset) {
-			// 設定時間後才調整 time zone。
+				&& date_value.getTimezoneOffset() !== present_local_minute_offset) {
+			/**
+			 * 當基於本機當前的時區來調整成UTC時間時，若是 time zone 和預設的
+			 * `present_local_minute_offset` 不同，就必須在以 new Date() 設定時間後，才調整 time
+			 * zone。
+			 */
 			date_value.setMinutes(date_value.getMinutes()
-					+ nowaday_local_minute_offset
+					+ present_local_minute_offset
 					- date_value.getTimezoneOffset());
 		}
 
@@ -2228,7 +2233,7 @@ function module_code(library_namespace) {
 			zone : 0
 		});
 		Julian_Date_epoch = Julian_Date_epoch.getTime()
-				+ (nowaday_local_minute_offset - (Julian_Date_epoch
+				+ (present_local_minute_offset - (Julian_Date_epoch
 						.getTimezoneOffset() || 0)) * ONE_MINTE_LENGTH_VALUE;
 	}
 
@@ -2647,10 +2652,15 @@ function module_code(library_namespace) {
 		if (!is_Date(end)) {
 			end = new Date(end);
 		}
-		diff2 = end.getMonth() - start.getMonth()
-		//
-		+ (end.getDate() - start.getDate()) / 30;
-		if (diff = end.getFullYear() - start.getFullYear()) {
+		// assert: new Date(0) 得到1月1日
+		// assert: (new Date(0)).getMonth()===0&&(new Date(0)).getDate()===1
+		diff2 = new Date(end - start);
+		// ↑ 如此可處理年尾到年首的差異。
+		// 計算兩者相差年分計數。
+		diff = diff2.getFullYear() - /* 1970 */new Date(0).getFullYear();
+		// 計算兩者相差大概月分。
+		diff2 = diff2.getMonth() + (diff2.getDate() - 1) / 30;
+		if (diff) {
 			// assert: {Integer}diff 年 {Float}diff2 月, diff > 0.
 			// → difference = {Float} 年（至小數）
 			difference = diff + diff2 / 12;
@@ -3022,8 +3032,8 @@ function module_code(library_namespace) {
 			if (!a && isNaN(a = format_date.UTC_offset)) {
 				// input UTC 時之差距(milliseconds)
 				// .getTimezoneOffset() is in minute.
-				// 60*1000(milliseconds)=6e4(milliseconds)
-				a = format_date.UTC_offset = 6e4 * nowaday_local_minute_offset;
+				a = format_date.UTC_offset = ONE_MINTE_LENGTH_VALUE
+						* present_local_minute_offset;
 			}
 
 			// 值過小時當作時間: d < 90000000 ≈ 24*60*60*1000，判別為當天，只顯示時間。不允許 d < 0！
