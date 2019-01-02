@@ -1015,7 +1015,12 @@ function module_code(library_namespace) {
 		if (!page_name || typeof page_name !== 'string')
 			return page_name;
 
-		page_name = page_name.trimEnd().replace(/^[\s:]+/, '')
+		page_name = page_name
+		// 不採用 .trimEnd()：對於標題，無論前後加幾個"\u200E"(LEFT-TO-RIGHT MARK)都會被視為無物。
+		// "\u200F" 亦不被視作 /\s/，但經測試會被 wiki 忽視。
+		.replace(/[\s\u200E\u200F]+$/, '')
+		// 只能允許出現頂多一個 ":"。
+		.replace(/^[\s\u200E\u200F]*(?::[\s\u200E\u200F]*)?/, '')
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1');
 
@@ -1230,17 +1235,46 @@ function module_code(library_namespace) {
 		return '{{' + this.join(separator || '|') + '}}';
 	}
 
-	// escape wikitext control characters
-	// escape 掉會造成問題之 characters。
-	// @see function section_link_escape(text, is_uri)
-	function escape_wikitext(wikitext, is_uri) {
-		return wikitext.replace(/[\|{}\[\]<>]/g,
-		// 經測試 anchor 亦不可包含[{}\[\]\n]。
-		function(character) {
+	/**
+	 * escape wikitext control characters of text, to plain wikitext.<br />
+	 * escape 掉會造成問題之 characters。
+	 * 
+	 * @example <code>
+	CeL.wiki.escape_text(text);
+	 * </code>
+	 * 
+	 * TODO: "&"
+	 * 
+	 * @param {String}text
+	 *            包含有問題字元的文字字串。
+	 * @param {Boolean}is_uri
+	 *            輸出為 URI 或 URL。
+	 * @returns {String}plain wikitext
+	 * 
+	 * @see function section_link_escape(text, is_uri)
+	 * @see [[w:en:Help:Special characters]]
+	 */
+	function escape_text(text, is_uri) {
+		function escape_character(character) {
+			var code = character.charCodeAt(0);
 			if (is_uri) {
-				return '%' + character.charCodeAt(0).toString(16);
+				return '%' + code.toString(16);
 			}
-			return '&#' + character.charCodeAt(0) + ';';
+			return '&#' + code + ';';
+		}
+
+		return text
+		// 經測試 anchor 亦不可包含[{}\[\]\n]。
+		.replace(/[\|{}\[\]<>]/g, escape_character)
+		// escape "''", "'''"
+		.replace(/''/g, "'" + escape_character("'"))
+		// escape [[w:en:Help:Magic links]]
+		.replace(/__/g, "_" + escape_character("_"))
+		// escape signing
+		.replace(/~~~/g, "~~" + escape_character("~"))
+		// escape list, section title
+		.replace(/\n([=*#;:\n])/g, function(all, character) {
+			return "\n" + escape_character(character);
 		});
 	}
 
@@ -4810,8 +4844,8 @@ function module_code(library_namespace) {
 
 	//
 	/**
-	 * 重定向頁所符合的匹配模式。 Note that the redirect link must be explicit – it cannot
-	 * contain magic words, templates, etc.
+	 * redirect/重定向頁所符合的匹配模式。 Note that the redirect link must be explicit – it
+	 * cannot contain magic words, templates, etc.
 	 * 
 	 * matched: [ all, "title#section" ]
 	 * 
@@ -4886,6 +4920,7 @@ function module_code(library_namespace) {
 
 	(頁面開頭)
 	註解說明(可省略)
+	本頁面為[[User:bot|]]~~~作業的設定。自動生成的報表請參見：[[報告]]
 
 	; 單一值變數名1: 變數值
 	; 單一值變數名2: 變數值
@@ -9934,7 +9969,7 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/wiki/API:Backlinks
 		backlinks : 'bl',
 
-		// 取得所有嵌入包含 title 的頁面。 (transclusion, inclusion)
+		// 取得所有[[w:zh:Wikipedia:嵌入包含]] title 的頁面。 (transclusion, inclusion)
 		// 参照読み込み
 		// e.g., {{Template name}}, {{/title}}.
 		// 設定 title 'Template:tl' 可取得使用指定 Template 的頁面。
@@ -11193,7 +11228,18 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/w/api.php?action=query&prop=redirects&rdprop=title&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
 
 	/**
-	 * 取得所有 redirect 到 [[title]] 之 pages。<br />
+	 * 取得所有重定向到(title重定向標的)之頁面列表，(title重定向標的)將會排在[0]。
+	 * 
+	 * 注意: 無法避免雙重重定向問題!
+	 * 
+	 * 工作機制:<br />
+	 * 1. 若 [[title]] redirect 到 [[base]]，則將 base 設定成 base；否則將 base 設定成 title。<br />
+	 * 2. 取得所有 redirect/重定向/重新導向 到 base(title重定向標的) 之 pages。
+	 * 
+	 * 因此若 R2 → R1 → R，且 R' → R，則 wiki_API.redirects(R2) 會得到 [{R1},{R2}]，
+	 * wiki_API.redirects(R1) 與 wiki_API.redirects(R) 與 wiki_API.redirects(R')
+	 * 皆會得到 [{R},{R1},{R'}]
+	 * 
 	 * 可以 [[Special:Whatlinkshere]] 確認。
 	 * 
 	 * @param {String}title
@@ -11203,8 +11249,8 @@ function module_code(library_namespace) {
 	 *            page_data, page_data, ... ]; }
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項. 此 options 可能會被變更！<br />
-	 *            {Boolean}options.no_trace: 若頁面還重定向到其他頁面則不溯源。溯源時 title 將以 root
-	 *            替代。<br />
+	 *            {Boolean}options.no_trace: 若頁面還重定向/重新導向到其他頁面則不溯源。溯源時 title 將以
+	 *            root 替代。<br />
 	 *            {Boolean}options.include_root 回傳 list 包含 title，而不只是所有 redirect
 	 *            到 [[title]] 之 pages。
 	 * 
@@ -11316,16 +11362,17 @@ function module_code(library_namespace) {
 	};
 
 	/**
-	 * 計算實質嵌入包含(transclusion)之頁面數。
+	 * 計算實質[[w:zh:Wikipedia:嵌入包含]](transclusion)之頁面數。
 	 * 
-	 * 若條目(頁面)嵌入包含有模板(頁面)別名，則將同時登記 embeddedin 於別名 alias 與 root。<br />
+	 * 若條目(頁面)[[w:zh:Wikipedia:嵌入包含]]有模板(頁面)別名，則將同時登記 embeddedin 於別名 alias 與
+	 * root。<br />
 	 * e.g., 當同時包含 {{Refimprove}}, {{RefImprove}} 時會算作兩個，但實質僅一個。<br />
 	 * 惟計數時，此時應僅計算一次。本函數可以去除重複名稱，避免模板尚有名稱重複者。
 	 * 
 	 * @param {Object}root_name_hash
 	 *            模板本名 hash. 模板本名[{String}模板別名/本名] = {String}root 模板本名
 	 * @param {Array}embeddedin_list
-	 *            頁面嵌入包含之模板 list。
+	 *            頁面[[w:zh:Wikipedia:嵌入包含]]之模板 list。
 	 * 
 	 * @returns {ℕ⁰:Natural+0}normalized count
 	 */
@@ -14090,6 +14137,7 @@ function module_code(library_namespace) {
 		// list file path
 		_this.file_name = file_name;
 
+		// console.log('Read file: ' + file_name);
 		node_fs.readFile(file_name, encoding, function(error, data) {
 			/**
 			 * 結束作業。
@@ -14388,6 +14436,8 @@ function module_code(library_namespace) {
 				break;
 
 			case 'redirects':
+				// 取得所有重定向到(title重定向標的)之頁面列表，(title重定向標的)將會排在[0]。
+				// 注意: 無法避免雙重重定向問題!
 				to_get_data = function(title, callback) {
 					// wiki_API.redirects(title, callback, options)
 					wiki_API.redirects(title, function(root_page_data,
@@ -20566,7 +20616,7 @@ function module_code(library_namespace) {
 
 		template_text : to_template_wikitext,
 
-		escape_wikitext : escape_wikitext,
+		escape_text : escape_text,
 
 		parse : parse_wikitext,
 		parser : page_parser,
