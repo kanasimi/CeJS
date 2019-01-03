@@ -11228,13 +11228,15 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/w/api.php?action=query&prop=redirects&rdprop=title&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
 
 	/**
-	 * 取得所有重定向到(title重定向標的)之頁面列表，(title重定向標的)將會排在[0]。
+	 * 取得所有重定向到(title重定向標的)之頁面列表。
 	 * 
 	 * 注意: 無法避免雙重重定向問題!
 	 * 
 	 * 工作機制:<br />
-	 * 1. 若 [[title]] redirect 到 [[base]]，則將 base 設定成 base；否則將 base 設定成 title。<br />
-	 * 2. 取得所有 redirect/重定向/重新導向 到 base(title重定向標的) 之 pages。
+	 * 1. 先溯源: 若 [[title]] redirect 到 [[base]]，則將 base(title重定向標的) 設定成 base；<br />
+	 * 否則將 base 設定成 title。<br />
+	 * 2. 取得所有 redirect/重定向/重新導向 到 base 之 pages。<br />
+	 * 3. 若設定 options.include_root，則(title重定向標的)將會排在[0]。
 	 * 
 	 * 因此若 R2 → R1 → R，且 R' → R，則 wiki_API.redirects(R2) 會得到 [{R1},{R2}]，
 	 * wiki_API.redirects(R1) 與 wiki_API.redirects(R) 與 wiki_API.redirects(R')
@@ -11261,6 +11263,7 @@ function module_code(library_namespace) {
 		options = library_namespace.new_options(options);
 
 		if (!options.no_trace) {
+			options.query_title = title;
 			// 先溯源(追尋至重定向終點)
 			wiki_API.page(title, function(page_data) {
 				// 已追尋至重定向終點，不再溯源。
@@ -11345,19 +11348,31 @@ function module_code(library_namespace) {
 
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page = {pageid,ns,title,redirects:[{},{}]}
-			var redirects = pages.redirects || [];
+			var redirect_list = pages.redirects || [];
 			library_namespace.debug(
 			//
-			get_page_title(pages) + ': 有 ' + redirects.length
+			get_page_title(pages) + ': 有 ' + redirect_list.length
 			//
 			+ ' 個同名頁面(重定向至此頁面)。', 2, 'wiki_API.redirects');
 			if (options.include_root) {
 				// 避免修改或覆蓋 pages.redirects。
-				redirects = redirects.slice();
-				redirects.unshift(pages);
+				redirect_list = redirect_list.slice();
+				redirect_list.unshift(pages);
 			}
+
+			if (options.query_title)
+				redirect_list.query_title = options.query_title;
+
+			library_namespace.debug(
+			//
+			'redirects (alias) of ' + get_page_title_link(pages) + ': ('
+			//
+			+ redirect_list.length + ') [' + redirect_list.slice(0, 3)
+			// CeL.wiki.title_of(page_data)
+			.map(get_page_title) + ']...', 1, 'wiki_API.redirects');
+
 			// callback(root_page_data 本名, redirect_list 別名 alias list)
-			callback(pages, redirects);
+			callback(pages, redirect_list);
 		}, null, options);
 	};
 
@@ -14442,19 +14457,6 @@ function module_code(library_namespace) {
 					// wiki_API.redirects(title, callback, options)
 					wiki_API.redirects(title, function(root_page_data,
 							redirect_list) {
-						library_namespace.log(
-						//
-						'redirects (alias) of '
-						//
-						+ get_page_title_link(title) + ': ('
-						//
-						+ redirect_list.length + ') ['
-						//
-						+ redirect_list.slice(0, 3)
-						//
-						.map(function(page_data) {
-							return page_data.title;
-						}) + ']...');
 						if (!operation.keep_redirects && redirect_list
 								&& redirect_list[0])
 							// cache 中不需要此累贅之資料。
