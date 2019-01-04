@@ -11263,15 +11263,28 @@ function module_code(library_namespace) {
 		options = library_namespace.new_options(options);
 
 		if (!options.no_trace) {
+			// .original_title , .convert_from
 			options.query_title = title;
+			// 用 .page() 可省略 .converttitles
+			// .redirects() 本身不會作繁簡轉換。
+			// redirect_to: 追尋至重定向終點
+			options.redirects = 1;
+			options.prop = 'info';
+
 			// 先溯源(追尋至重定向終點)
 			wiki_API.page(title, function(page_data) {
+				// console.log(page_data);
+				// delete options.prop;
+				options.page_data = page_data;
+
 				// 已追尋至重定向終點，不再溯源。
 				options.no_trace = true;
 				wiki_API.redirects(
-				// redirect_to: 追尋至重定向終點
-				parse_redirect(get_page_content(page_data)) || title, callback,
-						options);
+				// 已經轉換過，毋須 parse_redirect()。
+				// parse_redirect(get_page_content(page_data)) ||
+
+				// 若是 convert 過則採用新的 title。
+				page_data.title || title, callback, options);
 			}, options);
 			return;
 		}
@@ -11345,6 +11358,13 @@ function module_code(library_namespace) {
 			}
 
 			pages = pages[0];
+			if (get_page_content.is_page_data(options.page_data)
+			//
+			&& get_page_content.is_page_data(pages)
+			//
+			&& options.page_data.pageid === pages.pageid) {
+				pages = Object.assign(options.page_data, pages);
+			}
 
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page = {pageid,ns,title,redirects:[{},{}]}
