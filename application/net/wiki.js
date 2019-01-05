@@ -2782,7 +2782,7 @@ function module_code(library_namespace) {
 			return (this.delimiter || '') + this.join('');
 		},
 		// attributes, styles
-		style : function() {
+		table_style : function() {
 			return this.join('');
 		},
 		// 手工字詞轉換 language conversion -{}-
@@ -3937,9 +3937,8 @@ function module_code(library_namespace) {
 				// 含有 delimiter 的話，即使位在 "{|" 之後，依舊會被當作 row。
 				&& !/\n[!|]|!!|\|\|/.test(token)) {
 					// table style / format modifier (not displayed)
-					// 'table_style'
 					// "\n|-" 後面的 string
-					token = _set_wiki_type(token, 'style');
+					token = _set_wiki_type(token, 'table_style');
 					if (false && index === 0)
 						token = _set_wiki_type(token, 'table_row');
 					return token;
@@ -3966,17 +3965,42 @@ function module_code(library_namespace) {
 					// "|-" 應當緊接著 style，可以是否設定過 row 判斷。
 					// 但若這段有 /[<>]/ 則當作是內容。
 					if (row || /[<>]/.test(matched[1])) {
-						var cell = matched[1].match(/^([^|]+)(\|[\s\S]*)$/);
+						var cell = matched[1].match(/^([^|]+)(\|)([\s\S]*)$/);
 						if (cell) {
-							cell = [ cell[1].includes(include_mark)
+							// TODO: data-sort-type in table head
+
+							var data_type = cell
+							// @see
+							// [[w:en:Help:Sorting#Configuring the sorting]]
+							.match(/data-sort-type=(["']([^"']+)["']|[^\s]+)/);
+
+							cell[1] = cell[1].includes(include_mark)
 							// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 							? parse_wikitext(cell[1], options, queue)
 							//
 							: _set_wiki_type(cell[1],
 							// cell style / format modifier (not displayed)
-							'style'),
-							//
-							parse_wikitext(cell[2], options, queue) ];
+							'table_style');
+							// assert: cell[2] === '|'
+							cell[1].push(cell[2]);
+
+							cell[3] = parse_wikitext(cell[3], options, queue);
+							if (data_type) {
+								data_type = data_type[1] || data_type[2];
+								if (typeof data_type === 'number') {
+									data_type = +cell[3];
+									if (!isNaN(data_type)) {
+										// cell[3] = data_type;
+									}
+								} else if (typeof data_type === 'isoDate') {
+									data_type = Date.parse(cell[3]);
+									if (!isNaN(data_type)) {
+										// cell[3] = new Date(data_type);
+									}
+								}
+							}
+
+							cell = [ cell[1], cell[3] ];
 						} else {
 							// 經過改變，需再進一步處理。
 							cell = parse_wikitext(matched[1], options, queue);
@@ -4010,7 +4034,7 @@ function module_code(library_namespace) {
 						//
 						: _set_wiki_type(matched[1],
 						// row style / format modifier (not displayed)
-						'style');
+						'table_style');
 						row = [ cell ];
 					}
 
@@ -5021,8 +5045,6 @@ function module_code(library_namespace) {
 	 * 
 	 * 當解析發生錯誤的時候，應該要在設定頁面的討論頁顯示錯誤訊息。
 	 * 
-	 * TODO: parse table
-	 * 
 	 * @example <code>
 
 	var configuration = CeL.wiki.parse_configuration(page_data);
@@ -5060,15 +5082,17 @@ function module_code(library_namespace) {
 	 * @see [[w:zh:Template:Easy_Archive]]
 	 */
 	function parse_configuration(wikitext) {
+		var configuration = library_namespace.null_Object(),
+		// 變數名稱
+		variable_name;
+
 		if (get_page_content.is_page_data(wikitext)) {
+			variable_name = wikitext.title;
 			wikitext = get_page_content(wikitext);
 		}
 
-		var configuration = library_namespace.null_Object(),
-		// 變數名稱
-		variable_name,
 		// using parser
-		parsed = parse_wikitext(wikitext);
+		var parsed = parse_wikitext(wikitext);
 
 		if (!Array.isArray(parsed)) {
 			return configuration;
@@ -5092,6 +5116,54 @@ function module_code(library_namespace) {
 				variable_name = normalize_value(token.title);
 				return;
 			}
+
+			// parse table
+			if (token.type === 'table' && variable_name) {
+				var value = [];
+				token.forEach(function(line) {
+					if (line.type !== 'table_row') {
+						return;
+					}
+					var row = [];
+					line.forEach(function(cell) {
+						if (cell.type !== 'table_cell') {
+							return;
+						}
+
+						// TODO: data-sort-type in table head
+
+						var data_type;
+						cell = normalize_value(cell.filter(function(token) {
+							if (token.type !== 'table_style')
+								return true;
+							data_type = token.toString()
+							// @see
+							// [[w:en:Help:Sorting#Configuring the sorting]]
+							.match(/data-sort-type=(["']([^"']+)["']|[^\s]+)/);
+							if (data_type) {
+								data_type = data_type[1] || data_type[2];
+							}
+						}).join(''));
+
+						if (typeof data_type === 'number') {
+							if (!isNaN(data_type = +cell))
+								cell = data_type;
+						} else if (typeof data_type === 'isoDate') {
+							data_type = Date.parse(cell
+									.replace(/<[^<>]+>/g, ''));
+							if (!isNaN(data_type))
+								cell = new Date(data_type);
+						}
+
+						row.push(cell);
+					});
+					value.push(row);
+				});
+				configuration[variable_name] = value;
+				// 僅採用一個列表。
+				variable_name = null;
+			}
+
 			if (token.type !== 'list')
 				return;
 
@@ -5435,7 +5507,7 @@ function module_code(library_namespace) {
 				node.forEach(function(row) {
 					var cells = [], is_head;
 					row.forEach(function(cell) {
-						if (cell.type === 'style') {
+						if (cell.type === 'table_style') {
 							// 不計入style
 							return;
 						}
@@ -5448,7 +5520,7 @@ function module_code(library_namespace) {
 						}
 
 						var append_cells;
-						if (cell[0].type === 'style') {
+						if (cell[0].type === 'table_style') {
 							append_cells = cell[0].toString()
 							// 檢測要增加的null cells
 							.match(/[^a-z\d_]colspan=(?:"\s*)?(\d{1,2})/i);
