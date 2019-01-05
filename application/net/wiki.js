@@ -2848,8 +2848,6 @@ function module_code(library_namespace) {
 			return this.join('\n');
 		},
 		list : function() {
-			// return this.list_type + this.join('\n' + this.list_type);
-
 			var list_prefix = this.list_prefix;
 			return this.map(function(item, index) {
 				return (list_prefix && list_prefix[index] || '') + item;
@@ -4173,36 +4171,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// 處理 / parse list @ wikitext
 		// @see [[en:MOS:LIST]]
-		// 注意: 這裡僅處理明確指示列表的情況，無法處理以模板型式表現的列表。
-		// TODO: \n[;: ]
-		// TODO: \n*#a\n*#b
-
-		function handle_list(all) {
-			var previous, type;
-			if (all.charAt(0) === '\n') {
-				previous = '\n';
-				all = all.slice(1);
-			} else {
-				previous = '';
-			}
-			type = all.charAt(0);
-			all = all.slice(1);
-			all = all.split('\n' + type);
-			// 經過改變，需再進一步處理。
-			all = all.map(function(t) {
-				return parse_wikitext(t, options, queue);
-
-				// console.log(type + ': ' + JSON.stringify(t));
-				t = parse_wikitext(t, options, queue);
-				// console.log(options);
-				// console.log(t);
-				return t;
-			});
-			all = _set_wiki_type(all, 'list');
-			all.list_type = type;
-			queue.push(all);
-			return previous + include_mark + (queue.length - 1) + end_mark;
-		}
+		// 注意: 這裡僅處理在原wikitext中明確指示列表的情況，無法處理以模板型式表現的列表。
 
 		// 列表層級。 e.g., ['#','*','#',':']
 		var list_prefixes_now = [], list_now = [],
@@ -4289,6 +4258,8 @@ function module_code(library_namespace) {
 				if (list.list_type === DEFINITION_LIST) {
 					list.dt_index = [];
 				}
+				// .get_item_prefix() 會回溯 parent list，使得節點搬動時也能夠顯示出正確的前綴。
+				// 然而這不能應付像 ";#1\n:#2" 這樣子的特殊情況，因此最後採用 .list_prefix 的方法。
 				// list.get_item_prefix = get_item_prefix;
 
 				if (latest_list) {
@@ -4298,7 +4269,7 @@ function module_code(library_namespace) {
 				} else {
 					queue.push(list);
 					wikitext_with_list.push(
-					//
+					// 經過改變，需再進一步處理。
 					include_mark + (queue.length - 1) + end_mark);
 				}
 
@@ -4332,22 +4303,6 @@ function module_code(library_namespace) {
 
 		// console.log('12: ' + JSON.stringify(wikitext));
 		// console.log(queue);
-		// 僅在第一層結構處理 list，否則會出現問題。
-		if (false && initialized_fix && !queue) {
-			// console.log(wikitext);
-			wikitext = wikitext.replace(/(?:(?:^|\n)[*][^\n]*)+/g, handle_list);
-			wikitext = wikitext.replace(/(?:(?:^|\n)[#][^\n]*)+/g, handle_list);
-
-			// TODO: <dl>, 重新規劃列表的資料結構
-
-			// TODO: 處理多層選單。
-			// * level 1
-			// ** level 2
-			// ** level 2
-			// * level 1
-			// ** level 2
-			// ** level 2
-		}
 
 		wikitext.split('\n').forEach(parse_list_line);
 		wikitext = wikitext_with_list.join('\n');
