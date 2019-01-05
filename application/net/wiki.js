@@ -4202,27 +4202,33 @@ function module_code(library_namespace) {
 			// latest_list === list_now[list_now.length - 1]
 			latest_list = list_now[position - 1],
 			// 尋找從本行開始的新列表。
-			matched = line.slice(position).match(/^([*#;:]+)(.*)$/);
+			matched = line.slice(position).match(/^([*#;:]+)(\s*)(.*)$/);
 			if (!matched) {
 				if (position > 0) {
 					// console.log([ position, line ]);
 					var prefix = line.slice(0, position);
+					line = line.slice(position);
+					matched = line.match(/^\s+/);
+					if (matched) {
+						// 將空白字元放在 .list_prefix 可以減少很多麻煩。
+						prefix += matched[0];
+						line = line.slice(matched[0].length);
+					}
 					// '\n': from `wikitext.split('\n')`
 					latest_list.list_prefix.push('\n' + prefix);
 
-					line = line.slice(position);
-
 					// is <dt>
-					if (prefix.endsWith(';')) {
+					if (/;\s*$/.test(prefix)) {
 						latest_list.dt_index.push(latest_list.length);
 
 						// search "; title : definition"
-						if (matched = line.match(/^(.*):(.*)$/)) {
+						if (matched = line.match(/^(.*)(:\s*)(.*)$/)) {
 							latest_list.push(
 							// 經過改變，需再進一步處理。
 							parse_wikitext(matched[1], options, queue));
-							latest_list.list_prefix.push(':');
-							line = matched[2];
+							// 將空白字元放在 .list_prefix 可以減少很多麻煩。
+							latest_list.list_prefix.push(matched[2]);
+							line = matched[3];
 						}
 					}
 
@@ -4230,6 +4236,7 @@ function module_code(library_namespace) {
 					// 經過改變，需再進一步處理。
 					parse_wikitext(line, options, queue));
 				} else {
+					// 非列表。
 					// assert: position === -1
 					wikitext_with_list.push(line.slice(position));
 				}
@@ -4246,20 +4253,22 @@ function module_code(library_namespace) {
 			}
 
 			var list_symbols = matched[1].split('');
-			line = matched[2];
+			line = matched[3];
 			list_symbols.forEach(function handle_list_item(list_type) {
 				// 處理多層選單。
 				var list = _set_wiki_type([], 'list');
-				// for "\n;#a\n:#b"
-				list.list_prefix = [ list_type ];
+				// for ";#a\n:#b"
+				// matched[2]: 將空白字元放在 .list_prefix 可以減少很多麻煩。
+				list.list_prefix = [ list_type + matched[2] ];
 				// 注意: 在以 API 取得頁面列表時，也會設定 pages.list_type。
 				list.list_type = list_type = list_conversion[list_type]
 						|| list_type;
 				if (list.list_type === DEFINITION_LIST) {
+					// list[list.dt_index[NO]] 為 ";"。
 					list.dt_index = [];
 				}
 				// .get_item_prefix() 會回溯 parent list，使得節點搬動時也能夠顯示出正確的前綴。
-				// 然而這不能應付像 ";#1\n:#2" 這樣子的特殊情況，因此最後採用 .list_prefix 的方法。
+				// 然而這不能應付像 ";#a\n:#b" 這樣子的特殊情況，因此最後採用 .list_prefix 的方法。
 				// list.get_item_prefix = get_item_prefix;
 
 				if (latest_list) {
@@ -4281,18 +4290,19 @@ function module_code(library_namespace) {
 			// is <dt>, should use: ';' ===
 			// latest_list.list_prefix[latest_list.list_prefix.length - 1]
 			// assert: latest_list.length === latest_list.list_prefix.length - 1
-			if (latest_list.list_prefix[0] === ';') {
+			if (/;\s*$/.test(latest_list.list_prefix[0])) {
 				// assert: latest_list.length === 0
 				// latest_list.dt_index.push(latest_list.length);
 				latest_list.dt_index.push(0);
 
 				// search "; title : definition"
-				if (matched = line.match(/^(.*):(.*)$/)) {
+				if (matched = line.match(/^(.*)(:\s*)(.*)$/)) {
 					latest_list.push(
 					// 經過改變，需再進一步處理。
 					parse_wikitext(matched[1], options, queue));
-					latest_list.list_prefix.push(':');
-					line = matched[2];
+					// 將空白字元放在 .list_prefix 可以減少很多麻煩。
+					latest_list.list_prefix.push(matched[2]);
+					line = matched[3];
 				}
 			}
 
