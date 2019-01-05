@@ -1273,7 +1273,7 @@ function module_code(library_namespace) {
 		// escape signing
 		.replace(/~~~/g, "~~" + escape_character("~"))
 		// escape list, section title
-		.replace(/\n([=*#;:\n])/g, function(all, character) {
+		.replace(/\n([*#;:=\n])/g, function(all, character) {
 			return "\n" + escape_character(character);
 		});
 	}
@@ -2848,7 +2848,14 @@ function module_code(library_namespace) {
 			return this.join('\n');
 		},
 		list : function() {
-			return this.list_type + this.join('\n' + this.list_type);
+			// return this.list_type + this.join('\n' + this.list_type);
+
+			var list_prefix = this.list_prefix;
+			return this.map(function(item, index) {
+				return (list_prefix && list_prefix[index] || '') + item;
+			}).join('');
+
+			return this.list_type + this.join('\n' + this.get_item_prefix());
 		},
 		paragraph : function() {
 			return this.join('\n') + (this.separator || '');
@@ -2858,6 +2865,14 @@ function module_code(library_namespace) {
 			return this.join('');
 		}
 	};
+
+	// const , for <dl>
+	var DEFINITION_LIST = 'd';
+	function get_item_prefix() {
+		if (!this.parent)
+			return this.list_type;
+		return this.parent.get_item_prefix() + this.list_type;
+	}
 
 	var Magic_words_hash = 'DISPLAYTITLE|DEFAULTSORT|デフォルトソート|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
 			.split('|').to_hash(),
@@ -3044,7 +3059,7 @@ function module_code(library_namespace) {
 			// /\n([*#:;]+|[= ]|{\|)/:
 			// https://www.mediawiki.org/wiki/Markup_spec/BNF/Article#Wiki-page
 			// https://www.mediawiki.org/wiki/Markup_spec#Start_of_line_only
-			/^(?:[*#:;= ]|{\|)/.test(wikitext))
+			/^(?:[*#;:= ]|{\|)/.test(wikitext))
 				wikitext = (initialized_fix[0] = '\n') + wikitext;
 			if (!wikitext.endsWith('\n'))
 				wikitext += (initialized_fix[1] = '\n');
@@ -3405,6 +3420,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// language conversion -{}- 以後來使用的為主。
+		// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
 		// [[w:zh:H:Convert]], [[mw:Help:Magic words]]
 		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
 		// TODO: <source></source>內之-{}-無效。
@@ -4176,9 +4192,9 @@ function module_code(library_namespace) {
 			all = all.map(function(t) {
 				return parse_wikitext(t, options, queue);
 
-				console.log(type + ': ' + JSON.stringify(t));
+				// console.log(type + ': ' + JSON.stringify(t));
 				t = parse_wikitext(t, options, queue);
-				console.log(options);
+				// console.log(options);
 				// console.log(t);
 				return t;
 			});
@@ -4188,9 +4204,136 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
+		// 列表層級。 e.g., ['#','*','#',':']
+		var list_prefixes_now = [], list_now = [],
+		//
+		wikitext_with_list = [],
+		//
+		list_conversion = {
+			';' : DEFINITION_LIST,
+			':' : DEFINITION_LIST
+		};
+		function parse_list_line(line) {
+			var index = 0, position = 0;
+			while (index < list_prefixes_now.length
+			// 確認本行與上一行有多少相同的列表層級。
+			&& list_prefixes_now[index] ===
+			//
+			(list_conversion[line.charAt(position)] || line.charAt(position))) {
+				// position += list_prefixes_now[index++].length;
+				index++;
+				position++;
+			}
+
+			// console.log(list_now);
+			list_prefixes_now.truncate(position);
+			list_now.truncate(position);
+
+			var prefix,
+			// latest_list === list_now[list_now.length - 1]
+			latest_list = list_now[position - 1],
+			// 尋找從本行開始的新列表。
+			matched = line.slice(position).match(/^([*#;:]+)(.*)$/);
+			if (!matched) {
+				if (position > 0) {
+					// console.log([ position, line ]);
+					var prefix = line.slice(0, position);
+					// '\n': from `wikitext.split('\n')`
+					latest_list.list_prefix.push('\n' + prefix);
+
+					line = line.slice(position);
+
+					// is <dt>
+					if (prefix.endsWith(';')) {
+						latest_list.dt_index.push(latest_list.length);
+
+						// search "; title : definition"
+						if (matched = line.match(/^(.*):(.*)$/)) {
+							latest_list.push(
+							// 經過改變，需再進一步處理。
+							parse_wikitext(matched[1], options, queue));
+							latest_list.list_prefix.push(':');
+							line = matched[2];
+						}
+					}
+
+					latest_list.push(
+					// 經過改變，需再進一步處理。
+					parse_wikitext(line, options, queue));
+				} else {
+					// assert: position === -1
+					wikitext_with_list.push(line.slice(position));
+				}
+				return;
+			}
+
+			if (position > 0) {
+				prefix = line.slice(0, position);
+				// '\n': from `wikitext.split('\n')`
+				latest_list.list_prefix.push('\n' + prefix);
+				if (prefix.endsWith(';')) {
+					latest_list.dt_index.push(latest_list.length);
+				}
+			}
+
+			var list_symbols = matched[1].split('');
+			line = matched[2];
+			list_symbols.forEach(function handle_list_item(list_type) {
+				// 處理多層選單。
+				var list = _set_wiki_type([], 'list');
+				// for "\n;#a\n:#b"
+				list.list_prefix = [ list_type ];
+				// 注意: 在以 API 取得頁面列表時，也會設定 pages.list_type。
+				list.list_type = list_type = list_conversion[list_type]
+						|| list_type;
+				if (list.list_type === DEFINITION_LIST) {
+					list.dt_index = [];
+				}
+				// list.get_item_prefix = get_item_prefix;
+
+				if (latest_list) {
+					list.index = latest_list.length;
+					list.parent = latest_list;
+					latest_list.push(list);
+				} else {
+					queue.push(list);
+					wikitext_with_list.push(
+					//
+					include_mark + (queue.length - 1) + end_mark);
+				}
+
+				latest_list = list;
+				list_now.push(list);
+				list_prefixes_now.push(list_type);
+			});
+
+			// is <dt>, should use: ';' ===
+			// latest_list.list_prefix[latest_list.list_prefix.length - 1]
+			// assert: latest_list.length === latest_list.list_prefix.length - 1
+			if (latest_list.list_prefix[0] === ';') {
+				// assert: latest_list.length === 0
+				// latest_list.dt_index.push(latest_list.length);
+				latest_list.dt_index.push(0);
+
+				// search "; title : definition"
+				if (matched = line.match(/^(.*):(.*)$/)) {
+					latest_list.push(
+					// 經過改變，需再進一步處理。
+					parse_wikitext(matched[1], options, queue));
+					latest_list.list_prefix.push(':');
+					line = matched[2];
+				}
+			}
+
+			latest_list.push(
+			// 經過改變，需再進一步處理。
+			parse_wikitext(line, options, queue));
+		}
+
 		// console.log('12: ' + JSON.stringify(wikitext));
+		// console.log(queue);
 		// 僅在第一層結構處理 list，否則會出現問題。
-		if (initialized_fix && !queue) {
+		if (false && initialized_fix && !queue) {
 			// console.log(wikitext);
 			wikitext = wikitext.replace(/(?:(?:^|\n)[*][^\n]*)+/g, handle_list);
 			wikitext = wikitext.replace(/(?:(?:^|\n)[#][^\n]*)+/g, handle_list);
@@ -4205,6 +4348,15 @@ function module_code(library_namespace) {
 			// ** level 2
 			// ** level 2
 		}
+
+		wikitext.split('\n').forEach(parse_list_line);
+		wikitext = wikitext_with_list.join('\n');
+		// free
+		wikitext_with_list = null;
+
+		// ----------------------------------------------------
+
+		// TODO: <pre>: \n + space
 
 		// ↑ parse sequence finished *EXCEPT FOR* paragraph
 		// ------------------------------------------------------------------------
@@ -4994,7 +5146,7 @@ function module_code(library_namespace) {
 
 			if (variable_name
 			// 列表形式的資料。
-			&& (matched = line.match(/^[:*#]+(.*)/))) {
+			&& (matched = line.match(/^[*#;:]+(.*)/))) {
 				matched = normalize_value(matched[1]);
 				if (value === undefined)
 					value = matched;
@@ -9795,7 +9947,10 @@ function module_code(library_namespace) {
 				library_namespace.show_value(data, 'get_list: ' + type);
 			}
 
-			var titles = [], pages = [],
+			// {Array}title_list
+			var titles = [],
+			// {Array}page_list
+			pages = [],
 			// 取得列表後，設定/紀錄新的後續檢索用索引值。
 			// https://www.mediawiki.org/wiki/API:Query#Backwards_compatibility_of_continue
 			// {Object}next_index: 後續檢索用索引值。
