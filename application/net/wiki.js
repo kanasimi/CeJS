@@ -5021,8 +5021,6 @@ function module_code(library_namespace) {
 	 * 
 	 * 當解析發生錯誤的時候，應該要在設定頁面的討論頁顯示錯誤訊息。
 	 * 
-	 * TODO: using parser
-	 * 
 	 * TODO: parse table
 	 * 
 	 * @example <code>
@@ -5069,13 +5067,18 @@ function module_code(library_namespace) {
 		var configuration = library_namespace.null_Object(),
 		// 變數名稱
 		variable_name,
-		// 變數的值
-		value,
-		// 已經增加過說明。
-		had_add_comments;
+		// using parser
+		parsed = parse_wikitext(wikitext);
+
+		if (!Array.isArray(parsed)) {
+			return configuration;
+
+			return;
+			throw 'Invalid configuration wikitext';
+		}
 
 		function normalize_value(value) {
-			return value.trim()
+			return value.toString().trim()
 			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
 			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
 			// <source lang="cpp">
@@ -5084,54 +5087,39 @@ function module_code(library_namespace) {
 			.replace(/^\[\[([^\[\]\|{}\n]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1');
 		}
 
-		function reset_variable(var_name) {
-			if (variable_name)
-				configuration[variable_name] = value;
-			// reset
-			variable_name = var_name && normalize_value(var_name) || undefined;
-			value = undefined;
-			had_add_comments = false;
-		}
+		parsed.forEach(function(token) {
+			if (token.type === 'section_title') {
+				variable_name = normalize_value(token.title);
+				return;
+			}
+			if (token.type !== 'list')
+				return;
 
-		wikitext.split('\n').forEach(function(line) {
-			// console.log(line);
-			var matched = line.match(/^;([^:]+)(?::(.*))?/);
-			// console.log(matched);
-			if (matched) {
-				reset_variable(matched[1]);
-				value = normalize_value(matched[2]);
+			if (token.list_type !== DEFINITION_LIST) {
+				if (variable_name) {
+					configuration[variable_name] = token.map(normalize_value);
+					// 僅採用一個列表。
+					variable_name = null;
+				}
 				return;
 			}
 
-			matched = line.match(/^(==+)(.+?)(\1)$/);
-			if (matched) {
-				reset_variable(matched[2]);
-				return;
-			}
-
-			if (variable_name
-			// 列表形式的資料。
-			&& (matched = line.match(/^[*#;:]+(.*)/))) {
-				matched = normalize_value(matched[1]);
-				if (value === undefined)
-					value = matched;
-				else if (Array.isArray(value))
-					value.push(matched);
-				else
-					value = [ value, matched ];
-				return;
-			}
-
-			if (variable_name && value && !had_add_comments) {
-				// 這一行 value 當作是說明。
-				had_add_comments = true;
-				return;
-			}
-
-			reset_variable();
-		});
-
-		reset_variable();
+			variable_name = null;
+			token.dt_index.forEach(function(dt_index, index) {
+				var next_dt_index = token.dt_index[index + 1] || token.length;
+				configuration[normalize_value(token[dt_index])]
+				// 變數的值
+				= dt_index + 2 === next_dt_index
+				// 僅僅提供單一數值。
+				? normalize_value(token[dt_index + 1])
+				// 提供了一個列表。
+				: token.slice(dt_index + 1, next_dt_index)
+				//
+				.map(normalize_value);
+			});
+		},
+		// 僅處理第一階層。
+		1);
 
 		return configuration;
 	}
