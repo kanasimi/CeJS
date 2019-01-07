@@ -1608,7 +1608,7 @@ function module_code(library_namespace) {
 						// parse 或者處理。
 						if (typeof result === 'string') {
 							// {String}wikitext to ( {Object}element or '' )
-							result = parse_wikitext(result);
+							result = parse_wikitext(result, null, []);
 						}
 						if (typeof result === 'string'
 						//
@@ -2542,7 +2542,7 @@ function module_code(library_namespace) {
 	}
 
 	function insert_before(before_node, to_insert) {
-		var order_needed = parse_wikitext(before_node), order_list = this.order_list;
+		var order_needed = parse_wikitext(before_node, null, []), order_list = this.order_list;
 		if (order_needed) {
 			order_needed = footer_order(order_needed, order_list);
 		}
@@ -4396,37 +4396,8 @@ function module_code(library_namespace) {
 			}
 
 			// 經過改變，需再進一步處理。
-			if (true) {
-				// 1: ' '.length
-				line = parse_wikitext(line.slice(1), options, queue);
-			} else {
-				// PREFIX: 必須為非語法、不會被特殊處理的文字。
-				var PREFIX = '.';
-				line = parse_wikitext(PREFIX + line.slice(1), options, queue);
-				if (typeof line === 'string') {
-					if (!line.startsWith(PREFIX)) {
-						throw 'parse_wikitext: Failed to parse: "' + PREFIX
-								+ '" + ' + line.slice(1);
-					}
-					line = line.slice(1);
-				} else if (!Array.isArray(line) || line.type !== 'plain'
-						|| typeof line[0] !== 'string'
-						|| !line[0].startsWith(PREFIX)) {
-					throw 'parse_wikitext: Failed to parse: ' + line;
-				} else {
-					// console.log(line);
-					if (line[0].length !== PREFIX.length) {
-						// e.g., ['.12',[]]
-						line[0] = line[0].slice(1);
-					} else if (line.length === 2) {
-						// e.g., ['.',[]]
-						line = line[1];
-					} else {
-						// e.g., ['.',[],[]]
-						line = line.shift();
-					}
-				}
-			}
+			// 1: ' '.length
+			line = parse_wikitext(line.slice(1), options, queue);
 
 			if (list_now) {
 				list_now.push(line);
