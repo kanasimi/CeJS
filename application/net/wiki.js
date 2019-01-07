@@ -1018,6 +1018,8 @@ function module_code(library_namespace) {
 		page_name = page_name
 		// 不採用 .trimEnd()：對於標題，無論前後加幾個"\u200E"(LEFT-TO-RIGHT MARK)都會被視為無物。
 		// "\u200F" 亦不被視作 /\s/，但經測試會被 wiki 忽視。
+		// tested: [[title]], {{title}}
+		// @seealso [[w:en:Category:CS1 errors: invisible characters]]
 		.replace(/[\s\u200E\u200F]+$/, '')
 		// 只能允許出現頂多一個 ":"。
 		.replace(/^[\s\u200E\u200F]*(?::[\s\u200E\u200F]*)?/, '')
@@ -1872,6 +1874,7 @@ function module_code(library_namespace) {
 		if (true) {
 			text = text.replace(
 			// 盡可能減少字元的使用量，因此僅處理開頭，不處理結尾。
+			// @see [[w:en:Help:Wikitext#External links]]
 			is_uri ? /[\|{}\[\]<]/g
 			// 為了容許一些特定標籤能夠顯示格式，"<>"已經在preprocess_section_link_token(),section_link()裡面處理過了。
 			: /[\|{}<>]/g && /[\|{]/g,
@@ -1935,7 +1938,9 @@ function module_code(library_namespace) {
 			};
 		}
 
-		var parsed_title = preprocess_section_link_tokens(parse_wikitext(section_title)),
+		var parsed_title = preprocess_section_link_tokens(
+		// []: 避免被當作 <pre>
+		parse_wikitext(section_title, null, [])),
 		// 注意: 當這空白字園出現在功能性token中時，可能會出錯。
 		id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
 		// anchor: 可以直接拿來做 wikilink anchor 的章節標題。
@@ -2854,6 +2859,12 @@ function module_code(library_namespace) {
 			}).join('');
 
 			return this.list_type + this.join('\n' + this.get_item_prefix());
+		},
+		pre : function() {
+			return ' ' + this.join('\n ');
+		},
+		hr : function() {
+			return this[0];
 		},
 		paragraph : function() {
 			return this.join('\n') + (this.separator || '');
@@ -4118,8 +4129,6 @@ function module_code(library_namespace) {
 				apostrophe_type);
 		// '', ''' 似乎會經過微調: [[n:zh:Special:Permalink/120676]]
 
-		// ----, -{4,}
-
 		// ~~~, ~~~~, ~~~~~: 不應該出現
 
 		// ----------------------------------------------------
@@ -4194,18 +4203,19 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// 處理 / parse list @ wikitext
-		// @see [[en:MOS:LIST]]
+		// @see [[w:en:MOS:LIST]], [[w:en:Help:Wikitext#Lists]]
 		// 注意: 這裡僅處理在原wikitext中明確指示列表的情況，無法處理以模板型式表現的列表。
 
 		// 列表層級。 e.g., ['#','*','#',':']
 		var list_prefixes_now = [], list_now = [],
 		//
-		wikitext_with_list = [],
+		lines_without_style = [],
 		//
 		list_conversion = {
 			';' : DEFINITION_LIST,
 			':' : DEFINITION_LIST
 		};
+
 		function parse_list_line(line) {
 			var index = 0, position = 0;
 			while (index < list_prefixes_now.length
@@ -4262,7 +4272,7 @@ function module_code(library_namespace) {
 				} else {
 					// 非列表。
 					// assert: position === -1
-					wikitext_with_list.push(line.slice(position));
+					lines_without_style.push(line.slice(position));
 				}
 				return;
 			}
@@ -4301,8 +4311,8 @@ function module_code(library_namespace) {
 					latest_list.push(list);
 				} else {
 					queue.push(list);
-					wikitext_with_list.push(
-					// 經過改變，需再進一步處理。
+					lines_without_style.push(
+					//
 					include_mark + (queue.length - 1) + end_mark);
 				}
 
@@ -4339,13 +4349,108 @@ function module_code(library_namespace) {
 		// console.log(queue);
 
 		wikitext.split('\n').forEach(parse_list_line);
-		wikitext = wikitext_with_list.join('\n');
-		// free
-		wikitext_with_list = null;
+		wikitext = lines_without_style;
 
 		// ----------------------------------------------------
+		// parse horizontal rule, line, HTML <hr /> element: ----, -{4,}
+		// @see [[w:en:Help:Wikitext#Horizontal rule]]
+		// Their use in Wikipedia articles is deprecated.
+		// They should never appear in regular article prose.
 
-		// TODO: <pre>: \n + space
+		function parse_hr_tag(line, index) {
+			var matched = line.match(/^(-{4,})(.*)$/);
+			if (!matched
+			// 例如在模板、link 中，一開始就符合的情況。
+			|| index === 0 && !initialized_fix) {
+				lines_without_style.push(line);
+				return;
+			}
+
+			var hr = _set_wiki_type(matched[1], 'hr');
+
+			queue.push(hr);
+			lines_without_style.push(include_mark + (queue.length - 1)
+					+ end_mark + matched[2]);
+		}
+
+		// reset
+		lines_without_style = [];
+
+		wikitext.forEach(parse_hr_tag);
+		wikitext = lines_without_style;
+
+		// ----------------------------------------------------
+		// parse preformatted text, HTML <pre> element: \n + space
+		// @seealso [[w:en:Help:Wikitext#Pre]]
+
+		function parse_preformatted(line, index) {
+			if (!line.startsWith(' ')
+			// 例如在模板、link 中，一開始就符合的情況。
+			|| index === 0 && !initialized_fix) {
+				if (list_now) {
+					// reset
+					list_now = null;
+				}
+				lines_without_style.push(line);
+				return;
+			}
+
+			// 經過改變，需再進一步處理。
+			if (true) {
+				// 1: ' '.length
+				line = parse_wikitext(line.slice(1), options, queue);
+			} else {
+				// PREFIX: 必須為非語法、不會被特殊處理的文字。
+				var PREFIX = '.';
+				line = parse_wikitext(PREFIX + line.slice(1), options, queue);
+				if (typeof line === 'string') {
+					if (!line.startsWith(PREFIX)) {
+						throw 'parse_wikitext: Failed to parse: "' + PREFIX
+								+ '" + ' + line.slice(1);
+					}
+					line = line.slice(1);
+				} else if (!Array.isArray(line) || line.type !== 'plain'
+						|| typeof line[0] !== 'string'
+						|| !line[0].startsWith(PREFIX)) {
+					throw 'parse_wikitext: Failed to parse: ' + line;
+				} else {
+					// console.log(line);
+					if (line[0].length !== PREFIX.length) {
+						// e.g., ['.12',[]]
+						line[0] = line[0].slice(1);
+					} else if (line.length === 2) {
+						// e.g., ['.',[]]
+						line = line[1];
+					} else {
+						// e.g., ['.',[],[]]
+						line = line.shift();
+					}
+				}
+			}
+
+			if (list_now) {
+				list_now.push(line);
+				return;
+			}
+
+			list_now = _set_wiki_type([ line ], 'pre');
+
+			queue.push(list_now);
+			lines_without_style.push(include_mark + (queue.length - 1)
+					+ end_mark);
+		}
+
+		// reset
+		lines_without_style = [];
+		// pre_list
+		list_now = null;
+
+		wikitext.forEach(parse_preformatted);
+		wikitext = lines_without_style;
+
+		// free
+		lines_without_style = null;
+		wikitext = wikitext.join('\n');
 
 		// ↑ parse sequence finished *EXCEPT FOR* paragraph
 		// ------------------------------------------------------------------------
@@ -5082,6 +5187,16 @@ function module_code(library_namespace) {
 	 * @see [[w:zh:Template:Easy_Archive]]
 	 */
 	function parse_configuration(wikitext) {
+		function normalize_value(value) {
+			return value.toString().trim()
+			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
+			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
+			// <source lang="cpp">
+			.replace(/<\/?(?:nowiki|code)>/g, '')
+			// link → page title
+			.replace(/^\[\[([^\[\]\|{}\n]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1');
+		}
+
 		var configuration = library_namespace.null_Object(),
 		// 變數名稱
 		variable_name;
@@ -5099,16 +5214,6 @@ function module_code(library_namespace) {
 
 			return;
 			throw 'Invalid configuration wikitext';
-		}
-
-		function normalize_value(value) {
-			return value.toString().trim()
-			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
-			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
-			// <source lang="cpp">
-			.replace(/<\/?(?:nowiki|code)>/g, '')
-			// link → page title
-			.replace(/^\[\[([^\[\]\|{}\n]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1');
 		}
 
 		parsed.forEach(function(token) {
