@@ -3980,7 +3980,7 @@ function module_code(library_namespace) {
 						if (cell) {
 							// TODO: data-sort-type in table head
 
-							var data_type = cell
+							var data_type = cell[1]
 							// @see
 							// [[w:en:Help:Sorting#Configuring the sorting]]
 							.match(/data-sort-type=(["']([^"']+)["']|[^\s]+)/);
@@ -4291,9 +4291,8 @@ function module_code(library_namespace) {
 			list_symbols.forEach(function handle_list_item(list_type) {
 				// 處理多層選單。
 				var list = _set_wiki_type([], 'list');
-				// for ";#a\n:#b"
-				// matched[2]: 將空白字元放在 .list_prefix 可以減少很多麻煩。
-				list.list_prefix = [ list_type + matched[2] ];
+				// .list_prefix: for ";#a\n:#b"
+				list.list_prefix = [ list_type ];
 				// 注意: 在以 API 取得頁面列表時，也會設定 pages.list_type。
 				list.list_type = list_type = list_conversion[list_type]
 						|| list_type;
@@ -4320,6 +4319,9 @@ function module_code(library_namespace) {
 				list_now.push(list);
 				list_prefixes_now.push(list_type);
 			});
+
+			// matched[2]: 將空白字元放在 .list_prefix 可以減少很多麻煩。
+			latest_list.list_prefix[0] += matched[2];
 
 			// is <dt>, should use: ';' ===
 			// latest_list.list_prefix[latest_list.list_prefix.length - 1]
