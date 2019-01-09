@@ -2234,17 +2234,12 @@ function module_code(library_namespace) {
 				// Only check the first level. 只檢查第一層。
 				// check <b>[[User:|]]</b>
 				section_index < section.length || buffer.length > 0;) {
-					if (buffer.length === 0) {
-						token = section[section_index++];
-						if (/* token && */token.type === 'list') {
-							// 因為使用習慣問題，每個列表必須各別計算使用者留言次數。
-							buffer = token.slice();
-							// assert: buffer.length > 0
-							token = '';
-						}
-					}
-					if (buffer.length > 0) {
-						token = buffer.shift();
+					token = buffer.length > 0 ? buffer.shift()
+							: section[section_index++];
+					while (/* token && */token.type === 'list') {
+						// 因為使用習慣問題，每個列表必須各別計算使用者留言次數。
+						Array.prototype.unshift.apply(buffer, token.slice(1));
+						token = token[0];
 					}
 
 					if (typeof token === 'object') {
