@@ -2219,17 +2219,34 @@ function module_code(library_namespace) {
 		// 統計各討論串中簽名的次數和發言時間。
 		if (options.get_users) {
 			section_list.forEach(function(section) {
+				// console.log(section);
+				// console.log('section: ' + section.toString());
+
 				// [[WP:TALK]] conversations, dialogues, discussions, messages
 				// section.discussions = [];
 				// 發言用戶名順序
 				section.users = [];
 				// 發言時間日期
 				section.dates = [];
-				for (var section_index = 0, this_user;
+				for (var section_index = 0,
+				// list buffer
+				buffer = [], this_user, token;
 				// Only check the first level. 只檢查第一層。
 				// check <b>[[User:|]]</b>
-				section_index < section.length; section_index++) {
-					var token = section[section_index];
+				section_index < section.length || buffer.length > 0;) {
+					if (buffer.length === 0) {
+						token = section[section_index++];
+						if (/* token && */token.type === 'list') {
+							// 因為使用習慣問題，每個列表必須各別計算使用者留言次數。
+							buffer = token.slice();
+							// assert: buffer.length > 0
+							token = '';
+						}
+					}
+					if (buffer.length > 0) {
+						token = buffer.shift();
+					}
+
 					if (typeof token === 'object') {
 						// assert: {Array}token
 						token = token.toString();
@@ -2237,6 +2254,7 @@ function module_code(library_namespace) {
 						// 因此等到出現日期的時候再來處理。
 						var user_list = Object
 								.keys(parse_all_user_links(token));
+						// console.log('token: ' + token);
 						// console.log(user_list);
 						// 因為現在有個性化簽名，需要因應之。應該包含像[[zh:Special:Diff/48714597]]的簽名。
 						if (user_list.length === 1) {
@@ -2297,6 +2315,8 @@ function module_code(library_namespace) {
 				// 要先有不同的人發言，才能算作有回應。
 				= section.users.unique().length >= 2 ? section.users.length - 1
 						: 0;
+				// console.log('users: ' + section.users);
+				// console.log('replies: ' + section.replies);
 			});
 		}
 
@@ -4233,6 +4253,8 @@ function module_code(library_namespace) {
 			list_now.truncate(position);
 
 			var prefix,
+			// is <dt>
+			is_dt,
 			// latest_list === list_now[list_now.length - 1]
 			latest_list = list_now[position - 1],
 			// 尋找從本行開始的新列表。
@@ -4241,6 +4263,7 @@ function module_code(library_namespace) {
 				if (position > 0) {
 					// console.log([ position, line ]);
 					var prefix = line.slice(0, position);
+					is_dt = prefix.endsWith(';');
 					line = line.slice(position);
 					matched = line.match(/^\s+/);
 					if (matched) {
@@ -4251,8 +4274,7 @@ function module_code(library_namespace) {
 					// '\n': from `wikitext.split('\n')`
 					latest_list.list_prefix.push('\n' + prefix);
 
-					// is <dt>
-					if (/;\s*$/.test(prefix)) {
+					if (is_dt) {
 						latest_list.dt_index.push(latest_list.length);
 
 						// search "; title : definition"
@@ -4320,13 +4342,15 @@ function module_code(library_namespace) {
 				list_prefixes_now.push(list_type);
 			});
 
+			is_dt = latest_list.list_prefix[0].endsWith(';');
+
 			// matched[2]: 將空白字元放在 .list_prefix 可以減少很多麻煩。
 			latest_list.list_prefix[0] += matched[2];
 
 			// is <dt>, should use: ';' ===
 			// latest_list.list_prefix[latest_list.list_prefix.length - 1]
 			// assert: latest_list.length === latest_list.list_prefix.length - 1
-			if (/;\s*$/.test(latest_list.list_prefix[0])) {
+			if (is_dt) {
 				// assert: latest_list.length === 0
 				// latest_list.dt_index.push(latest_list.length);
 				latest_list.dt_index.push(0);
@@ -10945,8 +10969,10 @@ function module_code(library_namespace) {
 			if (error) {
 				/**
 				 * <code>
-				   wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
-				   wiki_API.edit: Error to edit [[Wikiversity:互助客栈/topic list]]: [tags-apply-not-allowed-one] The tag "Bot" is not allowed to be manually applied.
+				wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
+				wiki_API.edit: Error to edit [[Wikiversity:互助客栈/topic list]]: [tags-apply-not-allowed-one] The tag "Bot" is not allowed to be manually applied.
+				[[Wikipedia:首页/明天]]是連鎖保護
+				wiki_API.edit: Error to edit [[Wikipedia:典範條目/2019年1月9日]]: [cascadeprotected] This page has been protected from editing because it is transcluded in the following page, which is protected with the "cascading" option turned on: * [[:Wikipedia:首页/明天]]
 				 * </code>
 				 * 
 				 * @see https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
@@ -20903,6 +20929,7 @@ function module_code(library_namespace) {
 		// {Object} file option hash
 		file_options : file_options,
 		HTML_to_wikitext : HTML_to_wikitext,
+		DEFINITION_LIST : DEFINITION_LIST,
 
 		/** constant 中途跳出作業用。 */
 		quit_operation : {
