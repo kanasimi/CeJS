@@ -1534,6 +1534,8 @@ function module_code(library_namespace) {
 			modify_this = undefined;
 		}
 
+		// console.log('max_depth: ' + max_depth);
+
 		if (type || type === '') {
 			if (typeof type !== 'string') {
 				library_namespace.warn(
@@ -1629,7 +1631,7 @@ function module_code(library_namespace) {
 				// comment 可以放在任何地方，因此能滲透至任一層。
 				// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 				// && type !== 'comment'
-				&& (!max_depth || depth < max_depth)) {
+				&& (!max_depth || depth + 1 < max_depth)) {
 					traversal_tokens(token, depth + 1);
 					if (exit) {
 						// 直接跳出。
