@@ -1897,9 +1897,12 @@ function module_code(library_namespace) {
 
 	// @inner
 	// return [[維基連結]]
-	function section_link_toString(page_title) {
+	function section_link_toString(page_title, style) {
 		return '[[' + (page_title || this[0] || '') + '#' + (this[1] || '')
-				+ '|' + (this[2] || '') + ']]';
+		//
+		+ '|' + (this[2] ? style ? '<span style="' + style + '">' + this[2]
+		//
+		+ '</span>' : this[2] : '') + ']]';
 	}
 
 	// 用來保留 display_text 中的 language conversion -{}-，
@@ -2717,7 +2720,7 @@ function module_code(library_namespace) {
 	};
 
 	/**
-	 * .toString() of wiki elements<br />
+	 * .toString() of wiki elements: wiki_toString[token.type]<br />
 	 * parse_wikitext() 將把 wikitext 解析為各 {Array} 組成之結構。當以 .toString() 結合時，將呼叫
 	 * .join() 組合各次元素。此處即為各 .toString() 之定義。<br />
 	 * 所有的 key (type) 皆為小寫。
@@ -4000,6 +4003,7 @@ function module_code(library_namespace) {
 							var data_type = cell[1]
 							// @see
 							// [[w:en:Help:Sorting#Configuring the sorting]]
+							// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
 							.match(/data-sort-type=(["']([^"']+)["']|[^\s]+)/);
 
 							cell[1] = cell[1].includes(include_mark)
@@ -5178,7 +5182,9 @@ function module_code(library_namespace) {
 	</code>
 	 * 
 	 * @see [[w:zh:User:Cewbot/規範多個問題模板設定]]
-	 * @see [[w:zh:Template:Easy_Archive]]
+	 * @see [[w:zh:Template:Easy_Archive]],
+	 *      [[w:en:Template:Auto_archiving_notice]],
+	 *      [[w:en:Template:Setup_auto_archiving]]
 	 */
 	function parse_configuration(wikitext) {
 		function normalize_value(value) {
@@ -5238,6 +5244,7 @@ function module_code(library_namespace) {
 							data_type = token.toString()
 							// @see
 							// [[w:en:Help:Sorting#Configuring the sorting]]
+							// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
 							.match(/data-sort-type=(["']([^"']+)["']|[^\s]+)/);
 							if (data_type) {
 								data_type = data_type[1] || data_type[2];
