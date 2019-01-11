@@ -5181,7 +5181,7 @@ function module_code(library_namespace) {
 
 	</code>
 	 * 
-	 * @see [[w:zh:User:Cewbot/規範多個問題模板設定]]
+	 * @see [[w:zh:User:Cewbot/規範多個問題模板設定]], [[w:zh:User:Cewbot/討論頁面主題列表設定]]
 	 * @see [[w:zh:Template:Easy_Archive]],
 	 *      [[w:en:Template:Auto_archiving_notice]],
 	 *      [[w:en:Template:Setup_auto_archiving]]
@@ -5197,12 +5197,14 @@ function module_code(library_namespace) {
 			.replace(/^\[\[([^\[\]\|{}\n]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1');
 		}
 
+		/** {Object}設定頁面/文字所獲得之手動設定 manual settings。 */
 		var configuration = library_namespace.null_Object(),
-		// 變數名稱
-		variable_name;
+		/** {String}當前使用之變數名稱 */
+		variable_name, configuration_page_title;
 
 		if (get_page_content.is_page_data(wikitext)) {
 			variable_name = wikitext.title;
+			configuration_page_title = variable_name;
 			wikitext = get_page_content(wikitext);
 		}
 
@@ -5298,6 +5300,14 @@ function module_code(library_namespace) {
 		},
 		// 僅處理第一階層。
 		1);
+
+		// 避免被覆蓋。保證用 configuration.configuration_page_title 可以檢查是否由頁面取得了設定。
+		// 注意: 當設定頁面為空的時候，無法獲得這個值。
+		if (configuration_page_title) {
+			configuration.configuration_page_title = configuration_page_title;
+		} else {
+			delete configuration.configuration_page_title;
+		}
 
 		return configuration;
 	}
@@ -5761,6 +5771,7 @@ function module_code(library_namespace) {
 	// 'zh:title'→'[[:zh:title]]'
 	// 'n:title'→'[[:n:title]]'
 	// 'Category:category'→'[[:Category:category]]'
+	// TODO: [[link|<span style="color: #000;">title</span>]]
 	// TODO: 與 URL_to_wiki_link() 整合。
 	// TODO: #section name
 	// TODO: 複製到非維基項目外的私人維基，例如moegirl時，可能需要用到[[zhwiki:]]這樣的prefix。
