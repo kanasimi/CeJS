@@ -11858,7 +11858,10 @@ function module_code(library_namespace) {
 		} else if (options[KEY_TITLE] || options.title) {
 			parameters[KEY_TITLE] = options[KEY_TITLE] || options.title;
 		} else if (get_page_content.is_page_data(page_data)) {
-			parameters[KEY_ID] = page_data.pageid;
+			if (page_data.pageid >= 0)
+				parameters[KEY_ID] = page_data.pageid;
+			else
+				parameters[KEY_TITLE] = page_data.title;
 		} else {
 			if (library_namespace.is_debug()) {
 				library_namespace.error('draw_parameters No page specified: '
@@ -11971,9 +11974,9 @@ function module_code(library_namespace) {
 
 		/**
 		 * response: <code>
+		{"error":{"code":"nosuchpageid","info":"There is no page with ID 0.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1277"}
 		error:
 		{"code":"articleexists","info":"A page of that name already exists, or the name you have chosen is not valid. Please choose another name.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."}
-		{"code":"nosuchpageid","info":"There is no page with ID 0.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."}
 		 * </code>
 		 */
 
