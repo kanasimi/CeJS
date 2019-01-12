@@ -5188,7 +5188,7 @@ function module_code(library_namespace) {
 
 	(頁面開頭)
 	註解說明(可省略)
-	本頁面為[[User:bot|]]~~~作業的設定。自動生成的報表請參見：[[報告]]
+	本頁面為 [[User:bot|]] ~~~作業的設定。每次執行作業前，機器人都會從本頁面讀入設定。您可以更改特定數值，但請盡量不要改變本頁的格式。自動生成的報表請參見：[[報告]]
 
 	; 單一值變數名1: 變數值
 	; 單一值變數名2: 變數值
@@ -5225,7 +5225,7 @@ function module_code(library_namespace) {
 			.replace(/^\[\[([^\[\]\|{}\n]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1');
 		}
 
-		/** {Object}設定頁面/文字所獲得之手動設定 manual settings。 */
+		/** {Object}設定頁面/文字所獲得之個人化設定/手動設定 manual settings。 */
 		var configuration = library_namespace.null_Object(),
 		/** {String}當前使用之變數名稱 */
 		variable_name,
@@ -10950,7 +10950,8 @@ function module_code(library_namespace) {
 		}
 
 		var action = !is_undo
-				&& wiki_API.edit.check_data(text, title, 'wiki_API.edit');
+				&& wiki_API.edit.check_data(text, title, options,
+						'wiki_API.edit');
 		if (action) {
 			library_namespace.debug('直接執行 callback。', 2, 'wiki_API.edit');
 			callback(title, action);
@@ -11007,6 +11008,7 @@ function module_code(library_namespace) {
 		}
 
 		wiki_API.query(action, function(data) {
+			// console.log(data);
 			var error = data.error
 			// 檢查伺服器回應是否有錯誤資訊。
 			? '[' + data.error.code + '] ' + data.error.info : data.edit
@@ -11095,7 +11097,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns error: 非undefined表示((data))為有問題的資料。
 	 */
-	wiki_API.edit.check_data = function(data, title, caller) {
+	wiki_API.edit.check_data = function(data, title, options, caller) {
 		var action;
 		// 可以利用 ((return [ CeL.wiki.edit.cancel, 'reason' ];)) 來回傳 reason。
 		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來跳過 (skip)，不特別顯示或處理。
@@ -11104,9 +11106,9 @@ function module_code(library_namespace) {
 			data = [ wiki_API.edit.cancel ];
 		}
 
-		if (!data) {
+		if (!data && (!options || !options.allow_empty)) {
 			action = [ 'empty', gettext(typeof data === 'string'
-			//
+			// 內容被清空
 			? 'Content is empty' : 'Content is not settled') ];
 
 		} else if (Array.isArray(data) && data[0] === wiki_API.edit.cancel) {
@@ -20054,8 +20056,10 @@ function module_code(library_namespace) {
 			id = id.id;
 		}
 
-		var action = wiki_API.edit.check_data(data, id, 'wikidata_edit');
+		var action = wiki_API.edit.check_data(data, id, options,
+				'wikidata_edit');
 		if (action) {
+			library_namespace.debug('直接執行 callback。', 2, 'wikidata_edit');
 			callback(undefined, action);
 			return;
 		}
