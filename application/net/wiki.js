@@ -3939,7 +3939,13 @@ function module_code(library_namespace) {
 		// [[Help:Table]]
 		/\n{\|([\s\S]*?)\n\|}/g, function(all, parameters) {
 			// 經測試，table 不會向前回溯。
+
 			// 處理表格標題。
+			function get_caption(caption) {
+				// .toString(): 可能會包括 include_mark, end_mark，應去除之！
+				return caption.toString().trim();
+			}
+
 			var main_caption;
 			parameters = parameters.replace(/\n\|\+(.*)/g, function(all,
 					caption) {
@@ -3949,14 +3955,15 @@ function module_code(library_namespace) {
 				});
 				if (main_caption === undefined) {
 					// 表格標題以首次出現的為主。
-					// .toString(): 可能會包括 include_mark, end_mark，應去除之！
-					main_caption = caption[0].toString().trim();
+					// console.log(caption);
+					main_caption = get_caption(caption.join(''));
 				}
 				// 'table_caption'
 				caption = _set_wiki_type(caption, 'caption');
 				queue.push(caption);
 				return include_mark + (queue.length - 1) + end_mark;
 			});
+
 			// 添加新行由一個豎線和連字符 "|-" 組成。
 			parameters = parameters.split('\n|-').map(function(token, index) {
 				library_namespace.debug('parse table_row / row style: '
@@ -4060,14 +4067,35 @@ function module_code(library_namespace) {
 
 					} else {
 						// assert: matched.index === 0
-						cell = matched[1].includes(include_mark)
-						// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-						? parse_wikitext(matched[1], options, queue)
-						//
-						: _set_wiki_type(matched[1],
-						// row style / format modifier (not displayed)
-						'table_style');
-						row = [ cell ];
+						if (matched[1].includes(include_mark)) {
+							// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+							// 注意: caption 也被當作 table_row 看待。
+							cell = parse_wikitext(matched[1], options, queue);
+							// console.trace('cell:');
+							// console.log(cell);
+							if (cell.type === 'plain' && cell[cell.length - 1]
+							//
+							&& cell[cell.length - 1].type === 'caption') {
+								var caption = cell.pop();
+								row = [
+								// the style of whole <table>
+								_set_wiki_type(cell, 'table_style'),
+								//
+								caption ];
+								row.caption = get_caption(caption.join(''));
+							} else {
+								row = [ cell ];
+								if (cell.type === 'caption') {
+									row.caption = get_caption(cell.join(''));
+								}
+							}
+
+						} else {
+							cell = _set_wiki_type(matched[1],
+							// row style / format modifier (not displayed)
+							'table_style');
+							row = [ cell ];
+						}
 					}
 
 					// matched[2] 屬於下一 cell。
@@ -5200,16 +5228,19 @@ function module_code(library_namespace) {
 		/** {Object}設定頁面/文字所獲得之手動設定 manual settings。 */
 		var configuration = library_namespace.null_Object(),
 		/** {String}當前使用之變數名稱 */
-		variable_name, configuration_page_title;
+		variable_name,
+		// using parser
+		parsed, configuration_page_title;
 
 		if (get_page_content.is_page_data(wikitext)) {
 			variable_name = wikitext.title;
 			configuration_page_title = variable_name;
-			wikitext = get_page_content(wikitext);
+			parsed = page_parser(wikitext).parse();
+			// wikitext = get_page_content(wikitext);
+		} else {
+			// assert: typeof wikitext === 'string'
+			parsed = parse_wikitext(wikitext);
 		}
-
-		// using parser
-		var parsed = parse_wikitext(wikitext);
 
 		if (!Array.isArray(parsed)) {
 			return configuration;
@@ -5218,6 +5249,7 @@ function module_code(library_namespace) {
 			throw 'Invalid configuration wikitext';
 		}
 
+		// 僅處理第一階層。
 		parsed.forEach(function(token) {
 			if (token.type === 'section_title') {
 				variable_name = normalize_value(token.title);
@@ -5225,10 +5257,17 @@ function module_code(library_namespace) {
 			}
 
 			// parse table
-			if (token.type === 'table' && variable_name) {
+			// @see wiki_API.table_to_array
+			if (token.type === 'table' && (token.caption || variable_name)) {
 				var value = [];
 				token.forEach(function(line) {
-					if (line.type !== 'table_row') {
+					if (line.type !== 'table_row'
+					// 注意: caption 也被當作 table_row 看待。
+					|| line.caption) {
+						return;
+					}
+					if (line.is_head) {
+						// TODO: using the data
 						return;
 					}
 					var row = [];
@@ -5265,11 +5304,13 @@ function module_code(library_namespace) {
 
 						row.push(cell);
 					});
+					// console.log(line);
 					value.push(row);
 				});
-				configuration[variable_name] = value;
-				// 僅採用一個列表。
-				variable_name = null;
+				configuration[token.caption || variable_name] = value;
+				// 僅採用第一個列表。
+				if (!token.caption)
+					variable_name = null;
 			}
 
 			if (token.type !== 'list')
@@ -5284,10 +5325,12 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			variable_name = null;
 			token.dt_index.forEach(function(dt_index, index) {
+				variable_name = normalize_value(token[dt_index]);
+				if (!variable_name)
+					return;
 				var next_dt_index = token.dt_index[index + 1] || token.length;
-				configuration[normalize_value(token[dt_index])]
+				configuration[variable_name]
 				// 變數的值
 				= dt_index + 2 === next_dt_index
 				// 僅僅提供單一數值。
@@ -5297,9 +5340,8 @@ function module_code(library_namespace) {
 				//
 				.map(normalize_value);
 			});
-		},
-		// 僅處理第一階層。
-		1);
+			variable_name = null;
+		});
 
 		// 避免被覆蓋。保證用 configuration.configuration_page_title 可以檢查是否由頁面取得了設定。
 		// 注意: 當設定頁面為空的時候，無法獲得這個值。
@@ -5577,12 +5619,12 @@ function module_code(library_namespace) {
 
 	CeL.run(['application.platform.nodejs', 'data.CSV']);
 	wiki.page('List of monarchs of Thailand', function(page_data) {
-		CeL.wiki.list_to_array(page_data, 'monarchs of Thailand.txt');
+		CeL.wiki.table_to_array(page_data, 'monarchs of Thailand.txt');
 	});
 
 	</code>
 	 */
-	wiki_API.list_to_array = function(page_data, options) {
+	wiki_API.table_to_array = function(page_data, options) {
 		if (!get_page_content.is_page_data(page_data)) {
 			library_namespace.error('Invalid page data!');
 			return;
@@ -5598,7 +5640,7 @@ function module_code(library_namespace) {
 		processor = options && options.row_processor;
 
 		page_parser(page_data).parse()
-		// 僅取第一層。
+		// 僅處理第一階層。
 		.forEach(function(node) {
 			if (node.type === 'section_title') {
 				if (false) {
