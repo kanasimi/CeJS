@@ -11834,7 +11834,6 @@ function module_code(library_namespace) {
 		// 可能沒有 session
 
 		// ----------------------------
-
 		// 處理 target page。
 		var KEY_ID = 'pageid', KEY_TITLE = 'title';
 		if (parameters.to) {
@@ -11843,26 +11842,20 @@ function module_code(library_namespace) {
 			KEY_TITLE = 'from';
 		}
 
-		var
 		// 都先從 options 取值，再從 session 取值。
-		page_data =
-		// options.page_data ||
-		(options[KEY_ID] >= 0 || options.pageid >= 0) && options || session
-				&& session.last_page;
-
-		// 可能沒有 page_data
-
 		if (options[KEY_ID] >= 0 || options.pageid >= 0) {
 			parameters[KEY_ID] = options[KEY_ID] >= 0 ? options[KEY_ID]
 					: options.pageid;
 		} else if (options[KEY_TITLE] || options.title) {
 			parameters[KEY_TITLE] = options[KEY_TITLE] || options.title;
-		} else if (get_page_content.is_page_data(page_data)) {
-			if (page_data.pageid >= 0)
-				parameters[KEY_ID] = page_data.pageid;
+		} else if (get_page_content.is_page_data(session && session.last_page)) {
+			// options.page_data
+			if (session.last_page.pageid >= 0)
+				parameters[KEY_ID] = session.last_page.pageid;
 			else
-				parameters[KEY_TITLE] = page_data.title;
+				parameters[KEY_TITLE] = session.last_page.title;
 		} else {
+			// 可能沒有 page_data
 			if (library_namespace.is_debug()) {
 				library_namespace.error('draw_parameters No page specified: '
 						+ options);
@@ -11871,7 +11864,6 @@ function module_code(library_namespace) {
 		}
 
 		// ----------------------------
-
 		// 處理 token。
 		if (!token_type) {
 			token_type = 'csrf';
@@ -11977,6 +11969,7 @@ function module_code(library_namespace) {
 		{"error":{"code":"nosuchpageid","info":"There is no page with ID 0.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1277"}
 		error:
 		{"code":"articleexists","info":"A page of that name already exists, or the name you have chosen is not valid. Please choose another name.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."}
+		{"code":"selfmove","info":"The title is the same; cannot move a page over itself.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."}
 		 * </code>
 		 */
 
