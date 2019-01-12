@@ -7065,7 +7065,6 @@ function module_code(library_namespace) {
 			}
 
 			if (type === 'move_to') {
-				next[1].page_key = 'from';
 				if (move_to_title) {
 					next[1].to = move_to_title;
 				}
@@ -11848,14 +11847,14 @@ function module_code(library_namespace) {
 		// 都先從 options 取值，再從 session 取值。
 		page_data =
 		// options.page_data ||
-		options[KEY_ID] && options || session && session.last_page;
+		(options[KEY_ID] >= 0 || options.pageid >= 0) && options || session
+				&& session.last_page;
 
 		// 可能沒有 page_data
 
-		if (options[KEY_ID] >= 0) {
-			parameters[KEY_ID] = options[KEY_ID];
-		} else if (options.pageid >= 0) {
-			parameters[KEY_ID] = options.pageid;
+		if (options[KEY_ID] >= 0 || options.pageid >= 0) {
+			parameters[KEY_ID] = options[KEY_ID] >= 0 ? options[KEY_ID]
+					: options.pageid;
 		} else if (options[KEY_TITLE] || options.title) {
 			parameters[KEY_TITLE] = options[KEY_TITLE] || options.title;
 		} else if (get_page_content.is_page_data(page_data)) {
@@ -11911,7 +11910,7 @@ function module_code(library_namespace) {
 		// TODO: 若是頁面不存在/已刪除，那就直接跳出。
 
 		if (action === 'move') {
-			library_namespace.is_debug((parameters.from || parameters.fromid)
+			library_namespace.is_debug((parameters.fromid || parameters.from)
 					+ ' → ' + parameters.to, 1, 'wiki_operator.move');
 		}
 
@@ -11969,6 +11968,14 @@ function module_code(library_namespace) {
 			ignorewarnings : false,
 			tags : false
 		};
+
+		/**
+		 * response: <code>
+		error:
+		{"code":"articleexists","info":"A page of that name already exists, or the name you have chosen is not valid. Please choose another name.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."}
+		{"code":"nosuchpageid","info":"There is no page with ID 0.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."}
+		 * </code>
+		 */
 
 		// console.log(options);
 		wiki_operator('move', default_parameters, options, callback);
