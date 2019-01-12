@@ -6,6 +6,8 @@
  * 
  * TODO:<code>
 
+wiki.listen() 可隨時監視設定頁面與緊急停止頁面的變更
+
 wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
 wiki_API.page() 整合各 action=query 至單一公用 function。
 [[mw:Manual:Pywikibot/zh]]
@@ -2131,8 +2133,8 @@ function module_code(library_namespace) {
 	 * TODO: 這會漏算沒有日期標示的簽名
 	 * 
 	 * @example <code>
-	parser = CeL.wiki.parser(page_data);
-	parser.each_section(function(section, index) {
+	parsed = CeL.wiki.parser(page_data);
+	parsed.each_section(function(section, index) {
 		if (index === 0)
 			return;
 		console.log('#' + section.section_title);
@@ -7004,20 +7006,41 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 		// administrator functions
 
+		case 'move_to':
+			// wiki.page(from title)
+			// .move_to(to, [from title,] options, callback)
+
+			// wiki.move_to(to, from, options, callback)
+			// wiki.move_to(to, from, options)
+			// wiki.move_to(to, from, callback)
+			// wiki.move_to(to, from)
+
+			// wiki.page(from).move_to(to, options, callback)
+			// wiki.page(from).move_to(to, options)
+			// wiki.page(from).move_to(to, callback)
+			// wiki.page(from).move_to(to)
+
+			var move_to_title;
+			if (typeof next[1] === 'string') {
+				move_to_title = next[1];
+				// shift arguments
+				next.splice(1, 1);
+			}
+
 		case 'remove':
-			// wiki.page(title).remove(options, callback)
+			// wiki.page(title).remove([title,] options, callback)
 			if (type === 'remove') {
 				// 正名。
 				type = 'delete';
 			}
 		case 'delete':
-			// wiki.page(title).delete(options, callback)
+			// wiki.page(title).delete([title,] options, callback)
 
 		case 'protect':
-			// wiki.page(title).protect(options, callback)
+			// wiki.page(title).protect([title,] options, callback)
 
 		case 'rollback':
-			// wiki.page(title).rollback(options, callback)
+			// wiki.page(title).rollback([title,] options, callback)
 
 			// 這些控制用的功能，不必須取得頁面內容。
 			if (typeof next[1] === 'string') {
@@ -7033,12 +7056,21 @@ function module_code(library_namespace) {
 
 			if (typeof next[1] === 'function') {
 				// shift arguments
+				// insert as options
 				next.splice(1, 0, undefined);
 			}
 			if (!next[1]) {
 				// initialize options
 				next[1] = library_namespace.null_Object();
 			}
+
+			if (type === 'move_to') {
+				next[1].page_key = 'from';
+				if (move_to_title) {
+					next[1].to = move_to_title;
+				}
+			}
+
 			// 保護/回退
 			if (this.stopped && !next[1].skip_stopped) {
 				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 '
@@ -7055,10 +7087,10 @@ function module_code(library_namespace) {
 
 			} else {
 				next[1][KEY_SESSION] = this;
-				wiki_API[type](next[1], function(result, error) {
+				wiki_API[type](next[1], function(response, error) {
 					// next[2] : callback
 					if (typeof next[2] === 'function')
-						next[2].call(_this, result, error);
+						next[2].call(_this, response, error);
 					_this.next();
 				});
 			}
@@ -7096,7 +7128,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'query_API|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|search|remove|delete|protect|rollback|logout|run|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+	wiki_API.prototype.next.methods = 'query_API|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|search|remove|delete|move_to|protect|rollback|logout|run|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------
@@ -11797,27 +11829,46 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var session = options[KEY_SESSION],
+		var session = options[KEY_SESSION];
+
+		// assert: 有parameters, e.g., {Object}parameters
+		// 可能沒有 session
+
+		// ----------------------------
+
+		// 處理 target page。
+		var KEY_ID = 'pageid', KEY_TITLE = 'title';
+		if (parameters.to) {
+			// move_to
+			KEY_ID = 'fromid';
+			KEY_TITLE = 'from';
+		}
+
+		var
 		// 都先從 options 取值，再從 session 取值。
 		page_data =
 		// options.page_data ||
-		options.pageid && options || session && session.last_page;
+		options[KEY_ID] && options || session && session.last_page;
 
-		// assert: 有parameters, e.g., {Object}parameters
-		// 可能沒有 session, page_data
+		// 可能沒有 page_data
 
-		// 處理 pageid/title。
-		if (options.pageid >= 0) {
-			parameters.pageid = options.pageid;
-		} else if (options.title) {
-			parameters.title = options.title;
-		} else if (page_data) {
-			parameters.pageid = page_data.pageid;
+		if (options[KEY_ID] >= 0) {
+			parameters[KEY_ID] = options[KEY_ID];
+		} else if (options.pageid >= 0) {
+			parameters[KEY_ID] = options.pageid;
+		} else if (options[KEY_TITLE] || options.title) {
+			parameters[KEY_TITLE] = options[KEY_TITLE] || options.title;
+		} else if (get_page_content.is_page_data(page_data)) {
+			parameters[KEY_ID] = page_data.pageid;
 		} else {
-			// library_namespace.error('draw_parameters No page specified: ' +
-			// options);
-			return 'No page specified';
+			if (library_namespace.is_debug()) {
+				library_namespace.error('draw_parameters No page specified: '
+						+ options);
+			}
+			return 'No page id/title specified';
 		}
+
+		// ----------------------------
 
 		// 處理 token。
 		if (!token_type) {
@@ -11843,10 +11894,12 @@ function module_code(library_namespace) {
 	}
 
 	// use "csrf" token retrieved from action=query&meta=tokens
+	// callback(response, error);
 	function wiki_operator(action, default_parameters, options, callback) {
 		// default_parameters
 		// Warning: 除 pageid/title/token 之外，這邊只要是能指定給 API 的，皆必須列入！
 		var parameters = draw_parameters(options, default_parameters);
+		// console.log(parameters);
 		if (!library_namespace.is_Object(parameters)) {
 			// error occurred.
 			if (typeof callback === 'function')
@@ -11856,6 +11909,11 @@ function module_code(library_namespace) {
 
 		var session = options[KEY_SESSION];
 		// TODO: 若是頁面不存在/已刪除，那就直接跳出。
+
+		if (action === 'move') {
+			library_namespace.is_debug((parameters.from || parameters.fromid)
+					+ ' → ' + parameters.to, 1, 'wiki_operator.move');
+		}
 
 		var action = 'action=' + action,
 		//
@@ -11894,6 +11952,26 @@ function module_code(library_namespace) {
 			watchlist : false,
 			oldimage : false
 		}, options, callback);
+	};
+
+	// ----------------------------------------------------
+
+	// wiki_API.move_to(): move a page from `from` to target `to`.
+	wiki_API.move_to = function(options, callback) {
+		// https://www.mediawiki.org/w/api.php?action=help&modules=move
+		var default_parameters = {
+			to : true,
+			reason : false,
+			movetalk : false,
+			movesubpages : false,
+			noredirect : false,
+			watchlist : false,
+			ignorewarnings : false,
+			tags : false
+		};
+
+		// console.log(options);
+		wiki_operator('move', default_parameters, options, callback);
 	};
 
 	// ----------------------------------------------------
@@ -15492,18 +15570,19 @@ function module_code(library_namespace) {
 									+ '! 沒有頁面內容！');
 						}
 
-						var parser = CeL.wiki.parser(page_data).parse();
+						/** 頁面解析後的結構。 */
+						var parsed = CeL.wiki.parser(page_data).parse();
 						// debug 用.
 						// check parser, test if parser working properly.
-						if (CeL.wiki.content_of(page_data) !== parser
+						if (CeL.wiki.content_of(page_data) !== parsed
 								.toString()) {
 							console.log(CeL.LCS(CeL.wiki.content_of(page_data),
-									parser.toString(), 'diff'));
+									parsed.toString(), 'diff'));
 							throw 'Parser error: '
 									+ CeL.wiki.title_link_of(page_data);
 						}
 
-						parser.each('link', function(token, index) {
+						parsed.each('link', function(token, index) {
 							console.log(token);
 						});
 					}
