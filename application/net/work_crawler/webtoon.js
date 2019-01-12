@@ -116,7 +116,9 @@ function module_code(library_namespace) {
 			//
 			work_data = {
 				// 必要屬性：須配合網站平台更改。
-				title : get_label(text.between('<h1 class="subj">', '</h1>')),
+				title : get_label(text.between('<h1 class="subj">', '</h1>')
+				// https://www.webtoons.com/zh-hant/challenge/%E5%A6%82%E4%BD%A0%E6%89%80%E9%A1%98/list?title_no=166730
+				|| text.between('<h3 class="subj _challengeTitle">', '<')),
 				author : get_label(html.between(
 				// <meta property="com-linewebtoon:webtoon:author"
 				// content="A / B" />
@@ -136,6 +138,7 @@ function module_code(library_namespace) {
 				last_update : get_label(html.between('<span class="date">',
 						'</span>'))
 			};
+			extract_work_data(work_data, html);
 			// console.log(work_data);
 			return work_data;
 		},
