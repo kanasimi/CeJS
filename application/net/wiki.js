@@ -2905,10 +2905,20 @@ function module_code(library_namespace) {
 		return this.parent.get_item_prefix() + this.list_type;
 	}
 
-	var Magic_words_hash = 'DISPLAYTITLE|DEFAULTSORT|デフォルトソート|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
-			.split('|').to_hash(),
+	var Magic_words_hash = library_namespace.null_Object();
+	'DISPLAYTITLE|DEFAULTSORT|デフォルトソート|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
+	// 這些需要指定數值. e.g., {{DEFAULTSORT:1}}: OK, {{DEFAULTSORT}}: NG
+	.split('|').forEach(function name(Magic_words) {
+		Magic_words_hash[Magic_words] = false;
+	});
+	'CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME'
+	// 這些不用指定數值.
+	.split('|').forEach(function name(Magic_words) {
+		Magic_words_hash[Magic_words] = true;
+	});
+
 	// 狀態開關: [[mw:Help:Magic words#Behavior switches]]
-	PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
+	var PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
 	PATTERN_BEHAVIOR_SWITCH = /__(NOTOC|FORCETOC|TOC|NOEDITSECTION|NEWSECTIONLINK|NONEWSECTIONLINK|NOGALLERY|HIDDENCAT|NOCONTENTCONVERT|NOCC|NOTITLECONVERT|NOTC|INDEX|NOINDEX|STATICREDIRECT|NOGLOBAL)__/g;
 
 	// [[w:en:Wikipedia:Extended image syntax]]
@@ -3373,14 +3383,33 @@ function module_code(library_namespace) {
 
 			// 'Defaultsort' → 'DEFAULTSORT'
 			parameters.name = typeof parameters[0][0] === 'string'
+			// 後面不允許空白。 must / *DEFAULTSORT:/
+			&& parameters[0][0].trimStart().toUpperCase();
+			// TODO: {{ {{UCFIRST:T}} }}
+			// TODO: {{ :{{UCFIRST:T}} }}
+			// console.log(parameters);
+			if (parameters.name && (parameters.name in Magic_words_hash)
 			// test if token is [[Help:Magic words]]
-			&& parameters[0][0].toUpperCase();
-			if (parameters.name && (parameters.name in Magic_words_hash)) {
+			&& (Magic_words_hash[parameters.name] || parameters[0].length > 1)) {
 				// 此時以 parameters[0][1] 可獲得首 parameter。
 				parameters.is_magic_word = true;
 			} else {
+				parameters.name = typeof parameters[0][0] === 'string'
+				//
+				&& parameters[0][0].trim().toLowerCase();
+				// console.log(parameters.name);
+				// .page_name
+				parameters.page_title = normalize_page_name(
+				// incase "{{ DEFAULTSORT : }}"
 				// 正規化 template name。
 				// 'ab/cd' → 'Ab/cd'
+				(parameters.name in get_namespace.hash ? ''
+				// {{T}}嵌入[[Template:T]]
+				// {{Template:T}}嵌入[[Template:T]]
+				// {{:T}}嵌入[[T]]
+				// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
+				: 'Template:') + parameters[0].toString());
+
 				parameters.name = normalize_page_name(parameters[0].toString());
 			}
 			parameters.parameters = _parameters;
@@ -3453,6 +3482,7 @@ function module_code(library_namespace) {
 		// language conversion -{}- 以後來使用的為主。
 		// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
 		// [[w:zh:H:Convert]], [[mw:Help:Magic words]]
+		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
 		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
 		// TODO: <source></source>內之-{}-無效。
 		wikitext = wikitext.replace_till_stable(/-{(.*?)}-/g, function(all,
@@ -5191,6 +5221,7 @@ function module_code(library_namespace) {
 	(頁面開頭)
 	註解說明(可省略)
 	本頁面為 [[User:bot|]] ~~~作業的設定。每次執行作業前，機器人都會從本頁面讀入設定。您可以更改特定數值，但請盡量不要改變本頁的格式。自動生成的報表請參見：[[報告]]
+	 * 請注意：變更本頁面後，必須重新執行機器人程式才有效果。
 
 	; 單一值變數名1: 變數值
 	; 單一值變數名2: 變數值
@@ -5865,6 +5896,7 @@ function module_code(library_namespace) {
 			// e.g., `CeL.wiki.title_link_of(page_data, display_text)`
 			// shift arguments
 			display_text = session;
+			session = null;
 		}
 
 		// TODO: [[s:zh:title]] instead of [[:zh:title]]
@@ -8775,6 +8807,7 @@ function module_code(library_namespace) {
 		no_edit : true,
 		page_options : {
 			// multi : 'keep index',
+			// converttitles : 1,
 			redirects : 1
 		}
 	}, page_list);
@@ -9607,9 +9640,12 @@ function module_code(library_namespace) {
 			callback(page_data.title, page_data);
 
 		}, Object.assign({
-			// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規標題。
+			// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規化標題。
 			prop : '',
 			redirects : 1,
+			// Only works if the wiki's content language supports variant
+			// conversion. en, crh, gan, iu, kk, ku, shi, sr, tg, uz and zh.
+			// converttitles : 1,
 			save_response : true
 		}, options));
 	};
@@ -13236,7 +13272,10 @@ function module_code(library_namespace) {
 		// assert: {Date}last_query_time start time
 		last_query_time,
 		// TODO: 僅僅採用last_query_revid做控制，不需要偵測是否有重複。
-		last_query_revid = options.revid | 0;
+		last_query_revid = options.revid | 0,
+		// {String}設定頁面。 注意: 必須是已經轉換過、正規化後的最終頁面標題。
+		configuration_page_title = typeof options.adapt_configuration === 'function'
+				&& options.configuration_page;
 
 		if (!(delay_ms > 0))
 			delay_ms = 0;
@@ -13402,6 +13441,15 @@ function module_code(library_namespace) {
 					}).join(', '));
 				}
 
+				var configuration_row;
+				if (configuration_page_title) {
+					// 檢測看看是否有 configuration_page_title
+					rows.forEach(function(row, index) {
+						if (row.title === configuration_page_title)
+							configuration_row = row;
+					});
+				}
+
 				if (options.filter && rows.length > 0) {
 					// TODO: 把篩選功能放到get_recent()，減少資料處理的成本。
 					rows = rows.filter(
@@ -13433,6 +13481,13 @@ function module_code(library_namespace) {
 								return row.revid;
 							}), 2, 'add_listener');
 					// console.log([ row.title, options.filter ]);
+				}
+
+				// TODO: configuration_row 應該按照 rows 的順序，
+				// 並且假如特別 filter 到設定頁面的時候，那麼設定頁面還是應該要被 listener 檢查。
+				if (configuration_row && !rows.includes(configuration_row)) {
+					// 保證 configuration_page_title 的變更一定會被檢查到
+					rows.unshift(configuration_row);
 				}
 
 				var exit;
@@ -13605,6 +13660,14 @@ function module_code(library_namespace) {
 									}
 								}
 
+								if (configuration_row === row) {
+									options.adapt_configuration(
+									// (page_data)
+									parse_configuration(row));
+									run_next();
+									return;
+								}
+
 								if (exit = listener.call(options, row, index,
 										rows)) {
 									last_query_time = new Date;
@@ -13625,7 +13688,7 @@ function module_code(library_namespace) {
 					}
 
 					// use options.with_content as the options of wiki.page()
-					if (options.with_content) {
+					if (options.with_content || configuration_row) {
 						// TODO: 考慮所傳回之內容過大，i.e. 回傳超過 limit (12 MB)，被截斷之情形。
 						session.page(rows.map(function(row) {
 							return row.pageid;
@@ -13655,6 +13718,12 @@ function module_code(library_namespace) {
 									page_id_hash[row.pageid]));
 								}
 								Object.assign(row, page_id_hash[row.pageid]);
+								if (configuration_row === row) {
+									options.adapt_configuration(
+									//
+									parse_configuration(row));
+									return;
+								}
 								listener.call(options, row, index, rows);
 							});
 							// Release memory. 釋放被占用的記憶體.
