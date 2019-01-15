@@ -1081,8 +1081,6 @@ function module_code(library_namespace) {
 		return page_name.join(':');
 	}
 
-	wiki_API.normalize_page_name = normalize_page_name;
-
 	// @see wiki_toString
 	function normalize_name_pattern(file_name, add_group, remove_namespace) {
 		if (get_page_content.is_page_data(file_name))
@@ -5248,7 +5246,7 @@ function module_code(library_namespace) {
 	function parse_configuration(wikitext) {
 		// 忽略 <span> 之類。
 		function filter_tags(token) {
-			console.log(token);
+			// console.log(token);
 			if (token.type === 'tag') {
 				return filter_tags(token[1]);
 			}
@@ -13285,7 +13283,7 @@ function module_code(library_namespace) {
 		last_query_revid = options.revid | 0,
 		// {String}設定頁面。 注意: 必須是已經轉換過、正規化後的最終頁面標題。
 		configuration_page_title = typeof options.adapt_configuration === 'function'
-				&& options.configuration_page;
+				&& normalize_page_name(options.configuration_page);
 
 		if (!(delay_ms > 0))
 			delay_ms = 0;
@@ -13320,6 +13318,11 @@ function module_code(library_namespace) {
 		//
 		library_namespace.age_of(last_query_time, Date.now()) + ' 前開始' : '最近')
 				+ '更改的頁面。');
+
+		if (configuration_page_title) {
+			library_namespace.info('add_listener: Configuration page: '
+					+ get_page_title_link(configuration_page_title));
+		}
 
 		if (false) {
 			library_namespace.debug('recent_options: '
@@ -13461,7 +13464,7 @@ function module_code(library_namespace) {
 					});
 				}
 				if (configuration_row) {
-					library_namespace.info('Configuration page '
+					library_namespace.info('add_listener: Configuration page '
 							+ get_page_title_link(configuration_page_title)
 							+ ' edited!');
 				}
@@ -21173,6 +21176,7 @@ function module_code(library_namespace) {
 		// CeL.wiki.title_link_of() 常用於 summary 或 log/debug message。
 		title_link_of : get_page_title_link,
 		content_of : get_page_content,
+		// normalize_page_title
 		normalize_title : normalize_page_name,
 		normalize_title_pattern : normalize_name_pattern,
 		section_link : section_link,
