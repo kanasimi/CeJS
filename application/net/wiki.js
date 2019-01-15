@@ -5246,8 +5246,20 @@ function module_code(library_namespace) {
 	 *      [[w:en:Template:Setup_auto_archiving]]
 	 */
 	function parse_configuration(wikitext) {
+		// 忽略 <span> 之類。
+		function filter_tags(token) {
+			console.log(token);
+			if (token.type === 'tag') {
+				return filter_tags(token[1]);
+			}
+			if (Array.isArray(token)) {
+				return token.toString.call(token.map(filter_tags));
+			}
+			return token;
+		}
+
 		function normalize_value(value) {
-			return value.toString().trim()
+			return filter_tags(value).toString().trim()
 			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
 			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
 			// <source lang="cpp">
@@ -5321,7 +5333,7 @@ function module_code(library_namespace) {
 							if (data_type) {
 								data_type = data_type[1] || data_type[2];
 							}
-						}).join(''));
+						}).map(filter_tags).join(''));
 
 						if (typeof data_type === 'number') {
 							if (!isNaN(data_type = +cell))
