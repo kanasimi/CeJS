@@ -2252,8 +2252,18 @@ function module_code(library_namespace) {
 						// 因此等到出現日期的時候再來處理。
 						var user_list = Object
 								.keys(parse_all_user_links(token));
-						// console.log('token: ' + token);
-						// console.log(user_list);
+						if (false && section.section_title
+								&& section.section_title.title.includes('')) {
+							console.log('token: ' + token);
+							console.log(user_list);
+						}
+						if (user_list.length > 1
+						// assert: 前面的都只是指向機器人頁面的連結。
+						&& /^1+0$/.test(user_list.map(function(user) {
+							return PATTERN_BOT_NAME.test(user) ? 1 : 0;
+						}).join(''))) {
+							user_list = user_list.slice(-1);
+						}
 						// 因為現在有個性化簽名，需要因應之。應該包含像[[zh:Special:Diff/48714597]]的簽名。
 						if (user_list.length === 1) {
 							this_user = user_list[0];
@@ -13475,7 +13485,7 @@ function module_code(library_namespace) {
 				if (configuration_row) {
 					library_namespace.info('add_listener: Configuration page '
 							+ get_page_title_link(configuration_page_title)
-							+ ' edited!');
+							+ ' edited. Re-parse...');
 				}
 
 				if (options.filter && rows.length > 0) {
