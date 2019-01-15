@@ -6,8 +6,6 @@
  * 
  * TODO:<code>
 
-wiki.listen() 可隨時監視設定頁面與緊急停止頁面的變更
-
 wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
 wiki_API.page() 整合各 action=query 至單一公用 function。
 [[mw:Manual:Pywikibot/zh]]
@@ -13441,6 +13439,7 @@ function module_code(library_namespace) {
 					}).join(', '));
 				}
 
+				// 使 wiki.listen() 可隨時監視設定頁面與緊急停止頁面的變更。
 				var configuration_row;
 				if (configuration_page_title) {
 					// 檢測看看是否有 configuration_page_title
@@ -13448,6 +13447,11 @@ function module_code(library_namespace) {
 						if (row.title === configuration_page_title)
 							configuration_row = row;
 					});
+				}
+				if (configuration_row) {
+					library_namespace.info('Configuration page '
+							+ get_page_title_link(configuration_page_title)
+							+ ' edited!');
 				}
 
 				if (options.filter && rows.length > 0) {
