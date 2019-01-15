@@ -4431,7 +4431,11 @@ function module_code(library_namespace) {
 		// console.log('12: ' + JSON.stringify(wikitext));
 		// console.log(queue);
 
-		wikitext.split('\n').forEach(parse_list_line);
+		wikitext = wikitext.split('\n');
+		// e.g., for "<b>#ccc</b>"
+		var first_line = !initialized_fix && wikitext.shift();
+
+		wikitext.forEach(parse_list_line);
 		wikitext = lines_without_style;
 
 		// ----------------------------------------------------
@@ -4504,6 +4508,11 @@ function module_code(library_namespace) {
 
 		// free
 		lines_without_style = null;
+
+		if (!initialized_fix) {
+			// recover
+			wikitext.unshift(first_line);
+		}
 		wikitext = wikitext.join('\n');
 
 		// ↑ parse sequence finished *EXCEPT FOR* paragraph
