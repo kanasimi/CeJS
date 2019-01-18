@@ -77,7 +77,7 @@ function test_base() {
 		assert(CeL.is_empty_object({}), 'CeL.is_Object({})');
 		assert(!CeL.is_empty_object({a:1}), 'CeL.is_Object({})');
 
-		var options = { a:2, b:'abc', c:function(a,b){return a>b;} };
+		var options = { a:2, b:'abc', c: function(a,b) {return a>b;} };
 		assert([options, CeL.setup_options(options)], 'CeL.setup_options(options)===options #1');
 		assert([JSON.stringify(options), JSON.stringify(CeL.setup_options(options))], 'CeL.setup_options(options)===options #2');
 
@@ -510,7 +510,7 @@ function test_native() {
 		assert([-1, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/e/) ], 'first_matched() #5');
 		assert([ 1, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched('b') ], 'first_matched() #6');
 		assert([ 7, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched('d') ], 'first_matched() #7');
-		assert([ 0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(function(v){return v.includes('a');}) ], 'first_matched() #8');
+		assert([ 0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(function(v) {return v.includes('a');}) ], 'first_matched() #8');
 
 		assert(['2,8', Array.intersection([2,3,5,6,8], [1,2,4,8,9], true).join(',')], 'Array.intersection()');
 		assert(["aa ", "aa '''fff'''".remove_head_tail("'''")], 'string.remove_head_tail() #1');
@@ -1851,10 +1851,10 @@ function test_CSV() {
 	]);
 
 	error_count += CeL.test('CSV handle_array', [
-  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[2][0],'_3']],
-  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[2][1],':_4']],
-  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']],
-  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']],
+  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v) {return ':'+v;}]})[2][0],'_3']],
+  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v) {return ':'+v;}]})[2][1],':_4']],
+  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v) {return ':'+v;}]})[0][1],'b']],
+  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v) {return ':'+v;}]})[0][1],'b']],
   	]);
 
 	CeL.set_debug(0);
@@ -2148,7 +2148,7 @@ function test_date() {
 		// e.g., UTC+8: -8 * 60 = -480
 		var present_local_minute_offset = (new Date).getTimezoneOffset() || 0;
 		//year = -2010
-		for(var year=-500;year<2010;year++)if(year){
+		for (var year=-500;year<2010;year++)if(year) {
 			assert([year+'/1/1 0:0:0.000',(year.pad(4)+'/1/1').to_Date('CE').format('CE')], 'date Basic tests: '+year+'/1/1');
 			assert([year+'/2/28 0:0:0.000',(year.pad(4)+'/2/28').to_Date('CE').format('CE')], 'date Basic tests: '+year+'/2/28');
 			if (year<=1582&&year%4===(year<0?-1:0))
@@ -2833,13 +2833,13 @@ function test_wiki() {
 		assert([ wikitext, parser.toString() ], 'wiki.parse: external link');
 		wikitext = '++\npp:http://h /p n\n++'; parser = CeL.wiki.parse(wikitext);
 		assert([ wikitext, parser.toString() ], 'wiki.parse: plain url #1');
-		assert([ '++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'wiki.parse: plain url #2');
+		assert([ '++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function(token) {return '~~';}, true).toString() ], 'wiki.parse: plain url #2');
 		wikitext = 'http://http://h'; parser = CeL.wiki.parse(wikitext);
 		assert([ wikitext, parser.toString() ], 'wiki.parse: plain url #3');
-		assert([ '~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'wiki.parse: plain url #4');
+		assert([ '~~', CeL.wiki.parser(wikitext).each('url', function(token) {return '~~';}, true).toString() ], 'wiki.parse: plain url #4');
 		wikitext = 'http://http://h{{t}}http://s.r[g]ftp://p.q'; parser = CeL.wiki.parse(wikitext);
 		assert([ wikitext, parser.toString() ], 'wiki.parse: plain url #5');
-		assert([ '~~{{t}}~~[g]~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'wiki.parse: plain url #6');
+		assert([ '~~{{t}}~~[g]~~', CeL.wiki.parser(wikitext).each('url', function(token) {return '~~';}, true).toString() ], 'wiki.parse: plain url #6');
 
 		wikitext = '1{{t|a=\nb\n}}{{p|b}}2'; parser = CeL.wiki.parser(wikitext);
 		assert([ 'b', parser.parse()[1].parameters.a ], 'wiki.parse: template .parameters');
@@ -2847,7 +2847,7 @@ function test_wiki() {
 		wikitext = 't<!--='; parser = CeL.wiki.parse(wikitext);
 		assert([ wikitext, parser.toString() ]);
 		wikitext = 'a[[l]]b'; parser = CeL.wiki.parser(wikitext).parse();
-		assert([ 'a{{t}}b', parser.each('link', function(token, parent, index){return '{{t}}';}, true).toString() ]);
+		assert([ 'a{{t}}b', parser.each('link', function(token, parent, index) {return '{{t}}';}, true).toString() ]);
 
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ 'file', parser[0].type ], 'wiki.parse.file #1-1');
@@ -2868,8 +2868,8 @@ function test_wiki() {
 		assert([ '  a<br/>b   ', parser[3].toString() ], 'wiki.parse.file #3-5');
 
 		wikitext = '{{c|d[[e]]f}}'; parser = CeL.wiki.parser(wikitext).parse();
-		assert([ '{{c|df}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true).toString() ], 'search all links');
-		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true, 1).toString() ], 'only links of level 1');
+		assert([ '{{c|df}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index) {return '';}, true).toString() ], 'search all links');
+		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index) {return '';}, true, 1).toString() ], 'only links of level 1');
 		assert([ 'file', CeL.wiki.parse('[[FiLe:a]]').type ]);
 		assert([ 'Ab', CeL.wiki.parse('[[FiLe:ab]]').name ]);
 		// TODO: 當前解析為 'link', 應為 'text'
@@ -2964,36 +2964,53 @@ function test_wiki() {
 		assert([ wikitext, parser.toString() ]);
 		wikitext = '==t==\n[[w:t/t#a-{c}-]] \n'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
+		wikitext = "'''''Italic and bold formatting'''''"; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ]);
+		assert([ 'italic', parser[0].type ], "'''''t''''' will render as <i><b>t</b></i>");
+		assert([ 'bold', parser[0][0].type ]);
 		wikitext = "a '''''b''''' c's ''d'' e ''f'' g ''h''."; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
 		wikitext = 'a[[t|\'\'\' <span>T</span>\'\'\']].'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
 		wikitext = '<nowiki>-{ </nowiki> a <nowiki>}-</nowiki>'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ]);
 		assert([ '<nowiki>-{ </nowiki>', parser[0].toString() ]);
 		wikitext = '-{ <nowiki>dd}-<b></nowiki> }-<nowiki> ff</b></nowiki>'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ]);
 		assert([ '-{ <nowiki>dd}-<b></nowiki> }-', parser[0].toString() ]);
 		// language conversion -{}- 以後來使用的為主。
 		wikitext = '-{}-'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
-		assert([ undefined, CeL.wiki.parse(wikitext).converted ]);
+		assert([ '', CeL.wiki.parse(wikitext).converted ], 'null conversion');
 		wikitext = '-{  阿  }-'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
 		assert([ '  阿  ', CeL.wiki.parse(wikitext).converted ]);
 		wikitext = '-{zh-cn:2 ;  zh-tw: 阿  }-'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
-		assert([ '阿', CeL.wiki.parse(wikitext).converted ]);
+		assert([ '阿', CeL.wiki.parse(wikitext).toString('zh-tw') ]);
+		wikitext = '-{zh-cn:2 ;  zh-tw: 阿 ;  }-'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ]);
+		assert([ '阿 ', CeL.wiki.parse(wikitext).toString('zh-tw') ], '最後的單一/\s/會被轉換為"&#160;"');
 		wikitext = '-{zh-cn:2 ;  zh-tw: 阿  ;  }-'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
-		assert([ '阿  ', CeL.wiki.parse(wikitext).converted ]);
+		assert([ '阿', CeL.wiki.parse(wikitext).toString('zh-tw') ]);
 		wikitext = '-{ "ee" [[dd]]  ;zh-hk:阿;- ;zh-tw:1亞1;zh-cn:阿2 ;  zh-tw: 亞;;}-'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
-		assert([ '亞;', CeL.wiki.parse(wikitext).conversion['zh-tw'] ]);
-		wikitext = '-{;  zh-hk:阿;- ;zh-tw:1亞1;zh-cn:阿2  ; zh-cn:阿3 ;  zh-tw: 2亞   ;  	 }-'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ '亞;', CeL.wiki.parse(wikitext).toString('zh-tw') ]);
+		wikitext = '-{;  zh-hk:阿;- ;zh-tw:1亞1;zh-cn:阿2  ;  zh-tw: 2亞 ; zh-cn:阿3 ;  	 }-'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
-		// 顯示的時候，兩個以上的結尾空格會轉換成 " &nbsp;"。
-		assert([ '2亞   ', CeL.wiki.parse(wikitext).conversion['zh-tw'] ]);
+		assert([ '2亞 ', CeL.wiki.parse(wikitext).toString('zh-tw') ], '最後的單一/\s/會被轉換為"&#160;"');
 		wikitext = '-{  zh-tw:1;  zh-cn:2 ;}--{}--{  }--{;zh-tw:1;zh-cn:2}--{zh-tw:1;  zh-cn:2 ;  }-a[[t#a3| s[r]-{  ;  zh-hk:阿;- ;zh-tw:亞;zh-cn:阿2 ;  zh-tw:  亞姆----; ddff;;-ees: ggfggf;;}- ]]b'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
+		wikitext = '-{zh-cn: cn ;  zh-hant :tw2  }-'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ]);
+		assert([ 'tw2', parser[0].toString('zh-tw') ], 'language fallback');
+		wikitext = '-{zh-tw:    tw ; tw : tw2   ; f ;; ccc ;   }-'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ]);
+		assert([ 'tw ; tw : tw2   ; f ;; ccc ', parser[0].toString('zh-tw') ], 'language fallback');
+		wikitext = '-{zh-tw:    tw ; tw : tw2   ; f ;; ccc  ;   }-'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ]);
+		assert([ 'tw ; tw : tw2   ; f ;; ccc', parser[0].toString('zh-tw') ], 'language fallback: 最後的單一/\s/會被轉換為"&#160;"');
 
 		wikitext = '1<br>2'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ], 'wiki.parse: HTML single tag #1');
@@ -3011,7 +3028,7 @@ function test_wiki() {
 		assert([ 'b', parser[1].tag ], 'wiki.parse: HTML tag #4');
 		assert([ ' style="color:#000"  ', String(parser[1][0]).toString() ], 'wiki.parse: HTML tag #5: tag attributes');
 		assert([ 'tag_inner', parser[1][1].type ], 'wiki.parse: HTML tag #6');
-		assert([ '1<b style="color:#000"  ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function(token, parent, index){return '';}, true).toString() ], 'wiki.parse: HTML tag #7');
+		assert([ '1<b style="color:#000"  ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function(token, parent, index) {return '';}, true).toString() ], 'wiki.parse: HTML tag #7');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ], 'wiki.parse: HTML tag pre #1');
@@ -3099,7 +3116,24 @@ function test_wiki() {
 		assert([ wikitext, parser.toString() ], 'wiki.parse: list #6');
 		wikitext = '#1\n#2\n#3\n #4\n #5\n\n;1\n;2\n;3\n ;4\n ;5\n;6\n\n;#a\n;#a\n;#a\n\n;a\n;b\n;c\n\n:#a\n;#a\n:#a\n;#a\n\n;t:#a\n;#b\n'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ], 'wiki.parse: list #7');
+		wikitext = "a\n:* 1\n:* 2"; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ], 'wiki.parse: list #8');
+		wikitext = "a{{t\n|1=\n'''r'''\n:* 1\n:* 2}}b"; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ], 'wiki.parse: list #9');
 
+		wikitext = 'a\n p\n  2\n {{t}}\n  [[a]]\nb'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ], 'wiki.parse: pre #1');
+
+		wikitext = 'a\n----\nb'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ], 'wiki.parse: hr #1');
+		assert([ '----', parser[2].toString() ], 'wiki.parse: hr #1-1');
+		assert([ 'hr', parser[2].type ], 'wiki.parse: hr #1-2');
+		wikitext = 'a\n----------\nb'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ], 'wiki.parse: hr #2');
+		assert([ '----------', parser[2].toString() ], 'wiki.parse: hr #2-1');
+		assert([ 'hr', parser[2].type ], 'wiki.parse: hr #2-2');
+		wikitext = 'a\n----------c\nb'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ], 'wiki.parse: hr #3');
 	});
 
 

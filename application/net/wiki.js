@@ -1985,7 +1985,7 @@ function module_code(library_namespace) {
 		// console.log(parsed_title);
 		// console.log(parsed_title.toString().trim());
 
-		// display_text 應該是對已經正規化的 section_title 再做的變化。
+		// display_text 應該是對已經正規化的 section_title 再作的變化。
 		var display_text = section_link_escape(parsed_title.toString().trim())
 		// recover language conversion -{}-
 		.replace(section_link_START_CONVERT_reg, '-{').replace(
@@ -2257,6 +2257,7 @@ function module_code(library_namespace) {
 							console.log('token: ' + token);
 							console.log(user_list);
 						}
+
 						if (user_list.length > 1
 						// assert: 前面的都只是指向機器人頁面的連結。
 						&& /^1+0$/.test(user_list.map(function(user) {
@@ -2264,6 +2265,7 @@ function module_code(library_namespace) {
 						}).join(''))) {
 							user_list = user_list.slice(-1);
 						}
+
 						// 因為現在有個性化簽名，需要因應之。應該包含像[[zh:Special:Diff/48714597]]的簽名。
 						if (user_list.length === 1) {
 							this_user = user_list[0];
@@ -2819,8 +2821,24 @@ function module_code(library_namespace) {
 			return this.join('');
 		},
 		// 手工字詞轉換 language conversion -{}-
-		convert : function() {
-			return '-{' + this.join(';') + '}-';
+		convert : function(language) {
+			if (!language) {
+				return '-{' + this.join(';') + '}-';
+			}
+
+			language = language.toLowerCase();
+			// language fallback: [[mw:Localisation statistics]]
+			// (zh-tw, zh-hk, zh-mo) → zh-hant (→ zh?)
+			// (zh-cn, zh-sg, zh-my) → zh-hans (→ zh?)
+			// [[Wikipedia_talk:地区词处理#zh-my|馬來西亞簡體華語]]
+			if (!this.conversion[language] && /^zh-(?:tw|hk|mo)/.test(language)) {
+				language = 'zh-hant';
+			}
+			if (!this.conversion[language] && /^zh/.test(language)) {
+				language = 'zh-hans';
+			}
+
+			return this.conversion[language] || '在手动语言转换规则中检测到错误';
 		},
 
 		// Behavior switches
@@ -2922,6 +2940,12 @@ function module_code(library_namespace) {
 	.split('|').forEach(function name(Magic_words) {
 		Magic_words_hash[Magic_words] = true;
 	});
+
+	// 經測試，":"前面與後面不可皆有空白。
+	// (\s{2,}): 最後的單一/\s/會被轉換為"&#160;"
+	// matched: [ all, leading spaces,
+	// this language code, colon, this language token, last spaces ]
+	var PATTERN_conversion = /^(\s*)(zh-(?:cn|tw|hk|mo|sg|my|hant|hans))(\s*:|:\s*)([^\s].*?)(\s{2,})?$/;
 
 	// 狀態開關: [[mw:Help:Magic words#Behavior switches]]
 	var PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
@@ -3077,11 +3101,16 @@ function module_code(library_namespace) {
 		 * e.g., '\u0000'.<br />
 		 * include_mark + ({ℕ⁰:Natural+0}index of queue) + end_mark
 		 * 
+		 * assert: /\s/.test(include_mark) === false
+		 * 
 		 * @type {String}
 		 */
-		include_mark = options && options.include_mark || '\0',
-		/** {String}結束之特殊標記。 end of include_mark. 不可為數字 (\d) 或 include_mark。 */
-		end_mark = options && options.end_mark || ';',
+		include_mark = options && options.include_mark || '\u0000',
+		/**
+		 * {String}結束之特殊標記。 end of include_mark. 不可為數字 (\d) 或
+		 * include_mark，不包含會被解析的字元如 /;/。應為 wikitext 所不容許之字元。
+		 */
+		end_mark = options && options.end_mark || '\u0001',
 		/** {Boolean}是否順便作正規化。預設不會規範頁面內容。 */
 		normalize = options && options.normalize,
 		/** {Array}是否需要初始化。 [ {String}prefix added, {String}postfix added ] */
@@ -3506,67 +3535,63 @@ function module_code(library_namespace) {
 
 			// console.log(parameters);
 
-			// language fallback :[[mw:Localisation statistics]]
-			// (zh-hk, zh-mo, zh-tw) → zh-hant (→ zh?)
-			// (zh-cn, zh-sg, zh-my) → zh-hans (→ zh?)
-			// [[Wikipedia_talk:地区词处理#zh-my|馬來西亞簡體華語]]
-
 			var conversion = library_namespace.null_Object(),
-			// [, last conversion, this language token, this language code ]
-			PATTERN = /(^|.*?);(\s*(zh-(?:cn|tw|hk|mo|sg|my|hant|hans)):\s*)/g,
 			//
-			matched, last_matched, last_index = 0,
-			//
-			conversion_list = [], converted, token;
-			while (matched = PATTERN.exec(parameters)) {
-				last_index = PATTERN.lastIndex;
-				// 顯示的時候，兩個以上的結尾空格會轉換成 " &nbsp;"。
-				token = matched[1];
-				// console.log([ matched, token ]);
-				if (last_matched) {
-					conversion[last_matched[3]]
-					//
-					= converted = token;
-					token = last_matched[2] + matched[1];
-					// 經過改變，需再進一步處理。
-					token = parse_wikitext(token, options, queue);
-					conversion_list.push(token);
-				} else {
-					if (token) {
-						conversion[''] = converted = token;
-					}
-					token = matched[1];
-					// 經過改變，需再進一步處理。
-					token = parse_wikitext(token, options, queue);
-					conversion_list.push(token);
-				}
-				last_matched = matched;
-			}
-			matched = parameters.slice(last_index);
-			// 只有在曾經匹配過的時候才需要去尾
-			token = last_matched ? matched.trimEnd().replace(/;$/, '')
-					: matched;
-			// console.log([ matched, token, '$' ]);
-			if (token) {
-				conversion[last_matched ? last_matched[3] : '']
-				//
-				= converted = token;
-			}
-			token = last_matched ? last_matched[2] + matched : matched;
-			// 經過改變，需再進一步處理。
-			token = parse_wikitext(token, options, queue);
-			conversion_list.push(token);
+			conversion_list = [], latest_language;
 
+			// console.log('parameters: ' + JSON.stringify(parameters));
+			parameters = parameters.split(';');
+			parameters.forEach(function(converted, index) {
+				if (PATTERN_conversion.test(converted)
+				// e.g., "-{ a; zh-tw: tw }-" 之 " a"
+				|| conversion_list.length === 0
+				// 最後一個是空白。
+				|| !converted.trim() && index + 1 === parameters.length) {
+					conversion_list.push(converted);
+				} else {
+					conversion_list[conversion_list.length - 1]
+					// e.g., "-{zh-tw: tw ; tw : tw2}-"
+					+= ';' + converted;
+				}
+			});
+			// console.log(conversion_list);
+			conversion_list = conversion_list.map(function(token) {
+				var matched = token.match(PATTERN_conversion);
+				if (!matched) {
+					// 經過改變，需再進一步處理。
+					return parse_wikitext(token, options, queue);
+				}
+
+				matched = matched.slice(1);
+				// matched: [ leading spaces,
+				// this language code, colon, this language token, last spaces ]
+				if (!matched[4])
+					matched.pop();
+				conversion[matched[1]] = matched[3]
+				// 經過改變，需再進一步處理。
+				= parse_wikitext(matched[3], options, queue);
+				if (!matched[0])
+					matched.shift();
+				token = _set_wiki_type(matched, 'plain');
+				token.is_conversion = true;
+				return token;
+			});
+			// console.log(conversion_list);
 			parameters = _set_wiki_type(conversion_list, 'convert');
 			parameters.conversion = conversion;
 
 			if (queue.switches && (queue.switches.__NOCC__
 			// 使用魔術字 __NOCC__ 或 __NOCONTENTCONVERT__ 可避免轉換。
 			|| queue.switches.__NOCONTENTCONVERT__)) {
-				parameters.converted = parameters.toString();
-			} else {
+				parameters.no_convert = true;
+			} else if (Object.keys(conversion).length === 0) {
+				// assert: parameters.length === 1
+				// e.g., "-{ t {{T}} }-"
+				// NOT "-{ zh-tw: tw {{T}} }-"
+				parameters.converted = parameters[0];
+			} else if (options && options.language) {
 				// TODO: 先檢測當前使用的語言，然後轉成在當前環境下轉換過、會顯示出的結果。
-				parameters.converted = converted;
+				parameters.converted = parameters.toString(options.language);
 			}
 
 			queue.push(parameters);
@@ -4203,7 +4228,7 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
-		// 若是要處理<b>, <i>這兩項，也必須要調整 section_link()。
+		// 若是要處理<b>, <i>這兩項，也必須調整 section_link()。
 
 		// ''''b''''' → <i><b>b</b></i>
 		// 因此先從<b>開始找。
@@ -4243,7 +4268,9 @@ function module_code(library_namespace) {
 			// Use plain section_title instead of title with wikitext.
 			// 因為尚未resolve_escaped()，直接使用未parse_wikitext()者會包含未解碼之code!
 			// parameters.title = parameters.toString().trim();
-			parameters.link = section_link(parameters.toString());
+			parameters.link = section_link(parameters.toString(),
+			// for options.language
+			options);
 			/** {String}section title in wikitext */
 			parameters.title = parameters.link.id;
 
