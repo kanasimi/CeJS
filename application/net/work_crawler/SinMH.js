@@ -152,6 +152,7 @@ function module_code(library_namespace) {
 		get_chapter_list : function(work_data, html, get_label) {
 			// reset work_data.chapter_list
 			delete work_data.chapter_list;
+
 			var chapter_block, PATTERN_chapter_block =
 			// <div class="chapter-category clearfix">
 			// <div class="chapter-body clearfix">
