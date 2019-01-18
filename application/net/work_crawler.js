@@ -32,8 +32,9 @@ Runs untrusted code securely https://github.com/patriksimek/vm2
 </code>
  * 
  * @see https://github.com/abc9070410/JComicDownloader
- *      https://github.com/eight04/ComicCrawler
- *      https://github.com/yuru-yuri/manga-dl https://github.com/riderkick/FMD
+ *      https://github.com/eight04/ComicCrawler https://github.com/riderkick/FMD
+ *      https://github.com/yuru-yuri/manga-dl
+ *      https://github.com/Xonshiz/comic-dl
  *      https://github.com/wellwind/8ComicDownloaderElectron
  *      https://github.com/Arachnid-27/Cimoc
  *      https://github.com/qq573011406/KindleHelper
@@ -1325,10 +1326,10 @@ function module_code(library_namespace) {
 		if (!search_url_data || typeof this.parse_search_result !== 'function') {
 			search_url_data = library_namespace.null_Object();
 			search_url_data[work_title] = '';
-			this.onerror('本線上作品網站 ' + this.id + ' 的模組未提供搜尋功能。請手動設定/輸入 ['
-					+ work_title + '] 之 id 於 ' + search_result_file
-					+ '\n (e.g., ' + JSON.stringify(search_url_data) + ')',
-					work_title);
+			this.onerror('本線上作品網站 ' + this.id
+					+ ' 的模組未提供搜尋功能。請輸入作品 id，或手動設定/編輯 [' + work_title
+					+ '] 之 id 於 ' + search_result_file + '\n (e.g., '
+					+ JSON.stringify(search_url_data) + ')', work_title);
 			finish(true);
 			return Work_crawler.THROWED;
 		}
@@ -1457,10 +1458,15 @@ function module_code(library_namespace) {
 				if (approximate_title.length !== 1) {
 					library_namespace.error(
 					// failed: not only one
-					(approximate_title.length === 0 ? '未找到' : '找到'
-							+ approximate_title.length + '個')
-							// 相匹配
-							+ '與[' + work_title + ']相符者。');
+					(approximate_title.length === 0 ? '未搜尋到' : '找到'
+					//
+					+ approximate_title.length + '個') + '與[' + work_title
+					// 相匹配
+					+ ']相符者。' + (approximate_title.length === 0 ?
+					//
+					'若您輸入的是 work id，則必須設定 extract_work_id() 以免將 work id 誤判為 work title。'
+					//
+					: ''));
 					finish_up(approximate_title.length > 0 && {
 						titles : approximate_title
 					});
@@ -2407,10 +2413,14 @@ function module_code(library_namespace) {
 	// @see dm5.js for sample of this.get_chapter_list()
 	// e.g., work_data.chapter_list = [ chapter_data,
 	// chapter_data={url:'',title:'',date:new Date}, ... ]
-	function setup_chapter_list(work_data) {
+	function setup_chapter_list(work_data, reset) {
+		if (reset) {
+			// reset work_data.chapter_list
+			delete work_data.chapter_list;
+		}
 		var chapter_list = work_data.chapter_list;
 		if (!chapter_list) {
-			work_data.chapter_list = chapter_list = [];
+			chapter_list = work_data.chapter_list = [];
 		}
 		return chapter_list;
 	}
@@ -2422,8 +2432,12 @@ function module_code(library_namespace) {
 		// reset last NO in part
 		delete chapter_list.NO_in_part;
 
+		part_title = get_label(part_title);
 		if (part_title) {
-			chapter_list.part_title = get_label(part_title);
+			library_namespace.debug(part_title, 1, 'set_part_title');
+			chapter_list.part_title = part_title;
+			if (part_NO > 0 && !('add_part_NO' in chapter_list))
+				chapter_list.add_part_NO = true;
 			// last part NO. part_NO starts from 1
 			chapter_list.part_NO = part_NO || (chapter_list.part_NO | 0) + 1;
 		} else {
@@ -2434,6 +2448,9 @@ function module_code(library_namespace) {
 	}
 	// should called by this.get_chapter_list()
 	// this.add_chapter(work_data, chapter_data);
+	//
+	// 警告: 您可能必須要重設 work_data.chapter_list
+	// e.g., delete work_data.chapter_list;
 	function add_chapter_data(work_data, chapter_data) {
 		var chapter_list = setup_chapter_list(work_data);
 		if (typeof chapter_data === 'string') {
@@ -2442,18 +2459,21 @@ function module_code(library_namespace) {
 				url : chapter_data
 			};
 		}
+		// assert: {Onject}chapter_data
 		if (chapter_list.part_title) {
-			chapter_data.part_NO = chapter_list.part_NO;
-			chapter_data.part_title = chapter_list.part_title;
-			chapter_list.NO_in_part |= 0;
-			// NO_in_part, NO in part starts from 1
-			chapter_data.NO_in_part = ++chapter_list.NO_in_part;
+			Object.assign(chapter_data, {
+				part_NO : chapter_list.part_NO,
+				part_title : chapter_list.part_title,
+				// NO_in_part, NO in part starts from 1
+				NO_in_part : (chapter_list.NO_in_part | 0) + 1
+			});
 		}
 		if (false) {
 			console.log(chapter_list.length + ': '
 					+ JSON.stringify(chapter_data));
 		}
 		chapter_list.push(chapter_data);
+		return chapter_data;
 	}
 	// set work_data.inverted_order = true;
 	// this.reverse_chapter_list_order(work_data);
@@ -2502,6 +2522,31 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(chapter_data));
 		});
 	}
+
+	// 分析所有數字後的非數字，猜測章節的單位。
+	function guess_unit(title_list) {
+		var units = library_namespace.null_Object(), PATTERN = /\d+([^\d])/g, matched;
+		title_list.forEach(function(title) {
+			title = library_namespace.from_Chinese_numeral(title);
+			while (matched = PATTERN.exec(title)) {
+				if (!(matched[1] in units))
+					units[matched[1]] = library_namespace.null_Object();
+				units[matched[1]][matched[0]] = null;
+			}
+		});
+
+		var unit, count = 0;
+		Object.keys(units)
+		// using array.reduce()
+		.forEach(function(_unit) {
+			var _count = Object.keys(units[_unit]).length;
+			if (count < _count) {
+				count = _count;
+				unit = _unit;
+			}
+		});
+		return unit;
+	}
 	/**
 	 * 依章節標題來定章節編號。 本函數將會改變 chapter_data.chapter_NO ！
 	 * 
@@ -2514,11 +2559,22 @@ function module_code(library_namespace) {
 	 * 
 	 * @see parse_chapter_data() @ ck101.js
 	 */
-	function set_chapter_NO_via_title(chapter_data, default_NO) {
+	function set_chapter_NO_via_title(chapter_data, default_NO, default_unit) {
+		function get_title(chapter_data) {
+			return library_namespace.is_Object(chapter_data) ? chapter_data.title
+					: chapter_data;
+		}
+
 		if (Array.isArray(chapter_data.chapter_list)) {
 			// input sorted work_data, use work_data.chapter_list
 			// last_chapter_NO, start NO
 			default_NO |= 0;
+			if (!default_unit && chapter_data.chapter_list.length > 1
+			//
+			&& library_namespace.from_Chinese_numeral) {
+				default_unit = guess_unit(chapter_data.chapter_list
+						.map(get_title));
+			}
 			chapter_data.chapter_list.forEach(function(chapter_data) {
 				var chapter_NO = this.set_chapter_NO_via_title(chapter_data,
 						++default_NO);
@@ -2537,10 +2593,14 @@ function module_code(library_namespace) {
 		// chapter_data={title:'',chapter_NO:1}
 
 		// console.log(chapter_data);
-		var title = library_namespace.is_Object(chapter_data) ? chapter_data.title
-				: title;
+		var title = get_title(chapter_data);
+		if (default_unit !== '季') {
+			title = title.replace(/四季/g, '');
+		}
+
 		if (library_namespace.from_Chinese_numeral)
 			title = library_namespace.from_Chinese_numeral(title);
+
 		var matched = title.match(/(?:^|第 ?)(\d{1,3}(?:\.\d)?) ?話/) || title
 		// 因為中間的章節可能已經被下架，因此依章節標題來定章節編號。
 		.match(/^(?:[＃#] *|(?:Episode|act)[ .:]*)?(\d{1,3})(?:$|[ .\-])/i)
@@ -2578,6 +2638,7 @@ function module_code(library_namespace) {
 		} else if (library_namespace.is_Object(work_data)) {
 			var chapter_data = work_data.chapter_list ? work_data.chapter_list[chapter_NO - 1]
 					: work_data;
+			// console.trace(chapter_data);
 			if (!chapter_data) {
 				this.onerror(
 						'get_chapter_directory_name: Invalid chapter_data: '
@@ -2585,6 +2646,7 @@ function module_code(library_namespace) {
 				typeof callback === 'function' && callback(work_data);
 				return Work_crawler.THROWED;
 			}
+			// console.log(chapter_data);
 			if (!no_part && chapter_data.part_title && (work_data.chapter_list
 			// 當只有一個 part 的時候，預設不會添上 part 標題。
 			&& work_data.chapter_list.part_NO > 1 || this.add_part)) {
@@ -2674,7 +2736,7 @@ function module_code(library_namespace) {
 
 			function process_images(chapter_data, XMLHttp) {
 				// get chapter label, will used as chapter directory name.
-				chapter_label = _this.get_chapter_directory_name(chapter_data,
+				chapter_label = _this.get_chapter_directory_name(work_data,
 						chapter_NO);
 				chapter_directory = work_data.directory + chapter_label;
 				library_namespace.create_directory(chapter_directory);
@@ -3451,7 +3513,10 @@ function module_code(library_namespace) {
 								+ '] is not image types accepted!\n'
 								+ image_data.file);
 					}
-					if (!image_data.file.endsWith('.' + file_type.extension)) {
+					if (!image_data.file.endsWith('.' + file_type.extension)
+							// accept '.jpeg' as alias of '.jpg'
+							&& !file_type.extensions.includes(image_data.file
+									.match(/[^.]*$/)[0])) {
 						// 依照所驗證的檔案格式改變副檔名。
 						image_data.file = image_data.file.replace(/[^.]+$/,
 						// e.g. .png

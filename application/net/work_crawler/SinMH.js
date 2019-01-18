@@ -150,11 +150,29 @@ function module_code(library_namespace) {
 			return work_data;
 		},
 		get_chapter_list : function(work_data, html, get_label) {
-			var chapter_block, chapter_list = [], PATTERN_chapter_block =
-			//
-			/class="chapter-body[^<>]+>([\s\S]+?)<\/div>/g;
+			// reset work_data.chapter_list
+			delete work_data.chapter_list;
+			var chapter_block, PATTERN_chapter_block =
+			// <div class="chapter-category clearfix">
+			// <div class="chapter-body clearfix">
+			/class="chapter-(body|category)[^<>]+>([\s\S]+?)<\/div>/g;
 			while (chapter_block = PATTERN_chapter_block.exec(html)) {
-				chapter_block = chapter_block[1];
+				delete chapter_block.input;
+				// console.log(chapter_block);
+				if (chapter_block[1] === 'category') {
+					// console.log(chapter_block[2]);
+					chapter_block = chapter_block[2]
+					// <div class="caption pull-left"><span>章节</span></div>
+					// <div class="caption pull-left"><span>单话</span></div>
+					.match(/class="caption[^<>]+>([\s\S]+)/);
+					// console.log(chapter_block);
+					if (chapter_block) {
+						this.set_part(work_data, chapter_block[1]);
+					}
+					continue;
+				}
+
+				chapter_block = chapter_block[2];
 				var link, PATTERN_chapter_link =
 				//
 				/<a href="([^<>"]+)"[^<>]*>([\s\S]+?)<\/a>/g;
@@ -167,12 +185,14 @@ function module_code(library_namespace) {
 						url : link[1],
 						title : get_label(link[2])
 					};
-					chapter_list.push(chapter_data);
+					this.add_chapter(work_data, chapter_data);
+					// console.log(work_data.chapter_list);
+					// console.log(chapter_data);
 				}
 			}
-			// console.log(chapter_list);
+			// console.log(work_data.chapter_list);
 			var text;
-			if (chapter_list.length === 0
+			if (work_data.chapter_list.length === 0
 			// 已屏蔽删除本漫画所有章节链接
 			&& (text = html.between('class="ip-body">', '</div>'))) {
 				work_data.filtered = true;
@@ -183,14 +203,13 @@ function module_code(library_namespace) {
 				if (this.try_to_get_blocked_work && chapter_id) {
 					// 嘗試取得被屏蔽的作品。
 					// e.g., 全职法师
-					chapter_list.push({
+					this.add_chapter(work_data, {
 						url : '/comic/read/?id=' + chapter_id
 					});
 				} else {
 					library_namespace.warn(get_label(text));
 				}
 			}
-			work_data.chapter_list = chapter_list;
 		},
 
 		pre_parse_chapter_data
@@ -208,12 +227,11 @@ function module_code(library_namespace) {
 							+ '.html';
 					work_data.chapter_list[chapter_NO - 1].url = url;
 					library_namespace.get_URL(this.full_URL(url), callback,
-							this.charset, null,
-							//
-							Object.assign({
-								error_retry : this.MAX_ERROR_RETRY,
-								no_warning : true
-							}, this.get_URL_options));
+					//
+					this.charset, null, Object.assign({
+						error_retry : this.MAX_ERROR_RETRY,
+						no_warning : true
+					}, this.get_URL_options));
 					return;
 				}
 			}
@@ -239,7 +257,8 @@ function module_code(library_namespace) {
 				}
 			}
 
-			var chapter_data = library_namespace.null_Object();
+			// console.log(work_data.chapter_list);
+			var chapter_data = work_data.chapter_list[chapter_NO - 1];
 			// 2018/3 古风漫画网改版。
 			html = html.between('<script>;phone.') || html;
 			eval(html.between('<script>', '</script>').replace(/;var /g,
