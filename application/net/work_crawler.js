@@ -2421,19 +2421,19 @@ function module_code(library_namespace) {
 		}
 		return chapter_list;
 	}
-	// should called by this.get_chapter_list()
+	// should be called by this.get_chapter_list()
 	// this.set_part(work_data, 'part_title');
 	function set_part_title(work_data, part_title, part_NO) {
 		var chapter_list = setup_chapter_list(work_data);
 
-		// reset last NO in part
+		// reset latest NO in part
 		delete chapter_list.NO_in_part;
 
 		part_title = get_label(part_title);
 		if (part_title) {
 			library_namespace.debug(part_title, 1, 'set_part_title');
 			chapter_list.part_title = part_title;
-			if (part_NO > 0 && !('add_part_NO' in chapter_list))
+			if (part_NO >= 1 && !('add_part_NO' in chapter_list))
 				chapter_list.add_part_NO = true;
 			// last part NO. part_NO starts from 1
 			chapter_list.part_NO = part_NO || (chapter_list.part_NO | 0) + 1;
@@ -2443,7 +2443,7 @@ function module_code(library_namespace) {
 			delete chapter_list.part_title;
 		}
 	}
-	// should called by this.get_chapter_list()
+	// should be called by this.get_chapter_list()
 	// this.add_chapter(work_data, chapter_data);
 	//
 	// 警告: 您可能必須要重設 work_data.chapter_list
@@ -2456,15 +2456,58 @@ function module_code(library_namespace) {
 				url : chapter_data
 			};
 		}
+
 		// assert: {Onject}chapter_data
 		if (chapter_list.part_title) {
-			Object.assign(chapter_data, {
-				part_NO : chapter_list.part_NO,
-				part_title : chapter_list.part_title,
+			// 如果 chapter_data 設定了值，那就用 chapter_data 原先的值。
+			if (chapter_data.part_NO !== chapter_list.part_NO
+					&& chapter_list.part_NO >= 1) {
+				if (chapter_data.part_NO >= 1) {
+					library_namespace.warn(
+					//
+					'add_chapter_data: 原已設定 part_NO: ' + chapter_list.part_NO
+					//
+					+ '，但在 chapter_data 中又設定  chapter_data.part_NO: '
+					//
+					+ chapter_data.part_NO + '，兩者相衝突。');
+				} else {
+					chapter_data.part_NO = chapter_list.part_NO;
+				}
+			}
+
+			if (chapter_data.part_title !== chapter_list.part_title) {
+				if (chapter_data.part_title) {
+					library_namespace.warn(
+					//
+					'add_chapter_data: 原已設定 part_title: '
+					//
+					+ chapter_list.part_title
+					//
+					+ '，但在 chapter_data 中又設定  chapter_data.part_title: '
+					//
+					+ chapter_data.part_title + '，兩者相衝突。');
+				} else {
+					chapter_data.part_title = chapter_list.part_title;
+				}
+			}
+
+			if (chapter_data.NO_in_part >= 1) {
+				if (chapter_list.NO_in_part >= 1
+						&& chapter_list.NO_in_part !== chapter_data.NO_in_part) {
+					library_namespace.warn(
+					//
+					'add_chapter_data: chapter_list.NO_in_part: '
+							+ chapter_data.NO_in_part + '→'
+							+ chapter_list.NO_in_part);
+				}
+				chapter_list.NO_in_part = chapter_data.NO_in_part;
+			} else {
+				chapter_data.NO_in_part = chapter_list.NO_in_part
 				// NO_in_part, NO in part starts from 1
-				NO_in_part : (chapter_list.NO_in_part | 0) + 1
-			});
+				= (chapter_list.NO_in_part | 0) + 1;
+			}
 		}
+
 		if (false) {
 			console.log(chapter_list.length + ': '
 					+ JSON.stringify(chapter_data));
@@ -2621,31 +2664,34 @@ function module_code(library_namespace) {
 			chapter_data.chapter_NO = default_NO;
 		return default_NO;
 	}
-	// should called by get_data() or this.pre_parse_chapter_data()
+	// should be called by get_data() or this.pre_parse_chapter_data()
 	// this.get_chapter_directory_name(work_data, chapter_NO);
-	// this.get_chapter_directory_name(chapter_data, chapter_NO);
-	// this.get_chapter_directory_name(chapter_title, chapter_NO);
-	function get_chapter_directory_name(work_data, chapter_NO, no_part) {
+	// this.get_chapter_directory_name(work_data, chapter_NO, chapter_data);
+	// this.get_chapter_directory_name(work_data, chapter_NO, chapter_title);
+	function get_chapter_directory_name(work_data, chapter_NO, chapter_data,
+			no_part) {
+		if (typeof chapter_data === 'boolean' && no_part === undefined) {
+			// this.get_chapter_directory_name(work_data, chapter_NO, no_part);
+			// shift arguments
+			no_part = chapter_data;
+			chapter_data = null;
+		}
+
 		var part, chapter_title;
 
-		if (typeof work_data === 'string') {
+		if (typeof chapter_data === 'string') {
 			// treat chapter_data as chapter_title.
 			chapter_title = work_data;
 
-		} else if (library_namespace.is_Object(work_data)) {
-			var chapter_data = work_data.chapter_list ? work_data.chapter_list[chapter_NO - 1]
-					: work_data;
+		} else if (library_namespace.is_Object(chapter_data)
+				|| Array.isArray(work_data.chapter_list)
+				&& library_namespace
+						.is_Object(chapter_data = work_data.chapter_list[chapter_NO - 1])) {
 			// console.trace(chapter_data);
-			if (!chapter_data) {
-				this.onerror(
-						'get_chapter_directory_name: Invalid chapter_data: '
-								+ work_data, work_data);
-				typeof callback === 'function' && callback(work_data);
-				return Work_crawler.THROWED;
-			}
-			// console.log(chapter_data);
-			if (!no_part && chapter_data.part_title && (work_data.chapter_list
-			// 當只有一個 part 的時候，預設不會添上 part 標題。
+			if (!no_part && chapter_data.part_title
+			//
+			&& (Array.isArray(work_data.chapter_list)
+			// 當只有一個 part 的時候，預設不會添上 part 標題，除非設定了 this.add_part。
 			&& work_data.chapter_list.part_NO > 1 || this.add_part)) {
 				part = chapter_data.NO_in_part | 0;
 				if (part >= 1) {
@@ -2662,18 +2708,20 @@ function module_code(library_namespace) {
 			chapter_title = chapter_data.chapter_title || chapter_data.title;
 
 		} else {
-			this.onerror('get_chapter_directory_name: Invalid work_data: '
-					+ work_data, work_data);
+			this.onerror('get_chapter_directory_name: Invalid chapter_data: '
+					+ work_data.id + '#' + chapter_NO, work_data);
 			typeof callback === 'function' && callback(work_data);
 			return Work_crawler.THROWED;
 		}
 
-		// assert: !!chapter_data.title === true
+		// assert: !chapter_data || !!chapter_data.title === true
 		chapter_title = chapter_title ? chapter_title.trim() : '';
 
 		var chapter_directory_name = (part || '')
 		// 檔名 NO 的基本長度（不足補零）。以 chapter_data.chapter_NO 可自定章節編號。
-		+ (chapter_data.chapter_NO || chapter_NO).pad(4) + (chapter_title ? ' '
+		+ (chapter_data && chapter_data.chapter_NO || chapter_NO).pad(4)
+		//
+		+ (chapter_title ? ' '
 		// 把網頁編碼還原成看得懂的文字。 get_label()
 		+ library_namespace.HTML_to_Unicode(chapter_title) : '');
 
@@ -2734,7 +2782,7 @@ function module_code(library_namespace) {
 			function process_images(chapter_data, XMLHttp) {
 				// get chapter label, will used as chapter directory name.
 				chapter_label = _this.get_chapter_directory_name(work_data,
-						chapter_NO);
+						chapter_NO, chapter_data, false);
 				chapter_directory = work_data.directory + chapter_label;
 				library_namespace.create_directory(chapter_directory);
 
