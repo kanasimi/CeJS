@@ -723,7 +723,7 @@ function module_code(library_namespace) {
 		// text
 		html : {
 			// other file extensions
-			extension : [ 'htm', 'shtml' ],
+			extensions : [ 'htm', 'shtml' ],
 			min_size : 52
 		},
 		pdf : {
@@ -758,14 +758,14 @@ function module_code(library_namespace) {
 			// check EOI, End Of Image mark of .jpeg: ÿÙ
 			eof : 'FF D9',
 			// other file extensions
-			extension : [ 'jpeg' ],
+			extensions : [ 'jpeg' ],
 			min_size : 3e3
 		},
 		tif : {
 			// II*.
 			magic : '49 49 2A 00',
 			// other file extensions
-			extension : [ 'tiff' ],
+			extensions : [ 'tiff' ],
 			min_size : 3e3
 		},
 		ico : {
@@ -808,7 +808,7 @@ function module_code(library_namespace) {
 			// 00 00 01 Bx
 			magic : '00 00 01',
 			eof : '00 00 01 B7',
-			extension : [ 'mpeg' ],
+			extensions : [ 'mpeg' ],
 			min_size : 1e3
 		},
 
@@ -858,16 +858,16 @@ function module_code(library_namespace) {
 		magic_data.type = type = type[0];
 		// 副檔名。
 		// TODO: 大小寫。
-		if (magic_data.extension) {
-			if (!Array.isArray(magic_data.extension)) {
-				magic_data.extension = [ magic_data.extension ];
+		if (magic_data.extensions) {
+			if (!Array.isArray(magic_data.extensions)) {
+				magic_data.extensions = [ magic_data.extensions ];
 			}
-			if (!magic_data.extension.includes(type)) {
+			if (!magic_data.extensions.includes(type)) {
 				// 以 type name 為主
-				magic_data.extension.unshift(type);
+				magic_data.extensions.unshift(type);
 			}
 		} else {
-			magic_data.extension = [ type ];
+			magic_data.extensions = [ type ];
 		}
 
 		if (!magic_data.magic) {
@@ -980,7 +980,8 @@ function module_code(library_namespace) {
 		var result = {
 			type : magic_data.type,
 			// 副檔名。
-			extension : magic_data.extension[0]
+			extensions : magic_data.extensions[0],
+			extensions : magic_data.extensions
 		};
 
 		if (magic_data.min_size > 0) {
