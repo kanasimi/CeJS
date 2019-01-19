@@ -980,7 +980,7 @@ function module_code(library_namespace) {
 		var result = {
 			type : magic_data.type,
 			// 副檔名。
-			extensions : magic_data.extensions[0],
+			extension : magic_data.extensions[0],
 			extensions : magic_data.extensions
 		};
 
