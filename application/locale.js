@@ -1211,8 +1211,10 @@ function module_code(library_namespace) {
 		switch (domain_name) {
 		case 'Chinese':
 			// number to Chinese year name.
-			if (ordinal == 1)
+			if (ordinal == 1) {
+				// 一年 → 元年
 				return '元';
+			}
 
 			var prefix = '';
 			if (ordinal < 0) {

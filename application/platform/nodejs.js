@@ -795,6 +795,16 @@ function module_code(library_namespace) {
 			&& process.mainModule.filename.replace(/[\\\/]app\.asar.+/, '') === process.resourcesPath
 			&& library_namespace.platform.OS;
 
+	is_installation_package = undefined;
+	(function() {
+		try {
+			var updater = require("electron-updater"), autoUpdater = updater.autoUpdater;
+			is_installation_package = autoUpdater.app.isPackaged;
+		} catch (e) {
+			// TODO: handle exception
+		}
+	})();
+
 	_.is_installation_package = function() {
 		return is_installation_package;
 	};

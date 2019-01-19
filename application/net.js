@@ -380,7 +380,7 @@ function module_code(library_namespace) {
 	.parse_URI = parse_URI;
 
 	/**
-	 * 正規化 file name，排除會導致error的字元。
+	 * 正規化 file name，排除會導致 error 的字元。 normalize file name
 	 * 
 	 * @param {String}file_name
 	 *            file name

@@ -232,7 +232,8 @@ function module_code(library_namespace) {
 
 		consume_url : 'consume/index.nhn',
 		pre_parse_chapter_data
-		// 執行在解析章節資料process_chapter_data()之前的作業(async)。
+		// 執行在解析章節資料 process_chapter_data() 之前的作業 (async)。
+		// 必須自行保證執行 callback()，不丟出異常、中斷。
 		: function(XMLHttp, work_data, callback, chapter_NO) {
 			// console.log(work_data);
 			var chapter_data = work_data.chapter_list[chapter_NO - 1],

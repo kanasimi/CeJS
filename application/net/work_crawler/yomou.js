@@ -3,6 +3,8 @@
  * 
  * @fileoverview 本檔案包含了批量下載小説家になろう/小説を読もう！的工具。
  * 
+ * TODO: なろう小説API https://dev.syosetu.com/man/api/
+ * 
  * <code>
 
 CeL.yomou().start(work_id);
@@ -12,7 +14,7 @@ CeL.yomou().start(work_id);
  * @see 小説投稿サイト https://matome.naver.jp/odai/2139450042041120001
  *      http://www.akatsuki-novels.com/novels/ranking_total
  *      http://www.mai-net.net/bbs/sst/sst.php?act=list&cate=all&page=1
- *      https://github.com/whiteleaf7/narou
+ *      https://github.com/whiteleaf7/narou https://github.com/59naga/naroujs
  *      https://github.com/59naga/scrape-narou
  * 
  * @since 2017/2/22 0:18:34 模組化。

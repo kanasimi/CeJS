@@ -93,22 +93,35 @@ function module_code(library_namespace) {
 		}
 
 		if (command) {
+			if (!require('fs').existsSync(Excel_file_path)) {
+				library_namespace.error('Excel 檔案！');
+				return;
+			}
+
 			library_namespace.debug('Execute command: ' + command, 1,
 					'read_Excel_file');
+			// console.log(command);
+			// console.log(JSON.stringify(command));
 			execSync(command);
 		} else {
 			library_namespace.debug('Using cache file: ' + text_file_path, 1,
 					'read_Excel_file');
 		}
 
+		// console.log(text_file_path);
 		// 'auto': Excel 將活頁簿儲存成 "Unicode 文字"時的正常編碼為 UTF-16LE
 		var content = library_namespace.read_file(text_file_path, 'auto');
 		// console.log(content);
+		if (!content) {
+			library_namespace.error('沒有內容。請檢查工作表是否存在！');
+			return;
+		}
 
 		if (typeof options.content_processor === 'function') {
 			content = options.content_processor(content);
 		}
 
+		// content = '' + content;
 		var remove_title_row = options.remove_title_row;
 		if (remove_title_row === undefined) {
 			// auto detect title line

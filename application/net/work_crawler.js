@@ -2414,12 +2414,9 @@ function module_code(library_namespace) {
 	// e.g., work_data.chapter_list = [ chapter_data,
 	// chapter_data={url:'',title:'',date:new Date}, ... ]
 	function setup_chapter_list(work_data, reset) {
-		if (reset) {
-			// reset work_data.chapter_list
-			delete work_data.chapter_list;
-		}
-		var chapter_list = work_data.chapter_list;
-		if (!chapter_list) {
+		var chapter_list;
+		// reset: reset work_data.chapter_list
+		if (reset || !Array.isArray(chapter_list = work_data.chapter_list)) {
 			chapter_list = work_data.chapter_list = [];
 		}
 		return chapter_list;

@@ -135,7 +135,9 @@ function module_code(library_namespace) {
 
 				// 選擇性屬性：須配合網站平台更改。
 				description : get_label(html.between('intro-all', '</div>')
-						.between('>'))
+						.between('>')),
+				// reset work_data.chapter_list
+				chapter_list : []
 			}, data = html.between('detail-list', '</ul>');
 			extract_work_data(work_data, data,
 			// e.g., "<strong>漫画别名：</strong>暂无</span>"
@@ -150,9 +152,6 @@ function module_code(library_namespace) {
 			return work_data;
 		},
 		get_chapter_list : function(work_data, html, get_label) {
-			// reset work_data.chapter_list
-			delete work_data.chapter_list;
-
 			var chapter_block, PATTERN_chapter_block =
 			// <div class="chapter-category clearfix">
 			// <div class="chapter-body clearfix">

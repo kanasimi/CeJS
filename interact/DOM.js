@@ -6710,2048 +6710,2259 @@ function module_code(library_namespace) {
 
 	_.locate_node = locate_node;
 
-
-
-
-
-
-//	2007/4/25-27 0:48:22	RFC 3492 IDNA Punycode	未最佳化
-//	http://stackoverflow.com/questions/183485/can-anyone-recommend-a-good-free-javascript-for-punycode-to-unicode-conversion
-//	http://xn-punycode.com/
-function Punycode() {
-}
-
-Punycode.map='abcdefghijklmnopqrstuvwxyz0123456789';
-Punycode.Dmap=0;
-Punycode.base=Punycode.map.length;
-Punycode.tmin=1;
-Punycode.tmax=26;
-Punycode.skew=38;
-Punycode.damp=700;
-//偏移
-Punycode.initial_bias=72;
-//128
-Punycode.initial_n=0x80;
-//the default ACE prefix
-Punycode.prefix="xn--";
-Punycode.delimiter='-';
-Punycode._b=Punycode.base-Punycode.tmin;
-//Punycode._t = (Punycode._b * Punycode.tmax) >> 1;
-Punycode._t=Math.floor(Punycode._b*Punycode.tmax/2);
-
-//	IDNA ToASCII
-Punycode.encodeDomain=function(UURL){
- var m=UURL.match(/^([\w\d\-]+:\/\/)?([^\/]+)/),UDomain=m?m[2]:'',i=(m=UDomain)?UURL.indexOf(m):0;
-	if(false)document.write('<hr />Punycode.encodeDomain UDomain: ['+i+']['+m+']<br />');
- if(m&&m.replace(/[\x01-\x7f]+/g,''))
-  m=m.replace(/([^.]+)\./g,function($0,$1){
-	  if(false)document.write($1+'→'+encode($1)+'<br />');
-	 return Punycode.prefix+Punycode.encode($1)+'.';
-	}),UURL=encodeURI(UURL.slice(0,i)+m+UURL.slice(i+UDomain.length));
- return UURL;
-};
-
-//	IDNA ToUnicode
-Punycode.decodeDomain=function(PURL){
- var m=PURL.match(/^([\w\d\-]+:\/\/)?([^\/]+)/),PDomain=m?m[2]:'',i=(m=PDomain)?PURL.indexOf(m):0;
- if(false)document.write('<hr />Punycode.decodeDomain PDomain: ['+i+']['+m+']<br />');
- if(m){
-  m=m.replace(new RegExp(Punycode.prefix+'([^.]+)\\.','g'),function($0,$1){
-	  if(false)document.write($1+'→'+Punycode.decode($1)+'<br />');
-	 return Punycode.decode($1)+'.';
-	});
-  if(m!=PDomain){
-   PURL=PURL.slice(0,i)+m+PURL.slice(i+PDomain.length);
-   try{PURL=decodeURI(PURL);}catch(e){PURL=unescape(PURL);}
-  }
- }
- return PURL;
-};
-
-
-Punycode.adapt=function(delta,numpoints,firsttime){
-	if(false)document.write('*adapt: '+delta+', '+numpoints+', '+firsttime+', _b='+_b+', _t='+_t+'<br />');
- delta=
-	//Math.floor(delta/(firsttime?damp:2));
-	 firsttime?Math.floor(delta/Punycode.damp):delta>>1;
- delta+=Math.floor(delta/numpoints);
- var k=0;
- for(;delta>_t;k+=Punycode.base)delta=Math.floor(delta/Punycode._b);
- return k+Math.floor((Punycode._b+1)*delta/(delta+Punycode.skew));
-};
-
-Punycode.encode=function(UString){
- var n=Punycode.initial_n,cA=[],m,mA=[],i=0,c
-	,q,delta=0,bias=Punycode.initial_bias,output=UString.replace(/[^\x01-\x7f]+/g,''),h=output.length,b=h;
- if(false)document.write('<hr />Punycode.encode begin: ['+output+']<br />');
- if(b)output+=Punycode.delimiter;
-
- for(;i<UString.length;i++){
-  cA.push(c=UString.charCodeAt(i));
-  if(c>n)mA.push(c);
- }
- mA.sort(library_namespace.descending);
-
- while(h<cA.length){
-		//	預防重複
-  do{c=mA.pop();}while(m==c);
-  m=c;
-  if(false)if(m-n>(Number.MAX_VALUE-delta)/(h+1)){alert('Punycode: overflow');return;}
-//	should test overflow
-  delta+=(m-n)*(h+1);
-  n=m;
-  for(i=0;i<cA.length;i++){
-//		fail on overflow
-	  if(false)if(c=cA[i],c<n&&!++delta){alert('Punycode: overflow');return;}
-   if(c=cA[i],c<n)++delta;
-	if(false)document.write('<b>'+UString.charAt(i)+' '+(c.toString(16)+','+n.toString(16)).toUpperCase()+'</b><br />');
-   if(c==n){
-    for(q=delta,k=Punycode.base;;k+=Punycode.base){
-     t=k<=bias/* +Punycode.tmin: not needed */?Punycode.tmin:k>=bias+tmax?Punycode.tmax:k-bias;
-     if(q<t)break;
-     output+=Punycode.map.charAt(t+(q-t)%(Punycode.base-t));
-     if(false)document.write('<b>'+output+'</b><br />');
-     q=Math.floor((q-t)/(base-t));
-    }
-    output+=Punycode.map.charAt(q);
-    bias=Punycode.adapt(delta,h+1,h==b);
-    if(false)document.write('h='+h+'/'+cA.length+', bias='+bias+', '+output+'<br />');
-    delta=0,h++;
-   }
-  }
-  delta++,n++;
- }
- if(false)document.write(UString+'→'+output+'<br />');
- return output;
-};
-
-Punycode.decode=function(PCode){
- var n=Punycode.initial_n,i=0,p=PCode.lastIndexOf(Punycode.delimiter),bias=Punycode.initial_bias,output=p==-1?'':PCode.slice(0,p)
-	,oldi,w,digit,l;
- if(false)document.write('<hr />Punycode.decode begin: ['+output+']<br />');
- if(!Punycode.Dmap)for(w=0,Punycode.Dmap={};w<Punycode.map.length;w++){
-	 Punycode.Dmap[Punycode.map.charAt(w)]=w;
-	 if(false)document.write('Punycode.Dmap['+Punycode.map.charAt(w)+']='+w+'<br />');
- }
- while(p<PCode.length-1){
-  for(oldi=i,w=1,k=Punycode.base;;k+=Punycode.base){
-   if(++p>=PCode.length){alert('Punycode: invalid input: out of range');return PCode;}
-   if(false)document.write('PCode.charAt('+p+')'+' = '+PCode.charAt(p)+' → '+Punycode.Dmap[PCode.charAt(p)]+'<br />');
-   if(isNaN(digit=Dmap[PCode.charAt(p)])){alert('Punycode: invalid input');return PCode;}
-   if(false)if(digit>(Number.MAX_VALUE-i)/w){alert('Punycode: overflow');return;}
-   i+=digit*w;
-   t=k<=bias/* +Punycode.tmin: not needed */?Punycode.tmin:k>=bias+Punycode.tmax?Punycode.tmax:k-bias;
-   if(false)document.write('i='+i+', t='+t+', digit='+digit+', k='+k+'<br />');
-   if(digit<t)break;
-   if(false)if(w>Number.MAX_VALUE/(base-t)){alert('Punycode: overflow');return;}
-   w*=Punycode.base-t;
-  }
-  bias=Punycode.adapt(i-oldi,l=output.length+1,oldi==0);
-  if(false)document.write('bias='+bias+', n='+n+', i='+i+', l='+l+'<br />');
-  if(false)if(i/l>Number.MAX_VALUE-n){alert('Punycode: overflow');return;}
-  n+=Math.floor(i/l);
-  i%=l;
-  if(false)document.write('['+output.length+']'+output+'+'+n+'(0x'+n.toString(16).toUpperCase()+')@'+i+'→');
-  output=output.slice(0,i)+String.fromCharCode(n)+output.slice(i);
-  if(false)document.write('['+output.length+']'+output+'<br />');
-  i++;
- }
- if(false)document.write(PCode+'→'+output+'<br />');
- return output;
-};
-
-
-if(false){
-	var testC='Hello-Another-Way--fc4qua05auwb3674vfr0b',rC;
-	document.write('<hr />'+
-	//Punycode.encodeDomain('http://國際.計畫.org/國際.計畫.htm')
-	Punycode.decodeDomain('http://xn--9cs229l.xn--gpyr35b.org/%E5%9C%8B%E9%9A%9B.%E8%A8%88%E7%95%AB.htm')
-	//Punycode.encode('463578')
-	
-	+Punycode.decode('ihqwcrb4cv8a8dqg056pqjye')
-	+'<hr />'+Punycode.encode('他们为什么不说中文')
-	
-	+Punycode.decode('ihqwctvzc91f659drss3x8bo0yb')+'<hr />'+Punycode.encode('他們爲什麽不說中文')
-	
-	+'<hr />'+
-	(rC=Punycode.decode(testC))+'<hr />'+(rC=Punycode.encode(rC))+'<hr />'+(testC==rC?'OK':'<b style="color:red">FAILED</b>:<br />'+testC+'<br />'+rC)
-	);
-}
-
-
-
-/**<code>	一個非常不好的 handle onload 方法。只在onload不具有arguments時有用，應該亦可用setTimeout('~',0)
-	where	0:back,1:front
-
-for IE:
-<!--[if IE]><script defer type="text/javascript">
-//	onload code
-</script><![endif]-->
-
-c.f.	http://www.brothercake.com/	http://simonwillison.net/2004/May/26/addLoadEvent/
-	GO1.1 Generic onload by Brothercake
-	window.addEventListener,document.addEventListener,typeof window.attachEvent
-c.f.	setTimeout('~',0);	不過這不能確定已經load好
-</code>*/
-if(false){
-	var addonload=function (s,where){
-		 if(!s||typeof window!='object')return 1;
-		 if(typeof s=='function'){
-		  s=library_namespace.parse_function(s);
-		  if(!s||!s.funcName)return 2;
-		  s=s.funcName+'()';
-		 }
-		 var o=window.onload?typeof window.onload=='string'?window.onload:library_namespace.parse_function(window.onload).contents:'';
-		 window.onload=new Function(where?s+';\n'+o:o+';\n'+s);
-		}
-}
-
-
-_// JSDT:_module_
-.
-DOM_loaded = function() {
-	if (winodow.document.readyState === "complete"
-		|| winodow.document.body) {
-		_.DOM_loaded = function() {
-			return true;
-		};
-		return true;
+	// 2007/4/25-27 0:48:22 RFC 3492 IDNA Punycode 未最佳化
+	// http://stackoverflow.com/questions/183485/can-anyone-recommend-a-good-free-javascript-for-punycode-to-unicode-conversion
+	// http://xn-punycode.com/
+	function Punycode() {
 	}
 
-	return false;
-};
-
-
-if(false){
-// The DOM ready check for Internet Explorer
-try{document.documentElement.doScroll('left');}
-catch(e){setTimeout(arguments.callee, 50);return;}
-}
-
-_// JSDT:_module_
-.
-/**
- * 比較好點的 add onload。
- * 比起 add_listener()，本函數在已經 load 時依然會執行，而 add_listener 因為是用榜定的方法，因此 load 完就不再觸發(?)。
- * 這東西頂多只能擺在 include 的 JS file 中，不能 runtime include。
- * @example <code>
- * CeL.run('net.web');
- * CeL.on_load(function(){sl(1);},'sl(2);');
- * </code>
- * 
- * @requires	_.add_listener,_.DOM_loaded
- * @see
- * jQuery: $(document).ready(listener);
- * DOMContentLoaded	http://webdesign.piipo.com/jquery/jquery_events
- * 可直接參考 SWFObject。
- * TODO:
- * <a href="http://javascript.nwbox.com/IEContentLoaded/" accessdate="2010/6/3 11:15" title="IEContentLoaded - An alternative for DOMContentLoaded on Internet Explorer">IEContentLoaded</a>
- * DOMContentLoaded是firefox下特有的Event, 當所有DOM解析完以後會觸發這個事件。
- * DOMContentLoaded與DOM中的onLoad事件與其相近。但onload要等到所有頁面元素加載完成才會觸發, 包括頁面上的圖片等等。
- * <a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/06/05/jquery-ready-vs-load.aspx" accessdate="2010/6/3 11:17">jQuery ready vs load - 黑暗執行緒</a>
- * $(document).ready(fn)發生在"網頁本身的HTML"載入後就觸發，而$(window).load(fn)則會等到"網頁HTML 標籤中引用的圖檔、內嵌物件(如Flash)、IFrame"等拉哩拉雜的東西都載入後才會觸發。
- * @_memberOf	_module_
- */
-on_load = function on_load() {
-	var _s = _.on_load, loaded=_.DOM_loaded(), i = 0, a = arguments, l = a.length;
-	for (; i < l; i++)
-		if(loaded)
-			a[i].call(document);
-		else
-			_.add_listener('load', a[i], document);
-};
-
-
-_// JSDT:_module_
-.
-/**
- * bind/add listener. register event control, setup code to run.
- * listener 應該加上 try{}catch{}，否則會搞不清楚哪裡出問題。
- * **	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 p_first 而改變。
- * **	NOT TESTED!!
- * TODO:
- * remove_listener():
- * .removeEventListener();
- * .detachEvent();
- * default 'this'
- * 自訂 event
- * 
- * @param {string}type	listen to what event type. event name/action.
- * 				http://www.whatwg.org/specs/web-apps/current-work/#event-handler-event-type
- * @param listener	listener function/function array/function string,
- * 				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
- * 			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}
- * @param [target_element]	bind/attach to what HTML element
- * @param [p_first]	parentNode first
- * @return
- * @since	2010/1/20 23:42:51
- * @see
- * c.f., GEvent.add_listener()
- * @_memberOf	_module_
- */
-add_listener = function add_listener(type, listener, target_element, p_first) {
-
-	var _s = _.add_listener, i, adder;
-
-	//	進階功能.
-	//	type is Object or Array.
-	if (library_namespace.is_Object(type) || Array.isArray(type)){
-		// type is Object:
-		// usage: add_listener({unload:Unload},target_element);
-		// usage: add_listener({load:{true:[function(){sl(1);},'sl(2);']}},target_element);
-		// type is Array:
-		// usage: add_listener([{load:load},{unload:Unload}],target_element);
-
-		//	此時 listener 已被忽略，shift arguments。
-		if (!(listener = get_element(listener)))
-			return;
-
-		for (i in type){
-			library_namespace.debug(i + ': ' + type[i], 2, 'add_listener');
-
-			Array.isArray(type)?
-					_s(type[i], listener, target_element)
-					: _s(i, type[i], listener, target_element);
-		}
-
-		return;
-	}
-
-	if (!type || !listener)
-		return;
-
-	if (typeof listener === 'string')
-		listener = new Function('e', listener);
-
-	if (typeof target_element === 'string')
-		target_element = get_element(target_element);
-
-	if(typeof p_first !== 'boolean')
-		p_first = typeof p_first === 'undefined' ? _s.p_first : !!p_first;
-
-	//	listener is Array or Object.
-	if (library_namespace.is_Object(listener) || Array.isArray(listener)){
-		// usage: add_listener('unload',{true:Unload1});
-		// usage: add_listener('unload',[Unload1,Unload2]);
-		// 因為 Array 會從最小的開始照順序出，所以這邊不再判別是否為 Array。
-		for (i in listener){
-			if(false) if(isNaN(f)
-					//||i==1||i===true
-					){sl('add_listener: to '+i);_s.p_first=i==='true';}
-			_s(type, listener[i], target_element,
-					i === 'true' || (i === 'false' ? false : undefined));if(false) sl((typeof i)+' ['+i+'] '+_s.p_first);
-		}
-
-	}else if(library_namespace.is_Function(listener)){
-		/**
-		 * 先設定好 native listener adding function
-		 */
-		if (target_element)
-			adder = target_element.addEventListener;
-		else if (!(adder = _s.global_adder) && adder !== null)
-			_s.global_adder = adder = _s.get_adder();
-
-		//$(document).ready(listener);
-
-		//	使 listener 能以 this 取得 target_element
-		i = function(e) {
-			// this_event
-			if(!e)
-				e = window.event;
-
-			if(false)library_namespace.debug('fire ' + type, 0, 'add_listener');
-
-			//	正規化 <a href="http://www.w3.org/TR/2009/WD-DOM-Level-3-Events-20090908/#interface-Event">Document Object Model (DOM) Level 3 Events</a>.
-			//	這邊的附加設定應盡量只添上 native object, 預防 memory leak.
-			if(!e.currentTarget)
-				e.currentTarget = target_element;
-			if(!e.target)
-				e.target = e.srcElement || target_element;
-
-			//	from fix in jQuery
-
-			// check if target is a textnode (safari)
-			if ( e.target && e.target.nodeType === TEXT_NODE )
-				e.target = e.target.parentNode;
-
-			// Add relatedTarget, if necessary
-			if ( !e.relatedTarget && e.fromElement )
-				e.relatedTarget = e.fromElement === e.target ? e.toElement : e.fromElement;
-
-			//	取得滑鼠座標
-			//	http://hartshorne.ca/2006/01/23/javascript_cursor_position/
-			//	http://hartshorne.ca/2006/01/18/javascript_events/
-			if ( isNaN(e.pageX) && !isNaN(e.clientX) ) {
-				var s = get_window_status.scroll();
-				e.pageX = e.clientX + s[0] - s[2];
-				e.pageY = e.clientY + s[1] - s[3];
-			}
-
-			//	.call: 使 listener 可以用 'this' 來指涉 element
-			listener.call(target_element, e);
-		};
-
-		// 主要核心動作設定之處理
-		//	TODO: 在 onload 時使 target_element = null
-		if(false) sl(type+' ('+((typeof p_first=='undefined'?_s.p_first:!!p_first)?'p_first':'run first')+'): '+listener);
-		if(adder){
-			try{
-				//	直接用 target_element.addEventListener 不會有問題。
-				//	.call(window.document): for Chrome 'Illegal invocation' issue
-				//	http://stackoverflow.com/questions/1007340/javascript-function-aliasing-doesnt-seem-to-work
-				//	但 IE9 需要 .call(target_element) 或者別用 .call，否則會得到 "Invalid procedure call or argument"
-				adder.call(target_element, type, i, p_first);
-			}catch(e){
-				adder.call(window.document, type, i, p_first);
-			}
-			return;
-		}
-
-		if(target_element){
-			if(false)library_namespace.warn('add_listener: Can not get element.addEventListener! element.attachEvent: ' + target_element.attachEvent);
-		}
-		return target_element && (adder = target_element.attachEvent) ?
-			// http://msdn.microsoft.com/en-us/library/ms536343(VS.85).aspx
-			adder('on' + type, i)
-
-		: _s.default_adder(type, i, p_first, target_element)
-		;
-	}
-
-};
-
-_// JSDT:_module_
-.
-/**
- * useCapture: parentNode first
- * @see
- * <a href="http://www.w3.org/TR/DOM-Level-3-Events/#event-flow" accessdate="2010/4/16 22:40">Document Object Model (DOM) Level 3 Events Specification</a>,
- * <a href="http://www.w3.org/TR/DOM-Level-3-Events/#interface-EventTarget" accessdate="2010/4/16 22:42">Interface EventTarget</a>
- */
-add_listener.p_first = false;
-
-_// JSDT:_module_
-.
-/**
- * get (native) global listener adding function.
- * TODO: 只設定一次
- * historical for Netscape Navigator, mozilla: window.captureEvents, document.captureEvents
- */
-add_listener.get_adder = function() {
-	/**
-	 * moz (gecko), safari 1.2, ow5b6.1, konqueror, W3C standard: window.addEventListener
-	 * @ignore
-	 * @see
-	 * <a href="https://developer.mozilla.org/en/DOM/element.addEventListener" accessdate="2010/4/16 22:35">element.addEventListener - MDC</a>
-	 * <a href="http://simonwillison.net/2004/May/26/addLoadEvent/" accessdate="2010/4/16 22:36">Executing JavaScript on page load</a>
-	 */
-	return window.addEventListener
-	/**
-	 * opera 7.50, ie5.0w, ie5.5w, ie6w: window.attachEvent
-	 * opera 7.50: document.attachEvent
-	 */
-	|| typeof window.attachEvent === 'function' && function(type, listener) {
-		window.attachEvent('on' + type, listener);
-	}
-	/**
-	 * MSN/OSX, opera 7.50, safari 1.2, ow5b6.1: document.addEventListener
-	 */
-	|| document.addEventListener
-	/**
-	 * ie5m, MSN/OSX, ie5.0w, ie5.5w ie6w: document.onreadystatechange
-	 */
-	|| null;
-};
-
-_// JSDT:_module_
-.
-/**
- * 最原始的，含括其他情況。
- * all: window.onload.
- * TODO: use queue
- * @param type	listen to what event type
- * @param listener	listener function/function array
- * @param [p_first]	parentNode first
- * @param [target_element]	bind/attach to what HTML element
- * @return
- * @see
- * http://blog.othree.net/log/2007/02/06/third-argument-of-addeventlistener/
- */
-add_listener.default_adder = function(type, listener, p_first, target_element) {
-	if(!target_element)
-		target_element = window;
-
-	var old = target_element[type = 'on' + type];
-	if(false)library_namespace.debug('adder ' + type + (old?' with old listener: '+old:''), 0, 'add_listener.default_adder');
-
-	return target_element[type] =
-		old ?
-			//	TODO: typeof old === 'string'
-			p_first ? function(e) {
-				if(!e)
-					e = window.event;
-				if(false)library_namespace.debug('fire ' + type + ' (parentNode first)', 0, 'add_listener.default_adder');
-				old.call(target_element, e);
-				listener.call(target_element, e);
-			} : function(e) {
-				if(!e)
-					e = window.event;
-				if(false)library_namespace.debug('fire ' + type + ' (parentNode latter)', 0, 'add_listener.default_adder');
-				listener.call(target_element, e);
-				old.call(target_element, e);
-			}
-		:
-			function(this_event) {
-			if(false)library_namespace.debug('fire ' + type, 0, 'add_listener.default_adder');
-				listener.call(target_element, this_event || window.event);
-			}
-		;
-};
-
-_// JSDT:_module_
-.
-/**
- * TODO:
- * listener list.
- * 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
- * add_listener.list[node][event type]=[listener list]
- */
-add_listener.list = library_namespace.null_Object();
-
-_// JSDT:_module_
-.
-/**
- * TODO:
- * 觸發函數.
- * 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
- * add_listener.list[type]=[listener list]
- */
-add_listener.list = library_namespace.null_Object();
-
-
-
-_// JSDT:_module_
-.
-/**
- * 阻止 JavaScript 事件冒泡傳遞，使 event 不傳到 parentNode。
- * @param e	event handler
- * @param c	cancel bubble
- * @see
- * http://www.jb51.net/html/200705/23/9858.htm
- * @_memberOf	_module_
- */
-stop_event = function(event, c) {
-	if (!event)
-		event = window.event;
-
-	if(typeof event.preventDefault === 'function')
-		//	在拖曳時可阻止預定動作，例如跳頁展示圖片或檔案。 
-		event.preventDefault();
-	else
-		event.returnValue = false;
-
-	if(c)
-		// cancelBubble 在IE下有效，stopPropagation 在 Firefox 下有效。
-		// 停止冒泡，事件不會上升，我們就可以獲取精確的鼠標進入元素。 http://realazy.org/lab/bubble/
-		if(typeof event.stopPropagation === 'function')
-			event.stopPropagation();
-		else
-			event.cancelBubble = true;
-
-	return false;
-};
-
-
-
-//comparator([key, original index])
-function sort_nodes(node_list, comparator, key_generator) {
-
-	if (typeof key_generator !== 'function')
-		key_generator = function(n) {
-			return n;
-		};
-
-	var i = 0, length = node_list.length, list = [];
-	for (; i < length; i++)
-		list.push([ key_generator(node_list[i]), i ]);
-
-	list.sort(comparator);
-
-	// 依照次序排列 nodes。
-	// TODO: 採用 .insertBefore() 時的最佳演算法，最小化（最少化）.insertBefore() 操作。找出 sort 後之連續 node list，有需要更動時才改。
-	// TODO: 最佳化 table list。
-	// TODO: 先 hide 是否會較快?
-	for (i = 0; i < length; i++) {
-	}
-}
-
-
-
-_// JSDT:_module_
-.
-/**
- * 獲取頁面上選中的選取區資訊。
- * 
- * @example <code>
-	CeL.add_listener('mouseup', function (e) { var s = CeL.get_selection(); if (s && s.text) CeL.debug('select @' + this + '(' + s.element + ')' + ' (' + s.left + '+' + s.width + ',' + s.top + '+' + s.height + '), (' + e.pageX + ',' + e.pageY + '): ' + s.text); }, target_element);
- * </code>
- * 
- * @param	{Number} [index]	TODO: 第幾選取區, default: all or 0 if there's only ONE/ZERO selection
- * @return	{Object}
- * 	{
- * 		left: {Number} in px,
- * 		top: {Number} in px,
- * 		width: {Number} in px,
- * 		height: {Number} in px,
- * 		text: {String} 文字,
- * 		element: {HTMLElement},
- * 		selection: selection object (browser dependent)
- * 	}
- * @return	{undefined}	error.
- * @see
- * http://plugins.jquery.com/project/selectedText,
- * Gecko: https://developer.mozilla.org/en/DOM/Selection
- * @_memberOf	_module_
- */
-get_selection = function(index) {
-};
-
-
-try{
-
-	if (window.getSelection)
-		_.get_selection = function(index) {
-			//	Firefox, Opera, Safari
-			//	http://help.dottoro.com/ljcvonpc.php
-			//	Although the selection object is supported by Opera, it is only partially suppported. The window.getSelection method provides more complex functionality in that browser.
-			//	http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
-			var e = document.activeElement,
-			//	在 Opera 中，e 為 [object Text]
-			tag = e && e.tagName && e.tagName.toLowerCase(),
-			s = window.getSelection();
-			if(!s.rangeCount)
-				//	點擊而無選擇?
-				//	最起碼回應能得知的資訊
-				return {
-					text : '',
-					element: s,
-					selection: s
-				};
-
-			//	超出範圍可能會 Error: INDEX_SIZE_ERR: DOM Exception 1
-			s = s.getRangeAt(!isNaN(index) && 0 <= index
-					&& index < s.rangeCount ? index : 0);
-
-			//	Gecko: https://developer.mozilla.org/en/DOM/range
-			//	除了 Gecko 外，都有 s.getBoundingClientRect 但無 s.endContainer.getBoundingClientRect。
-			//	Gecko 可以取 mouse event 作 workaround
-			if(false)library_namespace.debug(s.endContainer.parentNode);
-			var offset = _.get_node_offset(
-					s.getBoundingClientRect ? s : s.endContainer.parentNode
-				);
-
-			return {
-				//	TODO: offset
-				//	TODO: do test
-				//s.startOffset,
-				left : offset.left,
-				top : offset.top,
-				//s.endOffset,
-				width : offset.width,
-				height : offset.height,
-				text : tag === 'textarea' || tag === 'input' || tag === 'select'
-						? e.value.substring(e.selectionStart, e.selectionEnd)
-						: s.toString(),
-				element: 
-					//s.endContainer
-					s,
-				selection: s
-			};
-	
-		};
-
-	else if (document.selection && document.selection.createRange) {
-		// Internet Explorer
-		// http://msdn.microsoft.com/en-us/library/ms534692%28VS.85%29.aspx
-		// TODO: http://help.dottoro.com/ljefwsqm.php
-
-		document.execCommand
-		&& document.execCommand('MultipleSelection', true, true);
-
-		_.get_selection = function(input) {
-			var s = document.selection.createRange();
-
-			return s.type !== 'None' && {
-				//	TODO: do test
-				//	http://msdn.microsoft.com/en-us/library/ms535872%28v=VS.85%29.aspx
-				//	s.offsetLeft, s.offsetTop 較不準
-				left : s.boundingLeft,
-				top : s.boundingTop,
-				width : s.boundingWidth,
-				height : s.boundingHeight,
-				text : s.text,
-				//	TODO
-				//element: null,
-				selection: s
-			};
-
-		};
-
-	} else if (document.getSelection)
-		_.get_selection = function(input) {
-			return {
-				//	TODO: get offset from mouse location
-				text : document.getSelection()
-			};
-		};
-
-}catch (e) {
-	// TODO: handle exception
-}
-
-// ↑HTML only	-------------------------------------------------------
-
-
-
-var is_IE=/*@cc_on!@*/!true;
-
-//http://www.real-blog.com/programming/259
-//http://fettig.net/weblog/2006/10/09/detecting-ie7-in-javascript/
-if(false)
-if(typeof window.XMLHttpRequest!="undefined"){
- // IE 7, mozilla, safari, opera 9
-}else{
- // IE6, old browsers
-}
-
-
-
-
-
-/**<code>
-http://www.cnlei.org/blog/article.asp?id=337
-在IE下：
->> 支持keyCode
->> 不支持which和charCode,二者值為 undefined
-
-在Firefox下：
->> 支持keyCode，除功能鍵外，其他鍵值始終為 0
->> 支持which和charCode，二者的值相同
-
-在Opera下：
->> 支持keyCode和which，二者的值相同
->> 不支持charCode，值為 undefined
-
-</code>*/
-_// JSDT:_module_
-.
-/**
- * 條碼器(Barcode Scanner)/雷射讀碼器的輸入可用 onkeypress 取得
- * @param callback	callback
- * @return
- * @since	2008/8/26 23:10
- * @example <code>
- * //	usage:
- * deal_with_barcode(function(t) {
- * 	if (t.length > 9 && t.length < 17)
- * 		document.getElementById("p").value = t,
- * 		document.forms[0].submit();
- * });
- * </code>
- * 
- * @_memberOf	_module_
- */
-deal_with_barcode = function (callback) {
-	var k, lt = 0, st = 0;
-	document.onkeypress = function(this_event) {
-		var c = new Date();
-		if (
-				// 前後不超過 800，
-				c - st > 800 ||
-				// 與上一輸入不超過 90
-				c - lt > 90) {
-			st = c;
-			k = "";
-		}
-		lt = c;
-		c = this_event || window.event;
-		c = c.keyCode || c.which || c.charCode;
-		if (c > 32 && c < 120)
-			k += String.fromCharCode(c);
-		else if (c == 13)
-			callback(k, this_event);
+	Punycode.map = 'abcdefghijklmnopqrstuvwxyz0123456789';
+	Punycode.Dmap = 0;
+	Punycode.base = Punycode.map.length;
+	Punycode.tmin = 1;
+	Punycode.tmax = 26;
+	Punycode.skew = 38;
+	Punycode.damp = 700;
+	// 偏移
+	Punycode.initial_bias = 72;
+	// 128
+	Punycode.initial_n = 0x80;
+	// the default ACE prefix
+	Punycode.prefix = "xn--";
+	Punycode.delimiter = '-';
+	Punycode._b = Punycode.base - Punycode.tmin;
+	// Punycode._t = (Punycode._b * Punycode.tmax) >> 1;
+	Punycode._t = Math.floor(Punycode._b * Punycode.tmax / 2);
+
+	// IDNA ToASCII
+	Punycode.encodeDomain = function(UURL) {
+		var m = UURL.match(/^([\w\d\-]+:\/\/)?([^\/]+)/), UDomain = m ? m[2]
+				: '', i = (m = UDomain) ? UURL.indexOf(m) : 0;
+		if (false)
+			document.write('<hr />Punycode.encodeDomain UDomain: [' + i + ']['
+					+ m + ']<br />');
+		if (m && m.replace(/[\x01-\x7f]+/g, ''))
+			m = m.replace(/([^.]+)\./g, function($0, $1) {
+				if (false)
+					document.write($1 + '→' + encode($1) + '<br />');
+				return Punycode.prefix + Punycode.encode($1) + '.';
+			}), UURL = encodeURI(UURL.slice(0, i) + m
+					+ UURL.slice(i + UDomain.length));
+		return UURL;
 	};
 
-};
-
-
-
-//	https://addons.mozilla.org/js/search-plugin.js
-//	TODO, & Chrome
-function add_engine() {
-	// NYI
-	throw 'TODO';
-}
-
-
-
-//	for string encoding	-------------------------------------------------------
-//	將HTML:&#ddd; → Unicode text
-//	此函數只能用一次，為輸入資料良好之情況下使用。完整版： HTML_to_Unicode
-//turnUnicode[generateCode.dLK]='setTool,getText';
-function turnUnicode(b){
- if(false){
-		//行不通
-	 s=s.replace(/&#(\d+);/g,String.fromCharCode("$1"));
- }
- var s=this.valueOf().replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'"),m,t;
-
- //舊版本
- if(false){
-	 if(m=s.match(/&#(\d{2,7});/g))for(var i=0;i<m.length;i++)s=s.replace(m[i],String.fromCharCode(parseInt(m[i].slice(2,-1))));
- }
-
- if(false){
-		//預防&#38;：&#38;=&
- s=s
- .replace(/&#(0*38|[xX]0*26);/g, "\0")
- 
- 	.replace(/&#0*38;([^\d;]|$)/g, "\0$1")
- .replace(/&#[xX]0*26;?([^a-fA-F\d;]|$)/g, "\0$1");
- }
- 
-	//JScript 5.5~
- s=s.replace(/&#0*(\d{2,7});/g,function($0,$1){return String.fromCharCode($1);});
- 	//預防error之版本,~10FFFF=1114111
- if(false){
-	 s=s	.replace(/&#0*(\d{2,7});/g, function($0,$1){return $1>1114111?$0:String.fromCharCode($1);});
-	 
-	 if(mode=='x')
-	 	//$x111;之版本
-	  s=s.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g,function($0,$1){return String.fromCharCode(parseInt($1,16));});
-	 s=s	.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g,function($0,$1){var t=parseInt($1,16);return t>1114111?$0:String.fromCharCode(t);});
- }
-
-
- 	//預防&#38;回復
- s=s.replace(/\0/g, "&")
- ;
- if(b)s=s.gText();
- return s;
-};
-//	可適用perl: HTML::Entities::encode_entities()
-//	需要escape的: [\<\>\"\'\%\;\)\(\&\+], tr/A-Za-z0-9\ //dc	http://www.cert.org/tech_tips/malicious_code_mitigation.html
-
-// @see https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
-var HTML_Entities = {
-	quot : '"',
-	// 這在 HTML_to_Unicode() 不能先處理!
-	// amp : '&',
-	apos : "'",
-	lt : '<',
-	gt : '>',
-	nbsp : '\u00A0',
-	iexcl : '¡',
-	cent : '¢',
-	pound : '£',
-	curren : '¤',
-	yen : '¥',
-	brvbar : '¦',
-	sect : '§',
-	uml : '¨',
-	copy : '©',
-	ordf : 'ª',
-	laquo : '«',
-	not : '¬',
-	shy : '\u00AD',
-	reg : '®',
-	macr : '¯',
-	deg : '°',
-	plusmn : '±',
-	sup2 : '²',
-	sup3 : '³',
-	acute : '´',
-	micro : 'µ',
-	para : '¶',
-	middot : '·',
-	cedil : '¸',
-	sup1 : '¹',
-	ordm : 'º',
-	raquo : '»',
-	frac14 : '¼',
-	frac12 : '½',
-	frac34 : '¾',
-	iquest : '¿',
-	Agrave : 'À',
-	Aacute : 'Á',
-	Acirc : 'Â',
-	Atilde : 'Ã',
-	Auml : 'Ä',
-	Aring : 'Å',
-	AElig : 'Æ',
-	Ccedil : 'Ç',
-	Egrave : 'È',
-	Eacute : 'É',
-	Ecirc : 'Ê',
-	Euml : 'Ë',
-	Igrave : 'Ì',
-	Iacute : 'Í',
-	Icirc : 'Î',
-	Iuml : 'Ï',
-	ETH : 'Ð',
-	Ntilde : 'Ñ',
-	Ograve : 'Ò',
-	Oacute : 'Ó',
-	Ocirc : 'Ô',
-	Otilde : 'Õ',
-	Ouml : 'Ö',
-	times : '×',
-	Oslash : 'Ø',
-	Ugrave : 'Ù',
-	Uacute : 'Ú',
-	Ucirc : 'Û',
-	Uuml : 'Ü',
-	Yacute : 'Ý',
-	THORN : 'Þ',
-	szlig : 'ß',
-	agrave : 'à',
-	aacute : 'á',
-	acirc : 'â',
-	atilde : 'ã',
-	auml : 'ä',
-	aring : 'å',
-	aelig : 'æ',
-	ccedil : 'ç',
-	egrave : 'è',
-	eacute : 'é',
-	ecirc : 'ê',
-	euml : 'ë',
-	igrave : 'ì',
-	iacute : 'í',
-	icirc : 'î',
-	iuml : 'ï',
-	eth : 'ð',
-	ntilde : 'ñ',
-	ograve : 'ò',
-	oacute : 'ó',
-	ocirc : 'ô',
-	otilde : 'õ',
-	ouml : 'ö',
-	divide : '÷',
-	oslash : 'ø',
-	ugrave : 'ù',
-	uacute : 'ú',
-	ucirc : 'û',
-	uuml : 'ü',
-	yacute : 'ý',
-	thorn : 'þ',
-	yuml : 'ÿ',
-	OElig : 'Œ',
-	oelig : 'œ',
-	Scaron : 'Š',
-	scaron : 'š',
-	Yuml : 'Ÿ',
-	fnof : 'ƒ',
-	circ : 'ˆ',
-	tilde : '˜',
-	Alpha : 'Α',
-	Beta : 'Β',
-	Gamma : 'Γ',
-	Delta : 'Δ',
-	Epsilon : 'Ε',
-	Zeta : 'Ζ',
-	Eta : 'Η',
-	Theta : 'Θ',
-	Iota : 'Ι',
-	Kappa : 'Κ',
-	Lambda : 'Λ',
-	Mu : 'Μ',
-	Nu : 'Ν',
-	Xi : 'Ξ',
-	Omicron : 'Ο',
-	Pi : 'Π',
-	Rho : 'Ρ',
-	Sigma : 'Σ',
-	Tau : 'Τ',
-	Upsilon : 'Υ',
-	Phi : 'Φ',
-	Chi : 'Χ',
-	Psi : 'Ψ',
-	Omega : 'Ω',
-	alpha : 'α',
-	beta : 'β',
-	gamma : 'γ',
-	delta : 'δ',
-	epsilon : 'ε',
-	zeta : 'ζ',
-	eta : 'η',
-	theta : 'θ',
-	iota : 'ι',
-	kappa : 'κ',
-	lambda : 'λ',
-	mu : 'μ',
-	nu : 'ν',
-	xi : 'ξ',
-	omicron : 'ο',
-	pi : 'π',
-	rho : 'ρ',
-	sigmaf : 'ς',
-	sigma : 'σ',
-	tau : 'τ',
-	upsilon : 'υ',
-	phi : 'φ',
-	chi : 'χ',
-	psi : 'ψ',
-	omega : 'ω',
-	thetasym : 'ϑ',
-	upsih : 'ϒ',
-	piv : 'ϖ',
-	ensp : ' ',
-	emsp : ' ',
-	thinsp : ' ',
-	zwnj : '\u200C',
-	zwj : '\u200D',
-	lrm : '\u200E',
-	rlm : '\u200F',
-	ndash : '–',
-	mdash : '—',
-	lsquo : '‘',
-	rsquo : '’',
-	sbquo : '‚',
-	ldquo : '“',
-	rdquo : '”',
-	bdquo : '„',
-	dagger : '†',
-	Dagger : '‡',
-	bull : '•',
-	hellip : '…',
-	permil : '‰',
-	prime : '′',
-	Prime : '″',
-	lsaquo : '‹',
-	rsaquo : '›',
-	oline : '‾',
-	frasl : '⁄',
-	euro : '€',
-	image : 'ℑ',
-	weierp : '℘',
-	real : 'ℜ',
-	trade : '™',
-	alefsym : 'ℵ',
-	larr : '←',
-	uarr : '↑',
-	rarr : '→',
-	darr : '↓',
-	harr : '↔',
-	crarr : '↵',
-	lArr : '⇐',
-	uArr : '⇑',
-	rArr : '⇒',
-	dArr : '⇓',
-	hArr : '⇔',
-	forall : '∀',
-	part : '∂',
-	exist : '∃',
-	empty : '∅',
-	nabla : '∇',
-	isin : '∈',
-	notin : '∉',
-	ni : '∋',
-	prod : '∏',
-	sum : '∑',
-	minus : '−',
-	lowast : '∗',
-	radic : '√',
-	prop : '∝',
-	infin : '∞',
-	ang : '∠',
-	and : '∧',
-	or : '∨',
-	cap : '∩',
-	cup : '∪',
-	int : '∫',
-	there4 : '∴',
-	sim : '∼',
-	cong : '≅',
-	asymp : '≈',
-	ne : '≠',
-	equiv : '≡',
-	le : '≤',
-	ge : '≥',
-	sub : '⊂',
-	sup : '⊃',
-	nsub : '⊄',
-	sube : '⊆',
-	supe : '⊇',
-	oplus : '⊕',
-	otimes : '⊗',
-	perp : '⊥',
-	sdot : '⋅',
-	lceil : '⌈',
-	rceil : '⌉',
-	lfloor : '⌊',
-	rfloor : '⌋',
-	lang : '〈',
-	rang : '〉',
-	loz : '◊',
-	spades : '♠',
-	clubs : '♣',
-	hearts : '♥',
-	diams : '♦'
-};
-
-_// JSDT:_module_
-.
-/**
- * Translate HTML code to Unicode text.
- * @param {String} HTML	HTML code
- * @param {Boolean} only_digital
- * @returns
- * @_memberOf	_module_
- */
-HTML_to_Unicode = function(HTML, only_digital) {
-	//	使用\0可能會 Warning: non-octal digit in an escape sequence that doesn't match a back-reference
-	var t = HTML.valueOf();
-
-	if (!only_digital)
-		// 處理常用的 HTML Entities。
-		t = t
-			//	自動clip null character
-			.replace(/\0\0/g, '')
-			.replace(/&nbsp;/g, ' ')
-			.replace(/&lt;/g, '<')
-			.replace(/&gt;/g, '>')
-			.replace(/&quot;/g, '"')
-			//.replace(/&apos;/g, "'")
-			;
-
-	t = t
-		//預防&#38;：&#38;=&
-		.replace(/&#(0*38|[xX]0*26);/g, "\0\0")
-		//預防error之版本,~10FFFF=1114111
-		.replace(/&#0*(\d{2,7});/g, function ($0, $1) { return $1 > 1114111 ? $0 : String.fromCharCode($1); })
-		.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function ($0, $1) { var t = parseInt($1, 16); return t > 1114111 ? $0 : String.fromCharCode(t); })
-		.replace(/%([a-fA-F\d]{2})/g, function ($0, $1) { return String.fromCharCode(parseInt($1, 16)); })
-		;
-
-	if (!only_digital) {
-		// HTML Entities (HTML character entity)
-		t = t.replace(/&([a-z]{2,8});/ig, function(entity, name) {
-			return (name in HTML_Entities) ? HTML_Entities[name] : entity;
-		});
-	}
-
-	if (!only_digital)
-		t = t
-			//預防&#38;回復
-			.replace(/\0\0/g, "&")
-			.replace(/&amp;/g, '&')
-			;
-
-	return t;
-};
-
-_.HTML_to_Unicode.entities = HTML_Entities;
-
-
-_// JSDT:_module_
-.
-/**
- * Translate Unicode text to HTML
- * @param {String} text	Unicode text
- * @param mode	mode='x':&#xhhh;
- * @return {String}	HTML
- * @_memberOf	_module_
- */
-to_HTML = function(text, mode) {
-	var html = '', t, i = 0;
-	for (; i < text.length; i++) {
-		t = text.charCodeAt(i);
-		html += '&#' + (mode === 'x' ? 'x' + t.toString(16) : t) + ';';
-	}
-
-	return html;
-};
-
-_// JSDT:_module_
-.
-/**
- * Translate Unicode text to HTML code. escape chars
- * @param text	Unicode text
- * @param flags	flags, f&1!=0: turn \t, (f&2)==0: \n→<br />, f==4: to quoted
- * @param	ignore_tags	e.g., {object:{src:/^https?:\/\//},img:{src:/^https?:\/\//},a:{href:/^https?:\/\//}}
- * @return
- * @see https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references#Predefined_entities_in_XML
- * @_memberOf	_module_
- */
-Unicode_to_HTML = function(text, flags, ignore_tags) {
-	text = ('' + text)
-		// "&"這個字元得要首先escape
-		.replace(/&/g, '&amp;')
-		//	就是會出現這奇怪情況。但是卻也不能否認有特別想要表示"&amp;"這樣的情況。
-		//.replace(/&amp;amp;/g, '&amp;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&apos;')
-		;
-
-	if (ignore_tags)
-		text = text.replace(
-		/<([^>]+)>/g,
-		function($0, $1) {
-			if (!($1 in ignore_tags))
-				return '&lt;' + $1;
-			var s = $1.split(/ /), i = 1, l = s.length, c = ignore_tags[$1];
-			for (; i < l; i++) {
-				m = s[i].match(/^([^=]+)(.+?)/);
-				if (!(m[1] in c)
-						|| !(library_namespace.is_type(
-								c[m[1]], 'RegExp')
-								&& c[m[1]].test(m[2]) || library_namespace
-								.is_Function(c[m[1]])
-								&& c[m[1]](m[2])))
-					s[i] = '';
-				return s.join(' ');
-			}
-		});
-	else
-		text = text.replace(/</g, '&lt;');
-
-	if (flags == 4) return text;
-
-	text = text.replace(/ /g, '&nbsp;');
-
-	//if (!f) f = 0;
-	if (flags & 1)
-		text = text.replace(/	/g, '<span style="margin-left:3em;">&nbsp;</span>');
-	if (!(flags & 2))
-		{
-		text = text.replace(/(\r?\n)/g, '<br />$1')
-		 //+'<br />\n'
-		;
-		}
-	return text;
-};
-
-// Ucode:\uhhhh及\xhh之意
-_// JSDT:_module_
-.
-Unicode_unescape = function(U) {
-	var T = U.replace(/\\\\|\\u005[cC]|\\x5[cC]|\\134/g, "\0");
-		if(false){
-			//way 1
-			T=T.replace(/\\u([a-fA-F\d]{4})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
-			.replace(/\\x([a-fA-F\d]{2})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
-			.replace(/\\([0-7]{1,3})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));});
-			//way 2
-			T=T.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2})/g,function($0,$1){return String.fromCharCode(parseInt($1.substr(1),16));})
-			.replace(/\\([0-7]{1,3})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));});
-		}
-		//way 3
-		T=T.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2}|[0-7]{1,3})/g, function ($0, $1) { var t = $1.charAt(0); return String.fromCharCode(parseInt(t == 'u' || t == 'x' ? $1.substr(1) : $1, 16)); })
-		;
-
-	if (T.indexOf("\\") != -1)
-		T = T
-			.replace(/\\t/g, "<Tab>")
-			.replace(/\\n/g, "<Line Feed>")
-			.replace(/\\v/g, "<Vertical Tab>")
-			.replace(/\\f/g, "<Form Feed>")
-			.replace(/\\r/g, "<Carriage Return>")
-			.replace(/\\(.)/g, "$1");
-
-	return T.replace(/\0/g, "\\");
-};
-
-_// JSDT:_module_
-.
-//Unicode escape sequence
-//	TODO: 效能
-Unicode_escape = function(text, max_code) {
-	var i = 0, U = '', t;
-	if (isNaN(max_code))
-		max_code = 256;
-	for (; i < text.length; i++)
-		U += (t = text.charCodeAt(i)) < max_code ?
-				text.charAt(i)
-				: "\\u0000".substr(0, 6 - (t = t.toString(16)).length) + t;
-	return U;
-};
-
-function CSSToTxt(C) {
-	return C.replace(/\\\\|\\0{0,4}5[cC][ \t\r\n\f]?/g, "\0")
-		.replace(/\\([a-fA-F\d]{1,6})[ \t\r\n\f]?/g, function ($0, $1) { return String.fromCharCode(parseInt($1, 16)); })
-		.replace(/\\(.)/g, "$1").replace(/\0/g, "\\");
-}
-function TxtToCSS(T, r, sp) {
-	//	r:radio,sp:separator
-	var i = 0, C = '', t, p = r && r > 3 && r < 9 ? '0'.repeat(r - 1) : '';
-	if (!sp) sp = ''; sp += '\\';
-
-	for (; i < T.length; i++){
-		t = T.charCodeAt(i).toString(16);
-		 //(p&&r>t.length?p.substr(0,r-t.length):''):如果length是0或負值，會傳回空字串。
-		 C += sp + p.substr(0, r - t.length) + t;
-	}
-	return C.slice(sp.length - 1);
-}
-
-
-_// JSDT:_module_
-.
-/**
- * Translate a query string to a native Object contains key/value pair set.
- * @param	{String} query_string	query string. default: location.search
- * @param	{Object} add_to	append to this object
- * @return	key/value pairs
- * @type	Object
- * @since	2010/6/16 15:18:50
- * @_memberOf	_module_
- * @see
- */
-get_query = function(query_string, add_to) {
-	if (!query_string)
-		query_string = window/* self */.location.search.slice(1);
-	 else if(typeof query_string!=='string'){
-		 //TODO
-	 }
-
-	var i, q = query_string.replace(/\+/g, ' ').split('&'), p, s = add_to || library_namespace.null_Object(), k, v;
-	for (i in q)
-		try {
-			if (p = q[i].match(/^([^=]*)=(.*)$/)) {
-				k = decodeURIComponent(p[1]);
-				v = decodeURIComponent(p[2]);
-				if (k in s)
-					if (typeof s[k] === 'string')
-						s[k] = [ s[k], v ];
-					else
-						s[k].push(v);
-				else
-					s[k] = v;
-			} else
-				s[decodeURIComponent(q[i])] = undefined;
-		} catch (e) {
-			// TODO: handle exception
-		}
-
-	return s;
-};
-
-
-_// JSDT:_module_
-.
-/**
- * Translate a native Object contains key/value pair set to a query string.
- * TODO: 增進效率。
- * @param	{Object} query_Object	query Object.
- * @return	{String} query string
- * @type	String
- * @_memberOf	_module_
- * @see
- * jQuery.param
- */
-to_query_string = function(query_Object) {
-	if (!library_namespace.is_Object(query_Object))
-		return;
-
-	var name,query_list=[];
-	for(name in query_Object)
-		query_list.push(encodeURIComponent(name)+'='+encodeURIComponent(query_Object[name]));
-	return query_list.join('&');
-};
-
-/**	簡化 HTML (word)。
-	simplify HTML.
-
-	目標：剩下語意部分，去掉 style。
-	
-TODO:
-保留 b, em
-*/
-
-var has_RegExp_group = false;
-
-try {
-	has_RegExp_group = (new RegExp('(\\d)\\1')).test('00');
-} catch (e) {
-}
-
-//	保留 color: return style string to add
-//reduce_HTML.keep_color =
-reduce_HTML._keep_color = function (c) {
-	if (c !== 'black')
-		return c;
-};
-reduce_HTML.file = function (FP, enc) {
-	//sl('reduce_HTML [' + FP + ']');
-	var t = simpleRead(FP, enc || simpleFileAutodetectEncode), l;
-	if (!t) {
-		error('Open [' + FP + '] failed.');
-		return;
-	}
-
-	l = t.length;
-	t = this(t);
-
-	FP = FP.replace(/\.[xs]?html?$/i, function ($0) { return '.reduced' + $0; });
-	if(false)sl('reduce_HTML: ' + l + '→' + t.length + ' (' + parseInt(100 * t.length / l) + '%)' + ', save to [<a href="' + encodeURI(FP) + '">' + FP + '</a>].');
-	simpleWrite(FP, t, 'utf-8');
-};
-function reduce_HTML(t) {
-	if (!t)
-		return;
-	var _f = reduce_HTML, f = function($0, $1, $2) {
-		return $1 != $2 || ($1.toLowerCase() in {
-			a : 1,
-			p : 1,
-			head : 1
-		}) ? $0 : '';
-	};
-	if(false){
-		if(m=t.match(/<!--\[if [^\]]+\]>[\s\S]*?<!\[endif\]-->/))sl(m[0].replace(/</g,'&lt;'));
-		if(m=t.match(/<!\[if !vml\]>[\s\S]*?<!\[endif\]>/))sl(m[0]);
-	}
-
-	t = t
-		.replace(/[\s\n]*<(t[dh])([^>]+)>[\s\n]*/ig, function ($0, $1, $2) { var a = $2.match(/[\s\n](col|row)span=['"]?\d{1,3}['"]?/ig); return '<' + $1 + (a ? a.join('') : '') + '>'; })
-		.replace(/<\?xml:namespace[^>]+>/g, '')
-		.replace(/[\s\n]*(<\/t[dh]>)[\s\n]*/ig, '$1')
-		.replace(/<wbr[^>]*>/ig, '<br />')
-		.replace(/<([bh]r)[\s\n]+([^>]*)\/?>/ig, function ($0, $1, $2) { var m = $2.match(/[\s\n;"'][\s\n]*page-break-before[\s\n]*:[\s\n]*([^\s\n;"']+)/); return '<' + $1 + (m ? ' style="page-break-before:' + m[1] + '"' : '') + '>'; })
-		.replace(/<(span|font|p|div|b|u|i)[\s\n]+([^>]*)>/ig, function ($0, $1, $2) {
-			var t = '<' + $1, s = '', m;
-			if (
-					//	/Italic/i.test($2)
-					$2.indexOf('Italic') !== -1)
-				s += 'font-style:italic;';
-			//	TODO: <u>, <b>
-			if (_f.keep_color && (m = $2.match(/[\s\n;"'][\s\n]*color[\s\n]*:[\s\n]*([^\s\n;"']+)/)) && (m = _f.keep_color(m[1])))
-				//	保留 color
-				s += 'color:' + m + ';';
-			return t + (s ? ' style="' + s + '"' : '') + '>';
-		})
-		.replace(/<(tr|table)[\s\n]+([^>]*)>/ig, '<$1>')
-			//	不能用 .+|\n ，IE8 sometimes crash
-		.replace(/<span>([\s\S]*?)<\/span>/ig, '$1')
-			//	need several times
-		.replace(/<span>([\s\S]*?)<\/span>/ig, '$1')
-		.replace(/<font>([\s\S]*?)<\/font>/ig, '$1')
-			//	2 times
-		.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig, f)
-		.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig, f)
-		
-		.replace(/<o:p>([\s\S]*?)<\/o:p>/ig, '$1')
-		.replace(/<st1:[^>]+>([\s\S]*?)<\/st1:[^>]+>/ig, '$1')
-		.replace(/<!\[if !vml\]>([\s\S]*?)<!\[endif\]>/ig, '$1')
-		.replace(/<o:SmartTagType [^>]+\/>/ig, '')
-		/**<code>
-		<td>
-		<p>&nbsp;</p>
-		</td>
-		</code>*/
-		.replace(/<(span|p|div|t[dr])([^>]*>)<(span|p)>(([\s\n]+|&nbsp;)*?)<\/(span|p)><\/(span|p|div|t[dr])>/ig, '<$1$2$4</$7>')
-		.replace(/[\s\n]*<\/p>([\s\n]*<br\s*\/?>)*[\s\n]*<p[^>]*>/ig, '<br />\n')
-		.replace(/<link rel=(File-List|colorSchemeMapping|themeData|Edit-Time-Data)[^>]+>/ig, '')
-		.replace(/^[\s\n]*<\html[^>]*>[\s\n]*/, '<\html>')
-		.replace(/[\s\n]*<\body[^>]+>[\s\n]*/, '<\body>')
-		.replace(/[\s\n]*<!--\[if [^\]]+\]>[\s\S]*?<!\[endif\]-->(\r?\n)*/ig, '')
-		.replace(/[\s\n]*<\style[^>]*>[\s\S]*?<\/style>[\s\n]*/ig, '')
-		.replace(/[\s\n]*<\meta[\s\n][^>]+>[\s\n]*/ig, '')
-	
-		//	from HTML_to_Unicode()
-			//預防error之版本,~10FFFF=1114111
-		.replace(/&#0*(\d{2,7});/ig, function ($0, $1) { return $1 > 1114111 ? $0 : String.fromCharCode($1); })
-		.replace(/([\s\n]+|&nbsp;)+$|^([\s\n]+|&nbsp;)+/g, '')
-		;
-
-	if(has_RegExp_group){
-		t = t.replace(/<([bis])[\s\n]*>([^<]*)<\/\1>([\s\n]*)<\1>/ig, '$2');
-	}
-
-	if (/<(img|table)[>\s\n]/.test(t)) {
-		library_namespace.debug('Has table or images.');
-		t = t.replace(/<\/head>/i, '<\style type="text/css">table,th,td{border:1px solid #888;border-collapse:collapse;}img{border:0;max-width:99%;}</style></head>');
-	}
-
-	return t;
-};
-
-
-
-
-/**
- * 傳回 element's data-* attributes 相對應帶有連字符號的 name。
- * 
- * @param {String}[name]
- *            dataset name.
- * 
- * @returns {String} element's data-* attributes 相對的 name。
- * 
- * @since 2012/11/9 23:15:30
- */
-function to_hyphenated(name) {
-	if (library_namespace.is_debug() && /-[a-z]/.test(name))
-		throw new SyntaxError('The dataset name "' + name + '" contains a U+002D HYPHEN-MINUS character (-) followed by a lowercase ASCII letter.');
-
-	//	'data-': dataset prefix.
-	return 'data-' + name.replace(/[A-Z]/g, function($0) {
-		return '-' + $0.toLowerCase();
-	});
-}
-
-
-/**
- * 設定 dataset。<br />
- * 以 node.dataset 為準，node.attributes 為輔。<br />
- * ** 注意: IE8 中無法設定 <title> 之 .dataset，會被忽略掉。即使從 .outerHTML 亦無法取得。
- * 
- * @example <code>
- * //	get value
- * CeL.DOM_data(node, name);
- * 
- * //	set value
- * CeL.DOM_data(node, name, value);
- * 
- * //	delete value
- * CeL.DOM_data(node, name, undefined);
- * </code>
- * 
- * @param {HTMLElement}node
- *            所指定之 node。
- * @param {String|Object}[name]
- *            dataset name.
- * @param [value]
- *            設成 undefined 時，將 delete 此 name。
- * 
- * @returns value of dataset[name]
- * 
- * @since 2012/11/9 23:15:30
- */
-function dataset_compatible(node, name, value) {
-	if (!node || node.nodeType === TEXT_NODE)
-		// IE8 中，甚至不能設定 node.dataset，會出現 "物件不支援此屬性或方法"。
-		return;
-
-	if (!node.dataset)
-		// initialization.
-		// 給予個預設值，省略判斷，簡化流程。
-		node.dataset = library_namespace.null_Object();
-
-	if (!name) {
-		//	get all dataset.
-		return dataset_synchronize(node);
-		return node.dataset;
-	}
-
-	var d = node.dataset;
-
-	if (arguments.length > 2) {
-		// need to set value.
-		if (value === undefined)
-			delete d[name];
-		else
-			d[name] = value;
-
-		// 同步。保證全程使用此函數時，同時也會設定好 the element's data-* attributes。
-		if (value === undefined)
-			node.removeAttribute(to_hyphenated(name));
-		else
-			node.setAttribute(to_hyphenated(name), value);
-
-	} else if (library_namespace.is_Object(name)) {
-		//	此時 name = { name : value };
-		//	因為並非單純的指定到 .dataset，因此不用 Object.assign()。
-		for ( var n in name)
-			dataset_compatible(node, n, name[n]);
-		return node.dataset;
-
-	} else if ((value = node.getAttribute ? node.getAttribute(to_hyphenated(name)) : node[to_hyphenated(name)]) !== undefined) {
-		// 同步。
-		d[name] = value;
-	}
-
-	return d[name];
-}
-
-
-/**
- * 同步 / synchronize / update / prepare dataset。<br />
- * 
- * //	https://github.com/remy/polyfills/blob/master/dataset.js
- * //	https://github.com/eligrey/Xccessors
- * We won't use Element.prototype.__defineGetter__('dataset', ..):
- * IE 7 have no Object.prototype.__defineGetter__ or Object.defineProperty.
- * 
- * TODO:
- * remove attribute.
- * 
- * @param {HTMLElement}node
- *            所指定之 node。
- * @param {Boolean}[from_attributes]
- *            from the element's data-* attributes.<br />
- *            預設為 dataset ↔ attribute。設定此 flag 將會作單向設定。
- * 
- * @since 2012/11/9 23:35:30
- */
-function dataset_synchronize(node, from_attributes) {
-	if (!node || node.nodeType === TEXT_NODE)
-		// IE8 中，甚至不能設定 node.dataset，會出現 "物件不支援此屬性或方法"。
-		return;
-
-	var d = node.dataset, name;
-
-	//if (!d) return;
-	// assert: node.dataset 已經設定好了。
-
-	if (from_attributes === undefined || from_attributes) {
-		library_namespace.debug('attribute → dataset.', 2, 'dataset_synchronize');
-
-		for_attributes(node, function(name, value) {
-			//library_namespace.debug('attribute → dataset: test [' + name + '].', 2, 'dataset_synchronize');
-			if (name = name.match(/^data-([^A-Z]+)$/))
-				d[name[1].replace(/-([a-z])/g, function($0, $1) {
-					return $1.toUpperCase();
-				})] = value;
-		});
-
-		if(false){
-			for ( var i = 0, attributes = node.attributes, length = attributes.length, attribute; i < length; i++) {
-				if(false)library_namespace.debug('attribute → dataset: test [' + i + '][' + attributes[i].name + '].', 2, 'dataset_synchronize');
-				if (name = (attribute = attributes[i].name).match(/^data-([^A-Z]+)$/)) {
-					d[name[1].replace(/-([a-z])/g, function($0, $1) {
-						return $1.toUpperCase();
-					})] = node.getAttribute(attribute);
+	// IDNA ToUnicode
+	Punycode.decodeDomain = function(PURL) {
+		var m = PURL.match(/^([\w\d\-]+:\/\/)?([^\/]+)/), PDomain = m ? m[2]
+				: '', i = (m = PDomain) ? PURL.indexOf(m) : 0;
+		if (false)
+			document.write('<hr />Punycode.decodeDomain PDomain: [' + i + ']['
+					+ m + ']<br />');
+		if (m) {
+			m = m.replace(new RegExp(Punycode.prefix + '([^.]+)\\.', 'g'),
+					function($0, $1) {
+						if (false)
+							document.write($1 + '→' + Punycode.decode($1)
+									+ '<br />');
+						return Punycode.decode($1) + '.';
+					});
+			if (m != PDomain) {
+				PURL = PURL.slice(0, i) + m + PURL.slice(i + PDomain.length);
+				try {
+					PURL = decodeURI(PURL);
+				} catch (e) {
+					PURL = unescape(PURL);
 				}
 			}
 		}
+		return PURL;
+	};
 
+	Punycode.adapt = function(delta, numpoints, firsttime) {
+		if (false)
+			document.write('*adapt: ' + delta + ', ' + numpoints + ', '
+					+ firsttime + ', _b=' + _b + ', _t=' + _t + '<br />');
+		delta =
+		// Math.floor(delta/(firsttime?damp:2));
+		firsttime ? Math.floor(delta / Punycode.damp) : delta >> 1;
+		delta += Math.floor(delta / numpoints);
+		var k = 0;
+		for (; delta > _t; k += Punycode.base)
+			delta = Math.floor(delta / Punycode._b);
+		return k
+				+ Math.floor((Punycode._b + 1) * delta
+						/ (delta + Punycode.skew));
+	};
+
+	Punycode.encode = function(UString) {
+		var n = Punycode.initial_n, cA = [], m, mA = [], i = 0, c, q, delta = 0, bias = Punycode.initial_bias, output = UString
+				.replace(/[^\x01-\x7f]+/g, ''), h = output.length, b = h;
+		if (false)
+			document.write('<hr />Punycode.encode begin: [' + output
+					+ ']<br />');
+		if (b)
+			output += Punycode.delimiter;
+
+		for (; i < UString.length; i++) {
+			cA.push(c = UString.charCodeAt(i));
+			if (c > n)
+				mA.push(c);
+		}
+		mA.sort(library_namespace.descending);
+
+		while (h < cA.length) {
+			// 預防重複
+			do {
+				c = mA.pop();
+			} while (m == c);
+			m = c;
+			if (false)
+				if (m - n > (Number.MAX_VALUE - delta) / (h + 1)) {
+					alert('Punycode: overflow');
+					return;
+				}
+			// should test overflow
+			delta += (m - n) * (h + 1);
+			n = m;
+			for (i = 0; i < cA.length; i++) {
+				// fail on overflow
+				if (false)
+					if (c = cA[i], c < n && !++delta) {
+						alert('Punycode: overflow');
+						return;
+					}
+				if (c = cA[i], c < n)
+					++delta;
+				if (false)
+					document.write('<b>'
+							+ UString.charAt(i)
+							+ ' '
+							+ (c.toString(16) + ',' + n.toString(16))
+									.toUpperCase() + '</b><br />');
+				if (c == n) {
+					for (q = delta, k = Punycode.base;; k += Punycode.base) {
+						t = k <= bias/* +Punycode.tmin: not needed */? Punycode.tmin
+								: k >= bias + tmax ? Punycode.tmax : k - bias;
+						if (q < t)
+							break;
+						output += Punycode.map.charAt(t + (q - t)
+								% (Punycode.base - t));
+						if (false)
+							document.write('<b>' + output + '</b><br />');
+						q = Math.floor((q - t) / (base - t));
+					}
+					output += Punycode.map.charAt(q);
+					bias = Punycode.adapt(delta, h + 1, h == b);
+					if (false)
+						document.write('h=' + h + '/' + cA.length + ', bias='
+								+ bias + ', ' + output + '<br />');
+					delta = 0, h++;
+				}
+			}
+			delta++, n++;
+		}
+		if (false)
+			document.write(UString + '→' + output + '<br />');
+		return output;
+	};
+
+	Punycode.decode = function(PCode) {
+		var n = Punycode.initial_n, i = 0, p = PCode
+				.lastIndexOf(Punycode.delimiter), bias = Punycode.initial_bias, output = p == -1 ? ''
+				: PCode.slice(0, p), oldi, w, digit, l;
+		if (false)
+			document.write('<hr />Punycode.decode begin: [' + output
+					+ ']<br />');
+		if (!Punycode.Dmap)
+			for (w = 0, Punycode.Dmap = {}; w < Punycode.map.length; w++) {
+				Punycode.Dmap[Punycode.map.charAt(w)] = w;
+				if (false)
+					document.write('Punycode.Dmap[' + Punycode.map.charAt(w)
+							+ ']=' + w + '<br />');
+			}
+		while (p < PCode.length - 1) {
+			for (oldi = i, w = 1, k = Punycode.base;; k += Punycode.base) {
+				if (++p >= PCode.length) {
+					alert('Punycode: invalid input: out of range');
+					return PCode;
+				}
+				if (false)
+					document.write('PCode.charAt(' + p + ')' + ' = '
+							+ PCode.charAt(p) + ' → '
+							+ Punycode.Dmap[PCode.charAt(p)] + '<br />');
+				if (isNaN(digit = Dmap[PCode.charAt(p)])) {
+					alert('Punycode: invalid input');
+					return PCode;
+				}
+				if (false)
+					if (digit > (Number.MAX_VALUE - i) / w) {
+						alert('Punycode: overflow');
+						return;
+					}
+				i += digit * w;
+				t = k <= bias/* +Punycode.tmin: not needed */? Punycode.tmin
+						: k >= bias + Punycode.tmax ? Punycode.tmax : k - bias;
+				if (false)
+					document.write('i=' + i + ', t=' + t + ', digit=' + digit
+							+ ', k=' + k + '<br />');
+				if (digit < t)
+					break;
+				if (false)
+					if (w > Number.MAX_VALUE / (base - t)) {
+						alert('Punycode: overflow');
+						return;
+					}
+				w *= Punycode.base - t;
+			}
+			bias = Punycode.adapt(i - oldi, l = output.length + 1, oldi == 0);
+			if (false)
+				document.write('bias=' + bias + ', n=' + n + ', i=' + i
+						+ ', l=' + l + '<br />');
+			if (false)
+				if (i / l > Number.MAX_VALUE - n) {
+					alert('Punycode: overflow');
+					return;
+				}
+			n += Math.floor(i / l);
+			i %= l;
+			if (false)
+				document
+						.write('[' + output.length + ']' + output + '+' + n
+								+ '(0x' + n.toString(16).toUpperCase() + ')@'
+								+ i + '→');
+			output = output.slice(0, i) + String.fromCharCode(n)
+					+ output.slice(i);
+			if (false)
+				document.write('[' + output.length + ']' + output + '<br />');
+			i++;
+		}
+		if (false)
+			document.write(PCode + '→' + output + '<br />');
+		return output;
+	};
+
+	if (false) {
+		var testC = 'Hello-Another-Way--fc4qua05auwb3674vfr0b', rC;
+		document
+				.write('<hr />'
+						+
+						// Punycode.encodeDomain('http://國際.計畫.org/國際.計畫.htm')
+						Punycode
+								.decodeDomain('http://xn--9cs229l.xn--gpyr35b.org/%E5%9C%8B%E9%9A%9B.%E8%A8%88%E7%95%AB.htm')
+						// Punycode.encode('463578')
+
+						+ Punycode.decode('ihqwcrb4cv8a8dqg056pqjye')
+						+ '<hr />'
+						+ Punycode.encode('他们为什么不说中文')
+
+						+ Punycode.decode('ihqwctvzc91f659drss3x8bo0yb')
+						+ '<hr />'
+						+ Punycode.encode('他們爲什麽不說中文')
+
+						+ '<hr />'
+						+ (rC = Punycode.decode(testC))
+						+ '<hr />'
+						+ (rC = Punycode.encode(rC))
+						+ '<hr />'
+						+ (testC == rC ? 'OK'
+								: '<b style="color:red">FAILED</b>:<br />'
+										+ testC + '<br />' + rC));
 	}
 
-	if (!from_attributes) {
-		library_namespace.debug('dataset → attribute.', 2, 'dataset_synchronize');
-		for (name in d)
-			node.setAttribute(to_hyphenated(name), d[name]);
+	/**
+	 * <code>	一個非常不好的 handle onload 方法。只在onload不具有arguments時有用，應該亦可用setTimeout('~',0)
+	 where	0:back,1:front
+
+	 for IE:
+	 <!--[if IE]><script defer type="text/javascript">
+	 //	onload code
+	 </script><![endif]-->
+
+	 c.f.	http://www.brothercake.com/	http://simonwillison.net/2004/May/26/addLoadEvent/
+	 GO1.1 Generic onload by Brothercake
+	 window.addEventListener,document.addEventListener,typeof window.attachEvent
+	 c.f.	setTimeout('~',0);	不過這不能確定已經load好
+	 </code>
+	 */
+	if (false) {
+		var addonload = function(s, where) {
+			if (!s || typeof window != 'object')
+				return 1;
+			if (typeof s == 'function') {
+				s = library_namespace.parse_function(s);
+				if (!s || !s.funcName)
+					return 2;
+				s = s.funcName + '()';
+			}
+			var o = window.onload ? typeof window.onload == 'string' ? window.onload
+					: library_namespace.parse_function(window.onload).contents
+					: '';
+			window.onload = new Function(where ? s + ';\n' + o : o + ';\n' + s);
+		}
 	}
 
-	return d;
-}
+	_// JSDT:_module_
+	.DOM_loaded = function() {
+		if (winodow.document.readyState === "complete" || winodow.document.body) {
+			_.DOM_loaded = function() {
+				return true;
+			};
+			return true;
+		}
 
+		return false;
+	};
 
-//http://www.whatwg.org/specs/web-apps/current-work/multipage/elements.html#dom-dataset
-//http://dev.w3.org/html5/spec/single-page.html#dom-dataset
-//	detect dataset support.
-var support_dataset, dataset;
-try {
-	//	Element.prototype.__lookupGetter__("dataset")
-	_.support_dataset = support_dataset = library_namespace.is_WWW(true)
-		&& library_namespace.is_type(document.body.dataset, 'DOMStringMap');
-} catch (e) {
-}
+	if (false) {
+		// The DOM ready check for Internet Explorer
+		try {
+			document.documentElement.doScroll('left');
+		} catch (e) {
+			setTimeout(arguments.callee, 50);
+			return;
+		}
+	}
 
-if (support_dataset)
-	dataset = function (node, name, value) {
+	_// JSDT:_module_
+	.
+	/**
+	 * 比較好點的 add onload。 比起 add_listener()，本函數在已經 load 時依然會執行，而 add_listener
+	 * 因為是用榜定的方法，因此 load 完就不再觸發(?)。 這東西頂多只能擺在 include 的 JS file 中，不能 runtime
+	 * include。
+	 * 
+	 * @example <code>
+	CeL.run('net.web');
+	CeL.on_load(function(){sl(1);},'sl(2);');
+	</code>
+	 * 
+	 * @requires _.add_listener,_.DOM_loaded
+	 * @see jQuery: $(document).ready(listener); DOMContentLoaded
+	 *      http://webdesign.piipo.com/jquery/jquery_events 可直接參考 SWFObject。
+	 *      TODO: <a href="http://javascript.nwbox.com/IEContentLoaded/"
+	 *      accessdate="2010/6/3 11:15" title="IEContentLoaded - An alternative
+	 *      for DOMContentLoaded on Internet Explorer">IEContentLoaded</a>
+	 *      DOMContentLoaded是firefox下特有的Event, 當所有DOM解析完以後會觸發這個事件。
+	 *      DOMContentLoaded與DOM中的onLoad事件與其相近。但onload要等到所有頁面元素加載完成才會觸發,
+	 *      包括頁面上的圖片等等。 <a
+	 *      href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/06/05/jquery-ready-vs-load.aspx"
+	 *      accessdate="2010/6/3 11:17">jQuery ready vs load - 黑暗執行緒</a>
+	 *      $(document).ready(fn)發生在"網頁本身的HTML"載入後就觸發，而$(window).load(fn)則會等到"網頁HTML
+	 *      標籤中引用的圖檔、內嵌物件(如Flash)、IFrame"等拉哩拉雜的東西都載入後才會觸發。
+	 * @_memberOf _module_
+	 */
+	on_load = function on_load() {
+		var _s = _.on_load, loaded = _.DOM_loaded(), i = 0, a = arguments, l = a.length;
+		for (; i < l; i++)
+			if (loaded)
+				a[i].call(document);
+			else
+				_.add_listener('load', a[i], document);
+	};
+
+	_// JSDT:_module_
+	.
+	/**
+	 * bind/add listener. register event control, setup code to run. listener
+	 * 應該加上 try{}catch{}，否則會搞不清楚哪裡出問題。 ** 對同樣的 object，事件本身還是會依照 call
+	 * add_listener() 的順序跑，不會因為 p_first 而改變。 ** NOT TESTED!! TODO:
+	 * remove_listener(): .removeEventListener(); .detachEvent(); default 'this'
+	 * 自訂 event
+	 * 
+	 * @param {string}type
+	 *            listen to what event type. event name/action.
+	 *            http://www.whatwg.org/specs/web-apps/current-work/#event-handler-event-type
+	 * @param listener
+	 *            listener function/function array/function string, 須 String 之
+	 *            recursive function 時可 "(function(){return function
+	 *            f(){f();};})()" function(e){var
+	 *            target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else
+	 *            e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else
+	 *            e.returnValue=false;return false;}
+	 * @param [target_element]
+	 *            bind/attach to what HTML element
+	 * @param [p_first]
+	 *            parentNode first
+	 * @return
+	 * @since 2010/1/20 23:42:51
+	 * @see c.f., GEvent.add_listener()
+	 * @_memberOf _module_
+	 */
+	add_listener = function add_listener(type, listener, target_element,
+			p_first) {
+
+		var _s = _.add_listener, i, adder;
+
+		// 進階功能.
+		// type is Object or Array.
+		if (library_namespace.is_Object(type) || Array.isArray(type)) {
+			// type is Object:
+			// usage: add_listener({unload:Unload},target_element);
+			// usage:
+			// add_listener({load:{true:[function(){sl(1);},'sl(2);']}},target_element);
+			// type is Array:
+			// usage:
+			// add_listener([{load:load},{unload:Unload}],target_element);
+
+			// 此時 listener 已被忽略，shift arguments。
+			if (!(listener = get_element(listener)))
+				return;
+
+			for (i in type) {
+				library_namespace.debug(i + ': ' + type[i], 2, 'add_listener');
+
+				Array.isArray(type) ? _s(type[i], listener, target_element)
+						: _s(i, type[i], listener, target_element);
+			}
+
+			return;
+		}
+
+		if (!type || !listener)
+			return;
+
+		if (typeof listener === 'string')
+			listener = new Function('e', listener);
+
+		if (typeof target_element === 'string')
+			target_element = get_element(target_element);
+
+		if (typeof p_first !== 'boolean')
+			p_first = typeof p_first === 'undefined' ? _s.p_first : !!p_first;
+
+		// listener is Array or Object.
+		if (library_namespace.is_Object(listener) || Array.isArray(listener)) {
+			// usage: add_listener('unload',{true:Unload1});
+			// usage: add_listener('unload',[Unload1,Unload2]);
+			// 因為 Array 會從最小的開始照順序出，所以這邊不再判別是否為 Array。
+			for (i in listener) {
+				if (false)
+					if (isNaN(f)
+					// ||i==1||i===true
+					) {
+						sl('add_listener: to ' + i);
+						_s.p_first = i === 'true';
+					}
+				_s(type, listener[i], target_element, i === 'true'
+						|| (i === 'false' ? false : undefined));
+				if (false)
+					sl((typeof i) + ' [' + i + '] ' + _s.p_first);
+			}
+
+		} else if (library_namespace.is_Function(listener)) {
+			/**
+			 * 先設定好 native listener adding function
+			 */
+			if (target_element)
+				adder = target_element.addEventListener;
+			else if (!(adder = _s.global_adder) && adder !== null)
+				_s.global_adder = adder = _s.get_adder();
+
+			// $(document).ready(listener);
+
+			// 使 listener 能以 this 取得 target_element
+			i = function(e) {
+				// this_event
+				if (!e)
+					e = window.event;
+
+				if (false)
+					library_namespace.debug('fire ' + type, 0, 'add_listener');
+
+				// 正規化 <a
+				// href="http://www.w3.org/TR/2009/WD-DOM-Level-3-Events-20090908/#interface-Event">Document
+				// Object Model (DOM) Level 3 Events</a>.
+				// 這邊的附加設定應盡量只添上 native object, 預防 memory leak.
+				if (!e.currentTarget)
+					e.currentTarget = target_element;
+				if (!e.target)
+					e.target = e.srcElement || target_element;
+
+				// from fix in jQuery
+
+				// check if target is a textnode (safari)
+				if (e.target && e.target.nodeType === TEXT_NODE)
+					e.target = e.target.parentNode;
+
+				// Add relatedTarget, if necessary
+				if (!e.relatedTarget && e.fromElement)
+					e.relatedTarget = e.fromElement === e.target ? e.toElement
+							: e.fromElement;
+
+				// 取得滑鼠座標
+				// http://hartshorne.ca/2006/01/23/javascript_cursor_position/
+				// http://hartshorne.ca/2006/01/18/javascript_events/
+				if (isNaN(e.pageX) && !isNaN(e.clientX)) {
+					var s = get_window_status.scroll();
+					e.pageX = e.clientX + s[0] - s[2];
+					e.pageY = e.clientY + s[1] - s[3];
+				}
+
+				// .call: 使 listener 可以用 'this' 來指涉 element
+				listener.call(target_element, e);
+			};
+
+			// 主要核心動作設定之處理
+			// TODO: 在 onload 時使 target_element = null
+			if (false)
+				sl(type
+						+ ' ('
+						+ ((typeof p_first == 'undefined' ? _s.p_first
+								: !!p_first) ? 'p_first' : 'run first') + '): '
+						+ listener);
+			if (adder) {
+				try {
+					// 直接用 target_element.addEventListener 不會有問題。
+					// .call(window.document):
+					// for Chrome 'Illegal invocation' issue
+					// http://stackoverflow.com/questions/1007340/javascript-function-aliasing-doesnt-seem-to-work
+					// 但 IE9 需要 .call(target_element) 或者別用 .call，否則會得到 "Invalid
+					// procedure call or argument"
+					adder.call(target_element, type, i, p_first);
+				} catch (e) {
+					adder.call(window.document, type, i, p_first);
+				}
+				return;
+			}
+
+			if (target_element) {
+				if (false)
+					library_namespace
+							.warn('add_listener: Can not get element.addEventListener! element.attachEvent: '
+									+ target_element.attachEvent);
+			}
+			return target_element && (adder = target_element.attachEvent) ?
+			// http://msdn.microsoft.com/en-us/library/ms536343(VS.85).aspx
+			adder('on' + type, i)
+			//
+			: _s.default_adder(type, i, p_first, target_element);
+		}
+
+	};
+
+	_// JSDT:_module_
+	.
+	/**
+	 * useCapture: parentNode first
+	 * 
+	 * @see <a href="http://www.w3.org/TR/DOM-Level-3-Events/#event-flow"
+	 *      accessdate="2010/4/16 22:40">Document Object Model (DOM) Level 3
+	 *      Events Specification</a>, <a
+	 *      href="http://www.w3.org/TR/DOM-Level-3-Events/#interface-EventTarget"
+	 *      accessdate="2010/4/16 22:42">Interface EventTarget</a>
+	 */
+	add_listener.p_first = false;
+
+	_// JSDT:_module_
+	.
+	/**
+	 * get (native) global listener adding function. TODO: 只設定一次 historical for
+	 * Netscape Navigator, mozilla: window.captureEvents, document.captureEvents
+	 */
+	add_listener.get_adder = function() {
+		/**
+		 * moz (gecko), safari 1.2, ow5b6.1, konqueror, W3C standard:
+		 * window.addEventListener
+		 * 
+		 * @ignore
+		 * @see <a
+		 *      href="https://developer.mozilla.org/en/DOM/element.addEventListener"
+		 *      accessdate="2010/4/16 22:35">element.addEventListener - MDC</a>
+		 *      <a href="http://simonwillison.net/2004/May/26/addLoadEvent/"
+		 *      accessdate="2010/4/16 22:36">Executing JavaScript on page load</a>
+		 */
+		return window.addEventListener
+		/**
+		 * opera 7.50, ie5.0w, ie5.5w, ie6w: window.attachEvent opera 7.50:
+		 * document.attachEvent
+		 */
+		|| typeof window.attachEvent === 'function'
+				&& function(type, listener) {
+					window.attachEvent('on' + type, listener);
+				}
+				/**
+				 * MSN/OSX, opera 7.50, safari 1.2, ow5b6.1:
+				 * document.addEventListener
+				 */
+				|| document.addEventListener
+				/**
+				 * ie5m, MSN/OSX, ie5.0w, ie5.5w ie6w:
+				 * document.onreadystatechange
+				 */
+				|| null;
+	};
+
+	_// JSDT:_module_
+	.
+	/**
+	 * 最原始的，含括其他情況。 all: window.onload. TODO: use queue
+	 * 
+	 * @param type
+	 *            listen to what event type
+	 * @param listener
+	 *            listener function/function array
+	 * @param [p_first]
+	 *            parentNode first
+	 * @param [target_element]
+	 *            bind/attach to what HTML element
+	 * @return
+	 * @see http://blog.othree.net/log/2007/02/06/third-argument-of-addeventlistener/
+	 */
+	add_listener.default_adder = function(type, listener, p_first,
+			target_element) {
+		if (!target_element)
+			target_element = window;
+
+		var old = target_element[type = 'on' + type];
+		if (false)
+			library_namespace.debug('adder ' + type
+					+ (old ? ' with old listener: ' + old : ''), 0,
+					'add_listener.default_adder');
+
+		return target_element[type] = old ?
+		// TODO: typeof old === 'string'
+		p_first ? function(e) {
+			if (!e)
+				e = window.event;
+			if (false)
+				library_namespace.debug('fire ' + type + ' (parentNode first)',
+						0, 'add_listener.default_adder');
+			old.call(target_element, e);
+			listener.call(target_element, e);
+		} : function(e) {
+			if (!e)
+				e = window.event;
+			if (false)
+				library_namespace.debug(
+						'fire ' + type + ' (parentNode latter)', 0,
+						'add_listener.default_adder');
+			listener.call(target_element, e);
+			old.call(target_element, e);
+		} : function(this_event) {
+			if (false)
+				library_namespace.debug('fire ' + type, 0,
+						'add_listener.default_adder');
+			listener.call(target_element, this_event || window.event);
+		};
+	};
+
+	_// JSDT:_module_
+	.
+	/**
+	 * TODO: listener list. 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
+	 * add_listener.list[node][event type]=[listener list]
+	 */
+	add_listener.list = library_namespace.null_Object();
+
+	_// JSDT:_module_
+	.
+	/**
+	 * TODO: 觸發函數. 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
+	 * add_listener.list[type]=[listener list]
+	 */
+	add_listener.list = library_namespace.null_Object();
+
+	_// JSDT:_module_
+	.
+	/**
+	 * 阻止 JavaScript 事件冒泡傳遞，使 event 不傳到 parentNode。
+	 * 
+	 * @param e
+	 *            event handler
+	 * @param c
+	 *            cancel bubble
+	 * @see http://www.jb51.net/html/200705/23/9858.htm
+	 * @_memberOf _module_
+	 */
+	stop_event = function(event, c) {
+		if (!event)
+			event = window.event;
+
+		if (typeof event.preventDefault === 'function')
+			// 在拖曳時可阻止預定動作，例如跳頁展示圖片或檔案。
+			event.preventDefault();
+		else
+			event.returnValue = false;
+
+		if (c)
+			// cancelBubble 在IE下有效，stopPropagation 在 Firefox 下有效。
+			// 停止冒泡，事件不會上升，我們就可以獲取精確的鼠標進入元素。 http://realazy.org/lab/bubble/
+			if (typeof event.stopPropagation === 'function')
+				event.stopPropagation();
+			else
+				event.cancelBubble = true;
+
+		return false;
+	};
+
+	// comparator([key, original index])
+	function sort_nodes(node_list, comparator, key_generator) {
+
+		if (typeof key_generator !== 'function')
+			key_generator = function(n) {
+				return n;
+			};
+
+		var i = 0, length = node_list.length, list = [];
+		for (; i < length; i++)
+			list.push([ key_generator(node_list[i]), i ]);
+
+		list.sort(comparator);
+
+		// 依照次序排列 nodes。
+		// TODO: 採用 .insertBefore() 時的最佳演算法，最小化（最少化）.insertBefore() 操作。
+		// 找出 sort 後之連續 node list，有需要更動時才改。
+		// TODO: 最佳化 table list。
+		// TODO: 先 hide 是否會較快?
+		for (i = 0; i < length; i++) {
+		}
+	}
+
+	_// JSDT:_module_
+	.
+	/**
+	 * 獲取頁面上選中的選取區資訊。
+	 * 
+	 * @example <code>
+		CeL.add_listener('mouseup', function (e) { var s = CeL.get_selection(); if (s && s.text) CeL.debug('select @' + this + '(' + s.element + ')' + ' (' + s.left + '+' + s.width + ',' + s.top + '+' + s.height + '), (' + e.pageX + ',' + e.pageY + '): ' + s.text); }, target_element);
+	 * </code>
+	 * 
+	 * @param {Number}
+	 *            [index] TODO: 第幾選取區, default: all or 0 if there's only
+	 *            ONE/ZERO selection
+	 * @return {Object} { left: {Number} in px, top: {Number} in px, width:
+	 *         {Number} in px, height: {Number} in px, text: {String} 文字,
+	 *         element: {HTMLElement}, selection: selection object (browser
+	 *         dependent) }
+	 * @return {undefined} error.
+	 * @see http://plugins.jquery.com/project/selectedText, Gecko:
+	 *      https://developer.mozilla.org/en/DOM/Selection
+	 * @_memberOf _module_
+	 */
+	get_selection = function(index) {
+	};
+
+	try {
+
+		if (window.getSelection)
+			_.get_selection = function(index) {
+				// Firefox, Opera, Safari
+				// http://help.dottoro.com/ljcvonpc.php
+				// Although the selection object is supported by Opera, it is
+				// only partially suppported. The window.getSelection method
+				// provides more complex functionality in that browser.
+				// http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
+				var e = document.activeElement,
+				// 在 Opera 中，e 為 [object Text]
+				tag = e && e.tagName && e.tagName.toLowerCase(), s = window
+						.getSelection();
+				if (!s.rangeCount)
+					// 點擊而無選擇?
+					// 最起碼回應能得知的資訊
+					return {
+						text : '',
+						element : s,
+						selection : s
+					};
+
+				// 超出範圍可能會 Error: INDEX_SIZE_ERR: DOM Exception 1
+				s = s.getRangeAt(!isNaN(index) && 0 <= index
+						&& index < s.rangeCount ? index : 0);
+
+				// Gecko: https://developer.mozilla.org/en/DOM/range
+				// 除了 Gecko 外，都有 s.getBoundingClientRect 但無
+				// s.endContainer.getBoundingClientRect。
+				// Gecko 可以取 mouse event 作 workaround
+				if (false)
+					library_namespace.debug(s.endContainer.parentNode);
+				var offset = _.get_node_offset(s.getBoundingClientRect ? s
+						: s.endContainer.parentNode);
+
+				return {
+					// TODO: offset
+					// TODO: do test
+					// s.startOffset,
+					left : offset.left,
+					top : offset.top,
+					// s.endOffset,
+					width : offset.width,
+					height : offset.height,
+					text : tag === 'textarea' || tag === 'input'
+							|| tag === 'select' ? e.value.substring(
+							e.selectionStart, e.selectionEnd) : s.toString(),
+					element :
+					// s.endContainer
+					s,
+					selection : s
+				};
+
+			};
+
+		else if (document.selection && document.selection.createRange) {
+			// Internet Explorer
+			// http://msdn.microsoft.com/en-us/library/ms534692%28VS.85%29.aspx
+			// TODO: http://help.dottoro.com/ljefwsqm.php
+
+			document.execCommand
+					&& document.execCommand('MultipleSelection', true, true);
+
+			_.get_selection = function(input) {
+				var s = document.selection.createRange();
+
+				return s.type !== 'None' && {
+					// TODO: do test
+					// http://msdn.microsoft.com/en-us/library/ms535872%28v=VS.85%29.aspx
+					// s.offsetLeft, s.offsetTop 較不準
+					left : s.boundingLeft,
+					top : s.boundingTop,
+					width : s.boundingWidth,
+					height : s.boundingHeight,
+					text : s.text,
+					// TODO
+					// element: null,
+					selection : s
+				};
+
+			};
+
+		} else if (document.getSelection)
+			_.get_selection = function(input) {
+				return {
+					// TODO: get offset from mouse location
+					text : document.getSelection()
+				};
+			};
+
+	} catch (e) {
+		// TODO: handle exception
+	}
+
+	// ↑HTML only -------------------------------------------------------
+
+	var is_IE = /* @cc_on!@ */!true;
+
+	// http://www.real-blog.com/programming/259
+	// http://fettig.net/weblog/2006/10/09/detecting-ie7-in-javascript/
+	if (false)
+		if (typeof window.XMLHttpRequest != "undefined") {
+			// IE 7, mozilla, safari, opera 9
+		} else {
+			// IE6, old browsers
+		}
+
+	/**
+	 * <code>
+	http://www.cnlei.org/blog/article.asp?id=337
+	在IE下：
+	>> 支持keyCode
+	>> 不支持which和charCode,二者值為 undefined
+
+	在Firefox下：
+	>> 支持keyCode，除功能鍵外，其他鍵值始終為 0
+	>> 支持which和charCode，二者的值相同
+
+	在Opera下：
+	>> 支持keyCode和which，二者的值相同
+	>> 不支持charCode，值為 undefined
+
+	</code>
+	 */
+	_// JSDT:_module_
+	.
+	/**
+	 * 條碼器(Barcode Scanner)/雷射讀碼器的輸入可用 onkeypress 取得
+	 * 
+	 * @param callback
+	 *            callback
+	 * @return
+	 * @since 2008/8/26 23:10
+	 * @example <code>
+	 * //	usage:
+	 * deal_with_barcode(function(t) {
+	 * 	if (t.length > 9 && t.length < 17)
+	 * 		document.getElementById("p").value = t,
+	 * 		document.forms[0].submit();
+	 * });
+	 * </code>
+	 * 
+	 * @_memberOf _module_
+	 */
+	deal_with_barcode = function(callback) {
+		var k, lt = 0, st = 0;
+		document.onkeypress = function(this_event) {
+			var c = new Date();
+			if (
+			// 前後不超過 800，
+			c - st > 800 ||
+			// 與上一輸入不超過 90
+			c - lt > 90) {
+				st = c;
+				k = "";
+			}
+			lt = c;
+			c = this_event || window.event;
+			c = c.keyCode || c.which || c.charCode;
+			if (c > 32 && c < 120)
+				k += String.fromCharCode(c);
+			else if (c == 13)
+				callback(k, this_event);
+		};
+
+	};
+
+	// https://addons.mozilla.org/js/search-plugin.js
+	// TODO, & Chrome
+	function add_engine() {
+		// NYI
+		throw 'TODO';
+	}
+
+	// for string encoding
+	// -------------------------------------------------------
+	// 將HTML:&#ddd; → Unicode text
+	// 此函數只能用一次，為輸入資料良好之情況下使用。完整版： HTML_to_Unicode
+	// turnUnicode[generateCode.dLK]='setTool,getText';
+	function turnUnicode(b) {
+		if (false) {
+			// 行不通
+			s = s.replace(/&#(\d+);/g, String.fromCharCode("$1"));
+		}
+		var s = this.valueOf().replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<')
+				.replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(
+						/&apos;/g, "'"), m, t;
+
+		// 舊版本
+		if (false) {
+			if (m = s.match(/&#(\d{2,7});/g))
+				for (var i = 0; i < m.length; i++) {
+					s = s.replace(m[i], String.fromCharCode(parseInt(m[i]
+							.slice(2, -1))));
+				}
+		}
+
+		if (false) {
+			// 預防&#38;：&#38;=&
+			s = s.replace(/&#(0*38|[xX]0*26);/g, "\0")
+
+			.replace(/&#0*38;([^\d;]|$)/g, "\0$1").replace(
+					/&#[xX]0*26;?([^a-fA-F\d;]|$)/g, "\0$1");
+		}
+
+		// JScript 5.5~
+		s = s.replace(/&#0*(\d{2,7});/g, function($0, $1) {
+			return String.fromCharCode($1);
+		});
+		// 預防error之版本,~10FFFF=1114111
+		if (false) {
+			s = s.replace(/&#0*(\d{2,7});/g, function($0, $1) {
+				return $1 > 1114111 ? $0 : String.fromCharCode($1);
+			});
+
+			if (mode == 'x')
+				// $x111;之版本
+				s = s.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function($0, $1) {
+					return String.fromCharCode(parseInt($1, 16));
+				});
+			s = s.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function($0, $1) {
+				var t = parseInt($1, 16);
+				return t > 1114111 ? $0 : String.fromCharCode(t);
+			});
+		}
+
+		// 預防&#38;回復
+		s = s.replace(/\0/g, "&");
+		if (b)
+			s = s.gText();
+		return s;
+	}
+
+	// 可適用perl: HTML::Entities::encode_entities()
+	// 需要escape的: [\<\>\"\'\%\;\)\(\&\+], tr/A-Za-z0-9\ //dc
+	// http://www.cert.org/tech_tips/malicious_code_mitigation.html
+
+	// @see
+	// https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
+	var HTML_Entities = {
+		"quot" : "\"",
+		// 這在 HTML_to_Unicode() 不能先處理!
+		// amp : '&',
+		"apos" : "'",
+		"lt" : "<",
+		"gt" : ">",
+		"nbsp" : " ",
+		"iexcl" : "¡",
+		"cent" : "¢",
+		"pound" : "£",
+		"curren" : "¤",
+		"yen" : "¥",
+		"brvbar" : "¦",
+		"sect" : "§",
+		"uml" : "¨",
+		"copy" : "©",
+		"ordf" : "ª",
+		"laquo" : "«",
+		"not" : "¬",
+		"shy" : "­",
+		"reg" : "®",
+		"macr" : "¯",
+		"deg" : "°",
+		"plusmn" : "±",
+		"sup2" : "²",
+		"sup3" : "³",
+		"acute" : "´",
+		"micro" : "µ",
+		"para" : "¶",
+		"middot" : "·",
+		"cedil" : "¸",
+		"sup1" : "¹",
+		"ordm" : "º",
+		"raquo" : "»",
+		"frac14" : "¼",
+		"frac12" : "½",
+		"frac34" : "¾",
+		"iquest" : "¿",
+		"Agrave" : "À",
+		"Aacute" : "Á",
+		"Acirc" : "Â",
+		"Atilde" : "Ã",
+		"Auml" : "Ä",
+		"Aring" : "Å",
+		"AElig" : "Æ",
+		"Ccedil" : "Ç",
+		"Egrave" : "È",
+		"Eacute" : "É",
+		"Ecirc" : "Ê",
+		"Euml" : "Ë",
+		"Igrave" : "Ì",
+		"Iacute" : "Í",
+		"Icirc" : "Î",
+		"Iuml" : "Ï",
+		"ETH" : "Ð",
+		"Ntilde" : "Ñ",
+		"Ograve" : "Ò",
+		"Oacute" : "Ó",
+		"Ocirc" : "Ô",
+		"Otilde" : "Õ",
+		"Ouml" : "Ö",
+		"times" : "×",
+		"Oslash" : "Ø",
+		"Ugrave" : "Ù",
+		"Uacute" : "Ú",
+		"Ucirc" : "Û",
+		"Uuml" : "Ü",
+		"Yacute" : "Ý",
+		"THORN" : "Þ",
+		"szlig" : "ß",
+		"agrave" : "à",
+		"aacute" : "á",
+		"acirc" : "â",
+		"atilde" : "ã",
+		"auml" : "ä",
+		"aring" : "å",
+		"aelig" : "æ",
+		"ccedil" : "ç",
+		"egrave" : "è",
+		"eacute" : "é",
+		"ecirc" : "ê",
+		"euml" : "ë",
+		"igrave" : "ì",
+		"iacute" : "í",
+		"icirc" : "î",
+		"iuml" : "ï",
+		"eth" : "ð",
+		"ntilde" : "ñ",
+		"ograve" : "ò",
+		"oacute" : "ó",
+		"ocirc" : "ô",
+		"otilde" : "õ",
+		"ouml" : "ö",
+		"divide" : "÷",
+		"oslash" : "ø",
+		"ugrave" : "ù",
+		"uacute" : "ú",
+		"ucirc" : "û",
+		"uuml" : "ü",
+		"yacute" : "ý",
+		"thorn" : "þ",
+		"yuml" : "ÿ",
+		"OElig" : "Œ",
+		"oelig" : "œ",
+		"Scaron" : "Š",
+		"scaron" : "š",
+		"Yuml" : "Ÿ",
+		"fnof" : "ƒ",
+		"circ" : "ˆ",
+		"tilde" : "˜",
+		"Alpha" : "Α",
+		"Beta" : "Β",
+		"Gamma" : "Γ",
+		"Delta" : "Δ",
+		"Epsilon" : "Ε",
+		"Zeta" : "Ζ",
+		"Eta" : "Η",
+		"Theta" : "Θ",
+		"Iota" : "Ι",
+		"Kappa" : "Κ",
+		"Lambda" : "Λ",
+		"Mu" : "Μ",
+		"Nu" : "Ν",
+		"Xi" : "Ξ",
+		"Omicron" : "Ο",
+		"Pi" : "Π",
+		"Rho" : "Ρ",
+		"Sigma" : "Σ",
+		"Tau" : "Τ",
+		"Upsilon" : "Υ",
+		"Phi" : "Φ",
+		"Chi" : "Χ",
+		"Psi" : "Ψ",
+		"Omega" : "Ω",
+		"alpha" : "α",
+		"beta" : "β",
+		"gamma" : "γ",
+		"delta" : "δ",
+		"epsilon" : "ε",
+		"zeta" : "ζ",
+		"eta" : "η",
+		"theta" : "θ",
+		"iota" : "ι",
+		"kappa" : "κ",
+		"lambda" : "λ",
+		"mu" : "μ",
+		"nu" : "ν",
+		"xi" : "ξ",
+		"omicron" : "ο",
+		"pi" : "π",
+		"rho" : "ρ",
+		"sigmaf" : "ς",
+		"sigma" : "σ",
+		"tau" : "τ",
+		"upsilon" : "υ",
+		"phi" : "φ",
+		"chi" : "χ",
+		"psi" : "ψ",
+		"omega" : "ω",
+		"thetasym" : "ϑ",
+		"upsih" : "ϒ",
+		"piv" : "ϖ",
+		"ensp" : " ",
+		"emsp" : " ",
+		"thinsp" : " ",
+		"zwnj" : "‌",
+		"zwj" : "‍",
+		"lrm" : "‎",
+		"rlm" : "‏",
+		"ndash" : "–",
+		"mdash" : "—",
+		"lsquo" : "‘",
+		"rsquo" : "’",
+		"sbquo" : "‚",
+		"ldquo" : "“",
+		"rdquo" : "”",
+		"bdquo" : "„",
+		"dagger" : "†",
+		"Dagger" : "‡",
+		"bull" : "•",
+		"hellip" : "…",
+		"permil" : "‰",
+		"prime" : "′",
+		"Prime" : "″",
+		"lsaquo" : "‹",
+		"rsaquo" : "›",
+		"oline" : "‾",
+		"frasl" : "⁄",
+		"euro" : "€",
+		"image" : "ℑ",
+		"weierp" : "℘",
+		"real" : "ℜ",
+		"trade" : "™",
+		"alefsym" : "ℵ",
+		"larr" : "←",
+		"uarr" : "↑",
+		"rarr" : "→",
+		"darr" : "↓",
+		"harr" : "↔",
+		"crarr" : "↵",
+		"lArr" : "⇐",
+		"uArr" : "⇑",
+		"rArr" : "⇒",
+		"dArr" : "⇓",
+		"hArr" : "⇔",
+		"forall" : "∀",
+		"part" : "∂",
+		"exist" : "∃",
+		"empty" : "∅",
+		"nabla" : "∇",
+		"isin" : "∈",
+		"notin" : "∉",
+		"ni" : "∋",
+		"prod" : "∏",
+		"sum" : "∑",
+		"minus" : "−",
+		"lowast" : "∗",
+		"radic" : "√",
+		"prop" : "∝",
+		"infin" : "∞",
+		"ang" : "∠",
+		"and" : "∧",
+		"or" : "∨",
+		"cap" : "∩",
+		"cup" : "∪",
+		"int" : "∫",
+		"there4" : "∴",
+		"sim" : "∼",
+		"cong" : "≅",
+		"asymp" : "≈",
+		"ne" : "≠",
+		"equiv" : "≡",
+		"le" : "≤",
+		"ge" : "≥",
+		"sub" : "⊂",
+		"sup" : "⊃",
+		"nsub" : "⊄",
+		"sube" : "⊆",
+		"supe" : "⊇",
+		"oplus" : "⊕",
+		"otimes" : "⊗",
+		"perp" : "⊥",
+		"sdot" : "⋅",
+		"lceil" : "⌈",
+		"rceil" : "⌉",
+		"lfloor" : "⌊",
+		"rfloor" : "⌋",
+		"lang" : "〈",
+		"rang" : "〉",
+		"loz" : "◊",
+		"spades" : "♠",
+		"clubs" : "♣",
+		"hearts" : "♥",
+		"diams" : "♦"
+	};
+
+	_// JSDT:_module_
+	.
+	/**
+	 * Translate HTML code to Unicode text.
+	 * 
+	 * @param {String}
+	 *            HTML HTML code
+	 * @param {Boolean}
+	 *            only_digital
+	 * @returns
+	 * @_memberOf _module_
+	 */
+	HTML_to_Unicode = function(HTML, only_digital) {
+		// 使用\0可能會 Warning: non-octal digit in an escape sequence that
+		// doesn't
+		// match a back-reference
+		var t = HTML.valueOf();
+
+		if (!only_digital)
+			// 處理常用的 HTML Entities。
+			t = t
+			// 自動clip null character
+			.replace(/\0\0/g, '').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<')
+					.replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+			// .replace(/&apos;/g, "'")
+			;
+
+		t = t
+		// 預防&#38;：&#38;=&
+		.replace(/&#(0*38|[xX]0*26);/g, "\0\0")
+		// 預防error之版本,~10FFFF=1114111
+		.replace(/&#0*(\d{2,7});/g, function($0, $1) {
+			return $1 > 1114111 ? $0 : String.fromCharCode($1);
+		}).replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function($0, $1) {
+			var t = parseInt($1, 16);
+			return t > 1114111 ? $0 : String.fromCharCode(t);
+		}).replace(/%([a-fA-F\d]{2})/g, function($0, $1) {
+			return String.fromCharCode(parseInt($1, 16));
+		});
+
+		if (!only_digital) {
+			// HTML Entities (HTML character entity)
+			t = t.replace(/&([a-z]{2,8});/ig, function(entity, name) {
+				return (name in HTML_Entities) ? HTML_Entities[name] : entity;
+			});
+		}
+
+		if (!only_digital)
+			t = t
+			// 預防&#38;回復
+			.replace(/\0\0/g, "&").replace(/&amp;/g, '&');
+
+		return t;
+	};
+
+	_.HTML_to_Unicode.entities = HTML_Entities;
+
+	_// JSDT:_module_
+	.
+	/**
+	 * Translate Unicode text to HTML
+	 * 
+	 * @param {String}
+	 *            text Unicode text
+	 * @param mode
+	 *            mode='x':&#xhhh;
+	 * @return {String} HTML
+	 * @_memberOf _module_
+	 */
+	to_HTML = function(text, mode) {
+		var html = '', t, i = 0;
+		for (; i < text.length; i++) {
+			t = text.charCodeAt(i);
+			html += '&#' + (mode === 'x' ? 'x' + t.toString(16) : t) + ';';
+		}
+
+		return html;
+	};
+
+	_// JSDT:_module_
+	.
+	/**
+	 * Translate Unicode text to HTML code. escape chars
+	 * 
+	 * @param text
+	 *            Unicode text
+	 * @param flags
+	 *            flags, f&1!=0: turn \t, (f&2)==0: \n→<br />, f==4: to quoted
+	 * @param ignore_tags
+	 *            e.g.,
+	 *            {object:{src:/^https?:\/\//},img:{src:/^https?:\/\//},a:{href:/^https?:\/\//}}
+	 * @return
+	 * @see https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references#Predefined_entities_in_XML
+	 * @_memberOf _module_
+	 */
+	Unicode_to_HTML = function(text, flags, ignore_tags) {
+		text = ('' + text)
+		// "&"這個字元得要首先escape
+		.replace(/&/g, '&amp;')
+		// 就是會出現這奇怪情況。但是卻也不能否認有特別想要表示"&amp;"這樣的情況。
+		// .replace(/&amp;amp;/g, '&amp;')
+		.replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+
+		if (ignore_tags)
+			text = text.replace(/<([^>]+)>/g, function($0, $1) {
+				if (!($1 in ignore_tags))
+					return '&lt;' + $1;
+				var s = $1.split(/ /),
+				//
+				i = 1, l = s.length, c = ignore_tags[$1];
+				for (; i < l; i++) {
+					m = s[i].match(/^([^=]+)(.+?)/);
+					if (!(m[1] in c)
+							|| !(library_namespace.is_type(c[m[1]], 'RegExp')
+									&& c[m[1]].test(m[2]) || library_namespace
+									.is_Function(c[m[1]])
+									&& c[m[1]](m[2])))
+						s[i] = '';
+					return s.join(' ');
+				}
+			});
+		else
+			text = text.replace(/</g, '&lt;');
+
+		if (flags == 4)
+			return text;
+
+		text = text.replace(/ /g, '&nbsp;');
+
+		// if (!f) f = 0;
+		if (flags & 1)
+			text = text.replace(/	/g,
+					'<span style="margin-left:3em;">&nbsp;</span>');
+		if (!(flags & 2)) {
+			text = text.replace(/(\r?\n)/g, '<br />$1')
+			// +'<br />\n'
+			;
+		}
+		return text;
+	};
+
+	// Ucode: \uhhhh及\xhh之意
+_
+	// JSDT:_module_
+	.Unicode_unescape = function(U) {
+		var T = U.replace(/\\\\|\\u005[cC]|\\x5[cC]|\\134/g, "\0");
+		if (false) {
+			// way 1
+			T = T.replace(/\\u([a-fA-F\d]{4})/g, function($0, $1) {
+				return String.fromCharCode(parseInt($1, 16));
+			}).replace(/\\x([a-fA-F\d]{2})/g, function($0, $1) {
+				return String.fromCharCode(parseInt($1, 16));
+			}).replace(/\\([0-7]{1,3})/g, function($0, $1) {
+				return String.fromCharCode(parseInt($1, 16));
+			});
+			// way 2
+			T = T.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2})/g,
+					function($0, $1) {
+						return String.fromCharCode(parseInt($1.substr(1), 16));
+					}).replace(/\\([0-7]{1,3})/g, function($0, $1) {
+				return String.fromCharCode(parseInt($1, 16));
+			});
+		}
+		// way 3
+		T = T.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2}|[0-7]{1,3})/g,
+		//
+		function($0, $1) {
+			var t = $1.charAt(0);
+			return String.fromCharCode(parseInt(t == 'u' || t == 'x' ? $1
+					.substr(1) : $1, 16));
+		});
+
+		if (T.indexOf("\\") != -1)
+			T = T.replace(/\\t/g, "<Tab>").replace(/\\n/g, "<Line Feed>")
+					.replace(/\\v/g, "<Vertical Tab>").replace(/\\f/g,
+							"<Form Feed>").replace(/\\r/g, "<Carriage Return>")
+					.replace(/\\(.)/g, "$1");
+
+		return T.replace(/\0/g, "\\");
+	};
+
+	_// JSDT:_module_
+	.
+	// Unicode escape sequence
+	// TODO: 效能
+	Unicode_escape = function(text, max_code) {
+		var i = 0, U = '', t;
+		if (isNaN(max_code))
+			max_code = 256;
+		for (; i < text.length; i++)
+			U += (t = text.charCodeAt(i)) < max_code ? text.charAt(i)
+					: "\\u0000".substr(0, 6 - (t = t.toString(16)).length) + t;
+		return U;
+	};
+
+	function CSSToTxt(C) {
+		return C.replace(/\\\\|\\0{0,4}5[cC][ \t\r\n\f]?/g, "\0").replace(
+				/\\([a-fA-F\d]{1,6})[ \t\r\n\f]?/g, function($0, $1) {
+					return String.fromCharCode(parseInt($1, 16));
+				}).replace(/\\(.)/g, "$1").replace(/\0/g, "\\");
+	}
+	function TxtToCSS(T, r, sp) {
+		// r:radio,sp:separator
+		var i = 0, C = '', t, p = r && r > 3 && r < 9 ? '0'.repeat(r - 1) : '';
+		if (!sp)
+			sp = '';
+		sp += '\\';
+
+		for (; i < T.length; i++) {
+			t = T.charCodeAt(i).toString(16);
+			// (p&&r>t.length?p.substr(0,r-t.length):''):如果length是0或負值，會傳回空字串。
+			C += sp + p.substr(0, r - t.length) + t;
+		}
+		return C.slice(sp.length - 1);
+	}
+
+	_// JSDT:_module_
+	.
+	/**
+	 * Translate a query string to a native Object contains key/value pair set.
+	 * 
+	 * @param {String}
+	 *            query_string query string. default: location.search
+	 * @param {Object}
+	 *            add_to append to this object
+	 * @return key/value pairs
+	 * @type Object
+	 * @since 2010/6/16 15:18:50
+	 * @_memberOf _module_
+	 * @see
+	 */
+	get_query = function(query_string, add_to) {
+		if (!query_string)
+			query_string = window/* self */.location.search.slice(1);
+		else if (typeof query_string !== 'string') {
+			// TODO
+		}
+
+		var i, q = query_string.replace(/\+/g, ' ').split('&'), p, s = add_to
+				|| library_namespace.null_Object(), k, v;
+		for (i in q)
+			try {
+				if (p = q[i].match(/^([^=]*)=(.*)$/)) {
+					k = decodeURIComponent(p[1]);
+					v = decodeURIComponent(p[2]);
+					if (k in s)
+						if (typeof s[k] === 'string')
+							s[k] = [ s[k], v ];
+						else
+							s[k].push(v);
+					else
+						s[k] = v;
+				} else
+					s[decodeURIComponent(q[i])] = undefined;
+			} catch (e) {
+				// TODO: handle exception
+			}
+
+		return s;
+	};
+
+	_// JSDT:_module_
+	.
+	/**
+	 * Translate a native Object contains key/value pair set to a query string.
+	 * TODO: 增進效率。
+	 * 
+	 * @param {Object}
+	 *            query_Object query Object.
+	 * @return {String} query string
+	 * @type String
+	 * @_memberOf _module_
+	 * @see jQuery.param
+	 */
+	to_query_string = function(query_Object) {
+		if (!library_namespace.is_Object(query_Object))
+			return;
+
+		var name, query_list = [];
+		for (name in query_Object)
+			query_list.push(encodeURIComponent(name) + '='
+					+ encodeURIComponent(query_Object[name]));
+		return query_list.join('&');
+	};
+
+	/**
+	 * 簡化 HTML (word)。 simplify HTML.
+	 * 
+	 * 目標：剩下語意部分，去掉 style。
+	 * 
+	 * TODO: 保留 b, em
+	 */
+
+	var has_RegExp_group = false;
+
+	try {
+		has_RegExp_group = (new RegExp('(\\d)\\1')).test('00');
+	} catch (e) {
+	}
+
+	// 保留 color: return style string to add
+	// reduce_HTML.keep_color =
+	reduce_HTML._keep_color = function(c) {
+		if (c !== 'black')
+			return c;
+	};
+	reduce_HTML.file = function(FP, enc) {
+		// sl('reduce_HTML [' + FP + ']');
+		var t = simpleRead(FP, enc || simpleFileAutodetectEncode), l;
+		if (!t) {
+			error('Open [' + FP + '] failed.');
+			return;
+		}
+
+		l = t.length;
+		t = this(t);
+
+		FP = FP.replace(/\.[xs]?html?$/i, function($0) {
+			return '.reduced' + $0;
+		});
+		if (false)
+			sl('reduce_HTML: ' + l + '→' + t.length + ' ('
+					+ parseInt(100 * t.length / l) + '%)'
+					+ ', save to [<a href="' + encodeURI(FP) + '">' + FP
+					+ '</a>].');
+		simpleWrite(FP, t, 'utf-8');
+	};
+	function reduce_HTML(t) {
+		if (!t)
+			return;
+		var _f = reduce_HTML, f = function($0, $1, $2) {
+			return $1 != $2 || ($1.toLowerCase() in {
+				a : 1,
+				p : 1,
+				head : 1
+			}) ? $0 : '';
+		};
+		if (false) {
+			if (m = t.match(/<!--\[if [^\]]+\]>[\s\S]*?<!\[endif\]-->/))
+				sl(m[0].replace(/</g, '&lt;'));
+			if (m = t.match(/<!\[if !vml\]>[\s\S]*?<!\[endif\]>/))
+				sl(m[0]);
+		}
+
+		t = t
+				.replace(
+						/[\s\n]*<(t[dh])([^>]+)>[\s\n]*/ig,
+						function($0, $1, $2) {
+							var a = $2
+									.match(/[\s\n](col|row)span=['"]?\d{1,3}['"]?/ig);
+							return '<' + $1 + (a ? a.join('') : '') + '>';
+						})
+				.replace(/<\?xml:namespace[^>]+>/g, '')
+				.replace(/[\s\n]*(<\/t[dh]>)[\s\n]*/ig, '$1')
+				.replace(/<wbr[^>]*>/ig, '<br />')
+				.replace(
+						/<([bh]r)[\s\n]+([^>]*)\/?>/ig,
+						function($0, $1, $2) {
+							var m = $2
+									.match(/[\s\n;"'][\s\n]*page-break-before[\s\n]*:[\s\n]*([^\s\n;"']+)/);
+							return '<'
+									+ $1
+									+ (m ? ' style="page-break-before:' + m[1]
+											+ '"' : '') + '>';
+						})
+				.replace(
+						/<(span|font|p|div|b|u|i)[\s\n]+([^>]*)>/ig,
+						function($0, $1, $2) {
+							var t = '<' + $1, s = '', m;
+							if (
+							// /Italic/i.test($2)
+							$2.indexOf('Italic') !== -1)
+								s += 'font-style:italic;';
+							// TODO: <u>, <b>
+							if (_f.keep_color
+									&& (m = $2
+											.match(/[\s\n;"'][\s\n]*color[\s\n]*:[\s\n]*([^\s\n;"']+)/))
+									&& (m = _f.keep_color(m[1])))
+								// 保留 color
+								s += 'color:' + m + ';';
+							return t + (s ? ' style="' + s + '"' : '') + '>';
+						})
+				.replace(/<(tr|table)[\s\n]+([^>]*)>/ig, '<$1>')
+				// 不能用 .+|\n ，IE8 sometimes crash
+				.replace(/<span>([\s\S]*?)<\/span>/ig, '$1')
+				// need several times
+				.replace(/<span>([\s\S]*?)<\/span>/ig, '$1')
+				.replace(/<font>([\s\S]*?)<\/font>/ig, '$1')
+				// 2 times
+				.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig, f)
+				.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig, f)
+
+				.replace(/<o:p>([\s\S]*?)<\/o:p>/ig, '$1')
+				.replace(/<st1:[^>]+>([\s\S]*?)<\/st1:[^>]+>/ig, '$1')
+				.replace(/<!\[if !vml\]>([\s\S]*?)<!\[endif\]>/ig, '$1')
+				.replace(/<o:SmartTagType [^>]+\/>/ig, '')
+				/**
+				 * <code>
+				<td>
+				<p>&nbsp;</p>
+				</td>
+				</code>
+				 */
+				.replace(
+						/<(span|p|div|t[dr])([^>]*>)<(span|p)>(([\s\n]+|&nbsp;)*?)<\/(span|p)><\/(span|p|div|t[dr])>/ig,
+						'<$1$2$4</$7>')
+				.replace(/[\s\n]*<\/p>([\s\n]*<br\s*\/?>)*[\s\n]*<p[^>]*>/ig,
+						'<br />\n')
+				.replace(
+						/<link rel=(File-List|colorSchemeMapping|themeData|Edit-Time-Data)[^>]+>/ig,
+						'')
+				.replace(/^[\s\n]*<\html[^>]*>[\s\n]*/, '<\html>')
+				.replace(/[\s\n]*<\body[^>]+>[\s\n]*/, '<\body>')
+				.replace(
+						/[\s\n]*<!--\[if [^\]]+\]>[\s\S]*?<!\[endif\]-->(\r?\n)*/ig,
+						'').replace(
+						/[\s\n]*<\style[^>]*>[\s\S]*?<\/style>[\s\n]*/ig, '')
+				.replace(/[\s\n]*<\meta[\s\n][^>]+>[\s\n]*/ig, '')
+
+				// from HTML_to_Unicode()
+				// 預防error之版本,~10FFFF=1114111
+				.replace(/&#0*(\d{2,7});/ig, function($0, $1) {
+					return $1 > 1114111 ? $0 : String.fromCharCode($1);
+				}).replace(/([\s\n]+|&nbsp;)+$|^([\s\n]+|&nbsp;)+/g, '');
+
+		if (has_RegExp_group) {
+			t = t.replace(/<([bis])[\s\n]*>([^<]*)<\/\1>([\s\n]*)<\1>/ig, '$2');
+		}
+
+		if (/<(img|table)[>\s\n]/.test(t)) {
+			library_namespace.debug('Has table or images.');
+			t = t
+					.replace(
+							/<\/head>/i,
+							'<\style type="text/css">table,th,td{border:1px solid #888;border-collapse:collapse;}img{border:0;max-width:99%;}</style></head>');
+		}
+
+		return t;
+	}
+	;
+
+	/**
+	 * 傳回 element's data-* attributes 相對應帶有連字符號的 name。
+	 * 
+	 * @param {String}[name]
+	 *            dataset name.
+	 * 
+	 * @returns {String} element's data-* attributes 相對的 name。
+	 * 
+	 * @since 2012/11/9 23:15:30
+	 */
+	function to_hyphenated(name) {
+		if (library_namespace.is_debug() && /-[a-z]/.test(name))
+			throw new SyntaxError(
+					'The dataset name "'
+							+ name
+							+ '" contains a U+002D HYPHEN-MINUS character (-) followed by a lowercase ASCII letter.');
+
+		// 'data-': dataset prefix.
+		return 'data-' + name.replace(/[A-Z]/g, function($0) {
+			return '-' + $0.toLowerCase();
+		});
+	}
+
+	/**
+	 * 設定 dataset。<br />
+	 * 以 node.dataset 為準，node.attributes 為輔。<br /> ** 注意: IE8 中無法設定 <title> 之
+	 * .dataset，會被忽略掉。即使從 .outerHTML 亦無法取得。
+	 * 
+	 * @example <code>
+	 * //	get value
+	 * CeL.DOM_data(node, name);
+	 * 
+	 * //	set value
+	 * CeL.DOM_data(node, name, value);
+	 * 
+	 * //	delete value
+	 * CeL.DOM_data(node, name, undefined);
+	 * </code>
+	 * 
+	 * @param {HTMLElement}node
+	 *            所指定之 node。
+	 * @param {String|Object}[name]
+	 *            dataset name.
+	 * @param [value]
+	 *            設成 undefined 時，將 delete 此 name。
+	 * 
+	 * @returns value of dataset[name]
+	 * 
+	 * @since 2012/11/9 23:15:30
+	 */
+	function dataset_compatible(node, name, value) {
+		if (!node || node.nodeType === TEXT_NODE)
+			// IE8 中，甚至不能設定 node.dataset，會出現 "物件不支援此屬性或方法"。
+			return;
+
+		if (!node.dataset)
+			// initialization.
+			// 給予個預設值，省略判斷，簡化流程。
+			node.dataset = library_namespace.null_Object();
+
+		if (!name) {
+			// get all dataset.
+			return dataset_synchronize(node);
+			return node.dataset;
+		}
+
 		var d = node.dataset;
-		//	test node has NO .dataset
-		if (!name || !d)
-			return d;
 
-		if (arguments.length > 2)
+		if (arguments.length > 2) {
+			// need to set value.
 			if (value === undefined)
 				delete d[name];
 			else
 				d[name] = value;
 
-		else if (library_namespace.is_Object(name)) {
-			//	此時 name = { name : value };
+			// 同步。保證全程使用此函數時，同時也會設定好 the element's data-* attributes。
+			if (value === undefined)
+				node.removeAttribute(to_hyphenated(name));
+			else
+				node.setAttribute(to_hyphenated(name), value);
+
+		} else if (library_namespace.is_Object(name)) {
+			// 此時 name = { name : value };
+			// 因為並非單純的指定到 .dataset，因此不用 Object.assign()。
 			for ( var n in name)
-				d[n] = name[n];
-			return d;
+				dataset_compatible(node, n, name[n]);
+			return node.dataset;
+
+		} else if ((value = node.getAttribute ? node
+				.getAttribute(to_hyphenated(name)) : node[to_hyphenated(name)]) !== undefined) {
+			// 同步。
+			d[name] = value;
 		}
 
 		return d[name];
-	};
+	}
 
-else {
-	// The browser does not support dataset!
-	library_namespace.debug('The runtime environment does not support dataset!');
-	dataset = dataset_compatible;
-}
+	/**
+	 * 同步 / synchronize / update / prepare dataset。<br /> //
+	 * https://github.com/remy/polyfills/blob/master/dataset.js //
+	 * https://github.com/eligrey/Xccessors We won't use
+	 * Element.prototype.__defineGetter__('dataset', ..): IE 7 have no
+	 * Object.prototype.__defineGetter__ or Object.defineProperty.
+	 * 
+	 * TODO: remove attribute.
+	 * 
+	 * @param {HTMLElement}node
+	 *            所指定之 node。
+	 * @param {Boolean}[from_attributes]
+	 *            from the element's data-* attributes.<br />
+	 *            預設為 dataset ↔ attribute。設定此 flag 將會作單向設定。
+	 * 
+	 * @since 2012/11/9 23:35:30
+	 */
+	function dataset_synchronize(node, from_attributes) {
+		if (!node || node.nodeType === TEXT_NODE)
+			// IE8 中，甚至不能設定 node.dataset，會出現 "物件不支援此屬性或方法"。
+			return;
 
-_.DOM_data = dataset;
+		var d = node.dataset, name;
 
+		// if (!d) return;
+		// assert: node.dataset 已經設定好了。
 
+		if (from_attributes === undefined || from_attributes) {
+			library_namespace.debug('attribute → dataset.', 2,
+					'dataset_synchronize');
 
+			for_attributes(node, function(name, value) {
+				// library_namespace.debug('attribute → dataset: test [' +
+				// name
+				// + '].', 2, 'dataset_synchronize');
+				if (name = name.match(/^data-([^A-Z]+)$/))
+					d[name[1].replace(/-([a-z])/g, function($0, $1) {
+						return $1.toUpperCase();
+					})] = value;
+			});
 
-//	↑for string encoding	-----------------------------------------------
+			if (false) {
+				for (var i = 0, attributes = node.attributes, length = attributes.length, attribute; i < length; i++) {
+					if (false)
+						library_namespace.debug('attribute → dataset: test ['
+								+ i + '][' + attributes[i].name + '].', 2,
+								'dataset_synchronize');
+					if (name = (attribute = attributes[i].name)
+							.match(/^data-([^A-Z]+)$/)) {
+						d[name[1].replace(/-([a-z])/g, function($0, $1) {
+							return $1.toUpperCase();
+						})] = node.getAttribute(attribute);
+					}
+				}
+			}
 
+		}
 
+		if (!from_attributes) {
+			library_namespace.debug('dataset → attribute.', 2,
+					'dataset_synchronize');
+			for (name in d)
+				node.setAttribute(to_hyphenated(name), d[name]);
+		}
 
-var is_Safari = library_namespace.is_WWW(true) && navigator.userAgent,
-/** {Boolean}support CSS position sticky */
-CSS_position_sticky;
+		return d;
+	}
 
-if (is_Safari) {
-	is_Safari = is_Safari.toLowerCase();
-	is_Safari = is_Safari.indexOf('safari') !== -1
-			&& is_Safari.indexOf('chrome') === -1
-			&& is_Safari.indexOf('chromium') === -1;
+	// http://www.whatwg.org/specs/web-apps/current-work/multipage/elements.html#dom-dataset
+	// http://dev.w3.org/html5/spec/single-page.html#dom-dataset
+	// detect dataset support.
+	var support_dataset, dataset;
+	try {
+		// Element.prototype.__lookupGetter__("dataset")
+		_.support_dataset = support_dataset = library_namespace.is_WWW(true)
+				&& library_namespace.is_type(document.body.dataset,
+						'DOMStringMap');
+	} catch (e) {
+	}
 
-	// Warning: 未完善。
-	// Firefox (Gecko): 32.0~
-	CSS_position_sticky = is_Safari || /Firefox\/(?:[4-9]\d|3[2-9])/.test(navigator.userAgent)
-	// https://developer.mozilla.org/en-US/docs/Web/CSS/position#Browser_compatibility
-	|| /Chrome\/(?:[6-9]\d|5[6-9])/.test(navigator.userAgent);
-}
+	if (support_dataset)
+		dataset = function(node, name, value) {
+			var d = node.dataset;
+			// test node has NO .dataset
+			if (!name || !d)
+				return d;
 
-/**
- * 動態[生成/顯示][目錄/目次]。<br>
- * automatically generated menu / list / table of contents.<br>
- * TODO:
- * fix dataset bug.
- * mouseover → popup TOC.
- * 
- * @example <code>
+			if (arguments.length > 2)
+				if (value === undefined)
+					delete d[name];
+				else
+					d[name] = value;
+
+			else if (library_namespace.is_Object(name)) {
+				// 此時 name = { name : value };
+				for ( var n in name)
+					d[n] = name[n];
+				return d;
+			}
+
+			return d[name];
+		};
+
+	else {
+		// The browser does not support dataset!
+		library_namespace
+				.debug('The runtime environment does not support dataset!');
+		dataset = dataset_compatible;
+	}
+
+	_.DOM_data = dataset;
+
+	// ↑for string encoding -----------------------------------------------
+
+	var is_Safari = library_namespace.is_WWW(true) && navigator.userAgent,
+	/** {Boolean}support CSS position sticky */
+	CSS_position_sticky;
+
+	if (is_Safari) {
+		is_Safari = is_Safari.toLowerCase();
+		is_Safari = is_Safari.indexOf('safari') !== -1
+				&& is_Safari.indexOf('chrome') === -1
+				&& is_Safari.indexOf('chromium') === -1;
+
+		// Warning: 未完善。
+		// Firefox (Gecko): 32.0~
+		CSS_position_sticky = is_Safari
+				|| /Firefox\/(?:[4-9]\d|3[2-9])/.test(navigator.userAgent)
+				// https://developer.mozilla.org/en-US/docs/Web/CSS/position#Browser_compatibility
+				|| /Chrome\/(?:[6-9]\d|5[6-9])/.test(navigator.userAgent);
+	}
+
+	/**
+	 * 動態[生成/顯示][目錄/目次]。<br>
+	 * automatically generated menu / list / table of contents.<br>
+	 * TODO: fix dataset bug. mouseover → popup TOC.
+	 * 
+	 * @example <code>
 	CeL.run([ 'application.locale', 'interact.DOM' ], function() {
 		CeL.gettext.use_domain('', function() {
 			CeL.auto_TOC();
 		});
 	});
- * </code>
- * 
- * @param {String|HTMLElement}[content_node]
- *            針對指定 node 列出目錄。
- * @param {Integer}[level]
- *            to <h\d>. default: 6.
- * @param {Integer}[force]
- *            0:auto, 1:re-show, 2: force show.
- */
-function auto_TOC(content_node, level, force) {
-	if (!(content_node = get_element(content_node)))
-		content_node = document.body;
-	if (!force && content_node.scrollHeight < 4 * screen.height)
-		return;
+	 * </code>
+	 * 
+	 * @param {String|HTMLElement}[content_node]
+	 *            針對指定 node 列出目錄。
+	 * @param {Integer}[level]
+	 *            to <h\d>. default: 6.
+	 * @param {Integer}[force]
+	 *            0:auto, 1:re-show, 2: force show.
+	 */
+	function auto_TOC(content_node, level, force) {
+		if (!(content_node = get_element(content_node)))
+			content_node = document.body;
+		if (!force && content_node.scrollHeight < 4 * screen.height)
+			return;
 
-	// 設定目錄 height。
-	function set_height() {
-		var height;
-		if (CSS_position_sticky)
-			if (node.style.position)
-				TOC_list.style.height = '';
-			else if (!isNaN(height = window.innerHeight)
-			// 當 TOC_list 的高度超出可見區域時，方縮小之。
-			&& (height = (height - 40) | 0) < TOC_list.offsetHeight)
-				TOC_list.style.height = height + 'px';
-	}
+		// 設定目錄 height。
+		function set_height() {
+			var height;
+			if (CSS_position_sticky)
+				if (node.style.position)
+					TOC_list.style.height = '';
+				else if (!isNaN(height = window.innerHeight)
+				// 當 TOC_list 的高度超出可見區域時，方縮小之。
+				&& (height = (height - 40) | 0) < TOC_list.offsetHeight)
+					TOC_list.style.height = height + 'px';
+		}
 
-	function add_TOC_node(node)  {
-		library_namespace.debug('&lt;' + node.tagName + '&gt;\n'
-				+ node.innerHTML.slice(0, 200), 3);
+		function add_TOC_node(node) {
+			library_namespace.debug('&lt;' + node.tagName + '&gt;\n'
+					+ node.innerHTML.slice(0, 200), 3);
 
-		head_array.push(node);
-		title = set_text(node);
-		// l: title 長度在規範內。
-		i = title.length < auto_TOC.max_length;
-		// l: tagName
-		// CSS 分大小寫。
-		l = node.tagName.toLowerCase();
-		if (!node.id && !node.name)
-			// from wiki
-			node.id = encodeURIComponent(title).replace(/%/g, '.').replace(
-					/\s/g, '');
-
-		// 實際上應該用<li>，但<h\d>可能不會有 nested 層疊結構。
-		list_array.push({
-			div : {
-				a : i ? title : [ title.slice(0, auto_TOC.max_length), {
-					span : '..',
-					C : auto_TOC.CSS_prefix + 'more'
-				} ],
-				href : href + (node.id || node.name),
-				// subtitle
-				R : (i ? '' : title + (node.title ? '\n' : ''))
-						+ (node.title || ''),
-				target : '_self',
-				onclick : function() {
-					// 先緊縮目錄。
-					toggle_display(TOC_list, false);
+			head_array.push(node);
+			title = set_text(node);
+			// l: title 長度在規範內。
+			i = title.length < auto_TOC.max_length;
+			// l: tagName
+			// CSS 分大小寫。
+			l = node.tagName.toLowerCase();
+			if (!node.id && !node.name) {
+				node.id = encodeURIComponent(title);
+				if (false) {
+					// from wiki
+					node.id = node.id.replace(/%/g, '.').replace(/\s/g, '');
 				}
-			},
-			C : auto_TOC.CSS_prefix
-					+ l
-					+ (l === 'header' ? '' : ' ' + auto_TOC.CSS_prefix
-							+ 'header')
-		});
-
-	}
-
-	var list_array = [], head_array = [], node = content_node.firstChild, matched, title, i, l,
-	// Chrome 22 在遇上 /p/cgi.cgi?_=_ 時，僅指定 href : #~ 會變成 /p/#~。因此需要 workaround。
-	href = location.href.replace(/#.*$/, '') + '#';
-	if (is_Safari)
-		// encodeURI(): Safari 5.1.7 needs this. But Opera will broken on this.
-		href = encodeURI(href);
-
-	level |= 0;
-	level = new RegExp('^(h[1-' + (level >= 1 && level <= 6 ? level : 6)
-			+ ']|header)$', 'i');
-
-	while (node) {
-		if ((matched = node.tagName) && matched.match(level))
-			add_TOC_node(node);
-
-		// 表層遍歷。
-		// TODO: 增加對更深層的探索。
-		node = node.nextSibling;
-	}
-
-	if (list_array.length === 0)
-		// <h2> 為最常利用之中級結構。
-		for_nodes(add_TOC_node, 'h2');
-
-	if (list_array.length > 1) {
-		var TOC_list, id = set_attribute(content_node, 'id'),
-		//
-		back_title = gettext('↑Back to TOC');
-
-		title = set_attribute(content_node, 'title');
-		if (!title) {
-			node = content_node.firstChild;
-			// 當 firstChild 為 <header> 時，採用其內容為標題。
-			if (/^h[1-3]$/i.test(node.tagName))
-				title = set_text(node);
-		}
-		if (!title)
-			title = id;
-
-		id = auto_TOC.CSS_prefix + (id || Math.random());
-		TOC_list = id + '_list';
-
-		// 回來修改各 <header>
-		for (i = 0, l = head_array.length; i < l; i++) {
-			if (false && i > 0) {
-				// Firefox/38.0 在兩個 hade 相鄰的情況，anchor 似乎無法正常作動。只好手動助之加入 <p>
-				// ** 無用! 需於 <html> 中手動加入!
-				matched = node.nextSibling;
-				while (matched.nodeType === TEXT_NODE)
-					matched = matched.nextSibling;
-				if (matched === head_array[i])
-					new_node({
-						p: ' '
-					}, [ node, 3 ]);
 			}
-			set_class(node = head_array[i], auto_TOC.CSS_prefix + 'head');
-			new_node({
-				a : '📑',
-				href : href + id,
-				C : auto_TOC.CSS_prefix + 'back',
-				//T : '↑Back to TOC',
-				R : back_title,
-				target : '_self'
-			}, [ node, 1 ]);
-		}
 
-		list_array = [
-				// 設定目錄定位。
-				{
-					span : [
-							{
-								span : CSS_position_sticky ? auto_TOC.icon.unpin
-										: '',
-								onclick : function() {
-									this.innerHTML = auto_TOC.icon[
-									//
-									(node.style.position = node.style.position ? ''
-											: 'static') ? 'pin' : 'unpin'];
-									set_height();
-								},
-								R : 'Pin/unpin the contents.\n設定目錄為固定或相對定位。'
-							},
-							{
-								span : auto_TOC.icon.right,
-								onclick : function() {
-									this.innerHTML = auto_TOC.icon[
-									//
-									(node.style.cssFloat = node.style.cssFloat ? ''
-											: 'right') ? 'left' : 'right'];
-								},
-								R : 'Switch the position of the contents.\n設定目錄左右定位。'
-							} ],
-					C : auto_TOC.CSS_prefix + 'position_control'
-				}, {
-					// U+1F4D1 BOOKMARK TABS
-					// http://www.utf8-chartable.de/unicode-utf8-table.pl?start=128000
-					// http://www.fileformat.info/info/emoji/list.htm
-					// http://codepoints.net/U+1F4D1
-					div : ['📑', {
-						T : title ? [ 'Contents of [%1]', title ] : 'Contents'
-					}],
-					C : auto_TOC.CSS_prefix + 'control',
-					title : gettext('expand'),
+			// 實際上應該用<li>，但<h\d>可能不會有 nested 層疊結構。
+			list_array.push({
+				div : {
+					a : i ? title : [ title.slice(0, auto_TOC.max_length), {
+						span : '..',
+						C : auto_TOC.CSS_prefix + 'more'
+					} ],
+					href : href + (node.id || node.name),
+					// subtitle
+					R : (i ? '' : title + (node.title ? '\n' : ''))
+							+ (node.title || ''),
+					target : '_self',
 					onclick : function() {
-						var expand = toggle_display(TOC_list) !== 'none';
-						// show/hide (顯示/隱藏), 展開/收合目錄
-						this.title = gettext(expand ? 'collapse' : 'expand');
-						if (expand)
-							set_height();
+						// 先緊縮目錄。
+						toggle_display(TOC_list, false);
 					}
-				}, {
-					div : list_array,
-					id : TOC_list,
-					C : auto_TOC.CSS_prefix + 'list'
-				} ];
+				},
+				C : auto_TOC.CSS_prefix
+						+ l
+						+ (l === 'header' ? '' : ' ' + auto_TOC.CSS_prefix
+								+ 'header')
+			});
 
-		var class_name = auto_TOC.CSS_prefix
-		// 若是不具有此屬性，則明確指定不使用此屬性；預防有瀏覽器雖然已實現此屬性，但是並沒有被本函式庫偵測出來。
-		+ (CSS_position_sticky ? 'box' : 'box_no_sticky');
-		if (node = get_element(id)) {
-			_.remove_all_child(node);
-			set_class(node, class_name);
-			new_node(list_array, node);
-		} else {
-			node = new_node({
-				div : list_array,
-				id : id,
-				C : class_name
-			}, [ content_node, 1 ]);
 		}
 
-		// auto_TOC.set_text(id);
+		var list_array = [], head_array = [], node = content_node.firstChild, matched, title, i, l,
+		// Chrome 22 在遇上 /p/cgi.cgi?_=_ 時，僅指定 href : #~ 會變成 /p/#~。因此需要
+		// workaround。
+		href = location.href.replace(/#.*$/, '') + '#';
+		if (is_Safari)
+			// encodeURI(): Safari 5.1.7 needs this.
+			// But Opera will broken on this.
+			href = encodeURI(href);
 
-		// 作 cache。
-		TOC_list = get_element(TOC_list);
+		level |= 0;
+		level = new RegExp('^(h[1-' + (level >= 1 && level <= 6 ? level : 6)
+				+ ']|header)$', 'i');
 
-		// 載入 CSS resource。
-		// include resource of module.
-		library_namespace.run(library_namespace.get_module_path(module_name,
-				'auto_TOC.css'));
-	} else
-		library_namespace.warn('auto_TOC: No ' + level + ' found.');
+		while (node) {
+			if ((matched = node.tagName) && matched.match(level))
+				add_TOC_node(node);
 
-	// Release memory. 釋放被占用的記憶體.
-	head_array = list_array = null;
-}
+			// 表層遍歷。
+			// TODO: 增加對更深層的探索。
+			node = node.nextSibling;
+		}
 
-//	title 最大長度 in px。
-auto_TOC.max_length = 80;
-//	CSS class name 前綴。
-auto_TOC.CSS_prefix = 'TOC_';
+		if (list_array.length === 0)
+			// <h2> 為最常利用之中級結構。
+			for_nodes(add_TOC_node, 'h2');
 
-//	TODO: set domain
-auto_TOC.set_text = function(id) {
-	// 目錄
-	gettext.translate_nodes(get_element(id).childNodes);
-	// ↑回到目錄
-	gettext.translate_nodes('.' + auto_TOC.CSS_prefix + 'back');
-};
+		if (list_array.length > 1) {
+			var TOC_list, id = set_attribute(content_node, 'id'),
+			//
+			back_title = gettext('↑Back to TOC');
 
-auto_TOC.icon = {
-	pin : '⚓',
-	unpin : '⇧',
-	left : '⇦',
-	right : '⇨'
-};
+			title = set_attribute(content_node, 'title');
+			if (!title) {
+				node = content_node.firstChild;
+				// 當 firstChild 為 <header> 時，採用其內容為標題。
+				if (/^h[1-3]$/i.test(node.tagName))
+					title = set_text(node);
+			}
+			if (!title)
+				title = id;
 
-_// JSDT:_module_
-.
-auto_TOC = auto_TOC;
+			id = auto_TOC.CSS_prefix + (id || Math.random());
+			TOC_list = id + '_list';
 
-
-
-// ---------------------------------------------------------------------//
-
-
-function random_color(from, gap) {
-	function scale(from, gap) {
-		return from + (Math.random() * gap) | 0;
-	}
-	from |= 0;
-	if (from < 0 || from > 255)
-		from = 0;
-	if (!gap)
-		gap = 256 - from;
-	var color = [], i = 3;
-	while (i--)
-		color.push(scale(from, gap));
-	return 'rgb(' + color + ');';
-}
-
-function parse_frame(document_node) {
-	function parse_frameset(frameset) {
-		var nodes = frameset.childNodes, i = 0, length = nodes.length, tag, list = [], cols = frameset.cols
-				.trim(), cell, node, background = random_color(210),
-		//
-		get_info = function() {
-			var name = node.name + '(' + layout.shift() + ')';
-			return node.src ? {
-				b : name,
-				title : node.src
-			} : name;
-		},
-		// IE 先看 cols，之後才看 rows。
-		layout = (cols || frameset.rows.trim()).split(/\s*,\s*/);
-		// cols = !!cols;
-
-		for (; i < length; i++)
-			if ((tag = (node = nodes[i]).tagName)
-					&& (cell =
-					//
-					(tag = tag.toLowerCase()) === 'frame' ? {
-						a : get_info(),
-						href : '#',
-						onclick : function() {
-							//	application.debug.show_value first
-							if(library_namespace.show_value)
-								// Error null: 462 [Error] (facility code 10): 遠端伺服器不存在或無法使用
-								try{library_namespace.show_value(this, this.id || this.name);}catch(e){library_namespace.error(e);}
-							else {
-								library_namespace.warn('Need to include application.debug first! Trying now...');
-								library_namespace.run('application.debug');
-							}
-							return false;
-						}.bind(node)
-					}
-					//
-					: tag === 'frameset' && [
-							{
-								div : get_info(),
-								S : 'width:100%;color:#e73;background-color:'
-										+ background + ';'
-							}, parse_frameset(node) ])) {
-				cell = {
-					td : cell,
-					S : 'background-color:' + background + ';'
-				};
-				list.push(cols ? cell : {
-					tr : cell
-				});
+			// 回來修改各 <header>
+			for (i = 0, l = head_array.length; i < l; i++) {
+				if (false && i > 0) {
+					// Firefox/38.0 在兩個 hade 相鄰的情況，anchor 似乎無法正常作動。
+					// 只好手動助之加入 <p>
+					// ** 無用! 需於 <html> 中手動加入!
+					matched = node.nextSibling;
+					while (matched.nodeType === TEXT_NODE)
+						matched = matched.nextSibling;
+					if (matched === head_array[i])
+						new_node({
+							p : ' '
+						}, [ node, 3 ]);
+				}
+				set_class(node = head_array[i], auto_TOC.CSS_prefix + 'head');
+				new_node({
+					a : '📑',
+					href : href + id,
+					C : auto_TOC.CSS_prefix + 'back',
+					// T : '↑Back to TOC',
+					R : back_title,
+					target : '_self'
+				}, [ node, 1 ]);
 			}
 
-		return {
-			table : {
-				tbody : cols ? {
-					tr : list
-				} : list
-			},
-			S : 'width:100%;border-collapse:collapse;'
-		};
+			list_array = [
+			// 設定目錄定位。
+			{
+				span : [ {
+					span : CSS_position_sticky ? auto_TOC.icon.unpin : '',
+					onclick : function() {
+						this.innerHTML = auto_TOC.icon[
+						//
+						(node.style.position = node.style.position
+						//
+						? '' : 'static') ? 'pin' : 'unpin'];
+						set_height();
+					},
+					R : 'Pin/unpin the contents.\n設定目錄為固定或相對定位。'
+				}, {
+					span : auto_TOC.icon.right,
+					onclick : function() {
+						this.innerHTML = auto_TOC.icon[
+						//
+						(node.style.cssFloat = node.style.cssFloat
+						//
+						? '' : 'right') ? 'left' : 'right'];
+					},
+					R : 'Switch the position of the contents.\n設定目錄左右定位。'
+				} ],
+				C : auto_TOC.CSS_prefix + 'position_control'
+			}, {
+				// U+1F4D1 BOOKMARK TABS
+				// http://www.utf8-chartable.de/unicode-utf8-table.pl?start=128000
+				// http://www.fileformat.info/info/emoji/list.htm
+				// http://codepoints.net/U+1F4D1
+				div : [ '📑', {
+					T : title ? [ 'Contents of [%1]', title ] : 'Contents'
+				} ],
+				C : auto_TOC.CSS_prefix + 'control',
+				title : gettext('expand'),
+				onclick : function() {
+					var expand = toggle_display(TOC_list) !== 'none';
+					// show/hide (顯示/隱藏), 展開/收合目錄
+					this.title = gettext(expand ? 'collapse' : 'expand');
+					if (expand)
+						set_height();
+				}
+			}, {
+				div : list_array,
+				id : TOC_list,
+				C : auto_TOC.CSS_prefix + 'list'
+			} ];
+
+			var class_name = auto_TOC.CSS_prefix
+			// 若是不具有此屬性，則明確指定不使用此屬性；預防有瀏覽器雖然已實現此屬性，但是並沒有被本函式庫偵測出來。
+			+ (CSS_position_sticky ? 'box' : 'box_no_sticky');
+			if (node = get_element(id)) {
+				_.remove_all_child(node);
+				set_class(node, class_name);
+				new_node(list_array, node);
+			} else {
+				node = new_node({
+					div : list_array,
+					id : id,
+					C : class_name
+				}, [ content_node, 1 ]);
+			}
+
+			// auto_TOC.set_text(id);
+
+			// 作 cache。
+			TOC_list = get_element(TOC_list);
+
+			// 載入 CSS resource。
+			// include resource of module.
+			library_namespace.run(library_namespace.get_module_path(
+					module_name, 'auto_TOC.css'));
+		} else
+			library_namespace.warn('auto_TOC: No ' + level + ' found.');
+
+		// Release memory. 釋放被占用的記憶體.
+		head_array = list_array = null;
 	}
 
-	try {
-		// IE 只會取第一個 <frameset>。
-		var frameset = document_node.getElementsByTagName('frameset')[0];
-		if (frameset)
-			library_namespace.log(parse_frameset(frameset));
-		else if(library_namespace.is_debug())
-			library_namespace.warn('No frameset detected.');
-	} catch (e) {
-		library_namespace.error(e);
-	}
-}
+	// title 最大長度 in px。
+	auto_TOC.max_length = 80;
+	// CSS class name 前綴。
+	auto_TOC.CSS_prefix = 'TOC_';
 
-_.parse_frame = parse_frame;
+	// TODO: set domain
+	auto_TOC.set_text = function(id) {
+		// 目錄
+		gettext.translate_nodes(get_element(id).childNodes);
+		// ↑回到目錄
+		gettext.translate_nodes('.' + auto_TOC.CSS_prefix + 'back');
+	};
 
-return (
+	auto_TOC.icon = {
+		pin : '⚓',
+		unpin : '⇧',
+		left : '⇦',
+		right : '⇨'
+	};
+
 	_// JSDT:_module_
-);
+	.auto_TOC = auto_TOC;
+
+	// ---------------------------------------------------------------------//
+
+	function random_color(from, gap) {
+		function scale(from, gap) {
+			return from + (Math.random() * gap) | 0;
+		}
+		from |= 0;
+		if (from < 0 || from > 255)
+			from = 0;
+		if (!gap)
+			gap = 256 - from;
+		var color = [], i = 3;
+		while (i--)
+			color.push(scale(from, gap));
+		return 'rgb(' + color + ');';
+	}
+
+	function parse_frame(document_node) {
+		function parse_frameset(frameset) {
+			var nodes = frameset.childNodes, i = 0, length = nodes.length, tag, list = [], cols = frameset.cols
+					.trim(), cell, node, background = random_color(210),
+			//
+			get_info = function() {
+				var name = node.name + '(' + layout.shift() + ')';
+				return node.src ? {
+					b : name,
+					title : node.src
+				} : name;
+			},
+			// IE 先看 cols，之後才看 rows。
+			layout = (cols || frameset.rows.trim()).split(/\s*,\s*/);
+			// cols = !!cols;
+
+			for (; i < length; i++) {
+				if ((tag = (node = nodes[i]).tagName)
+						&& (cell = (tag = tag.toLowerCase()) === 'frame' ? {
+							a : get_info(),
+							href : '#',
+							onclick : function() {
+								// application.debug.show_value first
+								if (library_namespace.show_value)
+									// Error null: 462 [Error] (facility
+									// code
+									// 10): 遠端伺服器不存在或無法使用
+									try {
+										library_namespace.show_value(this,
+												this.id || this.name);
+									} catch (e) {
+										library_namespace.error(e);
+									}
+								else {
+									library_namespace.warn(
+									//
+									'Need to include application.debug first!'
+									//
+									+ ' Trying now...');
+									library_namespace.run('application.debug');
+								}
+								return false;
+							}.bind(node)
+						} : tag === 'frameset' && [ {
+							div : get_info(),
+							S : 'width:100%;color:#e73;background-color:'
+							//
+							+ background + ';'
+						}, parse_frameset(node) ])) {
+					cell = {
+						td : cell,
+						S : 'background-color:' + background + ';'
+					};
+					list.push(cols ? cell : {
+						tr : cell
+					});
+				}
+			}
+
+			return {
+				table : {
+					tbody : cols ? {
+						tr : list
+					} : list
+				},
+				S : 'width:100%;border-collapse:collapse;'
+			};
+		}
+
+		try {
+			// IE 只會取第一個 <frameset>。
+			var frameset = document_node.getElementsByTagName('frameset')[0];
+			if (frameset)
+				library_namespace.log(parse_frameset(frameset));
+			else if (library_namespace.is_debug())
+				library_namespace.warn('No frameset detected.');
+		} catch (e) {
+			library_namespace.error(e);
+		}
+	}
+
+	_.parse_frame = parse_frame;
+
+	return (_// JSDT:_module_
+	);
+
 }

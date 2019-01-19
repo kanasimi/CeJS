@@ -199,6 +199,8 @@ function module_code(library_namespace) {
 	// copy from data.date.
 	/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+	/** {Number}一分鐘的 time 值(in milliseconds)。should be 60 * 1000 = 60000. */
+	ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
 
 	CE_REFORM_YEAR = library_namespace.Gregorian_reform_date.getFullYear(),
 
@@ -5807,7 +5809,8 @@ function module_code(library_namespace) {
 	 * @returns {Array} 共存紀年
 	 */
 	function add_contemporary(date, 指定紀年, options) {
-		var tmp, date_index, time_offset = date.getTimezoneOffset() * 60 * 1000,
+		var tmp, date_index, time_offset = date.getTimezoneOffset()
+				* ONE_MINTE_LENGTH_VALUE,
 		// 以當日為單位而非採用精準時間
 		use_whole_day = options && ('use_whole_day' in options)
 		//
@@ -5957,13 +5960,15 @@ function module_code(library_namespace) {
 			共存紀年.forEach(function(era) {
 				if (date_index = era.Date_to_date_index(date
 				// 轉成目標共存紀年的當日零時。
-				- time_offset + (era[MINUTE_OFFSET_KEY] || 0) * 60 * 1000)) {
+				- time_offset + (era[MINUTE_OFFSET_KEY] || 0)
+						* ONE_MINTE_LENGTH_VALUE)) {
 					// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
 					date_index = era.日名(date_index[2], date_index[1],
 							date_index[0]).reverse();
-					if (options.numeral)
+					if (options.numeral) {
 						date_index = numeralize_date_format(date_index,
 								options.numeral);
+					}
 
 					// [ era, 年, 月, 日 ]
 					var name = [ era ];
@@ -6004,7 +6009,7 @@ function module_code(library_namespace) {
 	}
 
 	// e.g., UTC+8: -8 * 60 = -480
-	var nowaday_local_minute_offset = (new Date).getTimezoneOffset() || 0,
+	var present_local_minute_offset = (new Date).getTimezoneOffset() || 0,
 	//
 	ONE_MINUTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 1) - new Date(0, 0, 1, 0, 0);
 
@@ -6120,7 +6125,7 @@ function module_code(library_namespace) {
 	 */
 	function correct_timezone_offset(date) {
 		var timezone_offset_min = date.getTimezoneOffset()
-				- nowaday_local_minute_offset;
+				- present_local_minute_offset;
 		if (timezone_offset_min !== 0) {
 			date.setMinutes(date.getMinutes() + timezone_offset_min);
 		}
@@ -8197,17 +8202,19 @@ function module_code(library_namespace) {
 		var 日 = library_namespace.Chinese_numerals_Normal_digits.slice(1),
 		// e.g., 元, 二, 二十, 二十二, 二十有二, 卅又二
 		年 = '(?:(?:[廿卅]|[' + 日 + ']?十)[有又]?[' + 日 + ']?|[' + 日 + '元明隔去]){1,4}年',
-		// 春王正月 冬十有二月
-		月 = 季_SOURCE + '[閏闰]?(?:[正臘' + 日 + ']|十[有又]?){1,3}月';
+		// 春王正月 冬十有二月, 秦二世二年後九月
+		月 = 季_SOURCE + '[閏闰後]?(?:[正臘' + 日 + ']|十[有又]?){1,3}月';
 		日 = '(?:(?:(?:干支)?(?:初[' + 日 + ']日?|(?:' + 日
 		// "元日":正月初一，常具文意而不表示日期，剔除之。
 		+ '|(?:[一二三]?十|[廿卅])[有又]?[' + 日 + ']?|[' + 日 + '])日)|干支日?)[朔晦望]?旦?'
 		// 朔晦望有其他含義，誤標率較高。
 		+ (options && options.add_望 ? '|[朔晦望]日?' : '') + ')';
 
-		// 建構 史籍紀年_PATTERN
-
 		/**
+		 * 建構 史籍紀年_PATTERN
+		 * 
+		 * TODO: 排除 /干支[年歲嵗]/
+		 * 
 		 * <code>
 
 		// test cases:
@@ -8220,6 +8227,8 @@ function module_code(library_namespace) {
 		乃元康四年嘉谷
 		（玄宗開元）十年
 
+		道光十九年正月廿五
+
 		未及一年
 		去年
 		明年
@@ -8229,7 +8238,6 @@ function module_code(library_namespace) {
 
 		</code>
 		 */
-		// TODO: 排除 /干支[年歲嵗]/
 		史籍紀年_PATTERN = [
 		// 識別干支紀年「年號+干支(年)」。
 		'(?:' + 紀年 + ')+干支年?',

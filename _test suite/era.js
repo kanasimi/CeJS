@@ -340,7 +340,8 @@ function show_calendar(era_name) {
 	// 取得指定紀年之文字式曆譜:年曆,朔閏表,曆日譜。
 	dates = CeL.era.dates(era_name, {
 		含參照用 : PATTERN_J_translate.test(era_name),
-		add_country : true
+		add_country : true,
+		numeral : output_numeral
 	}), is_年譜, i, j, matched, hidden_column = [], group;
 
 	if (!dates)
@@ -2057,11 +2058,12 @@ function translate_era(era) {
 			show_calendar(era);
 
 		var format = output_format_object.setValue();
-		if (!format)
+		if (!format) {
 			format = output_format_object.setValue(
 			// '%Y年'.replace(/-(\d+年)/, '前$1')
 			CE_name + '%Y年'.replace(/^-/, '前')
 					+ (date.精 === '年' ? '' : '%m月%d日'));
+		}
 
 		if (format === '共存紀年')
 			if (Array.isArray(output = date.共存紀年))
@@ -2087,7 +2089,7 @@ function translate_era(era) {
 			if (output_numeral === 'Chinese')
 				output = CeL.to_Chinese_numeral(output);
 			output = output.replace(/-(\d+年)/, '前$1');
-			if (output !== era)
+			if (output !== era) {
 				output = {
 					a : output,
 					title : (CE_PATTERN.test(output) ? '共存紀年:' : '') + output,
@@ -2095,6 +2097,7 @@ function translate_era(era) {
 					target : '_self',
 					onclick : click_title_as_era
 				};
+			}
 		}
 
 		// -----------------------------
@@ -2658,6 +2661,7 @@ function affairs() {
 
 	era_input_object = new CeL.select_input('era_input', CeL.era
 			.get_candidate(), 'includeKeyWC');
+	era_input_object.focus();
 
 	CeL.get_element('era_input').onkeypress
 	//

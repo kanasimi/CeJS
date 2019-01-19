@@ -65,7 +65,7 @@ archive_file.verify(options, callback);
  </code>
  * 
  * @see CeL.application.OS.Windows.archive
- * @see https://github.com/quentinrossetti/node-7z
+ * @see https://github.com/quentinrossetti/node-7z https://stuk.github.io/jszip/
  * 
  * @since 2018/3/4 13:57:28
  * @since 2018/3/8 19:59:47 初步可用
