@@ -385,7 +385,9 @@ function module_code(library_namespace) {
 				// 丟出異常錯誤。
 				throw error;
 			} else {
-				console.trace(error);
+				console.trace(
+				// typeof error === 'object' ? JSON.stringify(error) :
+				error);
 				throw this.id + ': ' + (new Date).toISOString() + ' ' + error;
 			}
 			// return CeL.work_crawler.THROWED;
@@ -439,6 +441,7 @@ function module_code(library_namespace) {
 		full_URL : full_URL_of_path,
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
 		// 每次預設會從上一次中斷的章節接續下載，不用特地指定 recheck。
+		// 有些漫畫作品分區分單行本、章節與外傳，當章節數量改變、添加新章節時就需要重新檢查。
 		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。否則只會自上次下載過的章節接續下載。
 		// recheck : true,
 		// recheck=false:明確指定自上次下載過的章節接續下載。
@@ -2606,6 +2609,10 @@ function module_code(library_namespace) {
 		}
 
 		if (Array.isArray(chapter_data.chapter_list)) {
+			if (!this.recheck) {
+				library_namespace
+						.warn('set_chapter_NO_via_title: 本作存有不同的 part，建議設置 recheck 來避免多次下載時，遇上缺話的情況。');
+			}
 			// input sorted work_data, use work_data.chapter_list
 			// last_chapter_NO, start NO
 			default_NO |= 0;
@@ -2693,6 +2700,10 @@ function module_code(library_namespace) {
 			&& (Array.isArray(work_data.chapter_list)
 			// 當只有一個 part 的時候，預設不會添上 part 標題，除非設定了 this.add_part。
 			&& work_data.chapter_list.part_NO > 1 || this.add_part)) {
+				if (!this.recheck) {
+					library_namespace.warn((work_data.title || work_data.id)
+							+ ': 本作存有不同的 part，建議設置 recheck 來避免多次下載時，遇上缺話的情況。');
+				}
 				part = chapter_data.NO_in_part | 0;
 				if (part >= 1) {
 					chapter_NO = part;
@@ -3559,9 +3570,10 @@ function module_code(library_namespace) {
 								+ image_data.file);
 					}
 					if (!image_data.file.endsWith('.' + file_type.extension)
-							// accept '.jpeg' as alias of '.jpg'
-							&& !file_type.extensions.includes(image_data.file
-									.match(/[^.]*$/)[0])) {
+					//
+					&& (!file_type.extensions || !file_type.extensions
+					// accept '.jpeg' as alias of '.jpg'
+					.includes(image_data.file.match(/[^.]*$/)[0]))) {
 						// 依照所驗證的檔案格式改變副檔名。
 						image_data.file = image_data.file.replace(/[^.]+$/,
 						// e.g. .png
