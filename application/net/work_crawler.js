@@ -1467,7 +1467,7 @@ function module_code(library_namespace) {
 					// 相匹配
 					+ ']相符者。' + (approximate_title.length === 0 ?
 					//
-					'若您輸入的是 work id，則必須設定 extract_work_id() 以免將 work id 誤判為 work title。'
+					'若您輸入的是 work id，請回報議題讓下載工具設定 extract_work_id()，以免將 work id 誤判為 work title。'
 					//
 					: ''));
 					finish_up(approximate_title.length > 0 && {
