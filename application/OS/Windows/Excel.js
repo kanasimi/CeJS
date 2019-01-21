@@ -94,7 +94,7 @@ function module_code(library_namespace) {
 
 		if (command) {
 			if (!require('fs').existsSync(Excel_file_path)) {
-				library_namespace.error('Excel 檔案！');
+				library_namespace.error('Excel 檔案不存在！ ' + Excel_file_path);
 				return;
 			}
 

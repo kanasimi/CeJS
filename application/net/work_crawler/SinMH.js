@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL function for downloading SinMH comics.
+ * @name CeL function for downloading SinMH CMS comics.
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸常見漫畫管理系統: 圣樱漫画管理系统 (圣樱CMS) MHD模板 的工具。
  * 
@@ -161,6 +161,7 @@ function module_code(library_namespace) {
 				// console.log(chapter_block);
 				if (chapter_block[1] === 'category') {
 					// console.log(chapter_block[2]);
+					// e.g., 决断地 @ gufengmh
 					chapter_block = chapter_block[2]
 					// <div class="caption pull-left"><span>章节</span></div>
 					// <div class="caption pull-left"><span>单话</span></div>

@@ -1264,6 +1264,21 @@ function module_code(library_namespace) {
 				return item;
 			}
 
+			if (file_path in this.downloading) {
+				if (this.downloading[file_path].url === item_data.url) {
+					library_namespace.log('add_chapter: 已經在下載隊列中，跳過重複下載動作: '
+							+ file_path);
+				} else {
+					library_namespace.error(
+					//
+					'add_chapter: 下載隊列中相同檔名卻有著不同的網址: 下載隊列中 '
+							+ this.downloading[file_path].url + ' !== 準備下載 '
+							+ item_data.url);
+				}
+				// console.log(this.downloading[file_path]);
+				return item;
+			}
+
 			// 避免衝突，檢測是不是有不同URL，相同檔名存在。
 			while (item.href in resource_href_hash) {
 				item.href = item.href.replace(
@@ -1351,8 +1366,20 @@ function module_code(library_namespace) {
 
 				// item_data.write_file = false;
 
-				// 註銷.downloading登記。
-				delete _this.downloading[item_data.file_path];
+				// 註銷 .downloading 登記。
+				if (item_data.file_path in _this.downloading) {
+					delete _this.downloading[item_data.file_path];
+				} else {
+					library_namespace.error(
+					// 下載隊列
+					'file path is not in downloading queue: '
+							+ item_data.file_path);
+				}
+				if (false) {
+					library_namespace.log('add_chapter: Still downloading:');
+					console.log(_this.downloading);
+					console.log(_this.add_listener('all_downloaded'));
+				}
 				if (_this.add_listener('all_downloaded')
 				// 在事後檢查.on_all_downloaded，看是不是有callback。
 				&& library_namespace.is_empty_object(_this.downloading)) {
@@ -1790,12 +1817,12 @@ function module_code(library_namespace) {
 
 		/**
 		 * <code>
-		 * this.metadata = {
-		 * 	'dc:tagname' : [ {Object} ],
-		 * 	meta : { [property] : [ {Object} ] },
-		 * 	link : { href : {Object} }
-		 * }
-		 * </code>
+		this.metadata = {
+			'dc:tagname' : [ {Object} ],
+			meta : { [property] : [ {Object} ] },
+			link : { href : {Object} }
+		}
+		</code>
 		 */
 		function add_information(data) {
 			var key = data[0].replace(metadata_prefix, ''),
@@ -1951,12 +1978,12 @@ function module_code(library_namespace) {
 		this.metadata.link = link;
 		/**
 		 * <code>
-		 * this.metadata = {
-		 * 	'dc:tagname' : [ {Object} ],
-		 * 	meta : { [property] : [ {Object} ] },
-		 * 	link : { href : {Object} }
-		 * }
-		 * </code>
+		this.metadata = {
+			'dc:tagname' : [ {Object} ],
+			meta : { [property] : [ {Object} ] },
+			link : { href : {Object} }
+		}
+		</code>
 		 */
 		this.raw_data_ptr.metadata.clear();
 		Object.entries(this.metadata).forEach(function(data) {
