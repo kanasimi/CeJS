@@ -2720,7 +2720,8 @@ function module_code(library_namespace) {
 			&& (Array.isArray(work_data.chapter_list)
 			// 當只有一個 part 的時候，預設不會添上 part 標題，除非設定了 this.add_part。
 			&& work_data.chapter_list.part_NO > 1 || this.add_part)) {
-				if (!this.recheck) {
+				if (!this.recheck && !this.recheck_prompted) {
+					this.recheck_prompted = true;
 					library_namespace.warn((work_data.title || work_data.id)
 							+ ': 本作存有不同的 part，建議設置 recheck 來避免多次下載時，遇上缺話的情況。');
 				}
