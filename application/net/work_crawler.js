@@ -1528,6 +1528,7 @@ function module_code(library_namespace) {
 			// <meta name="Keywords" content="~" />
 			// <meta property="og:site_name" name="application-name"
 			// content="卡提諾論壇"/>
+			// matched: [ all tag, key, value ]
 			/<meta\s+(?:property|name)=["'](?:[^<>"']+:)?([^<>"':]+)["']\s[^<>]*?content=["']([^<>"']+)/g;
 			html = html.between(null, '</head>') || html;
 		}
@@ -1543,7 +1544,7 @@ function module_code(library_namespace) {
 			if (!key || !overwrite && work_data[key])
 				continue;
 
-			var value = matched[1], link = value.match(
+			var value = matched[2], link = value.match(
 			// 從連結的title取得更完整的資訊。
 			/^[:：︰\s]*<a [^<>]*?title=["']([^<>"']+)["'][^<>]*>([\s\S]*?)<\/a>\s*$/
 			//
@@ -3263,6 +3264,8 @@ function module_code(library_namespace) {
 
 			if (typeof _this.after_get_image === 'function') {
 				// 每張圖片下載結束都會執行一次。
+				// var latest_image_data = image_list[image_list.index];
+				// using: image_data
 				_this.after_get_image(image_list, work_data, chapter_NO);
 			}
 
@@ -3754,7 +3757,7 @@ function module_code(library_namespace) {
 					}
 					image_data.done = true;
 					if (typeof callback === 'function')
-						callback(image_data);
+						callback(image_data/* , 'OK' */);
 					return;
 				}
 			}
@@ -4311,6 +4314,7 @@ function module_code(library_namespace) {
 		file_name = library_namespace.to_file_name(file_name);
 		// assert: PATTERN_ebook_file.test(file_name) === true
 
+		// console.trace('ebook_path: file_name: ' + file_name);
 		return [ work_data.ebook_directory || this.main_directory, file_name ];
 	}
 
