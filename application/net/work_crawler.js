@@ -2628,7 +2628,8 @@ function module_code(library_namespace) {
 		}
 
 		if (Array.isArray(chapter_data.chapter_list)) {
-			if (!this.recheck) {
+			if (!this.recheck && !this.recheck_prompted) {
+				this.recheck_prompted = true;
 				library_namespace
 						.warn('set_chapter_NO_via_title: 本作存有不同的 part，建議設置 recheck 來避免多次下載時，遇上缺話的情況。');
 			}
@@ -2814,6 +2815,8 @@ function module_code(library_namespace) {
 				chapter_label = _this.get_chapter_directory_name(work_data,
 						chapter_NO, chapter_data, false);
 				chapter_directory = work_data.directory + chapter_label;
+				library_namespace.debug('先準備好章節目錄: ' + chapter_directory, 1,
+						'process_images');
 				library_namespace.create_directory(chapter_directory);
 
 				images_archive = new library_namespace.storage.archive(
@@ -3747,7 +3750,23 @@ function module_code(library_namespace) {
 							library_namespace.debug('保存圖片數據到 HDD 上: '
 									+ image_data.file, 1, 'get_image');
 							// TODO: 檢查舊的檔案是不是文字檔。例如有沒有包含 HTML 標籤。
-							node_fs.writeFileSync(image_data.file, contents);
+							try {
+								node_fs
+										.writeFileSync(image_data.file,
+												contents);
+							} catch (e) {
+								_this.onerror('無法寫入圖像檔案 [' + image_data.file
+								//
+								+ ']。這可能肇因於作品資訊 cache 與當前網站上之作品章節結構不同。'
+								//
+								+ '若您之前曾經下載過本作品的話，請將作品資訊 cache 改名之後嘗試全新下載。',
+										image_data);
+								if (typeof callback === 'function') {
+									callback(image_data,
+											'image_file_write_error');
+								}
+								return Work_crawler.THROWED;
+							}
 						}
 					} else if (old_file_status
 							&& old_file_status.size > contents.length) {
