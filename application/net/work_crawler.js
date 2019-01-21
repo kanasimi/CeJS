@@ -524,7 +524,7 @@ function module_code(library_namespace) {
 			if (/^\(?(?:完[結结成]?|Completed)\)?$/i.test(status))
 				return status;
 
-			// e.g., 连载中, 連載中, 已完结, 已完成, 完結作品
+			// e.g., 连载中, 連載中, 已完结, 已完成, 已完結作品, 已連載完畢
 			var matched = status.match(/(?:^|已)完[結结成]/);
 			if (matched)
 				return matched[0];
@@ -673,6 +673,9 @@ function module_code(library_namespace) {
 			reget_chapter : 'boolean',
 			recheck : 'boolean|string',
 			research : 'boolean',
+
+			write_chapter_metadata : 'boolean',
+			write_image_metadata : 'boolean',
 
 			// 儲存偏好選項 save_options。
 			save_preference : 'boolean',
@@ -1534,11 +1537,26 @@ function module_code(library_namespace) {
 		while (matched = PATTERN_work_data.exec(html)) {
 			// delete matched.input;
 			// console.log(matched);
-			var key = get_label(matched[1]).replace(/[:：︰\s]+$/, '').trim(), value;
+
+			var key = get_label(matched[1]).replace(/[:：︰\s]+$/, '').trim();
 			// default: do not overwrite
-			if (key && (overwrite || !work_data[key])
+			if (!key || !overwrite && work_data[key])
+				continue;
+
+			var value = matched[1], link = value.match(
+			// 從連結的title取得更完整的資訊。
+			/^[:：︰\s]*<a [^<>]*?title=["']([^<>"']+)["'][^<>]*>([\s\S]*?)<\/a>\s*$/
 			//
-			&& (value = get_label(matched[2]).replace(/^[:：︰\s]+/, '').trim())) {
+			);
+			if (link) {
+				link[1] = get_label(link[1]);
+				link[2] = get_label(link[2]);
+				if (link[1].length > link[2].length) {
+					value = link[1];
+				}
+			}
+			value = get_label(value).replace(/^[:：︰\s]+/, '').trim();
+			if (value) {
 				work_data[key] = value.replace(/ {3,}/g, '  ');
 			}
 		}
@@ -2808,7 +2826,8 @@ function module_code(library_namespace) {
 					work_directory : work_data.directory,
 					to_remove : []
 				});
-				if (node_fs.existsSync(images_archive.archive_file_path)) {
+				if (library_namespace
+						.file_exists(images_archive.archive_file_path)) {
 					if (library_namespace.platform.OS === 'darwin'
 							&& images_archive.program_type === 'zip') {
 						// In Max OS: 直接解開圖片壓縮檔以避免麻煩。
@@ -2970,8 +2989,8 @@ function module_code(library_namespace) {
 							image_list[image_list.index], image_list.index);
 					if (time_interval > 0)
 						image_data.time_interval = time_interval;
-					_this.get_image(image_data, function(status) {
-						check_if_done();
+					_this.get_image(image_data, function(image_data, status) {
+						check_if_done(image_data, status);
 
 						// 添加計數器
 						if (!(++image_list.index < image_list.length)) {
@@ -3225,12 +3244,25 @@ function module_code(library_namespace) {
 		}
 		get_data();
 
-		function check_if_done() {
+		// image_data: latest_image_data
+		function check_if_done(image_data, status) {
+			if (_this.write_image_metadata
+			// 將每個圖像的資訊寫入同名(添加.json延伸檔名)的JSON檔。
+			&& library_namespace.file_exists(image_data.file)) {
+				var chapter_data = work_data.chapter_list
+						&& work_data.chapter_list[chapter_NO - 1],
+				//
+				metadata = Object.assign(library_namespace.null_Object(),
+						work_data, chapter_data, image_data);
+				delete metadata.chapter_list;
+				library_namespace.write_file(image_data.file + '.json',
+						metadata);
+			}
+
 			--left;
 
 			if (typeof _this.after_get_image === 'function') {
-				// 每個圖片下載結束都會執行一次。
-				// var latest_image_data = image_list[image_list.index];
+				// 每張圖片下載結束都會執行一次。
 				_this.after_get_image(image_list, work_data, chapter_NO);
 			}
 
@@ -3354,6 +3386,20 @@ function module_code(library_namespace) {
 						recurse : true
 					});
 				}
+
+				if (_this.write_chapter_metadata && library_namespace
+				// 將每個章節壓縮檔的資訊寫入同名(添加.json延伸檔名)的JSON檔。
+				.file_exists(images_archive.archive_file_path)) {
+					var chapter_data = work_data.chapter_list
+							&& work_data.chapter_list[chapter_NO - 1],
+					//
+					metadata = Object.assign(library_namespace.null_Object(),
+							work_data, chapter_data);
+					delete metadata.chapter_list;
+					library_namespace.write_file(
+							images_archive.archive_file_path + '.json',
+							metadata);
+				}
 			}
 
 			continue_next_chapter.call(_this, work_data, chapter_NO, callback);
@@ -3445,6 +3491,7 @@ function module_code(library_namespace) {
 	}
 
 	// 下載單一個圖片。
+	// callback(image_data, status)
 	function get_image(image_data, callback, images_archive) {
 		// console.log(image_data);
 		if (!image_data || !image_data.file || !image_data.url) {
@@ -3454,7 +3501,8 @@ function module_code(library_namespace) {
 			}
 			// 注意: 此時 image_data 可能是 undefined
 			this.onerror('未指定圖像資料', image_data);
-			typeof callback === 'function' && callback('invalid_data');
+			if (typeof callback === 'function')
+				callback(image_data, 'invalid_data');
 			return;
 		}
 
@@ -3519,7 +3567,8 @@ function module_code(library_namespace) {
 		if (image_downloaded) {
 			// console.log('get_image: Skip ' + image_data.file);
 			image_data.done = true;
-			typeof callback === 'function' && callback('image_downloaded');
+			if (typeof callback === 'function')
+				callback(image_data, 'image_downloaded');
 			return;
 		}
 
@@ -3704,7 +3753,8 @@ function module_code(library_namespace) {
 								+ ')，將不覆蓋：' + image_data.file);
 					}
 					image_data.done = true;
-					typeof callback === 'function' && callback();
+					if (typeof callback === 'function')
+						callback(image_data);
 					return;
 				}
 			}
@@ -3757,7 +3807,8 @@ function module_code(library_namespace) {
 
 				_this.onerror('圖像下載錯誤', image_data);
 				// image_data.done = false;
-				typeof callback === 'function' && callback();
+				if (typeof callback === 'function')
+					callback(image_data, 'image_download_error');
 				return Work_crawler.THROWED;
 				// 網頁介面不可使用process.exit()，會造成白屏
 				// process.exit(1);
