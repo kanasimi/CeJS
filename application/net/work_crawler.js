@@ -615,6 +615,8 @@ function module_code(library_namespace) {
 							this.get_URL_options, options)
 							: this.get_URL_options);
 		},
+
+		confirm_recheck : confirm_recheck,
 		set_part : set_part_title,
 		add_chapter : add_chapter_data,
 		reverse_chapter_list_order : reverse_chapter_list_order,
@@ -2585,6 +2587,15 @@ function module_code(library_namespace) {
 		});
 	}
 
+	// 對於某些作品，顯示建議重新檢查的提示；以每個作品為單位。
+	function confirm_recheck(work_data, prompt) {
+		if (this.recheck || work_data.recheck_confirmed) {
+			return;
+		}
+		work_data.recheck_confirmed = true;
+		library_namespace.warn(prompt + '，建議設置 recheck 選項來避免多次下載時，遇上缺話的情況。');
+	}
+
 	// 分析所有數字後的非數字，猜測章節的單位。
 	function guess_unit(title_list) {
 		var units = library_namespace.null_Object(), PATTERN = /\d+([^\d])/g, matched;
@@ -2610,7 +2621,7 @@ function module_code(library_namespace) {
 		return unit;
 	}
 	/**
-	 * 依章節標題來定章節編號。 本函數將會改變 chapter_data.chapter_NO ！
+	 * 依章節標題來設定章節編號。 本函數將會改變 chapter_data.chapter_NO ！
 	 * 
 	 * @param {Object|Array}chapter_data
 	 *            chapter_data or work_data
@@ -2628,11 +2639,9 @@ function module_code(library_namespace) {
 		}
 
 		if (Array.isArray(chapter_data.chapter_list)) {
-			if (!this.recheck && !this.recheck_prompted) {
-				this.recheck_prompted = true;
-				library_namespace
-						.warn('set_chapter_NO_via_title: 本作存有不同的 part，建議設置 recheck 來避免多次下載時，遇上缺話的情況。');
-			}
+			this.confirm_recheck(chapter_data,
+			// assert: `chapter_data` is work data
+			'set_chapter_NO_via_title: 本作依章節標題來設定章節編號');
 			// input sorted work_data, use work_data.chapter_list
 			// last_chapter_NO, start NO
 			default_NO |= 0;
@@ -2720,11 +2729,9 @@ function module_code(library_namespace) {
 			&& (Array.isArray(work_data.chapter_list)
 			// 當只有一個 part 的時候，預設不會添上 part 標題，除非設定了 this.add_part。
 			&& work_data.chapter_list.part_NO > 1 || this.add_part)) {
-				if (!this.recheck && !this.recheck_prompted) {
-					this.recheck_prompted = true;
-					library_namespace.warn((work_data.title || work_data.id)
-							+ ': 本作存有不同的 part，建議設置 recheck 來避免多次下載時，遇上缺話的情況。');
-				}
+				this.confirm_recheck(work_data,
+				//
+				(work_data.title || work_data.id) + ': 本作存有不同的 part');
 				part = chapter_data.NO_in_part | 0;
 				if (part >= 1) {
 					chapter_NO = part;
@@ -2875,7 +2882,7 @@ function module_code(library_namespace) {
 				: '/' + work_data.chapter_count,
 				//
 				' [', chapter_label, '] ', left, ' images.',
-				// 例如需要收費/被鎖住的章節。 .locked
+				// 例如需要收費/被鎖住的章節。 .locked 此章节为付费章节 本章为付费章节
 				chapter_data.limited ? ' (本章為需要付費/被鎖住的章節)' : '' ].join('');
 				if (chapter_data.limited) {
 					// 針對特殊狀況提醒。
@@ -3507,7 +3514,11 @@ function module_code(library_namespace) {
 				image_data.done = true;
 			}
 			// 注意: 此時 image_data 可能是 undefined
-			this.onerror('未指定圖像資料', image_data);
+			if (this.skip_error) {
+				this.onwarning('未指定圖像資料', image_data);
+			} else {
+				this.onerror('未指定圖像資料', image_data);
+			}
 			if (typeof callback === 'function')
 				callback(image_data, 'invalid_data');
 			return;
@@ -3760,8 +3771,9 @@ function module_code(library_namespace) {
 								//
 								+ ']。這可能肇因於作品資訊 cache 與當前網站上之作品章節結構不同。'
 								//
-								+ '若您之前曾經下載過本作品的話，請將作品資訊 cache 改名之後嘗試全新下載。',
-										image_data);
+								+ '若您之前曾經下載過本作品的話，請封存原有作品目錄，'
+								//
+								+ '或將作品資訊 cache 改名之後嘗試全新下載。', image_data);
 								if (typeof callback === 'function') {
 									callback(image_data,
 											'image_file_write_error');
