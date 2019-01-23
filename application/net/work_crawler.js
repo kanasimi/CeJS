@@ -115,7 +115,9 @@ function module_code(library_namespace) {
 
 	function Work_crawler(configurations) {
 		Object.assign(this, configurations);
-		this.import_args();
+
+		// 預設必須自行執行 crawler.import_args();
+		// this.import_args();
 
 		// 在crawler=new CeL.work_crawler({})的情況下可能沒辦法得到準確的檔案路徑，因此這個路徑僅供參考。
 		if (typeof module === 'object') {
@@ -213,6 +215,42 @@ function module_code(library_namespace) {
 
 		// console.log(this.get_URL_options);
 		this.default_agent = this.set_agent();
+	}
+
+	// import command line arguments 以命令行參數為準
+	// 從命令列引數來的設定，優先等級比起作品預設設定更高。
+	function import_args() {
+		if (!library_namespace.env.arg_hash) {
+			return;
+		}
+
+		for ( var key in library_namespace.env.arg_hash) {
+			if ((key in this.import_arg_hash) || (key in this)) {
+				var value = library_namespace.env.arg_hash[key];
+				if (key === 'main_directory' && value) {
+					value = value.replace(/[\\\/]/g, path_separator).replace(
+							/[\\\/]*$/, path_separator);
+				}
+				// TODO: check .proxy
+				library_namespace.log(library_namespace.display_align([
+				//
+				[ key + ': ', this[key] ],
+				//
+				[ '由命令列 → ', value ] ]));
+				if (this.import_arg_hash[key] === 'number') {
+					try {
+						// this[key] = +value;
+						// 這樣可以處理如"1e3"
+						this[key] = JSON.parse(value);
+					} catch (e) {
+						library_namespace.error('Can not parse ' + key + '='
+								+ value);
+					}
+				} else {
+					this[key] = value;
+				}
+			}
+		}
 	}
 
 	// 初始化 agent。
@@ -680,42 +718,6 @@ function module_code(library_namespace) {
 	}
 
 	Object.assign(Work_crawler.prototype, Work_crawler_prototype);
-
-	// import command line arguments 以命令行參數為準
-	// 從命令列引數來的設定，優先等級比起作品預設設定更高。
-	function import_args() {
-		if (!library_namespace.env.arg_hash) {
-			return;
-		}
-
-		for ( var key in library_namespace.env.arg_hash) {
-			if ((key in this.import_arg_hash) || (key in this)) {
-				var value = library_namespace.env.arg_hash[key];
-				if (key === 'main_directory' && value) {
-					value = value.replace(/[\\\/]/g, path_separator).replace(
-							/[\\\/]*$/, path_separator);
-				}
-				// TODO: check .proxy
-				library_namespace.log(library_namespace.display_align([
-				//
-				[ key + ': ', this[key] ],
-				//
-				[ '由命令列 → ', value ] ]));
-				if (this.import_arg_hash[key] === 'number') {
-					try {
-						// this[key] = +value;
-						// 這樣可以處理如"1e3"
-						this[key] = JSON.parse(value);
-					} catch (e) {
-						library_namespace.error('Can not parse ' + key + '='
-								+ value);
-					}
-				} else {
-					this[key] = value;
-				}
-			}
-		}
-	}
 
 	// --------------------------------------------------------------------------------------------
 
