@@ -116,8 +116,9 @@ function module_code(library_namespace) {
 	function Work_crawler(configurations) {
 		Object.assign(this, configurations);
 
-		// 預設必須自行執行 crawler.import_args();
-		// this.import_args();
+		// 預設自動匯入 .env.arg_hash
+		if (this.auto_import_args)
+			this.import_args();
 
 		// 在crawler=new CeL.work_crawler({})的情況下可能沒辦法得到準確的檔案路徑，因此這個路徑僅供參考。
 		if (typeof module === 'object') {
@@ -193,62 +194,144 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// 設定預設可容許的最小圖像大小。
 		if (!(this.MIN_LENGTH >= 0)) {
-			// 設定預設可容許的最小圖像大小。
-			this.MIN_LENGTH = this.allow_EOI_error ? 4e3 : 1e3;
+			// 先設定一個，預防到最後都沒有被設定到。
+			this.setup_value('MIN_LENGTH', 'default');
 		}
 
 		this.get_URL_options = {
 			// start_time : Date.now(),
 			no_protocol_warn : true,
-			timeout : library_namespace.to_millisecond(this.timeout),
 			headers : Object.assign({
-				'User-Agent' : this.user_agent,
 				Referer : this.base_URL
 			}, this.headers)
 		};
-		if (this.proxy) {
-			// 代理伺服器 proxy_server
-			library_namespace.info('Using proxy server: ' + this.proxy);
-			this.get_URL_options.proxy = this.proxy;
-		}
+
+		this.setup_value('timeout', this.timeout);
+		this.setup_value('user_agent', this.user_agent);
 
 		// console.log(this.get_URL_options);
 		this.default_agent = this.set_agent();
 	}
 
+	// 檢核參數. normalize and setup value
+	// return has error
+	function setup_value(key, value) {
+		if (!key)
+			return '未提供鍵值';
+
+		if (library_namespace.is_Object(key)) {
+			// assert: value === undefined
+			value = key;
+			for (key in value) {
+				this.setup_value(key, value[key]);
+			}
+			// TODO: return error
+			return;
+		}
+
+		// assert: typeof key === 'string'
+
+		switch (key) {
+		case 'proxy':
+			// 代理伺服器 proxy_server
+			// TODO: check .proxy
+			library_namespace.info('Using proxy server: ' + this.proxy);
+			this.get_URL_options.proxy = this.proxy = value;
+			return;
+
+		case 'timeout':
+			value = library_namespace.to_millisecond(value);
+			if (!(value >= 0)) {
+				return '無法解析的時間';
+			}
+			this.get_URL_options.timeout = value;
+			break;
+
+		case 'user_agent':
+			this.get_URL_options.headers['User-Agent'] = value;
+			break;
+
+		case 'allow_EOI_error':
+			if (this.using_default_MIN_LENGTH) {
+				this[key] = value;
+				// 因為 .allow_EOI_error 會影響到 .MIN_LENGTH
+				this.setup_value('MIN_LENGTH', 'default');
+				return;
+			}
+			break;
+
+		case 'MIN_LENGTH':
+			// 設定預設可容許的最小圖像大小。
+			if (!(value >= 0)) {
+				if (value === 'default') {
+					this.using_default_MIN_LENGTH = true;
+					value = this.allow_EOI_error ? 4e3 : 1e3;
+				} else
+					return '最小圖像大小應大於等於零';
+			} else {
+				delete this.using_default_MIN_LENGTH;
+			}
+			break;
+
+		case 'main_directory':
+			if (!value || typeof value !== 'string')
+				return;
+			value = value.replace(/[\\\/]/g, path_separator)
+			// main_directory 必須以 path separator 作結。
+			.replace(/[\\\/]*$/, path_separator);
+			break;
+		}
+
+		if (key in this.import_arg_hash) {
+			if (!this.import_arg_hash[key].includes(typeof value)) {
+				library_namespace.warn('setup_value: ' + key + ' 這個值所允許的數值類型為 '
+						+ this.import_arg_hash[key] + '，但現在被設定了 {'
+						+ (typeof value) + '} ' + value);
+			}
+		}
+
+		if (value === undefined) {
+			// delete this[key];
+		}
+		this[key] = value;
+	}
+
 	// import command line arguments 以命令行參數為準
 	// 從命令列引數來的設定，優先等級比起作品預設設定更高。
 	function import_args() {
+		// console.log(library_namespace.env.arg_hash);
 		if (!library_namespace.env.arg_hash) {
 			return;
 		}
 
 		for ( var key in library_namespace.env.arg_hash) {
-			if ((key in this.import_arg_hash) || (key in this)) {
-				var value = library_namespace.env.arg_hash[key];
-				if (key === 'main_directory' && value) {
-					value = value.replace(/[\\\/]/g, path_separator).replace(
-							/[\\\/]*$/, path_separator);
+			if (!(key in this.import_arg_hash) && !(key in this)) {
+				continue;
+			}
+
+			var value = library_namespace.env.arg_hash[key];
+
+			if (this.import_arg_hash[key] === 'number') {
+				try {
+					// value = +value;
+					// 這樣可以處理如"1e3"
+					value = JSON.parse(value);
+				} catch (e) {
+					library_namespace.error('import_args: Can not parse ' + key
+							+ '=' + value);
+					continue;
 				}
-				// TODO: check .proxy
+			}
+
+			var old_value = this[key], error = this.setup_value(key, value);
+			if (error) {
+				library_namespace.error('import_args: 無法設定 ' + key + '='
+						+ old_value + ': ' + error);
+			} else {
 				library_namespace.log(library_namespace.display_align([
-				//
-				[ key + ': ', this[key] ],
-				//
-				[ '由命令列 → ', value ] ]));
-				if (this.import_arg_hash[key] === 'number') {
-					try {
-						// this[key] = +value;
-						// 這樣可以處理如"1e3"
-						this[key] = JSON.parse(value);
-					} catch (e) {
-						library_namespace.error('Can not parse ' + key + '='
-								+ value);
-					}
-				} else {
-					this[key] = value;
-				}
+						[ key + ': ', old_value ], [ '由命令列 → ', value ] ]));
 			}
 		}
 	}
@@ -268,15 +351,7 @@ function module_code(library_namespace) {
 		return this.get_URL_options.agent = agent;
 	}
 
-	/** {Natural}下載失敗時最多重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
-	Work_crawler.MAX_ERROR_RETRY = 4;
-
-	Work_crawler.HTML_extension = 'htm';
-
-	// fatal error throwed
-	Work_crawler.THROWED = {
-		throwed : true
-	};
+	// --------------------------------
 
 	// set download directory
 	function set_main_directory(main_directory) {
@@ -291,6 +366,21 @@ function module_code(library_namespace) {
 
 	Work_crawler.set_main_directory = set_main_directory;
 
+	// --------------------------------
+
+	// fatal error throwed
+	Work_crawler.THROWED = {
+		throwed : true
+	};
+
+	// --------------------------------
+	// 這邊放的是一些會在 Work_crawler_prototype 中被運算到的數值。
+
+	/** {Natural}下載失敗時最多重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
+	Work_crawler.MAX_ERROR_RETRY = 4;
+
+	Work_crawler.HTML_extension = 'htm';
+
 	var Work_crawler_prototype = {
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
@@ -304,6 +394,9 @@ function module_code(library_namespace) {
 		// site_id : '',
 		// base_URL : '',
 		// charset : 'GBK',
+
+		// 預設自動匯入 .env.arg_hash
+		auto_import_args : true,
 
 		// {String}瀏覽器識別 navigator.userAgent 模擬 Chrome。
 		user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
@@ -649,6 +742,7 @@ function module_code(library_namespace) {
 			image_count : true
 		},
 
+		setup_value : setup_value,
 		import_args : import_args,
 		// 命令列可以設定的選項。通常僅做測試微調用。
 		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
@@ -783,6 +877,13 @@ function module_code(library_namespace) {
 				+ ' Starting ' + work_id + ', 儲存至 ' + this.main_directory);
 		// prepare work directory.
 		library_namespace.create_directory(this.main_directory);
+		// check if this.main_directory exists.
+		// e.g., set "E:\directory\" but "E:\" do not exists.
+		if (!library_namespace.directory_exists(this.main_directory)) {
+			library_namespace.error('Can not create main_directory: '
+					+ this.main_directory);
+			return;
+		}
 
 		if (!this.server_URL) {
 			this.parse_work_id(work_id, callback);
