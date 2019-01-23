@@ -22,6 +22,7 @@ CLI progress bar
 預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
+用安全一點的 eval()
 parse 圖像。
 拼接長圖。
 自動搜尋不同的網站並選擇下載作品。
@@ -114,31 +115,7 @@ function module_code(library_namespace) {
 
 	function Work_crawler(configurations) {
 		Object.assign(this, configurations);
-		// 從命令列引數來的設定，優先等級比起作品預設設定更高。
-		if (library_namespace.env.arg_hash) {
-			for ( var key in library_namespace.env.arg_hash) {
-				if ((key in this.import_arg_hash) || (key in this)) {
-					var value = library_namespace.env.arg_hash[key];
-					library_namespace.log(library_namespace.display_align([
-					//
-					[ key + ': ', this[key] ],
-					//
-					[ '由命令列 → ', value ] ]));
-					if (this.import_arg_hash[key] === 'number') {
-						try {
-							// this[key] = +value;
-							// 這樣可以處理如"1e3"
-							this[key] = JSON.parse(value);
-						} catch (e) {
-							library_namespace.error('Can not parse ' + key
-									+ '=' + value);
-						}
-					} else {
-						this[key] = value;
-					}
-				}
-			}
-		}
+		this.import_args();
 
 		// 在crawler=new CeL.work_crawler({})的情況下可能沒辦法得到準確的檔案路徑，因此這個路徑僅供參考。
 		if (typeof module === 'object') {
@@ -263,6 +240,7 @@ function module_code(library_namespace) {
 		throwed : true
 	};
 
+	// set download directory
 	function set_main_directory(main_directory) {
 		if (main_directory
 				&& (main_directory = main_directory.replace(/[\\\/]+$/, ''))) {
@@ -616,7 +594,6 @@ function module_code(library_namespace) {
 							: this.get_URL_options);
 		},
 
-		confirm_recheck : confirm_recheck,
 		set_part : set_part_title,
 		add_chapter : add_chapter_data,
 		reverse_chapter_list_order : reverse_chapter_list_order,
@@ -634,10 +611,12 @@ function module_code(library_namespace) {
 			image_count : true
 		},
 
+		import_args : import_args,
 		// 命令列可以設定的選項。通常僅做測試微調用。
 		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
 		// @see work_crawler/gui_electron/gui_electron_functions.js
 		import_arg_hash : {
+			// set download directory
 			main_directory : 'string',
 			user_agent : 'string',
 			one_by_one : 'boolean',
@@ -701,6 +680,42 @@ function module_code(library_namespace) {
 	}
 
 	Object.assign(Work_crawler.prototype, Work_crawler_prototype);
+
+	// import command line arguments 以命令行參數為準
+	// 從命令列引數來的設定，優先等級比起作品預設設定更高。
+	function import_args() {
+		if (!library_namespace.env.arg_hash) {
+			return;
+		}
+
+		for ( var key in library_namespace.env.arg_hash) {
+			if ((key in this.import_arg_hash) || (key in this)) {
+				var value = library_namespace.env.arg_hash[key];
+				if (key === 'main_directory' && value) {
+					value = value.replace(/[\\\/]/g, path_separator).replace(
+							/[\\\/]*$/, path_separator);
+				}
+				// TODO: check .proxy
+				library_namespace.log(library_namespace.display_align([
+				//
+				[ key + ': ', this[key] ],
+				//
+				[ '由命令列 → ', value ] ]));
+				if (this.import_arg_hash[key] === 'number') {
+					try {
+						// this[key] = +value;
+						// 這樣可以處理如"1e3"
+						this[key] = JSON.parse(value);
+					} catch (e) {
+						library_namespace.error('Can not parse ' + key + '='
+								+ value);
+					}
+				} else {
+					this[key] = value;
+				}
+			}
+		}
+	}
 
 	// --------------------------------------------------------------------------------------------
 
@@ -1470,7 +1485,9 @@ function module_code(library_namespace) {
 					//
 					+ approximate_title.length + '個') + '與[' + work_title
 					// 相匹配
-					+ ']相符者。' + (approximate_title.length === 0 ?
+					+ ']相符者。' + (approximate_title.length === 0
+					// is_latin
+					&& /^[\x20-\x7e]+$/.test(work_title) ?
 					//
 					'若您輸入的是 work id，請回報議題讓下載工具設定 extract_work_id()，以免將 work id 誤判為 work title。'
 					//
@@ -2593,7 +2610,8 @@ function module_code(library_namespace) {
 			return;
 		}
 		work_data.recheck_confirmed = true;
-		library_namespace.warn(prompt + '，建議設置 recheck 選項來避免多次下載時，遇上缺話的情況。');
+		library_namespace.warn((work_data.title || work_data.id) + ': '
+				+ prompt + '，建議設置 recheck 選項來避免多次下載時，遇上缺話的情況。');
 	}
 
 	// 分析所有數字後的非數字，猜測章節的單位。
@@ -2621,7 +2639,7 @@ function module_code(library_namespace) {
 		return unit;
 	}
 	/**
-	 * 依章節標題來設定章節編號。 本函數將會改變 chapter_data.chapter_NO ！
+	 * 依章節標題來決定章節編號。 本函數將會改變 chapter_data.chapter_NO ！
 	 * 
 	 * @param {Object|Array}chapter_data
 	 *            chapter_data or work_data
@@ -2639,9 +2657,8 @@ function module_code(library_namespace) {
 		}
 
 		if (Array.isArray(chapter_data.chapter_list)) {
-			this.confirm_recheck(chapter_data,
 			// assert: `chapter_data` is work data
-			'set_chapter_NO_via_title: 本作依章節標題來設定章節編號');
+			confirm_recheck.call(this, chapter_data, '本作依章節標題來決定章節編號');
 			// input sorted work_data, use work_data.chapter_list
 			// last_chapter_NO, start NO
 			default_NO |= 0;
@@ -2729,9 +2746,7 @@ function module_code(library_namespace) {
 			&& (Array.isArray(work_data.chapter_list)
 			// 當只有一個 part 的時候，預設不會添上 part 標題，除非設定了 this.add_part。
 			&& work_data.chapter_list.part_NO > 1 || this.add_part)) {
-				this.confirm_recheck(work_data,
-				//
-				(work_data.title || work_data.id) + ': 本作存有不同的 part');
+				confirm_recheck.call(this, work_data, '本作存有不同的 part');
 				part = chapter_data.NO_in_part | 0;
 				if (part >= 1) {
 					chapter_NO = part;
