@@ -23,12 +23,13 @@ CLI progress bar
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
 用安全一點的 eval()
+	Runs untrusted code securely https://github.com/patriksimek/vm2
 parse 圖像。
 拼接長圖。
+自動判別網址所需要使用的下載工具。
 自動搜尋不同的網站並選擇下載作品。
 從其他的資料來源網站尋找取得作品以及章節的資訊。
 檢核章節內容。
-Runs untrusted code securely https://github.com/patriksimek/vm2
 
 </code>
  * 
@@ -1582,9 +1583,9 @@ function module_code(library_namespace) {
 				id_list = id;
 			})) {
 				if (approximate_title.length !== 1) {
-					library_namespace.error(
+					library_namespace.error(_this.id + ': '
 					// failed: not only one
-					(approximate_title.length === 0 ? '未搜尋到' : '找到'
+					+ (approximate_title.length === 0 ? '未搜尋到' : '找到'
 					//
 					+ approximate_title.length + '個') + '與[' + work_title
 					// 相匹配
