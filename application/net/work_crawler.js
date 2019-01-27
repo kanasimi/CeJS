@@ -3021,6 +3021,13 @@ function module_code(library_namespace) {
 				// http://stackoverflow.com/questions/245840/rename-files-in-sub-directories
 				// for /r %x in (*.jfif) do ren "%x" *.jpg
 				function normalize_image_data(image_data, index) {
+					// set image file path
+					function image_file_path_of_chapter_NO(chapter_NO) {
+						return chapter_directory + work_data.id + '-'
+								+ chapter_NO + '-' + (index + 1).pad(3) + '.'
+								+ file_extension;
+					}
+
 					library_namespace.debug(chapter_label + ': ' + (index + 1)
 							+ '/' + image_list.length, 6,
 							'normalize_image_data');
@@ -3080,11 +3087,28 @@ function module_code(library_namespace) {
 								// 採用預設的圖片延伸檔名。
 								file_extension = _this.default_image_extension;
 							}
-							// set image file path
-							image_data.file = chapter_directory + work_data.id
-							//
-							+ '-' + chapter_NO + '-' + (index + 1).pad(3) + '.'
-									+ file_extension;
+
+							var old_image_file_path = image_file_path_of_chapter_NO(chapter_NO);
+							if (chapter_data.NO_in_part >= 1
+									&& chapter_NO !== chapter_data.NO_in_part) {
+								// 若有分部，則以部編號為主。
+								image_data.file = image_file_path_of_chapter_NO(chapter_data.NO_in_part);
+
+								// 假如之前已取得過圖片檔案，就把舊圖片改名成新的名稱格式。
+								// 例如之前沒有分部，現在卻增加了分部。
+								if (!library_namespace
+										.file_exists(image_data.file)
+										// && old_image_file_path !==
+										// image_data.file
+										&& library_namespace
+												.file_exists(old_image_file_path)) {
+									library_namespace.move_file(
+											old_image_file_path,
+											image_data.file);
+								}
+							} else {
+								image_data.file = old_image_file_path;
+							}
 						}
 					}
 
