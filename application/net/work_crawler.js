@@ -2204,6 +2204,7 @@ function module_code(library_namespace) {
 					if (!_this.hasOwnProperty('reget_chapter')) {
 						work_data.reget_chapter = false;
 					}
+					// 如果章節刪除與增加，重整結果數量相同，則檢查不到，必須採用 .recheck。
 					library_namespace
 							.log(_this.id
 									+ ': 章節數量'
@@ -3052,64 +3053,67 @@ function module_code(library_namespace) {
 
 					if (image_data.file) {
 						// image_data.file: 指定圖片要儲存檔的檔名與路徑 file_path。
+						// 已經設定過就不再設定 image_data.file。
+						return image_data;
+					}
 
+					if (typeof image_data.file_name === 'function') {
+						// return {String}file name
+						image_data.file_name = image_data.file_name(work_data,
+								chapter_NO, index);
+					}
+					if (image_data.file_name) {
+						image_data.file = chapter_directory
+								+ image_data.file_name;
+						// 採用 image_data.file_name 來設定 image_data.file。
+						return image_data;
+					}
+
+					var file_extension = image_data.file_extension
+							|| work_data.image_extension;
+					if (!file_extension && image_data.url) {
+						// 由圖片的網址來判別可能的延伸檔名。
+						var matched = image_data.url.replace(/[?#].*$/, '');
+						matched = matched.match(/\.([a-z\d\-_]+)$/i);
+						if (matched) {
+							matched = matched[1].toLowerCase();
+							if (matched in _this.image_types) {
+								// e.g., manhuagui.js
+								library_namespace.debug('file extension: .'
+										+ matched + ' ← ' + image_data.url, 3,
+										'get_data');
+								file_extension = matched;
+							}
+						}
+					}
+					if (!file_extension) {
+						// 採用預設的圖片延伸檔名。
+						file_extension = _this.default_image_extension;
+					}
+
+					// 本來希望若之前沒有分部，現在卻增加了分部，那麼若資料夾中有舊的圖像檔案，可以直接改名。
+					// 但由於增加分部之後，chapter_directory已經加上分部名稱，和原先沒有分部情況下資料夾名稱不同，因此抓不到原先的圖像檔案。
+					// TODO: 重新命名舊的資料夾。
+					var old_image_file_path = image_file_path_of_chapter_NO(chapter_NO),
+					// 使圖片檔名中的章節編號等同於資料夾編號。
+					using_chapter_NO = chapter_data.chapter_NO >= 1 ? chapter_data.chapter_NO
+							: chapter_data.NO_in_part >= 1
+									&& chapter_data.NO_in_part;
+					if (using_chapter_NO && using_chapter_NO !== chapter_NO) {
+						// 若有分部，則以部編號為主。
+						image_data.file = image_file_path_of_chapter_NO(using_chapter_NO);
+
+						// 假如之前已取得過圖片檔案，就把舊圖片改名成新的名稱格式。
+						// 例如之前沒有分部，現在卻增加了分部。
+						if (!library_namespace.file_exists(image_data.file)
+						// && old_image_file_path !==
+						// image_data.file
+						&& library_namespace.file_exists(old_image_file_path)) {
+							library_namespace.move_file(old_image_file_path,
+									image_data.file);
+						}
 					} else {
-						if (typeof image_data.file_name === 'function') {
-							// return {String}file name
-							image_data.file_name = image_data.file_name(
-									work_data, chapter_NO, index);
-						}
-						if (image_data.file_name) {
-							image_data.file = chapter_directory
-									+ image_data.file_name;
-						} else {
-							var file_extension = image_data.file_extension
-									|| work_data.image_extension;
-							if (!file_extension && image_data.url) {
-								// 由圖片的網址來判別可能的延伸檔名。
-								var matched = image_data.url.replace(/[?#].*$/,
-										'');
-								matched = matched.match(/\.([a-z\d\-_]+)$/i);
-								if (matched) {
-									matched = matched[1].toLowerCase();
-									if (matched in _this.image_types) {
-										// e.g., manhuagui.js
-										library_namespace.debug(
-												'file extension: .' + matched
-														+ ' ← '
-														+ image_data.url, 3,
-												'get_data');
-										file_extension = matched;
-									}
-								}
-							}
-							if (!file_extension) {
-								// 採用預設的圖片延伸檔名。
-								file_extension = _this.default_image_extension;
-							}
-
-							var old_image_file_path = image_file_path_of_chapter_NO(chapter_NO);
-							if (chapter_data.NO_in_part >= 1
-									&& chapter_NO !== chapter_data.NO_in_part) {
-								// 若有分部，則以部編號為主。
-								image_data.file = image_file_path_of_chapter_NO(chapter_data.NO_in_part);
-
-								// 假如之前已取得過圖片檔案，就把舊圖片改名成新的名稱格式。
-								// 例如之前沒有分部，現在卻增加了分部。
-								if (!library_namespace
-										.file_exists(image_data.file)
-										// && old_image_file_path !==
-										// image_data.file
-										&& library_namespace
-												.file_exists(old_image_file_path)) {
-									library_namespace.move_file(
-											old_image_file_path,
-											image_data.file);
-								}
-							} else {
-								image_data.file = old_image_file_path;
-							}
-						}
+						image_data.file = old_image_file_path;
 					}
 
 					return image_data;
