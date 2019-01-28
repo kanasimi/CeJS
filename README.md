@@ -1,7 +1,8 @@
-﻿<!--
+<!--
 http://stackshare.io/continuous-integration
 -->
-[![npm version](https://badge.fury.io/js/cejs.svg)](https://www.npmjs.com/package/cejs)
+[![npm version](https://badge.fury.io/js/cejs.svg)](https://www.npmjs.com/package/cejs)[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkanasimi%2FCeJS.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkanasimi%2FCeJS?ref=badge_shield)
+
 [![npm downloads](https://img.shields.io/npm/dm/cejs.svg)](https://www.npmjs.com/package/cejs)
 [![Build Status](https://travis-ci.org/kanasimi/CeJS.svg?branch=master)](https://travis-ci.org/kanasimi/CeJS)
 [![Build status](https://ci.appveyor.com/api/projects/status/ny0vr4x2uesiumm0?svg=true)](https://ci.appveyor.com/project/kanasimi/cejs)
@@ -196,3 +197,7 @@ https://github.com/tiimgreen/github-cheat-sheet/blob/master/README.zh-tw.md
 
 try: README.wiki
 -->
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkanasimi%2FCeJS.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkanasimi%2FCeJS?ref=badge_large)
