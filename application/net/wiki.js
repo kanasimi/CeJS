@@ -5054,7 +5054,7 @@ function module_code(library_namespace) {
 	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *([^\[\]\|{}\n#\/]+)/i,
 	// [[特殊:功績]]: zh-classical
 	// matched: [ all, " user name " ]
-	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録|功績)\/([^\[\]\|{}\n#\/]+)/i,
+	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊) *: *(?:Contributions|Contribs|使用者貢獻|用戶貢獻|用户贡献|投稿記録|功績)\/([^\[\]\|{}\n#\/]+)/i,
 	//
 	PATTERN_user_link_all = new RegExp(PATTERN_user_link.source, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
 			PATTERN_user_contributions_link.source, 'ig');
@@ -13443,6 +13443,7 @@ function module_code(library_namespace) {
 				if (false) {
 					library_namespace.log(recent_options.parameters
 							|| recent_options.SQL_options);
+					console.log(rows);
 				}
 
 				if (false) {
