@@ -25,6 +25,7 @@ TODO:
 定義參數的規範，例如數量包含可選範圍，可用 RegExp。不像現在import_arg_hash只規範了'number|string'
 	將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
 定義列表檔案的規範，可以統合設定檔案的規範。
+	rearrange_list_file 整合報告
 	解析及操作列表檔案的功能
 
 
@@ -179,11 +180,11 @@ function module_code(library_namespace) {
 				}
 			}, this);
 			if (!this.id && !(this.id = this.id.match(/[^\\\/]*$/)[0])) {
-				library_namespace.error('Can not detect .id from '
+				library_namespace.error('Can not detect work id from '
 						+ this.base_URL);
 			}
 		}
-		process.title = 'Starting ' + this.id;
+		process.title = gettext('Starting %1', this.id);
 
 		if (library_namespace.is_digits(this.baidu_cse)) {
 			if (!this.parse_search_result) {
