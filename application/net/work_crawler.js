@@ -18,6 +18,17 @@
 # finish_up(), .after_download_chapter(), .after_download_work()
 
 TODO:
+將工具檔結構以及說明統合在一起，並且建造可以自動生成的工具
+	自動判別網址所需要使用的下載工具，輸入網址自動揀選所需的工具檔案。
+		自動搜尋不同的網站並選擇下載作品。
+	從其他的資料來源網站尋找取得作品以及章節的資訊。
+定義參數的規範，例如數量包含可選範圍，可用 RegExp。不像現在import_arg_hash只規範了'number|string'
+	將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
+定義列表檔案的規範，可以統合設定檔案的規範。
+	解析及操作列表檔案的功能
+
+
+暗色主題
 CLI progress bar
 預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
@@ -26,9 +37,6 @@ CLI progress bar
 	Runs untrusted code securely https://github.com/patriksimek/vm2
 parse 圖像。
 拼接長圖。
-自動判別網址所需要使用的下載工具。
-自動搜尋不同的網站並選擇下載作品。
-從其他的資料來源網站尋找取得作品以及章節的資訊。
 檢核章節內容。
 
 </code>
@@ -110,7 +118,15 @@ function module_code(library_namespace) {
 	// @see CeL.application.net.wiki
 	PATTERN_non_CJK = /^[\u0000-\u2E7F]*$/i,
 	//
-	path_separator = library_namespace.env.path_separator;
+	path_separator = library_namespace.env.path_separator,
+	//
+	gettext = function(msg, _1, _2) {
+		if (library_namespace.gettext) {
+			return (gettext = library_namespace.gettext).apply(null, arguments);
+		}
+
+		return msg.replace(/%1/g, _1).replace(/%2/g, _2);
+	};
 
 	// --------------------------------------------------------------------------------------------
 
@@ -431,8 +447,9 @@ function module_code(library_namespace) {
 		MIN_CHAPTER_SIZE : 200,
 
 		// retry delay. cf. one_by_one
-		// {Natural|String|Function}當網站不允許太過頻繁的訪問/access時，可以設定下載章節資訊前的等待時間。
+		// {Natural|String|Function}當網站不允許太過頻繁的訪問讀取/access時，可以設定下載章節資訊/章節內容前的等待時間。
 		// chapter_time_interval : '1s',
+		get_chapter_time_interval : get_chapter_time_interval,
 
 		// 需要重新讀取頁面的時候使用。
 		REGET_PAGE : {
@@ -477,7 +494,7 @@ function module_code(library_namespace) {
 		// 移動完之後這個值會被設定為空，以防被覆寫。
 		error_log_file_backup : 'error_files.'
 				+ (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.txt',
-		// 這些值會被複製到記錄報告中。
+		// last updated date, latest update date. 最後更新日期時間。這些值會被複製到記錄報告中。
 		last_update_status_keys : 'last_update_chapter,latest_chapter,latest_chapter_name,latest_chapter_url,last_update,update_time'
 				.split(','),
 		// 記錄報告檔案/日誌的路徑。
@@ -760,7 +777,10 @@ function module_code(library_namespace) {
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
 			// 一般僅使用於命令列設定。default:1
 			start_list_serial : 'number',
-			chapter_time_interval : 'number',
+			// 重新整理列表檔案 rearrange list file
+			rearrange_list_file : 'boolean',
+			// string: 如 "3s"
+			chapter_time_interval : 'number|string',
 			MIN_LENGTH : 'number',
 			// 容許錯誤用的相關操作設定。
 			MAX_ERROR_RETRY : 'number',
@@ -874,8 +894,9 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.log(this.id + ': ' + (new Date).toISOString()
-				+ ' Starting ' + work_id + ', 儲存至 ' + this.main_directory);
+		library_namespace.log(this.id + ': ' + (new Date).toISOString() + ' '
+		//
+		+ gettext('Starting %1, save to %2', work_id, this.main_directory));
 		// prepare work directory.
 		library_namespace.create_directory(this.main_directory);
 		// check if this.main_directory exists.
@@ -1002,8 +1023,10 @@ function module_code(library_namespace) {
 		if (this.convert_id && this.convert_id[work_id]) {
 			// 因為 convert_id[work_id]() 可能回傳 list，因此需要以 get_work_list() 特別處理。
 			this.get_work_list([ work_id ], callback);
+			return;
+		}
 
-		} else if (work_id
+		if (work_id
 		// list=filename
 		.startsWith('l=') || node_fs.existsSync(work_id)) {
 			// e.g.,
@@ -1019,7 +1042,8 @@ function module_code(library_namespace) {
 				[ '.lst', '.txt' ].some(function(extension) {
 					var work_list_file = work_id.replace(/\.js$/i, extension);
 					if (library_namespace.storage.file_exists(work_list_file)) {
-						library_namespace.info('改採用列表檔案: ' + work_list_file);
+						library_namespace.info(this.id + ': 改採用列表檔案: '
+								+ work_list_file);
 						work_id = work_list_file;
 						return true;
 					}
@@ -1029,21 +1053,57 @@ function module_code(library_namespace) {
 			if (!work_list) {
 				// 若是檔案不存在，.fs_read() 可能會回傳 undefined。
 				library_namespace.warn(this.id + ': 無法讀取列表檔案 ' + work_id);
-				work_list = [];
-			} else {
-				work_list = (work_list.toString() || '')
-				//
-				.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
-				// 去掉BOM (byte order mark)
-				.trim()
-				// TODO: 處理title中包含"#"的作品
-				.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/)
-				// 避免同一次作業中重複下載相同的作品。
-				.unique();
+				this.get_work_list([], callback);
+				return;
 			}
-			this.get_work_list(work_list, callback);
 
-		} else if (work_id
+			work_list = work_list.toString() || '';
+
+			if (this.rearrange_list_file) {
+				library_namespace.debug(this.id + ': 重新整理列表檔案: ' + work_id);
+				work_list = work_list.split('\n');
+				var line_hash = library_namespace.null_Object(), changed = 0;
+				work_list = work_list.map(function(line) {
+					if (!line.trim() || line.startsWith('#')
+							|| line.includes('/*') || line.includes('*/')) {
+						return line;
+					}
+					if (line in line_hash) {
+						changed++;
+						// comment out this work title
+						return '#' + line;
+					}
+					line_hash[line] = null;
+					return line;
+				});
+				// free
+				line_hash = null;
+				work_list = work_list.join('\n');
+				if (changed) {
+					library_namespace.info(this.id + ': Comment out ' + changed
+							+ ' work titles: ' + work_id);
+					library_namespace.write_file(work_id, work_list);
+				} else {
+					library_namespace.debug(this.id
+							+ ': No change to list file ' + work_id);
+				}
+			}
+
+			work_list = work_list.replace(/\/\*[\s\S]*?\*\//g, '')
+			//
+			.replace(/\/\/[^\n]*/g, '')
+			// 去掉BOM (byte order mark)
+			.trim()
+			// TODO: 處理title中包含"#"的作品
+			.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/)
+			// 避免同一次作業中重複下載相同的作品。
+			.unique();
+
+			this.get_work_list(work_list, callback);
+			return;
+		}
+
+		if (work_id
 		// 跳過來自命令列參數的手動設定。
 		&& !(work_id.match(/^[^=]*/)[0] in this.import_arg_hash)) {
 			if (false && this.need_create_ebook) {
@@ -1054,11 +1114,11 @@ function module_code(library_namespace) {
 				// node 各漫畫網站工具檔.js ABC
 				this.get_work(work_id, callback);
 			}
-		} else {
-			library_namespace.error('parse_work_id: Invalid work id: '
-					+ work_id);
-			typeof callback === 'function' && callback();
+			return;
 		}
+
+		library_namespace.error('parse_work_id: Invalid work id: ' + work_id);
+		typeof callback === 'function' && callback();
 	}
 
 	function get_work_list(work_list, callback) {
@@ -1443,7 +1503,8 @@ function module_code(library_namespace) {
 			library_namespace.log(this.id + ': Re-search title: [' + work_title
 					+ ']');
 		} else if (search_result[work_title]) {
-			library_namespace.log(this.id + ': Find cache: ' + work_title + '→'
+			library_namespace.log(this.id + ': ' + gettext('Cache found: ')
+					+ work_title + '→'
 					+ JSON.stringify(search_result[work_title]));
 			finish(true);
 			return;
@@ -1686,6 +1747,21 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// this.chapter_time_interval: 下載章節資訊/章節內容前的等待時間。
+	// usage: var chapter_time_interval =
+	// this.get_chapter_time_interval(argument_1, work_data)
+	function get_chapter_time_interval(argument_1, work_data) {
+		var chapter_time_interval = this.chapter_time_interval;
+		if (typeof chapter_time_interval === 'function') {
+			// 採用函數可以提供亂數值的間隔。
+			chapter_time_interval = this.chapter_time_interval(argument_1,
+					work_data);
+		}
+		chapter_time_interval = library_namespace
+				.to_millisecond(chapter_time_interval);
+		return chapter_time_interval > 0 && chapter_time_interval;
+	}
+
 	var null_XMLHttp = {
 		responseText : ''
 	};
@@ -1753,12 +1829,8 @@ function module_code(library_namespace) {
 				);
 				if (work_data === _this.REGET_PAGE) {
 					// 需要重新讀取頁面。e.g., 502
-					var chapter_time_interval = library_namespace
-							.to_millisecond(_this.chapter_time_interval);
-					if (typeof chapter_time_interval === 'function') {
-						chapter_time_interval = _this
-								.chapter_time_interval(work_URL);
-					}
+					var chapter_time_interval = _this
+							.get_chapter_time_interval(work_URL, work_data);
 					process.stdout.write('process_work_data: '
 							+ (chapter_time_interval > 0 ? 'Wait '
 									+ library_namespace.age_of(0,
@@ -1949,6 +2021,7 @@ function module_code(library_namespace) {
 			if (_this.chapter_list_URL) {
 				work_data.chapter_list_URL = work_URL = _this.full_URL(
 						_this.chapter_list_URL, work_id, work_data);
+				// console.log(work_URL);
 				var post_data = null;
 				if (Array.isArray(work_URL)) {
 					post_data = work_URL[1];
@@ -2142,7 +2215,7 @@ function module_code(library_namespace) {
 			var recheck_flag = 'recheck' in work_data ? work_data.recheck
 			// work_data.recheck 可能是程式自行判別的。
 			: _this.recheck,
-			// 章節的增加數量: 新-舊, 當前-上一次的
+			/** {Integer}章節的增加數量: 新-舊, 當前-上一次的 */
 			chapter_added = work_data.chapter_count
 					- work_data.last_download.chapter;
 
@@ -2495,12 +2568,8 @@ function module_code(library_namespace) {
 		var actual_operation = get_chapter_data.bind(this, work_data,
 				chapter_NO, callback),
 		// this.chapter_time_interval: 下載章節資訊前的等待時間。
-		chapter_time_interval = library_namespace
-				.to_millisecond(this.chapter_time_interval);
-		if (typeof chapter_time_interval === 'function') {
-			chapter_time_interval = this.chapter_time_interval(chapter_NO,
-					work_data);
-		}
+		chapter_time_interval = this.get_chapter_time_interval(chapter_NO,
+				work_data);
 
 		var next = chapter_time_interval > 0 ? (function() {
 			process.stdout.write(this.id + ': ' + work_data.title
@@ -2765,7 +2834,7 @@ function module_code(library_namespace) {
 			// assert: `chapter_data` is work data
 			confirm_recheck.call(this, chapter_data, '本作依章節標題來決定章節編號');
 			// input sorted work_data, use work_data.chapter_list
-			// last_chapter_NO, start NO
+			// latest_chapter_NO, start NO
 			default_NO |= 0;
 			if (!default_unit && chapter_data.chapter_list.length > 1
 			//
@@ -2899,8 +2968,9 @@ function module_code(library_namespace) {
 		//
 		chapter_URL = this.chapter_URL(work_data, chapter_NO);
 		// console.log(work_data);
-		// console.log(chapter_URL);
+		// console.log('chapter_URL: ' + chapter_URL);
 		chapter_URL = chapter_URL && this.full_URL(chapter_URL);
+		// console.log('chapter_URL: ' + chapter_URL);
 		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
 				+ chapter_NO + '/' + work_data.chapter_count + ': '
 				+ chapter_URL, 1, 'get_chapter_data');
@@ -3096,6 +3166,7 @@ function module_code(library_namespace) {
 					// TODO: 重新命名舊的資料夾。
 					var old_image_file_path = image_file_path_of_chapter_NO(chapter_NO),
 					// 使圖片檔名中的章節編號等同於資料夾編號。
+					// 注意：若是某個章節分成好幾部分，可能造成這些章節中的圖片檔名相同。
 					using_chapter_NO = chapter_data.chapter_NO >= 1 ? chapter_data.chapter_NO
 							: chapter_data.NO_in_part >= 1
 									&& chapter_data.NO_in_part;
@@ -3140,10 +3211,11 @@ function module_code(library_namespace) {
 				//
 				get_next_image = function() {
 					// assert: image_list.index < image_list.length
-					process.stdout.write('圖 '
-							+ (image_list.index + 1)
-							+ (_this.dynamical_count_images ? '' : '/'
-									+ image_list.length) + '...\r');
+					process.stdout.write(gettext('IMG %1',
+							(image_list.index + 1)
+									+ (_this.dynamical_count_images ? '' : '/'
+											+ image_list.length))
+							+ '...\r');
 					var image_data = normalize_image_data(
 							image_list[image_list.index], image_list.index);
 					if (time_interval > 0)
@@ -3252,13 +3324,9 @@ function module_code(library_namespace) {
 							&& work_data.chapter_list[chapter_NO - 1];
 					if (chapter_data === _this.REGET_PAGE) {
 						// 需要重新讀取頁面。e.g., 502
-						var chapter_time_interval = library_namespace
-								.to_millisecond(_this.chapter_time_interval);
-						if (typeof chapter_time_interval === 'function') {
-							chapter_time_interval = _this
-									.chapter_time_interval(chapter_URL,
-											work_data);
-						}
+						var chapter_time_interval = _this
+								.get_chapter_time_interval(chapter_URL,
+										work_data);
 						process.stdout.write('process_chapter_data: '
 								+ (chapter_time_interval > 0 ? 'Wait '
 										+ library_namespace.age_of(0,

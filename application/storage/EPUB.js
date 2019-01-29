@@ -1152,7 +1152,7 @@ function module_code(library_namespace) {
 			if (inner.endsWith(' \/')) {
 				return opening_tag;
 			}
-			return '<img ' + inner + ' \/>';
+			return '<img ' + inner.replace(/[\s\/]+$/g, '') + ' \/>';
 		})
 
 		// 2017/2/2 15:1:26
@@ -1264,22 +1264,29 @@ function module_code(library_namespace) {
 				return item;
 			}
 
-			if (file_path in this.downloading) {
+			// 避免衝突，檢測是不是有不同 URL，相同檔名存在。
+			while (file_path in this.downloading) {
 				if (this.downloading[file_path].url === item_data.url) {
-					library_namespace.log('add_chapter: 已經在下載隊列中，跳過重複下載動作: '
+					library_namespace.log('add_chapter: 檔案已在下載隊列中，跳過重複下載動作: '
 							+ file_path);
-				} else {
-					library_namespace.error(
-					//
-					'add_chapter: 下載隊列中相同檔名卻有著不同的網址: 下載隊列中 '
-							+ this.downloading[file_path].url + ' !== 準備下載 '
-							+ item_data.url);
+					// console.log(this.downloading[file_path]);
+					return item;
 				}
-				// console.log(this.downloading[file_path]);
-				return item;
+
+				library_namespace
+						.debug('add_chapter: 下載隊列中相同檔名卻有著不同的網址: 下載隊列中 '
+								+ this.downloading[file_path].url
+								+ ' !== 準備下載 ' + item_data.url
+								+ '，嘗試改成另一個檔案名稱。');
+
+				file_path = file_path.replace(
+				// 必須是encode_identifier()之後不會變化的檔名。
+				/(?:-(\d+))?(\.[a-z\d\-]+)?$/, function(all, NO, ext_part) {
+					return '-' + ((NO | 0) + 1) + (ext_part || '');
+				});
 			}
 
-			// 避免衝突，檢測是不是有不同URL，相同檔名存在。
+			// 避免衝突，檢測是不是有不同 URL，相同檔名存在。
 			while (item.href in resource_href_hash) {
 				item.href = item.href.replace(
 				// 必須是encode_identifier()之後不會變化的檔名。
@@ -1510,7 +1517,7 @@ function module_code(library_namespace) {
 
 				contents = contents.replace(/<a ([^<>]+)>([^<>]+)<\/a>/ig,
 				// <a href="*.png">挿絵</a> → <img alt="挿絵" src="*.png" />
-				function(all, attributes, innerHTML) {
+				function(all, attributes, innerText) {
 					var href = attributes
 							.match(/(?:^|\s)href=(["'])([^"'])\1/i)
 							|| attributes.match(/(?:^|\s)href=()([^"'\s])/i);
@@ -1519,7 +1526,7 @@ function module_code(library_namespace) {
 					}
 					return '<img '
 							+ (attributes.includes('alt="') ? '' : 'alt="'
-									+ innerHTML + '" ')
+									+ innerText + '" ')
 							+ attributes.replace(/(?:^|\s)href=(["'])/ig,
 									' src=$1').trim() + ' />';
 				});
@@ -1636,6 +1643,11 @@ function module_code(library_namespace) {
 				if (!(item_data.word_count > 0)) {
 					item_data.word_count = library_namespace.count_word(
 							contents, 1 + 2);
+					if (!(item_data.word_count > 0)) {
+						library_namespace.debug('No content got: '
+						//
+						+ (item_data.title || item_data.id || item_data.url));
+					}
 				}
 				html.push('<p class="word_count">',
 				// 加入本章節之字數統計標示。

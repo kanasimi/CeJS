@@ -643,6 +643,8 @@ function module_code(library_namespace) {
 		}
 
 		if (need_to_load.length > 0) {
+			library_namespace.debug('need_to_load: ' + need_to_load, 1,
+					'load_domain');
 			library_namespace.run(need_to_load, typeof callback === 'function'
 					&& function() {
 						library_namespace.debug('Running callback...', 2,
@@ -671,14 +673,10 @@ function module_code(library_namespace) {
 	 * @returns {Object}當前使用之 domain。
 	 */
 	function use_domain(domain_name, callback, force) {
-		if (typeof callback !== 'function') {
-			if (arguments.length === 2) {
-				// shift 掉 callback。
-				force = callback;
-				callback = undefined;
-			} else {
-				callback = null;
-			}
+		if (typeof callback === 'boolean' && force === undefined) {
+			// shift 掉 callback。
+			force = callback;
+			callback = undefined;
 		}
 
 		// 查驗 domain_name 是否已載入。
@@ -746,6 +744,29 @@ function module_code(library_namespace) {
 	}
 
 	gettext.use_domain = use_domain;
+
+	/**
+	 * using windows active console code page
+	 * 
+	 * @example <code>
+	CeL.gettext.use_domain.via_code_page(require('child_process').execSync('CHCP').toString().match(/(\d+)[^\d]*$/)[1], true);
+	</code>
+	 * 
+	 * @see https://docs.microsoft.com/en-us/windows/console/console-code-pages
+	 *      https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/chcp
+	 */
+	use_domain.via_code_page = function(code_page, callback, force) {
+		return use_domain({
+			437 : 'en-US',
+			866 : 'ru-RU',
+			936 : 'cmn-Hans-CN',
+			950 : 'cmn-Hant-TW',
+			932 : 'ja-JP',
+			949 : 'ko-KR',
+			1256 : 'arb-Arab',
+			54936 : 'cmn-Hans-CN'
+		}[code_page | 0], callback, force);
+	};
 
 	/**
 	 * 設定欲轉換的文字格式。
@@ -965,7 +986,9 @@ function module_code(library_namespace) {
 	};
 
 	gettext.translate_node = function(node) {
-		var dataset, id, conversion, i = 0, key;
+		var dataset,
+		// message id
+		id, conversion, i = 0, key;
 		try {
 			// 為提高效率，不作檢查。
 			dataset =
@@ -1008,17 +1031,20 @@ function module_code(library_namespace) {
 	gettext.DOM_separator = '|';
 
 	gettext.adapt_domain = function(language, callback) {
-		library_namespace.debug('Loading ' + language + ' ...');
+		library_namespace.debug('Loading ' + language + ' ...', 1,
+				'gettext.adapt_domain');
 
 		gettext.use_domain(language, function() {
-			library_namespace.debug(language + ' loaded.');
+			library_namespace.debug(language + ' loaded.', 1,
+					'gettext.adapt_domain');
 			try {
 				// 設置頁面語系。
 				document.getElementsByTagName('html')[0].setAttribute('lang',
 						language);
 			} catch (e) {
 			}
-			gettext.translate_nodes();
+			if (library_namespace.is_WWW())
+				gettext.translate_nodes();
 			create_domain_menu.onchange.forEach(function(handler) {
 				handler();
 			});
@@ -1030,6 +1056,7 @@ function module_code(library_namespace) {
 	};
 
 	/**
+	 * create domain / language menu
 	 * 
 	 * @param node
 	 * @param domain_Array
@@ -1037,8 +1064,15 @@ function module_code(library_namespace) {
 	function create_domain_menu(node, domain_Array, onchange) {
 		if (!node || !domain_Array
 		//
-		|| !library_namespace.new_node)
+		|| !library_namespace.new_node) {
 			return;
+		}
+
+		if (false) {
+			// TODO
+			library_namespace.error('create_domain_menu: Can not find node'
+					+ (node ? ': ' + node : ''));
+		}
 
 		var menu = [],
 		// default domain.
@@ -1533,14 +1567,17 @@ function module_code(library_namespace) {
 				// http://taigi-pahkho.wikia.com/wiki/%E9%A0%AD%E9%A0%81
 				// using 臺灣閩南語推薦用字
 				'nan-Hant-TW' :
-
-				'臺灣閩南語|zh-min-nan|zh-min-nan-Hant-TW|臺語|台語|臺灣話|台灣話|閩南語|河洛話|福老話',
 				//
+				'臺灣閩南語|zh-min-nan|zh-min-nan-Hant-TW|臺語|台語|臺灣話|台灣話|閩南語|河洛話|福老話',
+
 				'cmn-Hant-HK' : '香港普通話|zh-yue-Hant-HK|Cantonese|香港華語|香港官話',
+
 				// 粵語審音配詞字庫 http://humanum.arts.cuhk.edu.hk/Lexis/lexi-can/
 				'yue-Hant-HK' : '香港粵語|zh-yue-Hant-HK|Hong Kong Cantonese|港式粵語|香港話|港式廣東話|港式廣州話',
+
 				// Subtag: cmn, Preferred-Value: cmn
 				'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|简化字|简化中文|簡化字|簡體中文|普通话|中国|官话|Simplified Chinese|Mandarin Chinese',
+
 				// 現代標準漢語
 				'cmn-Hant-TW' : '繁體中文|zh-TW|繁體|zh-cmn-Hant-TW|TW|Chinese|傳統中文|正體中文|正體|漢語|華語|中文|中國|臺灣|台灣|官話|中華民國國語|Traditional Chinese',
 
