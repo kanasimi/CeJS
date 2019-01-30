@@ -643,7 +643,7 @@ function module_code(library_namespace) {
 		}
 
 		if (need_to_load.length > 0) {
-			library_namespace.debug('need_to_load: ' + need_to_load, 1,
+			library_namespace.debug('need_to_load: ' + need_to_load, 2,
 					'load_domain');
 			library_namespace.run(need_to_load, typeof callback === 'function'
 					&& function() {

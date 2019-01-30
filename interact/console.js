@@ -176,8 +176,10 @@ function module_code(library_namespace) {
 			return this;
 
 		library_namespace.debug('Search style (' + (typeof style) + ') ['
-				+ style + '] in SGR_code.style_value_alias', min_debug,
-				'SGR_style_add');
+		//
+		+ (typeof JSON === 'object' ? JSON.stringify(style) : style)
+		//
+		+ '] in SGR_code.style_value_alias', min_debug, 'SGR_style_add');
 		if (typeof style !== 'object')
 			while (style in SGR_code.style_value_alias) {
 				library_namespace.debug('Find style [' + style + '] → ['
@@ -186,7 +188,8 @@ function module_code(library_namespace) {
 				style = SGR_code.style_value_alias[style];
 			}
 
-		library_namespace.debug('parse (' + (typeof style) + ') [' + style
+		library_namespace.debug('parse (' + (typeof style) + ') ['
+				+ (typeof JSON === 'object' ? JSON.stringify(style) : style)
 				+ '] if it is a pure value.', min_debug, 'SGR_style_add');
 		if (typeof style === 'string')
 			if (style.includes(SGR_code.separator))
@@ -233,7 +236,8 @@ function module_code(library_namespace) {
 		else if (typeof style === 'number')
 			style |= 0;
 
-		library_namespace.debug('parse (' + (typeof style) + ') [' + style
+		library_namespace.debug('parse (' + (typeof style) + ') ['
+				+ (typeof JSON === 'object' ? JSON.stringify(style) : style)
 				+ '] if it is a object.', min_debug, 'SGR_style_add');
 		if (library_namespace.is_Object(style)) {
 			Object.keys(style).some(
@@ -293,11 +297,14 @@ function module_code(library_namespace) {
 		if (false)
 			if (library_namespace.is_Object(options))
 				this.options = options;
-		library_namespace.debug('Set style [' + style + ']', min_debug,
-				'SGR_style');
+		// 對於 Object.create(null)，這邊會出錯。
+		library_namespace.debug('Set style ['
+				+ (typeof JSON === 'object' ? JSON.stringify(style) : style)
+				+ ']', min_debug, 'SGR_style');
 		this.add(style);
-		library_namespace.debug('Set style [' + style + '] finished.',
-				min_debug + 1, 'SGR_style');
+		library_namespace.debug('Set style ['
+				+ (typeof JSON === 'object' ? JSON.stringify(style) : style)
+				+ '] finished.', min_debug + 1, 'SGR_style');
 	}
 
 	/**

@@ -22,6 +22,7 @@ TODO:
 	自動判別網址所需要使用的下載工具，輸入網址自動揀選所需的工具檔案。
 		自動搜尋不同的網站並選擇下載作品。
 	從其他的資料來源網站尋找取得作品以及章節的資訊。
+	自動記得某個作品要從哪些網站下載。
 定義參數的規範，例如數量包含可選範圍，可用 RegExp。不像現在import_arg_hash只規範了'number|string'
 	將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
 定義列表檔案的規範，可以統合設定檔案的規範。
@@ -180,8 +181,8 @@ function module_code(library_namespace) {
 				}
 			}, this);
 			if (!this.id && !(this.id = this.id.match(/[^\\\/]*$/)[0])) {
-				library_namespace.error('Can not detect work id from '
-						+ this.base_URL);
+				library_namespace.error(gettext('無法從網址擷取作品 id：%1',
+						this.base_URL));
 			}
 		}
 		process.title = gettext('Starting %1', this.id);
@@ -234,7 +235,7 @@ function module_code(library_namespace) {
 	}
 
 	// 檢核參數. normalize and setup value
-	// return has error
+	// return {String}has error
 	function setup_value(key, value) {
 		if (!key)
 			return '未提供鍵值';
@@ -255,7 +256,9 @@ function module_code(library_namespace) {
 		case 'proxy':
 			// 代理伺服器 proxy_server
 			// TODO: check .proxy
-			library_namespace.info('Using proxy server: ' + this.proxy);
+			library_namespace.info({
+				T : [ '使用proxy：%1', this.proxy ]
+			});
 			this.get_URL_options.proxy = this.proxy = value;
 			return;
 
@@ -304,9 +307,11 @@ function module_code(library_namespace) {
 
 		if (key in this.import_arg_hash) {
 			if (!this.import_arg_hash[key].includes(typeof value)) {
-				library_namespace.warn('setup_value: ' + key + ' 這個值所允許的數值類型為 '
-						+ this.import_arg_hash[key] + '，但現在被設定了 {'
-						+ (typeof value) + '} ' + value);
+				library_namespace.warn([ 'setup_value: ', {
+					T : [ '"%1" 這個值所允許的數值類型為 %2，但現在被設定了 {%3} %4',
+					//
+					key, this.import_arg_hash[key], typeof value, value ]
+				} ]);
 			}
 		}
 
@@ -349,7 +354,8 @@ function module_code(library_namespace) {
 						+ old_value + ': ' + error);
 			} else {
 				library_namespace.log(library_namespace.display_align([
-						[ key + ': ', old_value ], [ '由命令列 → ', value ] ]));
+						[ key + ': ', old_value ],
+						[ gettext('由命令列 → '), value ] ]));
 			}
 		}
 	}
@@ -569,7 +575,7 @@ function module_code(library_namespace) {
 		full_URL : full_URL_of_path,
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
 		// 每次預設會從上一次中斷的章節接續下載，不用特地指定 recheck。
-		// 有些漫畫作品分區分單行本、章節與外傳，當章節數量改變、添加新章節時就需要重新檢查。
+		// 有些漫畫作品分區分單行本、章節與外傳，當章節數量改變、添加新章節時就需要重新檢查/掃描。
 		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。否則只會自上次下載過的章節接續下載。
 		// recheck : true,
 		// recheck=false:明確指定自上次下載過的章節接續下載。
@@ -777,7 +783,7 @@ function module_code(library_namespace) {
 			start_chapter : 'number',
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
 			// 一般僅使用於命令列設定。default:1
-			start_list_serial : 'number',
+			start_list_serial : 'number|string',
 			// 重新整理列表檔案 rearrange list file
 			rearrange_list_file : 'boolean',
 			// string: 如 "3s"
@@ -883,7 +889,9 @@ function module_code(library_namespace) {
 	// callback(work_data)
 	function start_downloading(work_id, callback) {
 		if (!work_id) {
-			library_namespace.log(this.id + ': 沒有輸入 work_id！');
+			library_namespace.log({
+				T : [ '%1: 沒有輸入 work_id！', this.id ]
+			});
 			return;
 		}
 
@@ -895,16 +903,19 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.log(this.id + ': ' + (new Date).toISOString() + ' '
-		//
-		+ gettext('Starting %1, save to %2', work_id, this.main_directory));
+		library_namespace.log([ this.id, ': ', (new Date).toISOString(), ' ', {
+			T : [ 'Starting %1, save to %2', work_id, this.main_directory ]
+		} ]);
 		// prepare work directory.
 		library_namespace.create_directory(this.main_directory);
 		// check if this.main_directory exists.
 		// e.g., set "E:\directory\" but "E:\" do not exists.
 		if (!library_namespace.directory_exists(this.main_directory)) {
-			library_namespace.error('Can not create main_directory: '
-					+ this.main_directory);
+			library_namespace.error({
+				T : [ 'Can not create base directory: %1',
+				//
+				this.main_directory ]
+			});
 			return;
 		}
 
@@ -1048,7 +1059,7 @@ function module_code(library_namespace) {
 						work_id = work_list_file;
 						return true;
 					}
-				});
+				}, this);
 			}
 			var work_list = library_namespace.fs_read(work_id);
 			if (!work_list) {
@@ -1125,7 +1136,19 @@ function module_code(library_namespace) {
 	function get_work_list(work_list, callback) {
 		// console.log(work_list);
 		// 真正處理的作品數。
-		var work_count = 0, all_work_status = library_namespace.null_Object();
+		var work_count = 0, all_work_status = library_namespace.null_Object(),
+		//
+		start_list_serial = this.start_list_serial;
+
+		// console.log(start_list_serial);
+		if (start_list_serial && !(start_list_serial >= 1)) {
+			// start_list_serial=work_title
+			start_list_serial = work_list.indexOf(start_list_serial);
+			if (start_list_serial >= 0) {
+				// start_list_serial starts from 1
+				start_list_serial++;
+			}
+		}
 
 		// assert: Array.isArray(work_list)
 		work_list.run_async(function for_each_title(get_next_work, work_title,
@@ -1147,8 +1170,7 @@ function module_code(library_namespace) {
 			work_title = work_title.trim();
 			if (!work_title
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
-			|| this.start_list_serial > 0
-					&& this_index < this.start_list_serial) {
+			|| /* start_list_serial > 0 && */this_index < start_list_serial) {
 				// 直接進入下一個作品 work_title。
 				get_next_work();
 				return;
@@ -1194,9 +1216,17 @@ function module_code(library_namespace) {
 			}
 
 			work_count++;
-			library_namespace.log('Download ' + work_count
-					+ (work_count === this_index ? '' : '/' + this_index) + '/'
-					+ work_list.length + ': ' + work_title);
+			library_namespace.log([ this.id, ': ', {
+				T : [ 'Download %1: %2', work_count
+				//
+				+ (work_count === this_index ? '' : '/' + this_index)
+				//
+				+ '/' + work_list.length, work_title ],
+				S : {
+					color : 'magenta',
+					backgroundColor : 'cyan'
+				}
+			} ]);
 			this.get_work(work_title, function(work_data) {
 				var work_status = set_work_status(work_data);
 				if (work_status) {
@@ -1504,6 +1534,7 @@ function module_code(library_namespace) {
 			library_namespace.log(this.id + ': Re-search title: [' + work_title
 					+ ']');
 		} else if (search_result[work_title]) {
+			// 已經搜尋過此作品標題。
 			library_namespace.log(this.id + ': ' + gettext('Cache found: ')
 					+ work_title + '→'
 					+ JSON.stringify(search_result[work_title]));
@@ -2349,6 +2380,15 @@ function module_code(library_namespace) {
 				delete work_data.image_count;
 			}
 
+			if (_this.need_create_ebook && !work_data.reget_chapter
+			// 最起碼應該要重新生成電子書。否則會只記錄到最後幾個檢查過的章節。
+			&& work_data.last_download.chapter !== work_data.chapter_count) {
+				library_namespace.info('將從頭檢查、重新生成電子書。');
+				work_data.regenerate = true;
+				work_data.last_download.chapter = _this.start_chapter;
+			}
+
+			// backup
 			_this.save_work_data(work_data);
 
 			if (typeof callback === 'function' && callback.options
@@ -2359,7 +2399,9 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (!work_data.reget_chapter && !_this.regenerate
+			if (!work_data.reget_chapter
+			//
+			&& !_this.regenerate && !work_data.regenerate
 			// 還必須已經下載到最新章節。
 			&& work_data.last_download.chapter === work_data.chapter_count) {
 				// 跳過本作品不處理。
@@ -3194,6 +3236,7 @@ function module_code(library_namespace) {
 				// console.log(image_list);
 				// TODO: 當某 chapter 檔案過多(如1000)，將一次 request 過多 connects 而造成問題。
 				if (!_this.one_by_one) {
+					// 並行下載。
 					image_list.forEach(function(image_data, index) {
 						image_data = normalize_image_data(image_data, index);
 						_this.get_image(image_data, check_if_done,
@@ -3671,7 +3714,7 @@ function module_code(library_namespace) {
 						.warn('若欲動態增加章節，必須手動增加章節數量: work_data.chapter_count++！');
 			}
 
-			library_namespace.log(work_data.directory_name
+			library_namespace.log(this.id + ': ' + work_data.directory_name
 			// 增加章節數量的訊息。
 			+ ': ' + work_data.chapter_count
 			//
@@ -3687,7 +3730,8 @@ function module_code(library_namespace) {
 			//
 			+ ' done. ' + (new Date).toISOString() + ' 本作品下載作業結束.');
 			if (work_data.error_images > 0) {
-				library_namespace.error(work_data.directory_name + ': '
+				library_namespace.error(this.id + ': '
+						+ work_data.directory_name + ': '
 						+ work_data.error_images
 						+ ' images download error this time.');
 			}

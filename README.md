@@ -5,7 +5,8 @@ http://stackshare.io/continuous-integration
 [![npm downloads](https://img.shields.io/npm/dm/cejs.svg)](https://www.npmjs.com/package/cejs)
 [![Build Status](https://travis-ci.org/kanasimi/CeJS.svg?branch=master)](https://travis-ci.org/kanasimi/CeJS)
 [![Build status](https://ci.appveyor.com/api/projects/status/ny0vr4x2uesiumm0?svg=true)](https://ci.appveyor.com/project/kanasimi/cejs)
-[![CircleCI](https://circleci.com/gh/kanasimi/CeJS.svg?style=svg)](https://circleci.com/gh/kanasimi/CeJS)
+[![CircleCI Build status](https://circleci.com/gh/kanasimi/CeJS.svg?style=svg)](https://circleci.com/gh/kanasimi/CeJS)
+[![scrutinizer Build status](https://scrutinizer-ci.com/g/kanasimi/CeJS/badges/build.png?b=master)](https://scrutinizer-ci.com/g/kanasimi/CeJS/)
 [![Known Vulnerabilities](https://snyk.io/test/github/kanasimi/CeJS/badge.svg?targetFile=package.json)](https://snyk.io/test/github/kanasimi/CeJS?targetFile=package.json)
 <!--
 [![Known Vulnerabilities](https://snyk.io/test/npm/cejs/badge.svg)](https://snyk.io/test/npm/cejs)

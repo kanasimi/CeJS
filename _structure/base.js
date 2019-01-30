@@ -2090,6 +2090,87 @@ OS='UNIX'; // unknown
 		}
 	}
 
+	function is_DOM_node(node) {
+		return _.is_Object(node) && ('T' in node
+		// || 'span' in node
+		);
+	}
+
+	// 在沒有載入 new_node() @ CeL.DOM 的情況下嘗試解析 DOM object
+	function extract_message_from_nodes(nodes, style_array) {
+		if (Array.isArray(nodes)) {
+			// nodes.forEach()
+			for (var index = 0; index < nodes.length; index++) {
+				nodes[index] = extract_message_from_nodes(nodes[index], style_array);
+			}
+			return nodes.join('');
+		}
+
+		if (!_.is_Object(nodes)) {
+			if (style_array) {
+				style_array.push(style_array.has_style ? [
+				style_array.has_style.fg ? '-fg' : '',
+				style_array.has_style.bg ? '-bg' : ''].join(';') : '', nodes);
+				if (style_array.has_style)
+					style_array.has_style = true;
+			}
+			return nodes;
+		}
+
+		var tag_name = nodes.$;
+		if (!tag_name) {
+			for (tag_name in nodes) {
+				break;
+			}
+		}
+
+		var inner = nodes[tag_name];
+		if (tag_name !== 'T') {
+			inner = extract_message_from_nodes(inner);
+		} else if (typeof _.gettext === 'function') {
+			inner = _.gettext.apply(null, inner);
+		} else if (Array.isArray(inner)) {
+			inner = inner[0].replace(/%(\d+)/g, function(all, NO) {
+				return NO in inner ? inner[NO] : all;
+			});
+		}
+
+		var color_index = _.SGR && _.SGR.color_index,
+		//
+		style = color_index && (nodes.style || nodes.S);
+		// console.log(style);
+		// parse CSS
+		if (typeof style === 'string') {
+			style.replace(/(?:^|[;\s])(background-)?color\s*:\s*([^\s;]+)/g, function(all, bg, color) {
+				color = color.toLowerCase();
+				if (!(color in color_index))
+					return;
+				if (typeof style === 'string') {
+					style = null_Object();
+				}
+				style[bg ? 'bg' : 'fg'] = color;
+			});
+			if (typeof style === 'string') {
+				style = '';
+			}
+		} else if (style && style.color
+				&& (style.color in color_index)) {
+			style = {
+				fg : style.color,
+				bg : style.backgroundColor
+			};
+		} else
+			style = '';
+
+		if (style_array) {
+			style_array.push(style, inner);
+			if (style)
+				style_array.has_style = style;
+		}
+		// 不再傳入 style_array
+		return inner;
+	}
+
 	/**
 	 * 預先處理 messages。
 	 * 
@@ -2103,9 +2184,39 @@ OS='UNIX'; // unknown
 	 * @returns {Array}styled messages
 	 */
 	function preprocess_messages(messages, type, from_styled_logger) {
+		// console.log(using_style);
+		// console.trace(messages);
 		if (!using_style) {
 			// 不採用 styled log。不自動著色。
 			return typeof messages === 'string' ? messages : SGR_to_plain(messages);
+		}
+
+		var style_array;
+		if (Array.isArray(messages)) {
+			// messages.forEach()
+			for (var index = 0; index < messages.length; index++) {
+				if (is_DOM_node(messages[index])) {
+					style_array = true;
+					break;
+				}
+			}
+
+		} else if (is_DOM_node(messages)) {
+			style_array = true;
+		}
+		if (style_array) {
+			// 從頭到尾沒有特殊格式的話，就轉成純粹的字串。
+			messages = extract_message_from_nodes(messages, style_array = [ '' ]);
+			if (style_array.has_style) {
+				// reset style
+				if (_.is_Object(style_array.has_style)) {
+					style_array.push([
+		  				style_array.has_style.fg ? '-fg' : '',
+  						style_array.has_style.bg ? '-bg' : ''].join(';'), '');
+				}
+				messages = style_array;
+			}
+			// console.trace(style_array);
 		}
 
 		if (typeof messages === 'string') {
