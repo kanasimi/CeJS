@@ -14,10 +14,19 @@ workflows:
 
 # a collection of steps
 jobs:
-  test-latest: &test-template
+  test-LTS: &test-template
     docker:
       # https://circleci.com/docs/2.0/circleci-images/
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
+      - image: circleci/node:10
+    steps:
+      - checkout
+      - run: # run tests
+          name: test
+          command: npm test
+  test-latest:
+    <<: *test-template
+    docker:
       - image: circleci/node:11
     steps:
       - checkout
@@ -37,10 +46,6 @@ jobs:
       - run: # run tests
           name: test
           command: npm test
-  test-LTS:
-    <<: *test-template
-    docker:
-      - image: circleci/node:10
   test-0.10:
     <<: *test-template
     docker:
