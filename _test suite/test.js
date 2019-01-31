@@ -3167,9 +3167,9 @@ function test_wiki() {
 		}, 'zh-cn');
 
 		_setup_test('wiki: CeL.wiki.langlinks()');
-		CeL.wiki.langlinks('語言', function(title) {
+		CeL.wiki.langlinks('文明', function(title) {
 			var test_name = 'wiki: CeL.wiki.langlinks()';
-			assert([ 'Language', title ], test_name);
+			assert([ 'Civilization', title ], test_name);
 			_finish_test(test_name);
 		}, 'en');
 
