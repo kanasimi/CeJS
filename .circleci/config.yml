@@ -18,7 +18,7 @@ jobs:
     docker:
       # https://circleci.com/docs/2.0/circleci-images/
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
-      - image: circleci/node:10
+      - image: circleci/node:10.9.0
     steps:
       - checkout
       - run: # run tests
@@ -27,7 +27,7 @@ jobs:
   test-latest:
     <<: *test-template
     docker:
-      - image: circleci/node:11
+      - image: circleci/node:11.8.0
     steps:
       - checkout
       - run:
@@ -49,7 +49,7 @@ jobs:
   test-0.10:
     <<: *test-template
     docker:
-      - image: circleci/node:6
+      - image: circleci/node:4.8.7
       # https://discuss.circleci.com/t/how-to-change-node-version-in-circleci-2-0/17455/2
       - run:
           name: Install node@0.10.25
