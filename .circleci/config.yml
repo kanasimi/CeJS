@@ -28,7 +28,7 @@ jobs:
     <<: *test-template
     docker:
       - image: circleci/node:11.8.0-stretch
-    working_directory: ~/repo
+    # working_directory: ~/repo
     steps:
       - checkout
       - run:
