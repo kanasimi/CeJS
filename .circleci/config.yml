@@ -8,7 +8,10 @@ workflows:
   test:
     jobs:
       # https://discuss.circleci.com/t/run-tests-on-multiple-versions-of-python/15462/2
+      - test-latest
       - test-LTS
+      # Wikimedia Tool Labs: v0.10.25
+      - test-0.10
 
 # a collection of steps
 jobs:
@@ -24,6 +27,7 @@ jobs:
           command: npm test
 
   test-latest:
+    # <<: *test-template
     docker:
       - image: circleci/node:11.8.0-stretch
     steps:
@@ -41,6 +45,27 @@ jobs:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
+      - run: # run tests
+          name: test
+          command: npm test
+
+  test-0.10:
+    # <<: *test-template
+    docker:
+      - image: circleci/node:4.8.7
+      # https://discuss.circleci.com/t/how-to-change-node-version-in-circleci-2-0/17455/2
+      - run:
+          name: Install node@0.10.25
+          command: |
+            set +e             
+            touch $BASH_ENV  
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+            echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
+            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+            echo 'nvm install v0.10.25' >> $BASH_ENV
+            echo 'nvm alias default node' >> $BASH_ENV
+    steps:
+      - checkout
       - run: # run tests
           name: test
           command: npm test
