@@ -11,7 +11,7 @@ workflows:
       - test-latest
       - test-LTS
       # Wikimedia Tool Labs: v0.10.25
-      - test-0.10
+      - test-old
 
 # a collection of steps
 jobs:
@@ -27,43 +27,43 @@ jobs:
           command: npm test
 
   test-latest:
-    # <<: *test-template
+    #<<: *test-template
     docker:
       - image: circleci/node:11.8.0-stretch
     steps:
       - checkout
-      - run:
-          name: update-npm
-          command: 'sudo npm install -g npm@latest'
-      - restore_cache: # special step to restore the dependency cache
-          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
-          key: dependency-cache-{{ checksum "package.json" }}
-      - run:
-          name: install-npm-wee
-          command: npm install
-      - save_cache: # special step to save the dependency cache
-          key: dependency-cache-{{ checksum "package.json" }}
-          paths:
-            - ./node_modules
+      #- run:
+      #    name: update-npm
+      #    command: 'sudo npm install -g npm@latest'
+      #- restore_cache: # special step to restore the dependency cache
+      #    # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+      #    key: dependency-cache-{{ checksum "package.json" }}
+      #- run:
+      #    name: install-npm-wee
+      #    command: npm install
+      #- save_cache: # special step to save the dependency cache
+      #    key: dependency-cache-{{ checksum "package.json" }}
+      #    paths:
+      #      - ./node_modules
       - run: # run tests
           name: test
           command: npm test
 
-  test-0.10:
-    # <<: *test-template
+  test-old:
+    #<<: *test-template
     docker:
       - image: circleci/node:4.8.7
       # https://discuss.circleci.com/t/how-to-change-node-version-in-circleci-2-0/17455/2
-      - run:
-          name: Install node@0.10.25
-          command: |
-            set +e             
-            touch $BASH_ENV  
-            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
-            echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
-            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
-            echo 'nvm install v0.10.25' >> $BASH_ENV
-            echo 'nvm alias default node' >> $BASH_ENV
+      #- run:
+      #    name: Install node@0.10.25
+      #    command: |
+      #      set +e             
+      #      touch $BASH_ENV  
+      #      curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+      #      echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
+      #      echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      #      echo 'nvm install v0.10.25' >> $BASH_ENV
+      #      echo 'nvm alias default node' >> $BASH_ENV
     steps:
       - checkout
       - run: # run tests
