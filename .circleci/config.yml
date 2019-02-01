@@ -52,7 +52,8 @@ jobs:
   test-old:
     #<<: *test-template
     docker:
-      - image: circleci/node:4.8.7
+      - image: circleci/node:0.10.25
+      #- image: circleci/node:4.8.7
       # https://discuss.circleci.com/t/how-to-change-node-version-in-circleci-2-0/17455/2
       #- run:
       #    name: Install node@0.10.25
