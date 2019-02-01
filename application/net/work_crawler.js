@@ -1019,7 +1019,8 @@ function module_code(library_namespace) {
 				url = url.replace(/^\.\//, '');
 			}
 			if (url.startsWith('.')) {
-				library_namespace.warn('full_URL_of_path: Invalid url: ' + url);
+				library_namespace.warn('full_URL_of_path: '
+						+ gettext('無效的網址：%1', url));
 			}
 			url = this.base_URL + url;
 		} else if (url.URL) {
@@ -1049,13 +1050,13 @@ function module_code(library_namespace) {
 				work_id = work_id.slice('l='.length);
 			}
 			if (/\.js$/i.test(work_id)) {
-				library_namespace.warn(this.id + ': 您可能錯把下載工具檔當作了列表檔案: '
-						+ work_id);
+				library_namespace.warn(this.id + ': '
+						+ gettext('您可能錯把下載工具檔當作了列表檔案：%1', work_id));
 				[ '.lst', '.txt' ].some(function(extension) {
 					var work_list_file = work_id.replace(/\.js$/i, extension);
 					if (library_namespace.storage.file_exists(work_list_file)) {
-						library_namespace.info(this.id + ': 改採用列表檔案: '
-								+ work_list_file);
+						library_namespace.info(this.id + ': '
+								+ gettext('改採用列表檔案：%1', work_list_file));
 						work_id = work_list_file;
 						return true;
 					}
@@ -1064,7 +1065,8 @@ function module_code(library_namespace) {
 			var work_list = library_namespace.fs_read(work_id);
 			if (!work_list) {
 				// 若是檔案不存在，.fs_read() 可能會回傳 undefined。
-				library_namespace.warn(this.id + ': 無法讀取列表檔案 ' + work_id);
+				library_namespace.warn(this.id + ': '
+						+ gettext('無法讀取列表檔案：%1', work_id));
 				this.get_work_list([], callback);
 				return;
 			}
@@ -1072,7 +1074,8 @@ function module_code(library_namespace) {
 			work_list = work_list.toString() || '';
 
 			if (this.rearrange_list_file) {
-				library_namespace.debug(this.id + ': 重新整理列表檔案: ' + work_id);
+				library_namespace.debug(this.id + ': '
+						+ gettext('重新整理列表檔案：%1', work_id));
 				work_list = work_list.split('\n');
 				var line_hash = library_namespace.null_Object(), changed = 0;
 				work_list = work_list.map(function(line) {
@@ -1092,12 +1095,13 @@ function module_code(library_namespace) {
 				line_hash = null;
 				work_list = work_list.join('\n');
 				if (changed) {
-					library_namespace.info(this.id + ': Comment out ' + changed
-							+ ' work titles: ' + work_id);
+					library_namespace.info(this.id + ': '
+					//
+					+ gettext('重新整理列表檔案 [%1]，註解排除了個 %2 作品。', work_id, changed));
 					library_namespace.write_file(work_id, work_list);
 				} else {
-					library_namespace.debug(this.id
-							+ ': No change to list file ' + work_id);
+					library_namespace.debug(this.id + ': '
+							+ gettext('重新整理列表檔案 [%1]，未作改變。' + work_id));
 				}
 			}
 
@@ -1150,6 +1154,15 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (Array.isArray(this.work_list_now)
+				&& this.work_list_now !== work_list) {
+			library_namespace.error(gettext(
+					'警告：正下載以"%2"開始、長度 %1 的作品列表中。重複下載作品列表可能造成錯誤！',
+					this.work_list_now.length, this.work_list_now[0]));
+		}
+
+		this.work_list_now = work_list;
+
 		// assert: Array.isArray(work_list)
 		work_list.run_async(function for_each_title(get_next_work, work_title,
 				this_index) {
@@ -1165,8 +1178,9 @@ function module_code(library_namespace) {
 				get_next_work();
 			}
 
-			// convert to next index
-			this_index++;
+			// work_list.list_serial: this.work_list_now.list_serial
+			// this_index: convert to serial, and is next index
+			work_list.list_serial = ++this_index;
 			work_title = work_title.trim();
 			if (!work_title
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
@@ -1251,6 +1265,7 @@ function module_code(library_namespace) {
 			});
 
 		}, function all_work_done() {
+			delete this.work_list_now;
 			library_namespace.log(this.id + ': All ' + work_list.length
 					+ ' works done. ' + (new Date).toISOString()
 					+ ' 所有作品下載作業結束.');
@@ -3017,7 +3032,17 @@ function module_code(library_namespace) {
 		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
 				+ chapter_NO + '/' + work_data.chapter_count + ': '
 				+ chapter_URL, 1, 'get_chapter_data');
-		process.title = chapter_NO + ' @ ' + (work_data.title || work_data.id)
+		process.title = chapter_NO
+				+ ' @ '
+				+ (work_data.title || work_data.id)
+				//
+				+ (Array.isArray(this.work_list_now)
+						&& typeof this.work_list_now[this.work_list_now.list_serial - 1] === 'string'
+						&& this.work_list_now[this.work_list_now.list_serial - 1]
+								.trim() === work_data.title ? ' '
+						+ this.work_list_now.list_serial + '/'
+						+ this.work_list_now.length : '')
+				//
 				+ ' @ ' + this.id;
 
 		// --------------------------------------
