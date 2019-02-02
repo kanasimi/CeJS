@@ -1806,7 +1806,13 @@ function module_code(library_namespace) {
 		}
 		chapter_time_interval = library_namespace
 				.to_millisecond(chapter_time_interval);
-		return chapter_time_interval > 0 && chapter_time_interval;
+
+		if (chapter_time_interval > 0
+		// this.last_fetch_time = Date.now();
+		&& this.last_fetch_time > 0) {
+			chapter_time_interval -= Date.now() - this.last_fetch_time;
+			return chapter_time_interval > 0 && chapter_time_interval;
+		}
 	}
 
 	var null_XMLHttp = {
@@ -1841,6 +1847,7 @@ function module_code(library_namespace) {
 
 		function process_work_data(XMLHttp) {
 			// console.log(XMLHttp);
+			_this.last_fetch_time = Date.now();
 			var html = XMLHttp.responseText;
 			if (!html && !_this.skip_get_work_page) {
 				library_namespace
@@ -3018,17 +3025,22 @@ function module_code(library_namespace) {
 
 	// @inner
 	function get_chapter_data(work_data, chapter_NO, callback) {
+		function get_chapter_URL() {
+			var chapter_URL = _this.chapter_URL(work_data, chapter_NO);
+			// console.log(work_data);
+			// console.log('chapter_URL: ' + chapter_URL);
+			chapter_URL = chapter_URL && _this.full_URL(chapter_URL);
+			// console.log('chapter_URL: ' + chapter_URL);
+			return chapter_URL;
+		}
+
 		var _this = this,
 		// left: remaining chapter count
 		left, image_list, waiting, chapter_label,
 		//
 		chapter_directory, images_archive, chapter_page_file_name,
 		//
-		chapter_URL = this.chapter_URL(work_data, chapter_NO);
-		// console.log(work_data);
-		// console.log('chapter_URL: ' + chapter_URL);
-		chapter_URL = chapter_URL && this.full_URL(chapter_URL);
-		// console.log('chapter_URL: ' + chapter_URL);
+		chapter_URL = get_chapter_URL();
 		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
 				+ chapter_NO + '/' + work_data.chapter_count + ': '
 				+ chapter_URL, 1, 'get_chapter_data');
@@ -3392,6 +3404,9 @@ function module_code(library_namespace) {
 							// default chapter_data
 							&& work_data.chapter_list[chapter_NO - 1];
 					if (chapter_data === _this.REGET_PAGE) {
+						// 當重新讀取章節內容的時候，可以改變網址。
+						chapter_URL = get_chapter_URL();
+
 						// 需要重新讀取頁面。e.g., 502
 						var chapter_time_interval = _this
 								.get_chapter_time_interval(chapter_URL,
@@ -3491,6 +3506,11 @@ function module_code(library_namespace) {
 			}
 
 			function pre_parse_chapter_data(XMLHttp) {
+				// 可能是從 library_namespace.get_URL_cache() 過來的。
+				if (XMLHttp && XMLHttp.responseURL) {
+					_this.last_fetch_time = Date.now();
+				}
+
 				// 對於每一張圖片都得要從載入的頁面獲得資訊的情況，可以參考 hhcool.js, dm5.js。
 
 				if (typeof _this.pre_parse_chapter_data === 'function') {
@@ -3525,10 +3545,12 @@ function module_code(library_namespace) {
 			} else {
 				// 警告: reget_chapter=false 僅適用於小說之類不取得圖片的情形，
 				// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL取得名稱的於目錄中。
-				library_namespace.get_URL_cache(chapter_URL, function(data) {
+				library_namespace.get_URL_cache(chapter_URL, function(data,
+						error, XMLHttp) {
 					pre_parse_chapter_data({
 						buffer : data,
-						responseText : data && data.toString(_this.charset)
+						responseText : data && data.toString(_this.charset),
+						responseURL : XMLHttp && XMLHttp.responseURL
 					});
 				}, {
 					file_name : chapter_file_name,
@@ -4244,6 +4266,7 @@ function module_code(library_namespace) {
 			});
 			// 重新設定章節數量。
 			work_data.chapter_count = work_data.chapter_list.length;
+			return true;
 		}
 	}
 
@@ -4382,7 +4405,7 @@ function module_code(library_namespace) {
 				&& work_data.chapter_list[chapter_NO - 1],
 		// 卷篇集幕部冊册本/volume/part/book
 		part_title = data.title || chapter_data && chapter_data.part_title,
-		// 章節名稱 / 章節节回折篇話话頁页/chapter
+		// 章節名稱 / 篇章名稱 / 章節节回折篇話话頁页/chapter
 		chapter_title = data.sub_title || chapter_data
 				&& (chapter_data.chapter_title || chapter_data.title),
 		//
