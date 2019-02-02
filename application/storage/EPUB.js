@@ -1173,7 +1173,7 @@ function module_code(library_namespace) {
 		//
 		.replace(/&([^#a-z])/ig, '&amp;$1');
 
-		// contents = contents.replace(/<script[^<>]*>[^<>]*<\/script>/, '');
+		// contents = contents.replace(/<script[^<>]*>[\s\S]*?<\/script>/g, '');
 
 		library_namespace.debug('正規化後: ' + contents, 6);
 		return contents;
@@ -1297,9 +1297,9 @@ function module_code(library_namespace) {
 
 			if (item_data.href && item_data.href !== item.href) {
 				// 有手動設定.href
-				library_namespace
-						.error('add_chapter: 儲存檔名改變，您需要自行修正原參照文件中之檔名:\n'
-								+ item_data.href + ' →\n' + item.href);
+				library_namespace.error('add_chapter: '
+						+ '儲存檔名改變，您需要自行修正原參照文件中之檔名:\n' + item_data.href
+						+ ' →\n' + item.href);
 			}
 
 			// 避免衝突，檢測是不是有不同id，相同id存在。
@@ -2180,6 +2180,16 @@ function module_code(library_namespace) {
 		// 請注意： rename 必須先安裝 7-Zip **16.04 以上的版本**。
 		archive_file.rename([ mimetype_filename, mimetype_first_order_name ]);
 
+		// https://support.microsoft.com/en-us/help/830473/command-prompt-cmd-exe-command-line-string-limitation
+		// On computers running Microsoft Windows XP or later, the maximum
+		// length of the string that you can use at the command prompt is 8191
+		// characters.
+		if (Array.isArray(file_list) && file_list.join('" "').length > 7800) {
+			library_namespace.warn('檔案列表過長，改成壓縮整個目錄。');
+			file_list = null;
+			// archive all directory
+		}
+
 		library_namespace.storage.archive.archive_under(this.path.root,
 		// archive others.
 		archive_file, {
@@ -2269,6 +2279,7 @@ function module_code(library_namespace) {
 
 		generate_TOC : generate_TOC,
 		flush : write_chapters,
+		// pack up
 		archive : archive_to_ZIP,
 		// preserve additional properties
 		preserve_attributes : 'meta,url,file,type,date,word_count'.split(','),
