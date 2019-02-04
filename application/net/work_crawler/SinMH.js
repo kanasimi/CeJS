@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL function for downloading SinMH CMS comics.
+ * @name CeL module for downloading SinMH CMS comics.
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸常見漫畫管理系統: 圣樱漫画管理系统 (圣樱CMS) MHD模板 的工具。
  * 
@@ -88,28 +88,28 @@ function module_code(library_namespace) {
 		// 2. 使用API取得搜尋所得的作品資料。 (set search_URL:'API')
 		search_URL_API : function(work_title) {
 			// SinConf.apiHost
-			var apiHost = this.base_URL.replace(/\/\/[a-z]+/, '//api');
+			var apiHost = this.api_base_URL
+					|| this.base_URL.replace(/\/\/[a-z]+/, '//api');
 			return [ apiHost + 'comic/search', {
 				keywords : work_title
 			} ];
 		},
 		parse_search_result : function(html, get_label) {
+			// console.log(html);
 			if (html.startsWith('{')) {
 				// 2. 使用API取得搜尋所得的作品資料。
-				// this.id_of_search_result='slug';
-				this.title_of_search_result = 'title';
 				/**
 				 * e.g.,<code>
 				{"items":[{"id":3542,"status":1,"commend":0,"is_original":0,"is_vip":0,"name":"军阀霸宠：纯情妖女火辣辣","title":"民国妖闻录","alias":"","original_name":"","letter":"j","slug":"junfabachongchunqingyaonuhuolala","coverUrl":"http://res.gufengmh.com/images/cover/201711/1509877682Xreq-5mrrSsDm82P.jpg","uri":"/manhua/junfabachongchunqingyaonuhuolala/","last_chapter_name":"040：纯良少年的堕落","last_chapter_id":235075,"author":"逐浪动漫","author_id":3901,"serialise":1}],"_links":{"self":{"href":"http://api.gufengmh.com/comic/search?page=1"}},"_meta":{"totalCount":1,"pageCount":1,"currentPage":1,"perPage":20},"status":0}
 				 </code>
 				 */
-				var id_data = html ? JSON.parse(html) : [];
-				return [ id_data.items.map(function(data) {
-					return data.slug;
-				}), id_data.items ];
+				var id_data = html ? JSON.parse(html).items : [];
+				// console.log(id_data);
+				return [ id_data, id_data ];
 			}
 
 			// 1. 使用網頁取得搜尋所得的作品資料。
+			// e.g., 36mh.js
 			html = html.between('<h4 class="fl">');
 			var id_list = [], id_data = [], matched,
 			//
@@ -126,38 +126,61 @@ function module_code(library_namespace) {
 
 		// 取得作品的章節資料。 get_work_data()
 		work_URL : function(work_id) {
+			// console.log(work_id);
 			return 'manhua/' + work_id + '/';
 		},
 		parse_work_data : function(html, get_label, extract_work_data) {
+			// console.log(html);
 			var work_data = {
 				// 必要屬性：須配合網站平台更改。
 				title : get_label(html.between('<h1>', '</h1>')),
 
 				// 選擇性屬性：須配合網站平台更改。
 				description : get_label(html.between('intro-all', '</div>')
-						.between('>')),
+						.between('>')
+						// 930mh.js
+						|| html.between('<p class="comic_deCon_d">', '</p>')),
 				// reset work_data.chapter_list
 				chapter_list : []
-			}, data = html.between('detail-list', '</ul>');
-			extract_work_data(work_data, data,
+			};
+			extract_work_data(work_data, html.between('detail-list', '</ul>'),
 			// e.g., "<strong>漫画别名：</strong>暂无</span>"
 			/<strong[^<>]*>([^<>]+)<\/strong>([\s\S]+?)<\/li>/g);
 
+			// 930mh.js
+			extract_work_data(work_data, html
+					.between('<ul class="comic_deCon_liT">',
+							'<p class="comic_deCon_d">')
+					// <li>时间：2019-02-04 <li>最新：<a
+					// href="/manhua/17884/668443.html">第6话</a></li>
+					.replace(/<li>/g, '</li><li>'),
+			// e.g., "<li>类别：<a href="/list/shaonian/">少年</a></li>"
+			/<li>([^：]+)：([\s\S]+?)<\/li>/g);
+			extract_work_data(work_data, html);
+
 			Object.assign(work_data, {
-				author : work_data.漫画作者,
-				status : work_data.漫画状态,
-				last_update : work_data.更新时间
+				author : work_data.漫画作者 || work_data.作者,
+				status : work_data.漫画状态 || work_data.状态,
+				last_update : work_data.更新时间 || work_data.时间
 			});
+
 			// console.log(work_data);
 			return work_data;
 		},
 		get_chapter_list : function(work_data, html, get_label) {
-			var chapter_block, PATTERN_chapter_block =
+			var chapter_block, PATTERN_chapter_block = html
+					.includes('class="chapter-body')
 			// <div class="chapter-category clearfix">
 			// <div class="chapter-body clearfix">
-			/class="chapter-(body|category)[^<>]+>([\s\S]+?)<\/div>/g;
+			? /class="chapter-(body|category)[^<>]+>([\s\S]+?)<\/div>/g
+			// 930mh.js
+			// <div class="zj_list_head">...<h2>章节<em class="c_3">列表</em></h2>
+			// <div class="zj_list_head_px" data-key="6"><span>排序 :...</div>
+			// <div class="zj_list_con autoHeight">...</div>
+			: /class="zj_list_(con|head)[^<>]+>([\s\S]+?)<\/div>/g;
+
 			while (chapter_block = PATTERN_chapter_block.exec(html)) {
-				delete chapter_block.input;
+				// delete chapter_block.input;
 				// console.log(chapter_block);
 				if (chapter_block[1] === 'category') {
 					// console.log(chapter_block[2]);
@@ -169,6 +192,21 @@ function module_code(library_namespace) {
 					// console.log(chapter_block);
 					if (chapter_block) {
 						this.set_part(work_data, chapter_block[1]);
+					}
+					continue;
+				}
+
+				if (chapter_block[1] === 'head') {
+					// console.log(chapter_block[2]);
+					// 930mh.js
+					// e.g., http://www.duzhez.com/manhua/269/
+					chapter_block = chapter_block[2]
+					// <h2>章节<em class="c_3">列表</em></h2>
+					// <h2>番外篇<em class="c_3">列表</em></h2>
+					.between('<h2>', '<em class="c_3">列表</em>');
+					// console.log(chapter_block);
+					if (chapter_block) {
+						this.set_part(work_data, chapter_block);
 					}
 					continue;
 				}
@@ -192,10 +230,14 @@ function module_code(library_namespace) {
 				}
 			}
 			// console.log(work_data.chapter_list);
-			var text;
-			if (work_data.chapter_list.length === 0
+
+			var text = work_data.chapter_list.length === 0
 			// 已屏蔽删除本漫画所有章节链接
-			&& (text = html.between('class="ip-body">', '</div>'))) {
+			&& (html.between('class="ip-body">', '</div>')
+			// 930mh.js 一人之下
+			|| html.between('<p class="ip-notice"', '</p>').between('>'));
+
+			if (text) {
 				work_data.filtered = true;
 				var chapter_id = html.between('href="/comic/read/?id=', '"')
 						|| html.between('SinMH.initComic(', ')')
@@ -217,10 +259,11 @@ function module_code(library_namespace) {
 		// 執行在解析章節資料 process_chapter_data() 之前的作業 (async)。
 		// 必須自行保證執行 callback()，不丟出異常、中斷。
 		: function(XMLHttp, work_data, callback, chapter_NO) {
+			var html = XMLHttp.responseText;
 			if (work_data.filtered && chapter_NO === 1) {
-				var html = XMLHttp.responseText, first_chapter_id = html
-						.between('SinMH.initChapter(', ',')
+				var first_chapter_id = html.between('SinMH.initChapter(', ',')
 						|| html.between('SinTheme.initChapter(', ',');
+				// console.log(html);
 				if (first_chapter_id) {
 					library_namespace.debug('add first chapter: '
 							+ first_chapter_id);
@@ -236,11 +279,35 @@ function module_code(library_namespace) {
 					return;
 				}
 			}
+
+			var crypto_url = html
+					.match(/<script src="([^"]+\/crypto.js)"><\/script>/);
+			if (crypto_url) {
+				var file_name = this.main_directory + 'crypto.js';
+				library_namespace.get_URL_cache(this.full_URL(crypto_url[1]),
+				// @see function cops201921() @
+				// http://www.duzhez.com/js/cops201921.js
+				function(data, error, XMLHttp) {
+					// data = data.toString();
+
+					// @see https://code.google.com/archive/p/crypto-js/
+					// 懶得自己寫，直接 including。
+					global.CryptoJS = require(file_name);
+
+					callback();
+				}, {
+					file_name : file_name,
+					get_URL_options : this.get_URL_options
+				});
+				return;
+			}
+
 			callback();
 		},
 
 		// 取得每一個章節的各個影像內容資料。 get_chapter_data()
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
+			// console.log(html);
 			if (work_data.filtered && !work_data.chapter_filtered) {
 				var next_chapter_data = html.between('nextChapterData =', ';');
 				// console.log(next_chapter_data || html);
@@ -259,21 +326,41 @@ function module_code(library_namespace) {
 			}
 
 			// console.log(work_data.chapter_list);
-			var chapter_data = work_data.chapter_list[chapter_NO - 1];
-			// 2018/3 古风漫画网改版。
-			html = html.between('<script>;phone.') || html;
-			eval(html.between('<script>', '</script>').replace(/;var /g,
-					';chapter_data.'));
-			if (!chapter_data) {
+			var chapter_data = work_data.chapter_list[chapter_NO - 1],
+			// <!--全站头部导航 结束-->\n<script>
+			chapter_data_code = html.match(/<script>(;var [\s\S]+?)<\/script>/);
+			if (!chapter_data_code) {
 				library_namespace.warn(work_data.title + ' #' + chapter_NO
 						+ ': No valid chapter data got!');
 				return;
 			}
+			eval(chapter_data_code[1].replace(/;var /g, ';chapter_data.'));
+			// console.log(chapter_data);
 
 			// 設定必要的屬性。
 			chapter_data.title = get_label(html.between('<h2>', '</h2>'));
 			// e.g., 'images/comic/4/7592/'
 			var path = encodeURI(chapter_data.chapterPath);
+			if (global.CryptoJS
+					&& typeof chapter_data.chapterImages === 'string') {
+				/**
+				 * <code>
+				JSON.parse(CryptoJS.AES.decrypt(chapterImages,CryptoJS.enc.Utf8.parse("6133AFVvxas55841"),{iv:CryptoJS.enc.Utf8.parse("A25vcxQQrpmbV51t"),mode:CryptoJS.mode.CBC,padding:CryptoJS.pad.Pkcs7}).toString(CryptoJS.enc.Utf8))
+				</code>
+				 * 
+				 * @see function cops201921() @ http://www.duzhez.com/js/cops201921.js
+				 */
+				chapter_data.chapterImages =
+				// 使用 CryptoJS https://code.google.com/archive/p/crypto-js/
+				// https://github.com/brix/crypto-js
+				JSON.parse(CryptoJS.AES.decrypt(chapter_data.chapterImages,
+				//
+				CryptoJS.enc.Utf8.parse("6133AFVvxas55841"), {
+					iv : CryptoJS.enc.Utf8.parse("A25vcxQQrpmbV51t"),
+					mode : CryptoJS.mode.CBC,
+					padding : CryptoJS.pad.Pkcs7
+				}).toString(CryptoJS.enc.Utf8));
+			}
 			chapter_data.image_list = chapter_data.chapterImages.map(function(
 					url) {
 				return {
@@ -308,6 +395,12 @@ function module_code(library_namespace) {
 
 		if (configuration.search_URL === 'API') {
 			configuration.search_URL = default_configuration.search_URL_API;
+			// 因為不見得會執行到 parse_search_result()，不可放在 parse_search_result() 裡面。
+			if (!configuration.id_of_search_result) {
+				// gufengmh.js: using 'slug'
+				configuration.id_of_search_result = 'id';
+			}
+			configuration.title_of_search_result = 'title';
 		}
 
 		// 每次呼叫皆創建一個新的實體。

@@ -23,7 +23,7 @@ TODO:
 		自動搜尋不同的網站並選擇下載作品。
 	從其他的資料來源網站尋找取得作品以及章節的資訊。
 	自動記得某個作品要從哪些網站下載。
-定義參數的規範，例如數量包含可選範圍，可用 RegExp。不像現在import_arg_hash只規範了'number|string'
+定義參數的規範，例如數量包含可選範圍，可用 RegExp https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern 。如'number:0~|string:/v\\d|V[1-3]|a|b|c/', 'number:1~400|string:item1;item2;item3'。不像現在import_arg_hash只規範了'number|string'
 	將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
 定義列表檔案的規範，可以統合設定檔案的規範。
 	rearrange_list_file 整合報告
@@ -434,9 +434,13 @@ function module_code(library_namespace) {
 		 * 下載圖片的逾時等待時間。若逾時時間太小（如10秒），下載大檔案容易失敗。
 		 * 
 		 * 注意: 因為 this.get_URL_options 在 constructor 中建構完畢，因此 timeout
-		 * 必須在一開始就設定。之後設定沒有效果。
+		 * 必須在一開始就設定。之後必須以 `this.setup_value('timeout', this.timeout);`
+		 * 設定，否則沒有效果。
 		 */
 		timeout : '30s',
+		// 本站速度頗慢，必須等待較久否則容易中斷。
+		// timeout : '60s',
+
 		// {Natural}出錯時重新嘗試的次數。若值太小，傳輸到一半壞掉的圖片可能被當作正常圖片而不會出現錯誤。
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
 		// {Natural}圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。
@@ -729,6 +733,7 @@ function module_code(library_namespace) {
 			// chapter_NO starts from 1
 			// console.log(work_data.chapter_list);
 			// console.log(work_data.chapter_list[chapter_NO - 1]);
+			// console.trace(chapter_NO + '/' + work_data.chapter_list.length);
 
 			// e.g., work_data.chapter_list = [ chapter_data,
 			// chapter_data={url:'',title:'',date:new Date}, ... ]
@@ -1232,7 +1237,7 @@ function module_code(library_namespace) {
 			work_count++;
 			library_namespace.log([ this.id, ': ', {
 				T : [ 'Download %1: %2', work_count
-				//
+				// 下載作品列表
 				+ (work_count === this_index ? '' : '/' + this_index)
 				//
 				+ '/' + work_list.length, work_title ],
@@ -1522,9 +1527,9 @@ function module_code(library_namespace) {
 			search_result = search_result[work_title];
 			var search_result_id = _this.id_of_search_result;
 			if (search_result_id) {
-				search_result = typeof search_result_id === 'function'
-				//
-				? search_result_id(search_result)
+				// console.log([ search_result_id, search_result ]);
+				search_result = typeof search_result_id === 'function' ? _this
+						.id_of_search_result(search_result)
 						: search_result ? search_result[search_result_id]
 								: search_result;
 			}
@@ -1672,10 +1677,9 @@ function module_code(library_namespace) {
 
 				var search_result_id = _this.title_of_search_result;
 				if (search_result_id) {
-					title = typeof search_result_id === 'function'
-					//
-					? search_result_id(title) : title ? title[search_result_id]
-							: title;
+					title = typeof search_result_id === 'function' ? _this
+							.title_of_search_result(title)
+							: title ? title[search_result_id] : title;
 				}
 				title = title.trim();
 				// console.log([ 'compare', title, work_title ]);
@@ -1827,6 +1831,7 @@ function module_code(library_namespace) {
 			work_title = work_id.title;
 			work_id = work_id.id;
 		}
+		// console.trace([ work_id, work_title ]);
 		process.title = '下載' + work_title + ' - 資訊 @ ' + this.id;
 
 		var _this = this, work_URL = this.full_URL(this.work_URL, work_id), work_data;
@@ -2983,7 +2988,7 @@ function module_code(library_namespace) {
 			if (!no_part && chapter_data.part_title
 			//
 			&& (Array.isArray(work_data.chapter_list)
-			// 當只有一個 part 的時候，預設不會添上 part 標題，除非設定了 this.add_part。
+			// 當只有一個 part (分部) 的時候，預設不會添上 part 標題，除非設定了 this.add_part。
 			&& work_data.chapter_list.part_NO > 1 || this.add_part)) {
 				confirm_recheck.call(this, work_data, '本作存有不同的 part');
 				part = chapter_data.NO_in_part | 0;
@@ -3045,6 +3050,7 @@ function module_code(library_namespace) {
 				+ chapter_NO + '/' + work_data.chapter_count + ': '
 				+ chapter_URL, 1, 'get_chapter_data');
 		process.title = chapter_NO
+				// + '/' + work_data.chapter_count
 				+ ' @ '
 				+ (work_data.title || work_data.id)
 				//
@@ -3334,14 +3340,16 @@ function module_code(library_namespace) {
 						&& !_this.skip_get_chapter_page
 						&& (!_this.skip_error || get_data.error_count < _this.MAX_ERROR_RETRY)) {
 					library_namespace.error((work_data.title || work_data.id)
-							+ ': Failed to get data of chapter ' + chapter_NO);
+							+ ': '
+							+ gettext('Failed to get data of chapter %1',
+									chapter_NO));
 					if (get_data.error_count === _this.MAX_ERROR_RETRY) {
 						if (_this.skip_chapter_data_error) {
-							library_namespace
+							library_namespace.warn('process_chapter_data: '
 							// Skip this chapter if do not throw
-							.warn('process_chapter_data: Skip '
-									+ work_data.title + ' #' + chapter_NO
-									+ ' and continue next.');
+							+ gettext('Skip %1 #%2 and continue next chapter.',
+							//
+							work_data.title, chapter_NO));
 							check_if_done();
 							return;
 						}
@@ -3405,18 +3413,21 @@ function module_code(library_namespace) {
 							&& work_data.chapter_list[chapter_NO - 1];
 					if (chapter_data === _this.REGET_PAGE) {
 						// 當重新讀取章節內容的時候，可以改變網址。
-						chapter_URL = get_chapter_URL();
 
 						// 需要重新讀取頁面。e.g., 502
-						var chapter_time_interval = _this
+						var new_chapter_URL = get_chapter_URL(), chapter_time_interval = _this
 								.get_chapter_time_interval(chapter_URL,
 										work_data);
 						process.stdout.write('process_chapter_data: '
+								// 等待幾秒鐘 以重新取得章節內容頁面網址
 								+ (chapter_time_interval > 0 ? 'Wait '
 										+ library_namespace.age_of(0,
 												chapter_time_interval) + ' to '
-										: '') + 'reget page [' + chapter_URL
+										: '')
+								+ (chapter_URL === new_chapter_URL ? 'reget'
+										: 'get') + ' page [' + chapter_URL
 								+ ']...\r');
+						chapter_URL = new_chapter_URL;
 						if (chapter_time_interval > 0) {
 							setTimeout(reget_chapter_data,
 									chapter_time_interval);
@@ -4074,6 +4085,7 @@ function module_code(library_namespace) {
 										.writeFileSync(image_data.file,
 												contents);
 							} catch (e) {
+								library_namespace.error(e);
 								_this.onerror('無法寫入圖像檔案 [' + image_data.file
 								//
 								+ ']。這可能肇因於作品資訊 cache 與當前網站上之作品章節結構不同。'
@@ -4611,7 +4623,7 @@ function module_code(library_namespace) {
 			// 不應再被納入檢測。
 			library_namespace.info(library_namespace.display_align({
 				'Set milestone:' : last_file,
-				'→' : rename_to
+				'move to →' : rename_to
 			}));
 			library_namespace.move_file(last_file, rename_to);
 		});
