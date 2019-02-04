@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL function for downloading qTcms 20170501 version comics.
+ * @name CeL module for downloading qTcms 20170501 version comics.
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸常見漫畫管理系統: 晴天漫画CMS (晴天漫画系统 晴天漫画程序, 晴天新漫画系统)
  *               的工具。
@@ -67,7 +67,7 @@ function module_code(library_namespace) {
 		},
 
 		// --------------------------------------
-		// via web page
+		// search comic via web page
 
 		// 解析 作品名稱 → 作品id get_work()
 		search_URL_web : 'statics/search.aspx?key=',
@@ -97,7 +97,8 @@ function module_code(library_namespace) {
 		},
 
 		// --------------------------------------
-		// via API
+		// default: search comic via API
+		// copy from 360taofu.js
 
 		// 解析 作品名稱 → 作品id get_work()
 		search_URL : function(work_title) {
@@ -123,8 +124,14 @@ function module_code(library_namespace) {
 			// webdir: "/"
 			// classid1pinyin: latin + "/"
 			// titlepinyin: latin
-			var matched = data.u.match(/([^\/]+\/[^\/]+)\/$/);
-			return matched && matched[1].replace('/', '_');
+			var matched = data.u.match(/(?:\/|^)([a-z]+)\/([a-z\-\d]+)\/$/);
+
+			// assert: !!matched === true
+			if (!this.common_catalog)
+				return matched[1] + '_' + matched[2];
+
+			// assert: this.common_catalog === matched[1]
+			return matched[2];
 		},
 		title_of_search_result : 't',
 
