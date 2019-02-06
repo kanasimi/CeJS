@@ -371,7 +371,7 @@ function (global) {
 
 		// TODO: 似乎不總是有用。見 era.htm。
 		return global.eval && global.eval !== eval_code ? global.eval(code)
-			// 這種表示法 Eclipse Kepler (4.3.2) SR2 之 jsdoc 尚無法處理。
+			// 這種表示法 Eclipse Kepler (4.3.2) SR2 之 JsDoc 尚無法處理。
 			: (0, eval)(code);
 	};
 
@@ -2131,7 +2131,9 @@ OS='UNIX'; // unknown
 			inner = _.gettext.apply(null, inner);
 		} else if (Array.isArray(inner)) {
 			inner = inner[0].replace(/%(\d+)/g, function(all, NO) {
-				return NO in inner ? inner[NO] : all;
+				return NO in inner ?
+				// extract_message_from_nodes(inner[NO])
+				inner[NO] : all;
 			});
 		}
 
@@ -2139,7 +2141,7 @@ OS='UNIX'; // unknown
 		//
 		style = color_index && (nodes.style || nodes.S);
 		// console.log(style);
-		// parse CSS
+		// parse CSS to SGR color style
 		if (typeof style === 'string') {
 			style.replace(/(?:^|[;\s])(background-)?color\s*:\s*([^\s;]+)/g, function(all, bg, color) {
 				color = color.toLowerCase();
@@ -2219,9 +2221,10 @@ OS='UNIX'; // unknown
 			// console.trace(style_array);
 		}
 
+		var matched;
 		if (typeof messages === 'string') {
 			// 自動著色。
-			var matched = messages.match(PATTERN_log_caller);
+			matched = messages.match(PATTERN_log_caller);
 			if (matched) {
 				// e.g., CeL.log("function_name: messages");
 				messages = [ matched[1], default_style[type], matched[2], 0 ];
@@ -2233,7 +2236,7 @@ OS='UNIX'; // unknown
 			// assert: Array.isArray(messages)
 			// 自動著色。
 			// TODO: 效果不佳。
-			var matched = messages[0].match(PATTERN_log_caller);
+			matched = messages[0].match(PATTERN_log_caller);
 			if (matched) {
 				// e.g., CeL.log([ 'function_name: messages 0', 'style',
 				// 'messages 1' ]);

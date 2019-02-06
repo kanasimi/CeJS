@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL function for downloading **maybe** qTcms 2014 version comics.
+ * @name CeL module for downloading **maybe** qTcms 2014 version comics.
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸常見漫畫管理系統: **可能為** 舊型晴天漫画CMS (晴天漫画系统 晴天漫画程序,
  *               NOT 晴天新漫画系统) 的工具。

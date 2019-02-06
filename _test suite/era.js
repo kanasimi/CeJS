@@ -2640,7 +2640,7 @@ function affairs() {
 
 	CeL.toggle_display('input_panel', true);
 
-	_.create_menu('language', [ 'TW', 'CN', 'ja', 'en' ], function() {
+	_.create_menu('language_menu', [ 'TW', 'CN', 'ja', 'en' ], function() {
 		draw_era.redraw();
 	});
 
@@ -3002,9 +3002,9 @@ function affairs() {
 		em : '隨即重新整理'
 	}, '，以更改設定！）' ];
 	CeL.new_node(method_nodes, 'method_layer');
-	method_nodes = [ 'Because using complete LEA-406' + CeL.LEA406.default_type
+	method_nodes = [ '🌌 Because using complete LEA-406'
 	//
-	, ' to calculate the position of moon,'
+	+ CeL.LEA406.default_type, ' to calculate the position of moon,'
 	//
 	+ ' it often takes seconds to minutes to display.', {
 		br : null

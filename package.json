@@ -1,21 +1,8 @@
 {
 	"name" : "cejs",
 	"title" : "CeJS",
-	"version" : "2.0.20190130",
+	"version" : "2.0.20190206",
 	"description" : "A JavaScript module framework that is simple to use.",
-	"main" : "index.js",
-	"dependencies" : {},
-	"devDependencies" : {},
-	"engines" : {
-		"node" : ">=0.10"
-	},
-	"scripts" : {
-		"test" : "node \"_test suite/test.js\""
-	},
-	"repository" : {
-		"type" : "git",
-		"url" : "git+https://github.com/kanasimi/CeJS.git"
-	},
 	"keywords" : [ "arbitrary-precision", "arithmetic", "numerals",
 			"Chinese era", "calendar", "character encoding", "address input",
 			"internationalization" ],
@@ -26,8 +13,23 @@
 	},
 	"contributors" : "vimunci",
 	"license" : "BSD-3-Clause",
+	"homepage" : "https://github.com/kanasimi/CeJS",
 	"bugs" : {
 		"url" : "https://github.com/kanasimi/CeJS/issues"
 	},
-	"homepage" : "https://github.com/kanasimi/CeJS"
+	"repository" : {
+		"type" : "git",
+		"url" : "git+https://github.com/kanasimi/CeJS.git"
+	},
+
+	"main" : "index.js",
+	"scripts" : {
+		"test" : "node \"_test suite/test.js\""
+	},
+
+	"engines" : {
+		"node" : ">=0.10"
+	},
+	"devDependencies" : {},
+	"dependencies" : {}
 }

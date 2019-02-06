@@ -581,6 +581,7 @@ function module_code(library_namespace) {
 		// 每次預設會從上一次中斷的章節接續下載，不用特地指定 recheck。
 		// 有些漫畫作品分區分單行本、章節與外傳，當章節數量改變、添加新章節時就需要重新檢查/掃描。
 		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。否則只會自上次下載過的章節接續下載。
+		// recheck='multi_parts_changed': 當有多個分部的時候才重新檢查。
 		// recheck : true,
 		// recheck=false:明確指定自上次下載過的章節接續下載。
 		// recheck : false,
@@ -745,14 +746,19 @@ function module_code(library_namespace) {
 		// this.get_URL(url, function(XMLHttp) {})
 		get_URL : function(url, callback, post_data, options) {
 			if (options === true) {
-				options = {
+				options = Object.assign({
 					error_retry : this.MAX_ERROR_RETRY
-				};
+				}, this.get_URL_options);
+			} else if (library_namespace.is_Object(options)) {
+				options = Object.assign(library_namespace.null_Object(),
+						this.get_URL_options, options);
+			} else {
+				// assert: !options === true
+				options = this.get_URL_options;
 			}
+
 			get_URL(this.full_URL(url), callback, this.charset, post_data,
-					options ? Object.assign(library_namespace.null_Object(),
-							this.get_URL_options, options)
-							: this.get_URL_options);
+					options);
 		},
 
 		set_part : set_part_title,
@@ -1870,8 +1876,9 @@ function module_code(library_namespace) {
 					return Work_crawler.THROWED;
 				}
 				error_count = (error_count | 0) + 1;
-				library_namespace.log('process_work_data: Retry ' + error_count
-						+ '/' + _this.MAX_ERROR_RETRY + '...');
+				library_namespace.log('process_work_data: '
+						+ gettext('Retry %1', error_count + '/'
+								+ _this.MAX_ERROR_RETRY) + '...');
 				_this.get_work_data({
 					// 书号
 					id : work_id,
@@ -1943,7 +1950,9 @@ function module_code(library_namespace) {
 			// 自動添加之作業用屬性：
 			work_data.id = work_id;
 			work_data.last_download = {
+				// {Date}
 				date : (new Date).toISOString(),
+				// {Natural}chapter_NO
 				chapter : _this.start_chapter
 			};
 			// source URL of work
@@ -2278,6 +2287,14 @@ function module_code(library_namespace) {
 			chapter_added = work_data.chapter_count
 					- work_data.last_download.chapter;
 
+			if (recheck_flag === 'multi_parts_changed') {
+				recheck_flag = work_data.chapter_list
+				// 當有多個分部的時候才重新檢查。
+				&& work_data.chapter_list.part_NO > 1 && 'changed';
+			} else if (typeof recheck_flag === 'function') {
+				recheck_flag = recheck_flag.call(this, work_data);
+			}
+
 			if (recheck_flag
 			// _this.get_chapter_list() 中
 			// 可能重新設定過 work_data.last_download.chapter。
@@ -2365,7 +2382,8 @@ function module_code(library_namespace) {
 
 				}
 
-			} else if (_this.start_chapter > Work_crawler.prototype.start_chapter) {
+			} else if (_this.start_chapter > (work_data.last_download.chapter > Work_crawler.prototype.start_chapter ? work_data.last_download.chapter
+					: Work_crawler.prototype.start_chapter)) {
 				library_namespace
 						.warn('若之前已經下載到最新章節，則指定 start_chapter 時，必須同時設定 recheck！');
 			}
@@ -2483,6 +2501,7 @@ function module_code(library_namespace) {
 			if (work_URL)
 				_this.get_URL_options.headers.Referer = work_URL;
 			// 開始下載chapter。
+			work_data.start_downloading_chaper = Date.now();
 			pre_get_chapter_data.call(_this, work_data,
 					work_data.last_download.chapter, callback);
 		}
@@ -2642,10 +2661,19 @@ function module_code(library_namespace) {
 				work_data);
 
 		var next = chapter_time_interval > 0 ? (function() {
-			process.stdout.write(this.id + ': ' + work_data.title
-					+ ': 下載章節資訊前先等待 '
-					+ library_namespace.age_of(0, chapter_time_interval)
-					+ '...\r');
+			var message = [ this.id, ': ', work_data.title + ': ',
+					'下載章節資訊前先等待 ',
+					library_namespace.age_of(0, chapter_time_interval) ],
+			// 預估剩餘時間 estimated time remaining
+			estimated_time = (Date.now() - work_data.start_downloading_chaper)
+			// chapter_NO starts from 1
+			* (work_data.chapter_count - chapter_NO - 1) / (chapter_NO - 1);
+			if (estimated_time > 0) {
+				message.push('，預估還需 ', library_namespace.age_of(0,
+						estimated_time), ' 下載完本作品');
+			}
+			message.push('...\r');
+			process.stdout.write(message.join(''));
 			setTimeout(actual_operation, chapter_time_interval);
 		}).bind(this) : actual_operation;
 
@@ -2855,7 +2883,8 @@ function module_code(library_namespace) {
 		}
 		work_data.recheck_confirmed = true;
 		library_namespace.warn((work_data.title || work_data.id) + ': '
-				+ prompt + '，建議設置 recheck 選項來避免多次下載時，遇上缺話的情況。');
+				+ prompt
+				+ '，建議設置 recheck=multi_parts_changed 選項來避免多次下載時，遇上缺話的情況。');
 	}
 
 	// 分析所有數字後的非數字，猜測章節的單位。
@@ -2997,7 +3026,7 @@ function module_code(library_namespace) {
 				}
 
 				part = (chapter_data.part_NO >= 1
-				//
+				// '': 使章節目錄名稱不包含 part_NO。
 				? chapter_data.part_NO.pad(2) + ' ' : '')
 				//
 				+ chapter_data.part_title + ' ';
@@ -3340,14 +3369,12 @@ function module_code(library_namespace) {
 						&& !_this.skip_get_chapter_page
 						&& (!_this.skip_error || get_data.error_count < _this.MAX_ERROR_RETRY)) {
 					library_namespace.error((work_data.title || work_data.id)
-							+ ': '
-							+ gettext('Failed to get data of chapter %1',
-									chapter_NO));
+							+ ': ' + gettext('無法取得第 %1 章的內容。', chapter_NO));
 					if (get_data.error_count === _this.MAX_ERROR_RETRY) {
 						if (_this.skip_chapter_data_error) {
 							library_namespace.warn('process_chapter_data: '
-							// Skip this chapter if do not throw
-							+ gettext('Skip %1 #%2 and continue next chapter.',
+							// Skip this chapter if do not need throw
+							+ gettext('跳過 %1 #%2 並接著下載下一章。',
 							//
 							work_data.title, chapter_NO));
 							check_if_done();
@@ -3359,9 +3386,9 @@ function module_code(library_namespace) {
 						return Work_crawler.THROWED;
 					}
 					get_data.error_count = (get_data.error_count | 0) + 1;
-					library_namespace.log('process_chapter_data: Retry '
-							+ get_data.error_count + '/'
-							+ _this.MAX_ERROR_RETRY + '...');
+					library_namespace.log('process_chapter_data: '
+							+ gettext('Retry %1', get_data.error_count + '/'
+									+ _this.MAX_ERROR_RETRY) + '...');
 					if (!work_data.reget_chapter) {
 						library_namespace
 								.warn('因 cache file 壞了(例如為空)，將重新取得 chapter_URL，設定 .reget_chapter。');
@@ -3455,11 +3482,13 @@ function module_code(library_namespace) {
 					&& (!chapter_data || !chapter_data.limited
 					// 圖片檔案會用其他方式手動下載。
 					&& !chapter_data.images_downloaded)) {
+						var message = chapter_data.limited ? 'Limited'
+								: 'No image got';
 						library_namespace.debug(work_data.directory_name + ' #'
 								+ chapter_NO + '/' + work_data.chapter_count
-								+ ': No image get.');
-						set_work_status(work_data, '#' + chapter_NO
-								+ ': no image get.');
+								+ ': ' + message);
+						set_work_status(work_data, '#' + chapter_NO + ': '
+								+ message);
 					}
 					// 注意: 若是沒有 reget_chapter，則 preserve_chapter_page 不應發生效用。
 					if (work_data.reget_chapter && _this.preserve_chapter_page) {
@@ -3848,25 +3877,28 @@ function module_code(library_namespace) {
 				// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
 				&& node_fs.existsSync(this.EOI_error_path(image_data.file));
 
-		if (image_data.acceptable_types === 'images') {
-			// 將會測試是否已經下載過一切可接受的檔案類別。
-			image_data.acceptable_types = Object.keys(this.image_types);
-		}
+		if (!image_downloaded) {
+			if (this.acceptable_types && !image_data.acceptable_types)
+				image_data.acceptable_types = this.acceptable_types;
+			if (image_data.acceptable_types === 'images') {
+				// 將會測試是否已經下載過一切可接受的檔案類別。
+				image_data.acceptable_types = Object.keys(this.image_types);
+			}
 
-		if (!image_downloaded
-		// 可以接受的副檔名/檔案類別 acceptable file extensions
-		// e.g., acceptable_types : [ 'png' ]
-		// 當之前下載時發現檔案類別並非預設的、例如JPG檔案時，會將副檔名改為認證的副檔名。但是這樣一來可能就會找不到了。因此需要設定acceptable_types。
-		&& Array.isArray(image_data.acceptable_types)) {
-			image_downloaded = image_data.acceptable_types.some(function(
-					extension) {
-				var alternative_filename = image_data.file.replace(
-						/\.[a-z\d]+$/, '.' + extension);
-				if (node_fs.existsSync(alternative_filename)) {
-					image_data.file = alternative_filename;
-					return true;
-				}
-			});
+			// 可以接受的副檔名/檔案類別 acceptable file extensions
+			// e.g., acceptable_types : [ 'png' ]
+			// 當之前下載時發現檔案類別並非預設的、例如JPG檔案時，會將副檔名改為認證的副檔名。但是這樣一來可能就會找不到了。因此需要設定acceptable_types。
+			if (Array.isArray(image_data.acceptable_types)) {
+				image_downloaded = image_data.acceptable_types.some(function(
+						extension) {
+					var alternative_filename = image_data.file.replace(
+							/\.[a-z\d]+$/, '.' + extension);
+					if (node_fs.existsSync(alternative_filename)) {
+						image_data.file = alternative_filename;
+						return true;
+					}
+				});
+			}
 		}
 
 		// 檢查壓縮檔裡面的圖片檔案。
@@ -3882,6 +3914,12 @@ function module_code(library_namespace) {
 				images_archive.to_remove.push(bad_image_archived);
 			}
 
+			if (false) {
+				console.log([ images_archive.fso_path_hash,
+						image_data.acceptable_types, image_archived,
+						images_archive.fso_path_hash[image_archived] ]);
+				throw 123;
+			}
 			image_downloaded = image_downloaded
 					|| images_archive.fso_path_hash[image_archived]
 					|| this.skip_existed_bad_file
@@ -4169,8 +4207,9 @@ function module_code(library_namespace) {
 			}
 
 			image_data.error_count = (image_data.error_count | 0) + 1;
-			library_namespace.log('get_image: Retry ' + image_data.error_count
-					+ '/' + _this.MAX_ERROR_RETRY + '...');
+			library_namespace.log('get_image: '
+					+ gettext('Retry %1', image_data.error_count + '/'
+							+ _this.MAX_ERROR_RETRY) + '...');
 			var get_image_again = function() {
 				_this.get_image(image_data, callback, images_archive);
 			}

@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL function for downloading comico comics.
+ * @name CeL module for downloading comico comics.
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載 韓國 NHN comico Corp. 漫畫 的工具。
  * 

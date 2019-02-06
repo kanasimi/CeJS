@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL function for downloading PTCMS novels.
+ * @name CeL module for downloading PTCMS novels.
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸常見小說管理系統: PT小说聚合程序 (PTCMS系统) 各個版本的工具。
  * 

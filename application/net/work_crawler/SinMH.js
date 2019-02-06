@@ -9,15 +9,19 @@
 
  </code>
  * 
+ * TODO: ONE漫画 https://www.onemanhua.com/ 可能是比 930mh.js 更舊的版本?
+ * 
  * @see https://cms.shenl.com/sinmh/
  * 
- * @since 2018/7/26 11:9:53 模組化。
+ * @since 2018/7/26 11:9:53 模組化 MHD模板。<br />
+ *        2019/2/4 add 930mh.js 使用 CryptoJS, 採用 DMZJ模板
  */
 
 // More examples:
 // @see
-// https://github.com/kanasimi/work_crawler/blob/master/comic.cmn-Hans-CN/gufengmh.js
 // https://github.com/kanasimi/work_crawler/blob/master/comic.cmn-Hans-CN/36mh.js
+// https://github.com/kanasimi/work_crawler/blob/master/comic.cmn-Hans-CN/gufengmh.js
+// https://github.com/kanasimi/work_crawler/blob/master/comic.cmn-Hans-CN/930mh.js
 'use strict';
 
 // --------------------------------------------------------------------------------------------
@@ -51,6 +55,9 @@ function module_code(library_namespace) {
 		// 嘗試取得被屏蔽的作品。
 		// 對於被屏蔽的作品，將會每次都從頭檢查。
 		try_to_get_blocked_work : true,
+
+		// 當有多個分部的時候才重新檢查。
+		recheck : 'multi_parts_changed',
 
 		// allow .jpg without EOI mark.
 		// allow_EOI_error : true,
@@ -139,9 +146,7 @@ function module_code(library_namespace) {
 				description : get_label(html.between('intro-all', '</div>')
 						.between('>')
 						// 930mh.js
-						|| html.between('<p class="comic_deCon_d">', '</p>')),
-				// reset work_data.chapter_list
-				chapter_list : []
+						|| html.between('<p class="comic_deCon_d">', '</p>'))
 			};
 			extract_work_data(work_data, html.between('detail-list', '</ul>'),
 			// e.g., "<strong>漫画别名：</strong>暂无</span>"
@@ -168,6 +173,8 @@ function module_code(library_namespace) {
 			return work_data;
 		},
 		get_chapter_list : function(work_data, html, get_label) {
+			// console.log(work_data);
+
 			var chapter_block, PATTERN_chapter_block = html
 					.includes('class="chapter-body')
 			// <div class="chapter-category clearfix">
@@ -177,7 +184,11 @@ function module_code(library_namespace) {
 			// <div class="zj_list_head">...<h2>章节<em class="c_3">列表</em></h2>
 			// <div class="zj_list_head_px" data-key="6"><span>排序 :...</div>
 			// <div class="zj_list_con autoHeight">...</div>
-			: /class="zj_list_(con|head)[^<>]+>([\s\S]+?)<\/div>/g;
+			: /class="zj_list_(con|head)[^<>]+>([\s\S]+?)<\/div>/g,
+			//
+			latest_chapter_list = work_data.chapter_list;
+			// reset work_data.chapter_list
+			work_data.chapter_list = [];
 
 			while (chapter_block = PATTERN_chapter_block.exec(html)) {
 				// delete chapter_block.input;
@@ -244,11 +255,27 @@ function module_code(library_namespace) {
 						|| html.between('SinTheme.initComic(', ')')
 						|| html.between('var pageId = "comic.', '"');
 				if (this.try_to_get_blocked_work && chapter_id) {
-					// 嘗試取得被屏蔽的作品。
-					// e.g., 全职法师
-					this.add_chapter(work_data, {
-						url : '/comic/read/?id=' + chapter_id
-					});
+					library_namespace.info((work_data.title || work_data.id)
+							+ ': 嘗試取得被屏蔽的作品。');
+					if (Array.isArray(latest_chapter_list)
+					// e.g., 全职法师, 一人之下 http://www.duzhez.com/manhua/1532/
+					&& latest_chapter_list.length > 1
+					//
+					&& (!this.recheck || this.recheck in {
+						changed : true,
+						multi_parts_changed : true
+					})) {
+						library_namespace.info('使用之前的 cache，自 #'
+								+ latest_chapter_list.length + ' 接續下載。');
+						work_data.chapter_list = latest_chapter_list;
+						work_data.last_download.chapter = latest_chapter_list.length;
+
+					} else {
+						this.add_chapter(work_data,
+						//
+						'/comic/read/?id=' + chapter_id);
+					}
+
 				} else {
 					library_namespace.warn(get_label(text));
 				}
@@ -270,18 +297,17 @@ function module_code(library_namespace) {
 					var url = this.work_URL(work_data.id) + first_chapter_id
 							+ '.html';
 					work_data.chapter_list[chapter_NO - 1].url = url;
-					library_namespace.get_URL(this.full_URL(url), callback,
-					//
-					this.charset, null, Object.assign({
+					this.get_URL(url, callback, null, {
 						error_retry : this.MAX_ERROR_RETRY,
 						no_warning : true
-					}, this.get_URL_options));
+					});
 					return;
 				}
 			}
 
 			var crypto_url = html
-					.match(/<script src="([^"]+\/crypto.js)"><\/script>/);
+			// 930mh.js: Error on http://www.duzhez.com/manhua/449/245193.html
+			&& html.match(/<script src="([^"]+\/crypto.js)"><\/script>/);
 			if (crypto_url) {
 				var file_name = this.main_directory + 'crypto.js';
 				library_namespace.get_URL_cache(this.full_URL(crypto_url[1]),
@@ -328,10 +354,12 @@ function module_code(library_namespace) {
 			// console.log(work_data.chapter_list);
 			var chapter_data = work_data.chapter_list[chapter_NO - 1],
 			// <!--全站头部导航 结束-->\n<script>
-			chapter_data_code = html.match(/<script>(;var [\s\S]+?)<\/script>/);
+			chapter_data_code = html
+			// 930mh.js: Error on http://www.duzhez.com/manhua/449/245193.html
+			&& html.match(/<script>(;var [\s\S]+?)<\/script>/);
 			if (!chapter_data_code) {
 				library_namespace.warn(work_data.title + ' #' + chapter_NO
-						+ ': No valid chapter data got!');
+						+ ': ' + 'No valid chapter data got!');
 				return;
 			}
 			eval(chapter_data_code[1].replace(/;var /g, ';chapter_data.'));
@@ -349,12 +377,13 @@ function module_code(library_namespace) {
 				</code>
 				 * 
 				 * @see function cops201921() @ http://www.duzhez.com/js/cops201921.js
+				 * @see https://segmentfault.com/q/1010000011225051
 				 */
 				chapter_data.chapterImages =
 				// 使用 CryptoJS https://code.google.com/archive/p/crypto-js/
 				// https://github.com/brix/crypto-js
 				JSON.parse(CryptoJS.AES.decrypt(chapter_data.chapterImages,
-				//
+				// 930mh.js key 密鑰
 				CryptoJS.enc.Utf8.parse("6133AFVvxas55841"), {
 					iv : CryptoJS.enc.Utf8.parse("A25vcxQQrpmbV51t"),
 					mode : CryptoJS.mode.CBC,

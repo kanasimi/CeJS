@@ -90,7 +90,7 @@ td {
 }
 
 /* ↑ copy from game.css */
-#analysis, #language {
+#analysis {
 	float: right;
 }
 
@@ -170,7 +170,12 @@ td {
 	color: #f10;
 }
 
-#language {
+/* ------------------------------------------- */
+#language_menu {
+	float: right;
+}
+
+#language_menu {
 	font-size: .8em;
 	background-color: #fef;
 	border: 1px solid #faa;
@@ -178,11 +183,12 @@ td {
 	padding: .2em;
 }
 
-#language select, #language option {
+#language_menu select, #language_menu option {
 	color: #44f;
 	background-color: #ddf;
 }
 
+/* ------------------------------------------- */
 #era_input {
 	width: 18em;
 	font-size: 1.3em;
@@ -393,12 +399,13 @@ td {
 	content: "✗ ";
 }
 
-#era_graph_options .setted {
+/* @see draw_era.change_option */
+#era_graph_options .configured {
 	color: #52b;
 }
 
 /* or use "🗸 " */
-#era_graph_options .setted:before {
+#era_graph_options .configured:before {
 	content: "✓ ";
 }
 
@@ -580,7 +587,7 @@ div.box {
 		<g:plusone></g:plusone>
 	</div>
 
-	<div id="language"></div>
+	<div id="language_menu"></div>
 
 	<div id="input_panel">
 		<span data-gettext="紀年"
@@ -1564,7 +1571,9 @@ Jews, however, reckon the start of each new Seleucid year with the lunar month T
 		<div id="method_layer" class="config_layer">⚙️</div>
 
 		<div id="place_layer" class="config_layer">
-			🌄日出🌇日落☀中天、🌃曙光暮光、🌝月出月落欄之基準地點：<br /> 🏠<input id="place_name" />
+			🌄日出🌇日落
+			<!-- ☀ -->
+			🌞中天、🌃曙光暮光、🌝月出月落欄之基準地點：<br /> 🏠<input id="place_name" />
 			<div id="place_list"></div>
 			<hr />
 			📍 手動設定 🌐<a
@@ -1580,10 +1589,11 @@ Jews, however, reckon the start of each new Seleucid year with the lunar month T
 				title="input numbers" style="font-size: 1.5em">🔢</span><br /> <span
 				data-gettext="緯度："></span><input id="longitude" /> <span
 				title="input numbers" style="font-size: 1.5em">🔢</span><br />
-			您可使用各種網路工具以取得經緯度。例如 🗺 <a rel="nofollow"
-				href="http://geonames.nga.mil/namesviewer/">NGA: Geonames Search
-				- OGC Viewer</a>、<a rel="nofollow" href="http://www.latlong.net/">Latitude
-				Longitude Finder</a>。
+			您可使用各種網路工具以取得經緯度。例如
+			<!-- 🗺 -->
+			🌎<a rel="nofollow" href="http://geonames.nga.mil/namesviewer/">NGA:
+				Geonames Search - OGC Viewer</a>、<a rel="nofollow"
+				href="http://www.latlong.net/">Latitude Longitude Finder</a>。
 		</div>
 
 		<div id="data_layer" class="config_layer"></div>

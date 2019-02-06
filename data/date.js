@@ -625,6 +625,10 @@ function module_code(library_namespace) {
 	/**
 	 * convert the string to Date object.
 	 * 
+	 * TODO: parse /([今昨明]|大?[前後])天/, '01-03' (相對於當前),
+	 * /\d+(分[鐘钟]?|小[時时]|毫?秒|[日天週年]|星期|[禮礼]拜|[個个]月)([前後])/; 相對於
+	 * options.base_date . also see indicate_date_time()
+	 * 
 	 * @example <code>
 	 * '2003/1-4 12:53:5.45PM'.to_Date('CST').format();
 	 * '12:53:5.45PM 2003/1-4'.to_Date('CST').format();

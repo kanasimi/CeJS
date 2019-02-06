@@ -1686,6 +1686,7 @@ function module_code(library_namespace) {
 				options.onloadstart();
 			}
 
+			// console.log(response);
 			if ((response.statusCode / 100 | 0) === 3
 					&& response.headers.location
 					&& response.headers.location !== URL_to_fetch

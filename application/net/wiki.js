@@ -2827,6 +2827,7 @@ function module_code(library_namespace) {
 			}
 
 			language = language.toLowerCase();
+			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general%7Cnamespaces%7Cnamespacealiases%7Cstatistics
 			// language fallback: [[mw:Localisation statistics]]
 			// (zh-tw, zh-hk, zh-mo) → zh-hant (→ zh?)
 			// (zh-cn, zh-sg, zh-my) → zh-hans (→ zh?)
@@ -9707,24 +9708,24 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	if (false) {
-		CeL.wiki.langlinks('語言', function(title) {
-			title === 'Language';
+		CeL.wiki.langlinks('文明', function(title) {
+			title === 'Civilization';
 			if (title)
 				CeL.show_value(title);
 		}, 'en');
 
-		CeL.wiki.langlinks([ 'en', 'Language' ], function(title) {
-			title === '語言';
+		CeL.wiki.langlinks([ 'en', 'Civilization' ], function(title) {
+			title === '文明';
 			if (title)
 				CeL.show_value(title);
 		}, 'zh');
 
 		// TODO?
 		// return 'title' or {langs:['',''], lang:'title'}
-		CeL.wiki.langlinks('語言', function(title) {
+		CeL.wiki.langlinks('文明', function(title) {
 			if (title)
 				CeL.show_value(title);
-		}) == CeL.wiki.langlinks('語言', function(title) {
+		}) == CeL.wiki.langlinks('文明', function(title) {
 			if (title)
 				CeL.show_value(title);
 		}, 10)
@@ -9745,7 +9746,8 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * @see https://www.mediawiki.org/wiki/Manual:Langlinks_table
+	 * @see https://www.mediawiki.org/wiki/API:Langlinks
+	 *      https://www.mediawiki.org/wiki/Manual:Langlinks_table
 	 */
 	wiki_API.langlinks = function(title, callback, to_lang, options) {
 		var from_lang;

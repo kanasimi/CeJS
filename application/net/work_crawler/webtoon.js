@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL function for downloading webtoon comics.
+ * @name CeL module for downloading webtoon comics.
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載 WEBTOON 韓國漫畫 的工具。
  * 

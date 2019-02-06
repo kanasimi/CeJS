@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL function for downloading syosetu.com novels.
+ * @name CeL module for downloading syosetu.com novels.
  * 
  * @fileoverview 本檔案包含了批量下載小説家になろう/小説を読もう！的工具。
  * 
