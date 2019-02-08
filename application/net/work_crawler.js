@@ -2662,13 +2662,13 @@ function module_code(library_namespace) {
 
 		var next = chapter_time_interval > 0 ? (function() {
 			var message = [ this.id, ': ', work_data.title + ': ',
-					'下載章節資訊前先等待 ',
+					'下載第' + chapter_NO + '章之章節資訊前先等待 ',
 					library_namespace.age_of(0, chapter_time_interval) ],
 			// 預估剩餘時間 estimated time remaining
 			estimated_time = (Date.now() - work_data.start_downloading_chaper)
 			// chapter_NO starts from 1
 			* (work_data.chapter_count - chapter_NO - 1) / (chapter_NO - 1);
-			if (estimated_time > 0) {
+			if (0 < estimated_time && estimated_time < 1e15) {
 				message.push('，預估還需 ', library_namespace.age_of(0,
 						estimated_time), ' 下載完本作品');
 			}
@@ -2731,6 +2731,8 @@ function module_code(library_namespace) {
 		// reset: reset work_data.chapter_list
 		if (reset || !Array.isArray(chapter_list = work_data.chapter_list)) {
 			chapter_list = work_data.chapter_list = [];
+			// 漫畫目錄名稱不須包含分部號碼。使章節目錄名稱不包含 part_NO。
+			// work_data.chapter_list.add_part_NO = false;
 		}
 		return chapter_list;
 	}
@@ -2783,7 +2785,7 @@ function module_code(library_namespace) {
 					+ '，但在 chapter_data 中又設定  chapter_data.part_NO: '
 					//
 					+ chapter_data.part_NO + '，兩者相衝突。');
-				} else {
+				} else if (chapter_list.add_part_NO !== false) {
 					chapter_data.part_NO = chapter_list.part_NO;
 				}
 			}
@@ -3025,11 +3027,12 @@ function module_code(library_namespace) {
 					chapter_NO = part;
 				}
 
-				part = (chapter_data.part_NO >= 1
-				// '': 使章節目錄名稱不包含 part_NO。
-				? chapter_data.part_NO.pad(2) + ' ' : '')
+				part = (work_data.chapter_list.add_part_NO !== false
+				// work_data.chapter_list.add_part_NO === false:
+				// 漫畫目錄名稱不須包含分部號碼。使章節目錄名稱不包含 part_NO。
+				&& chapter_data.part_NO >= 1 ? chapter_data.part_NO.pad(2)
 				//
-				+ chapter_data.part_title + ' ';
+				+ ' ' : '') + chapter_data.part_title + ' ';
 				part = part.trimStart();
 			}
 			chapter_title = chapter_data.chapter_title || chapter_data.title;
@@ -3078,19 +3081,20 @@ function module_code(library_namespace) {
 		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
 				+ chapter_NO + '/' + work_data.chapter_count + ': '
 				+ chapter_URL, 1, 'get_chapter_data');
-		process.title = chapter_NO
-				// + '/' + work_data.chapter_count
-				+ ' @ '
-				+ (work_data.title || work_data.id)
-				//
-				+ (Array.isArray(this.work_list_now)
+		process.title = [
+				chapter_NO,
+				// '/', work_data.chapter_count,
+				' @ ',
+				work_data.title || work_data.id,
+				Array.isArray(this.work_list_now)
 						&& typeof this.work_list_now[this.work_list_now.list_serial - 1] === 'string'
-						&& this.work_list_now[this.work_list_now.list_serial - 1]
-								.trim() === work_data.title ? ' '
+						// .includes(): 可能經過一些變化而不完全一樣
+						&& work_data.title
+								.includes(this.work_list_now[this.work_list_now.list_serial - 1]
+										.trim()) ? ' '
 						+ this.work_list_now.list_serial + '/'
-						+ this.work_list_now.length : '')
-				//
-				+ ' @ ' + this.id;
+						+ this.work_list_now.length : '', ' @ ', this.id ]
+				.join('');
 
 		// --------------------------------------
 
@@ -3452,8 +3456,8 @@ function module_code(library_namespace) {
 												chapter_time_interval) + ' to '
 										: '')
 								+ (chapter_URL === new_chapter_URL ? 'reget'
-										: 'get') + ' page [' + chapter_URL
-								+ ']...\r');
+										: 'get') + ' chapter page ['
+								+ chapter_URL + ']...\r');
 						chapter_URL = new_chapter_URL;
 						if (chapter_time_interval > 0) {
 							setTimeout(reget_chapter_data,
@@ -4155,14 +4159,14 @@ function module_code(library_namespace) {
 			library_namespace.warn(
 			// 圖檔損壞: e.g., Do not has EOI
 			(verified_image === false ? 'Image damaged: '
-			//
-			: (XMLHttp.status ? XMLHttp.status + ' ' : '')
-			//
-			+ '(' + (!contents ? 'No contents' : contents.length + ' B'
-			//
-			+ (contents.length >= _this.MIN_LENGTH ? '' : ', too small'))
-			//
-			+ '): Failed to get ') + image_url + '\n→ ' + image_data.file);
+					: (XMLHttp.status ? XMLHttp.status + ' ' : '')
+							+ '('
+							+ (!contents ? 'No contents' : contents.length
+									+ ' B'
+									+ (contents.length >= _this.MIN_LENGTH ? ''
+											: ', too small'))
+							+ '): Failed to get image ')
+					+ image_url + '\n→ ' + image_data.file);
 			if (image_data.error_count === _this.MAX_ERROR_RETRY) {
 				image_data.has_error = true;
 				// throw new Error(_this.id + ': ' + _this.MESSAGE_RE_DOWNLOAD);
