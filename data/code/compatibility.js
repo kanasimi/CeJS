@@ -1484,9 +1484,10 @@ function module_code(library_namespace) {
 	// let all_matched = Array.from(string.matchAll(regExp), mapfn);
 	var matchAll;
 	if (has_Generator) {
+		// e.g., node.ja 11.9.0, Chrome/61.0.3163.100 Electron/2.0.9
 		// TODO: returns an RegExpStringIterator
 		// String.prototype.matchAll 調用 RegExp.prototype[Symbol.matchAll]
-		eval('matchAll = function* matchAll(regexp) { regexp = new_global_RegExp(regexp); let matched; while (matched = regexp.exec(this)) { yield matched; } }');
+		eval('matchAll = function* matchAll(regexp) { const is_global = !library_namespace.is_RegExp(regexp) || regexp.global; regexp = new_global_RegExp(regexp); let matched; if (is_global) { while (matched = regexp.exec(this)) { yield matched; } } else if (matched = regexp.exec(this)) { yield matched; } }');
 	}
 
 	// ------------------------------------------
@@ -1512,11 +1513,20 @@ function module_code(library_namespace) {
 		endsWith : endsWith,
 
 		matchAll : matchAll || function matchAll_array(regexp) {
+			/* const */var is_global = !library_namespace.is_RegExp(regexp)
+			//
+			|| regexp.global;
+
 			/* const */regexp = new_global_RegExp(regexp);
 
 			var matched, list = [];
-			while (matched = regexp.exec(this)) {
-				// yield matched;
+			if (is_global) {
+				while (matched = regexp.exec(this)) {
+					// yield matched;
+					list.push(matched);
+				}
+			} else if (matched = regexp.exec(this)) {
+				// e.g., 'a1b2A3B4a5cc'.matchAll(/(a)(.)/i)
 				list.push(matched);
 			}
 
