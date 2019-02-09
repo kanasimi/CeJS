@@ -433,6 +433,11 @@ function (global) {
 	} catch (e) {
 		null_Object = function () {
 			return {};
+
+			o = { __proto__: null };
+			for (var a in o)
+				delete o[a];
+			return o;
 		};
 	}
 

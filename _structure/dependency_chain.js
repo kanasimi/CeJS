@@ -3834,9 +3834,12 @@ if (typeof CeL === 'function')
 		// node 6.2.2 does not has Object.values(), Object.entries()
 		&& Object.entries
 		// node 4 does not has Array.prototype.includes()
-		&& Array.prototype.includes) {
+		&& Array.prototype.includes
+		// Chrome/73.0.3683.20, Firefox/67.0 has .matchAll(),
+		// node 11.9 DO NOT has .matchAll().
+		&& String.prototype.matchAll) {
 			library_namespace
-					.debug('已經有近代的 Set，跳過 shim、相容性 test 專用的 functions。');
+					.debug('已經有近代的執行環境特性，跳過 shim、相容性 test 專用的 functions。');
 			get_named('data.code.compatibility', true).included = true;
 		}
 

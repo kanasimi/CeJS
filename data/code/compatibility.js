@@ -1447,30 +1447,49 @@ function module_code(library_namespace) {
 		return result;
 	}
 
+	// ------------------------------------------
+
 	// @see CeL.data.native.RegExp_flags()
 	var has_RegExp_flags = /./g.flags === 'g';
+
+	// Generator function
+	var has_Generator;
+	(function() {
+		var g, i, l;
+		try {
+			eval('g = function*() { yield 2;yield 1; }; l = []; for(i of g()) l.push(i); l = l.join();');
+			has_Generator = l === '2,1';
+		} catch (e) {
+		}
+	})();
+
+	/**
+	 * return a new RegExp instance with global flag
+	 */
+	function new_global_RegExp(regexp) {
+		return library_namespace.is_RegExp(regexp)
+		// do NOT chancg regexp.lastIndex
+		? new RegExp(regexp.source,
+				has_RegExp_flags ? regexp.global ? regexp.flags : regexp.flags
+						+ 'g' : regexp.ignoreCase ? 'ig' : 'g')
+		//
+		: new RegExp(regexp, 'g');
+	}
+	_.new_global_RegExp = new_global_RegExp;
 
 	// String.prototype.matchAll()
 	// http://2ality.com/2018/02/string-prototype-matchall.html
 	// https://tc39.github.io/proposal-string-matchall/
-	// let all_matched = [...string.matchAll(regExp)];
-	function matchAll(regexp) {
-		regexp = library_namespace.is_RegExp(regexp)
-		// do NOT chancg regex.lastIndex
-		? new RegExp(regexp.source,
-				has_RegExp_flags ? regexp.global ? regex.flags : regex.flags
-						+ 'g' : regex.ignoreCase ? 'ig' : 'g')
-		//
-		: new RegExp(regexp, 'g');
-
-		var matched, list = [];
-		while (matched = regexp.exec(this)) {
-			// yield matched;
-			list.push(matched);
-		}
-
-		return list;
+	// let all_matched = [...string.matchAll(regExp)].map(mapfn);
+	// let all_matched = Array.from(string.matchAll(regExp), mapfn);
+	var matchAll;
+	if (has_Generator) {
+		// TODO: returns an RegExpStringIterator
+		// String.prototype.matchAll 調用 RegExp.prototype[Symbol.matchAll]
+		eval('matchAll = function* matchAll(regexp) { regexp = new_global_RegExp(regexp); let matched; while (matched = regexp.exec(this)) { yield matched; } }');
 	}
+
+	// ------------------------------------------
 
 	set_method(String.prototype, {
 		repeat : repeat,
@@ -1492,7 +1511,17 @@ function module_code(library_namespace) {
 		startsWith : startsWith,
 		endsWith : endsWith,
 
-		// matchAll : matchAll,
+		matchAll : matchAll || function matchAll_array(regexp) {
+			/* const */regexp = new_global_RegExp(regexp);
+
+			var matched, list = [];
+			while (matched = regexp.exec(this)) {
+				// yield matched;
+				list.push(matched);
+			}
+
+			return list;
+		},
 
 		codePointAt : codePointAt
 	});
@@ -2734,19 +2763,19 @@ function module_code(library_namespace) {
 		// caught
 		'catch' : function Promise_catch(onRejected) {
 			return this.then(undefined, onRejected);
-		},
-
-		'try' : Promise_try,
-
-		// finale
-		'finally' : Promise_finally
+		}
 	});
 
 	set_method(library_namespace.env.global, {
 		Promise : Promise
 	}, 'function');
 
+	set_method(library_namespace.env.global.Promise, {
+		'try' : Promise_try
+	}, 'function');
+
 	set_method(library_namespace.env.global.Promise.prototype, {
+		// finale
 		'finally' : Promise_finally
 	}, 'function');
 

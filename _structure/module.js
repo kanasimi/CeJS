@@ -1042,7 +1042,7 @@ if (typeof CeL === 'function') {
 					_.error('It seems the JSON.parse() does not work properly');
 			})();
 
-		// see Array.from of data.code.compatibility.
+		// see Array.from of dependency_chain.js
 		function tag_list_default(tag, context) {
 			// 必須考量輸入的可能是 document.styleSheets 的情況。
 			// 須注意: @ IE8, false === CeL.is_NodeList(document.styleSheets);
