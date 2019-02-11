@@ -40,6 +40,7 @@ CLI progress bar
 parse 圖像。
 拼接長圖。
 檢核章節內容。
+考慮 search_URL 搜尋的頁數，包含所有結果
 
 </code>
  * 
@@ -96,8 +97,8 @@ if (typeof CeL === 'function') {
 		+ '|data.date.'
 		// CeL.character.load(), 僅在要設定 this.charset 時才需要載入。
 		+ '|data.character.'
-		// for .detect_HTML_language(), .time_zone_of_language()
-		+ '|application.locale.'
+		// gettext, and for .detect_HTML_language(), .time_zone_of_language()
+		+ '|application.locale.gettext'
 		// guess_text_language()
 		+ '|application.locale.encoding.'
 		// storage.archive()
@@ -115,20 +116,14 @@ function module_code(library_namespace) {
 
 	// requiring
 	var get_URL = this.r('get_URL'),
+	// library_namespace.locale.gettext
+	gettext = this.r('gettext'),
 	/** node.js file system module */
 	node_fs = library_namespace.platform.nodejs && require('fs'),
 	// @see CeL.application.net.wiki
 	PATTERN_non_CJK = /^[\u0000-\u2E7F]*$/i,
 	//
-	path_separator = library_namespace.env.path_separator,
-	//
-	gettext = function(msg, _1, _2) {
-		if (library_namespace.gettext) {
-			return (gettext = library_namespace.gettext).apply(null, arguments);
-		}
-
-		return msg.replace(/%1/g, _1).replace(/%2/g, _2);
-	};
+	path_separator = library_namespace.env.path_separator;
 
 	// --------------------------------------------------------------------------------------------
 
@@ -1561,7 +1556,7 @@ function module_code(library_namespace) {
 					+ ']');
 		} else if (search_result[work_title]) {
 			// 已經搜尋過此作品標題。
-			library_namespace.log(this.id + ': ' + gettext('Cache found: ')
+			library_namespace.log(this.id + ': ' + gettext('已緩存作品id：')
 					+ work_title + '→'
 					+ JSON.stringify(search_result[work_title]));
 			finish(true);
@@ -1912,6 +1907,7 @@ function module_code(library_namespace) {
 				}
 
 			} catch (e) {
+				// throw e;
 				var warning = 'process_work_data: ' + (work_title || work_id)
 						+ ': ' + e;
 				_this.onwarning(warning);
@@ -2666,9 +2662,12 @@ function module_code(library_namespace) {
 					library_namespace.age_of(0, chapter_time_interval) ],
 			// 預估剩餘時間 estimated time remaining
 			estimated_time = (Date.now() - work_data.start_downloading_chaper)
-			// chapter_NO starts from 1
-			* (work_data.chapter_count - chapter_NO - 1) / (chapter_NO - 1);
-			if (0 < estimated_time && estimated_time < 1e15) {
+					* (work_data.chapter_count
+					// this.start_chapter, chapter_NO starts from 1
+					- (this.start_chapter >= 1 ? this.start_chapter - 1 : 0)
+					//
+					- (chapter_NO - 1)) / (chapter_NO - 1);
+			if (1e3 < estimated_time && estimated_time < 1e15) {
 				message.push('，預估還需 ', library_namespace.age_of(0,
 						estimated_time), ' 下載完本作品');
 			}
@@ -3031,7 +3030,8 @@ function module_code(library_namespace) {
 				// work_data.chapter_list.add_part_NO === false:
 				// 漫畫目錄名稱不須包含分部號碼。使章節目錄名稱不包含 part_NO。
 				&& chapter_data.part_NO >= 1 ? chapter_data.part_NO.pad(2)
-				//
+				// 小說才有第一部第二部之分，漫畫分部不會有號碼(part_NO)，因此去掉漫畫目錄名稱名稱之號碼標示。
+				// "01 单话 0001 第371回" → "单话 0001 第371回"
 				+ ' ' : '') + chapter_data.part_title + ' ';
 				part = part.trimStart();
 			}
@@ -4410,6 +4410,7 @@ function module_code(library_namespace) {
 		});
 
 		if (work_data.image) {
+			// cover image of work
 			ebook.set_cover(work_data.image);
 		}
 

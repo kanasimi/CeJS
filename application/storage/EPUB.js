@@ -408,7 +408,7 @@ function module_code(library_namespace) {
 
 		// http://epubzone.org/news/epub-3-and-global-language-support
 		if (options.language) {
-			if (library_namespace.gettext) {
+			if (library_namespace.gettext.load_domain) {
 				library_namespace.debug('Load language ' + options.language);
 				library_namespace.gettext.load_domain(options.language);
 			}
@@ -1778,12 +1778,10 @@ function module_code(library_namespace) {
 			library_namespace.debug('Use language ' + language);
 		}
 
-		var _ = library_namespace.gettext
-		// @see application/locale/resource/locale.txt
-		? library_namespace.gettext.in_domain.bind(null, language) : function(
-				text_id, _1) {
-			return text_id.replace(/%1/g, _1);
-		};
+		var _ = library_namespace.gettext.in_domain
+		// @see application/locale/resource/locale.csv
+		? library_namespace.gettext.in_domain.bind(null, language)
+				: library_namespace.gettext;
 
 		return _;
 	}
@@ -1852,13 +1850,14 @@ function module_code(library_namespace) {
 			});
 
 			if (key === 'language') {
-				if (library_namespace.gettext) {
+				if (library_namespace.gettext.get_alias) {
 					values = values.map(function(value) {
 						return library_namespace.gettext.get_alias(value);
 					});
 				}
 			} else if (key === 'source') {
-				if (library_namespace.gettext) {
+				// if (library_namespace.locale.gettext)
+				if (library_namespace.locale) {
 					values = values.map(function(value) {
 						if (/^https?:\/\/[^\s]+$/.test(value)) {
 							value = '<a href="' + value + '">'

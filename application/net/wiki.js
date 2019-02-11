@@ -99,8 +99,8 @@ typeof CeL === 'function' && CeL.run({
 	// optional 選用: .show_value() @ CeL.interact.DOM, CeL.application.debug
 	// optional 選用: CeL.wiki.cache(): CeL.application.platform.nodejs.fs_mkdir()
 	// optional 選用: CeL.wiki.traversal(): CeL.application.platform.nodejs
-	// optional 選用: wiki_API.work(), gettext():
-	// CeL.application.platform.nodejs.gettext()
+	// optional 選用: wiki_API.work(): gettext():
+	// CeL.application.locale.gettext()
 	+ '|application.net.Ajax.get_URL'
 	// CeL.date.String_to_Date(), Julian_day(): CeL.data.date
 	+ '|data.date.',
@@ -117,18 +117,9 @@ function module_code(library_namespace) {
 	// requiring
 	var get_URL = this.r('get_URL'),
 	//
-	gettext = library_namespace.gettext || function(text_id) {
-		if (library_namespace.gettext) {
-			gettext = library_namespace.gettext;
-			return gettext.apply(null, arguments);
-		}
-
-		// a simplified version
-		var arg = arguments;
-		return text_id.replace(/%(\d+)/g, function(all, NO) {
-			return arg[NO];
-		});
-	};
+	gettext = library_namespace.cache_gettext(function(_) {
+		gettext = _;
+	});
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -2832,6 +2823,7 @@ function module_code(library_namespace) {
 			// (zh-tw, zh-hk, zh-mo) → zh-hant (→ zh?)
 			// (zh-cn, zh-sg, zh-my) → zh-hans (→ zh?)
 			// [[Wikipedia_talk:地区词处理#zh-my|馬來西亞簡體華語]]
+			// [[MediaWiki:Variantname-zh-tw]]
 			if (!this.conversion[language] && /^zh-(?:tw|hk|mo)/.test(language)) {
 				language = 'zh-hant';
 			}
@@ -7893,16 +7885,17 @@ function module_code(library_namespace) {
 						//
 						done === nochange_count
 						// 未改變任何條目。
-						? gettext('all ') : '', nochange_count) : '')
+						? gettext('all ')
+						//
+						: '', nochange_count) : '')
 						// 使用時間, 歷時, 費時, elapsed time
 						+ gettext(', %1 elapsed.',
 						//
 						messages.start.age(new Date)));
 					}
 					if (this.stopped) {
-						messages.add(
-						//
-						gettext("'''Stopped''', give up editing."));
+						messages
+								.add(gettext("'''Stopped''', give up editing."));
 					}
 					if (done === nochange_count && !config.no_edit) {
 						messages.add(gettext('Nothing change.'));
@@ -17059,7 +17052,8 @@ function module_code(library_namespace) {
 	// @see set_default_language()
 	// language-code.wikipedia.org e.g., zh-classical.wikipedia.org
 	//
-	// IETF language tag language code for gettext() e.g., zh-classical → lzh
+	// IETF language tag language code for gettext()
+	// e.g., zh-classical → lzh
 	// [[language_code:]] e.g., [[zh-classical:]] @see [[m:List of Wikipedias]]
 	// [[yue:]] → zh-yue → zh_yuewiki
 	//

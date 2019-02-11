@@ -1625,7 +1625,9 @@ OS='UNIX'; // unknown
 	 * 提供給函數設定 flag / optional argument 處理用。
 	 * 
 	 * @example <code>
-	 * var setting = setting_pair({});
+
+	var setting = setting_pair({});
+
 	 * </code>
 	 * 
 	 * @param default_setting
@@ -2085,6 +2087,53 @@ OS='UNIX'; // unknown
 		error : 'red;bg=white'
 	};
 
+	// a simple simulation of CeL.application.locale.gettext
+	// Please include application.locale if you need a full version.
+	// cache gettext only inside sync function, or using CeL.gettext instead:
+	// application.locale 會自動 overwrite .gettext。
+	// 假如多次使用，不如直接 include application.locale。
+	function simple_gettext(text_id) {
+		if (false && library_namespace.locale && library_namespace.locale.gettext) {
+			_.gettext = library_namespace.locale.gettext;
+			return _.gettext.apply(null, arguments);
+		}
+
+		// a simplified version
+		// assert: typeof text_id === 'string'
+		var arg = arguments;
+		return text_id.replace(/%(\d+)/g, function(all, NO) {
+			return NO < arg.length ?
+			// extract_message_from_nodes(arg[NO])
+			arg[NO] : all;
+		});
+	}
+
+	_.gettext = simple_gettext;
+
+	/**
+	 * @example <code>
+
+	var gettext = CeL.cache_gettext(function(_) { gettext = _; });
+	var gettext = CeL.cache_gettext(_ => gettext = _);
+
+	 </code>
+	 */
+	_.cache_gettext = function(adapter) {
+		return function _gettext() {
+			var gettext = library_namespace.locale
+			//
+			&& library_namespace.locale.gettext;
+			if (gettext) {
+				adapter(gettext);
+			} else {
+				gettext = simple_gettext;
+			}
+
+			return gettext.apply ? gettext.apply(null, arguments)
+			// 這方法沒有準確符合arguments的長度，有缺陷。
+			: gettext(arguments[0], arguments[1], arguments[2], arguments[3]);
+		};
+	};
 
 	if (typeof process === 'object' && process.versions) {
 		process.versions[library_name.toLowerCase()] = library_version;
@@ -2132,14 +2181,8 @@ OS='UNIX'; // unknown
 		var inner = nodes[tag_name];
 		if (tag_name !== 'T') {
 			inner = extract_message_from_nodes(inner);
-		} else if (typeof _.gettext === 'function') {
+		} {
 			inner = _.gettext.apply(null, inner);
-		} else if (Array.isArray(inner)) {
-			inner = inner[0].replace(/%(\d+)/g, function(all, NO) {
-				return NO in inner ?
-				// extract_message_from_nodes(inner[NO])
-				inner[NO] : all;
-			});
 		}
 
 		var color_index = _.SGR && _.SGR.color_index,

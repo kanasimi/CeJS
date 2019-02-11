@@ -1379,10 +1379,10 @@ function module_code(library_namespace) {
 			return (library_namespace.is_Function(options.parser) ? options.parser
 					: Date_to_String.parser[options.parser]
 							|| Date_to_String.default_parser)(date_value,
-					options.format,
-					library_namespace.gettext ? library_namespace.gettext
-							.to_standard(options.locale) : options.locale,
-					options);
+					options.format, library_namespace.gettext.to_standard
+					//
+					? library_namespace.gettext.to_standard(options.locale)
+							: options.locale, options);
 		}
 
 		library_namespace.warn('Date_to_String: 無法判斷 date value [' + date_value
@@ -1573,7 +1573,7 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 		}
 
-		if (locale && gettext && !options.no_gettext) {
+		if (locale && gettext.to_standard && !options.no_gettext) {
 			locale = gettext.to_standard(locale);
 		}
 		if (!locale) {
@@ -1629,18 +1629,16 @@ function module_code(library_namespace) {
 
 	strftime.null_domain = '';
 
-	var gettext_date = library_namespace.gettext;
-	if (gettext_date) {
-		gettext_date = gettext_date.date;
-	} else {
+	var gettext_date = library_namespace.gettext.date;
+	if (!gettext_date) {
 		gettext_date = function(v) {
-			if (library_namespace.gettext) {
-				gettext_date = library_namespace.gettext.date;
+			if (library_namespace.locale.gettext) {
+				gettext_date = library_namespace.locale.gettext.date;
 				return gettext_date[this].apply(gettext_date, arguments);
 			}
 			return v;
 		};
-		'year,month,date,week'.split(',').forEach(function(type) {
+		'year,month,date,week,full_week'.split(',').forEach(function(type) {
 			gettext_date[type] = gettext_date.bind(type);
 		});
 	}
@@ -2696,8 +2694,8 @@ function module_code(library_namespace) {
 		}
 
 		if (diff2 >= 1) {
-			// month
-			return diff2.to_fixed(1) + ' M';
+			// Month
+			return diff2.to_fixed(1) + ' month';
 		}
 
 		if (difference < 1000) {
@@ -2747,9 +2745,7 @@ function module_code(library_namespace) {
 
 		var passed = date_value_diff <= 0,
 		//
-		gettext = library_namespace.gettext || function(text, _1, _2) {
-			return text.replace(/%1/g, _1).replace(/%2/g, _2);
-		};
+		gettext = library_namespace.gettext;
 
 		if (passed) {
 			date_value_diff = -date_value_diff;
@@ -2764,21 +2760,21 @@ function module_code(library_namespace) {
 			return passed ? 'several seconds ago' : 'soon';
 		}
 		if (date_value_diff < 10) {
-			return gettext(passed ? '% seconds ago' : 'after % seconds', Math
+			return gettext(passed ? '%1 seconds ago' : 'after %1 seconds', Math
 					.round(date_value_diff));
 		}
 
 		// → minutes
 		date_value_diff /= 60;
 		if (date_value_diff < 60) {
-			return gettext(passed ? '% minutes ago' : 'after % minutes', Math
+			return gettext(passed ? '%1 minutes ago' : 'after %1 minutes', Math
 					.round(date_value_diff));
 		}
 
 		// → hours
 		date_value_diff /= 60;
 		if (date_value_diff < 3) {
-			return gettext(passed ? '% hours ago' : 'after % hours', Math
+			return gettext(passed ? '%1 hours ago' : 'after %1 hours', Math
 					.round(date_value_diff));
 		}
 
@@ -2802,7 +2798,7 @@ function module_code(library_namespace) {
 		}
 
 		if (false && date_value_diff < 7) {
-			return gettext(passed ? '% days ago' : 'after % days',
+			return gettext(passed ? '%1 days ago' : 'after %1 days',
 					date_value_diff | 0);
 		}
 
@@ -2810,7 +2806,7 @@ function module_code(library_namespace) {
 
 		// TODO: weeks
 		if (false && date_value_diff < 30) {
-			return gettext(passed ? '% days ago' : 'after % days', Math
+			return gettext(passed ? '%1 days ago' : 'after %1 days', Math
 					.round(date_value_diff / 7));
 		}
 
