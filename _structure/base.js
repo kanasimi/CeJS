@@ -293,8 +293,8 @@ function (global) {
 		&& typeof document === 'object'
 			&& document === window.document
 		// 下兩個在 IE5.5 中都是 Object
-		// && library_namespace.is_type(window, 'global')
-		// && library_namespace.is_type(document, 'HTMLDocument')
+		// && _.is_type(window, 'global')
+		// && _.is_type(document, 'HTMLDocument')
 
 		// && navigator.userAgent
 	,
@@ -406,7 +406,7 @@ function (global) {
 		// Firefox/49.0 WebExtensions 可能 throw:
 		// Error: call to Function() blocked by CSP
 		_.global_eval = function(code) {
-			library_namespace.error('global_eval: Can not eval()!');
+			_.error('global_eval: Can not eval()!');
 		};
 	}
 
@@ -2093,8 +2093,8 @@ OS='UNIX'; // unknown
 	// application.locale 會自動 overwrite .gettext。
 	// 假如多次使用，不如直接 include application.locale。
 	function simple_gettext(text_id) {
-		if (false && library_namespace.locale && library_namespace.locale.gettext) {
-			_.gettext = library_namespace.locale.gettext;
+		if (false && _.locale && _.locale.gettext) {
+			_.gettext = _.locale.gettext;
 			return _.gettext.apply(null, arguments);
 		}
 
@@ -2120,9 +2120,7 @@ OS='UNIX'; // unknown
 	 */
 	_.cache_gettext = function(adapter) {
 		return function _gettext() {
-			var gettext = library_namespace.locale
-			//
-			&& library_namespace.locale.gettext;
+			var gettext = _.locale && _.locale.gettext;
 			if (gettext) {
 				adapter(gettext);
 			} else {
