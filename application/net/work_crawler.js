@@ -1043,30 +1043,43 @@ function module_code(library_namespace) {
 	}
 
 	var PATTERN_favorite_list_token = /(?:^|\n)(\/\*[\s\S]*?\*\/(.*)|.*)/g;
-	function parse_favorite_list(list_data, rearrange_list) {
-		var matched, list = [], work_hash = library_namespace.null_Object(), parsed;
-		list.work_indexes = [];
-		if (rearrange_list) {
+	function parse_favorite_list(work_list_data, options) {
+		if (options === true) {
+			options = {
+				rearrange_list : true
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
+
+		if (options.rearrange_list) {
 			library_namespace.debug(this.id + ': '
 					+ gettext('重新整理列表檔案：%1', work_id));
-			parsed = list.parsed = [];
+			options.get_parsed = true;
+		}
+
+		var matched, work_list = [], work_hash = library_namespace
+				.null_Object(), parsed;
+		work_list.duplicated = 0;
+		work_list.work_indexes = [];
+		if (options.get_parsed) {
+			parsed = work_list.parsed = [];
 			parsed.toString = function() {
 				return this.join('\n');
 			};
-			list.duplicated = 0;
 		}
 
-		while (matched = PATTERN_favorite_list_token.exec(list_data)) {
+		while (matched = PATTERN_favorite_list_token.exec(work_list_data)) {
 			// or work id
 			var work_title = matched[1];
-			if (rearrange_list)
+			if (parsed)
 				parsed.push(work_title);
 
 			// .trim() 會去掉 "\r", BOM (byte order mark)
 			work_title = work_title.trim();
 
 			if (!work_title) {
-				// Skip empty line
+				// Skip blank line
 			} else if (work_title.startsWith('#')
 					|| work_title.startsWith('//')) {
 				;
@@ -1074,19 +1087,21 @@ function module_code(library_namespace) {
 				if (matched[2] = matched[2].trim())
 					library_namespace.warn(gettext('作品列表區塊註解後面的"%1"會被忽略',
 							matched[2]));
-			} else {
-				// verify work titles: .unique(), 避免同一次作業中重複下載相同的作品。
-				if (!(work_title in work_hash)) {
-					work_hash[work_title] = null;
-					list.push(work_title);
-				} else if (rearrange_list) {
-					list.duplicated++;
+			} else if (work_title in work_hash) {
+				work_list.duplicated++;
+				if (options.rearrange_list) {
 					// comment out this work title / work id
 					parsed[parsed.length - 1] = '#' + parsed[parsed.length - 1];
 				}
+			} else {
+				// verify work titles: .unique(), 避免同一次作業中重複下載相同的作品。
+				work_hash[work_title] = null;
+				work_list.push(work_title);
 			}
 		}
-		return list;
+
+		// need `delete work_list.parsed` yourself
+		return work_list;
 	}
 
 	// parse and rearrange favorite list file
@@ -1099,8 +1114,9 @@ function module_code(library_namespace) {
 			return [];
 		}
 
-		work_list = parse_favorite_list(work_list.toString(),
-				this.rearrange_list_file);
+		work_list = parse_favorite_list(work_list.toString(), {
+			rearrange_list : this.rearrange_list_file
+		});
 
 		if (this.rearrange_list_file) {
 			if (work_list.duplicated > 0) {
