@@ -400,6 +400,8 @@ function module_code(library_namespace) {
 
 	Work_crawler.HTML_extension = 'htm';
 
+	Work_crawler.parse_favorite_list = parse_favorite_list;
+
 	var Work_crawler_prototype = {
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
@@ -842,10 +844,14 @@ function module_code(library_namespace) {
 		get_work : get_work,
 		get_work_data : get_work_data,
 		save_work_data : save_work_data_file,
-		get_image : get_image
+		get_image : get_image,
+
+		parse_favorite_list_file : parse_favorite_list_file
 	}
 
 	Object.assign(Work_crawler.prototype, Work_crawler_prototype);
+	// free
+	Work_crawler_prototype = null;
 
 	// --------------------------------------------------------------------------------------------
 
@@ -951,7 +957,7 @@ function module_code(library_namespace) {
 	 * front end #2: start get work information operation. e.g., search only, no
 	 * download.
 	 * 
-	 * @param {String}work_title
+	 * @param {String}work_id
 	 *            作品標題/作品名稱
 	 * @param {Function}callback
 	 *            callback function(work_data).
@@ -967,7 +973,7 @@ function module_code(library_namespace) {
 
 	 * </code>
 	 */
-	function start_get_data_of(work_title, callback, options) {
+	function start_get_data_of(work_id, callback, options) {
 		function start_get_data_of_callback(work_data) {
 			typeof callback === 'function' && callback.call(this, work_data);
 		}
@@ -975,7 +981,7 @@ function module_code(library_namespace) {
 			get_data_only : true
 		}, options);
 
-		// TODO: test
+		// TODO: full test
 		this.start(work_id, start_get_data_of_callback);
 	}
 
@@ -1036,6 +1042,88 @@ function module_code(library_namespace) {
 		return url;
 	}
 
+	var PATTERN_favorite_list_token = /(?:^|\n)(\/\*[\s\S]*?\*\/(.*)|.*)/g;
+	function parse_favorite_list(list_data, rearrange_list) {
+		var matched, list = [], work_hash = library_namespace.null_Object(), parsed;
+		list.work_indexes = [];
+		if (rearrange_list) {
+			library_namespace.debug(this.id + ': '
+					+ gettext('重新整理列表檔案：%1', work_id));
+			parsed = list.parsed = [];
+			parsed.toString = function() {
+				return this.join('\n');
+			};
+			list.duplicated = 0;
+		}
+
+		while (matched = PATTERN_favorite_list_token.exec(list_data)) {
+			// or work id
+			var work_title = matched[1];
+			if (rearrange_list)
+				parsed.push(work_title);
+
+			// .trim() 會去掉 "\r", BOM (byte order mark)
+			work_title = work_title.trim();
+
+			if (!work_title) {
+				// Skip empty line
+			} else if (work_title.startsWith('#')
+					|| work_title.startsWith('//')) {
+				;
+			} else if (work_title.startsWith('/*')) {
+				if (matched[2] = matched[2].trim())
+					library_namespace.warn(gettext('作品列表區塊註解後面的"%1"會被忽略',
+							matched[2]));
+			} else {
+				// verify work titles: .unique(), 避免同一次作業中重複下載相同的作品。
+				if (!(work_title in work_hash)) {
+					work_hash[work_title] = null;
+					list.push(work_title);
+				} else if (rearrange_list) {
+					list.duplicated++;
+					// comment out this work title / work id
+					parsed[parsed.length - 1] = '#' + parsed[parsed.length - 1];
+				}
+			}
+		}
+		return list;
+	}
+
+	// parse and rearrange favorite list file
+	function parse_favorite_list_file(favorite_list_file_path) {
+		var work_list = library_namespace.fs_read(favorite_list_file_path);
+		if (!work_list) {
+			// 若是檔案不存在，.fs_read() 可能會回傳 undefined。
+			library_namespace.warn(this.id + ': '
+					+ gettext('無法讀取列表檔案：%1', favorite_list_file_path));
+			return [];
+		}
+
+		work_list = parse_favorite_list(work_list.toString(),
+				this.rearrange_list_file);
+
+		if (this.rearrange_list_file) {
+			if (work_list.duplicated > 0) {
+				work_list.parsed = work_list.parsed.toString();
+				library_namespace.info(this.id
+						+ ': '
+						+ gettext('重新整理列表檔案 [%1]，註解排除了個 %2 作品。',
+								favorite_list_file_path, work_list.duplicated));
+				library_namespace
+						.write_file(favorite_list_file_path, work_list);
+			} else {
+				library_namespace.debug(this.id
+						+ ': '
+						+ gettext('重新整理列表檔案 [%1]，未作改變。'
+								+ favorite_list_file_path));
+			}
+			// free
+			delete work_list.parsed;
+		}
+
+		return work_list;
+	}
+
 	function parse_work_id(work_id, callback) {
 		work_id = String(work_id);
 
@@ -1068,58 +1156,7 @@ function module_code(library_namespace) {
 					}
 				}, this);
 			}
-			var work_list = library_namespace.fs_read(work_id);
-			if (!work_list) {
-				// 若是檔案不存在，.fs_read() 可能會回傳 undefined。
-				library_namespace.warn(this.id + ': '
-						+ gettext('無法讀取列表檔案：%1', work_id));
-				this.get_work_list([], callback);
-				return;
-			}
-
-			work_list = work_list.toString() || '';
-
-			if (this.rearrange_list_file) {
-				library_namespace.debug(this.id + ': '
-						+ gettext('重新整理列表檔案：%1', work_id));
-				work_list = work_list.split('\n');
-				var line_hash = library_namespace.null_Object(), changed = 0;
-				work_list = work_list.map(function(line) {
-					if (!line.trim() || line.startsWith('#')
-							|| line.includes('/*') || line.includes('*/')) {
-						return line;
-					}
-					if (line in line_hash) {
-						changed++;
-						// comment out this work title
-						return '#' + line;
-					}
-					line_hash[line] = null;
-					return line;
-				});
-				// free
-				line_hash = null;
-				work_list = work_list.join('\n');
-				if (changed) {
-					library_namespace.info(this.id + ': '
-					//
-					+ gettext('重新整理列表檔案 [%1]，註解排除了個 %2 作品。', work_id, changed));
-					library_namespace.write_file(work_id, work_list);
-				} else {
-					library_namespace.debug(this.id + ': '
-							+ gettext('重新整理列表檔案 [%1]，未作改變。' + work_id));
-				}
-			}
-
-			work_list = work_list.replace(/\/\*[\s\S]*?\*\//g, '')
-			//
-			.replace(/\/\/[^\n]*/g, '')
-			// 去掉BOM (byte order mark)
-			.trim()
-			// TODO: 處理title中包含"#"的作品
-			.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/)
-			// 避免同一次作業中重複下載相同的作品。
-			.unique();
+			var work_list = this.parse_favorite_list_file(work_id);
 
 			this.get_work_list(work_list, callback);
 			return;
@@ -2496,7 +2533,7 @@ function module_code(library_namespace) {
 
 			if (work_URL)
 				_this.get_URL_options.headers.Referer = work_URL;
-			// 開始下載chapter。
+			// 開始下載 chapter。
 			work_data.start_downloading_chaper = Date.now();
 			pre_get_chapter_data.call(_this, work_data,
 					work_data.last_download.chapter, callback);
@@ -2661,12 +2698,12 @@ function module_code(library_namespace) {
 					'下載第' + chapter_NO + '章之章節資訊前先等待 ',
 					library_namespace.age_of(0, chapter_time_interval) ],
 			// 預估剩餘時間 estimated time remaining
-			estimated_time = (Date.now() - work_data.start_downloading_chaper)
-					* (work_data.chapter_count
+			estimated_time = work_data.chapter_count > chapter_NO
 					// this.start_chapter, chapter_NO starts from 1
-					- (this.start_chapter >= 1 ? this.start_chapter - 1 : 0)
-					//
-					- (chapter_NO - 1)) / (chapter_NO - 1);
+					&& (work_data.chapter_count - (chapter_NO - 1))
+					* (Date.now() - work_data.start_downloading_chaper)
+					/ (chapter_NO - (this.start_chapter >= 1 ? this.start_chapter
+							: 1));
 			if (1e3 < estimated_time && estimated_time < 1e15) {
 				message.push('，預估還需 ', library_namespace.age_of(0,
 						estimated_time), ' 下載完本作品');
@@ -2674,7 +2711,8 @@ function module_code(library_namespace) {
 			message.push('...\r');
 			process.stdout.write(message.join(''));
 			setTimeout(actual_operation, chapter_time_interval);
-		}).bind(this) : actual_operation;
+		}).bind(this)
+				: actual_operation;
 
 		if (this.chapter_filter) {
 			var chapter_data = work_data.chapter_list
