@@ -25,14 +25,12 @@ TODO:
 	自動記得某個作品要從哪些網站下載。
 定義參數的規範，例如數量包含可選範圍，可用 RegExp https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern 。如'number:0~|string:/v\\d|V[1-3]|a|b|c/', 'number:1~400|string:item1;item2;item3'。不像現在import_arg_hash只規範了'number|string'
 	將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
-定義列表檔案的規範，可以統合設定檔案的規範。
-	rearrange_list_file 整合報告
-	解析及操作列表檔案的功能
+解析及操作列表檔案的功能。
+rearrange_list_file 整合報告
 
 
 暗色主題
 CLI progress bar
-預設介面語言繁體中文+...
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
 用安全一點的 eval()
@@ -1042,8 +1040,9 @@ function module_code(library_namespace) {
 		return url;
 	}
 
-	var PATTERN_favorite_list_token = /(?:^|\n)(\/\*[\s\S]*?\*\/(.*)|.*)/g;
-	function parse_favorite_list(work_list_data, options) {
+	// /./ doesn't include "\r", can't preserv line separator.
+	var PATTERN_favorite_list_token = /(?:^|\n)(\/\*[\s\S]*?\*\/([^\n]*)|[^\n]*)/g;
+	function parse_favorite_list(work_list_text, options) {
 		if (options === true) {
 			options = {
 				rearrange_list : true
@@ -1053,8 +1052,6 @@ function module_code(library_namespace) {
 		}
 
 		if (options.rearrange_list) {
-			library_namespace.debug(this.id + ': '
-					+ gettext('重新整理列表檔案：%1', work_id));
 			options.get_parsed = true;
 		}
 
@@ -1064,34 +1061,43 @@ function module_code(library_namespace) {
 		work_list.work_indexes = [];
 		if (options.get_parsed) {
 			parsed = work_list.parsed = [];
+			parsed.duplicated = [];
 			parsed.toString = function() {
 				return this.join('\n');
 			};
 		}
 
-		while (matched = PATTERN_favorite_list_token.exec(work_list_data)) {
+		while (matched = PATTERN_favorite_list_token.exec(work_list_text)) {
 			// or work id
 			var work_title = matched[1];
-			if (parsed)
+			if (parsed) {
+				// `work_title` includes "\r"
 				parsed.push(work_title);
+			}
 
 			// .trim() 會去掉 "\r", BOM (byte order mark)
 			work_title = work_title.trim();
 
+			// 定義列表檔案的規範，可以統合設定檔案的規範。
 			if (!work_title) {
 				// Skip blank line
 			} else if (work_title.startsWith('#')
 					|| work_title.startsWith('//')) {
 				;
 			} else if (work_title.startsWith('/*')) {
-				if (matched[2] = matched[2].trim())
+				if (matched[2] = matched[2].trim()) {
 					library_namespace.warn(gettext('作品列表區塊註解後面的"%1"會被忽略',
 							matched[2]));
+				}
 			} else if (work_title in work_hash) {
 				work_list.duplicated++;
-				if (options.rearrange_list) {
-					// comment out this work title / work id
-					parsed[parsed.length - 1] = '#' + parsed[parsed.length - 1];
+				if (parsed) {
+					parsed.duplicated.push(work_title);
+					if (options.rearrange_list) {
+						// comment out this work title / work id
+						parsed[parsed.length - 1] = '#'
+								+ parsed[parsed.length - 1];
+					}
 				}
 			} else {
 				// verify work titles: .unique(), 避免同一次作業中重複下載相同的作品。
@@ -1105,7 +1111,8 @@ function module_code(library_namespace) {
 	}
 
 	// parse and rearrange favorite list file
-	function parse_favorite_list_file(favorite_list_file_path) {
+	function parse_favorite_list_file(favorite_list_file_path,
+			rearrange_list_file) {
 		var work_list = library_namespace.fs_read(favorite_list_file_path);
 		if (!work_list) {
 			// 若是檔案不存在，.fs_read() 可能會回傳 undefined。
@@ -1114,19 +1121,27 @@ function module_code(library_namespace) {
 			return [];
 		}
 
+		if (rearrange_list_file === undefined) {
+			rearrange_list_file = this.rearrange_list_file;
+		}
+		if (rearrange_list_file) {
+			library_namespace.debug(this.id + ': '
+					+ gettext('重新整理列表檔案：%1', favorite_list_file_path));
+		}
 		work_list = parse_favorite_list(work_list.toString(), {
-			rearrange_list : this.rearrange_list_file
+			rearrange_list : rearrange_list_file
 		});
 
-		if (this.rearrange_list_file) {
+		if (rearrange_list_file) {
 			if (work_list.duplicated > 0) {
+				// console.log(work_list.parsed);
 				work_list.parsed = work_list.parsed.toString();
 				library_namespace.info(this.id
 						+ ': '
 						+ gettext('重新整理列表檔案 [%1]，註解排除了個 %2 作品。',
 								favorite_list_file_path, work_list.duplicated));
-				library_namespace
-						.write_file(favorite_list_file_path, work_list);
+				library_namespace.write_file(favorite_list_file_path,
+						work_list.parsed);
 			} else {
 				library_namespace.debug(this.id
 						+ ': '
