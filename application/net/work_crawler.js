@@ -401,7 +401,7 @@ function module_code(library_namespace) {
 	Work_crawler.parse_favorite_list = parse_favorite_list;
 
 	var Work_crawler_prototype = {
-		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
+		// 所有的子檔案要修訂注解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
 		// 下載檔案儲存目錄路徑。圖片檔+紀錄檔下載位置。
 		// 這個目錄會在 work_crawler_loder.js 裡面被 setup_crawler() 之 data_directory 覆寫。
@@ -1088,7 +1088,7 @@ function module_code(library_namespace) {
 				;
 			} else if (work_title.startsWith('/*')) {
 				if (matched[2] && (matched[2] = matched[2].trim())) {
-					library_namespace.warn(gettext('作品列表區塊註解後面的"%1"會被忽略',
+					library_namespace.warn(gettext('作品列表區塊注解後面的"%1"會被忽略',
 							matched[2]));
 				}
 			} else if (work_title in work_hash) {
@@ -1096,7 +1096,7 @@ function module_code(library_namespace) {
 				if (parsed) {
 					parsed.duplicated.push(work_title);
 					if (options.rearrange_list) {
-						if (typeof options.rearrange_list === 'funcrion') {
+						if (typeof options.rearrange_list === 'function') {
 							options.rearrange_list(parsed);
 						} else {
 							// comment out this work title / work id
@@ -1144,7 +1144,7 @@ function module_code(library_namespace) {
 				work_list.parsed = work_list.parsed.toString();
 				library_namespace.info(this.id
 						+ ': '
-						+ gettext('重新整理列表檔案 [%1]，註解排除了個 %2 作品。',
+						+ gettext('重新整理列表檔案 [%1]，注解排除了個 %2 作品。',
 								favorite_list_file_path, work_list.duplicated));
 				library_namespace.write_file(favorite_list_file_path,
 						work_list.parsed);
