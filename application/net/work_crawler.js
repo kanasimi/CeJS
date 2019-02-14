@@ -20,7 +20,6 @@
 TODO:
 將工具檔結構以及說明統合在一起，並且建造可以自動生成的工具
 	自動判別網址所需要使用的下載工具，輸入網址自動揀選所需的工具檔案。
-		自動搜尋不同的網站並選擇下載作品。
 	從其他的資料來源網站尋找取得作品以及章節的資訊。
 	自動記得某個作品要從哪些網站下載。
 定義參數的規範，例如數量包含可選範圍，可用 RegExp https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern 。如'number:0~|string:/v\\d|V[1-3]|a|b|c/', 'number:1~400|string:item1;item2;item3'。不像現在import_arg_hash只規範了'number|string'
@@ -1043,7 +1042,7 @@ function module_code(library_namespace) {
 	}
 
 	// /./ doesn't include "\r", can't preserv line separator.
-	var PATTERN_favorite_list_token = /(?:^|\n)(\/\*[\s\S]*?\*\/([^\n]*)|[^\n]*)/g;
+	var PATTERN_favorite_list_token = /(?:\n|^)(\/\*[\s\S]*?\*\/([^\n]*)|[^\n]*)/g;
 	function parse_favorite_list(work_list_text, options) {
 		if (options === true) {
 			options = {
@@ -1070,8 +1069,15 @@ function module_code(library_namespace) {
 		}
 
 		if (!work_list_text) {
-			// PATTERN_favorite_list_token 會無限次 match ''
+			// PATTERN_favorite_list_token 會無限次 match ''。
 			return work_list;
+		}
+
+		// /(?:^|\n).../ 會無限次 match '\n...'，
+		// 故改 /(?:\n|^)
+		// 但這遇到 '\n...' 會少一個 ''。
+		if (work_list_text.startsWith('\n')) {
+			parsed.push('');
 		}
 
 		while (matched = PATTERN_favorite_list_token.exec(work_list_text)) {
