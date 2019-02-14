@@ -663,10 +663,11 @@ function module_code(library_namespace) {
 			if (matched)
 				return matched[0];
 
-			if (status.includes(matched = '完結済')
-			// http://book.qidian.com/
-			|| status.includes(matched = '完本')) {
-				return matched;
+			// 完本: http://book.qidian.com/
+			if ('完結済|完本|読み切り'.split('|').some(function(word) {
+				return status.includes(word);
+			})) {
+				return status;
 			}
 
 			// ck101: 全文完, 全書完
@@ -914,6 +915,7 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.log([ this.id, ': ', (new Date).toISOString(), ' ', {
+			// 開始下載/處理
 			T : [ 'Starting %1, save to %2', work_id, this.main_directory ]
 		} ]);
 		// prepare work directory.
@@ -1085,7 +1087,7 @@ function module_code(library_namespace) {
 					|| work_title.startsWith('//')) {
 				;
 			} else if (work_title.startsWith('/*')) {
-				if (matched[2] = matched[2].trim()) {
+				if (matched[2] && (matched[2] = matched[2].trim())) {
 					library_namespace.warn(gettext('作品列表區塊註解後面的"%1"會被忽略',
 							matched[2]));
 				}
@@ -1094,9 +1096,13 @@ function module_code(library_namespace) {
 				if (parsed) {
 					parsed.duplicated.push(work_title);
 					if (options.rearrange_list) {
-						// comment out this work title / work id
-						parsed[parsed.length - 1] = '#'
-								+ parsed[parsed.length - 1];
+						if (typeof options.rearrange_list === 'funcrion') {
+							options.rearrange_list(parsed);
+						} else {
+							// comment out this work title / work id
+							parsed[parsed.length - 1] = '#'
+									+ parsed[parsed.length - 1];
+						}
 					}
 				}
 			} else {

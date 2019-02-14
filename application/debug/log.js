@@ -155,7 +155,9 @@ function module_code(library_namespace) {
 			}
 			_p.lbuf.push(m);
 
-			if (B) { // && typeof document === 'object'
+			if (B
+			// && typeof document === 'object'
+			) {
 				o = _p.instance.log_tag;
 				if (o) {
 					o = document.createElement(o);
@@ -167,7 +169,11 @@ function module_code(library_namespace) {
 				} else {
 					o = document.createTextNode(m);
 				}
+				// TODO: pause
 				B.appendChild(o);
+				while (B.childNodes.length > _p.max_logs) {
+					B.removeChild(B.firstChild);
+				}
 			}
 		}
 
@@ -955,6 +961,17 @@ function module_code(library_namespace) {
 					+ date_stamp + '  '
 					+ (has_performance_now ? time : '+' + _diff_ms) + ' ms">['
 					+ diff_ms + ']</span> ';
+		},
+
+		/**
+		 * 當記錄太長時，限制記錄數目在 max_logs。超過這個數目就會把之前的最舊的紀錄消除掉。
+		 * 
+		 * @param {Natural}max_logs
+		 *            最大記錄數目
+		 */
+		set_max_logs : function(max_logs) {
+			var _t = this, _p = p[_t.id];
+			_p.max_logs = max_logs;
 		},
 
 		/**
