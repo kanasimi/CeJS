@@ -1069,6 +1069,11 @@ function module_code(library_namespace) {
 			};
 		}
 
+		if (!work_list_text) {
+			// PATTERN_favorite_list_token 會無限次 match ''
+			return work_list;
+		}
+
 		while (matched = PATTERN_favorite_list_token.exec(work_list_text)) {
 			// or work id
 			var work_title = matched[1];
