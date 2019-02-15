@@ -1168,6 +1168,8 @@ function module_code(library_namespace) {
 	 * 取得 text 中，head 與 foot 之間的字串。不包括 head 與 foot。<br />
 	 * 可以 [3] last index 是否回傳 NOT_FOUND (-1) 檢測到底是有找到，只是回傳空字串，或是沒找到。
 	 * 
+	 * TODO: {RegExp}head, {RegExp}foot
+	 * 
 	 * @example <code>
 
 	 // More examples: see /_test suite/test.js
@@ -1192,7 +1194,7 @@ function module_code(library_namespace) {
 				index = 0;
 			else if ((index = data[0].indexOf(data[1], data[3])) !== NOT_FOUND)
 				index += data[1].length;
-			library_namespace.debug('head index: ' + index, 4);
+			// library_namespace.debug('head index: ' + index, 4);
 
 			if ((data[3] = index) !== NOT_FOUND
 					&& (!data[2] || (data[3] = data[0].indexOf(data[2], index)) !== NOT_FOUND))
@@ -1676,6 +1678,32 @@ function module_code(library_namespace) {
 
 		return count;
 	}
+
+	function determine_line_separator(text) {
+		var matched, PATTERN = /\r?\n|\r/g, rn = 0, r = 0, n = 0;
+		while (matched = PATTERN.exec(text)) {
+			if (matched[0] === '\r\n')
+				rn++;
+			else if (matched[0] === '\n')
+				n++;
+			else
+				r++;
+		}
+
+		if (rn > n && rn > r) {
+			return '\r\n';
+		}
+		if (n > r && n > rn) {
+			return '\n';
+		}
+		if (r > n && r > rn) {
+			return '\r';
+		}
+
+		return library_namespace.env.line_separator;
+	}
+
+	_.determine_line_separator = determine_line_separator;
 
 	/**
 	 * 取至小數 digits 位， 肇因： JScript即使在做加減運算時，有時還是會出現 3*1.6=4.800000000000001,

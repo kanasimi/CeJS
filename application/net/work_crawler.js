@@ -25,7 +25,6 @@ TODO:
 定義參數的規範，例如數量包含可選範圍，可用 RegExp https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern 。如'number:0~|string:/v\\d|V[1-3]|a|b|c/', 'number:1~400|string:item1;item2;item3'。不像現在import_arg_hash只規範了'number|string'
 	將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
 解析及操作列表檔案的功能。
-rearrange_list_file 整合報告
 
 
 暗色主題
@@ -1042,7 +1041,7 @@ function module_code(library_namespace) {
 	}
 
 	// /./ doesn't include "\r", can't preserv line separator.
-	var PATTERN_favorite_list_token = /(?:\n|^)(\/\*[\s\S]*?\*\/([^\n]*)|[^\n]*)/g;
+	var PATTERN_favorite_list_token = /(?:\r?\n|^)(\/\*[\s\S]*?\*\/([^\r\n]*)|[^\r\n]*)/g;
 	function parse_favorite_list(work_list_text, options) {
 		if (options === true) {
 			options = {
@@ -1063,21 +1062,22 @@ function module_code(library_namespace) {
 		if (options.get_parsed) {
 			parsed = work_list.parsed = [];
 			parsed.duplicated = [];
+			parsed.line_separator = library_namespace
+					.determine_line_separator(work_list_text);
 			parsed.toString = function() {
-				return this.join('\n');
+				return this.join(this.line_separator);
 			};
+			// /(?:^|\n).../ 會無限次 match '\n...'，
+			// 故改 /(?:\n|^)
+			// 但這遇到 '\n...' 會少一個 ''。
+			if (/^\r?\n/.test(work_list_text)) {
+				parsed.push('');
+			}
 		}
 
 		if (!work_list_text) {
 			// PATTERN_favorite_list_token 會無限次 match ''。
 			return work_list;
-		}
-
-		// /(?:^|\n).../ 會無限次 match '\n...'，
-		// 故改 /(?:\n|^)
-		// 但這遇到 '\n...' 會少一個 ''。
-		if (work_list_text.startsWith('\n')) {
-			parsed.push('');
 		}
 
 		while (matched = PATTERN_favorite_list_token.exec(work_list_text)) {
@@ -1155,7 +1155,10 @@ function module_code(library_namespace) {
 				work_list.parsed = work_list.parsed.toString();
 				library_namespace.info(this.id
 						+ ': '
-						+ gettext('重新整理列表檔案 [%1]，注解排除了個 %2 作品。',
+						+ gettext(typeof rearrange_list_file === 'function'
+						// rearrange_list_file 整合報告
+						? '重新整理列表檔案 [%1]，處理了%2個作品。'
+								: '重新整理列表檔案 [%1]，注解排除了%2個作品。',
 								favorite_list_file_path, work_list.duplicated));
 				library_namespace.write_file(favorite_list_file_path,
 						work_list.parsed);
@@ -1435,7 +1438,8 @@ function module_code(library_namespace) {
 				});
 				reports.push('</table>', '</body></html>');
 				try {
-					node_fs.writeFileSync(report_file, reports.join('\r\n'));
+					node_fs.writeFileSync(report_file, reports
+							.join(library_namespace.env.line_separator));
 				} catch (e) {
 					// TODO: handle exception
 				}
@@ -2153,10 +2157,14 @@ function module_code(library_namespace) {
 										[ '→', work_data[key] ] ]));
 					}
 				}
-				matched = matched.last_download.chapter;
-				if (matched > _this.start_chapter) {
-					// 將開始/接續下載的章節編號。對已下載過的章節，必須配合 .recheck。
-					work_data.last_download.chapter = matched;
+				if (matched.last_download) {
+					// 紀錄一下上一次下載的資訊。
+					work_data.latest_download = matched.last_download;
+					matched = matched.last_download.chapter;
+					if (matched > _this.start_chapter) {
+						// 將開始/接續下載的章節編號。對已下載過的章節，必須配合 .recheck。
+						work_data.last_download.chapter = matched;
+					}
 				}
 			}
 
@@ -2514,16 +2522,26 @@ function module_code(library_namespace) {
 				work_data.last_download.chapter = _this.start_chapter;
 			}
 
-			// backup
-			_this.save_work_data(work_data);
-
 			if (typeof callback === 'function' && callback.options
 					&& callback.options.get_data_only) {
 				// 最終廢棄動作，防止執行 work_data[this.KEY_EBOOK].pack()。
 				delete work_data[_this.KEY_EBOOK];
+				if (work_data.latest_download) {
+					// recover latest download data
+					work_data.last_download = work_data.latest_download;
+				} else {
+					delete work_data.last_download;
+				}
+
+				// backup
+				_this.save_work_data(work_data);
+
 				callback(work_data);
 				return;
 			}
+
+			// backup
+			_this.save_work_data(work_data);
 
 			if (!work_data.reget_chapter
 			//
