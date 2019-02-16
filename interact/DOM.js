@@ -895,7 +895,7 @@ function module_code(library_namespace) {
 	.remove_node = remove_node;
 
 	/**
-	 * empty node. remove_all_children
+	 * empty node. CeL.remove_all_childrens
 	 */
 	_// JSDT:_module_
 	.remove_all_child = _.replace_HTML;
@@ -6710,6 +6710,110 @@ function module_code(library_namespace) {
 
 	_.locate_node = locate_node;
 
+	/** {private} */
+	function limit_input_maxlength() {
+		if (this.value.length > this.maxLength)
+			this.value = this.value.slice(0, this.maxLength);
+	}
+
+	/** {private} */
+	function limit_input_maxlength_onkeydown() {
+		return this.value.length <= this.maxLength;
+	}
+
+	/** {private} */
+	function check_input_pattern_onkeydown() {
+		if (false)
+			if (this.value > this.getAttribute('max'))
+				this.value = this.getAttribute('max');
+		return this.validator.test(this.value);
+	}
+
+	/** {private} */
+	function check_input_onkeydown(event) {
+		// console.log([ this.value, this.maxLength, this.validator ]);
+		// console.log(event);
+
+		// https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/charCode
+		// https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
+		if (event.ctrlKey || event.altKey || [
+		// backspace
+		8,
+		// tab
+		9,
+		// enter
+		13,
+		// delete
+		46,
+		// End
+		35,
+		// Home
+		36,
+		// arrow keys<^>v
+		37, 38, 39, 40 ].includes(event.which)) {
+			return true;
+		}
+
+		// https://stackoverflow.com/questions/8354975/how-can-i-limit-possible-inputs-in-a-html5-number-element
+		if (window.getSelection && window.getSelection().toString()
+		// when select text and input
+		|| document.selection && document.selection.type !== 'Control'
+				&& document.selection.createRange().text) {
+			return true;
+		}
+
+		return (!(this.maxLength >= 0) || this.value.length < this.maxLength)
+				&& (!this.validator || this.validator.test(this.value
+						+ event.key));
+	}
+
+	_.adapt_input_validation = function adapt_input_validation() {
+		for_nodes(function(node) {
+			// console.log(node);
+			if (node.type === 'number'
+					&& (node.hasAttribute('max') || node.hasAttribute('min'))) {
+				node.setAttribute('maxlength', Math.max(node
+						.getAttribute('max')
+						&& node.getAttribute('max').length || 0, node
+						.getAttribute('min')
+						&& node.getAttribute('min').length || 0));
+			}
+
+			if (node.hasAttribute('maxlength')) {
+				_.add_listener('change', limit_input_maxlength, node);
+				if (false) {
+					// useless @ Chrome/61.0.3163.100
+					_.add_listener('keydown', limit_input_maxlength_onkeydown,
+							node, true);
+				} else {
+					if (!node.onkeydown)
+						node.onkeydown = check_input_onkeydown;
+					if (false && !node.oninput)
+						node.oninput = check_input_onkeydown;
+				}
+			}
+
+			if (node.hasAttribute('pattern')) {
+				var validator = node.getAttribute('pattern');
+				try {
+					// e.g., "\d*"
+					validator = new RegExp('^' + validator + '$');
+					node.validator = validator;
+					if (!node.onkeydown)
+						node.onkeydown = check_input_onkeydown;
+					if (false && !node.oninput)
+						node.oninput = check_input_onkeydown;
+				} catch (e) {
+					library_namespace.error({
+						T : [ 'Invalid pattern: %1', validator ]
+					});
+				}
+			}
+		},
+		// "input[type="number"][maxlength]"
+		'input');
+	};
+
 	// 2007/4/25-27 0:48:22 RFC 3492 IDNA Punycode 未最佳化
 	// http://stackoverflow.com/questions/183485/can-anyone-recommend-a-good-free-javascript-for-punycode-to-unicode-conversion
 	// http://xn-punycode.com/
@@ -7090,6 +7194,7 @@ function module_code(library_namespace) {
 	add_listener = function add_listener(type, listener, target_element,
 			p_first) {
 
+		// _s: self
 		var _s = _.add_listener, i, adder;
 
 		// 進階功能.
@@ -7198,7 +7303,7 @@ function module_code(library_namespace) {
 				}
 
 				// .call: 使 listener 可以用 'this' 來指涉 element
-				listener.call(target_element, e);
+				return listener.call(target_element, e);
 			};
 
 			// 主要核心動作設定之處理
