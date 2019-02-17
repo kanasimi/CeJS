@@ -148,9 +148,13 @@ function module_code(library_namespace) {
 						// 930mh.js
 						|| html.between('<p class="comic_deCon_d">', '</p>'))
 			};
+			// <ul class="detail-list cf"> ... </ul>
 			extract_work_data(work_data, html.between('detail-list', '</ul>'),
 			// e.g., "<strong>漫画别名：</strong>暂无</span>"
-			/<strong[^<>]*>([^<>]+)<\/strong>([\s\S]+?)<\/li>/g);
+			// gufengmh.js:<li><span><strong>漫画类型：</strong>...</span><span><strong>漫画作者：</strong>...</span></li>
+			/<strong[^<>]*>([^<>]+)<\/strong>([\s\S]+?)<\/(?:li|span)>/g);
+			// console.log(html.between('detail-list', '</ul>'));
+			// console.log(work_data);
 
 			// 930mh.js
 			extract_work_data(work_data, html
@@ -166,10 +170,34 @@ function module_code(library_namespace) {
 			Object.assign(work_data, {
 				author : work_data.漫画作者 || work_data.作者,
 				status : work_data.漫画状态 || work_data.状态,
-				last_update : work_data.更新时间 || work_data.时间
+				last_update : work_data.更新时间 || work_data.时间,
+				latest_chapter : work_data.最新 || work_data.更新至,
+				latest_chapter_url : html.between('最新：<a href="', '"')
+				// for 36mh.js
+				|| html.between('更新至 [ <a href="', '"')
+				// gufengmh.js
+				|| html.between('更新至：</strong><a href="', '"')
 			});
 
+			console.log(work_data);
+			if (!work_data.last_update && !work_data.latest_chapter
+					&& work_data.status) {
+				// for 36mh.js
+				var matched = work_data.status
+						.match(/^([\s\S]+?)最近于([\s\S]+?)更新至([\s\S]+?)$/);
+				if (matched) {
+					Object.assign(work_data, {
+						status : matched[1],
+						last_update : matched[2].replace(
+								/^[\s\n]*\[|\][\s\n]*$/g, '').trim(),
+						latest_chapter : matched[3].replace(
+								/^[\s\n]*\[|\][\s\n。]*$/g, '').trim()
+					});
+				}
+			}
+
 			// console.log(work_data);
+			throw 123
 			return work_data;
 		},
 		get_chapter_list : function(work_data, html, get_label) {
