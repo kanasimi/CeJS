@@ -498,8 +498,11 @@ function module_code(library_namespace) {
 		// 移動完之後這個值會被設定為空，以防被覆寫。
 		error_log_file_backup : 'error_files.'
 				+ (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.txt',
-		// last updated date, latest update date. 最後更新日期時間。這些值會被複製到記錄報告中。
-		last_update_status_keys : 'last_update_chapter,latest_chapter,latest_chapter_name,latest_chapter_url,last_update,update_time'
+		// last updated date, latest update date. 最後更新日期時間。
+		// latest_chapter_name, last_update_chapter → latest_chapter
+		// update_time, latest_update → last_update
+		// 這些值會被複製到記錄報告中，並用在 show_search_result() @ gui_electron_functions.js。
+		last_update_status_keys : 'latest_chapter,latest_chapter_url,last_update'
 				.split(','),
 		// 記錄報告檔案/日誌的路徑。
 		report_file : 'report.' + (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.'
@@ -1041,7 +1044,7 @@ function module_code(library_namespace) {
 	}
 
 	// /./ doesn't include "\r", can't preserv line separator.
-	var PATTERN_favorite_list_token = /(?:\r?\n|^)(\/\*[\s\S]*?\*\/([^\r\n]*)|[^\r\n]*)/g;
+	var PATTERN_favorite_list_token = /(?:\r?\n|^)(\s*\/\*[\s\S]*?\*\/([^\r\n]*)|[^\r\n]*)/g;
 	function parse_favorite_list(work_list_text, options) {
 		if (options === true) {
 			options = {
@@ -1096,7 +1099,7 @@ function module_code(library_namespace) {
 				// Skip blank line
 			} else if (work_title.startsWith('#')
 					|| work_title.startsWith('//')) {
-				;
+				// Skip comments
 			} else if (work_title.startsWith('/*')) {
 				if (matched[2] && (matched[2] = matched[2].trim())) {
 					library_namespace.warn(gettext('作品列表區塊注解後面的"%1"會被忽略',
@@ -2246,7 +2249,8 @@ function module_code(library_namespace) {
 						|| !work_data.process_status.includes('finished'))
 					set_work_status(work_data, 'finished');
 				// cf. work_data.latest_chapter 最新章節,
-				// work_data.latest_chapter_url
+				// work_data.latest_chapter_url 最新更新章節URL,
+				// work_data.last_update 最新更新時間
 				if (work_data.last_update) {
 					set_work_status(work_data, 'last updated date: '
 							+ work_data.last_update);

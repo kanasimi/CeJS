@@ -1582,7 +1582,7 @@ function module_code(library_namespace) {
 	function new_node(nodes, layer, ns) {
 		var node, for_each,
 		// parent: parent node of layer or layer.firstChild
-		parent, children, handler = new_node.handler;
+		parent, children = undefined, handler = new_node.handler;
 
 		if (false) {
 			if (!library_namespace.is_WWW(true)
@@ -1624,12 +1624,12 @@ function module_code(library_namespace) {
 			// Object.seal(nodes);
 
 			var tag_key, tag = nodes.$, n = 'className', s, ignore = {
-				// tag
-				$ : null,
 				// attrib
-				A : null
-			/**
-			 * <code>
+				A : null,
+				/**
+				 * <code>
+				// inner
+				I : null,
 				// namespace
 				NS : null,
 				// class
@@ -1638,12 +1638,15 @@ function module_code(library_namespace) {
 				S : null,
 				// dataset
 				D : {},
-				// support for application.locale.gettext.
+				// text / message id, support for application.locale.gettext.
 				T : {},
 				//	reference, usually using <title>
-				R : ''
-			</code>
-			 */
+				R : '',
+				</code>
+				 */
+
+				// tag name
+				$ : null
 			};
 
 			if (typeof tag === 'undefined') {
@@ -1790,7 +1793,11 @@ function module_code(library_namespace) {
 					dataset(node, nodes[n]);
 				}
 
-				if ((n = 'T') in nodes) {
+				if ((n = 'I') in nodes) {
+					ignore[n] = null;
+					children = nodes.I;
+
+				} else if ((n = 'T') in nodes) {
 					ignore[n] = null;
 					n = nodes[n];
 					if (Array.isArray(n)) {
@@ -1834,7 +1841,7 @@ function module_code(library_namespace) {
 
 				// 設定 children nodes
 				ignore[tag_key || tag] = null;
-				if (!children)
+				if (children === undefined)
 					children = nodes[tag_key || tag];
 
 				// 自動作 list 的轉換
@@ -1918,7 +1925,7 @@ function module_code(library_namespace) {
 				library_namespace.warn('new_node: Unknown nodes [' + nodes
 						+ ']');
 
-			// release
+			// release memory, free memory
 			node = null;
 			return;
 		} else
