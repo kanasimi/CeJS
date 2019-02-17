@@ -509,6 +509,20 @@ function module_code(library_namespace) {
 				+ Work_crawler.HTML_extension,
 		report_file_JSON : 'report.json',
 
+		search_result_file_name : 'search.json',
+		get_search_result_file : function() {
+			var search_result_file = this.main_directory
+					+ this.search_result_file_name;
+			return search_result_file;
+		},
+		get_search_result : function() {
+			var search_result_file = this.get_search_result_file(),
+			// search cache
+			// 檢查看看之前是否有取得過。
+			search_result = library_namespace.get_JSON(search_result_file);
+			return search_result;
+		},
+
 		onwarning : function onwarning(warning, work_data) {
 			library_namespace.error(warning);
 		},
@@ -1614,8 +1628,7 @@ function module_code(library_namespace) {
 		function finish(no_cache) {
 			if (!no_cache) {
 				// write cache
-				node_fs.writeFileSync(search_result_file, JSON
-						.stringify(search_result));
+				library_namespace.write_file(search_result_file, search_result);
 			}
 			search_result = search_result[work_title];
 			var search_result_id = _this.id_of_search_result;
@@ -1632,10 +1645,11 @@ function module_code(library_namespace) {
 			}, finish_up);
 		}
 
-		var search_result_file = this.main_directory + 'search.json',
+		var search_result_file = this.main_directory
+				+ this.search_result_file_name,
 		// search cache
 		// 檢查看看之前是否有取得過。
-		search_result = library_namespace.get_JSON(search_result_file)
+		search_result = this.get_search_result()
 				|| library_namespace.null_Object();
 		library_namespace.debug('search result file: ' + search_result_file, 2,
 				'get_work');
@@ -1657,6 +1671,12 @@ function module_code(library_namespace) {
 
 		var search_url_data = this.search_URL, search_URL_string, post_data;
 		if (!search_url_data || typeof this.parse_search_result !== 'function') {
+			if (callback && callback.options) {
+				// e.g., for .get_data_only
+				finish_up('本線上作品網站 ' + this.id + ' 的模組未提供搜尋功能。');
+				return;
+			}
+
 			search_url_data = library_namespace.null_Object();
 			search_url_data[work_title] = '';
 			this.onerror('本線上作品網站 ' + this.id
@@ -2011,7 +2031,18 @@ function module_code(library_namespace) {
 
 			if (!work_data.title) {
 				work_data.title = work_title;
+			} else if (!work_title
+			// cache work title: 方便下次從 search cache 反查。
+			&& typeof _this.parse_search_result !== 'function') {
+				// search cache
+				var search_result = _this.get_search_result();
+				if (!search_result[work_data.title]) {
+					search_result[work_data.title] = work_id;
+					library_namespace.write_file(search_result_file,
+							search_result);
+				}
 			}
+
 			// 從已設定的網站名稱挑選一個可用的。
 			if (work_data.site_name) {
 				_this.site_name = work_data.site_name;
@@ -4498,7 +4529,11 @@ function module_code(library_namespace) {
 			language : work_data.language || this.language,
 			// 作品內容最後編輯時間。
 			modified : work_data.last_update_Date
-		});
+		}), subject = [].concat(work_data.status);
+		if (work_data.genre)
+			subject = subject.concat(work_data.genre);
+		if (work_data.tags)
+			subject = subject.concat(work_data.tags);
 
 		ebook.time_zone = work_data.time_zone || this.time_zone;
 
@@ -4507,7 +4542,7 @@ function module_code(library_namespace) {
 			// 作者名
 			creator : work_data.author,
 			// 🏷標籤, ジャンル, タグ, キーワード
-			subject : work_data.genre || work_data.status,
+			subject : subject.unique(),
 			// 作品描述: 劇情簡介, synopsis, あらすじ
 			description : get_label(work_data.description
 			// .description 中不可存在 tag。

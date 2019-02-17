@@ -51,6 +51,7 @@ function module_code(library_namespace) {
 
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.comic中Comic_site.prototype內的母comments，並以其為主體。
 
+		// 因為要經過轉址，所以一個圖一個圖來。
 		// one_by_one : true,
 		// base_URL : '',
 
@@ -120,6 +121,8 @@ function module_code(library_namespace) {
 			return [ html, html ];
 		},
 		id_of_search_result : function(data) {
+			// console.log(data);
+
 			// .u: webdir + classid1pinyin + titlepinyin + "/"
 			// webdir: "/"
 			// classid1pinyin: latin + "/"
@@ -148,7 +151,7 @@ function module_code(library_namespace) {
 			var work_data;
 			eval('work_data=' + html.between('qingtiancms_Details=', ';var'));
 
-			// nokiacn.js, iqg365.js
+			// nokiacn.js, iqg365.js, 733dm.js
 			extract_work_data(work_data, html.between(
 			// <div class="cy_title">\n <h1>相合之物</h1>
 			'<h1>', ' id="comic-description">'),
@@ -178,15 +181,15 @@ function module_code(library_namespace) {
 
 				// 必要屬性：須配合網站平台更改。
 				title : work_data.title
-				// nokiacn.js, iqg365.js
+				// nokiacn.js, iqg365.js, 733dm.js
 				|| get_label(html.between('<h1>', '</h1>')),
 				author : work_data.作者,
 				status : work_data.状态,
 				last_update : work_data.更新时间,
+				latest_chapter : work_data.最新话,
+				latest_chapter_url : html.between('最新话：<a href="', '"'),
 
 				// 選擇性屬性：須配合網站平台更改。
-				latest_chapter : work_data.最新话,
-
 				评分 : work_data.评分 || get_label(html.between(
 				// 360taofu.js: <p class="fl">评分：<strong class="ui-text-orange"
 				// id="comicStarDis">...</p>
@@ -194,7 +197,7 @@ function module_code(library_namespace) {
 
 				// 網頁中列的description比meta中的完整。
 				description : get_label(html.between(
-				// nokiacn.js, iqg365.js
+				// nokiacn.js, iqg365.js, 733dm.js
 				// <p id="comic-description">...</p>
 				' id="comic-description">', '</')) || get_label(html.between(
 				// 360taofu.js: <div id="workint" class="work-ov">
@@ -223,7 +226,9 @@ function module_code(library_namespace) {
 			// console.log(work_data.chapter_list);
 		},
 
-		parse_chapter_data : function(html, work_data) {
+		parse_chapter_data : function(html, work_data
+		// , get_label, chapter_NO
+		) {
 			// modify from mh160.js
 
 			var chapter_data = html.between('qTcms_S_m_murl_e="', '"');
