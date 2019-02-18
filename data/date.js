@@ -2643,7 +2643,9 @@ function module_code(library_namespace) {
 			// count till now.
 			end = new Date;
 		}
-		var difference = end - start, diff, diff2;
+		var difference = end - start, diff, diff2,
+		//
+		gettext = library_namespace.gettext;
 		if (!(difference >= 0) || !isFinite(difference)) {
 			return;
 		}
@@ -2668,11 +2670,11 @@ function module_code(library_namespace) {
 			difference = diff + diff2 / 12;
 			// diff = {String} format to show
 			if (options && options.月) {
-				diff += ' Y ' + Math.round(diff2) + ' M';
+				diff = gettext('%1 Y %2 M', diff, Math.round(diff2));
 			} else {
 				// years
 				// SI symbol: a (for Latin annus)
-				diff = difference.to_fixed(1) + ' Y';
+				diff = gettext('%1 Y', difference.to_fixed(1));
 			}
 			if (options && options.歲) {
 				// 計算年齡(虛歲)幾歲。
@@ -2694,28 +2696,27 @@ function module_code(library_namespace) {
 		}
 
 		if (diff2 >= 1) {
-			// Month
-			return diff2.to_fixed(1) + ' month';
+			return gettext('%1 M', diff2.to_fixed(1));
 		}
 
 		if (difference < 1000) {
-			return difference + ' ms';
+			return gettext('%1 ms', difference);
 		}
 
 		if ((difference /= 1000) < 60) {
-			return difference.to_fixed(1) + ' s';
+			return gettext('%1 s', difference.to_fixed(1));
 		}
 
 		if ((difference /= 60) < 60) {
-			return difference.to_fixed(1) + ' min';
+			return gettext('%1 min', difference.to_fixed(1));
 		}
 
 		if ((difference /= 60) < 24) {
-			return difference.to_fixed(1) + ' hr';
+			return gettext('%1 hr', difference.to_fixed(1));
 		}
 
 		// day
-		return (difference / 24).to_fixed(1) + ' d';
+		return gettext('%1 d', (difference / 24).to_fixed(1));
 	}
 
 	// 將在 data.date.era 更正。
@@ -2759,22 +2760,22 @@ function module_code(library_namespace) {
 		if (date_value_diff < 10) {
 			return passed ? 'several seconds ago' : 'soon';
 		}
-		if (date_value_diff < 10) {
-			return gettext(passed ? '%1 seconds ago' : 'after %1 seconds', Math
+		if (date_value_diff < 60) {
+			return gettext(passed ? '%1 seconds ago' : '%1 seconds later', Math
 					.round(date_value_diff));
 		}
 
 		// → minutes
 		date_value_diff /= 60;
 		if (date_value_diff < 60) {
-			return gettext(passed ? '%1 minutes ago' : 'after %1 minutes', Math
+			return gettext(passed ? '%1 minutes ago' : '%1 minutes later', Math
 					.round(date_value_diff));
 		}
 
 		// → hours
 		date_value_diff /= 60;
 		if (date_value_diff < 3) {
-			return gettext(passed ? '%1 hours ago' : 'after %1 hours', Math
+			return gettext(passed ? '%1 hours ago' : '%1 hours later', Math
 					.round(date_value_diff));
 		}
 
@@ -2783,30 +2784,25 @@ function module_code(library_namespace) {
 		// → days
 		date_value_diff /= 24;
 
-		if (date_value_diff < 2) {
+		if (date_value_diff <= 3) {
 			// the day of the month
-			var date_of_month = date.getDate(), date_now = new Date().getDate();
-			if (date_of_month === date_now) {
-				return date.format(gettext('today, %H:%M'));
-			}
-			if (Math.abs(date_of_month - date_now) === 1) {
-				return date.format(gettext(passed ? 'yesterday, %H:%M'
-						: 'tomorrow, %H:%M'));
-			}
-			// TODO: 前天 the day before yesterday
-			// 後天 the day after tomorrow
+			var message = /* date_of_month */date.getDate()
+					- /* date_now */(new Date).getDate() + 3;
+			message = [ '3 days ago', 'the day before yesterday', 'yesterday',
+					'today', 'tomorrow', 'the day after tomorrow',
+					'3 days later' ][message];
+			return date.format(gettext(message + ', %H:%M'));
 		}
 
-		if (false && date_value_diff < 7) {
-			return gettext(passed ? '%1 days ago' : 'after %1 days',
-					date_value_diff | 0);
+		if (date_value_diff <= 35) {
+			return gettext(passed ? '%1 days ago' : '%1 days later', Math
+					.round(date_value_diff));
 		}
 
 		// ----------------------------
 
-		// TODO: weeks
 		if (false && date_value_diff < 30) {
-			return gettext(passed ? '%1 days ago' : 'after %1 days', Math
+			return gettext(passed ? '%1 weeks ago' : '%1 weeks later', Math
 					.round(date_value_diff / 7));
 		}
 

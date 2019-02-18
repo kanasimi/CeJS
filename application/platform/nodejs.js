@@ -788,7 +788,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
-	// 為 electron-builder 安裝包
+	// 為 electron-builder 📦安裝包
 	var is_installation_package = process.env.Apple_PubSub_Socket_Render
 			// @ Windows, Linux Mint
 			|| process.mainModule

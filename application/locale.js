@@ -1097,7 +1097,9 @@ function module_code(library_namespace) {
 		};
 
 		if (tmp = create_domain_menu.tag)
-			menu = [ {
+			menu = [
+			// '🗣',
+			{
 				T : tmp
 			}, ': ', menu ];
 
@@ -1534,6 +1536,8 @@ function module_code(library_namespace) {
 			.null_Object();
 
 	// TODO: lazy evaluation
+
+	// https://cloud.google.com/speech-to-text/docs/languages?hl=zh-tw
 	// http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 
 	// http://www.rfc-editor.org/rfc/bcp/bcp47.txt
@@ -1560,7 +1564,9 @@ function module_code(library_namespace) {
 				 * 英文名稱, 最細分之標準 language tag)'
 				 */
 
-				'arb-Arab' : 'العربية|ar|Arabic|阿拉伯語|ar-arb-Arab',
+				// ar-AE: 阿拉伯文 (阿拉伯聯合大公國)
+				// ar-SA: 阿拉伯文 (沙烏地阿拉伯)
+				'arb-Arab' : 'العربية|ar|Arabic|阿拉伯語|ar-arb-Arab|ar-AE|ar-SA',
 
 				// Min Nan Chinese. Macrolanguage: zh.
 				// zh-min-nan:
@@ -1568,7 +1574,7 @@ function module_code(library_namespace) {
 				// using 臺灣閩南語推薦用字
 				'nan-Hant-TW' :
 				//
-				'臺灣閩南語|zh-min-nan|zh-min-nan-Hant-TW|臺語|台語|臺灣話|台灣話|閩南語|河洛話|福老話',
+				'臺灣閩南語|min-nan-Hant-TW|Taiwanese|zh-min-nan|zh-min-nan-Hant-TW|臺語|台語|臺灣話|台灣話|閩南語|河洛話|福老話',
 
 				'cmn-Hant-HK' : '香港普通話|zh-yue-Hant-HK|Cantonese|香港華語|香港官話',
 
@@ -1576,32 +1582,42 @@ function module_code(library_namespace) {
 				'yue-Hant-HK' : '香港粵語|zh-yue-Hant-HK|Hong Kong Cantonese|港式粵語|香港話|港式廣東話|港式廣州話',
 
 				// Subtag: cmn, Preferred-Value: cmn
-				'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|简化字|简化中文|簡化字|簡體中文|普通话|中国|官话|Simplified Chinese|Mandarin Chinese',
+				'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|简化字|简化中文|簡化字|簡體中文|普通话|中国|中国大陆|官话|Simplified Chinese|Mandarin Chinese',
 
 				// 現代標準漢語
 				'cmn-Hant-TW' : '繁體中文|zh-TW|繁體|zh-cmn-Hant-TW|TW|Chinese|傳統中文|正體中文|正體|漢語|華語|中文|中國|臺灣|台灣|官話|中華民國國語|Traditional Chinese',
 
-				// Subtag: en, Suppress-Script: Latn
-				// "zh-Hant" and "zh-Hans" represent Chinese written in
-				// Traditional and
-				// Simplified scripts respectively, while the language subtag
-				// "en" has a
-				// "Suppress-Script" field in the registry indicating that most
-				// English
-				// texts are written in the Latin script, discouraging a tag
-				// such as
-				// "en-Latn-US".
-				'en-US' : 'English|en-US|英語|en-eng-Latn-US|en-Latn-US|eng-Latn-US|US',
+				/**
+				 * Subtag: en, Suppress-Script: Latn
+				 * 
+				 * "zh-Hant" and "zh-Hans" represent Chinese written in
+				 * Traditional and Simplified scripts respectively, while the
+				 * language subtag "en" has a "Suppress-Script" field in the
+				 * registry indicating that most English texts are written in
+				 * the Latin script, discouraging a tag such as "en-Latn-US".
+				 * 
+				 * @see https://www.w3.org/International/articles/bcp47/
+				 */
+				'en-GB' : 'British English|en-GB|英國英語|en-eng-Latn-GB|en-Latn-GB|eng-Latn-GB|Great Britain|United Kingdom|英式英語',
+				// 後來的會覆蓋前面的。
+				'en-US' : 'English|en-US|英語|en-eng-Latn-US|en-Latn-US|eng-Latn-US|US|USA|United States|美語|美國英語|美式英語',
 
 				// Subtag: ja, Suppress-Script: Jpan
-				'ja-JP' : '日本語|ja-JP|Japanese|日文|日語|国語|JP|ja-jpn-Jpan-JP|ja-Jpan-JP|jpn-Jpan-JP',
+				'ja-JP' : '日本語|ja-JP|Japanese|日語|日文|国語|日本|JP|ja-jpn-Jpan-JP|ja-Jpan-JP|jpn-Jpan-JP',
 
 				// Subtag: ko, Suppress-Script: Kore
 				'ko-KR' : '한국어|ko-KR|Korean|韓國語|조선어|朝鮮語|조선말|고려말|韓文|韓語|ko-kor-Kore-KR|ko-Kore-KR|kor-Kore-KR|KR',
 
-				// Subtag: ru, Suppress-Script: Cyrl
-				'ru-RU' : 'Русский|ru-RU|Russian|俄語|rus-Cyrl-RU|ru-rus-Cyrl-RU|RU'
+				'th-TH' : 'ไทย|th-TH|Thai|泰語|泰國',
 
+				// Subtag: ru, Suppress-Script: Cyrl
+				'ru-RU' : 'Русский|ru-RU|Russian|俄語|rus-Cyrl-RU|ru-rus-Cyrl-RU|RU',
+
+				'fr-FR' : 'Français|fr-FR|French|法語',
+
+				'de-DE' : 'Deutsch|de-DE|German|德語',
+
+				'es-ES' : 'Español|es-ES|Spanish|西班牙語'
 			});
 
 	// setup default / current domain. ユーザーロケール(言語と地域)の判定。

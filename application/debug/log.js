@@ -971,7 +971,9 @@ function module_code(library_namespace) {
 		 */
 		set_max_logs : function(max_logs) {
 			var _t = this, _p = p[_t.id];
-			_p.max_logs = max_logs;
+			max_logs = Math.floor(max_logs);
+			// accept NaN
+			_p.max_logs = max_logs < 0 ? 0 : max_logs;
 		},
 
 		/**

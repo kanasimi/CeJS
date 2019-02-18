@@ -908,6 +908,7 @@ function module_code(library_namespace) {
 
 	// wikitext to plain text
 	// CeL.wiki.plain_text(wikitext)
+	// @seealso function get_label(html) @ work_crawler.js
 	function wikitext_to_plain_text(wikitext) {
 		if (!wikitext || !(wikitext = wikitext.trim())) {
 			// 一般 template 中之 parameter 常有設定空值的狀況，因此首先篩選以加快速度。
@@ -8675,7 +8676,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Boolean}
 	 */
-	wiki_API.query.allow_JSONP = library_namespace.is_WWW(true);
+	wiki_API.query.allow_JSONP = library_namespace.is_WWW(true) && false;
 
 	/**
 	 * URL last queried.<br />
@@ -15052,6 +15053,7 @@ function module_code(library_namespace) {
 						+ (title ? ' ' + get_page_title_link(title) : '')
 						//
 						+ ': ' + pages.length + ' page(s).');
+						pages.query_title = title;
 						// page list, title page_data
 						callback(pages);
 					}, Object.assign({
@@ -21181,6 +21183,7 @@ function module_code(library_namespace) {
 		PATTERN_common_characters : PATTERN_common_characters,
 		PATTERN_only_common_characters : PATTERN_only_common_characters,
 		PATTERN_BOT_NAME : PATTERN_BOT_NAME,
+		PATTERN_category : PATTERN_category,
 
 		namespace : get_namespace,
 		remove_namespace : remove_namespace,

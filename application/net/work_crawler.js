@@ -1068,15 +1068,18 @@ function module_code(library_namespace) {
 			options = library_namespace.setup_options(options);
 		}
 
-		if (options.rearrange_list) {
-			options.get_parsed = true;
+		var remove_list = options.remove, rearrange_list = options.rearrange_list
+				|| remove_list;
+		if (remove_list && !Array.isArray(remove_list)) {
+			remove_list = [ remove_list ];
 		}
+		var get_parsed = options.get_parsed || rearrange_list;
 
 		var matched, work_list = [], work_hash = library_namespace
 				.null_Object(), parsed;
-		work_list.duplicated = 0;
+		work_list.blank = work_list.comments = work_list.duplicated = 0;
 		work_list.work_indexes = [];
-		if (options.get_parsed) {
+		if (get_parsed) {
 			parsed = work_list.parsed = [];
 			parsed.duplicated = [];
 			parsed.line_separator = library_namespace
@@ -1099,7 +1102,7 @@ function module_code(library_namespace) {
 
 		while (matched = PATTERN_favorite_list_token.exec(work_list_text)) {
 			// or work id
-			var work_title = matched[1];
+			var work_title = matched[1], remove_it = false;
 			if (parsed) {
 				// `work_title` includes "\r"
 				parsed.push(work_title);
@@ -1111,21 +1114,29 @@ function module_code(library_namespace) {
 			// 定義列表檔案的規範，可以統合設定檔案的規範。
 			if (!work_title) {
 				// Skip blank line
+				work_list.blank++;
 			} else if (work_title.startsWith('#')
 					|| work_title.startsWith('//')) {
 				// Skip comments
+				work_list.comments++;
 			} else if (work_title.startsWith('/*')) {
+				work_list.comments++;
 				if (matched[2] && (matched[2] = matched[2].trim())) {
-					library_namespace.warn(gettext('作品列表區塊注解後面的"%1"會被忽略',
+					library_namespace.warn(gettext('作品列表區塊注解 "*/" 後面的"%1"會被忽略',
 							matched[2]));
 				}
-			} else if (work_title in work_hash) {
-				work_list.duplicated++;
+			} else if ((work_title in work_hash)
+					|| (remove_it = remove_list
+							&& remove_list.includes(work_title))) {
+				if (!remove_it)
+					work_list.duplicated++;
 				if (parsed) {
-					parsed.duplicated.push(work_title);
-					if (options.rearrange_list) {
-						if (typeof options.rearrange_list === 'function') {
-							options.rearrange_list(parsed);
+					// 改變原先的 list data。
+					if (!remove_it)
+						parsed.duplicated.push(work_title);
+					if (rearrange_list) {
+						if (typeof rearrange_list === 'function') {
+							rearrange_list(parsed);
 						} else {
 							// comment out this work title / work id
 							parsed[parsed.length - 1] = '#'
@@ -1720,10 +1731,9 @@ function module_code(library_namespace) {
 		get_URL(search_URL_string, function(XMLHttp) {
 			_this.set_agent();
 			if (!XMLHttp.responseText) {
-				library_namespace.error(
-				// 沒有搜索結果。
-				'get_work: Nothing got for searching [' + work_title + ']');
-				finish_up('Nothing got for searching');
+				library_namespace.error('get_work: 沒有搜索結果（網站暫時不可用或改版？）: ['
+						+ work_title + ']');
+				finish_up('沒有搜索結果。網站暫時不可用或改版？');
 				return;
 			}
 			// this.parse_search_result() returns:
@@ -2281,7 +2291,8 @@ function module_code(library_namespace) {
 					set_work_status(work_data, 'finished');
 				// cf. work_data.latest_chapter 最新章節,
 				// work_data.latest_chapter_url 最新更新章節URL,
-				// work_data.last_update 最新更新時間
+				// work_data.last_update 最新更新時間,
+				// work_data.some_limited 部份章節需要付費/被鎖住/被限制
 				if (work_data.last_update) {
 					set_work_status(work_data, 'last updated date: '
 							+ work_data.last_update);
