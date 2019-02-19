@@ -670,7 +670,7 @@ function module_code(library_namespace) {
 			status = String(status);
 
 			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
-			if (/^\(?(?:完[結结成]?|Completed)\)?$/i.test(status))
+			if (/^[(\[]?(?:完[結结成]?|Completed)[)\]]?$/i.test(status))
 				return status;
 
 			// e.g., 连载中, 連載中, 已完结, 已完成, 已完結作品, 已連載完畢
@@ -1059,6 +1059,7 @@ function module_code(library_namespace) {
 
 	// /./ doesn't include "\r", can't preserv line separator.
 	var PATTERN_favorite_list_token = /(?:\r?\n|^)(\s*\/\*[\s\S]*?\*\/([^\r\n]*)|[^\r\n]*)/g;
+	// 最愛清單 / 圖書館 / 書籤 / 書庫
 	function parse_favorite_list(work_list_text, options) {
 		if (options === true) {
 			options = {
