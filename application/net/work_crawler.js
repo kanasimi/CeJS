@@ -2287,8 +2287,9 @@ function module_code(library_namespace) {
 					});
 				}
 				if (!work_data.process_status
-						|| !work_data.process_status.includes('finished'))
+						|| !work_data.process_status.includes('finished')) {
 					set_work_status(work_data, 'finished');
+				}
 				// cf. work_data.latest_chapter 最新章節,
 				// work_data.latest_chapter_url 最新更新章節URL,
 				// work_data.last_update 最新更新時間,
@@ -2356,14 +2357,43 @@ function module_code(library_namespace) {
 
 			}
 
-			// 之前已設定 work_data.chapter_count=0
-			if (!work_data.chapter_count
 			// work_data.chapter_list 為非正規之 chapter data list。
 			// e.g., work_data.chapter_list = [ chapter_data,
 			// chapter_data={url:'',title:'',date:new Date}, ... ]
-			&& Array.isArray(work_data.chapter_list)) {
-				// 自 work_data.chapter_list 計算章節數量。
-				work_data.chapter_count = work_data.chapter_list.length;
+			var chapter_list = Array.isArray(work_data.chapter_list)
+					&& work_data.chapter_list;
+
+			if (chapter_list) {
+				// fill required data from chapter_list
+
+				// 之前已設定 work_data.chapter_count=0
+				if (!work_data.chapter_count) {
+					// 自 work_data.chapter_list 計算章節數量。
+					work_data.chapter_count = chapter_list.length;
+				}
+
+				var last_chapter_data = chapter_list.length > 0
+						&& chapter_list[chapter_list.length - 1],
+				//
+				set_attribute = function(attribute, value) {
+					if (!work_data[attribute] && value) {
+						work_data[attribute] = value;
+						// 有些資訊來自章節清單。
+						work_data.fill_from_chapter_list = true;
+					}
+				};
+
+				if (typeof last_chapter_data === 'string') {
+					set_attribute('latest_chapter_url', last_chapter_data);
+				} else {
+					// assert: CeL.is_Object(last_chapter_data)
+					set_attribute('latest_chapter_url', last_chapter_data.url);
+					set_attribute('latest_chapter', last_chapter_data.title);
+					set_attribute('last_update', last_chapter_data.date);
+				}
+
+				// free
+				last_chapter_data = set_attribute = null;
 			}
 
 			if (work_data.chapter_count >= 1) {
@@ -2423,9 +2453,9 @@ function module_code(library_namespace) {
 					- work_data.last_download.chapter;
 
 			if (recheck_flag === 'multi_parts_changed') {
-				recheck_flag = work_data.chapter_list
+				recheck_flag = chapter_list
 				// 當有多個分部的時候才重新檢查。
-				&& work_data.chapter_list.part_NO > 1 && 'changed';
+				&& chapter_list.part_NO > 1 && 'changed';
 			} else if (typeof recheck_flag === 'function') {
 				recheck_flag = recheck_flag.call(this, work_data);
 			}
