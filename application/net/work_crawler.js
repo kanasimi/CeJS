@@ -18,16 +18,15 @@
 # finish_up(), .after_download_chapter(), .after_download_work()
 
 TODO:
-將工具檔結構以及說明統合在一起，並且建造可以自動生成的工具
+將工具檔結構以及說明統合在一起，並且建造可以自動生成的工具。
 	自動判別網址所需要使用的下載工具，輸入網址自動揀選所需的工具檔案。
 	從其他的資料來源網站尋找取得作品以及章節的資訊。
 	自動記得某個作品要從哪些網站下載。
-定義參數的規範，例如數量包含可選範圍，可用 RegExp https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern 。如'number:0~|string:/v\\d|V[1-3]|a|b|c/', 'number:1~400|string:item1;item2;item3'。不像現在import_arg_hash只規範了'number|string'
-	將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
-解析及操作列表檔案的功能。
+
+將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
 
 
-暗色主題
+暗色主題 dark theme
 CLI progress bar
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
@@ -225,6 +224,97 @@ function module_code(library_namespace) {
 		this.default_agent = this.set_agent();
 	}
 
+	// ------------------------------------------
+
+	/**
+	 * 定義參數的規範，例如數量包含可選範圍，可用 RegExp。如'number:0~|string:/v\\d/i',
+	 * 'number:1~400|string:item1;item2;item3'。不像現在import_arg_hash只規範了'number|string'
+	 * 
+	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern
+	 */
+	function generate_argument_condition(condition) {
+		if (library_namespace.is_Object(condition))
+			return condition;
+
+		var condition_data = library_namespace.null_Object(), matched, PATTERN = /([a-z]+)(?::(\/(\\\/|[^\/])+\/([i]*)|[^|]+))?(?:\||$)/g;
+		while (matched = PATTERN.exec(condition)) {
+			var type = matched[1], _condition;
+			if (!matched[2]) {
+				;
+
+			} else if (matched[3]) {
+				_condition = new RegExp(matched[3], matched[4]);
+
+			} else if (type === 'number'
+					&& (_condition = matched[2]
+							.match(/([+\-]?\d+(?:\.\d+)?)?~([+\-]?\d+(?:\.\d+)?)?/))) {
+				_condition = {
+					min : _condition[1] && +_condition[1],
+					max : _condition[2] && +_condition[2]
+				};
+
+			} else if (type === 'number' && matched[2] === 'natural') {
+				_condition = function(value) {
+					return value >= 1 && value === Math.floor(value);
+				};
+
+			} else if (type === 'number' && matched[2] === 'integer') {
+				_condition = function(value) {
+					return value === Math.floor(value);
+				};
+
+			} else {
+				_condition = matched[2].split(';');
+			}
+
+			condition_data[type] = _condition;
+		}
+
+		return condition_data;
+	}
+
+	function verify_arg(key, value) {
+		if (!(key in this.import_arg_hash)) {
+			return true;
+		}
+
+		var type = typeof value, arg_type_data = this.import_arg_hash[key];
+
+		if (type in arg_type_data) {
+			arg_type_data = arg_type_data[type];
+			if (Array.isArray(arg_type_data)) {
+				if (arg_type_data.includes(value))
+					// verified
+					return;
+
+			} else if (arg_type_data && ('min' in arg_type_data)) {
+				if ((!arg_type_data.min || arg_type_data.min <= value)
+						&& (!arg_type_data.max || value <= arg_type_data.max))
+					// verified
+					return;
+
+			} else if (typeof arg_type_data === 'function') {
+				if (arg_type_data(value))
+					return;
+
+			} else {
+				// assert: arg_type_data === undefined
+				return;
+			}
+
+		}
+
+		arg_type_data = JSON.stringify(arg_type_data);
+
+		library_namespace.warn([ 'verify_arg: ', {
+			T : [ '"%1" 這個值所允許的數值類型為 %2，但現在被設定了 {%3} %4',
+			//
+			key, arg_type_data, typeof value, value ]
+		} ]);
+
+		return true;
+	}
+
 	// 檢核參數. normalize and setup value
 	// return {String}has error
 	function setup_value(key, value) {
@@ -297,13 +387,7 @@ function module_code(library_namespace) {
 		}
 
 		if (key in this.import_arg_hash) {
-			if (!this.import_arg_hash[key].includes(typeof value)) {
-				library_namespace.warn([ 'setup_value: ', {
-					T : [ '"%1" 這個值所允許的數值類型為 %2，但現在被設定了 {%3} %4',
-					//
-					key, this.import_arg_hash[key], typeof value, value ]
-				} ]);
-			}
+			this.verify_arg(key, value);
 		}
 
 		if (value === undefined) {
@@ -350,6 +434,8 @@ function module_code(library_namespace) {
 			}
 		}
 	}
+
+	// --------------------------------
 
 	// 初始化 agent。
 	// create and keep a new agent. 維持一個獨立的 agent。
@@ -499,10 +585,11 @@ function module_code(library_namespace) {
 		error_log_file_backup : 'error_files.'
 				+ (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.txt',
 		// last updated date, latest update date. 最後更新日期時間。
+		// latest_chapter_url → latest_chapter_url
 		// latest_chapter_name, last_update_chapter → latest_chapter
 		// update_time, latest_update → last_update
 		// 這些值會被複製到記錄報告中，並用在 show_search_result() @ gui_electron_functions.js。
-		last_update_status_keys : 'latest_chapter,latest_chapter_url,last_update'
+		last_update_status_keys : 'latest_chapter,last_update_chapter,latest_chapter,latest_chapter_name,latest_chapter_url,last_update,update_time'
 				.split(','),
 		// 記錄報告檔案/日誌的路徑。
 		report_file : 'report.' + (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.'
@@ -789,6 +876,7 @@ function module_code(library_namespace) {
 			image_count : true
 		},
 
+		verify_arg : verify_arg,
 		setup_value : setup_value,
 		import_args : import_args,
 		// 命令列可以設定的選項。通常僅做測試微調用。
@@ -802,17 +890,17 @@ function module_code(library_namespace) {
 			// 篩選想要下載的章節標題關鍵字。例如"單行本"。
 			chapter_filter : 'string',
 			// 將開始/接續下載的章節編號。對已下載過的章節，必須配合 .recheck。
-			start_chapter : 'number',
+			start_chapter : 'number:natural',
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
 			// 一般僅使用於命令列設定。default:1
-			start_list_serial : 'number|string',
+			start_list_serial : 'number:natural|string',
 			// 重新整理列表檔案 rearrange list file
 			rearrange_list_file : 'boolean',
 			// string: 如 "3s"
-			chapter_time_interval : 'number|string',
-			MIN_LENGTH : 'number',
+			chapter_time_interval : 'number:natural|string',
+			MIN_LENGTH : 'number:natural',
 			// 容許錯誤用的相關操作設定。
-			MAX_ERROR_RETRY : 'number',
+			MAX_ERROR_RETRY : 'number:natural',
 			allow_EOI_error : 'boolean',
 			skip_error : 'boolean',
 			skip_chapter_data_error : 'boolean',
@@ -834,7 +922,7 @@ function module_code(library_namespace) {
 			// 重新擷取用的相關操作設定。
 			regenerate : 'boolean',
 			reget_chapter : 'boolean',
-			recheck : 'boolean|string',
+			recheck : 'boolean|string:changed;multi_parts_changed',
 			research : 'boolean',
 
 			write_chapter_metadata : 'boolean',
@@ -861,7 +949,12 @@ function module_code(library_namespace) {
 		get_image : get_image,
 
 		parse_favorite_list_file : parse_favorite_list_file
-	}
+	};
+
+	Object.keys(Work_crawler_prototype.import_arg_hash).forEach(function(key) {
+		this[key] = generate_argument_condition(this[key]);
+	}, Work_crawler_prototype.import_arg_hash);
+	// console.log(Work_crawler_prototype.import_arg_hash);
 
 	Object.assign(Work_crawler.prototype, Work_crawler_prototype);
 	// free
@@ -1059,7 +1152,7 @@ function module_code(library_namespace) {
 
 	// /./ doesn't include "\r", can't preserv line separator.
 	var PATTERN_favorite_list_token = /(?:\r?\n|^)(\s*\/\*[\s\S]*?\*\/([^\r\n]*)|[^\r\n]*)/g;
-	// 最愛清單 / 圖書館 / 書籤 / 書庫
+	// 解析及操作列表檔案的功能。 最愛清單 / 圖書館 / 書籤 / 書庫
 	function parse_favorite_list(work_list_text, options) {
 		if (options === true) {
 			options = {
@@ -4430,10 +4523,10 @@ function module_code(library_namespace) {
 		next_chapter_url = next_chapter && next_chapter.url,
 		// /下一[章页][：: →]*<a [^<>]*?href="([^"]+.html)"[^<>]*>/
 		next_url = html.match(PATTERN_next_chapter ||
-		// PTCMS default. e.g., "下一章 →"
+		// PTCMS default. e.g., "下一章 →" /下一章[：: →]*/
 		// PATTERN_next_chapter: [ all, next chapter url ]
 		// e.g., <a href="//read.qidian.com/chapter/abc123">下一章</a>
-		/ href=["']([^<>"']+)["'][^<>]*>下一[章页]/);
+		/ href=["']([^<>"']+)["'][^<>]*>(?:<button[^<>]*>)?下一[章页]/);
 		// console.log(chapter_NO + ': ' + next_url[1]);
 
 		if (next_chapter && next_url
@@ -4571,11 +4664,15 @@ function module_code(library_namespace) {
 			language : work_data.language || this.language,
 			// 作品內容最後編輯時間。
 			modified : work_data.last_update_Date
-		}), subject = [].concat(work_data.status);
-		if (work_data.genre)
-			subject = subject.concat(work_data.genre);
-		if (work_data.tags)
-			subject = subject.concat(work_data.tags);
+		}), subject = [];
+		// keywords 太多雜訊，如:
+		// '万古剑神,,万古剑神全文阅读,万古剑神免费阅读,万古剑神txt下载,万古剑神txt全集下载,万古剑神蒙白'
+		'status,genre,tags,category,categories,类型'.split(',')
+		// 標籤 類別 類型 类型 types
+		.forEach(function(type) {
+			if (work_data[type])
+				subject = subject.concat(work_data[type]);
+		});
 
 		ebook.time_zone = work_data.time_zone || this.time_zone;
 
