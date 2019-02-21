@@ -671,12 +671,14 @@ function module_code(library_namespace) {
 
 		/**
 		 * <code>
-		 * this.metadata = {
-		 * 	'dc:tagname' : [ {Object} ],
-		 * 	meta : { [property] : [ {Object} ] },
-		 * 	link : { href : {Object} }
-		 * }
-		 * </code>
+
+		this.metadata = {
+			'dc:tagname' : [ {Object} ],
+			meta : { [property] : [ {Object} ] },
+			link : { href : {Object} }
+		}
+
+		</code>
 		 */
 		if (required) {
 			// 若已經有此key則沿用舊container直接設定。
@@ -1989,11 +1991,13 @@ function module_code(library_namespace) {
 		this.metadata.link = link;
 		/**
 		 * <code>
+
 		this.metadata = {
 			'dc:tagname' : [ {Object} ],
 			meta : { [property] : [ {Object} ] },
 			link : { href : {Object} }
 		}
+
 		</code>
 		 */
 		this.raw_data_ptr.metadata.clear();
@@ -2004,7 +2008,28 @@ function module_code(library_namespace) {
 			}
 
 			// TODO: 正規化{Object}data[1]，如值中有 {Date}。
-			this.raw_data_ptr.metadata.append(data[1]);
+			var _data;
+			// calibre 裡面的標籤採用逗號","做為分隔，若是直接輸入{Array}subject，
+			// JSON.to_XML(this.raw_data, this.to_XML_options)
+			// 的時候會以 this.to_XML_options.separator : '\n' 為分隔，
+			// 造成無法判別，因此需要特別處理。
+			if (data[0] === 'dc:subject') {
+				_data = data[1].map(function(object) {
+					object = Object.clone(object);
+					for ( var tag in object) {
+						if (Array.isArray(object[tag]))
+							object[tag] = object[tag].join(',');
+						// only apply to children.
+						// 資料結構和 new_node 類似:
+						// {tagName:children,attrName:attr,...}
+						break;
+					}
+					return object;
+				});
+			} else {
+				_data = data[1];
+			}
+			this.raw_data_ptr.metadata.append(_data);
 		}, this);
 
 		if (library_namespace.is_Object(this.metadata.meta)) {
