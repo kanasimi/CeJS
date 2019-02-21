@@ -775,8 +775,10 @@ function (global) {
 	 * @returns {undefined} error occurred
 	 * 
 	 * @example<code>
-	 * CeL.is_type(value_to_test, 'Array');
-	 * </code>
+
+	CeL.is_type(value_to_test, 'Array');
+
+	</code>
 	 * 
 	 * @since 2009/12/14 19:50:14
 	 * @see <a
@@ -950,6 +952,7 @@ function (global) {
 	.
 	is_empty_object = function is_empty_object(value) {
 		if (typeof value === 'object') {
+			// TODO: using value.hasOwnProperty()
 			for (var key in value) {
 				return false;
 			}

@@ -9,7 +9,7 @@
 
  </code>
  * 
- * TODO: 去掉前後網站廣告
+ * TODO: 去掉前後網站廣告。
  * 
  * @see https://www.ptcms.com/
  * @see http://down.chinaz.com/test/201210/2252_1.htm 杰奇小说连载系统 杰奇原创文学系统,
@@ -41,8 +41,6 @@ typeof CeL === 'function' && CeL.run({
 	require : 'application.net.work_crawler.'
 	//
 	+ '|application.storage.EPUB.'
-	// for CeL.to_file_name()
-	+ '|application.net.'
 	// for .detect_HTML_language(), .time_zone_of_language()
 	+ '|application.locale.',
 

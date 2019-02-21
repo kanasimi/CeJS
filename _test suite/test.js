@@ -205,12 +205,6 @@ function test_compatibility() {
 		assert([ "1;2,3,4,5;6;t", a.flatMap(function(i){return i+'';}).join(';') ], 'array.flatMap()');
 		*/
 
-		assert([ Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(.)/ig)).join(';'), "a1,a,1;A3,A,3;a5,a,5" ], 'String.prototype.matchAll(/ /g)');
-		assert([ Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(.)/i)).join(';'), "a1,a,1" ], 'String.prototype.matchAll(/ /)');
-		assert([ Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(a)/i)).join(';'), "" ], 'String.prototype.matchAll(/ /) NOT matched');
-		assert([ Array.from('_a1b2A3B4a5cc'.matchAll('aa')).join(';'), "" ], 'String.prototype.matchAll("") NOT matched');
-		assert([ Array.from('_a1b2A1B4a1cc'.matchAll('a1')).join(';'), "a1;a1" ], 'String.prototype.matchAll("")');
-
 	});
 
 	// ----------------------------------------------------
@@ -301,13 +295,20 @@ function test_compatibility() {
 	]);
 
 	error_count += CeL.test('compatibility', [
-		[[ NaN, NaN ], 'Object.is(NaN,NaN)'],
+		[ [ NaN, NaN ], 'Object.is(NaN,NaN)' ],
 
-		[[/./ig.flags, 'gi'], '/./ig.flags'],
-		[[5, Math.hypot(3, 4)], 'normal positive Math.hypot'],
-		[[5, Math.hypot(-3, -4)], 'negative Math.hypot'],
-		[[Number.MAX_VALUE, Math.hypot(3 / 5 * Number.MAX_VALUE, 4 / 5 * Number.MAX_VALUE)], 'avoid overflow'],
-		[[5, Math.hypot(Number.MIN_VALUE * 3, Number.MIN_VALUE * 4) / Number.MIN_VALUE], 'avoid underflow'],
+		[ [/./ig.flags, 'gi'], '/./ig.flags' ],
+		[ [5, Math.hypot(3, 4)], 'normal positive Math.hypot' ],
+		[ [5, Math.hypot(-3, -4)], 'negative Math.hypot' ],
+		[ [Number.MAX_VALUE, Math.hypot(3 / 5 * Number.MAX_VALUE, 4 / 5 * Number.MAX_VALUE)], 'avoid overflow' ],
+		[ [5, Math.hypot(Number.MIN_VALUE * 3, Number.MIN_VALUE * 4) / Number.MIN_VALUE], 'avoid underflow' ],
+
+		[ [ Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(.)/ig)).join(';'), "a1,a,1;A3,A,3;a5,a,5" ], 'String.prototype.matchAll(/ /g)' ],
+		[ [ Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(.)/i)).join(';'), "a1,a,1" ], 'String.prototype.matchAll(/ /)' ],
+		[ [ Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(a)/i)).join(';'), "" ], 'String.prototype.matchAll(/ /) NOT matched' ],
+		[ [ Array.from('_a1b2A3B4a5cc'.matchAll('aa')).join(';'), "" ], 'String.prototype.matchAll("") NOT matched' ],
+		[ [ Array.from('_a1b2A1B4a1cc'.matchAll('a1')).join(';'), "a1;a1" ], 'String.prototype.matchAll("")' ],
+
 	]);
 
 }

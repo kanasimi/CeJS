@@ -228,7 +228,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 定義參數的規範，例如數量包含可選範圍，可用 RegExp。如'number:0~|string:/v\\d/i',
-	 * 'number:1~400|string:item1;item2;item3'。不像現在import_arg_hash只規範了'number|string'
+	 * 'number:1~400|string:item1;item2;item3'。亦可僅使用'number|string'。
 	 * 
 	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern
 	 */
@@ -1750,8 +1750,7 @@ function module_code(library_namespace) {
 			}, finish_up);
 		}
 
-		var search_result_file = this.main_directory
-				+ this.search_result_file_name,
+		var search_result_file = this.get_search_result_file(),
 		// search cache
 		// 檢查看看之前是否有取得過。
 		search_result = this.get_search_result()
@@ -1785,8 +1784,9 @@ function module_code(library_namespace) {
 			search_url_data = library_namespace.null_Object();
 			search_url_data[work_title] = '';
 			this.onerror('本線上作品網站 ' + this.id
-					+ ' 的模組未提供搜尋功能。請輸入作品 id，或手動設定/編輯 [' + work_title
-					+ '] 之 id 於 ' + search_result_file + '\n (e.g., '
+					+ ' 的模組未提供搜尋功能。請先輸入作品 id，下載過一次後工具會自動記錄作品標題與 id 的轉換。'
+					+ '亦可手動設定/編輯 [' + work_title + '] 之 id 於 '
+					+ search_result_file + '\n (e.g., '
 					+ JSON.stringify(search_url_data) + ')', work_title);
 			finish(true);
 			return Work_crawler.THROWED;
@@ -2049,7 +2049,7 @@ function module_code(library_namespace) {
 			work_id = work_id.id;
 		}
 		// console.trace([ work_id, work_title ]);
-		process.title = '下載' + work_title + ' - 資訊 @ ' + this.id;
+		process.title = '下載' + (work_title || work_id) + ' - 資訊 @ ' + this.id;
 
 		var _this = this, work_URL = this.full_URL(this.work_URL, work_id), work_data;
 		library_namespace.debug('work_URL: ' + work_URL, 2, 'get_work_data');
@@ -2139,9 +2139,13 @@ function module_code(library_namespace) {
 			// cache work title: 方便下次從 search cache 反查。
 			&& typeof _this.parse_search_result !== 'function') {
 				// search cache
-				var search_result = _this.get_search_result();
+				var search_result_file = _this.get_search_result_file(),
+				//
+				search_result = _this.get_search_result()
+						|| library_namespace.null_Object();
 				if (!search_result[work_data.title]) {
 					search_result[work_data.title] = work_id;
+					// 補上已知的轉換。這樣未來輸入作品標題的時候就能自動轉換。
 					library_namespace.write_file(search_result_file,
 							search_result);
 				}
