@@ -791,7 +791,7 @@ function module_code(library_namespace) {
 						&& (Date.now() - set_last_update_Date(work_data))
 						// 因為沒有明確記載作品是否完結，10年沒更新就不再重新下載。
 						/ library_namespace.to_millisecond('1D') > (work_data.recheck_days || 10 * 366)) {
-					library_namespace.info('is_finished: 本作品已經 '
+					library_namespace.info('is_finished: 本作品已 '
 							+ library_namespace
 									.age_of(set_last_update_Date(work_data))
 							+ ' 沒有更新，時間過久不再重新下載，僅作檢查: ' + work_data.title);
@@ -2645,10 +2645,14 @@ function module_code(library_namespace) {
 
 				}
 
-			} else if (_this.start_chapter > (work_data.last_download.chapter > Work_crawler.prototype.start_chapter ? work_data.last_download.chapter
-					: Work_crawler.prototype.start_chapter)) {
-				library_namespace
-						.warn('若之前已經下載到最新章節，則指定 start_chapter 時，必須同時設定 recheck！');
+			} else if (_this.start_chapter > Work_crawler.prototype.start_chapter
+					&& work_data.last_download.chapter > _this.start_chapter) {
+				library_namespace.info({
+					T : [ '之前已下載到較新的第%2章，因指定 start_chapter=%1 而回溯。',
+							_this.start_chapter,
+							work_data.last_download.chapter ]
+				});
+				work_data.last_download.chapter = _this.start_chapter;
 			}
 
 			if (!('reget_chapter' in work_data)) {
@@ -4613,6 +4617,16 @@ function module_code(library_namespace) {
 				&& work_data.last_update) {
 			var last_update_Date = work_data.last_update;
 			// assert: typeof last_update_Date === 'string'
+
+			var matched = last_update_Date.match(/^(\d{1,2})[-/](\d{1,2})$/);
+			if (matched) {
+				// for month-date. e.g., '02-11'
+				var year = (new Date).getFullYear(), date = year + '-'
+						+ last_update_Date;
+				last_update_Date = Date.parse(date) > Date.now() ? (year - 1)
+						+ '-' + last_update_Date : date;
+			}
+
 			last_update_Date = last_update_Date.to_Date({
 				// 注意: 若此時尚未設定 work_data.time_zone，可能會獲得錯誤的結果。
 				zone : work_data.time_zone
