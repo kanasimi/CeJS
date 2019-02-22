@@ -783,18 +783,18 @@ function module_code(library_namespace) {
 		is_finished : function(work_data) {
 			var status_list = library_namespace.is_Object(work_data) ? work_data.status
 					// treat work_data as status
-					: work_data;
+					: work_data, date;
 			if (!status_list) {
 				if (this.recheck
 						&& !work_data.recheck
 						&& library_namespace.is_Object(work_data)
-						&& (Date.now() - set_last_update_Date(work_data))
-						// 因為沒有明確記載作品是否完結，10年沒更新就不再重新下載。
-						/ library_namespace.to_millisecond('1D') > (work_data.recheck_days || 10 * 366)) {
+						&& (Date.now() - (date = set_last_update_Date(work_data)))
+								// 因為沒有明確記載作品是否完結，10年沒更新就不再重新下載。
+								/ library_namespace.to_millisecond('1D') > (work_data.recheck_days || 10 * 366)) {
 					library_namespace.info('is_finished: 本作品已 '
-							+ library_namespace
-									.age_of(set_last_update_Date(work_data))
-							+ ' 沒有更新，時間過久不再重新下載，僅作檢查: ' + work_data.title);
+							+ library_namespace.age_of(date)
+							+ ' 沒有更新，時間過久不再強制重新下載，僅在章節數量有變化時才重新下載：'
+							+ work_data.title);
 					work_data.recheck = 'changed';
 				}
 
