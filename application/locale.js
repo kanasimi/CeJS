@@ -366,28 +366,71 @@ function module_code(library_namespace) {
 		function convert(text_id, domain_specified) {
 			// 未設定個別 domain 者，將以此訊息(text_id)顯示。
 			// text_id 一般應採用原文(original)，或最常用語言；亦可以代碼表示，但須設定所有可能使用的語言。
-			if (typeof text_id !== 'function' && (text_id in domain))
-				text_id = domain[text_id];
 
-			return typeof text_id === 'function' ? text_id(domain_name, arg,
+			// 注意: 在 text_id 與所屬 domain 之 text 相同的情況下，domain 中不會有這一筆記錄。
+			// 因此無法以 `text_id in domain` 來判別 fallback。
+			using_default = typeof text_id === 'function'
+					|| !(text_id in domain);
+			if (!using_default) {
+				text_id = domain[text_id];
+			}
+
+			return typeof text_id === 'function' ? text_id(domain_name, args,
 					domain_specified) : text_id;
 		}
 
-		var arg = arguments, length = arg.length,
+		function try_domain(_domain_name, recover) {
+			var original_domain_data = [ domain_name, domain ];
+
+			domain_name = _domain_name;
+			// 在不明環境，如 node.js 中執行時，((gettext_texts[domain_name])) 可能為
+			// undefined。
+			domain = this && this.domain || gettext_texts[domain_name]
+					|| library_namespace.null_Object();
+			var _text = String(convert(library_namespace.is_Object(text_id) ? text_id[domain_name]
+					: text_id));
+
+			if (recover) {
+				domain_name = original_domain_data[0];
+				domain = original_domain_data[1];
+			}
+			return _text;
+		}
+
+		var args = arguments, length = args.length, using_default,
 		// this: 本次轉換之特殊設定。
 		domain_name = this && this.domain_name || gettext_domain_name,
-		// 在不明環境，如 node.js 中執行時，((gettext_texts[domain_name])) 可能為 undefined。
-		domain = this && this.domain || gettext_texts[domain_name]
-				|| library_namespace.null_Object(),
 		//
-		text = ''
-				+ (convert(library_namespace.is_Object(text_id) ? text_id[domain_name]
-						: text_id));
+		domain, text = try_domain(domain_name),
+		// 強制轉換/必須轉換 force convert. e.g., 輸入 id，因此不能以 text_id 顯示。
+		force_convert = using_default && this && (this.force_convert
+		//
+		|| this.getAttribute && this.getAttribute('force_convert'));
+
+		if (force_convert) {
+			// force_convert: fallback_domain_name_list
+			if (!Array.isArray(force_convert))
+				force_convert = force_convert.split(',');
+			force_convert.some(function(_domain_name) {
+				_domain_name = gettext.to_standard(_domain_name);
+				if (!_domain_name || _domain_name === domain_name)
+					return;
+				var _text = try_domain(_domain_name, true);
+				if (!using_default) {
+					domain_name = _domain_name;
+					text = _text;
+					// return the first matched
+					return true;
+				}
+			});
+		}
 
 		library_namespace.debug('Use domain_name: ' + domain_name, 6);
 
-		if (length <= 1)
+		if (length <= 1) {
+			// assert: {String}text
 			return text;
+		}
 
 		var text_list = [], matched, last_index = 0,
 		// 允許 convert 出的結果為 object。
@@ -432,13 +475,13 @@ function module_code(library_namespace) {
 								+ '→' + domain_specified, 6);
 						domain_name = domain_specified;
 						domain = domain_used;
-						conversion = convert(arg[NO], domain_specified);
+						conversion = convert(args[NO], domain_specified);
 						library_namespace.debug('回存/回復 domain: ' + domain_name
 								+ '→' + origin_domain_name, 6);
 						domain_name = origin_domain_name;
 						domain = origin_domain;
 					} else {
-						conversion = convert(arg[NO]);
+						conversion = convert(args[NO]);
 					}
 				}
 
@@ -488,9 +531,9 @@ function module_code(library_namespace) {
 			return gettext.call(options, text_id);
 		}
 
-		var arg = Array.prototype.slice.call(arguments);
-		arg.shift();
-		return gettext.apply(options, arg);
+		var args = Array.prototype.slice.call(arguments);
+		args.shift();
+		return gettext.apply(options, args);
 	};
 
 	/**
@@ -879,7 +922,7 @@ function module_code(library_namespace) {
 	 * @returns {String} 正規名稱。
 	 * @returns undefined : can't found.
 	 */
-	gettext.to_standard = function(alias) {
+	gettext.to_standard = function to_standard(alias) {
 		if (typeof alias !== 'string')
 			return;
 
@@ -1021,7 +1064,7 @@ function module_code(library_namespace) {
 			conversion = [ id ];
 			while ((key = gettext_DOM_id + ++i) in dataset)
 				conversion.push(dataset[key]);
-			library_namespace.set_text(node, gettext.apply(null, conversion));
+			library_namespace.set_text(node, gettext.apply(node, conversion));
 		}
 	};
 	// for DOM use.
@@ -1377,7 +1420,7 @@ function module_code(library_namespace) {
 		switch (domain_name) {
 		case 'cmn-Hant-TW':
 			// 中文日期
-			return date.format('%Y年%m月%d日 %H時%M分%S秒', {
+			return date.format('%Y年%m月%d日', {
 				locale : domain_name
 			});
 			// 19世紀80年代, 20世紀60年代
