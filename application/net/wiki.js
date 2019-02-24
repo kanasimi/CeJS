@@ -6801,7 +6801,7 @@ function module_code(library_namespace) {
 			// 因此需要重新設定，否則若可能在測試得到錯誤的數值。
 			// 例如this.running = true，但是實際上已經不會再執行了。
 			// TODO: 這可能會有bug。
-			this.running = 0 < this.actions.length;
+			// this.running = 0 < this.actions.length;
 
 			// wiki.cache(operation, callback, _this);
 			wiki_API.cache(next[1], function() {
@@ -6809,7 +6809,9 @@ function module_code(library_namespace) {
 				// next[2] : callback
 				if (typeof next[2] === 'function')
 					next[2].apply(this, arguments);
-				_this.next();
+				// 因為wiki_API.cache(list)會使用到wiki_API.prototype[method]；
+				// 其最後會再 call wiki_API.next()，是以不再重複 call .next()。
+				// _this.next();
 			},
 			// next[3]: options to call wiki_API.cache()
 			Object.assign({
