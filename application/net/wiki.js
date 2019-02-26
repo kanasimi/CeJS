@@ -6797,11 +6797,11 @@ function module_code(library_namespace) {
 				next.splice(2, 0, undefined);
 			}
 
-			// 因為wiki_API.cache(list)會使用到wiki_API.prototype[method]；
-			// 因此需要重新設定，否則若可能在測試得到錯誤的數值。
-			// 例如this.running = true，但是實際上已經不會再執行了。
+			// 因為 wiki_API.cache(list) 會使用到 wiki_API.prototype[method]；
+			// 因此需要重新設定 this.running，否則可能中途停止。
+			// 例如 this.running = true，但是實際上已經不會再執行了。
 			// TODO: 這可能會有bug。
-			// this.running = 0 < this.actions.length;
+			this.running = 0 < this.actions.length;
 
 			// wiki.cache(operation, callback, _this);
 			wiki_API.cache(next[1], function() {
@@ -14546,6 +14546,7 @@ function module_code(library_namespace) {
 			callback = undefined;
 		}
 
+		var index = 0;
 		/**
 		 * 連續作業時，轉到下一作業。
 		 * 
@@ -14559,6 +14560,7 @@ function module_code(library_namespace) {
 			// operation = { type:'embeddedin', operator:function(data) }
 			if (index < operation.length) {
 				var this_operation = operation[index++];
+				// console.log(this_operation);
 				if (!this_operation) {
 					// Allow null operation.
 					library_namespace.debug('未設定 operation[' + (index - 1)
@@ -14611,8 +14613,6 @@ function module_code(library_namespace) {
 		}
 
 		if (Array.isArray(operation)) {
-			var index = 0;
-
 			next_operator();
 			return;
 		}
@@ -14740,6 +14740,8 @@ function module_code(library_namespace) {
 				last_data_got = data;
 				if (operator)
 					operator.call(_this, data, operation);
+				library_namespace.debug('loading callback', 3,
+						'wiki_API.cache.finish_work');
 				if (typeof callback === 'function')
 					callback.call(_this, data);
 			}
@@ -14835,7 +14837,7 @@ function module_code(library_namespace) {
 			 * 取得並處理下一項 data。
 			 */
 			function get_next_item(data) {
-				library_namespace.debug('處理多項列表作業: ' + index + '/'
+				library_namespace.debug('處理多項列表作業: ' + (index + 1) + '/'
 						+ list.length, 2, 'wiki_API.cache.get_next_item');
 				if (index < list.length) {
 					// 利用基本相同的參數以取得 cache。
