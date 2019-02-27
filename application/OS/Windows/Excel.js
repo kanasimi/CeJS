@@ -85,10 +85,12 @@ function module_code(library_namespace) {
 				+ (sheet_name || '') + '" "' + text_file_path + '"';
 
 		// check if updated: 若是沒有更新過，那麼用舊的文字檔案就可以。
-		var text_status = library_namespace.fso_status(text_file_path);
-		if (text_status) {
-			var Excel_status = library_namespace.fso_status(Excel_file_path);
-			if (Date.parse(text_status.mtime) - Date.parse(Excel_status.mtime) > 0)
+		var target_file_status = library_namespace.fso_status(text_file_path);
+		if (target_file_status) {
+			var soutce_file_status = library_namespace
+					.fso_status(Excel_file_path);
+			if (Date.parse(target_file_status.mtime)
+					- Date.parse(soutce_file_status.mtime) > 0)
 				command = null;
 		}
 

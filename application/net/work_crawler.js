@@ -596,6 +596,8 @@ function module_code(library_namespace) {
 				+ Work_crawler.HTML_extension,
 		report_file_JSON : 'report.json',
 
+		backup_file_extension : 'bak',
+
 		search_result_file_name : 'search.json',
 		get_search_result_file : function() {
 			var search_result_file = this.main_directory
@@ -1653,10 +1655,11 @@ function module_code(library_namespace) {
 		delete work_data[this.KEY_EBOOK];
 		// 避免當 work_data 過大而出現崩潰的情況，造成資料檔案被清空。因此先試試 JSON.stringify()。
 		var data_to_write = Buffer.from(JSON.stringify(work_data));
-		if (this.bakeup_work_data) {
-			var bakeup_file = work_data.data_file + '.bak';
-			library_namespace.remove_file(bakeup_file);
-			library_namespace.move_fso(work_data.data_file, bakeup_file);
+		if (this.backup_work_data) {
+			var backup_file = work_data.data_file + '.'
+					+ this.backup_file_extension;
+			library_namespace.remove_file(backup_file);
+			library_namespace.move_fso(work_data.data_file, backup_file);
 		}
 		try {
 			node_fs.writeFileSync(work_data.data_file, data_to_write);

@@ -6797,7 +6797,8 @@ function module_code(library_namespace) {
 				next.splice(2, 0, undefined);
 			}
 
-			// 因為 wiki_API.cache(list) 會使用到 wiki_API.prototype[method]；
+			// 因為 wiki_API.cache(list) 會使用到 wiki_API.prototype[method]，
+			// 算是 .next() 編制外功能；
 			// 因此需要重新設定 this.running，否則可能中途停止。
 			// 例如 this.running = true，但是實際上已經不會再執行了。
 			// TODO: 這可能會有bug。

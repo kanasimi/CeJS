@@ -404,9 +404,11 @@ function module_code(library_namespace) {
 		domain, text = try_domain(domain_name),
 		// 強制轉換/必須轉換 force convert. e.g., 輸入 id，因此不能以 text_id 顯示。
 		force_convert = using_default && this && (this.force_convert
-		//
+		// for DOM
 		|| this.getAttribute && this.getAttribute('force_convert'));
 
+		// 設定 force_convert 時，最好先 `gettext.load_domain(force_convert)`
+		// 以避免最後仍找不到任何一個可用的 domain。
 		if (force_convert) {
 			// force_convert: fallback_domain_name_list
 			if (!Array.isArray(force_convert))
@@ -419,7 +421,7 @@ function module_code(library_namespace) {
 				if (!using_default) {
 					domain_name = _domain_name;
 					text = _text;
-					// return the first matched
+					// using the first matched
 					return true;
 				}
 			});
