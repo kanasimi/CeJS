@@ -790,20 +790,22 @@ function module_code(library_namespace) {
 
 	// 為 electron-builder 📦安裝包
 	var is_installation_package = process.env.Apple_PubSub_Socket_Render
-			// @ Windows, Linux Mint
+			// 2018-2019/3 @ Windows, Linux Mint
 			|| process.mainModule
 			&& process.mainModule.filename.replace(/[\\\/]app\.asar.+/, '') === process.resourcesPath
 			&& library_namespace.platform.OS;
 
-	is_installation_package = undefined;
-	(function() {
-		try {
-			var updater = require("electron-updater"), autoUpdater = updater.autoUpdater;
-			is_installation_package = autoUpdater.app.isPackaged;
-		} catch (e) {
-			// TODO: handle exception
-		}
-	})();
+	if (false) {
+		// 這個方法僅能用在 app's main process file
+		(function() {
+			try {
+				// https://electronjs.org/docs/api/app
+				var updater = require("electron-updater"), autoUpdater = updater.autoUpdater;
+				is_installation_package = autoUpdater.app.isPackaged;
+			} catch (e) {
+			}
+		})();
+	}
 
 	_.is_installation_package = function() {
 		return is_installation_package;
