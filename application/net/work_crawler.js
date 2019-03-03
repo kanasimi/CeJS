@@ -238,7 +238,7 @@ function module_code(library_namespace) {
 
 		var condition_data = library_namespace.null_Object(), matched, PATTERN = /([a-z]+)(?::(\/(\\\/|[^\/])+\/([i]*)|[^|]+))?(?:\||$)/g;
 		while (matched = PATTERN.exec(condition)) {
-			var type = matched[1], _condition;
+			var type = matched[1], _condition = undefined;
 			if (!matched[2]) {
 				;
 
@@ -279,6 +279,7 @@ function module_code(library_namespace) {
 		}
 
 		var type = typeof value, arg_type_data = this.import_arg_hash[key];
+		// console.log(arg_type_data);
 
 		if (type in arg_type_data) {
 			arg_type_data = arg_type_data[type];
@@ -442,6 +443,10 @@ function module_code(library_namespace) {
 	// 以不同 agent 應對不同 host。
 	function set_agent(URL) {
 		var agent;
+		if (Array.isArray(URL)) {
+			// [ url, post_data, options ]
+			URL = URL[0];
+		}
 		if (URL
 		// restore
 		|| !(agent = this.default_agent)) {
@@ -783,6 +788,10 @@ function module_code(library_namespace) {
 			// 已停更
 		},
 		is_finished : function(work_data) {
+			if ('is_finished' in work_data) {
+				return work_data.is_finished;
+			}
+
 			var status_list = library_namespace.is_Object(work_data) ? work_data.status
 					// treat work_data as status
 					: work_data, date;
@@ -843,22 +852,34 @@ function module_code(library_namespace) {
 			return this.full_URL(this.work_URL, work_data.id)
 					+ work_data.chapter_list[chapter_NO - 1].url;
 		},
-		// this.get_URL(url, function(XMLHttp) {})
+		// this.get_URL(url, function callback(XMLHttp) {})
 		get_URL : function(url, callback, post_data, options) {
+			if (Array.isArray(url) && !post_data && !options) {
+				// [ url, post_data, options ]
+				post_data = url[1];
+				options = url[2];
+				url = url[0];
+			}
+
 			if (options === true) {
 				options = Object.assign({
 					error_retry : this.MAX_ERROR_RETRY
 				}, this.get_URL_options);
 			} else if (library_namespace.is_Object(options)) {
+				var headers = Object.assign(library_namespace.null_Object(),
+						this.get_URL_options.headers, options.headers);
 				options = Object.assign(library_namespace.null_Object(),
 						this.get_URL_options, options);
+				options.headers = headers;
 			} else {
 				// assert: !options === true
 				options = this.get_URL_options;
 			}
 
-			get_URL(this.full_URL(url), callback, this.charset, post_data,
-					options);
+			// console.trace(url);
+			url = this.full_URL(url);
+			// console.log(url);
+			get_URL(url, callback, this.charset, post_data, options);
 		},
 
 		set_part : set_part_title,
@@ -1776,7 +1797,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var search_url_data = this.search_URL, search_URL_string, post_data;
+		var search_url_data = this.search_URL, search_URL_string, post_data, get_URL_options;
 		if (!search_url_data || typeof this.parse_search_result !== 'function') {
 			if (callback && callback.options) {
 				// e.g., for .get_data_only
@@ -1801,8 +1822,10 @@ function module_code(library_namespace) {
 			// return [ search_url_data, POST data ]
 			search_url_data = this.search_URL(work_title, get_label);
 			if (Array.isArray(search_url_data)) {
-				// use POST method
+				// use POST method, also see this.get_URL()
+				// [ url, post_data, options ]
 				post_data = search_url_data[1];
+				get_URL_options = search_url_data[2];
 				search_url_data = search_url_data[0];
 			}
 			search_url_data = this.full_URL(search_url_data);
@@ -1957,7 +1980,7 @@ function module_code(library_namespace) {
 
 		}, search_url_data.charset || this.charset, post_data, Object.assign({
 			error_retry : this.MAX_ERROR_RETRY
-		}, this.get_URL_options));
+		}, this.get_URL_options, get_URL_options));
 	}
 
 	// node.innerText
@@ -2031,11 +2054,11 @@ function module_code(library_namespace) {
 		chapter_time_interval = library_namespace
 				.to_millisecond(chapter_time_interval);
 
-		if (chapter_time_interval > 0
+		if (chapter_time_interval >= 0
 		// this.last_fetch_time = Date.now();
 		&& this.last_fetch_time > 0) {
 			chapter_time_interval -= Date.now() - this.last_fetch_time;
-			return chapter_time_interval > 0 && chapter_time_interval;
+			return chapter_time_interval >= 0 && chapter_time_interval;
 		}
 	}
 
@@ -2066,8 +2089,7 @@ function module_code(library_namespace) {
 				process_work_data(null_XMLHttp);
 				return;
 			}
-			get_URL(work_URL, process_work_data, _this.charset, null,
-					_this.get_URL_options);
+			_this.get_URL(work_URL, process_work_data);
 		}
 
 		function process_work_data(XMLHttp) {
@@ -2341,6 +2363,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------------
 
 		function pre_process_chapter_list_data(XMLHttp) {
+			_this.get_URL_options.headers.Referer = XMLHttp.responseURL;
 			var html = XMLHttp.responseText;
 			if (!html && !_this.skip_get_work_page) {
 				var message = _this.id + ': Can not get chapter list page!';
@@ -2455,7 +2478,6 @@ function module_code(library_namespace) {
 					_this.reverse_chapter_list_order(work_data);
 					delete work_data.inverted_order;
 				}
-
 			}
 
 			// work_data.chapter_list 為非正規之 chapter data list。
@@ -2778,8 +2800,6 @@ function module_code(library_namespace) {
 				library_namespace.log(message);
 			}
 
-			if (work_URL)
-				_this.get_URL_options.headers.Referer = work_URL;
 			// 開始下載 chapter。
 			work_data.start_downloading_chaper = Date.now();
 			pre_get_chapter_data.call(_this, work_data,
@@ -3489,9 +3509,6 @@ function module_code(library_namespace) {
 					library_namespace.log(message);
 				}
 
-				if (chapter_URL)
-					_this.get_URL_options.headers.Referer = chapter_URL;
-
 				// 正規化/初始化圖像資料
 				// http://stackoverflow.com/questions/245840/rename-files-in-sub-directories
 				// for /r %x in (*.jfif) do ren "%x" *.jpg
@@ -3653,6 +3670,7 @@ function module_code(library_namespace) {
 
 			function process_chapter_data(XMLHttp) {
 				XMLHttp = XMLHttp || this;
+				_this.get_URL_options.headers.Referer = XMLHttp.responseURL;
 				var html = XMLHttp.responseText;
 				if (!html
 						&& !_this.skip_get_chapter_page
@@ -3862,10 +3880,15 @@ function module_code(library_namespace) {
 					return;
 				}
 				// library_namespace.info('reget_chapter_data: ' + chapter_URL);
-				get_URL(chapter_URL, pre_parse_chapter_data, _this.charset,
-						null, Object.assign({
-							error_retry : _this.MAX_ERROR_RETRY
-						}, _this.get_URL_options));
+				if (Array.isArray(chapter_URL)) {
+					chapter_URL[2] = Object.assign({
+						error_retry : _this.MAX_ERROR_RETRY
+					}, chapter_URL[2]);
+				} else {
+					chapter_URL = [ chapter_URL, null, true ];
+				}
+
+				_this.get_URL(chapter_URL, pre_parse_chapter_data);
 			}
 
 			if (work_data.reget_chapter) {
@@ -4621,13 +4644,16 @@ function module_code(library_namespace) {
 			var last_update_Date = work_data.last_update;
 			// assert: typeof last_update_Date === 'string'
 
-			var matched = last_update_Date.match(/^(\d{1,2})[-/](\d{1,2})$/);
+			var matched = last_update_Date
+			// dm5.js: "02月27号"
+			.match(/^(\d{1,2})[-/月](\d{1,2})[日号]?$/);
 			if (matched) {
 				// for month-date. e.g., '02-11'
-				var year = (new Date).getFullYear(), date = year + '-'
+				last_update_Date = '/' + matched[1] + '/' + matched[2];
+				var year = (new Date).getFullYear(), date = year
 						+ last_update_Date;
 				last_update_Date = Date.parse(date) > Date.now() ? (year - 1)
-						+ '-' + last_update_Date : date;
+						+ last_update_Date : date;
 			}
 
 			last_update_Date = last_update_Date.to_Date({
@@ -4688,6 +4714,7 @@ function module_code(library_namespace) {
 		}), subject = [];
 		// keywords 太多雜訊，如:
 		// '万古剑神,,万古剑神全文阅读,万古剑神免费阅读,万古剑神txt下载,万古剑神txt全集下载,万古剑神蒙白'
+		// category: PTCMS
 		'status,genre,tags,category,categories,类型'.split(',')
 		// 標籤 類別 類型 类型 types
 		.forEach(function(type) {

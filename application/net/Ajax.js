@@ -1399,6 +1399,7 @@ function module_code(library_namespace) {
 			URL_to_fetch = encodeURI(URL_to_fetch);
 		}
 
+		// console.log(URL_to_fetch);
 		var URL_object_to_fetch = typeof URL_to_fetch === 'string' ? node_url
 				.parse(
 				// 處理 '//domain.org/path' 的情況。
@@ -2103,6 +2104,9 @@ function module_code(library_namespace) {
 			// Host : URL_object_to_fetch.host,
 			// 'Upgrade-Insecure-Requests' : 1,
 
+			// Origin : URL_object_to_fetch.protocol + '://'
+			// + URL_object_to_fetch.host,
+
 			// User Agent
 			'User-Agent' : get_URL_node.default_user_agent
 		}, options.headers, URL_object_to_fetch.headers);
@@ -2132,11 +2136,13 @@ function module_code(library_namespace) {
 				throw 1;
 			}
 			Object.assign(URL_object_to_fetch.headers, {
-				'Content-Type' : options.form_data
+				'Content-Type' : options.headers
 				//
-				? 'multipart/form-data; boundary='
+				&& options.headers['Content-Type']
+				//
+				|| (options.form_data ? 'multipart/form-data; boundary='
 				// boundary 存入→ post_data.boundary
-				+ _post_data.boundary : 'application/x-www-form-urlencoded',
+				+ _post_data.boundary : 'application/x-www-form-urlencoded'),
 				// prevent HTTP 411 錯誤 – 需要內容長度頭 (411 Length Required)
 				'Content-Length' : options.form_data
 				//
