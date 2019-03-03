@@ -663,11 +663,18 @@ function module_code(library_namespace) {
 		if (!gettext_check_resource(domain_name, 1)) {
 			library_namespace.debug('準備載入系統相應 domain resource。', 2, 'gettext');
 			need_to_load.push(library_namespace.get_module_path(module_name,
-					'resource/' + domain_name + '.js'), function() {
+			// resource/
+			CeL.env.resource_directory_name + '/' + domain_name + '.js'),
+			//
+			function() {
 				library_namespace.debug('Resource of module included.', 2,
 						'gettext');
 				gettext_check_resource(domain_name, 1, true);
 			});
+		}
+
+		if (typeof gettext_location === 'function') {
+			gettext_location = gettext_location();
 		}
 
 		if (typeof gettext_location === 'string'
@@ -1015,7 +1022,7 @@ function module_code(library_namespace) {
 
 		// handle with document.title in IE 8.
 		if (CeL.set_text.need_check_title)
-			CeL.gettext.document_title = document_title;
+			CeL.gettext.document_title = 'document_title';
 
 		// translate all nodes to show in specified language (or default domain).
 		CeL.gettext.translate_nodes();
@@ -1575,8 +1582,8 @@ function module_code(library_namespace) {
 
 	var gettext_DOM_id, gettext_main_alias = library_namespace.null_Object(), gettext_aliases = library_namespace
 			.null_Object(), gettext_texts = library_namespace.null_Object(), gettext_domain_name,
-	// CeL.env.domain_location = 'resource/';
-	// CeL.gettext.use_domain_location('resource/');
+	// CeL.env.domain_location = CeL.env.resource_directory_name + '/';
+	// CeL.gettext.use_domain_location(CeL.env.resource_directory_name + '/');
 	gettext_location = library_namespace.env.domain_location, gettext_resource = library_namespace
 			.null_Object();
 

@@ -89,8 +89,8 @@ function module_code(library_namespace) {
 				// 選擇性屬性：須配合網站平台更改。
 				author : html.between('og:novel:author" content="', '"'),
 				// e.g., 连载[中], [已]完成
-				status : [ html.between('og:novel:status" content="', '"'),
-						html.between('og:novel:category" content="', '"') ],
+				status : html.between('og:novel:status" content="', '"'),
+				category : html.between('og:novel:category" content="', '"'),
 				image : html.between('og:image" content="', '"'),
 				last_update :
 				//
