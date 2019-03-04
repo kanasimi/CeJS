@@ -26,7 +26,6 @@ TODO:
 將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
 
 
-暗色主題 dark theme
 CLI progress bar
 下載完畢後作繁簡轉換。
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
@@ -2041,10 +2040,22 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// this.chapter_time_interval: 下載章節資訊/章節內容前的等待時間。
-	// usage: var chapter_time_interval =
-	// this.get_chapter_time_interval(argument_1, work_data)
+	/**
+	 * 取得下載章節資訊/章節內容前的等待時間。
+	 * 
+	 * @example<code>
+	var chapter_time_interval = this.get_chapter_time_interval(argument_1, work_data);
+	</code>
+	 * 
+	 * @param [argument_1]
+	 *            'search': for search works.
+	 * @param {Object}[work_data]
+	 *            作品資訊。
+	 * 
+	 * @returns {Integer|Undefined}下載章節資訊/章節內容前的等待時間 (ms)。
+	 */
 	function get_chapter_time_interval(argument_1, work_data) {
+		// this.chapter_time_interval: 下載章節資訊/章節內容前的等待時間。
 		var chapter_time_interval = this.chapter_time_interval;
 		if (typeof chapter_time_interval === 'function') {
 			// 採用函數可以提供亂數值的間隔。
@@ -2054,11 +2065,11 @@ function module_code(library_namespace) {
 		chapter_time_interval = library_namespace
 				.to_millisecond(chapter_time_interval);
 
-		if (chapter_time_interval >= 0
-		// this.last_fetch_time = Date.now();
-		&& this.last_fetch_time > 0) {
-			chapter_time_interval -= Date.now() - this.last_fetch_time;
-			return chapter_time_interval >= 0 && chapter_time_interval;
+		if (chapter_time_interval >= 0) {
+			var delta = Date.now() - this.last_fetch_time;
+			if (delta > 0)
+				chapter_time_interval -= delta;
+			return chapter_time_interval;
 		}
 	}
 
@@ -2535,7 +2546,7 @@ function module_code(library_namespace) {
 							+ (work_data.title ? ' ' + work_data.title : '')
 							// (Did not set work_data.chapter_count)
 							// No chapter got! 若是作品不存在就不會跑到這邊了
-							+ ': Can not get chapter count! 或許作品已被刪除'
+							+ ': Can not get chapter count! 或許作品已被刪除或屏蔽'
 							+ (_this.got_chapter_count ? '' : '或者網站改版')
 							+ '了? (' + _this.id + ')';
 				}
