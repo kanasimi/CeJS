@@ -1260,7 +1260,9 @@ function module_code(library_namespace) {
 	get_URL_node_requests = 0;
 
 	// 強制使用POST傳送。
-	var FORCE_POST = {};
+	var FORCE_POST = {
+		FORCE_POST : true
+	};
 
 	/**
 	 * 讀取 URL via node http/https。<br />
@@ -1375,8 +1377,17 @@ function module_code(library_namespace) {
 		}
 
 		if (post_data && !options.form_data) {
-			post_data = get_URL.parameters_to_String(post_data, charset)
-					|| FORCE_POST;
+			if (library_namespace.is_Object(post_data)
+					&& options.headers
+					&& typeof options.headers['Content-Type'] === 'string'
+					&& options.headers['Content-Type']
+							.includes('application/json')) {
+				post_data = JSON.stringify(post_data) || FORCE_POST;
+
+			} else {
+				post_data = get_URL.parameters_to_String(post_data, charset)
+						|| FORCE_POST;
+			}
 		}
 
 		if (!onload && typeof options.onchange === 'function') {
@@ -2092,6 +2103,8 @@ function module_code(library_namespace) {
 			// Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
 			// + 'image/webp,image/apng,image/*,*/*;q=0.8',
 
+			// Accept : 'application/json, text/plain, */*',
+
 			// 為了防止 Cloudflare bot protection(?) 阻擋，必須加上 Accept-Language。
 			// TODO: get language from system infomation
 			'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
@@ -2129,7 +2142,7 @@ function module_code(library_namespace) {
 		if (post_data) {
 			URL_object_to_fetch.method = 'POST';
 			var _post_data = post_data === FORCE_POST ? '' : post_data;
-			if (0 && options.form_data) {
+			if (false && options.form_data) {
 				console.log('-'.repeat(79));
 				console.log(_post_data.to_Array().content_length);
 				console.log(_post_data);
