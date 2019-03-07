@@ -3784,7 +3784,9 @@ function module_code(library_namespace) {
 
 				} catch (e) {
 					library_namespace.error(_this.id
-							+ ': Error on chapter url: ' + chapter_URL);
+							+ ': Error on chapter url: '
+							+ (Array.isArray(chapter_URL) ? chapter_URL[0]
+									: chapter_URL));
 					_this.onerror(e, work_data);
 					typeof callback === 'function' && callback(work_data);
 					return Work_crawler.THROWED;
@@ -3798,11 +3800,11 @@ function module_code(library_namespace) {
 					if (!_this.need_create_ebook
 					// 雖然是漫畫，但是本章節沒有獲取到任何圖片。
 					&& (!chapter_data || !chapter_data.limited
-					// 圖片檔案會用其他方式手動下載。
+					// 圖片檔案會用其他方式手動下載。 .allow_empty_chapter
 					&& !chapter_data.images_downloaded)) {
 						var message = chapter_data.limited ? 'Limited'
 								: 'No image got';
-						library_namespace.debug(work_data.directory_name + ' #'
+						_this.onwarning(work_data.directory_name + ' #'
 								+ chapter_NO + '/' + work_data.chapter_count
 								+ ': ' + message);
 						set_work_status(work_data, '#' + chapter_NO + ': '
