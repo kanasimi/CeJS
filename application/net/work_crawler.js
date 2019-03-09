@@ -212,7 +212,8 @@ function module_code(library_namespace) {
 			// start_time : Date.now(),
 			no_protocol_warn : true,
 			headers : Object.assign({
-				Referer : this.base_URL
+			// Referer will set @ start_downloading()
+			// Referer : this.base_URL
 			}, this.headers)
 		};
 
@@ -334,6 +335,13 @@ function module_code(library_namespace) {
 		// assert: typeof key === 'string'
 
 		switch (key) {
+		case 'Referer':
+			if (value) {
+				// Referer 不可為 undefined。
+				this.get_URL_options.Referer = value;
+			}
+			return;
+
 		case 'proxy':
 			// 代理伺服器 proxy_server
 			// TODO: check .proxy
@@ -1065,6 +1073,8 @@ function module_code(library_namespace) {
 			});
 			return;
 		}
+
+		this.setup_value('Referer', this.base_URL);
 
 		if (!this.server_URL) {
 			this.parse_work_id(work_id, callback);
@@ -2384,8 +2394,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------------
 
 		function pre_process_chapter_list_data(XMLHttp) {
-			if (XMLHttp.responseURL)
-				_this.get_URL_options.headers.Referer = XMLHttp.responseURL;
+			_this.setup_value('Referer', XMLHttp.responseURL);
 			var html = XMLHttp.responseText;
 			if (!html && !_this.skip_get_work_page) {
 				var message = _this.id + ': Can not get chapter list page!';
@@ -3698,8 +3707,7 @@ function module_code(library_namespace) {
 
 			function process_chapter_data(XMLHttp) {
 				XMLHttp = XMLHttp || this;
-				if (XMLHttp.responseURL)
-					_this.get_URL_options.headers.Referer = XMLHttp.responseURL;
+				_this.setup_value('Referer', XMLHttp.responseURL);
 				var html = XMLHttp.responseText;
 				if (!html
 						&& !_this.skip_get_chapter_page
