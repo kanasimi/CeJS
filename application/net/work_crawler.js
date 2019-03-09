@@ -2384,7 +2384,8 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------------
 
 		function pre_process_chapter_list_data(XMLHttp) {
-			_this.get_URL_options.headers.Referer = XMLHttp.responseURL;
+			if (XMLHttp.responseURL)
+				_this.get_URL_options.headers.Referer = XMLHttp.responseURL;
 			var html = XMLHttp.responseText;
 			if (!html && !_this.skip_get_work_page) {
 				var message = _this.id + ': Can not get chapter list page!';
@@ -3697,7 +3698,8 @@ function module_code(library_namespace) {
 
 			function process_chapter_data(XMLHttp) {
 				XMLHttp = XMLHttp || this;
-				_this.get_URL_options.headers.Referer = XMLHttp.responseURL;
+				if (XMLHttp.responseURL)
+					_this.get_URL_options.headers.Referer = XMLHttp.responseURL;
 				var html = XMLHttp.responseText;
 				if (!html
 						&& !_this.skip_get_chapter_page
