@@ -1919,6 +1919,7 @@ function module_code(library_namespace) {
 			}
 
 		} else if (typeof nodes !== 'string' && !Array.isArray(nodes)
+				&& !_.is_NodeList(nodes)
 				&& (!_.is_HTML_element(nodes) || isNaN(nodes.nodeType))) {
 			// for Safari: Array.isArray(nodes)
 			if (nodes)
@@ -2149,12 +2150,22 @@ function module_code(library_namespace) {
 								library_namespace
 										.warn('new_node.handler[2]: The addition does not change the layer!');
 
+					} else if (_.is_NodeList(n)) {
+						// or useing n.forEach()
+
+						// .appendChild() 會把 child node 自 n 中移出，因此必須先轉成 {Array}。
+						n = Array.from(n);
+						for (var i = 0, length = n.length; i < length; i++) {
+							l.appendChild(n[i]);
+						}
+
 					} else {
 						library_namespace.warn('new_node.handler[2]: 類型不相符! (['
 								+ (typeof n) + '] ' + n + ')');
 					}
 				}
 
+				// free
 				n = null;
 			},
 

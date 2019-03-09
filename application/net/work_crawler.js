@@ -766,8 +766,8 @@ function module_code(library_namespace) {
 			if (/^[(\[]?(?:完[結结成]?|Completed)[)\]]?$/i.test(status))
 				return status;
 
-			// e.g., 连载中, 連載中, 已完结, 已完成, 已完結作品, 已連載完畢
-			var matched = status.match(/(?:^|已)完[結结成]/);
+			// e.g., 连载中, 連載中, 已完结, 已完成, 已完結作品, 已連載完畢, 已完/未完
+			var matched = status.match(/(?:^|已)完(?:[結结成]|$)/);
 			if (matched)
 				return matched[0];
 
@@ -878,7 +878,7 @@ function module_code(library_namespace) {
 			// console.trace(url);
 			url = this.full_URL(url);
 			// console.log(url);
-			get_URL(url, callback, this.charset, post_data, options);
+			get_URL(url, callback.bind(this), this.charset, post_data, options);
 		},
 
 		set_part : set_part_title,
@@ -1747,6 +1747,10 @@ function module_code(library_namespace) {
 		var work_id = this.extract_work_id(work_title)
 				|| this.extract_work_id_from_URL(work_title);
 		if (work_id) {
+			if (work_id === true) {
+				library_namespace
+						.warn('get_work: crawler.extract_work_id() 不應回傳 true！請修改工具檔 code！');
+			}
 			this.get_work_data(work_id, finish_up);
 			return;
 		}
@@ -3331,6 +3335,12 @@ function module_code(library_namespace) {
 				&& library_namespace
 						.is_Object(chapter_data = work_data.chapter_list[chapter_NO - 1])) {
 			// console.trace(chapter_data);
+			if (chapter_data.part_title
+					&& !(work_data.chapter_list.part_NO > 0)) {
+				library_namespace
+						.warn('工具檔似乎沒有設定應設定的 `work_data.chapter_list.part_NO`?');
+			}
+
 			if (!no_part && chapter_data.part_title
 			//
 			&& (Array.isArray(work_data.chapter_list)
@@ -3798,7 +3808,7 @@ function module_code(library_namespace) {
 				//
 				&& !((left = image_list.length) >= 1)) {
 					if (!_this.need_create_ebook
-					// 雖然是漫畫，但是本章節沒有獲取到任何圖片。
+					// 雖然是漫畫，但是本章節沒有獲取到任何圖片時的警告。
 					&& (!chapter_data || !chapter_data.limited
 					// 圖片檔案會用其他方式手動下載。 .allow_empty_chapter
 					&& !chapter_data.images_downloaded)) {
