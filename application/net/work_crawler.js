@@ -654,6 +654,9 @@ function module_code(library_namespace) {
 		preserve_bad_image : true,
 		// 是否保留 cache
 		// preserve_cache : true,
+		// 當新獲取的檔案比較大時，覆寫舊的檔案。
+		// https://github.com/kanasimi/work_crawler/issues/242
+		overwrite_old_file : true,
 
 		// 在取得小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
 		check_next_chapter : check_next_chapter,
@@ -930,6 +933,8 @@ function module_code(library_namespace) {
 			preserve_work_page : 'boolean',
 			preserve_chapter_page : 'boolean',
 			remove_ebook_directory : 'boolean',
+			// 當新獲取的檔案比較大時，覆寫舊的檔案。
+			overwrite_old_file : 'boolean',
 
 			// 代理伺服器 proxy_server: "username:password@hostname:port"
 			proxy : 'string',
@@ -1995,7 +2000,8 @@ function module_code(library_namespace) {
 						/<\/?[a-z][^<>]*>/g, '')
 				// incase 以"\r"為主。 e.g., 起点中文网
 				.replace(/\r\n?/g, '\n')).trim().replace(
-				/[\s\u200B]+$|^[\s\u200B]+/g, '')
+		// \u2060: word joiner (WJ). /^\s$/.test('\uFEFF')
+		/[\s\u200B\u200E\u200F\u2060]+$|^[\s\u200B\u200E\u200F\u2060]+/g, '')
 		// .replace(/\s{2,}/g, ' ').replace(/\s?\n+/g, '\n')
 		: '';
 	}
@@ -3814,9 +3820,11 @@ function module_code(library_namespace) {
 					&& !chapter_data.images_downloaded)) {
 						var message = chapter_data.limited ? 'Limited'
 								: 'No image got';
-						_this.onwarning(work_data.directory_name + ' #'
-								+ chapter_NO + '/' + work_data.chapter_count
-								+ ': ' + message);
+						_this.onwarning('process_chapter_data: '
+								+ work_data.directory_name + ' #' + chapter_NO
+								+ '/' + work_data.chapter_count + ': '
+								+ message);
+						// console.log(chapter_data);
 						set_work_status(work_data, '#' + chapter_NO + ': '
 								+ message);
 					}
@@ -4206,26 +4214,34 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// 檢查實際存在的圖片檔案。
+		// 檢查實際存在的圖片檔案。當之前已存在完整的圖片時，就不再嘗試下載圖片。
 		var image_downloaded = node_fs.existsSync(image_data.file)
 				|| this.skip_existed_bad_file
 				// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
-				&& node_fs.existsSync(this.EOI_error_path(image_data.file));
+				&& node_fs.existsSync(this.EOI_error_path(image_data.file)),
+		// 可以接受的副檔名/檔案類別 acceptable file extensions
+		// e.g., acceptable_types : [ 'png' ]
+		// 當之前下載時發現檔案類別並非預設的檔案，例如預設JPG但取得PNG檔案時，會將副檔名改為所取得圖像實際的格式/副檔名。但是這樣一來可能就會找不到了。因此需要設定acceptable_types。
+		acceptable_types;
 
 		if (!image_downloaded) {
-			if (this.acceptable_types && !image_data.acceptable_types)
-				image_data.acceptable_types = this.acceptable_types;
-			if (image_data.acceptable_types === 'images') {
-				// 將會測試是否已經下載過一切可接受的檔案類別。
-				image_data.acceptable_types = Object.keys(this.image_types);
+			// 正規化 acceptable_types
+			acceptable_types = image_data.acceptable_types
+					|| this.acceptable_types;
+			if (!acceptable_types) {
+			} else if (typeof acceptable_types === 'string') {
+				if (acceptable_types === 'images') {
+					// 將會測試是否已經下載過一切可接受的檔案類別。
+					acceptable_types = Object.keys(this.image_types);
+				} else {
+					acceptable_types = [ acceptable_types ];
+				}
+			} else if (!Array.isArray(acceptable_types)) {
+				acceptable_types = null;
 			}
 
-			// 可以接受的副檔名/檔案類別 acceptable file extensions
-			// e.g., acceptable_types : [ 'png' ]
-			// 當之前下載時發現檔案類別並非預設的、例如JPG檔案時，會將副檔名改為認證的副檔名。但是這樣一來可能就會找不到了。因此需要設定acceptable_types。
-			if (Array.isArray(image_data.acceptable_types)) {
-				image_downloaded = image_data.acceptable_types.some(function(
-						extension) {
+			if (acceptable_types) {
+				image_downloaded = acceptable_types.some(function(extension) {
 					var alternative_filename = image_data.file.replace(
 							/\.[a-z\d]+$/, '.' + extension);
 					if (node_fs.existsSync(alternative_filename)) {
@@ -4250,8 +4266,8 @@ function module_code(library_namespace) {
 			}
 
 			if (false) {
-				console.log([ images_archive.fso_path_hash,
-						image_data.acceptable_types, image_archived,
+				console.log([ images_archive.fso_path_hash, acceptable_types,
+						image_archived,
 						images_archive.fso_path_hash[image_archived] ]);
 				throw 123;
 			}
@@ -4263,9 +4279,8 @@ function module_code(library_namespace) {
 
 			if (!image_downloaded
 			// 可以接受的副檔名/檔案類別 acceptable file extensions
-			&& Array.isArray(image_data.acceptable_types)) {
-				image_downloaded = image_data.acceptable_types.some(function(
-						extension) {
+			&& acceptable_types) {
+				image_downloaded = acceptable_types.some(function(extension) {
 					var alternative_filename = image_archived.replace(
 							/\.[a-z\d]+$/, '.' + extension);
 					return images_archive.fso_path_hash[alternative_filename];
@@ -4437,9 +4452,9 @@ function module_code(library_namespace) {
 						old_file_status = old_archived_file;
 					}
 
-					if (!old_file_status
+					if (!old_file_status || _this.overwrite_old_file
 					// 得到更大的檔案，寫入更大的檔案。
-					|| !(old_file_status.size >= contents.length)) {
+					&& !(old_file_status.size >= contents.length)) {
 						if (_this.image_post_processor) {
 							// 圖片後處理程序 image post-processing
 							contents = _this.image_post_processor(contents,
