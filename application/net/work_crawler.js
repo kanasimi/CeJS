@@ -49,7 +49,7 @@ parse 圖像。
  * 
  * @see 爬蟲框架 https://scrapy.org/
  * 
- * @since 2016/10/30 21:40:6
+ * @since 2016/10/30 21:40:6 完成主要架構設計與構思，開始撰寫程式。
  * @since 2016/11/1 23:15:16 正式運用：批量下載腾讯漫画 qq。
  * @since 2016/11/5 22:44:17 正式運用：批量下載漫画台 manhuatai。
  * @since 2016/11/27 19:7:2 模組化。
@@ -1152,11 +1152,12 @@ function module_code(library_namespace) {
 		if (typeof url === 'function') {
 			url = url.call(this, base_data, base_data_2);
 		} else if (base_data) {
-			base_data = encode_URI_component(base_data, url.charset
+			base_data = encode_URI_component(String(base_data), url.charset
 					|| this.charset);
 			if (url.URL) {
 				url.URL += base_data
 			} else {
+				// assert: typeof url === 'string'
 				url += base_data;
 			}
 		}
@@ -4781,7 +4782,7 @@ function module_code(library_namespace) {
 			// 作品描述: 劇情簡介, synopsis, あらすじ
 			description : get_label(work_data.description
 			// .description 中不可存在 tag。
-			.replace(/\n*<br[^<>]+>\n*/ig, '\n')),
+			.replace(/\n*<br[^<>]*>\n*/ig, '\n')),
 			publisher : work_data.site_name + ' (' + this.base_URL + ')',
 			// source URL
 			source : work_data.url
@@ -4789,7 +4790,7 @@ function module_code(library_namespace) {
 
 		if (work_data.image) {
 			// cover image of work
-			ebook.set_cover(work_data.image);
+			ebook.set_cover(this.full_URL(work_data.image));
 		}
 
 		return work_data[this.KEY_EBOOK] = ebook;
