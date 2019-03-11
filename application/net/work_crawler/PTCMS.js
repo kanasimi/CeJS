@@ -81,7 +81,7 @@ function module_code(library_namespace) {
 			var work_data = {
 				// 必要屬性：須配合網站平台更改。
 				title : html.between('og:novel:title" content="', '"')
-				// e.g., 88dushu
+				// e.g., 88dushu.js
 				|| html.between('og:title" content="', '"')
 				// 通常與og:title相同
 				|| html.between('og:novel:book_name" content="', '"'),
@@ -134,7 +134,7 @@ function module_code(library_namespace) {
 			}
 
 			if (work_data.site_name.includes('?$')) {
-				// e.g., 88dushu
+				// e.g., 88dushu.js
 				work_data.site_name = html.between("AddFavorite('", "'");
 			}
 
@@ -162,7 +162,7 @@ function module_code(library_namespace) {
 			PATTERN_chapter = /<(li|dd|dt)([^<>]*)>(.*?)<\/\1>/g;
 			while (matched = PATTERN_chapter.exec(html)) {
 				if (matched[1] === 'dt' ||
-				// e.g., 88dushu
+				// e.g., 88dushu.js
 				matched[1] === 'li' && matched[2].includes('class="fj"')) {
 					part_title = get_label(matched[3]);
 					if (part_title.includes('最新章节') && part_title.length > 20) {
@@ -180,7 +180,9 @@ function module_code(library_namespace) {
 				&& (matched = matched[3].between('<a ', '</a>'))) {
 					var chapter_data = {
 						// 從href取得章節的網址。
-						url : matched.between('href="', '"'),
+						url : matched.between('href="', '"')
+						// xbiquge.js: 交錯使用 "", ''
+						|| matched.between("href='", "'"),
 						part_title : part_title,
 						// 從title/顯示的文字取得章節的標題。
 						title : matched.between('title="', '"')
@@ -189,6 +191,7 @@ function module_code(library_namespace) {
 					work_data.chapter_list.push(chapter_data);
 				}
 			}
+			// console.log(work_data.chapter_list);
 		},
 
 		// 取得每一個章節的內容與各個影像資料。 get_chapter_data()
@@ -206,9 +209,12 @@ function module_code(library_namespace) {
 			sub_title = get_label(html.between('<h1>', '</h1>'))
 			// || get_label(html.between('<H1>', '</H1>'))
 			// || chapter_data.title
-			, text = (html.between('<div id="content">', '</div>')
+			, text = (html
+			// general: <div id="content">
+			// xbiquge.js: <div id="content" name="content">
+			.between('<div id="content"', '</div>').between('>')
 			// 去除掉廣告。
-			// e.g., 88dushu
+			// e.g., 88dushu.js
 			|| html.between('<div class="yd_text2">', '</div>')).replace(
 					/<script[^<>]*>[^<>]*<\/script>/g, ''),
 			//
