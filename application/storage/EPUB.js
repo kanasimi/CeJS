@@ -1840,9 +1840,9 @@ function module_code(library_namespace) {
 			var key = data[0].replace(metadata_prefix, ''),
 			// data = [ tag_name or property, element list ]
 			values = data[1].map(function(element) {
-				var value = element[data[0]]
+				var value = data[0] in element ? element[data[0]]
 				// for <meta>, data[0] is property
-				|| element.meta || element.content;
+				: element.meta || element.content || '';
 				if (library_namespace.is_Date(value)) {
 					// e.g., dcterms:modified, <dc:date>
 					// value = date_to_String(value);
@@ -1870,6 +1870,7 @@ function module_code(library_namespace) {
 					});
 				}
 			} else if (key === 'description') {
+				// console.log(values);
 				values = values.map(function(value) {
 					// 作品介紹可以換行。
 					return value.replace(/\n/g, '<br />');
@@ -1881,6 +1882,7 @@ function module_code(library_namespace) {
 			'<dd>', values.join(', '), '</dd>');
 		}
 
+		// console.log(this.metadata);
 		Object.entries(this.metadata).forEach(function(data) {
 			if (data[0] === 'meta' || data[0] === 'link') {
 				// 待會處理。
