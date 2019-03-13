@@ -558,8 +558,12 @@ function module_code(library_namespace) {
 			REGET_PAGE : true
 		},
 
-		// {String}預設的圖片延伸檔名/副檔名/filename extension。
+		// {String}預設的圖片類別/圖片延伸檔名/副檔名/檔案類別/image filename extension。
 		default_image_extension : 'jpg',
+
+		// {String}可以接受的圖片類別/圖片延伸檔名/副檔名/檔案類別 acceptable file extensions。
+		// acceptable_types : 'images',
+		// acceptable_types : 'png',
 
 		// {String}仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無
 		MESSAGE_RE_DOWNLOAD : '神仙打鼓有時錯，腳步踏差誰人無。下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
@@ -3714,7 +3718,8 @@ function module_code(library_namespace) {
 						&& !_this.skip_get_chapter_page
 						&& (!_this.skip_error || get_data.error_count < _this.MAX_ERROR_RETRY)) {
 					library_namespace.error((work_data.title || work_data.id)
-							+ ': ' + gettext('無法取得第 %1 章的內容。', chapter_NO));
+					// work_data.chapter_unit || _this.chapter_unit
+					+ ': ' + gettext('無法取得第 %1 章的內容。', chapter_NO));
 					if (get_data.error_count === _this.MAX_ERROR_RETRY) {
 						if (_this.skip_chapter_data_error) {
 							library_namespace.warn('process_chapter_data: '
@@ -4225,15 +4230,20 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// 檢查實際存在的圖片檔案。當之前已存在完整的圖片時，就不再嘗試下載圖片。
+		/**
+		 * 每張圖片都要檢查實際存在的圖片檔案。當之前已存在完整的圖片時，就不再嘗試下載圖片。<br />
+		 * 工作機制：<br />
+		 * 檢核預設的圖片延伸檔名/副檔名(.default_image_extension)。若是不存在預設的圖片延伸檔名/副檔名，將會檢查所有可以接受的圖片類別(.acceptable_types)。
+		 * 每張圖片都要檢核所有可接受的圖片類別，會加大硬碟讀取負擔。
+		 * 會用到.overwrite_old_file這個選項的，應該都是需要提報issue的，因此這個選項不會列出來。麻煩請在個別網站遇到此情況時提報issue，列出作品名稱以及圖片類別，以供這邊確認圖片類別。
+		 * 只要存在完整無損害的預設圖片類別或是可接受的圖片類別，就直接跳出，不再嘗試下載這張圖片。否則會重新下載圖片。
+		 * 當下載的圖片以之前的圖片更大時，就會覆蓋原先的圖片。
+		 * 若下載的圖片類別並非預設的圖片類別(.default_image_extension)，例如預設JPG但取得PNG檔案時，會將副檔名改為實際取得的圖像格式。因此下一次下載時，需要設定.acceptable_types才能找得到圖片。
+		 */
 		var image_downloaded = node_fs.existsSync(image_data.file)
 				|| this.skip_existed_bad_file
 				// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
-				&& node_fs.existsSync(this.EOI_error_path(image_data.file)),
-		// 可以接受的副檔名/檔案類別 acceptable file extensions
-		// e.g., acceptable_types : [ 'png' ]
-		// 當之前下載時發現檔案類別並非預設的檔案，例如預設JPG但取得PNG檔案時，會將副檔名改為所取得圖像實際的格式/副檔名。但是這樣一來可能就會找不到了。因此需要設定acceptable_types。
-		acceptable_types;
+				&& node_fs.existsSync(this.EOI_error_path(image_data.file)), acceptable_types;
 
 		if (!image_downloaded) {
 			// 正規化 acceptable_types
@@ -4248,6 +4258,8 @@ function module_code(library_namespace) {
 					acceptable_types = [ acceptable_types ];
 				}
 			} else if (!Array.isArray(acceptable_types)) {
+				library_namespace.warn('Invalid acceptable_types: '
+						+ acceptable_types);
 				acceptable_types = null;
 			}
 
@@ -4289,7 +4301,7 @@ function module_code(library_namespace) {
 					&& bad_image_archived;
 
 			if (!image_downloaded
-			// 可以接受的副檔名/檔案類別 acceptable file extensions
+			// 可以接受的圖片類別/圖片延伸檔名/副檔名/檔案類別 acceptable file extensions
 			&& acceptable_types) {
 				image_downloaded = acceptable_types.some(function(extension) {
 					var alternative_filename = image_archived.replace(
@@ -4605,7 +4617,7 @@ function module_code(library_namespace) {
 		// chapter_data.url
 		next_chapter_url = next_chapter && next_chapter.url,
 		// /下一[章页][：: →]*<a [^<>]*?href="([^"]+.html)"[^<>]*>/
-		next_url = html.match(PATTERN_next_chapter ||
+		next_url = html && html.match(PATTERN_next_chapter ||
 		// PTCMS default. e.g., "下一章 →" /下一章[：: →]*/
 		// PATTERN_next_chapter: [ all, next chapter url ]
 		// e.g., <a href="//read.qidian.com/chapter/abc123">下一章</a>
@@ -4659,8 +4671,11 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			var message = 'check_next_chapter: Insert a chapter url after chapter '
-					+ chapter_NO + ': ' + next_url
+			var message = work_data.chapter_list[chapter_NO - 1];
+			message = 'check_next_chapter: Insert a chapter url after chapter '
+					+ chapter_NO
+					+ (message && message.url ? ' (' + message.url + ')' : '')
+					+ ': ' + next_url
 					// 原先下一個章節的 URL 被往後移一個。
 					+ (next_chapter_url ? '→' + next_chapter_url : '');
 			if (next_chapter_url) {
