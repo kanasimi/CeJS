@@ -2748,14 +2748,17 @@ function module_code(library_namespace) {
 					// 先搬移原目錄。
 					.replace(/[\\\/]+$/, '.' + (new Date).format('%4Y%2m%2d'));
 					// 常出現在 manhuatai, 2manhua。
-					library_namespace.warn('將先備分舊內容、移動目錄，而後重新下載！\n'
-							+ work_data.directory + '\n→\n' + move_to);
+					library_namespace.warn([ {
+						T : [ '將先備分舊內容、移動目錄，而後重新第%1章下載！', _this.start_chapter ]
+					}, '\n', work_data.directory, '\n→\n', move_to ]);
 					// TODO: 成壓縮檔。
 					library_namespace.fs_move(work_data.directory, move_to);
 					// re-create work_data.directory
 					library_namespace.create_directory(work_data.directory);
 				} else {
-					library_namespace.info('將從頭檢查、重新下載。');
+					library_namespace.info({
+						T : [ '將從頭檢查、自第%1章重新下載。', _this.start_chapter ]
+					});
 				}
 				work_data.reget_chapter = true;
 				work_data.last_download.chapter = _this.start_chapter;
@@ -2771,7 +2774,9 @@ function module_code(library_namespace) {
 			if (_this.need_create_ebook && !work_data.reget_chapter
 			// 最起碼應該要重新生成電子書。否則會只記錄到最後幾個檢查過的章節。
 			&& work_data.last_download.chapter !== work_data.chapter_count) {
-				library_namespace.info('將從頭檢查、重新生成電子書。');
+				library_namespace.info({
+					T : [ '將從頭檢查、、自第%1章重新生成電子書。', _this.start_chapter ]
+				});
 				work_data.regenerate = true;
 				work_data.last_download.chapter = _this.start_chapter;
 			}
@@ -3437,6 +3442,7 @@ function module_code(library_namespace) {
 		try {
 			chapter_URL = get_chapter_URL();
 		} catch (e) {
+			// e.g., qq.js
 			_this.onerror(e, work_data);
 			typeof callback === 'function' && callback(work_data);
 			return Work_crawler.THROWED;
