@@ -838,6 +838,21 @@ function module_code(library_namespace) {
 				return finished;
 			}
 		},
+
+		estimated_message : function(work_data, chapter_NO) {
+			// 預估剩餘時間 estimated time remaining
+			var estimated_time = work_data.chapter_count > chapter_NO
+					// this.start_chapter, chapter_NO starts from 1
+					&& (work_data.chapter_count - (chapter_NO - 1))
+					* (Date.now() - work_data.start_downloading_chaper)
+					/ (chapter_NO - (this.start_chapter >= 1 ? this.start_chapter
+							: 1));
+			if (1e3 < estimated_time && estimated_time < 1e15) {
+				return gettext('預估還需 %1 下載完本作品', library_namespace.age_of(0,
+						estimated_time));
+			}
+		},
+
 		work_URL : function(work_id) {
 			// default work_URL: this.base_URL + work_id + '/'
 			return work_id + '/';
@@ -3000,22 +3015,15 @@ function module_code(library_namespace) {
 			var message = [ this.id, ': ', work_data.title + ': ',
 					'下載第' + chapter_NO + '章之章節資訊前先等待 ',
 					library_namespace.age_of(0, chapter_time_interval) ],
-			// 預估剩餘時間 estimated time remaining
-			estimated_time = work_data.chapter_count > chapter_NO
-					// this.start_chapter, chapter_NO starts from 1
-					&& (work_data.chapter_count - (chapter_NO - 1))
-					* (Date.now() - work_data.start_downloading_chaper)
-					/ (chapter_NO - (this.start_chapter >= 1 ? this.start_chapter
-							: 1));
-			if (1e3 < estimated_time && estimated_time < 1e15) {
-				message.push('，預估還需 ', library_namespace.age_of(0,
-						estimated_time), ' 下載完本作品');
+			//
+			estimated_message = this.estimated_message(work_data, chapter_NO);
+			if (estimated_message) {
+				message.push('，', estimated_message);
 			}
 			message.push('...\r');
 			process.stdout.write(message.join(''));
 			setTimeout(actual_operation, chapter_time_interval);
-		}).bind(this)
-				: actual_operation;
+		}).bind(this) : actual_operation;
 
 		if (this.chapter_filter) {
 			var chapter_data = work_data.chapter_list
@@ -3424,7 +3432,16 @@ function module_code(library_namespace) {
 		//
 		chapter_directory, images_archive, chapter_page_file_name,
 		//
-		chapter_URL = get_chapter_URL();
+		chapter_URL;
+
+		try {
+			chapter_URL = get_chapter_URL();
+		} catch (e) {
+			_this.onerror(e, work_data);
+			typeof callback === 'function' && callback(work_data);
+			return Work_crawler.THROWED;
+		}
+
 		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
 				+ chapter_NO + '/' + work_data.chapter_count + ': '
 				+ chapter_URL, 1, 'get_chapter_data');
@@ -3463,11 +3480,15 @@ function module_code(library_namespace) {
 		// --------------------------------------
 
 		function get_data() {
+			var estimated_message = _this.estimated_message(work_data,
+					chapter_NO);
 			process.stdout.write('Get data of chapter ' + chapter_NO
 			//
 			+ (typeof _this.pre_chapter_URL === 'function' ? ''
 			//
-			: '/' + work_data.chapter_count) + '...\r');
+			: '/' + work_data.chapter_count)
+			//
+			+ (estimated_message ? ', ' + estimated_message : '') + '...\r');
 
 			// default: 置於 work_data.directory 下。
 			var chapter_file_name = work_data.directory
@@ -4628,7 +4649,7 @@ function module_code(library_namespace) {
 
 		// 去掉開頭的 "./"。
 		&& (next_url = next_url[1].replace(/^(\.\/)+/,
-		//
+		// TODO: {Array}this.chapter_URL()
 		this.chapter_URL(work_data, chapter_NO).replace(/[^\/]+$/, '')))
 
 		// 有些在目錄上面的章節連結到了錯誤的頁面，只能靠下一頁來取得正確頁面。
