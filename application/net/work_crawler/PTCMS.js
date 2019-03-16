@@ -200,6 +200,11 @@ function module_code(library_namespace) {
 			return url.startsWith('/') ? url : work_data.base_url + url;
 		},
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
+			if (!html && this.skip_error === true) {
+				// Skip empty chapter
+				return;
+			}
+
 			// 在取得小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
 			this.check_next_chapter(work_data, chapter_NO, html,
 					this.PATTERN_next_chapter);
