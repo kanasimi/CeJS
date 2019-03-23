@@ -1012,9 +1012,13 @@ function module_code(library_namespace) {
 		// "\u200F" 亦不被視作 /\s/，但經測試會被 wiki 忽視。
 		// tested: [[title]], {{title}}
 		// @seealso [[w:en:Category:CS1 errors: invisible characters]]
-		.replace(/[\s\u200E\u200F]+$/, '')
+		.replace(/[\s\u200B\u200E\u200F\u2060]+$/, '')
 		// 只能允許出現頂多一個 ":"。
-		.replace(/^[\s\u200E\u200F]*(?::[\s\u200E\u200F]*)?/, '')
+		.replace(
+		// \u2060: word joiner (WJ). /^\s$/.test('\uFEFF')
+		/^[\s\u200B\u200E\u200F\u2060]*(?::[\s\u200B\u200E\u200F\u2060]*)?/
+		// 去除不可見字符 \p{Cf}，警告 \p{C}。
+		, '')
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1');
 
@@ -2615,12 +2619,15 @@ function module_code(library_namespace) {
 	 * @see parse_wikitext()
 	 */
 	function resolve_escaped(queue, include_mark, end_mark) {
-		library_namespace.debug('queue: ' + queue.join('\n--- '), 4,
-				'resolve_escaped');
-		// console.log('resolve_escaped: '+JSON.stringify(queue));
-		queue.forEach(function(item, index) {
-			library_namespace.debug([ 'item', index, item ], 4,
+		if (false) {
+			library_namespace.debug('queue: ' + queue.join('\n--- '), 4,
 					'resolve_escaped');
+			console.log('resolve_escaped: ' + JSON.stringify(queue));
+		}
+		queue.forEach(function(item, index) {
+			if (false)
+				library_namespace.debug([ 'item', index, item ], 4,
+						'resolve_escaped');
 			if (typeof item !== 'string')
 				// assert: Array.isArray(item)
 				return;
@@ -4041,7 +4048,7 @@ function module_code(library_namespace) {
 
 				var row, matched, delimiter,
 				// 分隔 <td>, <th>
-				// [ all, inner, delimiter ]
+				// matched: [ all, inner, delimiter ]
 				// 必須有實體才能如預期作 .exec()。
 				// "\n|| t" === "\n| t"
 				PATTERN_CELL = /([\s\S]*?)(\n(?:\|\|?|!)|\|\||!!|$)/g;
@@ -4070,11 +4077,12 @@ function module_code(library_namespace) {
 							// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
 							.match(/data-sort-type=(["']([^"']+)["']|[^\s]+)/);
 
-							cell[1] = cell[1].includes(include_mark)
-							// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-							? parse_wikitext(cell[1], options, queue)
-							//
-							: _set_wiki_type(cell[1],
+							if (cell[1].includes(include_mark)) {
+								cell[1] = [
+								// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+								parse_wikitext(cell[1], options, queue) ];
+							}
+							cell[1] = _set_wiki_type(cell[1],
 							// cell style / format modifier (not displayed)
 							'table_style');
 							// assert: cell[2] === '|'
@@ -6001,11 +6009,10 @@ function module_code(library_namespace) {
 			if (flow_view === 'expandtemplates')
 				return String(page_data.expandtemplates.wikitext || '');
 
-			library_namespace
-					.debug(
-							get_page_title_link(page_data)
-									+ ': The page has expandtemplates.wikitext but do not used.',
-							1, 'get_page_content');
+			library_namespace.debug(get_page_title_link(page_data)
+			//
+			+ ': The page has expandtemplates.wikitext but do not used.', 1,
+					'get_page_content');
 		}
 
 		// 檢測一般頁面。
@@ -6810,7 +6817,7 @@ function module_code(library_namespace) {
 				// next[2] : callback
 				if (typeof next[2] === 'function')
 					next[2].apply(_this, arguments);
-				// 因為wiki_API.cache(list)會使用到wiki_API.prototype[method]；
+				// 因為 wiki_API.cache(list) 會使用到 wiki_API.prototype[method]；
 				// 其最後會再 call wiki_API.next()，是以此處不再重複 call .next()。
 				// _this.next();
 			},
@@ -12336,7 +12343,8 @@ function module_code(library_namespace) {
 	} catch (e) {
 		// enumerate for wiki_API.cache
 		// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
-		library_namespace.warn('無 node.js 之 fs，因此不具備 cache 或 SQL 功能。');
+		library_namespace.warn(this.id
+				+ ': 無 node.js 之 fs，因此不具備 cache 或 SQL 功能。');
 		node_fs = {
 			readFile : function(file_path, options, callback) {
 				library_namespace.error('Can not read file ' + file_path);
