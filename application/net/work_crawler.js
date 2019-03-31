@@ -531,8 +531,10 @@ function module_code(library_namespace) {
 		// {String}瀏覽器識別 navigator.userAgent 模擬 Chrome。
 		user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
 		// 並且每次更改不同的 user agent。
-		.replace(/( Chrome\/\d+\.\d+\.)(\d+)/, function($0, $1, $2) {
-			return $1 + (Math.random() * 1e4 | 0);
+		.replace(/( Chrome\/\d+\.\d+\.)(\d+)/,
+		//
+		function(all, main_ver, sub_ver) {
+			return main_ver + (Math.random() * 1e4 | 0);
 		}),
 
 		/**
@@ -709,7 +711,6 @@ function module_code(library_namespace) {
 		chapter_unit : '話',
 		parse_ebook_name : parse_ebook_name,
 
-		full_URL : full_URL_of_path,
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
 		// 每次預設會從上一次中斷的章節接續下載，不用特地指定 recheck。
 		// 有些漫畫作品分區分單行本、章節與外傳，當章節數量改變、添加新章節時就需要重新檢查/掃描。
@@ -742,228 +743,29 @@ function module_code(library_namespace) {
 		// archive_all_good_images_only : true,
 		// 壓縮圖像檔案之後，刪掉原先的圖像檔案。 請注意： 必須先安裝 7-Zip **18.01 以上的版本**。
 		remove_images_after_archive : true,
+		// or .cbz
 		images_archive_extension : 'zip',
 
 		image_path_to_url : image_path_to_url,
 		// 規範 work id 的正規模式；提取出引數中的作品id 以回傳。
-		extract_work_id : function(work_information) {
-			// default: accept numerals only
-			if (library_namespace.is_digits(work_information)
-			// || /^[a-z_\-\d]+$/.test(work_information)
-			)
-				return work_information;
-		},
+		extract_work_id : extract_work_id,
 		// 自作品網址 URL 提取出 work id。 via URL
-		extract_work_id_from_URL : function(work_information) {
-			if (typeof work_information === 'string'
-					&& /^https?:\/\//.test(work_information)) {
-				var PATTERN_work_id_of_url = this.PATTERN_work_id_of_url;
-				if (!PATTERN_work_id_of_url) {
-					PATTERN_work_id_of_url = this.full_URL(this.work_URL,
-							'work_id');
-					if (PATTERN_work_id_of_url.endsWith('work_id/')) {
-						// 允許不用"/"結尾。
-						PATTERN_work_id_of_url = PATTERN_work_id_of_url.slice(
-								0, -1);
-					}
-					PATTERN_work_id_of_url = this.PATTERN_work_id_of_url
-					// assert:
-					// 'work_id'===library_namespace.to_RegExp_pattern('work_id')
-					= new RegExp('^'
-							+ library_namespace.to_RegExp_pattern(
-									PATTERN_work_id_of_url).replace('work_id',
-									'([^\/]+)'));
-				}
-
-				var matched = work_information.match(PATTERN_work_id_of_url);
-				if (matched) {
-					matched = matched[1];
-					library_namespace
-							.info('extract_work_id_from_URL: 自作品網址提取出 work id: '
-									+ matched);
-					return /* this.extract_work_id(matched) && */matched;
-				}
-				library_namespace
-						.warn('extract_work_id_from_URL: 無法自作品網址提取出 work id！ '
-								+ work_information);
-			}
-		},
+		extract_work_id_from_URL : extract_work_id_from_URL,
 		// 由文章狀態/進程取得用在作品完結的措辭。
-		finished_words : function finished_words(status) {
-			status = String(status);
+		finished_words : finished_words,
+		is_finished : is_finished,
 
-			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
-			if (/^[(\[]?(?:完[結结成]?|Completed)[)\]]?$/i.test(status))
-				return status;
-
-			// e.g., 连载中, 連載中, 已完结, 已完成, 已完結作品, 已連載完畢, 已完/未完
-			var matched = status.match(/(?:^|已)完(?:[結结成]|$)/);
-			if (matched)
-				return matched[0];
-
-			// 完本: http://book.qidian.com/
-			if ('完結済|完本|読み切り'.split('|').some(function(word) {
-				return status.includes(word);
-			})) {
-				return status;
-			}
-
-			// ck101: 全文完, 全書完
-			// MAGCOMI: 連載終了作品
-			if (/全[文書]完|終了/.test(status)) {
-				return status;
-			}
-
-			// 已停更
-		},
-		is_finished : function(work_data) {
-			if ('is_finished' in work_data) {
-				return work_data.is_finished;
-			}
-
-			var status_list = library_namespace.is_Object(work_data) ? work_data.status
-					// treat work_data as status
-					: work_data, date;
-			if (!status_list) {
-				if (this.recheck
-						&& !work_data.recheck
-						&& library_namespace.is_Object(work_data)
-						&& (Date.now() - (date = set_last_update_Date(work_data)))
-								// 因為沒有明確記載作品是否完結，10年沒更新就不再重新下載。
-								/ library_namespace.to_millisecond('1D') > (work_data.recheck_days || 10 * 366)) {
-					library_namespace.info('is_finished: 本作品已 '
-							+ library_namespace.age_of(date)
-							+ ' 沒有更新，時間過久不再強制重新下載，僅在章節數量有變化時才重新下載：'
-							+ work_data.title);
-					work_data.recheck = 'changed';
-				}
-
-				return status_list;
-			}
-			// {String|Array}status_list
-
-			if (!Array.isArray(status_list)) {
-				return this.finished_words(status_list);
-			}
-
-			var finished;
-			if (status_list.some(function(status) {
-				return finished = this.finished_words(status);
-			}, this)) {
-				return finished;
-			}
-		},
-
-		estimated_message : function(work_data, chapter_NO) {
-			if (!(work_data.chapter_count > chapter_NO))
-				return;
-
-			// 到現在使用時間 (ms)
-			var time_used = Date.now() - work_data.start_downloading_chaper,
-			// chapter_NO starts from 1
-			chapters_to_download = work_data.chapter_count - (chapter_NO - 1),
-			// this.start_chapter starts from 1
-			chapters_downloaded = chapter_NO
-					- (this.start_chapter > 1 ? this.start_chapter : 1),
-			// 預估剩餘時間 estimated time remaining (ms)
-			estimated_time = chapters_to_download *
-			// 到現在平均每個章節使用時間。
-			time_used / chapters_downloaded;
-
-			if (1e3 < estimated_time && estimated_time < 1e15) {
-				return gettext('預估還需 %1 下載完本作品', library_namespace.age_of(0,
-						estimated_time));
-			}
-		},
+		estimated_message : estimated_message,
 
 		// 檢查磁碟上面是否真的有已經下載的漫畫檔案。
 		// .check_downloaded_chapters() 必須先確保已獲得最終之 chapter_data.title。
-		check_downloaded_chapters : function(work_data) {
-			var chapter_list = Array.isArray(work_data.chapter_list)
-					&& work_data.chapter_list;
-
-			if (this.need_create_ebook || !chapter_list)
-				return;
-
-			var chapter_to_check = [];
-
-			chapter_list.forEach(function(chapter_data, index) {
-				var downloaded_file = work_data.directory
-						+ this.get_chapter_directory_name(work_data, index + 1)
-						+ '.' + this.images_archive_extension;
-				// console.log('downloaded_file: ' + downloaded_file);
-				if (library_namespace.storage.file_exists(downloaded_file)) {
-					chapter_data.skip_this_chapter = '跳過之前已下載過，已無需再檢查的章節。';
-				} else {
-					chapter_to_check.push('#'
-							+ (index + 1)
-							+ (chapter_data.title ? ' ' + chapter_data.title
-									: ''));
-				}
-			}, this);
-
-			if (chapter_to_check.length === 0) {
-				library_namespace.log('check_downloaded_chapters: 跳過所有章節');
-			} else {
-				library_namespace.log('check_downloaded_chapters: 僅檢查: '
-						+ chapter_to_check.join(', '));
-			}
-
-			// console.log(work_data.chapter_list);
-			// console.log(new_chapter_list);
-			// work_data.chapter_list = new_chapter_list;
-		},
-
+		check_downloaded_chapters : check_downloaded_chapters,
 		// 應該改成.check_downloaded_chapters()，檢查磁碟上面是否真的有已經下載的檔案。
-		check_downloaded_chapter_url : function(work_data, new_chapter_list,
-				from_chapter_NO) {
-			if (// this.recheck === 'multi_parts_changed' &&
-			false && Array.isArray(new_chapter_list)
-			// && new_chapter_list.part_NO > 1
-			&& Array.isArray(work_data.chapter_list)) {
+		check_downloaded_chapter_url : check_downloaded_chapter_url,
 
-				var old_url_hash = library_namespace.null_Object();
-				work_data.chapter_list.forEach(function(chapter_data, index) {
-					// assert: {Object}chapter_data
-					old_url_hash[chapter_data.url] = index;
-				});
-
-				var chapter_to_check = [];
-				if (from_chapter_NO === undefined) {
-					from_chapter_NO = work_data.last_download.chapter;
-				}
-				// console.log('from_chapter_NO = ' + from_chapter_NO);
-				new_chapter_list.forEach(function(chapter_data, index) {
-					if (index + 1 <= from_chapter_NO
-							|| (chapter_data.url in old_url_hash)) {
-						chapter_data.skip_this_chapter =
-						//
-						'跳過之前已下載/檢查過，已無需再檢查的章節。';
-					} else {
-						chapter_to_check.push('#'
-								+ (index + 1)
-								+ (chapter_data.title ? ' '
-										+ chapter_data.title : ''));
-					}
-				}, this);
-				// free
-				old_url_hash = null;
-
-				if (chapter_to_check.length === 0) {
-					library_namespace
-							.log('check_downloaded_chapter_url: 跳過所有章節');
-				} else {
-					library_namespace.log('check_downloaded_chapter_url: 僅檢查: '
-							+ chapter_to_check.join(', '));
-				}
-
-				// console.log(work_data.chapter_list);
-				// console.log(new_chapter_list);
-				// work_data.chapter_list = new_chapter_list;
-				return;
-			}
-		},
-
+		full_URL : full_URL_of_path,
+		// this.get_URL(url, function callback(XMLHttp) {})
+		get_URL : this_get_URL,
 		work_URL : function(work_id) {
 			// default work_URL: this.base_URL + work_id + '/'
 			return work_id + '/';
@@ -996,35 +798,6 @@ function module_code(library_namespace) {
 
 			return this.full_URL(this.work_URL, work_data.id)
 					+ chapter_data.url;
-		},
-		// this.get_URL(url, function callback(XMLHttp) {})
-		get_URL : function(url, callback, post_data, options) {
-			if (Array.isArray(url) && !post_data && !options) {
-				// [ url, post_data, options ]
-				post_data = url[1];
-				options = url[2];
-				url = url[0];
-			}
-
-			if (options === true) {
-				options = Object.assign({
-					error_retry : this.MAX_ERROR_RETRY
-				}, this.get_URL_options);
-			} else if (library_namespace.is_Object(options)) {
-				var headers = Object.assign(library_namespace.null_Object(),
-						this.get_URL_options.headers, options.headers);
-				options = Object.assign(library_namespace.null_Object(),
-						this.get_URL_options, options);
-				options.headers = headers;
-			} else {
-				// assert: !options === true
-				options = this.get_URL_options;
-			}
-
-			// console.trace(url);
-			url = this.full_URL(url);
-			// console.log(url);
-			get_URL(url, callback.bind(this), this.charset, post_data, options);
 		},
 
 		set_part : set_part_title,
@@ -1321,6 +1094,37 @@ function module_code(library_namespace) {
 		}
 
 		return url;
+	}
+
+	// this.get_URL(url, callback, post_data, get_URL_options, charset)
+	function this_get_URL(url, callback, post_data, get_URL_options, charset) {
+		if (Array.isArray(url) && !post_data && !get_URL_options) {
+			// [ url, post_data, get_URL_options ]
+			post_data = url[1];
+			get_URL_options = url[2];
+			url = url[0];
+		}
+
+		if (get_URL_options === true) {
+			get_URL_options = Object.assign({
+				error_retry : this.MAX_ERROR_RETRY
+			}, this.get_URL_options);
+		} else if (library_namespace.is_Object(get_URL_options)) {
+			var headers = Object.assign(library_namespace.null_Object(),
+					this.get_URL_options.headers, get_URL_options.headers);
+			get_URL_options = Object.assign(library_namespace.null_Object(),
+					this.get_URL_options, get_URL_options);
+			get_URL_options.headers = headers;
+		} else {
+			// assert: !get_URL_options === true
+			get_URL_options = this.get_URL_options;
+		}
+
+		// console.trace(url);
+		url = this.full_URL(url);
+		// console.log(get_URL_options);
+		get_URL(url, callback.bind(this), charset || this.charset, post_data,
+				get_URL_options);
 	}
 
 	// /./ doesn't include "\r", can't preserv line separator.
@@ -1845,11 +1649,55 @@ function module_code(library_namespace) {
 			work_data[this.KEY_EBOOK] = ebook;
 	}
 
+	function extract_work_id(work_information) {
+		// default: accept numerals only
+		if (library_namespace.is_digits(work_information)
+		// || /^[a-z_\-\d]+$/.test(work_information)
+		)
+			return work_information;
+	}
+
+	function extract_work_id_from_URL(work_information) {
+		if (typeof work_information === 'string'
+				&& /^https?:\/\//.test(work_information)) {
+			var PATTERN_work_id_of_url = this.PATTERN_work_id_of_url;
+			if (!PATTERN_work_id_of_url) {
+				PATTERN_work_id_of_url = this
+						.full_URL(this.work_URL, 'work_id');
+				if (PATTERN_work_id_of_url.endsWith('work_id/')) {
+					// 允許不用"/"結尾。
+					PATTERN_work_id_of_url = PATTERN_work_id_of_url
+							.slice(0, -1);
+				}
+				PATTERN_work_id_of_url = this.PATTERN_work_id_of_url
+				// assert:
+				// 'work_id'===library_namespace.to_RegExp_pattern('work_id')
+				= new RegExp('^'
+						+ library_namespace.to_RegExp_pattern(
+								PATTERN_work_id_of_url).replace('work_id',
+								'([^\/]+)'));
+			}
+
+			var matched = work_information.match(PATTERN_work_id_of_url);
+			if (matched) {
+				matched = matched[1];
+				library_namespace
+						.info('extract_work_id_from_URL: 自作品網址提取出 work id: '
+								+ matched);
+				return /* this.extract_work_id(matched) && */matched;
+			}
+			library_namespace
+					.warn('extract_work_id_from_URL: 無法自作品網址提取出 work id！ '
+							+ work_information);
+		}
+	}
+
 	function get_work(work_title, callback) {
 		this.running = true;
 		var _this = this;
 
 		// 執行順序: finish() → finish_up()
+		// 若在this.finish_up()中處理work_data，則必須執行`this.save_work_data(work_data)`才能保存變更過的work_data。
 		function finish_up(work_data) {
 			if (work_data && work_data.title) {
 				// 最後紀錄。
@@ -1882,7 +1730,12 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof _this.finish_up === 'function') {
-				_this.finish_up(work_data);
+				try {
+					_this.finish_up(work_data);
+				} catch (e) {
+					// TODO: handle exception
+				}
+				// _this.save_work_data(work_data);
 			}
 			typeof callback === 'function' && callback.call(_this, work_data);
 			_this.running = false;
@@ -2001,8 +1854,8 @@ function module_code(library_namespace) {
 
 		// console.log(search_url_data);
 		this.setup_agent(search_URL_string);
-		// console.log(this.get_URL_options);
-		get_URL(search_URL_string, function(XMLHttp) {
+
+		this.get_URL(search_URL_string, function(XMLHttp) {
 			_this.setup_agent();
 			if (!XMLHttp.responseText) {
 				library_namespace.error('get_work: 沒有搜索結果（網站暫時不可用或改版？）: ['
@@ -2132,9 +1985,9 @@ function module_code(library_namespace) {
 				finish();
 			}
 
-		}, search_url_data.charset || this.charset, post_data, Object.assign({
+		}, post_data, Object.assign({
 			error_retry : this.MAX_ERROR_RETRY
-		}, this.get_URL_options, get_URL_options));
+		}, get_URL_options), search_url_data.charset);
 	}
 
 	// node.innerText
@@ -2196,6 +2049,88 @@ function module_code(library_namespace) {
 		}
 	}
 
+	function check_downloaded_chapters(work_data) {
+		var chapter_list = Array.isArray(work_data.chapter_list)
+				&& work_data.chapter_list;
+
+		if (this.need_create_ebook || !chapter_list)
+			return;
+
+		var chapter_to_check = [];
+
+		chapter_list.forEach(function(chapter_data, index) {
+			var downloaded_file = work_data.directory
+					+ this.get_chapter_directory_name(work_data, index + 1)
+					+ '.' + this.images_archive_extension;
+			// console.log('downloaded_file: ' + downloaded_file);
+			if (library_namespace.storage.file_exists(downloaded_file)) {
+				chapter_data.skip_this_chapter = '跳過之前已下載過，已無需再檢查的章節。';
+			} else {
+				chapter_to_check.push('#' + (index + 1)
+				//
+				+ (chapter_data.title ? ' ' + chapter_data.title : ''));
+			}
+		}, this);
+
+		if (chapter_to_check.length === 0) {
+			library_namespace.log('check_downloaded_chapters: 跳過所有章節');
+		} else {
+			library_namespace.log('check_downloaded_chapters: 僅檢查'
+					+ chapter_to_check.length + '個章節: '
+					+ chapter_to_check.join(', '));
+		}
+
+		// console.log(work_data.chapter_list);
+		// console.log(new_chapter_list);
+		// work_data.chapter_list = new_chapter_list;
+	}
+	function check_downloaded_chapter_url(work_data, new_chapter_list,
+			from_chapter_NO) {
+		if (// this.recheck === 'multi_parts_changed' &&
+		false && Array.isArray(new_chapter_list)
+		// && new_chapter_list.part_NO > 1
+		&& Array.isArray(work_data.chapter_list)) {
+
+			var old_url_hash = library_namespace.null_Object();
+			work_data.chapter_list.forEach(function(chapter_data, index) {
+				// assert: {Object}chapter_data
+				old_url_hash[chapter_data.url] = index;
+			});
+
+			var chapter_to_check = [];
+			if (from_chapter_NO === undefined) {
+				from_chapter_NO = work_data.last_download.chapter;
+			}
+			// console.log('from_chapter_NO = ' + from_chapter_NO);
+			new_chapter_list.forEach(function(chapter_data, index) {
+				if (index + 1 <= from_chapter_NO
+						|| (chapter_data.url in old_url_hash)) {
+					chapter_data.skip_this_chapter =
+					//
+					'跳過之前已下載/檢查過，已無需再檢查的章節。';
+				} else {
+					chapter_to_check.push('#' + (index + 1)
+					//
+					+ (chapter_data.title ? ' ' + chapter_data.title : ''));
+				}
+			}, this);
+			// free
+			old_url_hash = null;
+
+			if (chapter_to_check.length === 0) {
+				library_namespace.log('check_downloaded_chapter_url: 跳過所有章節');
+			} else {
+				library_namespace.log('check_downloaded_chapter_url: 僅檢查: '
+						+ chapter_to_check.join(', '));
+			}
+
+			// console.log(work_data.chapter_list);
+			// console.log(new_chapter_list);
+			// work_data.chapter_list = new_chapter_list;
+			return;
+		}
+	}
+
 	/**
 	 * 取得下載章節資訊/章節內容前的等待時間。
 	 * 
@@ -2229,6 +2164,72 @@ function module_code(library_namespace) {
 		}
 	}
 
+	function finished_words(status) {
+		status = String(status);
+
+		// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
+		if (/^[(\[]?(?:完[結结成]?|Completed)[)\]]?$/i.test(status))
+			return status;
+
+		// e.g., 连载中, 連載中, 已完结, 已完成, 已完結作品, 已連載完畢, 已完/未完
+		var matched = status.match(/(?:^|已)完(?:[結结成]|$)/);
+		if (matched)
+			return matched[0];
+
+		// 完本: http://book.qidian.com/
+		if ('完結済|完本|読み切り'.split('|').some(function(word) {
+			return status.includes(word);
+		})) {
+			return status;
+		}
+
+		// ck101: 全文完, 全書完
+		// MAGCOMI: 連載終了作品
+		if (/全[文書]完|終了/.test(status)) {
+			return status;
+		}
+
+		// 已停更
+	}
+
+	function is_finished(work_data) {
+		if ('is_finished' in work_data) {
+			return work_data.is_finished;
+		}
+
+		var status_list = library_namespace.is_Object(work_data) ? work_data.status
+				// treat work_data as status
+				: work_data, date;
+		if (!status_list) {
+			if (this.recheck
+					&& !work_data.recheck
+					&& library_namespace.is_Object(work_data)
+					&& (Date.now() - (date = set_last_update_Date(work_data)))
+					// 因為沒有明確記載作品是否完結，10年沒更新就不再重新下載。
+					/ library_namespace.to_millisecond('1D') > (work_data.recheck_days || 10 * 366)) {
+				library_namespace.info('is_finished: 本作品已 '
+						+ library_namespace.age_of(date)
+						+ ' 沒有更新，時間過久不再強制重新下載，僅在章節數量有變化時才重新下載：'
+						+ work_data.title);
+				work_data.recheck = 'changed';
+			}
+
+			return status_list;
+		}
+		// {String|Array}status_list
+
+		if (!Array.isArray(status_list)) {
+			return this.finished_words(status_list);
+		}
+
+		var finished;
+		if (status_list.some(function(status) {
+			return finished = this.finished_words(status);
+		}, this)) {
+			return finished;
+		}
+	}
+
 	var null_XMLHttp = {
 		responseText : ''
 	};
@@ -2246,8 +2247,7 @@ function module_code(library_namespace) {
 
 		var _this = this, work_URL = this.full_URL(this.work_URL, work_id), work_data;
 		library_namespace.debug('work_URL: ' + work_URL, 2, 'get_work_data');
-
-		get_work_page();
+		// console.log(work_URL);
 
 		// ----------------------------------------------------------
 
@@ -2258,6 +2258,10 @@ function module_code(library_namespace) {
 			}
 			_this.get_URL(work_URL, process_work_data);
 		}
+
+		get_work_page();
+
+		// ----------------------------------------------------------
 
 		function process_work_data(XMLHttp) {
 			// console.log(XMLHttp);
@@ -3083,6 +3087,28 @@ function module_code(library_namespace) {
 		pre_get_chapter_data.apply(this, _arguments);
 	}
 
+	function estimated_message(work_data, chapter_NO) {
+		if (!(work_data.chapter_count > chapter_NO))
+			return;
+
+		// 到現在使用時間 (ms)
+		var time_used = Date.now() - work_data.start_downloading_chaper,
+		// chapter_NO starts from 1
+		chapters_to_download = work_data.chapter_count - (chapter_NO - 1),
+		// this.start_chapter starts from 1
+		chapters_downloaded = chapter_NO
+				- (this.start_chapter > 1 ? this.start_chapter : 1),
+		// 預估剩餘時間 estimated time remaining (ms)
+		estimated_time = chapters_to_download *
+		// 到現在平均每個章節使用時間。
+		time_used / chapters_downloaded;
+
+		if (1e3 < estimated_time && estimated_time < 1e15) {
+			return gettext('預估還需 %1 下載完本作品', library_namespace.age_of(0,
+					estimated_time));
+		}
+	}
+
 	// @inner
 	function pre_get_chapter_data(work_data, chapter_NO, callback) {
 		if (this.continue_arguments) {
@@ -3467,8 +3493,9 @@ function module_code(library_namespace) {
 		// TODO: 神落しの鬼 @ pixivコミック: ニノ巻
 		// TODO: 特別編その2
 
-		library_namespace.warn('Can not determine chapter NO from title: '
-				+ (title || JSON.stringify(chapter_data))
+		library_namespace.warn('Can not determine chapter NO from '
+				+ (title ? 'title: ' + title : 'chapter: '
+						+ JSON.stringify(chapter_data))
 				+ (default_NO >= 0 ? ' (Set as ' + default_NO + ')' : ''));
 		if (library_namespace.is_Object(chapter_data) && default_NO >= 0)
 			chapter_data.chapter_NO = default_NO;
@@ -3997,6 +4024,9 @@ function module_code(library_namespace) {
 					&& (!chapter_data || !chapter_data.limited
 					// 圖片檔案會用其他方式手動下載。 .allow_empty_chapter
 					&& !chapter_data.images_downloaded)) {
+						if (!chapter_data.limited) {
+							// console.log(chapter_data);
+						}
 						var message = chapter_data.limited ? 'Limited'
 								: 'No image got';
 						_this.onwarning('process_chapter_data: '
@@ -4942,7 +4972,7 @@ function module_code(library_namespace) {
 		// keywords 太多雜訊，如:
 		// '万古剑神,,万古剑神全文阅读,万古剑神免费阅读,万古剑神txt下载,万古剑神txt全集下载,万古剑神蒙白'
 		// category: PTCMS
-		'status,genre,tags,category,categories,类型'.split(',')
+		'status,genre,tags,category,categories,类型,カテゴリ'.split(',')
 		// 標籤 類別 類型 类型 types
 		.forEach(function(type) {
 			if (work_data[type])
