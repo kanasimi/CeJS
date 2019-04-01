@@ -69,7 +69,7 @@ if (false) {
 // for i18n: define gettext() user domain resource location.
 // gettext() will auto load (CeL.env.domain_location + language + '.js').
 // e.g., resource/cmn-Hant-TW.js, resource/ja-JP.js
-CeL.env.domain_location = 'resource/';
+CeL.env.domain_location = CeL.env.resource_directory_name + '/';
 // declaration for gettext()
 var _;
 
@@ -1253,16 +1253,16 @@ add_tag.parse.draw_limit = 400;
 
 // 登錄預設可 include 之資料圖層
 add_tag.data_file = {
-	'中國皇帝生卒' : [ 'resource/emperor.js',
+	'中國皇帝生卒' : [ CeL.env.domain_location + 'emperor.js',
 	// 資料來源 title, URL, memo
 	'中國皇帝壽命列表', 'https://zh.wikipedia.org/wiki/中国皇帝寿命列表', '僅列到年份，尚不夠精確。' ],
 
 	// 臺灣歷史地震時間軸視覺化（英文：Visulation）
-	'臺灣地震' : [ 'resource/quake.js', '臺灣地震年表',
+	'臺灣地震' : [ CeL.env.domain_location + 'quake.js', '臺灣地震年表',
 			'http://921kb.sinica.edu.tw/history/quake_history.html' ],
 
 	'古籍異象' : [
-			'resource/abnormal.js',
+			CeL.env.domain_location + 'abnormal.js',
 			'中國古籍異象',
 			'http://sciencehistory.twbbs.org/?p=982',
 			'因資料數量龐大，載入與處理速度緩慢，請稍作等待。\n'
@@ -1867,6 +1867,7 @@ var 準確程度_MESSAGE = {
 },
 // Japan convert
 J_translate = {
+	R : '令和',
 	H : '平成',
 	S : '昭和',
 	T : '大正',
@@ -2643,10 +2644,6 @@ function affairs() {
 	_.create_menu('language_menu', [ 'TW', 'CN', 'ja', 'en' ], function() {
 		draw_era.redraw();
 	});
-
-	// handle with document.title in IE 8.
-	if (CeL.set_text.need_check_title)
-		_.document_title = document_title;
 
 	// translate all nodes to show in specified language (or default domain).
 	_.translate_nodes();
