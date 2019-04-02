@@ -775,7 +775,7 @@ function module_code(library_namespace) {
 	'\0-\x08\x0B\x0C\x0E');
 
 	/**
-	 * 可以使用 /\p{C}/ 之類的 RegExp。
+	 * 可以使用 /\p{C}/u 之類的 RegExp。
 	 * 
 	 * @param {String|RegExp}source
 	 *            source of RegExp instance.
@@ -790,21 +790,30 @@ function module_code(library_namespace) {
 				flag = source.flags;
 			source = source.source;
 		}
-		if (typeof flag === 'string' && !('unicode' in RegExp.prototype))
-			flag = flag.replace(/u/g, '');
 
-		// 後處理 Unicode category。
-		source = source.replace(/\\p{([A-Z][A-Za-z_]*)}/g, function(all,
-				category) {
-			return Unicode_category[category] || all;
-		});
+		if (typeof flag === 'string' && flag.includes('u')) {
+			if (!('unicode' in RegExp.prototype))
+				flag = flag.replace(/u/g, '');
+
+			// 後處理 Unicode category。
+			source = source.replace(/\\p{([A-Z][A-Za-z_]*)}/g, function(all,
+					category) {
+				return Unicode_category[category] || all;
+			});
+		}
 
 		return new RegExp(source, flag);
 	}
 
 	new_RegExp.category = Unicode_category;
 
-	_.RegExp = new_RegExp;
+	try {
+		if (new RegExp(/\p{C}/, 'u').test('\u200E'))
+			_.RegExp = RegExp;
+	} catch (e) {
+		// TODO: handle exception
+	}
+	_.RegExp = _.RegExp || new_RegExp;
 
 	// ---------------------------------------------------------------------//
 
@@ -3795,14 +3804,16 @@ function module_code(library_namespace) {
 	 * @returns {String}replaced text. 變更/取代後的結果。
 	 */
 	function replace_till_stable(text, pattern, replace_to) {
-		library_namespace
-				.debug('pattern: ' + pattern, 6, 'replace_till_stable');
+		if (false)
+			library_namespace.debug('pattern: ' + pattern, 6,
+					'replace_till_stable');
 		for (var original; original !== text;) {
 			original = text;
 			text = original.replace(pattern, replace_to);
-			library_namespace.debug('[' + original + '] '
-					+ (original === text ? 'done.' : '→ [' + text + ']'), 6,
-					'replace_till_stable');
+			if (false)
+				library_namespace.debug('[' + original + '] '
+						+ (original === text ? 'done.' : '→ [' + text + ']'),
+						6, 'replace_till_stable');
 		}
 		return text;
 	}
