@@ -2123,6 +2123,8 @@ function module_code(library_namespace) {
 			// User Agent
 			'User-Agent' : get_URL_node.default_user_agent
 		}, options.headers, URL_object_to_fetch.headers);
+		// console.log(URL_object_to_fetch.headers);
+		// console.log(options.headers);
 
 		if (node_zlib.gunzipSync
 		// && node_zlib.deflateSync
@@ -2175,6 +2177,8 @@ function module_code(library_namespace) {
 
 		// console.log(URL_object_to_fetch);
 		try {
+			// console.log(URL_object_to_fetch);
+
 			// from node.js 10.9.0
 			// http.request(url[, options][, callback])
 			// request: Class: http.ClientRequest
@@ -2182,7 +2186,7 @@ function module_code(library_namespace) {
 					_onload) : node_http.request(URL_object_to_fetch, _onload);
 		} catch (e) {
 			// e.g., _http_client.js:52
-			if (0) {
+			if (false) {
 				throw new TypeError(
 						'Request path contains unescaped characters');
 			}
@@ -2494,8 +2498,11 @@ function module_code(library_namespace) {
 	 */
 	_.HttpsProxyAgent = HttpsProxyAgent;
 
-	var node_util = require('util');
-	node_util.inherits(HttpsProxyAgent, node_https.Agent);
+	var node_util;
+	if (is_nodejs) {
+		node_util = require('util');
+		node_util.inherits(HttpsProxyAgent, node_https.Agent);
+	}
 
 	// https://github.com/nodejs/node/blob/master/lib/_http_agent.js
 	HttpsProxyAgent.prototype.getName = function getName(options) {
@@ -2637,7 +2644,8 @@ function module_code(library_namespace) {
 			throw true;
 		}
 	} catch (e) {
-		library_namespace.debug('無 node.js 之 fs，因此不具備 node 之檔案操作功能。');
+		library_namespace.debug(this.id
+				+ ': 無 node.js 之 fs，因此不具備 node 之檔案操作功能。');
 		if (false) {
 			// enumerate for get_URL_cache_node
 			// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
