@@ -322,9 +322,9 @@ function test_native() {
 		[ CeL.RegExp(/T/i).test('t') ],
 		[ CeL.RegExp(/T/, 'i').test('t') ],
 		[ CeL.RegExp('T', 'i').test('t') ],
-		[ CeL.RegExp(/[\p{C}]/i).test('\u200E') ],
-		[ CeL.RegExp(/[\p{C}]/i).test('\u200Et') ],
-		[ !CeL.RegExp(/[\p{C}]/i).test('t') ],
+		[ CeL.RegExp(/[\p{C}]/, 'iu').test('\u200E') ],
+		[ CeL.RegExp(/[\p{C}]/, 'iu').test('\u200Et') ],
+		[ !CeL.RegExp(/[\p{C}]/, 'iu').test('t') ],
 	]);
 
 	error_count += CeL.test('pad(): basic test', [
@@ -3142,6 +3142,11 @@ function test_wiki() {
 		assert([ 'hr', parser[2].type ], 'wiki.parse: hr #2-2');
 		wikitext = 'a\n----------c\nb'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ], 'wiki.parse: hr #3');
+
+		wikitext = 'a\n{|\n|a||b\n|}\nb'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ], 'wiki.parse: table #1');
+		wikitext = '{|\n!{{t}}|t\n|}'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ], 'wiki.parse: table #2');
 	});
 
 
