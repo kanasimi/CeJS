@@ -1260,8 +1260,8 @@ function module_code(library_namespace) {
 		}
 
 		return text
-		// 經測試 anchor 亦不可包含[{}\[\]\n]。
-		.replace(/[\|{}\[\]<>]/g, escape_character)
+		// 經測試 anchor 亦不可包含[{}\[\]\n�]。
+		.replace(/[\|{}\[\]<>�]/g, escape_character)
 		// escape "''", "'''"
 		.replace(/''/g, "'" + escape_character("'"))
 		// escape [[w:en:Help:Magic links]]
@@ -1991,8 +1991,9 @@ function module_code(library_namespace) {
 			// @see [[w:en:Help:Wikitext#External links]]
 			is_uri ? /[\|{}\[\]<]/g
 			// 為了容許一些特定標籤能夠顯示格式，"<>"已經在preprocess_section_link_token(),section_link()裡面處理過了。
-			: /[\|{}<>]/g && /[\|{]/g,
-			// 經測試 anchor 亦不可包含[{}\[\]\n]。
+			// display_text 在 "[[", "]]" 中，不可允許 "[]"
+			: /[\|{}<>]/g && /[\|{\[\]]/g,
+			// 經測試 anchor 亦不可包含[{}\[\]\n�]。
 			function(character) {
 				if (is_uri) {
 					return '%' + character.charCodeAt(0).toString(16);
@@ -2010,11 +2011,18 @@ function module_code(library_namespace) {
 	// @inner
 	// return [[維基連結]]
 	function section_link_toString(page_title, style) {
-		return '[[' + (page_title || this[0] || '') + '#' + (this[1] || '')
+		var anchor = (this[1] || '').replace(/�/g, '?'),
+		// 目前維基百科 link anchor, display_text 尚無法接受"�"這個字元。
+		display_text = (this[2] || '').replace(/�/g, '?');
+
+		display_text = display_text ?
 		//
-		+ '|' + (this[2] ? style ? '<span style="' + style + '">' + this[2]
+		style ? '<span style="' + style + '">' + display_text + '</span>'
+				: display_text : '';
+
+		return '[[' + (page_title || this[0] || '') + '#' + anchor
 		//
-		+ '</span>' : this[2] : '') + ']]';
+		+ '|' + display_text + ']]';
 	}
 
 	// 用來保留 display_text 中的 language conversion -{}-，
@@ -2061,7 +2069,7 @@ function module_code(library_namespace) {
 		// 注意: 當這空白字園出現在功能性token中時，可能會出錯。
 		id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
 		// anchor: 可以直接拿來做 wikilink anchor 的章節標題。
-		// 有多個完全相同的anchor時，後面的會加上"_2", "_3",...。
+		// 有多個完全相同的 anchor 時，後面的會加上"_2", "_3",...。
 		// 這個部分的處理請見 function for_each_section()
 		anchor = section_link_escape(id
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
@@ -2108,6 +2116,7 @@ function module_code(library_namespace) {
 		// link = [ page title 頁面標題, anchor / section title 章節標題,
 		// display_text / label 要顯示的連結文字 default: section_title ]
 		var link = [ options && options.page_title, anchor, display_text ];
+		// console.log(link);
 		Object.assign(link, {
 			// link.id = {String}id
 			id : id,
