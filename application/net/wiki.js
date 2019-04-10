@@ -1167,9 +1167,9 @@ function module_code(library_namespace) {
 	// 分類名稱重複時，排序索引以後出現者為主。
 	var
 	// [ all_category_text, category_name, sort_order, post_space ]
-	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ) *: *([^\[\]\|{}\n]+)(?:\s*\|\s*([^\[\]\|]*))?\]\](\s*\n?)/ig,
+	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ) *: *([^\[\]\|{}\n]+)(?:\s*\|\s*([^\[\]\|�]*))?\]\](\s*\n?)/ig,
 	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
-	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ) *: *([^\[\]\|{}\n]+)/i;
+	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ) *: *([^\[\]\|{}\n�]+)/i;
 
 	// ------------------------------------------------------------------------
 
@@ -1737,6 +1737,124 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
+	/**
+	 * 擷取出頁面簡介。
+	 * 
+	 * @example <code>
+	 CeL.wiki.extract_introduction(page_data).toString();
+	 * </code>
+	 * 
+	 * @param {Array|Object}first_section
+	 *            first section or page data
+	 * @param {String}[title]
+	 *            page title.
+	 * 
+	 * @returns {Undefined|Array} introduction object
+	 */
+	function extract_introduction(first_section, title) {
+
+		var parsed;
+		if (get_page_content.is_page_data(first_section)) {
+			if (!title)
+				title = get_page_title(first_section);
+			parsed = page_parser(first_section).parse();
+			parsed.each_section(function(section, index) {
+				if (index === 0)
+					first_section = section;
+			});
+		}
+		if (!first_section)
+			return;
+
+		var introduction_section = [], representative_image, index = 0;
+		if (parsed) {
+			introduction_section.page = parsed.page;
+			introduction_section.title = title;
+			// free
+			parsed = null;
+		}
+		introduction_section.toString = first_section.toString;
+
+		for (; index < first_section.length; index++) {
+			var token = first_section[index];
+			if (token.type === 'file') {
+				// {String}代表圖像。
+				if (!representative_image)
+					representative_image = token.name;
+				continue;
+			}
+
+			if (token.type === 'transclusion') {
+				if (token.name === 'NoteTA') {
+					// preserve 轉換用詞
+					// introduction_section.push(token);
+					continue;
+				}
+
+				// 抽取出代表圖像。
+				if (!representative_image) {
+					representative_image = token.parameters.image
+							|| token.parameters.file
+					// ||token.parameters['Image location']
+					;
+				}
+				if (!representative_image) {
+					token = token.toString();
+					// console.log(token);
+					var matched = token
+							.match(/\|[^=]+=([^\|{}]+\.(?:jpg|png|svg|gif|bmp))[\s\n]*[\|}]/i);
+					if (matched) {
+						representative_image = matched[1];
+					}
+				}
+
+				continue;
+			}
+
+			if (!token.toString().trim()) {
+				continue;
+			}
+
+			if (token.type === 'bold' || token.type === 'plain'
+					&& token.toString().includes(title)) {
+				// title_piece
+				introduction_section.title_token = token;
+			}
+			introduction_section.push(token);
+			if (introduction_section.title_token)
+				break;
+		}
+
+		while (++index < first_section.length) {
+			token = first_section[index];
+			// remove {{Notetag}}, <ref>
+			if (token.type === 'tag' && token.tag === 'ref'
+					|| token.type === 'transclusion'
+					&& token.name === 'Notetag')
+				continue;
+			introduction_section.push(token);
+		}
+		index = introduction_section.length;
+		// trimEnd()
+		while (--index > 0) {
+			if (introduction_section[index].toString().trim())
+				break;
+			introduction_section.pop();
+		}
+
+		if (representative_image) {
+			// remove [[File:...]]
+			representative_image = representative_image.replace(/^\[\[[^:]+:/i,
+					'').replace(/\|[\s\S]*/, '').replace(/\]\]$/, '');
+			representative_image = get_page_title(representative_image);
+		}
+		introduction_section.representative_image = representative_image;
+
+		return introduction_section;
+	}
+
+	// ------------------------------------------
+
 	// @inner
 	function preprocess_section_link_token(token) {
 		if (token.type === 'tag') {
@@ -2127,8 +2245,10 @@ function module_code(library_namespace) {
 	 * @example <code>
 	parsed = CeL.wiki.parser(page_data);
 	parsed.each_section(function(section, index) {
-		if (index === 0)
+		if (index === 0) {
+			// first_section = section;
 			return;
+		}
 		console.log('#' + section.section_title);
 		console.log([ section.users, section.dates ]);
 	}, {
@@ -2154,7 +2274,8 @@ function module_code(library_namespace) {
 			// section_title === parser[section.range[0] - 1]
 			var this_section_title_index = section_list.length > 0 ? section_list[section_list.length - 1].range[1]
 					: undefined,
-			//
+			// range: 本 section inner 在 root parserd 中的 index.
+			// parserd[range[0]] to parserd[range[1]] - 1
 			range = [ this_section_title_index >= 0
 			// +1: 這個範圍不包括 section_title。
 			? this_section_title_index + 1 : 0, next_section_title_index ],
@@ -2673,15 +2794,15 @@ function module_code(library_namespace) {
 	/** {RegExp}模板的匹配模式。 */
 	var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
 	/** {RegExp}wikilink內部連結的匹配模式。 */
-	PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
+	PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]�][^\|{}<>\[\]�]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
 	/**
 	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_section, page_name,
 	 * section_title, displayed_text ]
 	 * 
-	 * 頁面標題不可包含無效的字元：[\n\[\]{}]，經測試 anchor 亦不可包含[\n\[\]{}]，但 display text 可以包含
+	 * 頁面標題不可包含無效的字元：[\n\[\]{}�]，經測試 anchor 亦不可包含[\n\[\]{}]，但 display text 可以包含
 	 * [\n]
 	 */
-	PATTERN_wikilink = /\[\[(([^\[\]\|{}\n#]+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([\s\S]+?))?\]\]/,
+	PATTERN_wikilink = /\[\[(([^\[\]\|{}\n#�]+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([\s\S]+?))?\]\]/,
 	//
 	PATTERN_wikilink_global = new RegExp(PATTERN_wikilink.source, 'g'),
 	/**
@@ -4722,7 +4843,7 @@ function module_code(library_namespace) {
 	TEMPLATE_START_PATTERN = new RegExp(TEMPLATE_NAME_PATTERN.source.replace(
 			/\[[^\[]+$/, ''), 'g'),
 	/** {RegExp}內部連結 PATTERN */
-	LINK_NAME_PATTERN = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)(\||\]\])/;
+	LINK_NAME_PATTERN = /\[\[[\s\n]*([^\s\n\|{}<>\[\]�][^\|{}<>\[\]]*)(\||\]\])/;
 
 	/**
 	 * parse template token. 取得完整的模板 token。<br />
@@ -5053,10 +5174,10 @@ function module_code(library_namespace) {
 	// https://phabricator.wikimedia.org/T183711
 	// Doesn't conflict with any language code or other interwiki link.
 	// https://gerrit.wikimedia.org/r/#/c/400267/4/wmf-config/InitialiseSettings.php
-	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *([^\[\]\|{}\n#\/]+)/i,
+	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *([^\[\]\|{}\n#\/�]+)/i,
 	// [[特殊:功績]]: zh-classical
 	// matched: [ all, " user name " ]
-	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊) *: *(?:Contributions|Contribs|使用者貢獻|用戶貢獻|用户贡献|投稿記録|功績)\/([^\[\]\|{}\n#\/]+)/i,
+	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊) *: *(?:Contributions|Contribs|使用者貢獻|用戶貢獻|用户贡献|投稿記録|功績)\/([^\[\]\|{}\n#\/�]+)/i,
 	//
 	PATTERN_user_link_all = new RegExp(PATTERN_user_link.source, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
 			PATTERN_user_contributions_link.source, 'ig');
@@ -5207,7 +5328,7 @@ function module_code(library_namespace) {
 	 *      https://en.wikipedia.org/wiki/Help:Redirect
 	 *      https://phabricator.wikimedia.org/T68974
 	 */
-	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^\[\]\|{}\n]+)(?:\|[^\[\]{}]+?)?\]\]/i;
+	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^\[\]\|{}\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i;
 
 	/**
 	 * parse redirect page. 解析重定向資訊。 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名:
@@ -5311,7 +5432,7 @@ function module_code(library_namespace) {
 			// <source lang="cpp">
 			.replace(/<\/?(?:nowiki|code)>/g, '')
 			// link → page title
-			.replace(/^\[\[([^\[\]\|{}\n]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1');
+			.replace(/^\[\[([^\[\]\|{}\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1');
 		}
 
 		/** {Object}設定頁面/文字所獲得之個人化設定/手動設定 manual settings。 */
@@ -7263,7 +7384,7 @@ function module_code(library_namespace) {
 			this.push((use_ordered_list ? '# ' : '* ')
 					+ (title && (title = get_page_title_link(title))
 					// 對於非條目作特殊處理。
-					? /^\[\[[^\[\]\|{}\n#:]+:/.test(title) ? "'''" + title
+					? /^\[\[[^\[\]\|{}\n#�:]+:/.test(title) ? "'''" + title
 							+ "''' " : title + ' ' : '') + message);
 		}
 	}
@@ -13612,14 +13733,18 @@ function module_code(library_namespace) {
 								: 'ids|content|timestamp|user|flags|size'
 							}, options.with_diff);
 
-							session.page(row.pageid, function(page_data) {
-								if (exit || !page_data) {
+							session.page(row.pageid,
+							//
+							function(page_data, error) {
+								if (exit || !page_data || error) {
+									if (error)
+										console.error(error);
 									run_next();
 									return;
 								}
 
 								var revisions = page_data.revisions;
-								if (latest_only && (!revisions[0]
+								if (latest_only && (!revisions || !revisions[0]
 								// 確定是最新版本 revisions[0].revid。
 								|| revisions[0].revid !== row.revid)) {
 									library_namespace.log(
@@ -13632,7 +13757,9 @@ function module_code(library_namespace) {
 									//
 									+ row.revid + ' 不同於從頁面內容取得的最新版本 '
 									//
-									+ revisions[0].revid + '，跳過這一項。');
+									+ (revisions && revisions[0]
+									//
+									&& revisions[0].revid) + '，跳過這一項。');
 									run_next();
 									return;
 								}
@@ -21144,7 +21271,7 @@ function module_code(library_namespace) {
 			PATTERN =
 			// [ all, title, sitelink, miscellaneous ]
 			// TODO: use PATTERN_wikilink
-			/\n\|\s*\[\[([^\[\]\|{}\n]+)\|([^\[\]\n]*?)\]\]\s*\|\|([^\n]+)/g;
+			/\n\|\s*\[\[([^\[\]\|{}\n�]+)\|([^\[\]\n]*?)\]\]\s*\|\|([^\n]+)/g;
 			while (matched = PATTERN.exec(data)) {
 				var miscellaneous = matched[3].split(/\s*\|\|\s*/),
 				//
@@ -21161,7 +21288,7 @@ function module_code(library_namespace) {
 				}
 				if ((matched = miscellaneous[4])
 				//
-				&& (matched = matched.match(/\[\[:d:([^\[\]\|{}\n#:]+)/))) {
+				&& (matched = matched.match(/\[\[:d:([^\[\]\|{}\n#�:]+)/))) {
 					item.wikidata = matched[1];
 				}
 				items.push(item);
@@ -21206,6 +21333,7 @@ function module_code(library_namespace) {
 
 		file_pattern : file_pattern,
 		lead_text : lead_text,
+		extract_introduction : extract_introduction,
 		// sections : get_sections,
 
 		plain_text : wikitext_to_plain_text,
