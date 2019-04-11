@@ -1683,7 +1683,9 @@ function module_code(library_namespace) {
 	 * 快速取得 lead section / first section / 導入文 文字用。
 	 * 
 	 * @example <code>
+
 	CeL.wiki.lead_text(content);
+
 	 * </code>
 	 * 
 	 * @param {String}wikitext
@@ -1741,7 +1743,9 @@ function module_code(library_namespace) {
 	 * 擷取出頁面簡介。
 	 * 
 	 * @example <code>
-	 CeL.wiki.extract_introduction(page_data).toString();
+
+	CeL.wiki.extract_introduction(page_data).toString();
+
 	 * </code>
 	 * 
 	 * @param {Array|Object}first_section
@@ -1750,9 +1754,10 @@ function module_code(library_namespace) {
 	 *            page title.
 	 * 
 	 * @returns {Undefined|Array} introduction object
+	 * 
+	 * @since 2019/4/10
 	 */
 	function extract_introduction(first_section, title) {
-
 		var parsed;
 		if (get_page_content.is_page_data(first_section)) {
 			if (!title)
@@ -2012,7 +2017,8 @@ function module_code(library_namespace) {
 	// return [[維基連結]]
 	function section_link_toString(page_title, style) {
 		var anchor = (this[1] || '').replace(/�/g, '?'),
-		// 目前維基百科 link anchor, display_text 尚無法接受"�"這個字元。
+		// 目前維基百科 link anchor, display_text 尚無法接受 REPLACEMENT CHARACTER U+FFFD
+		// "�" 這個字元。
 		display_text = (this[2] || '').replace(/�/g, '?');
 
 		display_text = display_text ?
@@ -10597,6 +10603,13 @@ function module_code(library_namespace) {
 
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
 		recentchanges : 'rc',
+
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Busercontribs
+		// wiki.usercontribs(user_name,function(list){console.log(list);},{limit:80});
+		// get new → old
+		usercontribs : [ 'uc', , function(title_parameter) {
+			return title_parameter.replace(/^&uctitle=/, '&ucuser=');
+		} ],
 
 		// 'type name' : [ 'abbreviation 縮寫 / prefix', 'parameter' ]
 		// ** 可一次處理多個標題，但可能較耗資源、較慢。
