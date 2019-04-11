@@ -725,8 +725,6 @@ function module_code(library_namespace) {
 	// ---------------------------------------------------------------------//
 
 	// Unicode category
-	// https://github.com/slevithan/xregexp/blob/master/xregexp-all.js#L1725
-	// http://stackoverflow.com/questions/11598786/how-to-replace-non-printable-unicode-characters-javascript
 
 	// 使用例之說明：
 	// @see CeL.data.native for Unicode category (e.g., \p{Cf})
@@ -739,9 +737,11 @@ function module_code(library_namespace) {
 		 * @type {RegExp}
 		 * @see [[d:Property:P1814|假名]]
 		 */
-		PATTERN_読み仮名 = CeL.RegExp(/^[\p{Hiragana}\p{Katakana}ー・ 　]+$/);
+		PATTERN_読み仮名 = CeL.RegExp(/^[\p{Hiragana}\p{Katakana}ー・ 　]+$/, 'u');
 	}
 
+	// https://github.com/slevithan/xregexp/blob/master/tools/output/categories.js
+	// http://stackoverflow.com/questions/11598786/how-to-replace-non-printable-unicode-characters-javascript
 	var Unicode_category = {
 		// Control
 		Cc : '\0-\x1F\x7F-\x9F',
@@ -785,6 +785,14 @@ function module_code(library_namespace) {
 	 * @returns {RegExp}RegExp instance.
 	 */
 	function new_RegExp(source, flag) {
+		if (has_Unicode_flag) {
+			try {
+				return new RegExp(source, flag);
+			} catch (e) {
+				// e.g., 自行設定了 Unicode_category
+			}
+		}
+
 		if (library_namespace.is_RegExp(source)) {
 			if (flag === undefined)
 				flag = source.flags;
@@ -807,13 +815,15 @@ function module_code(library_namespace) {
 
 	new_RegExp.category = Unicode_category;
 
+	var has_Unicode_flag;
 	try {
-		if (new RegExp(/\p{C}/, 'u').test('\u200E'))
-			_.RegExp = RegExp;
+		has_Unicode_flag = new RegExp(/\p{C}/, 'u');
+		has_Unicode_flag = has_Unicode_flag.test('\u200E')
+				&& has_Unicode_flag.unicode && has_Unicode_flag.flags === 'u';
 	} catch (e) {
-		// TODO: handle exception
+		has_Unicode_flag = false;
 	}
-	_.RegExp = _.RegExp || new_RegExp;
+	_.RegExp = new_RegExp;
 
 	// ---------------------------------------------------------------------//
 
