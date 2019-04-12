@@ -1445,6 +1445,7 @@ function module_code(library_namespace) {
 		// updated version of RFC-822 date stamps.</a>
 		// Date_to_RFC822[generateCode.dLK]='String_to_Date';
 		RFC822 : function(date_value) {
+			// e.g., "Wed, 14 Jun 2017 07:00:00 GMT"
 			return date_value.toUTCString().replace(/UTC/gi, 'GMT');
 		}
 	};

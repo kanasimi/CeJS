@@ -438,6 +438,8 @@ function module_code(library_namespace) {
 				}
 			}
 
+			// console.log(chapter_data);
+
 			return chapter_data;
 		}
 

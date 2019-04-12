@@ -876,8 +876,10 @@ function date_to_loc(date, start_date) {
 
 // area width, height.
 // TODO: return [top, left, width, height]
-/*
- * show_range(CeL.era('清德宗光緒六年三月十三日'), 80, '清德宗光緒六年三月十三日');
+/**
+ * <code>
+ show_range(CeL.era('清德宗光緒六年三月十三日'), 80, '清德宗光緒六年三月十三日');
+ </code>
  */
 function show_range(date_range, height_range, title, style) {
 	var ratio = SVG_object && SVG_object.ratio;

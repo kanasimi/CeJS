@@ -167,7 +167,7 @@ function (global) {
 
 
 	/**
-	 * Global Scope object<br />
+	 * Global Scope object 整體<br />
 	 * 於 CeL.eval_code 使用.<br />
 	 * 
 	 * TODO:<br />

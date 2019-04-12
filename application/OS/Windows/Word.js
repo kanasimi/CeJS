@@ -50,7 +50,8 @@ function module_code(library_namespace) {
 	var execSync = require('child_process').execSync;
 
 	// save to .xml file → .docx file
-	// 必須先安裝 Word
+	// 必須先安裝 Word。
+	// 存成 doc 檔案依然可以開啟，但不能以右鍵選單列印。
 	function xml_save_to_doc(Word_file_path, xml, options) {
 		if (options === true) {
 			options = {

@@ -3477,12 +3477,15 @@ function module_code(library_namespace) {
 		if (library_namespace.from_Chinese_numeral)
 			title = library_namespace.from_Chinese_numeral(title);
 
-		var matched = title.match(/(?:^|第 ?)(\d{1,3}(?:\.\d)?) ?話/) || title
 		// 因為中間的章節可能已經被下架，因此依章節標題來定章節編號。
+		var matched = title.match(/(?:^|第 ?)(\d{1,3}(?:\.\d)?) ?話/) || title
+		// #1, Episode 1, act 1
 		.match(/^(?:[＃#] *|(?:Episode|act)[ .:]*)?(\d{1,3})(?:$|[ .\-])/i)
 		// 章節編號有prefix，或放在末尾。 e.g., 乙ゲーにトリップした俺♂, たすけてまおうさま @ pixivコミック
 		// e.g., へるぷ22, チャプター24後編
-		|| title.match(/^[^\d]+(\d{1,2})(?:$|[^\d])/);
+		|| title.match(/^[^\d]+(\d{1,2})(?:$|[^\d])/)
+		// 1限目
+		|| title.match(/^(\d{1,2}) ?限目/);
 		if (matched) {
 			// 可能有第0話。
 			if (library_namespace.is_Object(chapter_data))

@@ -800,7 +800,7 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof flag === 'string' && flag.includes('u')) {
-			if (!('unicode' in RegExp.prototype))
+			if (!has_Unicode_flag)
 				flag = flag.replace(/u/g, '');
 
 			// 後處理 Unicode category。
@@ -817,9 +817,12 @@ function module_code(library_namespace) {
 
 	var has_Unicode_flag;
 	try {
-		has_Unicode_flag = new RegExp(/\p{C}/, 'u');
-		has_Unicode_flag = has_Unicode_flag.test('\u200E')
-				&& has_Unicode_flag.unicode && has_Unicode_flag.flags === 'u';
+		if (has_Unicode_flag = ('unicode' in RegExp.prototype)
+				&& new RegExp(/\p{C}/, 'u')) {
+			has_Unicode_flag = has_Unicode_flag.test('\u200E')
+					&& has_Unicode_flag.unicode
+					&& has_Unicode_flag.flags === 'u';
+		}
 	} catch (e) {
 		has_Unicode_flag = false;
 	}

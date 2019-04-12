@@ -6,6 +6,7 @@
  * @since 2013/2/13 12:45:44
  * 
  * TODO:<br />
+ * 檢查前後相交的記年資料 每個月日數是否相同<br />
  * 歲時記事 幾龍治水、幾日得辛、幾牛耕地、幾姑把蠶、蠶食幾葉
  * http://mathematicsclass.blogspot.tw/2009/06/blog-post_17.html<br />
  * bug: 西漢武帝後元2年<br />
@@ -27,6 +28,7 @@
  * 
  * 未來發展：<br />
  * 加入世界各國的對應機能。<br />
+ * 加入 國旗
  * 
  * @example <code>
 
@@ -1353,17 +1355,12 @@ function module_code(library_namespace) {
 			year_data = parseInt(year_data, PACK_RADIX).toString(RADIX_2)
 					.slice(1);
 
-			var year_data_Array = [],
-			//
-			leap_month_index, leap_month_index_list;
+			var year_data_Array = [], leap_month_index, leap_month_index_list;
 
-			// LUNISOLAR_MONTH_COUNT 個月 + 1個閏月。
+			// LUNISOLAR_MONTH_COUNT 個月 + 1個閏月 = 13。
 			while (year_data.length > LUNISOLAR_MONTH_COUNT + 1) {
-				// 閏月的部分以 4
-				// (LEAP_MONTH_PADDING.length)
-				// 個二進位數字指示。
 				leap_month_index = parseInt(
-				//
+				// 閏月的部分以 4 (LEAP_MONTH_PADDING.length) 個二進位數字指示。
 				year_data.slice(-LEAP_MONTH_PADDING.length), RADIX_2);
 				year_data = year_data.slice(0, -LEAP_MONTH_PADDING.length);
 

@@ -13,6 +13,7 @@
  * 
  * @since
  * @see https://github.com/tc39/proposals
+ *      https://github.com/Financial-Times/polyfill-library/tree/master/polyfills
  * @see <a
  *      href="http://msdn.microsoft.com/en-us/library/s4esdbwz%28v=VS.85%29.aspx"
  *      accessdate="2010/4/16 20:4">Version Information (Windows Scripting -

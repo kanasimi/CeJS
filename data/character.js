@@ -496,6 +496,12 @@ function module_code(library_namespace) {
 		}
 	})();
 
+	/**
+	 * 
+	 * @param {String}string
+	 * @param [encoding]
+	 * @returns
+	 */
 	function encode_URI_component(string, encoding) {
 		if (!encoding || /^UTF-?8$/i.test(encoding)) {
 			// fallback
