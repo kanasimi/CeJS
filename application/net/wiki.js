@@ -614,16 +614,8 @@ function module_code(library_namespace) {
 	};
 	// families must with language prefix
 	// the key MUST in lower case!
-	api_URL.family = {
-		wikipedia : true,
-		wikibooks : true,
-		wikinews : true,
-		wikiquote : true,
-		wikisource : true,
-		wikiversity : true,
-		wikivoyage : true,
-		wiktionary : true
-	};
+	api_URL.family = 'wikipedia|wikibooks|wikinews|wikiquote|wikisource|wikiversity|wikivoyage|wiktionary'
+			.split('|').to_hash();
 
 	api_URL.shortcut_of_project = library_namespace.null_Object();
 	Object.keys(api_URL.alias).forEach(function(shortcut) {
@@ -1620,8 +1612,10 @@ function module_code(library_namespace) {
 				}
 
 				// depth-first search (DFS) 向下層巡覽，再進一步處理。
+				// Skip inner tokens, skip children.
+				if (result !== for_each_token.skip_inner
 				// is_atom: 不包含可 parse 之要素，不包含 text。
-				if (Array.isArray(token) && !token.is_atom
+				&& Array.isArray(token) && !token.is_atom
 				// comment 可以放在任何地方，因此能滲透至任一層。
 				// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 				// && type !== 'comment'
@@ -1656,6 +1650,8 @@ function module_code(library_namespace) {
 
 	// 直接跳出。
 	for_each_token.exit = [ 'for_each_token.exit: abort the operation' ];
+	// Skip inner tokens, skip children.
+	for_each_token.skip_inner = [ 'for_each_token.skip_inner: skip children' ];
 
 	// 兩 token 都必須先有 .index, .parent!
 	// token.parent[token.index] === token
@@ -1793,6 +1789,11 @@ function module_code(library_namespace) {
 				if (token.name === 'NoteTA') {
 					// preserve 轉換用詞
 					// introduction_section.push(token);
+					continue;
+				}
+
+				if (token.name === 'R') {
+					// Skip reference
 					continue;
 				}
 
@@ -2352,6 +2353,7 @@ function module_code(library_namespace) {
 
 		// 讀取每一個章節的資料: 參與討論者,討論發言的時間
 		// 統計各討論串中簽名的次數和發言時間。
+		// TODO: 無法判別先日期，再使用者名稱的情況。
 		if (options.get_users) {
 			section_list.forEach(function(section) {
 				// console.log(section);
@@ -2421,6 +2423,7 @@ function module_code(library_namespace) {
 
 					// assert: {String}token
 					var date = parse_date(token, options);
+					// console.log(date);
 					if (!date || !this_user) {
 						continue;
 					}
@@ -2859,10 +2862,7 @@ function module_code(library_namespace) {
 	PATTERN_WIKI_TAG_VOID = new RegExp('<(' + self_close_tags
 			+ ')(\\s[^<>]*)?>', 'ig'),
 	// 在其內部的wikitext不會被parse。
-	no_parse_tags = {
-		pre : true,
-		nowiki : true
-	};
+	no_parse_tags = 'pre|nowiki'.split('|').to_hash();
 
 	/**
 	 * .toString() of wiki elements: wiki_toString[token.type]<br />
@@ -12398,10 +12398,7 @@ function module_code(library_namespace) {
 		jpwiki : 'jawiki'
 	},
 	// @see function set_default_language(language)
-	valid_language = {
-		'nds-nl' : true,
-		'map-bms' : true
-	};
+	valid_language = 'nds-nl|map-bms'.split('|').to_hash();
 
 	Object.entries(language_code_to_site_alias).forEach(function(pair) {
 		if (pair[0].includes('-'))
