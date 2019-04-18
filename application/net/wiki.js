@@ -1767,6 +1767,8 @@ function module_code(library_namespace) {
 		if (!first_section)
 			return;
 
+		// --------------------------------------
+
 		var introduction_section = [], representative_image, index = 0;
 		if (parsed) {
 			introduction_section.page = parsed.page;
@@ -1775,6 +1777,8 @@ function module_code(library_namespace) {
 			parsed = null;
 		}
 		introduction_section.toString = first_section.toString;
+
+		// --------------------------------------
 
 		for (; index < first_section.length; index++) {
 			var token = first_section[index];
@@ -1831,6 +1835,9 @@ function module_code(library_namespace) {
 				break;
 		}
 
+		// ------------------
+
+		// 已經跳過導航模板。把首段餘下的其他內容全部納入簡介中。
 		while (++index < first_section.length) {
 			token = first_section[index];
 			// remove {{Notetag}}, <ref>
@@ -1841,14 +1848,28 @@ function module_code(library_namespace) {
 			introduction_section.push(token);
 		}
 		index = introduction_section.length;
-		// trimEnd()
+		// trimEnd() 去頭去尾
 		while (--index > 0) {
 			if (introduction_section[index].toString().trim())
 				break;
 			introduction_section.pop();
 		}
 
+		// --------------------------------------
+
+		// 首個段落不包含代表圖像。檢查其他段落以抽取出代表圖像。
 		if (representative_image) {
+			parsed.each('file', function(token) {
+				representative_image = token.name;
+				return for_each_token.exit;
+			});
+		}
+
+		// --------------------------------------
+
+		if (representative_image) {
+			// assert: {String}representative_image
+
 			// remove [[File:...]]
 			representative_image = representative_image.replace(/^\[\[[^:]+:/i,
 					'').replace(/\|[\s\S]*/, '').replace(/\]\]$/, '');
@@ -2414,7 +2435,7 @@ function module_code(library_namespace) {
 							// 簽名長度不應超過255位元組。
 							|| token.length > 255 - '[[U:n]]'.length) {
 								// 一行內有多個使用者名稱的情況，取最後一個？
-								//例如簽名中插入自己的舊名稱或者其他人的情況
+								// 例如簽名中插入自己的舊名稱或者其他人的情況
 								this_user = null;
 							}
 							if (!this_user) {
@@ -2425,12 +2446,12 @@ function module_code(library_namespace) {
 					}
 
 					// assert: {String}token
-					if(token.includes('\n\n')&&!token.trim()){
-						//預設簽名必須與日期在同一行。不可分段。
-						this_user=null;
+					if (token.includes('\n\n') && !token.trim()) {
+						// 預設簽名必須與日期在同一行。不可分段。
+						this_user = null;
 						continue;
 					}
-					
+
 					var date = parse_date(token, options);
 					// console.log([ this_user, date ]);
 					if (!date || !this_user) {
@@ -5326,9 +5347,9 @@ function module_code(library_namespace) {
 	parse_user.all = parse_all_user_links;
 
 	// 由使用者名稱來檢測匿名使用者/未註冊用戶 [[WP:IP]]
-	function is_IP_user(user_name) {
+	function is_IP_user(user_name, IPv6) {
 		// for IPv4
-		return /^[12]?\d{1,2}(?:\.[12]?\d{1,2}){3}$/.test(user_name)
+		return !IPv6 && /^[12]?\d{1,2}(?:\.[12]?\d{1,2}){3}$/.test(user_name)
 		// for IPv6
 		|| /^[\da-f]{1,4}(?::[\da-f]{1,4}){7}$/i.test(user_name);
 	}
