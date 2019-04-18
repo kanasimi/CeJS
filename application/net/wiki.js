@@ -2354,6 +2354,7 @@ function module_code(library_namespace) {
 		// 讀取每一個章節的資料: 參與討論者,討論發言的時間
 		// 統計各討論串中簽名的次數和發言時間。
 		// TODO: 無法判別先日期，再使用者名稱的情況。
+		// TODO: 無法判別一行內有多個使用者名稱的情況。
 		if (options.get_users) {
 			section_list.forEach(function(section) {
 				// console.log(section);
@@ -2408,11 +2409,13 @@ function module_code(library_namespace) {
 							// console.log(token);
 							// console.log(token.length);
 							// console.log(this_user);
-							if (user_list.length > 0
+							if (user_list.length >= 2
 							// 若是有其他非字串的token介於名稱與日期中間，代表這個名稱可能並不是發言者，那麼就重設名稱。
 							// 簽名長度不應超過255位元組。
 							|| token.length > 255 - '[[U:n]]'.length) {
-								this_user = undefined;
+								// 一行內有多個使用者名稱的情況，取最後一個？
+								//例如簽名中插入自己的舊名稱或者其他人的情況
+								this_user = null;
 							}
 							if (!this_user) {
 								continue;
@@ -2422,8 +2425,14 @@ function module_code(library_namespace) {
 					}
 
 					// assert: {String}token
+					if(token.includes('\n\n')&&!token.trim()){
+						//預設簽名必須與日期在同一行。不可分段。
+						this_user=null;
+						continue;
+					}
+					
 					var date = parse_date(token, options);
-					// console.log(date);
+					// console.log([ this_user, date ]);
 					if (!date || !this_user) {
 						continue;
 					}
@@ -3652,6 +3661,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// language conversion -{}- 以後來使用的為主。
+		// TODO: -{R|里}-
 		// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
 		// [[w:zh:H:Convert]], [[mw:Help:Magic words]]
 		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
