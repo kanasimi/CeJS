@@ -33,6 +33,7 @@ CLI progress bar
 	Runs untrusted code securely https://github.com/patriksimek/vm2
 parse 圖像。
 拼接長圖。 using .epub
+	處理每張圖片被分割成多個小圖的情況 add .image_indexes[] ?
 檢核章節內容。
 考慮 search_URL 搜尋的頁數，包含所有結果
 
@@ -2534,6 +2535,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------------
 
 		function pre_process_chapter_list_data(XMLHttp) {
+			// 因為隱私問題？有些瀏覽器似乎會隱藏網址，只要輸入host即可？
 			if (/(?:\.html?|\/)$/.test(XMLHttp.responseURL))
 				_this.setup_value('Referer', XMLHttp.responseURL);
 			var html = XMLHttp.responseText;
@@ -3019,7 +3021,7 @@ function module_code(library_namespace) {
 		if (!this.continue_arguments) {
 			// set flag to pause / cancel task
 			library_namespace.info(this.id + ': 準備設定' + (quit ? '取消' : '暫停')
-					+ '下載作業');
+					+ '下載作業，將會在下載完本章節後生效。');
 			this.continue_arguments = [ quit ? QUIT_TASK : STOP_TASK ];
 			if (callback) {
 				this.continue_arguments.push(callback);
@@ -3233,9 +3235,9 @@ function module_code(library_namespace) {
 	// e.g., work_data.chapter_list = [ chapter_data,
 	// chapter_data={url:'',title:'',date:new Date}, ... ]
 	function setup_chapter_list(work_data, reset) {
-		var chapter_list;
+		var chapter_list = work_data.chapter_list;
 		// reset: reset work_data.chapter_list
-		if (reset || !Array.isArray(chapter_list = work_data.chapter_list)) {
+		if (reset || !Array.isArray(chapter_list)) {
 			chapter_list = work_data.chapter_list = [];
 			// 漫畫目錄名稱不須包含分部號碼。使章節目錄名稱不包含 part_NO。
 			// work_data.chapter_list.add_part_NO = false;
@@ -3529,9 +3531,14 @@ function module_code(library_namespace) {
 						.is_Object(chapter_data = work_data.chapter_list[chapter_NO - 1])) {
 			// console.trace(chapter_data);
 			if (chapter_data.part_title
+					&& work_data.chapter_list.add_part_NO !== false
 					&& !(work_data.chapter_list.part_NO >= 1)) {
-				library_namespace
-						.warn('工具檔似乎沒有設定應設定的 `work_data.chapter_list.part_NO`?');
+				// console.trace(chapter_data);
+				console.trace(work_data.chapter_list.add_part_NO);
+				library_namespace.warn('工具檔設定了 part_title '
+						+ JSON.stringify(chapter_data.part_title)
+						+ '，卻似乎沒有設定應設定的 `work_data.chapter_list.part_NO`? ('
+						+ JSON.stringify(work_data.chapter_list.part_NO) + ')');
 			}
 
 			if (!no_part && chapter_data.part_title
@@ -3904,6 +3911,7 @@ function module_code(library_namespace) {
 
 			function process_chapter_data(XMLHttp) {
 				XMLHttp = XMLHttp || this;
+				// 因為隱私問題？有些瀏覽器似乎會隱藏網址，只要輸入host即可？
 				if (/(?:\.html?|\/)$/.test(XMLHttp.responseURL))
 					_this.setup_value('Referer', XMLHttp.responseURL);
 				var html = XMLHttp.responseText;
@@ -4370,7 +4378,8 @@ function module_code(library_namespace) {
 			//
 			', ' + work_data.image_count + ' images' : '')
 			//
-			+ ' done. ' + (new Date).toISOString() + ' 本作品下載作業結束.');
+			+ ' done. ' + (new Date).toISOString() + ' 本作品下載作業結束。'
+					+ (work_data.some_limited ? '有些為付費章節。' : ''));
 			if (work_data.error_images > 0) {
 				library_namespace.error(this.id + ': '
 						+ work_data.directory_name + ': '

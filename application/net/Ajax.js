@@ -2227,6 +2227,7 @@ function module_code(library_namespace) {
 						+ JSON.stringify(post_data));
 			}
 		}
+		// console.log(URL_object_to_fetch.headers);
 
 		/** {Natural}timeout in ms for get URL. 逾時ms數 */
 		var timeout = options.timeout || get_URL_node.default_timeout, timeout_id,
@@ -2674,13 +2675,14 @@ function module_code(library_namespace) {
 	/**
 	 * cache 作業操作之輔助套裝函數。
 	 * 
+	 * 注意: 若執行 onload() 時沒提供 XMLHttp，表示採用 cache。
+	 * 
 	 * TODO: 以 HEAD 檢測，若有新版本則不採用 cache。
 	 * 
 	 * @param {String|Object}URL
 	 *            欲請求之目的 URL or options
 	 * @param {Function}[onload]
-	 *            callback when successful loaded. onload(data, error/is_cached,
-	 *            XMLHttp)
+	 *            callback when successful loaded. onload(data, error, XMLHttp)
 	 * @param {Object}[options]
 	 *            附加參數/設定特殊功能與選項
 	 */
@@ -2723,6 +2725,10 @@ function module_code(library_namespace) {
 			file_name = options.directory + file_name;
 		}
 
+		library_namespace.debug('下載 ' + URL + '\n→ ' + file_name
+				+ ' (encoding ' + encoding + ', charset ' + options.charset
+				+ ')', 1, 'get_URL_cache_node');
+
 		node_fs.readFile(file_name, encoding,
 		//
 		function(error, data) {
@@ -2736,7 +2742,7 @@ function module_code(library_namespace) {
 							+ data.slice(0, 200) + ']...', 5,
 							'get_URL_cache_node');
 					// TODO: use cached_status
-					onload(data, true);
+					onload(data);
 					return;
 				}
 
