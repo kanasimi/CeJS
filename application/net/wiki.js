@@ -1784,8 +1784,9 @@ function module_code(library_namespace) {
 			var token = first_section[index];
 			if (token.type === 'file') {
 				// {String}代表圖像。
-				if (!representative_image)
-					representative_image = token.name;
+				if (!representative_image) {
+					representative_image = token;
+				}
 				continue;
 			}
 
@@ -1858,22 +1859,23 @@ function module_code(library_namespace) {
 		// --------------------------------------
 
 		// 首個段落不包含代表圖像。檢查其他段落以抽取出代表圖像。
-		if (representative_image) {
+		if (!representative_image) {
 			parsed.each('file', function(token) {
-				representative_image = token.name;
+				representative_image = token;
 				return for_each_token.exit;
 			});
 		}
 
 		// --------------------------------------
 
-		if (representative_image) {
+		if (typeof representative_image === 'string') {
 			// assert: {String}representative_image
 
 			// remove [[File:...]]
 			representative_image = representative_image.replace(/^\[\[[^:]+:/i,
 					'').replace(/\|[\s\S]*/, '').replace(/\]\]$/, '');
-			representative_image = get_page_title(representative_image);
+			representative_image = parse_wikitext('[[File:'
+					+ get_page_title(representative_image) + ']]');
 		}
 		introduction_section.representative_image = representative_image;
 
@@ -2037,6 +2039,7 @@ function module_code(library_namespace) {
 
 	// @inner
 	// return [[維基連結]]
+	// TODO: using external link to display "�"
 	function section_link_toString(page_title, style) {
 		var anchor = (this[1] || '').replace(/�/g, '?'),
 		// 目前維基百科 link anchor, display_text 尚無法接受 REPLACEMENT CHARACTER U+FFFD
@@ -2048,9 +2051,11 @@ function module_code(library_namespace) {
 		style ? '<span style="' + style + '">' + display_text + '</span>'
 				: display_text : '';
 
-		return '[[' + (page_title || this[0] || '') + '#' + anchor
-		//
-		+ '|' + display_text + ']]';
+		return get_page_title_link(
+				(page_title || this[0] || '') + '#' + anchor, null,
+				display_text);
+		return '[[' + (page_title || this[0] || '') + '#' + anchor + '|'
+				+ display_text + ']]';
 	}
 
 	// 用來保留 display_text 中的 language conversion -{}-，
@@ -3888,6 +3893,7 @@ function module_code(library_namespace) {
 							matched = token[1]
 									.match(/^([\s\n]*)([\s\S]*?)([\s\n]*)$/);
 							if (matched[1] || matched[3]) {
+								// image_description
 								parameters.caption
 								// 相當於 .trim()
 								= matched[2] = parse_wikitext(matched[2],
@@ -6065,6 +6071,7 @@ function module_code(library_namespace) {
 	}
 
 	// get the wikilink of page_data.
+	// CeL.wiki.title_link_of()
 	// 'title'→'[[title]]'
 	// 'zh:title'→'[[:zh:title]]'
 	// 'n:title'→'[[:n:title]]'
