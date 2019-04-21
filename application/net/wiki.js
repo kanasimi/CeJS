@@ -2379,8 +2379,7 @@ function module_code(library_namespace) {
 
 		// 讀取每一個章節的資料: 參與討論者,討論發言的時間
 		// 統計各討論串中簽名的次數和發言時間。
-		// TODO: 無法判別先日期，再使用者名稱的情況。
-		// TODO: 無法判別一行內有多個使用者名稱的情況。
+		// TODO: 無法判別先日期，再使用者名稱的情況。 e.g., [[w:zh:Special:Diff/54030530]]
 		if (options.get_users) {
 			section_list.forEach(function(section) {
 				// console.log(section);
@@ -2406,55 +2405,72 @@ function module_code(library_namespace) {
 						token = token[0];
 					}
 
-					if (typeof token === 'object') {
+					if (typeof token === 'string') {
+						// assert: {String}token
+						if (!token.trim() && token.includes('\n\n')) {
+							// 預設簽名必須與日期在同一行。不可分段。
+							this_user = null;
+							continue;
+						}
+
+					} else {
 						// assert: {Array}token
 						token = token.toString();
 						// assert: wikiprojects 計畫的簽名("~~~~~")必須要先從名稱再有日期。
 						// 因此等到出現日期的時候再來處理。
-						var user_list = Object
-								.keys(parse_all_user_links(token));
+						// 取得依照順序出現的使用者序列。
+						var user_list = parse_all_user_links(token, true);
 						if (false && section.section_title
 								&& section.section_title.title.includes('')) {
 							console.log('token: ' + token);
-							console.log(user_list);
+							console.log('user_list: ' + user_list);
 						}
 
-						if (user_list.length > 1
-						// assert: 前面的都只是指向機器人頁面的連結。
-						&& /^1+0$/.test(user_list.map(function(user) {
-							return PATTERN_BOT_NAME.test(user) ? 1 : 0;
-						}).join(''))) {
-							user_list = user_list.slice(-1);
-						}
-
-						// 因為現在有個性化簽名，需要因應之。應該包含像[[zh:Special:Diff/48714597]]的簽名。
-						if (user_list.length === 1) {
-							this_user = user_list[0];
-						} else {
-							// 同一個token卻沒有找到，或找到兩個以上簽名，因此沒有辦法準確判別到底哪一個才是真正的留言者。
-							// console.log(token);
-							// console.log(token.length);
-							// console.log(this_user);
-							if (user_list.length >= 2
-							// 若是有其他非字串的token介於名稱與日期中間，代表這個名稱可能並不是發言者，那麼就重設名稱。
-							// 簽名長度不應超過255位元組。
-							|| token.length > 255 - '[[U:n]]'.length) {
-								// 一行內有多個使用者名稱的情況，取最後一個？
-								// 例如簽名中插入自己的舊名稱或者其他人的情況
+						// 判別一行內有多個使用者名稱的情況。取最後一個簽名。
+						if (user_list.length > 0) {
+							this_user = user_list[user_list.length - 1];
+							// ↑ 這個使用者名稱可能為 bot。
+							if (options.ignore_bot
+									&& PATTERN_BOT_NAME.test(this_user)) {
 								this_user = null;
 							}
-							if (!this_user) {
-								continue;
+						}
+
+						// --------------------------------
+						if (false) {
+							// 以下為取得多個使用者名稱的情況下，欲判別出簽名的程式碼。由於現在僅簡單取用最後一個簽名，已經被廢棄。
+
+							if (user_list.length > 1
+							// assert: 前面的都只是指向機器人頁面的連結。
+							&& /^1+0$/.test(user_list.map(function(user) {
+								return PATTERN_BOT_NAME.test(user) ? 1 : 0;
+							}).join(''))) {
+								user_list = user_list.slice(-1);
+							}
+
+							// 因為現在有個性化簽名，需要因應之。應該包含像[[w:zh:Special:Diff/48714597]]的簽名。
+							if (user_list.length === 1) {
+								this_user = user_list[0];
+							} else {
+								// 同一個token卻沒有找到，或找到兩個以上簽名，因此沒有辦法準確判別到底哪一個才是真正的留言者。
+								// console.log(token);
+								// console.log(token.length);
+								// console.log(this_user);
+								if (user_list.length >= 2
+								// 若是有其他非字串的token介於名稱與日期中間，代表這個名稱可能並不是發言者，那麼就重設名稱。
+								// 簽名長度不應超過255位元組。
+								|| token.length > 255 - '[[U:n]]'.length) {
+									// 一行內有多個使用者名稱的情況，取最後一個？
+									// 例如簽名中插入自己的舊名稱或者其他人的情況
+									this_user = null;
+								}
+								if (!this_user) {
+									continue;
+								}
 							}
 						}
-						// 繼續解析日期，預防有類似 "<b>[[User:]] date</b>" 的情況。
-					}
 
-					// assert: {String}token
-					if (token.includes('\n\n') && !token.trim()) {
-						// 預設簽名必須與日期在同一行。不可分段。
-						this_user = null;
-						continue;
+						// 繼續解析日期，預防有類似 "<b>[[User:]] date</b>" 的情況。
 					}
 
 					var date = parse_date(token, options);
@@ -2462,9 +2478,11 @@ function module_code(library_namespace) {
 					if (!date || !this_user) {
 						continue;
 					}
-					section.users.push(this_user);
-					this_user = null;
+					// 同時添加使用者與日期
 					section.dates.push(date);
+					section.users.push(this_user);
+					// reset
+					this_user = null;
 				}
 
 				if (false) {
@@ -5276,7 +5294,7 @@ function module_code(library_namespace) {
 		// 正規化連結中的使用者名稱。
 		var name_from_link = normalize_page_name(matched[1]);
 		if (user_name) {
-			// 用戶名正規化
+			// 用戶名正規化。
 			user_name = normalize_page_name(user_name);
 			if (user_name !== name_from_link) {
 				return false;
@@ -5295,14 +5313,19 @@ function module_code(library_namespace) {
 	 * parse all user name. 解析所有使用者/用戶對話頁面資訊。 CeL.wiki.parse.user.all()
 	 * 
 	 * @example <code>
+	// 取得各使用者的簽名數量hash。
 	var user_hash = CeL.wiki.parse.user.all(wikitext), user_list = Object.keys(user_hash);
+	// 取得依照第一次出現處排序、不重複的使用者序列。
 	var user_list = Object.keys(CeL.wiki.parse.user.all(wikitext));
+	// 取得依照順序出現的使用者序列。
+	var user_serial_list = CeL.wiki.parse.user.all(wikitext, true);
 	 * </code>
 	 * 
 	 * @param {String}wikitext
 	 *            wikitext to parse/check
 	 * @param {String}[user_name]
 	 *            測試是否有此 user name，return {Integer}此 user name 之連結數量。
+	 *            若輸入true表示取得依照順序出現的使用者序列。
 	 * 
 	 * @returns {Integer}link count of the user name
 	 * @returns {Object}normalized user name hash: hash[name] = {Integer}count
@@ -5314,11 +5337,13 @@ function module_code(library_namespace) {
 			var matched;
 			library_namespace.debug(PATTERN_all, 3, 'parse_all_user_links');
 			while (matched = PATTERN_all.exec(wikitext)) {
-				// 用戶名正規化
+				// 用戶名正規化。
 				var name = normalize_page_name(matched[1]);
 				if (!user_name || user_name === name) {
 					// console.log(name);
-					if (name in user_hash) {
+					if (user_list) {
+						user_list.push(name);
+					} else if (name in user_hash) {
 						user_hash[name]++;
 					} else {
 						user_hash[name] = 1;
@@ -5327,26 +5352,37 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var user_hash = library_namespace.null_Object();
+		var user_hash, user_list;
+		if (user_name === true) {
+			user_list = [];
+			user_name = null;
+		} else if (user_name) {
+			// user_name should be {String}user name
+			user_name = normalize_page_name(user_name);
+		} else {
+			user_hash = library_namespace.null_Object();
+		}
 
 		if (!wikitext) {
-			return user_name ? 0 : user_hash;
+			return user_name ? 0 : user_list || user_hash;
 		}
 
 		library_namespace.debug(wikitext, 3, 'parse_all_user_links');
 		library_namespace.debug('user name: ' + user_name, 3,
 				'parse_all_user_links');
 
-		if (user_name) {
-			user_name = normalize_page_name(user_name);
-		}
-
 		check_pattern(PATTERN_user_link_all);
 		check_pattern(PATTERN_user_contributions_link_all);
 
-		return user_name ? user_name in user_hash[user_name] ? user_hash[user_name]
-				: 0
-				: user_hash;
+		if (user_list) {
+			return user_list;
+		}
+
+		if (user_name) {
+			return user_name in user_hash[user_name] ? user_hash[user_name] : 0;
+		}
+
+		return user_hash;
 	}
 
 	// CeL.wiki.parse.user.all()
