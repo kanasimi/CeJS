@@ -138,6 +138,13 @@ function module_code(library_namespace) {
 		get_chapter_list : function(work_data, html, get_label) {
 			html = html.between('<div class="cVolList">', '<div id="foot">');
 
+			work_data.chapter_list = [];
+			// 漫畫目錄名稱不須包含分部號碼。使章節目錄名稱不包含 part_NO。
+			work_data.chapter_list.add_part_NO = false;
+
+			// 轉成由舊至新之順序。
+			work_data.inverted_order = true;
+
 			var matched;
 			while (matched = PATTERN_chapter.exec(html)) {
 				// delete matched.input;
@@ -153,14 +160,7 @@ function module_code(library_namespace) {
 				});
 			}
 
-			// 轉成由舊至新之順序。
-			work_data.inverted_order = true;
-
-			// 漫畫目錄名稱不須包含分部號碼。使章節目錄名稱不包含 part_NO。
-			work_data.chapter_list.add_part_NO = false;
-
 			// console.log(work_data.chapter_list);
-			return;
 		},
 
 		pre_parse_chapter_data
