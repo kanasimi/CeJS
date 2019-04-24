@@ -20,7 +20,7 @@ jobs:
       # https://circleci.com/docs/2.0/circleci-images/
       # https://hub.docker.com/r/circleci/node/tags/
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
-      - image: circleci/node:10.9.0-stretch
+      - image: circleci/node:11.14.0-stretch
 
     steps:
       - checkout
