@@ -138,29 +138,26 @@ function module_code(library_namespace) {
 		get_chapter_list : function(work_data, html, get_label) {
 			html = html.between('<div class="cVolList">', '<div id="foot">');
 
-			work_data.chapter_list = [];
-			// 漫畫目錄名稱不須包含分部號碼。使章節目錄名稱不包含 part_NO。
-			work_data.chapter_list.add_part_NO = false;
-			work_data.chapter_list.part_NO = 0;
-
-			var matched, part_title, NO_in_part = 1;
+			var matched;
 			while (matched = PATTERN_chapter.exec(html)) {
 				// delete matched.input;
 				// console.log(matched);
 				if (matched[1]) {
-					part_title = get_label(matched[1]);
-					work_data.chapter_list.part_NO++;
-					NO_in_part = 0;
+					this.set_part(work_data, get_label(matched[1]));
 					continue;
 				}
 
-				work_data.chapter_list.unshift({
-					part_title : part_title,
-					NO_in_part : NO_in_part++,
+				this.add_chapter(work_data, {
 					title : get_label(matched[3].replace(work_data.title, '')),
 					url : matched[2]
 				});
 			}
+
+			// 轉成由舊至新之順序。
+			work_data.inverted_order = true;
+
+			// 漫畫目錄名稱不須包含分部號碼。使章節目錄名稱不包含 part_NO。
+			work_data.chapter_list.add_part_NO = false;
 
 			// console.log(work_data.chapter_list);
 			return;
