@@ -2889,8 +2889,10 @@ function module_code(library_namespace) {
 	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_WITH_PROTOCOL_GLOBAL,
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
+	 * 
+	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=protocols&utf8&format=json
 	 */
-	PATTERN_external_link_global = /\[((?:https?:|ftp:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:(\s)([^\]]*))?\]/ig,
+	PATTERN_external_link_global = /\[((?:https?:|ftps?:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:(\s)([^\]]*))?\]/ig,
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
 	markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|math|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark',
 	// MediaWiki可接受的 HTML void elements 標籤.
@@ -3120,11 +3122,13 @@ function module_code(library_namespace) {
 	}
 
 	var Magic_words_hash = library_namespace.null_Object();
+	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=functionhooks&utf8&format=json
 	'DISPLAYTITLE|DEFAULTSORT|デフォルトソート|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
 	// 這些需要指定數值. e.g., {{DEFAULTSORT:1}}: OK, {{DEFAULTSORT}}: NG
 	.split('|').forEach(function name(Magic_words) {
 		Magic_words_hash[Magic_words] = false;
 	});
+	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=variables&utf8&format=json
 	'CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME'
 	// 這些不用指定數值.
 	.split('|').forEach(function name(Magic_words) {
@@ -6490,6 +6494,28 @@ function module_code(library_namespace) {
 			}, next[4]));
 			break;
 
+		case 'siteinfo':
+			// wiki.siteinfo(options, callback)
+			// wiki.siteinfo(callback)
+			if (typeof next[1] === 'function' && !next[2]) {
+				// next[1] : callback
+				next[2] = next[1];
+				next[1] = null;
+			}
+
+			wiki_API.siteinfo(Object.assign({
+				// [KEY_SESSION]
+				session : this
+			}, next[1]), function(data, error) {
+				if (typeof next[2] === 'function') {
+					// next[2] : callback
+					next[2].call(_this, data, error);
+				}
+				// run next action
+				_this.next();
+			});
+			break;
+
 		case 'page':
 			// this.page(page data, callback, options);
 			if (library_namespace.is_Object(next[2]) && !next[3])
@@ -7304,6 +7330,7 @@ function module_code(library_namespace) {
 			break;
 
 		// ------------------------------------------------
+
 		// administrator functions
 
 		case 'move_to':
@@ -7320,11 +7347,13 @@ function module_code(library_namespace) {
 			// wiki.page(from).move_to(to, callback)
 			// wiki.page(from).move_to(to)
 
-			var move_to_title;
-			if (typeof next[1] === 'string') {
-				move_to_title = next[1];
-				// shift arguments
-				next.splice(1, 1);
+			if (type === 'move_to') {
+				var move_to_title;
+				if (typeof next[1] === 'string') {
+					move_to_title = next[1];
+					// shift arguments
+					next.splice(1, 1);
+				}
 			}
 
 		case 'remove':
@@ -7341,6 +7370,8 @@ function module_code(library_namespace) {
 
 		case 'rollback':
 			// wiki.page(title).rollback([title,] options, callback)
+
+			// --------------------------------------------
 
 			// 這些控制用的功能，不必須取得頁面內容。
 			if (typeof next[1] === 'string') {
@@ -7427,7 +7458,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'query_API|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|search|remove|delete|move_to|protect|rollback|logout|run|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|search|remove|delete|move_to|protect|rollback|logout|run|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------
@@ -11078,6 +11109,93 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// https://www.mediawiki.org/w/api.php?action=help&modules=sitematrix
+	// https://zh.wikipedia.org/w/api.php?action=help&modules=paraminfo
+
+	// get_site_configurations
+	// https://zh.wikipedia.org/w/api.php?action=help&modules=query%2Bsiteinfo
+	// https://www.mediawiki.org/wiki/API:Siteinfo
+	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general%7Cnamespaces%7Cnamespacealiases%7Cstatistics&utf8
+	function siteinfo(options, callback) {
+		// console.log([ options, callback ]);
+
+		options = Object.assign({
+			meta : 'siteinfo',
+			// magicwords: #重定向 interwikimap, thumb %1px center,
+			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|specialpagealiases|magicwords|extensiontags|protocols&utf8&format=json
+			siprop : 'general|namespaces|namespacealiases|specialpagealiases'
+					+ '|magicwords|languagevariants|extensiontags|protocols'
+		// + '|functionhooks|variables'
+		}, options);
+
+		var session;
+		if ('session' in options) {
+			session = options[KEY_SESSION];
+			delete options[KEY_SESSION];
+		}
+
+		var action = 'action=' + 'query',
+		//
+		API_URL = session && session.API_URL;
+		if (API_URL) {
+			action = [ API_URL, action ];
+		}
+
+		wiki_API.query(action, function(response, error) {
+			// console.log(JSON.stringify(response));
+			error = error || response && response.error;
+			if (error) {
+				callback(response, error);
+				return;
+			}
+
+			response = response.query;
+			if (session) {
+				adapt_site_configurations(session, response);
+			}
+			callback(response);
+		}, options, session);
+		return;
+
+		wiki_operator('query', {
+			meta : true,
+
+			siprop : false,
+			sifilteriw : false,
+			sishowalldb : false,
+			sinumberingroup : false,
+			siinlanguagecode : false
+		}, Object.assign({
+			meta : 'siteinfo',
+			// magicwords: #重定向 interwikimap, thumb %1px
+			// center,
+			siprop : 'general|namespaces|namespacealiases|specialpagealiases'
+					+ '|magicwords|languagevariants|extensiontags|protocols'
+		}, options), callback);
+	}
+
+	wiki_API.siteinfo = siteinfo;
+
+	// TODO
+	function adapt_site_configurations(session, configurations) {
+		if (configurations.general) {
+			var variants = configurations.general.variants;
+			if (variants.zh) {
+				delete variants.zh.zh;
+				delete variants.zh['zh-hans'];
+				delete variants.zh['zh-hant'];
+			}
+			for ( var lang_code in variants) {
+				;
+			}
+		}
+	}
+
+	// html to wikitext
+	// https://zh.wikipedia.org/w/api.php?action=help&modules=flow-parsoid-utils
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * check if need to stop / 檢查是否需要緊急停止作業 (Emergency shutoff-compliant).
 	 * 
@@ -12170,8 +12288,8 @@ function module_code(library_namespace) {
 		} else {
 			// 可能沒有 page_data
 			if (library_namespace.is_debug()) {
-				library_namespace.error('draw_parameters No page specified: '
-						+ options);
+				library_namespace.error('draw_parameters: No page specified: '
+						+ JSON.stringify(options));
 			}
 			return 'No page id/title specified';
 		}
@@ -12222,20 +12340,19 @@ function module_code(library_namespace) {
 					+ ' → ' + parameters.to, 1, 'wiki_operator.move');
 		}
 
-		var action = 'action=' + action,
-		//
-		API_URL = session && session.API_URL;
+		var _action = 'action=' + action;
+		var API_URL = session && session.API_URL;
 		if (API_URL) {
-			action = [ API_URL, action ];
+			_action = [ API_URL, action ];
 		}
 
-		wiki_API.query(action, function(response) {
+		wiki_API.query(_action, function(response, error) {
 			// console.log(JSON.stringify(response));
-			var error = response && response.error;
+			error = error || response && response.error;
 			if (error) {
 				callback(response, error);
 			} else {
-				callback(response.protect);
+				callback(response[action]);
 			}
 		}, parameters, session);
 	}
@@ -13821,7 +13938,8 @@ function module_code(library_namespace) {
 								// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 								parameters : page_options,
 								rvprop
-								// e.g., minor:'',anon:''/* e.g., IP user */,
+								// e.g.,
+								// minor:'',anon:''/* e.g., IP user 匿名用戶 */,
 								// bot flag: ('bot' in row)
 								: 'ids|content|timestamp|user|flags|size'
 							}, options.with_diff);
