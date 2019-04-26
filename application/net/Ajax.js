@@ -1667,12 +1667,17 @@ function module_code(library_namespace) {
 			// 應已在 _ontimeout 出過警告訊息。
 			&& error.code !== 'TIMEOUT') {
 				if (error.code === 'ENOTFOUND') {
-					CeL
-							.error('get_URL_node: Not found: [' + URL_to_fetch
-									+ ']');
+					library_namespace.error('get_URL_node: Not found: ['
+							+ URL_to_fetch + ']');
+				} else if (error.code === 'EPROTO'
+						&& parseInt(library_namespace.platform.nodejs) >= 12) {
+					library_namespace
+							.error('get_URL_node: Node.js v12 disable TLS v1.0 and v1.1 by default. Please set tls.DEFAULT_MIN_VERSION = "TLSv1" first! ['
+									+ URL_to_fetch + ']');
 				} else {
-					CeL.error('get_URL_node: Get error when retrieving ['
-							+ URL_to_fetch + ']:');
+					library_namespace
+							.error('get_URL_node: Get error when retrieving ['
+									+ URL_to_fetch + ']:');
 					// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 					console.error(error);
 				}
@@ -1698,6 +1703,7 @@ function module_code(library_namespace) {
 				options.onloadstart();
 			}
 
+			// console.log('response:');
 			// console.log(response);
 			if ((response.statusCode / 100 | 0) === 3
 					&& response.headers.location
@@ -2463,8 +2469,13 @@ function module_code(library_namespace) {
 			request = node_http.request(request);
 
 			request.on('connect', function(response, socket, head) {
+				var tls = require('tls');
+				// https://github.com/nodejs/node/issues/27384
+				// node.js v12 disable TLS v1.0 and v1.1 by default
+				// tls.DEFAULT_MIN_VERSION = 'TLSv1';
+
 				// a tls.TLSSocket object
-				var tls_socket = require('tls').connect({
+				var tls_socket = tls.connect({
 					host : options.host,
 					socket : socket
 				}, function() {

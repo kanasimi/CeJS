@@ -5,7 +5,7 @@
  * 
  * <code>
 
-CeL.comico(null, function(crawler) {
+CeL.comico(configuration, function(crawler) {
 	start_crawler(crawler, typeof module === 'object' && module);
 }, function(crawler) {
 	setup_crawler(crawler, typeof module === 'object' && module);
@@ -483,6 +483,13 @@ function module_code(library_namespace) {
 		// for 年齡確認您是否已滿18歲？
 		crawler.get_URL_options.cookie = 'islt18age=' + Date.now();
 
+		var tls = require('tls');
+		// https://github.com/nodejs/node/issues/27384
+		// node.js v12 disable TLS v1.0 and v1.1 by default
+		tls.DEFAULT_MIN_VERSION = 'TLSv1';
+		// free
+		tls = null;
+
 		if (crawler.password && crawler.loginid) {
 			library_namespace.log((crawler.id || module_name) + ': Login as ['
 					+ crawler.loginid + ']');
@@ -537,7 +544,6 @@ function module_code(library_namespace) {
 			callback(crawler);
 		}
 
-		return crawler;
 	}
 
 	return new_comico_comics_crawler;
