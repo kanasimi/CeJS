@@ -107,6 +107,7 @@ function module_code(library_namespace) {
 			}
 			return url;
 		},
+		// 每個項目的<li>開頭。
 		search_head_token : '<li class="list-article02__item">',
 		// title 不能用 [^<>"]+ : for case of "薔薇的嘆息 <薔薇色的疑雲 I>"
 		PATTERN_search : /<a href="[^<>"]*?\/(\d+)\/"[^<>]*? title="([^"]+)"/,
@@ -136,15 +137,30 @@ function module_code(library_namespace) {
 		parse_work_data : function(html, get_label, extract_work_data) {
 			// console.log(html);
 
+			var cmnData = html.between('var cmnData =', '</script>'), matched;
+			if (!cmnData) {
+				// 公式作品の「掲載終了日」について、お知らせいたします。
+				// 出版社の都合により、以下2作品を掲載終了とさせていただきます。
+				// 更新中の掲載終了につき、大変ご迷惑をおかけし申し訳ございません。
+
+				// 下記の公式作品は既に掲載終了しています。
+				matched = get_label(html.between(
+				// <p class="m-section-error__heading">お探しのページは存在しません</p>
+				'<p class="m-section-error__heading">', '</p>'));
+				if (matched) {
+					throw matched;
+				}
+			}
+
+			eval('cmnData=' + cmnData);
+
 			var work_data = {
 				// 必要屬性：須配合網站平台更改。
 				// <h1 class="article-hero05__ttl">美麗的代價</h1>
 				title : get_label((html.between('<h1 class="article', '</h1>') || html
 						.between('<h1', '</h1>')).between('>'))
 			// 選擇性屬性：須配合網站平台更改。
-			}, cmnData = html.between('var cmnData =', '</script>'), matched;
-
-			eval('cmnData=' + cmnData);
+			};
 
 			extract_work_data(work_data, html);
 
@@ -390,7 +406,8 @@ function module_code(library_namespace) {
 				}
 
 			} else if (image_url_list = html
-					.between(' _comicImage">', '</div>')) {
+			// comico_jp: <div class="comic-image _comicImage">
+			.between(' _comicImage">', '</div>')) {
 				// 一般正常可取得圖片的情況。
 				// 去除 placeholder。 <div class="comic-image__blank-layer">
 				image_url_list = image_url_list.between(null, '<div ')
@@ -402,9 +419,24 @@ function module_code(library_namespace) {
 					// {Array}cmnData.imageData 裡面。
 					if (image_url_list.length === 1) {
 						cmnData.imageData.unshift(image_url_list[0]);
-					} else {
-						throw work_data.title + ' #' + chapter_NO
-								+ ': 網頁改版? 不能解析!';
+
+					} else if (
+					/**
+					 * e.g.,
+					 * http://www.comico.jp/detail.nhn?titleNo=27605&articleNo=1
+					 * <code>
+
+					<div class="swiper-wrapper _swiperWrapper _comicImage">
+					<!-- Slides -->
+					<div class="swiper-slide _swiperSlide o-hidden">
+					<div dir="ltr">
+					<div id="_popIn_video"></div>
+
+					</code>
+					 */
+					!html.includes(' class="swiper-slide _swiperSlide')) {
+						throw 'parse_chapter_data: ' + work_data.title + ' #'
+								+ chapter_NO + ': 網頁改版? 無法解析!';
 						Array.prototype.unshift.apply(cmnData.imageData,
 								image_url_list);
 					}
@@ -417,7 +449,7 @@ function module_code(library_namespace) {
 			} else {
 				console.log(html);
 				throw work_data.title + ' #' + chapter_NO
-						+ ': Can not parse data! 網頁改版? 不能解析!';
+						+ ': Can not parse data! 網頁改版? 無法不能解析!';
 			}
 
 			if (cmnData.url) {
