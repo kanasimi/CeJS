@@ -1670,6 +1670,7 @@ function module_code(library_namespace) {
 					library_namespace.error('get_URL_node: Not found: ['
 							+ URL_to_fetch + ']');
 				} else if (error.code === 'EPROTO'
+						&& tls.DEFAULT_MIN_VERSION === 'TLSv1.2'
 						&& parseInt(library_namespace.platform.nodejs) >= 12) {
 					library_namespace
 							.error('get_URL_node: Node.js v12 disable TLS v1.0 and v1.1 by default. Please set tls.DEFAULT_MIN_VERSION = "TLSv1" first! ['
@@ -1703,6 +1704,10 @@ function module_code(library_namespace) {
 				options.onloadstart();
 			}
 
+			// 若原先有agent，應該合併到原先的agent，而非可能為暫時性/泛用的agent。
+			merge_cookie(options.agent || agent, response.headers['set-cookie']);
+			// 先合併完cookie之後才能轉址，否則會漏失掉須設定的cookie。
+
 			// console.log('response:');
 			// console.log(response);
 			if ((response.statusCode / 100 | 0) === 3
@@ -1730,7 +1735,10 @@ function module_code(library_namespace) {
 				library_namespace.debug(response.statusCode
 						+ ' Redirecting to [' + options.URL + '] ← ['
 						+ URL_to_fetch + ']', 1, 'get_URL_node');
-				get_URL_node(options, onload, charset, post_data);
+				get_URL_node(options, onload, charset
+				// 重新導向的時候去掉 post data 不傳送。
+				// , post_data
+				);
 				return;
 			}
 
@@ -1811,9 +1819,6 @@ function module_code(library_namespace) {
 							.to_file_name(matched);
 				}
 			}
-
-			// 若原先有agent，應該合併到原先的agent，而非可能為暫時性/泛用的agent。
-			merge_cookie(options.agent || agent, response.headers['set-cookie']);
 
 			// 為預防字元編碼破碎，因此不能設定 response.setEncoding()？
 			// 但經測試，Wikipedia 有時似乎會有回傳字元錯位之情形？
