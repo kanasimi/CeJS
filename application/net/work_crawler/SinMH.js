@@ -130,6 +130,8 @@ function module_code(library_namespace) {
 
 			return [ id_list, id_data ];
 		},
+		// e.g., 50mh.js
+		// id_of_search_result : 'slug',
 
 		// 取得作品的章節資料。 get_work_data()
 		work_URL : function(work_id) {
@@ -295,7 +297,9 @@ function module_code(library_namespace) {
 					})) {
 						library_namespace.info('使用之前的 cache，自 #'
 								+ latest_chapter_list.length + ' 接續下載。');
-						work_data.chapter_list = latest_chapter_list;
+						// 這可以保留 work_data.chapter_list 先前的屬性。
+						work_data.chapter_list = Object.assign(
+								latest_chapter_list, work_data.chapter_list);
 						work_data.last_download.chapter = latest_chapter_list.length;
 
 					} else {
@@ -338,6 +342,13 @@ function module_code(library_namespace) {
 			&& html.match(/<script src="([^"]+\/crypto.js)"><\/script>/);
 			if (crypto_url) {
 				var file_name = this.main_directory + 'crypto.js';
+				// TODO: this is a workaround to pass to require()
+				if (!library_namespace.is_absolute_path(file_name)) {
+					file_name = process.cwd()
+							+ library_namespace.env.path_separator + file_name;
+				}
+				// console.log(file_name);
+
 				library_namespace.get_URL_cache(this.full_URL(crypto_url[1]),
 				// @see function cops201921() @
 				// http://www.duzhez.com/js/cops201921.js
@@ -423,7 +434,9 @@ function module_code(library_namespace) {
 				return {
 					// e.g., 外挂仙尊 184 第76话
 					// 但是這還是沒辦法取得圖片...
-					url : /^https?:\/\//.test(url) ? url : path + url
+					url : encodeURI(/^https?:\/\//.test(url) ? url
+					//
+					: path + url)
 				}
 			});
 
