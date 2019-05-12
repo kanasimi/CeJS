@@ -18,13 +18,16 @@
 # finish_up(), .after_download_chapter(), .after_download_work()
 
 TODO:
-將工具檔結構以及說明統合在一起，並且建造可以自動生成的工具。
+將工具檔結構以及說明統合在一起，並且建造可以自動生成index/說明的工具。
 	自動判別網址所需要使用的下載工具，輸入網址自動揀選所需的工具檔案。
 	從其他的資料來源網站尋找取得作品以及章節的資訊。
 	自動記得某個作品要從哪些網站下載。
 
 將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
 
+開啟錯誤紀錄
+
+漫畫下載流程教學
 
 CLI progress bar
 下載完畢後作繁簡轉換。
@@ -35,7 +38,7 @@ parse 圖像。
 拼接長圖。 using .epub
 	處理每張圖片被分割成多個小圖的情況 add .image_indexes[] ?
 檢核章節內容。
-考慮 search_URL 搜尋的頁數，包含所有結果
+考慮 search_URL 搜尋的頁數，當搜索獲得太多結果時也要包含所有結果
 
 </code>
  * 
@@ -309,7 +312,7 @@ function module_code(library_namespace) {
 		arg_type_data = JSON.stringify(arg_type_data);
 
 		library_namespace.warn([ 'verify_arg: ', {
-			T : [ '"%1" 這個值所允許的數值類型為 %2，但現在被設定了 {%3} %4',
+			T : [ '"%1" 這個值所允許的數值類型為 %2，但現在被設定成 {%3} %4',
 			//
 			key, arg_type_data, typeof value, value ]
 		} ]);
@@ -922,13 +925,26 @@ function module_code(library_namespace) {
 		var _this = this;
 
 		// 取得圖庫伺服器列表。
-		get_URL(server_URL, function(XMLHttp) {
+		this.get_URL(server_URL, function(XMLHttp, error) {
+			if (error) {
+				_this.onerror(error);
+				typeof callback === 'function' && callback(error);
+				return Work_crawler.THROWED;
+			}
+
 			var html = XMLHttp.responseText;
-			_this.server_list = _this.parse_server_list(html)
-			// 確保有東西。
-			.filter(function(server) {
-				return !!server;
-			}).unique();
+			try {
+				_this.server_list = _this.parse_server_list(html)
+				// 確保有東西。
+				.filter(function(server) {
+					return !!server;
+				}).unique();
+			} catch (e) {
+				_this.onerror(e);
+				typeof callback === 'function' && callback(e);
+				return Work_crawler.THROWED;
+			}
+
 			if (_this.server_list.length > 0) {
 				library_namespace.log('Get ' + _this.server_list.length
 						+ ' servers from [' + server_URL + ']: '
@@ -943,9 +959,7 @@ function module_code(library_namespace) {
 			}
 
 			typeof callback === 'function' && callback();
-		}, this.charset, null, Object.assign({
-			error_retry : this.MAX_ERROR_RETRY
-		}, this.get_URL_options));
+		}, null, true);
 	}
 
 	// front end #1: start downloading operation
@@ -1002,8 +1016,11 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		this.set_server_list(this.server_URL, function() {
-			_this.parse_work_id(work_id, callback);
+		this.set_server_list(this.server_URL, function(error) {
+			if (error)
+				callback();
+			else
+				_this.parse_work_id(work_id, callback);
 		}, server_file);
 	}
 
@@ -1100,17 +1117,19 @@ function module_code(library_namespace) {
 	// this.get_URL(url, callback, post_data, get_URL_options, charset)
 	function this_get_URL(url, callback, post_data, get_URL_options, charset) {
 		if (Array.isArray(url) && !post_data && !get_URL_options) {
-			// [ url, post_data, get_URL_options ]
+			// this.get_URL([ url, post_data, get_URL_options ])
 			post_data = url[1];
 			get_URL_options = url[2];
 			url = url[0];
 		}
 
 		if (get_URL_options === true) {
+			// this.get_URL(url, callback, post_data, true)
 			get_URL_options = Object.assign({
 				error_retry : this.MAX_ERROR_RETRY
 			}, this.get_URL_options);
 		} else if (library_namespace.is_Object(get_URL_options)) {
+			// this.get_URL(url, callback, post_data, get_URL_options)
 			var headers = Object.assign(library_namespace.null_Object(),
 					this.get_URL_options.headers, get_URL_options.headers);
 			get_URL_options = Object.assign(library_namespace.null_Object(),
@@ -1124,6 +1143,8 @@ function module_code(library_namespace) {
 		// console.trace(url);
 		url = this.full_URL(url);
 		// console.log(get_URL_options);
+
+		// callback(result_Object, error)
 		get_URL(url, callback.bind(this), charset || this.charset, post_data,
 				get_URL_options);
 	}
@@ -2186,6 +2207,7 @@ function module_code(library_namespace) {
 
 		// ck101: 全文完, 全書完
 		// MAGCOMI: 連載終了作品
+		// comico_jp: 更新終了
 		if (/全[文書]完|終了/.test(status)) {
 			return status;
 		}
@@ -3340,8 +3362,10 @@ function module_code(library_namespace) {
 		chapter_list.push(chapter_data);
 		return chapter_data;
 	}
+	// 轉成由舊至新之順序。 should reset work_data.chapter_list first!
 	// set work_data.inverted_order = true;
 	// this.reverse_chapter_list_order(work_data);
+	// @see work_crawler/hhcool.js
 	function reverse_chapter_list_order(work_data) {
 		var chapter_list = work_data.chapter_list;
 		if (!Array.isArray(chapter_list) || chapter_list.length === 0) {
@@ -3541,6 +3565,10 @@ function module_code(library_namespace) {
 						+ JSON.stringify(work_data.chapter_list.part_NO) + ')');
 			}
 
+			if (false) {
+				console.log([ no_part, chapter_data.part_title,
+						work_data.chapter_list.part_NO, this.add_part ]);
+			}
 			if (!no_part && chapter_data.part_title
 			//
 			&& (Array.isArray(work_data.chapter_list)
@@ -4024,6 +4052,7 @@ function module_code(library_namespace) {
 					typeof callback === 'function' && callback(work_data);
 					return Work_crawler.THROWED;
 				}
+
 				// console.log(JSON.stringify(chapter_data));
 				if (!chapter_data || !(image_list = chapter_data.image_list)
 				//
@@ -4083,12 +4112,22 @@ function module_code(library_namespace) {
 					work_data.image_count += left;
 				}
 
-				// 自動填補章節名稱。
-				if (!chapter_data.title
+				if (typeof chapter_data === 'object'
 						&& Array.isArray(work_data.chapter_list)
 						&& library_namespace
-								.is_Object(work_data.chapter_list[chapter_NO - 1])) {
-					chapter_data.title = work_data.chapter_list[chapter_NO - 1].title;
+								.is_Object(work_data.chapter_list[chapter_NO - 1])
+						&& chapter_data !== work_data.chapter_list[chapter_NO - 1]) {
+					if (false) {
+						// 自動引用舊的章節資訊。
+						chapter_data = Object.assign(
+								work_data.chapter_list[chapter_NO - 1],
+								chapter_data);
+					} else {
+						// 自動填補章節名稱。
+						if (!chapter_data.title) {
+							chapter_data.title = work_data.chapter_list[chapter_NO - 1].title;
+						}
+					}
 				}
 				// TODO: 自動填補 chapter_data.url。
 
@@ -4707,8 +4746,10 @@ function module_code(library_namespace) {
 								+ ']。這可能肇因於作品資訊 cache 與當前網站上之作品章節結構不同。'
 								//
 								+ '若您之前曾經下載過本作品的話，請封存原有作品目錄，'
+								// https://github.com/kanasimi/work_crawler/issues/278
+								+ '或將作品資訊 cache 檔（作品目錄下的 作品id.json）'
 								//
-								+ '或將作品資訊 cache 改名之後嘗試全新下載。', image_data);
+								+ '改名之後嘗試全新下載。', image_data);
 								if (typeof callback === 'function') {
 									callback(image_data,
 											'image_file_write_error');
