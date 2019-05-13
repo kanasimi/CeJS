@@ -137,6 +137,7 @@ function module_code(library_namespace) {
 	/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
 	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 	// ONE_DAY_LENGTH_VALUE = CeL.date.to_millisecond('1D')
+	// 3 * ONE_DAY_LENGTH_VALUE === CeL.date.to_millisecond('3D')
 
 	/** {Number}一分鐘的 time 值(in milliseconds)。should be 60 * 1000 = 60000. */
 	ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
@@ -2665,6 +2666,10 @@ function module_code(library_namespace) {
 		diff = diff2.getFullYear() - /* 1970 */new Date(0).getFullYear();
 		// 計算兩者相差大概月分。
 		diff2 = diff2.getMonth() + (diff2.getDate() - 1) / 30;
+		// 將數字四捨五入到指定的小數位數。
+		var to_fixed_digits = options && (options.digits | 0) >= 0
+		//
+		? options.digits | 0 : 1;
 		if (diff) {
 			// assert: {Integer}diff 年 {Float}diff2 月, diff > 0.
 			// → difference = {Float} 年（至小數）
@@ -2675,7 +2680,7 @@ function module_code(library_namespace) {
 			} else {
 				// years
 				// SI symbol: a (for Latin annus)
-				diff = gettext('%1 Y', difference.to_fixed(1));
+				diff = gettext('%1 Y', difference.to_fixed(to_fixed_digits));
 			}
 			if (options && options.歲) {
 				// 計算年齡(虛歲)幾歲。
@@ -2697,7 +2702,7 @@ function module_code(library_namespace) {
 		}
 
 		if (diff2 >= 1) {
-			return gettext('%1 M', diff2.to_fixed(1));
+			return gettext('%1 M', diff2.to_fixed(to_fixed_digits));
 		}
 
 		if (difference < 1000) {
@@ -2705,19 +2710,21 @@ function module_code(library_namespace) {
 		}
 
 		if ((difference /= 1000) < 60) {
-			return gettext('%1 s', difference.to_fixed(1));
+			return gettext('%1 s', difference.to_fixed(to_fixed_digits));
 		}
 
 		if ((difference /= 60) < 60) {
-			return gettext('%1 min', difference.to_fixed(1));
+			return gettext('%1 min', difference.to_fixed(to_fixed_digits));
 		}
 
 		if ((difference /= 60) < 24) {
-			return gettext('%1 hr', difference.to_fixed(1));
+			return gettext('%1 hr', difference.to_fixed(to_fixed_digits));
 		}
 
 		// day
-		return gettext('%1 d', (difference / 24).to_fixed(1));
+		return gettext('%1 d', (difference / 24).to_fixed(to_fixed_digits));
+
+		// TODO: weeks
 	}
 
 	// 將在 data.date.era 更正。
@@ -2789,11 +2796,15 @@ function module_code(library_namespace) {
 			// the day of the month
 			var message = /* date_of_month */date.getDate()
 					- /* date_now */(new Date).getDate() + 3;
-			message = [ '3 days ago', 'the day before yesterday', 'yesterday',
-					'today', 'tomorrow', 'the day after tomorrow',
-					'3 days later' ][message];
+			message = [ '2 days before yesterday', 'the day before yesterday',
+					'yesterday', 'today', 'tomorrow', 'the day after tomorrow',
+					'2 days after tomorrow'
+			// , '3 days after tomorrow'
+			][message];
 			return date.format(gettext(message + ', %H:%M'));
 		}
+
+		// TODO: week, 周六
 
 		if (date_value_diff <= 35) {
 			return gettext(passed ? '%1 days ago' : '%1 days later', Math
@@ -2809,9 +2820,11 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 
-		// for months
+		// for dates in this year, *月*日
 
 		// ----------------------------
+
+		// *年*月*日
 
 		return date.format(options.general_format
 				|| indicate_date_time.general_format);
