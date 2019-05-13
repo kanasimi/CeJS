@@ -138,6 +138,7 @@ function module_code(library_namespace) {
 				work_data.site_name = html.between("AddFavorite('", "'");
 			}
 
+			// console.log(work_data);
 			return work_data;
 		},
 		// 取得包含章節列表的文字範圍。
@@ -154,13 +155,17 @@ function module_code(library_namespace) {
 			if (this.get_chapter_list_contents) {
 				html = this.get_chapter_list_contents(html);
 			}
+			// console.log(html);
 
 			work_data.chapter_list = [];
 			var part_title, matched,
 			// 章節以及篇章連結的模式。
 			// [ all, tag name, attributes, 連結內容 HTML ]
-			PATTERN_chapter = /<(li|dd|dt)([^<>]*)>(.*?)<\/\1>/g;
+			PATTERN_chapter = /<(li|dd|dt)([^<>]*)>([\s\S]*?)<\/\1>/g;
 			while (matched = PATTERN_chapter.exec(html)) {
+				// delete matched.input;
+				// console.log(matched);
+
 				if (matched[1] === 'dt' ||
 				// e.g., 88dushu.js
 				matched[1] === 'li' && matched[2].includes('class="fj"')) {
