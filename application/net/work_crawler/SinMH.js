@@ -415,16 +415,17 @@ function module_code(library_namespace) {
 				JSON.parse(CryptoJS.AES.decrypt(chapterImages,CryptoJS.enc.Utf8.parse("6133AFVvxas55841"),{iv:CryptoJS.enc.Utf8.parse("A25vcxQQrpmbV51t"),mode:CryptoJS.mode.CBC,padding:CryptoJS.pad.Pkcs7}).toString(CryptoJS.enc.Utf8))
 				</code>
 				 * 
-				 * @see function cops201921() @ http://www.duzhez.com/js/cops201921.js
 				 * @see https://segmentfault.com/q/1010000011225051
+				 * @see function cops201921() @ http://www.duzhez.com/js/cops201921.js<br /> →
+				 * 2019/5/1 亲亲漫画改版: function kda20190501() @ http://www.duzhez.com/js/kda20190501.js
 				 */
 				chapter_data.chapterImages =
 				// 使用 CryptoJS https://code.google.com/archive/p/crypto-js/
 				// https://github.com/brix/crypto-js
 				JSON.parse(CryptoJS.AES.decrypt(chapter_data.chapterImages,
 				// 930mh.js key 密鑰
-				CryptoJS.enc.Utf8.parse("6133AFVvxas55841"), {
-					iv : CryptoJS.enc.Utf8.parse("A25vcxQQrpmbV51t"),
+				CryptoJS.enc.Utf8.parse("9Xc4PMs2cvQinnbd"), {
+					iv : CryptoJS.enc.Utf8.parse("ioXA45KJnv98ccSB"),
 					mode : CryptoJS.mode.CBC,
 					padding : CryptoJS.pad.Pkcs7
 				}).toString(CryptoJS.enc.Utf8));
