@@ -340,10 +340,10 @@ function module_code(library_namespace) {
 
 		switch (key) {
 		case 'proxy':
-			// 代理伺服器 proxy_server
+			// 使用代理伺服器 proxy_server
 			// TODO: check .proxy
 			library_namespace.info({
-				T : [ '使用proxy：%1', value ]
+				T : [ 'Using proxy server: %1', value ]
 			});
 			this.get_URL_options.proxy = this.proxy = value;
 			return;

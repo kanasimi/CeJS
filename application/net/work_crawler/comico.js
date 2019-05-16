@@ -84,6 +84,7 @@ function module_code(library_namespace) {
 		set_downloaded_if_read : true,
 
 		convert_id : {
+			// switch
 			// 警告: 需要自行呼叫 insert_id_list(id_list);
 			adult : function(insert_id_list, get_label) {
 				// TW only: 此前被當作是一般作品。

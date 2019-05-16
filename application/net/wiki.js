@@ -136,7 +136,7 @@ function module_code(library_namespace) {
 	// API URL (default): e.g., 'https://www.wikidata.org/w/api.php'
 	//
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
-	// site: e.g., 'zhwiki'
+	// site: e.g., 'zhwiki'. `.wikiid` @ siteinfo
 	// @see wikidatawiki_p.wb_items_per_site.ips_site_id
 	//
 	// [[en:Help:Interwikimedia_links]] [[en:Special:Interwiki]]
@@ -274,7 +274,7 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	PATTERN_URL_prefix = /^(?:https?:)?\/\/[^.:\\\/]+\.[^.:\\\/]+/i;
+	PATTERN_URL_prefix = /^(?:(?:https?|s?ftp|telnet|ssh):)?\/\/[^.:\\\/]+\.[^.:\\\/]+/i;
 	// ↓ 這會無法匹配中文域名。
 	// PATTERN_URL_prefix = /^(?:https?:)?\/\/([a-z\d\-]{1,20})\./i,
 
@@ -460,6 +460,12 @@ function module_code(library_namespace) {
 					+ options.parameters + ']', 1, 'add_parameters');
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------
+
+	var default_site_configurations = {
+
+	};
 
 	// --------------------------------------------------------------------------------------------
 	// 工具函數。
@@ -719,11 +725,12 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Integer|String|Undefined}namespace NO.
 	 */
-	function get_namespace(namespace) {
+	function get_namespace(namespace, namespace_hash) {
 		if (namespace == Math.floor(namespace)) {
 			// {Integer}namespace
 			return namespace;
 		}
+		namespace_hash = namespace_hash || get_namespace.hash;
 
 		if (typeof namespace === 'string') {
 			var list = [];
@@ -744,8 +751,8 @@ function module_code(library_namespace) {
 					list.push(_n);
 					return;
 				}
-				if (_n in get_namespace.hash) {
-					list.push(get_namespace.hash[_n]);
+				if (_n in namespace_hash) {
+					list.push(namespace_hash[_n]);
 					return;
 				}
 				library_namespace.warn('get_namespace: Invalid namespace: ['
@@ -835,19 +842,26 @@ function module_code(library_namespace) {
 	get_namespace.name_of_NO = [];
 
 	/**
-	 * build ((get_namespace.pattern))
+	 * build `get_namespace.pattern`
+	 * 
+	 * @inner
 	 */
-	(function() {
+	function generate_namespace_pattern(namespace_hash, name_of_NO) {
 		var source = [];
-		for ( var namespace in get_namespace.hash) {
-			get_namespace.name_of_NO[get_namespace.hash[namespace]] = namespace;
+		for ( var namespace in namespace_hash) {
+			name_of_NO[namespace_hash[namespace]] = namespace;
 			if (namespace)
 				source.push(namespace);
 		}
+
+		// return pattern
 		// [ , namespace, title ]
-		get_namespace.pattern = new RegExp('^('
-				+ source.join('|').replace(/_/g, '[ _]') + '):(.+)$', 'i');
-	})();
+		return new RegExp('^(' + source.join('|').replace(/_/g, '[ _]')
+				+ '):(.+)$', 'i');
+	}
+	get_namespace.pattern = generate_namespace_pattern(get_namespace.hash,
+			get_namespace.name_of_NO);
+	// console.log(get_namespace.pattern);
 
 	/**
 	 * remove namespace part of the title.
@@ -3011,23 +3025,25 @@ function module_code(library_namespace) {
 			return this.join('');
 		},
 		// 手工字詞轉換 language conversion -{}-
-		convert : function(language) {
+		convert : function(language, lang_fallbacks) {
 			if (!language) {
 				return '-{' + this.join(';') + '}-';
 			}
 
 			language = language.toLowerCase();
+
 			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general%7Cnamespaces%7Cnamespacealiases%7Cstatistics
-			// language fallback: [[mw:Localisation statistics]]
+			// language fallbacks: [[mw:Localisation statistics]]
 			// (zh-tw, zh-hk, zh-mo) → zh-hant (→ zh?)
 			// (zh-cn, zh-sg, zh-my) → zh-hans (→ zh?)
 			// [[Wikipedia_talk:地区词处理#zh-my|馬來西亞簡體華語]]
 			// [[MediaWiki:Variantname-zh-tw]]
-			if (!this.conversion[language] && /^zh-(?:tw|hk|mo)/.test(language)) {
-				language = 'zh-hant';
-			}
-			if (!this.conversion[language] && /^zh/.test(language)) {
-				language = 'zh-hans';
+			if (!this.conversion[language]) {
+				if (/^zh-(?:tw|hk|mo)/.test(language)) {
+					language = 'zh-hant';
+				} else if (/^zh/.test(language)) {
+					language = 'zh-hans';
+				}
 			}
 
 			return this.conversion[language] || '在手动语言转换规则中检测到错误';
@@ -5500,7 +5516,7 @@ function module_code(library_namespace) {
 	</code>
 	 * 
 	 * @see [[w:zh:User:Cewbot/規範多個問題模板設定]], [[w:zh:User:Cewbot/討論頁面主題列表設定]]
-	 * @see [[w:zh:Template:Easy_Archive]],
+	 * @see 存檔 舊議 [[w:zh:Template:Easy_Archive]],
 	 *      [[w:en:Template:Auto_archiving_notice]],
 	 *      [[w:en:Template:Setup_auto_archiving]]
 	 */
@@ -6351,6 +6367,8 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 	// instance 相關函數。
+
+	wiki_API.prototype.configurations = default_site_configurations;
 
 	wiki_API.prototype.toString = function(type) {
 		return get_page_content(this.last_page) || '';
@@ -11155,40 +11173,52 @@ function module_code(library_namespace) {
 			}
 			callback(response);
 		}, options, session);
-		return;
-
-		wiki_operator('query', {
-			meta : true,
-
-			siprop : false,
-			sifilteriw : false,
-			sishowalldb : false,
-			sinumberingroup : false,
-			siinlanguagecode : false
-		}, Object.assign({
-			meta : 'siteinfo',
-			// magicwords: #重定向 interwikimap, thumb %1px
-			// center,
-			siprop : 'general|namespaces|namespacealiases|specialpagealiases'
-					+ '|magicwords|languagevariants|extensiontags|protocols'
-		}, options), callback);
 	}
 
 	wiki_API.siteinfo = siteinfo;
 
 	// TODO
 	function adapt_site_configurations(session, configurations) {
-		if (configurations.general) {
-			var variants = configurations.general.variants;
-			if (variants.zh) {
-				delete variants.zh.zh;
-				delete variants.zh['zh-hans'];
-				delete variants.zh['zh-hant'];
-			}
-			for ( var lang_code in variants) {
-				;
+		console.log(configurations);
+		var site_configurations = session.configurations;
+		if (site_configurations === default_site_configurations) {
+			session.configurations = site_configurations
+			//
+			= Object.assign(library_namespace.null_Object(),
+			//
+			default_site_configurations);
+		}
+
+		var general = configurations.general;
+		if (general) {
+			// site_configurations.general=general;
+			'mainpage|sitename|linktrail|legaltitlechars|invalidusernamechars|case|lang|maxarticlesize|timezone|timeoffset|maxuploadsize'
+					.split('|').forEach(function(name) {
+						site_configurations[name] = general[name];
+					});
+
+			site_configurations.magiclinks = Object.keys(general.magiclinks);
+			site_configurations.lang_fallback = general.fallback.map(function(
+					lang) {
+				return lang.code;
+			});
+		}
+
+		var languagevariants = configurations.languagevariants;
+		if (languagevariants && languagevariants.zh) {
+			delete languagevariants.zh.zh;
+			delete languagevariants.zh['zh-hans'];
+			delete languagevariants.zh['zh-hant'];
+
+			// language fallbacks
+			site_configurations.lang_fallbacks = library_namespace
+					.null_Object();
+			for ( var lang_code in languagevariants.zh) {
+				site_configurations.lang_fallbacks[lang_code] = languagevariants.zh[lang_code].fallbacks;
 			}
 		}
+
+		var namespaces = configurations.namespaces;
 	}
 
 	// html to wikitext

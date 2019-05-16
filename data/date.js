@@ -2666,9 +2666,9 @@ function module_code(library_namespace) {
 		diff = diff2.getFullYear() - /* 1970 */new Date(0).getFullYear();
 		// 計算兩者相差大概月分。
 		diff2 = diff2.getMonth() + (diff2.getDate() - 1) / 30;
-		// 將數字四捨五入到指定的小數位數。
+		// 將數字四捨五入到指定的小數位數。 TODO: 把時間表示方式改為60進位。
 		var to_fixed_digits = options && (options.digits | 0) >= 0
-		//
+		// e.g., {digits:0}
 		? options.digits | 0 : 1;
 		if (diff) {
 			// assert: {Integer}diff 年 {Float}diff2 月, diff > 0.

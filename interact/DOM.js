@@ -4813,10 +4813,13 @@ function module_code(library_namespace) {
 		if (class_name && !library_namespace.is_Object(class_name)
 				&& !options.remove) {
 			c = Array.isArray(class_name) ? class_name.join(' ') : class_name;
-			if (!options.reset)
-				// add 時不 detect 是為了速度.
-				c = element.className + ' ' + c;
-			element.className = c.trim();
+			c = c.trim();
+			if (options.reset) {
+				element.className = c;
+			} else if (!(' ' + element.className + ' ').includes(' ' + c + ' ')) {
+				// add 時不 detect 多重 class 是為了速度。
+				element.className += ' ' + c;
+			}
 
 			if (!options.status)
 				return;

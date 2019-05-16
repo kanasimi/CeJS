@@ -1670,7 +1670,7 @@ function module_code(library_namespace) {
 					library_namespace.error('get_URL_node: Not found: ['
 							+ URL_to_fetch + ']');
 				} else if (error.code === 'EPROTO'
-						&& tls.DEFAULT_MIN_VERSION === 'TLSv1.2'
+						&& require('tls').DEFAULT_MIN_VERSION === 'TLSv1.2'
 						&& parseInt(library_namespace.platform.nodejs) >= 12) {
 					library_namespace
 							.error('get_URL_node: Node.js v12 disable TLS v1.0 and v1.1 by default. Please set tls.DEFAULT_MIN_VERSION = "TLSv1" first! ['

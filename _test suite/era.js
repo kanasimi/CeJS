@@ -2016,8 +2016,11 @@ function translate_era(era) {
 		};
 	}
 
-	if (!era)
-		era = era_input_object.setValue();
+	if (!era && !(era = era_input_object.setValue())) {
+		era = (new Date).format('%Y/%m/%d');
+		// CeL.era('') 解析出來包含時間，可能造成日期不一致的問題。
+		// 例如在中午打開本網頁、直接按下"共存紀年"的情況。
+	}
 
 	era = era.trim();
 

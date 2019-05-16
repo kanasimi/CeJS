@@ -498,7 +498,7 @@ if (typeof CeL === 'function') {
 			// http://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
 			_.get_file = function(path, encoding) {
 				// for node.js
-				if (/^\/[a-z]:\//i.test(path)) {
+				if (_.platform.Windows && /^\/[a-z]:\//i.test(path)) {
 					// 在 electron package 中，script_base_path 可能形如 '/D:/'...。
 					// node.js 在讀取 "/D:/"... 這一種檔案時會轉換成 "/D:/D:/"...
 					path = path.slice(1);
