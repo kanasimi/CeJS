@@ -1088,6 +1088,11 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (!url) {
+			// error occurred: 未能解析出網址
+			return url;
+		}
+
 		// combine urls
 		if (typeof url === 'string' && !url.includes('://')) {
 			if (url.startsWith('/')) {
@@ -2355,14 +2360,19 @@ function module_code(library_namespace) {
 			if (!work_data.title) {
 				work_data.title = work_title;
 			} else if (!work_title
-			// cache work title: 方便下次從 search cache 反查。
-			&& typeof _this.parse_search_result !== 'function') {
+			// default: `{title:id}`
+			&& (!_this.id_of_search_result && !_this.title_of_search_result
+			// 應對有些作品存在卻因為網站本身的問題而搜尋不到的情況，例如 buka。
+			// 這時 this.parse_search_result() 函數本身必須能夠解析 `{title:id}`。
+			|| typeof _this.parse_search_result !== 'function')) {
+				// cache work title: 方便下次從 search cache 反查。
+
 				// search cache
 				var search_result_file = _this.get_search_result_file(),
 				//
 				search_result = _this.get_search_result()
 						|| library_namespace.null_Object();
-				if (!search_result[work_data.title]) {
+				if (!(work_data.title in search_result)) {
 					search_result[work_data.title] = work_id;
 					// 補上已知的轉換。這樣未來輸入作品標題的時候就能自動轉換。
 					library_namespace.write_file(search_result_file,
@@ -3363,7 +3373,7 @@ function module_code(library_namespace) {
 		return chapter_data;
 	}
 	// 轉成由舊至新之順序。 should reset work_data.chapter_list first!
-	// set work_data.inverted_order = true;
+	// set: work_data.inverted_order = true;
 	// this.reverse_chapter_list_order(work_data);
 	// @see work_crawler/hhcool.js
 	function reverse_chapter_list_order(work_data) {
@@ -3554,6 +3564,13 @@ function module_code(library_namespace) {
 				&& library_namespace
 						.is_Object(chapter_data = work_data.chapter_list[chapter_NO - 1])) {
 			// console.trace(chapter_data);
+
+			if (!('add_part_NO' in work_data.chapter_list)) {
+				// 自動設定是否包含分部號碼。
+				// 漫畫目錄名稱不須包含分部號碼。使章節目錄名稱不包含 part_NO。
+				work_data.chapter_list.add_part_NO = !!this.need_create_ebook;
+			}
+
 			if (chapter_data.part_title
 					&& work_data.chapter_list.add_part_NO !== false
 					&& !(work_data.chapter_list.part_NO >= 1)) {
