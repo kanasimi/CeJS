@@ -1349,8 +1349,12 @@ function module_code(library_namespace) {
 					options.hash, charset);
 		}
 
-		library_namespace.debug('URL: (' + (typeof URL_to_fetch) + ') ['
-				+ URL_to_fetch + ']', 1, 'get_URL_node');
+		library_namespace.debug('URL: ('
+				+ (typeof URL_to_fetch)
+				+ ') ['
+				+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+						: URL_to_fetch && URL_to_fetch.URL) + ']', 1,
+				'get_URL_node');
 
 		if (typeof onload === 'object') {
 			// use JSONP.
@@ -1466,9 +1470,10 @@ function module_code(library_namespace) {
 		// https://superuser.com/questions/876100/https-proxy-vs-https-proxy
 		// https://docs.oracle.com/cd/E56344_01/html/E54018/gmgas.html
 		// https://stackoverflow.com/questions/32824819/difference-between-http-proxy-https-proxy-and-proxy
-		|| /^https:/i.test(URL_to_fetch) && library_namespace.env.HTTPS_PROXY
-		// process.env.http_proxy
-		|| library_namespace.env.http_proxy);
+		|| typeof URL_to_fetch === 'string' && /^https:/i.test(URL_to_fetch)
+				&& library_namespace.env.HTTPS_PROXY
+				// process.env.http_proxy
+				|| library_namespace.env.http_proxy);
 
 		if (!proxy_server) {
 			;
@@ -1619,14 +1624,20 @@ function module_code(library_namespace) {
 			get_URL_node_requests--;
 			get_URL_node_connections--;
 			if (timeout_id) {
-				library_namespace.debug('clear timeout ' + (timeout / 1000)
-						+ 's [' + URL_to_fetch + ']', 3, 'get_URL_node');
+				library_namespace.debug('clear timeout '
+						+ (timeout / 1000)
+						+ 's ['
+						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+								: URL_to_fetch && URL_to_fetch.URL) + ']', 3,
+						'get_URL_node');
 				// console.trace('clear timeout ' + URL_to_fetch);
 				clearTimeout(timeout_id);
 			}
 			if (false && !get_URL_node_connection_Set['delete'](URL_to_fetch)) {
 				library_namespace.warn('get_URL_node: URL not exists in Set: ['
-						+ URL_to_fetch + ']. 之前同時間重複請求？');
+						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+								: URL_to_fetch && URL_to_fetch.URL)
+						+ ']. 之前同時間重複請求？');
 			}
 		},
 		// on failed
@@ -1668,17 +1679,22 @@ function module_code(library_namespace) {
 			&& error.code !== 'TIMEOUT') {
 				if (error.code === 'ENOTFOUND') {
 					library_namespace.error('get_URL_node: Not found: ['
-							+ URL_to_fetch + ']');
+							+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+									: URL_to_fetch && URL_to_fetch.URL) + ']');
 				} else if (error.code === 'EPROTO'
 						&& require('tls').DEFAULT_MIN_VERSION === 'TLSv1.2'
 						&& parseInt(library_namespace.platform.nodejs) >= 12) {
 					library_namespace
 							.error('get_URL_node: Node.js v12 disable TLS v1.0 and v1.1 by default. Please set tls.DEFAULT_MIN_VERSION = "TLSv1" first! ['
-									+ URL_to_fetch + ']');
+									+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+											: URL_to_fetch && URL_to_fetch.URL)
+									+ ']');
 				} else {
 					library_namespace
 							.error('get_URL_node: Get error when retrieving ['
-									+ URL_to_fetch + ']:');
+									+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+											: URL_to_fetch && URL_to_fetch.URL)
+									+ ']:');
 					// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 					console.error(error);
 				}
@@ -1733,8 +1749,12 @@ function module_code(library_namespace) {
 				options.URL = node_url.resolve(URL_to_fetch,
 						response.headers.location);
 				library_namespace.debug(response.statusCode
-						+ ' Redirecting to [' + options.URL + '] ← ['
-						+ URL_to_fetch + ']', 1, 'get_URL_node');
+						+ ' Redirecting to ['
+						+ options.URL
+						+ '] ← ['
+						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+								: URL_to_fetch && URL_to_fetch.URL) + ']', 1,
+						'get_URL_node');
 				get_URL_node(options, onload, charset
 				// 重新導向的時候去掉 post data 不傳送。
 				// , post_data
@@ -1747,10 +1767,16 @@ function module_code(library_namespace) {
 			result_Object.status = response.statusCode;
 			// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
 			if (options.onfail || (response.statusCode / 100 | 0) === 2) {
-				library_namespace.debug('STATUS: ' + response.statusCode + ' '
-						+ URL_to_fetch, 2, 'get_URL_node');
+				library_namespace.debug('STATUS: '
+						+ response.statusCode
+						+ ' '
+						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+								: URL_to_fetch && URL_to_fetch.URL), 2,
+						'get_URL_node');
 			} else if (!options.no_warning) {
-				library_namespace.warn('get_URL_node: [' + URL_to_fetch
+				library_namespace.warn('get_URL_node: ['
+						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+								: URL_to_fetch && URL_to_fetch.URL)
 						+ ']: status ' + response.statusCode);
 			}
 
@@ -1830,14 +1856,18 @@ function module_code(library_namespace) {
 			&& !options.write_to && !options.write_to_directory) {
 				// 照理unregister()應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				unregister();
-				library_namespace.warn('got [' + URL_to_fetch
+				library_namespace.warn('got ['
+						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+								: URL_to_fetch && URL_to_fetch.URL)
 						+ '], but there is no listener!', 1, 'get_URL_node');
 				// console.log(response);
 				return;
 			}
 
-			library_namespace.debug('[' + URL_to_fetch + '] loading...', 3,
-					'get_URL_node');
+			library_namespace.debug('['
+					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+							: URL_to_fetch && URL_to_fetch.URL)
+					+ '] loading...', 3, 'get_URL_node');
 
 			var flow_encoding = response.headers['content-encoding'];
 			flow_encoding = flow_encoding && flow_encoding.trim().toLowerCase();
@@ -1864,10 +1894,14 @@ function module_code(library_namespace) {
 			response.on('data', function(chunk) {
 				// {Buffer}chunk
 				length += chunk.length;
-				library_namespace
-						.debug('receive BODY.length: ' + chunk.length + '/'
-								+ length + ': ' + URL_to_fetch, 4,
-								'get_URL_node');
+				library_namespace.debug('receive BODY.length: '
+						+ chunk.length
+						+ '/'
+						+ length
+						+ ': '
+						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+								: URL_to_fetch && URL_to_fetch.URL), 4,
+						'get_URL_node');
 				if (length > options.MAX_BUFFER_SIZE) {
 					if (data)
 						data = null;
@@ -1889,7 +1923,9 @@ function module_code(library_namespace) {
 
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			response.on('end', function() {
-				library_namespace.debug('end(): ' + URL_to_fetch, 2,
+				library_namespace.debug('end(): '
+						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+								: URL_to_fetch && URL_to_fetch.URL), 2,
 						'get_URL_node');
 
 				// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
@@ -1977,7 +2013,11 @@ function module_code(library_namespace) {
 							library_namespace.error(
 							//
 							'get_URL_node: Error: node_zlib.gunzipSync(): ' + e
-									+ ' [' + URL_to_fetch + ']');
+							//
+							+ ' [' + (typeof URL_to_fetch === 'string'
+							//
+							? URL_to_fetch : URL_to_fetch && URL_to_fetch.URL)
+									+ ']');
 							if (false) {
 								console.log(e);
 								console.log(URL_object_to_fetch);
@@ -2282,8 +2322,12 @@ function module_code(library_namespace) {
 			// setTimeout method 2
 			// {Object}timeout_id @ node.js
 			timeout_id = setTimeout(_ontimeout, timeout);
-			library_namespace.debug('add timeout ' + (timeout / 1000) + 's ['
-					+ URL_to_fetch + ']', 2, 'get_URL_node');
+			library_namespace.debug('add timeout '
+					+ (timeout / 1000)
+					+ 's ['
+					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+							: URL_to_fetch && URL_to_fetch.URL) + ']', 2,
+					'get_URL_node');
 		} else if (timeout) {
 			library_namespace.warn('get_URL_node: Invalid timeout: ' + timeout);
 		}
