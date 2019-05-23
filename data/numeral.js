@@ -136,7 +136,7 @@ function module_code(library_namespace) {
 	//
 	= new RegExp('^[' + positional_Chinese_numerals_digits + ']+$'),
 
-	// 舊時/非正式/通用數字
+	// 舊時/非正式/通用數字 正規化
 	numeral_convert_pair = {
 		// o : '〇',
 		Ｏ : '〇',
@@ -150,6 +150,15 @@ function module_code(library_namespace) {
 		亖 : '四',
 		// Firefox/3.0.19 無法 parse '䦉': 錯誤: invalid property id
 		'䦉' : '肆',
+
+		// [[ja:大字 (数字)]]
+		壱 : '壹',
+		弐 : '貳',
+		貮 : '貳',
+		参 : '參',
+		陆 : '陸',
+		// 漆 : '柒',
+		// 什 : '拾',
 
 		// 俗亦以「什」代拾，然易竄為「仟」。
 
@@ -167,9 +176,10 @@ function module_code(library_namespace) {
 		// 圩 : '五十',
 		皕 : '二百',
 		// 古亦作「陌」。
-		陌 : '百',
+		陌 : '佰',
 		// 古亦作「阡」。
 		阡 : '仟',
+		万 : '萬',
 		萬萬 : '億',
 		// 太常使用。
 		// 經 : '京',
