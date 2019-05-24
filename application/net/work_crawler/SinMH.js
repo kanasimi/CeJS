@@ -218,7 +218,8 @@ function module_code(library_namespace) {
 			// reset work_data.chapter_list
 			work_data.chapter_list = [];
 			// 漫畫目錄名稱不須包含分部號碼。使章節目錄名稱不包含 part_NO。
-			work_data.chapter_list.add_part_NO = false;
+			// 將會在 function get_chapter_directory_name() 自動設定。
+			// work_data.chapter_list.add_part_NO = false;
 
 			while (chapter_block = PATTERN_chapter_block.exec(html)) {
 				// delete chapter_block.input;
