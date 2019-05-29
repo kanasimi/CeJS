@@ -2183,7 +2183,7 @@ OS='UNIX'; // unknown
 		if (tag_name !== 'T') {
 			inner = extract_message_from_nodes(inner);
 		} {
-			inner = _.gettext.apply(null, inner);
+			inner = _.gettext.apply(null, Array.isArray(inner) ? inner : [ inner ]);
 		}
 
 		var color_index = _.SGR && _.SGR.color_index,
@@ -2204,11 +2204,11 @@ OS='UNIX'; // unknown
 			if (typeof style === 'string') {
 				style = '';
 			}
-		} else if (style && style.color
-				&& (style.color in color_index)) {
+		} else if (style && ((style.color in color_index)
+			|| (style.backgroundColor in color_index))) {
 			style = {
-				fg : style.color,
-				bg : style.backgroundColor
+				fg : (style.color in color_index) && style.color || '',
+				bg : (style.backgroundColor in color_index) && style.backgroundColor || ''
 			};
 		} else
 			style = '';
