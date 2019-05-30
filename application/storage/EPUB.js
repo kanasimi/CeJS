@@ -1489,6 +1489,12 @@ function module_code(library_namespace) {
 						return all;
 					}
 
+					url = decodeURI(url);
+					// url = library_namespace.HTML_to_Unicode(url);
+					// e.g.,
+					// https://ck101.com/forum.php?mod=viewthread&tid=4016100
+					url = url.replace(/&amp;/g, '&');
+
 					// [ url, path, file_name, is_directory ]
 					var matched = url.match(/^([\s\S]*\/)([^\/]+)(\/)?$/);
 					if (!matched || attribute_name.toLowerCase() !== 'src'
