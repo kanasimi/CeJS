@@ -622,11 +622,11 @@ function module_code(library_namespace) {
 	 */
 	gettext.use_domain_location = function(path) {
 		if (typeof path === 'string') {
-			gettext_location = path;
+			gettext_domain_location = path;
 			// 重設 user domain resource。
 			gettext_check_resource('', 2, false);
 		}
-		return gettext_location;
+		return gettext_domain_location;
 	};
 	/**
 	 * 取得當前使用之 domain name。
@@ -673,25 +673,23 @@ function module_code(library_namespace) {
 			});
 		}
 
-		if (typeof gettext_location === 'function') {
-			gettext_location = gettext_location();
+		if (typeof gettext_domain_location === 'function') {
+			gettext_domain_location = gettext_domain_location();
 		}
 
-		if (typeof gettext_location === 'string'
+		if (typeof gettext_domain_location === 'string'
 		//
 		&& !gettext_check_resource(domain_name, 2)) {
 			library_namespace.debug('準備載入 user 指定 domain resource，如語系檔。', 2,
 					'gettext');
+			need_to_load.push(typeof gettext_domain_location === 'string'
 			// TODO: .json
-			need_to_load.push(
-					typeof gettext_location === 'string' ? gettext_location
-							+ domain_name + '.js'
-							: gettext_location(domain_name), function() {
-						library_namespace
-								.debug('User-defined resource included.', 2,
-										'gettext');
-						gettext_check_resource(domain_name, 2, true);
-					});
+			? gettext_domain_location + domain_name + '.js'
+					: gettext_domain_location(domain_name), function() {
+				library_namespace.debug('User-defined resource included.', 2,
+						'gettext');
+				gettext_check_resource(domain_name, 2, true);
+			});
 		}
 
 		if (need_to_load.length > 0) {
@@ -714,6 +712,18 @@ function module_code(library_namespace) {
 	/**
 	 * 取得/設定當前使用之 domain。
 	 * 
+	 * @example<code>
+
+	// for i18n: define gettext() user domain resource location.
+	// gettext() will auto load (CeL.env.domain_location + language + '.js').
+	// e.g., resource/cmn-Hant-TW.js, resource/ja-JP.js
+	CeL.gettext.use_domain_location(module.filename.replace(/[^\\\/]*$/,
+			'resource' + CeL.env.path_separator));
+
+	CeL.gettext.use_domain('GUESS', true);
+
+	</code>
+	 * 
 	 * @param {String}[domain_name]
 	 *            設定當前使用之 domain name。
 	 * @param {Function}[callback]
@@ -729,6 +739,10 @@ function module_code(library_namespace) {
 			// shift 掉 callback。
 			force = callback;
 			callback = undefined;
+		}
+
+		if (domain_name === 'GUESS') {
+			domain_name = guess_language();
 		}
 
 		// 查驗 domain_name 是否已載入。
@@ -797,6 +811,17 @@ function module_code(library_namespace) {
 
 	gettext.use_domain = use_domain;
 
+	use_domain.code_page_mapper = {
+		437 : 'en-US',
+		866 : 'ru-RU',
+		936 : 'cmn-Hans-CN',
+		950 : 'cmn-Hant-TW',
+		932 : 'ja-JP',
+		949 : 'ko-KR',
+		1256 : 'arb-Arab',
+		54936 : 'cmn-Hans-CN'
+	};
+
 	/**
 	 * using windows active console code page
 	 * 
@@ -808,17 +833,48 @@ function module_code(library_namespace) {
 	 *      https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/chcp
 	 */
 	use_domain.via_code_page = function(code_page, callback, force) {
-		return use_domain({
-			437 : 'en-US',
-			866 : 'ru-RU',
-			936 : 'cmn-Hans-CN',
-			950 : 'cmn-Hant-TW',
-			932 : 'ja-JP',
-			949 : 'ko-KR',
-			1256 : 'arb-Arab',
-			54936 : 'cmn-Hans-CN'
-		}[code_page | 0], callback, force);
+		return use_domain(use_domain.code_page_mapper[code_page], callback,
+				force);
 	};
+
+	function guess_language() {
+		if (library_namespace.is_WWW()) {
+			// http://stackoverflow.com/questions/1043339/javascript-for-detecting-browser-language-preference
+			return gettext.to_standard(navigator.userLanguage
+					|| navigator.language
+					// IE 11
+					|| navigator.browserLanguage || navigator.systemLanguage);
+		}
+
+		if (library_namespace.platform.is_Windows()) {
+			// TODO: `wmic.exe os get locale, oslanguage, codeset`
+			// `REG QUERY HKLM\System\CurrentControlSet\Control\Nls\Language /v
+			// InstallLanguage`
+			try {
+				var code_page = require('child_process').execSync('CHCP')
+						.toString().match(/(\d+)[^\d]*$/)[1];
+				return use_domain.code_page_mapper[code_page];
+			} catch (e) {
+				// TODO: handle exception
+			}
+			return;
+		}
+
+		var LANG = library_namespace.env.LANG;
+		if (!LANG) {
+			try {
+				LANG = require('child_process').execSync('locale').toString()
+						.match(/(?:^|\n)LANG=([^\n]+)/)[1];
+			} catch (e) {
+				// TODO: handle exception
+			}
+		}
+
+		// e.g., LANG=zh_TW.UTF-8
+		return gettext.to_standard(LANG);
+	}
+
+	gettext.guess_language = guess_language;
 
 	/**
 	 * 設定欲轉換的文字格式。
@@ -1584,7 +1640,7 @@ function module_code(library_namespace) {
 			.null_Object(), gettext_texts = library_namespace.null_Object(), gettext_domain_name,
 	// CeL.env.domain_location = CeL.env.resource_directory_name + '/';
 	// CeL.gettext.use_domain_location(CeL.env.resource_directory_name + '/');
-	gettext_location = library_namespace.env.domain_location, gettext_resource = library_namespace
+	gettext_domain_location = library_namespace.env.domain_location, gettext_resource = library_namespace
 			.null_Object();
 
 	// TODO: lazy evaluation
@@ -1674,16 +1730,11 @@ function module_code(library_namespace) {
 
 	// setup default / current domain. ユーザーロケール(言語と地域)の判定。
 	// 偏好的語言/優先言語
-	// TODO: `wmic.exe os get locale, oslanguage, codeset`
-	// TODO: `REG QUERY HKLM\System\CurrentControlSet\Control\Nls\Language /v
-	// InstallLanguage`
-	if (library_namespace.is_WWW()
-			// http://stackoverflow.com/questions/1043339/javascript-for-detecting-browser-language-preference
-			&& (gettext.default_domain = gettext
-					.to_standard(navigator.userLanguage || navigator.language
-					// IE 11
-					|| navigator.browserLanguage || navigator.systemLanguage))) {
-		// initialization 時，gettext 可能還沒 loaded。因此設在 post action。e.g., @ HTA.
+	gettext.default_domain = guess_language();
+	// console.log('setup default / current domain: ' + gettext.default_domain);
+	if (gettext.default_domain) {
+		// initialization 時，gettext 可能還沒 loaded。
+		// 因此設在 post action。e.g., @ HTA.
 		this.finish = function(name_space, waiting) {
 			gettext.use_domain(gettext.default_domain, function() {
 				gettext.adapt_domain(gettext.default_domain, waiting);
