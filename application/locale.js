@@ -186,15 +186,20 @@ function module_code(library_namespace) {
 		JP : 'ja',
 		// ko-KR
 		KR : 'ko',
+		// en-GB
 		GB : 'en',
-		// en-UK
+		// There is no "en-UK" language code although it is often used on web
+		// pages. http://microformats.org/wiki/en-uk
+		// https://moz.com/community/q/uk-and-gb-when-selecting-targeted-engines-in-campaign-management
 		UK : 'en',
 		// en-US
 		US : 'en',
 		FR : 'fr',
 		DE : 'de',
 		// ru-RU
-		RU : 'ru'
+		RU : 'ru',
+		// arb-Arab
+		Arab : 'arb'
 	};
 
 	/**
@@ -221,6 +226,7 @@ function module_code(library_namespace) {
 
 	// mapping: region name → region code (ISO 3166)
 	// https://en.wikipedia.org/wiki/ISO_3166-1
+	// language_tag.region_code() 會自動測試添加"國"字，因此不用省略這個字。
 	language_tag.REGION_CODE = {
 		臺 : 'TW',
 		臺灣 : 'TW',
@@ -238,10 +244,13 @@ function module_code(library_namespace) {
 		港 : 'HK',
 		香港 : 'HK',
 		韓國 : 'KR',
-		英國 : 'UK',
+		英國 : 'GB',
 		美國 : 'US',
 		法國 : 'FR',
-		德國 : 'DE'
+		德國 : 'DE',
+		俄國 : 'RU',
+		俄羅斯 : 'RU',
+		阿拉伯 : 'Arab'
 	};
 
 	// reverse
@@ -809,35 +818,11 @@ function module_code(library_namespace) {
 		return gettext_texts[domain_name];
 	}
 
+	// using_domain
 	gettext.use_domain = use_domain;
 
-	use_domain.code_page_mapper = {
-		437 : 'en-US',
-		866 : 'ru-RU',
-		936 : 'cmn-Hans-CN',
-		950 : 'cmn-Hant-TW',
-		932 : 'ja-JP',
-		949 : 'ko-KR',
-		1256 : 'arb-Arab',
-		54936 : 'cmn-Hans-CN'
-	};
-
-	/**
-	 * using windows active console code page
-	 * 
-	 * @example <code>
-	CeL.gettext.use_domain.via_code_page(require('child_process').execSync('CHCP').toString().match(/(\d+)[^\d]*$/)[1], true);
-	</code>
-	 * 
-	 * @see https://docs.microsoft.com/en-us/windows/console/console-code-pages
-	 *      https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/chcp
-	 */
-	use_domain.via_code_page = function(code_page, callback, force) {
-		return use_domain(use_domain.code_page_mapper[code_page], callback,
-				force);
-	};
-
 	function guess_language() {
+
 		if (library_namespace.is_WWW()) {
 			// http://stackoverflow.com/questions/1043339/javascript-for-detecting-browser-language-preference
 			return gettext.to_standard(navigator.userLanguage
@@ -846,33 +831,78 @@ function module_code(library_namespace) {
 					|| navigator.browserLanguage || navigator.systemLanguage);
 		}
 
-		if (library_namespace.platform.is_Windows()) {
-			// TODO: `wmic.exe os get locale, oslanguage, codeset`
-			// `REG QUERY HKLM\System\CurrentControlSet\Control\Nls\Language /v
-			// InstallLanguage`
+		function exec(command, PATTERN, mapper) {
 			try {
-				var code_page = require('child_process').execSync('CHCP')
-						.toString().match(/(\d+)[^\d]*$/)[1];
-				return use_domain.code_page_mapper[code_page];
+				var code = require('child_process').execSync(command, {
+					stdio : 'pipe'
+				}).toString();
+				if (PATTERN)
+					code = code.match(PATTERN)[1];
+				if (mapper)
+					code = mapper[code];
+				return gettext.to_standard(code);
 			} catch (e) {
 				// TODO: handle exception
 			}
-			return;
+		}
+
+		if (library_namespace.platform.is_Windows()) {
+			// TODO:
+			// `REG QUERY HKLM\System\CurrentControlSet\Control\Nls\Language /v
+			// InstallLanguage`
+
+			// https://www.lisenet.com/2014/get-windows-system-information-via-wmi-command-line-wmic/
+			// TODO: `wmic OS get Caption,CSDVersion,OSArchitecture,Version`
+
+			return exec(
+					// https://docs.microsoft.com/zh-tw/powershell/module/international/get-winsystemlocale?view=win10-ps
+					'PowerShell.exe -Command "& {Get-WinSystemLocale | Select-Object LCID}"',
+					/(\d+)[^\d]*$/, guess_language.LCID_mapper)
+					// WMIC is deprecated.
+					// https://stackoverflow.com/questions/1610337/how-can-i-find-the-current-windows-language-from-cmd
+					// get 非 Unicode 應用程式的語言與系統地區設定所定義的語言
+					|| exec('WMIC.EXE OS GET CodeSet', /(\d+)[^\d]*$/,
+							guess_language.code_page_mapper)
+					// using windows active console code page
+					// https://docs.microsoft.com/en-us/windows/console/console-code-pages
+					// CHCP may get 65001, so we do not use this at first.
+					|| exec('CHCP', /(\d+)[^\d]*$/,
+							guess_language.code_page_mapper);
 		}
 
 		var LANG = library_namespace.env.LANG;
-		if (!LANG) {
-			try {
-				LANG = require('child_process').execSync('locale').toString()
-						.match(/(?:^|\n)LANG=([^\n]+)/)[1];
-			} catch (e) {
-				// TODO: handle exception
-			}
-		}
-
 		// e.g., LANG=zh_TW.UTF-8
-		return gettext.to_standard(LANG);
+		if (LANG)
+			return gettext.to_standard(LANG);
+
+		return exec('locale', /(?:^|\n)LANG=([^\n]+)/);
 	}
+
+	// https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/chcp
+	guess_language.code_page_mapper = {
+		437 : 'en-US',
+		866 : 'ru-RU',
+		932 : 'ja-JP',
+		936 : 'cmn-Hans-CN',
+		949 : 'ko-KR',
+		950 : 'cmn-Hant-TW',
+		1256 : 'arb-Arab',
+		54936 : 'cmn-Hans-CN'
+	// 65001: 'Unicode'
+	};
+
+	// https://zh.wikipedia.org/wiki/区域设置#列表
+	guess_language.LCID_mapper = {
+		1028 : 'cmn-Hant-TW',
+		1033 : 'en-US',
+		1041 : 'ja-JP',
+		1042 : 'ko-KR',
+		1049 : 'ru-RU',
+		2052 : 'cmn-Hans-CN',
+		2057 : 'en-GB',
+		3076 : 'cmn-Hant-HK',
+		14337 : 'arb-Arab'
+	};
 
 	gettext.guess_language = guess_language;
 
@@ -1706,7 +1736,7 @@ function module_code(library_namespace) {
 				 * 
 				 * @see https://www.w3.org/International/articles/bcp47/
 				 */
-				'en-GB' : 'British English|en-GB|英國英語|en-eng-Latn-GB|en-Latn-GB|eng-Latn-GB|Great Britain|United Kingdom|英式英語',
+				'en-GB' : 'British English|en-GB|英國英語|en-eng-Latn-GB|en-Latn-GB|eng-Latn-GB|en-UK|Great Britain|United Kingdom|英式英語',
 				// 後來的會覆蓋前面的。
 				'en-US' : 'English|en-US|英語|en-eng-Latn-US|en-Latn-US|eng-Latn-US|US|USA|United States|美語|美國英語|美式英語',
 
@@ -1728,8 +1758,8 @@ function module_code(library_namespace) {
 				'es-ES' : 'Español|es-ES|Spanish|西班牙語'
 			});
 
+	// 初始化偏好的語言/優先言語。
 	// setup default / current domain. ユーザーロケール(言語と地域)の判定。
-	// 偏好的語言/優先言語
 	gettext.default_domain = guess_language();
 	// console.log('setup default / current domain: ' + gettext.default_domain);
 	if (gettext.default_domain) {
