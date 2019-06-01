@@ -2770,6 +2770,10 @@ function module_code(library_namespace) {
 
 		if (!file_name && (file_name = decodeURI(URL).match(/[^\/]+$/))) {
 			file_name = file_name[0];
+			if (library_namespace.HTML_to_Unicode) {
+				// 去掉 "&amp;" 之類。
+				file_name = library_namespace.HTML_to_Unicode(file_name);
+			}
 			library_namespace.debug('自URL取得檔名: ' + URL + '\n→ ' + file_name, 1,
 					'get_URL_cache_node');
 		}
