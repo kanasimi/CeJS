@@ -18,7 +18,7 @@
 # finish_up(), .after_download_chapter(), .after_download_work()
 
 TODO:
-將工具檔結構以及說明統合在一起，並且建造可以自動生成index/說明的工具。
+建造可以自動生成index/說明的工具。
 	自動判別網址所需要使用的下載工具，輸入網址自動揀選所需的工具檔案。
 	從其他的資料來源網站尋找取得作品以及章節的資訊。
 	自動記得某個作品要從哪些網站下載。
@@ -452,7 +452,8 @@ function module_code(library_namespace) {
 			} else {
 				library_namespace.log(library_namespace.display_align([
 						[ key + ': ', old_value ],
-						[ gettext('由命令列 → '), value ] ]));
+						// + ' ': 增加間隙。
+						[ gettext('由命令列') + ' → ', value ] ]));
 			}
 		}
 	}
@@ -569,7 +570,7 @@ function module_code(library_namespace) {
 		// {Natural}預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_SIZE : 200,
 
-		// retry delay. cf. one_by_one
+		// retry delay. cf. .one_by_one
 		// {Natural|String|Function}當網站不允許太過頻繁的訪問讀取/access時，可以設定下載章節資訊/章節內容前的等待時間。
 		// chapter_time_interval : '1s',
 		get_chapter_time_interval : get_chapter_time_interval,
@@ -598,7 +599,7 @@ function module_code(library_namespace) {
 		// 循序逐個、一個個下載圖像。僅對漫畫有用，對小說無用。小說章節皆為逐個下載。 Download images one by one.
 		// default: 同時下載本章節中所有圖像。 Download ALL images at the same time.
 		// 若設成{Natural}大於零的數字(ms)或{String}時間長度，那會當成下載每張圖片之時間間隔 time_interval。
-		// cf. chapter_time_interval
+		// cf. .chapter_time_interval
 		// one_by_one : true,
 		//
 		// e.g., '2-1.jpg' → '2-1 bad.jpg'
@@ -1838,7 +1839,7 @@ function module_code(library_namespace) {
 		} else if (search_result[work_title]) {
 			// 已經搜尋過此作品標題。
 			library_namespace.log([ this.id + ': ', {
-				T : '已緩存作品id：'
+				T : '已緩存作品 id：'
 			}, work_title, '→', JSON.stringify(search_result[work_title]) ]);
 			finish(true);
 			return;
