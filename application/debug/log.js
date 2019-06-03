@@ -1491,7 +1491,7 @@ function finish(name_space) {
 					// ('attribute' in false), ('attribute' in 0) is NOT
 					// evaluable.
 
-					// options = CeL.null_Object();
+					// options = Object.create(null);
 					// This is faster.
 					options = new Boolean;
 
@@ -1916,7 +1916,7 @@ function finish(name_space) {
 			if (Array.isArray(conditions)) {
 				conditions.forEach(handler);
 			} else {
-				var tests_left = CeL.null_Object(), tests_count = 0,
+				var tests_left = Object.create(null), tests_count = 0,
 				// assert: typeof conditions === 'function'
 				finish_test = function(test_name) {
 					tests_count--;

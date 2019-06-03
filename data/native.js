@@ -1580,7 +1580,7 @@ function module_code(library_namespace) {
 
 		} else {
 			// 以 hash 純量 index 加速判別是否重複。
-			var hash = library_namespace.null_Object();
+			var hash = Object.create(null);
 			this.forEach(function(element) {
 				var type = typeof element;
 				// 能確保順序不變。
@@ -1976,8 +1976,7 @@ function module_code(library_namespace) {
 
 		// e.g., reference_map[{k:0}] = 'REF|0'
 		// reference_list = [ {k:0}, ... ]
-		var reference_map = new Map, reference_hash = library_namespace
-				.null_Object(), index = 0;
+		var reference_map = new Map, reference_hash = Object.create(null), index = 0;
 
 		return JSON.stringify(object, function(key, value) {
 			// console.log([ this, key, value ]);
@@ -2339,7 +2338,7 @@ function module_code(library_namespace) {
 		}
 
 		// new Map()
-		var hash = library_namespace.null_Object();
+		var hash = Object.create(null);
 		if (!select_max) {
 			this.forEach(function(item) {
 				if (item in hash) {
@@ -2614,7 +2613,7 @@ function module_code(library_namespace) {
 								+ value);
 			}
 			if (!options) {
-				options = library_namespace.null_Object();
+				options = Object.create(null);
 			}
 			options.comparator = function(v) {
 				return value.test(v) ? -1 : 1;
@@ -2642,7 +2641,7 @@ function module_code(library_namespace) {
 				start : options
 			};
 		} else if (!library_namespace.is_Object(options)) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		var callback, comparison, not_found = true,
@@ -2796,15 +2795,15 @@ function module_code(library_namespace) {
 	 *      https://en.wikipedia.org/wiki/Topological_sorting
 	 */
 	function merge_unduplicated_sequence(sequence_list) {
-		var map = library_namespace.null_Object();
+		var map = Object.create(null);
 
 		function add_node(element, index) {
 			var chain = map[element];
 			if (!chain)
 				chain = map[element]
 				// [ 0: possible backward, 1: possible foreword ]
-				= [ library_namespace.null_Object(),
-						library_namespace.null_Object() ];
+				= [ Object.create(null),
+						Object.create(null) ];
 			if (index > 0)
 				// 登記前面的。
 				chain[0][this[index - 1]] = true;
@@ -3529,8 +3528,7 @@ function module_code(library_namespace) {
 			diff : true
 		}, options)), from_added = [], to_added = [],
 		// 避免經過重排後，已經無法回溯至原先資料。
-		from_added_index = from_added.index = [], move_to = library_namespace
-				.null_Object();
+		from_added_index = from_added.index = [], move_to = Object.create(null);
 		to_added.index = [];
 
 		// TODO: diff其中有undefined
@@ -3706,9 +3704,9 @@ function module_code(library_namespace) {
 	toTitleCase.add_exception = function(words, upper) {
 		// initialize
 		if (!toTitleCase.lower)
-			toTitleCase.lower = library_namespace.null_Object();
+			toTitleCase.lower = Object.create(null);
 		if (!toTitleCase.upper)
-			toTitleCase.upper = library_namespace.null_Object();
+			toTitleCase.upper = Object.create(null);
 
 		var target = upper ? toTitleCase.upper : toTitleCase.lower;
 
@@ -4143,7 +4141,7 @@ function module_code(library_namespace) {
 		// {Function}[get_key]
 		to_hash : function(get_key, hash) {
 			if (!hash) {
-				hash = library_namespace.null_Object();
+				hash = Object.create(null);
 			}
 			// TODO: 衝突時處理。
 			this.forEach(get_key ? function(item, index) {

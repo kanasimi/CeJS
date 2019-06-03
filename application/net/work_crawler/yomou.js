@@ -85,7 +85,7 @@ function module_code(library_namespace) {
 					+ '/';
 		},
 		parse_work_data : function(html, get_label) {
-			var work_data = library_namespace.null_Object();
+			var work_data = Object.create(null);
 			html.between('<table', '<div id="ad_s_box">')
 			//
 			.each_between('<tr>', '</tr>', function(text) {
@@ -254,8 +254,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_syosetu_crawler(configuration) {
-		configuration = configuration ? Object.assign(library_namespace
-				.null_Object(), default_configuration, configuration)
+		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
 				: default_configuration;
 		// 每次呼叫皆創建一個新的實體。
 		return new library_namespace.work_crawler(configuration);

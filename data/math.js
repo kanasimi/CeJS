@@ -970,7 +970,7 @@ function module_code(library_namespace) {
 	_.ceil_log = ceil_log;
 
 	/** {Object}all possible last 2 digits of square number */
-	var square_ending = library_namespace.null_Object();
+	var square_ending = Object.create(null);
 	[ 0, 1, 4, 9, 16, 21, 24, 25, 29, 36, 41, 44, 49, 56, 61, 64, 69, 76, 81,
 			84, 89, 96 ].forEach(function(n) {
 		square_ending[n] = null;
@@ -1766,7 +1766,7 @@ function module_code(library_namespace) {
 			radix = DEFAULT_BASE;
 		}
 		if (!factors)
-			factors = library_namespace.null_Object();
+			factors = Object.create(null);
 		Object.defineProperties(factors, {
 			natural : {
 				enumerable : false,
@@ -2363,7 +2363,7 @@ function module_code(library_namespace) {
 		// default error, accuracy, stopping tolerance, 容許誤差
 		var error = Number.EPSILON;
 		if (!options)
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		else if (options > 0)
 			error = options;
 		else if (options.error > 0)
@@ -2429,7 +2429,7 @@ function module_code(library_namespace) {
 		// default error, accuracy, stopping tolerance, 容許誤差
 		var error = Number.EPSILON;
 		if (!options)
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		else if (typeof options === 'number' && options > 0)
 			// ↑ @Firefox/44.0:
 			// isNaN(Object.create(null)): TypeError: can't convert v to number
@@ -2529,7 +2529,7 @@ function module_code(library_namespace) {
 		// @see Number.EPSILON
 		var error = 0;
 		if (!options)
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		else if (typeof options === 'number' && options > 0)
 			error = options;
 		else if (options.error > 0)
@@ -2672,7 +2672,7 @@ function module_code(library_namespace) {
 		// @see Number.EPSILON
 		var error = 0;
 		if (!options)
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		else if (options > 0)
 			error = options;
 		else if (options.error > 0)
@@ -3706,7 +3706,7 @@ function module_code(library_namespace) {
 		if (sequence_1 === sequence_2)
 			return true;
 		// processed elements
-		var processed = library_namespace.null_Object();
+		var processed = Object.create(null);
 		for (var start = 0; start < last; start++) {
 			var element = sequence_1.charAt(start);
 			if (element in processed)

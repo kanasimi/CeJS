@@ -295,8 +295,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_qTcms2017_comics_crawler(configuration) {
-		configuration = configuration ? Object.assign(library_namespace
-				.null_Object(), default_configuration, configuration)
+		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
 				: default_configuration;
 
 		// 每次呼叫皆創建一個新的實體。

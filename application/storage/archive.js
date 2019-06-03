@@ -200,6 +200,9 @@ function module_code(library_namespace) {
 		executable_file_path.unzip = add_quote(executable_file_path.unzip);
 	}
 
+	// TODO: https://pureinfotech.com/compress-files-powershell-windows-10/
+	// ompress files using PowerShell
+
 	function Archive_file(archive_file_path, options, callback) {
 		if (!callback && typeof options === 'function') {
 			// shift arguments.
@@ -546,7 +549,7 @@ function module_code(library_namespace) {
 							is_original = false;
 							switches = Object.assign(
 							//
-							library_namespace.null_Object(), switches);
+							Object.create(null), switches);
 						}
 						switches[switch_name]
 						//
@@ -580,7 +583,7 @@ function module_code(library_namespace) {
 		// initialization
 		this.information = undefined;
 		// fso path hash
-		this.fso_path_hash = library_namespace.null_Object();
+		this.fso_path_hash = Object.create(null);
 		// fso_status_list, files of archive
 		this.fso_status_list = [];
 
@@ -588,7 +591,7 @@ function module_code(library_namespace) {
 		// console.log(JSON.stringify(output.split(/\r?\n\r?\n/)));
 		output.split(/\r?\n\r?\n/).forEach(function(FSO_data_lines) {
 			// console.log(JSON.stringify(FSO_data_lines));
-			var FSO_data = library_namespace.null_Object();
+			var FSO_data = Object.create(null);
 			FSO_data_lines.split(/\r?\n|\r/).forEach(function(line) {
 				var matched = line.match(/^([a-z\s]+)=(.*)$/i);
 				if (matched) {
@@ -643,7 +646,7 @@ function module_code(library_namespace) {
 		// initialization
 		this.information = undefined;
 		// fso path hash
-		this.fso_path_hash = library_namespace.null_Object();
+		this.fso_path_hash = Object.create(null);
 		// fso_status_list, files of archive
 		this.fso_status_list = [];
 
@@ -669,7 +672,7 @@ function module_code(library_namespace) {
 			if (!matched)
 				return;
 
-			var FSO_data = library_namespace.null_Object();
+			var FSO_data = Object.create(null);
 			matched.shift();
 			matched.forEach(function(data, index) {
 				FSO_data[headers[index]] = data;

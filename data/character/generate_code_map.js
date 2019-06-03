@@ -196,7 +196,7 @@ function to_hex(char) {
 // --------------------------------------------------------------------------------------
 
 function parse_converted_file(file_path_list) {
-	var convert_map = CeL.null_Object(),
+	var convert_map = Object.create(null),
 	// 分bytes
 	total_char_length = new Array(4).fill(0);
 

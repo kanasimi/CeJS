@@ -429,7 +429,7 @@ function module_code(library_namespace) {
 			parameters = String(parameters).split('&');
 		}
 
-		var hash = library_namespace.null_Object();
+		var hash = Object.create(null);
 
 		parameters.forEach(function(parameter) {
 			var index = parameter.indexOf('=');
@@ -1172,10 +1172,10 @@ function module_code(library_namespace) {
 		// remove duplicate cookie
 
 		if (!agent.cookie_hash) {
-			agent.cookie_hash = library_namespace.null_Object();
+			agent.cookie_hash = Object.create(null);
 		}
 		if (!agent.cookie_index)
-			agent.cookie_index = library_namespace.null_Object();
+			agent.cookie_index = Object.create(null);
 		// cookie_index[key] = index of agent.last_cookie
 		var cookie_index = agent.cookie_index;
 
@@ -2760,7 +2760,7 @@ function module_code(library_namespace) {
 			};
 		} else if (!library_namespace.is_Object(options)) {
 			// 前置處理。
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		var file_name = options.file_name,

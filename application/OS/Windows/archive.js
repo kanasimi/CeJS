@@ -375,7 +375,7 @@ function module_code(library_namespace) {
 	function archive_data(path, callback, options) {
 		if (path && typeof callback === 'function') {
 			// 前置處理。
-			options = Object.assign(library_namespace.null_Object(), options, {
+			options = Object.assign(Object.create(null), options, {
 				path : path,
 				callback : callback
 			});

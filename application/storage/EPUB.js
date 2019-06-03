@@ -236,7 +236,7 @@ function module_code(library_namespace) {
 
 		// The resources downloading now.
 		// @see add_chapter()
-		this.downloading = library_namespace.null_Object();
+		this.downloading = Object.create(null);
 
 		/**
 		 * <code>
@@ -249,7 +249,7 @@ function module_code(library_namespace) {
 		 * 
 		 * @see set_meta_information()
 		 */
-		this.metadata = library_namespace.null_Object();
+		this.metadata = Object.create(null);
 
 		var raw_data;
 		if (options.rebuild) {
@@ -418,7 +418,7 @@ function module_code(library_namespace) {
 
 		// console.log(JSON.stringify(raw_data));
 
-		this.raw_data_ptr = library_namespace.null_Object();
+		this.raw_data_ptr = Object.create(null);
 		var resources = [];
 		raw_data.package.forEach(function(node) {
 			if (typeof node === 'string' && !node.trim()) {
@@ -451,7 +451,7 @@ function module_code(library_namespace) {
 		resources = this.raw_data_ptr.manifest;
 		var chapters = this.raw_data_ptr.spine,
 		// id to resources index
-		index_of_id = library_namespace.null_Object();
+		index_of_id = Object.create(null);
 
 		resources.forEach(function(resource, index) {
 			if (typeof resource === 'string') {
@@ -490,8 +490,8 @@ function module_code(library_namespace) {
 		// id to resources index, index_of_id
 		// this.chapter_index_of_id[id]
 		// = {ℕ⁰:Natural+0}index (of item) of this.chapters
-		this.chapter_index_of_id = library_namespace.null_Object();
-		this.resource_index_of_id = library_namespace.null_Object();
+		this.chapter_index_of_id = Object.create(null);
+		this.resource_index_of_id = Object.create(null);
 
 		// rebuild by the order of <spine>
 		// console.log(chapters);
@@ -636,7 +636,7 @@ function module_code(library_namespace) {
 		}
 		if (value !== undefined) {
 			if (!library_namespace.is_Object(value)) {
-				var element = library_namespace.null_Object();
+				var element = Object.create(null);
 				// 將value當作childNode
 				element[tag_name] = value;
 				value = element;
@@ -683,7 +683,7 @@ function module_code(library_namespace) {
 		if (required) {
 			// 若已經有此key則沿用舊container直接設定。
 			container = container[tag_name]
-					|| (container[tag_name] = library_namespace.null_Object());
+					|| (container[tag_name] = Object.create(null));
 			if (value === undefined) {
 				// get container object
 				return container.map(function(element) {
@@ -1210,7 +1210,7 @@ function module_code(library_namespace) {
 		}
 
 		var _this = this, item = normalize_item.call(this, item_data);
-		item_data = item[KEY_DATA] || library_namespace.null_Object();
+		item_data = item[KEY_DATA] || Object.create(null);
 		// assert: library_namespace.is_Object(item_data)
 		// console.log(item_data);
 		// console.log(item);
@@ -1222,7 +1222,7 @@ function module_code(library_namespace) {
 		// 有contents的話，採用contents做為內容。並從item.href擷取出檔名。
 		if (!contents && item_data.url) {
 			// 沒contents的一律當作resource。
-			var resource_href_hash = library_namespace.null_Object(),
+			var resource_href_hash = Object.create(null),
 			//
 			file_type = detect_file_type(item_data.file || item.href)
 					|| detect_file_type(item_data.url),
@@ -1935,7 +1935,7 @@ function module_code(library_namespace) {
 		this.chapters.map(function(chapter) {
 			var data = chapter[KEY_DATA]
 			//
-			|| library_namespace.null_Object(),
+			|| Object.create(null),
 			//
 			date = Array.isArray(data.date) ? data.date[0] : data.date;
 			// console.log(data);
@@ -2078,7 +2078,7 @@ function module_code(library_namespace) {
 			// 再做一次檢查，預防被外部touch過。
 			normalize_item.call(this, resource, true));
 			if (resource[KEY_DATA]) {
-				var info = library_namespace.null_Object(), configured;
+				var info = Object.create(null), configured;
 				this.preserve_attributes.forEach(function(name) {
 					if (resource[KEY_DATA][name]) {
 						configured = true;

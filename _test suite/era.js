@@ -1028,7 +1028,7 @@ function add_tag(period, data, group, register_only, options) {
 			CeL.log('add_tag: create new group [' + target + ']');
 		Object.defineProperty(
 		//
-		draw_era.tags[target] = CeL.null_Object(), 'hide', {
+		draw_era.tags[target] = Object.create(null), 'hide', {
 			writable : true
 		});
 	}
@@ -1062,7 +1062,7 @@ function add_tag(period, data, group, register_only, options) {
 }
 
 // add_tag.group_count[group] = {Integer}count
-add_tag.group_count = CeL.null_Object();
+add_tag.group_count = Object.create(null);
 
 add_tag.show = function(array_data, options) {
 	if (!Array.isArray(array_data))
@@ -1160,7 +1160,7 @@ add_tag.parse = function(group, data, line_separator, date_index, title_index,
 	if (title_index === undefined)
 		title_index = 1;
 	if (!CeL.is_Object(options))
-		options = CeL.null_Object();
+		options = Object.create(null);
 	if (!('onclick' in options))
 		options.onclick = add_tag.show_calendar;
 
@@ -1300,7 +1300,7 @@ function draw_era(hierarchy) {
 	SVG_object.clean();
 	delete SVG_object.start;
 	CeL.remove_all_child('era_graph_target');
-	add_tag.group_count = CeL.null_Object();
+	add_tag.group_count = Object.create(null);
 
 	SVG_object.hierarchy = hierarchy;
 	var periods = CeL.era.periods(hierarchy, draw_era.options),
@@ -1524,7 +1524,7 @@ function draw_era(hierarchy) {
 
 			if (!lastAdd.dataset)
 				// 目前僅 Chrome 支援。
-				lastAdd.dataset = CeL.null_Object();
+				lastAdd.dataset = Object.create(null);
 			lastAdd.dataset.hierarchy
 			//
 			= period_hierarchy + name;
@@ -1648,7 +1648,7 @@ draw_era.change_option = function() {
 
 draw_era.default_group = '\n';
 // draw_era.tags[group][period] = [ date_range, height_range, title, style ];
-draw_era.tags = CeL.null_Object();
+draw_era.tags = Object.create(null);
 
 draw_era.draw_navigation = function(hierarchy, last_is_Era, count_layers) {
 	var period_hierarchy = '',
@@ -1787,7 +1787,7 @@ draw_era.ruler_date_year_options = {
 	format : '%Y'
 };
 
-draw_era.date_cache = CeL.null_Object();
+draw_era.date_cache = Object.create(null);
 
 // ---------------------------------------------------------------------//
 
@@ -1903,7 +1903,7 @@ country_color = {
 // 黎 : '#9f9',
 // 阮 : '#9f9',
 // 莫 : '#9f9'
-}, had_inputted = CeL.null_Object(), country_PATTERN;
+}, had_inputted = Object.create(null), country_PATTERN;
 
 (function() {
 	country_PATTERN = [];
@@ -2684,9 +2684,9 @@ function affairs() {
 
 	var i, v, o = output_format_types, list = [],
 	// output_format_types 反解: auto-generated
-	output_format_types_reversed = CeL.null_Object();
+	output_format_types_reversed = Object.create(null);
 	// reset output_format_types to local language expression.
-	output_format_types = CeL.null_Object();
+	output_format_types = Object.create(null);
 	// 在地化的輸出格式。
 	if (_.is_domain_name('ja'))
 		o['六曜'] = '%六曜';
@@ -4900,8 +4900,8 @@ function affairs() {
 
 	};
 
-	calendar_columns = CeL.null_Object();
-	calendar_column_alias = CeL.null_Object();
+	calendar_columns = Object.create(null);
+	calendar_column_alias = Object.create(null);
 	o = null;
 	for (i in list) {
 		if (Array.isArray(list[i])

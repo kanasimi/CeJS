@@ -257,10 +257,10 @@ function module_code(library_namespace) {
 		else
 			sortByIndex_I = indexArray;
 		var i, sortByIndex_A = [];
-		sortByIndex_Datatype = library_namespace.null_Object();
+		sortByIndex_Datatype = Object.create(null);
 		if (typeof isNumberIndex === 'object') {
 			if (isNumberIndex.constructor === Array) {
-				sortByIndex_Datatype = library_namespace.null_Object();
+				sortByIndex_Datatype = Object.create(null);
 				for (i = 0; i < isNumberIndex.length; i++)
 					sortByIndex_Datatype[isNumberIndex[i]] = 1;
 			} else
@@ -1177,7 +1177,7 @@ function module_code(library_namespace) {
 			Object.assign(this, options);
 		} else
 			// 前置處理。
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 
 		if (!Array.isArray(this.new_keys))
 			this.new_keys = [];
@@ -1185,7 +1185,7 @@ function module_code(library_namespace) {
 		// Warning: 手動設定 .keys, .pair 非常危險!
 		if (!library_namespace.is_Object(this.pair)) {
 			// initialization.
-			this.pair = library_namespace.null_Object();
+			this.pair = Object.create(null);
 			this.keys = [];
 
 			if (options.path)
@@ -1202,7 +1202,7 @@ function module_code(library_namespace) {
 				this.keys = Object.keys(this.pair);
 
 		} else if (is_clone) {
-			this.pair = Object.assign(library_namespace.null_Object(),
+			this.pair = Object.assign(Object.create(null),
 					this.pair);
 			this.keys = this.keys.slice();
 			if (!options.no_sort)
@@ -1247,7 +1247,7 @@ function module_code(library_namespace) {
 
 			// 前置處理。
 			if (!library_namespace.is_Object(options))
-				options = library_namespace.null_Object();
+				options = Object.create(null);
 
 			if (options.no_key)
 				keys = false;
@@ -1585,9 +1585,9 @@ function module_code(library_namespace) {
 		reverse : function(options) {
 			// 前置處理。
 			if (!library_namespace.is_Object(options))
-				options = library_namespace.null_Object();
+				options = Object.create(null);
 
-			var this_pair = this.pair, pair = library_namespace.null_Object(),
+			var this_pair = this.pair, pair = Object.create(null),
 			//
 			keys = [], key, value, is_number = options.is_number;
 			// TODO: Pair.reverse 對 duplicated key 不穩定。
@@ -1710,7 +1710,7 @@ function module_code(library_namespace) {
 	 * @since 2014/7/21 23:17:32
 	 */
 	function list_to_Object(list) {
-		var i = 0, length = list.length, pair = library_namespace.null_Object();
+		var i = 0, length = list.length, pair = Object.create(null);
 		if (length % 2 !== 0)
 			library_namespace.warn('list_to_Object: The length (' + length
 					+ ') of list is not an even number!');
@@ -1909,8 +1909,7 @@ function module_code(library_namespace) {
 	function parse_torrent(path, name_only) {
 		// 注意:此方法不可跨 domain!
 		// JScript 下，XMLHttpRequest 會將檔案當作 UTF-8 讀取。
-		var data = library_namespace.get_file(path), status = library_namespace
-				.null_Object();
+		var data = library_namespace.get_file(path), status = Object.create(null);
 		if (!data || data.charAt(0) !== 'd') {
 			library_namespace.error((data ? 'Illegal' : 'Can not get')
 					+ ' torrent data of [' + path + ']!');

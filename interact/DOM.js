@@ -1336,13 +1336,12 @@ function module_code(library_namespace) {
 		var set_value_list = function(value) {
 			var i, l, v;
 			if (Array.isArray(value))
-				for (i = 0, l = value.length, v = library_namespace
-						.null_Object(); i < l; i++)
+				for (i = 0, l = value.length, v = Object.create(null); i < l; i++)
 					v[value[i]] = true;
 			else if (library_namespace.is_Object(value))
 				v = value;
 			else
-				(v = library_namespace.null_Object())[value] = true;
+				(v = Object.create(null))[value] = true;
 			return v;
 		};
 
@@ -1618,7 +1617,7 @@ function module_code(library_namespace) {
 
 		} else if (library_namespace.is_Object(nodes)) {
 			// 不更動到原先的 arguments。但無作用。
-			// nodes = Object.assign(library_namespace.null_Object(), nodes);
+			// nodes = Object.assign(Object.create(null), nodes);
 
 			// for test.
 			// Object.seal(nodes);
@@ -2932,7 +2931,7 @@ function module_code(library_namespace) {
 			} else if (typeof actions === 'function')
 				actions(attribute.nodeName, attribute.nodeValue, node);
 			if (!cache)
-				cache = library_namespace.null_Object();
+				cache = Object.create(null);
 			// attribute.nodeName === attribute.name
 			// attribute.nodeValue === node.getAttribute(attribute_name)
 			cache[attribute.nodeName] = attribute.nodeValue;
@@ -2977,7 +2976,7 @@ function module_code(library_namespace) {
 			return;
 		}
 		if (typeof setFrameTargetSet != 'object')
-			setFrameTargetSet = library_namespace.null_Object();
+			setFrameTargetSet = Object.create(null);
 		if (l)
 			try {
 				l = decodeURIComponent(l);
@@ -3009,6 +3008,7 @@ function module_code(library_namespace) {
 		if (false)
 			setTimeout('alert(window.frames["' + f + '"].location.href);', 900);
 	}
+
 	/**
 	 * <code>
 		set window.top page to certain location
@@ -3542,7 +3542,7 @@ function module_code(library_namespace) {
 			config = _s.c;
 		else if (!library_namespace.is_Object(config))
 			// document.cookie 不須每次詳細設定，但這樣可以選擇 {} / {...} / true
-			config = Object.assign(library_namespace.null_Object(), _s.c);
+			config = Object.assign(Object.create(null), _s.c);
 
 		if (library_namespace.is_Object(name)) {
 			for ( var i in name)
@@ -3757,7 +3757,7 @@ function module_code(library_namespace) {
 			return unescape(c[2]);
 		}
 
-		var r = library_namespace.null_Object(), v, M, i = 0;
+		var r = Object.create(null), v, M, i = 0;
 		library_namespace.debug(
 		//
 		document.cookie + '\n' + R + '\n' + m.length + '\n' + m, 2);
@@ -4806,7 +4806,7 @@ function module_code(library_namespace) {
 			return;
 
 		if (!options)
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 
 		var c;
 
@@ -4829,7 +4829,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('set_class: remove [' + class_name
 					+ '] from [' + o.className + ']');
 		c = element.className.split(/\s+/);
-		var r = library_namespace.null_Object(), i, changed = options.reset;
+		var r = Object.create(null), i, changed = options.reset;
 
 		// 設定原先的 className. TODO: 增進效率。
 		if (!changed)
@@ -5122,14 +5122,14 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		sPopP = library_namespace.null_Object();
+		sPopP = Object.create(null);
 		// 預設style class name:(null:used last time),ruby,popup,window
 		sPopP.DclassName = ',popupedTxt_ruby,popupedTxt,popupedTxt'.split(',');
 		// 已登記的背景style,請在CSS中加入[sPopC]_[body class name]
 		sPopP.bgS = 'bgb,bgn';
 		{
 			var i = 0, t = sPopP.bgS.split(',');
-			sPopP.bgS = library_namespace.null_Object();
+			sPopP.bgS = Object.create(null);
 			for (; i < t.length; i++)
 				sPopP.bgS[t[i]] = i + 1;
 		}
@@ -5700,7 +5700,7 @@ function module_code(library_namespace) {
 	// var VBalert_f;VBalert();
 	function VBalert(prompt, buttons, title, helpfile, context) {
 		if (typeof VBalert_f != 'object')
-					VBalert_f = library_namespace.null_Object(),
+					VBalert_f = Object.create(null),
 					library_namespace
 							.set_Object_value(
 									'VBalert_f',
@@ -5737,7 +5737,7 @@ function module_code(library_namespace) {
 		alert(VBalert('12', VBalert_f.vbInformation
 				+ VBalert_f.vbDefaultButton3));
 
-	// TODO: get_size(node = window) = library_namespace.null_Object();
+	// TODO: get_size(node = window) = Object.create(null);
 
 	/**
 	 * <code>	get window status	取得視窗可利用的size。現在還得用種方法，真是羞恥。	2005/1/13 20:0
@@ -7477,7 +7477,7 @@ function module_code(library_namespace) {
 	 * TODO: listener list. 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
 	 * add_listener.list[node][event type]=[listener list]
 	 */
-	add_listener.list = library_namespace.null_Object();
+	add_listener.list = Object.create(null);
 
 	_// JSDT:_module_
 	.
@@ -7485,7 +7485,7 @@ function module_code(library_namespace) {
 	 * TODO: 觸發函數. 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
 	 * add_listener.list[type]=[listener list]
 	 */
-	add_listener.list = library_namespace.null_Object();
+	add_listener.list = Object.create(null);
 
 	_// JSDT:_module_
 	.
@@ -8303,7 +8303,7 @@ _
 		}
 
 		var i, q = query_string.replace(/\+/g, ' ').split('&'), p, s = add_to
-				|| library_namespace.null_Object(), k, v;
+				|| Object.create(null), k, v;
 		for (i in q)
 			try {
 				if (p = q[i].match(/^([^=]*)=(.*)$/)) {
@@ -8563,7 +8563,7 @@ _
 		if (!node.dataset)
 			// initialization.
 			// 給予個預設值，省略判斷，簡化流程。
-			node.dataset = library_namespace.null_Object();
+			node.dataset = Object.create(null);
 
 		if (!name) {
 			// get all dataset.

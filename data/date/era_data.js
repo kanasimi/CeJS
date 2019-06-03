@@ -119,7 +119,7 @@ http://astro.kasi.re.kr/Life/Knowledge/solar2lunar/convert_daily_l2s.php
 
 /** {Object}為了不汙染 global，在 loading 時傳遞的暫時工作空間 temporary working space */
 CeL.era.pass_on = {
-	countries : CeL.null_Object(),
+	countries : Object.create(null),
 	last_day : '2101/1/29'
 };
 

@@ -232,11 +232,11 @@ function module_code(library_namespace) {
 		臺灣 : 'TW',
 		台 : 'TW',
 		台灣 : 'TW',
-		中 : 'CN',
 		// for language_tag.LANGUAGE_CODE
 		中文 : 'ZH',
 		陸 : 'CN',
 		大陸 : 'CN',
+		中國 : 'CN',
 		中國大陸 : 'CN',
 		jpn : 'JP',
 		日 : 'JP',
@@ -395,7 +395,7 @@ function module_code(library_namespace) {
 			// 在不明環境，如 node.js 中執行時，((gettext_texts[domain_name])) 可能為
 			// undefined。
 			domain = this && this.domain || gettext_texts[domain_name]
-					|| library_namespace.null_Object();
+					|| Object.create(null);
 			var _text = String(convert(library_namespace.is_Object(text_id) ? text_id[domain_name]
 					: text_id));
 
@@ -564,8 +564,7 @@ function module_code(library_namespace) {
 
 		var domain = gettext_resource[domain_name];
 		if (!domain)
-			gettext_resource[domain_name] = domain = library_namespace
-					.null_Object();
+			gettext_resource[domain_name] = domain = Object.create(null);
 
 		if (type)
 			if (type = [ , 'system', 'user' ][type]) {
@@ -663,7 +662,7 @@ function module_code(library_namespace) {
 
 		if (!(domain_name in gettext_texts)) {
 			// initialization
-			gettext_texts[domain_name] = library_namespace.null_Object();
+			gettext_texts[domain_name] = Object.create(null);
 		}
 
 		var need_to_load = [];
@@ -793,7 +792,7 @@ function module_code(library_namespace) {
 
 			if (!(domain_name in gettext_texts)) {
 				// 為確保回傳的是最終的domain，先初始化。
-				gettext_texts[domain_name] = library_namespace.null_Object();
+				gettext_texts[domain_name] = Object.create(null);
 			}
 
 			load_domain(domain_name, function() {
@@ -871,7 +870,8 @@ function module_code(library_namespace) {
 		}
 
 		var LANG = library_namespace.env.LANG;
-		// e.g., LANG=zh_TW.UTF-8
+		// e.g., LANG=zh_TW.Big5
+		// en_US.UTF-8
 		if (LANG)
 			return gettext.to_standard(LANG);
 
@@ -934,7 +934,7 @@ function module_code(library_namespace) {
 			gettext_texts[domain] = text_Object;
 		else {
 			// specify a new domain.
-			// gettext_texts[domain] = library_namespace.null_Object();
+			// gettext_texts[domain] = Object.create(null);
 			library_namespace.set_method(gettext_texts[domain], text_Object);
 		}
 	};
@@ -1666,12 +1666,10 @@ function module_code(library_namespace) {
 	// ------------------------------------
 	// initialization
 
-	var gettext_DOM_id, gettext_main_alias = library_namespace.null_Object(), gettext_aliases = library_namespace
-			.null_Object(), gettext_texts = library_namespace.null_Object(), gettext_domain_name,
+	var gettext_DOM_id, gettext_main_alias = Object.create(null), gettext_aliases = Object.create(null), gettext_texts = Object.create(null), gettext_domain_name,
 	// CeL.env.domain_location = CeL.env.resource_directory_name + '/';
 	// CeL.gettext.use_domain_location(CeL.env.resource_directory_name + '/');
-	gettext_domain_location = library_namespace.env.domain_location, gettext_resource = library_namespace
-			.null_Object();
+	gettext_domain_location = library_namespace.env.domain_location, gettext_resource = Object.create(null);
 
 	// TODO: lazy evaluation
 

@@ -34,11 +34,11 @@ if (typeof CeL === 'function')
 			 */
 			value_name = '234567891JQKA'.split(''),
 			/** {Object}各點數之 index 值。 */
-			value_index = library_namespace.null_Object(),
+			value_index = Object.create(null),
 			/** {Array}各花色 index 值之名稱。 */
 			suit_name = '♠♥♦♣'.split(''),
 			/** {Object}各花色之 index 值。 */
-			suit_index = library_namespace.null_Object(),
+			suit_index = Object.create(null),
 
 			/** {Object}各牌型之基礎配分。 */
 			category_score = {

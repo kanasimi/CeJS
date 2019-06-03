@@ -17,12 +17,7 @@
 if (typeof CeL === 'function')
 	(function(library_namespace) {
 
-		/**
-		 * 取得裸 Object (naked Object)。
-		 * 
-		 * @returns 裸 Object (naked Object)。
-		 */
-		var null_Object = library_namespace.null_Object,
+		var
 		/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 		NOT_FOUND = ''.indexOf('_');
 
@@ -494,7 +489,7 @@ if (typeof CeL === 'function')
 								var set = new_hash_set();
 								hash_map = set[0];
 								has_hash = set[1];
-								value_of_id = null_Object();
+								value_of_id = Object.create(null);
 								size = 0;
 							}
 						});
@@ -1438,7 +1433,7 @@ if (typeof CeL === 'function')
 		 * @ignore
 		 * @type {Object}
 		 */
-		var named_code = null_Object();
+		var named_code = Object.create(null);
 
 		/**
 		 * 在 module 中稍後求值，僅對 function 有效。<br />
@@ -1757,12 +1752,12 @@ if (typeof CeL === 'function')
 					// 挑出所有需要的 resource，
 					// 把需要的 variable 填入 variable_hash 中，
 					// 並去除重複。
-					var require_resource = null_Object(),
+					var require_resource = Object.create(null),
 					// required variables.
 					// variable_hash = {
 					// variable name : variable full name
 					// }.
-					variable_hash = declaration.variable_hash = null_Object();
+					variable_hash = declaration.variable_hash = Object.create(null);
 
 					code_required.forEach(function(variable) {
 						// [ variable full name, modele name, variable name ]
@@ -1832,7 +1827,7 @@ if (typeof CeL === 'function')
 		// file loading 之處理。
 
 		// cache
-		var document_head, tag_of_type = null_Object(), URL_of_tag = null_Object(), TO_FINISH = null_Object(),
+		var document_head, tag_of_type = Object.create(null), URL_of_tag = Object.create(null), TO_FINISH = Object.create(null),
 		// 需要修補 load events on linking elements?
 		no_sheet_onload = library_namespace.is_WWW(true) && navigator.userAgent,
 		// external resource tester.
@@ -1929,7 +1924,7 @@ if (typeof CeL === 'function')
 			id = declaration.id;
 			// 預先定義/正規化，避免麻煩。
 			if (!library_namespace.is_Object(options))
-				options = null_Object();
+				options = Object.create(null);
 
 			// waiting handler
 			function waiting() {
@@ -2056,7 +2051,7 @@ if (typeof CeL === 'function')
 						library_namespace.debug('初始設定函式回傳 Array，先轉成 Object。',
 								1, 'load_named');
 						var list = initializator;
-						initializator = null_Object();
+						initializator = Object.create(null);
 						list.forEach(function(method) {
 							var name = typeof method === 'function'
 									&& library_namespace
@@ -2162,7 +2157,7 @@ if (typeof CeL === 'function')
 								if (typeof no_extend === 'string')
 									no_extend = no_extend.split(',');
 								if (Array.isArray(no_extend)) {
-									l = null_Object();
+									l = Object.create(null);
 									no_extend.forEach(function(i) {
 										l[i] = 1;
 									});
@@ -2171,13 +2166,13 @@ if (typeof CeL === 'function')
 							}
 
 							if (!library_namespace.is_Object(no_extend))
-								no_extend = null_Object();
+								no_extend = Object.create(null);
 
 							// 去掉 function 預設可列舉的成員。
 							// Firefox/3.0.19 中，.prototype 亦可列舉。
 							// TODO: how to cache.
 							(l = function() {
-							}).prototype = null_Object();
+							}).prototype = Object.create(null);
 							for (i in l)
 								no_extend[i] = 1;
 
@@ -3441,7 +3436,7 @@ if (typeof CeL === 'function')
 		 */
 		function check_and_run_set_options(options, reset) {
 			if (reset)
-				Object.assign(this.options = null_Object(),
+				Object.assign(this.options = Object.create(null),
 						check_and_run.options);
 
 			if (library_namespace.is_Object(options)) {

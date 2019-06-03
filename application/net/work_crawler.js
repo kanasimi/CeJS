@@ -240,7 +240,7 @@ function module_code(library_namespace) {
 		if (library_namespace.is_Object(condition))
 			return condition;
 
-		var condition_data = library_namespace.null_Object(), matched, PATTERN = /([a-z]+)(?::(\/(\\\/|[^\/])+\/([i]*)|[^|]+))?(?:\||$)/g;
+		var condition_data = Object.create(null), matched, PATTERN = /([a-z]+)(?::(\/(\\\/|[^\/])+\/([i]*)|[^|]+))?(?:\||$)/g;
 		while (matched = PATTERN.exec(condition)) {
 			var type = matched[1], _condition = undefined;
 			if (!matched[2]) {
@@ -1139,9 +1139,9 @@ function module_code(library_namespace) {
 			}, this.get_URL_options);
 		} else if (library_namespace.is_Object(get_URL_options)) {
 			// this.get_URL(url, callback, post_data, get_URL_options)
-			var headers = Object.assign(library_namespace.null_Object(),
+			var headers = Object.assign(Object.create(null),
 					this.get_URL_options.headers, get_URL_options.headers);
-			get_URL_options = Object.assign(library_namespace.null_Object(),
+			get_URL_options = Object.assign(Object.create(null),
 					this.get_URL_options, get_URL_options);
 			get_URL_options.headers = headers;
 		} else {
@@ -1177,8 +1177,7 @@ function module_code(library_namespace) {
 		}
 		var get_parsed = options.get_parsed || rearrange_list;
 
-		var matched, work_list = [], work_hash = library_namespace
-				.null_Object(), parsed;
+		var matched, work_list = [], work_hash = Object.create(null), parsed;
 		work_list.blank = work_list.comments = work_list.duplicated = 0;
 		work_list.work_indexes = [];
 		if (get_parsed) {
@@ -1366,7 +1365,7 @@ function module_code(library_namespace) {
 	function get_work_list(work_list, callback) {
 		// console.log(work_list);
 		// 真正處理的作品數。
-		var work_count = 0, all_work_status = library_namespace.null_Object(),
+		var work_count = 0, all_work_status = Object.create(null),
 		//
 		start_list_serial = this.start_list_serial;
 
@@ -1761,7 +1760,7 @@ function module_code(library_namespace) {
 								}).join('; ')));
 			} else {
 				var status = work_data;
-				work_data = library_namespace.null_Object();
+				work_data = Object.create(null);
 				set_work_status(work_data,
 						status && typeof status === 'string' ? status
 								: 'not found');
@@ -1824,7 +1823,7 @@ function module_code(library_namespace) {
 		// search cache
 		// 檢查看看之前是否有取得過。
 		search_result = this.get_search_result()
-				|| library_namespace.null_Object();
+				|| Object.create(null);
 		library_namespace.debug({
 			T : [ 'search result file: ', search_result_file ]
 		}, 2, 'get_work');
@@ -1853,7 +1852,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			search_url_data = library_namespace.null_Object();
+			search_url_data = Object.create(null);
 			search_url_data[work_title] = '';
 			this.onerror(gettext('本線上作品網站 %1 的模組未提供搜尋功能。', this.id)
 					+ gettext('請先輸入作品 id，下載過一次後工具會自動記錄作品標題與 id 的轉換。')
@@ -2144,7 +2143,7 @@ function module_code(library_namespace) {
 		// && new_chapter_list.part_NO > 1
 		&& Array.isArray(work_data.chapter_list)) {
 
-			var old_url_hash = library_namespace.null_Object();
+			var old_url_hash = Object.create(null);
 			work_data.chapter_list.forEach(function(chapter_data, index) {
 				// assert: {Object}chapter_data
 				old_url_hash[chapter_data.url] = index;
@@ -2407,7 +2406,7 @@ function module_code(library_namespace) {
 				var search_result_file = _this.get_search_result_file(),
 				//
 				search_result = _this.get_search_result()
-						|| library_namespace.null_Object();
+						|| Object.create(null);
 				if (!(work_data.title in search_result)) {
 					search_result[work_data.title] = work_id;
 					// 補上已知的轉換。這樣未來輸入作品標題的時候就能自動轉換。
@@ -3481,12 +3480,12 @@ function module_code(library_namespace) {
 
 	// 分析所有數字後的非數字，猜測章節的單位。
 	function guess_unit(title_list) {
-		var units = library_namespace.null_Object(), PATTERN = /\d+([^\d])/g, matched;
+		var units = Object.create(null), PATTERN = /\d+([^\d])/g, matched;
 		title_list.forEach(function(title) {
 			title = library_namespace.from_Chinese_numeral(title);
 			while (matched = PATTERN.exec(title)) {
 				if (!(matched[1] in units))
-					units[matched[1]] = library_namespace.null_Object();
+					units[matched[1]] = Object.create(null);
 				units[matched[1]][matched[0]] = null;
 			}
 		});
@@ -4279,7 +4278,7 @@ function module_code(library_namespace) {
 				var chapter_data = Array.isArray(work_data.chapter_list)
 						&& work_data.chapter_list[chapter_NO - 1],
 				//
-				metadata = Object.assign(library_namespace.null_Object(),
+				metadata = Object.assign(Object.create(null),
 						work_data, chapter_data, image_data);
 				delete metadata.chapter_list;
 				library_namespace.write_file(image_data.file + '.json',
@@ -4422,7 +4421,7 @@ function module_code(library_namespace) {
 					var chapter_data = Array.isArray(work_data.chapter_list)
 							&& work_data.chapter_list[chapter_NO - 1],
 					//
-					metadata = Object.assign(library_namespace.null_Object(),
+					metadata = Object.assign(Object.create(null),
 							work_data, chapter_data);
 					delete metadata.chapter_list;
 					library_namespace.write_file(

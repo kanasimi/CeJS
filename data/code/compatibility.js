@@ -261,7 +261,7 @@ function module_code(library_namespace) {
 
 		try {
 			if (!prototype)
-				prototype = library_namespace.null_Object();
+				prototype = Object.create(null);
 			for (key in object) {
 				// !hasOwnProperty(key)
 				if (!(key in prototype) || object[key] !== prototype[key])
@@ -291,7 +291,7 @@ function module_code(library_namespace) {
 	}
 
 	function getOwnPropertyDescriptors(object) {
-		var descriptors = library_namespace.null_Object();
+		var descriptors = Object.create(null);
 		// for...in 循環也枚舉原型鏈中的屬性
 		for ( var property in object) {
 			var descriptor = Object.getOwnPropertyDescriptor(object, property);
@@ -339,7 +339,7 @@ function module_code(library_namespace) {
 
 	// Object.fromEntries()
 	function fromEntries(iterable) {
-		var object = library_namespace.null_Object();
+		var object = Object.create(null);
 
 		iterable.forEach(function(pair) {
 			// pair = [ key, value ]

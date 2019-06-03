@@ -236,7 +236,7 @@ function module_code(library_namespace) {
 	// = [ Set(對應之 era_list index list), 'key of search_index',
 	// 'key'..
 	// ]
-	search_index = library_namespace.null_Object(),
+	search_index = Object.create(null),
 
 	// constant 常數。
 
@@ -352,7 +352,7 @@ function module_code(library_namespace) {
 	// now it's CE.
 	MAX_MONTH_DAYS = CE_MONTH_DAYS,
 
-	MONTH_DAY_INDEX = library_namespace.null_Object(),
+	MONTH_DAY_INDEX = Object.create(null),
 
 	// 辨識曆數項。
 	// 基本上與程式碼設計合一，不可更改。
@@ -1152,10 +1152,10 @@ function module_code(library_namespace) {
 		// {Integer}
 		this.end = end;
 		// this.sub[sub Period name] = sub Period
-		this.sub = library_namespace.null_Object();
+		this.sub = Object.create(null);
 		// 屬性值 attributes
 		// e.g., this.attributes[君主名] = {String}君主名
-		this.attributes = library_namespace.null_Object();
+		this.attributes = Object.create(null);
 
 		// .name, .parent, .level: see Period.prototype.add_sub()
 
@@ -4099,7 +4099,7 @@ function module_code(library_namespace) {
 		// days: 遁開始日後經過天數。0–179
 		var days = JD + 1 - index[0] | 0,
 		//
-		result = library_namespace.null_Object();
+		result = Object.create(null);
 		result.days = days;
 		result.閏 = index[1];
 
@@ -4164,7 +4164,7 @@ function module_code(library_namespace) {
 			// 初始化 era.notes
 			date_index = this.notes
 			// do cache.
-			= library_namespace.null_Object();
+			= Object.create(null);
 
 			sign_note.copy_attributes.forEach(function(key) {
 				if (this[key])
@@ -5212,7 +5212,7 @@ function module_code(library_namespace) {
 					i = era_data.slice(3);
 
 				if (!附加屬性)
-					附加屬性 = library_namespace.null_Object();
+					附加屬性 = Object.create(null);
 				i.forEach(function(pair) {
 					pair = pair.trim();
 					if (j = pair.match(
@@ -5239,7 +5239,7 @@ function module_code(library_namespace) {
 
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 
 		if (!Array.isArray(era_data_array))
 			era_data_array = [ era_data_array ];
@@ -5480,7 +5480,7 @@ function module_code(library_namespace) {
 				if (!(j = 紀年[i]) || i <= 0) {
 					if (j || (j = k)) {
 						if (!tmp.era)
-							tmp.era = library_namespace.null_Object();
+							tmp.era = Object.create(null);
 						add_attribute(tmp.era, j, last_era_data);
 						if (library_namespace.is_debug()
 								&& Array.isArray(tmp.era[j]))
@@ -6156,7 +6156,7 @@ function module_code(library_namespace) {
 
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 
 		if (!date)
 			date = new Date();
@@ -6946,7 +6946,7 @@ function module_code(library_namespace) {
 		if (!key) {
 			// 取得所有年代之列表。
 			if (!get_candidate.all_list) {
-				list = library_namespace.null_Object();
+				list = Object.create(null);
 				era_list.forEach(function(era) {
 					list[era] = era.toString(SEARCH_STRING);
 				});
@@ -6956,7 +6956,7 @@ function module_code(library_namespace) {
 		}
 
 		if (key in search_index) {
-			list = library_namespace.null_Object();
+			list = Object.create(null);
 			for_each_era_of_key(key, function(era) {
 				list[era] = era.toString(SEARCH_STRING);
 			});
@@ -6965,7 +6965,7 @@ function module_code(library_namespace) {
 		else if (key = to_era_Date(key, {
 			era_only : true
 		})) {
-			list = library_namespace.null_Object();
+			list = Object.create(null);
 			key.forEach(function name(era) {
 				list[era] = era.toString(SEARCH_STRING);
 			});
@@ -7217,7 +7217,7 @@ function module_code(library_namespace) {
 		if (!period_now.bar) {
 			// 前置處理。
 			if (!library_namespace.is_Object(options))
-				options = library_namespace.null_Object();
+				options = Object.create(null);
 
 			var list = [];
 			add_period(period_now.sub, list, options);
@@ -7232,8 +7232,8 @@ function module_code(library_namespace) {
 
 			// 處理歷史時期的 bar。
 			if (list = list[PERIOD_KEY]) {
-				period_now.bar[PERIOD_KEY] = library_namespace.null_Object();
-				period_now[PERIOD_KEY] = library_namespace.null_Object();
+				period_now.bar[PERIOD_KEY] = Object.create(null);
+				period_now[PERIOD_KEY] = Object.create(null);
 				for ( var period_name in list) {
 					var period_list = list[period_name];
 					if (Array.isArray(period_list))
@@ -7289,7 +7289,7 @@ function module_code(library_namespace) {
 
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 
 		var date_list = [], era_list,
 		// date: 月曆/日曆，非年曆。
@@ -7539,7 +7539,7 @@ function module_code(library_namespace) {
 	function Date_to_era_String(date_value, format, locale, options) {
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		var config = this || options, 紀年名,
 		// 指定紀年。
 		紀年 = config.era_object;
@@ -8445,7 +8445,7 @@ function module_code(library_namespace) {
 					options = minute_offset;
 			} else if (!isNaN(minute_offset)) {
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 				options.minute_offset = minute_offset;
 			}
 		}

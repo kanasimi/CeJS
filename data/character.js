@@ -82,11 +82,11 @@ function module_code(library_namespace) {
 	// coding map / config hash for decoding specified coding to Unicode.
 	// map_set[encoding_name]
 	// = [ config, [1 byte map], [2 byte map], [3 byte map], [4 byte map] ]
-	map_set = library_namespace.null_Object(),
+	map_set = Object.create(null),
 	// encoding Unicode to specified coding
 	// encode_map_set[encoding_name]
 	// = {Unicode_char:char_code}
-	encode_map_set = library_namespace.null_Object(),
+	encode_map_set = Object.create(null),
 	/** {String}REPLACEMENT CHARACTER U+FFFD, '?' in old IE */
 	UNKNOWN_CHARACTER = '�', UNKNOWN_CHARACTER_CODE = UNKNOWN_CHARACTER
 			.codePointAt(0);
@@ -161,7 +161,7 @@ function module_code(library_namespace) {
 		// main_encode_map[Unicode character]
 		// = {ℕ⁰:Natural+0}code of specified coding
 		main_encode_map = encode_map_set[encoding]
-				|| (encode_map_set[encoding] = library_namespace.null_Object());
+				|| (encode_map_set[encoding] = Object.create(null));
 		// console.log(Object.keys(map_data));
 		for ( var key in map_data) {
 			var char_list = map_data[key], matched = key

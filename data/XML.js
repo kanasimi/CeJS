@@ -297,7 +297,7 @@ function module_code(library_namespace) {
 
 		// 前置處理。
 		if (!library_namespace.is_Object(options)) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		// console.log(XML);

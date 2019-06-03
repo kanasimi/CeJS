@@ -199,7 +199,7 @@ function module_code(library_namespace) {
 
 		// 紀錄各種後續檢索用索引值。應以 append，而非整個換掉的方式更改。
 		// 對舊版本須用到 for (in .next_mark)
-		this.next_mark = library_namespace.null_Object();
+		this.next_mark = Object.create(null);
 
 		// setup session.
 		if (API_URL) {
@@ -452,7 +452,7 @@ function module_code(library_namespace) {
 		if (typeof options.parameters === 'string') {
 			action[1] += '&' + options.parameters;
 		} else if (library_namespace.is_Object(options.parameters)) {
-			var parameters = library_namespace.null_Object();
+			var parameters = Object.create(null);
 			// TODO: 篩選掉指定為false的
 			action[1] += '&' + get_URL.parameters_to_String(options.parameters);
 		} else {
@@ -623,7 +623,7 @@ function module_code(library_namespace) {
 	api_URL.family = 'wikipedia|wikibooks|wikinews|wikiquote|wikisource|wikiversity|wikivoyage|wiktionary'
 			.split('|').to_hash();
 
-	api_URL.shortcut_of_project = library_namespace.null_Object();
+	api_URL.shortcut_of_project = Object.create(null);
 	Object.keys(api_URL.alias).forEach(function(shortcut) {
 		api_URL.shortcut_of_project[api_URL.alias[shortcut]] = shortcut;
 	});
@@ -1191,7 +1191,7 @@ function module_code(library_namespace) {
 	 * @returns {Object}title/id hash
 	 */
 	function list_to_hash(page_data_list, use_id) {
-		var hash = library_namespace.null_Object();
+		var hash = Object.create(null);
 		page_data_list.forEach(use_id ? function(page_data) {
 			// = true
 			hash[page_data.pageid] = page_data;
@@ -1214,7 +1214,7 @@ function module_code(library_namespace) {
 	function unique_list(page_data_list) {
 		var array = [],
 		// 以 hash 純量 index 加速判別是否重複。
-		hash = library_namespace.null_Object();
+		hash = Object.create(null);
 
 		page_data_list.forEach(function(page_data) {
 			var key = typeof page_data == 'string' ? page_data
@@ -1521,7 +1521,7 @@ function module_code(library_namespace) {
 			modify_this = options.modify;
 			max_depth = options.max_depth;
 		} else {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		// console.log(options);
@@ -2218,7 +2218,7 @@ function module_code(library_namespace) {
 		// 章節標題list。
 		section_list.title = [];
 		// index hash
-		section_list.index = library_namespace.null_Object();
+		section_list.index = Object.create(null);
 
 		while (true) {
 			var matched = PATTERN_section.exec(wikitext),
@@ -2321,7 +2321,7 @@ function module_code(library_namespace) {
 		// sections[0]: 常常是設定與公告區，或者放置維護模板/通知模板。
 		section_list = this.sections = [],
 		// section_title_hash[section link anchor] = {Natural}count
-		section_title_hash = library_namespace.null_Object();
+		section_title_hash = Object.create(null);
 
 		// to test: 沒有章節標題的文章, 以章節標題開頭的文章, 以章節標題結尾的文章, 章節標題+章節標題。
 
@@ -3137,7 +3137,7 @@ function module_code(library_namespace) {
 		return this.parent.get_item_prefix() + this.list_type;
 	}
 
-	var Magic_words_hash = library_namespace.null_Object();
+	var Magic_words_hash = Object.create(null);
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=functionhooks&utf8&format=json
 	'DISPLAYTITLE|DEFAULTSORT|デフォルトソート|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
 	// 這些需要指定數值. e.g., {{DEFAULTSORT:1}}: OK, {{DEFAULTSORT}}: NG
@@ -3362,7 +3362,7 @@ function module_code(library_namespace) {
 
 		// parse attributes
 		function parse_tag_attributes(attributes) {
-			var attribute_hash = library_namespace.null_Object();
+			var attribute_hash = Object.create(null);
 			if (typeof attributes === 'string') {
 				var attributes_list = [], matched,
 				// [ all, front, all attributes, name, value, unquoted value ]
@@ -3507,9 +3507,9 @@ function module_code(library_namespace) {
 			previous,
 			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
 			// token.parameters[{String}key] = {String}value
-			_parameters = library_namespace.null_Object(),
+			_parameters = Object.create(null),
 			// token.index_of[{String}key] = {Integer}index
-			parameter_index_of = library_namespace.null_Object();
+			parameter_index_of = Object.create(null);
 			if (index > 0) {
 				previous = '{{' + parameters.slice(0, index);
 				parameters = parameters.slice(index + '}}'.length);
@@ -3746,7 +3746,7 @@ function module_code(library_namespace) {
 
 			// console.log(parameters);
 
-			var conversion = library_namespace.null_Object(),
+			var conversion = Object.create(null),
 			//
 			conversion_list = [], latest_language;
 
@@ -4413,7 +4413,7 @@ function module_code(library_namespace) {
 				switch_word) {
 			var parameters = _set_wiki_type(switch_word, 'switch');
 			if (!queue.switches) {
-				queue.switches = library_namespace.null_Object();
+				queue.switches = Object.create(null);
 			}
 			if (!queue.switches[switch_word]) {
 				queue.switches[switch_word] = [ parameters ];
@@ -5380,7 +5380,7 @@ function module_code(library_namespace) {
 			// user_name should be {String}user name
 			user_name = normalize_page_name(user_name);
 		} else {
-			user_hash = library_namespace.null_Object();
+			user_hash = Object.create(null);
 		}
 
 		if (!wikitext) {
@@ -5544,7 +5544,7 @@ function module_code(library_namespace) {
 		}
 
 		/** {Object}設定頁面/文字所獲得之個人化設定/手動設定 manual settings。 */
-		var configuration = library_namespace.null_Object(),
+		var configuration = Object.create(null),
 		/** {String}當前使用之變數名稱 */
 		variable_name,
 		// using parser
@@ -7410,7 +7410,7 @@ function module_code(library_namespace) {
 			}
 			if (!next[1]) {
 				// initialize options
-				next[1] = library_namespace.null_Object();
+				next[1] = Object.create(null);
 			}
 
 			if (type === 'move_to') {
@@ -7725,7 +7725,7 @@ function module_code(library_namespace) {
 
 		var done = 0,
 		//
-		log_item = Object.assign(library_namespace.null_Object(),
+		log_item = Object.assign(Object.create(null),
 				wiki_API.prototype.work.log_item, config.log_item),
 		/** {Boolean}console 不顯示訊息，也不處理 {Array}messages。 */
 		no_message = config.no_message, messages = [];
@@ -8598,7 +8598,7 @@ function module_code(library_namespace) {
 		// assert: action[2] && {String}action[2]
 		action[2] ? action[0] + (action[2].startsWith('&') ? '' : '&')
 		//
-		+ action[2] : action[0], library_namespace.null_Object() ];
+		+ action[2] : action[0], Object.create(null) ];
 		if (!action[1].format) {
 			// 加上 "&utf8", "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
 			action[0] = get_URL.add_parameter(action[0], 'format=json&utf8');
@@ -8771,7 +8771,7 @@ function module_code(library_namespace) {
 					if (!agent.cookie_cache)
 						agent.cookie_cache
 						// {zh:['','',...],en:['','',...]}
-						= library_namespace.null_Object();
+						= Object.create(null);
 					var last_cookie = agent.last_cookie;
 					agent.last_cookie = [];
 					while (last_cookie.length > 0) {
@@ -8953,7 +8953,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Object}
 	 */
-	wiki_API.query.last = library_namespace.null_Object();
+	wiki_API.query.last = Object.create(null);
 
 	/**
 	 * 取得 page_data 之 title parameter。<br />
@@ -9420,7 +9420,7 @@ function module_code(library_namespace) {
 				if (Array.isArray(data.query.redirects)) {
 					page_list.redirect_from
 					// 記錄經過重導向的標題。
-					= redirect_from = library_namespace.null_Object();
+					= redirect_from = Object.create(null);
 					data.query.redirects.forEach(function(item) {
 						redirect_from[item.to] = item.from;
 					});
@@ -9432,7 +9432,7 @@ function module_code(library_namespace) {
 				if (Array.isArray(data.query.converted)) {
 					page_list.convert_from
 					// 記錄經過轉換的標題。
-					= convert_from = library_namespace.null_Object();
+					= convert_from = Object.create(null);
 					data.query.converted.forEach(function(item) {
 						convert_from[item.to] = item.from;
 					});
@@ -10134,7 +10134,7 @@ function module_code(library_namespace) {
 			});
 
 		} else {
-			langs = library_namespace.null_Object();
+			langs = Object.create(null);
 			langs.langs = [];
 			langlinks.forEach(function(lang) {
 				langs[lang.lang] = lang['*'];
@@ -10214,7 +10214,7 @@ function module_code(library_namespace) {
 			callback = (options = callback).callback;
 		} else {
 			// 前置處理。
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		wiki_API.page(title, function(page_data) {
@@ -10223,7 +10223,7 @@ function module_code(library_namespace) {
 			// content.match(pattern) === [ , '{type:"continue"}' ]
 			pattern = options.pattern,
 			// {Object} continue data
-			data = library_namespace.null_Object();
+			data = Object.create(null);
 
 			if (!pattern) {
 				pattern = new RegExp(library_namespace.to_RegExp_pattern(
@@ -10256,14 +10256,14 @@ function module_code(library_namespace) {
 						matched = get_list.type[matched] + 'continue';
 
 					content = data;
-					data = library_namespace.null_Object();
+					data = Object.create(null);
 					if (matched in content) {
 						data[matched] = content[matched];
 					}
 				}
 
 			// callback({Object} continue data);
-			callback(data || library_namespace.null_Object());
+			callback(data || Object.create(null));
 		}, options);
 	}
 
@@ -10825,7 +10825,7 @@ function module_code(library_namespace) {
 	wiki_API.list = function(target, callback, options) {
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 
 		if (!options.initialized) {
 			if (!options[KEY_SESSION]) {
@@ -10936,7 +10936,7 @@ function module_code(library_namespace) {
 			callback();
 		},
 		// Tokens may not be obtained when using a callback
-		library_namespace.null_Object(), session);
+		Object.create(null), session);
 		return this;
 	};
 
@@ -11030,7 +11030,7 @@ function module_code(library_namespace) {
 				API_URL = options;
 			}
 			// 前置處理。
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		if (!session) {
@@ -11080,7 +11080,7 @@ function module_code(library_namespace) {
 			}
 
 			// https://www.mediawiki.org/w/api.php?action=help&modules=login
-			var token = Object.assign(library_namespace.null_Object(),
+			var token = Object.assign(Object.create(null),
 					session.token);
 			// .csrftoken 是本函式為 cache 加上的，非正規 parameter。
 			delete token.csrftoken;
@@ -11184,7 +11184,7 @@ function module_code(library_namespace) {
 		if (site_configurations === default_site_configurations) {
 			session.configurations = site_configurations
 			//
-			= Object.assign(library_namespace.null_Object(),
+			= Object.assign(Object.create(null),
 			//
 			default_site_configurations);
 		}
@@ -11211,8 +11211,7 @@ function module_code(library_namespace) {
 			delete languagevariants.zh['zh-hant'];
 
 			// language fallbacks
-			site_configurations.lang_fallbacks = library_namespace
-					.null_Object();
+			site_configurations.lang_fallbacks = Object.create(null);
 			for ( var lang_code in languagevariants.zh) {
 				site_configurations.lang_fallbacks[lang_code] = languagevariants.zh[lang_code].fallbacks;
 			}
@@ -11254,7 +11253,7 @@ function module_code(library_namespace) {
 					title : options
 				};
 			} else {
-				options = library_namespace.null_Object();
+				options = Object.create(null);
 			}
 
 		/**
@@ -12252,7 +12251,7 @@ function module_code(library_namespace) {
 					.warn('wiki_API.redirects.count: Invalid embeddedin list.');
 			return 0;
 		}
-		var name_hash = library_namespace.null_Object();
+		var name_hash = Object.create(null);
 		embeddedin_list.forEach(function(title) {
 			title = get_page_title(title);
 			library_namespace.debug('含有模板{{' + root_name_hash[title] + '}}←{{'
@@ -12275,7 +12274,7 @@ function module_code(library_namespace) {
 		}
 
 		// 汲取出 parameters。
-		var parameters = library_namespace.null_Object();
+		var parameters = Object.create(null);
 		if (default_parameters) {
 			for ( var parameter_name in default_parameters) {
 				if (parameter_name in options) {
@@ -12737,6 +12736,8 @@ function module_code(library_namespace) {
 	user_name,
 	/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
 	wmflabs,
+	/** {Object}Wikimedia Toolforge job data. CeL.wiki.job_data */
+	job_data,
 	/** node mysql handler */
 	node_mysql,
 	/** {Object}default SQL configurations */
@@ -12915,6 +12916,18 @@ function module_code(library_namespace) {
 			}
 		} catch (e) {
 			// TODO: handle exception
+		}
+
+		if (process.env.JOB_ID && process.env.JOB_NAME) {
+			// assert: process.env.ENVIRONMENT === 'BATCH'
+			CeL.wiki.job_data = job_data = {
+				id : process.env.JOB_ID,
+				name : process.env.JOB_NAME,
+				request : process.env.REQUEST,
+				script : process.env.JOB_SCRIPT,
+				stdout_file : process.env.SGE_STDOUT_PATH,
+				stderr_file : process.env.SGE_STDERR_PATH
+			};
 		}
 	}
 
@@ -13424,7 +13437,7 @@ function module_code(library_namespace) {
 
 		var SQL = options.SQL;
 		if (!SQL) {
-			SQL = library_namespace.null_Object();
+			SQL = Object.create(null);
 			if (options.bot === 0 || options.bot === 1) {
 				// assert: 0 || 1
 				SQL.bot = options.bot;
@@ -13568,7 +13581,7 @@ function module_code(library_namespace) {
 	// 警告: 同時間只能有一隻程式在跑，否則可能會造成混亂！
 	function add_listener(listener, options) {
 		if (!options) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		} else if (options > 0) {
 			options = {
 				interval : options
@@ -13592,8 +13605,8 @@ function module_code(library_namespace) {
 		// @see .SQL_config
 		where = options.SQL_options
 		//
-		|| (options.SQL_options = library_namespace.null_Object());
-		where = where.where || (where.where = library_namespace.null_Object());
+		|| (options.SQL_options = Object.create(null));
+		where = where.where || (where.where = Object.create(null));
 		// console.log(session);
 
 		if (!session
@@ -14146,7 +14159,7 @@ function module_code(library_namespace) {
 							}
 
 							// 配對。
-							var page_id_hash = library_namespace.null_Object();
+							var page_id_hash = Object.create(null);
 							page_list.forEach(function(page_data, index) {
 								page_id_hash[page_data.pageid] = page_data;
 							});
@@ -14194,7 +14207,7 @@ function module_code(library_namespace) {
 					exit = listener.call(options, options.input_Array ? rows
 					// 模擬rows單筆之結構。
 					: {
-						row : library_namespace.null_Object()
+						row : Object.create(null)
 					});
 				}
 
@@ -15005,7 +15018,7 @@ function module_code(library_namespace) {
 
 		if (typeof _this !== 'object') {
 			// _this: 傳遞於各 operator 間的 ((this))。
-			_this = library_namespace.null_Object();
+			_this = Object.create(null);
 		}
 
 		var file_name = operation.file_name,
@@ -15445,8 +15458,7 @@ function module_code(library_namespace) {
 
 			default:
 				if (typeof type === 'function')
-					to_get_data = type.bind(Object.assign(library_namespace
-							.null_Object(), _this, operation));
+					to_get_data = type.bind(Object.assign(Object.create(null), _this, operation));
 				else if (type)
 					throw new Error('wiki_API.cache: Bad type: ' + type);
 				else {
@@ -15586,7 +15598,7 @@ function module_code(library_namespace) {
 
 		// renew cache data
 		renew : function() {
-			// library_namespace.null_Object()
+			// Object.create(null)
 			this[this.KEY_DATA] = {};
 		},
 		read : function(cache_file_path, options) {
@@ -15823,7 +15835,7 @@ function module_code(library_namespace) {
 		if (typeof config === 'function' && callback === undefined) {
 			// shift arguments.
 			callback = config;
-			config = library_namespace.null_Object();
+			config = Object.create(null);
 		} else {
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			config = library_namespace.new_options(config);
@@ -16902,7 +16914,7 @@ function module_code(library_namespace) {
 	// entity (Q\d+) 用。
 	// 可考量加入 .type (item|property) 為 key 的一部分，
 	// 或改成 wikidata_search_cache={item:{},property:{}}。
-	wikidata_search_cache_entity = library_namespace.null_Object();
+	wikidata_search_cache_entity = Object.create(null);
 
 	wikidata_search.add_cache = function(key, id, language, is_entity) {
 		cached_hash = is_entity ? wikidata_search_cache_entity
@@ -18095,7 +18107,7 @@ function module_code(library_namespace) {
 		if (Array.isArray(property)) {
 			// e.g., entity.value(['property','property'])
 			var property_list = property;
-			property = library_namespace.null_Object();
+			property = Object.create(null);
 			property_list.forEach(function(key) {
 				property[key] = null;
 			});
@@ -18251,14 +18263,14 @@ function module_code(library_namespace) {
 
 	// @see wikidata_search_cache
 	// wikidata_datatype_cache.P31 = {String}datatype of P31;
-	var wikidata_datatype_cache = library_namespace.null_Object();
+	var wikidata_datatype_cache = Object.create(null);
 
 	// callback(datatype of property, error)
 	function wikidata_datatype(property, callback, options) {
 		if (is_api_and_title(property, 'language')) {
 			property = wikidata_search.use_cache(property, function(id, error) {
 				wikidata_datatype(id, callback, options);
-			}, Object.assign(library_namespace.null_Object(),
+			}, Object.assign(Object.create(null),
 					wikidata_search.use_cache.default_options, options));
 			if (!property) {
 				// assert: property === undefined
@@ -18427,7 +18439,7 @@ function module_code(library_namespace) {
 						//
 						id || 'Nothing found: [' + value + ']', datatype,
 								options, to_pass);
-					}, Object.assign(library_namespace.null_Object(),
+					}, Object.assign(Object.create(null),
 					// 因wikidata_search.use_cache.default_options包含.type設定，必須將特殊type設定放在匯入default_options後!
 					wikidata_search.use_cache.default_options, {
 						type : matched[1],
@@ -18910,8 +18922,7 @@ function module_code(library_namespace) {
 			// 將{Object}簡易的屬性雜湊轉換成{Array}屬性名稱列表 →
 			// 因為需要動到不可回復的操作，因此不更動到原先的屬性。
 			// 初始化
-			additional_properties = Object.assign(library_namespace
-					.null_Object(), additional_properties);
+			additional_properties = Object.assign(Object.create(null), additional_properties);
 
 			// console.log(property);
 
@@ -19366,7 +19377,7 @@ function module_code(library_namespace) {
 
 			normalize_next_value();
 
-		}, Object.assign(library_namespace.null_Object(),
+		}, Object.assign(Object.create(null),
 				wikidata_search.use_cache.default_options, options));
 
 	}
@@ -19403,7 +19414,7 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(property_data.references));
 			// console.log(property_data.references);
 
-			var references = library_namespace.null_Object();
+			var references = Object.create(null);
 			property_data.references.forEach(function(reference_data) {
 				references[reference_data.property] = [ reference_data ];
 			});
@@ -19449,7 +19460,7 @@ function module_code(library_namespace) {
 
 		}, exists_references
 		// 確保會設定 .remove / .exists_index = duplicate_index。
-		|| library_namespace.null_Object(),
+		|| Object.create(null),
 		//
 		Object.assign({
 			// [KEY_SESSION]
@@ -19524,7 +19535,7 @@ function module_code(library_namespace) {
 			library_namespace.debug(
 					'把所有不是正規屬性的當作是 claims property key，搬到 data.claims。'
 							+ '正規屬性留在原處。', 5, 'set_claims');
-			data.claims = library_namespace.null_Object();
+			data.claims = Object.create(null);
 			for ( var key in data) {
 				if (!(key in entity_properties)) {
 					data.claims[key] = data[key];
@@ -19756,7 +19767,7 @@ function module_code(library_namespace) {
 			set_next_claim();
 		}, entity && entity.claims
 		// 確保會設定 .remove / .exists_index = duplicate_index。
-		|| library_namespace.null_Object(),
+		|| Object.create(null),
 		//
 		Object.assign({
 			// [KEY_SESSION]
@@ -20025,9 +20036,9 @@ function module_code(library_namespace) {
 
 		// 正規化 →
 		// labels = {language_code:[label_1,label_2,...],...}
-		var labels = library_namespace.null_Object(),
+		var labels = Object.create(null),
 		// 先指定的為主labels，其他多的labels放到aliases。
-		aliases = data.aliases || library_namespace.null_Object(),
+		aliases = data.aliases || Object.create(null),
 		// reconstruct labels
 		error_list = label_data.filter(function(label) {
 			if (!label && label !== '') {
@@ -20223,7 +20234,7 @@ function module_code(library_namespace) {
 		var data_aliases = data.aliases, aliases_queue;
 		if (Array.isArray(data_aliases)) {
 			aliases_queue = data_aliases;
-			data_aliases = library_namespace.null_Object();
+			data_aliases = Object.create(null);
 			aliases_queue.forEach(function(alias) {
 				// 判別 language。
 				var value = alias && alias.value, language = alias.language
@@ -20432,7 +20443,7 @@ function module_code(library_namespace) {
 
 		// 正規化 →
 		// descriptions = {language_code:description,...}
-		var descriptions = library_namespace.null_Object(),
+		var descriptions = Object.create(null),
 		//
 		d_language = session.language || session[KEY_HOST_SESSION].language
 				|| default_language,
@@ -20588,7 +20599,7 @@ function module_code(library_namespace) {
 
 		if (!library_namespace.is_Object(options)) {
 			// 前置處理。
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		if (!id && !options['new']) {
@@ -21076,7 +21087,7 @@ function module_code(library_namespace) {
 
 		} else {
 			// 初始化。
-			// library_namespace.null_Object();
+			// Object.create(null);
 			data = {
 			// labels : [],
 			// aliases : []
@@ -21457,7 +21468,7 @@ function module_code(library_namespace) {
 				_options = options;
 			}
 		} else {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		var language = options.language || default_language, parameters;
@@ -21467,7 +21478,7 @@ function module_code(library_namespace) {
 		}
 
 		if (_options) {
-			parameters = library_namespace.null_Object();
+			parameters = Object.create(null);
 			PetScan_parameters.forEach(function(parameter) {
 				if (parameter in options) {
 					parameters[parameter] = options[parameter];

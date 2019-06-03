@@ -411,39 +411,13 @@ function (global) {
 	}
 
 
-	/**
-	 * 取得裸 Object (naked Object)。Object prototype may only be an Object or null<br />
-	 * 預防 Object.prototype 有東西，並消除 .toString() 之類。<br />
-	 * 
-	 * 注意: '' + Object.create(null) 會 throw TypeError: Cannot convert object to
-	 * primitive value
-	 * 
-	 * @returns 裸 Object (naked Object)。
-	 * 
-	 * @see <a href="http://hax.iteye.com/blog/1663476" accessdate="2013/1/8
-	 *      20:17">如何创建一个JavaScript裸对象 - hax的技术部落格 - ITeye技术网站</a>
-	 * 
-	 */
-	var null_Object = function () {
-		return Object.create(null);
-	};
-
-	try {
-		null_Object();
-	} catch (e) {
-		null_Object = function () {
+	// 2019/6/3 18:16:44	CeL.null_Object() → Object.create(null)
+	if (typeof Object.create !== 'function') {
+		// 先暫時給一個，用於 `Object.create(null)`。
+		(Object.create = function() {
 			return {};
-
-			o = { __proto__: null };
-			for (var a in o)
-				delete o[a];
-			return o;
-		};
+		}).not_native = true;
 	}
-
-	// export.
-	_.null_Object = null_Object;
-
 
 	/**
 	 * setup options. 前置處理 options，正規化 read-only 參數。
@@ -451,7 +425,7 @@ function (global) {
 	 * @example<code>
 	   //	// 前導作業/前置處理。
 	   //	if (!library_namespace.is_Object(options))
-	   //		options = library_namespace.null_Object();
+	   //		options = Object.create(null);
 	   // →
 	   //	options = library_namespace.setup_options(options);
 	   //	options = library_namespace.setup_options(options, true);
@@ -473,7 +447,7 @@ function (global) {
 
 		// create a new one. copy options.
 		// or use Object.clone(options)
-		options = Object.assign(null_Object(), options);
+		options = Object.assign(Object.create(null), options);
 		// 註冊為副本。
 		options.new_NO = (options.new_NO | 0) + 1;
 		return options;
@@ -485,7 +459,7 @@ function (global) {
 	 * @example<code>
 	   //	// 前導作業/前置處理。
 	   //	if (!library_namespace.is_Object(options))
-	   //		options = library_namespace.null_Object();
+	   //		options = Object.create(null);
 	   // →
 	   //	options = library_namespace.setup_options(options);
 	 * </code>
@@ -501,7 +475,7 @@ function (global) {
 		if (typeof options === 'string') {
 			// e.g., 'bot' → {bot:true}
 			// e.g., 'bot|minor' → {bot:true,minor:true}
-			var _options = null_Object(), i = 0;
+			var _options = Object.create(null), i = 0;
 			for (options = options.split('|'); i < options.length; i++) {
 				if (options[i]) {
 					_options[options[i]] = true;
@@ -509,7 +483,7 @@ function (global) {
 			}
 			return _options;
 		}
-		return options || Object.assign(null_Object(), options);
+		return options || Object.assign(Object.create(null), options);
 	}
 	/**
 	 * setup options. 前置處理 / clone options，避免修改或覆蓋附加參數。<br />
@@ -518,7 +492,7 @@ function (global) {
 	 * @example<code>
 	   //	// 前導作業/前置處理。
 	   //	if (!library_namespace.is_Object(options))
-	   //		options = library_namespace.null_Object();
+	   //		options = Object.create(null);
 	   // →
 	   //	options = library_namespace.new_options(options);
 	 * </code>
@@ -537,9 +511,9 @@ function (global) {
 		if (options) {
 			if ((new_options.new_key in options) && length === 1)
 				return options;
-			options = Object.assign(null_Object(), options);
+			options = Object.assign(Object.create(null), options);
 		} else {
-			options = null_Object();
+			options = Object.create(null);
 		}
 		if (length > 1) {
 			for(var i = 1; i < length; i++)
@@ -563,7 +537,7 @@ function (global) {
 	_.new_options = new_options;
 
 
-	var modify_function_hash = null_Object();
+	var modify_function_hash = Object.create(null);
 
 	_// JSDT:_module_
 	.
@@ -1032,6 +1006,15 @@ function (global) {
 	};
 
 	platform.is_Windows = function() {
+		// https://www.lisenet.com/2014/get-windows-system-information-via-wmi-command-line-wmic/
+		// TODO: `wmic OS get Caption,CSDVersion,OSArchitecture,Version`
+
+		// WMIC is deprecated.
+		// https://docs.microsoft.com/zh-tw/dotnet/api/system.environment.osversion
+		// nvironment.OSVersion屬性不提供可靠的方式，來識別正確的作業系統和它的版本。 因此，我們不建議使用此方法。
+		// `PowerShell.exe -Command "&
+		// {[System.Environment]::OSVersion.Version}"`
+
 		return platform.OS && platform.OS.toLowerCase().indexOf('win') === 0;
 	};
 
@@ -1254,7 +1237,7 @@ function (global) {
 	 */
 	reset_env = function (OS_type, reset) {
 		if (reset)
-			this.env = null_Object();
+			this.env = Object.create(null);
 
 		var OS, env = this.env, is_node = typeof process === 'object' && process.env,
 		//
@@ -1639,7 +1622,7 @@ OS='UNIX'; // unknown
 	 * @returns {Function}
 	 */
 	function setting_pair(default_setting) {
-		var setting_now = default_setting || null_Object(),
+		var setting_now = default_setting || Object.create(null),
 		setting_handle = function (name, value) {
 			if (_.is_Object(name)) {
 				// setter
@@ -1670,7 +1653,7 @@ OS='UNIX'; // unknown
 					: name ? setting_now[name] : setting_now;
 		};
 		setting_handle.reset = function (setting) {
-			return setting_now = setting || null_Object();
+			return setting_now = setting || Object.create(null);
 		};
 
 		// additional setting.
@@ -1716,7 +1699,7 @@ OS='UNIX'; // unknown
 				: setting_now[name];
 	};
 	setting_pair.prototype.reset = function(setting) {
-		return this.setting_now = setting || null_Object();
+		return this.setting_now = setting || Object.create(null);
 	};
 
 	</code>
@@ -1922,7 +1905,7 @@ OS='UNIX'; // unknown
 		if (b)
 			load = get_function_name.ns;
 		else
-			get_function_name.b = b = null_Object(), get_function_name.ns = load = null_Object();
+			get_function_name.b = b = Object.create(null), get_function_name.ns = load = Object.create(null);
 
 		if (!ns)
 			ns = this;
@@ -2197,7 +2180,7 @@ OS='UNIX'; // unknown
 				if (!(color in color_index))
 					return;
 				if (typeof style === 'string') {
-					style = null_Object();
+					style = Object.create(null);
 				}
 				style[bg ? 'bg' : 'fg'] = color;
 			});
@@ -2704,7 +2687,7 @@ OS='UNIX'; // unknown
 	 */
 	function set_method(name_space, properties, filter, attributes) {
 		if (!attributes)
-			attributes = null_Object();
+			attributes = Object.create(null);
 
 		if (!name_space) {
 			_.debug('沒有指定擴展的對象，擴展到 set_method.default_target。', 1, 'set_method');
@@ -2714,7 +2697,7 @@ OS='UNIX'; // unknown
 				)
 					return name_space;
 				else
-					name_space = null_Object();
+					name_space = Object.create(null);
 		}
 
 		if (name_space === properties) {
@@ -2727,7 +2710,7 @@ OS='UNIX'; // unknown
 		if (filter && Array.isArray(filter)) {
 			// filter: Array → Object
 			key = filter;
-			filter = null_Object();
+			filter = Object.create(null);
 			if (typeof key[0] === 'string')
 				// set default value: overwrite.
 				key.unshift(false);
@@ -2774,6 +2757,15 @@ OS='UNIX'; // unknown
 				return;
 
 			attributes.value = value = properties[key];
+			// 以新的覆蓋舊的。
+			if (name_space[key] && name_space[key][not_native_keyword]) {
+				try {
+					delete name_space[key];
+				} catch (e) {
+					// TODO: handle exception
+				}
+			}
+
 			// Opera/9.80 中，set_method(Number, ..) 會造成：
 			// Object.defineProperty: first argument not an Object
 			try {
@@ -2861,6 +2853,47 @@ OS='UNIX'; // unknown
 						Object.defineProperty(object, key, properties[key]);
 			return object;
 		},
+		// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Object/create
+		// Object.create() 指定其原型物件與屬性，創建一個新物件。
+		create : function create(proto, propertiesObject) {
+			if (proto === null) {
+				/**
+				 * 取得裸 Object (naked Object)。
+				 * 
+				 * TODO: 快速回應的方法。但不見得在所有環境都適用，還需要再經過測試。
+				 * 
+				 * @returns 裸 Object (naked Object)。
+				 */
+				return {};
+			}
+
+			if (proto !== null && typeof proto !== 'object' && typeof proto !== 'function') {
+				throw TypeError('Object prototype may only be an Object or null');
+			}
+
+			var object = new Object();
+			object.__proto__ = proto;
+			/**
+			 * Object.create(null) 可取得裸 Object (naked Object)。Object prototype
+			 * may only be an Object or null<br />
+			 * 預防 Object.prototype 有東西，並消除 .toString() 之類。<br />
+			 * 
+			 * 注意: '' + Object.create(null) 會 throw TypeError: Cannot convert
+			 * object to primitive value
+			 * 
+			 * @see <a href="http://hax.iteye.com/blog/1663476"
+			 *      accessdate="2013/1/8 20:17">如何创建一个JavaScript裸对象 - hax的技术部落格 -
+			 *      ITeye技术网站</a>
+			 */
+			for ( var attribute in object) {
+				// This will also delete .__proto__
+				delete object[attribute];
+			}
+
+			if (typeof propertiesObject === 'object')
+				Object.defineProperties(object, propertiesObject);
+			return object;
+		},
 		// 延展物件
 		// to add property, use Object.assign()
 		// application.debug.log use this.
@@ -2899,6 +2932,10 @@ OS='UNIX'; // unknown
 						callbackfn(this[index], index, this);
 		}
 	});
+
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
+	// 依賴於 set_method() 設定完之後才能使用的方法
+
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// for software verification(驗證) and validation(驗收).

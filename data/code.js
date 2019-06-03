@@ -471,7 +471,7 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
-	var is_controller = library_namespace.is_Object, null_Object = library_namespace.null_Object;
+	var is_controller = library_namespace.is_Object;
 
 	// 處理非巢式嵌套格式處理器。
 	// 2013/1/27 20:9:34
@@ -528,7 +528,7 @@ function module_code(library_namespace) {
 			item_processor) {
 		var index = 0, length = format_Array.length, formatted_result = [], item,
 		//
-		status_now = null_Object(),
+		status_now = Object.create(null),
 		// 囤積的 controller。
 		controller, cloned;
 
@@ -545,7 +545,7 @@ function module_code(library_namespace) {
 			if (is_controller(item)) {
 				if (controller) {
 					if (!cloned) {
-						controller = cloned = Object.assign(null_Object(),
+						controller = cloned = Object.assign(Object.create(null),
 								controller);
 						// cloned = true;
 					}
@@ -588,7 +588,7 @@ function module_code(library_namespace) {
 
 		return unnested_formatter_convert_Array(format_structure, this,
 				initial_controller
-						&& unnested_formatter_change_status(null_Object(),
+						&& unnested_formatter_change_status(Object.create(null),
 								initial_controller, this),
 				typeof item_processor === 'function' && item_processor);
 	}

@@ -157,10 +157,10 @@ function module_code(library_namespace) {
 		貮 : '貳',
 		参 : '參',
 		陆 : '陸',
+		// 去除常用字以防 false positive
 		// 漆 : '柒',
-		// 什 : '拾',
-
 		// 俗亦以「什」代拾，然易竄為「仟」。
+		// 什 : '拾',
 
 		// 念圓 : '貳拾圓',
 		// 念 : '貳拾',
@@ -259,7 +259,7 @@ function module_code(library_namespace) {
 			+ Chinese_numerals_Normal_digits + '\\d '
 			+ Chinese_numerals_Normal_base_denomination.join('') + '又]+|分之)+$'),
 	//
-	numeral_value = library_namespace.null_Object();
+	numeral_value = Object.create(null);
 
 	_.Chinese_numerals_Normal_digits = Chinese_numerals_Normal_digits;
 	_.Chinese_numerals_Formal_digits = Chinese_numerals_Formal_digits;

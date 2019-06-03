@@ -237,7 +237,7 @@ if (typeof CeL === 'function')
 			 * @inner
 			 */
 			function digit_cache(base) {
-				var digits = library_namespace.null_Object();
+				var digits = Object.create(null);
 				base.forEach(function (digit, index) {
 					if (digit.length !== 1)
 						library_namespace.error('digit_cache: Invalid digit: [' + digit + '].');
@@ -2504,7 +2504,7 @@ if (typeof CeL === 'function')
 
 
 			//max_digits[base]={integer}, min_digits[base]={integer}
-			var max_digits = library_namespace.null_Object(), min_digits = library_namespace.null_Object(),
+			var max_digits = Object.create(null), min_digits = Object.create(null),
 			//
 			LOG_MAX = Math.log(Number.MAX_VALUE), LOG_MIN = Math.log(Number.EPSILON);
 			function max_digits_of(base) {
@@ -2950,7 +2950,7 @@ if (typeof CeL === 'function')
 				integer = this.clone();
 				delete integer[KEY_NEGATIVE];
 
-				var prime, index = 1, factors = library_namespace.null_Object(), power,
+				var prime, index = 1, factors = Object.create(null), power,
 				get_sqrt = function () {
 					sqrt = Math.floor(integer.clone().square_root().valueOf());
 				}, sqrt = get_sqrt();

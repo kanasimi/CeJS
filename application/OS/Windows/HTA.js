@@ -407,7 +407,7 @@ reload:function(){
 			base_space = this.g(base_space);
 		}
 		if (!library_namespace.is_Object(config))
-			config = library_namespace.null_Object();
+			config = Object.create(null);
 		config.window = this.win();
 		config.base = base_space || this.doc();
 		config.submit = submit;

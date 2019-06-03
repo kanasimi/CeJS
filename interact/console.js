@@ -650,9 +650,9 @@ function module_code(library_namespace) {
 			this.options = options;
 
 		options = Array.isArray(text) ? SGR_parse_list(text, options
-				|| library_namespace.null_Object())
+				|| Object.create(null))
 		// String(): 標準化 / normalization
-		: SGR_parse(String(text), options || library_namespace.null_Object());
+		: SGR_parse(String(text), options || Object.create(null));
 
 		this.text = options[0];
 
@@ -754,9 +754,9 @@ function module_code(library_namespace) {
 	 * style value alias<br />
 	 * 為允許使用者添增，因此放在 public。
 	 */
-	SGR_code.style_value_alias = library_namespace.null_Object();
+	SGR_code.style_value_alias = Object.create(null);
 	// SGR_code.color_index.black = 0
-	SGR_code.color_index = library_namespace.null_Object();
+	SGR_code.color_index = Object.create(null);
 	SGR_code.color = 'black,red,green,yellow,blue,magenta,cyan,white'
 			.split(',');
 	// 鎖定物件。

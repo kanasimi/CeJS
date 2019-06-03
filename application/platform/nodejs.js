@@ -521,7 +521,7 @@ function module_code(library_namespace) {
 				filter : options
 			};
 		} else if (!library_namespace.is_Object(options)) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		if (isNaN(depth)) {
@@ -648,7 +648,7 @@ function module_code(library_namespace) {
 			: value;
 		}, library_namespace.env.arg_hash
 		// ↑ use ((CeL.env.arg_hash)) to get command line arguments
-		= library_namespace.null_Object());
+		= Object.create(null));
 	}
 
 	// --------------------------------------------

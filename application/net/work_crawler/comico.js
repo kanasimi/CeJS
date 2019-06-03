@@ -503,8 +503,7 @@ function module_code(library_namespace) {
 	var module_name = this.id;
 
 	function new_comico_comics_crawler(configuration, callback, initializer) {
-		configuration = configuration ? Object.assign(library_namespace
-				.null_Object(), default_configuration, configuration)
+		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
 				: default_configuration;
 
 		// 每次呼叫皆創建一個新的實體。

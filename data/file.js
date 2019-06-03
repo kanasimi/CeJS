@@ -119,18 +119,11 @@ function module_code(library_namespace) {
 			TotalSize : '',
 			VolumeName : ''
 		}
-	},
+	};
 
 	// a network drive.
 	// http://msdn.microsoft.com/en-us/library/ys4ctaz0(v=vs.84).aspx
 	// NETWORK_DRIVE = 3,
-
-	/**
-	 * 取得裸 Object (naked Object)。
-	 * 
-	 * @returns 裸 Object (naked Object)。
-	 */
-	null_Object = library_namespace.null_Object;
 
 	/**
 	 * 取得指定 path 之檔名/資料夾名稱。
@@ -152,11 +145,11 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function new_folder() {
-		var folder = null_Object();
+		var folder = Object.create(null);
 		// 檔案, sub-files.
-		folder[FILES] = null_Object();
+		folder[FILES] = Object.create(null);
 		// directory status/infomation.
-		folder[DATA] = null_Object();
+		folder[DATA] = Object.create(null);
 		return folder;
 	}
 
@@ -277,7 +270,7 @@ function module_code(library_namespace) {
 
 		// private properties.
 		this.structure = new_folder();
-		this.count = null_Object();
+		this.count = Object.create(null);
 		this.path_list = [];
 
 		this.add(path, options);
@@ -387,7 +380,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('初始化+正規化。', 2, 'add_path');
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
-			options = null_Object();
+			options = Object.create(null);
 		if (isNaN(options.depth) || options.depth < 0
 		// || options.depth > default_depth
 		)
@@ -560,7 +553,7 @@ function module_code(library_namespace) {
 									'add_path');
 							base[FILES][name] = file_data_fields
 							//
-							? fill_data(item, file_data_fields, null_Object())
+							? fill_data(item, file_data_fields, Object.create(null))
 									: null;
 							// 預防 callback 動到 item，排在最後才處理。
 							if (callback = callback_Array
@@ -713,7 +706,7 @@ function module_code(library_namespace) {
 		// DATA:{},
 		// 資料夾名稱(sub directory name):{}
 		// };
-		var structure = null_Object(),
+		var structure = Object.create(null),
 		//
 		traverse = function(folder, base) {
 			if (folder[FILES].length)
@@ -721,7 +714,7 @@ function module_code(library_namespace) {
 
 			for ( var name in folder)
 				if (name !== FILES && name !== DATA)
-					traverse(folder[name], base[name] = null_Object());
+					traverse(folder[name], base[name] = Object.create(null));
 		};
 
 		traverse(this.structure, structure);
@@ -1127,7 +1120,7 @@ function module_code(library_namespace) {
 
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
-			options = null_Object();
+			options = Object.create(null);
 
 		// 計數 + 進度。
 		options.index = 0;
@@ -1450,7 +1443,7 @@ function module_code(library_namespace) {
 	 */
 	function Files_encode(target_encoding, options) {
 		if (!options)
-			options = null_Object();
+			options = Object.create(null);
 
 		var modify = typeof options.modify === 'function' && options.modify,
 		//
@@ -1519,7 +1512,7 @@ function module_code(library_namespace) {
 			return;
 
 		if (!options)
-			options = null_Object();
+			options = Object.create(null);
 		else if (typeof options === 'string')
 			options = {
 				encoding : options

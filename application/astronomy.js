@@ -1035,7 +1035,7 @@ if (typeof CeL === 'function')
 
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var tmp, cos_B = Math.cos(latitude),
 				//
@@ -2218,7 +2218,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @inner
 			 */
-			var VSOP87_terms = library_namespace.null_Object();
+			var VSOP87_terms = Object.create(null);
 
 			/**
 			 * VSOP87 天體/行星的日心座標位置 (Heliocentric ecliptic spherical coordinates)
@@ -2269,7 +2269,7 @@ if (typeof CeL === 'function')
 				 */
 				var τ = Julian_century(TT_JD) / 10,
 				//
-				coordinates = library_namespace.null_Object(),
+				coordinates = Object.create(null),
 				//
 				object_terms = VSOP87_terms[VSOP87.object_name(object)];
 				if (!object_terms)
@@ -2277,7 +2277,7 @@ if (typeof CeL === 'function')
 
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var terms = options.terms;
 				if (!terms)
@@ -2456,7 +2456,7 @@ if (typeof CeL === 'function')
 			function convert_VSOP87_file(file_name, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var encoding = options.encoding || 'ascii',
 				// 需要先設定 fs = require('fs');
@@ -2474,7 +2474,7 @@ if (typeof CeL === 'function')
 
 					var object, type, group,
 					//
-					terms = library_namespace.null_Object();
+					terms = Object.create(null);
 
 					data.forEach(function(line) {
 						if (!line)
@@ -2561,11 +2561,11 @@ if (typeof CeL === 'function')
 						&& object.object)
 					object = (options = object).object;
 				else if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var τ0, τ = 0, rectangular, object_heliocentric,
 				//
-				coordinates = library_namespace.null_Object(),
+				coordinates = Object.create(null),
 				// light-time error in days
 				error = options.error || 1e-6;
 
@@ -2742,7 +2742,7 @@ if (typeof CeL === 'function')
 			function solar_coordinates(TT_JD, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				// heliocentric coordinates. 計算日心黃道坐標中地球的位置。
 				var coordinates = VSOP87(TT_JD, solar_terms_object);
@@ -3016,7 +3016,7 @@ if (typeof CeL === 'function')
 
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var index, days, date, year,
 				// apparent in degrees
@@ -3183,10 +3183,10 @@ if (typeof CeL === 'function')
 				//
 				|| (solar_term_calendar_cache[cache]
 				//
-				= library_namespace.null_Object());
+				= Object.create(null));
 
 				// 不動到原 options。
-				options = Object.assign(library_namespace.null_Object(),
+				options = Object.assign(Object.create(null),
 						options);
 
 				var handler = solar_term_calendar_year_start.bind(options);
@@ -3444,7 +3444,7 @@ if (typeof CeL === 'function')
 				if (!library_namespace.is_Object(options))
 					options = typeof options === 'string' ? {
 						terms : options
-					} : library_namespace.null_Object();
+					} : Object.create(null);
 
 				/**
 				 * Julian millennia since J2000.0.<br />
@@ -3469,7 +3469,7 @@ if (typeof CeL === 'function')
 				 * U: 移動黃道(瞬時黃道?)計算的地心黃緯 in radians. (ecliptic latitude reckoned
 				 * from the moving ecliptic)
 				 */
-				coordinates = library_namespace.null_Object();
+				coordinates = Object.create(null);
 
 				library_namespace.debug(
 				//
@@ -3607,7 +3607,7 @@ if (typeof CeL === 'function')
 			 * @type {Object}
 			 * @inner
 			 */
-			var LEA406_terms = library_namespace.null_Object();
+			var LEA406_terms = Object.create(null);
 
 			/**
 			 * 增加指定項目的計算數據，提供給模組內部函數使用。
@@ -3715,7 +3715,7 @@ if (typeof CeL === 'function')
 			function convert_LEA406(file_name, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var encoding = options.encoding || 'ascii',
 				//
@@ -3883,7 +3883,7 @@ if (typeof CeL === 'function')
 			function lunar_coordinates(TT_JD, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var coordinates = LEA406(TT_JD, 'FK5' in options ? {
 					FK5 : options.FK5
@@ -4413,7 +4413,7 @@ if (typeof CeL === 'function')
 						// 這邊預設採用 0,0 是為了計算 .π，但此法不見得理想!
 						local = options.local || [ 0, 0 ];
 					} else
-						options = library_namespace.null_Object();
+						options = Object.create(null);
 				}
 
 				var sun_coordinates = solar_coordinates(TT_JD, {
@@ -4931,7 +4931,7 @@ if (typeof CeL === 'function')
 			Besselian_elements.lunar = function(TT_JD, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var local = options.local || [ 0, 0 ];
 
@@ -5145,7 +5145,7 @@ if (typeof CeL === 'function')
 			function eclipse_JD(TT_JD, phase, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 				if (!options.eclipse)
 					options = Object.assign({
 						eclipse : true
@@ -5688,7 +5688,7 @@ if (typeof CeL === 'function')
 				}
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var operator, UT_JD;
 				if (typeof options.mean === 'boolean')
@@ -5786,7 +5786,7 @@ if (typeof CeL === 'function')
 			function lunar_phase_of_JD(UT_JD, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var TT_JD;
 				if (options.TT)
@@ -6091,7 +6091,7 @@ if (typeof CeL === 'function')
 
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 
 				var 歲首 = options.歲首,
 				//

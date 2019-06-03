@@ -232,7 +232,7 @@ function module_code(library_namespace) {
 	archive_org.URL_prefix = 'http://web.archive.org/web/';
 
 	/** {Object} cached[URL] = [ return of archived data, error ] */
-	archive_org.cached = library_namespace.null_Object();
+	archive_org.cached = Object.create(null);
 
 	// --------------------------------------------------------------------------------------------
 
@@ -335,7 +335,7 @@ function module_code(library_namespace) {
 	}
 
 	/** {Object}check_URL.link_status[normalized_URL] = status/error */
-	check_URL.link_status = library_namespace.null_Object();
+	check_URL.link_status = Object.create(null);
 
 	/**
 	 * normalize URL to check

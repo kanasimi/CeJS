@@ -129,7 +129,7 @@ function module_code(library_namespace) {
 		if (library_namespace.is_Object(is_HTML))
 			options = is_HTML, is_HTML = undefined;
 		else if (!library_namespace.is_Object(options)) {
-			options = isNaN(options) ? library_namespace.null_Object() : {
+			options = isNaN(options) ? Object.create(null) : {
 				reading_length : options
 			};
 		}
@@ -674,7 +674,7 @@ function module_code(library_namespace) {
 
 		// 前置處理。
 		if (!library_namespace.is_Object(options)) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		var i, old_length = text.length,

@@ -148,7 +148,7 @@ if (typeof CeL === 'function')
 
 				var units = quantity.units;
 				if (!units)
-					quantity.units = units = library_namespace.null_Object();
+					quantity.units = units = Object.create(null);
 
 				if (unit_symbol in units) {
 					var array = units[unit_symbol];
@@ -214,7 +214,7 @@ if (typeof CeL === 'function')
 							parse_unit(matched[2], quantity, true));
 
 				is_division = is_division ? -1 : 1;
-				// var units = library_namespace.null_Object();
+				// var units = Object.create(null);
 				// reset pattern
 				PATTERN_UNIT.lastIndex = 0;
 				while (matched = PATTERN_UNIT.exec(unit)) {
@@ -306,7 +306,7 @@ if (typeof CeL === 'function')
 
 				if (!unit_name_all) {
 					// initialization.
-					unit_name_all = library_namespace.null_Object();
+					unit_name_all = Object.create(null);
 					for ( var l in unit_name)
 						Object.assign(unit_name_all, unit_name[l]);
 				}

@@ -116,9 +116,9 @@ function module_code(library_namespace) {
 	//
 	UTC_PATTERN = /UTC(?:\s*([+-]?\d{1,2})(:\d{1,2})?)?/i,
 	// assert: isNaN(DEFAULT_TIME_ZONE) === true
-	// isNaN(CeL.null_Object()) will throw @ Chrome/36
+	// isNaN(Object.create(null)) will throw @ Chrome/36
 	// (Cannot convert object to primitive value),
-	// therefore we can't use library_namespace.null_Object() here.
+	// therefore we can't use Object.create(null) here.
 	DEFAULT_TIME_ZONE = {
 		timezone : 'default'
 	};
@@ -695,7 +695,7 @@ function module_code(library_namespace) {
 		} else if (!library_namespace.is_Object(options)) {
 			// 前置處理。
 			tmp = options;
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 			if (tmp) {
 				if (tmp in String_to_Date.parser) {
 					options.parser = String_to_Date.parser[tmp];
@@ -866,7 +866,7 @@ function module_code(library_namespace) {
 
 		// 前置處理。
 		if (!library_namespace.is_Object(options)) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		var date_data,
@@ -1124,7 +1124,7 @@ function module_code(library_namespace) {
 		// Common Era / Before the Common Era, CE / BCE. 公元/西元.
 		CE : function(date_string, minute_offset, options) {
 			if (!library_namespace.is_Object(options)) {
-				options = library_namespace.null_Object();
+				options = Object.create(null);
 			}
 			if (!('no_year_0' in options)) {
 				options.no_year_0 = true;
@@ -1266,7 +1266,7 @@ function module_code(library_namespace) {
 	 */
 	function Julian_String_to_Date(date_string, minute_offset, options) {
 		if (!library_namespace.is_Object(options)) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		options.post_process = Julian_shift_days;
@@ -1359,7 +1359,7 @@ function module_code(library_namespace) {
 				parser : options
 			};
 		} else if (!library_namespace.is_Object(options)) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		if (false) {
@@ -1426,7 +1426,7 @@ function module_code(library_namespace) {
 		CE : function(date_value, format, locale, options) {
 			// 前置處理。
 			if (!library_namespace.is_Object(options)) {
-				options = library_namespace.null_Object();
+				options = Object.create(null);
 			}
 			if (!('no_year_0' in options)) {
 				options.no_year_0 = true;
@@ -1479,7 +1479,7 @@ function module_code(library_namespace) {
 	function strftime(date_value, format, locale, options) {
 		// 前置處理。
 		if (!library_namespace.is_Object(options)) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		var original_Date = options.original_Date || date_value,
@@ -1566,13 +1566,13 @@ function module_code(library_namespace) {
 		if (!strftime.search) {
 			library_namespace.debug('初始化 strftime', 2,
 					'strftime.set_conversion');
-			strftime.search = library_namespace.null_Object();
-			strftime.conversion = library_namespace.null_Object();
+			strftime.search = Object.create(null);
+			strftime.conversion = Object.create(null);
 		}
 
 		// 前置處理。
 		if (!library_namespace.is_Object(options)) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		if (locale && gettext.to_standard && !options.no_gettext) {
@@ -1583,7 +1583,7 @@ function module_code(library_namespace) {
 		}
 
 		if (!(locale in (locale_conversion = strftime.conversion))) {
-			locale_conversion[locale] = library_namespace.null_Object();
+			locale_conversion[locale] = Object.create(null);
 		}
 		locale_conversion = locale_conversion[locale];
 		for (i in conversion) {
@@ -1937,7 +1937,7 @@ function module_code(library_namespace) {
 
 				// 前置處理。
 				if (!library_namespace.is_Object(options)) {
-					options = library_namespace.null_Object();
+					options = Object.create(null);
 				}
 
 				if (!options.no_new_Date) {
@@ -2009,7 +2009,7 @@ function module_code(library_namespace) {
 
 			// 前置處理。
 			if (!library_namespace.is_Object(options)) {
-				options = library_namespace.null_Object();
+				options = Object.create(null);
 			}
 			// 因為可能會更改 date_value，因此把本來的 date_value 放在 options
 			// 中供有需要的取用。
@@ -2458,7 +2458,7 @@ function module_code(library_namespace) {
 			options) {
 		// 前置處理。
 		if (!library_namespace.is_Object(options)) {
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		}
 
 		if (isNaN(options.year_padding)) {

@@ -2578,7 +2578,7 @@ function cacher(cache_file, options) {
 	if (!library_namespace.is_Object(options)) {
 		options = typeof options === 'string' ? {
 			encoding : options
-		} : library_namespace.null_Object();
+		} : Object.create(null);
 	}
 
 	if (this.file !== cache_file) {

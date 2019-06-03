@@ -638,7 +638,7 @@ function module_code(library_namespace) {
 
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 
 		// 決定將 URL 存放至何處(存成哪個檔案)。
 		var file_path = options.file_name || get_file_name;

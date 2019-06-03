@@ -196,7 +196,7 @@ function _format(date, options, to_name, is_leap, combine) {
  * @returns {Function}測試器。
  */
 function new_tester(to_Calendar, to_Date, options) {
-	options = Object.assign(library_namespace.null_Object(),
+	options = Object.assign(Object.create(null),
 			new_tester.default_options, options || {});
 	var epoch = (options.epoch || to_Date.epoch) - 0 || 0,
 	//
@@ -583,7 +583,7 @@ _.Tabular_Date = Tabular_Date;
 
 
 // Hebrew_month_serial[month_name] = month serial (1–12 or 13)
-var Hebrew_month_serial = library_namespace.null_Object(),
+var Hebrew_month_serial = Object.create(null),
 // Hour is divided into 1080 parts called haliq (singular of halaqim)
 Hebrew_1_HOUR = 1080 | 0,
 // hour length in halaqim
@@ -1180,7 +1180,7 @@ function Date_to_Hebrew(date, options) {
 				month_name : true
 			};
 		else
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 
 	return _format([ year, month, days + 1,
 	// hour
@@ -2028,7 +2028,7 @@ var Dai_festivals = {
 Dai_Date.date_of_days = function(days, options) {
 	// 前置處理。
 	if (!library_namespace.is_Object(options))
-		options = library_namespace.null_Object();
+		options = Object.create(null);
 
 	var date, festival,
 	//
@@ -2737,7 +2737,7 @@ _.Myanmar_Date = Myanmar_Date;
 function Date_to_Myanmar(date, options) {
 	// 前置處理。
 	if (!library_namespace.is_Object(options))
-		options = library_namespace.null_Object();
+		options = Object.create(null);
 
 	// reckon the year of ((date))
 	var year = Math.floor((date - Myanmar_Date.epoch)
@@ -3167,7 +3167,7 @@ Hindu_year_offset = {
 },
 
 
-Hindu_constants = library_namespace.null_Object();
+Hindu_constants = Object.create(null);
 
 // सूर्य सिद्धांत
 // https://en.wikipedia.org/wiki/Surya_Siddhanta
@@ -3230,7 +3230,7 @@ var Hindu_default_system = Hindu_constants.Surya_Siddhanta;
 			system[object] *= TURN_TO_DEGREES / civil_days;
 		system.year_days = TURN_TO_DEGREES / system.sun;
 		// cache for Hindu_Date.conjunction()
-		system.conjunction = library_namespace.null_Object();
+		system.conjunction = Object.create(null);
 		system.moon_sun = 1 / (system.moon - system.sun);
 		system.moon_days = system.moon_sun * TURN_TO_DEGREES;
 	}
@@ -3373,7 +3373,7 @@ Hindu_Date.conjunction = function(days, system, angle, next, no_recursion) {
 function Hindu_Date(year, month, date, options) {
 	// 前置處理。
 	if (!library_namespace.is_Object(options))
-		options = library_namespace.null_Object();
+		options = Object.create(null);
 
 	if (options.era in Hindu_year_offset)
 		year += Hindu_year_offset[options.era];
@@ -3465,7 +3465,7 @@ _.Hindu_Date = Hindu_Date;
 function Date_to_Hindu(date, options) {
 	// 前置處理。
 	if (!library_namespace.is_Object(options))
-		options = library_namespace.null_Object();
+		options = Object.create(null);
 
 	// $year/$month/$day → $JulianDay
 	// → $ahar, $mllong, $mslong, $tllong, $tslong, $tithi, $clong, $nclong
@@ -3869,7 +3869,7 @@ function Date_to_Thai(date, month, year, options) {
 	if (typeof month === 'object') {
 		options = month;
 	} else {
-		options = library_namespace.null_Object();
+		options = Object.create(null);
 	}
 	var _Date, weekday = options.weekday;
 	// normalize date
@@ -4124,7 +4124,7 @@ function Date_to_Bahai(date, options) {
 
 	// 前置處理。
 	if (!library_namespace.is_Object(options))
-		options = library_namespace.null_Object();
+		options = Object.create(null);
 
 	// 日期序數→日期名。year/month/date index to serial.
 	year -= Bahai_epochal_year - 1;
@@ -5443,7 +5443,7 @@ function 平氣平朔無中置閏(曆數_月日數, 曆數_節氣日數, 曆元J
 }
 
 
-var to_曆 = library_namespace.null_Object();
+var to_曆 = Object.create(null);
 function add_平氣平朔曆法(config) {
 	for ( var 曆名 in config) {
 		var 曆數 = config[曆名];

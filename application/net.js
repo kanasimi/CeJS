@@ -223,7 +223,7 @@ function module_code(library_namespace) {
 			host : location.host,
 			// local file @ IE: C:\xx\xx\ff, others: /C:/xx/xx/ff
 			pathname : location.pathname
-		} : library_namespace.null_Object();
+		} : Object.create(null);
 		URI.URI = href;
 
 		tmp = matched[1] || options && options.protocol;
@@ -321,9 +321,9 @@ function module_code(library_namespace) {
 		var data = typeof string === 'string' ? string.replace(/\+/g, '%20')
 				.split(/&/) : [], i = 0, l = data.length, name, value, matched;
 		if (!library_namespace.is_Object(param))
-			param = library_namespace.null_Object();
+			param = Object.create(null);
 		if (!library_namespace.is_Object(options))
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 
 		for (; i < l; i++)
 			if (data[i]) {
@@ -662,8 +662,7 @@ function module_code(library_namespace) {
 						+ user_setting.temporary_file, 2,
 						'URI_accessor.module.curl');
 			}
-			var setting = new library_namespace.setting_pair(library_namespace
-					.null_Object(), URI_accessor.setting, user_setting),
+			var setting = new library_namespace.setting_pair(Object.create(null), URI_accessor.setting, user_setting),
 			//
 			value = setting('user_agent'),
 			//
@@ -716,8 +715,7 @@ function module_code(library_namespace) {
 		},
 
 		wget : function(user_setting) {
-			var setting = new library_namespace.setting_pair(library_namespace
-					.null_Object(), URI_accessor.setting, user_setting), value = setting('user_agent'), tmp = '" "', command_array = [
+			var setting = new library_namespace.setting_pair(Object.create(null), URI_accessor.setting, user_setting), value = setting('user_agent'), tmp = '" "', command_array = [
 					'wget --timestamping --keep-session-cookies --no-check-certificate '
 							+ (library_namespace.is_debug(2) ? '-d ' : '')
 							+ (setting('additional_options') ? setting('additional_options')
@@ -1050,8 +1048,7 @@ function module_code(library_namespace) {
 			video_url = [ video_url ];
 		}
 
-		var count = video_url.length, error_count = 0, i, info_hash = library_namespace
-				.null_Object(), video_info, result,
+		var count = video_url.length, error_count = 0, i, info_hash = Object.create(null), video_info, result,
 		/**
 		 * for message show
 		 */
@@ -1068,7 +1065,7 @@ function module_code(library_namespace) {
 				callback : options
 			};
 		else if (!library_namespace.is_Object(options))
-			options = library_namespace.null_Object();
+			options = Object.create(null);
 		if (!options.base_directory)
 			options.base_directory = download_to;
 
