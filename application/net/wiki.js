@@ -11080,8 +11080,7 @@ function module_code(library_namespace) {
 			}
 
 			// https://www.mediawiki.org/w/api.php?action=help&modules=login
-			var token = Object.assign(Object.create(null),
-					session.token);
+			var token = Object.assign(Object.create(null), session.token);
 			// .csrftoken 是本函式為 cache 加上的，非正規 parameter。
 			delete token.csrftoken;
 			wiki_API.query([ session.API_URL,
@@ -12920,7 +12919,7 @@ function module_code(library_namespace) {
 
 		if (process.env.JOB_ID && process.env.JOB_NAME) {
 			// assert: process.env.ENVIRONMENT === 'BATCH'
-			CeL.wiki.job_data = job_data = {
+			wiki_API.job_data = job_data = {
 				id : process.env.JOB_ID,
 				name : process.env.JOB_NAME,
 				request : process.env.REQUEST,
@@ -15458,7 +15457,8 @@ function module_code(library_namespace) {
 
 			default:
 				if (typeof type === 'function')
-					to_get_data = type.bind(Object.assign(Object.create(null), _this, operation));
+					to_get_data = type.bind(Object.assign(Object.create(null),
+							_this, operation));
 				else if (type)
 					throw new Error('wiki_API.cache: Bad type: ' + type);
 				else {
@@ -18922,7 +18922,8 @@ function module_code(library_namespace) {
 			// 將{Object}簡易的屬性雜湊轉換成{Array}屬性名稱列表 →
 			// 因為需要動到不可回復的操作，因此不更動到原先的屬性。
 			// 初始化
-			additional_properties = Object.assign(Object.create(null), additional_properties);
+			additional_properties = Object.assign(Object.create(null),
+					additional_properties);
 
 			// console.log(property);
 
