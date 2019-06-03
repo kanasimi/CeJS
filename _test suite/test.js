@@ -771,6 +771,8 @@ function test_locale() {
 
 	//	###單數複數形式 (plural) test
 	error_count += CeL.test('單數複數形式 (plural)', function(assert) {
+		// CeL.gettext.use_domain('en', function() {}, true);
+		var message_id = '已載入 %1 筆資料。';
 		CeL.gettext.set_text({
 			'已載入 %1 筆資料。' : function(domain_name, arg) {
 				// with error detection:
@@ -786,10 +788,10 @@ function test_locale() {
 		}, 'en');
 
 		CeL.gettext.use_domain('en', function() {
-			assert([ 'No entry loaded.', CeL.gettext('已載入 %1 筆資料。', 0) ]);
-			assert([ 'One entry loaded.', CeL.gettext('已載入 %1 筆資料。', 1) ]);
-			assert([ '2 entries loaded.', CeL.gettext('已載入 %1 筆資料。', 2) ]);
-			assert([ '3 entries loaded.', CeL.gettext('已載入 %1 筆資料。', 3) ]);
+			assert([  'No entry loaded.', CeL.gettext(message_id, 0) ], '單數複數形式 (plural): 0');
+			assert([ 'One entry loaded.', CeL.gettext(message_id, 1) ], '單數複數形式 (plural): 1');
+			assert([ '2 entries loaded.', CeL.gettext(message_id, 2) ], '單數複數形式 (plural): 2');
+			assert([ '3 entries loaded.', CeL.gettext(message_id, 3) ], '單數複數形式 (plural): 3');
 			//CeL.info('單數複數形式 (plural) test OK.');
 		}, true);
 	});

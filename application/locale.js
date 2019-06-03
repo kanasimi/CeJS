@@ -935,7 +935,12 @@ function module_code(library_namespace) {
 		else {
 			// specify a new domain.
 			// gettext_texts[domain] = Object.create(null);
-			library_namespace.set_method(gettext_texts[domain], text_Object);
+
+			// 不覆蓋原有的設定。
+			// library_namespace.set_method(gettext_texts[domain], text_Object);
+
+			// 覆蓋原有的設定。
+			Object.assign(gettext_texts[domain], text_Object);
 		}
 	};
 
@@ -1666,10 +1671,12 @@ function module_code(library_namespace) {
 	// ------------------------------------
 	// initialization
 
-	var gettext_DOM_id, gettext_main_alias = Object.create(null), gettext_aliases = Object.create(null), gettext_texts = Object.create(null), gettext_domain_name,
+	var gettext_DOM_id, gettext_main_alias = Object.create(null), gettext_aliases = Object
+			.create(null), gettext_texts = Object.create(null), gettext_domain_name,
 	// CeL.env.domain_location = CeL.env.resource_directory_name + '/';
 	// CeL.gettext.use_domain_location(CeL.env.resource_directory_name + '/');
-	gettext_domain_location = library_namespace.env.domain_location, gettext_resource = Object.create(null);
+	gettext_domain_location = library_namespace.env.domain_location, gettext_resource = Object
+			.create(null);
 
 	// TODO: lazy evaluation
 
