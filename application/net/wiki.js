@@ -12925,7 +12925,9 @@ function module_code(library_namespace) {
 				request : process.env.REQUEST,
 				script : process.env.JOB_SCRIPT,
 				stdout_file : process.env.SGE_STDOUT_PATH,
-				stderr_file : process.env.SGE_STDERR_PATH
+				stderr_file : process.env.SGE_STDERR_PATH,
+				// 'continuous' or 'task'
+				is_task : process.env.QUEUE === 'task'
 			};
 		}
 	}
@@ -13452,7 +13454,20 @@ function module_code(library_namespace) {
 			options.where);
 			SQL = generate_SQL_WHERE(SQL, 'rc_');
 
-			SQL[0] = 'SELECT * FROM `recentchanges`' + SQL[0]
+			// https://phabricator.wikimedia.org/T223406
+			// TODO: 舊版上 `actor`, `comment` 這兩個資料表不存在會出錯，需要先偵測。
+			var fields = [
+					'*',
+					// https://www.mediawiki.org/wiki/Manual:Actor_table#actor_id
+					'(SELECT `actor_user` FROM `actor` WHERE `actor`.`actor_id` = `recentchanges`.`rc_actor`) AS `userid`',
+					'(SELECT `actor_name` FROM `actor` WHERE `actor`.`actor_id` = `recentchanges`.`rc_actor`) AS `user_name`',
+					// https://www.mediawiki.org/wiki/Manual:Comment_table#comment_id
+					'(SELECT `comment_text` FROM `comment` WHERE `comment`.`comment_id` = `recentchanges`.`rc_comment_id`) AS `comment`',
+					'(SELECT `comment_data` FROM `comment` WHERE `comment`.`comment_id` = `recentchanges`.`rc_comment_id`) AS `comment_data`' ];
+
+			SQL[0] = 'SELECT ' + fields.join(',')
+			// https://www.mediawiki.org/wiki/Manual:Recentchanges_table
+			+ ' FROM `recentchanges`' + SQL[0]
 			// new → old, may contain duplicate title.
 			// or rc_this_oldid, but too slow (no index).
 			+ ' ORDER BY `rc_timestamp` DESC LIMIT ' + (
@@ -13512,12 +13527,18 @@ function module_code(library_namespace) {
 					revid : row.rc_this_oldid,
 					old_revid : row.rc_last_oldid,
 					rcid : row.rc_id,
+					user : row.user_name && row.user_name.toString()
 					// text of the username for the user that made the
 					// change, or the IP address if the change was made by
 					// an unregistered user. Corresponds to rev_user_text
-					user : row.rc_user_text.toString(),
+					//
+					// `rc_user_text` deprecated: MediaWiki version: ≤ 1.33
+					|| row.rc_user_text && row.rc_user_text.toString(),
+					// NULL for anonymous edits
+					userid : row.userid
 					// 0 for anonymous edits
-					userid : row.rc_user,
+					// `rc_user` deprecated: MediaWiki version: ≤ 1.33
+					|| row.rc_user,
 					// old_length
 					oldlen : row.rc_old_len,
 					// new length
@@ -13525,7 +13546,12 @@ function module_code(library_namespace) {
 					// Corresponds to rev_timestamp
 					// use new Date(.timestamp)
 					timestamp : SQL_timestamp_to_ISO(row.rc_timestamp),
-					comment : row.rc_comment.toString(),
+					comment : row.comment && row.comment.toString()
+					// `rc_comment` deprecated: MediaWiki version: ≤ 1.32
+					|| row.rc_comment && row.rc_comment.toString(),
+					// usually NULL
+					comment_data : row.comment_data
+							&& row.comment_data.toString(),
 					// parsedcomment : TODO,
 					logid : row.rc_logid,
 					// TODO
@@ -13537,11 +13563,13 @@ function module_code(library_namespace) {
 
 					// 以下為recentchanges之外，本函數額外加入。
 					is_new : !!row.rc_new,
+					// e.g., 1 or 0
 					// is_bot : !!row.rc_bot,
 					// is_minor : !!row.rc_minor,
+					// e.g., mw.edit
 					is_flow : row.rc_source.toString() === 'flow',
-					// patrolled : row.rc_patrolled,
-					// deleted : row.rc_deleted,
+					// patrolled : !!row.rc_patrolled,
+					// deleted : !!row.rc_deleted,
 
 					row : row
 				});
