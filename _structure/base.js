@@ -411,7 +411,7 @@ function (global) {
 	}
 
 
-	// 2019/6/3 18:16:44	CeL.null_Object() → Object.create(null)
+	// 2019/6/3 18:16:44 CeL.null_Object() → Object.create(null)
 	if (typeof Object.create !== 'function') {
 		// 先暫時給一個，用於 `Object.create(null)`。
 		(Object.create = function() {
@@ -1380,17 +1380,27 @@ function (global) {
 					env[key] = value;
 			}
 
-			if (!env.home && !(env.home = process.env.HOME || process.env.USERPROFILE)
+			var node_os = require('os');
+
+			if (!env.home
+			&& !(env.home = typeof node_os.homedir === 'function' && node_os.homedir()
+			|| process.env.HOME || process.env.USERPROFILE)
 			// e.g., Windows 10
 			&& process.env.HOMEDRIVE && process.env.HOMEPATH) {
 				env.home = process.env.HOMEDRIVE + process.env.HOMEPATH;
 			}
 
 			if (!env.user) {
-				env.user = process.env.USER || process.env.USERNAME
+				env.user = typeof node_os.userInfo === 'function' && node_os.userInfo() && node_os.userInfo().username
+				|| process.env.USER || process.env.USERNAME
 				// e.g., macOS
 				|| process.env.LOGNAME;
 			}
+
+			env.line_separator = node_os.EOL || env.line_separator;
+
+			// free
+			node_os = null;
 		}
 
 		// 條件式編譯(条件コンパイル) for version>=4, 用 /*@ and @*/ to 判別。
@@ -2660,6 +2670,8 @@ OS='UNIX'; // unknown
 	 * // {a:1,b:1,c:3,d:2}
 	 * </code>
 	 * 
+	 * 注意: CeL.set_method() 不覆蓋原有的設定。欲覆蓋原有的設定請用 Object.assign()。
+	 * 
 	 * @param {Object|Function}name_space
 	 *            target name-space. extend to what name-space.
 	 * @param {Object|Function}properties
@@ -2856,7 +2868,7 @@ OS='UNIX'; // unknown
 		// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Object/create
 		// Object.create() 指定其原型物件與屬性，創建一個新物件。
 		create : function create(proto, propertiesObject) {
-			if (proto === null) {
+			if (proto === null && !propertiesObject) {
 				/**
 				 * 取得裸 Object (naked Object)。
 				 * 
