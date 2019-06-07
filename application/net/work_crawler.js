@@ -345,7 +345,7 @@ function module_code(library_namespace) {
 			library_namespace.info({
 				T : [ 'Using proxy server: %1', value ]
 			});
-			this.get_URL_options.proxy = this.proxy = value;
+			this.get_URL_options.proxy = this[key] = value;
 			return;
 
 		case 'timeout':
@@ -353,7 +353,7 @@ function module_code(library_namespace) {
 			if (!(value >= 0)) {
 				return '無法解析的時間';
 			}
-			this.get_URL_options.timeout = value;
+			this.get_URL_options.timeout = this[key] = value;
 			break;
 
 		// case 'agent':
@@ -363,7 +363,7 @@ function module_code(library_namespace) {
 			if (!value) {
 				return '未設定 User-Agent。';
 			}
-			this.get_URL_options.headers['User-Agent'] = value;
+			this.get_URL_options.headers['User-Agent'] = this[key] = value;
 			break;
 
 		case 'Referer':
@@ -544,10 +544,10 @@ function module_code(library_namespace) {
 
 		/**
 		 * {Natural|String}timeout for get_URL()
-		 * 下載圖片的逾時等待時間。若逾時時間太小（如10秒），下載大檔案容易失敗。
+		 * 下載網頁或圖片的逾時等待時間。若逾時時間太小（如10秒），下載大檔案容易失敗。
 		 * 
 		 * 注意: 因為 this.get_URL_options 在 constructor 中建構完畢，因此 timeout
-		 * 必須在一開始就設定。之後必須以 `this.setup_value('timeout', this.timeout);`
+		 * 會在一開始就設定。之後必須以 `this.setup_value('timeout', this.timeout);`
 		 * 設定，否則沒有效果。
 		 */
 		timeout : '30s',
@@ -583,9 +583,10 @@ function module_code(library_namespace) {
 		// {String}預設的圖片類別/圖片延伸檔名/副檔名/檔案類別/image filename extension。
 		default_image_extension : 'jpg',
 
-		// {String}可以接受的圖片類別/圖片延伸檔名/副檔名/檔案類別 acceptable file extensions。
+		// {Array|String}可以接受的圖片類別/圖片延伸檔名/副檔名/檔案類別 acceptable file extensions。
 		// acceptable_types : 'images',
 		// acceptable_types : 'png',
+		// acceptable_types : ['webp', 'png'],
 
 		// 當圖像不存在 EOI (end of image) 標記，或是被偵測出非圖像時，依舊強制儲存檔案。
 		// allow image without EOI (end of image) mark. default:false
@@ -653,7 +654,8 @@ function module_code(library_namespace) {
 		},
 		// for uncaught error. work_data 可能為 undefined/image_data
 		onerror : function onerror(error, work_data) {
-			process.title = gettext('Error: %1', error);
+			process.title = this.id + ': '
+					+ gettext('Error: %1', String(error));
 			if (typeof error === 'object') {
 				// 丟出異常錯誤。
 				throw error;
@@ -844,6 +846,8 @@ function module_code(library_namespace) {
 			// string: 如 "3s"
 			chapter_time_interval : 'number:natural|string|function',
 			MIN_LENGTH : 'number:natural',
+			// timeout : 'number:natural|string',
+			timeout : 'number:natural',
 			// 容許錯誤用的相關操作設定。
 			MAX_ERROR_RETRY : 'number:natural',
 			allow_EOI_error : 'boolean',
@@ -1822,8 +1826,7 @@ function module_code(library_namespace) {
 		var search_result_file = this.get_search_result_file(),
 		// search cache
 		// 檢查看看之前是否有取得過。
-		search_result = this.get_search_result()
-				|| Object.create(null);
+		search_result = this.get_search_result() || Object.create(null);
 		library_namespace.debug({
 			T : [ 'search result file: ', search_result_file ]
 		}, 2, 'get_work');
@@ -4278,8 +4281,8 @@ function module_code(library_namespace) {
 				var chapter_data = Array.isArray(work_data.chapter_list)
 						&& work_data.chapter_list[chapter_NO - 1],
 				//
-				metadata = Object.assign(Object.create(null),
-						work_data, chapter_data, image_data);
+				metadata = Object.assign(Object.create(null), work_data,
+						chapter_data, image_data);
 				delete metadata.chapter_list;
 				library_namespace.write_file(image_data.file + '.json',
 						metadata);
@@ -4421,8 +4424,8 @@ function module_code(library_namespace) {
 					var chapter_data = Array.isArray(work_data.chapter_list)
 							&& work_data.chapter_list[chapter_NO - 1],
 					//
-					metadata = Object.assign(Object.create(null),
-							work_data, chapter_data);
+					metadata = Object.assign(Object.create(null), work_data,
+							chapter_data);
 					delete metadata.chapter_list;
 					library_namespace.write_file(
 							images_archive.archive_file_path + '.json',
