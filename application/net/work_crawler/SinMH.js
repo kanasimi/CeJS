@@ -402,7 +402,17 @@ function module_code(library_namespace) {
 						+ ': ' + 'No valid chapter data got!');
 				return;
 			}
-			eval(chapter_data_code[1].replace(/;var /g, ';chapter_data.'));
+			// eval(chapter_data_code[1].replace(/;var /g, ';chapter_data.'));
+			chapter_data_code[1].split(';var ').forEach(function(token) {
+				try {
+					eval('chapter_data.' + token);
+				} catch (e) {
+					// e.g.,
+					// https://www.gufengmh8.com/manhua/wodeshashounanyou/742494.html
+					// ;var pageTitle = "我的杀手男友第65、66话 "肉偿在线观看";
+					console.error('SyntaxError: ' + token);
+				}
+			});
 			// console.log(chapter_data);
 
 			// 設定必要的屬性。
@@ -463,8 +473,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_SinMH_comics_crawler(configuration) {
-		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
-				: default_configuration;
+		configuration = configuration ? Object.assign(Object.create(null),
+				default_configuration, configuration) : default_configuration;
 
 		if (configuration.search_URL === 'API') {
 			configuration.search_URL = default_configuration.search_URL_API;
