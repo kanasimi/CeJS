@@ -231,7 +231,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------
 
 	/**
-	 * 定義參數的規範，例如數量包含可選範圍，可用 RegExp。如'number:0~|string:/v\\d/i',
+	 * 正規化定義參數的規範，例如數量包含可選範圍，可用 RegExp。如'number:0~|string:/v\\d/i',
 	 * 'number:1~400|string:item1;item2;item3'。亦可僅使用'number|string'。
 	 * 
 	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern
@@ -276,6 +276,36 @@ function module_code(library_namespace) {
 
 		return condition_data;
 	}
+
+	/**
+	 * 初始設定好命令列選項之型態資料集。
+	 * 
+	 * @param {Object}[arg_hash]
+	 *            參數型態資料集。
+	 * @param {Boolean}[append]
+	 *            添加至當前的參數型態資料集。否則會重新設定參數型態資料集。
+	 * 
+	 * @returns {Object}命令列選項之型態資料集。
+	 */
+	function setup_argument_conditions(arg_hash, append) {
+		if (append) {
+			arg_hash = Object.assign(Work_crawler.prototype.import_arg_hash,
+					arg_hash);
+		} else if (arg_hash) {
+			// default: rest import_arg_hash
+			Work_crawler.prototype.import_arg_hash = arg_hash;
+		} else {
+			arg_hash = Work_crawler.prototype.import_arg_hash;
+		}
+
+		Object.keys(arg_hash).forEach(function(key) {
+			arg_hash[key] = generate_argument_condition(arg_hash[key]);
+		});
+		// console.log(arg_hash);
+		return arg_hash;
+	}
+
+	Work_crawler.setup_argument_conditions = setup_argument_conditions;
 
 	function verify_arg(key, value) {
 		if (!(key in this.import_arg_hash)) {
@@ -825,7 +855,7 @@ function module_code(library_namespace) {
 		verify_arg : verify_arg,
 		setup_value : setup_value,
 		import_args : import_args,
-		// 命令列可以設定的選項。通常僅做測試微調用。
+		// 命令列可以設定的選項之型態資料集。通常僅做測試微調用。
 		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
 		// @see work_crawler/gui_electron/gui_electron_functions.js
 		// @see work_crawler/resource/locale of work_crawler - locale.csv
@@ -846,8 +876,8 @@ function module_code(library_namespace) {
 			// string: 如 "3s"
 			chapter_time_interval : 'number:natural|string|function',
 			MIN_LENGTH : 'number:natural',
-			// timeout : 'number:natural|string',
-			timeout : 'number:natural',
+			timeout : 'number:natural|string',
+			// timeout : 'number:natural',
 			// 容許錯誤用的相關操作設定。
 			MAX_ERROR_RETRY : 'number:natural',
 			allow_EOI_error : 'boolean',
@@ -880,7 +910,7 @@ function module_code(library_namespace) {
 			write_image_metadata : 'boolean',
 
 			// 儲存偏好選項 save_options。
-			save_preference : 'boolean',
+			save_preference : 'boolean'
 		},
 
 		setup_agent : setup_agent,
@@ -902,14 +932,11 @@ function module_code(library_namespace) {
 		parse_favorite_list_file : parse_favorite_list_file
 	};
 
-	Object.keys(Work_crawler_prototype.import_arg_hash).forEach(function(key) {
-		this[key] = generate_argument_condition(this[key]);
-	}, Work_crawler_prototype.import_arg_hash);
-	// console.log(Work_crawler_prototype.import_arg_hash);
-
 	Object.assign(Work_crawler.prototype, Work_crawler_prototype);
 	// free
 	Work_crawler_prototype = null;
+
+	setup_argument_conditions();
 
 	// --------------------------------------------------------------------------------------------
 
@@ -1462,7 +1489,7 @@ function module_code(library_namespace) {
 			work_count++;
 			library_namespace.log([ this.id, ': ', {
 				T : [ 'Download %1: %2', work_count
-				// 下載作品列表
+				// 下載作品列表。
 				+ (work_count === this_index ? '' : '/' + this_index)
 				//
 				+ '/' + work_list.length, work_title ],
@@ -2359,7 +2386,7 @@ function module_code(library_namespace) {
 			}
 
 			try {
-				// 作品詳情。
+				// 解析出作品資料/作品詳情。
 				work_data = _this.parse_work_data(html, get_label,
 						extract_work_data
 				// , { id : work_id, title : work_title, url : work_URL }
@@ -2712,11 +2739,12 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------------
 
-		// get 目次/完整目錄列表/章節列表
+		// 解析出 章節列表/目次/完整目錄列表
 		function process_chapter_list_data(html) {
 			// old name: this.get_chapter_count()
 			if (typeof _this.get_chapter_list === 'function') {
 				try {
+					// 解析出章節列表。
 					_this.get_chapter_list(work_data, html, get_label);
 				} catch (e) {
 					library_namespace.error([ _this.id + ': ', {
@@ -3967,7 +3995,7 @@ function module_code(library_namespace) {
 				//
 				get_next_image = function() {
 					// assert: image_list.index < image_list.length
-					process.stdout.write(gettext('IMG %1',
+					process.stdout.write(gettext('下載圖 %1',
 							(image_list.index + 1)
 									+ (_this.dynamical_count_images ? '' : '/'
 											+ image_list.length))
@@ -4077,6 +4105,8 @@ function module_code(library_namespace) {
 				try {
 					// image_data.url 的正確設定方法:
 					// = base_URL + encodeURI(CeL.HTML_to_Unicode(url))
+
+					// 解析出章節資料。
 					chapter_data = _this.parse_chapter_data
 							&& _this.parse_chapter_data(html, work_data,
 									get_label, chapter_NO)
@@ -4297,16 +4327,17 @@ function module_code(library_namespace) {
 				_this.after_get_image(image_list, work_data, chapter_NO);
 			}
 
-			// this.dynamical_count_images: 動態改變章節中的圖片數量。
+			// this.dynamical_count_images: 設定動態改變章節中的圖片數量。
 			// Dynamically change the number of pictures in the chapter.
-			// 只有在 this.one_by_one===true 這個時候才會設定 image_list.index，
+			// 只有在 this.one_by_one===true 時才會設定 image_list.index，
 			// 因此只在設定了.one_by_one 的時候才有作用，否則就算改變 image_list 也已經來不及處理。
 			if (_this.one_by_one && _this.dynamical_count_images) {
 				left = image_list.length - image_list.index - 1;
 			} else if (Array.isArray(image_list) && image_list.length > 1) {
-				process.stdout.write('圖 ' + left + ' left...\r');
-				library_namespace.debug(chapter_label + ': ' + left + ' left',
-						3, 'check_if_done');
+				process.stdout.write(gettext('剩 %1 張圖...', left) + '\r');
+				library_namespace.debug([ chapter_label + ': ', {
+					T : [ '剩 %1 張圖...', left ]
+				} ], 3, 'check_if_done');
 			}
 			// console.log('check_if_done: left: ' + left);
 
