@@ -852,6 +852,7 @@ function module_code(library_namespace) {
 
 			// https://www.lisenet.com/2014/get-windows-system-information-via-wmi-command-line-wmic/
 			// TODO: `wmic OS get Caption,CSDVersion,OSArchitecture,Version`
+			// require('os').release()
 
 			return exec(
 					// https://docs.microsoft.com/zh-tw/powershell/module/international/get-winsystemlocale?view=win10-ps
@@ -936,7 +937,7 @@ function module_code(library_namespace) {
 			// specify a new domain.
 			// gettext_texts[domain] = Object.create(null);
 
-			// 不覆蓋原有的設定。
+			// CeL.set_method() 不覆蓋原有的設定。
 			// library_namespace.set_method(gettext_texts[domain], text_Object);
 
 			// 覆蓋原有的設定。
@@ -1198,6 +1199,11 @@ function module_code(library_namespace) {
 		return false;
 	};
 
+	// https://en.wikipedia.org/wiki/Regional_Indicator_Symbol
+	var domain_flags = {
+		'arb-Arab' : '🇦🇪'
+	};
+
 	/**
 	 * create domain / language menu
 	 * 
@@ -1223,8 +1229,24 @@ function module_code(library_namespace) {
 
 		domain_Array.forEach(function(domain) {
 			domain = gettext.to_standard(domain);
+			var flag;
+			if (domain in domain_flags) {
+				flag = domain_flags[domain];
+			} else if (flag = domain.match(/-([A-Z]{2})$/)) {
+				// using
+				// https://en.wikipedia.org/wiki/Regional_Indicator_Symbol
+				// '🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿'.match(/./ug)
+				var delta = '🇦'.codePointAt(0) - 'A'.codePointAt(0);
+				flag = String.fromCodePoint.apply(null, flag[1].chars().map(
+						function(_char) {
+							return delta + _char.codePointAt(0);
+						}));
+			} else {
+				flag = '';
+			}
+
 			var option = {
-				option : gettext.get_alias(domain),
+				option : flag + gettext.get_alias(domain),
 				value : domain
 			};
 			if (domain === tmp)
@@ -1530,6 +1552,7 @@ function module_code(library_namespace) {
 		}
 	};
 
+	// CeL.set_method() 不覆蓋原有的設定。
 	library_namespace.set_method(gettext.date, {
 		year : year_name,
 		month : month_name,
