@@ -5022,15 +5022,15 @@ function module_code(library_namespace) {
 			}
 
 			// 有錯誤。下載圖像錯誤時報錯。
-			var messages;
+			var message;
 			if (verified_image === false) {
 				// 圖檔損壞: e.g., Do not has EOI
-				messages = [ {
+				message = [ {
 					T : '圖檔損壞：'
 				} ];
 			} else {
 				// 圖檔沒資格驗證。
-				messages = [ {
+				message = [ {
 					T : '無法成功取得圖片。'
 				}, XMLHttp.status ? {
 					T : [ 'HTTP狀態碼%1，', XMLHttp.status ]
@@ -5042,10 +5042,10 @@ function module_code(library_namespace) {
 					: '檔案僅 %1 bytes：', contents.length ]
 				} ];
 			}
-			messages.push(image_url + '\n→ ' + image_data.file);
-			library_namespace.warn(messages);
+			message.push(image_url + '\n→ ' + image_data.file);
+			library_namespace.warn(message);
 			// free
-			messages = null;
+			message = null;
 
 			if (image_data.error_count === _this.MAX_ERROR_RETRY) {
 				image_data.has_error = true;
@@ -5599,7 +5599,9 @@ function module_code(library_namespace) {
 		// 僅留存最新的一個ebooks舊檔案。
 		for_each_old_ebook(this.ebook_archive_directory, function(last_file,
 				this_file) {
-			library_namespace.info([ '移除舊檔案：',
+			library_namespace.info([ {
+				T : '移除舊檔案：'
+			},
 			// 新檔比較大。刪舊檔。
 			_this.ebook_archive_directory + last_file.name + ' ('
 			// https://en.wikipedia.org/wiki/Religious_and_political_symbols_in_Unicode
