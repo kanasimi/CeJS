@@ -3123,13 +3123,10 @@ function module_code(library_namespace) {
 									.stringify(work_data.status)
 									: work_data.status)
 							: '',
-					work_data.last_download.chapter > _this.start_chapter ? [
-							' ',
-							{
-								// §: 章節編號
-								T : [ '自 §%1 接續下載。',
-										work_data.last_download.chapter ]
-							} ] : '' ].join('');
+					work_data.last_download.chapter > _this.start_chapter ? ' '
+					// §: 章節編號
+					+ gettext('自 §%1 接續下載。', work_data.last_download.chapter)
+							: '' ].join('');
 			if (_this.is_finished(work_data)) {
 				// 針對特殊狀況提醒。
 				library_namespace.info(message);
@@ -4541,7 +4538,7 @@ function module_code(library_namespace) {
 							'從圖片壓縮檔刪除%1張本次下載成功、上次下載失敗的損壞圖片：%2',
 							images_archive.to_remove.length,
 							// images_archive.archive_file_path
-							+images_archive.file_name)
+							images_archive.file_name)
 							+ '...\r');
 					images_archive.remove(images_archive.to_remove.unique());
 				}
@@ -4565,7 +4562,7 @@ function module_code(library_namespace) {
 					gettext(images_archive.file_existed ? '更新圖片壓縮檔：%1'
 							: '創建圖片壓縮檔：%1',
 					// images_archive.archive_file_path
-					+images_archive.file_name)
+					images_archive.file_name)
 							+ '...\r');
 					images_archive.update(chapter_directory, {
 						// 壓縮圖片檔案之後，刪掉原先的圖片檔案。
@@ -5025,25 +5022,31 @@ function module_code(library_namespace) {
 			}
 
 			// 有錯誤。下載圖像錯誤時報錯。
-			library_namespace.warn([
-			// 圖檔損壞: e.g., Do not has EOI
-			verified_image === false ? {
-				T : '圖檔損壞：'
+			var messages;
+			if (verified_image === false) {
+				// 圖檔損壞: e.g., Do not has EOI
+				messages = [ {
+					T : '圖檔損壞：'
+				} ];
+			} else {
+				// 圖檔沒資格驗證。
+				messages = [ {
+					T : '無法成功取得圖片。'
+				}, XMLHttp.status ? {
+					T : [ 'HTTP狀態碼%1，', XMLHttp.status ]
+				} : '', {
+					T : !contents ? '圖片無內容：' : [
+					//
+					contents.length < _this.MIN_LENGTH ? '檔案過小，僅 %1 bytes：'
+					//
+					: '檔案僅 %1 bytes：', contents.length ]
+				} ];
 			}
-			// 圖檔沒資格驗證。
-			: [ {
-				T : '無法成功取得圖片。'
-			}, XMLHttp.status ? {
-				T : [ 'HTTP狀態碼%1，', XMLHttp.status ]
-			} : '', {
-				T : [ !contents ? '圖片無內容：'
-				//
-				: contents.length < _this.MIN_LENGTH ? '檔案過小，僅 %1 bytes：'
-				//
-				: '檔案僅 %1 bytes：', contents.length ]
-			} ],
-			//
-			image_url + '\n→ ' + image_data.file ]);
+			messages.push(image_url + '\n→ ' + image_data.file);
+			library_namespace.warn(messages);
+			// free
+			messages = null;
+
 			if (image_data.error_count === _this.MAX_ERROR_RETRY) {
 				image_data.has_error = true;
 				// throw new Error(_this.id + ': ' +
