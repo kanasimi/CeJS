@@ -3084,9 +3084,12 @@ function module_code(library_namespace) {
 			&& work_data.last_download.chapter === work_data.chapter_count) {
 				// 跳過本作品不處理。
 				library_namespace.log([ 'process_chapter_list_data: ', {
-					T : [ '跳過 %1 不處理', work_data.id ]
-				} ], (work_data.author ? ' [' + work_data.author + ']' : '')
-						+ ' ' + work_data.title);
+					T : [ '跳過 %1 不處理。', work_data.id
+					//
+					+ (work_data.author ? ' [' + work_data.author + ']' : '')
+					//
+					+ ' ' + work_data.title ]
+				} ]);
 				// 最終廢棄動作，防止執行 work_data[this.KEY_EBOOK].pack()。
 				delete work_data[_this.KEY_EBOOK];
 				if (typeof callback === 'function') {
