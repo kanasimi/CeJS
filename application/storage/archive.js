@@ -224,9 +224,12 @@ function module_code(library_namespace) {
 		}
 		if (!apply_switches[this.program_type]) {
 			this.unknown_type = true;
-			library_namespace.error('Archive_file: Unknown type: '
-					+ this.program_type + ', please install '
-					+ default_program_type);
+			library_namespace.error([
+					'Archive_file: ',
+					{
+						T : [ 'Unknown type: %1, please install %2',
+								this.program_type, default_program_type ]
+					} ]);
 		}
 
 		// {String}this.program
@@ -343,9 +346,10 @@ function module_code(library_namespace) {
 		}
 
 		command = command.join(' ');
-		library_namespace.debug('working directory: '
-				+ library_namespace.storage.working_directory(), 1,
-				'archive_file_execute');
+		library_namespace.debug({
+			T : [ 'Working directory: %1',
+					library_namespace.storage.working_directory() ]
+		}, 1, 'archive_file_execute');
 		library_namespace.debug(command, 1, 'archive_file_execute');
 		try {
 			var output = execSync(command);
@@ -358,17 +362,28 @@ function module_code(library_namespace) {
 					// 預防 callback throw
 					callback(output);
 				} catch (e) {
-					console
-							.trace('archive_file_execute: callback execution error!');
+					if (false) {
+						console
+								.trace('archive_file_execute: Callback execution error!');
+					}
+					library_namespace.error([ 'archive_file_execute: ', {
+						T : 'Callback execution error!'
+					} ]);
 					library_namespace.error(e);
 				}
 			return output;
 		} catch (e) {
-			if (original_working_directory)
+			if (original_working_directory) {
 				// recover working directory.
 				process.chdir(original_working_directory);
-			console.trace('archive_file_execute: ' + this.program_type
-					+ ' execution error!');
+			}
+			if (false) {
+				console.trace('archive_file_execute: ' + this.program_type
+						+ ' execution error!');
+			}
+			library_namespace.error([ 'archive_file_execute: ', {
+				T : [ '%1 execution error!', this.program_type ]
+			} ]);
 			library_namespace.error(e);
 			if (typeof callback === 'function')
 				callback(null, e);
@@ -686,7 +701,9 @@ function module_code(library_namespace) {
 			} else {
 				this.fso_status_list.push(FSO_data);
 				if (this.fso_path_hash[FSO_data.path]) {
-					CeL.warn('Duplicate FSO path: ' + FSO_data.path);
+					CeL.warn({
+						T : [ 'Duplicate FSO path: %1', FSO_data.path ]
+					});
 				}
 				// FSO status hash get from archive_file.info()
 				// archive_file.fso_path_hash = { FSO path : {FSO data}, ... }
@@ -719,12 +736,16 @@ function module_code(library_namespace) {
 		}
 
 		if (!default_switches[this.program_type][operation]) {
-			var error = this.program_type + ' has no operation: ' + operation;
+			var error = {
+				T : [ '%1 未提供這種功能：%2', this.program_type, operation ]
+			};
 			if (operation !== 'rename') {
 				library_namespace.error(error);
 			} else {
 				library_namespace.debug(error, 1, 'archive_file_operation');
 			}
+			// TODO: Localization
+			error = this.program_type + ' has no operation: ' + operation;
 			error = new Error(error);
 			callback && callback(error);
 			return error;
@@ -737,8 +758,9 @@ function module_code(library_namespace) {
 			// change working directory. e.g., 進入到壓縮檔所在的目錄來解壓縮。
 			var using_working_directory = options.cwd, using_archive_file;
 			if (is_Archive_file(using_working_directory)) {
-				library_namespace.debug('在壓縮檔所在目錄下操作 ' + operation + '。', 1,
-						'archive_file_operation');
+				library_namespace.debug({
+					T : [ '在壓縮檔所在目錄下操作 %1。', operation ]
+				}, 1, 'archive_file_operation');
 				using_archive_file = using_working_directory;
 				using_working_directory = using_working_directory.archive_file_path
 						.replace(/[^\\\/]+$/, '');
@@ -754,10 +776,11 @@ function module_code(library_namespace) {
 				if (original_working_directory === using_working_directory) {
 					original_working_directory = null;
 				} else {
-					library_namespace.debug('change working directory: ['
-							+ original_working_directory + ']→['
-							+ using_working_directory + ']', 1,
-							'archive_file_operation');
+					library_namespace.debug({
+						T : [ 'Changing working directory: [%1]→[%2]',
+								original_working_directory,
+								using_working_directory ]
+					}, 1, 'archive_file_operation');
 					process.chdir(using_working_directory);
 				}
 			}

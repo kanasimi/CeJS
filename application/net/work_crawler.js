@@ -7,20 +7,20 @@
 
 下載作業流程:
 
-# 取得伺服器列表。 start_downloading()
+# 獲取伺服器列表。 start_downloading()
 # 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list(), .base_URL, .extract_work_id()
 # 特別處理特定id。	.convert_id()
 # 解析 作品名稱 → 作品id	get_work(), .search_URL, .parse_search_result()
-# 取得作品資訊與各章節資料。 get_work_data(), pre_process_chapter_list_data(), process_chapter_list_data()
+# 獲取作品資訊與各章節資料。 get_work_data(), pre_process_chapter_list_data(), process_chapter_list_data()
 # 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data(), .work_URL, .parse_work_data(), chapter_list_URL, .get_chapter_list()
-# 取得每一個章節的內容與各個影像資料。 pre_get_chapter_data(), .chapter_URL, get_chapter_data(), .pre_parse_chapter_data(), .parse_chapter_data()
-# 取得各個章節的每一個影像內容。 get_image(), .image_preprocessor(), .image_post_processor(), .after_get_image()
+# 獲取每一個章節的內容與各個影像資料。 pre_get_chapter_data(), .chapter_URL, get_chapter_data(), .pre_parse_chapter_data(), .parse_chapter_data()
+# 獲取各個章節的每一個影像內容。 get_image(), .image_preprocessor(), .image_post_processor(), .after_get_image()
 # finish_up(), .after_download_chapter(), .after_download_work()
 
 TODO:
 建造可以自動生成index/說明的工具。
 	自動判別網址所需要使用的下載工具，輸入網址自動揀選所需的工具檔案。
-	從其他的資料來源網站尋找取得作品以及章節的資訊。
+	從其他的資料來源網站尋找，以獲取作品以及章節的資訊。
 	自動記得某個作品要從哪些網站下載。
 
 將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
@@ -592,7 +592,7 @@ function module_code(library_namespace) {
 		// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
 		// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。
 		//
-		// 對於極少出現錯誤的網站，可以設定一個比較小的數值，並且設定.allow_EOI_error=false。因為這類型的網站要不是無法取得檔案，要不就是能夠取得完整的檔案；要取得破損檔案，並且已通過EOI測試的機會比較少。
+		// 對於極少出現錯誤的網站，可以設定一個比較小的數值，並且設定.allow_EOI_error=false。因為這類型的網站要不是無法獲取檔案，要不就是能夠獲取完整的檔案；要得到破損檔案，並且已通過EOI測試的機會比較少。
 		// MIN_LENGTH : 4e3,
 		// 對於有些圖片只有一條細橫桿的情況。
 		// MIN_LENGTH : 140,
@@ -674,7 +674,7 @@ function module_code(library_namespace) {
 		get_search_result : function() {
 			var search_result_file = this.get_search_result_file(),
 			// search cache
-			// 檢查看看之前是否有取得過。
+			// 檢查看看之前是否有獲取過。
 			search_result = library_namespace.get_JSON(search_result_file);
 			return search_result;
 		},
@@ -705,9 +705,9 @@ function module_code(library_namespace) {
 		// 之前下載到第8章且未設定 recheck，則指定 start_chapter=9 **有**效。
 		// 之前下載到第8章且未設定 recheck，則指定 start_chapter=7 **無**效。必須設定 recheck。
 		start_chapter : 1,
-		// 是否重新取得每個所檢測的章節內容 chapter_page。
-		// 警告: reget_chapter=false 僅適用於小說之類不取得圖片的情形，
-		// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL取得名稱的於目錄中。
+		// 是否重新獲取每個所檢測的章節內容 chapter_page。
+		// 警告: reget_chapter=false 僅適用於小說之類不獲取圖片的情形，
+		// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL獲取名稱的於目錄中。
 		reget_chapter : true,
 		// 是否保留 chapter page。false: 明確指定不保留，將刪除已存在的 chapter page。
 		// 注意: 若是沒有設定 .reget_chapter，則 preserve_chapter_page 不應發生效用。
@@ -722,7 +722,7 @@ function module_code(library_namespace) {
 		// https://github.com/kanasimi/work_crawler/issues/242
 		overwrite_old_file : true,
 
-		// 在取得小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
+		// 在獲取小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
 		check_next_chapter : check_next_chapter,
 
 		// for CeL.application.storage.EPUB
@@ -755,7 +755,7 @@ function module_code(library_namespace) {
 		// recheck=false:明確指定自上次下載過的章節接續下載。
 		// recheck : false,
 		//
-		// 當無法取得 chapter 資料時，直接嘗試下一章節。在手動+監視下 recheck 時可併用此項。 default:false
+		// 當無法獲取 chapter 資料時，直接嘗試下一章節。在手動+監視下 recheck 時可併用此項。 default:false
 		// skip_chapter_data_error : true,
 
 		// 重新搜尋。default:false
@@ -786,7 +786,7 @@ function module_code(library_namespace) {
 		extract_work_id : extract_work_id,
 		// 自作品網址 URL 提取出 work id。 via URL
 		extract_work_id_from_URL : extract_work_id_from_URL,
-		// 由文章狀態/進程取得用在作品完結的措辭。
+		// 由文章狀態/進程獲取用在作品完結的措辭。
 		finished_words : finished_words,
 		is_finished : is_finished,
 
@@ -955,7 +955,7 @@ function module_code(library_namespace) {
 
 		var _this = this;
 
-		// 取得圖庫伺服器列表。
+		// 獲取圖庫伺服器列表。
 		this.get_URL(server_URL, function(XMLHttp, error) {
 			if (error) {
 				_this.onerror(error);
@@ -1046,7 +1046,7 @@ function module_code(library_namespace) {
 		if (this.use_server_cache
 		// host_list
 		&& (this.server_list = library_namespace.get_JSON(server_file))) {
-			// use cache of host list. 不每一次重新取得伺服器列表。
+			// use cache of host list. 不每一次重新獲取伺服器列表。
 			this.parse_work_id(work_id, callback);
 			return;
 		}
@@ -1144,7 +1144,7 @@ function module_code(library_namespace) {
 			}
 			if (url.startsWith('.')) {
 				library_namespace.warn('full_URL_of_path: '
-						+ gettext('無效的網址：%1', url));
+						+ gettext('網址無效：%1', url));
 			}
 			url = this.base_URL + url;
 		} else if (url.URL) {
@@ -1389,7 +1389,7 @@ function module_code(library_namespace) {
 
 		library_namespace.error([ 'parse_work_id: ', {
 			// Invalid work id: %1
-			T : [ '無效的作品 id：%1', work_id ]
+			T : [ '作品 id 無效：%1', work_id ]
 		} ]);
 		typeof callback === 'function' && callback();
 	}
@@ -1816,7 +1816,7 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 
-		// 先試試看能否取得 work id。
+		// 先試試看能否判斷出 work id。
 		var work_id = this.extract_work_id(work_title)
 				|| this.extract_work_id_from_URL(work_title);
 		if (work_id) {
@@ -1853,7 +1853,7 @@ function module_code(library_namespace) {
 
 		var search_result_file = this.get_search_result_file(),
 		// search cache
-		// 檢查看看之前是否有取得過。
+		// 檢查看看之前是否有獲取過。
 		search_result = this.get_search_result() || Object.create(null);
 		library_namespace.debug({
 			T : [ 'search result file: ', search_result_file ]
@@ -2084,7 +2084,7 @@ function module_code(library_namespace) {
 	function extract_work_data(work_data, html, PATTERN_work_data, overwrite) {
 		if (!PATTERN_work_data) {
 			PATTERN_work_data =
-			// 由 meta data 取得作品資訊。 e.g.,
+			// 由 meta data 解析出作品資訊。 e.g.,
 			// <meta property="og:title" content="《作品》" />
 			// <meta property="og:novel:author" content="作者" />
 			// <meta name="Keywords" content="~" />
@@ -2107,7 +2107,7 @@ function module_code(library_namespace) {
 				continue;
 
 			var value = matched[2], link = value.match(
-			// 從連結的title取得更完整的資訊。
+			// 從連結的title獲取更完整的資訊。
 			/^[:：︰\s]*<a [^<>]*?title=["']([^<>"']+)["'][^<>]*>([\s\S]*?)<\/a>\s*$/
 			//
 			);
@@ -2221,7 +2221,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 取得下載章節資訊/章節內容前的等待時間。
+	 * 下載/獲取下載章節資訊/章節內容前的等待時間。
 	 * 
 	 * @example<code>
 	var chapter_time_interval = this.get_chapter_time_interval(argument_1, work_data);
@@ -2588,7 +2588,7 @@ function module_code(library_namespace) {
 					book_chapter_count : _this.need_create_ebook
 				}, _this.reset_work_data_properties);
 				// recall old work_data
-				// 基本上以新資料為準，除非無法取得新資料，才改用舊資料。
+				// 基本上以新資料為準，除非無法獲取新資料，才改用舊資料。
 				for ( var key in matched) {
 					if (skip_cache[key]) {
 						// Skip this cache data.
@@ -2813,7 +2813,7 @@ function module_code(library_namespace) {
 			}
 
 			if (work_data.chapter_count >= 1) {
-				// 標記曾經成功取得章節數量，代表這個部分的代碼運作機制沒有問題。
+				// 標記曾經成功獲取的章節數量，代表這個部分的代碼運作機制沒有問題。
 				_this.got_chapter_count = true;
 
 			} else {
@@ -2949,7 +2949,7 @@ function module_code(library_namespace) {
 					work_data.last_download.chapter = _this.start_chapter;
 
 				} else {
-					// 不可用 ('reget_chapter' in _this)，會取得 .prototype 的屬性。
+					// 不可用 ('reget_chapter' in _this)，會得到 .prototype 的屬性。
 					if (!_this.hasOwnProperty('reget_chapter')) {
 						work_data.reget_chapter = false;
 					}
@@ -3391,7 +3391,7 @@ function module_code(library_namespace) {
 
 		if (typeof this.pre_chapter_URL === 'function') {
 			// 在 this.chapter_URL() 之前執行 this.pre_chapter_URL()，
-			// 主要用途在取得 chapter_URL 之資料。
+			// 主要用途在獲取 chapter_URL 之資料。
 			try {
 				this.pre_chapter_URL(work_data, chapter_NO, next);
 			} catch (e) {
@@ -4061,7 +4061,7 @@ function module_code(library_namespace) {
 						// 若有分部，則以部編號為主。
 						image_data.file = image_file_path_of_chapter_NO(using_chapter_NO);
 
-						// 假如之前已取得過圖片檔案，就把舊圖片改名成新的名稱格式。
+						// 假如之前已獲取過圖片檔案，就把舊圖片改名成新的名稱格式。
 						// 例如之前沒有分部，現在卻增加了分部。
 						if (!library_namespace.file_exists(image_data.file)
 						// && old_image_file_path !==
@@ -4182,7 +4182,7 @@ function module_code(library_namespace) {
 				var chapter_data;
 				if (_this.check_chapter_NO) {
 					chapter_data = Array.isArray(_this.check_chapter_NO)
-					// 檢測所取得內容的章節編號是否相符。
+					// 檢測所獲得內容的章節編號是否相符。
 					? html.between(_this.check_chapter_NO[0],
 							_this.check_chapter_NO[1])
 					// {Function}return chapter NO is OK
@@ -4232,7 +4232,7 @@ function module_code(library_namespace) {
 								.get_chapter_time_interval(chapter_URL,
 										work_data);
 						var message = chapter_URL === new_chapter_URL
-						// 等待幾秒鐘 以重新取得章節內容頁面網址
+						// 等待幾秒鐘 以重新獲取章節內容頁面網址
 						? chapter_time_interval > 0 ? '等待 %2 之後再重新取得章節內容頁面：%1'
 								: '重新取得章節內容頁面：%1'
 						//
@@ -4402,8 +4402,8 @@ function module_code(library_namespace) {
 				reget_chapter_data();
 
 			} else {
-				// 警告: reget_chapter=false 僅適用於小說之類不取得圖片的情形，
-				// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL取得名稱的於目錄中。
+				// 警告: reget_chapter=false 僅適用於小說之類不下載/獲取圖片的情形，
+				// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL獲取名稱的於目錄中。
 				library_namespace.get_URL_cache(chapter_URL, function(data,
 						error, XMLHttp) {
 					pre_parse_chapter_data({
@@ -4462,7 +4462,7 @@ function module_code(library_namespace) {
 			// 須注意若是最後一張圖 get_image()直接 return 了，
 			// 此時尚未設定 waiting，因此此處不可以 waiting 判斷！
 			if (left > 0) {
-				// 還有/等待尚未取得的圖片檔案。
+				// 還有/等待尚未下載/獲取的圖片檔案。
 				if (waiting && left < 2) {
 					library_namespace.debug([ {
 						T : '等待尚未下載完成的圖片檔案：'
@@ -4610,7 +4610,7 @@ function module_code(library_namespace) {
 
 		if ('jump_to_chapter' in work_data) {
 			if (work_data.jump_to_chapter !== chapter_NO) {
-				// work_data.jump_to_chapter 可用來手動設定下一個要取得的章節號碼。
+				// work_data.jump_to_chapter 可用來手動設定下一個要獲取的章節號碼。
 				// 跳到章節
 				library_namespace.info({
 					T : [ '%2: jump to chapter %1',
@@ -4712,7 +4712,7 @@ function module_code(library_namespace) {
 		 * 會用到.overwrite_old_file這個選項的，應該都是需要提報issue的，因此這個選項不會列出來。麻煩請在個別網站遇到此情況時提報issue，列出作品名稱以及圖片類別，以供這邊確認圖片類別。
 		 * 只要存在完整無損害的預設圖片類別或是可接受的圖片類別，就直接跳出，不再嘗試下載這張圖片。否則會重新下載圖片。
 		 * 當下載的圖片以之前的圖片更大時，就會覆蓋原先的圖片。
-		 * 若下載的圖片類別並非預設的圖片類別(.default_image_extension)，例如預設JPG但取得PNG檔案時，會將副檔名改為實際取得的圖像格式。因此下一次下載時，需要設定.acceptable_types才能找得到圖片。
+		 * 若下載的圖片類別並非預設的圖片類別(.default_image_extension)，例如預設JPG但得到PNG檔案時，會將副檔名改為實際得到的圖像格式。因此下一次下載時，需要設定.acceptable_types才能找得到圖片。
 		 */
 		var image_downloaded = node_fs.existsSync(image_data.file)
 				|| this.skip_existed_bad_file
@@ -4808,7 +4808,7 @@ function module_code(library_namespace) {
 		image_data.parsed_url = image_url;
 		if (!PATTERN_non_CJK.test(image_url)) {
 			library_namespace.warn({
-				T : [ 'Need encodeURI: %1', image_url ]
+				T : [ '必須先將URL編碼：%1', image_url ]
 			});
 			// image_url = encodeURI(image_url);
 		}
@@ -4882,7 +4882,7 @@ function module_code(library_namespace) {
 			&& image_data.file_length.length > _this.MAX_EOI_ERROR) {
 				// console.log(image_data.file_length);
 				if (verified_image || image_data.is_bad || _this.skip_error
-				// skip error 的話，不管有沒有取得過檔案(包括404圖像不存在)，依然 pass。
+				// skip error 的話，不管有沒有下載/獲取過檔案(包括404圖像不存在)，依然 pass。
 				// && image_data.file_length.length === 0
 				//
 				|| image_data.file_length.cardinal_1()
@@ -5122,7 +5122,7 @@ function module_code(library_namespace) {
 
 		}, 'buffer', null, Object.assign({
 			/**
-			 * 最多平行取得檔案(圖片)的數量。
+			 * 最多平行下載/獲取檔案(圖片)的數量。
 			 * 
 			 * <code>
 			incase "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added. Use emitter.setMaxListeners() to increase limit"
@@ -5134,7 +5134,7 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// 在取得小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
+	// 在下載/獲取小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
 
 	// 通常應該會被 parse_chapter_data() 呼叫。
 	function check_next_chapter(work_data, chapter_NO, html,
@@ -5276,7 +5276,7 @@ function module_code(library_namespace) {
 
 		if ((!Array.isArray(ebook_files) || !ebook_files.includes('mimetype'))
 				// 若是沒有cache，但是有舊的epub檔，那麼就將之解壓縮。
-				// 其用意是為了保留媒體檔案與好的舊章節，預防已經無法取得。
+				// 其用意是為了保留媒體檔案與好的舊章節，預防已經無法下載/獲取。
 				// 由於這個動作，當舊的電子書存在時將不會清場。若有必要清場（如太多冗贅），須自行將舊電子書刪除。
 				&& library_namespace.file_exists(ebook_file_path[0]
 						+ ebook_file_path[1])) {
@@ -5590,8 +5590,8 @@ function module_code(library_namespace) {
 			// assert: PATTERN_ebook_file.test(rename_to) === false
 			// 不應再被納入檢測。
 			library_namespace.info(library_namespace.display_align([
-			//
-			[ 'Set milestone:', last_file ], [ 'move to →', rename_to ] ]));
+			// Set milestone: 日本小說網站有時會商業化，將之前的作品內容大幅刪除。這時若刪掉舊檔，就會失去這些內容。
+			[ '保留舊檔：', last_file ], [ 'move to →', rename_to ] ]));
 			library_namespace.move_file(last_file, rename_to);
 		});
 
