@@ -35,7 +35,7 @@ CLI progress bar
 用安全一點的 eval()
 	Runs untrusted code securely https://github.com/patriksimek/vm2
 parse 圖像。
-拼接長圖。 using .epub
+拼接長圖之後重新分割：以整個橫切全部都是同一顏色白色為界，並且可以省略掉相同顏色的區塊。 using .epub
 	處理每張圖片被分割成多個小圖的情況 add .image_indexes[] ?
 檢核章節內容。
 考慮 search_URL 搜尋的頁數，當搜索獲得太多結果時也要包含所有結果
@@ -2144,7 +2144,7 @@ function module_code(library_namespace) {
 				//
 				= gettext('跳過之前已下載或檢查過，已無需再檢查的章節。');
 			} else {
-				chapter_list_to_check.push('#' + (index + 1)
+				chapter_list_to_check.push('§' + (index + 1)
 				//
 				+ (chapter_data.title ? ' ' + chapter_data.title : ''));
 			}
@@ -2192,7 +2192,7 @@ function module_code(library_namespace) {
 					//
 					gettext('跳過之前已下載或檢查過，已無需再檢查的章節。');
 				} else {
-					chapter_list_to_check.push('#' + (index + 1)
+					chapter_list_to_check.push('§' + (index + 1)
 					//
 					+ (chapter_data.title ? ' ' + chapter_data.title : ''));
 				}
@@ -3779,7 +3779,7 @@ function module_code(library_namespace) {
 
 		} else {
 			this.onerror('get_chapter_directory_name: '
-					+ gettext('Invalid chapter_data: ', work_data.id + '#'
+					+ gettext('Invalid chapter_data: ', work_data.id + '§'
 							+ chapter_NO), work_data);
 			typeof callback === 'function' && callback(work_data);
 			return Work_crawler.THROWED;
@@ -3835,7 +3835,7 @@ function module_code(library_namespace) {
 			return Work_crawler.THROWED;
 		}
 
-		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
+		library_namespace.debug(work_data.id + ' ' + work_data.title + ' §'
 				+ chapter_NO + '/' + work_data.chapter_count + ': '
 				+ chapter_URL, 1, 'get_chapter_data');
 		process.title = [
@@ -3948,18 +3948,16 @@ function module_code(library_namespace) {
 					library_namespace.remove_file(chapter_directory
 							+ chapter_page_file_name);
 				}
-				var message = [ chapter_NO,
-				//
-				typeof _this.pre_chapter_URL === 'function' ? ''
-				//
-				: '/' + work_data.chapter_count,
-				//
-				' [', chapter_label, '] ', {
-					T : [ '%1 images.', left ]
+				var message = [ {
+					T : [ '%1 [%2] %3 images', chapter_NO
+					//
+					+ (typeof _this.pre_chapter_URL === 'function' ? ''
+					//
+					: '/' + work_data.chapter_count), chapter_label, left ]
 				},
 				// 例如需要收費/被鎖住的章節。 .locked 此章节为付费章节 本章为付费章节
 				chapter_data.limited ? {
-					T : ' (本章為需要付費/被鎖住的章節)'
+					T : '（本章為需要付費/被鎖住的章節）'
 				} : '' ];
 				if (chapter_data.limited) {
 					// 針對特殊狀況提醒。
@@ -4284,11 +4282,11 @@ function module_code(library_namespace) {
 						var message = gettext(chapter_data.limited ? '本章為需要付費/被鎖住的章節'
 								: '本章節沒有獲取到任何圖片！');
 						_this.onwarning('process_chapter_data: '
-								+ work_data.directory_name + ' #' + chapter_NO
+								+ work_data.directory_name + ' §' + chapter_NO
 								+ '/' + work_data.chapter_count + ': '
 								+ message);
 						// console.log(chapter_data);
-						set_work_status(work_data, '#' + chapter_NO + ': '
+						set_work_status(work_data, '§' + chapter_NO + ': '
 								+ message);
 					}
 					// 注意: 若是沒有 reget_chapter，則 preserve_chapter_page 不應發生效用。
@@ -5435,7 +5433,7 @@ function module_code(library_namespace) {
 				}
 
 				if (contents.length < _this.MIN_CHAPTER_SIZE) {
-					set_work_status(work_data, '#'
+					set_work_status(work_data, '§'
 							+ chapter_NO
 							+ ': '
 							+ (contents.length ? gettext('字數過少（%1字元）',
@@ -5647,12 +5645,13 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		process.title = gettext('打包 epub：%1', work_data.title + ' @ ' + this.id);
+		process.title = gettext('打包 epub 電子書：%1', work_data.title + ' @ '
+				+ this.id);
 		var file_path = ebook_path.call(this, work_data, file_name);
 
 		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
 		library_namespace.debug({
-			T : [ '打包 epub：%1', file_path[1] ]
+			T : [ '打包 epub 電子書：%1', file_path[1] ]
 		}, 1, 'pack_ebook');
 
 		// this: this_site
