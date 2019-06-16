@@ -693,7 +693,8 @@ function module_code(library_namespace) {
 				console.trace(
 				// typeof error === 'object' ? JSON.stringify(error) :
 				error);
-				throw this.id + ': ' + (new Date).toISOString() + ' ' + error;
+				throw this.id + ': ' + (new Date).format('%Y/%m/%d %H:%M:%S')
+						+ ' ' + error;
 			}
 			// return CeL.work_crawler.THROWED;
 			return Work_crawler.THROWED;
@@ -1015,7 +1016,9 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.log([ this.id, ': ', (new Date).toISOString(), ' ', {
+		library_namespace.log([ this.id, ': ',
+		//
+		(new Date).format('%Y/%m/%d %H:%M:%S'), ' ', {
 			// 開始下載/處理
 			T : [ 'Starting %1, save to %2', work_id, this.main_directory ]
 		} ]);
@@ -3949,7 +3952,7 @@ function module_code(library_namespace) {
 							+ chapter_page_file_name);
 				}
 				var message = [ {
-					T : [ '%1 [%2] %3 images', chapter_NO
+					T : [ '%1 [%2] %3 images.', chapter_NO
 					//
 					+ (typeof _this.pre_chapter_URL === 'function' ? ''
 					//
@@ -4226,10 +4229,12 @@ function module_code(library_namespace) {
 						// 當重新讀取章節內容的時候，可以改變網址。
 
 						// 需要重新讀取頁面。e.g., 502
-						var new_chapter_URL = get_chapter_URL(), chapter_time_interval = _this
+						var old_chapter_URL = chapter_URL;
+						chapter_URL = get_chapter_URL();
+						var chapter_time_interval = _this
 								.get_chapter_time_interval(chapter_URL,
 										work_data);
-						var message = chapter_URL === new_chapter_URL
+						var message = old_chapter_URL === chapter_URL
 						// 等待幾秒鐘 以重新獲取章節內容頁面網址
 						? chapter_time_interval > 0 ? '等待 %2 之後再重新取得章節內容頁面：%1'
 								: '重新取得章節內容頁面：%1'
@@ -4237,12 +4242,12 @@ function module_code(library_namespace) {
 						: chapter_time_interval > 0 ? '等待 %2 之後再取得章節內容頁面：%1'
 								: '取得章節內容頁面：%1';
 						process.stdout.write('process_chapter_data: '
-								+ gettext(message, chapter_URL,
-										library_namespace.age_of(0,
-												chapter_time_interval, {
-													digits : 1
-												})) + '...\r');
-						chapter_URL = new_chapter_URL;
+						// TODO: Array.isArray(chapter_URL)
+						+ gettext(message, chapter_URL,
+						//
+						library_namespace.age_of(0, chapter_time_interval, {
+							digits : 1
+						})) + '...\r');
 						if (chapter_time_interval > 0) {
 							setTimeout(reget_chapter_data,
 									chapter_time_interval);
