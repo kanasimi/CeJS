@@ -734,7 +734,7 @@ function module_code(library_namespace) {
 		milestone_extension : true,
 		add_ebook_chapter : add_ebook_chapter,
 		pack_ebook : pack_ebook,
-		/** 在包裝完電子紙書之後，把電子書目錄整個刪掉。 請注意：必須先安裝 7-Zip **18.01 以上的版本**。 */
+		/** 在包裝完電子書之後，把電子書目錄整個刪掉。 請注意：必須先安裝 7-Zip **18.01 以上的版本**。 */
 		remove_ebook_directory : true,
 		/** 章節數量無變化時依舊利用 cache 重建資料(如ebook)。 */
 		// regenerate : true,
@@ -3848,6 +3848,7 @@ function module_code(library_namespace) {
 				work_data.title || work_data.id,
 				Array.isArray(this.work_list_now)
 						&& typeof this.work_list_now[this.work_list_now.list_serial - 1] === 'string'
+						&& typeof work_data.title === 'string'
 						// .includes(): 可能經過一些變化而不完全一樣
 						&& work_data.title
 								.includes(this.work_list_now[this.work_list_now.list_serial - 1]
