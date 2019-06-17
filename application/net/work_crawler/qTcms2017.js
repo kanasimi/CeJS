@@ -1,8 +1,9 @@
 ﻿/**
- * @name CeL module for downloading qTcms 20170501 version comics.
+ * @name CeL module for downloading qTcms version 20170501-20190606010315
+ *       comics.
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸常見漫畫管理系統: 晴天漫画CMS (晴天漫画系统 晴天漫画程序, 晴天新漫画系统)
- *               的工具。
+ *               PC端网站 + 手机端网站(行動版) 的工具。
  * 
  * <code>
 
@@ -28,11 +29,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.work_crawler.qTcms2017',
 
-	require : 'application.net.work_crawler.'
-	// for CeL.to_file_name()
-	+ '|application.net.'
-	// for .detect_HTML_language(), .time_zone_of_language()
-	+ '|application.locale.',
+	require : 'application.net.work_crawler.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -114,20 +111,23 @@ function module_code(library_namespace) {
 		},
 		parse_search_result : function(html, get_label) {
 			// console.log(html);
-			html = eval(html.between('(', {
+			var data = eval(html.between('(', {
 				tail : ')'
 			}));
-			// console.log(html);
-			return [ html, html ];
+			// console.log(data);
+			return [ data, data ];
 		},
 		id_of_search_result : function(data) {
 			// console.log(data);
 
-			// .u: webdir + classid1pinyin + titlepinyin + "/"
+			// PC version: .u: webdir + classid1pinyin + titlepinyin + "/"
 			// webdir: "/"
 			// classid1pinyin: latin + "/"
 			// titlepinyin: latin
-			var matched = data.u.match(/(?:\/|^)([a-z]+)\/([a-z\-\d]+)\/$/);
+			var matched = data.u
+			// mobile version
+			|| data.url;
+			matched = matched.match(/(?:\/|^)([a-z]+)\/([a-z\-\d]+)\/$/);
 
 			// assert: !!matched === true
 			if (!this.common_catalog)
@@ -137,6 +137,36 @@ function module_code(library_namespace) {
 			return matched[2];
 		},
 		title_of_search_result : 't',
+
+		// --------------------------------------
+		// for mobile version
+
+		// 解析 作品名稱 → 作品id get_work()
+		search_URL_mobile : function(work_title) {
+			return [ 'statics/qingtiancms.ashx', {
+				action : 'GetWapSear1',
+				key : work_title
+			} ];
+		},
+		parse_search_result_mobile : function(html, get_label) {
+			/**
+			 * @example <code>
+			{"result": 1000,"msg": "提交成功","data": [{name:'读书成圣',last_update_chapter_name:'014 禁忌十八式',last_updatetime:'',types:'',authors:'',url:'/rexue/dushuchengsheng/'}],"page_data": ""}
+			</code>
+			 */
+			// console.log(JSON.stringify(html));
+			var data;
+			try {
+				eval('data=' + html);
+				data = data.data;
+			} catch (e) {
+				// e.g., "{err!}"
+				data = [];
+			}
+			// console.log(data);
+			return [ data, data ];
+		},
+		title_of_search_result_mobile : 'name',
 
 		// --------------------------------------
 
@@ -149,15 +179,22 @@ function module_code(library_namespace) {
 		parse_work_data : function(html, get_label, extract_work_data) {
 			// console.log(html);
 			var work_data;
+			/**
+			 * PC version:
+			 * 
+			 * @example <code>
+			var qingtiancms_Details={G_mubanpage:".html",id:"6638",hits:"9454",webdir:"/",pinglunid:"10",pinglunid1:"",pinglunid2:"cytdbnhsU",pinglunid3:"prod_1368b8102b9177303c660debbbbd257c",title:"读书成圣",classid1pinyin:"rexue/",titlepinyin:"dushuchengsheng"};var uyan_config = {'su':'/6638/'};
+			</code>
+			 */
 			eval('work_data=' + html.between('qingtiancms_Details=', ';var'));
 
-			// nokiacn.js, iqg365.js, 733dm.js
+			// PC version: nokiacn.js, iqg365.js, 733dm.js
 			extract_work_data(work_data, html.between(
 			// <div class="cy_title">\n <h1>相合之物</h1>
 			'<h1>', ' id="comic-description">'),
 					/<span>([^<>：]+)：([\s\S]*?)<\/span>/g);
 
-			// 360taofu.js
+			// PC version: 360taofu.js
 			extract_work_data(work_data, html.between(
 			// <div class="mh-date-info fl">\n <div class="mh-date-info-name">
 			'<div class="mh-date-info', '<div class="work-author">'),
@@ -166,16 +203,28 @@ function module_code(library_namespace) {
 			// 人气： 收藏数： 吐槽： 状态：
 			/<span[^<>]*>([^<>：]+)：([\s\S]*?)<\/span>/g);
 
-			// 共通
+			// PC version 共通
 			extract_work_data(work_data, html.between(
 			// <div class="cy_zhangjie">...<div class="cy_zhangjie_top">
 			'<div class="cy_zhangjie_top">',
 			// <div class="cy_plist" id="play_0">
 			' class="cy_plist"'), /<p>([^<>：]+)：([\s\S]*?)<\/p>/g);
 
+			// PC version, mobile version 共通
 			extract_work_data(work_data, html);
 
-			Object.assign(work_data, {
+			Object.assign(work_data, this.is_mobile ? {
+				// 必要屬性：須配合網站平台更改。
+				last_update : html.between('<span class="date">', '</span>'),
+
+				// 選擇性屬性：須配合網站平台更改。
+
+				// 網頁中列的description比meta中的完整。
+				description : get_label(html.between(
+				// 友绘漫画网
+				// <p class="txtDesc autoHeight">介绍:...</p>
+				'<p class="txtDesc autoHeight">', '</p>'))
+			} : {
 				// 避免覆寫
 				qTid : work_data.id,
 
@@ -208,10 +257,14 @@ function module_code(library_namespace) {
 			return work_data;
 		},
 		get_chapter_list : function(work_data, html, get_label) {
-			html = html.between('<div class="cy_plist', '</div>');
+			html = html.between('<div class="cy_plist', '</div>')
+			// mobile version: <div id="list">
+			// <ul class="Drama autoHeight" id="mh-chapter-list-ol-0">
+			|| html.between('<div id="list">', '</ul>');
+			// console.log(html);
 
 			var matched, PATTERN_chapter =
-			//
+			// matched: [ all, url, inner ]
 			/<li><a href="([^<>"]+)"[^<>]*>([\s\S]+?)<\/li>/g;
 
 			work_data.chapter_list = [];
@@ -222,6 +275,7 @@ function module_code(library_namespace) {
 				};
 				work_data.chapter_list.push(chapter_data);
 			}
+			// PC version, mobile version 共通
 			work_data.chapter_list.reverse();
 			// console.log(work_data.chapter_list);
 		},
@@ -295,8 +349,23 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_qTcms2017_comics_crawler(configuration) {
-		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
-				: default_configuration;
+		configuration = configuration ? Object.assign(Object.create(null),
+				default_configuration, configuration) : default_configuration;
+
+		if (configuration.is_mobile === undefined) {
+			configuration.is_mobile = configuration.base_URL.includes('://m.');
+			if (configuration.is_mobile) {
+				Object.assign(configuration, {
+					search_URL : configuration.search_URL_mobile,
+					parse_search_result :
+					//
+					configuration.parse_search_result_mobile,
+					title_of_search_result :
+					//
+					configuration.title_of_search_result_mobile
+				});
+			}
+		}
 
 		// 每次呼叫皆創建一個新的實體。
 		return new library_namespace.work_crawler(configuration);
