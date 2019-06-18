@@ -31,11 +31,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.work_crawler.SinMH',
 
-	require : 'application.net.work_crawler.'
-	// for CeL.to_file_name()
-	+ '|application.net.'
-	// for .detect_HTML_language(), .time_zone_of_language()
-	+ '|application.locale.',
+	require : 'application.net.work_crawler.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -150,7 +146,12 @@ function module_code(library_namespace) {
 						// 930mh.js
 						|| html.between('<p class="comic_deCon_d">', '</p>'))
 			};
-			// <ul class="detail-list cf"> ... </ul>
+
+			// <div class="book-detail pr fr">
+			// <ul class="detail-list cf">
+			// ...
+			// </ul>
+			// <a class="intro-act" id="intro-act" href="javascript:;">展開詳情</a>
 			extract_work_data(work_data, html.between('detail-list', '</ul>'),
 			// e.g., "<strong>漫画别名：</strong>暂无</span>"
 			// gufengmh.js:<li><span><strong>漫画类型：</strong>...</span><span><strong>漫画作者：</strong>...</span></li>
@@ -170,12 +171,13 @@ function module_code(library_namespace) {
 			extract_work_data(work_data, html);
 
 			Object.assign(work_data, {
-				author : work_data.漫画作者 || work_data.作者,
-				status : work_data.漫画状态 || work_data.状态,
+				author : work_data.漫画作者 || work_data.漫畫作者 || work_data.作者,
+				status : work_data.漫画状态 || work_data.漫畫狀態 || work_data.状态,
 				last_update : work_data.更新时间 || work_data.时间,
-				latest_chapter : work_data.最新 || work_data.更新至 || get_label(
-				// for 36mh.js
-				html.between('<span class="text">更新至：', '</span>')),
+				latest_chapter : work_data.最新 || work_data.更新至
+						|| get_label(html.between('<span class="text">更新至',
+						// for 36mh.js: "更新至：", 999comics.js: "更新至:"
+						'</span>').replace(/^[：:]/, '')),
 				latest_chapter_url : html.between('最新：<a href="', '"')
 				// for 36mh.js
 				|| html.between('更新至 [ <a href="', '"')
@@ -187,13 +189,22 @@ function module_code(library_namespace) {
 			if (!work_data.last_update && work_data.status) {
 				// for 36mh.js
 				var matched = work_data.status
-						.match(/^([\s\S]+?)最近于([\s\S]+?)$/);
+						.match(/^([\s\S]+?)最近[于於]([\s\S]+?)$/);
 				if (matched) {
 					Object.assign(work_data, {
 						status : matched[1],
 						last_update : matched[2].replace(
-								/^[\s\n]*\[|\][\s\n]*$/g, '').trim(),
+								/^[\s\n]*\[|\][\s\n]*$/g, '').trim()
 					});
+				}
+			}
+			if (!work_data.last_update) {
+				// for 999comics.js
+				var matched = html.match(/最近[于於]([\s\S]+?)<\//);
+				// console.log(matched);
+				if (matched) {
+					work_data.last_update = get_label(matched[1].replace(
+							/^[\s\n]*\[|\][\s\n]*$/g, ''));
 				}
 			}
 
@@ -402,15 +413,19 @@ function module_code(library_namespace) {
 						+ ': ' + 'No valid chapter data got!');
 				return;
 			}
+
 			// eval(chapter_data_code[1].replace(/;var /g, ';chapter_data.'));
 			chapter_data_code[1].split(';var ').forEach(function(token) {
+				if (!token.includes('='))
+					return;
+
 				try {
 					eval('chapter_data.' + token);
 				} catch (e) {
-					// e.g.,
+					// Ignore SyntaxError. e.g.,
 					// https://www.gufengmh8.com/manhua/wodeshashounanyou/742494.html
 					// ;var pageTitle = "我的杀手男友第65、66话 "肉偿在线观看";
-					console.error('SyntaxError: ' + token);
+					console.error('parse_chapter_data: SyntaxError: ' + token);
 				}
 			});
 			// console.log(chapter_data);
@@ -489,6 +504,9 @@ function module_code(library_namespace) {
 		// 每次呼叫皆創建一個新的實體。
 		return new library_namespace.work_crawler(configuration);
 	}
+
+	// for CeL.application.net.work_crawler.SinMH2013
+	new_SinMH_comics_crawler.default_configuration = default_configuration;
 
 	return new_SinMH_comics_crawler;
 }
