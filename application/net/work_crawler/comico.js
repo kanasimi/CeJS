@@ -30,11 +30,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.work_crawler.comico',
 
-	require : 'application.net.work_crawler.'
-	// for CeL.to_file_name()
-	+ '|application.net.'
-	// for .detect_HTML_language(), .time_zone_of_language()
-	+ '|application.locale.',
+	require : 'application.net.work_crawler.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -66,7 +62,7 @@ function module_code(library_namespace) {
 
 	var PATTERN_work_info = /<(p|div) class="[^<>"]+?__(author|(?:sub-)?description|meta)">([\s\S]+?)<\/\1>/g,
 	// assert: (NO_ticket_notified>=0) === false
-	NO_ticket_notified = '已無閱讀卷可用', auto_use_ticket_notified,
+	NO_ticket_notified = '已無閱讀卷可用。', auto_use_ticket_notified,
 	// 可以用閱讀卷閱讀的章節。
 	READABLE_FLAG = 'W',
 	//
@@ -88,7 +84,9 @@ function module_code(library_namespace) {
 			// 警告: 需要自行呼叫 insert_id_list(id_list);
 			adult : function(insert_id_list, get_label) {
 				// TW only: 此前被當作是一般作品。
-				library_namespace.info(this.id + ': 此後的作品標題都被當作是網頁限定作品。');
+				library_namespace.info([ this.id + ': ', {
+					T : '此後的作品標題都被當作是網頁限定作品。'
+				} ]);
 				// webonly
 				this.adult = true;
 				insert_id_list();
@@ -185,15 +183,18 @@ function module_code(library_namespace) {
 				last_checked : null
 			});
 			if (cmnData.time && cmnData.time.leftTime > 0) {
-				library_namespace.info('下次收到閱讀券還要 '
-				// レンタル券で無料 レンタル券が届きました（1日で回復）
-				// 作品を1話レンタルできます
-				+ library_namespace.age_of(0, 1000 * cmnData.time.leftTime));
+				library_namespace.info({
+					T : [ '下次收到閱讀券還要 %1。',
+					// レンタル券で無料 レンタル券が届きました（1日で回復）
+					// 作品を1話レンタルできます
+					library_namespace.age_of(0, 1000 * cmnData.time.leftTime) ]
+				});
 			}
 
 			return work_data;
 		},
 		chapter_list_URL : function(work_id, work_data) {
+			// library_namespace.set_debug(9);
 			return [ 'api/getArticleList.nhn', {
 				titleNo : work_id
 			} ];
@@ -229,11 +230,13 @@ function module_code(library_namespace) {
 						}
 						if (!work_data.downloaded_chapter_list[index]
 								&& chapter_data.freeFlg === READABLE_FLAG) {
-							library_namespace.info(work_data.title + ': 還有'
-									+ work_data.ticket_left + '張閱讀卷，且第 '
-									+ index + '/'
-									+ work_data.chapter_list.length
-									+ ' 章還有沒下載過，從此章開始檢查。');
+							library_namespace.info([ work_data.title + ': ', {
+								T : [ '還有%1張閱讀卷，且第 %2/%3 章還有沒下載過，從此章開始檢查。',
+								//
+								work_data.ticket_left, index,
+								//
+								work_data.chapter_list.length ]
+							} ]);
 							work_data.last_checked
 							// 記錄最後檢查過的章節。
 							= work_data.last_download.chapter;
@@ -255,24 +258,29 @@ function module_code(library_namespace) {
 			// console.log(work_data);
 			var chapter_data = work_data.chapter_list[chapter_NO - 1],
 			//
-			skip_chapter = !chapter_data.price || chapter_data.isPurchased
-					&& ('已付費購買 ' + chapter_data.title);
+			skip_chapter = !chapter_data.price || chapter_data.isPurchased && {
+				T : [ '已付費購買章節《%1》。', chapter_data.title ]
+			};
 			// console.log(chapter_data);
 			if (!skip_chapter && chapter_data.expireDate > 0) {
-				skip_chapter = '在 '
-						+ new Date(chapter_data.expireDate)
-								.format('%m/%d %H:%M')
-						+ ' 之前(還有 '
-						+ library_namespace.age_of(Date.now(),
-								chapter_data.expireDate) + ')可以閱讀本章: '
-						+ chapter_data.title;
+				skip_chapter = {
+					T : [ '在 %1 之前（還有 %2）可以閱讀本章節《%3》。',
+					//
+					new Date(chapter_data.expireDate).format('%m/%d %H:%M'),
+					//
+					library_namespace.age_of(Date.now(),
+					//
+					chapter_data.expireDate), chapter_data.title ]
+				};
 			}
 			if (!skip_chapter
 					&& work_data.downloaded_chapter_list[chapter_NO - 1]) {
 				// TODO: 應該檢查是不是真的有圖片檔案存在。若有檔案不見，
 				// 或者有損壞檔案，
 				// 那麼就把 work_data.downloaded_chapter_list[index] 設成 false。
-				skip_chapter = '之前已下載過 ' + chapter_data.title + '，不再重新購買。';
+				skip_chapter = {
+					T : [ '之前已下載過章節《%1》，不再重新購買。', chapter_data.title ]
+				};
 			}
 			if (!skip_chapter && chapter_data.freeFlg !== READABLE_FLAG) {
 				// N: TW: 本章節需要錢(coin)來閱讀。
@@ -281,37 +289,48 @@ function module_code(library_namespace) {
 				|| chapter_data.freeFlg === 'P') {
 					skip_chapter = true;
 				} else {
-					skip_chapter = '本章節狀況不明(' + chapter_data.freeFlg + ')。跳過 '
-							+ chapter_data.title + '，不採用閱讀卷。';
+					skip_chapter = {
+						T : [ '本章節狀況不明(%1)。跳過《%1》不採用閱讀卷。',
+								chapter_data.freeFlg, chapter_data.title ]
+					};
 				}
 			}
 			if (!skip_chapter && !(work_data.ticket_left > 0)) {
 				if (work_data.ticket_left !== NO_ticket_notified) {
 					work_data.ticket_left = NO_ticket_notified;
-					skip_chapter = NO_ticket_notified + '。跳過 '
-					//
-					+ chapter_data.title + '，不使用閱讀券。';
+					skip_chapter = [ {
+						T : NO_ticket_notified
+					}, {
+						T : [ '跳過《%1》，不使用閱讀券。', chapter_data.title ]
+					} ];
 				} else
 					skip_chapter = true;
 			}
 			if (!skip_chapter && !this.auto_use_ticket) {
 				skip_chapter = auto_use_ticket_notified ? true
 						// @see https://github.com/kanasimi/work_crawler
-						: '未設定讓本工具自動使用閱讀卷。若您並非使用安裝包，並想要讓本工具自動使用閱讀卷，請打開檔案總管，到安裝本工具的目錄下（若是您使用安裝包，就不能夠設定帳號密碼了。），在 work_crawler_loder.configuration.js 這個檔案中設定好帳號密碼資料，以及 "auto_use_ticket:true"。您可以參考 work_crawler_loder.js 這個檔案來做設定。';
+						: {
+							T : '未設定讓本工具自動使用閱讀卷。若您並非使用安裝包，並想要讓本工具自動使用閱讀卷，請打開檔案總管，到安裝本工具的目錄下（若是您使用安裝包，就不能夠設定帳號密碼了。），在 work_crawler_loder.configuration.js 這個檔案中設定好帳號密碼資料，以及 "auto_use_ticket:true"。您可以參考 work_crawler_loder.js 這個檔案來做設定。'
+						};
 				auto_use_ticket_notified = true;
 			}
 
 			if (skip_chapter) {
-				if (skip_chapter !== true)
-					library_namespace.info(work_data.title + ': '
-							+ skip_chapter);
+				if (skip_chapter !== true) {
+					if (!Array.isArray(skip_chapter)) {
+						skip_chapter = [ skip_chapter ];
+					}
+					skip_chapter.unshift(work_data.title, ': ');
+					library_namespace.info(skip_chapter);
+				}
 				callback();
 				return;
 			}
 
 			// http://www.comico.com.tw/notice/detail.nhn?no=751
-			library_namespace.info(work_data.title + ': 用閱讀券閱讀 '
-					+ chapter_data.title);
+			library_namespace.info([ work_data.title + ': ', {
+				T : [ '用閱讀券閱讀《%1》。', chapter_data.title ]
+			} ]);
 			var _this = this, html = XMLHttp.responseText;
 			this.get_URL(this.consume_url, function(XMLHttp) {
 				// console.log(XMLHttp.responseText);
@@ -371,7 +390,7 @@ function module_code(library_namespace) {
 			} else if (cmnData = html.between(
 			// e.g., http://plus.comico.jp/manga/24517/8/
 			'<p class="m-section-error__heading">', '</p>')) {
-				var message = work_data.title + ' #' + chapter_NO + ' '
+				var message = work_data.title + ' §' + chapter_NO + ' '
 						+ chapter_data.title + ': ' + cmnData;
 				if (cmnData !== 'お探しのページは存在しません') {
 					throw message;
@@ -436,8 +455,11 @@ function module_code(library_namespace) {
 					</code>
 					 */
 					!html.includes(' class="swiper-slide _swiperSlide')) {
-						throw 'parse_chapter_data: ' + work_data.title + ' #'
-								+ chapter_NO + ': 網頁改版? 無法解析!';
+						var message = '網頁改版？無法解析！';
+						if (CeL.gettext)
+							message = CeL.gettext(message);
+						throw 'parse_chapter_data: ' + work_data.title + ' §'
+								+ chapter_NO + ': ' + message;
 						Array.prototype.unshift.apply(cmnData.imageData,
 								image_url_list);
 					}
@@ -449,8 +471,10 @@ function module_code(library_namespace) {
 
 			} else {
 				console.log(html);
-				throw work_data.title + ' #' + chapter_NO
-						+ ': Can not parse data! 網頁改版? 無法不能解析!';
+				var message = '網頁改版？無法解析！';
+				if (CeL.gettext)
+					message = CeL.gettext(message);
+				throw work_data.title + ' §' + chapter_NO + ': ' + message;
 			}
 
 			if (cmnData.url) {
@@ -473,9 +497,11 @@ function module_code(library_namespace) {
 					// 付費章節: 中文版提供第一張的完整版，日文版只提供縮圖。
 					// 圖片都應該要有hash，且不該是縮圖。
 					&& (url.includes('.jp/tmb/') || /\.jpg$/.test(url))) {
-						throw work_data.title + ' #' + chapter_NO + ' '
-								+ chapter_data.title + ': Invalid image: '
-								+ url;
+						var message = CeL.gettext ? CeL.gettext(
+								'Invalid image url: %1', url)
+								: 'Invalid image url: ' + url;
+						throw work_data.title + ' §' + chapter_NO + ' '
+								+ chapter_data.title + ': ' + message;
 					}
 					return {
 						url : url
@@ -503,8 +529,8 @@ function module_code(library_namespace) {
 	var module_name = this.id;
 
 	function new_comico_comics_crawler(configuration, callback, initializer) {
-		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
-				: default_configuration;
+		configuration = configuration ? Object.assign(Object.create(null),
+				default_configuration, configuration) : default_configuration;
 
 		// 每次呼叫皆創建一個新的實體。
 		var crawler = new library_namespace.work_crawler(configuration);
@@ -523,8 +549,9 @@ function module_code(library_namespace) {
 		tls = null;
 
 		if (crawler.password && crawler.loginid) {
-			library_namespace.log((crawler.id || module_name) + ': Login as ['
-					+ crawler.loginid + ']');
+			library_namespace.log([ (crawler.id || module_name) + ': ', {
+				T : [ 'Login as [%1]', crawler.loginid ]
+			} ]);
 
 			var account_api_host = crawler.base_URL.replace(/^.+?[a-z]+\./,
 			// https://id.comico.com.tw/login/login.nhn
@@ -567,7 +594,9 @@ function module_code(library_namespace) {
 			var item_list = JSON.parse(XMLHttp.responseText).result;
 			if (item_list.length > 0) {
 				// TODO: 顯示物品的資訊。
-				library_namespace.info('已收到' + item_list.length + '項有期限的物品。');
+				library_namespace.info({
+					T : [ '已收到%1項有期限的物品。', item_list.length ]
+				});
 			}
 
 			// 最新消息

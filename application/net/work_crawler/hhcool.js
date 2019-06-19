@@ -197,7 +197,9 @@ function module_code(library_namespace) {
 
 				function for_each_image_page(html, error) {
 					if (error) {
-						library_namespace.error('下載時發生錯誤，無法順利取得檔案內容！');
+						library_namespace.error({
+							T : '下載時發生錯誤，無法順利取得檔案內容！'
+						});
 						library_namespace.error(error);
 						_this.onerror(error);
 						return;
@@ -212,13 +214,15 @@ function module_code(library_namespace) {
 						if (!this_image_list[index]) {
 							this_image_list[index] = image_data[0];
 						} else if (this_image_list[index] !== image_data[0]) {
-							_this.onerror('Different url: '
-							//
-							+ this_image_list[index] + ' !== ' + image_data[0]
-							//
-							+ '\n或許是下載的檔案出現錯誤？您可嘗試過段時間再下載，'
-							//
-							+ '或選用 "recheck" 選項來忽略 cache、重新下載每個圖片的頁面。');
+							_this.onerror([ {
+								T : [ 'Different url: %1 ≠ %2',
+								//
+								this_image_list[index], image_data[0] ]
+							}, '\n', {
+								T : '或許是下載的檔案出現錯誤？您可嘗試過段時間再下載，'
+								//
+								+ '或選用 .recheck 選項來忽略 cache、重新下載每個圖片的頁面。'
+							} ]);
 							run_next();
 							return;
 						}
@@ -284,8 +288,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_hhcool_comics_crawler(configuration, callback, initializer) {
-		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
-				: default_configuration;
+		configuration = configuration ? Object.assign(Object.create(null),
+				default_configuration, configuration) : default_configuration;
 
 		// 每次呼叫皆創建一個新的實體。
 		var crawler = new library_namespace.work_crawler(configuration);
