@@ -1,7 +1,7 @@
 ﻿/**
  * @name CeL module for downloading SinMH CMS comics.
  * 
- * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸常見漫畫管理系統: 圣樱漫画管理系统 (圣樱CMS) MHD模板 的工具。
+ * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸常見漫畫管理系統: 圣樱漫画管理系统 (圣樱CMS) MHD模板 PC端 的工具。
  * 
  * <code>
 
@@ -86,7 +86,7 @@ function module_code(library_namespace) {
 		},
 
 		// 解析 作品名稱 → 作品id get_work()
-		// 1. 使用網頁取得搜尋所得的作品資料。 (default)
+		// 1. 使用 PC端 網頁取得搜尋所得的作品資料。 (default)
 		search_URL : 'search/?keywords=',
 		// 2. 使用API取得搜尋所得的作品資料。 (set search_URL:'API')
 		search_URL_API : function(work_title) {
@@ -111,12 +111,26 @@ function module_code(library_namespace) {
 				return [ id_data, id_data ];
 			}
 
-			// 1. 使用網頁取得搜尋所得的作品資料。
+			// 1. 使用 PC端 網頁取得搜尋所得的作品資料。
 			// e.g., 36mh.js
-			html = html.between('<h4 class="fl">');
-			var id_list = [], id_data = [], matched,
-			//
+			var id_list = [], id_data = [], matched = html,
+			// matched: [ all, url, inner (title) ]
 			PATTERN_search = /<p class="ell"><a href="([^<>"]+)">([^<>]+)/g;
+
+			if (html = html.between('<h4 class="fl">')) {
+				// matched: [ all, url, inner (title) ]
+				PATTERN_search = /<p class="ell"><a href="([^<>"]+)">([^<>]+)/g;
+			} else {
+				// 行動版 mobile version
+				// e.g., <div id="update_list"><div class='UpdateList'><div
+				// class="itemBox" data-key="10992">
+				html = html.between('<div id="update_list">');
+				// e.g., <a class="title"
+				// href="https://m.36mh.com/manhua/dushizhixiuzhenguilai/"
+				// target="_blank">都市之修真归来</a>
+				// matched: [ all, url, inner (title) ]
+				PATTERN_search = /<a class="title" href="([^<>"]+)"[^<>]*>([^<>]+)/g;
+			}
 
 			while (matched = PATTERN_search.exec(html)) {
 				matched[1] = matched[1].match(/([^\/]+)\/$/);
