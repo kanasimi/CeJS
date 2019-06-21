@@ -26,11 +26,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.work_crawler.webtoon',
 
-	require : 'application.net.work_crawler.'
-	// for CeL.to_file_name()
-	+ '|application.net.'
-	// for .detect_HTML_language(), .time_zone_of_language()
-	+ '|application.locale.',
+	require : 'application.net.work_crawler.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -189,8 +185,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_webtoon_comics_crawler(configuration) {
-		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
-				: default_configuration;
+		configuration = configuration ? Object.assign(Object.create(null),
+				default_configuration, configuration) : default_configuration;
 
 		// 每次呼叫皆創建一個新的實體。
 		return new library_namespace.work_crawler(configuration);

@@ -2338,7 +2338,7 @@ function module_code(library_namespace) {
 		}
 	}
 
-	function get_chapter_NO(work_data, chapter_NO) {
+	function get_next_chapter_NO_item(work_data, chapter_NO) {
 		if (Array.isArray(work_data.download_chapter_NO_list)) {
 			// assert: work_data.download_chapter_NO_list 已經篩選過。
 			// ">=": work_data.download_chapter_NO_list 有可能為空，造成一開始就等於了。
@@ -3231,8 +3231,9 @@ function module_code(library_namespace) {
 
 			// 開始下載 chapter。
 			work_data.start_downloading_chaper = Date.now();
-			pre_get_chapter_data.call(_this, work_data, get_chapter_NO(
-					work_data, work_data.last_download.chapter), callback);
+			pre_get_chapter_data.call(_this, work_data,
+					get_next_chapter_NO_item(work_data,
+							work_data.last_download.chapter), callback);
 		}
 
 	}
@@ -3839,7 +3840,7 @@ function module_code(library_namespace) {
 				library_namespace
 						.warn({
 							T : [
-									'工具檔設定了 part_title %1，卻似乎未沒有設定應設定的 `work_data.chapter_list.part_NO`? (part_NO: %2)',
+									'工具檔設定了 part_title %1，卻似乎未設定應設定的 `work_data.chapter_list.part_NO`? (part_NO: %2)',
 									JSON.stringify(chapter_data.part_title),
 									JSON
 											.stringify(work_data.chapter_list.part_NO) ]
@@ -3874,7 +3875,7 @@ function module_code(library_namespace) {
 
 		} else {
 			this.onerror('get_chapter_directory_name: '
-					+ gettext('Invalid chapter_data: ', work_data.id + '§'
+					+ gettext('Invalid chapter_data: %1', work_data.id + ' §'
 							+ chapter_NO), work_data);
 			typeof callback === 'function' && callback(work_data);
 			return Work_crawler.THROWED;
@@ -4248,7 +4249,7 @@ function module_code(library_namespace) {
 						if (_this.skip_chapter_data_error) {
 							library_namespace.warn('process_chapter_data: '
 							// Skip this chapter if do not need throw
-							+ gettext('跳過 %1 #%2 並接著下載下一章。',
+							+ gettext('跳過 %1 §%2 並接著下載下一章。',
 							//
 							work_data.title, chapter_NO));
 							check_if_done();
@@ -4703,7 +4704,7 @@ function module_code(library_namespace) {
 		}
 
 		// 增加章節計數，準備下載下一個章節。
-		chapter_NO = get_chapter_NO(work_data, chapter_NO + 1);
+		chapter_NO = get_next_chapter_NO_item(work_data, chapter_NO + 1);
 
 		if ('jump_to_chapter' in work_data) {
 			if (work_data.jump_to_chapter !== chapter_NO) {

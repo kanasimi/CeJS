@@ -2969,9 +2969,7 @@ function affairs() {
 	},
 	// "Apple Color Emoji","Segoe UI Emoji","NotoColorEmoji","Segoe UI
 	// Symbol","Android Emoji","EmojiSymbols"
-	sunrise_sunset_icons = ' 🌄☀️🌇'.chars().map(function(i) {
-		return i.trim();
-	}),
+	sunrise_sunset_icons = [ '🌃', '🌅'/* 🌄 */, '☀️', '🌇' ],
 	//
 	建除_LIST = '建除滿平定執破危成收開閉'.split(''),
 	// https://github.com/zealotrush/ben_rime/blob/master/symbols.yaml

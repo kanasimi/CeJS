@@ -27,11 +27,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.work_crawler.qTcms2014',
 
-	require : 'application.net.work_crawler.'
-	// for CeL.to_file_name()
-	+ '|application.net.'
-	// for .detect_HTML_language(), .time_zone_of_language()
-	+ '|application.locale.',
+	require : 'application.net.work_crawler.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',

@@ -3,6 +3,8 @@
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸常見漫畫管理系統: 可能是 圣樱漫画管理系统 (圣樱CMS) 2013年版 的工具。
  * 
+ * TODO: https://m.999comics.com/
+ * 
  * <code>
 
  CeL.SinMH2013(configuration).start(work_id);
@@ -161,7 +163,7 @@ function module_code(library_namespace) {
 			</ul>
 			</div>
 
-			</code>
+			</code> 單話 番外篇 單行本
 			 * 
 			 * <code>
 

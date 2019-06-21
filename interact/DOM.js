@@ -7492,31 +7492,37 @@ function module_code(library_namespace) {
 	/**
 	 * 阻止 JavaScript 事件冒泡傳遞，使 event 不傳到 parentNode。
 	 * 
-	 * @param e
+	 * @param {Event}event
 	 *            event handler
-	 * @param c
+	 * @param {Boolean}cancel
 	 *            cancel bubble
 	 * @see http://www.jb51.net/html/200705/23/9858.htm
 	 * @_memberOf _module_
 	 */
-	stop_event = function(event, c) {
+	stop_event = function(event, cancel) {
 		if (!event)
 			event = window.event;
 
-		if (typeof event.preventDefault === 'function')
+		if (typeof event.preventDefault === 'function') {
 			// 在拖曳時可阻止預定動作，例如跳頁展示圖片或檔案。
 			event.preventDefault();
-		else
+		} else {
 			event.returnValue = false;
+		}
 
-		if (c)
+		if (cancel) {
 			// cancelBubble 在IE下有效，stopPropagation 在 Firefox 下有效。
 			// 停止冒泡，事件不會上升，我們就可以獲取精確的鼠標進入元素。 http://realazy.org/lab/bubble/
-			if (typeof event.stopPropagation === 'function')
+			if (typeof event.stopPropagation === 'function') {
+				// IE9 & Other Browsers
 				event.stopPropagation();
-			else
+			} else {
+				// IE8 and Lower
 				event.cancelBubble = true;
+			}
+		}
 
+		// for using in <a>
 		return false;
 	};
 

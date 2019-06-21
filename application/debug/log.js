@@ -1123,7 +1123,12 @@ function finish(name_space) {
 			/**
 			 * U+1F41B BUG
 			 */
-			debug : '🐛'
+			debug : '🐛',
+			/**
+			 * U+1F463 footprints
+			 * https://unicode.org/emoji/charts/full-emoji-list.html
+			 */
+			trace : '👣'
 		},
 		// base path of icon
 		icon_path = CeL.get_module_path(module_name, 'icon/');

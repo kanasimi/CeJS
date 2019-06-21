@@ -34,11 +34,7 @@ typeof CeL === 'function' && CeL.run({
 
 	require : 'application.net.work_crawler.'
 	//
-	+ '|application.storage.EPUB.'
-	// for CeL.to_file_name()
-	+ '|application.net.'
-	// for .detect_HTML_language(), .time_zone_of_language()
-	+ '|application.locale.',
+	+ '|application.storage.EPUB.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -254,8 +250,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_syosetu_crawler(configuration) {
-		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
-				: default_configuration;
+		configuration = configuration ? Object.assign(Object.create(null),
+				default_configuration, configuration) : default_configuration;
 		// 每次呼叫皆創建一個新的實體。
 		return new library_namespace.work_crawler(configuration);
 	}

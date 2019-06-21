@@ -40,9 +40,7 @@ typeof CeL === 'function' && CeL.run({
 
 	require : 'application.net.work_crawler.'
 	//
-	+ '|application.storage.EPUB.'
-	// for .detect_HTML_language(), .time_zone_of_language()
-	+ '|application.locale.',
+	+ '|application.storage.EPUB.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',

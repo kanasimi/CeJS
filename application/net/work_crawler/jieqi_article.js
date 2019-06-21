@@ -9,7 +9,7 @@
 
  </code>
  * 
- * @see http://www.jieqi.com/files/page/html/product/article.html 杰奇小说连载系统
+ * @see http://www.jieqi.com/files/page/html/product/article.html 杰奇网络 杰奇小说连载系统
  *      （2004-2015?，新版为杰奇原创文学系统）
  * 
  * @since 2019/2/20 16:58:20 模組化。
@@ -29,9 +29,7 @@ typeof CeL === 'function' && CeL.run({
 
 	require : 'application.net.work_crawler.'
 	//
-	+ '|application.storage.EPUB.'
-	// for .detect_HTML_language(), .time_zone_of_language()
-	+ '|application.locale.',
+	+ '|application.storage.EPUB.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -74,7 +72,9 @@ function module_code(library_namespace) {
 				// 直接進入作品資訊頁面。
 				id_data.push(get_label(matched[1]));
 				matched = html
-						.match(/og:novel:read_url" content="[^<>"]*?\/(\d+)\/"/);
+				// e.g., <meta property="og:novel:read_url"
+				// content="https://www.zhuishubang.com/120382/"/>
+				.match(/og:novel:read_url" content="[^<>"]*?\/(\d+)\/"/);
 				id_list.push(+matched[1]);
 
 			} else {
@@ -183,8 +183,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_jieqi_article_novels_crawler(configuration) {
-		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
-				: default_configuration;
+		configuration = configuration ? Object.assign(Object.create(null),
+				default_configuration, configuration) : default_configuration;
 
 		// 每次呼叫皆創建一個新的實體。
 		return new library_namespace.work_crawler(configuration);

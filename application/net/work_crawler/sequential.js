@@ -119,14 +119,16 @@ function module_code(library_namespace) {
 			var latest_image_data = image_list[image_list.index];
 			// console.log(latest_image_data);
 			if (!latest_image_data.has_error) {
-				// CeL.debug(work_data.id + ': 本章節上一張圖片下載成功。下載本章節下一幅圖片。');
+				library_namespace.debug(work_data.id
+						+ ': 本章節上一張圖片下載成功。下載本章節下一幅圖片。', 3);
 				image_list.push(this.get_image_url(work_data, chapter_NO,
 						image_list.length));
 				return;
 			}
 
 			if (image_list.length === 1) {
-				// CeL.debug(work_data.id + ': 第一張圖就下載失敗了。結束下載本作品。');
+				library_namespace.debug(work_data.id + ': 第一張圖就下載失敗了。結束下載本作品。',
+						3);
 				return;
 			}
 

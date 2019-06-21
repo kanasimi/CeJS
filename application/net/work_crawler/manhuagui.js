@@ -5,24 +5,21 @@
  * 
  * 2017/10: 爱看漫/看漫画改名(DNS被導引到)漫画柜
  * 
+ * 57mh 介面程式碼類似於 999comics。manhuagui 似乎是在這基礎上經過修改？
+ * @see CeL.application.net.work_crawler.SinMH2013
+ * 
  * @see http://www.manhua.demo.shenl.com/?theme=mhd
  * @see qTcms 晴天漫画程序 晴天漫画系统 http://manhua3.qingtiancms.net/
  * 
  * <code>
 
- CeL.manhuagui(configuration).start(work_id);
+CeL.manhuagui(configuration, function(crawler) {
+	start_crawler(crawler, typeof module === 'object' && module);
+}, function(crawler) {
+	setup_crawler(crawler, typeof module === 'object' && module);
+});
 
  </code>
- * 
- * 57mh 介面程式碼類似於 999comics。manhuagui 似乎是在這基礎上經過修改？ 57mh 這一批介面外觀與
- * CeL.application.net.work_crawler.SinMH 類似，但介面程式碼有些差距。或可稱為
- * CeL.application.net.work_crawler.SinMH2013 或
- * CeL.application.net.work_crawler.SMH。
- * 
- * @see https://www.999comics.com/static/scripts/main.js?v=1.0 MHD
- *      http://www.wuqimh.com/templates/wuqi/default/scripts/main.js?v=1.0.3 MHW
- *      https://cf.hamreus.com/scripts_tw/main_EB87BCACAD66FA68CA738D0C925DC508.js
- *      main_EB87BCACAD66FA68CA738D0C925DC508.js 末: SMH = { update: "2013/4/1" }
  * 
  * @since 2019/6/17 19:32:13 模組化。
  */
@@ -172,7 +169,7 @@ function module_code(library_namespace) {
 			// e.g., "<strong>漫画别名：</strong>暂无</span>"
 			/<strong[^<>]*>([^<>]+)<\/strong>(.+?)<\/span>/g);
 			if (data = get_label(data.between('<li class="status">', '</li>'))) {
-				CeL.log(data);
+				library_namespace.log(data);
 			}
 			return work_data;
 		},
@@ -247,7 +244,7 @@ function module_code(library_namespace) {
 				if (chapter_list.length > 1) {
 					// 轉成由舊至新之順序。
 					if (chapter_list.some_without_id) {
-						CeL.warn('有些篇章之URL檔名非數字: '
+						library_namespace.warn('有些篇章之URL檔名非數字: '
 								+ JSON.stringify(chapter_list.some_without_id));
 						chapter_list.reverse();
 					} else {
@@ -305,8 +302,9 @@ function module_code(library_namespace) {
 			var chapter_data = work_data.chapter_list[chapter_NO - 1],
 			// e.g., "/comic/8772/86612.html"
 			chapter_id = +chapter_data.url.match(/^\/comic\/\d+\/(\d+)\.html$/)[1];
-			CeL.get_URL(this.base_URL + 'support/chapter.ashx?bid='
-					+ work_data.id + '&cid=' + chapter_id, function(XMLHttp) {
+			library_namespace.get_URL(this.base_URL
+					+ 'support/chapter.ashx?bid=' + work_data.id + '&cid='
+					+ chapter_id, function(XMLHttp) {
 				// console.log(XMLHttp.responseText);
 				chapter_data.sibling = JSON.parse(XMLHttp.responseText);
 				if (chapter_data.sibling.n > 0
@@ -346,7 +344,7 @@ function module_code(library_namespace) {
 			'<script type="text/javascript">window["\\x65\\x76\\x61\\x6c"]',
 					'</script>');
 			if (!chapter_data || !(chapter_data = decode(chapter_data))) {
-				CeL.warn(work_data.title + ' #' + chapter_NO
+				library_namespace.warn(work_data.title + ' #' + chapter_NO
 						+ ': No valid chapter data got!');
 				return;
 			}
@@ -364,7 +362,8 @@ function module_code(library_namespace) {
 			var path = encodeURI(chapter_data.path),
 			// 令牌 @see SMH.utils.getPicUrl() @ ((core_filename))
 			token = '?cid=' + chapter_data.cid + '&'
-					+ CeL.get_URL.parameters_to_String(chapter_data.sl);
+			//
+			+ library_namespace.get_URL.parameters_to_String(chapter_data.sl);
 			// 漫畫櫃的webp圖像檔案可能是即時生成的? 大小常常不一樣。
 			chapter_data.image_list = chapter_data.files.map(function(url) {
 				return {
@@ -393,10 +392,11 @@ function module_code(library_namespace) {
 		}
 
 		// 創建 main directory。
-		CeL.create_directory(crawler.main_directory);
+		library_namespace.create_directory(crawler.main_directory);
 
 		var LZString;
-		CeL.get_URL_cache(crawler.script_base_URL + decode_filename,
+		library_namespace.get_URL_cache(crawler.script_base_URL
+				+ decode_filename,
 		// 2017/3/3? ikanman 改版
 		function(contents, error) {
 			contents = contents.between('\nwindow["\\x65\\x76\\x61\\x6c"]',

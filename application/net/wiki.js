@@ -1690,7 +1690,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 快速取得 lead section / first section / 導入文 文字用。
+	 * 快速取得第一個標題 lead section / first section / introduction 導入文 文字用。
 	 * 
 	 * @example <code>
 
@@ -1702,6 +1702,9 @@ function module_code(library_namespace) {
 	 *            wikitext to parse
 	 * 
 	 * @returns {String}lead section wikitext 文字
+	 * 
+	 * @see [[mw:Extension:Labeled_Section_Transclusion#Transclude_the_introduction]]
+	 *      {{subst:#lsth:page title}}
 	 * 
 	 * @see 文章的開頭部分[[WP:LEAD|導言章節]] (lead section, introduction),
 	 *      [[en:Wikipedia:Hatnote]] 頂註
@@ -3220,6 +3223,9 @@ function module_code(library_namespace) {
 	[[俄羅斯公民簽證要求]]: [[File:Visa requirements for Russian citizens.png|Visa requirements for Russian citizens|thumb|800px|center|俄罗斯护照持有人可免签证或落地签证前往的国家或地区 
 	{{legend|#042E9B|[[俄罗斯]]}}{{legend|#2196f3|[[克里米亚]]}}{{legend|#ffc726|[[:en:Internal_passport_of_Russia|内部护照]]|]]}}{{legend|#22b14c|免签证}}{{legend|#B5E61D|落地签证}}{{legend|#61c09a|电子签证}}{{legend|#79D343|需电子签证或预先在互联网注册}}{{legend|#A8ACAB|需要申请签证}}]]
 
+	parse 嵌入section內文 [[mw:Extension:Labeled_Section_Transclusion]]:
+	{{#lsth:page_title|section begin in wikitext|section end in wikitext}}, {{#section-h:page_title}} 語意上相當於 {{page_title#section}}。如果有多個相同名稱的section，僅轉換第一個。The matching is case insensitive
+	TODO: parse <section begin=chapter1 />, {{#lst:page_title|section begin|section end}}, {{#lstx:page_title|section|replacement_text}}
 
 	提高效率。e.g., [[三国杀武将列表]], [[世界大桥列表]], [[三国杀武将列表]]<br />
 	可能為模板參數特殊設計？有些 template 內含不完整的起始或結尾，使 parameter 亦未首尾對應。
@@ -3563,7 +3569,7 @@ function module_code(library_namespace) {
 
 						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
 						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
-						// parser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
+						// parser 調用超過一個Template中參數的值，只會使用最後指定的值。
 						if (typeof token === 'string') {
 							// 處理某些特殊屬性的值。
 							if (false && /url$/i.test(key)) {

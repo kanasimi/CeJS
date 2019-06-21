@@ -1369,7 +1369,8 @@ function module_code(library_namespace) {
 							+ item_data.type + '] ' + item_data.url);
 				}
 
-				library_namespace.log('add_chapter: got resource: ['
+				// 已經取得資源：
+				library_namespace.log('add_chapter: ' + 'got resource: ['
 						+ item['media-type'] + '] ' + item_data.url + '\n→ '
 						+ item.href);
 

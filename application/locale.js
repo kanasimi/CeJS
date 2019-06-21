@@ -1694,8 +1694,12 @@ function module_code(library_namespace) {
 	// ------------------------------------
 	// initialization
 
-	var gettext_DOM_id, gettext_main_alias = Object.create(null), gettext_aliases = Object
-			.create(null), gettext_texts = Object.create(null), gettext_domain_name,
+	var gettext_DOM_id, gettext_main_alias = Object.create(null), gettext_aliases = {
+	// MUST in lower case. @see gettext.to_standard
+	// hans : 'cmn-Hans-CN',
+	// hant : 'cmn-Hant-TW'
+	}
+			&& Object.create(null), gettext_texts = Object.create(null), gettext_domain_name,
 	// CeL.env.domain_location = CeL.env.resource_directory_name + '/';
 	// CeL.gettext.use_domain_location(CeL.env.resource_directory_name + '/');
 	gettext_domain_location = library_namespace.env.domain_location, gettext_resource = Object
@@ -1748,10 +1752,10 @@ function module_code(library_namespace) {
 				'yue-Hant-HK' : '香港粵語|zh-yue-Hant-HK|Hong Kong Cantonese|港式粵語|香港話|港式廣東話|港式廣州話',
 
 				// Subtag: cmn, Preferred-Value: cmn
-				'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|简化字|简化中文|簡化字|簡體中文|普通话|中国|中国大陆|官话|Simplified Chinese|Mandarin Chinese',
+				'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|Hans|简化字|简化中文|簡化字|簡體中文|普通话|中国|中国大陆|官话|Simplified Chinese|Mandarin Chinese',
 
 				// 現代標準漢語
-				'cmn-Hant-TW' : '繁體中文|zh-TW|繁體|zh-cmn-Hant-TW|TW|Chinese|傳統中文|正體中文|正體|漢語|華語|中文|中國|臺灣|台灣|官話|中華民國國語|Traditional Chinese',
+				'cmn-Hant-TW' : '繁體中文|zh-TW|繁體|zh-cmn-Hant-TW|TW|Hant|Chinese|傳統中文|正體中文|正體|漢語|華語|中文|中國|臺灣|台灣|官話|中華民國國語|Traditional Chinese',
 
 				/**
 				 * Subtag: en, Suppress-Script: Latn

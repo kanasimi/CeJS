@@ -77,8 +77,6 @@ function module_code(library_namespace) {
 	/**
 	 * TODO:
 	 * 
-	 * Object.create(O [ , Properties ])
-	 * 
 	 * http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K875.aspx<br />
 	 * 8進制數字表示被禁止， 010 代表 10 而不是 8
 	 * 
