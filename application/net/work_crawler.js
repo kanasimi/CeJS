@@ -1624,6 +1624,64 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------------------------------
 
+	// only for .parse_search_result() !!
+	function extract_work_id_from_search_result_link(PATTERN_item_token, html) {
+		// @see luoxia.js, dmzj.js
+		function parse_token(token) {
+			// console.log(token);
+			// matched: [ link, attributes, inner HTML ]
+			var matched = token.match(/<a\s([^<>]+)>([\s\S]+?)<\/a>/i);
+			if (!matched)
+				return;
+
+			var id = matched[1]
+			// dmzj.js: title=""href="" 中間沒有空格。
+			.match(/href=["'][^"'<>]+?\/([a-z\d\-_]+)(?:\/|\.html)?["']/i);
+
+			if (!id)
+				return;
+
+			id = id[1];
+			if (false && !isNaN(id)) {
+				id = +id;
+			}
+			id_list.push(id);
+			var title = matched[1].match(/title=["']([^"'<>]+)["']/);
+			id_data.push(get_label(title && title[1] || matched[2]));
+		}
+
+		var matched,
+		// {Array}id_list = [ id, id, ... ]
+		id_list = [],
+		// {Array}id_data = [ title, title, ... ]
+		id_data = [];
+
+		// PATTERN_item_token 會分離出每個作品的欄位。
+		if (library_namespace.is_RegExp(PATTERN_item_token)) {
+			// assert: PATTERN_item_token.global === true
+			// matched: [ , HTML token to check ]
+			while (matched = PATTERN_item_token.exec(html)) {
+				parse_token(matched[1]);
+			}
+
+		} else if (Array.isArray(PATTERN_item_token)) {
+			html.each_between(PATTERN_item_token[0], PATTERN_item_token[1],
+					parse_token);
+
+		} else {
+			throw new TypeError('extract_work_id_from_search_result_link: '
+					+ gettext('Invalid token pattern: {%1} %2',
+							typeof PATTERN_item_token, JSON
+									.stringify(PATTERN_item_token)));
+		}
+
+		return [ id_list, id_data ];
+	}
+
+	Work_crawler.extract_work_id_from_search_result_link = extract_work_id_from_search_result_link;
+
+	// --------------------------------
+
 	var PATTERN_url_for_baidu = /([\d_]+)(?:\.html|\/(?:index\.html)?)?$/;
 	if (library_namespace.is_debug()) {
 		[ 'http://www.host/0/123/', 'http://www.host/123/index.html',
