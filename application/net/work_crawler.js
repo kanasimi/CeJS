@@ -2699,12 +2699,12 @@ function module_code(library_namespace) {
 						: [ key + ':', {
 							T : matched[key],
 							S : {
-								color : 'green'
+								color : 'blue'
 							}
 						}, '→', {
 							T : work_data[key],
 							S : {
-								color : 'yellow'
+								color : 'green'
 							}
 						} ]);
 					}
