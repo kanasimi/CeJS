@@ -45,7 +45,9 @@ function module_code(library_namespace) {
 	var default_configuration = {
 
 		one_by_one : true,
+		// 這類型網站必須靠偵測到錯誤時，轉到下一個章節來運作；因此當圖片下載錯誤時不能直接中斷跳出。
 		skip_error : true,
+		// 但是不保留損壞的檔案。
 		preserve_bad_image : false,
 		MAX_ERROR_RETRY : 2,
 

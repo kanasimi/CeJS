@@ -2689,9 +2689,24 @@ function module_code(library_namespace) {
 
 					} else if (typeof work_data[key] !== 'object'
 							&& work_data[key] !== matched[key]) {
-						library_namespace.info(library_namespace
-								.display_align([ [ key + ':', matched[key] ],
-										[ gettext('新資料→'), work_data[key] ] ]));
+						library_namespace.info(String(matched[key]).length > 30
+								|| String(work_data[key]).length > 30
+						//
+						? library_namespace.display_align([
+								[ key + ':', matched[key] ],
+								[ gettext('新資料→'), work_data[key] ] ])
+						// 採用比較簡潔並醒目多色彩的顯示方式。
+						: [ key + ':', {
+							T : matched[key],
+							S : {
+								color : 'green'
+							}
+						}, '→', {
+							T : work_data[key],
+							S : {
+								color : 'yellow'
+							}
+						} ]);
 					}
 				}
 				if (matched.last_download) {
@@ -5057,24 +5072,28 @@ function module_code(library_namespace) {
 							|| verified_image === false) {
 						image_data.file = bad_file_path;
 						image_data.has_error = true;
-						library_namespace.warn([ {
-							T : has_error ? contents
+						if (_this.preserve_bad_image) {
+							library_namespace.warn([ {
+								T : has_error ? contents
+								//
+								? '強制將非圖片檔儲存為圖片 ' : '強制將空內容儲存為圖片'
+								// assert: (!!verified_image===false)
+								// 圖檔損壞: e.g., Do not has EOI
+								: '強制儲存損壞的圖片'
+							}, XMLHttp.status
+							// 狀態碼正常就不顯示。
+							&& (XMLHttp.status / 100 | 0) !== 2 ? {
+								T : [ ' (status %1)', XMLHttp.status ]
+							} : '',
+							// 顯示 crawler 程式指定的錯誤。
+							image_data.is_bad ? {
+								T : [ ' (error: %1)', image_data.is_bad ]
+							} : '', contents ? {
+								T : [ ' %1 bytes', contents.length ]
+							} : '',
 							//
-							? '強制將非圖片檔儲存為圖片 ' : '強制將空內容儲存為圖片'
-							// assert: (!!verified_image===false)
-							// 圖檔損壞: e.g., Do not has EOI
-							: '強制儲存損壞的圖片'
-						}, XMLHttp.status
-						// 狀態碼正常就不顯示。
-						&& (XMLHttp.status / 100 | 0) !== 2 ? {
-							T : [ ' (status %1)', XMLHttp.status ]
-						} : '',
-						// 顯示 crawler 程式指定的錯誤。
-						image_data.is_bad ? {
-							T : [ ' (error: %1)', image_data.is_bad ]
-						} : '', contents ? {
-							T : [ ' %1 bytes', contents.length ]
-						} : '', ': ' + image_data.file + '\n← ' + image_url ]);
+							': ' + image_data.file + '\n← ' + image_url ]);
+						}
 						if (!contents
 						// 404之類，就算有內容，也不過是錯誤訊息頁面。
 						|| (XMLHttp.status / 100 | 0) === 4) {
