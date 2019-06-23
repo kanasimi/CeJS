@@ -252,8 +252,21 @@ function module_code(library_namespace) {
 	function new_syosetu_crawler(configuration) {
 		configuration = configuration ? Object.assign(Object.create(null),
 				default_configuration, configuration) : default_configuration;
+
 		// 每次呼叫皆創建一個新的實體。
-		return new library_namespace.work_crawler(configuration);
+		var crawler = new library_namespace.work_crawler(configuration);
+
+		// for 年齢確認
+		// https://static.syosetu.com/sub/nl/view/js/event/redirect_ageauth.js
+		crawler.get_URL_options.cookie = 'over18=yes';
+
+		if (false) {
+			crawler.data_of(work_id, function(work_data) {
+				console.log(work_data);
+			});
+		}
+
+		return crawler;
 	}
 
 	return new_syosetu_crawler;
