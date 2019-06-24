@@ -64,14 +64,21 @@ function module_code(library_namespace) {
 		// 解析 作品名稱 → 作品id get_work()
 		search_URL : 'search.php?order=hyoka&word=',
 		parse_search_result : function(html, get_label) {
+			// console.log(html);
 			var id_data = [],
 			// {Array}id_list = [id,id,...]
-			id_list = [];
-			html.each_between('<div class="novel_h">', '</a>', function(text) {
+			id_list = [],
+			// 2019/6/24 目前僅有 ミッドナイトノベルズ 採用這個 header
+			header = '<article class="search_novel">';
+			if (!html.includes(header))
+				header = '<div class="novel_h">';
+
+			html.each_between(header, '</a>', function(text) {
 				id_list.push(text
 						.between(' href="' + this.novel_base_URL, '/"'));
 				id_data.push(get_label(text.between('/">')));
 			}, this);
+
 			return [ id_list, id_data ];
 		},
 
@@ -89,6 +96,7 @@ function module_code(library_namespace) {
 				//
 				= get_label(text.between('<td', '</td>').between('>'));
 			});
+			// console.log(work_data);
 
 			work_data = Object.assign({
 				// 必要屬性：須配合網站平台更改。
@@ -99,13 +107,19 @@ function module_code(library_namespace) {
 				// <span id="noveltype">完結済</span>全1部
 				// <span id="noveltype_notend">連載中</span>全1部
 				status : [ html.between('<span id="noveltype', '<')
-						.between('>') ].append(
-						work_data.ジャンル ? work_data.ジャンル.split(/\s+/) : '')
-						.append(work_data.キーワード.split(/\s+/)),
+						.between('>') ],
 				author : work_data.作者名,
 				last_update : work_data.最終話掲載日 || work_data.掲載日,
 				description : work_data.あらすじ
 			}, work_data);
+
+			if (work_data.ジャンル)
+				work_data.genre = work_data.ジャンル.split(/\s+/);
+			if (work_data.キーワード) {
+				// No キーワード:
+				// https://novel18.syosetu.com/novelview/infotop/ncode/n3731fh/
+				work_data.tags = work_data.キーワード.split(/\s+/);
+			}
 
 			return work_data;
 		},
@@ -256,9 +270,19 @@ function module_code(library_namespace) {
 		// 每次呼叫皆創建一個新的實體。
 		var crawler = new library_namespace.work_crawler(configuration);
 
-		// for 年齢確認
-		// https://static.syosetu.com/sub/nl/view/js/event/redirect_ageauth.js
-		crawler.get_URL_options.cookie = 'over18=yes';
+		if (crawler.isR18) {
+			// for なろうの関連サイト/R-18サイト 年齢確認
+			// https://static.syosetu.com/sub/nl/view/js/event/redirect_ageauth.js
+			crawler.get_URL_options.cookie = 'over18=yes';
+
+			Object.assign(crawler, {
+				novel_base_URL : 'https://novel18.syosetu.com/',
+
+				// 解析 作品名稱 → 作品id get_work()
+				// search/search/search.php hyoka: 総合ポイントの高い順 総合評価の高い順
+				search_URL : 'search/search/?order=hyoka&word='
+			});
+		}
 
 		if (false) {
 			crawler.data_of(work_id, function(work_data) {
