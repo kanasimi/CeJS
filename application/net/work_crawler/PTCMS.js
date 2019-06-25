@@ -55,6 +55,19 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function is_server_error(result) {
+		// TODO: 81xsw 有時會 403，需要重新再擷取一次。
+
+		return result in {
+			// 88dus 有時會 502，需要重新再擷取一次。
+			'502 Bad Gateway' : true,
+			// 630book 有時會 503，需要重新再擷取一次。
+			'503 Service Unavailable' : true,
+			// 630book 有時會 "500 - 内部服务器错误。"
+			'服务器错误' : true
+		};
+	}
+
 	var default_configuration = {
 
 		// auto_create_ebook, automatic create ebook
@@ -152,12 +165,7 @@ function module_code(library_namespace) {
 			// 由 meta data 取得作品資訊。
 			extract_work_data(work_data, html);
 
-			// 有時會 502，需要重新再擷取一次。
-			if (work_data.title === '502 Bad Gateway'
-			// 630book 有時會 503，需要重新再擷取一次。
-			|| work_data.title === '503 Service Unavailable'
-			// 630book 有時會 "500 - 内部服务器错误。"
-			|| work_data.title === '服务器错误') {
+			if (is_server_error(work_data.title)) {
 				return this.REGET_PAGE;
 			}
 
@@ -264,14 +272,7 @@ function module_code(library_namespace) {
 			//
 			KEY_interval_cache = 'original_chapter_time_interval';
 
-			// TODO: 81xsw 有時會 403，需要重新再擷取一次。
-
-			// 88dus 有時會 502，需要重新再擷取一次。
-			if (sub_title === '502 Bad Gateway'
-			// 630book 有時會 503，需要重新再擷取一次。
-			|| sub_title === '503 Service Unavailable'
-			// 630book 有時會 "500 - 内部服务器错误。"
-			|| sub_title === '服务器错误' && text.length < 2000) {
+			if (is_server_error(sub_title) && text.length < 2000) {
 				this[KEY_interval_cache] = this.chapter_time_interval;
 				// 當網站不允許太過頻繁的訪問/access時，可以設定下載之前的等待時間(ms)。
 				this.chapter_time_interval = 10 * 1000;
