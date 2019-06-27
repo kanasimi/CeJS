@@ -23,9 +23,9 @@ TODO:
 	從其他的資料來源網站尋找，以獲取作品以及章節的資訊。
 	自動記得某個作品要從哪些網站下載。
 
-將可選參數import_arg_hash及說明統合在一起，不像現在分別放在work_crawler.js與gui_electron_functions.js。考慮加入I18n
+GUI開啟錯誤紀錄
 
-開啟錯誤紀錄
+增加版本上報
 
 漫畫下載流程教學
 
@@ -43,8 +43,8 @@ parse 圖像。
 </code>
  * 
  * @see https://github.com/abc9070410/JComicDownloader
- *      https://github.com/eight04/ComicCrawler https://github.com/riderkick/FMD
- *      https://github.com/yuru-yuri/manga-dl
+ *      http://pxer.pea3nut.org/md/use https://github.com/eight04/ComicCrawler
+ *      https://github.com/riderkick/FMD https://github.com/yuru-yuri/manga-dl
  *      https://github.com/Xonshiz/comic-dl
  *      https://github.com/wellwind/8ComicDownloaderElectron
  *      https://github.com/Arachnid-27/Cimoc
@@ -95,7 +95,7 @@ if (typeof CeL === 'function') {
 		+ '|data.date.'
 		// CeL.character.load(), 僅在要設定 this.charset 時才需要載入。
 		+ '|data.character.'
-		// gettext, and for .detect_HTML_language(), .time_zone_of_language()
+		// gettext(), and for .detect_HTML_language(), .time_zone_of_language()
 		+ '|application.locale.gettext'
 		// guess_text_language()
 		+ '|application.locale.encoding.'
@@ -251,19 +251,27 @@ function module_code(library_namespace) {
 
 			} else if (type === 'number'
 					&& (_condition = matched[2]
-							.match(/([+\-]?\d+(?:\.\d+)?)?~([+\-]?\d+(?:\.\d+)?)?/))) {
+							.match(/([+\-]?\d+(?:\.\d+)?)?[–~]([+\-]?\d+(?:\.\d+)?)?/))) {
 				_condition = {
 					min : _condition[1] && +_condition[1],
 					max : _condition[2] && +_condition[2]
 				};
 
-			} else if (type === 'number' && matched[2] === 'natural') {
-				_condition = function(value) {
+			} else if (type === 'number'
+					&& (matched[2] === 'natural' || matched[2] === 'ℕ')) {
+				_condition = function is_natural(value) {
 					return value >= 1 && value === Math.floor(value);
 				};
 
+			} else if (type === 'number'
+					&& (matched[2] === 'natural+0' || matched[2] === 'ℕ+0')) {
+				// Naturals with zero: non-negative integers 非負整數。
+				_condition = function is_non_negative(value) {
+					return value >= 0 && value === Math.floor(value);
+				};
+
 			} else if (type === 'number' && matched[2] === 'integer') {
-				_condition = function(value) {
+				_condition = function is_integer(value) {
 					return value === Math.floor(value);
 				};
 
@@ -315,36 +323,46 @@ function module_code(library_namespace) {
 		var type = typeof value, arg_type_data = this.import_arg_hash[key];
 		// console.log(arg_type_data);
 
-		if (type in arg_type_data) {
-			arg_type_data = arg_type_data[type];
-			if (Array.isArray(arg_type_data)) {
-				if (arg_type_data.includes(value))
-					// verified
-					return;
+		if (!(type in arg_type_data)) {
+			library_namespace.warn([ 'verify_arg: ', {
+				T : [ '"%1" 這個值所允許的數值類型為 %4，但現在被設定成 {%2} %3',
+				//
+				key, typeof value, value, arg_type_data ]
+			} ]);
 
-			} else if (arg_type_data && ('min' in arg_type_data)) {
-				if ((!arg_type_data.min || arg_type_data.min <= value)
-						&& (!arg_type_data.max || value <= arg_type_data.max))
-					// verified
-					return;
+			return true;
+		}
 
-			} else if (typeof arg_type_data === 'function') {
-				if (arg_type_data(value))
-					return;
-
-			} else {
-				// assert: arg_type_data === undefined
+		arg_type_data = arg_type_data[type];
+		if (Array.isArray(arg_type_data)) {
+			if (arg_type_data.includes(value)) {
+				// verified
 				return;
 			}
 
+		} else if (arg_type_data && ('min' in arg_type_data)) {
+			if ((!arg_type_data.min || arg_type_data.min <= value)
+					&& (!arg_type_data.max || value <= arg_type_data.max)) {
+				// verified
+				return;
+			}
+
+		} else if (typeof arg_type_data === 'function') {
+			if (arg_type_data(value))
+				return;
+
+		} else {
+			if (arg_type_data !== undefined) {
+				library_namespace.warn([ 'verify_arg: ', {
+					T : [ '無法處理 "%1" 在數值類型為 %2 時之條件！', key, arg_type_data ]
+				} ]);
+			}
+			// 應該修改審查條件式，而非數值本身的問題。
+			return;
 		}
 
-		arg_type_data = JSON.stringify(arg_type_data);
-
 		library_namespace.warn([ 'verify_arg: ', {
-			T : [ '"%1" 這個值所允許的數值類型為 %2，但現在被設定成 {%3} %4',
-			//
-			key, arg_type_data, typeof value, value ]
+			T : [ '"%1" 被設定成了有問題的值：{%2} %3', key, typeof value, value ]
 		} ]);
 
 		return true;
@@ -539,7 +557,7 @@ function module_code(library_namespace) {
 	// --------------------------------
 	// 這邊放的是一些會在 Work_crawler_prototype 中被運算到的數值。
 
-	/** {Natural}下載失敗時最多重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
+	/** {Natural}重試次數：下載失敗、出錯時重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。若值太小，傳輸到一半壞掉的圖片可能被當作正常圖片而不會出現錯誤。 */
 	Work_crawler.MAX_ERROR_RETRY = 4;
 
 	Work_crawler.HTML_extension = 'htm';
@@ -584,9 +602,9 @@ function module_code(library_namespace) {
 		// 本站速度頗慢，必須等待較久否則容易中斷。
 		// timeout : '60s',
 
-		// {Natural}出錯時重新嘗試的次數。若值太小，傳輸到一半壞掉的圖片可能被當作正常圖片而不會出現錯誤。
+		/** {Natural}重試次數：下載失敗、出錯時重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。若值太小，傳輸到一半壞掉的圖片可能被當作正常圖片而不會出現錯誤。 */
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
-		// {Natural}圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。
+		/** {Natural}圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。 */
 		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR_RETRY),
 		// {Natural}MIN_LENGTH:最小容許圖案檔案大小 (bytes)。
 		// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
@@ -859,6 +877,8 @@ function module_code(library_namespace) {
 		import_args : import_args,
 		// 命令列可以設定的選項之型態資料集。通常僅做測試微調用。
 		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
+		// 現在import_arg_hash之說明已經與I18n統合在一起。
+		// work_crawler/work_crawler_loder.js與gui_electron_functions.js各參考了import_arg_hash的可選參數。
 		// @see work_crawler/gui_electron/gui_electron_functions.js
 		// @see work_crawler/resource/locale of work_crawler - locale.csv
 		import_arg_hash : {
@@ -876,12 +896,11 @@ function module_code(library_namespace) {
 			// 重新整理列表檔案 rearrange list file
 			rearrange_list_file : 'boolean',
 			// string: 如 "3s"
-			chapter_time_interval : 'number:natural|string|function',
-			MIN_LENGTH : 'number:natural',
-			timeout : 'number:natural|string',
-			// timeout : 'number:natural',
+			chapter_time_interval : 'number:natural+0|string|function',
+			MIN_LENGTH : 'number:natural+0',
+			timeout : 'number:natural+0|string',
 			// 容許錯誤用的相關操作設定。
-			MAX_ERROR_RETRY : 'number:natural',
+			MAX_ERROR_RETRY : 'number:natural+0',
 			allow_EOI_error : 'boolean',
 			skip_error : 'boolean',
 			skip_chapter_data_error : 'boolean',
@@ -1624,32 +1643,39 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------------------------------
 
-	// only for .parse_search_result() !!
-	function extract_work_id_from_search_result_link(PATTERN_item_token, html) {
-		// @see luoxia.js, dmzj.js
-		function parse_token(token) {
-			// console.log(token);
+	// @see luoxia.js, dmzj.js
+	function parse_search_result_token(id_list, id_data, token_parser, token) {
+		var matched = token.match(/<a\s([^<>]+)>([\s\S]+?)<\/a>/i);
+		if (library_namespace.is_RegExp(token_parser)) {
+			matched = token.match(token_parser);
+		} else {
 			// matched: [ link, attributes, inner HTML ]
-			var matched = token.match(/<a\s([^<>]+)>([\s\S]+?)<\/a>/i);
-			if (!matched)
-				return;
-
-			var id = matched[1]
-			// dmzj.js: title=""href="" 中間沒有空格。
-			.match(/href=["'][^"'<>]+?\/([a-z\d\-_]+)(?:\/|\.html)?["']/i);
-
-			if (!id)
-				return;
-
-			id = id[1];
-			if (false && !isNaN(id)) {
-				id = +id;
-			}
-			id_list.push(id);
-			var title = matched[1].match(/title=["']([^"'<>]+)["']/);
-			id_data.push(get_label(title && title[1] || matched[2]));
+			matched = token.match(/<a\s([^<>]+)>([\s\S]+?)<\/a>/i);
 		}
+		if (!matched)
+			return;
 
+		var id = matched[1]
+		// dmzj.js: title=""href="" 中間沒有空格。
+		.match(/href=["'][^"'<>]+?\/([a-z\d\-_]+)(?:\/|\.html)?["']/i);
+
+		if (!id)
+			return;
+
+		id = id[1];
+		if (false && !isNaN(id)) {
+			id = +id;
+		}
+		id_list.push(id);
+
+		var title = matched[1].match(/title=["']([^"'<>]+)["']/);
+		id_data.push(get_label(title && title[1] || matched[2]));
+	}
+
+	// only for .parse_search_result() !!
+	function extract_work_id_from_search_result_link(PATTERN_item_token, html,
+			token_parser) {
+		// console.log(html);
 		var matched,
 		// {Array}id_list = [ id, id, ... ]
 		id_list = [],
@@ -1661,12 +1687,14 @@ function module_code(library_namespace) {
 			// assert: PATTERN_item_token.global === true
 			// matched: [ , HTML token to check ]
 			while (matched = PATTERN_item_token.exec(html)) {
-				parse_token(matched[1]);
+				parse_search_result_token(id_list, id_data, token_parser,
+						matched[1]);
 			}
 
 		} else if (Array.isArray(PATTERN_item_token)) {
 			html.each_between(PATTERN_item_token[0], PATTERN_item_token[1],
-					parse_token);
+					parse_search_result_token.bind(null, id_list, id_data,
+							token_parser));
 
 		} else {
 			throw new TypeError('extract_work_id_from_search_result_link: '
@@ -1675,9 +1703,12 @@ function module_code(library_namespace) {
 									.stringify(PATTERN_item_token)));
 		}
 
+		// console.log([ id_list, id_data ]);
+		// throw 'extract_work_id_from_search_result_link';
 		return [ id_list, id_data ];
 	}
 
+	// CeL.work_crawler.extract_work_id_from_search_result_link()
 	Work_crawler.extract_work_id_from_search_result_link = extract_work_id_from_search_result_link;
 
 	// --------------------------------
@@ -1941,8 +1972,10 @@ function module_code(library_namespace) {
 		} else if (search_result[work_title]) {
 			// 已經搜尋過此作品標題。
 			library_namespace.log([ this.id + ': ', {
-				T : '已緩存作品 id：'
-			}, work_title, '→', JSON.stringify(search_result[work_title]) ]);
+				T : [ '已緩存作品 id，不再重新搜尋：%1',
+				//
+				work_title + '→' + JSON.stringify(search_result[work_title]) ]
+			} ]);
 			finish(true);
 			return;
 		}
@@ -2007,7 +2040,7 @@ function module_code(library_namespace) {
 				finish_up('沒有搜索結果。網站暫時不可用或改版？');
 				return;
 			}
-			// this.parse_search_result() returns:
+			// this.parse_search_result() returns 關鍵字搜尋結果:
 			// [ {Array}id_list, 與id_list相對應之{Array}或{Object} ]
 			// e.g., [ [id,id,...], [title,title,...] ]
 			// e.g., [ [id,id,...], [data,data,...] ]
@@ -2052,9 +2085,10 @@ function module_code(library_namespace) {
 			// console.log(id_data);
 			id_data = id_data[1];
 			if (id_list.length !== 1) {
-				library_namespace.warn('[' + work_title + ']: Get '
-				//
-				+ id_list.length + ' works: ' + JSON.stringify(id_data));
+				library_namespace.warn({
+					T : [ '搜尋《%1》找到%2個作品：%3', work_title, id_list.length,
+							JSON.stringify(id_data) ]
+				});
 			}
 
 			// 近似的標題。
@@ -2333,6 +2367,7 @@ function module_code(library_namespace) {
 			return status;
 
 		// e.g., 连载中, 連載中, 已完结, 已完成, 已完結作品, 已連載完畢, 已完/未完
+		// 已載完: https://www.cartoonmad.com/comic/1029.html
 		var matched = status.match(/(?:^|已)完(?:[結结成]|$)/);
 		if (matched)
 			return matched[0];
@@ -2689,8 +2724,10 @@ function module_code(library_namespace) {
 
 					} else if (typeof work_data[key] !== 'object'
 							&& work_data[key] !== matched[key]) {
-						library_namespace.info(String(matched[key]).length > 30
-								|| String(work_data[key]).length > 30
+						var _message = String(matched[key])
+								+ String(work_data[key]);
+						library_namespace.info(_message.length > 60
+								|| _message.includes('\n')
 						//
 						? library_namespace.display_align([
 								[ key + ':', matched[key] ],
@@ -2699,7 +2736,7 @@ function module_code(library_namespace) {
 						: [ key + ':', {
 							T : matched[key],
 							S : {
-								color : 'blue'
+								color : 'green'
 							}
 						}, '→', {
 							T : work_data[key],
@@ -4811,11 +4848,11 @@ function module_code(library_namespace) {
 			+ ' ' + (work_data.chapter_unit || this.chapter_unit),
 			// 增加字數統計的訊息。
 			work_data.words_so_far > 0 ? {
-				T : [ '（本次下載共%1個字）', work_data.words_so_far ]
+				T : [ '（本次下載共處理%1個字）', work_data.words_so_far ]
 			} : '',
 			// 增加漫畫圖片數量的統計訊息。
 			work_data.image_count > 0 ? {
-				T : [ '（本次共下載%1張圖）', work_data.image_count ]
+				T : [ '（本次下載共處理%1張圖）', work_data.image_count ]
 			} : '', {
 				T : [ '於 %1 下載完畢。',
 				//
@@ -4994,12 +5031,21 @@ function module_code(library_namespace) {
 
 		get_URL(image_url, function(XMLHttp) {
 			// console.log(XMLHttp);
-			// 圖片數據的內容。
+			// console.log(image_data);
+			if (image_data.url !== XMLHttp.responseURL) {
+				// 紀錄最後實際下載的圖片網址。
+				image_data.responseURL = XMLHttp.responseURL;
+			}
+
+			/** {Buffer}圖片數據的內容。 */
 			var contents = XMLHttp.buffer;
 			if (_this.image_preprocessor) {
 				// 圖片前處理程序 預處理器 image pre-processing
-				contents = _this.image_preprocessor(contents, image_data)
-						|| contents;
+				// 例如修正圖片結尾非正規格式之情況。
+				// 必須自行確保不會 throw，需檢查 contents 是否非 {Buffer}。
+				contents = _this.image_preprocessor(contents, image_data);
+				if (contents === undefined)
+					contents = XMLHttp.buffer;
 			}
 
 			var has_error = !contents || !(contents.length >= _this.MIN_LENGTH)
@@ -5265,9 +5311,13 @@ function module_code(library_namespace) {
 					// e.g., for 9mdm.js→dagu.js 魔剑王 第59话 4392-59-011.jpg
 
 				} else if (!_this.skip_error) {
-					library_namespace.info({
+					library_namespace.info([ {
 						T : '若錯誤持續發生，您可以設定 skip_error=true 來忽略圖片錯誤。'
-					});
+					}, {
+						T : '您必須設定 skip_error 或 allow_EOI_error 選項，才會儲存損壞的檔案。'
+					}, {
+						T : '若您需要重新下載之前下載失敗的章節，請開啟 recheck 選項。'
+					} ]);
 				}
 
 				_this.onerror(gettext('圖片下載錯誤'), image_data);
@@ -5484,9 +5534,10 @@ function module_code(library_namespace) {
 			// 作品內容最後編輯時間。
 			modified : work_data.last_update_Date
 		}), subject = [];
-		// keywords 太多雜訊，如:
+		// keywords,キーワード 太多雜訊，如:
 		// '万古剑神,,万古剑神全文阅读,万古剑神免费阅读,万古剑神txt下载,万古剑神txt全集下载,万古剑神蒙白'
 		// category: PTCMS
+		// ジャンル,キーワード: yomou.js (此兩者為未分割的字串。)
 		'status,genre,tags,category,categories,类型,カテゴリ'.split(',')
 		// 標籤 類別 類型 类型 types
 		.forEach(function(type) {
@@ -5500,7 +5551,7 @@ function module_code(library_namespace) {
 		ebook.set({
 			// 作者名
 			creator : work_data.author,
-			// 🏷標籤, ジャンル, タグ, キーワード
+			// 🏷標籤, ジャンル genre, タグ, キーワード
 			subject : subject.unique(),
 			// 作品描述: 劇情簡介, synopsis, あらすじ
 			description : get_label(work_data.description
