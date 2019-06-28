@@ -157,7 +157,11 @@ function module_code(library_namespace) {
 			code_of_alias[encoding] = code_name;
 		}
 
-		var code_map = map_set[encoding] = [], config = code_map,
+		if (!map_set[encoding]) {
+			// 不重新設定，以允許多次設定。
+			map_set[encoding] = [];
+		}
+		var code_map = map_set[encoding], config = code_map,
 		// main_encode_map[Unicode character]
 		// = {ℕ⁰:Natural+0}code of specified coding
 		main_encode_map = encode_map_set[encoding]
@@ -185,8 +189,25 @@ function module_code(library_namespace) {
 
 			if (typeof char_list === 'string') {
 				char_list.chars(true).forEach(function(character) {
+					if (main_encode_map[character]) {
+						library_namespace.debug(code_name
+						// http://founder.acgvlyric.org/iu/doku.php/%E9%80%A0%E5%AD%97:%E5%BA%8F_%E5%B8%B8%E7%94%A8%E9%A6%99%E6%B8%AF%E5%A4%96%E5%AD%97%E8%A1%A8
+						+ ': character mapper ['
+						// 除了少數幾個特殊的字之外，其他大部分都對應到後來指定的字碼。
+						+ character + ']: 0x'
+						// @see data/character/Big5.js
+						+ main_encode_map[character].toString(16).toUpperCase()
+						// e.g., "包" should be A55D in Big5, not FABD
+						+ ' → 0x'
+						// "者" should be AACC in Big5, not 8ECD
+						+ char_code.toString(16).toUpperCase(),
+						//
+						2, 'add_code_map');
+					}
 					// register
 					main_encode_map[character] = char_code;
+
+					// 為了能辨識，無論哪種都還是得設定這個對應 to Unicode。
 					main_map[char_code++] = character;
 				});
 				continue;
@@ -509,6 +530,13 @@ function module_code(library_namespace) {
 		}
 		// charset
 		encoding = normalize_encoding_name(encoding);
+
+		if (false) {
+			// for pure Big5, no 香港增補字符集
+			string = string.replace(/[―喰蔃瀞靝鼗弌鍮蠏覩瑨牐]/g, function(char) {
+				return '&#' + char.charCodeAt(0) + ';';
+			});
+		}
 
 		var encoded = '';
 		string.encode(encoding).forEach(function(byte) {
