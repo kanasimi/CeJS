@@ -12,7 +12,7 @@
 # 特別處理特定id。	.convert_id()
 # 解析 作品名稱 → 作品id	get_work(), .search_URL, .parse_search_result()
 # 獲取作品資訊與各章節資料。 get_work_data(), pre_process_chapter_list_data(), process_chapter_list_data()
-# 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data(), .work_URL, .parse_work_data(), chapter_list_URL, .get_chapter_list()
+# 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data(), .work_URL, .parse_work_data(), chapter_list_URL, .get_chapter_list(), .after_get_work_data()
 # 獲取每一個章節的內容與各個影像資料。 pre_get_chapter_data(), .chapter_URL, get_chapter_data(), .pre_parse_chapter_data(), .parse_chapter_data()
 # 獲取各個章節的每一個影像內容。 get_image(), .image_preprocessor(), .image_post_processor(), .after_get_image()
 # finish_up(), .after_download_chapter(), .after_download_work()
@@ -2146,10 +2146,9 @@ function module_code(library_namespace) {
 					return;
 				}
 				approximate_title = approximate_title[0];
-				library_namespace.warn(library_namespace.display_align({
-					'Use title:' : work_title,
-					'→' : approximate_title[1]
-				}));
+				library_namespace.warn(library_namespace.display_align([
+						[ gettext('Use title:'), work_title ],
+						[ '→', approximate_title[1] ] ]));
 				work_title = approximate_title[1];
 				id_list = approximate_title[0];
 			}
@@ -3339,11 +3338,20 @@ function module_code(library_namespace) {
 				library_namespace.log(message);
 			}
 
-			// 開始下載 chapter。
 			work_data.start_downloading_chaper = Date.now();
-			pre_get_chapter_data.call(_this, work_data,
-					get_next_chapter_NO_item(work_data,
-							work_data.last_download.chapter), callback);
+			function start_to_process_chapter_data() {
+				// 開始下載 chapter。
+				pre_get_chapter_data.call(_this, work_data,
+						get_next_chapter_NO_item(work_data,
+								work_data.last_download.chapter), callback);
+			}
+			if (typeof _this.after_get_work_data === 'function') {
+				// 必須自行保證執行 callback()，不丟出異常、中斷。
+				_this.after_get_work_data(start_to_process_chapter_data,
+						work_data);
+			} else {
+				start_to_process_chapter_data();
+			}
 		}
 
 	}
@@ -4727,7 +4735,7 @@ function module_code(library_namespace) {
 					node_fs.appendFileSync(error_log_file,
 					// 產生錯誤紀錄檔。
 					error_file_logs.join(library_namespace.env.line_separator));
-					set_work_status(work_data, gettext('%1：%2張圖片下載錯誤',
+					set_work_status(work_data, gettext('%1：%2筆圖片下載錯誤紀錄',
 							chapter_label, error_file_logs.length));
 				}
 			}
