@@ -139,7 +139,7 @@ function module_code(library_namespace) {
 	// site: e.g., 'zhwiki'. `.wikiid` @ siteinfo
 	// @see wikidatawiki_p.wb_items_per_site.ips_site_id
 	//
-	// [[en:Help:Interwikimedia_links]] [[en:Special:Interwiki]]
+	// [[en:Help:Interwikimedia_links]] [[Special:Interwiki]]
 	// https://zh.wikipedia.org/wiki/Special:GoToInterwiki/testwiki:
 	// link prefix: e.g., 'zh:n:' for zh.wikinews
 	//
@@ -569,6 +569,7 @@ function module_code(library_namespace) {
 
 	// the key MUST in lower case!
 	// @see https://www.wikimedia.org/
+	// @see [[Special:Interwiki]] 跨維基資料 跨 wiki 字首
 	api_URL.wikimedia = {
 		meta : true,
 		commons : true,
@@ -588,6 +589,7 @@ function module_code(library_namespace) {
 	// [[mw:Manual:InitialiseSettings.php]]
 	// https://noc.wikimedia.org/conf/highlight.php?file=InitialiseSettings.php
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
+	// @see [[Special:Interwiki]] 跨維基資料 跨 wiki 字首
 	api_URL.alias = {
 		// project with language prefix
 		// project: language.*.org
@@ -3215,7 +3217,7 @@ function module_code(library_namespace) {
 	};
 
 	/**
-	 * parse The MediaWiki markup language (wikitext).
+	 * parse The MediaWiki markup language (wikitext). 解析維基語法。
 	 * 
 	 * TODO:<code>
 
@@ -3423,7 +3425,7 @@ function module_code(library_namespace) {
 
 			// 2016/9/28 9:7:7
 			// 因為no_parse_tag內部可能已解析成其他的單元，因此還是必須parse_wikitext()。
-			// e.g., '<nowiki>-{ }-</nowiki>'
+			// e.g., '<nowiki>-{}-</nowiki>'
 			// 經過改變，需再進一步處理。
 			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
 					'parse_wikitext.tag');
@@ -3432,6 +3434,13 @@ function module_code(library_namespace) {
 			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
 			parse_wikitext(attributes, options, queue));
 			inner = parse_wikitext(inner, options, queue);
+			if (tag === 'nowiki') {
+				// <nowiki> 中僅留 -{}- 有效用。
+				inner.forEach(function(token, index) {
+					if (token.type && token.type !== 'convert')
+						inner[index] = inner[index].toString();
+				});
+			}
 			// 若為 <pre> 之內，則不再變換。
 			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
 			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
@@ -11183,6 +11192,7 @@ function module_code(library_namespace) {
 	wiki_API.siteinfo = siteinfo;
 
 	// TODO
+	// @see [[Special:Interwiki]] 跨維基資料 跨 wiki 字首
 	function adapt_site_configurations(session, configurations) {
 		console.log(configurations);
 		var site_configurations = session.configurations;
