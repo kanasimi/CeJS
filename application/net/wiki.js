@@ -3435,11 +3435,24 @@ function module_code(library_namespace) {
 			parse_wikitext(attributes, options, queue));
 			inner = parse_wikitext(inner, options, queue);
 			if (tag === 'nowiki' && Array.isArray(inner)) {
-				// <nowiki> 中僅留 -{}- 有效用。
+				library_namespace.debug('-'.repeat(70)
+						+ '\n<nowiki> 中僅留 -{}- 有效用。', 3,
+						'parse_wikitext.transclusion');
+				// console.log(inner);
+				if (inner.type && inner.type !== 'plain') {
+					// 當 inner 本身就是特殊 token 時，先把它包裝起來。
+					inner = _set_wiki_type([ inner ], 'plain');
+				}
+				// TODO: <nowiki><b>-{...}-</b></nowiki>
 				inner.forEach(function(token, index) {
+					// 處理每個子 token。
 					if (token.type && token.type !== 'convert')
 						inner[index] = inner[index].toString();
 				});
+				if (inner.length <= 1) {
+					inner = inner[0];
+				}
+				// console.log(inner);
 			}
 			// 若為 <pre> 之內，則不再變換。
 			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
