@@ -3434,7 +3434,7 @@ function module_code(library_namespace) {
 			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
 			parse_wikitext(attributes, options, queue));
 			inner = parse_wikitext(inner, options, queue);
-			if (tag === 'nowiki') {
+			if (tag === 'nowiki' && Array.isArray(inner)) {
 				// <nowiki> 中僅留 -{}- 有效用。
 				inner.forEach(function(token, index) {
 					if (token.type && token.type !== 'convert')
