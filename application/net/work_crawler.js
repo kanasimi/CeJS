@@ -778,7 +778,7 @@ function module_code(library_namespace) {
 		// skip_chapter_data_error : true,
 
 		// 重新搜尋。default:false
-		// research : false,
+		// search_again : false,
 
 		// TODO: .heif
 		image_types : {
@@ -925,7 +925,7 @@ function module_code(library_namespace) {
 			regenerate : 'boolean',
 			reget_chapter : 'boolean',
 			recheck : 'boolean|string:changed;multi_parts_changed',
-			research : 'boolean',
+			search_again : 'boolean',
 
 			write_chapter_metadata : 'boolean',
 			write_image_metadata : 'boolean',
@@ -1914,14 +1914,30 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 
-		// 先試試看能否判斷出 work id。
-		var work_id = this.extract_work_id(work_title);
-		if (!work_id && (work_id = this.extract_work_id_from_URL(work_title))) {
-			work_id = {
-				input_url : work_title,
-				id : work_id
-			};
+		var work_id = work_title.match(/^(title|id):(.+)$/);
+		if (work_id) {
+			// 明確指定為作品ID或作品標題。
+			if (work_id[1] === 'id') {
+				// work_title = '';
+				work_id = work_id[2];
+			} else {
+				work_title = work_id[2];
+				work_id = null;
+			}
+
+		} else {
+			// 未明確指定輸入的類別。先試試看能否判斷出 work id。
+			work_id = this.extract_work_id(work_title);
+
+			if (!work_id
+					&& (work_id = this.extract_work_id_from_URL(work_title))) {
+				work_id = {
+					input_url : work_title,
+					id : work_id
+				};
+			}
 		}
+
 		if (work_id) {
 			if (work_id === true) {
 				library_namespace.warn([ 'get_work: ', {
@@ -1965,7 +1981,8 @@ function module_code(library_namespace) {
 
 		// assert: work_title前後不應包含space
 		work_title = work_title.trim();
-		if (this.research) {
+		// 重新搜尋 re-search, to search again, search once more, repeat a search
+		if (this.search_again) {
 			library_namespace.log([ this.id + ': ', {
 				T : [ '重新搜尋作品《%1》', work_title ]
 			} ]);
