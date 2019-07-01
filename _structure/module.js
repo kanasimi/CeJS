@@ -490,6 +490,21 @@ if (typeof CeL === 'function') {
 			_.env.argv = process.argv;
 			// env hash: see CeL.env.arg_hash @ CeL.application.platform.nodejs
 
+			if (_.platform.browser === 'node')
+				_.platform.is_CLI = true;
+			else if (_.platform.browser === 'electron')
+				// is GUI
+				_.platform.is_CLI = false;
+
+			// 為 CLI interactive 互動形式。
+			// @see WScript.Interactive @ CeL.application.OS.Windows.job
+			_.platform.is_interactive
+			// isTTY: 為 nodejs: interactive 互動形式。
+			// 但 isTTY 在 command line 執行程式時也會為 true！
+			= process.stdout && process.stdout.isTTY
+			// Windows 7 to Windows 10
+			|| process.env.SESSIONNAME === 'Console';
+
 			// TODO:
 			// https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
 			var node_read_file = _.new_XMLHttp = _.new_XMLHttp.readFileSync;

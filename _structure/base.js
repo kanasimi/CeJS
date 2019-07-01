@@ -1025,7 +1025,7 @@ function (global) {
 			// shortcut for Windows
 			platform.Windows = platform.is_Windows();
 	
-			var userAgent = String(navigator.userAgent), matched, tmp;
+			var userAgent = String(navigator.userAgent), matched;
 			platform.mobile = /mobile/i.test(userAgent);
 
 			// 特別的網頁瀏覽器放前面。因此 "IE" 應置於後。
@@ -1043,7 +1043,7 @@ function (global) {
 			}
 	
 			// Web browser layout engine.
-			tmp = navigator.product;
+			var tmp = navigator.product;
 			if (matched = userAgent
 					.match(/(Gecko|WebKit|Blink|KHTML|Presto|Trident)[\/ ](\d+(?:\.\d+))/i)) {
 				if (tmp && tmp !== matched[1] && has_console)
@@ -1056,6 +1056,8 @@ function (global) {
 				// Firefox: Gecko
 				platform.engine = tmp;
 		})();
+
+	// for node.js: .platform.browser, .platform.is_interactive will setup in _structure/module.js.
 
 	_.platform = platform;
 
