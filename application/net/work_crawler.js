@@ -335,12 +335,38 @@ function module_code(library_namespace) {
 
 		arg_type_data = arg_type_data[type];
 		if (Array.isArray(arg_type_data)) {
+			if (arg_type_data.length === 1
+					&& typeof arg_type_data[0] === 'string') {
+				var fso_type = arg_type_data[0]
+						.match(/^fso_(file|files|directory|directories)$/);
+				if (fso_type) {
+					fso_type = fso_type[1];
+					if (typeof value === 'string')
+						value = value.split('|');
+					// assert: Array.isArray(value)
+					var all_passed = value
+							.every(fso_type.startsWith('file') ? library_namespace.storage.file_exists
+									: library_namespace.storage.directory_exists);
+					if (!all_passed) {
+						library_namespace.warn([ 'verify_arg: ', {
+							T : [ '有些 "%1" 所指定的%2路徑不存在：%3',
+							//
+							key, gettext(fso_type), value.join('|') ]
+						} ]);
+						return true;
+					}
+					return;
+				}
+			}
+
+			// e.g., "string:value1,value2"
 			if (arg_type_data.includes(value)) {
 				// verified
 				return;
 			}
 
 		} else if (arg_type_data && ('min' in arg_type_data)) {
+			// assert: type === 'number'
 			if ((!arg_type_data.min || arg_type_data.min <= value)
 					&& (!arg_type_data.max || value <= arg_type_data.max)) {
 				// verified
@@ -568,12 +594,14 @@ function module_code(library_namespace) {
 		// 所有的子檔案要修訂注解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
 		// 下載檔案儲存目錄路徑。圖片檔+紀錄檔下載位置。
-		// 這個目錄會在 work_crawler_loder.js 裡面被 setup_crawler() 之 data_directory 覆寫。
+		// 這個目錄會在 work_crawler_loader.js 裡面被 setup_crawler() 之
+		// global.data_directory 覆寫。
 		main_directory : library_namespace.storage
 		// 決定預設的主要下載目錄 default_main_directory。
 		.determin_download_directory(true),
 
 		// id : '',
+		// site_id is also crower_id.
 		// site_id : '',
 		// base_URL : '',
 		// charset : 'GBK',
@@ -878,12 +906,12 @@ function module_code(library_namespace) {
 		// 命令列可以設定的選項之型態資料集。通常僅做測試微調用。
 		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
 		// 現在import_arg_hash之說明已經與I18n統合在一起。
-		// work_crawler/work_crawler_loder.js與gui_electron_functions.js各參考了import_arg_hash的可選參數。
+		// work_crawler/work_crawler_loader.js與gui_electron_functions.js各參考了import_arg_hash的可選參數。
 		// @see work_crawler/gui_electron/gui_electron_functions.js
 		// @see work_crawler/resource/locale of work_crawler - locale.csv
 		import_arg_hash : {
-			// set download directory
-			main_directory : 'string',
+			// set download directory, fso:directory
+			main_directory : 'string:fso_directory',
 			user_agent : 'string',
 			one_by_one : 'boolean',
 			// 篩選想要下載的章節標題關鍵字。例如"單行本"。
