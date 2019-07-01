@@ -269,6 +269,8 @@ function module_code(library_namespace) {
 			} else
 				return;
 
+			// TODO: port?
+			URI.origin = URI.protocol + '//' + URI.hostname;
 		} else {
 			// test URI.protocol === 'file:'
 			path = href + path;
@@ -276,7 +278,9 @@ function module_code(library_namespace) {
 		}
 		if (!href)
 			library_namespace.warn('將 [' + path + '] 當作 pathname!');
-		library_namespace.debug('local file: [' + location.pathname + ']', 2);
+		if (library_namespace.is_WWW())
+			library_namespace.debug('local file: [' + location.pathname + ']',
+					2);
 
 		// NG: /^([^%]+|%[a-f\d]{2})+$/
 		// prevent catastrophic backtracking. e.g., '.'.repeat(300)+'%'
@@ -662,7 +666,8 @@ function module_code(library_namespace) {
 						+ user_setting.temporary_file, 2,
 						'URI_accessor.module.curl');
 			}
-			var setting = new library_namespace.setting_pair(Object.create(null), URI_accessor.setting, user_setting),
+			var setting = new library_namespace.setting_pair(Object
+					.create(null), URI_accessor.setting, user_setting),
 			//
 			value = setting('user_agent'),
 			//
@@ -715,7 +720,8 @@ function module_code(library_namespace) {
 		},
 
 		wget : function(user_setting) {
-			var setting = new library_namespace.setting_pair(Object.create(null), URI_accessor.setting, user_setting), value = setting('user_agent'), tmp = '" "', command_array = [
+			var setting = new library_namespace.setting_pair(Object
+					.create(null), URI_accessor.setting, user_setting), value = setting('user_agent'), tmp = '" "', command_array = [
 					'wget --timestamping --keep-session-cookies --no-check-certificate '
 							+ (library_namespace.is_debug(2) ? '-d ' : '')
 							+ (setting('additional_options') ? setting('additional_options')
@@ -1048,7 +1054,8 @@ function module_code(library_namespace) {
 			video_url = [ video_url ];
 		}
 
-		var count = video_url.length, error_count = 0, i, info_hash = Object.create(null), video_info, result,
+		var count = video_url.length, error_count = 0, i, info_hash = Object
+				.create(null), video_info, result,
 		/**
 		 * for message show
 		 */
