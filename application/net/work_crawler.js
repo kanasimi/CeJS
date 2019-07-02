@@ -344,14 +344,19 @@ function module_code(library_namespace) {
 					if (typeof value === 'string')
 						value = value.split('|');
 					// assert: Array.isArray(value)
-					var all_passed = value
-							.every(fso_type.startsWith('file') ? library_namespace.storage.file_exists
-									: library_namespace.storage.directory_exists);
-					if (!all_passed) {
+					var error_fso = undefined, checker = fso_type
+							.startsWith('file') ? library_namespace.storage.file_exists
+							: library_namespace.storage.directory_exists;
+					if (value.some(function(fso_path) {
+						if (!checker(fso_path)) {
+							error_fso = fso_path;
+							return true;
+						}
+					})) {
 						library_namespace.warn([ 'verify_arg: ', {
 							T : [ '有些 "%1" 所指定的%2路徑不存在：%3',
 							//
-							key, gettext(fso_type), value.join('|') ]
+							key, gettext(fso_type), error_fso ]
 						} ]);
 						return true;
 					}
