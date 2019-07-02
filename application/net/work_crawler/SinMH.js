@@ -12,9 +12,11 @@
  * TODO: ONE漫画 https://www.onemanhua.com/ 可能是比 930mh.js 更舊的版本?
  * 
  * @see https://cms.shenl.com/sinmh/
+ * @see https://www.manhuadui.com/js/common.js "Created by Shen.L on 2016/1/28."
  * 
  * @since 2018/7/26 11:9:53 模組化 MHD模板。<br />
- *        2019/2/4 add 930mh.js 使用 CryptoJS, 採用 DMZJ模板
+ *        2019/2/4 add 930mh.js 使用 CryptoJS，採用 DMZJ模板。<br />
+ *        2019/7/2 50mh.js 使用 CryptoJS，採用 DMZJ模板。
  */
 
 // More examples:
@@ -311,8 +313,10 @@ function module_code(library_namespace) {
 						|| html.between('SinTheme.initComic(', ')')
 						|| html.between('var pageId = "comic.', '"');
 				if (this.try_to_get_blocked_work && chapter_id) {
-					library_namespace.info((work_data.title || work_data.id)
-							+ ': 嘗試取得被屏蔽的作品。');
+					library_namespace.info([ work_data.title || work_data.id,
+							': ', {
+								T : '嘗試取得被屏蔽的作品。'
+							} ]);
 					if (Array.isArray(latest_chapter_list)
 					// e.g., 全职法师, 一人之下 http://www.duzhez.com/manhua/1532/
 					&& latest_chapter_list.length > 1
@@ -321,8 +325,10 @@ function module_code(library_namespace) {
 						changed : true,
 						multi_parts_changed : true
 					})) {
-						library_namespace.info('使用之前的 cache，自 #'
-								+ latest_chapter_list.length + ' 接續下載。');
+						library_namespace.info({
+							T : [ '使用之前的 cache，自 §%1 接續下載。',
+									latest_chapter_list.length ]
+						});
 						// 這可以保留 work_data.chapter_list 先前的屬性。
 						work_data.chapter_list = Object.assign(
 								latest_chapter_list, work_data.chapter_list);
@@ -365,7 +371,11 @@ function module_code(library_namespace) {
 
 			var crypto_url = html
 			// 930mh.js: Error on http://www.duzhez.com/manhua/449/245193.html
-			&& html.match(/<script src="([^"]+\/crypto.js)"><\/script>/);
+			&& html
+			// https://www.manhuadui.com/manhua/haizeiwang/296660.html :
+			// <script
+			// src="https://cdn.staticfile.org/crypto-js/3.1.9-1/crypto-js.js"></script>
+			.match(/<script src="([^"]+\/crypto(?:-js)\.js)"><\/script>/);
 			if (crypto_url) {
 				var file_name = this.main_directory + 'crypto.js';
 				// TODO: this is a workaround to pass to require()
@@ -423,8 +433,9 @@ function module_code(library_namespace) {
 			// 930mh.js: Error on http://www.duzhez.com/manhua/449/245193.html
 			&& html.match(/<script>(;var [\s\S]+?)<\/script>/);
 			if (!chapter_data_code) {
-				library_namespace.warn(work_data.title + ' #' + chapter_NO
-						+ ': ' + 'No valid chapter data got!');
+				library_namespace.warn({
+					T : [ '無法解析《%1》§%2 之章節資料！', work_data.title, chapter_NO ]
+				});
 				return;
 			}
 
@@ -436,10 +447,11 @@ function module_code(library_namespace) {
 				try {
 					eval('chapter_data.' + token);
 				} catch (e) {
+					console.error(new SyntaxError(
 					// Ignore SyntaxError. e.g.,
 					// https://www.gufengmh8.com/manhua/wodeshashounanyou/742494.html
 					// ;var pageTitle = "我的杀手男友第65、66话 "肉偿在线观看";
-					console.error('parse_chapter_data: SyntaxError: ' + token);
+					'parse_chapter_data: ' + token));
 				}
 			});
 			// console.log(chapter_data);
@@ -450,6 +462,8 @@ function module_code(library_namespace) {
 			var path = encodeURI(chapter_data.chapterPath);
 			if (global.CryptoJS
 					&& typeof chapter_data.chapterImages === 'string') {
+				// console.log(this.crypto);
+
 				/**
 				 * <code>
 				JSON.parse(CryptoJS.AES.decrypt(chapterImages,CryptoJS.enc.Utf8.parse("6133AFVvxas55841"),{iv:CryptoJS.enc.Utf8.parse("A25vcxQQrpmbV51t"),mode:CryptoJS.mode.CBC,padding:CryptoJS.pad.Pkcs7}).toString(CryptoJS.enc.Utf8))
@@ -463,13 +477,15 @@ function module_code(library_namespace) {
 				// 使用 CryptoJS https://code.google.com/archive/p/crypto-js/
 				// https://github.com/brix/crypto-js
 				JSON.parse(CryptoJS.AES.decrypt(chapter_data.chapterImages,
-				// 930mh.js key 密鑰
-				CryptoJS.enc.Utf8.parse("9Xc4PMs2cvQinnbd"), {
-					iv : CryptoJS.enc.Utf8.parse("ioXA45KJnv98ccSB"),
+				// 930mh.js key 密鑰 "十六位字符作为密钥"
+				CryptoJS.enc.Utf8.parse(this.crypto.key), {
+					iv : CryptoJS.enc.Utf8.parse(this.crypto.iv),
 					mode : CryptoJS.mode.CBC,
 					padding : CryptoJS.pad.Pkcs7
 				}).toString(CryptoJS.enc.Utf8));
 			}
+
+			// assert: Array.isArray(chapter_data.chapterImages)
 			chapter_data.image_list = chapter_data.chapterImages.map(function(
 					url) {
 				return {
@@ -486,7 +502,9 @@ function module_code(library_namespace) {
 				// 避免若連內容被屏蔽，會從頭檢查到尾都沒有成果。
 				work_data.chapter_filtered = true;
 				if (work_data.filtered) {
-					library_namespace.info('因為本章節內容也被屏蔽，因此不再嘗試解析其他章節。');
+					library_namespace.info({
+						T : [ '§%1 已被屏蔽，不再嘗試解析其他章節。', chapter_NO ]
+					});
 				} else {
 					library_namespace.warn(get_label(html));
 				}
