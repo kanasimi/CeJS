@@ -375,7 +375,8 @@ function module_code(library_namespace) {
 			// https://www.manhuadui.com/manhua/haizeiwang/296660.html :
 			// <script
 			// src="https://cdn.staticfile.org/crypto-js/3.1.9-1/crypto-js.js"></script>
-			.match(/<script src="([^"]+\/crypto(?:-js)\.js)"><\/script>/);
+			.match(/<script src="([^"]+\/crypto(?:-js)?\.js)"><\/script>/);
+			// console.log(crypto_url);
 			if (crypto_url) {
 				var file_name = this.main_directory + 'crypto.js';
 				// TODO: this is a workaround to pass to require()
@@ -460,6 +461,7 @@ function module_code(library_namespace) {
 			chapter_data.title = get_label(html.between('<h2>', '</h2>'));
 			// e.g., 'images/comic/4/7592/'
 			var path = encodeURI(chapter_data.chapterPath);
+			// console.log(chapter_data.chapterImages);
 			if (global.CryptoJS
 					&& typeof chapter_data.chapterImages === 'string') {
 				// console.log(this.crypto);
