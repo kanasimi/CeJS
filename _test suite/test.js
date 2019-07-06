@@ -373,8 +373,20 @@ function test_native() {
 		html.each_between('<h2>', '</h2>', function(token) {
 			list.push('>' + token);
 		});
+		assert([ '>title1|>title2|>title3|>title4|>title5', list.join('|') ], 'each_between #1');
 
-		assert([ '>title1|>title2|>title3|>title4|>title5', list.join('|') ], 'each_between');
+		html = '123_456_789_012';
+		list = [];
+		html.each_between(null, '_', function(token) {
+			list.push(token);
+		});
+		assert([ '123|456|789', list.join('|') ], 'each_between: null header');
+
+		list = [];
+		html.each_between('_', null, function(token) {
+			list.push(token);
+		});
+		assert([ '456|789|012', list.join('|') ], 'each_between: null footer');
 
 		// ------------------------------------------------
 

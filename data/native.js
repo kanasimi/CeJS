@@ -1447,14 +1447,16 @@ function module_code(library_namespace) {
 		index |= 0;
 		// assert: !!head && !!foot
 		// && typeof head === 'string' && typeof foot === 'string'
-		var head_length = head.length, foot_length = foot ? foot.length : 0, foot_index;
+		var head_length = head ? head.length : 0, foot_length = foot ? foot.length
+				: 0, foot_index;
 
 		if (!thisArg) {
 			thisArg = this;
 		}
 
 		while (foot || !(foot_index > 0) ? index !== NOT_FOUND
-				&& (index = this.indexOf(head, index)) !== NOT_FOUND
+		// allow null header
+		&& (!head || (index = this.indexOf(head, index)) !== NOT_FOUND)
 				: (index = foot_index) < this.length) {
 			foot_index = this.indexOf(foot || head, index += head_length);
 			if (foot_index === NOT_FOUND) {
@@ -2802,8 +2804,7 @@ function module_code(library_namespace) {
 			if (!chain)
 				chain = map[element]
 				// [ 0: possible backward, 1: possible foreword ]
-				= [ Object.create(null),
-						Object.create(null) ];
+				= [ Object.create(null), Object.create(null) ];
 			if (index > 0)
 				// 登記前面的。
 				chain[0][this[index - 1]] = true;
