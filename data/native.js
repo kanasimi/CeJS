@@ -2906,6 +2906,8 @@ function module_code(library_namespace) {
 
 	// ------------------------------------
 
+	// TODO: add `Promise` version
+
 	/**
 	 * 依照順序從 index 至 last 執行 for_each。
 	 * 
@@ -2926,7 +2928,9 @@ function module_code(library_namespace) {
 	 * </code>
 	 * 
 	 * @param {Function}for_each
-	 *            run for_each(run_next, item, index, list) for every elements.
+	 *            run for_each(run_next, item, index, list[, get_status]) for
+	 *            every elements. Must handle exception yourself.
+	 *            {Object}function get_status(): 狀態探測函數。
 	 * @param {Integer|Array}last
 	 *            last index or {Array}list
 	 * @param {Integer|Array}[index]
@@ -2936,10 +2940,13 @@ function module_code(library_namespace) {
 	 *            Will run after all elements executed
 	 * @param {Object}[_this]
 	 *            passed to for_each
+	 * @param {Boolean}[parallelly]
+	 *            run parallelly
 	 * 
 	 * @see CeL.data.code.thread
 	 */
-	function run_serial_asynchronous(for_each, last, index, callback, _this) {
+	function run_serial_asynchronous(for_each, last, index, callback, _this,
+			parallelly) {
 		var list;
 		// initialization
 		if (Array.isArray(last)) {
@@ -2948,6 +2955,7 @@ function module_code(library_namespace) {
 		}
 		if (typeof index === 'function') {
 			// shift arguments.
+			parallelly = _this;
 			_this = callback;
 			callback = index;
 			index = 0;
@@ -2959,7 +2967,8 @@ function module_code(library_namespace) {
 			index |= 0;
 		}
 
-		// main loop
+		// ----------------------------------------------------------
+		// main loop for serial
 		function run_next() {
 			if (index > last
 			// 預留可變動 list 的空間。
@@ -2976,10 +2985,44 @@ function module_code(library_namespace) {
 			for_each.call(_this, run_next, list ? list[_index] : _index,
 					_index, list);
 		}
-		run_next();
+
+		if (!parallelly) {
+			run_next();
+			return;
+		}
+
+		// ----------------------------------------------------------
+		// parallelly
+
+		function get_status() {
+			return {
+				left : left
+			};
+		}
+
+		function check_left() {
+			if (--left === 0) {
+				typeof callback === 'function' && callback.call(_this);
+			}
+			library_namespace.debug(left + ' left...', 3,
+					'run_parallel_asynchronous');
+		}
+
+		var left = 0;
+		for (; index <= last; index++, left++) {
+			setImmediate(for_each, [ check_left, list ? list[index] : index,
+					index, list, get_status ]);
+		}
+
 	}
 
 	_.run_serial = run_serial_asynchronous;
+
+	function run_parallel_asynchronous(for_each, last, index, callback, _this) {
+		run_serial_asynchronous(for_each, last, index, callback, _this, true);
+	}
+
+	_.run_parallel = run_parallel_asynchronous;
 
 	// ---------------------------------------------------------------------//
 
@@ -4193,9 +4236,17 @@ function module_code(library_namespace) {
 
 		diff_with : diff_with_Array,
 
-		// [].run_async(for_each(run_next, item, index, list), callback, _this)
-		run_async : function run_asynchronous(for_each, callback, _this) {
+		// warpper
+		run_serial :
+		// [].run_serial(for_each(run_next, item, index, list), callback, _this)
+		function Array_run_serial_asynchronous(for_each, callback, _this) {
 			run_serial_asynchronous(for_each, this, callback, _this);
+		},
+		// [].run_parallel(for_each(run_next, item, index, list, get_status),
+		// callback, _this)
+		run_parallel : function Array_run_parallel_asynchronous(for_each,
+				callback, _this) {
+			run_serial_asynchronous(for_each, this, callback, _this, true);
 		},
 
 		truncate : Array_truncate,

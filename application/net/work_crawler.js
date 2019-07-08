@@ -1477,7 +1477,7 @@ function module_code(library_namespace) {
 		this.work_list_now = work_list;
 
 		// assert: Array.isArray(work_list)
-		work_list.run_async(function for_each_title(get_next_work, work_title,
+		work_list.run_serial(function for_each_title(get_next_work, work_title,
 				this_index) {
 			// 解開/插入作品。
 			function insert_id_list(id_list) {
@@ -2902,11 +2902,16 @@ function module_code(library_namespace) {
 				&& work_data.process_status.every(function(status) {
 					return !String(status).startsWith('last saved date: ');
 				})) {
+					if (Date.parse(work_data.last_saved) > 0) {
+						work_data.last_saved = new Date(work_data.last_saved);
+					}
 					set_work_status(work_data, 'last saved date: '
-							+ (library_namespace.is_Date(work_data.last_saved)
-							//
-							? work_data.last_saved.format('%Y/%m/%d')
-									: work_data.last_saved));
+					//
+					+ (library_namespace.is_Date(work_data.last_saved)
+					//
+					? work_data.last_saved.format('%Y/%m/%d %H:%M:%S')
+					//
+					: work_data.last_saved));
 				}
 				// TODO: skip finished + no update works
 			}
@@ -2944,14 +2949,11 @@ function module_code(library_namespace) {
 					// 解析出章節列表。
 					_this.get_chapter_list(work_data, html, get_label);
 				} catch (e) {
-					library_namespace
-							.error([
-									_this.id + ': ',
-									{
-										T : [ '《%2》：執行 %1 時發生嚴重錯誤，異常中斷。',
-												'.get_chapter_list()',
-												work_data.title ]
-									} ]);
+					library_namespace.error([ _this.id + ': ', {
+						T : [ '《%2》：執行 %1 時發生嚴重錯誤，異常中斷。',
+						//
+						'.get_chapter_list()', work_data.title ]
+					} ]);
 					_this.onerror(e, work_data);
 					typeof callback === 'function' && callback(work_data);
 					return Work_crawler.THROWED;
@@ -4092,6 +4094,9 @@ function module_code(library_namespace) {
 				typeof callback === 'function' && callback(work_data);
 				return;
 			}
+			if (!chapter_URL) {
+				throw new Error(gettext('無法取得 §%1 的網址。', chapter_NO));
+			}
 		} catch (e) {
 			// e.g., qq.js
 			_this.onerror(e, work_data);
@@ -4520,6 +4525,10 @@ function module_code(library_namespace) {
 						return;
 					}
 
+					if (!chapter_data) {
+						throw new Error('解析出空的頁面資訊！');
+					}
+
 				} catch (e) {
 					library_namespace.error([ _this.id + ': ', {
 						T : [ '解析章節頁面時發生錯誤，中斷跳出：%1',
@@ -4534,7 +4543,7 @@ function module_code(library_namespace) {
 				}
 
 				// console.log(JSON.stringify(chapter_data));
-				if (!chapter_data || !(image_list = chapter_data.image_list)
+				if (!(image_list = chapter_data.image_list)
 				//
 				|| !((left = chapter_data.image_count) >= 1)
 				//

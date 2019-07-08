@@ -10,6 +10,8 @@ wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無
 wiki_API.page() 整合各 action=query 至單一公用 function。
 [[mw:Manual:Pywikibot/zh]]
 
+const util = require('util'); new util.promisify(CeL.wiki)(...)
+
 parser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
 parser 所有子頁面加入白名單 white-list
 parser 所有node當前之level層級
@@ -2913,7 +2915,11 @@ function module_code(library_namespace) {
 	 */
 	PATTERN_external_link_global = /\[((?:https?:|ftps?:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:(\s)([^\]]*))?\]/ig,
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
-	markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|math|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark',
+	markup_tags = 'br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark'
+			// [[Help:Parser tag]], [[Help:Extension tag]]
+			+ '|includeonly|noinclude|onlyinclude'
+			// [[Special:Version#mw-version-parser-extensiontags]]
+			+ '|categorytree|ce|charinsert|chem|gallery|graph|hiero|imagemap|indicator|inputbox|nowiki|mapframe|maplink|math|poem|quiz|ref|references|score|section|source|syntaxhighlight|templatedata|templatestyles|timeline',
 	// MediaWiki可接受的 HTML void elements 標籤.
 	// NO b|span|sub|sup|li|dt|dd|center|small
 	// 包含可使用，亦可不使用 self-closing 的 tags。
@@ -3304,7 +3310,7 @@ function module_code(library_namespace) {
 
 		if (false) {
 			// assert: false>=0, (undefined>=0)
-			// assert: NaN | 0 === 0
+			// assert: (NaN | 0) === 0
 			var depth_of_children = ((options && options[KEY_DEPTH]) | 0) + 1;
 			// assert: depth_of_children >= 1
 			library_namespace.debug('[' + wikitext + ']: depth_of_children: '
@@ -3434,6 +3440,8 @@ function module_code(library_namespace) {
 			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
 			parse_wikitext(attributes, options, queue));
 			inner = parse_wikitext(inner, options, queue);
+
+			// 處理特殊 tags。
 			if (tag === 'nowiki' && Array.isArray(inner)) {
 				library_namespace.debug('-'.repeat(70)
 						+ '\n<nowiki> 中僅留 -{}- 有效用。', 3,
@@ -3445,8 +3453,8 @@ function module_code(library_namespace) {
 				}
 				// TODO: <nowiki><b>-{...}-</b></nowiki>
 				inner.forEach(function(token, index) {
-					// 處理每個子 token。
-					if (token.type && token.type !== 'convert')
+					// 處理每個子 token。 經測試，<nowiki>中 -{}- 也無效。
+					if (token.type /* && token.type !== 'convert' */)
 						inner[index] = inner[index].toString();
 				});
 				if (inner.length <= 1) {
@@ -9690,7 +9698,7 @@ function module_code(library_namespace) {
 				}
 
 				// TODO: test
-				page_list.run_async(function(run_next, page_data, index) {
+				page_list.run_serial(function(run_next, page_data, index) {
 					var revision = get_page_content.revision(page_data);
 					wiki_API_expandtemplates(revision['*'], run_next,
 					//
@@ -14005,8 +14013,8 @@ function module_code(library_namespace) {
 						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 						// rvdiffto=prev 已經parsed，因此仍須自行解析。
 						// TODO: test
-						// 因為採用.run_async(.page())，因此約一秒會跑一頁面。
-						rows.run_async(function(run_next, row, index, list) {
+						// 因為採用.run_serial(.page())，因此約一秒會跑一頁面。
+						rows.run_serial(function(run_next, row, index, list) {
 							// console.log(row);
 							if (!row.pageid) {
 								run_next();

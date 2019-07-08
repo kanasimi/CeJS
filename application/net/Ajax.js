@@ -1287,6 +1287,11 @@ function module_code(library_namespace) {
 	 * @since 2015/1/13 23:23:38
 	 */
 	function get_URL_node(URL_to_fetch, onload, charset, post_data, options) {
+		if (!URL_to_fetch) {
+			onload(undefined, new SyntaxError('No URL input.'));
+			return;
+		}
+
 		get_URL_node_requests++;
 		if (get_URL_node_connections >= get_URL_node.connects_limit) {
 			library_namespace.debug('Waiting ' + get_URL_node_connections
@@ -1450,7 +1455,7 @@ function module_code(library_namespace) {
 
 
 
-		require('./work_crawler_loder.js'); var PROXY='localhost:8080';
+		require('./work_crawler_loader.js'); var PROXY='localhost:8080';
 
 		CeL.get_URL('https://zh.wikipedia.org/wiki/Special:%E6%9C%80%E8%BF%91%E6%9B%B4%E6%94%B9',function(X){console.log(X.responseText)},null,null,{proxy:PROXY});
 		CeL.get_URL('https://zh.wikipedia.org/wiki/Special:%E6%9C%80%E8%BF%91%E6%9B%B4%E6%94%B9',function(X){console.log(X.responseText)});
@@ -1689,6 +1694,14 @@ function module_code(library_namespace) {
 									+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
 											: URL_to_fetch && URL_to_fetch.URL)
 									+ ']');
+					/**
+					 * <code>
+					To solve:
+					get_URL_node: Retry 1/4: Error: write EPROTO 14180:error:1425F102:SSL routines:ssl_choose_client_version:unsupported protocol:c:\ws\deps\openssl\openssl\ssl\statem\statem_lib.c:1922:
+
+					require('tls').DEFAULT_MIN_VERSION = 'TLSv1';
+					</code>
+					 */
 				} else {
 					library_namespace
 							.error('get_URL_node: Get error when retrieving ['

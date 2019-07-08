@@ -244,7 +244,7 @@ function module_code(library_namespace) {
 				});
 			}
 
-			chapter_list.run_async(for_each_chapter, callback);
+			chapter_list.run_serial(for_each_chapter, callback);
 		},
 
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
