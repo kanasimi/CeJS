@@ -367,7 +367,7 @@ function module_code(library_namespace) {
 	// 見 initialize_era_date()
 	已壓縮曆數_PATTERN = /^(?:[\d\/]*=)?[\da-z]{3}[\da-z ]*$/,
 
-	// matched: [ , is_閏月, 月分號碼 ]
+	// matched: [ , is_閏月, 月序/月分號碼 ]
 	// TODO: 11冬月, 12臘月.
 	// TODO: [閏後]
 	MONTH_NAME_PATTERN = /^([閏闰])?([正元]|[01]?\d)月?$/,
@@ -678,7 +678,17 @@ function module_code(library_namespace) {
 
 		二十八宿_LIST = 二十八宿_LIST.split('');
 		'蛟龍貉兔狐虎豹獬牛蝠鼠燕豬貐狼狗雉雞烏猴猿犴羊獐馬鹿蛇蚓'.split('')
-		//
+		// https://zh.wikisource.org/wiki/演禽通纂_(四庫全書本)/全覽
+		// 角木蛟〈蛇父雉母細頸上白嬰四脚〉亢金龍 氐土狢
+		// 房日兎 心月狐 尾火虎〈為暗禽〉
+		// 箕水豹〈為暗禽〉 斗木獬 牛金牛
+		// 女土蝠 虚日䑕 危月燕
+		// 室火猪 壁水㺄 奎木狼
+		// 婁金狗 胃土雉 昴日雞〈為明禽〉
+		// 畢月烏 嘴火猴 參水猿
+		// 井木犴 鬼金羊 柳土獐
+		// 星日馬 張月鹿 翼火蛇
+		// 軫水蚓
 		.forEach(function(動物, index) {
 			二十八宿_LIST[index]
 			// starts from '角木蛟'
@@ -3360,10 +3370,12 @@ function module_code(library_namespace) {
 				if (起始月分)
 					年干支.setMonth(年干支.getMonth() + START_MONTH - 起始月分);
 			}
-			年干支 = (年干支.getFullYear() - library_namespace.YEAR_STEM_BRANCH_EPOCH
-			// 中曆年起始於CE年末，則應算作下一年之
-			// YEAR_STEM_BRANCH_EPOCH。
-			+ (年干支.getMonth() > 9 ? 1 : 0) - (offset ? 1 : 0))
+			年干支 = 年干支.getFullYear()
+			// 中曆年起始於CE年末，則應算作下一年之 YEAR_STEM_BRANCH_EPOCH。
+			+ (年干支.getMonth() > 9 ? 1 : 0) - (offset ? 1 : 0);
+			// e.g., 中曆2001年: 2001
+			this.起始年序 = 年干支;
+			年干支 = (年干支 - library_namespace.YEAR_STEM_BRANCH_EPOCH)
 					.mod(library_namespace.SEXAGENARY_CYCLE_LENGTH);
 			this.起始年干支序 = 年干支;
 		}
@@ -3781,9 +3793,7 @@ function module_code(library_namespace) {
 
 	// 僅適用於夏曆!
 	function note_季(date, options) {
-		var 月 = date.月;
-		if (isNaN(月) && (月 = 月.match(MONTH_NAME_PATTERN)))
-			月 = 月[2];
+		var 月 = date.月序;
 
 		// 此非季節，而為「冬十月」之類用。
 		return get_季(月 - START_MONTH, options && options.icon);
@@ -3791,9 +3801,7 @@ function module_code(library_namespace) {
 
 	// 僅適用於夏曆!
 	function note_孟仲季(date) {
-		var 月 = date.月;
-		if (isNaN(月) && (月 = 月.match(MONTH_NAME_PATTERN)))
-			月 = 月[2];
+		var 月 = date.月序;
 
 		return 0 <= (月 -= START_MONTH)
 		// 此非季節，而為「冬十月」之類用。
@@ -3802,12 +3810,12 @@ function module_code(library_namespace) {
 
 	// 僅適用於夏曆!
 	function note_月律(date) {
-		return 月律_LIST[date.月 - START_MONTH];
+		return 月律_LIST[date.月序 - START_MONTH];
 	}
 
 	function note_月の別名(date, 新暦) {
 		// 新暦に適用する
-		var index = 新暦 ? date.getMonth() : date.月 - START_MONTH;
+		var index = 新暦 ? date.getMonth() : date.月序 - START_MONTH;
 		return index >= 0 ? 月の別名_LIST[index] : '';
 	}
 
@@ -3826,11 +3834,17 @@ function module_code(library_namespace) {
 		return '';
 	}
 
-	function note_五行(date) {
-		return date.年干支序 >= 0 ? (date.年干支序 % 2 ? '陰' : '陽')
+	function note_五行(date, using_地支) {
+		var index = date.年干支序;
+		if (using_地支) {
+			// mapper
+			index = note_五行.地支_mapper[index % note_五行.地支_mapper.length];
+		}
+		return index >= 0 ? (index % 2 ? '陰' : '陽')
 		// http://zh.wikipedia.org/wiki/五行#五行與干支表
-		+ 陰陽五行_LIST[(date.年干支序 >> 1) % 陰陽五行_LIST.length] : '';
+		+ 陰陽五行_LIST[(index >> 1) % 陰陽五行_LIST.length] : '';
 	}
+	note_五行.地支_mapper = [ 8, 5, 0, 1, 4, 3, 2, 5, 6, 7, 4, 9 ];
 
 	function note_繞迥(date) {
 		var 生肖 = note_生肖(date);
@@ -3842,7 +3856,17 @@ function module_code(library_namespace) {
 		+ (生肖 ? ' ' + note_五行(date).replace(/金$/, '鐵') + 生肖 : '');
 	}
 
-	function note_納音(date) {
+	function note_納音(date, type) {
+		if (type === '年') {
+			date = date.歲次;
+			if (!date)
+				return;
+		} else if (type === '月') {
+			// date.月干支序===library_namespace.stem_branch_index(date.月干支)
+			date = date.月干支;
+			if (!date)
+				return;
+		}
 		var index = library_namespace.stem_branch_index(date);
 		// 0 – 59 干支序轉納音: 納音_LIST[index / 2 | 0];
 		// '/2': 0,1→0; 2,3→1; ...
@@ -3850,19 +3874,28 @@ function module_code(library_namespace) {
 		return 納音_LIST[index / 2 | 0];
 	}
 
-	function note_二十八宿(date) {
-		// http://koyomi8.com/sub/rekicyuu_doc01.htm
-		// 日の干支などと同様、28日周期で一巡して元に戻り、これを繰り返すだけである。
-		// 8 : 二十八宿_offset
-		var index = (8
-		// 不可用 "| 0"
-		+ Math.floor(date.getTime() / ONE_DAY_LENGTH_VALUE))
-				.mod(二十八宿_LIST.length);
-		return 二十八宿_LIST[index];
+	function note_二十八宿(date, type) {
+		var index;
+		if (type === '年') {
+			// 14: 二十八宿_年禽_offset
+			index = date.年序 + 14;
+		} else if (type === '月') {
+			// 在日宿當值之年，正月起角，順布十二個月，其他仿此。
+			// 19: 二十八宿_月禽_offset
+			index = 19 + date.年序 * 12 + date.月序;
+		} else {
+			// http://koyomi8.com/sub/rekicyuu_doc01.htm
+			// 日の干支などと同様、28日周期で一巡して元に戻り、これを繰り返すだけである。
+			// 8: 二十八宿_日禽_offset
+			index = 8
+			// 不可用 "| 0"
+			+ Math.floor(date.getTime() / ONE_DAY_LENGTH_VALUE);
+		}
+		return 二十八宿_LIST[index.mod(二十八宿_LIST.length)];
 	}
 
 	function note_二十七宿(date) {
-		var index = 二十七宿_offset[date.月] + date.日;
+		var index = 二十七宿_offset[date.月序] + date.日;
 		return date.參照曆法 !== 'CE' && index >= 0
 		// 僅對於日本之旧暦與紀年，方能得到正確之暦注值！
 		? 二十七宿_LIST[index % 二十七宿_LIST.length] : '';
@@ -3874,7 +3907,7 @@ function module_code(library_namespace) {
 	}
 
 	function note_六曜(date) {
-		var index = +date.月 + date.日;
+		var index = date.月序 + date.日;
 		return date.參照曆法 !== 'CE' && index >= 0
 		// 六曜は元々は、1箇月（≒30日）を5等分して6日を一定の周期とし（30÷5 =
 		// 6）、それぞれの日を星毎に区別する為の単位として使われた。
@@ -3906,7 +3939,7 @@ function module_code(library_namespace) {
 	}
 
 	function note_血忌(date) {
-		var index = date.月;
+		var index = date.月序;
 		if (index > 0) {
 			var 干支序 = ++index / 2 | 0;
 			if (index % 2 === 1)
@@ -4223,13 +4256,14 @@ function module_code(library_namespace) {
 			library_namespace.error('sign_note: 加注日期於紀年 [' + this + '] 範圍外！');
 			date.error = 'out of range';
 		} else {
-			// 欲使用 date_index，應該考慮採 (date.年, date.月, date.日)。
+			// 欲使用 date_index，應該考慮採 (date.年|date.年序, date.月序, date.日)。
 			// 因為日期可能不是從1月1日開始。
 			// Object.seal(date.index = date_index);
 
 			date.年干支序 = tmp
 			//
 			= this.get_year_stem_branch_index() + date_index[0];
+			date.年序 = this.起始年序 + date_index[0];
 
 			date.歲次 = library_namespace.to_stem_branch(tmp);
 
@@ -4242,9 +4276,12 @@ function module_code(library_namespace) {
 				// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
 				tmp = this.日名(date_index[2], date_index[1], date_index[0])
 						.reverse();
-				date.閏月 = typeof (tmp2 = tmp[1]) === 'string'
+				tmp2 = tmp[1];
+				date.閏月 = typeof tmp2 === 'string'
 				//
 				&& tmp2.charAt(0) === LEAP_MONTH_PREFIX;
+				date.月序 = date.閏月 ? +tmp2
+						.slice(/* LEAP_MONTH_PREFIX.length */1) : tmp2;
 
 				if (options.numeral)
 					tmp = numeralize_date_format(tmp, options.numeral);

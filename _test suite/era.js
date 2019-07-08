@@ -601,6 +601,7 @@ function show_calendar(era_name) {
 				list.push(conversion);
 			}
 		}
+		// console.log(list);
 
 		// 處理改朝換代巡覽。
 		var 未延續前紀年 = (後紀年名 !== date.紀年名);
@@ -4286,6 +4287,7 @@ function affairs() {
 		// http://www.cfarmcale2100.com.tw/
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html#zassetsu
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/astrology_j.html
+		// 值年太歲星君: https://zh.wikipedia.org/wiki/%E5%A4%AA%E6%AD%B2
 
 		// 没滅日 大小歳/凶会 下段 雑注 日遊 節月
 		// http://www.wagoyomi.info/guchu.cgi
@@ -4357,14 +4359,37 @@ function affairs() {
 		} ],
 
 		// 日柱的五行 日の五行 : 以六十甲子納音代
-		納音 : [ {
+		日納音 : [ {
 			a : {
-				T : '納音'
+				T : '日納音'
 			},
-			R : '六十甲子納音、納音五行。中曆曆注、日本の暦注の一つ。',
+			R : '六十甲子納音、納音五行。中曆曆注、日本の暦注の一つ。\n'
+			//
+			+ '日納音較月納音、年納音常用。司马雄 民俗宝典·万年历 稱日納音為五行',
 			href : 'https://zh.wikipedia.org/wiki/納音'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.納音(date);
+		} ],
+
+		月納音 : [ {
+			a : {
+				T : '月納音'
+			},
+			R : '中曆曆注。納音五行',
+			href : 'https://zh.wikipedia.org/wiki/納音'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.納音(date, '月');
+		} ],
+
+		// e.g., 毛耀顺主编《中华五千年长历》 "納音屬水"
+		年納音 : [ {
+			a : {
+				T : '年納音'
+			},
+			R : '中曆曆注。納音五行',
+			href : 'https://zh.wikipedia.org/wiki/納音'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.納音(date, '年');
 		} ],
 
 		// http://koyomi8.com/sub/rekicyuu_doc01.htm#jyuunicyoku
@@ -4595,16 +4620,39 @@ function affairs() {
 			};
 		} ],
 
+		年禽 : [ {
+			a : {
+				T : '年禽'
+			},
+			R : '中曆曆注。二十八宿年禽。見演禽訣。',
+			href : 'http://blog.sina.com.cn/s/blog_4aacc33b0100b8eh.html'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.二十八宿(date, '年');
+		} ],
+
+		月禽 : [ {
+			a : {
+				T : '月禽'
+			},
+			R : '中曆曆注。二十八宿年禽。見演禽訣。',
+			href : 'http://blog.sina.com.cn/s/blog_4aacc33b0100b8eh.html'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.二十八宿(date, '月');
+		} ],
+
 		/**
+		 * 廿八宿禽 日禽
+		 * 
 		 * @see <a
 		 *      href="https://ja.wikipedia.org/wiki/%E6%9A%A6%E6%B3%A8%E4%B8%8B%E6%AE%B5"
 		 *      accessdate="2015/3/7 13:52">暦注下段</a>
+		 *      https://zh.wikisource.org/wiki/演禽通纂_(四庫全書本)/全覽
 		 */
 		二十八宿 : [ {
 			a : {
 				T : '二十八宿'
 			},
-			R : '中曆曆注、日本の暦注の一つ。又稱二十八舍或二十八星。'
+			R : '中曆曆注、日本の暦注の一つ。又稱二十八舍、二十八星、禽星或日禽。見演禽訣。'
 			//
 			+ '28 Mansions, 28 asterisms.',
 			href : 'https://zh.wikipedia.org/wiki/二十八宿',
@@ -4690,6 +4738,25 @@ function affairs() {
 			return CeL.era.三元九運(date);
 		} ],
 
+		// e.g., 毛耀顺主编《中华五千年长历》 "干木支火"
+		年五行 : [ {
+			a : {
+				T : '年五行'
+			},
+			R : '陰陽五行紀年',
+			href : 'https://zh.wikipedia.org/wiki/五行'
+			// #五行與干支表
+			+ '#.E4.BA.94.E8.A1.8C.E4.B8.8E.E5.B9.B2.E6.94.AF.E8.A1.A8'
+		}, function(date) {
+			return [ '干', {
+				T : CeL.era.五行(date),
+				S : 'color:#2a6;'
+			}, '支', {
+				T : CeL.era.五行(date, true),
+				S : 'color:#2a6;'
+			} ];
+		} ],
+
 		astrological : [ {
 			a : {
 				T : 'zodiac sign'
@@ -4736,18 +4803,6 @@ function affairs() {
 			href : 'https://zh.wikipedia.org/wiki/生肖'
 		}, function(date) {
 			return CeL.era.生肖(date, true) + CeL.era.生肖(date);
-		} ],
-
-		五行 : [ {
-			a : {
-				T : '五行'
-			},
-			R : '陰陽五行紀年',
-			href : 'https://zh.wikipedia.org/wiki/五行'
-			// #五行與干支表
-			+ '#.E4.BA.94.E8.A1.8C.E4.B8.8E.E5.B9.B2.E6.94.AF.E8.A1.A8'
-		}, function(date) {
-			return CeL.era.五行(date);
 		} ],
 
 		繞迥 : [ {
