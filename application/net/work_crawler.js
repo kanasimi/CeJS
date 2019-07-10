@@ -327,7 +327,13 @@ function module_code(library_namespace) {
 			library_namespace.warn([ 'verify_arg: ', {
 				T : [ '"%1" 這個值所允許的數值類型為 %4，但現在被設定成 {%2} %3',
 				//
-				key, typeof value, value, arg_type_data ]
+				key, typeof value, value,
+				//
+				library_namespace.is_Object(arg_type_data)
+				//
+				? Object.keys(arg_type_data).map(function(type) {
+					return gettext(type);
+				}).join('|') : arg_type_data ]
 			} ]);
 
 			return true;
@@ -1590,11 +1596,13 @@ function module_code(library_namespace) {
 				this.main_directory + this.log_directory_name);
 				try {
 					node_fs.writeFileSync(this.main_directory
-							+ this.log_directory_name + this.report_file_JSON,
-							JSON.stringify({
-								date : (new Date).toISOString(),
-								status : all_work_status
-							}));
+					//
+					+ this.log_directory_name + this.report_file_JSON,
+					//
+					JSON.stringify({
+						date : (new Date).toISOString(),
+						status : all_work_status
+					}));
 				} catch (e) {
 					// TODO: handle exception
 				}
@@ -4094,7 +4102,7 @@ function module_code(library_namespace) {
 				typeof callback === 'function' && callback(work_data);
 				return;
 			}
-			if (!chapter_URL) {
+			if (!chapter_URL && !_this.skip_get_chapter_page) {
 				throw new Error(gettext('無法取得 §%1 的網址。', chapter_NO));
 			}
 		} catch (e) {
