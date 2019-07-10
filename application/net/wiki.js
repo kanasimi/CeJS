@@ -1233,14 +1233,6 @@ function module_code(library_namespace) {
 		return array;
 	}
 
-	function to_template_wikitext_toString_slice(separator) {
-		return this.join(separator || '|');
-	}
-
-	function to_template_wikitext_toString(separator) {
-		return '{{' + this.join(separator || '|') + '}}';
-	}
-
 	/**
 	 * escape wikitext control characters of text, to plain wikitext.<br />
 	 * escape 掉會造成問題之 characters。
@@ -1284,6 +1276,21 @@ function module_code(library_namespace) {
 		});
 	}
 
+	function to_template_wikitext_toString_slice(separator) {
+		return this.join(separator || '|');
+	}
+
+	function to_template_wikitext_toString(separator) {
+		var text = this.join(separator || '|'), tail = '}}';
+		if (text.includes('\n'))
+			tail = '\n' + tail;
+		return '{{' + text + tail;
+	}
+
+	function to_template_wikitext_join_array(value) {
+		return Array.isArray(value) ? value.join('\n') : value;
+	}
+
 	// 2017/1/18 18:46:2
 	// TODO: escape special characters
 	function to_template_wikitext(parameters, options) {
@@ -1296,13 +1303,26 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var wikitext = keys.map(function(key) {
-			if (is_continue
+		var wikitext = [];
+		keys.forEach(function(key) {
+			var value = parameters[key], ignore_key = is_continue
 			//
-			&& (is_continue = library_namespace.is_digits(key))) {
-				return parameters[key];
+			&& (is_continue = library_namespace.is_digits(key));
+			// console.log([ key, value ]);
+
+			// ignore_value: 沒有設定數值時，直接忽略這一個 parameter。
+			if (value === undefined) {
+				if (!Array.isArray(parameters))
+					return;
+				// wikitext 不採用 `undefined`。
+				value = '';
+			} else {
+				value = to_template_wikitext_join_array(value);
 			}
-			return key + '=' + parameters[key];
+			if (!ignore_key)
+				value = key + '=' + value;
+
+			wikitext.push(value);
 		});
 		if (template_name) {
 			wikitext.unshift(template_name);
@@ -1757,7 +1777,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------
 
 	/**
-	 * 擷取出頁面簡介。
+	 * 擷取出頁面簡介。例如使用在首頁優良條目簡介。
 	 * 
 	 * @example <code>
 
@@ -1809,9 +1829,8 @@ function module_code(library_namespace) {
 					representative_image = token;
 				}
 				continue;
-			}
 
-			if (token.type === 'transclusion') {
+			} else if (token.type === 'transclusion') {
 				if (token.name === 'NoteTA') {
 					// preserve 轉換用詞
 					// introduction_section.push(token);
@@ -1840,6 +1859,10 @@ function module_code(library_namespace) {
 					}
 				}
 
+				continue;
+
+			} else if (token.type === 'tag' && token.tag === 'ref') {
+				// 去掉所有參考資料。
 				continue;
 			}
 
@@ -7065,12 +7088,20 @@ function module_code(library_namespace) {
 			break;
 
 		case 'upload':
-			if (next[2]) {
-				if (typeof next[2] === 'string') {
-					next[2] = {
-						comment : next[2]
-					};
-				}
+			var tmp = next[1];
+			if (typeof tmp === 'object'
+			// wiki.upload(file_data + options, callback)
+			&& (tmp = tmp.file_path
+			//
+			|| tmp.media_url || tmp.file_url)) {
+				// shift arguments
+				next.splice(1, 0, tmp);
+
+			} else if (typeof next[2] === 'string') {
+				// wiki.upload(file_path, comment, callback)
+				next[2] = {
+					comment : next[2]
+				};
 			}
 
 			// wiki.upload(file_path, options, callback)
@@ -11859,12 +11890,26 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// arguments: the same as .edit
-	// file path/url
-	wiki_API.upload = function(file_path, token, options, callback) {
+	/**
+	 * 上傳檔案/媒體。
+	 * 
+	 * arguments: Similar to wiki_API.edit<br />
+	 * wiki_API.upload(file_path, token, options, callback);
+	 * 
+	 * @param {String}file_path
+	 *            file path/url
+	 * @param {Object}token
+	 *            login 資訊，包含“csrf”令牌/密鑰。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * @param {Function}[callback]
+	 *            回調函數。 callback(page_data, error, result)
+	 */
+	wiki_API.upload = function upload(file_path, token, options, callback) {
 		// https://commons.wikimedia.org/w/api.php?action=help&modules=upload
 		// https://www.mediawiki.org/wiki/API:Upload
 		var action, post_data = {
+			// upload_text: media description
 			text : undefined,
 			// 備註
 			comment : undefined,
@@ -11900,6 +11945,64 @@ function module_code(library_namespace) {
 			// 錯置?
 			// options.comment = options.summary;
 		}
+
+		if (!options.text) {
+			// 從 options / file_data / media_data 自動抽取出文件資訊。
+			options.text = {
+				description : options.description,
+				date : library_namespace.is_Date(options.date) ? options.date
+						.toISOString().replace(/\.\d+Z$/, 'Z') : options.date,
+				source : options.source_url || options.media_url
+						|| options.file_url,
+				author : /^Q\d+/.test(options.author) ? '{{label|'
+						+ options.author + '}}' : options.author,
+				permission : options.permission,
+				other_versions : options.other_versions
+						|| options['other versions'],
+				other_fields : options.other_versions
+						|| options['other fields']
+			};
+			options.text = [ '== {{int:filedesc}} ==',
+			//
+			to_template_wikitext(options.text, {
+				name : 'Information',
+				separator : '\n|'
+			}) ];
+
+			if (options.license) {
+				options.text.push('', '== {{int:license-header}} ==',
+				//
+				to_template_wikitext_join_array(options.license));
+			}
+
+			// add categories
+			if (options.categories) {
+				options.text.push('',
+				//
+				to_template_wikitext_join_array(options.categories
+				//
+				.map(function(category_name) {
+					if (!category_name.includes('[[')) {
+						if (!PATTERN_category_prefix.test(category_name))
+							category_name = 'Category:' + category_name;
+						// NG: CeL.wiki.title_link_of()
+						category_name = '[[' + category_name + ']]';
+					}
+					return category_name;
+				})));
+			}
+
+			options.text = options.text.join('\n');
+
+		} else if (library_namespace.is_Object(options.text)) {
+			options.text = '== {{int:filedesc}} ==\n'
+			// 將 .text 當作文件資訊。
+			+ to_template_wikitext(options.text, {
+				name : 'Information',
+				separator : '\n|'
+			});
+		}
+
 		// TODO: check {{Information|permission=license}}
 		for (action in post_data) {
 			if (action in options) {
@@ -11909,14 +12012,6 @@ function module_code(library_namespace) {
 			}
 		}
 		post_data.token = token;
-		if (library_namespace.is_Object(post_data.text)) {
-			post_data.text = '== {{int:filedesc}} ==\n'
-			// 將 .text 當作文件資訊。
-			+ to_template_wikitext(post_data.text, {
-				name : 'Information',
-				separator : '\n|'
-			});
-		}
 
 		var session;
 		if ('session' in options) {
@@ -11953,6 +12048,10 @@ function module_code(library_namespace) {
 			.replace(/#/g, '-');
 			// https://www.mediawiki.org/wiki/Manual:$wgFileExtensions
 		}
+		if (options.show_message && post_data.file.url) {
+			library_namespace.log(file_path + '\nUpload to → '
+					+ get_page_title_link('File:' + post_data.filename));
+		}
 
 		if (session && session.API_URL && options.check_media) {
 			// TODO: Skip exists file
@@ -11964,30 +12063,57 @@ function module_code(library_namespace) {
 			action = [ session.API_URL, action ];
 		}
 
-		wiki_API.query(action, function(data, error) {
-			if (error || !data || (error = data.error)
-			/**
-			 * <code>
-			{upload:{result:'Warning',warnings:{exists:'file_name',nochange:{}},filekey:'',sessionkey:''}}
-			{upload:{result:'Warning',warnings:{"duplicate":["file_name"]}}
-			{upload:{result:'Warning',warnings:{"was-deleted":"file_name","duplicate-archive":"file_name"}}
-			{upload:{result:'Success',filename:'',imageinfo:{}}}
+		if (options.test_only) {
+			delete options.session;
+			delete options.text;
+			action = post_data.text;
+			delete post_data.text;
 
-			{"error":{"code":"fileexists-no-change","info":"The upload is an exact duplicate of the current version of [[:File:name.jpg]].","stasherrors":[{"message":"uploadstash-exception","params":["UploadStashBadPathException","Path doesn't exist."],"code":"uploadstash-exception","type":"error"}],"*":"See https://test.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1279"}
-			</code>
-			 */
-			|| !(data = data.upload) || data.result !== 'Success') {
-				// console.error(error);
-				if (typeof callback === 'function')
-					callback(data, error || data && data.result
-							|| 'Error on uploading');
-				return;
-			}
+			console.log('-'.repeat(80));
+			console.log(options);
+			console.log(post_data);
+			library_namespace.info('wiki_API.upload: text:\n' + action);
+			return;
+		}
 
-			// console.log(data);
-			typeof callback === 'function' && callback(data);
-		}, post_data, options);
+		wiki_API.query(action, upload_callback.bind(null, callback,
+				options.show_message), post_data, options);
 	};
+
+	function upload_callback(callback, show_message, data, error) {
+		if (error || !data || (error = data.error)
+		/**
+		 * <code>
+		{upload:{result:'Warning',warnings:{exists:'file_name',nochange:{}},filekey:'',sessionkey:''}}
+		{upload:{result:'Warning',warnings:{"duplicate":["file_name"]}}
+		{upload:{result:'Warning',warnings:{"was-deleted":"file_name","duplicate-archive":"file_name"}}
+		{upload:{result:'Success',filename:'',imageinfo:{}}}
+
+		{"error":{"code":"fileexists-no-change","info":"The upload is an exact duplicate of the current version of [[:File:name.jpg]].","stasherrors":[{"message":"uploadstash-exception","params":["UploadStashBadPathException","Path doesn't exist."],"code":"uploadstash-exception","type":"error"}],"*":"See https://test.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1279"}
+		</code>
+		 */
+		|| !(data = data.upload) || data.result !== 'Success') {
+			// console.error(error);
+			error = error || data && data.result || 'Error on uploading';
+			if (show_message) {
+				console.log(data);
+				library_namespace.error(typeof error === 'object' ? JSON
+						.stringify(error) : error);
+				if (data && data.warnings) {
+					library_namespace.warn(JSON.stringify(data.warnings));
+				} else {
+					// library_namespace.warn(JSON.stringify(data));
+				}
+			}
+			typeof callback === 'function' && callback(data, error);
+			return;
+		}
+
+		if (show_message) {
+			console.log(data);
+		}
+		typeof callback === 'function' && callback(data);
+	}
 
 	// ------------------------------------------------------------------------
 
