@@ -2045,7 +2045,11 @@ function translate_era(era) {
 	if (date) {
 		set_era_by_url_data(era);
 
-		output = date.曆法;
+		output = date.曆法 || {
+			France : 'France',
+			British : 'Great Britain',
+			España : 'Spain'
+		}[date.國家];
 		if (output && !(output in had_inputted)) {
 			add_calendar_column(output.includes(';') ? output.split(';')
 					: output, true, false, true);
@@ -3017,6 +3021,12 @@ function affairs() {
 
 	// add 東亞陰陽曆法
 	function add_曆法(曆名, 說明, link) {
+		if (!CeL[曆名 + '_Date']) {
+			// 當設定了不存在的曆法，也不該拋出異常。
+			CeL.error('曆法不存在: ' + 曆名);
+			return;
+		}
+
 		if (!說明)
 			說明 = '';
 		else if (Array.isArray(說明))
@@ -4219,35 +4229,49 @@ function affairs() {
 			T : '月相'
 		}, '」欄並附注可能之日月食。' ] ],
 
-		夏曆 : [ {
+		天文夏曆 : [ {
 			a : {
-				T : '夏曆'
+				T : '天文夏曆'
 			},
 			R : 'traditional Chinese lunisolar calendar.'
 			//
 			+ '\n當前使用之農曆/陰曆/夏曆/黃曆曆法. 計算速度較慢！'
 			//
 			+ '\n以定氣定朔無中置閏規則計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
-			href : 'https://zh.wikipedia.org/wiki/農曆'
+			href : 'https://zh.wikipedia.org/wiki/農曆',
+			S : 'font-size:.7em;'
 		}, add_陰陽暦() ],
 
-		殷曆 : [ {
+		天文殷曆 : [ {
 			a : {
-				T : '殷曆'
+				T : '天文殷曆'
 			},
 			R : '以定氣定朔無中置閏規則計算得出，非實曆。殷曆預設歲首為建丑。計算速度較慢！',
-			href : 'https://zh.wikipedia.org/wiki/古六歷'
+			href : 'https://zh.wikipedia.org/wiki/古六歷',
+			S : 'font-size:.7em;'
 		}, add_陰陽暦('丑') ],
 
-		周曆 : [ {
+		天文周曆 : [ {
 			a : {
-				T : '周曆'
+				T : '天文周曆'
 			},
 			R : '以定氣定朔無中置閏規則計算得出，非實曆。周曆預設歲首為建子。計算速度較慢！',
-			href : 'https://zh.wikipedia.org/wiki/古六歷'
+			href : 'https://zh.wikipedia.org/wiki/古六歷',
+			S : 'font-size:.7em;'
 		}, add_陰陽暦('子') ],
 
-		// 黃帝曆 : add_曆法('黃帝曆', '非黃帝紀元'),
+		// http://www.bsm.org.cn/show_article.php?id=2372 許名瑲 青川郝家坪秦牘《田律》曆日考釋
+		黃帝曆 : add_曆法('黃帝曆',
+				'非黃帝紀元。古六歷之一，年終置閏稱閏月。復原推得，與實曆恐有數日誤差。應為戰國初創制，僅行用於戰國時期。'),
+		顓頊曆 : add_曆法('顓頊曆', '古六歷之一，年終置閏稱後九月。復原推得，與實曆恐有數日誤差。應為戰國初創制，行用於戰國至秦朝。'),
+		古夏曆 : add_曆法('古夏曆',
+				'非今夏曆。古六歷之一，年終置閏稱閏月。復原推得，與實曆恐有數日誤差。應為戰國初創制，僅行用於戰國時期。'),
+		殷曆 : add_曆法('殷曆', '古六歷之一，年終置閏稱閏月。復原推得，與實曆恐有數日誤差。應為戰國初創制，僅行用於戰國時期。'),
+		周曆 : add_曆法('周曆', '古六歷之一，年終置閏稱閏月。復原推得，與實曆恐有數日誤差。應為戰國初創制，僅行用於戰國時期。'),
+		// 魯曆 : add_曆法('魯曆', '古六歷之一，年終置閏稱閏月。復原推得，與實曆恐有數日誤差。應為戰國初創制，僅行用於戰國時期。'),
+
+		// http://www.bsm.org.cn/show_article.php?id=2262
+		// 許名瑲 漢簡曆日考徵（三）——氣朔篇（太初曆之一）
 		太初曆 : add_曆法('太初曆', '從漢武帝太初元年夏五月（前104年）至後漢章帝元和二年二月甲寅（85年），太初曆共實行了188年。'),
 		後漢四分曆 : add_曆法('後漢四分曆', '東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》。'),
 		乾象曆 : add_曆法('乾象曆', '三國東吳孫權黃武二年正月（223年）施行，直到天紀三年（280年）東吳滅亡。'),
@@ -4299,7 +4323,7 @@ function affairs() {
 			R : '月干支/大小月。此為推算所得，於部分非寅正起始之年分可能有誤！'
 			//
 			+ '\n警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
-			href : 'https://zh.wikipedia.org/wiki/干支',
+			href : 'https://zh.wikipedia.org/wiki/干支#干支纪月',
 			S : 'font-size:.7em;'
 		}, function(date) {
 			return (date.月干支 || '') + (date.大小月 || '');
@@ -4311,7 +4335,7 @@ function affairs() {
 					T : '日干支'
 				},
 				R : '警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
-				href : 'https://zh.wikipedia.org/wiki/干支',
+				href : 'https://zh.wikipedia.org/wiki/干支#干支纪日',
 				S : 'font-size:.7em;'
 			} : {
 				T : '朔日',
@@ -4790,7 +4814,7 @@ function affairs() {
 			R : '年干支/干支紀年'
 			//
 			+ '\n警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
-			href : 'https://zh.wikipedia.org/wiki/干支'
+			href : 'https://zh.wikipedia.org/wiki/干支#干支纪年'
 		}, function(date) {
 			return date.歲次;
 		} ],
@@ -4914,6 +4938,14 @@ function affairs() {
 				});
 			return numeral;
 		} ],
+
+		火空海 : [ {
+			a : {
+				T : '火空海'
+			},
+			R : '藏曆繞迥紀年始於公元1027年，即時輪經傳入西藏的年代，之前的403年使用火空海紀年。',
+			href : 'https://zh.wikipedia.org/wiki/火空海'
+		}, Year_numbering(-623, true) ],
 
 		AUC : [ {
 			a : {
