@@ -5449,8 +5449,8 @@ function 平氣平朔無中置閏(曆數_月日數, 曆數_節氣日數, 曆元J
 		曆數_節氣日數 = (節氣長 = +曆數_節氣日數[0]) / (節氣之日長 = +曆數_節氣日數[1]);
 	}
 
-	// 冬至序 = SOLAR_TERMS_NAME.indexOf('冬至') = 18;
-	曆元節氣偏移 = SOLAR_TERMS_NAME.indexOf('冬至');
+	// const 冬至序 = CeL.astronomy.SOLAR_TERMS.indexOf('冬至') = 18;
+	曆元節氣偏移 = 18;
 
 	return [ 平氣平朔曆法_Date, Date_to_平氣平朔曆法 ];
 }
