@@ -5109,7 +5109,7 @@ function 太初曆數() {
 }
 
 
-//copy from CeL.astronomy.SOLAR_TERMS
+// copy from CeL.astronomy.SOLAR_TERMS
 var SOLAR_TERMS = ["春分","清明","穀雨","立夏","小滿","芒種","夏至","小暑","大暑","立秋","處暑","白露","秋分","寒露","霜降","立冬","小雪","大雪","冬至","小寒","大寒","立春","雨水","驚蟄"];
 
 /**
@@ -5302,9 +5302,10 @@ function 平氣平朔無中置閏(曆數_月日數, 曆數_節氣日數, 曆元J
 		// 年初起算index 0 必存有歲首中氣(一般為冬至)，可跳過。
 		if (閏月 < 1)
 			閏月 = 1;
-		// +1e-10: 預防浮點誤差。e.g., 太初曆 @ -1644/11/25 CE
-		合朔積日時間 += 閏月 * 曆數_月日數 + 1e-10;
-		中氣積日時間 += 閏月 * 2 * 曆數_節氣日數 + 1e-10;
+		// +1e-9: 預防浮點捨入誤差 Round-off error。
+		// e.g., 太初曆 @ -1644/11/25 CE, 元嘉曆 @ 17844/4/4 CE (+1e-10: NG)
+		合朔積日時間 += 閏月 * 曆數_月日數 + 1e-9;
+		中氣積日時間 += 閏月 * 2 * 曆數_節氣日數 + 1e-9;
 		// 用加的，並且由前往後搜尋，取得首個無中氣之月。
 		while (中氣積日時間 < Math.floor(合朔積日時間)) {
 			閏月++;
@@ -5313,6 +5314,9 @@ function 平氣平朔無中置閏(曆數_月日數, 曆數_節氣日數, 曆元J
 		}
 		// 自第二個月(年初起算index 1)起算，index ((閏月))個月時，恰好((中氣>=朔日))
 		// 是故此時年初起算index ((閏月-1+1)) 為閏月。
+
+		// assert: {Natural}閏月=1–12
+		// 但 +1e-10 在 `CeL.元嘉曆_Date(23104, 12, 30).format('CE');` 會出現13!
 		return 閏月;
 
 		/** <code>
@@ -5517,7 +5521,11 @@ function 平氣平朔無中置閏(曆數_月日數, 曆數_節氣日數, 曆元J
 		var 為閏月 = isNaN(month) && month.match(/^閏(\d{1,2})$/);
 		// 還原至 {Integer}積年>=0, {Integer}月_index(0–11)。
 		var 月_index = 為閏月 ? 為閏月[1] : month;
-		月_index = (月_index - 正月偏移).mod(12) - 曆元月序;
+		if (正月偏移) {
+			// -1, +1: 月序數從1開始。
+			月_index = (月_index - 1 - 正月偏移).mod(12) + 1;
+		}
+		月_index -= 曆元月序;
 		var 積年 = year - 曆元年序;
 		if (月_index < 0) {
 			// 應該用前1年的曆數
@@ -5536,7 +5544,7 @@ function 平氣平朔無中置閏(曆數_月日數, 曆數_節氣日數, 曆元J
 
 		var 積月 = 年初積月 + 月_index;
 		// -1: 日 starts from 1
-		var 積日 = Math.floor(積月 * 曆數_月日數) + (date - 1);
+		var 積日 = Math.floor(積月 * 曆數_月日數 - 曆元閏餘日數) + (date - 1);
 
 		return Julian_day.to_Date(曆元JDN + 積日);
 	}
@@ -5581,7 +5589,7 @@ function 平氣平朔無中置閏(曆數_月日數, 曆數_節氣日數, 曆元J
 	var 歲首月建序 = library_namespace.stem_branch_index(options.歲首月建 || options.建正 || '寅') | 0;
 	var 建正序 = options.建正 ? library_namespace.stem_branch_index(options.建正) : 歲首月建序;
 	// 當年月序數 + 正月偏移 = 實際月份名稱
-	// 每年從正月開始的，此數值應該皆為0。
+	// 處理歲首不在正月(1月)的情況。每年從正月開始的，此數值應該皆為0。
 	// e.g, 顓頊曆從10月開始新的一年，歲首月序=月序1+正月偏移9=實際月份名稱10
 	var 正月偏移 = 歲首月建序 - 建正序;
 
@@ -5608,6 +5616,11 @@ function 平氣平朔無中置閏(曆數_月日數, 曆數_節氣日數, 曆元J
 		曆元年序 = +options.曆元年序;
 
 	var 曆元閏餘日數 = +options.曆元閏餘日數 || 0;
+	if (曆元閏餘日數) {
+		// 1e-9: 預防浮點捨入誤差 Round-off error。
+		// e.g., 魯曆 5784/閏12/29 ⇨ 隔天 5785/1/0 (3784/1/19 CE) (+1e-10: NG)
+		曆元閏餘日數 += 曆元閏餘日數 < 0 ? -1e-9 : 1e-9;
+	}
 	// {Integer} e.g., 魯曆: 1460 = 940 + 521
 	var 曆元閏餘小分 = Math.round(曆元閏餘日數 * 月之日長);
 
@@ -5695,6 +5708,13 @@ add_平氣平朔太陰太陽曆法({
 	// http://www.bsm.org.cn/show_article.php?id=2372 許名瑲 青川郝家坪秦牘《田律》曆日考釋
 	// https://github.com/suchowan/when_exe/blob/master/lib/when_exe/region/chinese/twins.rb
 	// https://github.com/ytliu0/ChineseCalendar/issues/2
+
+	// 2019/7/11 21:21:26
+	// 和 青川郝家坪秦牘《田律》曆日考釋
+	// http://www.bsm.org.cn/show_article.php?id=2372
+	// 比較的結果，除了殷曆差一個月（但這邊做出的歷表和廖育棟(Yuk Tung Liu)老師的相符合，不曉得是不是許名瑲老師另外做過調整？）
+	// https://ytliu0.github.io/ChineseCalendar/table_chinese.html
+	// 以及魯曆的朔餘有差別之外（見前面"加注小餘"段），其他部分（月序數、朔餘、節氣小餘）都能夠重現出來了。
 
 	// 4560年: 1元, 秦始皇26年(-222/10/31)秦滅六國
 
@@ -6051,6 +6071,14 @@ CeL.元嘉曆_Date.test(-2e4, 1e7, 4).join('\n') || 'OK';
 
 CeL.大明曆_Date.test(-2e4, 1e7, 4).join('\n') || 'OK';
 // 97203 ms, error 0/4
+
+
+CeL.顓頊曆_Date.test(-2e4, 1e7, 4).join('\n') || 'OK';
+// OK
+
+CeL.魯曆_Date.test(-2e4, 1e7, 4).join('\n') || 'OK';
+// OK
+
 
 */
 
