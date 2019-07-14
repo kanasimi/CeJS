@@ -636,18 +636,6 @@ function module_code(library_namespace) {
 		// 正規化數字。
 		number_array = number_array.map(function(value) {
 			return Math.absolute(to_int_or_bigint(value));
-
-			// 這方法無法準確處理像 `1e38/7`, `10/7` 這樣的情況。
-			if (typeof value === 'number') {
-				return Math.abs(Math.round(value));
-			}
-			if (typeof value === 'bigint') {
-				return Math.absolute(value);
-			}
-			var number = parseInt(value);
-			return Number.isSafeInteger(number) ? Math.abs(number)
-			//
-			: Math.absolute(BigInt(value));
 		})
 		// 由小至大排序可以減少計算次數?? 最起碼能夠延後使用 {BigInt} 的時機。
 		.sort(library_namespace.general_ascending).unique_sorted();
@@ -677,17 +665,6 @@ function module_code(library_namespace) {
 				remainder = [ gcd, number ].to_int_or_bigint();
 				gcd = remainder[0];
 				number = remainder[1];
-				if (false) {
-					remainder = Number(number);
-					if (Number.isSafeInteger(remainder)
-					// 在大量計算前，盡可能先轉換成普通 {Number} 以加快速度。
-					&& Number.isSafeInteger(Number(gcd))) {
-						gcd = Number(gcd);
-						number = remainder;
-					} else {
-						gcd = BigInt(gcd);
-					}
-				}
 			}
 			// assert: typeof gcd === typeof number
 			// console.log([ gcd, number ]);
@@ -724,7 +701,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Natural} LCM of the numbers specified
 	 */
-	LCM = function(number_array) {
+	LCM = function LCM(number_array) {
 		if (arguments.length > 1) {
 			// Array.from()
 			number_array = Array.prototype.slice.call(arguments);
@@ -778,7 +755,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Integer} LCM of the numbers specified
 	 */
-	LCM2 = function(number_array) {
+	LCM2 = function LCM2(number_array) {
 		if (arguments.length > 1) {
 			// Array.from()
 			number_array = Array.prototype.slice.call(arguments);
