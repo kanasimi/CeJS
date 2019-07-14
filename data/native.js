@@ -1738,7 +1738,7 @@ function module_code(library_namespace) {
 	 * @param {Number}[max]
 	 *            maximum decimals. max===0:round() else floor()
 	 * 
-	 * @return 取至小數 digits 位後之數字。
+	 * @return {Number}取至小數 digits 位後之數字。
 	 * 
 	 * @see https://bugzilla.mozilla.org/show_bug.cgi?id=5856
 	 *      IEEE754の丸め演算は最も報告されるES3「バグ」である。 http://www.jibbering.com/faq/#FAQ4_6
@@ -1767,8 +1767,10 @@ function module_code(library_namespace) {
 			// 16: Math.ceil(Math.abs(Math.log10(Number.EPSILON)))
 			decimals = 16;
 
-		if (!max && Number.prototype.toFixed)
-			return parseFloat(value.toFixed(decimals).replace(/\.?0+$/, ''));
+		if (!max && Number.prototype.toFixed) {
+			// 去掉末尾的0。必須預防 `(49.5).to_fixed(0)`。
+			return parseFloat(value.toFixed(decimals).replace(/\.0+$/, ''));
+		}
 
 		if (value < 0)
 			// 負數
@@ -2550,7 +2552,7 @@ function module_code(library_namespace) {
 	// 用於由小至大升序序列排序, ascending, smallest to largest, A to Z。
 	// 注意：sort 方法會在原地排序 Array 物件。
 	// @see std::less<int>()
-	function ascending(a, b) {
+	function general_ascending(a, b) {
 		// '12/34', '56/78' 可以比大小，但不能相減。
 		// 但這對數字有問題: '1212'<'987'
 		// 若對一般物件，採用 .sort() 即可。
@@ -2577,6 +2579,7 @@ function module_code(library_namespace) {
 		return a < b ? 1 : a > b ? -1 : 0;
 	}
 
+	_.general_ascending = general_ascending;
 	_.ascending = Number_ascending;
 	_.descending = Number_descending;
 
@@ -2719,7 +2722,7 @@ function module_code(library_namespace) {
 		&& (index === 0 && comparator(array[index]) > 0)) ? NOT_FOUND : index;
 	}
 
-	search_sorted_Array.default_comparator = ascending;
+	search_sorted_Array.default_comparator = general_ascending;
 
 	_.search_sorted_Array = search_sorted_Array;
 
