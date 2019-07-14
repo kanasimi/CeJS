@@ -587,6 +587,7 @@ function module_code(library_namespace) {
 	}
 
 	// Let all elements of {Array}this the same type: int, else bigint.
+	// 可能的話應該將絕對值最大的數字放在前面，早點判別出是否需要用 {BigInt}。
 	function array_to_int_or_bigint() {
 		// assert: {Array}this
 
@@ -595,13 +596,15 @@ function module_code(library_namespace) {
 			value = to_int_or_bigint(value);
 			this[index] = value;
 			return typeof value === 'bigint';
-		})) {
+		}, this)) {
 			// must using bigint
 			this.forEach(function(value, index) {
 				this[index] = BigInt(value);
-			});
+			}, this);
 		}
 
+		// assert: all elements of `this` is in the same type.
+		// typeof this[0] === typeof this[1]
 		return this;
 	}
 
@@ -670,14 +673,20 @@ function module_code(library_namespace) {
 
 			if (typeof number === 'bigint') {
 				number %= BigInt(gcd);
-				remainder = Number(number);
-				if (Number.isSafeInteger(remainder)
-				// 在大量計算前，盡可能先轉換成普通 {Number} 以加快速度。
-				&& Number.isSafeInteger(Number(gcd))) {
-					gcd = Number(gcd);
-					number = remainder;
-				} else {
-					gcd = BigInt(gcd);
+				// [ gcd, number ] = [ gcd, number ].to_int_or_bigint();
+				remainder = [ gcd, number ].to_int_or_bigint();
+				gcd = remainder[0];
+				number = remainder[1];
+				if (false) {
+					remainder = Number(number);
+					if (Number.isSafeInteger(remainder)
+					// 在大量計算前，盡可能先轉換成普通 {Number} 以加快速度。
+					&& Number.isSafeInteger(Number(gcd))) {
+						gcd = Number(gcd);
+						number = remainder;
+					} else {
+						gcd = BigInt(gcd);
+					}
 				}
 			}
 			// assert: typeof gcd === typeof number
