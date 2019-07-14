@@ -172,12 +172,12 @@ function module_code(library_namespace) {
 		if (!n2 || isNaN(n2))
 			n2 = 1;
 
-		if (n1 != Math.floor(n1)) {
+		if (!Number.isInteger(n1)) {
 			c = n1;
 			var i = 9, f = n2;
 			while (i--) {
 				// 以整數運算比較快！這樣會造成整數多4%，浮點數多1/3倍的時間，但仍值得。
-				if (f *= DEFAULT_BASE, c *= DEFAULT_BASE, c === Math.floor(c)) {
+				if (f *= DEFAULT_BASE, c *= DEFAULT_BASE, Number.isInteger(c)) {
 					n1 = c, n2 = f;
 					break;
 				}
@@ -440,13 +440,178 @@ function module_code(library_namespace) {
 													: '') + ']: ' + d.length
 											+ ',' + i + ',' + d[i]));
 		d = _.continued_fraction(d, i);
+		if (d[1] < 0) {
+			d[0] = -d[0];
+			d[1] = -d[1];
+		}
 		if (false)
 			library_namespace.debug('→ ' + d[0] + '/' + d[1]);
-		if (d[1] < 0)
-			d[0] = -d[0], d[1] = -d[1];
 
+		// [ {Integer}±numerator, {Natural}denominator ]
 		return [ d[0], d[1], d[0] / d[1] - number ];
 	};
+
+	// 正規化帶分數。 to_mixed_fraction
+	// 2019/7/10 14:22:6
+	// mixed_fraction =
+	// [ {Integer}±whole, {Integer}±numerator, {Natural|Undefined}denominator ]
+	function normalize_mixed_fraction(mixed_fraction) {
+		if (typeof mixed_fraction === 'number') {
+			mixed_fraction = [ mixed_fraction ];
+		}
+
+		var whole = mixed_fraction[0] || ABSORBING_ELEMENT;
+		var numerator = mixed_fraction[1] || ABSORBING_ELEMENT;
+		var denominator = mixed_fraction[2] || MULTIPLICATIVE_IDENTITY;
+
+		// {Natural}denominator >= 1
+		if (denominator < 0) {
+			denominator = -denominator;
+			numerator = -numerator;
+		}
+
+		// {Natural}denominator ∈ ℤ
+		if (!Number.isInteger(denominator)) {
+			denominator = _.to_rational_number(denominator);
+			numerator *= denominator[1];
+			denominator = denominator[0];
+		}
+
+		// {Integer}±numerator ∈ ℤ
+		if (!Number.isInteger(numerator)) {
+			numerator = _.to_rational_number(numerator);
+			denominator *= numerator[1];
+			numerator = numerator[0];
+		}
+
+		// assert: {Natural}denominator, {Integer}±numerator
+
+		// TODO: 約分here。
+
+		// {Integer}±whole ∈ ℤ
+		if (!Number.isInteger(whole)) {
+			whole = _.to_rational_number(whole);
+			var LCM = _.LCM(denominator, whole[1]);
+			numerator = numerator
+					* (LCM / denominator)
+					+ (whole[0] < 0 ? -(-whole[0] % whole[1]) : whole[0]
+							% whole[1]) * (LCM / whole[1]);
+			denominator = LCM;
+			whole = whole[0] < 0 ? -Math.floor(-whole[0] / whole[1]) : Math
+					.floor(whole[0] / whole[1]);
+		}
+
+		// whole, numerator 必須同符號。
+		if (whole * numerator < 0) {
+			if (whole < 0) {
+				whole++;
+				// numerator > 0
+				numerator -= denominator;
+			} else {
+				whole--;
+				// numerator < 0
+				numerator += denominator;
+			}
+		}
+
+		// 處理假分數。同時會處理絕對值為整數之問題。
+		if (Math.abs(numerator) >= denominator) {
+			whole += Math.floor(numerator / denominator);
+			numerator %= denominator;
+		}
+		// 約分。
+		if (numerator === ABSORBING_ELEMENT) {
+			denominator = MULTIPLICATIVE_IDENTITY;
+		} else {
+			var GCD = _.GCD(numerator, denominator);
+			if (GCD >= 2) {
+				numerator /= GCD;
+				denominator /= GCD;
+			}
+		}
+
+		// export
+		mixed_fraction = Object.assign([ whole, numerator, denominator ], {
+			valueOf : mixed_fraction_valueOf,
+			toString : mixed_fraction_toString
+		});
+		return mixed_fraction;
+	}
+
+	function mixed_fraction_valueOf() {
+		return this[0] + this[1] / this[2];
+	}
+
+	function mixed_fraction_toString() {
+		if (!this[1])
+			return String(this[0]);
+
+		if (!this[0])
+			return this[1] + '/' + this[2];
+
+		return this[0] + (this[1] < 0 ? '' : '+') + this[1] + '/' + this[2];
+	}
+
+	_.normalize_mixed_fraction = normalize_mixed_fraction;
+
+	// ------------------------------------------------------------------------
+
+	// 在大量計算前，盡可能先轉換成普通 {Number} 以加快速度。
+	// cohandler(may convert to number)
+	function to_int_or_bigint(value, cohandler) {
+		var number;
+		// 這方法無法準確處理像 `1e38/7`, `10/7` 這樣的情況。
+		if (typeof value === 'bigint') {
+			number = Number(value);
+			if (Number.isSafeInteger(number)) {
+				cohandler && cohandler(true);
+				return number;
+			} else {
+				cohandler && cohandler(false);
+				return value;
+			}
+		}
+		if (typeof value === 'number') {
+			cohandler && cohandler(true);
+			return Math.round(value);
+		}
+
+		number = parseInt(value);
+		if (Number.isSafeInteger(number)) {
+			cohandler && cohandler(true);
+			return number;
+		}
+
+		cohandler && cohandler(false);
+		return BigInt(value);
+	}
+
+	// Let all elements of {Array}this the same type: int, else bigint.
+	function array_to_int_or_bigint() {
+		// assert: {Array}this
+
+		// cache int values
+		if (this.some(function(value, index) {
+			value = to_int_or_bigint(value);
+			this[index] = value;
+			return typeof value === 'bigint';
+		})) {
+			// must using bigint
+			this.forEach(function(value, index) {
+				this[index] = BigInt(value);
+			});
+		}
+
+		return this;
+	}
+
+	// 可用於 {BigInt} 之 Math.abs
+	// https://en.wikipedia.org/wiki/Absolute_value
+	function absolute(value) {
+		return value < 0 ? -value : value;
+	}
+
+	Math.absolute = absolute;
 
 	/**
 	 * 求多個數之 GCD(Greatest Common Divisor, 最大公因數/公約數).<br />
@@ -457,31 +622,79 @@ function module_code(library_namespace) {
 	 * @param {Integers}number_array
 	 *            number array
 	 * 
-	 * @returns {Integer} GCD of the numbers specified
+	 * @returns {Natural} GCD of the numbers specified
 	 */
 	function GCD(number_array) {
-		if (arguments.length > 1)
+		if (arguments.length > 1) {
 			// Array.from()
 			number_array = Array.prototype.slice.call(arguments);
+		}
+
+		// 正規化數字。
+		number_array = number_array.map(function(value) {
+			return Math.absolute(to_int_or_bigint(value));
+
+			// 這方法無法準確處理像 `1e38/7`, `10/7` 這樣的情況。
+			if (typeof value === 'number') {
+				return Math.abs(Math.round(value));
+			}
+			if (typeof value === 'bigint') {
+				return Math.absolute(value);
+			}
+			var number = parseInt(value);
+			return Number.isSafeInteger(number) ? Math.abs(number)
+			//
+			: Math.absolute(BigInt(value));
+		})
+		// 由小至大排序可以減少計算次數?? 最起碼能夠延後使用 {BigInt} 的時機。
+		.sort(library_namespace.general_ascending).unique_sorted();
+		// console.log(number_array);
 
 		// 不在此先設定 gcd = number_array[0]，是為了讓每個數字通過資格檢驗。
-		var index = 0, length = number_array.length, gcd, remainder, number;
+		var index = 0, length = number_array.length, gcd = 0, remainder, number;
+		// assert: 所有數字皆已先轉換成數字，並已轉為絕對值。
+
 		while (index < length) {
-			if (typeof (number = number_array[index++]) !== 'number')
-				number = parseInt(number);
-			if (number = Math.abs(number)) {
-				if (gcd)
-					// Euclidean algorithm 輾轉相除法。
-					while (remainder = number % gcd) {
-						number = gcd;
-						// 使用絕對值最小的餘數。
-						gcd = Math.min(remainder, gcd - remainder);
-					}
-				else
-					gcd = number;
-				if (!(1 < gcd))
-					break;
+			number = number_array[index++];
+			if (number >= 1) {
+				gcd = number;
+				break;
 			}
+		}
+		// console.log(gcd);
+
+		while (index < length && 2 <= gcd) {
+			number = number_array[index++];
+			if (!(number >= 1))
+				continue;
+
+			if (typeof number === 'bigint') {
+				number %= BigInt(gcd);
+				remainder = Number(number);
+				if (Number.isSafeInteger(remainder)
+				// 在大量計算前，盡可能先轉換成普通 {Number} 以加快速度。
+				&& Number.isSafeInteger(Number(gcd))) {
+					gcd = Number(gcd);
+					number = remainder;
+				} else {
+					gcd = BigInt(gcd);
+				}
+			}
+			// assert: typeof gcd === typeof number
+			// console.log([ gcd, number ]);
+
+			// Euclidean algorithm 輾轉相除法。
+			while ((remainder = number % gcd) >= 1) {
+				number = gcd;
+				// 使用絕對值最小的餘數。為了要處理 {BigInt}，因此不採用 Math.min()。
+				// gcd = Math.min(remainder, gcd - remainder);
+				gcd = gcd - remainder < remainder ? gcd - remainder : remainder;
+			}
+		}
+
+		if (typeof gcd === 'bigint'
+				&& Number.isSafeInteger(number = Number(gcd))) {
+			gcd = number;
 		}
 		return gcd;
 	}
@@ -500,15 +713,16 @@ function module_code(library_namespace) {
 	 * @param {Integers}number_array
 	 *            number array
 	 * 
-	 * @returns {Integer} LCM of the numbers specified
+	 * @returns {Natural} LCM of the numbers specified
 	 */
 	LCM = function(number_array) {
-		if (arguments.length > 1)
+		if (arguments.length > 1) {
 			// Array.from()
 			number_array = Array.prototype.slice.call(arguments);
+		}
 
 		var i = 0, l = number_array.length, lcm, r = [], n, n0, lcm0;
-		// 正規化數字
+		// 正規化數字。
 		for (; i < l; i++) {
 			if (n = Math.abs(parseInt(number_array[i])))
 				r.push(n);
@@ -556,9 +770,10 @@ function module_code(library_namespace) {
 	 * @returns {Integer} LCM of the numbers specified
 	 */
 	LCM2 = function(number_array) {
-		if (arguments.length > 1)
+		if (arguments.length > 1) {
 			// Array.from()
 			number_array = Array.prototype.slice.call(arguments);
+		}
 
 		var i = 0, l = number_array.length, lcm = 1, r, n, num, gcd;
 		for (; i < l && lcm; i++) {
@@ -907,7 +1122,7 @@ function module_code(library_namespace) {
 	function floor_sqrt(number) {
 		// return Math.sqrt(number) | 0;
 
-		if (isNaN(number = Math.floor(number)))
+		if (!Number.isFinite(number = Math.floor(number)))
 			return;
 		var g = 0, v, h, t;
 		while ((t = g << 1) < (v = number - g * g)) {
@@ -1015,7 +1230,7 @@ function module_code(library_namespace) {
 
 		// e.g., p^2 * r, q^2 * r
 		var product = f1 * f2;
-		if (product <= Number.MAX_SAFE_INTEGER) {
+		if (Number.isSafeInteger(product)) {
 			return is_square(product);
 		}
 
@@ -1026,7 +1241,7 @@ function module_code(library_namespace) {
 			f1 = f2;
 			f2 = tmp;
 		}
-		if (f2 > Number.MAX_SAFE_INTEGER) {
+		if (!Number.isSafeInteger(f2)) {
 			library_namespace.error('The number ' + f2
 					+ ' is NOT a safe number!');
 		}
@@ -1064,7 +1279,7 @@ function module_code(library_namespace) {
 			}
 			if (tmp) {
 				product = f1 * f2;
-				if (product <= Number.MAX_SAFE_INTEGER) {
+				if (Number.isSafeInteger(product)) {
 					return is_square(product);
 				}
 			}
@@ -1333,7 +1548,7 @@ function module_code(library_namespace) {
 
 	// integer: number to test
 	function test_is_prime(integer, index, sqrt) {
-		// assert: integer === Math.floor(integer), integer ≥ 0
+		// assert: Number.isInteger(integer), integer ≥ 0
 		index |= 0;
 		if (!sqrt)
 			sqrt = floor_sqrt(integer);
@@ -1409,7 +1624,7 @@ function module_code(library_namespace) {
 	// CeL.prime(CeL.prime_pi(Number.MAX_SAFE_INTEGER = 2^53 - 1)) =
 	// 9007199254740881
 	function prime_pi(value) {
-		value = Math.abs(Math.floor(value));
+		value = Math.floor(Math.abs(value));
 		if (last_prime_tested < value)
 			prime(value, value);
 		// +1: index of function prime() starts from 1!
@@ -2456,8 +2671,7 @@ function module_code(library_namespace) {
 		//
 		y2 = equation(x2), x3 = x2, y3 = y2,
 		// divided differences, 1階差商
-		y10 = (y1 - y0)
-		/ (x1 - x0), y21 = (y2 - y1) /(x2 - x1),
+		y10 = (y1 - y0) / (x1 - x0), y21 = (y2 - y1) / (x2 - x1),
 		// 2階差商
 		y210 = (y21 - y10) / (x2 - x0),
 		// 暫時使用。
@@ -3929,6 +4143,7 @@ function module_code(library_namespace) {
 	});
 
 	library_namespace.set_method(Array.prototype, {
+		to_int_or_bigint : array_to_int_or_bigint,
 		is_AP : Array_is_AP,
 		combines_AP : Array_combines_AP,
 		is_permutation : Array_is_permutation,
