@@ -613,6 +613,7 @@ function module_code(library_namespace) {
 
 		// id : '',
 		// site_id is also crower_id.
+		// <meta name="generator" content="site_id" />
 		// site_id : '',
 		// base_URL : '',
 		// charset : 'GBK',
@@ -884,6 +885,11 @@ function module_code(library_namespace) {
 
 			if (chapter_data && chapter_data.skip_this_chapter)
 				return Work_crawler.SKIP_THIS_CHAPTER;
+
+			if (typeof chapter_data === 'string') {
+				// treat chapter_data as chapter url
+				return chapter_data;
+			}
 
 			// e.g., work_data.chapter_list = [ chapter_data,
 			// chapter_data={url:'',title:'',date:new Date}, ... ]
@@ -1247,8 +1253,9 @@ function module_code(library_namespace) {
 		// console.log(get_URL_options);
 
 		// callback(result_Object, error)
-		get_URL(url, callback.bind(this), charset || this.charset, post_data,
-				get_URL_options);
+		get_URL(url, callback && callback.bind(this)
+				|| library_namespace.null_function, charset || this.charset,
+				post_data, get_URL_options);
 	}
 
 	// /./ doesn't include "\r", can't preserv line separator.
@@ -1721,21 +1728,37 @@ function module_code(library_namespace) {
 		// {Array}id_list = [ id, id, ... ]
 		id_list = [],
 		// {Array}id_data = [ title, title, ... ]
-		id_data = [];
+		id_data = [],
+		//
+		search_result_parser = typeof token_parser === 'function'
+		//
+		&& function(token) {
+			// function parser(token, id_list, id_data){console.log(token);}
+			var result = token_parser.call(this, token, id_list, id_data);
+			if (Array.isArray(result) && result.length === 2) {
+				id_list.push(result[0]);
+				id_data.push(result[1]);
+			}
+		};
 
 		// PATTERN_item_token 會分離出每個作品的欄位。
 		if (library_namespace.is_RegExp(PATTERN_item_token)) {
 			// assert: PATTERN_item_token.global === true
 			// matched: [ , HTML token to check ]
 			while (matched = PATTERN_item_token.exec(html)) {
-				parse_search_result_token(id_list, id_data, token_parser,
-						matched[1]);
+				if (search_result_parser) {
+					search_result_parser(matched[1]);
+				} else {
+					parse_search_result_token(id_list, id_data, token_parser,
+							matched[1]);
+				}
 			}
 
 		} else if (Array.isArray(PATTERN_item_token)) {
 			html.each_between(PATTERN_item_token[0], PATTERN_item_token[1],
-					parse_search_result_token.bind(null, id_list, id_data,
-							token_parser));
+					search_result_parser
+							|| parse_search_result_token.bind(null, id_list,
+									id_data, token_parser));
 
 		} else {
 			throw new TypeError('extract_work_id_from_search_result_link: '
@@ -2298,10 +2321,17 @@ function module_code(library_namespace) {
 		var chapter_list_to_check = [];
 
 		chapter_list.forEach(function(chapter_data, index) {
+			if (typeof chapter_data === 'string') {
+				chapter_data = chapter_list[index] = {
+					url : chapter_data
+				};
+			}
+
 			var downloaded_file = work_data.directory
 					+ this.get_chapter_directory_name(work_data, index + 1)
 					+ '.' + this.images_archive_extension;
 			// console.log('downloaded_file: ' + downloaded_file);
+
 			if (library_namespace.storage.file_exists(downloaded_file)) {
 				chapter_data.skip_this_chapter
 				//
@@ -5197,7 +5227,7 @@ function module_code(library_namespace) {
 							library_namespace.warn([ {
 								T : has_error ? contents
 								//
-								? '強制將非圖片檔儲存為圖片 ' : '強制將空內容儲存為圖片'
+								? '強制將非圖片檔儲存為圖片' : '強制將空內容儲存為圖片'
 								// assert: (!!verified_image===false)
 								// 圖檔損壞: e.g., Do not has EOI
 								: '強制儲存損壞的圖片'
