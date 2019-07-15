@@ -2311,6 +2311,9 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// 檢查磁碟上面是否真的有已經下載的漫畫檔案。
+	// .check_downloaded_chapters() 必須先確保已獲得最終之 chapter_data.title。
+	// e.g., calling from .get_chapter_list()
 	function check_downloaded_chapters(work_data) {
 		var chapter_list = Array.isArray(work_data.chapter_list)
 				&& work_data.chapter_list;
@@ -2328,8 +2331,9 @@ function module_code(library_namespace) {
 			}
 
 			var downloaded_file = work_data.directory
-					+ this.get_chapter_directory_name(work_data, index + 1)
-					+ '.' + this.images_archive_extension;
+			// + 1: chapter_NO starts from 1
+			+ this.get_chapter_directory_name(work_data, index + 1) + '.'
+					+ this.images_archive_extension;
 			// console.log('downloaded_file: ' + downloaded_file);
 
 			if (library_namespace.storage.file_exists(downloaded_file)) {
@@ -2338,7 +2342,7 @@ function module_code(library_namespace) {
 				= gettext('跳過之前已下載或檢查過，已無需再檢查的章節。');
 			} else {
 				chapter_list_to_check.push('§' + (index + 1)
-				//
+				// + 1: chapter_NO starts from 1
 				+ (chapter_data.title ? ' ' + chapter_data.title : ''));
 			}
 		}, this);
@@ -2360,6 +2364,11 @@ function module_code(library_namespace) {
 		// console.log(new_chapter_list);
 		// work_data.chapter_list = new_chapter_list;
 	}
+	/**
+	 * 檢查磁碟上面是否真的有已經下載的檔案。
+	 * 
+	 * @deprecated 應該改成.check_downloaded_chapters()。
+	 */
 	function check_downloaded_chapter_url(work_data, new_chapter_list,
 			from_chapter_NO) {
 		if (// this.recheck === 'multi_parts_changed' &&
@@ -3428,7 +3437,8 @@ function module_code(library_namespace) {
 				library_namespace.log(message);
 			}
 
-			work_data.start_downloading_chaper = Date.now();
+			work_data.start_downloading_time = Date.now();
+			work_data.start_downloading_chapter = work_data.last_download.chapter || 1;
 			function start_to_process_chapter_data() {
 				// 開始下載 chapter。
 				pre_get_chapter_data.call(_this, work_data,
@@ -3553,23 +3563,23 @@ function module_code(library_namespace) {
 			return;
 
 		// 到現在使用時間 (ms)
-		var time_used = Date.now() - work_data.start_downloading_chaper,
+		var time_used = Date.now() - work_data.start_downloading_time,
 		// chapter_NO starts from 1
 		chapters_to_download = work_data.chapter_count - (chapter_NO - 1),
-		// this.start_chapter starts from 1
-		chapters_downloaded = chapter_NO
-				- (this.start_chapter > 1 ? this.start_chapter : 1),
+		// this.start_downloading_chapter starts from 1
+		chapters_downloaded = chapter_NO - work_data.start_downloading_chapter,
 		// 預估剩餘時間 estimated time remaining (ms)
 		estimated_time = chapters_to_download *
 		// 到現在平均每個章節使用時間。
 		time_used / chapters_downloaded;
 
-		if (1e3 < estimated_time && estimated_time < 1e15) {
-			return gettext('預估還需 %1 下載完本作品。', library_namespace.age_of(0,
-					estimated_time, {
-						digits : 1
-					}));
+		if (!(1e3 < estimated_time && estimated_time < 1e15)) {
+			return '';
 		}
+		return gettext('預估還需 %1 下載完本作品。', library_namespace.age_of(0,
+				estimated_time, {
+					digits : 1
+				}));
 	}
 
 	// @inner
