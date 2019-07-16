@@ -1714,7 +1714,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 快速取得第一個標題 lead section / first section / introduction 導入文 文字用。
+	 * 快速取得第一個標題 lead section / first section / introduction 序言 導入文 文字用。
 	 * 
 	 * @example <code>
 
@@ -1960,11 +1960,13 @@ function module_code(library_namespace) {
 			new_token.tag = token.tag;
 			return new_token;
 		}
+
 		if ((token.type === 'file' || token.type === 'category')
 				&& !token.is_link) {
 			// 顯示時，TOC 中的圖片、分類會被消掉，圖片在內文中才會顯現。
 			return '';
 		}
+
 		if (token.type === 'link' || token.type === 'category'
 		// e.g., [[:File:file name.jpg]]
 		|| token.type === 'file') {
@@ -1985,19 +1987,23 @@ function module_code(library_namespace) {
 			// console.log(token);
 			return token;
 		}
-		// 模板這個部分除了解析模板之外沒有好的方法。
+
 		// 這邊僅處理常用模板。需要先保證這些模板存在，並且具有預期的功能。
-		// TODO: [[Template:疑問]], [[Template:Block]]
+		// TODO: 模板這個部分除了解析模板之外沒有好的方法。
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {
 			// template-linking templates: Tl, Tlx, Tls, T1, ...
-			if (/^T[l1n][a-z]{0,3}[23]?$/.test(token.name)) {
+			if (/^(?:T[l1n][a-z]{0,3}[23]?)$/.test(token.name)) {
 				token.shift();
 				return token;
 			}
+
+			// TODO: [[Template:User link]], [[Template:U]]
+
+			// TODO: [[Template:疑問]], [[Template:Block]]
+
 			// 警告: 在遇到標題包含模板時，因為不能解析連模板最後產出的結果，會產生錯誤結果。
-			// TODO: 採用 parse 或 expandtemplates
 			return token;
 		}
 
@@ -2012,9 +2018,11 @@ function module_code(library_namespace) {
 			// TODO: error: 用在[URL]無標題連結會失效。需要計算外部連結的序號。
 			return token;
 		}
+
 		if (token.type === 'switch') {
 			return '';
 		}
+
 		if (token.type === 'bold' || token.type === 'italic') {
 			// 去除粗體與斜體。
 			token.original_type = token.type;
@@ -2022,6 +2030,7 @@ function module_code(library_namespace) {
 			token.toString = wiki_toString[token.type];
 			return token;
 		}
+
 		if (typeof token === 'string') {
 			// console.log('>> [' + index + '] ' + token);
 			// console.log(parent);
@@ -2040,6 +2049,7 @@ function module_code(library_namespace) {
 			}
 			return token;
 		}
+
 		return token;
 	}
 
@@ -11896,6 +11906,10 @@ function module_code(library_namespace) {
 	 * arguments: Similar to wiki_API.edit<br />
 	 * wiki_API.upload(file_path, token, options, callback);
 	 * 
+	 * TODO: 檔案資訊 添加/編輯 說明 (Must be plain text. Can not use wikitext!)
+	 * https://commons.wikimedia.org/w/api.php?action=help&modules=wbsetlabel
+	 * wikitext_to_plain_text(wikitext)
+	 * 
 	 * @param {String}file_path
 	 *            file path/url
 	 * @param {Object}token
@@ -11959,7 +11973,7 @@ function module_code(library_namespace) {
 				permission : options.permission,
 				other_versions : options.other_versions
 						|| options['other versions'],
-				other_fields : options.other_versions
+				other_fields : options.other_fields
 						|| options['other fields']
 			};
 			options.text = [ '== {{int:filedesc}} ==',
