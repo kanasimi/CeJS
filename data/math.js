@@ -32,6 +32,7 @@ function module_code(library_namespace) {
 
 	// requiring
 	var set_bind = this.r('set_bind');
+	var has_bigint = library_namespace.env.has_bigint;
 
 	/**
 	 * null module constructor
@@ -457,6 +458,7 @@ function module_code(library_namespace) {
 	// [ {Integer}±whole, {Integer}±numerator, {Natural|Undefined}denominator ]
 	function normalize_mixed_fraction(mixed_fraction) {
 		if (typeof mixed_fraction === 'number') {
+			// treat as float
 			mixed_fraction = [ mixed_fraction ];
 		}
 
@@ -472,15 +474,19 @@ function module_code(library_namespace) {
 
 		// {Natural}denominator ∈ ℤ
 		if (!Number.isInteger(denominator)) {
+			// assert: is float
 			denominator = _.to_rational_number(denominator);
-			numerator *= denominator[1];
+			numerator *= typeof numerator === 'bigint' ? BigInt(denominator[1])
+					: denominator[1];
 			denominator = denominator[0];
 		}
 
 		// {Integer}±numerator ∈ ℤ
 		if (!Number.isInteger(numerator)) {
+			// assert: is float
 			numerator = _.to_rational_number(numerator);
-			denominator *= numerator[1];
+			denominator *= typeof denominator === 'bigint' ? BigInt(numerator[1])
+					: numerator[1];
 			numerator = numerator[0];
 		}
 
@@ -492,6 +498,7 @@ function module_code(library_namespace) {
 		if (!Number.isInteger(whole)) {
 			whole = _.to_rational_number(whole);
 			var LCM = _.LCM(denominator, whole[1]);
+			// TODO: convert all numbers to the same type.
 			numerator = numerator
 					* (LCM / denominator)
 					+ (whole[0] < 0 ? -(-whole[0] % whole[1]) : whole[0]
@@ -500,6 +507,7 @@ function module_code(library_namespace) {
 			whole = whole[0] < 0 ? -Math.floor(-whole[0] / whole[1]) : Math
 					.floor(whole[0] / whole[1]);
 		}
+		// TODO: convert all numbers to the same type.
 
 		// whole, numerator 必須同符號。
 		if (whole * numerator < 0) {
@@ -556,6 +564,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// 正規化數字成 integer 或 bigint
 	// 在大量計算前，盡可能先轉換成普通 {Number} 以加快速度。
 	// cohandler(may convert to number)
 	function to_int_or_bigint(value, cohandler) {
@@ -638,7 +647,9 @@ function module_code(library_namespace) {
 			return Math.absolute(to_int_or_bigint(value));
 		})
 		// 由小至大排序可以減少計算次數?? 最起碼能夠延後使用 {BigInt} 的時機。
-		.sort(library_namespace.general_ascending).unique_sorted();
+		.sort(library_namespace.general_ascending)
+		// .unique_sorted()
+		;
 		// console.log(number_array);
 
 		// 不在此先設定 gcd = number_array[0]，是為了讓每個數字通過資格檢驗。
@@ -694,8 +705,6 @@ function module_code(library_namespace) {
 	 * 求多個數之 LCM(Least Common Multiple, 最小公倍數): method 1.<br />
 	 * Using 類輾轉相除法.<br />
 	 * 
-	 * TODO: 更快的方法： 短除法? 一次算出 GCD, LCM?
-	 * 
 	 * @param {Integers}number_array
 	 *            number array
 	 * 
@@ -707,35 +716,130 @@ function module_code(library_namespace) {
 			number_array = Array.prototype.slice.call(arguments);
 		}
 
-		var i = 0, l = number_array.length, lcm, r = [], n, n0, lcm0;
 		// 正規化數字。
-		for (; i < l; i++) {
-			if (n = Math.abs(parseInt(number_array[i])))
-				r.push(n);
+		number_array = number_array.map(function(value) {
+			return Math.absolute(to_int_or_bigint(value));
+		})
+		// .sort().reverse()
+		;
+		if (number_array.some(function(number) {
+			return number == 0;
+		})) {
 			// 允許 0:
-			// else if (!n) return n;
+			return 0;
 		}
-		// r.sort().reverse();
-		for (number_array = r, l = number_array.length, lcm = number_array[0],
-				i = 1; i < l; i++) {
-			n = n0 = number_array[i];
-			lcm0 = lcm;
+
+		var lcm = number_array[0];
+		for (var index = 1, length = number_array.length; index < length; index++) {
+			var number = number_array[index];
+			// assert: {Integer}number
+			var gcd = _.GCD(number, lcm);
+			if (typeof number === typeof gcd) {
+				number /= gcd;
+				if (typeof number === typeof lcm) {
+					gcd = lcm * number;
+					if (Number.isSafeInteger(gcd)) {
+						lcm = gcd;
+					} else if (has_bigint) {
+						lcm = BigInt(lcm) * BigInt(number);
+					} else {
+						throw new RangeError('LCM is not SafeInteger!');
+					}
+				} else {
+					lcm = BigInt(lcm) * BigInt(number);
+				}
+			} else {
+				// assert: {BigInt}number, {Number}gcd
+				number /= BigInt(gcd);
+				if (typeof number !== typeof lcm) {
+					lcm = BigInt(lcm);
+				}
+				lcm *= number;
+			}
+		}
+		return lcm;
+	};
+
+	_// JSDT:_module_
+	.
+	/**
+	 * 求多個數之 LCM(Least Common Multiple, 最小公倍數): method 1.<br />
+	 * Using 類輾轉相除法.<br />
+	 * 
+	 * TODO: 更快的方法： 短除法? 一次算出 GCD, LCM?
+	 * 
+	 * @param {Integers}number_array
+	 *            number array
+	 * 
+	 * @returns {Natural} LCM of the numbers specified
+	 */
+	LCM3 = function LCM3(number_array) {
+		if (arguments.length > 1) {
+			// Array.from()
+			number_array = Array.prototype.slice.call(arguments);
+		}
+
+		// 正規化數字。
+		number_array = number_array.map(function(value) {
+			return Math.absolute(to_int_or_bigint(value));
+		})
+		// .sort().reverse()
+		;
+		if (number_array.some(function(number) {
+			return number == 0;
+		})) {
+			// 允許 0:
+			return 0;
+		}
+
+		var lcm = number_array[0], using_bigint;
+		for (var index = 1, length = number_array.length; index < length; index++) {
+			var number = number_array[index];
+			// assert: {Integer}number
+			if (typeof number !== typeof lcm) {
+				// assert: number, lcm 有一個是 bigint。
+				using_bigint = true;
+				lcm = BigInt(lcm);
+				number = BigInt(number);
+			}
+			// console.log([ lcm, number ]);
+			var number0 = number;
+			var lcm0 = lcm;
 			// 倒反版的 Euclidean algorithm 輾轉相除法.
 			// 反覆讓兩方各自加到比對方大的倍數，當兩者相同時，即為 lcm。
-			while (lcm !== n) {
-				if (lcm > n) {
-					if (r = -lcm % n0) {
-						n = lcm + r + n0;
+			while (lcm !== number) {
+				// console.log([ lcm0, number0, lcm, number ]);
+				if (lcm > number) {
+					var remainder = -lcm % number0;
+					if (remainder) {
+						number = lcm + remainder + number0;
+						if (!using_bigint && has_bigint
+								&& !Number.isSafeInteger(number)) {
+							using_bigint = true;
+							number0 = BigInt(number0);
+							lcm0 = BigInt(lcm0);
+							number = BigInt(lcm + remainder) + number0;
+							lcm = BigInt(lcm);
+						}
 					} else {
-						// n0 整除 lcm: 取 lcm 即可.
+						// number0 整除 lcm: 取 lcm 即可.
 						break;
 					}
 				} else {
-					if (r = -n % lcm0) {
-						lcm = n + r + lcm0;
+					var remainder = -number % lcm0;
+					if (remainder) {
+						lcm = number + remainder + lcm0;
+						if (!using_bigint && has_bigint
+								&& !Number.isSafeInteger(lcm)) {
+							using_bigint = true;
+							number0 = BigInt(number0);
+							lcm0 = BigInt(lcm0);
+							lcm = BigInt(number + remainder) + BigInt(lcm0);
+							number = BigInt(number);
+						}
 					} else {
-						// lcm0 整除 n: 取 n 即可.
-						lcm = n;
+						// lcm0 整除 number: 取 number 即可.
+						lcm = number;
 						break;
 					}
 				}
@@ -789,16 +893,25 @@ function module_code(library_namespace) {
 	 * @since 2013/8/3 20:24:30
 	 */
 	function extended_GCD(n1, n2) {
-		var remainder, quotient, use_g1 = false,
+		var remainder, quotient, using_g1 = false, using_bigint,
 		// 前一group [dividend 應乘的倍數, divisor 應乘的倍數]
-		m1g1 = 1, m2g1 = 0,
+		m1g1 = 1, m2g1 = 0;
+		if (typeof n1 === 'bigint') {
+			m1g1 = BigInt(m1g1);
+			m2g1 = BigInt(m2g1);
+			using_bigint = true;
+		}
 		// 前前group [dividend 應乘的倍數, divisor 應乘的倍數]
-		m1g2 = 0, m2g2 = 1;
+		var m1g2 = /* 0 */m2g1, m2g2 = /* 1 */m1g1;
 
 		while (remainder = n1 % n2) {
-			quotient = (n1 - remainder) / n2 | 0;
+			quotient = (n1 - remainder) / n2;
+			if (!using_bigint) {
+				// assert: typeof quotient === 'number'
+				quotient = Math.floor(quotient);
+			}
 			// 現 group = remainder = 前前group - quotient * 前一group
-			if (use_g1 = !use_g1)
+			if (using_g1 = !using_g1)
 				m1g1 -= quotient * m1g2, m2g1 -= quotient * m2g2;
 			else
 				m1g2 -= quotient * m1g1, m2g2 -= quotient * m2g1;
@@ -806,7 +919,7 @@ function module_code(library_namespace) {
 			n1 = n2;
 			n2 = remainder;
 		}
-		return use_g1 ? [ n2, m1g1, m2g1 ] : [ n2, m1g2, m2g2 ];
+		return using_g1 ? [ n2, m1g1, m2g1 ] : [ n2, m1g2, m2g2 ];
 	}
 
 	// extended GCD algorithm
@@ -838,19 +951,27 @@ function module_code(library_namespace) {
 
 		var remainder = dividend % divisor;
 		if (closest) {
-			if (remainder !== 0
-			//
-			&& Math.abs(2 * remainder) > Math.abs(divisor))
+			if (remainder != 0
+			// 0 !== 0n
+			&& Math.absolute(remainder + remainder) > Math.absolute(divisor))
 				if (remainder < 0)
-					remainder += Math.abs(divisor);
+					remainder += Math.absolute(divisor);
 				else
-					remainder -= Math.abs(divisor);
+					remainder -= Math.absolute(divisor);
 
-		} else if (remainder < 0)
+		} else if (remainder < 0) {
 			// assert: (-0 < 0) === false
-			remainder += Math.abs(divisor);
+			remainder += Math.absolute(divisor);
+		}
 
-		return [ Math.round((dividend - remainder) / divisor), remainder ];
+		dividend = (dividend - remainder) / divisor;
+		if (typeof dividend === 'number') {
+			Math.round(dividend);
+		} else {
+			// assert: typeof dividend === 'bigint'
+		}
+
+		return [ dividend, remainder ];
 	}
 
 	// 帶餘數除法 division with remainder
@@ -1035,7 +1156,7 @@ function module_code(library_namespace) {
 	 */
 	function modular_inverse(number, modulo) {
 		number = extended_GCD(number, modulo);
-		if (number[0] === 1)
+		if (number[0] == 1)
 			return (number = number[1]) < 0 ? number + modulo : number;
 	}
 
