@@ -27,6 +27,11 @@ body {
 	background-color: #ffe;
 }
 
+/* using 20px is good */
+img[class="inline"] {
+	vertical-align: bottom;
+}
+
 /* copy from game.css */
 em {
 	color: #f24071;
@@ -159,6 +164,10 @@ td {
 	border-radius: .2em;
 	white-space: nowrap;
 	padding-bottom: .1em;
+}
+
+.add_mark:hover {
+	background-color: #ffd;
 }
 
 .remove_mark {
@@ -584,7 +593,6 @@ div.box {
 		<a rel="nofollow" title="visitor"
 			href="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&point=T"><img
 			src="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&mode=pic&page=CeL&point=era" /></a>
-		<g:plusone></g:plusone>
 	</div>
 
 	<div id="language_menu"></div>
@@ -626,7 +634,8 @@ div.box {
 			<li>請使用個人電腦等級以上、新一點的瀏覽器，方可產生紀年線圖。<em>據測試，IE 11 尚無法使用線圖。</em>此外由於頻寬不足，加上載入時須做初始化，本頁面在載入時得稍微等一下。
 			</li>
 			<li>您可參照測試範例，先輸入來源紀年與日期，後選取輸出格式，按下轉換執行鍵「→」即可獲得轉換結果。</li>
-			<li>感謝孫郁興、黃一農、譚冰、唐凯、Yan Naing Aye等教授與研究者，親自指導與提供本函式庫之資料來源。</li>
+			<li>感謝孫郁興、黃一農、譚冰、唐凯、Yan Naing Aye、廖育棟(Yuk Tung
+				Liu)等教授與研究者，親自指導與提供本函式庫之資料來源。</li>
 			<li>請各位先進幫助測試本工具之正確性，看看是否有謬誤之處。更希望能幫忙到有需要的文史前輩們。</li>
 			<li>Please help us <a rel="nofollow"
 				href="https://docs.google.com/spreadsheets/d/1E0NJV7eRfRD89QkGAUHxMpJY5TkSSRVvzCzBhx5hm7w/edit?usp=sharing"
@@ -649,8 +658,8 @@ div.box {
 				href="ftp://cyrano-se.obspm.fr/pub/transit/POLAC/Doc/ARTICLES/SOLUTION_LUNE/Kudryavtsev-2007aa471.pdf"
 				accessdate="2015/4/25 10:6"
 				title="S. M. Kudryavtsev. 2007. Long-term harmonic development of lunar ephemeris.">LEA-406</a>
-				來計算月亮位置。LEA-406 基於 LE406，據 <span class="proper_noun">S. M.
-					Kudryavtsev</span>，較 ELP/MPP02 更貼近 LE406。<!-- 譜分析法 (spectral analysis) 或稱為頻率分析法 (frequency analysis) 的精度比分析理論 ELP/MPP02 (45053 項) 高7~70 倍，而且項數也少。 -->預設使用
+				來計算月亮位置。LEA-406 基於 LE406，據 <span class="proper_noun">Sergey
+					M. Kudryavtsev</span>，較 ELP/MPP02 更貼近 LE406。<!-- 譜分析法 (spectral analysis) 或稱為頻率分析法 (frequency analysis) 的精度比分析理論 ELP/MPP02 (45053 項) 高7~70 倍，而且項數也少。 -->預設使用
 				LEA-406b，您亦可在分類欄交互切換 LEA-406a 與 LEA-406b。LEA-406a 速度較慢，但更接近
 				LE406。惟當前 JPL <a rel="nofollow"
 				href="http://ssd.jpl.nasa.gov/horizons.cgi"
@@ -694,7 +703,10 @@ div.box {
 			<li>本函式庫為 <a rel="nofollow"
 				href="https://github.com/kanasimi/CeJS/blob/master/data/date/era.js">CeJS
 					日期轉換</a>計畫的一部分。若有任何建議以及疑問、錯誤回報等，請移步 <a
-				href="https://github.com/kanasimi/CeJS">CeJS @ GitHub</a>。
+				href="https://github.com/kanasimi/CeJS/issues">CeJS issues @ <img
+					src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Font_Awesome_5_brands_github.svg/20px-Font_Awesome_5_brands_github.svg.png"
+					alt="GitHub" class="inline" />GitHub
+			</a>。
 			</li>
 		</ul>
 		<div class="timeStamp">2013/4/21 17:54:53</div>
@@ -824,7 +836,7 @@ div.box {
 					accessdate="2013/4/13 19:44">明鄭時期清《時憲曆》與明《大統曆》曆數比對</a>），其與「中央研究院
 					兩千年中西曆轉換」僅於交接的一個月（1661年中曆12月）有出入。現以其所載為準。
 					<hr /> <a rel="nofollow"
-					href="http://140.112.30.230/datemap/index.php"
+					href="http://thdl.ntu.edu.tw/datemap/index.php"
 					accessdate="2013/4/5 19:2"
 					title="中西曆對照查詢系統（明代以降） || Chinse and
 						Western Dates Mapping System (Later than Ming Dynasty)">中西曆對照查詢系統（明代以降）</a>的資料沿用清時憲曆，因此恐非實際施行、使用過的曆數。<br />因非身在學界，若有能提供相關資料，包括王叔武(1979)<a
@@ -840,8 +852,8 @@ div.box {
 				<td>1500–841 BCE 之中國地區朔閏</td>
 				<td><a rel="nofollow"
 					href="http://bbs.nongli.net/dispbbs_2_14995.html"
-					accessdate="2014/2/1 11:19" title="寿星万年历5.05(测试版) [中华农历论坛]">许剑伟(2011
-						v5.05)寿星天文历</a></td>
+					accessdate="2014/2/1 11:19" title="寿星万年历5.08(测试版) [中华农历论坛]">许剑伟(2018/11/16
+						v5.09)寿星天文历</a></td>
 				<td><em><s>處理中</s>現暫緩處理，待有機會取得可靠的朔閏表或日與日間對照表後再開工。</em><br />寿星天文历於
 					721 BCE 起的數據已與<span class="proper_noun">张培瑜</span> 1997年第二版<span
 					class="creation_title">三千五百年历日天象</span>核對。</td>
@@ -850,11 +862,13 @@ div.box {
 				<td>共和元年 841–1 BCE 之中曆</td>
 				<td>饶尚宽(2006/3)<span class="creation_title">春秋战国秦汉朔闰表（公元前722年–公元220年）</span><br />
 				</td>
-				<td>周朝諸侯國年表主要參考 Wikipedia 相關頁面。共和元年之前恐僅能獲得大概年分。 <a
+				<td>周朝諸侯國年表主要參考 Wikipedia 相關頁面。共和元年之前恐僅能獲得大概年分。<br /> <a
 					href="https://ytliu0.github.io/ChineseCalendar/index_chinese.html"
 					accessdate="2019/7/6 9:5">公曆和農曆日期對照(公元前722年—公元2200年)</a>算出了戰國時期的<a
 					href="https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%85%AD%E6%AD%B7"
-					accessdate="2019/7/6 17:9" title="古六歷">古六曆</a>曆譜。待有時間後再開工。
+					accessdate="2019/7/6 17:9" title="古六歷">古六曆</a>曆譜。本工具亦<a
+					href="https://github.com/kanasimi/CeJS/blob/master/data/date/calendar.js"
+					accessdate="2019/7/12 6:9" title="data/date/calendar.js">還原了古六曆</a>，納入為可選欄位之一。
 					<hr /> <em><s>處理中</s>現暫緩處理，待有機會取得可靠的朔閏表或日與日間對照表後再開工。</em><br />未以寿星天文历（<span
 					class="creation_title">三千五百年历日天象</span>）為準。<span
 					class="proper_noun">张培瑜</span><span class="creation_title">三千五百年历日天象</span>與董作賓(1960)<span
@@ -884,7 +898,7 @@ div.box {
 				<td><em>原作中，部分資料似乎需要修正。</em>請參照<a
 					href="https://docs.google.com/file/d/0B3Mb73DFKnSFUW5vbG1jSE8zSU0/edit?pli=1"
 					accessdate="2014/2/3 18:36"
-					title="201402.春秋 note.txt - Google 雲端硬碟">轉換記錄</a>。<br />此時期建正尚未明確（<span
+					title="201402.春秋 note.txt - Google 雲端硬碟">轉換記錄</a>。<br />此時期魯國建正尚未固定（<span
 					class="creation_title">春秋时期鲁国历法研究</span> p63–73），因此<em>所列出的月干支僅供參考</em>。</td>
 			</tr>
 			<tr>
@@ -1658,11 +1672,21 @@ Jews, however, reckon the start of each new Seleucid year with the lunar month T
 
 	<div id="comments">
 		<p>
+			本函式庫為 <a rel="nofollow"
+				href="https://github.com/kanasimi/CeJS/blob/master/data/date/era.js">CeJS
+				日期轉換</a>計畫的一部分。若有任何建議以及疑問、錯誤回報等，請移步 <a
+				href="https://github.com/kanasimi/CeJS/issues">CeJS issues @ <img
+				src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Font_Awesome_5_brands_github.svg/20px-Font_Awesome_5_brands_github.svg.png"
+				alt="GitHub" class="inline" />GitHub
+			</a>。
+		</p>
+		<p style="display: none;">
 			<a rel="nofollow" href="http://services.nexodyne.com/email/"
 				title="✉ email / contact address">📧<img
 				src="http://services.nexodyne.com/email/icon/94fLdogG3w%3D%3D/xi8K%2Btk%3D/R01haWw%3D/0/image.png" /></a>
 			（請手動繕打電子郵件位址）
 		</p>
+
 		<div class="g-comments"
 			data-href="http://lyrics.meicho.com.tw/lib/JS/_test%20suite/era.htm"
 			data-width="800" data-first_party_property="BLOGGER"
