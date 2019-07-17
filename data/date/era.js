@@ -185,6 +185,18 @@ function module_code(library_namespace) {
 		return new RegExp(pattern_source, flag || '');
 	}
 
+	function to_list(string) {
+		if (typeof string === 'string') {
+			if (string.includes('|'))
+				string = string.split('|');
+			else if (string.includes(','))
+				string = string.split(',');
+			else
+				string = string.chars('');
+		}
+		return string;
+	}
+
 	var is_Date = library_namespace.is_Date,
 
 	/**
@@ -385,11 +397,13 @@ function module_code(library_namespace) {
 	日_SOURCE = /\s*初?(\d{1,2}|數{1,3}|[^\s日朔晦望]{1,5})日?/.source,
 
 	// 四季, 四時
-	季_LIST = '春夏秋冬', 季_Unicode = '🌱☀🍂⛄',
+	季_LIST = to_list('春夏秋冬'),
+	// ⛱️,☀️
+	季_Unicode = to_list('🌱,😎,🍂,⛄'),
 	// 季名稱。e.g., 春正月
 	季_SOURCE = '[' + 季_LIST + ']?王?',
 
-	孟仲季_LIST = '孟仲季'.split(''),
+	孟仲季_LIST = to_list('孟仲季'),
 
 	// see: numeralize_time()
 	時刻_PATTERN = generate_pattern(
@@ -471,7 +485,7 @@ function module_code(library_namespace) {
 		傳說 : '傳說時代'
 	},
 
-	主要索引名稱 = '紀年,君主,朝代,國家'.split(','),
+	主要索引名稱 = to_list('紀年,君主,朝代,國家'),
 
 	// 配合 parse_era() 與 get_next_era()。
 	// 因為須從範圍小的開始搜尋，因此範圍小的得排前面！
@@ -593,35 +607,35 @@ function module_code(library_namespace) {
 
 	// 十二生肖，或屬相。
 	// Chinese Zodiac
-	十二生肖_LIST = '鼠牛虎兔龍蛇馬羊猴雞狗豬'.split(''),
+	十二生肖_LIST = to_list('鼠牛虎兔龍蛇馬羊猴雞狗豬'),
 	// Chinese Zodiac in Unicode, 表情符號/圖畫文字/象形字
-	十二生肖圖像文字_LIST = '🐁🐄🐅🐇🐉🐍🐎🐑🐒🐓🐕🐖'.chars(''),
+	十二生肖圖像文字_LIST = to_list('🐁🐄🐅🐇🐉🐍🐎🐑🐒🐓🐕🐖'),
 	// 陰陽五行
 	// The Wu Xing, (五行 wŭ xíng) also known as the Five
 	// Elements, Five
 	// Phases, the Five Agents, the Five Movements, Five
 	// Processes, and
 	// the Five Steps/Stages
-	陰陽五行_LIST = '木火土金水'.split(''),
+	陰陽五行_LIST = to_list('木火土金水'),
 
 	// @see https://zh.wikipedia.org/wiki/%E5%8D%81%E4%BA%8C%E5%BE%8B
 	// 十二月律
 	// 黃鐘之月:十一月子月
 	// 蕤賓 or 蕤賔 http://sidneyluo.net/a/a05/016.htm 晉書 卷十六 ‧ 志第六 律歷上
-	月律_LIST = '太簇,夾鐘,姑洗,仲呂,蕤賓,林鐘,夷則,南呂,無射,應鐘,黃鐘,大呂'.split(','),
+	月律_LIST = to_list('太簇,夾鐘,姑洗,仲呂,蕤賓,林鐘,夷則,南呂,無射,應鐘,黃鐘,大呂'),
 
 	// 各月の別名, 日本月名
 	// https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D
-	月の別名_LIST = '睦月,如月,弥生,卯月,皐月,水無月,文月,葉月,長月,神無月,霜月,師走'.split(','),
+	月の別名_LIST = to_list('睦月,如月,弥生,卯月,皐月,水無月,文月,葉月,長月,神無月,霜月,師走'),
 	// '大安赤口先勝友引先負仏滅'.match(/../g)
-	六曜_LIST = '大安,赤口,先勝,友引,先負,仏滅'.split(','),
+	六曜_LIST = to_list('大安,赤口,先勝,友引,先負,仏滅'),
 	// 七曜, 曜日. ㈪-㈰: ㈰㈪㈫㈬㈭㈮㈯. ㊊-㊐: ㊐㊊㊋㊌㊍㊎㊏
-	七曜_LIST = '日月火水木金土'.split(''),
+	七曜_LIST = to_list('日月火水木金土'),
 	// "十二值位星"（十二值:建除十二神,十二值位:十二建星） @ 「通勝」或農民曆
 	// 建、除、滿、平、定、執、破、危、成、收、開、閉。
 	// http://jerry100630902.pixnet.net/blog/post/333011570-%E8%AA%8D%E8%AD%98%E4%BD%A0%E7%9A%84%E5%A2%83%E7%95%8C~-%E9%99%BD%E6%9B%86%E3%80%81%E9%99%B0%E6%9B%86%E3%80%81%E9%99%B0%E9%99%BD%E5%90%88%E6%9B%86---%E7%AF%80%E6%B0%A3-
 	// 十二建星每月兩「建」，即正月建寅、二月建卯、三月建辰……，依此類推。正月為寅月，所以六寅日（甲寅、丙寅、戊寅、庚寅、壬寅）中必須有兩個寅日和「建」遇到一起；二月為卯月，所以六卯日（乙卯、丁卯、己卯、辛卯、癸卯）中必須有兩個卯日和「建」遇到一起，否則就不對。逢節（立春、驚蜇、清明、立夏、芒種、小暑、立秋、白魯、寒露、立冬、大雪、小寒）兩個建星相重，這樣才能保證本月第一個與月支相同之日與「建」相遇。
-	十二直_LIST = '建除満平定執破危成納開閉'.split(''),
+	十二直_LIST = to_list('建除満平定執破危成納開閉'),
 	// "廿八星宿" @ 農民曆: 東青龍7北玄武7西白虎7南朱雀7
 	// It will be splitted later.
 	// jp:角亢氐房心尾箕斗牛女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫
@@ -633,25 +647,23 @@ function module_code(library_namespace) {
 	二十七宿_LIST = 二十八宿_LIST.replace(/牛/, ''),
 	// 旧暦（太陽太陰暦）における月日がわかれば、自動的に二十七宿が決定される。
 	// 各月の朔日の宿
-	二十七宿_offset = '室奎胃畢參鬼張角氐心斗虛'.split(''),
+	二十七宿_offset = to_list('室奎胃畢參鬼張角氐心斗虛'),
 	// 六十甲子納音 / 納音五行
 	// 《三命通會》《論納音取象》
 	// http://ctext.org/wiki.pl?if=gb&chapter=212352
-	納音_LIST = ('海中,爐中,大林,路旁,劍鋒,山頭,澗下,城頭,白蠟,楊柳,井泉,屋上,霹靂,松柏,長流,'
+	納音_LIST = to_list('海中,爐中,大林,路旁,劍鋒,山頭,澗下,城頭,白蠟,楊柳,井泉,屋上,霹靂,松柏,長流,'
 	// 0 – 59 干支序轉納音: 納音_LIST[index / 2 | 0]; '/2': 0,1→0; 2,3→1; ...
-	+ '砂中,山下,平地,壁上,金泊,覆燈,天河,大驛,釵釧,桑柘,大溪,沙中,天上,石榴,大海').split(','),
+	+ '砂中,山下,平地,壁上,金泊,覆燈,天河,大驛,釵釧,桑柘,大溪,沙中,天上,石榴,大海'),
 	// It will be splitted later.
 	九星_LIST = '一白水星,二黑土星,三碧木星,四綠木星,五黃土星,六白金星,七赤金星,八白土星,九紫火星',
 	// '一白水星,二黒土星,三碧木星,四緑木星,五黄土星,六白金星,七赤金星,八白土星,九紫火星'
-	九星_JP_LIST = 九星_LIST.replace(/黑/, '黒').replace(/綠/, '緑').replace(/黃/, '黄')
-			.split(',');
+	九星_JP_LIST = to_list(九星_LIST.replace(/黑/, '黒').replace(/綠/, '緑').replace(
+			/黃/, '黄'));
 
 	// ---------------------------------------------------------------------//
 	// 初始調整並規範基本常數。
 
-	季_LIST = 季_LIST.split('');
-	季_Unicode = 季_Unicode.chars('');
-	九星_LIST = 九星_LIST.split(',');
+	九星_LIST = to_list(九星_LIST);
 
 	(function() {
 		var a = [ 2, 1 ];
@@ -676,8 +688,8 @@ function module_code(library_namespace) {
 
 		Object.seal(CE_REFORM_YEAR_DATA);
 
-		二十八宿_LIST = 二十八宿_LIST.split('');
-		'蛟龍貉兔狐虎豹獬牛蝠鼠燕豬貐狼狗雉雞烏猴猿犴羊獐馬鹿蛇蚓'.split('')
+		二十八宿_LIST = to_list(二十八宿_LIST);
+		to_list('蛟龍貉兔狐虎豹獬牛蝠鼠燕豬貐狼狗雉雞烏猴猿犴羊獐馬鹿蛇蚓')
 		// https://zh.wikisource.org/wiki/演禽通纂_(四庫全書本)/全覽
 		// 角木蛟〈蛇父雉母細頸上白嬰四脚〉亢金龍 氐土狢
 		// 房日兎 心月狐 尾火虎〈為暗禽〉
@@ -703,7 +715,7 @@ function module_code(library_namespace) {
 			二十七宿_offset.push(二十七宿_LIST.indexOf(first) - START_DATE);
 		});
 
-		二十七宿_LIST = 二十七宿_LIST.split('');
+		二十七宿_LIST = to_list(二十七宿_LIST);
 
 		// 為納音配上五行。
 		if (false) {
@@ -1432,7 +1444,7 @@ function module_code(library_namespace) {
 					initial_month = null;
 				}
 			}
-			year_data = year_data.split('');
+			year_data = to_list(year_data);
 
 			year_data.forEach(function(month_days) {
 				year_data_Array.push(
@@ -2507,8 +2519,8 @@ function module_code(library_namespace) {
 						calendar_data[NAME_KEY] = [];
 
 						// 該 copy 的其他紀年屬性全 copy 過來。
-						library_namespace.set_method(this, era, '歲首序|閏月名'
-								.split('|'));
+						library_namespace.set_method(this, era,
+								to_list('歲首序|閏月名'));
 
 						// 複製首年之 START_DATE_KEY。
 						tmp = era.日名(date_index, 月序, 年序, true);
@@ -3847,13 +3859,17 @@ function module_code(library_namespace) {
 	note_五行.地支_mapper = [ 8, 5, 0, 1, 4, 3, 2, 5, 6, 7, 4, 9 ];
 
 	function note_繞迥(date) {
-		var 生肖 = note_生肖(date);
-		return '第' + library_namespace.to_Chinese_numeral(
+		var 生肖 = note_生肖(date),
 		// 第一繞迥(rabqung)自公元1027年開始算起
 		// 每60年一繞迥，library_namespace.SEXAGENARY_CYCLE_LENGTH
-		Math.floor((date.getFullYear() - (1027 - 60)) / 60)) + '繞迥'
+		year_serial = date.getFullYear() - (1027 - 60);
+		return '第' + library_namespace.to_Chinese_numeral(
+		// 勝生周 丁卯周
+		Math.floor(year_serial / 60)) + '繞迥'
 		//
-		+ (生肖 ? ' ' + note_五行(date).replace(/金$/, '鐵') + 生肖 : '');
+		+ (生肖 ? ' ' + ((year_serial % 60) + 1)
+		//
+		+ note_五行(date).replace(/金$/, '鐵') + 生肖 : '');
 	}
 
 	function note_納音(date, type) {
@@ -3952,9 +3968,9 @@ function module_code(library_namespace) {
 		return '';
 
 		index = [];
-		library_namespace.BRANCH_LIST
+		to_list(library_namespace.BRANCH_LIST)
 		// note: 示例如何計算出各月 index。
-		.split('').forEach(function(s) {
+		.forEach(function(s) {
 			index.push(library_namespace.stem_branch_index(s));
 		});
 		[ 1, 7, 2, 8, 3, 9, 4, 10, 5, 11, 6, 0 ];
@@ -4374,8 +4390,8 @@ function module_code(library_namespace) {
 		// 預設會 copy 的紀年曆注。
 		// "精"會特別處理。
 		// 據: 根據/出典/原始參考文獻/資料引用來源/典拠。
-		copy_attributes : '據,準,疑,傳說,曆法,君主名,表字,君主號,諱,諡,廟號,生,卒,君主性別,在位,年號'
-				.split(','),
+		copy_attributes : to_list('據,準,疑,傳說,曆法,'
+				+ '君主名,表字,君主號,諱,諡,廟號,生,卒,君主性別,在位,年號'),
 		// 曆注, note
 		// 減輕負擔:要這些曆注的自己算。
 		notes : {
@@ -4870,11 +4886,10 @@ function module_code(library_namespace) {
 
 								// 將元年前面不足的填滿。
 								// 為了增高壓縮率，對元年即使給了整年的資料，也僅取從指定之日期開始之資料。
-								month_data = new Array(
+								month_data = to_list(new Array(
 								// reset
 								month_now = +month_name[2]
-										+ (month_name[1] ? 1 : 0)).join('0')
-										.split('');
+										+ (month_name[1] ? 1 : 0)).join('0'));
 							}
 
 							// 處理簡略表示法: '閏=\d+'
@@ -4982,8 +4997,8 @@ function module_code(library_namespace) {
 					// padding
 					Array_push(
 					//
-					month_data, new Array(j + 1 - month_data.length).join(0)
-							.split(''));
+					month_data, to_list(new Array(j + 1 - month_data.length)
+							.join(0)));
 				} else if (month_data.length > j) {
 					library_namespace.warn('pack_era: 紀年 [' + 紀年名稱 + '] '
 							+ year_now + '年：月分資料過長！ (' + month_data.length
@@ -7308,7 +7323,7 @@ function module_code(library_namespace) {
 
 	// 預設會 copy 的 period 屬性。
 	// 生卒年月日 Date of Birth and Death, lifetime.
-	get_periods.copy_attributes = '生,卒'.split(',');
+	get_periods.copy_attributes = to_list('生,卒');
 
 	/**
 	 * 取得指定紀年之文字式曆譜:年曆,朔閏表,曆日譜。
@@ -7855,7 +7870,12 @@ function module_code(library_namespace) {
 				era_list = null;
 			}
 
-			if (Array.isArray((era = date.shift()).name)) {
+			era = date.shift();
+			if (!era) {
+				// e.g., 昭宗永曆　注
+				return;
+			}
+			if (Array.isArray(era.name)) {
 				// 當有多個可能的紀年名稱時，僅取紀年名，保留最大可能性。
 				era = era_list ? era.name[0] : era.toString();
 			}
