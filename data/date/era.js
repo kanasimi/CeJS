@@ -6409,6 +6409,11 @@ function module_code(library_namespace) {
 						月 = 年;
 						年 = null;
 						日 = matched[1];
+						if (tmp[1] === '閏') {
+							// e.g., tmp=[閏六月,閏,六,,,月]
+							月 = tmp[1] + 月;
+							tmp[1] = '';
+						}
 					} else if (tmp[5].charAt(0) === '日'
 					// e.g., '一日'
 					// 僅輸入單一干支，當作日干支而非年干支。
@@ -7844,14 +7849,20 @@ function module_code(library_namespace) {
 				if (previous_date || get_previous_date()) {
 					// console.log(previous_date);
 					// console.log(era);
-					date = to_era_Date(era, {
+					era_list = to_era_Date(era, {
 						parse_only : true,
 						base : to_era_Date(previous_date, {
 							date_only : true
 						})
 					});
-					// console.log(date);
-					date.shift();
+					// console.log(era_list);
+					era_list.shift();
+					if (era_list[0] && era_list[1]) {
+						// 確定可以找到時，才採用以{Date}為準的日期。
+						date = era_list;
+					} else {
+						// e.g., "永曆二年" + "閏六月"
+					}
 					// assert: 必然會選出最接近的一個紀年。
 					era_list = null;
 
@@ -7872,7 +7883,7 @@ function module_code(library_namespace) {
 
 			era = date.shift();
 			if (!era) {
-				// e.g., 昭宗永曆　注
+				// e.g., 昭宗永曆 注
 				return;
 			}
 			if (Array.isArray(era.name)) {
