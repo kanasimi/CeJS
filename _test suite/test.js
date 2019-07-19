@@ -492,6 +492,19 @@ function test_native() {
 	]);
 
 	error_count += CeL.test('data.native misc', function(assert) {
+		assert([ 49, (49.4).to_fixed(0) ], 'to_fixed() #1');
+		assert([ 50, (49.5).to_fixed(0) ], 'to_fixed() #2');
+		assert([ 49.5, (49.5).to_fixed(1) ], 'to_fixed() #3');
+		assert([ 49.6, (49.58).to_fixed(1) ], 'to_fixed() #4');
+		assert([ 49, (49).to_fixed(3) ], 'to_fixed() #5');
+		assert([ 49.7, (49.685).to_fixed(1) ], 'to_fixed() #6');
+		assert([ 0.3, (0.2+0.1).to_fixed(3) ], 'to_fixed() #7');
+		assert([ 0.3, (0.2+0.1).to_fixed() ], 'to_fixed() #8');
+		assert([ 0.667, (2/3).to_fixed(3) ], 'to_fixed() #9');
+		// or using +CeL.math.normalize_mixed_fraction(3*1.6)
+		assert([ 4.8, (3*1.6).to_fixed() ], 'to_fixed() #10');
+		assert([ 0.8, (2.4/3).to_fixed() ], 'to_fixed() #11');
+
 		assert([ 'Abc Def', 'abc def'.toTitleCase() ], 'toTitleCase() #1');
 		assert([ 'Abc DefG', 'abc defG'.toTitleCase() ], 'toTitleCase() #2');
 		assert([ 'Abc Defg', 'abc defG'.toTitleCase(true) ], 'toTitleCase() #3');
@@ -1015,10 +1028,22 @@ function test_math() {
 		//CeL.log(a+'\n'+a[0]/a[1]+'\n'+Math.SQRT2+'\n'+(Math.SQRT2-a[0]/a[1])+'\n'+CeL.data.math.mutual_division(a[0],a[1]));
 		assert([a[0]/a[1], Math.SQRT2], { name : '取得連分數序列的數值', error_rate : Number.EPSILON });
 
-		assert([CeL.data.math.GCD(5583697894,136671782),118126],'GCD type 1: input number sequence');
-		assert([CeL.data.math.GCD([342*1, 563*1, 3452*1, 5333*1]),1],'GCD type 2: input Array');
-		var v=5235;
-		assert([CeL.data.math.GCD([342*v, 563*v, 3452*v, 5333*v]),v],'GCD type 2: input Array');
+		assert([118126,CeL.data.math.GCD(5583697894,136671782)],'GCD type 1: input number sequence');
+		assert([1,CeL.data.math.GCD([342*1, 563*1, 3452*1, 5333*1])],'GCD type 2: input Array #1');
+		var v = 5235;
+		assert([v,CeL.data.math.GCD([342*v, 563*v, 3452*v, 5333*v])],'GCD type 2: input Array #2');
+		if (CeL.env.has_bigint) {
+			v = 34*117239;
+			// 這邊的 CeL.GCD 等於這個 CeL.data.math.integer.GCD
+			assert([v,CeL.data.math.GCD(BigInt(v)*BigInt('46548941561489489'),-BigInt(v)*BigInt('69585986564567654345'),v*15348347,-v*153786453)],'GCD BigInt #1');
+			assert([34,CeL.data.math.GCD(BigInt(v)*BigInt('148949478945654'),-BigInt(v)*BigInt('35894156451561264'),v*235445,-v*15646,34*589415,BigInt(34)*BigInt('5690645679574563'))],'GCD BigInt #2');
+			v = BigInt(34*117239)*BigInt(568785);
+			assert([Number(v),CeL.data.math.GCD(BigInt(v)*BigInt('94784456789734875'),-BigInt(v)*BigInt('898567843574764865685'),v*BigInt(103884839),-v*BigInt(35419844547))],'GCD BigInt #3');
+			v = BigInt(34*117239)*BigInt('564614564568989123645647');
+			assert([v,CeL.data.math.GCD(BigInt(v)*BigInt('3490666734985649'),-BigInt(v)*BigInt('148346348367897457'),v*BigInt(64841),-v*BigInt(887413))],'GCD BigInt #4');
+			v = BigInt('906986785894578648748946545');
+			assert([v,CeL.data.math.GCD(v*BigInt(2),v*BigInt(3))],'GCD BigInt #5');
+		}
 
 		assert([CeL.data.math.LCM(69790*656890,95897*656890),4396335929230700],'LCM type 1: input number sequence');
 		assert([CeL.data.math.LCM([389,4342,5411,442]),155369538506],'LCM type 2: input Array');
@@ -1029,6 +1054,15 @@ function test_math() {
 		assert([CeL.data.math.LCM2([389,4342,5411,442]),155369538506],'LCM2 type 2: input Array');
 		var v=6893;
 		assert([CeL.data.math.LCM2([389*v,4342*v,5411*v,442*v]),1070962228921858],'LCM2 type 2: input Array');
+
+		assert(['3/8', CeL.normalize_mixed_fraction(.375).toString()],'normalize_mixed_fraction #1');
+		assert(['1+1/6', CeL.normalize_mixed_fraction([2-5/6]).toString()],'normalize_mixed_fraction #2');
+		assert(['-1-11/12', CeL.normalize_mixed_fraction([-2.75,5,6]).toString()],'normalize_mixed_fraction #3');
+		assert(['3+1/5', CeL.normalize_mixed_fraction([3.45,2,-8]).toString()],'normalize_mixed_fraction #4');
+		assert(['2', CeL.normalize_mixed_fraction([2.5-5/6,1,3]).toString()],'normalize_mixed_fraction #5');
+		assert([4.8, +CeL.normalize_mixed_fraction(3*1.6)],'normalize_mixed_fraction #6');
+		assert([0.8, +CeL.normalize_mixed_fraction(2.4/3)],'normalize_mixed_fraction #7');
+		assert([0.3, +CeL.normalize_mixed_fraction(0.2+0.1)],'normalize_mixed_fraction #8');
 
 		assert(Number.isSafeInteger(CeL.factorial(18)), 'Number.isSafeInteger()');
 		assert([CeL.data.math.factorial(18), 6402373705728000], 'factorial');
