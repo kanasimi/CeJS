@@ -18,6 +18,8 @@
 # finish_up(), .after_download_chapter(), .after_download_work()
 
 TODO:
+save cookie
+
 建造可以自動生成index/說明的工具。
 	自動判別網址所需要使用的下載工具，輸入網址自動揀選所需的工具檔案。
 	從其他的資料來源網站尋找，以獲取作品以及章節的資訊。
@@ -47,6 +49,7 @@ parse 圖像。
  *      https://github.com/riderkick/FMD https://github.com/yuru-yuri/manga-dl
  *      https://github.com/Xonshiz/comic-dl
  *      https://github.com/wellwind/8ComicDownloaderElectron
+ *      https://github.com/inorichi/tachiyomi
  *      https://github.com/Arachnid-27/Cimoc
  *      https://github.com/qq573011406/KindleHelper
  *      https://github.com/InzGIBA/manga
@@ -119,9 +122,7 @@ function module_code(library_namespace) {
 	/** node.js file system module */
 	node_fs = library_namespace.platform.nodejs && require('fs'),
 	// @see CeL.application.net.wiki
-	PATTERN_non_CJK = /^[\u0000-\u2E7F]*$/i,
-	//
-	path_separator = library_namespace.env.path_separator;
+	PATTERN_non_CJK = /^[\u0000-\u2E7F]*$/i;
 
 	// --------------------------------------------------------------------------------------------
 
@@ -406,6 +407,7 @@ function module_code(library_namespace) {
 	}
 
 	// 檢核參數. normalize and setup value
+	// crawler.setup_value(key, value);
 	// return {String}has error
 	function setup_value(key, value) {
 		if (!key)
@@ -431,6 +433,20 @@ function module_code(library_namespace) {
 				T : [ 'Using proxy server: %1', value ]
 			});
 			this.get_URL_options.proxy = this[key] = value;
+			return;
+
+		case 'cookie':
+			// set-cookie, document.cookie
+			if (this.get_URL_options.agent) {
+				library_namespace.merge_cookie(this.get_URL_options.agent,
+						value);
+			} else if (this.get_URL_options.cookie) {
+				if (!/;\s*$/.test(this.get_URL_options.cookie))
+					this.get_URL_options.cookie += ';';
+				this.get_URL_options.cookie += value;
+			} else {
+				this.get_URL_options.cookie = value;
+			}
 			return;
 
 		case 'timeout':
@@ -487,9 +503,11 @@ function module_code(library_namespace) {
 		case 'main_directory':
 			if (!value || typeof value !== 'string')
 				return;
-			value = value.replace(/[\\\/]/g, path_separator)
+			value = value.replace(/[\\\/]/g,
+			// 正規化成當前作業系統使用的目錄分隔符號。
+			library_namespace.env.path_separator);
 			// main_directory 必須以 path separator 作結。
-			.replace(/[\\\/]*$/, path_separator);
+			value = library_namespace.append_path_separator(value);
 			break;
 		}
 
@@ -568,11 +586,11 @@ function module_code(library_namespace) {
 
 	// set download directory
 	function set_main_directory(main_directory) {
-		if (main_directory
-				&& (main_directory = main_directory.replace(/[\\\/]+$/, ''))) {
-			Work_crawler.prototype.main_directory = main_directory
-			// main_directory 必須以 path separator 作結。
-			+ path_separator;
+		main_directory = library_namespace
+		// main_directory 必須以 path separator 作結。
+		.append_path_separator(main_directory);
+		if (main_directory) {
+			Work_crawler.prototype.main_directory = main_directory;
 		}
 		return Work_crawler.prototype.main_directory;
 	}
@@ -653,7 +671,7 @@ function module_code(library_namespace) {
 		// 對於極少出現錯誤的網站，可以設定一個比較小的數值，並且設定.allow_EOI_error=false。因為這類型的網站要不是無法獲取檔案，要不就是能夠獲取完整的檔案；要得到破損檔案，並且已通過EOI測試的機會比較少。
 		// MIN_LENGTH : 4e3,
 		// 對於有些圖片只有一條細橫桿的情況。
-		// MIN_LENGTH : 140,
+		// MIN_LENGTH : 130,
 
 		// {Natural}預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_SIZE : 200,
@@ -696,13 +714,14 @@ function module_code(library_namespace) {
 		// 加上有錯誤檔案之註記。
 		EOI_error_path : EOI_error_path,
 		// cache directory below this.main_directory.
-		// MUST append path_separator!
-		cache_directory_name : 'cache' + path_separator,
+		// 必須以 path separator 作結。
+		cache_directory_name : library_namespace.append_path_separator('cache'),
 		// archive directory below this.main_directory for ebook. 封存舊電子書用的目錄。
-		// MUST append path_separator!
-		archive_directory_name : 'archive' + path_separator,
-		// log directory below this.main_directory
-		log_directory_name : 'log' + path_separator,
+		// 必須以 path separator 作結。
+		archive_directory_name : library_namespace
+				.append_path_separator('archive'),
+		// log directory below this.main_directory 必須以 path separator 作結。
+		log_directory_name : library_namespace.append_path_separator('log'),
 		// 錯誤記錄檔案: 記錄無法下載的圖檔。
 		error_log_file : 'error_files.txt',
 		// 當從頭開始檢查時，會重新設定錯誤記錄檔案。此時會把舊的記錄檔改名成為這個檔案。
@@ -744,15 +763,25 @@ function module_code(library_namespace) {
 		onerror : function onerror(error, work_data) {
 			process.title = this.id + ': '
 					+ gettext('Error: %1', String(error));
+
+			// 直接丟出異常錯誤。
+			throw typeof error === 'object' ? error : new Error(this.id + ': '
+			// 先包裝成 new Error()，就不必 console.trace() 了。
+			+ (new Date).format('%Y/%m/%d %H:%M:%S') + ' ' + error);
+
+			// old method
 			if (typeof error === 'object') {
-				// 丟出異常錯誤。
+				// 直接丟出異常錯誤。
 				throw error;
 			} else {
-				console.trace(
-				// typeof error === 'object' ? JSON.stringify(error) :
-				error);
-				throw this.id + ': ' + (new Date).format('%Y/%m/%d %H:%M:%S')
-						+ ' ' + error;
+				if (false) {
+					// 會直接 throw new Error()，就不必 console.trace() 了。
+					console.trace(
+					// typeof error === 'object' ? JSON.stringify(error) :
+					error);
+				}
+				throw new Error(this.id + ': '
+						+ (new Date).format('%Y/%m/%d %H:%M:%S') + ' ' + error);
 			}
 			// return CeL.work_crawler.THROWED;
 			return Work_crawler.THROWED;
@@ -930,6 +959,8 @@ function module_code(library_namespace) {
 			// set download directory, fso:directory
 			main_directory : 'string:fso_directory',
 			user_agent : 'string',
+			// document.cookie: "key=value"
+			cookie : 'string',
 			one_by_one : 'boolean',
 			// 篩選想要下載的章節標題關鍵字。例如"單行本"。
 			chapter_filter : 'string',
@@ -2729,15 +2760,16 @@ function module_code(library_namespace) {
 					// 允許自訂作品目錄，將作品移至特殊目錄下。
 					// @see qq.js, qidian.js
 					// set base directory name below this.main_directory
-					work_base_directory += work_data.base_directory_name
-							+ path_separator;
+					work_base_directory += library_namespace
+							.append_path_separator(work_data.base_directory_name);
 					// 特殊目錄可能還不存在。
 					library_namespace.create_directory(work_base_directory);
 					if (_this.need_create_ebook)
 						work_data.ebook_directory = work_base_directory;
 				}
-				work_data.directory = work_base_directory
-						+ work_data.directory_name + path_separator;
+				work_data.directory = library_namespace
+						.append_path_separator(work_base_directory
+								+ work_data.directory_name);
 			}
 			work_data.data_file = work_data.directory
 					+ work_data.directory_name + '.json';
@@ -4143,7 +4175,7 @@ function module_code(library_namespace) {
 				return;
 			}
 			if (!chapter_URL && !_this.skip_get_chapter_page) {
-				throw new Error(gettext('無法取得 §%1 的網址。', chapter_NO));
+				throw gettext('無法取得 §%1 的網址。', chapter_NO);
 			}
 		} catch (e) {
 			// e.g., qq.js
@@ -4251,7 +4283,8 @@ function module_code(library_namespace) {
 							_this.check_images_archive(images_archive);
 					}
 				}
-				chapter_directory += path_separator;
+				chapter_directory = library_namespace
+						.append_path_separator(chapter_directory);
 
 				chapter_page_file_name = work_data.directory_name + '-'
 						+ chapter_label + '.' + Work_crawler.HTML_extension;
@@ -4574,7 +4607,8 @@ function module_code(library_namespace) {
 					}
 
 					if (!chapter_data) {
-						throw new Error('解析出空的頁面資訊！');
+						// 照理來說多少應該要有資訊，因此不應用 `this.skip_error` 跳過。
+						throw gettest('解析出空的頁面資訊！');
 					}
 
 				} catch (e) {
@@ -5094,7 +5128,6 @@ function module_code(library_namespace) {
 				console.log([ images_archive.fso_path_hash, acceptable_types,
 						image_archived,
 						images_archive.fso_path_hash[image_archived] ]);
-				throw 123;
 			}
 			image_downloaded = image_downloaded
 					|| images_archive.fso_path_hash[image_archived]
@@ -5137,7 +5170,8 @@ function module_code(library_namespace) {
 			library_namespace.warn({
 				T : [ '必須先將URL編碼：%1', image_url ]
 			});
-			// image_url = encodeURI(image_url);
+			if (!image_url.includes('%'))
+				image_url = encodeURI(image_url);
 		}
 
 		if (!image_data.file_length) {
