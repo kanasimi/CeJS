@@ -108,7 +108,7 @@ function module_code(library_namespace) {
 				});
 			} else {
 				html.each_between(
-				// for dm5.js
+				// for dm5.js, 1kkk.js
 				'<li onclick="window.location.href=', '</li>',
 				/**
 				 * e.g., <code>
@@ -321,13 +321,40 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			// @see CeL.application.net.wiki
+			var PATTERN_non_CJK = /^[\u0000-\u2E7F]*$/i;
+
+			function normalize_URL(image_url) {
+				// console.log(image_url);
+				// 13 === ('http://n.'+'http').length
+				var index = image_url.indexOf('http://', 13)
+						|| image_url.indexOf('https://', 13);
+				if (index > 0) {
+					if (false) {
+						console.log(image_url + '\n→ '
+						// e.g., http://ikmhw.com/669/155853.html
+						+ image_url.slice(index));
+					}
+					image_url = image_url.slice(index);
+				}
+
+				if (!PATTERN_non_CJK.test(image_url)
+						&& !image_url.includes('%')) {
+					// e.g., http://ikmhw.com/669/155853.html
+					image_url = encodeURI(image_url);
+				}
+				return image_url;
+			}
+
 			var image_list = work_data.image_list[chapter_NO - 1]
-			//
+			// new Array(image_count)
 			= work_data.chapter_list[chapter_NO - 1].image_list = [
 			// 第一張圖片的網址在網頁中。
 			// <div class="comiclist">\n <div class="comicpage">\n <img
 			// src="..."
-			html.between(' class="comiclist"', '</div>').between(' src="', '"') ];
+			// e.g., https://www.tohomh.com/shijie/276.html
+			normalize_URL(html.between(' class="comiclist"', '</div>').between(
+					' src="', '"')) ];
 
 			html = html.match(
 			//
@@ -359,31 +386,64 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			library_namespace.run_serial(function(run_next, image_NO) {
+			// library_namespace.run_serial 在 ikmhw.js 太慢了。但一次呼叫太多行程，會造成無回應。
+			var iterator = image_count < 50 ? library_namespace.run_parallel
+					: library_namespace.run_serial;
+			if (iterator === library_namespace.run_parallel) {
+				// actually image_count - 1
+				process.stdout.write('Get ' + image_count
+						+ ' image data pages. '
+						+ _this.estimated_message(work_data, chapter_NO)
+						+ '...\r');
+			}
+			iterator(function(run_next, image_NO) {
 				// @see https://manhua.wzlzs.com/muban/mh/js/p.js?20181207
 				function add_image_data(XMLHttp) {
 					// console.log(XMLHttp.responseText);
-					var image_data;
+					var image_url;
 					try {
-						image_data
+						image_url
 						// {"IsError":false,"MessageStr":null,"Code":"https://mh2.ahjsny.com/upload/id/0001/0001.jpg"}
 						= encodeURI(JSON.parse(XMLHttp.responseText).Code);
+
 					} catch (e) {
 						// e.g., status 500
+						library_namespace.warn([
+						//
+						'pre_parse_chapter_data_API: ', {
+							T : [ 'Error code: %1', XMLHttp.responseText ]
+						} ]);
+
 						if (_this.skip_error) {
 							_this.onwarning(e);
 						} else {
 							_this.onerror(e);
 						}
 					}
-					image_list.push(image_data);
+
+					image_url = normalize_URL(image_url);
+					if (iterator === library_namespace.run_serial) {
+						// 兩者皆可。
+						// image_list.push(image_url);
+						image_list[image_NO - 1] = image_url;
+					} else {
+						// 警告: 採用非同步的方法，獲得網址的順序不一定。因此不能採用 .push()，而應採用 [index]
+						// 的方法來記錄。
+						// image_NO = index + 1, image_NO: 2–
+						image_list[image_NO - 1] = image_url;
+					}
 					run_next();
 				}
 
-				process.stdout.write('Get image data page of §' + chapter_NO
-						+ ': ' + image_NO + '/' + image_count + '...\r');
+				if (iterator === library_namespace.run_serial) {
+					process.stdout.write('Get image data page of §'
+							+ chapter_NO + ': ' + image_NO + '/' + image_count
+							+ '. '
+							+ _this.estimated_message(work_data, chapter_NO)
+							+ '...\r');
+				}
 
-				// TODO: Should use POST
+				// Should use POST?
 				_this.get_URL(base_URL + image_NO + '&tmp=' + Math.random(),
 						add_image_data);
 			}, image_count, config.iid, callback);
@@ -673,6 +733,7 @@ function module_code(library_namespace) {
 				})
 			};
 
+			// console.log(chapter_data);
 			return chapter_data;
 		},
 
@@ -731,7 +792,7 @@ function module_code(library_namespace) {
 		// dm5.js: for <b>漫画</b>
 		// 已被列为限制漫画，其中有部份章节可能含有暴力、血腥、色情或不当的语言等内容，不适合未成年观众，为保护未成年人，我们将对
 		// <b>漫画</b> 进行屏蔽。如果你法定年龄已超过18岁。 请点击此处继续阅读！
-		crawler.get_URL_options.cookie = 'isAdult=1';
+		crawler.setup_value('cookie', 'isAdult=1');
 
 		return crawler;
 	}
