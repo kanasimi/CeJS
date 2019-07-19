@@ -494,18 +494,32 @@ function module_code(library_namespace) {
 
 		// TODO: 約分here。
 
+		var using_bigint;
+
 		// {Integer}±whole ∈ ℤ
-		if (!Number.isInteger(whole)) {
+		if (typeof whole === 'number' && !Number.isInteger(whole)) {
+			// assert: whole is float
 			whole = _.to_rational_number(whole);
 			var LCM = _.LCM(denominator, whole[1]);
-			// TODO: convert all numbers to the same type.
+			if (typeof LCM === 'bigint') {
+				using_bigint = true;
+				// convert all numbers to the same type.
+				numerator = BigInt(numerator);
+				denominator = BigInt(denominator);
+				whole = whole.map(BigInt);
+			}
 			numerator = numerator
+					// (LCM / denominator) === GCD * whole[1]
 					* (LCM / denominator)
 					+ (whole[0] < 0 ? -(-whole[0] % whole[1]) : whole[0]
 							% whole[1]) * (LCM / whole[1]);
 			denominator = LCM;
-			whole = whole[0] < 0 ? -Math.floor(-whole[0] / whole[1]) : Math
-					.floor(whole[0] / whole[1]);
+			if (using_bigint) {
+				whole = whole[0] / whole[1];
+			} else {
+				whole = whole[0] < 0 ? -Math.floor(-whole[0] / whole[1]) : Math
+						.floor(whole[0] / whole[1]);
+			}
 		}
 		// TODO: convert all numbers to the same type.
 
@@ -523,16 +537,20 @@ function module_code(library_namespace) {
 		}
 
 		// 處理假分數。同時會處理絕對值為整數之問題。
-		if (Math.abs(numerator) >= denominator) {
-			whole += Math.floor(numerator / denominator);
+		if (Math.absolute(numerator) >= denominator) {
+			whole += using_bigint ? numerator / denominator : Math
+					.floor(numerator / denominator);
 			numerator %= denominator;
 		}
 		// 約分。
-		if (numerator === ABSORBING_ELEMENT) {
+		if (numerator == ABSORBING_ELEMENT) {
+			// normalize
 			denominator = MULTIPLICATIVE_IDENTITY;
 		} else {
 			var GCD = _.GCD(numerator, denominator);
 			if (GCD >= 2) {
+				if (using_bigint)
+					GCD = BigInt(GCD);
 				numerator /= GCD;
 				denominator /= GCD;
 			}
@@ -547,6 +565,9 @@ function module_code(library_namespace) {
 	}
 
 	function mixed_fraction_valueOf() {
+		if (!this[1])
+			return this[0];
+
 		return this[0] + this[1] / this[2];
 	}
 
@@ -569,7 +590,6 @@ function module_code(library_namespace) {
 	// cohandler(may convert to number)
 	function to_int_or_bigint(value, cohandler) {
 		var number;
-		// 這方法無法準確處理像 `1e38/7`, `10/7` 這樣的情況。
 		if (typeof value === 'bigint') {
 			number = Number(value);
 			if (Number.isSafeInteger(number)) {
@@ -580,9 +600,16 @@ function module_code(library_namespace) {
 				return value;
 			}
 		}
+
+		// 這方法無法準確處理像 `1e38/7`, `10/7` 這樣的情況。
 		if (typeof value === 'number') {
+			number = Math.round(value);
+			if (!Number.isSafeInteger(number)) {
+				throw new RangeError('Can not convert number ' + value
+						+ ' to safe integer!');
+			}
 			cohandler && cohandler(true);
-			return Math.round(value);
+			return Math.round(number);
 		}
 
 		number = parseInt(value);
@@ -590,6 +617,10 @@ function module_code(library_namespace) {
 			cohandler && cohandler(true);
 			return number;
 		}
+
+		if (!has_bigint)
+			throw new RangeError('Can not convert ' + number
+					+ ' to safe integer!');
 
 		cohandler && cohandler(false);
 		return BigInt(value);
@@ -743,18 +774,15 @@ function module_code(library_namespace) {
 					} else if (has_bigint) {
 						lcm = BigInt(lcm) * BigInt(number);
 					} else {
-						throw new RangeError('LCM is not SafeInteger!');
+						throw new RangeError('LCM is not safe integer!');
 					}
 				} else {
+					// assert: {BigInt}number or {BigInt}lcm
 					lcm = BigInt(lcm) * BigInt(number);
 				}
 			} else {
 				// assert: {BigInt}number, {Number}gcd
-				number /= BigInt(gcd);
-				if (typeof number !== typeof lcm) {
-					lcm = BigInt(lcm);
-				}
-				lcm *= number;
+				lcm = BigInt(lcm) * (number / BigInt(gcd));
 			}
 		}
 		return lcm;
@@ -896,7 +924,10 @@ function module_code(library_namespace) {
 		var remainder, quotient, using_g1 = false, using_bigint,
 		// 前一group [dividend 應乘的倍數, divisor 應乘的倍數]
 		m1g1 = 1, m2g1 = 0;
-		if (typeof n1 === 'bigint') {
+		if (typeof n1 === 'bigint' || typeof n2 === 'bigint') {
+			// convert all numbers to the same type.
+			n1 = BigInt(n1);
+			n2 = BigInt(n2);
 			m1g1 = BigInt(m1g1);
 			m2g1 = BigInt(m2g1);
 			using_bigint = true;
@@ -966,7 +997,7 @@ function module_code(library_namespace) {
 
 		dividend = (dividend - remainder) / divisor;
 		if (typeof dividend === 'number') {
-			Math.round(dividend);
+			dividend = Math.round(dividend);
 		} else {
 			// assert: typeof dividend === 'bigint'
 		}
