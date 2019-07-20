@@ -475,7 +475,7 @@ function module_code(library_namespace) {
 				byte = byte.charCodeAt(0);
 			}
 			if (typeof byte === 'number' && 0 <= byte && byte < 0x100
-					&& (byte | 0 === byte)) {
+					&& ((byte | 0) === byte)) {
 				return byte;
 			}
 			throw new Error('Invalid byte: [' + index + '] ' + byte);

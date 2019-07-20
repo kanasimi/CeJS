@@ -295,6 +295,8 @@ function module_code(library_namespace) {
 
 		// --------------------------------------------------------------------
 
+		parallel_limit : 200,
+
 		pre_parse_chapter_data_API
 		// 執行在解析章節資料 process_chapter_data() 之前的作業 (async)。
 		// 必須自行保證執行 callback()，不丟出異常、中斷。
@@ -387,7 +389,7 @@ function module_code(library_namespace) {
 			}
 
 			// library_namespace.run_serial 在 ikmhw.js 太慢了。但一次呼叫太多行程，會造成無回應。
-			var iterator = image_count < 50 ? library_namespace.run_parallel
+			var iterator = image_count < this.parallel_limit ? library_namespace.run_parallel
 					: library_namespace.run_serial;
 			if (iterator === library_namespace.run_parallel) {
 				// actually image_count - 1

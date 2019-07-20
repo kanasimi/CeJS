@@ -113,6 +113,7 @@ function module_code(library_namespace) {
 				description : work_data.あらすじ
 			}, work_data);
 
+			// 此兩者為未分割的字串。
 			if (work_data.ジャンル)
 				work_data.genre = work_data.ジャンル.split(/\s+/);
 			if (work_data.キーワード) {
@@ -198,7 +199,7 @@ function module_code(library_namespace) {
 			if (index === NOT_FOUND
 			//
 			&& (index = text.indexOf('<div id="novel_honbun"')) === NOT_FOUND) {
-				throw new Error('text not found!');
+				throw new Error('無法解析章節資料並取得章節內容文字！');
 			}
 			text = text.slice(index);
 			text = text.between(null, {
@@ -234,7 +235,9 @@ function module_code(library_namespace) {
 							url : matched[1]
 						});
 					} else {
-						library_namespace.error('No image got: ' + url);
+						library_namespace.error({
+							T : [ '無法從章節內容中之連結抽取出圖片網址：%1', url ]
+						});
 					}
 				});
 			});
@@ -264,6 +267,16 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_syosetu_crawler(configuration) {
+		if (configuration && configuration.isR18) {
+			// 放在這邊，避免覆蓋原設定。
+			if (!configuration.novel_base_URL)
+				configuration.novel_base_URL = 'https://novel18.syosetu.com/';
+			configuration.search_URL = configuration.search_URL
+			// 解析 作品名稱 → 作品id get_work()
+			// search/search/search.php hyoka: 総合ポイントの高い順 総合評価の高い順
+			|| 'search/search/?order=hyoka&word=';
+		}
+
 		configuration = configuration ? Object.assign(Object.create(null),
 				default_configuration, configuration) : default_configuration;
 
@@ -273,15 +286,7 @@ function module_code(library_namespace) {
 		if (crawler.isR18) {
 			// for なろうの関連サイト/R-18サイト 年齢確認
 			// https://static.syosetu.com/sub/nl/view/js/event/redirect_ageauth.js
-			crawler.get_URL_options.cookie = 'over18=yes';
-
-			Object.assign(crawler, {
-				novel_base_URL : 'https://novel18.syosetu.com/',
-
-				// 解析 作品名稱 → 作品id get_work()
-				// search/search/search.php hyoka: 総合ポイントの高い順 総合評価の高い順
-				search_URL : 'search/search/?order=hyoka&word='
-			});
+			crawler.setup_value('cookie', 'over18=yes');
 		}
 
 		if (false) {

@@ -67,6 +67,8 @@ typeof CeL === 'function' && CeL.run({
 	// + '|application.net.Ajax.'
 	// write_file(), read_file()
 	+ '|application.storage.'
+	// gettext()
+	+ '|application.locale.gettext'
 	// for .to_file_name()
 	// + '|application.net.'
 	// for .gettext
@@ -84,6 +86,11 @@ typeof CeL === 'function' && CeL.run({
 });
 
 function module_code(library_namespace) {
+
+	// requiring
+	var
+	// library_namespace.locale.gettext
+	gettext = this.r('gettext');
 
 	var mimetype_filename = 'mimetype',
 	// http://www.idpf.org/epub/31/spec/epub-ocf.html#sec-container-metainf
@@ -122,7 +129,10 @@ function module_code(library_namespace) {
 			// parse container
 			var rootfile = this.container.container.rootfiles;
 			if (Array.isArray(rootfile)) {
-				library_namespace.error('本函式庫尚不支援多 rootfile (.opf)!');
+				library_namespace.error({
+					// <rootfile>
+					T : '本函式庫尚不支援多 rootfile (.opf)！'
+				});
 				rootfile = rootfile.filter(function(root_file) {
 					return /\.opf$/i.test(root_file['full-path']);
 				})[0] || rootfile[0];
@@ -193,13 +203,15 @@ function module_code(library_namespace) {
 			if (/^[a-z][a-z\d]*$/i.test(options.id_prefix)) {
 				this.id_prefix = options.id_prefix;
 			} else {
-				throw new Error('Invalid id prefix: ' + options.id_prefix);
+				throw new Error(gettext('Invalid id prefix: %1',
+						options.id_prefix));
 			}
 		}
 
 		if (!this.root_directory_name) {
-			library_namespace
-					.warn('The root directory is directly under the base directory!');
+			library_namespace.warn({
+				T : '未設定電子書章節目錄，將把所有章節內容直接放在電子書根目錄底下！'
+			});
 		}
 
 		var root_directory = base_directory
@@ -1348,11 +1360,9 @@ function module_code(library_namespace) {
 					if (item['media-type']
 					// 需要連接網站的重要原因之一是為了取得 media-type。
 					&& item['media-type'] !== XMLHttp.type) {
-						library_namespace
-								.error('add_chapter: 從網路得到的 media-type ['
-										+ XMLHttp.type
-										+ '] 與從副檔名所得到的 media-type ['
-										+ item['media-type'] + '] 不同!');
+						library_namespace.error('add_chapter: 獲取內容之媒體類型為['
+								+ XMLHttp.type + ']，與從副檔名所得到的媒體類型['
+								+ item['media-type'] + '] 不同！');
 					}
 					// 這邊已經不能用 item_data.type。
 					item['media-type'] = XMLHttp.type;

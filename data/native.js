@@ -2989,7 +2989,9 @@ function module_code(library_namespace) {
 					_index, list);
 		}
 
-		if (!parallelly) {
+		if (!parallelly
+		// parallelly 在這情況下不會執行 callback。
+		|| index > last) {
 			run_next();
 			return;
 		}
@@ -3003,9 +3005,10 @@ function module_code(library_namespace) {
 			};
 		}
 
-		function check_left() {
-			if (--left === 0) {
+		function check_left(exit_loop) {
+			if (--left === 0 || exit_loop) {
 				typeof callback === 'function' && callback.call(_this);
+				return;
 			}
 			library_namespace.debug(left + ' left...', 3,
 					'run_parallel_asynchronous');
@@ -3013,14 +3016,15 @@ function module_code(library_namespace) {
 
 		var left = 0;
 		for (; index <= last; index++, left++) {
-			setImmediate(for_each, [ check_left, list ? list[index] : index,
-					index, list, get_status ]);
+			setImmediate(for_each, check_left, list ? list[index] : index,
+					index, list, get_status);
 		}
 
 	}
 
 	_.run_serial = run_serial_asynchronous;
 
+	// 警告: 採用非同步的方法，獲得網址的順序不一定。因此不能採用 .push()，而應採用 [index] 的方法來記錄。
 	function run_parallel_asynchronous(for_each, last, index, callback, _this) {
 		run_serial_asynchronous(for_each, last, index, callback, _this, true);
 	}
@@ -4122,19 +4126,22 @@ function module_code(library_namespace) {
 		// alert : JSalert,
 
 		// https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate
+		// https://github.com/YuzuJS/setImmediate/blob/master/setImmediate.js
 		// TODO: window.postMessage can be used to trigger an immediate but
 		// yielding callback.
-		setImmediate : function setImmediate(callback, parameters) {
-			return setTimeout(typeof callback === 'function' ? function() {
-				if (parameters)
-					callback.apply(null, parameters);
-				else
-					// 因為 setTimeout(callback, 0) 可能傳入未規範的 arguments，因此不在外面處理
-					// callback。
+		setImmediate : function setImmediate(callback) {
+			var args = arguments;
+			// 因為 setTimeout(callback, 0) 可能使 callback 傳入未規範的 arguments，因此不在外面處理
+			// callback。
+			return setTimeout(function() {
+				if (args.length === 0) {
 					callback();
-			}
-			// 特殊功能... for {String}
-			: callback, 0);
+					return;
+				}
+				args = Array.from(args);
+				args.shift();
+				callback.apply(null, args);
+			}, 0);
 		},
 		clearImmediate : function clearImmediate(id) {
 			return clearTimeout(id);

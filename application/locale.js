@@ -375,11 +375,12 @@ function module_code(library_namespace) {
 		function convert(text_id, domain_specified) {
 			// 未設定個別 domain 者，將以此訊息(text_id)顯示。
 			// text_id 一般應採用原文(original)，或最常用語言；亦可以代碼表示，但須設定所有可能使用的語言。
+			// console.log(text_id);
 
 			// 注意: 在 text_id 與所屬 domain 之 text 相同的情況下，domain 中不會有這一筆記錄。
 			// 因此無法以 `text_id in domain` 來判別 fallback。
 			using_default = typeof text_id === 'function'
-					|| !(text_id in domain);
+					|| typeof text_id === 'object' || !(text_id in domain);
 			if (!using_default) {
 				text_id = domain[text_id];
 			}

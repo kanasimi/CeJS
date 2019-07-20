@@ -342,6 +342,9 @@ function module_code(library_namespace) {
 	 *            no year 0
 	 * 
 	 * @returns {Array} [ year, month, date ]
+	 * 
+	 * @see https://en.wikipedia.org/wiki/Julian_day#Julian_or_Gregorian_calendar_from_Julian_day_number
+	 *      algorithm by Richards
 	 */
 	Julian_day.to_YMD = function(JDN, type, no_year_0) {
 		var f = JDN + 1401 | 0;
@@ -2552,6 +2555,7 @@ function module_code(library_namespace) {
 	}
 
 	_.to_stem_branch = index_to_stem_branch;
+	// 可能回傳 0。若無法轉換，會回傳 undefined。
 	_.stem_branch_index = function(value, options) {
 		return is_Date(value) ? options && options.hour ? hour_stem_branch_index(value)
 				: date_stem_branch_index(value)
@@ -2678,7 +2682,7 @@ function module_code(library_namespace) {
 			if (options && options.月) {
 				diff = gettext('%1 Y %2 M', diff, Math.round(diff2));
 			} else {
-				// years
+				// years 近一年, 一年多
 				// SI symbol: a (for Latin annus)
 				diff = gettext('%1 Y', difference.to_fixed(to_fixed_digits));
 			}

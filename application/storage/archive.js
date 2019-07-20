@@ -152,7 +152,7 @@ function module_code(library_namespace) {
 		executable_file_path['7z'] = library_namespace
 				.run_JSctipt(
 						"var p7z_path='HKCU\\\\Software\\\\7-Zip\\\\Path';"
-								// use stdout
+								// use stdout. 64 bit first.
 								+ "console.log(add_quote(RegRead(p7z_path+64)||RegRead(p7z_path)));",
 						{
 							attach_library : true

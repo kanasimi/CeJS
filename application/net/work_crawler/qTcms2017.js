@@ -280,9 +280,7 @@ function module_code(library_namespace) {
 			// console.log(work_data.chapter_list);
 		},
 
-		parse_chapter_data : function(html, work_data
-		// , get_label, chapter_NO
-		) {
+		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
 			// modify from mh160.js
 
 			var chapter_data = html.between('qTcms_S_m_murl_e="', '"');
@@ -291,12 +289,14 @@ function module_code(library_namespace) {
 				chapter_data = atob(chapter_data).split("$qingtiandy$");
 			}
 			if (!chapter_data) {
-				CeL.log('無法解析資料！');
+				library_namespace.warn({
+					T : [ '無法解析《%1》§%2 之章節資料！', work_data.title, chapter_NO ]
+				});
 				return;
 			}
 			// console.log(JSON.stringify(chapter_data));
 			// console.log(chapter_data.length);
-			// CeL.set_debug(6);
+			// library_namespace.set_debug(6);
 
 			// 設定必要的屬性。
 			chapter_data = {

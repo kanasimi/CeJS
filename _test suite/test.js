@@ -3262,7 +3262,7 @@ function test_wiki() {
 			_finish_test(test_name);
 		});
 
-		_setup_test('wiki: CeL.wiki.data(basic)');
+		_setup_test('wiki: CeL.wiki.data(basic), wikidata_entity()');
 		CeL.wiki.data('宇宙', '形狀', function(data) {
 			var test_name = 'wiki: CeL.wiki.data(basic)';
 			assert([ '宇宙的形狀', data ], test_name);

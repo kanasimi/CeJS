@@ -244,8 +244,11 @@ function module_code(library_namespace) {
 				if (chapter_list.length > 1) {
 					// 轉成由舊至新之順序。
 					if (chapter_list.some_without_id) {
-						library_namespace.warn('有些篇章之URL檔名非數字: '
-								+ JSON.stringify(chapter_list.some_without_id));
+						library_namespace.warn({
+							T : [ '有些篇章之URL檔名非數字：%1',
+							//
+							JSON.stringify(chapter_list.some_without_id) ]
+						});
 						chapter_list.reverse();
 					} else {
 						// 按照章節添加時間排序。
@@ -344,8 +347,9 @@ function module_code(library_namespace) {
 			'<script type="text/javascript">window["\\x65\\x76\\x61\\x6c"]',
 					'</script>');
 			if (!chapter_data || !(chapter_data = decode(chapter_data))) {
-				library_namespace.warn(work_data.title + ' #' + chapter_NO
-						+ ': No valid chapter data got!');
+				library_namespace.warn({
+					T : [ '無法解析《%1》§%2 之章節資料！', work_data.title, chapter_NO ]
+				});
 				return;
 			}
 			chapter_data = Object.assign(

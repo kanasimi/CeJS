@@ -11906,7 +11906,8 @@ function module_code(library_namespace) {
 	 * arguments: Similar to wiki_API.edit<br />
 	 * wiki_API.upload(file_path, token, options, callback);
 	 * 
-	 * TODO: 檔案資訊 添加/編輯 說明 (Must be plain text. Can not use wikitext!)
+	 * TODO: https://commons.wikimedia.org/wiki/Commons:Structured_data<br />
+	 * 檔案資訊 添加/編輯 說明 (Must be plain text. Can not use wikitext!)
 	 * https://commons.wikimedia.org/w/api.php?action=help&modules=wbsetlabel
 	 * wikitext_to_plain_text(wikitext)
 	 * 
@@ -11973,8 +11974,7 @@ function module_code(library_namespace) {
 				permission : options.permission,
 				other_versions : options.other_versions
 						|| options['other versions'],
-				other_fields : options.other_fields
-						|| options['other fields']
+				other_fields : options.other_fields || options['other fields']
 			};
 			options.text = [ '== {{int:filedesc}} ==',
 			//
@@ -12926,7 +12926,8 @@ function module_code(library_namespace) {
 		if (user_name) {
 			wiki_API.user_name = user_name;
 		}
-		home_directory += library_namespace.env.path_separator;
+		home_directory = library_namespace
+				.append_path_separator(home_directory);
 	}
 
 	// setup SQL config language (and database/host).

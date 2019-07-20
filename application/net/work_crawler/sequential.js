@@ -60,16 +60,12 @@ function module_code(library_namespace) {
 				return work_information;
 		},
 
-		skip_get_work_page : true,
-		skip_get_chapter_page : true,
-		// 設定動態改變章節中的圖片數量。
-		dynamical_count_images : true,
-
 		// 取得作品的章節資料。 get_work_data()
 		work_URL : function(work_id) {
 			// 必須是圖片網址的起始部分。
 			return '' + work_id + '/';
 		},
+		skip_get_work_page : true,
 		// 解析出作品資料/作品詳情。
 		parse_work_data : function(html, get_label) {
 			// 先給一個空的初始化作品資料以便後續作業。
@@ -103,6 +99,7 @@ function module_code(library_namespace) {
 					+ (image_index + 1) + '.jpg';
 		},
 
+		skip_get_chapter_page : true,
 		// 解析出章節資料。
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
 			// 設定必要的屬性。
@@ -115,22 +112,27 @@ function module_code(library_namespace) {
 			return chapter_data;
 		},
 
+		// 設定動態改變章節中的圖片數量。
+		dynamical_count_images : true,
+
 		// 每個圖片下載結束都會執行一次。
 		after_get_image : function(image_list, work_data, chapter_NO) {
 			// console.log(image_list);
 			var latest_image_data = image_list[image_list.index];
 			// console.log(latest_image_data);
 			if (!latest_image_data.has_error) {
-				library_namespace.debug(work_data.id
-						+ ': 本章節上一張圖片下載成功。下載本章節下一幅圖片。', 3);
+				library_namespace.debug([ work_data.id + ': ', {
+					T : '本章節上一張圖片下載成功。下載本章節下一幅圖片。'
+				} ], 3);
 				image_list.push(this.get_image_url(work_data, chapter_NO,
 						image_list.length));
 				return;
 			}
 
 			if (image_list.length === 1) {
-				library_namespace.debug(work_data.id + ': 第一張圖就下載失敗了。結束下載本作品。',
-						3);
+				library_namespace.debug([ work_data.id + ': ', {
+					T : '第一張圖就下載失敗了。結束下載本作品。'
+				} ], 3);
 				return;
 			}
 

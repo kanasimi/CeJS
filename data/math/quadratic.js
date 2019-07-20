@@ -256,7 +256,7 @@ if (typeof CeL === 'function')
 			// TODO: https://www.alpertron.com.ar/METHODS.HTM Solve the equation: a x2 + b xy + c y2 + dx + ey + f = 0 圓錐曲線/二元二次方程
 			// [[en:Conic_section#General Cartesian form]]
 			function solve_Pell(d, n, limit, return_Integer) {
-				if (!(d >= 1) || !(d | 0 === d)) {
+				if (!(d >= 1) || !((d | 0) === d)) {
 					// 錯誤參數
 					throw 'Invalid parameter: ' + d;
 				}

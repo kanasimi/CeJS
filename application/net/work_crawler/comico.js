@@ -310,7 +310,7 @@ function module_code(library_namespace) {
 				skip_chapter = auto_use_ticket_notified ? true
 						// @see https://github.com/kanasimi/work_crawler
 						: {
-							T : '未設定讓本工具自動使用閱讀卷。若您並非使用安裝包，並想要讓本工具自動使用閱讀卷，請打開檔案總管，到安裝本工具的目錄下（若是您使用安裝包，就不能夠設定帳號密碼了。），在 work_crawler_loder.configuration.js 這個檔案中設定好帳號密碼資料，以及 "auto_use_ticket:true"。您可以參考 work_crawler_loder.js 這個檔案來做設定。'
+							T : '未設定讓本工具自動使用閱讀卷。若您並非使用安裝包，並想要讓本工具自動使用閱讀卷，請打開檔案總管，到安裝本工具的目錄下（若是您使用安裝包，就不能夠設定帳號密碼了。），在 work_crawler.configuration.js 這個檔案中設定好帳號密碼資料，以及 "auto_use_ticket:true"。您可以參考 work_crawler.default_configuration.js 這個檔案來做設定。'
 						};
 				auto_use_ticket_notified = true;
 			}
@@ -512,7 +512,7 @@ function module_code(library_namespace) {
 			return chapter_data;
 		},
 
-		// @see work_crawler_loder.js
+		// @see work_crawler_loader.js
 		after_download_list : function() {
 			// logout
 		}
@@ -539,14 +539,11 @@ function module_code(library_namespace) {
 		}
 
 		// for 年齡確認您是否已滿18歲？
-		crawler.get_URL_options.cookie = 'islt18age=' + Date.now();
+		crawler.setup_value('cookie', 'islt18age=' + Date.now());
 
-		var tls = require('tls');
 		// https://github.com/nodejs/node/issues/27384
 		// node.js v12 disable TLS v1.0 and v1.1 by default
-		tls.DEFAULT_MIN_VERSION = 'TLSv1';
-		// free
-		tls = null;
+		require('tls').DEFAULT_MIN_VERSION = 'TLSv1';
 
 		if (crawler.password && crawler.loginid) {
 			library_namespace.log([ (crawler.id || module_name) + ': ', {

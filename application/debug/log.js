@@ -1629,7 +1629,7 @@ function finish(name_space) {
 				if (!error_message) {
 					error_message = [ test_name,
 					// if fault, message: 失敗時所要呈現訊息。
-					CeL.to_SGR([ ' ', 'fg=red', 'failed', '-fg', ': ' ]) ];
+					CeL.to_SGR([ ' ', 'fg=red', 'failed:', '-fg;-bg', ' ' ]) ];
 					if (type) {
 						error_message.push('type of ' + quote(condition)
 								+ ' is not (' + type + ')');

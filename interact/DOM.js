@@ -1112,6 +1112,8 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// TODO: fire event
+
 		var text = element[p];
 		if (p === 'innerHTML') {
 			// 分斷行 2003/1/25 22:40
@@ -1285,10 +1287,10 @@ function module_code(library_namespace) {
 										: vl;
 						library_namespace.debug('set value [' + v + '].', 2,
 								'fill_form');
-						// n.value 必為 string，v 可能為數字，因此不用 ===。
+						// n.value 必為 string，v 可能為數字，因此不用 `===`。
 						if (n.checked !== (typeof v === 'boolean' ? v
 								: v == n.value)) {
-							// 有改變才 fire event.
+							// 有改變才 fire event。
 							event_sequence(n, !n.checked);
 						}
 					}

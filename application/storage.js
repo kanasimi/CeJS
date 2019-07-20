@@ -149,6 +149,7 @@ function module_code(library_namespace) {
 			}
 		};
 
+		// directory exists and is empty
 		_.directory_is_empty = function(directory_path, options) {
 			var fso_name_list = _.read_directory(directory_path, options);
 			return Array.isArray(fso_name_list) && fso_name_list.length === 0;
@@ -237,11 +238,22 @@ function module_code(library_namespace) {
 
 	var path_separator = library_namespace.env.path_separator;
 
-	// join path
+	// join path 自動加上最後的路徑分隔符號/目錄分隔符號。
 	function append_path_separator(directory_path, file_name) {
-		if (directory_path && !/[\\\/]$/.test(directory_path)) {
+		if (!directory_path) {
+			return directory_path;
+		}
+
+		// assert: typeof directory_path === 'string'
+
+		// 正規化成當前作業系統使用的路徑分隔符號。
+		if (false) {
+			directory_path = directory_path.replace(/[\\\/]/g, path_separator);
+		}
+
+		if (!/[\\\/]$/.test(directory_path)) {
 			directory_path +=
-			// 所添加的路徑分隔，以路徑本身的路徑分隔為主。
+			// 所添加的路徑分隔符號，以路徑本身的路徑分隔符號為主。
 			directory_path.includes('/') ? '/'
 			//
 			: directory_path.includes('\\')
@@ -249,7 +261,15 @@ function module_code(library_namespace) {
 			|| directory_path.endsWith(':') ? '\\'
 			//
 			: path_separator;
+
+		} else {
+			// 去除末尾太多個、不需要也不正規的路徑分隔符號。
+			directory_path = directory_path.replace(/[\\\/]{2,}$/, function(
+					path_separators) {
+				return path_separators[0];
+			});
 		}
+
 		// library_namespace.simplify_path()
 		return file_name ? directory_path + file_name : directory_path;
 	}

@@ -35,7 +35,10 @@ function initialization() {}
 ```
 
 ``` JavaScript
-CeL.run( 'module.name', function callback() { /* ... */ } );
+// CeL.run( 'module.name', function callback() { /* ... */ } );
+CeL.run([ 'data.math', 'application.debug.log' ], function() {
+	CeL.assert([ CeL.GCD(4, 6), 2 ]);
+});
 ```
 
 ## Node.js usage / node.js 運行方式
@@ -46,7 +49,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 不囉嗦，已經做過的步驟可以跳過：
 1. 請先安裝 [node.js](https://nodejs.org/) 與 [7-Zip](https://en.wikipedia.org/wiki/7-Zip)
 2. 下載 GitHub repository 安裝檔 [GitHub.updater.node.js](https://raw.githubusercontent.com/kanasimi/gh-updater/master/GitHub.updater.node.js)
-3. 在[命令行界面](https://zh.wikipedia.org/wiki/%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%95%8C%E9%9D%A2)下，進到 GitHub repository 安裝檔(<code>GitHub.updater.node.js</code>)所在的目錄，執行命令以下載 CeJS 程式庫：
+3. 在[命令行界面](https://zh.wikipedia.org/wiki/%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%95%8C%E9%9D%A2)下，進到 GitHub repository 安裝檔(`GitHub.updater.node.js`)所在的目錄，執行命令以下載 CeJS 程式庫：
 
    ``` sh
    node GitHub.updater.node.js
@@ -60,7 +63,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
    ``` JavaScript
    // or: require('./CeJS-master/_for include/node.loader.js');
    require('./_CeL.loader.nodejs.js');
-   var cejs = require("cejs")
+   var cejs = require("cejs");
    CeL.run([ 'data.math', 'application.debug.log' ]);
    CeL.assert([ CeL.GCD(4, 6), 2 ]);
    ```
@@ -77,7 +80,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
    ``` sh
    $ npm install cejs
    ```
-* 請注意：採用 <code>npm</code> 安裝的可能不是最新版，尚未加入最新功能。建議下載最新版本壓縮檔，解開後配置；而不是直接執行 <code>npm install</code> 安裝舊版的程式庫。
+* 請注意：採用 `npm` 安裝的可能不是最新版，尚未加入最新功能。建議下載最新版本壓縮檔，解開後配置；而不是直接執行 `npm install` 安裝舊版的程式庫。
 
 ### Installation via GitHub latest version 一般正常安裝方法
 鑒於更新頻繁，有些功能可能最新版本才具備；若是執行的程式採用了新功能，將會發生嚴重錯誤。此時您可直接到 GitHub 下載最新版本壓縮檔，解開後配置。
@@ -117,7 +120,7 @@ git clean -dfx
 #### To setup the loader as a split file:
 1. Copy the loader file, <code>[_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js)</code> to the target directory (e.g., the same as the script file).
 2. Create the repository_path_list_file, <code>[_repository_path_list.txt](https://github.com/kanasimi/CeJS/blob/master/_for%20include/_repository_path_list.sample.txt)</code> in the same directory.
-3. Set the path list to search the library base: Write to the repository_path_list_file (<code>_repository_path_list.txt</code>), one path per line.
+3. Set the path list to search the library base: Write to the repository_path_list_file (`_repository_path_list.txt`), one path per line.
 4. to use in a script file:
 
    ``` JavaScript

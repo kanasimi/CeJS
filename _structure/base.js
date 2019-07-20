@@ -1057,7 +1057,8 @@ function (global) {
 				platform.engine = tmp;
 		})();
 
-	// for node.js: .platform.browser, .platform.is_interactive will setup in _structure/module.js.
+	// for node.js: .platform.browser, .platform.is_interactive will setup in
+	// _structure/module.js.
 
 	_.platform = platform;
 
@@ -1578,13 +1579,21 @@ OS='UNIX'; // unknown
 			// TODO: handle exception
 		}
 
-		// RegExp lookbehind assertions from ECMA-262, 9th edition, ECMAScript
-		// 2018
+		// RegExp lookbehind assertions
+		// from ECMA-262, 9th edition, ECMAScript 2018
 		try {
 			env.has_RegExp_lookbehind = '$12.34'.match(new RegExp('(?<=\\D)\\d+'))[0] === '12'
 				// http://2ality.com/2017/05/regexp-lookbehind-assertions.html
 				&& 'a1ba2ba3b'.match(new RegExp('(?<=b)a.b', 'g')).join(',') === 'a2b,a3b'
 				&& '0b11b22b33b4'.match(new RegExp('(?<!1)b\\d', 'g')).join(',') === 'b1,b3,b4';
+		} catch (e) {
+			// TODO: handle exception
+		}
+
+		// BigInt
+		try {
+			env.has_bigint = typeof BigInt === 'function' && typeof BigInt(1) === 'bigint'
+				&& eval('999999n*8888888n*777777777n===6913572635062427358024n');
 		} catch (e) {
 			// TODO: handle exception
 		}

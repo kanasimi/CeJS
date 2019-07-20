@@ -175,8 +175,9 @@ function module_code(library_namespace) {
 			return value !== value;
 		},
 		// isFinite(null) === true
-		isFinite : function(value) {
-			return !isNaN(value) && value !== Infinity && value !== -Infinity;
+		isFinite : function isFinite(value) {
+			// https://tc39.es/ecma262/#sec-isfinite-number
+			return Number.isFinite(Number(value));
 		}
 	}, null);
 
@@ -821,15 +822,18 @@ function module_code(library_namespace) {
 	// 1. === 1.0
 
 	function ToNumber(value) {
+		// Number(value)
 		return +value;
 	}
 
-	// cf. Math.floor()
+	// cf. value | 0
 	/** <code>((Number.MAX_SAFE_INTEGER / 4) | 0) < 0, 0 < ((Number.MAX_SAFE_INTEGER / 5) | 0)</code> */
 	function ToInteger(value) {
 		// return value >> 0;
-		// http://wiki.ecmascript.org/doku.php?id=harmony:number.tointeger&s=number+tointeger
-		return (value = Number(value)) ? value | 0 : 0;
+		// https://tc39.es/ecma262/#sec-tointeger
+		value = Number(value);
+		return value > 0 ? Math.floor(value) : value < 0 ? -Math.floor(value)
+				: 0;
 	}
 
 	// Number.isNaN()
@@ -922,7 +926,10 @@ function module_code(library_namespace) {
 		 * cf. .is_digits()
 		 */
 		isInteger : function isInteger(number) {
-			return typeof number === 'number' && ToInteger(number) === number;
+			// https://tc39.es/ecma262/#sec-number.isinteger
+			return Number.isFinite(number)
+			// Math.floor(Infinity) === Infinity
+			&& ToInteger(number) === number;
 		},
 		parseFloat : parseFloat,
 		parseInt : parseInt,
@@ -930,8 +937,9 @@ function module_code(library_namespace) {
 		 * Number.isNaN()
 		 */
 		isNaN : is_NaN,
-		isFinite : function(value) {
-			return typeof value === 'number' && isFinite(value);
+		isFinite : function isFinite(value) {
+			return typeof value === 'number' && !isNaN(value)
+					&& value !== Infinity && value !== -Infinity;
 		}
 	});
 

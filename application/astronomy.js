@@ -5386,6 +5386,8 @@ function module_code(library_namespace) {
 	 * @see http://eco.mtk.nao.ac.jp/cgi-bin/koyomi/cande/phenom_phase.cgi
 	 * @see http://homepage3.nifty.com/ayumi_ho/moon1.htm
 	 * @see http://www2s.biglobe.ne.jp/~yoss/moon/moon.html
+	 * 
+	 * @deprecated
 	 */
 	function deprecated_accurate_lunar_phase
 	//
@@ -6594,7 +6596,7 @@ function module_code(library_namespace) {
 	// 地心直角黃道座標 = 天體S日心視黃道 - 地球S日心視黃道
 	// G地心視黃道: 球座標
 	// :: LEA406 進入點: 計算月亮位置(地心瞬時黃道坐標)
-	// (天體/行星: G地心視黃道:FK5? why here?) (FK5 2選1)
+	// (天體/行星: G地心視黃道: FK5? why here?) (FK5 2選1)
 	// (G地心視黃道: 修正月亮光行時及太陽光行差) (修正光行時及光行差 2選1)
 	// G地心視黃道: 修正地球章動 nutation。
 	//
@@ -6733,6 +6735,7 @@ function module_code(library_namespace) {
 		if (Object.defineProperty.not_native)
 			// e.g., IE8
 			return;
+
 		// type: to [ radians, radians, AU ]
 		Object.defineProperty(Coordinates.prototype, type, {
 			enumerable : true,

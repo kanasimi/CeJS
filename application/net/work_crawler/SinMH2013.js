@@ -251,8 +251,9 @@ function module_code(library_namespace) {
 				chapter_data = decode(chapter_data);
 			}
 			if (!chapter_data) {
-				library_namespace.warn(work_data.title + ' §' + chapter_NO
-						+ ': ' + 'No valid chapter data got!');
+				library_namespace.warn({
+					T : [ '無法解析《%1》§%2 之章節資料！', work_data.title, chapter_NO ]
+				});
 				return;
 			}
 			// console.log(chapter_data);

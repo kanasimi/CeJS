@@ -355,7 +355,7 @@ function module_code(library_namespace) {
 	}, BOM_list = Object.keys(BOM_to_encoding),
 	//
 	max_BOM_length = BOM_list.reduce(function(length, BOM) {
-		// assert: BOM.length / 2 | 0 === BOM.length / 2
+		// assert: (BOM.length / 2 | 0) === BOM.length / 2
 		return Math.max(length, Math.ceil(BOM.length / 2));
 	}, 0);
 
@@ -391,7 +391,7 @@ function module_code(library_namespace) {
 					if (!BOM.startsWith(BOM_key))
 						return true;
 					// 去掉 BOM
-					// assert: BOM.length / 2 | 0 === BOM.length / 2
+					// assert: (BOM.length / 2 | 0) === BOM.length / 2
 					buffer = buffer.slice(BOM_key.length / 2).toString(
 							BOM_to_encoding[BOM_key]);
 				})) {
@@ -624,6 +624,12 @@ function module_code(library_namespace) {
 		// CeL.env.argv: see module.js
 		process.argv.slice(2).forEach(function(arg) {
 			var matched = arg.match(/^(-{0,2})([^=]+?)(=(.*))?$/);
+			if (!matched) {
+				// e.g., "=..."
+				this[arg] = PATTERN_number_string.test(value) ? +value : value;
+				return;
+			}
+
 			if (matched[2].startsWith('-')) {
 				console.warn(
 				//

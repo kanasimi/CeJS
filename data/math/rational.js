@@ -18,6 +18,7 @@
 
 /*
 TODO:
+以 BigInt() 重寫。
 http://reference.wolfram.com/mathematica/ref/RootApproximant.html
 
 規格書:
@@ -74,6 +75,7 @@ if (typeof CeL === 'function')
 			// 為正規 radix。
 			valid_radix = Integer.valid_radix,
 			DEFAULT_BASE = Integer.DEFAULT_BASE
+
 			;
 
 			// ---------------------------------------------------------------------//
@@ -103,6 +105,7 @@ if (typeof CeL === 'function')
 			PATTERN_FRACTION = /([+\-]?)(?:(\d+)([ +\-]))?(\d+)\/(\d+)/,
 			//	[ full , sign, integer part 整數部分, fractional part 小數部分, repeating decimal 循環小數1, repeating decimal 循環小數2 ]
 			PATTERN_DECIMAL = /([+\-]?)(\d*)\.(\d*)(?:¯(\d+)|\((\d+)\))?/
+
 			;
 
 			// ---------------------------------------------------------------------//

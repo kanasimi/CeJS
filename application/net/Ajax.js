@@ -1869,10 +1869,10 @@ function module_code(library_namespace) {
 			&& !options.write_to && !options.write_to_directory) {
 				// 照理unregister()應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				unregister();
-				library_namespace.warn('got ['
+				library_namespace.warn('get_URL_node: got ['
 						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
 								: URL_to_fetch && URL_to_fetch.URL)
-						+ '], but there is no listener!', 1, 'get_URL_node');
+						+ '], but there is no listener!');
 				// console.log(response);
 				return;
 			}
@@ -3022,7 +3022,11 @@ function module_code(library_namespace) {
 						// methods of
 						// https://developer.mozilla.org/en-US/docs/Web/API/Body
 						text : function text() {
-							return Promise.resolve(this.body.toString());
+							try {
+								return Promise.resolve(this.body.toString());
+							} catch (e) {
+								return Promise.reject(e);
+							}
 						},
 						json : function json() {
 							return this.text().then(JSON.parse);

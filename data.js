@@ -1061,7 +1061,7 @@ function module_code(library_namespace) {
 		for (var i, j = 0; j < labelN.length; j++)
 			if ((i = s.indexOf(labelN[j])) != NOT_FOUND)
 				s = s.slice(0, i) + labelV[j] + s.slice(i + labelN[j].length)
-				, j = 0; //research from begin
+				, j = 0; // search again from beginning
 		return s;
 	}
 	 </code>

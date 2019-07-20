@@ -48,7 +48,8 @@ function module_code(library_namespace) {
 
 		// 最小容許圖案檔案大小 (bytes)。
 		// 對於有些圖片只有一條細橫桿的情況。
-		MIN_LENGTH : 140,
+		// e.g., webtoon\167 吸血鬼也沒關係\0003 [第2話] 健忘症\167-3-036.png
+		MIN_LENGTH : 130,
 
 		// 解析 作品名稱 → 作品id get_work()
 		search_URL : function(work_title) {
