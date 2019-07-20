@@ -35,4 +35,16 @@ node_js:
 install:
   - npm install
 
+# TODO:
+# https://docs.travis-ci.com/user/deployment/releases/
 deploy:
+  # https://docs.travis-ci.com/user/deployment/npm/
+  provider: npm
+  email: vimunci@gmail.com
+  on:
+    branch: master
+    tags: true
+    #node: "4"
+  # travis encrypt YOUR_AUTH_TOKEN --add deploy.api_key -r kanasimi/CeJS
+  api_key:
+    secure: qFVpryLMXZXTn1p6X0tQ+UEoZguZW4XhNGkMYgleAqly+E4kOnaUflpNrSSNAjdTYi5zAa8DjkfM9YxkfLPbTbRlvFfz2qo8+QzQvYOQRFPCebxAGocs3bMRRj70qx5S6a6E7/Ex2tVbk8gMoEBnHSFf2FlQ39BmPW+e2V+lExr4/tFk8QC9+RFCEXx7Ia9wKzizL3kLvJfgoh/3eFjvQ8IrP7wJlP6kOt9WNYgH5nTbaKMrKWibxiHzz7TzJU0gNvAe5rAyXZVcZu+8ANryTaqEsyfR6UP9ul+NBJ3/jUjzVxGPjkoS03kNCZIyzXLBqI0aMR+UKXhz0ASJr8lZGanXw6RSjvGygFHTwUgQ8jvBxkZeam304GE7j5eiqk9cnsmujCBevtbLg1Zl7zYI/O6W5Q3F/Tmy7lNVvmX7D36oQ8wP7wXxBuKH76b+rkhCdddAR/53X/iik9FJmH5mDQ5CsbZAN3BMbHuOca8lMTIzhnEBOaU4LPalOWUaVTN1tFc/pRB84apLv2TjVnS/tbZHuoc38ZVV3GcFkHSq5OzZGAWH0GsRzatpCvypDpKDbVEwdKtomrbBx4mV3sxDGykmmCeqzcqLmq7tvJ/+ibT6XGc2WpkZFFrzCCp0XSh09LfIzInrOw4XYvhuyVnIUwGoHiXRc6j+06wj8AS0vFg=
