@@ -15317,7 +15317,7 @@ function module_code(library_namespace) {
 		 * 
 		 * @type {Boolean}
 		 */
-		use_JSON = 'json' in operation ? operation.json : /\.json$/i
+		using_JSON = 'json' in operation ? operation.json : /\.json$/i
 				.test(file_name),
 		/** {String}file encoding for fs of node.js. */
 		encoding = _this.encoding || wiki_API.encoding;
@@ -15345,13 +15345,13 @@ function module_code(library_namespace) {
 			// 當資料 Invalid，例如採用 JSON 卻獲得空資料時；則視為 error，不接受此資料。
 			('accept_empty_data' in _this
 			//
-			? _this.accept_empty_data : !use_JSON))) {
+			? _this.accept_empty_data : !using_JSON))) {
 				library_namespace.debug('Using cached data.', 3,
 						'wiki_API.cache');
 				library_namespace.debug('Cached data: ['
 						+ (data && data.slice(0, 200)) + ']...', 5,
 						'wiki_API.cache');
-				if (use_JSON && data) {
+				if (using_JSON && data) {
 					try {
 						data = JSON.parse(data);
 					} catch (e) {
@@ -15381,17 +15381,19 @@ function module_code(library_namespace) {
 					library_namespace.debug(
 							'設定 operation.cache === false，不寫入 cache。', 3,
 							'wiki_API.cache.write_cache');
+
 				} else if (/[^\\\/]$/.test(file_name)) {
 					library_namespace
 							.info('wiki_API.cache: Write cache data to ['
-									+ file_name + '].');
+									+ file_name + '].'
+									+ (using_JSON ? ' (using JSON)' : ''));
 					library_namespace.debug('Cache data: '
 							+ (data && JSON.stringify(data).slice(0, 190))
 							+ '...', 3, 'wiki_API.cache.write_cache');
 					var write = function() {
 						// 為了預防需要建立目錄，影響到後面的作業，
 						// 因此採用 fs.writeFileSync() 而非 fs.writeFile()。
-						node_fs.writeFileSync(file_name, use_JSON ? JSON
+						node_fs.writeFileSync(file_name, using_JSON ? JSON
 								.stringify(data) : data, encoding);
 					};
 					try {
@@ -16106,6 +16108,9 @@ function module_code(library_namespace) {
 					list = list[1];
 					// 讀取 production replicas 時，儲存的是 pageid。
 					list.is_id = true;
+				} else {
+					library_namespace.warn('未設定 rev_list：可能是未知格式？'
+							+ cache_config.file_name);
 				}
 				id_list = list;
 			}
