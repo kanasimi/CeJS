@@ -12926,8 +12926,8 @@ function module_code(library_namespace) {
 		if (user_name) {
 			wiki_API.user_name = user_name;
 		}
-		home_directory = library_namespace
-				.append_path_separator(home_directory);
+		// There is no CeL.storage.append_path_separator() here!
+		home_directory += library_namespace.env.path_separator;
 	}
 
 	// setup SQL config language (and database/host).
