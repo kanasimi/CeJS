@@ -6418,7 +6418,9 @@ function module_code(library_namespace) {
 
 	// check if session.last_data is usable, 非過期資料。
 	function last_data_is_usable(session) {
-		if (session.last_data && !session.last_data.error
+		// When "servers are currently under maintenance", session.last_data is
+		// a string.
+		if (typeof session.last_data === 'object' && !session.last_data.error
 		// 若是session.last_data與session.last_page連動，必須先確認是否沒變更過session.last_page，才能當作cache、跳過重新擷取entity之作業。
 		&& (!(KEY_CORRESPOND_PAGE in session.last_data)
 		// assert:
@@ -7193,8 +7195,9 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof next[1] === 'function') {
-				library_namespace.debug('直接將last_data輸入 callback: ' + next[1],
-						3, 'wiki_API.prototype.next.data');
+				library_namespace.debug(
+						'直接將 last_data 輸入 callback: ' + next[1], 3,
+						'wiki_API.prototype.next.data');
 				if (last_data_is_usable(this)) {
 					next[1].call(this, this.last_data);
 					this.next();
