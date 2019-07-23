@@ -14596,11 +14596,14 @@ function module_code(library_namespace) {
 			library_namespace.debug('Check if public dump archive exists: ['
 					+ source_directory + archive + ']', 1, 'get_latest_dump');
 			try {
-				node_fs.accessSync(source_directory + archive);
-				library_namespace.log('get_latest_dump: Public dump archive ['
-						+ source_directory + archive + '] exists.');
-				extract();
-				return;
+				// 1e7: Only using the cache when it exists and big enough.
+				if (node_fs.statSync(source_directory + archive).size > 1e7) {
+					library_namespace
+							.log('get_latest_dump: Public dump archive ['
+									+ source_directory + archive + '] exists.');
+					extract();
+					return;
+				}
 			} catch (e) {
 			}
 		}
