@@ -5227,7 +5227,7 @@ function module_code(library_namespace) {
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * @returns {Date}date of the date string
+	 * @returns {Date|Array}date of the date string
 	 * 
 	 * @see [[en:Wikipedia:Signatures]], "~~~~~",
 	 *      [[en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
@@ -16007,14 +16007,16 @@ function module_code(library_namespace) {
 	 * rev_id (包含重定向)。<br />
 	 * 從 `page` 之 page id 確認 page 之 namespace，以及未被刪除。然後選擇其中最大的 revision id。
 	 * 
-	 * .i: page id, .r: revision id
+	 * should get: { i: page id, r: latest revision id }
+	 * 
+	 * AND `page`.`page_is_redirect` = 0
 	 * 
 	 * @type {String}
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
 	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/maintenance/tables.sql
 	 */
-	var all_revision_SQL = 'SELECT `rev_page` AS i, MAX(`rev_id`) AS r FROM `revision` INNER JOIN `page` ON `page`.`page_id` = `revision`.`rev_page` WHERE `page`.`page_namespace` = 0 AND `revision`.`rev_deleted` = 0 GROUP BY `rev_page`';
+	var all_revision_SQL = 'SELECT `page`.`page_id` AS `i`, `page`.`page_latest` AS `r` FROM `page` INNER JOIN `revision` ON `page`.`page_latest` = `revision`.`rev_id` WHERE `page`.`page_namespace` = 0 AND `revision`.`rev_deleted` = 0';
 
 	if (false) {
 		/**
@@ -16022,7 +16024,11 @@ function module_code(library_namespace) {
 		 * the page.page_latest is not the latest revision id of a page in
 		 * Wikimedia Toolforge database replication.
 		 */
-		all_revision_SQL = 'SELECT `page_id` AS i, `page_latest` AS l FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
+		all_revision_SQL = 'SELECT `page_id` AS `i`, `page_latest` AS `l` FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
+		/**
+		 * 2019/7 deprecated: too late
+		 */
+		all_revision_SQL = 'SELECT `rev_page` AS `i`, MAX(`rev_id`) AS `r` FROM `revision` INNER JOIN `page` ON `page`.`page_id` = `revision`.`rev_page` WHERE `page`.`page_namespace` = 0 AND `revision`.`rev_deleted` = 0 GROUP BY `rev_page`';
 	}
 	if (false) {
 		// for debug.
@@ -16100,7 +16106,7 @@ function module_code(library_namespace) {
 								.stringify(traversal_pages.id_mark)) {
 					library_namespace.info(
 					// cache file 內容來自 The production replicas (database)，
-					// 為經過 cache_config.list 整理過之資料。
+					// 為經過下方 generate_revision_list() 整理過之資料。
 					'traversal_pages: 此資料似乎為 page id，來自 production replicas: ['
 							+ this.file_name + ']');
 					// Skip list[0] = traversal_pages.id_mark
@@ -16109,8 +16115,8 @@ function module_code(library_namespace) {
 					// 讀取 production replicas 時，儲存的是 pageid。
 					list.is_id = true;
 				} else {
-					library_namespace.warn('未設定 rev_list：可能是未知格式？'
-							+ cache_config.file_name);
+					library_namespace.error('未設定 rev_list：可能是未知格式？檔案：'
+							+ this.file_name);
 				}
 				id_list = list;
 			}
@@ -16124,7 +16130,7 @@ function module_code(library_namespace) {
 		} else if (wmflabs && !config.no_database) {
 			library_namespace.debug('若沒有 cache，則嘗試讀取 database 之資料。', 1,
 					'traversal_pages');
-			cache_config.list = function() {
+			cache_config.list = function generate_revision_list() {
 				library_namespace.info(
 				// Wikimedia Toolforge database replicas.
 				'traversal_pages: 嘗試讀取 Wikimedia Toolforge 上之 database replication 資料，'
