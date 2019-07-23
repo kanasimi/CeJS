@@ -14546,8 +14546,8 @@ function module_code(library_namespace) {
 
 		var data_file_OK;
 		try {
-			// check if file exists
-			data_file_OK = node_fs.statSync(directory + filename);
+			// check if data file exists and big enough
+			data_file_OK = node_fs.statSync(directory + filename).size > 1e7;
 		} catch (e) {
 		}
 
@@ -14597,10 +14597,11 @@ function module_code(library_namespace) {
 					+ source_directory + archive + ']', 1, 'get_latest_dump');
 			try {
 				// 1e7: Only using the cache when it exists and big enough.
+				// So we do not using node_fs.accessSync() only.
 				if (node_fs.statSync(source_directory + archive).size > 1e7) {
 					library_namespace
-							.log('get_latest_dump: Public dump archive ['
-									+ source_directory + archive + '] exists.');
+							.log('get_latest_dump: Using public dump archive file ['
+									+ source_directory + archive + '].');
 					extract();
 					return;
 				}
@@ -14615,11 +14616,12 @@ function module_code(library_namespace) {
 		library_namespace.debug('Check if file exists: [' + source_directory
 				+ archive + ']', 1, 'get_latest_dump');
 		try {
-			node_fs.statSync(source_directory + archive);
-			library_namespace.log('get_latest_dump: Archive ['
-					+ source_directory + archive + '] exists.');
-			extract();
-			return;
+			if (node_fs.statSync(source_directory + archive).size > 1e7) {
+				library_namespace.log('get_latest_dump: Archive ['
+						+ source_directory + archive + '] exists.');
+				extract();
+				return;
+			}
 		} catch (e) {
 		}
 
