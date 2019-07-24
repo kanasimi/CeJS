@@ -303,12 +303,60 @@ function module_code(library_namespace) {
 		: function(XMLHttp, work_data, callback, chapter_NO) {
 			// console.log(XMLHttp);
 			// console.log(work_data);
+			var chapter_data = work_data.chapter_list[chapter_NO - 1];
+			// console.log(chapter_data);
+
+			// @see function process_images(chapter_data, XMLHttp)
+			// @ CeL.work_crawler
+			var chapter_label = this.get_chapter_directory_name(work_data,
+					chapter_NO, chapter_data, false);
+			var chapter_directory = work_data.directory + chapter_label;
+
 			if (!work_data.image_list) {
 				// image_list[chapter_NO] = [url, url, ...]
 				work_data.image_list = [];
-			} else if (work_data.chapter_list[chapter_NO - 1].image_list
-			//
-			= work_data.image_list[chapter_NO - 1]) {
+
+			} else if ((chapter_data.image_list = work_data.image_list[chapter_NO - 1])
+					&& chapter_data.image_list
+					// 之前已經取得過圖片資訊。但需要處理下載目錄改變的情況。
+					.every(function(image_data, index) {
+						if (!image_data || !image_data.file)
+							return;
+
+						if (!work_data.old_directory
+						// 圖片並未包含當前的章節目錄。
+						&& !image_data.file.startsWith(chapter_directory)
+						// 當包含目錄名稱時就猜測看看可能的原始目錄名稱。
+						&& image_data.file.includes(work_data.directory_name)) {
+							var index = image_data.file
+									.indexOf(work_data.directory_name);
+							// assert: index > 0
+							var path = this.main_directory
+									+ image_data.file.slice(index);
+							if (path.startsWith(chapter_directory)) {
+								work_data.old_directory = image_data.file
+										.slice(0, index)
+										+ work_data.directory.slice(index);
+								image_data.file = path;
+							}
+						}
+
+						if (work_data.old_directory && image_data.file
+						//
+						.startsWith(work_data.old_directory)) {
+							image_data.file = image_data.file.replace(
+									work_data.old_directory,
+									work_data.directory);
+						}
+
+						var path_OK = image_data.file
+						// 假如不是以 `chapter_data.directory` 開頭，可能是因為連章節名稱都改變了。
+						// 這時就需要重新抓取圖片網址。
+						.startsWith(chapter_directory);
+
+						return path_OK;
+					}, this)) {
+				// console.log(chapter_data.image_list);
 				callback();
 				return;
 			}
@@ -350,7 +398,7 @@ function module_code(library_namespace) {
 
 			var image_list = work_data.image_list[chapter_NO - 1]
 			// new Array(image_count)
-			= work_data.chapter_list[chapter_NO - 1].image_list = [
+			= chapter_data.image_list = [
 			// 第一張圖片的網址在網頁中。
 			// <div class="comiclist">\n <div class="comicpage">\n <img
 			// src="..."

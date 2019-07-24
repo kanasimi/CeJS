@@ -316,6 +316,16 @@ function module_code(library_namespace) {
 
 	Work_crawler.setup_argument_conditions = setup_argument_conditions;
 
+	/**
+	 * 檢核 crawler 的設定參數。
+	 * 
+	 * @param {String}key
+	 *            參數名稱
+	 * @param value
+	 *            欲設定的值
+	 * 
+	 * @returns {Boolean} true: Error occudded
+	 */
 	function verify_arg(key, value) {
 		if (!(key in this.import_arg_hash)) {
 			return true;
@@ -406,7 +416,7 @@ function module_code(library_namespace) {
 		return true;
 	}
 
-	// 檢核參數. normalize and setup value
+	// 設定 crawler 的參數。 normalize and setup value
 	// crawler.setup_value(key, value);
 	// return {String}has error
 	function setup_value(key, value) {
@@ -612,7 +622,7 @@ function module_code(library_namespace) {
 	// --------------------------------
 	// 這邊放的是一些會在 Work_crawler_prototype 中被運算到的數值。
 
-	/** {Natural}重試次數：下載失敗、出錯時重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。若值太小，傳輸到一半壞掉的圖片可能被當作正常圖片而不會出現錯誤。 */
+	/** {Natural}重試次數：下載失敗、出錯時重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。若值太小，在某些網站很容易出現圖片壞掉的問題。 */
 	Work_crawler.MAX_ERROR_RETRY = 4;
 
 	Work_crawler.HTML_extension = 'htm';
@@ -660,11 +670,12 @@ function module_code(library_namespace) {
 		// 本站速度頗慢，必須等待較久否則容易中斷。
 		// timeout : '60s',
 
-		/** {Natural}重試次數：下載失敗、出錯時重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。若值太小，傳輸到一半壞掉的圖片可能被當作正常圖片而不會出現錯誤。 */
+		/** {Natural}重試次數：下載失敗、出錯時重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。若值太小，在某些網站很容易出現圖片壞掉的問題。 */
 		MAX_ERROR_RETRY : Work_crawler.MAX_ERROR_RETRY,
 		/** {Natural}圖片下載未完全，出現 EOI (end of image) 錯誤時重新嘗試的次數。 */
 		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR_RETRY),
-		// {Natural}MIN_LENGTH:最小容許圖案檔案大小 (bytes)。
+		// {Natural}MIN_LENGTH:最小容許圖片檔案大小 (bytes)。
+		// 若值太小，傳輸到一半壞掉的圖片可能被當作正常圖片而不會出現錯誤。
 		// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
 		// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。
 		//
@@ -2838,6 +2849,8 @@ function module_code(library_namespace) {
 					words_so_far : _this.need_create_ebook,
 					book_chapter_count : _this.need_create_ebook
 				}, _this.reset_work_data_properties);
+				// work_data.old_data = Object.create(null);
+
 				// recall old work_data
 				// 基本上以新資料為準，除非無法獲取新資料，才改用舊資料。
 				for ( var key in matched) {
@@ -2854,6 +2867,14 @@ function module_code(library_namespace) {
 							&& work_data[key] !== matched[key]) {
 						var _message = String(matched[key])
 								+ String(work_data[key]);
+						// work_data.old_data[key] = matched[key];
+
+						// 記錄舊下載目錄的資料以供調整目錄時使用。
+						// work_data.old_directory
+						if (key === 'directory') {
+							work_data.old_directory = matched[key];
+						}
+
 						library_namespace.info(_message.length > 60
 								|| _message.includes('\n')
 						//
@@ -4246,6 +4267,7 @@ function module_code(library_namespace) {
 					// 先準備好章節目錄
 					T : [ '先創建章節目錄：%1', chapter_directory ]
 				}, 1, 'process_images');
+				// console.log(chapter_directory);
 				library_namespace.create_directory(chapter_directory);
 
 				images_archive = new library_namespace.storage.archive(
@@ -4608,7 +4630,7 @@ function module_code(library_namespace) {
 
 					if (!chapter_data) {
 						// 照理來說多少應該要有資訊，因此不應用 `this.skip_error` 跳過。
-						throw gettest('解析出空的頁面資訊！');
+						throw gettext('解析出空的頁面資訊！');
 					}
 
 				} catch (e) {
@@ -5360,17 +5382,25 @@ function module_code(library_namespace) {
 												contents);
 							} catch (e) {
 								library_namespace.error(e);
-								_this.onerror(
+								var message = [ gettext('無法寫入圖片檔案 [%1]。',
+										image_data.file) ];
+								if (e.code === 'ENOENT') {
+									message.push(gettext(
+									// TODO: show chapter_directory 當前作品章節目錄：
+									'可能因為作品下載目錄改變了，而 cache 資料指向不存在的舊位置。'));
+								} else {
+									message.push(gettext(
+									//
+									'可能因為作品資訊 cache 與當前網站上之作品章節結構不同。'));
+								}
+								message.push(gettext(
 								//
-								gettext('無法寫入圖片檔案 [%1]。', image_data.file)
-								//
-								+ gettext('這可能肇因於作品資訊 cache 與當前網站上之作品章節結構不同。')
-								//
-								+ gettext('若您之前曾經下載過本作品的話，請封存原有作品目錄，'
+								'若您之前曾經下載過本作品的話，請封存原有作品目錄，'
 								// https://github.com/kanasimi/work_crawler/issues/278
 								+ '或將作品資訊 cache 檔（作品目錄下的 作品id.json）'
 								//
-								+ '改名之後嘗試全新下載。'), image_data);
+								+ '改名之後嘗試全新下載。'));
+								_this.onerror(message.join('\n'), image_data);
 								if (typeof callback === 'function') {
 									callback(image_data,
 											'image_file_write_error');
