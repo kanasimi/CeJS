@@ -177,6 +177,7 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	get_not_exist_filename.PATTERN = /( )?(?:\((\d{1,3})\))?(\.[^.]*)?$/;
+	get_not_exist_filename.max_index = 999;
 
 	// 找到下一個可用的檔案名稱。若是有重複的檔案存在，則會找到下一個沒有使用的編號為止。
 	// recheck: 從頭檢查起。否則接續之前的序號檢查。
@@ -195,10 +196,9 @@ function module_code(library_namespace) {
 			// Get next index that can use.
 			get_not_exist_filename.PATTERN, function(all, prefix_space, index,
 					extension) {
-				if (index > 99) {
-					throw 'The index ' + index + ' is too big! '
-					//
-					+ move_to_path;
+				if (index > get_not_exist_filename.max_index) {
+					throw new Error('get_not_exist_filename: The index '
+							+ index + ' is too big! ' + move_to_path);
 				}
 				return (prefix_space || !index ? ' ' : '') + '('
 						+ ((index | 0) + 1) + ')' + (extension || '');
