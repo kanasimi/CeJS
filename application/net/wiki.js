@@ -3627,7 +3627,7 @@ function module_code(library_namespace) {
 					var matched = _token.match(/^([^=]+)=([\s\S]*)$/);
 					if (matched) {
 						var key = matched[1].trimEnd(),
-						//
+						// key token must accept '\n'
 						value = matched[2].trimStart();
 
 						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
@@ -8787,6 +8787,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('Set form_data', 6);
 				// throw 'Set form_data';
 				// options.form_data 會被當作傳入 to_form_data() 之 options。
+				// to_form_data() will get file using get_URL()
 				get_URL_options.form_data = options.form_data;
 			}
 
@@ -11929,7 +11930,7 @@ function module_code(library_namespace) {
 		var action, post_data = {
 			// upload_text: media description
 			text : undefined,
-			// 備註
+			// 備註 comment won't accept templates and external links
 			comment : undefined,
 			// must be set to reupload
 			ignorewarnings : undefined,
@@ -12052,6 +12053,7 @@ function module_code(library_namespace) {
 				options.form_data = true;
 			}
 			post_data.file = file_path.includes('://') ? {
+				// to_form_data() will get file using get_URL()
 				url : file_path
 			} : {
 				file : file_path
@@ -14438,6 +14440,9 @@ function module_code(library_namespace) {
 	/**
 	 * 取得最新之 Wikimedia dump。
 	 * 
+	 * TODO: using
+	 * /public/dumps/public/zhwiki/latest/zhwiki-latest-pages-articles.xml.bz2
+	 * 
 	 * @param {String}[wiki_site_name]
 	 *            project code name. e.g., 'enwiki'
 	 * @param {Function}callback
@@ -16243,6 +16248,19 @@ function module_code(library_namespace) {
 						var speed = count / (Date.now() - start_read_time);
 						speed = speed < .1 ? (1e3 * speed).toFixed(2)
 								+ ' page/s' : speed.toFixed(3) + ' page/ms';
+
+						var estimated = (Date.now() - start_read_time)
+								/ position * (file_size - position)
+								/ (60 * 1000);
+						if (estimated > 1) {
+							estimated = estimated > 99 ? (estimated / 60)
+									.toFixed(1)
+									+ ' hr' : estimated.toFixed(1) + ' min';
+							estimated = ', ' + estimated + ' estimated';
+						} else {
+							estimated = '';
+						}
+
 						// e.g.,
 						// "2730000 (99%): 21.326 page/ms [[Category:大洋洲火山岛]]"
 						library_namespace.log(
@@ -16251,7 +16269,8 @@ function module_code(library_namespace) {
 						//
 						+ (100 * position / file_size | 0) + '%): '
 						//
-						+ speed + ' ' + get_page_title_link(page_data));
+						+ speed + estimated + '. '
+								+ get_page_title_link(page_data));
 					}
 
 					// ----------------------------
