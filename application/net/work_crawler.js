@@ -1226,7 +1226,7 @@ function module_code(library_namespace) {
 			var value = library_namespace
 			//
 			.value_of(field_name, null, work_data);
-			if (value !== undefined)
+			if (value || value === 0)
 				display_list.push([
 						gettext(show_work_data.prefix + field_name) + '  ',
 						value ]);
@@ -1257,11 +1257,16 @@ function module_code(library_namespace) {
 					gettext('work_data.chapter_title') ] ];
 			// console.log(chapter_list[0]);
 			chapter_list.forEach(function(chapter_data, index) {
+				var data;
+				if (library_namespace.is_Object(chapter_data)) {
+					data = chapter_data.title || chapter_data.url;
+					if (chapter_data.limited)
+						data += ' (' + gettext('limited') + ')';
+				} else {
+					data = JSON.stringify(chapter_data);
+				}
 				// +1: chapter_NO starts from 1
-				display_list.push([
-						'    ' + (index + 1) + '  ',
-						chapter_data.title || chapter_data.url
-								|| JSON.stringify(chapter_data) ]);
+				display_list.push([ '    ' + (index + 1) + '  ', data ]);
 			});
 			library_namespace.log(library_namespace.display_align(display_list)
 					+ '\n');
@@ -4754,7 +4759,7 @@ function module_code(library_namespace) {
 						return;
 					}
 
-					if (!chapter_data) {
+					if (!chapter_data && Array.isArray(work_data.chapter_list)) {
 						// 照理來說多少應該要有資訊，因此不應用 `this.skip_error` 跳過。
 						throw gettext('解析出空的頁面資訊！');
 					}
