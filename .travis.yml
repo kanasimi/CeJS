@@ -35,14 +35,13 @@ node_js:
 install:
   - npm install
 
-# TODO:
-# https://docs.travis-ci.com/user/deployment/releases/
+# TODO: https://docs.travis-ci.com/user/deployment/releases/ https://github.com/Cretezy/scrypt-async-modern/blob/master/.travis.yml
 deploy:
   # https://docs.travis-ci.com/user/deployment/npm/
   provider: npm
   email: vimunci@gmail.com
   on:
-    branch: master
+    #branch: master
     tags: true
     #node: "4"
   # travis encrypt YOUR_AUTH_TOKEN --add deploy.api_key -r kanasimi/CeJS

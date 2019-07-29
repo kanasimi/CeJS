@@ -118,9 +118,11 @@ function module_code(library_namespace) {
 		var gap = length - string.length;
 		if (gap > 0) {
 			// library_namespace.debug(gap + ' [' + fillString + ']');
-			if (!fillString || typeof fillString !== 'string')
+			if (!fillString || typeof fillString !== 'string') {
 				fillString = typeof fillString === 'number' ? String(fillString)
 						: string === '' || isNaN(string) ? ' ' : '0';
+			}
+			// assert: {String}fillString
 
 			var l = fillString.length,
 			/**
@@ -4017,7 +4019,7 @@ function module_code(library_namespace) {
 				+ screen_display_width());
 	}
 
-	// CLI螢幕顯示對齊用。e.g., 對比兩者。
+	// CLI 螢幕顯示對齊用。e.g., 對比兩者。
 	// left justification, to line up in correct
 	function display_align(lines, options) {
 		var key_display_width = [], display_lines = [],
@@ -4046,7 +4048,9 @@ function module_code(library_namespace) {
 			// 可能沒有 key.padStart()!
 			display_lines.push(key.pad(key.length + max_key_display_width
 			// assert: String_display_width(' ') === 1
-			- key_display_width.shift()) + value);
+			- key_display_width.shift(), options && options.to_fill || ' ',
+					options && options.from_start)
+					+ value);
 		});
 		return display_lines.join('\n');
 	}

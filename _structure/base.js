@@ -114,7 +114,7 @@ function (global) {
 		 * @type {String}
 		 * @ignore
 		 */
-		library_version = '2.0.0',
+		library_version = '3.0.0',
 
 
 		/**
@@ -574,11 +574,11 @@ function (global) {
 	 */
 	value_of = function (variable_name, modify_function, name_space, value) {
 		var variable_name_array;
-		if (Array.isArray(variable_name) && variable_name.length)
-			variable_name_array = variable_name,
+		if (Array.isArray(variable_name) && variable_name.length > 0) {
+			variable_name_array = variable_name;
 			variable_name = variable_name.join('.');
 			// 在 Object("") 的情況下，typeof this==='object'。此時不可用 typeof。
-		else if (typeof variable_name === 'string' && variable_name)
+		} else if (typeof variable_name === 'string' && variable_name)
 			variable_name_array = variable_name.split('.');
 		else
 			// return variable_name: 預防 value_of(null/undefined/NaN)

@@ -73,10 +73,10 @@ function module_code(library_namespace) {
 		},
 		// 解析出章節列表。
 		get_chapter_list : function(work_data, html, get_label) {
-			if (!Object.hasOwnProperty(this, 'start_chapter')
-					&& work_data.last_download.chapter > this.start_chapter) {
-				// 未設定 .start_chapter 且之前下載過，則接續上一次的下載。
-				this.start_chapter = work_data.last_download.chapter;
+			if (!Object.hasOwnProperty(this, 'start_chapter_NO')
+					&& work_data.last_download.chapter > this.start_chapter_NO) {
+				// 未設定 .start_chapter_NO 且之前下載過，則接續上一次的下載。
+				this.start_chapter_NO = work_data.last_download.chapter;
 			}
 
 			if (!Array.isArray(work_data.chapter_list)) {
@@ -85,9 +85,9 @@ function module_code(library_namespace) {
 			}
 
 			// reuse work_data.chapter_list
-			while (work_data.chapter_list.length < this.start_chapter) {
+			while (work_data.chapter_list.length < this.start_chapter_NO) {
 				// 隨便墊入作品資料網址 給本次下載開始下載章節前所有未設定的章節資料，
-				// 這樣才能準確從 .start_chapter 開始下載。後續章節網址會動態增加。
+				// 這樣才能準確從 .start_chapter_NO 開始下載。後續章節網址會動態增加。
 				work_data.chapter_list.push(this.work_URL(work_data.id));
 			}
 			// console.log(work_data);

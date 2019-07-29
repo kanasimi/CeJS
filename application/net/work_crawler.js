@@ -803,7 +803,8 @@ function module_code(library_namespace) {
 		// 若是 start_chapter 在之前下載過的最後一個章節之前的話，那麼就必須要設定 recheck 才會有效。
 		// 之前下載到第8章且未設定 recheck，則指定 start_chapter=9 **有**效。
 		// 之前下載到第8章且未設定 recheck，則指定 start_chapter=7 **無**效。必須設定 recheck。
-		start_chapter : 1,
+		// start_chapter : 1,
+		start_chapter_NO : 1,
 		// 是否重新獲取每個所檢測的章節內容 chapter_page。
 		// 警告: reget_chapter=false 僅適用於小說之類不獲取圖片的情形，
 		// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL獲取名稱的於目錄中。
@@ -969,14 +970,19 @@ function module_code(library_namespace) {
 		import_arg_hash : {
 			// set download directory, fso:directory
 			main_directory : 'string:fso_directory',
-			user_agent : 'string',
-			// document.cookie: "key=value"
-			cookie : 'string',
+
+			show_information_only : 'boolean',
+
 			one_by_one : 'boolean',
 			// 篩選想要下載的章節標題關鍵字。例如"單行本"。
 			chapter_filter : 'string',
-			// 將開始/接續下載的章節編號。對已下載過的章節，必須配合 .recheck。
-			start_chapter : 'number:natural',
+			// 開始/接續下載的章節。將依類型轉成 .start_chapter_title 或
+			// .start_chapter_NO。對已下載過的章節，必須配合 .recheck。
+			start_chapter : 'number:natural|string',
+			// 開始/接續下載的章節編號。
+			start_chapter_NO : 'number:natural',
+			// 開始/接續下載的章節標題。
+			start_chapter_title : 'string',
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
 			// 一般僅使用於命令列設定。default:1
 			start_list_serial : 'number:natural|string',
@@ -998,8 +1004,11 @@ function module_code(library_namespace) {
 			// 當新獲取的檔案比較大時，覆寫舊的檔案。
 			overwrite_old_file : 'boolean',
 
+			user_agent : 'string',
 			// 代理伺服器 proxy_server: "username:password@hostname:port"
 			proxy : 'string',
+			// 設定下載時要添加的 cookie。 document.cookie: "key=value"
+			cookie : 'string',
 
 			// 漫畫下載完畢後壓縮圖片檔案。
 			archive_images : 'boolean',
@@ -1023,6 +1032,7 @@ function module_code(library_namespace) {
 
 		setup_agent : setup_agent,
 		data_of : start_get_data_of,
+		show_work_data : show_work_data,
 
 		is_stopping_now : is_stopping_now,
 		stop_task : stop_task,
@@ -1194,11 +1204,76 @@ function module_code(library_namespace) {
 			typeof callback === 'function' && callback.call(this, work_data);
 		}
 		start_get_data_of_callback.options = Object.assign({
+			// get_information_only
 			get_data_only : true
 		}, options);
 
 		// TODO: full test
 		this.start(work_id, start_get_data_of_callback);
+	}
+
+	// latest_chapter
+	var work_data_display_fields = 'title,id,author,status,chapter_count,last_update,last_download.date,last_download.chapter,url,directory'
+			.split(',');
+	show_work_data.prefix = 'work_data.';
+
+	// 在 CLI 命令列介面顯示作品資訊。
+	function show_work_data(work_data, options) {
+		var display_fields = options && options.display_fields
+				|| work_data_display_fields;
+		var display_list = [];
+		display_fields.forEach(function(field_name) {
+			var value = library_namespace
+			//
+			.value_of(field_name, null, work_data);
+			if (value !== undefined)
+				display_list.push([
+						gettext(show_work_data.prefix + field_name) + '  ',
+						value ]);
+		});
+
+		library_namespace.log('-'.repeat(70) + '\n');
+		library_namespace.info({
+			T : 'work information:'
+		});
+
+		library_namespace.log(library_namespace.display_align(display_list, {
+			from_start : true
+		}) + '\n');
+
+		library_namespace.info({
+			T : show_work_data.prefix + 'description'
+		});
+		library_namespace.log(library_namespace.value_of('description', null,
+				work_data)
+				+ '\n');
+
+		var chapter_list = Array.isArray(work_data.chapter_list)
+				&& work_data.chapter_list;
+		if (chapter_list) {
+			library_namespace.info(gettext(show_work_data.prefix
+					+ 'chapter_list'));
+			display_list = [ [ gettext('work_data.chapter_NO') + '  ',
+					gettext('work_data.chapter_title') ] ];
+			// console.log(chapter_list[0]);
+			chapter_list.forEach(function(chapter_data, index) {
+				// +1: chapter_NO starts from 1
+				display_list.push([
+						'    ' + (index + 1) + '  ',
+						chapter_data.title || chapter_data.url
+								|| JSON.stringify(chapter_data) ]);
+			});
+			library_namespace.log(library_namespace.display_align(display_list)
+					+ '\n');
+		}
+
+		library_namespace
+				.info({
+					T : '您可指定 "start_chapter_NO=章節編號數字" 或 "start_chapter_title=章節標題" 來選擇要開始下載的章節。'
+				});
+		library_namespace.info({
+			T : '或指定 "chapter_filter=章節標題" 僅下載某個章節。'
+		});
 	}
 
 	// ----------------------------------------------------------------------------
@@ -2605,6 +2680,20 @@ function module_code(library_namespace) {
 		library_namespace.debug('work_URL: ' + work_URL, 2, 'get_work_data');
 		// console.log(work_URL);
 
+		if (this.start_chapter) {
+			if (library_namespace.is_digits(this.start_chapter)
+			// 已經超越預設的第1章節才作設定。
+			&& this.start_chapter > 1
+					&& this.start_chapter == (this.start_chapter | 0)) {
+				// {Natural}chapter_NO
+				this.start_chapter_NO = this.start_chapter | 0;
+			} else {
+				// 將這個當作指定開始下載的章節標題。
+				this.start_chapter_title = this.start_chapter.toLowerCase();
+			}
+			delete this.start_chapter;
+		}
+
 		// ----------------------------------------------------------
 
 		function get_work_page() {
@@ -2746,8 +2835,7 @@ function module_code(library_namespace) {
 			work_data.last_download = {
 				// {Date}
 				date : (new Date).toISOString(),
-				// {Natural}chapter_NO
-				chapter : _this.start_chapter
+				chapter : _this.start_chapter_NO
 			};
 			// source URL of work
 			work_data.url = work_URL;
@@ -2899,9 +2987,9 @@ function module_code(library_namespace) {
 					// 紀錄一下上一次下載的資訊。
 					work_data.latest_download = matched.last_download;
 					matched = matched.last_download.chapter;
-					if (matched > _this.start_chapter) {
+					if (matched > _this.start_chapter_NO) {
 						// 將開始/接續下載的章節編號。對已下載過的章節，必須配合 .recheck。
-						work_data.last_download.chapter = matched;
+						work_data.last_download.chapter = matched | 0;
 					}
 				}
 			}
@@ -3241,8 +3329,10 @@ function module_code(library_namespace) {
 			if (recheck_flag
 			// _this.get_chapter_list() 中
 			// 可能重新設定過 work_data.last_download.chapter。
-			&& work_data.last_download.chapter !== _this.start_chapter) {
-				library_namespace.debug('已設定 .recheck 選項，且之前曾下載過本作品，作品目錄有內容。');
+			&& work_data.last_download.chapter !== _this.start_chapter_NO) {
+				library_namespace.debug({
+					T : '已設定 .recheck 選項，且之前曾下載過本作品，作品目錄有內容。'
+				});
 
 				if (recheck_flag !== 'changed'
 						&& typeof recheck_flag !== 'number') {
@@ -3270,7 +3360,7 @@ function module_code(library_namespace) {
 					}
 					// 無論是哪一種，既然是recheck則都得要從頭check並生成資料。
 					work_data.reget_chapter = _this.reget_chapter;
-					work_data.last_download.chapter = _this.start_chapter;
+					work_data.last_download.chapter = _this.start_chapter_NO;
 
 				} else if ( // 依變更判定是否重新更新文件。
 				// for: {Natural}recheck_flag
@@ -3302,7 +3392,7 @@ function module_code(library_namespace) {
 					// 重新下載。
 					work_data.reget_chapter = true;
 					// work_data.regenerate = true;
-					work_data.last_download.chapter = _this.start_chapter;
+					work_data.last_download.chapter = _this.start_chapter_NO;
 
 				} else {
 					// 不可用 ('reget_chapter' in _this)，會得到 .prototype 的屬性。
@@ -3336,20 +3426,32 @@ function module_code(library_namespace) {
 					}
 					if (work_data.reget_chapter || _this.regenerate) {
 						// 即使是這一種，還是得要從頭 check cache 並生成資料(如.epub)。
-						work_data.last_download.chapter = _this.start_chapter;
+						work_data.last_download.chapter = _this.start_chapter_NO;
 					}
 
 				}
 
-			} else if (_this.start_chapter > Work_crawler.prototype.start_chapter
-					&& work_data.last_download.chapter > _this.start_chapter) {
+			} else if (_this.start_chapter_title) {
+				library_namespace
+						.info({
+							T : [
+									'之前已下載到較新的第 %2 %3，因指定 start_chapter_title=%1 而重新檢查下載。',
+									_this.start_chapter_title,
+									work_data.last_download.chapter,
+									work_data.chapter_unit
+											|| _this.chapter_unit ]
+						});
+				work_data.last_download.chapter = Work_crawler.prototype.start_chapter_NO;
+
+			} else if (_this.start_chapter_NO > Work_crawler.prototype.start_chapter_NO
+					&& work_data.last_download.chapter > _this.start_chapter_NO) {
 				library_namespace.info({
-					T : [ '之前已下載到較新的第 %2 %3，因指定 start_chapter=%1 而回溯。',
-							_this.start_chapter,
+					T : [ '之前已下載到較新的第 %2 %3，因指定 start_chapter_NO=%1 而回溯。',
+							_this.start_chapter_NO,
 							work_data.last_download.chapter,
 							work_data.chapter_unit || _this.chapter_unit ]
 				});
-				work_data.last_download.chapter = _this.start_chapter;
+				work_data.last_download.chapter = _this.start_chapter_NO;
 			}
 
 			if (!('reget_chapter' in work_data)) {
@@ -3376,7 +3478,7 @@ function module_code(library_namespace) {
 								T : [
 										// 另存
 										'將先備份舊內容、移動目錄，而後重新自第 %1 %2下載！',
-										_this.start_chapter,
+										_this.start_chapter_NO,
 										work_data.chapter_unit
 												|| _this.chapter_unit ]
 							}, '\n', work_data.directory, '\n→\n', move_to ]);
@@ -3386,16 +3488,16 @@ function module_code(library_namespace) {
 					library_namespace.create_directory(work_data.directory);
 				} else {
 					library_namespace.info({
-						T : [ '將從頭檢查、自第 %1 %2重新下載。', _this.start_chapter,
+						T : [ '將從頭檢查、自第 %1 %2重新下載。', _this.start_chapter_NO,
 								work_data.chapter_unit || _this.chapter_unit ]
 					});
 				}
 				work_data.reget_chapter = true;
-				work_data.last_download.chapter = _this.start_chapter;
+				work_data.last_download.chapter = _this.start_chapter_NO;
 			}
 
 			work_data.error_images = 0;
-			if (work_data.last_download.chapter === _this.start_chapter) {
+			if (work_data.last_download.chapter === _this.start_chapter_NO) {
 				work_data.image_count = 0;
 			} else {
 				delete work_data.image_count;
@@ -3405,11 +3507,11 @@ function module_code(library_namespace) {
 			// 最起碼應該要重新生成電子書。否則會只記錄到最後幾個檢查過的章節。
 			&& work_data.last_download.chapter !== work_data.chapter_count) {
 				library_namespace.info({
-					T : [ '將從頭檢查、自第 %1 %2重新生成電子書。', _this.start_chapter,
+					T : [ '將從頭檢查、自第 %1 %2重新生成電子書。', _this.start_chapter_NO,
 							work_data.chapter_unit || _this.chapter_unit ]
 				});
 				work_data.regenerate = true;
-				work_data.last_download.chapter = _this.start_chapter;
+				work_data.last_download.chapter = _this.start_chapter_NO;
 			}
 
 			if (typeof callback === 'function' && callback.options
@@ -3479,9 +3581,10 @@ function module_code(library_namespace) {
 									.stringify(work_data.status)
 									: work_data.status)
 							: '',
-					work_data.last_download.chapter > _this.start_chapter ? ' '
-					// §: 章節編號
-					+ gettext('自 §%1 接續下載。', work_data.last_download.chapter)
+					work_data.last_download.chapter > _this.start_chapter_NO ? ' '
+							// §: 章節編號
+							+ gettext('自 §%1 接續下載。',
+									work_data.last_download.chapter)
 							: '' ].join('');
 			if (_this.is_finished(work_data)) {
 				// 針對特殊狀況提醒。
@@ -3611,6 +3714,7 @@ function module_code(library_namespace) {
 		pre_get_chapter_data.apply(this, _arguments);
 	}
 
+	// estimated time of completion 估計時間 預計剩下時間 預估剩餘時間 預計完成時間還要多久
 	function estimated_message(work_data, chapter_NO) {
 		if (!(work_data.chapter_count > chapter_NO))
 			return;
@@ -3687,9 +3791,31 @@ function module_code(library_namespace) {
 		// ----------------------------
 
 		var chapter_data = Array.isArray(work_data.chapter_list)
-				&& work_data.chapter_list[chapter_NO - 1],
+				&& work_data.chapter_list[chapter_NO - 1];
+
+		if (this.start_chapter_title && chapter_data) {
+			// console.log(chapter_data);
+			var chapter_directory_name = this.get_chapter_directory_name(
+					work_data, chapter_NO);
+			// console.log(chapter_directory_name);
+			if (!chapter_directory_name.toLowerCase().includes(
+					this.start_chapter_title)) {
+				CeL.debug({
+					T : [ '還沒到指定開始下載的章節標題 %2，跳過[%1]不下載。', chapter_data.title,
+							chapter_directory_name ]
+				});
+				// 執行一些最後結尾的動作。
+				continue_next_chapter.call(this, work_data, chapter_NO,
+						callback);
+				return;
+			}
+
+			// 去除標記。
+			delete this.start_chapter_title;
+		}
+
 		/** {String}skip reason */
-		skip_this_chapter = chapter_data
+		var skip_this_chapter = chapter_data
 				&& (chapter_data.skip_this_chapter === true ? gettext('跳過本章節不下載。')
 						: chapter_data.skip_this_chapter);
 

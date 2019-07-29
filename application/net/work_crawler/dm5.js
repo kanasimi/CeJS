@@ -301,6 +301,61 @@ function module_code(library_namespace) {
 		// 執行在解析章節資料 process_chapter_data() 之前的作業 (async)。
 		// 必須自行保證執行 callback()，不丟出異常、中斷。
 		: function(XMLHttp, work_data, callback, chapter_NO) {
+			/**
+			 * 之前已經取得過圖片資訊。但需要處理下載目錄改變的情況。
+			 * 
+			 * TODO: fix https://github.com/eight04/ComicCrawler/issues/208
+			 * <code>
+			https://www.tohomh123.com/wocaibushiedunvpei/182.html
+
+			解析到的第一張圖片網址: https://mh3.zhengdongwuye.cn/upload/wocaibushiedunvpei/2606792/0000.jpg
+			正確的的第一張圖片網址: https://m-tohomh123-com.mipcdn.com/i/mh3.zhengdongwuye.cn/upload/wocaibushiedunvpei/2606792/0000.jpg
+			</code>
+			 */
+			function fix_image_path(image_data, index) {
+				if (!image_data || !image_data.file) {
+					return;
+				}
+				if (image_data.file.includes(this.EOI_error_postfix
+				// reget bad files "* bad.*"
+				+ '.')) {
+					delete image_data.file;
+					return;
+				}
+
+				if (!work_data.old_directory
+				// 圖片並未包含當前的章節目錄。
+				&& !image_data.file.startsWith(chapter_directory)
+				// 當包含目錄名稱時就猜測看看可能的原始目錄名稱。
+				&& image_data.file.includes(work_data.directory_name)) {
+					var index = image_data.file
+							.indexOf(work_data.directory_name);
+					// assert: index > 0
+					var path = this.main_directory
+							+ image_data.file.slice(index);
+					if (path.startsWith(chapter_directory)) {
+						work_data.old_directory = image_data.file.slice(0,
+								index)
+								+ work_data.directory.slice(index);
+						image_data.file = path;
+					}
+				}
+
+				if (work_data.old_directory && image_data.file
+				//
+				.startsWith(work_data.old_directory)) {
+					image_data.file = image_data.file.replace(
+							work_data.old_directory, work_data.directory);
+				}
+
+				var path_OK = image_data.file
+				// 假如不是以 `chapter_data.directory` 開頭，可能是因為連章節名稱都改變了。
+				// 這時就需要重新抓取圖片網址。
+				.startsWith(chapter_directory);
+
+				return path_OK;
+			}
+
 			// console.log(XMLHttp);
 			// console.log(work_data);
 			var chapter_data = work_data.chapter_list[chapter_NO - 1];
@@ -317,45 +372,7 @@ function module_code(library_namespace) {
 				work_data.image_list = [];
 
 			} else if ((chapter_data.image_list = work_data.image_list[chapter_NO - 1])
-					&& chapter_data.image_list
-					// 之前已經取得過圖片資訊。但需要處理下載目錄改變的情況。
-					.every(function(image_data, index) {
-						if (!image_data || !image_data.file)
-							return;
-
-						if (!work_data.old_directory
-						// 圖片並未包含當前的章節目錄。
-						&& !image_data.file.startsWith(chapter_directory)
-						// 當包含目錄名稱時就猜測看看可能的原始目錄名稱。
-						&& image_data.file.includes(work_data.directory_name)) {
-							var index = image_data.file
-									.indexOf(work_data.directory_name);
-							// assert: index > 0
-							var path = this.main_directory
-									+ image_data.file.slice(index);
-							if (path.startsWith(chapter_directory)) {
-								work_data.old_directory = image_data.file
-										.slice(0, index)
-										+ work_data.directory.slice(index);
-								image_data.file = path;
-							}
-						}
-
-						if (work_data.old_directory && image_data.file
-						//
-						.startsWith(work_data.old_directory)) {
-							image_data.file = image_data.file.replace(
-									work_data.old_directory,
-									work_data.directory);
-						}
-
-						var path_OK = image_data.file
-						// 假如不是以 `chapter_data.directory` 開頭，可能是因為連章節名稱都改變了。
-						// 這時就需要重新抓取圖片網址。
-						.startsWith(chapter_directory);
-
-						return path_OK;
-					}, this)) {
+					&& chapter_data.image_list.every(fix_image_path, this)) {
 				// console.log(chapter_data.image_list);
 				callback();
 				return;
@@ -439,6 +456,11 @@ function module_code(library_namespace) {
 			// library_namespace.run_serial 在 ikmhw.js 太慢了。但一次呼叫太多行程，會造成無回應。
 			var iterator = image_count < this.parallel_limit ? library_namespace.run_parallel
 					: library_namespace.run_serial;
+			if (false) {
+				CeL.log(iterator === library_namespace.run_parallel
+				//
+				? 'run_parallel' : 'run_serial');
+			}
 			if (iterator === library_namespace.run_parallel) {
 				// actually image_count - 1
 				process.stdout.write('Get ' + image_count
