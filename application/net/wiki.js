@@ -638,7 +638,7 @@ function module_code(library_namespace) {
 	 * @param {wiki_API}session
 	 *            正作業中之 wiki_API instance。
 	 * @param {String}[API_URL]
-	 *            language code or API URL of Wikidata
+	 *            language code or API URL of MediaWiki project
 	 * 
 	 * @inner
 	 */
@@ -7561,6 +7561,40 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// estimated time of completion 估計時間 預計剩下時間 預估剩餘時間 預計完成時間還要多久
+	// e.g., " (99%): 0.178 page/ms, 1.5 minutes estimated."
+	function estimated_message(starting_time, processed, total, page_count) {
+		/** {Natural}ms */
+		var time_elapsed = Date.now() - starting_time;
+		var estimated = time_elapsed / processed * (total_pages - processed)
+		// 1 minutes
+		/ (60 * 1000);
+		if (estimated > 1) {
+			estimated = estimated > 99 ? (estimated / 60).toFixed(1) + ' hours'
+					: estimated.toFixed(1) + ' minutes';
+			estimated = ', ' + estimated + ' estimated';
+		} else {
+			estimated = '';
+		}
+
+		var speed;
+		if (page_count > 0) {
+			speed = page_count / time_elapsed;
+			speed = speed < 1 ? (1e3 * speed).toFixed(2) + ' page/s' : speed
+					.toFixed(3)
+					+ ' page/ms';
+			speed = ': ' + speed;
+		} else {
+			speed = '';
+		}
+
+		return (page_count > 0 ? page_count : '') + ' ('
+				+ (100 * processed / total_pages | 0) + '%)' + speed
+				+ estimated;
+	}
+
+	// ------------------------------------------------------------------------
+
 	// 或者還可以去除 "MediaWiki message delivery" 這些系統預設的非人類發布者。
 	/** {RegExp}pattern to test if is a robot name. CeL.wiki.PATTERN_BOT_NAME */
 	var PATTERN_BOT_NAME = /bot(?:$|[^a-z])|[機机][器械]人|ボット(?:$|[^a-z])|봇$/i;
@@ -8428,11 +8462,11 @@ function module_code(library_namespace) {
 					// start–end/all
 					+ Math.min(max_size, nochange_count)) + '/'
 							+ nochange_count;
-					// Add percentage.
-					if (nochange_count > 1e4)
-						done += ' ('
-								+ (100 * work_continue / nochange_count | 0)
-								+ '%)';
+					// Add percentage message.
+					if (nochange_count > 1e4) {
+						done += estimated_message(config.start_working_time,
+								work_continue, nochange_count);
+					}
 					// done += '。';
 					nochange_count = 'wiki_API.work: ';
 					done = config.summary ? [ nochange_count, 'fg=green',
@@ -8450,6 +8484,8 @@ function module_code(library_namespace) {
 				// console.log([ 'page_options:', page_options ]);
 				this.page(this_slice, main_work, page_options);
 			}).bind(this);
+
+			config.start_working_time = Date.now();
 			setup_target();
 
 		} else {
@@ -11027,10 +11063,9 @@ function module_code(library_namespace) {
 	// 認證用 cookie:
 	// {zhwikiSession,centralauth_User,centralauth_Token,centralauth_Session,wikidatawikiSession,wikidatawikiUserID,wikidatawikiUserName}
 	wiki_API.login = function(name, password, options) {
+		var error;
 		function _next() {
-			if (typeof callback === 'function') {
-				callback(session.token.lgname);
-			}
+			callback && callback(session.token.lgname, error);
 			library_namespace.debug('已登入 [' + session.token.lgname
 					+ ']。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
 			// popup 'login'.
@@ -11092,6 +11127,7 @@ function module_code(library_namespace) {
 					if (data.result !== 'Failed' || data.result !== 'NeedToken') {
 						// Unknown result
 					}
+					error = data;
 				}
 			}
 			session.get_token(_next);
@@ -11113,6 +11149,7 @@ function module_code(library_namespace) {
 			// 前置處理。
 			options = Object.create(null);
 		}
+		callback = typeof callback === 'function' && callback;
 
 		if (!session) {
 			// 初始化 session 與 agent。這裡 callback 當作 API_URL。
@@ -11122,6 +11159,7 @@ function module_code(library_namespace) {
 			library_namespace
 					.warn('wiki_API.login: The user name or password is not provided. Abandon login attempt.');
 			// console.trace('Stop login');
+			callback && callback();
 			return session;
 		}
 
@@ -11176,6 +11214,7 @@ function module_code(library_namespace) {
 					//		
 					'wiki_API.login: 無法 login！ Abort! Response:');
 					library_namespace.error(data);
+					callback && callback(null, data);
 				}
 			}, token, session);
 		}, null, session);
@@ -16245,32 +16284,12 @@ function module_code(library_namespace) {
 					}
 
 					if (++count % 1e4 === 0) {
-						var speed = count / (Date.now() - start_read_time);
-						speed = speed < .1 ? (1e3 * speed).toFixed(2)
-								+ ' page/s' : speed.toFixed(3) + ' page/ms';
-
-						var estimated = (Date.now() - start_read_time)
-								/ position * (file_size - position)
-								/ (60 * 1000);
-						if (estimated > 1) {
-							estimated = estimated > 99 ? (estimated / 60)
-									.toFixed(1)
-									+ ' hr' : estimated.toFixed(1) + ' min';
-							estimated = ', ' + estimated + ' estimated';
-						} else {
-							estimated = '';
-						}
-
-						// e.g.,
-						// "2730000 (99%): 21.326 page/ms [[Category:大洋洲火山岛]]"
 						library_namespace.log(
 						// 'traversal_pages: ' +
-						count + ' ('
-						//
-						+ (100 * position / file_size | 0) + '%): '
-						//
-						+ speed + estimated + '. '
-								+ get_page_title_link(page_data));
+						estimated_message(start_read_time, position, file_size,
+						// e.g.,
+						// "2730000 (99%): 21.326 page/ms [[Category:大洋洲火山岛]]"
+						count) + '. ' + get_page_title_link(page_data));
 					}
 
 					// ----------------------------
