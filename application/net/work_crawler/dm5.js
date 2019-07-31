@@ -45,6 +45,10 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// https://stackoverflow.com/questions/31673587/error-unable-to-verify-the-first-certificate-in-nodejs
+	// fix Error: unable to verify the first certificate
+	process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+
 	var default_configuration = {
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.comic中Comic_site.prototype內的母comments，並以其為主體。
 
@@ -715,9 +719,14 @@ function module_code(library_namespace) {
 				parameters.page = image_NO;
 				// library_namespace.set_debug(6);
 				// console.log(library_namespace.get_URL.parameters_to_String(parameters));
-				library_namespace.get_URL(_this.full_URL(_this.chapter_URL(
-						work_data, chapter_NO)
-						+ 'chapterfun.ashx'), function(XMLHttp) {
+				_this.get_URL(_this.chapter_URL(work_data, chapter_NO)
+						+ 'chapterfun.ashx', function(XMLHttp, error) {
+					if (error) {
+						_this.onerror(error, work_data);
+						run_next();
+						return;
+					}
+
 					var html = XMLHttp.responseText;
 					// console.log(html);
 					if (html === '错误的请求') {
@@ -763,9 +772,7 @@ function module_code(library_namespace) {
 					});
 					get_image_file(image_NO, image_list, run_next);
 
-				}, null, parameters, Object.assign({
-					error_retry : _this.MAX_ERROR_RETRY
-				}, _this.get_URL_options));
+				}, parameters, true);
 			}
 
 			// --------------------------------------
