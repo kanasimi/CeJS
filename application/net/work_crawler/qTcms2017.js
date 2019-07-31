@@ -260,7 +260,8 @@ function module_code(library_namespace) {
 			html = html.between('<div class="cy_plist', '</div>')
 			// mobile version: <div id="list">
 			// <ul class="Drama autoHeight" id="mh-chapter-list-ol-0">
-			|| html.between('<div id="list">', '</ul>');
+			// 88bag.js: <div id="list" >
+			|| html.between('<div id="list"', '</ul>');
 			// console.log(html);
 
 			var matched, PATTERN_chapter =
