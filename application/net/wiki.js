@@ -7563,7 +7563,8 @@ function module_code(library_namespace) {
 
 	// estimated time of completion 估計時間 預計剩下時間 預估剩餘時間 預計完成時間還要多久
 	// e.g., " (99%): 0.178 page/ms, 1.5 minutes estimated."
-	function estimated_message(starting_time, processed, total, page_count) {
+	function estimated_message(starting_time, processed, total_pages,
+			page_count) {
 		/** {Natural}ms */
 		var time_elapsed = Date.now() - starting_time;
 		var estimated = time_elapsed / processed * (total_pages - processed)
@@ -16167,8 +16168,9 @@ function module_code(library_namespace) {
 					// 讀取 production replicas 時，儲存的是 pageid。
 					list.is_id = true;
 				} else {
-					library_namespace.error('未設定 rev_list：可能是未知格式？檔案：'
-							+ this.file_name);
+					library_namespace
+							.error('traversal_pages: cache 檔案未設定 rev_list：可能是未知格式？ '
+									+ this.file_name);
 				}
 				id_list = list;
 			}
@@ -16194,8 +16196,12 @@ function module_code(library_namespace) {
 				: all_revision_SQL.replace(/page_id/g, 'page_title'), function(
 						error, rows, fields) {
 					if (error) {
+						library_namespace.error('traversal_pages: '
+						//		
+						+ 'Error reading database replication!');
 						library_namespace.error(error);
 						config.no_database = error;
+						delete config.list;
 					} else {
 						library_namespace.log('traversal_pages: All '
 								+ rows.length + ' pages. 轉換中...');
