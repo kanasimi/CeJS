@@ -16204,7 +16204,7 @@ function module_code(library_namespace) {
 						error, rows, fields) {
 					if (error) {
 						library_namespace.error('traversal_pages: '
-						//		
+						//
 						+ 'Error reading database replication!');
 						library_namespace.error(error);
 						config.no_database = error;
@@ -17410,7 +17410,7 @@ function module_code(library_namespace) {
 	/**
 	 * 將特定的屬性值轉為JavaScript的物件。
 	 * 
-	 * @param {Object}value
+	 * @param {Object}data
 	 *            從Wikidata所得到的屬性值。
 	 * @param {Function}[callback]
 	 *            回調函數。 callback(轉成JavaScript的值)
@@ -17425,39 +17425,45 @@ function module_code(library_namespace) {
 	 *      https://www.mediawiki.org/wiki/Wikibase/Indexing/RDF_Dump_Format#Value_representation
 	 *      https://www.wikidata.org/wiki/Special:ListDatatypes
 	 */
-	function wikidata_datavalue(value, callback, options) {
+	function wikidata_datavalue(data, callback, options) {
+		// console.log(data);
+		// console.log(JSON.stringify(data));
 		if (library_namespace.is_Object(callback) && !options) {
 			// shift arguments.
 			options = callback;
 			callback = undefined;
 		}
-		if (options && options.multi && !Array.isArray(value)) {
-			delete options.multi;
-			if (typeof callback === 'function') {
-				wikidata_datavalue(value, function() {
-					callback([ value ]);
-				}, options);
-			}
-			value = [ wikidata_datavalue(value, undefined, options) ];
-			return value;
-		}
+
+		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+		options = library_namespace.new_options(options);
+
+		callback = typeof callback === 'function' && callback;
+
+		var value = options.multi && !Array.isArray(data) ? [ data ] : data;
 
 		if (Array.isArray(value)) {
-			if (options && options.multi || value.length > 1
-					&& (!options || !options.single)) {
-				if (options && options.multi) {
-					// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
-					options = library_namespace.new_options(options);
+			if (!options.single) {
+				if (options.multi) {
 					delete options.multi;
 				}
 				// TODO: array + ('numeric-id' in value)
-				value = value.map(function(v) {
+				// TODO: using Promise.all([])
+				if (callback) {
+					// console.log(value);
+					value.run_parallel(function(run_next, item, index) {
+						// console.log([ index, item ]);
+						wikidata_datavalue(item, function(v, error) {
+							// console.log([ index, v ]);
+							value[index] = v;
+							run_next();
+						}, options);
+					}, function() {
+						callback(value);
+					});
+				}
+				return value.map(function(v) {
 					return wikidata_datavalue(v, undefined, options);
 				});
-				if (typeof callback === 'function') {
-					callback(value);
-				}
-				return value;
 			}
 
 			// 選擇推薦值/最佳等級。
@@ -17499,6 +17505,7 @@ function module_code(library_namespace) {
 		}
 
 		if (!value) {
+			callback && callback(value);
 			return value;
 		}
 
@@ -17506,12 +17513,28 @@ function module_code(library_namespace) {
 		// TODO: value.references
 		value = value.mainsnak || value;
 		if (value) {
+			// console.log(value);
+			// console.log(JSON.stringify(value));
+
 			// 與 normalize_wikidata_value() 須同步!
 			if (value.snaktype === 'novalue') {
-				return null;
+				value = null;
+				callback && callback(value);
+				return value;
 			}
 			if (value.snaktype === 'somevalue') {
-				return wikidata_edit.somevalue;
+				// e.g., [[Q1]], Property:P1419 形狀
+				// Property:P805 主條目
+				if (callback && data.qualifiers
+						&& Array.isArray(value = data.qualifiers.P805)) {
+					if (value.length === 1) {
+						value = value[0];
+					}
+					wikidata_datavalue(value, callback, options);
+				}
+				value = wikidata_edit.somevalue;
+				callback && callback(value);
+				return value;
 			}
 		}
 		// assert: value.snaktype === 'value'
@@ -17525,21 +17548,22 @@ function module_code(library_namespace) {
 
 		if (typeof value !== 'object') {
 			// e.g., typeof value === 'string'
-			if (typeof callback === 'function')
-				callback(value);
+			callback && callback(value);
 			return value;
 		}
 
 		if ('text' in value) {
 			// e.g., { text: 'Ὅμηρος', language: 'grc' }
-			return value.text;
+			value = value.text;
+			callback && callback(value);
+			return value;
 		}
 
 		if ('amount' in value) {
 			// qualifiers 純量數值
-			if (typeof callback === 'function')
-				callback(+value.amount);
-			return +value.amount;
+			value = +value.amount;
+			callback && callback(value);
+			return value;
 		}
 
 		if ('latitude' in value) {
@@ -17573,7 +17597,9 @@ function module_code(library_namespace) {
 			// TODO: precision
 			coordinate.precision = value.precision;
 			coordinate.toString = coordinate_toString;
-			return coordinate;
+			value = coordinate;
+			callback && callback(value);
+			return value;
 		}
 
 		if ('time' in value) {
@@ -17625,29 +17651,30 @@ function module_code(library_namespace) {
 				matched.JD = Julian_day.from_YMD(year, matched[1], matched[2],
 						!matched.Julian);
 			matched.toString = time_toString;
-			if (typeof callback === 'function')
-				callback(matched);
+			callback && callback(matched);
 			return matched;
 		}
 
 		if ('numeric-id' in value) {
 			// wikidata entity. 實體
 			value = 'Q' + value['numeric-id'];
-			if (typeof callback === 'function') {
+			if (callback) {
 				library_namespace.debug('Trying to get entity ' + value, 1,
 						'wikidata_datavalue');
-				wikidata_entity(value, options && options.get_object ? callback
+				wikidata_entity(value, options.get_object ? callback
 				// default: get label 標籤標題
 				: function(entity, error) {
 					if (error) {
-						callback(undefined, error);
+						callback && callback(undefined, error);
 						return;
 					}
 					entity = entity.labels || entity;
 					entity = entity[wikidata_get_site(options, true)
 							|| default_language]
 							|| entity;
-					callback('value' in entity ? entity.value : entity);
+					callback
+							&& callback('value' in entity ? entity.value
+									: entity);
 				}, wikidata_get_site(options, true));
 			}
 			return value;
@@ -17655,6 +17682,7 @@ function module_code(library_namespace) {
 
 		library_namespace.warn('wikidata_datavalue: 尚無法處理此屬性: [' + type
 				+ ']，請修改本函數。');
+		callback && callback(value);
 		return value;
 	}
 

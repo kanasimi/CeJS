@@ -109,7 +109,7 @@ function module_code(library_namespace) {
 		// e.g., pad(-9, 3) === '-09'
 		if (typeof string === 'number' && string < 0
 		//
-		&& !from_start && (!fillString || fillString == '0'))
+		&& !from_start && (!fillString || fillString === 0))
 			return '-' + pad(-string, length - 1, '0');
 
 		string = String(string);
@@ -2956,7 +2956,7 @@ function module_code(library_namespace) {
 		// initialization
 		if (Array.isArray(last)) {
 			list = last;
-			last = Infinity;
+			last = list.length;
 		}
 		if (typeof index === 'function') {
 			// shift arguments.
@@ -2971,6 +2971,8 @@ function module_code(library_namespace) {
 			// default: starts from 0.
 			index |= 0;
 		}
+
+		// console.log([ for_each, last, index, callback, _this, parallelly ]);
 
 		// ----------------------------------------------------------
 		// main loop for serial
@@ -3016,10 +3018,22 @@ function module_code(library_namespace) {
 					'run_parallel_asynchronous');
 		}
 
+		if (_this) {
+			for_each = for_each.bind(_this);
+		}
+
 		var left = 0;
+		if (list) {
+			list.forEach(function(item, index) {
+				left++;
+				setImmediate(for_each, check_left, item, index, list,
+						get_status);
+			});
+			return;
+		}
+
 		for (; index <= last; index++, left++) {
-			setImmediate(for_each, check_left, list ? list[index] : index,
-					index, list, get_status);
+			setImmediate(for_each, check_left, index, index, list, get_status);
 		}
 
 	}
