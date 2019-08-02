@@ -1234,7 +1234,7 @@ function module_code(library_namespace) {
 
 		library_namespace.log('-'.repeat(70) + '\n');
 		library_namespace.info({
-			T : 'work information:'
+			T : 'Work information:'
 		});
 
 		library_namespace.log(library_namespace.display_align(display_list, {
