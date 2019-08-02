@@ -7561,15 +7561,16 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// estimated time of completion 估計時間 預計剩下時間 預估剩餘時間 預計完成時間還要多久
 	// e.g., " (99%): 0.178 page/ms, 1.5 minutes estimated."
-	function estimated_message(starting_time, processed, total_pages,
-			page_count) {
+	function estimated_message(processed_amount, total_amount, starting_time,
+			page_count, unit) {
 		/** {Natural}ms */
 		var time_elapsed = Date.now() - starting_time;
-		var estimated = time_elapsed / processed * (total_pages - processed)
-		// 1 minutes
-		/ (60 * 1000);
+		// estimated time of completion 估計時間 預計剩下時間 預估剩餘時間 預計完成時間還要多久
+		var estimated = time_elapsed / processed_amount
+				* (total_amount - processed_amount)
+				// 1 minutes
+				/ (60 * 1000);
 		if (estimated > 1) {
 			estimated = estimated > 99 ? (estimated / 60).toFixed(1) + ' hours'
 					: estimated.toFixed(1) + ' minutes';
@@ -7580,18 +7581,24 @@ function module_code(library_namespace) {
 
 		var speed;
 		if (page_count > 0) {
+			if (!unit) {
+				// page(s)
+				unit = 'page';
+			}
 			speed = page_count / time_elapsed;
-			speed = speed < 1 ? (1e3 * speed).toFixed(2) + ' page/s' : speed
-					.toFixed(3)
-					+ ' page/ms';
+			speed = speed < 1 ? (1e3 * speed).toFixed(2) + ' ' + unit + '/s'
+					: speed.toFixed(3) + ' ' + unit + '/ms';
 			speed = ': ' + speed;
 		} else {
 			speed = '';
 		}
 
-		return (page_count > 0 ? page_count : '') + ' ('
-				+ (100 * processed / total_pages | 0) + '%)' + speed
-				+ estimated;
+		return (page_count > 0 ? page_count === total_amount ? processed_amount
+				+ '/' + total_amount : page_count : '')
+				+ ' ('
+				+ (100 * processed_amount / total_amount | 0)
+				+ '%)'
+				+ speed + estimated;
 	}
 
 	// ------------------------------------------------------------------------
@@ -8465,8 +8472,8 @@ function module_code(library_namespace) {
 							+ nochange_count;
 					// Add percentage message.
 					if (nochange_count > 1e4) {
-						done += estimated_message(config.start_working_time,
-								work_continue, nochange_count);
+						done += estimated_message(work_continue,
+								nochange_count, config.start_working_time);
 					}
 					// done += '。';
 					nochange_count = 'wiki_API.work: ';
@@ -8950,7 +8957,7 @@ function module_code(library_namespace) {
 					// e.g., 503, 413
 					if (get_URL_options
 							&& typeof get_URL_options.onfail === 'function') {
-						get_URL_options.onfail(status_code);
+						get_URL_options.onfail(error || status_code);
 					} else if (typeof callback === 'function') {
 						library_namespace.warn(
 						//
@@ -8958,7 +8965,7 @@ function module_code(library_namespace) {
 						// 避免 TypeError:
 						// Cannot convert object to primitive value
 						+ JSON.stringify(action));
-						callback(response, status_code);
+						callback(response, error || status_code);
 					}
 					return;
 				}
@@ -16292,7 +16299,7 @@ function module_code(library_namespace) {
 					if (++count % 1e4 === 0) {
 						library_namespace.log(
 						// 'traversal_pages: ' +
-						estimated_message(start_read_time, position, file_size,
+						estimated_message(position, file_size, start_read_time,
 						// e.g.,
 						// "2730000 (99%): 21.326 page/ms [[Category:大洋洲火山岛]]"
 						count) + '. ' + get_page_title_link(page_data));
@@ -17631,7 +17638,11 @@ function module_code(library_namespace) {
 						'wikidata_datavalue');
 				wikidata_entity(value, options && options.get_object ? callback
 				// default: get label 標籤標題
-				: function(entity) {
+				: function(entity, error) {
+					if (error) {
+						callback(undefined, error);
+						return;
+					}
 					entity = entity.labels || entity;
 					entity = entity[wikidata_get_site(options, true)
 							|| default_language]
@@ -18087,7 +18098,7 @@ function module_code(library_namespace) {
 	 * @param {String}[property]
 	 *            取得特定屬性值。
 	 * @param {Function}[callback]
-	 *            回調函數。 callback(轉成JavaScript的值)
+	 *            回調函數。 callback(轉成JavaScript的值, error)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
@@ -18286,8 +18297,8 @@ function module_code(library_namespace) {
 		// console.log('wikidata_entity: action: ' + action);
 		// console.log(arguments);
 		// TODO:
-		wiki_API.query(action, function(data) {
-			var error = data && data.error;
+		wiki_API.query(action, function(data, error) {
+			error = error || data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				if (error.code === 'param-missing') {
@@ -18302,15 +18313,17 @@ function module_code(library_namespace) {
 					'wikidata_entity: 未設定欲取得之特定實體id。請確定您的要求，尤其是 sites 存在: '
 							+ decodeURI(action[0]));
 				} else {
-					library_namespace.error('wikidata_entity: ['
+					library_namespace.error('wikidata_entity: '
 					//
-					+ error.code + '] ' + error.info);
+					+ (error.code ? '[' + error.code + '] '
+					//
+					+ error.info : error));
 				}
 				callback(undefined, error);
 				return;
 			}
 
-			// data:
+			// assert: library_namespace.is_Object(data):
 			// {entities:{Q1:{pageid:129,lastrevid:0,id:'P1',labels:{},claims:{},...},P1:{id:'P1',missing:''}},success:1}
 			// @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON
 			// @see https://www.wikidata.org/wiki/Special:ListDatatypes
@@ -18500,7 +18513,7 @@ function module_code(library_namespace) {
 		tree = [];
 
 		function next_entity() {
-			wikidata_entity(entity_now, function() {
+			wikidata_entity(entity_now, function(data, error) {
 				;
 			});
 		}
@@ -19841,6 +19854,10 @@ function module_code(library_namespace) {
 				site : options.site,
 				title : decodeURIComponent(options.title)
 			}, function(_entity, error) {
+				if (error) {
+					callback(undefined, error);
+					return;
+				}
 				// console.log(_entity);
 				options = Object.assign({
 					id : _entity.id
@@ -20906,7 +20923,7 @@ function module_code(library_namespace) {
 						library_namespace.debug('Get entity '
 								+ JSON.stringify(entity), 3, 'wikidata_edit');
 					}
-					if (!entity || ('missing' in entity)) {
+					if ('missing' in entity) {
 						// TODO: e.g., 此頁面不存在/已刪除。
 						// return;
 					}
@@ -21506,15 +21523,23 @@ function module_code(library_namespace) {
 	 */
 	function wikidata_merge(to, from, token, options, callback) {
 		if (!/^Q\d{1,10}$/.test(to)) {
-			wikidata_entity(to, function(entity) {
-				wikidata_merge(entity.id, from, callback, options);
+			wikidata_entity(to, function(entity, error) {
+				if (error) {
+					callback(undefined, error);
+				} else {
+					wikidata_merge(entity.id, from, callback, options);
+				}
 			});
 			return;
 		}
 
 		if (!/^Q\d{1,10}$/.test(from)) {
-			wikidata_entity(from, function(entity) {
-				wikidata_merge(to, entity.id, callback, options);
+			wikidata_entity(from, function(entity, error) {
+				if (error) {
+					callback(undefined, error);
+				} else {
+					wikidata_merge(to, entity.id, callback, options);
+				}
 			});
 			return;
 		}
@@ -21841,6 +21866,9 @@ function module_code(library_namespace) {
 		set_language : set_default_language,
 		// site_name_of
 		site_name : language_to_site_name,
+
+		estimated_message : estimated_message,
+
 		LTR_SCRIPTS : LTR_SCRIPTS,
 		PATTERN_LTR : PATTERN_LTR,
 		PATTERN_common_characters : PATTERN_common_characters,
