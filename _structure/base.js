@@ -508,9 +508,11 @@ function (global) {
 		// create a new one. copy options.
 		// or use Object.clone(options)
 		var length = arguments.length;
-		if (options) {
-			if ((new_options.new_key in options) && length === 1)
+		if (_.is_Object(options)) {
+			if ((new_options.new_key in options) && length === 1) {
+				// converted
 				return options;
+			}
 			options = Object.assign(Object.create(null), options);
 		} else {
 			options = Object.create(null);

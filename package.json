@@ -1,7 +1,7 @@
 {
 	"name" : "cejs",
 	"title" : "CeJS",
-	"version" : "2.0.20190720",
+	"version" : "3.0.20190803",
 	"description" : "A JavaScript module framework that is simple to use.",
 	"keywords" : [ "arbitrary-precision", "arithmetic", "numerals",
 			"Chinese era", "calendar", "character encoding", "address input",
@@ -11,7 +11,7 @@
 		"email" : "vimunci@gmail.com",
 		"url" : "https://github.com/kanasimi/CeJS"
 	},
-	"contributors" : "vimunci",
+	"contributors" : [ "vimunci" ],
 	"license" : "BSD-3-Clause",
 	"homepage" : "https://github.com/kanasimi/CeJS",
 	"bugs" : {

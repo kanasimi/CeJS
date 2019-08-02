@@ -17530,6 +17530,7 @@ function module_code(library_namespace) {
 					if (value.length === 1) {
 						value = value[0];
 					}
+					delete options[library_namespace.new_options.new_key];
 					wikidata_datavalue(value, callback, options);
 				}
 				value = wikidata_edit.somevalue;
