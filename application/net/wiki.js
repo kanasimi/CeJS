@@ -3627,7 +3627,7 @@ function module_code(library_namespace) {
 					var matched = _token.match(/^([^=]+)=([\s\S]*)$/);
 					if (matched) {
 						var key = matched[1].trimEnd(),
-						// key token must accept '\n'
+						// key token must accept '\n'. e.g., "key \n = value"
 						value = matched[2].trimStart();
 
 						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
@@ -4310,9 +4310,11 @@ function module_code(library_namespace) {
 
 			// 添加新行由一個豎線和連字符 "|-" 組成。
 			parameters = parameters.split('\n|-').map(function(token, index) {
-				library_namespace.debug('parse table_row / row style: '
-				//
-				+ JSON.stringify(token), 5, 'parse_wikitext.table');
+				if (typeof JSON === 'object') {
+					library_namespace.debug('parse table_row / row style: '
+					//
+					+ JSON.stringify(token), 5, 'parse_wikitext.table');
+				}
 				if (index === 0
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 				&& !token.includes(include_mark)
@@ -4333,9 +4335,11 @@ function module_code(library_namespace) {
 				// "\n|| t" === "\n| t"
 				PATTERN_CELL = /([\s\S]*?)(\n(?:\|\|?|!)|\|\||!!|$)/g;
 				while (matched = PATTERN_CELL.exec(token)) {
-					library_namespace.debug('parse table_cell: '
-					//
-					+ JSON.stringify(matched), 5, 'parse_wikitext.table');
+					if (typeof JSON === 'object') {
+						library_namespace.debug('parse table_cell: '
+						//
+						+ JSON.stringify(matched), 5, 'parse_wikitext.table');
+					}
 					// console.log(matched);
 					if (matched[2].length === 3 && matched[2].charAt(2)
 					// e.g., "\n||| t"
@@ -8425,7 +8429,7 @@ function module_code(library_namespace) {
 		var single_page_options = Object.assign({
 			// 已經在多個頁面的時候取得過內容，因此不需要再確認一次。只是要過個水設定一下。
 			// 若是沒有設定這個選項，那麼對於錯誤的頁面，將會再嘗試取得。
-			allow_missing : true,
+			allow_missing : true
 		}, config.page_options);
 		// 在個別頁面還採取 .multi 這個選項會造成錯誤。
 		delete single_page_options.multi;
@@ -10406,7 +10410,7 @@ function module_code(library_namespace) {
 		// 而應使用循環取得資料版:
 		CeL.wiki.cache({
 			type : 'categorymembers',
-			list : 'Category_name',
+			list : 'Category_name'
 		}, function(list) {
 			CeL.log('Get ' + list.length + ' item(s).');
 		}, {
@@ -17265,7 +17269,7 @@ function module_code(library_namespace) {
 					wikidata_search.use_cache(key[index++], cache_next_key,
 					//
 					Object.assign({
-						API_URL : get_data_API_URL(options),
+						API_URL : get_data_API_URL(options)
 					}, wikidata_search.use_cache.default_options, {
 						// 警告:若是設定must_callback=false，會造成程序不callback而中途跳出!
 						must_callback : true
@@ -19864,7 +19868,7 @@ function module_code(library_namespace) {
 			// placeholder 佔位符
 			property : null,
 			snaktype : null,
-			value : null,
+			value : null
 		},
 		// action to set properties. 創建Wikibase陳述。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
