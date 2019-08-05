@@ -24,7 +24,7 @@ typeof CeL === 'function' && CeL.run({
 	code : module_code
 });
 
-function detect_require() {
+function detect_require(library_namespace) {
 	if (library_namespace.platform.nodejs) {
 		return 'application.platform.nodejs.';
 	}

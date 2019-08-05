@@ -632,7 +632,8 @@ function module_code(library_namespace) {
 	var Work_crawler_prototype = {
 		// 所有的子檔案要修訂注解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
-		// 下載檔案儲存目錄路徑。圖片檔+紀錄檔下載位置。
+		// 下載檔案儲存目錄路徑。
+		// 圖片檔與紀錄檔的下載位置。下載線上網站的作品檔案後，將儲存於此目錄下。
 		// 這個目錄會在 work_crawler_loader.js 裡面被 setup_crawler() 之
 		// global.data_directory 覆寫。
 		main_directory : library_namespace.storage
@@ -1710,6 +1711,7 @@ function module_code(library_namespace) {
 					// console.log(work_status);
 					all_work_status[work_status.title] = work_status;
 				}
+				// console.trace('' + get_next_work);
 				get_next_work();
 			});
 
@@ -2090,6 +2092,7 @@ function module_code(library_namespace) {
 				}
 				// _this.save_work_data(work_data);
 			}
+			// console.log('' + callback);
 			typeof callback === 'function' && callback.call(_this, work_data);
 			_this.running = false;
 		}
@@ -3556,6 +3559,7 @@ function module_code(library_namespace) {
 				// 最終廢棄動作，防止執行 work_data[this.KEY_EBOOK].pack()。
 				delete work_data[_this.KEY_EBOOK];
 				if (typeof callback === 'function') {
+					// console.log(callback + '');
 					callback(work_data);
 				}
 				return;
@@ -5907,7 +5911,8 @@ function module_code(library_namespace) {
 		}
 
 		if (Array.isArray(data.title)) {
-			data.title = data.title.join(' - ');
+			data.title = data.title
+					.join(library_namespace.EPUB.prototype.title_separator);
 		}
 		// assert: !data.title || typeof data.title === 'string'
 
@@ -5928,8 +5933,10 @@ function module_code(library_namespace) {
 		chapter_title = data.sub_title || chapter_data
 				&& (chapter_data.chapter_title || chapter_data.title),
 		//
-		file_title = chapter_NO.pad(3) + ' '
-				+ (part_title ? part_title + ' - ' : '')
+		file_title = chapter_NO.pad(3)
+				+ ' '
+				+ (part_title ? part_title
+						+ library_namespace.EPUB.prototype.title_separator : '')
 				+ (chapter_title || ''),
 		//
 		item_data = {
@@ -6011,7 +6018,8 @@ function module_code(library_namespace) {
 				file_name : file_name,
 				author : matched[1],
 				title : matched[2],
-				// titles : matched[2].trim().split(' - '),
+				// titles :
+				// matched[2].trim().split(library_namespace.EPUB.prototype.title_separator),
 				site_name : matched[3],
 				// e.g., "20170101"
 				date : matched[4],

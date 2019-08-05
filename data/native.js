@@ -2977,9 +2977,8 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------------
 		// main loop for serial
 		function run_next() {
-			if (index > last
 			// 預留可變動 list 的空間。
-			|| list && index === list.length) {
+			if (list ? index === list.length : index > last) {
 				// done.
 				typeof callback === 'function' && callback.call(_this);
 				return;

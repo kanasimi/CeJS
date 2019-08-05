@@ -1530,8 +1530,10 @@ function module_code(library_namespace) {
 							error_retry : 4
 						}, item_data.get_URL_options)
 					});
-					return matched ? ' title="' + url + '" ' + attribute_name
-							+ '="' + href + '"' : all;
+					return matched ? ' title="'
+					// recover url
+					+ encodeURI(url).replace(/&/g, '&amp;') + '" '
+							+ attribute_name + '="' + href + '"' : all;
 				});
 
 				contents = contents.replace(/<a ([^<>]+)>([^<>]+)<\/a>/ig,
@@ -1576,7 +1578,7 @@ function module_code(library_namespace) {
 			} else if (library_namespace.is_Object(contents)) {
 				// 預設自動生成。
 				library_namespace.debug(contents, 6);
-				var _ = setup_gettext.call(this),
+				var gettext = setup_gettext.call(this),
 				//
 				html = [ '<?xml version="1.0" encoding="UTF-8"?>',
 				// https://www.w3.org/QA/2002/04/valid-dtd-list.html
@@ -1596,13 +1598,13 @@ function module_code(library_namespace) {
 				//
 				.filter(function(title) {
 					return !!title;
-				}).join(' - '), '</title>', '</head><body>');
+				}).join(this.title_separator), '</title>', '</head><body>');
 
 				// ------------------------------
 
 				// 設定item_data.url可以在閱讀電子書時，直接點選標題就跳到網路上的來源。
 				var url_header = item_data.url
-						&& ('<a href="' + item_data.url + '">'), title_layer = [];
+						&& ('<a href="' + encodeURI(item_data.url) + '">'), title_layer = [];
 				// 卷標題 part/episode > chapter > section
 				if (contents.title) {
 					title_layer
@@ -1670,9 +1672,9 @@ function module_code(library_namespace) {
 				}
 				html.push('<p class="word_count">',
 				// 加入本章節之字數統計標示。
-				_('%1 words', item_data.word_count)
+				gettext('%1 words', item_data.word_count)
 				// 從第一章到本章的文字總數。
-				+ (item_data.words_so_far > 0 ? ', ' + _('%1 words',
+				+ (item_data.words_so_far > 0 ? ', ' + gettext('%1 words',
 				// item_data.words_so_far: 本作品到前一個章節總計的字數。
 				item_data.words_so_far + item_data.word_count) : ''), '</p>');
 
@@ -1797,17 +1799,19 @@ function module_code(library_namespace) {
 			library_namespace.debug('Use language ' + language);
 		}
 
-		var _ = library_namespace.gettext.in_domain
+		var gettext = library_namespace.gettext.in_domain
 		// @see application/locale/resource/locale.csv
 		? library_namespace.gettext.in_domain.bind(null, language)
 				: library_namespace.gettext;
 
-		return _;
+		return gettext;
 	}
 
 	// 自動生成目錄。
 	function generate_TOC() {
-		var _ = setup_gettext.call(this),
+		var gettext = setup_gettext.call(this),
+		// 一般說來，title 應該只有一個。
+		book_title = set_meta_information.call(this, 'title').join(', '),
 		//
 		TOC_html = [ '<?xml version="1.0" encoding="UTF-8"?>',
 		// https://www.w3.org/QA/2002/04/valid-dtd-list.html
@@ -1819,12 +1823,10 @@ function module_code(library_namespace) {
 		'<html xmlns="http://www.w3.org/1999/xhtml"',
 		//
 		' xmlns:epub="http://www.idpf.org/2007/ops">',
+		// The 'head' element should have a 'title' child element.
+		'<head><meta charset="UTF-8" /><title>', book_title, '</title></head>',
 		//
-		'<head><meta charset="UTF-8" /></head>',
-		//
-		'<body>',
-		// 一般說來，title應該只有一個。
-		'<h1>', set_meta_information.call(this, 'title').join(', '), '</h1>' ];
+		'<body>', '<h1>', book_title, '</h1>' ];
 
 		this.resources.some(function(resource) {
 			if (resource.properties = "cover-image") {
@@ -1842,7 +1844,8 @@ function module_code(library_namespace) {
 
 		TOC_html.push(
 		// 作品資訊, 小説情報, 電子書籍紹介, 作品情報, book information
-		'<h2>', _('Work information'), '</h2>', '<div id="work_data">', '<dl>');
+		'<h2>', gettext('Work information'), '</h2>', '<div id="work_data">',
+				'<dl>');
 
 		/**
 		 * <code>
@@ -1894,7 +1897,7 @@ function module_code(library_namespace) {
 				});
 			}
 
-			TOC_html.push('<dt>', _(key), '</dt>',
+			TOC_html.push('<dt>', gettext('TOC.' + key), '</dt>',
 			//
 			'<dd>', values.join(', '), '</dd>');
 		}
@@ -1916,7 +1919,7 @@ function module_code(library_namespace) {
 
 		// Skip this.metadata.link
 
-		var _ = setup_gettext.call(this),
+		var gettext = setup_gettext.call(this),
 		// 字數計算, 合計文字数
 		total_word_count = 0;
 		this.chapters.forEach(function(chapter) {
@@ -1927,11 +1930,11 @@ function module_code(library_namespace) {
 			}
 		});
 		if (total_word_count > 0) {
-			TOC_html.push('<dt>', _('word count'), '</dt>', '<dd>',
+			TOC_html.push('<dt>', gettext('word count'), '</dt>', '<dd>',
 			//
-			_('%1 words', total_word_count) + ' / '
+			gettext('%1 words', total_word_count) + ' / '
 			//
-			+ _('%1 chapters', this.chapters.length) + ' ≈ '
+			+ gettext('%1 chapters', this.chapters.length) + ' ≈ '
 			// 平均文字数
 			+ Math.round(total_word_count / this.chapters.length), '</dd>');
 		}
@@ -1941,31 +1944,124 @@ function module_code(library_namespace) {
 		// Navigation Document.
 		TOC_html.push('<nav epub:type="toc" id="toc">',
 		// 作品目錄 目次 Table of contents
-		'<h2>', _('Contents'), '</h2>', '<ol>');
+		'<h2>', gettext('Contents'), '</h2>', '<ol>');
+
+		var chapter_list = [];
 
 		this.chapters.map(function(chapter) {
-			var data = chapter[KEY_DATA]
-			//
-			|| Object.create(null),
-			//
-			date = Array.isArray(data.date) ? data.date[0] : data.date;
+			var data = chapter[KEY_DATA] || Object.create(null);
 			// console.log(data);
-
-			date = date ? ' <small>(' + (library_namespace.is_Date(date)
-			//
-			? date.format('%Y-%2m-%2d') : date) + ')</small>' : '';
+			var date = Array.isArray(data.date) ? data.date[0] : data.date;
 			// console.log(date);
+			var chapter_item;
+			if (date) {
+				if (library_namespace.is_Date(date)) {
+					date = date.format('%Y-%2m-%2d');
+				}
+				chapter_item = [ ' ', {
+					small : date
+				} ];
+			} else {
+				chapter_item = [];
+			}
 
-			TOC_html.push([ '<li>', '<a href="' + chapter.href + '">',
-			//
-			data.title
+			var title = data.title
 			// 未失真的 title = decode_identifier.call(this, item.id)
-			|| decode_identifier.call(this, chapter.id),
-			//
-			date, '</a>', '</li>' ].join(''));
+			|| decode_identifier.call(this, chapter.id);
+
+			var url = chapter.href;
+			var parent_list = chapter_list;
+
+			if (this.add_TOC_hierarchy) {
+				var NO = title.match(/^(\d{1,4}\s)(.+)$/);
+				if (NO) {
+					title = NO[2];
+					NO = NO[1];
+				}
+				var title_hierarchy = title.split(this.title_separator);
+				/**
+				 * 階層顯示目錄。 <code>
+
+				chapter_list = [
+					// chapter without part:
+					{li:
+						{a:['title',' ',{small:'date'}],href:'url'}
+					},
+					// chapter with part:
+					{li: [
+						{a:['title']},
+						{ol:[{li:'chapters'}]}
+					] }
+				]
+
+				</code>
+				 */
+				while (parent_list.length > 0) {
+					// get the last <li>
+					var anchor = parent_list[parent_list.length - 1];
+					var part_title = (Array.isArray(anchor.li) ? anchor.li[0]
+							: anchor.li).a[0];
+					// @see chapter with part
+					if (part_title !== title_hierarchy[0]) {
+						break;
+					}
+					title_hierarchy.shift();
+					if (!Array.isArray(anchor.li)) {
+						// assert: anchor.li =
+						// {a:['title',' ',{small:'date'}],href:'url'}
+						anchor.li = [ anchor.li, {
+							ol : /* next parent_list */[]
+						} ];
+					}
+					parent_list = anchor.li[1].ol;
+				}
+
+				while (title_hierarchy.length > 1) {
+					// assert: {String}title_hierarchy[0] ===
+					// title_hierarchy[0].trim() !== ''
+					var anchor = {
+						li : [ {
+							a : [ title_hierarchy.shift() ],
+							href : url
+						}, {
+							ol : /* next parent_list */[]
+						} ]
+					};
+					parent_list.push(anchor);
+					parent_list = anchor.li[1].ol;
+				}
+				// assert: title_hierarchy.length === 1
+				title = (NO || '') + title_hierarchy.shift();
+				// assert: {String}title === title.trim() !== ''
+			}
+
+			chapter_item.unshift({
+				a : title,
+				href : url
+			});
+			parent_list.push({
+				li : chapter_item
+			});
 		}, this);
 
-		TOC_html.push('</ol>', '</nav>', '</body>', '</html>');
+		if (chapter_list.length === 1) {
+			var anchor_li = chapter_list[0].li;
+			// anchor_li: [ {a:['title']}, {ol:[{li:'chapters'}]} ]
+			var part_title = Array.isArray(anchor_li) && anchor_li[0].a;
+			if (Array.isArray(part_title)) {
+				part_title = part_title[0];
+			}
+			if (part_title && part_title.includes('正文')) {
+				// 只有一卷，叫作"正文卷"。
+				chapter_list = anchor_li[1].ol;
+			}
+		}
+
+		// console.log(chapter_list);
+		// console.log(JSON.stringify(chapter_list));
+
+		TOC_html.push(JSON.to_XML(chapter_list, this.to_XML_options), '</ol>',
+				'</nav>', '</body>', '</html>');
 
 		return TOC_html.join(this.to_XML_options.separator);
 	}
@@ -1980,6 +2076,7 @@ function module_code(library_namespace) {
 					callback));
 			library_namespace.debug('Waiting for all resources loaded...', 0,
 					'write_chapters');
+			console.log(this.downloading);
 			return;
 		}
 
@@ -2262,9 +2359,6 @@ function module_code(library_namespace) {
 				// the operatoin failed
 				library_namespace.error(error);
 			}
-		} else {
-			// 最起碼 command_file_name 已經不需要存在。
-			library_namespace.remove_file(this.path.root + command_file_name);
 		}
 		typeof callback === 'function' && callback();
 	}
@@ -2279,6 +2373,10 @@ function module_code(library_namespace) {
 		// http://www.idpf.org/epub/31/spec/epub-spec.html#gloss-package-document
 		// e.g., EPUB/content.opf
 		package_document_name : 'content.opf',
+
+		title_separator : ' - ',
+		// 階層顯示目錄。
+		add_TOC_hierarchy : true,
 
 		to_XML_options : {
 			declaration : true,

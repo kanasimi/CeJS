@@ -45,10 +45,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// https://stackoverflow.com/questions/31673587/error-unable-to-verify-the-first-certificate-in-nodejs
-	// fix Error: unable to verify the first certificate
-	process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
-
 	var default_configuration = {
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.comic中Comic_site.prototype內的母comments，並以其為主體。
 

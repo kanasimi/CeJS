@@ -1191,7 +1191,7 @@ function module_code(library_namespace) {
 			if (library_namespace.is_WWW())
 				gettext.translate_nodes();
 			create_domain_menu.onchange.forEach(function(handler) {
-				handler();
+				handler(language);
 			});
 			typeof callback === 'function' && callback(language);
 		}, true);
