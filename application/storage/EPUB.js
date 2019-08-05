@@ -1958,8 +1958,9 @@ function module_code(library_namespace) {
 				if (library_namespace.is_Date(date)) {
 					date = date.format('%Y-%2m-%2d');
 				}
+				// 首发时间
 				chapter_item = [ ' ', {
-					small : date
+					small : '(' + date + ')'
 				} ];
 			} else {
 				chapter_item = [];
@@ -2002,7 +2003,7 @@ function module_code(library_namespace) {
 					var part_title = (Array.isArray(anchor.li) ? anchor.li[0]
 							: anchor.li).a[0];
 					// @see chapter with part
-					if (part_title !== title_hierarchy[0]) {
+					if (part_title !== title_hierarchy[0].trim()) {
 						break;
 					}
 					title_hierarchy.shift();
@@ -2021,7 +2022,7 @@ function module_code(library_namespace) {
 					// title_hierarchy[0].trim() !== ''
 					var anchor = {
 						li : [ {
-							a : [ title_hierarchy.shift() ],
+							a : [ title_hierarchy.shift().trim() ],
 							href : url
 						}, {
 							ol : /* next parent_list */[]
@@ -2031,14 +2032,25 @@ function module_code(library_namespace) {
 					parent_list = anchor.li[1].ol;
 				}
 				// assert: title_hierarchy.length === 1
-				title = (NO || '') + title_hierarchy.shift();
+				title = (NO || '') + title_hierarchy.shift().trim();
 				// assert: {String}title === title.trim() !== ''
 			}
 
-			chapter_item.unshift({
-				a : title,
-				href : url
-			});
+			// calibre 的目錄只取 <a> 的內容。
+			if (true) {
+				// 以這方法，目錄中會出現日期。
+				chapter_item.unshift(title);
+				chapter_item = {
+					a : chapter_item,
+					href : url
+				};
+			} else {
+				// 以這方法，目錄中不會出現日期。
+				chapter_item.unshift({
+					a : title,
+					href : url
+				});
+			}
 			parent_list.push({
 				li : chapter_item
 			});
@@ -2076,7 +2088,7 @@ function module_code(library_namespace) {
 					callback));
 			library_namespace.debug('Waiting for all resources loaded...', 0,
 					'write_chapters');
-			console.log(this.downloading);
+			// console.log(this.downloading);
 			return;
 		}
 
