@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @name CeL function for MediaWiki (Wikipedia / 維基百科)
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用的程式庫，主要用於編寫[[維基百科:機器人]]
@@ -10436,7 +10436,7 @@ function module_code(library_namespace) {
 	 * @param {String}[title]
 	 *            page title 頁面標題。
 	 * @param {Function}callback
-	 *            回調函數。 callback(pages, titles, title)<br />
+	 *            回調函數。 callback(pages, titles, title, error)<br />
 	 *            注意: arguments 與 get_list() 之 callback 連動。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
@@ -10634,7 +10634,7 @@ function module_code(library_namespace) {
 
 		wiki_API.query(title,
 		// treat as {Function}callback or {Object}wiki_API.work config.
-		function(data) {
+		function(data, error) {
 			function add_page(page) {
 				titles.push(page.title);
 				pages.push(page);
@@ -10731,7 +10731,7 @@ function module_code(library_namespace) {
 						+ (typeof data === 'object'
 								&& typeof JSON !== 'undefined' ? JSON
 								.stringify(data) : data) + ']');
-				callback(pages, titles, title);
+				callback(pages, titles, title, data);
 
 			} else if (data.query[type]) {
 				// 一般情況。
@@ -17412,7 +17412,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 將特定的屬性值轉為JavaScript的物件。
+	 * 將特定的屬性值轉為 JavaScript 的物件。
 	 * 
 	 * @param {Object}data
 	 *            從Wikidata所得到的屬性值。
@@ -17535,7 +17535,9 @@ function module_code(library_namespace) {
 						value = value[0];
 					}
 					delete options[library_namespace.new_options.new_key];
+					// console.log(value);
 					wikidata_datavalue(value, callback, options);
+					return;
 				}
 				value = wikidata_edit.somevalue;
 				callback && callback(value);
@@ -17666,10 +17668,16 @@ function module_code(library_namespace) {
 			if (callback) {
 				library_namespace.debug('Trying to get entity ' + value, 1,
 						'wikidata_datavalue');
+				// console.log(value);
+				// console.log(wikidata_get_site(options, true));
 				wikidata_entity(value, options.get_object ? callback
 				// default: get label 標籤標題
 				: function(entity, error) {
+					// console.log([ entity, error ]);
 					if (error) {
+						library_namespace.debug(
+								'Failed to get entity ' + value, 0,
+								'wikidata_datavalue');
 						callback && callback(undefined, error);
 						return;
 					}
@@ -17680,7 +17688,9 @@ function module_code(library_namespace) {
 					callback
 							&& callback('value' in entity ? entity.value
 									: entity);
-				}, wikidata_get_site(options, true));
+				}, {
+					languages : wikidata_get_site(options, true)
+				});
 			}
 			return value;
 		}

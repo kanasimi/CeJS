@@ -3265,7 +3265,8 @@ function test_wiki() {
 		_setup_test('wiki: CeL.wiki.data(basic), wikidata_entity()');
 		CeL.wiki.data('宇宙', '形狀', function(data, error) {
 			var test_name = 'wiki: CeL.wiki.data(basic)';
-			assert(Array.isArray(data) ? data.includes('宇宙的形狀') : data === '宇宙的形狀' , test_name);
+			// console.log(data);
+			assert(Array.isArray(data) ? data.includes('宇宙的形狀') : [ data, '宇宙的形狀' ], test_name);
 			_finish_test(test_name);
 		});
 
