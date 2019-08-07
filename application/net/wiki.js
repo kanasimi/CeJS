@@ -1810,7 +1810,7 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 
-		var introduction_section = [], representative_image, index = 0;
+		var introduction_section = [], representative_image;
 		if (parsed) {
 			introduction_section.page = parsed.page;
 			introduction_section.title = title;
@@ -1821,16 +1821,19 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 
+		var index = 0;
 		for (; index < first_section.length; index++) {
 			var token = first_section[index];
+			// console.log(token);
 			if (token.type === 'file') {
 				// {String}代表圖像。
 				if (!representative_image) {
 					representative_image = token;
 				}
 				continue;
+			}
 
-			} else if (token.type === 'transclusion') {
+			if (token.type === 'transclusion') {
 				if (token.name === 'NoteTA') {
 					// preserve 轉換用詞
 					// introduction_section.push(token);
@@ -1860,8 +1863,10 @@ function module_code(library_namespace) {
 				}
 
 				continue;
+			}
 
-			} else if (token.type === 'tag' && token.tag === 'ref') {
+			if ((token.type === 'tag' || token.type === 'tag_single')
+					&& token.tag === 'ref') {
 				// 去掉所有參考資料。
 				continue;
 			}
@@ -1875,6 +1880,8 @@ function module_code(library_namespace) {
 				// title_piece
 				introduction_section.title_token = token;
 			}
+			// console.log('Add token:');
+			// console.log(token);
 			introduction_section.push(token);
 			if (introduction_section.title_token)
 				break;
@@ -1886,8 +1893,8 @@ function module_code(library_namespace) {
 		while (++index < first_section.length) {
 			token = first_section[index];
 			// remove {{Notetag}}, <ref>
-			if (token.type === 'tag' && token.tag === 'ref'
-					|| token.type === 'transclusion'
+			if ((token.type === 'tag' || token.type === 'tag_single')
+					&& token.tag === 'ref' || token.type === 'transclusion'
 					&& token.name === 'Notetag')
 				continue;
 			introduction_section.push(token);
@@ -1930,7 +1937,7 @@ function module_code(library_namespace) {
 
 	// @inner
 	function preprocess_section_link_token(token) {
-		if (token.type === 'tag') {
+		if (token.type === 'tag'/* || token.type === 'tag_single' */) {
 			// token: [ tag_attributes, tag_inner ]
 			if (token.tag === 'nowiki') {
 				// escape characters inside <nowiki>
@@ -5597,7 +5604,7 @@ function module_code(library_namespace) {
 		// 忽略 <span> 之類。
 		function filter_tags(token) {
 			// console.log(token);
-			if (token.type === 'tag') {
+			if (token.type === 'tag'/* || token.type === 'tag_single' */) {
 				return filter_tags(token[1]);
 			}
 			if (Array.isArray(token)) {
@@ -10901,52 +10908,6 @@ function module_code(library_namespace) {
 		} ]
 	};
 
-	// setup wiki_API.prototype.methods
-	(function wiki_API_prototype_methods() {
-		// 登記 methods。
-		var methods = wiki_API.prototype.next.methods;
-
-		for ( var name in get_list.type) {
-			methods.push(name);
-			wiki_API[name] = get_list.bind(null, name);
-		}
-
-		// add method to wiki_API.prototype
-		// setup other wiki_API.prototype methods.
-		methods.forEach(function(method) {
-			library_namespace.debug('add action to wiki_API.prototype: '
-					+ method, 2);
-			wiki_API.prototype[method] = function() {
-				// assert: 不可改動 method @ IE！
-				var args = [ method ];
-				Array.prototype.push.apply(args, arguments);
-				try {
-					library_namespace.debug('add action: '
-							+ args.map(JSON.stringify).join('<br />\n'), 3,
-							'wiki_API.prototype.' + method);
-				} catch (e) {
-					// TODO: handle exception
-				}
-				this.actions.push(args);
-				// TODO: 不應該僅以this.running判定，
-				// 因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
-				if (!this.running
-				// 當只剩下剛剛.push()進的operation時，表示已經不會再執行，則還是實行this.next()。
-				// TODO: 若是其他執行序會操作this.actions、主動執行this.next()，
-				// 或.next()正執行之其他操作會執行this.next()，可能造成重複執行的結果！
-				// 2016/11/16 14:45:19 但這方法似乎會提早執行...
-				// || this.actions.length === 1
-				) {
-					this.next();
-				} else {
-					library_namespace.debug('正在執行中，直接跳出。', 6,
-							'wiki_API.prototype.' + method);
-				}
-				return this;
-			};
-		});
-	})();
-
 	// ------------------------------------------------------------------------
 
 	/**
@@ -10960,7 +10921,7 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
-	wiki_API.list = function(target, callback, options) {
+	function wiki_API_list(target, callback, options) {
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
 			options = Object.create(null);
@@ -11005,9 +10966,62 @@ function module_code(library_namespace) {
 			continue_session : options[KEY_SESSION],
 			limit : options.limit || 'max'
 		}, options));
-	};
+	}
 
-	wiki_API.list.default_type = 'embeddedin';
+	wiki_API.list = wiki_API_list;
+
+	wiki_API_list.default_type = 'embeddedin';
+	// supported type list
+	wiki_API_list.type_list = [];
+
+	// ------------------------------------------------------------------------
+
+	// setup wiki_API.prototype.methods
+	(function wiki_API_prototype_methods() {
+		// 登記 methods。
+		var methods = wiki_API.prototype.next.methods;
+
+		for ( var name in get_list.type) {
+			methods.push(name);
+			wiki_API_list.type_list.push(name);
+			wiki_API[name] = get_list.bind(null, name);
+		}
+
+		// add method to wiki_API.prototype
+		// setup other wiki_API.prototype methods.
+		methods.forEach(function(method) {
+			library_namespace.debug('add action to wiki_API.prototype: '
+					+ method, 2);
+			wiki_API.prototype[method] = function() {
+				// assert: 不可改動 method @ IE！
+				var args = [ method ];
+				Array.prototype.push.apply(args, arguments);
+				try {
+					library_namespace.debug('add action: '
+							+ args.map(JSON.stringify).join('<br />\n'), 3,
+							'wiki_API.prototype.' + method);
+				} catch (e) {
+					// TODO: handle exception
+				}
+				this.actions.push(args);
+				// TODO: 不應該僅以this.running判定，
+				// 因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
+				if (!this.running
+				// 當只剩下剛剛.push()進的operation時，表示已經不會再執行，則還是實行this.next()。
+				// TODO: 若是其他執行序會操作this.actions、主動執行this.next()，
+				// 或.next()正執行之其他操作會執行this.next()，可能造成重複執行的結果！
+				// 2016/11/16 14:45:19 但這方法似乎會提早執行...
+				// || this.actions.length === 1
+				) {
+					this.next();
+				} else {
+					library_namespace.debug('正在執行中，直接跳出。', 6,
+							'wiki_API.prototype.' + method);
+				}
+				return this;
+			};
+		});
+	})();
 
 	// ------------------------------------------------------------------------
 
