@@ -11624,8 +11624,10 @@ function module_code(library_namespace) {
 			wiki_API.edit.set_stamp(options, timestamp);
 		}
 		// the token should be sent as the last parameter.
+		library_namespace.debug('options.token = ' + JSON.stringify(token), 9,
+				'wiki_API.edit');
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
-				: token;
+				: token || '';
 		library_namespace.debug('#2: ' + Object.keys(options).join(','), 4,
 				'wiki_API.edit');
 
