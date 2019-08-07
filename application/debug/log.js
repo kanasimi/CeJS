@@ -1923,7 +1923,7 @@ function finish(name_space) {
 			} else {
 				var tests_left = Object.create(null), tests_count = 0,
 				// assert: typeof conditions === 'function'
-				finish_test = function(test_name) {
+				finish_test = function finish_test(test_name) {
 					tests_count--;
 					delete tests_left[test_name];
 					if (tests_count === 0
@@ -1931,10 +1931,7 @@ function finish(name_space) {
 					) {
 						report();
 					}
-				};
-
-				conditions(assert_proxy, function setup_test(test_name,
-						test_function) {
+				}, setup_test = function setup_test(test_name, test_function) {
 					// need wait (pending)
 					assert_proxy.asynchronous = true;
 					tests_count++;
@@ -1954,7 +1951,17 @@ function finish(name_space) {
 						finish_test(test_name);
 					}
 
-				}, finish_test);
+				};
+
+				// TODO: add try{} to conditions()
+				if (conditions.constructor.name === 'AsyncFunction') {
+					// allow async functions
+					// https://github.com/tc39/ecmascript-asyncawait/issues/78
+					eval('(async function(){await conditions(assert_proxy, setup_test, finish_test);})()');
+					assert_proxy.asynchronous = true;
+				} else {
+					conditions(assert_proxy, setup_test, finish_test);
+				}
 			}
 
 			if (!assert_proxy.asynchronous) {

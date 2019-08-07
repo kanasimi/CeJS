@@ -10431,6 +10431,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function get_list(type, title, callback, options) {
+		// console.trace(title);
 		library_namespace.debug(type
 				+ (title ? ' ' + get_page_title_link(title) : '')
 				+ ', callback: ' + callback, 3, 'get_list');
@@ -10474,8 +10475,9 @@ function module_code(library_namespace) {
 		}
 
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!Array.isArray(title))
-			title = [ , title ];
+		var action = is_api_and_title(title, true) ? title.clone()
+		// assert: {String}title
+		: [ , title ];
 
 		var continue_from = prefix + 'continue',
 		// {wiki_API}options.continue_session: 藉以取得後續檢索用索引值之 {wiki_API}。
@@ -10519,7 +10521,7 @@ function module_code(library_namespace) {
 			// 在多人共同編輯的情況下，才需要每次重新 load page。
 			get_continue(Array.isArray(options.get_continue)
 			//
-			? options.get_continue : [ title[0], options.get_continue ], {
+			? options.get_continue : [ action[0], options.get_continue ], {
 				type : type,
 				// [KEY_SESSION]
 				session : continue_session || options[KEY_SESSION],
@@ -10563,22 +10565,23 @@ function module_code(library_namespace) {
 					+ ': start from ' + continue_from, 2, 'get_list');
 		}
 
-		title[1] = title[1] ? '&'
+		action[1] = action[1] ? '&'
 		// allpages 不具有 title。
 		+ (parameter === get_list.default_parameter ? prefix : '')
-		// 不能設定 wiki_API.query.title_param(title, true)，有些用 title 而不用 titles。
+		// 不能設定 wiki_API.query.title_param(action, true)，有些用 title 而不用 titles。
 		// e.g., 20150916.Multiple_issues.v2.js
-		+ wiki_API.query.title_param(title[1]/* , true, options.is_id */) : '';
+		+ wiki_API.query.title_param(action[1]/* , true, options.is_id */)
+				: '';
 
 		if (typeof title_preprocessor === 'function') {
 			// title_preprocessor(title_parameter)
-			library_namespace.debug('title_parameter: [' + title[1] + ']', 3,
+			library_namespace.debug('title_parameter: [' + action[1] + ']', 3,
 					'get_list');
-			title[1] = title_preprocessor(title[1], options);
-			library_namespace.debug('→ [' + title[1] + ']', 3, 'get_list');
+			action[1] = title_preprocessor(action[1], options);
+			library_namespace.debug('→ [' + action[1] + ']', 3, 'get_list');
 		}
 
-		title[1] = 'query&' + parameter + '=' + type + title[1]
+		action[1] = 'query&' + parameter + '=' + type + action[1]
 		// 處理數目限制 limit。
 		// No more than 500 (5,000 for bots) allowed.
 		+ (options.limit > 0 || options.limit === 'max'
@@ -10598,17 +10601,17 @@ function module_code(library_namespace) {
 
 		for ( var parameter in options) {
 			if (parameter.startsWith(prefix)) {
-				title[1] += '&' + parameter + '='
+				action[1] += '&' + parameter + '='
 						+ encodeURIComponent(options[parameter]);
 			}
 		}
 
-		add_parameters(title, options);
+		add_parameters(action, options);
 
 		// TODO: 直接以是不是 .startsWith(prefix) 來判定是不是該加入 parameters。
 
-		if (!title[0])
-			title = title[1];
+		if (!action[0])
+			action = action[1];
 		// console.log('get_list: title: ' + title);
 
 		if (typeof callback !== 'function') {
@@ -10623,13 +10626,18 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		wiki_API.query(title,
+		wiki_API.query(action,
 		// treat as {Function}callback or {Object}wiki_API.work config.
 		function(data, error) {
+			// console.log(JSON.stringify(data));
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value) {
 				library_namespace.show_value(data, 'get_list: ' + type);
+			}
+
+			if (error) {
+				callback(undefined, error);
 			}
 
 			var
@@ -10709,6 +10717,9 @@ function module_code(library_namespace) {
 			// 紀錄清單類型。
 			// assert: overwrite 之屬性不應該是原先已經存在之屬性。
 			pages.list_type = type;
+			if (is_api_and_title(title, true)) {
+				title = title[1];
+			}
 			if (get_page_content.is_page_data(title)) {
 				title = title.title;
 			}
@@ -10739,7 +10750,7 @@ function module_code(library_namespace) {
 				// (pages, titles, title) → (pages, error)
 				// 按照需求程度編配/編排 arguments。
 				// 因為 callback 所欲知最重要的資訊是 pages，因此將 pages 置於第一 argument。
-				callback(pages, title);
+				callback(pages);
 				return;
 			}
 
