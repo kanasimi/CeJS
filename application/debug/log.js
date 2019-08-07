@@ -1955,16 +1955,16 @@ function finish(name_space) {
 					}
 				};
 
-				try {
-					if (conditions.constructor.name === 'AsyncFunction') {
-						// allow async functions
-						// https://github.com/tc39/ecmascript-asyncawait/issues/78
-						eval('(async function(){await conditions(assert_proxy, setup_test, finish_test);})()');
-					} else {
+				if (conditions.constructor.name === 'AsyncFunction') {
+					// allow async functions
+					// https://github.com/tc39/ecmascript-asyncawait/issues/78
+					eval('try { (async function(){ await conditions(assert_proxy, setup_test, finish_test); })(); } catch (e) { handler([ false, test_name ]); }');
+				} else {
+					try {
 						conditions(assert_proxy, setup_test, finish_test);
+					} catch (e) {
+						handler([ false, test_name ]);
 					}
-				} catch (e) {
-					handler([ false, test_name ]);
 				}
 			}
 
