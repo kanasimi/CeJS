@@ -1501,7 +1501,8 @@ function module_code(library_namespace) {
 		if (isNaN(options.offset) && !isNaN(options.zone)) {
 			options.offset = options.zone * 60;
 		}
-		// library_namespace.debug('options.offset = ' + options.offset, 6);
+		// console.log(options);
+		// library_namespace.debug('options.offset = ' + options.offset, 0);
 
 		// to this minute offset. UTC+8: 8 * 60 = +480
 		// or using options.minute_offset?

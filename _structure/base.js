@@ -114,7 +114,7 @@ function (global) {
 		 * @type {String}
 		 * @ignore
 		 */
-		library_version = '3.0.0',
+		library_version = '3.1.0',
 
 
 		/**

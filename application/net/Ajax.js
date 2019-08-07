@@ -2991,7 +2991,7 @@ function module_code(library_namespace) {
 				response.on('data', function(chunk) {
 					// {Buffer}chunk
 					length += chunk.length;
-					library_namespace.debug('receive BODY.length: '
+					library_namespace.debug('receive BODY '
 					//
 					+ chunk.length + '/' + length + ': ' + url.format(), 4,
 							'fetch');
