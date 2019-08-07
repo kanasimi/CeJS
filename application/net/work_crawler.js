@@ -2331,13 +2331,14 @@ function module_code(library_namespace) {
 				id_list = id;
 			})) {
 				if (approximate_title.length !== 1) {
+					var message = [ approximate_title.length === 0
+					// failed: not only one
+					? '未搜尋到與《%1》相符者。' : '找到%2個與《%1》相符者。', work_title,
+							approximate_title.length ];
 					library_namespace.error([
 							_this.id + ': ',
 							{
-								T : [ approximate_title.length === 0
-								// failed: not only one
-								? '未搜尋到與《%1》相符者。' : '找到%2個與《%1》相符者。',
-										work_title, approximate_title.length ]
+								T : message
 							},
 							approximate_title.length === 0
 							// is_latin
@@ -2346,6 +2347,7 @@ function module_code(library_namespace) {
 										+ '請回報議題讓下載工具設定 extract_work_id()，'
 										+ '以免將 work id 誤判為 work title。'
 							} : '' ]);
+					_this.onerror(gettext.apply(null, message), work_title);
 					finish_up(approximate_title.length > 0 && {
 						titles : approximate_title
 					});
