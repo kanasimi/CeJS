@@ -1722,14 +1722,15 @@ function finish(name_space) {
 		 * @since 2012/9/19 00:20:49, 2015/10/18 23:8:9 refactoring 重構
 		 */
 		function log_front_end_test(test_name, conditions, options) {
-			if (Array.isArray(test_name) && !options) {
-				// shift: 跳過 test_name。
+			if ((Array.isArray(test_name) || typeof test_name !== 'function')
+					&& !options) {
+				// shift arguments: 跳過 test_name。
 				options = conditions;
 				conditions = test_name;
 			}
 
 			if (!Array.isArray(conditions) && typeof conditions !== 'function') {
-				throw new Error(CeL.Class + '.test: PLease input {Array}!');
+				throw new Error(CeL.Class + '.test: Please input {Array}!');
 				return;
 			}
 
@@ -1923,15 +1924,7 @@ function finish(name_space) {
 			} else {
 				var tests_left = Object.create(null), tests_count = 0,
 				// assert: typeof conditions === 'function'
-				finish_test = function finish_test(test_name) {
-					tests_count--;
-					delete tests_left[test_name];
-					if (tests_count === 0
-					// && CeL.is_empty_object(tests_left)
-					) {
-						report();
-					}
-				}, setup_test = function setup_test(test_name, test_function) {
+				setup_test = function setup_test(test_name, test_function) {
 					// need wait (pending)
 					assert_proxy.asynchronous = true;
 					tests_count++;
@@ -1950,17 +1943,28 @@ function finish(name_space) {
 						}
 						finish_test(test_name);
 					}
-
+				},
+				//
+				finish_test = function finish_test(test_name) {
+					tests_count--;
+					delete tests_left[test_name];
+					if (tests_count === 0
+					// && CeL.is_empty_object(tests_left)
+					) {
+						report();
+					}
 				};
 
-				// TODO: add try{} to conditions()
-				if (conditions.constructor.name === 'AsyncFunction') {
-					// allow async functions
-					// https://github.com/tc39/ecmascript-asyncawait/issues/78
-					eval('(async function(){await conditions(assert_proxy, setup_test, finish_test);})()');
-					assert_proxy.asynchronous = true;
-				} else {
-					conditions(assert_proxy, setup_test, finish_test);
+				try {
+					if (conditions.constructor.name === 'AsyncFunction') {
+						// allow async functions
+						// https://github.com/tc39/ecmascript-asyncawait/issues/78
+						eval('(async function(){await conditions(assert_proxy, setup_test, finish_test);})()');
+					} else {
+						conditions(assert_proxy, setup_test, finish_test);
+					}
+				} catch (e) {
+					handler([ false, test_name ]);
 				}
 			}
 

@@ -48,8 +48,9 @@ var test_start = new Date - 0,
 test_debug_level = 0,
 /** {ℕ⁰:Natural+0}test level */
 test_level = 1,
-/** {ℕ⁰:Natural+0}count of errors (failed + fatal) */
-error_count = 0,
+/** {ℕ⁰:Natural+0}count of all errors (failed + fatal) */
+all_error_count = 0,
+/** {Object}tests still running */
 still_running = {
 	left_count : 0
 };
@@ -67,7 +68,7 @@ require('../index');
 
 
 function test_base() {
-	error_count += CeL.test('set options', function(assert) {
+	all_error_count += CeL.test('set options', function(assert) {
 		assert(CeL.is_Object({}), 'CeL.is_Object({})');
 		assert(CeL.is_Object(Object.create(null)), 'CeL.is_Object(Object.create(null))');
 
@@ -99,7 +100,7 @@ function test_base() {
 		assert([JSON.stringify(o2), JSON.stringify(o1)], 'CeL.new_options(options) #7');
 	});
 
-	error_count += CeL.test('dependency_chain', function(assert) {
+	all_error_count += CeL.test('dependency_chain', function(assert) {
 		var dc = new CeL.dependency_chain;
 		dc.add(1, 2);
 		assert(['1', Array.from(dc.get(2).previous.values()).join()]);
@@ -118,7 +119,7 @@ function test_base() {
 
 function test_compatibility() {
 
-	error_count += CeL.test('Set, Map, Array.from()', function(assert) {
+	all_error_count += CeL.test('Set, Map, Array.from()', function(assert) {
 		var a = [1, 2, 3, 1],
 			s = new Set(a),
 			e = s.entries(),
@@ -209,7 +210,7 @@ function test_compatibility() {
 
 	// ----------------------------------------------------
 
-	error_count += CeL.test('Math.clz32()', function(assert) {
+	all_error_count += CeL.test('Math.clz32()', function(assert) {
 		var BITS = 32;
 		assert([BITS, Math.clz32(0)], 'Math.clz32(0) === 32');
 		for (var i = BITS, test_number_in_2 = '1'; --i;) {
@@ -220,7 +221,7 @@ function test_compatibility() {
 		}
 	});
 
-	error_count += CeL.test('String.prototype.split()', [
+	all_error_count += CeL.test('String.prototype.split()', [
 		[[ '11,22'.split(/,/).join(';'), '11;22' ]],
 		[[ '11,'.split(/,/).join(';'), '11;' ]],
 		[[ ',22'.split(/,/).join(';'), ';22' ]],
@@ -252,7 +253,7 @@ function test_compatibility() {
 	]);
 
 	// sample to test:
-	error_count += CeL.test('library base functions', [
+	all_error_count += CeL.test('library base functions', [
 		[ [ 'js.js', CeL.simplify_path('./aaa///./../js.js') ], 'simplify_path #1-1' ],
 		[ [ 'js.js', CeL.simplify_path('./aaa/../js.js') ], 'simplify_path #1-2' ],
 		[ [ 'js.js', CeL.simplify_path('aaa/../js.js') ], 'simplify_path #1-3' ],
@@ -294,7 +295,7 @@ function test_compatibility() {
 		[ [ 'https://d.o/p/a/http://d.o/p/a/', CeL.simplify_path('https://d.o//p/a/http://d.o//p//a/') ], 'simplify_path /http://#4' ],
 	]);
 
-	error_count += CeL.test('compatibility', [
+	all_error_count += CeL.test('compatibility', [
 		[ [ NaN, NaN ], 'Object.is(NaN,NaN)' ],
 
 		[ [/./ig.flags, 'gi'], '/./ig.flags' ],
@@ -318,7 +319,7 @@ function test_compatibility() {
 
 
 function test_native() {
-	error_count += CeL.test('CeL.RegExp()', [
+	all_error_count += CeL.test('CeL.RegExp()', [
 		[ CeL.RegExp(/T/i).test('t') ],
 		[ CeL.RegExp(/T/, 'i').test('t') ],
 		[ CeL.RegExp('T', 'i').test('t') ],
@@ -327,7 +328,7 @@ function test_native() {
 		[ !CeL.RegExp(/[\p{C}]/, 'iu').test('t') ],
 	]);
 
-	error_count += CeL.test('pad(): basic test', [
+	all_error_count += CeL.test('pad(): basic test', [
 		[[ CeL.pad(23, 5), '00023' ]],
 		[[ ''.pad(5), '     ' ],'pad(): empty string'],
 
@@ -337,14 +338,14 @@ function test_native() {
 		[[ '23'.pad(4, 's', 1), '23ss' ]],
 	]);
 
-	error_count += CeL.test('pad(): character.length > 1', [
+	all_error_count += CeL.test('pad(): character.length > 1', [
 		[[ '23'.pad(6, '01'), '010123' ]],
 		[[ '23'.pad(6, '012'), '012023' ]],
 		[[ '2347823'.pad(5, '01'), '2347823' ]],
 		[[ '23'.pad(6, '12', 1), '231212' ]],
 	]);
 
-	error_count += CeL.test('between(): character.length > 1', [
+	all_error_count += CeL.test('between(): character.length > 1', [
 		[[ '0123456789123456789'.between('567', '345'), '8912' ]],
 		[[ '0123456789123456789'.between('567', '89'), '' ]],
 		[[ '0123456789123456789'.between('54'), '' ]],
@@ -356,7 +357,7 @@ function test_native() {
 		[[ '124|523', '1<b>124</b>42<b>523</b>'.all_between('<b>', '</b>').join('|'), '.all_between()' ]],
 	]);
 
-	error_count += CeL.test('檢驗 find_between()', function(assert) {
+	all_error_count += CeL.test('檢驗 find_between()', function(assert) {
 		var html = '<p></p><h2>title1</h2>abc<h2>title2</h2>\nABC<h2>title3</h2>ABC\n<h2>title4</h2>\nABC\n<h2>title5</h2>',
 		// matched token
 		get_next_between = html.find_between('<h2>', '</h2>'), list = [], text;
@@ -451,7 +452,7 @@ function test_native() {
 				&& !b.last, 'SubUint32Array');
 	}
 
-	error_count += CeL.test('檢驗 search_sorted_Array() 準確度。', function(assert) {
+	all_error_count += CeL.test('檢驗 search_sorted_Array() 準確度。', function(assert) {
 		[ 0, 1, 2, 3, 4, 8, 10, 127, 128, 129, 1023, 1024, 1025 ].forEach(function(
 				amount) {
 			CeL.debug('test ' + amount, 3);
@@ -479,7 +480,7 @@ function test_native() {
 		});
 	});
 
-	error_count += CeL.test('search_sorted_Array()', [
+	all_error_count += CeL.test('search_sorted_Array()', [
 		[[ 1, CeL.search_sorted_Array([ 0, 2, 4 ], 3, { found : true }) ]],
 		[[ 'r', [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ] }) ]],
 		[[ undefined, [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ], /* 以便未找到時回傳 undefined. */ near : [] }) ]],
@@ -491,7 +492,7 @@ function test_native() {
 		[[-1, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/e/) ], '處理搜尋 {RegExp} 的情況#1-5'],
 	]);
 
-	error_count += CeL.test('data.native misc', function(assert) {
+	all_error_count += CeL.test('data.native misc', function(assert) {
 		assert([ 49, (49.4).to_fixed(0) ], 'to_fixed() #1');
 		assert([ 50, (49.5).to_fixed(0) ], 'to_fixed() #2');
 		assert([ 49.5, (49.5).to_fixed(1) ], 'to_fixed() #3');
@@ -602,7 +603,7 @@ function test_native() {
 
 	});
 
-	error_count += CeL.test('edit distance & LCS', function(assert) {
+	all_error_count += CeL.test('edit distance & LCS', function(assert) {
 		assert([ 17, 'correction systems'.edit_distance('spell checkers, correction system') ], 'edit_distance() #1');
 		assert([ 9, 'Levenshtein distance'.edit_distance('edit distance') ], 'edit_distance() #2');
 		assert([ 7, 'spell check'.edit_distance('Spell Check Tool') ], 'edit_distance() #3');
@@ -667,7 +668,7 @@ function test_console() {
 
 	var text = '0123456789', ansi = new SGR(text);
 
-	error_count += CeL.test('SGR basic', [
+	all_error_count += CeL.test('SGR basic', [
 		[[ text, ansi.text ]],
 	]);
 
@@ -679,7 +680,7 @@ function test_console() {
 		bg : 'blue'
 	});
 
-	error_count += CeL.test('SGR @ 3', [
+	all_error_count += CeL.test('SGR @ 3', [
 		[[ 2, ansi.style_at(3, true).foreground ]],
 		[[ '1;32;44', ansi.style_at(3, true).toString(false) ]],
 		[[ undefined, ansi.style_at(4, true) ]],
@@ -689,19 +690,19 @@ function test_console() {
 	node_info('Test SGR: set style alias');
 	ansi.style_at(5, 'fg=紫');
 
-	error_count += CeL.test('SGR @ 5', [
+	all_error_count += CeL.test('SGR @ 5', [
 		[[ 4, ansi.style_at(5).background ]],
 		[[ 'blue', SGR.color[ansi.style_at(5).background] ]],
 	]);
 
 	ansi.style_at(7, '5;-bold');
-	error_count += CeL.test('SGR: set style multi-alias', [
+	all_error_count += CeL.test('SGR: set style multi-alias', [
 		[[ true, ansi.style_at(8).blink ], '(8).blink'],
 		[[ false, ansi.style_at(9).bold ], '(9).bold'],
 	]);
 
 	text = '012*[1;32;44m34*[1;35;44m56*[22;35;44;5m789';
-	error_count += CeL.test('SGR: Test all', [
+	all_error_count += CeL.test('SGR: Test all', [
 		[[ text, ansi.toString() ]],
 		[[ text, new SGR(text).toString() ]],
 
@@ -753,7 +754,7 @@ function test_console() {
 function test_locale() {
 
 	//	##i18n (Internationalization) / l10n (Localization)
-	error_count += CeL.test('將 domain 別名正規化，轉為正規/標準名稱。', [
+	all_error_count += CeL.test('將 domain 別名正規化，轉為正規/標準名稱。', [
 		[['cmn-Hant-TW', CeL.gettext.to_standard('zh')], 'gettext.to_standard(zh)'],
 		[['cmn-Hant-TW', CeL.gettext.to_standard('tw')], 'gettext.to_standard(tw)'],
 		[['cmn-Hant-TW', CeL.gettext.to_standard('zh-TW')], 'gettext.to_standard(zh-TW)'],
@@ -782,7 +783,7 @@ function test_locale() {
 
 
 	//	###System message test
-	error_count += CeL.test('System message', function(assert) {
+	all_error_count += CeL.test('System message', function(assert) {
 		CeL.gettext.use_domain('TW', function() {
 			assert([ '載入中…', CeL.gettext('Loading...') ]);
 			assert([ '已載入 20%…', CeL.gettext('Loading %1%...', 20) ]);
@@ -795,7 +796,7 @@ function test_locale() {
 
 
 	//	###單數複數形式 (plural) test
-	error_count += CeL.test('單數複數形式 (plural)', function(assert) {
+	all_error_count += CeL.test('單數複數形式 (plural)', function(assert) {
 		// CeL.gettext.use_domain('en', function() {}, true);
 		var message_id = '已載入 %1 筆資料。';
 		CeL.gettext.set_text({
@@ -822,7 +823,7 @@ function test_locale() {
 	});
 
 
-	error_count += CeL.test('直接取得特定domain的文字。', function(assert) {
+	all_error_count += CeL.test('直接取得特定domain的文字。', function(assert) {
 		CeL.gettext.use_domain('zh-TW', function() {
 			CeL.gettext.use_domain('en', function() {
 				assert([ 'Loading...', CeL.gettext('Loading...') ]);
@@ -839,7 +840,7 @@ function test_locale() {
 	}, true);
 
 	//	設定欲轉換的文字格式。
-	error_count += CeL.test('設定欲轉換的文字格式。', function(assert) {
+	all_error_count += CeL.test('設定欲轉換的文字格式。', function(assert) {
 		CeL.gettext.set_text({
 			'%n1 smart ways to spend %c2' : '%Chinese/n1個花%c2的聰明方法'
 		}, 'Traditional Chinese');
@@ -859,7 +860,7 @@ function test_locale() {
 
 
 	//	###test with 貨幣
-	error_count += CeL.test('轉換文字 with 貨幣。', function(assert) {
+	all_error_count += CeL.test('轉換文字 with 貨幣。', function(assert) {
 		CeL.gettext.conversion['smart way'] = [ 'no %n', '1 %n', '%d %ns' ];
 		// You can also use this:
 		CeL.gettext.conversion['smart way'] = function(count) {
@@ -889,7 +890,7 @@ function test_locale() {
 	});
 
 
-	error_count += CeL.test('locale', [
+	all_error_count += CeL.test('locale', [
 		[[ "二十世紀八十年代", CeL.gettext('%數1世紀%數2年代', 20, 80) ], 'conversion:小寫中文數字'],
 		[[ "央行上調基準利率2碼", CeL.gettext('央行上調基準利率%碼1', .005) ], 'conversion:碼'],
 
@@ -906,7 +907,7 @@ function test_locale() {
 
 
 function test_numeral() {
-	error_count += CeL.test('中文數字 basic', [
+	all_error_count += CeL.test('中文數字 basic', [
 		[['一百兆〇八億〇八百', CeL.to_Chinese_numeral(100000800000800)], '小寫中文數字'],
 		[['捌兆肆仟陸佰柒拾貳億捌仟柒佰參拾捌萬玖仟零肆拾柒', CeL.to_Chinese_numeral(8467287389047,true)], '大寫中文數字'],
 		[['新臺幣肆萬參拾伍圓參角肆分貳文參', CeL.to_TWD(40035.3423)], '貨幣/currency test'],
@@ -914,7 +915,7 @@ function test_numeral() {
 	]);
 	// 此步驟頗費時。
 	if (test_level) {
-		error_count += CeL.test('中文數字 0 to 1000', function(assert) {
+		all_error_count += CeL.test('中文數字 0 to 1000', function(assert) {
 			for (var natural = 0; natural <= 1000; natural++) {
 				assert([ natural, CeL.from_Chinese_numeral(
 				//
@@ -923,7 +924,7 @@ function test_numeral() {
 		});
 	}
 
-	error_count += CeL.test('Roman numerals 1 to 1000000', function(assert) {
+	all_error_count += CeL.test('Roman numerals 1 to 1000000', function(assert) {
 		for (var natural = 1; natural < 1e6; natural++) {
 			if (natural % 10000 === 0)
 				CeL.debug(natural + ': ' + CeL.to_Roman_numeral(natural, true), 2);
@@ -933,7 +934,7 @@ function test_numeral() {
 		}
 	});
 
-	error_count += CeL.test('中文數字', [
+	all_error_count += CeL.test('中文數字', [
 		[["壬辰以來，至景初元年丁已歲，積4046，算上。", CeL.from_Chinese_numeral('壬辰以來，至景初元年丁已歲，積四千四十六，算上。')]],
 		[['40179字', CeL.from_Chinese_numeral('四萬百七十九字')]],
 		[[10000000000000000, CeL.from_Chinese_numeral('京')]],
@@ -948,7 +949,7 @@ function test_numeral() {
 		[[4022, CeL.from_positional_Chinese_numeral('〤〇〢二')],'擴充蘇州碼子'],
 	]);
 
-	error_count += CeL.test('貨幣/currency test', [
+	all_error_count += CeL.test('貨幣/currency test', [
 		[[ '新臺幣肆萬參拾伍圓參角肆分貳文參', CeL.to_TWD(40035.3423) ], '中文貨幣/currency test'],
 	]);
 }
@@ -971,7 +972,7 @@ function test_math() {
 
 	CeL.run('data.math');
 
-	error_count += CeL.test('Combinatorics 組合數學', function(assert) {
+	all_error_count += CeL.test('Combinatorics 組合數學', function(assert) {
 		assert([ false, [ 2, 3, 5, 6, 4 ].is_AP() ], 'is_AP(): false');
 		assert([ true, [ 5, 6, 7, 8, 9 ].is_AP() ], 'is_AP(): true');
 		assert([ false, [ 2, 3, 5, 6, 4, 4 ].combines_AP() ], 'combines_AP(): false');
@@ -985,7 +986,7 @@ function test_math() {
 		});
 	});
 
-	error_count += CeL.test('Basic math functions', function(assert) {
+	all_error_count += CeL.test('Basic math functions', function(assert) {
 		assert([ CeL.polynomial_value([ 3, 4, 5, 6 ], 2),
 				3 + 4 * 2 + 5 * 2 * 2 + 6 * 2 * 2 * 2 ], 'polynomial value');
 
@@ -1180,7 +1181,7 @@ function test_math() {
 
 	// ---------------------------------------------------------------------//
 
-	error_count += CeL.test('Basic integer examples', function(assert) {
+	all_error_count += CeL.test('Basic integer examples', function(assert) {
 		assert([(new CeL.data.math.integer(123)).add(2).toString(), '125']);
 		assert([(new CeL.data.math.integer(123)).add(-2).toString(), '121']);
 		assert([ new CeL.data.math.integer(967803).digits().join(','), '9,6,7,8,0,3' ], '.digits()');
@@ -1223,7 +1224,7 @@ function test_math() {
 
 	// ---------------------------------------------------------------------//
 
-	error_count += CeL.test('normal number test. 正常四則運算測試案例。', function(assert) {
+	all_error_count += CeL.test('normal number test. 正常四則運算測試案例。', function(assert) {
 		// ≈11 s @ Chrome/31.0.1640.0
 		// ≈19 s @ Firefox/27.0 nightly
 		// ≈35 s @ Firefox/3.0.19
@@ -1295,7 +1296,7 @@ function test_math() {
 
 if (test_level) {
 	// 此步驟頗費時。
-	error_count += CeL.test('division test', function(assert) {
+	all_error_count += CeL.test('division test', function(assert) {
 		// ≈1.5 m @ Chrome/31.0.1640.0
 		var base = 10, limit = parseInt('1111', base) + 2, d = 1, n, numerator, denominator = new CeL.data.math.integer(d, null, base), q;
 
@@ -1318,7 +1319,7 @@ if (test_level) {
 	// @see
 	// http://www.wolframalpha.com/
 
-	error_count += CeL.test('Advanced integer examples #1', function(assert) {
+	all_error_count += CeL.test('Advanced integer examples #1', function(assert) {
 		var v = '90846795678256376423066498367647582364097529386948569238664755236548675867234.576856065785675678';
 		assert([(new CeL.data.math.integer(v)).toString(), v], 'assignment');
 		assert([(new CeL.data.math.integer(v)).round().toString(), '90846795678256376423066498367647582364097529386948569238664755236548675867235'], 'round #1');
@@ -1526,7 +1527,7 @@ if (test_level) {
 	// ≈14 s @ Firefox/3.0.19
 	// ≈3.5 m @ IE8
 if (test_level) {
-	error_count += CeL.test('power() and log()', function(assert) {
+	all_error_count += CeL.test('power() and log()', function(assert) {
 		var test_count = 101,
 		factor = 1, power = new CeL.data.math.integer('42364232342234'), I = new CeL.data.math.integer(factor), i = 0;
 		factor = Math.log(factor) / Math.log(power);
@@ -1537,7 +1538,7 @@ if (test_level) {
 
 	// ---------------------------------------------------------------------//
 
-	error_count += CeL.test('square root of small integer', function(assert) {
+	all_error_count += CeL.test('square root of small integer', function(assert) {
 		for (var m = 'test square_root: ', i = 1, I2; i < 100000000; i += 1000000) {
 			I2 = (new CeL.data.math.integer(i)).square();
 			assert([I2.clone().square_root().compare(i), 0], m + i + '^2');
@@ -1547,7 +1548,7 @@ if (test_level) {
 	});
 
 
-	error_count += CeL.test('square root of big integer', function(assert) {
+	all_error_count += CeL.test('square root of big integer', function(assert) {
 		// ~5 s @ Gecko/20100101 Firefox/35.0
 		var test_count = 200
 		for (var i = test_count, I = new CeL.data.math.integer(1), a = new CeL.data.math.integer('62537864798693472567385647825635478963754675867263725675627835674527634854699999999999'), I2;
@@ -1562,7 +1563,7 @@ if (test_level) {
 
 	// ---------------------------------------------------------------------//
 
-	error_count += CeL.test('integer', function(assert) {
+	all_error_count += CeL.test('integer', function(assert) {
 		assert([(new CeL.data.math.integer(37)).precise_divide(30).join(','), '1,2,3'], 'precise_divide');
 
 		var d = '2396479263746238964792536748675698343467598263986482', i = new CeL.data.math.integer(1), q = i.division(d, 20);
@@ -1659,7 +1660,7 @@ if (test_level) {
 
 	// ---------------------------------------------------------------------//
 
-	error_count += CeL.test('rational', function(assert) {
+	all_error_count += CeL.test('rational', function(assert) {
 		var rational = new CeL.rational(2.37);
 		assert([rational.reduce().toString(), '237/100'], 'Rational.assignment(Number)');
 		rational = new CeL.rational(new CeL.data.math.integer('.021'));
@@ -1762,7 +1763,7 @@ if (test_level) {
 	// ---------------------------------------------------------------------//
 
 	var solution;
-	error_count += CeL.test('quadratic', [
+	all_error_count += CeL.test('quadratic', [
 		[['√3', (new CeL.quadratic(3)).toString()], 'quadratic.assignment 1'],
 		[['2√3', (new CeL.quadratic(12)).toString()], 'quadratic.assignment 2'],
 		[['3√5', (new CeL.quadratic(5, 3)).toString()], 'quadratic.assignment 3'],
@@ -1810,7 +1811,7 @@ if (test_level) {
 
 function test_Hamming() {
 	var data, code;
-	error_count += CeL.test('CSV basic', [
+	all_error_count += CeL.test('CSV basic', [
 		[[code = '101110010010', CeL.Hamming.encode(data = '11000010')]],
 		[[data, CeL.Hamming.decode(code)]],
 		[[code = '101001001111', CeL.Hamming.encode(data = '10101111')]],
@@ -1826,7 +1827,7 @@ function test_Hamming() {
 
 
 function test_quantity() {
-	error_count += CeL.test('單位換算', [
+	all_error_count += CeL.test('單位換算', [
 		[[(new CeL.quantity('5.4cm')).toString(),'5.4 cm'],''],
 		[[(new CeL.quantity('4cm^2')).toString(),'4 cm²'],''],
 		[[(new CeL.quantity('4cm2')).toString(),'4 cm²'],''],
@@ -1850,7 +1851,7 @@ function test_quantity() {
 
 function test_code() {
 	return;
-	error_count += CeL.test('code', function(assert) {
+	all_error_count += CeL.test('code', function(assert) {
 		var e = CeL.parse_escape('00%M0\\\\\\\\\\%Mg\\a1\\n1\\s1\\a222',
 				function(s) {
 					//CeL.log('s: [' + s + ']');
@@ -1889,24 +1890,24 @@ function test_CSV() {
 
 	//node_info('test: 讀入 CSV 檔。');
 
-	error_count += CeL.test('CSV basic', [
+	all_error_count += CeL.test('CSV basic', [
 		[[CeL.parse_CSV('"a","b""c"\n_1,_2\n_3,_4\n_5,_6\n')[0][1],'b"c']],
 		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6\n')[2][1],'_4']],
 		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6')[2][1],'_4']],
 		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{select_column:true})[2].b,'_4']],
 	]);
 
-	error_count += CeL.test('CSV title', [
+	all_error_count += CeL.test('CSV title', [
 		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{has_title:1}).index.b,1]],
 		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{has_title:1}).title.join('|'),'a|b']],
 	]);
 
-	error_count += CeL.test('CSV skip_title', [
+	all_error_count += CeL.test('CSV skip_title', [
 		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{skip_title:1}).join('|'),'a,b|_1,_2|_3,_4|_5,_6']],
 		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{skip_title:1,has_title:1}).join('|'),'_1,_2|_3,_4|_5,_6']],
 	]);
 
-	error_count += CeL.test('CSV handle_array', [
+	all_error_count += CeL.test('CSV handle_array', [
   		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v) {return ':'+v;}]})[2][0],'_3']],
   		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v) {return ':'+v;}]})[2][1],':_4']],
   		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v) {return ':'+v;}]})[0][1],'b']],
@@ -1915,20 +1916,20 @@ function test_CSV() {
 
 	CeL.set_debug(0);
 
-	error_count += CeL.test('CSV no_text_qualifier', [
+	all_error_count += CeL.test('CSV no_text_qualifier', [
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_2']],
   		[[CeL.parse_CSV('a,b\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_1']],
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:1})[1][0],'_1']],
   	]);
 
-  	error_count += CeL.test('CSV row_limit', [
+	all_error_count += CeL.test('CSV row_limit', [
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1})[1].join('|'),'_1|_2']],
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1})[2],undefined]],
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._2.join('|'),'_1|_2']],
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._3,undefined]],
   	]);
 
-	error_count += CeL.test('CSV to_Object', [
+	all_error_count += CeL.test('CSV to_Object', [
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1})._4.join('|'),'_3|_4']],
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1,select_column:true})._4.b,'_4']],
   	]);
@@ -1936,19 +1937,19 @@ function test_CSV() {
   	node_info('test: 將 {Array|Object} 依設定轉成 CSV text。');
 
   	CeL.to_CSV_String.config.line_separator="\n";
-  	error_count += CeL.test('CSV basic', [
+  	all_error_count += CeL.test('CSV basic', [
   		[[CeL.to_CSV_String([["a","b"],[1,2],[3,4]]),'"a","b"\n"1","2"\n"3","4"']],
   		[[CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]]),'"a","b"\n"""e""","2"\n"3","4"']],
   		[[CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]],{no_text_qualifier:'auto'}),'a,b\n"""e""",2\n3,4']],
   		[[CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]],{no_text_qualifier:true}),'a,b\n"e",2\n3,4']],
   	]);
 
-  	error_count += CeL.test('CSV Object', [
+  	all_error_count += CeL.test('CSV Object', [
   		[[CeL.to_CSV_String({a:[1,2],b:[3,4]}),'"1","2"\n"3","4"']],
   		[[CeL.to_CSV_String({a:{r:1,s:2},b:{t:3,u:4}}),'"1","2"\n"3","4"']],
   	]);
 
-  	error_count += CeL.test('CSV select_column', [
+  	all_error_count += CeL.test('CSV select_column', [
   		[[CeL.to_CSV_String([["a","b"],[1,2],[3,4]],{select_column:1}),'"b"\n"2"\n"4"']],
   		[[CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{select_column:[2,1]}),'"c","b"\n"3","2"\n"5","4"']],
   		[[CeL.to_CSV_String({a:[1,2],b:[3,4]},{select_column:1}),'"2"\n"4"']],
@@ -1957,7 +1958,7 @@ function test_CSV() {
   		[[CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{select_column:['s','t']}),'"2",""\n"4","5"']],
   	]);
 
-  	error_count += CeL.test('CSV has_title', [
+  	all_error_count += CeL.test('CSV has_title', [
   		[[CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{has_title:1,select_column:['s','t']}),'"s","t"\n"2",""\n"4","5"']],
   		[[CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"3","2"\n"5","4"']],
   		[[CeL.to_CSV_String([["a","b","c"],[1,2],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"","2"\n"5","4"']],
@@ -1974,7 +1975,7 @@ function test_CSV() {
 
 
 function test_XML() {
-  	error_count += CeL.test('XML', [
+	all_error_count += CeL.test('XML', [
 		[[
 			JSON.stringify(JSON.from_XML('<n:t1 a1="a1"><ns:c1 /><c2 /></n:t1>')),
 			JSON.stringify({"n:t1":[{"ns:c1":null},{"c2":null}],"a1":"a1"})
@@ -2005,7 +2006,7 @@ function test_XML() {
 
 
 function test_net() {
-  	error_count += CeL.test('get_full_URL', [
+	all_error_count += CeL.test('get_full_URL', [
 		[[ 'https://host.name/root/sub/path/to/file.htm', CeL.get_full_URL('path/to/file.htm', 'https://host.name/root/sub/CGI.pl') ], 'get_full_URL() #1'],
 		[[ 'https://host.name/root/sub/path/to/file.htm', CeL.get_full_URL('path/to/file.htm', 'https://host.name/root/sub/') ], 'get_full_URL() #2'],
 		[[ 'https://host.name/path/to/file.htm', CeL.get_full_URL('/path/to/file.htm', 'https://host.name/root/sub/CGI.pl') ], 'get_full_URL() #3'],
@@ -2023,7 +2024,7 @@ function test_net() {
 function test_date() {
 	CeL.run('data.date');
 
- 	error_count += CeL.test('parse date', [
+	all_error_count += CeL.test('parse date', [
 		[[0,new Date('May 5 2022')-'May 5 2022'.to_Date()], '.to_Date(): 無法 parse 的值'],
 		[[0,new Date('May 5 2022 UTC+09:00')-'May 5 2022'.to_Date({zone:'UTC+9'})], '.to_Date(): 無法 parse 的值+TZ@options'],
 		[[0,new Date('May 5 2022 UTC+09:00')-'May 5 2022 UTC+09:00'.to_Date()], '.to_Date(): 無法 parse 的值+TZ'],
@@ -2094,7 +2095,7 @@ function test_date() {
 
 
 	var tmp;
- 	error_count += CeL.test('to_Date(CE)', [
+	all_error_count += CeL.test('to_Date(CE)', [
 		[["1582/10/15 0:0:0.000",'1582/10/5'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
 
 		[["1582/10/15 0:0:0.000",'1582/10/5'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
@@ -2125,14 +2126,14 @@ function test_date() {
 
 	CeL.debug((new Date).format('\\%m\\x61%m/%d/%Y'));
 
-	error_count += CeL.test('time zone', function(assert) {
+	all_error_count += CeL.test('time zone', function(assert) {
 		var tmp = '2001/8/7 03:35:8PM';
 		CeL.debug(tmp+' → '+tmp.to_Date('CST')+' → '+tmp.to_Date('CST').format('%Y年%m月%d日%H時%M分%S秒%f毫秒'), 3);
 		assert(['2001年8月7日15時35分8秒000毫秒',tmp.to_Date('CST').format({format:'%Y年%m月%d日%H時%M分%S秒%f毫秒',offset:8*60})]);
 		assert(['2001年08月07日',tmp.to_Date('CST').format({format:'%Y年%2m月%2d日',offset:8*60})]);
 	});
 
-	error_count += CeL.test('CeL.Julian_day', function(assert) {
+	all_error_count += CeL.test('CeL.Julian_day', function(assert) {
 		for (var JD = 4e6; JD > -1364; JD--) {
 			// Julian calendar, first NG: -1402
 			var date = CeL.Julian_day.to_YMD(JD);
@@ -2160,7 +2161,7 @@ function test_date() {
 
 	CeL.run('data.date');
 
-	error_count += CeL.test('Julian date', function(assert) {
+	all_error_count += CeL.test('Julian date', function(assert) {
 		// Date_to_String.no_year_0 = true;
 
 		// leap year @ Julian
@@ -2200,7 +2201,7 @@ function test_date() {
 		'0000/3/1'.to_Date()
 	});
 
-	error_count += CeL.test('date Basic tests', function(assert) {
+	all_error_count += CeL.test('date Basic tests', function(assert) {
 		// e.g., UTC+8: -8 * 60 = -480
 		var present_local_minute_offset = (new Date).getTimezoneOffset() || 0;
 		//year = -2010
@@ -2223,7 +2224,7 @@ function test_date() {
 	//CeL.Date_to_String.no_year_0 = CeL.String_to_Date.no_year_0 = false;
 
 
-	error_count += CeL.test('date: .format(CE)', [
+	all_error_count += CeL.test('date: .format(CE)', [
 		[["-300/2/28 0:0:0.000",'-0300/2/23'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
 		[["-300/2/29 0:0:0.000",'-0300/2/24'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
 		[["-300/3/1 0:0:0.000",'-0300/2/25'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
@@ -2252,7 +2253,7 @@ function test_date() {
 	]);
 
 
-	error_count += CeL.test('Date_to_JD', [
+	all_error_count += CeL.test('Date_to_JD', [
 		[[2451545, CeL.Date_to_JD(new Date(Date.parse('1 January 2000 12:00 UTC')))],'Date_to_JD: 標準曆元 J2000.0 #1'],
 		[[2451545, CeL.Date_to_JDN(new Date(Date.parse('1 January 2000 UTC')))],'Date_to_JD: 標準曆元 J2000.0 #2'],
 		[[2456413, CeL.Date_to_JD(new Date(Date.parse('2013/4/30 12:00 UTC')))],'Date_to_JD: 2013/4/30'],
@@ -2265,7 +2266,7 @@ function test_date() {
 	//CeL.Date_to_String.no_year_0 = CeL.String_to_Date.no_year_0 = true;
 
 
-	error_count += CeL.test('date: .to_Date(CE)', [
+	all_error_count += CeL.test('date: .to_Date(CE)', [
 		[[0,			CeL.Date_to_JD('-4713/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'JD 0'],
 
 		[[1096,		CeL.Date_to_JD('-4710/1/1 12:0'.to_Date({parser:'CE',zone:0}))]],
@@ -2299,7 +2300,7 @@ function test_date() {
 
 	//CeL.Date_to_String.no_year_0 = CeL.String_to_Date.no_year_0 = true;
 
-	error_count += CeL.test('日干支#1', [
+	all_error_count += CeL.test('日干支#1', [
 		[["甲子",'1912年2月18日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'1912年（中華民國元年）2月18日，合農曆壬子年正月初一，是「甲子日」'],
 
 		[["己巳",'公元前720年2月22日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'《春秋》所記，魯隱公三年夏曆二月己巳日（周平王五十一年，公元前720年2月22日）之日食'],
@@ -2321,7 +2322,7 @@ function test_date() {
 	]);
 
 	CeL.String_to_Date.default_parser.year_padding = 0;
-	error_count += CeL.test('日干支#2', [
+	all_error_count += CeL.test('日干支#2', [
 		[["甲子壬辰",'西元4年3月1日'.to_Date('CE').format({format:'%歲次%日干支',locale:'cmn-Hant-TW'})],"西元4年3月1日"],
 
 
@@ -2332,7 +2333,7 @@ function test_date() {
 	]);
 
 
-	error_count += CeL.test('stem_branch_index', function(assert) {
+	all_error_count += CeL.test('stem_branch_index', function(assert) {
 		for (var i = 0; i < 60; i++) {
 			assert([ i, CeL.stem_branch_index(CeL.to_stem_branch(i)) ]);
 		}
@@ -2351,23 +2352,23 @@ function test_character() {
 	setup_test(test_name);
 	CeL.character.load(['Big-5','GB2312','EUCJP','Shift JIS'], function() {
 		var text = '2017年 good 世界中の書籍を';
-		error_count += CeL.test(test_name + 'Big5', [
+		all_error_count += CeL.test(test_name + 'Big5', [
 			[[ '作輩', Buffer.from('A740BDFA', 'hex').toString('Big-5') ], 'Big5 #1'],
 			[[ text, text.encode('Big5').toString('Big5') ], 'Big5 #2'],
 		]);
-		error_count += CeL.test(test_name + 'GBK', [
+		all_error_count += CeL.test(test_name + 'GBK', [
 			[[ '労鰷', Buffer.from('84BAF69C', 'hex').toString('GB2312') ], 'GBK #1'],
 			[[ text, text.encode('GBK').toString('GBK') ], 'GBK #2'],
 		]);
-		error_count += CeL.test(test_name + 'EUC-JP', [
+		all_error_count += CeL.test(test_name + 'EUC-JP', [
 			[[ '駈鮎鮏ﾆ', Buffer.from('B6EFB0BEFCE68EC6', 'hex').toString('EUCJP') ], 'EUC-JP #1'],
 			[[ text, text.encode('EUC-JP').toString('EUC-JP') ], 'EUC-JP #2'],
 		]);
-		error_count += CeL.test(test_name + 'Shift_JIS', [
+		all_error_count += CeL.test(test_name + 'Shift_JIS', [
 			[[ '嫋ﾕ錵', Buffer.from('9B5DD5E845', 'hex').toString('ShiftJIS') ], 'Shift_JIS #1'],
 			[[ text, text.encode('Shift_JIS').toString('Shift_JIS') ], 'Shift_JIS #2'],
 		]);
-		error_count += CeL.test(test_name + 'encode_URI_component', [
+		all_error_count += CeL.test(test_name + 'encode_URI_component', [
 			[[ text, CeL.decode_URI_component(CeL.encode_URI_component(text, 'Shift_JIS'), 'Shift_JIS') ], 'encode_URI_component #1'],
 		]);
 		finish_test(test_name);
@@ -2380,7 +2381,7 @@ function test_character() {
 
 
 function test_encoding() {
-	error_count += CeL.test('ロマ字↔仮名', [
+	all_error_count += CeL.test('ロマ字↔仮名', [
 		[[ 'わたし', CeL.to_kana('watasi') ], 'convert romaji to kana. ロマ字→仮名.'],
 		// TODO: Pair.reverse 對 duplicated key 不穩定。
 		// [[ 'watasi', CeL.to_romaji('わたし') ], 'convert romaji to kana. 仮名→ロマ字.'],
@@ -2393,7 +2394,7 @@ function test_encoding() {
 
 
 function test_check() {
-	error_count += CeL.test('姓/名', [
+	all_error_count += CeL.test('姓/名', [
 		[[ CeL.parse_personal_name('歐陽司徒').名, '司徒' ], '解析姓名/人名'],
 		[[ CeL.parse_personal_name('歐陽佩君').姓, '歐陽' ], '解析姓名/人名'],
 		[[ CeL.parse_personal_name('歐陽佩君').名, '佩君' ], '解析姓名/人名'],
@@ -2418,7 +2419,7 @@ function test_check() {
 
 
 function test_astronomy() {
-	error_count += CeL.test('astronomy', [
+	all_error_count += CeL.test('astronomy', [
 		// http://songgz.iteye.com/blog/1571007
 		[[ 66, Math.round(CeL.deltaT(2008)) ], 'get ΔT of year 2008 in seconds'],
 		[[ 29, Math.round(CeL.deltaT(1950)) ], 'get ΔT of year 1950 in seconds'],
@@ -2799,7 +2800,7 @@ function test_wiki() {
 	// Set default language. 改變預設之語言。 e.g., 'zh'
 	CeL.wiki.set_language('zh');
 
-	error_count += CeL.test('wiki: regular functions', [
+	all_error_count += CeL.test('wiki: regular functions', [
 
 		[['Abc', CeL.wiki.normalize_title('abc')], 'normalize_title #0'],
 		[['en:Abc', CeL.wiki.normalize_title('EN:abc')], 'normalize_title #1'],
@@ -2822,7 +2823,7 @@ function test_wiki() {
 		[[true, CeL.wiki.parse.user('[[User:Adam/test]]', 'adam')], 'parse.user #3'],
 	]);
 
-	error_count += CeL.test('wiki: CeL.wiki.plain_text() basic test', [
+	all_error_count += CeL.test('wiki: CeL.wiki.plain_text() basic test', [
 		[ [ 'エアポート快特', CeL.wiki.plain_text('<font lang="ja">エアポート快特</font>') ] ],
 		[ [ "卡斯蒂利亞王后 凱瑟琳", CeL.wiki.plain_text("卡斯蒂利亞王后'''凱瑟琳'''") ] ],
 		[ [ "MS 明朝 (MS Mincho) 及 MS P明朝 (MS PMincho)",
@@ -2835,7 +2836,7 @@ function test_wiki() {
 
 	]);
 
-	error_count += CeL.test('wiki: file_pattern & parse_template', [
+	all_error_count += CeL.test('wiki: file_pattern & parse_template', [
 		[[ '!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
 		//
 		.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3') ], 'file_pattern'],
@@ -2883,7 +2884,7 @@ function test_wiki() {
 
 	]);
 
-	error_count += CeL.test('CeL.wiki.parser', function(assert) {
+	all_error_count += CeL.test('CeL.wiki.parser', function(assert) {
 		var wikitext, parser;
 		wikitext = 't[http://a.b/ x[[l]]'; parser = CeL.wiki.parse(wikitext);
 		assert([ wikitext, parser.toString() ], 'wiki.parse: external link');
@@ -3300,9 +3301,9 @@ function test_wiki() {
 			type : 'property'
 		});
 
-	}, function(recorder, _error_count, test_name) {
+	}, function(recorder, error_count, test_name) {
 		// console.log('CeL.wiki: asynchronous functions: ' + _error_count + ' errors');
-		error_count += _error_count;
+		all_error_count += error_count;
 		finish_test('CeL.wiki: asynchronous functions');
 	});
 
@@ -3492,7 +3493,7 @@ function test_era() {
 	CeL.set_debug(0);
 
 	// 設計上所要求必須通過之測試範例：測試正確性。
-	error_count += CeL.test('紀年/曆數', [
+	all_error_count += CeL.test('紀年/曆數', [
 		[['孺子嬰', CeL.era('初始').君主], '初始.君主: 孺子嬰#1'],
 		[['孺子嬰', '初始元年11月1日'.to_Date('era').君主], '初始.君主: 孺子嬰#2'],
 		[['庚辰年庚辰月庚辰日庚辰時', '一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})], '可提供統一時間標準與各干支間的轉換。統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
@@ -3573,7 +3574,7 @@ function test_era() {
 	]);
 
 	var tmp = '後黎神宗永祚10年1月26日|朝鮮仁祖6年1月26日|江戸朝廷後水尾天皇寛永5年1月26日|莫光祖永祚4年|';
-	error_count += CeL.test('.共存紀年 test: 可能需要因添加紀年而改變。', [
+	all_error_count += CeL.test('.共存紀年 test: 可能需要因添加紀年而改變。', [
 		[CeL.era('238/6/2').共存紀年.join('|').covers('吳大帝嘉禾7年5月3日|魏明帝景初2年6月3日|蜀後主延熙1年5月2日'), '統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#1'],
 		[CeL.era('延熙1年5月2日').共存紀年.join('|').covers('弥生時代神功皇后38年|高句麗東川王12年6月3日|新羅助賁尼師今9年6月3日|吳大帝嘉禾7年5月3日|百濟古尒王5年6月3日|魏明帝景初2年6月3日|魏燕王紹漢2年6月3日'), '各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#1'],
 		[CeL.era('240-1-19').共存紀年.join().covers('魏明帝景初3年後12月8日,蜀後主延熙2年12月8日,吳大帝赤烏2年12月8日'), '測試特殊月名#1'],
@@ -3597,7 +3598,7 @@ function test_era() {
 	]);
 
 
-	error_count += CeL.test('參照紀年之演算機制', function(assert) {
+	all_error_count += CeL.test('參照紀年之演算機制', function(assert) {
 		assert([8, CeL.era('明宣宗宣德',{get_era:1}).calendar[7].leap], '明宣宗宣德8年閏8月');
 		//setup 8月–, CE~CE
 		CeL.era.set('曆A|1433/8/15~9/13|:宣德');
@@ -3614,7 +3615,7 @@ function test_era() {
 		_c0=CeL.era('曆C',{get_era:1}).calendar[0];assert(['9,4,NaN',[_c0.start,_c0.length,+_c0.leap].join()],'測試 參照紀年之演算機制:9月–');
 	});
 
-	error_count += CeL.test('period_end of era()', [
+	all_error_count += CeL.test('period_end of era()', [
 		[[CeL.era('1627年',{date_only:true,period_end:true}).format('CE'), '1627年'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 年'],
 		[[CeL.era('1627年9月',{date_only:true,period_end:true}).format('CE'), '1627年9月'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 月'],
 		[[CeL.era('1627年9月3日',{date_only:true,period_end:true}).format('CE'), '1627年9月3日'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 日'],
@@ -3677,7 +3678,7 @@ function finish_test(type) {
 		return;
 	}
 
-	if (error_count === 0) {
+	if (all_error_count === 0) {
 		// console.trace(still_running);
 		node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg',
 		// Takes ? ms
@@ -3687,10 +3688,10 @@ function finish_test(type) {
 	}
 
 	CeL.gettext.conversion['error'] = [ 'no %n', '1 %n', '%d %ns' ];
-	node_info([ 'CeJS: ', 'fg=red;bg=white', CeL.gettext('All %error@1 occurred.', error_count), '-fg;-bg' ]);
-	if (error_count > 0) {
+	node_info([ 'CeJS: ', 'fg=red;bg=white', CeL.gettext('All %error@1 occurred.', all_error_count), '-fg;-bg' ]);
+	if (all_error_count > 0) {
 		setTimeout(function() {
-			throw new Error(CeL.gettext('All %error@1.', error_count));
+			throw new Error(CeL.gettext('All %error@1.', all_error_count));
 		}, 0);
 	}
 }
