@@ -11042,6 +11042,8 @@ function module_code(library_namespace) {
 			if (data && data.query && data.query.tokens) {
 				// 設定 tokens。
 				Object.assign(session.token, data.query.tokens);
+				if (!session.token[type + 'token'])
+					session.token[type + 'token'] = BLANK_TOKEN;
 				library_namespace.debug(
 				//
 				type + 'token: ' + session.token[type + 'token']
@@ -11627,7 +11629,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('options.token = ' + JSON.stringify(token), 9,
 				'wiki_API.edit');
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
-				: token || '';
+				: token || BLANK_TOKEN;
 		library_namespace.debug('#2: ' + Object.keys(options).join(','), 4,
 				'wiki_API.edit');
 
