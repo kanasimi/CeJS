@@ -1722,7 +1722,7 @@ function finish(name_space) {
 		 * @since 2012/9/19 00:20:49, 2015/10/18 23:8:9 refactoring 重構
 		 */
 		function log_front_end_test(test_name, conditions, options) {
-			if ((Array.isArray(test_name) || typeof test_name !== 'function')
+			if ((Array.isArray(test_name) || typeof test_name === 'function')
 					&& !options) {
 				// shift arguments: 跳過 test_name。
 				options = conditions;
