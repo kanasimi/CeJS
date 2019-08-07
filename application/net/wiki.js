@@ -6757,16 +6757,14 @@ function module_code(library_namespace) {
 			// 注意: arguments 與 get_list() 之 callback 連動。
 			wiki_API[list_type]([ this.API_URL, next[1] ],
 			//
-			function wiki_API_next_list_callback(pages, titles, title) {
-				// [ last_list ]
-				_this.last_titles = titles;
+			function wiki_API_next_list_callback(pages, error) {
 				// [ page_data ]
 				_this.last_pages = pages;
 
 				if (typeof next[2] === 'function') {
 					// 注意: arguments 與 get_list() 之 callback 連動。
-					// next[2] : callback(pages, titles, title)
-					next[2].call(_this, pages, titles, title);
+					// next[2] : callback(pages, error)
+					next[2].call(_this, pages, error);
 				} else if (next[2] && next[2].each) {
 					// next[2] : 當作 work，處理積存工作。
 					if (pages) {
@@ -7708,22 +7706,22 @@ function module_code(library_namespace) {
 		return index;
 	}
 
-	// wiki_API.prototype.work(config): configuration:
+	// wiki_API.prototype.work(config, page_list): configuration:
 	({
 		// 注意: 與 wiki_API.prototype.work(config)
 		// 之 config.before/config.after 連動。
-		before : function(messages, pages, titles) {
+		before : function before(messages, pages) {
 		},
 		// {Function|Array} 每個 page 執行一次。
-		each : function(page_data, messages) {
+		each : function each(page_data, messages) {
 			return 'text to replace';
 		},
 		// 注意: 與 wiki_API.prototype.work(config)
 		// 之 config.before/config.after 連動。
-		after : function(messages, pages, titles) {
+		after : function after(messages, pages) {
 		},
 		// run this at last. 在wiki_API.prototype.work()工作最後執行此config.last()。
-		last : function() {
+		last : function last() {
 		},
 		// 不作編輯作業。
 		no_edit : true,
@@ -7740,14 +7738,14 @@ function module_code(library_namespace) {
 	 * robot 作業操作之輔助套裝函數。此函數可一次取得50至300個頁面內容再批次處理。<br />
 	 * 不會推入 this.actions queue，即時執行。因此需要先 get list！
 	 * 
+	 * 注意: arguments 與 get_list() 之 callback 連動。
+	 * 
 	 * @param {Object}config
 	 *            configuration
 	 * @param {Array}pages
 	 *            page data list
-	 * @param {Array}[titles]
-	 *            title list
 	 */
-	wiki_API.prototype.work = function(config, pages, titles) {
+	wiki_API.prototype.work = function(config, pages) {
 		if (typeof config === 'function')
 			config = {
 				each : config
@@ -7758,9 +7756,9 @@ function module_code(library_namespace) {
 		}
 
 		if (!pages)
-			pages = this.last_pages, titles = this.last_titles;
+			pages = this.last_pages;
 		// config.run_empty: 即使無頁面/未取得頁面，依舊強制執行下去。
-		if (!pages && !titles && !config.run_empty) {
+		if (!pages && !config.run_empty) {
 			// 採用推入前一個 this.actions queue 的方法，
 			// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 			library_namespace
@@ -7953,23 +7951,11 @@ function module_code(library_namespace) {
 			messages.input_title_list = true;
 		}
 
-		if (false && Array.isArray(pages)
-		//
-		&& (Array.isArray(titles) ? pages.length !== titles.length : !titles)) {
+		if (false && Array.isArray(pages) && !titles) {
 			library_namespace.warn('wiki_API.work: rebuild titles.');
-			titles = [];
-			pages.forEach(function(page) {
-				titles.push(page.title);
+			titles = pages.map(function(page) {
+				return page.title;
 			});
-		}
-
-		// do a little check.
-		if (Array.isArray(pages) && Array.isArray(titles)
-		//
-		&& pages.length !== titles.length) {
-			library_namespace.warn(
-			//
-			'wiki_API.work: The length of pages and titles are different!');
 		}
 
 		var main_work = (function(data) {
@@ -8037,7 +8023,7 @@ function module_code(library_namespace) {
 				if (log_item.get_pages) {
 					messages.add(pages);
 				}
-				library_namespace.debug(pages, 2, wiki_API.work);
+				library_namespace.debug(pages, 2, 'wiki_API.work');
 				if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
@@ -8057,8 +8043,10 @@ function module_code(library_namespace) {
 				// 2016/6/22 change API 應用程式介面變更:
 				// .first(messages, titles, pages) → .before(messages, pages,
 				// titles)
+				// 2019/8/7 change API 應用程式介面變更:
+				// .before(messages, pages, titles) → .before(messages, pages)
 				// 按照需求程度編排 arguments，並改變適合之函數名。
-				config.before.call(this, messages, pages, titles);
+				config.before.call(this, messages, pages);
 			}
 
 			/**
@@ -8316,8 +8304,10 @@ function module_code(library_namespace) {
 					// 2016/6/22 change API 應用程式介面變更:
 					// .last(messages, titles, pages) → .after(messages, pages,
 					// titles)
+					// 2019/8/7 change API 應用程式介面變更:
+					// .after(messages, pages, titles) → .after(messages, pages)
 					// 按照需求程度編排 arguments，並改變適合之函數名。
-					config.after.call(this, messages, pages, titles);
+					config.after.call(this, messages, pages);
 				}
 
 				var log_to = 'log_to' in config ? config.log_to
@@ -8409,7 +8399,7 @@ function module_code(library_namespace) {
 
 		}).bind(this);
 
-		var target = pages || titles,
+		var target = pages,
 		// 首先取得多個頁面內容所用之 options。
 		// e.g., page_options:{rvprop:'ids|content|timestamp'}
 		// @see
@@ -9126,13 +9116,12 @@ function module_code(library_namespace) {
 							.info('wiki_API.query.title_param: 將採用 title 為主要查詢方法。');
 				}
 				// reset
-				pageid = page_data
-						.map(function(page) {
-							// {String}title or {title:'title'}
-							return (typeof page === 'object' ? page.title
-									: page)
-									|| '';
-						});
+				pageid = page_data.map(function(page) {
+					// {String}title or {title:'title'}
+					return (typeof page === 'object' ? page.title
+					// assert: page && typeof page === 'string'
+					: page) || '';
+				});
 				if (is_id) {
 					pageid = pageid.join('|');
 				} else {
@@ -10401,7 +10390,7 @@ function module_code(library_namespace) {
 	if (false) {
 		// 若是想一次取得所有 list，不應使用單次版:
 		// 注意: arguments 與 get_list() 之 callback 連動。
-		wiki.categorymembers('Category_name', function(pages, titles, title) {
+		wiki.categorymembers('Category_name', function(pages, error) {
 			console.log(pages.length);
 		}, {
 			limit : 'max'
@@ -10436,7 +10425,7 @@ function module_code(library_namespace) {
 	 * @param {String}[title]
 	 *            page title 頁面標題。
 	 * @param {Function}callback
-	 *            回調函數。 callback(pages, titles, title, error)<br />
+	 *            回調函數。 callback(pages, error)<br />
 	 *            注意: arguments 與 get_list() 之 callback 連動。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
@@ -10545,12 +10534,13 @@ function module_code(library_namespace) {
 						// 刪掉標記，避免無窮迴圈。
 						delete options.get_continue;
 						// 設定/紀錄後續檢索用索引值，避免無窮迴圈。
-						if (continue_session)
+						if (continue_session) {
 							continue_session.next_mark
-
+							//
 							[continue_from] = continuation_data;
-						else
+						} else {
 							options[continue_from] = continuation_data;
+						}
 						get_list(type, title, callback, options);
 
 					} else {
@@ -10558,7 +10548,8 @@ function module_code(library_namespace) {
 						library_namespace.debug('Nothing to continue!', 1,
 								'get_list');
 						if (typeof callback === 'function') {
-							callback();
+							callback(undefined, new Error(
+									'Nothing to continue!'));
 						}
 					}
 				}
@@ -10635,19 +10626,13 @@ function module_code(library_namespace) {
 		wiki_API.query(title,
 		// treat as {Function}callback or {Object}wiki_API.work config.
 		function(data, error) {
-			function add_page(page) {
-				titles.push(page.title);
-				pages.push(page);
-			}
-
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value) {
 				library_namespace.show_value(data, 'get_list: ' + type);
 			}
 
-			// {Array}title_list
-			var titles = [],
+			var
 			// {Array}page_list
 			pages = [],
 			// 取得列表後，設定/紀錄新的後續檢索用索引值。
@@ -10662,9 +10647,10 @@ function module_code(library_namespace) {
 			if (library_namespace.is_Object(next_index)) {
 				pages.next_index = next_index;
 				library_namespace.debug(
-						'因為 continue_session 可能與作業中之 wiki_API instance 不同，'
-						//
-						+ '因此需要在本函數 function get_list() 中設定好。', 4, 'get_list');
+				//
+				'因為 continue_session 可能與作業中之 wiki_API instance 不同，'
+				//
+				+ '因此需要在本函數 function get_list() 中設定好。', 4, 'get_list');
 				// console.log(continue_session);
 				if (continue_session) {
 					// console.log(continue_session.next_mark);
@@ -10686,9 +10672,10 @@ function module_code(library_namespace) {
 				}
 				if (library_namespace.is_debug(2)
 				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
+				&& library_namespace.show_value) {
 					library_namespace.show_value(next_index,
 							'get_list: get the continue value');
+				}
 				if (options.limit === 'max' && type.includes('users')) {
 					library_namespace.debug(
 					//
@@ -10725,50 +10712,61 @@ function module_code(library_namespace) {
 			if (get_page_content.is_page_data(title)) {
 				title = title.title;
 			}
+			// 紀錄 title。
+			pages.title = title;
 
 			if (!data || !data.query) {
 				library_namespace.error('get_list: Unknown response: ['
 						+ (typeof data === 'object'
 								&& typeof JSON !== 'undefined' ? JSON
 								.stringify(data) : data) + ']');
-				callback(pages, titles, title, data);
+				callback(pages, data);
+				return;
+			}
 
-			} else if (data.query[type]) {
+			if (data.query[type]) {
 				// 一般情況。
 				if (Array.isArray(data = data.query[type])) {
-					data.forEach(add_page);
+					pages = Object.assign(data, pages);
 				}
 
 				library_namespace.debug(get_page_title_link(title) + ': '
-						+ titles.length + ' page(s)', 2, 'get_list');
+						+ pages.length + ' page(s)', 2, 'get_list');
 				// 注意: arguments 與 get_list() 之 callback 連動。
-				// 2016/6/22 change API 應用程式介面變更:
+				// 2016/6/22 change API 應用程式介面變更 of callback():
 				// (title, titles, pages) → (pages, titles, title)
+				// 2019/8/7 change API 應用程式介面變更 of callback():
+				// (pages, titles, title) → (pages, error)
 				// 按照需求程度編配/編排 arguments。
 				// 因為 callback 所欲知最重要的資訊是 pages，因此將 pages 置於第一 argument。
-				callback(pages, titles, title);
-
-			} else {
-				// console.log(data.query);
-				data = data.query.pages;
-				for ( var pageid in data) {
-					if (pages.length) {
-						library_namespace
-								.warn('get_list: More than 1 page got!');
-					} else {
-						var page = data[pageid];
-						if (Array.isArray(page[type]))
-							page[type].forEach(add_page);
-
-						library_namespace.debug('[' + page.title + ']: '
-								+ titles.length + ' page(s)', 1, 'get_list');
-						// 注意: arguments 與 get_list() 之 callback 連動。
-						callback(pages, titles, page.title);
-					}
-					return;
-				}
-				library_namespace.error('get_list: No page got!');
+				callback(pages, title);
+				return;
 			}
+
+			// console.log(data.query);
+			data = data.query.pages;
+			for ( var pageid in data) {
+				if (pages.length > 0) {
+					library_namespace.warn('get_list: More than 1 page got!');
+					callback(pages, new Error('More than 1 page got!'));
+				} else {
+					var page = data[pageid];
+					if (Array.isArray(page[type])) {
+						pages = Object.assign(page[type], pages);
+					}
+
+					library_namespace.debug('[' + page.title + ']: '
+							+ pages.length + ' page(s)', 1, 'get_list');
+					pages.title = page.title;
+					// 注意: arguments 與 get_list() 之 callback 連動。
+					callback(pages);
+				}
+				return;
+			}
+
+			library_namespace.error('get_list: No page got!');
+			callback(pages/* , new Error('No page got!') */);
+
 		}, null, options);
 	}
 
@@ -10807,8 +10805,8 @@ function module_code(library_namespace) {
 		 * 為頁面標題執行前綴搜索。<br />
 		 * <code>
 		// 注意: arguments 與 get_list() 之 callback 連動。
-		CeL.wiki.prefixsearch('User:Cewbot/log/20151002/', function(pages, titles, title){ console.log(titles); }, {limit:'max'});
-		wiki_instance.prefixsearch('User:Cewbot', function(pages, titles, title){ console.log(titles); }, {limit:'max'});
+		CeL.wiki.prefixsearch('User:Cewbot/log/20151002/', function(pages, error){ console.log(pages); }, {limit:'max'});
+		wiki_instance.prefixsearch('User:Cewbot', function(pages, error){ console.log(pages); }, {limit:'max'});
 		 * </code>
 		 * 
 		 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bprefixsearch
@@ -10967,15 +10965,13 @@ function module_code(library_namespace) {
 		}
 
 		// 注意: arguments 與 get_list() 之 callback 連動。
-		options[KEY_SESSION][options.type](target, function(pages, titles,
-				title) {
+		options[KEY_SESSION][options.type](target, function(pages, error) {
 			library_namespace.debug('Get ' + pages.length + ' ' + options.type
-					+ ' pages of ' + get_page_title_link(title), 2,
-					'wiki_API.list');
+					+ ' pages of ' + pages.title, 2, 'wiki_API.list');
 			if (typeof options.callback === 'function') {
 				// options.callback() 為取得每一階段清單時所會被執行的函數。
 				// 注意: arguments 與 get_list() 之 callback 連動。
-				options.callback(pages, titles, title);
+				options.callback(pages, target, options);
 			}
 			if (options.pages) {
 				// Array.prototype.push.apply(options.pages, pages);
@@ -10986,9 +10982,7 @@ function module_code(library_namespace) {
 			if (pages.next_index) {
 				library_namespace.debug('尚未取得所有清單，因此繼續取得下一階段清單。', 2,
 						'wiki_API.list');
-				setImmediate(function() {
-					wiki_API.list(target, callback, options);
-				});
+				setImmediate(wiki_API.list, [ target, callback, options ]);
 			} else {
 				library_namespace.debug('run callback after all list got.', 2,
 						'wiki_API.list');
@@ -13822,10 +13816,8 @@ function module_code(library_namespace) {
 					|| default_language);
 		}
 		// use get_list()
-		session.recentchanges(function(rows) {
-			// {Array}rows
-			callback(rows);
-		}, options);
+		// 注意: arguments 與 get_list() 之 callback 連動。
+		session.recentchanges(callback, options);
 	}
 
 	// 一定會提供的功能。
