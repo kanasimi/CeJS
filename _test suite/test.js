@@ -43,7 +43,8 @@ require('./_for include/_CeL.loader.nodejs.js');
 
 // Date.now()
 // console.time(''), console.timeEnd('')
-var test_start = new Date - 0,
+/** {ℕ⁰:Natural}test start time value */
+var test_start_time = (new Date).getTime(),
 /** {ℕ⁰:Natural+0}debug level during normal test period */
 test_debug_level = 0,
 /** {ℕ⁰:Natural+0}test level */
@@ -3678,20 +3679,24 @@ function finish_test(type) {
 		return;
 	}
 
+	// 耗時，經過時間 Takes ? ms
+	var elapsed_message = ' Elapsed time: '
+		+ Math.round((Date.now() - test_start_time) / 1000) + ' s.';
+
 	if (all_error_count === 0) {
 		// console.trace(still_running);
-		node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg',
-		// Takes ? ms
-		' Takes ' + (new Date - test_start) / 1000 + ' s.' ]);
-		// normal done.
+		node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。',
+				'-fg;-bg', elapsed_message ]);
+		// normal done. No error.
 		return;
 	}
 
 	CeL.gettext.conversion['error'] = [ 'no %n', '1 %n', '%d %ns' ];
-	node_info([ 'CeJS: ', 'fg=red;bg=white', CeL.gettext('All %error@1 occurred.', all_error_count), '-fg;-bg' ]);
+	node_info([ 'CeJS: ', 'fg=red;bg=white', CeL.gettext('All %error@1 occurred.', all_error_count),
+			'-fg;-bg' ]);
 	if (all_error_count > 0) {
 		setTimeout(function() {
-			throw new Error(CeL.gettext('All %error@1.', all_error_count));
+			throw new Error(CeL.gettext('All %error@1.', all_error_count) + elapsed_message);
 		}, 0);
 	}
 }

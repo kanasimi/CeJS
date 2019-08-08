@@ -1870,12 +1870,16 @@ function finish(name_space) {
 
 				var error_count = recorder.failed.length
 						+ recorder.fatal.length;
-				if (options && typeof options.callback === 'function') {
+				function finish() {
 					// 確保 callback 會在本函數之後執行。
+					// 最後執行setTimeout(options.callback)，使options.callback在訊息顯示完之後才執行。
 					// 因為已 callback，自此後不應改變 recorder，否則不會被 callback 處理。
-					setTimeout(function() {
-						options.callback(recorder, error_count, test_name);
-					}, 0);
+					if (options && typeof options.callback === 'function') {
+						setTimeout(function() {
+							options.callback(recorder, error_count, test_name);
+						}, 0);
+					}
+					return error_count;
 				}
 
 				if (error_count === 0) {
@@ -1885,7 +1889,7 @@ function finish(name_space) {
 							'passed', '-fg' ]));
 
 					log_front_end_info(join());
-					return error_count;
+					return finish();
 				}
 
 				// not all passed.
@@ -1912,7 +1916,7 @@ function finish(name_space) {
 					log_controller[3](join());
 				}
 
-				return error_count;
+				return finish();
 			}
 
 			assert_proxy.report = report;
