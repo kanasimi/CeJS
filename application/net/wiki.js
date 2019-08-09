@@ -9941,7 +9941,7 @@ function module_code(library_namespace) {
 			}
 
 			// data:
-			// {"batchcomplete":"","purge":[{"ns":4,"title":"Title","purged":""}]}
+			// {"batchcomplete":"","purge":[{"ns":0,"title":"Title","purged":""}]}
 
 			if (!data || !data.purge) {
 				library_namespace.warn(
@@ -9955,12 +9955,18 @@ function module_code(library_namespace) {
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
 					library_namespace.show_value(data);
-				callback(undefined, 'Unknown response');
+				callback(undefined, data);
 				return;
 			}
 
-			// callback({Array}pages)
-			callback(data.purge);
+			var page_data_list = data.purge;
+			// page_data_list: e.g., [{ns:4,title:'Meta:Sandbox',purged:''}]
+			if (page_data_list.length < 2 && (!options || !options.multi)) {
+				page_data_list = page_data_list[0];
+			}
+
+			// callback(page_data) or callback({Array}page_data_list)
+			callback(page_data_list);
 		}, post_data, options);
 	};
 
@@ -18168,6 +18174,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON
+	 * @see https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 	 */
 	function wikidata_entity(key, property, callback, options) {
 		if (typeof property === 'function' && !options) {

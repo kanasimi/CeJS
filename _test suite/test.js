@@ -3691,12 +3691,14 @@ function finish_test(type) {
 		return;
 	}
 
+	// add gettext format [error]
 	CeL.gettext.conversion['error'] = [ 'no %n', '1 %n', '%d %ns' ];
 	node_info([ 'CeJS: ', 'fg=red;bg=white', CeL.gettext('All %error@1 occurred.', all_error_count),
 			'-fg;-bg' ]);
 	if (all_error_count > 0) {
+		var error_message = CeL.gettext('All %error@1.', all_error_count) + elapsed_message;
 		setTimeout(function() {
-			throw new Error(CeL.gettext('All %error@1.', all_error_count) + elapsed_message);
+			throw new Error(error_message);
 		}, 0);
 	}
 }
