@@ -9962,6 +9962,7 @@ function module_code(library_namespace) {
 			var page_data_list = data.purge;
 			// page_data_list: e.g., [{ns:4,title:'Meta:Sandbox',purged:''}]
 			if (page_data_list.length < 2 && (!options || !options.multi)) {
+				// 沒有特別設定的時候，回傳與輸入的形式相同。輸入單頁則回傳單頁。
 				page_data_list = page_data_list[0];
 			}
 

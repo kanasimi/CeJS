@@ -3697,9 +3697,7 @@ function finish_test(type) {
 			'-fg;-bg' ]);
 	if (all_error_count > 0) {
 		var error_message = CeL.gettext('All %error@1.', all_error_count) + elapsed_message;
-		setTimeout(function() {
-			throw new Error(error_message);
-		}, 0);
+		throw new Error(error_message);
 	}
 }
 
