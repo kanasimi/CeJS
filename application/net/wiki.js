@@ -6314,7 +6314,7 @@ function module_code(library_namespace) {
 		}
 
 		if (page_data.expandtemplates
-		// 若有則用之否，則最起碼回傳一般的內容。
+		// 若有則用之，否則最起碼回傳一般的內容。
 		&& ('wikitext' in page_data.expandtemplates)) {
 			if (flow_view === 'expandtemplates')
 				return String(page_data.expandtemplates.wikitext || '');
@@ -6345,6 +6345,7 @@ function module_code(library_namespace) {
 					return revision['*'];
 				});
 			}
+			// treat flow_view as revision_NO
 			if (flow_view < 0) {
 				// e.g., -1: select the oldest revision.
 				flow_view += content.length;
@@ -6389,11 +6390,11 @@ function module_code(library_namespace) {
 	};
 
 	// return {Object}main revision (.revisions[0])
-	get_page_content.revision = function(page_data, NO) {
+	get_page_content.revision = function(page_data, revision_NO) {
 		return library_namespace.is_Object(page_data)
 		// treat as page data. Try to get page contents: page.revisions[0]['*']
 		// 一般說來應該是由新排到舊，[0] 為最新的版本 last revision。
-		&& page_data.revisions && page_data.revisions[NO || 0];
+		&& page_data.revisions && page_data.revisions[revision_NO || 0];
 	};
 
 	// CeL.wiki.content_of.edit_time(page_data) -

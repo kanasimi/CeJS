@@ -1838,11 +1838,8 @@ function finish(name_space) {
 			}
 
 			// --------------------------------
-			// report.
+			// report. 當有多個 setup_test()，report() 可能執行多次！
 			var report = function() {
-				// 確保 report() 只執行一次。
-				report = library_namespace.null_function;
-
 				var messages = test_name ? [ CeL.to_SGR([ 'Test '
 				// asynchronous operations
 				+ (assert_proxy.asynchronous ? 'asynchronous ' : '') + '[',
@@ -1960,19 +1957,21 @@ function finish(name_space) {
 					) {
 						report();
 					}
+				}, conditions_error = function(error) {
+					assert_proxy.asynchronous = false;
+					handler([ [ error, "OK" ], test_name ]);
 				};
 
 				try {
 					if (conditions.constructor.name === 'AsyncFunction') {
 						// allow async functions
 						// https://github.com/tc39/ecmascript-asyncawait/issues/78
-						eval('(async function(){ try { await conditions(assert_proxy, setup_test, finish_test); } catch (e) { handler([ [ e, "OK" ], test_name ]); report(); } })();');
+						eval('(async function(){ try { await conditions(assert_proxy, setup_test, finish_test); } catch (e) { conditions_error(e); } })();');
 					} else {
 						conditions(assert_proxy, setup_test, finish_test);
 					}
 				} catch (e) {
-					assert_proxy.asynchronous = false;
-					handler([ [ e, "OK" ], test_name ]);
+					conditions_error(e);
 				}
 			}
 

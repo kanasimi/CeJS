@@ -2347,7 +2347,7 @@ function module_code(library_namespace) {
 										+ '請回報議題讓下載工具設定 extract_work_id()，'
 										+ '以免將 work id 誤判為 work title。'
 							} : '' ]);
-					_this.onerror(gettext.apply(null, message), work_title);
+					_this.onwarning(gettext.apply(null, message), work_title);
 					finish_up(approximate_title.length > 0 && {
 						titles : approximate_title
 					});
