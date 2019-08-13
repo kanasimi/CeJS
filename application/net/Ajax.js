@@ -1902,19 +1902,29 @@ function module_code(library_namespace) {
 
 			/** {Array} [ {Buffer}, {Buffer}, ... ] */
 			var data = [], length = 0,
-			// https://xhr.spec.whatwg.org/#progressevent
+			// total_size https://xhr.spec.whatwg.org/#progressevent
 			total_length = +response.headers['content-length'], lengthComputable = total_length >= 0;
 			response.on('data', function(chunk) {
 				// {Buffer}chunk
 				length += chunk.length;
-				library_namespace.debug('receive BODY.length: '
+				var message = (options.write_to ? options.write_to + ': ' : '')
 						+ chunk.length
 						+ '/'
 						+ length
-						+ ': '
+						+ (total_length ? '/' + total_length : '')
+						+ ' bytes ('
+						// 00% of 0.00MiB
+						+ (total_length ? (100 * length / total_length | 0)
+								+ '%, ' : '')
+						//
+						+ (length / 1.024 / (/* Date.now() */(new Date)
+								.getTime() - start_time)).toFixed(2)
+						+ ' KiB/s): '
 						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL), 4,
+								: URL_to_fetch && URL_to_fetch.URL);
+				library_namespace.debug('receive BODY.length: ' + message, 4,
 						'get_URL_node');
+				process.stdout.write(message + ' ...\r');
 				if (length > options.MAX_BUFFER_SIZE) {
 					if (data)
 						data = null;
@@ -2085,8 +2095,8 @@ function module_code(library_namespace) {
 							.slice(0, 256);
 					if (!options.no_warning) {
 						library_namespace.info('get_URL_node: Write '
-								+ data.length + ' B to [' + file_path + ']: '
-								+ URL_to_fetch);
+								+ data.length + ' bytes to [' + file_path
+								+ ']: ' + URL_to_fetch);
 					}
 					try {
 						var fd = node_fs.openSync(file_path, 'w');
@@ -2114,8 +2124,8 @@ function module_code(library_namespace) {
 						}
 					} catch (e) {
 						library_namespace.error('get_URL_node: Error to write '
-								+ data.length + ' B to [' + file_path + ']: '
-								+ URL_to_fetch);
+								+ data.length + ' bytes to [' + file_path
+								+ ']: ' + URL_to_fetch);
 						console.error(e);
 					}
 				}
@@ -2368,6 +2378,7 @@ function module_code(library_namespace) {
 			});
 		}
 
+		var start_time = (new Date).getTime();
 		request.end();
 	}
 
@@ -2912,6 +2923,7 @@ function module_code(library_namespace) {
 					}
 				}
 
+				// Warning: 已經有些程式碼預設會回傳 {String}
 				onload(data.toString(), undefined, XMLHttp);
 			},
 			// character encoding of HTML web page

@@ -932,7 +932,9 @@ function module_code(library_namespace) {
 		.replace(/<\!--[\s\S]*?-->/g, '')
 		// 沒先處理的話，也會去除 <br />
 		.replace(/<br(?:\s[^<>]*)?>/ig, '\n').replace(/<\/?[a-z][^>]*>/g, '')
-		// e.g., "{{En icon}}"
+		// "{{=}}" → "="
+		.replace(/{{=\s*}}/ig, '=')
+		// e.g., remove "{{En icon}}"
 		.replace(/{{[a-z\s]+}}/ig, '')
 		// e.g., "[[link]]" → "link"
 		// 警告：應處理 "[[ [[link]] ]]" → "[[ link ]]" 之特殊情況

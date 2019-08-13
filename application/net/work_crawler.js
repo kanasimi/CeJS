@@ -1,7 +1,7 @@
 ﻿/**
  * @name CeL function for downloading online works (novels, comics).
  * 
- * @fileoverview 本檔案包含了批量下載線上作品（小說、漫畫）的函式庫。 WWW work crawler.
+ * @fileoverview 本檔案包含了批量下載網路作品（小說、漫畫）的函式庫。 WWW work crawler.
  * 
  * <code>
 
@@ -633,7 +633,7 @@ function module_code(library_namespace) {
 		// 所有的子檔案要修訂注解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
 		// 下載檔案儲存目錄路徑。
-		// 圖片檔與紀錄檔的下載位置。下載線上網站的作品檔案後，將儲存於此目錄下。
+		// 圖片檔與紀錄檔的下載位置。下載網路網站的作品檔案後，將儲存於此目錄下。
 		// 這個目錄會在 work_crawler_loader.js 裡面被 setup_crawler() 之
 		// global.data_directory 覆寫。
 		main_directory : library_namespace.storage
@@ -836,7 +836,7 @@ function module_code(library_namespace) {
 		pack_ebook : pack_ebook,
 		/** 在包裝完電子書之後，把電子書目錄整個刪掉。 請注意：必須先安裝 7-Zip **18.01 以上的版本**。 */
 		remove_ebook_directory : true,
-		/** 章節數量無變化時依舊利用 cache 重建資料(如ebook)。 */
+		/** 章節數量無變化時，依舊利用 cache 重建資料(如ebook)。 */
 		// regenerate : true,
 		/** 進一步處理書籍之章節內容。例如繁簡轉換、錯別字修正、裁剪廣告。 */
 		contents_post_processor : function(contents, work_data) {
@@ -947,8 +947,10 @@ function module_code(library_namespace) {
 		set_chapter_NO_via_title : set_chapter_NO_via_title,
 		get_chapter_directory_name : get_chapter_directory_name,
 
-		// work_data properties to reset
+		// work_data properties to reset. do not inherit
+		// 設定不繼承哪些作品資訊。
 		reset_work_data_properties : {
+			limited : true,
 			// work_data.recheck
 			recheck : true,
 			download_chapter_NO_list : true,
@@ -972,6 +974,7 @@ function module_code(library_namespace) {
 			// set download directory, fso:directory
 			main_directory : 'string:fso_directory',
 
+			// crawler.show_work_data(work_data);
 			show_information_only : 'boolean',
 
 			one_by_one : 'boolean',
@@ -1214,12 +1217,13 @@ function module_code(library_namespace) {
 	}
 
 	// latest_chapter
-	var work_data_display_fields = 'title,id,author,status,chapter_count,last_update,last_download.date,last_download.chapter,url,directory'
+	var work_data_display_fields = 'title,id,author,status,chapter_count,last_update,last_download.date,last_download.chapter,tags,url,directory'
 			.split(',');
 	show_work_data.prefix = 'work_data.';
 
 	// 在 CLI 命令列介面顯示作品資訊。
 	function show_work_data(work_data, options) {
+		// console.log(work_data);
 		var display_fields = options && options.display_fields
 				|| work_data_display_fields;
 		var display_list = [];
@@ -2190,13 +2194,13 @@ function module_code(library_namespace) {
 		if (!search_url_data || typeof this.parse_search_result !== 'function') {
 			if (callback && callback.options) {
 				// e.g., for .get_data_only
-				finish_up(gettext('本線上作品網站 %1 的模組未提供搜尋功能。', this.id));
+				finish_up(gettext('本網路作品網站 %1 的模組未提供搜尋功能。', this.id));
 				return;
 			}
 
 			search_url_data = Object.create(null);
 			search_url_data[work_title] = '';
-			this.onerror(gettext('本線上作品網站 %1 的模組未提供搜尋功能。', this.id)
+			this.onerror(gettext('本網路作品網站 %1 的模組未提供搜尋功能。', this.id)
 					+ gettext('請先輸入作品 id，下載過一次後工具會自動記錄作品標題與 id 的轉換。')
 					+ gettext('亦可手動設定，編輯《%1》之 id 於 %2', work_title,
 							search_result_file) + '\n (e.g., '
@@ -2939,7 +2943,8 @@ function module_code(library_namespace) {
 
 			var matched = library_namespace.get_JSON(work_data.data_file);
 			if (matched) {
-				// work_data properties to reset
+				// work_data properties to reset. do not inherit
+				// 設定不繼承哪些作品資訊。
 				var skip_cache = Object.assign({
 					process_status : _this.recheck,
 
@@ -3246,22 +3251,17 @@ function module_code(library_namespace) {
 
 			} else {
 				// console.log(work_data);
-				var warning;
+				var warning = _this.id + ': ' + work_id
+						+ (work_data.title ? ' ' + work_data.title : '') + ': ';
 				if (work_data.removed) {
-					warning = work_id
-							+ (work_data.title ? ' ' + work_data.title : '')
-							+ ': ' + (work_data.removed || '作品不存在或已被刪除。');
+					warning += typeof work_data.removed === 'string' ? work_data.removed
+							: '作品不存在或已被刪除。';
 				} else {
-					warning = _this.id
-							+ ': '
-							+ work_id
-							+ (work_data.title ? ' ' + work_data.title : '')
-							// (Did not set work_data.chapter_count)
-							// No chapter got! 若是作品不存在就不會跑到這邊了
-							+ ': '
-							+ gettext('Can not get chapter count! ')
-							+ (_this.got_chapter_count ? '或許作品已被刪除或屏蔽？'
-									: '或許作品已被刪除或屏蔽，或者網站改版了？');
+					warning += gettext('Can not get chapter count! ')
+					// (Did not set work_data.chapter_count)
+					+ (_this.got_chapter_count ? '或許作品已被刪除或屏蔽？'
+					// No chapter got! 若是作品不存在就不會跑到這邊了
+					: '或許作品已被刪除或屏蔽，或者網站改版了？');
 				}
 				_this.onwarning(warning, work_data);
 

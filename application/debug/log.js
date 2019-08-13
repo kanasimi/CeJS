@@ -1703,6 +1703,50 @@ function finish(name_space) {
 			type : Boolean
 		} ] ], 'type test');
 
+
+		// --------------------------------------
+		// TODO:
+
+		// may ignore:
+		CeL.setup_test(test_group_name);
+
+		CeL.test(test_group_name, conditions, options);
+		// conditions #1: [
+		// [ test value: true / false, 'test_name' ],
+		// [ test value: true / false, {name:'test_name'} ],
+		// [ test value: true / false, {options} ],
+		// [ test value: true / false ],
+		// test value: true / false,
+		//
+		// [ [ test value 1, test value 2 ], 'test_name' ],
+		// [ [ test value 1, test value 2 ], {name:'test_name'} ],
+		// [ [ test value 1, test value 2 ], {options} ],
+		// [ [ test value 1, test value 2 ] ],
+		//
+		// [ function tester(), 'test_name' ],
+		// [ function tester() ],
+		// [ function tester(callback), {need_callback:true} ],
+		// function tester(),
+		// function tester() { return new Promise },
+		// async function tester(),
+		//
+		// ]
+
+		// conditions #2:
+		// function async_tester(assert)
+		// async function async_tester(assert)
+		//
+		// CeL.test(test_group_name, function async_tester(assert, callback), {need_callback:true});
+		//
+		// assert(test value: true / false, 'test_name');
+		// assert(test value: true / false, options);
+		// assert(test value: true / false);
+		// assert([ test value 1, test value 2 ], 'test_name');
+		// assert([ test value 1, test value 2 ]);
+
+		CeL.test_finished();
+
+
 		</code>
 		 * 
 		 * @param {String}[test_name]
@@ -1730,7 +1774,8 @@ function finish(name_space) {
 			}
 
 			if (!Array.isArray(conditions) && typeof conditions !== 'function') {
-				throw new Error(CeL.Class + '.test: Please input {Array}!');
+				throw new Error(CeL.Class
+						+ '.test: Please input {Array} or {Function}!');
 				return;
 			}
 
