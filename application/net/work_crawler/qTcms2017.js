@@ -289,7 +289,7 @@ function module_code(library_namespace) {
 				// 對於非utf-8編碼之中文，不能使用 atob()???
 				chapter_data = atob(chapter_data).split("$qingtiandy$");
 			}
-			if (!chapter_data) {
+			if (!Array.isArray(chapter_data)) {
 				library_namespace.warn({
 					T : [ '無法解析《%1》§%2 之章節資料！', work_data.title, chapter_NO ]
 				});
@@ -298,6 +298,17 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(chapter_data));
 			// console.log(chapter_data.length);
 			// library_namespace.set_debug(6);
+
+			// e.g., http://m.88bag.net/rexue/zuomeigongyu/36279.html
+			// @see
+			// http://m.88bag.net/template/wap1/css/d7s/js/show.20170501.js?20190722091626
+			if (chapter_data.length === 1
+					&& chapter_data[0].startsWith('+http://')) {
+				chapter_data = {
+					limited : true
+				};
+				return chapter_data;
+			}
 
 			// 設定必要的屬性。
 			chapter_data = {
