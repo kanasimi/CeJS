@@ -1907,24 +1907,30 @@ function module_code(library_namespace) {
 			response.on('data', function(chunk) {
 				// {Buffer}chunk
 				length += chunk.length;
-				var message = (options.write_to ? options.write_to + ': ' : '')
-						+ chunk.length
-						+ '/'
+				var message = [ (options.write_to ? options.write_to + ': '
+						: '')
+						// + chunk.length + '/'
 						+ length
 						+ (total_length ? '/' + total_length : '')
 						+ ' bytes ('
 						// 00% of 0.00MiB
 						+ (total_length ? (100 * length / total_length | 0)
 								+ '%, ' : '')
-						//
 						+ (length / 1.024 / (/* Date.now() */(new Date)
 								.getTime() - start_time)).toFixed(2)
-						+ ' KiB/s): '
+						+ ' KiB/s)' ];
+				message.push(': '
 						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL);
-				library_namespace.debug('receive BODY.length: ' + message, 4,
-						'get_URL_node');
-				process.stdout.write(message + ' ...\r');
+								: URL_to_fetch && URL_to_fetch.URL));
+				library_namespace.debug('receive BODY.length: '
+						+ message.join(''), 4, 'get_URL_node');
+				if (options.show_progress && length !== total_length) {
+					if (!(options.show_progress > 1)) {
+						message.pop();
+					}
+					process.stdout.write(message.join('') + ' ...\r');
+				}
+
 				if (length > options.MAX_BUFFER_SIZE) {
 					if (data)
 						data = null;
