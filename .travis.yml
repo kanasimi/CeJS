@@ -42,8 +42,9 @@ matrix:
       # 2019-04-23, Version 12.0.0 (Current), @BethGriggs
         - "12"
 
-    - os: windows
-      node_js: 12
+    #- os: windows
+    #  2019/8/14 10:50:35 date error
+    #  node_js: 12
     - os: osx
       node_js: 12
 
