@@ -7581,6 +7581,7 @@ function module_code(library_namespace) {
 		// estimated time of completion 估計時間 預計剩下時間 預估剩餘時間 預計完成時間還要多久
 		var estimated = time_elapsed / processed_amount
 				* (total_amount - processed_amount)
+				// default showing interval: 1 minute
 				/ library_namespace.to_millisecond('1 min');
 		if (estimated > 1) {
 			estimated = estimated > 99 ? (estimated / 60).toFixed(1) + ' hours'
