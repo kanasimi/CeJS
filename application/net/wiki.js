@@ -7581,8 +7581,7 @@ function module_code(library_namespace) {
 		// estimated time of completion 估計時間 預計剩下時間 預估剩餘時間 預計完成時間還要多久
 		var estimated = time_elapsed / processed_amount
 				* (total_amount - processed_amount)
-				// 1 minutes
-				/ (60 * 1000);
+				/ library_namespace.to_millisecond('1 min');
 		if (estimated > 1) {
 			estimated = estimated > 99 ? (estimated / 60).toFixed(1) + ' hours'
 					: estimated.toFixed(1) + ' minutes';
@@ -8797,249 +8796,251 @@ function module_code(library_namespace) {
 			get_URL(action, {
 				callback : callback
 			});
+			return;
+		}
 
-		} else {
-			// console.log('-'.repeat(79));
-			// console.log(options);
-			var get_URL_options = options && options.get_URL_options;
-			// @see function setup_API_URL(session, API_URL)
-			if (!get_URL_options) {
-				var session = options && (options[KEY_SESSION]
-				// 檢查若 options 本身即為 session。
-				|| is_wiki_API(options) && options);
-				if (session) {
-					if (method === 'edit' && post_data
-					//
-					&& (!post_data.token || post_data.token === BLANK_TOKEN)
-					// 防止未登錄編輯
-					&& session.token
-					//
-					&& (session.token.lgpassword || session.preserve_password)) {
-						// console.log([ action, post_data ]);
-						library_namespace.error('wiki_API.query: 未登錄編輯？');
-						throw new Error('未登錄編輯？');
+		// console.log('-'.repeat(79));
+		// console.log(options);
+		var get_URL_options = Object.assign(Object.create(null),
+				wiki_API.query.get_URL_options, options
+						&& options.get_URL_options);
+
+		// @see function setup_API_URL(session, API_URL)
+		var session = options && (options[KEY_SESSION]
+		// 檢查若 options 本身即為 session。
+		|| is_wiki_API(options) && options);
+		if (session) {
+			if (method === 'edit' && post_data
+			//
+			&& (!post_data.token || post_data.token === BLANK_TOKEN)
+			// 防止未登錄編輯
+			&& session.token
+			//
+			&& (session.token.lgpassword || session.preserve_password)) {
+				// console.log([ action, post_data ]);
+				library_namespace.error('wiki_API.query: 未登錄編輯？');
+				throw new Error('未登錄編輯？');
+			}
+
+			// assert: get_URL_options 為 session。
+			if (!session.get_URL_options) {
+				library_namespace.debug(
+						'為 wiki_API instance，但無 agent，需要造出 agent。', 2,
+						'wiki_API.query');
+				setup_API_URL(session, true);
+			}
+			get_URL_options = session.get_URL_options;
+		}
+
+		if (options && options.form_data) {
+			// @see wiki_API.upload()
+			library_namespace.debug('Set form_data', 6);
+			// throw 'Set form_data';
+			// options.form_data 會被當作傳入 to_form_data() 之 options。
+			// to_form_data() will get file using get_URL()
+			get_URL_options.form_data = options.form_data;
+		}
+
+		if (false) {
+			// test options.get_URL_options
+			if (get_URL_options) {
+				if (false)
+					console.log('wiki_API.query: Using get_URL_options: '
+							+ get_URL_options.agent);
+				// console.log(options);
+				// console.log(action);
+			} else {
+				// console.trace('wiki_API.query: Without get_URL_options');
+				// console.log(action);
+				throw 'wiki_API.query: Without get_URL_options';
+			}
+		}
+
+		if (false && typeof callback === 'function'
+		// use options.get_URL_options:{onfail:function(error){}} instead.
+		&& (!get_URL_options || !get_URL_options.onfail)) {
+			get_URL_options = Object.assign({
+				onfail : function(error) {
+					if (false) {
+						if (error.code === 'ENOTFOUND'
+						// CeL.wiki.wmflabs
+						&& wmflabs) {
+							// 若在 Wikimedia Toolforge 取得 wikipedia 的資料，
+							// 卻遇上 domain name not found，
+							// 通常表示 language (API_URL) 設定錯誤。
+						}
+
+						/**
+						 * do next action. 警告: 若是自行設定 .onfail，則需要自行善後。
+						 * 例如可能得在最後自行執行(手動呼叫) wiki.next()， 使
+						 * wiki_API.prototype.next() 知道應當重新啟動以處理 queue。
+						 */
+						wiki.next();
+
+						var session = options && (options[KEY_SESSION]
+						// 檢查若 options 本身即為 session。
+						|| is_wiki_API(options) && options);
+						if (session) {
+							session.running = false;
+						}
 					}
+					typeof callback === 'function'
+							&& callback(undefined, error);
+				}
+			}, get_URL_options);
+		}
 
-					// assert: get_URL_options 為 session。
-					if (!session.get_URL_options) {
+		var agent = get_URL_options.agent;
+		if (agent && agent.last_cookie && (agent.last_cookie.length > 80
+		// cache cache: 若是用同一個 agent 來 access 過多 Wikipedia 網站，
+		// 可能因 wikiSession 過多(如.length === 86)而造成 413 (請求實體太大)。
+		|| agent.cookie_cache)) {
+			if (agent.last_cookie.length > 80) {
+				library_namespace.debug('重整 cookie[' + agent.last_cookie.length
+						+ ']。', 1, 'wiki_API.query');
+				if (!agent.cookie_cache)
+					agent.cookie_cache
+					// {zh:['','',...],en:['','',...]}
+					= Object.create(null);
+				var last_cookie = agent.last_cookie;
+				agent.last_cookie = [];
+				while (last_cookie.length > 0) {
+					var cookie_item = last_cookie.pop();
+					if (!cookie_item) {
+						// 不知為何，也可能出現這種 cookie_item === undefined 的情況。
+						continue;
+					}
+					var matched = cookie_item.match(/^([a-z_\d]{2,20})wiki/);
+					if (matched) {
+						var language = matched[1];
+						if (language in agent.cookie_cache)
+							agent.cookie_cache[language].push(cookie_item);
+						else
+							agent.cookie_cache[language] = [ cookie_item ];
+					} else {
+						agent.last_cookie.push(cookie_item);
+					}
+				}
+				library_namespace.debug('重整 cookie: → ['
+						+ agent.last_cookie.length + ']。', 1, 'wiki_API.query');
+			}
+
+			var language = session && session.language;
+			if (!language) {
+				library_namespace.debug('未設定 session，自 API_URL 擷取 language: ['
+						+ action[0] + ']。', 1, 'wiki_API.query');
+				language = typeof action[0] === 'string'
+				// TODO: 似乎不能真的擷取到所需 language。
+				&& action[0].match(PATTERN_wiki_project_URL);
+				language = language && language[3] || default_language;
+				// e.g., wiki_API.query: Get "ja" from
+				// ["https://ja.wikipedia.org/w/api.php?action=edit&format=json&utf8",{}]
+				library_namespace.debug('Get "' + language + '" from '
+						+ JSON.stringify(action), 1, 'wiki_API.query');
+			}
+			language = language.replace(/-/g, '_');
+			if (language in agent.cookie_cache) {
+				agent.last_cookie.append(agent.cookie_cache[language]);
+				delete agent.cookie_cache[language];
+			}
+		}
+
+		get_URL(action, function(XMLHttp, error) {
+			var status_code, response;
+			if (error) {
+				// assert: !!XMLHttp === false
+				status_code = error;
+			} else {
+				status_code = XMLHttp.status;
+				response = XMLHttp.responseText;
+			}
+
+			if (error || /^[45]/.test(status_code)) {
+				// e.g., 503, 413
+				if (typeof get_URL_options.onfail === 'function') {
+					get_URL_options.onfail(error || status_code);
+				} else if (typeof callback === 'function') {
+					library_namespace.warn(
+					//
+					'wiki_API.query: Get error ' + status_code + ': '
+					// 避免 TypeError:
+					// Cannot convert object to primitive value
+					+ JSON.stringify(action));
+					callback(response, error || status_code);
+				}
+				return;
+			}
+
+			// response = XMLHttp.responseXML;
+			library_namespace.debug('response ('
+					+ response.length
+					+ ' characters): '
+					+ (library_namespace.platform.nodejs ? '\n' + response
+							: response.replace(/</g, '&lt;')), 3,
+					'wiki_API.query');
+
+			// "<\": for Eclipse JSDoc.
+			if (/<\html[\s>]/.test(response.slice(0, 40))) {
+				response = response.between('source-javascript', '</pre>')
+						.between('>')
+						// 去掉所有 HTML tag。
+						.replace(/<[^>]+>/g, '');
+
+				// '&#123;' : (")
+				// 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況?
+				if (response.includes('&#'))
+					response = library_namespace.HTML_to_Unicode(response);
+			}
+
+			// library_namespace.log(response);
+			// library_namespace.log(library_namespace.HTML_to_Unicode(response));
+			if (response) {
+				try {
+					response = library_namespace.parse_JSON(response);
+				} catch (e) {
+					// <title>414 Request-URI Too Long</title>
+					// <title>414 Request-URI Too Large</title>
+					if (response.includes('>414 Request-URI Too ')) {
 						library_namespace.debug(
-								'為 wiki_API instance，但無 agent，需要造出 agent。', 2,
-								'wiki_API.query');
-						setup_API_URL(session, true);
-					}
-					get_URL_options = session.get_URL_options;
-				}
-			}
-			if (options && options.form_data) {
-				// @see wiki_API.upload()
-				library_namespace.debug('Set form_data', 6);
-				// throw 'Set form_data';
-				// options.form_data 會被當作傳入 to_form_data() 之 options。
-				// to_form_data() will get file using get_URL()
-				get_URL_options.form_data = options.form_data;
-			}
-
-			if (false) {
-				// test options.get_URL_options
-				if (get_URL_options) {
-					if (false)
-						console.log('wiki_API.query: Using get_URL_options: '
-								+ get_URL_options.agent);
-					// console.log(options);
-					// console.log(action);
-				} else {
-					// console.trace('wiki_API.query: Without get_URL_options');
-					// console.log(action);
-					throw 'wiki_API.query: Without get_URL_options';
-				}
-			}
-
-			if (false && typeof callback === 'function'
-			// use options.get_URL_options:{onfail:function(error){}} instead.
-			&& (!get_URL_options || !get_URL_options.onfail)) {
-				get_URL_options = Object.assign({
-					onfail : function(error) {
-						if (false) {
-							if (error.code === 'ENOTFOUND'
-							// CeL.wiki.wmflabs
-							&& wmflabs) {
-								// 若在 Wikimedia Toolforge 取得 wikipedia 的資料，
-								// 卻遇上 domain name not found，
-								// 通常表示 language (API_URL) 設定錯誤。
-							}
-
-							/**
-							 * do next action. 警告: 若是自行設定 .onfail，則需要自行善後。
-							 * 例如可能得在最後自行執行(手動呼叫) wiki.next()， 使
-							 * wiki_API.prototype.next() 知道應當重新啟動以處理 queue。
-							 */
-							wiki.next();
-
-							var session = options && (options[KEY_SESSION]
-							// 檢查若 options 本身即為 session。
-							|| is_wiki_API(options) && options);
-							if (session) {
-								session.running = false;
-							}
-						}
-						typeof callback === 'function'
-								&& callback(undefined, error);
-					}
-				}, get_URL_options);
-			}
-
-			var agent = get_URL_options && get_URL_options.agent;
-			if (agent && agent.last_cookie && (agent.last_cookie.length > 80
-			// cache cache: 若是用同一個 agent 來 access 過多 Wikipedia 網站，
-			// 可能因 wikiSession 過多(如.length === 86)而造成 413 (請求實體太大)。
-			|| agent.cookie_cache)) {
-				if (agent.last_cookie.length > 80) {
-					library_namespace.debug('重整 cookie['
-							+ agent.last_cookie.length + ']。', 1,
-							'wiki_API.query');
-					if (!agent.cookie_cache)
-						agent.cookie_cache
-						// {zh:['','',...],en:['','',...]}
-						= Object.create(null);
-					var last_cookie = agent.last_cookie;
-					agent.last_cookie = [];
-					while (last_cookie.length > 0) {
-						var cookie_item = last_cookie.pop();
-						if (!cookie_item) {
-							// 不知為何，也可能出現這種 cookie_item === undefined 的情況。
-							continue;
-						}
-						var matched = cookie_item
-								.match(/^([a-z_\d]{2,20})wiki/);
-						if (matched) {
-							var language = matched[1];
-							if (language in agent.cookie_cache)
-								agent.cookie_cache[language].push(cookie_item);
-							else
-								agent.cookie_cache[language] = [ cookie_item ];
-						} else {
-							agent.last_cookie.push(cookie_item);
-						}
-					}
-					library_namespace.debug('重整 cookie: → ['
-							+ agent.last_cookie.length + ']。', 1,
-							'wiki_API.query');
-				}
-
-				var language = session && session.language;
-				if (!language) {
-					library_namespace.debug(
-							'未設定 session，自 API_URL 擷取 language: [' + action[0]
-									+ ']。', 1, 'wiki_API.query');
-					language = typeof action[0] === 'string'
-					// TODO: 似乎不能真的擷取到所需 language。
-					&& action[0].match(PATTERN_wiki_project_URL);
-					language = language && language[3] || default_language;
-					// e.g., wiki_API.query: Get "ja" from
-					// ["https://ja.wikipedia.org/w/api.php?action=edit&format=json&utf8",{}]
-					library_namespace.debug('Get "' + language + '" from '
-							+ JSON.stringify(action), 1, 'wiki_API.query');
-				}
-				language = language.replace(/-/g, '_');
-				if (language in agent.cookie_cache) {
-					agent.last_cookie.append(agent.cookie_cache[language]);
-					delete agent.cookie_cache[language];
-				}
-			}
-
-			get_URL(action, function(XMLHttp, error) {
-				var status_code, response;
-				if (error) {
-					// assert: !!XMLHttp === false
-					status_code = error;
-				} else {
-					status_code = XMLHttp.status;
-					response = XMLHttp.responseText;
-				}
-
-				if (error || /^[45]/.test(status_code)) {
-					// e.g., 503, 413
-					if (get_URL_options
-							&& typeof get_URL_options.onfail === 'function') {
-						get_URL_options.onfail(error || status_code);
-					} else if (typeof callback === 'function') {
-						library_namespace.warn(
 						//
-						'wiki_API.query: Get error ' + status_code + ': '
-						// 避免 TypeError:
-						// Cannot convert object to primitive value
-						+ JSON.stringify(action));
-						callback(response, error || status_code);
+						action[0], 1, 'wiki_API.query');
+					} else {
+						// TODO: 處理 API 傳回結尾亂編碼的情況。
+						// https://phabricator.wikimedia.org/T134094
+						// 不一定總是有效。
+
+						library_namespace.error(
+						//
+						'wiki_API.query: Invalid content: ['
+								+ String(response).slice(0, 40000) + ']');
+						library_namespace.error(e);
 					}
+
+					// error handling
+					if (get_URL_options.onfail) {
+						get_URL_options.onfail(e);
+					} else if (typeof callback === 'function') {
+						callback(response, e);
+					}
+
+					// exit!
 					return;
 				}
+			}
 
-				// response = XMLHttp.responseXML;
-				library_namespace.debug('response ('
-						+ response.length
-						+ ' characters): '
-						+ (library_namespace.platform.nodejs ? '\n' + response
-								: response.replace(/</g, '&lt;')), 3,
-						'wiki_API.query');
+			if (typeof callback === 'function') {
+				callback(response);
+			} else {
+				library_namespace
+						.error('wiki_API.query: No {Function}callback!');
+			}
 
-				// "<\": for Eclipse JSDoc.
-				if (/<\html[\s>]/.test(response.slice(0, 40))) {
-					response = response.between('source-javascript', '</pre>')
-							.between('>')
-							// 去掉所有 HTML tag。
-							.replace(/<[^>]+>/g, '');
+		}, null, post_data, get_URL_options);
+	};
 
-					// '&#123;' : (")
-					// 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況?
-					if (response.includes('&#'))
-						response = library_namespace.HTML_to_Unicode(response);
-				}
-
-				// library_namespace.log(response);
-				// library_namespace.log(library_namespace.HTML_to_Unicode(response));
-				if (response) {
-					try {
-						response = library_namespace.parse_JSON(response);
-					} catch (e) {
-						// <title>414 Request-URI Too Long</title>
-						// <title>414 Request-URI Too Large</title>
-						if (response.includes('>414 Request-URI Too ')) {
-							library_namespace.debug(
-							//
-							action[0], 1, 'wiki_API.query');
-						} else {
-							// TODO: 處理 API 傳回結尾亂編碼的情況。
-							// https://phabricator.wikimedia.org/T134094
-							// 不一定總是有效。
-
-							library_namespace.error(
-							//
-							'wiki_API.query: Invalid content: ['
-									+ String(response).slice(0, 40000) + ']');
-							library_namespace.error(e);
-						}
-
-						// error handling
-						if (get_URL_options.onfail) {
-							get_URL_options.onfail(e);
-						} else if (typeof callback === 'function') {
-							callback(response, e);
-						}
-
-						// exit!
-						return;
-					}
-				}
-
-				if (typeof callback === 'function') {
-					callback(response);
-				} else {
-					library_namespace
-							.error('wiki_API.query: No {Function}callback!');
-				}
-
-			}, null, post_data, get_URL_options);
-		}
+	wiki_API.query.get_URL_options = {
+		// default timeout: 1 minute
+		timeout : library_namespace.to_millisecond('1 min')
 	};
 
 	/**
