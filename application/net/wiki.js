@@ -14052,18 +14052,29 @@ function module_code(library_namespace) {
 
 		// 取得頁面資料。
 		function receive() {
+
 			function receive_next() {
+				// 預防上一個任務還在執行的情況。
+				// https://zh.moegirl.org/index.php?limit=500&title=Special%3A%E7%94%A8%E6%88%B7%E8%B4%A1%E7%8C%AE&contribs=user&target=Cewbot&namespace=&tagfilter=&start=2019-08-12&end=2019-08-13
+				if (next_task_id) {
+					library_namespaceinfo('已經設定過下次任務。可能是上一個任務還在查詢中，或者應該會 timeout？將會清除之前的任務，重新設定任務。');
+					// for debug:
+					console.log(next_task_id);
+					clearTimeout(next_task_id);
+				}
+
 				var real_interval_ms = Date.now() - receive_time;
 				library_namespace
 						.debug('interval from latest receive() starts: '
 								+ real_interval_ms + ' ms (' + Date.now()
 								+ ' - ' + receive_time + ')', 3, 'receive_next');
-				setTimeout(receive,
+				next_task_id = setTimeout(receive,
 				// 減去已消耗時間，達到更準確的時間間隔控制。
 				Math.max(interval - real_interval_ms, 0));
 			}
 
-			// 上一次執行receive()的時間
+			var next_task_id = undefined;
+			// 上一次執行 receive() 的時間。
 			var receive_time = Date.now();
 
 			library_namespace.debug('Get recent change from '
