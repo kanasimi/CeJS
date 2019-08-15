@@ -93,7 +93,8 @@ function module_code(library_namespace) {
 	gettext = this.r('gettext');
 
 	var mimetype_filename = 'mimetype',
-	// http://www.idpf.org/epub/31/spec/epub-ocf.html#sec-container-metainf
+	// http://www.idpf.org/epub/dir/
+	// https://w3c.github.io/publ-epub-revision/epub32/spec/epub-ocf.html#sec-container-metainf
 	// All OCF Abstract Containers must include a directory called META-INF
 	// in their Root Directory.
 	// e.g., META-INF/container.xml
@@ -252,12 +253,12 @@ function module_code(library_namespace) {
 
 		/**
 		 * <code>
-		 * this.metadata = {
-		 * 	'dc:tagname' : [ {Object} ],
-		 * 	meta : { [property] : [ {Object} ] },
-		 * 	link : { href : {Object} }
-		 * }
-		 * </code>
+		this.metadata = {
+			'dc:tagname' : [ {Object} ],
+			meta : { [property] : [ {Object} ] },
+			link : { href : {Object} }
+		}
+		</code>
 		 * 
 		 * @see set_meta_information()
 		 */
@@ -327,7 +328,9 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.debug('重建 index_of_id...', 1, 'rebuild_index_of_id');
+		library_namespace.debug({
+			T : '重建 index_of_id……'
+		}, 1, 'rebuild_index_of_id');
 		list.forEach(function(item, index) {
 			if (item.id) {
 				index_of_id[item.id] = index;
@@ -517,8 +520,9 @@ function module_code(library_namespace) {
 						+ chapter.idref + ']');
 			}
 			if (!(index in resources)) {
-				library_namespace
-						.warn('spine之中包含了重複的id，將跳過之: ' + chapter.idref);
+				library_namespace.warn({
+					T : [ '<spine> 中包含了重複的 id，將跳過之：', chapter.idref ]
+				});
 				return;
 			}
 			chapter = resources[index];
