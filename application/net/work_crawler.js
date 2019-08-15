@@ -3254,12 +3254,13 @@ function module_code(library_namespace) {
 				var warning = _this.id + ': ' + work_id
 						+ (work_data.title ? ' ' + work_data.title : '') + ': ';
 				if (work_data.removed) {
+					// cf. work_data.filtered
 					warning += typeof work_data.removed === 'string' ? work_data.removed
 							: '作品不存在或已被刪除。';
 				} else {
 					warning += gettext('Can not get chapter count! ')
 					// (Did not set work_data.chapter_count)
-					+ (_this.got_chapter_count ? '或許作品已被刪除或屏蔽？'
+					+ gettext(_this.got_chapter_count ? '或許作品已被刪除或屏蔽？'
 					// No chapter got! 若是作品不存在就不會跑到這邊了
 					: '或許作品已被刪除或屏蔽，或者網站改版了？');
 				}
