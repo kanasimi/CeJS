@@ -1476,14 +1476,17 @@ function module_code(library_namespace) {
 		// https://docs.oracle.com/cd/E56344_01/html/E54018/gmgas.html
 		// https://stackoverflow.com/questions/32824819/difference-between-http-proxy-https-proxy-and-proxy
 		|| typeof URL_to_fetch === 'string' && /^https:/i.test(URL_to_fetch)
-				&& library_namespace.env.HTTPS_PROXY
-				// process.env.http_proxy
-				|| library_namespace.env.http_proxy);
+				&& process.env.HTTPS_PROXY
+				// `set http_proxy=http://127.0.0.1:8080`
+				|| process.env.http_proxy);
 
 		if (!proxy_server) {
 			;
 
 		} else if (URL_is_https) {
+			library_namespace.debug('Using https proxy to get '
+					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch : 'url')
+					+ '.', 1, 'get_URL_node');
 			// ... just add the special agent:
 			proxy_original_agent = proxy_server.agent = agent;
 			agent = new HttpsProxyAgent(proxy_server);
@@ -1501,6 +1504,9 @@ function module_code(library_namespace) {
 			}
 
 		} else {
+			library_namespace.debug('Using http proxy to get '
+					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch : 'url')
+					+ '.', 1, 'get_URL_node');
 			// https://www.proxynova.com/proxy-server-list/country-tw/
 			// proxy_server.URL_to_fetch = URL_to_fetch;
 
@@ -2456,21 +2462,30 @@ function module_code(library_namespace) {
 	// ---------------------------------------------------------------------//
 
 	function parse_proxy_server(proxy_server) {
-		if (typeof proxy_server === 'string' && (proxy_server = proxy_server
-		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
-		// 代理伺服器 proxy_server: "username:password@hostname:port"
-		// [ all, username, password, hostname, port ]
-		.match(/^(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/))) {
-			proxy_server = {
-				proxy : proxy_server[0],
-				username : proxy_server[1],
-				password : proxy_server[2],
-				hostname : proxy_server[3],
-				port : +proxy_server[4]
-			};
+		if (typeof proxy_server !== 'string') {
+			return proxy_server;
 		}
 
-		return proxy_server;
+		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
+		// 代理伺服器 proxy_server: "username:password@hostname:port"
+		// [ all, protocol, username, password, hostname, port ]
+		var matched = proxy_server
+				.match(/^(?:(https?:)\/\/)?(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/);
+
+		if (!matched) {
+			return;
+		}
+
+		matched = {
+			proxy : matched[0],
+			protocol : matched[1],
+			username : matched[2],
+			password : matched[3],
+			hostname : matched[4],
+			port : +matched[5]
+		};
+
+		return matched;
 	}
 
 	function get_proxy_URL(proxy_server, URL_object_to_fetch, URL_to_fetch) {
