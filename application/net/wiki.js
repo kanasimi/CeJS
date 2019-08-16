@@ -756,7 +756,7 @@ function module_code(library_namespace) {
 					list.push(0);
 					return;
 				}
-				if (!isNaN(_n)) {
+				if (!options.is_page_title && !isNaN(_n)) {
 					// {Integer}_n
 					list.push(_n);
 					return;
@@ -774,7 +774,7 @@ function module_code(library_namespace) {
 				+ n + '] @ namespace list ' + namespace);
 			});
 			if (list.length === 0) {
-				return undefined;
+				return;
 			}
 			// list.sort().unique_sorted().join('|');
 			list = list.unique();
@@ -785,7 +785,7 @@ function module_code(library_namespace) {
 			library_namespace.warn('get_namespace: Invalid namespace: ['
 					+ namespace + ']');
 		}
-		return undefined;
+		return;
 	}
 
 	/**
