@@ -730,11 +730,11 @@ function module_code(library_namespace) {
 	 * @returns {Integer|String|Undefined}namespace NO.
 	 */
 	function get_namespace(namespace, options) {
-		if (namespace == Math.floor(namespace)) {
+		options = library_namespace.setup_options(options);
+		if (!options.is_page_title && (namespace == Math.floor(namespace))) {
 			// {Integer}namespace
 			return namespace;
 		}
-		options = library_namespace.setup_options(options);
 		var namespace_hash = options.namespace_hash || get_namespace.hash;
 
 		if (typeof namespace === 'string') {
