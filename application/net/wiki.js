@@ -725,16 +725,17 @@ function module_code(library_namespace) {
 	 * get NO of namespace
 	 * 
 	 * @param {String|Integer}namespace
-	 *            namespace
+	 *            namespace or page title
 	 * 
 	 * @returns {Integer|String|Undefined}namespace NO.
 	 */
-	function get_namespace(namespace, namespace_hash) {
+	function get_namespace(namespace, options) {
 		if (namespace == Math.floor(namespace)) {
 			// {Integer}namespace
 			return namespace;
 		}
-		namespace_hash = namespace_hash || get_namespace.hash;
+		options = library_namespace.setup_options(options);
+		var namespace_hash = options.namespace_hash || get_namespace.hash;
 
 		if (typeof namespace === 'string') {
 			var list = [];
@@ -743,7 +744,12 @@ function module_code(library_namespace) {
 			// '|Template|Category'
 			// https://www.mediawiki.org/w/api.php?action=help&modules=main#main.2Fdatatypes
 			.split(/(?:[,;|\u001F]|%7C|%1F)/).forEach(function(n) {
-				// get namespace only. e.g., 'wikipedia:sandbox' → 'wikipedia'
+				if (options.is_page_title && n.startsWith(':')) {
+					// e.g., [[:title]]
+					n = n.slice(1);
+				}
+				// get namespace `_n` only.
+				// e.g., 'wikipedia:sandbox' → 'wikipedia'
 				var _n = n.replace(/:.*$/, '').trim();
 				if (!_n) {
 					// _n === ''
@@ -757,6 +763,10 @@ function module_code(library_namespace) {
 				}
 				if (_n in namespace_hash) {
 					list.push(namespace_hash[_n]);
+					return;
+				}
+				if (options.is_page_title) {
+					list.push(0);
 					return;
 				}
 				library_namespace.warn('get_namespace: Invalid namespace: ['
@@ -820,6 +830,7 @@ function module_code(library_namespace) {
 		// 模板
 		template : 10,
 		template_talk : 11,
+		// [[Help:title]], [[使用說明:title]]
 		help : 12,
 		help_talk : 13,
 		category : 14,
@@ -10905,7 +10916,7 @@ function module_code(library_namespace) {
 
 		// linkshere: 取得連結到 [[title]] 的頁面。
 		// [[Special:Whatlinkshere]]
-		// 使用說明:連入頁面
+		// [[使用說明:連入頁面]]
 		// https://zh.wikipedia.org/wiki/Help:%E9%93%BE%E5%85%A5%E9%A1%B5%E9%9D%A2
 		linkshere : [ 'lh', 'prop' ],
 
