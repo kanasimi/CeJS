@@ -115,27 +115,34 @@ function module_code(library_namespace) {
 
 			// 1. 使用 PC端 網頁取得搜尋所得的作品資料。
 			// e.g., 36mh.js
-			var id_list = [], id_data = [], matched = html,
+			var id_list = [], id_data = [], matched,
 			// matched: [ all, url, inner (title) ]
 			PATTERN_search = /<p class="ell"><a href="([^<>"]+)">([^<>]+)/g;
 
-			if (html = html.between('<h4 class="fl">')) {
+			if (matched = html.between('<h4 class="fl">')) {
+				html = matched;
 				// matched: [ all, url, inner (title) ]
-				PATTERN_search = /<p class="ell"><a href="([^<>"]+)">([^<>]+)/g;
-			} else {
+				// PATTERN_search = /<p class="ell"><a
+				// href="([^<>"]+)">([^<>]+)/g;
+
+			} else if (matched = html.between('<div id="update_list">')) {
 				// 行動版 mobile version
 				// e.g., <div id="update_list"><div class='UpdateList'><div
 				// class="itemBox" data-key="10992">
-				html = html.between('<div id="update_list">');
+				html = matched;
 				// e.g., <a class="title"
 				// href="https://m.36mh.com/manhua/dushizhixiuzhenguilai/"
 				// target="_blank">都市之修真归来</a>
 				// matched: [ all, url, inner (title) ]
 				PATTERN_search = /<a class="title" href="([^<>"]+)"[^<>]*>([^<>]+)/g;
+
+			} else {
+				// throw new Error('Unknown site!');
 			}
 
 			while (matched = PATTERN_search.exec(html)) {
-				matched[1] = matched[1].match(/([^\/]+)\/$/);
+				// .html: mh1234.js
+				matched[1] = matched[1].match(/([^\/]+)(?:\/|\.html)$/);
 				id_list.push(matched[1][1]);
 				id_data.push(get_label(matched[2]));
 			}
@@ -160,7 +167,11 @@ function module_code(library_namespace) {
 				description : get_label(html.between('intro-all', '</div>')
 						.between('>')
 						// 930mh.js
-						|| html.between('<p class="comic_deCon_d">', '</p>'))
+						|| html.between('<p class="comic_deCon_d">', '</p>')
+						// copy from 733mh.js: for mh1234.js
+						|| html.between(
+								'<div class="introduction" id="intro1">',
+								'</div>'))
 			};
 
 			// <div class="book-detail pr fr">
@@ -184,10 +195,18 @@ function module_code(library_namespace) {
 					.replace(/<li>/g, '</li><li>'),
 			// e.g., "<li>类别：<a href="/list/shaonian/">少年</a></li>"
 			/<li>([^：]+)：([\s\S]+?)<\/li>/g);
+
+			// copy from 733mh.js: for mh1234.js
+			extract_work_data(work_data, html.between('<div class="info">',
+					'<div class="info_cover">'),
+					/<em>([^<>]+?)<\/em>([\s\S]*?)<\/p>/g);
+
+			// 由 meta data 取得作品資訊。
 			extract_work_data(work_data, html);
 
 			Object.assign(work_data, {
-				author : work_data.漫画作者 || work_data.漫畫作者 || work_data.作者,
+				author : work_data.漫画作者 || work_data.漫畫作者 || work_data.作者
+						|| work_data.原著作者,
 				status : work_data.漫画状态 || work_data.漫畫狀態 || work_data.状态,
 				last_update : work_data.更新时间 || work_data.时间,
 				latest_chapter : work_data.最新 || work_data.更新至
@@ -298,51 +317,85 @@ function module_code(library_namespace) {
 					// console.log(chapter_data);
 				}
 			}
+
+			this.check_filtered(work_data, html, get_label,
+			//
+			latest_chapter_list);
+		},
+		// 注意：在呼叫本函數之前，不可改變 html！
+		check_filtered : function(work_data, html, get_label,
+				latest_chapter_list) {
+			// console.log(work_data);
 			// console.log(work_data.chapter_list);
+			var text = work_data.chapter_list.length === 0 && get_label(
+			/**
+			 * 已屏蔽删除本漫画所有章节链接 e.g., <code>
 
-			var text = work_data.chapter_list.length === 0
-			// 已屏蔽删除本漫画所有章节链接
-			&& (html.between('class="ip-body">', '</div>')
 			// 930mh.js 一人之下
-			|| html.between('<p class="ip-notice"', '</p>').between('>'));
+			<div class="zj_list_con autoHeight">
+			<p class="ip-notice" style="padding:10px;color: red;background:snow;font-size:14px;width:875px;">
+			尊敬的各位喜爱一人之下漫画的用户，本站应《一人之下》版权方要求现已屏蔽删除本漫画所有章节链接，只保留作品文字信息简介以及章节目录，请喜欢一人之下的漫友购买杂志或到官网付费欣赏。为此给各位漫友带来的不便，敬请谅解！
+			</p>
+			</div>
 
-			if (text) {
-				work_data.filtered = true;
-				var chapter_id = html.between('href="/comic/read/?id=', '"')
-						|| html.between('SinMH.initComic(', ')')
-						|| html.between('SinTheme.initComic(', ')')
-						|| html.between('var pageId = "comic.', '"');
-				if (this.try_to_get_blocked_work && chapter_id) {
-					library_namespace.info([ work_data.title || work_data.id,
-							': ', {
-								T : '嘗試取得被屏蔽的作品。'
-							} ]);
-					if (Array.isArray(latest_chapter_list)
-					// e.g., 全职法师, 一人之下 http://www.duzhez.com/manhua/1532/
-					&& latest_chapter_list.length > 1
-					//
-					&& (!this.recheck || this.recheck in {
-						changed : true,
-						multi_parts_changed : true
-					})) {
-						library_namespace.info({
-							T : [ '使用之前的 cache，自 §%1 接續下載。',
-									latest_chapter_list.length ]
-						});
-						// 這可以保留 work_data.chapter_list 先前的屬性。
-						work_data.chapter_list = Object.assign(
-								latest_chapter_list, work_data.chapter_list);
-						work_data.last_download.chapter = latest_chapter_list.length;
+			// mh1234.js
+			<div class="ip-body">
+			<p class="ip-notice">
+			    尊敬的各位喜爱妖精种植手册漫画的用户，本站应《妖精种植手册                》版权方要求现已屏蔽删除本漫画所有章节链接，只保留作品文字信息简介以及章节目录，请喜欢妖精种植手册                的漫友购买杂志或到官网付费欣赏。为此给各位漫友带来的不便，敬请谅解！
+			</p>
+			<p>
+			    版权方在线阅读地址: <span><a href="http://www.mh1234.com" rel="nofollow">http://www.mh1234.com</a></span>
+			</p>
+			</div>
 
-					} else {
-						this.add_chapter(work_data,
-						//
-						'/comic/read/?id=' + chapter_id);
-					}
+			</code>
+			 */
+			html.between('<p class="ip-notice"', '</p>').between('>')
+			//
+			|| html.between('class="ip-body">', '</div>'));
+
+			// console.log(text);
+			if (!text) {
+				return;
+			}
+
+			work_data.removed = text;
+
+			var chapter_id = html.between('href="/comic/read/?id=', '"')
+					|| html.between('SinMH.initComic(', ')')
+					|| html.between('SinTheme.initComic(', ')')
+					|| html.between('var pageId = "comic.', '"');
+
+			if (this.try_to_get_blocked_work && chapter_id) {
+				library_namespace.info([ work_data.title || work_data.id, ': ',
+						{
+							T : '嘗試取得被屏蔽的作品。'
+						} ]);
+				if (Array.isArray(latest_chapter_list)
+				// e.g., 全职法师, 一人之下 http://www.duzhez.com/manhua/1532/
+				&& latest_chapter_list.length > 1
+				//
+				&& (!this.recheck || this.recheck in {
+					changed : true,
+					multi_parts_changed : true
+				})) {
+					library_namespace.info({
+						T : [ '使用之前的 cache，自 §%1 接續下載。',
+								latest_chapter_list.length ]
+					});
+					// 這可以保留 work_data.chapter_list 先前的屬性。
+					work_data.chapter_list = Object.assign(latest_chapter_list,
+							work_data.chapter_list);
+					work_data.last_download.chapter = latest_chapter_list.length;
 
 				} else {
-					library_namespace.warn(get_label(text));
+					this.add_chapter(work_data,
+					//
+					'/comic/read/?id=' + chapter_id);
 				}
+
+			} else {
+				library_namespace.warn(text);
 			}
 		},
 
@@ -351,7 +404,7 @@ function module_code(library_namespace) {
 		// 必須自行保證執行 callback()，不丟出異常、中斷。
 		: function(XMLHttp, work_data, callback, chapter_NO) {
 			var html = XMLHttp.responseText;
-			if (work_data.filtered && chapter_NO === 1) {
+			if (work_data.removed && chapter_NO === 1) {
 				var first_chapter_id = html.between('SinMH.initChapter(', ',')
 						|| html.between('SinTheme.initChapter(', ',');
 				// console.log(html);
@@ -410,10 +463,13 @@ function module_code(library_namespace) {
 		// 取得每一個章節的各個影像內容資料。 get_chapter_data()
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
 			// console.log(html);
-			if (work_data.filtered && !work_data.chapter_filtered) {
+			if (work_data.removed && !work_data.chapter_filtered) {
 				var next_chapter_data = html.between('nextChapterData =', ';');
 				// console.log(next_chapter_data || html);
-				if ((next_chapter_data = JSON.parse(next_chapter_data))
+				if (next_chapter_data
+				// next_chapter_data==='' @
+				// https://www.mh1234.com/comic/9384.html
+				&& (next_chapter_data = JSON.parse(next_chapter_data))
 						&& next_chapter_data.id > 0) {
 					library_namespace.debug('add chapter: '
 							+ next_chapter_data.id);
@@ -458,7 +514,9 @@ function module_code(library_namespace) {
 			// console.log(chapter_data);
 
 			// 設定必要的屬性。
-			chapter_data.title = get_label(html.between('<h2>', '</h2>'));
+			chapter_data.title = get_label(html.between('<h2>', '</h2>'))
+			// e.g., mh1234.js has no <h2>...</h2>'
+			|| chapter_data.title;
 			// e.g., 'images/comic/4/7592/'
 			var path = encodeURI(chapter_data.chapterPath);
 			// console.log(chapter_data.chapterImages);
@@ -503,7 +561,7 @@ function module_code(library_namespace) {
 					&& (html = html.between('class="ip-notice">', '<'))) {
 				// 避免若連內容被屏蔽，會從頭檢查到尾都沒有成果。
 				work_data.chapter_filtered = true;
-				if (work_data.filtered) {
+				if (work_data.removed) {
 					library_namespace.info({
 						T : [ '§%1 已被屏蔽，不再嘗試解析其他章節。', chapter_NO ]
 					});
