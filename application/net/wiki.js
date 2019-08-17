@@ -7045,7 +7045,7 @@ function module_code(library_namespace) {
 							if (!library_namespace.platform.nodejs) {
 								library_namespace
 										.error('wiki_API.prototype.next: '
-												+ 'Not using nod.js!');
+												+ 'Not using node.js!');
 								return;
 							}
 							// 下面的 workaround 僅適用於 node.js。
@@ -13902,6 +13902,13 @@ function module_code(library_namespace) {
 			};
 		}
 
+		if (isNaN(options.max_page) || options.max_page >= 1) {
+			// normal
+		} else {
+			throw new Error(
+					'add_listener: assert: isNaN(options.max_page) || options.max_page >= 1');
+		}
+
 		if (!(options.limit > 0)) {
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 			options.rvlimit = 500;
@@ -14012,7 +14019,7 @@ function module_code(library_namespace) {
 		interval = library_namespace.to_millisecond(options.interval) || 500,
 		// assert: {Date}last_query_time start time
 		last_query_time,
-		// TODO: 僅僅採用last_query_revid做控制，不需要偵測是否有重複。
+		// TODO: 僅僅採用 last_query_revid 做控制，不需要偵測是否有重複。 latest_revid
 		last_query_revid = options.revid | 0,
 		// {String}設定頁面。 注意: 必須是已經轉換過、正規化後的最終頁面標題。
 		configuration_page_title = typeof options.adapt_configuration === 'function'
@@ -14144,14 +14151,6 @@ function module_code(library_namespace) {
 					console.log(rows);
 				}
 
-				if (false) {
-					library_namespace.log('去除掉重複的紀錄之前 last_query_revid: '
-							+ last_query_revid + ', ' + rows.length
-							+ ' records:');
-					library_namespace.log(rows.map(function(row) {
-						return row.revid;
-					}));
-				}
 				// 去除之前已經處理過的頁面。
 				if (rows.length > 0) {
 					// 判別新舊順序。
@@ -14162,14 +14161,13 @@ function module_code(library_namespace) {
 						rows.reverse();
 					}
 
-					if (rows.length > options.max_page) {
-						// assert: options.max_page > 0
-						// 直接截斷，僅處理到 .max_page。
-						rows.truncate(options.max_page);
-					}
-
-					// cache the lastest record
-					last_query_time = rows[rows.length - 1];
+					library_namespace.debug(
+							'準備去除掉重複的紀錄。之前已處理到 last_query_revid='
+									+ last_query_revid + ', 本次取得 '
+									+ rows.length + ' record(s). revid: '
+									+ rows.map(function(row) {
+										return row.revid;
+									}), 3);
 					// e.g., use API
 					while (rows.length > 0
 					// 去除掉重複的紀錄。因為是從舊的排列到新的，因此從起頭開始去除。
@@ -14177,27 +14175,32 @@ function module_code(library_namespace) {
 						rows.shift();
 					}
 
-					// 預設全部都處理完，因此先登記。假如僅處理其中的一部分，屆時再特別登記。
-					if (false) {
-						library_namespace.log('The lastest record: '
-								+ JSON.stringify(last_query_time));
+					if (rows.length > 0) {
+						// assert: options.max_page >= 1
+						if (rows.length > options.max_page) {
+							// 直接截斷，僅處理到 .max_page。
+							rows.truncate(options.max_page);
+						}
+
+						// cache the lastest record
+						last_query_time = rows[rows.length - 1];
+						// 紀錄/標記本次處理到哪。
+						// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
+						last_query_revid = last_query_time.revid;
+						last_query_time = last_query_time.timestamp;
+						// 確保 {Date}last_query_time
+						// last_query_time = new Date(last_query_time);
 					}
 
-					// 紀錄/標記本次處理到哪。
-					// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
-					last_query_revid = last_query_time.revid;
-					// 確保 {Date}last_query_time
-					// last_query_time = new Date(last_query_time.timestamp);
-					last_query_time = last_query_time.timestamp;
+					// 預設全部都處理完，因此先登記。假如僅處理其中的一部分，屆時再特別登記。
+					library_namespace.debug('The lastest record: '
+							+ JSON.stringify(last_query_time), 4);
 				}
-				if (false) {
-					library_namespace.log('去除掉重複的紀錄之後 last_query_revid: '
-							+ last_query_revid + ', ' + rows.length
-							+ ' records left:');
-					library_namespace.log(rows.map(function(row) {
-						return row.revid;
-					}).join(', '));
-				}
+				library_namespace.debug('去除掉重複的紀錄之後 last_query_revid='
+						+ last_query_revid + ', ' + rows.length
+						+ ' record(s) left. revid: ' + rows.map(function(row) {
+							return row.revid;
+						}).join(', '), 1);
 
 				// 使 wiki.listen() 可隨時監視設定頁面與緊急停止頁面的變更。
 				var configuration_row;
