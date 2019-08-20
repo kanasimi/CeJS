@@ -1485,8 +1485,9 @@ function module_code(library_namespace) {
 
 		} else if (URL_is_https) {
 			library_namespace.debug('Using https proxy to get '
-					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch : 'url')
-					+ '.', 1, 'get_URL_node');
+					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+							: URL_to_fetch && URL_to_fetch.URL || 'url') + '.',
+					2, 'get_URL_node');
 			// ... just add the special agent:
 			proxy_original_agent = proxy_server.agent = agent;
 			agent = new HttpsProxyAgent(proxy_server);
@@ -1505,8 +1506,9 @@ function module_code(library_namespace) {
 
 		} else {
 			library_namespace.debug('Using http proxy to get '
-					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch : 'url')
-					+ '.', 1, 'get_URL_node');
+					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+							: URL_to_fetch && URL_to_fetch.URL || 'url') + '.',
+					2, 'get_URL_node');
 			// https://www.proxynova.com/proxy-server-list/country-tw/
 			// proxy_server.URL_to_fetch = URL_to_fetch;
 
@@ -2046,7 +2048,8 @@ function module_code(library_namespace) {
 							data = node_zlib.gunzipSync(data);
 						} catch (e) {
 							library_namespace.error(
-							//
+							// get_URL_node: Error: node_zlib.gunzipSync():
+							// Error: unexpected end of file [http://...]
 							'get_URL_node: Error: node_zlib.gunzipSync(): ' + e
 							//
 							+ ' [' + (typeof URL_to_fetch === 'string'
@@ -2473,7 +2476,7 @@ function module_code(library_namespace) {
 				.match(/^(?:(https?:)\/\/)?(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/);
 
 		if (!matched) {
-			return;
+			return false;
 		}
 
 		matched = {

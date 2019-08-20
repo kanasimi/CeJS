@@ -29,7 +29,6 @@
 "H"	"application.debug.log"	"passed"	"Used as debugging message."	"通過"		"passed"	"パス"		
 	"application.locale.gettext"	"Language"	"Label used when selecting language."	"語言"		"Language"	"言語"	"언어"	
 	"application.locale.gettext"	"所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。"	"Used as debugging message when selecting language."	"所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。"		"Specified domain [%1] is not yet loaded. You may need to set the FORCE flag."	"指定されたドメインがまだロードされていません。必要があるなら、強制ロードフラグを設定して下さい。"		
-	"application.locale.gettext"	"使用 [%2] (%1) 領域/語系。"	"Used as debugging message when selecting language."	"使用 [%2] (%1) 領域/語系。"		"Using domain/locale [%2] (%1)."	"ドメイン/言語 [%2] (%1) を使用します。"		
 	"application.net.wiki"	"%1 elapsed, %3 at %2"	"Used as log message. e.g., 2 s elapsed, finished at 20010101T0000"	"隔 %1，%2 %3"		"%1 elapsed, %3 at %2"	"%1 後、%2 %3"		
 	"application.net.wiki"	"no change"	"Used as log message. 無更動 沒有變更 No modification made"	"無改變"		"no change"	"無変更"		
 	"application.net.wiki"	"finished"	"Used as log message."	"完成"		"finished"	"完成"		

@@ -68,18 +68,20 @@ function module_code(library_namespace) {
 	 * @see <span title="Select Graphic Rendition">SGR</span> parameters
 	 */
 	function SGR_style_name(style_name) {
-		library_namespace
-				.debug('Search style name [' + style_name
-						+ '] in SGR_code.style_name_alias', min_debug,
-						'SGR_style_name');
+		library_namespace.debug({
+			T : [ 'Search style name [%1] in `SGR_code.style_name_alias`...',
+					style_name ]
+		}, min_debug, 'SGR_style_name');
 		if (typeof style_name !== 'object'
 				&& (style_name in SGR_code.style_name_alias))
 			style_name = SGR_code.style_name_alias[style_name];
 		if (library_namespace.is_debug() && (typeof style_name === 'object'
 		//
-		|| !(style_name in SGR_code.style_data)))
-			library_namespace.warn('SGR_style_name: Unknown style name: ['
-					+ style_name + ']');
+		|| !(style_name in SGR_code.style_data))) {
+			library_namespace.warn([ 'SGR_style_name: ', {
+				T : [ 'Unknown style name: [%1]', style_name ]
+			} ]);
+		}
 		return style_name;
 	}
 
@@ -97,11 +99,10 @@ function module_code(library_namespace) {
 		if (typeof style_value !== 'object'
 				&& (style_value in SGR_code.color_index)) {
 			if (typeof style_name !== 'string' || !(style_name in color_shift)) {
-				library_namespace.warn(
 				// Expects value in color_shift.
-				'SGR_style_value: Invalid name of color: ['
-				//
-				+ style_name + '].');
+				library_namespace.warn([ 'SGR_style_value: ', {
+					T : [ 'Invalid name of color: [%1].', style_name ]
+				} ]);
 				return;
 			}
 			// color_shift[style_name] +
@@ -114,17 +115,26 @@ function module_code(library_namespace) {
 		if (typeof style_value === 'boolean') {
 			if ((style_name in SGR_code.style_data)
 					&& SGR_code.style_data[style_name][style_value ? 0 : 1] === undefined) {
-				library_namespace.warn('Invalid value [' + style_value
-						+ '] of style: [' + style_name
-						+ ']: Can not set boolean value.');
+				library_namespace.warn([ {
+					T : [ 'Invalid value [%1] of style: [%2]: ',
+					//
+					style_value, style_name ]
+				}, {
+					T : '無法將真偽值轉為樣式。'
+				} ]);
 				return;
 			}
 			return style_value;
 		}
 
 		if (isNaN(style_value) || (style_value |= 0) < 0) {
-			library_namespace.warn('Invalid value [' + style_value
-					+ '] of style: [' + style_name + ']: value is not number.');
+			library_namespace.warn([ {
+				T : [ 'Invalid value [%1] of style: [%2]: ',
+				//
+				style_value, style_name ]
+			}, {
+				T : '欲設定的樣式值並非數字。'
+			} ]);
 			return;
 		}
 
@@ -135,9 +145,15 @@ function module_code(library_namespace) {
 				if (style_value >= color_shift[style_name])
 					style_value -= color_shift[style_name];
 			} else {
-				library_namespace.warn('Invalid value [' + style_value
-						+ '] of style [' + style_name + ']: value does not @ '
-						+ SGR_code.style_data[style_name] + '.');
+				library_namespace.warn([ {
+					T : [ 'Invalid value [%1] of style: [%2]: ',
+					//
+					style_value, style_name ]
+				}, {
+					T : [ '樣式值不在可設定的樣式資料[%1]中。',
+					//
+					SGR_code.style_data[style_name] ]
+				} ]);
 				return;
 			}
 
@@ -175,11 +191,11 @@ function module_code(library_namespace) {
 			// skip.
 			return this;
 
-		library_namespace.debug('Search style (' + (typeof style) + ') ['
-		//
-		+ (typeof JSON === 'object' ? JSON.stringify(style) : style)
-		//
-		+ '] in SGR_code.style_value_alias', min_debug, 'SGR_style_add');
+		library_namespace.debug({
+			T : [ 'Searching style {%2} [%1] in SGR_code.style_value_alias...',
+					typeof JSON === 'object' ? JSON.stringify(style) : style,
+					typeof style ]
+		}, min_debug, 'SGR_style_add');
 		if (typeof style !== 'object')
 			while (style in SGR_code.style_value_alias) {
 				library_namespace.debug('Find style [' + style + '] → ['

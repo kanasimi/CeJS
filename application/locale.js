@@ -131,7 +131,7 @@ function module_code(library_namespace) {
 		} else if (match = language_tag.privateuse_RegExp.exec(tag)) {
 
 			// x-fragment[-fragment]..
-			library_namespace.debug('parse privateuse [' + tag + ']', 2,
+			library_namespace.debug('parse privateuse subtag [' + tag + ']', 2,
 					'language_tag.parse');
 			tag = match[1];
 			this.privateuse = i = [];
@@ -140,8 +140,8 @@ function module_code(library_namespace) {
 			while (match = language_tag.privateuse_fragment_RegExp.exec(tag)) {
 				i.push(match[1]);
 			}
-			library_namespace
-					.debug('privateuse: ' + i, 2, 'language_tag.parse');
+			library_namespace.debug('privateuse subtag: ' + i, 2,
+					'language_tag.parse');
 
 		} else if (library_namespace.is_debug()) {
 			library_namespace.warn('unrecognized language tag: [' + tag + ']');
@@ -765,8 +765,9 @@ function module_code(library_namespace) {
 
 		if (is_loaded) {
 			gettext_domain_name = domain_name;
-			library_namespace.debug('直接設定 user domain resource。', 2,
-					'gettext.use_domain');
+			library_namespace.debug({
+				T : [ '已載入過 [%1]，直接設定 user domain resource。', domain_name ]
+			}, 2, 'gettext.use_domain');
 			gettext_check_resource(domain_name, 2, true);
 			typeof callback === 'function' && callback(domain_name);
 
@@ -775,11 +776,12 @@ function module_code(library_namespace) {
 					&& library_namespace.is_included('interact.DOM')) {
 				// 顯示使用 domain name 之訊息：此時執行，仍無法改採新 domain 顯示訊息。
 				library_namespace.debug({
-					T : [ '%3載入/使用 [%2] (%1) 領域/語系。', domain_name,
-							gettext.get_alias(domain_name),
-							(domain_name === gettext_domain_name
-							//
-							? '強制重複' : '') ]
+					T : [ domain_name === gettext_domain_name
+					//
+					? '強制再次載入/使用 [%2] (%1) 領域/語系。'
+					//
+					: '載入/使用 [%2] (%1) 領域/語系。', domain_name,
+							gettext.get_alias(domain_name) ]
 				}, 1, 'gettext.use_domain');
 			} else {
 				library_namespace.debug(
@@ -804,8 +806,10 @@ function module_code(library_namespace) {
 		} else {
 			if (domain_name) {
 				if (domain_name !== gettext_domain_name)
-					library_namespace.warn('所指定之 domain [' + domain_name
-							+ '] 尚未載入，若有必要請使用強制載入 flag。');
+					library_namespace.warn({
+						T : [ '所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。',
+								domain_name ]
+					});
 
 			} else if (typeof callback === 'function'
 					&& library_namespace.is_debug())
@@ -977,15 +981,20 @@ function module_code(library_namespace) {
 		if (!library_namespace.is_Object(list))
 			return;
 
-		var norm, alias, alias_list, index, i, l;
+		/** {String}normalized domain name */
+		var norm;
+		/** {String}domain alias */
+		var alias;
+		/** {Array}domain alias list */
+		var alias_list, index, i, l;
 		for (norm in list) {
 			alias_list = list[norm];
-			if (typeof alias_list === 'string')
+			if (typeof alias_list === 'string') {
 				alias_list = alias_list.split('|');
-			else if (!Array.isArray(alias_list)) {
-				library_namespace
-						.warn('gettext.set_alias: Illegal alias list: ['
-								+ alias_list + ']');
+			} else if (!Array.isArray(alias_list)) {
+				library_namespace.warn([ 'gettext.set_alias: ', {
+					T : [ 'Illegal domain alias list: [%1]', alias_list ]
+				} ]);
 				continue;
 			}
 
@@ -994,9 +1003,11 @@ function module_code(library_namespace) {
 
 			for (i = 0, l = alias_list.length; i < l; i++)
 				if (alias = alias_list[i]) {
-					// library_namespace.debug('Adding [' + alias + '] → [' +
-					// norm +
-					// ']', 1, 'gettext.set_alias');
+					library_namespace.debug({
+						T : [ 'Adding domain alias [%1] → [%2]...',
+						//
+						alias, norm ]
+					}, 2, 'gettext.set_alias');
 					if (!(norm in gettext_main_alias))
 						gettext_main_alias[norm] = alias;
 
@@ -1033,8 +1044,9 @@ function module_code(library_namespace) {
 		var index;
 		// for fallback
 		while (true) {
-			library_namespace.debug('test [' + alias + ']', 6,
-					'gettext.to_standard');
+			library_namespace.debug({
+				T : [ 'Testing domain alias [%1]...', alias ]
+			}, 6, 'gettext.to_standard');
 			if (alias in gettext_aliases)
 				return gettext_aliases[alias];
 
@@ -1159,7 +1171,9 @@ function module_code(library_namespace) {
 			}
 
 		} catch (e) {
-			library_namespace.warn('gettext.translate_node: 提取 gettext id 失敗。');
+			library_namespace.warn([ 'gettext.translate_node: ', {
+				T : 'Failed to extract gettext id.'
+			} ]);
 		}
 
 		if (id) {
@@ -1176,12 +1190,14 @@ function module_code(library_namespace) {
 	gettext.DOM_separator = '|';
 
 	gettext.adapt_domain = function(language, callback) {
-		library_namespace.debug('Loading ' + language + ' ...', 1,
-				'gettext.adapt_domain');
+		library_namespace.debug({
+			T : [ 'Loading language / domain [%1]...', language ]
+		}, 1, 'gettext.adapt_domain');
 
 		gettext.use_domain(language, function() {
-			library_namespace.debug(language + ' loaded.', 1,
-					'gettext.adapt_domain');
+			library_namespace.debug({
+				T : [ 'Language / domain [%1] loaded.', language ]
+			}, 1, 'gettext.adapt_domain');
 			try {
 				// 設置頁面語系。
 				document.getElementsByTagName('html')[0].setAttribute('lang',
@@ -1220,8 +1236,9 @@ function module_code(library_namespace) {
 
 		if (false) {
 			// TODO
-			library_namespace.error('create_domain_menu: Can not find node'
-					+ (node ? ': ' + node : ''));
+			library_namespace.error([ 'create_domain_menu: ', {
+				T : [ 'Can not find menu node: [%1]', node ]
+			} ]);
 		}
 
 		var menu = [],
@@ -1262,12 +1279,13 @@ function module_code(library_namespace) {
 			}
 		};
 
-		if (tmp = create_domain_menu.tag)
+		if (tmp = create_domain_menu.tag) {
 			menu = [
 			// '🗣',
 			{
 				T : tmp
 			}, ': ', menu ];
+		}
 
 		if (typeof onchange === 'function')
 			create_domain_menu.onchange.push(onchange);
@@ -1285,7 +1303,9 @@ function module_code(library_namespace) {
 	// 數字系統。numeral system.
 	// 英文的基數
 	gettext.numeral = function(attribute, domain_name) {
-		library_namespace.debug('數字: ' + attribute + '@' + domain_name, 6);
+		library_namespace.debug({
+			T : [ '轉換數字：[%1]成 %2 格式。', attribute, domain_name ]
+		}, 6);
 		switch (domain_name || gettext_domain_name) {
 		case 'Chinese':
 			return to_Chinese_numeral(attribute);
@@ -1848,7 +1868,6 @@ function module_code(library_namespace) {
 	_.to_常用漢字 = to_常用漢字;
 
 	// -----------------------------------------------------------------------------------------------------------------
-	//
 
 	return (_// JSDT:_module_
 	);

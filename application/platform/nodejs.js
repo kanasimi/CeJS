@@ -118,7 +118,7 @@ function module_code(library_namespace) {
 		if (!callback)
 			callback = function(error) {
 				if (false) {
-					library_namespace.log(source + '\n->\n' + target);
+					library_namespace.log(source + '\n→\n' + target);
 				}
 				if (error) {
 					library_namespace.error(error);
@@ -216,9 +216,10 @@ function module_code(library_namespace) {
 				try {
 					if (library_namespace.platform.is_Windows()
 							&& directory_name.endsWith('.')) {
-						library_namespace
-								.warn('以點 "." 作為結尾的目錄名稱，將導致沒有辦法刪除或者複製: '
-										+ directory_name);
+						library_namespace.warn({
+							T : [ '以點 "." 作為結尾的目錄名稱，將導致沒有辦法刪除或者複製：%1',
+									JSON.stringify(directory_name) ]
+						});
 					}
 					if (isNaN(mode)) {
 						mode = parseInt('700', 8)
@@ -228,8 +229,9 @@ function module_code(library_namespace) {
 				} catch (e) {
 					if (e.code !== 'EEXIST')
 						;
-					library_namespace.debug('Error to create ' + directory_name
-							+ ': ' + e, 1, 'create_directory');
+					library_namespace.debug({
+						T : [ '創建目錄 [%1] 失敗：%2', directory_name, String(e) ]
+					}, 1, 'create_directory');
 					error++;
 				}
 			}
@@ -293,8 +295,9 @@ function module_code(library_namespace) {
 			var fso_status = node_fs.lstatSync(path);
 			// https://nodejs.org/api/fs.html#fs_class_fs_stats
 			if (!fso_status.isDirectory()) {
-				library_namespace
-						.debug('Remove file: ' + path, 1, 'remove_fso');
+				library_namespace.debug({
+					T : [ 'Removing file: %1', path ]
+				}, 1, 'remove_fso');
 				// delete file, link, ...
 				node_fs.unlinkSync(path);
 				return;
@@ -302,8 +305,9 @@ function module_code(library_namespace) {
 
 			// 設定recurse/force時才會recurse操作。
 			if (recurse) {
-				library_namespace.debug('recurse remove sub-fso of ' + path, 2,
-						'remove_fso');
+				library_namespace.debug({
+					T : [ 'Recursively removing subdirectories of %1', path ]
+				}, 2, 'remove_fso');
 				var error
 				// recurse, iterative method
 				= remove_fso_list(node_fs.readdirSync(path), recurse, path);
@@ -312,8 +316,9 @@ function module_code(library_namespace) {
 				}
 			}
 
-			library_namespace.debug('Remove directory: ' + path, 1,
-					'remove_fso');
+			library_namespace.debug({
+				T : [ 'Removing directory: %1', path ]
+			}, 1, 'remove_fso');
 			// delete directory itself.
 			node_fs.rmdirSync(path);
 
@@ -466,7 +471,9 @@ function module_code(library_namespace) {
 			node_fs.writeFileSync(file_path, data, options);
 		} catch (e) {
 			if (library_namespace.is_debug()) {
-				library_namespace.error('fs_writeFileSync: Can not save data!');
+				library_namespace.error([ 'fs_writeFileSync: ', {
+					T : [ 'Can not save data to file [%1]!', file_path ]
+				} ]);
 				library_namespace.error(e);
 			}
 			return e;
@@ -541,7 +548,9 @@ function module_code(library_namespace) {
 		try {
 			list = node_fs.readdirSync(path);
 		} catch (e) {
-			library_namespace.debug('Not exists: ' + path);
+			library_namespace.debug({
+				T : [ '不存在檔案或目錄：%1', path ]
+			});
 			return;
 		}
 		// treat path as directory
@@ -587,7 +596,9 @@ function module_code(library_namespace) {
 			}
 		});
 
-		library_namespace.debug('處理完畢: ' + path, 2, 'traverse_file_system');
+		library_namespace.debug({
+			T : [ '處理完畢：%1', path ]
+		}, 2, 'traverse_file_system');
 	}
 
 	_.traverse_file_system = traverse_file_system;
@@ -631,9 +642,9 @@ function module_code(library_namespace) {
 			}
 
 			if (matched[2].startsWith('-')) {
-				console.warn(
-				//
-				'platform.nodejs: Invalid argument: [' + arg + ']');
+				library_namespace.warn([ 'platform.nodejs: ', {
+					T : [ 'Invalid command-line argument: [%1]', arg ]
+				} ]);
 				this[arg] = true;
 				return;
 			}
@@ -821,8 +832,9 @@ function module_code(library_namespace) {
 
 	function run_JSctipt(code, options) {
 		if (!library_namespace.platform('windows')) {
-			library_namespace
-					.error('run_JSctipt: Only executing under Windows!');
+			library_namespace.error([ 'run_JSctipt: ', {
+				T : 'JSctipt 檔案只能在 Windows 環境下執行！'
+			} ]);
 			return;
 		}
 

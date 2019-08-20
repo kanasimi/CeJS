@@ -18,7 +18,7 @@
 # finish_up(), .after_download_chapter(), .after_download_work()
 
 TODO:
-save cookie
+save cookie @ CLI
 
 建造可以自動生成index/說明的工具。
 	自動判別網址所需要使用的下載工具，輸入網址自動揀選所需的工具檔案。
@@ -2359,7 +2359,7 @@ function module_code(library_namespace) {
 				}
 				approximate_title = approximate_title[0];
 				library_namespace.warn(library_namespace.display_align([
-						[ gettext('Use title:'), work_title ],
+						[ gettext('Using title:'), work_title ],
 						[ '→', approximate_title[1] ] ]));
 				work_title = approximate_title[1];
 				id_list = approximate_title[0];
@@ -2395,6 +2395,7 @@ function module_code(library_namespace) {
 		// \u2060: word joiner (WJ). /^\s$/.test('\uFEFF')
 		/[\s\u200B\u200E\u200F\u2060]+$|^[\s\u200B\u200E\u200F\u2060]+/g, '')
 		// .replace(/\s{2,}/g, ' ').replace(/\s?\n+/g, '\n')
+		// .replace(/[\t\n]/g, ' ').replace(/ {3,}/g, ' ' + ' ')
 		: '';
 	}
 
@@ -2418,13 +2419,14 @@ function module_code(library_namespace) {
 			// delete matched.input;
 			// console.log(matched);
 
-			var key = get_label(matched[1]).replace(/[:：︰\s]+$/, '').trim();
+			var key = get_label(matched[1]).replace(/[:：︰\s]+$/, '').trim()
+					.replace(/[\t\n]/g, ' ').replace(/ {3,}/g, '  ');
 			// default: do not overwrite
 			if (!key || !overwrite && work_data[key])
 				continue;
 
 			var value = matched[2], link = value.match(
-			// 從連結的title獲取更完整的資訊。
+			// 從連結的 title 獲取更完整的資訊。
 			/^[:：︰\s]*<a [^<>]*?title=["']([^<>"']+)["'][^<>]*>([\s\S]*?)<\/a>\s*$/
 			//
 			);
@@ -2437,7 +2439,8 @@ function module_code(library_namespace) {
 			}
 			value = get_label(value).replace(/^[:：︰\s]+/, '').trim();
 			if (value) {
-				work_data[key] = value.replace(/ {3,}/g, '  ');
+				work_data[key] = value.replace(/[\t\n]/g, ' ').replace(
+						/ {3,}/g, '  ');
 			}
 		}
 	}
@@ -3210,7 +3213,8 @@ function module_code(library_namespace) {
 					set_attribute('latest_chapter_url', last_chapter_data.url);
 					set_attribute('latest_chapter', last_chapter_data.title);
 					set_attribute('last_update', last_chapter_data.date);
-				} else {
+				} else if (!work_data.removed) {
+					// assert: work_data.removed 的情況，會在之後另外補上錯誤訊息。
 					library_namespace.error({
 						T : [ 'Invalid chapter_data: %1',
 								JSON.stringify(last_chapter_data) ]
