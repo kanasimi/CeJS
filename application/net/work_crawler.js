@@ -755,6 +755,7 @@ function module_code(library_namespace) {
 		backup_file_extension : 'bak',
 
 		search_result_file_name : 'search.json',
+		cache_title_to_id : true,
 		get_search_result_file : function() {
 			var search_result_file = this.main_directory
 					+ this.search_result_file_name;
@@ -1026,6 +1027,7 @@ function module_code(library_namespace) {
 			reget_chapter : 'boolean',
 			recheck : 'boolean|string:changed;multi_parts_changed',
 			search_again : 'boolean',
+			cache_title_to_id : 'boolean',
 
 			write_chapter_metadata : 'boolean',
 			write_image_metadata : 'boolean',
@@ -2799,7 +2801,7 @@ function module_code(library_namespace) {
 
 			if (!work_data.title) {
 				work_data.title = work_title;
-			} else if (!work_title
+			} else if (_this.cache_title_to_id && !work_title
 			// default: `{title:id}`
 			&& (!_this.id_of_search_result && !_this.title_of_search_result
 			// 應對有些作品存在卻因為網站本身的問題而搜尋不到的情況，例如 buka。
