@@ -2681,32 +2681,97 @@ function module_code(library_namespace) {
 		return iterable;
 	}
 
+	/**
+	 * <code>
+	var promise1 = Promise.resolve(3);
+	var promise2 = new Promise(function(resolve, reject) {
+		setTimeout(function() {
+			reject('foo');
+		}, 100);
+	});
+	var promises = [ promise1, promise2 ];
+
+	Promise.allSettled(promises).then(function(results) {
+		results.forEach(function(result) {
+			console.log([ result.status, result.value, result.reason ].join(', '));
+		});
+	});
+
+	Promise.all(promises).then(function(results) {
+		results.forEach(function(result) {
+			console.log(result.join(', '));
+		});
+	});
+	</code>
+	 */
+
+	function for_all_promises(iterable, onFulfilled, onRejected) {
+		// -iterable.length: be sure `remaining` is negative before
+		// iterable.forEach() completed
+		var remaining = -iterable.length, result_list = [];
+
+		function fill(value, index) {
+			// CeL.log([ remaining, index, value ].join(', '));
+			result_list[index] = value;
+			if (--remaining === 0) {
+				// CeL.log('result_list: ' + result_list);
+				onFulfilled(result_list);
+			}
+		}
+
+		GetIterator(iterable).forEach(function(item, index) {
+			var then = get_then_of_thenable(item);
+			if (!then) {
+				// Not a .then() object
+				result_list[index] = item;
+				return;
+			}
+
+			function reject(reason) {
+				if (onRejected) {
+					// Promise.all()
+					onRejected(reason);
+				} else {
+					// Promise.allSettled()
+					fill({
+						status : "rejected",
+						reason : reason
+					}, index);
+				}
+			}
+
+			try {
+				then.call(item, function(result) {
+					fill(onRejected ? result : {
+						status : "fulfilled",
+						value : result
+					}, index);
+				}, reject);
+			} catch (e) {
+				reject(e);
+			}
+
+			remaining++;
+		});
+
+		remaining += iterable.length;
+		if (remaining === 0) {
+			// No .then() object
+			onFulfilled(result_list);
+		}
+	}
+
 	// https://eyesofkids.gitbooks.io/javascript-start-es6-promise/content/contents/promise_all_n_race.html
 	// Promises/A+並沒有關於Promise.reject或Promise.resolve的定義，它們是ES6 Promise標準中的實作。
 	Promise.all = function all(iterable) {
 		return new this(function(onFulfilled, onRejected) {
-			// -iterable.length: be sure `remaining` is negative before
-			// iterable.forEach() completed
-			var remaining = -iterable.length, result_list = [];
+			for_all_promises(iterable, onFulfilled, onRejected);
+		});
+	};
 
-			GetIterator(iterable).forEach(function(item, index) {
-				var then = get_then_of_thenable(item);
-				if (then) {
-					then.call(item, function(result) {
-						result_list[index] = result;
-						if (--remaining === 0) {
-							onFulfilled(result_list);
-						}
-					}, onRejected);
-					remaining++;
-				} else {
-					result_list[index] = item;
-				}
-			});
-
-			if ((remaining += iterable.length) === 0) {
-				onFulfilled(result_list);
-			}
+	Promise.allSettled = function allSettled(iterable) {
+		return new this(function(onFulfilled/* , onRejected */) {
+			for_all_promises(iterable, onFulfilled);
 		});
 	};
 
