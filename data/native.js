@@ -2994,7 +2994,7 @@ function module_code(library_namespace) {
 
 		if (!parallelly
 		// parallelly 在這情況下不會執行 callback。
-		|| index > last) {
+		|| !(index <= last)) {
 			run_next();
 			return;
 		}
@@ -3008,14 +3008,16 @@ function module_code(library_namespace) {
 			};
 		}
 
-		function check_left(exit_loop) {
-			if (--left === 0 || exit_loop) {
+		var check_left = function(exit_loop) {
+			if (--left === 0 || exit_loop === 'quit') {
+				// run once only
+				check_left = library_namespace.null_function;
 				typeof callback === 'function' && callback.call(_this);
 				return;
 			}
 			library_namespace.debug(left + ' left...', 3,
 					'run_parallel_asynchronous');
-		}
+		};
 
 		if (_this) {
 			for_each = for_each.bind(_this);
@@ -3023,11 +3025,15 @@ function module_code(library_namespace) {
 
 		var left = 0;
 		if (list) {
-			list.forEach(function(item, index) {
-				left++;
-				setImmediate(for_each, check_left, item, index, list,
-						get_status);
-			});
+			if (list.length === 0) {
+				setImmediate(check_left, 'quit');
+			} else {
+				list.forEach(function(item, index) {
+					left++;
+					setImmediate(for_each, check_left, item, index, list,
+							get_status);
+				});
+			}
 			return;
 		}
 
