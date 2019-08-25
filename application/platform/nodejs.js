@@ -830,10 +830,10 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
-	function run_JSctipt(code, options) {
+	function run_JScript(code, options) {
 		if (!library_namespace.platform('windows')) {
-			library_namespace.error([ 'run_JSctipt: ', {
-				T : 'JSctipt 檔案只能在 Windows 環境下執行！'
+			library_namespace.error([ 'run_JScript: ', {
+				T : 'JScript 檔案只能在 Windows 環境下執行！'
 			} ]);
 			return;
 		}
@@ -848,13 +848,13 @@ function module_code(library_namespace) {
 		}
 
 		var script_file = append_path_separator(library_namespace.env.TEMP
-				|| library_namespace.env.TMP || '.', 'run_JSctipt.'
+				|| library_namespace.env.TMP || '.', 'run_JScript.'
 				+ Math.random() + '.js');
 		// console.log('script_file: ' + script_file);
 		remove_fso(script_file);
 		if (options.attach_library) {
-			// console.log('attach library code: ' + run_JSctipt.library_code);
-			code = run_JSctipt.library_code + code;
+			// console.log('attach library code: ' + run_JScript.library_code);
+			code = run_JScript.library_code + code;
 		}
 		var BOM = Buffer.from('fffe', 'hex');
 		code = Buffer.from(code, 'utf16le');
@@ -888,10 +888,10 @@ function module_code(library_namespace) {
 		return result;
 	}
 
-	_.run_JSctipt = run_JSctipt;
+	_.run_JScript = run_JScript;
 
 	// 常用函數集。
-	run_JSctipt.library_code = "var WshShell=WScript.CreateObject('WScript.Shell'),FSO=WScript.CreateObject('Scripting.FileSystemObject'),WshProcessEnv=WshShell.Environment('Process'),"
+	run_JScript.library_code = "var WshShell=WScript.CreateObject('WScript.Shell'),FSO=WScript.CreateObject('Scripting.FileSystemObject'),WshProcessEnv=WshShell.Environment('Process'),"
 			// https://msdn.microsoft.com/ja-jp/library/cc364502.aspx
 			+ "tmp_dir=(WshProcessEnv('TEMP')||WshProcessEnv('TMP'))+'\\\\',"
 			// https://stackoverflow.com/questions/4388879/vbscript-output-to-console

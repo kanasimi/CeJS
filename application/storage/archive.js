@@ -86,7 +86,7 @@ if (typeof CeL === 'function') {
 
 		// .includes() @ CeL.data.code.compatibility
 		require : 'data.code.compatibility.'
-		// run_JSctipt() @ CeL.application.platform.nodejs
+		// run_JScript() @ CeL.application.platform.nodejs
 		// executable_file_path() @ CeL.application.platform.nodejs
 		+ '|application.platform.nodejs.',
 
@@ -150,7 +150,7 @@ function module_code(library_namespace) {
 		// 嘗試取得7-Zip的執行路徑
 		// try to read 7z program path from Windows registry
 		executable_file_path['7z'] = library_namespace
-				.run_JSctipt(
+				.run_JScript(
 						"var p7z_path='HKCU\\\\Software\\\\7-Zip\\\\Path';"
 								// use stdout. 64 bit first.
 								+ "console.log(add_quote(RegRead(p7z_path+64)||RegRead(p7z_path)));",
