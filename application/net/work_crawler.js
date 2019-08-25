@@ -2353,7 +2353,8 @@ function module_code(library_namespace) {
 										+ '請回報議題讓下載工具設定 extract_work_id()，'
 										+ '以免將 work id 誤判為 work title。'
 							} : '' ]);
-					_this.onwarning(gettext.apply(null, message), work_title);
+					message = gettext.apply(null, message);
+					_this.onwarning(message, work_title);
 					finish_up(approximate_title.length > 0 && {
 						titles : approximate_title
 					});
@@ -3613,6 +3614,10 @@ function module_code(library_namespace) {
 
 			work_data.start_downloading_time = Date.now();
 			work_data.start_downloading_chapter = work_data.last_download.chapter || 1;
+			if (typeof _this.after_download_chapter === 'function') {
+				_this.after_download_chapter(work_data, 0);
+			}
+
 			function start_to_process_chapter_data() {
 				// 開始下載 chapter。
 				pre_get_chapter_data.call(_this, work_data,
@@ -4204,13 +4209,10 @@ function module_code(library_namespace) {
 
 		library_namespace.warn([
 				{
-					T : [
-							'Can not determine chapter NO from %1.',
-							title ? gettext('title: %1', title)
-									: gettext('chapter: %1', JSON
-											.stringify(chapter_data)) ]
+					T : title ? [ '無法從章節標題《%1》判斷章節序號。', title ] : [
+							'無法從章節資料判斷章節序號：%1。', JSON.stringify(chapter_data) ]
 				}, default_NO >= 0 ? {
-					T : [ ' (Set as %1)', default_NO ]
+					T : [ '依序將章節序號設定為 %1。', default_NO ]
 				} : '' ]);
 		if (library_namespace.is_Object(chapter_data) && default_NO >= 0)
 			chapter_data.chapter_NO = default_NO;
