@@ -1021,6 +1021,7 @@ function module_code(library_namespace) {
 			archive_all_good_images_only : 'boolean',
 			// 壓縮圖片檔案之後，刪掉原先的圖片檔案。
 			remove_images_after_archive : 'boolean',
+			images_archive_extension : 'string',
 
 			// 重新擷取用的相關操作設定。
 			regenerate : 'boolean',
