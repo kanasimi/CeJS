@@ -1763,7 +1763,7 @@ function module_code(library_namespace) {
 				library_namespace.info([
 						this.id + ': ',
 						{
-							T : [ '共%1個特殊狀況記錄於[%2]。',
+							T : [ '共%1個作品出現特殊狀況，記錄於[%2]。',
 									work_status_titles.length, report_file ]
 						} ]);
 				work_status_titles.forEach(function(work_title, index) {
@@ -2752,9 +2752,9 @@ function module_code(library_namespace) {
 					return Work_crawler.THROWED;
 				}
 				error_count = (error_count | 0) + 1;
-				library_namespace.log('process_work_data: '
-						+ gettext('Retry %1', error_count + '/'
-								+ _this.MAX_ERROR_RETRY) + '...');
+				library_namespace.log([ 'process_work_data: ', {
+					T : [ 'Retry %1/%2', error_count, _this.MAX_ERROR_RETRY ]
+				}, '...' ]);
 				_this.get_work_data({
 					// 书号
 					id : work_id,
@@ -2844,7 +2844,7 @@ function module_code(library_namespace) {
 					library_namespace.warn([
 							'process_work_data: ',
 							{
-								T : [ work_data.title ? '《%1》（id：%2）非中日文作品標題。'
+								T : [ work_data.title ? '《%1》（id：%2）非中日韓文作品標題。'
 								//
 								: '無法取得或未設定作品標題《%1》（id：%2）。', work_data.title,
 										work_id ]
@@ -4394,9 +4394,10 @@ function module_code(library_namespace) {
 		function get_data() {
 			var estimated_message = _this.estimated_message(work_data,
 					chapter_NO);
-			process.stdout.write(gettext('Get data of chapter %1', chapter_NO
-					+ (typeof _this.pre_chapter_URL === 'function' ? '' : '/'
-							+ work_data.chapter_count))
+			process.stdout.write(gettext('Getting data of chapter %1',
+					chapter_NO
+							+ (typeof _this.pre_chapter_URL === 'function' ? ''
+									: '/' + work_data.chapter_count))
 					+ (estimated_message ? gettext(', %1', estimated_message)
 							: '') + '...\r');
 
@@ -4684,9 +4685,11 @@ function module_code(library_namespace) {
 						return Work_crawler.THROWED;
 					}
 					get_data.error_count = (get_data.error_count | 0) + 1;
-					library_namespace.log('process_chapter_data: '
-							+ gettext('Retry %1', get_data.error_count + '/'
-									+ _this.MAX_ERROR_RETRY) + '...');
+					library_namespace.log([ 'process_chapter_data: ', {
+						T : [ 'Retry %1/%2',
+						//
+						get_data.error_count, _this.MAX_ERROR_RETRY ]
+					}, '...' ]);
 					if (!work_data.reget_chapter) {
 						library_namespace
 								.warn({
@@ -5657,9 +5660,9 @@ function module_code(library_namespace) {
 
 			image_data.error_count = (image_data.error_count | 0) + 1;
 			library_namespace.log([ 'get_image: ', {
-				T : [ 'Retry %1',
+				T : [ 'Retry %1/%2',
 				//
-				image_data.error_count + '/' + _this.MAX_ERROR_RETRY ]
+				image_data.error_count, _this.MAX_ERROR_RETRY ]
 			}, '...' ]);
 			var get_image_again = function() {
 				_this.get_image(image_data, callback, images_archive);
@@ -5754,14 +5757,14 @@ function module_code(library_namespace) {
 
 			var message = work_data.chapter_list[chapter_NO - 1];
 			message = [ 'check_next_chapter: ', {
-				T : [ 'Insert a chapter url after chapter %1', chapter_NO
+				T : [ 'Insert a chapter url after chapter %1: %2', chapter_NO
 				//
-				+ (message && message.url ? ' (' + message.url + ')' : '')
+				+ (message && message.url ? ' (' + message.url + ')' : ''),
 				//
-				+ ': ' + next_url
-				// 原先下一個章節的 URL 被往後移一個。
-				+ (next_chapter_url ? '→' + next_chapter_url : '') ]
-			} ];
+				next_url ]
+			},
+			// 原先下一個章節的 URL 被往後移一個。
+			next_chapter_url ? ' → ' + next_chapter_url : '' ];
 			if (next_chapter_url) {
 				// Insert a chapter url
 				library_namespace.log(message);

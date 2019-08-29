@@ -292,8 +292,9 @@ function module_code(library_namespace) {
 		var XMLHttp = library_namespace.new_XMLHttp();
 
 		try {
-			// IE:404會throw error, timeout除了throw error, 還會readystatechange;
-			// Gecko亦會throw error
+			// IE:404 會 throw error, timeout 除了 throw error,
+			// 還會 readystatechange;
+			// Gecko 亦會 throw error
 			// IE 10 中，local file 光 .open() 就 throw 了。
 			XMLHttp.open(options.method || (post_data ? 'POST' : 'GET'), URL,
 					!!onload, options.user || '', options.password || '');
@@ -383,10 +384,9 @@ function module_code(library_namespace) {
 	function parameters_to_String(parameters, charset) {
 		if (!library_namespace.is_Object(parameters)) {
 			if (typeof parameters !== 'string' && parameters !== undefined) {
-				library_namespace.debug(
-				// 可能無法處理
-				'非字串之 parameters: [' + parameters + ']', 1,
-						'get_URL.parameters_to_String');
+				library_namespace.debug({
+					T : [ '不處理非字串之參數：[%1]', parameters ]
+				}, 1, 'get_URL.parameters_to_String');
 			}
 			// '' + parameters
 			return parameters && String(parameters) || '';
@@ -401,13 +401,13 @@ function module_code(library_namespace) {
 			// TODO: for parameters[key] === undefined
 			+ encode_URI_component(String(parameters[key]), charset));
 		});
-		library_namespace.debug(array.length + ' parameters:<br />\n'
-		//
-		+ array.map(function(parameters) {
+		library_namespace.debug([ {
+			T : [ '共%1個參數：', array.length ]
+		}, '<br />\n', array.map(function(parameters) {
 			return parameters.length > 400 ? parameters.slice(0,
 			//
 			library_namespace.is_debug(6) ? 2000 : 400) + '...' : parameters;
-		}).join('<br />\n'), 4, 'parameters_to_String');
+		}).join('<br />\n') ], 4, 'parameters_to_String');
 		return array.join('&');
 	}
 
@@ -419,10 +419,9 @@ function module_code(library_namespace) {
 
 		if (!Array.isArray(parameters)) {
 			if (typeof parameters !== 'string') {
-				// 可能無法處理
-				library_namespace.debug(
-						'非字串之 parameters: [' + parameters + ']', 1,
-						'get_URL.parse_parameters');
+				library_namespace.debug({
+					T : [ '輸入了非字串之參數：[%1]', parameters ]
+				}, 1, 'get_URL.parse_parameters');
 			}
 			// http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
 			// '' + parameters
@@ -483,6 +482,26 @@ function module_code(library_namespace) {
 
 	var is_nodejs = library_namespace.platform.nodejs;
 
+	// "Error: socket hang up" {code: 'ECONNRESET'}
+	// "Error: connect ETIMEDOUT 1.1.1.1:80"
+	// {errno:'ETIMEDOUT', code: 'ETIMEDOUT', address: '125.89.70.31', port:80 }
+	// "Error: read ECONNRESET"
+	// {errno: 'ECONNRESET', code: 'ECONNRESET', syscall: 'read'}
+	// "BAD STATUS"
+	function localize_error(error) {
+		var message = String(error);
+		if (library_namespace.gettext) {
+			// 處理特別的錯誤訊息。
+			var matched = message.match(/^Error: connect ETIMEDOUT (.+)$/);
+			if (matched) {
+				message = [ 'Error: connect ETIMEDOUT %1', matched[1] ];
+			}
+			message = Array.isArray(message) ? library_namespace.gettext.apply(
+					null, message) : library_namespace.gettext(message);
+		}
+		return message;
+	}
+
 	/**
 	 * <code>
 
@@ -522,7 +541,8 @@ function module_code(library_namespace) {
 				// chunk = chunk.to_Array(true);
 				if (!chunk.content_length) {
 					console.log(chunk);
-					throw 'chunk do not has regular .content_length!';
+					throw new Error(
+							'The chunk do not has regular .content_length!');
 				}
 				content_length += chunk.content_length;
 			} else {
@@ -538,7 +558,7 @@ function module_code(library_namespace) {
 
 		if (!(content_length > 0)) {
 			console.log(this);
-			throw 2;
+			throw new Error('Illegal chunk.content_length!');
 		}
 
 		boundary = form_data_new_line + '--' + this.boundary;
@@ -581,7 +601,7 @@ function module_code(library_namespace) {
 				}
 			}
 		}
-		throw 'give_boundary: Retry too many times!';
+		throw 'give_boundary: ' + 'Retry too many times!';
 	}
 
 	var to_form_data_generated = {
@@ -642,9 +662,9 @@ function module_code(library_namespace) {
 						// get {Buffer}
 						content = fs.readFileSync(value);
 					} catch (e) {
-						library_namespace
-								.error('to_form_data: Error to get file: ['
-										+ value + '].');
+						library_namespace.error([ 'to_form_data: ', {
+							T : [ 'Failed to get file: [%1]', value ]
+						} ]);
 						// Skip this one.
 						callback();
 						return;
@@ -666,15 +686,19 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			library_namespace.debug('fetch URL [' + value + ']', 1,
-					'to_form_data');
+			library_namespace.debug({
+				T : [ '自網路取得 URL：%1', value ]
+			}, 1, 'to_form_data');
 			_.get_URL(value, function(XMLHttp, error) {
 				if (options && options.url_post_processor) {
 					options.url_post_processor(value, XMLHttp, error);
 				}
 				if (error) {
-					library_namespace.error('to_form_data: Error to get URL: ['
-							+ URL + '].');
+					library_namespace.error([ 'to_form_data: ', {
+						T : [ 'Get error when retrieving [%1]: %2',
+						//
+						URL, localize_error(error) ]
+					} ]);
 					// Skip this one.
 					callback();
 					return;
@@ -685,8 +709,10 @@ function module_code(library_namespace) {
 						.match(/([^\\\/]*)[\\\/]?$/)[1];
 				// console.log('-'.repeat(79));
 				// console.log(value);
-				library_namespace.debug('fetch URL [' + value + ']: '
-						+ XMLHttp.buffer.length + ' bytes', 1, 'to_form_data');
+
+				library_namespace.debug({
+					T : [ '自網路取得 URL：%1，%2位元組。', value, XMLHttp.buffer.length ]
+				}, 1, 'to_form_data');
 				push_and_callback(XMLHttp.type, XMLHttp.buffer);
 			}, 'buffer');
 		}
@@ -1183,14 +1209,16 @@ function module_code(library_namespace) {
 			var matched = piece.match(/^([^=;]+)(?:=([^;]+))?/);
 			library_namespace.debug(agent.last_cookie, 3, 'merge_cookie');
 			if (!matched) {
-				library_namespace.warn('merge_cookie: Invalid cookie? ['
-						+ piece + ']');
+				library_namespace.warn([ 'merge_cookie: ', {
+					T : 'Invalid cookie?'
+				}, ' [' + piece + ']' ]);
 				agent.last_cookie.push(piece);
 			} else if (matched[1] in cookie_index) {
-				library_namespace.debug(
-						'merge_cookie: duplicated cookie! 以後來/新出現者為準。 ['
-								+ agent.last_cookie[cookie_index[matched[1]]]
-								+ ']→[' + piece + ']', 3, 'merge_cookie');
+				library_namespace.debug([ 'merge_cookie: ', {
+					T : 'cookie 名稱重複！以後來/新出現者為準。'
+				}, ' [' + agent.last_cookie[cookie_index[matched[1]]]
+				//
+				+ ']→[' + piece + ']' ], 3, 'merge_cookie');
 				agent.cookie_hash[matched[1]] = matched[2];
 				// 直接取代。
 				agent.last_cookie[cookie_index[matched[1]]] = piece;
@@ -1294,10 +1322,12 @@ function module_code(library_namespace) {
 
 		get_URL_node_requests++;
 		if (get_URL_node_connections >= get_URL_node.connects_limit) {
-			library_namespace.debug('Waiting ' + get_URL_node_connections
-			// 避免同時開過多 connections 的機制。
-			+ '/' + get_URL_node_requests + ' connections: '
-					+ JSON.stringify(URL_to_fetch), 3, 'get_URL_node');
+			library_namespace.debug({
+				T : [ 'Waiting %1/%2 connections: %3',
+				// 避免同時開過多 connections 的機制。
+				get_URL_node_connections, get_URL_node_requests,
+						JSON.stringify(URL_to_fetch) ]
+			}, 3, 'get_URL_node');
 			var _arguments = arguments;
 			setTimeout(function() {
 				get_URL_node_requests--;
@@ -1324,7 +1354,6 @@ function module_code(library_namespace) {
 			to_form_data(post_data, function(data) {
 				// console.log(data.toString().slice(0,800));
 				// console.log('>> ' + data.toString().slice(-200));
-				// throw 3;
 				options.form_data = to_form_data_generated;
 				get_URL_node(URL_to_fetch, onload, charset, data, options);
 			}, options.form_data);
@@ -1354,12 +1383,13 @@ function module_code(library_namespace) {
 					options.hash, charset);
 		}
 
-		library_namespace.debug('URL: ('
-				+ (typeof URL_to_fetch)
-				+ ') ['
-				+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-						: URL_to_fetch && URL_to_fetch.URL) + ']', 1,
-				'get_URL_node');
+		library_namespace.debug({
+			T : [ 'Fetching URL: %1', '{' + (typeof URL_to_fetch) + '} ['
+			//
+			+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+			//
+			: URL_to_fetch && URL_to_fetch.URL) + ']' ]
+		}, 1, 'get_URL_node');
 
 		if (typeof onload === 'object') {
 			// use JSONP.
@@ -1378,8 +1408,9 @@ function module_code(library_namespace) {
 		// assert: 自此開始不會改變 URL，也不會中途 exit 本函數。
 		if (false) {
 			if (get_URL_node_connection_Set.has(URL_to_fetch)) {
-				library_namespace.warn('get_URL_node: Already has ['
-						+ URL_to_fetch + ']. 同時間重複請求？');
+				library_namespace.warn([ 'get_URL_node: ', {
+					T : [ '正下載 URL [%1] 中。同時間重複請求？', URL_to_fetch ]
+				} ]);
 			} else {
 				get_URL_node_connection_Set.add(URL_to_fetch);
 			}
@@ -1484,10 +1515,13 @@ function module_code(library_namespace) {
 			;
 
 		} else if (URL_is_https) {
-			library_namespace.debug('Using https proxy to get '
-					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-							: URL_to_fetch && URL_to_fetch.URL || 'url') + '.',
-					2, 'get_URL_node');
+			library_namespace.debug({
+				T : [ 'Using HTTPS proxy to get URL: %1',
+				//
+				typeof URL_to_fetch === 'string' ? URL_to_fetch
+				//
+				: URL_to_fetch && URL_to_fetch.URL || 'url' ]
+			}, 2, 'get_URL_node');
 			// ... just add the special agent:
 			proxy_original_agent = proxy_server.agent = agent;
 			agent = new HttpsProxyAgent(proxy_server);
@@ -1505,10 +1539,13 @@ function module_code(library_namespace) {
 			}
 
 		} else {
-			library_namespace.debug('Using http proxy to get '
-					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-							: URL_to_fetch && URL_to_fetch.URL || 'url') + '.',
-					2, 'get_URL_node');
+			library_namespace.debug({
+				T : [ 'Using HTTP proxy to get URL: %1',
+				//
+				typeof URL_to_fetch === 'string' ? URL_to_fetch
+				//
+				: URL_to_fetch && URL_to_fetch.URL || 'url' ]
+			}, 2, 'get_URL_node');
 			// https://www.proxynova.com/proxy-server-list/country-tw/
 			// proxy_server.URL_to_fetch = URL_to_fetch;
 
@@ -1540,8 +1577,9 @@ function module_code(library_namespace) {
 		}
 
 		if (agent) {
-			library_namespace.debug('使用' + (agent === true ? '新' : '自定義')
-					+ ' agent。', 6, 'get_URL_node');
+			library_namespace.debug({
+				T : agent === true ? '使用新 agent。' : '使用自定義 agent。'
+			}, 6, 'get_URL_node');
 			if (agent === true) {
 				// use new agent.
 				agent = URL_is_https ? new node_https.Agent
@@ -1549,18 +1587,15 @@ function module_code(library_namespace) {
 			} else if (agent.protocol
 			// agent.protocol 可能是 undefined。
 			&& agent.protocol !== URL_object_to_fetch.protocol) {
+				var message = {
+					T : [ '自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定：%1',
+					//
+					agent.protocol + ' !== ' + URL_object_to_fetch.protocol ]
+				};
 				if (options.no_protocol_warn) {
-					library_namespace.debug(
-							'自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
-									+ agent.protocol + ' !== '
-									+ URL_object_to_fetch.protocol, 3,
-							'get_URL_node');
+					library_namespace.debug(message, 3, 'get_URL_node');
 				} else {
-					library_namespace
-							.warn('get_URL_node: 自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
-									+ agent.protocol
-									+ ' !== '
-									+ URL_object_to_fetch.protocol);
+					library_namespace.warn([ 'get_URL_node: ', message ]);
 				}
 				// use new agent.
 				// assert: options.agent === agent
@@ -1579,8 +1614,9 @@ function module_code(library_namespace) {
 
 		// console.log([ options.cookie, agent.last_cookie ]);
 		if (options.cookie && !agent.last_cookie) {
-			library_namespace.debug('reset cookie to: ' + options.cookie, 3,
-					'get_URL_node');
+			library_namespace.debug({
+				T : [ '重新設定 cookie 成：%1', options.cookie ]
+			}, 3, 'get_URL_node');
 			agent.last_cookie = options.cookie;
 		}
 
@@ -1675,9 +1711,12 @@ function module_code(library_namespace) {
 				}
 				options.URL = URL_to_fetch;
 				// Failed to get [' + URL_to_fetch + '].
-				library_namespace.log('get_URL_node: Retry '
-						+ options.error_count + '/' + options.error_retry
-						+ ': ' + error);
+				library_namespace.log([ 'get_URL_node: ', {
+					T : [ 'Retry %1/%2: %3', options.error_count,
+					//
+					options.error_retry, localize_error(error) ]
+				} ]);
+				// console.error(error);
 				get_URL_node(options, onload, charset, post_data);
 				return;
 			}
@@ -1691,17 +1730,27 @@ function module_code(library_namespace) {
 			// 應已在 _ontimeout 出過警告訊息。
 			&& error.code !== 'TIMEOUT') {
 				if (error.code === 'ENOTFOUND') {
-					library_namespace.error('get_URL_node: Not found: ['
-							+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-									: URL_to_fetch && URL_to_fetch.URL) + ']');
+					library_namespace.error([ 'get_URL_node: ', {
+						T : [ 'URL not found: [%1]',
+						//
+						typeof URL_to_fetch === 'string' ? URL_to_fetch
+						//
+						: URL_to_fetch && URL_to_fetch.URL ]
+					} ]);
 				} else if (error.code === 'EPROTO'
 						&& require('tls').DEFAULT_MIN_VERSION === 'TLSv1.2'
 						&& parseInt(library_namespace.platform.nodejs) >= 12) {
-					library_namespace
-							.error('get_URL_node: Node.js v12 disable TLS v1.0 and v1.1 by default. Please set tls.DEFAULT_MIN_VERSION = "TLSv1" first! ['
-									+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-											: URL_to_fetch && URL_to_fetch.URL)
-									+ ']');
+					library_namespace.error([ 'get_URL_node: ', {
+						T : 'Node.js v12 and later versions '
+						//
+						+ 'disable TLS v1.0 and v1.1 by default. '
+					}, {
+						T : 'Please set tls.DEFAULT_MIN_VERSION = "TLSv1"'
+						//
+						+ ' first!'
+					}, ' [' + (typeof URL_to_fetch === 'string' ? URL_to_fetch
+					//
+					: URL_to_fetch && URL_to_fetch.URL) + ']' ]);
 					/**
 					 * <code>
 					To solve:
@@ -1711,13 +1760,17 @@ function module_code(library_namespace) {
 					</code>
 					 */
 				} else {
-					library_namespace
-							.error('get_URL_node: Get error when retrieving ['
-									+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-											: URL_to_fetch && URL_to_fetch.URL)
-									+ ']:');
+					library_namespace.error([ 'get_URL_node: ', {
+						T : [ 'Get error when retrieving [%1]: %2',
+						//
+						typeof URL_to_fetch === 'string' ? URL_to_fetch
+						//
+						: URL_to_fetch && URL_to_fetch.URL,
+						//
+						localize_error(error) ]
+					} ]);
 					// 這裡用太多並列處理，會造成 error.code "EMFILE"。
-					console.error(error);
+					// console.error(error);
 				}
 			}
 			// 在出現錯誤時，將 onload 當作 callback。並要確保 {Object}response
@@ -1795,10 +1848,13 @@ function module_code(library_namespace) {
 								: URL_to_fetch && URL_to_fetch.URL), 2,
 						'get_URL_node');
 			} else if (!options.no_warning) {
-				library_namespace.warn('get_URL_node: ['
-						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL)
-						+ ']: status ' + response.statusCode);
+				library_namespace.warn([ 'get_URL_node: ', {
+					T : [ '異常 HTTP 狀態碼 %2：%1',
+					//
+					typeof URL_to_fetch === 'string' ? URL_to_fetch
+					//
+					: URL_to_fetch && URL_to_fetch.URL, response.statusCode ]
+				} ]);
 			}
 
 			library_namespace.debug('response HEADERS: '
@@ -2234,10 +2290,9 @@ function module_code(library_namespace) {
 			URL_object_to_fetch.method = 'POST';
 			var _post_data = post_data === FORCE_POST ? '' : post_data;
 			if (false && options.form_data) {
-				console.log('-'.repeat(79));
-				console.log(_post_data.to_Array().content_length);
-				console.log(_post_data);
-				throw 1;
+				// console.log('-'.repeat(79));
+				// console.log(_post_data.to_Array().content_length);
+				// console.log(_post_data);
 			}
 			Object.assign(URL_object_to_fetch.headers, {
 				'Content-Type' : options.headers

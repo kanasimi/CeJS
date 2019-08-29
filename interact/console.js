@@ -79,7 +79,7 @@ function module_code(library_namespace) {
 		//
 		|| !(style_name in SGR_code.style_data))) {
 			library_namespace.warn([ 'SGR_style_name: ', {
-				T : [ 'Unknown style name: [%1]', style_name ]
+				T : [ 'Unknown style name: [%1].', style_name ]
 			} ]);
 		}
 		return style_name;
@@ -198,45 +198,51 @@ function module_code(library_namespace) {
 		}, min_debug, 'SGR_style_add');
 		if (typeof style !== 'object')
 			while (style in SGR_code.style_value_alias) {
-				library_namespace.debug('Find style [' + style + '] → ['
-						+ SGR_code.style_value_alias[style] + ']', min_debug,
-						'SGR_style_add');
+				library_namespace.debug({
+					T : [ 'Find style [%1] normalized to → [%2]', style,
+							SGR_code.style_value_alias[style] ]
+				}, min_debug, 'SGR_style_add');
 				style = SGR_code.style_value_alias[style];
 			}
 
-		library_namespace.debug('parse (' + (typeof style) + ') ['
-				+ (typeof JSON === 'object' ? JSON.stringify(style) : style)
-				+ '] if it is a pure value.', min_debug, 'SGR_style_add');
-		if (typeof style === 'string')
+		library_namespace.debug({
+			T : [ 'Parse {%2} [%1] if it is a primitive value.',
+					typeof JSON === 'object' ? JSON.stringify(style) : style,
+					typeof style ]
+		}, min_debug, 'SGR_style_add');
+		if (typeof style === 'string') {
 			if (style.includes(SGR_code.separator))
 				style = style.split(SGR_code.separator);
 
 			else if (isNaN(style)) {
-				library_namespace.debug(
-				//
-				'test if [' + style + '] is "[+-] style name".', min_debug,
-						'SGR_style_add');
+				library_namespace.debug({
+					T : [ 'Test if [%1] is "[+-] style name".', style ]
+				}, min_debug, 'SGR_style_add');
 				var matched = style.match(/^([+\-])\s*([^\s].*)$/);
 				if (matched && (matched[2] = SGR_style_name(matched[2].trim()))) {
 					matched[1] = matched[1] === '+';
 					if (undefined === SGR_style_value(matched[1], matched[2]))
-						library_namespace.warn(
-						// Expects integer.
-						'SGR_style_add: Invalid configuration of style: ['
-								+ matched[2] + '].');
+						library_namespace.warn([ 'SGR_style_add: ', {
+							T : [ 'Invalid configuration of style: [%1].',
+							// Expects integer.
+							matched[2] ]
+						} ]);
 					else {
-						library_namespace.debug('Set style "' + matched[2]
-								+ '" = ' + matched[1] + '.', min_debug,
-								'SGR_style_add');
+						library_namespace.debug({
+							T : [ 'Set style "%1" = %2.', matched[2],
+									matched[1] ]
+						}, min_debug, 'SGR_style_add');
 						this[matched[2]] = matched[1];
 					}
 					return this;
 				}
 
-				library_namespace.debug('test if [' + style +
-				//
-				'] is "style name = style value (0,1,false,true,..)".',
-						min_debug, 'SGR_style_add');
+				library_namespace.debug({
+					T : [
+							'Test if [%1] is "style name = '
+									+ 'style value (0, 1, false, true, ...)".',
+							style ]
+				}, min_debug, 'SGR_style_add');
 				matched = style.match(/^([^=]+)=(.+)$/);
 				if (matched && (matched[1] = SGR_style_name(matched[1].trim()))) {
 					if (undefined !== (matched[2] = SGR_style_value(matched[2]
@@ -247,32 +253,40 @@ function module_code(library_namespace) {
 
 				// 死馬當活馬醫。
 				style = SGR_style_name(style);
-			} else
+			} else {
 				style |= 0;
-		else if (typeof style === 'number')
+			}
+		} else if (typeof style === 'number') {
 			style |= 0;
+		}
 
-		library_namespace.debug('parse (' + (typeof style) + ') ['
-				+ (typeof JSON === 'object' ? JSON.stringify(style) : style)
-				+ '] if it is a object.', min_debug, 'SGR_style_add');
 		if (library_namespace.is_Object(style)) {
+			library_namespace.debug({
+				T : [
+						'Parse {%2} [%1] if it is a object.',
+						typeof JSON === 'object' ? JSON.stringify(style)
+								: style, typeof style ]
+			}, min_debug, 'SGR_style_add');
 			Object.keys(style).some(
 					function(style_name) {
 						var style_value = style[style_name];
-						if (!(style_name = SGR_style_name(style_name)))
+						if (!(style_name = SGR_style_name(style_name))) {
 							// 已於 SGR_style_name() 警告過。
 							return;
+						}
 
 						style_value = SGR_style_value(style_value, style_name);
 						if (style_value !== undefined) {
-							library_namespace.debug('Set [' + style_name
-									+ '] = [' + style_value + '].',
-									min_debug + 1, 'SGR_style_add');
+							library_namespace.debug({
+								T : [ 'Set style "%1" = [%2].', style_name,
+										style_value ]
+							}, min_debug + 1, 'SGR_style_add');
 							this[style_name] = style_value;
 						} else if (is_reset_style(style_value)) {
-							library_namespace.debug('reset style ('
-									+ (typeof style) + ') [' + style + '].',
-									min_debug, 'SGR_style_add');
+							library_namespace.debug({
+								T : [ 'Reset style {%2} [%1].', style,
+										typeof style ]
+							}, min_debug + 1, 'SGR_style_add');
 							this.to_reset();
 							return true;
 						}
@@ -288,14 +302,14 @@ function module_code(library_namespace) {
 		} else if (40 <= style && style <= 47) {
 			this.background = style;
 		} else if (is_reset_style(style)) {
-			library_namespace.debug(
-			//
-			'reset style (' + (typeof style) + ') [' + style + '].', min_debug,
-					'SGR_style_add');
+			library_namespace.debug({
+				T : [ 'Reset style {%2} [%1].', style, typeof style ]
+			}, min_debug, 'SGR_style_add');
 			this.to_reset();
 		} else if (library_namespace.is_debug()) {
-			library_namespace.warn('SGR_style_add: Unknown style: [' + style
-					+ ']');
+			library_namespace.warn([ 'SGR_style_add: ', {
+				T : [ 'Unknown style: [%1].', style ]
+			} ]);
 		}
 
 		return this;
@@ -325,7 +339,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * indicate the color styles.<br />
-	 * 實際上應該列出所有設定值超過一種的格式名。
+	 * 實際上應該列出所有設定值超過一種的樣式/格式名。
 	 * 
 	 * @type {Object}
 	 */
@@ -350,7 +364,7 @@ function module_code(library_namespace) {
 		},
 
 		to_reset : function() {
-			library_namespace.debug('reset style.', min_debug,
+			library_namespace.debug('Reset style.', min_debug,
 					'SGR_style.prototype.to_reset');
 			this.forEach(function(style_name) {
 				delete this[style_name];
@@ -360,7 +374,7 @@ function module_code(library_namespace) {
 		},
 
 		clone : function(options) {
-			library_namespace.debug('clone [' + this + '].', min_debug,
+			library_namespace.debug('Clone style [' + this + '].', min_debug,
 					'SGR_style.prototype.clone');
 			var result = new SGR_style();
 			this.forEach(function(style_name) {
@@ -558,14 +572,15 @@ function module_code(library_namespace) {
 			return this.style[index];
 
 		var style_now;
-		library_namespace.debug('start 遍歷 to ' + index, min_debug,
+		// 遍歷
+		library_namespace.debug('Start traversing to ' + index, min_debug,
 				'SGR_style_at');
 		this.style.some(function(this_style, this_index) {
 			if (this_index > index)
 				return true;
 
-			library_namespace.debug('遍歷 to index ' + this_index, min_debug + 1,
-					'SGR_style_at');
+			library_namespace.debug('Traversing to index ' + this_index,
+					min_debug + 1, 'SGR_style_at');
 			if (style_now) {
 				// TODO: reduce. 決定最短顯示法。
 				style_now.add(this_style);
@@ -577,13 +592,15 @@ function module_code(library_namespace) {
 			style_now = new SGR_style();
 
 		if (style) {
-			library_namespace.debug('設定 style of "' + this.text + '"[' + index
+			// 設定
+			library_namespace.debug('Set style of "' + this.text + '"[' + index
 					+ '] = [' + style + ']', min_debug, 'SGR_style_at');
 			if (!this.style[index])
 				this.style[index] = style_now;
 			style_now.add(style = new SGR_style(style));
 
-			library_namespace.debug('設定 to_index', min_debug, 'SGR_style_at');
+			library_namespace
+					.debug('Set `to_index`', min_debug, 'SGR_style_at');
 			if (index < to_index) {
 				// TODO: 更有效率點。
 				while (index < to_index)
@@ -767,7 +784,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * style value alias<br />
+	 * style value alias: style_value_alias[alias] = normalized<br />
 	 * 為允許使用者添增，因此放在 public。
 	 */
 	SGR_code.style_value_alias = Object.create(null);

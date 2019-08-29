@@ -1676,8 +1676,9 @@ function module_code(library_namespace) {
 			// check
 			if (number !== (number | 0)
 			//
-			|| number < 10 || 99 < number)
-				throw '無法轉換 [' + number + ']！';
+			|| number < 10 || 99 < number) {
+				throw gettext('無法轉換數字 [%1]！', number);
+			}
 			number = to_positional_Chinese_numeral(number)
 					.replace(/(.)〇/, '$1');
 			return number + '折';

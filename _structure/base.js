@@ -227,7 +227,7 @@ function (global) {
 		 * declaration for debug
 		 */
 		// this.global = arguments[0] || arguments.callee.ce_doc;
-		return new (this.init.apply(global, arguments));
+		// return new (this.init.apply(global, arguments));
 	};
 
 	// if (typeof _.prototype !== 'object')
@@ -896,14 +896,16 @@ function (global) {
 	_// JSDT:_module_
 	.
 	/**
-	 * Test if the value is a native ECMAScript Object.<br />
+	 * Test if the value is a native ECMAScript Object. is an ordinary object.<br />
 	 * 去除 null, undefined。 TODO:<br />
 	 * test null<br />
 	 * BUG: IE8 中 is_Object(ELEMENT_NODE) === true！
 	 * 
 	 * @param v
 	 *            value to test
-	 * @returns {Boolean} the value is a native Object.
+	 * @returns {Boolean} the value is an ordinary object (a native Object).
+	 *          else: exotic object, ECMAScript function object (pure function),
+	 *          a primitive value.
 	 * @since 2009/12/20 08:38:26
 	 */
 	is_Object =

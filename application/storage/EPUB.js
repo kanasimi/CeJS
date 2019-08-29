@@ -1375,9 +1375,8 @@ function module_code(library_namespace) {
 			// 需要先準備好目錄結構以存入media file。
 			this.initialize();
 
-			// 自網路取得 url。
 			library_namespace.log([ 'add_chapter: ', {
-				T : [ 'fetch URL: %1', item_data.url ]
+				T : [ '自網路取得 URL：%1', item_data.url ]
 			} ]);
 
 			// assert: CeL.application.net.Ajax included
@@ -2149,7 +2148,7 @@ function module_code(library_namespace) {
 					callback));
 			library_namespace.debug([ 'write_chapters: ', {
 				T : 'Waiting for all resources loaded...'
-			} ]);
+			} ], 0);
 			// console.log(this.downloading);
 			return;
 		}
@@ -2316,7 +2315,7 @@ function module_code(library_namespace) {
 					target_file, remove, callback, file_list));
 			library_namespace.info([ 'archive_to_ZIP: ', {
 				T : 'Waiting for all resources loaded...'
-			} ]);
+			} ], 0);
 			return;
 		}
 

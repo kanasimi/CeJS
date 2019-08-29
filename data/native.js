@@ -208,14 +208,19 @@ function module_code(library_namespace) {
 		// detect error, 包含引數
 		// 原先：functionRegExp=/^\s*function\s+(\w+) ..
 		// 因為有function(~){~}這種的，所以改變。
-		if (!m)
-			// JScript5 不能用throw!
+		if (!m) {
+			// JScript5 不能用 throw!
 			// http://www.oldversion.com/Internet-Explorer.html
-			throw new Error(1002, 'Syntax error (語法錯誤)');
+			// Syntax error!
+			throw new Error(1002, '語法錯誤！');
+		}
 
-		if (function_name != m[1])
-			library_namespace
-					.warn('Function name unmatch (函數名稱不相符，可能是用了reference？)');
+		if (function_name != m[1]) {
+			// Function name unmatched.
+			library_namespace.warn({
+				T : '函數名稱不相符，可能是用了 reference？'
+			});
+		}
 
 		library_namespace.debug('function ' + m[1] + '(' + m[2] + '){\n' + m[3]
 				+ '\n}', 9);
@@ -467,8 +472,9 @@ function module_code(library_namespace) {
 
 			if (typeof pattern === 'string' && pattern.length > 1)
 				if (pattern.charAt(0) === '/') {
-					library_namespace.debug('Treat [' + pattern
-							+ '] as RegExp.', 3, 'String_to_RegExp');
+					library_namespace.debug({
+						T : [ 'Treat [%1] as RegExp.', pattern ]
+					}, 3, 'String_to_RegExp');
 					var m = pattern.match(/^\/(.+)\/([a-z]*)$/),
 					// 設定 flag。
 					flag = m ? m[2]
@@ -484,28 +490,36 @@ function module_code(library_namespace) {
 								if (m) {
 									// 設定絕對可接受的 flag，或完全不設定。
 									pattern = new RegExp(m[1]);
-									library_namespace
-											.warn('String_to_RegExp: Invalid flags: ['
-													+ flag + ']');
+									library_namespace.warn([
+									//
+									'String_to_RegExp: ', {
+										T : [ 'Invalid flags: [%1]', flag ]
+									} ]);
 								} else
 									throw 1;
 							} catch (e) {
-								library_namespace
-										.warn('String_to_RegExp: Illegal pattern: ['
-												+ m[1] + ']');
+								library_namespace.warn([
+								//
+								'String_to_RegExp: ', {
+									T : [ 'Illegal pattern: [%1]', m[1] ]
+								} ]);
 							}
 						}
 					} catch (e) {
-						library_namespace.debug('Error: [' + pattern
-								+ '] 並非 RegExp？' + e.message, 2,
-								'String_to_RegExp');
+						library_namespace.debug({
+							T : [ '轉換模式 [%1] 出錯：並非 RegExp？ %2', pattern,
+									e.message ]
+						}, 2, 'String_to_RegExp');
 					}
 
 				} else if (pattern.charAt(0) === '\\'
 						&& typeof library_namespace.wildcard_to_RegExp === 'function') {
-					library_namespace.debug('Treat [' + pattern
-							+ '] as wildcard search string.', 3,
-							'String_to_RegExp');
+					library_namespace.debug({
+						T : [
+								'Treat pattern [%1] as '
+										+ 'Windows wildcard search string.',
+								pattern ]
+					}, 3, 'String_to_RegExp');
 					pattern = new RegExp(library_namespace
 							.wildcard_to_RegExp(pattern));
 				}
@@ -518,8 +532,9 @@ function module_code(library_namespace) {
 							// .replace(/,/g, '|')
 							);
 				} catch (e) {
-					library_namespace.debug('無法轉換 [' + pattern + ']', 3,
-							'String_to_RegExp');
+					library_namespace.debug({
+						T : [ '無法轉換模式 [%1]！', pattern ]
+					}, 3, 'String_to_RegExp');
 				}
 		}
 
