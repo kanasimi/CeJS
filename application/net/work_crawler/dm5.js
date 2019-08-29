@@ -383,7 +383,8 @@ function module_code(library_namespace) {
 			if (!html) {
 				// e.g., 雏蜂 https://www.tohomh.com/chufeng/259.html
 				// node tohomh.js 雏蜂 skip_error
-				delete work_data.chapter_list[chapter_NO - 1];
+				// e.g., https://www.tohomh123.com/wuliandianfeng/295.html
+				delete chapter_data.image_list;
 				callback();
 				return;
 			}
@@ -392,6 +393,10 @@ function module_code(library_namespace) {
 			var PATTERN_non_CJK = /^[\u0000-\u2E7F]*$/i;
 
 			function normalize_URL(image_url) {
+				if (!image_url) {
+					return image_url;
+				}
+
 				// console.log(image_url);
 				// 13 === ('http://n.'+'http').length
 				var index = image_url.indexOf('http://', 13)
@@ -544,10 +549,10 @@ function module_code(library_namespace) {
 			text = html.between('var isVip', '</script>'),
 			//
 			DM5 = work_data.DM5 = Object.create(null), matched,
-			//
+			// ("): for "...'..." e.g., https://www.dm5.com/m816581/
 			PATTERN_assignment =
 			// [ expression, variable name, value, quote ]
-			/\sDM5_([a-zA-Z\d_]+)\s*=\s*(\d+|true|false|(["'])(?:\\.|[^\\"']+)*\3)/g
+			/\sDM5_([a-zA-Z\d_]+)\s*=\s*(\d+|true|false|(")(?:\\.|[^\\"]+)*")/g
 			// @see sfacg.js
 			;
 			// console.log(text);
@@ -562,6 +567,9 @@ function module_code(library_namespace) {
 				}
 				// for \t. e.g., '"03部65话\t"' https://www.dm5.com/m712588/
 				value = value.replace(/\t/g, '\\t');
+				// console.log(value);
+				// console.log(matched[1]);
+				// console.log(JSON.parse(value));
 				DM5[matched[1]] = JSON.parse(value);
 			}
 			// console.log(DM5);
