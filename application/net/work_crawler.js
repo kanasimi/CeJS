@@ -1688,8 +1688,8 @@ function module_code(library_namespace) {
 
 			work_count++;
 			library_namespace.log([ this.id, ': ', {
-				T : [ 'Download %1: %2', work_count
-				// 下載作品列表。
+				T : [ 'Downloading %1: %2', work_count
+				// 下載作品列表 %1：%2。
 				+ (work_count === this_index ? '' : '/' + this_index)
 				//
 				+ '/' + work_list.length, work_title ],
@@ -5587,7 +5587,7 @@ function module_code(library_namespace) {
 				message = [ {
 					T : '無法成功取得圖片。'
 				}, XMLHttp.status ? {
-					T : [ 'HTTP狀態碼%1，', XMLHttp.status ]
+					T : [ 'HTTP 狀態碼 %1，', XMLHttp.status ]
 				} : '', {
 					T : !contents ? '圖片無內容：' : [
 					//

@@ -488,13 +488,15 @@ function module_code(library_namespace) {
 	// "Error: read ECONNRESET"
 	// {errno: 'ECONNRESET', code: 'ECONNRESET', syscall: 'read'}
 	// "BAD STATUS"
+	// Error: Timeout 30s
 	function localize_error(error) {
 		var message = String(error);
 		if (library_namespace.gettext) {
 			// 處理特別的錯誤訊息。
-			var matched = message.match(/^Error: connect ETIMEDOUT (.+)$/);
+			var matched = message
+					.match(/^(Error: (?:connect ETIMEDOUT|Timeout) )(.+)$/);
 			if (matched) {
-				message = [ 'Error: connect ETIMEDOUT %1', matched[1] ];
+				message = [ matched[1] + '%1', matched[2] ];
 			}
 			message = Array.isArray(message) ? library_namespace.gettext.apply(
 					null, message) : library_namespace.gettext(message);
@@ -695,7 +697,7 @@ function module_code(library_namespace) {
 				}
 				if (error) {
 					library_namespace.error([ 'to_form_data: ', {
-						T : [ 'Get error when retrieving [%1]: %2',
+						T : [ 'Got error when retrieving [%1]: %2',
 						//
 						URL, localize_error(error) ]
 					} ]);
@@ -1761,7 +1763,7 @@ function module_code(library_namespace) {
 					 */
 				} else {
 					library_namespace.error([ 'get_URL_node: ', {
-						T : [ 'Get error when retrieving [%1]: %2',
+						T : [ 'Got error when retrieving [%1]: %2',
 						//
 						typeof URL_to_fetch === 'string' ? URL_to_fetch
 						//
@@ -1822,13 +1824,14 @@ function module_code(library_namespace) {
 				}
 				options.URL = node_url.resolve(URL_to_fetch,
 						response.headers.location);
-				library_namespace.debug(response.statusCode
-						+ ' Redirecting to ['
-						+ options.URL
-						+ '] ← ['
-						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL) + ']', 1,
-						'get_URL_node');
+				library_namespace.debug({
+					T : [
+							'%1 Redirecting to [%2] ← [%3]',
+							response.statusCode,
+							options.URL,
+							typeof URL_to_fetch === 'string' ? URL_to_fetch
+									: URL_to_fetch && URL_to_fetch.URL ]
+				}, 1, 'get_URL_node');
 				get_URL_node(options, onload, charset
 				// 重新導向的時候去掉 post data 不傳送。
 				// , post_data
@@ -1841,25 +1844,28 @@ function module_code(library_namespace) {
 			result_Object.status = response.statusCode;
 			// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
 			if (options.onfail || (response.statusCode / 100 | 0) === 2) {
-				library_namespace.debug('STATUS: '
-						+ response.statusCode
-						+ ' '
-						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL), 2,
-						'get_URL_node');
+				library_namespace.debug({
+					T : [
+							'HTTP status code: %1 %2',
+							response.statusCode,
+							typeof URL_to_fetch === 'string' ? URL_to_fetch
+									: URL_to_fetch && URL_to_fetch.URL ]
+				}, 2, 'get_URL_node');
 			} else if (!options.no_warning) {
 				library_namespace.warn([ 'get_URL_node: ', {
-					T : [ '異常 HTTP 狀態碼 %2：%1',
+					T : [ '異常 HTTP 狀態碼 %1：%2', response.statusCode,
 					//
 					typeof URL_to_fetch === 'string' ? URL_to_fetch
 					//
-					: URL_to_fetch && URL_to_fetch.URL, response.statusCode ]
+					: URL_to_fetch && URL_to_fetch.URL ]
 				} ]);
 			}
 
-			library_namespace.debug('response HEADERS: '
-					+ JSON.stringify(response.headers), 4,
-					'get_URL_node._onload');
+			library_namespace.debug({
+				T : [ 'response HEADERS: %1',
+				//
+				JSON.stringify(response.headers) ]
+			}, 4, 'get_URL_node._onload');
 			// XMLHttp.headers['content-type']==='text/html; charset=utf-8'
 			result_Object.headers = response.headers;
 
@@ -1913,8 +1919,9 @@ function module_code(library_namespace) {
 							// 有的時候還需要這一項。
 							// matched = unescape(matched);
 						}
-						library_namespace.debug('檔案名稱: ' + matched, 3,
-								'get_URL_node');
+						library_namespace.debug({
+							T : [ '檔案名稱：%1', matched ]
+						}, 3, 'get_URL_node');
 					} catch (e) {
 						// TODO: handle exception
 					}
@@ -1933,18 +1940,23 @@ function module_code(library_namespace) {
 			&& !options.write_to && !options.write_to_directory) {
 				// 照理unregister()應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				unregister();
-				library_namespace.warn('get_URL_node: got ['
-						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL)
-						+ '], but there is no listener!');
+				library_namespace.warn([ 'get_URL_node: ', {
+					T : [ 'Got URL [%1], but there is no listener!',
+					//
+					typeof URL_to_fetch === 'string' ? URL_to_fetch
+					//
+					: URL_to_fetch && URL_to_fetch.URL ]
+				} ]);
 				// console.log(response);
 				return;
 			}
 
-			library_namespace.debug('['
-					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-							: URL_to_fetch && URL_to_fetch.URL)
-					+ '] loading...', 3, 'get_URL_node');
+			library_namespace.debug({
+				T : [
+						'等待接收從網址 [%1] 傳輸回的資料……',
+						typeof URL_to_fetch === 'string' ? URL_to_fetch
+								: URL_to_fetch && URL_to_fetch.URL ]
+			}, 3, 'get_URL_node');
 
 			var flow_encoding = response.headers['content-encoding'];
 			flow_encoding = flow_encoding && flow_encoding.trim().toLowerCase();
@@ -2039,9 +2051,10 @@ function module_code(library_namespace) {
 
 				if (response.statusCode === 503 && data
 						&& data.toString().includes(' id="jschl-answer"')) {
-					library_namespace.error(
-					// TODO: https://github.com/codemanki/cloudscraper
-					'You need to bypass the DDoS protection by Cloudflare');
+					library_namespace.error({
+						T : // TODO: https://github.com/codemanki/cloudscraper
+						'You need to bypass the DDoS protection by Cloudflare!'
+					});
 				}
 
 				// 基本檢測。
@@ -2093,7 +2106,7 @@ function module_code(library_namespace) {
 					switch (flow_encoding) {
 					case 'gzip':
 						library_namespace.debug('gunzip ' + data.length
-								+ ' bytes data ...', 2, 'get_URL_node');
+								+ ' bytes data...', 2, 'get_URL_node');
 						/**
 						 * <code>
 						可能因為呼叫到舊版library，於此有時會出現 "TypeError: Object #<Object> has no method 'gunzipSync'"
@@ -2134,9 +2147,11 @@ function module_code(library_namespace) {
 						data = node_zlib.deflateSync(data);
 						break;
 					default:
-						library_namespace
-								.warn('get_URL_node: Unknown encoding: ['
-										+ flow_encoding + ']');
+						library_namespace.warn([ 'get_URL_node: ', {
+							T : [ 'Unknown HTTP compression method: [%1]',
+							//
+							flow_encoding ]
+						} ]);
 						break;
 					}
 				}
@@ -2165,9 +2180,11 @@ function module_code(library_namespace) {
 							// 避免 Error: ENAMETOOLONG: name too long
 							.slice(0, 256);
 					if (!options.no_warning) {
-						library_namespace.info('get_URL_node: Write '
-								+ data.length + ' bytes to [' + file_path
-								+ ']: ' + URL_to_fetch);
+						library_namespace.info([ 'get_URL_node: ', {
+							T : [ 'Write %2 bytes to file [%1]: %3',
+							//
+							file_path, data.length, URL_to_fetch ]
+						} ]);
 					}
 					try {
 						var fd = node_fs.openSync(file_path, 'w');
@@ -2194,9 +2211,11 @@ function module_code(library_namespace) {
 							}
 						}
 					} catch (e) {
-						library_namespace.error('get_URL_node: Error to write '
-								+ data.length + ' bytes to [' + file_path
-								+ ']: ' + URL_to_fetch);
+						library_namespace.error([ 'get_URL_node: ', {
+							T : [ 'Failed to write %2 bytes to [%1]: %3',
+							//
+							file_path, data.length, URL_to_fetch ]
+						} ]);
 						console.error(e);
 					}
 				}
@@ -2367,8 +2386,9 @@ function module_code(library_namespace) {
 						'get_URL_node');
 				request.write(_post_data);
 			} else {
-				library_namespace.error('Invalid POST data: '
-						+ JSON.stringify(post_data));
+				library_namespace.error({
+					T : [ 'Invalid POST data: %1', JSON.stringify(post_data) ]
+				});
 			}
 		}
 		// console.log(URL_object_to_fetch.headers);
@@ -2391,13 +2411,16 @@ function module_code(library_namespace) {
 				// TODO: handle exception
 			}
 			if (!options.no_warning) {
-				library_namespace.info('get_URL_node: timeout '
-						+ (timeout / 1000) + 's [' + URL_to_fetch + ']');
+				library_namespace.info([ 'get_URL_node: ', {
+					T : [ 'Timeout %1: [%2]', (timeout / 1000) + 's',
+					//
+					URL_to_fetch ]
+				} ]);
 			}
 			if (!e) {
 				e = new Error('Timeout '
 						+ (timeout % 1000 === 0 ? timeout / 1000 + 's'
-								: timeout + 'ms') + ': ' + URL_to_fetch);
+								: timeout + 'ms') + ': [' + URL_to_fetch + ']');
 				e.code = 'TIMEOUT';
 			}
 
@@ -2415,14 +2438,17 @@ function module_code(library_namespace) {
 			// setTimeout method 2
 			// {Object}timeout_id @ node.js
 			timeout_id = setTimeout(_ontimeout, timeout);
-			library_namespace.debug('add timeout '
-					+ (timeout / 1000)
-					+ 's ['
-					+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-							: URL_to_fetch && URL_to_fetch.URL) + ']', 2,
-					'get_URL_node');
+			library_namespace.debug({
+				T : [
+						'Add timeout %1: [%2]',
+						(timeout / 1000) + 's',
+						typeof URL_to_fetch === 'string' ? URL_to_fetch
+								: URL_to_fetch && URL_to_fetch.URL ]
+			}, 2, 'get_URL_node');
 		} else if (timeout) {
-			library_namespace.warn('get_URL_node: Invalid timeout: ' + timeout);
+			library_namespace.warn([ 'get_URL_node: ', {
+				T : [ 'Invalid timeout: %1', timeout ]
+			} ]);
 		}
 
 		library_namespace.debug('set onerror: '
@@ -2808,8 +2834,9 @@ function module_code(library_namespace) {
 			throw true;
 		}
 	} catch (e) {
-		library_namespace.debug(this.id
-				+ ': 無 node.js 之 fs，因此不具備 node 之檔案操作功能。');
+		library_namespace.debug([ this.id + ': ', {
+			T : '無 node.js 之 `fs` 套件，因此不具備 node 之檔案操作功能。'
+		} ]);
 		if (false) {
 			// enumerate for get_URL_cache_node
 			// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
@@ -2877,8 +2904,9 @@ function module_code(library_namespace) {
 				// 去掉 "&amp;" 之類。
 				file_name = library_namespace.HTML_to_Unicode(file_name);
 			}
-			library_namespace.debug('自URL取得檔名: ' + URL + '\n→ ' + file_name, 1,
-					'get_URL_cache_node');
+			library_namespace.debug([ {
+				T : [ '自 URL 取得檔名：%1', URL ]
+			}, '\n→ ' + file_name ], 1, 'get_URL_cache_node');
 		}
 		if (options.file_name_processor) {
 			file_name = options.file_name_processor(file_name);
@@ -2892,9 +2920,15 @@ function module_code(library_namespace) {
 			file_name = options.directory + file_name;
 		}
 
-		library_namespace.debug('下載 ' + URL + '\n→ ' + file_name
-				+ ' (encoding ' + encoding + ', charset ' + options.charset
-				+ ')', 1, 'get_URL_cache_node');
+		library_namespace.debug([
+				{
+					T : [ '下載 %1', URL ]
+				},
+				'\n→ ',
+				{
+					T : [ '%1 (file encoding %2, charset %3)', file_name,
+							encoding, options.charset ]
+				} ], 1, 'get_URL_cache_node');
 
 		node_fs.readFile(file_name, encoding,
 		//
@@ -2903,8 +2937,9 @@ function module_code(library_namespace) {
 				if (!error
 				// 若是容許空內容，應該特別指定options.allow_empty。
 				&& (data || options.allow_empty)) {
-					library_namespace.debug('Using cached data.', 3,
-							'get_URL_cache_node');
+					library_namespace.debug({
+						T : 'Using cached data.'
+					}, 3, 'get_URL_cache_node');
 					library_namespace.debug('Cached data: ['
 							+ data.slice(0, 200) + ']...', 5,
 							'get_URL_cache_node');
@@ -2913,17 +2948,18 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				library_namespace.debug(
-						'No valid cached data. Try to get data (again)...', 3,
-						'get_URL_cache_node');
+				library_namespace.debug({
+					T : 'No valid cached data. Try to get data (again)...'
+				}, 3, 'get_URL_cache_node');
 			}
 
 			_.get_URL(URL, function(XMLHttp, error) {
 				if (error) {
-					library_namespace.error(
-					//
-					'get_URL_cache_node.cache: Error to get URL: [' + URL
-							+ '].');
+					library_namespace.error([ 'get_URL_cache_node.cache: ', {
+						T : [ 'Got error when retrieving [%1]: %2',
+						//
+						URL, localize_error(error) ]
+					} ]);
 					// WARNING: XMLHttp 僅在重新取得URL時提供。
 					onload(undefined, error, XMLHttp);
 					return;
@@ -2952,17 +2988,20 @@ function module_code(library_namespace) {
 						file_name = (options.directory || '')
 						// 若是沒有特別設置檔名，則改採用header裡面的檔名。
 						+ XMLHttp.filename;
-						library_namespace.info(
-						//
-						'get_URL_cache_node: Get file name from header: '
-						//
-						+ XMLHttp.filename);
+						library_namespace.info([
+								'get_URL_cache_node: ',
+								{
+									T : [ 'Got file name from HTTP header: %1',
+											XMLHttp.filename ]
+								} ]);
 					} else if (!options.file_name.endsWith(XMLHttp.filename)) {
-						library_namespace.info(
-						//
-						'get_URL_cache_node: file name from header: '
-						//
-						+ XMLHttp.filename + ' → ' + options.file_name);
+						library_namespace.info([ 'get_URL_cache_node: ', {
+							T : [ 'Set file name: [%1], '
+							//
+							+ 'file name from header: [%2].',
+							//
+							options.file_name, XMLHttp.filename ]
+						} ]);
 					}
 				}
 
@@ -2973,13 +3012,17 @@ function module_code(library_namespace) {
 				 */
 				if (data && /[^\\\/]$/.test(file_name)) {
 					if (!options.no_write_info) {
-						library_namespace.info(
-						//
-						'get_URL_cache_node.cache: Write cache data to ['
-								+ file_name + '].');
-						library_namespace.debug('Cache data: '
-								+ (data && JSON.stringify(data).slice(0, 190))
-								+ '...', 3, 'get_URL_cache_node');
+						library_namespace.info([
+								'get_URL_cache_node.cache: ',
+								{
+									T : [ 'Write data to cache file [%1].',
+											file_name ]
+								} ]);
+						library_namespace.debug({
+							T : [ 'The data to cache: %1...',
+							//
+							data && JSON.stringify(data).slice(0, 190) ]
+						}, 3, 'get_URL_cache_node');
 					}
 					node_fs.writeFileSync(file_name, data, encoding);
 				}
@@ -3070,9 +3113,10 @@ function module_code(library_namespace) {
 					});
 
 					url = node_url.resolve(url, response.headers.location);
-					library_namespace.debug(
-							response.statusCode + ' Redirecting to [' + url
-									+ '] ← [' + input + ']', 1, 'fetch');
+					library_namespace.debug({
+						T : [ '%1 Redirecting to [%2] ← [%3]',
+								response.statusCode, url, input ]
+					}, 1, 'fetch');
 					fetch(url, options);
 					return;
 				}
