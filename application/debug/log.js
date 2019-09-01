@@ -1340,39 +1340,41 @@ function finish(name_space) {
 						+ message);
 			}
 
-			if (CeL.is_debug(level)) {
-				if (typeof message === 'function') {
-					// for .debug(function(){return some_function(..);}, 3);
-					message = 'function: [' + message + ']<br />return: ['
-							+ message() + ']';
-				}
-
-				if (!caller && has_caller) {
-					// TODO: do not use arguments
-					caller = caller !== arguments.callee
-							&& CeL.get_function_name(arguments.callee.caller);
-					if (false) {
-						CeL.log(CeL.is_type(arguments.callee.caller));
-						CeL.log(Array.isArray(caller));
-						CeL.log(caller + ': ' + arguments.callee.caller);
-						CeL.warn(CeL.debug);
-					}
-				}
-				if (caller) {
-					message = CeL.is_WWW() ? [ {
-						// (caller.charAt(0) === '.' ? CeL.Class + caller :
-						// caller)
-						span : caller,
-						'class' : 'debug_caller'
-					}, ': ', message ] : CeL.to_SGR([ '', 'fg=yellow',
-							caller + ': ', '-fg', message ]);
-				}
-
-				CeL.Log.log.call(CeL.Log, message, clean, {
-					level : 'debug',
-					add_class : 'debug_' + (level || CeL.is_debug())
-				});
+			if (!CeL.is_debug(level)) {
+				return;
 			}
+
+			if (typeof message === 'function') {
+				// for .debug(function(){return some_function(..);}, 3);
+				message = 'function: [' + message + ']<br />return: ['
+						+ message() + ']';
+			}
+
+			if (!caller && has_caller) {
+				// TODO: do not use arguments
+				caller = caller !== arguments.callee
+						&& CeL.get_function_name(arguments.callee.caller);
+				if (false) {
+					CeL.log(CeL.is_type(arguments.callee.caller));
+					CeL.log(Array.isArray(caller));
+					CeL.log(caller + ': ' + arguments.callee.caller);
+					CeL.warn(CeL.debug);
+				}
+			}
+			if (caller) {
+				message = CeL.is_WWW() ? [ {
+					// (caller.charAt(0) === '.' ? CeL.Class + caller :
+					// caller)
+					span : caller,
+					'class' : 'debug_caller'
+				}, ': ', message ] : CeL.to_SGR([ '', 'fg=yellow',
+						caller + ': ', '-fg', message ]);
+			}
+
+			CeL.Log.log(message, clean, {
+				level : 'debug',
+				add_class : 'debug_' + (level || CeL.is_debug())
+			});
 		}
 
 		var log_front_end_info =
