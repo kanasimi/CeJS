@@ -46,6 +46,41 @@ function module_code(library_namespace) {
 		return encodeURIComponent(string);
 	};
 
+	function time_message(millisecond) {
+		if (library_namespace.age_of) {
+			return library_namespace.age_of(0, millisecond, {
+				digits : 1
+			});
+		}
+
+		return millisecond % 1000 === 0 ? millisecond / 1000 + 's'
+				: millisecond + 'ms';
+	}
+
+	// "Error: socket hang up" {code: 'ECONNRESET'}
+	// "Error: connect ETIMEDOUT 1.1.1.1:80"
+	// {errno:'ETIMEDOUT', code: 'ETIMEDOUT', address: '125.89.70.31', port:80 }
+	// Error: connect ECONNREFUSED 127.0.0.1:443
+	// "Error: read ECONNRESET"
+	// {errno: 'ECONNRESET', code: 'ECONNRESET', syscall: 'read'}
+	// Error: getaddrinfo ENOTFOUND domain
+	// "BAD STATUS"
+	// Error: Timeout 30s
+	function localize_error(error) {
+		var message = String(error);
+		if (library_namespace.gettext) {
+			// 處理特別的錯誤訊息。
+			var matched = message
+					.match(/^(Error: (?:(?:connect|getaddrinfo) E[A-Z]+|Timeout) )(.+)$/);
+			if (matched) {
+				message = [ matched[1] + '%1', matched[2] ];
+			}
+			message = Array.isArray(message) ? library_namespace.gettext.apply(
+					null, message) : library_namespace.gettext(message);
+		}
+		return message;
+	}
+
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 	NOT_FOUND = ''.indexOf('_');
@@ -481,28 +516,6 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	var is_nodejs = library_namespace.platform.nodejs;
-
-	// "Error: socket hang up" {code: 'ECONNRESET'}
-	// "Error: connect ETIMEDOUT 1.1.1.1:80"
-	// {errno:'ETIMEDOUT', code: 'ETIMEDOUT', address: '125.89.70.31', port:80 }
-	// "Error: read ECONNRESET"
-	// {errno: 'ECONNRESET', code: 'ECONNRESET', syscall: 'read'}
-	// "BAD STATUS"
-	// Error: Timeout 30s
-	function localize_error(error) {
-		var message = String(error);
-		if (library_namespace.gettext) {
-			// 處理特別的錯誤訊息。
-			var matched = message
-					.match(/^(Error: (?:connect ETIMEDOUT|Timeout) )(.+)$/);
-			if (matched) {
-				message = [ matched[1] + '%1', matched[2] ];
-			}
-			message = Array.isArray(message) ? library_namespace.gettext.apply(
-					null, message) : library_namespace.gettext(message);
-		}
-		return message;
-	}
 
 	/**
 	 * <code>
@@ -1676,8 +1689,8 @@ function module_code(library_namespace) {
 			get_URL_node_connections--;
 			if (timeout_id) {
 				library_namespace.debug('clear timeout '
-						+ (timeout / 1000)
-						+ 's ['
+						+ time_message(timeout)
+						+ ' ['
 						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
 								: URL_to_fetch && URL_to_fetch.URL) + ']', 3,
 						'get_URL_node');
@@ -2115,29 +2128,31 @@ function module_code(library_namespace) {
 						 */
 						try {
 							data = node_zlib.gunzipSync(data);
-						} catch (e) {
+						} catch (error) {
 							library_namespace.error(
 							// get_URL_node: Error: node_zlib.gunzipSync():
 							// Error: unexpected end of file [http://...]
-							'get_URL_node: Error: node_zlib.gunzipSync(): ' + e
+							'get_URL_node: Error: node_zlib.gunzipSync(): '
+							//
+							+ localize_error(error)
 							//
 							+ ' [' + (typeof URL_to_fetch === 'string'
 							//
 							? URL_to_fetch : URL_to_fetch && URL_to_fetch.URL)
 									+ ']');
 							if (false) {
-								console.log(e);
+								console.log(error);
 								console.log(URL_object_to_fetch);
 								console.log(node_zlib);
 								console.log(data);
 								console.trace(
 								//
 								'get_URL_node: Error: node_zlib.gunzipSync()');
-								console.error(e.stack);
+								console.error(error.stack);
 							}
 							// Release memory. 釋放被占用的記憶體.
 							data = null;
-							_onfail(e);
+							_onfail(error);
 							return;
 						}
 						break;
@@ -2412,15 +2427,14 @@ function module_code(library_namespace) {
 			}
 			if (!options.no_warning) {
 				library_namespace.info([ 'get_URL_node: ', {
-					T : [ 'Timeout %1: [%2]', (timeout / 1000) + 's',
+					T : [ 'Timeout %1: [%2]', time_message(timeout),
 					//
 					URL_to_fetch ]
 				} ]);
 			}
 			if (!e) {
-				e = new Error('Timeout '
-						+ (timeout % 1000 === 0 ? timeout / 1000 + 's'
-								: timeout + 'ms') + ': [' + URL_to_fetch + ']');
+				e = new Error('Timeout ' + time_message(timeout) + ': ['
+						+ URL_to_fetch + ']');
 				e.code = 'TIMEOUT';
 			}
 
@@ -2441,7 +2455,7 @@ function module_code(library_namespace) {
 			library_namespace.debug({
 				T : [
 						'Add timeout %1: [%2]',
-						(timeout / 1000) + 's',
+						time_message(timeout),
 						typeof URL_to_fetch === 'string' ? URL_to_fetch
 								: URL_to_fetch && URL_to_fetch.URL ]
 			}, 2, 'get_URL_node');
