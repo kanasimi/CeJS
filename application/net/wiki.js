@@ -689,7 +689,8 @@ function module_code(library_namespace) {
 		}
 
 		// TODO: 這只是簡陋的判別方法。
-		var matched = session.API_URL.match(PATTERN_wiki_project_URL);
+		var matched = session.API_URL
+				&& session.API_URL.match(PATTERN_wiki_project_URL);
 		if (matched
 				&& !/test|wiki/i.test(matched[3])
 				&& ((matched = matched[4].toLowerCase()) in api_URL.shortcut_of_project)) {
@@ -2424,15 +2425,15 @@ function module_code(library_namespace) {
 			}
 
 			var level = section_title_token.level;
-			if (
-			// 要篩選的章節標題層級 e.g., {level_filter:3}
-			1 <= options.level_filter ? level === options.level_filter
-			// e.g., {level_filter:[1,2]}
-			: Array.isArray(options.level_filter) ? options.level_filter
-					.includes(level)
-			// default: level 2
+			// console.log([ level, options.level_filter ]);
+			if (Array.isArray(options.level_filter)
+			// 要篩選的章節標題層級 e.g., {level_filter:[1,2]}
+			? options.level_filter.includes(level)
+			// e.g., {level_filter:3}
+			: 1 <= options.level_filter ? level === options.level_filter
+			// default: level 2. 僅處理階級2的章節標題。
 			: level === 2) {
-				// 僅處理階級2的章節標題。
+				// console.log(section_title_token);
 				add_section(section_title_index);
 			}
 		}, Object.assign({
@@ -9920,7 +9921,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// 強制更新/清除緩存並重新載入/重新整理/刷新頁面。
+	// 強制更新快取/清除緩存並重新載入/重新整理/刷新頁面。
 	// @see https://www.mediawiki.org/w/api.php?action=help&modules=purge
 	// 極端做法：[[WP:NULL|Null edit]], re-edit the same contents
 	wiki_API.purge = function(title, callback, options) {
@@ -14168,7 +14169,7 @@ function module_code(library_namespace) {
 									+ rows.map(function(row) {
 										return row.revid;
 									}), 3);
-					// e.g., use API
+					// e.g., use API 常常會回傳和上次有重疊的資料
 					while (rows.length > 0
 					// 去除掉重複的紀錄。因為是從舊的排列到新的，因此從起頭開始去除。
 					&& rows[0].revid <= last_query_revid) {
