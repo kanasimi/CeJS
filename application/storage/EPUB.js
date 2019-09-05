@@ -1388,7 +1388,9 @@ function module_code(library_namespace) {
 					// 需要連接網站的重要原因之一是為了取得 media-type。
 					&& item['media-type'] !== XMLHttp.type) {
 						library_namespace.error([ 'add_chapter: ', {
-							T : [ '已取得之資源，其媒體類型為 [%1]，與從副檔名所得到的媒體類型 [%2] 不同！',
+							T : [ '已取得之資源，其內容之媒體類型為 [%1]，'
+							//
+							+ '與從副檔名所得到的媒體類型 [%2] 不同！',
 							//
 							XMLHttp.type, item['media-type'] ]
 						} ]);

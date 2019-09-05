@@ -1144,7 +1144,7 @@ function module_code(library_namespace) {
 		//
 		(new Date).format('%Y/%m/%d %H:%M:%S'), ' ', {
 			// 開始下載/處理
-			T : [ 'Starting %1, save to %2', work_id, this.main_directory ]
+			T : [ '開始處理《%1》，儲存至 %2', work_id, this.main_directory ]
 		} ]);
 		// prepare work directory.
 		library_namespace.create_directory(this.main_directory);
@@ -2185,7 +2185,7 @@ function module_code(library_namespace) {
 		} else if (search_result[work_title]) {
 			// 已經搜尋過此作品標題。
 			library_namespace.log([ this.id + ': ', {
-				T : [ '已緩存作品 id，不再重新搜尋：%1',
+				T : [ '已快取作品 id，不再重新搜尋：%1',
 				//
 				work_title + '→' + JSON.stringify(search_result[work_title]) ]
 			} ]);
@@ -2906,7 +2906,7 @@ function module_code(library_namespace) {
 			} else if (_this.preserve_work_page === false) {
 				// 明確指定不保留，將刪除已存在的作品資料 cache。
 				library_namespace.debug({
-					T : [ '刪除已存在的作品資料 cache：%1', work_page_path ]
+					T : [ '刪除已存在的作品資料快取：%1', work_page_path ]
 				}, 1, 'process_work_data');
 				library_namespace.remove_file(work_page_path);
 			}
@@ -3436,7 +3436,7 @@ function module_code(library_namespace) {
 														|| _this.chapter_unit ]
 									},
 									work_data.reget_chapter ? '但已設定下載所有章節內容。'
-											: _this.regenerate ? '僅利用 cache 重建資料（如小說、電子書），不重新下載所有章節內容。'
+											: _this.regenerate ? '僅利用快取重建資料（如小說、電子書），不重新下載所有章節內容。'
 													: '跳過本作品不處理。' ]);
 
 					// 採用依變更判定時，預設不重新擷取。
