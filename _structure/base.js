@@ -949,13 +949,56 @@ function (global) {
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
+	function is_version(version_now, version_to_test, exactly) {
+		if (!isNaN(version_now)) {
+			if (!version_to_test) {
+				// 數字化版本號
+				return +version_now;
+			}
+			return exactly ? version_now == version_to_test
+					: version_now > version_to_test;
+		}
+
+		if (typeof version_now === 'string') {
+			version_now = version_now.replace(/^v(?:er)/i, '');
+			version_to_test = version_to_test && String(version_to_test).replace(/^v(?:er)/i, '');
+			if (exactly) {
+				return version_now === version_to_test;
+			}
+			version_now = version_now.split('.');
+			if (!version_to_test) {
+				// 數字化版本號
+				// 預防: +1.9 > +1.10 == 1.1
+				return +version_now[0] + version_now[1] / 100;
+			}
+			version_to_test = version_to_test.split('.');
+
+			var diff = version_now[0] - version_to_test[0];
+			if (diff)
+				return diff > 0;
+
+			if (!version_to_test[1])
+				return true;
+			diff = version_now[1] - version_to_test[1];
+			if (diff)
+				return diff > 0;
+
+			return !version_to_test[2] || +version_now[2] >= +version_to_test[2];
+		}
+
+		if (!version_to_test)
+			return version_now;
+	}
 
 	/**
 	 * 檢測 Web browser / engine 相容性，runtime environment 執行環境。
 	 * 
+	 * Warning: should use CeL.platform('node', '12.10'), NOT
+	 * CeL.platform('node', 12.10)
+	 * 
 	 * @param {String|Object}key
 	 *            Web browser / engine name.
-	 * @param {Number}[version]
+	 * @param {String|Number}[version]
 	 *            最低版本。
 	 * @param {Boolean}[exactly]
 	 *            需要準確相同。
@@ -980,21 +1023,22 @@ function (global) {
 		// CeL.platform(name, version, exactly);
 		tmp = platform.browser;
 		if (tmp && tmp.toLowerCase() === key
-				&& (!version || (exactly ? platform.version === version
-						: platform.version >= version)))
+				&& (!version || is_version(platform.version, version, exactly))) {
 			return true;
-	
+		}
+
 		tmp = platform.engine;
 		if (tmp && tmp.toLowerCase() === key
-				&& (!version || (exactly ? platform.engine_version === version
-						: platform.engine_version >= version)))
+				&& (!version || is_version(platform.engine_version, version, exactly))) {
 			return true;
-	
+		}
+
 		tmp = platform.OS;
 		if (tmp && tmp.toLowerCase().indexOf(
 			//
-			key === 'windows' ? 'win' : key) === 0)
+			key === 'windows' ? 'win' : key) === 0) {
 			return true;
+		}
 
 		return false;
 	};
