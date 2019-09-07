@@ -17245,7 +17245,7 @@ function module_code(library_namespace) {
 	// 載於, 出典, source of claim
 	// 'en:stated in' : 'P248',
 	// 導入自, source
-	// 'en:imported from' : 'P143',
+	// 'en:imported from Wikimedia project' : 'P143',
 	// 來源網址, website
 	// 'en:reference URL' : 'P854',
 	// 檢索日期
@@ -18643,7 +18643,8 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// P143 (導入自, imported from) for bot, P248 (載於, stated in) for humans
+	// P143 (導入自, 'imported from Wikimedia project') for bot, P248 (載於, stated
+	// in) for humans
 	// + 來源網址 (P854) reference URL
 	// + 檢索日期 (P813) retrieved date
 
@@ -18737,7 +18738,9 @@ function module_code(library_namespace) {
 		value = +value;
 		// TODO: 極大極小值。
 		// 負數已經自動加上 "-"
-		return value < 0 ? String(value) : '+' + value;
+		return value < 0 ? String(value)
+		// `value || 0`: for NaN
+		: '+' + (value || 0);
 	}
 
 	/**
@@ -18997,10 +19000,13 @@ function module_code(library_namespace) {
 			value = wikidata_quantity(value);
 			value = {
 				amount : value,
+				// unit of measure item (empty for dimensionless values)
 				// e.g., 'http://www.wikidata.org/entity/Q857027'
 				unit : String(unit),
+				// optional https://www.wikidata.org/wiki/Help:Data_type
 				upperBound : typeof options.upperBound === 'number' ? wikidata_quantity(options.upperBound)
 						: value,
+				// optional https://www.wikidata.org/wiki/Help:Data_type
 				lowerBound : typeof options.lowerBound === 'number' ? wikidata_quantity(options.lowerBound)
 						: value
 			};
@@ -19194,7 +19200,8 @@ function module_code(library_namespace) {
 	// example 2:
 	//
 	// [{生物俗名:['SB2#1','SB2#2','SB2#3'],multi:true,language:'zh-tw',references:{臺灣物種名錄物種編號:123456}},
-	// {読み仮名 : 'かな',language : 'ja',references : {imported_from : 'jawiki'}}]
+	// {読み仮名 : 'かな',language : 'ja',references : {'imported from Wikimedia
+	// project' : 'jawiki'}}]
 	// +exists_property_hash
 	//
 	// {Array}可接受的原始輸入形式之2'
@@ -19202,7 +19209,8 @@ function module_code(library_namespace) {
 	// [{生物俗名:'SB2#1',options:AP1},{生物俗名:'SB2#2',options:AP1},{生物俗名:'SB2#3',options:AP1},
 	// {読み仮名 : 'かな',options(KEY_property_options):AP2}]
 	// +additional_properties:AP1={language:'zh-tw',references:{臺灣物種名錄物種編號:123456}}
-	// +additional_properties:AP2={language:'ja',references:{imported_from:'jawiki'}}
+	// +additional_properties:AP2={language:'ja',references:{'imported from
+	// Wikimedia project':'jawiki'}}
 
 	/**
 	 * 規範化屬性列表。
@@ -20272,7 +20280,8 @@ function module_code(library_namespace) {
 					読み仮名 : 'かな',
 					language : 'ja',
 					references : {
-						imported_from : 'jawiki'
+						// P143
+						'imported from Wikimedia project' : 'jawiki'
 					}
 				} ]
 			};
