@@ -557,7 +557,7 @@ function module_code(library_namespace) {
 		if (matched) {
 			// 先測試是否為自訂 API。
 			return /\.php$/i.test(project) ? project
-			// e.g., 'http://zh.wikipedia.org/'
+			// e.g., 'https://zh.wikipedia.org/'
 			// e.g., 'https://www.mediawiki.org/w/api.php'
 			// e.g., 'https://www.mediawiki.org/wiki/'
 			: (matched[1] || api_URL.default_protocol || 'https:') + '//'
@@ -17236,6 +17236,7 @@ function module_code(library_namespace) {
 			list.length <= 1)) {
 				list = list[0];
 			}
+			// console.trace(options);
 			callback(list);
 		}, null, options);
 	}
@@ -17324,8 +17325,7 @@ function module_code(library_namespace) {
 						}));
 						return;
 					}
-					// console.log(options);
-					// console.trace(1);
+					// console.trace(options);
 					wikidata_search.use_cache(key[index++], cache_next_key,
 					//
 					Object.assign({
@@ -18800,6 +18800,10 @@ function module_code(library_namespace) {
 				// console.log(normalized_data);
 				value[index] = normalized_data;
 				if (--left === 0 && typeof callback === 'function') {
+					library_namespace.debug('is_multi: Run callback:', 3,
+							'normalize_wikidata_value');
+					// console.log(value);
+					// console.log(callback + '');
 					callback(value, to_pass);
 				}
 			};
@@ -18844,7 +18848,7 @@ function module_code(library_namespace) {
 		}
 
 		// --------------------------------------
-		// 處理單一項目
+		// 處理單一項目。
 		var snaktype, datavalue_type, error;
 
 		function normalized() {
@@ -18900,7 +18904,7 @@ function module_code(library_namespace) {
 		}
 
 		// --------------------------------------
-		// 處理一般賦值
+		// 處理一般賦值。
 
 		if (!datatype) {
 			// auto-detect: guess datatype
@@ -18970,7 +18974,7 @@ function module_code(library_namespace) {
 		}
 
 		// --------------------------------------
-		// 依據各種不同的datatype生成結構化資料。
+		// 依據各種不同的 datatype 生成結構化資料。
 
 		switch (datatype) {
 		case 'globe-coordinate':
@@ -18980,7 +18984,7 @@ function module_code(library_namespace) {
 				longitude : +value[1],
 				altitude : typeof value[2] === 'number' ? value[2] : null,
 				precision : options.precision || 0.000001,
-				globe : options.globe || 'http://www.wikidata.org/entity/Q2'
+				globe : options.globe || 'https://www.wikidata.org/entity/Q2'
 			};
 			break;
 
@@ -19001,7 +19005,7 @@ function module_code(library_namespace) {
 			value = {
 				amount : value,
 				// unit of measure item (empty for dimensionless values)
-				// e.g., 'http://www.wikidata.org/entity/Q857027'
+				// e.g., 'https://www.wikidata.org/entity/Q857027'
 				unit : String(unit),
 				// optional https://www.wikidata.org/wiki/Help:Data_type
 				upperBound : typeof options.upperBound === 'number' ? wikidata_quantity(options.upperBound)
@@ -19072,7 +19076,7 @@ function module_code(library_namespace) {
 				precision : precision,
 				calendarmodel : options.calendarmodel
 				// proleptic Gregorian calendar:
-				|| 'http://www.wikidata.org/entity/Q1985727'
+				|| 'https://www.wikidata.org/entity/Q1985727'
 			};
 			break;
 
@@ -19086,8 +19090,8 @@ function module_code(library_namespace) {
 				value = {
 					'entity-type' : datatype === 'wikibase-item' ? 'item'
 							: 'property',
-					'numeric-id' : matched[2] | 0,
-					// 在設定時，id這項可省略。
+					'numeric-id' : +matched[2],
+					// 在設定時，id 這項可省略。
 					id : value
 				};
 			} else {
@@ -19175,7 +19179,7 @@ function module_code(library_namespace) {
 	// * 若某項有 .mainsnak 或 .snaktype 則當作輸入了全套完整的資料，不處理此項。
 	//
 	// {Array}可接受的原始輸入形式之3
-	// 將{Array}屬性名稱列表轉換成{Array}屬性id列表 →
+	// 將{Array}屬性名稱列表轉換成{Array}屬性 id 列表 →
 	// [{P248:'宇宙',property:'P248'},{P143:'zhwiki',property:'P143'},{P854:undefined,property:'P854'},{P3088:123,remove:true,property:'P3088'}]
 	// + additional_properties + exists_property_hash
 	//
@@ -19406,11 +19410,13 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 
-		// 將{Array}屬性名稱列表轉換成{Array}屬性id列表 →
+		// 將{Array}屬性名稱列表轉換成{Array}屬性 id 列表 →
 
 		// console.log(demands);
 		wikidata_search.use_cache(demands, function(property_id_list) {
-			// 將{Array}屬性名稱列表轉換成{Array}屬性id列表 →
+			// console.log(property_id_list);
+
+			// 將{Array}屬性名稱列表轉換成{Array}屬性 id 列表 →
 			if (property_id_list.length !== property_corresponding.length) {
 				throw new Error(
 				//
@@ -19483,8 +19489,8 @@ function module_code(library_namespace) {
 			if (exists_property_hash) {
 				// console.log(exists_property_hash);
 				properties = properties.filter(function(property_data) {
-					// 當有輸入exists_property_hash時，所有的相關作業都會在這段處理。
-					// 之後normalize_next_value()不會再動到exists_property_hash相關作業。
+					// 當有輸入 exists_property_hash 時，所有的相關作業都會在這段處理。
+					// 之後 normalize_next_value()不會再動到 exists_property_hash 相關作業。
 					var property_id = property_data.property;
 					if (!property_id) {
 						// 在此無法處理。例如未能轉換 key 成 id。
@@ -19507,7 +19513,7 @@ function module_code(library_namespace) {
 					}
 
 					if (property_to_remove(property_data)) {
-						// 刪除時，需要存在此property才有必要處置。
+						// 刪除時，需要存在此 property 才有必要處置。
 						if (!exists_property_list) {
 							library_namespace.debug('Skip ' + property_id
 							//
@@ -19598,6 +19604,8 @@ function module_code(library_namespace) {
 						return true;
 					}
 
+					// console.log(property_data);
+
 					// {Object|Array}property_data[KEY_property_options].references
 					// 當作每個 properties 的參照。
 					var references = 'references' in property_data
@@ -19626,7 +19634,7 @@ function module_code(library_namespace) {
 						'normalize_next_value');
 				if (index === properties.length) {
 					library_namespace.debug(
-							'done: 已經將可查到的屬性名稱轉換成屬性id。 callback(properties);',
+							'done: 已經將可查到的屬性名稱轉換成屬性 id。 callback(properties);',
 							2, 'normalize_next_value');
 					callback(properties);
 					return;
@@ -19648,6 +19656,12 @@ function module_code(library_namespace) {
 				_options = Object.assign({
 					// multi : false,
 					callback : function(normalized_value) {
+						// console.trace(options);
+						if (typeof options.value_filter === 'function') {
+							normalized_value = options
+									.value_filter(normalized_value);
+						}
+
 						if (Array.isArray(normalized_value)
 								&& options.aoto_select) {
 							// 採用首個可用的，最有可能是目標的。
@@ -19672,18 +19686,18 @@ function module_code(library_namespace) {
 
 							if (Array.isArray(normalized_value)) {
 								library_namespace.error(
-								// 得到多個值而非單一值
+								// 得到多個值而非單一值。
 								'normalize_next_value: get multiple values instead of just one value: ['
 										+ value + '] → '
 										+ JSON.stringify(normalized_value));
 
 							} else if (false && normalized_value.error) {
-								// 之前應該已經在normalize_wikidata_value()顯示過錯誤訊息
+								// 之前應該已經在 normalize_wikidata_value() 顯示過錯誤訊息。
 								library_namespace
 										.error('normalize_next_value: '
 												+ normalized_value.error);
 							}
-							// 因為之前應該已經顯示過錯誤訊息，因此這邊直接放棄作業，排除此property。
+							// 因為之前應該已經顯示過錯誤訊息，因此這邊直接放棄作業，排除此 property。
 
 							properties.splice(--index, 1);
 							normalize_next_value();
@@ -19714,7 +19728,7 @@ function module_code(library_namespace) {
 									+ value + ' ('
 									+ wikidata_datavalue(normalized_value)
 									+ ')', 1, 'normalize_next_value');
-							// TODO: 依舊增添references
+							// TODO: 依舊增添 references。
 							properties.splice(--index, 1);
 							normalize_next_value();
 							return;
@@ -19980,7 +19994,7 @@ function module_code(library_namespace) {
 				//
 				options, session, entity && entity.claims ? entity : _entity);
 			},
-			// 若是未輸入entity，那就取得entity內容以幫助檢查是否已存在相同屬性值。
+			// 若是未輸入 entity，那就取得 entity 內容以幫助檢查是否已存在相同屬性值。
 			entity && entity.claims ? {
 				props : ''
 			} : null);
@@ -19988,8 +20002,8 @@ function module_code(library_namespace) {
 		}
 
 		if (!entity || !entity.claims) {
-			library_namespace
-					.debug('未輸入entity以供檢查是否已存在相同屬性值。', 1, 'set_claims');
+			library_namespace.debug('未輸入 entity 以供檢查是否已存在相同屬性值。', 1,
+					'set_claims');
 		}
 
 		// TODO: 可拆解成 wbsetclaim
@@ -20087,7 +20101,7 @@ function module_code(library_namespace) {
 			}
 
 			POST_data.property = property_id;
-			// 照datavalue修改 POST_data。
+			// 照 datavalue 修改 POST_data。
 			POST_data.snaktype = property_data.snaktype;
 			if (POST_data.snaktype === 'value') {
 				POST_data.value = JSON.stringify(property_data.datavalue.value);
@@ -20121,6 +20135,8 @@ function module_code(library_namespace) {
 					// data =
 					// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
 
+					library_namespace.debug('設定完主要數值，接著設定 references。', 1,
+							'set_next_claim');
 					set_references(data.claim.id, property_data, shift_to_next,
 							POST_data, claim_action[0], session);
 
@@ -20171,7 +20187,7 @@ function module_code(library_namespace) {
 		Object.assign({
 			// [KEY_SESSION]
 			session : session
-		}));
+		}, options));
 	}
 
 	if (false) {
@@ -20281,7 +20297,7 @@ function module_code(library_namespace) {
 					language : 'ja',
 					references : {
 						// P143
-						'imported from Wikimedia project' : 'jawiki'
+						'imported from Wikimedia project' : 'jawikipedia'
 					}
 				} ]
 			};
@@ -21146,7 +21162,7 @@ function module_code(library_namespace) {
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					library_namespace.error(
-					// e.g., 數據庫被禁止寫入以進行維護，所以您目前將無法保存您所作的編輯
+					// e.g., "數據庫被禁止寫入以進行維護，所以您目前將無法保存您所作的編輯"
 					// Mediawiki is in read-only mode during maintenance
 					'wikidata_edit.do_wbeditentity: '
 					//
@@ -21178,11 +21194,18 @@ function module_code(library_namespace) {
 		// TODO: 創建實體項目重定向。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
 
+		// console.log(options);
+
 		// TODO: 避免 callback hell: using ES7 async/await?
 		// TODO: 用更簡單的方法統合這幾個函數。
+		library_namespace.debug('Run set_claims', 2, 'wikidata_edit');
 		set_claims(data, token, function() {
+			library_namespace.debug('Run set_labels', 2, 'wikidata_edit');
 			set_labels(data, token, function() {
+				library_namespace.debug('Run set_aliases', 2, 'wikidata_edit');
 				set_aliases(data, token, function() {
+					library_namespace.debug('Run set_descriptions', 2,
+							'wikidata_edit');
 					set_descriptions(data, token, do_wbeditentity, options,
 							session, entity);
 				}, options, session, entity);
