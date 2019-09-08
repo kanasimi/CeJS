@@ -303,11 +303,25 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// 設定recurse/force時才會recurse操作。
+			// 設定 recurse/force 時才會遞迴操作。
 			if (recurse) {
 				library_namespace.debug({
 					T : [ 'Recursively removing subdirectories of %1', path ]
 				}, 2, 'remove_fso');
+
+				// https://github.com/nodejs/node/pull/29168
+				// fs: add recursive option to fs.rmdir(), fs.rmdirSync(), and
+				// fs.promises.rmdir().
+				if (library_namespace.platform('node', '12.10')) {
+					// using native function
+					node_fs.rmdirSync(path, {
+						// emfileWait : 10 * 1000,
+						// maxBusyTries : 10,
+						recursive : true
+					});
+					return;
+				}
+
 				var error
 				// recurse, iterative method
 				= remove_fso_list(node_fs.readdirSync(path), recurse, path);
