@@ -303,9 +303,11 @@ function module_code(library_namespace) {
 			// @see
 			// http://m.88bag.net/template/wap1/css/d7s/js/show.20170501.js?20190722091626
 			if (chapter_data.length === 1
-					&& chapter_data[0].startsWith('+http://')) {
+					&& (chapter_data[0].startsWith('+http://') || chapter_data[0]
+							.startsWith('--http://'))) {
 				chapter_data = {
-					limited : true
+					limited : chapter_data[0].startsWith('+http://') ? '对不起,该章节已经下架!!本站仅提供检索服务,请尊重作品版权'
+							: '请点击下方链接开始观看本期漫画：' + chapter_data[0].slice(2)
 				};
 				return chapter_data;
 			}
