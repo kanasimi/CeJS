@@ -6397,8 +6397,6 @@ function module_code(library_namespace) {
 		return ('missing' in page_data) ? undefined : String(page_data || '');
 	}
 
-	get_page_content.revision_content = revision_content;
-
 	/**
 	 * check if page_data is page data.
 	 * 
@@ -6554,7 +6552,9 @@ function module_code(library_namespace) {
 			//
 			+ next.map(function(arg) {
 				// for function
-				return String(arg).slice(0, 80);
+				return (arg.toString ? String(arg)
+				//
+				: JSON.stringify(arg)).slice(0, 80);
 			}) + ']', 1, 'wiki_API.prototype.next');
 		}
 
@@ -9971,7 +9971,7 @@ function module_code(library_namespace) {
 		wiki_API.query(action, typeof callback === 'function'
 		//
 		&& function(data) {
-			// copy from wiki_API.redirects()
+			// copy from wiki_API.redirects_here()
 
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
@@ -10458,6 +10458,21 @@ function module_code(library_namespace) {
 		});
 
 		// 而應使用循環取得資料版:
+		// method 1: using wiki_API_list()
+		CeL.wiki.list(title, function(list/* , target, options */) {
+			// assert: Array.isArray(list)
+			if (list.error) {
+				;
+			} else {
+				CeL.log('Get ' + list.length + ' item(s).');
+			}
+		}, Object.assign({
+			// [KEY_SESSION]
+			session : wiki,
+			type : list_type
+		}, options));
+
+		// method 2:
 		CeL.wiki.cache({
 			type : 'categorymembers',
 			list : 'Category_name'
@@ -10476,6 +10491,12 @@ function module_code(library_namespace) {
 			cache : false
 		});
 	}
+
+	// allow async functions
+	// https://github.com/tc39/ecmascript-asyncawait/issues/78
+	var get_list_async_code = '(async function() {'
+			+ ' try { if (wiki_API_list.exit === await options.for_each(item)) options.abort_operation = true; }'
+			+ ' catch(e) { library_namespace.error(e); }' + ' })();';
 
 	/**
 	 * get list. 檢索/提取列表<br />
@@ -10643,6 +10664,7 @@ function module_code(library_namespace) {
 			action[1] = title_preprocessor(action[1], options);
 			library_namespace.debug('→ [' + action[1] + ']', 3, 'get_list');
 		}
+		// console.trace(action);
 
 		action[1] = 'query&' + parameter + '=' + type + action[1]
 		// 處理數目限制 limit。
@@ -10689,7 +10711,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// console.log(action);
+		// console.trace(action);
 		wiki_API.query(action,
 		// treat as {Function}callback or {Object}wiki_API.work config.
 		function(data, error) {
@@ -10805,22 +10827,16 @@ function module_code(library_namespace) {
 				}
 
 				// run for each item
-				pages.forEach(function(item) {
+				pages.some(function(item) {
 					try {
 						if (options.for_each.constructor.name
 						//
 						=== 'AsyncFunction') {
-							// allow async functions
-							// https://github.com/tc39/ecmascript-asyncawait/issues/78
-							eval('(async function() {'
-							//
-							+ ' try { await options.for_each(item); }'
-							//
-							+ ' catch(e) { library_namespace.error(e); }'
-							//
-							+ ' })();');
-						} else {
-							options.for_each(item);
+							eval(get_list_async_code);
+						} else if (wiki_API_list.exit === options
+								.for_each(item)) {
+							options.abort_operation = true;
+							return true;
 						}
 
 					} catch (e) {
@@ -10939,11 +10955,14 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/wiki/API:Embeddedin
 		embeddedin : 'ei',
 
-		// **暫時使用wiki_API.redirects()，因為尚未整合，在跑舊程式20150916.Multiple_issues.v2.js會有問題。
 		// 回傳連結至指定頁面的所有重新導向。 Returns all redirects to the given pages.
 		// 転送ページ
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bredirects
-		// redirects : 'rd',
+		// @since 2019/9/11
+		redirects : [ 'rd', 'prop', function(title_parameter) {
+			// console.trace(title_parameter);
+			return title_parameter.replace(/^&title=/, '&redirects&titles=');
+		} ],
 
 		// 取得所有使用 file 的頁面。
 		// title 必須包括File:前綴。
@@ -11003,8 +11022,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 取得完整 list 後才作業。<br />
-	 * 注意: 可能會改變 options！
+	 * 取得完整 list 後才作業。
 	 * 
 	 * @param {String}target
 	 *            page title 頁面標題。
@@ -11015,23 +11033,31 @@ function module_code(library_namespace) {
 	 */
 	function wiki_API_list(target, callback, options) {
 		// 前置處理。
-		if (!library_namespace.is_Object(options))
-			options = Object.create(null);
+		options = library_namespace.new_options(options);
 
 		if (!options.initialized) {
 			if (!options[KEY_SESSION]) {
 				options[KEY_SESSION] = new wiki_API;
 			}
 			if (!options.type) {
-				options.type = wiki_API.list.default_type;
+				options.type = wiki_API_list.default_type;
 			}
 			options.initialized = true;
 		}
 
+		if (!options.limit)
+			options.limit = 'max';
+
+		options.continue_session = options[KEY_SESSION];
+
 		// 注意: arguments 與 get_list() 之 callback 連動。
 		options[KEY_SESSION][options.type](target, function(pages, error) {
 			library_namespace.debug('Get ' + pages.length + ' ' + options.type
-					+ ' pages of ' + pages.title, 2, 'wiki_API.list');
+					+ ' pages of ' + pages.title, 2, 'wiki_API_list');
+			if (error) {
+				console.trace(error);
+				pages.error = error;
+			}
 			if (typeof options.callback === 'function') {
 				// options.callback() 為取得每一階段清單時所會被執行的函數。
 				// 注意: arguments 與 get_list() 之 callback 連動。
@@ -11056,17 +11082,18 @@ function module_code(library_namespace) {
 					pages.length = length;
 				}
 				options.pages = pages;
-			} else {
-				throw new Error('options.pages has been set up!');
+			} else if (!pages.error) {
+				pages.error = new Error('options.pages has been set up!');
 			}
 
-			if (pages.next_index) {
+			if (pages.next_index && !options.abort_operation) {
 				library_namespace.debug('尚未取得所有清單，因此繼續取得下一階段清單。', 2,
-						'wiki_API.list');
-				setImmediate(wiki_API.list, target, callback, options);
+						'wiki_API_list');
+				setImmediate(wiki_API_list, target, callback, options);
 			} else {
-				library_namespace.debug('run callback after all list got.', 2,
-						'wiki_API.list');
+				library_namespace.debug(
+						'run callback after all list got or abort operation.',
+						2, 'wiki_API_list');
 				// console.trace(options.for_each);
 				if (!options.for_each) {
 					callback(options.pages, target, options);
@@ -11079,13 +11106,14 @@ function module_code(library_namespace) {
 			}
 		},
 		// 引入 options，避免 get_list() 不能確實僅取指定 namespace。
-		Object.assign({
-			continue_session : options[KEY_SESSION],
-			limit : options.limit || 'max'
-		}, options));
+		options);
 	}
 
+	// `CeL.wiki.list`
 	wiki_API.list = wiki_API_list;
+
+	// `options.for_each` 設定直接跳出。 `CeL.wiki.list.exit`
+	wiki_API_list.exit = [ 'wiki_API_list.exit: abort the operation' ];
 
 	wiki_API_list.default_type = 'embeddedin';
 	// supported type list
@@ -12441,13 +12469,13 @@ function module_code(library_namespace) {
 	 * 
 	 * 工作機制:<br />
 	 * 1. 先溯源: 若 [[title]] redirect 到 [[base]]，則將 base(title重定向標的) 設定成 base；<br />
-	 * 否則將 base 設定成 title。<br />
+	 * 否則將 base(title重定向標的) 設定成 title。<br />
 	 * 2. 取得所有 redirect/重定向/重新導向 到 base 之 pages。<br />
 	 * 3. 若設定 options.include_root，則(title重定向標的)將會排在[0]。
 	 * 
-	 * 因此若 R2 → R1 → R，且 R' → R，則 wiki_API.redirects(R2) 會得到 [{R1},{R2}]，
-	 * wiki_API.redirects(R1) 與 wiki_API.redirects(R) 與 wiki_API.redirects(R')
-	 * 皆會得到 [{R},{R1},{R'}]
+	 * 因此若 R2 → R1 → R，且 R' → R，則 wiki_API.redirects_here(R2) 會得到 [{R1},{R2}]，
+	 * wiki_API.redirects_here(R1) 與 wiki_API.redirects_here(R) 與
+	 * wiki_API.redirects_here(R') 皆會得到 [ {R}, {R1}, {R'} ]
 	 * 
 	 * 可以 [[Special:Whatlinkshere]] 確認。
 	 * 
@@ -12464,8 +12492,11 @@ function module_code(library_namespace) {
 	 *            到 [[title]] 之 pages。
 	 * 
 	 * @see [[Special:DoubleRedirects]]
+	 * 
+	 * @since 2019/9/11: wiki_API.redirects → wiki_API.redirects_here,
+	 *        wiki_API.redirects 改給 get_list.type .redirects 使用。
 	 */
-	wiki_API.redirects = function(title, callback, options) {
+	wiki_API.redirects_here = function(title, callback, options) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
@@ -12486,7 +12517,7 @@ function module_code(library_namespace) {
 
 				// 已追尋至重定向終點，不再溯源。
 				options.no_trace = true;
-				wiki_API.redirects(
+				wiki_API.redirects_here(
 				// 已經轉換過，毋須 parse_redirect()。
 				// parse_redirect(get_page_content(page_data)) ||
 
@@ -12498,7 +12529,7 @@ function module_code(library_namespace) {
 
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
-			throw 'wiki_API.redirects: Invalid title: '
+			throw 'wiki_API.redirects_here: Invalid title: '
 					+ get_page_title_link(title);
 		}
 
@@ -12516,7 +12547,7 @@ function module_code(library_namespace) {
 			if (error) {
 				library_namespace.error(
 				//
-				'wiki_API.redirects: [' + error.code + '] ' + error.info);
+				'wiki_API.redirects_here: [' + error.code + '] ' + error.info);
 				/**
 				 * e.g., Too many values supplied for parameter 'pageids': the
 				 * limit is 50
@@ -12532,7 +12563,7 @@ function module_code(library_namespace) {
 			if (!data || !data.query || !data.query.pages) {
 				library_namespace.warn(
 				//
-				'wiki_API.redirects: Unknown response: ['
+				'wiki_API.redirects_here: Unknown response: ['
 				//
 				+ (typeof data === 'object' && typeof JSON !== 'undefined'
 				//
@@ -12555,7 +12586,7 @@ function module_code(library_namespace) {
 					// 此頁面不存在/已刪除。Page does not exist. Deleted?
 					library_namespace.warn(
 					//
-					'wiki_API.redirects: Not exists: '
+					'wiki_API.redirects_here: Not exists: '
 					//
 					+ (page.title ? get_page_title_link(page)
 					//
@@ -12580,7 +12611,7 @@ function module_code(library_namespace) {
 			//
 			get_page_title(pages) + ': 有 ' + redirect_list.length
 			//
-			+ ' 個同名頁面(重定向至此頁面)。', 2, 'wiki_API.redirects');
+			+ ' 個同名頁面(重定向至此頁面)。', 2, 'wiki_API.redirects_here');
 			if (options.include_root) {
 				// 避免修改或覆蓋 pages.redirects。
 				redirect_list = redirect_list.slice();
@@ -12596,7 +12627,7 @@ function module_code(library_namespace) {
 			//
 			+ redirect_list.length + ') [' + redirect_list.slice(0, 3)
 			// CeL.wiki.title_of(page_data)
-			.map(get_page_title) + ']...', 1, 'wiki_API.redirects');
+			.map(get_page_title) + ']...', 1, 'wiki_API.redirects_here');
 
 			// callback(root_page_data 本名, redirect_list 別名 alias list)
 			callback(pages, redirect_list);
@@ -12618,17 +12649,17 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {ℕ⁰:Natural+0}normalized count
 	 */
-	wiki_API.redirects.count = function(root_name_hash, embeddedin_list) {
+	wiki_API.redirects_here.count = function(root_name_hash, embeddedin_list) {
 		if (!Array.isArray(embeddedin_list)) {
 			library_namespace
-					.warn('wiki_API.redirects.count: Invalid embeddedin list.');
+					.warn('wiki_API.redirects_here.count: Invalid embeddedin list.');
 			return 0;
 		}
 		var name_hash = Object.create(null);
 		embeddedin_list.forEach(function(title) {
 			title = get_page_title(title);
 			library_namespace.debug('含有模板{{' + root_name_hash[title] + '}}←{{'
-					+ title + '}}', 3, 'wiki_API.redirects.count');
+					+ title + '}}', 3, 'wiki_API.redirects_here.count');
 			name_hash[root_name_hash[title] || title] = null;
 		});
 		return Object.keys(name_hash).length;
@@ -15854,12 +15885,12 @@ function module_code(library_namespace) {
 				};
 				break;
 
-			case 'redirects':
+			case 'redirects_here':
 				// 取得所有重定向到(title重定向標的)之頁面列表，(title重定向標的)將會排在[0]。
 				// 注意: 無法避免雙重重定向問題!
 				to_get_data = function(title, callback) {
-					// wiki_API.redirects(title, callback, options)
-					wiki_API.redirects(title, function(root_page_data,
+					// wiki_API.redirects_here(title, callback, options)
+					wiki_API.redirects_here(title, function(root_page_data,
 							redirect_list) {
 						if (!operation.keep_redirects && redirect_list
 								&& redirect_list[0])
@@ -15879,7 +15910,7 @@ function module_code(library_namespace) {
 					var options = Object.assign({
 						type : list_type
 					}, _this, operation);
-					wiki_API.list(title, function(pages) {
+					wiki_API_list(title, function(pages) {
 						if (!options.for_each || options.get_list) {
 							library_namespace.log(list_type
 							// allpages 不具有 title。
@@ -16507,7 +16538,7 @@ function module_code(library_namespace) {
 						var title = CeL.wiki.title_of(page_data),
 						/**
 						 * {String}page content, maybe undefined. 條目/頁面內容 =
-						 * CeL.wiki.content_of.revision_content(revision)
+						 * CeL.wiki.revision_content(revision)
 						 */
 						content = CeL.wiki.content_of(page_data);
 
@@ -16533,9 +16564,9 @@ function module_code(library_namespace) {
 								.edit_time(page_data);
 
 						// [[Wikipedia:快速删除方针]]
-						if (CeL.wiki.content_of.revision_content(revision)) {
+						if (CeL.wiki.revision_content(revision)) {
 							// max_length = Math.max(max_length,
-							// CeL.wiki.content_of.revision_content(revision).length);
+							// CeL.wiki.revision_content(revision).length);
 
 							// filter patterns
 
@@ -22156,6 +22187,7 @@ function module_code(library_namespace) {
 		title_of : get_page_title,
 		// CeL.wiki.title_link_of() 常用於 summary 或 log/debug message。
 		title_link_of : get_page_title_link,
+		revision_content : revision_content,
 		content_of : get_page_content,
 		// normalize_page_title
 		normalize_title : normalize_page_name,
