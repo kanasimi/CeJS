@@ -14484,11 +14484,11 @@ function module_code(library_namespace) {
 								}
 
 								// assert: (row.is_new || revisions.length > 1)
-								if (revisions && revisions.length >= 1
+								if (revisions && revisions.length >= 2
 										&& options.with_diff) {
 
 									// get_page_content(row, -1);
-									var from = revisions.length > 1 &&
+									var from = revisions.length >= 2 &&
 									//
 									revision_content(
 									// select the oldest revision.
@@ -14511,7 +14511,6 @@ function module_code(library_namespace) {
 											return token.toString();
 										});
 
-										page_parser(row);
 										to = page_parser(row).parse();
 										to = to.map(function(token) {
 											if (!token && (token !== ''
@@ -14524,7 +14523,7 @@ function module_code(library_namespace) {
 											return token.toString();
 										});
 
-										// verify
+										// verify parser
 
 										if (revision_content(revisions[0])
 										//
