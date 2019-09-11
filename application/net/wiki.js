@@ -14504,8 +14504,9 @@ function module_code(library_namespace) {
 											if (!token && (token !== ''
 											// 有時會出意外。
 											|| from.length !== 1)) {
+												console.log(revisions);
 												console.log(row);
-												throw row.title;
+												throw new Error(row.title);
 											}
 											return token.toString();
 										});
@@ -14516,8 +14517,9 @@ function module_code(library_namespace) {
 											if (!token && (token !== ''
 											//
 											|| to.length !== 1)) {
+												console.log(revisions);
 												console.log(row);
-												throw row.title;
+												throw new Error(row.title);
 											}
 											return token.toString();
 										});
