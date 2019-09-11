@@ -14284,11 +14284,24 @@ function module_code(library_namespace) {
 				// 去除之前已經處理過的頁面。
 				if (rows.length > 0) {
 					// 判別新舊順序。
-					if (rows.length > 1 && rows[0].revid > rows[1].revid) {
+					var has_new_to_old = rows.length > 1
+					// 2019/9/12: 可能有亂序。
+					&& rows.some(function(row, index) {
+						return index > 0 && rows[index - 1].revid > row.revid;
+					});
+					if (has_new_to_old) {
 						// e.g., use SQL
-						// 把從新的排列到舊的轉成從舊的排列到新的。
-						// .reverse(): 轉成 old to new.
-						rows.reverse();
+						library_namespace.debug('判別新舊順序: 有新到舊或亂序: Get '
+								+ rows.length + ' recent pages:\n'
+								+ rows.map(function(row) {
+									return row.revid;
+								}), 2, 'add_listener');
+						library_namespace.debug('把從新的排列到舊的或亂序轉成從舊的排列到新的。', 1,
+								'add_listener');
+						// 因可能有亂序，不能光以 .reverse() 轉成 old to new。
+						rows.sort(function(row_1, row_2) {
+							return row_1.revid - row_2.revid;
+						});
 					}
 
 					library_namespace.debug(
@@ -14383,7 +14396,14 @@ function module_code(library_namespace) {
 				// TODO: configuration_row 應該按照 rows 的順序，
 				// 並且假如特別 filter 到設定頁面的時候，那麼設定頁面還是應該要被 listener 檢查。
 				if (configuration_row && !rows.includes(configuration_row)) {
-					// 保證 configuration_page_title 的變更一定會被檢查到
+					if (library_namespace.is_debug()) {
+						library_namespace.debug(
+								'unshift configuration_row revid='
+										+ configuration_row.revid + ':', 1,
+								'add_listener');
+						console.log(configuration_row);
+					}
+					// 保證 configuration_page_title 的變更一定會被檢查到。
 					rows.unshift(configuration_row);
 				}
 
@@ -14407,9 +14427,8 @@ function module_code(library_namespace) {
 								return;
 							}
 
-							library_namespace.debug(
-							//
-							'Get page: ' + index + '/' + rows.length, 2,
+							library_namespace.debug('Get page: ' + index + '/'
+									+ rows.length + ' revid=' + row.revid, 2,
 									'add_listener.with_diff');
 
 							var page_options = {
@@ -14484,7 +14503,7 @@ function module_code(library_namespace) {
 								}
 
 								// assert: (row.is_new || revisions.length > 1)
-								if (revisions && revisions.length >= 2
+								if (revisions && revisions.length >= 1
 										&& options.with_diff) {
 
 									// get_page_content(row, -1);
@@ -14504,7 +14523,6 @@ function module_code(library_namespace) {
 											if (!token && (token !== ''
 											// 有時會出意外。
 											|| from.length !== 1)) {
-												console.log(revisions);
 												console.log(row);
 												throw new Error(row.title);
 											}
@@ -14516,7 +14534,6 @@ function module_code(library_namespace) {
 											if (!token && (token !== ''
 											//
 											|| to.length !== 1)) {
-												console.log(revisions);
 												console.log(row);
 												throw new Error(row.title);
 											}
