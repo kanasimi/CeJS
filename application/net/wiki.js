@@ -1434,6 +1434,8 @@ function module_code(library_namespace) {
 
 	should use:
 	parsetree of https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
+	or
+	https://www.mediawiki.org/w/api.php?action=help&modules=parse
 
 	class Wiki_page extends Array { }
 	http://www.2ality.com/2015/02/es6-classes-final.html
@@ -6291,6 +6293,24 @@ function module_code(library_namespace) {
 						: '') + ']]';
 	}
 
+	function revision_content(revision) {
+		if (!revision)
+			return '';
+
+		if (revision.slots) {
+			// 2019 API: page_data.revisions[0].slots.main['*']
+			// https://www.mediawiki.org/wiki/Manual:Slot
+			// https://www.mediawiki.org/wiki/API:Revisions
+			revision = revision.slots;
+			for ( var slot in revision) {
+				// e.g., slot === 'main'
+				revision = revision[slot];
+				break;
+			}
+		}
+		return revision['*'] || '';
+	}
+
 	/**
 	 * get the contents of page data. 取得頁面內容。
 	 * 
@@ -6356,16 +6376,16 @@ function module_code(library_namespace) {
 				// 一般說來caller自己應該知道自己設定了rvlimit>1，因此此處不警告。
 				// 警告：但多版本的情況需要自行偵測是否回傳{Array}！
 				return content.map(function(revision) {
-					return revision['*'];
+					return revision_content(revision);
 				});
 			}
-			// treat flow_view as revision_NO
+			// treat flow_view as revision_index
 			if (flow_view < 0) {
 				// e.g., -1: select the oldest revision.
 				flow_view += content.length;
 			}
 			content = content[flow_view | 0];
-			return content && content['*'] || '';
+			return revision_content(content);
 		}
 
 		// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
@@ -6376,6 +6396,8 @@ function module_code(library_namespace) {
 		// TODO: 提供此頁面的刪除和移動日誌以便參考。
 		return ('missing' in page_data) ? undefined : String(page_data || '');
 	}
+
+	get_page_content.revision_content = revision_content;
 
 	/**
 	 * check if page_data is page data.
@@ -6404,23 +6426,25 @@ function module_code(library_namespace) {
 	};
 
 	// return {Object}main revision (.revisions[0])
-	get_page_content.revision = function(page_data, revision_NO) {
+	get_page_content.revision = function(page_data, revision_index) {
 		return library_namespace.is_Object(page_data)
-		// treat as page data. Try to get page contents: page.revisions[0]['*']
+		// treat as page data. Try to get page contents:
+		// revision_content(page.revisions[0])
 		// 一般說來應該是由新排到舊，[0] 為最新的版本 last revision。
-		&& page_data.revisions && page_data.revisions[revision_NO || 0];
+		&& page_data.revisions && page_data.revisions[revision_index || 0];
 	};
 
 	// CeL.wiki.content_of.edit_time(page_data) -
 	// new Date(page_data.revisions[0].timestamp) === 0
-	// TODO: page_data.edit_time(revision_NO, return_value)
+	// TODO: page_data.edit_time(revision_index, return_value)
 	// return {Date}最後編輯時間/最近的變更日期。
 	// 更正確地說，revision[0]（通常是最後一個 revision）的 timestamp。
-	get_page_content.edit_time = function(page_data, revision_NO, return_value) {
+	get_page_content.edit_time = function(page_data, revision_index,
+			return_value) {
 		var timestamp = library_namespace.is_Object(page_data)
 				&& page_data.revisions;
 		if (timestamp
-				&& (timestamp = timestamp[revision_NO || 0] || timestamp[0])
+				&& (timestamp = timestamp[revision_index || 0] || timestamp[0])
 				&& (timestamp = timestamp.timestamp)) {
 			return return_value ? Date.parse(timestamp) : new Date(timestamp);
 		}
@@ -6437,7 +6461,7 @@ function module_code(library_namespace) {
 	 */
 	get_page_content.has_content = function(page_data) {
 		var revision = get_page_content.revision(page_data);
-		return revision && !!revision['*'];
+		return !!revision_content(revision);
 	};
 
 	// ------------------------------------------------------------------------
@@ -7233,7 +7257,7 @@ function module_code(library_namespace) {
 					if (!this.last_page) {
 						next[1].call(this, undefined, {
 							code : 'no_id',
-							message : 'Did not set id! 未設定欲取得之特定實體id。'
+							message : 'Did not set id! 未設定欲取得之特定實體 id。'
 						});
 						this.next();
 						break;
@@ -7353,7 +7377,7 @@ function module_code(library_namespace) {
 					} else {
 						next[3] && next[3].call(this, undefined, {
 							code : 'no_id',
-							message : 'Did not set id! 未設定欲取得之特定實體id。'
+							message : 'Did not set id! 未設定欲取得之特定實體 id。'
 						});
 						this.next();
 						break;
@@ -7558,8 +7582,10 @@ function module_code(library_namespace) {
 
 		case 'run':
 			// next[1] : callback
-			if (typeof next[1] === 'function')
-				next[1].call(this, next[2]);
+			if (typeof next[1] === 'function') {
+				// pass arguments
+				next[1].apply(this, next.slice(2));
+			}
 			this.next();
 			break;
 
@@ -9119,7 +9145,7 @@ function module_code(library_namespace) {
 		if (Array.isArray(page_data)) {
 			// auto detect multi
 			if (multi === undefined) {
-				multi = pageid.length > 1;
+				multi = pageid && pageid.length > 1;
 			}
 
 			pageid = [];
@@ -9398,6 +9424,10 @@ function module_code(library_namespace) {
 			get_content = true;
 		}
 
+		// 2019 API:
+		// https://www.mediawiki.org/wiki/Manual:Slot
+		// https://www.mediawiki.org/wiki/API:Revisions
+		action[1] = 'rvslots=' + (options.rvslots || 'main') + '&' + action[1];
 		if (get_content) {
 			// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query
@@ -9418,9 +9448,7 @@ function module_code(library_namespace) {
 			//
 			|| wiki_API.page.rvprop;
 
-			action[1] = 'rvprop='
-			//
-			+ get_content + '&' + action[1];
+			action[1] = 'rvprop=' + get_content + '&' + action[1];
 
 			get_content = get_content.includes('content');
 		}
@@ -9790,7 +9818,9 @@ function module_code(library_namespace) {
 						callback(page_list);
 						return;
 					}
-					wiki_API_expandtemplates(revision['*'] || '', function() {
+					wiki_API_expandtemplates(
+					//
+					revision_content(revision), function() {
 						callback(page_list);
 					}, Object.assign({
 						page : page_list,
@@ -9806,9 +9836,9 @@ function module_code(library_namespace) {
 				// TODO: test
 				page_list.run_serial(function(run_next, page_data, index) {
 					var revision = get_page_content.revision(page_data);
-					wiki_API_expandtemplates(revision['*'], run_next,
+					wiki_API_expandtemplates(
 					//
-					Object.assign({
+					revision_content(revision), run_next, Object.assign({
 						page : page_data,
 						title : page_data.title,
 						revid : revision && revision.revid,
@@ -10441,7 +10471,9 @@ function module_code(library_namespace) {
 			session : wiki,
 			// title_prefix : 'Template:',
 			// cache path prefix
-			prefix : base_directory
+			prefix : base_directory,
+			// Do not write cache file to disk.
+			cache : false
 		});
 	}
 
@@ -10657,6 +10689,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// console.log(action);
 		wiki_API.query(action,
 		// treat as {Function}callback or {Object}wiki_API.work config.
 		function(data, error) {
@@ -10726,7 +10759,7 @@ function module_code(library_namespace) {
 				}
 
 			} else if (library_namespace.is_Object(data)
-			// ↑ 在503的時候data可能是字串。
+			// ↑ 在 503 的時候 data 可能是字串。
 			&& ('batchcomplete' in data) && continue_session) {
 				// ↑ check "batchcomplete"
 				var keyword_continue = get_list.type[type];
@@ -10766,6 +10799,36 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			function run_for_each() {
+				if (typeof options.for_each !== 'function') {
+					return;
+				}
+
+				// run for each item
+				pages.forEach(function(item) {
+					try {
+						if (options.for_each.constructor.name
+						//
+						=== 'AsyncFunction') {
+							// allow async functions
+							// https://github.com/tc39/ecmascript-asyncawait/issues/78
+							eval('(async function() {'
+							//
+							+ ' try { await options.for_each(item); }'
+							//
+							+ ' catch(e) { library_namespace.error(e); }'
+							//
+							+ ' })();');
+						} else {
+							options.for_each(item);
+						}
+
+					} catch (e) {
+						library_namespace.error(e);
+					}
+				});
+			}
+
 			if (data.query[type]) {
 				// 一般情況。
 				if (Array.isArray(data = data.query[type])) {
@@ -10774,6 +10837,9 @@ function module_code(library_namespace) {
 
 				library_namespace.debug(get_page_title_link(title) + ': '
 						+ pages.length + ' page(s)', 2, 'get_list');
+
+				run_for_each();
+
 				// 注意: arguments 與 get_list() 之 callback 連動。
 				// 2016/6/22 change API 應用程式介面變更 of callback():
 				// (title, titles, pages) → (pages, titles, title)
@@ -10790,6 +10856,7 @@ function module_code(library_namespace) {
 			for ( var pageid in data) {
 				if (pages.length > 0) {
 					library_namespace.warn('get_list: More than 1 page got!');
+					run_for_each();
 					callback(pages, new Error('More than 1 page got!'));
 				} else {
 					var page = data[pageid];
@@ -10800,6 +10867,7 @@ function module_code(library_namespace) {
 					library_namespace.debug('[' + page.title + ']: '
 							+ pages.length + ' page(s)', 1, 'get_list');
 					pages.title = page.title;
+					run_for_each();
 					// 注意: arguments 與 get_list() 之 callback 連動。
 					callback(pages);
 				}
@@ -10969,20 +11037,45 @@ function module_code(library_namespace) {
 				// 注意: arguments 與 get_list() 之 callback 連動。
 				options.callback(pages, target, options);
 			}
-			if (options.pages) {
-				// Array.prototype.push.apply(options.pages, pages);
-				options.pages.append(pages);
-			} else {
+			// 設定了 options.for_each 時，callback() 不會傳入 list！
+			// 用意在省記憶體。options.for_each() 執行過就不用再記錄了。
+			if (Array.isArray(options.pages)) {
+				if (!options.for_each || options.get_list) {
+					// Array.prototype.push.apply(options.pages, pages);
+					options.pages.append(pages);
+				} else {
+					// Only preserve length property.
+					options.pages.length += pages.length;
+				}
+			} else if (!options.pages) {
+				if (!options.for_each || options.get_list) {
+				} else {
+					// Only preserve length property.
+					var length = pages.length;
+					pages.truncate();
+					pages.length = length;
+				}
 				options.pages = pages;
+			} else {
+				throw new Error('options.pages has been set up!');
 			}
+
 			if (pages.next_index) {
 				library_namespace.debug('尚未取得所有清單，因此繼續取得下一階段清單。', 2,
 						'wiki_API.list');
-				setImmediate(wiki_API.list, [ target, callback, options ]);
+				setImmediate(wiki_API.list, target, callback, options);
 			} else {
 				library_namespace.debug('run callback after all list got.', 2,
 						'wiki_API.list');
-				callback(options.pages, target, options);
+				// console.trace(options.for_each);
+				if (!options.for_each) {
+					callback(options.pages, target, options);
+				} else {
+					// `options.for_each` 可能還在執行中，例如正在取得頁面內容；
+					// 等到 `options.for_each` 完成之後才執行 callback。
+					options[KEY_SESSION].run(callback, options.pages, target,
+							options);
+				}
 			}
 		},
 		// 引入 options，避免 get_list() 不能確實僅取指定 namespace。
@@ -14360,10 +14453,12 @@ function module_code(library_namespace) {
 
 									// get_page_content(row, -1);
 									var from = revisions.length > 1 &&
+									//
+									revision_content(
 									// select the oldest revision.
-									revisions[revisions.length - 1]['*'] || '',
+									revisions[revisions.length - 1]), to
 									// 解析頁面結構。
-									to = revisions[0]['*'] || '';
+									= revision_content(revisions[0]);
 
 									if (!options.with_diff.line) {
 										from = page_parser(from).parse();
@@ -14393,11 +14488,16 @@ function module_code(library_namespace) {
 
 										// verify
 
-										if ((revisions[0]['*'] || '') !== to
-												.join('')) {
-											console.log(revisions[0]['*']);
+										if (revision_content(revisions[0])
+										//
+										!== to.join('')) {
+											console.log(
+											//
+											revision_content(revisions[0]));
 											console.log(to);
-											to = revisions[0]['*'];
+											to
+											//
+											= revision_content(revisions[0]);
 											console.log(library_namespace.LCS(
 											//
 											to, parse_wikitext(to).toString(),
@@ -14410,14 +14510,18 @@ function module_code(library_namespace) {
 
 										if (revisions.length > 1 &&
 										//
-										(revisions[revisions.length - 1]
+										revision_content
 										//
-										['*'] || '') !== from.join('')) {
+										(revisions[revisions.length - 1])
+										//
+										!== from.join('')) {
 											console.log(library_namespace.LCS(
 											//
-											revisions[revisions.length - 1]
+											revision_content
 											//
-											['*'], from.join(''), 'diff'));
+											(revisions[revisions.length - 1]),
+											//
+											from.join(''), 'diff'));
 											throw 'Parser error (from): ' +
 											// debug 用. check parser, test
 											// if parser working properly.
@@ -15772,18 +15876,21 @@ function module_code(library_namespace) {
 
 			case 'list':
 				to_get_data = function(title, callback) {
+					var options = Object.assign({
+						type : list_type
+					}, _this, operation);
 					wiki_API.list(title, function(pages) {
-						library_namespace.log(list_type
-						// allpages 不具有 title。
-						+ (title ? ' ' + get_page_title_link(title) : '')
-						//
-						+ ': ' + pages.length + ' page(s).');
+						if (!options.for_each || options.get_list) {
+							library_namespace.log(list_type
+							// allpages 不具有 title。
+							+ (title ? ' ' + get_page_title_link(title) : '')
+							//
+							+ ': ' + pages.length + ' page(s).');
+						}
 						pages.query_title = title;
 						// page list, title page_data
 						callback(pages);
-					}, Object.assign({
-						type : list_type
-					}, _this, operation));
+					}, options);
 				};
 				break;
 
@@ -16400,7 +16507,7 @@ function module_code(library_namespace) {
 						var title = CeL.wiki.title_of(page_data),
 						/**
 						 * {String}page content, maybe undefined. 條目/頁面內容 =
-						 * revision['*']
+						 * CeL.wiki.content_of.revision_content(revision)
 						 */
 						content = CeL.wiki.content_of(page_data);
 
@@ -16426,9 +16533,9 @@ function module_code(library_namespace) {
 								.edit_time(page_data);
 
 						// [[Wikipedia:快速删除方针]]
-						if (revision['*']) {
+						if (CeL.wiki.content_of.revision_content(revision)) {
 							// max_length = Math.max(max_length,
-							// revision['*'].length);
+							// CeL.wiki.content_of.revision_content(revision).length);
 
 							// filter patterns
 
@@ -18197,7 +18304,7 @@ function module_code(library_namespace) {
 	</code>
 	 * 
 	 * @param {String|Array}key
-	 *            entity id. 欲取得之特定實體id。 e.g., 'Q1', 'P6'
+	 *            entity id. 欲取得之特定實體 id。 e.g., 'Q1', 'P6'
 	 * @param {String}[property]
 	 *            取得特定屬性值。
 	 * @param {Function}[callback]
@@ -18347,7 +18454,7 @@ function module_code(library_namespace) {
 		// ----------------------------
 
 		if (!key || library_namespace.is_empty_object(key)) {
-			library_namespace.error('wikidata_entity: 未設定欲取得之特定實體id。');
+			library_namespace.error('wikidata_entity: 未設定欲取得之特定實體 id。');
 			callback(undefined, 'no_key');
 			return;
 		}
@@ -18414,7 +18521,7 @@ function module_code(library_namespace) {
 					 * required was missing. (Either provide the item "ids" or
 					 * pairs of "sites" and "titles" for corresponding pages)
 					 */
-					'wikidata_entity: 未設定欲取得之特定實體id。請確定您的要求，尤其是 sites 存在: '
+					'wikidata_entity: 未設定欲取得之特定實體 id。請確定您的要求，尤其是 sites 存在: '
 							+ decodeURI(action[0]));
 				} else {
 					library_namespace.error('wikidata_entity: '
@@ -21021,7 +21128,7 @@ function module_code(library_namespace) {
 		if (!id && !options['new']) {
 			callback(undefined, {
 				code : 'no_id',
-				message : 'Did not set id! 未設定欲取得之特定實體id。'
+				message : 'Did not set id! 未設定欲取得之特定實體 id。'
 			});
 			return;
 		}
