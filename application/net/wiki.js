@@ -8455,11 +8455,13 @@ function module_code(library_namespace) {
 		page_options = Object.assign({
 			is_id : config.is_id,
 			multi : true
-		}, config.page_options),
+		},
 		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
+		config.page_options), slice_size = (config.slice | 0) >= 1 ? Math.min(
+				config.slice | 0, 500)
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		// titles/pageids: Maximum number of values is 50 (500 for bots).
-		slice_size = config.slice >= 1 ? Math.min(config.slice | 0, 500) : 500,
+		: PATTERN_BOT_NAME.test(this.token && this.token.lgname) ? 500 : 50,
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */
 		work_continue = 0, this_slice_size, setup_target;
 
@@ -10822,7 +10824,8 @@ function module_code(library_namespace) {
 			}
 
 			function run_for_each() {
-				if (typeof options.for_each !== 'function') {
+				if (options.abort_operation
+						|| typeof options.for_each !== 'function') {
 					return;
 				}
 
@@ -10833,6 +10836,8 @@ function module_code(library_namespace) {
 						//
 						=== 'AsyncFunction') {
 							eval(get_list_async_code);
+							// console.log(options);
+							return options.abort_operation;
 						} else if (wiki_API_list.exit === options
 								.for_each(item)) {
 							options.abort_operation = true;
