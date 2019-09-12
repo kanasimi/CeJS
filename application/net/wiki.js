@@ -1543,7 +1543,7 @@ function module_code(library_namespace) {
 
 		var spaces = template_token[index].toString().match(/(\n)\s*$|( ?)$/);
 		spaces = [ matched[1], matched[2][2] + matched[3],
-				spaces[1] || spaces[2] ];
+				(spaces[1] || spaces[2]) + '|' ];
 
 		if (library_namespace.is_Object(replace_to)) {
 			replace_to = Object.keys(replace_to).map(function(key) {
@@ -1554,6 +1554,8 @@ function module_code(library_namespace) {
 			replace_to = replace_to.join(spaces[2]);
 		}
 
+		library_namespace.log(parameter + ': "' + template_token[index] + '"→"'
+				+ replace_to + '"');
 		template_token[index] = replace_to;
 		return true;
 	}
@@ -7934,7 +7936,7 @@ function module_code(library_namespace) {
 		// 是為 Robot 運作。
 		? PATTERN_BOT_NAME.test(callback) ? callback
 		// Robot: 若用戶名包含 'bot'，則直接引用之。
-		: (this.token.lgname.length < 9
+		: (this.token.lgname && this.token.lgname.length < 9
 				&& PATTERN_BOT_NAME.test(this.token.lgname)
 		//
 		? this.token.lgname : 'Robot')
@@ -8409,8 +8411,8 @@ function module_code(library_namespace) {
 
 				var log_to = 'log_to' in config ? config.log_to
 				// default log_to
-				: 'User:' + this.token.lgname + '/log/'
-						+ (new Date).format('%4Y%2m%2d'),
+				: this.token.lgname ? 'User:' + this.token.lgname + '/log/'
+						+ (new Date).format('%4Y%2m%2d') : null,
 				// options for summary.
 				options = {
 					// new section. append 章節/段落 after all, at bottom.
@@ -8421,11 +8423,13 @@ function module_code(library_namespace) {
 									|| this.date_format) + ']' + count_summary,
 					// Robot: 若用戶名包含 'bot'，則直接引用之。
 					// 注意: this.token.lgname 可能為 undefined！
-					summary : (PATTERN_BOT_NAME.test(this.token.lgname)
+					summary : (this.token.lgname
+							&& PATTERN_BOT_NAME.test(this.token.lgname)
 					//
-					? this.token.lgname : 'Robot') + ': '
-					//
-					+ config.summary + count_summary,
+					? this.token.lgname : 'Robot')
+							+ ': '
+							//
+							+ config.summary + count_summary,
 					// Throw an error if the page doesn't exist.
 					// 若頁面不存在/已刪除，則產生錯誤。
 					nocreate : 1,
