@@ -1552,6 +1552,13 @@ function module_code(library_namespace) {
 		}
 		if (Array.isArray(replace_to)) {
 			replace_to = replace_to.join(spaces[2]);
+		} else {
+			replace_to = replace_to.toString();
+		}
+
+		if (spaces[2].includes('\n') && !/\n\s*$/.test(replace_to)) {
+			// Add new-lint at tail
+			replace_to += spaces[2];
 		}
 
 		library_namespace.debug(parameter + ': "' + template_token[index]
@@ -16652,7 +16659,7 @@ function module_code(library_namespace) {
 									+ '! 沒有頁面內容！');
 						}
 
-						/** 頁面解析後的結構。 */
+						/** {Array}頁面解析後的結構。 */
 						var parsed = CeL.wiki.parser(page_data).parse();
 						// debug 用.
 						// check parser, test if parser working properly.
