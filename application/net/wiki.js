@@ -1554,8 +1554,8 @@ function module_code(library_namespace) {
 			replace_to = replace_to.join(spaces[2]);
 		}
 
-		library_namespace.log(parameter + ': "' + template_token[index] + '"→"'
-				+ replace_to + '"');
+		library_namespace.debug(parameter + ': "' + template_token[index]
+				+ '"→"' + replace_to + '"', 2, 'replace_parameter');
 		template_token[index] = replace_to;
 		return true;
 	}
