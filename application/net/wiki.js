@@ -14556,13 +14556,13 @@ function module_code(library_namespace) {
 										&& options.with_diff) {
 
 									// get_page_content(row, -1);
-									var from = revisions.length >= 2 &&
-									//
-									revision_content(
-									// select the oldest revision.
-									revisions[revisions.length - 1]), to
+									var from = revisions.length >= 2
+											&& revision_content(
+											// select the oldest revision.
+											revisions[revisions.length - 1])
+											|| '',
 									// 解析頁面結構。
-									= revision_content(revisions[0]);
+									to = revision_content(revisions[0]);
 
 									if (!options.with_diff.line) {
 										from = page_parser(from).parse();
