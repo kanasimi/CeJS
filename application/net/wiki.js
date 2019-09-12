@@ -1512,6 +1512,55 @@ function module_code(library_namespace) {
 	// CeL.wiki.parser.footer_order()
 	page_parser.footer_order = footer_order;
 
+	/**
+	 * 將 parse_wikitext() 獲得之 template_token 中的特定 parameter 換成 replace_to。
+	 * 
+	 * 若不改變 parameter name，只變更 value，則 replace_to 應該使用 'parameter name = value'
+	 * 而非僅 'value'。
+	 * 
+	 * @param {Array}template_token
+	 *            由 parse_wikitext() 獲得之 template_token
+	 * @param {String}parameter
+	 *            parameter name
+	 * @param {String|Array|Object}replace_to
+	 *            要換成的值。
+	 * 
+	 * @returns {Boolean} has successfully replaced
+	 */
+	function replace_parameter(template_token, parameter, replace_to) {
+		var index = template_token.index_of.com_code;
+		if (!(index >= 0))
+			return false;
+
+		var attribute_text = template_token[index];
+		if (Array.isArray(attribute_text)) {
+			attribute_text = attribute_text[0];
+		}
+
+		var matched = String(attribute_text).match(/^(\s*)([^=]+)(=\s*)/);
+		matched[2] = matched[2].match(/^(.*?[^\s])(\s*)$/);
+		// assert: matched[2] !== null, matched[2][1] === parameter
+
+		var spaces = template_token[index].toString().match(/(\n)\s*$|( ?)$/);
+		spaces = [ matched[1], matched[2][2] + matched[3],
+				spaces[1] || spaces[2] ];
+
+		if (library_namespace.is_Object(replace_to)) {
+			replace_to = Object.keys(replace_to).map(function(key) {
+				return spaces[0] + key + spaces[1] + replace_to[key];
+			});
+		}
+		if (Array.isArray(replace_to)) {
+			replace_to = replace_to.join(spaces[2]);
+		}
+
+		template_token[index] = replace_to;
+		return true;
+	}
+
+	// CeL.wiki.parser.replace_parameter()
+	page_parser.replace_parameter = replace_parameter;
+
 	// ------------------------------------------
 
 	if (false) {
