@@ -98,11 +98,11 @@ return {module_function_1,module_class_1};
  * 用在比較或是 return undefined<br />
  * 在舊的 browser 中，undefined 可能不存在。
  */
-function (global) {
+function (globalThis) {
 
 	if (false)
-		if (typeof global !== 'object' && typeof global !== 'function')
-			throw new Error('No global object specified!');
+		if (typeof globalThis !== 'object' && typeof globalThis !== 'function')
+			throw new Error('No globalThis object specified!');
 
 	var
 		// https://developers.google.com/closure/compiler/docs/js-for-compiler
@@ -114,7 +114,7 @@ function (global) {
 		 * @type {String}
 		 * @ignore
 		 */
-		library_version = '3.1.0',
+		library_version = '3.2.0',
 
 
 		/**
@@ -166,26 +166,8 @@ function (global) {
 	}
 
 
-	/**
-	 * Global Scope object 整體<br />
-	 * 於 CeL.eval_code 使用.<br />
-	 * 
-	 * TODO:<br />
-	 * Function constructor evaluates in a scope of that function, not in a
-	 * global scope.<br />
-	 * http://perfectionkills.com/global-eval-what-are-the-options/
-	 * 
-	 * @ignore
-	 * @see <a
-	 *      href="http://stackoverflow.com/questions/3277182/how-to-get-the-global-object-in-javascript"
-	 *      accessdate="2011/8/6 10:7">How to get the Global Object in
-	 *      JavaScript? - Stack Overflow</a>
-	 */
-	// var global = Function('return this')(); // isWeb()?window:this;
-	// (function(){return this;})()
-
 	try {
-		old_namespace = global[library_name];
+		old_namespace = globalThis[library_name];
 	} catch (e) {
 		// throw { message: '' };
 		throw new Error(library_name + ': Cannot get the global scope object!');
@@ -201,7 +183,7 @@ function (global) {
 
 	// 若已經定義過，跳過。因為已有對 conflict 的對策，因此跳過。
 	if (false)
-		if (global[library_name] !== undefined)
+		if (globalThis[library_name] !== undefined)
 			return;
 
 
@@ -226,8 +208,8 @@ function (global) {
 		 * function CeL: library root<br />
 		 * declaration for debug
 		 */
-		// this.global = arguments[0] || arguments.callee.ce_doc;
-		// return new (this.init.apply(global, arguments));
+		// this.globalThis = arguments[0] || arguments.callee.ce_doc;
+		// return new (this.init.apply(globalThis, arguments));
 	};
 
 	// if (typeof _.prototype !== 'object')
@@ -255,9 +237,9 @@ function (global) {
 	.
 	recover_namespace = function () {
 		if (old_namespace === undefined)
-			delete global[library_name];
+			delete globalThis[library_name];
 		else
-			global[library_name] = old_namespace;
+			globalThis[library_name] = old_namespace;
 		return _;
 	};
 
@@ -278,7 +260,7 @@ function (global) {
 
 
 	var is_WWW = typeof window === 'object'
-		&& global === window
+		&& globalThis === window
 		// 由條件嚴苛的開始。
 		&& typeof navigator === 'object'
 			// Internet Explorer 6.0 (6.00.2900.2180),
@@ -293,7 +275,7 @@ function (global) {
 		&& typeof document === 'object'
 			&& document === window.document
 		// 下兩個在 IE5.5 中都是 Object
-		// && _.is_type(window, 'global')
+		// && _.is_type(window, 'globalThis')
 		// && _.is_type(document, 'HTMLDocument')
 
 		// && navigator.userAgent
@@ -343,17 +325,17 @@ function (global) {
 	 *      http://stackoverflow.com/questions/3277182/how-to-get-the-global-object-in-javascript
 	 *      http://perfectionkills.com/global-eval-what-are-the-options/
 	 */
-	eval_code = global.execScript ?
+	eval_code = globalThis.execScript ?
 	function (code) {
 		// 解決 CeL.run() 在可以直接取得 code 的情況下，於舊版 JScript 可能會以 eval() 來 include，
-		// 這將造成 var 的值不會被設定到 global。
+		// 這將造成 var 的值不會被設定到 global scope。
 
 		// use window.execScript(code, "JavaScript") in JScript:
 		// window.execScript() 將直接使用全局上下文環境，
 		// 因此，execScript(Str)中的字符串Str可以影響全局變量。——也包括聲明全局變量、函數以及對象構造器。
 
 		// window.execScript doesn’t return a value.
-		return global.execScript(code, "JavaScript");
+		return globalThis.execScript(code, "JavaScript");
 	}
 	:
 	function eval_code(code) {
@@ -363,14 +345,14 @@ function (global) {
 		 * is the scope object for new symbols.
 		 */
 		if(false) {
-			this.debug(global.eval, 2);
-			this.debug(global.eval && global.eval !== arguments.callee);
+			this.debug(globalThis.eval, 2);
+			this.debug(globalThis.eval && globalThis.eval !== arguments.callee);
 		}
-		// NO global.eval.call(global, code) :
+		// NO globalThis.eval.call(global, code) :
 		// http://perfectionkills.com/global-eval-what-are-the-options/
 
 		// TODO: 似乎不總是有用。見 era.htm。
-		return global.eval && global.eval !== eval_code ? global.eval(code)
+		return globalThis.eval && globalThis.eval !== eval_code ? globalThis.eval(code)
 			// 這種表示法 Eclipse Kepler (4.3.2) SR2 之 JsDoc 尚無法處理。
 			: (0, eval)(code);
 	};
@@ -563,7 +545,7 @@ function (global) {
 	 *            註冊: 當以 .set_value() 改變時，順便執行此函數:<br />
 	 *            modify_function(value, variable_name).
 	 * @param {Object|Function}[name_space]
-	 *            initialize name-space. default: global.
+	 *            initialize name-space. default: globalThis.
 	 * @param [value]
 	 *            設定 variable 為 value.
 	 * 
@@ -601,12 +583,12 @@ function (global) {
 		// or detect obj1 .. obj2
 		l = variable_name_array.length,
 		v = name_space ||
-			// this.env.global
-			global,
+			// `CeL.env.global`, NOT `CeL.env.globalThis`
+			globalThis,
 		// do set value
 		do_set = arguments.length > 3;
 		if (false)
-			this.debug('global.' + this.Class + ' = ' + this.env.global[this.Class]);
+			this.debug('globalThis.' + this.Class + ' = ' + this.env.global[this.Class]);
 
 		if (do_set)
 			l--;
@@ -659,7 +641,7 @@ function (global) {
 	 * @param [value]
 	 *            設定 variable 為 value.
 	 * @param {Object|Function}[name_space]
-	 *            initialize name-space. default: global.
+	 *            initialize name-space. default: globalThis.
 	 * 
 	 * @returns name-space of specified variable identifier name.<br />
 	 *          e.g., return a.b.c when call .set_value('a.b.c.d').
@@ -692,8 +674,8 @@ function (global) {
 
 
 	if (false)
-		if (!global.is_digits)
-			global.is_digits = _.is_digits;
+		if (!globalThis.is_digits)
+			globalThis.is_digits = _.is_digits;
 
 
 	/**
@@ -1154,7 +1136,7 @@ function (global) {
 		} else if (false /* 20160609 deprecated */) {
 			// 以 require('/path/to/node.loader.js') 之方法 include library 時，
 			// ((__filename)) 會得到 loader 之 path，
-			// 且不能從 global.__filename 獲得 script path，只好另尋出路。
+			// 且不能從 globalThis.__filename 獲得 script path，只好另尋出路。
 
 			// isTTY: 為 nodejs: interactive 互動形式。
 			// 但 isTTY 在 command line 執行程式時也會為 true！
@@ -1367,13 +1349,13 @@ function (global) {
 		env.organization = 'Colorless echo';
 
 		/**
-		 * default global object. 有可能為 undefined!
+		 * default globalThis object. 有可能為 undefined!
 		 * 
-		 * @name CeL.env.global
+		 * @name CeL.env.globalThis
 		 * @type {Object}
 		 */
-		env.global = global;
-		// from now, global 已被覆蓋。
+		env.global = globalThis;
+		// from now on, `CeL.env.global` 已被覆蓋。
 
 		/**
 		 * 在 registry 中存放 library 資料的 base path
@@ -1899,7 +1881,7 @@ OS='UNIX'; // unknown
 		};
 		// TODO
 		if (typeof RegExp !== 'object')
-			global.RegExp = function () { };
+			globalThis.RegExp = function () { };
 	}
 
 	/**
@@ -2031,7 +2013,7 @@ OS='UNIX'; // unknown
 
 		if (!(value in constant_function)
 			// true/false/Number/null/undefined/global variables only!
-			// && ((value in global) || !isNaN(value))
+			// && ((value in globalThis) || !isNaN(value))
 			) {
 			constant_function[value] = new Function('return(' + value + ')');
 		}
@@ -2442,7 +2424,7 @@ OS='UNIX'; // unknown
 			 */
 			var _s = _.log;
 			// _s.function_to_call.apply(null,arguments);
-			// _s.function_to_call.apply(global, arguments);
+			// _s.function_to_call.apply(globalThis, arguments);
 
 			_s.buffer.push(message);
 
@@ -2451,7 +2433,7 @@ OS='UNIX'; // unknown
 
 			// 沒加 'debug &&' 在 IE 中會跳出大量 alert.
 			if (debug && _s.buffer.length > _s.max_length) {
-				_s.function_to_call.call(global, _s.buffer.join('\n\n'));
+				_s.function_to_call.call(globalThis, _s.buffer.join('\n\n'));
 				// reset buffer
 				_s.buffer = [];
 			}
@@ -3026,17 +3008,17 @@ OS='UNIX'; // unknown
 
 	if (false) {
 		if (has_console) {
-			console.log('global: ' + typeof global);
-			console.log(library_name + ': ' + typeof global[library_name]);
+			console.log('globalThis: ' + typeof globalThis);
+			console.log(library_name + ': ' + typeof globalThis[library_name]);
 		}
 	}
 
 	/**
-	 * 能執行到最後都沒出錯才設定到 global。
+	 * 能執行到最後都沒出錯才設定到 globalThis。
 	 * 
 	 * @ignore
 	 */
-	global[library_name] = _;
+	globalThis[library_name] = _;
 	if (typeof module === 'object'
 	// NG if we have specified module.exports: ((module.exports === exports))
 	// http://weizhifeng.net/node-js-exports-vs-module-exports.html
@@ -3045,15 +3027,15 @@ OS='UNIX'; // unknown
 		module.exports = _;
 	}
 
-	// test global.
+	// test globalThis.
 	try {
 		if (_ !== eval(library_name))
 			throw 1;
-		// TODO: test delete global object.
+		// TODO: test delete globalThis object.
 	} catch (e) {
 		if (e === 1) {
-			// 若失敗，表示其他對 global 的操作亦無法成功。可能因為 global 並非真的 Global，或權限被限制了？
-			_.warn('無法正確設定 global object!');
+			// 若失敗，表示其他對 globalThis 的操作亦無法成功。可能因為 globalThis 並非真的 Global，或權限被限制了？
+			_.warn('無法正確設定 globalThis object!');
 		} else if (e && e.message && e.message.indexOf('by CSP') !== -1) {
 			// Firefox/49.0 WebExtensions 可能 throw:
 			// Error: call to eval() blocked by CSP
@@ -3065,9 +3047,29 @@ OS='UNIX'; // unknown
 
 }
 )(
+	/**
+	 * Global Scope object 整體<br />
+	 * 於 CeL.eval_code 使用.<br />
+	 *
+	 * TODO:<br />
+	 * Function constructor evaluates in a scope of that function, not in a
+	 * global scope.<br />
+	 * http://perfectionkills.com/global-eval-what-are-the-options/
+	 *
+	 * @ignore
+	 * @see <a
+	 *      href="http://stackoverflow.com/questions/3277182/how-to-get-the-global-object-in-javascript"
+	 *      accessdate="2011/8/6 10:7">How to get the Global Object in
+	 *      JavaScript? - Stack Overflow</a>
+	 */
+
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/globalThis
+	typeof globalThis === 'object' && globalThis.Array === Array && globalThis
+
 	// In strict mode, this inside globe functions is undefined.
 	// https://developer.mozilla.org/en/JavaScript/Strict_mode
-	typeof window !== 'undefined' && window
+	||typeof window !== 'undefined' && window
+	// isWeb() ? window : this;
 
 	// https://github.com/tc39/proposal-global
 	// 由於在HTML Application環境中，self並不等於window，但是應該要用window，所以先跳過這一項。
@@ -3081,6 +3083,7 @@ OS='UNIX'; // unknown
 	// require isn't actually a global but rather local to each module.
 	// However, this causes CSP violations in Chrome apps.
 	|| Function('return this')()
+	// (function(){return this;})()
 )
 // ) // void(
 ;
