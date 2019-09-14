@@ -742,7 +742,7 @@ function module_code(library_namespace) {
 			var list = [];
 			namespace.replace(/[_\s]+/g, '_').toLowerCase()
 			// for ',Template,Category', ';Template;Category',
-			// '|Template|Category'
+			// 'main|module|template|category'
 			// https://www.mediawiki.org/w/api.php?action=help&modules=main#main.2Fdatatypes
 			.split(/(?:[,;|\u001F]|%7C|%1F)/).forEach(function(n) {
 				if (options.is_page_title && n.startsWith(':')) {
@@ -1513,41 +1513,66 @@ function module_code(library_namespace) {
 	page_parser.footer_order = footer_order;
 
 	/**
-	 * 將 parse_wikitext() 獲得之 template_token 中的特定 parameter 換成 replace_to。
+	 * 將 parse_wikitext() 獲得之 template_token 中的指定 parameter 換成 replace_to。
 	 * 
 	 * 若不改變 parameter name，只變更 value，則 replace_to 應該使用 'parameter name = value'
 	 * 而非僅 'value'。
 	 * 
 	 * @param {Array}template_token
 	 *            由 parse_wikitext() 獲得之 template_token
-	 * @param {String}parameter
-	 *            parameter name
-	 * @param {String|Array|Object}replace_to
-	 *            要換成的值。
+	 * @param {String}parameter_name
+	 *            指定屬性名稱 parameter name
+	 * @param {String|Number|Array|Object}replace_to
+	 *            要換成的屬性名稱加上賦值。 e.g., "parameter name = value" ||<br />
+	 *            {parameter_1 = value, parameter_2 = value}
 	 * 
 	 * @returns {Boolean} has successfully replaced
 	 */
-	function replace_parameter(template_token, parameter, replace_to) {
-		var index = template_token.index_of.com_code;
-		if (!(index >= 0))
+	function replace_parameter(template_token, parameter_name, replace_to) {
+		var index = template_token.index_of[parameter_name];
+		if (!(index >= 0)) {
 			return false;
+		}
 
 		var attribute_text = template_token[index];
 		if (Array.isArray(attribute_text)) {
+			// 要是有合規的 `parameter_name`，
+			// 則應該是 [ {String} parameter_name + " = ", ... ]。
 			attribute_text = attribute_text[0];
 		}
 
-		var matched = String(attribute_text).match(/^(\s*)([^=]+)(=\s*)/);
-		matched[2] = matched[2].match(/^(.*?[^\s])(\s*)$/);
-		// assert: matched[2] !== null, matched[2][1] === parameter
+		var matched = attribute_text
+				&& attribute_text.toString().match(/^(\s*)([^\s=][^=]*)(=\s*)/);
+		if (matched) {
+			matched[2] = matched[2].match(/^(.*?[^\s])(\s*)$/);
+			// assert: matched[2] !== null, matched[2][1] == parameter_name
+			if (matched[2] && matched[2][1] == parameter_name) {
+				matched[0] = matched[2][2] + matched[3];
+			} else {
+				// e.g., replace parameter_name === 1 of {{tl|A{{=}}B}}
+				throw new Error(
+						'replace_parameter: Can not found valid parameter ['
+								+ parameter_name + ']: ' + template_token);
+			}
+		} else if (isNaN(parameter_name)) {
+			// This should not have happened.
+			throw new Error(
+					'replace_parameter: Can not found valid parameter ['
+							+ parameter_name + '] (Should not happen): '
+							+ template_token);
+		} else {
+			// e.g., replace parameter_name === 1 of {{tl|title}}
+			matched = [];
+		}
 
 		var spaces = template_token[index].toString().match(/(\n)\s*$|( ?)$/);
-		spaces = [ matched[1], matched[2][2] + matched[3],
-				(spaces[1] || spaces[2]) + '|' ];
+		spaces = [ matched[1], matched[0], (spaces[1] || spaces[2]) + '|' ];
 
 		if (library_namespace.is_Object(replace_to)) {
 			replace_to = Object.keys(replace_to).map(function(key) {
-				return spaces[0] + key + spaces[1] + replace_to[key];
+				return spaces[1] ? spaces[0] + key + spaces[1]
+				//
+				+ replace_to[key] : replace_to[key];
 			});
 		}
 		if (Array.isArray(replace_to)) {
@@ -1557,18 +1582,42 @@ function module_code(library_namespace) {
 		}
 
 		if (spaces[2].includes('\n') && !/\n\s*$/.test(replace_to)) {
-			// Add new-lint at tail
+			// Append new-line
 			replace_to += spaces[2];
 		}
 
-		library_namespace.debug(parameter + ': "' + template_token[index]
+		// a little check: parameter 的數字順序不應受影響。
+		if (index + 1 < template_token.length) {
+			// 後面沒有 parameter 了，影響較小。
+		} else if (isNaN(parameter_name)) {
+			// TODO: NG: {{t|a=a|1}} → {{t|a|1}}
+			if (!/(?:^|\|)\s*[^\s][^=]*=/.test(replace_to)) {
+				library_namespace
+						.warn('Insert named parameter and disrupt the order of parameters? '
+								+ template_token);
+			}
+		} else {
+			// NG: {{t|a|b}} → {{t|a=1|b}}
+			var matched = replace_to.match(/(?:^|\|)\s*([^\s][^=]*)=/);
+			if (!matched) {
+				if (index != parameter_name) {
+					library_namespace.warn('Insert non-named parameter to ['
+							+ parameter_name
+							+ '] and disrupt the order of parameters? '
+							+ template_token);
+				}
+			} else if (matched[1].trim() != parameter_name) {
+				library_namespace
+						.warn('Insert numerical parameter name and disrupt the order of parameters? '
+								+ template_token);
+			}
+		}
+
+		library_namespace.debug(parameter_name + ': "' + template_token[index]
 				+ '"→"' + replace_to + '"', 2, 'replace_parameter');
 		template_token[index] = replace_to;
 		return true;
 	}
-
-	// CeL.wiki.parser.replace_parameter()
-	page_parser.replace_parameter = replace_parameter;
 
 	// ------------------------------------------
 
@@ -6032,6 +6081,9 @@ function module_code(library_namespace) {
 	// TODO: 統合於 CeL.wiki.parser 之中。
 	Object.assign(parse_wikitext, {
 		template : parse_template,
+		// CeL.wiki.parse.replace_parameter()
+		replace_parameter : replace_parameter,
+
 		date : parse_date,
 		// timestamp : parse_timestamp,
 		user : parse_user,
@@ -7538,6 +7590,8 @@ function module_code(library_namespace) {
 		// administrator functions
 
 		case 'move_to':
+			// wiki_API.move_to(): move a page from `from` to target `to`.
+
 			// wiki.page(from title)
 			// .move_to(to, [from title,] options, callback)
 
@@ -7847,7 +7901,7 @@ function module_code(library_namespace) {
 	 * 注意: arguments 與 get_list() 之 callback 連動。
 	 * 
 	 * @param {Object}config
-	 *            configuration
+	 *            configuration. { page_options: { rvprop: 'ids|timestamp|user' } }
 	 * @param {Array}pages
 	 *            page data list
 	 */
@@ -7975,7 +8029,7 @@ function module_code(library_namespace) {
 			: function(title, error, result) {
 				if (error) {
 					// ((return [ CeL.wiki.edit.cancel, 'skip' ];))
-					// 來跳過，不特別顯示或處理。
+					// 來跳過 (skip) 本次編輯動作，不特別顯示或處理。
 					// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
 					if (error === 'skip') {
 						done++;
@@ -11956,8 +12010,12 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.edit.check_data = function(data, title, options, caller) {
 		var action;
+		// return CeL.wiki.edit.cancel as a symbol to skip this edit,
+		// do not generate warning message.
 		// 可以利用 ((return [ CeL.wiki.edit.cancel, 'reason' ];)) 來回傳 reason。
-		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來跳過 (skip)，不特別顯示或處理。
+		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來跳過 (skip)
+		// 本次編輯動作，不特別顯示或處理。
+		// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
 		if (data === wiki_API.edit.cancel) {
 			// 統一規範放棄編輯頁面訊息。
 			data = [ wiki_API.edit.cancel ];
@@ -12882,6 +12940,7 @@ function module_code(library_namespace) {
 	wiki_API.move_to = function(options, callback) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=move
 		var default_parameters = {
+			// move_to_title
 			to : true,
 			reason : false,
 			movetalk : false,
@@ -16603,9 +16662,9 @@ function module_code(library_namespace) {
 							return [ CeL.wiki.edit.cancel,
 							// 本作業は記事だけを編集する
 							'本作業僅處理條目命名空間或模板或 Category' ];
-							throw '非條目:' + get_page_title_link(page_data)
+							throw '非條目: ' + get_page_title_link(page_data)
 							//
-							+ '! 照理來說不應該出現有 ns !== 0 的情況。';
+							+ '! 照理來說不應該出現 ns !== 0 的情況。';
 						}
 
 						/** {Object}revision data. 修訂版本資料。 */
