@@ -1582,8 +1582,8 @@ function module_code(library_namespace) {
 		}
 
 		if (spaces[2].includes('\n') && !/\n\s*$/.test(replace_to)) {
-			// Append new-line
-			replace_to += spaces[2];
+			// Append new-line without tail "|"
+			replace_to += spaces[2].replace(/\|$/, '');
 		}
 
 		// a little check: parameter 的數字順序不應受影響。
