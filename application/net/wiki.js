@@ -1566,7 +1566,7 @@ function module_code(library_namespace) {
 		}
 
 		var spaces = template_token[index].toString().match(/(\n)\s*$|( ?)$/);
-		spaces = [ matched[1], matched[0], (spaces[1] || spaces[2]) + '|' ];
+		spaces = [ matched[1], matched[0], spaces[1] || spaces[2] ];
 
 		if (library_namespace.is_Object(replace_to)) {
 			replace_to = Object.keys(replace_to).map(function(key) {
@@ -1576,14 +1576,14 @@ function module_code(library_namespace) {
 			});
 		}
 		if (Array.isArray(replace_to)) {
-			replace_to = replace_to.join(spaces[2]);
+			replace_to = replace_to.join(spaces[2] + '|');
 		} else {
 			replace_to = replace_to.toString();
 		}
 
 		if (spaces[2].includes('\n') && !/\n\s*$/.test(replace_to)) {
 			// Append new-line without tail "|"
-			replace_to += spaces[2].replace(/\|$/, '');
+			replace_to += spaces[2];
 		}
 
 		// a little check: parameter 的數字順序不應受影響。
