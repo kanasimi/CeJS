@@ -8011,7 +8011,7 @@ function module_code(library_namespace) {
 		nochange_count = 0;
 
 		if (Array.isArray(pages) && pages.length === 0) {
-			// 列表中沒有項目，快速完結。
+			library_namespace.debug('列表中沒有項目，快速完結。', 1, 'wiki_API.work');
 			if (typeof config.last === 'function') {
 				this.run(config.last.bind(options));
 			}
@@ -8176,16 +8176,23 @@ function module_code(library_namespace) {
 			});
 		}
 
-		var main_work = (function(data) {
-			if (!Array.isArray(data)) {
+		var main_work = (function(data, error) {
+			if (error) {
+				library_namespace.error('wiki_API.work: Get error: ' + error);
+				data = [];
+			} else if (!Array.isArray(data)) {
 				if (!data && this_slice_size === 0) {
 					library_namespace.info('wiki_API.work: ' + config.summary
 					// 任務/工作
 					+ ': 未取得或設定任何頁面。這個部份的任務已完成？');
 					data = [];
-				} else {
+				} else if (data) {
 					// 可能是 page data 或 title。
 					data = [ data ];
+				} else {
+					library_namespace
+							.error('wiki_API.work: No valid data got!');
+					data = [];
 				}
 			}
 
