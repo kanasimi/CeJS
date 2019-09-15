@@ -6399,7 +6399,8 @@ function module_code(library_namespace) {
 
 		// is_api_and_title(page_data)
 		if (get_page_content.is_page_data(page_data)) {
-			need_escape = page_data.ns === get_namespace.hash.category;
+			need_escape = page_data.ns === get_namespace.hash.category
+					|| get_namespace.hash.file;
 			title = page_data.title;
 		} else if ((title = get_page_title(page_data))
 		// 通常應該:
@@ -8020,7 +8021,7 @@ function module_code(library_namespace) {
 		nochange_count = 0;
 
 		if (Array.isArray(pages) && pages.length === 0) {
-			library_namespace.debug('列表中沒有項目，快速完結。', 1, 'wiki_API.work');
+			library_namespace.info('wiki_API.work: 列表中沒有項目，快速完結。');
 			if (typeof config.last === 'function') {
 				this.run(config.last.bind(options));
 			}
