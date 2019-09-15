@@ -1515,16 +1515,19 @@ function module_code(library_namespace) {
 	/**
 	 * 將 parse_wikitext() 獲得之 template_token 中的指定 parameter 換成 replace_to。
 	 * 
-	 * 若不改變 parameter name，只變更 value，則 replace_to 應該使用 'parameter name = value'
-	 * 而非僅 'value'。
+	 * 不在乎 spaces 的版本可參考 。
+	 * 
+	 * WARNING: 若不改變 parameter name，只變更 value，<br />
+	 * 則 replace_to 應該使用 'parameter name = value' 而非僅 'value'。
 	 * 
 	 * @param {Array}template_token
 	 *            由 parse_wikitext() 獲得之 template_token
 	 * @param {String}parameter_name
 	 *            指定屬性名稱 parameter name
-	 * @param {String|Number|Array|Object}replace_to
+	 * @param {String|Number|Array|Object|Function}replace_to
 	 *            要換成的屬性名稱加上賦值。 e.g., "parameter name = value" ||<br />
-	 *            {parameter_1 = value, parameter_2 = value}
+	 *            {parameter_1 = value, parameter_2 = value} ||<br />
+	 *            function replace_to(value, parameter_name)
 	 * 
 	 * @returns {Boolean} has successfully replaced
 	 */
@@ -1534,6 +1537,19 @@ function module_code(library_namespace) {
 			return false;
 		}
 
+		if (typeof replace_to === 'function') {
+			// function replace_to(value, parameter_name)
+			replace_to = replace_to(template_token.parameters[parameter_name],
+					parameter_name);
+		}
+
+		if (replace_to === undefined) {
+			return false;
+		}
+
+		// --------------------------------------
+		// 判斷上下文使用的 spaces。
+
 		var attribute_text = template_token[index];
 		if (Array.isArray(attribute_text)) {
 			// 要是有合規的 `parameter_name`，
@@ -1542,7 +1558,13 @@ function module_code(library_namespace) {
 		}
 
 		var matched = attribute_text
-				&& attribute_text.toString().match(/^(\s*)([^\s=][^=]*)(=\s*)/);
+		// extract parameter name
+		// https://www.mediawiki.org/wiki/Help:Templates#Named_parameters
+		// assert: parameter name should these characters
+		// https://test.wikipedia.org/wiki/Test_n
+		// OK in parameter name: ":\\\/#\"'"
+		// NG in parameter name: "=" /\s$/
+		&& attribute_text.toString().match(/^(\s*)([^\s=][^=]*)(=\s*)/);
 		if (matched) {
 			matched[2] = matched[2].match(/^(.*?[^\s])(\s*)$/);
 			// assert: matched[2] !== null, matched[2][1] == parameter_name
@@ -1568,11 +1590,14 @@ function module_code(library_namespace) {
 		var spaces = template_token[index].toString().match(/(\n)\s*$|( ?)$/);
 		spaces = [ matched[1], matched[0], spaces[1] || spaces[2] ];
 
+		// --------------------------------------
+		// 正規化 replace_to。
+
 		if (library_namespace.is_Object(replace_to)) {
 			replace_to = Object.keys(replace_to).map(function(key) {
 				return spaces[1] ? spaces[0] + key + spaces[1]
 				//
-				+ replace_to[key] : replace_to[key];
+				+ replace_to[key] : key + '=' + replace_to[key];
 			});
 		}
 		if (Array.isArray(replace_to)) {
@@ -1581,12 +1606,34 @@ function module_code(library_namespace) {
 			replace_to = replace_to.toString();
 		}
 
+		// assert: {String}replace_to
+
+		if (!spaces[1] && !isNaN(parameter_name)) {
+			var matched = replace_to.match(/^\s*(\d+)\s*=\s*([\s\S]*)$/);
+			if (matched && matched[1] == parameter_name) {
+				// e.g., replace [2] to non-named 'value' in {{t|1|2}}
+				library_namespace.debug('auto remove numbered parameter: '
+				// https://www.mediawiki.org/wiki/Help:Templates#Numbered_parameters
+				+ parameter_name, 3, 'replace_parameter');
+				replace_to = matched[2];
+			}
+		}
+
 		if (spaces[2].includes('\n') && !/\n\s*$/.test(replace_to)) {
 			// Append new-line without tail "|"
 			replace_to += spaces[2];
 		}
 
+		if (template_token[index] === replace_to) {
+			// 不處理沒有變更的情況。
+			return false;
+		}
+
+		// TODO: 不處理僅添加空白字元的情況。
+
+		// --------------------------------------
 		// a little check: parameter 的數字順序不應受影響。
+
 		if (index + 1 < template_token.length) {
 			// 後面沒有 parameter 了，影響較小。
 		} else if (isNaN(parameter_name)) {
@@ -1613,9 +1660,12 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// --------------------------------------
+
 		library_namespace.debug(parameter_name + ': "' + template_token[index]
 				+ '"→"' + replace_to + '"', 2, 'replace_parameter');
 		template_token[index] = replace_to;
+
 		return true;
 	}
 

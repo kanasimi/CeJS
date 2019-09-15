@@ -3133,6 +3133,12 @@ function test_wiki() {
 		assert([ '{{t| s |ww}}',CeL.wiki.parse.replace_parameter(token, 1, ' s ') && token.toString() ], 'wiki.parse.replace_parameter: #10');
 		token = CeL.wiki.parse('{{t|1=2}}');
 		assert([ '{{t|3}}',	CeL.wiki.parse.replace_parameter(token, 1, 3) && token.toString() ], 'wiki.parse.replace_parameter: #11');
+		token = CeL.wiki.parse('{{t| 2=2}}');
+		assert([ '{{t| 2=3}}',	CeL.wiki.parse.replace_parameter(token, 2, {'2':3}) && token.toString() ], 'wiki.parse.replace_parameter: #12');
+		token = CeL.wiki.parse('{{t| 12|34}}');
+		assert([ '{{t| 12|4}}',	CeL.wiki.parse.replace_parameter(token, 2, {'2':4}) && token.toString() ], 'wiki.parse.replace_parameter: #13');
+		assert([ '{{t| 12|5}}',	CeL.wiki.parse.replace_parameter(token, 2, ' 2 = 5') && token.toString() ], 'wiki.parse.replace_parameter: #14');
+		assert([ false,	CeL.wiki.parse.replace_parameter(token, 2, 5) && token.toString() ], 'wiki.parse.replace_parameter: #15');
 
 		wikitext = 't\n**a[[L#{{t:p}}|l]]b\n**a[[L#{{t:p}}]]b\n'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ], 'wiki.parse: list #1');
