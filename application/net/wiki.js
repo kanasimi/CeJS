@@ -8010,6 +8010,14 @@ function module_code(library_namespace) {
 		/** {ℕ⁰:Natural+0}全無變更頁面數。 */
 		nochange_count = 0;
 
+		if (Array.isArray(pages) && pages.length === 0) {
+			// 列表中沒有項目，快速完結。
+			if (typeof config.last === 'function') {
+				this.run(config.last.bind(options));
+			}
+			return;
+		}
+
 		if (typeof config.each === 'function') {
 			// {Function}
 			each = [ config.each ];
