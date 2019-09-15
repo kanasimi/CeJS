@@ -7866,7 +7866,7 @@ function module_code(library_namespace) {
 			this.push((use_ordered_list ? '# ' : '* ')
 					+ (title && (title = get_page_title_link(title))
 					// 對於非條目作特殊處理。
-					? /^\[\[[^\[\]\|{}\n#�:]+:/.test(title) ? "'''" + title
+					? /^\[\[[^\[\]\|{}\n#�:]*:/.test(title) ? "'''" + title
 							+ "''' " : title + ' ' : '') + message);
 		}
 	}
