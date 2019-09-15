@@ -6705,16 +6705,24 @@ function module_code(library_namespace) {
 			type = 'list';
 		}
 
-		if (library_namespace.is_debug(2)) {
+		if (library_namespace.is_debug(3)) {
 			library_namespace.debug(
 			//
 			'處理 ' + (this.token.lgname ? this.token.lgname + ' ' : '') + '['
 			//
 			+ next.map(function(arg) {
 				// for function
-				return (arg.toString ? String(arg)
-				//
-				: JSON.stringify(arg)).slice(0, 80);
+				var message;
+				if (arg.toString) {
+					message = arg.toString();
+				} else {
+					try {
+						message = JSON.stringify(arg);
+					} catch (e) {
+						message = String(arg);
+					}
+				}
+				return message.slice(0, 80);
 			}) + ']', 1, 'wiki_API.prototype.next');
 		}
 
