@@ -6719,7 +6719,8 @@ function module_code(library_namespace) {
 					try {
 						message = JSON.stringify(arg);
 					} catch (e) {
-						message = String(arg);
+						// message = String(arg);
+						message = library_namespace.is_type(arg);
 					}
 				}
 				return message.slice(0, 80);
@@ -11037,7 +11038,14 @@ function module_code(library_namespace) {
 				});
 			}
 
-			if (data.query[type]) {
+			/**
+			 * for redirects: e.g., <code>
+
+			{"batchcomplete":"","query":{"redirects":[{"from":"Category:言語別分類","to":"Category:言語別"}],"pages":{"1664588":{"pageid":1664588,"ns":14,"title":"Category:言語別","redirects":[{"pageid":4005079,"ns":14,"title":"Category:言語別分類"}]}}},"limits":{"redirects":5000}}
+
+			</code>
+			 */
+			if (type !== 'redirects' && data.query[type]) {
 				// 一般情況。
 				if (Array.isArray(data = data.query[type])) {
 					pages = Object.assign(data, pages);
@@ -11153,7 +11161,7 @@ function module_code(library_namespace) {
 		// @since 2019/9/11
 		redirects : [ 'rd', 'prop', function(title_parameter) {
 			// console.trace(title_parameter);
-			return title_parameter.replace(/^&title=/, '&redirects&titles=');
+			return title_parameter.replace(/^&title=/, '&titles=');
 		} ],
 
 		// 取得所有使用 file 的頁面。
