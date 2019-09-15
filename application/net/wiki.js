@@ -1527,7 +1527,7 @@ function module_code(library_namespace) {
 	 * @param {String|Number|Array|Object|Function}replace_to
 	 *            要換成的屬性名稱加上賦值。 e.g., "parameter name = value" ||<br />
 	 *            {parameter_1 = value, parameter_2 = value} ||<br />
-	 *            function replace_to(value, parameter_name)
+	 *            function replace_to(value, parameter_name, template_token)
 	 * 
 	 * @returns {Boolean} has successfully replaced
 	 */
@@ -1538,9 +1538,9 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof replace_to === 'function') {
-			// function replace_to(value, parameter_name)
+			// function replace_to(value, parameter_name, template_token)
 			replace_to = replace_to(template_token.parameters[parameter_name],
-					parameter_name);
+					parameter_name, template_token);
 		}
 
 		if (replace_to === undefined) {
