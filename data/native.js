@@ -4258,11 +4258,26 @@ function module_code(library_namespace) {
 		 * 
 		 * 應能確保順序不變。
 		 */
-		unique : function unique_Array(sorted) {
+		unique : function unique_Array(sorted, get_key) {
+			if (typeof sorted === 'function') {
+				// shift arguments.
+				get_key = sorted;
+				sorted = false;
+			}
+
 			if (sorted) {
 				return this.unique_sorted();
 			}
-			return Array.from(new Set(this));
+
+			if (typeof get_key !== 'function') {
+				return Array.from(new Set(this));
+			}
+
+			var map = new Map;
+			this.forEach(function(item) {
+				map.set(get_key(item), item);
+			});
+			return map.values();
 		},
 		// Check if there is only one unique/single value in the array.
 		// 集合中包含不重複的元素的個數=1
