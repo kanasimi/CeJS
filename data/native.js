@@ -4277,7 +4277,7 @@ function module_code(library_namespace) {
 			this.forEach(function(item) {
 				map.set(get_key(item), item);
 			});
-			return map.values();
+			return Array.from(map.values());
 		},
 		// Check if there is only one unique/single value in the array.
 		// 集合中包含不重複的元素的個數=1
