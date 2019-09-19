@@ -2766,9 +2766,12 @@ function module_code(library_namespace) {
 			try {
 				// 解析出作品資料/作品詳情。
 				work_data = _this.parse_work_data(html, get_label,
-						extract_work_data
-				// , { id : work_id, title : work_title, url : work_URL }
-				);
+				// parse_work_data:function(html,get_label,extract_work_data,options){}
+				extract_work_data, {
+					id : work_id,
+					title : work_title,
+					url : work_URL
+				});
 				if (work_data === _this.REGET_PAGE) {
 					// 需要重新讀取頁面。e.g., 502
 					var chapter_time_interval = _this
@@ -2862,6 +2865,7 @@ function module_code(library_namespace) {
 			work_data.url = work_URL;
 
 			process.title = gettext('下載%1 - 目次 @ %2', work_data.title, _this.id);
+			// console.log(work_data);
 			work_data.directory_name = library_namespace.to_file_name(
 			// 允許自訂作品目錄名/命名資料夾。
 			work_data.directory_name
@@ -2873,6 +2877,7 @@ function module_code(library_namespace) {
 			+ (work_data.title ? ' ' + work_data.title : '')
 			// e.g., '.' + (new Date).format('%Y%2m%2d')
 			+ (work_data.directory_name_extension || ''));
+			// console.log(work_data.directory_name);
 			// full directory path of the work.
 			if (!work_data.directory) {
 				var work_base_directory = _this.main_directory;
@@ -4266,8 +4271,10 @@ function module_code(library_namespace) {
 			}
 
 			if (false) {
+				console.log(chapter_data);
 				console.log([ no_part, chapter_data.part_title,
 						work_data.chapter_list.part_NO, this.add_part ]);
+				throw new Error('detect parts');
 			}
 			if (!no_part && chapter_data.part_title
 			//
@@ -4873,6 +4880,13 @@ function module_code(library_namespace) {
 						if (!chapter_data.title) {
 							chapter_data.title = work_data.chapter_list[chapter_NO - 1].title;
 						}
+						if (!chapter_data.part_title
+								&& (work_data.chapter_list.part_title || work_data.chapter_list[chapter_NO - 1].part_title)) {
+							library_namespace
+									.warn({
+										T : '原先的章節資料設定了分部標題，但 .parse_chapter_data() 傳回的章節資料缺少了分部標題。或許您可以沿用原先的章節資料。'
+									});
+						}
 					}
 				}
 				// TODO: 自動填補 chapter_data.url。
@@ -5249,7 +5263,7 @@ function module_code(library_namespace) {
 		 */
 		var image_downloaded = node_fs.existsSync(image_data.file)
 				|| this.skip_existed_bad_file
-				// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
+				// 檢查是否已有上次下載失敗，例如 server 上本身就已經出錯的檔案。
 				&& node_fs.existsSync(this.EOI_error_path(image_data.file)), acceptable_types;
 
 		if (!image_downloaded) {
@@ -5304,7 +5318,7 @@ function module_code(library_namespace) {
 			image_downloaded = image_downloaded
 					|| images_archive.fso_path_hash[image_archived]
 					|| this.skip_existed_bad_file
-					// 檢查是否已有上次下載失敗，例如server上本身就已經出錯的檔案。
+					// 檢查是否已有上次下載失敗，例如 server 上本身就已經出錯的檔案。
 					&& bad_image_archived;
 
 			if (!image_downloaded
