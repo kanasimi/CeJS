@@ -91,7 +91,7 @@ function module_code(library_namespace) {
 	CeL.storage.directory_is_empty(directory_path, options)
 	// alias: mkdir
 	CeL.storage.create_directory(directory_path / directory_path_list)
-	// alias: delete.
+	// alias: delete. recurse: clean directory
 	CeL.storage.remove_directory(directory_path / directory_path_list, recurse)
 	// alias: rename
 	CeL.storage.move_directory(move_from_path, move_to_path)

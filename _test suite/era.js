@@ -2965,12 +2965,23 @@ function affairs() {
 	// copy from data.date.
 	/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
-	// 添加文字版本圖像 in Unicode
+	// 月相 添加文字版本圖像 in Unicode 🌚新月臉 🌛上弦月臉 🌝滿月臉 🌜下弦月臉 🥮月餅 🎑賞月
 	LUNAR_PHASE_SYMBOL = {
+		// 新月 New Moon
 		朔 : '🌑',
+		// 蛾眉月 Waxing Crescent Moon
+		新月 : '🌒',
+		// First Quarter Moon
 		上弦 : '🌓',
+		// Waxing Gibbous Moon
+		盈凸月 : '🌔',
+		// 滿月 Full Moon
 		望 : '🌕',
+		// Waning Gibbous Moon
+		虧凸月 : '🌖',
+		// Last Quarter Moon
 		下弦 : '🌗',
+		// 殘月 Waning Crescent Moon
 		晦日 : '🌘'
 	},
 	// "Apple Color Emoji","Segoe UI Emoji","NotoColorEmoji","Segoe UI

@@ -184,6 +184,7 @@ function module_code(library_namespace) {
 	 * @constructor
 	 */
 	function wiki_API(user_name, password, API_URL) {
+		// console.trace([ user_name, password, API_URL ]);
 		library_namespace.debug('API_URL: ' + API_URL + ', default_language: '
 				+ default_language, 3, 'wiki_API');
 		if (!this || this.constructor !== wiki_API) {
@@ -7986,7 +7987,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.debug('wiki_API.work: 開始執行:先作環境建構與初始設定。');
+		library_namespace.debug('wiki_API.work: 開始執行: 先作環境建構與初始設定。');
 		if (config.summary) {
 			// '開始處理 ' + config.summary + ' 作業'
 			library_namespace.sinfo([ 'wiki_API.work: start [', 'fg=yellow',
@@ -11129,7 +11130,7 @@ function module_code(library_namespace) {
 		allusers : 'au',
 
 		/**
-		 * 為頁面標題執行前綴搜索。<br />
+		 * 為頁面標題執行前綴搜索。ページ名の先頭一致検索を行います。<br />
 		 * <code>
 		// 注意: arguments 與 get_list() 之 callback 連動。
 		CeL.wiki.prefixsearch('User:Cewbot/log/20151002/', function(pages, error){ console.log(pages); }, {limit:'max'});
@@ -11161,7 +11162,6 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bredirects
 		// @since 2019/9/11
 		redirects : [ 'rd', 'prop', function(title_parameter) {
-			// console.trace(title_parameter);
 			return title_parameter.replace(/^&title=/, '&titles=');
 		} ],
 
@@ -11195,8 +11195,9 @@ function module_code(library_namespace) {
 		// ** 可一次處理多個標題，但可能較耗資源、較慢。
 
 		// TODO
-		// **暫時使用wiki_API.langlinks()，因為尚未整合，在跑舊程式會有問題。
+		// **暫時使用wiki_API.langlinks()，因為尚未整合，在跑舊程式時會有問題。
 		NYI_langlinks : [ 'll', 'prop', function(title_parameter, options) {
+			// console.trace(title_parameter);
 			if (options && options.lang && typeof options.lang === 'string') {
 				return title_parameter + '&lllang=' + options.lang;
 			}
@@ -11212,6 +11213,10 @@ function module_code(library_namespace) {
 		// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
 		// 基本上同 imageusage。
 		fileusage : [ 'fu', 'prop' ],
+
+		// TODO: 列舉包含指定 URL 的頁面。 [[Special:LinkSearch]]
+		// https://www.mediawiki.org/wiki/API:Exturlusage
+		// exturlusage : 'eu',
 
 		// 回傳指定頁面的所有連結。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Blinks
@@ -11237,6 +11242,7 @@ function module_code(library_namespace) {
 		options = library_namespace.new_options(options);
 
 		if (!options.initialized) {
+			// console.trace(options);
 			if (!options[KEY_SESSION]) {
 				options[KEY_SESSION] = new wiki_API;
 			}
@@ -11627,6 +11633,9 @@ function module_code(library_namespace) {
 
 	// https://www.mediawiki.org/w/api.php?action=help&modules=sitematrix
 	// https://zh.wikipedia.org/w/api.php?action=help&modules=paraminfo
+
+	// https://noc.wikimedia.org/conf/VariantSettings.php.txt
+	// https://phabricator.wikimedia.org/T233070
 
 	// get_site_configurations
 	// https://zh.wikipedia.org/w/api.php?action=help&modules=query%2Bsiteinfo

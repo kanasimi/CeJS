@@ -70,7 +70,7 @@ CeL.run([ 'data.math', 'application.debug.log' ], function() {
 
 5. 每次要更新到最新 CeJS 程式庫時，只要重新執行一次 GitHub repository 安裝檔即可。
 
-### Installation via npm
+### Installation via npm 安裝
 <!-- NodeICO badges -->
 [![NPM](https://nodei.co/npm/cejs.png)](https://nodei.co/npm/cejs/)
 <!-- [![NPM](https://nodei.co/npm-dl/cejs.png)](https://nodei.co/npm/cejs/) -->
@@ -152,7 +152,7 @@ CeL.assert([ "2³⋅13⋅80611⋅82217",
 		CeL.factorize(689269837048).toString() ], 'factorize');
 ```
 
-## Features and examples
+## Features and examples 特點
 For further introduction, please see the [wiki](https://github.com/kanasimi/CeJS/wiki).
 進一步介紹請參閱本計畫之 [wiki](https://github.com/kanasimi/CeJS/wiki)。
 <!-- TODO: screenshot data:image/png;base64, -->

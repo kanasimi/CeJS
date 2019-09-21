@@ -2013,7 +2013,10 @@ function finish(name_space) {
 					if (conditions.constructor.name === 'AsyncFunction') {
 						// allow async functions
 						// https://github.com/tc39/ecmascript-asyncawait/issues/78
-						eval('(async function(){ try { await conditions(assert_proxy, setup_test, finish_test); } catch (e) { conditions_error(e); } })();');
+						eval('(async function() {'
+								+ ' try { await conditions(assert_proxy, setup_test, finish_test); }'
+								+ ' catch(e) { conditions_error(e); }'
+								+ ' })();');
 					} else {
 						conditions(assert_proxy, setup_test, finish_test);
 					}

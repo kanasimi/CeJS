@@ -1398,6 +1398,7 @@ function module_code(library_namespace) {
 					options.hash, charset);
 		}
 
+		// TODO: Will be "get_URL_node: [object Object]" in UNIX CLI
 		library_namespace.debug({
 			T : [ 'Fetching URL: %1', '{' + (typeof URL_to_fetch) + '} ['
 			//
@@ -2427,9 +2428,9 @@ function module_code(library_namespace) {
 			}
 			if (!options.no_warning) {
 				library_namespace.info([ 'get_URL_node: ', {
-					T : [ 'Timeout %1: [%2]', time_message(timeout),
+					T : [ 'Connection timeout for %1: [%2]',
 					//
-					URL_to_fetch ]
+					time_message(timeout), URL_to_fetch ]
 				} ]);
 			}
 			if (!e) {

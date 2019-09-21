@@ -550,6 +550,7 @@ function module_code(library_namespace) {
 			//
 			DM5 = work_data.DM5 = Object.create(null), matched,
 			// ("): for "...'..." e.g., https://www.dm5.com/m816581/
+			// 尚未發現有 '..."...' 的情況。
 			PATTERN_assignment =
 			// [ expression, variable name, value, quote ]
 			/\sDM5_([a-zA-Z\d_]+)\s*=\s*(\d+|true|false|(")(?:\\.|[^\\"]+)*")/g

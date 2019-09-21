@@ -522,6 +522,7 @@ function module_code(library_namespace) {
 			// console.log(chapter_data.chapterImages);
 			if (global.CryptoJS
 					&& typeof chapter_data.chapterImages === 'string') {
+				// console.log(chapter_data.chapterImages);
 				// console.log(this.crypto);
 
 				/**
@@ -530,8 +531,6 @@ function module_code(library_namespace) {
 				</code>
 				 * 
 				 * @see https://segmentfault.com/q/1010000011225051
-				 * @see function cops201921() @ http://www.duzhez.com/js/cops201921.js<br /> →
-				 * 2019/5/1 亲亲漫画改版: function kda20190501() @ http://www.duzhez.com/js/kda20190501.js
 				 */
 				chapter_data.chapterImages =
 				// 使用 CryptoJS https://code.google.com/archive/p/crypto-js/
