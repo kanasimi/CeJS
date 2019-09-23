@@ -13571,7 +13571,7 @@ function module_code(library_namespace) {
 	 *          TODO: https://github.com/sidorares/node-mysql2
 	 */
 	function run_SQL(SQL, callback, config) {
-		function _callback(error, results, fields) {
+		var _callback = function(error, results, fields) {
 			// the connection will return to the pool, ready to be used again by
 			// someone else.
 			// connection.release();
@@ -13580,7 +13580,8 @@ function module_code(library_namespace) {
 			// connection.destroy();
 
 			callback(error, results, fields);
-		}
+		};
+		_callback = callback;
 
 		// TypeError: Converting circular structure to JSON
 		// library_namespace.debug(JSON.stringify(config), 3, 'run_SQL');
@@ -14046,6 +14047,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項.
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Recentchanges_table
+	 *      https://www.mediawiki.org/wiki/Actor_migration
 	 */
 	function get_recent_via_databases(callback, options) {
 		if (options && (typeof options === 'string')) {
