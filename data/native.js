@@ -4056,37 +4056,71 @@ function module_code(library_namespace) {
 	// CLI 螢幕顯示對齊用。e.g., 對比兩者。
 	// left justification, to line up in correct
 	function display_align(lines, options) {
-		var key_display_width = [], display_lines = [],
-		//
-		use_display_width = options && options.display_width
-				|| screen_display_width();
-		library_namespace.debug('display width: ' + use_display_width, 3);
+		// 前置作業。
+		options = library_namespace.setup_options(options);
+
 		if (library_namespace.is_Object(lines)) {
 			// pairs/lines={key:value,key:value,...}
 			lines = Object.entries(lines);
 		}
-		lines.forEach(function(line) {
+		var use_display_width = options.display_width || screen_display_width();
+		library_namespace.debug('display width: ' + use_display_width, 3);
+		var key_display_width = [], some_has_new_line = lines.some(function(
+				line) {
 			var key = String(line[0]), value = String(line[1]);
+			// assert: key.includes('\n') === false
 			if ((value.length > use_display_width) || value.includes('\n')) {
-				for ( var key in lines) {
-					display_lines.push(key.trim() + '\n' + value);
-				}
-				return display_lines.join('\n');
+				return true;
 			}
 			key_display_width.push(String_display_width(key));
 		});
 
-		var max_key_display_width = Math.max.apply(null, key_display_width);
+		var key_style = options.key_style,
+		// e.g., value_style : { color : 'green' }
+		value_style = options.value_style,
+		// 採用醒目多色彩的顯示方式。
+		using_style = !!('using_style' in options ? options.using_style
+				: key_style || value_style),
+		//
+		display_lines = [], max_key_display_width = !some_has_new_line
+				&& Math.max.apply(null, key_display_width);
 		lines.forEach(function(line) {
-			var key = line[0], value = line[1];
-			// 可能沒有 key.padStart()!
-			display_lines.push(key.pad(key.length + max_key_display_width
-			// assert: String_display_width(' ') === 1
-			- key_display_width.shift(), options && options.to_fill || ' ',
-					options && options.from_start)
-					+ value);
+			var key = String(line[0]), value = line[1];
+			if (some_has_new_line) {
+				key = key.trim();
+				value = String(value);
+				if (using_style) {
+					value = [ key_style ? {
+						T : key,
+						S : key_style
+					} : key, '\n', value_style ? {
+						T : value,
+						S : value_style
+					} : value, '\n' ];
+				} else {
+					value = key + '\n' + value;
+				}
+			} else {
+				// 可能沒有 key.padStart()!
+				key = key.pad(key.length + max_key_display_width
+				// assert: String_display_width(' ') === 1
+				- key_display_width.shift(), options.to_fill || ' ',
+						options.from_start);
+				if (using_style) {
+					value = [ key_style ? {
+						T : key,
+						S : key_style
+					} : key, value_style ? {
+						T : value,
+						S : value_style
+					} : value, '\n' ];
+				} else {
+					value = key + value;
+				}
+			}
+			display_lines.push(value);
 		});
-		return display_lines.join('\n');
+		return using_style ? display_lines : display_lines.join('\n');
 	}
 
 	_.display_align = display_align;
