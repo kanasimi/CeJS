@@ -2980,8 +2980,6 @@ function module_code(library_namespace) {
 
 					} else if (typeof work_data[key] !== 'object'
 							&& work_data[key] !== matched[key]) {
-						var _message = String(matched[key])
-								+ String(work_data[key]);
 						// work_data.old_data[key] = matched[key];
 
 						// 記錄舊下載目錄的資料以供調整目錄時使用。
@@ -2990,24 +2988,20 @@ function module_code(library_namespace) {
 							work_data.old_directory = matched[key];
 						}
 
-						library_namespace.info(_message.length > 60
-								|| _message.includes('\n')
-						//
-						? library_namespace.display_align([
-								[ key + ':', matched[key] ],
-								[ gettext('新資料→'), work_data[key] ] ])
+						var _message = String(matched[key])
+								+ String(work_data[key]);
+						_message = _message.length > 60
 						// 採用比較簡潔並醒目多色彩的顯示方式。
-						: [ key + ':', {
-							T : matched[key],
-							S : {
+						|| _message.includes('\n') ? gettext('新資料→') : '→';
+						_message = [ [ key + ':', matched[key] ],
+								[ _message, work_data[key] ] ];
+						library_namespace.info(
+						//
+						library_namespace.display_align(_message, {
+							value_style : {
 								color : 'green'
 							}
-						}, '→', {
-							T : work_data[key],
-							S : {
-								color : 'green'
-							}
-						} ]);
+						}));
 					}
 				}
 				if (matched.last_download) {
