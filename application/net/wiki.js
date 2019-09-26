@@ -7231,13 +7231,17 @@ function module_code(library_namespace) {
 						//
 						? result.error.code === 'badtoken'
 						// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
-						: !result.edit : result === '') {
+						: !result.edit
+						// flow:
+						// {status:'ok',workflow:'...',committed:{topiclist:{...}}}
+						&& result.status !== 'ok' : result === '') {
 							// Invalid token
 							library_namespace.warn(
 							//
 							'wiki_API.prototype.next: ' + _this.language
 							//
 							+ ': It seems we lost the token. 似乎丟失了 token。');
+							// console.log(result);
 							if (!library_namespace.platform.nodejs) {
 								library_namespace
 										.error('wiki_API.prototype.next: '
@@ -8882,9 +8886,13 @@ function module_code(library_namespace) {
 		else if (!Array.isArray(action))
 			library_namespace.error('wiki_API.query: Invalid action: ['
 					+ action + ']');
-		library_namespace.debug('api URL: (' + (typeof action[0]) + ') ['
-				+ action[0] + '] → [' + api_URL(action[0]) + ']', 3,
-				'wiki_API.query');
+		library_namespace.debug('api URL: ('
+				+ (typeof action[0])
+				+ ') ['
+				+ action[0]
+				+ ']'
+				+ (action[0] === api_URL(action[0]) ? '' : ' → ['
+						+ api_URL(action[0]) + ']'), 3, 'wiki_API.query');
 		action[0] = api_URL(action[0]);
 
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
@@ -11458,7 +11466,7 @@ function module_code(library_namespace) {
 			session.next();
 		}
 
-		function _done(data) {
+		function _done(data, _error) {
 			// 注意: 在 mass edit 時會 lose token (badtoken)，需要保存 password。
 			if (!session.preserve_password) {
 				// 捨棄 password。
@@ -11470,7 +11478,9 @@ function module_code(library_namespace) {
 				// console.log(JSON.stringify(data.warnings));
 			}
 
-			if (data && (data = data.login)) {
+			if (_error) {
+				error = _error;
+			} else if (data && (data = data.login)) {
 				if (data.result === 'Success') {
 					wiki_API.login.copy_keys.forEach(function(key) {
 						if (data[key]) {
@@ -11583,13 +11593,51 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			delete session.token.csrftoken;
+			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Btokens
+			// wiki_API.query(action, callback, post_data, options)
+			wiki_API.query([ session.API_URL,
+			// Fetching a token via "action=login" is deprecated.
+			// Use "action=query&meta=tokens&type=login" instead.
+			'query&meta=tokens&type=login' ], function(data, _error) {
+				// console.log([ data, error ]);
+				if (_error || !data.query || !data.query.tokens
+						|| !data.query.tokens.logintoken) {
+					library_namespace.error(
+					//		
+					'wiki_API.login: 無法 login！ Abort! Response:');
+					error = _error;
+					library_namespace.error(error || data);
+					callback && callback(null, error || data);
+					return;
+				}
+
+				Object.assign(session.token, data.query.tokens);
+				// console.log(data.query.tokens);
+				// https://www.mediawiki.org/w/api.php?action=help&modules=login
+				var token = Object.create(null);
+				for ( var parameter in wiki_API.login.parameters) {
+					var key = wiki_API.login.parameters[parameter];
+					if (key in session.token)
+						token[parameter] = session.token[key];
+				}
+				// console.log(token);
+				wiki_API.query([ session.API_URL, 'login' ], _done, token,
+						session);
+			}, null, session);
+
+			return;
+
+			// deprecated:
+
 			// https://www.mediawiki.org/w/api.php?action=help&modules=login
 			var token = Object.assign(Object.create(null), session.token);
+			// console.log(token);
 			// .csrftoken 是本函式為 cache 加上的，非正規 parameter。
 			delete token.csrftoken;
 			wiki_API.query([ session.API_URL,
-			// 'query&meta=tokens&type=login'
-			'login' ], function(data) {
+			// 'query&meta=tokens&type=login|csrf'
+			'login' ], function(data, error) {
 				if (data && data.login && data.login.result === 'NeedToken') {
 					token.lgtoken = session.token.lgtoken = data.login.token;
 					wiki_API.query([ session.API_URL, 'login' ], _done, token,
@@ -11602,6 +11650,7 @@ function module_code(library_namespace) {
 					callback && callback(null, data);
 				}
 			}, token, session);
+
 		}, null, session);
 
 		return session;
@@ -11609,6 +11658,13 @@ function module_code(library_namespace) {
 
 	/** {Natural}登入失敗時最多重新嘗試下載的次數。 */
 	wiki_API.login.MAX_ERROR_RETRY = 8;
+
+	wiki_API.login.parameters = {
+		lgname : 'lgname',
+		lgpassword : 'lgpassword',
+		lgtoken : 'logintoken',
+		lgdomain : 'lgdomain'
+	};
 
 	/** {Array}欲 copy 至 session.token 之 keys。 */
 	wiki_API.login.copy_keys = 'lguserid,lgtoken,cookieprefix,sessionid'
@@ -11997,9 +12053,9 @@ function module_code(library_namespace) {
 		// the token should be sent as the last parameter.
 		library_namespace.debug('options.token = ' + JSON.stringify(token), 6,
 				'wiki_API.edit');
-		options.token = (library_namespace.is_Object(token) ? token.csrftoken
-				: token)
-				|| BLANK_TOKEN;
+		options.token = (library_namespace.is_Object(token)
+		//
+		? token.csrftoken : token) || BLANK_TOKEN;
 		library_namespace.debug('#2: ' + Object.keys(options).join(','), 4,
 				'wiki_API.edit');
 
@@ -12041,7 +12097,10 @@ function module_code(library_namespace) {
 				if (data.error && data.error.code === 'no-direct-editing'
 				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 				&& options.section === 'new') {
-					// 無法以正常方式編輯，嘗試當作 Flow 討論頁面。
+					library_namespace.debug('無法以正常方式編輯，嘗試當作 Flow 討論頁面。', 1,
+							'wiki_API.edit');
+					// console.log(options);
+					options[KEY_SESSION] = session;
 					edit_topic(title, options.sectiontitle,
 					// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
 					text.replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''), options.token,
@@ -13567,7 +13626,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://wikitech.wikimedia.org/wiki/Help:Toolforge/Database
 	 * 
-	 * @require https://github.com/mysqljs/mysql<br />
+	 * @require https://github.com/mysqljs/mysql <br />
+	 *          https://quarry.wmflabs.org/ <br />
 	 *          TODO: https://github.com/sidorares/node-mysql2
 	 */
 	function run_SQL(SQL, callback, config) {
@@ -17130,7 +17190,9 @@ function module_code(library_namespace) {
 
 		// e.g., 從 wiki_API.page 得到的 page_data
 		if (page_data = get_page_content.revision(page_data))
-			return page_data.contentmodel === 'flow-board';
+			return (page_data.contentmodel || page_data.slots
+					&& page_data.slots.main
+					&& page_data.slots.main.contentmodel) === 'flow-board';
 	}
 
 	/** {Object}abbreviation 縮寫 */
@@ -17157,7 +17219,8 @@ function module_code(library_namespace) {
 	function Flow_page(title, callback, options) {
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!is_api_and_title(title)) {
-			title = [ , title ];
+			title = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL,
+					title ];
 		}
 
 		var page_data;
@@ -17247,8 +17310,12 @@ function module_code(library_namespace) {
 	function edit_topic(title, topic, text, token, options, callback) {
 		var action = 'flow';
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (Array.isArray(title))
-			action = [ title[0], action ], title = title[1];
+		if (Array.isArray(title)) {
+			action = [ title[0], action ];
+			title = title[1];
+		} else if (options[KEY_SESSION]) {
+			action = [ options[KEY_SESSION].API_URL, action ];
+		}
 
 		if (get_page_content.is_page_data(title))
 			title = title.title;
@@ -17268,7 +17335,7 @@ function module_code(library_namespace) {
 
 		// default parameters
 		var _options = {
-			notification : 'flow',
+			// notification : 'flow',
 			submodule : 'new-topic',
 			page : title,
 			nttopic : topic,
@@ -17276,7 +17343,7 @@ function module_code(library_namespace) {
 			ntformat : 'wikitext'
 		};
 
-		wiki_API.login.copy_keys.forEach(function(key) {
+		edit_topic.copy_keys.forEach(function(key) {
 			if (options[key])
 				_options[key] = options[key];
 		});
@@ -17310,14 +17377,15 @@ function module_code(library_namespace) {
 				library_namespace.error(error);
 			}
 
-			if (typeof callback === 'function')
+			if (typeof callback === 'function') {
 				// title.title === get_page_title(title)
 				callback(title.title, error, data);
+			}
 		}, _options, options);
 	}
 
 	/** {Array}欲 copy 至 Flow edit parameters 之 keys。 */
-	wiki_API.login.copy_keys = 'summary|bot|redirect|nocreate'.split(',');
+	edit_topic.copy_keys = 'summary|bot|redirect|nocreate'.split(',');
 
 	Object.assign(Flow_info, {
 		is_Flow : is_Flow,
