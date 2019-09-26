@@ -4065,11 +4065,15 @@ function module_code(library_namespace) {
 		}
 		var use_display_width = options.display_width || screen_display_width();
 		library_namespace.debug('display width: ' + use_display_width, 3);
-		var key_display_width = [], some_has_new_line = lines.some(function(
-				line) {
+		var key_display_width = [], line_separator = String('line_separator' in options ? options.line_separator
+				// '\n'
+				: determine_line_separator()), force_using_new_line = line_separator === '\r\n' ? '\n'
+				: line_separator;
+		var some_has_new_line = lines.some(function(line) {
 			var key = String(line[0]), value = String(line[1]);
-			// assert: key.includes('\n') === false
-			if ((value.length > use_display_width) || value.includes('\n')) {
+			// assert: key.includes(line_separator) === false
+			if ((value.length > use_display_width)
+					|| value.includes(force_using_new_line)) {
 				return true;
 			}
 			key_display_width.push(String_display_width(key));
@@ -4093,12 +4097,12 @@ function module_code(library_namespace) {
 					value = [ key_style ? {
 						T : key,
 						S : key_style
-					} : key, '\n', value_style ? {
+					} : key, line_separator, value_style ? {
 						T : value,
 						S : value_style
-					} : value, '\n' ];
+					} : value ];
 				} else {
-					value = key + '\n' + value;
+					value = key + line_separator + value;
 				}
 			} else {
 				// 可能沒有 key.padStart()!
@@ -4113,14 +4117,22 @@ function module_code(library_namespace) {
 					} : key, value_style ? {
 						T : value,
 						S : value_style
-					} : value, '\n' ];
+					} : value ];
 				} else {
 					value = key + value;
 				}
 			}
-			display_lines.push(value);
+			if (using_style) {
+				if (display_lines.length > 0) {
+					// 前面有東西就先跳一行。
+					display_lines.push(line_separator);
+				}
+				display_lines.append(value);
+			} else {
+				display_lines.push(value);
+			}
 		});
-		return using_style ? display_lines : display_lines.join('\n');
+		return using_style ? display_lines : display_lines.join(line_separator);
 	}
 
 	_.display_align = display_align;

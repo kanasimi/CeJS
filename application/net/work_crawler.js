@@ -2995,13 +2995,13 @@ function module_code(library_namespace) {
 						|| _message.includes('\n') ? gettext('新資料→') : '→';
 						_message = [ [ key + ':', matched[key] ],
 								[ _message, work_data[key] ] ];
-						library_namespace.info(
-						//
-						library_namespace.display_align(_message, {
+						_message = library_namespace.display_align(_message, {
 							value_style : {
 								color : 'green'
 							}
-						}));
+						});
+						// console.log(_message);
+						library_namespace.info(_message);
 					}
 				}
 				if (matched.last_download) {
