@@ -5445,8 +5445,16 @@ function module_code(library_namespace) {
 
 		// <s>去掉</s>skip年分前之雜項。
 		// <s>去掉</s>skip星期與其後之雜項。
-		var matched, date_parser = date_parser_config[options.language
-				|| default_language], PATTERN_date = date_parser[0];
+		var date_parser;
+		if (options.language in api_URL.wikimedia) {
+			// all wikimedia using English in default.
+			date_parser = date_parser_config.en;
+		} else {
+			date_parser = date_parser_config[options.language]
+			// e.g., 'commons'
+			|| date_parser_config[default_language];
+		}
+		var PATTERN_date = date_parser[0], matched;
 		date_parser = date_parser[1];
 
 		// reset PATTERN index
@@ -11455,6 +11463,8 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/wiki/API:Edit
 	// 認證用 cookie:
 	// {zhwikiSession,centralauth_User,centralauth_Token,centralauth_Session,wikidatawikiSession,wikidatawikiUserID,wikidatawikiUserName}
+	//
+	// TODO: https://www.mediawiki.org/w/api.php?action=help&modules=clientlogin
 	wiki_API.login = function(name, password, options) {
 		var error;
 		function _next() {
@@ -12065,72 +12075,97 @@ function module_code(library_namespace) {
 			delete options[KEY_SESSION];
 		}
 
-		wiki_API.query(action, function(data) {
-			// console.log(data);
-			var error = data.error
-			// 檢查伺服器回應是否有錯誤資訊。
-			? '[' + data.error.code + '] ' + data.error.info : data.edit
-					&& data.edit.result !== 'Success'
-					&& ('[' + data.edit.result + '] '
-					// 新用戶要輸入過多或特定內容如 URL，可能遇到:<br />
-					// [Failure] 必需輸入驗證碼
-					+ (data.edit.info || data.edit.captcha && '必需輸入驗證碼'
-					// 垃圾連結 [[MediaWiki:Abusefilter-warning-link-spam]]
-					// e.g., youtu.be, bit.ly
-					// @see 20170708.import_VOA.js
-					|| data.edit.spamblacklist
-							&& 'Contains spam link 包含被列入黑名單的連結: '
-							+ data.edit.spamblacklist
-					// || JSON.stringify(data.edit)
-					));
-			if (error) {
-				/**
-				 * <code>
-				wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
-				wiki_API.edit: Error to edit [[Wikiversity:互助客栈/topic list]]: [tags-apply-not-allowed-one] The tag "Bot" is not allowed to be manually applied.
-				[[Wikipedia:首页/明天]]是連鎖保護
-				wiki_API.edit: Error to edit [[Wikipedia:典範條目/2019年1月9日]]: [cascadeprotected] This page has been protected from editing because it is transcluded in the following page, which is protected with the "cascading" option turned on: * [[:Wikipedia:首页/明天]]
-				 * </code>
-				 * 
-				 * @see https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
-				 */
-				if (data.error && data.error.code === 'no-direct-editing'
-				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
-				&& options.section === 'new') {
-					library_namespace.debug('無法以正常方式編輯，嘗試當作 Flow 討論頁面。', 1,
-							'wiki_API.edit');
-					// console.log(options);
-					options[KEY_SESSION] = session;
-					edit_topic(title, options.sectiontitle,
-					// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
-					text.replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''), options.token,
-							options, callback);
-					return;
-				}
-				/**
-				 * <s>遇到過長/超過限度的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />
-				 * [editconflict] Edit conflict detected</s>
-				 * 
-				 * when edit:<br />
-				 * [contenttoobig] The content you supplied exceeds the article
-				 * size limit of 2048 kilobytes
-				 * 
-				 * 頁面大小系統上限 2,048 KB = 2 MB。
-				 * 
-				 * 須注意是否有其他競相編輯的 bots。
-				 */
-				library_namespace.warn('wiki_API.edit: Error to edit '
-						+ get_page_title_link(title) + ': ' + error);
-			} else if (data.edit && ('nochange' in data.edit)) {
-				// 在極少的情況下，data.edit === undefined。
-				library_namespace.info('wiki_API.edit: '
-						+ get_page_title_link(title) + ': no change');
-			}
-			if (typeof callback === 'function') {
-				// title.title === get_page_title(title)
-				callback(title, error, data);
-			}
-		}, options, session);
+		wiki_API
+				.query(
+						action,
+						function(data, error) {
+							// console.log(data);
+							error = error
+									|| (data.error
+									// 檢查伺服器回應是否有錯誤資訊。
+									? '[' + data.error.code + '] '
+											+ data.error.info
+											: data.edit
+													&& data.edit.result !== 'Success'
+													&& ('[' + data.edit.result
+															+ '] '
+													// 新用戶要輸入過多或特定內容如
+													// URL，可能遇到:<br />
+													// [Failure] 必需輸入驗證碼
+													+ (data.edit.info
+															|| data.edit.captcha
+															&& '必需輸入驗證碼'
+													// 垃圾連結
+													// [[MediaWiki:Abusefilter-warning-link-spam]]
+													// e.g., youtu.be, bit.ly
+													// @see
+													// 20170708.import_VOA.js
+													|| data.edit.spamblacklist
+															&& 'Contains spam link 包含被列入黑名單的連結: '
+															+ data.edit.spamblacklist
+													// ||
+													// JSON.stringify(data.edit)
+													)));
+							if (error) {
+								/**
+								 * <code>
+								wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
+								wiki_API.edit: Error to edit [[Wikiversity:互助客栈/topic list]]: [tags-apply-not-allowed-one] The tag "Bot" is not allowed to be manually applied.
+								[[Wikipedia:首页/明天]]是連鎖保護
+								wiki_API.edit: Error to edit [[Wikipedia:典範條目/2019年1月9日]]: [cascadeprotected] This page has been protected from editing because it is transcluded in the following page, which is protected with the "cascading" option turned on: * [[:Wikipedia:首页/明天]]
+								 * </code>
+								 * 
+								 * @see https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
+								 */
+								if (!data.error) {
+								} else if (data.error.code === 'no-direct-editing'
+										// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
+										&& options.section === 'new') {
+									library_namespace.debug(
+											'無法以正常方式編輯，嘗試當作 Flow 討論頁面。', 1,
+											'wiki_API.edit');
+									// console.log(options);
+									options[KEY_SESSION] = session;
+									edit_topic(title, options.sectiontitle,
+											// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
+											text.replace(
+													/[\s\n\-]*~~~~[\s\n\-]*$/,
+													''), options.token,
+											options, callback);
+									return;
+								} else if (data.error.code === 'missingtitle') {
+									// "The page you specified doesn't exist."
+									// console.log(options);
+								}
+								/**
+								 * <s>遇到過長/超過限度的頁面 (e.g., 過多
+								 * transclusion。)，可能產生錯誤：<br />
+								 * [editconflict] Edit conflict detected</s>
+								 * 
+								 * when edit:<br />
+								 * [contenttoobig] The content you supplied
+								 * exceeds the article size limit of 2048
+								 * kilobytes
+								 * 
+								 * 頁面大小系統上限 2,048 KB = 2 MB。
+								 * 
+								 * 須注意是否有其他競相編輯的 bots。
+								 */
+								library_namespace
+										.warn('wiki_API.edit: Error to edit '
+												+ get_page_title_link(title)
+												+ ': ' + error);
+							} else if (data.edit && ('nochange' in data.edit)) {
+								// 在極少的情況下，data.edit === undefined。
+								library_namespace.info('wiki_API.edit: '
+										+ get_page_title_link(title)
+										+ ': no change');
+							}
+							if (typeof callback === 'function') {
+								// title.title === get_page_title(title)
+								callback(title, error, data);
+							}
+						}, options, session);
 	};
 
 	/**
@@ -18323,6 +18358,7 @@ function module_code(library_namespace) {
 				language = session.API_URL;
 			}
 		}
+		// console.log(session);
 
 		if (language) {
 			// 正規化。
@@ -18346,16 +18382,20 @@ function module_code(library_namespace) {
 			 */
 			var matched = language.match(PATTERN_wiki_project_URL);
 			if (matched) {
+				// console.log(matched);
 				library_namespace.debug(language, 4, 'language_to_site_name');
 				family = family || matched[4];
 				// TODO: error handling
-				matched = matched[3]
+				language = matched[3]
 				// e.g., 'zh-min-nan' → 'zh_min_nan'
-				.replace(/[- ]/g, '_')
-				// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
-				+ (family === 'wikipedia' ? 'wiki' : family);
-				library_namespace.debug(matched, 3, 'language_to_site_name');
-				return matched;
+				.replace(/[- ]/g, '_');
+				// using "commons" instead of "commonswikimedia"
+				if (family !== 'wikimedia' || !(language in api_URL.wikimedia)) {
+					// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
+					language += family === 'wikipedia' ? 'wiki' : family;
+				}
+				library_namespace.debug(language, 3, 'language_to_site_name');
+				return language;
 			}
 		} else {
 			// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
@@ -18376,7 +18416,9 @@ function module_code(library_namespace) {
 			language = language_code_to_site_alias[language];
 		}
 
-		return language + (!family || family === 'wikipedia' ? 'wiki' : family);
+		language += !family || family === 'wikipedia' ? 'wiki' : family;
+		// throw language;
+		return language;
 	}
 
 	/**
