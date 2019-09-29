@@ -3144,10 +3144,10 @@ function test_wiki() {
 		assert([ wikitext, parser.toString() ], 'wiki.parse: {{#parserfunctions:}} #1');
 		token=[];
 		parser.each('function',function(t){token.push(t)});
-		assert([ '{{#time:Y年Fj日|-7 days +9 hours}}}', token.join() ], 'wiki.parse: {{#parserfunctions:}} #2');
+		assert([ '{{#time:Y年Fj日|-7 days +9 hours}}', token.join() ], 'wiki.parse: {{#parserfunctions:}} #2');
 		assert([ 'time', token[0].name ], 'wiki.parse: {{#parserfunctions:}} #3');
 		assert([ 'Y年Fj日', token[0].parameters[1] ], 'wiki.parse: {{#parserfunctions:}} #4');
-		assert([ '-7 days +9 hours', token[0].parameters[1] ], 'wiki.parse: {{#parserfunctions:}} #5');
+		assert([ '-7 days +9 hours', token[0].parameters[2] ], 'wiki.parse: {{#parserfunctions:}} #5');
 
 		wikitext = 't\n**a[[L#{{t:p}}|l]]b\n**a[[L#{{t:p}}]]b\n'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ], 'wiki.parse: list #1');
