@@ -3158,6 +3158,49 @@ function module_code(library_namespace) {
 	// 在其內部的wikitext不會被parse。
 	no_parse_tags = 'pre|nowiki'.split('|').to_hash();
 
+	function evaluate_parser_function(options) {
+		var argument_1 = this.parameters[1] && this.parameters[1].toString();
+		var argument_2 = this.parameters[2] && this.parameters[2].toString();
+		var argument_3 = this.parameters[3] && this.parameters[3].toString();
+
+		switch (this.name) {
+		case 'len':
+			// {{#len:string}}
+
+			// TODO: ags such as <nowiki> and other tag extensions will always
+			// have a length of zero, since their content is hidden from the
+			// parser.
+			return argument_1.length;
+
+		case 'sub':
+			// {{#sub:string|start|length}}
+			return argument_3 ? argument_1.substring(argument_2, argument_3)
+					: argument_1.slice(argument_2);
+
+		case 'time':
+			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##time
+			// {{#time: format string | date/time object | language code | local
+			// }}
+			if (!argument_2 || argument_2 === 'now') {
+				argument_2 = new Date;
+				return argument_1.replace(/Y/g, argument_2.getUTCFullYear())
+				//
+				.replace(/n/g, argument_2.getUTCMonth() + 1)
+				//
+				.replace(/m/g, (argument_2.getUTCMonth() + 1).pad(2))
+				//
+				.replace(/j/g, argument_2.getUTCDate())
+				//
+				.replace(/d/g, argument_2.getUTCDate().pad(2));
+				// TODO
+			}
+
+			// TODO
+		}
+
+		return this;
+	}
+
 	/**
 	 * .toString() of wiki elements: wiki_toString[token.type]<br />
 	 * parse_wikitext() 將把 wikitext 解析為各 {Array} 組成之結構。當以 .toString() 結合時，將呼叫
@@ -3224,6 +3267,9 @@ function module_code(library_namespace) {
 		// e.g., template
 		transclusion : function() {
 			return '{{' + this.join('|') + '}}';
+		},
+		'function' : function() {
+			return '{{' + this[0] + this.slice(1).join('|') + '}}';
 		},
 		// [[Help:Table]]
 		table : function() {
@@ -3773,11 +3819,39 @@ function module_code(library_namespace) {
 			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
 			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
 			parameters = parameters.split('|');
-			if (parameters[0].includes(include_mark)
-			// if not [[w:en:Help:Conditional expressions]]
-			&& !/^[\s\n]*#[a-z]+:/.test(parameters[0])) {
-				// e.g., {{ {{tl|t}} | p }}
-				return all;
+
+			// matched: [ all, functionname token, functionname, argument 1 ]
+			var matched = parameters[0].match(/^([\s\n]*#([a-z]+):)([\s\S]*)$/);
+
+			// if not [[mw:Help:Extension:ParserFunctions]]
+			if (!matched) {
+				index = +parameters[0].between(include_mark, end_mark);
+				if (index && queue[index = +index]
+				// incase:
+				// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}
+				&& queue[index].type !== 'function') {
+					// console.log(parameters);
+					// console.log(queue[index]);
+
+					// e.g., `{{ {{tl|t}} | p }}` is incalid:
+					// → `{{ {{t}} | p }}`
+					return all;
+				}
+
+				// e.g., token.name ===
+				// 'Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}'
+
+			} else {
+				// console.log(matched);
+
+				// [[mw:Help:Extension:ParserFunctions]]
+				// [[mw:Extension:StringFunctions]]
+				// [[mw:Help:Magic words#Parser_functions]]
+				// [[w:en:Help:Conditional expressions]]
+
+				// will set latter
+				parameters[0] = '';
+				parameters.splice(1, 0, matched[3]);
 			}
 
 			index = 1;
@@ -3876,41 +3950,56 @@ function module_code(library_namespace) {
 				return token;
 			});
 
-			// 'Defaultsort' → 'DEFAULTSORT'
-			parameters.name = typeof parameters[0][0] === 'string'
-			// 後面不允許空白。 must / *DEFAULTSORT:/
-			&& parameters[0][0].trimStart().toUpperCase();
-			// TODO: {{ {{UCFIRST:T}} }}
-			// TODO: {{ :{{UCFIRST:T}} }}
-			// console.log(parameters);
-			if (parameters.name && (parameters.name in Magic_words_hash)
-			// test if token is [[Help:Magic words]]
-			&& (Magic_words_hash[parameters.name] || parameters[0].length > 1)) {
-				// 此時以 parameters[0][1] 可獲得首 parameter。
-				parameters.is_magic_word = true;
-			} else {
-				parameters.name = typeof parameters[0][0] === 'string'
-				//
-				&& parameters[0][0].trim().toLowerCase();
-				// console.log(parameters.name);
-				// .page_name
-				parameters.page_title = normalize_page_name(
-				// incase "{{ DEFAULTSORT : }}"
-				// 正規化 template name。
-				// 'ab/cd' → 'Ab/cd'
-				(parameters.name in get_namespace.hash ? ''
-				// {{T}}嵌入[[Template:T]]
-				// {{Template:T}}嵌入[[Template:T]]
-				// {{:T}}嵌入[[T]]
-				// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
-				: 'Template:') + parameters[0].toString());
+			// add properties
 
-				parameters.name = normalize_page_name(parameters[0].toString());
+			if (matched) {
+				parameters[0] = matched[1];
+				parameters.name = matched[2];
+				// 若指定 .valueOf = function()，
+				// 會造成 '' + token 執行 .valueOf()。
+				parameters.evaluate = evaluate_parser_function;
+
+			} else {
+				// 'Defaultsort' → 'DEFAULTSORT'
+				parameters.name = typeof parameters[0][0] === 'string'
+				// 後面不允許空白。 must / *DEFAULTSORT:/
+				&& parameters[0][0].trimStart().toUpperCase();
+
+				if (parameters.name
+						&& (parameters.name in Magic_words_hash)
+						// test if token is [[Help:Magic words]]
+						&& (Magic_words_hash[parameters.name] || parameters[0].length > 1)) {
+					// TODO: {{ {{UCFIRST:T}} }}
+					// TODO: {{ :{{UCFIRST:T}} }}
+					// console.log(parameters);
+
+					// 此時以 parameters[0][1] 可獲得首 parameter。
+					parameters.is_magic_word = true;
+				} else {
+					parameters.name = typeof parameters[0][0] === 'string'
+					//
+					&& parameters[0][0].trim().toLowerCase();
+					// console.log(parameters.name);
+					// .page_name
+					parameters.page_title = normalize_page_name(
+					// incase "{{ DEFAULTSORT : }}"
+					// 正規化 template name。
+					// 'ab/cd' → 'Ab/cd'
+					(parameters.name in get_namespace.hash ? ''
+					// {{T}}嵌入[[Template:T]]
+					// {{Template:T}}嵌入[[Template:T]]
+					// {{:T}}嵌入[[T]]
+					// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
+					: 'Template:') + parameters[0].toString());
+
+					parameters.name = normalize_page_name(parameters[0]
+							.toString());
+				}
 			}
 			parameters.parameters = _parameters;
 			parameters.index_of = parameter_index_of;
 
-			_set_wiki_type(parameters, 'transclusion');
+			_set_wiki_type(parameters, matched ? 'function' : 'transclusion');
 			queue.push(parameters);
 			// TODO: parameters.parameters = []
 			return previous + include_mark + (queue.length - 1) + end_mark;
@@ -12075,97 +12164,83 @@ function module_code(library_namespace) {
 			delete options[KEY_SESSION];
 		}
 
-		wiki_API
-				.query(
-						action,
-						function(data, error) {
-							// console.log(data);
-							error = error
-									|| (data.error
-									// 檢查伺服器回應是否有錯誤資訊。
-									? '[' + data.error.code + '] '
-											+ data.error.info
-											: data.edit
-													&& data.edit.result !== 'Success'
-													&& ('[' + data.edit.result
-															+ '] '
-													// 新用戶要輸入過多或特定內容如
-													// URL，可能遇到:<br />
-													// [Failure] 必需輸入驗證碼
-													+ (data.edit.info
-															|| data.edit.captcha
-															&& '必需輸入驗證碼'
-													// 垃圾連結
-													// [[MediaWiki:Abusefilter-warning-link-spam]]
-													// e.g., youtu.be, bit.ly
-													// @see
-													// 20170708.import_VOA.js
-													|| data.edit.spamblacklist
-															&& 'Contains spam link 包含被列入黑名單的連結: '
-															+ data.edit.spamblacklist
-													// ||
-													// JSON.stringify(data.edit)
-													)));
-							if (error) {
-								/**
-								 * <code>
-								wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
-								wiki_API.edit: Error to edit [[Wikiversity:互助客栈/topic list]]: [tags-apply-not-allowed-one] The tag "Bot" is not allowed to be manually applied.
-								[[Wikipedia:首页/明天]]是連鎖保護
-								wiki_API.edit: Error to edit [[Wikipedia:典範條目/2019年1月9日]]: [cascadeprotected] This page has been protected from editing because it is transcluded in the following page, which is protected with the "cascading" option turned on: * [[:Wikipedia:首页/明天]]
-								 * </code>
-								 * 
-								 * @see https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
-								 */
-								if (!data.error) {
-								} else if (data.error.code === 'no-direct-editing'
-										// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
-										&& options.section === 'new') {
-									library_namespace.debug(
-											'無法以正常方式編輯，嘗試當作 Flow 討論頁面。', 1,
-											'wiki_API.edit');
-									// console.log(options);
-									options[KEY_SESSION] = session;
-									edit_topic(title, options.sectiontitle,
-											// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
-											text.replace(
-													/[\s\n\-]*~~~~[\s\n\-]*$/,
-													''), options.token,
-											options, callback);
-									return;
-								} else if (data.error.code === 'missingtitle') {
-									// "The page you specified doesn't exist."
-									// console.log(options);
-								}
-								/**
-								 * <s>遇到過長/超過限度的頁面 (e.g., 過多
-								 * transclusion。)，可能產生錯誤：<br />
-								 * [editconflict] Edit conflict detected</s>
-								 * 
-								 * when edit:<br />
-								 * [contenttoobig] The content you supplied
-								 * exceeds the article size limit of 2048
-								 * kilobytes
-								 * 
-								 * 頁面大小系統上限 2,048 KB = 2 MB。
-								 * 
-								 * 須注意是否有其他競相編輯的 bots。
-								 */
-								library_namespace
-										.warn('wiki_API.edit: Error to edit '
-												+ get_page_title_link(title)
-												+ ': ' + error);
-							} else if (data.edit && ('nochange' in data.edit)) {
-								// 在極少的情況下，data.edit === undefined。
-								library_namespace.info('wiki_API.edit: '
-										+ get_page_title_link(title)
-										+ ': no change');
-							}
-							if (typeof callback === 'function') {
-								// title.title === get_page_title(title)
-								callback(title, error, data);
-							}
-						}, options, session);
+		wiki_API.query(action, function(data, error) {
+			// console.log(data);
+			if (!error) {
+				error = data.error
+				// 檢查伺服器回應是否有錯誤資訊。
+				? '[' + data.error.code + '] ' + data.error.info : data.edit
+						&& data.edit.result !== 'Success'
+						&& ('[' + data.edit.result + '] '
+						/**
+						 * 新用戶要輸入過多或特定內容如 URL，可能遇到:<br />
+						 * [Failure] 必需輸入驗證碼
+						 */
+						+ (data.edit.info || data.edit.captcha && '必需輸入驗證碼'
+						/**
+						 * 垃圾連結 [[MediaWiki:Abusefilter-warning-link-spam]]
+						 * e.g., youtu.be, bit.ly
+						 * 
+						 * @see 20170708.import_VOA.js
+						 */
+						|| data.edit.spamblacklist
+								&& 'Contains spam link 包含被列入黑名單的連結: '
+								+ data.edit.spamblacklist
+						// || JSON.stringify(data.edit)
+						));
+			}
+			if (error) {
+				/**
+				 * <code>
+				wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
+				wiki_API.edit: Error to edit [[Wikiversity:互助客栈/topic list]]: [tags-apply-not-allowed-one] The tag "Bot" is not allowed to be manually applied.
+				[[Wikipedia:首页/明天]]是連鎖保護
+				wiki_API.edit: Error to edit [[Wikipedia:典範條目/2019年1月9日]]: [cascadeprotected] This page has been protected from editing because it is transcluded in the following page, which is protected with the "cascading" option turned on: * [[:Wikipedia:首页/明天]]
+				 * </code>
+				 * 
+				 * @see https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
+				 */
+				if (!data.error) {
+				} else if (data.error.code === 'no-direct-editing'
+				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
+				&& options.section === 'new') {
+					library_namespace.debug('無法以正常方式編輯，嘗試當作 Flow 討論頁面。', 1,
+							'wiki_API.edit');
+					// console.log(options);
+					options[KEY_SESSION] = session;
+					edit_topic(title, options.sectiontitle,
+					// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
+					text.replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''), options.token,
+							options, callback);
+					return;
+				} else if (data.error.code === 'missingtitle') {
+					// "The page you specified doesn't exist."
+					 console.log(options);
+				}
+				/**
+				 * <s>遇到過長/超過限度的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />
+				 * [editconflict] Edit conflict detected</s>
+				 * 
+				 * when edit:<br />
+				 * [contenttoobig] The content you supplied exceeds the article
+				 * size limit of 2048 kilobytes
+				 * 
+				 * 頁面大小系統上限 2,048 KB = 2 MB。
+				 * 
+				 * 須注意是否有其他競相編輯的 bots。
+				 */
+				library_namespace.warn('wiki_API.edit: Error to edit '
+						+ get_page_title_link(title) + ': ' + error);
+			} else if (data.edit && ('nochange' in data.edit)) {
+				// 在極少的情況下，data.edit === undefined。
+				library_namespace.info('wiki_API.edit: '
+						+ get_page_title_link(title) + ': no change');
+			}
+			if (typeof callback === 'function') {
+				// title.title === get_page_title(title)
+				callback(title, error, data);
+			}
+		}, options, session);
 	};
 
 	/**
