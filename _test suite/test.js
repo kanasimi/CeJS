@@ -2943,7 +2943,7 @@ function test_wiki() {
 		assert([ 'plain', parser.type ]);
 		assert([ 'transclusion', parser[1].type ]);
 		wikitext = '{{#ifexpr: {{{1}}} > 0 and {{{1}}} < 1.0 or {{#ifeq:{{{decimal}}}| yes}} |is decimal |not decimal}}'; parser = CeL.wiki.parse(wikitext);
-		assert([ 'transclusion', parser.type ]);
+		assert([ 'function', parser.type ]);
 
 		wikitext = 'a[[link]]b'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ]);
@@ -3139,6 +3139,15 @@ function test_wiki() {
 		assert([ '{{t| 12|4}}',	CeL.wiki.parse.replace_parameter(token, 2, {'2':4}) && token.toString() ], 'wiki.parse.replace_parameter: #13');
 		assert([ '{{t| 12|5}}',	CeL.wiki.parse.replace_parameter(token, 2, ' 2 = 5') && token.toString() ], 'wiki.parse.replace_parameter: #14');
 		assert([ false,	CeL.wiki.parse.replace_parameter(token, 2, 5) && token.toString() ], 'wiki.parse.replace_parameter: #15');
+
+		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}'; parser = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parser.toString() ], 'wiki.parse: {{#parserfunctions:}} #1');
+		token=[];
+		parser.each('function',function(t){token.push(t)});
+		assert([ '{{#time:Y年Fj日|-7 days +9 hours}}}', token.join() ], 'wiki.parse: {{#parserfunctions:}} #2');
+		assert([ 'time', token[0].name ], 'wiki.parse: {{#parserfunctions:}} #3');
+		assert([ 'Y年Fj日', token[0].parameters[1] ], 'wiki.parse: {{#parserfunctions:}} #4');
+		assert([ '-7 days +9 hours', token[0].parameters[1] ], 'wiki.parse: {{#parserfunctions:}} #5');
 
 		wikitext = 't\n**a[[L#{{t:p}}|l]]b\n**a[[L#{{t:p}}]]b\n'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ], 'wiki.parse: list #1');
