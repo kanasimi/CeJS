@@ -2110,13 +2110,17 @@ function module_code(library_namespace) {
 	// ------------------------------------------
 
 	// @inner
-	function preprocess_section_link_token(token) {
+	function preprocess_section_link_token(token, options) {
+		if (typeof options.preprocess_section_link_token === 'function') {
+			token = options.preprocess_section_link_token(token);
+		}
+
 		if (token.type === 'tag'/* || token.type === 'tag_single' */) {
 			// token: [ tag_attributes, tag_inner ]
 			if (token.tag === 'nowiki') {
 				// escape characters inside <nowiki>
 				return preprocess_section_link_token(token[1] ? token[1]
-						.toString() : '');
+						.toString() : '', options);
 			}
 
 			// 容許一些特定標籤能夠顯示格式。以繼承原標題的粗體斜體和顏色等等格式。
@@ -2137,7 +2141,8 @@ function module_code(library_namespace) {
 
 			// reduce HTML tags. e.g., <ref>
 			// console.log(token);
-			var new_token = preprocess_section_link_tokens(token[1] || '');
+			var new_token = preprocess_section_link_tokens(token[1] || '',
+					options);
 			new_token.tag = token.tag;
 			return new_token;
 		}
@@ -2160,7 +2165,7 @@ function module_code(library_namespace) {
 				token.toString = function() {
 					return this.join('|')
 				};
-				token = preprocess_section_link_tokens(token);
+				token = preprocess_section_link_tokens(token, options);
 			} else {
 				// 去掉最前頭的 ":"。 @see wiki_toString
 				token = token[0].toString().replace(/^ *:?/, '') + token[1];
@@ -2174,7 +2179,7 @@ function module_code(library_namespace) {
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {
-			// template-linking templates: Tl, Tlx, Tls, T1, ...
+			// template-linking templates: {{Tl}}, {{Tlx}}, {{Tls}}, {{T1}}, ...
 			if (/^(?:T[l1n][a-z]{0,3}[23]?)$/.test(token.name)) {
 				token.shift();
 				return token;
@@ -2192,9 +2197,9 @@ function module_code(library_namespace) {
 			// escape external link
 			// console.log('>> ' + token);
 			// console.log(token[1]);
-			// console.log(preprocess_section_link_tokens(token[1]));
+			// console.log(preprocess_section_link_tokens(token[1], options));
 			if (token[1]) {
-				return preprocess_section_link_tokens(token[1]);
+				return preprocess_section_link_tokens(token[1], options);
 			}
 			// TODO: error: 用在[URL]無標題連結會失效。需要計算外部連結的序號。
 			return token;
@@ -2213,8 +2218,10 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof token === 'string') {
+			// console.log('>> ' + token);
 			// console.log('>> [' + index + '] ' + token);
 			// console.log(parent);
+
 			// TODO: use library_namespace.DOM.HTML_to_Unicode()
 			token = token.replace(/&#(\d+);/g, function(all, code) {
 				return String.fromCharCode(code);
@@ -2235,15 +2242,20 @@ function module_code(library_namespace) {
 	}
 
 	// @inner
-	function preprocess_section_link_tokens(tokens) {
+	function preprocess_section_link_tokens(tokens, options) {
 		if (Array.isArray(tokens) && tokens.type === 'plain') {
-			// console.log('tokens:');
-			// console.log(tokens);
-			for_each_token.call(tokens, preprocess_section_link_token, true);
+			if (false) {
+				library_namespace
+						.info('preprocess_section_link_tokens: tokens:');
+				console.log(tokens);
+			}
+			for_each_token.call(tokens, function(token, index, parent) {
+				return preprocess_section_link_token(token, options);
+			}, true);
 			return tokens;
 		}
 
-		return preprocess_section_link_token(tokens);
+		return preprocess_section_link_token(tokens, options);
 	}
 
 	function section_link_escape(text, is_uri) {
@@ -2329,11 +2341,13 @@ function module_code(library_namespace) {
 				// TODO
 				callback : options
 			};
+		} else {
+			options = library_namespace.setup_options(options);
 		}
 
 		var parsed_title = preprocess_section_link_tokens(
 		// []: 避免被當作 <pre>
-		parse_wikitext(section_title, null, [])),
+		parse_wikitext(section_title, null, []), options),
 		// 注意: 當這空白字園出現在功能性token中時，可能會出錯。
 		id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
 		// anchor: 可以直接拿來做 wikilink anchor 的章節標題。
@@ -2521,8 +2535,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @example <code>
 	parsed = CeL.wiki.parser(page_data);
-	parsed.each_section(function(section, index) {
-		if (index === 0) {
+	parsed.each_section(function(section, section_index) {
+		if (section_index === 0) {
 			// first_section = section;
 			return;
 		}
@@ -2630,6 +2644,7 @@ function module_code(library_namespace) {
 				// list buffer
 				buffer = [], this_user, token;
 				// Only check the first level. 只檢查第一層。
+				// TODO: parse [[Wikipedia:削除依頼/暫定2車線]]: <div>...</div>
 				// check <b>[[User:|]]</b>
 				section_index < section.length || buffer.length > 0;) {
 					token = buffer.length > 0 ? buffer.shift()
@@ -12215,7 +12230,7 @@ function module_code(library_namespace) {
 					return;
 				} else if (data.error.code === 'missingtitle') {
 					// "The page you specified doesn't exist."
-					 console.log(options);
+					// console.log(options);
 				}
 				/**
 				 * <s>遇到過長/超過限度的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />
