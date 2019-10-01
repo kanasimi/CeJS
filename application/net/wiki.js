@@ -3853,10 +3853,14 @@ function module_code(library_namespace) {
 			// if not [[mw:Help:Extension:ParserFunctions]]
 			if (!matched) {
 				index = +parameters[0].between(include_mark, end_mark);
-				if (index && queue[index = +index]
-				// incase:
-				// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}
-				&& queue[index].type !== 'function') {
+				if (index && queue[index = +index] && !(queue[index].type in {
+					// incase:
+					// {{Wikipedia:削除依頼/ログ/{{今日}}}}
+					transclusion : true,
+					// incase:
+					// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}
+					'function' : true
+				})) {
 					// console.log(parameters);
 					// console.log(queue[index]);
 
