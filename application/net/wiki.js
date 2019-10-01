@@ -1516,10 +1516,45 @@ function module_code(library_namespace) {
 	/**
 	 * 將 parse_wikitext() 獲得之 template_token 中的指定 parameter 換成 replace_to。
 	 * 
-	 * 不在乎 spaces 的版本可參考 。
-	 * 
 	 * WARNING: 若不改變 parameter name，只變更 value，<br />
 	 * 則 replace_to 應該使用 'parameter name = value' 而非僅 'value'。
+	 * 
+	 * @example<code>
+
+	// replace parameter name
+	CeL.wiki.parse.replace_parameter(token, replace_from_parameter_name,
+		value => {
+			return { replace_from_parameter_name : value };
+		}
+	);
+
+	// replace parameter name: 不在乎 spaces 的版本。
+	CeL.wiki.parse.replace_parameter(token, replace_from_parameter_name,
+		value => replace_from_parameter_name + '=' + value
+	);
+
+	// replace 1 parameter to 2 parameters
+	CeL.wiki.parse.replace_parameter(token, replace_from_parameter_name,
+		original_value => {
+			parameter_1 : value_1,
+			parameter_2 : original_value
+		}
+	);
+
+	// replace `replace_from_parameter_name = *` to "replace to wikitext"
+	CeL.wiki.parse.replace_parameter(token, replace_from_parameter_name,
+		"replace to wikitext"
+	);
+
+	// multi-replacement
+	CeL.wiki.parse.replace_parameter(token, {
+		replace_from_1 : replace_to_config_1,
+		replace_from_2 : replace_to_config_2
+	});
+
+	 </code>
+	 * 
+	 * @see 20190912.fix_Infobox_company.js, 20190913.move_link.js
 	 * 
 	 * @param {Array}template_token
 	 *            由 parse_wikitext() 獲得之 template_token
@@ -1530,7 +1565,7 @@ function module_code(library_namespace) {
 	 *            {parameter_1 = value, parameter_2 = value} ||<br />
 	 *            function replace_to(value, parameter_name, template_token)
 	 * 
-	 * @returns {Inerger} count of has successfully replaced
+	 * @returns {ℕ⁰:Natural+0} count of successful replacement
 	 */
 	function replace_parameter(template_token, parameter_name, replace_to) {
 		if (replace_to === undefined
@@ -6529,7 +6564,7 @@ function module_code(library_namespace) {
 		// is_api_and_title(page_data)
 		if (get_page_content.is_page_data(page_data)) {
 			need_escape = page_data.ns === get_namespace.hash.category
-					|| get_namespace.hash.file;
+					|| page_data.ns === get_namespace.hash.file;
 			title = page_data.title;
 		} else if ((title = get_page_title(page_data))
 		// 通常應該:
@@ -7995,12 +8030,21 @@ function module_code(library_namespace) {
 		if (typeof message !== 'string') {
 			message = message && String(message) || '';
 		}
-		if (message = message.trim()) {
-			this.push((use_ordered_list ? '# ' : '* ')
-					+ (title && (title = get_page_title_link(title))
-					// 對於非條目作特殊處理。
-					? /^\[\[[^\[\]\|{}\n#�:]*:/.test(title) ? "'''" + title
-							+ "''' " : title + ' ' : '') + message);
+		message = message.trim();
+		if (message) {
+			if (title) {
+				title = get_page_title_link(title);
+				if (title) {
+					if (/^\[\[[^\[\]\|{}\n#�:]*:/.test(title)) {
+						// 對於非條目作特殊處理。
+						title = "'''" + title + "'''";
+					}
+					title += ' ';
+				}
+			}
+			message = (use_ordered_list ? '# ' : '* ') + (title || '')
+					+ message;
+			this.push(message);
 		}
 	}
 
