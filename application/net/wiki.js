@@ -3910,6 +3910,9 @@ function module_code(library_namespace) {
 			} else {
 				// console.log(matched);
 
+				// 有特殊 elements 置入其中。
+				// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
+
 				// [[mw:Help:Extension:ParserFunctions]]
 				// [[mw:Extension:StringFunctions]]
 				// [[mw:Help:Magic words#Parser_functions]]
@@ -3922,19 +3925,21 @@ function module_code(library_namespace) {
 
 			index = 1;
 			parameters = parameters.map(function(token, _index) {
-				if (_index === 0
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
-				&& !token.includes(include_mark)) {
-					return _set_wiki_type(
-					//
-					token.split(normalize ? /\s*:\s*/ : ':'), 'page_title');
-				}
-
-				// 經過改變，需再進一步處理。
+				// 預防經過改變，需再進一步處理。
 				token = parse_wikitext(token, Object.assign({
 					inside_transclusion : true
 				}, options), queue);
+
+				if (_index === 0) {
+					// console.log(token);
+					if (typeof token === 'string') {
+						return _set_wiki_type(token.split(normalize ? /\s*:\s*/
+								: ':'), 'page_title');
+					}
+					// 有特殊 elements 置入其中。
+					// e.g., {{ {{t|n}} | a }}
+					return token;
+				}
 
 				var _token = token;
 				// console.log(_token);
@@ -14874,7 +14879,7 @@ function module_code(library_namespace) {
 					// 比較頁面修訂差異。
 					if (options.with_diff || options.with_content >= 2) {
 						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
-						// rvdiffto=prev 已經parsed，因此仍須自行解析。
+						// rvdiffto=prev 已經 parsed，因此仍須自行解析。
 						// TODO: test
 						// 因為採用.run_serial(.page())，因此約一秒會跑一頁面。
 						rows.run_serial(function(run_next, row, index, list) {
