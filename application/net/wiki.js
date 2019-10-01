@@ -1530,12 +1530,24 @@ function module_code(library_namespace) {
 	 *            {parameter_1 = value, parameter_2 = value} ||<br />
 	 *            function replace_to(value, parameter_name, template_token)
 	 * 
-	 * @returns {Boolean} has successfully replaced
+	 * @returns {Inerger} count of has successfully replaced
 	 */
 	function replace_parameter(template_token, parameter_name, replace_to) {
+		if (replace_to === undefined
+				&& library_namespace.is_Object(parameter_name)) {
+			var count = 0;
+			for ( var replace_from in parameter_name) {
+				count += replace_parameter(template_token, replace_from,
+						parameter_name[replace_from]);
+			}
+			return count;
+		}
+
+		// --------------------------------------
+
 		var index = template_token.index_of[parameter_name];
 		if (!(index >= 0)) {
-			return false;
+			return 0;
 		}
 
 		if (typeof replace_to === 'function') {
@@ -1545,7 +1557,7 @@ function module_code(library_namespace) {
 		}
 
 		if (replace_to === undefined) {
-			return false;
+			return 0;
 		}
 
 		// --------------------------------------
@@ -1627,7 +1639,7 @@ function module_code(library_namespace) {
 
 		if (template_token[index] === replace_to) {
 			// 不處理沒有變更的情況。
-			return false;
+			return 0;
 		}
 
 		// TODO: 不處理僅添加空白字元的情況。
@@ -1667,7 +1679,7 @@ function module_code(library_namespace) {
 				+ '"→"' + replace_to + '"', 2, 'replace_parameter');
 		template_token[index] = replace_to;
 
-		return true;
+		return 1;
 	}
 
 	// ------------------------------------------
