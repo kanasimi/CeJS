@@ -3110,7 +3110,7 @@ function test_wiki() {
 
 		var token;
 		token = CeL.wiki.parse('{{t|1}}');
-		assert([ false,	CeL.wiki.parse.replace_parameter(token, 2, 'aa') && token.toString() ], 'wiki.parse.replace_parameter: #0');
+		assert([ 0,	CeL.wiki.parse.replace_parameter(token, 2, 'aa') && token.toString() ], 'wiki.parse.replace_parameter: #0');
 		token = CeL.wiki.parse('{{t|1}}');
 		assert([ '{{t|aa}}',	CeL.wiki.parse.replace_parameter(token, 1, 'aa') && token.toString() ], 'wiki.parse.replace_parameter: #1');
 		token = CeL.wiki.parse('{{t | }}');
@@ -3136,9 +3136,13 @@ function test_wiki() {
 		token = CeL.wiki.parse('{{t| 2=2}}');
 		assert([ '{{t| 2=3}}',	CeL.wiki.parse.replace_parameter(token, 2, {'2':3}) && token.toString() ], 'wiki.parse.replace_parameter: #12');
 		token = CeL.wiki.parse('{{t| 12|34}}');
-		assert([ '{{t| 12|4}}',	CeL.wiki.parse.replace_parameter(token, 2, {'2':4}) && token.toString() ], 'wiki.parse.replace_parameter: #13');
+		assert([ 1,	CeL.wiki.parse.replace_parameter(token, 2, {'2':4}) ], 'wiki.parse.replace_parameter: #13');
+		assert([ '{{t| 12|4}}',	token.toString() ], 'wiki.parse.replace_parameter: #13-2');
 		assert([ '{{t| 12|5}}',	CeL.wiki.parse.replace_parameter(token, 2, ' 2 = 5') && token.toString() ], 'wiki.parse.replace_parameter: #14');
-		assert([ false,	CeL.wiki.parse.replace_parameter(token, 2, 5) && token.toString() ], 'wiki.parse.replace_parameter: #15');
+		assert([ 0,	CeL.wiki.parse.replace_parameter(token, 2, 5) && token.toString() ], 'wiki.parse.replace_parameter: #15');
+		token = CeL.wiki.parse('{{t| a= 1| v=4|b=5}}');
+		assert([ 2,	CeL.wiki.parse.replace_parameter(token, {a:'k =1',b:'r = 1'}) ], 'wiki.parse.replace_parameter: #16');
+		assert([ '{{t|k =1| v=4|r = 1}}',	token.toString() ], 'wiki.parse.replace_parameter: #16-2');
 
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}'; parser = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parser.toString() ], 'wiki.parse: {{#parserfunctions:}} #1');
