@@ -2391,8 +2391,21 @@ OS='UNIX'; // unknown
 			if (!_.is_debug(level))
 				return;
 
-			if (caller)
-				messages = _.get_function_name(caller) + ': ' + messages;
+			if (caller) {
+				caller = _.get_function_name(caller) + ': ';
+				if (typeof messages === 'object') {
+					if (Array.isArray(messages)) {
+						// e.g., CeL.debug([{T:'msg'},'msg2'],1,'caller');
+						messages.unshift(caller);
+					} else {
+						// e.g., CeL.debug({T:'msg'},1,'caller');
+						messages = [ caller, messages ];
+					}
+				} else {
+					// e.g., CeL.debug('msg',1,'caller');
+					messages = caller + messages;
+				}
+			}
 			// console.trace()
 			console.log(preprocess_messages(messages, 'debug'));
 		};
@@ -3034,7 +3047,8 @@ OS='UNIX'; // unknown
 		// TODO: test delete globalThis object.
 	} catch (e) {
 		if (e === 1) {
-			// 若失敗，表示其他對 globalThis 的操作亦無法成功。可能因為 globalThis 並非真的 Global，或權限被限制了？
+			// 若失敗，表示其他對 globalThis 的操作亦無法成功。可能因為 globalThis 並非真的
+			// Global，或權限被限制了？
 			_.warn('無法正確設定 globalThis object!');
 		} else if (e && e.message && e.message.indexOf('by CSP') !== -1) {
 			// Firefox/49.0 WebExtensions 可能 throw:
@@ -3050,12 +3064,12 @@ OS='UNIX'; // unknown
 	/**
 	 * Global Scope object 整體<br />
 	 * 於 CeL.eval_code 使用.<br />
-	 *
+	 * 
 	 * TODO:<br />
 	 * Function constructor evaluates in a scope of that function, not in a
 	 * global scope.<br />
 	 * http://perfectionkills.com/global-eval-what-are-the-options/
-	 *
+	 * 
 	 * @ignore
 	 * @see <a
 	 *      href="http://stackoverflow.com/questions/3277182/how-to-get-the-global-object-in-javascript"
