@@ -2990,15 +2990,17 @@ function module_code(library_namespace) {
 
 						var _message = String(matched[key])
 								+ String(work_data[key]);
-						_message = _message.length > 60
+						var multi_lines = _message.length > 60
 						// 採用比較簡潔並醒目多色彩的顯示方式。
-						|| _message.includes('\n') ? gettext('新資料→') : '→';
+						|| _message.includes('\n');
+						_message = multi_lines ? gettext('新資料→') : '→';
 						_message = [ [ key + ':', matched[key] ],
 								[ _message, work_data[key] ] ];
 						_message = library_namespace.display_align(_message, {
 							value_style : {
 								color : 'green'
-							}
+							},
+							line_separator : multi_lines ? '\n' : ''
 						});
 						// console.log(_message);
 						library_namespace.info(_message);
