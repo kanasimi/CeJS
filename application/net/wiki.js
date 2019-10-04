@@ -1044,6 +1044,8 @@ function module_code(library_namespace) {
 		/^[\s\u200B\u200E\u200F\u2060]*(?::[\s\u200B\u200E\u200F\u2060]*)?/
 		// 去除不可見字符 \p{Cf}，警告 \p{C}。
 		, '')
+		// 無論是中日文、英文的維基百科，所有的 '\u3000' 都會被轉成空白字元 /[ _]/。
+		.replace(/　+/g, ' ')
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1');
 
@@ -3311,8 +3313,10 @@ function module_code(library_namespace) {
 		},
 		// 內部連結 (wikilink / internal link) + interwiki link
 		link : function() {
-			return '[[' + this[0] + this[1]
-			//
+			return '[[' + this[0]
+			// + (this[1] || '')
+			+ this[1]
+			// + (this[2] || '')
 			+ (this.length > 2 ? '|' + this[2] : '') + ']]';
 		},
 		// 外部連結 external link, external web link
@@ -11869,8 +11873,11 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/w/api.php?action=help&modules=sitematrix
 	// https://zh.wikipedia.org/w/api.php?action=help&modules=paraminfo
 
+	// https://noc.wikimedia.org/conf/InitialiseSettings.php.txt
 	// https://noc.wikimedia.org/conf/VariantSettings.php.txt
 	// https://phabricator.wikimedia.org/T233070
+
+	// https://www.mediawiki.org/wiki/Manual:LocalSettings.php
 
 	// get_site_configurations
 	// https://zh.wikipedia.org/w/api.php?action=help&modules=query%2Bsiteinfo
