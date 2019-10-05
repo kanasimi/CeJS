@@ -106,9 +106,9 @@ function module_code(library_namespace) {
 					matched = matched[1].match(/([^\/]+)\/?$/);
 					id_list.push(matched[1]);
 				});
-			} else {
+			} else if (html.includes('<li onclick="window.location.href=')) {
 				html.each_between(
-				// for dm5.js, 1kkk.js
+				// for dm5.js 2019/9, 1kkk.js
 				'<li onclick="window.location.href=', '</li>',
 				/**
 				 * e.g., <code>
@@ -118,9 +118,26 @@ function module_code(library_namespace) {
 				function(text) {
 					id_list.push(text.between("'/", "/'"));
 					id_data.push(get_label(text.between(
-					//
+					// 不能用 "</span>"：可能是 "<span class="red">" 的結尾。
 					'<span class="left">', '<span class="right">')));
 				});
+			} else if (html.includes(' class="new-search-list-item"')) {
+				html.each_between(
+				// for dm5.js 2019/10
+				'<a href="/', '</a>',
+				/**
+				 * e.g., <code>
+				<a href="/manhua-zhizunshenjixitong/" class="new-search-list-item" target="search"><p class="new-search-list-content"><span class="left"><span class="red">至尊神级系统</span></span><span class="new-search-list-right">更新至 第143回</span></p></a>
+				</code>
+				 */
+				function(text) {
+					id_list.push(text.between(null, '/"'));
+					id_data.push(get_label(text.between('<span class="left">',
+					// 不能用 "</span>"：可能是 "<span class="red">" 的結尾。
+					'<span class="new-search-list-right">')));
+				});
+			} else if (html) {
+				throw new Error(this.id + ': 網站改版？無法解析搜尋結果！');
 			}
 
 			return [ id_list, id_data ];
