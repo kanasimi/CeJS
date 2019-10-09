@@ -195,7 +195,8 @@ function module_code(library_namespace) {
 		},
 		chapter_list_URL : function(work_id, work_data) {
 			// library_namespace.set_debug(9);
-			return [ 'api/getArticleList.nhn', {
+			// 2019/9: 'api/getArticleList.nhn'
+			return [ 'api/getArticleListAll.nhn', {
 				titleNo : work_id
 			} ];
 		},
@@ -204,6 +205,7 @@ function module_code(library_namespace) {
 				work_data.downloaded_chapter_list = [];
 
 			// console.log(html);
+			var recerse_count = 0;
 			html = JSON.parse(html).result;
 			html.list.forEach(function(chapter_data, index) {
 				chapter_data.url = chapter_data.articleDetailUrl;
@@ -215,10 +217,18 @@ function module_code(library_namespace) {
 					// 記錄是否已經下載過本章節。
 					= chapter_data.read;
 				}
+				if (index > 0) {
+					recerse_count += Math.sign(html.list[index - 1].articleNo
+							- chapter_data.articleNo);
+				}
 			}, this);
 			work_data.chapter_list = html.list;
 			// 預防尾大不掉。
 			delete html.list;
+			// console.log(recerse_count);
+			if (recerse_count > 0) {
+				work_data.chapter_list.reverse();
+			}
 			Object.assign(work_data, html);
 
 			// 先檢查是不是還有還有沒讀過的章節。
@@ -427,6 +437,7 @@ function module_code(library_namespace) {
 
 			} else if (image_url_list = html
 			// comico_jp: <div class="comic-image _comicImage">
+			// e.g., 新手村
 			.between(' _comicImage">', '</div>')) {
 				// 一般正常可取得圖片的情況。
 				// 去除 placeholder。 <div class="comic-image__blank-layer">
@@ -483,6 +494,7 @@ function module_code(library_namespace) {
 				cmnData._url = cmnData.url;
 				delete cmnData.url;
 			}
+			// console.log(work_data);
 			// console.log(chapter_data);
 			// console.log(cmnData);
 
@@ -493,7 +505,8 @@ function module_code(library_namespace) {
 					// http://comicimg.comico.jp/tmb/00000/1/hexhex_hexhexhex.jpg"
 					&& url.includes('.jp/tmb/') && /\.jpg$/.test(url))
 						return;
-					if (chapter_data.freeFlg !== 'Y'
+					// chapter_data.isOfficial ? 官方作品 : 新手村
+					if (chapter_data.isOfficial && chapter_data.freeFlg !== 'Y'
 					// 付費章節: 中文版提供第一張的完整版，日文版只提供縮圖。
 					// 圖片都應該要有hash，且不該是縮圖。
 					&& (url.includes('.jp/tmb/') || /\.jpg$/.test(url))) {
