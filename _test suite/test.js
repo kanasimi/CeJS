@@ -3765,7 +3765,6 @@ function do_test() {
 	'application.locale', test_locale,
 	// 基本的功能先作測試。
 /*
-*/
 	test_base,
 	test_compatibility,
 	//
@@ -3798,11 +3797,17 @@ function do_test() {
 	//
 	'application.astronomy', test_astronomy,
 	//
-	'application.net.wiki', test_wiki,
+*/
+	[
+		'application.net.wiki.page',
+		'application.net.wiki.parser',
+		'application.net.wiki' ], test_wiki,
+/*
 	//
 	'data.date.calendar', test_calendar,
 	//
 	'data.date.era', test_era,
+*/
 	//
 	function() {
 		still_running.all_configured = true;

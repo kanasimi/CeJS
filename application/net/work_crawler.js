@@ -1058,7 +1058,7 @@ function module_code(library_namespace) {
 	};
 
 	Object.assign(Work_crawler.prototype, Work_crawler_prototype);
-	// free
+	// Release memory. 釋放被占用的記憶體。
 	Work_crawler_prototype = null;
 
 	setup_argument_conditions();
@@ -1527,7 +1527,7 @@ function module_code(library_namespace) {
 						+ gettext('重新整理列表檔案 [%1]，未作改變。'
 								+ favorite_list_file_path));
 			}
-			// free
+			// Release memory. 釋放被占用的記憶體。
 			delete work_list.parsed;
 		}
 
@@ -2537,7 +2537,7 @@ function module_code(library_namespace) {
 					+ (chapter_data.title ? ' ' + chapter_data.title : ''));
 				}
 			}, this);
-			// free
+			// Release memory. 釋放被占用的記憶體。
 			old_url_hash = null;
 
 			if (chapter_list_to_check.length === 0) {
@@ -3226,7 +3226,7 @@ function module_code(library_namespace) {
 					});
 				}
 
-				// free
+				// Release memory. 釋放被占用的記憶體。
 				last_chapter_data = set_attribute = null;
 			}
 
@@ -5608,7 +5608,7 @@ function module_code(library_namespace) {
 			}
 			message.push(image_url + '\n→ ' + image_data.file);
 			library_namespace.warn(message);
-			// free
+			// Release memory. 釋放被占用的記憶體。
 			message = null;
 
 			if (image_data.error_count === _this.MAX_ERROR_RETRY) {

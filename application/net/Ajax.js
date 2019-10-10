@@ -1398,7 +1398,6 @@ function module_code(library_namespace) {
 					options.hash, charset);
 		}
 
-		// TODO: Will be "get_URL_node: [object Object]" in UNIX CLI
 		library_namespace.debug({
 			T : [ 'Fetching URL: %1', '{' + (typeof URL_to_fetch) + '} ['
 			//
@@ -2353,6 +2352,12 @@ function module_code(library_namespace) {
 
 		URL_object_to_fetch.agent = agent;
 		set_cookie_to_URL_object(URL_object_to_fetch, agent);
+		if (library_namespace.is_debug(3)) {
+			library_namespace.debug('Set headers: '
+					+ JSON.stringify(URL_object_to_fetch.headers), 3,
+					'get_URL_node');
+			console.log(URL_object_to_fetch.headers);
+		}
 
 		// console.log(URL_object_to_fetch);
 		try {
@@ -2407,7 +2412,6 @@ function module_code(library_namespace) {
 				});
 			}
 		}
-		// console.log(URL_object_to_fetch.headers);
 
 		/** {Natural}timeout in ms for get URL. 逾時ms數 */
 		var timeout = options.timeout || get_URL_node.default_timeout, timeout_id,

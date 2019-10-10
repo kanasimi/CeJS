@@ -15,7 +15,7 @@ http://stackshare.io/continuous-integration
 
 # [Colorless echo](http://lyrics.meicho.com.tw/) JavaScript kit
 The project aims to develop a JavaScript module framework that is simple to use with some interesting features.
-本計畫希望能建立一個能簡單上手的 JavaScript 程式庫架構。<!-- toolkit -->
+本計畫目標是建立一個簡單上手的 JavaScript 程式庫架構。<!-- toolkit -->
 
 ## Web page usage / browser 運行方式
 ``` HTML

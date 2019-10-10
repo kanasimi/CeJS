@@ -123,7 +123,7 @@ function module_code(library_namespace) {
 				});
 			} else if (html.includes(' class="new-search-list-item"')) {
 				html.each_between(
-				// for dm5.js 2019/10
+				// for dm5.js 2019/10 搜尋改版
 				'<a href="/', '</a>',
 				/**
 				 * e.g., <code>
