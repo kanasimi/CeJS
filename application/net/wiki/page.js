@@ -8,7 +8,7 @@
 
 </code>
  * 
- * @since
+ * @since 2019/10/10 拆分 application.net.wiki
  */
 
 // More examples: see /_test suite/test.js
