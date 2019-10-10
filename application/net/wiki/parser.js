@@ -8,7 +8,7 @@
 
 </code>
  * 
- * @since 2019/10/10 拆分 application.net.wiki
+ * @since 2019/10/10 拆分自 CeL.application.net.wiki
  */
 
 // More examples: see /_test suite/test.js
@@ -35,7 +35,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.net.wiki;
+	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_URL_prefix = wiki_API.PATTERN_URL_prefix, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
 

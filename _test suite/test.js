@@ -3261,6 +3261,19 @@ function test_wiki() {
 			get_creation_Date : true
 		});
 
+
+		_setup_test('wiki: get categorymembers');
+		wiki.categorymembers('Countries in North America', function(list) {
+			assert(list.some(function(page_data) {
+				return page_data.title === 'United States';
+			}), 'get categorymembers: [[Category:Countries in North America]]');
+			_finish_test('wiki: get categorymembers');
+		}, {
+			limit : 'max',
+			namespace : '0'
+		});
+
+
 		_setup_test('wiki: CeL.wiki.convert()');
 		CeL.wiki.convert('中国', function(text) {
 			var test_name = 'wiki: CeL.wiki.convert() #1';
@@ -3421,6 +3434,8 @@ function test_wiki() {
 		summary : '沙盒 test edit (section)',
 		nocreate : 1
 	});
+
+	// --------------------------------
 
 	wiki.logout();
 
@@ -3801,6 +3816,7 @@ function do_test() {
 	[
 		'application.net.wiki.page',
 		'application.net.wiki.parser',
+		'application.net.wiki.list',
 		'application.net.wiki' ], test_wiki,
 /*
 */

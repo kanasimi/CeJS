@@ -8,7 +8,7 @@
 
 </code>
  * 
- * @since 2019/10/10 拆分 application.net.wiki
+ * @since 2019/10/10 拆分自 CeL.application.net.wiki
  */
 
 // More examples: see /_test suite/test.js
@@ -35,7 +35,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.net.wiki;
+	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, wikidata_get_site = wiki_API.wikidata_get_site, add_parameters = wiki_API.add_parameters, node_fs = wiki_API.node_fs;
 
@@ -671,6 +671,99 @@ function module_code(library_namespace) {
 	// @see https://www.mediawiki.org/w/api.php?action=help&modules=query
 	wiki_API_page.auto_converttitles = 'zh,gan,iu,kk,ku,shi,sr,tg,uz'
 			.split(',');
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * 取得頁面之重定向資料（重新導向至哪一頁）。
+	 * 
+	 * 注意: 重定向僅代表一種強烈的關聯性，而不表示從屬關係(對於定向到章節的情況)或者等價關係。
+	 * 例如我們可能將[[有罪推定]]定向至[[無罪推定]]，然而雙方是完全相反的關係。
+	 * 只因為[[無罪推定]]是一種比較值得關注的特性，而[[有罪推定]]沒有特殊的性質(common)。因此我們只談[[無罪推定]]，不會特別拿[[有罪推定]]出來談。
+	 * 
+	 * TODO:
+	 * https://www.mediawiki.org/w/api.php?action=help&modules=searchtranslations
+	 * 
+	 * @example <code>
+
+	CeL.wiki.redirect_to('史記', function(redirect_data, page_data) {
+		CeL.show_value(redirect_data);
+	});
+
+	 </code>
+	 * 
+	 * @param {String|Array}title
+	 *            title or [ {String}API_URL, {String}title or {Object}page_data ]
+	 * @param {Function}[callback]
+	 *            回調函數。 callback({String}title that redirect to or {Object}with
+	 *            redirect to what section, {Object}page_data, error)
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
+	 */
+	wiki_API.redirect_to = function(title, callback, options) {
+		wiki_API.page(title, function(page_data, error) {
+			if (error || !page_data || ('missing' in page_data)) {
+				// error? 此頁面不存在/已刪除。
+				callback(undefined, page_data, error);
+				return;
+			}
+
+			// e.g., [ { from: 'AA', to: 'A', tofragment: 'aa' } ]
+			// e.g., [ { from: 'AA', to: 'A', tofragment: '.AA.BB.CC' } ]
+			var redirect_data = page_data.response.query.redirects;
+			if (redirect_data) {
+				if (redirect_data.length !== 1) {
+					// 可能是多重重定向？
+					// e.g., A→B→C
+					library_namespace.warn('wiki_API.redirect_to: Get '
+							+ redirect_data.length + ' redirect links for ['
+							// title.join(':')
+							+ title + ']!');
+					library_namespace.warn(redirect_data);
+				}
+				// 僅取用並回傳第一筆資料。
+				redirect_data = redirect_data[0];
+				// assert: redirect_data && redirect_data.to === page_data.title
+
+				// test if is #REDIRECT [[title#section]]
+				if (redirect_data.tofragment) {
+					try {
+						redirect_data.to_link = redirect_data.to + '#'
+						// 須注意: 對某些 section 可能 throw！
+						+ decodeURIComponent(redirect_data.tofragment
+						//
+						.replace(/\./g, '%'));
+					} catch (e) {
+						redirect_data.to_link = redirect_data.to + '#'
+						//
+						+ redirect_data.tofragment;
+					}
+					library_namespace.debug(get_page_title_link(title)
+					// →
+					+ ' redirected to section [[' + redirect_data.to + '#'
+							+ redirect_data.tofragment + ']]!', 1,
+							'wiki_API.redirect_to');
+					callback(redirect_data, page_data);
+					return;
+				}
+
+			}
+
+			// page_data.title is normalized title.
+			callback(page_data.title, page_data);
+
+		}, Object.assign({
+			// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規化標題。
+			prop : '',
+			redirects : 1,
+			// Only works if the wiki's content language supports variant
+			// conversion. en, crh, gan, iu, kk, ku, shi, sr, tg, uz and zh.
+			// converttitles : 1,
+			save_response : true
+		}, options));
+	};
 
 	// ------------------------------------------------------------------------
 
