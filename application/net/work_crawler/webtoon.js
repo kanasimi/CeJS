@@ -140,16 +140,21 @@ function module_code(library_namespace) {
 			return work_data;
 		},
 		chapter_list_URL : function(work_id, work_data) {
+			// return url of the first chapter
 			return work_data.chapter_1_url;
 		},
 		get_chapter_list : function(work_data, html) {
+			// console.log(html);
 			var data = html.between('<div class="episode_lst">', '</ul>'), matched,
 			/**
 			 * 咚漫 2018/10/27? 改版 <code>
 			<a data-sc-event-parameter="{ title_title:'谪仙录',titleNo:'1307',genre:FANTASY,subcategory_"0":DRAMAsubcategory_"1":FANTASY,picAuthor:泼克文化,wriAuthor:泼克文化,update_day:,serial_status:SERIES,reader_gender:男,episode_name:第零话 1,episodeNo:1,change_mode:'',is_read_complete:'',change_episode_direction:''}" data-sc-event-name="TitleReadChangeEpisode" data-buried-obj="1" data-sc-name="PC_read-page_image-episode-btn"  href="//www.dongmanmanhua.cn/fantasy/zhexianlu/%E7%AC%AC%E9%9B%B6%E8%AF%9D-1/viewer?title_no=1307&episode_no=1" class="on  N=a:vtw.llist,g:zh_CN_zh-hans">
+
+			// 穿越時空愚到你	https://www.webtoons.com/zh-hant/drama/2019foolsday/list?title_no=1562
+			<span class="subj">水下那一分鐘 ft. 奇奇怪怪 <夢境與真實></span>
 			</code>
 			 */
-			PATTERN_chapter = /<li[^<>]*>[\s\S]*?<a [^<>]*?href="([^"<>]+)"[^<>]*>[\s\S]*?<span class="subj">([^<>]*)<\/span>[\s\S]*?<\/li>/g;
+			PATTERN_chapter = /<li[^<>]*>[\s\S]*?<a [^<>]*?href="([^"<>]+)"[^<>]*>[\s\S]*?<span class="subj">([\s\S]*?)<\/span>[\s\S]*?<\/li>/g;
 
 			work_data.chapter_list = [];
 			while (matched = PATTERN_chapter.exec(data)) {
@@ -159,6 +164,7 @@ function module_code(library_namespace) {
 				};
 				work_data.chapter_list.push(chapter_data);
 			}
+			// console.log(work_data.chapter_list);
 		},
 
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
