@@ -8738,8 +8738,9 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// export 導出.
-	Object.assign(wiki_API, {
-		// @inner
+
+	// @inner
+	library_namespace.set_method(wiki_API, {
 		KEY_SESSION : KEY_SESSION,
 		KEY_HOST_SESSION : KEY_HOST_SESSION,
 
@@ -8761,12 +8762,11 @@ function module_code(library_namespace) {
 		PATTERN_category_prefix : PATTERN_category_prefix,
 
 		PATTERN_PROJECT_CODE_i : PATTERN_PROJECT_CODE_i,
-		PATTERN_wiki_project_URL : PATTERN_wiki_project_URL,
+		PATTERN_wiki_project_URL : PATTERN_wiki_project_URL
+	});
 
-		// --------------------------------------
-
-		// @static
-
+	// @static
+	Object.assign(wiki_API, {
 		api_URL : api_URL,
 		set_language : set_default_language,
 

@@ -5088,14 +5088,14 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// export 導出.
+
+	// @inner
+	library_namespace.set_method(wiki_API, {
+		setup_data_session : setup_data_session
+	});
+
+	// @static
 	Object.assign(wiki_API, {
-		// @inner
-		setup_data_session : setup_data_session,
-
-		// --------------------------------------
-
-		// @static
-
 		PATTERN_common_characters : PATTERN_common_characters,
 		PATTERN_only_common_characters : PATTERN_only_common_characters,
 
