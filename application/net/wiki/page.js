@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL function for MediaWiki (Wikipedia / 維基百科): page revisions
+ * @name CeL function for MediaWiki (Wikipedia / 維基百科): page, revisions
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用程式庫的子程式庫。
  * 
@@ -25,7 +25,7 @@ typeof CeL === 'function' && CeL.run({
 
 	require : 'data.native.'
 	//
-	+ '|application.net.wiki.query.',
+	+ '|application.net.wiki.query.|application.net.wiki.Flow.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -524,10 +524,11 @@ function module_code(library_namespace) {
 					}
 					if (page_list && get_content
 					//
-					&& (page_list.is_Flow = is_Flow(page_list))
+					&& (page_list.is_Flow = wiki_API.Flow.is_Flow(page_list))
 					// e.g., { flow_view : 'header' }
 					&& options.flow_view) {
-						Flow_page(page_list, callback, options);
+						// Flow_page()
+						wiki_API.Flow.page(page_list, callback, options);
 						return;
 					}
 

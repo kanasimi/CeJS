@@ -8,7 +8,7 @@
 
 </code>
  * 
- * @since 2019/10/10 拆分自 CeL.application.net.wiki
+ * @since 2019/10/11 拆分自 CeL.application.net.wiki
  */
 
 // More examples: see /_test suite/test.js
@@ -5093,6 +5093,8 @@ function module_code(library_namespace) {
 	library_namespace.set_method(wiki_API, {
 		setup_data_session : setup_data_session
 	});
+
+	// ------------------------------------------
 
 	// @static
 	Object.assign(wiki_API, {
