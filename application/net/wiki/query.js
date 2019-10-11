@@ -48,7 +48,7 @@ function module_code(library_namespace) {
 	 * 實際執行 query 操作，直接 call API 之核心函數。
 	 * 
 	 * 所有會利用到 wiki_API.prototype.work ← wiki_API.prototype.next ← <br />
-	 * wiki_API.page, wiki_API.edit, ... ← wiki_API.query ← get_URL ← <br />
+	 * wiki_API.page, wiki_API.edit, ... ← wiki_API_query ← get_URL ← <br />
 	 * need standalone http agent 的功能，都需要添附 session 參數。
 	 * 
 	 * @param {String|Array}action
@@ -65,13 +65,13 @@ function module_code(library_namespace) {
 	 * @see api source:
 	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/includes/api
 	 */
-	wiki_API.query = function(action, callback, post_data, options) {
+	function wiki_API_query(action, callback, post_data, options) {
 		// 處理 action
-		library_namespace.debug('action: ' + action, 2, 'wiki_API.query');
+		library_namespace.debug('action: ' + action, 2, 'wiki_API_query');
 		if (typeof action === 'string')
 			action = [ , action ];
 		else if (!Array.isArray(action))
-			library_namespace.error('wiki_API.query: Invalid action: ['
+			library_namespace.error('wiki_API_query: Invalid action: ['
 					+ action + ']');
 		library_namespace.debug('api URL: ('
 				+ (typeof action[0])
@@ -80,7 +80,7 @@ function module_code(library_namespace) {
 				+ ']'
 				+ (action[0] === wiki_API.api_URL(action[0]) ? '' : ' → ['
 						+ wiki_API.api_URL(action[0]) + ']'), 3,
-				'wiki_API.query');
+				'wiki_API_query');
 		action[0] = wiki_API.api_URL(action[0]);
 
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
@@ -99,7 +99,7 @@ function module_code(library_namespace) {
 		lag_interval = options && options.lag >= 0 ? options.lag :
 		// ↑ wiki_API.edit 可能輸入 session 當作 options。
 		// options[KEY_SESSION] && options[KEY_SESSION].lag ||
-		wiki_API.query.default_lag;
+		wiki_API_query.default_lag;
 
 		if (false) {
 			// method 1:
@@ -107,33 +107,33 @@ function module_code(library_namespace) {
 			need_check_lag = action[1]
 					.match(/(?:action|assert)=([a-z]+)(?:&|$)/);
 			if (!need_check_lag) {
-				library_namespace.warn('wiki_API.query: Unknown action: '
+				library_namespace.warn('wiki_API_query: Unknown action: '
 						+ action[1]);
 			} else if (need_check_lag = /edit|create/i.test(need_check_lag[1])) {
 				to_wait = lag_interval
-						- (Date.now() - wiki_API.query.last[action[0]]);
+						- (Date.now() - wiki_API_query.last[action[0]]);
 			}
 		}
 		if (need_check_lag) {
 			to_wait = lag_interval
-					- (Date.now() - wiki_API.query.last[action[0]]);
+					- (Date.now() - wiki_API_query.last[action[0]]);
 		}
 
 		// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
 		if (to_wait > 0) {
 			library_namespace.debug('Waiting ' + to_wait + ' ms..', 2,
-					'wiki_API.query');
+					'wiki_API_query');
 			setTimeout(function() {
-				wiki_API.query(action, callback, post_data, options);
+				wiki_API_query(action, callback, post_data, options);
 			}, to_wait);
 			return;
 		}
 		if (need_check_lag) {
 			// reset timer
-			wiki_API.query.last[action[0]] = Date.now();
+			wiki_API_query.last[action[0]] = Date.now();
 		} else {
 			library_namespace.debug('非 edit (modify)，不延遲等待。', 3,
-					'wiki_API.query');
+					'wiki_API_query');
 		}
 
 		// additional parameters
@@ -164,7 +164,7 @@ function module_code(library_namespace) {
 			// UA → nginx → Varnish:80 → Varnish:3128 → Apache → HHVM → database
 			// https://wikitech.wikimedia.org/wiki/LVS_and_Varnish
 			library_namespace.debug('connect to Varnish:3128 directly.', 3,
-					'wiki_API.query');
+					'wiki_API_query');
 			// [[User:Antigng/https expected]]
 			var HOST;
 			action[0] = action[0].replace(
@@ -198,12 +198,12 @@ function module_code(library_namespace) {
 			if (library_namespace.is_debug(3)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value)
-				library_namespace.show_value(data, 'wiki_API.query: data');
+				library_namespace.show_value(data, 'wiki_API_query: data');
 
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.error('wiki_API.query: ['
+				library_namespace.error('wiki_API_query: ['
 				//
 				+ error.code + '] ' + error.info);
 			}
@@ -214,12 +214,12 @@ function module_code(library_namespace) {
 		}
 
 		// 開始處理 query request。
-		if (!post_data && wiki_API.query.allow_JSONP) {
+		if (!post_data && wiki_API_query.allow_JSONP) {
 			library_namespace.debug(
 					'採用 JSONP callback 的方法。須注意：若有 error，將不會執行 callback！', 2,
-					'wiki_API.query');
+					'wiki_API_query');
 			library_namespace.debug('callback : (' + (typeof callback) + ') ['
-					+ callback + ']', 3, 'wiki_API.query');
+					+ callback + ']', 3, 'wiki_API_query');
 			get_URL(action, {
 				callback : callback
 			});
@@ -229,7 +229,7 @@ function module_code(library_namespace) {
 		// console.log('-'.repeat(79));
 		// console.log(options);
 		var get_URL_options = Object.assign(Object.create(null),
-				wiki_API.query.get_URL_options, options
+				wiki_API_query.get_URL_options, options
 						&& options.get_URL_options);
 
 		// @see function setup_API_URL(session, API_URL)
@@ -245,7 +245,7 @@ function module_code(library_namespace) {
 			//
 			&& (session.token.lgpassword || session.preserve_password)) {
 				// console.log([ action, post_data ]);
-				library_namespace.error('wiki_API.query: 未登錄編輯？');
+				library_namespace.error('wiki_API_query: 未登錄編輯？');
 				throw new Error('未登錄編輯？');
 			}
 
@@ -253,7 +253,7 @@ function module_code(library_namespace) {
 			if (!session.get_URL_options) {
 				library_namespace.debug(
 						'為 wiki_API instance，但無 agent，需要造出 agent。', 2,
-						'wiki_API.query');
+						'wiki_API_query');
 				setup_API_URL(session, true);
 			}
 			get_URL_options = session.get_URL_options;
@@ -272,14 +272,14 @@ function module_code(library_namespace) {
 			// test options.get_URL_options
 			if (get_URL_options) {
 				if (false)
-					console.log('wiki_API.query: Using get_URL_options: '
+					console.log('wiki_API_query: Using get_URL_options: '
 							+ get_URL_options.agent);
 				// console.log(options);
 				// console.log(action);
 			} else {
-				// console.trace('wiki_API.query: Without get_URL_options');
+				// console.trace('wiki_API_query: Without get_URL_options');
 				// console.log(action);
-				throw 'wiki_API.query: Without get_URL_options';
+				throw 'wiki_API_query: Without get_URL_options';
 			}
 		}
 
@@ -325,7 +325,7 @@ function module_code(library_namespace) {
 		|| agent.cookie_cache)) {
 			if (agent.last_cookie.length > 80) {
 				library_namespace.debug('重整 cookie[' + agent.last_cookie.length
-						+ ']。', 1, 'wiki_API.query');
+						+ ']。', 1, 'wiki_API_query');
 				if (!agent.cookie_cache)
 					agent.cookie_cache
 					// {zh:['','',...],en:['','',...]}
@@ -350,21 +350,21 @@ function module_code(library_namespace) {
 					}
 				}
 				library_namespace.debug('重整 cookie: → ['
-						+ agent.last_cookie.length + ']。', 1, 'wiki_API.query');
+						+ agent.last_cookie.length + ']。', 1, 'wiki_API_query');
 			}
 
 			var language = session && session.language;
 			if (!language) {
 				library_namespace.debug('未設定 session，自 API_URL 擷取 language: ['
-						+ action[0] + ']。', 1, 'wiki_API.query');
+						+ action[0] + ']。', 1, 'wiki_API_query');
 				language = typeof action[0] === 'string'
 				// TODO: 似乎不能真的擷取到所需 language。
 				&& action[0].match(PATTERN_wiki_project_URL);
-				language = language && language[3] || default_language;
-				// e.g., wiki_API.query: Get "ja" from
+				language = language && language[3] || wiki_API.set_language();
+				// e.g., wiki_API_query: Get "ja" from
 				// ["https://ja.wikipedia.org/w/api.php?action=edit&format=json&utf8",{}]
 				library_namespace.debug('Get "' + language + '" from '
-						+ JSON.stringify(action), 1, 'wiki_API.query');
+						+ JSON.stringify(action), 1, 'wiki_API_query');
 			}
 			language = language.replace(/-/g, '_');
 			if (language in agent.cookie_cache) {
@@ -390,7 +390,7 @@ function module_code(library_namespace) {
 				} else if (typeof callback === 'function') {
 					library_namespace.warn(
 					//
-					'wiki_API.query: Get error ' + status_code + ': '
+					'wiki_API_query: Get error ' + status_code + ': '
 					// 避免 TypeError:
 					// Cannot convert object to primitive value
 					+ JSON.stringify(action));
@@ -405,7 +405,7 @@ function module_code(library_namespace) {
 					+ ' characters): '
 					+ (library_namespace.platform.nodejs ? '\n' + response
 							: response.replace(/</g, '&lt;')), 3,
-					'wiki_API.query');
+					'wiki_API_query');
 
 			// "<\": for Eclipse JSDoc.
 			if (/<\html[\s>]/.test(response.slice(0, 40))) {
@@ -431,7 +431,7 @@ function module_code(library_namespace) {
 					if (response.includes('>414 Request-URI Too ')) {
 						library_namespace.debug(
 						//
-						action[0], 1, 'wiki_API.query');
+						action[0], 1, 'wiki_API_query');
 					} else {
 						// TODO: 處理 API 傳回結尾亂編碼的情況。
 						// https://phabricator.wikimedia.org/T134094
@@ -439,7 +439,7 @@ function module_code(library_namespace) {
 
 						library_namespace.error(
 						//
-						'wiki_API.query: Invalid content: ['
+						'wiki_API_query: Invalid content: ['
 								+ String(response).slice(0, 40000) + ']');
 						library_namespace.error(e);
 					}
@@ -460,13 +460,14 @@ function module_code(library_namespace) {
 				callback(response);
 			} else {
 				library_namespace
-						.error('wiki_API.query: No {Function}callback!');
+						.error('wiki_API_query: No {Function}callback!');
 			}
 
 		}, null, post_data, get_URL_options);
-	};
+	}
+	;
 
-	wiki_API.query.get_URL_options = {
+	wiki_API_query.get_URL_options = {
 		// default timeout: 1 minute
 		timeout : library_namespace.to_millisecond('1 min')
 	};
@@ -483,10 +484,10 @@ function module_code(library_namespace) {
 	 *      https://www.mediawiki.org/wiki/API:Etiquette 禮儀
 	 *      https://phabricator.wikimedia.org/T135240
 	 */
-	wiki_API.query.default_lag = 5000;
+	wiki_API_query.default_lag = 5000;
 
 	// local rule
-	wiki_API.query.lag = {
+	wiki_API_query.lag = {
 		// [[:ja:WP:bot]]
 		// Botの速度は、おおよそ毎分 6 編集を限度としてください。
 		// e.g., @ User contributions,
@@ -503,15 +504,15 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Boolean}
 	 */
-	wiki_API.query.allow_JSONP = library_namespace.is_WWW(true) && false;
+	wiki_API_query.allow_JSONP = library_namespace.is_WWW(true) && false;
 
 	/**
 	 * URL last queried.<br />
-	 * wiki_API.query.last[URL] = {Date}last queried date
+	 * wiki_API_query.last[URL] = {Date}last queried date
 	 * 
 	 * @type {Object}
 	 */
-	wiki_API.query.last = Object.create(null);
+	wiki_API_query.last = Object.create(null);
 
 	/**
 	 * 取得 page_data 之 title parameter。<br />
@@ -528,7 +529,7 @@ function module_code(library_namespace) {
 	 * @param {String}[param_name]
 	 *            param name. default: 'title' or 'titles'.
 	 */
-	wiki_API.query.title_param = function(page_data, multi, is_id, param_name) {
+	wiki_API_query.title_param = function(page_data, multi, is_id, param_name) {
 		var pageid;
 
 		if (Array.isArray(page_data)) {
@@ -550,9 +551,9 @@ function module_code(library_namespace) {
 			} else {
 				if (library_namespace.is_Object(page_data)) {
 					library_namespace
-							.warn('wiki_API.query.title_param: 看似有些非正規之頁面資料。');
+							.warn('wiki_API_query.title_param: 看似有些非正規之頁面資料。');
 					library_namespace
-							.info('wiki_API.query.title_param: 將採用 title 為主要查詢方法。');
+							.info('wiki_API_query.title_param: 將採用 title 為主要查詢方法。');
 				}
 				// reset
 				pageid = page_data.map(function(page) {
@@ -568,7 +569,7 @@ function module_code(library_namespace) {
 					pageid = undefined;
 				}
 				library_namespace.debug(pageid || page_data, 2,
-						'wiki_API.query.title_param');
+						'wiki_API_query.title_param');
 			}
 
 		} else if (library_namespace.is_Object(page_data)) {
@@ -587,7 +588,7 @@ function module_code(library_namespace) {
 
 		} else if (!page_data) {
 			library_namespace
-					.error('wiki_API.query.title_param: Invalid title: ['
+					.error('wiki_API_query.title_param: Invalid title: ['
 							+ page_data + ']');
 			// console.warn(page_data);
 		}
@@ -611,10 +612,10 @@ function module_code(library_namespace) {
 	 * 
 	 * @see get_page_title === wiki_API.title_of
 	 */
-	wiki_API.query.id_of_page = function(page_data, title_only) {
+	wiki_API_query.id_of_page = function(page_data, title_only) {
 		if (Array.isArray(page_data))
 			return page_data.map(function(page) {
-				wiki_API.query.id_of_page(page, title_only);
+				wiki_API_query.id_of_page(page, title_only);
 			});
 		if (library_namespace.is_Object(page_data))
 			// 有 pageid 則使用之，以加速。
@@ -622,7 +623,7 @@ function module_code(library_namespace) {
 
 		if (!page_data)
 			library_namespace
-					.error('wiki_API.query.id_of_page: Invalid title: ['
+					.error('wiki_API_query.id_of_page: Invalid title: ['
 							+ page_data + ']');
 		return page_data;
 	};
@@ -631,5 +632,5 @@ function module_code(library_namespace) {
 
 	// export 導出.
 
-	return wiki_API.query;
+	return wiki_API_query;
 }

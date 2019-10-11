@@ -3813,17 +3813,16 @@ function do_test() {
 	//
 	'application.astronomy', test_astronomy,
 	//
-	[
-		'application.net.wiki.parser',
-		'application.net.wiki.edit',
-		'application.net.wiki.list'
-	], test_wiki,
-/*
-*/
-	//
 	'data.date.calendar', test_calendar,
 	//
 	'data.date.era', test_era,
+	//
+	[
+		'application.net.wiki.parser',
+		'application.net.wiki.edit',
+		'application.net.wiki.list',
+		'application.net.wiki.data'
+	], test_wiki,
 	//
 	function() {
 		still_running.all_configured = true;

@@ -347,7 +347,7 @@ function module_code(library_namespace) {
 		// value[1] 為 titles (page list)。
 		&& !Array.isArray(title)
 		// 為了預防輸入的是問題頁面。
-		&& !wiki_API.is_page_data(title)
+		&& !get_page_content.is_page_data(title)
 		// 處理 is_id。
 		&& (!(title > 0)
 		// 注意：這情況下即使是{Natural}page_id 也會pass!
@@ -1776,8 +1776,9 @@ function module_code(library_namespace) {
 
 		case 'set_data':
 			// 設定 this.data_session。
+			// using @inner
 			// setup_data_session(session, callback, API_URL, password, force)
-			setup_data_session(this /* session */,
+			wiki_API.setup_data_session(this /* session */,
 			// 確保 data_session login 了才執行下一步。
 			function() {
 				// next[1] : callback of set_data
@@ -2097,7 +2098,8 @@ function module_code(library_namespace) {
 			break;
 
 		case 'copy_from':
-			wiki_API_prototype_copy_from.apply(this, next.slice(1));
+			// `wiki_API_prototype_copy_from`
+			wiki_API.edit.copy_from.apply(this, next.slice(1));
 			break;
 
 		case 'edit':
@@ -2478,11 +2480,11 @@ function module_code(library_namespace) {
 			// 因此這邊自屬於page_data之輸入項目設定 .last_page
 			if (wiki_API.is_page_data(next[1])
 			// 預防把 wikidata entity 拿來當作 input 了。
-			&& !is_entity(next[1])) {
+			&& !wiki_API.is_entity(next[1])) {
 				this.last_page = next[1];
 			}
 			// wikidata_entity(key, property, callback, options)
-			wikidata_entity(next[1], next[2], function(data, error) {
+			wiki_API.data(next[1], next[2], function(data, error) {
 				// 就算發生錯誤，依然設定一個 dummy，預防 edit_data 時引用可能非所欲的 this.last_page。
 				_this.last_data = data || {
 					key : next[1],
@@ -2520,7 +2522,8 @@ function module_code(library_namespace) {
 
 			if (typeof next[1] === 'function'
 			//
-			|| library_namespace.is_Object(next[1]) && !is_entity(next[1])) {
+			|| library_namespace.is_Object(next[1])
+					&& !wiki_API.is_entity(next[1])) {
 				library_namespace.debug('未設定/不設定 id，第一個 next[1] 即為 data。', 6,
 						'wiki_API.next.edit_data');
 				// next = [ 'edit_data', data[, options, callback] ]
@@ -2603,7 +2606,7 @@ function module_code(library_namespace) {
 			// / / 因此這邊自屬於page_data之輸入項目設定 .last_page
 			if (wiki_API.is_page_data(next[1])
 			// 預防把 wikidata entity 拿來當作 input 了。
-			&& !is_entity(next[1])) {
+			&& !wiki_API.is_entity(next[1])) {
 				this.last_page = next[1];
 			}
 			// wikidata_edit(id, data, token, options, callback)
@@ -2615,7 +2618,7 @@ function module_code(library_namespace) {
 			}, next[3]),
 			// callback
 			function(data, error) {
-				if (false && data && !is_entity(data)) {
+				if (false && data && !wiki_API.is_entity(data)) {
 					console.trace(data);
 					throw 'data is NOT entity';
 				}
@@ -3798,342 +3801,8 @@ function module_code(library_namespace) {
 		succeed : true
 	};
 
-	// ------------------------------------------------------------------------
-
-	// 不用 copy_to 的原因是 copy_to(wiki) 得遠端操作 wiki，不能保證同步性。
-	// this_wiki.copy_from(wiki) 則呼叫時多半已經設定好 wiki，直接在本this_wiki中操作比較不會有同步性問題。
-	// 因為直接採wiki_API.prototype.copy_from()會造成.page().copy_from()時.page()尚未執行完，
-	// 這會使執行.copy_from()時尚未取得.last_page，因此只好另開function。
-	// @see [[Template:Copied]], [[Special:Log/import]]
-	// TODO: 添加 wikidata sitelinks 語言連結。處理分類。處理模板。
-	var wiki_API_prototype_copy_from = function(title, options, callback) {
-		if (typeof options === 'function') {
-			// shift arguments
-			callback = options;
-			options = undefined;
-		}
-
-		options = Object.assign({
-			// [KEY_SESSION]
-			session : this
-		}, options);
-
-		var _this = this, copy_from_wiki;
-		function edit() {
-			// assert: wiki_API.is_page_data(title)
-			var content_to_copy = wiki_API.content_of(title);
-			if (typeof options.processor === 'function') {
-				// options.processor(from content_to_copy, to content)
-				content_to_copy = options.processor(title, wiki_API
-						.content_of(_this.last_page));
-			}
-			if (!content_to_copy) {
-				library_namespace
-						.warn('wiki_API_prototype_copy_from: Nothing to copy!');
-				_this.next();
-			}
-
-			var content;
-			if (options.append && (content
-			//
-			= wiki_API.content_of(_this.last_page).trimEnd())) {
-				content_to_copy = content + '\n' + content_to_copy;
-				options.summary = 'Append from '
-						+ wiki_API.title_link_of(title, copy_from_wiki) + '.';
-			}
-			if (!options.summary) {
-				options.summary = 'Copy from '
-				// TODO: 複製到非維基項目外的私人維基，例如moegirl時，可能需要用到[[zhwiki:]]這樣的prefix。
-				+ wiki_API.title_link_of(title, copy_from_wiki) + '.';
-			}
-			_this.actions.unshift(
-			// wiki.edit(page, options, callback)
-			[ 'edit', content_to_copy, options, callback ]);
-			_this.next();
-		}
-
-		if (wiki_API.is_wiki_API(title)) {
-			// from page 為另一 wiki_API
-			copy_from_wiki = title;
-			// wiki.page('title').copy_from(wiki)
-			title = copy_from_wiki.last_page;
-			if (!title) {
-				// wiki.page('title').copy_from(wiki);
-				library_namespace.debug('先擷取同名title: '
-						+ wiki_API
-								.title_link_of(this.last_page, copy_from_wiki));
-				// TODO: create interwiki link
-				copy_from_wiki.page(wiki_API.title_of(this.last_page),
-				//
-				function(page_data) {
-					library_namespace.debug('Continue coping page');
-					// console.log(copy_from_wiki.last_page);
-					wiki_API_prototype_copy_from.call(_this, copy_from_wiki,
-							options, callback);
-				});
-				return;
-			}
-		}
-
-		if (wiki_API.is_page_data(title)) {
-			// wiki.page().copy_from(page_data)
-			edit();
-
-		} else {
-			// treat title as {String}page title in this wiki
-			// wiki.page().copy_from(title)
-			var to_page_data = this.last_page;
-			// 即時性，不用 async。
-			// wiki_API.page(title, callback, options)
-			wiki_API.page(title, function(from_page_data) {
-				// recover this.last_page
-				_this.last_page = to_page_data;
-				title = from_page_data;
-				edit();
-			}, options);
-		}
-
-		return this;
-	};
-
 	// --------------------------------------------------------------------------------------------
 	// 以下皆泛用，無須 wiki_API instance。
-
-	// ------------------------------------------------------------------------
-
-	/**
-	 * 展開內容
-	 * 
-	 * 這種方法不能展開 module
-	 * 
-	 * @example <code>
-
-	wiki.page(title, function(page_data) {
-		console.log(CeL.wiki.content_of(page_data, 'expandtemplates'));
-	}, {
-		expandtemplates : true
-	});
-
-	 </code>
-	 * 
-	 * @see wiki_API.protect
-	 */
-	function wiki_API_expandtemplates(wikitext, callback, options) {
-		var action = 'expandtemplates', post_data = {
-			text : wikitext,
-			prop : 'wikitext'
-		};
-
-		options = library_namespace.new_options(options);
-
-		for ( var parameter in wiki_API_expandtemplates.parameters) {
-			if (parameter in options) {
-				if (options[parameter] || options[parameter] === 0)
-					post_data[parameter] = options[parameter];
-			}
-		}
-
-		var session = options[KEY_SESSION];
-		if (session && session.API_URL) {
-			action = [ session.API_URL, action ];
-		}
-
-		wiki_API.query(action, function(data) {
-			var error = data && data.error;
-			// 檢查伺服器回應是否有錯誤資訊。
-			if (error) {
-				library_namespace.error('wiki_API_expandtemplates: ['
-				//
-				+ error.code + '] ' + error.info);
-				typeof callback === 'function'
-				//
-				&& callback(undefined, errpr);
-				return;
-			}
-
-			if (options.page) {
-				// use page_data.expandtemplates.wikitext
-				Object.assign(options.page, data);
-			}
-
-			typeof callback === 'function'
-			//
-			&& callback(data.expandtemplates);
-
-		}, post_data, options);
-	}
-
-	wiki_API_expandtemplates.parameters = {
-		title : undefined,
-		// text : wikitext,
-		revid : undefined,
-		prop : undefined,
-		includecomments : undefined,
-
-		templatesandboxprefix : undefined,
-		templatesandboxtitle : undefined,
-		templatesandboxtext : undefined,
-		templatesandboxcontentmodel : undefined,
-		templatesandboxcontentformat : undefined
-	};
-
-	wiki_API.expandtemplates = wiki_API_expandtemplates;
-
-	// ------------------------------------------------------------------------
-
-	// 強制更新快取/清除緩存並重新載入/重新整理/刷新頁面。
-	// @see https://www.mediawiki.org/w/api.php?action=help&modules=purge
-	// 極端做法：[[WP:NULL|Null edit]], re-edit the same contents
-	wiki_API.purge = function(title, callback, options) {
-		var action = normalize_title_parameter(title, options);
-		if (!action) {
-			throw 'wiki_API.purge: Invalid title: '
-					+ wiki_API.title_link_of(title);
-		}
-
-		// POST_parameters
-		var post_data = action[1];
-		action[1] = 'purge';
-		if (!action[0]) {
-			action = action[1];
-		}
-
-		wiki_API.query(action, typeof callback === 'function'
-		//
-		&& function(data) {
-			// copy from wiki_API.redirects_here()
-
-			var error = data && data.error;
-			// 檢查伺服器回應是否有錯誤資訊。
-			if (error) {
-				library_namespace.error(
-				//
-				'wiki_API.purge: [' + error.code + '] ' + error.info);
-				if (data.warnings && data.warnings.query
-				//
-				&& data.warnings.query['*'])
-					library_namespace.warn(data.warnings.query['*']);
-				callback(undefined, error);
-				return;
-			}
-
-			// data:
-			// {"batchcomplete":"","purge":[{"ns":0,"title":"Title","purged":""}]}
-
-			if (!data || !data.purge) {
-				library_namespace.warn(
-				//
-				'wiki_API.purge: Unknown response: ['
-				//
-				+ (typeof data === 'object' && typeof JSON !== 'undefined'
-				//
-				? JSON.stringify(data) : data) + ']');
-				if (library_namespace.is_debug()
-				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
-					library_namespace.show_value(data);
-				callback(undefined, data);
-				return;
-			}
-
-			var page_data_list = data.purge;
-			// page_data_list: e.g., [{ns:4,title:'Meta:Sandbox',purged:''}]
-			if (page_data_list.length < 2 && (!options || !options.multi)) {
-				// 沒有特別設定的時候，回傳與輸入的形式相同。輸入單頁則回傳單頁。
-				page_data_list = page_data_list[0];
-			}
-
-			// callback(page_data) or callback({Array}page_data_list)
-			callback(page_data_list);
-		}, post_data, options);
-	};
-
-	// ------------------------------------------------------------------------
-
-	/**
-	 * 檢查頁面是否被保護。
-	 * 
-	 * 採用如:
-	 * 
-	 * @example <code>
-
-	wiki.page(title, function(page_data) {
-		console.log(CeL.wiki.is_protected(page_data));
-	}, {
-		prop : 'revisions|info',
-		// rvprop : 'ids|timestamp',
-		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Binfo
-		// https://www.mediawiki.org/wiki/API:Info#inprop.3Dprotection
-		additional : 'inprop=protection'
-	});
-
-	 </code>
-	 * 
-	 * @see wiki_API.protect
-	 */
-	wiki_API.is_protected = function has_protection(page_data) {
-		var protection_list = page_data.protection || page_data;
-		if (!Array.isArray(protection_list)) {
-			return;
-		}
-
-		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Binfo
-		// https://www.mediawiki.org/wiki/API:Info#inprop.3Dprotection
-		return protection_list.some(function(protection) {
-			return protection.type === 'edit' && protection.level === 'sysop';
-		});
-	};
-
-	// ------------------------------------------------------------------------
-
-	if (false) {
-		CeL.wiki.convert('中国', function(text) {
-			text === "中國";
-		});
-	}
-
-	// 繁簡轉換
-	wiki_API.convert = function(text, callback, uselang) {
-		if (!text) {
-			callback('');
-			return;
-		}
-
-		// 作基本的 escape。不能用 encodeURIComponent()，這樣會把中文也一同 escape 掉。
-		// 多一層 encoding，避免 MediaWiki parser 解析 HTML。
-		text = escape(text)
-		// recover special characters (e.g., Chinese words) by unescape()
-		.replace(/%u[\dA-F]{4}/g, unescape);
-		// assert: 此時 text 不應包含任何可被 MediaWiki parser 解析的語法。
-
-		// assert: '!' === encodeURIComponent('!')
-		text = '!' + encodeURIComponent(text) + '!';
-
-		// 由於用 [[link]] 也不會自動 redirect，因此直接轉換即可。
-		wiki_API.query([ wiki_API.api_URL('zh'),
-		// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
-		'action=parse&contentmodel=wikitext&uselang=' + (uselang || 'zh-hant')
-		// prop=text|links
-		+ '&prop=text&text=' + text ], function(data, error) {
-			if (error || !data) {
-				callback('', error);
-				return;
-			}
-			data = data.parse;
-			text = data.text['*']
-			// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
-			.replace(/<!--[\s\S]*?-->/g, '')
-			// 去掉前後包覆。 e.g., <p> or <pre>
-			.replace(/![^!]*$/, '').replace(/^[^!]*!/, '');
-			try {
-				// recover special characters
-				text = unescape(text);
-				callback(text);
-			} catch (e) {
-				callback(undefined, e);
-			}
-		});
-	};
 
 	// ------------------------------------------------------------------------
 
@@ -4864,6 +4533,8 @@ function module_code(library_namespace) {
 
 	// ========================================================================
 
+	// 不可 catch default_language。
+	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
 	/** {String}default language / wiki name */
 	var default_language;
 
@@ -9095,10 +8766,9 @@ function module_code(library_namespace) {
 		// --------------------------------------
 
 		// @static
+
 		api_URL : api_URL,
 		set_language : set_default_language,
-		// site_name_of
-		site_name : language_to_site_name,
 
 		estimated_message : estimated_message,
 
@@ -9127,7 +8797,6 @@ function module_code(library_namespace) {
 
 		is_wiki_API : is_wiki_API,
 		is_page_data : get_page_content.is_page_data,
-		is_entity : is_entity,
 
 		title_of : get_page_title,
 		// CeL.wiki.title_link_of() 常用於 summary 或 log/debug message。

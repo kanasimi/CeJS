@@ -182,7 +182,7 @@ function module_code(library_namespace) {
 	 * @param {String}timestamp
 	 *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
 	 */
-	wiki_API.edit = function(title, text, token, options, callback, timestamp) {
+	function wiki_API_edit(title, text, token, options, callback, timestamp) {
 		var is_undo = options && options.undo;
 		if (is_undo) {
 			// 一般 undo_count 超過1也不一定能成功？因此設定輸入 {undo:1} 時改 {undo:true} 亦可。
@@ -195,11 +195,11 @@ function module_code(library_namespace) {
 
 		var undo_count = options
 				&& (options.undo_count || is_undo
-						&& (is_undo < wiki_API.edit.undo_count_limit && is_undo));
+						&& (is_undo < wiki_API_edit.undo_count_limit && is_undo));
 
 		if (undo_count || typeof text === 'function') {
 			library_namespace.debug('先取得內容再 edit '
-					+ wiki_API.title_link_of(title) + '。', 1, 'wiki_API.edit');
+					+ wiki_API.title_link_of(title) + '。', 1, 'wiki_API_edit');
 			// console.log(title);
 			if (undo_count) {
 				var _options = Object.clone(options);
@@ -216,12 +216,12 @@ function module_code(library_namespace) {
 			}
 
 			wiki_API.page(title, function(page_data) {
-				if (options && (!options.ignore_denial && wiki_API.edit
+				if (options && (!options.ignore_denial && wiki_API_edit
 				// TODO: 每經過固定時間，或者編輯特定次數之後，就再檢查一次。
 				.denied(page_data, options.bot_id, options.notification))) {
 					library_namespace.warn(
 					// Permission denied
-					'wiki_API.edit: Denied to edit '
+					'wiki_API_edit: Denied to edit '
 							+ wiki_API.title_link_of(page_data));
 					callback(page_data, 'denied');
 
@@ -241,7 +241,7 @@ function module_code(library_namespace) {
 						[page_data.revisions.length - 1].parentid;
 					}
 					// 需要同時改變 wiki_API.prototype.next！
-					wiki_API.edit(title,
+					wiki_API_edit(title,
 					// 這裡不直接指定 text，是為了讓使(回傳要編輯資料的)設定值函數能即時依page_data變更 options。
 					// undo_count ? '' :
 					typeof text === 'function' &&
@@ -257,10 +257,10 @@ function module_code(library_namespace) {
 		}
 
 		var action = !is_undo
-				&& wiki_API.edit.check_data(text, title, options,
-						'wiki_API.edit');
+				&& wiki_API_edit.check_data(text, title, options,
+						'wiki_API_edit');
 		if (action) {
-			library_namespace.debug('直接執行 callback。', 2, 'wiki_API.edit');
+			library_namespace.debug('直接執行 callback。', 2, 'wiki_API_edit');
 			callback(title, action);
 			return;
 		}
@@ -274,13 +274,13 @@ function module_code(library_namespace) {
 			// e.g., write_to:'Wikipedia:沙盒',
 			title = options.write_to;
 			library_namespace.debug('依 options.write_to 寫入至 '
-					+ wiki_API.title_link_of(title), 1, 'wiki_API.edit');
+					+ wiki_API.title_link_of(title), 1, 'wiki_API_edit');
 		}
 
 		// 造出可 modify 的 options。
 		if (options)
 			library_namespace.debug('#1: ' + Object.keys(options).join(','), 4,
-					'wiki_API.edit');
+					'wiki_API_edit');
 		if (is_undo) {
 			options = library_namespace.setup_options(options);
 		} else {
@@ -290,7 +290,7 @@ function module_code(library_namespace) {
 		}
 		if (library_namespace.is_Object(title)) {
 			// 將 {Object}page_data 最新版本的 timestamp 標記註記到 options 去。
-			wiki_API.edit.set_stamp(options, title);
+			wiki_API_edit.set_stamp(options, title);
 			if (title.pageid)
 				options.pageid = title.pageid;
 			else
@@ -300,16 +300,16 @@ function module_code(library_namespace) {
 		}
 		if (timestamp) {
 			// 若是 timestamp 並非最新版，則會放棄編輯。
-			wiki_API.edit.set_stamp(options, timestamp);
+			wiki_API_edit.set_stamp(options, timestamp);
 		}
 		// the token should be sent as the last parameter.
 		library_namespace.debug('options.token = ' + JSON.stringify(token), 6,
-				'wiki_API.edit');
+				'wiki_API_edit');
 		options.token = (library_namespace.is_Object(token)
 		//
 		? token.csrftoken : token) || BLANK_TOKEN;
 		library_namespace.debug('#2: ' + Object.keys(options).join(','), 4,
-				'wiki_API.edit');
+				'wiki_API_edit');
 
 		var session;
 		if ('session' in options) {
@@ -345,10 +345,10 @@ function module_code(library_namespace) {
 			if (error || !data) {
 				/**
 				 * <code>
-				wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
-				wiki_API.edit: Error to edit [[Wikiversity:互助客栈/topic list]]: [tags-apply-not-allowed-one] The tag "Bot" is not allowed to be manually applied.
+				wiki_API_edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
+				wiki_API_edit: Error to edit [[Wikiversity:互助客栈/topic list]]: [tags-apply-not-allowed-one] The tag "Bot" is not allowed to be manually applied.
 				[[Wikipedia:首页/明天]]是連鎖保護
-				wiki_API.edit: Error to edit [[Wikipedia:典範條目/2019年1月9日]]: [cascadeprotected] This page has been protected from editing because it is transcluded in the following page, which is protected with the "cascading" option turned on: * [[:Wikipedia:首页/明天]]
+				wiki_API_edit: Error to edit [[Wikipedia:典範條目/2019年1月9日]]: [cascadeprotected] This page has been protected from editing because it is transcluded in the following page, which is protected with the "cascading" option turned on: * [[:Wikipedia:首页/明天]]
 				 * </code>
 				 * 
 				 * @see https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
@@ -358,7 +358,7 @@ function module_code(library_namespace) {
 				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 				&& options.section === 'new') {
 					library_namespace.debug('無法以正常方式編輯，嘗試當作 Flow 討論頁面。', 1,
-							'wiki_API.edit');
+							'wiki_API_edit');
 					// console.log(options);
 					options[KEY_SESSION] = session;
 					edit_topic(title, options.sectiontitle,
@@ -382,11 +382,11 @@ function module_code(library_namespace) {
 				 * 
 				 * 須注意是否有其他競相編輯的 bots。
 				 */
-				library_namespace.warn('wiki_API.edit: Error to edit '
+				library_namespace.warn('wiki_API_edit: Error to edit '
 						+ wiki_API.title_link_of(title) + ': ' + error);
 			} else if (data.edit && ('nochange' in data.edit)) {
 				// 在極少的情況下，data.edit === undefined。
-				library_namespace.info('wiki_API.edit: '
+				library_namespace.info('wiki_API_edit: '
 						+ wiki_API.title_link_of(title) + ': no change');
 			}
 			if (typeof callback === 'function') {
@@ -394,20 +394,21 @@ function module_code(library_namespace) {
 				callback(title, error, data);
 			}
 		}, options, session);
-	};
+	}
+	;
 
 	/**
 	 * 放棄編輯頁面用。<br />
-	 * assert: true === !!wiki_API.edit.cancel
+	 * assert: true === !!wiki_API_edit.cancel
 	 * 
 	 * @type any
 	 */
-	wiki_API.edit.cancel = {
+	wiki_API_edit.cancel = {
 		cancel : '放棄編輯頁面用'
 	};
 
 	/** {Natural}小於此數則代表當作 undo 幾個版本。 */
-	wiki_API.edit.undo_count_limit = 100;
+	wiki_API_edit.undo_count_limit = 100;
 
 	/**
 	 * 對要編輯的資料作基本檢測。
@@ -421,7 +422,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns error: 非undefined表示((data))為有問題的資料。
 	 */
-	wiki_API.edit.check_data = function(data, title, options, caller) {
+	wiki_API_edit.check_data = function(data, title, options, caller) {
 		var action;
 		// return CeL.wiki.edit.cancel as a symbol to skip this edit,
 		// do not generate warning message.
@@ -429,9 +430,9 @@ function module_code(library_namespace) {
 		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來跳過 (skip)
 		// 本次編輯動作，不特別顯示或處理。
 		// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
-		if (data === wiki_API.edit.cancel) {
+		if (data === wiki_API_edit.cancel) {
 			// 統一規範放棄編輯頁面訊息。
-			data = [ wiki_API.edit.cancel ];
+			data = [ wiki_API_edit.cancel ];
 		}
 
 		if (!data && (!options || !options.allow_empty)) {
@@ -439,7 +440,7 @@ function module_code(library_namespace) {
 			// 內容被清空
 			? 'Content is empty' : 'Content is not settled') ];
 
-		} else if (Array.isArray(data) && data[0] === wiki_API.edit.cancel) {
+		} else if (Array.isArray(data) && data[0] === wiki_API_edit.cancel) {
 			action = data.slice(1);
 			if (action.length === 1) {
 				// error messages
@@ -451,19 +452,19 @@ function module_code(library_namespace) {
 			}
 
 			library_namespace.debug('採用個別特殊訊息: ' + action, 2, caller
-					|| 'wiki_API.edit.check_data');
+					|| 'wiki_API_edit.check_data');
 		}
 
 		if (action) {
 			if (action[1] !== 'skip') {
 				// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
-				library_namespace.warn((caller || 'wiki_API.edit.check_data')
+				library_namespace.warn((caller || 'wiki_API_edit.check_data')
 						+ ': ' + wiki_API.title_link_of(title) + ': '
 						+ (action[1] || gettext('No reason provided')));
 			} else {
 				library_namespace.debug(
 						'Skip ' + wiki_API.title_link_of(title), 2, caller
-								|| 'wiki_API.edit.check_data');
+								|| 'wiki_API_edit.check_data');
 			}
 			return action[0];
 		}
@@ -479,7 +480,7 @@ function module_code(library_namespace) {
 	 * 時將會以從 page_data 取得之 timestamp 作為時間戳記傳入呼叫，當 MediaWiki 系統 (API)
 	 * 發現有新的時間戳記，會回傳編輯衝突，並放棄編輯此頁面。<br />
 	 * 詳見 [https://github.com/kanasimi/CeJS/blob/master/application/net/wiki.js
-	 * wiki_API.edit.set_stamp]。
+	 * wiki_API_edit.set_stamp]。
 	 * 
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
@@ -490,7 +491,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://www.mediawiki.org/wiki/API:Edit
 	 */
-	wiki_API.edit.set_stamp = function(options, timestamp) {
+	wiki_API_edit.set_stamp = function(options, timestamp) {
 		if (wiki_API.is_page_data(timestamp)
 		// 在 .page() 會取得 page_data.revisions[0].timestamp
 		&& (timestamp = wiki_API.content_of.revision(timestamp)))
@@ -498,7 +499,7 @@ function module_code(library_namespace) {
 			timestamp = timestamp.timestamp;
 		// timestamp = '2000-01-01T00:00:00Z';
 		if (timestamp) {
-			library_namespace.debug(timestamp, 3, 'wiki_API.edit.set_stamp');
+			library_namespace.debug(timestamp, 3, 'wiki_API_edit.set_stamp');
 			options.basetimestamp = options.starttimestamp = timestamp;
 		}
 		return options;
@@ -514,12 +515,12 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://zh.wikipedia.org/wiki/Template:Bots
 	 */
-	wiki_API.edit.get_bot = function(content) {
+	wiki_API_edit.get_bot = function(content) {
 		// TODO: use parse_template(content, 'bots')
 		var bots = [], matched, PATTERN = /{{[\s\n]*bots[\s\n]*([\S][\s\S]*?)}}/ig;
 		while (matched = PATTERN.exec(content)) {
 			library_namespace.debug(matched.join('<br />'), 1,
-					'wiki_API.edit.get_bot');
+					'wiki_API_edit.get_bot');
 			if (matched = matched[1].trim().replace(/(^\|\s*|\s*\|$)/g, '')
 			// .split('|')
 			)
@@ -527,7 +528,7 @@ function module_code(library_namespace) {
 		}
 		if (0 < bots.length) {
 			library_namespace.debug(bots.join('<br />'), 1,
-					'wiki_API.edit.get_bot');
+					'wiki_API_edit.get_bot');
 			return bots;
 		}
 	};
@@ -544,7 +545,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Boolean|String}封鎖機器人帳戶訪問。
 	 */
-	wiki_API.edit.denied = function(content, bot_id, notification) {
+	wiki_API_edit.denied = function(content, bot_id, notification) {
 		if (!content)
 			return;
 		var page_data;
@@ -555,19 +556,19 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.debug('contents to test: [' + content + ']', 3,
-				'wiki_API.edit.denied');
+				'wiki_API_edit.denied');
 
-		var bots = wiki_API.edit.get_bot(content),
+		var bots = wiki_API_edit.get_bot(content),
 		/** {String}denied messages */
 		denied, allow_bot;
 
 		if (bots) {
 			library_namespace.debug('test ' + bot_id + '/' + notification, 3,
-					'wiki_API.edit.denied');
+					'wiki_API_edit.denied');
 			// botlist 以半形逗號作間隔。
 			bot_id = (bot_id = bot_id && bot_id.toLowerCase()) ? new RegExp(
 					'(?:^|[\\s,])(?:all|' + bot_id + ')(?:$|[\\s,])', 'i')
-					: wiki_API.edit.denied.all;
+					: wiki_API_edit.denied.all;
 
 			if (notification) {
 				if (typeof notification === 'string'
@@ -583,7 +584,7 @@ function module_code(library_namespace) {
 				else if (!library_namespace.is_RegExp(notification)) {
 					library_namespace.warn(
 					//
-					'wiki_API.edit.denied: Invalid notification: ['
+					'wiki_API_edit.denied: Invalid notification: ['
 							+ notification + ']');
 					notification = null;
 				}
@@ -592,7 +593,7 @@ function module_code(library_namespace) {
 
 			bots.some(function(data) {
 				library_namespace.debug('test [' + data + ']', 1,
-						'wiki_API.edit.denied');
+						'wiki_API_edit.denied');
 				data = data.toLowerCase();
 
 				var matched,
@@ -641,7 +642,7 @@ function module_code(library_namespace) {
 			denied = 'Ban all compliant bots.';
 
 		if (denied) {
-			library_namespace.warn('wiki_API.edit.denied: ' + denied);
+			library_namespace.warn('wiki_API_edit.denied: ' + denied);
 			return denied;
 		}
 
@@ -657,14 +658,115 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 */
-	wiki_API.edit.denied.all = /(?:^|[\s,])all(?:$|[\s,])/;
+	wiki_API_edit.denied.all = /(?:^|[\s,])all(?:$|[\s,])/;
+
+	// ------------------------------------------------------------------------
+
+	// 不用 copy_to 的原因是 copy_to(wiki) 得遠端操作 wiki，不能保證同步性。
+	// this_wiki.copy_from(wiki) 則呼叫時多半已經設定好 wiki，直接在本this_wiki中操作比較不會有同步性問題。
+	// 因為直接採wiki_API.prototype.copy_from()會造成.page().copy_from()時.page()尚未執行完，
+	// 這會使執行.copy_from()時尚未取得.last_page，因此只好另開function。
+	// @see [[Template:Copied]], [[Special:Log/import]]
+	// TODO: 添加 wikidata sitelinks 語言連結。處理分類。處理模板。
+	function wiki_API_prototype_copy_from(title, options, callback) {
+		if (typeof options === 'function') {
+			// shift arguments
+			callback = options;
+			options = undefined;
+		}
+
+		options = Object.assign({
+			// [KEY_SESSION]
+			session : this
+		}, options);
+
+		var _this = this, copy_from_wiki;
+		function edit() {
+			// assert: wiki_API.is_page_data(title)
+			var content_to_copy = wiki_API.content_of(title);
+			if (typeof options.processor === 'function') {
+				// options.processor(from content_to_copy, to content)
+				content_to_copy = options.processor(title, wiki_API
+						.content_of(_this.last_page));
+			}
+			if (!content_to_copy) {
+				library_namespace
+						.warn('wiki_API_prototype_copy_from: Nothing to copy!');
+				_this.next();
+			}
+
+			var content;
+			if (options.append && (content
+			//
+			= wiki_API.content_of(_this.last_page).trimEnd())) {
+				content_to_copy = content + '\n' + content_to_copy;
+				options.summary = 'Append from '
+						+ wiki_API.title_link_of(title, copy_from_wiki) + '.';
+			}
+			if (!options.summary) {
+				options.summary = 'Copy from '
+				// TODO: 複製到非維基項目外的私人維基，例如moegirl時，可能需要用到[[zhwiki:]]這樣的prefix。
+				+ wiki_API.title_link_of(title, copy_from_wiki) + '.';
+			}
+			_this.actions.unshift(
+			// wiki.edit(page, options, callback)
+			[ 'edit', content_to_copy, options, callback ]);
+			_this.next();
+		}
+
+		if (wiki_API.is_wiki_API(title)) {
+			// from page 為另一 wiki_API
+			copy_from_wiki = title;
+			// wiki.page('title').copy_from(wiki)
+			title = copy_from_wiki.last_page;
+			if (!title) {
+				// wiki.page('title').copy_from(wiki);
+				library_namespace.debug('先擷取同名title: '
+						+ wiki_API
+								.title_link_of(this.last_page, copy_from_wiki));
+				// TODO: create interwiki link
+				copy_from_wiki.page(wiki_API.title_of(this.last_page),
+				//
+				function(page_data) {
+					library_namespace.debug('Continue coping page');
+					// console.log(copy_from_wiki.last_page);
+					wiki_API_prototype_copy_from.call(_this, copy_from_wiki,
+							options, callback);
+				});
+				return;
+			}
+		}
+
+		if (wiki_API.is_page_data(title)) {
+			// wiki.page().copy_from(page_data)
+			edit();
+
+		} else {
+			// treat title as {String}page title in this wiki
+			// wiki.page().copy_from(title)
+			var to_page_data = this.last_page;
+			// 即時性，不用 async。
+			// wiki_API.page(title, callback, options)
+			wiki_API.page(title, function(from_page_data) {
+				// recover this.last_page
+				_this.last_page = to_page_data;
+				title = from_page_data;
+				edit();
+			}, options);
+		}
+
+		return this;
+	}
+	;
+
+	wiki_API_edit.copy_from = wiki_API_prototype_copy_from;
 
 	// ------------------------------------------------------------------------
 
 	/**
 	 * 上傳檔案/媒體。
 	 * 
-	 * arguments: Similar to wiki_API.edit<br />
+	 * arguments: Similar to wiki_API_edit<br />
 	 * wiki_API.upload(file_path, token, options, callback);
 	 * 
 	 * TODO: https://commons.wikimedia.org/wiki/Commons:Structured_data<br />
@@ -895,5 +997,5 @@ function module_code(library_namespace) {
 
 	// export 導出.
 
-	return wiki_API.edit;
+	return wiki_API_edit;
 }

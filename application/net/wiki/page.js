@@ -41,7 +41,8 @@ function module_code(library_namespace) {
 	// @inner
 	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, wikidata_get_site = wiki_API.wikidata_get_site, add_parameters = wiki_API.add_parameters, node_fs = wiki_API.node_fs;
 
-	var default_language = wiki_API.set_language();
+	// 不可 catch default_language。
+	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
 
 	// ------------------------------------------------------------------------
 
@@ -269,7 +270,7 @@ function module_code(library_namespace) {
 		// 自動搜尋/轉換繁簡標題。
 		if (!('converttitles' in options)) {
 			options.converttitles = wikidata_get_site(options, true)
-					|| default_language;
+					|| wiki_API.set_language();
 			if (!wiki_API_page.auto_converttitles
 					.includes(options.converttitles)) {
 				delete options.converttitles;
@@ -678,6 +679,155 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// 強制更新快取/清除緩存並重新載入/重新整理/刷新頁面。
+	// @see https://www.mediawiki.org/w/api.php?action=help&modules=purge
+	// 極端做法：[[WP:NULL|Null edit]], re-edit the same contents
+	wiki_API.purge = function(title, callback, options) {
+		var action = normalize_title_parameter(title, options);
+		if (!action) {
+			throw 'wiki_API.purge: Invalid title: '
+					+ wiki_API.title_link_of(title);
+		}
+
+		// POST_parameters
+		var post_data = action[1];
+		action[1] = 'purge';
+		if (!action[0]) {
+			action = action[1];
+		}
+
+		wiki_API.query(action, typeof callback === 'function'
+		//
+		&& function(data) {
+			// copy from wiki_API.redirects_here()
+
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.error(
+				//
+				'wiki_API.purge: [' + error.code + '] ' + error.info);
+				if (data.warnings && data.warnings.query
+				//
+				&& data.warnings.query['*'])
+					library_namespace.warn(data.warnings.query['*']);
+				callback(undefined, error);
+				return;
+			}
+
+			// data:
+			// {"batchcomplete":"","purge":[{"ns":0,"title":"Title","purged":""}]}
+
+			if (!data || !data.purge) {
+				library_namespace.warn(
+				//
+				'wiki_API.purge: Unknown response: ['
+				//
+				+ (typeof data === 'object' && typeof JSON !== 'undefined'
+				//
+				? JSON.stringify(data) : data) + ']');
+				if (library_namespace.is_debug()
+				// .show_value() @ interact.DOM, application.debug
+				&& library_namespace.show_value)
+					library_namespace.show_value(data);
+				callback(undefined, data);
+				return;
+			}
+
+			var page_data_list = data.purge;
+			// page_data_list: e.g., [{ns:4,title:'Meta:Sandbox',purged:''}]
+			if (page_data_list.length < 2 && (!options || !options.multi)) {
+				// 沒有特別設定的時候，回傳與輸入的形式相同。輸入單頁則回傳單頁。
+				page_data_list = page_data_list[0];
+			}
+
+			// callback(page_data) or callback({Array}page_data_list)
+			callback(page_data_list);
+		}, post_data, options);
+	};
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * 展開內容
+	 * 
+	 * 這種方法不能展開 module
+	 * 
+	 * @example <code>
+
+	wiki.page(title, function(page_data) {
+		console.log(CeL.wiki.content_of(page_data, 'expandtemplates'));
+	}, {
+		expandtemplates : true
+	});
+
+	 </code>
+	 * 
+	 * @see wiki_API.protect
+	 */
+	function wiki_API_expandtemplates(wikitext, callback, options) {
+		var action = 'expandtemplates', post_data = {
+			text : wikitext,
+			prop : 'wikitext'
+		};
+
+		options = library_namespace.new_options(options);
+
+		for ( var parameter in wiki_API_expandtemplates.parameters) {
+			if (parameter in options) {
+				if (options[parameter] || options[parameter] === 0)
+					post_data[parameter] = options[parameter];
+			}
+		}
+
+		var session = options[KEY_SESSION];
+		if (session && session.API_URL) {
+			action = [ session.API_URL, action ];
+		}
+
+		wiki_API.query(action, function(data) {
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.error('wiki_API_expandtemplates: ['
+				//
+				+ error.code + '] ' + error.info);
+				typeof callback === 'function'
+				//
+				&& callback(undefined, errpr);
+				return;
+			}
+
+			if (options.page) {
+				// use page_data.expandtemplates.wikitext
+				Object.assign(options.page, data);
+			}
+
+			typeof callback === 'function'
+			//
+			&& callback(data.expandtemplates);
+
+		}, post_data, options);
+	}
+
+	wiki_API_expandtemplates.parameters = {
+		title : undefined,
+		// text : wikitext,
+		revid : undefined,
+		prop : undefined,
+		includecomments : undefined,
+
+		templatesandboxprefix : undefined,
+		templatesandboxtitle : undefined,
+		templatesandboxtext : undefined,
+		templatesandboxcontentmodel : undefined,
+		templatesandboxcontentformat : undefined
+	};
+
+	wiki_API.expandtemplates = wiki_API_expandtemplates;
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * 取得頁面之重定向資料（重新導向至哪一頁）。
 	 * 
@@ -767,6 +917,93 @@ function module_code(library_namespace) {
 			// converttitles : 1,
 			save_response : true
 		}, options));
+	};
+
+	// ------------------------------------------------------------------------
+
+	if (false) {
+		CeL.wiki.convert('中国', function(text) {
+			text === "中國";
+		});
+	}
+
+	// 繁簡轉換
+	wiki_API.convert = function(text, callback, uselang) {
+		if (!text) {
+			callback('');
+			return;
+		}
+
+		// 作基本的 escape。不能用 encodeURIComponent()，這樣會把中文也一同 escape 掉。
+		// 多一層 encoding，避免 MediaWiki parser 解析 HTML。
+		text = escape(text)
+		// recover special characters (e.g., Chinese words) by unescape()
+		.replace(/%u[\dA-F]{4}/g, unescape);
+		// assert: 此時 text 不應包含任何可被 MediaWiki parser 解析的語法。
+
+		// assert: '!' === encodeURIComponent('!')
+		text = '!' + encodeURIComponent(text) + '!';
+
+		// 由於用 [[link]] 也不會自動 redirect，因此直接轉換即可。
+		wiki_API.query([ wiki_API.api_URL('zh'),
+		// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
+		'action=parse&contentmodel=wikitext&uselang=' + (uselang || 'zh-hant')
+		// prop=text|links
+		+ '&prop=text&text=' + text ], function(data, error) {
+			if (error || !data) {
+				callback('', error);
+				return;
+			}
+			data = data.parse;
+			text = data.text['*']
+			// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
+			.replace(/<!--[\s\S]*?-->/g, '')
+			// 去掉前後包覆。 e.g., <p> or <pre>
+			.replace(/![^!]*$/, '').replace(/^[^!]*!/, '');
+			try {
+				// recover special characters
+				text = unescape(text);
+				callback(text);
+			} catch (e) {
+				callback(undefined, e);
+			}
+		});
+	};
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * 檢查頁面是否被保護。
+	 * 
+	 * 採用如:
+	 * 
+	 * @example <code>
+
+	wiki.page(title, function(page_data) {
+		console.log(CeL.wiki.is_protected(page_data));
+	}, {
+		prop : 'revisions|info',
+		// rvprop : 'ids|timestamp',
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Binfo
+		// https://www.mediawiki.org/wiki/API:Info#inprop.3Dprotection
+		additional : 'inprop=protection'
+	});
+
+	 </code>
+	 * 
+	 * @see wiki_API.protect
+	 */
+	wiki_API.is_protected = function has_protection(page_data) {
+		var protection_list = page_data.protection || page_data;
+		if (!Array.isArray(protection_list)) {
+			return;
+		}
+
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Binfo
+		// https://www.mediawiki.org/wiki/API:Info#inprop.3Dprotection
+		return protection_list.some(function(protection) {
+			return protection.type === 'edit' && protection.level === 'sysop';
+		});
 	};
 
 	// ------------------------------------------------------------------------
