@@ -23,7 +23,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.page',
 
-	require : 'application.net.wiki.',
+	require : 'application.net.wiki.query.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',

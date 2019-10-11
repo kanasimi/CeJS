@@ -3814,10 +3814,10 @@ function do_test() {
 	'application.astronomy', test_astronomy,
 	//
 	[
-		'application.net.wiki.page',
 		'application.net.wiki.parser',
-		'application.net.wiki.list',
-		'application.net.wiki' ], test_wiki,
+		'application.net.wiki.edit',
+		'application.net.wiki.list'
+	], test_wiki,
 /*
 */
 	//

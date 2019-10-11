@@ -708,7 +708,7 @@ function module_code(library_namespace) {
 		var parsed;
 		if (get_page_content.is_page_data(first_section)) {
 			if (!title)
-				title = get_page_title(first_section);
+				title = wiki_API.title_of(first_section);
 			parsed = page_parser(first_section).parse();
 			parsed.each_section(function(section, index) {
 				if (index === 0)
@@ -836,7 +836,7 @@ function module_code(library_namespace) {
 			representative_image = representative_image.replace(/^\[\[[^:]+:/i,
 					'').replace(/\|[\s\S]*/, '').replace(/\]\]$/, '');
 			representative_image = parse_wikitext('[[File:'
-					+ get_page_title(representative_image) + ']]');
+					+ wiki_API.title_of(representative_image) + ']]');
 		}
 		introduction_section.representative_image = representative_image;
 
