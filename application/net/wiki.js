@@ -7147,8 +7147,6 @@ function module_code(library_namespace) {
 			cache_config.list = config.list;
 
 		} else if (wiki_API.wmflabs && !config.no_database) {
-			library_namespace.debug('若沒有 cache，則嘗試讀取 database 之資料。', 1,
-					'traversal_pages');
 			function run_SQL_callback(error, rows, fields) {
 				if (error) {
 					library_namespace.error('traversal_pages: '
@@ -7175,6 +7173,7 @@ function module_code(library_namespace) {
 				// 因為已經取得所有列表，重新呼叫traversal_pages()。
 				traversal_pages(config, callback);
 			}
+
 			function generate_revision_list() {
 				library_namespace.info(
 				// Wikimedia Toolforge database replicas.
@@ -7192,6 +7191,10 @@ function module_code(library_namespace) {
 				wiki_API.run_SQL(SQL, run_SQL_callback, SQL_config);
 				return wiki_API.cache.abort;
 			}
+
+			library_namespace.debug('若沒有 cache，則嘗試讀取 database 之資料。', 1,
+					'traversal_pages');
+
 			cache_config.list = generate_revision_list;
 
 		} else {
