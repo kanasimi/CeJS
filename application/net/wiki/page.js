@@ -39,7 +39,7 @@ function module_code(library_namespace) {
 	// requiring
 	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
-	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, wikidata_get_site = wiki_API.wikidata_get_site, add_parameters = wiki_API.add_parameters, node_fs = wiki_API.node_fs;
+	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, wikidata_get_site = wiki_API.wikidata_get_site, add_parameters = wiki_API.add_parameters;
 
 	// 不可 catch default_language。
 	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
@@ -370,8 +370,8 @@ function module_code(library_namespace) {
 			}
 
 			var page_list = [],
-			//
-			page_cache_prefix = library_namespace.platform.nodejs && node_fs
+			// library_namespace.storage.write_file()
+			page_cache_prefix = library_namespace.write_file
 			//
 			&& options.page_cache_prefix;
 
@@ -448,7 +448,7 @@ function module_code(library_namespace) {
 					}
 
 				} else if (page_cache_prefix) {
-					node_fs.writeFile(page_cache_prefix
+					library_namespace.write_file(page_cache_prefix
 					//
 					+ page_data.title + '.json',
 					/**

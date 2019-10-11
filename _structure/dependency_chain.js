@@ -1757,7 +1757,8 @@ if (typeof CeL === 'function')
 					// variable_hash = {
 					// variable name : variable full name
 					// }.
-					variable_hash = declaration.variable_hash = Object.create(null);
+					variable_hash = declaration.variable_hash = Object
+							.create(null);
 
 					code_required.forEach(function(variable) {
 						// [ variable full name, modele name, variable name ]
@@ -1827,7 +1828,8 @@ if (typeof CeL === 'function')
 		// file loading 之處理。
 
 		// cache
-		var document_head, tag_of_type = Object.create(null), URL_of_tag = Object.create(null), TO_FINISH = Object.create(null),
+		var document_head, tag_of_type = Object.create(null), URL_of_tag = Object
+				.create(null), TO_FINISH = Object.create(null),
 		// 需要修補 load events on linking elements?
 		no_sheet_onload = library_namespace.is_WWW(true) && navigator.userAgent,
 		// external resource tester.
@@ -2839,7 +2841,7 @@ if (typeof CeL === 'function')
 					// force 僅使用一次。
 					// if (is_controller(item) && item.force) delete item.force;
 
-					// 初始設定函式本身定義的 callback 應該先執行。
+					// 初始設定函式本身定義的 callback，.finish() 應該先執行。
 					if (run_callback('finish',
 					// 傳入 module name space。
 					library_namespace.value_of(id), waiting)) {

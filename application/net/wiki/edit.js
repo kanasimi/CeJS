@@ -23,7 +23,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.edit',
 
-	require : 'application.net.wiki.page.',
+	require : 'application.net.wiki.page.|application.net.wiki.Flow.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -361,7 +361,8 @@ function module_code(library_namespace) {
 							'wiki_API_edit');
 					// console.log(options);
 					options[KEY_SESSION] = session;
-					edit_topic(title, options.sectiontitle,
+					// edit_topic()
+					wiki_API.Flow.edit(title, options.sectiontitle,
 					// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
 					text.replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''), options.token,
 							options, callback);

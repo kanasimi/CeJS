@@ -42,9 +42,6 @@ function module_code(library_namespace) {
 	// @inner
 	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter;
 
-	// 不可 catch default_language。
-	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
-
 	// --------------------------------------------------------------------------------------------
 	// Flow page support. Flow 功能支援。
 	// [[mediawikiwiki:Extension:Flow/API]]

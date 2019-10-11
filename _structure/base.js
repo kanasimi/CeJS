@@ -1045,6 +1045,7 @@ function (globalThis) {
 		// `PowerShell.exe -Command "&
 		// {[System.Environment]::OSVersion.Version}"`
 
+		// Windows: process.platform.toLowerCase().startsWith('win')
 		return platform.OS && platform.OS.toLowerCase().indexOf('win') === 0;
 	};
 
@@ -1276,6 +1277,11 @@ function (globalThis) {
 		//
 		win_env_keys = 'PROMPT|HOME|PUBLIC|SESSIONNAME|LOCALAPPDATA|OS|Path|PROCESSOR_IDENTIFIER|SystemDrive|SystemRoot|TEMP|TMP|USERNAME|USERPROFILE|ProgramData|ProgramFiles|ProgramFiles(x86)|ProgramW6432|windir'.split('|');
 
+		if (is_node) {
+			// import all environment variables
+			Object.assign(env, process.env);
+		}
+
 		/**
 		 * library main file base name
 		 * 
@@ -1407,19 +1413,23 @@ function (globalThis) {
 
 		if (is_node) {
 			// 環境變數 in node.js
-			for (var index = 0; index < win_env_keys.length; index++) {
-				var key = win_env_keys[index], value = process.env[key];
-				if (value)
-					env[key] = value;
+			if (false) {
+				for (var index = 0; index < win_env_keys.length; index++) {
+					var key = win_env_keys[index], value = process.env[key];
+					if (value)
+						env[key] = value;
+				}
 			}
 
 			var node_os = require('os');
 
 			if (!env.home
 			&& !(env.home = typeof node_os.homedir === 'function' && node_os.homedir()
+			// http://stackoverflow.com/questions/9080085/node-js-find-home-directory-in-platform-agnostic-way
 			|| process.env.HOME || process.env.USERPROFILE)
 			// e.g., Windows 10
 			&& process.env.HOMEDRIVE && process.env.HOMEPATH) {
+				/** {String}user home directory */
 				env.home = process.env.HOMEDRIVE + process.env.HOMEPATH;
 			}
 
