@@ -196,7 +196,8 @@ function module_code(library_namespace) {
 		chapter_list_URL : function(work_id, work_data) {
 			// library_namespace.set_debug(9);
 			// 2019/9: 'api/getArticleList.nhn'
-			return [ 'api/getArticleListAll.nhn', {
+			// 2019/10: 'api/getArticleListAll.nhn' 會出現沒有 .freeFlg 標記的問題。
+			return [ 'api/getArticleList.nhn', {
 				titleNo : work_id
 			} ];
 		},
@@ -227,6 +228,9 @@ function module_code(library_namespace) {
 			delete html.list;
 			// console.log(recerse_count);
 			if (recerse_count > 0) {
+				CeL.info({
+					T : [ '%1：將倒序轉為正序。', work_data.title ]
+				});
 				work_data.chapter_list.reverse();
 			}
 			Object.assign(work_data, html);
