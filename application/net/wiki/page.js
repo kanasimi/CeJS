@@ -23,7 +23,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.page',
 
-	require : 'application.net.wiki.query.',
+	require : 'data.native.'
+	//
+	+ '|application.net.wiki.query.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -38,6 +40,8 @@ function module_code(library_namespace) {
 	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, wikidata_get_site = wiki_API.wikidata_get_site, add_parameters = wiki_API.add_parameters, node_fs = wiki_API.node_fs;
+
+	var default_language = wiki_API.set_language();
 
 	// ------------------------------------------------------------------------
 
@@ -265,7 +269,7 @@ function module_code(library_namespace) {
 		// 自動搜尋/轉換繁簡標題。
 		if (!('converttitles' in options)) {
 			options.converttitles = wikidata_get_site(options, true)
-					|| wiki_API.set_language();
+					|| default_language;
 			if (!wiki_API_page.auto_converttitles
 					.includes(options.converttitles)) {
 				delete options.converttitles;
@@ -504,7 +508,7 @@ function module_code(library_namespace) {
 					if (is_api_and_title(title, true)) {
 						title = title[1];
 					}
-					if (wiki_API.content_of.is_page_data(title)) {
+					if (wiki_API.is_page_data(title)) {
 						// 去除掉可能造成誤判的錯誤標記 'missing'。
 						// 即使真有錯誤，也由page_list提供即可。
 						if ('missing' in title) {

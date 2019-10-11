@@ -23,7 +23,12 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.list',
 
-	require : 'application.net.wiki.query.|application.net.wiki.page.',
+	require : 'application.net.Ajax.get_URL'
+	//
+	+ '|application.net.wiki.query.|application.net.wiki.page.'
+	// wiki_API.parse.redirect()
+	// + '|application.net.wiki.parser.'
+	,
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -35,7 +40,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var get_URL = this.r('get_URL'), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, add_parameters = wiki_API.add_parameters;
 
@@ -1098,9 +1103,10 @@ function module_code(library_namespace) {
 			options = data && (data['continue'] || data['query-continue']);
 			var totalhits;
 			if (data && (data = data.query)) {
-				if (options)
+				if (options) {
 					// data.search.sroffset = options.search.sroffset;
 					Object.assign(data.search, options.search);
+				}
 				totalhits = data.searchinfo.totalhits;
 				data = data.search;
 			}
@@ -1115,7 +1121,7 @@ function module_code(library_namespace) {
 
 	wiki_API.search.default_parameters = {
 		// |portal
-		srnamespace : wiki_API.namespace('module|template|category|main'),
+		srnamespace : 'module|template|category|main',
 
 		srprop : 'redirecttitle',
 		// srlimit : 10,
@@ -1187,8 +1193,8 @@ function module_code(library_namespace) {
 				// 已追尋至重定向終點，不再溯源。
 				options.no_trace = true;
 				wiki_API.redirects_here(
-				// 已經轉換過，毋須 parse_redirect()。
-				// parse_redirect(get_page_content(page_data)) ||
+				// 已經轉換過，毋須 wiki_API.parse.redirect()。
+				// wiki_API.parse.redirect(wiki_API.content_of(page_data)) ||
 
 				// 若是 convert 過則採用新的 title。
 				page_data.title || title, callback, options);

@@ -39,6 +39,12 @@ function module_code(library_namespace) {
 	// @inner
 	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_URL_prefix = wiki_API.PATTERN_URL_prefix, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
 
+	var default_language = wiki_API.set_language();
+
+	var
+	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
+	NOT_FOUND = ''.indexOf('_');
+
 	// --------------------------------------------------------------------------------------------
 	// parse wikitext.
 
@@ -142,14 +148,14 @@ function module_code(library_namespace) {
 	function page_parser(wikitext, options) {
 		if (typeof wikitext === 'string') {
 			wikitext = [ wikitext ];
-		} else if (get_page_content.is_page_data(wikitext)) {
+		} else if (wiki_API.is_page_data(wikitext)) {
 			// 可以用 "CeL.wiki.parser(page_data).parse();" 來設置 parser。
 			var page_data = wikitext;
 			if (!page_data.parsed
 			// re-parse
 			|| options && (options.reparse || options.wikitext)) {
 				page_data.parsed = wikitext = [ options && options.wikitext
-						|| get_page_content(page_data, options || 0) ];
+						|| wiki_API.content_of(page_data, options || 0) ];
 				wikitext.page = page_data;
 			} else {
 				return page_data.parsed;
@@ -645,9 +651,9 @@ function module_code(library_namespace) {
 	 */
 	function lead_text(wikitext) {
 		var page_data;
-		if (get_page_content.is_page_data(wikitext)) {
+		if (wiki_API.is_page_data(wikitext)) {
 			page_data = wikitext;
-			wikitext = get_page_content(page_data);
+			wikitext = wiki_API.content_of(page_data);
 		}
 		if (!wikitext || typeof wikitext !== 'string') {
 			return wikitext;
@@ -706,7 +712,7 @@ function module_code(library_namespace) {
 	 */
 	function extract_introduction(first_section, title) {
 		var parsed;
-		if (get_page_content.is_page_data(first_section)) {
+		if (wiki_API.is_page_data(first_section)) {
 			if (!title)
 				title = wiki_API.title_of(first_section);
 			parsed = page_parser(first_section).parse();
@@ -1168,9 +1174,9 @@ function module_code(library_namespace) {
 	// use for_each_section() instead.
 	function deprecated_get_sections(wikitext) {
 		var page_data;
-		if (get_page_content.is_page_data(wikitext)) {
+		if (wiki_API.is_page_data(wikitext)) {
 			page_data = wikitext;
-			wikitext = get_page_content(page_data);
+			wikitext = wiki_API.content_of(page_data);
 		}
 		if (!wikitext || typeof wikitext !== 'string') {
 			return;
@@ -4299,7 +4305,7 @@ function module_code(library_namespace) {
 		} else {
 			date_parser = date_parser_config[options.language]
 			// e.g., 'commons'
-			|| date_parser_config[wiki_API.set_language()];
+			|| date_parser_config[default_language];
 		}
 		var PATTERN_date = date_parser[0], matched;
 		date_parser = date_parser[1];
@@ -4340,8 +4346,8 @@ function module_code(library_namespace) {
 		if (wiki_API.is_wiki_API(language)) {
 			language = language.language;
 		}
-		// console.log(language || wiki_API.set_language());
-		var to_String = date_parser_config[language || wiki_API.set_language()][2];
+		// console.log(language || default_language);
+		var to_String = date_parser_config[language || default_language][2];
 		return library_namespace.is_Object(to_String)
 		// treat to_String as date format
 		? date.format(to_String) : to_String(date);
@@ -4659,11 +4665,11 @@ function module_code(library_namespace) {
 		// using parser
 		parsed, configuration_page_title;
 
-		if (get_page_content.is_page_data(wikitext)) {
+		if (wiki_API.is_page_data(wikitext)) {
 			variable_name = wikitext.title;
 			configuration_page_title = variable_name;
 			parsed = page_parser(wikitext).parse();
-			// wikitext = get_page_content(wikitext);
+			// wikitext = wiki_API.content_of(wikitext);
 		} else {
 			// assert: typeof wikitext === 'string'
 			parsed = parse_wikitext(wikitext);
@@ -4813,8 +4819,8 @@ function module_code(library_namespace) {
 	/**
 	 * Convert URL to wiki link.
 	 * 
-	 * TODO: 在 wiki_API.set_language() 非 zh 使用 uselang, /zh-tw/條目 會有問題。 TODO:
-	 * [[en link]] → [[:en:en link]] TODO: use {{tsl}} or {{link-en}},
+	 * TODO: 在 default_language 非 zh 使用 uselang, /zh-tw/條目 會有問題。 TODO: [[en
+	 * link]] → [[:en:en link]] TODO: use {{tsl}} or {{link-en}},
 	 * {{en:Template:Interlanguage link multi}}.
 	 * 
 	 * TODO: 與 wiki_API.title_link_of() 整合。
@@ -4886,7 +4892,7 @@ function module_code(library_namespace) {
 		title = decodeURIComponent(matched[2]);
 
 		function compose_link() {
-			var link = (language === wiki_API.set_language() ? ''
+			var link = (language === default_language ? ''
 			//
 			: ':' + language + ':') + title + section
 			// link 說明
@@ -4913,7 +4919,7 @@ function module_code(library_namespace) {
 		}
 
 		// 若非外 project 或不同 language，則直接 callback(link)。
-		if (section || language === wiki_API.set_language()) {
+		if (section || language === default_language) {
 			callback(compose_link());
 			return;
 		}
@@ -4921,12 +4927,12 @@ function module_code(library_namespace) {
 		// 嘗試取得本 project 之對應連結。
 		wiki_API.langlinks([ language, title ], function(to_title) {
 			if (to_title) {
-				language = wiki_API.set_language();
+				language = default_language;
 				title = to_title;
 				// assert: section === ''
 			}
 			callback(compose_link());
-		}, wiki_API.set_language(), options);
+		}, default_language, options);
 	}
 
 	// ----------------------------------------------------
@@ -4991,6 +4997,7 @@ function module_code(library_namespace) {
 		date : parse_date,
 		// timestamp : parse_timestamp,
 		user : parse_user,
+		// CeL.wiki.parse.redirect , wiki_API.parse.redirect
 		redirect : parse_redirect,
 
 		wiki_URL : URL_to_wiki_link,
@@ -5053,7 +5060,7 @@ function module_code(library_namespace) {
 	</code>
 	 */
 	wiki_API.table_to_array = function(page_data, options) {
-		if (!get_page_content.is_page_data(page_data)) {
+		if (!wiki_API.is_page_data(page_data)) {
 			library_namespace.error('Invalid page data!');
 			return;
 		}

@@ -91,7 +91,7 @@ function module_code(library_namespace) {
 
 		var session = options[KEY_SESSION] || this;
 		wiki_API.page([ session.API_URL, title ], function(page_data) {
-			var content = get_page_content(page_data),
+			var content = wiki_API.content_of(page_data),
 			// default: NOT stopped
 			stopped = false, PATTERN;
 
@@ -230,7 +230,7 @@ function module_code(library_namespace) {
 						delete options.undo_count;
 						// page_data =
 						// {pageid:0,ns:0,title:'',revisions:[{revid:0,parentid:0,user:'',timestamp:''},...]}
-						var revision = get_page_content.revision(page_data);
+						var revision = wiki_API.content_of.revision(page_data);
 						if (revision) {
 							timestamp = revision.timestamp;
 							// 指定 rev_id 版本編號。
@@ -245,7 +245,7 @@ function module_code(library_namespace) {
 					// 這裡不直接指定 text，是為了讓使(回傳要編輯資料的)設定值函數能即時依page_data變更 options。
 					// undo_count ? '' :
 					typeof text === 'function' &&
-					// or: text(get_page_content(page_data),
+					// or: text(wiki_API.content_of(page_data),
 					// page_data.title, page_data)
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 					// 注意: 更改此介面需同時修改 wiki_API.prototype.work 中 'edit' 之介面。
@@ -493,7 +493,7 @@ function module_code(library_namespace) {
 	wiki_API.edit.set_stamp = function(options, timestamp) {
 		if (wiki_API.is_page_data(timestamp)
 		// 在 .page() 會取得 page_data.revisions[0].timestamp
-		&& (timestamp = get_page_content.revision(timestamp)))
+		&& (timestamp = wiki_API.content_of.revision(timestamp)))
 			// 自 page_data 取得 timestamp.
 			timestamp = timestamp.timestamp;
 		// timestamp = '2000-01-01T00:00:00Z';
@@ -549,7 +549,7 @@ function module_code(library_namespace) {
 			return;
 		var page_data;
 		if (wiki_API.is_page_data(content)) {
-			if (!(content = get_page_content(content)))
+			if (!(content = wiki_API.content_of(content)))
 				return;
 			page_data = content;
 		}
