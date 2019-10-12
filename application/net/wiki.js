@@ -5182,6 +5182,8 @@ function module_code(library_namespace) {
 		KEY_SESSION : KEY_SESSION,
 		KEY_HOST_SESSION : KEY_HOST_SESSION,
 
+		BLANK_TOKEN : BLANK_TOKEN,
+
 		setup_API_URL : setup_API_URL,
 		API_URL_of_options : API_URL_of_options,
 		is_api_and_title : is_api_and_title,

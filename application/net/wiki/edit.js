@@ -38,7 +38,7 @@ function module_code(library_namespace) {
 	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 
 	// @inner
-	var PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
+	var PATTERN_category_prefix = wiki_API.PATTERN_category_prefix, BLANK_TOKEN = wiki_API.BLANK_TOKEN;
 
 	// ------------------------------------------------------------------------
 

@@ -39,7 +39,7 @@ function module_code(library_namespace) {
 	// requiring
 	var get_URL = this.r('get_URL'), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
-	var setup_API_URL = wiki_API.setup_API_URL;
+	var setup_API_URL = wiki_API.setup_API_URL, BLANK_TOKEN = wiki_API.BLANK_TOKEN;
 
 	// --------------------------------------------------------------------------------------------
 	// 以下皆泛用，無須 wiki_API instance。
