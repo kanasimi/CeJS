@@ -4654,8 +4654,6 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 	// SQL 相關函數 @ Toolforge。
 
-	library_namespace.set_debug(9);
-
 	function setup_wmflabs() {
 		/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
 		var wmflabs;
@@ -7143,57 +7141,56 @@ function module_code(library_namespace) {
 			}
 		};
 
+		// node.js v0.11.16: In strict mode code, functions can only be declared
+		// at top level or immediately within another function.
+		function run_SQL_callback(error, rows, fields) {
+			if (error) {
+				library_namespace.error('traversal_pages: '
+				//
+				+ 'Error reading database replication!');
+				library_namespace.error(error);
+				config.no_database = error;
+				delete config.list;
+			} else {
+				library_namespace.log('traversal_pages: All ' + rows.length
+						+ ' pages. 轉換中...');
+				// console.log(rows.slice(0, 2));
+				var id_list = [], rev_list = [];
+				rows.forEach(function(row) {
+					// .i, .r: @see all_revision_SQL
+					id_list.push(is_id ? row.i | 0 : row.i.toString('utf8'));
+					rev_list.push(row.r);
+				});
+				config.list = [ traversal_pages.id_mark, id_list, rev_list ];
+				// config.is_id = is_id;
+			}
+			// 因為已經取得所有列表，重新呼叫traversal_pages()。
+			traversal_pages(config, callback);
+		}
+		function generate_revision_list() {
+			library_namespace.info(
+			// Wikimedia Toolforge database replicas.
+			'traversal_pages: 嘗試讀取 Wikimedia Toolforge 上之 database replication 資料，'
+					+ '一次讀取完所有頁面最新修訂版本之版本號 rev_id...');
+			// default: 採用 page_id 而非 page_title 來 query。
+			var is_id = 'is_id' in config ? config.is_id : true;
+			var SQL = is_id ? all_revision_SQL : all_revision_SQL.replace(
+					/page_id/g, 'page_title');
+			var SQL_config = config && config.SQL_config
+			//
+			|| wiki_API.new_SQL_config
+			// 光從 use_language 無法獲得如 wikinews 之資訊。
+			&& wiki_API.new_SQL_config(config[KEY_SESSION] || use_language);
+			wiki_API.run_SQL(SQL, run_SQL_callback, SQL_config);
+			return wiki_API.cache.abort;
+		}
+
 		if (Array.isArray(config.list)) {
 			library_namespace.debug('採用輸入之 list，列表長度 ' + config.list.length
 					+ '。', 1, 'traversal_pages');
 			cache_config.list = config.list;
 
 		} else if (wiki_API.wmflabs && !config.no_database) {
-			function run_SQL_callback(error, rows, fields) {
-				if (error) {
-					library_namespace.error('traversal_pages: '
-					//
-					+ 'Error reading database replication!');
-					library_namespace.error(error);
-					config.no_database = error;
-					delete config.list;
-				} else {
-					library_namespace.log('traversal_pages: All ' + rows.length
-							+ ' pages. 轉換中...');
-					// console.log(rows.slice(0, 2));
-					var id_list = [], rev_list = [];
-					rows.forEach(function(row) {
-						// .i, .r: @see all_revision_SQL
-						id_list
-								.push(is_id ? row.i | 0 : row.i
-										.toString('utf8'));
-						rev_list.push(row.r);
-					});
-					config.list = [ traversal_pages.id_mark, id_list, rev_list ];
-					// config.is_id = is_id;
-				}
-				// 因為已經取得所有列表，重新呼叫traversal_pages()。
-				traversal_pages(config, callback);
-			}
-
-			function generate_revision_list() {
-				library_namespace.info(
-				// Wikimedia Toolforge database replicas.
-				'traversal_pages: 嘗試讀取 Wikimedia Toolforge 上之 database replication 資料，'
-						+ '一次讀取完所有頁面最新修訂版本之版本號 rev_id...');
-				// default: 採用 page_id 而非 page_title 來 query。
-				var is_id = 'is_id' in config ? config.is_id : true;
-				var SQL = is_id ? all_revision_SQL : all_revision_SQL.replace(
-						/page_id/g, 'page_title');
-				var SQL_config = config && config.SQL_config
-				//
-				|| wiki_API.new_SQL_config
-				// 光從 use_language 無法獲得如 wikinews 之資訊。
-				&& wiki_API.new_SQL_config(config[KEY_SESSION] || use_language);
-				wiki_API.run_SQL(SQL, run_SQL_callback, SQL_config);
-				return wiki_API.cache.abort;
-			}
-
 			library_namespace.debug('若沒有 cache，則嘗試讀取 database 之資料。', 1,
 					'traversal_pages');
 
