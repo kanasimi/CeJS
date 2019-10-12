@@ -2814,20 +2814,21 @@ OS='UNIX'; // unknown
 					// 直接跳過，保留原值。
 					return;
 
-			if (typeof value === 'string')
+			if (typeof value === 'string') {
 				// _.is_type()
 				value = typeof name_space[key] === value;
-			else if (value)
+			} else if (value) {
 				if (value === true)
 					// 偵測是否已經存在 target name_space。
 					value = key in name_space;
 				else
 					_.warn('set_method.setter: Unknown filter: [' + value + ']');
-			else if (value !== false)
+			} else if (value !== false) {
 				// undefined, null, NaN
 				value = typeof name_space[key] === typeof properties[key]
 				// 假如原先有的並非原生函數，應該是有比較好、針對性的實作方法，那麼就用新的覆蓋舊的。
 				&& !name_space[key][not_native_keyword];
+			}
 
 			if (value)
 				return;
@@ -2852,7 +2853,7 @@ OS='UNIX'; // unknown
 
 			// 放這邊，確保 not_native_keyword 一定會被設定。
 			var name = native_name(name_space);
-			if (name)
+			if (name && value) {
 				try {
 					Object.defineProperty(value,
 					// 設定非 native 之 flag.
@@ -2862,6 +2863,7 @@ OS='UNIX'; // unknown
 				} catch (e) {
 					value[not_native_keyword] = true;
 				}
+			}
 
 			// Warning: 由於執行時可能處於 log() stack 中，若 log() 會用到 set_method()，這邊又
 			// call .debug()，可能會循環呼叫，造成 stack overflow。

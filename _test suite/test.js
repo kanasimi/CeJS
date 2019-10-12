@@ -148,7 +148,7 @@ function test_compatibility() {
 
 		s.add(4);
 		if (v.next().value !== 4)
-			CeL.error('test_compatibility: iterator 無法反映 Set 之更動！但此項為執行平台問題，將不被視作 fatal error。');
+			CeL.error('test_compatibility: iterator 無法反映 Set 之更動！但此項為執行平臺環境問題，將不被視作 fatal error。');
 		assert(v.next().done, 'set.values().done');
 
 		e = a.entries();
@@ -2213,7 +2213,7 @@ function test_date() {
 				assert([year+'/2/29 0:0:0.000',(year.pad(4)+'/2/29').to_Date('CE').format('CE')], 'date Basic tests: '+year+'/2/29');
 			var date = (year.pad(4)+'/3/1').to_Date('CE');
 			if (date.getTimezoneOffset() === present_local_minute_offset) {
-				// for 1952/3/1 @ 台北標準時間: 實施日光節約時間
+				// for 1952/3/1 @ 臺北標準時間: 實施日光節約時間
 				// https://blog.yorkxin.org/2014/07/11/dst-in-taiwan-study.html
 				assert([year+'/3/1 0:0:0.000',date.format('CE')], 'date Basic tests: '+year+'/3/1');
 			}

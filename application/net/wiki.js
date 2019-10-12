@@ -4654,6 +4654,8 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 	// SQL 相關函數 @ Toolforge。
 
+	library_namespace.set_debug(9);
+
 	function setup_wmflabs() {
 		/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
 		var wmflabs;
@@ -4685,7 +4687,7 @@ function module_code(library_namespace) {
 		}
 	}
 
-	setup_wmflabs();
+	setup_wmflabs.call(this);
 
 	// ------------------------------------------------------------------------
 
