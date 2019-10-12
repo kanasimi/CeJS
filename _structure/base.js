@@ -2827,7 +2827,7 @@ OS='UNIX'; // unknown
 				// undefined, null, NaN
 				value = typeof name_space[key] === typeof properties[key]
 				// 假如原先有的並非原生函數，應該是有比較好、針對性的實作方法，那麼就用新的覆蓋舊的。
-				&& !name_space[key][not_native_keyword];
+				&& name_space[key] && !name_space[key][not_native_keyword];
 			}
 
 			if (value)
