@@ -28,7 +28,7 @@ CeL.comico(configuration, function(crawler) {
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
 	// module name
-	name : 'application.net.work_crawler.comico',
+	name : 'application.net.work_crawler.sites.comico',
 
 	require : 'application.net.work_crawler.',
 
@@ -194,10 +194,15 @@ function module_code(library_namespace) {
 			return work_data;
 		},
 		chapter_list_URL : function(work_id, work_data) {
+			// console.log(work_data);
 			// library_namespace.set_debug(9);
+			return [
 			// 2019/9: 'api/getArticleList.nhn'
-			// 2019/10: 'api/getArticleListAll.nhn' 會出現沒有 .freeFlg 標記的問題。
-			return [ 'api/getArticleList.nhn', {
+			work_data.isOfficial ? 'api/getArticleList.nhn'
+			// 2019/10: 'api/getArticleListAll.nhn' 沒有 .freeFlg 標記，無法自動使用閱讀卷。
+			// 但是對新手村作品如 '3729 神光拜達摩' 來說，
+			// 用 'api/getArticleListAll.nhn' 才能取得所有作品之列表。
+			: 'api/getArticleListAll.nhn', {
 				titleNo : work_id
 			} ];
 		},
@@ -207,7 +212,14 @@ function module_code(library_namespace) {
 
 			// console.log(html);
 			var recerse_count = 0;
-			html = JSON.parse(html).result;
+			html = JSON.parse(html);
+			html = html.result;
+			// for 'api/getArticleList.nhn', there is no .totalPageCnt
+			if (('totalPageCnt' in html) && html.totalPageCnt !== 1) {
+				console.log(html);
+				throw new Error(work_data.title + ': ' + 'Total page is '
+						+ html.totalPageCnt + ', not 1!');
+			}
 			html.list.forEach(function(chapter_data, index) {
 				chapter_data.url = chapter_data.articleDetailUrl;
 				// 原先都將標題設在 subtitle，title 沒東西。
@@ -228,9 +240,9 @@ function module_code(library_namespace) {
 			delete html.list;
 			// console.log(recerse_count);
 			if (recerse_count > 0) {
-				CeL.info({
-					T : [ '%1：將倒序轉為正序。', work_data.title ]
-				});
+				CeL.info([ work_data.title + ': ', {
+					T : '將倒序章節列表轉為正序。'
+				} ]);
 				work_data.chapter_list.reverse();
 			}
 			Object.assign(work_data, html);
@@ -241,6 +253,10 @@ function module_code(library_namespace) {
 					work_data.chapter_list.some(function(chapter_data, index) {
 						if (++index >= work_data.last_download.chapter) {
 							return true;
+						}
+						if (!chapter_data.freeFlg) {
+							throw new Error(this.id + ': '
+									+ '網站改版？未發現 .freeFlg！');
 						}
 						if (!work_data.downloaded_chapter_list[index]
 								&& chapter_data.freeFlg === READABLE_FLAG) {

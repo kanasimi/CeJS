@@ -3271,6 +3271,7 @@ function module_code(library_namespace) {
 					// (Did not set work_data.chapter_count)
 					+ gettext(_this.got_chapter_count ? '或許作品已被刪除或屏蔽？'
 					// No chapter got! 若是作品不存在就不會跑到這邊了
+					// 或者是特殊作品？
 					: '或許作品已被刪除或屏蔽，或者網站改版了？');
 				}
 				_this.onwarning(warning, work_data);
@@ -3943,6 +3944,7 @@ function module_code(library_namespace) {
 		}
 		return chapter_list;
 	}
+	// part / section
 	// should be called by this.get_chapter_list()
 	// this.set_part(work_data, 'part_title');
 	function set_part_title(work_data, part_title, part_NO) {
@@ -5954,7 +5956,7 @@ function module_code(library_namespace) {
 				&& work_data.chapter_list[chapter_NO - 1],
 		// 卷篇集幕部冊册本輯/volume/part/book
 		part_title = data.title || chapter_data && chapter_data.part_title,
-		// 章節名稱 / 篇章名稱 / 章節节回折篇話话頁页/chapter
+		// 章節名稱 / 篇章名稱 / 章節节回折篇話话頁页/chapter/section
 		chapter_title = data.sub_title || chapter_data
 				&& (chapter_data.chapter_title || chapter_data.title),
 		//

@@ -14,9 +14,9 @@
  * modify from archive/2manhua.js
  * 
  * 57mh 介面程式碼類似於 999comics。manhuagui 似乎是在這基礎上經過修改？ 57mh 這一批介面外觀與
- * CeL.application.net.work_crawler.SinMH 類似，但介面程式碼有些差距。或可稱為
- * CeL.application.net.work_crawler.SinMH2013 或
- * CeL.application.net.work_crawler.SMH。
+ * CeL.application.net.work_crawler.sites.SinMH 類似，但介面程式碼有些差距。或可稱為
+ * CeL.application.net.work_crawler.sites.SinMH2013 或
+ * CeL.application.net.work_crawler.sites.SMH。
  * 
  * @see https://www.999comics.com/static/scripts/main.js?v=1.0 MHD (MHD: 漫画岛
  *      http://www.manhuadao.com/book/baiqianjiadeyaoguaiwangzi/)
@@ -37,11 +37,11 @@
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
 	// module name
-	name : 'application.net.work_crawler.SinMH2013',
+	name : 'application.net.work_crawler.sites.SinMH2013',
 
 	require : 'application.net.work_crawler.'
 	//
-	+ '|application.net.work_crawler.SinMH.',
+	+ '|application.net.work_crawler.sites.SinMH.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',

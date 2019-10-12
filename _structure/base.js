@@ -2853,7 +2853,7 @@ OS='UNIX'; // unknown
 
 			// 放這邊，確保 not_native_keyword 一定會被設定。
 			var name = native_name(name_space);
-			if (name && value) {
+			if (name && typeof value === 'function') {
 				try {
 					Object.defineProperty(value,
 					// 設定非 native 之 flag.

@@ -31,7 +31,7 @@
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
 	// module name
-	name : 'application.net.work_crawler.SinMH',
+	name : 'application.net.work_crawler.sites.SinMH',
 
 	require : 'application.net.work_crawler.',
 
@@ -596,7 +596,7 @@ function module_code(library_namespace) {
 		return new library_namespace.work_crawler(configuration);
 	}
 
-	// for CeL.application.net.work_crawler.SinMH2013
+	// for CeL.application.net.work_crawler.sites.SinMH2013
 	new_SinMH_comics_crawler.default_configuration = default_configuration;
 
 	return new_SinMH_comics_crawler;

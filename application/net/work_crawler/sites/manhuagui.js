@@ -6,7 +6,7 @@
  * 2017/10: 爱看漫/看漫画改名(DNS被導引到)漫画柜
  * 
  * 57mh 介面程式碼類似於 999comics。manhuagui 似乎是在這基礎上經過修改？
- * @see CeL.application.net.work_crawler.SinMH2013
+ * @see CeL.application.net.work_crawler.sites.SinMH2013
  * 
  * @see http://www.manhua.demo.shenl.com/?theme=mhd
  * @see qTcms 晴天漫画程序 晴天漫画系统 http://manhua3.qingtiancms.net/
@@ -35,7 +35,7 @@ CeL.manhuagui(configuration, function(crawler) {
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
 	// module name
-	name : 'application.net.work_crawler.manhuagui',
+	name : 'application.net.work_crawler.sites.manhuagui',
 
 	require : 'application.net.work_crawler.',
 

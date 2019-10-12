@@ -28,7 +28,7 @@ CeL.dm5(configuration).start(work_id);
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
 	// module name
-	name : 'application.net.work_crawler.dm5',
+	name : 'application.net.work_crawler.sites.dm5',
 
 	require : 'application.net.work_crawler.',
 

@@ -496,7 +496,7 @@ function module_code(library_namespace) {
 										T : [ 'Invalid flags: [%1]', flag ]
 									} ]);
 								} else
-									throw 1;
+									throw true;
 							} catch (e) {
 								library_namespace.warn([
 								//
@@ -2014,8 +2014,8 @@ function module_code(library_namespace) {
 				// confused if there are duplicate keys
 				while ((key = KEY_reference + index++) in reference_hash) {
 					if (recover_value) {
-						throw 'create_reference_map: Invalid index ' + key
-								+ '. It should not happen.';
+						throw new Error('create_reference_map: Invalid index '
+								+ key + '. It should not happen.');
 					}
 				}
 				// assert: typeof key!=='object', or will be traversed by
@@ -2031,11 +2031,11 @@ function module_code(library_namespace) {
 
 			} else if (typeof value === 'string' && !recover_value
 					&& value.startsWith(KEY_reference)) {
-				throw 'create_reference_map: '
+				throw new Error('create_reference_map: '
 				//
 				+ 'You should specify another KEY_reference instead of '
 						+ JSON.stringify(KEY_reference) + '. Confused value: '
-						+ value;
+						+ value);
 			}
 
 			return value;
@@ -2898,13 +2898,13 @@ function module_code(library_namespace) {
 				result[0].push(queue[0][0]);
 			else if (queue[0].length > 0) {
 				// 有多重起頭。
-				throw 'Invalid starts: ' + queue[0];
+				throw new Error('Invalid starts: ' + queue[0]);
 			}
 			if (queue[1].length === 1)
 				result[1].unshift(queue[1][0]);
 			else if (queue[1].length > 0) {
 				// 有多重結尾。
-				throw 'Invalid ends: ' + queue[1];
+				throw new Error('Invalid ends: ' + queue[1]);
 			}
 
 			// remove node.
@@ -3499,7 +3499,7 @@ function module_code(library_namespace) {
 		if (isNaN(from_index) || isNaN(to_index)) {
 			library_namespace.error('LCS: isNaN(from:' + from_index
 					+ ') || isNaN(' + to_index + ')');
-			throw 'LCS: isNaN(from_index) || isNaN(to_index)';
+			throw new Error('LCS: isNaN(from_index) || isNaN(to_index)');
 		}
 		backtrack(from_index, to_index, all_list);
 

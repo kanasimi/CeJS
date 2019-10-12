@@ -36,7 +36,7 @@
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
 	// module name
-	name : 'application.net.work_crawler.PTCMS',
+	name : 'application.net.work_crawler.sites.PTCMS',
 
 	require : 'application.net.work_crawler.'
 	//
