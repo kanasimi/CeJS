@@ -1303,6 +1303,8 @@ function module_code(library_namespace) {
 		return Array.isArray(value) ? value.join('\n') : value;
 	}
 
+	to_template_wikitext.join_array = to_template_wikitext_join_array;
+
 	// 2017/1/18 18:46:2
 	// TODO: escape special characters
 	function to_template_wikitext(parameters, options) {

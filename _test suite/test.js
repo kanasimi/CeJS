@@ -3821,7 +3821,8 @@ function do_test() {
 		'application.net.wiki.parser',
 		'application.net.wiki.edit',
 		'application.net.wiki.list',
-		'application.net.wiki.data'
+		'application.net.wiki.data',
+		'application.net.wiki.admin'
 	], test_wiki,
 	//
 	function() {

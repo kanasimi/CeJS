@@ -3,6 +3,8 @@
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用程式庫的子程式庫。
  * 
+ * 條件合適時，應該會由 CeL.application.net.wiki 載入。
+ * 
  * TODO:<code>
 
 
