@@ -2433,7 +2433,7 @@ function module_code(library_namespace) {
 			// 因為接下來的操作會呼叫 this.next() 本身，
 			// 因此必須把正在執行的標記特消掉。
 			this.running = false;
-			add_listener(next[1],
+			wiki_API.listen(next[1],
 			// next[2]: options to call wiki_API.listen()
 			Object.assign({
 				// [KEY_SESSION]
