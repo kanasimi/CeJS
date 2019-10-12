@@ -840,7 +840,7 @@ function module_code(library_namespace) {
 			};
 			options.text = [ '== {{int:filedesc}} ==',
 			//
-			wiki_API.to_template_wikitext(options.text, {
+			wiki_API.template_text(options.text, {
 				name : 'Information',
 				separator : '\n|'
 			}) ];
@@ -848,14 +848,14 @@ function module_code(library_namespace) {
 			if (options.license) {
 				options.text.push('', '== {{int:license-header}} ==',
 				//
-				wiki_API.to_template_wikitext.join_array(options.license));
+				wiki_API.template_text.join_array(options.license));
 			}
 
 			// add categories
 			if (options.categories) {
 				options.text.push('',
 				//
-				wiki_API.to_template_wikitext.join_array(options.categories
+				wiki_API.template_text.join_array(options.categories
 				//
 				.map(function(category_name) {
 					if (!category_name.includes('[[')) {
@@ -873,7 +873,7 @@ function module_code(library_namespace) {
 		} else if (library_namespace.is_Object(options.text)) {
 			options.text = '== {{int:filedesc}} ==\n'
 			// 將 .text 當作文件資訊。
-			+ wiki_API.to_template_wikitext(options.text, {
+			+ wiki_API.template_text(options.text, {
 				name : 'Information',
 				separator : '\n|'
 			});
