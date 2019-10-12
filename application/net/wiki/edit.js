@@ -36,8 +36,6 @@ function module_code(library_namespace) {
 
 	// requiring
 	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
-	// @inner
-	// var ;
 
 	// ------------------------------------------------------------------------
 

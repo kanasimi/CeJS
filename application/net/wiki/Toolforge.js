@@ -44,16 +44,6 @@ function module_code(library_namespace) {
 	// 不可 catch default_language。
 	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
 
-	/**
-	 * null module constructor
-	 * 
-	 * @class Toolforge 相關的 functions
-	 */
-	var _// JSDT:_module_
-	= function() {
-		// null module constructor
-	};
-
 	// ------------------------------------------------------------------------
 	// SQL 相關函數 @ Toolforge。
 
@@ -900,7 +890,9 @@ function module_code(library_namespace) {
 
 	// 可能會因環境而不同的功能。讓 wiki_API.recent 採用較有效率的實現方式。
 	if (SQL_config) {
-		wiki_API.recent = get_recent_via_databases;
+		wiki_API.recent =
+		// SQL_config ? get_recent_via_databases : get_recent_via_API;
+		get_recent_via_databases;
 	}
 
 	// ------------------------------------------------------------------------
@@ -920,6 +912,16 @@ function module_code(library_namespace) {
 	Object.assign(wiki_API, {
 
 	});
+
+	/**
+	 * null module constructor
+	 * 
+	 * @class Toolforge 相關的 functions
+	 */
+	var _// JSDT:_module_
+	= function() {
+		// null module constructor
+	};
 
 	return (_// JSDT:_module_
 	);
