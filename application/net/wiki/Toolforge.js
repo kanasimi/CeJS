@@ -908,23 +908,6 @@ function module_code(library_namespace) {
 		run_SQL : run_SQL
 	});
 
-	// ------------------------------------------
-
-	// @static
-	Object.assign(wiki_API, {
-
-	});
-
-	/**
-	 * null module constructor
-	 * 
-	 * @class Toolforge 相關的 functions
-	 */
-	var _// JSDT:_module_
-	= function() {
-		// null module constructor
-	};
-
-	return (_// JSDT:_module_
-	);
+	// 不設定(hook)本 module 之 namespace，僅執行 module code。
+	return library_namespace.env.not_to_extend_keyword;
 }

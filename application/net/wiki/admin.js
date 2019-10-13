@@ -1,5 +1,6 @@
 ﻿/**
- * @name CeL function for MediaWiki (Wikipedia / 維基百科): adminship functions
+ * @name CeL function for MediaWiki (Wikipedia / 維基百科): 管理員相關的 adminship
+ *       functions
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用程式庫的子程式庫。
  * 
@@ -359,16 +360,6 @@ function module_code(library_namespace) {
 
 	// export 導出.
 
-	/**
-	 * null module constructor
-	 * 
-	 * @class 管理員相關的 functions
-	 */
-	var _// JSDT:_module_
-	= function() {
-		// null module constructor
-	};
-
-	return (_// JSDT:_module_
-	);
+	// 不設定(hook)本 module 之 namespace，僅執行 module code。
+	return library_namespace.env.not_to_extend_keyword;
 }

@@ -4362,7 +4362,7 @@ function module_code(library_namespace) {
 
 			var module_name = this.id;
 			this.finish = function(name_space, waiting) {
-				// Call CeL.application.net.wiki.Toolforge
+				// import CeL.application.net.wiki.Toolforge
 				library_namespace.run(module_name + '.Toolforge', waiting);
 				return waiting;
 			};

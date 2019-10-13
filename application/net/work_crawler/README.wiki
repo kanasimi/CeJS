@@ -45,4 +45,4 @@
 * https://github.com/Arachnid-27/Cimoc
 * https://github.com/qq573011406/KindleHelper
 * https://github.com/InzGIBA/manga
-* [https://scrapy.org/ scrapy 爬蟲框架]
+* [https://scrapy.org/ Scrapy 爬蟲框架]

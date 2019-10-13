@@ -31,7 +31,7 @@ if (typeof CeL === 'function') {
 function module_code(library_namespace) {
 
 	// requiring
-	var Work_crawler = library_namespace.net.work_crawler, code_namespace = Work_crawler.code_namespace;
+	var Work_crawler = library_namespace.net.work_crawler, crawler_namespace = Work_crawler.crawler_namespace;
 
 	var gettext = library_namespace.locale.gettext,
 	/** node.js file system module */
@@ -225,16 +225,16 @@ function module_code(library_namespace) {
 					work_data[this.KEY_EBOOK].path.root, true);
 				}
 			} else if (work_data && work_data.titles) {
-				// @see ((approximate_title))
-				code_namespace.set_work_status(work_data, gettext('找到%1個作品：%2',
-						work_data.titles.length, work_data.titles.map(
-								function(item) {
-									return item[0] + ':' + item[1];
-								}).join('; ')));
+				crawler_namespace.set_work_status(work_data,
+				// @see `approximate_title`
+				gettext('找到%1個作品：%2', work_data.titles.length, work_data.titles
+						.map(function(item) {
+							return item[0] + ':' + item[1];
+						}).join('; ')));
 			} else {
 				var status = work_data;
 				work_data = Object.create(null);
-				code_namespace.set_work_status(work_data, status
+				crawler_namespace.set_work_status(work_data, status
 						&& typeof status === 'string' ? status : 'not found');
 			}
 
@@ -361,10 +361,10 @@ function module_code(library_namespace) {
 		if (typeof search_url_data === 'function') {
 			// 通過關鍵詞搜索作品。 解析 作品名稱 → 作品id
 			// search_url_data = search_url_data.call(this, work_title,
-			// code_namespace.get_label);
+			// crawler_namespace.get_label);
 			// return [ search_url_data, POST data ]
 			search_url_data = this.search_URL(work_title,
-					code_namespace.get_label);
+					crawler_namespace.get_label);
 			if (Array.isArray(search_url_data)) {
 				// use POST method, also see this.get_URL()
 				// [ url, post_data, options ]
@@ -383,7 +383,7 @@ function module_code(library_namespace) {
 			// 對 {Object}search_url_data，不可動到 search_url_data。
 			search_URL_string = (search_url_data.URL || search_url_data)
 			//
-			+ code_namespace.encode_URI_component(
+			+ crawler_namespace.encode_URI_component(
 			// e.g., 找不到"隔离带 2"，須找"隔离带"。
 			work_title.replace(/\s+\d{1,2}$/, '')
 			// e.g., "Knight's & Magic" @ 小説を読もう！ || 小説検索
@@ -412,7 +412,7 @@ function module_code(library_namespace) {
 				// console.log(XMLHttp.responseText);
 				// console.log(XMLHttp.buffer.toString(_this.charset));
 				id_data = _this.parse_search_result(XMLHttp.responseText,
-						code_namespace.get_label, work_title);
+						crawler_namespace.get_label, work_title);
 				if (id_data === undefined) {
 					_this.onerror('get_work.parse_search_result: '
 							+ gettext('作品網址解析函數 parse_search_result 未回傳結果！'),
@@ -556,8 +556,9 @@ function module_code(library_namespace) {
 			// delete matched.input;
 			// console.log(matched);
 
-			var key = code_namespace.get_label(matched[1]).replace(/[:：︰\s]+$/,
-					'').trim().replace(/[\t\n]/g, ' ').replace(/ {3,}/g, '  ');
+			var key = crawler_namespace.get_label(matched[1]).replace(
+					/[:：︰\s]+$/, '').trim().replace(/[\t\n]/g, ' ').replace(
+					/ {3,}/g, '  ');
 			// default: do not overwrite
 			if (!key || !overwrite && work_data[key])
 				continue;
@@ -568,13 +569,13 @@ function module_code(library_namespace) {
 			//
 			);
 			if (link) {
-				link[1] = code_namespace.get_label(link[1]);
-				link[2] = code_namespace.get_label(link[2]);
+				link[1] = crawler_namespace.get_label(link[1]);
+				link[2] = crawler_namespace.get_label(link[2]);
 				if (link[1].length > link[2].length) {
 					value = link[1];
 				}
 			}
-			value = code_namespace.get_label(value).replace(/^[:：︰\s]+/, '')
+			value = crawler_namespace.get_label(value).replace(/^[:：︰\s]+/, '')
 					.trim();
 			if (value) {
 				work_data[key] = value.replace(/[\t\n]/g, ' ').replace(
@@ -623,7 +624,7 @@ function module_code(library_namespace) {
 
 		function get_work_page() {
 			if (_this.skip_get_work_page) {
-				process_work_data(code_namespace.null_XMLHttp);
+				process_work_data(crawler_namespace.null_XMLHttp);
 				return;
 			}
 			_this.get_URL(work_URL, process_work_data);
@@ -671,7 +672,7 @@ function module_code(library_namespace) {
 				// 解析出作品資料/作品詳情。
 				work_data = _this.parse_work_data(html,
 				//
-				code_namespace.get_label,
+				crawler_namespace.get_label,
 				// parse_work_data:function(html,get_label,extract_work_data,options){}
 				extract_work_data, {
 					id : work_id,
@@ -740,7 +741,7 @@ function module_code(library_namespace) {
 				work_data.site_name = _this.site_name;
 			}
 			// 基本檢測。 e.g., "NOT FOUND", undefined
-			if (code_namespace.PATTERN_non_CJK.test(work_data.title)
+			if (crawler_namespace.PATTERN_non_CJK.test(work_data.title)
 			// e.g., "THE NEW GATE", "Knight's & Magic"
 			&& !/[a-z]+ [a-z\d&]/i.test(work_data.title)
 			// e.g., "Eje(c)t"
@@ -748,7 +749,7 @@ function module_code(library_namespace) {
 			// e.g., "H-Mate"
 			&& !/[a-z\-][A-Z]/.test(work_data.title)
 			// .title: 必要屬性：須配合網站平台更改。
-			&& code_namespace.PATTERN_non_CJK.test(work_id)) {
+			&& crawler_namespace.PATTERN_non_CJK.test(work_id)) {
 				if (!_this.skip_get_work_page || work_data.title)
 					library_namespace.warn([
 							'process_work_data: ',
@@ -1002,14 +1003,14 @@ function module_code(library_namespace) {
 				}
 				if (!work_data.process_status
 						|| !work_data.process_status.includes('finished')) {
-					code_namespace.set_work_status(work_data, 'finished');
+					crawler_namespace.set_work_status(work_data, 'finished');
 				}
 				// cf. work_data.latest_chapter 最新章節,
 				// work_data.latest_chapter_url 最新更新章節URL,
 				// work_data.last_update 最新更新時間,
 				// work_data.some_limited 部份章節需要付費/被鎖住/被限制
 				if (work_data.last_update) {
-					code_namespace.set_work_status(work_data,
+					crawler_namespace.set_work_status(work_data,
 							'last updated date: ' + work_data.last_update);
 				}
 				if (work_data.last_saved
@@ -1020,7 +1021,7 @@ function module_code(library_namespace) {
 					if (Date.parse(work_data.last_saved) > 0) {
 						work_data.last_saved = new Date(work_data.last_saved);
 					}
-					code_namespace.set_work_status(work_data,
+					crawler_namespace.set_work_status(work_data,
 					//
 					'last saved date: '
 					//
@@ -1050,7 +1051,7 @@ function module_code(library_namespace) {
 				_this.pre_get_chapter_list(
 				// function(callback, work_data, html, get_label)
 				process_chapter_list_data.bind(_this, html), work_data, html,
-						code_namespace.get_label);
+						crawler_namespace.get_label);
 			} else {
 				process_chapter_list_data(html);
 			}
@@ -1065,7 +1066,7 @@ function module_code(library_namespace) {
 				try {
 					// 解析出章節列表。
 					_this.get_chapter_list(work_data, html,
-							code_namespace.get_label);
+							crawler_namespace.get_label);
 				} catch (e) {
 					library_namespace.error([ _this.id + ': ', {
 						T : [ '《%2》：執行 %1 時發生嚴重錯誤，異常中斷。',
@@ -1488,7 +1489,7 @@ function module_code(library_namespace) {
 			if (_this.need_create_ebook) {
 				// console.log(work_data);
 				// console.log(JSON.stringify(work_data));
-				code_namespace.create_ebook.call(_this, work_data);
+				crawler_namespace.create_ebook.call(_this, work_data);
 			}
 
 			var message = [
@@ -1530,8 +1531,8 @@ function module_code(library_namespace) {
 
 			function start_to_process_chapter_data() {
 				// 開始下載 chapter。
-				code_namespace.pre_get_chapter_data.call(_this, work_data,
-						code_namespace.get_next_chapter_NO_item(work_data,
+				crawler_namespace.pre_get_chapter_data.call(_this, work_data,
+						crawler_namespace.get_next_chapter_NO_item(work_data,
 								work_data.last_download.chapter), callback);
 			}
 			if (typeof _this.after_get_work_data === 'function') {
@@ -1550,7 +1551,7 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	// @inner
-	Object.assign(code_namespace, {
+	Object.assign(crawler_namespace, {
 		set_work_status : set_work_status
 	});
 

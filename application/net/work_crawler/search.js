@@ -31,7 +31,7 @@ if (typeof CeL === 'function') {
 function module_code(library_namespace) {
 
 	// requiring
-	var Work_crawler = library_namespace.net.work_crawler, code_namespace = Work_crawler.code_namespace;
+	var Work_crawler = library_namespace.net.work_crawler, crawler_namespace = Work_crawler.crawler_namespace;
 
 	var gettext = library_namespace.locale.gettext;
 
@@ -63,7 +63,8 @@ function module_code(library_namespace) {
 		id_list.push(id);
 
 		var title = matched[1].match(/title=["']([^"'<>]+)["']/);
-		id_data.push(code_namespace.get_label(title && title[1] || matched[2]));
+		id_data.push(crawler_namespace.get_label(title && title[1]
+				|| matched[2]));
 	}
 
 	// only for .parse_search_result() !!

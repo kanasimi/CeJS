@@ -33,7 +33,7 @@ if (typeof CeL === 'function') {
 function module_code(library_namespace) {
 
 	// requiring
-	var Work_crawler = library_namespace.net.work_crawler, code_namespace = Work_crawler.code_namespace;
+	var Work_crawler = library_namespace.net.work_crawler, crawler_namespace = Work_crawler.crawler_namespace;
 
 	var get_URL = this.r('get_URL'),
 	//
@@ -931,7 +931,7 @@ function module_code(library_namespace) {
 				// insert_id_list: 提供異序(asynchronously,不同時)使用。
 				// 警告: 需要自行呼叫 insert_id_list(id_list);
 				id_converter.call(this, insert_id_list,
-						code_namespace.get_label);
+						crawler_namespace.get_label);
 				return;
 			}
 
@@ -947,7 +947,7 @@ function module_code(library_namespace) {
 				//
 				function(XMLHttp) {
 					var id_list = id_converter.parser.call(this,
-							XMLHttp.responseText, code_namespace.get_label);
+							XMLHttp.responseText, crawler_namespace.get_label);
 					insert_id_list(id_list);
 				}, null, true);
 				return;
@@ -974,7 +974,7 @@ function module_code(library_namespace) {
 				}
 			} ]);
 			this.get_work(work_title, function(work_data) {
-				var work_status = code_namespace.set_work_status(work_data);
+				var work_status = crawler_namespace.set_work_status(work_data);
 				if (work_status) {
 					// 把需要報告的狀態export到{Array}work_status。
 					// assert: {Array}work_status
@@ -1106,7 +1106,7 @@ function module_code(library_namespace) {
 		});
 	}
 
-	code_namespace.parse_search_result_set = {
+	crawler_namespace.parse_search_result_set = {
 		// baidu cse
 		baidu : function(html, get_label) {
 			// console.log(html);
@@ -1215,7 +1215,7 @@ function module_code(library_namespace) {
 		// 作業暫停中，取消作業。必須重啟作業。
 		var _arguments = this.continue_arguments;
 		this.continue_arguments = [ QUIT_TASK, callback ];
-		code_namespace.pre_get_chapter_data.apply(this, _arguments);
+		crawler_namespace.pre_get_chapter_data.apply(this, _arguments);
 		// return QUIT_TASK;
 	}
 
@@ -1249,7 +1249,7 @@ function module_code(library_namespace) {
 		library_namespace.info([ this.id + ': ', {
 			T : [ '繼續下載《%1》。', work_data.title || work_data.id ]
 		} ]);
-		code_namespace.pre_get_chapter_data.apply(this, _arguments);
+		crawler_namespace.pre_get_chapter_data.apply(this, _arguments);
 	}
 
 	// estimated time of completion 估計時間 預計剩下時間 預估剩餘時間 預計完成時間還要多久

@@ -31,7 +31,7 @@ if (typeof CeL === 'function') {
 function module_code(library_namespace) {
 
 	// requiring
-	var Work_crawler = library_namespace.net.work_crawler, code_namespace = Work_crawler.code_namespace;
+	var Work_crawler = library_namespace.net.work_crawler, crawler_namespace = Work_crawler.crawler_namespace;
 
 	var gettext = library_namespace.locale.gettext,
 	/** node.js file system module */
@@ -390,7 +390,7 @@ function module_code(library_namespace) {
 		// reset latest NO in part
 		delete chapter_list.NO_in_part;
 
-		part_title = code_namespace.get_label(part_title);
+		part_title = crawler_namespace.get_label(part_title);
 		if (part_title) {
 			library_namespace.debug(part_title, 1, 'set_part_title');
 			chapter_list.part_title = part_title;
@@ -749,7 +749,7 @@ function module_code(library_namespace) {
 		+ (chapter_data && chapter_data.chapter_NO || chapter_NO).pad(4)
 		//
 		+ (chapter_title ? ' '
-		// 把網頁編碼還原成看得懂的文字。 code_namespace.get_label()
+		// 把網頁編碼還原成看得懂的文字。 crawler_namespace.get_label()
 		+ library_namespace.HTML_to_Unicode(chapter_title) : '');
 
 		chapter_directory_name = library_namespace
@@ -928,7 +928,7 @@ function module_code(library_namespace) {
 					library_namespace.info(message);
 					if (!work_data.some_limited) {
 						work_data.some_limited = true;
-						code_namespace.set_work_status(work_data, 'limited');
+						crawler_namespace.set_work_status(work_data, 'limited');
 					}
 				} else {
 					library_namespace.log(message);
@@ -1155,7 +1155,7 @@ function module_code(library_namespace) {
 					if (typeof chapter_data !== 'boolean') {
 						chapter_NO_text
 						//
-						= code_namespace.get_label(chapter_data);
+						= crawler_namespace.get_label(chapter_data);
 						chapter_data = chapter_NO_text == chapter_NO
 								// for yomou only
 								|| (chapter_NO_text === '' || chapter_NO_text === undefined)
@@ -1186,7 +1186,7 @@ function module_code(library_namespace) {
 					// 解析出章節資料。
 					chapter_data = _this.parse_chapter_data
 							&& _this.parse_chapter_data(html, work_data,
-									code_namespace.get_label, chapter_NO)
+									crawler_namespace.get_label, chapter_NO)
 							|| Array.isArray(work_data.chapter_list)
 							// default chapter_data
 							&& work_data.chapter_list[chapter_NO - 1];
@@ -1261,7 +1261,7 @@ function module_code(library_namespace) {
 								+ '/' + work_data.chapter_count + ': '
 								+ message);
 						// console.log(chapter_data);
-						code_namespace.set_work_status(work_data, '§'
+						crawler_namespace.set_work_status(work_data, '§'
 								+ chapter_NO + ': ' + message);
 					}
 					// 注意: 若是沒有 reget_chapter，則 preserve_chapter_page 不應發生效用。
@@ -1363,7 +1363,7 @@ function module_code(library_namespace) {
 					console.log(chapter_URL);
 				}
 				if (_this.skip_get_chapter_page) {
-					pre_parse_chapter_data(code_namespace.null_XMLHttp);
+					pre_parse_chapter_data(crawler_namespace.null_XMLHttp);
 					return;
 				}
 				// library_namespace.info('reget_chapter_data: ' + chapter_URL);
@@ -1499,7 +1499,7 @@ function module_code(library_namespace) {
 					node_fs.appendFileSync(error_log_file,
 					// 產生錯誤紀錄檔。
 					error_file_logs.join(library_namespace.env.line_separator));
-					code_namespace.set_work_status(work_data, gettext(
+					crawler_namespace.set_work_status(work_data, gettext(
 							'%1：%2筆圖片下載錯誤紀錄', chapter_label,
 							error_file_logs.length));
 				}
@@ -1574,7 +1574,7 @@ function module_code(library_namespace) {
 	// @inner
 	function continue_next_chapter(work_data, chapter_NO, callback) {
 		// 這邊不紀錄最後下載的章節數 work_data.last_download.chapter。
-		// 因為可能是 code_namespace.pre_get_chapter_data() 篩選排除之後直接被呼叫的。
+		// 因為可能是 crawler_namespace.pre_get_chapter_data() 篩選排除之後直接被呼叫的。
 		// 假如是因篩選排除的，可能有些章節沒有下載到，因此下一次下載的時候應該重新檢查。
 
 		// 紀錄最後成功下載章節或者圖片日期。
@@ -1587,7 +1587,7 @@ function module_code(library_namespace) {
 		}
 
 		// 增加章節計數，準備下載下一個章節。
-		chapter_NO = code_namespace.get_next_chapter_NO_item(work_data,
+		chapter_NO = crawler_namespace.get_next_chapter_NO_item(work_data,
 				chapter_NO + 1);
 
 		if ('jump_to_chapter' in work_data) {
@@ -1647,7 +1647,7 @@ function module_code(library_namespace) {
 
 		} else {
 			// 為了預防太多堆疊，因此使用 setImmediate()。
-			setImmediate(code_namespace.pre_get_chapter_data.bind(this,
+			setImmediate(crawler_namespace.pre_get_chapter_data.bind(this,
 					work_data, chapter_NO, callback));
 		}
 	}
@@ -1657,7 +1657,7 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	// @inner
-	Object.assign(code_namespace, {
+	Object.assign(crawler_namespace, {
 		get_next_chapter_NO_item : get_next_chapter_NO_item,
 
 		pre_get_chapter_data : pre_get_chapter_data

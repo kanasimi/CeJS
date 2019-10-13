@@ -31,7 +31,7 @@ if (typeof CeL === 'function') {
 function module_code(library_namespace) {
 
 	// requiring
-	var Work_crawler = library_namespace.net.work_crawler, code_namespace = Work_crawler.code_namespace;
+	var Work_crawler = library_namespace.net.work_crawler, crawler_namespace = Work_crawler.crawler_namespace;
 
 	var gettext = library_namespace.locale.gettext,
 	/** node.js file system module */
@@ -178,7 +178,7 @@ function module_code(library_namespace) {
 			image_url = this.full_URL(image_url);
 		}
 		image_data.parsed_url = image_url;
-		if (!code_namespace.PATTERN_non_CJK.test(image_url)) {
+		if (!crawler_namespace.PATTERN_non_CJK.test(image_url)) {
 			library_namespace.warn({
 				T : [ '必須先將URL編碼：%1', image_url ]
 			});

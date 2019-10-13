@@ -31,7 +31,7 @@ if (typeof CeL === 'function') {
 function module_code(library_namespace) {
 
 	// requiring
-	var Work_crawler = library_namespace.net.work_crawler, code_namespace = Work_crawler.code_namespace;
+	var Work_crawler = library_namespace.net.work_crawler, crawler_namespace = Work_crawler.crawler_namespace;
 
 	var gettext = library_namespace.locale.gettext,
 	/** node.js file system module */
@@ -170,7 +170,7 @@ function module_code(library_namespace) {
 			this.site_id = this.id;
 		}
 
-		code_namespace.set_last_update_Date(work_data, true);
+		crawler_namespace.set_last_update_Date(work_data, true);
 
 		var ebook_directory = work_data.directory + work_data.directory_name
 		// + ' ebook'
@@ -230,7 +230,7 @@ function module_code(library_namespace) {
 			// 🏷標籤, ジャンル genre, タグ, キーワード
 			subject : subject.unique(),
 			// 作品描述: 劇情簡介, synopsis, あらすじ
-			description : code_namespace.get_label(work_data.description
+			description : crawler_namespace.get_label(work_data.description
 			// .description 中不可存在 tag。
 			.replace(/\n*<br[^<>]*>\n*/ig, '\n')),
 			publisher : work_data.site_name + ' (' + this.base_URL + ')',
@@ -319,8 +319,8 @@ function module_code(library_namespace) {
 		},
 		//
 		item = {
-			title : code_namespace.get_label(part_title || ''),
-			sub_title : code_namespace.get_label(chapter_title || ''),
+			title : crawler_namespace.get_label(part_title || ''),
+			sub_title : crawler_namespace.get_label(chapter_title || ''),
 			text : data.text,
 			post_processor : function(contents) {
 				// 正規化小說章節文字。
@@ -344,7 +344,7 @@ function module_code(library_namespace) {
 				}
 
 				if (contents.length < _this.MIN_CHAPTER_SIZE) {
-					code_namespace.set_work_status(work_data, '§'
+					crawler_namespace.set_work_status(work_data, '§'
 							+ chapter_NO
 							+ ': '
 							+ (contents.length ? gettext('字數過少（%1字元）',
@@ -577,7 +577,7 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	// @inner
-	Object.assign(code_namespace, {
+	Object.assign(crawler_namespace, {
 		set_last_update_Date : set_last_update_Date,
 		create_ebook : create_ebook
 	});

@@ -166,8 +166,8 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof this.parse_search_result === 'string') {
-			if (code_namespace.parse_search_result_set[this.parse_search_result]) {
-				this.parse_search_result = code_namespace.parse_search_result_set[this.parse_search_result];
+			if (crawler_namespace.parse_search_result_set[this.parse_search_result]) {
+				this.parse_search_result = crawler_namespace.parse_search_result_set[this.parse_search_result];
 			} else {
 				this.onerror('Work_crawler: No this parse_search_result: '
 						+ this.parse_search_result, work_data);
@@ -198,8 +198,8 @@ function module_code(library_namespace) {
 	}
 
 	// @inner static functions
-	var code_namespace = Object.create(null);
-	Work_crawler.code_namespace = code_namespace;
+	var crawler_namespace = Object.create(null);
+	Work_crawler.crawler_namespace = crawler_namespace;
 
 	// --------------------------------------------------------------------------------------------
 
@@ -406,15 +406,15 @@ function module_code(library_namespace) {
 	// modify from CeL.application.net.Ajax
 	// 本函式將使用之 encodeURIComponent()，包含對 charset 之處理。
 	// @see function_placeholder() @ module.js
-	code_namespace.encode_URI_component = function(string, encoding) {
+	crawler_namespace.encode_URI_component = function(string, encoding) {
 		if (library_namespace.character) {
 			library_namespace.debug('採用 ' + library_namespace.Class
 			// 有則用之。 use CeL.data.character.encode_URI_component()
 			+ '.character.encode_URI_component', 1, library_namespace.Class
 			// module name
 			+ '.application.net.work_crawler');
-			code_namespace.encode_URI_component = library_namespace.character.encode_URI_component;
-			return code_namespace.encode_URI_component(string, encoding);
+			crawler_namespace.encode_URI_component = library_namespace.character.encode_URI_component;
+			return crawler_namespace.encode_URI_component(string, encoding);
 		}
 		return encodeURIComponent(string);
 	};
@@ -423,8 +423,8 @@ function module_code(library_namespace) {
 		if (typeof url === 'function') {
 			url = url.call(this, base_data, base_data_2);
 		} else if (base_data) {
-			base_data = code_namespace.encode_URI_component(String(base_data),
-					url.charset || this.charset);
+			base_data = crawler_namespace.encode_URI_component(
+					String(base_data), url.charset || this.charset);
 			if (url.URL) {
 				url.URL += base_data
 			} else {
@@ -510,9 +510,9 @@ function module_code(library_namespace) {
 					&& library_namespace.is_Object(work_data)
 					&& (Date.now()
 					//
-					- (date = code_namespace.set_last_update_Date(work_data)))
-					// 因為沒有明確記載作品是否完結，10年沒更新就不再重新下載。
-					/ library_namespace.to_millisecond('1D') > (work_data.recheck_days || 10 * 366)) {
+					- (date = crawler_namespace.set_last_update_Date(work_data)))
+							// 因為沒有明確記載作品是否完結，10年沒更新就不再重新下載。
+							/ library_namespace.to_millisecond('1D') > (work_data.recheck_days || 10 * 366)) {
 				library_namespace.info([
 						'is_finished: ',
 						{
@@ -556,7 +556,7 @@ function module_code(library_namespace) {
 	};
 
 	// @inner
-	Object.assign(code_namespace, {
+	Object.assign(crawler_namespace, {
 		// @see CeL.application.net.wiki
 		PATTERN_non_CJK : /^[\u0000-\u2E7F]*$/i,
 		get_label : get_label,
