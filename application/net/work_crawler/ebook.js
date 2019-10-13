@@ -582,7 +582,7 @@ function module_code(library_namespace) {
 		create_ebook : create_ebook
 	});
 
-	// @static
+	// @instance
 	Object.assign(Work_crawler.prototype, {
 		// for CeL.application.storage.EPUB
 		// auto_create_ebook, automatic create ebook
@@ -609,5 +609,6 @@ function module_code(library_namespace) {
 		check_next_chapter : check_next_chapter
 	});
 
+	// 不設定(hook)本 module 之 namespace，僅執行 module code。
 	return library_namespace.env.not_to_extend_keyword;
 }

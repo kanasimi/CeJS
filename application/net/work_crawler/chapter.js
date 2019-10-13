@@ -1363,7 +1363,7 @@ function module_code(library_namespace) {
 					console.log(chapter_URL);
 				}
 				if (_this.skip_get_chapter_page) {
-					pre_parse_chapter_data(null_XMLHttp);
+					pre_parse_chapter_data(code_namespace.null_XMLHttp);
 					return;
 				}
 				// library_namespace.info('reget_chapter_data: ' + chapter_URL);
@@ -1663,7 +1663,7 @@ function module_code(library_namespace) {
 		pre_get_chapter_data : pre_get_chapter_data
 	});
 
-	// @static
+	// @instance
 	Object.assign(Work_crawler.prototype, {
 		// 檢查磁碟上面是否真的有已經下載的漫畫檔案。
 		// .check_downloaded_chapters() 必須先確保已獲得最終之 chapter_data.title。
@@ -1684,5 +1684,6 @@ function module_code(library_namespace) {
 		get_chapter_time_interval : get_chapter_time_interval
 	});
 
+	// 不設定(hook)本 module 之 namespace，僅執行 module code。
 	return library_namespace.env.not_to_extend_keyword;
 }

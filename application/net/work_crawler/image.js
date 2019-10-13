@@ -535,7 +535,7 @@ function module_code(library_namespace) {
 
 	// export 導出.
 
-	// @static
+	// @instance
 	Object.assign(Work_crawler.prototype, {
 		// {Array|String}可以接受的圖片類別/圖片延伸檔名/副檔名/檔案類別 acceptable file extensions。
 		// acceptable_types : 'images',
@@ -567,5 +567,6 @@ function module_code(library_namespace) {
 		get_image : get_image
 	});
 
+	// 不設定(hook)本 module 之 namespace，僅執行 module code。
 	return library_namespace.env.not_to_extend_keyword;
 }

@@ -33,9 +33,7 @@ function module_code(library_namespace) {
 	// requiring
 	var Work_crawler = library_namespace.net.work_crawler, code_namespace = Work_crawler.code_namespace;
 
-	var gettext = library_namespace.locale.gettext,
-	/** node.js file system module */
-	node_fs = library_namespace.platform.nodejs && require('fs');
+	var gettext = library_namespace.locale.gettext;
 
 	// --------------------------------------------------------------------------------------------
 
@@ -127,7 +125,7 @@ function module_code(library_namespace) {
 
 	// export 導出.
 
-	// @static
+	// @instance
 	Object.assign(Work_crawler.prototype, {
 		search_result_file_name : 'search.json',
 		cache_title_to_id : true,
@@ -146,5 +144,6 @@ function module_code(library_namespace) {
 
 	});
 
+	// 不設定(hook)本 module 之 namespace，僅執行 module code。
 	return library_namespace.env.not_to_extend_keyword;
 }

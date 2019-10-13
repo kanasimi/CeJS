@@ -623,7 +623,7 @@ function module_code(library_namespace) {
 
 		function get_work_page() {
 			if (_this.skip_get_work_page) {
-				process_work_data(null_XMLHttp);
+				process_work_data(code_namespace.null_XMLHttp);
 				return;
 			}
 			_this.get_URL(work_URL, process_work_data);
@@ -1554,7 +1554,7 @@ function module_code(library_namespace) {
 		set_work_status : set_work_status
 	});
 
-	// @static
+	// @instance
 	Object.assign(Work_crawler.prototype, {
 		// 規範 work id 的正規模式；提取出引數中的作品id 以回傳。
 		extract_work_id : extract_work_id,
@@ -1568,5 +1568,6 @@ function module_code(library_namespace) {
 		save_work_data : save_work_data_file
 	});
 
+	// 不設定(hook)本 module 之 namespace，僅執行 module code。
 	return library_namespace.env.not_to_extend_keyword;
 }
