@@ -1,0 +1,11 @@
+﻿== 下載作業流程 ==
+
+# 獲取伺服器列表。 start_downloading()
+# 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list(), .base_URL, .extract_work_id()
+# 特別處理特定id。	.convert_id()
+# 解析 作品名稱 → 作品id	get_work(), .search_URL, .parse_search_result()
+# 獲取作品資訊與各章節資料。 get_work_data(), pre_process_chapter_list_data(), process_chapter_list_data()
+# 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 get_work_data(), .work_URL, .parse_work_data(), chapter_list_URL, .get_chapter_list(), .after_get_work_data()
+# 獲取每一個章節的內容與各個影像資料。 pre_get_chapter_data(), .chapter_URL, get_chapter_data(), .pre_parse_chapter_data(), .parse_chapter_data()
+# 獲取各個章節的每一個影像內容。 get_image(), .image_preprocessor(), .image_post_processor(), .after_get_image()
+# finish_up(), .after_download_chapter(), .after_download_work()
