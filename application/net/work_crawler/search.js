@@ -39,17 +39,110 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// @see luoxia.js, dmzj.js
+	function parse_search_result_token(id_list, id_data, token_parser, token) {
+		var matched = token.match(/<a\s([^<>]+)>([\s\S]+?)<\/a>/i);
+		if (library_namespace.is_RegExp(token_parser)) {
+			matched = token.match(token_parser);
+		} else {
+			// matched: [ link, attributes, inner HTML ]
+			matched = token.match(/<a\s([^<>]+)>([\s\S]+?)<\/a>/i);
+		}
+		if (!matched)
+			return;
+
+		var id = matched[1]
+		// dmzj.js: title=""href="" 中間沒有空格。
+		.match(/href=["'][^"'<>]+?\/([a-z\d\-_]+)(?:\/|\.html)?["']/i);
+
+		if (!id)
+			return;
+
+		id = id[1];
+		if (false && !isNaN(id)) {
+			id = +id;
+		}
+		id_list.push(id);
+
+		var title = matched[1].match(/title=["']([^"'<>]+)["']/);
+		id_data.push(code_namespace.get_label(title && title[1] || matched[2]));
+	}
+
+	// only for .parse_search_result() !!
+	function extract_work_id_from_search_result_link(PATTERN_item_token, html,
+			token_parser) {
+		// console.log(html);
+		var matched,
+		// {Array}id_list = [ id, id, ... ]
+		id_list = [],
+		// {Array}id_data = [ title, title, ... ]
+		id_data = [],
+		//
+		search_result_parser = typeof token_parser === 'function'
+		//
+		&& function(token) {
+			// function parser(token, id_list, id_data){console.log(token);}
+			var result = token_parser.call(this, token, id_list, id_data);
+			if (Array.isArray(result) && result.length === 2) {
+				id_list.push(result[0]);
+				id_data.push(result[1]);
+			}
+		};
+
+		// PATTERN_item_token 會分離出每個作品的欄位。
+		if (library_namespace.is_RegExp(PATTERN_item_token)) {
+			// assert: PATTERN_item_token.global === true
+			// matched: [ , HTML token to check ]
+			while (matched = PATTERN_item_token.exec(html)) {
+				if (search_result_parser) {
+					search_result_parser(matched[1]);
+				} else {
+					parse_search_result_token(id_list, id_data, token_parser,
+							matched[1]);
+				}
+			}
+
+		} else if (Array.isArray(PATTERN_item_token)) {
+			html.each_between(PATTERN_item_token[0], PATTERN_item_token[1],
+					search_result_parser
+							|| parse_search_result_token.bind(null, id_list,
+									id_data, token_parser));
+
+		} else {
+			throw new TypeError('extract_work_id_from_search_result_link: '
+					+ gettext('Invalid token pattern: {%1} %2',
+							typeof PATTERN_item_token, JSON
+									.stringify(PATTERN_item_token)));
+		}
+
+		// console.log([ id_list, id_data ]);
+		// throw 'extract_work_id_from_search_result_link';
+		return [ id_list, id_data ];
+	}
+
+	// CeL.work_crawler.extract_work_id_from_search_result_link()
+	Work_crawler.extract_work_id_from_search_result_link = extract_work_id_from_search_result_link;
+
 	// --------------------------------------------------------------------------------------------
 
 	// export 導出.
 
-	// @inner
-	Object.assign(code_namespace, {
-
-	});
-
 	// @static
 	Object.assign(Work_crawler.prototype, {
+		search_result_file_name : 'search.json',
+		cache_title_to_id : true,
+		get_search_result_file : function() {
+			var search_result_file = this.main_directory
+					+ this.search_result_file_name;
+			return search_result_file;
+		},
+		get_search_result : function() {
+			var search_result_file = this.get_search_result_file(),
+			// search cache
+			// 檢查看看之前是否有獲取過。
+			search_result = library_namespace.get_JSON(search_result_file);
+			return search_result;
+		}
 
 	});
 

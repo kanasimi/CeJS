@@ -2268,6 +2268,14 @@ if (typeof CeL === 'function')
 						// 除非是其他 domain 的。
 						declaration.included = true;
 
+					} else if (initializator === library_namespace.env.not_to_extend_keyword) {
+						// assert: module 本身已經做好相關設定。目的僅在執行 module_code。
+						// e.g., CeL.application.net.wiki.admin
+						library_namespace.debug('僅執行 [' + id
+								+ '] 之 module code，不作相關設定。', 1, 'load_named');
+						// 設定登記 module 已載入。
+						declaration.included = true;
+
 					} else {
 						if (!error_Object)
 							library_namespace.error(error_Object = new Error(

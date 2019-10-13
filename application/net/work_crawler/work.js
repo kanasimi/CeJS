@@ -39,6 +39,78 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// latest_chapter
+	var work_data_display_fields = 'title,id,author,status,chapter_count,last_update,last_download.date,last_download.chapter,tags,url,directory'
+			.split(',');
+	show_work_data.prefix = 'work_data.';
+
+	// 在 CLI 命令列介面顯示作品資訊。
+	function show_work_data(work_data, options) {
+		// console.log(work_data);
+		var display_fields = options && options.display_fields
+				|| work_data_display_fields;
+		var display_list = [];
+		display_fields.forEach(function(field_name) {
+			var value = library_namespace
+			//
+			.value_of(field_name, null, work_data);
+			if (value || value === 0)
+				display_list.push([
+						gettext(show_work_data.prefix + field_name) + '  ',
+						value ]);
+		});
+
+		library_namespace.log('-'.repeat(70) + '\n');
+		library_namespace.info({
+			T : 'Work information:'
+		});
+
+		library_namespace.log(library_namespace.display_align(display_list, {
+			from_start : true
+		}) + '\n');
+
+		library_namespace.info({
+			T : show_work_data.prefix + 'description'
+		});
+		library_namespace.log(library_namespace.value_of('description', null,
+				work_data)
+				+ '\n');
+
+		var chapter_list = Array.isArray(work_data.chapter_list)
+				&& work_data.chapter_list;
+		if (chapter_list) {
+			library_namespace.info(gettext(show_work_data.prefix
+					+ 'chapter_list'));
+			display_list = [ [ gettext('work_data.chapter_NO') + '  ',
+					gettext('work_data.chapter_title') ] ];
+			// console.log(chapter_list[0]);
+			chapter_list.forEach(function(chapter_data, index) {
+				var data;
+				if (library_namespace.is_Object(chapter_data)) {
+					data = chapter_data.title || chapter_data.url;
+					if (chapter_data.limited)
+						data += ' (' + gettext('limited') + ')';
+				} else {
+					data = JSON.stringify(chapter_data);
+				}
+				// +1: chapter_NO starts from 1
+				display_list.push([ '    ' + (index + 1) + '  ', data ]);
+			});
+			library_namespace.log(library_namespace.display_align(display_list)
+					+ '\n');
+		}
+
+		library_namespace
+				.info({
+					T : '您可指定 "start_chapter_NO=章節編號數字" 或 "start_chapter_title=章節標題" 來選擇要開始下載的章節。'
+				});
+		library_namespace.info({
+			T : '或指定 "chapter_filter=章節標題" 僅下載某個章節。'
+		});
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	function set_work_status(work_data, status) {
 		if (status) {
 			if (!work_data.process_status)
@@ -1416,7 +1488,7 @@ function module_code(library_namespace) {
 			if (_this.need_create_ebook) {
 				// console.log(work_data);
 				// console.log(JSON.stringify(work_data));
-				create_ebook.call(_this, work_data);
+				code_namespace.create_ebook.call(_this, work_data);
 			}
 
 			var message = [
@@ -1488,6 +1560,8 @@ function module_code(library_namespace) {
 		extract_work_id : extract_work_id,
 		// 自作品網址 URL 提取出 work id。 via URL
 		extract_work_id_from_URL : extract_work_id_from_URL,
+
+		show_work_data : show_work_data,
 
 		get_work : get_work,
 		get_work_data : get_work_data,
