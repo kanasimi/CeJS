@@ -1,4 +1,9 @@
-﻿== 下載作業流程 ==
+== 下載作業流程 ==
+
+[[search.js]]
+→ [[work.js]]
+→ [[chapter.js]]
+→ [[image.js]]
 
 # 獲取伺服器列表。 start_downloading()
 # 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list(), .base_URL, .extract_work_id()
