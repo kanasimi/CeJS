@@ -1,3 +1,6 @@
+= CeJS 網路作品爬蟲程式庫 =
+批量下載網路作品（小說、漫畫）的函式庫。 WWW work crawler library.
+
 == 下載作業流程 ==
 
 [[../work_crawler.js]]: [[task.js]]
@@ -15,3 +18,31 @@
 # 獲取每一個章節的內容與各個影像資料。 pre_get_chapter_data(), .chapter_URL, get_chapter_data(), .pre_parse_chapter_data(), .parse_chapter_data()
 # 獲取各個章節的每一個影像內容。 get_image(), .image_preprocessor(), .image_post_processor(), .after_get_image()
 # finish_up(), .after_download_chapter(), .after_download_work()
+
+== History ==
+{| class="wikitable"
+|+ History 沿革
+! Date !! Modify
+|-
+| 2016/10/30 21:40:6 || 完成主要架構設計與構思，開始撰寫程式。
+|-
+| 2016/11/1 23:15:16 || 正式運用：批量下載腾讯漫画 qq。
+|-
+| 2016/11/5 22:44:17 || 正式運用：批量下載漫画台 manhuatai。
+|-
+| 2016/11/27 19:7:2 || 模組化。
+|-
+| 2019/10/13 13:23:25 || 分拆至 work_crawler/*.js
+|}
+
+== See also ==
+* https://github.com/abc9070410/JComicDownloader
+* http://pxer.pea3nut.org/md/use https://github.com/eight04/ComicCrawler
+* https://github.com/riderkick/FMD https://github.com/yuru-yuri/manga-dl
+* https://github.com/Xonshiz/comic-dl
+* https://github.com/wellwind/8ComicDownloaderElectron
+* https://github.com/inorichi/tachiyomi
+* https://github.com/Arachnid-27/Cimoc
+* https://github.com/qq573011406/KindleHelper
+* https://github.com/InzGIBA/manga
+* [https://scrapy.org/ scrapy 爬蟲框架]

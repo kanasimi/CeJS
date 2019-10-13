@@ -1,7 +1,7 @@
 ﻿/**
  * @name CeL function for downloading online works (novels, comics).
  * 
- * @fileoverview 本檔案包含了批量下載網路作品（小說、漫畫）的函式庫。 WWW work crawler.
+ * @fileoverview 本檔案包含了批量下載網路作品（小說、漫畫）的函式庫。 WWW work crawler library.
  * 
  * <code>
 
@@ -32,23 +32,6 @@ parse 圖像。
 考慮 search_URL 搜尋的頁數，當搜索獲得太多結果時也要包含所有結果
 
 </code>
- * 
- * @see https://github.com/abc9070410/JComicDownloader
- *      http://pxer.pea3nut.org/md/use https://github.com/eight04/ComicCrawler
- *      https://github.com/riderkick/FMD https://github.com/yuru-yuri/manga-dl
- *      https://github.com/Xonshiz/comic-dl
- *      https://github.com/wellwind/8ComicDownloaderElectron
- *      https://github.com/inorichi/tachiyomi
- *      https://github.com/Arachnid-27/Cimoc
- *      https://github.com/qq573011406/KindleHelper
- *      https://github.com/InzGIBA/manga
- * 
- * @see 爬蟲框架 https://scrapy.org/
- * 
- * @since 2016/10/30 21:40:6 完成主要架構設計與構思，開始撰寫程式。
- * @since 2016/11/1 23:15:16 正式運用：批量下載腾讯漫画 qq。
- * @since 2016/11/5 22:44:17 正式運用：批量下載漫画台 manhuatai。
- * @since 2016/11/27 19:7:2 模組化。
  */
 
 // More examples: see 各網站工具檔.js: https://github.com/kanasimi/work_crawler
