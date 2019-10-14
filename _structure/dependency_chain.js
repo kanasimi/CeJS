@@ -1564,25 +1564,26 @@ if (typeof CeL === 'function')
 					 * initialization. 為 declaration 所作的初始化工作。<br />
 					 * 因為 URL 可能也具有 named code 功能，因此一視同仁都設定 full function。
 					 */
-					(declaration = named_code[id] = {
+					declaration = named_code[id] = {
 						id : id,
 						callback : new Set,
 						error_handler : new Set,
 						load_later : load_later,
-						base : library_namespace
-					}).r = function require_variable(variable_name) {
-						// require variable without eval()
-						if (variable_name in declaration.variable_hash) {
-							variable_name = declaration.variable_hash[variable_name];
-						} else {
-							library_namespace.warn(
-							//
-							'require_variable: unregistered variable ['
-									+ variable_name + '] @ module [' + id
-									+ '].');
+						base : library_namespace,
+						r : function require_variable(variable_name) {
+							// require variable without eval()
+							if (variable_name in declaration.variable_hash) {
+								variable_name = declaration.variable_hash[variable_name];
+							} else {
+								library_namespace
+										.warn('require_variable: unregistered variable ['
+												+ variable_name
+												+ '] @ module [' + id + '].');
+							}
+							return library_namespace.value_of(variable_name);
 						}
-						return library_namespace.value_of(variable_name);
 					};
+
 					/**
 					 * note:<br />
 					 * "use" 是 JScript.NET 的保留字。或可考慮 "requires"。<br />
@@ -2095,7 +2096,7 @@ if (typeof CeL === 'function')
 						}
 						// assert: name_space 這時是 module 的 parent module。
 						name = module_name_list[l];
-						if (name_space[name])
+						if (name_space[name]) {
 							if (name_space[name].null_constructor_name) {
 								library_namespace.debug(
 										'可能因下層 module 先被載入，已預先定義過 [' + id
@@ -2117,7 +2118,9 @@ if (typeof CeL === 'function')
 								//
 								'load_named: 已存在 name-space [' + id + ']！');
 							}
-						// else: 尚未被定義或宣告過
+						} else {
+							// 尚未被定義或宣告過。
+						}
 
 						// TODO: alias
 
@@ -2155,6 +2158,11 @@ if (typeof CeL === 'function')
 							//
 							2, 'load_named');
 
+							// 可以 no_extend 設定不匯出的子函式。
+							// 所有無特殊名稱的 sub-module 皆應設定 `no_extend : 'this,*'`，
+							// 避免本身被 extend 到 library namespace 下，汙染如 CeL.data。
+							// e.g., application.net.wiki.* ,
+							// application.net.work_crawler.*
 							if (no_extend = declaration[library_namespace.env.not_to_extend_keyword]) {
 								if (typeof no_extend === 'string')
 									no_extend = no_extend.split(',');

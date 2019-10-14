@@ -31,7 +31,7 @@ typeof CeL === 'function' && CeL.run({
 	,
 
 	// 設定不匯出的子函式。
-	no_extend : '*',
+	no_extend : 'this,*',
 
 	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
 	code : module_code

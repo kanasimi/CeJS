@@ -4,10 +4,6 @@
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用的程式庫，主要用於編寫[[維基百科:機器人]]
  *               ([[WP:{{{name|{{int:Group-bot}}}}}|{{{name|{{int:Group-bot}}}}}]])。
  * 
- * 完整版的依賴鍊可參照 https://github.com/kanasimi/wikiapi/blob/master/wikiapi.js
- * https://github.com/kanasimi/wikibot/blob/master/wiki%20loader.js
- * https://github.com/kanasimi/CeJS/blob/master/_test%20suite/test.js
- * 
  * TODO:<code>
 
 wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
@@ -80,13 +76,12 @@ CeL.wiki.page('Wikipedia:機器人',function(page_data){console.log(page_data);}
 你可以在維基媒體的wiki網站URL最後增加?safemode=1來關閉你個人的CSS和JavaScript。範例：https://zh.wikipedia.org/wiki/文學?safemode=1。上面一行意思是你可以測試是否是你的使用者腳本或套件造成問題，而不必解除安裝。
 
 </code>
- * 
- * @since 2015/1/1
- * @see https://www.mediawiki.org/w/api.php
  */
 
 // More examples: see /_test suite/test.js
 // Wikipedia bots demo: https://github.com/kanasimi/wikibot
+// JavaScript MediaWiki API for ECMAScript 2017+ :
+// https://github.com/kanasimi/wikiapi
 'use strict';
 // 'use asm';
 
@@ -165,7 +160,7 @@ function module_code(library_namespace) {
 	// [[meta:List of Wikimedia projects by size]]
 	// family: 'wikipedia' (default), 'news', 'source', 'books', 'quote', ...
 	function get_project(language, family, type) {
-		;
+		TODO;
 	}
 
 	/** {String} old key: 'wiki' */

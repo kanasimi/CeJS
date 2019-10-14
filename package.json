@@ -1,7 +1,7 @@
 {
 	"name" : "cejs",
 	"title" : "CeJS",
-	"version" : "3.3.0",
+	"version" : "3.3.3",
 	"description" : "A JavaScript module framework that is simple to use.",
 	"keywords" : [ "arbitrary-precision", "arithmetic", "numerals",
 			"Chinese era", "calendar", "character encoding", "address input",

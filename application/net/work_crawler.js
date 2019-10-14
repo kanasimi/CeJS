@@ -34,7 +34,7 @@ parse 圖像。
 </code>
  */
 
-// More examples: see 各網站工具檔.js: https://github.com/kanasimi/work_crawler
+// More examples: See 各網站工具檔.js: https://github.com/kanasimi/work_crawler
 'use strict';
 // 'use asm';
 

@@ -1,6 +1,8 @@
 = CeJS 網路作品爬蟲程式庫 =
 批量下載網路作品（小說、漫畫）的函式庫。 WWW work crawler library.
 
+More examples: See [https://github.com/kanasimi/work_crawler 各網站工具檔.js]
+
 == 下載作業流程 ==
 
 [[../work_crawler.js]]: [[task.js]]
