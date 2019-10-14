@@ -796,6 +796,7 @@ function module_code(library_namespace) {
 		// Virtual namespaces
 		media : -2,
 		special : -1,
+
 		// 0: (Main/Article) main namespace 主要(條目內容/內文)命名空間/識別領域
 		// 條目 entry 文章 article: ns = 0, 頁面 page: ns = any. 章節/段落 section
 		'' : 0,
@@ -806,15 +807,27 @@ function module_code(library_namespace) {
 		// 使用者頁面
 		user : 2,
 		user_talk : 3,
+
 		// the project namespace for matters about the project
 		// Varies between wikis
 		project : 4,
+		WP : 4,
 		wikipedia : 4,
+
+		WD : 4,
+		wikidata : 4,
+		// [[commons:title]] @ enwiki 會造成混亂
+		// commons : 4,
+		COM : 4,
+
 		// https://en.wikinews.org/wiki/Help:Namespace
+		WN : 4,
 		wikinews : 4,
+
 		// Varies between wikis
 		project_talk : 5,
 		wikipedia_talk : 5,
+
 		// image
 		file : 6,
 		file_talk : 7,

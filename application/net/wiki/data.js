@@ -9,6 +9,8 @@
 </code>
  * 
  * @since 2019/10/11 拆分自 CeL.application.net.wiki
+ * 
+ * @see https://github.com/maxlath/wikibase-sdk
  */
 
 // More examples: see /_test suite/test.js
@@ -202,7 +204,7 @@ function module_code(library_namespace) {
 					data_config[2]);
 		}
 
-		library_namespace.debug('setup 宿主 host session.', 2,
+		library_namespace.debug('Setup 宿主 host session.', 2,
 				'setup_data_session');
 		session.data_session[KEY_HOST_SESSION] = session;
 		library_namespace.debug('run callback: ' + callback, 2,

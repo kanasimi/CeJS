@@ -1,0 +1,24 @@
+= CeJS MediaWiki 自動化作業用程式庫 =
+MediaWiki 自動化作業用的程式庫，主要用於編寫[[維基百科:機器人]]。
+
+Main initial point: [[../wiki.js]]
+
+完整版的依賴鍊可參照：
+* https://github.com/kanasimi/wikiapi/blob/master/wikiapi.js
+* https://github.com/kanasimi/wikibot/blob/master/wiki%20loader.js
+* https://github.com/kanasimi/CeJS/blob/master/_test%20suite/test.js
+
+More examples: See [[/_test suite/test.js|test.js]], [https://github.com/kanasimi/wikibot Wikipedia bots demo], [https://github.com/kanasimi/wikiapi JavaScript MediaWiki API for ECMAScript 2017+].
+
+== History ==
+{| class="wikitable"
+|+ History 沿革
+! Date !! Modify
+|-
+| 2015/1/1 || 開始撰寫模組程式碼。
+|-
+| 2019/10/11 || 分拆至 wiki/*.js
+|}
+
+== See also ==
+* [https://www.mediawiki.org/w/api.php MediaWiki API help]
