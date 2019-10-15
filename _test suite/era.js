@@ -657,17 +657,23 @@ function show_calendar(era_name) {
 		T : is_年譜 ? '年譜' : '曆譜'
 	}, ' (', {
 		T : [ _('共有 %1 個' + (dates.type ? '時' : '年') + '段紀錄'), dates.length ]
-	}, ')' ] : [ {
+	}, ')' ]
+	//
+	: [ {
 		T : '無可供列出之曆譜！',
 		S : 'color:#f00;background-color:#ff3;'
 	}, /[\/年]/.test(era_name) ? '' : [ {
 		br : null
 	}, '→', {
 		a : {
-			T : '嘗試加注年分'
+			T : '嘗試加注日期'
 		},
 		href : '#',
-		title : CeL.era.concat_name([ era_name, '1年' ]),
+		title : CeL.era.concat_name([ era_name,
+		//
+		(main_date.年 || 1) + '年', main_date.月 ? main_date.月 + '月' : '',
+		//
+		main_date.日 === 1 ? '' : main_date.日 ? main_date.日 + '日' : '' ]),
 		onclick : click_title_as_era
 	} ] ];
 

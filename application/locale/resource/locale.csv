@@ -135,7 +135,7 @@
 	"data.date.era: note_botton_layer"	"曆數處理"	"Panel name"	"曆數處理"		"DEVELOPMENT"	"開発ツール"		
 	"data.date.era: note_botton_layer"	"問題回報"	"Panel name"	"問題回報"		"FEEDBACK"	"問題報告"		
 	"data.date.era: 文字式年曆"	"無可供列出之曆譜！"	"Used as log message."	"無可供列出之曆譜！"		"No calendar to list!"	"ご提供できる情報がありません。"		
-	"data.date.era: 文字式年曆"	"嘗試加注年分"	"Used as log message."	"嘗試加注年分"		"Append year numbering"	"年分を追加する"		
+	"data.date.era: 文字式年曆"	"嘗試加注日期"	"Used as log message."	"嘗試加注日期"		"Try to append date"	"日付を追加する"		
 	"data.date.era: 文字式年曆"	"年譜"	"Label for calendar."	"年譜"		"calendar date"	"年暦譜"		
 	"data.date.era: 文字式年曆"	"共有 %1 個時段紀錄"	"Used as log message."	"共有 %1 個時段紀錄"		"%1 records"	"%1 件"		
 	"data.date.era: 文字式年曆"	"共有 %1 個年段紀錄"	"Used as log message."	"共有 %1 個年段紀錄"		"%1 years"	"%1 件"		

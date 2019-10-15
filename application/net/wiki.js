@@ -2043,7 +2043,7 @@ function module_code(library_namespace) {
 		case 'search':
 			wiki_API.search([ this.API_URL, next[1] ],
 			//
-			function wiki_API_search_callback(pages, totalhits, key) {
+			function wiki_API_search_callback(pages, error) {
 				// undefined || [ page_data ]
 				_this.last_pages = pages;
 				// 設定/紀錄後續檢索用索引值。
@@ -2054,7 +2054,7 @@ function module_code(library_namespace) {
 
 				if (typeof next[2] === 'function') {
 					// next[2] : callback(...)
-					next[2].call(_this, pages || [], totalhits, key);
+					next[2].call(_this, pages || [], error);
 				} else if (next[2] && next[2].each) {
 					// next[2] : 當作 work，處理積存工作。
 					// next[2].each(page_data, messages, config)

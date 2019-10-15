@@ -1052,8 +1052,8 @@ function module_code(library_namespace) {
 	 * @param {String}key
 	 *            search key
 	 * @param {Function}[callback]
-	 *            回調函數。 callback({Array}pages, {Integer}totalhits,
-	 *            {String}key_used)
+	 *            回調函數。 callback([ pages, searchinfo : {totalhits : {Integer}},
+	 *            search_key : {String}key_used ], error)
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
@@ -1074,6 +1074,7 @@ function module_code(library_namespace) {
 		}
 		if (library_namespace.is_RegExp(key)) {
 			// [[:en:Help:Searching/Regex]]
+			// [[mw:Help:CirrusSearch#Insource]]
 			// 有無 global flag 結果不同。
 			key = ('insource:' + key).replace(/g([^\/]*)$/, '$1');
 		}
@@ -1095,33 +1096,50 @@ function module_code(library_namespace) {
 			srsearch : key
 		}, wiki_API.search.default_parameters, _options)) ], function(data,
 				error) {
+			// console.log(data);
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value)
 				library_namespace.show_value(data, 'wiki_API.search');
 
+			if (error) {
+				if (typeof callback === 'function') {
+					callback(data, error);
+				}
+				return;
+			}
+
 			options = data && (data['continue'] || data['query-continue']);
-			var totalhits;
+			// var totalhits;
 			if (data && (data = data.query)) {
 				if (options) {
 					// data.search.sroffset = options.search.sroffset;
 					Object.assign(data.search, options.search);
 				}
-				totalhits = data.searchinfo.totalhits;
+				// totalhits = data.searchinfo.totalhits;
+
+				data.search.searchinfo = data.searchinfo;
+				// Object.assign(data.search, data.searchinfo);
+
 				data = data.search;
+				data.search_key = key;
+			} else {
+				callback(data, new Error('Unknown result'));
+				return;
 			}
 
 			// data: [ page_data ].sroffset = next
 			if (typeof callback === 'function') {
-				// callback({Array}pages, {Integer}totalhits, {String}key_used)
-				callback(data, totalhits, key);
+				// callback([ pages, searchinfo : {totalhits : {Integer}},
+				// search_key : {String}key_used ])
+				callback(data, error);
 			}
 		}, null, options);
 	};
 
 	wiki_API.search.default_parameters = {
 		// |portal
-		srnamespace : 'module|template|category|main',
+		srnamespace : wiki_API.namespace('module|template|category|main'),
 
 		srprop : 'redirecttitle',
 		// srlimit : 10,
