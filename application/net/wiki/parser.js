@@ -513,15 +513,18 @@ function module_code(library_namespace) {
 
 		// 遍歷 tokens
 		function traversal_tokens(_this, depth) {
-			function for_token(token, index) {
+
+			function for_token() {
+				if (exit) {
+					// 直接跳出。
+					return true;
+				}
+
+				var token = _this[index];
 				if (false) {
 					console.log('token depth ' + depth + '/' + max_depth
 							+ (exit ? ' (exit)' : '') + ':');
 					console.log(token);
-				}
-				if (exit) {
-					// 直接跳出。
-					return true;
 				}
 
 				if (!type
@@ -547,9 +550,12 @@ function module_code(library_namespace) {
 						return true;
 					}
 					if (result === for_each_token.remove_token) {
-						if (type === 'list') {
+						token = '';
+						if (_this.type === 'list') {
 							// for <ol>, <ul>: 直接消掉整個 item token。
+							// index--: 刪除完後，本 index 必須再遍歷一次。
 							_this.splice(index--, 1);
+							length--;
 						} else {
 							_this[index] = '';
 							if (index + 1 < _this.length
@@ -600,17 +606,24 @@ function module_code(library_namespace) {
 				}
 			}
 
+			var index, length;
 			if (slice && depth === 0) {
 				// 若有 slice，則以更快的方法遍歷 tokens。
 				// TODO: 可以設定多個範圍，而不是只有一個 range。
-				for (var index = slice[0] | 0, boundary = slice[1] >= 0 ? Math
-						.min(slice[1] | 0, _this.length) : _this.length; index < boundary; index++) {
-					if (for_token(_this[index], index))
-						break;
-				}
+				index = slice[0] | 0;
+				length = slice[1] >= 0 ? Math.min(slice[1] | 0, _this.length)
+						: _this.length;
+				// for (; index < length; index++) { ... }
 			} else {
 				// console.log(_this);
-				_this.some(for_token);
+				index = 0;
+				length = _this.length;
+				// _this.some(for_token);
+			}
+
+			for (; index < length; index++) {
+				if (for_token())
+					break;
 			}
 		}
 
