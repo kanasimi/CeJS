@@ -35,7 +35,9 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var gettext = library_namespace.cache_gettext(function(_) {
+		gettext = _;
+	}), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 
 	// @inner
 	var PATTERN_category_prefix = wiki_API.PATTERN_category_prefix, BLANK_TOKEN = wiki_API.BLANK_TOKEN;
@@ -405,7 +407,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @type any
 	 */
-	wiki_API_edit.cancel = {
+	wiki_API_edit.cancel = typeof Symbol === 'function' ? Symbol('CANCEL_EDIT')
+	//
+	: {
 		cancel : '放棄編輯頁面用'
 	};
 
