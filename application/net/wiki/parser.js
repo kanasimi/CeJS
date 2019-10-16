@@ -576,7 +576,7 @@ function module_code(library_namespace) {
 									&& token.attributes.name) {
 								// @see wikibot/20190913.move_link.js
 								library_namespace.debug(
-										'將刪除可能被引用的 <ref>，將嘗試自動刪除所有引用: '
+										'將刪除可能被引用的 <ref>，並嘗試自動刪除所有引用。您仍須自行刪除非{{r|name}}型態的模板參考引用: '
 												+ token.toString(), 1,
 										'for_each_token');
 								ref_list_to_remove.push(token.attributes.name);
@@ -632,10 +632,27 @@ function module_code(library_namespace) {
 		if (Array.isArray(this)) {
 			traversal_tokens(this, 0);
 			if (ref_list_to_remove.length > 0) {
+				for_each_token.call(this,/* 'template' */'transclusion',
+				// also remove {{r|name}}
+				function(token, index, parent) {
+					if (token.name === 'R'
+					// 嘗試自動刪除所有引用。
+					&& ref_list_to_remove.includes(token.parameters['1'])) {
+						if (token.parameters['2']) {
+							library_namespace
+									.warn('for_each_token: Can not remove: '
+											+ token.toString());
+						} else {
+							library_namespace.debug('Also remove: '
+									+ token.toString(), 3, 'for_each_token');
+							return for_each_token.remove_token;
+						}
+					}
+				});
 				for_each_token.call(this, 'tag_single', function(token, index,
 						parent) {
 					if (token.tag === 'ref' && token.attributes
-					// 嘗試自動刪除所有引用
+					// 嘗試自動刪除所有引用。
 					&& ref_list_to_remove.includes(token.attributes.name)) {
 						library_namespace.debug('Also remove: '
 								+ token.toString(), 3, 'for_each_token');
