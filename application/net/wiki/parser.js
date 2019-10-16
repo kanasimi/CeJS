@@ -569,6 +569,12 @@ function module_code(library_namespace) {
 							length--;
 
 						} else {
+							if (token.type === 'tag' && token.attributes.name) {
+								library_namespace
+										.warn('for_each_token: 刪除可能被引用的 reference，您可能必須自行刪除所有引用: '
+												+ token.toString());
+							}
+
 							token = index + 1 < length && _this[index + 1];
 							if (typeof token === 'string') {
 								// 去除後方的空白 + 僅一個換行。 去除前方的空白或許較不合適？
