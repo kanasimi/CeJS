@@ -572,6 +572,7 @@ function module_code(library_namespace) {
 
 						} else {
 							if (token.type === 'tag' && token.tag === 'ref'
+									&& token.attributes
 									&& token.attributes.name) {
 								// @see wikibot/20190913.move_link.js
 								library_namespace.debug(
@@ -633,7 +634,7 @@ function module_code(library_namespace) {
 			if (ref_list_to_remove.length > 0) {
 				for_each_token.call(this, 'tag_single', function(token, index,
 						parent) {
-					if (token.tag === 'ref'
+					if (token.tag === 'ref' && token.attributes
 					// 嘗試自動刪除所有引用
 					&& ref_list_to_remove.includes(token.attributes.name)) {
 						library_namespace.debug('Also remove: '
