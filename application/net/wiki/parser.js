@@ -436,8 +436,9 @@ function module_code(library_namespace) {
 	 *            {ℕ⁰:Natural+0}index of token, {Array}parent of token,
 	 *            {ℕ⁰:Natural+0}depth) {<br />
 	 *            return {String}wikitext or {Object}element;}
-	 * @param {Boolean}[modify_this]
+	 * @param {Boolean}[modify_by_return]
 	 *            若 processor 的回傳值為{String}wikitext，則將指定類型節點替換/replace作此回傳值。
+	 *            注意：即使設定為 false，回傳 .remove_token 依然會刪除當前 token！
 	 * @param {Natural}[max_depth]
 	 *            最大深度。
 	 * 
@@ -445,21 +446,21 @@ function module_code(library_namespace) {
 	 * 
 	 * @see page_parser.type_alias
 	 */
-	function for_each_token(type, processor, modify_this, max_depth) {
+	function for_each_token(type, processor, modify_by_return, max_depth) {
 		if (typeof type === 'function' && max_depth === undefined) {
-			// for_each_token(processor, modify_this, max_depth)
+			// for_each_token(processor, modify_by_return, max_depth)
 			// shift arguments.
-			max_depth = modify_this;
-			modify_this = processor;
+			max_depth = modify_by_return;
+			modify_by_return = processor;
 			processor = type;
 			type = undefined;
 		}
 
 		var options;
 		// for_each_token(type, processor, options)
-		if (max_depth === undefined && typeof modify_this === 'object') {
-			options = modify_this;
-			modify_this = options.modify;
+		if (max_depth === undefined && typeof modify_by_return === 'object') {
+			options = modify_by_return;
+			modify_by_return = options.modify;
 			max_depth = options.max_depth;
 		} else {
 			options = Object.create(null);
@@ -467,12 +468,12 @@ function module_code(library_namespace) {
 
 		// console.log(options);
 
-		if (typeof modify_this === 'number' && modify_this > 0
+		if (typeof modify_by_return === 'number' && modify_by_return > 0
 				&& max_depth === undefined) {
 			// for_each_token(type, processor, max_depth)
 			// shift arguments.
-			max_depth = modify_this;
-			modify_this = undefined;
+			max_depth = modify_by_return;
+			modify_by_return = undefined;
 		}
 
 		// console.log('max_depth: ' + max_depth);
@@ -550,34 +551,35 @@ function module_code(library_namespace) {
 					// for_each_token(
 					// token, token_index, parent_of_token, depth)
 					var result = processor(token, index, _this, depth);
-					// console.log(modify_this);
+					// console.log(modify_by_return);
 					// console.log(result);
 					if (result === for_each_token.exit) {
 						library_namespace.debug('Abort the operation', 3,
 								'for_each_token');
+						// exit: 直接跳出。
 						exit = true;
 						break;
 					}
+
 					if (result === for_each_token.remove_token) {
-						token = '';
 						if (_this.type === 'list') {
 							// for <ol>, <ul>: 直接消掉整個 item token。
 							// index--: 刪除完後，本 index 必須再遍歷一次。
 							_this.splice(index--, 1);
 							length--;
+
 						} else {
-							_this[index] = '';
-							if (index + 1 < _this.length
-									&& typeof _this[index + 1] === 'string') {
+							token = index + 1 < length && _this[index + 1];
+							if (typeof token === 'string') {
 								// 去除後方的空白 + 僅一個換行。 去除前方的空白或許較不合適？
 								// e.g., "* list\n\n{{t1}}\n{{t2}}",
 								// remove "{{t1}}\n" → "* list\n\n{{t2}}"
-								_this[index + 1] = _this[index + 1].replace(
-										/^\s*\n/, '');
+								_this[index + 1] = token.replace(/^\s*\n/, '');
 							}
+							_this[index] = token = '';
 						}
 
-					} else if (modify_this) {
+					} else if (modify_by_return) {
 						// 換掉整個 parent[index] token 的情況。
 						// 小技巧: 可以用 return [ inner ].is_atom = true 來避免進一步的
 						// parse 或者處理。
@@ -592,8 +594,9 @@ function module_code(library_namespace) {
 							_this[index] = token = result;
 						}
 					}
+
 				} else if (options.add_index === 'all'
-						&& typeof token !== 'string') {
+						&& typeof token === 'object') {
 					token.index = index;
 					token.parent = _this;
 				}
@@ -608,12 +611,9 @@ function module_code(library_namespace) {
 				// && type !== 'comment'
 				&& (!max_depth || depth + 1 < max_depth)) {
 					traversal_tokens(token, depth + 1);
-					if (exit) {
-						// 直接跳出。
-						break;
-					}
 				}
 			}
+
 		}
 
 		if (Array.isArray(this))
@@ -623,12 +623,14 @@ function module_code(library_namespace) {
 	}
 
 	Object.assign(for_each_token, {
+		// CeL.wiki.parser.parser_prototype.each.exit
 		// for_each_token.exit: 直接跳出。
 		exit : typeof Symbol === 'function' ? Symbol('EXIT_for_each_token')
 				: [ 'for_each_token.exit: abort the operation' ],
 		// for_each_token.skip_inner: Skip inner tokens, skip children.
 		skip_inner : typeof Symbol === 'function' ? Symbol('SKIP_CHILDREN')
 				: [ 'for_each_token.skip_inner: skip children' ],
+		// CeL.wiki.parser.parser_prototype.each.remove_token
 		// for_each_token.remove_token: remove current children token
 		remove_token : typeof Symbol === 'function' ? Symbol('REMOVE_TOKEN')
 				: [ 'for_each_token.skip_inner: remove current token' ]
