@@ -546,7 +546,24 @@ function module_code(library_namespace) {
 						exit = true;
 						return true;
 					}
-					if (modify_this) {
+					if (result === for_each_token.remove_token) {
+						if (type === 'list') {
+							// for <ol>, <ul>: 直接消掉整個 item token。
+							_this.splice(index--, 1);
+						} else {
+							_this[index] = '';
+							if (index + 1 < _this.length
+									&& typeof _this[index + 1] === 'string') {
+								// 去除後方的空白 + 僅一個換行。 去除前方的空白或許較不合適？
+								// e.g., "* list\n\n{{t1}}\n{{t2}}",
+								// remove "{{t1}}\n" → "* list\n\n{{t2}}"
+								_this[index + 1] = _this[index + 1].replace(
+										/^\s*\n/, '');
+							}
+						}
+
+					} else if (modify_this) {
+						// 換掉整個 parent[index] token 的情況。
 						// 小技巧: 可以用 return [ inner ].is_atom = true 來避免進一步的
 						// parse 或者處理。
 						if (typeof result === 'string') {
@@ -603,10 +620,17 @@ function module_code(library_namespace) {
 		return this;
 	}
 
-	// 直接跳出。
-	for_each_token.exit = [ 'for_each_token.exit: abort the operation' ];
-	// Skip inner tokens, skip children.
-	for_each_token.skip_inner = [ 'for_each_token.skip_inner: skip children' ];
+	Object.assign(for_each_token, {
+		// for_each_token.exit: 直接跳出。
+		exit : typeof Symbol === 'function' ? Symbol('EXIT_for_each_token')
+				: [ 'for_each_token.exit: abort the operation' ],
+		// for_each_token.skip_inner: Skip inner tokens, skip children.
+		skip_inner : typeof Symbol === 'function' ? Symbol('SKIP_CHILDREN')
+				: [ 'for_each_token.skip_inner: skip children' ],
+		// for_each_token.remove_token: remove current children token
+		remove_token : typeof Symbol === 'function' ? Symbol('REMOVE_TOKEN')
+				: [ 'for_each_token.skip_inner: remove current token' ]
+	});
 
 	// 兩 token 都必須先有 .index, .parent!
 	// token.parent[token.index] === token
@@ -1069,6 +1093,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Array}link object (see below)
 	 * 
+	 * @see [[phabricator:T18691]] 未來章節標題可能會有分享連結，這將更容易連結到此章節。
 	 * @see [[H:MW]], {{anchorencode:章節標題}}, [[Template:井戸端から誘導の使用]], escapeId()
 	 * @see https://phabricator.wikimedia.org/T152540
 	 *      https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
