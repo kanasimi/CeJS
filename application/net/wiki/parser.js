@@ -512,6 +512,8 @@ function module_code(library_namespace) {
 			this.parse();
 		}
 
+		var ref_list_to_remove = [];
+
 		// 遍歷 tokens。
 		function traversal_tokens(_this, depth) {
 			var index, length;
@@ -569,10 +571,14 @@ function module_code(library_namespace) {
 							length--;
 
 						} else {
-							if (token.type === 'tag' && token.attributes.name) {
-								library_namespace
-										.warn('for_each_token: 刪除可能被引用的 reference，您可能必須自行刪除所有引用: '
-												+ token.toString());
+							if (token.type === 'tag' && token.tag === 'ref'
+									&& token.attributes.name) {
+								// @see wikibot/20190913.move_link.js
+								library_namespace.debug(
+										'將刪除可能被引用的 <ref>，將嘗試自動刪除所有引用: '
+												+ token.toString(), 1,
+										'for_each_token');
+								ref_list_to_remove.push(token.attributes.name);
 							}
 
 							token = index + 1 < length && _this[index + 1];
@@ -622,8 +628,21 @@ function module_code(library_namespace) {
 
 		}
 
-		if (Array.isArray(this))
+		if (Array.isArray(this)) {
 			traversal_tokens(this, 0);
+			if (ref_list_to_remove.length > 0) {
+				for_each_token.call(this, 'tag_single', function(token, index,
+						parent) {
+					if (token.tag === 'ref'
+					// 嘗試自動刪除所有引用
+					&& ref_list_to_remove.includes(token.attributes.name)) {
+						library_namespace.debug('Also remove: '
+								+ token.toString(), 3, 'for_each_token');
+						return for_each_token.remove_token;
+					}
+				});
+			}
+		}
 
 		return this;
 	}
