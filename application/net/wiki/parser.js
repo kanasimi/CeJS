@@ -182,7 +182,7 @@ function module_code(library_namespace) {
 	page_parser.parser_prototype = {
 		each_section : for_each_section,
 
-		// for_token
+		// traversal_tokens()
 		// CeL.wiki.parser.parser_prototype.each.call(token_list,...)
 		// 在執行 .each() 之前，應該先執行 .parse()。
 		each : for_each_token,
@@ -511,15 +511,24 @@ function module_code(library_namespace) {
 			this.parse();
 		}
 
-		// 遍歷 tokens
+		// 遍歷 tokens。
 		function traversal_tokens(_this, depth) {
+			var index, length;
+			if (slice && depth === 0) {
+				// 若有 slice，則以更快的方法遍歷 tokens。
+				// TODO: 可以設定多個範圍，而不是只有一個 range。
+				index = slice[0] | 0;
+				length = slice[1] >= 0 ? Math.min(slice[1] | 0, _this.length)
+						: _this.length;
+				// for (; index < length; index++) { ... }
+			} else {
+				// console.log(_this);
+				index = 0;
+				length = _this.length;
+				// _this.some(for_token);
+			}
 
-			function for_token() {
-				if (exit) {
-					// 直接跳出。
-					return true;
-				}
-
+			for (; index < length && !exit; index++) {
 				var token = _this[index];
 				if (false) {
 					console.log('token depth ' + depth + '/' + max_depth
@@ -547,7 +556,7 @@ function module_code(library_namespace) {
 						library_namespace.debug('Abort the operation', 3,
 								'for_each_token');
 						exit = true;
-						return true;
+						break;
 					}
 					if (result === for_each_token.remove_token) {
 						token = '';
@@ -601,29 +610,9 @@ function module_code(library_namespace) {
 					traversal_tokens(token, depth + 1);
 					if (exit) {
 						// 直接跳出。
-						return true;
+						break;
 					}
 				}
-			}
-
-			var index, length;
-			if (slice && depth === 0) {
-				// 若有 slice，則以更快的方法遍歷 tokens。
-				// TODO: 可以設定多個範圍，而不是只有一個 range。
-				index = slice[0] | 0;
-				length = slice[1] >= 0 ? Math.min(slice[1] | 0, _this.length)
-						: _this.length;
-				// for (; index < length; index++) { ... }
-			} else {
-				// console.log(_this);
-				index = 0;
-				length = _this.length;
-				// _this.some(for_token);
-			}
-
-			for (; index < length; index++) {
-				if (for_token())
-					break;
 			}
 		}
 
