@@ -514,6 +514,8 @@ function module_code(library_namespace) {
 
 		var ref_list_to_remove = [];
 
+		// ----------------------------------------------------------
+
 		// 遍歷 tokens。
 		function traversal_tokens(_this, depth) {
 			var index, length;
@@ -629,13 +631,26 @@ function module_code(library_namespace) {
 
 		}
 
+		// ----------------------------------------------------------
+
 		if (Array.isArray(this)) {
 			traversal_tokens(this, 0);
+
 			if (ref_list_to_remove.length > 0) {
-				for_each_token.call(this,/* 'template' */'transclusion',
+				for_each_token.call(this, 'tag_single', function(token, index,
+						parent) {
+					if (token.tag === 'ref' && token.attributes
+					// 嘗試自動刪除所有引用。
+					&& ref_list_to_remove.includes(token.attributes.name)) {
+						library_namespace.debug('Also remove: '
+								+ token.toString(), 3, 'for_each_token');
+						return for_each_token.remove_token;
+					}
+				});
+				for_each_token.call(this, 'transclusion',
 				// also remove {{r|name}}
 				function(token, index, parent) {
-					if (token.name === 'R'
+					if (for_each_token.ref_name_templates.includes(token.name)
 					// 嘗試自動刪除所有引用。
 					&& ref_list_to_remove.includes(token.parameters['1'])) {
 						if (token.parameters['2']) {
@@ -647,16 +662,6 @@ function module_code(library_namespace) {
 									+ token.toString(), 3, 'for_each_token');
 							return for_each_token.remove_token;
 						}
-					}
-				});
-				for_each_token.call(this, 'tag_single', function(token, index,
-						parent) {
-					if (token.tag === 'ref' && token.attributes
-					// 嘗試自動刪除所有引用。
-					&& ref_list_to_remove.includes(token.attributes.name)) {
-						library_namespace.debug('Also remove: '
-								+ token.toString(), 3, 'for_each_token');
-						return for_each_token.remove_token;
 					}
 				});
 			}
@@ -676,7 +681,8 @@ function module_code(library_namespace) {
 		// CeL.wiki.parser.parser_prototype.each.remove_token
 		// for_each_token.remove_token: remove current children token
 		remove_token : typeof Symbol === 'function' ? Symbol('REMOVE_TOKEN')
-				: [ 'for_each_token.skip_inner: remove current token' ]
+				: [ 'for_each_token.skip_inner: remove current token' ],
+		ref_name_templates : [ 'R' ]
 	});
 
 	// 兩 token 都必須先有 .index, .parent!
@@ -1357,6 +1363,7 @@ function module_code(library_namespace) {
 		console.log('#' + section.section_title);
 		console.log([ section.users, section.dates ]);
 	}, {
+		level_filter : [ 2, 3 ],
 		get_users : true,
 		// set options[KEY_SESSION] for parse_date()
 		session : wiki
@@ -1406,7 +1413,7 @@ function module_code(library_namespace) {
 			}
 			if (section_title_hash[section_title_token.link[1]] > 0) {
 				section_title_token.link[1] += '_'
-				// 有多個完全相同的anchor時，後面的會加上"_2", "_3",...。
+				// 有多個完全相同的 anchor 時，後面的會加上 "_2", "_3", ...。
 				+ (++section_title_hash[section_title_token.link[1]]);
 			} else {
 				section_title_hash[section_title_token.link[1]] = 1;
@@ -1582,9 +1589,28 @@ function module_code(library_namespace) {
 			});
 		}
 
+		// console.log(for_section);
 		if (typeof for_section === 'function') {
-			// for_section(section, section_index)
-			section_list.some(for_section);
+			if (for_section.constructor.name === 'AsyncFunction') {
+				// console.log(section_list);
+				return Promise.all(section_list.map(for_section));
+
+				// @deprecated
+				section_list
+						.forEach(function(section, section_index) {
+							if (false) {
+								console.log('Process: ' + section.section_title
+										&& section.section_title[0].toString());
+							}
+							return eval('(async function() {'
+									+ ' try { return await for_section(section, section_index); }'
+									+ ' catch(e) { library_namespace.error(e); }'
+									+ ' })();');
+						});
+			} else {
+				// for_section(section, section_index)
+				section_list.some(for_section);
+			}
 		}
 		return this;
 	}
