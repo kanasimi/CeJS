@@ -39,7 +39,7 @@ function module_code(library_namespace) {
 	// @inner
 	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_URL_prefix = wiki_API.PATTERN_URL_prefix, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
 
-	// 不可 catch default_language。
+	// 不可 cache default_language。
 	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
 
 	var

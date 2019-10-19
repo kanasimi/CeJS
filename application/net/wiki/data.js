@@ -50,7 +50,7 @@ function module_code(library_namespace) {
 	var API_URL_of_options = wiki_API.API_URL_of_options, is_api_and_title = wiki_API.is_api_and_title, is_wikidata_site = wiki_API.is_wikidata_site, wikidata_get_site = wiki_API.wikidata_get_site, language_code_to_site_alias = wiki_API.language_code_to_site_alias;
 	var PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i, PATTERN_wiki_project_URL = wiki_API.PATTERN_wiki_project_URL;
 
-	// 不可 catch default_language。
+	// 不可 cache default_language。
 	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
 
 	var

@@ -43,7 +43,7 @@ function module_code(library_namespace) {
 	// @inner
 	// var ;
 
-	// 不可 catch default_language。
+	// 不可 cache default_language。
 	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
 
 	// ------------------------------------------------------------------------
@@ -200,7 +200,7 @@ function module_code(library_namespace) {
 		if (!user || !(password = config.match(/\n\s*password\s*=\s*([^\s]+)/)))
 			return;
 
-		return new_SQL_config(default_language, user[1], password[1]);
+		return new_SQL_config(wiki_API.set_language(), user[1], password[1]);
 	}
 
 	if (wmflabs) {
@@ -210,7 +210,8 @@ function module_code(library_namespace) {
 		// delete CeL.wiki.use_Varnish;
 
 		try {
-			if (node_mysql = require('mysql')) {
+			node_mysql = require('mysql');
+			if (node_mysql) {
 				SQL_config = parse_SQL_config(home_directory
 				// The production replicas.
 				// https://wikitech.wikimedia.org/wiki/Help:Toolforge#The_databases

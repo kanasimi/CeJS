@@ -414,7 +414,7 @@ function module_code(library_namespace) {
 			library_namespace.warn(
 			//
 			'normalize_title_parameter: Invalid title! '
-					+ get_page_title_link(title));
+					+ wiki_API.title_link_of(title));
 			return;
 		}
 
@@ -1552,7 +1552,7 @@ function module_code(library_namespace) {
 			if (flow_view === 'expandtemplates')
 				return String(page_data.expandtemplates.wikitext || '');
 
-			library_namespace.debug(get_page_title_link(page_data)
+			library_namespace.debug(wiki_API.title_link_of(page_data)
 			//
 			+ ': The page has expandtemplates.wikitext but do not used.', 1,
 					'get_page_content');
@@ -4229,7 +4229,7 @@ function module_code(library_namespace) {
 
 	// ========================================================================
 
-	// 不可 catch default_language。
+	// 不可 cache default_language。
 	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
 	/** {String}default language / wiki name */
 	var default_language;
@@ -5100,7 +5100,9 @@ function module_code(library_namespace) {
 	 * 則將直接中斷離開 operation，不執行 callback。<br />
 	 * 此時須由 operation.list() 自行處理 callback。
 	 */
-	wiki_API.cache.abort = {
+	wiki_API.cache.abort = typeof Symbol === 'function' ? Symbol('ABORT_CACHE')
+	//
+	: {
 		cache : 'abort'
 	};
 	/**

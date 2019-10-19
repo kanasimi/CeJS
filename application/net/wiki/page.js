@@ -45,7 +45,7 @@ function module_code(library_namespace) {
 	// @inner
 	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, wikidata_get_site = wiki_API.wikidata_get_site, add_parameters = wiki_API.add_parameters;
 
-	// 不可 catch default_language。
+	// 不可 cache default_language。
 	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
 
 	var
@@ -829,7 +829,7 @@ function module_code(library_namespace) {
 						//
 						+ redirect_data.tofragment;
 					}
-					library_namespace.debug(get_page_title_link(title)
+					library_namespace.debug(wiki_API.title_link_of(title)
 					// →
 					+ ' redirected to section [[' + redirect_data.to + '#'
 							+ redirect_data.tofragment + ']]!', 1,
@@ -1032,7 +1032,7 @@ function module_code(library_namespace) {
 		if (!session) {
 			// 先設定一個以方便操作。
 			session = new wiki_API(null, null, options.language
-					|| default_language);
+					|| wiki_API.set_language());
 		}
 		// use get_list()
 		// 注意: arguments 與 get_list() 之 callback 連動。
@@ -1097,7 +1097,7 @@ function module_code(library_namespace) {
 		&& (options.with_diff || options.with_content)) {
 			// 先設定一個以方便操作。
 			session = new wiki_API(null, null, options.language
-					|| default_language);
+					|| wiki_API.set_language());
 		}
 
 		var use_SQL = wiki_API.SQL_config
@@ -1221,7 +1221,7 @@ function module_code(library_namespace) {
 
 		library_namespace.info('add_listener: 開始監視 / scan '
 		//
-		+ (session && session.language || default_language)
+		+ (session && session.language || wiki_API.set_language())
 		//
 		+ (session && session.family ? '.' + session.family : '') + ' '
 		//
@@ -2449,7 +2449,7 @@ function module_code(library_namespace) {
 		//
 		use_language = wikidata_get_site(config, true)
 		// else use default_language
-		|| default_language,
+		|| wiki_API.set_language(),
 		/** {Object}用在 wiki_API.cache 之 configuration。 */
 		cache_config = {
 			// all title/id list
