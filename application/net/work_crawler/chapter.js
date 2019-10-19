@@ -860,9 +860,22 @@ function module_code(library_namespace) {
 				// console.log(chapter_directory);
 				library_namespace.create_directory(chapter_directory);
 
+				images_archive = work_data.directory + chapter_label + '.'
+						+ _this.images_archive_extension;
+				try {
+					var images_archive_status = node_fs
+							.statSync(images_archive);
+					// console.log(images_archive_status);
+					if (!(work_data.last_file_modified_date
+							- images_archive_status.mtime > 0)) {
+						// 紀錄最後下載的圖片壓縮檔時間。
+						work_data.last_file_modified_date = images_archive_status.mtime;
+					}
+				} catch (e) {
+					// TODO: handle exception
+				}
 				images_archive = new library_namespace.storage.archive(
-						work_data.directory + chapter_label + '.'
-								+ _this.images_archive_extension);
+						images_archive);
 				// cache
 				Object.assign(images_archive, {
 					base_directory : work_data.directory,
@@ -1550,6 +1563,8 @@ function module_code(library_namespace) {
 						remove : _this.remove_images_after_archive,
 						recurse : true
 					});
+					// 紀錄最後下載的圖片壓縮檔時間。
+					work_data.last_file_modified_date = new Date;
 				}
 
 				if (_this.write_chapter_metadata && library_namespace

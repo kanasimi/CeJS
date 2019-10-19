@@ -224,6 +224,7 @@ function module_code(library_namespace) {
 					// @see CeL.application.storage.EPUB
 					work_data[this.KEY_EBOOK].path.root, true);
 				}
+
 			} else if (work_data && work_data.titles) {
 				crawler_namespace.set_work_status(work_data,
 				// @see `approximate_title`
@@ -711,6 +712,8 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			// search key
+			work_data.input_title = work_title;
 			if (!work_data.title) {
 				work_data.title = work_title;
 			} else if (_this.cache_title_to_id && !work_title

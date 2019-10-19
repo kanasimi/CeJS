@@ -675,6 +675,7 @@ function module_code(library_namespace) {
 		if (remove_list && !Array.isArray(remove_list)) {
 			remove_list = [ remove_list ];
 		}
+		/** {Boolean} get parsed data */
 		var get_parsed = options.get_parsed || rearrange_list;
 
 		var matched, work_list = [], work_hash = Object.create(null), parsed;
@@ -779,6 +780,7 @@ function module_code(library_namespace) {
 		work_list = parse_favorite_list(work_list.toString(), {
 			rearrange_list : rearrange_list_file
 		});
+		work_list.path = favorite_list_file_path;
 
 		if (rearrange_list_file) {
 			if (work_list.duplicated > 0) {
@@ -866,6 +868,119 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
+
+	// archive old work
+	// @since 2019/10/19 20:33:29
+	function check_and_archive_old_work(work_data, work_list) {
+		if (false) {
+			console.log([ this.is_finished(work_data),
+					work_data.last_file_modified_date, Date.now()
+					//
+					- Date.parse(work_data.last_file_modified_date) ]);
+		}
+
+		if (!this.archive_old_works) {
+			return;
+		}
+
+		var interval = typeof this.archive_old_works === 'string'
+				&& library_namespace
+						.to_millisecond(typeof this.archive_old_works);
+		if (!(interval >= library_namespace.to_millisecond('1D'))) {
+			// using default interval
+			interval = library_namespace.to_millisecond(
+			// test: 作品已完結 or 逾半年未下載新章節
+			this.is_finished(work_data) ? '4 month' : '.5Y');
+		}
+
+		if (!(Date.now() - Date.parse(work_data.last_file_modified_date) > interval)) {
+			return;
+		}
+
+		// --------------------------------------
+
+		// console.log(work_data);
+		// console.log(work_list.path);
+
+		if (this.modify_work_list_when_archive_old_works
+		//
+		&& work_list && work_list.path) {
+			// Also remove work title + work id from work list
+			library_namespace.info([ this.id + ': ', {
+				T : [ '自作品列表中刪除將封存之作品：《%1》', work_data.title || work_data.id ]
+			} ]);
+
+			var work_list_text = library_namespace.read_file(work_list.path);
+			work_list_text = work_list_text && work_list_text.toString();
+			var new_work_list = CeL.work_crawler.parse_favorite_list(
+			//
+			work_list_text, {
+				get_parsed : true
+			// remove : [ work_data.title, work_data.id ]
+			}).parsed;
+
+			var last_marked_index, archived_prefix = '# '
+					+ gettext('archived: '),
+			//
+			prefix = '# ' + gettext('archived date: ')
+					+ (new Date).toISOString() + new_work_list.line_separator
+					+ archived_prefix;
+			new_work_list.forEach(function(line, index) {
+				var work = line.trim();
+				if (work === work_data.input_title || work === work_data.title
+						|| work == work_data.id) {
+					new_work_list[index]
+					// 接連被標示的，就不一個一個標示。
+					= (last_marked_index + 1 === index ? archived_prefix
+							: prefix)
+							+ line;
+					last_marked_index = index;
+				}
+			});
+
+			if (false) {
+				console.log([ work_list.path,
+						work_list.path + '.' + this.backup_file_extension,
+						new_work_list.toString() ]);
+				console.log(new_work_list);
+			}
+			library_namespace.move_file(work_list.path, work_list.path + '.'
+					+ this.backup_file_extension);
+			library_namespace.write_file(work_list.path, new_work_list
+					.toString());
+		}
+
+		library_namespace.info([ this.id + ': ', {
+			T : [ '封存舊作品：《%1》', work_data.title || work_data.id ]
+		} ]);
+
+		// 登記作品已被封存
+		crawler_namespace.set_work_status(work_data, 'archived at '
+				+ (new Date).format());
+		work_data.archived = new Date;
+		// backup
+		this.save_work_data(work_data);
+
+		// 將舊的作品搬移到 .archive_directory_name 資料夾內
+		var archive_directory = this.main_directory
+				+ this.archive_directory_name;
+		if (!library_namespace.directory_exists(archive_directory)) {
+			library_namespace.create_directory(
+			// 先創建封存用目錄。
+			archive_directory);
+		}
+
+		if (false) {
+			console.log(work_data);
+			console.log([ work_data.directory,
+					archive_directory + work_data.directory_name ]);
+		}
+		library_namespace.move_directory(work_data.directory, archive_directory
+				+ work_data.directory_name);
+
+		// assert: 在這之後不可再作任何關於 work_data.directory 的操作。
+		return true;
+	}
 
 	function get_work_list(work_list, callback) {
 		// console.log(work_list);
@@ -973,7 +1088,10 @@ function module_code(library_namespace) {
 					backgroundColor : 'cyan'
 				}
 			} ]);
+
 			this.get_work(work_title, function(work_data) {
+				check_and_archive_old_work.call(this, work_data, work_list);
+
 				var work_status = crawler_namespace.set_work_status(work_data);
 				if (work_status) {
 					// 把需要報告的狀態export到{Array}work_status。
@@ -997,7 +1115,7 @@ function module_code(library_namespace) {
 				get_next_work();
 			});
 
-		}, function all_work_done() {
+		}, function all_works_done() {
 			delete this.work_list_now;
 			library_namespace.log([ this.id + ': ', {
 				T : [ '共%1個作品下載完畢。', work_list.length ]
@@ -1357,6 +1475,11 @@ function module_code(library_namespace) {
 			write_chapter_metadata : 'boolean',
 			write_image_metadata : 'boolean',
 
+			// 封存舊作品。
+			archive_old_works : 'boolean|string',
+			// 同時自作品列表中刪除將封存之作品。
+			modify_work_list_when_archive_old_works : 'boolean',
+
 			// 儲存偏好選項 save_options。
 			save_preference : 'boolean'
 		},
@@ -1420,6 +1543,11 @@ function module_code(library_namespace) {
 		set_server_list : set_server_list,
 		parse_work_id : parse_work_id,
 		get_work_list : get_work_list,
+
+		// 封存舊作品。
+		archive_old_works : false,
+		// 同時自作品列表中刪除將封存之作品。
+		modify_work_list_when_archive_old_works : true,
 
 		parse_favorite_list_file : parse_favorite_list_file
 	});
