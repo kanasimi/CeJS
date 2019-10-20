@@ -43,348 +43,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	/**
-	 * 正規化定義參數的規範，例如數量包含可選範圍，可用 RegExp。如'number:0~|string:/v\\d/i',
-	 * 'number:1~400|string:item1;item2;item3'。亦可僅使用'number|string'。
-	 * 
-	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern
-	 */
-	function generate_argument_condition(condition) {
-		if (library_namespace.is_Object(condition))
-			return condition;
-
-		var condition_data = Object.create(null), matched, PATTERN = /([a-z]+)(?::(\/(\\\/|[^\/])+\/([i]*)|[^|]+))?(?:\||$)/g;
-		while (matched = PATTERN.exec(condition)) {
-			var type = matched[1], _condition = undefined;
-			if (!matched[2]) {
-				;
-
-			} else if (matched[3]) {
-				_condition = new RegExp(matched[3], matched[4]);
-
-			} else if (type === 'number'
-					&& (_condition = matched[2]
-							.match(/([+\-]?\d+(?:\.\d+)?)?[–~]([+\-]?\d+(?:\.\d+)?)?/))) {
-				_condition = {
-					min : _condition[1] && +_condition[1],
-					max : _condition[2] && +_condition[2]
-				};
-
-			} else if (type === 'number'
-					&& (matched[2] === 'natural' || matched[2] === 'ℕ')) {
-				_condition = function is_natural(value) {
-					return value >= 1 && value === Math.floor(value);
-				};
-
-			} else if (type === 'number'
-					&& (matched[2] === 'natural+0' || matched[2] === 'ℕ+0')) {
-				// Naturals with zero: non-negative integers 非負整數。
-				_condition = function is_non_negative(value) {
-					return value >= 0 && value === Math.floor(value);
-				};
-
-			} else if (type === 'number' && matched[2] === 'integer') {
-				_condition = function is_integer(value) {
-					return value === Math.floor(value);
-				};
-
-			} else {
-				_condition = matched[2].split(';');
-			}
-
-			condition_data[type] = _condition;
-		}
-
-		return condition_data;
-	}
-
-	/**
-	 * 初始設定好命令列選項之型態資料集。
-	 * 
-	 * @param {Object}[arg_hash]
-	 *            參數型態資料集。
-	 * @param {Boolean}[append]
-	 *            添加至當前的參數型態資料集。否則會重新設定參數型態資料集。
-	 * 
-	 * @returns {Object}命令列選項之型態資料集。
-	 */
-	function setup_argument_conditions(arg_hash, append) {
-		if (append) {
-			arg_hash = Object.assign(Work_crawler.prototype.import_arg_hash,
-					arg_hash);
-		} else if (arg_hash) {
-			// default: rest import_arg_hash
-			Work_crawler.prototype.import_arg_hash = arg_hash;
-		} else {
-			arg_hash = Work_crawler.prototype.import_arg_hash;
-		}
-
-		Object.keys(arg_hash).forEach(function(key) {
-			arg_hash[key] = generate_argument_condition(arg_hash[key]);
-		});
-		// console.log(arg_hash);
-		return arg_hash;
-	}
-
-	Work_crawler.setup_argument_conditions = setup_argument_conditions;
-
-	/**
-	 * 檢核 crawler 的設定參數。
-	 * 
-	 * @param {String}key
-	 *            參數名稱
-	 * @param value
-	 *            欲設定的值
-	 * 
-	 * @returns {Boolean} true: Error occudded
-	 */
-	function verify_arg(key, value) {
-		if (!(key in this.import_arg_hash)) {
-			return true;
-		}
-
-		var type = typeof value, arg_type_data = this.import_arg_hash[key];
-		// console.log(arg_type_data);
-
-		if (!(type in arg_type_data)) {
-			library_namespace.warn([ 'verify_arg: ', {
-				T : [ '"%1" 這個值所允許的數值類型為 %4，但現在被設定成 {%2} %3',
-				//
-				key, typeof value, value,
-				//
-				library_namespace.is_Object(arg_type_data)
-				//
-				? Object.keys(arg_type_data).map(function(type) {
-					return gettext(type);
-				}).join('|') : arg_type_data ]
-			} ]);
-
-			return true;
-		}
-
-		arg_type_data = arg_type_data[type];
-		if (Array.isArray(arg_type_data)) {
-			if (arg_type_data.length === 1
-					&& typeof arg_type_data[0] === 'string') {
-				var fso_type = arg_type_data[0]
-						.match(/^fso_(file|files|directory|directories)$/);
-				if (fso_type) {
-					fso_type = fso_type[1];
-					if (typeof value === 'string')
-						value = value.split('|');
-					// assert: Array.isArray(value)
-					var error_fso = undefined, checker = fso_type
-							.startsWith('file') ? library_namespace.storage.file_exists
-							: library_namespace.storage.directory_exists;
-					if (value.some(function(fso_path) {
-						if (!checker(fso_path)) {
-							error_fso = fso_path;
-							return true;
-						}
-					})) {
-						library_namespace.warn([ 'verify_arg: ', {
-							T : [ '有些 "%1" 所指定的%2路徑不存在：%3',
-							//
-							key, gettext(fso_type), error_fso ]
-						} ]);
-						return true;
-					}
-					return;
-				}
-			}
-
-			// e.g., "string:value1,value2"
-			if (arg_type_data.includes(value)) {
-				// verified
-				return;
-			}
-
-		} else if (arg_type_data && ('min' in arg_type_data)) {
-			// assert: type === 'number'
-			if ((!arg_type_data.min || arg_type_data.min <= value)
-					&& (!arg_type_data.max || value <= arg_type_data.max)) {
-				// verified
-				return;
-			}
-
-		} else if (typeof arg_type_data === 'function') {
-			if (arg_type_data(value))
-				return;
-
-		} else {
-			if (arg_type_data !== undefined) {
-				library_namespace.warn([ 'verify_arg: ', {
-					T : [ '無法處理 "%1" 在數值類型為 %2 時之條件！', key, arg_type_data ]
-				} ]);
-			}
-			// 應該修改審查條件式，而非數值本身的問題。
-			return;
-		}
-
-		library_namespace.warn([ 'verify_arg: ', {
-			T : [ '"%1" 被設定成了有問題的值：{%2} %3', key, typeof value, value ]
-		} ]);
-
-		return true;
-	}
-
-	// 設定 crawler 的參數。 normalize and setup value
-	// crawler.setup_value(key, value);
-	// return {String}has error
-	function setup_value(key, value) {
-		if (!key)
-			return '未提供鍵值';
-
-		if (library_namespace.is_Object(key)) {
-			// assert: value === undefined
-			value = key;
-			for (key in value) {
-				this.setup_value(key, value[key]);
-			}
-			// TODO: return error
-			return;
-		}
-
-		// assert: typeof key === 'string'
-
-		switch (key) {
-		case 'proxy':
-			// 使用代理伺服器 proxy_server
-			// TODO: check .proxy
-			library_namespace.info({
-				T : [ 'Using proxy server: %1', value ]
-			});
-			this.get_URL_options.proxy = this[key] = value;
-			return;
-
-		case 'cookie':
-			// set-cookie, document.cookie
-			if (this.get_URL_options.agent) {
-				library_namespace.merge_cookie(this.get_URL_options.agent,
-						value);
-			} else if (this.get_URL_options.cookie) {
-				if (!/;\s*$/.test(this.get_URL_options.cookie))
-					this.get_URL_options.cookie += ';';
-				this.get_URL_options.cookie += value;
-			} else {
-				this.get_URL_options.cookie = value;
-			}
-			return;
-
-		case 'timeout':
-			value = library_namespace.to_millisecond(value);
-			if (!(value >= 0)) {
-				return '無法解析的時間';
-			}
-			this.get_URL_options.timeout = this[key] = value;
-			break;
-
-		// case 'agent':
-		// @see function setup_agent(URL)
-
-		case 'user_agent':
-			if (!value) {
-				return '未設定 User-Agent。';
-			}
-			this.get_URL_options.headers['User-Agent'] = this[key] = value;
-			break;
-
-		case 'Referer':
-			if (!value) {
-				return 'Referer 不可為 undefined。';
-			}
-			library_namespace.debug({
-				T : [ '設定 Referer：%1', value ]
-			}, 2);
-			this.get_URL_options.headers.Referer = value;
-			// console.log(this.get_URL_options);
-			return;
-
-		case 'allow_EOI_error':
-			if (this.using_default_MIN_LENGTH) {
-				this[key] = value;
-				// 因為 .allow_EOI_error 會影響到 .MIN_LENGTH
-				this.setup_value('MIN_LENGTH', 'default');
-				return;
-			}
-			break;
-
-		case 'MIN_LENGTH':
-			// 設定預設可容許的最小圖像大小。
-			if (!(value >= 0)) {
-				if (value === 'default') {
-					this.using_default_MIN_LENGTH = true;
-					value = this.allow_EOI_error ? 4e3 : 1e3;
-				} else
-					return '最小圖片大小應大於等於零';
-			} else {
-				delete this.using_default_MIN_LENGTH;
-			}
-			break;
-
-		case 'main_directory':
-			if (!value || typeof value !== 'string')
-				return;
-			value = value.replace(/[\\\/]/g,
-			// 正規化成當前作業系統使用的目錄分隔符號。
-			library_namespace.env.path_separator);
-			// main_directory 必須以 path separator 作結。
-			value = library_namespace.append_path_separator(value);
-			break;
-		}
-
-		if (key in this.import_arg_hash) {
-			this.verify_arg(key, value);
-		}
-
-		if (value === undefined) {
-			// delete this[key];
-		}
-		this[key] = value;
-	}
-
-	// import command line arguments 以命令行參數為準
-	// 從命令列引數來的設定，優先等級比起作品預設設定更高。
-	function import_args() {
-		// console.log(library_namespace.env.arg_hash);
-		if (!library_namespace.env.arg_hash) {
-			return;
-		}
-
-		for ( var key in library_namespace.env.arg_hash) {
-			if (!(key in this.import_arg_hash) && !(key in this)) {
-				continue;
-			}
-
-			var value = library_namespace.env.arg_hash[key];
-
-			if (this.import_arg_hash[key] === 'number') {
-				try {
-					// value = +value;
-					// 這樣可以處理如"1e3"
-					value = JSON.parse(value);
-				} catch (e) {
-					library_namespace.error('import_args: '
-							+ gettext('無法解析 %1', key + '=' + value));
-					continue;
-				}
-			}
-
-			var old_value = this[key], error = this.setup_value(key, value);
-			if (error) {
-				library_namespace.error('import_args: '
-						+ gettext('無法設定 %1：%2', key + '=' + old_value, error));
-			} else {
-				library_namespace.log(library_namespace.display_align([
-						[ key + ': ', old_value ],
-						// + ' ': 增加間隙。
-						[ gettext('由命令列') + ' → ', value ] ]));
-			}
-		}
-	}
-
-	// --------------------------------
-
 	// 初始化 agent。
 	// create and keep a new agent. 維持一個獨立的 agent。
 	// 以不同 agent 應對不同 host。
@@ -808,6 +466,27 @@ function module_code(library_namespace) {
 		return work_list;
 	}
 
+	function write_favorite_list(work_list_text, favorite_list_file_path) {
+		if (!favorite_list_file_path)
+			favorite_list_file_path = this.work_list_now.path;
+		if (false) {
+			console.log([ favorite_list_file_path,
+					favorite_list_file_path + '.' + this.backup_file_extension,
+					new_work_list.toString() ]);
+			console.log(new_work_list);
+		}
+		// 先創目錄。
+		library_namespace.create_directory(favorite_list_file_path.replace(
+				/[^\\\/]+$/g, ''));
+		// backup old favorite list file 備份最後一次修改前的書籤，預防一不小心操作錯誤時還可以補救。
+		library_namespace.move_file(favorite_list_file_path,
+				favorite_list_file_path + '.' + this.backup_file_extension);
+		library_namespace.write_file(favorite_list_file_path, work_list_text
+				.toString());
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	function parse_work_id(work_id, callback) {
 		work_id = String(work_id);
 
@@ -879,6 +558,11 @@ function module_code(library_namespace) {
 					- Date.parse(work_data.last_file_modified_date) ]);
 		}
 
+		// Warning: 本功能僅適用於會遍歷所有章節檔案的工具檔。
+		// 若工具檔不會遍歷所有章節檔案，得到的是錯誤的 `work_data.last_file_modified_date`。
+		// 此時必須避免執行 check_and_archive_old_work()。
+		// e.g., work_crawler/comico.js
+
 		if (!this.archive_old_works) {
 			return;
 		}
@@ -912,19 +596,20 @@ function module_code(library_namespace) {
 
 			var work_list_text = library_namespace.read_file(work_list.path);
 			work_list_text = work_list_text && work_list_text.toString();
-			var new_work_list = CeL.work_crawler.parse_favorite_list(
-			//
-			work_list_text, {
+			var new_work_list = parse_favorite_list(work_list_text, {
 				get_parsed : true
 			// remove : [ work_data.title, work_data.id ]
 			}).parsed;
 
-			var last_marked_index, archived_prefix = '# '
-					+ gettext('archived: '),
-			//
-			prefix = '# ' + gettext('archived date: ')
-					+ (new Date).toISOString() + new_work_list.line_separator
-					+ archived_prefix;
+			var last_marked_index, archived_prefix = '# ' + gettext('已封存: '), prefix = '# '
+					+ gettext(
+							'封存日期：%1，最後一次於 %2 下載',
+							(new Date).toISOString(),
+							library_namespace
+									.is_Date(work_data.last_file_modified_date) ? work_data.last_file_modified_date
+									.toISOString()
+									: work_data.last_file_modified_date)
+					+ new_work_list.line_separator + archived_prefix;
 			new_work_list.forEach(function(line, index) {
 				var work = line.trim();
 				if (work === work_data.input_title || work === work_data.title
@@ -938,16 +623,7 @@ function module_code(library_namespace) {
 				}
 			});
 
-			if (false) {
-				console.log([ work_list.path,
-						work_list.path + '.' + this.backup_file_extension,
-						new_work_list.toString() ]);
-				console.log(new_work_list);
-			}
-			library_namespace.move_file(work_list.path, work_list.path + '.'
-					+ this.backup_file_extension);
-			library_namespace.write_file(work_list.path, new_work_list
-					.toString());
+			this.write_favorite_list(new_work_list, work_list.path);
 		}
 
 		library_namespace.info([ this.id + ': ', {
@@ -962,6 +638,7 @@ function module_code(library_namespace) {
 		this.save_work_data(work_data);
 
 		// 將舊的作品搬移到 .archive_directory_name 資料夾內
+		// @see function remove_old_ebooks(only_id) @ work_crawler/ebook.js
 		var archive_directory = this.main_directory
 				+ this.archive_directory_name;
 		if (!library_namespace.directory_exists(archive_directory)) {
@@ -978,7 +655,7 @@ function module_code(library_namespace) {
 		library_namespace.move_directory(work_data.directory, archive_directory
 				+ work_data.directory_name);
 
-		// assert: 在這之後不可再作任何關於 work_data.directory 的操作。
+		// assert: 在這之後不可再作任何 work_data.directory 下之 FSO 操作。
 		return true;
 	}
 
@@ -1213,61 +890,6 @@ function module_code(library_namespace) {
 		}, this);
 	}
 
-	// --------------------------------
-
-	var PATTERN_url_for_baidu = /([\d_]+)(?:\.html|\/(?:index\.html)?)?$/;
-	if (library_namespace.is_debug()) {
-		[ 'http://www.host/0/123/', 'http://www.host/123/index.html',
-				'http://www.host/123.html' ].forEach(function(url) {
-			console.assert('123' === 'http://www.host/123/'
-					.match(PATTERN_url_for_baidu)[1]);
-		});
-	}
-
-	crawler_namespace.parse_search_result_set = {
-		// baidu cse
-		baidu : function(html, get_label) {
-			// console.log(html);
-			var id_data = [],
-			// {Array}id_list = [id,id,...]
-			id_list = [], get_next_between = html.find_between(
-					' cpos="title" href="', '</a>'), text;
-
-			while ((text = get_next_between()) !== undefined) {
-				// console.log(text);
-				// 從URL網址中解析出作品id。
-				var matched = text.between(null, '"').match(
-						PATTERN_url_for_baidu);
-				// console.log(matched);
-				if (!matched)
-					continue;
-				id_list.push(matched[1]);
-				// 從URL網址中解析出作品title。
-				matched = text.match(/ title="([^"]+)"/);
-				if (matched) {
-					matched = matched[1];
-				} else {
-					// e.g., omanhua.js: <em>择</em><em>天</em><em>记</em>
-					matched = text.between('<em>', {
-						tail : '</em>'
-					});
-				}
-				// console.log(matched);
-				if (matched && (matched = get_label(matched))
-				// 只取第一個符合的。
-				// 避免如 http://host/123/, http://host/123/456.htm
-				&& !id_data.includes(matched)) {
-					id_data.push(matched);
-				} else {
-					id_list.pop();
-				}
-			}
-
-			// console.log([ id_list, id_data ]);
-			return [ id_list, id_data ];
-		}
-	};
-
 	// ----------------------------------------------------------------------------
 
 	// const
@@ -1404,86 +1026,6 @@ function module_code(library_namespace) {
 		onwarning : onwarning,
 		onerror : onerror,
 
-		verify_arg : verify_arg,
-		setup_value : setup_value,
-		import_args : import_args,
-		// 命令列可以設定的選項之型態資料集。通常僅做測試微調用。
-		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
-		// 現在import_arg_hash之說明已經與I18n統合在一起。
-		// work_crawler/work_crawler_loader.js與gui_electron_functions.js各參考了import_arg_hash的可選參數。
-		// @see work_crawler/gui_electron/gui_electron_functions.js
-		// @see work_crawler/resource/locale of work_crawler - locale.csv
-		import_arg_hash : {
-			// set download directory, fso:directory
-			main_directory : 'string:fso_directory',
-
-			// crawler.show_work_data(work_data);
-			show_information_only : 'boolean',
-
-			one_by_one : 'boolean',
-			// 篩選想要下載的章節標題關鍵字。例如"單行本"。
-			chapter_filter : 'string',
-			// 開始/接續下載的章節。將依類型轉成 .start_chapter_title 或
-			// .start_chapter_NO。對已下載過的章節，必須配合 .recheck。
-			start_chapter : 'number:natural|string',
-			// 開始/接續下載的章節編號。
-			start_chapter_NO : 'number:natural',
-			// 開始/接續下載的章節標題。
-			start_chapter_title : 'string',
-			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。
-			// 一般僅使用於命令列設定。default:1
-			start_list_serial : 'number:natural|string',
-			// 重新整理列表檔案 rearrange list file
-			rearrange_list_file : 'boolean',
-			// string: 如 "3s"
-			chapter_time_interval : 'number:natural+0|string|function',
-			MIN_LENGTH : 'number:natural+0',
-			timeout : 'number:natural+0|string',
-			// 容許錯誤用的相關操作設定。
-			MAX_ERROR_RETRY : 'number:natural+0',
-			allow_EOI_error : 'boolean',
-			skip_error : 'boolean',
-			skip_chapter_data_error : 'boolean',
-
-			preserve_work_page : 'boolean',
-			preserve_chapter_page : 'boolean',
-			remove_ebook_directory : 'boolean',
-			// 當新獲取的檔案比較大時，覆寫舊的檔案。
-			overwrite_old_file : 'boolean',
-
-			user_agent : 'string',
-			// 代理伺服器 proxy_server: "username:password@hostname:port"
-			proxy : 'string',
-			// 設定下載時要添加的 cookie。 document.cookie: "key=value"
-			cookie : 'string',
-
-			// 漫畫下載完畢後壓縮圖片檔案。
-			archive_images : 'boolean',
-			// 完全沒有出現錯誤才壓縮圖片檔案。
-			archive_all_good_images_only : 'boolean',
-			// 壓縮圖片檔案之後，刪掉原先的圖片檔案。
-			remove_images_after_archive : 'boolean',
-			images_archive_extension : 'string',
-
-			// 重新擷取用的相關操作設定。
-			regenerate : 'boolean',
-			reget_chapter : 'boolean',
-			recheck : 'boolean|string:changed;multi_parts_changed',
-			search_again : 'boolean',
-			cache_title_to_id : 'boolean',
-
-			write_chapter_metadata : 'boolean',
-			write_image_metadata : 'boolean',
-
-			// 封存舊作品。
-			archive_old_works : 'boolean|string',
-			// 同時自作品列表中刪除將封存之作品。
-			modify_work_list_when_archive_old_works : 'boolean',
-
-			// 儲存偏好選項 save_options。
-			save_preference : 'boolean'
-		},
-
 		setup_agent : setup_agent,
 		data_of : start_get_data_of,
 
@@ -1549,10 +1091,9 @@ function module_code(library_namespace) {
 		// 同時自作品列表中刪除將封存之作品。
 		modify_work_list_when_archive_old_works : true,
 
-		parse_favorite_list_file : parse_favorite_list_file
+		parse_favorite_list_file : parse_favorite_list_file,
+		write_favorite_list : write_favorite_list
 	});
-
-	setup_argument_conditions();
 
 	// 不設定(hook)本 module 之 namespace，僅執行 module code。
 	return library_namespace.env.not_to_extend_keyword;

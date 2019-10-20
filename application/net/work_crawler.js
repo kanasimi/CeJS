@@ -275,7 +275,8 @@ function module_code(library_namespace) {
 		// cache directory below this.main_directory.
 		// 必須以 path separator 作結。
 		cache_directory_name : library_namespace.append_path_separator('cache'),
-		// archive directory below this.main_directory for ebook. 封存舊電子書用的目錄。
+		// archive directory below this.main_directory for ebook / old comics.
+		// 封存舊電子書、舊漫畫用的目錄。
 		// 必須以 path separator 作結。
 		archive_directory_name : library_namespace
 				.append_path_separator('archive'),
@@ -549,7 +550,9 @@ function module_code(library_namespace) {
 	this.finish = function(name_space, waiting) {
 		library_namespace.run(
 		// @see work_crawler/*.js
-		'task,search,work,chapter,image,ebook'.split(',').map(function(name) {
+		'arguments,task,search,work,chapter,image,ebook'.split(',')
+		//
+		.map(function(name) {
 			return module_name + '.' + name;
 		}), waiting);
 		return waiting;

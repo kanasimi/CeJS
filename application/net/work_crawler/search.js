@@ -124,6 +124,61 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	var PATTERN_url_for_baidu = /([\d_]+)(?:\.html|\/(?:index\.html)?)?$/;
+	if (library_namespace.is_debug()) {
+		[ 'http://www.host/0/123/', 'http://www.host/123/index.html',
+				'http://www.host/123.html' ].forEach(function(url) {
+			console.assert('123' === 'http://www.host/123/'
+					.match(PATTERN_url_for_baidu)[1]);
+		});
+	}
+
+	crawler_namespace.parse_search_result_set = {
+		// baidu cse
+		baidu : function(html, get_label) {
+			// console.log(html);
+			var id_data = [],
+			// {Array}id_list = [id,id,...]
+			id_list = [], get_next_between = html.find_between(
+					' cpos="title" href="', '</a>'), text;
+
+			while ((text = get_next_between()) !== undefined) {
+				// console.log(text);
+				// 從URL網址中解析出作品id。
+				var matched = text.between(null, '"').match(
+						PATTERN_url_for_baidu);
+				// console.log(matched);
+				if (!matched)
+					continue;
+				id_list.push(matched[1]);
+				// 從URL網址中解析出作品title。
+				matched = text.match(/ title="([^"]+)"/);
+				if (matched) {
+					matched = matched[1];
+				} else {
+					// e.g., omanhua.js: <em>择</em><em>天</em><em>记</em>
+					matched = text.between('<em>', {
+						tail : '</em>'
+					});
+				}
+				// console.log(matched);
+				if (matched && (matched = get_label(matched))
+				// 只取第一個符合的。
+				// 避免如 http://host/123/, http://host/123/456.htm
+				&& !id_data.includes(matched)) {
+					id_data.push(matched);
+				} else {
+					id_list.pop();
+				}
+			}
+
+			// console.log([ id_list, id_data ]);
+			return [ id_list, id_data ];
+		}
+	};
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 
 	// @instance

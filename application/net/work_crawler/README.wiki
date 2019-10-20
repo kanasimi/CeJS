@@ -5,7 +5,8 @@ More examples: See [https://github.com/kanasimi/work_crawler 各網站工具檔.
 
 == 下載作業流程 ==
 
-[[../work_crawler.js]]: [[task.js]]
+[[../work_crawler.js]]: [[arguments.js]]
+→ [[task.js]]
 → [[search.js]]
 → [[work.js]]
 → [[chapter.js]]

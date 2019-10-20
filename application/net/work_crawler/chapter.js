@@ -866,8 +866,8 @@ function module_code(library_namespace) {
 					var images_archive_status = node_fs
 							.statSync(images_archive);
 					// console.log(images_archive_status);
-					if (!(work_data.last_file_modified_date
-							- images_archive_status.mtime > 0)) {
+					if (images_archive_status.mtime
+							- work_data.last_file_modified_date > 0) {
 						// 紀錄最後下載的圖片壓縮檔時間。
 						work_data.last_file_modified_date = images_archive_status.mtime;
 					}

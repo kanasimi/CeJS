@@ -67,7 +67,6 @@ function module_code(library_namespace) {
 	READABLE_FLAG = 'W',
 	//
 	default_configuration = {
-
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.comic中Comic_site.prototype內的母comments，並以其為主體。
 
 		// e.g., 20099 俺のメンタルは限界です\0003 3話 「マンガを描く原点」\20099-3-022.jpg
@@ -135,6 +134,12 @@ function module_code(library_namespace) {
 		},
 		parse_work_data : function(html, get_label, extract_work_data) {
 			// console.log(html);
+
+			if (this.archive_old_works) {
+				// 因為不會遍歷所有章節檔案，得到的是錯誤的 `work_data.last_file_modified_date`。
+				// 因此必須避免執行 check_and_archive_old_work()。
+				this.archive_old_works = false;
+			}
 
 			var cmnData = html.between('var cmnData =', '</script>'), matched;
 			if (!cmnData) {
