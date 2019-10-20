@@ -41,10 +41,7 @@ function module_code(library_namespace) {
 	// requiring
 	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
-	// var ;
-
-	// 不可 cache default_language。
-	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
+	var is_wikidata_site = wiki_API.is_wikidata_site;
 
 	// ------------------------------------------------------------------------
 	// SQL 相關函數 @ Toolforge。
@@ -200,7 +197,7 @@ function module_code(library_namespace) {
 		if (!user || !(password = config.match(/\n\s*password\s*=\s*([^\s]+)/)))
 			return;
 
-		return new_SQL_config(wiki_API.set_language(), user[1], password[1]);
+		return new_SQL_config(wiki_API.language, user[1], password[1]);
 	}
 
 	if (wmflabs) {
