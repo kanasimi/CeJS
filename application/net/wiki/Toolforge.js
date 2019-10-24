@@ -219,7 +219,7 @@ function module_code(library_namespace) {
 				+ 'replica.my.cnf');
 			}
 		} catch (e) {
-			// TODO: handle exception
+			library_namespace.error(e);
 		}
 
 		if (process.env.JOB_ID && process.env.JOB_NAME) {

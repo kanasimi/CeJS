@@ -39,9 +39,6 @@ function module_code(library_namespace) {
 	// @inner
 	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_URL_prefix = wiki_API.PATTERN_URL_prefix, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
 
-	// 不可 cache default_language。
-	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
-
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 	NOT_FOUND = ''.indexOf('_');
@@ -4404,7 +4401,7 @@ function module_code(library_namespace) {
 		} else {
 			date_parser = date_parser_config[options.language]
 			// e.g., 'commons'
-			|| date_parser_config[wiki_API.set_language()];
+			|| date_parser_config[wiki_API.language];
 		}
 		var PATTERN_date = date_parser[0], matched;
 		date_parser = date_parser[1];
@@ -4445,8 +4442,8 @@ function module_code(library_namespace) {
 		if (wiki_API.is_wiki_API(language)) {
 			language = language.language;
 		}
-		// console.log(language || wiki_API.set_language());
-		var to_String = date_parser_config[language || wiki_API.set_language()][2];
+		// console.log(language || wiki_API.language);
+		var to_String = date_parser_config[language || wiki_API.language][2];
 		return library_namespace.is_Object(to_String)
 		// treat to_String as date format
 		? date.format(to_String) : to_String(date);
@@ -4918,7 +4915,7 @@ function module_code(library_namespace) {
 	/**
 	 * Convert URL to wiki link.
 	 * 
-	 * TODO: 在 default_language 非 zh 使用 uselang, /zh-tw/條目 會有問題。 TODO: [[en
+	 * TODO: 在 default language 非 zh 時，使用 uselang, /zh-tw/條目 會有問題。 TODO: [[en
 	 * link]] → [[:en:en link]] TODO: use {{tsl}} or {{link-en}},
 	 * {{en:Template:Interlanguage link multi}}.
 	 * 
@@ -4991,7 +4988,7 @@ function module_code(library_namespace) {
 		title = decodeURIComponent(matched[2]);
 
 		function compose_link() {
-			var link = (language === wiki_API.set_language() ? ''
+			var link = (language === wiki_API.language ? ''
 			//
 			: ':' + language + ':') + title + section
 			// link 說明
@@ -5018,7 +5015,7 @@ function module_code(library_namespace) {
 		}
 
 		// 若非外 project 或不同 language，則直接 callback(link)。
-		if (section || language === wiki_API.set_language()) {
+		if (section || language === wiki_API.language) {
 			callback(compose_link());
 			return;
 		}
@@ -5026,12 +5023,12 @@ function module_code(library_namespace) {
 		// 嘗試取得本 project 之對應連結。
 		wiki_API.langlinks([ language, title ], function(to_title) {
 			if (to_title) {
-				language = wiki_API.set_language();
+				language = wiki_API.language;
 				title = to_title;
 				// assert: section === ''
 			}
 			callback(compose_link());
-		}, wiki_API.set_language(), options);
+		}, wiki_API.language, options);
 	}
 
 	// ----------------------------------------------------

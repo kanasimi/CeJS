@@ -360,7 +360,7 @@ function module_code(library_namespace) {
 				language = typeof action[0] === 'string'
 				// TODO: 似乎不能真的擷取到所需 language。
 				&& action[0].match(PATTERN_wiki_project_URL);
-				language = language && language[3] || wiki_API.set_language();
+				language = language && language[3] || wiki_API.language;
 				// e.g., wiki_API_query: Get "ja" from
 				// ["https://ja.wikipedia.org/w/api.php?action=edit&format=json&utf8",{}]
 				library_namespace.debug('Get "' + language + '" from '

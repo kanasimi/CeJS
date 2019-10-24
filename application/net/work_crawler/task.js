@@ -558,10 +558,13 @@ function module_code(library_namespace) {
 					- Date.parse(work_data.last_file_modified_date) ]);
 		}
 
-		// Warning: 本功能僅適用於會遍歷所有章節檔案的工具檔。
-		// 若工具檔不會遍歷所有章節檔案，得到的是錯誤的 `work_data.last_file_modified_date`。
-		// 此時必須避免執行 check_and_archive_old_work()。
-		// e.g., work_crawler/comico.js
+		/**
+		 * Warning: 本功能僅適用於會訪問到最新的章節檔案的工具檔。若工具檔不會遍歷所有章節檔案、訪問到最新的章節檔案，則得到的是錯誤的
+		 * `work_data.last_file_modified_date`。此時必須避免執行本函數
+		 * check_and_archive_old_work()。
+		 * 
+		 * e.g., work_crawler/sites/comico.js work_crawler/sites/dm5.js
+		 */
 
 		if (!this.archive_old_works) {
 			return;
@@ -574,7 +577,8 @@ function module_code(library_namespace) {
 			// using default interval
 			interval = library_namespace.to_millisecond(
 			// test: 作品已完結 or 逾半年未下載新章節
-			this.is_finished(work_data) ? '4 month' : '.5Y');
+			// 有些作品的已完結標記不確實，因此不能設太短。
+			this.is_finished(work_data) ? '5 month' : '.5Y');
 		}
 
 		if (!(Date.now() - Date.parse(work_data.last_file_modified_date) > interval)) {

@@ -50,9 +50,6 @@ function module_code(library_namespace) {
 	var API_URL_of_options = wiki_API.API_URL_of_options, is_api_and_title = wiki_API.is_api_and_title, is_wikidata_site = wiki_API.is_wikidata_site, wikidata_get_site = wiki_API.wikidata_get_site, language_code_to_site_alias = wiki_API.language_code_to_site_alias;
 	var PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i, PATTERN_wiki_project_URL = wiki_API.PATTERN_wiki_project_URL;
 
-	// 不可 cache default_language。
-	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
-
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 	NOT_FOUND = ''.indexOf('_');
@@ -297,7 +294,7 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 		+ '&language=' + (language
 		//
-		|| wikidata_get_site(options, true) || wiki_API.set_language())
+		|| wikidata_get_site(options, true) || wiki_API.language)
 		//
 		+ '&limit=' + (options.limit || 'max') ];
 
@@ -398,7 +395,7 @@ function module_code(library_namespace) {
 	wikidata_search.add_cache = function(key, id, language, is_entity) {
 		var cached_hash = is_entity ? wikidata_search_cache_entity
 				: wikidata_search_cache;
-		language = wikidata_get_site(language, true) || wiki_API.set_language();
+		language = wikidata_get_site(language, true) || wiki_API.language;
 		cached_hash[language + ':' + key] = id;
 	};
 
@@ -413,7 +410,7 @@ function module_code(library_namespace) {
 		var language_and_key,
 		// 須與 wikidata_search() 相同!
 		// TODO: 可以 guess_language(key) 猜測語言。
-		language = wikidata_get_site(options, true) || wiki_API.set_language(),
+		language = wikidata_get_site(options, true) || wiki_API.language,
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 		cached_hash = options && options.type && options.type !==
 		// default_options.type: 'property'
@@ -693,10 +690,9 @@ function module_code(library_namespace) {
 			// get label of entity
 			value = value.labels;
 			var language = wikidata_get_site(options, true);
-			language = language && value[language]
-					|| value[wiki_API.set_language()]
-					// 最起碼選個國際通用的。
-					|| value.en;
+			language = language && value[language] || value[wiki_API.language]
+			// 最起碼選個國際通用的。
+			|| value.en;
 			if (!language) {
 				// 隨便挑一個語言的 label。
 				for (language in value) {
@@ -882,7 +878,7 @@ function module_code(library_namespace) {
 					}
 					entity = entity.labels || entity;
 					entity = entity[wikidata_get_site(options, true)
-							|| wiki_API.set_language()]
+							|| wiki_API.language]
 							|| entity;
 					callback
 							&& callback('value' in entity ? entity.value
@@ -1033,7 +1029,7 @@ function module_code(library_namespace) {
 				// e.g., input "language" of [[Category:title]]
 				// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
 				// return language;
-				return wiki_API.set_language()
+				return wiki_API.language
 						+ (!family || family === 'wikipedia' ? 'wiki' : family);
 			}
 
@@ -1064,7 +1060,7 @@ function module_code(library_namespace) {
 			}
 		} else {
 			// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
-			language = wiki_API.set_language().replace(/[- ]/g, '_');
+			language = wiki_API.language.replace(/[- ]/g, '_');
 		}
 
 		var matched = language
@@ -1116,13 +1112,13 @@ function module_code(library_namespace) {
 		// 正規化。
 		language = language && String(language).trim().toLowerCase()
 		// 以防 incase wikt, wikisource
-		.replace(/wik.+$/, '') || wiki_API.set_language();
+		.replace(/wik.+$/, '') || wiki_API.language;
 
 		if (language.startsWith('category')) {
 			// e.g., input "language" of [[Category:title]]
 			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
 			return language;
-			return wiki_API.set_language() + 'wiki';
+			return wiki_API.language + 'wiki';
 		}
 
 		if (language in language_code_to_site_alias) {
@@ -1155,13 +1151,13 @@ function module_code(library_namespace) {
 		language = language && typeof language !== 'object' ? String(language)
 				.trim().toLowerCase()
 		// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
-		: wiki_API.set_language();
+		: wiki_API.language;
 
 		if (language.startsWith('category')) {
 			// e.g., input "language" of [[Category:title]]
 			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
 			return language;
-			return wiki_API.set_language() + 'wiki';
+			return wiki_API.language + 'wiki';
 		}
 
 		// e.g., 'zh-min-nan' → 'zh_min_nan'
@@ -1206,7 +1202,7 @@ function module_code(library_namespace) {
 
 		var labels = entity && entity.labels;
 		if (labels) {
-			var label = labels[language || wiki_API.set_language()];
+			var label = labels[language || wiki_API.language];
 			if (label)
 				return label.value;
 			if (!language)
@@ -1347,8 +1343,7 @@ function module_code(library_namespace) {
 				//
 				'wikidata_entity: 您或許該採用 options.props = ' + property);
 			/** {String}setup language of key and property name. 僅在需要 search 時使用。 */
-			property = [
-					wikidata_get_site(options, true) || wiki_API.set_language(),
+			property = [ wikidata_get_site(options, true) || wiki_API.language,
 					property ];
 		}
 
@@ -1372,9 +1367,7 @@ function module_code(library_namespace) {
 		} else if (typeof key === 'string'
 				&& !/^[PQ]\d{1,10}(\|[PQ]\d{1,10})*$/.test(key)) {
 			/** {String}setup language of key and property name. 僅在需要 search 時使用。 */
-			key = [
-					wikidata_get_site(options, true) || wiki_API.set_language(),
-					key ];
+			key = [ wikidata_get_site(options, true) || wiki_API.language, key ];
 		}
 
 		if (Array.isArray(key)) {
@@ -1625,7 +1618,7 @@ function module_code(library_namespace) {
 		}
 
 		var value, language = wikidata_get_site(options, true)
-				|| wiki_API.set_language(), matched = typeof property === 'string'
+				|| wiki_API.language, matched = typeof property === 'string'
 				&& property.match(/^P(\d+)$/i);
 
 		if (matched) {
@@ -3968,7 +3961,7 @@ function module_code(library_namespace) {
 		var descriptions = Object.create(null),
 		//
 		default_lang = session.language || session[KEY_HOST_SESSION].language
-				|| wiki_API.set_language(),
+				|| wiki_API.language,
 		// reconstruct labels
 		error_list = data_descriptions.filter(function(description) {
 			var language;
@@ -5008,7 +5001,7 @@ function module_code(library_namespace) {
 			options = Object.create(null);
 		}
 
-		var language = options.language || wiki_API.set_language(), parameters;
+		var language = options.language || wiki_API.language, parameters;
 		if (is_api_and_title(categories, 'language')) {
 			language = categories[0];
 			categories = categories[1];

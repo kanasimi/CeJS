@@ -152,7 +152,7 @@ function module_code(library_namespace) {
 	// db: e.g., 'zhwiki_p'
 	//
 	//
-	// language (or family/project): default: default_language
+	// language (or family/project): default language: wiki_API.language
 	// e.g., 'en', 'zh-classical', 'ja', ...
 	//
 	// project = language_code.family
@@ -185,8 +185,8 @@ function module_code(library_namespace) {
 	 */
 	function wiki_API(user_name, password, API_URL) {
 		// console.trace([ user_name, password, API_URL ]);
-		library_namespace.debug('API_URL: ' + API_URL + ', default_language: '
-				+ default_language, 3, 'wiki_API');
+		library_namespace.debug('API_URL: ' + API_URL + ', default language: '
+				+ wiki_API.language, 3, 'wiki_API');
 		if (!this || this.constructor !== wiki_API) {
 			return wiki_API.query.apply(null, arguments);
 		}
@@ -213,7 +213,7 @@ function module_code(library_namespace) {
 		if (!('language' in this)
 		// wikidata 不設定 language。
 		&& !this.is_wikidata) {
-			setup_API_language(this /* session */, default_language);
+			setup_API_language(this /* session */, wiki_API.language);
 		}
 	}
 
@@ -526,8 +526,8 @@ function module_code(library_namespace) {
 			if (lower_case in api_URL.wikimedia) {
 				project += '.wikimedia';
 			} else if (lower_case in api_URL.family) {
-				// (default_language || 'www') + '.' + project
-				project = default_language + '.' + project;
+				// (wiki_API.language || 'www') + '.' + project
+				project = wiki_API.language + '.' + project;
 			} else if (/wik/i.test(project)) {
 				// e.g., 'mediawiki' → 'www.mediawiki'
 				// e.g., 'wikidata' → 'www.wikidata'
@@ -635,10 +635,10 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function setup_API_URL(session, API_URL) {
-		library_namespace.debug('API_URL: ' + API_URL + ', default_language: '
-				+ default_language, 3, 'setup_API_URL');
+		library_namespace.debug('API_URL: ' + API_URL + ', default language: '
+				+ wiki_API.language, 3, 'setup_API_URL');
 		// console.log(session);
-		// console.trace(default_language);
+		// console.trace(wiki_API.language);
 		if (API_URL === true) {
 			// force to login.
 			API_URL = session.API_URL || wiki_API.API_URL;
@@ -839,8 +839,11 @@ function module_code(library_namespace) {
 		template_talk : 11,
 		// [[Help:title]], [[使用說明:title]]
 		help : 12,
+		H : 12,
 		help_talk : 13,
 		category : 14,
+		// https://commons.wikimedia.org/wiki/Commons:Administrators%27_noticeboard#Cleaning_up_after_creation_of_CAT:_namespace_redirect
+		CAT : 14,
 		category_talk : 15,
 		// 主題/主題首頁
 		portal : 100,
@@ -4229,11 +4232,6 @@ function module_code(library_namespace) {
 
 	// ========================================================================
 
-	// 不可 cache default_language。
-	// 否則會造成 `wiki_API.set_language()` 自行設定 default_language 時無法取得最新資料。
-	/** {String}default language / wiki name */
-	var default_language;
-
 	// Wikimedia project code alias
 	// https://github.com/wikimedia/mediawiki/blob/master/languages/LanguageCode.php
 	// language_code_to_site_alias[language code] = project code
@@ -4291,19 +4289,19 @@ function module_code(library_namespace) {
 				'set_default_language: Invalid language: [' + language
 						+ ']. e.g., "en".');
 			} else {
-				// get default_language
+				// to get default language
 			}
-			return default_language;
+			return wiki_API.language;
 		}
 
-		// assert: default_language is in lower case. See URL_to_wiki_link().
-		default_language = language.toLowerCase();
+		// assert: default language is in lower case. See URL_to_wiki_link().
+		wiki_API.language = language.toLowerCase();
 		// default api URL. Use <code>CeL.wiki.API_URL = api_URL('en')</code> to
 		// change it.
 		// see also: application.locale
 		wiki_API.API_URL = library_namespace.is_WWW()
 				&& (navigator.userLanguage || navigator.language)
-				|| default_language;
+				|| wiki_API.language;
 		if (!(wiki_API.API_URL in valid_language)) {
 			// 'en-US' → 'en'
 			wiki_API.API_URL = wiki_API.API_URL.toLowerCase().replace(/-.+$/,
@@ -4314,12 +4312,12 @@ function module_code(library_namespace) {
 				'set_default_language');
 
 		if (wiki_API.SQL_config) {
-			wiki_API.SQL_config.set_language(default_language);
+			wiki_API.SQL_config.set_language(wiki_API.language);
 		}
 
 		wiki_API.prototype.continue_key = gettext(default_continue_key);
 
-		return wiki_API.language = default_language;
+		return wiki_API.language;
 	}
 
 	// 設定預設之語言。 English

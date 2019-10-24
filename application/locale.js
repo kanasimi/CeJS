@@ -875,6 +875,25 @@ function module_code(library_namespace) {
 							guess_language.code_page_mapper);
 		}
 
+		/**
+		 * <code>
+
+		@see https://www.itread01.com/content/1546711411.html
+
+		TODO: detect process.env.TZ: node.js 設定測試環境使用
+
+		GreenWich時間
+		process.env.TZ = 'Europe/London';
+
+		timezone = {
+			'Europe/London' : 0,
+			'Asia/Shanghai' : -8,
+			'America/New_York' : 5
+		};
+
+		</code>
+		 */
+
 		var LANG = library_namespace.env.LANG;
 		// e.g., LANG=zh_TW.Big5
 		// en_US.UTF-8
