@@ -138,6 +138,9 @@ function module_code(library_namespace) {
 			if (this.archive_old_works) {
 				// 因為不會遍歷所有章節檔案，得到的是錯誤的 `work_data.last_file_modified_date`。
 				// 因此必須避免執行 check_and_archive_old_work()。
+				library_namespace.warn([ this.id + ': ', {
+					T : '本網站不支援封存舊作品功能 (.archive_old_works)！'
+				} ]);
 				this.archive_old_works = false;
 			}
 

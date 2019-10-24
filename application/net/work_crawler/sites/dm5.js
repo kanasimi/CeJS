@@ -547,6 +547,14 @@ function module_code(library_namespace) {
 		// 執行在解析章節資料 process_chapter_data() 之前的作業 (async)。
 		// 必須自行保證執行 callback()，不丟出異常、中斷。
 		: function(XMLHttp, work_data, callback, chapter_NO) {
+			if (this.archive_old_works) {
+				// 本工具檔不會壓縮檔案。
+				library_namespace.warn([ this.id + ': ', {
+					T : '本網站不支援封存舊作品功能 (.archive_old_works)！'
+				} ]);
+				this.archive_old_works = false;
+			}
+
 			// console.log(XMLHttp);
 			// console.log(work_data);
 			if (!work_data.image_list) {
