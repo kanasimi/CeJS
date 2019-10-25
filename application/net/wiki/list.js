@@ -1078,6 +1078,14 @@ function module_code(library_namespace) {
 			// 有無 global flag 結果不同。
 			key = ('insource:' + key).replace(/g([^\/]*)$/, '$1');
 		}
+		if ('namespace' in options) {
+			if (options.srnamespace) {
+				library_namespace.warn('Unrecognized parameter: namespace.');
+			} else {
+				options.srnamespace = options.namespace;
+				delete options.namespace;
+			}
+		}
 		if (options.srnamespace) {
 			options.srnamespace = wiki_API.namespace(options.srnamespace);
 		}

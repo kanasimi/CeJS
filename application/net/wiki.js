@@ -717,6 +717,8 @@ function module_code(library_namespace) {
 	/**
 	 * get NO of namespace
 	 * 
+	 * 要指定所有值，請使用*。
+	 * 
 	 * @param {String|Integer}namespace
 	 *            namespace or page title
 	 * 
