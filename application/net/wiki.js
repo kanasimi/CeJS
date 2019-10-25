@@ -717,8 +717,6 @@ function module_code(library_namespace) {
 	/**
 	 * get NO of namespace
 	 * 
-	 * 要指定所有值，請使用*。
-	 * 
 	 * @param {String|Integer}namespace
 	 *            namespace or page title
 	 * 
@@ -751,7 +749,9 @@ function module_code(library_namespace) {
 					list.push(0);
 					return;
 				}
-				if (!options.is_page_title && !isNaN(_n)) {
+				if (!options.is_page_title && (!isNaN(_n)
+				// 要指定所有值，請使用*。
+				|| _n === '*')) {
 					// {Integer}_n
 					list.push(_n);
 					return;
@@ -4133,6 +4133,7 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/w/api.php?action=help&modules=paraminfo
 
 	// https://noc.wikimedia.org/conf/InitialiseSettings.php.txt
+	// https://noc.wikimedia.org/conf/highlight.php?file=InitialiseSettings.php
 	// https://noc.wikimedia.org/conf/VariantSettings.php.txt
 	// https://phabricator.wikimedia.org/T233070
 
