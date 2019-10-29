@@ -412,6 +412,22 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
+	// CeL.wiki.parser.remove_token()
+	function remove_token_from_parent(parent_token, index, max_length) {
+		var token = index + 1 < (max_length >= 0 ? Math.min(max_length,
+				parent_token.length) : parent_token.length)
+				&& parent_token[index + 1];
+		if (typeof token === 'string') {
+			// 去除後方的空白 + 僅一個換行。 去除前方的空白或許較不合適？
+			// e.g., "* list\n\n{{t1}}\n{{t2}}",
+			// remove "{{t1}}\n" → "* list\n\n{{t2}}"
+			parent_token[index + 1] = token.replace(/^\s*\n/, '');
+		}
+		parent_token[index] = token = '';
+	}
+
+	page_parser.remove_token = remove_token_from_parent;
+
 	if (false) {
 		wikitext = 'a\n[[File:f.jpg|thumb|d]]\nb';
 		CeL.wiki.parser(wikitext).parse().each('namespace',
@@ -581,14 +597,8 @@ function module_code(library_namespace) {
 								ref_list_to_remove.push(token.attributes.name);
 							}
 
-							token = index + 1 < length && _this[index + 1];
-							if (typeof token === 'string') {
-								// 去除後方的空白 + 僅一個換行。 去除前方的空白或許較不合適？
-								// e.g., "* list\n\n{{t1}}\n{{t2}}",
-								// remove "{{t1}}\n" → "* list\n\n{{t2}}"
-								_this[index + 1] = token.replace(/^\s*\n/, '');
-							}
-							_this[index] = token = '';
+							remove_token_from_parent(_this, index, length);
+							token = '';
 						}
 
 					} else if (modify_by_return) {
@@ -3274,11 +3284,11 @@ function module_code(library_namespace) {
 
 				if (file_matched) {
 					parameters.name
-					// set File name
+					// set file name without "File:"
 					= wiki_API.normalize_title(file_matched[1]);
 				} else if (category_matched) {
 					parameters.name
-					// set Category name
+					// set category name without "Category:"
 					= wiki_API.normalize_title(category_matched[1]);
 				}
 			} else {
