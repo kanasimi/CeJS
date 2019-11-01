@@ -1047,11 +1047,11 @@ function module_code(library_namespace) {
 		// "\u200F" 亦不被視作 /\s/，但經測試會被 wiki 忽視。
 		// tested: [[title]], {{title}}
 		// @seealso [[w:en:Category:CS1 errors: invisible characters]]
-		.replace(/[\s\u200B\u200E\u200F\u2060]+$/, '')
+		.replace(/[\s\u00ff\u200B\u200E\u200F\u2060]+$/, '')
 		// 只能允許出現頂多一個 ":"。
 		.replace(
 		// \u2060: word joiner (WJ). /^\s$/.test('\uFEFF')
-		/^[\s\u200B\u200E\u200F\u2060]*(?::[\s\u200B\u200E\u200F\u2060]*)?/
+		/^[\s\u00ff\u200B\u200E\u200F\u2060]*(?::[\s\u00ff\u200B\u200E\u200F\u2060]*)?/
 		// 去除不可見字符 \p{Cf}，警告 \p{C}。
 		, '')
 		// 無論是中日文、英文的維基百科，所有的 '\u3000' 都會被轉成空白字元 /[ _]/。
@@ -1194,7 +1194,7 @@ function module_code(library_namespace) {
 	.source.replace('Tag', library_namespace
 			.ignore_case_pattern(PATTERN_file_prefix));
 
-	// [ all, file name ]
+	// [ all, file name without "File:" ]
 	PATTERN_file_prefix = new RegExp('^ *(?:: *)?(?:' + PATTERN_file_prefix
 			+ ') *: *([^\\[\\]|#]+)', 'i');
 
