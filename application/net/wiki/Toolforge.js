@@ -787,7 +787,7 @@ function module_code(library_namespace) {
 			// 筆數限制。就算隨意輸入，強制最多只能這麼多筆資料。
 			, 1e3)
 			// default records to get
-			: options.where ? 1e4 : 100);
+			: options.where ? 1e4 : 500);
 		}
 
 		if (false) {
