@@ -1446,7 +1446,7 @@ function (globalThis) {
 			node_os = null;
 		}
 		
-		if (env.home && !/^[\\\/]$/.test(env.home)) {
+		if (/[^\\\/]$/.test(env.home)) {
 			// CeL.append_path_separator(CeL.env.home)
 			env.home += env.path_separator;
 		}
