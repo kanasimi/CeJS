@@ -1097,14 +1097,16 @@ function module_code(library_namespace) {
 					|| wiki_API.language);
 		}
 
-		var use_SQL = wiki_API.SQL && wiki_API.SQL.config
+		var recent_options,
 		// options.use_SQL: 明確指定 use SQL. use SQL as possibile
-		&& ('use_SQL' in options ? options.use_SQL : !options.parameters
-		// 只設定了rcprop
-		|| Object.keys(options.parameters).join('') === 'rcprop'), recent_options,
+		use_SQL = 'use_SQL' in options ? options.use_SQL
 		//
-		get_recent = wiki_API.recent,
-		// 僅取得最新版本。注意: 這可能跳過中間編輯的版本，造成有些修訂被忽略。
+		: wiki_API.SQL && wiki_API.SQL.config || !options.parameters
+		// 只設定了rcprop
+		|| Object.keys(options.parameters).join('') === 'rcprop',
+		//
+		get_recent = use_SQL ? wiki_API.recent : wiki_API.recent_via_API,
+		// 僅取得最新文件版本。注意: 這可能跳過中間編輯的版本，造成有些修訂被忽略。
 		latest_only = 'latest' in options ? options.latest : true;
 		if (use_SQL) {
 			recent_options = options.SQL_options;
