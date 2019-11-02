@@ -1379,10 +1379,14 @@ function module_code(library_namespace) {
 							+ JSON.stringify(last_query_time), 4);
 				}
 				library_namespace.debug('去除掉重複的紀錄之後 last_query_revid='
-						+ last_query_revid + ', ' + rows.length
-						+ ' record(s) left. revid: ' + rows.map(function(row) {
-							return row.revid;
-						}).join(', '), 1);
+				//
+				+ last_query_revid + ', ' + rows.length + ' record(s) left.'
+				//
+				+ (rows.length > 0 ? ' revid: ' + rows.map(function(row) {
+					return row.revid;
+				}).join(', ') + '. title: ' + rows.map(function(row) {
+					return row.title;
+				}).join(', ') : ''), 1);
 
 				// 使 wiki.listen() 可隨時監視設定頁面與緊急停止頁面的變更。
 				var configuration_row;
@@ -2748,12 +2752,14 @@ function module_code(library_namespace) {
 					// options.last.call(file_stream, anchor, quit_operation)
 					// of read_dump()
 					last : function(anchor, quit_operation) {
+						var percent = (1000 * count / length | 0);
+						percent = percent / 10;
 						// e.g.,
 						// "All 1491092 pages in dump xml file, 198.165 s."
 						// includes redirection 包含重新導向頁面.
 						library_namespace.log('traversal_pages: All ' + count
 								+ '/' + length + ' pages using dump xml file ('
-								+ (1000 * count / length | 0) / 10 + '%), '
+								+ percent + '%), '
 								+ ((Date.now() - start_read_time) / 1000 | 0)
 								+ ' s elapsed.');
 						var need_API = [];

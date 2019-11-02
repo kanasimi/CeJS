@@ -279,7 +279,7 @@ function module_code(library_namespace) {
 			config = new_SQL_config(config);
 		}
 
-		library_namespace.debug(String(SQL), 1, 'run_SQL');
+		library_namespace.debug(String(SQL), 3, 'run_SQL');
 		// console.log(JSON.stringify(config));
 		var connection = node_mysql.createConnection(config);
 		connection.connect();
@@ -746,6 +746,7 @@ function module_code(library_namespace) {
 		} else {
 			options = library_namespace.setup_options(options);
 		}
+		// console.trace(options);
 
 		var SQL = options.SQL;
 		if (!SQL) {
@@ -785,9 +786,9 @@ function module_code(library_namespace) {
 			/** {ℕ⁰:Natural+0}limit count. */
 			options.limit > 0 ? Math.min(options.limit
 			// 筆數限制。就算隨意輸入，強制最多只能這麼多筆資料。
-			, 1e3)
+			, 1e4)
 			// default records to get
-			: options.where ? 1e4 : 500);
+			: options.where ? 1e4 : 5000);
 		}
 
 		if (false) {
