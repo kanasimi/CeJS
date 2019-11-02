@@ -1099,11 +1099,12 @@ function module_code(library_namespace) {
 
 		var recent_options,
 		// options.use_SQL: 明確指定 use SQL. use SQL as possibile
-		use_SQL = 'use_SQL' in options ? options.use_SQL
+		use_SQL = options.use_SQL || wiki_API.SQL && wiki_API.SQL.config
 		//
-		: wiki_API.SQL && wiki_API.SQL.config || !options.parameters
-		// 只設定了rcprop
-		|| Object.keys(options.parameters).join('') === 'rcprop',
+		&& (typeof options.parameters !== 'object'
+		// 只設定了 rcprop。
+		// || Object.keys(options.parameters).join('') === 'rcprop'
+		),
 		//
 		get_recent = use_SQL ? wiki_API.recent : wiki_API.recent_via_API,
 		// 僅取得最新文件版本。注意: 這可能跳過中間編輯的版本，造成有些修訂被忽略。
@@ -1111,14 +1112,15 @@ function module_code(library_namespace) {
 		if (use_SQL) {
 			// library_namespace.info('add_listener: Use SQL');
 			// console.log(options);
-			recent_options = options.SQL_options;
+			recent_options = Object.clone(options.SQL_options);
 			if (options[KEY_SESSION]) {
 				// pass API config to get_recent()
 				recent_options[KEY_SESSION] = options[KEY_SESSION];
 			}
 		} else {
+			recent_options = Object.clone(options);
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
-			recent_options = {
+			recent_options.parameters = Object.assign({
 				// List newest first (default).
 				// Note: rcstart has to be later than rcend.
 				// rcdir : 'older',
@@ -1127,35 +1129,27 @@ function module_code(library_namespace) {
 				// new Date().toISOString()
 				// rcstart : 'now',
 				rctype : 'edit|new'
-			};
+			}, recent_options.parameters);
 			if (latest_only) {
-				recent_options.rctoponly = 1;
-			}
-			if (options.parameters) {
-				// 警告:這會更動options!
-				Object.assign(options.parameters, recent_options);
-				recent_options = options;
-			} else {
-				recent_options = Object.assign({
-					parameters : recent_options
-				}, options);
+				recent_options.parameters.rctoponly = 1;
 			}
 			if (recent_options.parameters.rcprop
-			// 為了之後設定 last_query_time，因此必須要加上timestamp這一項information。
+			// 為了之後設定 last_query_time，因此必須要加上 timestamp 這一項 information。
 			&& !recent_options.parameters.rcprop.includes('timestamp')) {
-				if (Array.isArray(recent_options.parameters.rcprop))
+				if (Array.isArray(recent_options.parameters.rcprop)) {
 					recent_options.parameters.rcprop.push('timestamp');
-				else if (typeof recent_options.parameters.rcprop)
+				} else if (typeof recent_options.parameters.rcprop === 'string') {
 					recent_options.parameters.rcprop += '|timestamp';
-				else
+				} else {
 					throw new Error('Unkonwn rcprop: '
 							+ recent_options.parameters.rcprop);
+				}
 			}
 		}
 
 		var namespace = wiki_API.namespace(options.namespace);
 		if (namespace !== undefined) {
-			// 不指定namespace，或者指定namespace為((undefined)): 取得所有的namespace。
+			// 不指定 namespace，或者指定 namespace 為 ((undefined)): 取得所有的 namespace。
 			if (use_SQL) {
 				recent_options.namespace = namespace;
 			} else {
