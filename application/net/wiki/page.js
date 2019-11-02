@@ -1097,7 +1097,7 @@ function module_code(library_namespace) {
 					|| wiki_API.language);
 		}
 
-		var use_SQL = wiki_API.SQL.config
+		var use_SQL = wiki_API.SQL && wiki_API.SQL.config
 		// options.use_SQL: 明確指定 use SQL. use SQL as possibile
 		&& ('use_SQL' in options ? options.use_SQL : !options.parameters
 		// 只設定了rcprop
