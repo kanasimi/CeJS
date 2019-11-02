@@ -1445,6 +1445,11 @@ function (globalThis) {
 			// free
 			node_os = null;
 		}
+		
+		if (env.home && !/^[\\\/]$/.test(env.home)) {
+			// CeL.append_path_separator(CeL.env.home)
+			env.home += env.path_separator;
+		}
 
 		// 條件式編譯(条件コンパイル) for version>=4, 用 /*@ and @*/ to 判別。
 		// http://msdn.microsoft.com/en-us/library/ie/8ka90k2e(v=vs.94).aspx
