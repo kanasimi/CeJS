@@ -80,6 +80,21 @@ function module_code(library_namespace) {
 
 	// HTML only -------------------------------------------------------
 
+	// https://stackoverflow.com/questions/50840168/how-to-detect-if-the-os-is-in-dark-mode-in-browsers
+	// https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia
+	if (library_namespace.is_WWW(true) && window.matchMedia) {
+		// https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
+		// or: @media (prefers-color-scheme: light) { body { ... } }
+		if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+			// CeL.DOM.navigator_theme
+			_.navigator_theme = 'dark';
+		} else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+			_.navigator_theme = 'light';
+		} else {
+			// _.navigator_theme = 'no-preference';
+		}
+	}
+
 	/**
 	 * NodeType: const unsigned short.
 	 * 
