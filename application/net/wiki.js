@@ -1058,10 +1058,14 @@ function module_code(library_namespace) {
 		// tested: [[title]], {{title}}
 		// @seealso [[w:en:Category:CS1 errors: invisible characters]]
 		.replace(/[\u200E\u200F]/g, '')
-		// 無論是中日文、英文的維基百科，所有的 '\u3000' 都會被轉成空白字元 /[ _]/。
-		.replace(/　/g, ' ').trimEnd()
+
+		.trimEnd()
 		// 去除開頭的 ":"。
 		.replace(/^[:\s]+/, '')
+
+		// 無論是中日文、英文的維基百科，所有的 '\u3000' 都會被轉成空白字元 /[ _]/。
+		.replace(/　/g, ' ')
+
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1');
 

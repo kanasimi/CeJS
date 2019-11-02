@@ -2678,7 +2678,7 @@ function module_code(library_namespace) {
 									+ '! 沒有頁面內容！');
 						}
 
-						/** {Array}頁面解析後的結構。 */
+						/** {Array} parsed page content 頁面解析後的結構。 */
 						var parsed = CeL.wiki.parser(page_data).parse();
 						// debug 用.
 						// check parser, test if parser working properly.

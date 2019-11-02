@@ -5,6 +5,7 @@
  * 
  * TODO:<code>
 
+https://www.wikidata.org/wiki/Help:QuickStatements
 
 </code>
  * 

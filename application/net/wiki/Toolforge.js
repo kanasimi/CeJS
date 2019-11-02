@@ -705,7 +705,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		return [ ' WHERE ' + condition, value_array ];
+		return [ condition ? ' WHERE ' + condition : '', value_array ];
 	}
 
 	// ----------------------------------------------------
@@ -718,11 +718,14 @@ function module_code(library_namespace) {
 	 * Get page title 頁面標題 list of [[Special:RecentChanges]] 最近更改.
 	 * 
 	 * @examples<code>
-		// get title list
-		CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, {language:'ja', namespace:0, limit:20});
-		// 應並用 timestamp + this_oldid
-		CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return [row.title,row.rev_id,row.row.rc_timestamp.toString()];}));}, {where:{timestamp:'>=20170327143435',this_oldid:'>'+43772537}});
-		</code>
+
+	// get title list
+	CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, {language:'ja', namespace:0, limit:20});
+
+	// 應並用 timestamp + this_oldid
+	CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return [row.title,row.rev_id,row.row.rc_timestamp.toString()];}));}, {where:{timestamp:'>=20170327143435',this_oldid:'>'+43772537}});
+
+	</code>
 	 * 
 	 * TODO: filter
 	 * 
@@ -815,7 +818,9 @@ function module_code(library_namespace) {
 				//
 				= wiki_API.namespace.name_of_NO[row.rc_namespace];
 				if (namespace_text) {
-					namespace_text = upper_case_initial(namespace_text) + ':';
+					namespace_text
+					//
+					= wiki_API.upper_case_initial(namespace_text) + ':';
 				}
 				// 基本上API盡可能與recentchanges一致。
 				result.push({

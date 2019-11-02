@@ -2093,13 +2093,17 @@ function module_code(library_namespace) {
 		},
 		// link 的變體。但可採用 .name 取得 file name。
 		file : function() {
-			return '[[' + this[0] + this[1]
+			return '[[' + this[0]
+			// anchor
+			+ this[1]
 			//
 			+ (this.length > 2 ? '|' + this.slice(2).join('|') : '') + ']]';
 		},
 		// link 的變體。但可採用 .name 取得 category name。
 		category : function() {
-			return '[[' + this[0] + this[1]
+			return '[[' + this[0]
+			// anchor
+			+ this[1]
 			//
 			+ (this.length > 2 ? '|' + this.slice(2).join('|') : '') + ']]';
 		},
