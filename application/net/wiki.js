@@ -1042,20 +1042,26 @@ function module_code(library_namespace) {
 		if (!page_name || typeof page_name !== 'string')
 			return page_name;
 
+		// 注意:
+		// '\u00FF', '\u200B', '\u2060' 可被當作正規頁面名稱的一部分，包括在開頭結尾。
+		// \u200B: zero-width space (ZWSP)
+		// \u2060: word joiner (WJ).
+
+		// TODO: 去除不可見字符 \p{Cf}，警告 \p{C}。
+
+		// true === /^\s$/.test('\uFEFF')
+
 		page_name = page_name
-		// 不採用 .trimEnd()：對於標題，無論前後加幾個"\u200E"(LEFT-TO-RIGHT MARK)都會被視為無物。
+		// '\u200E', '\u200F' 在當作 title 時會被濾掉。
+		// 對於標題，無論前後加幾個"\u200E"(LEFT-TO-RIGHT MARK)都會被視為無物。
 		// "\u200F" 亦不被視作 /\s/，但經測試會被 wiki 忽視。
 		// tested: [[title]], {{title}}
 		// @seealso [[w:en:Category:CS1 errors: invisible characters]]
-		.replace(/[\s\u00ff\u200B\u200E\u200F\u2060]+$/, '')
-		// 只能允許出現頂多一個 ":"。
-		.replace(
-		// \u2060: word joiner (WJ). /^\s$/.test('\uFEFF')
-		/^[\s\u00ff\u200B\u200E\u200F\u2060]*(?::[\s\u00ff\u200B\u200E\u200F\u2060]*)?/
-		// 去除不可見字符 \p{Cf}，警告 \p{C}。
-		, '')
+		.replace(/[\u200E\u200F]/g, '')
 		// 無論是中日文、英文的維基百科，所有的 '\u3000' 都會被轉成空白字元 /[ _]/。
-		.replace(/　+/g, ' ')
+		.replace(/　/g, ' ').trimEnd()
+		// 去除開頭的 ":"。
+		.replace(/^[:\s]+/, '')
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1');
 
