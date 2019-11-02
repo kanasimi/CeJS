@@ -1097,20 +1097,21 @@ function module_code(library_namespace) {
 					|| wiki_API.language);
 		}
 
-		var recent_options,
+		// console.log(options);
+		var recent_options, use_SQL = wiki_API.SQL && wiki_API.SQL.config
 		// options.use_SQL: 明確指定 use SQL. use SQL as possibile
-		use_SQL = options.use_SQL || wiki_API.SQL && wiki_API.SQL.config
+		&& ('use_SQL' in options ? options.use_SQL
 		//
-		&& (typeof options.parameters !== 'object'
-		// 只設定了 rcprop。
-		// || Object.keys(options.parameters).join('') === 'rcprop'
-		),
+		: typeof options.parameters !== 'object'
+		//
+		|| !Object.keys(options.parameters).join('')
+		// 只設定了 rcprop: SQL 將會取得所有資訊，。
+		|| Object.keys(options.parameters).join('') === 'rcprop'),
 		//
 		get_recent = use_SQL ? wiki_API.recent : wiki_API.recent_via_API,
 		// 僅取得最新文件版本。注意: 這可能跳過中間編輯的版本，造成有些修訂被忽略。
 		latest_only = 'latest' in options ? options.latest : true;
 		if (use_SQL) {
-			// library_namespace.info('add_listener: Use SQL');
 			// console.log(options);
 			recent_options = Object.clone(options.SQL_options);
 			if (options[KEY_SESSION]) {
@@ -1214,7 +1215,9 @@ function module_code(library_namespace) {
 			last_query_time = new Date;
 		}
 
-		library_namespace.info('add_listener: 開始監視 / scan '
+		library_namespace.info('add_listener: 開始以 '
+		//
+		+ (use_SQL ? 'SQL' : 'API') + ' 監視 / scan '
 		//
 		+ (session && session.language || wiki_API.language)
 		//
