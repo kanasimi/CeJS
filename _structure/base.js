@@ -1445,11 +1445,6 @@ function (globalThis) {
 			// free
 			node_os = null;
 		}
-		
-		if (/[^\\\/]$/.test(env.home)) {
-			// CeL.append_path_separator(CeL.env.home)
-			env.home += env.path_separator;
-		}
 
 		// 條件式編譯(条件コンパイル) for version>=4, 用 /*@ and @*/ to 判別。
 		// http://msdn.microsoft.com/en-us/library/ie/8ka90k2e(v=vs.94).aspx
@@ -1519,6 +1514,12 @@ OS='UNIX'; // unknown
 		env.path_separator =
 			typeof require === 'function' && require('path') && require('path').sep
 			|| (is_UNIX ? '/' : '\\');
+
+		if (// env.home && !/[\\\/]$/.test(env.home)
+		/[^\\\/]$/.test(env.home)) {
+			// CeL.append_path_separator(CeL.env.home)
+			env.home += env.path_separator;
+		}
 
 		/**
 		 * library 之外部檔案 (external source files) 放置地。 純目錄名，不加目錄分隔。
