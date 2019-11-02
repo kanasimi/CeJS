@@ -1109,9 +1109,11 @@ function module_code(library_namespace) {
 		// 僅取得最新文件版本。注意: 這可能跳過中間編輯的版本，造成有些修訂被忽略。
 		latest_only = 'latest' in options ? options.latest : true;
 		if (use_SQL) {
+			// library_namespace.info('add_listener: Use SQL');
+			// console.log(options);
 			recent_options = options.SQL_options;
 			if (options[KEY_SESSION]) {
-				// pass API config
+				// pass API config to get_recent()
 				recent_options[KEY_SESSION] = options[KEY_SESSION];
 			}
 		} else {

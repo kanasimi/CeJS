@@ -666,7 +666,7 @@ function module_code(library_namespace) {
 					} else {
 						value_array.push(value);
 					}
-					return;
+					continue;
 				}
 				if (!/^[a-z_]+$/.test(name)) {
 					throw 'Invalid field name: ' + name;
@@ -765,6 +765,7 @@ function module_code(library_namespace) {
 			// {String|Array|Object}options.where: 自訂篩選條件。
 			options.where);
 			SQL = generate_SQL_WHERE(SQL, 'rc_');
+			// console.log(SQL);
 
 			// https://phabricator.wikimedia.org/T223406
 			// TODO: 舊版上 `actor`, `comment` 這兩個資料表不存在會出錯，需要先偵測。
