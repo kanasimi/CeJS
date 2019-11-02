@@ -279,7 +279,7 @@ function module_code(library_namespace) {
 			config = new_SQL_config(config);
 		}
 
-		library_namespace.debug(String(SQL), 3, 'run_SQL');
+		library_namespace.debug(String(SQL), 1, 'run_SQL');
 		// console.log(JSON.stringify(config));
 		var connection = node_mysql.createConnection(config);
 		connection.connect();

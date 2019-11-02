@@ -1400,7 +1400,7 @@ function module_code(library_namespace) {
 				}
 
 				if (options.filter && rows.length > 0) {
-					// TODO: 把篩選功能放到get_recent()，減少資料處理的成本。
+					// TODO: 把篩選功能放到 get_recent()，減少資料處理的成本。
 					rows = rows.filter(
 					// 篩選函數。rcprop必須加上篩選函數需要的資料，例如編輯摘要。
 					typeof options.filter === 'function' ? options.filter

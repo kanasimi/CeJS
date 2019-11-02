@@ -2453,15 +2453,25 @@ function module_code(library_namespace) {
 			break;
 
 		case 'listen':
-			// 因為接下來的操作會呼叫 this.next() 本身，
-			// 因此必須把正在執行的標記特消掉。
-			this.running = false;
+			if (!wiki_API.wmflabs) {
+				// 因為 wiki_API.cache(list) 會使用到 wiki_API.prototype[method]；
+				// 其最後會再 call wiki_API.next()，是以此處不再重複 call .next()。
+
+				// 因為接下來的操作會呼叫 this.next() 本身，
+				// 因此必須把正在執行的標記特消掉。
+				this.running = false;
+			}
+
 			wiki_API.listen(next[1],
 			// next[2]: options to call wiki_API.listen()
 			Object.assign({
 				// [KEY_SESSION]
 				session : this
 			}, next[2]));
+
+			if (wiki_API.wmflabs) {
+				this.next();
+			}
 			break;
 
 		// ------------------------------------------------
