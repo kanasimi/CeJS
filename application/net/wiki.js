@@ -4334,8 +4334,8 @@ function module_code(library_namespace) {
 		library_namespace.debug('wiki_API.API_URL = ' + wiki_API.API_URL, 3,
 				'set_default_language');
 
-		if (wiki_API.SQL_config) {
-			wiki_API.SQL_config.set_language(wiki_API.language);
+		if (wiki_API.SQL.config) {
+			wiki_API.SQL.config.set_language(wiki_API.language);
 		}
 
 		wiki_API.prototype.continue_key = gettext(default_continue_key);

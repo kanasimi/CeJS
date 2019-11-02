@@ -1042,7 +1042,7 @@ function module_code(library_namespace) {
 	if (!wiki_API.recent) {
 		// 可能會因環境而不同的功能。讓 wiki_API.recent 採用較有效率的實現方式。
 		wiki_API.recent =
-		// SQL_config ? get_recent_via_databases :
+		// wiki_API.SQL.config ? get_recent_via_databases :
 		get_recent_via_API;
 	}
 
@@ -1097,9 +1097,9 @@ function module_code(library_namespace) {
 					|| wiki_API.language);
 		}
 
-		var use_SQL = wiki_API.SQL_config
+		var use_SQL = wiki_API.SQL.config
 		// options.use_SQL: 明確指定 use SQL. use SQL as possibile
-		&& (options.use_SQL || !options.parameters
+		&& ('use_SQL' in options ? options.use_SQL : !options.parameters
 		// 只設定了rcprop
 		|| Object.keys(options.parameters).join('') === 'rcprop'), recent_options,
 		//
