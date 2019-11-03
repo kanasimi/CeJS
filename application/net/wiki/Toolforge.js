@@ -816,9 +816,9 @@ function module_code(library_namespace) {
 					// meaningless.
 					return;
 				}
-				var namespace_text
+				var namespace_text = row.rc_namespace === 0 ? ''
 				//
-				= wiki_API.namespace.name_of_NO[row.rc_namespace];
+				: wiki_API.namespace.name_of_NO[row.rc_namespace];
 				if (namespace_text) {
 					namespace_text
 					//
