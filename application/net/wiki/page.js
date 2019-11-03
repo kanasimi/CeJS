@@ -1391,9 +1391,9 @@ function module_code(library_namespace) {
 				//
 				+ (rows.length > 0 ? ' revid: ' + rows.map(function(row) {
 					return row.revid;
-				}).join('|') + '. title: ' + rows.map(function(row) {
+				}).join(', ') + '. title: ' + rows.map(function(row) {
 					return row.title;
-				}).join('|') : ''), 1);
+				}).join(', ') : ''), 1);
 
 				// 使 wiki.listen() 可隨時監視設定頁面與緊急停止頁面的變更。
 				var configuration_row;

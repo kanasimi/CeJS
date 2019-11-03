@@ -785,7 +785,7 @@ function module_code(library_namespace) {
 			// or `rc_timestamp`
 			// or rc_this_oldid, but too slow (no index).
 			// ASC: 小 → 大，DESC: 大 → 小
-			+ ' ORDER BY `rc_id` ASC LIMIT ' + (
+			+ ' ORDER BY `rc_this_oldid` ASC LIMIT ' + (
 			/** {ℕ⁰:Natural+0}limit count. */
 			options.limit > 0 ? Math.min(options.limit
 			// 筆數限制。就算隨意輸入，強制最多只能這麼多筆資料。
