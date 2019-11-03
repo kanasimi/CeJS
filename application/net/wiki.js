@@ -230,6 +230,16 @@ function module_code(library_namespace) {
 				&& ((value instanceof wiki_API) || value.API_URL && value.token);
 	}
 
+	// @inner TODO: MUST re-design
+	function get_wikimedia_project_name(session) {
+		return is_wiki_API(session)
+		// e.g., commons, wikidata
+		&& session.family === 'wikimedia'
+		// https://meta.wikimedia.org/wiki/Special:SiteMatrix
+		// TODO: using session.project_name or something others
+		&& session.language;
+	}
+
 	var
 	/**
 	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_section, page_name,
@@ -910,7 +920,9 @@ function module_code(library_namespace) {
 		if (NS === get_namespace.hash.wikipedia) {
 			var session = options[KEY_SESSION] || options;
 			if (is_wiki_API(session) && session.family) {
-				return wiki_API.upper_case_initial(session.family);
+				return wiki_API.upper_case_initial(
+				// e.g., commons, wikidata
+				get_wikimedia_project_name(session) || session.family);
 			}
 			// e.g., testwiki:
 			return 'Wikipedia';
