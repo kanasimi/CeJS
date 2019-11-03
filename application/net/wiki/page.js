@@ -1340,8 +1340,10 @@ function module_code(library_namespace) {
 								+ rows.map(function(row) {
 									return row.revid;
 								}), 2, 'add_listener');
-						library_namespace.debug('把從新的排列到舊的或亂序轉成從舊的排列到新的。', 1,
-								'add_listener');
+						library_namespace.debug('把從新的排列到舊的或亂序轉成從舊的排列到新的: '
+								+ rows.map(function(row) {
+									return row.revid;
+								}), 1, 'add_listener');
 						// 因可能有亂序，不能光以 .reverse() 轉成 old to new。
 						rows.sort(function(row_1, row_2) {
 							return row_1.revid - row_2.revid;
