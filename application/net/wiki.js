@@ -786,6 +786,8 @@ function module_code(library_namespace) {
 	/**
 	 * The namespace number of the page. 列舉型別 (enumeration)
 	 * 
+	 * assert: 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
+	 * 
 	 * CeL.wiki.namespace.hash
 	 * 
 	 * {{NAMESPACENUMBER:{{FULLPAGENAME}}}}
@@ -801,8 +803,8 @@ function module_code(library_namespace) {
 
 		// 0: (Main/Article) main namespace 主要(條目內容/內文)命名空間/識別領域
 		// 條目 entry 文章 article: ns = 0, 頁面 page: ns = any. 章節/段落 section
-		'' : 0,
 		main : 0,
+		'' : 0,
 		// 討論對話頁面
 		talk : 1,
 
@@ -810,11 +812,11 @@ function module_code(library_namespace) {
 		user : 2,
 		user_talk : 3,
 
+		// ----------------------------
+
 		// the project namespace for matters about the project
 		// Varies between wikis
 		project : 4,
-		WP : 4,
-		wikipedia : 4,
 
 		WD : 4,
 		wikidata : 4,
@@ -826,8 +828,15 @@ function module_code(library_namespace) {
 		WN : 4,
 		wikinews : 4,
 
+		WP : 4,
+		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
+		wikipedia : 4,
+
+		// ----------------------------
+
 		// Varies between wikis
 		project_talk : 5,
+		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
 		wikipedia_talk : 5,
 
 		// image
@@ -840,12 +849,14 @@ function module_code(library_namespace) {
 		template : 10,
 		template_talk : 11,
 		// [[Help:title]], [[使用說明:title]]
-		help : 12,
 		H : 12,
+		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
+		help : 12,
 		help_talk : 13,
-		category : 14,
 		// https://commons.wikimedia.org/wiki/Commons:Administrators%27_noticeboard#Cleaning_up_after_creation_of_CAT:_namespace_redirect
 		CAT : 14,
+		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
+		category : 14,
 		category_talk : 15,
 		// 主題/主題首頁
 		portal : 100,
@@ -866,6 +877,8 @@ function module_code(library_namespace) {
 		topic : 2600
 	};
 
+	// Should use `CeL.wiki.namespace.name_of(NS, session)`
+	// NOT `wiki_API.namespace.name_of_NO[NS]`
 	get_namespace.name_of_NO = [];
 
 	/**
@@ -889,6 +902,25 @@ function module_code(library_namespace) {
 	get_namespace.pattern = generate_namespace_pattern(get_namespace.hash,
 			get_namespace.name_of_NO);
 	// console.log(get_namespace.pattern);
+
+	function namespace_text_of_NO(NS, options) {
+		if (!NS)
+			return '';
+
+		if (NS === get_namespace.hash.wikipedia) {
+			var session = options[KEY_SESSION] || options;
+			if (is_wiki_API(session) && session.family) {
+				return wiki_API.upper_case_initial(session.family);
+			}
+			// e.g., testwiki:
+			return 'Wikipedia';
+		}
+
+		return wiki_API.upper_case_initial(wiki_API.namespace.name_of_NO[NS]);
+	}
+
+	// CeL.wiki.namespace.name_of(NS, session)
+	get_namespace.name_of = namespace_text_of_NO;
 
 	/**
 	 * remove namespace part of the title.

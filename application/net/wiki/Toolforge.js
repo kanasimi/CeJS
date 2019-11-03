@@ -816,20 +816,17 @@ function module_code(library_namespace) {
 					// meaningless.
 					return;
 				}
-				var namespace_text = row.rc_namespace === 0 ? ''
-				//
-				: wiki_API.namespace.name_of_NO[row.rc_namespace];
-				if (namespace_text) {
-					namespace_text
-					//
-					= wiki_API.upper_case_initial(namespace_text) + ':';
-				}
+
+				var namespace_text = row.rc_namespace
+				// pass session = options[KEY_SESSION]
+				? wiki_API.namespace.name_of(row.rc_namespace, options) + ':'
+						: '';
 				// 基本上API盡可能與recentchanges一致。
 				result.push({
 					type : ENUM_rc_type[row.rc_type],
 					// namespace
 					ns : row.rc_namespace,
-					// .rc_title未加上namespace prefix!
+					// .rc_title 未加上 namespace prefix!
 					title : (namespace_text
 					// @see normalize_page_name()
 					+ row.rc_title.toString()).replace(/_/g, ' '),
