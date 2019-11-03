@@ -782,8 +782,9 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/Manual:Recentchanges_table
 			+ ' FROM `recentchanges`' + SQL[0]
 			// new → old, may contain duplicate title.
+			// or `rc_timestamp`
 			// or rc_this_oldid, but too slow (no index).
-			+ ' ORDER BY `rc_timestamp` DESC LIMIT ' + (
+			+ ' ORDER BY `rc_id` DESC LIMIT ' + (
 			/** {ℕ⁰:Natural+0}limit count. */
 			options.limit > 0 ? Math.min(options.limit
 			// 筆數限制。就算隨意輸入，強制最多只能這麼多筆資料。
