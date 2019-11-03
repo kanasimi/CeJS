@@ -315,7 +315,7 @@ function module_code(library_namespace) {
 
 		wiki_API.query(action, typeof callback === 'function'
 		//
-		&& function(data) {
+		&& function process_page(data) {
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value) {
@@ -1121,7 +1121,7 @@ function module_code(library_namespace) {
 		} else {
 			recent_options = Object.clone(options);
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
-			recent_options.parameters = Object.assign({
+			Object.assign(recent_options.parameters, {
 				// List newest first (default).
 				// Note: rcstart has to be later than rcend.
 				// rcdir : 'older',
@@ -1130,7 +1130,7 @@ function module_code(library_namespace) {
 				// new Date().toISOString()
 				// rcstart : 'now',
 				rctype : 'edit|new'
-			}, recent_options.parameters);
+			});
 			if (latest_only) {
 				recent_options.parameters.rctoponly = 1;
 			}
@@ -1308,7 +1308,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-			get_recent(function(rows) {
+			get_recent(function process_rows(rows) {
 				if (!rows) {
 					library_namespace.warn((new Date).toISOString()
 							+ ': No rows get.');
