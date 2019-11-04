@@ -1651,7 +1651,7 @@ function module_code(library_namespace) {
 			} : '' ]);
 			if (work_data.error_images > 0) {
 				library_namespace.error([ this.id + ': ', {
-					T : [ '%1：本次下載作業，本作品共%2張圖片下載錯誤。',
+					T : [ '%1：本次下載作業，本作品共 %2張圖片下載錯誤。',
 					//
 					work_data.directory_name, work_data.error_images ]
 				} ]);
