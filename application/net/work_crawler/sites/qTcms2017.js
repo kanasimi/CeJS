@@ -264,9 +264,14 @@ function module_code(library_namespace) {
 			|| html.between('<div id="list"', '</ul>');
 			// console.log(html);
 
+			/**
+			 * <code>
+			76.js: <li><a target="_blank" href="/chuanyue/tangyinzaiyijie/351280.html"><p>杀手唐寅</p><i></i></a></li>
+			</code>
+			 */
 			var matched, PATTERN_chapter =
 			// matched: [ all, url, inner ]
-			/<li><a href="([^<>"]+)"[^<>]*>([\s\S]+?)<\/li>/g;
+			/<li><a [^<>]*?href="([^<>"]+)"[^<>]*>([\s\S]+?)<\/li>/g;
 
 			work_data.chapter_list = [];
 			while (matched = PATTERN_chapter.exec(html)) {
