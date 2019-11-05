@@ -205,12 +205,15 @@ function module_code(library_namespace) {
 			// console.log(work_data);
 			// library_namespace.set_debug(9);
 			return [
-			// 2019/9: 'api/getArticleList.nhn'
-			work_data.isOfficial ? 'api/getArticleList.nhn'
 			// 2019/10: 'api/getArticleListAll.nhn' 沒有 .freeFlg 標記，無法自動使用閱讀卷。
 			// 但是對新手村作品如 '3729 神光拜達摩' 來說，
 			// 用 'api/getArticleListAll.nhn' 才能取得所有作品之列表。
-			: 'api/getArticleListAll.nhn', {
+			//
+			// https://github.com/kanasimi/work_crawler/issues/384
+			// 第一次執行時，尚未取得 .isOfficial 標記，必須先採用 api/getArticleList.nhn
+			work_data.isOfficial === false ? 'api/getArticleListAll.nhn'
+			// 2019/9: 'api/getArticleList.nhn'
+			: 'api/getArticleList.nhn', {
 				titleNo : work_id
 			} ];
 		},
