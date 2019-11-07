@@ -2490,6 +2490,8 @@ function module_code(library_namespace) {
 			}
 		};
 
+		// default: 採用 page_id 而非 page_title 來 query。
+		var is_id = 'is_id' in config ? config.is_id : true;
 		// node.js v0.11.16: In strict mode code, functions can only be declared
 		// at top level or immediately within another function.
 		function run_SQL_callback(error, rows, fields) {
@@ -2521,8 +2523,6 @@ function module_code(library_namespace) {
 			// Wikimedia Toolforge database replicas.
 			'traversal_pages: 嘗試讀取 Wikimedia Toolforge 上之 database replication 資料，'
 					+ '一次讀取完所有頁面最新修訂版本之版本號 rev_id...');
-			// default: 採用 page_id 而非 page_title 來 query。
-			var is_id = 'is_id' in config ? config.is_id : true;
 			var SQL = is_id ? all_revision_SQL : all_revision_SQL.replace(
 					/page_id/g, 'page_title');
 			var SQL_config = config && config.SQL_config
@@ -2551,9 +2551,7 @@ function module_code(library_namespace) {
 			cache_config.type = 'allpages';
 		}
 
-		wiki_API.cache(cache_config,
-		// do for each page
-		function() {
+		function cache__for_each_page() {
 			// 有設定 config[KEY_SESSION] 才能獲得如 bot 之類，一次讀取/操作更多頁面的好處。
 			var session = config[KEY_SESSION]
 			//
@@ -2846,7 +2844,9 @@ function module_code(library_namespace) {
 				run_work(id_list);
 			}
 
-		}, {
+		}
+
+		wiki_API.cache(cache_config, cache__for_each_page, {
 			// cache path prefix
 			// e.g., task name
 			prefix : config.directory
