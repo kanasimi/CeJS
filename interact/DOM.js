@@ -5249,12 +5249,12 @@ function module_code(library_namespace) {
 					|| typeof sPopP.popObj.innerHTML != 'string'
 					|| !sPopP.popObj.innerHTML)
 				return;
-			// 重pop時不作其他判別處置
+			// 重新 pop up 時不作其他判別處置
 			oPos = sPopP.popObj;
 			tp = sPopF.popup;
 		} else {
 
-			// 處理object
+			// 處理 object
 			if (typeof oPos == 'string' && oPos)
 				if (oPos.length < 32 && document.getElementById(oPos)) {
 					// 輸入object name時轉成object
@@ -5298,7 +5298,9 @@ function module_code(library_namespace) {
 				if (typeof oPos == 'object'
 						&& (oPos.doneRuby || !oPos.innerHTML.match(/<\s*ruby/i)
 								&& (len < 60 && len * .7 - 9 < (typeof oPos.innerText == 'string' ? oPos.innerText
-										: oPos.innerHTML).length))) {
+										: _.HTML_to_Unicode(oPos.innerHTML
+										// .replace(/<[a-z][^<>]*>/g, '')
+										)).length))) {
 					// ruby的條件
 					tp = 'ruby';
 				} else if (sPopP.window && len < 300) {
@@ -5366,8 +5368,13 @@ function module_code(library_namespace) {
 			// 處理repeat
 			if (flag & sPopF.repeat || sPopP.RepeatC.indexOf(oTxt) !== -1) {
 				oPos.title = '';
-				oTxt = has_ruby_tag ? oTxt.repeat(oPos.innerHTML.length
-						/ oTxt.length) : '';
+				oTxt = has_ruby_tag ? oTxt
+						.repeat((typeof oPos.innerText == 'string' ? oPos.innerText
+								: _.HTML_to_Unicode(oPos.innerHTML
+								// .replace(/<[a-z][^<>]*>/g, '')
+								)).length
+								/ oTxt.length)
+						: '';
 			}
 
 			try {

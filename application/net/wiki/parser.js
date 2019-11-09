@@ -493,9 +493,8 @@ function module_code(library_namespace) {
 
 		if (type || type === '') {
 			if (typeof type !== 'string') {
-				library_namespace.warn(
-				//
-				'for_each_token: Invalid type specified! [' + type + ']');
+				library_namespace.warn('for_each_token: Invalid type [' + type
+						+ ']');
 				return this;
 			}
 			// normalize type
@@ -503,6 +502,10 @@ function module_code(library_namespace) {
 			type = type.toLowerCase().replace(/\s/g, '_');
 			if (type in page_parser.type_alias) {
 				type = page_parser.type_alias[type];
+			}
+			if (!(type in wiki_toString)) {
+				library_namespace.warn('for_each_token: Unknown type [' + type
+						+ ']');
 			}
 		}
 
@@ -802,8 +805,9 @@ function module_code(library_namespace) {
 				title = wiki_API.title_of(first_section);
 			parsed = page_parser(first_section).parse();
 			parsed.each_section(function(section, index) {
-				if (index === 0)
+				if (index === 0) {
 					first_section = section;
+				}
 			});
 		}
 		if (!first_section)
@@ -1598,6 +1602,8 @@ function module_code(library_namespace) {
 
 		// console.log(for_section);
 		if (typeof for_section === 'function') {
+			// TODO: return (result === for_each_token.remove_token)
+			// TODO: move section to another page
 			if (for_section.constructor.name === 'AsyncFunction') {
 				// console.log(section_list);
 				return Promise.all(section_list.map(for_section));
