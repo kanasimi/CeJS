@@ -501,7 +501,9 @@ function module_code(library_namespace) {
 			// 不應再被納入檢測。
 			library_namespace.info(library_namespace.display_align([
 			// Set milestone: 日本小說網站有時會商業化，將之前的作品內容大幅刪除。這時若刪掉舊檔，就會失去這些內容。
-			[ '保留舊檔：', last_file ], [ 'move to →', rename_to ] ]));
+			[ gettext('保留舊檔：'), last_file ],
+			//
+			[ gettext('搬移至 →'), rename_to ] ]));
 			library_namespace.move_file(last_file, rename_to);
 		});
 
