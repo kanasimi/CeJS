@@ -2942,6 +2942,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// language conversion -{}- 以後來使用的為主。
 		// TODO: -{R|里}-
+		// TODO: -{zh-hans:<nowiki>...</nowiki>;zh-hant:<nowiki>...</nowiki>;}-
 		// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
 		// [[w:zh:H:Convert]], [[mw:Help:Magic words]]
 		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
@@ -5053,6 +5054,35 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// object = CeL.wiki.parse.lua_object(page_data.wikitext);
+	function parse_lua_object_code(lua_code) {
+		// assert: true ===
+		// /^[\s\n]*return[\s\n]*{/.test(lua_code.replace(/(\n|^)\s*--[^\n]*/g,''))
+
+		var strings = [];
+		// https://www.lua.org/manual/5.3/manual.html#3.1
+		// an opening long bracket of level 1 is written as [=[, and so on.
+		lua_code = lua_code.replace(/\[(=*)\[([\s\S]*?)\](?:\1)\]/g, function(
+				all, equal_signs, string) {
+			// 另外儲存起來以避免干擾。
+			// e.g., [[w:zh:Module:CGroup/Physics]]
+			strings.push(string);
+			return "strings[" + (strings.length - 1) + "]";
+		});
+
+		lua_code = lua_code.replace(/(\n|^)\s*--/g, '$1//');
+		lua_code = lua_code.replace(/([a-z]+)\s*=\s*([{"']|strings\[\d+\])/ig,
+				'"$1":$2');
+
+		// patch for {Array}
+		lua_code = lua_code.replace(/{\n*{([\s\S]+?)}[\s\n]*(?:,[\s\n]*)?}/g,
+				'[{$1}]');
+
+		lua_code = eval('(function(){' + lua_code + '})()');
+
+		return lua_code;
+	}
+
 	// 簡易快速但很有可能出錯的 parser。
 	// e.g.,
 	// CeL.wiki.parse.every('{{lang}}','~~{{lang|en|ers}}ff{{ee|vf}}__{{lang|fr|fff}}@@{{lang}}',function(token){console.log(token);})
@@ -5117,6 +5147,8 @@ function module_code(library_namespace) {
 		redirect : parse_redirect,
 
 		wiki_URL : URL_to_wiki_link,
+
+		lua_object : parse_lua_object_code,
 
 		every : parse_every
 	});
