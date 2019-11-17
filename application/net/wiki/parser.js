@@ -5054,30 +5054,131 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// 簡易但很有可能出錯的 converter。
 	// object = CeL.wiki.parse.lua_object(page_data.wikitext);
+	// @see https://www.lua.org/manual/5.3/manual.html#3.1
 	function parse_lua_object_code(lua_code) {
 		// assert: true ===
 		// /^[\s\n]*return[\s\n]*{/.test(lua_code.replace(/(\n|^)\s*--[^\n]*/g,''))
 
-		var strings = [];
-		// https://www.lua.org/manual/5.3/manual.html#3.1
+		var __strings = [];
+		// fix `[=[ string ]=]`
 		// an opening long bracket of level 1 is written as [=[, and so on.
 		lua_code = lua_code.replace(/\[(=*)\[([\s\S]*?)\](?:\1)\]/g, function(
 				all, equal_signs, string) {
 			// 另外儲存起來以避免干擾。
 			// e.g., [[w:zh:Module:CGroup/Physics]]
-			strings.push(string);
-			return "strings[" + (strings.length - 1) + "]";
+			__strings.push(string);
+			return "__strings[" + (__strings.length - 1) + "]";
 		});
 
-		lua_code = lua_code.replace(/(\n|^)\s*--/g, '$1//');
-		lua_code = lua_code.replace(/([a-z]+)\s*=\s*([{"']|strings\[\d+\])/ig,
-				'"$1":$2');
+		// fix `"string"`
+		lua_code = lua_code.replace(/"(?:\\.|[^\\"]+)+"/g, function(all) {
+			// library_namespace.log(all);
+			__strings.push(JSON.parse(all));
+			return "__strings[" + (__strings.length - 1) + "]";
+		});
+		// fix `'string'`
+		lua_code = lua_code.replace(/'(?:\\.|[^\\']+)+'/g, function(all) {
+			// library_namespace.log(all);
+			__strings.push(eval(all));
+			return "__strings[" + (__strings.length - 1) + "]";
+		});
 
-		// patch for {Array}
-		lua_code = lua_code.replace(/{\n*{([\s\S]+?)}[\s\n]*(?:,[\s\n]*)?}/g,
-				'[{$1}]');
+		// fix `-- comments` → `// comments`
+		// lua_code = lua_code.replace(/([\n\s]|^)\s*--/g, '$1//');
+		// fix `-- comments` → 直接消掉
+		lua_code = lua_code.replace(/([\n\s]|^)\s*--[^\n]*/g, '$1');
 
+		// --------------------------------------
+		var __table_values = [];
+		// patch fieldsep ::= ‘,’ | ‘;’
+		lua_code = lua_code.replace_till_stable(/{([^{}]+)}/g, function(all,
+				fieldlist) {
+			// console.log(fieldlist);
+			var object_value = {},
+			// patch {Array}table: `{ field, field, ... }`
+			// field ::= ‘[’ exp ‘]’ ‘=’ exp | Name ‘=’ exp | exp
+			// fields of the form exp are equivalent to [i] = exp, where i are
+			// consecutive integers starting with 1.
+			// [,]
+			array_value = new Array(1);
+
+			fieldlist = fieldlist.split(/[,;]/);
+			fieldlist = fieldlist.forEach(function(field) {
+				field = field.trim();
+				if (!field) {
+					// assert: the last field
+					return;
+				}
+				var matched = field.match(
+				//
+				/^\[([\s\n]*__strings\[\d+\][\s\n]*)\][\s\n]*=([\s\S]+)$/
+				//
+				) || field.match(/^\[([\s\S]+)\][\s\n]*=([\s\S]+)$/);
+				if (matched) {
+					object_value[eval(matched[1])] = matched[2];
+					return;
+				}
+
+				// patch {Object}table: `{ name = exp }` → `{ name : exp }`
+				matched = field.match(/^([\w]+)[\s\n]*=([\s\S]+)$/);
+				if (matched) {
+					object_value[matched[1]] = matched[2];
+					return;
+				}
+
+				array_value.push(field);
+			});
+
+			if (array_value.length > 1) {
+				if (library_namespace.is_empty_object(object_value)) {
+					__table_values.push(array_value);
+				} else {
+					// mixed array, object
+					array_value.forEach(function(item, index) {
+						if (index > 0)
+							object_value[index] = item;
+					});
+
+					__table_values.push(object_value);
+				}
+			} else {
+				__table_values.push(object_value);
+			}
+
+			return '__table_values[' + (__table_values.length - 1) + ']';
+		});
+		// console.log(lua_code);
+
+		function recovery_code(code) {
+			return code.replace(/__table_values\[(\d+)\]/g,
+			//
+			function(all, index) {
+				var table_value = __table_values[+index];
+				// console.log(table_value);
+				if (Array.isArray(table_value)) {
+					table_value = table_value.map(recovery_code);
+					return '[' + table_value + ']';
+				}
+
+				var value_list = [];
+				for ( var name in table_value)
+					value_list.push(name + ':'
+							+ recovery_code(table_value[name]));
+				return '{' + value_list + '}';
+			});
+		}
+
+		lua_code = recovery_code(lua_code);
+		// --------------------------------------
+
+		lua_code = lua_code.replace_till_stable(/([^\w])nil([^\w])/g,
+				'$1null$2');
+
+		// TODO: or, and
+
+		// library_namespace.log(lua_code);
 		lua_code = eval('(function(){' + lua_code + '})()');
 
 		return lua_code;
