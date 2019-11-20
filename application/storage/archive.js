@@ -149,15 +149,16 @@ function module_code(library_namespace) {
 		// @see GitHub.updater.node.js
 		// 嘗試取得7-Zip的執行路徑
 		// try to read 7z program path from Windows registry
-		executable_file_path['7z'] = library_namespace
-				.run_JScript(
-						"var p7z_path='HKCU\\\\Software\\\\7-Zip\\\\Path';"
-								// use stdout. 64 bit first.
-								+ "console.log(add_quote(RegRead(p7z_path+64)||RegRead(p7z_path)));",
-						{
-							attach_library : true
-						});
+		executable_file_path['7z'] = library_namespace.run_JScript(
+				"var p7z_path='HKCU\\\\Software\\\\7-Zip\\\\Path';"
+				// use stdout. 64 bit first.
+				+ "p7z_path=RegRead(p7z_path+64)||RegRead(p7z_path);"
+				// `p7z_path` maybe `undefined` here.
+				+ "console.log(p7z_path&&add_quote(p7z_path));", {
+					attach_library : true
+				});
 		if (false) {
+			console.log(executable_file_path['7z']);
 			console.log('stdout: '
 					+ executable_file_path['7z'].stdout.toString());
 			console.log('stdout: '
@@ -166,13 +167,20 @@ function module_code(library_namespace) {
 					+ executable_file_path['7z'].stderr.toString());
 		}
 
-		executable_file_path['7z'] = library_namespace
-				.executable_file_path(JSON.parse(
-						executable_file_path['7z'].stdout.toString()).trim()
-						+ '7z.exe');
-		// console.log(executable_file_path['7z']);
-		if (executable_file_path['7z'])
+		executable_file_path['7z'] = executable_file_path['7z'].stdout
+				.toString().trim();
+		// 沒安裝 7-Zip 的情況，此時 `executable_file_path['7z'] === ''`。
+		if (executable_file_path['7z']) {
+			executable_file_path['7z'] = executable_file_path['7z']
+					&& JSON.parse(executable_file_path['7z']).trim() || '';
+			executable_file_path['7z'] = library_namespace
+					.executable_file_path(executable_file_path['7z'] + '7z.exe');
+			// console.log(executable_file_path['7z']);
 			executable_file_path['7z'] = add_quote(executable_file_path['7z']);
+		} else {
+			// error: no 7z.exe
+			delete executable_file_path['7z'];
+		}
 		// console.log(executable_file_path['7z']);
 	}
 
