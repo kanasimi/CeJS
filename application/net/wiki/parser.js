@@ -2166,10 +2166,37 @@ function module_code(library_namespace) {
 		// 手工字詞轉換 language conversion -{}-
 		convert : function(language, lang_fallbacks) {
 			if (!language) {
-				return '-{' + this.join(';') + '}-';
+				return '-{' + (this._flag ? this._flag + '|' : '')
+						+ this.join(';') + '}-';
 			}
 
-			language = language.toLowerCase();
+			var flag = this.flag;
+			if (flag in {
+				// add rule for convert code (but no display in placed code)
+				H : true,
+				T : true,
+				'-' : true
+			}) {
+				return '';
+			}
+
+			if (flag in {
+				// raw content
+				R : true,
+				D : true
+			}) {
+				return this.join(';');
+			}
+
+			language = language.trim().toLowerCase();
+			if (Array.isArray(flag)) {
+				if (!flag.includes(language)) {
+					// 單純顯示不繁簡轉換的文字
+					return this.join(';');
+				}
+				// TODO: 顯示繁簡轉換後的文字
+				return this.join(';');
+			}
 
 			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general%7Cnamespaces%7Cnamespacealiases%7Cstatistics
 			// language fallbacks: [[mw:Localisation statistics]]
@@ -2185,7 +2212,9 @@ function module_code(library_namespace) {
 				}
 			}
 
-			return this.conversion[language] || '在手动语言转换规则中检测到错误';
+			return this.conversion[language]
+			// 在手动语言转换规则中检测到错误
+			|| 'converter-manual-rule-error';
 		},
 
 		// Behavior switches
@@ -2292,9 +2321,9 @@ function module_code(library_namespace) {
 
 	// 經測試，":"前面與後面不可皆有空白。
 	// (\s{2,}): 最後的單一/\s/會被轉換為"&#160;"
-	// matched: [ all, leading spaces,
+	// matched: [ all, 指定轉換字串, 指定轉換詞, spaces,
 	// this language code, colon, this language token, last spaces ]
-	var PATTERN_conversion = /^(\s*)(zh-(?:cn|tw|hk|mo|sg|my|hant|hans))(\s*:|:\s*)([^\s].*?)(\s{2,})?$/;
+	var PATTERN_conversion = /^(([\s\S]+?)=>)?(\s*)(zh-(?:cn|tw|hk|mo|sg|my|hant|hans))(\s*:|:\s*)([^\s].*?)(\s{2,})?$/;
 
 	// 狀態開關: [[mw:Help:Magic words#Behavior switches]]
 	var PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
@@ -2435,11 +2464,12 @@ function module_code(library_namespace) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		// 每個parse_wikitext()都需要新的options，需要全新的。
 		// options = Object.assign({}, options);
+		options = library_namespace.setup_options(options);
 
 		if (false) {
 			// assert: false>=0, (undefined>=0)
 			// assert: (NaN | 0) === 0
-			var depth_of_children = ((options && options[KEY_DEPTH]) | 0) + 1;
+			var depth_of_children = ((options[KEY_DEPTH]) | 0) + 1;
 			// assert: depth_of_children >= 1
 			library_namespace.debug('[' + wikitext + ']: depth_of_children: '
 					+ depth_of_children, 3, 'parse_wikitext');
@@ -2457,18 +2487,18 @@ function module_code(library_namespace) {
 		 * 
 		 * @type {String}
 		 */
-		include_mark = options && options.include_mark || '\u0000',
+		include_mark = options.include_mark || '\u0000',
 		/**
 		 * {String}結束之特殊標記。 end of include_mark. 不可為數字 (\d) 或
 		 * include_mark，不包含會被解析的字元如 /;/。應為 wikitext 所不容許之字元。
 		 */
-		end_mark = options && options.end_mark || '\u0001',
+		end_mark = options.end_mark || '\u0001',
 		/** {Boolean}是否順便作正規化。預設不會規範頁面內容。 */
-		normalize = options && options.normalize,
+		normalize = options.normalize,
 		/** {Array}是否需要初始化。 [ {String}prefix added, {String}postfix added ] */
 		initialized_fix = !queue && [ '', '' ],
 		// 這項設定不應被繼承。
-		no_resolve = options && options.no_resolve;
+		no_resolve = options.no_resolve;
 		if (no_resolve) {
 			delete options.no_resolve;
 		}
@@ -2495,7 +2525,12 @@ function module_code(library_namespace) {
 			queue = [];
 		}
 
-		if (options && typeof options.prefix === 'function')
+		if (!queue.conversion_table) {
+			// [[MediaWiki:Conversiontable/zh-hant]]
+			queue.conversion_table = Object.create(null);
+		}
+
+		if (typeof options.prefix === 'function')
 			wikitext = options.prefix(wikitext, queue, include_mark, end_mark)
 					|| wikitext;
 
@@ -2943,8 +2978,13 @@ function module_code(library_namespace) {
 		// language conversion -{}- 以後來使用的為主。
 		// TODO: -{R|里}-
 		// TODO: -{zh-hans:<nowiki>...</nowiki>;zh-hant:<nowiki>...</nowiki>;}-
+		// TODO: 特別注意語法中帶有=>的單向轉換規則 [[w:zh:模組:CGroup/IT]]
 		// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
-		// [[w:zh:H:Convert]], [[mw:Help:Magic words]]
+		// https://zh.wikipedia.org/wiki/Help:中文维基百科的繁简、地区词处理#常用的轉換工具語法
+		// [[w:zh:H:Convert]], [[w:zh:H:AC]]
+		// [[mw:Help:Magic words]], [[mw:Writing systems/LanguageConverter]]
+		// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageConverter_8php_source.html
+		// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
 		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
 		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
 		// TODO: <source></source>內之-{}-無效。
@@ -2967,6 +3007,46 @@ function module_code(library_namespace) {
 			//
 			conversion_list = [], latest_language;
 
+			var _flag = parameters.match(/^([^|]*)\|(.*)$/), flag;
+			if (_flag) {
+				parameters = _flag[2];
+				var flag_hash = Object.create(null);
+				flag = _flag[1].split(';').map(function(f) {
+					f = f.trim();
+					if (f)
+						flag_hash[f] = true;
+					return f;
+				}).filter(function(f) {
+					return !!f;
+				});
+				if (flag.lengthy === 0) {
+					flag = null;
+				} else {
+					// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
+					[ 'R', 'N', '-', 'T', 'H', 'D', 'A' ].some(function(f) {
+						if (flag_hash[f]) {
+							flag = f;
+							return true;
+						}
+					});
+				}
+			}
+
+			var conversion_table = flag && (flag in {
+				// '+' add rules for alltext
+				// '+' : true,
+
+				// these flags above are reserved for program
+
+				// remove convert (not implement)
+				'-' : true,
+
+				// add rule for convert code (but no display in placed code)
+				H : true,
+				// add rule for convert code (all text convert)
+				A : true
+			}) && queue.conversion_table;
+
 			// console.log('parameters: ' + JSON.stringify(parameters));
 			parameters = parameters.split(';');
 			parameters.forEach(function(converted, index) {
@@ -2983,6 +3063,7 @@ function module_code(library_namespace) {
 				}
 			});
 			// console.log(conversion_list);
+			var convert_from = conversion_table && [];
 			conversion_list = conversion_list.map(function(token) {
 				var matched = token.match(PATTERN_conversion);
 				if (!matched) {
@@ -2990,23 +3071,50 @@ function module_code(library_namespace) {
 					return parse_wikitext(token, options, queue);
 				}
 
+				// matched.shift();
 				matched = matched.slice(1);
-				// matched: [ leading spaces,
+				// matched: [ 指定轉換字串, 指定轉換詞, spaces,
 				// this language code, colon, this language token, last spaces ]
-				if (!matched[4])
+				if (!matched[6])
 					matched.pop();
-				conversion[matched[1]] = matched[3]
+				conversion[matched[3]] = matched[5]
 				// 經過改變，需再進一步處理。
-				= parse_wikitext(matched[3], options, queue);
-				if (!matched[0])
-					matched.shift();
+				= parse_wikitext(matched[5], options, queue);
+				var convert_to = conversion_table
+						&& typeof matched[5] === 'string' && matched[5].trim();
+				if (!matched[2]) {
+					matched.splice(2, 1);
+				}
+				var _convert_from;
+				if (matched[0]) {
+					if (conversion_table && matched[1]) {
+						_convert_from = matched[1].trim();
+					}
+					matched.splice(1, 1);
+				} else {
+					matched.splice(0, 2);
+				}
 				token = _set_wiki_type(matched, 'plain');
 				token.is_conversion = true;
+
+				if (_convert_from) {
+					conversion_table[_convert_from] = token;
+				} else if (convert_to) {
+					convert_from.push(convert_to);
+				}
+
 				return token;
 			});
 			// console.log(conversion_list);
 			parameters = _set_wiki_type(conversion_list, 'convert');
 			parameters.conversion = conversion;
+			if (_flag) {
+				parameters._flag = _flag;
+				parameters.flag = flag;
+			}
+			convert_from && convert_from.forEach(function(token) {
+				conversion_table[token] = parameters;
+			});
 
 			if (queue.switches && (queue.switches.__NOCC__
 			// 使用魔術字 __NOCC__ 或 __NOCONTENTCONVERT__ 可避免轉換。
@@ -3017,7 +3125,7 @@ function module_code(library_namespace) {
 				// e.g., "-{ t {{T}} }-"
 				// NOT "-{ zh-tw: tw {{T}} }-"
 				parameters.converted = parameters[0];
-			} else if (options && options.language) {
+			} else if (options.language) {
 				// TODO: 先檢測當前使用的語言，然後轉成在當前環境下轉換過、會顯示出的結果。
 				parameters.converted = parameters.toString(options.language);
 			}
@@ -3738,7 +3846,7 @@ function module_code(library_namespace) {
 		// console.log('11: ' + JSON.stringify(wikitext));
 
 		// 在 transclusion 中不會被當作 bare / plain URL。
-		if (!options || !options.inside_transclusion) {
+		if (!options.inside_transclusion) {
 			wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL,
 			//
 			function(all, previous, URL) {
@@ -3992,7 +4100,7 @@ function module_code(library_namespace) {
 		// ------------------------------------------------------------------------
 
 		// console.log('13: ' + JSON.stringify(wikitext));
-		if (options && typeof options.postfix === 'function')
+		if (typeof options.postfix === 'function')
 			wikitext = options.postfix(wikitext, queue, include_mark, end_mark)
 					|| wikitext;
 
@@ -4015,7 +4123,7 @@ function module_code(library_namespace) {
 		// console.log('15: ' + JSON.stringify(wikitext));
 		// [ all, text, separator ]
 		var PATTERN_paragraph = /([\s\S]*?)((?:\s*\n){2,}|$)/g;
-		if (initialized_fix && options && options.parse_paragraph
+		if (initialized_fix && options.parse_paragraph
 				&& /\n\s*\n/.test(wikitext)) {
 			// 警告: 解析段落的動作可能破壞文件的第一層結構，會使文件的第一層結構以段落為主。
 			wikitext = wikitext.replace(PATTERN_paragraph,
@@ -4056,7 +4164,7 @@ function module_code(library_namespace) {
 
 		wikitext = queue[queue.length - 1];
 		// console.log(wikitext);
-		if (initialized_fix && options && Array.isArray(options.target_array)
+		if (initialized_fix && Array.isArray(options.target_array)
 				&& Array.isArray(wikitext) && wikitext.type === 'plain') {
 			// 可藉以複製必要的屬性。
 			// @see function parse_page(options)
@@ -4066,17 +4174,26 @@ function module_code(library_namespace) {
 			wikitext = options.target_array;
 		}
 
-		if (initialized_fix && queue.switches) {
-			wikitext.switches = queue.switches;
+		if (initialized_fix
+		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
+		// plain: 表示 wikitext 可能是一個頁面。最起碼是以 .join('') 轉換成字串的。
+		&& wikitext.type === 'plain') {
+			if (queue.switches)
+				wikitext.switches = queue.switches;
+
+			if (!library_namespace.is_empty_object(queue.conversion_table))
+				wikitext.conversion_table = queue.conversion_table;
+			if (options.conversion_title)
+				wikitext.conversion_title = options.conversion_title;
 		}
 
 		// Release memory. 釋放被占用的記憶體。
 		queue = null;
 
-		if (initialized_fix && (!options || !options.parse_paragraph)
+		if (initialized_fix
 		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
 		// plain: 表示 wikitext 可能是一個頁面。最起碼是以 .join('') 轉換成字串的。
-		&& wikitext.type === 'plain') {
+		&& wikitext.type === 'plain' && !options.parse_paragraph) {
 			// console.log(wikitext);
 			// 純文字分段。僅切割第一層結構。
 			for (var index = 0; index < wikitext.length; index++) {
@@ -5057,6 +5174,7 @@ function module_code(library_namespace) {
 	// 簡易但很有可能出錯的 converter。
 	// object = CeL.wiki.parse.lua_object(page_data.wikitext);
 	// @see https://www.lua.org/manual/5.3/manual.html#3.1
+	// TODO: secutity check
 	function parse_lua_object_code(lua_code) {
 		// assert: true ===
 		// /^[\s\n]*return[\s\n]*{/.test(lua_code.replace(/(\n|^)\s*--[^\n]*/g,''))
