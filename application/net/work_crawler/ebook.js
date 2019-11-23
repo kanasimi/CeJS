@@ -195,6 +195,12 @@ function module_code(library_namespace) {
 			});
 		}
 
+		var convert_text = this.convert_to_TW ? library_namespace.CN_to_TW
+		//
+		: function(text) {
+			return text;
+		};
+
 		// CeL.application.storage.EPUB
 		var ebook = new library_namespace.EPUB(ebook_directory, {
 			rebuild : this.hasOwnProperty('rebuild_ebook')
@@ -205,8 +211,10 @@ function module_code(library_namespace) {
 			// 以下為 epub <metadata> 必備之元素。
 			// 小説ID
 			identifier : work_data.id,
-			title : work_data.title,
-			language : work_data.language || this.language,
+			title : convert_text(work_data.title),
+			language : this.convert_to_TW ? library_namespace.gettext
+					.to_standard('cmn-Hant-TW')
+					&& 'zh-cmn-Hant-TW' : work_data.language || this.language,
 			// 作品內容最後編輯時間。
 			modified : work_data.last_update_Date
 		}), subject = [];
@@ -220,20 +228,29 @@ function module_code(library_namespace) {
 			if (work_data[type])
 				subject = subject.concat(work_data[type]);
 		});
+		if (this.convert_to_TW) {
+			subject.push(convert_text('語言轉換'),
+			//
+			gettext.get_alias('cmn-Hant-TW'));
+		}
+		subject = subject.unique().map(convert_text);
 
 		ebook.time_zone = work_data.time_zone || this.time_zone;
 
 		// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-opf-dcmes-optional
 		ebook.set({
 			// 作者名
-			creator : work_data.author,
+			creator : convert_text(work_data.author),
 			// 🏷標籤, ジャンル genre, タグ, キーワード
-			subject : subject.unique(),
+			subject : subject,
 			// 作品描述: 劇情簡介, synopsis, あらすじ
-			description : crawler_namespace.get_label(work_data.description
+			description : convert_text(
+			//
+			crawler_namespace.get_label(work_data.description
 			// .description 中不可存在 tag。
-			.replace(/\n*<br[^<>]*>\n*/ig, '\n')),
-			publisher : work_data.site_name + ' (' + this.base_URL + ')',
+			.replace(/\n*<br[^<>]*>\n*/ig, '\n'))),
+			publisher : convert_text(work_data.site_name) + ' ('
+					+ this.base_URL + ')',
 			// source URL
 			source : work_data.url
 		});
@@ -258,6 +275,14 @@ function module_code(library_namespace) {
 		var ebook = work_data && work_data[this.KEY_EBOOK];
 		if (!ebook) {
 			return;
+		}
+
+		// 可用來移除廣告。
+		if (this.pre_add_ebook_chapter) {
+			// 去除掉中間插入的廣告連結。
+			// 修正這個網站的語法錯誤。
+			// 去除掉結尾的廣告。
+			this.pre_add_ebook_chapter(data/* , work_data, chapter_NO */);
 		}
 
 		if (!data.sub_title) {
@@ -290,18 +315,34 @@ function module_code(library_namespace) {
 		chapter_data = Array.isArray(work_data.chapter_list)
 				&& work_data.chapter_list[chapter_NO - 1],
 		// 卷篇集幕部冊册本輯/volume/part/book
-		part_title = data.title || chapter_data && chapter_data.part_title,
+		part_title = crawler_namespace.get_label(data.title || chapter_data
+				&& chapter_data.part_title || ''),
 		// 章節名稱 / 篇章名稱 / 章節节回折篇話话頁页/chapter/section
-		chapter_title = data.sub_title || chapter_data
-				&& (chapter_data.chapter_title || chapter_data.title),
-		//
-		file_title = chapter_NO.pad(3)
+		chapter_title = crawler_namespace.get_label(data.sub_title
+				|| chapter_data
+				&& (chapter_data.chapter_title || chapter_data.title) || '');
+
+		// @see epub_hans_to_hant.js
+		if (this.convert_to_TW) {
+			part_title = library_namespace.CN_to_TW(part_title);
+			chapter_title = library_namespace.CN_to_TW(chapter_title);
+			process.stdout.write(gettext('將簡體中文轉換成繁體中文：《%1》', chapter_title)
+					+ '...\r');
+			// library_namespace.extension.zh_conversion.CN_to_TW();
+			data.text = library_namespace.CN_to_TW(data.text)
+			// TODO: 把半形標點符號轉換為全形標點符號
+			.replace(/["'](?:zh-(?:cmn-)?|cmn-)?(?:Hans-)?CN["']/ig,
+			// "zh-TW"
+			'"zh-cmn-Hant-TW"');
+		}
+
+		var file_title = chapter_NO.pad(3)
 				+ ' '
 				+ (part_title ? part_title
 						+ library_namespace.EPUB.prototype.title_separator : '')
-				+ (chapter_title || ''),
-		//
-		item_data = {
+				+ chapter_title;
+
+		var item_data = {
 			title : file_title,
 			// include images / 自動載入內含資源, 將外部media內部化
 			internalize_media : true,
@@ -316,11 +357,12 @@ function module_code(library_namespace) {
 				error_retry : this.MAX_ERROR_RETRY
 			}, this.get_URL_options),
 			words_so_far : work_data.words_so_far
-		},
-		//
-		item = {
-			title : crawler_namespace.get_label(part_title || ''),
-			sub_title : crawler_namespace.get_label(chapter_title || ''),
+		};
+
+		var item = {
+			title : part_title,
+			sub_title : chapter_title,
+			// contents
 			text : data.text,
 			post_processor : function(contents) {
 				// 正規化小說章節文字。
@@ -529,20 +571,31 @@ function module_code(library_namespace) {
 	// ebook_path.call(this, work_data, file_name)
 	function ebook_path(work_data, file_name) {
 		if (!file_name) {
-			file_name =
-			// e.g., "(一般小説) [author] title [site 20170101 1話].id.epub"
-			[ '(一般小説) [', work_data.author, '] ', work_data.title, ' [',
-					work_data.site_name, ' ',
+			file_name = [
+					'(一般小説) [',
+					work_data.author,
+					'] ',
+					work_data.title,
+					// e.g., "(一般小説) [author] title [site 20170101 1話].id.epub"
+					' [',
+					work_data.site_name,
+					' ',
 					work_data.last_update_Date.format('%Y%2m%2d'),
 					work_data.chapter_count >= 1
 					//
 					? ' ' + work_data.chapter_count
 					//
-					+ (work_data.chapter_unit || this.chapter_unit) : '', '].',
+					+ (work_data.chapter_unit || this.chapter_unit) : '',
+					']',
+					this.convert_to_TW ? ' ('
+					//
+					+ library_namespace.gettext.to_standard('cmn-Hant-TW')
+							+ ')' : '', '.',
 					typeof work_data.directory_id === 'function'
 					// 自行指定作品放置目錄與 ebook 用的 work id。
-					&& work_data.directory_id() || work_data.id, '.epub' ]
-					.join('');
+					&& work_data.directory_id() || work_data.id, '.epub' ];
+
+			file_name = file_name.join('');
 		}
 		file_name = library_namespace.to_file_name(file_name);
 		// assert: PATTERN_ebook_file.test(file_name) === true
