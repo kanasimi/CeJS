@@ -1560,7 +1560,7 @@ function module_code(library_namespace) {
 					if (!date || !this_user) {
 						continue;
 					}
-					// 同時添加使用者與日期
+					// 同時添加使用者與日期。
 					section.dates.push(date);
 					section.users.push(this_user);
 					// reset
@@ -2648,7 +2648,13 @@ function module_code(library_namespace) {
 			// {String}Element.tagName
 			// all.tagName = tag.toLowerCase();
 
-			_set_wiki_type(all, 'tag');
+			all = _set_wiki_type(all, 'tag');
+			// 在遍歷 tag inner 的子 node 時，真正需要的 .parent 是 all tag 而非 inner。
+			// e.g., `special page configuration.js`
+			// if (parent.type === 'tag_inner' && parent.parent.type === 'tag'
+			// && parent.parent.tag === 's') { ... }
+			inner.parent = all;
+			// attributes.parent = all;
 			if (attributes && attributes.attributes) {
 				all.attributes = attributes.attributes;
 				delete attributes.attributes;
