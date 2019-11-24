@@ -3018,6 +3018,8 @@ function test_wiki() {
 		assert([ wikitext, parsed.toString() ]);
 		wikitext = 'a\n{|\n!|t\n|-\n|t\n|[[{{t|p}}]]<!-- c -->\n|}\nb'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parsed.toString() ]);
+		wikitext = "text --'''-{[[User:user|user1]]}-'''（[[User talk:user|-{user2}-]]）"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parsed.toString() ]);
 		wikitext = '==t1==\n== t2 =='; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parsed.toString() ]);
 		wikitext = '[[t#-{c}-]]'; parsed = CeL.wiki.parser(wikitext).parse();

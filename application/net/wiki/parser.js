@@ -3007,7 +3007,7 @@ function module_code(library_namespace) {
 			//
 			conversion_list = [], latest_language;
 
-			var _flag = parameters.match(/^([^|]*)\|(.*)$/), flag;
+			var _flag = parameters.match(/^([a-zA-Z\-;\s]*)\|(.*)$/), flag;
 			if (_flag) {
 				parameters = _flag[2];
 				var flag_hash = Object.create(null);
