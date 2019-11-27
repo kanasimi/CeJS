@@ -3061,6 +3061,16 @@ function test_wiki() {
 		wikitext = '-{ "ee" [[dd]]  ;zh-hk:阿;- ;zh-tw:1亞1;zh-cn:阿2 ;  zh-tw: 亞;;}-'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parsed.toString() ]);
 		assert([ '亞;', CeL.wiki.parse(wikitext).toString('zh-tw') ]);
+		wikitext = '-{A|zh-hans:哥伦拜恩中学;zh-hant:科倫拜中學}-'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parsed.toString() ]);
+		wikitext = '-{|zh-hans:哥伦拜恩中学;zh-hant:科倫拜中學}-'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parsed.toString() ]);
+		wikitext = '-{zh-hans|zh-hans:哥伦拜恩中学;zh-hant:科倫拜中學}-'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parsed.toString() ]);
+		wikitext = '-{zh-hans;zh-hant|zh-hans:哥伦拜恩中学;zh-hant:科倫拜中學}-'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parsed.toString() ]);
+		wikitext = "'''[[哥伦拜恩中学|-{A|zh-hans:哥伦拜恩中学;zh-hant:科倫拜中學}-]]'''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([ wikitext, parsed.toString() ]);
 		wikitext = '-{;  zh-hk:阿;- ;zh-tw:1亞1;zh-cn:阿2  ;  zh-tw: 2亞 ; zh-cn:阿3 ;  	 }-'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([ wikitext, parsed.toString() ]);
 		assert([ '2亞 ', CeL.wiki.parse(wikitext).toString('zh-tw') ], '最後的單一/\s/會被轉換為"&#160;"');

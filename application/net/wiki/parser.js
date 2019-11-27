@@ -2166,7 +2166,7 @@ function module_code(library_namespace) {
 		// 手工字詞轉換 language conversion -{}-
 		convert : function(language, lang_fallbacks) {
 			if (!language) {
-				return '-{' + (this._flag ? this._flag + '|' : '')
+				return '-{' + ('_flag' in this ? this._flag + '|' : '')
 						+ this.join(';') + '}-';
 			}
 
@@ -3017,7 +3017,8 @@ function module_code(library_namespace) {
 			if (_flag) {
 				parameters = _flag[2];
 				var flag_hash = Object.create(null);
-				flag = _flag[1].split(';').map(function(f) {
+				_flag = _flag[1];
+				flag = _flag.split(';').map(function(f) {
 					f = f.trim();
 					if (f)
 						flag_hash[f] = true;
@@ -3114,7 +3115,7 @@ function module_code(library_namespace) {
 			// console.log(conversion_list);
 			parameters = _set_wiki_type(conversion_list, 'convert');
 			parameters.conversion = conversion;
-			if (_flag) {
+			if (typeof _flag === 'string') {
 				parameters._flag = _flag;
 				parameters.flag = flag;
 			}
