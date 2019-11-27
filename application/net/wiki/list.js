@@ -852,6 +852,109 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// 子分類 subcategory
+	var KEY_subcategories = 'subcategories', NS_category = wiki_API
+			.namespace('category');
+
+	// export
+	wiki_API.KEY_subcategories = KEY_subcategories;
+
+	/**
+	 * get all categorymembers and subcategories in [KEY_subcategories]
+	 * 
+	 * @example<code>
+
+	wiki.category_tree('Category:公共轉換組模板', function(list) { l=list; });
+
+	</code>
+	 * 
+	 * @param {String}root_category
+	 *            category to traversal
+	 * @param {Function}callback
+	 *            callback({Array}page_data_list, error)
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項 default: { depth : 10 }
+	 */
+	function category_tree(root_category, callback, options) {
+		var list_options = {
+			// [KEY_SESSION]
+			session : this,
+			type : 'categorymembers'
+		};
+
+		function get_categorymembers(category, callback, depth) {
+			library_namespace.debug('Get categorymembers of '
+					+ wiki_API.title_link_of(category) + '...', 1,
+					'wiki_API__category_tree');
+			wiki_API.list(category, function(list/* , target, options */) {
+				// assert: Array.isArray(list)
+				if (list.error) {
+					callback(null, list.error);
+					return;
+				}
+
+				library_namespace.debug(wiki_API.title_link_of(category)
+						+ ': Get ' + list.length + ' item(s).', 1,
+						'wiki_API__category_tree');
+				// console.log(list);
+				depth--;
+
+				var remaining = 0, subcategories = Object.create(null);
+				var title = list.title;
+				list = list.filter(function(page_data) {
+					if (page_data.ns !== NS_category)
+						return true;
+
+					var page_name = page_data.title.replace(
+					// @see PATTERN_category @ CeL.wiki
+					/^(Category|分類|分类|カテゴリ|분류):/ig, '');
+					if (depth === 0) {
+						// move subcategory to `subcategories`
+						subcategories[page_name] = null;
+						return false;
+					}
+
+					remaining++;
+					// assert: get_categorymembers() won't return soon
+					get_categorymembers(page_data, function(sub_list, error) {
+						subcategories[page_name] = sub_list;
+						if (--remaining === 0)
+							callback(list);
+					}, depth);
+					return false;
+				});
+				// recovery attributes
+				list.title = title;
+				if (remaining > 0) {
+					list[KEY_subcategories] = subcategories;
+					// waiting for get_categorymembers()
+				} else {
+					if (depth === 0
+							&& !library_namespace
+									.is_empty_object(subcategories)) {
+						list[KEY_subcategories] = subcategories;
+					} else {
+						// No subcategory
+					}
+					callback(list);
+				}
+
+			}, list_options);
+		}
+
+		// for wiki_API.prototype..next: 將會在 wiki_API.list() 隨即被喚醒。
+		// this.running = false;
+		get_categorymembers(root_category, callback,
+				(typeof options === 'number' ? options | 0 : options
+						&& (options.depth | 0))
+						|| category_tree.default_depth);
+	}
+
+	category_tree.default_depth = 10;
+	wiki_API.prototype.category_tree = category_tree;
+
+	// ------------------------------------------------------------------------
+
 	if (false) {
 		CeL.wiki.langlinks('文明', function(title) {
 			title === 'Civilization';
