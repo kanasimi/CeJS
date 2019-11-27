@@ -1871,6 +1871,19 @@ function module_code(library_namespace) {
 
 	// 自動生成目錄。
 	function generate_TOC() {
+		var original_domain = library_namespace.gettext.get_domain_name
+			&& library_namespace.gettext.get_domain_name();
+		if (original_domain) {
+			var use_domain = original_domain && this.metadata['dc:language'];
+			use_domain = use_domain && use_domain[0]['dc:language'];
+			if (use_domain && original_domain !== use_domain) {
+				// 確保目錄使用的語言與書籍相同。
+				library_namespace.gettext.use_domain(use_domain);
+			} else {
+				original_domain = null;
+			}
+		}
+
 		var // gettext = setup_gettext.call(this),
 		// 一般說來，title 應該只有一個。
 		book_title = set_meta_information.call(this, 'title').join(', '),
@@ -2007,6 +2020,12 @@ function module_code(library_namespace) {
 		TOC_html.push('<nav epub:type="toc" id="toc">',
 		// 作品目錄 目次 Table of contents
 		'<h2>', gettext('Contents'), '</h2>', '<ol>');
+
+		// recovery
+		if (original_domain)
+			library_namespace.gettext.use_domain(original_domain);
+
+		// --------------------------------------
 
 		var chapter_list = [];
 
