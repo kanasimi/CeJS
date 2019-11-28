@@ -134,7 +134,7 @@ function module_code(library_namespace) {
 	class Wiki_page extends Array { }
 	http://www.2ality.com/2015/02/es6-classes-final.html
 
-	 * </code>
+	</code>
 	 * 
 	 * @param {String|Object}wikitext
 	 *            wikitext / page data to parse
@@ -724,7 +724,7 @@ function module_code(library_namespace) {
 
 	CeL.wiki.lead_text(content);
 
-	 * </code>
+	</code>
 	 * 
 	 * @param {String}wikitext
 	 *            wikitext to parse
@@ -787,7 +787,7 @@ function module_code(library_namespace) {
 
 	CeL.wiki.extract_introduction(page_data).toString();
 
-	 * </code>
+	</code>
 	 * 
 	 * @param {Array|Object}first_section
 	 *            first section or page data
@@ -1147,8 +1147,10 @@ function module_code(library_namespace) {
 	 * 從話題/議題/章節標題產生連結到章節標題的wikilink。
 	 * 
 	 * @example <code>
+
 	CeL.wiki.section_link(section_title)
-	 * </code>
+
+	</code>
 	 * 
 	 * @param {String}section_title
 	 *            section title in wikitext. 章節標題。 節のタイトル。
@@ -1254,7 +1256,7 @@ function module_code(library_namespace) {
 	//
 	.forEach(for_sections, page_data.sections);
 
-	 * </code>
+	</code>
 	 */
 
 	// 將 wikitext 拆解為各 section list
@@ -1365,6 +1367,7 @@ function module_code(library_namespace) {
 	 * TODO: 這會漏算沒有日期標示的簽名
 	 * 
 	 * @example <code>
+
 	parsed = CeL.wiki.parser(page_data);
 	parsed.each_section(function(section, section_index) {
 		if (section_index === 0) {
@@ -1379,7 +1382,8 @@ function module_code(library_namespace) {
 		// set options[KEY_SESSION] for parse_date()
 		session : wiki
 	});
-	 * </code>
+
+	</code>
 	 */
 	function for_each_section(for_section, options) {
 		options = library_namespace.setup_options(options);
@@ -2405,7 +2409,7 @@ function module_code(library_namespace) {
 
 	parse {{Template:Single chart}}
 
-	 * </code>
+	</code>
 	 * 
 	 * 此功能之工作機制/原理：<br />
 	 * 找出完整的最小單元，並將之 push 入 queue，並把原 string 中之單元 token 替換成:<br />
@@ -4495,11 +4499,13 @@ function module_code(library_namespace) {
 	 * parse date string / 時間戳記 to {Date}
 	 * 
 	 * @example <code>
+
 	date_list = CeL.wiki.parse.date(CeL.wiki.content_of(page_data), {
 		get_timevalue : true,
 		get_all_list : true
 	});
-	 * </code>
+
+	</code>
 	 * 
 	 * @param {String}wikitext
 	 *            date text to parse.
@@ -4580,8 +4586,10 @@ function module_code(library_namespace) {
 	 * assert: the same as "~~~~~".
 	 * 
 	 * @example <code>
+
 	CeL.wiki.parse.date.to_String(new Date);
-	 * </code>
+
+	</code>
 	 */
 	function to_wiki_date(date, language) {
 		if (wiki_API.is_wiki_API(language)) {
@@ -4632,8 +4640,10 @@ function module_code(library_namespace) {
 	 * parse user name. 解析使用者/用戶對話頁面資訊。找出用戶頁、用戶討論頁、用戶貢獻頁的連結。
 	 * 
 	 * @example <code>
+
 	if (CeL.wiki.parse.user(CeL.wiki.title_link_of(title), user)) {}
-	 * </code>
+
+	</code>
 	 * 
 	 * TODO: 應該按照不同的維基項目來做篩選。
 	 * 
@@ -4689,13 +4699,15 @@ function module_code(library_namespace) {
 	 * parse all user name. 解析所有使用者/用戶對話頁面資訊。 CeL.wiki.parse.user.all()
 	 * 
 	 * @example <code>
+
 	// 取得各使用者的簽名數量hash。
 	var user_hash = CeL.wiki.parse.user.all(wikitext), user_list = Object.keys(user_hash);
 	// 取得依照第一次出現處排序、不重複的使用者序列。
 	var user_list = Object.keys(CeL.wiki.parse.user.all(wikitext));
 	// 取得依照順序出現的使用者序列。
 	var user_serial_list = CeL.wiki.parse.user.all(wikitext, true);
-	 * </code>
+
+	</code>
 	 * 
 	 * @param {String}wikitext
 	 *            wikitext to parse/check
@@ -5178,16 +5190,61 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// Using JSON.parse() instead of eval()
+	function eval_object(code) {
+		// library_namespace.log('eval_object: eval(' + code + ')');
+		// console.log(code);
+		// code = eval(code);
+
+		code = code.trim();
+		if (code.startsWith("'") && code.endsWith("'")) {
+			// '' to ""
+			code = code.replace(
+					/\\(.)|(.)/g,
+					function(all, escaped_character, character) {
+						if (character)
+							return character === '"' ? '\\"' : all;
+						return /^["\\\/bfnrtu]$/.test(escaped_character) ? all
+								: escaped_character;
+					}).replace(/^'|'$/g, '"');
+			code = code.replace(/\t/g, '\\t');
+		} else if (code.startsWith('"') && code.endsWith('"')) {
+			code = code.replace(/\\(.)/g, function(all, escaped_character) {
+				return /^["\\\/bfnrtu]$/.test(escaped_character) ? all
+						: escaped_character;
+			});
+			code = code.replace(/\t/g, '\\t');
+		}
+		try {
+			return JSON.parse(code);
+		} catch (e) {
+			console.trace('eval_object: Failed to parse code.');
+			console.log(JSON.stringify(code));
+			throw e;
+		}
+	}
+
 	// 簡易但很有可能出錯的 converter。
 	// object = CeL.wiki.parse.lua_object(page_data.wikitext);
 	// @see https://www.lua.org/manual/5.3/manual.html#3.1
 	// TODO: secutity check
 	function parse_lua_object_code(lua_code) {
-		// assert: true ===
-		// /^[\s\n]*return[\s\n]*{/.test(lua_code.replace(/(\n|^)\s*--[^\n]*/g,''))
+		if (!/^[\s\n]*return[\s\n]*{/.test(lua_code.replace(
+				/(\n|^)\s*--[^\n]*/g, ''))) {
+			library_namespace.warn('parse_lua_object_code: Invalid lua code? '
+			//
+			+ (typeof lua_code === 'string' && lua_code.length > 200
+			//
+			? lua_code.slice(0, 200) + '...' : lua_code));
+			return;
+		}
+
+		// --------------------------------------
+		// 將所有 String 轉存至 __strings，方便判別 Array, Object。
 
 		var __strings = [];
-		// fix `[=[ string ]=]`
+		library_namespace.debug("轉存 `[=[ string ]=]`", 7,
+				'parse_lua_object_code');
 		// an opening long bracket of level 1 is written as [=[, and so on.
 		lua_code = lua_code.replace(/\[(=*)\[([\s\S]*?)\](?:\1)\]/g, function(
 				all, equal_signs, string) {
@@ -5197,27 +5254,63 @@ function module_code(library_namespace) {
 			return "__strings[" + (__strings.length - 1) + "]";
 		});
 
-		// fix `"string"`
-		lua_code = lua_code.replace(/"(?:\\.|[^\\"]+)+"/g, function(all) {
+		// console.log(lua_code);
+		library_namespace.debug(
+				"Convert `\"string\"`, `'string'` to \"string\"", 6,
+				'parse_lua_object_code');
+		lua_code = lua_code
+				.replace(
+						/("(?:\\.|[^\\\n"])*"|'(?:\\.|[^\\\n'])*')(?:\\t|[\s\n]|--[^\n]*\n)*(?:(\.\.)(?:\\t|[\s\n]|--[^\n]*\n)*)?/g,
+						function(all, string, concatenation) {
+							string = eval_object(string);
+							return JSON.stringify(string)
+									+ (concatenation || '');
+						});
+		// console.log(lua_code);
+		if (false) {
+			library_namespace
+					.debug(
+							"remove comments after / between strings: `''..\\n--\\n''` , ``''--`",
+							6, 'parse_lua_object_code');
+			lua_code = lua_code
+					.replace_till_stable(
+							/"((?:\\.|[^\\"])*)"(?:\\t|[\s\n])*(\.\.(?:\\t|[\s\n])*)?--[^\n]*/g,
+							'$1$2');
+			// console.log(lua_code);
+		}
+
+		library_namespace.debug('concat `"string".."`', 6,
+				'parse_lua_object_code');
+		// Lua denotes the string concatenation operator by " .. " (two dots).
+		lua_code = lua_code
+				.replace_till_stable(
+						/("(?:\\.|[^\\"])+)"(?:\\t|[\s\n])*\.\.(?:\\t|[\s\n])*"/g,
+						'$1');
+
+		// console.log(lua_code);
+
+		library_namespace.debug('轉存 `"string"`', 6, 'parse_lua_object_code');
+		lua_code = lua_code.replace(/"(?:\\.|[^\\\n"])*"/g, function(all) {
 			// library_namespace.log(all);
 			__strings.push(JSON.parse(all));
 			return "__strings[" + (__strings.length - 1) + "]";
 		});
-		// fix `'string'`
-		lua_code = lua_code.replace(/'(?:\\.|[^\\']+)+'/g, function(all) {
-			// library_namespace.log(all);
-			__strings.push(eval(all));
-			return "__strings[" + (__strings.length - 1) + "]";
-		});
+		// console.log(lua_code);
 
 		// fix `-- comments` → `// comments`
 		// lua_code = lua_code.replace(/([\n\s]|^)\s*--/g, '$1//');
 		// fix `-- comments` → 直接消掉
-		lua_code = lua_code.replace(/([\n\s]|^)\s*--[^\n]*/g, '$1');
+		// lua_code = lua_code.replace(/([\n\s]|^)\s*--[^\n]*/g, '$1');
+		library_namespace.debug('remove all -- comments', 6,
+				'parse_lua_object_code');
+		lua_code = lua_code.replace(/--[^\n]*/g, '');
+
+		// console.log(lua_code);
 
 		// --------------------------------------
 		var __table_values = [];
-		// patch fieldsep ::= ‘,’ | ‘;’
+		library_namespace.debug('patch fieldsep ::= ‘,’ | ‘;’', 6,
+				'parse_lua_object_code');
 		lua_code = lua_code.replace_till_stable(/{([^{}]+)}/g, function(all,
 				fieldlist) {
 			// console.log(fieldlist);
@@ -5242,14 +5335,15 @@ function module_code(library_namespace) {
 				//
 				) || field.match(/^\[([\s\S]+)\][\s\n]*=([\s\S]+)$/);
 				if (matched) {
-					object_value[eval(matched[1])] = matched[2];
+					matched[1] = eval_object(matched[1]);
+					object_value[matched[1]] = matched[2].trim();
 					return;
 				}
 
 				// patch {Object}table: `{ name = exp }` → `{ name : exp }`
 				matched = field.match(/^([\w]+)[\s\n]*=([\s\S]+)$/);
 				if (matched) {
-					object_value[matched[1]] = matched[2];
+					object_value[matched[1]] = matched[2].trim();
 					return;
 				}
 
@@ -5277,6 +5371,9 @@ function module_code(library_namespace) {
 		// console.log(lua_code);
 
 		function recovery_code(code) {
+			if (!code) {
+				return code;
+			}
 			return code.replace(/__table_values\[(\d+)\]/g,
 			//
 			function(all, index) {
@@ -5284,18 +5381,25 @@ function module_code(library_namespace) {
 				// console.log(table_value);
 				if (Array.isArray(table_value)) {
 					table_value = table_value.map(recovery_code);
+					if (table_value[0] === undefined)
+						table_value[0] = JSON.stringify(null);
+					// console.log('[' + table_value + ']');
+					// console.log(table_value);
 					return '[' + table_value + ']';
 				}
 
 				var value_list = [];
 				for ( var name in table_value)
-					value_list.push(name + ':'
+					value_list.push(JSON.stringify(name) + ':'
 							+ recovery_code(table_value[name]));
 				return '{' + value_list + '}';
 			});
 		}
 
+		library_namespace.debug('recovery_code...', 6, 'parse_lua_object_code');
 		lua_code = recovery_code(lua_code);
+		// console.log(lua_code);
+
 		// --------------------------------------
 
 		lua_code = lua_code.replace_till_stable(/([^\w])nil([^\w])/g,
@@ -5303,8 +5407,27 @@ function module_code(library_namespace) {
 
 		// TODO: or, and
 
-		// library_namespace.log(lua_code);
-		lua_code = eval('(function(){' + lua_code + '})()');
+		if (false) {
+			library_namespace.log(lua_code);
+			lua_code = lua_code.replace(/([{,])\s*([a-z_][a-z_\d]*)\s*:/g,
+					'$1"$2":');
+			console.log(lua_code.replace_till_stable(
+			//
+			/\{(\s*[a-z_][a-z_\d]*\s*:\s*[a-z_][a-z_\d]*(\[\d+\])?\s*\,?)*\}/i,
+					'_'));
+		}
+		lua_code = lua_code.replace(/__strings\[(\d+)\]/g, function(all, id) {
+			return JSON.stringify(__strings[id]);
+		});
+		// lua_code = eval('(function(){' + lua_code + '})()');
+
+		lua_code = lua_code.replace(/^\s*return([\s\n{])/, '$1');
+		lua_code = lua_code.replace(/\t/g, '\\t');
+
+		// console.log(JSON.stringify(lua_code));
+		// console.log(JSON.stringify(lua_code.slice(6700)));
+		lua_code = JSON.parse(lua_code);
+		// console.log(lua_code);
 
 		return lua_code;
 	}
