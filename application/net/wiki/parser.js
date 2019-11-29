@@ -3120,7 +3120,7 @@ function module_code(library_namespace) {
 
 				var language_code = matched[3].trim(), convert_to
 				// 經過改變，需再進一步處理。
-				= parse_wikitext(matched[5].trim(), options, queue);
+				= parse_wikitext(matched[5], options, queue);
 				if (!convert_to) {
 					// 'converter-manual-rule-error'
 					return parse_wikitext(token, options, queue);
