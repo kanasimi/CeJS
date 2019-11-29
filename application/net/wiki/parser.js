@@ -2529,9 +2529,9 @@ function module_code(library_namespace) {
 			queue = [];
 		}
 
-		if (!queue.conversion_table) {
+		if (!options.conversion_table) {
 			// [[MediaWiki:Conversiontable/zh-hant]]
-			queue.conversion_table = Object.create(null);
+			options.conversion_table = Object.create(null);
 		}
 
 		if (typeof options.prefix === 'function')
@@ -3050,13 +3050,13 @@ function module_code(library_namespace) {
 				// these flags above are reserved for program
 
 				// remove convert (not implement)
-				'-' : true,
+				// '-' : true,
 
 				// add rule for convert code (but no display in placed code)
 				H : true,
 				// add rule for convert code (all text convert)
 				A : true
-			}) && queue.conversion_table;
+			}) && options.conversion_table;
 
 			// console.log('parameters: ' + JSON.stringify(parameters));
 			parameters = parameters.split(';');
@@ -3074,33 +3074,64 @@ function module_code(library_namespace) {
 				}
 			});
 			// console.log(conversion_list);
-			var convert_from = conversion_table && [];
+			var convert_from_list = conversion_table && [];
+			/**
+			 * <code>
+
+			-{zh-cn:cn; zh-tw:tw;}-
+			→
+			conversion_table['cn'] = conversion_table['tw'] =
+			{'zh-cn':'cn','zh-tw':'tw'}
+
+
+			-{txt=>zh-cn:cn; txt=>zh-tw:tw;}-
+			→
+			conversion_table['txt'] =
+			{'zh-cn':'cn','zh-tw':'tw'}
+
+
+			-{txt=>zh-cn:cn; zh-cn:cn; zh-tw:tw;}-
+			→
+			conversion_table['txt'] =
+			{'zh-cn':'cn'}
+			∪
+			conversion_table['cn'] = conversion_table['tw'] =
+			{'zh-cn':'cn','zh-tw':'tw'}
+
+			</code>
+			 */
 			conversion_list = conversion_list.map(function(token) {
 				var matched = token.match(PATTERN_conversion);
-				if (!matched) {
+				// console.log(matched);
+				if (!matched
+				// e.g., -{A|=>zh-tw:tw}-
+				|| matched[1] && !(matched[2] = matched[2].trim())) {
 					// 經過改變，需再進一步處理。
 					return parse_wikitext(token, options, queue);
 				}
 
 				// matched.shift();
 				matched = matched.slice(1);
+
 				// matched: [ 指定轉換字串, 指定轉換詞, spaces,
 				// this language code, colon, this language token, last spaces ]
 				if (!matched[6])
 					matched.pop();
-				conversion[matched[3]] = matched[5]
+
+				var language_code = matched[3].trim(), convert_to
 				// 經過改變，需再進一步處理。
-				= parse_wikitext(matched[5], options, queue);
-				var convert_to = conversion_table
-						&& typeof matched[5] === 'string' && matched[5].trim();
+				= parse_wikitext(matched[5].trim(), options, queue);
+				if (!convert_to) {
+					// 'converter-manual-rule-error'
+					return parse_wikitext(token, options, queue);
+				}
+				conversion[language_code] = convert_to;
 				if (!matched[2]) {
 					matched.splice(2, 1);
 				}
-				var _convert_from;
+				var specified_from;
 				if (matched[0]) {
-					if (conversion_table && matched[1]) {
-						_convert_from = matched[1].trim();
-					}
+					specified_from = matched[1];
 					matched.splice(1, 1);
 				} else {
 					matched.splice(0, 2);
@@ -3108,10 +3139,35 @@ function module_code(library_namespace) {
 				token = _set_wiki_type(matched, 'plain');
 				token.is_conversion = true;
 
-				if (_convert_from) {
-					conversion_table[_convert_from] = token;
-				} else if (convert_to) {
-					convert_from.push(convert_to);
+				if (!conversion_table) {
+					;
+				} else if (specified_from) {
+					if (!conversion_table[specified_from]) {
+						conversion_table[specified_from]
+						// Initialization
+						= Object.create(null);
+					} else if (conversion_table[specified_from].conversion) {
+						conversion_table[specified_from] = Object.clone(
+						// assert:
+						// conversion_table[specified_from].type==='convert'
+						conversion_table[specified_from].conversion);
+					}
+
+					if (options.conflict_conversion
+					// overwrite
+					&& conversion_table[specified_from][language_code]) {
+						options.conflict_conversion.call(conversion_table,
+								specified_from, language_code,
+								conversion_table[specified_from]
+								//
+								[language_code], convert_to);
+					}
+
+					conversion_table[specified_from][language_code]
+					// settle
+					= convert_to;
+				} else if (typeof convert_to === 'string') {
+					convert_from_list.push(convert_to);
 				}
 
 				return token;
@@ -3122,8 +3178,10 @@ function module_code(library_namespace) {
 			if (typeof _flag === 'string') {
 				parameters._flag = _flag;
 				parameters.flag = flag;
+				if (flag === 'T')
+					options.conversion_title = parameters;
 			}
-			convert_from && convert_from.forEach(function(token) {
+			convert_from_list && convert_from_list.forEach(function(token) {
 				conversion_table[token] = parameters;
 			});
 
@@ -4192,8 +4250,8 @@ function module_code(library_namespace) {
 			if (queue.switches)
 				wikitext.switches = queue.switches;
 
-			if (!library_namespace.is_empty_object(queue.conversion_table))
-				wikitext.conversion_table = queue.conversion_table;
+			if (!library_namespace.is_empty_object(options.conversion_table))
+				wikitext.conversion_table = options.conversion_table;
 			if (options.conversion_title)
 				wikitext.conversion_title = options.conversion_title;
 		}
