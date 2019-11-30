@@ -860,13 +860,16 @@ function module_code(library_namespace) {
 	wiki_API.KEY_subcategories = KEY_subcategories;
 
 	/**
-	 * get all categorymembers and subcategories in [KEY_subcategories]
+	 * traversal root_category, get all categorymembers and subcategories in
+	 * [KEY_subcategories]
 	 * 
 	 * @example<code>
 
-	wiki.category_tree('Category:公共轉換組模板', function(list) { l=list; });
+	wiki.category_tree('Category:公共轉換組模板', function(list) { page_list = list; });
 
 	</code>
+	 * 
+	 * 採用了 wiki_API.list()，將納進 wiki_API.prototype.next 的執行順序。
 	 * 
 	 * @param {String}root_category
 	 *            category to traversal
@@ -876,34 +879,70 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項 default: { depth : 10 }
 	 */
 	function category_tree(root_category, callback, options) {
+		if (typeof callback === 'object') {
+			// shift arguments.
+			options = callback;
+			callback = null;
+		}
+
 		var list_options = {
 			// [KEY_SESSION]
 			session : this,
 			type : 'categorymembers'
 		};
 
+		if (typeof options === 'function') {
+			options = {
+				for_each_page : options
+			};
+		} else if ((options | 0) >= 0) {
+			options = {
+				depth : options | 0
+			};
+		} else {
+			// including options.namespace
+			Object.assign(list_options, options);
+
+			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+			options = library_namespace.new_options(options);
+		}
+
 		function get_categorymembers(category, callback, depth) {
-			library_namespace.debug('Get categorymembers of '
-					+ wiki_API.title_link_of(category) + '...', 1,
-					'wiki_API__category_tree');
-			wiki_API.list(category, function(list/* , target, options */) {
+			function for_category_list(list/* , target, options */) {
 				// assert: Array.isArray(list)
 				if (list.error) {
 					callback(null, list.error);
 					return;
 				}
 
+				// ----------------------------------------
+
 				library_namespace.debug(wiki_API.title_link_of(category)
 						+ ': Get ' + list.length + ' item(s).', 1,
-						'wiki_API__category_tree');
+						'category_tree');
 				// console.log(list);
+				if (options.for_each_category) {
+					try {
+						options.for_each_category(list);
+					} catch (e) {
+						library_namespace.error(e);
+					}
+				}
 				depth--;
 
-				var remaining = 0, subcategories = Object.create(null);
-				var title = list.title;
-				list = list.filter(function(page_data) {
-					if (page_data.ns !== NS_category)
+				// ----------------------------------------
+
+				function page_filter(page_data) {
+					if (page_data.ns !== NS_category) {
+						if (options.for_each_page) {
+							try {
+								options.for_each_page(page_data);
+							} catch (e) {
+								library_namespace.error(e);
+							}
+						}
 						return true;
+					}
 
 					var page_name = page_data.title.replace(
 					// @see PATTERN_category @ CeL.wiki
@@ -919,10 +958,14 @@ function module_code(library_namespace) {
 					get_categorymembers(page_data, function(sub_list, error) {
 						subcategories[page_name] = sub_list;
 						if (--remaining === 0)
-							callback(list);
+							callback(options.no_list || list);
 					}, depth);
 					return false;
-				});
+				}
+
+				var remaining = 0, subcategories = Object.create(null);
+				var title = list.title;
+				list = list.filter(page_filter);
 				// recovery attributes
 				list.title = title;
 				if (remaining > 0) {
@@ -930,23 +973,27 @@ function module_code(library_namespace) {
 					// waiting for get_categorymembers()
 				} else {
 					if (depth === 0
-							&& !library_namespace
-									.is_empty_object(subcategories)) {
+					//
+					&& !library_namespace.is_empty_object(subcategories)) {
 						list[KEY_subcategories] = subcategories;
 					} else {
 						// No subcategory
 					}
-					callback(list);
+					callback(options.no_list || list);
 				}
 
-			}, list_options);
+			}
+
+			library_namespace.debug('Get categorymembers of '
+					+ wiki_API.title_link_of(category) + '...', 1,
+					'category_tree');
+
+			wiki_API.list(category, for_category_list, list_options);
 		}
 
-		// for wiki_API.prototype..next: 將會在 wiki_API.list() 隨即被喚醒。
-		// this.running = false;
-		get_categorymembers(root_category, callback,
-				(typeof options === 'number' ? options | 0 : options
-						&& (options.depth | 0))
+		get_categorymembers(root_category, callback
+				|| library_namespace.null_function,
+				((typeof options === 'number' ? options : options.depth) | 0)
 						|| category_tree.default_depth);
 	}
 

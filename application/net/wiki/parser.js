@@ -3153,7 +3153,7 @@ function module_code(library_namespace) {
 						conversion_table[specified_from].conversion);
 					}
 
-					if (options.conflict_conversion
+					if (false && options.conflict_conversion
 					// overwrite
 					&& conversion_table[specified_from][language_code]) {
 						options.conflict_conversion.call(conversion_table,
@@ -5287,6 +5287,7 @@ function module_code(library_namespace) {
 	// @see https://www.lua.org/manual/5.3/manual.html#3.1
 	// TODO: secutity check
 	function parse_lua_object_code(lua_code) {
+		lua_code = wiki_API.content_of(page_data);
 		if (!/^[\s\n]*return[\s\n]*{/.test(lua_code.replace(
 				/(\n|^)\s*--[^\n]*/g, ''))) {
 			library_namespace.warn('parse_lua_object_code: Invalid lua code? '

@@ -1256,9 +1256,9 @@ function module_code(library_namespace) {
 	// 分類名稱重複時，排序索引以後出現者為主。
 	var
 	// [ all_category_text, category_name, sort_order, post_space ]
-	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ) *: *([^\[\]\|{}\n]+)(?:\s*\|\s*([^\[\]\|�]*))?\]\](\s*\n?)/ig,
+	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}\n]+)(?:\s*\|\s*([^\[\]\|�]*))?\]\](\s*\n?)/ig,
 	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
-	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ) *: *([^\[\]\|{}\n�]+)/i;
+	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}\n�]+)/i;
 
 	// ------------------------------------------------------------------------
 
@@ -2099,6 +2099,9 @@ function module_code(library_namespace) {
 			}, this.next_mark, next[3]));
 			break;
 
+		// case 'category_tree':
+		// @see wiki_API.prototype.category_tree @ application.net.wiki.list
+
 		case 'search':
 			wiki_API.search([ this.API_URL, next[1] ],
 			//
@@ -2896,7 +2899,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|search|remove|delete|move_to|protect|rollback|logout|run|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|search|remove|delete|move_to|protect|rollback|logout|run|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------
@@ -3657,7 +3660,7 @@ function module_code(library_namespace) {
 						// 在編輯摘要中加上使用者連結，似乎還不至於驚擾到使用者。因此還不用特別處理。
 						config.summary.replace(/</g, '&lt;').replace(
 						// @see PATTERN_category @ CeL.wiki
-						/\[\[\s*(Category|分類|分类|カテゴリ)\s*:/ig, '[[:$1:'));
+						/\[\[\s*(Category|分類|分类|カテゴリ|분류)\s*:/ig, '[[:$1:'));
 					}
 				}
 
