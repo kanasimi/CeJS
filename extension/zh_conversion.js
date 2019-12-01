@@ -7,6 +7,7 @@
  * 
  * @fileoverview 本檔案包含了繁體/簡體中文轉換的 functions。
  * @example <code>
+
 	// 在非 Windows 平台上避免 fatal 錯誤。
 	CeL.env.ignore_COM_error = true;
 	// load module for CeL.CN_to_TW('简体')
@@ -17,122 +18,153 @@
 		var text = CeL.CN_to_TW('简体中文文字');
 		CeL.CN_to_TW.file('from.htm', 'to.htm', 'utf-8');
 	});
+
  </code>
- * @see
+ * @see https://github.com/BYVoid/OpenCC
  * @since 2014/6/17 22:39:16
  */
 
 'use strict';
 
-if (typeof CeL === 'function')
-	CeL.run({
-		name : 'extension.zh_conversion',
-		require : 'data.pair|application.OS.Windows.file.',
-		code : function(library_namespace) {
-			// requiring
-			var pair = this.r('pair');
+// --------------------------------------------------------------------------------------------
 
-			/**
-			 * null module constructor
-			 * 
-			 * @class 中文繁簡轉換的 functions
-			 */
-			var _// JSDT:_module_
-			= function() {
-				// null module constructor
-			};
+// 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
+typeof CeL === 'function' && CeL.run({
+	// module name
+	name : 'extension.zh_conversion',
 
-			/**
-			 * for JSDT: 有 prototype 才會將之當作 Class
-			 */
-			_// JSDT:_module_
-			.prototype = {};
+	require : 'data.pair|application.OS.Windows.file.',
 
-			var FLAG = 'gi', CN_to_TW_conversions,
-			// using BYVoid / OpenCC 開放中文轉換 (Open Chinese Convert) table.
-			// https://github.com/BYVoid/OpenCC/tree/master/data/dictionary
-			dictionary_base = library_namespace.get_module_path(this.id,
-					'OpenCC' + library_namespace.env.path_separator);
-			// console.log('dictionary_base: ' + dictionary_base);
+	// 設定不匯出的子函式。
+	// no_extend : '*',
 
-			function CN_to_TW(text, options) {
-				if (!CN_to_TW_conversions) {
-					// initialization.
-					CN_to_TW_conversions = (
-					//
-					'STPhrases,STCharacters,TWPhrasesName,TWPhrasesIT'
-					// 因此得要一個個 replace。
-					+ ',TWPhrasesOther,TWVariants,TWVariantsRevPhrases')
-							.split(',');
+	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
+	code : module_code
+});
 
-					CN_to_TW_conversions.forEach(function(file_name, index) {
-						CN_to_TW_conversions[index]
-						// 載入 resource。
-						= new pair(null, {
-							path : dictionary_base + file_name + '.txt',
-							item_processor : function(item) {
-								return item.replace(/ .+$/, '');
-							}
-						});
-					});
+function module_code(library_namespace) {
+	// requiring
+	var pair = this.r('pair');
 
-					// 手動修正表。
-					CN_to_TW_conversions.push(new pair(null, {
-						path : dictionary_base.replace(/[^\\\/]+[\\\/]$/,
-								'corrections.txt'),
-						remove_comments : true
-					}));
+	/**
+	 * null module constructor
+	 * 
+	 * @class 中文繁簡轉換的 functions
+	 */
+	var _// JSDT:_module_
+	= function() {
+		// null module constructor
+	};
 
-					// 設定事前轉換表。
-					if (CN_to_TW.pre)
-						CN_to_TW_conversions.unshift(new pair(CN_to_TW.pre, {
-							flag : CN_to_TW.flag || FLAG
-						}));
+	/**
+	 * for JSDT: 有 prototype 才會將之當作 Class
+	 */
+	_// JSDT:_module_
+	.prototype = {};
 
-					// 設定事後轉換表。
-					if (CN_to_TW.post)
-						CN_to_TW_conversions.push(new pair(CN_to_TW.post, {
-							flag : CN_to_TW.flag || FLAG
-						}));
-				}
+	// ------------------------------------------------------------------------
 
-				// 事前轉換表。
-				if (options && options.pre)
-					text = (new pair(options.pre, {
-						flag : options.flag || FLAG
-					})).convert(text);
+	var FLAG = 'gi',
+	// using BYVoid / OpenCC 開放中文轉換 (Open Chinese Convert) table.
+	// https://github.com/BYVoid/OpenCC/tree/master/data/dictionary
+	dictionary_base = library_namespace.get_module_path(this.id, 'OpenCC'
+			+ library_namespace.env.path_separator);
+	// console.log('dictionary_base: ' + dictionary_base);
 
-				CN_to_TW_conversions.forEach(function(conversion) {
-					text = conversion.convert(text);
-				});
-
-				// 事後轉換表。
-				if (options && options.post)
-					text = (new pair(options.post, {
-						flag : options.flag || FLAG
-					})).convert(text);
-
-				return text;
-			}
-
-			// 提供自行更改的功能。
-			CN_to_TW.conversions = CN_to_TW_conversions;
-
-			CN_to_TW.file = function(from, to, target_encoding) {
-				var text = library_namespace.get_file(from);
-				text = CN_to_TW(text);
-				library_namespace.write_file(to, text, target_encoding);
-			};
-
-			// 事前事後轉換表須事先設定。
-			// 可以 Object.assign(CeL.CN_to_TW.pre = {}, {}) 來新增事前轉換表。
-			// CN_to_TW.pre = {};
-			// CN_to_TW.post = {};
-
-			_.CN_to_TW = CN_to_TW;
-
-			return (_// JSDT:_module_
-			);
+	function CN_to_TW(text, options) {
+		if (!CN_to_TW.conversions) {
+			CN_to_TW.initialization();
 		}
 
-	});
+		// 事前轉換表。
+		if (options && options.pre)
+			text = (new pair(options.pre, {
+				flag : options.flag || FLAG
+			})).convert(text);
+
+		CN_to_TW.conversions.forEach(function(conversion) {
+			text = conversion.convert(text);
+		});
+
+		// 事後轉換表。
+		if (options && options.post)
+			text = (new pair(options.post, {
+				flag : options.flag || FLAG
+			})).convert(text);
+
+		return text;
+	}
+
+	CN_to_TW.files = ('STPhrases,STCharacters,TWPhrasesName,TWPhrasesIT'
+	// 因此得要一個個 replace。
+	+ ',TWPhrasesOther,TWVariants,TWVariantsRevPhrases').split(',');
+
+	CN_to_TW.initialization = function() {
+		CN_to_TW.conversions = CN_to_TW.files.map(function(file_name, index) {
+			// 載入 resource。
+			return new pair(null, {
+				path : dictionary_base + file_name + '.txt',
+				item_processor : function(item) {
+					return item.replace(/ .+$/, '');
+				}
+			});
+		});
+
+		// 手動修正表。
+		CN_to_TW.conversions.push(new pair(null, {
+			path : dictionary_base
+					.replace(/[^\\\/]+[\\\/]$/, 'corrections.txt'),
+			remove_comments : true
+		}));
+
+		// 設定事前轉換表。
+		if (CN_to_TW.pre)
+			CN_to_TW.conversions.unshift(new pair(CN_to_TW.pre, {
+				flag : CN_to_TW.flag || FLAG
+			}));
+
+		// 設定事後轉換表。
+		if (CN_to_TW.post)
+			CN_to_TW.conversions.push(new pair(CN_to_TW.post, {
+				flag : CN_to_TW.flag || FLAG
+			}));
+	};
+
+	CN_to_TW.file = function(from, to, target_encoding) {
+		var text = library_namespace.get_file(from);
+		text = CN_to_TW(text);
+		library_namespace.write_file(to, text, target_encoding);
+	};
+
+	// 事前事後轉換表須事先設定。
+	// 可以 Object.assign(CeL.CN_to_TW.pre = {}, {}) 來新增事前轉換表。
+	// CN_to_TW.pre = {};
+	// CN_to_TW.post = {};
+
+	// CN_to_TW.conversions: 提供自行更改的功能。
+
+	// ------------------------------------------------------------------------
+
+	var opencc_s2t;
+
+	function CN_to_TW_opencc(text, options) {
+		// Sync API
+		return opencc_s2t.convertSync(text);
+	}
+
+	// ------------------------------------------------------------------------
+	// export
+
+	try {
+		var OpenCC = require('opencc');
+		// Load the default Simplified to Traditional config
+		opencc_s2t = new OpenCC('s2t.json');
+		_.CN_to_TW = CN_to_TW_opencc;
+	} catch (e) {
+		_.CN_to_TW = CN_to_TW;
+	}
+
+	return (_// JSDT:_module_
+	);
+
+}
