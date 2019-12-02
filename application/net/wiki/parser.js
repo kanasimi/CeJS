@@ -2168,19 +2168,19 @@ function module_code(library_namespace) {
 			return this.join('');
 		},
 		// 手工字詞轉換 language conversion -{}-
-		convert : function(language, lang_fallbacks) {
+		convert : function(language, lang_fallbacks, force_show) {
 			if (!language) {
 				return '-{' + ('_flag' in this ? this._flag + '|' : '')
 						+ this.join(';') + '}-';
 			}
 
 			var flag = this.flag;
-			if (flag in {
+			if (!force_show && (flag in {
 				// add rule for convert code (but no display in placed code)
 				H : true,
 				T : true,
 				'-' : true
-			}) {
+			})) {
 				return '';
 			}
 
@@ -2216,7 +2216,25 @@ function module_code(library_namespace) {
 				}
 			}
 
-			return this.conversion[language]
+			var convert_to = this.conversion[language];
+			if (Array.isArray(convert_to)) {
+				// e.g., -{H|zh-tw:a-{b}-c}-
+				var not_all_string;
+				convert_to = convert_to.map(function(token) {
+					if (typeof token === 'string')
+						return token;
+					if (token.type === 'convert'
+							&& typeof token.converted === 'string')
+						return token.converted;
+					not_all_string = true;
+				});
+				if (!not_all_string)
+					convert_to = convert_to.join('');
+				else
+					convert_to = this.conversion[language];
+			}
+
+			return convert_to
 			// 在手动语言转换规则中检测到错误
 			|| 'converter-manual-rule-error';
 		},
@@ -3168,6 +3186,20 @@ function module_code(library_namespace) {
 					= convert_to;
 				} else if (typeof convert_to === 'string') {
 					convert_from_list.push(convert_to);
+				} else if (convert_to && convert_to.type === 'plain') {
+					// -{H|zh-cn:俄-{匊}-斯;zh-tw:俄-{匊}-斯;zh-hk:俄-{匊}-斯;}-
+					// 當作 "俄匊斯"
+					var not_all_string;
+					convert_to = convert_to.map(function(token) {
+						if (typeof token === 'string')
+							return token;
+						if (token.type === 'convert'
+								&& typeof token.converted === 'string')
+							return token.converted;
+						not_all_string = true;
+					});
+					if (!not_all_string)
+						convert_from_list.push(convert_to.join(''));
 				}
 
 				return token;
@@ -3184,6 +3216,8 @@ function module_code(library_namespace) {
 			convert_from_list && convert_from_list.forEach(function(token) {
 				conversion_table[token] = parameters;
 			});
+			// console.log(JSON.stringify(wikitext));
+			// console.log(conversion_table);
 
 			if (queue.switches && (queue.switches.__NOCC__
 			// 使用魔術字 __NOCC__ 或 __NOCONTENTCONVERT__ 可避免轉換。
@@ -5287,7 +5321,7 @@ function module_code(library_namespace) {
 	// @see https://www.lua.org/manual/5.3/manual.html#3.1
 	// TODO: secutity check
 	function parse_lua_object_code(lua_code) {
-		lua_code = wiki_API.content_of(page_data);
+		lua_code = wiki_API.content_of(lua_code);
 		if (!/^[\s\n]*return[\s\n]*{/.test(lua_code.replace(
 				/(\n|^)\s*--[^\n]*/g, ''))) {
 			library_namespace.warn('parse_lua_object_code: Invalid lua code? '
@@ -5615,7 +5649,7 @@ function module_code(library_namespace) {
 
 	</code>
 	 */
-	wiki_API.table_to_array = function(page_data, options) {
+	function table_to_array(page_data, options) {
 		if (!wiki_API.is_page_data(page_data)) {
 			library_namespace.error('Invalid page data!');
 			return;
@@ -5734,7 +5768,31 @@ function module_code(library_namespace) {
 		}
 
 		return array;
-	};
+	}
+
+	function array_to_table(array, options) {
+		options = library_namespace.setup_options(options);
+
+		var table = [ '{|' + ' class="' + (options['class'] || 'wikitable')
+				+ '"' ];
+		if (options.caption)
+			table[0] += '\n|+ ' + options.caption;
+
+		array.forEach(function(line, index) {
+			if (!options.no_header && index === 0) {
+				if (Array.isArray(line))
+					line = line.join(' !! ');
+				table.push('! ' + line);
+				return;
+			}
+
+			if (Array.isArray(line))
+				line = line.join(' || ');
+			table.push('| ' + line);
+		});
+
+		return table.join('\n|-\n') + '\n|}';
+	}
 
 	// ------------------------------------------------------------------------
 
@@ -5756,6 +5814,9 @@ function module_code(library_namespace) {
 		DEFINITION_LIST : DEFINITION_LIST,
 
 		section_link : section_link,
+
+		table_to_array : table_to_array,
+		array_to_table : array_to_table,
 
 		parse : parse_wikitext
 	// parser : page_parser,
