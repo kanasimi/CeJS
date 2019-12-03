@@ -260,6 +260,18 @@ function module_code(library_namespace) {
 			ebook.set_cover(this.full_URL(work_data.image));
 		}
 
+		if (this.vertical_writing) {
+			ebook.add({
+				// title : 'mainstyle',
+				file : 'main_style.css'
+			},
+			// https://en.wikipedia.org/wiki/Horizontal_and_vertical_writing_in_East_Asian_scripts
+			// 東亞文字排列方向 垂直方向自右而左的書寫方式。即 top-bottom-right-left
+			'html { writing-mode: vertical-rl;'
+			// https://blog.tommyku.com/blog/how-to-make-epubs-with-vertical-layout/
+			+ ' -epub-writing-mode: vertical-rl; }');
+		}
+
 		return work_data[this.KEY_EBOOK] = ebook;
 	}
 
@@ -571,12 +583,15 @@ function module_code(library_namespace) {
 	// ebook_path.call(this, work_data, file_name)
 	function ebook_path(work_data, file_name) {
 		if (!file_name) {
+			// e.g., "(一般小説) [author] title [site 20170101 1話].id.epub"
 			file_name = [
 					'(一般小説) [',
 					work_data.author,
 					'] ',
-					work_data.title,
-					// e.g., "(一般小説) [author] title [site 20170101 1話].id.epub"
+					this.convert_to_TW
+					//
+					? library_namespace.CN_to_TW(work_data.title)
+							: work_data.title,
 					' [',
 					work_data.site_name,
 					' ',
@@ -587,6 +602,9 @@ function module_code(library_namespace) {
 					//
 					+ (work_data.chapter_unit || this.chapter_unit) : '',
 					']',
+					this.vertical_writing === true ? ' ('
+							+ (/^ja/.test(work_data.language) ? '縦書き' : '縱書')
+							+ ')' : '',
 					this.convert_to_TW ? ' ('
 					//
 					+ library_namespace.gettext.to_standard('cmn-Hant-TW')

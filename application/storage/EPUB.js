@@ -90,7 +90,9 @@ function module_code(library_namespace) {
 	// requiring
 	var
 	// library_namespace.locale.gettext
-	gettext = this.r('gettext');
+	gettext = this.r('gettext'),
+	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
+	NOT_FOUND = ''.indexOf('_');
 
 	var mimetype_filename = 'mimetype',
 	// http://www.idpf.org/epub/dir/
@@ -959,7 +961,7 @@ function module_code(library_namespace) {
 
 	function normalize_item(item_data, strict) {
 		if (is_manifest_item(item_data)) {
-			if (strict && ([ KEY_DATA ] in item_data)) {
+			if (strict && (KEY_DATA in item_data)) {
 				item_data = Object.clone(item_data);
 				// item[KEY_DATA] 必須在 write_chapters() 時去除掉。
 				delete item_data[KEY_DATA];
@@ -1103,10 +1105,6 @@ function module_code(library_namespace) {
 
 		return item;
 	}
-
-	var
-	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
-	NOT_FOUND = ''.indexOf('_');
 
 	function index_of_chapter(title) {
 		rebuild_index_of_id.call(this);
@@ -1636,6 +1634,13 @@ function module_code(library_namespace) {
 				// content="text/html; charset=UTF-8" />
 				'<meta charset="UTF-8" />' ];
 
+				this.resources.forEach(function(resource) {
+					if (resource['media-type'] === 'text/css') {
+						// add all styles
+						html.push('<link rel="stylesheet" type="text/css" href="' + resource.href + '" />');
+					}
+				});
+
 				// console.log([ contents.title, contents.sub_title ]);
 				html.push('<title>', [ contents.title, contents.sub_title ]
 				//
@@ -1672,7 +1677,7 @@ function module_code(library_namespace) {
 				// ------------------------------
 
 				// 將作品資訊欄位置右。
-				html.push('<div id="chapter_information" style="float:right">');
+				html.push('<div id="chapter_information" style="float:right;">');
 
 				if (item_data.date) {
 					// 掲載日/掲載開始日, 最新投稿/最終投稿日
@@ -1825,8 +1830,9 @@ function module_code(library_namespace) {
 				// remove_chapter.call(this, item, true);
 			}
 
+			// console.log(item);
 			// chapter or resource
-			add_manifest_item.call(this, item, false);
+			add_manifest_item.call(this, item,item['media-type'] === 'text/css');
 		}
 		return item;
 	}
@@ -1899,9 +1905,18 @@ function module_code(library_namespace) {
 		//
 		' xmlns:epub="http://www.idpf.org/2007/ops">',
 		// The 'head' element should have a 'title' child element.
-		'<head><meta charset="UTF-8" /><title>', book_title, '</title></head>',
+		'<head>', '<meta charset="UTF-8" />' ];
+
+		this.resources.forEach(function(resource) {
+			if (resource['media-type'] === 'text/css') {
+				// add all styles
+				TOC_html.push('<link rel="stylesheet" type="text/css" href="' + resource.href + '" />');
+			}
+		});
+
+		TOC_html.push('<title>', book_title, '</title>', '</head>',
 		//
-		'<body>', '<h1>', book_title, '</h1>' ];
+		'<body>', '<h1>', book_title, '</h1>');
 
 		this.resources.some(function(resource) {
 			if (resource.properties = "cover-image") {
