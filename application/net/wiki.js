@@ -740,6 +740,10 @@ function module_code(library_namespace) {
 		}
 		var namespace_hash = options.namespace_hash || get_namespace.hash;
 
+		if (Array.isArray(namespace)) {
+			namespace = namespace.join('|');
+		}
+
 		if (typeof namespace === 'string') {
 			var list = [];
 			namespace.replace(/[_\s]+/g, '_').toLowerCase()
@@ -4303,6 +4307,7 @@ function module_code(library_namespace) {
 	// ========================================================================
 
 	// Wikimedia project code alias
+	// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageCode_8php_source.html
 	// https://github.com/wikimedia/mediawiki/blob/master/languages/LanguageCode.php
 	// language_code_to_site_alias[language code] = project code
 	// @see function language_to_site_name(language, project)
