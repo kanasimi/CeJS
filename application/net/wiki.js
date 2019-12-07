@@ -3192,7 +3192,9 @@ function module_code(library_namespace) {
 		nochange_count = 0;
 
 		if (Array.isArray(pages) && pages.length === 0) {
-			library_namespace.info('wiki_API.work: 列表中沒有項目，快速完結。');
+			if (!config.no_warning) {
+				library_namespace.info('wiki_API.work: 列表中沒有項目，快速完結。');
+			}
 			if (typeof config.last === 'function') {
 				this.run(config.last.bind(options));
 			}
@@ -3400,7 +3402,7 @@ function module_code(library_namespace) {
 						+ ') !== this slice size (' + this_slice_size + ') ！');
 					}
 
-				} else {
+				} else if (!config.no_warning) {
 					// TODO: 此時應該沒有 .continue。
 					library_namespace.warn('wiki_API.work: 取得 ' + data.length
 							+ '/' + this_slice_size + ' 個頁面，應有 '
