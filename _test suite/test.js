@@ -3073,7 +3073,7 @@ function test_wiki() {
 		wikitext = "'''[[哥伦拜恩中学|-{A|zh-hans:哥伦拜恩中学;zh-hant:科倫拜中學}-]]'''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 
-		wikitext = "-{H|zh-cn:俄-{匊}-斯;zh-tw:俄-{匊}-斯;zh-hk:俄-{匊}-斯;}-"; parsed = CeL.wiki.parser(wikitext).parse();
+		wikitext = "-{H|zh-cn:俄-{匊}-斯;zh-tw:俄-{匊}-斯;zh-hk:俄-{匊}-斯;}- "; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['', parsed.conversion_table.俄匊斯.toString('zh-tw')], 'conversion_table 1');
 		assert(['俄匊斯', parsed.conversion_table.俄匊斯.toString('zh-tw', null, true)], 'conversion_table force_show');
