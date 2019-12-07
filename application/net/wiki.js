@@ -3547,7 +3547,7 @@ function module_code(library_namespace) {
 								+ ' 開始' : '') + '。', 1, 'wiki_API.work');
 				pages = pages.slice(0, pages.OK_length);
 
-			} else if (pages.length !== this_slice_size) {
+			} else if (!config.no_warning && pages.length !== this_slice_size) {
 				// assert: data.length < this_slice_size
 				library_namespace.warn('wiki_API.work: 取得 ' + pages.length
 						+ '/' + this_slice_size + ' 個頁面，應有 '

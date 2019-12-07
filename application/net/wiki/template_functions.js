@@ -342,14 +342,15 @@ function module_code(library_namespace) {
 
 			if (token.parameters.multi) {
 				item = [ item ];
-				for (var i = 2; i < 9 && token.parameters['date' + i]; i++) {
+				for (var index = 2; index < 9
+						&& token.parameters['date' + index]; index++) {
 					item.push({
-						date : token.parameters['date' + i],
-						result : token.parameters['result' + i] || '保留',
-						page : token.parameters['page' + i],
-						target : token.parameters['target' + i]
+						date : token.parameters['date' + index],
+						result : token.parameters['result' + index] || '保留',
+						page : token.parameters['page' + index],
+						target : token.parameters['target' + index]
 					});
-					if (i > 5) {
+					if (index > 5) {
 						library_namespace.warn(
 						//
 						'parse_Old_vfd_multi: Invalid NO: ' + index);
@@ -375,8 +376,99 @@ function module_code(library_namespace) {
 		}
 	}
 
+	function assign_properties(object, properties, value_mapper) {
+		for ( var key in properties) {
+			var value = properties[key];
+			if (value_mapper)
+				value = value_mapper[value];
+			if (value
+			// String(value) === ''
+			|| value === '' || value === 0) {
+				object[key] = value;
+			}
+		}
+	}
+
+	function revert_object_key_value(object) {
+		var new_object;
+		for ( var key in object) {
+			new_object[object[key]] = key;
+		}
+		return new_object;
+	}
+
+	function item_list_to_template_object(item_list) {
+		var template_object = Object.create(null);
+
+		item_list.forEach(function(item, index) {
+			if (index === 0) {
+				assign_properties(template_object, {
+					'1' : item.date,
+					'2' : item.result,
+					page : item.page,
+					// move to, merge to, redirect to
+					'3' : item.target
+				});
+				return;
+			}
+
+			index++;
+			var mapper = revert_object_key_value({
+				date : 'date' + index,
+				result : 'result' + index,
+				page : 'page' + index,
+				target : 'target' + index
+			});
+			assign_properties(template_object, mapper, item);
+		});
+
+		return template_object;
+	}
+
+	/**
+	 * 將 parameters 形式的 object 轉成 wikitext。
+	 * 
+	 * @param {String}
+	 *            template_name template name
+	 * @param {Object}
+	 *            object parameters 形式的 object。 e.g., { '1': value, '2': value,
+	 *            parameter1 : value1 }
+	 * 
+	 * @inner
+	 */
+	function template_object_to_string(template_name, object) {
+		var string_list = [ '{{' + template_name ];
+
+		for ( var key in object) {
+			var value = object[key];
+			if (value
+			// String(value) === ''
+			|| value === '' || value === 0) {
+				string_list.push(key + '=' + value);
+			}
+		}
+
+		return string_list.join('|') + '}}';
+	}
+
+	/**
+	 * 將 page_data 中的 {{Old vfd multi}} 替換成 replace_to。
+	 * 
+	 * @param {Object|String}
+	 *            page_data
+	 * @param {Array|Object|String}
+	 *            replace_to
+	 */
 	function replace_Old_vfd_multi(page_data, replace_to) {
 		var parsed = get_parsed(page_data);
+
+		// normalize replace_to
+		if (Array.isArray(replace_to)) {
+			replace_to = item_list_to_template_object(replace_to);
+		}
+		if (typeof replace_to === 'object') {
+			replace_to = template_object_to_string('Old vfd multi', replace_to);
+		}
 
 		parsed.each('template', function(token) {
 			if (token.name in Old_vfd_multi_names)
