@@ -880,7 +880,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項 default: { depth : 10 }
 	 */
 	function category_tree(root_category, callback, options) {
-		if (typeof callback === 'object') {
+		if (typeof callback === 'object' && !options) {
 			// shift arguments.
 			options = callback;
 			callback = null;

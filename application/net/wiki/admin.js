@@ -201,6 +201,11 @@ function module_code(library_namespace) {
 			tags : false
 		};
 
+		if (!options || !options.reason) {
+			library_namespace
+					.warn('wiki_API.move_to: Should set reason when moving page!');
+		}
+
 		/**
 		 * response: <code>
 		{"error":{"code":"nosuchpageid","info":"There is no page with ID 0.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1277"}

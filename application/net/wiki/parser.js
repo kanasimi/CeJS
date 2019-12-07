@@ -3033,8 +3033,8 @@ function module_code(library_namespace) {
 		// TODO: <source></source>內之-{}-無效。
 		// TODO:
 		// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
-		wikitext = wikitext.replace_till_stable(/-{(.*?)}-/g, function(all,
-				parameters) {
+
+		function parse_language_conversion(all, parameters) {
 			// -{...}- 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('-{'), previous;
 			if (index > 0) {
@@ -3157,7 +3157,7 @@ function module_code(library_namespace) {
 				// 語言代碼 language variant 用字模式
 				var language_code = matched[3].trim(), convert_to
 				// 經過改變，需再進一步處理。
-				= parse_wikitext(matched[5], options, queue);
+				= matched[5] = parse_wikitext(matched[5], options, queue);
 				if (!convert_to) {
 					// 'converter-manual-rule-error'
 					return parse_wikitext(token, options, queue);
@@ -3221,6 +3221,7 @@ function module_code(library_namespace) {
 						convert_from_list.push(convert_to.join(''));
 				}
 
+				// console.log(JSON.stringify(token));
 				return token;
 			});
 			// console.log(conversion_list);
@@ -3254,7 +3255,10 @@ function module_code(library_namespace) {
 
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark;
-		});
+		}
+
+		wikitext = wikitext.replace_till_stable(/-{(.*?)}-/g,
+				parse_language_conversion);
 
 		// ----------------------------------------------------
 		// wikilink
