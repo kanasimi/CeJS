@@ -222,6 +222,7 @@ function module_code(library_namespace) {
 
 		// 請求無效
 		rep : '重複提出，無效',
+		ne : 'notexist|目標頁面或檔案不存在',
 		nq : 'notqualified|提刪者未取得提刪資格',
 		// 保留
 		dan : '刪後重建',
