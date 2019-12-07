@@ -2411,6 +2411,29 @@ function module_code(library_namespace) {
 		upright : 'size'
 	};
 
+	function join_string_of_array(array) {
+		for (var index = 1; index < array.length;) {
+			if (typeof array[index] !== 'string') {
+				index++;
+				continue;
+			}
+
+			if (array[index] === '') {
+				array.splice(index, 1);
+				continue;
+			}
+
+			if (typeof array[index - 1] === 'string') {
+				array[index - 1] += array[index];
+				array.splice(index, 1);
+			} else {
+				index++;
+			}
+		}
+
+		return array;
+	}
+
 	/**
 	 * parse The MediaWiki markup language (wikitext). 解析維基語法。
 	 * 
@@ -3275,10 +3298,8 @@ function module_code(library_namespace) {
 		// TODO: bug: 正常情況下 "[[ ]]" 不會被 parse，但是本函數還是會 parse 成 link。
 		// TODO: [[::zh:title]] would be rendered as plaintext
 
-		wikitext = wikitext.replace_till_stable(
-		// or use ((PATTERN_link))
-		PATTERN_wikilink_global, function(all_link, page_and_section,
-				page_name, section_title, displayed_text) {
+		function parse_wikilink(all_link, page_and_section, page_name,
+				section_title, displayed_text) {
 			// 自 end_mark 向前回溯。
 			var previous;
 			if (displayed_text && displayed_text.includes('[[')) {
@@ -3323,7 +3344,18 @@ function module_code(library_namespace) {
 				if (page_name.includes(include_mark)) {
 					// 預防有特殊 elements 置入link其中。
 					page_name = parse_wikitext(page_name, options, queue);
-					page_name.oddly = true;
+					if (false) {
+						console.log([ all_link, page_and_section, page_name,
+								section_title, displayed_text ]);
+					}
+					if (page_name.some(function(token) {
+						return token.is_link;
+					})) {
+						// e.g., [[:[[Portal:中國大陸新聞動態|中国大陆新闻]] 3月16日新闻]]
+						page_name.oddly = 'link_inside_link';
+					} else {
+						page_name.oddly = true;
+					}
 				} else {
 					// TODO: normalize 對 [[文章名稱 : 次名稱]] 可能出現問題。
 					page_name = page_name.split(normalize ? /\s*:\s*/ : ':');
@@ -3522,32 +3554,47 @@ function module_code(library_namespace) {
 					parameters.push(parameters.caption);
 				}
 			}
-			if (file_matched || category_matched) {
-				// shown by link, is a linking to a file
-				// e.g., token[0][0].trim() === "File"; token[0]: namespace
-				parameters.is_link = page_name[0].trim() === '';
 
-				if (file_matched) {
-					parameters.name
-					// set file name without "File:"
-					= wiki_API.normalize_title(file_matched[1]);
-				} else if (category_matched) {
-					parameters.name
-					// set category name without "Category:"
-					= wiki_API.normalize_title(category_matched[1]);
-				}
+			if (page_name.oddly === 'link_inside_link') {
+				// parameters.is_link = false;
+				parameters = parameters.flat();
+				parameters.unshift('[[');
+				parameters.push(']]');
+				join_string_of_array(parameters);
+				_set_wiki_type(parameters, 'plain');
 			} else {
-				parameters.is_link = true;
+				if (file_matched || category_matched) {
+					// shown by link, is a linking to a file
+					// e.g., token[0][0].trim() === "File"; token[0]: namespace
+					parameters.is_link = page_name[0].trim() === '';
+
+					if (file_matched) {
+						parameters.name
+						// set file name without "File:"
+						= wiki_API.normalize_title(file_matched[1]);
+					} else if (category_matched) {
+						parameters.name
+						// set category name without "Category:"
+						= wiki_API.normalize_title(category_matched[1]);
+					}
+				} else {
+					parameters.is_link = true;
+				}
+				// TODO: [[Special:]]
+				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
+				_set_wiki_type(parameters, file_matched ? 'file'
+						: category_matched ? 'category' : 'link');
 			}
-			// TODO: [[Special:]]
-			// TODO: [[Media:]]: 連結到圖片但不顯示圖片
-			_set_wiki_type(parameters, file_matched ? 'file'
-					: category_matched ? 'category' : 'link');
+
 			// [ page_name, section_title, displayed_text without '|' ]
 			// section_title && section_title.startsWith('#')
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark;
-		});
+		}
+
+		wikitext = wikitext.replace_till_stable(
+		// or use ((PATTERN_link))
+		PATTERN_wikilink_global, parse_wikilink);
 
 		// ----------------------------------------------------
 		// external link

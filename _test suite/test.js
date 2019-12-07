@@ -3028,6 +3028,14 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()]);
 		wikitext = '==t==\n[[w:t/t#a-{c}-]] \n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
+		wikitext = '[[:[[Portal:中國大陸新聞動態|中国大陆新闻]] 3月16日新闻]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['plain', parsed.type]);
+		assert(['link', parsed[1].type]);
+		wikitext = '==[[:[[Portal:中國大陸新聞動態|中国大陆新闻]] 3月16日新闻]]=='; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = '== [[:[[Portal:中國大陸新聞動態|中国大陆新闻]] 3月16日新闻]]==\ntext\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
 		wikitext = "'''''Italic and bold formatting'''''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['italic', parsed[0].type], "'''''t''''' will render as <i><b>t</b></i>");
