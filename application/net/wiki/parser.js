@@ -1411,8 +1411,13 @@ function module_code(library_namespace) {
 			if (this_section_title_index >= 0) {
 				section.section_title = _this[this_section_title_index];
 			}
-			section.range = range;
-			section.toString = _this.toString;
+			// 添加常用屬性與方法。
+			// TODO: using Object.defineProperties(section, {})
+			Object.assign(section, {
+				range : range,
+				each : for_each_token,
+				toString : _this.toString
+			});
 			section_list.push(section);
 		}
 
@@ -2171,7 +2176,8 @@ function module_code(library_namespace) {
 		convert : function(language, lang_fallbacks, force_show) {
 			if (!language) {
 				return '-{' + ('_flag' in this ? this._flag + '|' : '')
-						+ this.join(';') + '}-';
+				// this.join(';') gets the rule of conversion
+				+ this.join(';') + '}-';
 			}
 
 			var flag = this.flag;
@@ -2187,6 +2193,7 @@ function module_code(library_namespace) {
 			if (flag in {
 				// raw content
 				R : true,
+				// description
 				D : true
 			}) {
 				return this.join(';');
@@ -2201,6 +2208,8 @@ function module_code(library_namespace) {
 				// TODO: 顯示繁簡轉換後的文字
 				return this.join(';');
 			}
+
+			// TODO: 後援語種 fallback language variant
 
 			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general%7Cnamespaces%7Cnamespacealiases%7Cstatistics
 			// language fallbacks: [[mw:Localisation statistics]]
@@ -2341,11 +2350,12 @@ function module_code(library_namespace) {
 		Magic_words_hash[Magic_words] = true;
 	});
 
+	// parse 手動轉換語法的轉換標籤的語法
 	// 經測試，":"前面與後面不可皆有空白。
 	// (\s{2,}): 最後的單一/\s/會被轉換為"&#160;"
 	// matched: [ all, 指定轉換字串, 指定轉換詞, spaces,
 	// this language code, colon, this language token, last spaces ]
-	var PATTERN_conversion = /^(([\s\S]+?)=>)?(\s*)(zh-(?:cn|tw|hk|mo|sg|my|hant|hans))(\s*:|:\s*)([^\s].*?)(\s{2,})?$/;
+	var PATTERN_conversion = /^(([\s\S]+?)=>)?(\s*)(zh(?:-(?:cn|tw|hk|mo|sg|my|hant|hans))?)(\s*:|:\s*)([^\s].*?)(\s{2,})?$/;
 
 	// 狀態開關: [[mw:Help:Magic words#Behavior switches]]
 	var PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
@@ -2932,8 +2942,11 @@ function module_code(library_namespace) {
 					// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
 					: 'Template:') + parameters[0].toString());
 
-					parameters.name = wiki_API.normalize_title(parameters[0]
-							.toString());
+					parameters.name = wiki_API.normalize_title(
+							parameters[0].toString())
+					// 預防 {{Template:name|...}}
+					// PATTERN_template_starts
+					.replace(/^(?:Template|模板|テンプレート|Plantilla|틀):/, '');
 				}
 			}
 			parameters.parameters = _parameters;
@@ -3013,9 +3026,13 @@ function module_code(library_namespace) {
 		// [[mw:Help:Magic words]], [[mw:Writing systems/LanguageConverter]]
 		// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageConverter_8php_source.html
 		// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
+		// https://doc.wikimedia.org/mediawiki-core/master/php/ZhConversion_8php_source.html
+		// https://github.com/wikimedia/mediawiki/blob/master/languages/data/ZhConversion.php
 		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
 		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
 		// TODO: <source></source>內之-{}-無效。
+		// TODO:
+		// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
 		wikitext = wikitext.replace_till_stable(/-{(.*?)}-/g, function(all,
 				parameters) {
 			// -{...}- 自 end_mark 向前回溯。
@@ -3118,6 +3135,7 @@ function module_code(library_namespace) {
 
 			</code>
 			 */
+			// TODO: 剖析不出任何對應規則的話，則為 R 旗標轉換，即是停用字詞轉換，顯示原文（R stands for raw）。
 			conversion_list = conversion_list.map(function(token) {
 				var matched = token.match(PATTERN_conversion);
 				// console.log(matched);
@@ -3136,6 +3154,7 @@ function module_code(library_namespace) {
 				if (!matched[6])
 					matched.pop();
 
+				// 語言代碼 language variant 用字模式
 				var language_code = matched[3].trim(), convert_to
 				// 經過改變，需再進一步處理。
 				= parse_wikitext(matched[5], options, queue);

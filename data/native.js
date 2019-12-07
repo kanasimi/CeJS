@@ -2576,6 +2576,10 @@ function module_code(library_namespace) {
 		return a < b ? -1 : a > b ? 1 : 0;
 	}
 
+	function general_descending(a, b) {
+		return a < b ? 1 : a > b ? -1 : 0;
+	}
+
 	function Number_ascending(a, b) {
 		// 升序序列排序: 小→大
 		return a - b;
@@ -2597,6 +2601,7 @@ function module_code(library_namespace) {
 	}
 
 	_.general_ascending = general_ascending;
+	_.general_descending = general_descending;
 	_.ascending = Number_ascending;
 	_.descending = Number_descending;
 

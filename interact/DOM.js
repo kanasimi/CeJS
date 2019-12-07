@@ -1778,6 +1778,9 @@ function module_code(library_namespace) {
 				if ((n in nodes) || ((n = 'class') in nodes)
 						|| ((n = 'C') in nodes)) {
 					ignore[n] = null;
+					if (Array.isArray(nodes[n])) {
+						nodes[n] = nodes[n].join(' ');
+					}
 					node.className = nodes[n];
 				}
 

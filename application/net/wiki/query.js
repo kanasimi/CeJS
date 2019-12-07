@@ -121,7 +121,7 @@ function module_code(library_namespace) {
 
 		// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
 		if (to_wait > 0) {
-			library_namespace.debug('Waiting ' + to_wait + ' ms..', 2,
+			library_namespace.debug('Waiting ' + to_wait + ' ms...', 2,
 					'wiki_API_query');
 			setTimeout(function() {
 				wiki_API_query(action, callback, post_data, options);
@@ -542,9 +542,10 @@ function module_code(library_namespace) {
 			// 確認所有 page_data 皆有 pageid 屬性。
 			if (page_data.every(function(page) {
 				// {ℕ⁰:Natural+0}page.pageid
-				if (page = page && page.pageid)
-					pageid.push(page);
-				return page;
+				if (page && page.pageid >= 0 && page.pageid < Infinity) {
+					pageid.push(page.pageid);
+					return true;
+				}
 			})) {
 				pageid = pageid.join('|');
 

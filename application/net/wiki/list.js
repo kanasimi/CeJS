@@ -853,8 +853,9 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// 子分類 subcategory
-	var KEY_subcategories = 'subcategories', NS_category = wiki_API
-			.namespace('category');
+	var KEY_subcategories = 'subcategories',
+	//
+	NS_Category = wiki_API.namespace('Category');
 
 	// export
 	wiki_API.KEY_subcategories = KEY_subcategories;
@@ -895,17 +896,25 @@ function module_code(library_namespace) {
 			options = {
 				for_each_page : options
 			};
-		} else if ((options | 0) >= 0) {
+		} else if (typeof options === 'number'
+		// ([1,2]|0)>=0
+		&& (options | 0) >= 0) {
 			options = {
 				depth : options | 0
 			};
 		} else {
 			// including options.namespace
 			Object.assign(list_options, options);
+			list_options.namespace = 'namespace' in list_options
+			// 確保一定有 NS_Category。
+			? wiki_API.namespace(wiki_API.namespace(list_options.namespace)
+					+ '|' + NS_Category) : NS_Category;
 
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			options = library_namespace.new_options(options);
 		}
+
+		// console.log(list_options);
 
 		function get_categorymembers(category, callback, depth) {
 			function for_category_list(list/* , target, options */) {
@@ -933,7 +942,7 @@ function module_code(library_namespace) {
 				// ----------------------------------------
 
 				function page_filter(page_data) {
-					if (page_data.ns !== NS_category) {
+					if (page_data.ns !== NS_Category) {
 						if (options.for_each_page) {
 							try {
 								options.for_each_page(page_data);
@@ -1297,7 +1306,7 @@ function module_code(library_namespace) {
 
 	wiki_API.search.default_parameters = {
 		// |portal
-		srnamespace : wiki_API.namespace('module|template|category|main'),
+		srnamespace : wiki_API.namespace('Module|Template|Category|main'),
 
 		srprop : 'redirecttitle',
 		// srlimit : 10,

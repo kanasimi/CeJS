@@ -947,6 +947,7 @@ function module_code(library_namespace) {
 			action = [ session.API_URL, action ];
 		}
 
+		// no really update
 		if (options.test_only) {
 			delete options.session;
 			delete options.text;

@@ -231,11 +231,20 @@ function module_code(library_namespace) {
 					+ wiki_API.title_link_of(title);
 		}
 
+		// console.log(action);
+		var post_data;
+		if (false && action[1].length > 4000) {
+			// 2019/12 NG: wiki api.php 似乎不接受 POST？
+			// 將過長的標題列表改至 POST，預防 "414 Request-URI Too Long"。
+			post_data = action[1];
+			action[1] = '';
+		}
+
 		var get_content;
 		if ('prop' in options) {
-			get_content = options.prop &&
+			get_content = options.prop
 			// {String|Array}
-			options.prop.includes('revisions');
+			&& options.prop.includes('revisions');
 		} else {
 			options.prop = 'revisions';
 			get_content = true;
@@ -244,7 +253,8 @@ function module_code(library_namespace) {
 		// 2019 API:
 		// https://www.mediawiki.org/wiki/Manual:Slot
 		// https://www.mediawiki.org/wiki/API:Revisions
-		action[1] = 'rvslots=' + (options.rvslots || 'main') + '&' + action[1];
+		action[1] = 'rvslots=' + (options.rvslots || 'main')
+				+ (action[1] ? '&' + action[1] : '');
 		if (get_content) {
 			// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query
@@ -313,6 +323,7 @@ function module_code(library_namespace) {
 
 		library_namespace.debug('get url token: ' + action, 5, 'wiki_API_page');
 
+		// console.log(action);
 		wiki_API.query(action, typeof callback === 'function'
 		//
 		&& function process_page(data) {
@@ -413,22 +424,33 @@ function module_code(library_namespace) {
 					});
 				}
 			}
+
 			var convert_from;
 			if (data.query.converted) {
 				page_list.converted = data.query.converted;
 				if (Array.isArray(data.query.converted)) {
-					page_list.convert_from
+					page_list.convert_from = convert_from
 					// 記錄經過轉換的標題。
-					= convert_from = Object.create(null);
+					= Object.create(null);
 					data.query.converted.forEach(function(item) {
 						convert_from[item.to] = item.from;
 					});
 				}
 			}
+			if (data.query.normalized) {
+				page_list.normalized = data.query.normalized;
+				// console.log(data.query.normalized);
+				page_list.convert_from = convert_from
+				// 記錄經過轉換的標題。
+				|| (convert_from = Object.create(null));
+				data.query.normalized.forEach(function(item) {
+					convert_from[item.to] = item.from;
+				});
+			}
 
 			var pages = data.query.pages;
 			// 其他 .prop 本來就不會有內容。
-			var need_warn = get_content;
+			var need_warn = !options.allow_missing && get_content;
 
 			for ( var pageid in pages) {
 				var page_data = pages[pageid];
@@ -444,8 +466,14 @@ function module_code(library_namespace) {
 
 					if (need_warn) {
 						library_namespace.warn('wiki_API_page: '
+						/**
+						 * <code>
+						{"title":"","invalidreason":"The requested page title is empty or contains only the name of a namespace.","invalid":""}
+						</code>
+						 */
+						+ ('invalid' in page_data ? 'Invalid'
 						// 此頁面不存在/已刪除。Page does not exist. Deleted?
-						+ ('missing' in page_data
+						: 'missing' in page_data
 						// e.g., 'wiki_API_page: Not exists: [[title]]'
 						? 'Not exists' : 'No contents')
 						//
@@ -453,7 +481,11 @@ function module_code(library_namespace) {
 						//
 						? wiki_API.title_link_of(page_data)
 						//
-						: 'id ' + page_data.pageid));
+						: 'id ' + page_data.pageid)
+						//
+						+ (page_data.invalidreason
+						//
+						? '. ' + page_data.invalidreason : ''));
 					}
 
 				} else if (page_cache_prefix) {
@@ -475,15 +507,41 @@ function module_code(library_namespace) {
 				}
 
 				if (redirect_from && redirect_from[page_data.title]) {
-					page_data.original_title
+					page_data.original_title = page_data.redirect_from
 					// .from_title, .redirect_from_title
-					= page_data.redirect_from = redirect_from[page_data.title];
+					= redirect_from[page_data.title];
+					// e.g., "研究生教育" redirect to → "學士後"
+					// redirect to → "深造文憑"
+					while (redirect_from[page_data.original_title]) {
+						page_data.original_title
+						//
+						= redirect_from[page_data.original_title];
+					}
 				}
-				// 可以利用 page_data.convert_from 來判別標題是否已經過繁簡轉換。
-				if (convert_from && convert_from[page_data.title]) {
-					page_data.original_title
-					// .from_title, .convert_from_title
-					= page_data.convert_from = convert_from[page_data.title];
+				// 可以利用 page_data.convert_from
+				// 來判別標題是否已經過繁簡轉換與 "_" → " " 轉換。
+				if (convert_from) {
+					if (convert_from[page_data.title]) {
+						page_data.convert_from
+						// .from_title, .convert_from_title
+						= convert_from[page_data.title];
+						// 注意: 這邊 page_data.original_title
+						// 可能已設定為 redirect_from[page_data.title]
+						if (!page_data.original_title
+						// 通常 wiki 中，redirect_from 會比 convert_from 晚處理，
+						// 照理來說不應該會到 !convert_from[page_data.original_title] 這邊，
+						// 致使重設 `page_data.original_title`？
+						|| !convert_from[page_data.original_title]) {
+							page_data.original_title = page_data.convert_from;
+						}
+					}
+					// e.g., "人民法院_(消歧义)" converted → "人民法院 (消歧义)"
+					// converted → "人民法院 (消歧義)" redirects → "人民法院"
+					while (convert_from[page_data.original_title]) {
+						page_data.original_title
+						// .from_title, .convert_from_title
+						= convert_from[page_data.original_title];
+					}
 				}
 				page_list.push(page_data);
 			}
@@ -491,6 +549,12 @@ function module_code(library_namespace) {
 			if (data.warnings && data.warnings.query
 			//
 			&& typeof data.warnings.query['*'] === 'string') {
+				if (need_warn) {
+					library_namespace.warn(
+					//
+					'wiki_API_page: ' + data.warnings.query['*']);
+					// console.log(data);
+				}
 				/**
 				 * 2016/6/27 22:23:25 修正: 處理當非 bot 索求過多頁面時之回傳。<br />
 				 * e.g., <code>
@@ -605,7 +669,7 @@ function module_code(library_namespace) {
 				}
 
 				// copy attributes form original page_list
-				[ 'OK_length', 'truncated',
+				[ 'OK_length', 'truncated', 'normalized',
 				//
 				'redirects', 'redirect_from', 'converted', 'convert_from' ]
 				// 需要注意page_list可能帶有一些已經設定的屬性值，因此不能夠簡單的直接指派到另外一個值。
@@ -678,7 +742,7 @@ function module_code(library_namespace) {
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
 			callback(page_list);
 
-		}, null, options);
+		}, post_data, options);
 	}
 
 	// default properties of revisions

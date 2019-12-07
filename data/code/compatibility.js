@@ -2763,30 +2763,70 @@ function module_code(library_namespace) {
 
 	// https://eyesofkids.gitbooks.io/javascript-start-es6-promise/content/contents/promise_all_n_race.html
 	// Promises/A+並沒有關於Promise.reject或Promise.resolve的定義，它們是ES6 Promise標準中的實作。
+	// 如果參數中 promise 有一個失敗（rejected），此實例回調失敗（reject）
 	Promise.all = function all(iterable) {
 		return new this(function(onFulfilled, onRejected) {
 			for_all_promises(iterable, onFulfilled, onRejected);
 		});
 	};
 
+	// 拿到每個Promise的狀態 不管其是否處理成功
 	Promise.allSettled = function allSettled(iterable) {
 		return new this(function(onFulfilled/* , onRejected */) {
 			for_all_promises(iterable, onFulfilled);
 		});
 	};
 
+	// 如果參數中某個promise解決或拒絕，返回的promise就會解決或拒絕。
 	Promise.race = function race(iterable) {
 		return new this(function(onFulfilled, onRejected) {
 			GetIterator(iterable)
 			// won't skip anyone. Using forEach for sparse array
 			.forEach(function(item) {
-				var then = get_then_of_thenable(item);
-				if (then) {
-					then.call(item, onFulfilled, onRejected);
-				} else {
-					onFulfilled(item);
+				try {
+					var then = get_then_of_thenable(item);
+					if (then) {
+						then.call(item, onFulfilled, onRejected);
+					} else {
+						onFulfilled(item);
+					}
+				} catch (e) {
+					onRejected(e);
 				}
 			});
+		});
+	};
+
+	// https://sung.codes/blog/2019/05/18/promise-race-vs-promise-any-and-promise-all-vs-promise-allsettled/
+	Promise.any = function any(iterable) {
+		return new this(function(onFulfilled, onRejected) {
+			var remaining = 0, waiting;
+			GetIterator(iterable)
+			// won't skip anyone. Using forEach for sparse array
+			.forEach(function(item) {
+				try {
+					var then = get_then_of_thenable(item);
+					if (then) {
+						remaining++;
+						then.call(item, function(item) {
+							remaining--;
+							onFulfilled(item);
+						}, function(item) {
+							// TODO: check what to onRejected()
+							if (--remaining === 0 && waiting)
+								onRejected(item);
+						});
+					} else {
+						onFulfilled(item);
+					}
+				} catch (e) {
+					// Skip error
+				}
+			});
+			if (remaining > 0)
+				waiting = true;
+			else
+				onFulfilled();
 		});
 	};
 

@@ -424,7 +424,9 @@ function module_code(library_namespace) {
 			library_namespace.warn(
 			//
 			'normalize_title_parameter: Invalid title! '
-					+ wiki_API.title_link_of(title));
+					+ (wiki_API.title_link_of(title) || '(title: '
+							+ JSON.stringify(title) + ')'));
+			// console.trace(JSON.stringify(title));
 			return;
 		}
 
@@ -816,7 +818,7 @@ function module_code(library_namespace) {
 		special : -1,
 
 		// 0: (Main/Article) main namespace 主要(條目內容/內文)命名空間/識別領域
-		// 條目 entry 文章 article: ns = 0, 頁面 page: ns = any. 章節/段落 section
+		// 條目 条目 entry 文章 article: ns = 0, 頁面 page: ns = any. 章節/段落 section
 		main : 0,
 		'' : 0,
 		// 討論對話頁面
@@ -1067,6 +1069,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * 規範/正規化頁面名稱 page name。
+	 * 
+	 * <code>
+
+	page_title = CeL.wiki.normalize_title(page_title && page_title.toString());
+
+	</code>
 	 * 
 	 * TODO: 簡化。
 	 * 
@@ -2915,12 +2923,11 @@ function module_code(library_namespace) {
 		var time_elapsed = Date.now() - starting_time;
 		// estimated time of completion 估計時間 預計剩下時間 預估剩餘時間 預計完成時間還要多久
 		var estimated = time_elapsed / processed_amount
-				* (total_amount - processed_amount)
-				// default showing interval: 1 minute
-				/ library_namespace.to_millisecond('1 min');
-		if (estimated > 1) {
-			estimated = estimated > 99 ? (estimated / 60).toFixed(1) + ' hours'
-					: estimated.toFixed(1) + ' minutes';
+				* (total_amount - processed_amount);
+		if (estimated > 99 && estimated < 1e15/* Infinity */) {
+			estimated = library_namespace.age_of(0, estimated, {
+				digits : 1
+			});
 			estimated = ', ' + estimated + ' estimated';
 		} else {
 			estimated = '';
@@ -3017,11 +3024,11 @@ function module_code(library_namespace) {
 	 * 串聯起來，長度不超過 limit_length。
 	 * 
 	 * @param {Array}piece_list
-	 *            URI component list
+	 *            URI component list: page id / title / data
 	 * @param {Natural}[limit]
-	 *            limit index
+	 *            max count
 	 * @param {Natural}[limit_length]
-	 *            limit length
+	 *            max length in bytes
 	 * 
 	 * @returns {Number}邊際index。
 	 */
@@ -3034,10 +3041,10 @@ function module_code(library_namespace) {
 		// assert: 除了 piece_list 外必要之字串長 < 192
 		// e.g.,
 		// "https://zh.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content|timestamp&titles=...&format=json&utf8=1"
-		if (!(limit_length >= 0)) {
+		if (!(limit_length > 0)) {
 			limit_length = 8000;
 		}
-		if (false && !(limit >= 0)) {
+		if (false && !(limit > 0)) {
 			limit = 5000;
 		}
 
@@ -3047,15 +3054,38 @@ function module_code(library_namespace) {
 			piece_list.slice(0, limit_length / 30).join('|').slice(0,
 					limit_length).replace(/[^|]+$/, '');
 
-		piece_list.some(function(piece, i) {
-			// +3 === encodeURIComponent('|').length: separator '|'
-			length += encodeURIComponent(piece).length + 3;
-			if (i >= limit || length >= limit_length) {
-				index = i;
+		if (piece_list.some(function(piece, i) {
+			if (!piece || !(piece.pageid >= 0)) {
+				length = 1;
 				return true;
 			}
-		});
-		CeL.debug('0–' + index + ': length ' + length, 4, 'check_max_length');
+			// console.log([ piece, length ]);
+			length += piece.pageid.toString().length + 3;
+			if (i === index || i >= limit || length >= limit_length) {
+				// console.log({ i, index, limit, limit_length, length });
+				index = i;
+				length = 0;
+				return true;
+			}
+		}) && length > 0) {
+			library_namespace.debug('Some is not page data.', 1,
+					'check_max_length');
+			length = 0;
+			piece_list.some(function(piece, i) {
+				length += encodeURIComponent(piece && piece.title
+				// +3 === encodeURIComponent('|').length: separator '|'
+				|| piece).length + 3;
+				if (i >= limit || length >= limit_length) {
+					index = i;
+					return true;
+				}
+			});
+		}
+		// console.log(piece_list);
+		library_namespace.debug('1–' + index + '/' + piece_list.length
+				+ ', length ' + length, 2, 'check_max_length');
+		if (false && typeof piece_list[2] === 'string')
+			library_namespace.log(piece_list.slice(0, index).join('|'));
 
 		return index;
 	}
@@ -3107,6 +3137,13 @@ function module_code(library_namespace) {
 		if (!config || !config.each) {
 			library_namespace.warn('wiki_API.work: Bad callback!');
 			return;
+		}
+		if (!('no_edit' in config)) {
+			// default: 未設定 summary 則不編輯頁面。
+			config.no_edit = !config.summary;
+		} else if (config.no_edit && !config.summary) {
+			library_namespace
+					.warn('wiki_API.work: Did not set config.summary when edit page!');
 		}
 
 		if (!pages)
@@ -3322,7 +3359,9 @@ function module_code(library_namespace) {
 
 		var main_work = (function(data, error) {
 			if (error) {
-				library_namespace.error('wiki_API.work: Get error: ' + error);
+				library_namespace.error('wiki_API.work: Get error: '
+						+ (error.info || error));
+				// console.log(error);
 				data = [];
 			} else if (!Array.isArray(data)) {
 				if (!data && this_slice_size === 0) {
@@ -3340,24 +3379,32 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (data.length !== this_slice_size) {
-				// 處理有時可能連 data 都是 trimmed 過的。
+			if (false && data.length !== this_slice_size) {
+				// @deprecated: using pages.OK_length
+
 				// assert: data.length < this_slice_size
-				if (true || data.truncated) {
-					if (!setup_target || library_namespace.is_debug())
+				if (data.truncated) {
+					if (setup_target) {
+						// 處理有時可能連 data 都是 trimmed 過的。
+						// -this_slice_size: 先回溯到 pages 開頭之 index。
+						work_continue -= this_slice_size - data.length;
+						library_namespace.debug('一次取得大量頁面時，回傳內容超過限度而被截斷。將回退 '
+								+ (this_slice_size - data.length) + '頁。', 0,
+								'wiki_API.work');
+
+					} else if (library_namespace.is_debug(0)) {
 						library_namespace.warn(
 						//
 						'wiki_API.work: query 所得之 length (' + data.length
 						//
 						+ ') !== this slice size (' + this_slice_size + ') ！');
-
-					if (setup_target) {
-						// -this_slice_size: 先回溯到 pages 開頭之 index。
-						work_continue -= this_slice_size - data.length;
-						library_namespace.debug('一次取得大量頁面時，回傳內容超過限度而被截斷。將回退 '
-								+ (this_slice_size - data.length) + '頁。', 1,
-								'wiki_API.work');
 					}
+
+				} else {
+					// TODO: 此時應該沒有 .continue。
+					library_namespace.warn('wiki_API.work: 取得 ' + data.length
+							+ '/' + this_slice_size + ' 個頁面，應有 '
+							+ (this_slice_size - data.length) + ' 個重複頁面。');
 				}
 			}
 
@@ -3480,7 +3527,8 @@ function module_code(library_namespace) {
 					// -pages.length: 先回溯到 pages 開頭之 index。
 					work_continue -= pages.length - pages.OK_length;
 				} else {
-					library_namespace.error('wiki_API.work: 回傳內容超過限度而被截斷！');
+					library_namespace.error('wiki_API.work: 回傳內容超過限度而被截斷！僅取得 '
+							+ pages.length + '/' + this_slice_size + ' 個頁面');
 				}
 
 				library_namespace.debug('一次取得大量頁面時，回傳內容超過限度而被截斷。將回退 '
@@ -3496,6 +3544,12 @@ function module_code(library_namespace) {
 								+ ' id ' + pages[pages.OK_length].pageid
 								+ ' 開始' : '') + '。', 1, 'wiki_API.work');
 				pages = pages.slice(0, pages.OK_length);
+
+			} else if (pages.length !== this_slice_size) {
+				// assert: data.length < this_slice_size
+				library_namespace.warn('wiki_API.work: 取得 ' + pages.length
+						+ '/' + this_slice_size + ' 個頁面，應有 '
+						+ (this_slice_size - pages.length) + ' 個重複頁面。');
 			}
 
 			library_namespace.debug('for each page: 主要機制是把工作全部推入 queue。', 2,
@@ -3765,11 +3819,15 @@ function module_code(library_namespace) {
 					this.run(config.last.bind(options));
 				}
 
-				this.run(function() {
-					library_namespace.log('wiki_API.work: 結束 .work() 作業'
-					// 已完成作業
-					+ (config.summary ? ' [' + config.summary + ']' : '。'));
-				});
+				if (!no_message) {
+					this.run(function() {
+						library_namespace.log(
+						// 已完成作業
+						'wiki_API.work: 結束 .work() 作業'
+								+ (config.summary ? ' [' + config.summary + ']'
+										: '。'));
+					});
+				}
 			}
 
 		}).bind(this);
@@ -3827,7 +3885,11 @@ function module_code(library_namespace) {
 				// 為提高效率，不作 check。
 				max_size = config.is_id ? 500 : check_max_length(this_slice,
 						500);
-				// console.log([ 'max_size:', max_size, config.is_id ]);
+
+				if (false) {
+					console.log([ 'max_size:', max_size, this_slice.length,
+							target.length, config.is_id, work_continue ]);
+				}
 				if (max_size < slice_size) {
 					this_slice = this_slice.slice(0, max_size);
 				}

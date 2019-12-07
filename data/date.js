@@ -2711,7 +2711,7 @@ function module_code(library_namespace) {
 		}
 
 		if (difference < 1000) {
-			return gettext('%1 ms', difference);
+			return gettext('%1 ms', difference | 0);
 		}
 
 		if ((difference /= 1000) < 60) {
