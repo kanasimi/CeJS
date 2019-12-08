@@ -406,7 +406,7 @@ function module_code(library_namespace) {
 	function Old_vfd_multi__item_list_to_template_object(item_list) {
 		var template_object = Object.create(null);
 
-		if (index > 5) {
+		if (item_list.length > 5) {
 			library_namespace
 					.warn('Old_vfd_multi__item_list_to_template_object: {{'
 							+ Old_vfd_multi__main_name
