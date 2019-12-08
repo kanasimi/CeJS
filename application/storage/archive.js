@@ -260,6 +260,8 @@ function module_code(library_namespace) {
 	}
 	Archive_file.is_Archive_file = is_Archive_file;
 
+	Archive_file.executable_file_path = executable_file_path;
+
 	// --------------------------------------------------------------
 
 	// 注意: 這邊添加引號的目的主要只是escape空白字元space " "，不能偵測原先輸入中的引號!
