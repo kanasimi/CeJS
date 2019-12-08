@@ -260,8 +260,6 @@ function module_code(library_namespace) {
 	}
 	Archive_file.is_Archive_file = is_Archive_file;
 
-	Archive_file.executable_file_path = executable_file_path;
-
 	// --------------------------------------------------------------
 
 	// 注意: 這邊添加引號的目的主要只是escape空白字元space " "，不能偵測原先輸入中的引號!
@@ -923,6 +921,13 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// export 導出.
+
+	Object.assign(Archive_file, {
+		// 給外部程式設定壓縮執行檔路徑使用。
+		executable_file_path : executable_file_path,
+		// read-only
+		default_program_type : default_program_type
+	});
 
 	return Archive_file;
 }
