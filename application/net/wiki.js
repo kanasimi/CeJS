@@ -3906,7 +3906,9 @@ function module_code(library_namespace) {
 					+ Math.min(max_size, nochange_count)) + '/'
 							+ nochange_count;
 					// Add percentage message.
-					if (nochange_count > 1e4) {
+					if (nochange_count > 1e4
+					// 數量太大或執行時間過長時，就顯示剩餘時間訊息。
+					|| Date.now() - config.start_working_time > 2 * 60 * 1000) {
 						done += estimated_message(work_continue,
 								nochange_count, config.start_working_time);
 					}

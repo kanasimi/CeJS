@@ -271,13 +271,13 @@ function module_code(library_namespace) {
 	normalize_result_flag_sets(result_flags__Old_vfd_multi);
 	normalize_result_flag_sets(result_flags__Hat);
 
-	var Old_vfd_multi_names = {
+	var Old_vfd_multi__main_name = 'Old vfd multi', Old_vfd_multi__names = {
 		Oldafdfull : true,
 		'Vfd-kept' : true,
 		存廢討論被保留 : true,
-		頁面存廢討論被保留 : true,
-		'Old vfd multi' : true
+		頁面存廢討論被保留 : true
 	};
+	Old_vfd_multi__names[Old_vfd_multi__main_name] = true;
 
 	function normalize_result_flag(flag_sets, result, valid_flag_only) {
 		result = result && result.toString().trim().toLowerCase();
@@ -325,20 +325,20 @@ function module_code(library_namespace) {
 		var parsed = get_parsed(page_data);
 
 		parsed.each('template', function(token) {
-			if (!(token.name in Old_vfd_multi_names))
+			if (!(token.name in Old_vfd_multi__names))
 				return;
 			// {{Old vfd multi|提刪日期|處理結果|page=頁面名稱}}
 			var result = token.parameters[2];
 			result = normalize_result_flag(result_flags__Old_vfd_multi, result)
 			// default flag: k|保留
 			|| 'k';
-			var item = {
+			var item = add_properties_to_template_object(null, {
 				date : token.parameters[1],
 				result : result,
 				page : token.parameters.page,
 				// move to, merge to, redirect to
 				target : token.parameters[3]
-			};
+			});
 
 			if (token.parameters.multi) {
 				item = [ item ];
@@ -358,9 +358,9 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (options.using_data)
+			if (options.using_data) {
 				item.page_data = page_data;
-			else {
+			} else {
 				// normalized page title
 				item.page_title = page_data.title;
 			}
@@ -376,7 +376,11 @@ function module_code(library_namespace) {
 		}
 	}
 
-	function assign_properties(object, properties, value_mapper) {
+	function add_properties_to_template_object(template_object, properties,
+			value_mapper) {
+		if (!template_object)
+			template_object = Object.create(null);
+
 		for ( var key in properties) {
 			var value = properties[key];
 			if (value_mapper)
@@ -384,12 +388,14 @@ function module_code(library_namespace) {
 			if (value
 			// String(value) === ''
 			|| value === '' || value === 0) {
-				object[key] = value;
+				template_object[key] = value;
 			}
 		}
+
+		return template_object;
 	}
 
-	function revert_object_key_value(object) {
+	function reverse_object_key_value(object) {
 		var new_object;
 		for ( var key in object) {
 			new_object[object[key]] = key;
@@ -397,12 +403,20 @@ function module_code(library_namespace) {
 		return new_object;
 	}
 
-	function item_list_to_template_object(item_list) {
+	function Old_vfd_multi__item_list_to_template_object(item_list) {
 		var template_object = Object.create(null);
+
+		if (index > 5) {
+			library_namespace
+					.warn('Old_vfd_multi__item_list_to_template_object: {{'
+							+ Old_vfd_multi__main_name
+							+ '}} only support 5 records!');
+			console.log(item_list);
+		}
 
 		item_list.forEach(function(item, index) {
 			if (index === 0) {
-				assign_properties(template_object, {
+				add_properties_to_template_object(template_object, {
 					'1' : item.date,
 					'2' : item.result,
 					page : item.page,
@@ -413,13 +427,13 @@ function module_code(library_namespace) {
 			}
 
 			index++;
-			var mapper = revert_object_key_value({
+			var mapper = reverse_object_key_value({
 				date : 'date' + index,
 				result : 'result' + index,
 				page : 'page' + index,
 				target : 'target' + index
 			});
-			assign_properties(template_object, mapper, item);
+			add_properties_to_template_object(template_object, mapper, item);
 		});
 
 		return template_object;
@@ -464,16 +478,25 @@ function module_code(library_namespace) {
 
 		// normalize replace_to
 		if (Array.isArray(replace_to)) {
-			replace_to = item_list_to_template_object(replace_to);
+			replace_to = Old_vfd_multi__item_list_to_template_object(replace_to);
 		}
 		if (typeof replace_to === 'object') {
-			replace_to = template_object_to_string('Old vfd multi', replace_to);
+			replace_to = template_object_to_string(Old_vfd_multi__main_name,
+					replace_to);
 		}
 
+		var replaced;
 		parsed.each('template', function(token) {
-			if (token.name in Old_vfd_multi_names)
+			if (token.name in Old_vfd_multi__names) {
+				replaced = true;
 				return replace_to;
+			}
 		}, true);
+
+		if (!replaced && typeof replace_to === 'string'
+				&& replace_to.startsWith('{{')) {
+			parsed.unshift(replace_to + '\n');
+		}
 
 		return parsed.toString();
 	}
