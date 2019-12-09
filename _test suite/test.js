@@ -3139,6 +3139,10 @@ function test_wiki() {
 		wikitext = '<b a="A">i</b>'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{=}} #4');
 
+		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1 : 'v1', 2 : 'v2', p1 : 'vp1', p2 : 'vp2' }) ], 'template_object_to_wikitext: #1');
+		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1 : 'v1', 2 : 'v2', 4 : 'v4', p1 : 'vp1' }) ], 'template_object_to_wikitext: #2');
+		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1 : 'v1', 2 : 'v2', p1 : 'vp1', q2 : 'vq2' }, function(text_array) { return text_array.filter(function(text, index) { return !/^q/.test(text); }); }) ], 'template_object_to_wikitext: #3');
+
 		var token;
 		token = CeL.wiki.parse('{{t|1}}');
 		assert([0, CeL.wiki.parse.replace_parameter(token, 2, 'aa') && token.toString()], 'wiki.parse.replace_parameter: #0');

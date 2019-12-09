@@ -206,8 +206,109 @@ function module_code(library_namespace) {
 	// CeL.wiki.parser.footer_order()
 	page_parser.footer_order = footer_order;
 
+	// ------------------------------------------------------------------------
+
+	function is_valid_parameters_value(value) {
+		return value
+		// String(value) === ''
+		|| value === '' || value === 0;
+	}
+
+	// 僅添加有效的 parameters
+	function add_parameters_to_template_object(template_object, parameters,
+			value_mapper) {
+		if (!template_object)
+			template_object = Object.create(null);
+
+		for ( var key in parameters) {
+			var value = parameters[key];
+			if (value_mapper)
+				value = value_mapper[value];
+			if (is_valid_parameters_value(value)) {
+				template_object[key] = value;
+			}
+		}
+
+		return template_object;
+	}
+
+	/**
+	 * 將 parameters 形式的 object 轉成 wikitext。
+	 * 
+	 * @example<code>
+
+	CeL.wiki.parse.template_object_to_wikitext('t', {
+		1 : 'v1',
+		2 : 'v2',
+		p1 : 'vp1',
+		p2 : 'vp2'
+	}) === '{{t|v1|v2|p1=vp1|p2=vp2}}';
+
+	CeL.wiki.parse.template_object_to_wikitext('t', {
+		1 : 'v1',
+		2 : 'v2',
+		4 : 'v4',
+		p1 : 'vp1'
+	}) === '{{t|v1|v2|4=v4|p1=vp1}}';
+
+	CeL.wiki.parse.template_object_to_wikitext('t', {
+		1 : 'v1',
+		2 : 'v2',
+		p1 : 'vp1',
+		q2 : 'vq2'
+	}, function(text_array) {
+		return text_array.filter(function(text, index) {
+			return !/^q/.test(text);
+		});
+	}) === '{{t|v1|v2|p1=vp1}}';
+
+	 </code>
+	 * 
+	 * @param {String}template_name
+	 *            template name
+	 * @param {Object}template_object
+	 *            parameters 形式的 object。<br />
+	 *            e.g., { '1': value, '2': value, parameter1 : value1 }
+	 * @param {Object}[post_processor]
+	 *            post-processor for text_array
+	 */
+	function template_object_to_wikitext(template_name, template_object,
+			post_processor) {
+		var text_array = [ '{{' + template_name ], index = 1;
+
+		while (true) {
+			var value = template_object[index];
+			if (!is_valid_parameters_value(value)) {
+				break;
+			}
+			text_array[index++] = value;
+		}
+
+		for ( var key in template_object) {
+			if (key in text_array)
+				continue;
+			var value = template_object[key];
+			if (is_valid_parameters_value(value)) {
+				value = String(value);
+				if (value.includes('\n')
+						&& !text_array[text_array.length - 1].endsWith('\n')) {
+					text_array[text_array.length - 1] += '\n';
+				}
+				text_array.push(key + '=' + value);
+			}
+		}
+
+		if (post_processor)
+			text_array = post_processor(text_array);
+
+		return text_array.join('|') + '}}';
+	}
+
+	// ------------------------------------------
+
 	/**
 	 * 將 parse_wikitext() 獲得之 template_token 中的指定 parameter 換成 replace_to。
+	 * replace_template_parameter()
 	 * 
 	 * WARNING: 若不改變 parameter name，只變更 value，<br />
 	 * 則 replace_to 應該使用 'parameter name = value' 而非僅 'value'。
@@ -5649,6 +5750,8 @@ function module_code(library_namespace) {
 	// TODO: 統合於 CeL.wiki.parser 之中。
 	Object.assign(parse_wikitext, {
 		template : parse_template,
+		add_parameters_to_template_object : add_parameters_to_template_object,
+		template_object_to_wikitext : template_object_to_wikitext,
 		// CeL.wiki.parse.replace_parameter()
 		replace_parameter : replace_parameter,
 

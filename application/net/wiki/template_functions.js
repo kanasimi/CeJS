@@ -228,7 +228,7 @@ function module_code(library_namespace) {
 		dan : '刪後重建',
 		ic : '圖像因侵權被刪|ifd',
 		// 快速刪除
-		sd : '快速刪除',
+		sd : '快速刪除|speedy delete|speedily deleted',
 		drep : '多次被刪除，條目被白紙保護，禁止創建',
 		// 轉移至其他維基計畫
 		twc : '轉移至維基共享資源',
@@ -252,14 +252,18 @@ function module_code(library_namespace) {
 		k : 'keep|kept|保留',
 		nc : 'no consensus|nc|無共識|无共识',
 		m : 'moved|move|移動|移动',
-		r : 'redirect|重定向',
-		sk : 'speedy keep|快速保留|速留',
+		r : 'redirect|redirected|重定向',
+		sk : 'speedy keep|speedily kept|快速保留|速留',
 		ir : 'invalid request|無效|无效|請求無效',
 		// '''請求理由已消失'''，页面'''保留''' reason disappeared
 		rr : '請求理由消失',
 		merge : 'merge|merged|併入|合併',
 		d : 'delete|deleted|刪除',
 		tk : 'temporarily keep|暫時保留|暂时保留'
+	};
+
+	var result_flags__Article_history = {
+		renamed : 'rename|renamed'
 	};
 
 	function normalize_result_flag_sets(flag_sets) {
@@ -332,7 +336,7 @@ function module_code(library_namespace) {
 			result = normalize_result_flag(result_flags__Old_vfd_multi, result)
 			// default flag: k|保留
 			|| 'k';
-			var item = add_properties_to_template_object(null, {
+			var item = CeL.wiki.parse.add_parameters_to_template_object(null, {
 				date : token.parameters[1],
 				result : result,
 				page : token.parameters.page,
@@ -340,21 +344,23 @@ function module_code(library_namespace) {
 				target : token.parameters[3]
 			});
 
-			if (token.parameters.multi) {
-				item = [ item ];
-				for (var index = 2; index < 9
-						&& token.parameters['date' + index]; index++) {
-					item.push({
-						date : token.parameters['date' + index],
-						result : token.parameters['result' + index] || '保留',
-						page : token.parameters['page' + index],
-						target : token.parameters['target' + index]
-					});
-					if (index > 5) {
-						library_namespace.warn(
-						//
-						'parse_Old_vfd_multi: Invalid NO: ' + index);
-					}
+			// if (token.parameters.multi) item = [ item ];
+			for (var index = 2; index < 9
+			//
+			&& token.parameters['date' + index]; index++) {
+				if (!Array.isArray(item)) {
+					item = [ item ];
+				}
+				item.push({
+					date : token.parameters['date' + index],
+					result : token.parameters['result' + index] || '保留',
+					page : token.parameters['page' + index],
+					target : token.parameters['target' + index]
+				});
+				if (index > 5) {
+					library_namespace.warn(
+					//
+					'parse_Old_vfd_multi: Invalid NO: ' + index);
 				}
 			}
 
@@ -371,36 +377,22 @@ function module_code(library_namespace) {
 		});
 
 		if (processor) {
+			parse_Article_history(page_data, function(item_list) {
+				var item = [];
+				item_list.forEach(function(_item) {
+					if (_item.action !== 'AFD' && _item.action !== 'CSD')
+						return;
+					_item.date = _item.date.to_Date().format('%Y/%2m/%2d');
+					// _item.page=_item.link;
+					item.push(_item);
+				});
+			}, options);
+		}
+
+		if (processor) {
 			// No Hat template found.
 			processor(null, page_data);
 		}
-	}
-
-	function add_properties_to_template_object(template_object, properties,
-			value_mapper) {
-		if (!template_object)
-			template_object = Object.create(null);
-
-		for ( var key in properties) {
-			var value = properties[key];
-			if (value_mapper)
-				value = value_mapper[value];
-			if (value
-			// String(value) === ''
-			|| value === '' || value === 0) {
-				template_object[key] = value;
-			}
-		}
-
-		return template_object;
-	}
-
-	function reverse_object_key_value(object) {
-		var new_object;
-		for ( var key in object) {
-			new_object[object[key]] = key;
-		}
-		return new_object;
 	}
 
 	function Old_vfd_multi__item_list_to_template_object(item_list) {
@@ -416,7 +408,9 @@ function module_code(library_namespace) {
 
 		item_list.forEach(function(item, index) {
 			if (index === 0) {
-				add_properties_to_template_object(template_object, {
+				CeL.wiki.parse.add_parameters_to_template_object(
+				//
+				template_object, {
 					'1' : item.date,
 					'2' : item.result,
 					page : item.page,
@@ -426,43 +420,21 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			index++;
-			var mapper = reverse_object_key_value({
+			if (++index === 2) {
+				template_object.multi = 1;
+			}
+
+			var mapper = Object.reverse_key_value({
 				date : 'date' + index,
 				result : 'result' + index,
 				page : 'page' + index,
 				target : 'target' + index
 			});
-			add_properties_to_template_object(template_object, mapper, item);
+			CeL.wiki.parse.add_parameters_to_template_object(template_object,
+					mapper, item);
 		});
 
 		return template_object;
-	}
-
-	/**
-	 * 將 parameters 形式的 object 轉成 wikitext。
-	 * 
-	 * @param {String}
-	 *            template_name template name
-	 * @param {Object}
-	 *            object parameters 形式的 object。 e.g., { '1': value, '2': value,
-	 *            parameter1 : value1 }
-	 * 
-	 * @inner
-	 */
-	function template_object_to_string(template_name, object) {
-		var string_list = [ '{{' + template_name ];
-
-		for ( var key in object) {
-			var value = object[key];
-			if (value
-			// String(value) === ''
-			|| value === '' || value === 0) {
-				string_list.push(key + '=' + value);
-			}
-		}
-
-		return string_list.join('|') + '}}';
 	}
 
 	/**
@@ -480,9 +452,42 @@ function module_code(library_namespace) {
 		if (Array.isArray(replace_to)) {
 			replace_to = Old_vfd_multi__item_list_to_template_object(replace_to);
 		}
+
+		/**
+		 * <code>
+
+		+ new line
+		{{Old vfd multi|2008/11/22|k|page=124}}
+		->
+		{{Old vfd multi|2008/11/22|k|page=124
+		|multi=1
+		|...
+		}}
+
+		</code>
+		 */
+		var latest_index;
+		function add_new_line(string_list) {
+			string_list.forEach(function(parameter, index) {
+				if (index === 0)
+					return;
+				if (parameter.startsWith(/^multi=/)) {
+					string_list[index - 1] += '\n';
+					// string_list[index]+='\n';
+					return;
+				}
+				var matched = parameter.match(/^[^=\d]+(\d+)=/);
+				if (matched && latest_index !== +matched[1]) {
+					latest_index = +matched[1];
+					string_list[index - 1] += '\n';
+				}
+			});
+			return string_list;
+		}
+
 		if (typeof replace_to === 'object') {
-			replace_to = template_object_to_string(Old_vfd_multi__main_name,
-					replace_to);
+			replace_to = CeL.wiki.parse.template_object_to_wikitext(
+					Old_vfd_multi__main_name, replace_to, add_new_line);
 		}
 
 		var replaced;
@@ -490,6 +495,9 @@ function module_code(library_namespace) {
 			if (token.name in Old_vfd_multi__names) {
 				replaced = true;
 				return replace_to;
+			}
+			if (token.name in Article_history__name) {
+				;
 			}
 		}, true);
 
@@ -499,6 +507,43 @@ function module_code(library_namespace) {
 		}
 
 		return parsed.toString();
+	}
+
+	var Article_history__name = {
+		ArticleHistory : true,
+		'Article history' : true
+	};
+
+	// TODO: parse {{Article history}}
+	function parse_Article_history(page_data, processor, options) {
+		options = library_namespace.setup_options(options);
+		var parsed = get_parsed(page_data);
+
+		parsed.each('template', function(token) {
+			if (!(token.name in Article_history__name))
+				return;
+
+			var item_list = [];
+			for ( var key in token.parameters) {
+				var value = token.parameters[key];
+				var matched = key.match(/^action([1-9]\d?)(.*)?$/);
+				if (!matched)
+					item_list[key] = value;
+				var NO = +matched[1];
+				if (!item_list[NO])
+					item_list[NO] = Object.create(null);
+				item_list[NO][matched[2] || 'action'] = value;
+			}
+
+			processor(item_list, page_data);
+			processor = null;
+			return to_exit;
+		});
+
+		if (processor) {
+			// No Hat template found.
+			processor(null, page_data);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -514,6 +559,9 @@ function module_code(library_namespace) {
 			parse : parse_Old_vfd_multi,
 			replace_by : replace_Old_vfd_multi,
 			text_of : text_of_Hat_flag
+		},
+		Article_history : {
+			parse : parse_Article_history
 		}
 	});
 

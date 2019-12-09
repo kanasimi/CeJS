@@ -2237,6 +2237,20 @@ function module_code(library_namespace) {
 		return true;
 	}
 
+	// Object.reverse_key_value({a:b}) → {b:a}
+	function Object_reverse_key_value(object) {
+		var new_object = Object.create(null);
+		if (!object)
+			return new_object;
+
+		for ( var key in object) {
+			if (!object.hasOwnProperty || object.hasOwnProperty(key)) {
+				new_object[object[key]] = key;
+			}
+		}
+		return new_object;
+	}
+
 	/**
 	 * Count properties of the object.<br />
 	 * for Object.size()
@@ -2263,10 +2277,12 @@ function module_code(library_namespace) {
 		return count;
 	}
 
+	
 	set_method(Object, {
 		filter : Object_filter,
 		clone : Object_clone,
 		is_empty : Object_is_empty,
+		reverse_key_value : Object_reverse_key_value,
 		size : Object_size
 	});
 
