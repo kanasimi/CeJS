@@ -3233,7 +3233,7 @@ function module_code(library_namespace) {
 				}
 			});
 			// console.log(conversion_list);
-			var convert_from_list = conversion_table && [];
+			var convert_from_hash = conversion_table && Object.create(null);
 			/**
 			 * <code>
 
@@ -3327,8 +3327,10 @@ function module_code(library_namespace) {
 					conversion_table[specified_from][language_code]
 					// settle
 					= convert_to;
+
 				} else if (typeof convert_to === 'string') {
-					convert_from_list.push(convert_to);
+					// 後面的設定會覆蓋先前的設定。
+					convert_from_hash[language_code] = convert_to;
 				} else if (convert_to && convert_to.type === 'plain') {
 					// -{H|zh-cn:俄-{匊}-斯;zh-tw:俄-{匊}-斯;zh-hk:俄-{匊}-斯;}-
 					// 當作 "俄匊斯"
@@ -3341,8 +3343,10 @@ function module_code(library_namespace) {
 							return token.converted;
 						not_all_string = true;
 					});
-					if (!not_all_string)
-						convert_from_list.push(convert_to.join(''));
+					if (!not_all_string) {
+						// 後面的設定會覆蓋先前的設定。
+						convert_from_hash[language_code] = convert_to.join('');
+					}
 				}
 
 				// console.log(JSON.stringify(token));
@@ -3357,9 +3361,10 @@ function module_code(library_namespace) {
 				if (flag === 'T')
 					options.conversion_title = parameters;
 			}
-			convert_from_list && convert_from_list.forEach(function(token) {
-				conversion_table[token] = parameters;
-			});
+			Object.values(convert_from_hash).forEach(
+					function(convert_from_string) {
+						conversion_table[convert_from_string] = parameters;
+					});
 			// console.log(JSON.stringify(wikitext));
 			// console.log(conversion_table);
 
