@@ -465,7 +465,7 @@ function module_code(library_namespace) {
 			string_list.forEach(function(parameter, index) {
 				if (index === 0)
 					return;
-				if (parameter.startsWith(/^multi=/)) {
+				if (/^multi=/.test(parameter)) {
 					string_list[index - 1] += '\n';
 					// string_list[index]+='\n';
 					return;
