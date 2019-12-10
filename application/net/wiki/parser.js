@@ -3361,10 +3361,13 @@ function module_code(library_namespace) {
 				if (flag === 'T')
 					options.conversion_title = parameters;
 			}
-			Object.values(convert_from_hash).forEach(
-					function(convert_from_string) {
-						conversion_table[convert_from_string] = parameters;
-					});
+			// console.log(convert_from_hash);
+			convert_from_hash && Object.values(convert_from_hash)
+			//
+			.forEach(function(convert_from_string) {
+				// console.log(convert_from_string);
+				conversion_table[convert_from_string] = parameters;
+			});
 			// console.log(JSON.stringify(wikitext));
 			// console.log(conversion_table);
 
