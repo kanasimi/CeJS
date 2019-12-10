@@ -68,26 +68,22 @@ function module_code(library_namespace) {
 
 	// 汲取 page_data 中所有全局轉換（全頁面語言轉換），並交給 processor 處理。
 	// processor({type: 'item', rule: '', original: ''})
-	function parse_convention_item(page_data, processor) {
+	function parse_convention_item(page_data) {
+		var convention_item_list = [];
 		if (!page_data)
-			return 0;
+			return convention_item_list;
 
 		if (page_data.ns === NS_Module) {
 			var object = wiki_API.parse.lua_object(page_data);
-			var content = object && object.content;
-			if (!Array.isArray(content)) {
+			object = object && object.content;
+			if (!Array.isArray(object)) {
 				library_namespace
 						.error('parse_convention_item: Invalid convention group: '
 								+ wiki_API.title_link_of(page_data));
-				return 0;
+				return convention_item_list;
 			}
-			// console.log(content);
-			content.forEach(function(item) {
-				// console.log(item);
-				// console.log(page_data);
-				processor(item);
-			});
-			return content.length;
+			// console.log(object);
+			return object;
 		}
 
 		// console.log(page_data);
@@ -112,7 +108,7 @@ function module_code(library_namespace) {
 			parsed = get_parsed(page_data);
 		}
 
-		var count = 0;
+		var need_reparse;
 		// Convert -{}- to more infomational template
 		parsed.each('convert', function(token, index, parent) {
 			if (parent.type === 'convert' || !(token.flag in {
@@ -128,11 +124,10 @@ function module_code(library_namespace) {
 			if (!token)
 				return;
 
-			count++;
+			need_reparse = true;
 			return '{{CItem|' + token.replace(/=/g, '{{=}}') + '}}';
 		}, true);
-		if (count) {
-			count = 0;
+		if (need_reparse) {
 			// console.log(parsed.toString());
 
 			// re-parse
@@ -194,14 +189,13 @@ function module_code(library_namespace) {
 				});
 			}
 
-			count++;
 			// item = {type: 'item', rule: '', original: ''}
-			processor(item);
+			convention_item_list.push(item);
 		}
 
 		parsed.each('template', for_each_template);
 
-		return count;
+		return convention_item_list;
 	}
 
 	// ------------------------------------------------------------------------
@@ -324,8 +318,17 @@ function module_code(library_namespace) {
 		return flag;
 	}
 
-	function parse_Old_vfd_multi(page_data, processor, options) {
+	function parse_Old_vfd_multi(page_data, options) {
 		options = library_namespace.setup_options(options);
+
+		var item_list = [];
+		if (options.using_data) {
+			item_list.page_data = page_data;
+		} else {
+			// normalized page title
+			item_list.page_title = page_data.title;
+		}
+
 		var parsed = get_parsed(page_data);
 
 		parsed.each('template', function(token) {
@@ -336,27 +339,28 @@ function module_code(library_namespace) {
 			result = normalize_result_flag(result_flags__Old_vfd_multi, result)
 			// default flag: k|保留
 			|| 'k';
-			var item = CeL.wiki.parse.add_parameters_to_template_object(null, {
+			item_list.push(
+			//
+			CeL.wiki.parse.add_parameters_to_template_object(null, {
 				date : token.parameters[1],
 				result : result,
 				page : token.parameters.page,
 				// move to, merge to, redirect to
 				target : token.parameters[3]
-			});
+			}));
 
 			// if (token.parameters.multi) item = [ item ];
 			for (var index = 2; index < 9
 			//
 			&& token.parameters['date' + index]; index++) {
-				if (!Array.isArray(item)) {
-					item = [ item ];
-				}
-				item.push({
+				item_list.push(
+				//
+				CeL.wiki.parse.add_parameters_to_template_object(null, {
 					date : token.parameters['date' + index],
 					result : token.parameters['result' + index] || '保留',
 					page : token.parameters['page' + index],
 					target : token.parameters['target' + index]
-				});
+				}));
 				if (index > 5) {
 					library_namespace.warn(
 					//
@@ -364,35 +368,21 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (options.using_data) {
-				item.page_data = page_data;
-			} else {
-				// normalized page title
-				item.page_title = page_data.title;
-			}
-
-			processor(item, page_data);
-			processor = null;
-			return to_exit;
+			// return to_exit;
 		});
 
-		if (processor) {
-			parse_Article_history(page_data, function(item_list) {
-				var item = [];
-				item_list.forEach(function(_item) {
-					if (_item.action !== 'AFD' && _item.action !== 'CSD')
-						return;
-					_item.date = _item.date.to_Date().format('%Y/%2m/%2d');
-					// _item.page=_item.link;
-					item.push(_item);
-				});
-			}, options);
-		}
+		parse_Article_history(page_data, function(_item_list) {
+			_item_list.forEach(function(item) {
+				if (item.action !== 'AFD' && item.action !== 'CSD')
+					return;
 
-		if (processor) {
-			// No Hat template found.
-			processor(null, page_data);
-		}
+				item.date = item.date.to_Date().format('%Y/%2m/%2d');
+				// item.page = item.link;
+				item_list.push(item);
+			});
+		}, options);
+
+		return item_list;
 	}
 
 	function Old_vfd_multi__item_list_to_template_object(item_list) {
@@ -511,19 +501,29 @@ function module_code(library_namespace) {
 
 	var Article_history__name = {
 		ArticleHistory : true,
+		'Article milestones' : true,
+		AH : true,
 		'Article history' : true
 	};
 
-	// TODO: parse {{Article history}}
-	function parse_Article_history(page_data, processor, options) {
+	// parse {{Article history}}
+	function parse_Article_history(page_data, options) {
 		options = library_namespace.setup_options(options);
+
+		var item_list = [];
+		if (options.using_data) {
+			item_list.page_data = page_data;
+		} else {
+			// normalized page title
+			item_list.page_title = page_data.title;
+		}
+
 		var parsed = get_parsed(page_data);
 
 		parsed.each('template', function(token) {
 			if (!(token.name in Article_history__name))
 				return;
 
-			var item_list = [];
 			for ( var key in token.parameters) {
 				var value = token.parameters[key];
 				var matched = key.match(/^action([1-9]\d?)(.*)?$/);
@@ -535,15 +535,10 @@ function module_code(library_namespace) {
 				item_list[NO][matched[2] || 'action'] = value;
 			}
 
-			processor(item_list, page_data);
-			processor = null;
-			return to_exit;
+			// return to_exit;
 		});
 
-		if (processor) {
-			// No Hat template found.
-			processor(null, page_data);
-		}
+		return item_list;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -551,6 +546,7 @@ function module_code(library_namespace) {
 	// export 導出.
 	Object.assign(template_functions, {
 		parse_convention_item : parse_convention_item,
+
 		Hat : {
 			names : Hat_names,
 			text_of : text_of_Hat_flag
@@ -563,6 +559,7 @@ function module_code(library_namespace) {
 		Article_history : {
 			parse : parse_Article_history
 		}
+
 	});
 
 	return template_functions;
