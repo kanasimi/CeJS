@@ -281,8 +281,10 @@ function module_code(library_namespace) {
 			if (!is_valid_parameters_value(value)) {
 				break;
 			}
-			// text_array[index++] = value.toString();
-			text_array.push(String(value));
+			// value = value.toString();
+			value = String(value);
+			// text_array.push(value); index++;
+			text_array[index++] = value;
 		}
 
 		for ( var key in template_object) {
