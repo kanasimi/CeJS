@@ -68,6 +68,7 @@ function module_code(library_namespace) {
 
 	// 汲取 page_data 中所有全局轉換（全頁面語言轉換），並交給 processor 處理。
 	// processor({type: 'item', rule: '', original: ''})
+	// Warning: Will modify `page_data.parsed`
 	function parse_convention_item(page_data) {
 		var convention_item_list = [];
 		if (!page_data)
@@ -125,12 +126,13 @@ function module_code(library_namespace) {
 				return;
 
 			need_reparse = true;
+			// Warning: Will modify `page_data.parsed`
 			return '{{CItem|' + token.replace(/=/g, '{{=}}') + '}}';
 		}, true);
 		if (need_reparse) {
 			// console.log(parsed.toString());
 
-			// re-parse
+			// re-parse page
 			parsed = wiki_API.parser(parsed.toString());
 		}
 		// console.log(parsed.toString());
@@ -527,8 +529,10 @@ function module_code(library_namespace) {
 			for ( var key in token.parameters) {
 				var value = token.parameters[key];
 				var matched = key.match(/^action([1-9]\d?)(.*)?$/);
-				if (!matched)
+				if (!matched) {
 					item_list[key] = value;
+					continue;
+				}
 				var NO = +matched[1];
 				if (!item_list[NO])
 					item_list[NO] = Object.create(null);
