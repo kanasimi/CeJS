@@ -334,6 +334,19 @@ function module_code(library_namespace) {
 		var parsed = get_parsed(page_data);
 
 		parsed.each('template', function(token) {
+			var _item_list = parse_Article_history_token(token);
+			if (_item_list) {
+				_item_list.forEach(function(item) {
+					if (item.action !== 'AFD' && item.action !== 'CSD')
+						return;
+
+					item.date = item.date.to_Date().format('%Y/%2m/%2d');
+					// item.page = item.link;
+					item_list.push(item);
+				});
+				return;
+			}
+
 			if (!(token.name in Old_vfd_multi__names))
 				return;
 			// {{Old vfd multi|提刪日期|處理結果|page=頁面名稱}}
@@ -372,17 +385,6 @@ function module_code(library_namespace) {
 
 			// return to_exit;
 		});
-
-		parse_Article_history(page_data, function(_item_list) {
-			_item_list.forEach(function(item) {
-				if (item.action !== 'AFD' && item.action !== 'CSD')
-					return;
-
-				item.date = item.date.to_Date().format('%Y/%2m/%2d');
-				// item.page = item.link;
-				item_list.push(item);
-			});
-		}, options);
 
 		return item_list;
 	}
@@ -488,8 +490,15 @@ function module_code(library_namespace) {
 				replaced = true;
 				return replace_to;
 			}
-			if (token.name in Article_history__name) {
-				;
+
+			var item_list = parse_Article_history_token(token);
+			if (item_list && item_list.some(function(item) {
+				return item.action === 'AFD';
+			})) {
+				library_namespace.info(
+				// TODO
+				'replace_Old_vfd_multi: Should remove AFD action manually:');
+				console.log(token);
 			}
 		}, true);
 
@@ -508,6 +517,29 @@ function module_code(library_namespace) {
 		'Article history' : true
 	};
 
+	function parse_Article_history_token(token, item_list) {
+		if (!(token.name in Article_history__name))
+			return;
+
+		if (!item_list)
+			item_list = [];
+
+		for ( var key in token.parameters) {
+			var value = token.parameters[key];
+			var matched = key.match(/^action([1-9]\d?)(.*)?$/);
+			if (!matched) {
+				item_list[key] = value;
+				continue;
+			}
+			var NO = +matched[1];
+			if (!item_list[NO])
+				item_list[NO] = Object.create(null);
+			item_list[NO][matched[2] || 'action'] = value;
+		}
+
+		return item_list;
+	}
+
 	// parse {{Article history}}
 	function parse_Article_history(page_data, options) {
 		options = library_namespace.setup_options(options);
@@ -523,21 +555,7 @@ function module_code(library_namespace) {
 		var parsed = get_parsed(page_data);
 
 		parsed.each('template', function(token) {
-			if (!(token.name in Article_history__name))
-				return;
-
-			for ( var key in token.parameters) {
-				var value = token.parameters[key];
-				var matched = key.match(/^action([1-9]\d?)(.*)?$/);
-				if (!matched) {
-					item_list[key] = value;
-					continue;
-				}
-				var NO = +matched[1];
-				if (!item_list[NO])
-					item_list[NO] = Object.create(null);
-				item_list[NO][matched[2] || 'action'] = value;
-			}
+			parse_Article_history_token(token, item_list);
 
 			// return to_exit;
 		});
