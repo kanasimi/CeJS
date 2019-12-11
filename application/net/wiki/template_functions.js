@@ -529,6 +529,10 @@ function module_code(library_namespace) {
 					else
 						index++;
 				}
+				if (token.length === 1) {
+					// Nothing left
+					return '';
+				}
 			}
 		}, true);
 
