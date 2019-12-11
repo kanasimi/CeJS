@@ -268,12 +268,14 @@ function module_code(library_namespace) {
 			ebook.add({
 				// title : 'mainstyle',
 				file : 'main_style.css'
-			},
+			}, 'html { '
 			// https://en.wikipedia.org/wiki/Horizontal_and_vertical_writing_in_East_Asian_scripts
 			// 東亞文字排列方向 垂直方向自右而左的書寫方式。即 top-bottom-right-left
-			'html { writing-mode:' + mode + ';'
+			+ 'writing-mode:' + mode + ';'
 			// https://blog.tommyku.com/blog/how-to-make-epubs-with-vertical-layout/
-			+ ' -epub-writing-mode:' + mode + '; }');
+			+ '-epub-writing-mode:' + mode + ';'
+			// for Kindle Readers (kindlegen)?
+			+ '-webkit-writing-mode:' + mode + '; }');
 		}
 
 		return work_data[this.KEY_EBOOK] = ebook;
