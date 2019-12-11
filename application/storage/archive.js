@@ -130,6 +130,8 @@ function module_code(library_namespace) {
 		</code>
 		 */
 		"7za",
+		// for Linux Mint 19 "Tara"
+		"7zr",
 		// keka @ macOS
 		"/Applications/Keka.app/Contents/Resources/keka7z",
 				library_namespace.platform('windows')
