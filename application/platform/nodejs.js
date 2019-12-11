@@ -686,9 +686,10 @@ function module_code(library_namespace) {
 
 	// WshShell.ExpandEnvironmentStrings()
 	function ExpandEnvironmentStrings(string) {
-		return string.replace(/%([a-z_]+)%/ig, function(all, variable) {
-			return process.env.variable === undefined ? all
-					: process.env.variable;
+		return string.replace(/%([a-z_\d]+)%/ig, function(all, variable) {
+			var value = process.env[variable];
+			// console.log(value);
+			return value === undefined ? all : value;
 		});
 	}
 
