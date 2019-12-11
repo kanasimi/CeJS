@@ -236,7 +236,8 @@ function module_code(library_namespace) {
 					'Archive_file: ',
 					{
 						T : [ 'Unknown type: %1, please install %2',
-								this.program_type, default_program_type ]
+								this.program_type,
+								default_program_type || 'file archiver' ]
 					} ]);
 		}
 

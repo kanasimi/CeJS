@@ -62,9 +62,9 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// const
-	// var NS_MediaWiki = CeL.wiki.namespace('MediaWiki');
-	var NS_Module = CeL.wiki.namespace('Module');
-	// var NS_Template = CeL.wiki.namespace('Template');
+	// var NS_MediaWiki = wiki_API.namespace('MediaWiki');
+	var NS_Module = wiki_API.namespace('Module');
+	// var NS_Template = wiki_API.namespace('Template');
 
 	// 汲取 page_data 中所有全局轉換（全頁面語言轉換），並交給 processor 處理。
 	// processor({type: 'item', rule: '', original: ''})
@@ -326,7 +326,7 @@ function module_code(library_namespace) {
 		var item_list = [];
 		if (options.using_data) {
 			item_list.page_data = page_data;
-		} else {
+		} else if (page_data.title) {
 			// normalized page title
 			item_list.page_title = page_data.title;
 		}
@@ -356,7 +356,7 @@ function module_code(library_namespace) {
 			|| 'k';
 			item_list.push(
 			//
-			CeL.wiki.parse.add_parameters_to_template_object(null, {
+			wiki_API.parse.add_parameters_to_template_object(null, {
 				date : token.parameters[1],
 				result : result,
 				page : token.parameters.page,
@@ -370,7 +370,7 @@ function module_code(library_namespace) {
 			&& token.parameters['date' + index]; index++) {
 				item_list.push(
 				//
-				CeL.wiki.parse.add_parameters_to_template_object(null, {
+				wiki_API.parse.add_parameters_to_template_object(null, {
 					date : token.parameters['date' + index],
 					result : token.parameters['result' + index] || '保留',
 					page : token.parameters['page' + index],
@@ -402,7 +402,7 @@ function module_code(library_namespace) {
 
 		item_list.forEach(function(item, index) {
 			if (index === 0) {
-				CeL.wiki.parse.add_parameters_to_template_object(
+				wiki_API.parse.add_parameters_to_template_object(
 				//
 				template_object, {
 					'1' : item.date,
@@ -424,7 +424,7 @@ function module_code(library_namespace) {
 				page : 'page' + index,
 				target : 'target' + index
 			});
-			CeL.wiki.parse.add_parameters_to_template_object(template_object,
+			wiki_API.parse.add_parameters_to_template_object(template_object,
 					mapper, item);
 		});
 
@@ -444,6 +444,7 @@ function module_code(library_namespace) {
 
 		// normalize replace_to
 		if (Array.isArray(replace_to)) {
+			// console.log(replace_to);
 			replace_to = Old_vfd_multi__item_list_to_template_object(replace_to);
 		}
 
@@ -480,7 +481,7 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof replace_to === 'object') {
-			replace_to = CeL.wiki.parse.template_object_to_wikitext(
+			replace_to = wiki_API.parse.template_object_to_wikitext(
 					Old_vfd_multi__main_name, replace_to, add_new_line);
 		}
 
@@ -492,13 +493,42 @@ function module_code(library_namespace) {
 			}
 
 			var item_list = parse_Article_history_token(token);
-			if (item_list && item_list.some(function(item) {
-				return item.action === 'AFD';
-			})) {
-				library_namespace.info(
-				// TODO
-				'replace_Old_vfd_multi: Should remove AFD action manually:');
-				console.log(token);
+			if (item_list) {
+				var NO_to_delete = [], last_need_preserve;
+				item_list.forEach(function(item, index) {
+					++index;
+					if (item.action === 'AFD')
+						NO_to_delete.push(index);
+					else
+						last_need_preserve = index;
+				});
+
+				if (last_need_preserve) {
+					if (NO_to_delete.length === 0) {
+						library_namespace.warn('replace_Old_vfd_multi: '
+								+ 'Should find {{Article history}} '
+								+ 'but no {{Article history}} found:');
+						console.warn(token);
+						return;
+					}
+
+					if (last_need_preserve > NO_to_delete[0]) {
+						library_namespace.warn('replace_Old_vfd_multi: '
+						//
+						+ 'Should modify {{Article history}} manually:');
+						console.warn(token);
+						return;
+					}
+				}
+
+				var PATTERN = new RegExp('^\\s*action(?:'
+						+ NO_to_delete.join('|') + ')'), index = 1;
+				while (index < token.length) {
+					if (PATTERN.test(token[index]))
+						token.splice(index, 1);
+					else
+						index++;
+				}
 			}
 		}, true);
 
@@ -531,10 +561,10 @@ function module_code(library_namespace) {
 				item_list[key] = value;
 				continue;
 			}
-			var NO = +matched[1];
-			if (!item_list[NO])
-				item_list[NO] = Object.create(null);
-			item_list[NO][matched[2] || 'action'] = value;
+			var index = matched[1] - 1;
+			if (!item_list[index])
+				item_list[index] = Object.create(null);
+			item_list[index][matched[2] || 'action'] = value;
 		}
 
 		return item_list;
@@ -547,7 +577,7 @@ function module_code(library_namespace) {
 		var item_list = [];
 		if (options.using_data) {
 			item_list.page_data = page_data;
-		} else {
+		} else if (page_data.title) {
 			// normalized page title
 			item_list.page_title = page_data.title;
 		}
@@ -574,6 +604,7 @@ function module_code(library_namespace) {
 			text_of : text_of_Hat_flag
 		},
 		Old_vfd_multi : {
+			// CeL.wiki.template_functions.Old_vfd_multi.parse()
 			parse : parse_Old_vfd_multi,
 			replace_by : replace_Old_vfd_multi,
 			text_of : text_of_Hat_flag
