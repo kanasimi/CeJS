@@ -429,8 +429,8 @@ function module_code(library_namespace) {
 			remove_ebook_directory : 'boolean',
 			// 當新獲取的檔案比較大時，覆寫舊的檔案。
 			overwrite_old_file : 'boolean',
-			convert_to_TW : 'boolean',
 			vertical_writing : 'boolean|string',
+			convert_to_TW : 'boolean',
 
 			user_agent : 'string',
 			// 代理伺服器 proxy_server: "username:password@hostname:port"

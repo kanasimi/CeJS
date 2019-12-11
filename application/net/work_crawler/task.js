@@ -197,6 +197,11 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		if (this.convert_to_TW) {
+			// CeL.CN_to_TW('简体')
+			library_namespace.run('extension.zh_conversion');
+		}
+
 		library_namespace.log([ this.id, ': ',
 		//
 		(new Date).format('%Y/%m/%d %H:%M:%S'), ' ', {
@@ -1012,7 +1017,8 @@ function module_code(library_namespace) {
 		// 到現在平均每個章節使用時間。
 		time_used / chapters_downloaded;
 
-		if (!(1e3 < estimated_time && estimated_time < 1e15)) {
+		// 限制顯示訊息的上下限：僅此範圍內顯示訊息。
+		if (!(1e3 < estimated_time && estimated_time < 1e15/* Infinity */)) {
 			return '';
 		}
 		return gettext('預估還需 %1 下載完本作品。', library_namespace.age_of(0,

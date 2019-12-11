@@ -261,7 +261,7 @@ function module_code(library_namespace) {
 		}
 
 		if (this.vertical_writing) {
-			var mode = typeof this.vertical_writing === 'string' ? /^(?:rl|lr)$/
+			var mode = typeof this.vertical_writing === 'string' ? /^(?:lr|rl)$/
 					.test(this.vertical_writing) ? 'vertical-'
 					+ this.vertical_writing : this.vertical_writing
 					: 'vertical-rl';
@@ -606,7 +606,8 @@ function module_code(library_namespace) {
 					//
 					+ (work_data.chapter_unit || this.chapter_unit) : '',
 					']',
-					this.vertical_writing === true ? ' ('
+					this.vertical_writing === true
+							|| /^(?:lr|rl)$/.test(this.vertical_writing) ? ' ('
 							+ (/^ja/.test(work_data.language) ? '縦書き' : '縱書')
 							+ ')' : '',
 					this.convert_to_TW ? ' ('
