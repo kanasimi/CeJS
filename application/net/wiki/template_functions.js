@@ -349,6 +349,7 @@ function module_code(library_namespace) {
 
 			if (!(token.name in Old_vfd_multi__names))
 				return;
+
 			// {{Old vfd multi|提刪日期|處理結果|page=頁面名稱}}
 			var result = token.parameters[2];
 			result = normalize_result_flag(result_flags__Old_vfd_multi, result)
@@ -401,6 +402,9 @@ function module_code(library_namespace) {
 		}
 
 		item_list.forEach(function(item, index) {
+			if (item.hat_result === item.result)
+				delete item.hat_result;
+
 			if (index === 0) {
 				wiki_API.parse.add_parameters_to_template_object(
 				//
@@ -409,7 +413,8 @@ function module_code(library_namespace) {
 					'2' : item.result,
 					page : item.page,
 					// move to, merge to, redirect to
-					'3' : item.target
+					'3' : item.target,
+					hat_result : item.hat_result
 				});
 				return;
 			}
@@ -422,7 +427,8 @@ function module_code(library_namespace) {
 				date : 'date' + index,
 				result : 'result' + index,
 				page : 'page' + index,
-				target : 'target' + index
+				target : 'target' + index,
+				hat_result : 'hat_result' + index
 			});
 			wiki_API.parse.add_parameters_to_template_object(template_object,
 					mapper, item);
@@ -461,22 +467,26 @@ function module_code(library_namespace) {
 
 		</code>
 		 */
-		var latest_index;
+		var latest_index, new_line = '\n';
 		function add_new_line(string_list) {
+			var multi;
 			string_list.forEach(function(parameter, index) {
 				if (index === 0)
 					return;
 				if (/^multi=/.test(parameter)) {
-					string_list[index - 1] += '\n';
-					// string_list[index]+='\n';
+					multi = true;
+					string_list[index - 1] += new_line;
+					// string_list[index] += new_line;
 					return;
 				}
 				var matched = parameter.match(/^[^=\d]+(\d+)=/);
 				if (matched && latest_index !== +matched[1]) {
 					latest_index = +matched[1];
-					string_list[index - 1] += '\n';
+					string_list[index - 1] += new_line;
 				}
 			});
+			if (multi)
+				string_list[index - 1] += new_line;
 			return string_list;
 		}
 
@@ -488,6 +498,8 @@ function module_code(library_namespace) {
 		var replaced;
 		parsed.each('template', function(token) {
 			if (token.name in Old_vfd_multi__names) {
+				if (replaced)
+					return parsed.each.remove_token;
 				replaced = true;
 				return replace_to;
 			}
@@ -503,23 +515,28 @@ function module_code(library_namespace) {
 						last_need_preserve = index;
 				});
 
-				if (last_need_preserve) {
-					if (NO_to_delete.length === 0) {
-						library_namespace.warn('replace_Old_vfd_multi: '
-								+ 'Should find {{Article history}} '
-								+ 'but no {{Article history}} found:');
-						console.warn(token);
-						return;
-					}
-
-					if (last_need_preserve > NO_to_delete[0]) {
-						library_namespace.warn('replace_Old_vfd_multi: '
-						//
-						+ 'Should modify {{Article history}} manually:');
-						console.warn(token);
-						return;
-					}
+				if (!last_need_preserve) {
+					// Only action=AFD
+					return parsed.each.remove_token;
 				}
+
+				if (NO_to_delete.length === 0) {
+					library_namespace.warn('replace_Old_vfd_multi: '
+							+ 'Should find {{Article history}} '
+							+ 'but no {{Article history}} found:');
+					console.warn(token);
+					return;
+				}
+
+				if (last_need_preserve > NO_to_delete[0]) {
+					library_namespace.warn('replace_Old_vfd_multi: '
+					//
+					+ 'Should modify {{Article history}} manually:');
+					console.warn(token);
+					return;
+				}
+
+				// assert: last_need_preserve < NO_to_delete[0]
 
 				var PATTERN = new RegExp('^\\s*action(?:'
 						+ NO_to_delete.join('|') + ')'), index = 1;
@@ -529,9 +546,11 @@ function module_code(library_namespace) {
 					else
 						index++;
 				}
-				if (token.length === 1) {
+
+				// assert: token.length > 1
+				if (false && token.length === 1) {
 					// Nothing left
-					return '';
+					return parsed.each.remove_token;
 				}
 			}
 		}, true);

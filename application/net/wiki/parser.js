@@ -281,8 +281,12 @@ function module_code(library_namespace) {
 			if (!is_valid_parameters_value(value)) {
 				break;
 			}
+
 			// value = value.toString();
 			value = String(value);
+			if (value.includes('='))
+				value = index + '=' + value;
+
 			// text_array.push(value); index++;
 			text_array[index++] = value;
 		}
@@ -710,7 +714,8 @@ function module_code(library_namespace) {
 
 					} else if (modify_by_return) {
 						// 換掉整個 parent[index] token 的情況。
-						// `return undefined;` 不會替換，應該 `return '';` 以清空。
+						// `return undefined;` 不會替換，應該 return
+						// .each.remove_token; 以清空。
 						// 小技巧: 可以用 return [ inner ].is_atom = true 來避免進一步的
 						// parse 或者處理。
 						if (typeof result === 'string') {
