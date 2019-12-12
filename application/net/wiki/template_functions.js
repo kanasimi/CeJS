@@ -485,8 +485,10 @@ function module_code(library_namespace) {
 					string_list[index - 1] += new_line;
 				}
 			});
-			if (multi)
-				string_list[index - 1] += new_line;
+			if (multi) {
+				// 將 '}}' 前一個加上 '\n'。
+				string_list[string_list.length - 2] += new_line;
+			}
 			return string_list;
 		}
 
