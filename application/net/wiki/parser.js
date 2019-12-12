@@ -5090,18 +5090,36 @@ function module_code(library_namespace) {
 	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^\[\]\|{}\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i;
 
 	/**
-	 * parse redirect page. 解析重定向資訊。 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名:
-	 * "title#section"。
+	 * parse redirect page. 解析重定向資訊，或判斷頁面是否為重定向頁面。<br />
+	 * 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名: "title#section"。
 	 * 
-	 * @param {String}wikitext
-	 *            wikitext to parse
+	 * 應採用如下方法，可以取得 `('redirect' in page_data) && page_data.redirect === ''` 。
+	 * 
+	 * @example <code>
+
+	wiki.page(title, function(page_data) {
+		var is_redirect = CeL.wiki.is_protected(page_data);
+		// `true` or `undefined`
+		console.log(is_redirect);
+	}, {
+		prop : 'info'
+	});
+
+	 </code>
+	 * 
+	 * @param {String}page_data
+	 *            page data or wikitext to parse
 	 * 
 	 * @returns {String}title#section
 	 * @returns {Undefined}Not a redirect page.
 	 */
-	function parse_redirect(wikitext) {
-		if (wiki_API.is_page_data(wikitext)) {
-			wikitext = wiki_API.content_of(wikitext);
+	function parse_redirect(page_data) {
+		var wikitext, is_page_data = wiki_API.is_page_data(page_data);
+		if (is_page_data) {
+			wikitext = wiki_API.content_of(page_data);
+		} else {
+			// treat page_data as wikitext.
+			wikitext = page_data;
 		}
 
 		if (false) {
@@ -5121,6 +5139,11 @@ function module_code(library_namespace) {
 		var matched = wikitext && wikitext.match(PATTERN_redirect);
 		if (matched) {
 			return matched[1].trim();
+		}
+
+		if (is_page_data && ('redirect' in page_data)) {
+			// assert: page_data.redirect === ''
+			return true;
 		}
 
 		if (false && wikitext.includes('__STATICREDIRECT__')) {

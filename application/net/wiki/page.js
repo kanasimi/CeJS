@@ -55,7 +55,12 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// wiki.page() 範例。
 	if (false) {
+		CeL.wiki.page('史記', function(page_data) {
+			CeL.show_value(page_data);
+		});
+
 		wiki.page('巴黎協議 (消歧義)', {
 			query_props : 'pageprops'
 		});
@@ -78,6 +83,43 @@ function module_code(library_namespace) {
 		}, {
 			get_creation_Date : true
 		});
+
+		// for many pages, e.g., more than 200, please use:
+		wiki.work({
+			// redirects : 1,
+			each : for_each_page_data,
+			last : last_operation,
+			no_edit : true,
+			page_options : {
+				// multi : 'keep index',
+				// converttitles : 1,
+				redirects : 1
+			}
+		}, page_list);
+
+		// 組合以取得資訊。
+		wiki.page(title, function(page_data) {
+			console.log(page_data);
+		}, {
+			prop : 'revisions|info',
+			// rvprop : 'ids|timestamp',
+			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Binfo
+			// https://www.mediawiki.org/wiki/API:Info
+			additional : 'inprop=talkid|subjectid'
+					+ '|preload|displaytitle|varianttitles'
+		});
+
+		// 組合以取得資訊。
+		wiki.page(title, function(page_data) {
+			console.log(page_data);
+			if ('read' in page_data.actions)
+				console.log('readable');
+		}, {
+			prop : 'info',
+			// https://www.mediawiki.org/wiki/API:Info
+			additional : 'inprop=intestactions&intestactions=read'
+		// + '&intestactionsdetail=full'
+		});
 	}
 
 	// assert: !!KEY_KEEP_INDEX === true
@@ -88,6 +130,8 @@ function module_code(library_namespace) {
 	/**
 	 * 讀取頁面內容，取得頁面源碼。可一次處理多個標題。
 	 * 
+	 * 前文有 wiki.page() 範例。
+	 * 
 	 * 注意: 用太多 CeL.wiki.page() 並列處理，會造成 error.code "EMFILE"。
 	 * 
 	 * TODO:
@@ -96,24 +140,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @example <code>
 
-	CeL.wiki.page('史記', function(page_data) {
-		CeL.show_value(page_data);
-	});
+	// 前文有 wiki.page() 範例。
 
-	// for many pages, e.g., more than 200, please use:
-	wiki.work({
-		// redirects : 1,
-		each : for_each_page_data,
-		last : last_operation,
-		no_edit : true,
-		page_options : {
-			// multi : 'keep index',
-			// converttitles : 1,
-			redirects : 1
-		}
-	}, page_list);
-
-	 </code>
+	</code>
 	 * 
 	 * @param {String|Array}title
 	 *            title or [ {String}API_URL, {String}title or {Object}page_data ]
