@@ -211,6 +211,10 @@ function module_code(library_namespace) {
 		'Hidden archive top' : true
 	};
 
+	var Multidel_names = {
+		Multidel : true
+	};
+
 	// https://zh.wikipedia.org/wiki/Template:TalkendH
 	// [0]: 正式名稱。
 	var result_flags__Hat = {
@@ -218,13 +222,18 @@ function module_code(library_namespace) {
 
 		// 請求無效
 		rep : '重複提出，無效',
+		commons : '應在維基共享資源提請',
 		ne : 'notexist|目標頁面或檔案不存在',
 		nq : 'notqualified|提刪者未取得提刪資格',
 		// 保留
 		dan : '刪後重建',
+		// 刪除
 		ic : '圖像因侵權被刪|ifd',
 		// 快速刪除
 		sd : '快速刪除|speedy delete|speedily deleted',
+		lssd : '無來源或版權資訊，快速刪除',
+		svg : '已改用SVG圖形，快速刪除',
+		nowcommons : '維基共享資源已提供，快速刪除',
 		drep : '多次被刪除，條目被白紙保護，禁止創建',
 		// 轉移至其他維基計畫
 		twc : '轉移至維基共享資源',
@@ -236,7 +245,10 @@ function module_code(library_namespace) {
 		two : '轉移至其他維基計畫',
 		// 其他處理方法
 		c : '轉交侵權|copyvio',
+		// m2pfd : '轉送頁面存廢討論',
+		// m2ifd : '轉送檔案存廢討論',
 		cr : '分類重定向',
+		ma : '允許併入|mergeapproved',
 
 		// 快捷碼：破壞
 		del : '已刪除|相關頁面已刪除'
@@ -249,6 +261,7 @@ function module_code(library_namespace) {
 		nc : 'no consensus|nc|無共識|无共识',
 		m : 'moved|move|移動|移动',
 		r : 'redirect|redirected|重定向',
+		// 包含提刪者撤回
 		sk : 'speedy keep|speedily kept|快速保留|速留',
 		ir : 'invalid request|無效|无效|請求無效',
 		// '''請求理由已消失'''，页面'''保留''' reason disappeared
@@ -487,7 +500,7 @@ function module_code(library_namespace) {
 			});
 			if (multi) {
 				// 將 '}}' 前一個加上 '\n'。
-				string_list[string_list.length - 2] += new_line;
+				string_list[string_list.length - 1] += new_line;
 			}
 			return string_list;
 		}
@@ -555,6 +568,15 @@ function module_code(library_namespace) {
 					return parsed.each.remove_token;
 				}
 			}
+
+			if (token.name in Multidel_names) {
+				library_namespace.warn('replace_Old_vfd_multi: '
+				//
+				+ 'Should modify {{Multidel}} manually:');
+				console.warn(token);
+				return;
+			}
+
 		}, true);
 
 		if (!replaced && typeof replace_to === 'string'
