@@ -305,8 +305,11 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (post_processor)
+		if (post_processor) {
+			// text_array = [ '{{template_name', 'parameters', ... ]
+			// 不包含 '}}' !
 			text_array = post_processor(text_array);
+		}
 
 		return text_array.join('|') + '}}';
 	}
@@ -5097,6 +5100,10 @@ function module_code(library_namespace) {
 	 * @returns {Undefined}Not a redirect page.
 	 */
 	function parse_redirect(wikitext) {
+		if (wiki_API.is_page_data(wikitext)) {
+			wikitext = wiki_API.content_of(wikitext);
+		}
+
 		if (false) {
 			if (Array.isArray(wikitext)) {
 				throw '您可能取得了多個版本';
@@ -5106,7 +5113,7 @@ function module_code(library_namespace) {
 				// content = CeL.wiki.content_of(page_data);
 			}
 			if (!wikitext || typeof wikitext !== 'string') {
-				throw typeof wikitext
+				throw typeof wikitext;
 				return;
 			}
 		}
