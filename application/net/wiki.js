@@ -987,6 +987,32 @@ function module_code(library_namespace) {
 		&& n.endsWith('talk');
 	}
 
+	function to_talk_page(page_title) {
+		if (wiki_API.is_page_data(page_title)) {
+			page_title = wiki_API.title_of(page_title);
+		} else {
+			page_title = wiki_API.normalize_title(page_title);
+		}
+
+		if (!page_title || typeof page_title !== 'string')
+			return;
+
+		var matched = page_title
+				.match(/^([^:]+):(.+)$/ && /^([a-z _]+):(.+)$/i);
+		if (!matched) {
+			// assert: main page (namespace: 0)
+			return 'Talk:' + page_title;
+		}
+
+		var namespace = matched[1];
+		if (is_talk_namespace(namespace)) {
+			CeL.debug('Is already talk page: ' + page_title, 3, 'to_talk_page');
+			return page_title;
+		}
+
+		return namespace + ' talk:' + matched[2];
+	}
+
 	// ------------------------------------------------------------------------
 
 	// wikitext to plain text
@@ -5370,6 +5396,7 @@ function module_code(library_namespace) {
 		namespace : get_namespace,
 		remove_namespace : remove_namespace,
 		is_talk_namespace : is_talk_namespace,
+		to_talk_page : to_talk_page,
 
 		file_pattern : file_pattern,
 

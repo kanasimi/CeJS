@@ -2838,6 +2838,17 @@ function test_wiki() {
 	]);
 
 	all_error_count += CeL.test('wiki: file_pattern & parse_template', [
+		[[8, CeL.wiki.namespace('Wikipedia:NAME')], 'wiki.namespace #1'],
+		[[0, CeL.wiki.namespace('ABC')], 'wiki.namespace #2'],
+		[['NAME', CeL.wiki.remove_namespace('Wikipedia:NAME')], 'wiki.remove_namespace #1'],
+		[['ABC', CeL.wiki.remove_namespace('ABC')], 'wiki.remove_namespace #2'],
+		[[true, CeL.wiki.is_talk_namespace('talk:ABC')], 'wiki.is_talk_namespace #1'],
+		[[false, CeL.wiki.is_talk_namespace('ABC')], 'wiki.is_talk_namespace #2'],
+		[[false, CeL.wiki.is_talk_namespace('Wikipedia:NAME')], 'wiki.is_talk_namespace #3'],
+		[[true, CeL.wiki.is_talk_namespace('Wikipedia talk:NAME')], 'wiki.is_talk_namespace #4'],
+		[['Talk:ABC', CeL.wiki.to_talk_page('ABC')], 'wiki.to_talk_page #1'],
+		[['Wikipedia talk:NAME', CeL.wiki.to_talk_page('Wikipedia:NAME')], 'wiki.to_talk_page #2'],
+
 		[['!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
 			//
 			.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3')], 'file_pattern'],
