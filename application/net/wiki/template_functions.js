@@ -403,7 +403,8 @@ function module_code(library_namespace) {
 		return item_list;
 	}
 
-	function Old_vfd_multi__item_list_to_template_object(item_list) {
+	function Old_vfd_multi__item_list_to_template_object(item_list, page_data,
+			force_set_page) {
 		var template_object = Object.create(null);
 
 		if (item_list.length > 5) {
@@ -413,6 +414,8 @@ function module_code(library_namespace) {
 							+ '}} only support 5 records!');
 			console.log(item_list);
 		}
+
+		var page_title = page_data && page_data.title;
 
 		item_list.forEach(function(item, index) {
 			if (item.hat_result === item.result)
@@ -424,7 +427,8 @@ function module_code(library_namespace) {
 				template_object, {
 					'1' : item.date,
 					'2' : item.result,
-					page : item.page,
+					page : (force_set_page || item.page !== page_data.title)
+							&& item.page,
 					// move to, merge to, redirect to
 					'3' : item.target,
 					hat_result : item.hat_result
@@ -443,6 +447,9 @@ function module_code(library_namespace) {
 				target : 'target' + index,
 				hat_result : 'hat_result' + index
 			});
+			if (!force_set_page && item.page === page_title) {
+				delete mapper.page;
+			}
 			wiki_API.parse.add_parameters_to_template_object(template_object,
 					mapper, item);
 		});
@@ -464,7 +471,9 @@ function module_code(library_namespace) {
 		// normalize replace_to
 		if (Array.isArray(replace_to)) {
 			// console.log(replace_to);
-			replace_to = Old_vfd_multi__item_list_to_template_object(replace_to);
+			replace_to = Old_vfd_multi__item_list_to_template_object(
+			// 為了預防頁面被移動時出現問題，強制加上 `page` 設定。
+			replace_to, page_data, true);
 		}
 
 		/**
@@ -480,34 +489,39 @@ function module_code(library_namespace) {
 
 		</code>
 		 */
-		var latest_index, new_line = '\n';
-		function add_new_line(string_list) {
+		var latest_index, line_separator = '\n';
+		function add_line_separator(string_list) {
 			var multi;
 			string_list.forEach(function(parameter, index) {
 				if (index === 0)
 					return;
 				if (/^multi=/.test(parameter)) {
 					multi = true;
-					string_list[index - 1] += new_line;
-					// string_list[index] += new_line;
+					string_list[index - 1] += line_separator;
+					// string_list[index] += line_separator;
 					return;
 				}
 				var matched = parameter.match(/^[^=\d]+(\d+)=/);
 				if (matched && latest_index !== +matched[1]) {
 					latest_index = +matched[1];
-					string_list[index - 1] += new_line;
+					string_list[index - 1] += line_separator;
 				}
 			});
 			if (multi) {
-				// 將 '}}' 前一個加上 '\n'。
-				string_list[string_list.length - 1] += new_line;
+				// 將 '}}' 前一個加上 line_separator。
+				string_list[string_list.length - 1] += line_separator;
 			}
 			return string_list;
 		}
 
 		if (typeof replace_to === 'object') {
 			replace_to = wiki_API.parse.template_object_to_wikitext(
-					Old_vfd_multi__main_name, replace_to, add_new_line);
+					Old_vfd_multi__main_name, replace_to, add_line_separator);
+		}
+
+		if (typeof replace_to !== 'string' || !replace_to.startsWith('{{')) {
+			throw new Error('replace_Old_vfd_multi: Invalid replace_to: '
+					+ replace_to);
 		}
 
 		var replaced;
@@ -547,7 +561,7 @@ function module_code(library_namespace) {
 					library_namespace.warn('replace_Old_vfd_multi: '
 					//
 					+ 'Should modify {{Article history}} manually:');
-					console.warn(token);
+					library_namespace.log(token.toString());
 					return;
 				}
 
@@ -573,15 +587,20 @@ function module_code(library_namespace) {
 				library_namespace.warn('replace_Old_vfd_multi: '
 				//
 				+ 'Should modify {{Multidel}} manually:');
-				console.warn(token);
+				library_namespace.log(token.toString());
 				return;
 			}
 
 		}, true);
 
-		if (!replaced && typeof replace_to === 'string'
-				&& replace_to.startsWith('{{')) {
-			parsed.unshift(replace_to + '\n');
+		if (!replaced) {
+			// TODO: 將模板放在專題模板之後。
+			if (!replace_to.endsWith(line_separator)) {
+				// 前面的 replaced 是替代，無需加入換行。
+				// 這邊將會把 `replace_to` 直接添加在頁面頂端，因此需要格式化一下。
+				parsed.unshift(line_separator);
+			}
+			parsed.unshift(replace_to);
 		}
 
 		return parsed.toString();
