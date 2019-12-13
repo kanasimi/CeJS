@@ -943,26 +943,24 @@ function module_code(library_namespace) {
 	/**
 	 * remove namespace part of the title.
 	 * 
-	 * @param {String}title
+	 * @param {String}page_title
 	 *            page title 頁面標題。
 	 * 
 	 * @returns {String}title without namespace
 	 */
-	function remove_namespace(title) {
-		if (typeof title !== 'string') {
-			library_namespace.debug(title, 5, 'remove_namespace');
-			if (wiki_API.is_page_data(title)) {
-				title = title.title;
-				// assert: now title is string.
-			} else
-				return title;
+	function remove_namespace(page_title) {
+		page_title = wiki_API.normalize_title(page_title);
+		if (typeof page_title !== 'string') {
+			library_namespace.debug(page_title, 5, 'remove_namespace');
+			return page_title;
 		}
-		var matched = title.match(get_namespace.pattern);
-		library_namespace.debug('Test ' + wiki_API.title_link_of(title)
+		var matched = page_title.match(get_namespace.pattern);
+		library_namespace.debug('Test ' + wiki_API.title_link_of(page_title)
 				+ ', get [' + matched + '] using pattern '
 				+ get_namespace.pattern, 4, 'remove_namespace');
 		if (matched)
-			return (matched ? matched[2] : title).trim();
+			return (matched ? matched[2] : page_title).trim();
+		return page_title;
 	}
 
 	function is_talk_namespace(namespace) {
