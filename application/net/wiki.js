@@ -969,7 +969,7 @@ function module_code(library_namespace) {
 			// treat ((namespace)) as page title
 			// get namespace only. e.g., 'wikipedia:sandbox' → 'wikipedia'
 			namespace = namespace.replace(/:.*$/, '');
-			if (isNaN(namespace) && !/^(?:[a-z _]+[_ ])?talk$/i.test(namespace))
+			if (isNaN(namespace) && !/^(?:[a-z _]+[ _])?talk$/i.test(namespace))
 				return false;
 		}
 
@@ -1009,6 +1009,18 @@ function module_code(library_namespace) {
 		}
 
 		return namespace + ' talk:' + matched[2];
+	}
+
+	function talk_page_to_main(page_title) {
+		if (wiki_API.is_page_data(page_title)) {
+			page_title = wiki_API.title_of(page_title);
+		} else {
+			page_title = wiki_API.normalize_title(page_title);
+		}
+
+		// TODO: 需另外處理非 "talk" 說明頁。 e.g., "討論:..."
+		return /^Talk:/i.test(page_title) ? page_title.replace(/^Talk:/i, '')
+				: page_title.replace(/^([a-z _]+)[ _]talk:/i, '$1:');
 	}
 
 	// ------------------------------------------------------------------------
@@ -5406,6 +5418,7 @@ function module_code(library_namespace) {
 		remove_namespace : remove_namespace,
 		is_talk_namespace : is_talk_namespace,
 		to_talk_page : to_talk_page,
+		talk_page_to_main : talk_page_to_main,
 
 		file_pattern : file_pattern,
 
