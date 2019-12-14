@@ -1123,7 +1123,15 @@ function module_code(library_namespace) {
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {
-			// template-linking templates: {{Tl}}, {{Tlx}}, {{Tls}}, {{T1}}, ...
+			// 其他常用 template 可加在 template_functions.to_displayed_text 中。
+			if (wiki_API.to_displayed_text) {
+				var new_token = wiki_API.to_displayed_text(token, options);
+				if (new_token !== wiki_API.to_displayed_text.NOT_PARSED)
+					return new_token;
+			}
+
+			// 各語言 wiki 常用 template-linking templates:
+			// {{Tl}}, {{Tlx}}, {{Tls}}, {{T1}}, ...
 			if (/^(?:T[l1n][a-z]{0,3}[23]?)$/.test(token.name)) {
 				token.shift();
 				return token;

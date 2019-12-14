@@ -48,6 +48,9 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function template_functions() {
+	}
+
 	function get_parsed(page_data) {
 		var parsed = typeof page_data.each === 'function'
 		// `page_data` is parsed data
@@ -56,8 +59,40 @@ function module_code(library_namespace) {
 		return parsed;
 	}
 
-	function template_functions() {
+	// ------------------------------------------------------------------------
+	// template names: The first one is the main template name. 首個名稱為正式名稱。
+
+	var zh_Al_names = 'Al'.split('|').to_hash();
+
+	var Hat_names = 'TalkendH|Talkendh|Delh|Closereq|Hat|Hidden archive top'
+			.split('|').to_hash();
+
+	var Multidel_names = 'Multidel'.split('|').to_hash();
+
+	var Old_vfd_multi__names = 'Old vfd multi|Oldafdfull|Vfd-kept|存廢討論被保留|頁面存廢討論被保留'
+			.split('|');
+	var Old_vfd_multi__main_name = Old_vfd_multi__names[0];
+	Old_vfd_multi__names = Old_vfd_multi__names.to_hash();
+	// var Old_vfd_multi__main_name = Object.keys(Old_vfd_multi__names)[0];
+
+	var Article_history__names = 'Article history|ArticleHistory|Article milestones|AH'
+			.split('|').to_hash();
+
+	// ------------------------------------------------------------------------
+
+	function to_displayed_text(token, options) {
+		var token_name = token.name;
+		if (token_name in zh_Al_names) {
+			return parse_zh_Al_token(token, options);
+		}
+
+		return to_displayed_text.NOT_PARSED;
 	}
+
+	to_displayed_text.NOT_PARSED = typeof Symbol === 'function' ? Symbol('not parsed')
+			: {
+				NOT_PARSED : true
+			};
 
 	// ------------------------------------------------------------------------
 
@@ -200,24 +235,29 @@ function module_code(library_namespace) {
 		return convention_item_list;
 	}
 
-	// ------------------------------------------------------------------------
-	// template names: The first one is the main template name. 首個名稱為正式名稱。
-
-	var Hat_names = 'TalkendH|Talkendh|Delh|Closereq|Hat|Hidden archive top'
-			.split('|').to_hash();
-
-	var Multidel_names = 'Multidel'.split('|').to_hash();
-
-	var Old_vfd_multi__names = 'Old vfd multi|Oldafdfull|Vfd-kept|存廢討論被保留|頁面存廢討論被保留'
-			.split('|');
-	var Old_vfd_multi__main_name = Old_vfd_multi__names[0];
-	Old_vfd_multi__names = Old_vfd_multi__names.to_hash();
-	// var Old_vfd_multi__main_name = Object.keys(Old_vfd_multi__names)[0];
-
-	var Article_history__names = 'Article history|ArticleHistory|Article milestones|AH'
-			.split('|').to_hash();
-
 	// ------------------------------------------
+
+	// [[w:zh:Template:Al]]
+	function zh_Al_toString() {
+		return this.join('、');
+	}
+
+	function parse_zh_Al_token(token, options) {
+		if (!token || token.type !== 'transclusion'
+				|| !(token.name in zh_Al_names))
+			return;
+
+		var index = 0, page_title_list = [];
+		while (index < 60) {
+			var page_title = token.parameters[++index];
+			if (page_title)
+				page_title_list.push(page_title);
+			else
+				break;
+		}
+		page_title_list.toString = zh_Al_toString;
+		return page_title_list;
+	}
 
 	// https://zh.wikipedia.org/wiki/Template:TalkendH
 	// [0]: 正式名稱。
@@ -329,7 +369,7 @@ function module_code(library_namespace) {
 		return flag;
 	}
 
-	function parse_Old_vfd_multi(page_data, options) {
+	function parse_Old_vfd_multi_page(page_data, options) {
 		options = library_namespace.setup_options(options);
 
 		var item_list = [];
@@ -639,7 +679,7 @@ function module_code(library_namespace) {
 	}
 
 	// parse {{Article history}}
-	function parse_Article_history(page_data, options) {
+	function parse_Article_history_page(page_data, options) {
 		options = library_namespace.setup_options(options);
 
 		var item_list = [];
@@ -663,12 +703,20 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	Object.assign(wiki_API, {
+		to_displayed_text : to_displayed_text
+	});
+
 	// export 導出.
 	Object.assign(template_functions, {
 		parse_convention_item : parse_convention_item,
 
 		// ----------------------------
 
+		zh_Al : {
+			names : zh_Al_names,
+			parse : parse_zh_Al_token
+		},
 		Hat : {
 			names : Hat_names,
 			text_of : text_of_Hat_flag
@@ -677,13 +725,13 @@ function module_code(library_namespace) {
 			names : Old_vfd_multi__names,
 			main_name : Old_vfd_multi__main_name,
 			// CeL.wiki.template_functions.Old_vfd_multi.parse()
-			parse : parse_Old_vfd_multi,
+			parse_page : parse_Old_vfd_multi_page,
 			replace_by : replace_Old_vfd_multi,
 			text_of : text_of_Hat_flag
 		},
 		Article_history : {
 			names : Article_history__names,
-			parse : parse_Article_history
+			parse_page : parse_Article_history_page
 		},
 		Multidel : {
 			names : Multidel_names
