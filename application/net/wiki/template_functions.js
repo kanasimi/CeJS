@@ -201,19 +201,23 @@ function module_code(library_namespace) {
 	}
 
 	// ------------------------------------------------------------------------
+	// template names: The first one is the main template name.
 
-	var Hat_names = {
-		TalkendH : true,
-		Talkendh : true,
-		Delh : true,
-		Closereq : true,
-		Hat : true,
-		'Hidden archive top' : true
-	};
+	var Hat_names = 'TalkendH|Talkendh|Delh|Closereq|Hat|Hidden archive top'
+			.split('|').to_hash();
 
-	var Multidel_names = {
-		Multidel : true
-	};
+	var Multidel_names = 'Multidel'.split('|').to_hash();
+
+	var Old_vfd_multi__names = 'Old vfd multi|Oldafdfull|Vfd-kept|存廢討論被保留|頁面存廢討論被保留'
+			.split('|');
+	var Old_vfd_multi__main_name = Old_vfd_multi__names[0];
+	Old_vfd_multi__names = Old_vfd_multi__names.to_hash();
+	// var Old_vfd_multi__main_name = Object.keys(Old_vfd_multi__names)[0];
+
+	var Article_history__names = 'Article history|ArticleHistory|Article milestones|AH'
+			.split('|').to_hash();
+
+	// ------------------------------------------
 
 	// https://zh.wikipedia.org/wiki/Template:TalkendH
 	// [0]: 正式名稱。
@@ -283,14 +287,6 @@ function module_code(library_namespace) {
 
 	normalize_result_flag_sets(result_flags__Old_vfd_multi);
 	normalize_result_flag_sets(result_flags__Hat);
-
-	var Old_vfd_multi__main_name = 'Old vfd multi', Old_vfd_multi__names = {
-		Oldafdfull : true,
-		'Vfd-kept' : true,
-		存廢討論被保留 : true,
-		頁面存廢討論被保留 : true
-	};
-	Old_vfd_multi__names[Old_vfd_multi__main_name] = true;
 
 	function normalize_result_flag(flag_sets, result, valid_flag_only) {
 		result = result && result.toString().trim().toLowerCase();
@@ -404,7 +400,20 @@ function module_code(library_namespace) {
 	}
 
 	function Old_vfd_multi__item_list_to_template_object(item_list, page_data,
-			force_set_page) {
+			options) {
+		options = library_namespace.setup_options(options);
+		// 為了預防頁面被移動時出現問題，預設強制加上 `page` 設定。
+		var force_set_page = 'force_set_page' in options ? options.force_set_page
+				: true;
+		var additional_parameters = options.additional_parameters;
+		if (!Array.isArray(additional_parameters)) {
+			if (additional_parameters) {
+				library_namespace
+						.error('Old_vfd_multi__item_list_to_template_object: Invalid additional_parameters: '
+								+ additional_parameters);
+			}
+			additional_parameters = [];
+		}
 		var template_object = Object.create(null);
 
 		if (item_list.length > 5) {
@@ -418,21 +427,21 @@ function module_code(library_namespace) {
 		var page_title = page_data && page_data.title;
 
 		item_list.forEach(function(item, index) {
-			if (item.hat_result === item.result)
-				delete item.hat_result;
-
 			if (index === 0) {
-				wiki_API.parse.add_parameters_to_template_object(
-				//
-				template_object, {
+				var parameters = {
 					'1' : item.date,
 					'2' : item.result,
 					page : (force_set_page || item.page !== page_data.title)
 							&& item.page,
 					// move to, merge to, redirect to
-					'3' : item.target,
-					hat_result : item.hat_result
+					'3' : item.target
+				};
+				additional_parameters.forEach(function(parameter_name) {
+					parameters[parameter_name] = item[parameter_name];
 				});
+				wiki_API.parse.add_parameters_to_template_object(
+				//
+				template_object, parameters);
 				return;
 			}
 
@@ -440,13 +449,16 @@ function module_code(library_namespace) {
 				template_object.multi = 1;
 			}
 
-			var mapper = Object.reverse_key_value({
+			var mapper = {
 				date : 'date' + index,
 				result : 'result' + index,
 				page : 'page' + index,
-				target : 'target' + index,
-				hat_result : 'hat_result' + index
+				target : 'target' + index
+			};
+			additional_parameters.forEach(function(parameter_name) {
+				mapper[parameter_name] = parameter_name + index;
 			});
+			mapper = Object.reverse_key_value(mapper);
 			if (!force_set_page && item.page === page_title) {
 				delete mapper.page;
 			}
@@ -464,16 +476,17 @@ function module_code(library_namespace) {
 	 *            page_data
 	 * @param {Array|Object|String}
 	 *            replace_to
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
-	function replace_Old_vfd_multi(page_data, replace_to) {
+	function replace_Old_vfd_multi(page_data, replace_to, options) {
 		var parsed = get_parsed(page_data);
 
 		// normalize replace_to
 		if (Array.isArray(replace_to)) {
 			// console.log(replace_to);
 			replace_to = Old_vfd_multi__item_list_to_template_object(
-			// 為了預防頁面被移動時出現問題，強制加上 `page` 設定。
-			replace_to, page_data, true);
+					replace_to, page_data, options);
 		}
 
 		/**
@@ -606,15 +619,8 @@ function module_code(library_namespace) {
 		return parsed.toString();
 	}
 
-	var Article_history__name = {
-		ArticleHistory : true,
-		'Article milestones' : true,
-		AH : true,
-		'Article history' : true
-	};
-
 	function parse_Article_history_token(token, item_list) {
-		if (!(token.name in Article_history__name))
+		if (!(token.name in Article_history__names))
 			return;
 
 		if (!item_list)
@@ -665,18 +671,26 @@ function module_code(library_namespace) {
 	Object.assign(template_functions, {
 		parse_convention_item : parse_convention_item,
 
+		// ----------------------------
+
 		Hat : {
 			names : Hat_names,
 			text_of : text_of_Hat_flag
 		},
 		Old_vfd_multi : {
+			names : Old_vfd_multi__names,
+			main_name : Old_vfd_multi__main_name,
 			// CeL.wiki.template_functions.Old_vfd_multi.parse()
 			parse : parse_Old_vfd_multi,
 			replace_by : replace_Old_vfd_multi,
 			text_of : text_of_Hat_flag
 		},
 		Article_history : {
+			names : Article_history__names,
 			parse : parse_Article_history
+		},
+		Multidel : {
+			names : Multidel_names
 		}
 
 	});
