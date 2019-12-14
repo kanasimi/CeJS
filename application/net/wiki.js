@@ -1758,6 +1758,15 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// @see CeL.application.net.wiki.data
+	// 以下兩者必須不可能為 entity / property 之屬性。
+	// 相關/對應頁面。
+	var KEY_CORRESPOND_PAGE = typeof Symbol === 'function' ? Symbol('correspond page')
+			: 'page',
+	// 用來取得 entity value 之屬性名。 函數 : wikidata_entity_value
+	KEY_get_entity_value = typeof Symbol === 'function' ? Symbol('entity value')
+			: 'value';
+
 	// check if session.last_data is usable, 非過期資料。
 	function last_data_is_usable(session) {
 		// When "servers are currently under maintenance", session.last_data is
@@ -5354,6 +5363,8 @@ function module_code(library_namespace) {
 	library_namespace.set_method(wiki_API, {
 		KEY_SESSION : KEY_SESSION,
 		KEY_HOST_SESSION : KEY_HOST_SESSION,
+		KEY_CORRESPOND_PAGE : KEY_CORRESPOND_PAGE,
+		KEY_get_entity_value : KEY_get_entity_value,
 
 		BLANK_TOKEN : BLANK_TOKEN,
 

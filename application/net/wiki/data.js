@@ -49,7 +49,7 @@ function module_code(library_namespace) {
 	var get_URL = this.r('get_URL'), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION, KEY_HOST_SESSION = wiki_API.KEY_HOST_SESSION;
 	// @inner
 	var API_URL_of_options = wiki_API.API_URL_of_options, is_api_and_title = wiki_API.is_api_and_title, is_wikidata_site = wiki_API.is_wikidata_site, wikidata_get_site = wiki_API.wikidata_get_site, language_code_to_site_alias = wiki_API.language_code_to_site_alias;
-	var PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i, PATTERN_wiki_project_URL = wiki_API.PATTERN_wiki_project_URL;
+	var KEY_CORRESPOND_PAGE = wiki_API.KEY_CORRESPOND_PAGE, KEY_get_entity_value = wiki_API.KEY_get_entity_value, PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i, PATTERN_wiki_project_URL = wiki_API.PATTERN_wiki_project_URL;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -1243,12 +1243,6 @@ function module_code(library_namespace) {
 			}
 		}
 	}
-
-	// 以下兩者必須不可能為 entity / property 之屬性。
-	// 相關/對應頁面。
-	var KEY_CORRESPOND_PAGE = 'page',
-	// 用來取得 entity value 之屬性名。 函數 : wikidata_entity_value
-	KEY_get_entity_value = 'value';
 
 	/**
 	 * 取得特定實體的特定屬性值。
