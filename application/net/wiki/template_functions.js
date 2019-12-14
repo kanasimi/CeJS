@@ -201,7 +201,7 @@ function module_code(library_namespace) {
 	}
 
 	// ------------------------------------------------------------------------
-	// template names: The first one is the main template name.
+	// template names: The first one is the main template name. 首個名稱為正式名稱。
 
 	var Hat_names = 'TalkendH|Talkendh|Delh|Closereq|Hat|Hidden archive top'
 			.split('|').to_hash();
@@ -402,8 +402,8 @@ function module_code(library_namespace) {
 	function Old_vfd_multi__item_list_to_template_object(item_list, page_data,
 			options) {
 		options = library_namespace.setup_options(options);
-		// 為了預防頁面被移動時出現問題，預設強制加上 `page` 設定。
 		var force_set_page = 'force_set_page' in options ? options.force_set_page
+				// 為了預防頁面被移動時出現問題，預設強制加上 `page` 設定。
 				: true;
 		var additional_parameters = options.additional_parameters;
 		if (!Array.isArray(additional_parameters)) {
@@ -426,6 +426,7 @@ function module_code(library_namespace) {
 
 		var page_title = page_data && page_data.title;
 
+		var add_parameters = wiki_API.parse.add_parameters_to_template_object;
 		item_list.forEach(function(item, index) {
 			if (index === 0) {
 				var parameters = {
@@ -439,9 +440,7 @@ function module_code(library_namespace) {
 				additional_parameters.forEach(function(parameter_name) {
 					parameters[parameter_name] = item[parameter_name];
 				});
-				wiki_API.parse.add_parameters_to_template_object(
-				//
-				template_object, parameters);
+				add_parameters(template_object, parameters);
 				return;
 			}
 
@@ -462,8 +461,7 @@ function module_code(library_namespace) {
 			if (!force_set_page && item.page === page_title) {
 				delete mapper.page;
 			}
-			wiki_API.parse.add_parameters_to_template_object(template_object,
-					mapper, item);
+			add_parameters(template_object, mapper, item);
 		});
 
 		return template_object;
@@ -472,10 +470,8 @@ function module_code(library_namespace) {
 	/**
 	 * 將 page_data 中的 {{Old vfd multi}} 替換成 replace_to。
 	 * 
-	 * @param {Object|String}
-	 *            page_data
-	 * @param {Array|Object|String}
-	 *            replace_to
+	 * @param {Object|String}page_data
+	 * @param {Array|Object|String}replace_to
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */

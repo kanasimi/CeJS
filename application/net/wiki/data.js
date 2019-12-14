@@ -1544,9 +1544,17 @@ function module_code(library_namespace) {
 						}
 						// assert: KEY_get_entity_value, KEY_SESSION
 						// is NOT in data
-						Object.defineProperty(data, KEY_get_entity_value, {
-							value : wikidata_entity_value
-						});
+						if (typeof KEY_get_entity_value === 'symbol') {
+							data[KEY_get_entity_value] = wikidata_entity_value;
+						} else if (typeof KEY_get_entity_value === 'string') {
+							Object.defineProperty(data, KEY_get_entity_value, {
+								value : wikidata_entity_value
+							});
+						} else {
+							throw new TypeError(
+							//
+							'Invalid KEY_get_entity_value');
+						}
 						if (options && options[KEY_SESSION]) {
 							// for .resolve_item
 							data[KEY_SESSION] = options[KEY_SESSION];
