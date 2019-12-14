@@ -630,7 +630,8 @@ function module_code(library_namespace) {
 			title = library_namespace.from_Chinese_numeral(title);
 
 		// 因為中間的章節可能已經被下架，因此依章節標題來定章節編號。
-		var matched = title.match(/(?:^|第 ?)(\d{1,3}(?:\.\d)?) ?話/) || title
+		// \d{1,4}: e.g., http://www.moae.jp/comic/otonanosonnayatsu
+		var matched = title.match(/(?:^|第 ?)(\d{1,4}(?:\.\d)?) ?話/) || title
 		// #1, Episode 1, act 1
 		.match(/^(?:[＃#] *|(?:Episode|act)[ .:]*)?(\d{1,3})(?:$|[ .\-])/i)
 		// 章節編號有prefix，或放在末尾。 e.g., 乙ゲーにトリップした俺♂, たすけてまおうさま @ pixivコミック
