@@ -1764,8 +1764,8 @@ function module_code(library_namespace) {
 	var KEY_CORRESPOND_PAGE = typeof Symbol === 'function' ? Symbol('correspond page')
 			: 'page',
 	// 用來取得 entity value 之屬性名。 函數 : wikidata_entity_value
-	KEY_get_entity_value = typeof Symbol === 'function' ? Symbol('entity value')
-			: 'value';
+	// 為了方便使用，不採用 Symbol()。
+	KEY_get_entity_value = 'value';
 
 	// check if session.last_data is usable, 非過期資料。
 	function last_data_is_usable(session) {
