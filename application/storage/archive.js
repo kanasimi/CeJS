@@ -327,14 +327,19 @@ function module_code(library_namespace) {
 			for ( var switch_name in switches) {
 				var value = switches[switch_name];
 				if (typeof value === 'function') {
-					value = value.call(this);
+					// allow modify FSO_list when zipnote renaming file
+					value = value.call(this, FSO_list);
 				}
-				if (switch_name === 'program_path')
+				if (switch_name === 'program_path') {
+					if (value in executable_file_path)
+						value = executable_file_path[value];
 					command[0] = value;
-				else if (switch_name === 'standard_input')
+				} else if (switch_name === 'standard_input') {
 					standard_input = value;
-				else if (value !== undefined && value !== null)
+				} else if (value !== undefined && value !== null) {
+					// e.g., value === 0
 					command.push(value);
+				}
 			}
 		} else {
 			// assert: String|Number
@@ -514,7 +519,13 @@ function module_code(library_namespace) {
 			},
 			rename : {
 				program_path : executable_file_path.zipnote,
-				// TODO
+				standard_input : function(FSO_list) {
+					// console.log(this);
+					// console.log(FSO_list);
+					var args = '@ ' + FSO_list[0] + '\n' + '@=' + FSO_list[1];
+					FSO_list.truncate();
+					return args;
+				},
 				command : '-w'
 			},
 			// test
