@@ -697,10 +697,11 @@ function module_code(library_namespace) {
 	 * search $PATH, 搜尋可執行檔案的完整路徑。
 	 * 
 	 * @example <code>
+
 	// cache the path of p7z executable file
-	var p7zip_path = CeL.executable_file_path('7z')
-		|| '%ProgramFiles%\\7-Zip\\7z.exe';
-	 * </code>
+	var p7zip_path = CeL.executable_file_path('7z') || '%ProgramFiles%\\7-Zip\\7z.exe';
+
+	</code>
 	 * 
 	 * @param {String}file_name
 	 *            要搜尋的執行檔名。
@@ -756,7 +757,7 @@ function module_code(library_namespace) {
 									+ file_name);
 				return file_name;
 			}
-			// e.g., "%ProgramFiles%\\7-Zip\\7z.exe"
+			// e.g., for "%ProgramFiles%\\7-Zip\\7z.exe"
 			file_name = ExpandEnvironmentStrings(file_name);
 
 			if (/^[a-z]:\\/i.test(file_name)) {

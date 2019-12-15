@@ -162,7 +162,7 @@ function module_code(library_namespace) {
 				// use stdout. 64 bit first.
 				+ "p7z_path=RegRead(p7z_path+64)||RegRead(p7z_path);"
 				// `p7z_path` maybe `undefined` here.
-				+ "console.log(p7z_path&&add_quote(p7z_path));", {
+				+ "console.log(p7z_path&&add_fso_path_quote(p7z_path));", {
 					attach_library : true
 				});
 		if (false) {
@@ -184,7 +184,7 @@ function module_code(library_namespace) {
 			executable_file_path['7z'] = library_namespace
 					.executable_file_path(executable_file_path['7z'] + '7z.exe');
 			// console.log(executable_file_path['7z']);
-			executable_file_path['7z'] = add_quote(executable_file_path['7z']);
+			executable_file_path['7z'] = add_fso_path_quote(executable_file_path['7z']);
 		} else {
 			// error: no 7z.exe
 			delete executable_file_path['7z'];
@@ -196,7 +196,9 @@ function module_code(library_namespace) {
 		var program_path = executable_file_path[program_type];
 		// console.log(program_type + ': ' + program_path);
 		if (program_path) {
-			executable_file_path[program_type] = add_quote(program_path);
+			executable_file_path[program_type]
+			//
+			= add_fso_path_quote(program_path);
 			if (!default_program_type) {
 				// 挑選第一個可用的壓縮程式。
 				default_program_type = program_type;
@@ -204,19 +206,20 @@ function module_code(library_namespace) {
 		}
 	});
 
-	if (!executable_file_path['7z']
-			// && !executable_file_path.rar
-			&& (executable_file_path.zip = library_namespace
-					.executable_file_path('zipnote'))
+	// 舊版本 7z 不能 rename，Unix 上有 zip 可替代，因此即使有了 7z，依然作個測試。
+	if (// !executable_file_path.rar &&
+	// 比較少存在的放第一個測試。
+	(executable_file_path.zip = library_namespace
+			.executable_file_path('zipnote'))
 			&& (executable_file_path.zip = library_namespace
 					.executable_file_path('unzip'))
 			&& (executable_file_path.unzip = library_namespace
 					.executable_file_path('zip'))) {
 		// e.g., /usr/bin/zip Info-ZIP @ macOS, linux
 		// Info-ZIP must use zipnote to rename function!
-		executable_file_path.zip = add_quote(executable_file_path.zip);
-		executable_file_path.unzip = add_quote(executable_file_path.unzip);
-		executable_file_path.zipnote = add_quote(executable_file_path.zipnote);
+		executable_file_path.zip = add_fso_path_quote(executable_file_path.zip);
+		executable_file_path.unzip = add_fso_path_quote(executable_file_path.unzip);
+		executable_file_path.zipnote = add_fso_path_quote(executable_file_path.zipnote);
 	}
 
 	// TODO: https://pureinfotech.com/compress-files-powershell-windows-10/
@@ -275,7 +278,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------
 
 	// 注意: 這邊添加引號的目的主要只是escape空白字元space "\u0020"，不能偵測原先輸入中的引號!
-	function add_quote(arg) {
+	function add_fso_path_quote(arg) {
 		if (library_namespace.is_Object(arg) && arg.path) {
 			arg = arg.path;
 		}
@@ -286,7 +289,7 @@ function module_code(library_namespace) {
 				+ String(arg).replace(/"/g, '\\"') + '"';
 	}
 
-	function remove_quote(arg) {
+	function remove_fso_path_quote(arg) {
 		if (library_namespace.is_Object(arg) && arg.path) {
 			arg = arg.path;
 		}
@@ -331,14 +334,14 @@ function module_code(library_namespace) {
 				&& operation === 'update';
 		if (operation_need_chdir) {
 			if (Array.isArray(FSO_list)) {
-				FSO_list = FSO_list.map(remove_quote);
-				FSO_list.unshift(remove_quote(this.archive_file_path));
+				FSO_list = FSO_list.map(remove_fso_path_quote);
+				FSO_list.unshift(remove_fso_path_quote(this.archive_file_path));
 			} else {
 				FSO_list = [ this.archive_file_path, FSO_list ]
-						.map(remove_quote);
+						.map(remove_fso_path_quote);
 			}
 		} else
-			command.push(add_quote(this.archive_file_path));
+			command.push(add_fso_path_quote(this.archive_file_path));
 
 		var original_working_directory, using_working_directory;
 		if (FSO_list) {
@@ -368,7 +371,7 @@ function module_code(library_namespace) {
 					}
 				}
 			}
-			FSO_list = FSO_list.map(add_quote).join(' ');
+			FSO_list = FSO_list.map(add_fso_path_quote).join(' ');
 			if (this.program_type === '7z') {
 				// 即使在 Windows 下，採用 "\" 作路徑分隔可能造成 7-Zip "系統找不到指定的檔案"錯誤。
 				FSO_list = FSO_list.replace(/\\/g, '/');
@@ -535,11 +538,11 @@ function module_code(library_namespace) {
 			// destination directory path, output directory
 			output : function(value) {
 				if (value)
-					return add_quote('-o' + value);
+					return add_fso_path_quote('-o' + value);
 			},
 			// temp directory 設置臨時工作目錄。
 			work_directory : function(value) {
-				return add_quote('-w' + value);
+				return add_fso_path_quote('-w' + value);
 			},
 			// additional switches
 			extra : function(value) {
@@ -956,8 +959,8 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	Object.assign(Archive_file, {
-		add_quote : add_quote,
-		remove_quote : remove_quote,
+		add_fso_path_quote : add_fso_path_quote,
+		remove_fso_path_quote : remove_fso_path_quote,
 		// 給外部程式設定壓縮執行檔路徑使用。
 		executable_file_path : executable_file_path,
 		// read-only
