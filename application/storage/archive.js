@@ -130,8 +130,14 @@ function module_code(library_namespace) {
 		</code>
 		 */
 		"7za",
-		// for Linux Mint 19 "Tara"
-		"7zr",
+
+		// for Linux Mint 19.1 Cinnamon
+		// 7zr is a stand-alone executable. 7zr is a "light-version" of 7za(1).
+		// 7zr handles password-less archives in the 7z, LZMA2, and XZ formats
+		// only.
+		// 7zr 無法處理 zip file
+		// "7zr",
+
 		// keka @ macOS
 		"/Applications/Keka.app/Contents/Resources/keka7z",
 				library_namespace.platform('windows')
@@ -201,13 +207,16 @@ function module_code(library_namespace) {
 	if (!executable_file_path['7z']
 			// && !executable_file_path.rar
 			&& (executable_file_path.zip = library_namespace
-					.executable_file_path('zip'))
+					.executable_file_path('zipnote'))
+			&& (executable_file_path.zip = library_namespace
+					.executable_file_path('unzip'))
 			&& (executable_file_path.unzip = library_namespace
-					.executable_file_path('unzip'))) {
-		// e.g., /usr/bin/zip Info-ZIP @ macOS
-		// but Info-ZIP has NO rename function!
+					.executable_file_path('zip'))) {
+		// e.g., /usr/bin/zip Info-ZIP @ macOS, linux
+		// Info-ZIP must use zipnote to rename function!
 		executable_file_path.zip = add_quote(executable_file_path.zip);
 		executable_file_path.unzip = add_quote(executable_file_path.unzip);
+		executable_file_path.zipnote = add_quote(executable_file_path.zipnote);
 	}
 
 	// TODO: https://pureinfotech.com/compress-files-powershell-windows-10/
@@ -265,25 +274,30 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------
 
-	// 注意: 這邊添加引號的目的主要只是escape空白字元space " "，不能偵測原先輸入中的引號!
+	// 注意: 這邊添加引號的目的主要只是escape空白字元space "\u0020"，不能偵測原先輸入中的引號!
 	function add_quote(arg) {
 		if (library_namespace.is_Object(arg) && arg.path) {
 			arg = arg.path;
 		}
-		return /^".*"$/.test(arg) ? arg : '"' + arg + '"';
+		// JSON.stringify()
+		return /^"(\\.|[^\\\n])*"$/.test(arg) ? arg : '"'
+				+ arg.replace(/"/g, '\\"') + '"';
 	}
 
 	function remove_quote(arg) {
 		if (library_namespace.is_Object(arg) && arg.path) {
 			arg = arg.path;
 		}
-		return /^".*"$/.test(arg) ? arg.slice(1, -1) : arg;
+		// JSON.parse()
+		return /^".*"$/.test(arg) ? arg.slice(1, -1).replace(/\\(["'])/g, '$1')
+				: arg;
 	}
 
 	function archive_file_execute(switches, callback, FSO_list, operation,
 			options) {
-		var command = [ this.program ];
+		var command = [ this.program ], standard_input;
 		if (Array.isArray(switches)) {
+			standard_input = switches.standard_input;
 			command.push(switches.join(' '));
 		} else if (library_namespace.is_Object(switches)) {
 			// console.log(switches);
@@ -294,6 +308,8 @@ function module_code(library_namespace) {
 				}
 				if (switch_name === 'program_path')
 					command[0] = value;
+				else if (switch_name === 'standard_input')
+					standard_input = value;
 				else if (value !== undefined && value !== null)
 					command.push(value);
 			}
@@ -363,7 +379,9 @@ function module_code(library_namespace) {
 		}, 1, 'archive_file_execute');
 		library_namespace.debug(command, 1, 'archive_file_execute');
 		try {
-			var output = execSync(command);
+			var output = execSync(command, Object.assign({
+				input : standard_input
+			}, options && options.exec_options));
 			if (original_working_directory)
 				// recover working directory.
 				process.chdir(original_working_directory);
@@ -408,6 +426,7 @@ function module_code(library_namespace) {
 			'verify' ],
 	// default switches, modifiers
 	// program_type: { command : { switches } }
+	// 壓縮軟體
 	default_switches = {
 		'7z' : {
 			// add compress_list
@@ -470,6 +489,11 @@ function module_code(library_namespace) {
 				program_path : executable_file_path.unzip,
 				command : '-l -v'
 			},
+			rename : {
+				program_path : executable_file_path.zipnote,
+				// TODO
+				command : '-w'
+			},
 			// test
 			verify : {
 				command : '-T'
@@ -529,7 +553,7 @@ function module_code(library_namespace) {
 			level : function(value) {
 				if (value === 'max')
 					value = 9;
-				if (value >= 0)
+				if (value >= 0 && value <= 9)
 					return '-' + value;
 				return;
 			},
@@ -653,7 +677,7 @@ function module_code(library_namespace) {
 		return this.fso_path_hash;
 	}
 
-	// TODO: 警告: macOS 底下，無法讀取非latin字元!
+	// TODO: 警告: macOS 底下，無法讀取非 latin 字元!
 	// https://github.com/nodejs/node/issues/2165
 	// https://marcosc.com/2008/12/zip-files-and-encoding-i-hate-you/
 	// Mac OS HFS+ use UTF-8 NFD, UTF-8-MAC
@@ -810,13 +834,15 @@ function module_code(library_namespace) {
 				this, operation, options),
 		//
 		_postfix = postfix[this.program_type]
-				&& postfix[this.program_type][operation],
+				&& postfix[this.program_type][operation];
+
+		delete options.exec_options;
 		// @see archive_file_execute()
-		output = this.execute(switches,
+		var output = this.execute(switches,
 		//
-		callback && _postfix ? function(output) {
+		callback && _postfix ? function(output, error) {
 			// console.log(output.toString());
-			callback(_postfix.call(_this, output));
+			callback(_postfix.call(_this, output), error);
 		} : callback, FSO_list, operation, options);
 
 		if (original_working_directory) {
@@ -926,6 +952,8 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	Object.assign(Archive_file, {
+		add_quote : add_quote,
+		remove_quote : remove_quote,
 		// 給外部程式設定壓縮執行檔路徑使用。
 		executable_file_path : executable_file_path,
 		// read-only
