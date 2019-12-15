@@ -279,18 +279,22 @@ function module_code(library_namespace) {
 		if (library_namespace.is_Object(arg) && arg.path) {
 			arg = arg.path;
 		}
+		if (!arg)
+			return arg;
 		// JSON.stringify()
 		return /^"(\\.|[^\\\n])*"$/.test(arg) ? arg : '"'
-				+ arg.replace(/"/g, '\\"') + '"';
+				+ String(arg).replace(/"/g, '\\"') + '"';
 	}
 
 	function remove_quote(arg) {
 		if (library_namespace.is_Object(arg) && arg.path) {
 			arg = arg.path;
 		}
+		if (!arg)
+			return arg;
 		// JSON.parse()
-		return /^".*"$/.test(arg) ? arg.slice(1, -1).replace(/\\(["'])/g, '$1')
-				: arg;
+		return /^".*"$/.test(arg) ? String(arg).slice(1, -1).replace(
+				/\\(["'])/g, '$1') : arg;
 	}
 
 	function archive_file_execute(switches, callback, FSO_list, operation,
