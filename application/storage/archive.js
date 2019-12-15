@@ -105,6 +105,7 @@ function module_code(library_namespace) {
 	var execSync = require('child_process').execSync;
 
 	// --------------------------------------------------------------------------------------------
+	// 初始化、檢測可用壓縮工具。
 
 	// @see CeL.application.OS.Windows.execute
 	// @see CeL.application.platform.nodejs.executable_file_path
@@ -153,6 +154,25 @@ function module_code(library_namespace) {
 	// 預設的壓縮程式。
 	default_program_type;
 
+	function test_and_add_quoted_program(program_name, need_every) {
+		if (Array.isArray(program_name)) {
+			return program_name.some(function(program) {
+				program = test_and_add_quoted_program(program);
+				if (need_every)
+					return !program;
+			});
+		}
+
+		var path = library_namespace.executable_file_path(program_name);
+		if (!path) {
+			return;
+		}
+
+		path = add_fso_path_quote(path);
+		executable_file_path[program_name] = path;
+		return path;
+	}
+
 	if (!executable_file_path['7z'] && library_namespace.platform('windows')) {
 		// @see GitHub.updater.node.js
 		// 嘗試取得7-Zip的執行路徑
@@ -162,7 +182,7 @@ function module_code(library_namespace) {
 				// use stdout. 64 bit first.
 				+ "p7z_path=RegRead(p7z_path+64)||RegRead(p7z_path);"
 				// `p7z_path` maybe `undefined` here.
-				+ "console.log(p7z_path&&add_fso_path_quote(p7z_path));", {
+				+ "console.log(p7z_path&&add_quote(p7z_path));", {
 					attach_library : true
 				});
 		if (false) {
@@ -207,23 +227,19 @@ function module_code(library_namespace) {
 	});
 
 	// 舊版本 7z 不能 rename，Unix 上有 zip 可替代，因此即使有了 7z，依然作個測試。
-	if (// !executable_file_path.rar &&
-	// 比較少存在的放第一個測試。
-	(executable_file_path.zip = library_namespace
-			.executable_file_path('zipnote'))
-			&& (executable_file_path.zip = library_namespace
-					.executable_file_path('unzip'))
-			&& (executable_file_path.unzip = library_namespace
-					.executable_file_path('zip'))) {
+	if (true/* !executable_file_path.rar */) {
 		// e.g., /usr/bin/zip Info-ZIP @ macOS, linux
 		// Info-ZIP must use zipnote to rename function!
-		executable_file_path.zip = add_fso_path_quote(executable_file_path.zip);
-		executable_file_path.unzip = add_fso_path_quote(executable_file_path.unzip);
-		executable_file_path.zipnote = add_fso_path_quote(executable_file_path.zipnote);
+		// console.log(executable_file_path);
+
+		// 比較少存在的放第一個測試。
+		test_and_add_quoted_program([ 'zipnote', 'unzip', 'zip' ], true);
 	}
 
 	// TODO: https://pureinfotech.com/compress-files-powershell-windows-10/
 	// ompress files using PowerShell
+
+	// --------------------------------------------------------------------------------------------
 
 	function Archive_file(archive_file_path, options, callback) {
 		if (!callback && typeof options === 'function') {
