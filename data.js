@@ -13,7 +13,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'data',
 
-	require : 'data.native.to_fixed',
+	require : 'data.code.compatibility.|data.native.to_fixed',
 
 	// 設定不匯出的子函式。
 	// no_extend : '*',
@@ -1170,14 +1170,15 @@ function module_code(library_namespace) {
 			Object.assign(this, source);
 
 		if (library_namespace.is_Object(options)) {
-			// 單一 instance 僅能設定一個 flag。
-			// Pair.prototype.add() 不設定 .flag。
+			// 單一 instance 僅能設定一個 replace_flag。
+			// Pair.prototype.add() 不設定 .replace_flag。
 
-			// e.g., flag.
+			// e.g., replace_flag.
 			Object.assign(this, options);
-		} else
+		} else {
 			// 前置處理。
 			options = Object.create(null);
+		}
 
 		if (!Array.isArray(this.new_keys))
 			this.new_keys = [];
@@ -1202,8 +1203,7 @@ function module_code(library_namespace) {
 				this.keys = Object.keys(this.pair);
 
 		} else if (is_clone) {
-			this.pair = Object.assign(Object.create(null),
-					this.pair);
+			this.pair = Object.assign(Object.create(null), this.pair);
 			this.keys = this.keys.slice();
 			if (!options.no_sort)
 				this.keys.sort(options.comparator || this.comparator);
@@ -1217,6 +1217,12 @@ function module_code(library_namespace) {
 
 	library_namespace.set_method(Pair, {
 		is_pair : is_Pair,
+
+		KEY_REMOVE : typeof Symbol === 'function' ? Symbol('remove the key')
+		//
+		: {
+			KEY_REMOVE : true
+		},
 
 		to_Object : function(source) {
 			return (new Pair(source, {
@@ -1253,10 +1259,10 @@ function module_code(library_namespace) {
 				keys = false;
 
 			if (library_namespace.is_Object(source)) {
-				if (keys)
-					this.keys = keys
-					//
-					= Object.keys(Object.assign(pair, source));
+				Object.assign(pair, source);
+				if (keys) {
+					this.keys = keys = Object.keys(pair);
+				}
 
 			} else {
 				if (typeof source === 'string') {
@@ -1295,6 +1301,8 @@ function module_code(library_namespace) {
 					separator = options.separator || this.separator,
 					//
 					new_keys = !options.path && this.new_keys,
+					// remove_keys[key] = keys to remove
+					remove_keys = keys && Object.create(null),
 					//
 					item_processor
 					//
@@ -1325,42 +1333,63 @@ function module_code(library_namespace) {
 					//
 					+ source.length + ' pairs...', 3, 'Pair.add');
 					source.forEach(function(item) {
-						if (item_processor)
-							item = item_processor(item);
+						if (item_processor) {
+							item = item_processor(/* {String} */item);
+						}
 						if (typeof item === 'string')
 							item = item.split(separator);
 						var key = item[0], value = item[1];
-						if (key) {
-							library_namespace.debug('adding [' + key + '] → ['
-									+ value + ']', source.length > 200 ? 3 : 2,
-									'Pair.add');
-							if (key === value) {
-								library_namespace
-										.debug('沒有改變的項目：[' + key + ']');
-								if (unique)
-									return;
-								// 可能是為了確保不被改變而設定。
-							}
-							if (key in pair)
-								if (value == pair[key])
-									return;
-								else
-									// 後來覆蓋前面的。
-									library_namespace.warn(
-									//
-									'Pair.add: Duplicated key [' + key
-									//
-									+ '], value will be changed: ['
-									//
-									+ pair[key] + '] → [' + value + ']');
-							pair[key] = value;
-							if (keys)
-								keys.push(key);
-							if (new_keys)
-								new_keys.push(key);
+						if (!key) {
+							return;
 						}
+
+						library_namespace.debug('adding [' + key + '] → ['
+						// Cannot convert a Symbol value to a string
+						+ String(value) + ']', source.length > 200 ? 3 : 2,
+								'Pair.add');
+						if (key === value) {
+							library_namespace.debug('沒有改變的項目：[' + key + ']');
+							if (unique)
+								return;
+							// 可能是為了確保不被改變而設定。
+						}
+
+						if (value === Pair.KEY_REMOVE) {
+							library_namespace.debug('Remove [' + key + ']: '
+									+ pair[key], 0, 'Pair.add');
+							if (key in pair) {
+								delete pair[key];
+								if (remove_keys)
+									remove_keys[key] = true;
+							}
+							return;
+						}
+
+						if (key in pair) {
+							if (value == pair[key])
+								return;
+							// 後來的覆蓋前面的。
+							library_namespace
+									.warn('Pair.add: Duplicated key [' + key
+											+ '], value will be changed: ['
+											+ pair[key] + '] → ['
+											+ String(value) + ']');
+						}
+						pair[key] = value;
+						if (keys) {
+							delete remove_keys[key];
+							keys.push(key);
+						}
+						if (new_keys)
+							new_keys.push(key);
 					});
 				}
+			}
+
+			if (keys && !library_namespace.is_empty_object(remove_keys)) {
+				this.keys = keys = keys.filter(function(key) {
+					return !(key in remove_keys);
+				});
 			}
 
 			// 排序：長的 key 排前面。
@@ -1368,6 +1397,27 @@ function module_code(library_namespace) {
 			// e.g., '([\d〇一二三四五六七八九])米'
 			if (keys && !options.no_sort)
 				keys.sort(options.comparator || this.comparator);
+
+			return this;
+		},
+
+		remove : function(keys, options) {
+			if (!keys)
+				return this;
+
+			if (!Array.isArray(keys))
+				keys = [ keys ];
+
+			var pair = this.pair, changed;
+			keys.forEach(function(key) {
+				if (key in pair) {
+					delete pair[key];
+					changed = true;
+				}
+			});
+
+			if (changed)
+				this.keys = Object.keys(pair);
 
 			return this;
 		},
@@ -1466,9 +1516,9 @@ function module_code(library_namespace) {
 			return this.save(path, encoding, true);
 		},
 
-		pattern : function(flag) {
+		pattern : function(replace_flag) {
 			try {
-				return new RegExp(this.keys.join('|'), flag || 'g');
+				return new RegExp(this.keys.join('|'), replace_flag || 'g');
 			} catch (e) {
 				// @IE，當 keys 太多太長時，
 				// 若是使用 new RegExp(keys.join('|'), 'g') 的方法，
@@ -1478,9 +1528,7 @@ function module_code(library_namespace) {
 
 		get_keys : function(rebuild) {
 			if (rebuild || !Array.isArray(this.keys)) {
-				var pair = this.pair, keys = [];
-				for ( var key in pair)
-					keys.push(key);
+				var pair = this.pair, keys = Object.keys(pair);
 				// 排序：長的 key 排前面。
 				// 會造成的問題：若 key 為 RegExp 之 source 時，.length 不代表可能 match 之長度。
 				// e.g., '([\d〇一二三四五六七八九])米'
@@ -1492,13 +1540,14 @@ function module_code(library_namespace) {
 
 		for_each : function(operator, options) {
 			var pair = this.pair;
-			if (Array.isArray(this.keys))
+			if (Array.isArray(this.keys)) {
 				this.keys.forEach(function(key) {
 					operator(key, pair[key]);
 				});
-			else
+			} else {
 				for ( var key in pair)
 					operator(key, pair[key]);
+			}
 			return this;
 		},
 
@@ -1520,12 +1569,15 @@ function module_code(library_namespace) {
 						return target.test(key) && value;
 					};
 				else {
-					var flag = this.flag;
+					var replace_flag = this.flag;
 					selector = function() {
 						var reg;
 						try {
-							reg = typeof flag === 'function' ? flag(key)
-									: new RegExp(key, flag);
+							reg = typeof replace_flag === 'function'
+							//
+							? replace_flag(key)
+							//
+							: new RegExp(key, replace_flag);
 						} catch (e) {
 							// Error key?
 							library_namespace.error('Pair.select: key '
@@ -1554,12 +1606,12 @@ function module_code(library_namespace) {
 		// convert from key to value.
 		convert : function(text) {
 			text = String(text);
-			var pair = this.pair, flag = this.flag;
+			var pair = this.pair, replace_flag = this.flag;
 			if (library_namespace.is_debug(3)) {
-				library_namespace
-						.debug('Convert ' + text.length + ' characters, using '
-								+ this.keys.length + ' pairs with flag ['
-								+ flag + '].', 3, 'Pair.convert');
+				library_namespace.debug('Convert ' + text.length
+						+ ' characters, using ' + this.keys.length
+						+ ' pairs with replace_flag [' + replace_flag + '].',
+						3, 'Pair.convert');
 				library_namespace.debug('keys of pairs: '
 						+ this.keys.slice(0,
 								library_namespace.is_debug(6) ? 200 : 20)
@@ -1569,14 +1621,16 @@ function module_code(library_namespace) {
 			this.for_each(function(key, value) {
 				var reg;
 				try {
-					reg = typeof flag === 'function' ? flag(key) : new RegExp(
-							key, flag);
+					reg = typeof replace_flag === 'function'
+					//
+					? replace_flag(key) : new RegExp(key, replace_flag);
 					text = text.replace(reg, value);
 				} catch (e) {
 					// Error key?
 					library_namespace.error('Pair.convert: '
-							+ (reg || '[' + key + ']') + ' → [' + value + ']: '
-							+ e.message);
+							+ (reg || '[' + key + ']') + ' → ['
+							// Cannot convert a Symbol value to a string
+							+ String(value) + ']: ' + e.message);
 				}
 			});
 			return text;
@@ -1630,7 +1684,7 @@ function module_code(library_namespace) {
 		 * {String} 欄位分隔符號.
 		 */
 		// field_separator : /[\r\n]+/,
-		/** default RegExp flags: global match */
+		/** default RegExp replace flags: global match */
 		flag : 'g'
 	});
 
@@ -1909,7 +1963,8 @@ function module_code(library_namespace) {
 	function parse_torrent(path, name_only) {
 		// 注意:此方法不可跨 domain!
 		// JScript 下，XMLHttpRequest 會將檔案當作 UTF-8 讀取。
-		var data = library_namespace.get_file(path), status = Object.create(null);
+		var data = library_namespace.get_file(path);
+		var status = Object.create(null);
 		if (!data || data.charAt(0) !== 'd') {
 			library_namespace.error((data ? 'Illegal' : 'Can not get')
 					+ ' torrent data of [' + path + ']!');
