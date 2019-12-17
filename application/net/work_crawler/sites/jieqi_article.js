@@ -160,12 +160,19 @@ function module_code(library_namespace) {
 
 			var sub_title = work_data.previous_sub_title
 					|| get_label(html.between('<h2>', '</h1>')),
-			//
-			text = html.between('<div class="articleCon">', '</div>')
-			//
-			.between('<p>', {
+			// e.g., https://www.huaxiangju.com/25087/6323179.html
+			text = html.between('<div class="articleCon">');
+			text = text.between(null, '<div class="page">')
+					|| html.between(null, '</div>');
+			text = text.between('<p>', {
 				tail : '</p>'
 			});
+
+			if (false && !html.includes('<div class="articleCon">')) {
+				// console.log(html);
+				console.log(html.between('<div class="articleCon">', '</div>'));
+				console.log(text);
+			}
 
 			if (this.remove_ads) {
 				text = this.remove_ads(text);
