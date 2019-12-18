@@ -199,7 +199,13 @@ function module_code(library_namespace) {
 
 		if (this.convert_to_TW) {
 			// CeL.CN_to_TW('简体')
-			library_namespace.run('extension.zh_conversion');
+			library_namespace.run('extension.zh_conversion', function() {
+				library_namespace.CN_to_TW.files
+				// 小說不需要轉換資訊科技相關字詞。
+				= library_namespace.CN_to_TW.files.filter(function(file) {
+					return file !== 'TWPhrasesIT';
+				});
+			});
 		}
 
 		library_namespace.log([ this.id, ': ',
