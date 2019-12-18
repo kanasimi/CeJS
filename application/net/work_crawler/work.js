@@ -1126,7 +1126,10 @@ function module_code(library_namespace) {
 				if (typeof last_chapter_data === 'string') {
 					set_attribute('latest_chapter_url', last_chapter_data);
 				} else if (library_namespace.is_Object(last_chapter_data)) {
-					set_attribute('latest_chapter_url', last_chapter_data.url);
+					set_attribute(
+							'latest_chapter_url',
+							Array.isArray(last_chapter_data.url) ? last_chapter_data.url[0]
+									: last_chapter_data.url);
 					set_attribute('latest_chapter', last_chapter_data.title);
 					set_attribute('last_update', last_chapter_data.date);
 				} else if (!work_data.removed) {
