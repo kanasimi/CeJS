@@ -919,6 +919,9 @@ function module_code(library_namespace) {
 		var page_filter = options.page_filter || options.filter, category_filter = options.category_filter
 				|| options.filter;
 
+		// 處理遞迴結構。
+		var tree_of_category = Object.create(null);
+
 		function get_categorymembers(category, callback, depth) {
 			function for_category_list(list/* , target, options */) {
 				// assert: Array.isArray(list)
@@ -970,6 +973,13 @@ function module_code(library_namespace) {
 					var page_name = page_data.title.replace(
 					// @see PATTERN_category @ CeL.wiki
 					/^(Category|分類|分类|カテゴリ|분류):/ig, '');
+
+					if (tree_of_category[page_name]) {
+						// using cache
+						subcategories[page_name] = tree_of_category[page_name];
+						return false;
+					}
+
 					if (depth === 0) {
 						// move subcategory to `subcategories`
 						subcategories[page_name] = null;
@@ -980,7 +990,9 @@ function module_code(library_namespace) {
 					remaining++;
 					// assert: get_categorymembers() won't return soon
 					get_categorymembers(page_data, function(sub_list, error) {
-						subcategories[page_name] = sub_list;
+						subcategories[page_name] = tree_of_category[page_name]
+						//
+						= sub_list;
 						if (--remaining === 0)
 							callback(options.no_list || list);
 					}, depth);
