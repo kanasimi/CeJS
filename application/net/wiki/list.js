@@ -914,12 +914,8 @@ function module_code(library_namespace) {
 
 		// console.log(list_options);
 
-		var page_filter = library_namespace.generate_filter(options.filter), category_filter = page_filter;
-		page_filter = library_namespace.generate_filter(options.page_filter)
-				|| page_filter;
-		category_filter = library_namespace
-				.generate_filter(options.category_filter)
-				|| category_filter;
+		var page_filter = options.page_filter || options.filter, category_filter = options.category_filter
+				|| options.filter;
 
 		function get_categorymembers(category, callback, depth) {
 			function for_category_list(list/* , target, options */) {
@@ -960,8 +956,10 @@ function module_code(library_namespace) {
 						return true;
 					}
 
-					if (category_filter && !category_filter(page_data))
+					if (category_filter && !category_filter(page_data)) {
+						// library_namespace.log('Skip ' + page_data.title);
 						return false;
+					}
 
 					var page_name = page_data.title.replace(
 					// @see PATTERN_category @ CeL.wiki
