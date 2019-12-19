@@ -1620,15 +1620,13 @@ function module_code(library_namespace) {
 	// -------------------------------------------
 
 	// @see cardinal_1()
-	function unique_sorted_Array() {
-		var is_sorted, value, array = [];
-		this.forEach(function(element) {
-			if (!is_sorted) {
-				is_sorted = true;
-				array.push(value = element);
-			} else if (!Object.is(value, element)) {
-				array.push(value = element);
-			}
+	function unique_sorted_Array(get_key) {
+		var latest_key;
+		var array = this.filter(function(element, index) {
+			var key = get_key ? get_key(element) : element;
+			var is_different = Object.is(latest_key, key) || index === 0;
+			latest_key = key;
+			return is_different;
 		});
 
 		return array;
@@ -4330,13 +4328,10 @@ function module_code(library_namespace) {
 				// shift arguments.
 				get_key = sorted;
 				sorted = false;
-			}
 
-			if (sorted) {
-				return this.unique_sorted();
-			}
-
-			if (typeof get_key !== 'function') {
+			} else if (sorted) {
+				return this.unique_sorted(get_key);
+			} else if (typeof get_key !== 'function') {
 				return Array.from(new Set(this));
 			}
 
