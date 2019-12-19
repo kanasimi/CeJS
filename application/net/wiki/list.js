@@ -887,6 +887,8 @@ function module_code(library_namespace) {
 		var list_options = {
 			// [KEY_SESSION]
 			session : this,
+			// namespace : '*',
+			cmnamespace : '*',
 			type : 'categorymembers'
 		};
 
@@ -942,16 +944,20 @@ function module_code(library_namespace) {
 
 				// ----------------------------------------
 
-				function page_filter(page_data) {
+				// console.log(list);
+				function process_all_pages(page_data) {
+					// console.log(page_data)
 					if (page_data.ns !== NS_Category) {
-						if (page_filter && !page_filter(page_data))
-							return false;
-						if (options.for_each_page) {
-							try {
+						// console.log(page_data);
+						// console.log(page_filter(page_data));
+						try {
+							if (page_filter && !page_filter(page_data))
+								return false;
+							if (options.for_each_page) {
 								options.for_each_page(page_data);
-							} catch (e) {
-								library_namespace.error(e);
 							}
+						} catch (e) {
+							library_namespace.error(e);
 						}
 						return true;
 					}
@@ -970,6 +976,7 @@ function module_code(library_namespace) {
 						return false;
 					}
 
+					// library_namespace.log('Process ' + page_data.title);
 					remaining++;
 					// assert: get_categorymembers() won't return soon
 					get_categorymembers(page_data, function(sub_list, error) {
@@ -982,12 +989,12 @@ function module_code(library_namespace) {
 
 				var remaining = 0, subcategories = Object.create(null);
 				var title = list.title;
-				list = list.filter(page_filter);
+				list = list.filter(process_all_pages);
 				// recovery attributes
 				list.title = title;
 				if (remaining > 0) {
 					list[wiki_API.KEY_subcategories] = subcategories;
-					// waiting for get_categorymembers() @ page_filter()
+					// waiting for get_categorymembers() @ process_all_pages()
 				} else {
 					if (depth === 0
 					//
