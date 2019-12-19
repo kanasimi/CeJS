@@ -2004,6 +2004,42 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
+	function fit_filter_String(value) {
+		return String(value).includes(this);
+	}
+
+	function fit_filter_RegExp(value) {
+		return this.test(value);
+	}
+
+	function fit_filter_Object(value) {
+		return value in this;
+	}
+
+	function generate_filter(filter) {
+		if (!filter)
+			return;
+
+		if (typeof filter === 'function')
+			return filter;
+
+		if (typeof filter === 'string')
+			return fit_filter_String.bind(filter);
+
+		if (library_namespace.is_RegExp(filter))
+			return fit_filter_RegExp.bind(filter);
+
+		if (Array.isArray(filter))
+			return filter.includes.bind(filter);
+
+		if (library_namespace.is_Object(filter))
+			return fit_filter_Object.bind(filter);
+	}
+
+	_.generate_filter = generate_filter;
+
+	// ---------------------------------------------------------------------//
+
 	return (_// JSDT:_module_
 	);
 }

@@ -852,17 +852,15 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// 子分類 subcategory
-	var KEY_subcategories = 'subcategories',
 	//
-	NS_Category = wiki_API.namespace('Category');
+	var NS_Category = wiki_API.namespace('Category');
 
-	// export
-	wiki_API.KEY_subcategories = KEY_subcategories;
+	// export 子分類 subcategory
+	wiki_API.KEY_subcategories = 'subcategories';
 
 	/**
 	 * traversal root_category, get all categorymembers and subcategories in
-	 * [KEY_subcategories]
+	 * [CeL.wiki.KEY_subcategories]
 	 * 
 	 * @example<code>
 
@@ -916,6 +914,13 @@ function module_code(library_namespace) {
 
 		// console.log(list_options);
 
+		var page_filter = library_namespace.generate_filter(options.filter), category_filter = page_filter;
+		page_filter = library_namespace.generate_filter(options.page_filter)
+				|| page_filter;
+		category_filter = library_namespace
+				.generate_filter(options.category_filter)
+				|| category_filter;
+
 		function get_categorymembers(category, callback, depth) {
 			function for_category_list(list/* , target, options */) {
 				// assert: Array.isArray(list)
@@ -943,6 +948,8 @@ function module_code(library_namespace) {
 
 				function page_filter(page_data) {
 					if (page_data.ns !== NS_Category) {
+						if (page_filter && !page_filter(page_data))
+							return false;
 						if (options.for_each_page) {
 							try {
 								options.for_each_page(page_data);
@@ -952,6 +959,9 @@ function module_code(library_namespace) {
 						}
 						return true;
 					}
+
+					if (category_filter && !category_filter(page_data))
+						return false;
 
 					var page_name = page_data.title.replace(
 					// @see PATTERN_category @ CeL.wiki
@@ -978,13 +988,13 @@ function module_code(library_namespace) {
 				// recovery attributes
 				list.title = title;
 				if (remaining > 0) {
-					list[KEY_subcategories] = subcategories;
-					// waiting for get_categorymembers()
+					list[wiki_API.KEY_subcategories] = subcategories;
+					// waiting for get_categorymembers() @ page_filter()
 				} else {
 					if (depth === 0
 					//
 					&& !library_namespace.is_empty_object(subcategories)) {
-						list[KEY_subcategories] = subcategories;
+						list[wiki_API.KEY_subcategories] = subcategories;
 					} else {
 						// No subcategory
 					}
