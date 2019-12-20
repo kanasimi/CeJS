@@ -1621,15 +1621,15 @@ function module_code(library_namespace) {
 
 	// @see cardinal_1()
 	function unique_sorted_Array(get_key) {
-		var latest_key;
-		var array = this.filter(function(element, index) {
+		var latest_key, configured;
+		var unique_array = this.filter(function(element) {
 			var key = get_key ? get_key(element) : element;
-			var is_different = Object.is(latest_key, key) || index === 0;
+			var is_different = configured ? !Object.is(latest_key, key) : (configured = true);
 			latest_key = key;
 			return is_different;
 		});
 
-		return array;
+		return unique_array;
 	}
 
 	/**
