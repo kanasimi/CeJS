@@ -1119,11 +1119,12 @@ function module_code(library_namespace) {
 		}
 
 		// 這邊僅處理常用模板。需要先保證這些模板存在，並且具有預期的功能。
-		// TODO: 模板這個部分除了解析模板之外沒有好的方法。
+		// 其他常用 template 可加在 wiki.template_functions.to_displayed_text 中。
+		//
+		// 模板這個部分除了解析模板之外沒有好的方法。
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {
-			// 其他常用 template 可加在 template_functions.to_displayed_text 中。
 			if (wiki_API.to_displayed_text) {
 				var new_token = wiki_API.to_displayed_text(token, options);
 				if (new_token !== wiki_API.to_displayed_text.NOT_PARSED)
@@ -5398,7 +5399,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}URL
 	 *            URL text
-	 * @param {Boolean}[add_quote]
+	 * @param {Boolean}[need_add_quote]
 	 *            是否添加 [[]] 或 []。
 	 * @param {Function}[callback]
 	 *            回調函數。 callback({String}wiki link)
@@ -5409,7 +5410,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see [[WP:LINK#跨语言链接]]
 	 */
-	function URL_to_wiki_link(URL, add_quote, callback, options) {
+	function URL_to_wiki_link(URL, need_add_quote, callback, options) {
 		URL = URL.trim();
 		// URL = URL.replace(/[\s\n]+/g, ' ');
 
@@ -5417,7 +5418,7 @@ function module_code(library_namespace) {
 		if (!matched) {
 			library_namespace.debug('Can not parse URL: [' + URL
 					+ ']. Not a wikipedia link?', 3, 'URL_to_wiki_link');
-			if (add_quote) {
+			if (need_add_quote) {
 				if (PATTERN_URL_prefix.test(URL)) {
 					// 當作正常外部連結 external link。
 					// e.g., 'http://a.b.c ABC'
@@ -5477,7 +5478,7 @@ function module_code(library_namespace) {
 			// 在 <gallery> 中，"[[title (type)|]]" 無效，因此需要明確指定。
 			? '|' + title.replace(/\s*\([^()]+\)$/, '') : '');
 
-			if (add_quote) {
+			if (need_add_quote) {
 				link = wiki_API.title_link_of(link);
 			}
 

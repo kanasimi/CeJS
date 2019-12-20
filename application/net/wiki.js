@@ -985,6 +985,7 @@ function module_code(library_namespace) {
 		&& n.endsWith('talk');
 	}
 
+	// 不應包含 [[Special talk:*]]。
 	function to_talk_page(page_title) {
 		if (wiki_API.is_page_data(page_title)) {
 			page_title = wiki_API.title_of(page_title);

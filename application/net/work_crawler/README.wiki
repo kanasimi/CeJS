@@ -33,7 +33,7 @@ More examples: See [https://github.com/kanasimi/work_crawler 各網站工具檔.
 |-
 | 2016/11/5 22:44:17 || 正式運用：批量下載漫画台 manhuatai。
 |-
-| 2016/11/27 19:7:2 || 模組化。
+| 2016/11/27 19:7:2 || 模組化。 ([[sites]]/*)
 |-
 | 2019/10/13 13:23:25 || 分拆至 work_crawler/*.js
 |}

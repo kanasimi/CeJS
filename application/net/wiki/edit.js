@@ -181,7 +181,7 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @param {Function}callback
-	 *            回調函數。 callback(page_data, error, result)
+	 *            回調函數。 callback(page_data, {String|any}error, result)
 	 * @param {String}timestamp
 	 *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
 	 */

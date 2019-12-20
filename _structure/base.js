@@ -114,7 +114,7 @@ function (globalThis) {
 		 * @type {String}
 		 * @ignore
 		 */
-		library_version = '3.3.0',
+		library_version = '3.4.0',
 
 
 		/**
@@ -1491,7 +1491,7 @@ OS='UNIX'; // unknown
 		};
 
 		/**
-		 * 文件預設 line separator / NewLine / line delimiter。<br />
+		 * 文件預設 line separator / NewLine / new_line / line delimiter。<br />
 		 * in VB: vbCrLf
 		 * 
 		 * @name CeL.env.line_separator

@@ -2471,10 +2471,17 @@ function module_code(library_namespace) {
 	}
 
 	// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-ispromise
-	// Promise 物件
+	// https://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise
+	// test if is Promise 物件, Promise.isPromise(), `require('util').types.isPromise()`
 	function IsPromise(value) {
-		// value.constructor === Promise
 		return value instanceof Promise;
+
+		return Promise.resolve(value) == value;
+		return value && value.constructor === Promise;
+		return value && Object.prototype.toString.call(value) === "[object Promise]";
+
+		// NG: only thenable
+		return value && typeof value.then === 'function';
 
 		// assert: Should NOT access value.then
 		// https://promisesaplus.com/#point-75

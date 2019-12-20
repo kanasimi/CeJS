@@ -1171,11 +1171,13 @@ function module_code(library_namespace) {
 		.replace(/<hr *>/ig, '<hr />')
 		// <BR> → <br />
 		.replace(/<br *>/ig, '<br />')
+		
 		// .trim(), remove head/tail <BR>
-		.replace(/^(?:<br *\/>|[\s\n])+/ig, '')
+		.replace(/^(?:<br *\/>|[\s\n]|&nbsp;|&#160;)+/ig, '')
 		// 這會卡住:
 		// .replace(/(?:<br *\/>|[\s\n]+)+$/ig, '')
-		.replace(/(?:<br *\/>|[\s\n])+$/ig, '')
+		.replace(/(?:<br *\/>|[\s\n]|&nbsp;|&#160;)+$/ig, '')
+		
 		// for ALL <img>
 		.replace(/(<img ([^<>]+)>)(\s*<\/img>)?/ig,
 		// 改正明顯錯誤。
@@ -1195,13 +1197,14 @@ function module_code(library_namespace) {
 		// e.g., id="text" → id="text"
 		// .replace(/ ([a-z]+)=([a-z]+)/g, ' $1="$2"')
 
+		// '\f': 無效的 XML字元
+		// e.g., http://www.alphapolis.co.jp/content/sentence/213451/
+		.replace(/\x0c/g, '')
+
 		// [[non-breaking space]]
 		// EpubCheck 不認識 HTML character entity，
 		// 但卻又不允許 <!DOCTYPE html> 加入其他宣告。
 		.replace(/&nbsp;/g, '&#160;')
-		// '\f': 無效的 XML字元
-		// e.g., http://www.alphapolis.co.jp/content/sentence/213451/
-		.replace(/\x0c/g, '')
 		//
 		.replace(/&([^#a-z])/ig, '&amp;$1');
 

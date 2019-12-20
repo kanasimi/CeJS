@@ -960,7 +960,8 @@ function module_code(library_namespace) {
 
 		if (!magic_data) {
 			var contents_String = file_contents.toString();
-			if (contents_String.trimStart().startsWith('<!DOCTYPE html>')
+			// e.g., "<!DOCTYPE html>", "<!DOCTYPE html PUBLIC "...
+			if (contents_String.trimStart().startsWith('<!DOCTYPE html')
 			// TODO: 此處為太過簡陋的測試
 			|| /<html[ a-z\d-="']*>/i.test(contents_String)) {
 				magic_data = Magic_number.html;

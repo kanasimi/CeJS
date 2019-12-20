@@ -156,10 +156,9 @@ function module_code(library_namespace) {
 
 	function test_and_add_quoted_program(program_name, need_every) {
 		if (Array.isArray(program_name)) {
-			return program_name.some(function(program) {
+			return program_name.every(function(program) {
 				program = test_and_add_quoted_program(program);
-				if (need_every)
-					return !program;
+				return !need_every || program;
 			});
 		}
 
@@ -226,14 +225,16 @@ function module_code(library_namespace) {
 		}
 	});
 
+	// console.log(executable_file_path);
 	// 舊版本 7z 不能 rename，Unix 上有 zip 可替代，因此即使有了 7z，依然作個測試。
-	if (true/* !executable_file_path.rar */) {
+	if (// !executable_file_path.rar &&
+	// 比較少存在的放第一個測試。
+	test_and_add_quoted_program([ 'zipnote', 'unzip', 'zip' ], true)) {
 		// e.g., /usr/bin/zip Info-ZIP @ macOS, linux
-		// Info-ZIP must use zipnote to rename function!
-		// console.log(executable_file_path);
+		// 在 linux 下操作壓縮檔案的功能。
+		// Info-ZIP must use zipnote to rename file!
 
-		// 比較少存在的放第一個測試。
-		test_and_add_quoted_program([ 'zipnote', 'unzip', 'zip' ], true);
+		// default_program_type = 'zip';
 	}
 
 	// TODO: https://pureinfotech.com/compress-files-powershell-windows-10/

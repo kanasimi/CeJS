@@ -220,9 +220,10 @@ function module_code(library_namespace) {
 				verified_image = file_type && !file_type.damaged;
 				if (verified_image) {
 					if (!(file_type.type in _this.image_types)) {
+						verified_image = false;
 						library_namespace.warn({
 							T : [
-									file_type.type ? '無法處理類型為%2之圖片檔：%1'
+									file_type.type ? '無法處理類型為 %2 之圖片檔：%1'
 											: '無法判別圖片檔之類型：%1', image_data.file,
 									file_type.type ]
 						});

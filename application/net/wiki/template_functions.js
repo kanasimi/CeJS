@@ -76,7 +76,9 @@ function module_code(library_namespace) {
 	// var Old_vfd_multi__main_name = Object.keys(Old_vfd_multi__names)[0];
 
 	var Article_history__names = 'Article history|ArticleHistory|Article milestones|AH'
-			.split('|').to_hash();
+			.split('|');
+	var Article_history__main_name = Article_history__names[0];
+	Article_history__names = Article_history__names.to_hash();
 
 	// ------------------------------------------------------------------------
 
@@ -600,8 +602,10 @@ function module_code(library_namespace) {
 
 				if (NO_to_delete.length === 0) {
 					library_namespace.warn('replace_Old_vfd_multi: '
-							+ 'Should find {{Article history}} '
-							+ 'but no {{Article history}} found:');
+							+ 'Should find {{' + Article_history__main_name
+							+ '}} action=AFD, but no {{'
+							+ Article_history__main_name
+							+ '}} action=AFD found:');
 					console.warn(token);
 					return;
 				}
@@ -609,7 +613,8 @@ function module_code(library_namespace) {
 				if (last_need_preserve > NO_to_delete[0]) {
 					library_namespace.warn('replace_Old_vfd_multi: '
 					//
-					+ 'Should modify {{Article history}} manually:');
+					+ 'Should modify {{' + Article_history__main_name
+							+ '}} manually:');
 					library_namespace.log(token.toString());
 					return;
 				}

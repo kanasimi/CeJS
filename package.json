@@ -1,35 +1,46 @@
 {
-	"name" : "cejs",
-	"title" : "CeJS",
-	"version" : "3.3.3",
-	"description" : "A JavaScript module framework that is simple to use.",
-	"keywords" : [ "arbitrary-precision", "arithmetic", "numerals",
-			"Chinese era", "calendar", "character encoding", "address input",
-			"internationalization" ],
-	"author" : {
-		"name" : "vimunci",
-		"email" : "vimunci@gmail.com",
-		"url" : "https://github.com/kanasimi/CeJS"
+	"name": "cejs",
+	"title": "CeJS",
+	"version": "3.4.0",
+	"description": "A JavaScript module framework that is simple to use.",
+	"keywords": [
+		"arbitrary-precision",
+		"arithmetic",
+		"numerals",
+		"Chinese era",
+		"calendar",
+		"character encoding",
+		"address input",
+		"internationalization"
+	],
+	"author": {
+		"name": "vimunci",
+		"email": "vimunci@gmail.com",
+		"url": "https://github.com/kanasimi/CeJS"
 	},
-	"contributors" : [ "vimunci" ],
-	"license" : "BSD-3-Clause",
-	"homepage" : "https://github.com/kanasimi/CeJS",
-	"bugs" : {
-		"url" : "https://github.com/kanasimi/CeJS/issues"
+	"contributors": [
+		"vimunci"
+	],
+	"license": "BSD-3-Clause",
+	"homepage": "https://github.com/kanasimi/CeJS",
+	"bugs": {
+		"url": "https://github.com/kanasimi/CeJS/issues"
 	},
-	"repository" : {
-		"type" : "git",
-		"url" : "git+https://github.com/kanasimi/CeJS.git"
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/kanasimi/CeJS.git"
 	},
-
-	"main" : "index.js",
-	"scripts" : {
-		"test" : "node \"_test suite/test.js\""
+	"main": "index.js",
+	"scripts": {
+		"test": "node \"_test suite/test.js\""
 	},
-
-	"engines" : {
-		"node" : ">=0.10"
+	"engines": {
+		"node": ">=0.10"
 	},
-	"devDependencies" : {},
-	"dependencies" : {}
+	"devDependencies": {
+		
+	},
+	"dependencies": {
+		
+	}
 }

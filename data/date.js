@@ -239,6 +239,12 @@ function module_code(library_namespace) {
 	 * Get JDN of (year, month, date).<br />
 	 * input MUST latter than -4716/3/1 (4717/3/1 BCE)!!
 	 * 
+	 * <code>
+
+	JDN = CeL.Julian_day.from_YMD(year, month, date, 'CE');
+
+	</code>
+	 * 
 	 * @param {Integer}year
 	 *            year >= -4716
 	 * @param {Natural}month
@@ -344,7 +350,7 @@ function module_code(library_namespace) {
 	 * @returns {Array} [ year, month, date ]
 	 * 
 	 * @see https://en.wikipedia.org/wiki/Julian_day#Julian_or_Gregorian_calendar_from_Julian_day_number
-	 *      algorithm by Richards
+	 *      algorithm by Richards 2013
 	 */
 	Julian_day.to_YMD = function(JDN, type, no_year_0) {
 		var f = JDN + 1401 | 0;
@@ -422,6 +428,12 @@ function module_code(library_namespace) {
 	/**
 	 * Get the local midnight date of JDN.<br />
 	 * 傳回 local midnight (0:0)。
+	 * 
+	 * <code>
+
+	date = CeL.Julian_day.to_Date(JDN);
+
+	</code>
 	 * 
 	 * @param {Integer}JDN
 	 *            input {Integer}JDN or {Number}JD.
@@ -2248,8 +2260,8 @@ function module_code(library_namespace) {
 	// 預設的 Gregorian calendar 改曆日期:
 	// Julian calendar → Gregorian calendar.
 	//
-	// 這天之前使用 Julian calendar。
-	// e.g., UTC/Gregorian 1582/10/14 → Julian 1582/10/4.
+	// 這天開始使用 Gregorian calendar。之前使用 Julian calendar。
+	// e.g., UTC/Gregorian 1582/10/14 ⇔ Julian 1582/10/4.
 	//
 	// 西曆改曆分界點。這天之後採用 Gregorian calendar 表示。
 	// 西曆以1582年10月15日為改曆分界點，Julian calendar（儒略曆）1582年10月4日的下一日為 Gregorian
@@ -2260,20 +2272,24 @@ function module_code(library_namespace) {
 	// gcal-3.6/doc/GREG-REFORM
 	// http://www.tondering.dk/claus/cal/gregorian.php
 	// http://www.webexhibits.org/calendars/year-countries.html
+	// http://sizes.com/time/cal_Gregadoption.htm
 	/*
-	 * http://sizes.com/time/cal_Gregadoption.htm
+	 * https://en.wikipedia.org/wiki/List_of_adoption_dates_of_the_Gregorian_calendar_per_country
 	 * 
 	 * 使用公共轉換組「外國地名翻譯」
 	 * https://zh.wikipedia.org/wiki/%E6%A8%A1%E5%9D%97:CGroup/%E5%9C%B0%E5%90%8D
 	 */
 	var reform_by_region = {
 		'Italy' : '1582/10/15',
-		'Spain' : '1582/10/15',
-		'Portugal' : '1582/10/15',
 		'Poland' : '1582/10/15',
+		'Portugal' : '1582/10/15',
+		'Spain' : '1582/10/15',
 		'France' : '1582/12/20',
+		// 盧森堡 Source?
 		'Luxembourg' : '1583/1/1',
-		'Netherlands' : '1583/1/1',
+		// Holland: 1583/1/12
+		'Netherlands' : '1583/1/12',
+		// Source?
 		'Bavaria' : '1583/10/16',
 		'Austria' : '1584/1/17',
 		'Switzerland' : '1584/1/22',
@@ -2298,6 +2314,8 @@ function module_code(library_namespace) {
 		'Greece' : '1924/3/23',
 		'Turkey' : '1926/1/1',
 		'Egypt' : '1928/10/1'
+		// 之前使用伊斯蘭曆法。
+		// 'Saudi Arabia':'2016/10/1'
 	};
 
 	(function() {
