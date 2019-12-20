@@ -136,6 +136,31 @@ function module_code(library_namespace) {
 					// 不能用 "</span>"：可能是 "<span class="red">" 的結尾。
 					'<span class="new-search-list-right">')));
 				});
+			} else if (html.includes(' class="classList"')) {
+				html.each_between(
+				// for https://www.tohomh123.com/action/Search?keyword= 2019/11前
+				// 搜尋改版
+				'<li class="am-thumbnail">', '</a>',
+				/**
+				 * e.g., <code>
+
+				<div class="classList" id="classList_1">
+				<ul class="am-avg-sm-3 am-thumbnails list">
+				
+				<li class="am-thumbnail"><a href="/xiuzhenliaotianqun/" title="修真聊天群">
+				...
+				</p>
+				</li>
+				
+				</ul>
+				</div>
+
+				</code>
+				 */
+				function(text) {
+					id_list.push(text.between('<a href="/', '/"'));
+					id_data.push(get_label(text.between(' title="', '"')));
+				});
 			} else if (html) {
 				throw new Error(this.id + ': 網站改版？無法解析搜尋結果！');
 			}
@@ -248,6 +273,7 @@ function module_code(library_namespace) {
 			</code>
 			 */
 
+			// console.log(html);
 			html = html.between('detail-list-select',
 					'<div class="index-title">');
 
@@ -285,6 +311,7 @@ function module_code(library_namespace) {
 				}
 
 				matched = matched[1];
+				// console.log(matched);
 				var chapter_data = {
 					title : get_label(matched.between(' class="title', '</p>')
 					//
