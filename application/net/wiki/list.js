@@ -887,8 +887,6 @@ function module_code(library_namespace) {
 		var list_options = {
 			// [KEY_SESSION]
 			session : this,
-			// namespace : '*',
-			cmnamespace : '*',
 			type : 'categorymembers'
 		};
 
@@ -908,7 +906,7 @@ function module_code(library_namespace) {
 			list_options.namespace = 'namespace' in list_options
 			// 確保一定有 NS_Category。
 			? wiki_API.namespace(wiki_API.namespace(list_options.namespace)
-					+ '|' + NS_Category) : NS_Category;
+					+ '|' + NS_Category) : category_tree.default_namespace;
 
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			options = library_namespace.new_options(options);
@@ -1034,6 +1032,9 @@ function module_code(library_namespace) {
 	}
 
 	category_tree.default_depth = 10;
+	category_tree.default_namespace
+	// 必須包含 'Category'
+	= wiki_API.namespace('Module|Template|Category|main');
 	wiki_API.prototype.category_tree = category_tree;
 
 	// ------------------------------------------------------------------------
