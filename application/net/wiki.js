@@ -3296,12 +3296,11 @@ function module_code(library_namespace) {
 		var done = 0,
 		//
 		log_item = Object.assign(Object.create(null),
-				wiki_API.prototype.work.log_item, config.log_item),
-		/** {Boolean}console 不顯示訊息，也不處理 {Array}messages。 */
-		no_message = config.no_message, messages = [];
-		messages.add = no_message ? library_namespace.null_function
+				wiki_API.prototype.work.log_item, config.log_item), messages = [];
+		/** config.no_message: {Boolean}console 不顯示訊息，也不處理 {Array}messages。 */
+		messages.add = config.no_message ? library_namespace.null_function
 				: add_message;
-		messages.reset = no_message ? library_namespace.null_function
+		messages.reset = config.no_message ? library_namespace.null_function
 				: reset_messages;
 		messages.reset();
 
@@ -3310,7 +3309,7 @@ function module_code(library_namespace) {
 		each = each[0];
 		if (!callback) {
 			// TODO: [[ja:Special:Diff/62546431|有時最後一筆記錄可能會漏失掉]]
-			callback = no_message ? library_namespace.null_function
+			callback = config.no_message ? library_namespace.null_function
 			// default logger.
 			: function(title, error, result) {
 				if (error) {
@@ -3451,7 +3450,7 @@ function module_code(library_namespace) {
 					// TODO: 此時應該沒有 .continue。
 					library_namespace.warn('wiki_API.work: 取得 ' + data.length
 							+ '/' + this_slice_size + ' 個頁面，應有 '
-							+ (this_slice_size - data.length) + ' 個重複頁面。');
+							+ (this_slice_size - data.length) + ' 個不存在或重複頁面。');
 				}
 			}
 
@@ -3477,7 +3476,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (!no_message) {
+			if (!config.no_message) {
 				// 使用時間, 歷時, 費時, elapsed time
 				pages = gettext('First, use %1 to get %2 pages.', messages.last
 						.age(new Date), data.length);
@@ -3596,7 +3595,7 @@ function module_code(library_namespace) {
 				// assert: data.length < this_slice_size
 				library_namespace.warn('wiki_API.work: 取得 ' + pages.length
 						+ '/' + this_slice_size + ' 個頁面，應有 '
-						+ (this_slice_size - pages.length) + ' 個重複頁面。');
+						+ (this_slice_size - pages.length) + ' 個不存在或重複頁面。');
 			}
 
 			library_namespace.debug('for each page: 主要機制是把工作全部推入 queue。', 2,
@@ -3658,17 +3657,27 @@ function module_code(library_namespace) {
 						this.page(page, null, single_page_options)
 						// 編輯頁面內容。
 						.edit(function(page_data) {
+							if ('missing' in page_data) {
+								// return [ wiki_API.edit.cancel, 'skip' ];
+							}
+
 							// edit/process
-							if (!no_message) {
-								library_namespace.sinfo([
+							if (!config.no_message) {
+								var _messages = [
 								//
 								'wiki_API.work: edit '
 								//
-								+ (index + 1) + '/' + pages.length
-								//
-								+ ' [[', 'fg=yellow',
-								//
-								page_data.title, '-fg', ']]' ]);
+								+ (index + 1) + '/' + pages.length + ' ' ];
+								if ('missing' in page_data) {
+									_messages.push(
+									//
+									'fg=yellow', 'missing page');
+								} else {
+									_messages.push('', '[[', 'fg=yellow',
+									//
+									page_data.title, '-fg', ']]');
+								}
+								library_namespace.sinfo(_messages);
 							}
 							// 以 each() 的回傳作為要改變成什麼內容。
 							var content = each.call(
@@ -3702,7 +3711,7 @@ function module_code(library_namespace) {
 
 			// 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
 			function finish_up() {
-				if (!no_message) {
+				if (!config.no_message) {
 					library_namespace.debug('收尾。', 1, 'wiki_API.work');
 					var count_summary;
 
@@ -3814,7 +3823,7 @@ function module_code(library_namespace) {
 					skip_stopped : true
 				};
 
-				if (no_message) {
+				if (config.no_message) {
 					;
 				} else if (log_to && (done !== nochange_count
 				// 若全無變更，則預設僅從 console 提示，不寫入 log 頁面。因此無變更者將不顯示。
@@ -3866,7 +3875,7 @@ function module_code(library_namespace) {
 					this.run(config.last.bind(options));
 				}
 
-				if (!no_message) {
+				if (!config.no_message) {
 					this.run(function() {
 						library_namespace.log(
 						// 已完成作業
