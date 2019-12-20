@@ -1131,6 +1131,9 @@ function module_code(library_namespace) {
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
 	 */
 	function normalize_page_name(page_name, use_underline) {
+		if (wiki_API.is_page_data(page_name)) {
+			page_name = page_name.title;
+		}
 		if (!page_name || typeof page_name !== 'string')
 			return page_name;
 
@@ -4836,11 +4839,12 @@ function module_code(library_namespace) {
 				list = list.call(_this, last_data_got, operation);
 			}
 
-			if (!operation.postfix)
+			if (!operation.postfix) {
 				if (type === 'file')
 					operation.postfix = '.txt';
 				else if (type === 'URL')
 					operation.postfix = '.htm';
+			}
 
 			// 自行設定之檔名 operation.file_name 優先度較 type/title 高。
 			// 需要自行創建目錄！
