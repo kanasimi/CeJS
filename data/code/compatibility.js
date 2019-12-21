@@ -279,7 +279,9 @@ function module_code(library_namespace) {
 	}
 
 	function getOwnPropertyDescriptor(object, property) {
-		if (property in object) {
+		if ((property in object)
+		// !hasOwnProperty(property)
+		&& object[property] !== Object.getPrototypeOf(object)[property]) {
 			return {
 				configurable : true,
 				enumerable : true,
@@ -2472,13 +2474,15 @@ function module_code(library_namespace) {
 
 	// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-ispromise
 	// https://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise
-	// test if is Promise 物件, Promise.isPromise(), `require('util').types.isPromise()`
+	// test if is Promise 物件, Promise.isPromise(),
+	// `require('util').types.isPromise()`
 	function IsPromise(value) {
 		return value instanceof Promise;
 
 		return Promise.resolve(value) == value;
 		return value && value.constructor === Promise;
-		return value && Object.prototype.toString.call(value) === "[object Promise]";
+		return value
+				&& Object.prototype.toString.call(value) === "[object Promise]";
 
 		// NG: only thenable
 		return value && typeof value.then === 'function';
@@ -2907,6 +2911,23 @@ function module_code(library_namespace) {
 		// finale
 		'finally' : Promise_finally
 	}, 'function');
+
+	// --------------------------------------------------------
+
+	if (typeof Symbol === 'function') {
+		// Symbol.prototype.description
+		if (!('description' in Symbol.prototype)) {
+			// Object.getOwnPropertyDescriptor(Symbol.prototype, 'description');
+			Object.defineProperty(Symbol.prototype, 'description', {
+				enumerable : false,
+				configurable : true,
+				get : function() {
+					var matched = String(this).match(/^Symbol\(([\s\S]*)\)$/);
+					return matched[1];
+				}
+			});
+		}
+	}
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 

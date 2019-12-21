@@ -2170,6 +2170,13 @@ function module_code(library_namespace) {
 			});
 	}
 
+	var has_spread_operator, clone_Object;
+	try{
+		has_spread_operator = eval('clone_Object=function(object){return {...object};};');
+	}catch (e) {
+		// TODO: handle exception
+	}
+	
 	/**
 	 * clone object.<br />
 	 * for Object.clone()
@@ -2186,7 +2193,7 @@ function module_code(library_namespace) {
 	 * @see `return {...object}` :
 	 *      https://juejin.im/post/5b2a186cf265da596d04a648
 	 */
-	function Object_clone(object, deep) {
+	var Object_clone = function clone(object, deep) {
 		if (!object || typeof object !== 'object') {
 			// 純量。
 			return object;
@@ -2197,6 +2204,7 @@ function module_code(library_namespace) {
 
 		if (Array.isArray(object)) {
 			// TODO: for {Array}
+			// return [...object]
 		}
 
 		if (deep) {
@@ -2205,11 +2213,16 @@ function module_code(library_namespace) {
 			return JSON.parse(JSON.stringify(object));
 		}
 
+		if (clone_Object) {
+			return clone_Object(object);
+		}
+
 		// shallow clone Object.
 		return Object.assign(Object.create(
 		// copy prototype
 		Object.getPrototypeOf(object)), object);
-	}
+	};
+	
 
 	/**
 	 * Test if no property in the object.<br />

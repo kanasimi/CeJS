@@ -2757,7 +2757,7 @@ function module_code(library_namespace) {
 				this.last_page = next[1];
 			}
 			// wikidata_edit(id, data, token, options, callback)
-			wikidata_edit(next[1], next[2], this.data_session.token,
+			wiki_API.edit_data(next[1], next[2], this.data_session.token,
 			// next[3] : options
 			Object.assign({
 				// [KEY_SESSION]
@@ -2798,7 +2798,8 @@ function module_code(library_namespace) {
 			}
 
 			// next = [ 'merge_data', to, from, options[, callback] ]
-			wikidata_merge(next[1], next[2], this.data_session.token,
+			// wikidata_merge(to, from, token, options, callback)
+			wiki_API.merge_data(next[1], next[2], this.data_session.token,
 			// next[3] : options
 			Object.assign({
 				// [KEY_SESSION]
@@ -2818,7 +2819,7 @@ function module_code(library_namespace) {
 		case 'query_data':
 			// wdq, query data
 			// wikidata_query(query, callback, options)
-			wikidata_query(next[1], function(data) {
+			wiki_API.wdq(next[1], function(data) {
 				_this.last_list = Array.isArray(data) ? data : null;
 				// next[2] : callback
 				if (typeof next[2] === 'function')
@@ -5197,7 +5198,8 @@ function module_code(library_namespace) {
 
 					library_namespace.log('wiki_API.cache: Wikidata Query ['
 							+ query + '].');
-					wikidata_query(query, callback, operation);
+					// wikidata_query(query, callback, options)
+					wiki_API.wdq(query, callback, operation);
 				};
 				break;
 
