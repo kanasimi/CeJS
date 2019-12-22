@@ -362,10 +362,10 @@ function module_code(library_namespace) {
 		var flags;
 
 		if (token.type === 'section') {
-			section.each('template', function(token) {
-				flags = parse_Hat(token);
+			token.each('template', function(_token) {
+				flags = parse_Hat(_token);
 				// 僅以第一個有結論的為主。 e.g., [[Wikipedia:頁面存廢討論/記錄/2010/09/26#158]]
-				return flags && flags.result && section.each.exit;
+				return flags && flags.result && token.each.exit;
 			});
 			return flags;
 		}
