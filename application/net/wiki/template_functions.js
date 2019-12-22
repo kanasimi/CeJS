@@ -353,6 +353,39 @@ function module_code(library_namespace) {
 		}
 	}
 
+	function parse_Hat(token, options) {
+		options = library_namespace.setup_options(options);
+
+		if (!token)
+			return;
+
+		var flags;
+
+		if (token.type === 'section') {
+			section.each('template', function(token) {
+				flags = parse_Hat(token);
+				// 僅以第一個有結論的為主。 e.g., [[Wikipedia:頁面存廢討論/記錄/2010/09/26#158]]
+				return flags && flags.result && section.each.exit;
+			});
+			return flags;
+		}
+
+		if (!(token.name in Hat_names))
+			return;
+
+		flags = Object.create(null);
+
+		// {{Talkendh|result 處理結果|target}}
+		if (token.parameters[1]) {
+			flags.result = token.parameters[1];
+			if (flags.result && token.parameters[2]) {
+				flags.target = token.parameters[2];
+			}
+		}
+
+		return flags;
+	}
+
 	function text_of_Hat_flag(flag, allow__Old_vfd_multi__flags) {
 		var result = normalize_result_flag(result_flags__Old_vfd_multi, flag,
 				true);
@@ -724,7 +757,8 @@ function module_code(library_namespace) {
 		},
 		Hat : {
 			names : Hat_names,
-			text_of : text_of_Hat_flag
+			text_of : text_of_Hat_flag,
+			parse : parse_Hat
 		},
 		Old_vfd_multi : {
 			names : Old_vfd_multi__names,

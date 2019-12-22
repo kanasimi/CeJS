@@ -1536,6 +1536,7 @@ function module_code(library_namespace) {
 			// 添加常用屬性與方法。
 			// TODO: using Object.defineProperties(section, {})
 			Object.assign(section, {
+				type : 'section',
 				range : range,
 				each : for_each_token,
 				toString : _this.toString
