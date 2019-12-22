@@ -361,10 +361,16 @@ function module_code(library_namespace) {
 		var flags;
 
 		if (token.type === 'section') {
+			// console.log(token);
 			token.each('template', function(_token) {
-				flags = parse_Hat(_token);
-				// 僅以第一個有結論的為主。 e.g., [[Wikipedia:頁面存廢討論/記錄/2010/09/26#158]]
-				return flags && flags.result && token.each.exit;
+				// console.log(_token);
+				var _flags = parse_Hat(_token);
+				// console.log(_flags);
+				if (_flags) {
+					flags = _flags;
+					// 僅以第一個有結論的為主。 e.g., [[Wikipedia:頁面存廢討論/記錄/2010/09/26#158]]
+					return flags.result && token.each.exit;
+				}
 			});
 			return flags;
 		}
@@ -375,12 +381,15 @@ function module_code(library_namespace) {
 		flags = Object.create(null);
 
 		// {{Talkendh|result 處理結果|target}}
-		if (token.parameters[1]) {
+		// 早期{{delh}}沒有 result 處理結果。
+		if (token.parameters[1] !== undefined) {
 			flags.result = token.parameters[1];
-			if (flags.result && token.parameters[2]) {
-				flags.target = token.parameters[2];
-			}
 		}
+		if (token.parameters[2] !== undefined) {
+			flags.target = token.parameters[2];
+		}
+		// console.log(token);
+		// console.log(flags);
 
 		return flags;
 	}
@@ -439,7 +448,7 @@ function module_code(library_namespace) {
 			// default flag: k|保留
 			|| 'k';
 			item_list.push(
-			//
+			// 注意: 其他 parameters 會被捨棄掉!
 			wiki_API.parse.add_parameters_to_template_object(null, {
 				date : token.parameters[1],
 				result : result,
