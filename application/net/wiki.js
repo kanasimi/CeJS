@@ -3899,6 +3899,7 @@ function module_code(library_namespace) {
 		// @see
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 		page_options = Object.assign({
+			allow_missing : config.no_warning,
 			is_id : config.is_id,
 			multi : true
 		},

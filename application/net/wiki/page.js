@@ -478,8 +478,10 @@ function module_code(library_namespace) {
 			}
 
 			var pages = data.query.pages;
+			// console.log(options);
+			var need_warn = /* !options.no_warning && */!options.allow_missing
 			// 其他 .prop 本來就不會有內容。
-			var need_warn = !options.allow_missing && get_content;
+			&& get_content;
 
 			for ( var pageid in pages) {
 				var page_data = pages[pageid];
