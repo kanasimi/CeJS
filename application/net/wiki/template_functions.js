@@ -250,12 +250,11 @@ function module_code(library_namespace) {
 			return;
 
 		var index = 0, page_title_list = [];
-		while (index < 60) {
+		// allow `{{al||title}}`
+		while (index < token.length) {
 			var page_title = token.parameters[++index];
 			if (page_title)
 				page_title_list.push(page_title);
-			else
-				break;
 		}
 		page_title_list.toString = zh_Al_toString;
 		return page_title_list;
