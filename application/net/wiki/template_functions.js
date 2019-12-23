@@ -7,6 +7,7 @@
  * 
  * TODO:<code>
 
+template_functions/zhwiki.js
 
 </code>
  * 
@@ -62,7 +63,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 	// template names: The first one is the main template name. 首個名稱為正式名稱。
 
-	var zh_Al_names = 'Al'.split('|').to_hash();
+	var zhwiki_Al_names = 'Al'.split('|').to_hash();
 
 	var Hat_names = 'TalkendH|Talkendh|Delh|Closereq|Hat|Hidden archive top'
 			.split('|').to_hash();
@@ -84,8 +85,8 @@ function module_code(library_namespace) {
 
 	function to_displayed_text(token, options) {
 		var token_name = token.name;
-		if (token_name in zh_Al_names) {
-			return parse_zh_Al_token(token, options);
+		if (token_name in zhwiki_Al_names) {
+			return parse_zhwiki_Al_token(token, options);
 		}
 
 		return to_displayed_text.NOT_PARSED;
@@ -240,13 +241,13 @@ function module_code(library_namespace) {
 	// ------------------------------------------
 
 	// [[w:zh:Template:Al]]
-	function zh_Al_toString() {
+	function zhwiki_Al_toString() {
 		return this.join('、');
 	}
 
-	function parse_zh_Al_token(token, options) {
+	function parse_zhwiki_Al_token(token, options) {
 		if (!token || token.type !== 'transclusion'
-				|| !(token.name in zh_Al_names))
+				|| !(token.name in zhwiki_Al_names))
 			return;
 
 		var index = 0, page_title_list = [];
@@ -256,7 +257,7 @@ function module_code(library_namespace) {
 			if (page_title)
 				page_title_list.push(page_title);
 		}
-		page_title_list.toString = zh_Al_toString;
+		page_title_list.toString = zhwiki_Al_toString;
 		return page_title_list;
 	}
 
@@ -428,6 +429,10 @@ function module_code(library_namespace) {
 		parsed.each('template', function(token) {
 			var _item_list = parse_Article_history_token(token);
 			if (_item_list) {
+				if (!item_list.Article_history_items)
+					item_list.Article_history_items = [];
+				item_list.Article_history_items.append(_item_list);
+
 				_item_list.forEach(function(item) {
 					if (item.action !== 'AFD' && item.action !== 'CSD')
 						return;
@@ -712,7 +717,14 @@ function module_code(library_namespace) {
 			var value = token.parameters[key];
 			var matched = key.match(/^action([1-9]\d?)(.*)?$/);
 			if (!matched) {
-				item_list[key] = value;
+				if (library_namespace.is_digits(key)) {
+					// invalid numeral parameters
+					// e.g., [[Talk:香港國際機場]]
+					library_namespace.debug('Skip [' + key + ']: ' + value, 1,
+							'parse_Article_history_token');
+				} else {
+					item_list[key] = value;
+				}
 				continue;
 			}
 			var index = matched[1] - 1;
@@ -759,9 +771,11 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 
-		zh_Al : {
-			names : zh_Al_names,
-			parse : parse_zh_Al_token
+		zhwiki : {
+			Al : {
+				names : zhwiki_Al_names,
+				parse : parse_zhwiki_Al_token
+			}
 		},
 		Hat : {
 			names : Hat_names,

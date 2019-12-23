@@ -1019,6 +1019,9 @@ function module_code(library_namespace) {
 			page_title = wiki_API.normalize_title(page_title);
 		}
 
+		if (!page_title || typeof page_title !== 'string')
+			return page_title;
+
 		// TODO: 需另外處理非 "talk" 說明頁。 e.g., "討論:..."
 		return /^Talk:/i.test(page_title) ? page_title.replace(/^Talk:/i, '')
 				: page_title.replace(/^([a-z _]+)[ _]talk:/i, '$1:');
