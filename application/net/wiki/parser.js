@@ -166,6 +166,10 @@ function module_code(library_namespace) {
 					+ '].');
 		}
 
+		if (typeof options === 'string') {
+			options = library_namespace.setup_options(options);
+		}
+
 		if (library_namespace.is_Object(options)) {
 			wikitext.options = options;
 		}
@@ -214,7 +218,7 @@ function module_code(library_namespace) {
 		|| value === '' || value === 0;
 	}
 
-	// 僅添加有效的 parameters
+	// 僅添加有效的 parameters。基本上等同於 Object.assign()，只是不添加無效值。
 	function add_parameters_to_template_object(template_object, parameters,
 			value_mapper) {
 		if (!template_object)
@@ -224,6 +228,7 @@ function module_code(library_namespace) {
 			var value = parameters[key];
 			if (value_mapper)
 				value = value_mapper[value];
+			// 不添加無效值。
 			if (is_valid_parameters_value(value)) {
 				template_object[key] = value;
 			}
@@ -4468,20 +4473,21 @@ function module_code(library_namespace) {
 
 		wikitext = queue[queue.length - 1];
 		// console.log(wikitext);
-		if (initialized_fix && Array.isArray(options.target_array)
-				&& Array.isArray(wikitext) && wikitext.type === 'plain') {
-			// 可藉以複製必要的屬性。
-			// @see function parse_page(options)
-			options.target_array.truncate();
-			// copy parsed data to .target_array
-			Array.prototype.push.apply(options.target_array, wikitext);
-			wikitext = options.target_array;
-		}
-
 		if (initialized_fix
 		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
 		// plain: 表示 wikitext 可能是一個頁面。最起碼是以 .join('') 轉換成字串的。
-		&& wikitext.type === 'plain') {
+		&& (wikitext.type === 'plain'
+		// options.no_reduce, options.is_page
+		|| options.with_properties)) {
+			if (Array.isArray(options.target_array) && Array.isArray(wikitext)) {
+				// 可藉以複製必要的屬性。
+				// @see function parse_page(options)
+				options.target_array.truncate();
+				// copy parsed data to .target_array
+				Array.prototype.push.apply(options.target_array, wikitext);
+				wikitext = options.target_array;
+			}
+
 			if (queue.switches)
 				wikitext.switches = queue.switches;
 
