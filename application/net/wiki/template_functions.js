@@ -1,7 +1,8 @@
 ﻿/**
- * @name CeL function for MediaWiki (Wikipedia / 維基百科): 常用模板特設功能
+ * @name CeL function for MediaWiki (Wikipedia / 維基百科):
+ *       常用模板特設功能。本工具檔放置的是幾乎所有wiki計畫通用的模板，或者少數wiki計畫特有、且大量使用的著名模板。對各wiki有不同用途的模板，應放置於個別namespace下。
  * 
- * 注意:本程式庫必須應各wiki模板內容改動而改寫。
+ * 注意: 本程式庫必須應各wiki模板內容改動而改寫。
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用程式庫的子程式庫。
  * 
@@ -68,6 +69,9 @@ function module_code(library_namespace) {
 	var Hat_names = 'TalkendH|Talkendh|Delh|Closereq|Hat|Hidden archive top'
 			.split('|').to_hash();
 
+	var NoteTA_names = 'NoteTA|TA|NoteAT|NOTETA|Note TA|Noteta|NoteTa'.split(
+			'|').to_hash();
+
 	var Multidel_names = 'Multidel'.split('|').to_hash();
 
 	var Old_vfd_multi__names = 'Old vfd multi|Oldafdfull|Vfd-kept|存廢討論被保留|頁面存廢討論被保留'
@@ -107,19 +111,19 @@ function module_code(library_namespace) {
 	// 汲取 page_data 中所有全局轉換（全頁面語言轉換），並交給 processor 處理。
 	// processor({type: 'item', rule: '', original: ''})
 	// Warning: Will modify `page_data.parsed`
-	function parse_convention_item(page_data) {
-		var convention_item_list = [];
+	function parse_conversion_item(page_data, options) {
+		var conversion_item_list = [];
 		if (!page_data)
-			return convention_item_list;
+			return conversion_item_list;
 
 		if (page_data.ns === NS_Module) {
 			var object = wiki_API.parse.lua_object(page_data);
 			object = object && object.content;
 			if (!Array.isArray(object)) {
 				library_namespace
-						.error('parse_convention_item: Invalid convention group: '
+						.error('parse_conversion_item: Invalid conversion group: '
 								+ wiki_API.title_link_of(page_data));
-				return convention_item_list;
+				return conversion_item_list;
 			}
 			// console.log(object);
 			return object;
@@ -176,8 +180,14 @@ function module_code(library_namespace) {
 		// console.log(parsed.toString());
 
 		function for_each_template(token) {
+			var item = parse_NoteTA_token(token, options);
+			if (item) {
+				// conversion_item_list.push(item);
+				return;
+			}
+
 			// console.log(token);
-			const item = {
+			item = {
 				type : 'item'
 			};
 			switch (token.name) {
@@ -230,12 +240,53 @@ function module_code(library_namespace) {
 			}
 
 			// item = {type: 'item', rule: '', original: ''}
-			convention_item_list.push(item);
+			conversion_item_list.push(item);
 		}
 
 		parsed.each('template', for_each_template);
 
-		return convention_item_list;
+		return conversion_item_list;
+	}
+
+	// [[w:zh:Template:NoteTA]]
+	function parse_NoteTA_token(token, options) {
+		if (!token || !(token.name in NoteTA_names)) {
+			return;
+		}
+
+		var convertion = Object.assign([], {
+			// 固定轉換規則
+			// fixed : [],
+
+			// 公共轉換組
+			groups : []
+		});
+
+		var index, value = token.parameters.T;
+		if (value) {
+			// 標題轉換
+			convertion.title = value;
+		}
+
+		for (index = 1; index <= 30; index++) {
+			value = token.parameters[index];
+			if (!value)
+				continue;
+			convertion.push(value);
+			// [[w:zh:模組:NoteTA]]
+			value = wiki_API.parse('-{H|' + value + '}-', 'with_properties');
+			// console.log(value);
+		}
+
+		for (index = 1; index <= 10; index++) {
+			value = token.parameters['G' + index];
+			if (!value)
+				continue;
+			convertion.groups.push(value);
+			// TODO
+		}
+
+		return convertion;
 	}
 
 	// ------------------------------------------
@@ -305,8 +356,9 @@ function module_code(library_namespace) {
 	var result_flags__Old_vfd_multi = {
 		k : 'keep|kept|保留',
 		nc : 'no consensus|nc|無共識|无共识',
-		m : 'moved|move|移動|移动',
+		m : 'moved|move|renamed|移動|移动',
 		r : 'redirect|redirected|重定向',
+		// incubated : 'incubated',
 		// 包含提刪者撤回
 		sk : 'speedy keep|speedily kept|快速保留|速留',
 		ir : 'invalid request|無效|无效|請求無效',
@@ -767,7 +819,12 @@ function module_code(library_namespace) {
 
 	// export 導出.
 	Object.assign(template_functions, {
-		parse_convention_item : parse_convention_item,
+		parse_conversion_item : parse_conversion_item,
+		NoteTA : {
+			names : NoteTA_names,
+			parse : parse_NoteTA_token,
+			parse_page : parse_conversion_item
+		},
 
 		// ----------------------------
 
