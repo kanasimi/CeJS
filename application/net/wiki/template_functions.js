@@ -93,6 +93,10 @@ function module_code(library_namespace) {
 			return parse_zhwiki_Al_token(token, options);
 		}
 
+		if (token_name === 'A') {
+			return token.parameters[2] || token.parameters[1] || '';
+		}
+
 		return to_displayed_text.NOT_PARSED;
 	}
 
@@ -477,7 +481,7 @@ function module_code(library_namespace) {
 	// 'speedy delete'.includes('delete');
 	function Hat_flag_result_includes(flag, new_flag) {
 		// .toLowerCase(): e.g., [[Talk:以色列]]
-		flag = text_of_Hat_flag(flag, true).toLowerCase();
+		flag = text_of_Hat_flag(flag, true);
 		if (!flag)
 			return;
 		flag = String(flag).toLowerCase();
