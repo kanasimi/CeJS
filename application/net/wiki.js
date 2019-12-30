@@ -417,10 +417,14 @@ function module_code(library_namespace) {
 	 * @see api_URL
 	 */
 	function normalize_title_parameter(title, options) {
-		var action = is_api_and_title(title, true)
+		options = library_namespace.setup_options(options);
+		var action = options.multi && Array.isArray(title) && title.length === 2
+		// 即便設定 options.multi，也不該有 /^https?:\/\/.+\.php/i 的標題。
+		&& !/^https?:\/\/.+\.php$/.test(title[0]) || !is_api_and_title(title, true) ? [ , title ]
 		// 不改變原 title。
-		? title.clone() : [ , title ];
+		: title.clone();
 		if (!is_api_and_title(action, false, options)) {
+			//console.trace('normalize_title_parameter: Invalid title!');
 			library_namespace.warn(
 			//
 			'normalize_title_parameter: Invalid title! '
@@ -431,10 +435,9 @@ function module_code(library_namespace) {
 		}
 
 		// 處理 [ {String}API_URL, title ]
-		action[1] = wiki_API.query.title_param(action[1], true, options
-				&& options.is_id);
+		action[1] = wiki_API.query.title_param(action[1], true, options.is_id);
 
-		if (options && options.redirects) {
+		if (options.redirects) {
 			// 毋須 '&redirects=1'
 			action[1] += '&redirects';
 		}
@@ -3225,6 +3228,8 @@ function module_code(library_namespace) {
 		var each,
 		// options 在此暫時作為 default options。
 		options = config.options || {
+			// 預設會取得大量頁面。
+			multi : true,
 			// Throw an error if the page doesn't exist.
 			// 若頁面不存在/已刪除，則產生錯誤。
 			// 要取消這項，須注意在重定向頁之對話頁操作之可能。
@@ -3286,8 +3291,9 @@ function module_code(library_namespace) {
 		if (each[1]) {
 			Object.assign(options, each[1]);
 		}
+		callback = config.summary;
 		// 採用 {{tlx|template_name}} 時，[[Special:RecentChanges]]頁面無法自動解析成 link。
-		options.summary = (callback = config.summary)
+		options.summary = callback
 		// 是為 Robot 運作。
 		? PATTERN_BOT_NAME.test(callback) ? callback
 		// Robot: 若用戶名包含 'bot'，則直接引用之。

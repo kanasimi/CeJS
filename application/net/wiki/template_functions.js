@@ -327,7 +327,7 @@ function module_code(library_namespace) {
 		// 刪除
 		ic : '圖像因侵權被刪|ifd',
 		// 快速刪除
-		sd : '快速刪除|speedy delete|speedily deleted',
+		sd : 'speedy delete|speedily deleted|快速刪除',
 		lssd : '無來源或版權資訊，快速刪除',
 		svg : '已改用SVG圖形，快速刪除',
 		nowcommons : '維基共享資源已提供，快速刪除',
@@ -448,6 +448,11 @@ function module_code(library_namespace) {
 	}
 
 	function text_of_Hat_flag(flag, allow__Old_vfd_multi__flags) {
+		if (flag && flag.result) {
+			// is item
+			flag = flag.result;
+		}
+
 		var result = normalize_result_flag(result_flags__Old_vfd_multi, flag,
 				true);
 		if (result) {
@@ -463,6 +468,18 @@ function module_code(library_namespace) {
 		library_namespace.debug('Not normal Hat flag: ' + flag, 1,
 				'text_of_Hat_flag');
 		return flag;
+	}
+
+	// test if flag includes new_flag:
+	// CeL.wiki.template_functions.Hat.result_includes('快速刪除', 'd') === true
+	// '快速刪除' → 'speedy delete'
+	// 'd' → 'delete'
+	// 'speedy delete'.includes('delete');
+	function Hat_flag_result_includes(flag, new_flag) {
+		// .toLowerCase(): e.g., [[Talk:以色列]]
+		flag = text_of_Hat_flag(flag, true).toLowerCase();
+		new_flag = text_of_Hat_flag(new_flag, true).toLowerCase();
+		return flag.includes(new_flag);
 	}
 
 	function parse_Old_vfd_multi_page(page_data, options) {
@@ -519,7 +536,7 @@ function module_code(library_namespace) {
 			//
 			&& token.parameters['date' + index]; index++) {
 				item_list.push(
-				//
+				// TODO: remove duplicate records
 				wiki_API.parse.add_parameters_to_template_object(null, {
 					date : token.parameters['date' + index],
 					result : token.parameters['result' + index] || '保留',
@@ -837,6 +854,7 @@ function module_code(library_namespace) {
 		Hat : {
 			names : Hat_names,
 			text_of : text_of_Hat_flag,
+			result_includes : Hat_flag_result_includes,
 			parse : parse_Hat
 		},
 		Old_vfd_multi : {
