@@ -478,7 +478,15 @@ function module_code(library_namespace) {
 	function Hat_flag_result_includes(flag, new_flag) {
 		// .toLowerCase(): e.g., [[Talk:以色列]]
 		flag = text_of_Hat_flag(flag, true).toLowerCase();
-		new_flag = text_of_Hat_flag(new_flag, true).toLowerCase();
+		if (!flag)
+			return;
+		flag = String(flag).toLowerCase();
+
+		new_flag = text_of_Hat_flag(new_flag, true);
+		if (!new_flag)
+			return;
+		new_flag = String(new_flag).toLowerCase();
+
 		return flag.includes(new_flag);
 	}
 
@@ -544,9 +552,9 @@ function module_code(library_namespace) {
 					target : token.parameters['target' + index]
 				}));
 				if (index > 5) {
-					library_namespace.warn(
-					//
-					'parse_Old_vfd_multi: Invalid NO: ' + index);
+					library_namespace.warn('parse_Old_vfd_multi: '
+							+ wiki_API.title_link_of(page_data)
+							+ ' Invalid NO ' + index);
 				}
 			}
 

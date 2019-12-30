@@ -418,13 +418,15 @@ function module_code(library_namespace) {
 	 */
 	function normalize_title_parameter(title, options) {
 		options = library_namespace.setup_options(options);
-		var action = options.multi && Array.isArray(title) && title.length === 2
-		// 即便設定 options.multi，也不該有 /^https?:\/\/.+\.php/i 的標題。
-		&& !/^https?:\/\/.+\.php$/.test(title[0]) || !is_api_and_title(title, true) ? [ , title ]
+		var action = options.multi && Array.isArray(title)
+				&& title.length === 2
+				// 即便設定 options.multi，也不該有 /^https?:\/\/.+\.php/i 的標題。
+				&& !/^https?:\/\/.+\.php$/.test(title[0])
+				|| !is_api_and_title(title, true) ? [ , title ]
 		// 不改變原 title。
 		: title.clone();
 		if (!is_api_and_title(action, false, options)) {
-			//console.trace('normalize_title_parameter: Invalid title!');
+			// console.trace('normalize_title_parameter: Invalid title!');
 			library_namespace.warn(
 			//
 			'normalize_title_parameter: Invalid title! '
