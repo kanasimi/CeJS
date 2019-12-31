@@ -879,6 +879,7 @@ function module_code(library_namespace) {
 		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
 		category : 14,
 		category_talk : 15,
+
 		// 主題/主題首頁
 		portal : 100,
 		// 主題討論
@@ -887,14 +888,24 @@ function module_code(library_namespace) {
 		book_talk : 109,
 		draft : 118,
 		draft_talk : 119,
+		// Education Program
 		education_program : 446,
+		// Education Program talk
 		education_program_talk : 447,
+		// TimedText
 		timedtext : 710,
+		// TimedText talk
 		timedtext_talk : 711,
 		// 模块 模塊 模組
 		module : 828,
 		module_talk : 829,
-		// 話題
+		// Gadget
+		gadget : 2300,
+		gadget_talk : 2301,
+		// Gadget definition
+		gadget_definition : 2302,
+		gadget_definition_talk : 2303,
+		// 話題 The Flow namespace (prefix Topic:)
 		topic : 2600
 	};
 
@@ -978,8 +989,8 @@ function module_code(library_namespace) {
 				return false;
 		}
 
-		if (typeof namespace === 'number' || namespace > 0) {
-			return namespace % 2 === 1;
+		if (typeof namespace === 'number') {
+			return namespace > 0 && namespace % 2 === 1;
 		}
 
 		n = get_namespace.name_of_NO[get_namespace(namespace)];
@@ -990,10 +1001,16 @@ function module_code(library_namespace) {
 		&& n.endsWith('talk');
 	}
 
-	// 不應包含 [[Special talk:*]]。
+	// 討論頁面不應包含 [[Special talk:*]]。
 	function to_talk_page(page_title) {
+		var is_not_talk_ns;
 		if (wiki_API.is_page_data(page_title)) {
-			page_title = wiki_API.title_of(page_title);
+			var page_data = page_title;
+			page_title = wiki_API.title_of(page_data);
+			if (is_talk_namespace(page_data.ns))
+				return page_title;
+			is_not_talk_ns = true;
+
 		} else {
 			page_title = wiki_API.normalize_title(page_title);
 		}
@@ -1002,16 +1019,26 @@ function module_code(library_namespace) {
 			return;
 
 		var matched = page_title
-				.match(/^([^:]+):(.+)$/ && /^([a-z _]+):(.+)$/i);
-		if (!matched) {
+				.match(/^([^:]+):(.+)$/ && /^([a-z _]+):(.+)$/i), namespace;
+		if (!matched
+				|| /^[a-z _]+$/i.test(namespace = matched[1])
+				&& !(namespace.toLowerCase().replace(/ /g, '_') in get_namespace.hash)) {
 			// assert: main page (namespace: 0)
 			return 'Talk:' + page_title;
 		}
 
-		var namespace = matched[1];
-		if (is_talk_namespace(namespace)) {
+		if (!is_not_talk_ns && is_talk_namespace(namespace)) {
 			CeL.debug('Is already talk page: ' + page_title, 3, 'to_talk_page');
 			return page_title;
+		}
+
+		if (namespace in {
+			'話題' : true,
+			'话题' : true,
+			'Topic' : true
+		}) {
+			// There is no talk page for Topic.
+			return;
 		}
 
 		return namespace + ' talk:' + matched[2];
@@ -1165,7 +1192,7 @@ function module_code(library_namespace) {
 
 		.trimEnd()
 		// 去除開頭的 ":"。
-		.replace(/^[:\s]+/, '')
+		.replace(/^[:\s_]+/, '')
 
 		// 無論是中日文、英文的維基百科，所有的 '\u3000' 都會被轉成空白字元 /[ _]/。
 		.replace(/　/g, ' ')
@@ -1202,27 +1229,29 @@ function module_code(library_namespace) {
 					section = section.replace(/_/g, ' ');
 				}
 				page_name[index] = upper_case_initial(section);
+				return false;
+			}
 
-			} else if (has_language) {
+			if (has_language) {
 				// page title: 將首個字母轉成大寫。
 				page_name[index] = upper_case_initial(section);
 				return true;
-
-			} else {
-				section = use_underline ? section.replace(/[\s_]+$/, '')
-						: section.trimEnd();
-				section = section.toLowerCase();
-				if (section.length > 1) {
-					// lang code
-					has_language = true;
-					if (use_underline) {
-						section = section.replace(/_/g, '-');
-					}
-				}
-				// else: e.g., [[m:Abc]]
-				page_name[index] = section;
 			}
 
+			section = use_underline ? section.replace(/[\s_]+$/, '') : section
+					.trimEnd();
+			if (!/^[a-z][a-z_\-]+$/i.test(section)) {
+				return true;
+			}
+
+			section = section.toLowerCase();
+			// lang code
+			has_language = true;
+			if (use_underline) {
+				section = section.replace(/_/g, '-');
+			}
+			// else: e.g., [[m:Abc]]
+			page_name[index] = section;
 		});
 
 		return page_name.join(':');

@@ -54,6 +54,9 @@ function module_code(library_namespace) {
 	}
 
 	function get_parsed(page_data) {
+		if (!page_data)
+			return;
+
 		var parsed = typeof page_data.each === 'function'
 		// `page_data` is parsed data
 		? page_data : wiki_API.parser(page_data);
@@ -369,7 +372,7 @@ function module_code(library_namespace) {
 		// '''請求理由已消失'''，页面'''保留''' reason disappeared
 		rr : '請求理由消失',
 		merge : 'merge|merged|併入|合併',
-		d : 'delete|deleted|刪除',
+		d : 'delete|deleted|snowd|刪除',
 		tk : 'temporarily keep|暫時保留|暂时保留'
 	};
 
@@ -568,8 +571,8 @@ function module_code(library_namespace) {
 		return item_list;
 	}
 
-	function Old_vfd_multi__item_list_to_template_object(item_list, page_data,
-			options) {
+	function Old_vfd_multi__item_list_to_template_object(item_list, options,
+			page_data) {
 		options = library_namespace.setup_options(options);
 		var force_set_page = 'force_set_page' in options ? options.force_set_page
 				// 為了預防頁面被移動時出現問題，預設強制加上 `page` 設定。
@@ -651,7 +654,7 @@ function module_code(library_namespace) {
 		if (Array.isArray(replace_to)) {
 			// console.log(replace_to);
 			replace_to = Old_vfd_multi__item_list_to_template_object(
-					replace_to, page_data, options);
+					replace_to, options, page_data);
 		}
 
 		/**
@@ -874,6 +877,8 @@ function module_code(library_namespace) {
 			main_name : Old_vfd_multi__main_name,
 			// CeL.wiki.template_functions.Old_vfd_multi.parse()
 			parse_page : parse_Old_vfd_multi_page,
+
+			item_list_to_object : Old_vfd_multi__item_list_to_template_object,
 			replace_by : replace_Old_vfd_multi,
 			text_of : text_of_Hat_flag
 		},

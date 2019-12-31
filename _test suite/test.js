@@ -70,6 +70,17 @@ require('../index');
 
 function test_base() {
 	all_error_count += CeL.test('set options', function (assert) {
+		assert(CeL.is_digits('0123'), 'CeL.is_digits(0123)');
+		assert(CeL.is_digits('1'), 'CeL.is_digits(1)');
+		assert(CeL.is_digits('1654'), 'CeL.is_digits(1654)');
+		assert(CeL.is_digits(13241), 'CeL.is_digits(13241)');
+		assert(CeL.is_digits('0'), 'CeL.is_digits("0")');
+		assert(CeL.is_digits(0), 'CeL.is_digits(0)');
+		assert(!CeL.is_digits('A'), 'CeL.is_digits(A)');
+		assert(!CeL.is_digits('A123'), 'CeL.is_digits(A123)');
+		assert(!CeL.is_digits('ABC'), 'CeL.is_digits(ABC)');
+		assert(!CeL.is_digits({}), 'CeL.is_digits({})');
+
 		assert(CeL.is_Object({}), 'CeL.is_Object({})');
 		assert(CeL.is_Object(Object.create(null)), 'CeL.is_Object(Object.create(null))');
 
@@ -2817,6 +2828,7 @@ function test_wiki() {
 		[['en-us:Abc def', CeL.wiki.normalize_title('en-us:abc_def')], 'normalize_title #11'],
 		[['Abc_def', CeL.wiki.normalize_title('abc def', true)], 'normalize_title #12'],
 		[['User_talk:Abc_def', CeL.wiki.normalize_title('user talk: abc def', true)], 'normalize_title #13'],
+		[['ABC DEF:QQQ', CeL.wiki.normalize_title('ABC DEF:QQQ')], 'normalize_title #14'],
 
 		[['[[User:Adam/test]]', CeL.wiki.title_link_of('User:Adam/test')], 'title_link_of #1'],
 		[['Adam', CeL.wiki.parse.user('[[User:Adam/test]]')], 'parse.user #1'],
@@ -2849,7 +2861,17 @@ function test_wiki() {
 		[[false, CeL.wiki.is_talk_namespace('Wikipedia:NAME')], 'wiki.is_talk_namespace #3'],
 		[[true, CeL.wiki.is_talk_namespace('Wikipedia talk:NAME')], 'wiki.is_talk_namespace #4'],
 		[['Talk:ABC', CeL.wiki.to_talk_page('ABC')], 'wiki.to_talk_page #1'],
-		[['Wikipedia talk:NAME', CeL.wiki.to_talk_page('Wikipedia:NAME')], 'wiki.to_talk_page #2'],
+		[['Talk:ABC', CeL.wiki.to_talk_page('talk:ABC')], 'wiki.to_talk_page #2'],
+		[['Wikipedia talk:NAME', CeL.wiki.to_talk_page('Wikipedia:NAME')], 'wiki.to_talk_page #3'],
+		[['Wikipedia talk:NAME', CeL.wiki.to_talk_page('Wikipedia talk:NAME')], 'wiki.to_talk_page #4'],
+		[['Talk:ABC DEF: RRR', CeL.wiki.to_talk_page('ABC DEF: RRR')], 'wiki.to_talk_page #5'],
+		[!CeL.wiki.to_talk_page('topic:NAME'), 'wiki.to_talk_page: There is no talk page for Topic.'],
+		[['NAME', CeL.wiki.talk_page_to_main('NAME')], 'wiki.talk_page_to_main #1'],
+		[['NAME', CeL.wiki.talk_page_to_main('talk:NAME')], 'wiki.talk_page_to_main #2'],
+		[['明朝', CeL.wiki.talk_page_to_main('明朝')], 'wiki.talk_page_to_main #3'],
+		[['明朝', CeL.wiki.talk_page_to_main('Talk:明朝')], 'wiki.talk_page_to_main #4'],
+		[['Wikipedia:NAME', CeL.wiki.talk_page_to_main('Wikipedia:NAME')], 'wiki.talk_page_to_main #5'],
+		[['Wikipedia:NAME', CeL.wiki.talk_page_to_main('Wikipedia talk:NAME')], 'wiki.talk_page_to_main #6'],
 
 		[['!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
 			//
@@ -3094,6 +3116,7 @@ function test_wiki() {
 		wikitext = "'''[[哥伦拜恩中学|-{A|zh-hans:哥伦拜恩中学;zh-hant:科倫拜中學}-]]'''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 
+		// TODO: Should use options.with_properties
 		wikitext = "-{H|zh-cn:俄-{匊}-斯;zh-tw:俄-{匊}-斯;zh-hk:俄-{匊}-斯;}- "; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['', parsed.conversion_table.俄匊斯.toString('zh-tw')], 'conversion_table 1');
