@@ -568,7 +568,26 @@ function module_code(library_namespace) {
 			// return to_exit;
 		});
 
+		if (options.unique)
+			item_list = Old_vfd_multi__unique_item_list(item_list);
+
 		return item_list;
+	}
+
+	function Old_vfd_multi__unique_item_list(item_list) {
+		var key_hash = Object.creatc(null);
+
+		function key_filter(item) {
+			var key = [ CeL.Julian_day(item.date.to_Date()),
+					text_of_Hat_flag(item.result),
+					wiki_API.title_of(item.date.page) ].join('|');
+			if (!(key in key_hash)) {
+				key_hash[key] = item;
+				return true;
+			}
+		}
+
+		return unique_item_list.filter(key_filter);
 	}
 
 	function Old_vfd_multi__item_list_to_template_object(item_list, options,
@@ -877,6 +896,7 @@ function module_code(library_namespace) {
 			main_name : Old_vfd_multi__main_name,
 			// CeL.wiki.template_functions.Old_vfd_multi.parse()
 			parse_page : parse_Old_vfd_multi_page,
+			unique_item_list : Old_vfd_multi__unique_item_list,
 
 			item_list_to_object : Old_vfd_multi__item_list_to_template_object,
 			replace_by : replace_Old_vfd_multi,
