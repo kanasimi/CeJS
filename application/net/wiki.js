@@ -1032,12 +1032,8 @@ function module_code(library_namespace) {
 			return page_title;
 		}
 
-		if (namespace in {
-			'話題' : true,
-			'话题' : true,
-			'Topic' : true
-		}) {
-			// There is no talk page for Topic.
+		if (/^(Special|特殊|特別|Media|媒體|媒体|メディア|Topic|話題|话题)$/.test(namespace)) {
+			// There is no talk page for Topic or virtual namespaces.
 			return;
 		}
 

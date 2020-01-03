@@ -500,24 +500,13 @@ function module_code(library_namespace) {
 	function parse_Old_vfd_multi_page(page_data, options) {
 		options = library_namespace.setup_options(options);
 
-		var item_list = [];
-		if (options.using_data) {
-			item_list.page_data = page_data;
-		} else if (page_data.title) {
-			// normalized page title
-			item_list.page_title = page_data.title;
-		}
-
-		var parsed = get_parsed(page_data);
+		var item_list = [], Article_history_items = [], parsed = get_parsed(page_data);
 
 		parsed.each('template', function(token) {
 			var _item_list = parse_Article_history_token(token);
 			if (_item_list) {
-				if (!item_list.Article_history_items)
-					item_list.Article_history_items = [];
-				item_list.Article_history_items.append(_item_list);
-
 				_item_list.forEach(function(item) {
+					Article_history_items.push(item);
 					if (item.action !== 'AFD' && item.action !== 'CSD')
 						return;
 
@@ -536,28 +525,27 @@ function module_code(library_namespace) {
 			result = normalize_result_flag(result_flags__Old_vfd_multi, result)
 			// default flag: k|保留
 			|| 'k';
-			item_list.push(
-			// 注意: 其他 parameters 會被捨棄掉!
-			wiki_API.parse.add_parameters_to_template_object(null, {
+			var item = wiki_API.parse.add_parameters_to_template_object(null, {
+				// 注意: 其他 parameters 會被捨棄掉!
 				date : token.parameters[1],
 				result : result,
 				page : token.parameters.page,
 				// move to, merge to, redirect to
 				target : token.parameters[3]
-			}));
+			});
+			item_list.push(item);
 
 			// if (token.parameters.multi) item = [ item ];
 			for (var index = 2; index < 9
 			//
 			&& token.parameters['date' + index]; index++) {
-				item_list.push(
-				// TODO: remove duplicate records
-				wiki_API.parse.add_parameters_to_template_object(null, {
+				item = wiki_API.parse.add_parameters_to_template_object(null, {
 					date : token.parameters['date' + index],
 					result : token.parameters['result' + index] || '保留',
 					page : token.parameters['page' + index],
 					target : token.parameters['target' + index]
-				}));
+				});
+				item_list.push();
 				if (index > 5) {
 					library_namespace.warn('parse_Old_vfd_multi: '
 							+ wiki_API.title_link_of(page_data)
@@ -568,26 +556,42 @@ function module_code(library_namespace) {
 			// return to_exit;
 		});
 
-		if (options.unique)
+		// if (page_data.title.includes('')) console.log(item_list);
+
+		if (options.unique) {
+			// remove duplicate records
 			item_list = Old_vfd_multi__unique_item_list(item_list);
+		}
+
+		if (options.using_data) {
+			item_list.page_data = page_data;
+		} else if (page_data.title) {
+			// normalized page title
+			item_list.page_title = page_data.title;
+		}
+		if (Article_history_items.length > 0)
+			item_list.Article_history_items = Article_history_items;
 
 		return item_list;
 	}
 
 	function Old_vfd_multi__unique_item_list(item_list) {
-		var key_hash = Object.creatc(null);
+		var key_hash = Object.create(null);
 
 		function key_filter(item) {
-			var key = [ CeL.Julian_day(item.date.to_Date()),
-					text_of_Hat_flag(item.result),
-					wiki_API.title_of(item.date.page) ].join('|');
+			if (!item)
+				return;
+			var key = [ item.date && CeL.Julian_day(item.date.to_Date()),
+					text_of_Hat_flag(item.result, true),
+					wiki_API.title_of(item.page) ].join('|');
+			// if (item.date === '') console.log(key);
 			if (!(key in key_hash)) {
 				key_hash[key] = item;
 				return true;
 			}
 		}
 
-		return unique_item_list.filter(key_filter);
+		return item_list.filter(key_filter);
 	}
 
 	function Old_vfd_multi__item_list_to_template_object(item_list, options,
