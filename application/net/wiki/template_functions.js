@@ -583,7 +583,7 @@ function module_code(library_namespace) {
 				return;
 			var key = [ item.date && CeL.Julian_day(item.date.to_Date()),
 					text_of_Hat_flag(item.result, true),
-					wiki_API.title_of(item.page) ].join('|');
+					wiki_API.title_of(item.page), item.target ].join('|');
 			// if (item.date === '') console.log(key);
 			if (!(key in key_hash)) {
 				key_hash[key] = item;
