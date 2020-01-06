@@ -138,7 +138,11 @@ function module_code(library_namespace) {
 				// e.g., 连载[中], [已]完成
 				status : html.between('og:novel:status" content="', '"'),
 				category : html.between('og:novel:category" content="', '"'),
-				image : html.between('og:image" content="', '"'),
+				// https://www.booktxt.net/: '<div id="fmimg">'
+				image : html.between('<div id="fmimg">', '</div>').between(
+						'<img src="', '"')
+						// general
+						|| html.between('og:image" content="', '"'),
 				last_update :
 				//
 				html.between('og:novel:update_time" content="', '"')
@@ -287,6 +291,11 @@ function module_code(library_namespace) {
 				}
 				delete this[KEY_interval_cache];
 			}
+
+			if (this.remove_ads) {
+				text = this.remove_ads(text);
+			}
+			// console.log(text);
 
 			this.add_ebook_chapter(work_data, chapter_NO, {
 				title : chapter_data.part_title,
