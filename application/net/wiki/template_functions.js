@@ -520,6 +520,8 @@ function module_code(library_namespace) {
 			if (!(token.name in Old_vfd_multi__names))
 				return;
 
+			// console.log(token.toString());
+
 			// {{Old vfd multi|提刪日期|處理結果|page=頁面名稱}}
 			var result = token.parameters[2];
 			result = normalize_result_flag(result_flags__Old_vfd_multi, result)
@@ -545,7 +547,7 @@ function module_code(library_namespace) {
 					page : token.parameters['page' + index],
 					target : token.parameters['target' + index]
 				});
-				item_list.push();
+				item_list.push(item);
 				if (index > 5) {
 					library_namespace.warn('parse_Old_vfd_multi: '
 							+ wiki_API.title_link_of(page_data)
