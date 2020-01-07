@@ -1533,7 +1533,7 @@ function module_code(library_namespace) {
 				contents = contents.replace(/ (src|href)="([^"]+)"/ig,
 				//
 				function(all, attribute_name, url) {
-					if (/^\s*data:/.test(url)) {
+					if (/^\s*(data|mailto):/.test(url)) {
 						// https://en.wikipedia.org/wiki/Data_URI_scheme
 						library_namespace.log([ 'check_text: ', {
 							T : [ '跳過資料 URI scheme：%1', url ]
@@ -1543,7 +1543,14 @@ function module_code(library_namespace) {
 						return all;
 					}
 
-					url = decodeURI(url);
+					try {
+						url = decodeURI(url);
+					} catch (e) {
+						library_namespace.warn([ 'check_text: ', {
+							T : [ '網址無效：%1', url ]
+						} ]);
+						return all;
+					}
 					// url = library_namespace.HTML_to_Unicode(url);
 					// e.g.,
 					// https://ck101.com/forum.php?mod=viewthread&tid=4016100
