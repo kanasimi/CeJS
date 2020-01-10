@@ -507,7 +507,9 @@ function module_code(library_namespace) {
 			if (_item_list) {
 				_item_list.forEach(function(item) {
 					Article_history_items.push(item);
-					if (item.action !== 'AFD' && item.action !== 'CSD')
+					// allow `action=afd`
+					var action = item.action && item.action.toUpperCase();
+					if (action !== 'AFD' && action !== 'CSD')
 						return;
 
 					item.date = item.date.to_Date().format('%Y/%2m/%2d');
@@ -744,7 +746,8 @@ function module_code(library_namespace) {
 				var NO_to_delete = [], last_need_preserve;
 				item_list.forEach(function(item, index) {
 					++index;
-					if (item.action === 'AFD')
+					var action = item.action && item.action.toUpperCase();
+					if (action === 'AFD')
 						NO_to_delete.push(index);
 					else
 						last_need_preserve = index;
@@ -756,12 +759,14 @@ function module_code(library_namespace) {
 				}
 
 				if (NO_to_delete.length === 0) {
-					library_namespace.warn('replace_Old_vfd_multi: '
-							+ 'Should find {{' + Article_history__main_name
-							+ '}} action=AFD, but no {{'
-							+ Article_history__main_name
-							+ '}} action=AFD found:');
-					console.warn(token);
+					if (!replaced) {
+						library_namespace.warn('replace_Old_vfd_multi: '
+								+ 'Should find {{' + Article_history__main_name
+								+ '}} action=AFD, but no {{'
+								+ Article_history__main_name
+								+ '}} action=AFD found:');
+						console.warn(token);
+					}
 					return;
 				}
 
