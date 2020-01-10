@@ -507,8 +507,9 @@ function module_code(library_namespace) {
 			if (_item_list) {
 				_item_list.forEach(function(item) {
 					Article_history_items.push(item);
+					var action = item.action
 					// allow `action=afd`
-					var action = item.action && item.action.toUpperCase();
+					&& item.action.toString().toUpperCase();
 					if (action !== 'AFD' && action !== 'CSD')
 						return;
 
@@ -746,7 +747,9 @@ function module_code(library_namespace) {
 				var NO_to_delete = [], last_need_preserve;
 				item_list.forEach(function(item, index) {
 					++index;
-					var action = item.action && item.action.toUpperCase();
+					var action = item.action
+					// allow `action=afd`
+					&& item.action.toString().toUpperCase();
 					if (action === 'AFD')
 						NO_to_delete.push(index);
 					else
