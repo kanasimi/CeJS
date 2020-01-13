@@ -1037,9 +1037,13 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// TODO: 模組|模塊|模块 → Module talk
+
 		return namespace + ' talk:' + matched[2];
 	}
 
+	var PATTERN_talk_prefix = /^(?:Talk|討論|讨论):/i;
+	var PATTERN_talk_namespace_prefix = /^([a-z _]+)[ _]talk:/i;
 	function talk_page_to_main(page_title) {
 		if (wiki_API.is_page_data(page_title)) {
 			page_title = wiki_API.title_of(page_title);
@@ -1050,9 +1054,14 @@ function module_code(library_namespace) {
 		if (!page_title || typeof page_title !== 'string')
 			return page_title;
 
-		// TODO: 需另外處理非 "talk" 說明頁。 e.g., "討論:..."
-		return /^Talk:/i.test(page_title) ? page_title.replace(/^Talk:/i, '')
-				: page_title.replace(/^([a-z _]+)[ _]talk:/i, '$1:');
+		if (PATTERN_talk_prefix.test(page_title))
+			return page_title.replace(PATTERN_talk_prefix, '');
+
+		if (PATTERN_talk_namespace_prefix.test(page_title))
+			return page_title.replace(PATTERN_talk_namespace_prefix, '$1:');
+
+		// 另外處理非 "talk" 說明頁。 e.g., "xxx討論:..."
+		return page_title.replace(/^([^:\n]+?)(?:討論|讨论):/i, '$1:');
 	}
 
 	// ------------------------------------------------------------------------
@@ -3213,6 +3222,7 @@ function module_code(library_namespace) {
 	 *            page data list
 	 */
 	wiki_API.prototype.work = function(config, pages) {
+		// console.log(JSON.stringify(pages));
 		if (typeof config === 'function')
 			config = {
 				each : config
@@ -3973,6 +3983,9 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// console.log(JSON.stringify(pages));
+		// console.log(pages===target);
+		// console.log(JSON.stringify(target));
 		if (Array.isArray(target)) {
 			// Split when length is too long. 分割過長的 list。
 			setup_target = (function() {
