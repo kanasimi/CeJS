@@ -1037,8 +1037,8 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// TODO: 模組|模塊|模块 → Module talk
-
+		// 模組|模塊|模块 → Module talk
+		namespace = namespace.replace(/^(?:模組|模塊|模块)$/, 'Module');
 		return namespace + ' talk:' + matched[2];
 	}
 
