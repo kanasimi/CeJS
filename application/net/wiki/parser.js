@@ -1066,16 +1066,19 @@ function module_code(library_namespace) {
 		// console.log(token);
 
 		if (token.type === 'transclusion' && wiki_API.template_functions) {
-			var expand_template = wiki_API.template_functions.expand_template;
-			if (expand_template && (token.name in expand_template)) {
-				token = expand_template[token.name](token, options);
-			}
-			expand_template = wiki_API.template_functions[wiki_API
-					.site_name(session_of_options(options))];
+			var expand_template = wiki_API.template_functions[wiki_API
+					.site_name(wiki_API.session_of_options(options))];
 			expand_template = expand_template
 					&& expand_template.expand_template;
 			if (expand_template && (token.name in expand_template)) {
-				token = expand_template[token.name](token, options);
+				token = parse_wikitext(expand_template[token.name](token,
+						options));
+			} else {
+				expand_template = wiki_API.template_functions.expand_template;
+				if (expand_template && (token.name in expand_template)) {
+					token = parse_wikitext(expand_template[token.name](token,
+							options));
+				}
 			}
 		}
 

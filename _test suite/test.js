@@ -3272,6 +3272,8 @@ function test_wiki() {
 		assert(["[[#-%7b三宝颜共和国%7d-|-{三宝颜共和国}-]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-1');
 		wikitext = "[[A]]-{[[:三宝颜共和国]]}-BB ";
 		assert(["[[#A-%7b三宝颜共和国%7d-BB|A-{三宝颜共和国}-BB]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-2');
+		wikitext = "{{al|A|B}}";
+		assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #4-1');
 
 		wikitext = '#1\n#2\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #1');
