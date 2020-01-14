@@ -345,7 +345,8 @@ function module_code(library_namespace) {
 	function set_raw_data(raw_data, options) {
 		options = library_namespace.setup_options(options);
 
-		// console.log(JSON.stringify(raw_data));
+		// console.trace(JSON.stringify(raw_data));
+		// console.trace(JSON.stringify(options));
 		if (!raw_data) {
 			if (!options.id_type) {
 				options.id_type = 'workid';
@@ -409,7 +410,11 @@ function module_code(library_namespace) {
 					spine : [ {
 						itemref : null,
 						idref : 'id'
-					} ] && []
+					} ] && [],
+					// https://medium.com/parenting-tw/從零開始的電子書-epub-壹-72da1aca6571
+					// 設置電子書的頁面方向
+					'page-progression-direction' : typeof options.vertical_writing==='string'?/rl$/
+							.test(options.vertical_writing):options.vertical_writing?"rtl":"ltr"
 				} ],
 				// determine version.
 				// http://www.idpf.org/epub/31/spec/
@@ -544,6 +549,26 @@ function module_code(library_namespace) {
 		this.resources = resources.filter(function(resource) {
 			return library_namespace.is_Object(resource);
 		}, this);
+
+		if (false && options.vertical_writing) {
+			var mode = typeof options.vertical_writing === 'string' ? /^(?:lr|rl)$/
+					.test(options.vertical_writing) ? 'vertical-'
+					+ options.vertical_writing : options.vertical_writing
+					// e.g., true
+					: 'vertical-rl';
+			// another method: <html dir="rtl">
+			this.add({
+				// title : 'mainstyle',
+				file : 'main_style.css'
+			}, 'html { '
+			// https://en.wikipedia.org/wiki/Horizontal_and_vertical_writing_in_East_Asian_scripts
+			// 東亞文字排列方向 垂直方向自右而左的書寫方式。即 top-bottom-right-left
+			+ 'writing-mode:' + mode + ';'
+			// https://blog.tommyku.com/blog/how-to-make-epubs-with-vertical-layout/
+			+ '-epub-writing-mode:' + mode + ';'
+			// for Kindle Readers (kindlegen)?
+			+ '-webkit-writing-mode:' + mode + '; }');
+		}
 
 		// rebuild_index_of_id.call(this);
 		// rebuild_index_of_id.call(this, true);

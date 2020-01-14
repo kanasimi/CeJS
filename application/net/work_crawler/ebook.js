@@ -201,7 +201,7 @@ function module_code(library_namespace) {
 			return text;
 		};
 
-		// CeL.application.storage.EPUB
+		// library_namespace.log('using CeL.application.storage.EPUB');
 		var ebook = new library_namespace.EPUB(ebook_directory, {
 			rebuild : this.hasOwnProperty('rebuild_ebook')
 			// rebuild: 重新創建, 不使用舊的.opf資料. start over, re-create
@@ -215,6 +215,7 @@ function module_code(library_namespace) {
 			language : this.convert_to_TW ? library_namespace.gettext
 					.to_standard('cmn-Hant-TW')
 					&& 'zh-cmn-Hant-TW' : work_data.language || this.language,
+			vertical_writing : this.vertical_writing,
 			// 作品內容最後編輯時間。
 			modified : work_data.last_update_Date
 		}), subject = [];
@@ -260,11 +261,14 @@ function module_code(library_namespace) {
 			ebook.set_cover(this.full_URL(work_data.image));
 		}
 
+		// library_namespace.log('set vertical_writing');
 		if (this.vertical_writing) {
 			var mode = typeof this.vertical_writing === 'string' ? /^(?:lr|rl)$/
 					.test(this.vertical_writing) ? 'vertical-'
 					+ this.vertical_writing : this.vertical_writing
+					// e.g., true
 					: 'vertical-rl';
+			// another method: <html dir="rtl">
 			ebook.add({
 				// title : 'mainstyle',
 				file : 'main_style.css'
