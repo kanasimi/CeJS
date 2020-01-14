@@ -211,8 +211,6 @@ function module_code(library_namespace) {
 
 	// 維基姊妹項目
 	// TODO: 各種 type 間的轉換: 先要能擷取出 language code + family
-	// @see language_to_site_name()
-	//
 	//
 	// type: 'API', 'db', 'site', 'link', 'dump', ...
 	// API URL (default): e.g., 'https://www.wikidata.org/w/api.php'
@@ -240,7 +238,7 @@ function module_code(library_namespace) {
 	// [[meta:List of Wikimedia projects by size]]
 	// family: 'wikipedia' (default), 'news', 'source', 'books', 'quote', ...
 	function get_project(language, family, type) {
-		// @see CeL.wiki.site_name(wiki)
+		// @see CeL.wiki.site_name(wiki), language_to_site_name(wiki)
 		TODO;
 	}
 
