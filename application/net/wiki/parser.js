@@ -1330,8 +1330,10 @@ function module_code(library_namespace) {
 				// @see wiki_toString.convert
 				// return token.join(';');
 				token.toString = function() {
-					return section_link_START_CONVERT + this.join(';')
-							+ section_link_END_CONVERT;
+					return section_link_START_CONVERT
+					// + this.join(';')
+					// e.g., '==-{[[:三宝颜共和国]]}-=='
+					+ this.converted + section_link_END_CONVERT;
 				};
 			} else if (token.original_type) {
 				// revert type
