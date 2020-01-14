@@ -215,6 +215,8 @@ function module_code(library_namespace) {
 		&& !this.is_wikidata) {
 			setup_API_language(this /* session */, wiki_API.language);
 		}
+
+		this.siteinfo();
 	}
 
 	/**
@@ -228,6 +230,17 @@ function module_code(library_namespace) {
 	function is_wiki_API(value) {
 		return value
 				&& ((value instanceof wiki_API) || value.API_URL && value.token);
+	}
+
+	// extract session from options, get_session_from_options
+	// var session = session_of_options(options);
+	function session_of_options(options) {
+		var session = options
+		// 此時嘗試從 options[KEY_SESSION] 取得 session。
+		&& options[KEY_SESSION] || options;
+		if (is_wiki_API(session)) {
+			return session;
+		}
 	}
 
 	// @inner TODO: MUST re-design
@@ -309,12 +322,10 @@ function module_code(library_namespace) {
 	function API_URL_of_options(options) {
 		// library_namespace.debug('options:', 0, 'API_URL_of_options');
 		// console.log(options);
-		if (!options) {
-			return;
+		var session = session_of_options(options);
+		if (session) {
+			return session.API_URL;
 		}
-		return options.API_URL
-		// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
-		|| options[KEY_SESSION] && options[KEY_SESSION].API_URL;
 	}
 
 	/**
@@ -711,10 +722,11 @@ function module_code(library_namespace) {
 	// @see set_default_language(), language_to_site_name()
 	function setup_API_language(session, language_code) {
 		if (PATTERN_PROJECT_CODE_i.test(language_code)
-		// 不包括 test2.wikipedia.org 之類。
-		&& !/test|wiki/i.test(language_code)
-		// 排除 'Talk', 'User', 'Help', 'File', ...
-		&& !get_namespace.pattern.test(language_code)) {
+				// 不包括 test2.wikipedia.org 之類。
+				&& !/test|wiki/i.test(language_code)
+				// 排除 'Talk', 'User', 'Help', 'File', ...
+				&& !(session.namespace_pattern || get_namespace.pattern)
+						.test(language_code)) {
 			// [[m:List of Wikipedias]]
 			session.language
 			// e.g., 'zh-classical', 'zh-yue', 'zh-min-nan', 'simple'
@@ -745,7 +757,9 @@ function module_code(library_namespace) {
 			// {Integer}namespace
 			return namespace;
 		}
-		var namespace_hash = options.namespace_hash || get_namespace.hash;
+		var session = session_of_options(options);
+		var namespace_hash = options.namespace_hash || session
+				&& session.namespace_hash || get_namespace.hash;
 
 		if (Array.isArray(namespace)) {
 			namespace = namespace.join('|');
@@ -753,7 +767,10 @@ function module_code(library_namespace) {
 
 		if (typeof namespace === 'string') {
 			var list = [];
-			namespace.replace(/[_\s]+/g, '_').toLowerCase()
+			namespace = namespace_hash === get_namespace.hash ? namespace
+					.replace(/[_\s]+/g, '_') : namespace
+					.replace(/[_\s]+/g, ' ');
+			namespace.toLowerCase()
 			// for ',Template,Category', ';Template;Category',
 			// 'main|module|template|category'
 			// https://www.mediawiki.org/w/api.php?action=help&modules=main#main.2Fdatatypes
@@ -785,9 +802,15 @@ function module_code(library_namespace) {
 					list.push(0);
 					return;
 				}
-				library_namespace.warn('get_namespace: Invalid namespace: ['
-				//
-				+ n + '] @ namespace list ' + namespace);
+				if (namespace_hash === get_namespace.hash) {
+					library_namespace.debug('Invalid namespace: ['
+					//
+					+ n + '] @ namespace list ' + namespace,
+					//
+					1, 'get_namespace');
+				} else {
+					list.push(0);
+				}
 			});
 			if (list.length === 0) {
 				return;
@@ -914,7 +937,7 @@ function module_code(library_namespace) {
 	get_namespace.name_of_NO = [];
 
 	/**
-	 * build `get_namespace.pattern`
+	 * build session.namespace_pattern || get_namespace.pattern
 	 * 
 	 * @inner
 	 */
@@ -939,9 +962,10 @@ function module_code(library_namespace) {
 		if (!NS)
 			return '';
 
-		if (NS === get_namespace.hash.wikipedia) {
-			var session = options[KEY_SESSION] || options;
-			if (is_wiki_API(session) && session.family) {
+		var session = session_of_options(options);
+		if (NS === session && session.namespace_hash ? session.namespace_hash.wikipedia
+				: get_namespace.hash.wikipedia) {
+			if (session && session.family) {
 				return wiki_API.upper_case_initial(
 				// e.g., commons, wikidata
 				get_wikimedia_project_name(session) || session.family);
@@ -950,7 +974,9 @@ function module_code(library_namespace) {
 			return 'Wikipedia';
 		}
 
-		return wiki_API.upper_case_initial(wiki_API.namespace.name_of_NO[NS]);
+		var name_of_NO = session && session.name_of_NO
+				|| wiki_API.namespace.name_of_NO;
+		return wiki_API.upper_case_initial(name_of_NO[NS]);
 	}
 
 	// CeL.wiki.namespace.name_of(NS, session)
@@ -964,62 +990,114 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String}title without namespace
 	 */
-	function remove_namespace(page_title) {
+	function remove_namespace(page_title, options) {
 		page_title = wiki_API.normalize_title(page_title);
 		if (typeof page_title !== 'string') {
 			library_namespace.debug(page_title, 5, 'remove_namespace');
 			return page_title;
 		}
-		var matched = page_title.match(get_namespace.pattern);
+		var session = session_of_options(options);
+		var namespace_pattern = session && session.namespace_pattern
+				|| get_namespace.pattern;
+		var matched = page_title.match(namespace_pattern);
 		library_namespace.debug('Test ' + wiki_API.title_link_of(page_title)
-				+ ', get [' + matched + '] using pattern '
-				+ get_namespace.pattern, 4, 'remove_namespace');
+				+ ', get [' + matched + '] using pattern ' + namespace_pattern,
+				4, 'remove_namespace');
 		if (matched)
 			return (matched ? matched[2] : page_title).trim();
 		return page_title;
 	}
 
-	function is_talk_namespace(namespace) {
-		var n;
+	function is_talk_namespace(namespace, options) {
+		var session = session_of_options(options);
 		if (typeof namespace === 'string') {
-			// treat ((namespace)) as page title
-			// get namespace only. e.g., 'wikipedia:sandbox' → 'wikipedia'
-			namespace = namespace.replace(/:.*$/, '');
-			if (isNaN(namespace) && !/^(?:[a-z _]+[ _])?talk$/i.test(namespace))
-				return false;
+			namespace = wiki_API.normalize_title(namespace).toLowerCase();
+			var name_of_NO = session && session.name_of_NO
+					|| wiki_API.namespace.name_of_NO;
+			if (session && session.namespace_pattern) {
+				if (namespace.includes(':')) {
+					namespace = session.match(session.namespace_pattern);
+					if (!namespace) {
+						// assert: main
+						return false;
+					}
+					namespace = name_of_NO[namespace[1]];
+				} else {
+					namespace = name_of_NO[namespace];
+				}
+			} else {
+				// treat ((namespace)) as page title
+				// get namespace only. e.g., 'wikipedia:sandbox' → 'wikipedia'
+				if (namespace.includes(':')) {
+					namespace = namespace.replace(/:.*$/, '');
+					if (namespace in name_of_NO)
+						namespace = name_of_NO[namespace];
+					else
+						return /^(?:[a-z _]+[ _])?talk$/i.test(namespace);
+				}
+				namespace = +namespace;
+			}
 		}
 
 		if (typeof namespace === 'number') {
+			// 單數: talk page
 			return namespace > 0 && namespace % 2 === 1;
 		}
-
-		n = get_namespace.name_of_NO[get_namespace(namespace)];
-		// {String|Undefined}n
-		return n
-		// ((namespace)) is valid namespace,
-		// {String}n is this normalized namespace
-		&& n.endsWith('talk');
 	}
 
 	// 討論頁面不應包含 [[Special talk:*]]。
-	function to_talk_page(page_title) {
-		var is_not_talk_ns;
+	function to_talk_page(page_title, options) {
+		var namespace;
 		if (wiki_API.is_page_data(page_title)) {
-			var page_data = page_title;
-			page_title = wiki_API.title_of(page_data);
-			if (is_talk_namespace(page_data.ns))
-				return page_title;
-			is_not_talk_ns = true;
+			// assert: {Number}namespace
+			namespace = page_title.ns;
+			page_title = wiki_API.title_of(page_title);
 
 		} else {
 			page_title = wiki_API.normalize_title(page_title);
+			// assert: {Number|Undefined}namespace
+			namespace = wiki_API.namespace(page_title, options);
 		}
 
-		if (!page_title || typeof page_title !== 'string')
+		if (!page_title || typeof page_title !== 'string' || namespace < 0)
 			return;
 
+		// console.log([ namespace, page_title ]);
+		if (namespace % 2 === 1/* is_talk_namespace(namespace, options) */) {
+			CeL.debug('Is already talk page: ' + page_title, 3, 'to_talk_page');
+			return page_title;
+		}
+
+		var session = session_of_options(options);
+		var name_of_NO = session && session.name_of_NO
+				|| wiki_API.namespace.name_of_NO;
+		if (namespace >= 0) {
+			namespace = name_of_NO[namespace + 1];
+			if (!namespace)
+				return;
+			// 剝離 namespace。
+			page_title = page_title.replace(/^[^:]+:/, '');
+			page_title = namespace + ':' + page_title;
+			if (name_of_NO === wiki_API.namespace.name_of_NO) {
+				page_title = wiki_API.normalize_title(page_title);
+			}
+			return page_title;
+		}
+
+		// assert: namespace === undefined
+
+		// 模組|模塊|模块 → Module talk
+		if (/^(Special|特殊|特別|Media|媒體|媒体|メディア|Topic|話題|话题):/i.test(page_title)) {
+			// There is no talk page for Topic or virtual namespaces.
+			return;
+		}
+
+		// for zhwiki only
+		page_title = page_title.replace(/^(?:模組|模塊|模块):/i, 'Module:');
+
 		var matched = page_title
-				.match(/^([^:]+):(.+)$/ && /^([a-z _]+):(.+)$/i), namespace;
+				.match(/^([^:]+):(.+)$/ && /^([a-z _]+):(.+)$/i);
+		// console.log([matched,page_title]);
 		if (!matched
 				|| /^[a-z _]+$/i.test(namespace = matched[1])
 				&& !(namespace.toLowerCase().replace(/ /g, '_') in get_namespace.hash)) {
@@ -1027,36 +1105,54 @@ function module_code(library_namespace) {
 			return 'Talk:' + page_title;
 		}
 
-		if (!is_not_talk_ns && is_talk_namespace(namespace)) {
-			CeL.debug('Is already talk page: ' + page_title, 3, 'to_talk_page');
-			return page_title;
-		}
-
-		if (/^(Special|特殊|特別|Media|媒體|媒体|メディア|Topic|話題|话题)$/.test(namespace)) {
-			// There is no talk page for Topic or virtual namespaces.
-			return;
-		}
-
-		// 模組|模塊|模块 → Module talk
-		namespace = namespace.replace(/^(?:模組|模塊|模块)$/, 'Module');
 		return namespace + ' talk:' + matched[2];
 	}
 
-	var PATTERN_talk_prefix = /^(?:Talk|討論|讨论):/i;
-	var PATTERN_talk_namespace_prefix = /^([a-z _]+)[ _]talk:/i;
-	function talk_page_to_main(page_title) {
+	function talk_page_to_main(page_title, options) {
+		var namespace;
 		if (wiki_API.is_page_data(page_title)) {
+			// assert: {Number}namespace
+			namespace = page_title.ns;
 			page_title = wiki_API.title_of(page_title);
+
 		} else {
 			page_title = wiki_API.normalize_title(page_title);
+			// assert: {Number|Undefined}namespace
+			namespace = wiki_API.namespace(page_title, options);
 		}
 
 		if (!page_title || typeof page_title !== 'string')
 			return page_title;
 
+		if (namespace <= 0 || namespace % 2 === 0) {
+			CeL.debug('Is already NOT talk page: ' + page_title, 3,
+					'to_talk_page');
+			return page_title;
+		}
+
+		var session = session_of_options(options);
+		var name_of_NO = session && session.name_of_NO
+				|| wiki_API.namespace.name_of_NO;
+		if (namespace > 0) {
+			namespace = name_of_NO[namespace - 1];
+			// 剝離 namespace。
+			page_title = page_title.replace(/^[^:]+:/, '');
+			if (namespace) {
+				page_title = namespace + ':' + page_title;
+				if (name_of_NO === wiki_API.namespace.name_of_NO) {
+					page_title = wiki_API.normalize_title(page_title);
+				}
+			}
+			return page_title;
+		}
+
+		// assert: namespace === undefined
+
+		var PATTERN_talk_prefix = /^(?:Talk|討論|讨论):/i;
 		if (PATTERN_talk_prefix.test(page_title))
 			return page_title.replace(PATTERN_talk_prefix, '');
 
+		var PATTERN_talk_namespace_prefix = /^([a-z _]+)[ _]talk:/i;
 		if (PATTERN_talk_namespace_prefix.test(page_title))
 			return page_title.replace(PATTERN_talk_namespace_prefix, '$1:');
 
@@ -1603,8 +1699,9 @@ function module_code(library_namespace) {
 			// e.g., 'zh:title'
 			// @see PATTERN_PROJECT_CODE_i
 			project_prefixed = /^ *[a-z]{2}[a-z\d\-]{0,14} *:/i.test(title)
-			// 排除 'Talk', 'User', 'Help', 'File', ...
-			&& !get_namespace.pattern.test(title);
+					// 排除 'Talk', 'User', 'Help', 'File', ...
+					&& !(session && session.namespace_pattern || get_namespace.pattern)
+							.test(title);
 			// escape 具有特殊作用的 title。
 			need_escape = PATTERN_category_prefix.test(title)
 			// 應允許非規範過之 title，如採用 File: 與 Image:, 檔案:。
@@ -4435,8 +4532,9 @@ function module_code(library_namespace) {
 	// TODO
 	// @see [[Special:Interwiki]] 跨維基資料 跨 wiki 字首
 	function adapt_site_configurations(session, configurations) {
-		console.log(configurations);
+		// console.log(configurations);
 		var site_configurations = session.configurations;
+		session.latest_site_configurations = configurations;
 		if (site_configurations === default_site_configurations) {
 			session.configurations = site_configurations
 			//
@@ -4447,7 +4545,7 @@ function module_code(library_namespace) {
 
 		var general = configurations.general;
 		if (general) {
-			// site_configurations.general=general;
+			// site_configurations.general = general;
 			'mainpage|sitename|linktrail|legaltitlechars|invalidusernamechars|case|lang|maxarticlesize|timezone|timeoffset|maxuploadsize'
 					.split('|').forEach(function(name) {
 						site_configurations[name] = general[name];
@@ -4473,7 +4571,36 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// --------------------------------------------------------------------
+
 		var namespaces = configurations.namespaces;
+		var namespacealiases = configurations.namespacealiases;
+		if (namespaces && namespacealiases) {
+			// create
+			// session.configurations[namespace_hash,name_of_NO,namespace_pattern]
+			var namespace_hash
+			// namespace_hash[namespace] = NO
+			= site_configurations.namespace_hash = Object.create(null);
+			site_configurations.name_of_NO = Object.create(null);
+			for ( var namespace_NO in namespaces) {
+				var namespace_data = namespaces[namespace_NO];
+				// namespace_data.canonical || namespace_data.content
+				var name = namespace_data['*'];
+				if (typeof name === 'string') {
+					site_configurations.name_of_NO[namespace_NO] = name;
+					namespace_hash[name.toLowerCase()] = namespace_NO;
+				}
+			}
+			namespacealiases
+					.forEach(function(namespace_data) {
+						namespace_hash[namespace_data['*'].toLowerCase()] = namespace_data.id;
+					});
+			site_configurations.namespace_pattern = generate_namespace_pattern(
+					namespace_hash, []);
+		}
+
+		// --------------------------------------------------------------------
+
 	}
 
 	// html to wikitext
@@ -5389,7 +5516,7 @@ function module_code(library_namespace) {
 		if (typeof options === 'string') {
 			return PATTERN_PROJECT_CODE.test(options) && options;
 		}
-		var session = options && options[KEY_SESSION],
+		var session = session_of_options(options),
 		// options.language 較 session 的設定優先。
 		language = options && options.language;
 		if (session) {
@@ -5446,6 +5573,7 @@ function module_code(library_namespace) {
 
 		BLANK_TOKEN : BLANK_TOKEN,
 
+		session_of_options : session_of_options,
 		setup_API_URL : setup_API_URL,
 		API_URL_of_options : API_URL_of_options,
 		is_api_and_title : is_api_and_title,
@@ -5483,8 +5611,8 @@ function module_code(library_namespace) {
 		namespace : get_namespace,
 		remove_namespace : remove_namespace,
 		is_talk_namespace : is_talk_namespace,
-		to_talk_page : to_talk_page,
 		talk_page_to_main : talk_page_to_main,
+		to_talk_page : to_talk_page,
 
 		file_pattern : file_pattern,
 

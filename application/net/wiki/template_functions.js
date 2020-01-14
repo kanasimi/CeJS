@@ -90,14 +90,17 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
+
 	function to_displayed_text(token, options) {
 		var token_name = token.name;
 		if (token_name in zhwiki_Al_names) {
-			return parse_zhwiki_Al_token(token, options);
+			return wiki_API
+					.section_link(expand_zhwiki_Al_token(token, options))[2];
 		}
 
 		if (token_name === 'A') {
-			return token.parameters[2] || token.parameters[1] || '';
+			return wiki_API.section_link(expand_zhwiki_A_token(token, options))[2];
 		}
 
 		return to_displayed_text.NOT_PARSED;
@@ -319,6 +322,21 @@ function module_code(library_namespace) {
 		return page_title_list;
 	}
 
+	function expand_zhwiki_Al_token(token, options) {
+		var page_title_list = parse_zhwiki_Al_token(token, options);
+		return page_title_list.map(function(title) {
+			return wiki_API.title_link_of(title);
+		}).join('、');
+	}
+
+	function expand_zhwiki_A_token(token, options) {
+		return '[[' + token.parameters[1]
+		//
+		+ (token.parameters.name ? '#' + token.parameters.name : '')
+		//
+		+ (token.parameters[2] ? '|' + token.parameters[2] : '') + ']]';
+	}
+
 	// https://zh.wikipedia.org/wiki/Template:TalkendH
 	// [0]: 正式名稱。
 	var result_flags__Hat = {
@@ -520,6 +538,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			// TODO: {{Drv-kept}}
 			if (!(token.name in Old_vfd_multi__names))
 				return;
 
@@ -830,6 +849,7 @@ function module_code(library_namespace) {
 		if (!item_list)
 			item_list = [];
 
+		// TODO: dykdate, itndate [[Module:Article history/config]]
 		for ( var key in token.parameters) {
 			var value = token.parameters[key];
 			var matched = key.match(/^action([1-9]\d?)(.*)?$/);
@@ -837,7 +857,7 @@ function module_code(library_namespace) {
 				if (library_namespace.is_digits(key)) {
 					// invalid numeral parameters
 					// e.g., [[Talk:香港國際機場]]
-					library_namespace.debug('Skip [' + key + ']: ' + value, 1,
+					library_namespace.debug('Skip [' + key + ']: ' + value, 3,
 							'parse_Article_history_token');
 				} else {
 					item_list[key] = value;
@@ -896,7 +916,11 @@ function module_code(library_namespace) {
 		zhwiki : {
 			Al : {
 				names : zhwiki_Al_names,
+				expand : expand_zhwiki_Al_token,
 				parse : parse_zhwiki_Al_token
+			},
+			A : {
+				expand : expand_zhwiki_A_token
 			}
 		},
 		Hat : {

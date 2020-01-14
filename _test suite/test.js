@@ -2865,6 +2865,7 @@ function test_wiki() {
 		[['Wikipedia talk:NAME', CeL.wiki.to_talk_page('Wikipedia:NAME')], 'wiki.to_talk_page #3'],
 		[['Wikipedia talk:NAME', CeL.wiki.to_talk_page('Wikipedia talk:NAME')], 'wiki.to_talk_page #4'],
 		[['Talk:ABC DEF: RRR', CeL.wiki.to_talk_page('ABC DEF: RRR')], 'wiki.to_talk_page #5'],
+		[['Module talk:NAME', CeL.wiki.to_talk_page('模块:NAME')], 'wiki.to_talk_page #6'],
 		[!CeL.wiki.to_talk_page('topic:NAME'), 'wiki.to_talk_page: There is no talk page for Topic.'],
 		[['NAME', CeL.wiki.talk_page_to_main('NAME')], 'wiki.talk_page_to_main #1'],
 		[['NAME', CeL.wiki.talk_page_to_main('talk:NAME')], 'wiki.talk_page_to_main #2'],
@@ -3267,6 +3268,10 @@ function test_wiki() {
 		// [[w:zh:Special:Permalink/46747219]]
 		wikitext = " [[:File:title.jpg]] [[:File:title.jpg|abc]] [[:File:title.jpg| 20px |def]]";
 		assert(["[[#File:title.jpg abc 20px %7cdef|File:title.jpg abc 20px &#124;def]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #2-1');
+		wikitext = "-{[[:三宝颜共和国]]}-";
+		assert(["[[#三宝颜共和国|三宝颜共和国]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-1');
+		wikitext = "[[A]]-{[[:三宝颜共和国]]}-BB ";
+		assert(["[[#A三宝颜共和国BB|A三宝颜共和国BB]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-2');
 
 		wikitext = '#1\n#2\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #1');

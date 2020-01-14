@@ -1063,6 +1063,7 @@ function module_code(library_namespace) {
 		if (typeof options.preprocess_section_link_token === 'function') {
 			token = options.preprocess_section_link_token(token);
 		}
+		// console.log(token);
 
 		if (token.type === 'tag'/* || token.type === 'tag_single' */) {
 			// token: [ tag_attributes, tag_inner ]
@@ -1094,6 +1095,12 @@ function module_code(library_namespace) {
 					options);
 			new_token.tag = token.tag;
 			return new_token;
+		}
+
+		if (token.type === 'convert') {
+			// e.g., '==-{[[:三宝颜共和国]]}-=='
+			token = token.converted;
+			// 接下來交給 `token.type === 'link'` 處理。
 		}
 
 		if ((token.type === 'file' || token.type === 'category')
