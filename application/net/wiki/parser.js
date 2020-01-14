@@ -1065,6 +1065,20 @@ function module_code(library_namespace) {
 		}
 		// console.log(token);
 
+		if (token.type === 'transclusion' && wiki_API.template_functions) {
+			var expand_template = wiki_API.template_functions.expand_template;
+			if (expand_template && (token.name in expand_template)) {
+				token = expand_template[token.name](token, options);
+			}
+			expand_template = wiki_API.template_functions[wiki_API
+					.site_name(session_of_options(options))];
+			expand_template = expand_template
+					&& expand_template.expand_template;
+			if (expand_template && (token.name in expand_template)) {
+				token = expand_template[token.name](token, options);
+			}
+		}
+
 		if (token.type === 'tag'/* || token.type === 'tag_single' */) {
 			// token: [ tag_attributes, tag_inner ]
 			if (token.tag === 'nowiki') {
@@ -1131,18 +1145,13 @@ function module_code(library_namespace) {
 		}
 
 		// 這邊僅處理常用模板。需要先保證這些模板存在，並且具有預期的功能。
-		// 其他常用 template 可加在 wiki.template_functions.to_displayed_text 中。
+		// 其他常用 template 可加在
+		// wiki.template_functions[wiki_project].expand_template 中。
 		//
 		// 模板這個部分除了解析模板之外沒有好的方法。
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {
-			if (wiki_API.to_displayed_text) {
-				var new_token = wiki_API.to_displayed_text(token, options);
-				if (new_token !== wiki_API.to_displayed_text.NOT_PARSED)
-					return new_token;
-			}
-
 			// 各語言 wiki 常用 template-linking templates:
 			// {{Tl}}, {{Tlx}}, {{Tls}}, {{T1}}, ...
 			if (/^(?:T[l1n][a-z]{0,3}[23]?)$/.test(token.name)) {
@@ -1379,6 +1388,9 @@ function module_code(library_namespace) {
 			title : section_title,
 			// only for debug
 			// parsed_title : parsed_title,
+
+			// anchor : anchor,
+			// display_text : display_text,
 			toString : section_link_toString
 		});
 		return link;

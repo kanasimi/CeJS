@@ -129,40 +129,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// 維基姊妹項目
-	// TODO: 各種 type 間的轉換: 先要能擷取出 language code + family
-	// @see language_to_site_name()
-	//
-	//
-	// type: 'API', 'db', 'site', 'link', 'dump', ...
-	// API URL (default): e.g., 'https://www.wikidata.org/w/api.php'
-	//
-	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
-	// site: e.g., 'zhwiki'. `.wikiid` @ siteinfo
-	// @see wikidatawiki_p.wb_items_per_site.ips_site_id
-	//
-	// [[en:Help:Interwikimedia_links]] [[Special:Interwiki]]
-	// https://zh.wikipedia.org/wiki/Special:GoToInterwiki/testwiki:
-	// link prefix: e.g., 'zh:n:' for zh.wikinews
-	//
-	// https://dumps.wikimedia.org/backup-index.html
-	// dump: e.g., 'zhwikinews'
-	//
-	// SHOW DATABASES;
-	// db: e.g., 'zhwiki_p'
-	//
-	//
-	// language (or family/project): default language: wiki_API.language
-	// e.g., 'en', 'zh-classical', 'ja', ...
-	//
-	// project = language_code.family
-	//
-	// [[meta:List of Wikimedia projects by size]]
-	// family: 'wikipedia' (default), 'news', 'source', 'books', 'quote', ...
-	function get_project(language, family, type) {
-		TODO;
-	}
-
 	/** {String} old key: 'wiki' */
 	var KEY_SESSION = 'session', KEY_HOST_SESSION = 'host';
 
@@ -241,6 +207,41 @@ function module_code(library_namespace) {
 		if (is_wiki_API(session)) {
 			return session;
 		}
+	}
+
+	// 維基姊妹項目
+	// TODO: 各種 type 間的轉換: 先要能擷取出 language code + family
+	// @see language_to_site_name()
+	//
+	//
+	// type: 'API', 'db', 'site', 'link', 'dump', ...
+	// API URL (default): e.g., 'https://www.wikidata.org/w/api.php'
+	//
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
+	// site: e.g., 'zhwiki'. `.wikiid` @ siteinfo
+	// @see wikidatawiki_p.wb_items_per_site.ips_site_id
+	//
+	// [[en:Help:Interwikimedia_links]] [[Special:Interwiki]]
+	// https://zh.wikipedia.org/wiki/Special:GoToInterwiki/testwiki:
+	// link prefix: e.g., 'zh:n:' for zh.wikinews
+	//
+	// https://dumps.wikimedia.org/backup-index.html
+	// dump: e.g., 'zhwikinews'
+	//
+	// SHOW DATABASES;
+	// db: e.g., 'zhwiki_p'
+	//
+	//
+	// language (or family/project): default language: wiki_API.language
+	// e.g., 'en', 'zh-classical', 'ja', ...
+	//
+	// project = language_code.family
+	//
+	// [[meta:List of Wikimedia projects by size]]
+	// family: 'wikipedia' (default), 'news', 'source', 'books', 'quote', ...
+	function get_project(language, family, type) {
+		// @see CeL.wiki.site_name(wiki)
+		TODO;
 	}
 
 	// @inner TODO: MUST re-design

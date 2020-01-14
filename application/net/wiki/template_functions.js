@@ -90,29 +90,6 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
-
-	function to_displayed_text(token, options) {
-		var token_name = token.name;
-		if (token_name in zhwiki_Al_names) {
-			return wiki_API
-					.section_link(expand_zhwiki_Al_token(token, options))[2];
-		}
-
-		if (token_name === 'A') {
-			return wiki_API.section_link(expand_zhwiki_A_token(token, options))[2];
-		}
-
-		return to_displayed_text.NOT_PARSED;
-	}
-
-	to_displayed_text.NOT_PARSED = typeof Symbol === 'function' ? Symbol('not parsed')
-			: {
-				NOT_PARSED : true
-			};
-
-	// ------------------------------------------------------------------------
-
 	// const
 	// var NS_MediaWiki = wiki_API.namespace('MediaWiki');
 	var NS_Module = wiki_API.namespace('Module');
@@ -898,9 +875,18 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	Object.assign(wiki_API, {
-		to_displayed_text : to_displayed_text
-	});
+	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
+	function set_expand_template(template_name, wiki_project) {
+		var base_namespace = template_functions;
+		if (wiki_project)
+			base_namespace = base_namespace[wiki_project];
+		var expand_function = base_namespace[template_name].expand;
+		var export_to = base_namespace.expand_template
+				|| (base_namespace.expand_template = Object.create(null));
+		for (name in base_namespace[template_name].names) {
+			export_to[name] = expand_function;
+		}
+	}
 
 	// export 導出.
 	Object.assign(template_functions, {
@@ -949,6 +935,9 @@ function module_code(library_namespace) {
 		}
 
 	});
+
+	set_expand_template('Al', 'zhwiki');
+	set_expand_template('A', 'zhwiki');
 
 	return template_functions;
 }
