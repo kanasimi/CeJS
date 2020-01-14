@@ -1097,8 +1097,8 @@ function module_code(library_namespace) {
 			return new_token;
 		}
 
-		if (token.type === 'convert') {
-			// e.g., '==-{[[:三宝颜共和国]]}-=='
+		if (false && token.type === 'convert') {
+			// TODO: e.g., '==-{[[:三宝颜共和国]]}-=='
 			token = token.converted;
 			// 接下來交給 `token.type === 'link'` 處理。
 		}
