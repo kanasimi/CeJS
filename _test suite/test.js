@@ -3896,7 +3896,9 @@ function do_test() {
 			'application.net.wiki.edit',
 			'application.net.wiki.list',
 			'application.net.wiki.data',
-			'application.net.wiki.admin'
+			'application.net.wiki.admin',
+
+			'application.net.wiki.template_functions'
 		], test_wiki,
 		//
 		function () {

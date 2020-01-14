@@ -1066,8 +1066,8 @@ function module_code(library_namespace) {
 		// console.log(token);
 
 		if (token.type === 'transclusion' && wiki_API.template_functions) {
-			console.log(options);
-			console.log(wiki_API.template_functions);
+			// console.log(options);
+			// console.log(wiki_API.template_functions);
 			var expand_template = wiki_API.template_functions[options.site_name
 					|| wiki_API.site_name(wiki_API.session_of_options(options))];
 			expand_template = expand_template
