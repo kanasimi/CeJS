@@ -1208,19 +1208,18 @@ function module_code(library_namespace) {
 
 	// @inner
 	function preprocess_section_link_tokens(tokens, options) {
-		if (Array.isArray(tokens) && tokens.type === 'plain') {
-			if (false) {
-				library_namespace
-						.info('preprocess_section_link_tokens: tokens:');
-				console.log(tokens);
-			}
-			for_each_token.call(tokens, function(token, index, parent) {
-				return preprocess_section_link_token(token, options);
-			}, true);
-			return tokens;
+		if (tokens.type !== 'plain') {
+			tokens = set_wiki_type([ tokens ], 'plain');
 		}
 
-		return preprocess_section_link_token(tokens, options);
+		if (false) {
+			library_namespace.info('preprocess_section_link_tokens: tokens:');
+			console.log(tokens);
+		}
+		for_each_token.call(tokens, function(token, index, parent) {
+			return preprocess_section_link_token(token, options);
+		}, true);
+		return tokens;
 	}
 
 	function section_link_escape(text, is_uri) {
@@ -1330,10 +1329,15 @@ function module_code(library_namespace) {
 				// @see wiki_toString.convert
 				// return token.join(';');
 				token.toString = function() {
+					var converted = this.converted;
+					if (Array.isArray(converted)) {
+						converted = section_link(
+						// e.g., '==-{[[:三宝颜共和国]]}-=='
+						converted.toString(), options)[2];
+					}
 					return section_link_START_CONVERT
 					// + this.join(';')
-					// e.g., '==-{[[:三宝颜共和国]]}-=='
-					+ this.converted + section_link_END_CONVERT;
+					+ converted + section_link_END_CONVERT;
 				};
 			} else if (token.original_type) {
 				// revert type
