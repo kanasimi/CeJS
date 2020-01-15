@@ -215,7 +215,6 @@ function module_code(library_namespace) {
 			language : this.convert_to_TW ? library_namespace.gettext
 					.to_standard('cmn-Hant-TW')
 					&& 'zh-cmn-Hant-TW' : work_data.language || this.language,
-			vertical_writing : this.vertical_writing,
 			// 作品內容最後編輯時間。
 			modified : work_data.last_update_Date
 		}), subject = [];
@@ -261,25 +260,8 @@ function module_code(library_namespace) {
 			ebook.set_cover(this.full_URL(work_data.image));
 		}
 
-		// library_namespace.log('set vertical_writing');
-		if (this.vertical_writing) {
-			var mode = typeof this.vertical_writing === 'string' ? /^(?:lr|rl)$/
-					.test(this.vertical_writing) ? 'vertical-'
-					+ this.vertical_writing : this.vertical_writing
-					// e.g., true
-					: 'vertical-rl';
-			// another method: <html dir="rtl">
-			ebook.add({
-				// title : 'mainstyle',
-				file : 'main_style.css'
-			}, 'html { '
-			// https://en.wikipedia.org/wiki/Horizontal_and_vertical_writing_in_East_Asian_scripts
-			// 東亞文字排列方向 垂直方向自右而左的書寫方式。即 top-bottom-right-left
-			+ 'writing-mode:' + mode + ';'
-			// https://blog.tommyku.com/blog/how-to-make-epubs-with-vertical-layout/
-			+ '-epub-writing-mode:' + mode + ';'
-			// for Kindle Readers (kindlegen)?
-			+ '-webkit-writing-mode:' + mode + '; }');
+		if (this.vertical_writing || this.RTL_writing) {
+			ebook.set_writing_mode(this.vertical_writing, this.RTL_writing);
 		}
 
 		return work_data[this.KEY_EBOOK] = ebook;

@@ -410,11 +410,7 @@ function module_code(library_namespace) {
 					spine : [ {
 						itemref : null,
 						idref : 'id'
-					} ] && [],
-					// https://medium.com/parenting-tw/從零開始的電子書-epub-壹-72da1aca6571
-					// 設置電子書的頁面方向
-					'page-progression-direction' : typeof options.vertical_writing==='string'?/rl$/
-							.test(options.vertical_writing):options.vertical_writing?"rtl":"ltr"
+					} ] && []
 				} ],
 				// determine version.
 				// http://www.idpf.org/epub/31/spec/
@@ -459,6 +455,7 @@ function module_code(library_namespace) {
 				this.raw_data_ptr.manifest = node.manifest;
 			} else if (Array.isArray(node.spine)) {
 				this.raw_data_ptr.spine = node.spine;
+				this.raw_data_ptr.spine_parent = node;
 			}
 		}, this);
 
@@ -549,27 +546,7 @@ function module_code(library_namespace) {
 		this.resources = resources.filter(function(resource) {
 			return library_namespace.is_Object(resource);
 		}, this);
-
-		if (false && options.vertical_writing) {
-			var mode = typeof options.vertical_writing === 'string' ? /^(?:lr|rl)$/
-					.test(options.vertical_writing) ? 'vertical-'
-					+ options.vertical_writing : options.vertical_writing
-					// e.g., true
-					: 'vertical-rl';
-			// another method: <html dir="rtl">
-			this.add({
-				// title : 'mainstyle',
-				file : 'main_style.css'
-			}, 'html { '
-			// https://en.wikipedia.org/wiki/Horizontal_and_vertical_writing_in_East_Asian_scripts
-			// 東亞文字排列方向 垂直方向自右而左的書寫方式。即 top-bottom-right-left
-			+ 'writing-mode:' + mode + ';'
-			// https://blog.tommyku.com/blog/how-to-make-epubs-with-vertical-layout/
-			+ '-epub-writing-mode:' + mode + ';'
-			// for Kindle Readers (kindlegen)?
-			+ '-webkit-writing-mode:' + mode + '; }');
-		}
-
+		
 		// rebuild_index_of_id.call(this);
 		// rebuild_index_of_id.call(this, true);
 	}
@@ -769,7 +746,7 @@ function module_code(library_namespace) {
 
 		return value;
 	}
-
+	
 	// -------------------------------------------------------------------------
 	// 編輯 chapter 相關函式。
 
@@ -815,6 +792,8 @@ function module_code(library_namespace) {
 		}
 	}
 
+	var cover_image_propertie = "cover-image";
+	
 	// 表紙設定
 	// http://idpf.org/forum/topic-715
 	// https://wiki.mobileread.com/wiki/Ebook_Covers#OPF_entries
@@ -848,10 +827,53 @@ function module_code(library_namespace) {
 		var item = normalize_item.call(this, item_data);
 		// <item id="cover-image" href="cover.jpg" media-type="image/jpeg" />
 		item.id = 'cover-image';
-		item.properties = "cover-image";
+		item.properties = cover_image_propertie;
 
 		// TODO: <meta name="cover" content="cover-image" />
 		return this.add(item, contents);
+	}
+
+	// Must call after `new EPUB()`, `ebook.set()`, `ebook.set_cover()`.
+	// @see function create_ebook() @
+	// CeL.application.net.work_crawler.ebook
+	function set_writing_mode(vertical_writing, RTL_writing) {
+		if (vertical_writing || typeof vertical_writing === 'boolean') {
+			var writing_mode = typeof vertical_writing === 'string' ? /^(?:lr|rl)$/
+					.test(vertical_writing) ? 'vertical-'
+					+ vertical_writing : vertical_writing
+					// e.g., vertical_writing === true
+					: 'vertical-rl';
+
+			if (RTL_writing === undefined) {
+				RTL_writing = /rl$/.test(writing_mode);
+			}
+
+			if (!this.had_set_vertical_writing) {
+				// library_namespace.log('set vertical_writing');
+				// another method: <html dir="rtl">
+				this.add({
+					// title : 'mainstyle',
+					file : 'main_style.css'
+				}, 'html { '
+				// https://en.wikipedia.org/wiki/Horizontal_and_vertical_writing_in_East_Asian_scripts
+				// 東亞文字排列方向 垂直方向自右而左的書寫方式。即 top-bottom-right-left
+				+ 'writing-mode:' + writing_mode + ';'
+				// https://blog.tommyku.com/blog/how-to-make-epubs-with-vertical-layout/
+				+ '-epub-writing-mode:' + writing_mode + ';'
+				// for Kindle Readers (kindlegen)?
+				+ '-webkit-writing-mode:' + writing_mode + '; }');
+
+				// 只能設定一次。
+				this.had_set_vertical_writing = true;
+			}
+		}
+
+		// https://medium.com/parenting-tw/從零開始的電子書-epub-壹-72da1aca6571
+		// 設置電子書的頁面方向
+		if (typeof RTL_writing === 'boolean') {
+			var spine_parent = this.raw_data_ptr.spine_parent;
+			spine_parent['page-progression-direction'] = RTL_writing ? "rtl" : "ltr";
+		}
 	}
 
 	/**
@@ -1954,7 +1976,8 @@ function module_code(library_namespace) {
 		'<body>', '<h1>', book_title, '</h1>');
 
 		this.resources.some(function(resource) {
-			if (resource.properties = "cover-image") {
+			// only allow 1 cover-image
+			if (resource.properties === cover_image_propertie) {
 				TOC_html.push(JSON.to_XML({
 					img : null,
 					alt : "cover-image",
@@ -2203,7 +2226,10 @@ function module_code(library_namespace) {
 		// console.log(chapter_list);
 		// console.log(JSON.stringify(chapter_list));
 
-		TOC_html.push(JSON.to_XML(chapter_list, this.to_XML_options), '</ol>',
+		var to_XML_options = Object.clone(this.to_XML_options);
+		// No declaration needed.
+		delete to_XML_options.declaration;
+		TOC_html.push(JSON.to_XML(chapter_list, to_XML_options), '</ol>',
 				'</nav>', '</body>', '</html>');
 
 		return TOC_html.join(this.to_XML_options.separator);
@@ -2560,6 +2586,7 @@ function module_code(library_namespace) {
 		initialize : initialize,
 		set_raw_data : set_raw_data,
 		set : set_meta_information,
+		set_writing_mode : set_writing_mode,
 		// book.set_cover(url)
 		// book.set_cover({url:'url',file:'file_name'})
 		// book.set_cover(file_name, contents)
