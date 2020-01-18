@@ -1328,7 +1328,9 @@ function module_code(library_namespace) {
 				if (!use_underline) {
 					section = section.replace(/_/g, ' ');
 				}
-				page_name[index] = upper_case_initial(section);
+				page_name[index] = upper_case_initial(section)
+				// [[Mediawiki talk:]] → [[MediaWiki talk:]]
+				.replace(/^Mediawiki/, 'MediaWiki');
 				return false;
 			}
 
