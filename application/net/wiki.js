@@ -952,7 +952,10 @@ function module_code(library_namespace) {
 	function generate_namespace_pattern(namespace_hash, name_of_NO) {
 		var source = [];
 		for ( var namespace in namespace_hash) {
-			name_of_NO[namespace_hash[namespace]] = namespace;
+			name_of_NO[namespace_hash[namespace]] = upper_case_initial(
+					namespace)
+			// [[Mediawiki talk:]] → [[MediaWiki talk:]]
+			.replace(/^Mediawiki/, 'MediaWiki');
 			if (namespace)
 				source.push(namespace);
 		}
