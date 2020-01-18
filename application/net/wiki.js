@@ -758,7 +758,7 @@ function module_code(library_namespace) {
 		}
 		var session = session_of_options(options);
 		var namespace_hash = options.namespace_hash || session
-				&& session.namespace_hash || get_namespace.hash;
+				&& session.configurations.namespace_hash || get_namespace.hash;
 
 		if (Array.isArray(namespace)) {
 			namespace = namespace.join('|');
@@ -766,9 +766,8 @@ function module_code(library_namespace) {
 
 		if (typeof namespace === 'string') {
 			var list = [];
-			namespace = namespace_hash === get_namespace.hash ? namespace
-					.replace(/[_\s]+/g, '_') : namespace
-					.replace(/[_\s]+/g, ' ');
+			namespace = namespace.replace(/[_\s]+/g,
+					namespace_hash === get_namespace.hash ? '_' : ' ');
 			namespace.toLowerCase()
 			// for ',Template,Category', ';Template;Category',
 			// 'main|module|template|category'
@@ -816,6 +815,16 @@ function module_code(library_namespace) {
 			}
 			// list.sort().unique_sorted().join('|');
 			list = list.unique();
+			if (options.get_name) {
+				var name_of_NO = options.name_of_NO || session
+						&& session.configurations.name_of_NO
+						|| get_namespace.name_of_NO;
+				list = list.map(function(namespace_NO) {
+					return namespace_NO in name_of_NO
+					//
+					? name_of_NO[namespace_NO] : namespace_NO;
+				});
+			}
 			return list.length === 1 ? list[0] : list.join('|');
 		}
 
@@ -962,7 +971,7 @@ function module_code(library_namespace) {
 			return '';
 
 		var session = session_of_options(options);
-		if (NS === session && session.namespace_hash ? session.namespace_hash.wikipedia
+		if (NS === session && session.configurations.namespace_hash ? session.configurations.namespace_hash.wikipedia
 				: get_namespace.hash.wikipedia) {
 			if (session && session.family) {
 				return wiki_API.upper_case_initial(
@@ -1258,20 +1267,28 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}page_name
 	 *            頁面名 valid page name。
-	 * @param {Boolean}[use_underline]
-	 *            採用 "_" 取代 " "。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @returns {String}規範後之頁面名稱。
 	 * 
 	 * @see [[Wikipedia:命名常規]]
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
 	 */
-	function normalize_page_name(page_name, use_underline) {
+	function normalize_page_name(page_name, options) {
 		if (wiki_API.is_page_data(page_name)) {
 			page_name = page_name.title;
 		}
 		if (!page_name || typeof page_name !== 'string')
 			return page_name;
+
+		if (options === true) {
+			options = {
+				use_underline : true
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
 
 		// 注意:
 		// '\u00FF', '\u200B', '\u2060' 可被當作正規頁面名稱的一部分，包括在開頭結尾。
@@ -1300,19 +1317,24 @@ function module_code(library_namespace) {
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1');
 
+		/** {Boolean}採用 "_" 取代 " "。 */
+		var use_underline = options.use_underline;
 		page_name = use_underline
 		// ' ' → '_': 在 URL 上可更簡潔。
 		? page_name.replace(/ /g, '_') : page_name.replace(/_/g, ' ');
 
 		page_name = page_name.split(':');
 		var has_language;
-
+		var session = session_of_options(options);
+		var no_session_namespace_hash = !session
+				|| !session.configurations.namespace_hash;
 		page_name.some(function(section, index) {
 			section = use_underline ? section.replace(/^[\s_]+/, '') : section
 					.trimStart();
-			if (index === page_name.length - 1
+
+			if (index === page_name.length - 1 || no_session_namespace_hash
 			// @see PATTERN_PROJECT_CODE
-			|| !(use_underline ? /^[a-z][a-z\d\-_]{0,14}$/i
+			&& !(use_underline ? /^[a-z][a-z\d\-_]{0,14}$/i
 			//
 			: /^[a-z][a-z\d\- ]{0,14}$/i).test(section.trimEnd())) {
 				// page title: 將首個字母轉成大寫。
@@ -1320,17 +1342,14 @@ function module_code(library_namespace) {
 				return true;
 			}
 
-			if ((use_underline ? section : section.replace(/ /g, '_'))
-			//
-			.trimEnd().toLowerCase() in get_namespace.hash) {
+			var namespace = get_namespace(section, Object.assign({
+				get_name : true
+			}, options));
+			// console.log([ section, namespace ]);
+			if (namespace) {
 				// Wikipedia namespace
-				section = section.trimEnd().toLowerCase();
-				if (!use_underline) {
-					section = section.replace(/_/g, ' ');
-				}
-				page_name[index] = upper_case_initial(section)
-				// [[Mediawiki talk:]] → [[MediaWiki talk:]]
-				.replace(/^Mediawiki/, 'MediaWiki');
+				page_name[index] = use_underline ? namespace.replace(/ /g, '_')
+						: namespace.replace(/_/g, ' ');
 				return false;
 			}
 
@@ -1685,10 +1704,13 @@ function module_code(library_namespace) {
 		// e.g., is_category
 		need_escape, project_prefixed;
 
+		var namespace_hash = session && session.configurations.namespace_hash
+				|| get_namespace.hash;
+
 		// is_api_and_title(page_data)
 		if (wiki_API.is_page_data(page_data)) {
-			need_escape = page_data.ns === get_namespace.hash.category
-					|| page_data.ns === get_namespace.hash.file;
+			need_escape = page_data.ns === namespace_hash.category
+					|| page_data.ns === namespace_hash.file;
 			title = page_data.title;
 		} else if ((title = get_page_title(page_data))
 		// 通常應該:
@@ -4589,7 +4611,7 @@ function module_code(library_namespace) {
 				var name = namespace_data['*'];
 				if (typeof name === 'string') {
 					site_configurations.name_of_NO[namespace_NO] = name;
-					namespace_hash[name.toLowerCase()] = namespace_NO;
+					namespace_hash[name.toLowerCase()] = +namespace_NO;
 				}
 			}
 			namespacealiases
