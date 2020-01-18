@@ -164,6 +164,10 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	function edit_error_toString() {
+		return '[' + this.code + '] ' + this.info;
+	}
+
 	/**
 	 * 編輯頁面。一次處理一個標題。<br />
 	 * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問！此時需要另外含入檢查機制！
@@ -225,7 +229,8 @@ function module_code(library_namespace) {
 					library_namespace.warn(
 					// Permission denied
 					'wiki_API_edit: Denied to edit '
-							+ wiki_API.title_link_of(page_data));
+							+ wiki_API.title_link_of(page_data) + ': '
+							+ options.notification);
 					callback(page_data, 'denied');
 
 				} else {
@@ -322,29 +327,38 @@ function module_code(library_namespace) {
 
 		wiki_API.query(action, function(data, error) {
 			// console.log(data);
-			if (!error) {
-				error = data.error
+			if (error) {
+			} else if (data.error) {
 				// 檢查伺服器回應是否有錯誤資訊。
-				? '[' + data.error.code + '] ' + data.error.info : data.edit
-						&& data.edit.result !== 'Success'
-						&& ('[' + data.edit.result + '] '
-						/**
-						 * 新用戶要輸入過多或特定內容如 URL，可能遇到:<br />
-						 * [Failure] 必需輸入驗證碼
-						 */
-						+ (data.edit.info || data.edit.captcha && '必需輸入驗證碼'
-						/**
-						 * 垃圾連結 [[MediaWiki:Abusefilter-warning-link-spam]]
-						 * e.g., youtu.be, bit.ly
-						 * 
-						 * @see 20170708.import_VOA.js
-						 */
-						|| data.edit.spamblacklist
-								&& 'Contains spam link 包含被列入黑名單的連結: '
-								+ data.edit.spamblacklist
-						// || JSON.stringify(data.edit)
-						));
+				error = data.error;
+				error.toString = edit_error_toString;
+			} else if (data.edit && data.edit.result !== 'Success') {
+				error = {
+					code : data.edit.result,
+					info : data.edit.info
+					/**
+					 * 新用戶要輸入過多或特定內容如 URL，可能遇到:<br />
+					 * [Failure] 必需輸入驗證碼
+					 */
+					|| (data.edit.captcha ? '必需輸入驗證碼'
+
+					/**
+					 * 垃圾連結 [[MediaWiki:Abusefilter-warning-link-spam]] e.g.,
+					 * youtu.be, bit.ly
+					 * 
+					 * @see 20170708.import_VOA.js
+					 */
+					: data.edit.spamblacklist
+					//
+					? 'Contains spam link 包含被列入黑名單的連結: '
+					//
+					+ data.edit.spamblacklist
+
+					: JSON.stringify(data.edit)),
+					toString : edit_error_toString
+				};
 			}
+
 			if (error || !data) {
 				/**
 				 * <code>
