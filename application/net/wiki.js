@@ -4607,11 +4607,17 @@ function module_code(library_namespace) {
 			site_configurations.name_of_NO = Object.create(null);
 			for ( var namespace_NO in namespaces) {
 				var namespace_data = namespaces[namespace_NO];
+				namespace_NO = +namespace_NO;
 				// namespace_data.canonical || namespace_data.content
 				var name = namespace_data['*'];
 				if (typeof name === 'string') {
 					site_configurations.name_of_NO[namespace_NO] = name;
-					namespace_hash[name.toLowerCase()] = +namespace_NO;
+					namespace_hash[name.toLowerCase()] = namespace_NO;
+				}
+				if (namespace_data.canonical
+						&& typeof namespace_data.canonical === 'string'
+						&& namespace_data.canonical !== name) {
+					namespace_hash[namespace_data.canonical.toLowerCase()] = namespace_data.id;
 				}
 			}
 			namespacealiases
