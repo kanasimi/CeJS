@@ -287,8 +287,12 @@ function module_code(library_namespace) {
 				break;
 			}
 
-			// value = value.toString();
+			if (false && typeof value !== 'string') {
+				value = typeof value.toString === 'function' ? value.toString()
+						: String(value);
+			}
 			value = String(value);
+
 			if (value.includes('='))
 				value = index + '=' + value;
 

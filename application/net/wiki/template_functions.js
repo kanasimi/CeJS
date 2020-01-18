@@ -371,6 +371,9 @@ function module_code(library_namespace) {
 		tk : 'temporarily keep|暫時保留|暂时保留'
 	};
 
+	// default flag: k|保留
+	var default_result_of__Old_vfd_multi = 'k';
+
 	var result_flags__Article_history = {
 		renamed : 'rename|renamed'
 	};
@@ -497,6 +500,12 @@ function module_code(library_namespace) {
 
 		var item_list = [], Article_history_items = [], parsed = get_parsed(page_data);
 
+		var check_parameters = 'date|result|page|target'.split('|');
+		if (Array.isArray(options.additional_parameters)) {
+			// 讀取 .hat_result , .bot_checked 之類。
+			check_parameters.append(options.additional_parameters);
+		}
+
 		parsed.each('template', function(token) {
 			var _item_list = parse_Article_history_token(token);
 			if (_item_list) {
@@ -524,28 +533,41 @@ function module_code(library_namespace) {
 			// {{Old vfd multi|提刪日期|處理結果|page=頁面名稱}}
 			var result = token.parameters[2];
 			result = normalize_result_flag(result_flags__Old_vfd_multi, result)
-			// default flag: k|保留
-			|| 'k';
-			var item = wiki_API.parse.add_parameters_to_template_object(null, {
+					|| default_result_of__Old_vfd_multi;
+			var item = {
 				// 注意: 其他 parameters 會被捨棄掉!
 				date : token.parameters[1],
 				result : result,
 				page : token.parameters.page,
 				// move to, merge to, redirect to
 				target : token.parameters[3]
-			});
+			};
+			if (Array.isArray(options.additional_parameters)) {
+				options.additional_parameters.forEach(function(parameter) {
+					if (parameter in token.parameters)
+						item[parameter] = token.parameters[parameter];
+				});
+			}
+			item = wiki_API.parse.add_parameters_to_template_object(
+			//
+			null, item);
 			item_list.push(item);
 
 			// if (token.parameters.multi) item = [ item ];
 			for (var index = 2; index < 9
 			//
 			&& token.parameters['date' + index]; index++) {
-				item = wiki_API.parse.add_parameters_to_template_object(null, {
-					date : token.parameters['date' + index],
-					result : token.parameters['result' + index] || '保留',
-					page : token.parameters['page' + index],
-					target : token.parameters['target' + index]
+				item = Object.create(null);
+				check_parameters.forEach(function(parameter) {
+					var name = parameter + index;
+					if (name in token.parameters)
+						item[parameter] = token.parameters[name];
 				});
+				if (!item.result) {
+					item.result = default_result_of__Old_vfd_multi;
+				}
+				item = wiki_API.parse.add_parameters_to_template_object(null,
+						item);
 				item_list.push(item);
 				if (index > 5) {
 					library_namespace.warn('parse_Old_vfd_multi: '
