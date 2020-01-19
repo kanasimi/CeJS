@@ -486,12 +486,12 @@ function module_code(library_namespace) {
 		flag = text_of_Hat_flag(flag, true);
 		if (!flag)
 			return;
-		flag = String(flag).toLowerCase();
+		flag = String(flag).trim().toLowerCase();
 
 		new_flag = text_of_Hat_flag(new_flag, true);
 		if (!new_flag)
 			return;
-		new_flag = String(new_flag).toLowerCase();
+		new_flag = String(new_flag).trim().toLowerCase();
 
 		return flag.includes(new_flag);
 	}

@@ -3750,6 +3750,7 @@ function module_code(library_namespace) {
 				} else {
 					parameters.is_link = true;
 				}
+				// decodeURIComponent()
 				parameters.anchor = section_title.toString()
 				// remove prefix: '#'
 				.slice(1).trimEnd();
