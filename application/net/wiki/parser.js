@@ -1398,7 +1398,7 @@ function module_code(library_namespace) {
 			// only for debug
 			// parsed_title : parsed_title,
 
-			// anchor : anchor,
+			// anchor : anchor.toString().trimEnd(),
 			// display_text : display_text,
 			toString : section_link_toString
 		});
@@ -3542,7 +3542,7 @@ function module_code(library_namespace) {
 				section_title = parse_wikitext(section_title, options, queue);
 			}
 
-			// [ page_name, section_title, displayed_text ]
+			// [ page_name, #section_title|anchor, displayed_text ]
 			var parameters = [ page_name, section_title ];
 
 			// assert: 'a'.match(/(b)?/)[1]===undefined
@@ -3750,6 +3750,9 @@ function module_code(library_namespace) {
 				} else {
 					parameters.is_link = true;
 				}
+				parameters.anchor = section_title.toString()
+				// remove prefix: '#'
+				.slice(1).trimEnd();
 				// TODO: [[Special:]]
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
 				_set_wiki_type(parameters, file_matched ? 'file'

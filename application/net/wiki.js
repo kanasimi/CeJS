@@ -724,7 +724,7 @@ function module_code(library_namespace) {
 				// 不包括 test2.wikipedia.org 之類。
 				&& !/test|wiki/i.test(language_code)
 				// 排除 'Talk', 'User', 'Help', 'File', ...
-				&& !(session.namespace_pattern || get_namespace.pattern)
+				&& !(session.configurations.namespace_pattern || get_namespace.pattern)
 						.test(language_code)) {
 			// [[m:List of Wikipedias]]
 			session.language
@@ -945,7 +945,7 @@ function module_code(library_namespace) {
 	get_namespace.name_of_NO = [];
 
 	/**
-	 * build session.namespace_pattern || get_namespace.pattern
+	 * build session.configurations.namespace_pattern || get_namespace.pattern
 	 * 
 	 * @inner
 	 */
@@ -1008,7 +1008,8 @@ function module_code(library_namespace) {
 			return page_title;
 		}
 		var session = session_of_options(options);
-		var namespace_pattern = session && session.namespace_pattern
+		var namespace_pattern = session
+				&& session.configurations.namespace_pattern
 				|| get_namespace.pattern;
 		var matched = page_title.match(namespace_pattern);
 		library_namespace.debug('Test ' + wiki_API.title_link_of(page_title)
@@ -1025,9 +1026,10 @@ function module_code(library_namespace) {
 			namespace = wiki_API.normalize_title(namespace).toLowerCase();
 			var name_of_NO = session && session.name_of_NO
 					|| wiki_API.namespace.name_of_NO;
-			if (session && session.namespace_pattern) {
+			if (session && session.configurations.namespace_pattern) {
 				if (namespace.includes(':')) {
-					namespace = session.match(session.namespace_pattern);
+					namespace = session
+							.match(session.configurations.namespace_pattern);
 					if (!namespace) {
 						// assert: main
 						return false;
@@ -1707,6 +1709,14 @@ function module_code(library_namespace) {
 		// e.g., is_category
 		need_escape, project_prefixed;
 
+		if (session && display_text === undefined && !is_wiki_API(session)) {
+			// e.g., `CeL.wiki.title_link_of(page_data, display_text)`
+			// shift arguments
+			display_text = session;
+			session = null;
+		}
+
+		// console.trace(session);
 		var namespace_hash = session && session.configurations.namespace_hash
 				|| get_namespace.hash;
 
@@ -1726,7 +1736,7 @@ function module_code(library_namespace) {
 			// @see PATTERN_PROJECT_CODE_i
 			project_prefixed = /^ *[a-z]{2}[a-z\d\-]{0,14} *:/i.test(title)
 					// 排除 'Talk', 'User', 'Help', 'File', ...
-					&& !(session && session.namespace_pattern || get_namespace.pattern)
+					&& !(session && session.configurations.namespace_pattern || get_namespace.pattern)
 							.test(title);
 			// escape 具有特殊作用的 title。
 			need_escape = PATTERN_category_prefix.test(title)
@@ -1737,23 +1747,16 @@ function module_code(library_namespace) {
 		if (!title) {
 			return '';
 		}
-		if (is_wiki_API(session)) {
-			if (session.language && !project_prefixed) {
-				// e.g., [[w:zh:title]]
-				title = session.language + ':' + title;
-				if (session.family
-						&& (session.family in api_URL.shortcut_of_project)) {
-					title = api_URL.shortcut_of_project[session.family] + ':'
-							+ title;
-				} else {
-					need_escape = true;
-				}
+		if (session && session.language && !project_prefixed) {
+			// e.g., [[w:zh:title]]
+			title = session.language + ':' + title;
+			if (session.family
+					&& (session.family in api_URL.shortcut_of_project)) {
+				title = api_URL.shortcut_of_project[session.family] + ':'
+						+ title;
+			} else {
+				need_escape = true;
 			}
-		} else if (session) {
-			// e.g., `CeL.wiki.title_link_of(page_data, display_text)`
-			// shift arguments
-			display_text = session;
-			session = null;
 		}
 
 		// TODO: [[s:zh:title]] instead of [[:zh:title]]
