@@ -389,7 +389,7 @@ function module_code(library_namespace) {
 
 	function normalize_result_flag(flag_sets, result, valid_flag_only) {
 		result = result && result.toString().trim();
-		var normalized_result = result.toLowerCase();
+		var normalized_result = result && result.toLowerCase();
 		if (normalized_result in flag_sets)
 			return normalized_result;
 
