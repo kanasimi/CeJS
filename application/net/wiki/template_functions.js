@@ -643,7 +643,7 @@ function module_code(library_namespace) {
 			console.log(item_list);
 		}
 
-		var page_title = page_data && page_data.title;
+		var page_title = wiki_API.title_of(page_data);
 
 		var add_parameters = wiki_API.parse.add_parameters_to_template_object;
 		item_list.forEach(function(item, index) {
@@ -651,7 +651,7 @@ function module_code(library_namespace) {
 				var parameters = {
 					'1' : item.date,
 					'2' : item.result,
-					page : (force_set_page || item.page !== page_data.title)
+					page : (force_set_page || item.page !== page_title)
 							&& item.page,
 					// move to, merge to, redirect to
 					'3' : item.target
