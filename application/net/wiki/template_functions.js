@@ -793,11 +793,17 @@ function module_code(library_namespace) {
 				}
 
 				if (last_need_preserve > NO_to_delete[0]) {
-					library_namespace.warn('replace_Old_vfd_multi: '
-					//
-					+ 'Should modify {{' + Article_history__main_name
-							+ '}} manually:');
-					library_namespace.log(token.toString());
+					if (typeof options.modify_Article_history_warning) {
+						options.modify_Article_history_warning(
+						//
+						token, page_data);
+					} else {
+						library_namespace.warn('replace_Old_vfd_multi: '
+						//
+						+ 'Should modify {{' + Article_history__main_name
+								+ '}} manually:');
+						library_namespace.log(token.toString());
+					}
 					return;
 				}
 
