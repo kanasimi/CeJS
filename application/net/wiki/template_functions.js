@@ -686,23 +686,12 @@ function module_code(library_namespace) {
 		return template_object;
 	}
 
-	/**
-	 * 將 page_data 中的 {{Old vfd multi}} 替換成 replace_to。
-	 * 
-	 * @param {Object|String}page_data
-	 * @param {Array|Object|String}replace_to
-	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項
-	 */
-	function replace_Old_vfd_multi(page_data, replace_to, options) {
-		var parsed = get_parsed(page_data);
-
-		// normalize replace_to
-		if (Array.isArray(replace_to)) {
-			// console.log(replace_to);
-			replace_to = Old_vfd_multi__item_list_to_template_object(
-					replace_to, options, page_data);
-		}
+	function Old_vfd_multi__item_list_to_wikitext(item_list, options, page_data) {
+		// console.log(item_list);
+		var wikitext = Array.isArray(item_list) ?
+		// normalize wikitext
+		Old_vfd_multi__item_list_to_template_object(item_list, options,
+				page_data) : item_list;
 
 		/**
 		 * <code>
@@ -717,7 +706,8 @@ function module_code(library_namespace) {
 
 		</code>
 		 */
-		var latest_index, line_separator = '\n';
+		var line_separator = '\n';
+		var latest_index;
 		function add_line_separator(string_list) {
 			var multi;
 			string_list.forEach(function(parameter, index) {
@@ -742,17 +732,32 @@ function module_code(library_namespace) {
 			return string_list;
 		}
 
-		if (typeof replace_to === 'object') {
-			replace_to = wiki_API.parse.template_object_to_wikitext(
-					Old_vfd_multi__main_name, replace_to, add_line_separator);
+		if (typeof wikitext === 'object') {
+			wikitext = wiki_API.parse.template_object_to_wikitext(
+					Old_vfd_multi__main_name, wikitext, add_line_separator);
 		}
 
+		return wikitext;
+	}
+
+	/**
+	 * 將 page_data 中的 {{Old vfd multi}} 替換成 replace_to。
+	 * 
+	 * @param {Object|String}page_data
+	 * @param {Array|Object|String}replace_to
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 */
+	function replace_Old_vfd_multi(page_data, replace_to, options) {
+		replace_to = Old_vfd_multi__item_list_to_wikitext(replace_to, options,
+				page_data);
 		if (typeof replace_to !== 'string' || !replace_to.startsWith('{{')) {
 			throw new Error('replace_Old_vfd_multi: Invalid replace_to: '
 					+ replace_to);
 		}
 
 		var replaced;
+		var parsed = get_parsed(page_data);
 		parsed.each('template', function(token) {
 			if (token.name in Old_vfd_multi__names) {
 				if (replaced)
@@ -836,6 +841,7 @@ function module_code(library_namespace) {
 		}, true);
 
 		if (!replaced) {
+			var line_separator = '\n';
 			// TODO: 將模板放在專題模板之後。
 			if (!replace_to.endsWith(line_separator)) {
 				// 前面的 replaced 是替代，無需加入換行。
@@ -952,6 +958,7 @@ function module_code(library_namespace) {
 			unique_item_list : Old_vfd_multi__unique_item_list,
 
 			item_list_to_object : Old_vfd_multi__item_list_to_template_object,
+			item_list_to_wikitext : Old_vfd_multi__item_list_to_wikitext,
 			replace_by : replace_Old_vfd_multi,
 			text_of : text_of_Hat_flag
 		},

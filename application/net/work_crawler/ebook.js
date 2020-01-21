@@ -255,13 +255,18 @@ function module_code(library_namespace) {
 			source : work_data.url
 		});
 
+		if (this.vertical_writing || this.RTL_writing) {
+			if (this.RTL_writing === undefined) {
+				this.RTL_writing = typeof this.vertical_writing === 'string' ? /rl$/
+						.test(this.vertical_writing)
+						: !!this.vertical_writing;
+			}
+			ebook.set_writing_mode(this.vertical_writing, this.RTL_writing);
+		}
+
 		if (work_data.image) {
 			// cover image of work
 			ebook.set_cover(this.full_URL(work_data.image));
-		}
-
-		if (this.vertical_writing || this.RTL_writing) {
-			ebook.set_writing_mode(this.vertical_writing, this.RTL_writing);
 		}
 
 		return work_data[this.KEY_EBOOK] = ebook;
@@ -594,8 +599,7 @@ function module_code(library_namespace) {
 					//
 					+ (work_data.chapter_unit || this.chapter_unit) : '',
 					']',
-					this.vertical_writing === true
-							|| /^(?:lr|rl)$/.test(this.vertical_writing) ? ' ('
+					this.RTL_writing ? ' ('
 							+ (/^ja/.test(work_data.language) ? '縦書き' : '縱書')
 							+ ')' : '',
 					this.convert_to_TW ? ' ('

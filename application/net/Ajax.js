@@ -1270,7 +1270,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('agent.cookie_hash: '
 					+ JSON.stringify(agent.cookie_hash), 3,
 					'set_cookie_to_URL_object');
-			URL_object_to_fetch.headers.Cookie = (URL_object_to_fetch.headers.Cookie ? URL_object_to_fetch.headers.Cookie
+			var cookie= (URL_object_to_fetch.headers.Cookie ? URL_object_to_fetch.headers.Cookie
 					+ ';'
 					: '')
 					// cookie is Array @ Wikipedia
@@ -1280,6 +1280,11 @@ function module_code(library_namespace) {
 					.map(function(cookie) {
 						return cookie.replace(/;.*/, '');
 					}).join('; ') : agent.last_cookie);
+			if (cookie)	{
+				URL_object_to_fetch.headers.Cookie =cookie;
+			} else {
+				delete URL_object_to_fetch.headers.Cookie;
+			}
 		}
 		library_namespace.debug('Set cookie: '
 				+ JSON.stringify(URL_object_to_fetch.headers.Cookie), 3,
@@ -2064,7 +2069,9 @@ function module_code(library_namespace) {
 
 				if (response.statusCode === 503 && data
 						&& data.toString().includes(' id="jschl-answer"')) {
+					// console.log(data.toString());
 					library_namespace.error({
+						// https://github.com/Anorov/cloudflare-scrape
 						T : // TODO: https://github.com/codemanki/cloudscraper
 						'You need to bypass the DDoS protection by Cloudflare!'
 					});
@@ -2286,7 +2293,7 @@ function module_code(library_namespace) {
 
 			// 為了防止 Cloudflare bot protection(?) 阻擋，必須加上 Accept-Language。
 			// TODO: get language from system infomation
-			'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
+			// 'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
 
 			// 'Cache-Control' : 'no-cache',
 			// Pragma : 'no-cache',
@@ -2302,6 +2309,7 @@ function module_code(library_namespace) {
 			// User Agent
 			'User-Agent' : get_URL_node.default_user_agent
 		}, options.headers, URL_object_to_fetch.headers);
+		// delete URL_object_to_fetch.headers.Referer;
 		// console.log(URL_object_to_fetch.headers);
 		// console.log(options.headers);
 

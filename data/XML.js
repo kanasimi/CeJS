@@ -537,7 +537,7 @@ function module_code(library_namespace) {
 
 		if (options && (options === true || options.declaration)) {
 			// 加上起首之 declaration。
-			XML = '<?xml version="1.0" encoding="UTF-8"?>'
+			XML = XML_declaration("UTF-8")
 					+ (options && options.separator || '') + XML;
 		}
 

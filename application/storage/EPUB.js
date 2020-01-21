@@ -546,7 +546,7 @@ function module_code(library_namespace) {
 		this.resources = resources.filter(function(resource) {
 			return library_namespace.is_Object(resource);
 		}, this);
-		
+
 		// rebuild_index_of_id.call(this);
 		// rebuild_index_of_id.call(this, true);
 	}
@@ -746,7 +746,7 @@ function module_code(library_namespace) {
 
 		return value;
 	}
-	
+
 	// -------------------------------------------------------------------------
 	// 編輯 chapter 相關函式。
 
@@ -792,8 +792,9 @@ function module_code(library_namespace) {
 		}
 	}
 
-	var cover_image_propertie = "cover-image";
-	
+	/** const */
+	var cover_image_properties = "cover-image";
+
 	// 表紙設定
 	// http://idpf.org/forum/topic-715
 	// https://wiki.mobileread.com/wiki/Ebook_Covers#OPF_entries
@@ -827,20 +828,20 @@ function module_code(library_namespace) {
 		var item = normalize_item.call(this, item_data);
 		// <item id="cover-image" href="cover.jpg" media-type="image/jpeg" />
 		item.id = 'cover-image';
-		item.properties = cover_image_propertie;
+		item.properties = cover_image_properties;
 
 		// TODO: <meta name="cover" content="cover-image" />
 		return this.add(item, contents);
 	}
 
-	// Must call after `new EPUB()`, `ebook.set()`, `ebook.set_cover()`.
+	// Must call after `ebook.set()`.
 	// @see function create_ebook() @
 	// CeL.application.net.work_crawler.ebook
 	function set_writing_mode(vertical_writing, RTL_writing) {
 		if (vertical_writing || typeof vertical_writing === 'boolean') {
 			var writing_mode = typeof vertical_writing === 'string' ? /^(?:lr|rl)$/
-					.test(vertical_writing) ? 'vertical-'
-					+ vertical_writing : vertical_writing
+					.test(vertical_writing) ? 'vertical-' + vertical_writing
+					: vertical_writing
 					// e.g., vertical_writing === true
 					: 'vertical-rl';
 
@@ -872,7 +873,8 @@ function module_code(library_namespace) {
 		// 設置電子書的頁面方向
 		if (typeof RTL_writing === 'boolean') {
 			var spine_parent = this.raw_data_ptr.spine_parent;
-			spine_parent['page-progression-direction'] = RTL_writing ? "rtl" : "ltr";
+			spine_parent['page-progression-direction'] = RTL_writing ? "rtl"
+					: "ltr";
 		}
 	}
 
@@ -1218,13 +1220,13 @@ function module_code(library_namespace) {
 		.replace(/<hr *>/ig, '<hr />')
 		// <BR> → <br />
 		.replace(/<br *>/ig, '<br />')
-		
+
 		// .trim(), remove head/tail <BR>
 		.replace(/^(?:<br *\/>|[\s\n]|&nbsp;|&#160;)+/ig, '')
 		// 這會卡住:
 		// .replace(/(?:<br *\/>|[\s\n]+)+$/ig, '')
 		.replace(/(?:<br *\/>|[\s\n]|&nbsp;|&#160;)+$/ig, '')
-		
+
 		// for ALL <img>
 		.replace(/(<img ([^<>]+)>)(\s*<\/img>)?/ig,
 		// 改正明顯錯誤。
@@ -1691,12 +1693,15 @@ function module_code(library_namespace) {
 				// content="text/html; charset=UTF-8" />
 				'<meta charset="UTF-8" />' ];
 
-				this.resources.forEach(function(resource) {
-					if (resource['media-type'] === 'text/css') {
-						// add all styles
-						html.push('<link rel="stylesheet" type="text/css" href="' + resource.href + '" />');
-					}
-				});
+				this.resources
+						.forEach(function(resource) {
+							if (resource['media-type'] === 'text/css') {
+								// add all styles
+								html
+										.push('<link rel="stylesheet" type="text/css" href="'
+												+ resource.href + '" />');
+							}
+						});
 
 				// console.log([ contents.title, contents.sub_title ]);
 				html.push('<title>', [ contents.title, contents.sub_title ]
@@ -1734,7 +1739,8 @@ function module_code(library_namespace) {
 				// ------------------------------
 
 				// 將作品資訊欄位置右。
-				html.push('<div id="chapter_information" style="float:right;">');
+				html
+						.push('<div id="chapter_information" style="float:right;">');
 
 				if (item_data.date) {
 					// 掲載日/掲載開始日, 最新投稿/最終投稿日
@@ -1889,7 +1895,8 @@ function module_code(library_namespace) {
 
 			// console.log(item);
 			// chapter or resource
-			add_manifest_item.call(this, item,item['media-type'] === 'text/css');
+			add_manifest_item.call(this, item,
+					item['media-type'] === 'text/css');
 		}
 		return item;
 	}
@@ -1935,7 +1942,7 @@ function module_code(library_namespace) {
 	// 自動生成目錄。
 	function generate_TOC() {
 		var original_domain = library_namespace.gettext.get_domain_name
-			&& library_namespace.gettext.get_domain_name();
+				&& library_namespace.gettext.get_domain_name();
 		if (original_domain) {
 			var use_domain = original_domain && this.metadata['dc:language'];
 			use_domain = use_domain && use_domain[0]['dc:language'];
@@ -1967,7 +1974,8 @@ function module_code(library_namespace) {
 		this.resources.forEach(function(resource) {
 			if (resource['media-type'] === 'text/css') {
 				// add all styles
-				TOC_html.push('<link rel="stylesheet" type="text/css" href="' + resource.href + '" />');
+				TOC_html.push('<link rel="stylesheet" type="text/css" href="'
+						+ resource.href + '" />');
 			}
 		});
 
@@ -1977,7 +1985,7 @@ function module_code(library_namespace) {
 
 		this.resources.some(function(resource) {
 			// only allow 1 cover-image
-			if (resource.properties === cover_image_propertie) {
+			if (resource.properties === cover_image_properties) {
 				TOC_html.push(JSON.to_XML({
 					img : null,
 					alt : "cover-image",

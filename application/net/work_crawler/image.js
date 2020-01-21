@@ -189,6 +189,8 @@ function module_code(library_namespace) {
 		if (!image_data.file_length) {
 			image_data.file_length = [];
 		}
+		// console.log('get_image: image_url: ' + image_url);
+		// library_namespace.set_debug(3);
 
 		this.get_URL(image_url, function(XMLHttp) {
 			// console.log(XMLHttp);
@@ -528,8 +530,8 @@ function module_code(library_namespace) {
 			</code>
 			 */
 			max_listeners : 300
-		}, image_data.reset_get_URL_options ? null : this.get_URL_options,
-				image_data.get_URL_options), 'buffer');
+		}, 'get_URL_options' in image_data ? image_data.get_URL_options
+				: this.get_URL_options, image_data.get_URL_options), 'buffer');
 	}
 
 	// --------------------------------------------------------------------------------------------

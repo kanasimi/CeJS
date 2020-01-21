@@ -81,16 +81,18 @@ function module_code(library_namespace) {
 
 		// 解析 作品名稱 → 作品id get_work()
 		search_URL : function(work_title) {
-			return [ this.base_URL + 'e/search/index.php', {
+			return [ 'e/search/index.php', {
 				// orderby : 1,
 				// myorder : 1,
 				tbname : 'mh',
+				// tempid:1 @ https://www.dagumanhua.com/
 				tempid : 3,
 				show : 'title,player,playadmin,bieming,pinyin',
 				keyboard : work_title
 			} ];
 		},
 		parse_search_result : function(html) {
+			// console.log(html);
 			html = html.between('id="dmList"', '</div>');
 			var id_list = [], id_data = [];
 			html.each_between('<li>', '</li>', function(token) {
@@ -188,8 +190,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_qTcms2014_comics_crawler(configuration) {
-		configuration = configuration ? Object.assign(Object.create(null), default_configuration, configuration)
-				: default_configuration;
+		configuration = configuration ? Object.assign(Object.create(null),
+				default_configuration, configuration) : default_configuration;
 
 		// 每次呼叫皆創建一個新的實體。
 		return new library_namespace.work_crawler(configuration);

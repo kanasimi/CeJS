@@ -72,11 +72,12 @@ function module_code(library_namespace) {
 		parse_search_result_web : function(html, get_label) {
 			// console.log(html);
 			html = html.between('<div class="cy_list">', '</div>');
+			// console.log(html);
 			var id_list = [], id_data = [];
 			html.each_between('<li class="title">', '</li>', function(token) {
 				// console.log(token);
 				var matched = token.match(
-				//
+				// [ id, title ]
 				/<a href="\/([a-z]+\/[a-z\-\d]+)\/"[^<>]*?>([^<>]+)/);
 				// console.log(matched);
 				if (this.common_catalog
@@ -178,15 +179,20 @@ function module_code(library_namespace) {
 		},
 		parse_work_data : function(html, get_label, extract_work_data) {
 			// console.log(html);
-			var work_data;
-			/**
-			 * PC version:
-			 * 
-			 * @example <code>
-			var qingtiancms_Details={G_mubanpage:".html",id:"6638",hits:"9454",webdir:"/",pinglunid:"10",pinglunid1:"",pinglunid2:"cytdbnhsU",pinglunid3:"prod_1368b8102b9177303c660debbbbd257c",title:"读书成圣",classid1pinyin:"rexue/",titlepinyin:"dushuchengsheng"};var uyan_config = {'su':'/6638/'};
-			</code>
-			 */
-			eval('work_data=' + html.between('qingtiancms_Details=', ';var'));
+			var work_data = html.between('qingtiancms_Details=', ';var');
+			if (work_data) {
+				/**
+				 * PC version:
+				 * 
+				 * @example <code>
+				var qingtiancms_Details={G_mubanpage:".html",id:"6638",hits:"9454",webdir:"/",pinglunid:"10",pinglunid1:"",pinglunid2:"cytdbnhsU",pinglunid3:"prod_1368b8102b9177303c660debbbbd257c",title:"读书成圣",classid1pinyin:"rexue/",titlepinyin:"dushuchengsheng"};var uyan_config = {'su':'/6638/'};
+				</code>
+				 */
+				eval('work_data=' + work_data);
+			} else {
+				// dagu.js: has NO `qingtiancms_Details`
+				work_data = Object.create(null);
+			}
 
 			// PC version: nokiacn.js, iqg365.js, 733dm.js
 			extract_work_data(work_data, html.between(
@@ -332,7 +338,16 @@ function module_code(library_namespace) {
 
 					// f_qTcms_Pic_curUrl() → f_qTcms_Pic_curUrl_realpic(v) @
 					// http://www.nokiacn.net/template/skin2/css/d7s/js/show.20170501.js?20180805095630
-					if (url.startsWith('/')) {
+
+					if (this.for_each_image) {
+						// 733dm.js
+						// for_each_image:function(url,parameters,base64_encode){return(url);}
+						url = this.for_each_image(url, {
+							qTcms_S_m_id : html
+									.between('qTcms_Pic_m_if="', '"'),
+							qTcms_S_p_id : html.between('qTcms_S_p_id="', '"')
+						}, base64_encode);
+					} else if (url.startsWith('/')) {
 						// e.g., nokiacn.js
 						var image_base_url = this.image_base_url;
 						if (!image_base_url && image_base_url !== '') {
@@ -427,29 +442,107 @@ function module_code(library_namespace) {
 		return dec;
 	}
 
+	// ------------------------------------------
+
+	function utf8_encode(argString) {
+		var string = (argString + '');
+		var utftext = "";
+		var start, end;
+		var stringl = 0;
+		start = end = 0;
+		stringl = string.length;
+		for (var n = 0; n < stringl; n++) {
+			var c1 = string.charCodeAt(n);
+			var enc = null;
+			if (c1 < 128) {
+				end++;
+			} else if (c1 > 127 && c1 < 2048) {
+				enc = String.fromCharCode((c1 >> 6) | 192)
+						+ String.fromCharCode((c1 & 63) | 128);
+			} else {
+				enc = String.fromCharCode((c1 >> 12) | 224)
+						+ String.fromCharCode(((c1 >> 6) & 63) | 128)
+						+ String.fromCharCode((c1 & 63) | 128);
+			}
+			if (enc !== null) {
+				if (end > start) {
+					utftext += string.substring(start, end);
+				}
+				utftext += enc;
+				start = end = n + 1;
+			}
+		}
+		if (end > start) {
+			utftext += string.substring(start, string.length);
+		}
+		return utftext;
+	}
+
+	// btoa()
+	function base64_encode(data) {
+		var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+		var o1, o2, o3, h1, h2, h3, h4, bits, i = 0, ac = 0, enc = "", tmp_arr = [];
+		if (!data) {
+			return data;
+		}
+		data = utf8_encode(data + '');
+		do {
+			o1 = data.charCodeAt(i++);
+			o2 = data.charCodeAt(i++);
+			o3 = data.charCodeAt(i++);
+			bits = o1 << 16 | o2 << 8 | o3;
+			h1 = bits >> 18 & 0x3f;
+			h2 = bits >> 12 & 0x3f;
+			h3 = bits >> 6 & 0x3f;
+			h4 = bits & 0x3f;
+			tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3)
+					+ b64.charAt(h4);
+		} while (i < data.length);
+		enc = tmp_arr.join('');
+		switch (data.length % 3) {
+		case 1:
+			enc = enc.slice(0, -2) + '==';
+			break;
+		case 2:
+			enc = enc.slice(0, -1) + '=';
+			break;
+		}
+		return enc;
+	}
+
 	// --------------------------------------------------------------------------------------------
 
 	function new_qTcms2017_comics_crawler(configuration) {
-		configuration = configuration ? Object.assign(Object.create(null),
-				default_configuration, configuration) : default_configuration;
+		var using_configuration = Object.clone(default_configuration);
 
-		if (configuration.is_mobile === undefined) {
-			configuration.is_mobile = configuration.base_URL.includes('://m.');
-			if (configuration.is_mobile) {
-				Object.assign(configuration, {
-					search_URL : configuration.search_URL_mobile,
+		if (configuration.using_web_search) {
+			Object.assign(using_configuration, {
+				search_URL : using_configuration.search_URL_web,
+				parse_search_result :
+				//
+				using_configuration.parse_search_result_web,
+				id_of_search_result : null,
+				title_of_search_result : null
+			});
+		} else if (configuration.is_mobile === undefined) {
+			using_configuration.is_mobile = configuration.base_URL
+					.includes('://m.');
+			if (using_configuration.is_mobile) {
+				Object.assign(using_configuration, {
+					search_URL : using_configuration.search_URL_mobile,
 					parse_search_result :
 					//
-					configuration.parse_search_result_mobile,
+					using_configuration.parse_search_result_mobile,
 					title_of_search_result :
 					//
-					configuration.title_of_search_result_mobile
+					using_configuration.title_of_search_result_mobile
 				});
 			}
 		}
 
 		// 每次呼叫皆創建一個新的實體。
-		return new library_namespace.work_crawler(configuration);
+		return new library_namespace.work_crawler(Object.assign(
+				using_configuration, configuration));
 	}
 
 	return new_qTcms2017_comics_crawler;

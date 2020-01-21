@@ -430,6 +430,7 @@ function module_code(library_namespace) {
 			// 當新獲取的檔案比較大時，覆寫舊的檔案。
 			overwrite_old_file : 'boolean',
 			vertical_writing : 'boolean|string',
+			// RTL_writing : 'boolean',
 			convert_to_TW : 'boolean',
 
 			user_agent : 'string',

@@ -161,6 +161,42 @@ function module_code(library_namespace) {
 					id_list.push(text.between('<a href="/', '/"'));
 					id_data.push(get_label(text.between(' title="', '"')));
 				});
+			} else if (html.includes('<ul class="book-list">')) {
+				html.between('<ul class="book-list">', '</ul>').each_between(
+				// for https://www.mumumh.com/search?keyword=
+				'<li>', '</li>',
+				/**
+				 * e.g., <code>
+
+				<ul class="book-list">
+				<li>
+				<div class="book-list-cover">
+				<a href="/book/523" title="美丽新世界">
+				                <img class="book-list-cover-img lazy" data-original="https://pic.mumumh.com/static/upload/book/523/cover.jpg" src="https://s1.ax1x.com/2018/12/13/FN8WLQ.jpg" alt="美丽新世界">
+				            </a>
+				</div>
+				<div class="book-list-info">
+				<a href="/book/523">
+				<p class="book-list-info-title">美丽新世界</p>
+				<p class="book-list-info-desc">走后门进全国最大企业上班的豪承，因为同事的轻视和冷落，长期笼罩在屈辱的阴影之下。因为一道突如其来的人...</p>
+				</a>
+				<p class="book-list-info-bottom">
+				<a href="#" style="color:#666;">
+				    <span class="book-list-info-bottom-item">作者：高孙志</span>
+				</a>
+				                <span class='book-list-info-bottom-right-font'>连载中</span>
+				            </p>
+				</div>
+				</li>
+				
+				</ul>
+
+				</code>
+				 */
+				function(text) {
+					id_list.push(+text.between('<a href="/book/', '"'));
+					id_data.push(get_label(text.between(' title="', '"')));
+				});
 			} else if (html) {
 				throw new Error(this.id + ': 網站改版？無法解析搜尋結果！');
 			}
@@ -171,7 +207,48 @@ function module_code(library_namespace) {
 		// --------------------------------------------------------------------
 
 		// 取得作品的章節資料。 get_work_data()
+		parse_work_data_mobile : function(html, get_label, extract_work_data) {
+			// console.log(html);
+			html = html.between('<div class="detail-main">',
+					'<div id="chapter_indexes"');
+			var work_data = {
+				// 必要屬性：須配合網站平台更改。
+				title : get_label(html.between(
+						'<p class="detail-main-info-title">', '</p>')),
+
+				// 選擇性屬性：須配合網站平台更改。
+				tags : html.between('<p class="detail-main-info-class">',
+						'</p>').split('</span>').map(get_label).filter(
+						function(tag) {
+							return !!tag;
+						}),
+				description : get_label(html.between('<p class="detail-desc">',
+						'</p>'))
+			};
+
+			html.each_between('<p class="detail-main-info-author">', null,
+			//
+			function(text) {
+				text = text.between(null, '<p class="')
+						|| text.between(null, '</p>');
+				// console.log(text);
+				var matched = text.match(/^([^：]+)：([\s\S]+)$/);
+				if (matched) {
+					work_data[matched[1]] = get_label(matched[2]);
+				}
+			});
+
+			var matched = work_data.人气.match(/^(\d+)\s*\|(.+)$/);
+			if (matched) {
+				work_data.人气 = +matched[1];
+				work_data.status = matched[2];
+			}
+
+			// console.log(work_data);
+			return work_data;
+		},
 		parse_work_data : function(html, get_label, extract_work_data) {
+			// console.log(html);
 			var part_list = [], matched,
 			//
 			text = html.between('<div class="detail-list-title">', '</div>'),
@@ -181,8 +258,17 @@ function module_code(library_namespace) {
 				part_list[matched[1]] = get_label(matched[2]);
 			}
 
-			html = html.between('<div class="banner_detail_form">',
+			matched = html.between('<div class="banner_detail_form">',
 					'<div class="bottom"');
+			if (matched) {
+				html = matched;
+			} else if (matched = html.between('<div class="detail-main">',
+					'<div id="chapter_indexes"')) {
+				return this.parse_work_data_mobile(html, get_label,
+						extract_work_data);
+			} else {
+				throw new Error(this.id + ': 網站改版？無法解析作品資訊！');
+			}
 
 			var work_data = {
 				// 必要屬性：須配合網站平台更改。
@@ -248,9 +334,11 @@ function module_code(library_namespace) {
 				last_update : work_data.更新时间 || work_data.last_update
 			});
 
+			// console.log(work_data);
 			return work_data;
 		},
 		get_chapter_list : function(work_data, html, get_label) {
+			// console.log(html);
 			var is_dm5 = html.includes('DM5_COMIC_SORT');
 			// 1: 正序 由舊至新, 2: 倒序 由新至舊
 			work_data.inverted_order = typeof this.inverted_order === 'boolean' ? this.inverted_order
@@ -274,8 +362,18 @@ function module_code(library_namespace) {
 			 */
 
 			// console.log(html);
+			// mymhh.js:
+			// <ul class="detail-list-1 detail-list-select"
+			// id="detail-list-select">
 			html = html.between('detail-list-select',
-					'<div class="index-title">');
+					'<div class="index-title">')
+					// mymhh.js:
+					// <a class="detail-list-more" id="detail-list-more"
+					// href="javascript:void(0);"
+					// onclick="charpterMore(this);">展开全部章节</a>
+					|| html.between('detail-list-select',
+							' id="detail-list-more"');
+			// console.log(html);
 
 			// 2019/7/7 dm5.js:
 			// html.includes(' id="detail-list-select-2') === false
@@ -286,6 +384,7 @@ function module_code(library_namespace) {
 				// <ul class="view-win-list detail-list-select"
 				// id="detail-list-select-2" style="display:none;">
 			}
+			// console.log(html);
 
 			// reset work_data.chapter_list
 			work_data.chapter_list = [];
@@ -332,6 +431,7 @@ function module_code(library_namespace) {
 				if (matched) {
 					chapter_data[Date.parse(matched) ? 'date' : 'tip'] = matched;
 				}
+				// console.log(chapter_data);
 				this.add_chapter(work_data, chapter_data);
 			}
 			// console.log(work_data);
@@ -853,6 +953,7 @@ function module_code(library_namespace) {
 		},
 
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
+			// console.log(html);
 			return {
 				// 圖片已經先在前面 get_image_file() 下載完了。
 				images_downloaded : true
@@ -876,12 +977,14 @@ function module_code(library_namespace) {
 		// 要用下面的函數必須指定 pre_parse_chapter_data : null
 		parse_chapter_data_plain_link : function(html, work_data, get_label,
 				chapter_NO) {
+			// console.log(html);
 			var chapter_data = work_data.chapter_list[chapter_NO - 1];
 			// console.log(chapter_data);
 			chapter_data.image_list = [];
-			html.between('<div class="comicpage">', '<div class="fanye">')
+
 			/**
 			 * <code>
+
 			<div class="comiclist">
 			<div class="comicpage">
 			<div>
@@ -893,8 +996,34 @@ function module_code(library_namespace) {
 			<a href="/chapter/1541" class="block" title="第2话">下一章</a>
 			</div>
 			</code>
+			 * 
 			 */
-			.each_between('data-original="', '"', function(url) {
+			html = html.between('<div class="comicpage">',
+			//
+			'<div class="fanye">')
+			/**
+			 * mymhh.js: <code>
+
+			<div class="view-main-1 readForm" id="cp_img">
+			<!--<img class="lazy" data-original="https://pic.mumumh.com/static/upload/book/250/9062/438.jpg"
+			src="https://pic.mumumh.com/static/upload/book/loading.gif">-->
+
+			<img width="100%" data-original="https://pic.mumumh.com/static/upload/book/523/20704/901893.jpg" class="comic_img lazy" style="display: inline;" id="美丽新世界-第8话 - 我们是同一条船上的人了" src="https://pic.mumumh.com/static/upload/loading.gif">
+			<!--<img class="lazy" data-original="https://pic.mumumh.com/static/upload/book/250/9062/438.jpg"
+			src="https://pic.mumumh.com/static/upload/book/loading.gif">-->
+
+
+			</div>
+
+			</code>
+			 */
+			|| html.between(' id="cp_img">', '</div>')
+			//
+			.replace(/<!--[\s\S]*?-->/g, '');
+
+			// console.log(html);
+
+			html.each_between('data-original="', '"', function(url) {
 				chapter_data.image_list.push(url);
 			});
 
