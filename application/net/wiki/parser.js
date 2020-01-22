@@ -550,7 +550,7 @@ function module_code(library_namespace) {
 
 	if (false) {
 		wikitext = 'a\n[[File:f.jpg|thumb|d]]\nb';
-		CeL.wiki.parser(wikitext).parse().each('namespace',
+		CeL.wiki.parser(wikitext).parse().each('namespaced_title',
 				function(token, index, parent) {
 					console.log([ index, token, parent ]);
 				}, true).toString();
@@ -2261,7 +2261,7 @@ function module_code(library_namespace) {
 		// [[ m : abc ]] is OK, as "m : abc".
 		// [[: en : abc ]] is OK, as "en : abc".
 		// [[ :en:abc]] is NOT OK.
-		namespace : function() {
+		namespaced_title : function() {
 			return this.join(this.oddly ? '' : ':');
 		},
 		// page title, template name
@@ -2746,10 +2746,14 @@ function module_code(library_namespace) {
 			// [[MediaWiki:Conversiontable/zh-hant]]
 			options.conversion_table = Object.create(null);
 		}
+		if (!options.section_hierarchy) {
+			options.section_hierarchy = [ [] ];
+		}
 
-		if (typeof options.prefix === 'function')
+		if (typeof options.prefix === 'function') {
 			wikitext = options.prefix(wikitext, queue, include_mark, end_mark)
 					|| wikitext;
+		}
 
 		// ------------------------------------------------------------------------
 		// parse functions
@@ -3530,7 +3534,7 @@ function module_code(library_namespace) {
 					// TODO: normalize 對 [[文章名稱 : 次名稱]] 可能出現問題。
 					page_name = page_name.split(normalize ? /\s*:\s*/ : ':');
 				}
-				page_name = _set_wiki_type(page_name, 'namespace');
+				page_name = _set_wiki_type(page_name, 'namespaced_title');
 			}
 			if (normalize) {
 				// assert: section_title && section_title.startsWith('#')
@@ -4167,7 +4171,35 @@ function module_code(library_namespace) {
 
 			if (postfix && !normalize)
 				parameters.postfix = postfix;
-			parameters.level = section_level.length;
+			var level = section_level.length;
+			// assert: level >= 1
+			parameters.level = level;
+			// parse_wiki 處理時不一定按照先後順序，因此這邊還不能設定 section_hierarchy。
+			parameters.subsections = [];
+			if (options.section_hierarchy.length > level) {
+				// 去尾。
+				options.section_hierarchy.length = level;
+			}
+			options.section_hierarchy[level] = parameters;
+			// console.log(options.section_hierarchy);
+			while (--level >= 0) {
+				// 注意: level 1 的 subsections 可能包含 level 3!
+				var parent_section = options.section_hierarchy[level];
+				if (parent_section) {
+					if (parent_section.subsections) {
+						if (false) {
+							library_namespace.log(parent_section + ' → '
+									+ parameters);
+						}
+						parent_section.subsections.push(parameters);
+						parameters.parent_section = parent_section;
+					} else {
+						// root section list
+						parent_section.push(parameters);
+					}
+					break;
+				}
+			}
 			queue.push(parameters);
 			// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
 			return previous + include_mark + (queue.length - 1) + end_mark
@@ -4533,6 +4565,7 @@ function module_code(library_namespace) {
 				wikitext.conversion_table = options.conversion_table;
 			if (options.conversion_title)
 				wikitext.conversion_title = options.conversion_title;
+			wikitext.subsections = options.section_hierarchy[0];
 		}
 
 		// Release memory. 釋放被占用的記憶體。
