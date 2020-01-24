@@ -182,6 +182,9 @@ function module_code(library_namespace) {
 			setup_API_language(this /* session */, wiki_API.language);
 		}
 
+		// ------------------------------------------------
+		// pre-loading functions
+
 		this.siteinfo();
 	}
 
@@ -747,6 +750,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String|Integer}namespace
 	 *            namespace or page title
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @returns {Integer|String|Undefined}namespace NO.
 	 */
@@ -960,8 +965,7 @@ function module_code(library_namespace) {
 				source.push(namespace);
 		}
 
-		// return pattern
-		// [ , namespace, title ]
+		// namespace_pattern matched: [ , namespace, title ]
 		return new RegExp('^(' + source.join('|').replace(/_/g, '[ _]')
 				+ '):(.+)$', 'i');
 	}
@@ -996,15 +1000,20 @@ function module_code(library_namespace) {
 	/**
 	 * remove namespace part of the title.
 	 * 
+	 * wiki.remove_page()
+	 * 
 	 * @param {String}page_title
 	 *            page title 頁面標題。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @returns {String}title without namespace
 	 */
-	function remove_namespace(page_title, options) {
-		page_title = wiki_API.normalize_title(page_title);
+	function remove_page_title_namespace(page_title, options) {
+		page_title = wiki_API.normalize_title(page_title, options);
 		if (typeof page_title !== 'string') {
-			library_namespace.debug(page_title, 5, 'remove_namespace');
+			library_namespace.debug(page_title, 5,
+					'remove_page_title_namespace');
 			return page_title;
 		}
 		var session = session_of_options(options);
@@ -1014,16 +1023,37 @@ function module_code(library_namespace) {
 		var matched = page_title.match(namespace_pattern);
 		library_namespace.debug('Test ' + wiki_API.title_link_of(page_title)
 				+ ', get [' + matched + '] using pattern ' + namespace_pattern,
-				4, 'remove_namespace');
-		if (matched)
+				4, 'remove_page_title_namespace');
+		if (matched) {
+			// namespace_pattern matched: [ , namespace, title ]
 			return (matched ? matched[2] : page_title).trim();
+		}
+		// Leave untouched
 		return page_title;
 	}
 
+	function page_title_is_namespace(page_title, options) {
+		var namespace = !options ? 0 : !isNaN(options) ? +options
+				: typeof options === 'string' ? options : options.namespace;
+		return get_namespace(page_title, options) === get_namespace(namespace,
+				options);
+	}
+
+	function convert_page_title_to_namespace(page_title, options) {
+		var namespace = !options ? 0 : !isNaN(options) ? +options
+				: typeof options === 'string' ? options : options.namespace;
+		page_title = wiki_API.normalize_title(page_title, options);
+		return get_namespace(namespace, Object.assign({
+			get_name : true
+		}, options)) + ':' + remove_page_title_namespace(page_title, options);
+	}
+
+	// ------------------------------------------
+
 	function is_talk_namespace(namespace, options) {
-		var session = session_of_options(options);
 		if (typeof namespace === 'string') {
 			namespace = wiki_API.normalize_title(namespace).toLowerCase();
+			var session = session_of_options(options);
 			var name_of_NO = session && session.name_of_NO
 					|| wiki_API.namespace.name_of_NO;
 			if (session && session.configurations.namespace_pattern) {
@@ -1042,11 +1072,14 @@ function module_code(library_namespace) {
 				// treat ((namespace)) as page title
 				// get namespace only. e.g., 'wikipedia:sandbox' → 'wikipedia'
 				if (namespace.includes(':')) {
-					namespace = namespace.replace(/:.*$/, '');
-					if (namespace in name_of_NO)
-						namespace = name_of_NO[namespace];
+					// get namespace only, remove page title
+					var _namespace = namespace.replace(/:.*$/, '');
+					if (_namespace in name_of_NO)
+						namespace = name_of_NO[_namespace];
 					else
-						return /^(?:[a-z _]+[ _])?talk$/i.test(namespace);
+						return PATTERN_talk_prefix.test(namespace)
+								|| PATTERN_talk_namespace_prefix
+										.test(namespace);
 				}
 				namespace = +namespace;
 			}
@@ -1121,6 +1154,8 @@ function module_code(library_namespace) {
 		return namespace + ' talk:' + matched[2];
 	}
 
+	var PATTERN_talk_prefix = /^(?:Talk|討論|讨论):/i;
+	var PATTERN_talk_namespace_prefix = /^([a-z _]+)(?:[ _]talk|討論|讨论):/i;
 	function talk_page_to_main(page_title, options) {
 		var namespace;
 		if (wiki_API.is_page_data(page_title)) {
@@ -1161,11 +1196,9 @@ function module_code(library_namespace) {
 
 		// assert: namespace === undefined
 
-		var PATTERN_talk_prefix = /^(?:Talk|討論|讨论):/i;
 		if (PATTERN_talk_prefix.test(page_title))
 			return page_title.replace(PATTERN_talk_prefix, '');
 
-		var PATTERN_talk_namespace_prefix = /^([a-z _]+)[ _]talk:/i;
 		if (PATTERN_talk_namespace_prefix.test(page_title))
 			return page_title.replace(PATTERN_talk_namespace_prefix, '$1:');
 
@@ -1972,32 +2005,9 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// instance 相關函數。
+	// instance 實例相關函數。
 
 	wiki_API.prototype.configurations = default_site_configurations;
-
-	wiki_API.prototype.toString = function(type) {
-		return get_page_content(this.last_page) || '';
-	};
-
-	// @see function get_continue(), get_list()
-	wiki_API.prototype.show_next = typeof JSON === 'object' && JSON.stringify
-	//
-	? function() {
-		return this.next_mark && JSON.stringify(this.next_mark);
-	} : function() {
-		if (!this.next_mark)
-			return;
-		var line = [], value;
-		for ( var name in this.next_mark) {
-			value = this.next_mark[name];
-			line.push(name + ':' + (typeof value === 'string'
-			//
-			? '"' + value.replace(/"/g, '\\"') + '"' : value));
-		}
-		if (line.length > 0)
-			return '{' + line.join(',') + '}';
-	};
 
 	/**
 	 * 設定工作/添加新的工作。
@@ -2009,7 +2019,7 @@ function module_code(library_namespace) {
 	 * 工作原理: 每個實體會hold住一個queue ({Array}this.actions)。 當設定工作時，就把工作推入佇列中。
 	 * 另外內部會有另一個行程負責依序執行每一個工作。
 	 */
-	wiki_API.prototype.next = function() {
+	wiki_API.prototype.next = function next() {
 		this.running = 0 < this.actions.length;
 		if (!this.running) {
 			library_namespace.debug('The queue is empty.', 2,
@@ -3112,6 +3122,17 @@ function module_code(library_namespace) {
 			this.next();
 			break;
 
+		case 'run_async':
+			// ** MUST call `this.next();` in the callback function!
+			// next[1] : callback
+			if (typeof next[1] === 'function') {
+				// pass arguments
+				next[1].apply(this, next.slice(2));
+			} else {
+				this.next();
+			}
+			break;
+
 		// ------------------------------------------------
 
 		default:
@@ -3129,7 +3150,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|search|remove|delete|move_to|protect|rollback|logout|run|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|search|remove|delete|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------
@@ -3347,7 +3368,7 @@ function module_code(library_namespace) {
 	 * @param {Array}pages
 	 *            page data list
 	 */
-	wiki_API.prototype.work = function(config, pages) {
+	wiki_API.prototype.work = function do_batch_work(config, pages) {
 		// console.log(JSON.stringify(pages));
 		if (typeof config === 'function')
 			config = {
@@ -5530,7 +5551,7 @@ function module_code(library_namespace) {
 		if (typeof list === 'function') {
 			operation.list = list = list.call(this, last_data_got, operation);
 		}
-		return operation.type + '/' + remove_namespace(list);
+		return operation.type + '/' + remove_page_title_namespace(list);
 	};
 
 	// --------------------------------------------------------------------------------------------
@@ -5599,6 +5620,81 @@ function module_code(library_namespace) {
 
 	// export 導出.
 
+	// @instance 實例相關函數。
+	Object.assign(wiki_API.prototype, {
+		// @see function get_continue(), get_list()
+		show_next : typeof JSON === 'object' && JSON.stringify
+		//
+		? function show_next() {
+			return this.next_mark && JSON.stringify(this.next_mark);
+		} : function old_show_next() {
+			if (!this.next_mark)
+				return;
+			var line = [], value;
+			for ( var name in this.next_mark) {
+				value = this.next_mark[name];
+				line.push(name + ':' + (typeof value === 'string'
+				//
+				? '"' + value.replace(/"/g, '\\"') + '"' : value));
+			}
+			if (line.length > 0)
+				return '{' + line.join(',') + '}';
+		},
+
+		add_session_to_options : function add_session_to_options(options) {
+			return Object.assign({
+				// [KEY_SESSION]
+				session : this
+			}, library_namespace.setup_options(options))
+		},
+
+		// session_namespace(): wrapper for get_namespace()
+		namespace : function namespace(namespace, options) {
+			return get_namespace(namespace, this
+					.add_session_to_options(options));
+		},
+		remove_namespace : function remove_namespace(page_title, options) {
+			return remove_page_title_namespace(page_title, this
+					.add_session_to_options(options));
+		},
+		is_namespace : function is_namespace(page_title, options) {
+			if (typeof options !== 'object')
+				options = {
+					namespace : options || 0
+				}
+			return page_title_is_namespace(page_title, this
+					.add_session_to_options(options));
+		},
+		to_namespace : function to_namespace(page_title, options) {
+			if (typeof options !== 'object')
+				options = {
+					namespace : options || 0
+				}
+			return convert_page_title_to_namespace(page_title, this
+					.add_session_to_options(options));
+		},
+		// wrappers
+		is_talk_namespace : function wiki_API_is_talk_namespace(namespace,
+				options) {
+			return is_talk_namespace(namespace, this
+					.add_session_to_options(options));
+		},
+		to_talk_page : function wiki_API_to_talk_page(namespace, options) {
+			return to_talk_page(namespace,
+			//
+			this.add_session_to_options(options));
+		},
+		talk_page_to_main : function wiki_API_talk_page_to_main(namespace,
+				options) {
+			return talk_page_to_main(namespace, this
+					.add_session_to_options(options));
+		},
+
+		toString : function wiki_API_toString(type) {
+			return get_page_content(this.last_page) || '';
+		}
+	});
+
 	// @inner
 	library_namespace.set_method(wiki_API, {
 		KEY_SESSION : KEY_SESSION,
@@ -5644,10 +5740,13 @@ function module_code(library_namespace) {
 		PATTERN_category : PATTERN_category,
 
 		namespace : get_namespace,
-		remove_namespace : remove_namespace,
+		is_namespace : page_title_is_namespace,
+		to_namespace : convert_page_title_to_namespace,
+		remove_namespace : remove_page_title_namespace,
+		//
 		is_talk_namespace : is_talk_namespace,
-		talk_page_to_main : talk_page_to_main,
 		to_talk_page : to_talk_page,
+		talk_page_to_main : talk_page_to_main,
 
 		file_pattern : file_pattern,
 
