@@ -1550,17 +1550,20 @@ function module_code(library_namespace) {
 		options = library_namespace.setup_options(options);
 
 		var _this = this, page_title = this.page && this.page.title,
-		// sections[0]: 常常是設定與公告區，或者放置維護模板/通知模板。
-		section_list = this.sections = [],
+		// parsed.sections[0]: 常常是設定與公告區，或者放置維護模板/通知模板。
+		all_root_section_list = this.sections = [],
+		//
+		section_hierarchy = [ this.subsections = [] ],
 		// section_title_hash[section link anchor] = {Natural}count
 		section_title_hash = Object.create(null);
 
 		// to test: 沒有章節標題的文章, 以章節標題開頭的文章, 以章節標題結尾的文章, 章節標題+章節標題。
 
 		// 加入 **上一個** section, "this_section"
-		function add_section(next_section_title_index) {
+		function add_root_section(next_section_title_index) {
+			// assert: _this.type === 'plain'
 			// section_title === parser[section.range[0] - 1]
-			var this_section_title_index = section_list.length > 0 ? section_list[section_list.length - 1].range[1]
+			var this_section_title_index = all_root_section_list.length > 0 ? all_root_section_list[all_root_section_list.length - 1].range[1]
 					: undefined,
 			// range: 本 section inner 在 root parserd 中的 index.
 			// parserd[range[0]] to parserd[range[1]] - 1
@@ -1580,16 +1583,15 @@ function module_code(library_namespace) {
 				each : for_each_token,
 				toString : _this.toString
 			});
-			section_list.push(section);
+			all_root_section_list.push(section);
 		}
 
-		var section_hierarchy = [ this.subsections = [] ];
 		// get topics using for_each_token()
 		// 讀取每一個章節的資料: 標題,內容
 		// TODO: 不必然是章節，也可以有其它不同的分割方法。
 		// TODO: 可以讀取含入的子頁面
 		this.each('section_title', function(section_title_token,
-				section_title_index) {
+				section_title_index, parent_token) {
 			if (page_title) {
 				// [0]: page title
 				section_title_token.link[0] = page_title;
@@ -1604,15 +1606,18 @@ function module_code(library_namespace) {
 
 			var level = section_title_token.level;
 			// console.log([ level, options.level_filter ]);
-			if (Array.isArray(options.level_filter)
+			if (parent_token === _this
+			// ↑ root sections only. Do not include
+			// {{Columns-list|\n==title==\n...}}
+			&& (Array.isArray(options.level_filter)
 			// 要篩選的章節標題層級 e.g., {level_filter:[1,2]}
 			? options.level_filter.includes(level)
 			// e.g., {level_filter:3}
 			: 1 <= options.level_filter ? level === options.level_filter
 			// default: level 2. 僅處理階級2的章節標題。
-			: level === 2) {
+			: level === 2)) {
 				// console.log(section_title_token);
-				add_section(section_title_index);
+				add_root_section(section_title_index);
 			}
 
 			// ----------------------------------
@@ -1655,10 +1660,10 @@ function module_code(library_namespace) {
 		// options.for_each_token_options
 		options));
 		// add the last section
-		add_section(this.length);
-		if (section_list[0].range[1] === 0) {
+		add_root_section(this.length);
+		if (all_root_section_list[0].range[1] === 0) {
 			// 第一個章節為空。 e.g., 以章節標題開頭的文章。
-			section_list.shift();
+			all_root_section_list.shift();
 		}
 
 		// ----------------------------
@@ -1667,7 +1672,7 @@ function module_code(library_namespace) {
 		// 統計各討論串中簽名的次數和發言時間。
 		// TODO: 無法判別先日期，再使用者名稱的情況。 e.g., [[w:zh:Special:Diff/54030530]]
 		if (options.get_users) {
-			section_list.forEach(function(section) {
+			all_root_section_list.forEach(function(section) {
 				// console.log(section);
 				// console.log('section: ' + section.toString());
 
@@ -1810,11 +1815,11 @@ function module_code(library_namespace) {
 			// TODO: return (result === for_each_token.remove_token)
 			// TODO: move section to another page
 			if (for_section.constructor.name === 'AsyncFunction') {
-				// console.log(section_list);
-				return Promise.all(section_list.map(for_section));
+				// console.log(all_root_section_list);
+				return Promise.all(all_root_section_list.map(for_section));
 
 				// @deprecated
-				section_list
+				all_root_section_list
 						.forEach(function(section, section_index) {
 							if (false) {
 								console.log('Process: ' + section.section_title
@@ -1827,7 +1832,7 @@ function module_code(library_namespace) {
 						});
 			} else {
 				// for_section(section, section_index)
-				section_list.some(for_section);
+				all_root_section_list.some(for_section);
 			}
 		}
 		return this;
