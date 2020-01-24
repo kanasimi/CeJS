@@ -1154,8 +1154,8 @@ function module_code(library_namespace) {
 		return namespace + ' talk:' + matched[2];
 	}
 
-	var PATTERN_talk_prefix = /^(?:Talk|討論|讨论):/i;
-	var PATTERN_talk_namespace_prefix = /^([a-z _]+)(?:[ _]talk|討論|讨论):/i;
+	var PATTERN_talk_prefix = /^(?:Talk|討論|讨论|ノート|토론):/i;
+	var PATTERN_talk_namespace_prefix = /^([a-z _]+)(?:[ _]talk|討論|讨论|‐ノート|토론):/i;
 	function talk_page_to_main(page_title, options) {
 		var namespace;
 		if (wiki_API.is_page_data(page_title)) {
@@ -1199,11 +1199,11 @@ function module_code(library_namespace) {
 		if (PATTERN_talk_prefix.test(page_title))
 			return page_title.replace(PATTERN_talk_prefix, '');
 
-		if (PATTERN_talk_namespace_prefix.test(page_title))
+		if (PATTERN_talk_namespace_prefix.test(page_title)) {
 			return page_title.replace(PATTERN_talk_namespace_prefix, '$1:');
+		}
 
-		// 另外處理非 "talk" 說明頁。 e.g., "xxx討論:..."
-		return page_title.replace(/^([^:\n]+?)(?:討論|讨论):/i, '$1:');
+		return page_title;
 	}
 
 	// ------------------------------------------------------------------------
