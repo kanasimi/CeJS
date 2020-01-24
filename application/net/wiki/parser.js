@@ -1583,6 +1583,7 @@ function module_code(library_namespace) {
 			section_list.push(section);
 		}
 
+		var section_hierarchy = [ this.subsections = [] ];
 		// get topics using for_each_token()
 		// 讀取每一個章節的資料: 標題,內容
 		// TODO: 不必然是章節，也可以有其它不同的分割方法。
@@ -1613,10 +1614,43 @@ function module_code(library_namespace) {
 				// console.log(section_title_token);
 				add_section(section_title_index);
 			}
+
+			// ----------------------------------
+
+			if (section_hierarchy.length > level) {
+				// 去尾。
+				section_hierarchy.length = level;
+			}
+			section_hierarchy[level] = section_title_token;
+			// console.log(section_hierarchy);
+			while (--level >= 0) {
+				// 注意: level 1 的 subsections 可能包含 level 3!
+				var parent_section = section_hierarchy[level];
+				if (parent_section) {
+					if (parent_section.subsections) {
+						if (false) {
+							library_namespace.log(parent_section + ' → '
+									+ section_title_token);
+						}
+						parent_section.subsections.push(section_title_token);
+						section_title_token.parent_section = parent_section;
+					} else {
+						// assert: is root section list, parent_section ===
+						// this.subsections === section_hierarchy[0]
+						parent_section.push(section_title_token);
+					}
+					break;
+				}
+			}
+			section_title_token.subsections = [];
+
 		}, Object.assign({
-			modify : false,
-			// Only check the first level. 只檢查第一層之章節標題。
-			max_depth : 1
+			// 不可只檢查第一層之章節標題。就算在 template 中的 section title 也會被記入 TOC。
+			// e.g.,
+			// [[w:en:Wikipedia:Vital_articles/Level/5/Everyday_life/Sports,_games_and_recreation]]
+			// max_depth : 1,
+
+			modify : false
 		},
 		// options.for_each_token_options
 		options));
@@ -2745,9 +2779,6 @@ function module_code(library_namespace) {
 		if (!options.conversion_table) {
 			// [[MediaWiki:Conversiontable/zh-hant]]
 			options.conversion_table = Object.create(null);
-		}
-		if (!options.section_hierarchy) {
-			options.section_hierarchy = [ [] ];
 		}
 
 		if (typeof options.prefix === 'function') {
@@ -4175,31 +4206,7 @@ function module_code(library_namespace) {
 			// assert: level >= 1
 			parameters.level = level;
 			// parse_wiki 處理時不一定按照先後順序，因此這邊還不能設定 section_hierarchy。
-			parameters.subsections = [];
-			if (options.section_hierarchy.length > level) {
-				// 去尾。
-				options.section_hierarchy.length = level;
-			}
-			options.section_hierarchy[level] = parameters;
-			// console.log(options.section_hierarchy);
-			while (--level >= 0) {
-				// 注意: level 1 的 subsections 可能包含 level 3!
-				var parent_section = options.section_hierarchy[level];
-				if (parent_section) {
-					if (parent_section.subsections) {
-						if (false) {
-							library_namespace.log(parent_section + ' → '
-									+ parameters);
-						}
-						parent_section.subsections.push(parameters);
-						parameters.parent_section = parent_section;
-					} else {
-						// root section list
-						parent_section.push(parameters);
-					}
-					break;
-				}
-			}
+			// 請改用 parsed.each_section()。
 			queue.push(parameters);
 			// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
 			return previous + include_mark + (queue.length - 1) + end_mark
@@ -4565,7 +4572,6 @@ function module_code(library_namespace) {
 				wikitext.conversion_table = options.conversion_table;
 			if (options.conversion_title)
 				wikitext.conversion_title = options.conversion_title;
-			wikitext.subsections = options.section_hierarchy[0];
 		}
 
 		// Release memory. 釋放被占用的記憶體。
