@@ -989,7 +989,7 @@ function module_code(library_namespace) {
 			return 'Wikipedia';
 		}
 
-		var name_of_NO = session && session.name_of_NO
+		var name_of_NO = session && session.configurations.name_of_NO
 				|| wiki_API.namespace.name_of_NO;
 		return wiki_API.upper_case_initial(name_of_NO[NS]);
 	}
@@ -1054,7 +1054,7 @@ function module_code(library_namespace) {
 		if (typeof namespace === 'string') {
 			namespace = wiki_API.normalize_title(namespace).toLowerCase();
 			var session = session_of_options(options);
-			var name_of_NO = session && session.name_of_NO
+			var name_of_NO = session && session.configurations.name_of_NO
 					|| wiki_API.namespace.name_of_NO;
 			if (session && session.configurations.namespace_pattern) {
 				if (namespace.includes(':')) {
@@ -1115,7 +1115,7 @@ function module_code(library_namespace) {
 		}
 
 		var session = session_of_options(options);
-		var name_of_NO = session && session.name_of_NO
+		var name_of_NO = session && session.configurations.name_of_NO
 				|| wiki_API.namespace.name_of_NO;
 		if (namespace >= 0) {
 			namespace = name_of_NO[namespace + 1];
@@ -1179,7 +1179,7 @@ function module_code(library_namespace) {
 		}
 
 		var session = session_of_options(options);
-		var name_of_NO = session && session.name_of_NO
+		var name_of_NO = session && session.configurations.name_of_NO
 				|| wiki_API.namespace.name_of_NO;
 		if (namespace > 0) {
 			namespace = name_of_NO[namespace - 1];
@@ -5679,14 +5679,13 @@ function module_code(library_namespace) {
 			return is_talk_namespace(namespace, this
 					.add_session_to_options(options));
 		},
-		to_talk_page : function wiki_API_to_talk_page(namespace, options) {
-			return to_talk_page(namespace,
-			//
-			this.add_session_to_options(options));
+		to_talk_page : function wiki_API_to_talk_page(page_title, options) {
+			return to_talk_page(page_title, this
+					.add_session_to_options(options));
 		},
-		talk_page_to_main : function wiki_API_talk_page_to_main(namespace,
+		talk_page_to_main : function wiki_API_talk_page_to_main(page_title,
 				options) {
-			return talk_page_to_main(namespace, this
+			return talk_page_to_main(page_title, this
 					.add_session_to_options(options));
 		},
 
