@@ -771,8 +771,8 @@ function module_code(library_namespace) {
 
 		if (typeof namespace === 'string') {
 			var list = [];
-			namespace = namespace.replace(/[_\s]+/g,
-					namespace_hash === get_namespace.hash ? '_' : ' ');
+			// e.g., 'User_talk' → 'User talk'
+			namespace = namespace.replace(/[\s_]+/g, ' ');
 			namespace.toLowerCase()
 			// for ',Template,Category', ';Template;Category',
 			// 'main|module|template|category'
@@ -867,7 +867,7 @@ function module_code(library_namespace) {
 
 		// 使用者頁面
 		user : 2,
-		user_talk : 3,
+		'user talk' : 3,
 
 		// ----------------------------
 
@@ -875,72 +875,72 @@ function module_code(library_namespace) {
 		// Varies between wikis
 		project : 4,
 
-		WD : 4,
+		// WD : 4,
 		wikidata : 4,
 		// [[commons:title]] @ enwiki 會造成混亂
 		// commons : 4,
-		COM : 4,
+		// COM : 4,
 
 		// https://en.wikinews.org/wiki/Help:Namespace
-		WN : 4,
+		// WN : 4,
 		wikinews : 4,
 
-		WP : 4,
+		// WP : 4,
 		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
 		wikipedia : 4,
 
 		// ----------------------------
 
 		// Varies between wikis
-		project_talk : 5,
+		'project talk' : 5,
 		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
-		wikipedia_talk : 5,
+		'wikipedia talk' : 5,
 
 		// image
 		file : 6,
-		file_talk : 7,
+		'file talk' : 7,
 		// [[MediaWiki:title]]
 		mediawiki : 8,
-		mediawiki_talk : 9,
+		'mediawiki talk' : 9,
 		// 模板
 		template : 10,
-		template_talk : 11,
+		'template talk' : 11,
 		// [[Help:title]], [[使用說明:title]]
-		H : 12,
+		// H : 12,
 		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
 		help : 12,
-		help_talk : 13,
+		'help talk' : 13,
 		// https://commons.wikimedia.org/wiki/Commons:Administrators%27_noticeboard#Cleaning_up_after_creation_of_CAT:_namespace_redirect
-		CAT : 14,
+		// CAT : 14,
 		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
 		category : 14,
-		category_talk : 15,
+		'category talk' : 15,
 
 		// 主題/主題首頁
 		portal : 100,
 		// 主題討論
-		portal_talk : 101,
+		'portal talk' : 101,
 		book : 108,
-		book_talk : 109,
+		'book talk' : 109,
 		draft : 118,
-		draft_talk : 119,
+		'draft talk' : 119,
 		// Education Program
-		education_program : 446,
+		'education program' : 446,
 		// Education Program talk
-		education_program_talk : 447,
+		'education program talk' : 447,
 		// TimedText
 		timedtext : 710,
 		// TimedText talk
-		timedtext_talk : 711,
+		'timedtext talk' : 711,
 		// 模块 模塊 模組
 		module : 828,
-		module_talk : 829,
+		'module talk' : 829,
 		// Gadget
 		gadget : 2300,
-		gadget_talk : 2301,
+		'gadget talk' : 2301,
 		// Gadget definition
-		gadget_definition : 2302,
-		gadget_definition_talk : 2303,
+		'gadget definition' : 2302,
+		'gadget definition talk' : 2303,
 		// 話題 The Flow namespace (prefix Topic:)
 		topic : 2600
 	};
@@ -966,7 +966,7 @@ function module_code(library_namespace) {
 		}
 
 		// namespace_pattern matched: [ , namespace, title ]
-		return new RegExp('^(' + source.join('|').replace(/_/g, '[ _]')
+		return new RegExp('^(' + source.join('|').replace(/ /g, '[ _]')
 				+ '):(.+)$', 'i');
 	}
 	get_namespace.pattern = generate_namespace_pattern(get_namespace.hash,
@@ -1035,6 +1035,7 @@ function module_code(library_namespace) {
 	function page_title_is_namespace(page_title, options) {
 		var namespace = !options ? 0 : !isNaN(options) ? +options
 				: typeof options === 'string' ? options : options.namespace;
+		page_title = wiki_API.normalize_title(page_title, options);
 		return get_namespace(page_title, options) === get_namespace(namespace,
 				options);
 	}
@@ -1146,7 +1147,8 @@ function module_code(library_namespace) {
 		// console.log([matched,page_title]);
 		if (!matched
 				|| /^[a-z _]+$/i.test(namespace = matched[1])
-				&& !(namespace.toLowerCase().replace(/ /g, '_') in get_namespace.hash)) {
+				&& isNaN(get_namespace(namespace, add_session_to_options(
+						session, options)))) {
 			// assert: main page (namespace: 0)
 			return 'Talk:' + page_title;
 		}
@@ -2135,10 +2137,7 @@ function module_code(library_namespace) {
 				_this.next();
 			}, next[3],
 			// next[4] : options
-			Object.assign({
-				// [KEY_SESSION]
-				session : this
-			}, next[4]));
+			add_session_to_options(this, next[4]));
 			break;
 
 		case 'siteinfo':
@@ -2150,10 +2149,8 @@ function module_code(library_namespace) {
 				next[1] = null;
 			}
 
-			wiki_API.siteinfo(Object.assign({
-				// [KEY_SESSION]
-				session : this
-			}, next[1]), function(data, error) {
+			wiki_API.siteinfo(add_session_to_options(this, next[1]), function(
+					data, error) {
 				if (typeof next[2] === 'function') {
 					// next[2] : callback
 					next[2].call(_this, data, error);
@@ -2209,10 +2206,7 @@ function module_code(library_namespace) {
 					_this.next();
 				},
 				// next[3] : options
-				Object.assign({
-					// [KEY_SESSION]
-					session : this
-				}, next[3]));
+				add_session_to_options(this, next[3]));
 			}
 			break;
 
@@ -2263,10 +2257,7 @@ function module_code(library_namespace) {
 					_this.next();
 				},
 				// next[3] : options
-				Object.assign({
-					// [KEY_SESSION]
-					session : this
-				}, next[3]));
+				add_session_to_options(this, next[3]));
 			}
 			break;
 
@@ -2293,10 +2284,7 @@ function module_code(library_namespace) {
 				_this.next();
 			},
 			// next[3] : options
-			Object.assign({
-				// [KEY_SESSION]
-				session : this
-			}, next[3]));
+			add_session_to_options(this, next[3]));
 			break;
 
 		case 'list':
@@ -2365,10 +2353,7 @@ function module_code(library_namespace) {
 				_this.next();
 			},
 			// next[3] : options
-			Object.assign({
-				// [KEY_SESSION]
-				session : this
-			}, next[3]));
+			add_session_to_options(this, next[3]));
 			break;
 
 		case 'check':
@@ -2515,10 +2500,8 @@ function module_code(library_namespace) {
 					//
 					this.token,
 					// next[2]: options to call edit_topic()=CeL.wiki.Flow.edit
-					Object.assign({
-						// [KEY_SESSION]
-						session : this
-					}, next[2]), function(title, error, result) {
+					add_session_to_options(this, next[2]), function(title,
+							error, result) {
 						// next[3] : callback
 						if (typeof next[3] === 'function')
 							next[3].call(_this, title, error, result);
@@ -2565,11 +2548,9 @@ function module_code(library_namespace) {
 					// 因為已有 contents，直接餵給轉換函式。
 					next[1], this.token,
 					// next[2]: options to call wiki_API.edit()
-					Object.assign({
-						// [KEY_SESSION]
-						session : this
-					}, next[2]), function wiki_API_next_edit_callback(title,
-							error, result) {
+					add_session_to_options(this, next[2]),
+					//
+					function wiki_API_next_edit_callback(title, error, result) {
 						// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
 						if (result ? result.error
 						//
@@ -2686,10 +2667,7 @@ function module_code(library_namespace) {
 			// wiki.upload(file_path, options, callback)
 			wiki_API.upload(next[1], this.token.csrftoken,
 			// next[2]: options to call wiki_API.edit()
-			Object.assign({
-				// [KEY_SESSION]
-				session : this
-			}, next[2]), function(result, error) {
+			add_session_to_options(this, next[2]), function(result, error) {
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(_this, result, error);
@@ -2750,10 +2728,7 @@ function module_code(library_namespace) {
 
 			wiki_API.listen(next[1],
 			// next[2]: options to call wiki_API.listen()
-			Object.assign({
-				// [KEY_SESSION]
-				session : this
-			}, next[2]));
+			add_session_to_options(this, next[2]));
 
 			if (wiki_API.wmflabs) {
 				this.next();
@@ -2829,10 +2804,7 @@ function module_code(library_namespace) {
 				_this.next();
 			},
 			// next[4] : options
-			Object.assign({
-				// [KEY_SESSION]
-				session : this.data_session
-			}, next[4]));
+			add_session_to_options(this.data_session, next[4]));
 			break;
 
 		case 'edit_data':
@@ -2937,10 +2909,7 @@ function module_code(library_namespace) {
 			// wikidata_edit(id, data, token, options, callback)
 			wiki_API.edit_data(next[1], next[2], this.data_session.token,
 			// next[3] : options
-			Object.assign({
-				// [KEY_SESSION]
-				session : this.data_session
-			}, next[3]),
+			add_session_to_options(this.data_session, next[3]),
 			// callback
 			function(data, error) {
 				if (false && data && !wiki_API.is_entity(data)) {
@@ -2979,10 +2948,7 @@ function module_code(library_namespace) {
 			// wikidata_merge(to, from, token, options, callback)
 			wiki_API.merge_data(next[1], next[2], this.data_session.token,
 			// next[3] : options
-			Object.assign({
-				// [KEY_SESSION]
-				session : this.data_session
-			}, next[3]),
+			add_session_to_options(this.data_session, next[3]),
 			// next[4] : callback
 			function(data, error) {
 				// 此 wbmergeitems 之回傳 data 不包含 item 資訊。
@@ -4157,6 +4123,7 @@ function module_code(library_namespace) {
 							'wiki_API.work');
 				} else {
 					nochange_count = target.length;
+					// "Process %1"
 					done = '處理分塊 ' + (work_continue + 1) + '–' + (work_continue
 					// start–end/all
 					+ Math.min(max_size, nochange_count)) + '/'
@@ -5618,6 +5585,12 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function add_session_to_options(session, options) {
+		options = library_namespace.setup_options(options);
+		options[KEY_SESSION] = session;
+		return options;
+	}
+
 	// export 導出.
 
 	// @instance 實例相關函數。
@@ -5641,52 +5614,45 @@ function module_code(library_namespace) {
 				return '{' + line.join(',') + '}';
 		},
 
-		add_session_to_options : function add_session_to_options(options) {
-			return Object.assign({
-				// [KEY_SESSION]
-				session : this
-			}, library_namespace.setup_options(options))
-		},
-
 		// session_namespace(): wrapper for get_namespace()
 		namespace : function namespace(namespace, options) {
-			return get_namespace(namespace, this
-					.add_session_to_options(options));
+			return get_namespace(namespace, add_session_to_options(this,
+					options));
 		},
 		remove_namespace : function remove_namespace(page_title, options) {
-			return remove_page_title_namespace(page_title, this
-					.add_session_to_options(options));
+			return remove_page_title_namespace(page_title,
+					add_session_to_options(this, options));
 		},
 		is_namespace : function is_namespace(page_title, options) {
 			if (typeof options !== 'object')
 				options = {
 					namespace : options || 0
 				}
-			return page_title_is_namespace(page_title, this
-					.add_session_to_options(options));
+			return page_title_is_namespace(page_title, add_session_to_options(
+					this, options));
 		},
 		to_namespace : function to_namespace(page_title, options) {
 			if (typeof options !== 'object')
 				options = {
 					namespace : options || 0
 				}
-			return convert_page_title_to_namespace(page_title, this
-					.add_session_to_options(options));
+			return convert_page_title_to_namespace(page_title,
+					add_session_to_options(this, options));
 		},
 		// wrappers
 		is_talk_namespace : function wiki_API_is_talk_namespace(namespace,
 				options) {
-			return is_talk_namespace(namespace, this
-					.add_session_to_options(options));
+			return is_talk_namespace(namespace, add_session_to_options(this,
+					options));
 		},
 		to_talk_page : function wiki_API_to_talk_page(page_title, options) {
-			return to_talk_page(page_title, this
-					.add_session_to_options(options));
+			return to_talk_page(page_title, add_session_to_options(this,
+					options));
 		},
 		talk_page_to_main : function wiki_API_talk_page_to_main(page_title,
 				options) {
-			return talk_page_to_main(page_title, this
-					.add_session_to_options(options));
+			return talk_page_to_main(page_title, add_session_to_options(this,
+					options));
 		},
 
 		toString : function wiki_API_toString(type) {
