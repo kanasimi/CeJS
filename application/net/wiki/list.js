@@ -198,6 +198,8 @@ function module_code(library_namespace) {
 		library_namespace.debug('parameters: ' + JSON.stringify(prefix), 3,
 				'get_list');
 		if (Array.isArray(prefix)) {
+			// list_type : [ {String}prefix, {String}:query=prop|list,
+			// {Function}title_preprocessor ]
 			parameter = prefix[1] || get_list.default_parameter;
 			title_preprocessor = prefix[2];
 			prefix = prefix[0];
@@ -526,9 +528,15 @@ function module_code(library_namespace) {
 			</code>
 			 */
 			if (type !== 'redirects' && data.query[type]) {
+				data = data.query[type];
 				// 一般情況。
-				if (Array.isArray(data = data.query[type])) {
+				if (Array.isArray(data)) {
 					pages = Object.assign(data, pages);
+				} else if (data.results) {
+					// e.g.,
+					// https://en.wikipedia.org/w/api.php?action=query&list=querypage&qppage=MediaStatistics&qplimit=max&format=json&utf8
+					pages = Object.assign(data.results, pages);
+					pages.data = data;
 				}
 
 				library_namespace.debug(wiki_API.title_link_of(title) + ': '
@@ -585,8 +593,11 @@ function module_code(library_namespace) {
 	 * @type {Object}
 	 * 
 	 * @see https://www.mediawiki.org/wiki/API:Lists/All
+	 *      https://www.mediawiki.org/w/api.php?action=help&modules=query
 	 */
 	get_list.type = {
+		// list_type : [ {String}prefix, {String}:query=prop|list,
+		// {Function}title_preprocessor ]
 
 		// 'type name' : 'abbreviation 縮寫 / prefix' (parameter :
 		// get_list.default_parameter)
@@ -606,6 +617,8 @@ function module_code(library_namespace) {
 
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Ballusers
 		allusers : 'au',
+
+		allcategories : 'ac',
 
 		/**
 		 * 為頁面標題執行前綴搜索。ページ名の先頭一致検索を行います。<br />
@@ -627,6 +640,7 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/wiki/API:Backlinks
 		backlinks : 'bl',
 
+		// Find all pages that embed (transclude) the given title.
 		// 取得所有[[w:zh:Wikipedia:嵌入包含]] title 的頁面。 (transclusion, inclusion)
 		// 参照読み込み
 		// e.g., {{Template name}}, {{/title}}.
@@ -672,7 +686,7 @@ function module_code(library_namespace) {
 		// 'type name' : [ 'abbreviation 縮寫 / prefix', 'parameter' ]
 		// ** 可一次處理多個標題，但可能較耗資源、較慢。
 
-		// TODO
+		// TODO:
 		// **暫時使用wiki_API.langlinks()，因為尚未整合，在跑舊程式時會有問題。
 		NYI_langlinks : [ 'll', 'prop', function(title_parameter, options) {
 			// console.trace(title_parameter);
@@ -692,15 +706,62 @@ function module_code(library_namespace) {
 		// 基本上同 imageusage。
 		fileusage : [ 'fu', 'prop' ],
 
-		// TODO: 列舉包含指定 URL 的頁面。 [[Special:LinkSearch]]
+		// 列舉包含指定 URL 的頁面。 [[Special:LinkSearch]]
 		// https://www.mediawiki.org/wiki/API:Exturlusage
-		// exturlusage : 'eu',
+		exturlusage : [ 'eu', , function(title_parameter) {
+			// console.log(title_parameter);
+			return title_parameter.replace(/^&eutitle=([^=&]*)/,
+			//
+			function($0, link) {
+				if (link) {
+					var matched = link.match(/^([a-z]+):\/\/(.+)$/i);
+					if (matched) {
+						link = matched[2] + '&euprotocol='
+						//
+						+ matched[1].toLowerCase();
+					}
+				} else {
+					link = '';
+				}
+				return '&euquery=' + (link ? link.replace(/^(.+):\/\//) : '');
+			});
+		} ],
 
 		// 回傳指定頁面的所有連結。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Blinks
 		links : [ 'pl', 'prop', function(title_parameter) {
 			return title_parameter.replace(/^&title=/, '&titles=');
-		} ]
+		} ],
+
+		// 取得透過特殊頁面 QueryPage-based 所提供的清單。
+		querypage : [ 'qp', , function(title_parameter) {
+			return title_parameter.replace(/^&qptitle=/, '&qppage=');
+		} ],
+
+		// [[Help:Magic words]] 列出所有在 wiki 使用的頁面屬性名稱。
+		pagepropnames : 'ppn',
+		// 列出使用到指定頁面屬性的所有頁面。
+		pageswithprop : [ 'pwp', , function(title_parameter) {
+			return title_parameter.replace(/^&pwptitle=/, '&pwppropname=');
+		} ],
+
+		// 列出變更標記。
+		tags : [ 'tg', , function(title_parameter) {
+			if (!title_parameter)
+				return '&tgprop=displayname|description'
+				// all 要取得的屬性。
+				+ '|hitcount|defined|source|active';
+			return title_parameter.replace(/^&tgtitle=/, '&tgprop=');
+		} ],
+
+		// 取得有關使用者清單的資訊。
+		users : [ 'us', , function(title_parameter) {
+			return title_parameter.replace(/^&ustitle=/, '&ususers=');
+		} ],
+
+		// 從日誌中獲取事件。
+		// result: new → old
+		logevents : 'le'
 	};
 
 	// ------------------------------------------------------------------------
@@ -1260,7 +1321,7 @@ function module_code(library_namespace) {
 			key = key[1];
 		}
 		if (library_namespace.is_RegExp(key)) {
-			// [[:en:Help:Searching/Regex]]
+			// [[w:en:Help:Searching/Regex]]
 			// [[mw:Help:CirrusSearch#Insource]]
 			// 有無 global flag 結果不同。
 			key = ('insource:' + key).replace(/g([^\/]*)$/, '$1');
