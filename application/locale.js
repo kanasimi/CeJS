@@ -1047,7 +1047,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 將 domain 別名正規化，轉為正規/標準名稱。<br />
-	 * to a standard form. normalize.
+	 * to a standard form. normalize_domain_name().
 	 * 
 	 * @param {String}alias
 	 *            指定之別名。
@@ -1319,13 +1319,24 @@ function module_code(library_namespace) {
 	// ------------------------------------
 	// conversion specifications (轉換規格). e.g., 各區文化特色 - 數字、貨幣、時間、日期格式。
 
+	var allow_Chinese = {
+		Chinese : true
+	};
+
+	function domain_name_for_conversion(domain_name, allowed) {
+		if (allowed && (domain_name in allowed))
+			return domain_name;
+		return gettext.to_standard(domain_name || gettext_domain_name);
+	}
+
 	// 數字系統。numeral system.
 	// 英文的基數
 	gettext.numeral = function(attribute, domain_name) {
+		domain_name = domain_name_for_conversion(domain_name, allow_Chinese);
 		library_namespace.debug({
 			T : [ '轉換數字：[%1]成 %2 格式。', attribute, domain_name ]
 		}, 6);
-		switch (domain_name || gettext_domain_name) {
+		switch (domain_name) {
 		case 'Chinese':
 			return to_Chinese_numeral(attribute);
 
@@ -1354,7 +1365,8 @@ function module_code(library_namespace) {
 	 *      accessdate="2012/9/22 10:7">Decimal mark</a>
 	 */
 	gettext.numeral.decimal_mark = function(domain_name) {
-		switch (domain_name || gettext_domain_name) {
+		domain_name = domain_name_for_conversion(domain_name);
+		switch (domain_name) {
 		case 'cmn-Hant-TW':
 			// return '點';
 
@@ -1376,7 +1388,8 @@ function module_code(library_namespace) {
 	 *      accessdate="2012/9/22 10:7">Decimal mark</a>
 	 */
 	gettext.numeral.thousands_separator = function(domain_name) {
-		switch (domain_name || gettext_domain_name) {
+		domain_name = domain_name_for_conversion(domain_name);
+		switch (domain_name) {
 		case 'cmn-Hant-TW':
 			// return '';
 
@@ -1395,7 +1408,8 @@ function module_code(library_namespace) {
 		CeL.gettext('The %o1 year', 21);
 	}
 	gettext.ordinal = function(attribute, domain_name) {
-		switch (domain_name || gettext_domain_name) {
+		domain_name = domain_name_for_conversion(domain_name, allow_Chinese);
+		switch (domain_name) {
 		case 'Chinese':
 			return '第' + gettext.numeral(attribute, domain_name);
 
@@ -1418,7 +1432,8 @@ function module_code(library_namespace) {
 
 	// 貨幣, 通貨.
 	gettext.currency = function(attribute, domain_name) {
-		switch (domain_name || gettext_domain_name) {
+		domain_name = domain_name_for_conversion(domain_name);
+		switch (domain_name) {
 		case 'cmn-Hant-TW':
 			// data.numeral.to_TWD()
 			return library_namespace.to_TWD(attribute);
@@ -1449,6 +1464,7 @@ function module_code(library_namespace) {
 	// 工具函數。
 
 	function year_name(ordinal, domain_name) {
+		domain_name = domain_name_for_conversion(domain_name, allow_Chinese);
 		switch (domain_name) {
 		case 'Chinese':
 			// number to Chinese year name.
@@ -1474,6 +1490,7 @@ function module_code(library_namespace) {
 	}
 
 	function month_name(ordinal, domain_name) {
+		domain_name = domain_name_for_conversion(domain_name, allow_Chinese);
 		switch (domain_name) {
 		case 'Chinese':
 			// number to Chinese month name.
@@ -1495,6 +1512,7 @@ function module_code(library_namespace) {
 	}
 
 	function date_name(ordinal, domain_name) {
+		domain_name = domain_name_for_conversion(domain_name, allow_Chinese);
 		switch (domain_name) {
 		case 'Chinese':
 			// number to Chinese date name.
@@ -1542,6 +1560,7 @@ function module_code(library_namespace) {
 
 	function week_name(ordinal, domain_name, full_name) {
 		// assert: ordinal: 0–6
+		domain_name = domain_name_for_conversion(domain_name);
 		switch (domain_name) {
 		case 'cmn-Hant-TW':
 		case 'cmn-Hans-CN':
@@ -1572,6 +1591,7 @@ function module_code(library_namespace) {
 
 	// 日期
 	gettext.date = function(date, domain_name) {
+		domain_name = domain_name_for_conversion(domain_name);
 		if (date && !is_Date(date) && date.to_Date)
 			date = date.to_Date(domain_name);
 
@@ -1605,6 +1625,7 @@ function module_code(library_namespace) {
 
 	// 時間
 	gettext.time = function(date, domain_name) {
+		domain_name = domain_name_for_conversion(domain_name);
 		if (date && !is_Date(date) && date.to_Date)
 			date = date.to_Date(domain_name);
 
@@ -1626,6 +1647,7 @@ function module_code(library_namespace) {
 
 	// 日期+時間
 	gettext.datetime = function(date, domain_name) {
+		domain_name = domain_name_for_conversion(domain_name);
 		if (date && !is_Date(date) && date.to_Date)
 			date = date.to_Date(domain_name);
 
