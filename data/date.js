@@ -1785,13 +1785,13 @@ function module_code(library_namespace) {
 	}
 	_.week_date = week_date;
 
+	// <a href="http://www.cppreference.com/wiki/cn/chrono/c/strftime"
+	// accessdate="2012/3/24 15:23">strftime [C++ Reference]</a>
 	// <a
 	// href="http://help.adobe.com/zh_TW/as2/reference/flashlite/WS5b3ccc516d4fbf351e63e3d118cd9b5f6e-7923.html"
 	// accessdate="2012/3/24 15:29">Adobe Flash Platform * Date</a>
 	// <a href="http://msdn.microsoft.com/zh-tw/library/dca21baa.aspx"
 	// accessdate="2012/3/24 15:30">Date 物件</a>
-	// <a href="http://www.cppreference.com/wiki/cn/chrono/c/strftime"
-	// accessdate="2012/3/24 15:23">strftime [C++ Reference]</a>
 	// 除非必要，這邊不應用上 options.original_Date。
 	strftime.default_conversion = {
 		// ----------------------------
@@ -1799,19 +1799,33 @@ function module_code(library_namespace) {
 
 		// 完整年份(非兩位數的數字，近十年應為四位數的數字，如2013) 以4位十進制數寫年份。
 		Y : function(date_value, options) {
+			return date_value.getFullYear();
+		},
+		// 以替用方式寫年。例如在 ja_JP 本地環境中，以「平成23年」取代「2011年」。
+		EY : function(date_value, options) {
 			return gettext_date.year(
 			// (options && options.original_Date || date_value)
 			date_value.getFullYear(), options.numeral || options.locale);
 		},
+
 		// 月分 (1-12)。 將月份寫作十進制數（範圍[01,12]）。
 		// also: %B, %b
 		m : function(date_value, options) {
+			return 1 + date_value.getMonth();
+		},
+		// 寫完整月名，例如 October。
+		B : function(date_value, options) {
 			return gettext_date.month(1 +
 			// (options && options.original_Date || date_value)
 			date_value.getMonth(), options.locale);
 		},
+
 		// 月中的第幾天 (1-31) 以十進制數寫月的第幾日（範圍[01,31]）。
 		d : function(date_value, options) {
+			return date_value.getDate();
+		},
+		// 以替用數字系統寫零基的月的第幾日。例如 ja_JP 本地環境中「二十七」取代「 27 」。
+		Od : function(date_value, options) {
 			return gettext_date.date(
 			// (options && options.original_Date || date_value)
 			date_value.getDate(), options.locale);
