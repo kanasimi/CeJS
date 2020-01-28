@@ -325,6 +325,23 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
+	function to_parameter_name_only(parameter_name_pairs) {
+		var config = Object.create(null);
+		Object.keys(parameter_name_pairs).forEach(function(key) {
+			var parameter_name = parameter_name_pairs[key];
+			if (typeof parameter_name === 'string'
+			//
+			|| typeof parameter_name === 'number') {
+				config[key] = function(value) {
+					var config = Object.create(null);
+					config[parameter_name] = value;
+					return config;
+				};
+			}
+		});
+		return config;
+	}
+
 	/**
 	 * 將 parse_wikitext() 獲得之 template_token 中的指定 parameter 換成 replace_to。
 	 * replace_template_parameter()
@@ -334,12 +351,16 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
-	// replace parameter name
+	// replace parameter name only
 	CeL.wiki.parse.replace_parameter(token, replace_from_parameter_name,
 		value => {
-			return { replace_from_parameter_name : value };
+			return { replace_to_parameter_name : value };
 		}
 	);
+	CeL.wiki.parse.replace_parameter(token, {
+		parameter_1 : replace_to_parameter_1,
+		parameter_2 : replace_to_parameter_2,
+	}, 'parameter_name_only');
 
 	// replace parameter name: 不在乎 spaces 的版本。
 	CeL.wiki.parse.replace_parameter(token, replace_from_parameter_name,
@@ -350,7 +371,7 @@ function module_code(library_namespace) {
 	CeL.wiki.parse.replace_parameter(token, replace_from_parameter_name,
 		original_value => {
 			parameter_1 : value_1,
-			parameter_2 : original_value
+			parameter_2 : original_value,
 		}
 	);
 
@@ -362,7 +383,7 @@ function module_code(library_namespace) {
 	// multi-replacement
 	CeL.wiki.parse.replace_parameter(token, {
 		replace_from_1 : replace_to_config_1,
-		replace_from_2 : replace_to_config_2
+		replace_from_2 : replace_to_config_2,
 	});
 
 	 </code>
@@ -381,8 +402,15 @@ function module_code(library_namespace) {
 	 * @returns {ℕ⁰:Natural+0} count of successful replacement
 	 */
 	function replace_parameter(template_token, parameter_name, replace_to) {
-		if (replace_to === undefined
-				&& library_namespace.is_Object(parameter_name)) {
+		if (// replace_to === undefined &&
+		library_namespace.is_Object(parameter_name)) {
+			// treat `replace_to` as options
+			var options = library_namespace.setup_options(replace_to);
+			// Replace parameter name only, preserve value.
+			if (options.parameter_name_only) {
+				parameter_name = to_parameter_name_only(parameter_name);
+			}
+
 			var count = 0;
 			for ( var replace_from in parameter_name) {
 				count += replace_parameter(template_token, replace_from,
@@ -415,6 +443,7 @@ function module_code(library_namespace) {
 		if (Array.isArray(attribute_text)) {
 			// 要是有合規的 `parameter_name`，
 			// 則應該是 [ {String} parameter_name + " = ", ... ]。
+			// prevent {{| ...{{...|...=...}}... = ... }}
 			attribute_text = attribute_text[0];
 		}
 
@@ -1552,7 +1581,13 @@ function module_code(library_namespace) {
 		var _this = this, page_title = this.page && this.page.title,
 		// parsed.sections[0]: 常常是設定與公告區，或者放置維護模板/通知模板。
 		all_root_section_list = this.sections = [],
-		//
+		/**
+		 * If you want to get **every** sections, please using
+		 * `parsed..each('section_title', ...)` or traversals
+		 * `parsed.section_hierarchy` instead of enumerating `parsed.sections`.
+		 * `parsed.sections` will not including title like this:
+		 * {{Columns-list|\n==title==\n...}}
+		 */
 		section_hierarchy = [ this.subsections = [] ],
 		// section_title_hash[section link anchor] = {Natural}count
 		section_title_hash = Object.create(null);
@@ -4815,7 +4850,7 @@ function module_code(library_namespace) {
 					return matched[2] + ' ' + matched[3] + ' ' + +matched[4]
 							+ ' ' + matched[1] + ' ' + (matched[6] || 'UTC');
 				}, {
-					format : '%2H:%2M, %d %m %Y (UTC)',
+					format : '%2H:%2M, %d %B %Y (UTC)',
 					// use UTC
 					zone : 0,
 					locale : 'en-US'

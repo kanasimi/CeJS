@@ -3631,6 +3631,11 @@ function test_era() {
 
 	CeL.set_debug(0);
 
+	all_error_count += CeL.test('date.format()', [
+		[['3 February 1972', '1972-02-03'.to_Date().format({locale:'en',format:'%d %B %Y'})], 'format(1972-02-03)'],
+		[['2020 January 20', '2020-01-20'.to_Date().format({locale:'en',format:'%Y %B %d'})], 'format(2020-01-20)'],
+	]);
+
 	// 設計上所要求必須通過之測試範例：測試正確性。
 	all_error_count += CeL.test('紀年/曆數', [
 		[['孺子嬰', CeL.era('初始').君主], '初始.君主: 孺子嬰#1'],
