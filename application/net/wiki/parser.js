@@ -4837,8 +4837,10 @@ function module_code(library_namespace) {
 	// = [ {RegExp}PATTERN, {Function}parser({Array}matched) : return {String},
 	// {Function}to_String({Date}date) : return {String} ]
 	//
-	// 可使用parse API來做測試。
+	// 可使用 parse API 來做測試。
 	// https://www.mediawiki.org/w/api.php?action=help&modules=parse
+	//
+	// 須注意在各維基計劃上可能採用不同語系的日期格式。
 	//
 	// to_String: 日期的模式, should match "~~~~~".
 	var date_parser_config = {
@@ -4858,7 +4860,7 @@ function module_code(library_namespace) {
 		ja : [
 				// e.g., "2017年9月5日 (火) 09:29 (UTC)"
 				// [, Y, m, d, week, time(hh:mm), timezone ]
-				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日月火水木金土])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
+				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日月火水木金土一二三四五六])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
 				function(matched) {
 					return matched[1] + '/' + matched[2] + '/' + matched[3]
 							+ matched[5] + ' ' + (matched[6] || 'UTC+9');
@@ -4870,7 +4872,7 @@ function module_code(library_namespace) {
 				} ],
 		'zh-classical' : [
 				// Warning: need CeL.data.numeral
-				/([一二][〇一二三四五六七八九]{3})年([[〇一]?[〇一二三四五六七八九])月([〇一二三]?[〇一二三四五六七八九])日 （([日一二三四五六])）( [〇一二三四五六七八九]{1,2}時[〇一二三四五六七八九]{1,2})分(?: \(([A-Z]{3})\))?/g,
+				/([一二][〇一二三四五六七八九]{3})年([[〇一]?[〇一二三四五六七八九])月([〇一二三]?[〇一二三四五六七八九])日 （([日月火水木金土一二三四五六])）( [〇一二三四五六七八九]{1,2}時[〇一二三四五六七八九]{1,2})分(?: \(([A-Z]{3})\))?/g,
 				function(matched) {
 					return library_namespace
 							.from_positional_Chinese_numeral(matched[1] + '/'
@@ -4893,7 +4895,7 @@ function module_code(library_namespace) {
 				// e.g., "2016年8月1日 (一) 00:00 (UTC)",
 				// "2016年8月1日 (一) 00:00 (CST)"
 				// [, Y, m, d, week, time(hh:mm), timezone ]
-				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日一二三四五六])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
+				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日月火水木金土一二三四五六])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
 				function(matched) {
 					return matched[1] + '/' + matched[2] + '/' + matched[3]
 					//
