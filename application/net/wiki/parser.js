@@ -4840,7 +4840,7 @@ function module_code(library_namespace) {
 	// 可使用 parse API 來做測試。
 	// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 	//
-	// 須注意在各維基計劃上可能採用不同語系的日期格式。
+	// 須注意當使用者特別設定時，在各維基計劃上可能採用不同語系的日期格式。
 	//
 	// to_String: 日期的模式, should match "~~~~~".
 	var date_parser_config = {
@@ -4860,7 +4860,7 @@ function module_code(library_namespace) {
 		ja : [
 				// e.g., "2017年9月5日 (火) 09:29 (UTC)"
 				// [, Y, m, d, week, time(hh:mm), timezone ]
-				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日月火水木金土一二三四五六])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
+				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日月火水木金土])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
 				function(matched) {
 					return matched[1] + '/' + matched[2] + '/' + matched[3]
 							+ matched[5] + ' ' + (matched[6] || 'UTC+9');
@@ -4872,7 +4872,7 @@ function module_code(library_namespace) {
 				} ],
 		'zh-classical' : [
 				// Warning: need CeL.data.numeral
-				/([一二][〇一二三四五六七八九]{3})年([[〇一]?[〇一二三四五六七八九])月([〇一二三]?[〇一二三四五六七八九])日 （([日月火水木金土一二三四五六])）( [〇一二三四五六七八九]{1,2}時[〇一二三四五六七八九]{1,2})分(?: \(([A-Z]{3})\))?/g,
+				/([一二][〇一二三四五六七八九]{3})年([[〇一]?[〇一二三四五六七八九])月([〇一二三]?[〇一二三四五六七八九])日 （([日一二三四五六])）( [〇一二三四五六七八九]{1,2}時[〇一二三四五六七八九]{1,2})分(?: \(([A-Z]{3})\))?/g,
 				function(matched) {
 					return library_namespace
 							.from_positional_Chinese_numeral(matched[1] + '/'
@@ -4895,7 +4895,7 @@ function module_code(library_namespace) {
 				// e.g., "2016年8月1日 (一) 00:00 (UTC)",
 				// "2016年8月1日 (一) 00:00 (CST)"
 				// [, Y, m, d, week, time(hh:mm), timezone ]
-				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日月火水木金土一二三四五六])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
+				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日一二三四五六])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
 				function(matched) {
 					return matched[1] + '/' + matched[2] + '/' + matched[3]
 					//
@@ -4924,6 +4924,10 @@ function module_code(library_namespace) {
 	});
 
 	</code>
+	 * 
+	 * 技術細節警告：不同語系wiki有相異的日期辨識模式，採用和當前wiki不同語言的日期格式，可能無法辨識。
+	 * 
+	 * 經查本對話串中沒有一般型式的一般格式的日期，造成無法辨識。下次遇到這樣的問題，可以在最後由任何一個人加上本討論串已終結、準備存檔的字樣，簽名並且'''加上一般日期格式'''即可。
 	 * 
 	 * @param {String}wikitext
 	 *            date text to parse.
@@ -4974,14 +4978,21 @@ function module_code(library_namespace) {
 		}
 		var PATTERN_date = date_parser[0], matched;
 		date_parser = date_parser[1];
+		// console.log('Using PATTERN_date: ' + PATTERN_date);
 
 		// reset PATTERN index
 		PATTERN_date.lastIndex = 0;
 		while (matched = PATTERN_date.exec(wikitext)) {
+			// console.log(matched);
 			// Warning:
 			// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date()功能大多了。
 			var date = date_parser(matched);
 			// console.log(date);
+
+			// workaround. TODO: using String_to_Date.zone
+			// Date.parse('2019/11/6 16:11 JST') === NaN
+			date = date.replace(/ JST/, ' UTC+9');
+
 			date = Date.parse(date);
 			if (isNaN(date)) {
 				continue;
