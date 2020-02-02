@@ -329,7 +329,6 @@ function module_code(library_namespace) {
 		// 刪除
 		ic : '圖像因侵權被刪|ifd',
 		// 快速刪除
-		sd : 'speedy delete|speedily deleted|快速刪除',
 		lssd : '無來源或版權資訊，快速刪除',
 		svg : '已改用SVG圖形，快速刪除',
 		nowcommons : '維基共享資源已提供，快速刪除',
@@ -368,6 +367,7 @@ function module_code(library_namespace) {
 		rr : '請求理由消失',
 		merge : 'merge|merged|併入|合併',
 		d : 'delete|deleted|snowd|刪除',
+		sd : 'speedy delete|speedily deleted|快速刪除',
 		tk : 'temporarily keep|暫時保留|暂时保留'
 	};
 
