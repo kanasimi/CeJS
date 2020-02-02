@@ -1286,8 +1286,6 @@ function module_code(library_namespace) {
 		});
 	}
 
-	wiki_API.upper_case_initial = upper_case_initial;
-
 	/**
 	 * 規範/正規化頁面名稱 page name。
 	 * 
@@ -1348,7 +1346,7 @@ function module_code(library_namespace) {
 		.replace(/[\u200E\u200F]/g, '')
 
 		.trimEnd()
-		// 去除開頭的 ":"。
+		// 去除開頭的 ":"。 /\s/.test('\u3000')===true
 		.replace(/^[:\s_]+/, '')
 
 		// 無論是中日文、英文的維基百科，所有的 '\u3000' 都會被轉成空白字元 /[ _]/。
@@ -2053,7 +2051,7 @@ function module_code(library_namespace) {
 			+ next.map(function(arg) {
 				// for function
 				var message;
-				if (arg.toString) {
+				if (arg && arg.toString) {
 					message = arg.toString();
 				} else {
 					try {
@@ -2063,7 +2061,7 @@ function module_code(library_namespace) {
 						message = library_namespace.is_type(arg);
 					}
 				}
-				return message.slice(0, 80);
+				return message && message.slice(0, 80);
 			}) + ']', 1, 'wiki_API.prototype.next');
 		}
 
@@ -5703,6 +5701,8 @@ function module_code(library_namespace) {
 		PATTERN_LTR : PATTERN_LTR,
 		PATTERN_BOT_NAME : PATTERN_BOT_NAME,
 		PATTERN_category : PATTERN_category,
+
+		upper_case_initial : upper_case_initial,
 
 		namespace : get_namespace,
 		is_namespace : page_title_is_namespace,

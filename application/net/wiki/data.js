@@ -1024,9 +1024,7 @@ function module_code(library_namespace) {
 		if (language) {
 			// 正規化。
 			language = String(language).trim().toLowerCase();
-			if (language
-			// e.g., 'user talk' → 'user_talk'
-			.replace(/[_\- ]+/g, '_') in wiki_API.namespace.hash) {
+			if (!isNaN(wiki_API.namespace(language))) {
 				// e.g., input "language" of [[Category:title]]
 				// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
 				// return language;
