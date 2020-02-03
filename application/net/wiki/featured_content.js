@@ -84,6 +84,42 @@ function module_code(library_namespace) {
 		}
 	}
 
+	var featured_content_configurations = {
+		zhwiki : {
+			// @see [[Category:特色内容]]
+			list_source : {
+				FA : '典范条目‎',
+				FL : '特色列表‎',
+				FP : '特色图片‎',
+				GA : '優良條目‎',
+			},
+			get_FC : /* get_zhwiki_FC_via_list_page */get_FC_via_category
+		},
+		enwiki : {
+			// @see [[Category:Featured content]]
+			list_source : {
+				FFA : {
+					page : 'Wikipedia:Former featured articles',
+					handler : parse_enwiki_FFA
+				},
+				DGA : 'Delisted good articles',
+				FA : 'Featured articles',
+				FL : 'Featured lists‎',
+				FP : 'Featured pictures‎',
+				FT : 'Featured topics‎',
+				GA : 'Good articles'
+			},
+			get_FC : get_FC_via_category
+		}
+	};
+
+	function get_site_configurations(session) {
+		// e.g., 'zhwiki'
+		var site_name = wiki_API.site_name(session);
+		var FC_configurations = featured_content_configurations[site_name];
+		return FC_configurations;
+	}
+
 	// @see 20190101.featured_content_maintainer.js
 	// 注意: 這邊尚未處理 redirects 的問題!!
 	function parse_each_zhwiki_FC_item_list_page(page_data, redirects_to_hash,
@@ -317,8 +353,7 @@ function module_code(library_namespace) {
 	}
 
 	function get_FC_via_category(options, callback) {
-		var site_name = wiki_API.site_name(this);
-		var FC_configurations = featured_content[site_name];
+		var FC_configurations = get_site_configurations(this);
 
 		var type_name = normalize_type_name(options.type);
 		var list_source = FC_configurations.list_source[type_name];
@@ -397,43 +432,16 @@ function module_code(library_namespace) {
 	// export 導出.
 	// Object.assign(featured_content, {});
 
-	Object.assign(featured_content, {
-		zhwiki : {
-			// @see [[Category:特色内容]]
-			list_source : {
-				FA : '典范条目‎',
-				FL : '特色列表‎',
-				FP : '特色图片‎',
-				GA : '優良條目‎',
-			},
-			get_FC : /* get_zhwiki_FC_via_list_page */get_FC_via_category
-		},
-		enwiki : {
-			// @see [[Category:Featured content]]
-			list_source : {
-				FFA : {
-					page : 'Wikipedia:Former featured articles',
-					handler : parse_enwiki_FFA
-				},
-				DGA : 'Delisted good articles',
-				FA : 'Featured articles',
-				FL : 'Featured lists‎',
-				FP : 'Featured pictures‎',
-				FT : 'Featured topics‎',
-				GA : 'Good articles'
-			},
-			get_FC : get_FC_via_category
-		}
-	});
-
 	// ------------------------------------------------------------------------
 
 	// wrapper for local function
+	wiki_API.prototype.get_featured_content_configurations = function get_featured_content_configurations() {
+		return get_site_configurations(this);
+	};
+
 	wiki_API.prototype.get_featured_content = function get_featured_content(
 			options, callback) {
-		// e.g., 'zhwiki'
-		var site_name = wiki_API.site_name(this);
-		var FC_configurations = featured_content[site_name];
+		var FC_configurations = this.get_featured_content_configurations();
 		var get_FC_function = FC_configurations && FC_configurations.get_FC;
 		if (!get_FC_function) {
 			return;
