@@ -5585,7 +5585,9 @@ function module_code(library_namespace) {
 
 	function add_session_to_options(session, options) {
 		options = library_namespace.setup_options(options);
-		options[KEY_SESSION] = session;
+		if (typeof options === 'object') {
+			options[KEY_SESSION] = session;
+		}
 		return options;
 	}
 
