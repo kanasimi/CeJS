@@ -425,7 +425,8 @@ function module_code(library_namespace) {
 			var count = 0;
 			for ( var replace_from in parameter_name) {
 				replace_to = parameter_name[replace_from];
-				if (options.value_only && typeof replace_to === 'string') {
+				if (options.value_only
+						&& (typeof replace_to === 'string' || typeof replace_to === 'number')) {
 					// replace_to = { [replace_from] : replace_to };
 					replace_to = Object.create(null);
 					replace_to[replace_from] = parameter_name[replace_from];
@@ -541,18 +542,19 @@ function module_code(library_namespace) {
 		// --------------------------------------
 		// a little check: parameter 的數字順序不應受影響。
 
+		var PATERN_parameter_name = /(?:^|\|)[\s\n]*([^=\s\n][\s\S]*?)=/;
 		if (index + 1 < template_token.length) {
 			// 後面沒有 parameter 了，影響較小。
 		} else if (isNaN(parameter_name)) {
 			// TODO: NG: {{t|a=a|1}} → {{t|a|1}}
-			if (!/(?:^|\|)\s*[^\s][^=]*=/.test(replace_to)) {
+			if (!PATERN_parameter_name.test(replace_to)) {
 				library_namespace
 						.warn('replace_parameter: Insert named parameter and disrupt the order of parameters? '
 								+ template_token);
 			}
 		} else {
 			// NG: {{t|a|b}} → {{t|a=1|b}}
-			var matched = replace_to.match(/(?:^|\|)\s*([^\s][^=]*)=/);
+			var matched = replace_to.match(PATERN_parameter_name);
 			if (!matched) {
 				if (index != parameter_name) {
 					library_namespace
