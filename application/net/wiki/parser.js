@@ -351,6 +351,23 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
+	// replace value only
+	CeL.wiki.parse.replace_parameter(token, {
+		parameter_name : 'replace_to_value',
+		parameter_name_2 : 'replace_to_value_2',
+	}, 'value_only');
+	// old style 舊格式
+	CeL.wiki.parse.replace_parameter(token, parameter_name,
+		{ parameter_name : replace_to_value }
+	);
+
+	// {{T|p=v|n=v}} → {{T|V|n=v}}
+	CeL.wiki.parse.replace_parameter(token, 'p', 'V');
+	// replace `replace_from_parameter_name = *` to "replace to wikitext"
+	CeL.wiki.parse.replace_parameter(token, replace_from_parameter_name,
+		"replace to wikitext"
+	);
+
 	// replace parameter name only
 	CeL.wiki.parse.replace_parameter(token, replace_from_parameter_name,
 		value => {
@@ -375,11 +392,6 @@ function module_code(library_namespace) {
 		}
 	);
 
-	// replace `replace_from_parameter_name = *` to "replace to wikitext"
-	CeL.wiki.parse.replace_parameter(token, replace_from_parameter_name,
-		"replace to wikitext"
-	);
-
 	// multi-replacement
 	CeL.wiki.parse.replace_parameter(token, {
 		replace_from_1 : replace_to_config_1,
@@ -402,8 +414,7 @@ function module_code(library_namespace) {
 	 * @returns {ℕ⁰:Natural+0} count of successful replacement
 	 */
 	function replace_parameter(template_token, parameter_name, replace_to) {
-		if (// replace_to === undefined &&
-		library_namespace.is_Object(parameter_name)) {
+		if (library_namespace.is_Object(parameter_name)) {
 			// treat `replace_to` as options
 			var options = library_namespace.setup_options(replace_to);
 			// Replace parameter name only, preserve value.
@@ -413,8 +424,14 @@ function module_code(library_namespace) {
 
 			var count = 0;
 			for ( var replace_from in parameter_name) {
+				replace_to = parameter_name[replace_from];
+				if (options.value_only && typeof replace_to === 'string') {
+					// replace_to = { [replace_from] : replace_to };
+					replace_to = Object.create(null);
+					replace_to[replace_from] = parameter_name[replace_from];
+				}
 				count += replace_parameter(template_token, replace_from,
-						parameter_name[replace_from]);
+						replace_to);
 			}
 			return count;
 		}
@@ -530,7 +547,7 @@ function module_code(library_namespace) {
 			// TODO: NG: {{t|a=a|1}} → {{t|a|1}}
 			if (!/(?:^|\|)\s*[^\s][^=]*=/.test(replace_to)) {
 				library_namespace
-						.warn('Insert named parameter and disrupt the order of parameters? '
+						.warn('replace_parameter: Insert named parameter and disrupt the order of parameters? '
 								+ template_token);
 			}
 		} else {
@@ -538,14 +555,15 @@ function module_code(library_namespace) {
 			var matched = replace_to.match(/(?:^|\|)\s*([^\s][^=]*)=/);
 			if (!matched) {
 				if (index != parameter_name) {
-					library_namespace.warn('Insert non-named parameter to ['
-							+ parameter_name
-							+ '] and disrupt the order of parameters? '
-							+ template_token);
+					library_namespace
+							.warn('replace_parameter: Insert non-named parameter to ['
+									+ parameter_name
+									+ '] and disrupt the order of parameters? '
+									+ template_token);
 				}
 			} else if (matched[1].trim() != parameter_name) {
 				library_namespace
-						.warn('Insert numerical parameter name and disrupt the order of parameters? '
+						.warn('replace_parameter: Insert numerical parameter name and disrupt the order of parameters? '
 								+ template_token);
 			}
 		}
