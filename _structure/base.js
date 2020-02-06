@@ -465,7 +465,10 @@ function (globalThis) {
 			}
 			return _options;
 		}
-		return options || Object.assign(Object.create(null), options);
+		// e.g., number: Invalid option?
+		return (typeof options === 'object' /* || typeof options === 'function' */)
+		// typeof null === 'object'
+		&& options || Object.assign(Object.create(null), options);
 	}
 	/**
 	 * setup options. 前置處理 / clone options，避免修改或覆蓋附加參數。<br />
