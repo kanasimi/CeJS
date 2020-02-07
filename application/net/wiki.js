@@ -2535,10 +2535,9 @@ function module_code(library_namespace) {
 				this.next();
 
 			} else {
-				var has_token = true;
+				var has_token = true, original_queue;
 				if (typeof next[1] === 'function') {
 					// 為了避免消耗memory，儘可能把本sub任務先執行完。
-					var original_queue;
 					if (this.actions.length > 0) {
 						original_queue = this.actions;
 						this.actions = [];
@@ -2552,7 +2551,7 @@ function module_code(library_namespace) {
 					// next[2]: options to call edit_topic()=CeL.wiki.Flow.edit
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 					next[1] = next[1].call(next[2], this.last_page);
-					if (original_queue) {
+					if (false && original_queue) {
 						this.actions.append(original_queue);
 						// free
 						original_queue = null;
@@ -2574,7 +2573,8 @@ function module_code(library_namespace) {
 					// next[3] : callback
 					if (typeof next[3] === 'function')
 						next[3].call(this, this.last_page.title, 'nochange');
-					has_token && this.next();
+					original_queue && this.actions.append(original_queue);
+					(has_token || !this.running) && this.next();
 				} else {
 					wiki_API.edit([ this.API_URL, this.last_page ],
 					// 因為已有 contents，直接餵給轉換函式。
@@ -2672,7 +2672,9 @@ function module_code(library_namespace) {
 							if (_this.last_page) {
 								delete _this.last_page.revisions;
 							}
-							has_token && _this.next();
+							original_queue
+									&& this.actions.append(original_queue);
+							(has_token || !_this.running) && _this.next();
 						}
 					});
 				}
