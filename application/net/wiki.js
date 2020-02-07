@@ -1399,10 +1399,16 @@ function module_code(library_namespace) {
 
 			section = use_underline ? section.replace(/[\s_]+$/, '') : section
 					.trimEnd();
-			if (!/^[a-z][a-z_\-]+$/i.test(section)) {
+			var interwiki_pattern = session
+					&& session.configurations.interwiki_pattern
+					|| /^[a-z][a-z_\-]+$/i;
+			if (!interwiki_pattern.test(section)) {
+				// e.g., [[Avatar: The Last Airbender]]
+				page_name[index] = upper_case_initial(section);
 				return true;
 			}
 
+			// treat `section` as lang code
 			section = section.toLowerCase();
 			// lang code
 			has_language = true;
@@ -2573,7 +2579,9 @@ function module_code(library_namespace) {
 					// next[3] : callback
 					if (typeof next[3] === 'function')
 						next[3].call(this, this.last_page.title, 'nochange');
-					original_queue && this.actions.append(original_queue);
+					original_queue
+					// 回填/回復queue
+					&& this.actions.append(original_queue);
 					(has_token || !this.running) && this.next();
 				} else {
 					wiki_API.edit([ this.API_URL, this.last_page ],
@@ -2673,7 +2681,8 @@ function module_code(library_namespace) {
 								delete _this.last_page.revisions;
 							}
 							original_queue
-									&& this.actions.append(original_queue);
+							// 回填/回復queue
+							&& _this.actions.append(original_queue);
 							(has_token || !_this.running) && _this.next();
 						}
 					});
@@ -3381,9 +3390,10 @@ function module_code(library_namespace) {
 		if (!('no_edit' in config)) {
 			// default: 未設定 summary 則不編輯頁面。
 			config.no_edit = !config.summary;
-		} else if (config.no_edit && !config.summary) {
+		} else if (!config.no_edit && !config.summary) {
 			library_namespace
-					.warn('wiki_API.work: Did not set config.summary when edit page!');
+					.warn('wiki_API.work: Did not set config.summary when edit page (config.no_edit='
+							+ config.no_edit + ')!');
 		}
 
 		if (!pages)
@@ -4543,10 +4553,11 @@ function module_code(library_namespace) {
 
 		options = Object.assign({
 			meta : 'siteinfo',
-			// magicwords: #重定向 interwikimap, thumb %1px center,
-			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|specialpagealiases|magicwords|extensiontags|protocols&utf8&format=json
 			siprop : 'general|namespaces|namespacealiases|specialpagealiases'
-					+ '|magicwords|languagevariants|extensiontags|protocols'
+			// magicwords: #重定向 interwikimap, thumb %1px center,
+			+ '|magicwords|interwikimap'
+			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|specialpagealiases|magicwords|extensiontags|protocols&utf8&format=json
+			+ '|languagevariants|extensiontags|protocols'
 		// + '|functionhooks|variables'
 		}, options);
 
@@ -4608,6 +4619,15 @@ function module_code(library_namespace) {
 					lang) {
 				return lang.code;
 			});
+		}
+
+		var interwikimap = configurations.interwikimap;
+		if (interwikimap) {
+			// prefix_pattern
+			site_configurations.interwiki_pattern = new RegExp('^('
+					+ interwikimap.map(function(interwiki) {
+						return interwiki.prefix;
+					}).join('|') + ')(?::(.+))?$', 'i');
 		}
 
 		var languagevariants = configurations.languagevariants;
@@ -5687,6 +5707,13 @@ function module_code(library_namespace) {
 		talk_page_to_main : function wiki_API_talk_page_to_main(page_title,
 				options) {
 			return talk_page_to_main(page_title, add_session_to_options(this,
+					options));
+		},
+
+		normalize_title
+		//
+		: function wiki_API_normalize_title(page_title, options) {
+			return normalize_page_name(page_title, add_session_to_options(this,
 					options));
 		},
 
