@@ -2537,6 +2537,12 @@ function module_code(library_namespace) {
 			} else {
 				var has_token = true;
 				if (typeof next[1] === 'function') {
+					// 為了避免消耗memory，儘可能把本sub任務先執行完。
+					var original_queue;
+					if (this.actions.length > 0) {
+						original_queue = this.actions;
+						this.actions = [];
+					}
 					// 因為接下來的操作可能會呼叫 this.next() 本身，
 					// 因此必須把正在執行的標記特消掉。
 					this.running = false;
@@ -2546,10 +2552,16 @@ function module_code(library_namespace) {
 					// next[2]: options to call edit_topic()=CeL.wiki.Flow.edit
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 					next[1] = next[1].call(next[2], this.last_page);
+					if (original_queue) {
+						this.actions.append(original_queue);
+						// free
+						original_queue = null;
+					}
 					if (this.running) {
 						library_namespace.debug(
 								'其他執行緒正執行中，本執行緒最終將不會執行this.next()。', 0,
 								'wiki_API.prototype.next');
+						library_namespace.warn('警告:不應出現此情形!');
 						has_token = false;
 					}
 				}
