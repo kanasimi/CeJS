@@ -192,14 +192,12 @@ function module_code(library_namespace) {
 	function wiki_API_edit(title, text, token, options, callback, timestamp) {
 		// console.log(text);
 		if (library_namespace.is_thenable(text)) {
-			if (options && (KEY_SESSION in options)) {
-				options[KEY_SESSION].running = false;
-			}
-			text.then(function(text) {
-				wiki_API_edit(title, text, token, options, callback,
-				//
-				timestamp);
-			});
+			setTimeout(function() {
+				text.then(function(text) {
+					wiki_API_edit(title, text, token, options, callback,
+							timestamp);
+				})
+			}, 0);
 			return;
 		}
 
