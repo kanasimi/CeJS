@@ -192,16 +192,14 @@ function module_code(library_namespace) {
 	function wiki_API_edit(title, text, token, options, callback, timestamp) {
 		// console.log(text);
 		if (library_namespace.is_thenable(text)) {
+			if (options && (KEY_SESSION in options)) {
+				options[KEY_SESSION].running = false;
+			}
 			text.then(function(text) {
 				wiki_API_edit(title, text, token, options, callback,
 				//
 				timestamp);
 			});
-			var session;
-			if (options && ('session' in options)) {
-				session = options[KEY_SESSION];
-				session.stopped = true;
-			}
 			return;
 		}
 
@@ -339,7 +337,7 @@ function module_code(library_namespace) {
 				'wiki_API_edit');
 
 		var session;
-		if ('session' in options) {
+		if (KEY_SESSION in options) {
 			session = options[KEY_SESSION];
 			delete options[KEY_SESSION];
 		}
@@ -930,7 +928,7 @@ function module_code(library_namespace) {
 		post_data.token = token;
 
 		var session;
-		if ('session' in options) {
+		if (KEY_SESSION in options) {
 			session = options[KEY_SESSION];
 			// delete options[KEY_SESSION];
 		}
