@@ -2541,7 +2541,22 @@ function module_code(library_namespace) {
 				this.next();
 
 			} else {
-				var has_token = true, original_queue;
+				var original_queue,
+				// 可多次執行backfill。必須在最終執行剛好一次check_next。
+				backfill = function() {
+					if (original_queue) {
+						// assert: {Array}original_queue.length > 0
+						// 回填/回復queue
+						_this.actions.append(original_queue);
+						// free
+						original_queue = null;
+						return true;
+					}
+				}, check_next = function() {
+					if (backfill() && !_this.running) {
+						_this.next();
+					}
+				};
 				if (typeof next[1] === 'function') {
 					// 為了避免消耗memory，儘可能把本sub任務先執行完。
 					if (this.actions.length > 0) {
@@ -2557,17 +2572,13 @@ function module_code(library_namespace) {
 					// next[2]: options to call edit_topic()=CeL.wiki.Flow.edit
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 					next[1] = next[1].call(next[2], this.last_page);
-					if (false && original_queue) {
-						this.actions.append(original_queue);
-						// free
-						original_queue = null;
-					}
 					if (this.running) {
 						library_namespace.debug(
-								'其他執行緒正執行中，本執行緒最終將不會執行this.next()。', 0,
+						//
+						'其他執行緒正執行中，可能是 content/text() 呼叫了 wiki.next()。', 1,
 								'wiki_API.prototype.next');
-						library_namespace.warn('警告:不應出現此情形!');
-						has_token = false;
+					} else {
+						backfill();
 					}
 				}
 				if (next[2] && next[2].skip_nochange
@@ -2579,10 +2590,7 @@ function module_code(library_namespace) {
 					// next[3] : callback
 					if (typeof next[3] === 'function')
 						next[3].call(this, this.last_page.title, 'nochange');
-					original_queue
-					// 回填/回復queue
-					&& this.actions.append(original_queue);
-					(has_token || !this.running) && this.next();
+					check_next();
 				} else {
 					wiki_API.edit([ this.API_URL, this.last_page ],
 					// 因為已有 contents，直接餵給轉換函式。
@@ -2680,10 +2688,7 @@ function module_code(library_namespace) {
 							if (_this.last_page) {
 								delete _this.last_page.revisions;
 							}
-							original_queue
-							// 回填/回復queue
-							&& _this.actions.append(original_queue);
-							(has_token || !_this.running) && _this.next();
+							check_next();
 						}
 					});
 				}
