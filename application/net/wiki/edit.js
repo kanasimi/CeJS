@@ -197,6 +197,11 @@ function module_code(library_namespace) {
 				//
 				timestamp);
 			});
+			var session;
+			if (options && ('session' in options)) {
+				session = options[KEY_SESSION];
+				session.stopped = true;
+			}
 			return;
 		}
 
@@ -977,7 +982,7 @@ function module_code(library_namespace) {
 
 		// no really update
 		if (options.test_only) {
-			delete options.session;
+			delete options[KEY_SESSION];
 			delete options.text;
 			action = post_data.text;
 			delete post_data.text;
