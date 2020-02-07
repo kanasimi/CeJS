@@ -190,6 +190,16 @@ function module_code(library_namespace) {
 	 *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
 	 */
 	function wiki_API_edit(title, text, token, options, callback, timestamp) {
+		// console.log(text);
+		if (library_namespace.is_thenable(text)) {
+			text.then(function(text) {
+				wiki_API_edit(title, text, token, options, callback,
+				//
+				timestamp);
+			});
+			return;
+		}
+
 		var is_undo = options && options.undo;
 		if (is_undo) {
 			// 一般 undo_count 超過1也不一定能成功？因此設定輸入 {undo:1} 時改 {undo:true} 亦可。
@@ -259,21 +269,10 @@ function module_code(library_namespace) {
 						// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 						// 注意: 更改此介面需同時修改 wiki_API.prototype.work 中 'edit' 之介面。
 						text = text.call(options, page_data);
-						if (library_namespace.is_thenable(text)) {
-							text.then(function(value) {
-								text = value;
-								run_next();
-							});
-							return;
-						}
 					}
-
-					function run_next() {
-						// 需要同時改變 wiki_API.prototype.next！
-						wiki_API_edit(title, text, token, options, callback,
-								timestamp);
-					}
-					run_next();
+					// 需要同時改變 wiki_API.prototype.next！
+					wiki_API_edit(title, text, token, options, callback,
+							timestamp);
 				}
 			}, _options);
 			return;
