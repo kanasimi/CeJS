@@ -2488,6 +2488,18 @@ function module_code(library_namespace) {
 						// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 						next[1] = next[1].call(next[2], this.last_page);
 					}
+					if (library_namespace.is_thenable(next[1])) {
+						// 跳出wiki_API.next，預防next[1]再度呼叫wiki_API.next。
+						setTimeout(function() {
+							next[1].then(function(text) {
+								next[1] = text;
+								_this.actions.push(next);
+								_this.next();
+							});
+						}, 0);
+						return;
+					}
+
 					// edit_topic()
 					wiki_API.Flow.edit([ this.API_URL, this.last_page ],
 					// 新章節/新話題的標題文字。
@@ -2524,16 +2536,6 @@ function module_code(library_namespace) {
 
 			} else {
 				if (typeof next[1] === 'function') {
-					if (library_namespace.is_async_function(next[1])) {
-						setTimeout(function() {
-							next[1].then(function(text) {
-								next[1] = text;
-								_this.actions.push(next);
-								_this.next();
-							});
-						}, 0);
-						return;
-					}
 					// next[1] = next[1](get_page_content(this.last_page),
 					// this.last_page.title, this.last_page);
 					// 需要同時改變 wiki_API.edit！
@@ -2541,7 +2543,6 @@ function module_code(library_namespace) {
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 					next[1] = next[1].call(next[2], this.last_page);
 				}
-
 				if (next[2] && next[2].skip_nochange
 				// 採用 skip_nochange 可以跳過實際 edit 的動作。
 				&& next[1] === get_page_content(this.last_page)) {
