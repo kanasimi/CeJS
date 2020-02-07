@@ -2535,13 +2535,23 @@ function module_code(library_namespace) {
 				this.next();
 
 			} else {
+				var has_token = true;
 				if (typeof next[1] === 'function') {
+					// 因為接下來的操作可能會呼叫 this.next() 本身，
+					// 因此必須把正在執行的標記特消掉。
+					this.running = false;
 					// next[1] = next[1](get_page_content(this.last_page),
 					// this.last_page.title, this.last_page);
 					// 需要同時改變 wiki_API.edit！
 					// next[2]: options to call edit_topic()=CeL.wiki.Flow.edit
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 					next[1] = next[1].call(next[2], this.last_page);
+					if (this.running) {
+						library_namespace.debug(
+								'其他執行緒正執行中，本執行緒最終將不會執行this.next()。', 0,
+								'wiki_API.prototype.next');
+						has_token = false;
+					}
 				}
 				if (next[2] && next[2].skip_nochange
 				// 採用 skip_nochange 可以跳過實際 edit 的動作。
@@ -2552,7 +2562,7 @@ function module_code(library_namespace) {
 					// next[3] : callback
 					if (typeof next[3] === 'function')
 						next[3].call(this, this.last_page.title, 'nochange');
-					this.next();
+					has_token && this.next();
 				} else {
 					wiki_API.edit([ this.API_URL, this.last_page ],
 					// 因為已有 contents，直接餵給轉換函式。
@@ -2650,7 +2660,7 @@ function module_code(library_namespace) {
 							if (_this.last_page) {
 								delete _this.last_page.revisions;
 							}
-							_this.next();
+							has_token && _this.next();
 						}
 					});
 				}
