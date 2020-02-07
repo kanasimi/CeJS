@@ -495,7 +495,19 @@ function module_code(library_namespace) {
 			matched = [];
 		}
 
-		var spaces = template_token[index].toString().match(/(\n)\s*$|( ?)$/);
+		/**
+		 * 保留屬性質結尾的排版:多行保留行先頭的空白，但不包括末尾的空白。單行的則留最後一個空白。 preserve spaces for:
+		 * <code>
+
+		{{T
+		 | 1 = 1
+		 | 2 = 2
+		 | 3 = 3
+		}}
+
+		</code>
+		 */
+		var spaces = template_token[index].toString().match(/(\n *| ?)$/);
 		spaces = [ matched[1], matched[0], spaces[1] || spaces[2] ];
 
 		// --------------------------------------
