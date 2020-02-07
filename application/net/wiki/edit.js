@@ -248,17 +248,32 @@ function module_code(library_namespace) {
 						// get the oldest revision
 						[page_data.revisions.length - 1].parentid;
 					}
-					// 需要同時改變 wiki_API.prototype.next！
-					wiki_API_edit(title,
-					// 這裡不直接指定 text，是為了讓使(回傳要編輯資料的)設定值函數能即時依page_data變更 options。
-					// undo_count ? '' :
-					typeof text === 'function' &&
-					// or: text(wiki_API.content_of(page_data),
-					// page_data.title, page_data)
-					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
-					// 注意: 更改此介面需同時修改 wiki_API.prototype.work 中 'edit' 之介面。
-					text.call(options, page_data), token, options, callback,
-							timestamp);
+
+					// 這裡不直接指定 text，是為了使(回傳要編輯資料的)設定值函數能即時依page_data變更 options。
+					if (undo_count) {
+						// text = '';
+					}
+					if (typeof text === 'function') {
+						// or: text(wiki_API.content_of(page_data),
+						// page_data.title, page_data)
+						// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
+						// 注意: 更改此介面需同時修改 wiki_API.prototype.work 中 'edit' 之介面。
+						text = text.call(options, page_data);
+						if (library_namespace.is_thenable(text)) {
+							text.then(function(value) {
+								text = value;
+								run_next();
+							});
+							return;
+						}
+					}
+
+					function run_next() {
+						// 需要同時改變 wiki_API.prototype.next！
+						wiki_API_edit(title, text, token, options, callback,
+								timestamp);
+					}
+					run_next();
 				}
 			}, _options);
 			return;
