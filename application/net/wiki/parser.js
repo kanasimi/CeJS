@@ -508,7 +508,7 @@ function module_code(library_namespace) {
 		</code>
 		 */
 		var spaces = template_token[index].toString().match(/(\n *| ?)$/);
-		spaces = [ matched[1], matched[0], spaces[1] || spaces[2] ];
+		spaces = [ matched[1], matched[0], spaces[1] ];
 
 		// --------------------------------------
 		// 正規化 replace_to。
