@@ -2403,6 +2403,8 @@ function module_code(library_namespace) {
 			wiki_API.edit.copy_from.apply(this, next.slice(1));
 			break;
 
+		// ----------------------------------------------------------------------------------------
+
 		case 'edit':
 			// wiki.edit(page contents, options, callback)
 			if (typeof next[2] === 'string') {
@@ -2413,7 +2415,9 @@ function module_code(library_namespace) {
 			}
 
 			// TODO: {String|RegExp|Array}filter
-			if (!this.last_page) {
+			// 在多執行緒的情況下，例如下面 backfill 的時候，this.last_page 可能會被改變？因此先作個 cache。
+			var last_page_on_call = this.last_page;
+			if (!last_page_on_call) {
 				library_namespace
 						.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first!');
 				// next[3] : callback
@@ -2429,13 +2433,13 @@ function module_code(library_namespace) {
 				this.next();
 			} else if (this.stopped && !next[2].skip_stopped) {
 				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯'
-						+ wiki_API.title_link_of(this.last_page) + '！');
+						+ wiki_API.title_link_of(last_page_on_call) + '！');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
-					next[3].call(this, this.last_page.title, '已停止作業');
+					next[3].call(this, last_page_on_call.title, '已停止作業');
 				this.next();
 
-			} else if (this.last_page.is_Flow) {
+			} else if (last_page_on_call.is_Flow) {
 				// next[2]: options to call edit_topic()=CeL.wiki.Flow.edit
 				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 				if (next[2].section !== 'new') {
@@ -2445,21 +2449,21 @@ function module_code(library_namespace) {
 					if (typeof next[3] === 'function') {
 						// 2017/9/18 Flow已被重新定義為結構化討論 / 結構式討論。
 						// is [[mw:Structured Discussions]].
-						next[3].call(this, this.last_page.title, 'is Flow');
+						next[3].call(this, last_page_on_call.title, 'is Flow');
 					}
 					this.next();
 
-				} else if (!this.last_page.header) {
+				} else if (!last_page_on_call.header) {
 					// rollback
 					this.actions.unshift(next);
 					// 先取得關於討論板的描述。以此為依據，檢測頁面是否允許機器人帳戶訪問。
 					// Flow_page()
-					wiki_API.Flow.page(this.last_page, function() {
+					wiki_API.Flow.page(last_page_on_call, function() {
 						// next[3] : callback
 						if (typeof next[3] === 'function')
-							next[3].call(this, this.last_page.title);
+							next[3].call(this, last_page_on_call.title);
 						// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
-						delete _this.last_page.revisions;
+						delete last_page_on_call.revisions;
 						_this.next();
 					}, {
 						flow_view : 'header',
@@ -2468,31 +2472,32 @@ function module_code(library_namespace) {
 					});
 
 				} else if ((!next[2] || !next[2].ignore_denial)
-						&& wiki_API.edit.denied(this.last_page,
+						&& wiki_API.edit.denied(last_page_on_call,
 								this.token.lgname, next[2]
 										&& next[2].notification)) {
 					// {{bot}} support for flow page
-					// 採用 this.last_page 的方法，
+					// 採用 last_page_on_call 的方法，
 					// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 					library_namespace
 							.warn('wiki_API.prototype.next: Denied to edit flow '
-									+ wiki_API.title_link_of(this.last_page));
+									+ wiki_API.title_link_of(last_page_on_call));
 					// next[3] : callback
 					if (typeof next[3] === 'function')
-						next[3].call(this, this.last_page.title, 'denied');
+						next[3].call(this, last_page_on_call.title, 'denied');
 					this.next();
 
 				} else {
 					library_namespace.debug('直接採用 Flow 的方式增添新話題。');
-					// use/get the contents of this.last_page
+					// use/get the contents of last_page_on_call
 					if (typeof next[1] === 'function') {
-						// next[1] = next[1](get_page_content(this.last_page),
-						// this.last_page.title, this.last_page);
+						// next[1] =
+						// next[1](get_page_content(last_page_on_call),
+						// last_page_on_call.title, last_page_on_call);
 						// 需要同時改變 wiki_API.edit！
 						// next[2]: options to call
 						// edit_topic()=CeL.wiki.Flow.edit
 						// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
-						next[1] = next[1].call(next[2], this.last_page);
+						next[1] = next[1].call(next[2], last_page_on_call);
 					}
 					if (library_namespace.is_thenable(next[1])) {
 						// 跳出wiki_API.next，預防next[1]再度呼叫wiki_API.next。
@@ -2507,7 +2512,7 @@ function module_code(library_namespace) {
 					}
 
 					// edit_topic()
-					wiki_API.Flow.edit([ this.API_URL, this.last_page ],
+					wiki_API.Flow.edit([ this.API_URL, last_page_on_call ],
 					// 新章節/新話題的標題文字。
 					next[2].sectiontitle,
 					// 新話題最初的內容。因為已有 contents，直接餵給轉換函式。
@@ -2522,77 +2527,97 @@ function module_code(library_namespace) {
 						if (typeof next[3] === 'function')
 							next[3].call(_this, title, error, result);
 						// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
-						delete _this.last_page.revisions;
+						delete last_page_on_call.revisions;
 						_this.next();
 					});
 				}
 
 			} else if ((!next[2] || !next[2].ignore_denial)
-					&& wiki_API.edit.denied(this.last_page, this.token.lgname,
-							next[2] && next[2].notification)) {
-				// 採用 this.last_page 的方法，
+					&& wiki_API.edit.denied(last_page_on_call,
+							this.token.lgname, next[2] && next[2].notification)) {
+				// 採用 last_page_on_call 的方法，
 				// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 				library_namespace
 						.warn('wiki_API.prototype.next: Denied to edit '
-								+ wiki_API.title_link_of(this.last_page));
+								+ wiki_API.title_link_of(last_page_on_call));
 				// next[3] : callback
 				if (typeof next[3] === 'function')
-					next[3].call(this, this.last_page.title, 'denied');
+					next[3].call(this, last_page_on_call.title, 'denied');
 				this.next();
 
 			} else {
+				// ----------------------------------------------------------------------
+
+				// var report_id = Math.random();
 				var original_queue,
 				// 可多次執行backfill。必須在最終執行剛好一次check_next。
 				backfill = function() {
 					if (original_queue) {
 						// assert: {Array}original_queue.length > 0
-						// 回填/回復queue
+						if (false) {
+							console.trace(report_id + ': 回填/回復 queue: '
+									+ original_queue.length);
+						}
 						_this.actions.append(original_queue);
 						// free
 						original_queue = null;
-						return true;
 					}
 				}, check_next = function() {
-					if (backfill() && !_this.running) {
-						_this.next();
-					}
+					backfill();
+					// 無論如何都再執行 this.next()，並且設定 this.running。
+					_this.next();
 				};
 				if (typeof next[1] === 'function') {
 					// 為了避免消耗memory，儘可能把本sub任務先執行完。
+					// TODO: 這可能有不良影響
 					if (this.actions.length > 0) {
 						original_queue = this.actions;
 						this.actions = [];
+						if (false) {
+							console.trace(report_id + ': queue: '
+									+ original_queue.length);
+						}
 					}
-					// 因為接下來的操作可能會呼叫 this.next() 本身，
-					// 因此必須把正在執行的標記特消掉。
-					this.running = false;
-					// next[1] = next[1](get_page_content(this.last_page),
-					// this.last_page.title, this.last_page);
+					if (options.will_call_methods) {
+						// 因為接下來的操作可能會呼叫 this.next() 本身，
+						// 因此必須把正在執行的標記消掉。
+						this.running = false;
+						// 每次都設定，在這會出問題:
+						// 20200209.「S.P.A.L.」関連ページの貼り換えのbot作業依頼.js
+					}
+
+					// next[1] = next[1](get_page_content(last_page_on_call),
+					// last_page_on_call.title, last_page_on_call);
 					// 需要同時改變 wiki_API.edit！
 					// next[2]: options to call edit_topic()=CeL.wiki.Flow.edit
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
-					next[1] = next[1].call(next[2], this.last_page);
-					if (this.running) {
+					next[1] = next[1].call(next[2], last_page_on_call);
+					if (!options.will_call_methods) {
+						;
+					} else if (this.running) {
 						library_namespace.debug(
 						//
-						'其他執行緒正執行中，可能是 content/text() 呼叫了 wiki.next()。', 1,
+						'其他執行緒正執行中，可能是 content/text() 呼叫了 wiki.next()。', 3,
 								'wiki_API.prototype.next');
 					} else {
-						backfill();
+						// 這邊還不可backfill()，
+						// e.g., async function
+						// for_each_list_page(list_page_data) @
+						// 20200122.update_vital_articles.js
 					}
 				}
 				if (next[2] && next[2].skip_nochange
 				// 採用 skip_nochange 可以跳過實際 edit 的動作。
-				&& next[1] === get_page_content(this.last_page)) {
-					library_namespace.debug('Skip [' + this.last_page.title
+				&& next[1] === get_page_content(last_page_on_call)) {
+					library_namespace.debug('Skip [' + last_page_on_call.title
 							+ ']: The same contents.', 1,
 							'wiki_API.prototype.next');
 					// next[3] : callback
 					if (typeof next[3] === 'function')
-						next[3].call(this, this.last_page.title, 'nochange');
+						next[3].call(this, last_page_on_call.title, 'nochange');
 					check_next();
 				} else {
-					wiki_API.edit([ this.API_URL, this.last_page ],
+					wiki_API.edit([ this.API_URL, last_page_on_call ],
 					// 因為已有 contents，直接餵給轉換函式。
 					next[1], this.token,
 					// next[2]: options to call wiki_API.edit()
@@ -2634,7 +2659,7 @@ function module_code(library_namespace) {
 							// rollback
 							_this.actions.unshift(
 							// 重新登入以後，編輯頁面之前再取得一次頁面內容。
-							[ 'page', _this.last_page.title ], next);
+							[ 'page', last_page_on_call.title ], next);
 							// reset node agent.
 							// 應付 2016/1 MediaWiki 系統更新，
 							// 需要連 HTTP handler 都重換一個，重起 cookie。
@@ -2647,7 +2672,7 @@ function module_code(library_namespace) {
 								// library_namespace.set_debug(6);
 							}
 							// TODO: 在這即使 rollback 了 action，
-							// 還是可能出現丟失 this.last_page 的現象。
+							// 還是可能出現丟失 last_page_on_call 的現象。
 							// e.g., @ 20160517.解消済み仮リンクをリンクに置き換える.js
 
 							// 直到 .edit 動作才會出現 badtoken，
@@ -2683,10 +2708,10 @@ function module_code(library_namespace) {
 							// next[3] : callback
 							if (typeof next[3] === 'function')
 								next[3].call(_this, title, error, result);
-							// assert: 應該有_this.last_page。
+							// assert: 應該有 last_page_on_call。
 							// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
-							if (_this.last_page) {
-								delete _this.last_page.revisions;
+							if (last_page_on_call) {
+								delete last_page_on_call.revisions;
 							}
 							check_next();
 						}
@@ -2694,6 +2719,8 @@ function module_code(library_namespace) {
 				}
 			}
 			break;
+
+		// ----------------------------------------------------------------------------------------
 
 		case 'upload':
 			var tmp = next[1];
@@ -2770,7 +2797,7 @@ function module_code(library_namespace) {
 				// 其最後會再 call wiki_API.next()，是以此處不再重複 call .next()。
 
 				// 因為接下來的操作會呼叫 this.next() 本身，
-				// 因此必須把正在執行的標記特消掉。
+				// 因此必須把正在執行的標記消掉。
 				this.running = false;
 			}
 
@@ -3321,7 +3348,7 @@ function module_code(library_namespace) {
 				return true;
 			}
 		}) && length > 0) {
-			library_namespace.debug('Some is not page data.', 1,
+			library_namespace.debug('Some pieces are not page data.', 1,
 					'check_max_length');
 			length = 0;
 			piece_list.some(function(piece, i) {
@@ -3547,6 +3574,8 @@ function module_code(library_namespace) {
 						// e.g., [protectedpage]
 						// The "editprotected" right is required to edit this
 						// page
+						if (config.onerror)
+							config.onerror(error);
 						result = [ 'error', error ];
 						error = gettext('finished: %1', error);
 					}
@@ -4042,6 +4071,8 @@ function module_code(library_namespace) {
 				} else if (log_to && (done !== nochange_count
 				// 若全無變更，則預設僅從 console 提示，不寫入 log 頁面。因此無變更者將不顯示。
 				|| config.log_nochange)) {
+					// console.trace(log_to);
+					// CeL.set_debug(6);
 					this.page(log_to)
 					// 將 robot 運作記錄、log summary 報告結果寫入 log 頁面。
 					// TODO: 以表格呈現。
