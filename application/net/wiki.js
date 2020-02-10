@@ -23,6 +23,7 @@ https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 
 [[mw:Help:OAuth]]
 https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
+https://meta.wikimedia.org/wiki/Steward_requests/Miscellaneous#OAuth_permissions
 
 Wikimedia REST API
 https://www.mediawiki.org/wiki/RESTBase
@@ -2565,11 +2566,13 @@ function module_code(library_namespace) {
 				}, check_next = function() {
 					backfill();
 					// 無論如何都再執行 this.next()，並且設定 this.running。
+					// e.g., for
+					// 20200209.「S.P.A.L.」関連ページの貼り換えのbot作業依頼.js
 					_this.next();
 				};
 				if (typeof next[1] === 'function') {
 					// 為了避免消耗memory，儘可能把本sub任務先執行完。
-					// TODO: 這可能有不良影響
+					// TODO: 這可能有不良影響，需實驗檢測。
 					if (this.actions.length > 0) {
 						original_queue = this.actions;
 						this.actions = [];
@@ -2581,8 +2584,9 @@ function module_code(library_namespace) {
 					if (options.will_call_methods) {
 						// 因為接下來的操作可能會呼叫 this.next() 本身，
 						// 因此必須把正在執行的標記消掉。
-						this.running = false;
-						// 每次都設定，在這會出問題:
+						// this.running = false;
+
+						// 每次都設定 `wiki.running = false`，在這會出問題:
 						// 20200209.「S.P.A.L.」関連ページの貼り換えのbot作業依頼.js
 					}
 
