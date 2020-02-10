@@ -1881,7 +1881,7 @@ function module_code(library_namespace) {
 		if (typeof for_section === 'function') {
 			// TODO: return (result === for_each_token.remove_token)
 			// TODO: move section to another page
-			if (for_section.constructor.name === 'AsyncFunction') {
+			if (library_namespace.is_async_function(for_section)) {
 				// console.log(all_root_section_list);
 				return Promise.all(all_root_section_list.map(for_section));
 
@@ -2394,9 +2394,11 @@ function module_code(library_namespace) {
 		link : function() {
 			return '[[' + this[0]
 			// + (this[1] || '')
-			+ this[1]
+			+ this[1] + (this.length > 2
+			// && this[2] !== undefined && this[2] !== null
+			? '|'
 			// + (this[2] || '')
-			+ (this.length > 2 ? '|' + this[2] : '') + ']]';
+			+ this[2] : '') + ']]';
 		},
 		// 外部連結 external link, external web link
 		external_link : function() {
@@ -5012,6 +5014,7 @@ function module_code(library_namespace) {
 		date_parser = date_parser[1];
 		// console.log('Using PATTERN_date: ' + PATTERN_date);
 
+		var min_timevalue, max_timevalue;
 		// reset PATTERN index
 		PATTERN_date.lastIndex = 0;
 		while (matched = PATTERN_date.exec(wikitext)) {
@@ -5029,6 +5032,13 @@ function module_code(library_namespace) {
 			if (isNaN(date)) {
 				continue;
 			}
+
+			if (!(min_timevalue < date)) {
+				min_timevalue = date;
+			} else if (!(date < max_timevalue)) {
+				max_timevalue = date;
+			}
+
 			if (!options.get_timevalue) {
 				date = new Date(date);
 			}
@@ -5036,6 +5046,12 @@ function module_code(library_namespace) {
 				return date;
 			}
 			date_list.push(date);
+		}
+
+		// Warning: 不一定總有 date_list.min_timevalue, date_list.max_timevalue
+		if (min_timevalue) {
+			date_list.min_timevalue = min_timevalue;
+			date_list.max_timevalue = max_timevalue || min_timevalue;
 		}
 
 		return date_list;
@@ -5396,7 +5412,9 @@ function module_code(library_namespace) {
 			// <source lang="cpp">
 			.replace(/<\/?(?:nowiki|code)>/g, '')
 			// link → page title
-			.replace(/^\[\[([^\[\]\|{}\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1');
+			.replace(/^\[\[([^\[\]\|{}\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1')
+			// Remove comments
+			.replace(/<!--[\s\S]*?-->/g, '');
 		}
 
 		/** {Object}設定頁面/文字所獲得之個人化設定/手動設定 manual settings。 */
