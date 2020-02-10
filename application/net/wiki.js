@@ -2416,7 +2416,9 @@ function module_code(library_namespace) {
 			}
 
 			// TODO: {String|RegExp|Array}filter
-			// 在多執行緒的情況下，例如下面 backfill 的時候，this.last_page 可能會被改變？因此先作個 cache。
+			// 在多執行緒的情況下，例如下面
+			// `next[1] = next[1].call(next[2], last_page_on_call)`
+			// 的時候，this.last_page 可能會被改變？因此先作個 cache。
 			var last_page_on_call = this.last_page;
 			if (!last_page_on_call) {
 				library_namespace
@@ -2549,10 +2551,9 @@ function module_code(library_namespace) {
 			} else {
 				// ----------------------------------------------------------------------
 
-				// var report_id = Math.random();
 				var original_queue,
-				// 可多次執行backfill。必須在最終執行剛好一次check_next。
-				backfill = function() {
+				// 必須在最終執行剛好一次 check_next() 以 `this.next()`。
+				check_next = function() {
 					if (original_queue) {
 						// assert: {Array}original_queue.length > 0
 						if (false) {
@@ -2563,31 +2564,22 @@ function module_code(library_namespace) {
 						// free
 						original_queue = null;
 					}
-				}, check_next = function() {
-					backfill();
 					// 無論如何都再執行 this.next()，並且設定 this.running。
 					// e.g., for
 					// 20200209.「S.P.A.L.」関連ページの貼り換えのbot作業依頼.js
 					_this.next();
 				};
 				if (typeof next[1] === 'function') {
-					// 為了避免消耗memory，儘可能把本sub任務先執行完。
+					// 為了避免消耗 memory，儘可能把本 sub 任務先執行完。
+					// e.g., 20200206.reminded_expired_AfD.js
 					// TODO: 這可能有不良影響，需實驗檢測。
 					if (this.actions.length > 0) {
-						original_queue = this.actions;
-						this.actions = [];
+						original_queue = this.actions.clone();
+						this.actions.truncate();
 						if (false) {
 							console.trace(report_id + ': queue: '
 									+ original_queue.length);
 						}
-					}
-					if (options.will_call_methods) {
-						// 因為接下來的操作可能會呼叫 this.next() 本身，
-						// 因此必須把正在執行的標記消掉。
-						// this.running = false;
-
-						// 每次都設定 `wiki.running = false`，在這會出問題:
-						// 20200209.「S.P.A.L.」関連ページの貼り換えのbot作業依頼.js
 					}
 
 					// next[1] = next[1](get_page_content(last_page_on_call),
@@ -2596,19 +2588,6 @@ function module_code(library_namespace) {
 					// next[2]: options to call edit_topic()=CeL.wiki.Flow.edit
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 					next[1] = next[1].call(next[2], last_page_on_call);
-					if (!options.will_call_methods) {
-						;
-					} else if (this.running) {
-						library_namespace.debug(
-						//
-						'其他執行緒正執行中，可能是 content/text() 呼叫了 wiki.next()。', 3,
-								'wiki_API.prototype.next');
-					} else {
-						// 這邊還不可backfill()，
-						// e.g., async function
-						// for_each_list_page(list_page_data) @
-						// 20200122.update_vital_articles.js
-					}
 				}
 				if (next[2] && next[2].skip_nochange
 				// 採用 skip_nochange 可以跳過實際 edit 的動作。
