@@ -49,7 +49,8 @@ https://zh.wikipedia.org/w/api.php?action=query&format=json&list=users&usprop=bl
 https://www.mediawiki.org/w/api.php?action=help&modules=query%2Busercontribs
 https://zh.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&uclimit=1&ucdir=newer&ucprop=ids|title|timestamp|comment|parsedcomment|size|sizediff|flags|tags&ucuser=username
 
-
+對Action API的更改，請訂閱
+https://lists.wikimedia.org/pipermail/mediawiki-api-announce/
 
 雙重重定向/重新導向/転送
 特別:二重リダイレクト
@@ -2502,17 +2503,6 @@ function module_code(library_namespace) {
 						// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 						next[1] = next[1].call(next[2], last_page_on_call);
 					}
-					if (library_namespace.is_thenable(next[1])) {
-						// 跳出wiki_API.next，預防next[1]再度呼叫wiki_API.next。
-						setTimeout(function() {
-							next[1].then(function(text) {
-								next[1] = text;
-								_this.actions.push(next);
-								_this.next();
-							});
-						}, 0);
-						return;
-					}
 
 					// edit_topic()
 					wiki_API.Flow.edit([ this.API_URL, last_page_on_call ],
@@ -2581,6 +2571,8 @@ function module_code(library_namespace) {
 									+ original_queue.length);
 						}
 					}
+					// console.trace('next:');
+					// console.log(next);
 
 					// next[1] = next[1](get_page_content(last_page_on_call),
 					// last_page_on_call.title, last_page_on_call);
