@@ -192,12 +192,13 @@ function module_code(library_namespace) {
 	function wiki_API_edit(title, text, token, options, callback, timestamp) {
 		// console.log(text);
 		if (library_namespace.is_thenable(text)) {
-			setTimeout(function() {
-				text.then(function(text) {
-					wiki_API_edit(title, text, token, options, callback,
-							timestamp);
-				})
-			}, 0);
+			text.then(function(text) {
+				wiki_API_edit(title, text, token, options, callback,
+				//
+				timestamp);
+			}, function(error) {
+				callback(title, error);
+			});
 			return;
 		}
 
@@ -284,6 +285,7 @@ function module_code(library_namespace) {
 						'wiki_API_edit');
 		if (action) {
 			library_namespace.debug('直接執行 callback。', 2, 'wiki_API_edit');
+			// console.trace(action);
 			callback(title, action);
 			return;
 		}
@@ -428,7 +430,6 @@ function module_code(library_namespace) {
 			}
 		}, options, session);
 	}
-	;
 
 	/**
 	 * 放棄編輯頁面用。<br />
@@ -457,7 +458,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns error: 非undefined表示((data))為有問題的資料。
 	 */
-	wiki_API_edit.check_data = function(data, title, options, caller) {
+	wiki_API_edit.check_data = function check_data(data, title, options, caller) {
 		var action;
 		// return CeL.wiki.edit.cancel as a symbol to skip this edit,
 		// do not generate warning message.
