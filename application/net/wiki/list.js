@@ -502,9 +502,8 @@ function module_code(library_namespace) {
 				// run for each item
 				pages.some(function(item) {
 					try {
-						if (options.for_each.constructor.name
-						//
-						=== 'AsyncFunction') {
+						if (library_namespace
+								.is_async_function(options.for_each)) {
 							eval(get_list_async_code);
 							// console.log(options);
 							return options.abort_operation;
@@ -700,7 +699,9 @@ function module_code(library_namespace) {
 		// [[Special:Whatlinkshere]]
 		// [[使用說明:連入頁面]]
 		// https://zh.wikipedia.org/wiki/Help:%E9%93%BE%E5%85%A5%E9%A1%B5%E9%9D%A2
-		linkshere : [ 'lh', 'prop' ],
+		linkshere : [ 'lh', 'prop', function(title_parameter) {
+			return title_parameter.replace(/^&title=/, '&titles=');
+		} ],
 
 		// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
 		// 基本上同 imageusage。
@@ -880,10 +881,11 @@ function module_code(library_namespace) {
 		methods.forEach(function(method) {
 			library_namespace.debug('add action to wiki_API.prototype: '
 					+ method, 2);
-			wiki_API.prototype[method] = function() {
+			wiki_API.prototype[method] = function wiki_API_prototype_method() {
 				// assert: 不可改動 method @ IE！
 				var args = [ method ];
 				Array.prototype.push.apply(args, arguments);
+				// console.trace(this.running);
 				try {
 					library_namespace.debug('add action: '
 							+ args.map(JSON.stringify).join('<br />\n'), 3,
@@ -903,8 +905,13 @@ function module_code(library_namespace) {
 				) {
 					this.next();
 				} else {
-					library_namespace.debug('正在執行中，直接跳出。', 6,
-							'wiki_API.prototype.' + method);
+					library_namespace.debug(method + ': 正在執行中，直接跳出。', 3,
+							'wiki_API_prototype_methods');
+					if (library_namespace.is_debug(6)) {
+						console.trace(method);
+						// console.log(args);
+						console.log(this.actions);
+					}
 				}
 				return this;
 			};
