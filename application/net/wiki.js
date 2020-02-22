@@ -152,6 +152,23 @@ function module_code(library_namespace) {
 	 * @constructor
 	 */
 	function wiki_API(user_name, password, API_URL) {
+		var options;
+		if (API_URL && typeof API_URL === 'object') {
+			// session = new wiki_API(user_name, password, options);
+			options = API_URL;
+			API_URL = options.API_URL;
+		} else if (!API_URL && !password && user_name
+				&& typeof user_name === 'object') {
+			// session = new wiki_API(options);
+			options = user_name;
+			// console.log(options);
+			user_name = options.user_name;
+			password = options.password;
+			API_URL = options.API_URL;
+		} else {
+			options = Object.create(null);
+		}
+
 		// console.trace([ user_name, password, API_URL ]);
 		library_namespace.debug('API_URL: ' + API_URL + ', default language: '
 				+ wiki_API.language, 3, 'wiki_API');
@@ -188,6 +205,11 @@ function module_code(library_namespace) {
 		// pre-loading functions
 
 		this.siteinfo();
+
+		if (options.task_configuration_page) {
+			this.adapt_task_configurations(options.task_configuration_page,
+					options.adapt_configuration);
+		}
 	}
 
 	/**
@@ -400,7 +422,7 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof API_URL !== 'string') {
-			// 若是未設定 action[0]，則將在wiki_API.query()補設定。
+			// 若是未設定 action[0]，則將在 wiki_API.query() 補設定。
 			// 因此若為 undefined || null，此處先不回傳錯誤。
 			return !API_URL;
 		}
@@ -3526,7 +3548,7 @@ function module_code(library_namespace) {
 			// TODO: [[ja:Special:Diff/62546431|有時最後一筆記錄可能會漏失掉]]
 			callback = config.no_message ? library_namespace.null_function
 			// default logger.
-			: function(title, error, result) {
+			: function do_batch_work_summary(title, error, result) {
 				if (error) {
 					// ((return [ CeL.wiki.edit.cancel, 'skip' ];))
 					// 來跳過 (skip) 本次編輯動作，不特別顯示或處理。
@@ -3855,7 +3877,8 @@ function module_code(library_namespace) {
 						// 取得頁面內容。
 						// console.log(page);
 						// console.trace(this.running);
-						this.page(page, function(page_data, error) {
+						this.page(page, function work_page_callback(page_data,
+								error) {
 							// TODO: if (error) {...}
 							// console.log([ page_data, config.page_options ]);
 							each.call(this, page_data, messages, config);
@@ -3906,8 +3929,10 @@ function module_code(library_namespace) {
 								clear_work.call(this);
 							}
 							return content;
-						}, work_options, function() {
-							// function(title, error, result)
+						}, work_options, function work_edit_callback(
+						// title, error, result
+						) {
+							// nomally call do_batch_work_summary()
 							callback.apply(this, arguments);
 							if (--pages_left === 0) {
 								finish_up.call(this);
@@ -3962,6 +3987,7 @@ function module_code(library_namespace) {
 
 					count_summary = ': '
 							+ gettext('%1 pages done', count_summary);
+					// console.trace(count_summary);
 
 					if (log_item.report) {
 						messages.unshift(count_summary + (nochange_count > 0
@@ -4406,7 +4432,7 @@ function module_code(library_namespace) {
 
 		if (!session) {
 			// 初始化 session 與 agent。這裡 callback 當作 API_URL。
-			session = new wiki_API(name, password, API_URL);
+			session = new wiki_API(name, password, options);
 		}
 		if (!name || !password) {
 			library_namespace
@@ -4687,10 +4713,102 @@ function module_code(library_namespace) {
 			site_configurations.namespace_pattern = generate_namespace_pattern(
 					namespace_hash, []);
 		}
-
-		// --------------------------------------------------------------------
-
 	}
+
+	// ----------------------------------------------------
+
+	// TODO: yet test
+	// 讀入手動設定 manual settings。
+	// 檢查從網頁取得的設定。
+	function adapt_task_configurations(task_configuration_page,
+			configuration_adapter, options) {
+		options = library_namespace.setup_options(options);
+		var session = this, task_configuration = session.task_configuration
+				|| (session.task_configuration = Object.create(null));
+		if (typeof configuration_adapter === 'function') {
+			if (!options.once)
+				session.task_configuration.adapter = configuration_adapter;
+		} else {
+			configuration_adapter = session.task_configuration.adapter;
+		}
+
+		if (!task_configuration_page
+				&& !(task_configuration_page = task_configuration.page)) {
+			configuration_adapter && configuration_adapter();
+			return;
+		}
+
+		if (!options.once && ('min_interval' in options)) {
+			// 最小檢測時間間隔
+			if (options.min_interval > 0)
+				task_configuration.min_interval = options.min_interval;
+			else if (!options.min_interval)
+				delete task_configuration.min_interval;
+		}
+
+		if (task_configuration.last_update) {
+			// 曾經取得設定過。
+			if (task_configuration.min_interval > Date.now()
+					- task_configuration.last_update) {
+				// 時間未到。
+				configuration_adapter && configuration_adapter();
+				return;
+			}
+
+			if (wiki_API.is_page_data(task_configuration_page)) {
+				// TODO: test timestamp
+				adapt_configuration(task_configuration_page);
+				return;
+			}
+
+			// checck if there is new version.
+			session.page(task_configuration_page, function(page_data) {
+				if ((task_configuration.min_interval || 0) > Date
+						.parse(page_data.touched)
+						- task_configuration.last_update) {
+					// No new version
+					configuration_adapter && configuration_adapter();
+					return;
+				}
+				fetch_configuration();
+			}, {
+				prop : 'info',
+				redirects : 1
+			});
+			return;
+		}
+
+		fetch_configuration();
+
+		function fetch_configuration() {
+			session.page(task_configuration_page, adapt_configuration, {
+				redirects : 1
+			});
+		}
+
+		function adapt_configuration(page_data) {
+			if (!options.once) {
+				// cache
+				Object.assign(task_configuration, {
+					// {String}設定頁面。已經轉換過、正規化後的最終頁面標題。
+					page : page_data.title,
+					last_update : Date.now()
+				});
+			}
+			session.latest_task_configuration
+			// TODO: valid configuration 檢測數值是否合適。
+			= wiki_API.parse_configuration(page_data);
+			library_namespace
+					.info('adapt_task_configurations: Get configurations from '
+							+ wiki_API.title_link_of(page_data));
+			// console.log(session.latest_task_configuration);
+			configuration_adapter
+			// 每次更改過設定之後，重新執行一次。
+			&& configuration_adapter(session.latest_task_configuration);
+		}
+	}
+
+	wiki_API.prototype.adapt_task_configurations = adapt_task_configurations;
 
 	// html to wikitext
 	// https://zh.wikipedia.org/w/api.php?action=help&modules=flow-parsoid-utils
