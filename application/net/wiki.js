@@ -1118,6 +1118,11 @@ function module_code(library_namespace) {
 
 	// 討論頁面不應包含 [[Special talk:*]]。
 	function to_talk_page(page_title, options) {
+		options = Object.assign({
+			// for wiki_API.namespace()
+			is_page_title : true
+		}, options);
+		// console.log(options);
 		var namespace;
 		if (wiki_API.is_page_data(page_title)) {
 			// assert: {Number}namespace
@@ -1129,6 +1134,7 @@ function module_code(library_namespace) {
 			// assert: {Number|Undefined}namespace
 			namespace = wiki_API.namespace(page_title, options);
 		}
+		// console.log([ namespace, page_title ]);
 
 		if (!page_title || typeof page_title !== 'string' || namespace < 0)
 			return;
@@ -1147,7 +1153,7 @@ function module_code(library_namespace) {
 			if (!namespace)
 				return;
 			// 剝離 namespace。
-			page_title = page_title.replace(/^[^:]+:/, '');
+			page_title = wiki_API.remove_namespace(page_title, options);
 			page_title = namespace + ':' + page_title;
 			if (name_of_NO === wiki_API.namespace.name_of_NO) {
 				page_title = wiki_API.normalize_title(page_title);
@@ -1183,6 +1189,10 @@ function module_code(library_namespace) {
 	var PATTERN_talk_prefix = /^(?:Talk|討論|讨论|ノート|토론):/i;
 	var PATTERN_talk_namespace_prefix = /^([a-z _]+)(?:[ _]talk|討論|讨论|‐ノート|토론):/i;
 	function talk_page_to_main(page_title, options) {
+		options = Object.assign({
+			// for wiki_API.namespace()
+			is_page_title : true
+		}, options);
 		var namespace;
 		if (wiki_API.is_page_data(page_title)) {
 			// assert: {Number}namespace
@@ -1210,7 +1220,7 @@ function module_code(library_namespace) {
 		if (namespace > 0) {
 			namespace = name_of_NO[namespace - 1];
 			// 剝離 namespace。
-			page_title = page_title.replace(/^[^:]+:/, '');
+			page_title = wiki_API.remove_namespace(page_title, options);
 			if (namespace) {
 				page_title = namespace + ':' + page_title;
 				if (name_of_NO === wiki_API.namespace.name_of_NO) {
