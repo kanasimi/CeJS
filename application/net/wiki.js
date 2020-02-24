@@ -1022,9 +1022,9 @@ function module_code(library_namespace) {
 	get_namespace.name_of = namespace_text_of_NO;
 
 	/**
-	 * remove namespace part of the title.
+	 * remove namespace part of the title. 剝離 namespace。
 	 * 
-	 * wiki.remove_page()
+	 * wiki.remove_namespace(), wiki_API.remove_namespace()
 	 * 
 	 * @param {String}page_title
 	 *            page title 頁面標題。
@@ -1123,7 +1123,7 @@ function module_code(library_namespace) {
 			is_page_title : true
 		}, options);
 		// console.log(options);
-		var namespace;
+		var session = session_of_options(options), namespace;
 		if (wiki_API.is_page_data(page_title)) {
 			// assert: {Number}namespace
 			namespace = page_title.ns;
@@ -1131,6 +1131,17 @@ function module_code(library_namespace) {
 
 		} else {
 			page_title = wiki_API.normalize_title(page_title);
+			if (!session) {
+				// 模組|模塊|模块 → Module talk
+				if (/^(Special|特殊|特別|Media|媒體|媒体|メディア|Topic|話題|话题):/i
+						.test(page_title)) {
+					// There is no talk page for Topic or virtual namespaces.
+					return;
+				}
+
+				// for zhwiki only. But you should use session.to_talk_page() !
+				page_title = page_title.replace(/^(?:模組|模塊|模块):/i, 'Module:');
+			}
 			// assert: {Number|Undefined}namespace
 			namespace = wiki_API.namespace(page_title, options);
 		}
@@ -1145,7 +1156,6 @@ function module_code(library_namespace) {
 			return page_title;
 		}
 
-		var session = session_of_options(options);
 		var name_of_NO = session && session.configurations.name_of_NO
 				|| wiki_API.namespace.name_of_NO;
 		if (namespace >= 0) {
@@ -1162,15 +1172,6 @@ function module_code(library_namespace) {
 		}
 
 		// assert: namespace === undefined
-
-		// 模組|模塊|模块 → Module talk
-		if (/^(Special|特殊|特別|Media|媒體|媒体|メディア|Topic|話題|话题):/i.test(page_title)) {
-			// There is no talk page for Topic or virtual namespaces.
-			return;
-		}
-
-		// for zhwiki only
-		page_title = page_title.replace(/^(?:模組|模塊|模块):/i, 'Module:');
 
 		var matched = page_title
 				.match(/^([^:]+):(.+)$/ && /^([a-z _]+):(.+)$/i);
