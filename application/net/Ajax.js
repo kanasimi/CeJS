@@ -2293,7 +2293,8 @@ function module_code(library_namespace) {
 
 			// 為了防止 Cloudflare bot protection(?) 阻擋，必須加上 Accept-Language。
 			// TODO: get language from system infomation
-			// 'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
+			// dm5.js using "Microsoft-IIS/8.5", needs 'Accept-Language' to search!
+			'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
 
 			// 'Cache-Control' : 'no-cache',
 			// Pragma : 'no-cache',
