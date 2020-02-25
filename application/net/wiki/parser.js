@@ -342,18 +342,21 @@ function module_code(library_namespace) {
 		return config;
 	}
 
-	// TODO: 分析模板參數的空白模式典型。
-	// return |$0parameter$1=$2value$3|
 	function mode_space_of_parameters(template_token, parameter_name) {
 		if (false) {
 			template_token.forEach(function(parameter, index) {
 				if (index === 0)
 					return;
-				;
+				// TODO: 分析模板參數的空白模式典型。
+				// return |$0parameter$1=$2value$3|
 			});
 		}
 
 		var index = template_token.index_of[parameter_name];
+		if (!(index >= 0)) {
+			// 不存在此 parameter name 可 replace。
+			return;
+		}
 
 		// 判斷上下文使用的 spaces。
 
@@ -427,7 +430,13 @@ function module_code(library_namespace) {
 		parameter_name : 'replace_to_value',
 		parameter_name_2 : 'replace_to_value_2',
 	}, 'value_only');
-	// old style 舊格式
+
+	CeL.wiki.parse.replace_parameter(token, {
+		parameter_name : 'replace_to_value',
+		parameter_name_2 : 'replace_to_value_2',
+	}, { value_only : true, force_add : true, append_key_value : true });
+
+	// replace value only: old style 舊格式
 	CeL.wiki.parse.replace_parameter(token, parameter_name,
 		{ parameter_name : replace_to_value }
 	);
@@ -493,15 +502,47 @@ function module_code(library_namespace) {
 				parameter_name = to_parameter_name_only(parameter_name);
 			}
 
-			var count = 0;
+			var count = 0, latest_OK_key, key_of_spaces, spaces, next_insert_index;
 			for ( var replace_from in parameter_name) {
 				replace_to = parameter_name[replace_from];
+				var index = template_token.index_of[replace_from];
+				if (!(index >= 0)) {
+					// 不存在此 parameter name 可 replace。
+					if (options.value_only && options.force_add) {
+						if ((!key_of_spaces || key_of_spaces !== latest_OK_key)
+						//
+						&& (key_of_spaces = options.append_key_value
+						//
+						&& latest_OK_key
+						// mode_parameter
+						|| Object.keys(template_token.parameters).pop())) {
+							spaces = mode_space_of_parameters(template_token,
+									key_of_spaces);
+							// console.log(spaces);
+						}
+						replace_to = spaces && spaces[1] ? spaces[0]
+								+ replace_from + spaces[1] + replace_to
+								+ spaces[2] : replace_from + '=' + replace_to;
+						if (options.append_key_value && next_insert_index >= 0) {
+							// 警告: 這會使 template_token[next_insert_index]
+							// 不合正規格式！但能插入在最接近前一個插入點之後。
+							template_token[next_insert_index] += '|'
+									+ replace_to;
+						} else {
+							template_token.push(replace_to);
+						}
+					}
+					continue;
+				}
+
 				if (options.value_only
 						&& (typeof replace_to === 'string' || typeof replace_to === 'number')) {
 					// replace_to = { [replace_from] : replace_to };
 					replace_to = Object.create(null);
 					replace_to[replace_from] = parameter_name[replace_from];
 				}
+				latest_OK_key = replace_from;
+				next_insert_index = index;
 				count += replace_parameter(template_token, replace_from,
 						replace_to);
 			}
@@ -512,7 +553,7 @@ function module_code(library_namespace) {
 
 		var index = template_token.index_of[parameter_name];
 		if (!(index >= 0)) {
-			// 不存在此 parameter_name 可 replace。
+			// 不存在此 parameter name 可 replace。
 			return 0;
 		}
 
