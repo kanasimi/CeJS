@@ -342,6 +342,77 @@ function module_code(library_namespace) {
 		return config;
 	}
 
+	// TODO: 分析模板參數的空白模式典型。
+	// return |$0parameter$1=$2value$3|
+	function mode_space_of_parameters(template_token, parameter_name) {
+		if (false) {
+			template_token.forEach(function(parameter, index) {
+				if (index === 0)
+					return;
+				;
+			});
+		}
+
+		var index = template_token.index_of[parameter_name];
+
+		// 判斷上下文使用的 spaces。
+
+		var attribute_text = template_token[index];
+		if (Array.isArray(attribute_text)) {
+			// 要是有合規的 `parameter_name`，
+			// 則應該是 [ {String} parameter_name + " = ", ... ]。
+			// prevent {{| ...{{...|...=...}}... = ... }}
+			attribute_text = attribute_text[0];
+		}
+
+		var matched = attribute_text
+		// extract parameter name
+		// https://www.mediawiki.org/wiki/Help:Templates#Named_parameters
+		// assert: parameter name should these characters
+		// https://test.wikipedia.org/wiki/Test_n
+		// OK in parameter name: ":\\\/#\"'"
+		// NG in parameter name: "=" /\s$/
+		&& attribute_text.toString().match(/^(\s*)([^\s=][^=]*)(=\s*)/);
+		if (matched) {
+			matched[2] = matched[2].match(/^(.*?[^\s])(\s*)$/);
+			// assert: matched[2] !== null, matched[2][1] == parameter_name
+			if (matched[2] && matched[2][1] == parameter_name) {
+				matched[0] = matched[2][2] + matched[3];
+			} else {
+				throw new Error(
+				// e.g., replace parameter_name === 1 of {{tl|A{{=}}B}}
+				'mode_space_of_parameters: Can not found valid parameter ['
+						+ parameter_name + ']: ' + template_token);
+			}
+		} else if (isNaN(parameter_name)) {
+			throw new Error(
+			// This should not have happened.
+			'mode_space_of_parameters: Can not found valid parameter ['
+					+ parameter_name + '] (Should not happen): '
+					+ template_token);
+		} else {
+			// e.g., replace parameter_name === 1 of {{tl|title}}
+			matched = [];
+		}
+
+		/**
+		 * 保留屬性質結尾的排版:多行保留行先頭的空白，但不包括末尾的空白。單行的則留最後一個空白。 preserve spaces for:
+		 * <code>
+
+		{{T
+		 | 1 = 1
+		 | 2 = 2
+		 | 3 = 3
+		}}
+
+		</code>
+		 */
+		var spaces = template_token[index].toString().match(/(\n *| ?)$/);
+		spaces = [ matched[1], matched[0], spaces[1] ];
+
+		return spaces;
+	}
+
 	/**
 	 * 將 parse_wikitext() 獲得之 template_token 中的指定 parameter 換成 replace_to。
 	 * replace_template_parameter()
@@ -441,6 +512,7 @@ function module_code(library_namespace) {
 
 		var index = template_token.index_of[parameter_name];
 		if (!(index >= 0)) {
+			// 不存在此 parameter_name 可 replace。
 			return 0;
 		}
 
@@ -457,67 +529,18 @@ function module_code(library_namespace) {
 		// --------------------------------------
 		// 判斷上下文使用的 spaces。
 
-		var attribute_text = template_token[index];
-		if (Array.isArray(attribute_text)) {
-			// 要是有合規的 `parameter_name`，
-			// 則應該是 [ {String} parameter_name + " = ", ... ]。
-			// prevent {{| ...{{...|...=...}}... = ... }}
-			attribute_text = attribute_text[0];
-		}
-
-		var matched = attribute_text
-		// extract parameter name
-		// https://www.mediawiki.org/wiki/Help:Templates#Named_parameters
-		// assert: parameter name should these characters
-		// https://test.wikipedia.org/wiki/Test_n
-		// OK in parameter name: ":\\\/#\"'"
-		// NG in parameter name: "=" /\s$/
-		&& attribute_text.toString().match(/^(\s*)([^\s=][^=]*)(=\s*)/);
-		if (matched) {
-			matched[2] = matched[2].match(/^(.*?[^\s])(\s*)$/);
-			// assert: matched[2] !== null, matched[2][1] == parameter_name
-			if (matched[2] && matched[2][1] == parameter_name) {
-				matched[0] = matched[2][2] + matched[3];
-			} else {
-				// e.g., replace parameter_name === 1 of {{tl|A{{=}}B}}
-				throw new Error(
-						'replace_parameter: Can not found valid parameter ['
-								+ parameter_name + ']: ' + template_token);
-			}
-		} else if (isNaN(parameter_name)) {
-			// This should not have happened.
-			throw new Error(
-					'replace_parameter: Can not found valid parameter ['
-							+ parameter_name + '] (Should not happen): '
-							+ template_token);
-		} else {
-			// e.g., replace parameter_name === 1 of {{tl|title}}
-			matched = [];
-		}
-
-		/**
-		 * 保留屬性質結尾的排版:多行保留行先頭的空白，但不包括末尾的空白。單行的則留最後一個空白。 preserve spaces for:
-		 * <code>
-
-		{{T
-		 | 1 = 1
-		 | 2 = 2
-		 | 3 = 3
-		}}
-
-		</code>
-		 */
-		var spaces = template_token[index].toString().match(/(\n *| ?)$/);
-		spaces = [ matched[1], matched[0], spaces[1] ];
+		var spaces = mode_space_of_parameters(template_token, parameter_name);
 
 		// --------------------------------------
 		// 正規化 replace_to。
 
 		if (library_namespace.is_Object(replace_to)) {
 			replace_to = Object.keys(replace_to).map(function(key) {
-				return spaces[1] ? spaces[0] + key + spaces[1]
+				var value = replace_to[key];
+				// TODO: using is_valid_parameters_value(value)
+				return spaces[1] ? spaces[0] + key + spaces[1] + value
 				//
-				+ replace_to[key] : key + '=' + replace_to[key];
+				: key + '=' + value;
 			});
 		}
 		if (Array.isArray(replace_to)) {
@@ -5292,6 +5315,12 @@ function module_code(library_namespace) {
 	 * @example <code>
 
 	wiki.page(title, function(page_data) {
+		var redirect_to = CeL.wiki.parse.redirect(page_data);
+		// `true` or {String}redirect_to or `undefined`
+		console.log(redirect_to);
+	});
+
+	wiki.page(title, function(page_data) {
 		var is_redirect = CeL.wiki.is_protected(page_data);
 		// `true` or `undefined`
 		console.log(is_redirect);
@@ -6231,6 +6260,7 @@ function module_code(library_namespace) {
 
 		section_link : section_link,
 
+		// parse_table(), parse_wikitable()
 		table_to_array : table_to_array,
 		array_to_table : array_to_table,
 
