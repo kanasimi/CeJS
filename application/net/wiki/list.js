@@ -162,6 +162,20 @@ function module_code(library_namespace) {
 		});
 	}
 
+	function combine_by_page(pages, unique_attribute) {
+		var hash = Object.create(null);
+		pages.forEach(function(page_data) {
+			var value = page_data[unique_attribute];
+			if (page_data.title in hash) {
+				hash[page_data.title][unique_attribute].push(value);
+			} else {
+				page_data[unique_attribute] = [ value ];
+				hash[page_data.title] = page_data;
+			}
+		});
+		return Object.values(hash);
+	}
+
 	// allow async functions
 	// https://github.com/tc39/ecmascript-asyncawait/issues/78
 	var get_list_async_code = '(async function() {'
@@ -530,6 +544,12 @@ function module_code(library_namespace) {
 				data = data.query[type];
 				// 一般情況。
 				if (Array.isArray(data)) {
+					// console.log(options);
+					if (type === 'exturlusage' && options.combine_pages) {
+						// 處理有同一個頁面多個網址的情況。
+						data = combine_by_page(data, 'url');
+					}
+
 					pages = Object.assign(data, pages);
 				} else if (data.results) {
 					// e.g.,
@@ -709,22 +729,27 @@ function module_code(library_namespace) {
 
 		// 列舉包含指定 URL 的頁面。 [[Special:LinkSearch]]
 		// https://www.mediawiki.org/wiki/API:Exturlusage
+		// 注意: 可能會有同一個頁面多個網址的情況！可使用 options.combine_pages。
 		exturlusage : [ 'eu', , function(title_parameter) {
-			// console.log(title_parameter);
+			// console.log(decodeURIComponent(title_parameter));
 			return title_parameter.replace(/^&eutitle=([^=&]*)/,
 			//
 			function($0, link) {
 				if (link) {
-					var matched = link.match(/^([a-z]+):\/\/(.+)$/i);
+					var matched = decodeURIComponent(link)
+					//
+					.match(/^([a-z]+):\/\/(.+)$/i);
 					if (matched) {
-						link = matched[2] + '&euprotocol='
+						// `http://www.example.com/path/`
+						// → http + `www.example.com`
+						link = matched[2].replace(/\/.*$/, '') + '&euprotocol='
 						//
-						+ matched[1].toLowerCase();
+						+ encodeURIComponent(matched[1]);
 					}
 				} else {
 					link = '';
 				}
-				return '&euquery=' + (link ? link.replace(/^(.+):\/\//) : '');
+				return '&euquery=' + link;
 			});
 		} ],
 
