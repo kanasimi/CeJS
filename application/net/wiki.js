@@ -793,6 +793,7 @@ function module_code(library_namespace) {
 			namespace = namespace.join('|');
 		}
 
+		// console.log(namespace);
 		if (typeof namespace === 'string') {
 			var list = [];
 			// e.g., 'User_talk' → 'User talk'
@@ -1397,10 +1398,13 @@ function module_code(library_namespace) {
 		? page_name.replace(/ /g, '_') : page_name.replace(/_/g, ' ');
 
 		page_name = page_name.split(':');
-		var has_language;
+		var has_language = 0;
 		var session = session_of_options(options);
 		var no_session_namespace_hash = !session
 				|| !session.configurations.namespace_hash;
+		var interwiki_pattern = session
+				&& session.configurations.interwiki_pattern
+				|| /^[a-z][a-z_\-]+$/i;
 		page_name.some(function(section, index) {
 			section = use_underline ? section.replace(/^[\s_]+/, '') : section
 					.trimStart();
@@ -1410,15 +1414,23 @@ function module_code(library_namespace) {
 			&& !(use_underline ? /^[a-z][a-z\d\-_]{0,14}$/i
 			//
 			: /^[a-z][a-z\d\- ]{0,14}$/i).test(section.trimEnd())) {
-				// page title: 將首個字母轉成大寫。
-				page_name[index] = upper_case_initial(section);
+				// console.log(section);
+				if (session && interwiki_pattern.test(section)) {
+					// e.g., 'EN' → 'en'
+					page_name[index] = section.toLowerCase();
+				} else {
+					// page title: 將首個字母轉成大寫。
+					page_name[index] = upper_case_initial(section);
+				}
 				return true;
 			}
 
-			var namespace = get_namespace(section, Object.assign({
+			var namespace = isNaN(section)
+			//
+			&& get_namespace(section, Object.assign({
 				get_name : true
 			}, options));
-			// console.log([ section, namespace ]);
+			// console.log([ index, section, namespace ]);
 			if (namespace) {
 				// Wikipedia namespace
 				page_name[index] = use_underline ? namespace.replace(/ /g, '_')
@@ -1427,16 +1439,18 @@ function module_code(library_namespace) {
 			}
 
 			if (has_language) {
-				// page title: 將首個字母轉成大寫。
-				page_name[index] = upper_case_initial(section);
+				if (session && interwiki_pattern.test(section)) {
+					// e.g., 'EN' → 'en'
+					page_name[index] = section.toLowerCase();
+				} else {
+					// page title: 將首個字母轉成大寫。
+					page_name[index] = upper_case_initial(section);
+				}
 				return true;
 			}
 
 			section = use_underline ? section.replace(/[\s_]+$/, '') : section
 					.trimEnd();
-			var interwiki_pattern = session
-					&& session.configurations.interwiki_pattern
-					|| /^[a-z][a-z_\-]+$/i;
 			if (!interwiki_pattern.test(section)) {
 				// e.g., [[Avatar: The Last Airbender]]
 				page_name[index] = upper_case_initial(section);
@@ -1446,7 +1460,7 @@ function module_code(library_namespace) {
 			// treat `section` as lang code
 			section = section.toLowerCase();
 			// lang code
-			has_language = true;
+			has_language++;
 			if (use_underline) {
 				section = section.replace(/_/g, '-');
 			}
@@ -4163,6 +4177,15 @@ function module_code(library_namespace) {
 		: PATTERN_BOT_NAME.test(this.token && this.token.lgname) ? 500 : 50,
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */
 		work_continue = 0, this_slice_size, setup_target;
+
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query
+		[ 'redirects', 'converttitles' ].forEach(function(parameter) {
+			if (config[parameter]) {
+				library_namespace.debug('Copy [' + parameter
+						+ '] to page_options', 2, 'wiki_API.work');
+				page_options[parameter] = config[parameter];
+			}
+		});
 
 		// 個別頁面會採用的 page options 選項。
 		var single_page_options = Object.assign({

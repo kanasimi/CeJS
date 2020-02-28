@@ -2829,6 +2829,9 @@ function test_wiki() {
 		[['Abc_def', CeL.wiki.normalize_title('abc def', true)], 'normalize_title #12'],
 		[['User_talk:Abc_def', CeL.wiki.normalize_title('user talk: abc def', true)], 'normalize_title #13'],
 		[['ABC DEF:QQQ', CeL.wiki.normalize_title('ABC DEF:QQQ')], 'normalize_title #14'],
+		[['2001: A Space Odyssey', CeL.wiki.normalize_title('2001: A Space Odyssey')], 'normalize_title #15'],
+		[['2001: A Space Odyssey', CeL.wiki.normalize_title(':2001: A Space Odyssey')], 'normalize_title #16'],
+		[['en:2001: A Space Odyssey', CeL.wiki.normalize_title('en:2001: A Space Odyssey')], 'normalize_title #17'],
 
 		[['[[User:Adam/test]]', CeL.wiki.title_link_of('User:Adam/test')], 'title_link_of #1'],
 		[['Adam', CeL.wiki.parse.user('[[User:Adam/test]]')], 'parse.user #1'],
@@ -3326,6 +3329,19 @@ function test_wiki() {
 	setup_test('CeL.wiki: asynchronous functions');
 	CeL.test('CeL.wiki: asynchronous functions', function (assert, _setup_test, _finish_test) {
 		var wiki = new CeL.wiki(null, null, 'en');
+		wiki.run(function() {
+			_setup_test('wiki: namespace');
+			assert(['2001: A Space Odyssey', wiki.normalize_title('2001: A Space Odyssey')], 'wiki.normalize_title() #1');
+			assert(['2001: A Space Odyssey', wiki.normalize_title(':2001: A Space Odyssey')], 'wiki.normalize_title() #2');
+			assert(['en:2001: A Space Odyssey', wiki.normalize_title('en:2001: A Space Odyssey')], 'wiki.normalize_title() #3');
+			assert(['en:2001: A Space Odyssey', wiki.normalize_title('EN:2001: A Space Odyssey')], 'wiki.normalize_title() #4');
+			assert(['w:2001: A Space Odyssey', wiki.normalize_title('w:2001: A Space Odyssey')], 'wiki.normalize_title() #5');
+			assert(['w:2001: A Space Odyssey', wiki.normalize_title('W:2001: A Space Odyssey')], 'wiki.normalize_title() #6');
+			assert(['w:en:2001: A Space Odyssey', wiki.normalize_title('w:en:2001: A Space Odyssey')], 'wiki.normalize_title() #7');
+			assert(['w:en:2001: A Space Odyssey', wiki.normalize_title('w:EN:2001: A Space Odyssey')], 'wiki.normalize_title() #8');
+			_finish_test('wiki: namespace');
+		});
+
 		_setup_test('wiki: get_creation_Date');
 		wiki.page('Wikipedia:Sandbox', function (page_data) {
 			// {Date}page_data.creation_Date
@@ -3632,7 +3648,8 @@ function test_era() {
 	CeL.set_debug(0);
 
 	all_error_count += CeL.test('date.format()', [
-		[['3 February 1972', '1972-02-03'.to_Date().format({locale:'en',format:'%d %B %Y'})], 'format(1972-02-03)'],
+		[['3 February 1972', '1972-02-03'.to_Date().format({ locale: 'en', format: '%d %B %Y' })], 'format(1972-02-03)'],
+		// locale:'en-US'
 		[['2020 January 20', '2020-01-20'.to_Date().format({locale:'en',format:'%Y %B %d'})], 'format(2020-01-20)'],
 	]);
 
