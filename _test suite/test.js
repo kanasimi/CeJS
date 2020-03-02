@@ -3249,6 +3249,13 @@ function test_wiki() {
 		assert([test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'en'), 'en').toISOString()], 'wiki.parse.date: en #3: ' + test_date);
 		assert([test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'ja'), 'ja').toISOString()], 'wiki.parse.date: ja #3: ' + test_date);
 
+		wikitext = '==t==\nw\n==t2==  \nw\n\n==nt== <b></b>\nw\n==t3== <!--c--> \nw\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: section_title #1');
+		assert([3, parsed.each_section().sections.length], 'wiki.parse: section_title #2');
+		assert(['==t==', parsed.each_section().sections[0].section_title.toString()], 'wiki.parse: section_title #3');
+		assert(['==t2==  ', parsed.each_section().sections[0].section_title.toString()], 'wiki.parse: section_title #4');
+		assert(['==t3== <!--c--> ', parsed.each_section().sections[0].section_title.toString()], 'wiki.parse: section_title #5');
+
 		wikitext = '\nabc\n123\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([undefined, parsed.each_section().sections[0].section_title], 'wiki.parser.each_section #1-1: 沒有章節標題的文章');
 		assert([wikitext, parsed.each_section().sections[0].toString()], 'wiki.parser.each_section #1-2: 沒有章節標題的文章');

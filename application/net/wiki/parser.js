@@ -581,11 +581,11 @@ function module_code(library_namespace) {
 				// TODO: using is_valid_parameters_value(value)
 				return spaces[1] ? spaces[0] + key + spaces[1] + value
 				//
-				: key + '=' + value;
+				+ spaces[2] : key + '=' + value;
 			});
 		}
 		if (Array.isArray(replace_to)) {
-			replace_to = replace_to.join(spaces[2] + '|');
+			replace_to = replace_to.join('|');
 		} else {
 			replace_to = replace_to.toString();
 		}
@@ -2605,6 +2605,7 @@ function module_code(library_namespace) {
 			var level = '='.repeat(this.level);
 			return level
 			// this.join(''): 必須與 wikitext 相同。見 parse_wikitext.title。
+			// this.postfix maybe undefined, string, {Array}
 			+ this.join('') + level + (this.postfix || '');
 		},
 
@@ -4314,10 +4315,33 @@ function module_code(library_namespace) {
 		// [[w:zh:Special:Diff/46814116]]
 
 		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
-		wikitext = wikitext.replace_till_stable(
+
+		var PATTERN_section = new RegExp(
 		// @see PATTERN_section
-		/(^|\n)(=+)(.+)\2([ \t]*)(\n|$)/g, function(all, previous,
-				section_level, parameters, postfix, last) {
+		/(^|\n)(=+)(.+)\2((?:[ \t]|mark)*)(\n|$)/g.source.replace('mark', CeL
+				.to_RegExp_pattern(include_mark)
+				+ '\\d+' + CeL.to_RegExp_pattern(end_mark)), 'g');
+		// console.log(PATTERN_section);
+		// console.log(JSON.stringify(wikitext));
+
+		wikitext = wikitext.replace_till_stable(PATTERN_section, function(all,
+				previous, section_level, parameters, postfix, last) {
+			if (postfix && !/^[ \t]+$/.test(postfix)) {
+				// assert: postfix.includes(include_mark) &&
+				// postfix.includes(end_mark)
+				// console.log(JSON.stringify(postfix));
+				var tail = parse_wikitext(postfix, options, queue);
+				// console.log(tail);
+				if (!Array.isArray(tail) || tail.some(function(token) {
+					return typeof token === 'string' ? !/^[ \t]+$/.test(token)
+					//
+					: token.type !== 'comment';
+				})) {
+					return all;
+				}
+				postfix = tail;
+			}
+
 			// console.log('==> ' + JSON.stringify(all));
 			if (normalize) {
 				parameters = parameters.trim();
