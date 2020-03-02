@@ -120,6 +120,14 @@ function module_code(library_namespace) {
 			additional : 'inprop=intestactions&intestactions=read'
 		// + '&intestactionsdetail=full'
 		});
+
+		// Get all summaries <s>and diffs</s>
+		wiki.page('Heed (cat)', function(page_data) {
+			console.log(page_data);
+		}, {
+			rvprop : 'ids|timestamp|comment',
+			rvlimit : 'max'
+		});
 	}
 
 	// assert: !!KEY_KEEP_INDEX === true
@@ -1286,10 +1294,18 @@ function module_code(library_namespace) {
 		// assert: {Date}last_query_time start time
 		last_query_time,
 		// TODO: 僅僅採用 last_query_revid 做控制，不需要偵測是否有重複。 latest_revid
-		last_query_revid = options.revid | 0,
+		last_query_revid = options.revid | 0;
+
+		// @see function adapt_task_configurations() @ wiki.js
+		if (!options.adapt_configuration) {
+			options.adapt_configuration = session.task_configuration
+					&& session.task_configuration.adapter;
+		}
 		// {String}設定頁面。 注意: 必須是已經轉換過、正規化後的最終頁面標題。
-		configuration_page_title = typeof options.adapt_configuration === 'function'
-				&& wiki_API.normalize_title(options.configuration_page);
+		var configuration_page_title = typeof options.adapt_configuration === 'function'
+				&& wiki_API.normalize_title(options.configuration_page)
+				|| session.task_configuration
+				&& session.task_configuration.page;
 
 		if (!(delay_ms > 0))
 			delay_ms = 0;
@@ -1305,7 +1321,7 @@ function module_code(library_namespace) {
 			// treat as time back to 回溯這麼多時間。
 			if (last_query_time > library_namespace.to_millisecond('31d')) {
 				library_namespace
-						.info('add_listener: 2017 CE 最多約可回溯30天。您所指定的時間 ['
+						.info('add_listener: 2017 CE 最多可回溯約 30天。您所指定的時間 ['
 								+ options.start + '] 似乎過長了。');
 			}
 			last_query_time = new Date(Date.now() - last_query_time);
@@ -1748,9 +1764,9 @@ function module_code(library_namespace) {
 								}
 
 								if (configuration_row === row) {
-									options.adapt_configuration(
-									// (page_data)
-									parse_configuration(row));
+									session.adapt_task_configurations(
+									//
+									row, options.adapt_configuration, 'once');
 									run_next();
 									return;
 								}
@@ -1806,9 +1822,9 @@ function module_code(library_namespace) {
 								}
 								Object.assign(row, page_id_hash[row.pageid]);
 								if (configuration_row === row) {
-									options.adapt_configuration(
+									session.adapt_task_configurations(
 									//
-									parse_configuration(row));
+									row, options.adapt_configuration, 'once');
 									return;
 								}
 								listener.call(options, row, index, rows);

@@ -2010,7 +2010,7 @@ function finish(name_space) {
 				};
 
 				try {
-					if (conditions.constructor.name === 'AsyncFunction') {
+					if (library_namespace.is_async_function(conditions)) {
 						// allow async functions
 						// https://github.com/tc39/ecmascript-asyncawait/issues/78
 						eval('(async function() {'

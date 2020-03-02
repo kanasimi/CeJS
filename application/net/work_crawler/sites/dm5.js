@@ -72,6 +72,9 @@ function module_code(library_namespace) {
 
 		// 解析 作品名稱 → 作品id get_work()
 		search_URL : function(work_title) {
+			return 'search.ashx?d=' + new Date().getTime()
+			//
+			+ '&t=' + work_title + '&language=1';
 			// @see 搜索框文本改变 function SearchInputChange() @
 			// http://css122us.cdndm5.com/v201801302028/dm5/js/search.js
 			return [ 'search.ashx?d=' + new Date().getTime(), {
@@ -1035,6 +1038,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function new_dm5_comics_crawler(configuration, callback, initializer) {
+		// library_namespace.set_debug(9);
 		configuration = configuration ? Object.assign(Object.create(null),
 				default_configuration, configuration) : default_configuration;
 

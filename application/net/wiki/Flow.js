@@ -307,6 +307,16 @@ function module_code(library_namespace) {
 	 *      https://www.mediawiki.org/w/api.php?action=help&modules=flow%2Breply
 	 */
 	function edit_topic(title, topic, text, token, options, callback) {
+		// console.log(text);
+		if (library_namespace.is_thenable(text)) {
+			text.then(function(text) {
+				edit_topic(title, topic, text, token, options, callback);
+			}, function(error) {
+				callback(title, error);
+			});
+			return;
+		}
+
 		var action = 'flow';
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (Array.isArray(title)) {

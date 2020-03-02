@@ -81,8 +81,11 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * padding / fill.<br />
-	 * 將 string 以 character 補滿至長 length。<br />
+	 * padding / fill. 將 string 以 character 補滿至長 length。
+	 * 
+	 * @see Number.prototype.toLocaleString()
+	 *      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString
+	 * 
 	 * TODO: 效能測試:與 "return n > 9 ? n : '0' + n;" 相較。
 	 * 
 	 * @example <code>
@@ -1747,6 +1750,9 @@ function module_code(library_namespace) {
 	/**
 	 * 取至小數 digits 位， 肇因： JScript即使在做加減運算時，有時還是會出現 3*1.6=4.800000000000001,
 	 * 2.4/3=0.7999999999999999 等數值。此函數可取至 1.4 與 0.1。 c.f., round()
+	 * 
+	 * @see Number.prototype.toLocaleString()
+	 *      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString
 	 * 
 	 * @param {Number}[decimals]
 	 *            1,2,...: number of decimal places shown
@@ -4283,6 +4289,8 @@ function module_code(library_namespace) {
 			while ((index = this.indexOf(value, index)) !== NOT_FOUND)
 				this.splice(index, 1);
 		},
+		// TODO: should use Array.prototype.reduce()
+		// e.g., array.reduce((p,e)=>p+e)
 		// Array.prototype.sum()
 		sum : function(using_index) {
 			// total summation
@@ -4306,23 +4314,37 @@ function module_code(library_namespace) {
 			});
 			return product;
 		},
+		// TODO: Object.revert_key_value(array, get_key, hash)
+		//
 		// Array.prototype.to_hash()
 		// ['1e3',5,66]→{'1e3':0,'5':1,'66':2}
 		// {Function}[get_key]
 		to_hash : function(get_key, hash) {
+			if (false) {
+				return Object.assign(hash || Object.create(null),
+				//
+				Object.fromEntries(this.map(function(value, index) {
+					if (get_key)
+						value = get_key(value);
+					if (typeof value === 'object')
+						value =  JSON.stringify(value);
+					return  [ value, index ];
+				})));
+			}
+
 			if (!hash) {
 				hash = Object.create(null);
 			}
 			// TODO: 衝突時處理。
-			this.forEach(get_key ? function(item, index) {
-				item = get_key(item);
-				hash[typeof item === 'object' ? JSON.stringify(item)
+			this.forEach(get_key ? function(value, index) {
+				value = get_key(value);
+				hash[typeof value === 'object' ? JSON.stringify(value)
 				//
-				: item] = index;
-			} : function(item, index) {
-				hash[typeof item === 'object' ? JSON.stringify(item)
+				: value] = index;
+			} : function(value, index) {
+				hash[typeof value === 'object' ? JSON.stringify(value)
 				//
-				: item] = index;
+				: value] = index;
 			});
 			return hash;
 		},

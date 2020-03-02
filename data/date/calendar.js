@@ -4427,7 +4427,7 @@ function Date_to_Armenian(date, options) {
 	var month = days / Armenian_MONTH_DAYS | 0;
 	days %= Armenian_MONTH_DAYS;
 
-	days = [ year, month + 1, days + 1 ];
+	days = [ year, month + 1, days + 1 | 0 ];
 
 	if (options && options.format === 'name') {
 		//days[0] = 'տարի ' + days[0];
@@ -4641,9 +4641,10 @@ function Date_to_Egyptian(date, options) {
 		// 取得年內日數。
 		days -= Math.floor(year * Egyptian_reform_year_days);
 		year += Egyptian_reform_epochal_year;
-	} else
+	} else {
 		// 取得年內日數。
 		days = days.mod(Egyptian_year_days);
+	}
 
 	// assert: days >= 0
 

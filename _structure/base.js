@@ -3020,6 +3020,27 @@ OS='UNIX'; // unknown
 		}
 	});
 
+	// ---------------------------------------------------------------------//
+
+	function is_thenable(value) {
+		return value && typeof value.then === 'function';
+	}
+
+	function is_async_function(value) {
+		// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
+		// 注意 AsyncFunction 不是一個全域物件。 它可以以下程式碼獲得。
+		// Object.getPrototypeOf(async function(){}).constructor
+		return typeof value === 'function'
+		// to allow async functions:
+		// https://github.com/tc39/ecmascript-asyncawait/issues/78
+		&& value.constructor.name === 'AsyncFunction';
+	}
+
+	set_method(_, {
+		is_thenable : is_thenable,
+		is_async_function : is_async_function
+	});
+
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// 依賴於 set_method() 設定完之後才能使用的方法
 

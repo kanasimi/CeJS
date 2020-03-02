@@ -1270,7 +1270,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('agent.cookie_hash: '
 					+ JSON.stringify(agent.cookie_hash), 3,
 					'set_cookie_to_URL_object');
-			var cookie= (URL_object_to_fetch.headers.Cookie ? URL_object_to_fetch.headers.Cookie
+			var cookie = (URL_object_to_fetch.headers.Cookie ? URL_object_to_fetch.headers.Cookie
 					+ ';'
 					: '')
 					// cookie is Array @ Wikipedia
@@ -1280,8 +1280,8 @@ function module_code(library_namespace) {
 					.map(function(cookie) {
 						return cookie.replace(/;.*/, '');
 					}).join('; ') : agent.last_cookie);
-			if (cookie)	{
-				URL_object_to_fetch.headers.Cookie =cookie;
+			if (cookie) {
+				URL_object_to_fetch.headers.Cookie = cookie;
 			} else {
 				delete URL_object_to_fetch.headers.Cookie;
 			}
@@ -2293,7 +2293,8 @@ function module_code(library_namespace) {
 
 			// 為了防止 Cloudflare bot protection(?) 阻擋，必須加上 Accept-Language。
 			// TODO: get language from system infomation
-			// dm5.js using "Microsoft-IIS/8.5", needs 'Accept-Language' to search!
+			// dm5.js using "Microsoft-IIS/8.5", needs 'Accept-Language' to
+			// search!
 			'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
 
 			// 'Cache-Control' : 'no-cache',

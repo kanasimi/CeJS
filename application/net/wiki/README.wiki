@@ -3,6 +3,10 @@ MediaWiki 自動化作業程式庫，主要用於編寫[[維基百科:機器人]
 
 Main initial point: [[../wiki.js]]
 
+; Essential 必要: [[../wiki.js]], [[parser.js]], [[query.js]], [[page.js]], [[Flow.js]], [[list.js]], [[edit.js]], ([[admin.js]], [[data.js]])
+; Optional 可選: [[admin.js]], [[data.js]], [[Toolforge.js]]
+; Change with wikiproject page contents 隨各wikiproject頁面內容變化之功能: [[template_functions.js]]
+
 More examples: 完整版的依賴鍊可參照：
 * [https://github.com/kanasimi/wikiapi JavaScript MediaWiki API for ECMAScript 2017+] / [https://github.com/kanasimi/wikiapi/blob/master/wikiapi.js wikiapi.js]
 * [https://github.com/kanasimi/wikibot Wikipedia bots demo] / [https://github.com/kanasimi/wikibot/blob/master/wiki%20loader.js wiki loader.js]

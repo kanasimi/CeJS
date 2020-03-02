@@ -1398,7 +1398,7 @@ function module_code(library_namespace) {
 		? page_name.replace(/ /g, '_') : page_name.replace(/_/g, ' ');
 
 		page_name = page_name.split(':');
-		var has_language = 0;
+		var has_language;
 		var session = session_of_options(options);
 		var no_session_namespace_hash = !session
 				|| !session.configurations.namespace_hash;
@@ -1460,7 +1460,7 @@ function module_code(library_namespace) {
 			// treat `section` as lang code
 			section = section.toLowerCase();
 			// lang code
-			has_language++;
+			has_language = true;
 			if (use_underline) {
 				section = section.replace(/_/g, '-');
 			}

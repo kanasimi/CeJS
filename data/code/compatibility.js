@@ -2472,6 +2472,14 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// @see CeL.data.native.is_thenable()
+	function is_thenable(value) {
+		return !!get_then_of_thenable(value);
+		// old style
+		return value && typeof value.then === 'function';
+	}
+	// library_namespace.is_thenable = is_thenable;
+
 	// https://www.ecma-international.org/ecma-262/9.0/index.html#sec-ispromise
 	// https://stackoverflow.com/questions/27746304/how-do-i-tell-if-an-object-is-a-promise
 	// test if is Promise 物件, Promise.isPromise(),
@@ -2485,7 +2493,7 @@ function module_code(library_namespace) {
 				&& Object.prototype.toString.call(value) === "[object Promise]";
 
 		// NG: only thenable
-		return value && typeof value.then === 'function';
+		return is_thenable(value);
 
 		// assert: Should NOT access value.then
 		// https://promisesaplus.com/#point-75
