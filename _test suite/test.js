@@ -3253,8 +3253,8 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: section_title #1');
 		assert([3, parsed.each_section().sections.length], 'wiki.parse: section_title #2');
 		assert(['==t==', parsed.each_section().sections[0].section_title.toString()], 'wiki.parse: section_title #3');
-		assert(['==t2==  ', parsed.each_section().sections[0].section_title.toString()], 'wiki.parse: section_title #4');
-		assert(['==t3== <!--c--> ', parsed.each_section().sections[0].section_title.toString()], 'wiki.parse: section_title #5');
+		assert(['==t2==  ', parsed.each_section().sections[1].section_title.toString()], 'wiki.parse: section_title #4');
+		assert(['==t3== <!--c--> ', parsed.each_section().sections[2].section_title.toString()], 'wiki.parse: section_title #5');
 
 		wikitext = '\nabc\n123\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([undefined, parsed.each_section().sections[0].section_title], 'wiki.parser.each_section #1-1: 沒有章節標題的文章');
