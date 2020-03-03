@@ -1342,7 +1342,7 @@ function module_code(library_namespace) {
 	 *      https://www.mediawiki.org/wiki/Help:CirrusSearch
 	 */
 	wiki_API.search = function(key, callback, options) {
-		if (options > 0 || options === 'max') {
+		if (typeof options !== 'object' && (options === 'max' || options > 0)) {
 			options = {
 				srlimit : options
 			};
