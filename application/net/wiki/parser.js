@@ -5,6 +5,14 @@
  * 
  * TODO:<code>
 
+parser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
+parser 所有子頁面加入白名單 white-list
+parser 所有node當前之level層級
+parser 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起來。
+parser [[WP:維基化]]
+https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
+https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
+https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 
 </code>
  * 
@@ -5491,10 +5499,15 @@ function module_code(library_namespace) {
 		function filter_tags(token) {
 			// console.log(token);
 			if (token.type === 'tag'/* || token.type === 'tag_single' */) {
+				// `<nowiki>value</nowiki>` -> `value`
 				return filter_tags(token[1]);
 			}
 			if (Array.isArray(token)) {
-				return token.toString.call(token.map(filter_tags));
+				var value = token.toString.call(token.map(filter_tags));
+				if (token.type === 'list')
+					token.value = value;
+				else
+					return value;
 			}
 			return token;
 		}
@@ -5564,10 +5577,19 @@ function module_code(library_namespace) {
 
 						// TODO: data-sort-type in table head
 
-						var data_type;
-						cell = normalize_value(cell.filter(function(token) {
-							if (token.type !== 'table_style')
+						var data_type, has_list, has_non_empty_token;
+						// console.log(cell);
+						cell = cell.filter(function(token) {
+							if (token.type !== 'table_style') {
+								if (token.type === 'list') {
+									has_list = true;
+								} else {
+									has_non_empty_token
+									//
+									= !!token.toString().trim();
+								}
 								return true;
+							}
 							data_type = token.toString()
 							// @see
 							// [[w:en:Help:Sorting#Configuring the sorting]]
@@ -5576,7 +5598,28 @@ function module_code(library_namespace) {
 							if (data_type) {
 								data_type = data_type[1] || data_type[2];
 							}
-						}).map(filter_tags).join(''));
+						}).map(filter_tags);
+						if (!has_list) {
+							cell = normalize_value(cell.join(''));
+						} else if (has_non_empty_token) {
+							// 有些不合格之 token。
+							cell.forEach(function(token, index) {
+								if (token.type === 'list')
+									cell[index] = token.value;
+							});
+							cell = normalize_value(cell.join(''));
+						} else {
+							has_list = null;
+							cell.forEach(function(token) {
+								if (token.type === 'list')
+									if (has_list)
+										has_list.append(token);
+									else
+										has_list = token.slice();
+								// assert: token.trim() === ''
+							});
+							cell = has_list;
+						}
 
 						if (typeof data_type === 'number') {
 							if (!isNaN(data_type = +cell))
@@ -5588,10 +5631,14 @@ function module_code(library_namespace) {
 								cell = new Date(data_type);
 						}
 
+						// console.log(cell);
 						row.push(cell);
 					});
 					// console.log(line);
 					value.push(row);
+					if (row.length >= 2 && typeof row[0] === 'string') {
+						value[row[0]] = row[1];
+					}
 				});
 				configuration[token.caption || variable_name] = value;
 				// 僅採用第一個列表。

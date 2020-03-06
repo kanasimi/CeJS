@@ -1,4 +1,4 @@
-= CeJS MediaWiki module =
+﻿= CeJS MediaWiki module =
 MediaWiki 自動化作業程式庫，主要用於編寫[[維基百科:機器人]]。
 
 Main initial point: [[../wiki.js]]
@@ -8,6 +8,9 @@ Main initial point: [[../wiki.js]]
 ; Change with wikiproject page contents 隨各wikiproject頁面內容變化之功能: [[template_functions.js]]
 
 More examples: 完整版的依賴鍊可參照：
+<!--
+const util = require('util'); new util.promisify(CeL.wiki)(...)
+-->
 * [https://github.com/kanasimi/wikiapi JavaScript MediaWiki API for ECMAScript 2017+] / [https://github.com/kanasimi/wikiapi/blob/master/wikiapi.js wikiapi.js]
 * [https://github.com/kanasimi/wikibot Wikipedia bots demo] / [https://github.com/kanasimi/wikibot/blob/master/wiki%20loader.js wiki loader.js]
 * [[/_test suite/test.js|test.js]]

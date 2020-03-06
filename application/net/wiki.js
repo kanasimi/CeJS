@@ -10,17 +10,6 @@ wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無
 wiki_API.page() 整合各 action=query 至單一公用 function。
 [[mw:Manual:Pywikibot/zh]]
 
-const util = require('util'); new util.promisify(CeL.wiki)(...)
-
-parser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
-parser 所有子頁面加入白名單 white-list
-parser 所有node當前之level層級
-parser 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起來。
-parser [[WP:維基化]]
-https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
-https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
-https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
-
 [[mw:Help:OAuth]]
 https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 https://meta.wikimedia.org/wiki/Steward_requests/Miscellaneous#OAuth_permissions
