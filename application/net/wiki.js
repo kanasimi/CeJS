@@ -4740,9 +4740,8 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
-	// TODO: yet test
-	// 讀入手動設定 manual settings。
-	// 檢查從網頁取得的設定。
+	// 從網頁取得/讀入自動作業用的人為設定 manual settings。本設定頁面將影響作業功能，應受適當保護。且應小心編輯，以防機器人無法讀取。
+	// TODO: 檢查設定。
 	function adapt_task_configurations(task_configuration_page,
 			configuration_adapter, options) {
 		options = library_namespace.setup_options(options);

@@ -5590,13 +5590,15 @@ function module_code(library_namespace) {
 								}
 								return true;
 							}
+
+							// console.log(token);
 							data_type = token.toString()
 							// @see
 							// [[w:en:Help:Sorting#Configuring the sorting]]
 							// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
 							.match(/data-sort-type=(["']([^"']+)["']|[^\s]+)/);
 							if (data_type) {
-								data_type = data_type[1] || data_type[2];
+								data_type = data_type[2] || data_type[1];
 							}
 						}).map(filter_tags);
 						if (!has_list) {
@@ -5612,23 +5614,30 @@ function module_code(library_namespace) {
 							has_list = null;
 							cell.forEach(function(token) {
 								if (token.type === 'list')
-									if (has_list)
-										has_list.append(token);
-									else
-										has_list = token.slice();
+									if (has_list) {
+										has_list.append(token
+												.map(normalize_value));
+									} else {
+										has_list = token.map(normalize_value);
+									}
 								// assert: token.trim() === ''
 							});
 							cell = has_list;
 						}
 
-						if (typeof data_type === 'number') {
+						// console.log([ data_type, cell ]);
+						if (data_type === 'number') {
+							// console.log(cell);
 							if (!isNaN(data_type = +cell))
 								cell = data_type;
-						} else if (typeof data_type === 'isoDate') {
+						} else if (data_type === 'isoDate') {
 							data_type = Date.parse(cell
 									.replace(/<[^<>]+>/g, ''));
 							if (!isNaN(data_type))
 								cell = new Date(data_type);
+						} else if (data_type) {
+							library_namespace.warn('Invalid type: ['
+									+ data_type + '] ' + cell);
 						}
 
 						// console.log(cell);
@@ -5636,7 +5645,10 @@ function module_code(library_namespace) {
 					});
 					// console.log(line);
 					value.push(row);
-					if (row.length >= 2 && typeof row[0] === 'string') {
+					if (row.length >= 2
+					//
+					&& row[0] && typeof row[0] === 'string') {
+						// ! 變數名 (不可更改) !! 變數值 !! 注解說明
 						value[row[0]] = row[1];
 					}
 				});
