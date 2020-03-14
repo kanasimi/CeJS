@@ -680,6 +680,7 @@ function module_code(library_namespace) {
 					title : work_title,
 					url : work_URL
 				});
+				// console.log(work_data);
 				if (work_data === _this.REGET_PAGE) {
 					// 需要重新讀取頁面。e.g., 502
 					var chapter_time_interval = _this
@@ -712,28 +713,36 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// search key
+			// work_title: search key
 			work_data.input_title = work_title;
 			if (!work_data.title) {
 				work_data.title = work_title;
-			} else if (_this.cache_title_to_id && !work_title
-			// default: `{title:id}`
-			&& (!_this.id_of_search_result && !_this.title_of_search_result
-			// 應對有些作品存在卻因為網站本身的問題而搜尋不到的情況，例如 buka。
-			// 這時 this.parse_search_result() 函數本身必須能夠解析 `{title:id}`。
-			|| typeof _this.parse_search_result !== 'function')) {
-				// cache work title: 方便下次從 search cache 反查。
+			} else {
+				// assert: {String}work_data.title
+				work_data.title
+				// '&amp;' → '&' for `node webtoon.js challenge_18878`
+				// https://github.com/kanasimi/work_crawler/issues/409
+				= library_namespace.HTML_to_Unicode(work_data.title);
 
-				// search cache
-				var search_result_file = _this.get_search_result_file(),
-				//
-				search_result = _this.get_search_result()
-						|| Object.create(null);
-				if (!(work_data.title in search_result)) {
-					search_result[work_data.title] = work_id;
-					// 補上已知的轉換。這樣未來輸入作品標題的時候就能自動轉換。
-					library_namespace.write_file(search_result_file,
-							search_result);
+				if (_this.cache_title_to_id && !work_title
+				// default: `{title:id}`
+				&& (!_this.id_of_search_result && !_this.title_of_search_result
+				// 應對有些作品存在卻因為網站本身的問題而搜尋不到的情況，例如 buka。
+				// 這時 this.parse_search_result() 函數本身必須能夠解析 `{title:id}`。
+				|| typeof _this.parse_search_result !== 'function')) {
+					// cache work title: 方便下次從 search cache 反查。
+
+					// search cache
+					var search_result_file = _this.get_search_result_file(),
+					//
+					search_result = _this.get_search_result()
+							|| Object.create(null);
+					if (!(work_data.title in search_result)) {
+						search_result[work_data.title] = work_id;
+						// 補上已知的轉換。這樣未來輸入作品標題的時候就能自動轉換。
+						library_namespace.write_file(search_result_file,
+								search_result);
+					}
 				}
 			}
 
