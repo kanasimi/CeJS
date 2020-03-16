@@ -2213,7 +2213,9 @@ function module_code(library_namespace) {
 			// 必須有頁面內容，要不可能僅有資訊。有時可能已經擷取過卻發生錯誤而沒有頁面內容，此時依然會再擷取一次。
 			&& (get_page_content.has_content(next[1])
 			// 除非剛剛才取得，同一個執行緒中不需要再度取得內容。
-			|| next[3] && next[3].allow_missing && ('missing' in next[1]))) {
+			|| next[3] && next[3].allow_missing
+			// && ('missing' in next[1])
+			)) {
 				library_namespace.debug('採用所輸入之 '
 						+ wiki_API.title_link_of(next[1])
 						+ ' 作為 this.last_page。', 2, 'wiki_API.prototype.next');
@@ -2398,6 +2400,13 @@ function module_code(library_namespace) {
 			add_session_to_options(this, next[3]));
 			break;
 
+		case 'copy_from':
+			// `wiki_API_prototype_copy_from`
+			wiki_API.edit.copy_from.apply(this, next.slice(1));
+			break;
+
+		// ----------------------------------------------------------------------------------------
+
 		case 'check':
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			next[1] = library_namespace.new_options(this.check_options,
@@ -2409,13 +2418,25 @@ function module_code(library_namespace) {
 			} : next[1]);
 
 			// ('stopped' in this): 已經有 cache。
-			if (('stopped' in this)
+			if (this.checking_now || ('stopped' in this)
 			// force to check
-			&& next[1].force) {
-				library_namespace.debug('Skip check_stop().', 1,
-						'wiki_API.prototype.next');
+			&& !next[1].force) {
+				if (this.checking_now) {
+					library_namespace.debug('checking now...', 3,
+							'wiki_API.prototype.next');
+				} else {
+					library_namespace.debug('Skip check_stop().', 1,
+							'wiki_API.prototype.next');
+				}
+				if (typeof next[2] === 'function') {
+					// next[2] : callback(...)
+					next[2].call(this, this.stopped);
+				}
 				this.next();
 			} else {
+				// 僅檢測一次。在多執行緒的情況下，可能遇上檢測多次的情況。
+				this.checking_now = next[1].title || true;
+
 				library_namespace.debug('以 .check_stop() 檢查與設定是否須停止編輯作業。', 1,
 						'wiki_API.prototype.next');
 				library_namespace
@@ -2426,22 +2447,20 @@ function module_code(library_namespace) {
 				// 正作業中之 wiki_API instance。
 				next[1][KEY_SESSION] = this;
 				wiki_API.check_stop(function(stopped) {
-					// cache
+					delete _this.checking_now;
+					library_namespace.debug('check_stop: ' + stopped, 1,
+							'wiki_API.prototype.next');
 					_this.stopped = stopped;
-
+					if (typeof next[2] === 'function') {
+						// next[2] : callback(...)
+						next[2].call(_this, stopped);
+					}
 					_this.next();
 				},
 				// next[1] : options
 				next[1]);
 			}
 			break;
-
-		case 'copy_from':
-			// `wiki_API_prototype_copy_from`
-			wiki_API.edit.copy_from.apply(this, next.slice(1));
-			break;
-
-		// ----------------------------------------------------------------------------------------
 
 		case 'edit':
 			// wiki.edit(page contents, options, callback)
@@ -2467,9 +2486,19 @@ function module_code(library_namespace) {
 				this.next();
 
 			} else if (!('stopped' in this)) {
-				library_namespace.debug('rollback, check if need stop 緊急停止.',
-						2, 'wiki_API.prototype.next');
-				this.actions.unshift([ 'check' ], next);
+				library_namespace.debug(
+						'edit: rollback, check if need stop 緊急停止.', 2,
+						'wiki_API.prototype.next');
+				this.actions.unshift([ 'check', null, function() {
+					library_namespace.debug(
+					//
+					'edit: recover last_page_on_call: '
+					//
+					+ wiki_API.title_link_of(last_page_on_call) + '.',
+					//
+					2, 'wiki_API.prototype.next');
+					_this.last_page = last_page_on_call;
+				} ], next);
 				this.next();
 			} else if (this.stopped && !next[2].skip_stopped) {
 				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯'
@@ -4740,7 +4769,8 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
-	// 從網頁取得/讀入自動作業用的人為設定 manual settings。本設定頁面將影響作業功能，應受適當保護。且應小心編輯，以防機器人無法讀取。
+	// 從網頁取得/讀入自動作業用的人為設定 manual settings。
+	// 本設定頁面將影響作業功能，應受適當保護。且應謹慎編輯，以防機器人無法讀取。移動本頁面必須留下重定向。
 	// TODO: 檢查設定。
 	function adapt_task_configurations(task_configuration_page,
 			configuration_adapter, options) {
