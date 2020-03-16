@@ -2432,7 +2432,9 @@ function module_code(library_namespace) {
 					// next[2] : callback(...)
 					next[2].call(this, this.stopped);
 				}
-				this.next();
+				// 在多執行緒的情況下，避免 `RangeError: Maximum call stack size exceeded`。
+				setTimeout(this.next.bind(this), 0);
+
 			} else {
 				// 僅檢測一次。在多執行緒的情況下，可能遇上檢測多次的情況。
 				this.checking_now = next[1].title || true;
