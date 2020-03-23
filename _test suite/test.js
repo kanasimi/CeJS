@@ -3714,6 +3714,20 @@ function test_era() {
 		[["癸丑年閏11月1日", '2033年12月22日'.to_Date().format({ parser: 'Chinese', numeral: null, format: '%歲次年%月月%日日' })], '2033年閏十一月初一'],
 		[["癸丑年閏11月1日", '2033年12月22日'.to_Date().format({ parser: 'era', era: '中曆', format: '%歲次年%月月%日日', locale: 'cmn-Hant-TW' })], '2033年閏十一月初一'],
 		[CeL.era('公元1895年4月17日').共存紀年.join().includes('光緒21年3月23日'), '馬關條約公元 日期.共存紀年 包含光緒日期'],
+		[['1912/1/1', '中華民國1年1月1日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '中華民國紀年 公元日期']],
+		[['2021/12/31', '中華民國110年12月31日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '中華民國紀年 公元日期']],
+		// TODO: "民國23年"
+		[['1977/10/31', '民國66年10月31日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '民國紀年 公元日期']],
+		[['2020/7/31', '民國109年7月31日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '民國紀年 公元日期']],
+
+		// 日本の元号
+		[['1872/5/8', '明治5年4月2日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '明治紀年 公元日期']],
+		[['1890/6/6', '明治23年6月6日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '明治紀年 公元日期']],
+		[['1917/6/6', '大正6年6月6日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '大正紀年 公元日期']],
+		[['1931/6/6', '昭和6年6月6日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '昭和紀年 公元日期']],
+		[['1994/6/6', '平成6年6月6日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '平成紀年 公元日期']],
+		[['2020/2/29', '令和2年2月29日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '令和紀年 公元日期']],
+
 		[[undefined, CeL.era('2200/1/1').共存紀年]],
 		[[undefined, CeL.era('-4000/1/1').共存紀年]],
 		[[0, CeL.era('明年', { base: '嘉靖元年' }) - CeL.era('二年', { base: '嘉靖元年' })], '明年'],
