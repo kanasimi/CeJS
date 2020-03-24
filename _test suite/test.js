@@ -3346,6 +3346,7 @@ function test_wiki() {
 			assert(['w:2001: A Space Odyssey', wiki.normalize_title('W:2001: A Space Odyssey')], 'wiki.normalize_title() #6');
 			assert(['w:en:2001: A Space Odyssey', wiki.normalize_title('w:en:2001: A Space Odyssey')], 'wiki.normalize_title() #7');
 			assert(['w:en:2001: A Space Odyssey', wiki.normalize_title('w:EN:2001: A Space Odyssey')], 'wiki.normalize_title() #8');
+			assert(['ArXiv', wiki.normalize_title('arXiv')], 'wiki.normalize_title() #9');
 			_finish_test('wiki: namespace');
 		});
 

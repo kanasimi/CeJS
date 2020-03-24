@@ -1398,13 +1398,22 @@ function module_code(library_namespace) {
 			section = use_underline ? section.replace(/^[\s_]+/, '') : section
 					.trimStart();
 
-			if (index === page_name.length - 1 || no_session_namespace_hash
+			// 必然包含 page title，因此不處理最後一個。
+			if (index === page_name.length - 1) {
+				// page title: 將首個字母轉成大寫。
+				page_name[index] = upper_case_initial(section);
+				return true;
+			}
+
+			if (// index === page_name.length - 1 ||
+			no_session_namespace_hash
 			// @see PATTERN_PROJECT_CODE
 			&& !(use_underline ? /^[a-z][a-z\d\-_]{0,14}$/i
 			//
 			: /^[a-z][a-z\d\- ]{0,14}$/i).test(section.trimEnd())) {
 				// console.log(section);
-				if (session && interwiki_pattern.test(section)) {
+				if (// index < page_name.length - 1 &&
+				session && interwiki_pattern.test(section)) {
 					// e.g., 'EN' → 'en'
 					page_name[index] = section.toLowerCase();
 				} else {
