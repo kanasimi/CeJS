@@ -3338,6 +3338,8 @@ function test_wiki() {
 		var wiki = new CeL.wiki(null, null, 'en');
 		wiki.run(function() {
 			_setup_test('wiki: namespace');
+			assert(wiki.is_talk_namespace(wiki.to_talk_page('A: B')), 'wiki.is_talk_namespace() #1');
+
 			assert(['2001: A Space Odyssey', wiki.normalize_title('2001: A Space Odyssey')], 'wiki.normalize_title() #1');
 			assert(['2001: A Space Odyssey', wiki.normalize_title(':2001: A Space Odyssey')], 'wiki.normalize_title() #2');
 			assert(['en:2001: A Space Odyssey', wiki.normalize_title('en:2001: A Space Odyssey')], 'wiki.normalize_title() #3');
@@ -3347,6 +3349,7 @@ function test_wiki() {
 			assert(['w:en:2001: A Space Odyssey', wiki.normalize_title('w:en:2001: A Space Odyssey')], 'wiki.normalize_title() #7');
 			assert(['w:en:2001: A Space Odyssey', wiki.normalize_title('w:EN:2001: A Space Odyssey')], 'wiki.normalize_title() #8');
 			assert(['ArXiv', wiki.normalize_title('arXiv')], 'wiki.normalize_title() #9');
+
 			_finish_test('wiki: namespace');
 		});
 

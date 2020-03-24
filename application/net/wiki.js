@@ -1067,22 +1067,14 @@ function module_code(library_namespace) {
 
 	function is_talk_namespace(namespace, options) {
 		if (typeof namespace === 'string') {
-			namespace = wiki_API.normalize_title(namespace).toLowerCase();
+			namespace = wiki_API.normalize_title(namespace, options)
+					.toLowerCase();
 			var session = session_of_options(options);
 			var name_of_NO = session && session.configurations.name_of_NO
 					|| wiki_API.namespace.name_of_NO;
-			if (session && session.configurations.namespace_pattern) {
-				if (namespace.includes(':')) {
-					namespace = session
-							.match(session.configurations.namespace_pattern);
-					if (!namespace) {
-						// assert: main
-						return false;
-					}
-					namespace = name_of_NO[namespace[1]];
-				} else {
-					namespace = name_of_NO[namespace];
-				}
+			if (session) {
+				// assert: {Number|Undefined}namespace
+				namespace = wiki_API.namespace(namespace, options);
 			} else {
 				// treat ((namespace)) as page title
 				// get namespace only. e.g., 'wikipedia:sandbox' → 'wikipedia'
@@ -1120,7 +1112,7 @@ function module_code(library_namespace) {
 			page_title = wiki_API.title_of(page_title);
 
 		} else {
-			page_title = wiki_API.normalize_title(page_title);
+			page_title = wiki_API.normalize_title(page_title, options);
 			if (!session) {
 				// 模組|模塊|模块 → Module talk
 				if (/^(Special|特殊|特別|Media|媒體|媒体|メディア|Topic|話題|话题):/i
@@ -1156,7 +1148,7 @@ function module_code(library_namespace) {
 			page_title = wiki_API.remove_namespace(page_title, options);
 			page_title = namespace + ':' + page_title;
 			if (name_of_NO === wiki_API.namespace.name_of_NO) {
-				page_title = wiki_API.normalize_title(page_title);
+				page_title = wiki_API.normalize_title(page_title, options);
 			}
 			return page_title;
 		}
@@ -1191,7 +1183,7 @@ function module_code(library_namespace) {
 			page_title = wiki_API.title_of(page_title);
 
 		} else {
-			page_title = wiki_API.normalize_title(page_title);
+			page_title = wiki_API.normalize_title(page_title, options);
 			// assert: {Number|Undefined}namespace
 			namespace = wiki_API.namespace(page_title, options);
 		}
@@ -1215,7 +1207,7 @@ function module_code(library_namespace) {
 			if (namespace) {
 				page_title = namespace + ':' + page_title;
 				if (name_of_NO === wiki_API.namespace.name_of_NO) {
-					page_title = wiki_API.normalize_title(page_title);
+					page_title = wiki_API.normalize_title(page_title, options);
 				}
 			}
 			return page_title;
@@ -3493,7 +3485,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('wiki_API.work: 開始執行: 先作環境建構與初始設定。');
 		if (config.summary) {
 			// '開始處理 ' + config.summary + ' 作業'
-			library_namespace.sinfo([ 'wiki_API.work: start [', 'fg=yellow',
+			library_namespace.sinfo([ 'wiki_API.work: Start [', 'fg=yellow',
 					config.summary, '-fg', ']' ]);
 		}
 
