@@ -647,7 +647,7 @@ function module_code(library_namespace) {
 					delete options.multi;
 				}
 				// TODO: array + ('numeric-id' in value)
-				// TODO: using Promise.all([])
+				// TODO: using Promise.allSettled([])
 				if (callback) {
 					// console.log(value);
 					value.run_parallel(function(run_next, item, index) {

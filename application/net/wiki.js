@@ -787,11 +787,13 @@ function module_code(library_namespace) {
 			var list = [];
 			// e.g., 'User_talk' → 'User talk'
 			namespace = namespace.replace(/[\s_]+/g, ' ');
-			namespace.toLowerCase()
+			(options.is_page_title ? [ namespace.toLowerCase() ]
+			//
+			: namespace.toLowerCase()
 			// for ',Template,Category', ';Template;Category',
 			// 'main|module|template|category'
 			// https://www.mediawiki.org/w/api.php?action=help&modules=main#main.2Fdatatypes
-			.split(/(?:[,;|\u001F]|%7C|%1F)/).forEach(function(n) {
+			.split(/(?:[,;|\u001F]|%7C|%1F)/)).forEach(function(n) {
 				if (options.is_page_title && n.startsWith(':')) {
 					// e.g., [[:title]]
 					n = n.slice(1);
@@ -1050,8 +1052,10 @@ function module_code(library_namespace) {
 		var namespace = !options ? 0 : !isNaN(options) ? +options
 				: typeof options === 'string' ? options : options.namespace;
 		page_title = wiki_API.normalize_title(page_title, options);
-		return get_namespace(page_title, options) === get_namespace(namespace,
-				options);
+		return get_namespace(page_title, Object.assign({
+			// for wiki_API.namespace()
+			is_page_title : true
+		}, options)) === get_namespace(namespace, options);
 	}
 
 	function convert_page_title_to_namespace(page_title, options) {
@@ -2750,7 +2754,7 @@ function module_code(library_namespace) {
 								delete _this.retry_login;
 							// next[3] : callback
 							if (typeof next[3] === 'function')
-								next[3].call(_this, title, error, result);
+								next[3].apply(_this, arguments);
 							// assert: 應該有 last_page_on_call。
 							// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
 							if (last_page_on_call) {
@@ -3627,6 +3631,10 @@ function module_code(library_namespace) {
 					library_namespace.error('wiki_API.work: 無 result.edit'
 							+ (result && result.edit ? '.newrevid' : '')
 							+ '！可能是 token lost！');
+					if (false) {
+						console.trace(Array.isArray(title) && title[1]
+								&& title[1].title ? title[1].title : title);
+					}
 					error = 'no "result.edit'
 							+ (result && result.edit ? '.newrevid".' : '.');
 					result = [ 'error', 'token lost?' ];
@@ -3974,10 +3982,12 @@ function module_code(library_namespace) {
 							if (messages.quit_operation) {
 								clear_work.call(this);
 							}
+							// console.trace(content);
 							return content;
 						}, work_options, function work_edit_callback(
 						// title, error, result
 						) {
+							// console.trace(arguments);
 							// nomally call do_batch_work_summary()
 							callback.apply(this, arguments);
 							if (--pages_left === 0) {

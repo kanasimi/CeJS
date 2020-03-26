@@ -1955,7 +1955,8 @@ function module_code(library_namespace) {
 			// TODO: move section to another page
 			if (library_namespace.is_async_function(for_section)) {
 				// console.log(all_root_section_list);
-				return Promise.all(all_root_section_list.map(for_section));
+				return Promise.allSettled(all_root_section_list
+						.map(for_section));
 
 				// @deprecated
 				all_root_section_list
@@ -3692,6 +3693,7 @@ function module_code(library_namespace) {
 					category_matched = page_name
 					// test [[Category:name|order]]
 					.match(PATTERN_category_prefix);
+					// console.log([ page_name, category_matched ]);
 				}
 				if (page_name.includes(include_mark)) {
 					// 預防有特殊 elements 置入link其中。
@@ -5049,6 +5051,8 @@ function module_code(library_namespace) {
 	 * @example <code>
 
 	date_list = CeL.wiki.parse.date(CeL.wiki.content_of(page_data), {
+		//language : 'en',
+		session : session,
 		get_timevalue : true,
 		get_all_list : true
 	});
@@ -5371,13 +5375,13 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
-	 * @see https://en.wikipedia.org/wiki/Module:Redirect
+	 * @see function p.getTargetFromText(text) @ https://en.wikipedia.org/wiki/Module:Redirect
 	 *      https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics&utf8
 	 *      https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
 	 *      https://en.wikipedia.org/wiki/Help:Redirect
 	 *      https://phabricator.wikimedia.org/T68974
 	 */
-	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^\[\]\|{}\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i;
+	var PATTERN_redirect = /^[\s\n]*#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^\[\]\|{}\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i;
 
 	/**
 	 * parse redirect page. 解析重定向資訊，或判斷頁面是否為重定向頁面。<br />
