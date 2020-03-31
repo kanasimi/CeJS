@@ -236,12 +236,13 @@ function module_code(library_namespace) {
 						|| text.between(null, '</p>');
 				// console.log(text);
 				var matched = text.match(/^([^：]+)：([\s\S]+)$/);
+				// console.log(matched);
 				if (matched) {
 					work_data[matched[1]] = get_label(matched[2]);
 				}
 			});
 
-			var matched = work_data.人气.match(/^(\d+)\s*\|(.+)$/);
+			var matched = work_data.人气 && work_data.人气.match(/^(\d+)\s*\|(.+)$/);
 			if (matched) {
 				work_data.人气 = +matched[1];
 				work_data.status = matched[2];
@@ -253,8 +254,8 @@ function module_code(library_namespace) {
 		parse_work_data : function(html, get_label, extract_work_data) {
 			// console.log(html);
 			var part_list = [], matched,
-			//
-			text = html.between('<div class="detail-list-title">', '</div>'),
+			// e.g., https://www.mymhh.com/book/459
+			text = html.between('<div class="detail-list-title"', '</div>'),
 			//
 			PATTERN = /['"]detail-list-select-(\d)['"][^<>]+>([^<>]+)/g;
 			while (matched = PATTERN.exec(text)) {

@@ -317,6 +317,28 @@ function module_code(library_namespace) {
 			// assert: !get_URL_options === true
 			get_URL_options = this.get_URL_options;
 		}
+
+		// e.g., mymhh.js
+		var fetch_type = get_URL_options.fetch_type, headers = get_URL_options.headers || (get_URL_options.headers = Object.create(null));
+		if (fetch_type ? fetch_type === 'image'
+			// e.g., /(?:jpg|png)(?:$|\?)/i
+			: (new RegExp('\.(?:' + Object.keys(this.image_types).join('|') + ')(?:$|\\?)', 'i')).test(url)) {
+			Object.assign(headers, {
+				'Sec-Fetch-Dest' : fetch_type,
+				'Sec-Fetch-Mode' : 'no-cors',
+				'Sec-Fetch-Site' : 'cross-site'
+			});
+		} else if (fetch_type && fetch_type !== 'document') {
+			library_namespace.error('this_get_URL: Invalid fetch_type: ' + fetch_type);
+		} else {
+			Object.assign(headers, {
+				'Sec-Fetch-Dest' : fetch_type || 'document',
+				'Sec-Fetch-Mode' : 'navigate',
+				'Sec-Fetch-Site' : 'none'
+			});
+		}
+		delete get_URL_options.fetch_type;
+
 		// console.log(get_URL_options);
 
 		// callback(result_Object, error)

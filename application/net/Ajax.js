@@ -2284,11 +2284,20 @@ function module_code(library_namespace) {
 
 		};
 
-		URL_object_to_fetch.headers = Object.assign({
-			// 乾脆模擬得更真實一點。
-			// Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
-			// + 'image/webp,image/apng,image/*,*/*;q=0.8',
+		// --------------------------------------------------------------------
 
+		// https://fetch.spec.whatwg.org/#forbidden-header-name
+		// 必要的 headers: User-Agent, Accept-Language。其他是為了模擬得更真實點。
+		URL_object_to_fetch.headers = Object.assign({
+			// 網站的主機名稱。
+			Host : URL_object_to_fetch.host,
+
+			// User Agent
+			'User-Agent' : get_URL_node.default_user_agent,
+
+			// https://developer.mozilla.org/zh-CN/docs/Glossary/Quality_values
+			Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
+				+ 'image/webp,*/*;q=0.8',
 			// Accept : 'application/json, text/plain, */*',
 
 			// 為了防止 Cloudflare bot protection(?) 阻擋，必須加上 Accept-Language。
@@ -2297,19 +2306,27 @@ function module_code(library_namespace) {
 			// search!
 			'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
 
-			// 'Cache-Control' : 'no-cache',
-			// Pragma : 'no-cache',
-			// Connection : 'keep-alive',
-			// DNT : 1,
-			// 網站的主機名稱。
-			// Host : URL_object_to_fetch.host,
-			// 'Upgrade-Insecure-Requests' : 1,
+			DNT : 1,
+			Connection : 'keep-alive',
+			'Upgrade-Insecure-Requests' : 1,
 
-			// Origin : URL_object_to_fetch.protocol + '://'
-			// + URL_object_to_fetch.host,
+			// https://blog.kalan.dev/fetch-metadata-request-headers/
+			// 'Sec-Fetch-Dest': 'document',
+			// 'Sec-Fetch-Mode': 'navigate',
+			// 'Sec-Fetch-Site': 'none',
 
-			// User Agent
-			'User-Agent' : get_URL_node.default_user_agent
+			// TE 請求型頭部用來指定用戶代理希望使用的傳輸編碼類型。
+			// 可以將其非正式稱為 Accept-Transfer-Encoding，這個名稱顯得更直觀一些。
+			// 當 TE 設置為 trailers 時，如果服務端支持並且返回了
+			// Transfer-Encoding: trailers，那麼同時也必須返回另一個響應標頭 Trailer，
+			// TE : 'Trailers',
+
+			// Origin : URL_object_to_fetch.protocol + '://' +
+			// URL_object_to_fetch.host
+
+			Pragma : 'no-cache',
+			// 'max-age=0'
+			'Cache-Control' : 'no-cache'
 		}, options.headers, URL_object_to_fetch.headers);
 		// delete URL_object_to_fetch.headers.Referer;
 		// console.log(URL_object_to_fetch.headers);
@@ -2323,12 +2340,13 @@ function module_code(library_namespace) {
 			URL_object_to_fetch.headers['Accept-Encoding'] = 'gzip, deflate';
 		}
 
-		if (false)
+		if (false) {
 			// @see jQuery
 			if (!options.crossDomain
 					&& !URL_object_to_fetch.headers["X-Requested-With"]) {
 				URL_object_to_fetch.headers["X-Requested-With"] = "XMLHttpRequest";
 			}
+		}
 
 		if (post_data) {
 			URL_object_to_fetch.method = 'POST';

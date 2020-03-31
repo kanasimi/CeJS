@@ -251,7 +251,7 @@ function module_code(library_namespace) {
 			if (false) {
 				console.log([ _this.skip_error, _this.MAX_ERROR_RETRY,
 				//
-				has_error, _this.skip_error
+				_this.MIN_LENGTH, has_error, _this.skip_error
 				//
 				&& image_data.error_count === _this.MAX_ERROR_RETRY ]);
 				library_namespace.log({
@@ -530,8 +530,10 @@ function module_code(library_namespace) {
 			</code>
 			 */
 			max_listeners : 300
+		}, Object.assign({
+			fetch_type : 'image'
 		}, 'get_URL_options' in image_data ? image_data.get_URL_options
-				: this.get_URL_options, image_data.get_URL_options), 'buffer');
+				: this.get_URL_options), image_data.get_URL_options), 'buffer');
 	}
 
 	// --------------------------------------------------------------------------------------------
