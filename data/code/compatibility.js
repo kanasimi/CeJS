@@ -2860,16 +2860,16 @@ function module_code(library_namespace) {
 		if (false)
 			library_namespace.debug('creating onFinally step: ' + onFinally, 0,
 					'Promise_finally');
-		var constructor = this.constructor;
+		var _Promise = this.constructor || library_namespace.env.global.Promise;
 		// onFinally won't get any arguments
 		return this.then(function(value) {
-			return constructor.resolve(onFinally()).then(function() {
+			return _Promise.resolve(onFinally()).then(function() {
 				// inherit value
 				return value;
 			});
 		}, function(value) {
-			return constructor.resolve(onFinally()).then(function() {
-				// return constructor.reject(value);
+			return _Promise.resolve(onFinally()).then(function() {
+				// return _Promise.reject(value);
 				throw value;
 			});
 		});
@@ -2881,6 +2881,33 @@ function module_code(library_namespace) {
 		return new this(function(resolve/* , reject */) {
 			return resolve(executor());
 		});
+	}
+
+	// Promise.allSettled()
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
+	// https://github.com/es-shims/Promise.allSettled/blob/master/implementation.js
+	function Promise_allSettled(iterable) {
+		function onFulfilled(result) {
+			return {
+				status : "fulfilled",
+				value : result
+			};
+		}
+
+		function onRejected(reason) {
+			return {
+				status : "rejected",
+				reason : reason
+			};
+		}
+
+		var _Promise = this;
+		iterable = Array.from(iterable, function(promise) {
+			if (!is_thenable(promise))
+				promise = _Promise.resolve(promise);
+			return promise.then(onFulfilled, onRejected);
+		});
+		return _Promise.all(iterable);
 	}
 
 	// --------------------------------------------------------
@@ -2912,7 +2939,8 @@ function module_code(library_namespace) {
 	}, 'function');
 
 	set_method(library_namespace.env.global.Promise, {
-		'try' : Promise_try
+		'try' : Promise_try,
+		allSettled : Promise_allSettled
 	}, 'function');
 
 	set_method(library_namespace.env.global.Promise.prototype, {
