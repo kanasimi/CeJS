@@ -321,7 +321,7 @@ function module_code(library_namespace) {
 		 */
 		var content = wiki_API.content_of(page_data);
 		content = content.replace(/^[\s\S]+?\n(==.+?==)/, '$1')
-		//
+		// remove == Former featured articles that have been re-promoted ==
 		.replace(/==\s*Former featured articles.+?==[\s\S]*$/, '');
 		var FC_data_hash = this.FC_data_hash;
 		var PATTERN_Featured_content = /\[\[(.+?)\]\]/g, matched;

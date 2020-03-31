@@ -195,6 +195,7 @@ function module_code(library_namespace) {
 
 		this.siteinfo();
 
+		// console.log(options);
 		if (options.task_configuration_page) {
 			this.adapt_task_configurations(options.task_configuration_page,
 					options.adapt_configuration);
@@ -4802,6 +4803,8 @@ function module_code(library_namespace) {
 			configuration_adapter && configuration_adapter();
 			return;
 		}
+		library_namespace.debug('Try to get configurations from '
+				+ task_configuration_page, 1, 'adapt_task_configurations');
 
 		if (!options.once && ('min_interval' in options)) {
 			// 最小檢測時間間隔

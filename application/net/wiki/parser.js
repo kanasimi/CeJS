@@ -670,13 +670,14 @@ function module_code(library_namespace) {
 		var token = index + 1 < (max_length >= 0 ? Math.min(max_length,
 				parent_token.length) : parent_token.length)
 				&& parent_token[index + 1];
+		// assert: 以 "\n" 開頭的，都應該 `typeof token === 'string'`。
 		if (typeof token === 'string') {
 			// 去除後方的空白 + 僅一個換行。 去除前方的空白或許較不合適？
 			// e.g., "* list\n\n{{t1}}\n{{t2}}",
 			// remove "{{t1}}\n" → "* list\n\n{{t2}}"
 			parent_token[index + 1] = token.replace(/^\s*\n/, '');
 		}
-		parent_token[index] = token = '';
+		parent_token[index] = '';
 	}
 
 	page_parser.remove_token = remove_token_from_parent;

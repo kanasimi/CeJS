@@ -1341,7 +1341,7 @@ function module_code(library_namespace) {
 	 *      https://www.mediawiki.org/wiki/API:Search_and_discovery
 	 *      https://www.mediawiki.org/wiki/Help:CirrusSearch
 	 */
-	wiki_API.search = function(key, callback, options) {
+	wiki_API.search = function wiki_API_search(key, callback, options) {
 		if (typeof options !== 'object' && (options === 'max' || options > 0)) {
 			options = {
 				srlimit : options

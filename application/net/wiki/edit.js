@@ -190,6 +190,7 @@ function module_code(library_namespace) {
 	 *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
 	 */
 	function wiki_API_edit(title, text, token, options, callback, timestamp) {
+		// console.trace(title);
 		// console.log(text);
 		if (library_namespace.is_thenable(text)) {
 			text.then(function(text) {
