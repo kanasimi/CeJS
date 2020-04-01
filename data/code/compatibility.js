@@ -141,19 +141,29 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// global object
 
-	if (!library_namespace.env.global.global
-	//
-	&& library_namespace.env.global.global !== library_namespace.env.global) {
+	var globalThis = library_namespace.env.global;
+	if (false && (!globalThis.global || globalThis.global !== globalThis)) {
 		// Object.defineProperty() defined in base.js
-		Object.defineProperty(library_namespace.env.global, 'global', {
+		Object.defineProperty(globalThis, 'global', {
 			configurable : true,
 			enumerable : false,
-			value : library_namespace.env.global,
+			value : globalThis,
 			writable : false
 		});
 	}
 
-	set_method(library_namespace.env.global, {
+	if (!globalThis.globalThis || globalThis.globalThis !== globalThis) {
+		// e.g., node-v10.19.0
+		// Object.defineProperty() defined in base.js
+		Object.defineProperty(globalThis, 'globalThis', {
+			configurable : true,
+			enumerable : false,
+			value : globalThis,
+			writable : false
+		});
+	}
+
+	set_method(globalThis, {
 		encodeURI : escape,
 		decodeURI : unescape,
 		encodeURIComponent : encodeURI,
@@ -2860,7 +2870,7 @@ function module_code(library_namespace) {
 		if (false)
 			library_namespace.debug('creating onFinally step: ' + onFinally, 0,
 					'Promise_finally');
-		var _Promise = this.constructor || library_namespace.env.global.Promise;
+		var _Promise = this.constructor || globalThis.Promise;
 		// onFinally won't get any arguments
 		return this.then(function(value) {
 			return _Promise.resolve(onFinally()).then(function() {
@@ -2934,16 +2944,16 @@ function module_code(library_namespace) {
 		}
 	});
 
-	set_method(library_namespace.env.global, {
+	set_method(globalThis, {
 		Promise : Promise
 	}, 'function');
 
-	set_method(library_namespace.env.global.Promise, {
+	set_method(globalThis.Promise, {
 		'try' : Promise_try,
 		allSettled : Promise_allSettled
 	}, 'function');
 
-	set_method(library_namespace.env.global.Promise.prototype, {
+	set_method(globalThis.Promise.prototype, {
 		// finale
 		'finally' : Promise_finally
 	}, 'function');

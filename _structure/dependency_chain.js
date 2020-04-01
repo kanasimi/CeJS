@@ -3847,6 +3847,14 @@ if (typeof CeL === 'function')
 
 		// check from newer to older
 		if (has_Set
+		// node 10.19.0 does not has `globalThis`
+		&& typeof globalThis !== 'undefined' && globalThis
+		//
+		&& globalThis.globalThis === globalThis
+		//
+		&& typeof Promise === 'function'
+		// node 10.19.0 does not has Promise.allSettled()
+		&& typeof Promise.allSettled === 'function'
 		// node 7.9 does not has String.prototype.trimStart()
 		&& String.prototype.trimEnd && String.prototype.padEnd
 		// node 6.2.2 does not has Object.values(), Object.entries()
@@ -3856,8 +3864,9 @@ if (typeof CeL === 'function')
 		// Chrome/73.0.3683.20, Firefox/67.0 has .matchAll(),
 		// node 11.9 DO NOT has .matchAll().
 		&& String.prototype.matchAll) {
-			library_namespace
-					.debug('已經有近代的執行環境特性，跳過 shim、相容性 test 專用的 functions。');
+			library_namespace.debug(
+			//		
+			'已經有近代的執行環境特性，跳過 shim、相容性 test 專用的 functions。');
 			get_named('data.code.compatibility', true).included = true;
 		}
 
