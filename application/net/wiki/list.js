@@ -824,8 +824,14 @@ function module_code(library_namespace) {
 
 		// 注意: arguments 與 get_list() 之 callback 連動。
 		options[KEY_SESSION][options.type](target, function(pages, error) {
-			library_namespace.debug('Get ' + pages.length + ' ' + options.type
-					+ ' pages of ' + pages.title, 2, 'wiki_API_list');
+			if (pages) {
+				library_namespace.debug('Get ' + pages.length + ' '
+						+ options.type + ' pages of ' + pages.title, 2,
+						'wiki_API_list');
+			} else {
+				// has error!
+				pages = [];
+			}
 			if (error) {
 				console.trace(error);
 				pages.error = error;
