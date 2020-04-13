@@ -1231,12 +1231,15 @@ function module_code(library_namespace) {
 			}
 
 			// 容許一些特定標籤能夠顯示格式。以繼承原標題的粗體斜體和顏色等等格式。
+			// @see markup_tags
 			if (token.tag in {
 				b : true,
 				i : true,
+				q : true,
 				sub : true,
 				sup : true,
-				span : true
+				span : true,
+				code : true
 			}) {
 				// reduce HTML tags. e.g., <b>, <sub>, <sup>, <span>
 				token.tag_attributes = token.shift();
@@ -2250,6 +2253,12 @@ function module_code(library_namespace) {
 		}
 
 		return this;
+	}
+
+	function insert_wikitext(wikitext, location) {
+		// TODO: 定位版面布局元素 search anchor tokens of elements @ [[WP:LAY]],
+		// [[w:en:Wikipedia:Manual of Style/Layout#Order of article elements]],
+		// [[w:zh:Wikipedia:格式手冊/版面佈局#導言]]
 	}
 
 	/**
