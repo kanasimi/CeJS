@@ -1342,13 +1342,18 @@ function module_code(library_namespace) {
 			// console.log('>> [' + index + '] ' + token);
 			// console.log(parent);
 
-			// TODO: use library_namespace.DOM.HTML_to_Unicode()
-			token = token.replace(/&#(\d+);/g, function(all, code) {
-				return String.fromCharCode(code);
-			}).replace(/&#x([0-9a-f]+);/ig, function(all, code) {
-				return String.fromCharCode(parseInt(code, 16));
-			}).replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(
-					/&amp;/g, '&');
+			if (library_namespace.HTML_to_Unicode) {
+				// using library_namespace.DOM.HTML_to_Unicode()
+				token = library_namespace.HTML_to_Unicode(token);
+			} else {
+				token = token.replace(/&#(\d+);/g, function(all, code) {
+					return String.fromCharCode(code);
+				}).replace(/&#x([0-9a-f]+);/ig, function(all, code) {
+					return String.fromCharCode(parseInt(code, 16));
+				}).replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(
+						/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g,
+						'&');
+			}
 			if (/[^\s]/.test(token)) {
 				// 避免被進一步的處理，例如"&amp;amp;"。
 				token = [ token ];
