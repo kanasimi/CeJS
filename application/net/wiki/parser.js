@@ -1503,7 +1503,9 @@ function module_code(library_namespace) {
 				parent[index] = token.toString().replace(/</g, '&lt;');
 
 			} else if (token.is_plain) {
-				token[0] = library_namespace.Unicode_to_HTML(token[0]);
+				token[0] = library_namespace.Unicode_to_HTML(token[0])
+				// reduce size
+				.replace(/&gt;/g, '>');
 			}
 		}, true);
 		// console.log(parsed_title);
