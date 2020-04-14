@@ -31,7 +31,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.parser',
 
-	require : 'application.net.wiki.',
+	require : 'application.net.wiki.'
+	// CeL.DOM.HTML_to_Unicode(), CeL.DOM.Unicode_to_HTML()
+	+ '|interact.DOM',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',
@@ -1342,18 +1344,7 @@ function module_code(library_namespace) {
 			// console.log('>> [' + index + '] ' + token);
 			// console.log(parent);
 
-			if (library_namespace.HTML_to_Unicode) {
-				// using library_namespace.DOM.HTML_to_Unicode()
-				token = library_namespace.HTML_to_Unicode(token);
-			} else {
-				token = token.replace(/&#(\d+);/g, function(all, code) {
-					return String.fromCharCode(code);
-				}).replace(/&#x([0-9a-f]+);/ig, function(all, code) {
-					return String.fromCharCode(parseInt(code, 16));
-				}).replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(
-						/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g,
-						'&');
-			}
+			token = library_namespace.HTML_to_Unicode(token);
 			if (/[^\s]/.test(token)) {
 				// 避免被進一步的處理，例如"&amp;amp;"。
 				token = [ token ];
@@ -1512,11 +1503,7 @@ function module_code(library_namespace) {
 				parent[index] = token.toString().replace(/</g, '&lt;');
 
 			} else if (token.is_plain) {
-				// @see use library_namespace.DOM.Unicode_to_HTML()
-				token[0] = token[0].replace(/&/g, '&amp;')
-				// 這邊也必須 escape "<>"
-				.replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g,
-						"&apos;");
+				token[0] = library_namespace.Unicode_to_HTML(token[0]);
 			}
 		}, true);
 		// console.log(parsed_title);
