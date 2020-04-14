@@ -1503,9 +1503,17 @@ function module_code(library_namespace) {
 				parent[index] = token.toString().replace(/</g, '&lt;');
 
 			} else if (token.is_plain) {
-				token[0] = library_namespace.Unicode_to_HTML(token[0])
-				// reduce size
-				.replace(/&gt;/g, '>');
+				if (false) {
+					// @see use library_namespace.DOM.Unicode_to_HTML()
+					token[0] = library_namespace.Unicode_to_HTML(token[0])
+					// reduce size
+					.replace(/&gt;/g, '>');
+				}
+				// 僅作必要的轉換
+				token[0] = token[0].replace(/&/g, '&amp;')
+				// 這邊也必須 escape "<>"
+				.replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g,
+						"&apos;");
 			}
 		}, true);
 		// console.log(parsed_title);
