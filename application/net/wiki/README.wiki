@@ -1,4 +1,5 @@
-﻿= CeJS MediaWiki module =
+﻿
+= CeJS MediaWiki module =
 MediaWiki 自動化作業程式庫，主要用於編寫[[維基百科:機器人]]。
 
 Main initial point: [[../wiki.js]]
