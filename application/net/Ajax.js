@@ -2297,19 +2297,20 @@ function module_code(library_namespace) {
 
 			// https://developer.mozilla.org/zh-CN/docs/Glossary/Quality_values
 			Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
-				+ 'image/webp,*/*;q=0.8',
+					+ 'image/webp,*/*;q=0.8',
 			// Accept : 'application/json, text/plain, */*',
 
 			// 為了防止 Cloudflare bot protection(?) 阻擋，必須加上 Accept-Language。
 			// TODO: get language from system infomation
-			// dm5.js using "Microsoft-IIS/8.5", needs 'Accept-Language' to
-			// search!
+			// dm5.js using "Microsoft-IIS/8.5",
+			// needs 'Accept-Language' to search!
 			'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
 
 			DNT : 1,
 			Connection : 'keep-alive',
 			'Upgrade-Insecure-Requests' : 1,
 
+			// 為了順暢使用 Cloudflare，必須加上 Sec-Fetch-headers？ e.g., mymhh.js
 			// https://blog.kalan.dev/fetch-metadata-request-headers/
 			// 'Sec-Fetch-Dest': 'document',
 			// 'Sec-Fetch-Mode': 'navigate',
