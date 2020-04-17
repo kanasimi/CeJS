@@ -222,9 +222,28 @@ function module_code(library_namespace) {
 		return true;
 	}
 
-	// 設定 crawler 的參數。 normalize and setup value
-	// crawler.setup_value(key, value);
-	// return {String}has error
+	/**
+	 * 設定 crawler 的參數。 normalize and setup value
+	 * 
+	 * @example<code>
+
+	crawler.setup_value(key, value);
+
+	// 應該用:
+	this.setup_value(key, value);
+	// 不應用:
+	this[key] = value;
+	delete this[key];
+
+	</code>
+	 * 
+	 * @param {any}
+	 *            key
+	 * @param {any}
+	 *            value
+	 * 
+	 * @return {String}has error
+	 */
 	function setup_value(key, value) {
 		if (!key)
 			return '未提供鍵值';

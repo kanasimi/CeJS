@@ -242,7 +242,8 @@ function module_code(library_namespace) {
 				}
 			});
 
-			var matched = work_data.人气 && work_data.人气.match(/^(\d+)\s*\|(.+)$/);
+			var matched = work_data.人气
+					&& work_data.人气.match(/^(\d+)\s*\|(.+)$/);
 			if (matched) {
 				work_data.人气 = +matched[1];
 				work_data.status = matched[2];

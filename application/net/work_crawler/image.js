@@ -542,6 +542,7 @@ function module_code(library_namespace) {
 
 	// @instance
 	Object.assign(Work_crawler.prototype, {
+		// 本工具只能下載固定圖片類型，acceptable_types 僅能用來檢查圖片，不能挑選想下載的圖片類型。
 		// {Array|String}可以接受的圖片類別/圖片延伸檔名/副檔名/檔案類別 acceptable file extensions。
 		// acceptable_types : 'images',
 		// acceptable_types : 'png',

@@ -2774,12 +2774,14 @@ function module_code(library_namespace) {
 
 						// typeof content !== 'string'
 						if (!content) {
-							return [
-									CeL.wiki.edit.cancel,
-									'No contents: '
+							content = 'No contents: '
 											+ CeL.wiki.title_link_of(page_data)
 											// or: 此頁面不存在/已刪除。
-											+ '! 沒有頁面內容！' ];
+											+ '! 沒有頁面內容！';
+							// CeL.log(content);
+							return [
+									CeL.wiki.edit.cancel,
+									content ];
 						}
 
 						var last_edit_Date = CeL.wiki.content_of

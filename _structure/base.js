@@ -114,7 +114,7 @@ function (globalThis) {
 		 * @type {String}
 		 * @ignore
 		 */
-		library_version = '3.4.0',
+		library_version = '3.5.0',
 
 
 		/**
@@ -145,7 +145,6 @@ function (globalThis) {
 
 
 	// members of library -----------------------------------------------
-
 
 	// define 'undefined'
 	try {

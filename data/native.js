@@ -3966,14 +3966,14 @@ function module_code(library_namespace) {
 	 * @param {Function|Undefined}[match_previous]
 	 *            filter match_previous(previous token) return true if it's OK
 	 *            to replace, false if it's NOT OK to replace.
-	 * @param {Function|Undefined}[match_next]
-	 *            filter match_next(next token) return true if it's OK to
+	 * @param {Function|Undefined}[match_following]
+	 *            filter match_following(next token) return true if it's OK to
 	 *            replace, false if it's NOT OK to replace.
 	 * 
 	 * @returns {String}replaced text. 變更/取代後的結果。
 	 */
 	function replace_check_near(text, pattern, replace_to, match_previous,
-			match_next) {
+			match_following) {
 		var matched, results = [], last_index = 0;
 		if (!pattern.global) {
 			library_namespace.debug("The pattern doesn't has 'global' flag!",
@@ -3989,8 +3989,8 @@ function module_code(library_namespace) {
 			if ((!match_previous || match_previous(previous_text))
 			// context 上下文 前後文
 			// 前面的 foregoing paragraphs, see above, previously stated, precedent
-			// 後面的 behind rearwards;back;posteriority;atergo;rearward
-			&& (!match_next || match_next(text.slice(_last_index)))) {
+			// 後面的 next; behind rearwards;back;posteriority;atergo;rearward
+			&& (!match_following || match_following(text.slice(_last_index)))) {
 				last_index = pattern.lastIndex;
 				library_namespace.debug(previous_text + ',' + matched[0] + ','
 						+ matched[0].replace(pattern, replace_to), 5,

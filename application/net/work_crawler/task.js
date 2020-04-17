@@ -122,6 +122,15 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	/**
+	 * 抽取出圖片伺服器列表
+	 * 
+	 * @param {Array|Function}server_URL
+	 *            Server URL(s) where images are stored
+	 * @param {Function}[callback]
+	 * @param {String}[server_file]
+	 *            catch file
+	 */
 	function set_server_list(server_URL, callback, server_file) {
 		if (Array.isArray(server_URL)) {
 			// 直接設定。
@@ -318,18 +327,21 @@ function module_code(library_namespace) {
 			get_URL_options = this.get_URL_options;
 		}
 
+		var fetch_type = get_URL_options.fetch_type, headers = get_URL_options.headers
+				|| (get_URL_options.headers = Object.create(null));
 		// e.g., mymhh.js
-		var fetch_type = get_URL_options.fetch_type, headers = get_URL_options.headers || (get_URL_options.headers = Object.create(null));
 		if (fetch_type ? fetch_type === 'image'
-			// e.g., /(?:jpg|png)(?:$|\?)/i
-			: (new RegExp('\.(?:' + Object.keys(this.image_types).join('|') + ')(?:$|\\?)', 'i')).test(url)) {
+		// e.g., /(?:jpg|png)(?:$|\?)/i
+		: (new RegExp('\.(?:' + Object.keys(this.image_types).join('|')
+				+ ')(?:$|\\?)', 'i')).test(url)) {
 			Object.assign(headers, {
 				'Sec-Fetch-Dest' : fetch_type,
 				'Sec-Fetch-Mode' : 'no-cors',
 				'Sec-Fetch-Site' : 'cross-site'
 			});
 		} else if (fetch_type && fetch_type !== 'document') {
-			library_namespace.error('this_get_URL: Invalid fetch_type: ' + fetch_type);
+			library_namespace.error('this_get_URL: Invalid fetch_type: '
+					+ fetch_type);
 		} else {
 			Object.assign(headers, {
 				'Sec-Fetch-Dest' : fetch_type || 'document',
