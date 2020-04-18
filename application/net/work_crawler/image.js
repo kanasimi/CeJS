@@ -102,7 +102,7 @@ function module_code(library_namespace) {
 					// 將會測試是否已經下載過一切可接受的檔案類別。
 					acceptable_types = Object.keys(this.image_types);
 				} else {
-					acceptable_types = [ acceptable_types ];
+					acceptable_types = acceptable_types.split('|');
 				}
 			} else if (!Array.isArray(acceptable_types)) {
 				library_namespace.warn({
@@ -542,10 +542,12 @@ function module_code(library_namespace) {
 
 	// @instance
 	Object.assign(Work_crawler.prototype, {
-		// 本工具只能下載固定圖片類型，acceptable_types 僅能用來檢查圖片，不能挑選想下載的圖片類型。
+		// 可接受的圖片類別（延伸檔名），以"|"字元作分隔。未設定將不作檢查。輸入"image"表示接受所有圖片。若下載的圖片不包含在指定類型中，則會視為錯誤。
+		// 本工具只能下載特定幾種圖片類型。.acceptable_types 僅供檢查圖片，非用來挑選想下載的圖片類型。
 		// {Array|String}可以接受的圖片類別/圖片延伸檔名/副檔名/檔案類別 acceptable file extensions。
 		// acceptable_types : 'images',
 		// acceptable_types : 'png',
+		// acceptable_types : 'webp|png',
 		// acceptable_types : ['webp', 'png'],
 
 		// 當圖片不存在 EOI (end of image) 標記，或是被偵測出非圖片時，依舊強制儲存檔案。

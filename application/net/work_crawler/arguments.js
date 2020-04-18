@@ -458,6 +458,8 @@ function module_code(library_namespace) {
 			// 設定下載時要添加的 cookie。 document.cookie: "key=value"
 			cookie : 'string',
 
+			// 可接受的圖片類別（延伸檔名），以"|"字元作分隔。未設定將不作檢查。輸入"image"表示接受所有圖片。若下載的圖片不包含在指定類型中，則會視為錯誤。
+			acceptable_types : 'string',
 			// 漫畫下載完畢後壓縮圖片檔案。
 			archive_images : 'boolean',
 			// 完全沒有出現錯誤才壓縮圖片檔案。
