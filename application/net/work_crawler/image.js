@@ -82,10 +82,10 @@ function module_code(library_namespace) {
 		 * 工作機制：<br />
 		 * 檢核預設的圖片延伸檔名/副檔名(.default_image_extension)。若是不存在預設的圖片延伸檔名/副檔名，將會檢查所有可以接受的圖片類別(.acceptable_types)。
 		 * 每張圖片都要檢核所有可接受的圖片類別，會加大硬碟讀取負擔。
-		 * 會用到.overwrite_old_file這個選項的，應該都是需要提報issue的，因此這個選項不會列出來。麻煩請在個別網站遇到此情況時提報issue，列出作品名稱以及圖片類別，以供這邊確認圖片類別。
+		 * 會用到 .overwrite_old_file 這個選項的，應該都是需要提報 issue 的，因此這個選項不會列出來。麻煩請在個別網站遇到此情況時提報 issue，列出作品名稱以及圖片類別，以供這邊確認圖片類別。
 		 * 只要存在完整無損害的預設圖片類別或是可接受的圖片類別，就直接跳出，不再嘗試下載這張圖片。否則會重新下載圖片。
 		 * 當下載的圖片以之前的圖片更大時，就會覆蓋原先的圖片。
-		 * 若下載的圖片類別並非預設的圖片類別(.default_image_extension)，例如預設JPG但得到PNG檔案時，會將副檔名改為實際得到的圖像格式。因此下一次下載時，需要設定.acceptable_types才能找得到圖片。
+		 * 若下載的圖片類別並非預設的圖片類別(.default_image_extension)，例如預設 JPG 但得到 PNG 檔案時，會將副檔名改為實際得到的圖像格式。因此下一次下載時，需要設定 .acceptable_types 才能找得到圖片。
 		 */
 		var image_downloaded = node_fs.existsSync(image_data.file)
 				|| this.skip_existed_bad_file
@@ -97,7 +97,9 @@ function module_code(library_namespace) {
 			acceptable_types = image_data.acceptable_types
 					|| this.acceptable_types;
 			if (!acceptable_types) {
+				// 未設定將不作檢查。
 			} else if (typeof acceptable_types === 'string') {
+				acceptable_types = acceptable_types.trim();
 				if (acceptable_types === 'images') {
 					// 將會測試是否已經下載過一切可接受的檔案類別。
 					acceptable_types = Object.keys(this.image_types);
@@ -112,6 +114,7 @@ function module_code(library_namespace) {
 			}
 
 			if (acceptable_types) {
+				// 檢核所有可接受的圖片類別
 				image_downloaded = acceptable_types.some(function(extension) {
 					var alternative_filename = image_data.file.replace(
 							/\.[a-z\d]+$/, '.' + extension);
@@ -542,8 +545,8 @@ function module_code(library_namespace) {
 
 	// @instance
 	Object.assign(Work_crawler.prototype, {
-		// 可接受的圖片類別（延伸檔名），以"|"字元作分隔。未設定將不作檢查。輸入"images"表示接受所有圖片。若下載的圖片不包含在指定類型中，則會視為錯誤。
-		// 本工具只能下載特定幾種圖片類型。.acceptable_types 僅供檢查圖片，非用來挑選想下載的圖片類型。
+		// 可接受的圖片類別（延伸檔名）。以 "|" 字元作分隔，如 "webp|jpg|png"。未設定將不作檢查。輸入 "images" 表示接受所有圖片。
+		// 若下載的圖片不包含在指定類型中，則會視為錯誤。本工具只能下載特定幾種圖片類型。本選項僅供檢查圖片，非用來挑選想下載的圖片類型。
 		// {Array|String}可以接受的圖片類別/圖片延伸檔名/副檔名/檔案類別 acceptable file extensions。
 		// acceptable_types : 'images',
 		// acceptable_types : 'png',
