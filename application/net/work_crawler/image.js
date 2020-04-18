@@ -542,7 +542,7 @@ function module_code(library_namespace) {
 
 	// @instance
 	Object.assign(Work_crawler.prototype, {
-		// 可接受的圖片類別（延伸檔名），以"|"字元作分隔。未設定將不作檢查。輸入"image"表示接受所有圖片。若下載的圖片不包含在指定類型中，則會視為錯誤。
+		// 可接受的圖片類別（延伸檔名），以"|"字元作分隔。未設定將不作檢查。輸入"images"表示接受所有圖片。若下載的圖片不包含在指定類型中，則會視為錯誤。
 		// 本工具只能下載特定幾種圖片類型。.acceptable_types 僅供檢查圖片，非用來挑選想下載的圖片類型。
 		// {Array|String}可以接受的圖片類別/圖片延伸檔名/副檔名/檔案類別 acceptable file extensions。
 		// acceptable_types : 'images',
