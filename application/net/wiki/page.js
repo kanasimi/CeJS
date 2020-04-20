@@ -364,6 +364,7 @@ function module_code(library_namespace) {
 		wiki_API.query(action, typeof callback === 'function'
 		//
 		&& function process_page(data) {
+			// console.trace('Get page: ' + title);
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value) {
@@ -777,6 +778,9 @@ function module_code(library_namespace) {
 
 			// 一般正常回傳。
 
+			if (false && page_list && page_list.title) {
+				console.trace('Get page and callback: ' + page_list.title);
+			}
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
 			callback(page_list);
@@ -2775,13 +2779,11 @@ function module_code(library_namespace) {
 						// typeof content !== 'string'
 						if (!content) {
 							content = 'No contents: '
-											+ CeL.wiki.title_link_of(page_data)
-											// or: 此頁面不存在/已刪除。
-											+ '! 沒有頁面內容！';
+									+ CeL.wiki.title_link_of(page_data)
+									// or: 此頁面不存在/已刪除。
+									+ '! 沒有頁面內容！';
 							// CeL.log(content);
-							return [
-									CeL.wiki.edit.cancel,
-									content ];
+							return [ CeL.wiki.edit.cancel, content ];
 						}
 
 						var last_edit_Date = CeL.wiki.content_of

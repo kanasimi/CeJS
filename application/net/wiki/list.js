@@ -916,7 +916,9 @@ function module_code(library_namespace) {
 				// assert: 不可改動 method @ IE！
 				var args = [ method ];
 				Array.prototype.push.apply(args, arguments);
-				// console.trace(this.running);
+				if (library_namespace.is_debug() && !this.running) {
+					// console.trace(method + ': ' + this.running);
+				}
 				try {
 					library_namespace.debug('add action: '
 							+ args.map(JSON.stringify).join('<br />\n'), 3,
@@ -934,10 +936,18 @@ function module_code(library_namespace) {
 				// 2016/11/16 14:45:19 但這方法似乎會提早執行...
 				// || this.actions.length === 1
 				) {
+					// this.thread_count = (this.thread_count || 0) + 1;
 					this.next();
 				} else {
-					library_namespace.debug(method + ': 正在執行中，直接跳出。', 3,
-							'wiki_API_prototype_methods');
+					if (this.actions.length > 1) {
+						library_namespace.debug(method + ': 正在執行中('
+						//								
+						+ this.thread_count + ',' + this.actions.length + ')'
+						// ，直接跳出。
+						+ this.actions.slice(0, 9).map(function(action) {
+							return action[0];
+						}), 3, 'wiki_API_prototype_methods');
+					}
 					if (library_namespace.is_debug(6)) {
 						console.trace(method);
 						// console.log(args);
