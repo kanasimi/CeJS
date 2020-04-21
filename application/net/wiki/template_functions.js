@@ -918,7 +918,7 @@ function module_code(library_namespace) {
 		var expand_function = base_namespace[template_name].expand;
 		var export_to = base_namespace.expand_template
 				|| (base_namespace.expand_template = Object.create(null));
-		for (name in base_namespace[template_name].names) {
+		for (var name in base_namespace[template_name].names) {
 			export_to[name] = expand_function;
 		}
 	}
