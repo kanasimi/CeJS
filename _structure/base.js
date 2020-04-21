@@ -1275,11 +1275,11 @@ function (globalThis) {
 		if (reset)
 			this.env = Object.create(null);
 
-		var OS, env = this.env, is_node = typeof process === 'object' && process.env,
+		var OS, env = this.env, is_nodejs = typeof process === 'object' && process.env,
 		//
 		win_env_keys = 'PROMPT|HOME|PUBLIC|SESSIONNAME|LOCALAPPDATA|OS|Path|PROCESSOR_IDENTIFIER|SystemDrive|SystemRoot|TEMP|TMP|USERNAME|USERPROFILE|ProgramData|ProgramFiles|ProgramFiles(x86)|ProgramW6432|windir'.split('|');
 
-		if (is_node) {
+		if (is_nodejs) {
 			// import all environment variables
 			Object.assign(env, process.env);
 		}
@@ -1413,7 +1413,7 @@ function (globalThis) {
 			// this.warn(e.message);
 		}
 
-		if (is_node) {
+		if (is_nodejs) {
 			// 環境變數 in node.js
 			if (false) {
 				for (var index = 0; index < win_env_keys.length; index++) {

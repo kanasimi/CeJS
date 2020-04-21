@@ -1633,10 +1633,19 @@ function write_file(file_path, contents, format, IO_mode, no_overwrite) {
 
 	try {
 		if (is_ADO_Stream(file_stream)) {
-			if (file_stream.Type === AdoEnums.adTypeText)
+			if (file_stream.Type === AdoEnums.adTypeText) {
+				if (typeof format === 'string' && format.toUpperCase() === 'ASCII' && /\.js(?:on)?$/i.test(file_path)) {
+					contents = contents.replace(/[^\u0000-\u00ff]/g, function(character) {
+						character = character.charCodeAt(0).toString(16);
+						while (character.length % 4 !== 0)
+							character = '0' + character;
+						return '\\u' + character;
+					});
+				}
 				file_stream.WriteText(contents);
-			else
+			} else {
 				file_stream.Write(contents);
+			}
 
 			// 設定 end of the stream 後，將 truncate 之後的內容。
 			// http://msdn.microsoft.com/en-us/library/windows/desktop/ms676745.aspx

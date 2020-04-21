@@ -1002,7 +1002,7 @@ function module_code(library_namespace) {
 					var file_extension = image_data.file_extension
 							|| work_data.image_extension;
 					if (!file_extension && image_data.url) {
-						// 由圖片的網址來判別可能的延伸檔名。
+						// 由圖片的網址URL來判別可能的延伸檔名。
 						var matched = image_data.url.replace(/[?#].*$/, '');
 						matched = matched.match(/\.([a-z\d\-_]+)$/i);
 						if (matched) {
@@ -1020,7 +1020,7 @@ function module_code(library_namespace) {
 						}
 					}
 					if (!file_extension) {
-						// 採用預設的圖片延伸檔名。
+						// 猜不出的會採用預設的圖片延伸檔名/副檔名.default_image_extension。
 						file_extension = _this.default_image_extension;
 					}
 

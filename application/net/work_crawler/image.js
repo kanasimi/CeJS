@@ -80,7 +80,10 @@ function module_code(library_namespace) {
 		/**
 		 * 每張圖片都要檢查實際存在的圖片檔案。當之前已存在完整的圖片時，就不再嘗試下載圖片。<br />
 		 * 工作機制：<br />
-		 * 檢核預設的圖片延伸檔名/副檔名(.default_image_extension)。若是不存在預設的圖片延伸檔名/副檔名，將會檢查所有可以接受的圖片類別(.acceptable_types)。
+		 * 檢核`image_data.file`是否存在。`image_data.file`由圖片的網址URL來判別可能的延伸檔名。猜不出的會採用預設的圖片延伸檔名/副檔名.default_image_extension。
+		 * @see function process_images() @ CeL.application.net.work_crawler.chapter
+		 * 
+		 * 若`image_data.file`不存在，將會檢核所有可接受的圖片類別(.acceptable_types)。
 		 * 每張圖片都要檢核所有可接受的圖片類別，會加大硬碟讀取負擔。
 		 * 會用到 .overwrite_old_file 這個選項的，應該都是需要提報 issue 的，因此這個選項不會列出來。麻煩請在個別網站遇到此情況時提報 issue，列出作品名稱以及圖片類別，以供這邊確認圖片類別。
 		 * 只要存在完整無損害的預設圖片類別或是可接受的圖片類別，就直接跳出，不再嘗試下載這張圖片。否則會重新下載圖片。
@@ -114,7 +117,7 @@ function module_code(library_namespace) {
 			}
 
 			if (acceptable_types) {
-				// 檢核所有可接受的圖片類別
+				// 檢核所有可接受的圖片類別(.acceptable_types)。
 				image_downloaded = acceptable_types.some(function(extension) {
 					var alternative_filename = image_data.file.replace(
 							/\.[a-z\d]+$/, '.' + extension);

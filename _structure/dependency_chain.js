@@ -2342,9 +2342,9 @@ if (typeof CeL === 'function')
 							if (library_namespace.is_debug(2)
 									&& library_namespace.is_WWW())
 								if (typeof file_contents === 'string')
-									library_namespace.debug('取得檔案內容: (' +
+									library_namespace.debug('取得檔案內容: ('
 									//
-									file_contents.length + ' bytes) ['
+									+ file_contents.length + ' bytes) ['
 									//
 									+ file_contents.slice(0, 200)
 									//
@@ -2352,8 +2352,9 @@ if (typeof CeL === 'function')
 									//
 									.replace(/\n/g, '<br />') + ']'
 									//
-									+ (file_contents.length > 200 ? '..' : ''),
-											5, 'load_named');
+									+ (file_contents.length > 200 ? '...'
+									//
+									: ''), 5, 'load_named');
 							if (file_contents) {
 								// 對 cscript/wscript，若 /^var variable =
 								// /.test(file_contents)，會造成 global 無法設定此
@@ -2365,13 +2366,24 @@ if (typeof CeL === 'function')
 											.pre_parse_local_code(
 													file_contents, URL, id);
 
-								if (is_nodejs)
-									// Node.js 有比較特殊的 global scope 處理方法。
-									eval(file_contents);
-								else
+								if (is_nodejs) {
+									if (typeof require === 'function') {
+										// console.trace(URL);
+										declaration.result = require(
+										// Using require() in node.js
+										library_namespace.platform.Windows
+												&& /^\/[a-z]:\//i.test(URL)
+										// @see CeL..get_file() @ module.js
+										? URL.slice(1) : URL);
+									} else {
+										// Node.js 有比較特殊的 global scope 處理方法。
+										eval(file_contents);
+									}
+								} else {
 									// eval @ global. 這邊可能會出現 security 問題。
 									// TODO: do not use eval. 以其他方法取代 eval 的使用。
 									library_namespace.eval_code(file_contents);
+								}
 								// Release memory. 釋放被占用的記憶體.
 								file_contents = !!file_contents;
 								if (!declaration.module)
