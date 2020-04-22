@@ -1049,14 +1049,21 @@ function module_code(library_namespace) {
 		return page_title;
 	}
 
+	// TODO: is_namespace(page_title, 'Wikipedia|User')
 	function page_title_is_namespace(page_title, options) {
 		var namespace = !options ? 0 : !isNaN(options) ? +options
 				: typeof options === 'string' ? options : options.namespace;
-		page_title = wiki_API.normalize_title(page_title, options);
-		return get_namespace(page_title, Object.assign({
-			// for wiki_API.namespace()
-			is_page_title : true
-		}, options)) === get_namespace(namespace, options);
+		var page_ns;
+		if (wiki_API.is_page_data(page_title)) {
+			page_ns = page_title.ns;
+		} else {
+			page_title = wiki_API.normalize_title(page_title, options);
+			page_ns = get_namespace(page_title, Object.assign({
+				// for wiki_API.namespace()
+				is_page_title : true
+			}, options));
+		}
+		return page_ns === get_namespace(namespace, options);
 	}
 
 	function convert_page_title_to_namespace(page_title, options) {

@@ -1134,6 +1134,9 @@ function (globalThis) {
 			script_full_path = require.main.filename || script_full_path;
 
 		} else if (false && process.mainModule) {
+			// https://github.com/nodejs/node/pull/32232
+			// deprecate process.mainModule
+
 			// for newer node.js. 須放置於 ((__filename)) 判斷前!
 			script_full_path = process.mainModule.filename || script_full_path;
 		} else if (false /* 20160609 deprecated */) {

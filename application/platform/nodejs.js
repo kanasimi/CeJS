@@ -199,7 +199,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns error count
 	 */
-	function create_directory(directories, mode) {
+	function create_directory(directories, options) {
 		// var node_fs = require('fs');
 		var error = [];
 		if (typeof directories === 'string') {
@@ -221,11 +221,13 @@ function module_code(library_namespace) {
 									JSON.stringify(directory_name) ]
 						});
 					}
-					if (isNaN(mode)) {
+					if (false && isNaN(mode)) {
+						// https://github.com/nodejs/node/pull/32499
+						// deprecate process.umask() with no arguments
 						mode = parseInt('700', 8)
 								| (parseInt('777', 8) ^ process.umask());
 					}
-					node_fs.mkdirSync(directory_name, mode);
+					node_fs.mkdirSync(directory_name, options);
 				} catch (e) {
 					if (e.code !== 'EEXIST')
 						;
@@ -824,8 +826,11 @@ function module_code(library_namespace) {
 	// 為 electron-builder 📦安裝包/發行版
 	var is_installation_package = process.env.Apple_PubSub_Socket_Render
 			// 2018-2019/3 @ Windows, Linux Mint
-			|| process.mainModule
-			&& process.mainModule.filename.replace(/[\\\/]app\.asar.+/, '') === process.resourcesPath
+			|| (require.main ? require.main.filename
+			// https://github.com/nodejs/node/pull/32232
+			// deprecate process.mainModule
+			: process.mainModule && process.mainModule.filename).replace(
+					/[\\\/]app\.asar.+/, '') === process.resourcesPath
 			&& library_namespace.platform.OS;
 
 	if (false) {

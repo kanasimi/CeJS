@@ -282,8 +282,11 @@ function module_code(library_namespace) {
 	// test_current_directory: 先嘗試下載於當前目錄下。
 	function determin_download_directory(test_current_directory) {
 		var download_directory = test_current_directory
-				&& library_namespace.platform.nodejs && process.mainModule
-				&& process.mainModule.filename;
+				&& library_namespace.platform.nodejs
+				&& (require.main ? require.main.filename
+				// https://github.com/nodejs/node/pull/32232
+				// deprecate process.mainModule
+				: process.mainModule && process.mainModule.filename);
 		if (download_directory
 		// macOS dmg electron APP 中: process.mainModule.filename 例如為
 		// /Applications/work_crawler.app/Contents/Resources/app.asar/gui_electron/gui_electron.html

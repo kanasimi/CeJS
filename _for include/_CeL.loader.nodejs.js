@@ -109,6 +109,7 @@ typeof CeL !== 'function' && (function() {
 			return;
 
 		} catch (e) {
+			// console.error(e);
 		}
 
 		console.error('Failed to load CeJS library!\n');
@@ -125,9 +126,10 @@ typeof CeL !== 'function' && (function() {
 	if (typeof CeL !== 'function') {
 		console.error('Failed to load CeL!');
 		console.error('current working directory: ' + process.cwd());
-		console.error('main script: ' + (process.mainModule
-		//
-		&& process.mainModule.filename));
+		console.error('main script: ' + (require.main ? require.main.filename
+		// https://github.com/nodejs/node/pull/32232
+		// deprecate process.mainModule
+		: process.mainModule && process.mainModule.filename));
 		console.error('loader path: ' + module.filename);
 	}
 
