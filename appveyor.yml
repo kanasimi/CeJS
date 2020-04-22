@@ -11,10 +11,10 @@ environment:
     # LTS
     - nodejs_version: "12"
     # Current
-    - nodejs_version: "14"
+    - nodejs_version: "13"
 
 platform:
-  - x64
+  - x86
 
 # Install scripts. (runs after repo cloning)
 install:
