@@ -1506,7 +1506,7 @@ function module_code(library_namespace) {
 		// e.g., node.ja 11.9.0, Chrome/61.0.3163.100 Electron/2.0.9
 		// TODO: returns an RegExpStringIterator
 		// String.prototype.matchAll 調用 RegExp.prototype[Symbol.matchAll]
-		eval('matchAll = function* matchAll(regexp) { const is_global = !library_namespace.is_RegExp(regexp) || regexp.global; regexp = new_global_RegExp(regexp); let matched; if (is_global) { while (matched = regexp.exec(this)) { yield matched; } } else if (matched = regexp.exec(this)) { yield matched; } }');
+		eval('matchAll = function* matchAll(regexp) { const is_global = !library_namespace.is_RegExp(regexp) || regexp.global; regexp = new_global_RegExp(regexp); let matched; if (is_global) { while (matched = regexp.exec(this)) { yield matched; } } else { throw new TypeError("String.prototype.matchAll called with a non-global RegExp argument"); if (matched = regexp.exec(this)) { yield matched; } } }');
 	}
 
 	// ------------------------------------------
