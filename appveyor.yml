@@ -13,6 +13,9 @@ environment:
     # Current
     - nodejs_version: "14 x64"
 
+platform:
+  - x64
+
 # Install scripts. (runs after repo cloning)
 install:
   # Get the latest stable version of Node.js or io.js
