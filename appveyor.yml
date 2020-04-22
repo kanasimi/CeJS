@@ -9,9 +9,9 @@ environment:
     - nodejs_version: "0.11"
     #- nodejs_version: "0.12"
     # LTS
-    - nodejs_version: 12 x64
+    - nodejs_version: "12"
     # Current
-    - nodejs_version: 14 x64
+    - nodejs_version: "14"
 
 platform:
   - x64
@@ -19,7 +19,7 @@ platform:
 # Install scripts. (runs after repo cloning)
 install:
   # Get the latest stable version of Node.js or io.js
-  - ps: Install-Product node $env:nodejs_version
+  - ps: Install-Product node $env:nodejs_version $env:platform
   # install modules
   - npm install
 
