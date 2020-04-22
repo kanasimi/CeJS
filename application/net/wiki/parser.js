@@ -5514,8 +5514,18 @@ function module_code(library_namespace) {
 		// 忽略 <span> 之類。
 		function filter_tags(token) {
 			// console.log(token);
-			if (token.type === 'tag'/* || token.type === 'tag_single' */) {
-				// `<nowiki>value</nowiki>` -> `value`
+			if (token.type === 'tag' /* || token.type === 'tag_single' */) {
+				// console.log(token);
+				if (token.tag == 'nowiki') {
+					// assert: token[1].type === 'tag_inner'
+					// do not show type: 'tag_attributes' when .join('')
+					token[0][0] = '';
+					// token = token[1];
+					// token.is_nowiki = true;
+					// console.log(token);
+					return token;
+				}
+				// `<b>value</b>` -> `value`
 				return filter_tags(token[1]);
 			}
 			if (Array.isArray(token)) {
@@ -5529,7 +5539,11 @@ function module_code(library_namespace) {
 		}
 
 		function normalize_value(value) {
-			return filter_tags(value).toString().trim()
+			// console.trace(JSON.stringify(value));
+			// console.trace(JSON.stringify(filter_tags(value)));
+			value = filter_tags(value).toString().trim();
+			// console.log(JSON.stringify(value));
+			return value
 			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
 			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
 			// <source lang="cpp">
@@ -5618,7 +5632,11 @@ function module_code(library_namespace) {
 							}
 						}).map(filter_tags);
 						if (!has_list) {
-							cell = normalize_value(cell.join(''));
+							// console.log(cell);
+							cell.toString = function() {
+								return this.join('');
+							};
+							cell = normalize_value(cell);
 						} else if (has_non_empty_token) {
 							// 有些不合格之 token。
 							cell.forEach(function(token, index) {

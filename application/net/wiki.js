@@ -4460,12 +4460,18 @@ function module_code(library_namespace) {
 
 	// get token
 	// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Btokens
-	wiki_API.prototype.get_token = function(callback, type) {
+	wiki_API.prototype.get_token = function(callback, options) {
 		// assert: this (session) 已登入成功， callback 已設定好。
-		if (!type) {
-			// default_type: csrf (cross-site request forgery) token
-			type = 'csrf';
+		if (typeof options === 'string') {
+			options = {
+				type : options
+			};
+		} else {
+			options = library_namespace.setup_options(options);
 		}
+		var type = options.type
+		// default_type: csrf (cross-site request forgery) token
+		|| 'csrf';
 		// TODO: for {Array}type
 		var session = this, token = session.token;
 		if (!options.force && token[type + 'token']) {
@@ -4985,6 +4991,7 @@ function module_code(library_namespace) {
 					last_update : Date.now()
 				});
 			}
+			// latest raw task raw configuration
 			session.latest_task_configuration
 			// TODO: valid configuration 檢測數值是否合適。
 			= wiki_API.parse_configuration(page_data);
