@@ -17,10 +17,8 @@ workflows:
 jobs:
   test-LTS: &test-template
     docker:
-      # https://circleci.com/docs/2.0/circleci-images/
-      # https://hub.docker.com/r/circleci/node/tags/
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
-      - image: circleci/node:11.14.0-stretch
+      - image: circleci/node:lts-stretch
 
     steps:
       - checkout
@@ -31,7 +29,10 @@ jobs:
   test-latest:
     #<<: *test-template
     docker:
-      - image: circleci/node:11.8.0-stretch
+      # https://circleci.com/docs/2.0/circleci-images/
+      # https://hub.docker.com/r/circleci/node/tags/
+      # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
+      - image: circleci/node:current-stretch
 
     steps:
       - checkout

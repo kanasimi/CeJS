@@ -2,16 +2,16 @@
 # Test against this version of Node.js
 environment:
   matrix:
-# Wikimedia Tool Labs: v0.10.25
-# 0.10.25: node  x86 package not found
-#    - nodejs_version: "0.10"
-# FreeBSD ports node-devel
+    # Wikimedia Tool Labs: v0.10.25
+    # 0.10.25: node  x86 package not found
+    #- nodejs_version: "0.10"
+    # FreeBSD ports node-devel
     - nodejs_version: "0.11"
-#    - nodejs_version: "0.12"
-# 2017/11/2 LTS
-    - nodejs_version: "8"
-# AppVeyor do not using x64, and for node 11, "node  x86 package not found".
-    - nodejs_version: "10"
+    #- nodejs_version: "0.12"
+    # LTS
+    - nodejs_version: "12"
+    # Current
+    - nodejs_version: "14"
 
 # Install scripts. (runs after repo cloning)
 install:
