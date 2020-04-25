@@ -459,29 +459,13 @@ if (typeof CeL === 'function') {
 				&& (typeof process !== 'object'
 						|| typeof process.versions !== 'object' || !process.versions.electron)) {
 
-		} else if (
-		// typeof global === 'object' &&
-		typeof require === 'function'
-		// for node.js, node_fs
-		&& (_.new_XMLHttp = require('fs'))
-		//
-		&& typeof process === 'object' && typeof process.versions === 'object'
-				&& process.versions.node
-				//
-				&& typeof console === 'object'
-				&& typeof console.log === 'function') {
+		} else if (_.platform.nodejs) {
+			// for node.js, node_fs
+			_.new_XMLHttp = require('fs');
 			_.platform.browser = process.versions.electron ? 'electron'
 					: 'node';
 			_.platform.version = process.versions.electron
 					|| process.versions.node;
-			/**
-			 * shortcut for node.js: nodejs version.<br />
-			 * Node.js 有比較特殊的 global scope 處理方法。<br />
-			 * 有可能為 undefined!
-			 * 
-			 * @type {String|Undefined}
-			 */
-			_.platform.nodejs = process.versions.node;
 			_.platform.OS = process.platform;
 			// shortcut for Windows
 			_.platform.Windows = _.platform.is_Windows();

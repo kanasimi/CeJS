@@ -283,21 +283,18 @@ function module_code(library_namespace) {
 	function determin_download_directory(test_current_directory) {
 		var download_directory = test_current_directory
 				&& library_namespace.platform.nodejs
-				&& (require.main ? require.main.filename
-				// https://github.com/nodejs/node/pull/32232
-				// deprecate process.mainModule
-				: process.mainModule && process.mainModule.filename);
+				&& require.main && require.main.filename;
 		if (download_directory
-		// macOS dmg electron APP 中: process.mainModule.filename 例如為
+		// macOS dmg electron APP 中: require.main.filename 例如為
 		// /Applications/work_crawler.app/Contents/Resources/app.asar/gui_electron/gui_electron.html
 		//
-		// Linux Mint 中 AppImage: process.mainModule.filename 例如為
+		// Linux Mint 中 AppImage: require.main.filename 例如為
 		// /tmp/.mount_work_cWtD4AY/resources/app.asar/gui_electron/gui_electron.html
 		//
-		// Linux Mint 中 electron: process.mainModule.filename 例如為
+		// Linux Mint 中 electron: require.main.filename 例如為
 		// .../work_crawler-master/gui_electron/gui_electron.html
 		//
-		// Windows 10 中 electron: process.mainModule.filename 例如為
+		// Windows 10 中 electron: require.main.filename 例如為
 		// ...\work_crawler\gui_electron\gui_electron.html
 		&& !/\.html?$/i.test(download_directory)) {
 			download_directory = download_directory.match(/[^\\\/]+$/)[0]

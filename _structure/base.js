@@ -1037,6 +1037,27 @@ function (globalThis) {
 		return platform.browser + ' ' + platform.version;
 	};
 
+	try {
+		/**
+		 * is_nodejs, shortcut for node.js: nodejs version.<br />
+		 * Node.js 有比較特殊的 global scope 處理方法。<br />
+		 * 有可能為 undefined!
+		 * 
+		 * @type {String|Undefined}
+		 */
+		platform.nodejs =
+			// typeof global === 'object' &&
+			typeof require === 'function' && require('fs')
+			//
+			&& typeof process === 'object' && typeof process.versions === 'object'
+			//
+			&& typeof console === 'object' && typeof console.log === 'function'
+			//
+			&& process.versions.node;
+	} catch(e) {
+		// require('fs') error?
+	}
+
 	platform.is_Windows = function() {
 		// https://www.lisenet.com/2014/get-windows-system-information-via-wmi-command-line-wmic/
 		// TODO: `wmic OS get Caption,CSDVersion,OSArchitecture,Version`
@@ -1129,16 +1150,11 @@ function (globalThis) {
 		// 在 .hta 中取代 WScript.ScriptFullName。
 		script_full_path = WScript.ScriptFullName || script_full_path;
 
-	} else if (typeof require === 'function' && typeof process === 'object') {
+	} else if (platform.nodejs) {
 		if (require.main) {
+			// for newer node.js. 須放置於 ((__filename)) 判斷前!
 			script_full_path = require.main.filename || script_full_path;
 
-		} else if (false && process.mainModule) {
-			// https://github.com/nodejs/node/pull/32232
-			// deprecate process.mainModule
-
-			// for newer node.js. 須放置於 ((__filename)) 判斷前!
-			script_full_path = process.mainModule.filename || script_full_path;
 		} else if (false /* 20160609 deprecated */) {
 			// 以 require('/path/to/node.loader.js') 之方法 include library 時，
 			// ((__filename)) 會得到 loader 之 path，
@@ -1148,7 +1164,7 @@ function (globalThis) {
 			// 但 isTTY 在 command line 執行程式時也會為 true！
 			// && (process.stdout && !process.stdout.isTTY
 
-			// Unix node console 時 include 的話無 process.mainModule，而 __filename 為
+			// Unix node console 時 include 的話無 require.main，而 __filename 為
 			// node.loader.js 之 full path。
 
 			// for old node.js
@@ -1161,7 +1177,6 @@ function (globalThis) {
 				// debug
 				console.error('No script_full_path @ nodejs!');
 				console.log(process);
-				console.log(process.mainModule);
 				console.log('require.main: ' + JSON.stringify(require.main));
 				console.log('require.main.filename: ' + (require.main && require.main.filename));
 				console.log('__filename: ' + __filename);
@@ -1278,11 +1293,11 @@ function (globalThis) {
 		if (reset)
 			this.env = Object.create(null);
 
-		var OS, env = this.env, is_nodejs = typeof process === 'object' && process.env,
+		var OS, env = this.env,
 		//
 		win_env_keys = 'PROMPT|HOME|PUBLIC|SESSIONNAME|LOCALAPPDATA|OS|Path|PROCESSOR_IDENTIFIER|SystemDrive|SystemRoot|TEMP|TMP|USERNAME|USERPROFILE|ProgramData|ProgramFiles|ProgramFiles(x86)|ProgramW6432|windir'.split('|');
 
-		if (is_nodejs) {
+		if (platform.nodejs) {
 			// import all environment variables
 			Object.assign(env, process.env);
 		}
@@ -1416,7 +1431,7 @@ function (globalThis) {
 			// this.warn(e.message);
 		}
 
-		if (is_nodejs) {
+		if (platform.nodejs) {
 			// 環境變數 in node.js
 			if (false) {
 				for (var index = 0; index < win_env_keys.length; index++) {
@@ -1481,7 +1496,7 @@ OS='UNIX'; // unknown
 		 */
 		env.OS = OS = OS_type || OS
 				//
-				|| typeof process === 'object' && process.platform
+				|| platform.nodejs && process.platform
 				// 假如未設定則由 path 判斷。
 				|| (_.get_script_full_name().indexOf('\\') !== -1 ? 'Windows' : 'UNIX')
 				//
@@ -1517,7 +1532,7 @@ OS='UNIX'; // unknown
 		 * @see https://stackoverflow.com/questions/125813/how-to-determine-the-os-path-separator-in-javascript
 		 */
 		env.path_separator =
-			typeof require === 'function' && require('path') && require('path').sep
+			platform.nodejs && require('path') && require('path').sep
 			|| (is_UNIX ? '/' : '\\');
 
 		if (// env.home && !/[\\\/]$/.test(env.home)
@@ -2191,7 +2206,7 @@ OS='UNIX'; // unknown
 		};
 	};
 
-	if (typeof process === 'object' && process.versions) {
+	if (platform.nodejs && process.versions) {
 		process.versions[library_name.toLowerCase()] = library_version;
 		if (using_style === undefined) {
 			// 若為 nodejs，預設使用 style 紀錄。

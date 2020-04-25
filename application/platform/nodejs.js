@@ -826,13 +826,10 @@ function module_code(library_namespace) {
 	// 為 electron-builder 📦安裝包/發行版
 	var is_installation_package = process.env.Apple_PubSub_Socket_Render;
 	if (!is_installation_package) {
-		is_installation_package = require.main ? require.main.filename
-		// https://github.com/nodejs/node/pull/32232
-		// deprecate process.mainModule
-		: process.mainModule && process.mainModule.filename;
+		is_installation_package = require.main && require.main.filename;
 		is_installation_package = is_installation_package
 				&& is_installation_package.replace(/[\\\/]app\.asar.+/, '') === process.resourcesPath
-				&& library_namespace.platform.OS || false;
+				&& library_namespace.platform.OS;
 	}
 
 	if (false) {
