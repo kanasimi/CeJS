@@ -841,7 +841,8 @@ function module_code(library_namespace) {
 
 	/**
 	 * <code>
-	使用.firstChild或.lastChild須注意此node可能是text node，不能appendChild。須以.nodeType判別。
+	使用 .firstChild 或 .lastChild 須注意此node可能是 text node，不能 appendChild。須以 .nodeType 判別。
+	.children[0] (<span>) === .firstElementChild !== .firstChild (maybe #text)
 
 	http://msdn2.microsoft.com/zh-tw/library/system.xml.xmlnode.removechild(VS.80).aspx
 	繼承者注意事項 在衍生類別中覆寫 RemoveChild 時，為了要正確引發事件，您必須呼叫基底類別的 RemoveChild 方法。
@@ -1090,9 +1091,11 @@ function module_code(library_namespace) {
 	 * @see http://www.klstudio.com/post/94.html
 	 * @_memberOf _module_
 	 */
-	function set_text(element, text) {
+	function set_text(element, text, options) {
 		if (!(element = get_element(element)))
 			return;
+
+		options = library_namespace.setup_options(options);
 
 		var text_p = set_text.p;
 		if (typeof text_p !== 'string' || !text_p)
@@ -1105,11 +1108,27 @@ function module_code(library_namespace) {
 			: 'innerHTML';
 
 		var p = typeof element.value === 'string' ? 'value' : text_p;
-		if (typeof text !== 'undefined')
+		if (typeof text !== 'undefined') {
 			if (need_check_title && element.tagName.toLowerCase() === 'title')
 				document.title = text;
-			else
+			else {
 				element[p] = text;
+				if (element.tagName.toLowerCase() === 'input' && options.resize) {
+					var min_width = String(text);
+					min_width = min_width.display_width
+					// CeL.data.native.display_width()
+					? min_width.display_width() : min_width.length;
+					// 'font-size' is in em.
+					min_width = get_style(element, 'font-size', 'numeral')
+							* (min_width + 1) / 2;
+					if (options.max_width > 0 && min_width > options.max_width) {
+						min_width = options.max_width;
+					}
+					if (element.offsetWidth < min_width)
+						set_style(element, 'width', min_width + 'px');
+				}
+			}
+		}
 
 		// http://www-128.ibm.com/developerworks/tw/library/x-matters41.html
 		if (element.nodeType === 3 || element.nodeType === 4)
@@ -1118,7 +1137,7 @@ function module_code(library_namespace) {
 
 		// 用 .childNodes
 		if (false) {
-			var s = element.firstChild, t = [];
+			var s = element.children[0], t = [];
 			if (s) {
 				do {
 					t.push(set_text(s));
@@ -5943,9 +5962,7 @@ function module_code(library_namespace) {
 			var b = (n && n.ownerDocument || window.document).body;
 			return [ b.scrollLeft, b.scrollTop, b.clientLeft, b.clientTop ];
 		}
-				:
-
-				!isNaN(win.scrollX) ?
+				: !isNaN(win.scrollX) ?
 				// untested
 				function() {
 					var b = document.body;
@@ -5962,8 +5979,38 @@ function module_code(library_namespace) {
 	_// JSDT:_module_
 	.get_window_status = get_window_status;
 
-	_// JSDT:_module_
-	.
+	function set_style(element, name, value) {
+		if (element && typeof element === 'string')
+			element = document.getElementById(element);
+
+		if (typeof element.style !== 'object') {
+			library_namespace.warn('The element has no .style property!');
+			return;
+		}
+
+		if (typeof name === 'object' && !value) {
+			Object.assign(element.style, name);
+			if (false) {
+				var pair = name;
+				for (name in pair) {
+					value = pair[name];
+					set_style(element, name, value);
+				}
+			}
+			return;
+		}
+
+		if (!(name in element.style)) {
+			library_namespace.warn('There is no property [' + name
+					+ '] in the element!');
+			return;
+		}
+
+		element.style[name] = value;
+	}
+
+	_.set_style = set_style;
+
 	/**
 	 * get current computed style property of specified HTML element. TODO: 整合
 	 * get_node_offset, _.set_style
@@ -5993,9 +6040,12 @@ function module_code(library_namespace) {
 	 * @since 2010/4/2 00:14:09 refactoring 重構
 	 * @_memberOf _module_
 	 */
-	get_style = function(element, name, not_computed) {
+	function get_style(element, name, options) {
 		if (element && typeof element === 'string')
 			element = document.getElementById(element);
+
+		options = library_namespace.setup_options(options);
+		// TODO: options.no_computed
 
 		// opacity
 
@@ -6067,20 +6117,32 @@ function module_code(library_namespace) {
 
 		// 處理 px, pt, em, ..
 
-		library_namespace
-				.debug((library_namespace.node_description ? library_namespace
-						.node_description(element) : 'node')
-						+ '.style['
-						+ name
-						+ '] = ['
-						+ value
-						+ ']'
-						+ (style_interface === document.defaultView ? ' (use W3C .getComputedStyle)'
-								: style_interface === element.currentStyle ? ' (use IE .currentStyle)'
-										: ''));
+		library_namespace.debug((library_namespace.node_description
+		//
+		? library_namespace.node_description(element) : 'node')
+		//
+		+ '.style[' + name + '] = [' + value + ']'
+		//
+		+ (style_interface === document.defaultView
+		//
+		? ' (use W3C .getComputedStyle)'
+		//
+		: style_interface === element.currentStyle
+		//
+		? ' (use IE .currentStyle)' : ''));
+
+		if (options.numeral && typeof value === 'string') {
+			var matched = value.match(/^(\d+(\.\d+)?)px$/);
+			if (matched) {
+				value = +matched[1];
+			}
+		}
 
 		return value;
-	};
+	}
+
+	_// JSDT:_module_
+	.get_style = get_style;
 
 	// not yet tested.
 	function get_style_sheets(filter, limit) {
