@@ -2928,7 +2928,7 @@ function module_code(library_namespace) {
 				// overwrite callback() to run this.next();
 				// next[2] : callback
 				if (typeof next[2] === 'function')
-					next[2].apply(_this, arguments);
+					next[2].apply(this, arguments);
 				// 因為 wiki_API.cache(list) 會使用到 wiki_API.prototype[method]；
 				// 其最後會再 call wiki_API.next()，是以此處不再重複 call .next()。
 				// _this.next();

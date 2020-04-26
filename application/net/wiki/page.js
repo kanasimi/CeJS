@@ -1301,15 +1301,16 @@ function module_code(library_namespace) {
 		last_query_revid = options.revid | 0;
 
 		// @see function adapt_task_configurations() @ wiki.js
-		if (!options.adapt_configuration) {
-			options.adapt_configuration = session.task_configuration
-					&& session.task_configuration.adapter;
+		if (!options.configuration_adapter) {
+			// 採用預設的 configuration_adapter。
+			options.configuration_adapter = session.task_configuration
+					&& session.task_configuration.configuration_adapter;
 		}
 		// {String}設定頁面。 注意: 必須是已經轉換過、正規化後的最終頁面標題。
-		var configuration_page_title = typeof options.adapt_configuration === 'function'
+		var configuration_page_title = typeof options.configuration_adapter === 'function'
 				&& wiki_API.normalize_title(options.configuration_page)
 				|| session.task_configuration
-				&& session.task_configuration.page;
+				&& session.task_configuration.configuration_page_title;
 
 		if (!(delay_ms > 0))
 			delay_ms = 0;
@@ -1768,9 +1769,9 @@ function module_code(library_namespace) {
 								}
 
 								if (configuration_row === row) {
-									session.adapt_task_configurations(
+									session.adapt_task_configurations(row,
 									//
-									row, options.adapt_configuration, 'once');
+									options.configuration_adapter, 'once');
 									run_next();
 									return;
 								}
@@ -1826,9 +1827,9 @@ function module_code(library_namespace) {
 								}
 								Object.assign(row, page_id_hash[row.pageid]);
 								if (configuration_row === row) {
-									session.adapt_task_configurations(
+									session.adapt_task_configurations(row,
 									//
-									row, options.adapt_configuration, 'once');
+									options.configuration_adapter, 'once');
 									return;
 								}
 								listener.call(options, row, index, rows);

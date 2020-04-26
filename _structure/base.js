@@ -2898,7 +2898,7 @@ OS='UNIX'; // unknown
 				_.debug((name || '(' + _.is_type(name_space) + ')')
 						+ '.' + key + ' = (' + (typeof value) + ')'
 						+ (_.is_debug(4) || typeof value !== 'function'
-								&& typeof value !== 'object' ? ' [' + value + ']'
+								&& typeof value !== 'object' && typeof value !== 'symbol' ? ' [' + value + ']'
 								: ''), 1, 'set_method');
 			}
 		}
