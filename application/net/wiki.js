@@ -2556,6 +2556,8 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof next[1] !== 'string'
+			// @see check_and_delete_revisions
+			&& next[2] && next[2].section !== 'new'
 			//
 			&& !get_page_content.had_fetch_content(next[2].page_to_edit)) {
 				if (false) {
@@ -2567,6 +2569,27 @@ function module_code(library_namespace) {
 				throw new Error('wiki_API.prototype.next: 有多個執行緒互相競爭？');
 				break;
 			}
+
+			var check_and_delete_revisions = function() {
+				if (!next[2].page_to_edit)
+					return;
+				var next_action = _this.actions[0];
+				if (next_action && next_action[0] === 'edit'
+				// 明確指定內容時，只要知道標題即可，不必特地檢查是否有內容。
+				&& typeof next_action[1] !== 'string'
+				//
+				&& next_action[2] && next_action[2].section !== 'new'
+				//
+				&& next[2].page_to_edit === next_action[2].page_to_edit) {
+					// assert: wiki.page().edit().edit()
+					// e.g., 20160906.archive_moegirl.js
+					// Should reget page
+					_this.actions
+							.unshift([ 'page', next_action[2].page_to_edit ]);
+				}
+				// 因為已經更動過內容，為了預防 this.last_page 取得已修改過的錯誤資料，因此將之刪除。但留下標題資訊。
+				delete next[2].page_to_edit.revisions;
+			};
 
 			if (!('stopped' in this)) {
 				library_namespace.debug(
@@ -2595,24 +2618,6 @@ function module_code(library_namespace) {
 				this.next();
 				break;
 			}
-
-			var check_and_delete_revisions = function() {
-				if (!next[2].page_to_edit)
-					return;
-				if (_this.actions.length[0] && _this.actions[0][0] === 'edit'
-				//明確指定內容時，只要知道標題即可，不必特地檢查是否有內容。
-				&& typeof _this.actions[0][1] !== 'string'
-				//
-				&& next[2].page_to_edit === _this.actions[0][2].page_to_edit) {
-					// assert: wiki.page().edit().edit()
-					// e.g., 20160906.archive_moegirl.js
-					// Should reget page
-					_this.actions.unshift([ 'page',
-							_this.actions[0][2].page_to_edit ]);
-				}
-				// 因為已經更動過內容，為了預防 this.last_page 取得已修改過的錯誤資料，因此將之刪除。但留下標題資訊。
-				delete next[2].page_to_edit.revisions;
-			};
 
 			if (next[2].page_to_edit.is_Flow) {
 				// next[2]: options to call edit_topic()=CeL.wiki.Flow.edit
