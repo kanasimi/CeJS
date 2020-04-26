@@ -2533,6 +2533,7 @@ function module_code(library_namespace) {
 				next[2].page_to_edit = this.last_page;
 			}
 			// console.trace(next[2]);
+			// console.trace(next);
 
 			// TODO: {String|RegExp|Array}filter
 
@@ -2554,7 +2555,9 @@ function module_code(library_namespace) {
 				break;
 			}
 
-			if (!get_page_content.had_fetch_content(next[2].page_to_edit)) {
+			if (typeof next[1] !== 'string'
+			//
+			&& !get_page_content.had_fetch_content(next[2].page_to_edit)) {
 				if (false) {
 					library_namespace
 							.warn('wiki_API.prototype.next: 有多個執行緒互相競爭？本執行緒將會直接跳出，等待另一個取得頁面內容的執行緒完成後，由其處理。');
@@ -2593,6 +2596,24 @@ function module_code(library_namespace) {
 				break;
 			}
 
+			var check_and_delete_revisions = function() {
+				if (!next[2].page_to_edit)
+					return;
+				if (_this.actions.length[0] && _this.actions[0][0] === 'edit'
+				//明確指定內容時，只要知道標題即可，不必特地檢查是否有內容。
+				&& typeof _this.actions[0][1] !== 'string'
+				//
+				&& next[2].page_to_edit === _this.actions[0][2].page_to_edit) {
+					// assert: wiki.page().edit().edit()
+					// e.g., 20160906.archive_moegirl.js
+					// Should reget page
+					_this.actions.unshift([ 'page',
+							_this.actions[0][2].page_to_edit ]);
+				}
+				// 因為已經更動過內容，為了預防 this.last_page 取得已修改過的錯誤資料，因此將之刪除。但留下標題資訊。
+				delete next[2].page_to_edit.revisions;
+			};
+
 			if (next[2].page_to_edit.is_Flow) {
 				// next[2]: options to call edit_topic()=CeL.wiki.Flow.edit
 				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
@@ -2619,8 +2640,7 @@ function module_code(library_namespace) {
 						// next[3] : callback
 						if (typeof next[3] === 'function')
 							next[3].call(this, next[2].page_to_edit.title);
-						// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
-						delete next[2].page_to_edit.revisions;
+						check_and_delete_revisions();
 						_this.next();
 					}, {
 						flow_view : 'header',
@@ -2678,8 +2698,7 @@ function module_code(library_namespace) {
 					// next[3] : callback
 					if (typeof next[3] === 'function')
 						next[3].call(_this, title, error, result);
-					// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
-					delete next[2].page_to_edit.revisions;
+					check_and_delete_revisions();
 					_this.next();
 				});
 				break;
@@ -2849,10 +2868,7 @@ function module_code(library_namespace) {
 					if (typeof next[3] === 'function')
 						next[3].apply(_this, arguments);
 					// assert: 應該有 next[2].page_to_edit。
-					// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
-					if (next[2].page_to_edit) {
-						delete next[2].page_to_edit.revisions;
-					}
+					check_and_delete_revisions();
 					check_next();
 				}
 			});
