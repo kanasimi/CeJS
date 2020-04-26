@@ -206,13 +206,18 @@ function module_code(library_namespace) {
 			directories = [ directories ];
 		}
 		directories.forEach(function(directory_name) {
+			// directory_name = String(directory_name).replace(/[\\\/]+$/, '');
 			try {
 				directory_name
 				//
 				&& node_fs.accessSync(directory_name, node_fs.F_OK
 				//
 				| node_fs.R_OK | node_fs.W_OK | node_fs.X_OK);
+				library_namespace.debug('Already existed: [' + directory_name
+						+ ']', 1, 'create_directory');
 			} catch (e) {
+				library_namespace.debug('Create [' + directory_name + ']...',
+						1, 'create_directory');
 				try {
 					if (library_namespace.platform.is_Windows()
 							&& directory_name.endsWith('.')) {
@@ -231,9 +236,9 @@ function module_code(library_namespace) {
 				} catch (e) {
 					if (e.code !== 'EEXIST')
 						;
-					library_namespace.debug({
+					library_namespace.warn([ 'create_directory: ', {
 						T : [ '創建目錄 [%1] 失敗：%2', directory_name, String(e) ]
-					}, 1, 'create_directory');
+					} ]);
 					error++;
 				}
 			}

@@ -198,7 +198,7 @@ function module_code(library_namespace) {
 		// console.log(options);
 		if (options.task_configuration_page) {
 			this.adapt_task_configurations(options.task_configuration_page,
-					options.adapt_configuration);
+					options.configuration_adapter);
 		}
 	}
 
@@ -4939,9 +4939,31 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
-	// 從網頁取得/讀入自動作業用的人為設定 manual settings。
-	// 本設定頁面將影響作業功能，應受適當保護。且應謹慎編輯，以防機器人無法讀取。移動本頁面必須留下重定向。
-	// TODO: 檢查設定。
+	/**
+	 * 從網頁取得/讀入自動作業用的人為設定 manual settings。
+	 * 
+	 * TODO: 檢查設定。
+	 * 
+	 * @param {String}task_configuration_page
+	 *            自動作業用的設定頁面標題。 e.g., "User:bot/設定"
+	 * @param {Function}configuration_adapter
+	 *            整合設定用的處理函式
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * 設定頁面措辭模板:<code>
+
+	{{Bot use warning|bot=[[User:cewbot]]}}
+	本頁面為機器人執行___作業的設定頁面。每次執行作業前，機器人都會從本頁面讀入設定。本設定頁面將影響___作業功能，應受適當保護以免受破壞。且應謹慎編輯，以防機器人無法讀取。移動本頁面必須留下重定向。
+
+	自動生成的報表請參見：[[User:cewbot/report]]。
+	請注意：變更本頁面後，起碼必須等數分鐘，機器人才會應用新的設定。
+	參見：
+	GitHub上的原始碼 (source code)
+	已知無法解決問題：
+
+	</code>
+	 */
 	function adapt_task_configurations(task_configuration_page,
 			configuration_adapter, options) {
 		options = library_namespace.setup_options(options);
@@ -4949,13 +4971,13 @@ function module_code(library_namespace) {
 				|| (session.task_configuration = Object.create(null));
 		if (typeof configuration_adapter === 'function') {
 			if (!options.once)
-				session.task_configuration.adapter = configuration_adapter;
+				session.task_configuration.configuration_adapter = configuration_adapter;
 		} else {
-			configuration_adapter = session.task_configuration.adapter;
+			configuration_adapter = session.task_configuration.configuration_adapter;
 		}
 
 		if (!task_configuration_page
-				&& !(task_configuration_page = task_configuration.page)) {
+				&& !(task_configuration_page = task_configuration.configuration_page_title)) {
 			configuration_adapter && configuration_adapter();
 			return;
 		}
@@ -5010,26 +5032,32 @@ function module_code(library_namespace) {
 			});
 		}
 
+		// setup_configuration()
 		function adapt_configuration(page_data) {
 			if (!options.once) {
 				// cache
 				Object.assign(task_configuration, {
+					// `session.task_configuration.configuration_page_title`
 					// {String}設定頁面。已經轉換過、正規化後的最終頁面標題。
-					page : page_data.title,
+					configuration_page_title : page_data.title,
+					// configuration_pageid : page_data.id,
 					last_update : Date.now()
 				});
 			}
 			// latest raw task raw configuration
 			session.latest_task_configuration
 			// TODO: valid configuration 檢測數值是否合適。
-			= wiki_API.parse_configuration(page_data);
+			= wiki_API.parse.configuration(page_data);
 			library_namespace
 					.info('adapt_task_configurations: Get configurations from '
 							+ wiki_API.title_link_of(page_data));
 			// console.log(session.latest_task_configuration);
-			configuration_adapter
-			// 每次更改過設定之後，重新執行一次。
-			&& configuration_adapter(session.latest_task_configuration);
+			if (typeof configuration_adapter === 'function') {
+				// 每次更改過設定之後，重新執行一次。
+				// 檢查從網頁取得的設定，檢測數值是否合適。
+				configuration_adapter.call(session,
+						session.latest_task_configuration);
+			}
 		}
 	}
 

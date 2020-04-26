@@ -5466,6 +5466,12 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// const
+	// ! 變數名 (不可更改) !! 變數值 !! 注解說明
+	var NAME_INDEX = 0, VALUE_INDEX = 1;
+	var KEY_ORIGINAL_ARRAY = typeof Symbol === 'function' ? Symbol('KEY_ORIGINAL_ARRAY')
+			: '|ORIGINAL_ARRAY';
+
 	/**
 	 * 解析設定參數 wikitext configuration → JSON
 	 * 
@@ -5473,7 +5479,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @example <code>
 
-	var configuration = CeL.wiki.parse_configuration(page_data);
+	var configuration = CeL.wiki.parse.configuration(page_data);
 
 	value = configuration[variable_name];
 
@@ -5588,7 +5594,7 @@ function module_code(library_namespace) {
 			// parse table
 			// @see wiki_API.table_to_array
 			if (token.type === 'table' && (token.caption || variable_name)) {
-				var value = [];
+				var value_hash = Object.create(null);
 				token.forEach(function(line) {
 					if (line.type !== 'table_row'
 					// 注意: caption 也被當作 table_row 看待。
@@ -5678,15 +5684,17 @@ function module_code(library_namespace) {
 						row.push(cell);
 					});
 					// console.log(line);
-					value.push(row);
-					if (row.length >= 2
-					//
-					&& row[0] && typeof row[0] === 'string') {
+					if (row.length >= 2) {
 						// ! 變數名 (不可更改) !! 變數值 !! 注解說明
-						value[row[0]] = row[1];
+						var name = row[NAME_INDEX];
+						if (name && typeof name === 'string') {
+							// TODO: "false" → false
+							value_hash[name] = row[VALUE_INDEX];
+						}
 					}
 				});
-				configuration[token.caption || variable_name] = value;
+				value_hash[KEY_ORIGINAL_ARRAY] = token;
+				configuration[token.caption || variable_name] = value_hash;
 				// 僅採用第一個列表。
 				if (!token.caption)
 					variable_name = null;
@@ -5732,6 +5740,9 @@ function module_code(library_namespace) {
 
 		return configuration;
 	}
+
+	// CeL.wiki.parse.configuration.KEY_ORIGINAL_ARRAY
+	parse_configuration.KEY_ORIGINAL_ARRAY = KEY_ORIGINAL_ARRAY;
 
 	// ----------------------------------------------------
 
@@ -6191,6 +6202,8 @@ function module_code(library_namespace) {
 		// CeL.wiki.parse.redirect , wiki_API.parse.redirect
 		redirect : parse_redirect,
 
+		configuration : parse_configuration,
+
 		wiki_URL : URL_to_wiki_link,
 
 		lua_object : parse_lua_object_code,
@@ -6406,8 +6419,6 @@ function module_code(library_namespace) {
 		lead_text : lead_text,
 		extract_introduction : extract_introduction,
 		// sections : get_sections,
-
-		parse_configuration : parse_configuration,
 
 		// {Object} file option hash
 		file_options : file_options,
