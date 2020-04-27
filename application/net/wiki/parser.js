@@ -2988,8 +2988,11 @@ function module_code(library_namespace) {
 				return all;
 			}
 			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
-			var matched = inner.match(new RegExp(
-			//
+			var matched = tag !== 'nowiki' && inner.match(new RegExp(
+			// 但這種回溯搜尋不包含 <nowiki>
+			// @see console.log(parser[418]);
+			// https://zh.moegirl.org/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
+			// <nowiki>{{subst:unwiki|<nowiki>{{黑幕|黑幕内容}}</nowiki&gt;}}</nowiki>
 			'<(' + tag + ')(\\s[^<>]*)?>([\\s\\S]*?)$', 'i')), previous;
 			if (matched) {
 				previous = all.slice(0, -matched[0].length
