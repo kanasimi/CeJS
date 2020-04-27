@@ -196,7 +196,9 @@ function module_code(library_namespace) {
 				default_configuration, configuration) : default_configuration;
 
 		// 每次呼叫皆創建一個新的實體。
-		return new library_namespace.work_crawler(configuration);
+		var crawler = new library_namespace.work_crawler(configuration);
+
+		return crawler;
 	}
 
 	return new_webtoon_comics_crawler;
