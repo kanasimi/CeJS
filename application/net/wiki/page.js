@@ -1205,7 +1205,9 @@ function module_code(library_namespace) {
 		}
 
 		// console.log(options);
-		var recent_options, use_SQL = wiki_API.SQL && wiki_API.SQL.config;
+		// console.log(session);
+		var recent_options, use_SQL = 'use_SQL' in session ? session.use_SQL
+				: wiki_API.SQL && wiki_API.SQL.config;
 		if (!use_SQL) {
 			;
 		} else if ('use_SQL' in options) {
