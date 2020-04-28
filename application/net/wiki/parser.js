@@ -1672,7 +1672,7 @@ function module_code(library_namespace) {
 	parsed.each_section(function(section, section_index) {
 		if (section_index === 0) {
 			// first_section = section;
-			// Skip the first / lead section
+			// Skip lead section / first section / introduction.
 			return;
 		}
 		console.log('#' + section.section_title);
@@ -1932,6 +1932,26 @@ function module_code(library_namespace) {
 					// reset
 					this_user = null;
 				}
+
+				var min_timevalue, max_timevalue;
+				section.dates.forEach(function(date) {
+					if (!date || isNaN(date = +date)) {
+						return;
+					}
+					if (!(min_timevalue <= date))
+						min_timevalue = date;
+					else if (!(max_timevalue >= date))
+						max_timevalue = date;
+				});
+				if (min_timevalue) {
+					section.dates.min_timevalue = min_timevalue;
+					section.dates.max_timevalue = max_timevalue
+							|| min_timevalue;
+				}
+				section.dates.max_timevalue = Math.max.apply(null,
+						section.dates.map(function(date) {
+							return date.getTime();
+						}));
 
 				if (false) {
 					parser.each_section();
