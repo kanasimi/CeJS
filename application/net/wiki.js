@@ -2589,6 +2589,10 @@ function module_code(library_namespace) {
 				}
 				// 因為已經更動過內容，為了預防 this.last_page 取得已修改過的錯誤資料，因此將之刪除。但留下標題資訊。
 				delete next[2].page_to_edit.revisions;
+				// 預防連續編輯採用相同編輯選項。 var edit_options;
+				// wiki.page(A).edit(,edit_options);
+				// wiki.page(B).edit(,edit_options);
+				delete next[2].page_to_edit;
 			};
 
 			if (!('stopped' in this)) {
