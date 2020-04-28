@@ -1339,9 +1339,7 @@ function module_code(library_namespace) {
 		//
 		+ (use_SQL ? 'SQL' : 'API') + ' 監視 / scan '
 		//
-		+ (session && session.language || wiki_API.language)
-		//
-		+ (session && session.family ? '.' + session.family : '') + ' '
+		+ (session ? wiki_API.site_name(session) : wiki_API.language) + ' '
 		//
 		+ (Date.now() - last_query_time > 100 ?
 		//

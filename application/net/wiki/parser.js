@@ -1404,8 +1404,8 @@ function module_code(library_namespace) {
 	// TODO: using external link to display "�"
 	function section_link_toString(page_title, style) {
 		var anchor = (this[1] || '').replace(/�/g, '?'),
-		// 目前維基百科 link anchor, display_text 尚無法接受 REPLACEMENT CHARACTER U+FFFD
-		// "�" 這個字元。
+		// 目前 MediaWiki 之 link anchor, display_text 尚無法接受
+		// REPLACEMENT CHARACTER U+FFFD "�" 這個字元。
 		display_text = (this[2] || '').replace(/�/g, '?');
 
 		display_text = display_text ?
@@ -1672,6 +1672,7 @@ function module_code(library_namespace) {
 	parsed.each_section(function(section, section_index) {
 		if (section_index === 0) {
 			// first_section = section;
+			// Skip the first / lead section
 			return;
 		}
 		console.log('#' + section.section_title);
@@ -1699,7 +1700,7 @@ function module_code(library_namespace) {
 		 * {{Columns-list|\n==title==\n...}}
 		 */
 		section_hierarchy = [ this.subsections = [] ],
-		// section_title_hash[section link anchor] = {Natural}count
+		// `section link anchor` in section_title_hash: had this title
 		section_title_hash = Object.create(null);
 
 		// to test: 沒有章節標題的文章, 以章節標題開頭的文章, 以章節標題結尾的文章, 章節標題+章節標題。
@@ -1710,20 +1711,22 @@ function module_code(library_namespace) {
 			// section_title === parser[section.range[0] - 1]
 			var this_section_title_index = all_root_section_list.length > 0 ? all_root_section_list[all_root_section_list.length - 1].range[1]
 					: undefined,
-			// range: 本 section inner 在 root parserd 中的 index.
-			// parserd[range[0]] to parserd[range[1]] - 1
+			// range: 本 section inner 在 root parsed 中的 index.
+			// parsed[range[0]] to parsed[range[1]] - 1
 			range = [ this_section_title_index >= 0
 			// +1: 這個範圍不包括 section_title。
 			? this_section_title_index + 1 : 0, next_section_title_index ],
 			//
 			section = _this.slice(range[0], range[1]);
 			if (this_section_title_index >= 0) {
+				// section.section_title === parsed[section.range[0] - 1]
 				section.section_title = _this[this_section_title_index];
 			}
 			// 添加常用屬性與方法。
 			// TODO: using Object.defineProperties(section, {})
 			Object.assign(section, {
 				type : 'section',
+				// section = parsed.slice(range[0], range[1]);
 				range : range,
 				each : for_each_token,
 				toString : _this.toString
@@ -1736,18 +1739,26 @@ function module_code(library_namespace) {
 		// TODO: 不必然是章節，也可以有其它不同的分割方法。
 		// TODO: 可以讀取含入的子頁面
 		this.each('section_title', function(section_title_token,
-				section_title_index, parent_token) {
+		// section 的 index of parser。
+		section_title_index, parent_token) {
 			if (page_title) {
 				// [0]: page title
 				section_title_token.link[0] = page_title;
 			}
-			if (section_title_hash[section_title_token.link[1]] > 0) {
-				section_title_token.link[1] += '_'
+			var anchor = section_title_token.link[1];
+			if (anchor in section_title_hash) {
+				// The index of 2nd title starts from 2
+				var index = 2, base_anchor = anchor;
 				// 有多個完全相同的 anchor 時，後面的會加上 "_2", "_3", ...。
-				+ (++section_title_hash[section_title_token.link[1]]);
-			} else {
-				section_title_hash[section_title_token.link[1]] = 1;
+				while ((anchor = base_anchor + '_' + index)
+				// 測試是否有重複的標題。
+				in section_title_hash) {
+					index++;
+				}
+				section_title_token.link[1] = anchor;
 			}
+			// 登記已有之 anchor。
+			section_title_hash[anchor] = null;
 
 			var level = section_title_token.level;
 			// console.log([ level, options.level_filter ]);

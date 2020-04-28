@@ -573,6 +573,7 @@ function module_code(library_namespace) {
 			.split(','),
 	// 精確至日: 11。
 	INDEX_OF_PRECISION = time_unit.to_hash();
+	// 千紀: 一千年, https://en.wikipedia.org/wiki/Kyr
 	time_unit.zh = '十億年,億年,千萬年,百萬年,十萬年,萬年,千紀,世紀,年代,年,月,日,時,分,秒,毫秒,微秒,納秒'
 			.split(',');
 
@@ -1012,6 +1013,7 @@ function module_code(library_namespace) {
 				// treat language as options.
 				// options.language 較 session 的設定優先。
 				language = language.language || session.API_URL;
+				// session.family
 			} else if (wiki_API.is_wiki_API(language)) {
 				// treat language as session.
 				session = language;

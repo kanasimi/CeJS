@@ -268,8 +268,9 @@ function module_code(library_namespace) {
 					// 後續檢索用索引值。
 					options[continue_from] = continue_session.next_mark[continue_from];
 					// 經由,經過,通過來源
-					library_namespace.info('get_list: continue from ['
-							+ options[continue_from] + '] via {wiki_API}');
+					library_namespace.debug('continue from ['
+							+ options[continue_from] + '] via {wiki_API}', 1,
+							'get_list');
 					// 刪掉標記，避免無窮迴圈。
 					delete options.get_continue;
 				} else {
@@ -545,6 +546,17 @@ function module_code(library_namespace) {
 				// 一般情況。
 				if (Array.isArray(data)) {
 					// console.log(options);
+					var page_filter = options.page_filter
+					// 不採用 `options.filter`，預防誤用。
+					// || options.filter
+					;
+					if (page_filter) {
+						// console.log(page_filter);
+					}
+					if (typeof page_filter === 'function') {
+						data = data.filter(page_filter);
+					}
+
 					if (type === 'exturlusage' && options.combine_pages) {
 						// 處理有同一個頁面多個網址的情況。
 						data = combine_by_page(data, 'url');
@@ -847,6 +859,14 @@ function module_code(library_namespace) {
 				if (!options.for_each || options.get_list) {
 					// Array.prototype.push.apply(options.pages, pages);
 					options.pages.append(pages);
+					library_namespace.info('['
+							+ options.type
+							+ '] '
+							+ options.pages.length
+							+ ' pages: +'
+							+ pages.length
+							+ (pages.title ? ' '
+									+ wiki_API.title_link_of(pages) : ''));
 				} else {
 					// Only preserve length property.
 					options.pages.length += pages.length;
