@@ -4168,8 +4168,13 @@ function module_code(library_namespace) {
 			// 輸入 id 為實體項目 entity
 			entity = id;
 			if (!options.baserevid) {
-				// 檢測編輯衝突用。
-				options.baserevid = id.lastrevid;
+				if (id.lastrevid > 0) {
+					// 檢測編輯衝突用。
+					options.baserevid = id.lastrevid;
+				} else {
+					console.log(id);
+					throw new Error('Invalid entity!');
+				}
 			}
 			id = id.id;
 		}

@@ -5038,6 +5038,13 @@ function module_code(library_namespace) {
 
 		// setup_configuration()
 		function adapt_configuration(page_data) {
+			if ('missing' in page_data) {
+				library_namespace.debug('No configuration page: '
+						+ wiki_API.title_link_of(page_data), 1,
+						'adapt_task_configurations');
+				return;
+			}
+
 			if (!options.once) {
 				// cache
 				Object.assign(task_configuration, {
