@@ -1490,9 +1490,9 @@ function module_code(library_namespace) {
 		// console.log(options);
 		// console.log(action);
 
-		// console.log('wikidata_entity: API_URL: ' + API_URL);
-		// console.log('wikidata_entity: action: ' + action);
-		// console.log(arguments);
+		// library_namespace.log('wikidata_entity: API_URL: ' + API_URL);
+		library_namespace.log('wikidata_entity: action: ' + action);
+		console.log(arguments);
 		// TODO:
 		wiki_API.query(action, function(data, error) {
 			error = error || data && data.error;
