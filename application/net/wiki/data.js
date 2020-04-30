@@ -1491,8 +1491,9 @@ function module_code(library_namespace) {
 		// console.log(action);
 
 		// library_namespace.log('wikidata_entity: API_URL: ' + API_URL);
-		library_namespace.log('wikidata_entity: action: ' + action);
-		console.log(arguments);
+		// library_namespace.log('wikidata_entity: action: ' + action);
+		var _arguments = arguments;
+		// console.log(arguments);
 		// TODO:
 		wiki_API.query(action, function(data, error) {
 			error = error || data && data.error;
@@ -1541,6 +1542,12 @@ function module_code(library_namespace) {
 									+ wiki_API.title_link_of(key), 1,
 									'wikidata_entity');
 							data[KEY_CORRESPOND_PAGE] = key;
+							if (!data.lastrevid) {
+								library_namespace
+										.log('wikidata_entity: action: '
+												+ action);
+								console.log(_arguments);
+							}
 						}
 						// assert: KEY_get_entity_value, KEY_SESSION
 						// is NOT in data
