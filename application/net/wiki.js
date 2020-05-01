@@ -5042,7 +5042,8 @@ function module_code(library_namespace) {
 				library_namespace.debug('No configuration page: '
 						+ wiki_API.title_link_of(page_data), 1,
 						'adapt_task_configurations');
-				return;
+				// 有時必須初始設定，還是得執行 configuration_adapter。
+				// return;
 			}
 
 			if (!options.once) {
