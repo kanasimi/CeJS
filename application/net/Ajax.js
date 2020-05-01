@@ -1830,7 +1830,8 @@ function module_code(library_namespace) {
 				}
 
 				try {
-					request.abort();
+					// request.abort();
+					request.destroy();
 				} catch (e) {
 				}
 
@@ -2455,7 +2456,8 @@ function module_code(library_namespace) {
 				// http://hylom.net/node-http-request-get-and-timeout
 				// timeoutイベントは発生しているものの、イベント発生後も引き続きレスポンスを待ち続けている
 				// request.end();
-				request.abort();
+				// request.abort();
+				request.destroy();
 			} catch (err) {
 				// TODO: handle exception
 			}
@@ -3151,7 +3153,8 @@ function module_code(library_namespace) {
 						&& response.headers.location
 						&& response.headers.location !== url.format()) {
 					try {
-						request.abort();
+						// request.abort();
+						request.destroy();
 					} catch (e) {
 					}
 

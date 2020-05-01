@@ -114,7 +114,7 @@ function (globalThis) {
 		 * @type {String}
 		 * @ignore
 		 */
-		library_version = '3.5.0',
+		library_version = '3.6.0',
 
 
 		/**
@@ -352,6 +352,7 @@ function (globalThis) {
 
 		// TODO: 似乎不總是有用。見 era.htm。
 		return globalThis.eval && globalThis.eval !== eval_code ? globalThis.eval(code)
+			// QuickJS 2020-04-12 必須把本段註解全部刪除，否則不能正常執行。應為 bug。
 			// 這種表示法 Eclipse Kepler (4.3.2) SR2 之 JsDoc 尚無法處理。
 			: (0, eval)(code);
 	};
@@ -3040,7 +3041,10 @@ OS='UNIX'; // unknown
 	// ---------------------------------------------------------------------//
 
 	function is_thenable(value) {
-		return value && typeof value.then === 'function';
+		return value
+		// https://github.com/then/is-promise/blob/master/index.js
+		// && (typeof value === 'object' || typeof value === 'function')
+		&& typeof value.then === 'function';
 	}
 
 	function is_async_function(value) {
@@ -3141,7 +3145,7 @@ OS='UNIX'; // unknown
 
 	// In strict mode, this inside globe functions is undefined.
 	// https://developer.mozilla.org/en/JavaScript/Strict_mode
-	||typeof window !== 'undefined' && window
+	|| typeof window !== 'undefined' && window
 	// isWeb() ? window : this;
 
 	// https://github.com/tc39/proposal-global

@@ -2883,8 +2883,12 @@ function module_code(library_namespace) {
 			// T: for ISO 8601 Durations. e.g., 'P21DT3H'
 			[ '(?:d(?:ays?|T)?|[日天])', 24 ],
 			[ '(?:w(?:eeks?)?|週|[個个]?星期|個?禮拜|个?礼拜)', 7, true ],
-			// 以下僅僅給出約略大小。
-			[ '(?:mon(?:ths?)?|[個个ヶ]?月)', 30 ], [ '(?:y(?:r|ears?)?|年)', 12 ] ];
+			// 以下僅僅給出約略大小。 1 month: 30 days
+			[ '(?:mon(?:ths?)?|[個个ヶ]?月)', 30 ],
+			// https://en.wikipedia.org/wiki/Year#SI_prefix_multipliers
+			// NIST SP811 和ISO 80000-3：2006 支持將符號a作為一年的時間單位。在英語中，還使用縮寫y和yr。
+			// IUPAC: 1 a = 31556925.445 seconds
+			[ '(?:y(?:r|ears?)?|年)', 12 ] ];
 
 	(function() {
 		// [ all, amount ]

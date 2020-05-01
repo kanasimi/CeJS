@@ -5,10 +5,11 @@
  * 
  * @example
  * 
- * for including:<br />
- * <code>
- * require("./path/to/node.loader.js");
- * </code>
+ * for including: <code>
+
+require("./path/to/node.loader.js");
+
+</code>
  * 
  * @since 2011/11/26 23:33:32
  * @see http://nodejs.org/
@@ -27,8 +28,8 @@ try {
 		// main lib path relative to the loader script.
 		library_path : '../ce.js'
 	};
-	if (false && !global.require && typeof require === 'funtion')
-		global.require = require;
+	if (false && !globalThis.require && typeof require === 'funtion')
+		globalThis.require = require;
 
 	(function() {
 		// 若非 absolute path，則將之改為 absolute path，
@@ -77,7 +78,7 @@ try {
 
 	eval(CeL.library_code);
 	if (false) {
-		console.log('CeL === global.CeL: ' + (CeL === global.CeL));
+		console.log('CeL === globalThis.CeL: ' + (CeL === globalThis.CeL));
 		console.log('typeof CeL: ' + typeof CeL);
 		console.log('CeL: ' + CeL);
 		console.log('CeL.set_debug: ' + CeL.set_debug);

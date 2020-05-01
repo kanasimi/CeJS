@@ -8,7 +8,7 @@
 
 CeL.ace({
 	// configuration
-	site : ''
+	site : '' || CeL.get_script_name()
 }).start(work_id);
 
  </code>

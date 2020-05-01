@@ -1,7 +1,7 @@
 {
 	"name": "cejs",
 	"title": "CeJS",
-	"version": "3.5.0",
+	"version": "3.6.0",
 	"description": "A JavaScript module framework that is simple to use.",
 	"keywords": [
 		"arbitrary-precision",
@@ -30,7 +30,7 @@
 		"type": "git",
 		"url": "git+https://github.com/kanasimi/CeJS.git"
 	},
-	"main": "index.js",
+	"main": "./index.js",
 	"scripts": {
 		"test": "node \"_test suite/test.js\""
 	},
