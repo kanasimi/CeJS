@@ -1121,6 +1121,10 @@ function module_code(library_namespace) {
 					// 'font-size' is in em.
 					min_width = get_style(element, 'font-size', 'numeral')
 							* (min_width + 1) / 2;
+					if (options.min_width > 0
+							&& !(min_width >= options.min_width)) {
+						min_width = options.min_width;
+					}
 					if (options.max_width > 0 && min_width > options.max_width) {
 						min_width = options.max_width;
 					}
