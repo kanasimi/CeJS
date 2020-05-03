@@ -2653,12 +2653,16 @@ function module_code(library_namespace) {
 		// parser=CeL.wiki.parser(page_data);parser.each('section_title',function(token,index){console.log('['+index+']'+token.title);},false,1);
 		// @see for_each_token()
 		// parser.each('plain',function(token){},{slice:[1,2]});
-		section_title : function() {
-			var level = '='.repeat(this.level);
-			return level
+		section_title : function(get_inner) {
 			// this.join(''): 必須與 wikitext 相同。見 parse_wikitext.title。
+			var inner = this.join('');
+			if (get_inner)
+				return inner;
+
+			var level = '='.repeat(this.level);
+			return level + inner + level
 			// this.postfix maybe undefined, string, {Array}
-			+ this.join('') + level + (this.postfix || '');
+			+ (this.postfix || '');
 		},
 
 		// [[Help:Wiki markup]], HTML tags
