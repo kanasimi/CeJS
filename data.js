@@ -429,10 +429,15 @@ function module_code(library_namespace) {
 		// 長度過長時，極耗時間。e.g., ...\d{500000}...
 		// .replace(/\d*\.?\d+\s*[a-zA-Z°]+(\s*\/\s*(\d*\.?\d+\s*)?[a-zA-Z°]+)?/g,'0')
 
+		// https://en.wikipedia.org/wiki/Punctuation_of_English
+		// Do not count punctuations of English.
+		.replace(/[,;:.?!\-–"'()⟨⟩«»\[\]{}<>$%#@~`^&*\\\/⁄+=|]+/g, '')
 		// 將英文、數字、單位等改成單一字母。[.]: 縮寫。[\/]: m/s 之類。
+		// a's: 1
 		// http://en.wikibooks.org/wiki/Unicode/Character_reference/0000-0FFF
 		// http://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%88%97%E8%A1%A8
-		.replace(/[\wÀ-ÖØ-öø-ȳ\-–'.]{2,}/g, 'w')
+		.replace(/[\wÀ-ÖØ-öø-ȳ]{2,}/g, 'w')
+
 		// date/time or number
 		.replace(/[\d:+\-–\.\/,]{2,}/g, '0')
 		// 再去掉*全部*空白
