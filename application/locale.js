@@ -972,7 +972,7 @@ function module_code(library_namespace) {
 	// ------------------------------------
 
 	/**
-	 * 取得 domain 別名。
+	 * 取得 domain 別名。 若欲取得某個語言在其他語言中的名稱，應該設定好i18n，並以gettext()取得。
 	 * 
 	 * @param {String}[language]
 	 *            指定之正規名稱。
@@ -1005,7 +1005,7 @@ function module_code(library_namespace) {
 		/** {String}domain alias */
 		var alias;
 		/** {Array}domain alias list */
-		var alias_list, index, i, l;
+		var alias_list, i, l;
 		for (norm in list) {
 			alias_list = list[norm];
 			if (typeof alias_list === 'string') {
@@ -1020,28 +1020,40 @@ function module_code(library_namespace) {
 			// 加入 norm 本身。
 			alias_list.push(norm);
 
-			for (i = 0, l = alias_list.length; i < l; i++)
-				if (alias = alias_list[i]) {
-					library_namespace.debug({
-						T : [ 'Adding domain alias [%1] → [%2]...',
-						//
-						alias, norm ]
-					}, 2, 'gettext.set_alias');
-					if (!(norm in gettext_main_alias))
-						gettext_main_alias[norm] = alias;
-
-					// 正規化: 不分大小寫, _ → -
-					alias = alias.replace(/_/g, '-').toLowerCase();
-					// for fallback
-					while (true) {
-						gettext_aliases[alias] = norm;
-
-						index = alias.lastIndexOf('-');
-						if (index < 1)
-							break;
-						alias = alias.slice(0, index);
-					}
+			for (i = 0, l = alias_list.length; i < l; i++) {
+				alias = alias_list[i];
+				if (!alias) {
+					continue;
 				}
+
+				library_namespace.debug({
+					T : [ 'Adding domain alias [%1] → [%2]...',
+					//
+					alias, norm ]
+				}, 2, 'gettext.set_alias');
+				if (!(norm in gettext_main_alias))
+					gettext_main_alias[norm] = alias;
+
+				// 正規化: 不分大小寫, _ → -
+				alias = alias.replace(/_/g, '-').toLowerCase();
+				alias.split(/-/).forEach(function(token) {
+					if (!gettext_aliases[token])
+						gettext_aliases[token] = [];
+					if (!gettext_aliases[token].includes(norm))
+						gettext_aliases[token].push(norm);
+				});
+				continue;
+
+				// for fallback
+				while (true) {
+					gettext_aliases[alias] = norm;
+
+					var index = alias.lastIndexOf('-');
+					if (index < 1)
+						break;
+					alias = alias.slice(0, index);
+				}
+			}
 		}
 	};
 
@@ -1049,17 +1061,58 @@ function module_code(library_namespace) {
 	 * 將 domain 別名正規化，轉為正規/標準名稱。<br />
 	 * to a standard form. normalize_domain_name().
 	 * 
+	 * TODO: fix CeL.gettext.to_standard('cmn-CN') ===
+	 * CeL.gettext.to_standard('zh-CN')
+	 * 
 	 * @param {String}alias
 	 *            指定之別名。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
 	 * @returns {String} 正規名稱。
 	 * @returns undefined : can't found.
 	 */
-	gettext.to_standard = function to_standard(alias) {
+	gettext.to_standard = function to_standard(alias, options) {
 		if (typeof alias !== 'string')
 			return;
 
+		if (options === true) {
+			options = {
+				get_list : true
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
+
 		// 正規化: 不分大小寫, _ → -
-		alias = alias.toLowerCase().replace(/_/g, '-');
+		alias = alias.replace(/_/g, '-').toLowerCase();
+
+		var candidates;
+		alias.split(/-/)
+		// 通常越後面的越有特殊性。
+		.reverse().some(function(token) {
+			if (!gettext_aliases[token])
+				return;
+			// console.log(token + ': ' +
+			// JSON.stringify(gettext_aliases[token]));
+			if (!candidates) {
+				candidates = gettext_aliases[token];
+				return;
+			}
+
+			// 取交集。
+			candidates = Array.intersection(candidates,
+			//
+			gettext_aliases[token]);
+			// console.log('candidates: ' + JSON.stringify(candidates));
+			if (candidates.length < 2) {
+				return true;
+			}
+		});
+
+		return options.get_list ? candidates ? candidates.clone() : []
+				: candidates && candidates[0];
+
 		var index;
 		// for fallback
 		while (true) {
@@ -1077,7 +1130,9 @@ function module_code(library_namespace) {
 	};
 
 	var time_zone_of = {
+		// JST
 		'ja-JP' : 9,
+		// CST
 		'cmn-Hans-CN' : 8,
 		'cmn-Hant-TW' : 8
 	};
@@ -1269,7 +1324,7 @@ function module_code(library_namespace) {
 			var flag;
 			if (domain in domain_flags) {
 				flag = domain_flags[domain];
-			} else if (flag = domain.match(/-([A-Z]{2})$/)) {
+			} else if (flag = domain && domain.match(/-([A-Z]{2})$/)) {
 				// using
 				// https://en.wikipedia.org/wiki/Regional_Indicator_Symbol
 				// '🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿'.match(/./ug)
@@ -1759,8 +1814,8 @@ function module_code(library_namespace) {
 
 	var gettext_DOM_id, gettext_main_alias = Object.create(null), gettext_aliases = {
 	// MUST in lower case. @see gettext.to_standard
-	// hans : 'cmn-Hans-CN',
-	// hant : 'cmn-Hant-TW'
+	// hans : ['cmn-Hans-CN'],
+	// hant : ['cmn-Hant-TW']
 	}
 			&& Object.create(null), gettext_texts = Object.create(null), gettext_domain_name,
 	// CeL.env.domain_location = CeL.env.resource_directory_name + '/';
@@ -1800,6 +1855,14 @@ function module_code(library_namespace) {
 		// ar-SA: 阿拉伯文 (沙烏地阿拉伯)
 		'arb-Arab' : 'العربية|ar|Arabic|阿拉伯語|ar-arb-Arab|ar-AE|ar-SA',
 
+		// 現代標準漢語
+		'cmn-Hant-TW' : '繁體中文|zh-TW|繁體|zh-cmn-Hant-TW|TW|Hant|Chinese|傳統中文|正體中文|正體|漢語|華語|中文|中國|臺灣|台灣|官話|中華民國國語|Traditional Chinese',
+
+		// Subtag: cmn, Preferred-Value: cmn
+		'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|Hans|Chinese|简化字|简化中文|簡化字|簡體中文|普通话|中国|中国大陆|官话|Simplified Chinese|Mandarin Chinese',
+
+		'cmn-Hant-HK' : '香港普通話|zh-yue-Hant-HK|Cantonese|香港華語|香港官話',
+
 		// Min Nan Chinese. Macrolanguage: zh.
 		// zh-min-nan:
 		// http://taigi-pahkho.wikia.com/wiki/%E9%A0%AD%E9%A0%81
@@ -1808,16 +1871,11 @@ function module_code(library_namespace) {
 		//
 		'臺灣閩南語|min-nan-Hant-TW|Taiwanese|zh-min-nan|zh-min-nan-Hant-TW|臺語|台語|臺灣話|台灣話|閩南語|河洛話|福老話',
 
-		'cmn-Hant-HK' : '香港普通話|zh-yue-Hant-HK|Cantonese|香港華語|香港官話',
-
 		// 粵語審音配詞字庫 http://humanum.arts.cuhk.edu.hk/Lexis/lexi-can/
 		'yue-Hant-HK' : '香港粵語|zh-yue-Hant-HK|Hong Kong Cantonese|港式粵語|香港話|港式廣東話|港式廣州話',
 
-		// Subtag: cmn, Preferred-Value: cmn
-		'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|Hans|简化字|简化中文|簡化字|簡體中文|普通话|中国|中国大陆|官话|Simplified Chinese|Mandarin Chinese',
-
-		// 現代標準漢語
-		'cmn-Hant-TW' : '繁體中文|zh-TW|繁體|zh-cmn-Hant-TW|TW|Hant|Chinese|傳統中文|正體中文|正體|漢語|華語|中文|中國|臺灣|台灣|官話|中華民國國語|Traditional Chinese',
+		// 前面的會覆蓋後來的，前面的優先度較高。
+		'en-US' : 'English|en-US|英語|en-eng-Latn-US|en-Latn-US|eng-Latn-US|US|USA|United States|美語|美國英語|美式英語',
 
 		/**
 		 * Subtag: en, Suppress-Script: Latn
@@ -1831,8 +1889,6 @@ function module_code(library_namespace) {
 		 * @see https://www.w3.org/International/articles/bcp47/
 		 */
 		'en-GB' : 'British English|en-GB|英國英語|en-eng-Latn-GB|en-Latn-GB|eng-Latn-GB|en-UK|Great Britain|United Kingdom|英式英語',
-		// 後來的會覆蓋前面的。
-		'en-US' : 'English|en-US|英語|en-eng-Latn-US|en-Latn-US|eng-Latn-US|US|USA|United States|美語|美國英語|美式英語',
 
 		// Subtag: ja, Suppress-Script: Jpan
 		'ja-JP' : '日本語|ja-JP|Japanese|日語|日文|国語|日本|JP|ja-jpn-Jpan-JP|ja-Jpan-JP|jpn-Jpan-JP',
@@ -1869,6 +1925,8 @@ function module_code(library_namespace) {
 			return waiting;
 		};
 	}
+
+	// console.log(gettext_aliases);
 
 	_// JSDT:_module_
 	.gettext = gettext;

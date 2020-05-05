@@ -137,7 +137,7 @@ function (globalThis) {
 		old_namespace,
 
 		// default not_native_keyword.
-		KEY_not_native = 'not_native',
+		KEY_not_native = typeof Symbol === 'function' ? Symbol('not_native') : 'not_native',
 
 		// _base_function_to_extend,
 
@@ -398,7 +398,7 @@ function (globalThis) {
 		// 先暫時給一個，用於 `Object.create(null)`。
 		(Object.create = function() {
 			return {};
-		}).not_native = true;
+		})[KEY_not_native] = true;
 	}
 
 	/**
@@ -1349,11 +1349,12 @@ function (globalThis) {
 
 		/**
 		 * 非 native 的 method (native methods / native objects / built-in
-		 * objects)， 可由 .not_native ([not_native_keyword]) 來判別是否為 native method。<br />
-		 * e.g., use Object.defineProperty.not_native to test if the browser
-		 * don't have native support for Object.defineProperty().
+		 * objects)， 可由 [KEY_not_native] ([CeL.env.not_native_keyword]) 來判別是否為
+		 * native method。<br />
+		 * e.g., use Object.defineProperty[CeL.env.not_native_keyword] to test
+		 * if the browser don't have native support for Object.defineProperty().
 		 * 
-		 * @name CeL.env.not_to_extend_keyword
+		 * @name CeL.env.not_native_keyword
 		 * @type {String}
 		 */
 		env.not_native_keyword = KEY_not_native;

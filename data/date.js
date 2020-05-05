@@ -1174,6 +1174,7 @@ function module_code(library_namespace) {
 	// accessdate="2012/12/2 13:0" title="List of time zone abbreviations">time
 	// zone abbreviations</a> and offset in hour.
 	// TODO: Daylight Saving Time (DST).
+	// @see CeL.application.locale.time_zone_of_language()
 	String_to_Date.zone = {
 		// UTC+08:00
 		// China Standard Time

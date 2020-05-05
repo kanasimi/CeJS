@@ -6732,7 +6732,7 @@ function module_code(library_namespace) {
 	// T站心赤道 topocentric equatorial coordinate system
 	// H站心地平 topocentric horizontal coordinate system
 	'DSGETH'.split('').forEach(function(type) {
-		if (Object.defineProperty.not_native)
+		if (Object.defineProperty[library_namespace.env.not_native_keyword])
 			// e.g., IE8
 			return;
 

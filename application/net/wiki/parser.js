@@ -2000,7 +2000,8 @@ function module_code(library_namespace) {
 						.forEach(function(section, section_index) {
 							if (false) {
 								console.log('Process: ' + section.section_title
-										&& section.section_title[0].toString());
+								// section_title.toString(true): get inner
+								&& section.section_title.toString(true));
 							}
 							return eval('(async function() {'
 									+ ' try { return await for_section(section, section_index); }'
@@ -2656,8 +2657,11 @@ function module_code(library_namespace) {
 		section_title : function(get_inner) {
 			// this.join(''): 必須與 wikitext 相同。見 parse_wikitext.title。
 			var inner = this.join('');
-			if (get_inner)
+			if (get_inner) {
+				// section_title.toString(true): get inner
+				// Must .trim() yourself.
 				return inner;
+			}
 
 			var level = '='.repeat(this.level);
 			return level + inner + level
@@ -5095,6 +5099,11 @@ function module_code(library_namespace) {
 				} ]
 	};
 
+	// warning: number_to_signed(-0) === "+0"
+	function number_to_signed(number) {
+		return number < 0 ? number : '+' + number;
+	}
+
 	/**
 	 * parse date string / 時間戳記 to {Date}
 	 * 
@@ -5174,9 +5183,16 @@ function module_code(library_namespace) {
 			var date = date_parser(matched);
 			// console.log(date);
 
-			// workaround. TODO: using String_to_Date.zone
 			// Date.parse('2019/11/6 16:11 JST') === NaN
-			date = date.replace(/ JST/, ' UTC+9');
+			date = date.replace(/ (JST)/, function(all, zone) {
+				zone = library_namespace.String_to_Date
+				// Warning:
+				// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()功能大多了。
+				&& (zone in library_namespace.String_to_Date.zone)
+				//
+				? library_namespace.String_to_Date.zone[zone] : 9;
+				return ' UTC' + number_to_signed(zone);
+			});
 
 			date = Date.parse(date);
 			if (isNaN(date)) {

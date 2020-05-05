@@ -330,7 +330,6 @@ function test_compatibility() {
 
 //============================================================================================================================================================
 
-
 function test_native() {
 	all_error_count += CeL.test('CeL.RegExp()', [
 		[CeL.RegExp(/T/i).test('t')],
@@ -560,6 +559,7 @@ function test_native() {
 		assert([0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(function (v) { return v.includes('a'); })], 'first_matched() #8');
 
 		assert(['2,8', Array.intersection([2, 3, 5, 6, 8], [1, 2, 4, 8, 9], true).join(',')], 'Array.intersection()');
+		assert(["cmn-Hans-CN", Array.intersection(["cmn-Hant-TW","cmn-Hans-CN","cmn-Hant-HK"], ["cmn-Hans-CN"]).join(',')], 'Array.intersection(string array)');
 		assert(["aa ", "aa '''fff'''".remove_head_tail("'''")], 'string.remove_head_tail() #1');
 		assert(["aa f'ff", "aa '''f'ff'''".remove_head_tail("'''", 0, '')], 'string.remove_head_tail() #2');
 		assert(["aa b'b c'c dd ", "aa'''b'b'''c'c'''dd'''".remove_head_tail("'''", 0, ' ')], 'string.remove_head_tail() #3');
@@ -671,6 +671,21 @@ function test_native() {
 
 //============================================================================================================================================================
 
+function test_data() {
+	all_error_count += CeL.test('CeL.count_word()', [
+		[[1, CeL.count_word("ABC")], 'count_word() #1'],
+		[[1, CeL.count_word("ABC's")], 'count_word() #2'],
+		[[1, CeL.count_word("O'Neal")], 'count_word() #3'],
+		[[2, CeL.count_word("ABC DEF")], 'count_word() #4'],
+		[[2, CeL.count_word(" Abc, def. ")], 'count_word() #5'],
+	]);
+
+	
+}
+
+
+//============================================================================================================================================================
+
 
 function test_console() {
 	// CeL.set_debug(3);
@@ -773,6 +788,7 @@ function test_locale() {
 		[['cmn-Hant-TW', CeL.gettext.to_standard('zh-TW')], 'gettext.to_standard(zh-TW)'],
 		[['cmn-Hans-CN', CeL.gettext.to_standard('cn')], 'gettext.to_standard(cn)'],
 		[['cmn-Hans-CN', CeL.gettext.to_standard('zh-cn')], 'gettext.to_standard(zh-cn)'],
+		[['cmn-Hans-CN', CeL.gettext.to_standard('cmn-CN')], 'gettext.to_standard(cmn-CN)'],
 		[['ja-JP', CeL.gettext.to_standard('ja')], 'gettext.to_standard(ja)'],
 		[['ja-JP', CeL.gettext.to_standard('jp')], 'gettext.to_standard(jp)'],
 		[['日本語', CeL.gettext.get_alias('jp')], 'gettext.get_alias(jp)'],
@@ -3907,6 +3923,8 @@ function do_test() {
 		test_compatibility,
 		//
 		'data.native', test_native,
+		//
+		'data', test_data,
 		//
 		'data.date', test_date,
 		//

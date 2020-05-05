@@ -3135,7 +3135,7 @@ function module_code(library_namespace) {
 	 * @see 20181016.import_earthquake_shakemap.js
 	 */
 
-	// simple polyfill for fetch API
+	// simple polyfill for fetch API https://github.com/node-fetch/node-fetch
 	// @since 2018/10/16 17:47:12
 	// https://fetch.spec.whatwg.org/#fetch-method
 	// https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API
@@ -3203,7 +3203,8 @@ function module_code(library_namespace) {
 						redirected : !!options.redirected,
 						useFinalURL : url.format(),
 
-						body : data,
+						// TODO: body : new ReadableStream()
+						_data : data,
 
 						// methods of
 						// https://developer.mozilla.org/en-US/docs/Web/API/Body

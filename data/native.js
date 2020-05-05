@@ -1627,7 +1627,8 @@ function module_code(library_namespace) {
 		var latest_key, configured;
 		var unique_array = this.filter(function(element) {
 			var key = get_key ? get_key(element) : element;
-			var is_different = configured ? !Object.is(latest_key, key) : (configured = true);
+			var is_different = configured ? !Object.is(latest_key, key)
+					: (configured = true);
 			latest_key = key;
 			return is_different;
 		});
@@ -1636,37 +1637,56 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 取交集 a1 ∩ a2
+	 * 取交集 array_1 ∩ array_2
 	 * 
-	 * @param {Array}a1
+	 * @param {Array}array_1
 	 *            array 1
-	 * @param {Array}a2
+	 * @param {Array}array_2
 	 *            array 2
 	 * @param {Boolean}[sorted]
-	 *            a1, a2 are sorted.
+	 *            array_1, array_2 are sorted.
 	 * 
-	 * @returns {Array}intersection of a1 and a2
+	 * @returns {Array}intersection of array_1 and array_2
 	 */
-	function Array_intersection(a1, a2, sorted) {
+	function Array_intersection(array_1, array_2, sorted) {
 		if (!sorted) {
-			a1 = a1.clone().sort(Number_ascending);
-			a2 = a2.clone().sort(Number_ascending);
+			array_1 = array_1.clone().sort(general_ascending);
+			array_2 = array_2.clone().sort(general_ascending);
 		}
+		// console.log([array_1, array_2]);
 
-		var index_a1 = 0, index_a2 = 0,
-		// Object.create(a1)
+		var index_of_array_1 = 0, index_a2 = 0,
+		// Object.create(array_1)
 		result = [];
-		for (; index_a1 < a1.length && index_a2 < a2.length; index_a1++) {
-			var item = a1[index_a1];
-			while (a2[index_a2] < item)
+		for (; index_of_array_1 < array_1.length && index_a2 < array_2.length; index_of_array_1++) {
+			var item = array_1[index_of_array_1];
+			while (array_2[index_a2] < item)
 				index_a2++;
-			if (a2[index_a2] === item) {
-				// 相同元素最多取 a1, a2 之最小個數。
+			if (array_2[index_a2] === item) {
+				// 相同元素最多取 array_1, array_2 之最小個數。
 				index_a2++;
 				result.push(item);
 			}
 		}
 		return result;
+	}
+
+	var has_native_Map = !Map[library_namespace.env.not_native_keyword];
+	function Array_intersection_Map(array_1, array_2, sorted) {
+		if (sorted)
+			return Array_intersection(array_1, array_2, sorted);
+
+		// @see function unique_Array()
+		var map = new Map;
+		function set_item(item) {
+			if (!map['has'](item))
+				map['set'](item, null);
+		}
+		array_1.forEach(set_item);
+		var array = array_2.filter(function(item) {
+			return map['has'](item);
+		});
+		return array;
 	}
 
 	/**
@@ -2177,12 +2197,12 @@ function module_code(library_namespace) {
 	}
 
 	var has_spread_operator, clone_Object;
-	try{
+	try {
 		has_spread_operator = eval('clone_Object=function(object){return {...object};};');
-	}catch (e) {
+	} catch (e) {
 		// TODO: handle exception
 	}
-	
+
 	/**
 	 * clone object.<br />
 	 * for Object.clone()
@@ -2228,7 +2248,6 @@ function module_code(library_namespace) {
 		// copy prototype
 		Object.getPrototypeOf(object)), object);
 	};
-	
 
 	/**
 	 * Test if no property in the object.<br />
@@ -2294,7 +2313,6 @@ function module_code(library_namespace) {
 		return count;
 	}
 
-	
 	set_method(Object, {
 		filter : Object_filter,
 		clone : Object_clone,
@@ -2593,7 +2611,8 @@ function module_code(library_namespace) {
 		// for data.clone()
 		clone : Array_clone,
 		derive : Object.setPrototypeOf ? Array_derive : Array_derive_no_proto,
-		intersection : Array_intersection
+		intersection : has_native_Map ? Array_intersection_Map
+				: Array_intersection
 	});
 
 	// ------------------------------------
@@ -4327,8 +4346,8 @@ function module_code(library_namespace) {
 					if (get_key)
 						value = get_key(value);
 					if (typeof value === 'object')
-						value =  JSON.stringify(value);
-					return  [ value, index ];
+						value = JSON.stringify(value);
+					return [ value, index ];
 				})));
 			}
 
@@ -4370,10 +4389,13 @@ function module_code(library_namespace) {
 				return Array.from(new Set(this));
 			}
 
+			// @see function Array_intersection_Map()
 			var map = new Map;
-			this.forEach(function(item) {
-				map.set(get_key(item), item);
-			});
+			function set_item(item) {
+				if (!map['has'](item))
+					map['set'](get_key(item), item);
+			}
+			this.forEach(set_item);
 			return Array.from(map.values());
 		},
 		// Check if there is only one unique/single value in the array.
