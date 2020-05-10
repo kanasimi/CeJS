@@ -716,6 +716,10 @@ function module_code(library_namespace) {
 	 * @see page_parser.type_alias
 	 */
 	function for_each_token(type, processor, modify_by_return, max_depth) {
+		if (!this) {
+			return this;
+		}
+
 		if (typeof type === 'function' && max_depth === undefined) {
 			// for_each_token(processor, modify_by_return, max_depth)
 			// shift arguments.
@@ -1275,7 +1279,7 @@ function module_code(library_namespace) {
 		// e.g., [[:File:file name.jpg]]
 		|| token.type === 'file') {
 			// escape wikilink
-			// return displayed_text
+			// return display_text
 			if (token.length > 2) {
 				token = token.slice(2);
 				token.type = 'plain';
@@ -2389,7 +2393,10 @@ function module_code(library_namespace) {
 			// [[Help:Parser tag]], [[Help:Extension tag]]
 			+ '|includeonly|noinclude|onlyinclude'
 			// [[Special:Version#mw-version-parser-extensiontags]]
-			+ '|categorytree|ce|charinsert|chem|gallery|graph|hiero|imagemap|indicator|inputbox|nowiki|mapframe|maplink|math|poem|quiz|ref|references|score|section|source|syntaxhighlight|templatedata|templatestyles|timeline',
+			// <ce> is deprecated, using <chem>
+			// Replace all usages of <ce> with <chem> on wiki
+			// https://phabricator.wikimedia.org/T155125
+			+ '|categorytree|ce|chem|charinsert|gallery|graph|hiero|imagemap|indicator|inputbox|nowiki|mapframe|maplink|math|poem|quiz|ref|references|score|section|source|syntaxhighlight|templatedata|templatestyles|timeline',
 	// MediaWiki可接受的 HTML void elements 標籤.
 	// NO b|span|sub|sup|li|dt|dd|center|small
 	// 包含可使用，亦可不使用 self-closing 的 tags。
@@ -3697,7 +3704,7 @@ function module_code(library_namespace) {
 		// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
 
 		// 注意: [[p|{{tl|t}}]] 不會被解析成 wikilink，因此 wikilink 應該要擺在 transclusion
-		// 前面檢查，或是使 displayed_text 不包含 {{}}。
+		// 前面檢查，或是使 display_text 不包含 {{}}。
 
 		// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
 		// 可以解析成圖片, Caption: "{{tl|t}}"
@@ -3706,10 +3713,10 @@ function module_code(library_namespace) {
 		// TODO: [[::zh:title]] would be rendered as plaintext
 
 		function parse_wikilink(all_link, page_and_section, page_name,
-				section_title, displayed_text) {
+				section_title, display_text) {
 			// 自 end_mark 向前回溯。
 			var previous;
-			if (displayed_text && displayed_text.includes('[[')) {
+			if (display_text && display_text.includes('[[')) {
 				var index = all_link.lastIndexOf('[[');
 				previous = all_link.slice(0, index);
 				all_link = all_link.slice(index);
@@ -3717,7 +3724,7 @@ function module_code(library_namespace) {
 					page_and_section = index[1];
 					page_name = index[2];
 					section_title = index[3];
-					displayed_text = index[4];
+					display_text = index[4];
 				} else {
 					// revert
 					all_link = previous + all_link;
@@ -3750,16 +3757,19 @@ function module_code(library_namespace) {
 					// console.log([ page_name, category_matched ]);
 				}
 				if (page_name.includes(include_mark)) {
+					// console.trace(page_name);
 					// 預防有特殊 elements 置入link其中。
 					page_name = parse_wikitext(page_name, options, queue);
 					if (false) {
 						console.log([ all_link, page_and_section, page_name,
-								section_title, displayed_text ]);
+								section_title, display_text ]);
 					}
 					if (page_name.some(function(token) {
 						return token.is_link;
 					})) {
 						// e.g., [[:[[Portal:中國大陸新聞動態|中国大陆新闻]] 3月16日新闻]]
+						// [[[[t|l]], t|l]]
+						// console.trace(page_name);
 						page_name.oddly = 'link_inside_link';
 					} else {
 						page_name.oddly = true;
@@ -3780,11 +3790,11 @@ function module_code(library_namespace) {
 				section_title = parse_wikitext(section_title, options, queue);
 			}
 
-			// [ page_name, #section_title|anchor, displayed_text ]
+			// [ page_name, #section_title|anchor, display_text ]
 			var parameters = [ page_name, section_title ];
 
 			// assert: 'a'.match(/(b)?/)[1]===undefined
-			if (typeof displayed_text === 'string') {
+			if (typeof display_text === 'string') {
 				if (file_matched) {
 					// caption 可以放在中間，但即使是空白也會被認作是 caption:
 					// ;;; [[File:a.svg|caption|thumb]]
@@ -3795,7 +3805,7 @@ function module_code(library_namespace) {
 					// 先處理掉裏面的功能性代碼。 e.g.,
 					// [[File:a.svg|alt=alt_of_{{tl|t}}|NG_caption|gykvg=56789{{tl|t}}|{{#ifexist:abc|alt|link}}=abc|{{#ifexist:abc|left|456}}|{{#expr:100+300}}px|thumb]]
 					// e.g., [[File:a.svg|''a''|caption]]
-					displayed_text = parse_wikitext(displayed_text, {
+					display_text = parse_wikitext(display_text, {
 						no_resolve : true
 					}, queue);
 
@@ -3805,7 +3815,7 @@ function module_code(library_namespace) {
 					// parameters 有分大小寫，並且各種類會以首先符合的為主。
 					PATTERN = /([^\|]*?)(\||$)/ig;
 					// assert: 這會將剩下來的全部分完。
-					while (token = PATTERN.exec(displayed_text)) {
+					while (token = PATTERN.exec(display_text)) {
 						var matched = token[1].match(
 						// [ all, head space, option name or value, undefined,
 						// undefined, tail space ]
@@ -3957,14 +3967,22 @@ function module_code(library_namespace) {
 
 				} else {
 					// 需再進一步處理 {{}}, -{}- 之類。
-					parameters.caption = parse_wikitext(displayed_text,
-							options, queue);
+					parameters.caption = parse_wikitext(display_text, options,
+							queue);
 					parameters.push(parameters.caption);
 				}
 			}
 
 			if (page_name.oddly === 'link_inside_link') {
+				// console.trace(parameters);
 				// parameters.is_link = false;
+
+				if (file_matched ? display_text
+				// recover missed '|' before display_text
+				: typeof display_text === 'string') {
+					parameters[1] += '|';
+				}
+
 				parameters = parameters.flat();
 				parameters.unshift('[[');
 				parameters.push(']]');
@@ -3998,7 +4016,7 @@ function module_code(library_namespace) {
 						: category_matched ? 'category' : 'link');
 			}
 
-			// [ page_name, section_title, displayed_text without '|' ]
+			// [ page_name, section_title, display_text without '|' ]
 			// section_title && section_title.startsWith('#')
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark;
