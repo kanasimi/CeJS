@@ -1207,8 +1207,10 @@ function module_code(library_namespace) {
 		// normalize
 		if (!Array.isArray(agent.last_cookie))
 			agent.last_cookie = agent.last_cookie ? [ agent.last_cookie ] : [];
-		if (!Array.isArray(cookie))
-			cookie = cookie ? [ cookie ] : [];
+		if (!Array.isArray(cookie)) {
+			// assert: typeof cookie === 'string'
+			cookie = cookie ? cookie.split(';') : [];
+		}
 
 		// remove duplicate cookie
 
@@ -1221,6 +1223,7 @@ function module_code(library_namespace) {
 		var cookie_index = agent.cookie_index;
 
 		cookie.forEach(function(piece) {
+			// [ cookie, key, value ]
 			var matched = piece.match(/^([^=;]+)(?:=([^;]+))?/);
 			library_namespace.debug(agent.last_cookie, 3, 'merge_cookie');
 			if (!matched) {
