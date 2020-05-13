@@ -3208,14 +3208,15 @@ function module_code(library_namespace) {
 						redirected : !!options.redirected,
 						useFinalURL : url.format(),
 
-						// TODO: body : new ReadableStream()
 						_data : data,
 
+						// TODO: body : new ReadableStream()
 						// methods of
 						// https://developer.mozilla.org/en-US/docs/Web/API/Body
-						text : function text() {
+
+						text: function text() {
 							try {
-								return Promise.resolve(this.body.toString());
+								return Promise.resolve(this._data.toString());
 							} catch (e) {
 								return Promise.reject(e);
 							}
@@ -3224,7 +3225,7 @@ function module_code(library_namespace) {
 							return this.text().then(JSON.parse);
 						},
 						arrayBuffer : function arrayBuffer() {
-							return Promise.resolve(this.body.buffer);
+							return Promise.resolve(this._data.buffer);
 						}
 					};
 
