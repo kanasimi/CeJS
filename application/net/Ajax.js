@@ -1207,10 +1207,12 @@ function module_code(library_namespace) {
 		// normalize
 		if (!Array.isArray(agent.last_cookie))
 			agent.last_cookie = agent.last_cookie ? [ agent.last_cookie ] : [];
-		if (!Array.isArray(cookie)) {
-			// assert: typeof cookie === 'string'
-			cookie = cookie ? cookie.split(';') : [];
+		if (!cookie) {
+			cookie = [];
+		} else if (typeof cookie === 'string') {
+			cookie = cookie.split(';');
 		}
+		// assert: Array.isArray(cookie)
 
 		// remove duplicate cookie
 
