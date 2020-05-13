@@ -397,7 +397,9 @@ function module_code(library_namespace) {
 					// console.log(options);
 					options[KEY_SESSION] = session;
 					// edit_topic()
-					wiki_API.Flow.edit(title, options.sectiontitle,
+					wiki_API.Flow.edit(title,
+					// 新章節/新話題的標題文字。輸入空字串""的話，會用 summary 當章節標題。
+					options.sectiontitle,
 					// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
 					text.replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''), options.token,
 							options, callback);

@@ -252,7 +252,7 @@ function module_code(library_namespace) {
 				get_properties();
 			} else {
 				library_namespace.error('wiki_API_page: Invalid .query_props!');
-				throw 'wiki_API_page: Invalid .query_props';
+				throw new Error('wiki_API_page: Invalid .query_props');
 			}
 			return;
 		}
@@ -264,8 +264,8 @@ function module_code(library_namespace) {
 			callback(undefined, 'Invalid title: '
 					+ wiki_API.title_link_of(title));
 			return;
-			throw 'wiki_API_page: Invalid title: '
-					+ wiki_API.title_link_of(title);
+			throw new Error('wiki_API_page: Invalid title: '
+					+ wiki_API.title_link_of(title));
 		}
 
 		// console.log(action);
@@ -681,7 +681,7 @@ function module_code(library_namespace) {
 						//
 						|| page_data.title;
 					}).join('|'));
-					throw 're-sort page list';
+					throw new Error('re-sort page list');
 				}
 
 				// 維持頁面的順序與輸入的相同。
@@ -696,9 +696,9 @@ function module_code(library_namespace) {
 						console.log('-'.repeat(70)
 						//
 						+ '\nPage list:\n' + title[1].join('\n'));
-						throw 'wiki_API_page: 取得了未指定的頁面: '
+						throw new Error('wiki_API_page: 取得了未指定的頁面: '
 						//
-						+ wiki_API.title_link_of(original_title);
+						+ wiki_API.title_link_of(original_title));
 					}
 				});
 				// 緊湊化，去掉沒有設定到的頁面。
@@ -804,8 +804,8 @@ function module_code(library_namespace) {
 	wiki_API.purge = function(title, callback, options) {
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
-			throw 'wiki_API.purge: Invalid title: '
-					+ wiki_API.title_link_of(title);
+			throw new Error('wiki_API.purge: Invalid title: '
+					+ wiki_API.title_link_of(title));
 		}
 
 		// POST_parameters
@@ -1731,10 +1731,12 @@ function module_code(library_namespace) {
 											//
 											to, parse_wikitext(to).toString(),
 													'diff'));
-											throw 'Parser error (to): ' +
+											throw new Error(
+											//
+											'Parser error (to): ' +
 											// debug 用. check parser, test
 											// if parser working properly.
-											wiki_API.title_link_of(page_data);
+											wiki_API.title_link_of(page_data));
 										}
 
 										if (revisions.length > 1 &&
@@ -1751,10 +1753,12 @@ function module_code(library_namespace) {
 											revisions[revisions.length - 1]),
 											//
 											from.join(''), 'diff'));
-											throw 'Parser error (from): ' +
+											throw new Error(
+											//
+											'Parser error (from): ' +
 											// debug 用. check parser, test
 											// if parser working properly.
-											wiki_API.title_link_of(page_data);
+											wiki_API.title_link_of(page_data));
 										}
 									}
 
@@ -1923,7 +1927,7 @@ function module_code(library_namespace) {
 		if (!wiki_site_name) {
 			// console.log(options);
 			// console.log(options[KEY_SESSION]);
-			// throw options[KEY_SESSION].language;
+			// throw new Error(options[KEY_SESSION].language);
 			wiki_site_name = wiki_API.site_name(options[KEY_SESSION]
 					|| options.project || options.family);
 		}
@@ -2582,7 +2586,7 @@ function module_code(library_namespace) {
 			|| traversal_pages.list_file + '.' + use_language + '.json',
 			operator : function(list) {
 				if (!Array.isArray(list)) {
-					throw 'traversal_pages: No list get!';
+					throw new Error('traversal_pages: No list get!');
 				}
 				if (list.length === 3
 						&& JSON.stringify(list[0]) === JSON
@@ -2747,9 +2751,11 @@ function module_code(library_namespace) {
 							return [ CeL.wiki.edit.cancel,
 							// 本作業は記事だけを編集する
 							'本作業僅處理條目命名空間或模板或 Category' ];
-							throw '非條目: ' + wiki_API.title_link_of(page_data)
+							throw new Error('非條目: '
 							//
-							+ '! 照理來說不應該出現 ns !== 0 的情況。';
+							+ wiki_API.title_link_of(page_data)
+							//
+							+ '! 照理來說不應該出現 ns !== 0 的情況。');
 						}
 
 						/** {Object}revision data. 修訂版本資料。 */
@@ -2811,8 +2817,8 @@ function module_code(library_namespace) {
 								.toString()) {
 							console.log(CeL.LCS(CeL.wiki.content_of(page_data),
 									parsed.toString(), 'diff'));
-							throw 'Parser error: '
-									+ CeL.wiki.title_link_of(page_data);
+							throw new Error('Parser error: '
+									+ CeL.wiki.title_link_of(page_data));
 						}
 
 						// using for_each_token()

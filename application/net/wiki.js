@@ -1019,6 +1019,8 @@ function module_code(library_namespace) {
 	 * 
 	 * wiki.remove_namespace(), wiki_API.remove_namespace()
 	 * 
+	 * TODO: wiki.remove_namespace(page, only_remove_this_namespace)
+	 * 
 	 * @param {String}page_title
 	 *            page title 頁面標題。
 	 * @param {Object}[options]
@@ -2694,7 +2696,7 @@ function module_code(library_namespace) {
 
 				// edit_topic()
 				wiki_API.Flow.edit([ this.API_URL, next[2].page_to_edit ],
-				// 新章節/新話題的標題文字。
+				// 新章節/新話題的標題文字。輸入空字串""的話，會用 summary 當章節標題。
 				next[2].sectiontitle,
 				// 新話題最初的內容。因為已有 contents，直接餵給轉換函式。
 				// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
@@ -3628,7 +3630,8 @@ function module_code(library_namespace) {
 			// 標記此編輯為機器人編輯。[[WP:AL|機器人對其他使用者對話頁的小修改將不會觸發新訊息提示]]。
 			bot : 1,
 			// [[Special:tags]]
-			// tags : 'bot|test',
+			// tags : 'bot|test|bot trial',
+			tags : '',
 			// 設定寫入目標。一般為 debug、test 測試期間用。
 			write_to : '',
 			// 採用 skip_nochange 可以跳過實際 edit 的動作。
@@ -3656,11 +3659,12 @@ function module_code(library_namespace) {
 				// e.g., write_to
 				for (callback in options) {
 					if (callback in config) {
-						if (!config[callback] && callback in {
+						if (!config[callback] && (callback in {
 							nocreate : 1,
 							minor : 1,
-							bot : 1
-						}) {
+							bot : 1,
+							tags : 1
+						})) {
 							// 即使設定 minor=0 似乎也會當作設定了，得完全消滅才行。
 							delete options[callback];
 						} else
@@ -4068,6 +4072,7 @@ function module_code(library_namespace) {
 						// clone() 是為了能個別改變 summary。
 						// 例如: each() { options.summary += " -- ..."; }
 						var work_options = Object.clone(options);
+						// console.log(work_options);
 						// 取得頁面內容。一頁頁處理。
 						this.page(page, null, single_page_options)
 						// 編輯頁面內容。
@@ -4223,13 +4228,25 @@ function module_code(library_namespace) {
 						messages.add(gettext('Nothing change.'));
 					}
 					if (log_item.title && config.summary) {
-						// unescape
-						messages.unshift(
+						var unescaped_summary = config.summary.replace(/</g,
+								'&lt;').replace(
 						// 避免 log page 添加 Category。
 						// 在編輯摘要中加上使用者連結，似乎還不至於驚擾到使用者。因此還不用特別處理。
-						config.summary.replace(/</g, '&lt;').replace(
 						// @see PATTERN_category @ CeL.wiki
-						/\[\[\s*(Category|分類|分类|カテゴリ|분류)\s*:/ig, '[[:$1:'));
+						/\[\[\s*(Category|分類|分类|カテゴリ|분류)\s*:/ig, '[[:$1:');
+						if (false) {
+							// 在 [[t|{{t}}]] 時無效，改採 .replace(/{{/g,)。
+							unescaped_summary = unescaped_summary.replace(
+							// replace template
+							/{{([a-z\d]+)/ig, function(all, name) {
+								if (/^tl\w$/i.test(name))
+									return all;
+								return '{{tlx|' + name;
+							});
+						}
+						unescaped_summary = unescaped_summary.replace(/{{/g,
+								'&#123;&#123;');
+						messages.unshift(unescaped_summary);
 					}
 				}
 
@@ -4263,12 +4280,9 @@ function module_code(library_namespace) {
 					// Robot: 若用戶名包含 'bot'，則直接引用之。
 					// 注意: this.token.lgname 可能為 undefined！
 					summary : (this.token.lgname
-							&& PATTERN_BOT_NAME.test(this.token.lgname)
-					//
-					? this.token.lgname : 'Robot')
-							+ ': '
-							//
-							+ config.summary + count_summary,
+							&& PATTERN_BOT_NAME.test(this.token.lgname) ? this.token.lgname
+							: 'Robot')
+							+ ': ' + config.summary + count_summary,
 					// Throw an error if the page doesn't exist.
 					// 若頁面不存在/已刪除，則產生錯誤。
 					nocreate : 1,
@@ -5050,7 +5064,7 @@ function module_code(library_namespace) {
 				// cache
 				Object.assign(task_configuration, {
 					// `session.task_configuration.configuration_page_title`
-					// {String}設定頁面。已經轉換過、正規化後的最終頁面標題。
+					// {String}設定頁面。已經轉換過、正規化後的最終頁面標題。 e.g., "User:bot/設定"
 					configuration_page_title : page_data.title,
 					// configuration_pageid : page_data.id,
 					last_update : Date.now()
@@ -5619,10 +5633,9 @@ function module_code(library_namespace) {
 							'wiki_API.cache.write_cache');
 
 				} else if (/[^\\\/]$/.test(file_name)) {
-					library_namespace
-							.info('wiki_API.cache: Write cache data to ['
-									+ file_name + '].'
-									+ (using_JSON ? ' (using JSON)' : ''));
+					library_namespace.info('wiki_API.cache: '
+							+ 'Write cache data to [' + file_name + '].'
+							+ (using_JSON ? ' (using JSON)' : ''));
 					library_namespace.debug('Cache data: '
 							+ (data && JSON.stringify(data).slice(0, 190))
 							+ '...', 3, 'wiki_API.cache.write_cache');
@@ -5670,11 +5683,18 @@ function module_code(library_namespace) {
 			 * 取得並處理下一項 data。
 			 */
 			function get_next_item(data) {
-				library_namespace.debug('處理多項列表作業: ' + (index + 1) + '/'
-						+ list.length, 2, 'wiki_API.cache.get_next_item');
 				if (index < list.length) {
 					// 利用基本相同的參數以取得 cache。
 					_operation.list = list[index++];
+					var message = '處理多項列表作業: ' + type + ' ' + index + '/'
+							+ list.length;
+					if (list.length > 8) {
+						library_namespace.info('wiki_API.cache.get_next_item: '
+								+ message);
+					} else {
+						library_namespace.debug(message, 1,
+								'wiki_API.cache.get_next_item');
+					}
 					wiki_API.cache(_operation, get_next_item, _this);
 				} else {
 					// last 收尾
@@ -5879,6 +5899,7 @@ function module_code(library_namespace) {
 							delete redirect_list[0].redirects;
 						callback(redirect_list);
 					}, Object.assign({
+						// The first one is the redirect target.
 						include_root : true
 					}, _this, operation));
 				};

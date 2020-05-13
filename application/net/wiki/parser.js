@@ -2293,11 +2293,177 @@ function module_code(library_namespace) {
 		return this;
 	}
 
-	function insert_wikitext(wikitext, location) {
-		// TODO: 定位版面布局元素 search anchor tokens of elements @ [[WP:LAY]],
-		// [[w:en:Wikipedia:Manual of Style/Layout#Order of article elements]],
-		// [[w:zh:Wikipedia:格式手冊/版面佈局#導言]]
+	// ------------------------------------------------------------------------
+
+	// @inner
+	// get_layout_templates('short description', 'Template:Short description',
+	// callback, session)
+	function get_layout_templates(layout, layout_to_fetch, callback, options) {
+		wiki_API.redirects_here(layout_to_fetch, function(root_page_data,
+				redirect_list, error) {
+			var session = wiki_API.session_of_options(options);
+			var layout_index = session.configuration.layout_index;
+			if (!layout_index[layout])
+				layout_index[layout] = Object.create(null);
+			// assert: root_page_data.redirects === redirect_list
+			// console.log([root_page_data, redirect_list]);
+			redirect_list.forEach(function(page_data) {
+				layout_index[layout][page_data.title] = null;
+			});
+			callback();
+		}, Object.assign({
+			// redirect_list[0] === root_page_data
+			include_root : true
+		}, options));
 	}
+
+	// @inner
+	function get_layout_categories(layout, layout_to_fetch, callback, options) {
+		wiki_API.redirects_root(layout_to_fetch, function(title, page_data) {
+			wiki_API.list(title, function(list/* , target, options */) {
+				// assert: Array.isArray(list)
+				if (list.error) {
+					library_namespace.error(list.error);
+					callback();
+					return;
+				}
+
+				var session = wiki_API.session_of_options(options);
+				var layout_index = session.configuration.layout_index;
+				if (!layout_index[layout])
+					layout_index[layout] = Object.create(null);
+				list.forEach(function(page_data) {
+					layout_index[layout][page_data.title] = layout_to_fetch;
+				});
+				callback();
+			}, Object.assign({
+				type : 'categorymembers'
+			}, options));
+		}, options);
+	}
+
+	// @inner
+	function get_layout_elements(callback, options) {
+		var layout_list = options.layout_list;
+		var layout = layout_list.shift();
+		if (!layout) {
+			callback();
+			return;
+		}
+
+		var layout_to_fetch = layout[1];
+		if (Array.isArray(layout_to_fetch)) {
+			if (layout_to_fetch.length === 0) {
+				// Skip null layout_to_fetch
+				get_layout_elements(callback, options);
+				return;
+			}
+			layout_to_fetch = layout_to_fetch.shift();
+			layout_list.unshift(layout);
+		}
+		layout = layout[0];
+
+		if (/^Template:/i.test(layout_to_fetch)) {
+			get_layout_templates(layout, layout_to_fetch, function() {
+				get_layout_elements(callback, options);
+			}, options);
+			return;
+		}
+
+		if (/^Category:/i.test(layout_to_fetch)) {
+			get_layout_categories(layout, layout_to_fetch, function() {
+				get_layout_elements(callback, options);
+			}, options);
+			return;
+		}
+
+		throw new TypeError('Invalid layout to fetch: [' + layout + '] '
+				+ layout_to_fetch);
+	}
+
+	// 取得定位各布局項目所需元素。
+	function setup_layout_elements(callback, options) {
+		var session = wiki_API.session_of_options(options);
+		if (!session.configuration)
+			session.configuration = Object.create(null);
+		var layout_index = session.configuration.layout_index;
+		if (layout_index) {
+			callback();
+			return;
+		}
+		layout_index = session.configuration.layout_index = Object.create(null);
+
+		var layout_list = [];
+
+		for ( var layout in layout_configuration) {
+			var layout_to_fetch = layout_configuration[layout];
+			layout_list.push([ layout, layout_to_fetch ]);
+		}
+		// console.log(layout_list);
+
+		options.layout_list = layout_list;
+		library_namespace.info('setup_layout_elements: Get all elements...');
+		get_layout_elements(callback, options);
+	}
+
+	var layout_configuration = {
+		// {{Short description}}
+		'short description' : 'Template:Short description',
+
+		// [[Category:Hatnote templates]]
+		'hatnote' : 'Category:Hatnote templates',
+
+		// Deletion / protection tags
+		// [[Category:Speedy deletion templates]],
+		// [[Category:Proposed deletion-related templates]],
+		// [[Category:Protection templates]]
+		'deletion tag' : [ 'Category:Speedy deletion templates',
+				'Category:Proposed deletion-related templates',
+				'Category:Protection templates' ],
+
+		// Maintenance / dispute tags
+
+		// {{Use British English}}, {{Use mdy dates}}
+		'date style' : [ 'Template:Use mdy dates', 'Template:Use dmy dates' ],
+
+		// {{Info...}}
+
+		// [[Category:Foreign character warning boxes]]
+		'foreign character warning box' : 'Category:Foreign character warning boxes'
+
+	// Images
+	// Navigational boxes (header navboxes)
+	// introduction
+	};
+
+	// @inner
+	function insert_maintenance_tag(token, options) {
+		// this;
+	}
+
+	// TODO: 定位版面布局元素 search anchor tokens of elements @ [[WP:LAY]],
+	// [[w:en:Wikipedia:Manual of Style/Layout#Order of article elements]],
+	// [[w:en:Wikipedia:Manual of Style/Lead section]]
+	// [[w:zh:Wikipedia:格式手冊/版面佈局#導言]]
+	// location: 'hatnote', 'maintenance tag', 'navigation template'
+	function insert_token(token, options) {
+		var location;
+		if (typeof options === 'string') {
+			location = options;
+			options = Object.create(null);
+		} else {
+			options = library_namespace.setup_options(options);
+			location = options.location;
+		}
+
+		if (location === 'maintenance tag') {
+			return insert_maintenance_tag.call(this, token, options);
+		}
+
+		throw new Error('Can not insert as ' + location);
+	}
+
+	// --------------------------------------------------------------------------------------------
 
 	/**
 	 * 將特殊標記解譯/還原成 {Array} 組成之結構。
@@ -6505,8 +6671,11 @@ function module_code(library_namespace) {
 		table_to_array : table_to_array,
 		array_to_table : array_to_table,
 
-		parse : parse_wikitext
-	// parser : page_parser,
+		parse : parse_wikitext,
+		// parser : page_parser,
+
+		setup_layout_elements : setup_layout_elements,
+		insert_token : insert_token
 	});
 
 	return page_parser;

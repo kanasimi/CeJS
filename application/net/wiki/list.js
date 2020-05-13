@@ -371,6 +371,11 @@ function module_code(library_namespace) {
 		//
 		? '&' + prefix + 'namespace=' + options.namespace : '');
 
+		if (options.redirects)
+			action[1] += '&redirects=1';
+		if (options.converttitles)
+			action[1] += '&converttitles=1';
+
 		for ( var parameter in options) {
 			if (parameter.startsWith(prefix)) {
 				action[1] += '&' + parameter + '='
@@ -508,30 +513,55 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			function run_for_each() {
+			function run_for_each(error) {
 				if (options.abort_operation
 						|| typeof options.for_each !== 'function') {
+					callback(pages, error);
 					return;
 				}
 
 				// run for each item
+				var promises = [];
 				pages.some(function(item) {
 					try {
-						if (library_namespace
+						if (false && library_namespace
 								.is_async_function(options.for_each)) {
 							eval(get_list_async_code);
 							// console.log(options);
 							return options.abort_operation;
-						} else if (wiki_API_list.exit === options
-								.for_each(item)) {
+						}
+
+						var result = options.for_each(item);
+						if (result === wiki_API_list.exit) {
 							options.abort_operation = true;
 							return true;
+						}
+						if (library_namespace.is_thenable(result)) {
+							promises.push(result);
 						}
 
 					} catch (e) {
 						library_namespace.error(e);
+						error = error || e;
 					}
 				});
+
+				// 注意: arguments 與 get_list() 之 callback 連動。
+				// 2016/6/22 change API 應用程式介面變更 of callback():
+				// (title, titles, pages) → (pages, titles, title)
+				// 2019/8/7 change API 應用程式介面變更 of callback():
+				// (pages, titles, title) → (pages, error)
+				// 按照需求程度編配/編排 arguments。
+				// 因為 callback 所欲知最重要的資訊是 pages，因此將 pages 置於第一 argument。
+				if (promises.length > 0) {
+					Promise.allSettled(promises)['catch'](function(e) {
+						error = error || e;
+					})['then'](function(result) {
+						callback(pages, error);
+					});
+				} else {
+					callback(pages, error);
+				}
 			}
 
 			/**
@@ -554,6 +584,7 @@ function module_code(library_namespace) {
 						// console.log(page_filter);
 					}
 					if (typeof page_filter === 'function') {
+						// function page_filter(page_data){return passed;}
 						data = data.filter(page_filter);
 					}
 
@@ -574,15 +605,6 @@ function module_code(library_namespace) {
 						+ pages.length + ' page(s)', 2, 'get_list');
 
 				run_for_each();
-
-				// 注意: arguments 與 get_list() 之 callback 連動。
-				// 2016/6/22 change API 應用程式介面變更 of callback():
-				// (title, titles, pages) → (pages, titles, title)
-				// 2019/8/7 change API 應用程式介面變更 of callback():
-				// (pages, titles, title) → (pages, error)
-				// 按照需求程度編配/編排 arguments。
-				// 因為 callback 所欲知最重要的資訊是 pages，因此將 pages 置於第一 argument。
-				callback(pages);
 				return;
 			}
 
@@ -591,8 +613,7 @@ function module_code(library_namespace) {
 			for ( var pageid in data) {
 				if (pages.length > 0) {
 					library_namespace.warn('get_list: More than 1 page got!');
-					run_for_each();
-					callback(pages, new Error('More than 1 page got!'));
+					run_for_each(new Error('More than 1 page got!'));
 				} else {
 					var page = data[pageid];
 					if (Array.isArray(page[type])) {
@@ -603,8 +624,6 @@ function module_code(library_namespace) {
 							+ pages.length + ' page(s)', 1, 'get_list');
 					pages.title = page.title;
 					run_for_each();
-					// 注意: arguments 與 get_list() 之 callback 連動。
-					callback(pages);
 				}
 				return;
 			}
@@ -682,6 +701,8 @@ function module_code(library_namespace) {
 
 		// 回傳連結至指定頁面的所有重新導向。 Returns all redirects to the given pages.
 		// 転送ページ
+		// Warning: 採用 wiki_API.redirects_here(title) 才能追溯重新導向的標的。
+		// wiki.redirects() 無法追溯重新導向的標的！
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bredirects
 		// @since 2019/9/11
 		redirects : [ 'rd', 'prop', function(title_parameter) {
@@ -834,8 +855,9 @@ function module_code(library_namespace) {
 
 		options.continue_session = options[KEY_SESSION];
 
+		options[KEY_SESSION][options.type](target,
 		// 注意: arguments 與 get_list() 之 callback 連動。
-		options[KEY_SESSION][options.type](target, function(pages, error) {
+		function wiki_API_list_callback(pages, error) {
 			if (pages) {
 				library_namespace.debug('Get ' + pages.length + ' '
 						+ options.type + ' pages of ' + pages.title, 2,
@@ -859,14 +881,17 @@ function module_code(library_namespace) {
 				if (!options.for_each || options.get_list) {
 					// Array.prototype.push.apply(options.pages, pages);
 					options.pages.append(pages);
-					library_namespace.info('['
-							+ options.type
-							+ '] '
-							+ options.pages.length
-							+ ' pages: +'
-							+ pages.length
-							+ (pages.title ? ' '
-									+ wiki_API.title_link_of(pages) : ''));
+					library_namespace.info('[' + options.type + '] '
+					//
+					+ options.pages.length + ' pages: +' + pages.length
+					//
+					+ (pages.title ? ' ' + wiki_API.title_link_of(pages[0])
+					//
+					+ (pages.length > 1 ? '–'
+					//
+					+ wiki_API.title_link_of(pages[pages.length - 1])
+					//
+					: '') : ''));
 				} else {
 					// Only preserve length property.
 					options.pages.length += pages.length;
@@ -884,7 +909,8 @@ function module_code(library_namespace) {
 				pages.error = new Error('options.pages has been set up!');
 			}
 
-			if (pages.next_index && !options.abort_operation) {
+			if (pages.next_index && !options.abort_operation
+					&& !(options.pages.length >= options.limit)) {
 				library_namespace.debug('尚未取得所有清單，因此繼續取得下一階段清單。', 2,
 						'wiki_API_list');
 				setImmediate(wiki_API_list, target, callback, options);
@@ -1479,6 +1505,30 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/w/api.php?action=query&prop=redirects&rdprop&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
 	// https://zh.wikipedia.org/w/api.php?action=query&prop=redirects&rdprop=title&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
 
+	// 溯源(追尋至重定向終點)
+	wiki_API.redirects_root = function redirects_root(title, callback, options) {
+		// .original_title , .convert_from
+		options = Object.assign({
+			redirects : 1,
+			prop : 'info'
+		}, options);
+
+		// 用 .page() 可省略 .converttitles
+		// .redirects() 本身不會作繁簡轉換。
+		// redirect_to: 追尋至重定向終點
+
+		wiki_API.page(title, function(page_data) {
+			// console.log(page_data);
+
+			callback(
+			// 已經轉換過，毋須 wiki_API.parse.redirect()。
+			// wiki_API.parse.redirect(wiki_API.content_of(page_data)) ||
+
+			// 若是 convert 過則採用新的 title。
+			page_data.title || title, page_data);
+		}, options);
+	};
+
 	/**
 	 * 取得所有重定向到(title重定向標的)之頁面列表。
 	 * 
@@ -1513,33 +1563,20 @@ function module_code(library_namespace) {
 	 * @since 2019/9/11: wiki_API.redirects → wiki_API.redirects_here,
 	 *        wiki_API.redirects 改給 get_list.type .redirects 使用。
 	 */
-	wiki_API.redirects_here = function(title, callback, options) {
+	wiki_API.redirects_here = function redirects_here(title, callback, options) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
 		if (!options.no_trace) {
 			// .original_title , .convert_from
 			options.query_title = title;
-			// 用 .page() 可省略 .converttitles
-			// .redirects() 本身不會作繁簡轉換。
-			// redirect_to: 追尋至重定向終點
-			options.redirects = 1;
-			options.prop = 'info';
-
 			// 先溯源(追尋至重定向終點)
-			wiki_API.page(title, function(page_data) {
-				// console.log(page_data);
-				// delete options.prop;
+			wiki_API.redirects_root(title, function(title, page_data) {
+				// cache
 				options.page_data = page_data;
-
 				// 已追尋至重定向終點，不再溯源。
 				options.no_trace = true;
-				wiki_API.redirects_here(
-				// 已經轉換過，毋須 wiki_API.parse.redirect()。
-				// wiki_API.parse.redirect(wiki_API.content_of(page_data)) ||
-
-				// 若是 convert 過則採用新的 title。
-				page_data.title || title, callback, options);
+				wiki_API.redirects_here(title, callback, options);
 			}, options);
 			return;
 		}
@@ -1573,7 +1610,7 @@ function module_code(library_namespace) {
 				//
 				&& data.warnings.query['*'])
 					library_namespace.warn(data.warnings.query['*']);
-				callback();
+				callback(null, null, error);
 				return;
 			}
 
@@ -1632,6 +1669,7 @@ function module_code(library_namespace) {
 			if (options.include_root) {
 				// 避免修改或覆蓋 pages.redirects。
 				redirect_list = redirect_list.slice();
+				// The first one is the redirect target.
 				redirect_list.unshift(pages);
 			}
 

@@ -941,10 +941,10 @@ function module_code(library_namespace) {
 	 *            text id : function(domain name){ return text for this domain } }
 	 * @param {String}[domain]
 	 *            指定存入之 domain。
-	 * @param {Boolean}[replace]
+	 * @param {Boolean}[clean_and_replace]
 	 *            是否直接覆蓋掉原先之 domain。
 	 */
-	gettext.set_text = function(text_Object, domain, replace) {
+	gettext.set_text = function(text_Object, domain, clean_and_replace) {
 		if (!library_namespace.is_Object(text_Object))
 			return;
 
@@ -955,7 +955,7 @@ function module_code(library_namespace) {
 		if (!(domain in gettext_texts))
 			domain = gettext.to_standard(domain);
 
-		if (replace || !(domain in gettext_texts))
+		if (clean_and_replace || !(domain in gettext_texts))
 			gettext_texts[domain] = text_Object;
 		else {
 			// specify a new domain.

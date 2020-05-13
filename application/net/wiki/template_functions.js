@@ -255,6 +255,7 @@ function module_code(library_namespace) {
 			convertion.title = value;
 		}
 
+		//TODO: {{NoteTA}} 使用「1=」可以同時轉換標題和正文？
 		for (index = 1; index <= 30; index++) {
 			value = token.parameters[index];
 			if (!value)
