@@ -1962,8 +1962,8 @@ function module_code(library_namespace) {
 
 		var directory = options.directory || './',
 		//
-		filename = options.filename || wiki_site_name + '-' + latest
-				+ '-pages-articles.xml';
+		filepath = options.filepath || options.filename || wiki_site_name + '-'
+				+ latest + '-pages-articles.xml';
 
 		/**
 		 * <code>
@@ -1984,7 +1984,7 @@ function module_code(library_namespace) {
 		// https://wikitech.wikimedia.org/wiki/Help:Toolforge/Developing#Using_the_shared_Pywikibot_files_.28recommended_setup.29
 		// /shared/: shared files
 		dump_directory = '/shared/cache/'
-		filename = wiki_site_name + '-' + latest + '-pages-articles-multistream-index.txt';
+		filepath = wiki_site_name + '-' + latest + '-pages-articles-multistream-index.txt';
 		</code>
 		 */
 
@@ -2003,14 +2003,14 @@ function module_code(library_namespace) {
 		var data_file_OK;
 		try {
 			// check if data file exists and big enough
-			data_file_OK = node_fs.statSync(directory + filename).size > 1e7;
+			data_file_OK = node_fs.statSync(directory + filepath).size > 1e7;
 		} catch (e) {
 		}
 
 		if (data_file_OK) {
 			library_namespace.log('get_latest_dump: Using data file (.xml): ['
-					+ directory + filename + ']');
-			callback(directory + filename);
+					+ directory + filepath + ']');
+			callback(directory + filepath);
 			return;
 		}
 
@@ -2018,14 +2018,15 @@ function module_code(library_namespace) {
 
 		function extract() {
 			library_namespace.log('get_latest_dump.extract: Extracting ['
-					+ source_directory + archive + ']...');
+					+ source_directory + archive + '] to [' + directory
+					+ filepath + ']...');
 			// share the xml dump file. 應由 caller 自行設定。
 			// process.umask(parseInt('0022', 8));
 			require('child_process').exec(
 			//
 			'/bin/bzip2 -cd "' + source_directory + archive + '" > "'
 			//
-			+ directory + filename + '"', function(error, stdout, stderr) {
+			+ directory + filepath + '"', function(error, stdout, stderr) {
 				if (error) {
 					library_namespace.error(error);
 				} else {
@@ -2033,7 +2034,7 @@ function module_code(library_namespace) {
 					//
 					'get_latest_dump.extract: Done. Running callback...');
 				}
-				callback(directory + filename);
+				callback(directory + filepath);
 			});
 		}
 
@@ -2043,7 +2044,7 @@ function module_code(library_namespace) {
 		// 可在 /public/dumps/public/zhwiki/ 找到舊 dumps。 (using `df -BT`)
 		// e.g.,
 		// /public/dumps/public/zhwiki/20160203/zhwiki-20160203-pages-articles.xml.bz2
-		source_directory, archive = options.archive || filename + '.bz2';
+		source_directory, archive = options.archive || filepath + '.bz2';
 
 		if (wiki_API.wmflabs) {
 			source_directory = public_dumps_directory + wiki_site_name + '/'
@@ -2261,11 +2262,12 @@ function module_code(library_namespace) {
 	}
 
 	// @inner
-	function read_latest_revid_of_dump(filename, callback, options) {
+	function read_latest_revid_of_dump(filepath, callback, options) {
 		var buffer = Buffer.alloc(Math.pow(2, 16));
-		var position = Math.max(0, node_fs.statSync(path).size - buffer.length);
+		var position = Math.max(0, node_fs.statSync(filepath).size
+				- buffer.length);
 		// file descriptor
-		var fd = node_fs.openSync(filename, 'r');
+		var fd = node_fs.openSync(filepath, 'r');
 
 		while (true) {
 			node_fs.readSync(fd, buffer, 0, buffer.length, position);
@@ -2298,8 +2300,8 @@ function module_code(library_namespace) {
 	   CeL.run('application.platform.nodejs');
 	 * </code><br />
 	 * 
-	 * @param {String}[filename]
-	 *            欲讀取的 .xml 檔案名稱。
+	 * @param {String}[filepath]
+	 *            欲讀取的 .xml 檔案路徑。
 	 * @param {Function}callback
 	 *            回調函數。 callback({Object}page_data)
 	 * @param {Object}[options]
@@ -2313,22 +2315,22 @@ function module_code(library_namespace) {
 	 * 
 	 * @since 2016/3/11
 	 */
-	function read_dump(filename, callback, options) {
-		if (typeof filename === 'function' && typeof callback !== 'function'
+	function read_dump(filepath, callback, options) {
+		if (typeof filepath === 'function' && typeof callback !== 'function'
 				&& !options) {
 			// shift arguments
 			options = callback;
-			callback = filename;
-			filename = null;
+			callback = filepath;
+			filepath = null;
 		}
 
-		if (typeof filename !== 'string' || !filename.endsWith('.xml')) {
-			if (filename) {
+		if (typeof filepath !== 'string' || !filepath.endsWith('.xml')) {
+			if (filepath) {
 				library_namespace.log('read_dump: Invalid file path: ['
-						+ filename + '], try to get the latest dump file...');
+						+ filepath + '], try to get the latest dump file...');
 			}
-			get_latest_dump(filename, function(filename) {
-				read_dump(filename, callback, options);
+			get_latest_dump(filepath, function(filepath) {
+				read_dump(filepath, callback, options);
 			}, options);
 			// 警告: 無法馬上取得檔案時，將不會回傳任何資訊！
 			return;
@@ -2337,12 +2339,12 @@ function module_code(library_namespace) {
 		options = library_namespace.setup_options(options);
 
 		if (options.get_latest_revid) {
-			read_latest_revid_of_dump(filename, callback, options);
+			read_latest_revid_of_dump(filepath, callback, options);
 			return;
 		}
 
 		if (typeof options.first === 'function') {
-			options.first(filename);
+			options.first(filepath);
 		}
 
 		var run_last = function(quit_operation) {
@@ -2372,12 +2374,12 @@ function module_code(library_namespace) {
 		/**
 		 * dump file stream.
 		 * 
-		 * filename: XML file path.<br />
+		 * filepath: XML file path.<br />
 		 * e.g., 'enwiki-20160305-pages-meta-current1.xml'
 		 * 
 		 * @type {String}
 		 */
-		file_stream = new node_fs.ReadStream(filename, {
+		file_stream = new node_fs.ReadStream(filepath, {
 			// 加大 buffer。據測試，改到 1 MiB 反而慢。
 			highWaterMark : 128 * 1024
 		}),
@@ -2389,9 +2391,9 @@ function module_code(library_namespace) {
 		 * @type {Object}
 		 */
 		// file_status = node_fs.fstatSync(file_stream.fd);
-		// file_status = node_fs.statSync(filename),
+		// file_status = node_fs.statSync(filepath),
 		/** {Natural}檔案長度。掌握進度用。 */
-		// file_size = node_fs.statSync(filename).size,
+		// file_size = node_fs.statSync(filepath).size,
 		/**
 		 * byte counter. 已經處理過的資料長度，為 bytes，非 characters。指向 buffer 起頭在 file
 		 * 中的位置。
@@ -2616,7 +2618,7 @@ function module_code(library_namespace) {
 				// 一般來說只會用到 config.last，將在本函數中稍後執行，
 				// 因此先不開放 config.first, config.last。
 
-				// options.first(filename) of read_dump()
+				// options.first(filepath) of read_dump()
 				// first : config.first,
 
 				// options.last.call(file_stream, anchor, quit_operation)
@@ -2938,11 +2940,11 @@ function module_code(library_namespace) {
 					session : config[KEY_SESSION],
 					// directory to restore dump files.
 					directory : config.dump_directory,
-					// options.first(filename) of read_dump()
-					first : function(xml_filename) {
-						dump_file = xml_filename;
+					// options.first(filepath) of read_dump()
+					first : function(xml_filepath) {
+						dump_file = xml_filepath;
 						try {
-							file_size = node_fs.statSync(xml_filename).size;
+							file_size = node_fs.statSync(xml_filepath).size;
 						} catch (e) {
 							// 若不存在 dump_directory，則會在此出錯。
 							if (e.code === 'ENOENT') {
