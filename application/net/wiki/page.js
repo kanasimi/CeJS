@@ -2210,6 +2210,41 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// 模擬 revisions
+		// 注意: 這必須依照 revisions model 變更!
+		var revision = {
+			// rev_id
+			revid : revid,
+			parentid : Math.floor(xml.between('<parentid>', '</parentid>',
+					revision_index)),
+			minor : xml.slice(revision_index).includes('<minor />'),
+			user : unescape_xml(xml.between('<username>', '</username>',
+					revision_index)),
+			// e.g., '2000-01-01T00:00:00Z'
+			timestamp : xml.between('<timestamp>', '</timestamp>',
+					revision_index),
+			slots : {
+				main : {
+					contentmodel : xml.between('<model>', '</model>',
+							revision_index),
+					contentformat : xml.between('<format>', '</format>',
+							revision_index),
+					// old: e.g., '<text xml:space="preserve" bytes="80">'??
+					// 2016/3/11: e.g., '<text xml:space="preserve">'
+					// 2020/5/16: <text bytes="41058" xml:space="preserve">
+					'*' : unescape_xml(xml.between('<text ', '</text>',
+							revision_index).between('>'))
+				}
+			},
+			comment : unescape_xml(xml.between('<comment>', '</comment>',
+					revision_index))
+		};
+
+		if (revision.minor)
+			revision.minor = '';
+		else
+			delete revision.minor;
+
 		// page 之 structure 按照 wiki API 本身之 return
 		// page_data = {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
 		// includes redirection 包含重新導向頁面.
@@ -2219,20 +2254,39 @@ function module_code(library_namespace) {
 			ns : xml.between('<ns>', '</ns>', start_index) | 0,
 			title : unescape_xml(xml
 					.between('<title>', '</title>', start_index)),
-			revisions : [ {
-				// rev_id
-				revid : revid,
-				// e.g., '2000-01-01T00:00:00Z'
-				timestamp : xml.between('<timestamp>', '</timestamp>',
-						revision_index),
-				// old: e.g., '<text xml:space="preserve" bytes="80">'??
-				// 2016/3/11: e.g., '<text xml:space="preserve">'
-				'*' : unescape_xml(xml.between('<text xml:space="preserve">',
-						'</text>', revision_index))
-			} ]
+			revisions : [ revision ]
 		};
 
 		return page_data;
+	}
+
+	// @inner
+	function read_latest_revid_of_dump(filename, callback, options) {
+		var buffer = Buffer.alloc(Math.pow(2, 16));
+		var position = Math.max(0, node_fs.statSync(path).size - buffer.length);
+		// file descriptor
+		var fd = node_fs.openSync(filename, 'r');
+
+		while (true) {
+			node_fs.readSync(fd, buffer, 0, buffer.length, position);
+			var contents = buffer.toString('utf8');
+			var matched = contents
+					.match(/<revision>[\s\n]*<id>(\d{1,16})<\/id>[\s\S]*?$/);
+			if (matched) {
+				callback(+matched[1]);
+				return;
+			}
+
+			if (position > 0) {
+				position = Math.max(0, position - buffer.length
+				// +200: 預防跳過 /<id>(\d{1,16})<\/id>/。
+				// assert: buffer.length > 200
+				+ 200);
+			} else {
+				callback();
+				return;
+			}
+		}
 	}
 
 	/**
@@ -2281,6 +2335,11 @@ function module_code(library_namespace) {
 		}
 
 		options = library_namespace.setup_options(options);
+
+		if (options.get_latest_revid) {
+			read_latest_revid_of_dump(filename, callback, options);
+			return;
+		}
 
 		if (typeof options.first === 'function') {
 			options.first(filename);
@@ -2498,12 +2557,14 @@ function module_code(library_namespace) {
 	 * 
 	 * AND `page`.`page_is_redirect` = 0
 	 * 
+	 * https://stackoverflow.com/questions/14726789/how-can-i-change-the-default-mysql-connection-timeout-when-connecting-through-py
+	 * 
 	 * @type {String}
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
 	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/maintenance/tables.sql
 	 */
-	var all_revision_SQL = 'SELECT `page`.`page_id` AS `i`, `page`.`page_latest` AS `r` FROM `page` INNER JOIN `revision` ON `page`.`page_latest` = `revision`.`rev_id` WHERE `page`.`page_namespace` = 0 AND `revision`.`rev_deleted` = 0';
+	var all_revision_SQL = 'SELECT `page`.`page_id` AS `i`, `page`.`page_latest` AS `r` FROM `page` INNER JOIN `revision` ON `page`.`page_latest` = `revision`.`rev_id` WHERE `revision`.`rev_id` > 0 AND `revision`.`rev_deleted` = 0 AND `page`.`page_namespace` = 0';
 
 	if (false) {
 		/**
@@ -2525,7 +2586,7 @@ function module_code(library_namespace) {
 	/**
 	 * 應用功能: 遍歷所有頁面。 CeL.wiki.traversal()
 	 * 
-	 * TODO: 配合 revision_cacher，進一步加快速度。
+	 * TODO: 配合 revision_cacher，進一步加快速度？
 	 * 
 	 * @param {Object}[config]
 	 *            configuration
@@ -2542,16 +2603,16 @@ function module_code(library_namespace) {
 			config = library_namespace.new_options(config);
 		}
 
-		if (config.use_dump) {
+		if (config.use_dump_only) {
 			library_namespace.debug(
 					'use dump only: 僅僅使用 dump，不採用 API 取得最新頁面內容。', 1,
 					'traversal_pages');
 			// @see process_dump.js
-			if (config.use_dump === true) {
+			if (config.use_dump_only === true) {
 				// 這邊的 ((true)) 僅表示要使用，並採用預設值；不代表設定 dump file path。
-				config.use_dump = null;
+				config.use_dump_only = null;
 			}
-			read_dump(config.use_dump, callback, {
+			read_dump(config.use_dump_only, callback, {
 				// 一般來說只會用到 config.last，將在本函數中稍後執行，
 				// 因此先不開放 config.first, config.last。
 
@@ -2569,6 +2630,29 @@ function module_code(library_namespace) {
 				// /shared/: shared files
 				directory : config.dump_directory
 			});
+			return;
+		}
+
+		// 若不想使用 dump，可不設定 .filter。
+		// 經測試，全部使用 API，最快可入50分鐘內，一般在 1-2 hours 左右。
+		var dump_file;
+		// 若 config.filter 非 function，表示要先比對 dump，若修訂版本號相同則使用之，否則自 API 擷取。
+		// 並以 try_dump() 當作 filter()。
+		// 設定 config.filter 為 ((true)) 表示要使用預設為最新的 dump，
+		// 否則將之當作 dump file path。
+		if (config.filter && (typeof config.filter !== 'function')) {
+			dump_file = config.filter;
+			if (dump_file === true) {
+				// 這邊的 ((true)) 僅表示要使用，並不代表設定 dump file path。
+				dump_file = null;
+			}
+		}
+
+		if (!(config.latest_revid_of_dump > 0)) {
+			read_dump(dump_file, function(latest_revid_of_dump) {
+				config.latest_revid_of_dump = latest_revid_of_dump;
+				traversal_pages(config, callback);
+			}, options);
 			return;
 		}
 
@@ -2602,9 +2686,9 @@ function module_code(library_namespace) {
 					// 讀取 production replicas 時，儲存的是 pageid。
 					list.is_id = true;
 				} else {
-					library_namespace
-							.error('traversal_pages: cache 檔案未設定 rev_list：可能是未知格式？ '
-									+ this.file_name);
+					library_namespace.error('traversal_pages: '
+					//
+					+ 'cache 檔案未設定 rev_list：可能是未知格式？ ' + this.file_name);
 				}
 				id_list = list;
 			}
@@ -2645,6 +2729,9 @@ function module_code(library_namespace) {
 					+ '一次讀取完所有頁面最新修訂版本之版本號 rev_id...');
 			var SQL = is_id ? all_revision_SQL : all_revision_SQL.replace(
 					/page_id/g, 'page_title');
+			SQL = SQL.replace(/(`rev_id` > )0 /, '$1'
+					+ config.latest_revid_of_dump + ' ');
+			// assert: 當有比 dump_fire 裡面的更新的版本時，會被篩選出。
 			var SQL_config = config && config.SQL_config
 			//
 			|| wiki_API.new_SQL_config
@@ -2711,12 +2798,9 @@ function module_code(library_namespace) {
 				});
 
 				// Release memory. 釋放被占用的記憶體。
-				id_list = rev_list = null;
+				// id_list = null;
+				rev_list = null;
 
-				if (dump_file === true) {
-					// 這邊的 ((true)) 僅表示要使用，並不代表設定 dump file path。
-					dump_file = null;
-				}
 				read_dump(dump_file,
 				//
 				function(page_data, position, page_anchor) {
@@ -2868,17 +2952,16 @@ function module_code(library_namespace) {
 						}
 					},
 					filter : function(pageid, revid) {
-						if ((pageid in rev_of_id)
-								&& rev_of_id[pageid] === revid) {
-							// 隨時 delete rev_of_id[] 會使速度極慢。
-							// delete rev_of_id[pageid];
-							rev_of_id[pageid] = null;
-							return true;
-						}
+						// 開始執行時，dump_file 裡面的是最新的頁面。
+						// 注意: 若執行中有新的變更，本頁面會 traversal 兩次！
+						return !(pageid in rev_of_id);
 					},
 					// options.last.call(file_stream, anchor, quit_operation)
 					// of read_dump()
 					last : function(anchor, quit_operation) {
+						// Release memory. 釋放被占用的記憶體。
+						rev_of_id = null;
+
 						var percent = (1000 * count / length | 0);
 						percent = percent / 10;
 						// e.g.,
@@ -2889,13 +2972,8 @@ function module_code(library_namespace) {
 								+ percent + '%), '
 								+ ((Date.now() - start_read_time) / 1000 | 0)
 								+ ' s elapsed.');
-						var need_API = [];
-						need_API.is_id = is_id;
-						for ( var id in rev_of_id)
-							if (rev_of_id[id] !== null)
-								need_API.push(id);
-						// Release memory. 釋放被占用的記憶體。
-						rev_of_id = null;
+						var need_API = id_list;
+						// need_API.is_id = is_id;
 
 						// library_namespace.set_debug(3);
 						// 一般可以達到 95% 以上採用 dump file 的程度，10分鐘內跑完。
@@ -2943,16 +3021,7 @@ function module_code(library_namespace) {
 
 			// 工作流程: config.filter() → run_work()
 
-			// 若 config.filter 非 function，表示要先比對 dump，若修訂版本號相同則使用之，否則自 API 擷取。
-			// 並以 try_dump() 當作 filter()。
-			// 設定 config.filter 為 ((true)) 表示要使用預設為最新的 dump，
-			// 否則將之當作 dump file path。
-
-			// 若不想使用 dump，可不設定 .filter。
-			// 經測試，全部使用 API，最快可入50分鐘內，一般在 1-2 hours 左右。
-			var dump_file;
 			if (config.filter && (typeof config.filter !== 'function')) {
-				dump_file = config.filter;
 				config.filter = try_dump;
 			}
 
@@ -2980,7 +3049,9 @@ function module_code(library_namespace) {
 	 * 表示此 cache list 為 page id，而非 page title。 須採用絕不可能用來當作標題之 value。<br />
 	 * 勿用過於複雜、無法 JSON.stringify() 或過於簡單的結構。
 	 */
-	traversal_pages.id_mark = {};
+	traversal_pages.id_mark = {
+		id_mark : 'id_mark'
+	};
 
 	/** {String}default list file name (will append .json by wiki_API.cache) */
 	traversal_pages.list_file = 'all_pages';
