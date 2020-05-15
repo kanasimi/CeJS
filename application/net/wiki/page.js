@@ -2652,7 +2652,9 @@ function module_code(library_namespace) {
 			read_dump(dump_file, function(latest_revid_of_dump) {
 				config.latest_revid_of_dump = latest_revid_of_dump;
 				traversal_pages(config, callback);
-			}, options);
+			}, {
+				get_latest_revid : true
+			});
 			return;
 		}
 
@@ -2802,7 +2804,7 @@ function module_code(library_namespace) {
 				rev_list = null;
 
 				read_dump(dump_file,
-				//
+				// e.g., /shared/cache/zhwiki-20200401-pages-articles.xml
 				function(page_data, position, page_anchor) {
 					// filter
 
