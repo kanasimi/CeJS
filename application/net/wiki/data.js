@@ -1244,6 +1244,10 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
+	// Maximum number of values is 50
+	var MAX_ENTITIES_TO_GET = 50;
+
 	/**
 	 * 取得特定實體的特定屬性值。
 	 * 
@@ -1422,6 +1426,31 @@ function module_code(library_namespace) {
 					// Waiting for conversion.
 					return;
 				}
+
+			} else if (key.length > MAX_ENTITIES_TO_GET) {
+				if (!key.not_original) {
+					key = key.clone();
+					key.not_original = true;
+				}
+				var result, _error;
+				var get_next_slice = function get_next_slice() {
+					library_namespace.info('wikidata_entity: ' + key.length + ' items left...');
+					wikidata_entity(key.splice(0, MAX_ENTITIES_TO_GET), property, function(entities, error) {
+						//console.log(Object.keys(entities));
+						if (result)
+							Object.assign(result, entities);
+						else
+							result = entities;
+						_error = error || _error;
+						if (key.length > 0) {
+							get_next_slice();
+						} else {
+							callback(result, _error);
+						}
+					}, options);
+				}
+				get_next_slice();
+				return;
 
 			} else {
 				key = key.map(function(id) {
