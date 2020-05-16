@@ -2655,7 +2655,8 @@ function module_code(library_namespace) {
 				config.latest_revid_of_dump = latest_revid_of_dump;
 				traversal_pages(config, callback);
 			}, {
-				get_latest_revid : true
+				get_latest_revid : true,
+				directory : config.dump_directory
 			});
 			return;
 		}
@@ -2670,7 +2671,7 @@ function module_code(library_namespace) {
 		cache_config = {
 			// all title/id list
 			file_name : config.file_name
-			// all_pages.*.json 存有當前語言維基百科當前所有的頁面id以及最新版本 (*:當前語言)
+			// all_newer_pages.*.json 存有當前語言維基百科所有較新頁面的id以及最新版本 (*:當前語言)
 			|| traversal_pages.list_file + '.' + use_language + '.json',
 			operator : function(list) {
 				if (!Array.isArray(list)) {
@@ -2730,7 +2731,8 @@ function module_code(library_namespace) {
 			library_namespace.info(
 			// Wikimedia Toolforge database replicas.
 			'traversal_pages: 嘗試讀取 Wikimedia Toolforge 上之 database replication 資料，'
-					+ '一次讀取完所有頁面最新修訂版本之版本號 rev_id...');
+					+ '一次讀取完版本號 ' + config.latest_revid_of_dump
+					+ ' 之後，所有頁面最新修訂版本之版本號 rev_id...');
 			var SQL = is_id ? all_revision_SQL : all_revision_SQL.replace(
 					/page_id/g, 'page_title');
 			SQL = SQL.replace(/(`rev_id` > )0 /, '$1'
@@ -3058,7 +3060,7 @@ function module_code(library_namespace) {
 	};
 
 	/** {String}default list file name (will append .json by wiki_API.cache) */
-	traversal_pages.list_file = 'all_pages';
+	traversal_pages.list_file = 'all_newer_pages';
 
 	// --------------------------------------------------------------------------------------------
 
