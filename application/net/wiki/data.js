@@ -1434,9 +1434,12 @@ function module_code(library_namespace) {
 				}
 				var result, _error;
 				var get_next_slice = function get_next_slice() {
-					library_namespace.info('wikidata_entity: ' + key.length + ' items left...');
-					wikidata_entity(key.splice(0, MAX_ENTITIES_TO_GET), property, function(entities, error) {
-						//console.log(Object.keys(entities));
+					library_namespace.info('wikidata_entity: ' + key.length
+							+ ' items left...');
+					wikidata_entity(key.splice(0, MAX_ENTITIES_TO_GET),
+					//
+					property, function(entities, error) {
+						// console.log(Object.keys(entities));
 						if (result)
 							Object.assign(result, entities);
 						else
@@ -1502,6 +1505,14 @@ function module_code(library_namespace) {
 		var props = options.props;
 		if (Array.isArray(props)) {
 			props = props.join('|');
+		}
+		if (wiki_API.is_page_data(key) && typeof props === 'string') {
+			// for data.lastrevid
+			if (!props) {
+				props = 'info';
+			} else if (!/(?:^|\|)info(?:$|\|)/.test(props)) {
+				props += '|info';
+			}
 		}
 		// 可接受 "props=" (空 props)。
 		if (props || props === '') {
@@ -1575,7 +1586,7 @@ function module_code(library_namespace) {
 								library_namespace
 										.log('wikidata_entity: action: '
 												+ action);
-								console.log(_arguments);
+								console.trace(_arguments);
 							}
 						}
 						// assert: KEY_get_entity_value, KEY_SESSION
@@ -4208,7 +4219,7 @@ function module_code(library_namespace) {
 					// 檢測編輯衝突用。
 					options.baserevid = id.lastrevid;
 				} else {
-					console.log(id);
+					console.trace(id);
 					throw new Error('Invalid entity!');
 				}
 			}
