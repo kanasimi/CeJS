@@ -1210,8 +1210,7 @@ function module_code(library_namespace) {
 		if (!cookie) {
 			cookie = [];
 		} else if (typeof cookie === 'string') {
-			cookie = cookie.trim();
-			cookie = cookie ? cookie.split(';') : [];
+			cookie = cookie.split(';');
 		}
 		// assert: Array.isArray(cookie)
 
@@ -1226,6 +1225,9 @@ function module_code(library_namespace) {
 		var cookie_index = agent.cookie_index;
 
 		cookie.forEach(function(piece) {
+			piece = piece.trim();
+			if (!piece)
+				return;
 			// [ cookie, key, value ]
 			var matched = piece.match(/^([^=;]+)(?:=([^;]+))?/);
 			library_namespace.debug(agent.last_cookie, 3, 'merge_cookie');
