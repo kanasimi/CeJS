@@ -2273,7 +2273,9 @@ function module_code(library_namespace) {
 			node_fs.readSync(fd, buffer, 0, buffer.length, position);
 			var contents = buffer.toString('utf8');
 			var matched = contents
-					.match(/<revision>[\s\n]*<id>(\d{1,16})<\/id>[\s\S]*?$/);
+			// TODO: read_latest_revid_of_dump() 只能獲得最新創建文章的最新 revid，而非最後的
+			// revid。
+			.match(/<revision>[\s\n]*<id>(\d{1,16})<\/id>[\s\S]*?$/);
 			if (matched) {
 				callback(+matched[1]);
 				return;
@@ -2769,9 +2771,8 @@ function module_code(library_namespace) {
 			var session = config[KEY_SESSION]
 			//
 			|| new wiki_API(config.user, config.password, config.language);
-			library_namespace.log('traversal_pages: 開始遍歷 '
 			// includes redirection 包含重新導向頁面.
-			+ (id_list && id_list.length) + ' pages...');
+			library_namespace.log('traversal_pages: 開始遍歷所有 dump 頁面...');
 
 			/**
 			 * 工作原理:<code>
@@ -2802,10 +2803,6 @@ function module_code(library_namespace) {
 								+ id);
 					rev_of_id[id] = rev_list[index];
 				});
-
-				// Release memory. 釋放被占用的記憶體。
-				// id_list = null;
-				rev_list = null;
 
 				read_dump(dump_file,
 				// e.g., /shared/cache/zhwiki-20200401-pages-articles.xml
@@ -2850,12 +2847,15 @@ function module_code(library_namespace) {
 
 						/** {Object}revision data. 修訂版本資料。 */
 						var revision = page_data && page_data.revisions
-								&& page_data.revisions[0],
+						// @see function parse_dump_xml()
+						&& page_data.revisions[0],
 						/** {Natural}所取得之版本編號。 */
 						revid = revision && revision.revid;
-						revid = page_data && page_data.revisions
-								&& page_data.revisions[0]
-								&& page_data.revisions[0].revid;
+						if (config.latest_revid_of_dump < revid) {
+							// read_latest_revid_of_dump() 只能獲得最新創建文章的最新
+							// revid，而非最後的 revid。
+							config.latest_revid_of_dump = revid;
+						}
 
 						/** {String}page title = page_data.title */
 						var title = CeL.wiki.title_of(page_data),
@@ -2978,8 +2978,15 @@ function module_code(library_namespace) {
 								+ percent + '%), '
 								+ ((Date.now() - start_read_time) / 1000 | 0)
 								+ ' s elapsed.');
-						var need_API = id_list;
-						// need_API.is_id = is_id;
+						var latest_revid_of_dump = config.latest_revid_of_dump;
+						var need_API = id_list.filter(function(id, index) {
+							return latest_revid_of_dump < rev_list[index];
+						});
+						need_API.is_id = is_id;
+
+						// Release memory. 釋放被占用的記憶體。
+						id_list = null;
+						rev_list = null;
 
 						// library_namespace.set_debug(3);
 						// 一般可以達到 95% 以上採用 dump file 的程度，10分鐘內跑完。
