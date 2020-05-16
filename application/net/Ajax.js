@@ -1210,7 +1210,8 @@ function module_code(library_namespace) {
 		if (!cookie) {
 			cookie = [];
 		} else if (typeof cookie === 'string') {
-			cookie = cookie.split(';');
+			cookie = cookie.trim();
+			cookie = cookie ? cookie.split(';') : [];
 		}
 		// assert: Array.isArray(cookie)
 
@@ -3208,15 +3209,18 @@ function module_code(library_namespace) {
 						redirected : !!options.redirected,
 						useFinalURL : url.format(),
 
-						_data : data,
+						_buffer : data,
 
 						// TODO: body : new ReadableStream()
 						// methods of
 						// https://developer.mozilla.org/en-US/docs/Web/API/Body
+						// https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
 
-						text: function text() {
+						text : function text() {
 							try {
-								return Promise.resolve(this._data.toString());
+								return Promise.resolve(
+								//
+								this._buffer.toString());
 							} catch (e) {
 								return Promise.reject(e);
 							}
@@ -3225,7 +3229,7 @@ function module_code(library_namespace) {
 							return this.text().then(JSON.parse);
 						},
 						arrayBuffer : function arrayBuffer() {
-							return Promise.resolve(this._data.buffer);
+							return Promise.resolve(this._buffer.buffer);
 						}
 					};
 
