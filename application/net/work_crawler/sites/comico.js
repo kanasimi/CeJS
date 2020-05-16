@@ -161,15 +161,46 @@ function module_code(library_namespace) {
 
 			eval('cmnData=' + cmnData);
 
+			var title = (html.between('<h1 class="article', '</h1>') || html
+					.between('<h1', '</h1>')).between('>'), tags = [];
+			/**
+			 * e.g., http://www.comico.com.tw/challenge/3263/ 去除label
+			 * 
+			 * <code>
+
+			<h1 class="article-hero03__ttl"><i class="i-label i-label--fill article-hero03__ttl-icon">精選</i><span class="o-hidden _challengeTitle">小惡魔與草莓男友</span></h1>
+
+			</code>
+			 */
+			if (title.includes('</i>')) {
+				tags.push(get_label(title.between(null, '</i>')));
+				title = title.between('</i>');
+			}
 			var work_data = {
 				// 必要屬性：須配合網站平台更改。
 				// <h1 class="article-hero05__ttl">美麗的代價</h1>
-				title : get_label((html.between('<h1 class="article', '</h1>') || html
-						.between('<h1', '</h1>')).between('>'))
-			// 選擇性屬性：須配合網站平台更改。
+				title : get_label(title),
+
+				// 選擇性屬性：須配合網站平台更改。
+				tags : tags
 			};
 
 			extract_work_data(work_data, html);
+
+			// e.g., '<li class="article-hero03__list-tag-item">中篇故事</li>'
+			html.each_between('list-tag-item">', '</li>', function(text) {
+				tags.push(get_label(text));
+			});
+
+			// JavaScript Object Notation for Linked Data 關聯的資料
+			matched = html.between('<script type="application/ld+json">',
+					'</script>');
+			if (matched) {
+				// Structured Data 結構化資料
+				// https://search.google.com/structured-data/testing-tool
+				matched = JSON.parse(matched);
+				work_data.linked_data = matched;
+			}
 
 			while (matched = PATTERN_work_info.exec(html)) {
 				if (matched[3] = get_label(matched[3]).replace(/\t/g, ''))
@@ -199,21 +230,27 @@ function module_code(library_namespace) {
 				});
 			}
 
+			// console.log(work_data);
 			return work_data;
 		},
 		chapter_list_URL : function(work_id, work_data) {
 			// console.log(work_data);
 			// library_namespace.set_debug(9);
-			return [
-			// 2019/10: 'api/getArticleListAll.nhn' 沒有 .freeFlg 標記，無法自動使用閱讀卷。
-			// 但是對新手村作品如 '3729 神光拜達摩' 來說，
-			// 用 'api/getArticleListAll.nhn' 才能取得所有作品之列表。
-			//
-			// https://github.com/kanasimi/work_crawler/issues/384
-			// 第一次執行時，尚未取得 .isOfficial 標記，必須先採用 api/getArticleList.nhn
-			work_data.isOfficial === false ? 'api/getArticleListAll.nhn'
-			// 2019/9: 'api/getArticleList.nhn'
-			: 'api/getArticleList.nhn', {
+			var api = work_data.api && work_data.api.articleListAPI;
+			if (!api) {
+				api = work_data.isOfficial === false
+				// 2019/10: 'api/getArticleListAll.nhn' 沒有 .freeFlg
+				// 標記，無法自動使用閱讀卷。
+				// 但是對新手村作品如 '3729 神光拜達摩' 來說，
+				// 用 'api/getArticleListAll.nhn' 才能取得所有作品之列表。
+				//
+				// https://github.com/kanasimi/work_crawler/issues/384
+				// 第一次執行時，尚未取得 .isOfficial 標記，必須先採用 api/getArticleList.nhn
+				? 'api/getArticleListAll.nhn'
+				// 2019/9: 'api/getArticleList.nhn'
+				: 'api/getArticleList.nhn'
+			}
+			return [ api, {
 				titleNo : work_id
 			} ];
 		},
