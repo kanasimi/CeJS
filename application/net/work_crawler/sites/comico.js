@@ -155,7 +155,7 @@ function module_code(library_namespace) {
 				// <p class="m-section-error__heading">お探しのページは存在しません</p>
 				'<p class="m-section-error__heading">', '</p>'));
 				if (matched) {
-					throw matched;
+					throw new Error(matched);
 				}
 			}
 
@@ -198,8 +198,12 @@ function module_code(library_namespace) {
 			if (matched) {
 				// Structured Data 結構化資料
 				// https://search.google.com/structured-data/testing-tool
-				matched = JSON.parse(matched);
-				work_data.linked_data = matched;
+				try {
+					matched = JSON.parse(matched);
+					work_data.linked_data = matched;
+				} catch (e) {
+					// library_namespace.error(matched);
+				}
 			}
 
 			while (matched = PATTERN_work_info.exec(html)) {
@@ -288,7 +292,7 @@ function module_code(library_namespace) {
 			delete html.list;
 			// console.log(recerse_count);
 			if (recerse_count > 0) {
-				CeL.info([ work_data.title + ': ', {
+				library_namespace.info([ work_data.title + ': ', {
 					T : '將倒序章節列表轉為正序。'
 				} ]);
 				work_data.chapter_list.reverse();
@@ -471,7 +475,7 @@ function module_code(library_namespace) {
 				var message = work_data.title + ' §' + chapter_NO + ' '
 						+ chapter_data.title + ': ' + cmnData;
 				if (cmnData !== 'お探しのページは存在しません') {
-					throw message;
+					throw new Error(message);
 				}
 				library_namespace.error(message);
 				return chapter_data;
@@ -535,10 +539,11 @@ function module_code(library_namespace) {
 					 */
 					!html.includes(' class="swiper-slide _swiperSlide')) {
 						var message = '網頁改版？無法解析！';
-						if (CeL.gettext)
-							message = CeL.gettext(message);
-						throw 'parse_chapter_data: ' + work_data.title + ' §'
-								+ chapter_NO + ': ' + message;
+						if (library_namespace.gettext)
+							message = library_namespace.gettext(message);
+						throw new Error('parse_chapter_data: '
+								+ work_data.title + ' §' + chapter_NO + ': '
+								+ message);
 						Array.prototype.unshift.apply(cmnData.imageData,
 								image_url_list);
 					}
@@ -548,12 +553,34 @@ function module_code(library_namespace) {
 					cmnData.imageData = image_url_list;
 				}
 
+			} else if (html.includes('<p class="error-section__ttl">')) {
+				var message = get_label(html.between(
+				/**
+				 * <code>
+
+				<div class="error-section o-mt100 o-mb100">
+				<p class="error-section__ttl">無法閱讀</p>
+				<p class="error-section__description">本話正在審查當中。<br/>審查完成後將會開放閱讀</p>
+				<p class="o-mt30"><a href="" class="btn03" onclick="javascript:history.back();">離開</a></p>
+				        <!-- /.m-section-error --></div>
+
+				</code>
+				 */
+				'<p class="error-section__ttl">', '</p>'))
+				//
+				+ ': ' + get_label(html.between(
+				//
+				'<p class="error-section__description">', '</p>'));
+				throw new Error(work_data.title + ' §' + chapter_NO + ': '
+						+ message);
+
 			} else {
 				console.log(html);
 				var message = '網頁改版？無法解析！';
-				if (CeL.gettext)
-					message = CeL.gettext(message);
-				throw work_data.title + ' §' + chapter_NO + ': ' + message;
+				if (library_namespace.gettext)
+					message = library_namespace.gettext(message);
+				throw new Error(work_data.title + ' §' + chapter_NO + ': '
+						+ message);
 			}
 
 			if (cmnData.url) {
@@ -578,11 +605,12 @@ function module_code(library_namespace) {
 					// 付費章節: 中文版提供第一張的完整版，日文版只提供縮圖。
 					// 圖片都應該要有hash，且不該是縮圖。
 					&& (url.includes('.jp/tmb/') || /\.jpg$/.test(url))) {
-						var message = CeL.gettext ? CeL.gettext(
-								'Invalid image url: %1', url)
-								: 'Invalid image url: ' + url;
-						throw work_data.title + ' §' + chapter_NO + ' '
-								+ chapter_data.title + ': ' + message;
+						var message = library_namespace.gettext
+						//
+						? library_namespace.gettext('Invalid image url: %1',
+								url) : 'Invalid image url: ' + url;
+						throw new Error(work_data.title + ' §' + chapter_NO
+								+ ' ' + chapter_data.title + ': ' + message);
 					}
 					return {
 						url : url
@@ -637,12 +665,13 @@ function module_code(library_namespace) {
 			'https://id.');
 
 			crawler.get_URL(account_api_host + 'login/login.nhn', after_login,
-					{
-						autoLoginChk : 'Y',
-						loginid : crawler.loginid,
-						password : crawler.password,
-						nexturl : ''
-					});
+			//
+			{
+				autoLoginChk : 'Y',
+				loginid : crawler.loginid,
+				password : crawler.password,
+				nexturl : ''
+			});
 
 		} else {
 			callback(crawler);
