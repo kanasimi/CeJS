@@ -2799,7 +2799,7 @@ function module_code(library_namespace) {
 			 */
 
 			function try_dump() {
-				var start_read_time = Date.now(), length = id_list.length,
+				var start_read_time = Date.now(), newer_articles = id_list.length,
 				// max_length = 0,
 				count = 0, limit = config.limit,
 				//
@@ -2989,22 +2989,25 @@ function module_code(library_namespace) {
 					// options.last.call(file_stream, anchor, quit_operation)
 					// of read_dump()
 					last : function(anchor, quit_operation) {
-						// Release memory. 釋放被占用的記憶體。
-						rev_of_id = null;
-
-						var percent = (1000 * count / length | 0);
+						var percent = (1000 * count /
+						// 警告: 這個數字不準確
+						(count + newer_articles) | 0);
 						percent = percent / 10;
 						// e.g.,
 						// "All 1491092 pages in dump xml file, 198.165 s."
 						// includes redirection 包含重新導向頁面.
 						library_namespace.log('traversal_pages: All ' + count
-								+ '/' + length + ' pages using dump xml file ('
-								+ percent + '%), '
+								+ '/' + (count + newer_articles)
+								+ ' pages using dump xml file (' + percent
+								+ '%), '
 								+ ((Date.now() - start_read_time) / 1000 | 0)
 								+ ' s elapsed.');
 						config.latest_revid_of_dump = latest_revid_of_dump;
 						var need_API = Object.keys(rev_of_id);
 						need_API.is_id = is_id;
+
+						// Release memory. 釋放被占用的記憶體。
+						rev_of_id = null;
 
 						// library_namespace.set_debug(3);
 						// 一般可以達到 95% 以上採用 dump file 的程度，10分鐘內跑完。
