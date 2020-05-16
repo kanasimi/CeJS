@@ -2262,31 +2262,38 @@ function module_code(library_namespace) {
 	}
 
 	// @inner
-	function read_latest_revid_of_dump(filepath, callback, options) {
-		var buffer = Buffer.alloc(Math.pow(2, 16));
+	function almost_latest_revid_of_dump(filepath, callback, options) {
+		// 65536 === Math.pow(2, 16); as a block
+		var buffer = Buffer.alloc(65536);
 		var position = Math.max(0, node_fs.statSync(filepath).size
 				- buffer.length);
 		// file descriptor
 		var fd = node_fs.openSync(filepath, 'r');
+		var latest_revid_of_dump;
 
 		while (true) {
 			node_fs.readSync(fd, buffer, 0, buffer.length, position);
 			var contents = buffer.toString('utf8');
-			var matched = contents
-			// TODO: read_latest_revid_of_dump() 只能獲得最新創建文章的最新 revid，而非最後的
-			// revid。
-			.match(/<revision>[\s\n]*<id>(\d{1,16})<\/id>[\s\S]*?$/);
-			if (matched) {
-				callback(+matched[1]);
+			var matched, PATTERN = /<revision>[\s\n]*<id>(\d{1,16})<\/id>[\s\S]*?$/g;
+			// Warning: almost_latest_revid_of_dump() 只能快速取得最新創建幾篇文章的最新
+			// revid，而非最後的 revid。
+			while (matched = PATTERN.exec(contents)) {
+				matched = +matched[1];
+				if (!(latest_revid_of_dump > matched))
+					latest_revid_of_dump = matched;
+			}
+			if (latest_revid_of_dump > 0) {
+				callback(latest_revid_of_dump);
 				return;
 			}
 
 			if (position > 0) {
 				position = Math.max(0, position - buffer.length
-				// +200: 預防跳過 /<id>(\d{1,16})<\/id>/。
-				// assert: buffer.length > 200
-				+ 200);
+				// +256: 預防跳過 /<id>(\d{1,16})<\/id>/。
+				// assert: buffer.length > 256
+				+ 256);
 			} else {
+				// No data get.
 				callback();
 				return;
 			}
@@ -2304,8 +2311,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}[filepath]
 	 *            欲讀取的 .xml 檔案路徑。
-	 * @param {Function}callback
-	 *            回調函數。 callback({Object}page_data)
+	 * @param {Function}for_each_page
+	 *            Calling for each page. for_each_page({Object}page_data)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
@@ -2317,12 +2324,12 @@ function module_code(library_namespace) {
 	 * 
 	 * @since 2016/3/11
 	 */
-	function read_dump(filepath, callback, options) {
-		if (typeof filepath === 'function' && typeof callback !== 'function'
-				&& !options) {
+	function read_dump(filepath, for_each_page, options) {
+		if (typeof filepath === 'function'
+				&& typeof for_each_page !== 'function' && !options) {
 			// shift arguments
-			options = callback;
-			callback = filepath;
+			options = for_each_page;
+			for_each_page = filepath;
 			filepath = null;
 		}
 
@@ -2332,7 +2339,7 @@ function module_code(library_namespace) {
 						+ filepath + '], try to get the latest dump file...');
 			}
 			get_latest_dump(filepath, function(filepath) {
-				read_dump(filepath, callback, options);
+				read_dump(filepath, for_each_page, options);
 			}, options);
 			// 警告: 無法馬上取得檔案時，將不會回傳任何資訊！
 			return;
@@ -2341,7 +2348,7 @@ function module_code(library_namespace) {
 		options = library_namespace.setup_options(options);
 
 		if (options.get_latest_revid) {
-			read_latest_revid_of_dump(filepath, callback, options);
+			almost_latest_revid_of_dump(filepath, for_each_page, options);
 			return;
 		}
 
@@ -2477,7 +2484,7 @@ function module_code(library_namespace) {
 			 * function({Object}page_data, {Natural}position: 到本page結束時之檔案位置,
 			 * {Array}page_anchor)
 			 */
-			callback(page_data, bytes, page_anchor/* , file_status */)) {
+			for_each_page(page_data, bytes, page_anchor/* , file_status */)) {
 				// console.log(file_stream);
 				library_namespace.info('read_dump: Quit operation, 中途跳出作業...');
 				file_stream.end();
@@ -2594,13 +2601,13 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {Object}[config]
 	 *            configuration
-	 * @param {Function}callback
-	 *            回調函數。 callback(page_data)
+	 * @param {Function}for_each_page
+	 *            Calling for each page. for_each_page({Object}page_data)
 	 */
-	function traversal_pages(config, callback) {
-		if (typeof config === 'function' && callback === undefined) {
+	function traversal_pages(config, for_each_page) {
+		if (typeof config === 'function' && for_each_page === undefined) {
 			// shift arguments.
-			callback = config;
+			for_each_page = config;
 			config = Object.create(null);
 		} else {
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
@@ -2616,7 +2623,7 @@ function module_code(library_namespace) {
 				// 這邊的 ((true)) 僅表示要使用，並採用預設值；不代表設定 dump file path。
 				config.use_dump_only = null;
 			}
-			read_dump(config.use_dump_only, callback, {
+			read_dump(config.use_dump_only, for_each_page, {
 				// 一般來說只會用到 config.last，將在本函數中稍後執行，
 				// 因此先不開放 config.first, config.last。
 
@@ -2652,10 +2659,11 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (!(config.latest_revid_of_dump > 0)) {
+		var latest_revid_of_dump = config.latest_revid_of_dump;
+		if (!(latest_revid_of_dump > 0)) {
 			read_dump(dump_file, function(latest_revid_of_dump) {
 				config.latest_revid_of_dump = latest_revid_of_dump;
-				traversal_pages(config, callback);
+				traversal_pages(config, for_each_page);
 			}, {
 				get_latest_revid : true,
 				directory : config.dump_directory
@@ -2727,18 +2735,18 @@ function module_code(library_namespace) {
 				// config.is_id = is_id;
 			}
 			// 因為已經取得所有列表，重新呼叫traversal_pages()。
-			traversal_pages(config, callback);
+			traversal_pages(config, for_each_page);
 		}
 		function generate_revision_list() {
 			library_namespace.info(
 			// Wikimedia Toolforge database replicas.
 			'traversal_pages: 嘗試讀取 Wikimedia Toolforge 上之 database replication 資料，'
-					+ '一次讀取完版本號 ' + config.latest_revid_of_dump
+					+ '一次讀取完版本號 ' + latest_revid_of_dump
 					+ ' 之後，所有頁面最新修訂版本之版本號 rev_id...');
 			var SQL = is_id ? all_revision_SQL : all_revision_SQL.replace(
 					/page_id/g, 'page_title');
-			SQL = SQL.replace(/(`rev_id` > )0 /, '$1'
-					+ config.latest_revid_of_dump + ' ');
+			SQL = SQL.replace(/(`rev_id` > )0 /, '$1' + latest_revid_of_dump
+					+ ' ');
 			// assert: 當有比 dump_fire 裡面的更新的版本時，會被篩選出。
 			var SQL_config = config && config.SQL_config
 			//
@@ -2804,6 +2812,10 @@ function module_code(library_namespace) {
 					rev_of_id[id] = rev_list[index];
 				});
 
+				// Release memory. 釋放被占用的記憶體。
+				id_list = null;
+				rev_list = null;
+
 				read_dump(dump_file,
 				// e.g., /shared/cache/zhwiki-20200401-pages-articles.xml
 				function(page_data, position, page_anchor) {
@@ -2851,11 +2863,6 @@ function module_code(library_namespace) {
 						&& page_data.revisions[0],
 						/** {Natural}所取得之版本編號。 */
 						revid = revision && revision.revid;
-						if (config.latest_revid_of_dump < revid) {
-							// read_latest_revid_of_dump() 只能獲得最新創建文章的最新
-							// revid，而非最後的 revid。
-							config.latest_revid_of_dump = revid;
-						}
 
 						/** {String}page title = page_data.title */
 						var title = CeL.wiki.title_of(page_data),
@@ -2922,8 +2929,8 @@ function module_code(library_namespace) {
 					// page_data.dump = dump_file;
 
 					// ------------------------------------
-					// 有必要中途跳出時則須在 callback() 中設定：
-					// @ callback(page_data, messages):
+					// 有必要中途跳出時則須在 for_each_page() 中設定：
+					// @ for_each_page(page_data, messages):
 					if (false && need_quit) {
 						if (messages) {
 							// 當在 .work() 中執行時。
@@ -2936,7 +2943,7 @@ function module_code(library_namespace) {
 					}
 					// ------------------------------------
 
-					return callback(page_data);
+					return for_each_page(page_data);
 
 				}, {
 					session : config[KEY_SESSION],
@@ -2957,10 +2964,27 @@ function module_code(library_namespace) {
 							throw e;
 						}
 					},
+					// @see function parse_dump_xml(xml, start_index, filter)
 					filter : function(pageid, revid) {
-						// 開始執行時，dump_file 裡面的是最新的頁面。
-						// 注意: 若執行中有新的變更，本頁面會 traversal 兩次！
-						return !(pageid in rev_of_id);
+						if (!(pageid in rev_of_id)) {
+							// 開始執行時，dump_file 裡面的是最新的頁面。
+							// 注意: 若執行中有新的變更，不會 traversal 到本頁面最新版本！
+							return true;
+						}
+
+						// Warning: almost_latest_revid_of_dump()
+						// 只能快速取得最新創建幾篇文章的最新 revid，而非最後的 revid。
+						if (latest_revid_of_dump < revid) {
+							// assert: latest_revid_of_dump < revid
+							latest_revid_of_dump = revid;
+							// assert: revid <= rev_of_id[pageid]
+							if (revid === rev_of_id[pageid]) {
+								// 開始執行時，dump_file 裡面的是最新的頁面。
+								// 注意: 若執行中有新的變更，不會 traversal 到本頁面最新版本！
+								delete rev_of_id[pageid];
+								return true;
+							}
+						}
 					},
 					// options.last.call(file_stream, anchor, quit_operation)
 					// of read_dump()
@@ -2978,15 +3002,9 @@ function module_code(library_namespace) {
 								+ percent + '%), '
 								+ ((Date.now() - start_read_time) / 1000 | 0)
 								+ ' s elapsed.');
-						var latest_revid_of_dump = config.latest_revid_of_dump;
-						var need_API = id_list.filter(function(id, index) {
-							return latest_revid_of_dump < rev_list[index];
-						});
+						config.latest_revid_of_dump = latest_revid_of_dump;
+						var need_API = Object.keys(rev_of_id);
 						need_API.is_id = is_id;
-
-						// Release memory. 釋放被占用的記憶體。
-						id_list = null;
-						rev_list = null;
 
 						// library_namespace.set_debug(3);
 						// 一般可以達到 95% 以上採用 dump file 的程度，10分鐘內跑完。
@@ -3019,7 +3037,7 @@ function module_code(library_namespace) {
 					is_id : id_list.is_id,
 					no_message : true,
 					no_edit : 'no_edit' in config ? config.no_edit : true,
-					each : callback,
+					each : for_each_page,
 					// 取得多個頁面內容所用之 options。
 					// e.g., { rvprop : 'ids|timestamp|content' }
 					// Warning: 這對經由 dump 取得之 page 無效！
@@ -3043,7 +3061,7 @@ function module_code(library_namespace) {
 				// 可用於額外功能。
 				// e.g., 若 revision 相同，從 dump 而不從 API 讀取。
 				// id_list, rev_list 採用相同的 index。
-				config.filter(run_work, callback, id_list, rev_list);
+				config.filter(run_work, for_each_page, id_list, rev_list);
 			} else {
 				run_work(id_list);
 			}
