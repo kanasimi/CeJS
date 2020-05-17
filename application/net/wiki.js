@@ -4658,16 +4658,20 @@ function module_code(library_namespace) {
 			API_URL = options.API_URL;
 			session = options[KEY_SESSION];
 			callback = options.callback;
-		} else {
-			if (typeof options === 'function') {
-				callback = options;
-			} else if (typeof options === 'string') {
-				// treat options as API_URL
-				API_URL = options;
-			}
+		} else if (typeof options === 'function') {
+			callback = options;
 			// 前置處理。
 			options = Object.create(null);
+		} else if (typeof options === 'string') {
+			// treat options as API_URL
+			options = {
+				API_URL : API_URL = options
+			};
+		} else {
+			// 前置處理。
+			options = library_namespace.setup_options(options);
 		}
+		// besure {Function}callback
 		callback = typeof callback === 'function' && callback;
 
 		if (!session) {
