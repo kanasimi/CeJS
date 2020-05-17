@@ -1505,7 +1505,8 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/w/api.php?action=query&prop=redirects&rdprop&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
 	// https://zh.wikipedia.org/w/api.php?action=query&prop=redirects&rdprop=title&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
 
-	// 溯源(追尋至重定向終點)
+	// 溯源(追尋至重定向終點) redirects_target()
+	// TODO: using wiki_API.redirect_to
 	wiki_API.redirects_root = function redirects_root(title, callback, options) {
 		// .original_title , .convert_from
 		options = Object.assign({
@@ -1517,7 +1518,7 @@ function module_code(library_namespace) {
 		// .redirects() 本身不會作繁簡轉換。
 		// redirect_to: 追尋至重定向終點
 
-		wiki_API.page(title, function(page_data) {
+		wiki_API.page(title, function(page_data, error) {
 			// console.log(page_data);
 
 			callback(
@@ -1525,7 +1526,7 @@ function module_code(library_namespace) {
 			// wiki_API.parse.redirect(wiki_API.content_of(page_data)) ||
 
 			// 若是 convert 過則採用新的 title。
-			page_data.title || title, page_data);
+			page_data.title || title, page_data, error);
 		}, options);
 	};
 
@@ -1571,7 +1572,7 @@ function module_code(library_namespace) {
 			// .original_title , .convert_from
 			options.query_title = title;
 			// 先溯源(追尋至重定向終點)
-			wiki_API.redirects_root(title, function(title, page_data) {
+			wiki_API.redirects_root(title, function(title, page_data, error) {
 				// cache
 				options.page_data = page_data;
 				// 已追尋至重定向終點，不再溯源。

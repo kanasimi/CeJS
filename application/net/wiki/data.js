@@ -194,6 +194,7 @@ function module_code(library_namespace) {
 		typeof API_URL === 'string' && wiki_API.api_URL(API_URL)
 		//
 		|| wikidata_API_URL ];
+		// console.trace(data_config);
 		if (data_config[0] && data_config[1]) {
 			session.data_session = wiki_API.login(data_config[0],
 					data_config[1], data_config[2]);
@@ -1582,7 +1583,7 @@ function module_code(library_namespace) {
 									+ wiki_API.title_link_of(key), 1,
 									'wikidata_entity');
 							data[KEY_CORRESPOND_PAGE] = key;
-							if (!data.lastrevid) {
+							if (false && !data.lastrevid) {
 								library_namespace
 										.log('wikidata_entity: action: '
 												+ action);
@@ -4220,7 +4221,8 @@ function module_code(library_namespace) {
 					options.baserevid = id.lastrevid;
 				} else {
 					console.trace(id);
-					throw new Error('Invalid entity!');
+					throw new Error(
+							'wikidata_edit: Invalid entity: No .lastrevid!');
 				}
 			}
 			id = id.id;
