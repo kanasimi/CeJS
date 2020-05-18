@@ -1863,9 +1863,9 @@ function module_code(library_namespace) {
 						: '') + ']]';
 	}
 
-	function revision_content(revision) {
+	function revision_content(revision, allow_non_string) {
 		if (!revision)
-			return '';
+			return allow_non_string ? undefined : '';
 
 		if (revision.slots) {
 			// 2019 API: page_data.revisions[0].slots.main['*']
@@ -1878,7 +1878,7 @@ function module_code(library_namespace) {
 				break;
 			}
 		}
-		return revision['*'] || '';
+		return allow_non_string ? revision['*'] : revision['*'] || '';
 	}
 
 	/**
@@ -2003,13 +2003,24 @@ function module_code(library_namespace) {
 		&& page_data.revisions && page_data.revisions[revision_index || 0];
 	};
 
+	get_page_content.page_exists = function(page_data) {
+		return get_page_content.is_page_data(page_data)
+				&& !('missing' in page_data) && !('invalid' in page_data);
+	};
+
 	// 曾經以 session.page() 請求過內容。
 	get_page_content.had_fetch_content = function(page_data, revision_index) {
-		return get_page_content.revision(page_data) || ('missing' in page_data)
+		return get_page_content.is_page_data(page_data)
+		//
+		&& (('missing' in page_data)
 		// {title:'%2C',invalidreason:
 		// 'The requested page title contains invalid characters: "%2C".'
 		// ,invalid:''}
-		|| ('invalid' in page_data);
+		|| ('invalid' in page_data)
+		//
+		|| typeof revision_content(
+		//
+		get_page_content.revision(page_data), true) === 'string');
 	};
 
 	// CeL.wiki.content_of.edit_time(page_data) -
@@ -4077,7 +4088,9 @@ function module_code(library_namespace) {
 						this.page(page, null, single_page_options)
 						// 編輯頁面內容。
 						.edit(function(page_data) {
-							if ('missing' in page_data) {
+							if (('missing' in page_data)
+							//
+							|| ('invalid' in page_data)) {
 								// return [ wiki_API.edit.cancel, 'skip' ];
 							}
 
@@ -5056,7 +5069,7 @@ function module_code(library_namespace) {
 
 		// setup_configuration()
 		function adapt_configuration(page_data) {
-			if ('missing' in page_data) {
+			if (!wiki_API.content_of.page_exists(page_data)) {
 				library_namespace.debug('No configuration page: '
 						+ wiki_API.title_link_of(page_data), 1,
 						'adapt_task_configurations');

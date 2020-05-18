@@ -176,7 +176,7 @@ function module_code(library_namespace) {
 		if (options.get_creation_Date) {
 			// 警告:僅適用於單一頁面。
 			wiki_API_page(title, function(page_data, error) {
-				if (error || !page_data || ('missing' in page_data)) {
+				if (error || !wiki_API.content_of.page_exists(page_data)) {
 					// error? 此頁面不存在/已刪除。
 					callback(page_data, error);
 					return;
@@ -231,7 +231,9 @@ function module_code(library_namespace) {
 				&& !(prop = query_props.shift()))
 					;
 
-				if (!prop || page_data && ('missing' in page_data)) {
+				if (!prop || page_data
+				//
+				&& (('missing' in page_data) || ('invalid' in page_data))) {
 					// 此頁面不存在/已刪除。
 					callback(page_data);
 				} else {
@@ -897,7 +899,7 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.redirect_to = function(title, callback, options) {
 		wiki_API.page(title, function(page_data, error) {
-			if (error || !page_data || ('missing' in page_data)) {
+			if (error || !wiki_API.content_of.page_exists(page_data)) {
 				// error? 此頁面不存在/已刪除。
 				callback(undefined, page_data, error);
 				return;
@@ -2841,7 +2843,7 @@ function module_code(library_namespace) {
 					// Check data.
 
 					if (false) {
-						if (!page_data || ('missing' in page_data)) {
+						if (!CeL.wiki.content_of.page_exists(page_data)) {
 							// error? 此頁面不存在/已刪除。
 							return [ CeL.wiki.edit.cancel, '條目不存在或已被刪除' ];
 						}
@@ -3260,9 +3262,9 @@ function module_code(library_namespace) {
 		// 注意: 若未 return true，則表示 page_data 為正規且 cache 中沒有，或較 cache 新的頁面資料。
 		had : function(page_data) {
 			// page_data 為正規?
-			if (!page_data || ('missing' in page_data)) {
+			if (!wiki_API.content_of.page_exists(page_data)) {
 				// error? 此頁面不存在/已刪除。
-				return 'missing';
+				return 'not exists';
 			}
 
 			var

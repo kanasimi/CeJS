@@ -1637,7 +1637,7 @@ function module_code(library_namespace) {
 				var page = data[pageid];
 				pages.push(page);
 				// 僅處理第一頁。
-				if ('missing' in page) {
+				if (!wiki_API.content_of.page_exists(page)) {
 					// 此頁面不存在/已刪除。Page does not exist. Deleted?
 					library_namespace.warn(
 					//
