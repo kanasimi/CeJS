@@ -309,15 +309,12 @@ function module_code(library_namespace) {
 		if (options['continue'] > 0)
 			action[1] += '&continue=' + options['continue'];
 
-		wiki_API.query(action, function(data, error) {
-			if (!error) {
-				error = data ? data.error : 'No data get';
-			}
+		wiki_API.query(action, function handle_result(data, error) {
+			error = error || (data ? data.error : new Error('No data get!'));
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.error('wikidata_search: ['
-				//
-				+ error.code + '] ' + error.info);
+				library_namespace.error('wikidata_search: [' + error.code
+						+ '] ' + (error.info || error.message));
 				callback(undefined, error);
 				return;
 			}
@@ -1536,8 +1533,8 @@ function module_code(library_namespace) {
 		var _arguments = arguments;
 		// console.log(arguments);
 		// TODO:
-		wiki_API.query(action, function(data, error) {
-			error = error || data && data.error;
+		wiki_API.query(action, function handle_result(data, error) {
+			error = error || (data ? data.error : new Error('No data get!'));
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				if (error.code === 'param-missing') {
@@ -1556,7 +1553,7 @@ function module_code(library_namespace) {
 					//
 					+ (error.code ? '[' + error.code + '] '
 					//
-					+ error.info : error));
+					+ (error.info || error.message) : error));
 				}
 				callback(undefined, error);
 				return;
@@ -1825,13 +1822,13 @@ function module_code(library_namespace) {
 		var action = [ get_data_API_URL(options),
 		// https://www.wikidata.org/w/api.php?action=wbgetentities&props=datatype&ids=P7
 		'wbgetentities&props=datatype&ids=' + property ];
-		wiki_API.query(action, function(data) {
-			var error = data && data.error;
+		wiki_API.query(action, function handle_result(data, error) {
+			error = error || (data ? data.error : new Error('No data get!'));
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				library_namespace.error('wikidata_datatype: ['
 				//
-				+ error.code + '] ' + error.info);
+				+ error.code + '] ' + (error.info || error.message));
 				callback(undefined, error);
 				return;
 			}
@@ -2994,15 +2991,16 @@ function module_code(library_namespace) {
 
 			wiki_API.query([ API_URL, 'wbsetreference' ],
 			// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
-			function(data) {
+			function handle_result(data, error) {
+				error = error
+						|| (data ? data.error : new Error('No data get!'));
 				// console.log(data);
 				// console.log(JSON.stringify(data));
-				var error = data && data.error;
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					// e.g., set_references: [failed-save] Edit conflict.
 					library_namespace.error('set_references: [' + error.code
-							+ '] ' + error.info);
+							+ '] ' + (error.info || error.message));
 				}
 				// data =
 				// {"pageinfo":{"lastrevid":1},"success":1,"reference":{"hash":"123abc..","snaks":{...},"snaks-order":[]}}
@@ -3059,13 +3057,14 @@ function module_code(library_namespace) {
 		// the token should be sent as the last parameter.
 		POST_data.token = options.token;
 
-		wiki_API.query([ API_URL, 'wbremoveclaims' ], function(data) {
+		wiki_API.query([ API_URL, 'wbremoveclaims' ], function handle_result(
+				data, error) {
+			error = error || (data ? data.error : new Error('No data get!'));
 			// console.log(data);
-			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				library_namespace.error('remove_claims: [' + error.code + '] '
-						+ error.info);
+						+ (error.info || error.message));
 			}
 			// data =
 			// {pageinfo:{lastrevid:1},success:1,claims:['Q1$123-ABC']}
@@ -3255,8 +3254,9 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(POST_data));
 			// console.log(POST_data);
 
-			wiki_API.query(claim_action, function(data) {
-				var error = data && data.error;
+			wiki_API.query(claim_action, function handle_result(data, error) {
+				error = error
+						|| (data ? data.error : new Error('No data get!'));
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					/**
@@ -3265,7 +3265,7 @@ function module_code(library_namespace) {
 					 * </code>
 					 */
 					library_namespace.error('set_next_claim: [' + error.code
-							+ '] ' + error.info);
+							+ '] ' + (error.info || error.message));
 					library_namespace.warn('data to write: '
 							+ JSON.stringify(POST_data));
 					// console.log(claim_index);
@@ -3748,8 +3748,9 @@ function module_code(library_namespace) {
 			: label.value;
 
 			// 設定單一 Wikibase 實體的標籤。
-			wiki_API.query(action, function(data) {
-				var error = data && data.error;
+			wiki_API.query(action, function handle_result(data, error) {
+				error = error
+						|| (data ? data.error : new Error('No data get!'));
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					/**
@@ -3758,7 +3759,7 @@ function module_code(library_namespace) {
 					 * </code>
 					 */
 					library_namespace.error('set_next_labels: [' + error.code
-							+ '] ' + error.info);
+							+ '] ' + (error.info || error.message));
 				} else {
 					// successful done.
 					delete data_labels[label.language];
@@ -3924,8 +3925,9 @@ function module_code(library_namespace) {
 			POST_data.token = token;
 
 			// 設定單一 Wikibase 實體的標籤。
-			wiki_API.query(action, function(data) {
-				var error = data && data.error;
+			wiki_API.query(action, function handle_result(data, error) {
+				error = error
+						|| (data ? data.error : new Error('No data get!'));
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					/**
@@ -3934,7 +3936,7 @@ function module_code(library_namespace) {
 					 * </code>
 					 */
 					library_namespace.error('set_next_aliases: [' + error.code
-							+ '] ' + error.info);
+							+ '] ' + (error.info || error.message));
 				} else {
 					// successful done.
 				}
@@ -4085,8 +4087,9 @@ function module_code(library_namespace) {
 			POST_data.value = descriptions[language];
 
 			// 設定單一 Wikibase 實體的標籤。
-			wiki_API.query(action, function(data) {
-				var error = data && data.error;
+			wiki_API.query(action, function handle_result(data, error) {
+				error = error
+						|| (data ? data.error : new Error('No data get!'));
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					/**
@@ -4094,8 +4097,9 @@ function module_code(library_namespace) {
 					 * 
 					 * </code>
 					 */
-					library_namespace.error('set_next_descriptions: ['
-							+ error.code + '] ' + error.info);
+					library_namespace
+							.error('set_next_descriptions: [' + error.code
+									+ '] ' + (error.info || error.message));
 				} else {
 					// successful done.
 				}
@@ -4305,8 +4309,9 @@ function module_code(library_namespace) {
 			// the token should be sent as the last parameter.
 			options.token = token;
 
-			wiki_API.query(action, function handle_result(data) {
-				var error = data && data.error;
+			wiki_API.query(action, function handle_result(data, error) {
+				error = error
+						|| (data ? data.error : new Error('No data get!'));
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					library_namespace.error(
@@ -4316,7 +4321,7 @@ function module_code(library_namespace) {
 					//
 					+ (options.id ? options.id + ': ' : '')
 					// [readonly] The wiki is currently in read-only mode
-					+ '[' + error.code + '] ' + error.info);
+					+ '[' + error.code + '] ' + (error.info || error.message));
 					library_namespace.warn('data to write: '
 							+ JSON.stringify(options));
 					callback(undefined, error);
@@ -4859,14 +4864,14 @@ function module_code(library_namespace) {
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
 				: token;
 
-		wiki_API.query(action, function(data) {
-			var error = data && data.error;
+		wiki_API.query(action, function handle_result(data, error) {
+			error = error || (data ? data.error : new Error('No data get!'));
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				library_namespace.error('wikidata_merge: ['
 				// [failed-modify] Attempted modification of the item failed.
 				// (Conflicting descriptions for language zh)
-				+ error.code + '] ' + error.info);
+				+ error.code + '] ' + (error.info || error.message));
 				callback(undefined, error);
 				return;
 			}

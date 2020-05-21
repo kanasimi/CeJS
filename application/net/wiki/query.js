@@ -45,7 +45,7 @@ function module_code(library_namespace) {
 	// 以下皆泛用，無須 wiki_API instance。
 
 	/**
-	 * 實際執行 query 操作，直接 call API 之核心函數。
+	 * 實際執行 query 操作，直接 call API 之核心函數。 wiki_API.query()
 	 * 
 	 * 所有會利用到 wiki_API.prototype.work ← wiki_API.prototype.next ← <br />
 	 * wiki_API.page, wiki_API.edit, ... ← wiki_API_query ← get_URL ← <br />
@@ -459,13 +459,11 @@ function module_code(library_namespace) {
 			if (typeof callback === 'function') {
 				callback(response);
 			} else {
-				library_namespace
-						.error('wiki_API_query: No {Function}callback!');
+				throw new Error('wiki_API_query: No {Function}callback!');
 			}
 
 		}, null, post_data, get_URL_options);
 	}
-	;
 
 	wiki_API_query.get_URL_options = {
 		// default timeout: 1 minute
@@ -485,6 +483,10 @@ function module_code(library_namespace) {
 	 *      https://phabricator.wikimedia.org/T135240
 	 */
 	wiki_API_query.default_lag = 5000;
+
+	// 因為數量太多，只好增快速度。
+	// CeL.wiki.query.default_lag = 0;
+	// wiki_session.lag = 0;
 
 	// local rule
 	wiki_API_query.lag = {

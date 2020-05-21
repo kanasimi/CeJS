@@ -2856,7 +2856,7 @@ function module_code(library_namespace) {
 							//
 							+ wiki_API.title_link_of(page_data)
 							//
-							+ '! 照理來說不應該出現 ns !== 0 的情況。');
+							+ '! 照理來說不應該出現非條目的情況。');
 						}
 
 						/** {Object}revision data. 修訂版本資料。 */
