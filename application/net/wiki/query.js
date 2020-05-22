@@ -44,6 +44,96 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 	// 以下皆泛用，無須 wiki_API instance。
 
+	function check_session_badtoken(result, callback, options) {
+		var session = wiki_API.session_of_options(options);
+
+		if (result ? result.error
+		// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
+		? result.error.code === 'badtoken'
+		// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
+		: !result.edit
+		// flow:
+		// {status:'ok',workflow:'...',committed:{topiclist:{...}}}
+		&& result.status !== 'ok'
+		// e.g., wbcreateclaim
+		&& result.success : result === '') {
+			// Invalid token
+			library_namespace.warn(
+			//
+			'check_session_badtoken: ' + session.language
+			//
+			+ ': It seems we lost the token. 似乎丟失了 token。');
+			// console.log(result);
+			if (!library_namespace.platform.nodejs) {
+				throw new Error('check_session_badtoken: Not using node.js!');
+			}
+			// 下面的 workaround 僅適用於 node.js。
+			if (!session.token.lgpassword) {
+				// 死馬當活馬醫，仍然嘗試重新取得 token... 沒有密碼無效。
+				throw new Error(
+						'check_session_badtoken: No password preserved!');
+			}
+
+			if (typeof options.rollback_action !== 'function') {
+				throw new Error(
+						'check_session_badtoken: Did not set options.rollback_action()!');
+			}
+
+			// rollback action
+			options.rollback_action();
+
+			// reset node agent.
+			// 應付 2016/1 MediaWiki 系統更新，
+			// 需要連 HTTP handler 都重換一個，重起 cookie。
+			// 發現大多是因為一次處理數十頁面，可能遇上 HTTP status 413 的問題。
+			setup_API_URL(session, true);
+			if (false && result === '') {
+				// force to login again: see wiki_API.login
+				delete session.token.csrftoken;
+				delete session.token.lgtoken;
+				// library_namespace.set_debug(6);
+			}
+			// TODO: 在這即使 rollback 了 action，
+			// 還是可能出現丟失 next[2].page_to_edit 的現象。
+			// e.g., @ 20160517.解消済み仮リンクをリンクに置き換える.js
+
+			// 直到 .edit 動作才會出現 badtoken，
+			// 因此在 wiki_API.login 尚無法偵測是否 badtoken。
+			if ('retry_login' in session) {
+				if (++session.retry_login > 2) {
+					throw new Error(
+					// 當錯誤 login 太多次時，直接跳出。
+					'check_session_badtoken: Too many failed login attempts: ['
+							+ session.token.lgname + ']');
+				}
+				library_namespace.info('check_session_badtoken: Retry '
+						+ session.retry_login);
+			} else {
+				session.retry_login = 0;
+			}
+
+			library_namespace.info('check_session_badtoken: '
+					+ 'Try to get token again. 嘗試重新取得 token。');
+			wiki_API.login(session.token.lgname,
+			//
+			session.token.lgpassword, {
+				force : true,
+				// [KEY_SESSION]
+				session : session,
+				// 將 'login' 置於最前頭。
+				login_mark : true
+			});
+
+		} else {
+			if ('retry_login' in session) {
+				// 已成功 edit，去除 retry flag。
+				delete session.retry_login;
+			}
+			// run next action
+			callback(result);
+		}
+	}
+
 	/**
 	 * 實際執行 query 操作，直接 call API 之核心函數。 wiki_API.query()
 	 * 
@@ -66,6 +156,10 @@ function module_code(library_namespace) {
 	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/includes/api
 	 */
 	function wiki_API_query(action, callback, post_data, options) {
+		if (typeof callback !== 'function') {
+			throw new Error('wiki_API_query: No {Function}callback!');
+		}
+
 		// 處理 action
 		library_namespace.debug('action: ' + action, 2, 'wiki_API_query');
 		if (typeof action === 'string')
@@ -139,7 +233,10 @@ function module_code(library_namespace) {
 		// additional parameters
 		if (!action[2] && options && options.additional) {
 			action[2] = options.additional;
+			delete options.additional;
 		}
+
+		var original_action = action.clone();
 
 		// https://www.mediawiki.org/wiki/API:Data_formats
 		// 因不在 white-list 中，無法使用 CORS。
@@ -208,9 +305,7 @@ function module_code(library_namespace) {
 				+ error.code + '] ' + error.info);
 			}
 
-			if (typeof callback === 'function') {
-				callback(response);
-			}
+			callback(response);
 		}
 
 		// 開始處理 query request。
@@ -232,10 +327,7 @@ function module_code(library_namespace) {
 				wiki_API_query.get_URL_options, options
 						&& options.get_URL_options);
 
-		// @see function setup_API_URL(session, API_URL)
-		var session = options && (options[KEY_SESSION]
-		// 檢查若 options 本身即為 session。
-		|| wiki_API.is_wiki_API(options) && options);
+		var session = wiki_API.session_of_options(options);
 		if (session) {
 			if (method === 'edit' && post_data
 			//
@@ -456,11 +548,13 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (typeof callback === 'function') {
-				callback(response);
-			} else {
-				throw new Error('wiki_API_query: No {Function}callback!');
+			if (!options.rollback_action) {
+				// Re-run wiki_API.query() after get new token.
+				options.rollback_action = wiki_API_query.bind(null,
+						original_action, callback, post_data, options);
 			}
+			// callback(response);
+			check_session_badtoken(response, callback, options);
 
 		}, null, post_data, get_URL_options);
 	}

@@ -218,12 +218,12 @@ function module_code(library_namespace) {
 	// extract session from options, get_session_from_options
 	// var session = session_of_options(options);
 	function session_of_options(options) {
-		var session = options
+		// @see function setup_API_URL(session, API_URL)
+		return options
 		// 此時嘗試從 options[KEY_SESSION] 取得 session。
-		&& options[KEY_SESSION] || options;
-		if (is_wiki_API(session)) {
-			return session;
-		}
+		&& (options[KEY_SESSION]
+		// 檢查若 options 本身即為 session。
+		|| wiki_API.is_wiki_API(options) && options);
 	}
 
 	// 維基姊妹項目
@@ -2104,6 +2104,7 @@ function module_code(library_namespace) {
 		this.running = 0 < this.actions.length;
 		if (!this.running) {
 			// this.thread_count = 0;
+			// delete this.current_action;
 			library_namespace.debug('The queue is empty.', 2,
 					'wiki_API.prototype.next');
 			// console.warn(this);
@@ -2124,6 +2125,7 @@ function module_code(library_namespace) {
 			list_type = type;
 			type = 'list';
 		}
+		// this.current_action = next;
 
 		if (library_namespace.is_debug(3)) {
 			library_namespace.debug(
@@ -2145,89 +2147,6 @@ function module_code(library_namespace) {
 				}
 				return message && message.slice(0, 80);
 			}) + ']', 1, 'wiki_API.prototype.next');
-		}
-
-		// ------------------------------------------------
-
-		function check_badtoken(result, run_next_action, rollback_action,
-				session) {
-			// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
-			if (result ? result.error
-			//
-			? result.error.code === 'badtoken'
-			// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
-			: !result.edit
-			// flow:
-			// {status:'ok',workflow:'...',committed:{topiclist:{...}}}
-			&& result.status !== 'ok' : result === '') {
-				// Invalid token
-				library_namespace.warn(
-				//
-				'check_badtoken: ' + session.language
-				//
-				+ ': It seems we lost the token. 似乎丟失了 token。');
-				// console.log(result);
-				if (!library_namespace.platform.nodejs) {
-					throw new Error('check_badtoken: Not using node.js!');
-				}
-				// 下面的 workaround 僅適用於 node.js。
-				if (!session.token.lgpassword) {
-					// 死馬當活馬醫，仍然嘗試重新取得 token... 沒有密碼無效。
-					throw new Error('check_badtoken: '
-							+ 'No password preserved!');
-				}
-
-				// reset node agent.
-				// 應付 2016/1 MediaWiki 系統更新，
-				// 需要連 HTTP handler 都重換一個，重起 cookie。
-				// 發現大多是因為一次處理數十頁面，可能遇上 HTTP status 413 的問題。
-				setup_API_URL(session, true);
-				if (false && result === '') {
-					// force to login again: see wiki_API.login
-					delete session.token.csrftoken;
-					delete session.token.lgtoken;
-					// library_namespace.set_debug(6);
-				}
-				// TODO: 在這即使 rollback 了 action，
-				// 還是可能出現丟失 next[2].page_to_edit 的現象。
-				// e.g., @ 20160517.解消済み仮リンクをリンクに置き換える.js
-
-				// 直到 .edit 動作才會出現 badtoken，
-				// 因此在 wiki_API.login 尚無法偵測是否 badtoken。
-				if ('retry_login' in session) {
-					if (++session.retry_login > 2) {
-						throw new Error(
-						// 當錯誤 login 太多次時，直接跳出。
-						'check_badtoken: Too many failed login attempts: ['
-								+ session.token.lgname + ']');
-					}
-					library_namespace.info('wiki_API.next: Retry '
-							+ session.retry_login);
-				} else {
-					session.retry_login = 0;
-				}
-
-				rollback_action();
-
-				library_namespace.info('check_badtoken: '
-						+ 'Try to get token again. 嘗試重新取得 token。');
-				wiki_API.login(session.token.lgname,
-				//
-				session.token.lgpassword, {
-					force : true,
-					// [KEY_SESSION]
-					session : session,
-					// 將 'login' 置於最前頭。
-					login_mark : true
-				});
-
-			} else {
-				if ('retry_login' in session) {
-					// 已成功 edit，去除 retry flag。
-					delete session.retry_login;
-				}
-				run_next_action();
-			}
 		}
 
 		// ------------------------------------------------
@@ -2883,6 +2802,14 @@ function module_code(library_namespace) {
 				break;
 			}
 
+			next[2].rollback_action = function rollback_action() {
+				// rollback action
+				_this.actions.unshift(
+				// 重新登入以後，編輯頁面之前再取得一次頁面內容。
+				[ 'page', next[2].page_to_edit.title ], next);
+				check_next(true);
+			};
+
 			wiki_API.edit([ this.API_URL, next[2].page_to_edit ],
 			// 因為已有 contents，直接餵給轉換函式。
 			next[1], this.token,
@@ -2890,20 +2817,12 @@ function module_code(library_namespace) {
 			add_session_to_options(this, next[2]),
 			//
 			function wiki_API_next_edit_callback(title, error, result) {
-				check_badtoken(result, function run_next_action() {
-					// next[3] : callback
-					if (typeof next[3] === 'function')
-						next[3].apply(_this, arguments);
-					// assert: 應該有 next[2].page_to_edit。
-					check_and_delete_revisions();
-					check_next();
-				}, function rollback_action() {
-					// rollback action
-					_this.actions.unshift(
-					// 重新登入以後，編輯頁面之前再取得一次頁面內容。
-					[ 'page', next[2].page_to_edit.title ], next);
-					check_next(true);
-				}, _this);
+				// next[3] : callback
+				if (typeof next[3] === 'function')
+					next[3].apply(_this, arguments);
+				// assert: 應該有 next[2].page_to_edit。
+				check_and_delete_revisions();
+				check_next();
 			});
 			break;
 
@@ -4753,7 +4672,7 @@ function module_code(library_namespace) {
 			// Use "action=query&meta=tokens&type=login" instead.
 			'query&meta=tokens&type=login' ], function(data, _error) {
 				// console.log([ data, error ]);
-				if (_error || !data.query || !data.query.tokens
+				if (_error || !data || !data.query || !data.query.tokens
 						|| !data.query.tokens.logintoken) {
 					library_namespace.error(
 					//		
