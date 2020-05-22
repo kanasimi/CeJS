@@ -1930,7 +1930,7 @@ function module_code(library_namespace) {
 			// console.log(options);
 			// console.log(options[KEY_SESSION]);
 			// throw new Error(options[KEY_SESSION].language);
-			wiki_site_name = wiki_API.site_name(options[KEY_SESSION]
+			wiki_site_name = wiki_API.site_name(options
 					|| options.project || options.family);
 		}
 

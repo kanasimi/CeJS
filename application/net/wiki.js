@@ -226,39 +226,6 @@ function module_code(library_namespace) {
 		|| wiki_API.is_wiki_API(options) && options);
 	}
 
-	// 維基姊妹項目
-	// TODO: 各種 type 間的轉換: 先要能擷取出 language code + family
-	//
-	// type: 'API', 'db', 'site', 'link', 'dump', ...
-	// API URL (default): e.g., 'https://www.wikidata.org/w/api.php'
-	//
-	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
-	// site: e.g., 'zhwiki'. `.wikiid` @ siteinfo
-	// @see wikidatawiki_p.wb_items_per_site.ips_site_id
-	//
-	// [[en:Help:Interwikimedia_links]] [[Special:Interwiki]]
-	// https://zh.wikipedia.org/wiki/Special:GoToInterwiki/testwiki:
-	// link prefix: e.g., 'zh:n:' for zh.wikinews
-	//
-	// https://dumps.wikimedia.org/backup-index.html
-	// dump: e.g., 'zhwikinews'
-	//
-	// SHOW DATABASES;
-	// db: e.g., 'zhwiki_p'
-	//
-	//
-	// language (or family/project): default language: wiki_API.language
-	// e.g., 'en', 'zh-classical', 'ja', ...
-	//
-	// project = language_code.family
-	//
-	// [[meta:List of Wikimedia projects by size]]
-	// family: 'wikipedia' (default), 'news', 'source', 'books', 'quote', ...
-	function get_project(language, family, type) {
-		// @see CeL.wiki.site_name(wiki), language_to_site_name(wiki)
-		TODO;
-	}
-
 	// @inner TODO: MUST re-design
 	function get_wikimedia_project_name(session) {
 		return is_wiki_API(session)
@@ -522,6 +489,17 @@ function module_code(library_namespace) {
 	// 須亦能匹配 site key:
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 	PATTERN_PROJECT_CODE_i = new RegExp(PATTERN_PROJECT_CODE.source, 'i');
+
+	// 可用來拆分 language, family。以防 incase wikt, wikisource
+	// testwikidatawiki → [,testwikidata,wiki]
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
+	// e.g., 'zh_min_nanwikibooks'
+	// MariaDB [zhwiki_p]> SHOW DATABASES;
+	// e.g., "wikimania2018wiki_p"
+	// 2020/5 left:
+	// ["centralauth_p","heartbeat_p","information_schema","information_schema_p","meta_p"]
+	// [ all, language code, family ]
+	var PATTERN_SITE = /^([a-z\d\_]{2,13})(wiki|wikibooks|wiktionary|wikiquote|wikisource|wikinews|wikiversity|wikivoyage|wikimedia)$/;
 
 	/**
 	 * Wikimedia projects 的 URL match pattern 匹配模式。
@@ -4851,7 +4829,7 @@ function module_code(library_namespace) {
 			site_configurations.interwiki_pattern = new RegExp('^('
 					+ interwikimap.map(function(interwiki) {
 						return interwiki.prefix;
-					}).join('|') + ')(?::(.+))?$', 'i');
+					}).join('|') + ')(?::(.*))?$', 'i');
 		}
 
 		var languagevariants = configurations.languagevariants;
@@ -5940,6 +5918,39 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// 維基姊妹項目
+	// TODO: 各種 type 間的轉換: 先要能擷取出 language code + family
+	//
+	// type: 'API', 'db', 'site', 'link', 'dump', ...
+	// API URL (default): e.g., 'https://www.wikidata.org/w/api.php'
+	//
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
+	// site: e.g., 'zhwiki'. `.wikiid` @ siteinfo
+	// @see wikidatawiki_p.wb_items_per_site.ips_site_id
+	//
+	// [[en:Help:Interwikimedia_links]] [[Special:Interwiki]]
+	// https://zh.wikipedia.org/wiki/Special:GoToInterwiki/testwiki:
+	// link prefix: e.g., 'zh:n:' for zh.wikinews
+	//
+	// https://dumps.wikimedia.org/backup-index.html
+	// dump: e.g., 'zhwikinews'
+	//
+	// SHOW DATABASES;
+	// db: e.g., 'zhwiki_p'
+	//
+	//
+	// language (or family/project): default language: wiki_API.language
+	// e.g., 'en', 'zh-classical', 'ja', ...
+	//
+	// project = language_code.family
+	//
+	// [[meta:List of Wikimedia projects by size]]
+	// family: 'wikipedia' (default), 'news', 'source', 'books', 'quote', ...
+	function get_project(language, family, get_type) {
+		// @see CeL.wiki.site_name(wiki), language_to_site_name(wiki)
+		TODO;
+	}
+
 	/**
 	 * 自 options[KEY_SESSION] 取得 wikidata API 所須之 site parameter。
 	 * 
@@ -5951,6 +5962,8 @@ function module_code(library_namespace) {
 	 * @return {String}wikidata API 所須之 site parameter。
 	 * 
 	 * @inner 現階段屬於內部成員。未來可能會改變。
+	 * 
+	 * @deprecated using wiki_API.site_name()
 	 */
 	function wikidata_get_site(options, get_language) {
 		if (typeof options === 'string') {
@@ -5985,6 +5998,296 @@ function module_code(library_namespace) {
 		return get_language ? language
 		// language_to_site_name()
 		: wiki_API.site_name(language || options);
+	}
+
+	// @see [[:en:Help:Interwiki linking#Project titles and shortcuts]],
+	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
+	// TODO:
+	// [[:phab:T102533]]
+	// [[:sourceforge:project/shownotes.php?release id=226003&group id=34373]]
+	// http://sourceforge.net/project/shownotes.php%3Frelease_id%3D226003%26group_id%3D34373
+	// [[:gerrit:gitweb?p=mediawiki/core.git;a=blob;f=RELEASE-NOTES-1.23]]
+	// https://gerrit.wikimedia.org/r/gitweb%3Fp%3Dmediawiki/core.git;a%3Dblob;f%3DRELEASE-NOTES-1.23
+	// [[:google:湘江]]
+	// https://www.google.com/search?q=%E6%B9%98%E6%B1%9F
+	// [[:imdbtitle:0075713]], [[:imdbname:2339825]] → {{imdb name}}
+	// http://www.imdb.com/title/tt0075713/
+	// [[:arxiv:Hep-ex/0403017]]
+	// [[:gutenberg:27690]]
+	// [[:scores:Das wohltemperierte Klavier I, BWV 846-869 (Bach, Johann
+	// Sebastian)]]
+	// [[:wikt:제비]]
+	// [[:yue:海珠湖國家濕地公園]]
+
+	// @see set_default_language()
+	// language-code.wikipedia.org e.g., zh-classical.wikipedia.org
+	//
+	// IETF language tag language code for gettext()
+	// e.g., zh-classical → lzh
+	// [[language_code:]] e.g., [[zh-classical:]] @see [[m:List of Wikipedias]]
+	// [[yue:]] → zh-yue → zh_yuewiki
+	//
+	// site_namewiki for Wikidata API e.g., zh-classical → zh_classicalwiki
+	// @see https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
+	// language_code for database e.g., zh-classical → zh_classicalwiki_p
+
+	/**
+	 * language code → Wikidata site code / Wikidata site name / Wikimedia
+	 * project name<br />
+	 * 將語言代碼轉為 Wikidata API 可使用之 site name。
+	 * 
+	 * TODO: options.get_all_properties: return {language,family,site,API_URL}
+	 * 
+	 * @example<code>
+
+	// e.g., 'enwiki', 'zhwiki', 'enwikinews'
+	CeL.wiki.site_name(wiki)
+
+	</code>
+	 * 
+	 * @param {String}language
+	 *            語言代碼, project code or session。 e.g., en, zh-classical, ja
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns {String}Wikidata API 可使用之 site name。
+	 * 
+	 * @see wikidata_get_site()
+	 * @see https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
+	 * 
+	 * @since 2017/9/4 20:57:8 整合原先的 language_to_project(),
+	 *        language_to_site_name()
+	 */
+	function language_to_site_name(language, options) {
+		var session;
+
+		// 不能保證 wiki_API.is_wiki_API(language) → is_Object(language)，
+		// 因此使用 typeof。
+		if (typeof language === 'object') {
+			// treat language as options with session.
+			session = wiki_API.session_of_options(language);
+			// options.language 較 session 的設定優先。
+			language = language.language || session && (
+			// assert: typeof session.API_URL === 'string'
+			// 注意:在取得 page 後，中途更改過 API_URL 的話，session.language 會取得錯誤的資訊！
+			session.language
+			// 應該採用來自宿主 host session 的 language. @see setup_data_session()
+			|| session[KEY_HOST_SESSION] && session[KEY_HOST_SESSION].language)
+					|| language;
+		}
+		// console.log(session);
+
+		/**
+		 * Wikimedia project / family. e.g., wikipedia, wikinews, wiktionary.
+		 * assert: family && /^wik[it][a-z]{0,9}$/.test(family)
+		 * 
+		 * @type {String}
+		 */
+		var family;
+		/** {wiki_API}in what wiki session */
+		var in_session;
+
+		if (typeof options === 'string') {
+			// shift arguments
+			family = options;
+			options = null;
+		} else {
+			in_session = wiki_API.session_of_options(options);
+			family = options && options.family;
+		}
+
+		language = language && String(language) || in_session
+				&& in_session.language;
+		var matched = wiki_API.namespace(language, options);
+		// console.trace([ matched, language ]);
+		if (matched && !isNaN(matched)) {
+			// e.g., input "language" of [[Category:title]]
+			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
+			language = null;
+		}
+		// console.trace(language);
+		// 正規化。
+		// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
+		language = String(language || wiki_API.language).trim().toLowerCase()
+				.replace(/[_ ]/g, '-');
+		// console.trace(language);
+
+		var API_URL;
+
+		var interwiki_pattern = in_session && in_session.configurations
+				&& in_session.configurations.interwiki_pattern;
+		var interwikimap = library_namespace.is_RegExp(interwiki_pattern)
+				&& in_session.latest_site_configurations
+				&& in_session.latest_site_configurations.interwikimap;
+		if (Array.isArray(interwikimap)) {
+			matched = language.match(interwiki_pattern);
+			if (matched && interwikimap.some(function(map) {
+				if (map.prefix === matched[1]) {
+					// console.log(map);
+					// API_URL = map.url;
+					return matched = map
+					//
+					.url.replace(/\/wiki\/\$1/, '/w/api.php')
+					//
+					.replace(/\$1/, '');
+				}
+			})) {
+				language = matched;
+			}
+		} else if (language in language_code_to_site_alias) {
+			// e.g., 'lzh' → 'zh-classical'
+			language = language_code_to_site_alias[language];
+		}
+
+		matched = language
+		// e.g., 'zh-min-nan' → 'zh_min_nan'
+		.replace(/-/g, '_').match(PATTERN_SITE);
+		if (matched) {
+			language = matched[1];
+			family = family || matched[2];
+		} else if (matched = language.match(/^[a-z\d\-]{2,13}$/)) {
+			// e.g., 'zh-classical', 'zh-min-nan'
+			language = matched[0];
+		} else if (matched = language.match(PATTERN_wiki_project_URL)) {
+			// treat language as API_URL.
+			API_URL = /api\.php$/.test(language) ? language : null;
+			/**
+			 * 去掉 '.org' 之類。
+			 * 
+			 * matched: [ 0: protocol + host name, 1: protocol, 2: host name,<br />
+			 * 3: 第一 domain name (e.g., language code / family / project),<br />
+			 * 4: 第二 domain name (e.g., family: 'wikipedia') ]
+			 * 
+			 * @see PATTERN_PROJECT_CODE
+			 */
+			// console.log(matched);
+			library_namespace.debug(language, 4, 'language_to_site_name');
+			family = family || matched[4];
+			// TODO: error handling
+			language = matched[3];
+		} else if (matched = language.match(/^([a-z\d\-_]+)\.([a-z\d\-_]+)/)) {
+			language = matched[1];
+			family = family || matched[2];
+		} else {
+			library_namespace.error('language_to_site_name: Invalid language: '
+					+ language);
+		}
+
+		family = family || session && session.family || in_session
+				&& in_session.family;
+		if (!family || family === 'wiki')
+			family = 'wikipedia';
+
+		API_URL = API_URL || session && session.API_URL
+				|| api_URL(language + '.' + family);
+
+		var site = language;
+		// using "commons" instead of "commonswikimedia"
+		if (family !== 'wikimedia' || !(language in wiki_API.api_URL.wikimedia)) {
+			// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
+			site += family === 'wikipedia' ? 'wiki' : family;
+		}
+		library_namespace.debug(site, 3, 'language_to_site_name');
+
+		// throw site;
+		return options && options.get_all_properties ? {
+			language : language,
+			family : family,
+			site : site,
+			API_URL : API_URL
+		} : site;
+	}
+
+	/**
+	 * language code → Wikidata site name / Wikimedia project name<br />
+	 * 將語言代碼轉為 Wikidata site name / Wikimedia project name。
+	 * 
+	 * @param {String}language
+	 *            語言代碼, project code or session。
+	 * 
+	 * @returns {String}Wikidata site name / Wikimedia project name。
+	 * 
+	 * @see wikidata_get_site()
+	 */
+	function deprecated_language_to_project(language) {
+		if (wiki_API.is_wiki_API(language)) {
+			// treat language as session.
+			// assert: typeof language.API_URL === 'string'
+			language = language.API_URL.toLowerCase().match(
+			// @see PATTERN_PROJECT_CODE
+			/\/\/([a-z][a-z\d\-]{0,14})\.([a-z]+)/);
+			library_namespace.debug(language, 4, 'language_to_project');
+			// TODO: error handling
+			language = language[1].replace(/-/g, '_')
+			// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
+			+ (language[2] === 'wikipedia' ? 'wiki' : language[2]);
+			library_namespace.debug(language, 3, 'language_to_project');
+			return language;
+		}
+
+		// 正規化。
+		language = language && String(language).trim().toLowerCase()
+		// 以防 incase wikt, wikisource
+		.replace(/wik.+$/, '') || wiki_API.language;
+
+		if (language.startsWith('category')) {
+			// e.g., input "language" of [[Category:title]]
+			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
+			return language;
+			return wiki_API.language + 'wiki';
+		}
+
+		if (language in language_code_to_site_alias) {
+			// e.g., 'lzh' → 'zh-classical'
+			language = language_code_to_site_alias[language];
+		}
+
+		// e.g., 'zh-min-nan' → 'zh_min_nan'
+		var site = language.replace(/-/g, '_') + 'wiki';
+		if (site in wikidata_site_alias) {
+			site = wikidata_site_alias[site];
+		}
+
+		return site;
+	}
+
+	/**
+	 * language code → Wikidata site code<br />
+	 * 將語言代碼轉為 Wikidata API 可使用之 site name。
+	 * 
+	 * @param {String}language
+	 *            語言代碼。
+	 * 
+	 * @returns {String}Wikidata API 可使用之 site name。
+	 * 
+	 * @see https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
+	 */
+	function deprecated_language_to_site(language) {
+		// 正規化。
+		language = language && typeof language !== 'object' ? String(language)
+				.trim().toLowerCase()
+		// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
+		: wiki_API.language;
+
+		if (language.startsWith('category')) {
+			// e.g., input "language" of [[Category:title]]
+			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
+			return language;
+			return wiki_API.language + 'wiki';
+		}
+
+		// e.g., 'zh-min-nan' → 'zh_min_nan'
+		var site = language.replace(/-/g, '_');
+		if (!site.includes('wik')) {
+			// 以防 incase wikt, wikisource
+			site += 'wiki';
+		}
+
+		if (site in wikidata_site_alias) {
+			site = wikidata_site_alias[site];
+		}
+
+		return site;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -6120,6 +6423,8 @@ function module_code(library_namespace) {
 	Object.assign(wiki_API, {
 		api_URL : api_URL,
 		set_language : set_default_language,
+		// site_name_of
+		site_name : language_to_site_name,
 
 		estimated_message : estimated_message,
 
