@@ -60,7 +60,7 @@ function module_code(library_namespace) {
 		// flow:
 		// {status:'ok',workflow:'...',committed:{topiclist:{...}}}
 		&& result.status !== 'ok'
-		// e.g., wbcreateclaim @ wikidata
+		// e.g., success:1 @ wikidata
 		&& !result.success) : result === '') {
 			// Invalid token
 			library_namespace.warn(
@@ -218,12 +218,12 @@ function module_code(library_namespace) {
 						+ action[1]);
 			} else if (need_check_lag = /edit|create/i.test(need_check_lag[1])) {
 				to_wait = lag_interval
-						- (Date.now() - wiki_API_query.last[action[0]]);
+						- (Date.now() - wiki_API_query.last_option_time[action[0]]);
 			}
 		}
 		if (need_check_lag) {
 			to_wait = lag_interval
-					- (Date.now() - wiki_API_query.last[action[0]]);
+					- (Date.now() - wiki_API_query.last_option_time[action[0]]);
 		}
 
 		// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
@@ -237,7 +237,7 @@ function module_code(library_namespace) {
 		}
 		if (need_check_lag) {
 			// reset timer
-			wiki_API_query.last[action[0]] = Date.now();
+			wiki_API_query.last_option_time[action[0]] = Date.now();
 		} else {
 			library_namespace.debug('非 edit (modify)，不延遲等待。', 3,
 					'wiki_API_query');
@@ -614,11 +614,11 @@ function module_code(library_namespace) {
 
 	/**
 	 * URL last queried.<br />
-	 * wiki_API_query.last[URL] = {Date}last queried date
+	 * wiki_API_query.last_option_time[API_URL] = {Date}last queried date
 	 * 
 	 * @type {Object}
 	 */
-	wiki_API_query.last = Object.create(null);
+	wiki_API_query.last_option_time = Object.create(null);
 
 	/**
 	 * 取得 page_data 之 title parameter。<br />
