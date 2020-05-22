@@ -56,12 +56,12 @@ function module_code(library_namespace) {
 		// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
 		? result.error.code === 'badtoken'
 		// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
-		: !result.edit
+		: options.rollback_action && (!result.edit
 		// flow:
 		// {status:'ok',workflow:'...',committed:{topiclist:{...}}}
 		&& result.status !== 'ok'
-		// e.g., wbcreateclaim
-		&& result.success : result === '') {
+		// e.g., wbcreateclaim @ wikidata
+		&& !result.success) : result === '') {
 			// Invalid token
 			library_namespace.warn(
 			//
@@ -74,6 +74,7 @@ function module_code(library_namespace) {
 			}
 			// 下面的 workaround 僅適用於 node.js。
 			if (!session.token.lgpassword) {
+				// console.log(result);
 				// 死馬當活馬醫，仍然嘗試重新取得 token... 沒有密碼無效。
 				throw new Error(
 						'check_session_badtoken: No password preserved!');
@@ -84,8 +85,12 @@ function module_code(library_namespace) {
 						'check_session_badtoken: Did not set options.rollback_action()!');
 			}
 
-			// rollback action
-			options.rollback_action();
+			if (options.rollback_action) {
+				// rollback action
+				options.rollback_action();
+			} else {
+				options.requery();
+			}
 
 			// reset node agent.
 			// 應付 2016/1 MediaWiki 系統更新，
@@ -555,8 +560,8 @@ function module_code(library_namespace) {
 
 			if (!options.rollback_action) {
 				// Re-run wiki_API.query() after get new token.
-				options.rollback_action = wiki_API_query.bind(null,
-						original_action, callback, post_data, options);
+				options.requery = wiki_API_query.bind(null, original_action,
+						callback, post_data, options);
 			}
 			// callback(response);
 			check_session_badtoken(response, callback, options);
