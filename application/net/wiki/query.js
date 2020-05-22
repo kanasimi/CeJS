@@ -156,6 +156,9 @@ function module_code(library_namespace) {
 	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/includes/api
 	 */
 	function wiki_API_query(action, callback, post_data, options) {
+		// 前置處理。
+		options = library_namespace.setup_options(options);
+
 		if (typeof callback !== 'function') {
 			throw new Error('wiki_API_query: No {Function}callback!');
 		}
@@ -190,7 +193,7 @@ function module_code(library_namespace) {
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait,
 		// interval.
-		lag_interval = options && options.lag >= 0 ? options.lag :
+		lag_interval = options.lag >= 0 ? options.lag :
 		// ↑ wiki_API.edit 可能輸入 session 當作 options。
 		// options[KEY_SESSION] && options[KEY_SESSION].lag ||
 		wiki_API_query.default_lag;
@@ -231,7 +234,7 @@ function module_code(library_namespace) {
 		}
 
 		// additional parameters
-		if (!action[2] && options && options.additional) {
+		if (!action[2] && options.additional) {
 			action[2] = options.additional;
 			delete options.additional;
 		}
@@ -324,8 +327,7 @@ function module_code(library_namespace) {
 		// console.log('-'.repeat(79));
 		// console.log(options);
 		var get_URL_options = Object.assign(Object.create(null),
-				wiki_API_query.get_URL_options, options
-						&& options.get_URL_options);
+				wiki_API_query.get_URL_options, options.get_URL_options);
 
 		var session = wiki_API.session_of_options(options);
 		if (session) {
@@ -351,7 +353,7 @@ function module_code(library_namespace) {
 			get_URL_options = session.get_URL_options;
 		}
 
-		if (options && options.form_data) {
+		if (options.form_data) {
 			// @see wiki_API.upload()
 			library_namespace.debug('Set form_data', 6);
 			// throw 'Set form_data';
@@ -396,9 +398,7 @@ function module_code(library_namespace) {
 						 */
 						wiki.next();
 
-						var session = options && (options[KEY_SESSION]
-						// 檢查若 options 本身即為 session。
-						|| wiki_API.is_wiki_API(options) && options);
+						var session = wiki_API.session_of_options(options);
 						if (session) {
 							session.running = false;
 						}
