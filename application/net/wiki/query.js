@@ -46,6 +46,11 @@ function module_code(library_namespace) {
 
 	function check_session_badtoken(result, callback, options) {
 		var session = wiki_API.session_of_options(options);
+		if (!session) {
+			// run next action
+			callback(result);
+			return;
+		}
 
 		if (result ? result.error
 		// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
