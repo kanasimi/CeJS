@@ -5965,7 +5965,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @deprecated using wiki_API.site_name()
 	 */
-	function wikidata_get_site(options, get_language) {
+	function deprecated_wikidata_get_site(options, get_language) {
 		if (typeof options === 'string') {
 			return PATTERN_PROJECT_CODE.test(options) && options;
 		}
@@ -6108,10 +6108,10 @@ function module_code(library_namespace) {
 		}
 		// console.trace(language);
 		// 正規化。
-		language = String(language ||
+		language = String(language || in_session && in_session.language
+		// else use default language
 		// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
-		in_session && in_session.language || wiki_API.language).trim()
-				.toLowerCase().replace(/[_ ]/g, '-');
+		|| wiki_API.language).trim().toLowerCase().replace(/[_ ]/g, '-');
 		// console.trace(language);
 
 		var API_URL;
@@ -6405,7 +6405,6 @@ function module_code(library_namespace) {
 		is_api_and_title : is_api_and_title,
 		normalize_title_parameter : normalize_title_parameter,
 		add_parameters : add_parameters,
-		wikidata_get_site : wikidata_get_site,
 		is_wikidata_site : is_wikidata_site,
 		language_code_to_site_alias : language_code_to_site_alias,
 

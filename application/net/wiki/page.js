@@ -43,7 +43,7 @@ function module_code(library_namespace) {
 	// requiring
 	var get_URL = this.r('get_URL'), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
-	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, wikidata_get_site = wiki_API.wikidata_get_site, add_parameters = wiki_API.add_parameters;
+	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, add_parameters = wiki_API.add_parameters;
 
 	var
 	/** node.js file system module */
@@ -327,8 +327,9 @@ function module_code(library_namespace) {
 
 		// 自動搜尋/轉換繁簡標題。
 		if (!('converttitles' in options)) {
-			options.converttitles = wikidata_get_site(options, true)
-					|| wiki_API.language;
+			options.converttitles = wiki_API.site_name(options, {
+				get_all_properties : true
+			}).language;
 			if (!wiki_API_page.auto_converttitles
 					.includes(options.converttitles)) {
 				delete options.converttitles;
@@ -1930,8 +1931,8 @@ function module_code(library_namespace) {
 			// console.log(options);
 			// console.log(options[KEY_SESSION]);
 			// throw new Error(options[KEY_SESSION].language);
-			wiki_site_name = wiki_API.site_name(options
-					|| options.project || options.family);
+			wiki_site_name = wiki_API.site_name(options || options.project
+					|| options.family);
 		}
 
 		// dump host: http "301 Moved Permanently" to https
@@ -2676,9 +2677,9 @@ function module_code(library_namespace) {
 		/** {Array}id/title list */
 		var id_list, rev_list,
 		//
-		use_language = wikidata_get_site(config, true)
-		// else use default language
-		|| wiki_API.language,
+		use_language = wiki_API.site_name(options, {
+			get_all_properties : true
+		}).language,
 		/** {Object}用在 wiki_API.cache 之 configuration。 */
 		cache_config = {
 			// all title/id list

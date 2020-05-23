@@ -48,8 +48,8 @@ function module_code(library_namespace) {
 	// requiring
 	var get_URL = this.r('get_URL'), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION, KEY_HOST_SESSION = wiki_API.KEY_HOST_SESSION;
 	// @inner
-	var API_URL_of_options = wiki_API.API_URL_of_options, is_api_and_title = wiki_API.is_api_and_title, is_wikidata_site = wiki_API.is_wikidata_site, wikidata_get_site = wiki_API.wikidata_get_site, language_code_to_site_alias = wiki_API.language_code_to_site_alias;
-	var KEY_CORRESPOND_PAGE = wiki_API.KEY_CORRESPOND_PAGE, KEY_get_entity_value = wiki_API.KEY_get_entity_value, PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i, PATTERN_wiki_project_URL = wiki_API.PATTERN_wiki_project_URL;
+	var API_URL_of_options = wiki_API.API_URL_of_options, is_api_and_title = wiki_API.is_api_and_title, is_wikidata_site = wiki_API.is_wikidata_site, language_code_to_site_alias = wiki_API.language_code_to_site_alias;
+	var KEY_CORRESPOND_PAGE = wiki_API.KEY_CORRESPOND_PAGE, KEY_get_entity_value = wiki_API.KEY_get_entity_value, PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -296,7 +296,9 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 		+ '&language=' + (language
 		//
-		|| wikidata_get_site(options, true) || wiki_API.language)
+		|| wiki_API.site_name(options, {
+			get_all_properties : true
+		}).language)
 		//
 		+ '&limit=' + (options.limit || 'max') ];
 
@@ -394,7 +396,9 @@ function module_code(library_namespace) {
 	wikidata_search.add_cache = function(key, id, language, is_entity) {
 		var cached_hash = is_entity ? wikidata_search_cache_entity
 				: wikidata_search_cache;
-		language = wikidata_get_site(language, true) || wiki_API.language;
+		language = wiki_API.site_name(language, {
+			get_all_properties : true
+		}).language;
 		cached_hash[language + ':' + key] = id;
 	};
 
@@ -409,7 +413,9 @@ function module_code(library_namespace) {
 		var language_and_key,
 		// 須與 wikidata_search() 相同!
 		// TODO: 可以 guess_language(key) 猜測語言。
-		language = wikidata_get_site(options, true) || wiki_API.language,
+		language = wiki_API.site_name(options, {
+			get_all_properties : true
+		}).language,
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 		cached_hash = options && options.type && options.type !==
 		// default_options.type: 'property'
@@ -689,7 +695,9 @@ function module_code(library_namespace) {
 		if (is_entity(value)) {
 			// get label of entity
 			value = value.labels;
-			var language = wikidata_get_site(options, true);
+			var language = wiki_API.site_name(options, {
+				get_all_properties : true
+			}).language;
 			language = language && value[language] || value[wiki_API.language]
 			// 最起碼選個國際通用的。
 			|| value.en;
@@ -864,7 +872,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('Trying to get entity ' + value, 1,
 						'wikidata_datavalue');
 				// console.log(value);
-				// console.log(wikidata_get_site(options, true));
+				// console.log(wiki_API.site_name(options,{get_all_properties:true}).language);
 				wikidata_entity(value, options.get_object ? callback
 				// default: get label 標籤標題
 				: function(entity, error) {
@@ -877,14 +885,16 @@ function module_code(library_namespace) {
 						return;
 					}
 					entity = entity.labels || entity;
-					entity = entity[wikidata_get_site(options, true)
-							|| wiki_API.language]
-							|| entity;
+					entity = entity[wiki_API.site_name(options, {
+						get_all_properties : true
+					}).language] || entity;
 					callback
 							&& callback('value' in entity ? entity.value
 									: entity);
 				}, {
-					languages : wikidata_get_site(options, true)
+					languages : wiki_API.site_name(options, {
+						get_all_properties : true
+					}).language
 				});
 			}
 			return value;
@@ -1111,8 +1121,9 @@ function module_code(library_namespace) {
 				//
 				'wikidata_entity: 您或許該採用 options.props = ' + property);
 			/** {String}setup language of key and property name. 僅在需要 search 時使用。 */
-			property = [ wikidata_get_site(options, true) || wiki_API.language,
-					property ];
+			property = [ wiki_API.site_name(options, {
+				get_all_properties : true
+			}).language, property ];
 		}
 
 		// console.log('property: ' + property);
@@ -1135,7 +1146,9 @@ function module_code(library_namespace) {
 		} else if (typeof key === 'string'
 				&& !/^[PQ]\d{1,10}(\|[PQ]\d{1,10})*$/.test(key)) {
 			/** {String}setup language of key and property name. 僅在需要 search 時使用。 */
-			key = [ wikidata_get_site(options, true) || wiki_API.language, key ];
+			key = [ wiki_API.site_name(options, {
+				get_all_properties : true
+			}).language, key ];
 		}
 
 		if (Array.isArray(key)) {
@@ -1260,8 +1273,9 @@ function module_code(library_namespace) {
 					+ (key.site || key.language
 					// 在 options 包含之 wiki session 中之 key.language。
 					// e.g., "cz:" 在 zhwiki 將轉為 cs.wikipedia.org
-					&& wiki_API.site_name(key.language, options) || wikidata_get_site(options))
-					+ '&titles=' + encodeURIComponent(key.title);
+					&& wiki_API.site_name(key.language, options) || wiki_API
+							.site_name(options)) + '&titles='
+					+ encodeURIComponent(key.title);
 		} else {
 			action = 'ids=' + key;
 		}
@@ -1430,8 +1444,9 @@ function module_code(library_namespace) {
 			return property;
 		}
 
-		var value, language = wikidata_get_site(options, true)
-				|| wiki_API.language, matched = typeof property === 'string'
+		var value, language = wiki_API.site_name(options, {
+			get_all_properties : true
+		}).language, matched = typeof property === 'string'
 				&& property.match(/^P(\d+)$/i);
 
 		if (matched) {
@@ -1904,8 +1919,9 @@ function module_code(library_namespace) {
 			datavalue_type = datatype;
 			value = {
 				text : value,
-				language : wikidata_get_site(options, true)
-						|| guess_language(value)
+				language : wiki_API.site_name(options, {
+					get_all_properties : true
+				}).language || guess_language(value)
 			};
 			// console.log('use language: ' + value.language);
 			break;
@@ -2175,7 +2191,9 @@ function module_code(library_namespace) {
 		// demands 對應的 property
 		property_corresponding = [],
 		//
-		options_language = wikidata_get_site(options, true);
+		options_language = wiki_API.site_name(options, {
+			get_all_properties : true
+		}).language;
 
 		// console.log(options_language);
 		// console.log('-'.repeat(20));
@@ -3379,8 +3397,9 @@ function module_code(library_namespace) {
 
 			if (typeof label === 'string') {
 				label = {
-					language : wikidata_get_site(options, true)
-							|| guess_language(label),
+					language : wiki_API.site_name(options, {
+						get_all_properties : true
+					}).language || guess_language(label),
 					value : label
 				};
 			} else if (is_api_and_title(label, 'language')) {
@@ -3784,8 +3803,9 @@ function module_code(library_namespace) {
 		error_list = data_descriptions.filter(function(description) {
 			var language;
 			if (typeof description === 'string') {
-				language = wikidata_get_site(options, true)
-						|| guess_language(description) || default_lang;
+				language = wiki_API.site_name(options, {
+					get_all_properties : true
+				}).language || guess_language(description) || default_lang;
 			} else if (is_api_and_title(description, 'language')) {
 				language = description[0] || guess_language(description[1])
 						|| default_lang;
@@ -3799,8 +3819,10 @@ function module_code(library_namespace) {
 				return true;
 			} else {
 				language = description.language
-						|| wikidata_get_site(options, true)
-						|| guess_language(description.value) || default_lang;
+						|| wiki_API.site_name(options, {
+							get_all_properties : true
+						}).language || guess_language(description.value)
+						|| default_lang;
 				if ('remove' in description) {
 					description = '';
 				} else {
@@ -4024,7 +4046,7 @@ function module_code(library_namespace) {
 			options.id = id.id;
 
 		} else if (wiki_API.is_page_data(id)) {
-			options.site = wikidata_get_site(options);
+			options.site = wiki_API.site_name(options);
 			options.title = encodeURIComponent(id.title);
 
 		} else if (id === 'item' || id === 'property') {
