@@ -1269,12 +1269,10 @@ function module_code(library_namespace) {
 		// 不採用 wiki_API.is_page_data(key)
 		// 以允許自行設定 {title:title,language:language}。
 		if (key.title) {
-			action = 'sites='
-					+ (key.site || key.language
-					// 在 options 包含之 wiki session 中之 key.language。
-					// e.g., "cz:" 在 zhwiki 將轉為 cs.wikipedia.org
-					&& wiki_API.site_name(key.language, options) || wiki_API
-							.site_name(options)) + '&titles='
+			action = 'sites=' + (key.site ||
+			// 在 options 包含之 wiki session 中之 key.language。
+			// e.g., "cz:" 在 zhwiki 將轉為 cs.wikipedia.org
+			wiki_API.site_name(key.language, options)) + '&titles='
 					+ encodeURIComponent(key.title);
 		} else {
 			action = 'ids=' + key;

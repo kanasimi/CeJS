@@ -85,40 +85,34 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// 正規化。
-		language = language.trim().toLowerCase();
-		// TODO: 'zh.news'
-		// 警告: this.language 可能包含 'zhwikinews' 之類。
-		this.language = language
-		// 'zhwiki' → 'zh'
-		.replace(/wik[it][a-z]{0,9}$/, '')
-		// 'zh-classical' → 'zh_classical'
-		.replace(/-/g, '_');
-
 		if (language === 'meta') {
-			// @see /usr/bin/sql
+			// @see /usr/bin/sql 's7'+domain
 			this.host = 's7.labsdb';
-			// https://wikitech.wikimedia.org/wiki/Nova_Resource:Tools/Help#Metadata_database
+			// https://wikitech.wikimedia.org/wiki/Help:Toolforge/Database#Metadata_database
 			this.database = 'meta_p';
+			return;
+		}
 
-		} else if (language === TOOLSDB) {
+		if (language === TOOLSDB) {
 			this.host = language;
 			// delete this.database;
-
-		} else if (is_wikidata_site(language)) {
-			this.host = language + '.labsdb';
-			/**
-			 * The database names themselves consist of the mediawiki project
-			 * name, suffixed with _p
-			 * 
-			 * @see https://wikitech.wikimedia.org/wiki/Help:Toolforge/Database
-			 */
-			this.database = language + '_p';
-		} else {
-			// e.g., 'zh', 'zh_classical'
-			this.host = language + 'wiki.labsdb';
-			this.database = language + 'wiki_p';
+			return;
 		}
+
+		// 正規化。
+		var site = wiki_API.site_name(language);
+		// TODO: 'zh.news'
+		// 警告: this.language 可能包含 'zhwikinews' 之類。
+
+		this.host = site + '.labsdb';
+		/**
+		 * The database names themselves consist of the mediawiki project name,
+		 * suffixed with _p
+		 * 
+		 * @see https://wikitech.wikimedia.org/wiki/Help:Toolforge/Database
+		 */
+		this.database = site + '_p';
+
 		// console.log(this);
 	}
 

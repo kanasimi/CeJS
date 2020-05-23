@@ -2863,6 +2863,7 @@ function test_wiki() {
 		[['zh', CeL.wiki.site_name('zh.moegirl',{get_all_properties:true}).language], 'site_name #6'],
 		[[CeL.wiki.site_name(), CeL.wiki.site_name('talk')], 'site_name #7'],
 		[['zhmoegirl', CeL.wiki.site_name('zh','moegirl')], 'site_name #8'],
+		[['wikidatawiki', CeL.wiki.site_name('wikidata')], 'site_name #9'],
 	]);
 
 	all_error_count += CeL.test('wiki: CeL.wiki.plain_text() basic test', [
@@ -3389,6 +3390,7 @@ function test_wiki() {
 			assert([CeL.wiki.site_name(null,{session:wiki}), CeL.wiki.site_name('talk',{session:wiki})], 'CeL.wiki.site_name() #5');
 			assert(['https://commons.wikimedia.org/w/api.php', CeL.wiki.site_name('commons',{session:wiki,get_all_properties:true}).API_URL], 'CeL.wiki.site_name() #6');
 			assert(['https://cs.wikipedia.org/w/api.php', CeL.wiki.site_name('cz',{session:wiki,get_all_properties:true}).API_URL], 'CeL.wiki.site_name() #7');
+			assert(['wikidatawiki', CeL.wiki.site_name('wikidata',{session:wiki})], 'CeL.wiki.site_name() #8');
 
 			_finish_test('wiki: site_name');
 		});

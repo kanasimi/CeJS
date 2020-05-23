@@ -6101,7 +6101,11 @@ function module_code(library_namespace) {
 
 		var matched = wiki_API.namespace(language, options);
 		// console.trace([ matched, language ]);
-		if (matched && !isNaN(matched)) {
+		if (matched && !isNaN(matched)
+		//
+		&& (matched !== wiki_API.namespace.hash.project
+		// e.g., 'wikidata'
+		|| language.trim().toLowerCase() === 'project')) {
 			// e.g., input "language" of [[Category:title]]
 			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
 			language = null;
@@ -6147,9 +6151,16 @@ function module_code(library_namespace) {
 		if (matched) {
 			language = matched[1];
 			family = family || matched[2];
+
 		} else if (matched = language.match(/^[a-z\d\-]{2,13}$/)) {
 			// e.g., 'zh-classical', 'zh-min-nan'
 			language = matched[0];
+			if (language === 'wikidata') {
+				family = language;
+				language = 'www';
+			}
+			// console.trace([ language, family ]);
+
 		} else if (matched = language.match(PATTERN_wiki_project_URL)) {
 			// treat language as API_URL.
 			API_URL = /api\.php$/.test(language) ? language : null;
@@ -6185,12 +6196,22 @@ function module_code(library_namespace) {
 				|| api_URL(language + '.' + family);
 
 		var site = language.toLowerCase().replace(/-/g, '_');
-		// using "commons" instead of "commonswikimedia"
-		if (family !== 'wikimedia' || !(language in wiki_API.api_URL.wikimedia)) {
+		if (family === 'wikidata') {
+			// wikidatawiki_p
+			site = family + 'wiki';
+		} else if (family !== 'wikimedia'
+				|| !(language in wiki_API.api_URL.wikimedia)) {
+			// using "commons" instead of "commonswikimedia"
 			// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
 			site += family === 'wikipedia' ? 'wiki' : family;
 		}
 		library_namespace.debug(site, 3, 'language_to_site_name');
+
+		if (language === 'www') {
+			// get from API_URL
+			language = session && session.language || in_session
+					&& in_session.language || wiki_API.language;
+		}
 
 		// throw site;
 		return options && options.get_all_properties ? {
