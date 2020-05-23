@@ -2854,6 +2854,15 @@ function test_wiki() {
 		[['Adam', CeL.wiki.parse.user('[[User:Adam/test]]')], 'parse.user #1'],
 		[['Adam', CeL.wiki.parse.user('[[en:User:Adam/test]]')], 'parse.user #2: 連接到其他維基媒體站點上的用戶頁面'],
 		[[true, CeL.wiki.parse.user('[[User:Adam/test]]', 'adam')], 'parse.user #3'],
+
+		[['enwiki', CeL.wiki.site_name('en')], 'site_name #1'],
+		[['zhwiki', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php')], 'site_name #2'],
+		[['zhmoegirl', CeL.wiki.site_name('https://zh.moegirl.org/api.php')], 'site_name #3'],
+		[['wikipedia', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php',{get_all_properties:true}).family], 'site_name #4'],
+		[['zh', CeL.wiki.site_name('https://zh.moegirl.org/api.php',{get_all_properties:true}).language], 'site_name #5'],
+		[['zh', CeL.wiki.site_name('zh.moegirl',{get_all_properties:true}).language], 'site_name #6'],
+		[[CeL.wiki.site_name(), CeL.wiki.site_name('talk')], 'site_name #7'],
+		[['zhmoegirl', CeL.wiki.site_name('zh','moegirl')], 'site_name #8'],
 	]);
 
 	all_error_count += CeL.test('wiki: CeL.wiki.plain_text() basic test', [
@@ -3368,6 +3377,20 @@ function test_wiki() {
 			assert(['ArXiv', wiki.normalize_title('arXiv')], 'wiki.normalize_title() #9');
 
 			_finish_test('wiki: namespace');
+		});
+
+		wiki.run(function() {
+			_setup_test('wiki: site_name');
+
+			assert(['enwiki', CeL.wiki.site_name(wiki)], 'CeL.wiki.site_name() #1');
+			assert(['zhwiki', CeL.wiki.site_name('zh',wiki)], 'CeL.wiki.site_name() #2');
+			assert(['zh_classicalwiki', CeL.wiki.site_name('lzh',wiki)], 'CeL.wiki.site_name() #3');
+			assert(['cswiki', CeL.wiki.site_name('cz',wiki)], 'CeL.wiki.site_name() #4');
+			assert([CeL.wiki.site_name(null,{session:wiki}), CeL.wiki.site_name('talk',{session:wiki})], 'CeL.wiki.site_name() #5');
+			assert(['https://commons.wikimedia.org/w/api.php', CeL.wiki.site_name('commons',{session:wiki,get_all_properties:true}).API_URL], 'CeL.wiki.site_name() #6');
+			assert(['https://cs.wikipedia.org/w/api.php', CeL.wiki.site_name('cz',{session:wiki,get_all_properties:true}).API_URL], 'CeL.wiki.site_name() #7');
+
+			_finish_test('wiki: site_name');
 		});
 
 		_setup_test('wiki: get_creation_Date');

@@ -6063,7 +6063,7 @@ function module_code(library_namespace) {
 
 		// 不能保證 wiki_API.is_wiki_API(language) → is_Object(language)，
 		// 因此使用 typeof。
-		if (typeof language === 'object') {
+		if (language && typeof language === 'object') {
 			// treat language as options with session.
 			session = wiki_API.session_of_options(language);
 			// options.language 較 session 的設定優先。
@@ -6073,7 +6073,10 @@ function module_code(library_namespace) {
 			session.language
 			// 應該採用來自宿主 host session 的 language. @see setup_data_session()
 			|| session[KEY_HOST_SESSION] && session[KEY_HOST_SESSION].language)
-					|| language;
+			// || language
+			;
+			if (false && typeof language === 'object')
+				console.trace(language);
 		}
 		// console.log(session);
 
@@ -6096,8 +6099,6 @@ function module_code(library_namespace) {
 			family = options && options.family;
 		}
 
-		language = language && String(language) || in_session
-				&& in_session.language;
 		var matched = wiki_API.namespace(language, options);
 		// console.trace([ matched, language ]);
 		if (matched && !isNaN(matched)) {
@@ -6107,9 +6108,10 @@ function module_code(library_namespace) {
 		}
 		// console.trace(language);
 		// 正規化。
+		language = String(language ||
 		// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
-		language = String(language || wiki_API.language).trim().toLowerCase()
-				.replace(/[_ ]/g, '-');
+		in_session && in_session.language || wiki_API.language).trim()
+				.toLowerCase().replace(/[_ ]/g, '-');
 		// console.trace(language);
 
 		var API_URL;
@@ -6171,6 +6173,7 @@ function module_code(library_namespace) {
 		} else {
 			library_namespace.error('language_to_site_name: Invalid language: '
 					+ language);
+			// console.trace(language);
 		}
 
 		family = family || session && session.family || in_session
@@ -6181,7 +6184,7 @@ function module_code(library_namespace) {
 		API_URL = API_URL || session && session.API_URL
 				|| api_URL(language + '.' + family);
 
-		var site = language;
+		var site = language.toLowerCase().replace(/-/g, '_');
 		// using "commons" instead of "commonswikimedia"
 		if (family !== 'wikimedia' || !(language in wiki_API.api_URL.wikimedia)) {
 			// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
