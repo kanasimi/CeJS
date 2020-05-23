@@ -6195,15 +6195,16 @@ function module_code(library_namespace) {
 		API_URL = API_URL || session && session.API_URL
 				|| api_URL(language + '.' + family);
 
-		var site = language.toLowerCase().replace(/-/g, '_');
+		var site;
 		if (family === 'wikidata') {
 			// wikidatawiki_p
 			site = family + 'wiki';
-		} else if (family !== 'wikimedia'
-				|| !(language in wiki_API.api_URL.wikimedia)) {
-			// using "commons" instead of "commonswikimedia"
+		} else {
+			site = language.toLowerCase().replace(/-/g, '_')
 			// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
-			site += family === 'wikipedia' ? 'wiki' : family;
+			+ (family === 'wikipedia'
+			// using "commonswiki" instead of "commonswikimedia"
+			|| (language in wiki_API.api_URL.wikimedia) ? 'wiki' : family);
 		}
 		library_namespace.debug(site, 3, 'language_to_site_name');
 
