@@ -32,8 +32,12 @@ typeof CeL === 'function' && CeL.run({
 	name : 'application.net.wiki.parser',
 
 	require : 'application.net.wiki.'
+	// load MediaWiki module basic functions
+	+ '|application.net.wiki.namespace.'
+	// for PATTERN_BOT_NAME
+	+ '|application.net.wiki.task.'
 	// CeL.DOM.HTML_to_Unicode(), CeL.DOM.Unicode_to_HTML()
-	+ '|interact.DOM',
+	+ '|interact.DOM.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',
@@ -45,9 +49,9 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
-	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_URL_prefix = wiki_API.PATTERN_URL_prefix, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
+	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_URL_prefix = wiki_API.PATTERN_URL_prefix, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix, PATTERN_BOT_NAME = wiki_API.PATTERN_BOT_NAME;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -6651,6 +6655,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// export 導出.
+	// @static
 	Object.assign(wiki_API, {
 		switch_token : switch_token,
 

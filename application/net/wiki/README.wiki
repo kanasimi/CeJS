@@ -4,11 +4,11 @@ MediaWiki 自動化作業程式庫，主要用於編寫[[維基百科:機器人]
 
 Main initial point: [[../wiki.js]]
 
-; Essential 必要: [[../wiki.js]], [[parser.js]], [[query.js]], [[page.js]], [[Flow.js]], [[list.js]], [[edit.js]], ([[admin.js]], [[data.js]])
-; Optional 可選: [[admin.js]], [[data.js]], [[Toolforge.js]]
-; Change with wikiproject page contents 隨各wikiproject頁面內容變化之功能: [[template_functions.js]]
+; Essential 必要: [[../wiki.js]] → [[namespace.js]] → [[parser.js]], [[query.js]], [[page.js]], [[Flow.js]], [[list.js]], [[edit.js]], [[task.js]]
+; Optional 可選功能: [[data.js]], [[admin.js]], [[cache.js]], [[Toolforge.js]]
+; Change with wikiproject page contents 隨各 wikiproject 頁面內容變化之功能: [[template_functions.js]]
 
-More examples: 完整版的依賴鍊可參照：
+More examples: 使用範例可參照：
 <!--
 const util = require('util'); new util.promisify(CeL.wiki)(...)
 -->
@@ -26,6 +26,8 @@ const util = require('util'); new util.promisify(CeL.wiki)(...)
 開始撰寫模組程式碼。
 |-
 | 2019/10/11 || 分拆至 wiki/*.js
+|-
+| 2020/5/24 || 分拆 wiki.js。基本功能僅需要 `CeL.run('application.net.wiki')`。
 |}
 
 == See also ==

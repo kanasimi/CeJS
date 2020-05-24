@@ -3985,11 +3985,8 @@ function do_test() {
 		'data.date.era', test_era,
 		//
 		[
-			'application.net.wiki.parser',
-			'application.net.wiki.edit',
-			'application.net.wiki.list',
+			'application.net.wiki',
 			'application.net.wiki.data',
-			'application.net.wiki.admin',
 
 			'application.net.wiki.template_functions'
 		], test_wiki,

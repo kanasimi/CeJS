@@ -2496,12 +2496,14 @@ if (typeof CeL === 'function')
 
 							// 不能直接用
 							// .get_file()，得採用異序(asynchronously,不同時)的方式並行載入。
-							library_namespace.debug(
+							library_namespace.debug('Cannot load [' + id
 							//
-							'Cannot load [' + id
-							//
-							+ ']! 以 .get_file() 依序載入的方法失敗：' + e.message, 2,
+							+ ']! 以 .get_file() 依序載入的方法失敗：' + e.message
+									+ (id === URL ? '' : ' (' + URL + ')'), 2,
 									'load_named');
+							if (is_nodejs && library_namespace.is_debug()) {
+								console.error(e);
+							}
 
 							// 除非為 eval 錯誤，否則不設定 .included。
 							if (!library_namespace.env.same_origin_policy) {
@@ -2879,10 +2881,11 @@ if (typeof CeL === 'function')
 					// 傳入 module name space。
 					library_namespace.value_of(id), waiting)) {
 						if (library_namespace.is_debug(2)
-								&& library_namespace.is_WWW())
+								&& library_namespace.is_WWW()) {
 							library_namespace.debug('[' + id
 									+ '].finish() 需要 waiting。等待其執行完畢…', 5,
 									'load_named');
+						}
 						// 因無法即時載入，先行退出。
 						return INCLUDING;
 					}
@@ -2961,7 +2964,8 @@ if (typeof CeL === 'function')
 
 				// 若 return waiting 表示需要等待，例如 asynchronous。
 				// 這時*必須*在完成操作最後自行呼叫 waiting() 以喚醒剩下的作業！
-				return waiting;
+				library_namespace.run([], waiting);
+				return true;
 			},
 			/**
 			 * 執行失敗後之異常/例外處理函式。<br />

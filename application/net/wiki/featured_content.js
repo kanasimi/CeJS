@@ -29,8 +29,10 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.featured_content',
 
-	require : 'data.native.'
-	//
+	require : 'data.native.' + '|application.net.wiki.'
+	// load MediaWiki module basic functions
+	+ '|application.net.wiki.namespace.'
+	// for to_exit
 	+ '|application.net.wiki.parser.'
 	//
 	+ '|application.net.wiki.page.|application.net.wiki.list.',
@@ -44,7 +46,7 @@ typeof CeL === 'function' && CeL.run({
 
 function module_code(library_namespace) {
 	// requiring
-	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	// var is_api_and_title = wiki_API.is_api_and_title,
 	// normalize_title_parameter = wiki_API.normalize_title_parameter;

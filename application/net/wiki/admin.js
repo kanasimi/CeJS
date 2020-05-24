@@ -24,7 +24,11 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.admin',
 
-	require : 'application.net.wiki.query.|application.net.wiki.page.',
+	require : 'application.net.wiki.'
+	// load MediaWiki module basic functions
+	+ '|application.net.wiki.namespace.'
+	//
+	+ '|application.net.wiki.query.|application.net.wiki.page.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',
@@ -36,7 +40,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 
 	// ------------------------------------------------------------------------
 	// administrator functions. 管理員相關函數。

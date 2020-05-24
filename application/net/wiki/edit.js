@@ -23,7 +23,13 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.edit',
 
-	require : 'application.net.wiki.page.|application.net.wiki.Flow.',
+	require : 'application.net.wiki.'
+	// load MediaWiki module basic functions
+	+ '|application.net.wiki.namespace.'
+	// for BLANK_TOKEN
+	+ '|application.net.wiki.task.'
+	//
+	+ '|application.net.wiki.page.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',
@@ -35,12 +41,14 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var gettext = library_namespace.cache_gettext(function(_) {
-		gettext = _;
-	}), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 
 	// @inner
 	var PATTERN_category_prefix = wiki_API.PATTERN_category_prefix, BLANK_TOKEN = wiki_API.BLANK_TOKEN;
+
+	var gettext = library_namespace.cache_gettext(function(_) {
+		gettext = _;
+	});
 
 	// ------------------------------------------------------------------------
 

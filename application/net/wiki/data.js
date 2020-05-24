@@ -26,7 +26,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.data',
 
-	require : 'data.native.|data.date.'
+	require : 'data.native.|data.date.' + '|application.net.wiki.'
+	// load MediaWiki module basic functions
+	+ '|application.net.wiki.namespace.'
 	//
 	+ '|application.net.wiki.query.|application.net.wiki.page.'
 	// wiki_API.edit.check_data()
@@ -46,10 +48,12 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var get_URL = this.r('get_URL'), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION, KEY_HOST_SESSION = wiki_API.KEY_HOST_SESSION;
+	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION, KEY_HOST_SESSION = wiki_API.KEY_HOST_SESSION;
 	// @inner
 	var API_URL_of_options = wiki_API.API_URL_of_options, is_api_and_title = wiki_API.is_api_and_title, is_wikidata_site = wiki_API.is_wikidata_site, language_code_to_site_alias = wiki_API.language_code_to_site_alias;
 	var KEY_CORRESPOND_PAGE = wiki_API.KEY_CORRESPOND_PAGE, KEY_get_entity_value = wiki_API.KEY_get_entity_value, PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i;
+
+	var get_URL = this.r('get_URL');
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */

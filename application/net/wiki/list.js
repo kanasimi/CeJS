@@ -23,9 +23,13 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.list',
 
-	require : 'application.net.Ajax.get_URL'
+	require : 'application.net.wiki.'
+	// load MediaWiki module basic functions
+	+ '|application.net.wiki.namespace.'
+	// for library_namespace.get_URL()
+	+ '|application.net.Ajax.'
 	//
-	+ '|application.net.wiki.query.|application.net.wiki.page.'
+	+ '|application.net.wiki.query.'
 	// wiki_API.parse.redirect()
 	// + '|application.net.wiki.parser.'
 	,
@@ -40,7 +44,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var get_URL = this.r('get_URL'), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, add_parameters = wiki_API.add_parameters;
 
@@ -1442,7 +1446,7 @@ function module_code(library_namespace) {
 		}
 		wiki_API.query([ API_URL, 'query&list=search&'
 		//
-		+ get_URL.parameters_to_String(Object.assign({
+		+ library_namespace.get_URL.parameters_to_String(Object.assign({
 			srsearch : key
 		}, wiki_API.search.default_parameters, _options)) ], function(data,
 				error) {

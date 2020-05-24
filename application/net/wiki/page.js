@@ -26,8 +26,12 @@ typeof CeL === 'function' && CeL.run({
 	require : 'data.native.'
 	// CeL.date.String_to_Date(), Julian_day(), .to_millisecond(): CeL.data.date
 	+ '|data.date.'
-	//
-	+ '|application.net.Ajax.get_URL'
+	// for library_namespace.get_URL
+	+ '|application.net.Ajax.' + '|application.net.wiki.'
+	// load MediaWiki module basic functions
+	+ '|application.net.wiki.namespace.'
+	// for wiki_API.estimated_message()
+	// + '|application.net.wiki.task.'
 	//
 	+ '|application.net.wiki.query.|application.net.wiki.Flow.',
 
@@ -41,7 +45,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var get_URL = this.r('get_URL'), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, add_parameters = wiki_API.add_parameters;
 
@@ -1940,7 +1944,7 @@ function module_code(library_namespace) {
 		// e.g., '20160305'.
 		latest = options.latest;
 		if (!latest) {
-			get_URL(
+			library_namespace.get_URL(
 			// Get the latest version.
 			host + wiki_site_name + '/', function(XMLHttp) {
 				var response = XMLHttp.responseText;

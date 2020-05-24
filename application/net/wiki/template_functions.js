@@ -27,7 +27,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.template_functions',
 
-	require : 'data.native.'
+	require : 'data.native.' + '|application.net.wiki.'
+	// load MediaWiki module basic functions
+	+ '|application.net.wiki.namespace.'
 	//
 	+ '|application.net.wiki.parser.',
 
@@ -41,7 +43,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	// var is_api_and_title = wiki_API.is_api_and_title,
 	// normalize_title_parameter = wiki_API.normalize_title_parameter;
@@ -255,7 +257,7 @@ function module_code(library_namespace) {
 			convertion.title = value;
 		}
 
-		//TODO: {{NoteTA}} 使用「1=」可以同時轉換標題和正文？
+		// TODO: {{NoteTA}} 使用「1=」可以同時轉換標題和正文？
 		for (index = 1; index <= 30; index++) {
 			value = token.parameters[index];
 			if (!value)
@@ -919,7 +921,7 @@ function module_code(library_namespace) {
 		var expand_function = base_namespace[template_name].expand;
 		var export_to = base_namespace.expand_template
 				|| (base_namespace.expand_template = Object.create(null));
-		for (var name in base_namespace[template_name].names) {
+		for ( var name in base_namespace[template_name].names) {
 			export_to[name] = expand_function;
 		}
 	}

@@ -23,9 +23,11 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.query',
 
-	require : 'application.net.wiki.'
-	//
-	+ '|application.net.Ajax.get_URL',
+	require : 'application.net.Ajax.get_URL' + '|application.net.wiki.'
+	// load MediaWiki module basic functions
+	+ '|application.net.wiki.namespace.'
+	// for BLANK_TOKEN
+	+ '|application.net.wiki.task.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',
@@ -37,7 +39,9 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var get_URL = this.r('get_URL'), wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var get_URL = this.r('get_URL');
+
+	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var setup_API_URL = wiki_API.setup_API_URL, BLANK_TOKEN = wiki_API.BLANK_TOKEN;
 
@@ -475,6 +479,7 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// console.trace(action);
 		get_URL(action, function(XMLHttp, error) {
 			var status_code, response;
 			if (error) {
@@ -563,6 +568,7 @@ function module_code(library_namespace) {
 				options.requery = wiki_API_query.bind(null, original_action,
 						callback, post_data, options);
 			}
+			// console.trace(action);
 			// callback(response);
 			check_session_badtoken(response, callback, options);
 

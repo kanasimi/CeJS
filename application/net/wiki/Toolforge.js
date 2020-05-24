@@ -25,9 +25,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.Toolforge',
 
-	require : 'data.native.|application.storage.'
-	//
-	+ '|application.net.wiki.|application.net.wiki.query.',
+	require : 'data.native.|application.storage.' + '|application.net.wiki.'
+	// load MediaWiki module basic functions
+	+ '|application.net.wiki.namespace.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',
@@ -39,7 +39,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
+	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var is_wikidata_site = wiki_API.is_wikidata_site;
 
