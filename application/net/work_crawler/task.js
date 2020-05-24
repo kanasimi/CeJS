@@ -604,13 +604,18 @@ function module_code(library_namespace) {
 		}
 
 		/**
-		 * Warning: 本功能僅適用於會訪問到最新的章節檔案的工具檔。若工具檔不會遍歷所有章節檔案、訪問到最新的章節檔案，則得到的是錯誤的
+		 * Warning:
+		 * 本封存舊作品功能僅適用於會訪問到最新的章節檔案的工具檔。若工具檔不會遍歷所有章節檔案、訪問到最新的章節檔案，則得到的是錯誤的
 		 * `work_data.last_file_modified_date`。此時必須避免執行本函數
 		 * check_and_archive_old_work()。
 		 * 
 		 * e.g., work_crawler/sites/comico.js work_crawler/sites/dm5.js
 		 */
 
+		if (false) {
+			console.trace([ this.archive_old_works,
+					this.use_finished_date_to_archive_old_works ]);
+		}
 		if (!this.archive_old_works) {
 			return;
 		}
@@ -626,7 +631,16 @@ function module_code(library_namespace) {
 			this.is_finished(work_data) ? '5 month' : '.5Y');
 		}
 
-		if (!(Date.now() - Date.parse(work_data.last_file_modified_date) > interval)) {
+		var latest_update = this.use_finished_date_to_archive_old_works
+		// 以作品完結時間為分界來封存舊作品。預設為最後一次下載時間。
+		&& crawler_namespace.set_last_update_Date(work_data)
+		// .use_finished_date_to_archive_old_works 可以用來封存剛剛下載，但已完結許久、久未更新的作品。
+		|| Date.parse(work_data.last_file_modified_date);
+		if (false) {
+			console.trace([ this.use_finished_date_to_archive_old_works,
+					latest_update, Date.now() - latest_update > interval ]);
+		}
+		if (!(Date.now() - latest_update > interval)) {
 			return;
 		}
 
@@ -652,6 +666,7 @@ function module_code(library_namespace) {
 
 			var last_marked_index, archived_prefix = '# ' + gettext('已封存: '), prefix = '# '
 					+ gettext(
+							// '封存日期：%1，作品完結時間：%2',
 							'封存日期：%1，最後一次於 %2 下載',
 							(new Date).toISOString(),
 							library_namespace
