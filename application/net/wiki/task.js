@@ -2482,7 +2482,7 @@ function module_code(library_namespace) {
 	// {zhwikiSession,centralauth_User,centralauth_Token,centralauth_Session,wikidatawikiSession,wikidatawikiUserID,wikidatawikiUserName}
 	//
 	// TODO: https://www.mediawiki.org/w/api.php?action=help&modules=clientlogin
-	wiki_API.login = function(name, password, options) {
+	wiki_API.login = function(user_name, password, options) {
 		var error;
 		function _next() {
 			callback && callback(session.token.lgname, error);
@@ -2557,6 +2557,14 @@ function module_code(library_namespace) {
 
 		// 支援斷言編輯功能。
 		var action = 'assert=user', callback, session, API_URL;
+		if (!API_URL && !password && user_name && typeof user_name === 'object') {
+			// session = CeL.wiki.login(options);
+			options = user_name;
+			// console.log(options);
+			user_name = options.user_name;
+			// user_password
+			password = options.password;
+		}
 		if (library_namespace.is_Object(options)) {
 			API_URL = options.API_URL;
 			session = options[KEY_SESSION];
@@ -2579,9 +2587,9 @@ function module_code(library_namespace) {
 
 		if (!session) {
 			// 初始化 session 與 agent。這裡 callback 當作 API_URL。
-			session = new wiki_API(name, password, options);
+			session = new wiki_API(user_name, password, options);
 		}
-		if (!name || !password) {
+		if (!user_name || !password) {
 			library_namespace
 					.warn('wiki_API.login: The user name or password is not provided. Abandon login attempt.');
 			// console.trace('Stop login');
@@ -2613,7 +2621,8 @@ function module_code(library_namespace) {
 		library_namespace.debug('action: [' + action + ']。', 3,
 				'wiki_API.login');
 
-		library_namespace.debug('準備登入 [' + name + ']。', 1, 'wiki_API.login');
+		library_namespace.debug('準備登入 [' + user_name + ']。', 1,
+				'wiki_API.login');
 		wiki_API.query(action, function(data) {
 			// 確認尚未登入，才作登入動作。
 			if (data === '' && !options.force) {

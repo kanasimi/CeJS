@@ -155,6 +155,7 @@ function module_code(library_namespace) {
 		this.token = {
 			// lgusername
 			lgname : user_name,
+			// user_password
 			lgpassword : password
 		};
 
@@ -220,9 +221,9 @@ function module_code(library_namespace) {
 				'application.net.wiki.parser', 'application.net.wiki.query',
 				'application.net.wiki.page', 'application.net.wiki.Flow',
 				'application.net.wiki.list', 'application.net.wiki.edit',
-				'application.net.wiki.task' ], function() {
-			// library_namespace.info('wiki_API: Loaded.');
-		}, waiting);
+				'application.net.wiki.task' ],
+		// function() { library_namespace.info('wiki_API: Loaded.'); },
+		waiting);
 		return true;
 	};
 
