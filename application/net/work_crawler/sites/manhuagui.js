@@ -96,6 +96,9 @@ function module_code(library_namespace) {
 		base_URL : 'https://www.manhuagui.com/',
 		script_base_URL : 'https://cf.hamreus.com/scripts/',
 
+		// {Natural}MIN_LENGTH:最小容許圖案檔案大小 (bytes)。
+		MIN_LENGTH : 400,
+
 		// 當網站不允許太過頻繁的訪問/access時，可以設定下載之前的等待時間(ms)。
 		// 模仿實際人工請求。
 		// 2018/4: manhuagui 不允許過於頻繁的 access，會直接 ban IP。

@@ -458,7 +458,8 @@ function module_code(library_namespace) {
 			// 設定下載時要添加的 cookie。 document.cookie: "key=value"
 			cookie : 'string',
 
-			// 可接受的圖片類別（延伸檔名）。以 "|" 字元作分隔，如 "webp|jpg|png"。未設定將不作檢查。輸入 "images" 表示接受所有圖片。
+			// 可接受的圖片類別（延伸檔名）。以 "|" 字元作分隔，如 "webp|jpg|png"。未設定將不作檢查。輸入 "images"
+			// 表示接受所有圖片。
 			acceptable_types : 'string',
 			// 漫畫下載完畢後壓縮圖片檔案。
 			archive_images : 'boolean',
@@ -480,6 +481,8 @@ function module_code(library_namespace) {
 
 			// 封存舊作品。
 			archive_old_works : 'boolean|string',
+			// 以作品完結時間為分界來封存舊作品。預設為最後一次下載時間。
+			use_finished_date_to_archive_old_works : 'boolean',
 			// 同時自作品列表中刪除將封存之作品。
 			modify_work_list_when_archive_old_works : 'boolean',
 
