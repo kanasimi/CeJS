@@ -51,6 +51,28 @@ function module_code(library_namespace) {
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 	NOT_FOUND = ''.indexOf('_');
 
+	// ------------------------------------------------------------------------
+
+	// check if session.last_data is usable, 非過期資料。
+	function last_data_is_usable(session) {
+		// When "servers are currently under maintenance", session.last_data is
+		// a string.
+		if (typeof session.last_data === 'object' && !session.last_data.error
+		// 若是session.last_data與session.last_page連動，必須先確認是否沒變更過session.last_page，才能當作cache、跳過重新擷取entity之作業。
+		&& (!(KEY_CORRESPOND_PAGE in session.last_data)
+		// assert:
+		// wiki_API.is_page_data(session.last_data[KEY_CORRESPOND_PAGE])
+		|| session.last_page === session.last_data[KEY_CORRESPOND_PAGE])) {
+			library_namespace.debug('Use cached data: [['
+			//
+			+ (KEY_CORRESPOND_PAGE in session.last_data
+			// may use wiki_API.title_link_of()
+			? session.last_page.id : session.last_data.id) + ']]', 1,
+					'last_data_is_usable');
+			return true;
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// instance 實例相關函數。
 

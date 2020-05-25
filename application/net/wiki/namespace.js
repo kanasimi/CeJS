@@ -2120,30 +2120,7 @@ function module_code(library_namespace) {
 	// 以下兩者必須不可能為 entity / property 之屬性。
 	// 相關/對應頁面。
 	var KEY_CORRESPOND_PAGE = typeof Symbol === 'function' ? Symbol('correspond page')
-			: 'page',
-	// 用來取得 entity value 之屬性名。 函數 : wikidata_entity_value
-	// 為了方便使用，不採用 Symbol()。
-	KEY_get_entity_value = 'value';
-
-	// check if session.last_data is usable, 非過期資料。
-	function last_data_is_usable(session) {
-		// When "servers are currently under maintenance", session.last_data is
-		// a string.
-		if (typeof session.last_data === 'object' && !session.last_data.error
-		// 若是session.last_data與session.last_page連動，必須先確認是否沒變更過session.last_page，才能當作cache、跳過重新擷取entity之作業。
-		&& (!(KEY_CORRESPOND_PAGE in session.last_data)
-		// assert:
-		// wiki_API.is_page_data(session.last_data[KEY_CORRESPOND_PAGE])
-		|| session.last_page === session.last_data[KEY_CORRESPOND_PAGE])) {
-			library_namespace.debug('Use cached data: [['
-			//
-			+ (KEY_CORRESPOND_PAGE in session.last_data
-			// may use wiki_API.title_link_of()
-			? session.last_page.id : session.last_data.id) + ']]', 1,
-					'last_data_is_usable');
-			return true;
-		}
-	}
+			: 'page';
 
 	// ------------------------------------------------------------------------
 
@@ -2722,7 +2699,6 @@ function module_code(library_namespace) {
 		KEY_HOST_SESSION : KEY_HOST_SESSION,
 
 		KEY_CORRESPOND_PAGE : KEY_CORRESPOND_PAGE,
-		KEY_get_entity_value : KEY_get_entity_value,
 
 		session_of_options : session_of_options,
 		add_session_to_options : add_session_to_options,

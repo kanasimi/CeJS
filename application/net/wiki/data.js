@@ -51,13 +51,19 @@ function module_code(library_namespace) {
 	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION, KEY_HOST_SESSION = wiki_API.KEY_HOST_SESSION;
 	// @inner
 	var API_URL_of_options = wiki_API.API_URL_of_options, is_api_and_title = wiki_API.is_api_and_title, is_wikidata_site = wiki_API.is_wikidata_site, language_code_to_site_alias = wiki_API.language_code_to_site_alias;
-	var KEY_CORRESPOND_PAGE = wiki_API.KEY_CORRESPOND_PAGE, KEY_get_entity_value = wiki_API.KEY_get_entity_value, PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i;
+	var KEY_CORRESPOND_PAGE = wiki_API.KEY_CORRESPOND_PAGE, PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i;
 
 	var get_URL = this.r('get_URL');
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 	NOT_FOUND = ''.indexOf('_');
+
+	// ------------------------------------------------------------------------
+
+	// 用來取得 entity value 之屬性名。 函數 : wikidata_entity_value
+	// 為了方便使用，不採用 Symbol()。
+	var KEY_get_entity_value = 'value';
 
 	// ------------------------------------------------------------------------
 
