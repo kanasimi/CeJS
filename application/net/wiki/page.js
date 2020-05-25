@@ -2681,7 +2681,7 @@ function module_code(library_namespace) {
 		/** {Array}id/title list */
 		var id_list, rev_list,
 		//
-		use_language = wiki_API.site_name(options, {
+		use_language = wiki_API.site_name(config, {
 			get_all_properties : true
 		}).language,
 		/** {Object}用在 wiki_API.cache 之 configuration。 */
