@@ -43,6 +43,39 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	/** {Object|Function}fs in node.js */
+	var node_fs;
+	try {
+		if (library_namespace.platform.nodejs)
+			// @see https://nodejs.org/api/fs.html
+			node_fs = require('fs');
+		if (typeof node_fs.readFile !== 'function')
+			throw true;
+	} catch (e) {
+		// enumerate for wiki_API.cache
+		// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
+		library_namespace.warn(this.id
+				+ ': 無 node.js 之 fs，因此不具備 cache 或 SQL 功能。');
+		node_fs = {
+			// library_namespace.storage.read_file()
+			readFile : function(file_path, options, callback) {
+				library_namespace.error('Can not read file ' + file_path);
+				if (typeof callback === 'function')
+					callback(true);
+			},
+			// library_namespace.storage.write_file()
+			writeFile : function(file_path, data, options, callback) {
+				library_namespace.error('Can not write to file ' + file_path);
+				if (typeof options === 'function' && !callback)
+					callback = options;
+				if (typeof callback === 'function')
+					callback(true);
+			}
+		};
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	/**
 	 * cache 相關函數:
 	 * 

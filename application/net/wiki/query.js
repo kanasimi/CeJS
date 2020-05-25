@@ -638,7 +638,7 @@ function module_code(library_namespace) {
 	 */
 	wiki_API_query.default_edit_time_interval = 5000;
 
-	// 因為數量太多，只好增快速度。
+	// Only respect maxlag. 因為數量太多，只好增快速度。
 	// CeL.wiki.query.default_edit_time_interval = 0;
 	// wiki_session.edit_time_interval = 0;
 
