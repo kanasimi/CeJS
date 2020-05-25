@@ -23,7 +23,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.query',
 
-	require : 'application.net.Ajax.get_URL' + '|application.net.wiki.'
+	require : 'application.net.Ajax.get_URL'
+	// library_namespace.age_of()
+	+ '|data.date.' + '|application.net.wiki.'
 	// load MediaWiki module basic functions
 	+ '|application.net.wiki.namespace.'
 	// for BLANK_TOKEN
@@ -197,6 +199,9 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		if (!/^[a-z]+=/.test(action[1]))
 			action[1] = 'action=' + action[1];
+		if (!/(?:^|&)maxlag=/.test(action[1])) {
+			action[1] += '&maxlag=' + wiki_API_query.default_maxlag;
+		}
 		var method = action[1].match(/(?:^|&)action=([a-z]+)/);
 		method = method && method[1];
 
@@ -207,10 +212,12 @@ function module_code(library_namespace) {
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait,
 		// interval.
-		lag_interval = options.lag >= 0 ? options.lag :
+		lag_interval = options.edit_time_interval >= 0
+		//
+		? options.edit_time_interval :
 		// ↑ wiki_API.edit 可能輸入 session 當作 options。
-		// options[KEY_SESSION] && options[KEY_SESSION].lag ||
-		wiki_API_query.default_lag;
+		// options[KEY_SESSION] && options[KEY_SESSION].edit_time_interval ||
+		wiki_API_query.default_edit_time_interval;
 
 		if (false) {
 			// method 1:
@@ -563,6 +570,26 @@ function module_code(library_namespace) {
 				}
 			}
 
+			if (response && response.error
+			// https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
+			&& response.error.code === 'maxlag') {
+				var waiting = response.error.info
+				// /Waiting for [^ ]*: [0-9.-]+ seconds? lagged/
+				.match(/([0-9.-]+) seconds? lagged/);
+				waiting = waiting && +waiting[1] * 1000
+						|| wiki_API_query.default_edit_time_interval;
+				library_namespace.debug(
+				// 請注意，由於上游服務器逾時，緩存層（Varnish 或 squid）也可能會生成帶有503狀態代碼的錯誤消息。
+				'Re-run wiki_API.query() after waiting '
+				// waiting + ' ms'
+				+ (library_namespace.age_of(0, waiting, {
+					digits : 1
+				})) + '.', 1, 'wiki_API_query');
+				setTimeout(wiki_API_query.bind(null, original_action, callback,
+						post_data, options), waiting);
+				return;
+			}
+
 			if (!options.rollback_action) {
 				// Re-run wiki_API.query() after get new token.
 				options.requery = wiki_API_query.bind(null, original_action,
@@ -582,24 +609,33 @@ function module_code(library_namespace) {
 
 	/**
 	 * edit (modify) 時之最大延遲參數。<br />
-	 * default: 使用5秒 (5000 ms) 的最大延遲參數。
+	 * default: 使用5秒的最大延遲參數。較高的值表示更具攻擊性的行為，較低的值則更好。
 	 * 
 	 * 在 Wikimedia Toolforge 上 edit wikidata，單線程均速最快約 1584 ms/edits。
 	 * 
-	 * @type {Object} of {ℕ⁰:Natural+0}
+	 * @type {ℕ⁰:Natural+0}
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
 	 *      https://www.mediawiki.org/wiki/API:Etiquette 禮儀
 	 *      https://phabricator.wikimedia.org/T135240
 	 */
-	wiki_API_query.default_lag = 5000;
+	wiki_API_query.default_maxlag = 5;
+
+	/**
+	 * edit (modify) 時之編輯時間間隔。<br />
+	 * default: 使用5秒 (5000 ms) 的編輯時間間隔。
+	 * 
+	 * @type {ℕ⁰:Natural+0}
+	 */
+	wiki_API_query.default_edit_time_interval = 5000;
 
 	// 因為數量太多，只好增快速度。
-	// CeL.wiki.query.default_lag = 0;
-	// wiki_session.lag = 0;
+	// CeL.wiki.query.default_edit_time_interval = 0;
+	// wiki_session.edit_time_interval = 0;
 
 	// local rule
-	wiki_API_query.lag = {
+	// @see function setup_API_language()
+	wiki_API_query.edit_time_interval = {
 		// [[:ja:WP:bot]]
 		// Botの速度は、おおよそ毎分 6 編集を限度としてください。
 		// e.g., @ User contributions,
@@ -608,7 +644,7 @@ function module_code(library_namespace) {
 		// 由於資料庫回應延遲，此清單可能不會顯示最近 30 秒內的變更。
 		// Changes newer than 25 seconds may not be shown in this list.
 		// 此清單可能不會顯示最近 25 秒內的變更。
-		ja : 10000
+		jawiki : 10000
 	};
 
 	/**

@@ -20,7 +20,7 @@ if (typeof CeL === 'function') {
 
 		require : 'application.net.work_crawler.'
 		//
-		+ '|application.net.Ajax.get_URL',
+		+ '|data.date.|application.net.Ajax.get_URL',
 
 		// 設定不匯出的子函式。
 		no_extend : 'this,*',

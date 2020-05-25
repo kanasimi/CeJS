@@ -547,12 +547,16 @@ function module_code(library_namespace) {
 			session.language
 			// e.g., 'zh-classical', 'zh-yue', 'zh-min-nan', 'simple'
 			= language_code = language_code.toLowerCase();
+			var site_name = wiki_API.site_name(session);
+			var time_interval_config = wiki_API.query.edit_time_interval;
 			// apply local lag interval rule.
-			if (!(session.lag >= 0) && (language_code in wiki_API.query.lag)) {
-				session.lag = wiki_API.query.lag[language_code];
-				library_namespace.debug('Use interval ' + session.lag
-						+ ' for language ' + language_code, 1,
-						'setup_API_language');
+			if (!(session.edit_time_interval >= 0)
+					&& ((site_name in time_interval_config) || (language_code in time_interval_config))) {
+				session.edit_time_interval = time_interval_config[site_name]
+						|| time_interval_config[language_code];
+				library_namespace.debug('Use interval '
+						+ session.edit_time_interval + ' for language '
+						+ language_code, 1, 'setup_API_language');
 			}
 		}
 	}
