@@ -660,8 +660,13 @@ function module_code(library_namespace) {
 			language = null;
 		}
 		// console.trace(language);
+		// console.trace(in_session);
 		// 正規化。
-		language = String(language || in_session && in_session.language
+		language = String(language || in_session && (in_session.language
+		//
+		|| in_session[KEY_HOST_SESSION]
+		//
+		&& in_session[KEY_HOST_SESSION].language)
 		// else use default language
 		// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
 		|| wiki_API.language).trim().toLowerCase().replace(/[_ ]/g, '-');

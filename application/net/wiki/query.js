@@ -199,13 +199,16 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		if (!/^[a-z]+=/.test(action[1]))
 			action[1] = 'action=' + action[1];
-		if (!/(?:^|&)maxlag=/.test(action[1])
+
+		var session = wiki_API.session_of_options(options);
 		// respect maxlag
-		&& (options.maxlag >= 0 || wiki_API_query.default_maxlag >= 0)) {
-			action[1] += '&maxlag='
-					+ (options.maxlag >= 0 ? options.maxlag
-							: wiki_API_query.default_maxlag);
+		var maxlag = !isNaN(options.maxlag) ? options.maxlag
+				: !isNaN(session.maxlag) ? session.maxlag
+						: wiki_API_query.default_maxlag;
+		if (!action[1].includes('&maxlag=') && !isNaN(maxlag)) {
+			action[1] += '&maxlag=' + maxlag;
 		}
+
 		var method = action[1].match(/(?:^|&)action=([a-z]+)/);
 		method = method && method[1];
 
@@ -355,7 +358,6 @@ function module_code(library_namespace) {
 		var get_URL_options = Object.assign(Object.create(null),
 				wiki_API_query.get_URL_options, options.get_URL_options);
 
-		var session = wiki_API.session_of_options(options);
 		if (session) {
 			if (method === 'edit' && post_data
 			//
@@ -581,15 +583,15 @@ function module_code(library_namespace) {
 				var waiting = response.error.info
 				// /Waiting for [^ ]*: [0-9.-]+ seconds? lagged/
 				.match(/([0-9.-]+) seconds? lagged/);
-				waiting = waiting && +waiting[1] * 1000
-						|| wiki_API_query.default_edit_time_interval;
+				waiting = waiting && +waiting[1] * 1000 || edit_time_interval;
 				library_namespace.debug(
 				// 請注意，由於上游服務器逾時，緩存層（Varnish 或 squid）也可能會生成帶有503狀態代碼的錯誤消息。
-				'Re-run wiki_API.query() after waiting '
+				'Waiting '
 				// waiting + ' ms'
 				+ (library_namespace.age_of(0, waiting, {
 					digits : 1
-				})) + '.', 1, 'wiki_API_query');
+				})) + ' to re-run wiki_API.query().', 1, 'wiki_API_query');
+				// console.log([ original_action, post_data ]);
 				setTimeout(wiki_API_query.bind(null, original_action, callback,
 						post_data, options), waiting);
 				return;
@@ -625,6 +627,8 @@ function module_code(library_namespace) {
 	 *      https://phabricator.wikimedia.org/T135240
 	 */
 	wiki_API_query.default_maxlag = 5;
+	// for manually testing only
+	// CeL.wiki.query.default_maxlag = 20;
 
 	/**
 	 * edit (modify / create) 時之編輯時間間隔。<br />

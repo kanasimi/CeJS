@@ -1279,6 +1279,10 @@ function module_code(library_namespace) {
 		// 不採用 wiki_API.is_page_data(key)
 		// 以允許自行設定 {title:title,language:language}。
 		if (key.title) {
+			if (false) {
+				console
+						.trace([ wiki_API.site_name(key.language, options), key ]);
+			}
 			action = 'sites=' + (key.site ||
 			// 在 options 包含之 wiki session 中之 key.language。
 			// e.g., "cz:" 在 zhwiki 將轉為 cs.wikipedia.org
@@ -1322,11 +1326,12 @@ function module_code(library_namespace) {
 		}
 		// console.log(options);
 		// console.log(action);
+		// console.trace([ key, arguments, action ]);
+		// console.log(wiki_API.session_of_options(options));
 
 		// library_namespace.log('wikidata_entity: API_URL: ' + API_URL);
 		// library_namespace.log('wikidata_entity: action: ' + action);
 		var _arguments = arguments;
-		// console.log(arguments);
 		// TODO:
 		wiki_API.query(action, function handle_result(data, error) {
 			error = error || (data ? data.error : new Error('No data get!'));
