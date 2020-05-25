@@ -199,20 +199,24 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		if (!/^[a-z]+=/.test(action[1]))
 			action[1] = 'action=' + action[1];
-		if (!/(?:^|&)maxlag=/.test(action[1])) {
-			action[1] += '&maxlag=' + wiki_API_query.default_maxlag;
+		if (!/(?:^|&)maxlag=/.test(action[1])
+		// respect maxlag
+		&& (options.maxlag >= 0 || wiki_API_query.default_maxlag >= 0)) {
+			action[1] += '&maxlag='
+					+ (options.maxlag >= 0 ? options.maxlag
+							: wiki_API_query.default_maxlag);
 		}
 		var method = action[1].match(/(?:^|&)action=([a-z]+)/);
 		method = method && method[1];
 
-		// respect maxlag. 若為 query，非 edit (modify)，則不延遲等待。
-		var need_check_lag
+		// respect edit time interval. 若為 query，非 edit (modify)，則不延遲等待。
+		var need_check_edit_time_interval
 		// method 2: edit 時皆必須設定 token。
 		= post_data && post_data.token,
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait,
-		// interval.
-		lag_interval = options.edit_time_interval >= 0
+		// edit time interval in ms
+		edit_time_interval = options.edit_time_interval >= 0
 		//
 		? options.edit_time_interval :
 		// ↑ wiki_API.edit 可能輸入 session 當作 options。
@@ -222,19 +226,20 @@ function module_code(library_namespace) {
 		if (false) {
 			// method 1:
 			// assert: typeof action[1] === 'string'
-			need_check_lag = action[1]
+			need_check_edit_time_interval = action[1]
 					.match(/(?:action|assert)=([a-z]+)(?:&|$)/);
-			if (!need_check_lag) {
+			if (!need_check_edit_time_interval) {
 				library_namespace.warn('wiki_API_query: Unknown action: '
 						+ action[1]);
-			} else if (need_check_lag = /edit|create/i.test(need_check_lag[1])) {
-				to_wait = lag_interval
-						- (Date.now() - wiki_API_query.last_option_time[action[0]]);
+			} else if (need_check_edit_time_interval = /edit|create/i
+					.test(need_check_edit_time_interval[1])) {
+				to_wait = edit_time_interval
+						- (Date.now() - wiki_API_query.last_operation_time[action[0]]);
 			}
 		}
-		if (need_check_lag) {
-			to_wait = lag_interval
-					- (Date.now() - wiki_API_query.last_option_time[action[0]]);
+		if (need_check_edit_time_interval) {
+			to_wait = edit_time_interval
+					- (Date.now() - wiki_API_query.last_operation_time[action[0]]);
 		}
 
 		// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
@@ -246,9 +251,9 @@ function module_code(library_namespace) {
 			}, to_wait);
 			return;
 		}
-		if (need_check_lag) {
+		if (need_check_edit_time_interval) {
 			// reset timer
-			wiki_API_query.last_option_time[action[0]] = Date.now();
+			wiki_API_query.last_operation_time[action[0]] = Date.now();
 		} else {
 			library_namespace.debug('非 edit (modify)，不延遲等待。', 3,
 					'wiki_API_query');
@@ -608,7 +613,7 @@ function module_code(library_namespace) {
 	};
 
 	/**
-	 * edit (modify) 時之最大延遲參數。<br />
+	 * edit (modify / create) 時之最大延遲參數。<br />
 	 * default: 使用5秒的最大延遲參數。較高的值表示更具攻擊性的行為，較低的值則更好。
 	 * 
 	 * 在 Wikimedia Toolforge 上 edit wikidata，單線程均速最快約 1584 ms/edits。
@@ -622,7 +627,7 @@ function module_code(library_namespace) {
 	wiki_API_query.default_maxlag = 5;
 
 	/**
-	 * edit (modify) 時之編輯時間間隔。<br />
+	 * edit (modify / create) 時之編輯時間間隔。<br />
 	 * default: 使用5秒 (5000 ms) 的編輯時間間隔。
 	 * 
 	 * @type {ℕ⁰:Natural+0}
@@ -656,11 +661,11 @@ function module_code(library_namespace) {
 
 	/**
 	 * URL last queried.<br />
-	 * wiki_API_query.last_option_time[API_URL] = {Date}last queried date
+	 * wiki_API_query.last_operation_time[API_URL] = {Date}last queried date
 	 * 
 	 * @type {Object}
 	 */
-	wiki_API_query.last_option_time = Object.create(null);
+	wiki_API_query.last_operation_time = Object.create(null);
 
 	/**
 	 * 取得 page_data 之 title parameter。<br />
