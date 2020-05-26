@@ -2532,42 +2532,6 @@ function module_code(library_namespace) {
 				.test(site_or_language);
 	}
 
-	// ------------------------------------------------------------------------
-	// SQL 相關函數 @ Toolforge。
-
-	function setup_wmflabs() {
-		/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
-		var wmflabs;
-
-		// only for node.js.
-		// https://wikitech.wikimedia.org/wiki/Help:Toolforge/FAQ#How_can_I_detect_if_I.27m_running_in_Cloud_VPS.3F_And_which_project_.28tools_or_toolsbeta.29.3F
-		if (library_namespace.platform.nodejs) {
-			/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
-			wmflabs = require('fs').existsSync('/etc/wmflabs-project')
-			// e.g., 'tools-bastion-05'.
-			// if use `process.env.INSTANCEPROJECT`,
-			// you may get 'tools' or 'tools-login'.
-			&& (library_namespace.env.INSTANCENAME
-			// 以 /usr/bin/jsub 執行時可得。
-			// e.g., 'tools-exec-1210.eqiad.wmflabs'
-			|| library_namespace.env.HOSTNAME || true);
-		}
-
-		if (wmflabs) {
-			// CeL.wiki.wmflabs
-			wiki_API.wmflabs = wmflabs;
-
-			var module_name = this.id;
-			this.finish = function(name_space, waiting) {
-				// import CeL.application.net.wiki.Toolforge
-				library_namespace.run(module_name + '.Toolforge', waiting);
-				return waiting;
-			};
-		}
-	}
-
-	setup_wmflabs.call(this);
-
 	// --------------------------------------------------------------------------------------------
 
 	// extract session from options, get_session_from_options

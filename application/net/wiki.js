@@ -214,14 +214,42 @@ function module_code(library_namespace) {
 
 	// 等執行再包含入必須的模組。
 	this.finish = function(name_space, waiting) {
+		var sub_modules = [ 'namespace', 'parser', 'query', 'page', 'Flow',
+				'list', 'edit', 'task' ];
+
+		// ------------------------------------------------------------------------
+		// auto import SQL 相關函數 @ Toolforge。
+
+		// function setup_wmflabs()
+
+		// only for node.js.
+		// https://wikitech.wikimedia.org/wiki/Help:Toolforge/FAQ#How_can_I_detect_if_I.27m_running_in_Cloud_VPS.3F_And_which_project_.28tools_or_toolsbeta.29.3F
+		if (library_namespace.platform.nodejs) {
+			/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
+			wiki_API.wmflabs = require('fs').existsSync('/etc/wmflabs-project')
+			// e.g., 'tools-bastion-05'.
+			// if use `process.env.INSTANCEPROJECT`,
+			// you may get 'tools' or 'tools-login'.
+			&& (library_namespace.env.INSTANCENAME
+			// 以 /usr/bin/jsub 執行時可得。
+			// e.g., 'tools-exec-1210.eqiad.wmflabs'
+			|| library_namespace.env.HOSTNAME || true);
+		}
+
+		if (wiki_API.wmflabs) {
+			// import CeL.application.net.wiki.Toolforge
+			sub_modules.push('Toolforge');
+		}
+
+		// --------------------------------------------------------------------
+
 		library_namespace.debug('載入操作維基百科的主要功能 Essential 必要的依賴鍊。', 1,
 				'wiki_API');
 		// library_namespace.set_debug(2);
-		library_namespace.run([ 'application.net.wiki.namespace',
-				'application.net.wiki.parser', 'application.net.wiki.query',
-				'application.net.wiki.page', 'application.net.wiki.Flow',
-				'application.net.wiki.list', 'application.net.wiki.edit',
-				'application.net.wiki.task' ],
+		var module_name_prefix = this.id + '.';
+		library_namespace.run(sub_modules.map(function(module) {
+			return module_name_prefix + module;
+		}),
 		// function() { library_namespace.info('wiki_API: Loaded.'); },
 		waiting);
 		return true;
