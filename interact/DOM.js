@@ -8848,12 +8848,15 @@ _
 	 * 
 	 * @param {String|HTMLElement}[content_node]
 	 *            針對指定 node 列出目錄。
-	 * @param {Integer}[level]
-	 *            to <h\d>. default: 6.
-	 * @param {Integer}[force]
-	 *            0:auto, 1:re-show, 2: force show.
+	 * @param {Object}[options]
+	 *            附加參數/設定特殊功能與選項
 	 */
-	function auto_TOC(content_node, level, force) {
+	function auto_TOC(content_node, options) {
+		options = library_namespace.setup_options(options);
+		/** {Integer}to <h\d>. default: 6. */
+		var level = options.level;
+		/** {Integer}0:auto, 1:re-show, 2: force show. */
+		var force = options.force;
 		if (!(content_node = get_element(content_node)))
 			content_node = document.body;
 		if (!force && content_node.scrollHeight < 4 * screen.height)
@@ -8861,14 +8864,19 @@ _
 
 		// 設定目錄 height。
 		function set_height() {
-			var height;
-			if (CSS_position_sticky)
-				if (node.style.position)
-					TOC_list.style.height = '';
-				else if (!isNaN(height = window.innerHeight)
-				// 當 TOC_list 的高度超出可見區域時，方縮小之。
-				&& (height = (height - 40) | 0) < TOC_list.offsetHeight)
-					TOC_list.style.height = height + 'px';
+			if (!CSS_position_sticky) {
+				return;
+			}
+			if (node.style.position) {
+				TOC_list.style.height = '';
+				return;
+			}
+			var height = window.innerHeight;
+			if (!isNaN(height)
+			// 當 TOC_list 的高度超出可見區域時，方縮小之。
+			&& (height = (height - 40) | 0) < TOC_list.offsetHeight) {
+				TOC_list.style.height = height + 'px';
+			}
 		}
 
 		function add_TOC_node(node) {
@@ -9016,7 +9024,9 @@ _
 				// http://www.fileformat.info/info/emoji/list.htm
 				// http://codepoints.net/U+1F4D1
 				div : [ '📑', {
-					T : title ? [ 'Contents of [%1]', title ] : 'Contents'
+					T : title ? [ 'Contents of [%1]', options.title_name
+					//
+					&& options.title_name(title) || title ] : 'Contents'
 				} ],
 				C : auto_TOC.CSS_prefix + 'control',
 				title : gettext('expand'),
