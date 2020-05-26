@@ -202,9 +202,9 @@ function module_code(library_namespace) {
 
 		var session = wiki_API.session_of_options(options);
 		// respect maxlag
-		var maxlag = !isNaN(options.maxlag) ? options.maxlag
-				: !isNaN(session.maxlag) ? session.maxlag
-						: wiki_API_query.default_maxlag;
+		var maxlag = !isNaN(options.maxlag) ? options.maxlag : session
+				&& !isNaN(session.maxlag) ? session.maxlag
+				: wiki_API_query.default_maxlag;
 		if (!action[1].includes('&maxlag=') && !isNaN(maxlag)) {
 			action[1] += '&maxlag=' + maxlag;
 		}
