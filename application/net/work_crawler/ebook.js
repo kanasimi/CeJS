@@ -44,91 +44,99 @@ function module_code(library_namespace) {
 	// 通常應該會被 parse_chapter_data() 呼叫。
 	function check_next_chapter(work_data, chapter_NO, html,
 			PATTERN_next_chapter) {
-		var next_chapter = work_data.chapter_list[chapter_NO],
-		// chapter_data.url
-		next_chapter_url = next_chapter && next_chapter.url,
 		// /下一[章页][：: →]*<a [^<>]*?href="([^"]+.html)"[^<>]*>/
-		next_url = html && html.match(PATTERN_next_chapter ||
+		var next_url = html && html.match(PATTERN_next_chapter ||
 		// PTCMS default. e.g., "下一章 →" /下一章[：: →]*/
 		// PATTERN_next_chapter: [ all, next chapter url ]
 		// e.g., <a href="//read.qidian.com/chapter/abc123">下一章</a>
 		/ href=["']([^<>"']+)["'][^<>]*>(?:<button[^<>]*>)?下一[章页]/);
 		// console.log(chapter_NO + ': ' + next_url[1]);
 
-		if (next_chapter && next_url
+		if (!next_url)
+			return;
 
 		// 去掉開頭的 "./"。
-		&& (next_url = next_url[1].replace(/^(\.\/)+/,
+		next_url = next_url[1].replace(/^(\.\/)+/,
 		// TODO: {Array}this.chapter_URL()
-		this.chapter_URL(work_data, chapter_NO).replace(/[^\/]+$/, '')))
+		this.chapter_URL(work_data, chapter_NO).replace(/[^\/]+$/, ''));
+		if (!next_url)
+			return;
+
+		var next_chapter = work_data.chapter_list[chapter_NO],
+		// chapter_data.url
+		next_chapter_url = next_chapter && next_chapter.url;
 
 		// 有些在目錄上面的章節連結到了錯誤的頁面，只能靠下一頁來取得正確頁面。
-		&& next_url !== next_chapter_url
+		if (next_url === next_chapter_url
 		// 許多網站會把最新章節的下一頁設成章節列表，因此必須排除章節列表的網址。
-		&& next_url !== work_data.url
-		// && next_url !== './'
-		&& next_url !== 'index.html'
+		|| next_url === work_data.url
+		// || next_url === './'
+		|| next_url === 'index.html')
+			return;
 
-		// 符合這些條件的，依然是相同的網址。
-		// 照理來說.startsWith()本陳述應該皆為真。
-		&& !(next_url.startsWith(work_data.base_url)
-		// 檢查正規化規範連結之後是否與本章節相同。
-		? (next_url.length < next_chapter_url.length
-		//
-		? next_url === next_chapter_url.slice(work_data.base_url.length)
-		//
-		: next_chapter_url === next_url.slice(work_data.base_url.length))
-		//
-		: (next_url.length < next_chapter_url.length
-		//
-		? next_chapter_url.endsWith(next_url)
-		// 
-		: next_url.endsWith(next_chapter_url)))
+		if (next_chapter_url) {
+			// 符合這些條件的，依然是相同的網址。
+			// 照理來說.startsWith()本陳述應該皆為真。
+			if (next_url.startsWith(work_data.base_url)) {
+				var base_length = work_data.base_url.length;
+				// 檢查正規化規範連結之後是否與本章節相同。
+				if (next_url.length < next_chapter_url.length
+				// 檢查去除 work_data.base_url 後是否相同。
+				? next_url === next_chapter_url.slice(base_length)
+				//
+				: next_chapter_url === next_url.slice(base_length))
+					return;
 
-		) {
-
-			if (false) {
-				// 不採用插入的方法，直接改掉下一個章節。
-				library_namespace.info(library_namespace.display_align([
-						[ gettext('章節編號%1：', chapter_NO), next_chapter_url ],
-						[ '→ ', next_url ] ]));
-				next_chapter.url = next_url;
-			}
-
-			if (work_data.chapter_list.some(function(chapter_data) {
-				return chapter_data.url === next_url;
-			})) {
-				// url 已經在 chapter_list 裡面。
+			} else if (next_url.length < next_chapter_url.length
+			//
+			? next_chapter_url.endsWith(next_url)
+			// 
+			: next_url.endsWith(next_chapter_url)) {
 				return;
 			}
-
-			var message = work_data.chapter_list[chapter_NO - 1];
-			message = [ 'check_next_chapter: ', {
-				T : [ 'Insert a chapter url after chapter %1: %2', chapter_NO
-				//
-				+ (message && message.url ? ' (' + message.url + ')' : ''),
-				//
-				next_url ]
-			},
-			// 原先下一個章節的 URL 被往後移一個。
-			next_chapter_url ? ' → ' + next_chapter_url : '' ];
-			if (next_chapter_url) {
-				// Insert a chapter url
-				library_namespace.log(message);
-			} else {
-				// Append a chapter url at last
-				library_namespace.debug(message);
-			}
-
-			// 動態增加章節。
-			work_data.chapter_list.splice(chapter_NO, 0, {
-				// title : '',
-				url : next_url
-			});
-			// 重新設定章節數量。
-			work_data.chapter_count = work_data.chapter_list.length;
-			return true;
 		}
+
+		if (false) {
+			// 不採用插入的方法，直接改掉下一個章節。
+			library_namespace.info(library_namespace.display_align([
+					[ gettext('章節編號%1：', chapter_NO), next_chapter_url ],
+					[ '→ ', next_url ] ]));
+			next_chapter.url = next_url;
+		}
+
+		if (work_data.chapter_list.some(function(chapter_data) {
+			return chapter_data.url === next_url;
+		})) {
+			// url 已經在 chapter_list 裡面。
+			return;
+		}
+
+		var message = work_data.chapter_list[chapter_NO - 1];
+		message = [ 'check_next_chapter: ', {
+			T : [ 'Insert a chapter url after chapter %1: %2', chapter_NO
+			//
+			+ (message && message.url ? ' (' + message.url + ')' : ''),
+			//
+			next_url ]
+		},
+		// 原先下一個章節的 URL 被往後移一個。
+		next_chapter_url ? ' → ' + next_chapter_url : '' ];
+		if (next_chapter_url) {
+			// Insert a chapter url
+			library_namespace.log(message);
+		} else {
+			// Append a chapter url at last
+			library_namespace.debug(message);
+		}
+
+		// 動態增加章節。
+		work_data.chapter_list.splice(chapter_NO, 0, {
+			// title : '',
+			url : next_url
+		});
+		// 重新設定章節數量。
+		work_data.chapter_count = work_data.chapter_list.length;
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------
