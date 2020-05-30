@@ -617,7 +617,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (spaces[2].includes('\n') && !/\n\s*$/.test(replace_to)) {
+		if (spaces[2].includes('\n') && !/\n\s*?$/.test(replace_to)) {
 			// Append new-line without tail "|"
 			replace_to += spaces[2];
 		}
@@ -671,19 +671,97 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
-	// CeL.wiki.parser.remove_token()
-	function remove_token_from_parent(parent_token, index, max_length) {
-		var token = index + 1 < (max_length >= 0 ? Math.min(max_length,
-				parent_token.length) : parent_token.length)
-				&& parent_token[index + 1];
-		// assert: 以 "\n" 開頭的，都應該 `typeof token === 'string'`。
-		if (typeof token === 'string') {
+	// CeL.wiki.parser.remove_heading_spaces(parent, index, max_length)
+	// remove heading spaces from parent_token[index]
+	function remove_heading_spaces(parent_token, index, max_length,
+			do_not_preserve_tail_spaces) {
+		max_length = typeof max_length === 'number' && max_length >= 0 ? Math
+				.min(max_length, parent_token.length) : parent_token.length;
+
+		var _i = index;
+
+		var combined_tail;
+		for (; index < max_length; index++) {
+			var token = parent_token[index];
+			// assert: 以 "\n" 開頭的，都應該 `typeof token === 'string'`。
+			if (typeof token !== 'string') {
+				if (!combined_tail)
+					return;
+
+				index--;
+				break;
+			}
+
+			if (!token) {
+				continue;
+			}
+
+			if (combined_tail)
+				combined_tail += token;
+			else
+				combined_tail = token;
+			if (/[^\s\n]/.test(token)) {
+				break;
+			}
+			parent_token[index] = '';
+		}
+
+		// console.trace(JSON.stringify(combined_tail));
+		if (!/^\s/.test(combined_tail)) {
+			// No need to change
+
+			// 注意: /\s/.test('\n') === true
+		} else if (/^\s*?\n/.test(combined_tail)) {
+			var preserve_heading_new_line;
+			while (_i > 0) {
+				var token = parent_token[--_i];
+				if (token) {
+					// 前文以 new line 作結，或者要 trim 的 token 是第一個 token，
+					// 則不保留末尾的 preserve_heading_new_line。
+					preserve_heading_new_line =
+					// typeof token !== 'string' ||
+					!/\n\s*?$/.test(token);
+					break;
+				}
+				// assert: token === ''
+			}
+
+			combined_tail = combined_tail
 			// 去除後方的空白 + 僅一個換行。 去除前方的空白或許較不合適？
 			// e.g., "* list\n\n{{t1}}\n{{t2}}",
 			// remove "{{t1}}\n" → "* list\n\n{{t2}}"
-			parent_token[index + 1] = token.replace(/^\s*\n/, '');
+			.replace(/^\s*?\n/, preserve_heading_new_line ? '\n' : '');
+		} else {
+			combined_tail = combined_tail
+			// 去除後方太多空白，僅留下最後一個空白。
+			.replace(/^(\s)*/, do_not_preserve_tail_spaces ? '' : '$1');
 		}
+
+		parent_token[index] = combined_tail;
+		// return index;
+	}
+
+	page_parser.remove_heading_spaces = remove_heading_spaces;
+
+	// CeL.wiki.parser.remove_token(parent, index, max_length)
+	function remove_token_from_parent(parent_token, index, max_length,
+			do_not_preserve_tail_spaces) {
+		if (index === undefined && parent_token.parent
+				&& parent_token.index >= 0) {
+			// remove parent_token itself
+			// CeL.wiki.parser.remove_token(token)
+			index = parent_token.index;
+			parent_token = parent_token.parent;
+		}
+
+		var token = parent_token[index];
 		parent_token[index] = '';
+
+		remove_heading_spaces(parent_token, index + 1, max_length,
+				do_not_preserve_tail_spaces);
+
+		// console.log(parent_token.slice(index - 2, i + 2));
+		return token;
 	}
 
 	page_parser.remove_token = remove_token_from_parent;
@@ -1586,7 +1664,7 @@ function module_code(library_namespace) {
 		// 章節標題。
 		section_title,
 		// [ all title, "=", section title ]
-		PATTERN_section = /\n(={1,2})([^=\n]+)\1\s*\n/g;
+		PATTERN_section = /\n(={1,2})([^=\n]+)\1\s*?\n/g;
 
 		section_list.toString = function() {
 			return this.join('');
@@ -4307,6 +4385,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// table: \n{| ... \n|}
+		// TODO: 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]]
 		// 因為 table 中較可能包含 {{Template}}，但 {{Template}} 少包含 table，
 		// 因此先處理 {{Template}} 再處理 table。
 		// {|表示表格開始，|}表示表格結束。
@@ -4922,9 +5001,9 @@ function module_code(library_namespace) {
 
 		// console.log('15: ' + JSON.stringify(wikitext));
 		// [ all, text, separator ]
-		var PATTERN_paragraph = /([\s\S]*?)((?:\s*\n){2,}|$)/g;
+		var PATTERN_paragraph = /([\s\S]*?)((?:\s*?\n){2,}|$)/g;
 		if (initialized_fix && options.parse_paragraph
-				&& /\n\s*\n/.test(wikitext)) {
+				&& /\n\s*?\n/.test(wikitext)) {
 			// 警告: 解析段落的動作可能破壞文件的第一層結構，會使文件的第一層結構以段落為主。
 			wikitext = wikitext.replace(PATTERN_paragraph,
 			// assert: 這個 pattern 應該能夠完全分割 wikitext。
@@ -5001,7 +5080,7 @@ function module_code(library_namespace) {
 				var token = wikitext[index], matched;
 				// console.log('---> [' + index + '] ' + token);
 				if (typeof token === 'string') {
-					if (!/\n\s*\n/.test(token)) {
+					if (!/\n\s*?\n/.test(token)) {
 						continue;
 					}
 					// 刪掉原先的文字 token = wikitext[index]。
