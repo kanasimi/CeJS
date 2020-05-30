@@ -2432,7 +2432,7 @@ function module_code(library_namespace) {
 		 * 此時 bytes 指向檔案中 start position of buffer，可用來設定錨/定位點。
 		 */
 
-		library_namespace.info('read_dump: Starting read data...');
+		library_namespace.info('read_dump: Starting read dump file...');
 
 		/**
 		 * Parse Wikimedia dump xml file slice.

@@ -3070,6 +3070,8 @@ function module_code(library_namespace) {
 					 */
 					library_namespace.error('set_next_claim: [' + error.code
 							+ '] ' + (error.info || error.message));
+					library_namespace.warn('claim_action: '
+							+ JSON.stringify(claim_action));
 					library_namespace.warn('data to write: '
 							+ JSON.stringify(POST_data));
 					// console.log(claim_index);
@@ -4130,6 +4132,9 @@ function module_code(library_namespace) {
 					+ (options.id ? options.id + ': ' : '')
 					// [readonly] The wiki is currently in read-only mode
 					+ '[' + error.code + '] ' + (error.info || error.message));
+					library_namespace.warn('action: '
+					//
+					+ JSON.stringify(action));
 					library_namespace.warn('data to write: '
 							+ JSON.stringify(options));
 					callback(undefined, error);
@@ -4812,15 +4817,60 @@ function module_code(library_namespace) {
 				callback(undefined, error);
 				return;
 			}
-			data = JSON.parse(data.responseText);
+			// console.log(data.responseText);
+			try {
+				data = JSON.parse(data.responseText);
+			} catch (e) {
+				// e.g., java.util.concurrent.TimeoutException
+				callback(undefined, e);
+				return;
+			}
+			// {"head":{"vars":["item"]},"results":{"bindings":[{"item":{"type":"uri","value":"http://www.wikidata.org/entity/Q1"}},...]}}
+			// console.log(JSON.stringify(data));
+
 			var items = data.results;
 			if (!items || !Array.isArray(items = items.bindings)) {
 				callback(data);
 				return;
 			}
+
 			// 正常情況
+			items.for_id = for_erach_SPARQL_item_process_id;
+			// e.g., items.id_list('item'); items.id_list();
+			items.id_list = get_SPARQL_id_list;
 			callback(items);
 		});
+	}
+
+	function for_erach_SPARQL_item_process_id(processor, item_list, item_name) {
+		item_list = item_list || this;
+		item_list.forEach(function(item) {
+			var matched = item[item_name];
+			if (matched && matched.type === "uri") {
+				matched = matched.value && matched.value.match(/Q\d+$/);
+				if (matched) {
+					// processor(id)
+					processor(matched[0]);
+					return;
+				}
+			}
+			// Unknown item.
+			// processor(item)
+			processor(item);
+		});
+	}
+
+	function get_SPARQL_id_list(options) {
+		if (typeof options === 'string') {
+			options = {
+				item_name : options
+			};
+		}
+		var id_list = [];
+		for_erach_SPARQL_item_process_id(function(id) {
+			id_list.push(id);
+		}, this, options && options.item_name || 'item');
+		return id_list;
 	}
 
 	// --------------------------------------------------------------------------------------------
