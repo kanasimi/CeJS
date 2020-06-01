@@ -1458,6 +1458,27 @@ function module_code(library_namespace) {
 		return index;
 	}
 
+	function summary_to_wikitext(summary) {
+		// unescaped_summary
+		var wikitext = summary.replace(/</g, '&lt;').replace(
+		// 避免 wikitext 添加 Category。
+		// 在編輯摘要中加上使用者連結，似乎還不至於驚擾到使用者。因此還不用特別處理。
+		// @see PATTERN_category @ CeL.wiki
+		/\[\[\s*(Category|分類|分类|カテゴリ|분류)\s*:/ig, '[[:$1:');
+		if (false) {
+			// 在 [[t|{{t}}]] 時無效，改採 .replace(/{{/g,)。
+			wikitext = wikitext.replace(
+			// replace template
+			/{{([a-z\d]+)/ig, function(all, name) {
+				if (/^tl\w$/i.test(name))
+					return all;
+				return '{{tlx|' + name;
+			});
+		}
+		wikitext = wikitext.replace(/{{/g, '&#123;&#123;');
+		return wikitext;
+	}
+
 	// wiki_API.prototype.work(config, page_list): configuration:
 	({
 		// 注意: 與 wiki_API.prototype.work(config)
@@ -2153,25 +2174,7 @@ function module_code(library_namespace) {
 						messages.add(gettext('Nothing change.'));
 					}
 					if (log_item.title && config.summary) {
-						var unescaped_summary = config.summary.replace(/</g,
-								'&lt;').replace(
-						// 避免 log page 添加 Category。
-						// 在編輯摘要中加上使用者連結，似乎還不至於驚擾到使用者。因此還不用特別處理。
-						// @see PATTERN_category @ CeL.wiki
-						/\[\[\s*(Category|分類|分类|カテゴリ|분류)\s*:/ig, '[[:$1:');
-						if (false) {
-							// 在 [[t|{{t}}]] 時無效，改採 .replace(/{{/g,)。
-							unescaped_summary = unescaped_summary.replace(
-							// replace template
-							/{{([a-z\d]+)/ig, function(all, name) {
-								if (/^tl\w$/i.test(name))
-									return all;
-								return '{{tlx|' + name;
-							});
-						}
-						unescaped_summary = unescaped_summary.replace(/{{/g,
-								'&#123;&#123;');
-						messages.unshift(unescaped_summary);
+						messages.unshift(summary_to_wikitext(config.summary));
 					}
 				}
 
