@@ -1143,6 +1143,24 @@ function module_code(library_namespace) {
 
 		// administrator functions
 
+		case 'move_page':
+			if (type === 'move_page') {
+				// wiki.move_page(from, to, options, callback)
+				// wiki.move_page(from, to, callback)
+				if (typeof next[3] === 'function') {
+					// shift arguments
+					next.splice(3, 0, {
+						from : next[1]
+					});
+				} else {
+					next[3] = library_namespace.setup_options(next[3]);
+					next[3].from = next[1];
+				}
+				// remove `from`
+				next.splice(1, 1);
+				type = 'move_to';
+			}
+
 		case 'move_to':
 			// wiki_API.move_to(): move a page from `from` to target `to`.
 
@@ -1174,6 +1192,7 @@ function module_code(library_namespace) {
 				// 正名。
 				type = 'delete';
 			}
+
 		case 'delete':
 			// wiki.page(title).delete([title,] options, callback)
 
@@ -1283,7 +1302,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|search|remove|delete|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------
@@ -1458,6 +1477,7 @@ function module_code(library_namespace) {
 		return index;
 	}
 
+	// unescaped syntaxes in summary
 	function summary_to_wikitext(summary) {
 		// unescaped_summary
 		var wikitext = summary.replace(/</g, '&lt;').replace(

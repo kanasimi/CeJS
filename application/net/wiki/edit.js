@@ -172,6 +172,12 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	function add_section_to_summary(summary, section_title) {
+		if (!section_title)
+			return summary || '';
+		return '/* ' + section_title + ' */ ' + (summary || '');
+	}
+
 	function edit_error_toString() {
 		return '[' + this.code + '] ' + this.info;
 	}
@@ -336,6 +342,11 @@ function module_code(library_namespace) {
 			// 若是 timestamp 並非最新版，則會放棄編輯。
 			wiki_API_edit.set_stamp(options, timestamp);
 		}
+		if (options.sectiontitle && options.section !== 'new') {
+			options.summary = add_section_to_summary(options.summary, options.sectiontitle);
+			delete options.sectiontitle;
+		}
+
 		// the token should be sent as the last parameter.
 		library_namespace.debug('options.token = ' + JSON.stringify(token), 6,
 				'wiki_API_edit');

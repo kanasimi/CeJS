@@ -132,7 +132,7 @@ function module_code(library_namespace) {
 		if (API_URL && typeof API_URL === 'object') {
 			// session = new wiki_API(user_name, password, options);
 			options = API_URL;
-			API_URL = options.API_URL;
+			API_URL = options.API_URL/* || options.project */;
 		} else if (!API_URL && !password && user_name
 				&& typeof user_name === 'object') {
 			// session = new wiki_API(options);
@@ -140,7 +140,7 @@ function module_code(library_namespace) {
 			// console.log(options);
 			user_name = options.user_name;
 			password = options.password;
-			API_URL = options.API_URL;
+			API_URL = options.API_URL/* || options.project */;
 		} else {
 			options = Object.create(null);
 		}

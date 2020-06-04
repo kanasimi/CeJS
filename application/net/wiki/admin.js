@@ -59,7 +59,9 @@ function module_code(library_namespace) {
 		if (default_parameters) {
 			for ( var parameter_name in default_parameters) {
 				if (parameter_name in options) {
-					parameters[parameter_name] = options[parameter_name];
+					// in case options[parameter_name] === false
+					if (options[parameter_name])
+						parameters[parameter_name] = options[parameter_name];
 				} else if (default_parameters[parameter_name]) {
 					// 表示此屬性為必須存在/指定的屬性。
 					// This parameter is required.
@@ -76,7 +78,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 		// 處理 target page。
-		var KEY_ID = 'pageid', KEY_TITLE = 'title';
+		var default_KEY_ID = 'pageid', default_KEY_TITLE = 'title', KEY_ID = default_KEY_ID, KEY_TITLE = default_KEY_TITLE;
 		if (parameters.to) {
 			// move_to
 			KEY_ID = 'fromid';
@@ -84,11 +86,13 @@ function module_code(library_namespace) {
 		}
 
 		// 都先從 options 取值，再從 session 取值。
-		if (options[KEY_ID] >= 0 || options.pageid >= 0) {
+		if (options[KEY_ID] >= 0 || options[default_KEY_ID] >= 0) {
 			parameters[KEY_ID] = options[KEY_ID] >= 0 ? options[KEY_ID]
-					: options.pageid;
-		} else if (options[KEY_TITLE] || options.title) {
-			parameters[KEY_TITLE] = options[KEY_TITLE] || options.title;
+					: options[default_KEY_ID];
+		} else if (options[KEY_TITLE] || options[default_KEY_TITLE]) {
+			parameters[KEY_TITLE] = wiki_API.title_of(options[KEY_TITLE]
+			// options.from_title
+			|| options[default_KEY_TITLE]);
 		} else if (wiki_API.is_page_data(session && session.last_page)) {
 			// options.page_data
 			if (session.last_page.pageid >= 0)
@@ -117,9 +121,8 @@ function module_code(library_namespace) {
 		if (!token) {
 			// TODO: use session
 			if (false) {
-				library_namespace
-						.error('wiki_API.protect: No token specified: '
-								+ options);
+				library_namespace.error('draw_parameters: No token specified: '
+						+ options);
 			}
 			return 'No ' + token_type + 'token specified';
 		}
@@ -216,7 +219,11 @@ function module_code(library_namespace) {
 		error:
 		{"code":"articleexists","info":"A page of that name already exists, or the name you have chosen is not valid. Please choose another name.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."}
 		{"code":"selfmove","info":"The title is the same; cannot move a page over itself.","*":"See https://zh.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."}
-		 * </code>
+
+		{ from: 'from', to: 'to', reason: '', redirectcreated: '', moveoverredirect: '' }
+		{ error: { code: 'articleexists', info: 'A page already exists at [[:To]], or the page name you have chosen is not valid. Please choose another name.', '*': 'See https://test.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes.' } }
+
+		</code>
 		 */
 
 		// console.log(options);
