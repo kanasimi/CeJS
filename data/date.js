@@ -1881,6 +1881,18 @@ function module_code(library_namespace) {
 			return ms > 99 ? ms : ms > 9 ? '0' + ms : ms >= 0 ? '00' + ms : ms;
 		},
 
+		// 以 ISO 8601 格式（例如 -0430 ）寫距 UTC 的偏移
+		z : function(date_value, options) {
+			var offset = '+', minutes = -date_value.getTimezoneOffset();
+			if (minutes < 0) {
+				offset = '-';
+				minutes = -minutes;
+			}
+			var hours = minutes / 60 | 0;
+			offset += hours.pad(2) + (minutes % 60).pad(2);
+			return offset;
+		},
+
 		// ----------------------------
 		// misc
 
@@ -2329,8 +2341,8 @@ function module_code(library_namespace) {
 		'Greece' : '1924/3/23',
 		'Turkey' : '1926/1/1',
 		'Egypt' : '1928/10/1'
-		// 之前使用伊斯蘭曆法。
-		// 'Saudi Arabia':'2016/10/1'
+	// 之前使用伊斯蘭曆法。
+	// 'Saudi Arabia':'2016/10/1'
 	};
 
 	(function() {
