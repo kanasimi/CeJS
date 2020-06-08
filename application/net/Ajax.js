@@ -1224,20 +1224,22 @@ function module_code(library_namespace) {
 		// cookie_index[key] = index of agent.last_cookie
 		var cookie_index = agent.cookie_index;
 
+		// console.trace(cookie);
 		cookie.forEach(function(piece) {
 			piece = piece.trim();
 			if (!piece)
 				return;
 			// [ cookie, key, value ]
 			var matched = piece.match(/^([^=;]+)(?:=([^;]+))?/);
-			library_namespace.debug(agent.last_cookie, 3, 'merge_cookie');
+			library_namespace.debug('last_cookie: ' + agent.last_cookie, 3,
+					'merge_cookie');
 			if (!matched) {
 				library_namespace.warn([ 'merge_cookie: ', {
 					T : 'Invalid cookie?'
 				}, ' [' + piece + ']' ]);
 				agent.last_cookie.push(piece);
 			} else if (matched[1] in cookie_index) {
-				library_namespace.debug([ 'merge_cookie: ', {
+				library_namespace.debug([ {
 					T : 'cookie 名稱重複！以後來/新出現者為準。'
 				}, ' [' + agent.last_cookie[cookie_index[matched[1]]]
 				//
@@ -1246,8 +1248,10 @@ function module_code(library_namespace) {
 				// 直接取代。
 				agent.last_cookie[cookie_index[matched[1]]] = piece;
 			} else {
-				// 正常情況。
-				// 登記已存在之 cookie。
+				library_namespace.debug([ {
+					T : '正常情況。登記已存在之 cookie。'
+				} ], 3, 'merge_cookie');
+				// console.trace(matched);
 				agent.cookie_hash[matched[1]] = matched[2];
 				cookie_index[matched[1]] = agent.last_cookie.length;
 				agent.last_cookie.push(piece);

@@ -243,8 +243,8 @@ function module_code(library_namespace) {
 
 		// --------------------------------------------------------------------
 
-		library_namespace.debug('載入操作維基百科的主要功能 Essential 必要的依賴鍊。', 1,
-				'wiki_API');
+		// Essential dependency chain
+		library_namespace.debug('載入操作維基百科的主要功能 / 必要的依賴鍊。', 1, 'wiki_API');
 		// library_namespace.set_debug(2);
 		var module_name_prefix = this.id + '.';
 		library_namespace.run(sub_modules.map(function(module) {

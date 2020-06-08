@@ -431,6 +431,7 @@ function module_code(library_namespace) {
 		// default_options.type: 'property'
 		wikidata_search.use_cache.default_options.type ? wikidata_search_cache_entity
 				: wikidata_search_cache;
+		// console.trace([ language, options ]);
 
 		// console.log(key);
 		if (library_namespace.is_Object(key)) {
@@ -548,12 +549,11 @@ function module_code(library_namespace) {
 				// console.trace('wikidata_search.use_cache: Nothing found');
 
 			} else if (typeof id === 'string' && /^[PQ]\d{1,10}$/.test(id)) {
-				library_namespace.debug('cache '
+				library_namespace.info('wikidata_search.use_cache: cache '
 				// 搜尋此類型的實體。 預設值：item
 				+ (options && options.type || 'item')
 				//
-				+ ' ' + id + ' ← [' + language_and_key + ']', 1,
-						'wikidata_search.use_cache');
+				+ ' [' + language_and_key + '] → ' + id);
 			}
 			// 即使有錯誤，依然做 cache 紀錄，避免重複偵測操作。
 			cached_hash[language_and_key] = id;
@@ -1924,7 +1924,7 @@ function module_code(library_namespace) {
 				longitude : +value[1],
 				altitude : typeof value[2] === 'number' ? value[2] : null,
 				precision : options.precision || 0.000001,
-				globe : options.globe || 'https://www.wikidata.org/entity/Q2'
+				globe : options.globe || 'http://www.wikidata.org/entity/Q2'
 			};
 			break;
 
@@ -1946,7 +1946,7 @@ function module_code(library_namespace) {
 			value = {
 				amount : value,
 				// unit of measure item (empty for dimensionless values)
-				// e.g., 'https://www.wikidata.org/entity/Q857027'
+				// e.g., 'http://www.wikidata.org/entity/Q857027'
 				unit : String(unit),
 				// optional https://www.wikidata.org/wiki/Help:Data_type
 				upperBound : typeof options.upperBound === 'number' ? wikidata_quantity(options.upperBound)
@@ -2016,8 +2016,9 @@ function module_code(library_namespace) {
 				after : options.after || 0,
 				precision : precision,
 				calendarmodel : options.calendarmodel
+				// using `https://` will cause to "⧼wikibase-validator-bad-prefix⧽" error!
 				// proleptic Gregorian calendar:
-				|| 'https://www.wikidata.org/entity/Q1985727'
+				|| 'http://www.wikidata.org/entity/Q1985727'
 			};
 			break;
 
@@ -2208,6 +2209,7 @@ function module_code(library_namespace) {
 			get_all_properties : true
 		}).language;
 
+		// console.trace(options);
 		// console.log(options_language);
 		// console.log('-'.repeat(20));
 		// console.log(properties);
@@ -2241,12 +2243,16 @@ function module_code(library_namespace) {
 					var language = property.language || additional_properties
 							&& additional_properties.language
 							|| options_language;
-					// console.log(language);
+					// console.log(property);
+					// console.log(options);
+					// console.trace(language);
 					// throw language;
 					demands.push(language ? [ language, property_key ]
 							: property_key);
 					property_corresponding.push(property_data);
 				}
+				if (property.language)
+					property_data.language = property.language;
 				properties.push(property_data);
 			};
 
@@ -2559,11 +2565,14 @@ function module_code(library_namespace) {
 							&& property_data[KEY_property_options].references;
 					library_namespace.debug('Skip ' + property_id + '['
 							+ duplicate_index + ']: 此屬性已存在相同值 [' + value + ']。'
-							+ (references ? '但依舊處理其 references 設定。' : ''), 1,
+							+ (references ? '但依舊處理其 references 設定，'
+							//
+							+ '以防設定了 .force_add_references。' : ''), 1,
 							'normalize_wikidata_properties');
 					if (typeof references === 'object') {
 						// delete property_data.value;
 						property_data.exists_index = duplicate_index;
+						// console.trace(property_data);
 						return true;
 					}
 					return false;
@@ -2694,10 +2703,15 @@ function module_code(library_namespace) {
 							//
 							= property_data.exists_index;
 						}
+						if (property_data.language) {
+							normalized_value.language = property_data.language;
+						}
+						// console.trace(normalized_value);
 
-						// *
-						// {Object|Array}property_data[KEY_property_options].references
-						// 當作每個 properties 的參照。
+						/*
+						 * {Object|Array}property_data[KEY_property_options].references
+						 * 當作每個 properties 的參照。
+						 */
 						var references = 'references' in property_data
 						//
 						? property_data.references
@@ -2743,6 +2757,7 @@ function module_code(library_namespace) {
 	 */
 	function set_references(GUID, property_data, callback, options, API_URL,
 			session, exists_references) {
+		// console.trace(property_data);
 
 		normalize_wikidata_properties(property_data.references, function(
 				references) {
@@ -2774,6 +2789,7 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(references));
 			// console.log(references);
 			var POST_data = {
+				// TODO: baserevid
 				statement : GUID,
 				snaks : JSON.stringify(references)
 			};
@@ -2792,6 +2808,7 @@ function module_code(library_namespace) {
 
 			// the token should be sent as the last parameter.
 			POST_data.token = options.token;
+			// console.trace(POST_data);
 
 			wiki_API.query([ API_URL, 'wbsetreference' ],
 			// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
@@ -2816,6 +2833,8 @@ function module_code(library_namespace) {
 		|| Object.create(null),
 		//
 		Object.assign({
+			language : property_data.references.language
+					|| property_data.language,
 			// [KEY_SESSION]
 			session : session
 		}));
@@ -3024,9 +3043,10 @@ function module_code(library_namespace) {
 						+ wikidata_datavalue(property_data) + ']'
 						+ (force_add_references ? '，但依舊處理其 references 設定' : '')
 						+ '。', 1, 'set_next_claim');
+				// console.trace([ property_data, claims ]);
 				if (force_add_references) {
 					if (!property_data.references) {
-						throw 'set_next_claim: No references found!';
+						throw new Error('set_next_claim: No references found!');
 					}
 					var exists_references = entity.claims[property_id][property_data.exists_index].references;
 					set_references(

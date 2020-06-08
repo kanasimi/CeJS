@@ -586,7 +586,7 @@ function module_code(library_namespace) {
 				waiting = waiting && +waiting[1] * 1000 || edit_time_interval;
 				library_namespace.debug(
 				// 請注意，由於上游服務器逾時，緩存層（Varnish 或 squid）也可能會生成帶有503狀態代碼的錯誤消息。
-				'Waiting '
+				'The maxlag ' + maxlag + ' s hitted. Waiting '
 				// waiting + ' ms'
 				+ (library_namespace.age_of(0, waiting, {
 					digits : 1
