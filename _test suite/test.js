@@ -2828,6 +2828,8 @@ function test_astronomy() {
 function test_wiki() {
 	// Set default language. 改變預設之語言。 e.g., 'zh'
 	CeL.wiki.set_language('zh');
+	// Just for test
+	CeL.wiki.query.default_maxlag = 20;
 
 	all_error_count += CeL.test('wiki: regular functions', [
 

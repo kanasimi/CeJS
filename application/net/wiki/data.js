@@ -1763,7 +1763,10 @@ function module_code(library_namespace) {
 				var matched = datatype
 						&& datatype.match(/^wikibase-(item|property)$/);
 				if (matched && !/^[PQ]\d{1,10}$/.test(value)) {
-					library_namespace.debug('將屬性名稱轉換成 id。'
+					if (typeof value === 'object') {
+						;
+					}
+					library_namespace.debug('將屬性名稱轉換成 id (' + datatype + '): '
 							+ JSON.stringify(value), 3,
 							'normalize_wikidata_value');
 					// console.log(options);
@@ -2016,7 +2019,8 @@ function module_code(library_namespace) {
 				after : options.after || 0,
 				precision : precision,
 				calendarmodel : options.calendarmodel
-				// using `https://` will cause to "⧼wikibase-validator-bad-prefix⧽" error!
+				// using `https://` will cause to
+				// "⧼wikibase-validator-bad-prefix⧽" error!
 				// proleptic Gregorian calendar:
 				|| 'http://www.wikidata.org/entity/Q1985727'
 			};
