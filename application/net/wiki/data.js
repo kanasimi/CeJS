@@ -1985,14 +1985,21 @@ function module_code(library_namespace) {
 				amount : value,
 				// unit of measure item (empty for dimensionless values)
 				// e.g., 'http://www.wikidata.org/entity/Q857027'
-				unit : String(unit),
-				// optional https://www.wikidata.org/wiki/Help:Data_type
-				upperBound : typeof options.upperBound === 'number' ? wikidata_quantity(options.upperBound)
-						: value,
-				// optional https://www.wikidata.org/wiki/Help:Data_type
-				lowerBound : typeof options.lowerBound === 'number' ? wikidata_quantity(options.lowerBound)
-						: value
+				unit : String(unit)
 			};
+			// optional https://www.wikidata.org/wiki/Help:Data_type
+			if (typeof options.upperBound === 'number')
+				value.upperBound = wikidata_quantity(options.upperBound);
+			// optional https://www.wikidata.org/wiki/Help:Data_type
+			if (typeof options.lowerBound === 'number')
+				value.lowerBound = wikidata_quantity(options.lowerBound);
+			if (options.add_bound) {
+				// isNaN(null)
+				if (!('upperBound' in value))
+					value.upperBound = value.amount;
+				if (!('lowerBound' in value))
+					value.lowerBound = value.amount;
+			}
 			break;
 
 		case 'time':
@@ -2626,10 +2633,12 @@ function module_code(library_namespace) {
 						+ ': 此屬性無此值，無法刪除。' : ': 無此屬性id，無法刪除。')
 						//
 						, 1, 'normalize_wikidata_properties');
-						console.trace(wikidata_search.use_cache([
-								property_data.language, value ], {
-							get_id : true
-						}));
+						if (false) {
+							console.trace(wikidata_search.use_cache([
+									property_data.language, value ], {
+								get_id : true
+							}));
+						}
 						return false;
 					}
 
@@ -2787,22 +2796,39 @@ function module_code(library_namespace) {
 						exists_property_hash[property_data.property],
 						//
 						normalized_value, 1)) {
-							if (qualifiers || references) {
-								// TODO: 依舊增添 qualifiers / references。
-								library_namespace.warn(
-								//
-								'normalize_wikidata_properties: Skip existed value'
-								//
-								+ ' with qualifiers / references: ' + value);
-							} else {
-								library_namespace.debug('Skip exists value: '
-										+ value + ' ('
-										+ wikidata_datavalue(normalized_value)
-										+ ')', 1, 'normalize_next_value');
+							if (!options.force_add_properties || !qualifiers
+									&& !references) {
+								if (qualifiers || references) {
+									library_namespace.warn(
+									//
+									'normalize_next_value: Skip exists value: ['
+									//
+									+ value + '] ('
+									//
+									+ wikidata_datavalue(normalized_value)
+									//
+									+ ') for no .force_add_properties');
+								} else {
+									library_namespace.debug(
+									//
+									'Skip exists value: [' + value + '] ('
+									//
+									+ wikidata_datavalue(normalized_value)
+									//
+									+ ')', 1, 'normalize_next_value');
+								}
+								properties.splice(--index, 1);
+								normalize_next_value();
+								return;
 							}
-							properties.splice(--index, 1);
-							normalize_next_value();
-							return;
+
+							// TODO: 依舊增添 qualifiers / references。
+							library_namespace.debug('Skip '
+									+ property_data.property + ': 此屬性已存在相同值 ['
+									+ value + '] ('
+									+ wikidata_datavalue(normalized_value)
+									+ ')，但依舊處理其 qualifiers / references 設定。',
+									1, 'set_next_claim');
 						}
 
 						if (false) {
@@ -2871,14 +2897,11 @@ function module_code(library_namespace) {
 			claim : GUID,
 			snaktype : qualifier.snaktype,
 			property : qualifier.property,
-			value : qualifier.snaktype === 'value' ? wikidata_datavalue(qualifier.datavalue)
-					: ''
+			value : JSON
+					.stringify(qualifier.snaktype === 'value' ? qualifier.datavalue.value
+							: '')
 		// snakhash : ''
 		};
-
-		if (false && typeof POST_data.value === 'number')
-			POST_data.value = String(POST_data.value);
-		POST_data.value = JSON.stringify(POST_data.value);
 
 		if (options.bot) {
 			POST_data.bot = 1;
@@ -2895,7 +2918,6 @@ function module_code(library_namespace) {
 		POST_data.token = options.token;
 		// console.trace(POST_data);
 
-		// 2020/6/20 7:5:46 無法成功嘗試出 wbsetqualifier 的使用方法，只能改成在 wbsetclaim 設定。
 		wiki_API.query([ API_URL, 'wbsetqualifier' ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetqualifier
 		function handle_result(data, error) {
@@ -2911,7 +2933,7 @@ function module_code(library_namespace) {
 		}, POST_data, session);
 	}
 
-	// 限定詞
+	// 量詞/限定詞
 	function set_qualifiers(GUID, property_data, callback, options, API_URL,
 			session, exists_qualifiers) {
 		// console.trace(property_data);
@@ -2930,23 +2952,34 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// console.trace(qualifiers);
-
 			// console.log(JSON.stringify(property_data.qualifiers));
 			// console.log(property_data.qualifiers);
 
 			// console.log(JSON.stringify(qualifiers));
-			// console.log(qualifiers);
+			// console.trace(qualifiers);
 
-			var qualifier_index = 0, data_list = [];
+			if (false) {
+				// 2020/6/20 7:5:46 無法成功嘗試出 wbsetqualifier 的使用方法，
+				// 只能改成在 wbsetclaim 設定。
+				if (!property_data.qualifiers)
+					property_data.qualifiers = Object.create(null);
+				qualifiers.forEach(function(qualifier_data) {
+					property_data.qualifiers
+					//
+					[qualifier_data.property] = [ qualifier_data ];
+				});
+				callback();
+				return;
+			}
+
+			var qualifier_index = 0;
 			function set_next_qualifier(data, error) {
-				if (qualifier_index > 0)
-					data_list.push(data);
+				// data:
+				// {"pageinfo":{"lastrevid":1},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","hash":"","datavalue":{"value":{"entity-type":"item","numeric-id":1,"id":"Q1"},"type":"wikibase-entityid"},"datatype":"wikibase-item"},"type":"statement","qualifiers":{"P1":[{"snaktype":"value","property":"P1111","hash":"050a39e5b316e486dc21d365f7af9cde9ad25a3e","datavalue":{"value":{"amount":"+8937","unit":"1","upperBound":"+8937","lowerBound":"+8937"},"type":"quantity"},"datatype":"quantity"}]},"qualifiers-order":["P1"],"id":"","rank":"normal"}}
 				if (error || qualifier_index === qualifiers.length) {
-					console.log(JSON.stringify(data_list));
-					console.trace(data_list);
-					console.trace(error);
-					callback(data_list, error);
+					// console.trace(data);
+					// console.trace(error);
+					callback(data /* && data.claim */, error);
 					return;
 				}
 				set_single_qualifier(GUID, qualifiers[qualifier_index++],
@@ -2960,8 +2993,8 @@ function module_code(library_namespace) {
 		//
 		Object.assign({
 			language : property_data.qualifiers.language
-					|| get_property(property_data, 'language')
-					|| options.language,
+					|| get_property(property_data, 'language') || options
+					&& options.language,
 			// [KEY_SESSION]
 			session : session
 		}));
@@ -3054,8 +3087,8 @@ function module_code(library_namespace) {
 		//
 		Object.assign({
 			language : property_data.references.language
-					|| get_property(property_data, 'language')
-					|| options.language,
+					|| get_property(property_data, 'language') || options
+					&& options.language,
 			// [KEY_SESSION]
 			session : session
 		}));
@@ -3259,7 +3292,7 @@ function module_code(library_namespace) {
 
 			if (property_data.exists_index >= 0) {
 				library_namespace.debug('Skip ' + property_id + '['
-						+ property_data.exists_index + '] 此屬性已存在相同值 ['
+						+ property_data.exists_index + ']: 此屬性已存在相同值 ['
 						+ wikidata_datavalue(property_data) + ']'
 						+ (options.force_add_properties
 						//
@@ -3275,7 +3308,12 @@ function module_code(library_namespace) {
 					shift_to_next();
 				}
 
-				function process_references() {
+				var process_references = function process_references() {
+					if (!property_data.references) {
+						shift_to_next();
+						return;
+					}
+
 					// 即使已存在相同屬性值，依然添增/處理其 references 設定。
 					var exists_references = entity.claims[property_id][property_data.exists_index].references;
 					set_references(
@@ -3284,11 +3322,12 @@ function module_code(library_namespace) {
 							claim_action[0], session,
 							// should use .references[*].snaks
 							exists_references && exists_references[0].snaks);
-				}
+				};
 
 				// 即使已存在相同屬性值，依然添增/處理其 qualifiers 設定。
 				var exists_qualifiers = entity.claims[property_id][property_data.exists_index].qualifiers;
-				console.trace(property_data);
+				// console.trace(exists_qualifiers);
+				// console.trace(property_data);
 				POST_data.language = get_property(property_data, 'language')
 						|| data.language;
 				if (property_data.qualifiers) {
@@ -3297,7 +3336,7 @@ function module_code(library_namespace) {
 							property_data, process_references, POST_data,
 							claim_action[0], session,
 							// should use .qualifiers[*].snaks
-							exists_qualifiers && exists_qualifiers[0].snaks);
+							exists_qualifiers);
 				} else {
 					process_references();
 				}
@@ -3324,7 +3363,8 @@ function module_code(library_namespace) {
 						// _data =
 						// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
 
-						library_namespace.debug('設定完主要數值，接著設定 references。', 1,
+						library_namespace.debug(
+								'設定完主要數值 / qualifiers，接著設定 references。', 1,
 								'set_next_claim');
 						set_references(_data.claim.id, property_data,
 								shift_to_next, POST_data, claim_action[0],
