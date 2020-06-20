@@ -444,17 +444,7 @@ function module_code(library_namespace) {
 		// console.trace([ language, options ]);
 
 		// console.log(key);
-		if (library_namespace.is_Object(key)) {
-			// convert language+value object
-			if (key.language && ('value' in key)) {
-				// e.g., {language:'ja',value:'日本'}
-				key = [ key.language, key.value ];
-			} else if ((language_and_key = Object.keys(key)).length === 1
-			// e.g., {ja:'日本'}
-			&& (language_and_key = language_and_key[0])) {
-				key = [ language_and_key, key[language_and_key] ];
-			}
-		}
+		key = normalize_value_of_properties(key, language);
 
 		if (typeof key === 'string') {
 			key = normalize_wikidata_key(key);
@@ -2161,6 +2151,39 @@ function module_code(library_namespace) {
 				: property_data[type];
 	}
 
+	// @inner
+	// @since 2020/6
+	function normalize_value_of_properties(value, language) {
+		if (library_namespace.is_Object(value)) {
+			// convert language+value object
+			// {language:'language',value:'value'}
+			if (value.language && ('value' in value)) {
+				// e.g., {language:'ja',value:'日本'}
+				return [ value.language, value.value ];
+			}
+
+			var language_and_key;
+			if (value.remove) {
+				// {key:{remove:true}}
+
+			} else if ((language_and_key = Object.keys(value)).length === 1
+			//
+			&& is_api_and_title(language_and_key = [
+			// e.g., {key:{ja:'日本'}}
+			language_and_key[0], value[language_and_key[0]] ], 'language')) {
+				return language_and_key;
+			}
+
+		} else if (Array.isArray(value) && value.length === 2
+		// TODO: using is_api_and_title(value, 'language')
+		// treat as [ language, key to search ]
+		&& !value[0] && language) {
+			value[0] = language;
+		}
+
+		return value;
+	}
+
 	// example 1:
 	//
 	// {Object}可接受的原始輸入形式之一
@@ -2297,7 +2320,10 @@ function module_code(library_namespace) {
 			//
 			check = function(property_data) {
 				// console.trace(property_data);
-				var value = property_data.value;
+				var language = get_property(property_data, 'language')
+						|| options_language, value = property_data.value
+				//
+				= normalize_value_of_properties(property_data.value, language);
 				if (is_api_and_title(value, 'language')) {
 					// treat as [ language, key to search ]
 					if (!value.type)
@@ -2309,8 +2335,7 @@ function module_code(library_namespace) {
 				var property_key = property_data.property;
 				if (!/^[PQ]\d{1,10}$/.test(property_key)) {
 					// 有些設定在建構property_data時尚存留於((property))，這時得要自其中取出。
-					var language = get_property(property_data, 'language')
-							|| options_language;
+
 					// console.log(property);
 					// console.log(options);
 					// console.trace(language);
@@ -2363,23 +2388,7 @@ function module_code(library_namespace) {
 
 				var language = additional_properties.language;
 
-				if (library_namespace.is_Object(value)) {
-					// convert language+value object
-					// {language:'language',value:'value'}
-					if (value.language && ('value' in value)) {
-						// e.g., {language:'ja',value:'日本'}
-						value = [ value.language, value.value ];
-					} else if ((language = Object.keys(value)).length === 1
-					// e.g., {ja:'日本'}
-					&& (language = language[0])) {
-						value = [ language, value[language] ];
-					}
-				} else if (Array.isArray(value) && value.length === 2
-				// TODO: using is_api_and_title(value, 'language')
-				// treat as [ language, key to search ]
-				&& !value[0] && language) {
-					value[0] = language;
-				}
+				value = normalize_value_of_properties(value, language);
 
 				// console.trace(value);
 
@@ -2933,6 +2942,12 @@ function module_code(library_namespace) {
 		}, POST_data, session);
 	}
 
+	function remove_qualifiers(GUID, property_data, callback, options, API_URL,
+			session, exists_qualifiers) {
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbremovequalifiers
+
+	}
+
 	// 量詞/限定詞
 	function set_qualifiers(GUID, property_data, callback, options, API_URL,
 			session, exists_qualifiers) {
@@ -2957,20 +2972,6 @@ function module_code(library_namespace) {
 
 			// console.log(JSON.stringify(qualifiers));
 			// console.trace(qualifiers);
-
-			if (false) {
-				// 2020/6/20 7:5:46 無法成功嘗試出 wbsetqualifier 的使用方法，
-				// 只能改成在 wbsetclaim 設定。
-				if (!property_data.qualifiers)
-					property_data.qualifiers = Object.create(null);
-				qualifiers.forEach(function(qualifier_data) {
-					property_data.qualifiers
-					//
-					[qualifier_data.property] = [ qualifier_data ];
-				});
-				callback();
-				return;
-			}
 
 			var qualifier_index = 0;
 			function set_next_qualifier(data, error) {
