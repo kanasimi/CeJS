@@ -382,8 +382,13 @@ function module_code(library_namespace) {
 
 		for ( var parameter in options) {
 			if (parameter.startsWith(prefix)) {
-				action[1] += '&' + parameter + '='
-						+ encodeURIComponent(options[parameter]);
+				var value = options[parameter];
+				if (library_namespace.is_Date(value)) {
+					// https://www.mediawiki.org/w/api.php?action=help&modules=main#main/datatype/timestamp
+					value = value.toISOString();
+				}
+				value = encodeURIComponent(value);
+				action[1] += '&' + parameter + '=' + value;
 			}
 		}
 
@@ -605,6 +610,10 @@ function module_code(library_namespace) {
 					pages.data = data;
 				}
 
+				if (get_list.post_processor[type]) {
+					pages.forEach(get_list.post_processor[type]);
+				}
+
 				library_namespace.debug(wiki_API.title_link_of(title) + ': '
 						+ pages.length + ' page(s)', 2, 'get_list');
 
@@ -637,6 +646,30 @@ function module_code(library_namespace) {
 
 		}, null, options);
 	}
+
+	get_list.post_processor = {
+		usercontribs : function(item, index, pages) {
+			var comment = item.comment;
+			if (!comment)
+				return;
+			// https://translatewiki.net/wiki/MediaWiki:Logentry-move-move_redir/en
+			// https://translatewiki.net/wiki/MediaWiki:Logentry-move-move/en
+			// "User moved page [[From]] to [[To]] over redirect: summary"
+			var matched = comment
+					.match(/ moved page \[\[(.+?)\]\] to \[\[(.+?)\]\]( over redirect)?/);
+			if (!matched)
+				return;
+			if (item.from || item.to) {
+				library_namespace
+						.warn('usercontribs: There is already item.from or item.to!');
+				return;
+			}
+			item.from = matched[1];
+			item.to = matched[2];
+			if (matched[3])
+				item.redirect = true;
+		}
+	};
 
 	// const: 基本上與程式碼設計合一，僅表示名義，不可更改。
 	get_list.default_parameter = 'list';
@@ -735,7 +768,13 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Busercontribs
 		// wiki.usercontribs(user_name,function(list){console.log(list);},{limit:80});
 		// get new → old
-		usercontribs : [ 'uc', , function(title_parameter) {
+		usercontribs : [ 'uc', , function(title_parameter, options) {
+			if (!options.ucdir && options.ucend - options.ucstart > 0) {
+				library_namespace.warn(
+				//		
+				'usercontribs: Change ucdir to "newer"');
+				options.ucdir = 'newer';
+			}
 			return title_parameter.replace(/^&uctitle=/, '&ucuser=');
 		} ],
 
