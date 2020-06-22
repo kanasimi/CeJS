@@ -1882,7 +1882,7 @@ function module_code(library_namespace) {
 		},
 
 		// 以 ISO 8601 格式（例如 -0430 ）寫距 UTC 的偏移
-		z : function(date_value, options) {
+		z : function(date_value/* , options */) {
 			var offset = '+', minutes = -date_value.getTimezoneOffset();
 			if (minutes < 0) {
 				offset = '-';
