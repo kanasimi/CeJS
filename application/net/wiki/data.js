@@ -339,7 +339,8 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// console.log(data);
+			// console.trace(data);
+			// console.trace(data.search);
 			var list;
 			if (!Array.isArray(data.search)) {
 				list = [];
@@ -1722,7 +1723,7 @@ function module_code(library_namespace) {
 			// input: normalize_wikidata_value(value, options)
 			options = datatype;
 			datatype = undefined;
-		} else if (typeof options === 'string' && /^P\d{1,5}$/i.test(options)) {
+		} else if (typeof options === 'string' && /^[PQ]\d{1,5}$/i.test(options)) {
 			options = {
 				property : options
 			};
@@ -1733,6 +1734,12 @@ function module_code(library_namespace) {
 			};
 		} else {
 			options = library_namespace.setup_options(options);
+		}
+
+		if (value_is_to_remove(value)) {
+			if (typeof options.callback === 'function')
+				options.callback(value, to_pass);
+			return value;
 		}
 
 		var is_multi = is_multi_wikidata_value(value, options);
@@ -2073,6 +2080,7 @@ function module_code(library_namespace) {
 					id : value
 				};
 			} else {
+				// console.trace(datatype);
 				error = 'normalize_wikidata_value: Illegal ' + datatype + ': '
 						+ JSON.stringify(value);
 			}
@@ -2152,6 +2160,15 @@ function module_code(library_namespace) {
 	}
 
 	// @inner
+	// 為欲刪除之index。
+	function value_is_to_remove(value) {
+		// {key:{remove:true}}
+		return library_namespace.is_Object(value)
+		// {Function}Array.prototype.remove
+		&& (value.remove || value.remove === 0);
+	}
+
+	// @inner
 	// @since 2020/6
 	function normalize_value_of_properties(value, language) {
 		if (library_namespace.is_Object(value)) {
@@ -2163,7 +2180,7 @@ function module_code(library_namespace) {
 			}
 
 			var language_and_key;
-			if (value.remove) {
+			if (value_is_to_remove(value)) {
 				// {key:{remove:true}}
 
 			} else if ((language_and_key = Object.keys(value)).length === 1
@@ -2469,8 +2486,17 @@ function module_code(library_namespace) {
 			}
 			property_id_list.forEach(function(id, index) {
 				var property_data = property_corresponding[index];
+				// console.trace([ id, property_data ]);
 				// @see check() above
 				var value = property_data.value;
+				if (value_is_to_remove(value)) {
+					// value.key = property_data.property;
+					// 紀錄 id，以供之後 remove_qualifiers() 使用。
+					value.property = id;
+					// console.trace(value);
+					return;
+				}
+
 				if (is_api_and_title(value, 'language')) {
 					// treat as [ language, key to search ]
 					property_data.value = id;
@@ -2520,9 +2546,7 @@ function module_code(library_namespace) {
 					= property_data[KEY_property_options].remove;
 				}
 
-				if (property_data.remove
-				// 為欲刪除之index。
-				|| property_data.remove === 0) {
+				if (value_is_to_remove(property_data)) {
 					return true;
 				}
 				var value = property_value(property_data);
@@ -2552,6 +2576,7 @@ function module_code(library_namespace) {
 					//
 					exists_property_list = exists_property_hash[property_id];
 					// console.trace(property_data);
+					// console.trace(exists_property_list);
 
 					if (!(property_id in wikidata_datatype_cache)
 							&& exists_property_list) {
@@ -2686,7 +2711,7 @@ function module_code(library_namespace) {
 							//
 							? '但依舊處理其 qualifiers / references 設定，'
 							//
-							+ '以防設定了 .force_add_properties。' : ''), 1,
+							+ '以防設定了 .force_add_sub_properties。' : ''), 1,
 							'normalize_wikidata_properties');
 					if (typeof qualifiers === 'object'
 							|| typeof references === 'object') {
@@ -2805,8 +2830,8 @@ function module_code(library_namespace) {
 						exists_property_hash[property_data.property],
 						//
 						normalized_value, 1)) {
-							if (!options.force_add_properties || !qualifiers
-									&& !references) {
+							if (!options.force_add_sub_properties
+									|| !qualifiers && !references) {
 								if (qualifiers || references) {
 									library_namespace.warn(
 									//
@@ -2816,7 +2841,7 @@ function module_code(library_namespace) {
 									//
 									+ wikidata_datavalue(normalized_value)
 									//
-									+ ') for no .force_add_properties');
+									+ ') for no .force_add_sub_properties');
 								} else {
 									library_namespace.debug(
 									//
@@ -2837,7 +2862,9 @@ function module_code(library_namespace) {
 									+ value + '] ('
 									+ wikidata_datavalue(normalized_value)
 									+ ')，但依舊處理其 qualifiers / references 設定。',
-									1, 'set_next_claim');
+									1, 'normalize_next_value');
+							// NG: property_data.exists_index = index - 1;
+							// console.trace(property_data);
 						}
 
 						if (false) {
@@ -2898,6 +2925,28 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	function append_parameters(POST_data, options) {
+		if (options.bot) {
+			POST_data.bot = 1;
+		}
+		if (options.summary) {
+			POST_data.summary = options.summary;
+		}
+		if (options.tags) {
+			POST_data.tags = options.tags;
+		}
+		// TODO: baserevid, 但這需要每次重新取得 revid。
+
+		if (options.token) {
+			// the token should be sent as the last parameter.
+			// delete POST_data.token;
+			POST_data.token = options.token;
+		} else {
+			// throw new Error('No token specified!');
+		}
+		// console.trace(POST_data);
+	}
+
 	// @inner
 	function set_single_qualifier(GUID, qualifier, callback, options, API_URL,
 			session) {
@@ -2912,20 +2961,7 @@ function module_code(library_namespace) {
 		// snakhash : ''
 		};
 
-		if (options.bot) {
-			POST_data.bot = 1;
-		}
-		if (options.summary) {
-			POST_data.summary = options.summary;
-		}
-		if (options.tags) {
-			POST_data.tags = options.tags;
-		}
-		// TODO: baserevid, 但這需要每次重新取得 revid。
-
-		// the token should be sent as the last parameter.
-		POST_data.token = options.token;
-		// console.trace(POST_data);
+		append_parameters(POST_data, options);
 
 		wiki_API.query([ API_URL, 'wbsetqualifier' ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetqualifier
@@ -2936,22 +2972,63 @@ function module_code(library_namespace) {
 				library_namespace.error('set_single_qualifier: [' + error.code
 						+ '] ' + (error.info || error.message));
 			}
-			// data =
-			// 
+			// data:
+			// {"pageinfo":{"lastrevid":1},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","hash":"","datavalue":{"value":{"entity-type":"item","numeric-id":1,"id":"Q1"},"type":"wikibase-entityid"},"datatype":"wikibase-item"},"type":"statement","qualifiers":{"P1":[{"snaktype":"value","property":"P1111","hash":"050a39e5b316e486dc21d365f7af9cde9ad25a3e","datavalue":{"value":{"amount":"+8937","unit":"1","upperBound":"+8937","lowerBound":"+8937"},"type":"quantity"},"datatype":"quantity"}]},"qualifiers-order":["P1"],"id":"","rank":"normal"}}
 			callback(data, error);
 		}, POST_data, session);
 	}
 
-	function remove_qualifiers(GUID, property_data, callback, options, API_URL,
+	function remove_qualifiers(GUID, qualifier, callback, options, API_URL,
 			session, exists_qualifiers) {
-		// https://www.wikidata.org/w/api.php?action=help&modules=wbremovequalifiers
+		// console.trace(exists_qualifiers);
 
+		var qualifier_list = exists_qualifiers
+				&& exists_qualifiers[qualifier.property];
+		if (!Array.isArray(qualifier_list)) {
+			var error = 'remove_qualifiers: No property [' + qualifier.property
+					+ '] found!';
+			library_namespace.error(error);
+			callback(undefined, new Error(error));
+			return;
+		}
+
+		if (qualifier.value_processor)
+			qualifier.value_processor(qualifier_list);
+
+		var qualifier_hashs = qualifier_list.map(function(qualifier) {
+			return qualifier.hash;
+		}).join('|');
+
+		var POST_data = {
+			// TODO: baserevid
+			claim : GUID,
+			qualifiers : qualifier_hashs
+		};
+
+		append_parameters(POST_data, options);
+		// console.trace(session.token);
+
+		wiki_API.query([ API_URL, 'wbremovequalifiers' ],
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbremovequalifiers
+		function handle_result(data, error) {
+			error = error || (data ? data.error : new Error('No data get!'));
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.error('remove_qualifiers: [' + error.code
+						+ '] ' + (error.info || error.message));
+			}
+			// console.trace(data);
+			// console.trace(JSON.stringify(data));
+			// data = { pageinfo: { lastrevid: 1 }, success: 1 }
+			callback(data, error);
+		}, POST_data, session);
 	}
 
 	// 量詞/限定詞
 	function set_qualifiers(GUID, property_data, callback, options, API_URL,
 			session, exists_qualifiers) {
 		// console.trace(property_data);
+		// console.trace(options);
 
 		normalize_wikidata_properties(property_data.qualifiers, function(
 				qualifiers) {
@@ -2973,18 +3050,34 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(qualifiers));
 			// console.trace(qualifiers);
 
-			var qualifier_index = 0;
+			var qualifier_index = 0, latest_data_with_claim;
 			function set_next_qualifier(data, error) {
-				// data:
-				// {"pageinfo":{"lastrevid":1},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","hash":"","datavalue":{"value":{"entity-type":"item","numeric-id":1,"id":"Q1"},"type":"wikibase-entityid"},"datatype":"wikibase-item"},"type":"statement","qualifiers":{"P1":[{"snaktype":"value","property":"P1111","hash":"050a39e5b316e486dc21d365f7af9cde9ad25a3e","datavalue":{"value":{"amount":"+8937","unit":"1","upperBound":"+8937","lowerBound":"+8937"},"type":"quantity"},"datatype":"quantity"}]},"qualifiers-order":["P1"],"id":"","rank":"normal"}}
+				if (data && data.claim)
+					latest_data_with_claim = data;
 				if (error || qualifier_index === qualifiers.length) {
 					// console.trace(data);
 					// console.trace(error);
-					callback(data /* && data.claim */, error);
+					callback(data, error);
 					return;
 				}
-				set_single_qualifier(GUID, qualifiers[qualifier_index++],
-						set_next_qualifier, options, API_URL, session);
+
+				var qualifier = qualifiers[qualifier_index++];
+				if (typeof qualifier === 'function') {
+					qualifier = qualifier(latest_data_with_claim
+							&& latest_data_with_claim.claim
+							// 警告: 這並非最新資料!
+							&& latest_data_with_claim.claim.qualifiers
+							|| exists_qualifiers);
+				}
+				// console.trace(qualifier);
+				if (value_is_to_remove(qualifier)) {
+					remove_qualifiers(GUID, qualifier, set_next_qualifier,
+							options, API_URL, session, exists_qualifiers);
+					return;
+				}
+
+				set_single_qualifier(GUID, qualifier, set_next_qualifier,
+						options, API_URL, session);
 			}
 			set_next_qualifier();
 
@@ -2999,6 +3092,12 @@ function module_code(library_namespace) {
 			// [KEY_SESSION]
 			session : session
 		}));
+	}
+
+	function remove_references(GUID, property_data, callback, options, API_URL,
+			session, exists_references) {
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbremovereferences
+
 	}
 
 	/**
@@ -3049,20 +3148,7 @@ function module_code(library_namespace) {
 				POST_data.index = options.reference_index;
 			}
 
-			if (options.bot) {
-				POST_data.bot = 1;
-			}
-			if (options.summary) {
-				POST_data.summary = options.summary;
-			}
-			if (options.tags) {
-				POST_data.tags = options.tags;
-			}
-			// TODO: baserevid, 但這需要每次重新取得 revid。
-
-			// the token should be sent as the last parameter.
-			POST_data.token = options.token;
-			// console.trace(POST_data);
+			append_parameters(POST_data, options);
 
 			wiki_API.query([ API_URL, 'wbsetreference' ],
 			// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
@@ -3124,16 +3210,7 @@ function module_code(library_namespace) {
 			claim : exists_property_list[index].id
 		};
 
-		if (options.bot) {
-			POST_data.bot = 1;
-		}
-		if (options.summary) {
-			POST_data.summary = options.summary;
-		}
-		// TODO: baserevid, 但這需要每次重新取得 revid。
-
-		// the token should be sent as the last parameter.
-		POST_data.token = options.token;
+		append_parameters(POST_data, options);
 
 		wiki_API.query([ API_URL, 'wbremoveclaims' ], function handle_result(
 				data, error) {
@@ -3227,13 +3304,7 @@ function module_code(library_namespace) {
 
 		// TODO: 可結合成 wbsetclaim
 
-		if (options.bot) {
-			POST_data.bot = 1;
-		}
-		if (options.summary) {
-			POST_data.summary = options.summary;
-		}
-		// TODO: baserevid, 但這需要每次重新取得 revid。
+		append_parameters(POST_data, options);
 
 		// the token should be sent as the last parameter.
 		POST_data.token = token;
@@ -3284,7 +3355,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (property_data.remove) {
+			if (value_is_to_remove(property_data)) {
 				library_namespace.error('set_next_claim: Invalid .remove ['
 						+ property_data.remove + '].');
 				shift_to_next();
@@ -3295,13 +3366,14 @@ function module_code(library_namespace) {
 				library_namespace.debug('Skip ' + property_id + '['
 						+ property_data.exists_index + ']: 此屬性已存在相同值 ['
 						+ wikidata_datavalue(property_data) + ']'
-						+ (options.force_add_properties
+						+ (options.force_add_sub_properties
 						//
 						? '，但依舊處理其 qualifiers / references 設定' : '') + '。', 1,
 						'set_next_claim');
 				// console.trace([ property_data, claims ]);
 
-				if (!options.force_add_properties || !property_data.qualifiers
+				if (!options.force_add_sub_properties
+						|| !property_data.qualifiers
 						&& !property_data.references) {
 					// default: 跳過已存在相同屬性值之 qualifiers / references 設定。
 					// 因為此時 qualifiers / references 可能為好幾組設定，不容易分割排除重複
@@ -3650,6 +3722,140 @@ function module_code(library_namespace) {
 			bot : 1,
 			summary : 'bot test: edit property'
 		});
+
+		// ----------------------------
+
+		// using [,'2008 Canadian federal election'] or {en:'2008 Canadian
+		// federal election'} to search the entity named '2008 Canadian federal
+		// election' in English, else will treat as plain text '2008 Canadian
+		// federal election'
+
+		// remove claim: 'candidacy in election' = '2008 Canadian federal
+		// election'
+		wiki.data('Wikidata Sandbox 2', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				'candidacy in election' :
+				//
+				[ , '2008 Canadian federal election' ],
+				remove : true,
+				language : 'en'
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property'
+		});
+
+		// create claim: 'candidacy in election' = '2008 Canadian federal
+		// election' with qualifiers and references
+		wiki.data('Wikidata Sandbox 2', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				'candidacy in election' :
+				//
+				[ , '2008 Canadian federal election' ],
+				qualifiers : {
+					'votes received' : 8937,
+					'electoral district' : 'Terrebonne—Blainville',
+					'parliamentary group' : 'Liberal Party of Canada'
+				},
+				references : {
+					'reference URL' : "http://example.com/",
+					publisher : 'Library of Parliament (Canada)',
+					retrieved : new Date
+				},
+				language : 'en'
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property'
+		});
+
+		// remove 'votes received' of claim: 'candidacy in election' = '2008
+		// Canadian federal election'
+		wiki.data('Wikidata Sandbox 2', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				'candidacy in election' :
+				//
+				[ , '2008 Canadian federal election' ],
+				qualifiers : {
+					'votes received' : {
+						remove : true
+					}
+				},
+				language : 'en'
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property',
+			force_add_sub_properties : true
+		});
+
+		// add 'votes received' of claim: 'candidacy in election' = '2008
+		// Canadian federal election'
+		wiki.data('Wikidata Sandbox 2', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				'candidacy in election' :
+				//
+				[ , '2008 Canadian federal election' ],
+				qualifiers : {
+					'votes received' : 8938
+				},
+				language : 'en'
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property',
+			force_add_sub_properties : true
+		});
+
+		// remove 'parliamentary group' of claim: 'candidacy in election' =
+		// '2008 Canadian federal election'
+		wiki.data('Wikidata Sandbox 2', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				'candidacy in election' :
+				//
+				[ , '2008 Canadian federal election' ],
+				qualifiers : {
+					'parliamentary group' : {
+						remove : true
+					}
+				},
+				language : 'en'
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property',
+			force_add_sub_properties : true
+		});
+
+		// add 'member of political party' of claim: 'candidacy in election' =
+		// '2008 Canadian federal election'
+		wiki.data('Wikidata Sandbox 2', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				'candidacy in election' :
+				//
+				[ , '2008 Canadian federal election' ],
+				qualifiers : {
+					'member of political party' : 'Liberal Party of Canada'
+				},
+				language : 'en'
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property',
+			force_add_sub_properties : true
+		});
 	}
 
 	// ----------------------------------------------------
@@ -3837,13 +4043,7 @@ function module_code(library_namespace) {
 			value : ''
 		};
 
-		if (options.bot) {
-			POST_data.bot = 1;
-		}
-		if (options.summary) {
-			POST_data.summary = options.summary;
-		}
-		// TODO: baserevid, 但這需要每次重新取得 revid。
+		append_parameters(POST_data, options);
 
 		// the token should be sent as the last parameter.
 		POST_data.token = token;
@@ -4011,13 +4211,7 @@ function module_code(library_namespace) {
 		// remove : ''
 		};
 
-		if (options.bot) {
-			POST_data.bot = 1;
-		}
-		if (options.summary) {
-			POST_data.summary = options.summary;
-		}
-		// TODO: baserevid, 但這需要每次重新取得 revid。
+		append_parameters(POST_data, options);
 
 		var
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetaliases
@@ -4185,13 +4379,7 @@ function module_code(library_namespace) {
 			value : ''
 		};
 
-		if (options.bot) {
-			POST_data.bot = 1;
-		}
-		if (options.summary) {
-			POST_data.summary = options.summary;
-		}
-		// TODO: baserevid, 但這需要每次重新取得 revid。
+		append_parameters(POST_data, options);
 
 		// the token should be sent as the last parameter.
 		POST_data.token = token;
