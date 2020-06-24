@@ -62,7 +62,9 @@ function module_code(library_namespace) {
 		// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
 		? result.error.code === 'badtoken'
 		// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
-		: options.rollback_action && (!result.edit
+		: options.rollback_action && !options.get_page_before_undo
+		//
+		&& (!result.edit
 		// flow:
 		// {status:'ok',workflow:'...',committed:{topiclist:{...}}}
 		&& result.status !== 'ok'
@@ -71,10 +73,12 @@ function module_code(library_namespace) {
 			// Invalid token
 			library_namespace.warn(
 			//
-			'check_session_badtoken: ' + session.language
+			'check_session_badtoken: ' + wiki_API.site_name(session)
 			//
 			+ ': It seems we lost the token. 似乎丟失了 token。');
-			// console.log(result);
+			// console.trace(options);
+			// console.trace(result);
+
 			if (!library_namespace.platform.nodejs) {
 				throw new Error('check_session_badtoken: Not using node.js!');
 			}
@@ -87,8 +91,10 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof options.rollback_action !== 'function') {
-				throw new Error(
-						'check_session_badtoken: Did not set options.rollback_action()!');
+				var message = 'check_session_badtoken: Did not set options.rollback_action()!';
+				throw new Error(message);
+				library_namespace.error(message);
+				console.trace(options);
 			}
 
 			if (options.rollback_action) {
@@ -162,7 +168,7 @@ function module_code(library_namespace) {
 	 *            {Object}other parameters ]
 	 * @param {Function}callback
 	 *            回調函數。 callback(response data, error)
-	 * @param {Object}[post_data]
+	 * @param {Object}[POST_data]
 	 *            data when need using POST method
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項<br />
@@ -171,7 +177,7 @@ function module_code(library_namespace) {
 	 * @see api source:
 	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/includes/api
 	 */
-	function wiki_API_query(action, callback, post_data, options) {
+	function wiki_API_query(action, callback, POST_data, options) {
 		// 前置處理。
 		options = library_namespace.setup_options(options);
 
@@ -215,7 +221,7 @@ function module_code(library_namespace) {
 		// respect edit time interval. 若為 query，非 edit (modify)，則不延遲等待。
 		var need_check_edit_time_interval
 		// method 2: edit 時皆必須設定 token。
-		= post_data && post_data.token,
+		= POST_data && POST_data.token,
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait,
 		// edit time interval in ms
@@ -250,7 +256,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('Waiting ' + to_wait + ' ms...', 2,
 					'wiki_API_query');
 			setTimeout(function() {
-				wiki_API_query(action, callback, post_data, options);
+				wiki_API_query(action, callback, POST_data, options);
 			}, to_wait);
 			return;
 		}
@@ -341,7 +347,7 @@ function module_code(library_namespace) {
 		}
 
 		// 開始處理 query request。
-		if (!post_data && wiki_API_query.allow_JSONP) {
+		if (!POST_data && wiki_API_query.allow_JSONP) {
 			library_namespace.debug(
 					'採用 JSONP callback 的方法。須注意：若有 error，將不會執行 callback！', 2,
 					'wiki_API_query');
@@ -359,16 +365,16 @@ function module_code(library_namespace) {
 				wiki_API_query.get_URL_options, options.get_URL_options);
 
 		if (session) {
-			if (method === 'edit' && post_data
+			if (method === 'edit' && POST_data
 			//
-			&& (!post_data.token || post_data.token === BLANK_TOKEN)
+			&& (!POST_data.token || POST_data.token === BLANK_TOKEN)
 			// 防止未登錄編輯
 			&& session.token
 			//
 			&& (session.token.lgpassword || session.preserve_password)) {
-				// console.log([ action, post_data ]);
+				// console.log([ action, POST_data ]);
 				library_namespace.error('wiki_API_query: 未登錄編輯？');
-				throw new Error('未登錄編輯？');
+				throw new Error('wiki_API_query: 未登錄編輯？');
 			}
 
 			// assert: get_URL_options 為 session。
@@ -591,22 +597,28 @@ function module_code(library_namespace) {
 				+ (library_namespace.age_of(0, waiting, {
 					digits : 1
 				})) + ' to re-run wiki_API.query().', 1, 'wiki_API_query');
-				// console.log([ original_action, post_data ]);
+				// console.log([ original_action, POST_data ]);
 				setTimeout(wiki_API_query.bind(null, original_action, callback,
-						post_data, options), waiting);
+						POST_data, options), waiting);
 				return;
 			}
 
 			if (!options.rollback_action) {
+				if (need_check_edit_time_interval
+						&& (!POST_data || !POST_data.token)) {
+					throw new Error(
+					//
+					'wiki_API_query: Edit without options.rollback_action!');
+				}
 				// Re-run wiki_API.query() after get new token.
 				options.requery = wiki_API_query.bind(null, original_action,
-						callback, post_data, options);
+						callback, POST_data, options);
 			}
 			// console.trace(action);
 			// callback(response);
 			check_session_badtoken(response, callback, options);
 
-		}, null, post_data, get_URL_options);
+		}, null, POST_data, get_URL_options);
 	}
 
 	wiki_API_query.get_URL_options = {
@@ -628,7 +640,7 @@ function module_code(library_namespace) {
 	 */
 	wiki_API_query.default_maxlag = 5;
 	// for manually testing only
-	// CeL.wiki.query.default_maxlag = 20;
+	// delete CeL.wiki.query.default_maxlag;
 
 	/**
 	 * edit (modify / create) 時之編輯時間間隔。<br />

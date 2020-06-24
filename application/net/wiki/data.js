@@ -12,6 +12,7 @@ https://www.wikidata.org/wiki/Help:QuickStatements
  * @since 2019/10/11 拆分自 CeL.application.net.wiki
  * 
  * @see https://github.com/maxlath/wikibase-sdk
+ *      https://github.com/OpenRefine/OpenRefine/wiki/Reconciliation
  */
 
 // More examples: see /_test suite/test.js
@@ -1723,7 +1724,8 @@ function module_code(library_namespace) {
 			// input: normalize_wikidata_value(value, options)
 			options = datatype;
 			datatype = undefined;
-		} else if (typeof options === 'string' && /^[PQ]\d{1,5}$/i.test(options)) {
+		} else if (typeof options === 'string'
+				&& /^[PQ]\d{1,5}$/i.test(options)) {
 			options = {
 				property : options
 			};
@@ -2081,6 +2083,7 @@ function module_code(library_namespace) {
 				};
 			} else {
 				// console.trace(datatype);
+				// console.trace(arguments);
 				error = 'normalize_wikidata_value: Illegal ' + datatype + ': '
 						+ JSON.stringify(value);
 			}
@@ -2274,6 +2277,9 @@ function module_code(library_namespace) {
 		// console.log(options);
 		// console.trace('normalize_wikidata_properties');
 
+		if (options.process_sub_property)
+			properties = properties[options.process_sub_property];
+
 		library_namespace.debug('normalize properties: '
 				+ JSON.stringify(properties), 3,
 				'normalize_wikidata_properties');
@@ -2318,6 +2324,12 @@ function module_code(library_namespace) {
 		old_properties.forEach(function(property) {
 			if (!property) {
 				// Skip null property.
+				return;
+			}
+
+			// .process_sub_property 指的是可以全部刪除的，即 .references。
+			if (options.process_sub_property && value_is_to_remove(property)) {
+				properties.push(property);
 				return;
 			}
 
@@ -3094,9 +3106,75 @@ function module_code(library_namespace) {
 		}));
 	}
 
-	function remove_references(GUID, property_data, callback, options, API_URL,
-			session, exists_references) {
+	// ----------------------------------------------------
+
+	function set_single_references(GUID, references, callback, options,
+			API_URL, session, exists_references) {
+		// console.log(references);
+		// console.trace(JSON.stringify(references));
+		var POST_data = {
+			// TODO: baserevid
+			statement : GUID,
+			snaks : JSON.stringify(references)
+		};
+
+		if (options.reference_index >= 0) {
+			POST_data.index = options.reference_index;
+		}
+
+		append_parameters(POST_data, options);
+
+		wiki_API.query([ API_URL, 'wbsetreference' ],
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
+		function handle_result(data, error) {
+			error = error || (data ? data.error : new Error('No data get!'));
+			// console.log(data);
+			// console.log(JSON.stringify(data));
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				// e.g., set_references: [failed-save] Edit conflict.
+				library_namespace.error('set_references: [' + error.code + '] '
+						+ (error.info || error.message));
+			}
+			// data =
+			// {"pageinfo":{"lastrevid":1},"success":1,"reference":{"hash":"123abc..","snaks":{...},"snaks-order":[]}}
+			callback(data, error);
+
+		}, POST_data, session);
+	}
+
+	function remove_references(GUID, reference_data, callback, options,
+			API_URL, session, exists_references) {
+		// console.trace(reference_data);
+		// console.trace(exists_references);
+
+		if (reference_data.value_processor)
+			reference_data.value_processor(reference_list);
+
+		var POST_data = {
+			// TODO: baserevid
+			statement : GUID,
+			references : reference_data.reference_hash
+		};
+
+		append_parameters(POST_data, options);
+		// console.trace(session.token);
+		// console.trace(POST_data);
+
+		wiki_API.query([ API_URL, 'wbremovereferences' ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbremovereferences
+		function handle_result(data, error) {
+			error = error || (data ? data.error : new Error('No data get!'));
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.error('remove_referencess: [' + error.code
+						+ '] ' + (error.info || error.message));
+			}
+			// console.trace(data);
+			// console.trace(JSON.stringify(data));
+			// data = { pageinfo: { lastrevid: 1 }, success: 1 }
+			callback(data, error);
+		}, POST_data, session);
 
 	}
 
@@ -3109,19 +3187,23 @@ function module_code(library_namespace) {
 			session, exists_references) {
 		// console.trace(property_data);
 
-		normalize_wikidata_properties(property_data.references, function(
-				references) {
+		normalize_wikidata_properties(property_data, function(references) {
 			if (!Array.isArray(references)) {
+				var error;
 				if (references) {
-					library_namespace
-							.error('set_references: Invalid references: '
+					var error = new Error(
+							'set_references: Invalid references: '
 									+ JSON.stringify(references));
+					library_namespace.error(error);
 				} else {
 					// assert: 本次沒有要設定 references 的資料。
 				}
-				callback();
+				callback(exists_references, error);
 				return;
 			}
+
+			// console.trace(references);
+			// console.trace(exists_references);
 
 			// e.g., references:[{P1:'',language:'zh'},{P2:'',references:{}}]
 			property_data.references = references;
@@ -3131,48 +3213,72 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(property_data.references));
 			// console.log(property_data.references);
 
+			var reference_index = 0, references_to_remove = [];
+			var latest_data_with_claim = exists_references;
+			function remove_next_references(data, error) {
+				if (error) {
+					callback(data || latest_data_with_claim, error);
+					return;
+				}
+
+				if (reference_index === references_to_remove.length) {
+					if (library_namespace.is_empty_object(references)) {
+						callback(data || latest_data_with_claim, error);
+					} else {
+						set_single_references(GUID, references, callback,
+								options, API_URL, session, exists_references);
+					}
+					return;
+				}
+
+				latest_data_with_claim = data;
+				remove_references(GUID,
+						references_to_remove[reference_index++],
+						remove_next_references, options, API_URL, session,
+						exists_references);
+			}
+
 			references = Object.create(null);
 			property_data.references.forEach(function(reference_data) {
+				if (value_is_to_remove(reference_data)) {
+					if (!exists_references || exists_references.length === 0) {
+						library_namespace.error(
+						//		
+						'set_references: No reference to remove.');
+						return;
+					}
+
+					var index = reference_data.reference_index >= 0
+					//
+					? reference_data.reference_index
+					// default: remove latest reference
+					: exists_references.length - 1;
+					if (!exists_references[index]) {
+						library_namespace.error(
+						//		
+						'set_references: No reference[' + index
+								+ '] to remove.');
+						return;
+					}
+
+					reference_data.reference_hash =
+					//
+					exists_references[index].hash;
+					references_to_remove.push(reference_data);
+					return;
+				}
 				references[reference_data.property] = [ reference_data ];
 			});
 
-			// console.log(JSON.stringify(references));
-			// console.log(references);
-			var POST_data = {
-				// TODO: baserevid
-				statement : GUID,
-				snaks : JSON.stringify(references)
-			};
+			remove_next_references();
 
-			if (options.reference_index >= 0) {
-				POST_data.index = options.reference_index;
-			}
-
-			append_parameters(POST_data, options);
-
-			wiki_API.query([ API_URL, 'wbsetreference' ],
-			// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
-			function handle_result(data, error) {
-				error = error
-						|| (data ? data.error : new Error('No data get!'));
-				// console.log(data);
-				// console.log(JSON.stringify(data));
-				// 檢查伺服器回應是否有錯誤資訊。
-				if (error) {
-					// e.g., set_references: [failed-save] Edit conflict.
-					library_namespace.error('set_references: [' + error.code
-							+ '] ' + (error.info || error.message));
-				}
-				// data =
-				// {"pageinfo":{"lastrevid":1},"success":1,"reference":{"hash":"123abc..","snaks":{...},"snaks-order":[]}}
-				callback(data, error);
-			}, POST_data, session);
-
-		}, exists_references
+		}, exists_references && exists_references[0].snaks
 		// 確保會設定 .remove / .exists_index = duplicate_index。
 		|| Object.create(null),
 		//
 		Object.assign({
+			// .process_sub_property 指的是可以全部刪除的，即 .references。
+			process_sub_property : 'references',
 			language : property_data.references.language
 					|| get_property(property_data, 'language') || options
 					&& options.language,
@@ -3180,6 +3286,8 @@ function module_code(library_namespace) {
 			session : session
 		}));
 	}
+
+	// ----------------------------------------------------
 
 	/**
 	 * remove/delete/刪除 property/claims
@@ -3389,12 +3497,13 @@ function module_code(library_namespace) {
 
 					// 即使已存在相同屬性值，依然添增/處理其 references 設定。
 					var exists_references = entity.claims[property_id][property_data.exists_index].references;
+					// console.trace(exists_references);
 					set_references(
 							exists_property_list[property_data.exists_index].id,
 							property_data, shift_to_next, POST_data,
 							claim_action[0], session,
 							// should use .references[*].snaks
-							exists_references && exists_references[0].snaks);
+							exists_references);
 				};
 
 				// 即使已存在相同屬性值，依然添增/處理其 qualifiers 設定。
@@ -3730,8 +3839,8 @@ function module_code(library_namespace) {
 		// election' in English, else will treat as plain text '2008 Canadian
 		// federal election'
 
-		// remove claim: 'candidacy in election' = '2008 Canadian federal
-		// election'
+		// remove claim: 'candidacy in election'
+		// = '2008 Canadian federal election'
 		wiki.data('Wikidata Sandbox 2', function(data) {
 			result = data;
 		}).edit_data(function(entity) {
@@ -3747,8 +3856,8 @@ function module_code(library_namespace) {
 			summary : 'bot test: edit property'
 		});
 
-		// create claim: 'candidacy in election' = '2008 Canadian federal
-		// election' with qualifiers and references
+		// create claim: 'candidacy in election'
+		// = '2008 Canadian federal election' with qualifiers and references
 		wiki.data('Wikidata Sandbox 2', function(data) {
 			result = data;
 		}).edit_data(function(entity) {
@@ -3773,8 +3882,8 @@ function module_code(library_namespace) {
 			summary : 'bot test: edit property'
 		});
 
-		// remove 'votes received' of claim: 'candidacy in election' = '2008
-		// Canadian federal election'
+		// remove 'votes received' of claim: 'candidacy in election'
+		// = '2008 Canadian federal election'
 		wiki.data('Wikidata Sandbox 2', function(data) {
 			result = data;
 		}).edit_data(function(entity) {
@@ -3795,8 +3904,8 @@ function module_code(library_namespace) {
 			force_add_sub_properties : true
 		});
 
-		// add 'votes received' of claim: 'candidacy in election' = '2008
-		// Canadian federal election'
+		// add 'votes received' of claim: 'candidacy in election'
+		// = '2008 Canadian federal election'
 		wiki.data('Wikidata Sandbox 2', function(data) {
 			result = data;
 		}).edit_data(function(entity) {
@@ -3815,8 +3924,8 @@ function module_code(library_namespace) {
 			force_add_sub_properties : true
 		});
 
-		// remove 'parliamentary group' of claim: 'candidacy in election' =
-		// '2008 Canadian federal election'
+		// remove 'parliamentary group' of claim: 'candidacy in election'
+		// = '2008 Canadian federal election'
 		wiki.data('Wikidata Sandbox 2', function(data) {
 			result = data;
 		}).edit_data(function(entity) {
@@ -3837,8 +3946,8 @@ function module_code(library_namespace) {
 			force_add_sub_properties : true
 		});
 
-		// add 'member of political party' of claim: 'candidacy in election' =
-		// '2008 Canadian federal election'
+		// add 'member of political party' of claim: 'candidacy in election'
+		// = '2008 Canadian federal election'
 		wiki.data('Wikidata Sandbox 2', function(data) {
 			result = data;
 		}).edit_data(function(entity) {
@@ -3848,6 +3957,26 @@ function module_code(library_namespace) {
 				[ , '2008 Canadian federal election' ],
 				qualifiers : {
 					'member of political party' : 'Liberal Party of Canada'
+				},
+				language : 'en'
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property',
+			force_add_sub_properties : true
+		});
+
+		// remove ALL references of claim: 'candidacy in election'
+		// = '2008 Canadian federal election'
+		wiki.data('Wikidata Sandbox 2', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				'candidacy in election' :
+				//
+				[ , '2008 Canadian federal election' ],
+				references : {
+					remove : true
 				},
 				language : 'en'
 			};
