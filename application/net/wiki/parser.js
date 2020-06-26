@@ -435,7 +435,8 @@ function module_code(library_namespace) {
 	 * replace_template_parameter()
 	 * 
 	 * WARNING: 若不改變 parameter name，只變更 value，<br />
-	 * 則 replace_to 應該使用 'parameter name = value' 而非僅 'value'。
+	 * 則應該使用 { value_only: true }，<br />
+	 * 或使用 'parameter name = value' 而非僅 'value'。
 	 * 
 	 * @example<code>
 
@@ -1286,6 +1287,7 @@ function module_code(library_namespace) {
 
 	// @inner
 	function preprocess_section_link_token(token, options) {
+		// console.trace(token);
 		if (typeof options.preprocess_section_link_token === 'function') {
 			token = options.preprocess_section_link_token(token, options);
 		}
@@ -1310,6 +1312,7 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// console.log(token);
 		if (token.type === 'tag'/* || token.type === 'tag_single' */) {
 			// token: [ tag_attributes, tag_inner ]
 			if (token.tag === 'nowiki') {
@@ -1343,6 +1346,16 @@ function module_code(library_namespace) {
 					options);
 			new_token.tag = token.tag;
 			return new_token;
+		}
+
+		if (token.type === 'tag_single') {
+			if (token.tag in {
+				// hr : true,
+				// e.g., <br />
+				br : true
+			}) {
+				return '';
+			}
 		}
 
 		if (false && token.type === 'convert') {
@@ -1453,6 +1466,7 @@ function module_code(library_namespace) {
 			library_namespace.info('preprocess_section_link_tokens: tokens:');
 			console.log(tokens);
 		}
+		// console.trace(tokens);
 		for_each_token.call(tokens, function(token, index, parent) {
 			return preprocess_section_link_token(token, options);
 		}, true);
@@ -1548,6 +1562,7 @@ function module_code(library_namespace) {
 			options = library_namespace.setup_options(options);
 		}
 
+		// console.trace(parse_wikitext(section_title, null, []));
 		var parsed_title = preprocess_section_link_tokens(
 		// []: 避免被當作 <pre>
 		parse_wikitext(section_title, null, []), options),
@@ -2655,17 +2670,18 @@ function module_code(library_namespace) {
 	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr',
 	/** {RegExp}HTML tags 的匹配模式。 */
 	PATTERN_WIKI_TAG = new RegExp('<(' + markup_tags
-			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
+			+ ')(\/|\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
 	/** {RegExp}HTML tags 的匹配模式 of <nowiki>。 */
 	PATTERN_WIKI_TAG_of_nowiki = new RegExp('<(' + 'nowiki'
-			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
+			+ ')(\/|\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
 	/** {RegExp}HTML tags 的匹配模式 without <nowiki>。 */
 	PATTERN_WIKI_TAG_without_nowiki = new RegExp('<('
 			+ markup_tags.replace('nowiki|', '')
-			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
+			// allow "<br/>"
+			+ ')(\/|\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
 	/** {RegExp}HTML self closed tags 的匹配模式。 */
 	PATTERN_WIKI_TAG_VOID = new RegExp('<(' + self_close_tags
-			+ ')(\\s[^<>]*)?>', 'ig'),
+			+ ')(\/|\\s[^<>]*)?>', 'ig'),
 	// 在其內部的wikitext不會被parse。
 	no_parse_tags = 'pre|nowiki'.split('|').to_hash();
 
@@ -3287,7 +3303,7 @@ function module_code(library_namespace) {
 			// @see console.log(parser[418]);
 			// https://zh.moegirl.org/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
 			// <nowiki>{{subst:unwiki|<nowiki>{{黑幕|黑幕内容}}</nowiki&gt;}}</nowiki>
-			'<(' + tag + ')(\\s[^<>]*)?>([\\s\\S]*?)$', 'i')), previous;
+			'<(' + tag + ')(\/|\\s[^<>]*)?>([\\s\\S]*?)$', 'i')), previous;
 			if (matched) {
 				previous = all.slice(0, -matched[0].length
 				// length of </end_tag>
@@ -5554,6 +5570,10 @@ function module_code(library_namespace) {
 	if (CeL.wiki.parse.user(CeL.wiki.title_link_of(title), user)) {}
 
 	</code>
+	 * 
+	 * 採用模板來顯示簽名連結的方法，會影響到許多判斷簽名的程式，不只是簽名偵測。您可使用
+	 * <code><nowiki>[[User:Example|<span style="color: #007FFF;">'''我的簽名'''</span>]]</nowiki></code>
+	 * 的方法來添加顏色，或者參考[[zhwiki:Wikipedia:簽名]]的其他範例。
 	 * 
 	 * TODO: 應該按照不同的維基項目來做篩選。
 	 * 
