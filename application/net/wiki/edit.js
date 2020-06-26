@@ -202,6 +202,8 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback(page_data, {String|any}error, result)
 	 * @param {String}timestamp
 	 *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
+	 * 
+	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=edit
 	 */
 	function wiki_API_edit(title, text, token, options, callback, timestamp) {
 		// console.trace(title);
@@ -232,11 +234,13 @@ function module_code(library_namespace) {
 						&& (is_undo < wiki_API_edit.undo_count_limit && is_undo));
 
 		if (undo_count || typeof text === 'function') {
-			library_namespace.debug('先取得內容再 edit '
+			library_namespace.debug('先取得內容再 edit / undo '
 					+ wiki_API.title_link_of(title) + '。', 1, 'wiki_API_edit');
 			// console.log(title);
+			var _options;
 			if (undo_count) {
-				var _options = Object.clone(options);
+				_options = Object.clone(options);
+				_options.get_page_before_undo = true;
 				if (!_options.rvlimit) {
 					_options.rvlimit = undo_count;
 				}
@@ -343,7 +347,8 @@ function module_code(library_namespace) {
 			wiki_API_edit.set_stamp(options, timestamp);
 		}
 		if (options.sectiontitle && options.section !== 'new') {
-			options.summary = add_section_to_summary(options.summary, options.sectiontitle);
+			options.summary = add_section_to_summary(options.summary,
+					options.sectiontitle);
 			delete options.sectiontitle;
 		}
 
@@ -356,10 +361,12 @@ function module_code(library_namespace) {
 		library_namespace.debug('#2: ' + Object.keys(options).join(','), 4,
 				'wiki_API_edit');
 
-		var session;
-		if (KEY_SESSION in options) {
-			session = options[KEY_SESSION];
-			delete options[KEY_SESSION];
+		var post_data;
+		if (options[KEY_SESSION]) {
+			post_data = Object.clone(options);
+			delete post_data[KEY_SESSION];
+		} else {
+			post_data = options;
 		}
 
 		wiki_API.query(action, function(data, error) {
@@ -414,7 +421,6 @@ function module_code(library_namespace) {
 					library_namespace.debug('無法以正常方式編輯，嘗試當作 Flow 討論頁面。', 1,
 							'wiki_API_edit');
 					// console.log(options);
-					options[KEY_SESSION] = session;
 					// edit_topic()
 					wiki_API.Flow.edit(title,
 					// 新章節/新話題的標題文字。輸入空字串""的話，會用 summary 當章節標題。
@@ -450,7 +456,7 @@ function module_code(library_namespace) {
 				// title.title === wiki_API.title_of(title)
 				callback(title, error, data);
 			}
-		}, options, session);
+		}, post_data, options);
 	}
 
 	/**
