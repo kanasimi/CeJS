@@ -22,8 +22,8 @@ typeof CeL === 'function' && CeL.run({
 	+ '|application.locale.language_tag'
 	//
 	+ '|application.OS.Windows.file.open_file'
-	//
-	+ '|application.OS.Windows.file.is_file'
+	// library_namespace.file_exists()
+	+ '|application.storage.'
 	//
 	+ '|application.OS.Windows.file.AdoEnums'
 	//
@@ -41,8 +41,7 @@ function module_code(library_namespace) {
 	var module_name = this.id,
 	// requiring
 	new_COM = this.r('new_COM'), language_tag = this.r('language_tag'), open_file = this
-			.r('open_file'), is_file = this.r('is_file'), AdoEnums = this
-			.r('AdoEnums'), translate_ADO_Stream_binary_data = this
+			.r('open_file'), AdoEnums = this.r('AdoEnums'), translate_ADO_Stream_binary_data = this
 			.r('translate_ADO_Stream_binary_data');
 
 	// var to_standard_language_tag = gettext.to_standard;
@@ -141,7 +140,7 @@ function module_code(library_namespace) {
 		}
 		if (false && typeof _.get_HTML_encoding != 'function')
 			is_HTML = false;
-		if (!is_file(file_path)) {
+		if (!library_namespace.file_exists(file_path)) {
 			library_namespace.debug('Treat [' + file_path + '] as string.');
 			return file_path.length < 1024 ? guess_encoding.unknown_encoding
 					: (t = guess_text_language(file_path, undefined, options)) ? t
@@ -453,7 +452,6 @@ function module_code(library_namespace) {
 		// ascii=ISO-8859-1, _autodetect, _autodetect_all
 		return code || most_probable_code || guess_encoding.unknown_encoding;
 	}
-	;
 
 	// default code
 	guess_encoding.unknown_encoding = undefined;

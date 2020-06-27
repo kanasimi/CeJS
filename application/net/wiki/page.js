@@ -1240,6 +1240,9 @@ function module_code(library_namespace) {
 			}
 		} else {
 			recent_options = Object.clone(options);
+			if (!recent_options.parameters)
+				recent_options.parameters = Object.create(null);
+			// console.log(recent_options);
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
 			Object.assign(recent_options.parameters, {
 				// List newest first (default).

@@ -527,6 +527,7 @@ function module_code(library_namespace) {
 		// TODO: 這只是簡陋的判別方法。
 		var matched = session.API_URL
 				&& session.API_URL.match(PATTERN_wiki_project_URL);
+		// console.trace(matched);
 		if (matched
 				&& !/test|wiki/i.test(matched[3])
 				&& ((matched = matched[4].toLowerCase()) in api_URL.shortcut_of_project)) {
@@ -628,6 +629,7 @@ function module_code(library_namespace) {
 				console.trace(language);
 		}
 		// console.log(session);
+		// console.trace(session.family);
 
 		/**
 		 * Wikimedia project / family. e.g., wikipedia, wikinews, wiktionary.
@@ -679,6 +681,7 @@ function module_code(library_namespace) {
 		var interwikimap = library_namespace.is_RegExp(interwiki_pattern)
 				&& in_session.latest_site_configurations
 				&& in_session.latest_site_configurations.interwikimap;
+		// console.trace([ interwiki_pattern, interwikimap ]);
 		if (Array.isArray(interwikimap)) {
 			matched = language.match(interwiki_pattern);
 			if (matched && interwikimap.some(function(map) {
@@ -697,6 +700,10 @@ function module_code(library_namespace) {
 		} else if (language in language_code_to_site_alias) {
 			// e.g., 'lzh' → 'zh-classical'
 			language = language_code_to_site_alias[language];
+		} else if (!family && !session.family && session.API_URL) {
+			// e.g., API_URL: 'https://zh.moegirl.org/api.php'
+			// console.trace([ language, family ]);
+			language = session.API_URL;
 		}
 
 		matched = language
@@ -741,13 +748,16 @@ function module_code(library_namespace) {
 			// console.trace(language);
 		}
 
+		// console.trace(family);
 		family = family || session && session.family || in_session
 				&& in_session.family;
+		// console.trace(family);
 		if (!family || family === 'wiki')
 			family = 'wikipedia';
 
 		API_URL = API_URL || session && session.API_URL
 				|| api_URL(language + '.' + family);
+		// console.trace(API_URL);
 
 		var site;
 		if (family === 'wikidata') {
@@ -760,6 +770,7 @@ function module_code(library_namespace) {
 			// using "commonswiki" instead of "commonswikimedia"
 			|| (language in wiki_API.api_URL.wikimedia) ? 'wiki' : family);
 		}
+		// console.trace(site);
 		library_namespace.debug(site, 3, 'language_to_site_name');
 
 		var project = language === 'www' ? family
