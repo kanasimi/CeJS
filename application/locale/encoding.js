@@ -25,6 +25,8 @@ typeof CeL === 'function' && CeL.run({
 	// library_namespace.file_exists()
 	+ '|application.storage.'
 	//
+	+ '|application.OS.Windows.file.is_file'
+	//
 	+ '|application.OS.Windows.file.AdoEnums'
 	//
 	+ '|application.OS.Windows.file.translate_ADO_Stream_binary_data',
@@ -41,7 +43,8 @@ function module_code(library_namespace) {
 	var module_name = this.id,
 	// requiring
 	new_COM = this.r('new_COM'), language_tag = this.r('language_tag'), open_file = this
-			.r('open_file'), AdoEnums = this.r('AdoEnums'), translate_ADO_Stream_binary_data = this
+			.r('open_file'), is_file = this.r('is_file'), AdoEnums = this
+			.r('AdoEnums'), translate_ADO_Stream_binary_data = this
 			.r('translate_ADO_Stream_binary_data');
 
 	// var to_standard_language_tag = gettext.to_standard;
@@ -140,7 +143,8 @@ function module_code(library_namespace) {
 		}
 		if (false && typeof _.get_HTML_encoding != 'function')
 			is_HTML = false;
-		if (!library_namespace.file_exists(file_path)) {
+		// TODO: using library_namespace.file_exists(file_path) @ build.js
+		if (!is_file(file_path)) {
 			library_namespace.debug('Treat [' + file_path + '] as string.');
 			return file_path.length < 1024 ? guess_encoding.unknown_encoding
 					: (t = guess_text_language(file_path, undefined, options)) ? t

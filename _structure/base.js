@@ -3041,6 +3041,7 @@ OS='UNIX'; // unknown
 
 	// ---------------------------------------------------------------------//
 
+	// @see CeL.data.code.compatibility.is_thenable()
 	function is_thenable(value) {
 		return value
 		// https://github.com/then/is-promise/blob/master/index.js
@@ -3058,9 +3059,31 @@ OS='UNIX'; // unknown
 		&& value.constructor.name === 'AsyncFunction';
 	}
 
+
+	function run_and_then(first_to_run, and_then, error_catcher) {
+		if (!error_catcher) {
+			var result = first_to_run();
+			if (is_thenable(result))
+				return result.then(and_then);
+
+			return and_then(result);
+		}
+
+		try {
+			var result = first_to_run();
+			if (is_thenable(result))
+				return result.then(and_then, error_catcher);
+
+			return and_then(result);
+		} catch(e) {
+			return error_catcher(e);
+		}
+	}
+
 	set_method(_, {
 		is_thenable : is_thenable,
-		is_async_function : is_async_function
+		is_async_function : is_async_function,
+		run_and_then : run_and_then
 	});
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//

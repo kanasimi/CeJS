@@ -2473,7 +2473,7 @@ function module_code(library_namespace) {
 	}
 
 	// @private
-	// is thenable object, thenable物件
+	// is thenable object, thenable 物件
 	function get_then_of_thenable(value) {
 		// `value &&`: for null
 		if (value && (typeof value === 'function' || typeof value === 'object')) {
@@ -2482,7 +2482,7 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// @see CeL.data.native.is_thenable()
+	// @see is_thenable() @ base.js
 	function is_thenable(value) {
 		return !!get_then_of_thenable(value);
 		// old style

@@ -58,7 +58,7 @@ function module_code(library_namespace) {
 		// 去掉開頭的 "./"。
 		next_url = next_url[1].replace(/^(\.\/)+/,
 		// TODO: {Array}this.chapter_URL()
-		this.chapter_URL(work_data, chapter_NO).replace(/[^\/]+$/, ''));
+		this.chapter_URL(work_data, chapter_NO).replace(/[^\/]+$/, '')).trim();
 		if (!next_url)
 			return;
 
@@ -75,6 +75,10 @@ function module_code(library_namespace) {
 			return;
 
 		if (next_chapter_url) {
+			if (false) {
+				console
+						.trace([ work_data.base_url, next_url, next_chapter_url ]);
+			}
 			// 符合這些條件的，依然是相同的網址。
 			// 照理來說.startsWith()本陳述應該皆為真。
 			if (next_url.startsWith(work_data.base_url)) {
