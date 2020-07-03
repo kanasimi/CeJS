@@ -796,8 +796,8 @@ function module_code(library_namespace) {
 	}
 
 	// default properties of revisions
-	// timestamp 是為了 wiki_API.edit 檢查用。
-	wiki_API_page.rvprop = 'content|timestamp';
+	// ids, timestamp 是為了 wiki_API_edit.set_stamp 檢查編輯衝突用。
+	wiki_API_page.rvprop = 'ids|timestamp|content';
 
 	// @see https://www.mediawiki.org/w/api.php?action=help&modules=query
 	wiki_API_page.auto_converttitles = 'zh,gan,iu,kk,ku,shi,sr,tg,uz'
@@ -1630,7 +1630,7 @@ function module_code(library_namespace) {
 								// e.g.,
 								// minor:'',anon:''/* e.g., IP user 匿名用戶 */,
 								// bot flag: ('bot' in row)
-								: 'ids|content|timestamp|user|flags|size'
+								: 'ids|timestamp|content|user|flags|size'
 							}, options.with_diff);
 
 							session.page(row.pageid,

@@ -265,6 +265,8 @@ function module_code(library_namespace) {
 					callback(page_data, 'denied');
 
 				} else {
+					// @see wiki_API.prototype.next()
+					options.page_to_edit = page_data;
 					if (undo_count) {
 						delete options.undo_count;
 						// page_data =
@@ -342,7 +344,7 @@ function module_code(library_namespace) {
 		} else {
 			options.title = title;
 		}
-		if (timestamp) {
+		if (timestamp || options.page_to_edit) {
 			// 若是 timestamp 並非最新版，則會放棄編輯。
 			wiki_API_edit.set_stamp(options, timestamp);
 		}
@@ -556,16 +558,29 @@ function module_code(library_namespace) {
 	 * @see https://www.mediawiki.org/wiki/API:Edit
 	 */
 	wiki_API_edit.set_stamp = function(options, timestamp) {
+		if (false && options.page_to_edit) {
+			console.trace(options.page_to_edit);
+			if (wiki_API.is_page_data(timestamp))
+				console.trace(options.page_to_edit === timestamp);
+			// options.baserevid =
+		}
+
 		if (wiki_API.is_page_data(timestamp)
 		// 在 .page() 會取得 page_data.revisions[0].timestamp
-		&& (timestamp = wiki_API.content_of.revision(timestamp)))
+		&& (timestamp = wiki_API.content_of.revision(timestamp))) {
+			// console.trace(timestamp);
+			if (timestamp.revid)
+				options.baserevid = timestamp.revid;
 			// 自 page_data 取得 timestamp.
 			timestamp = timestamp.timestamp;
+		}
+
 		// timestamp = '2000-01-01T00:00:00Z';
 		if (timestamp) {
 			library_namespace.debug(timestamp, 3, 'wiki_API_edit.set_stamp');
 			options.basetimestamp = options.starttimestamp = timestamp;
 		}
+
 		return options;
 	};
 
