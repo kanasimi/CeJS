@@ -52,6 +52,7 @@ function module_code(library_namespace) {
 			// [ url, post_data, options ]
 			URL = URL[0];
 		}
+
 		if (URL
 		// restore
 		|| !(agent = this.default_agent)) {
@@ -59,6 +60,19 @@ function module_code(library_namespace) {
 					|| this.base_URL);
 			agent.keepAlive = true;
 		}
+
+		if (this.get_URL_options.agent
+		// copy cookie @ mid.js
+		&& this.get_URL_options.agent.last_cookie) {
+			if (agent.last_cookie) {
+				library_namespace.error([ 'setup_agent: ', {
+					T : '原先的 agent 已存在 .last_cookie，無法設定！請回報這個錯誤！'
+				} ]);
+			} else {
+				agent.last_cookie = this.get_URL_options.agent.last_cookie;
+			}
+		}
+
 		return this.get_URL_options.agent = agent;
 	}
 
@@ -310,6 +324,7 @@ function module_code(library_namespace) {
 		// console.trace(url);
 		url = this.full_URL(url);
 
+		// console.trace(this.get_URL_options);
 		if (get_URL_options === true) {
 			// this.get_URL(url, callback, post_data, true)
 			get_URL_options = Object.assign({
@@ -351,7 +366,7 @@ function module_code(library_namespace) {
 		}
 		delete get_URL_options.fetch_type;
 
-		// console.log(get_URL_options);
+		// console.trace(this.get_URL_options);
 
 		// callback(result_Object, error)
 		get_URL(url, callback && callback.bind(this)
