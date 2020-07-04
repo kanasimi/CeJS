@@ -1790,6 +1790,7 @@ function module_code(library_namespace) {
 	function for_each_section(for_section, options) {
 		options = library_namespace.setup_options(options);
 
+		// this: parsed
 		var _this = this, page_title = this.page && this.page.title,
 		// parsed.sections[0]: 常常是設定與公告區，或者放置維護模板/通知模板。
 		all_root_section_list = this.sections = [],
@@ -3665,6 +3666,12 @@ function module_code(library_namespace) {
 		// table "|-" 未起新行等。
 
 		// ----------------------------------------------------
+		// 因為<nowiki>可以打斷其他的語法，包括"<!--"，因此必須要首先處理。
+
+		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_of_nowiki,
+				parse_HTML_tag);
+
+		// ----------------------------------------------------
 		// comments: <!-- ... -->
 
 		// TODO: <nowiki> 之優先度更高！置於 <nowiki> 中，
@@ -3672,23 +3679,31 @@ function module_code(library_namespace) {
 
 		// "<\": for Eclipse JSDoc.
 		if (initialized_fix) {
+			wikitext = wikitext.replace(/<\!--([\s\S]*?)-->/g,
 			// 因為前後標記間所有內容無作用、能置於任何地方（除了 <nowiki> 中，"<no<!-- -->wiki>"
 			// 之類），又無需向前回溯；只需在第一次檢測，不會有遺珠之憾。
-			wikitext = wikitext.replace(/<\!--([\s\S]*?)-->/g,
-					function(all, parameters) {
-						// 不再作 parse。
-						queue.push(_set_wiki_type(parameters, 'comment'));
-						return include_mark + (queue.length - 1) + end_mark;
-					})
-			// 缺 end mark
-			.replace(/<\!--([\s\S]*)$/g, function(all, parameters) {
+			function(all, parameters) {
+				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+				// e.g., "<!-- <nowiki>...</nowiki> ... -->"
+				parameters = parse_wikitext(parameters, options, queue);
 				// 不再作 parse。
+				parameters = parameters.toString();
+				queue.push(_set_wiki_type(parameters, 'comment'));
+				return include_mark + (queue.length - 1) + end_mark;
+			})
+			// 缺 end mark: "...<!--..."
+			.replace(/<\!--([\s\S]*)$/, function(all, parameters) {
 				if (initialized_fix[1]) {
 					parameters = parameters.slice(0,
 					//
 					-initialized_fix[1].length);
 					initialized_fix[1] = '';
 				}
+				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+				// e.g., "<!-- <nowiki>...</nowiki> ... -->"
+				parameters = parse_wikitext(parameters, options, queue);
+				// 不再作 parse。
+				parameters = parameters.toString();
 				parameters = _set_wiki_type(parameters, 'comment');
 				if (!normalize)
 					parameters.no_end = true;
@@ -3696,12 +3711,6 @@ function module_code(library_namespace) {
 				return include_mark + (queue.length - 1) + end_mark;
 			});
 		}
-
-		// ----------------------------------------------------
-		// 因為<nowiki>可以打斷其他的語法，因此必須要先處理。
-
-		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_of_nowiki,
-				parse_HTML_tag);
 
 		// ----------------------------------------------------
 

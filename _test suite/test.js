@@ -3199,6 +3199,13 @@ function test_wiki() {
 		assert(['<nowiki>\n==t==\nw\n</nowiki>', parsed[1].toString()], 'wiki.parse: nowiki #2');
 		assert(['', parsed[1][0].toString()], 'wiki.parse: nowiki #3');
 		assert(['\n==t==\nw\n', parsed[1][1].toString()], 'wiki.parse: nowiki #4');
+		wikitext = '1<nowiki><!--</nowiki>2-->'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #5');
+		assert(['<nowiki><!--</nowiki>', parsed[1].toString()], 'wiki.parse: nowiki #6');
+
+		wikitext = '1<!--<nowiki><!--</nowiki>2-->3'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: comments #1');
+		assert(['<!--<nowiki><!--</nowiki>2-->', parsed[1].toString()], 'wiki.parse: comments #2');
 
 		wikitext = '{{tl|1=<b a{{=}}"A">i</b>|p=P}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{=}} #1');
