@@ -4118,16 +4118,16 @@ function module_code(library_namespace) {
 			// @see console.log(parser[418]);
 			// https://zh.moegirl.org/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
 			// <nowiki>{{subst:unwiki|<nowiki>{{黑幕|黑幕内容}}</nowiki&gt;}}</nowiki>
-			'[\\s\\S]*<(' + tag
+			'([\\s\\S]*)<(' + tag
 			//
 			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)$', 'i')), previous;
 			if (matched) {
-				previous = all.slice(0, -matched[0].length
+				previous = all.slice(0, matched[1].length - matched[0].length
 				// length of </end_tag>
 				- end_tag.length - 3);
-				tag = matched[1];
-				attributes = matched[2];
-				inner = matched[3];
+				tag = matched[2];
+				attributes = matched[3];
+				inner = matched[4];
 			} else {
 				previous = '';
 			}
@@ -4150,7 +4150,7 @@ function module_code(library_namespace) {
 					+ '此時視為一般 text，當作未匹配 match HTML tag 成功。\n' + previous);
 					library_namespace.info(attributes);
 					library_namespace.log(inner);
-					console.trace(new RegExp('[\\s\\S]*<(' + tag
+					console.trace(new RegExp('^([\\s\\S]*)<(' + tag
 							+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)$', 'i'));
 				}
 				return all;
