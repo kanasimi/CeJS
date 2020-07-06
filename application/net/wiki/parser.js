@@ -2673,18 +2673,18 @@ function module_code(library_namespace) {
 	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr',
 	/** {RegExp}HTML tags 的匹配模式。 */
 	PATTERN_WIKI_TAG = new RegExp('<(' + markup_tags
-			+ ')(\/|\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
+			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
 	/** {RegExp}HTML tags 的匹配模式 of <nowiki>。 */
 	PATTERN_WIKI_TAG_of_nowiki = new RegExp('<(' + 'nowiki'
-			+ ')(\/|\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
+			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
 	/** {RegExp}HTML tags 的匹配模式 without <nowiki>。 */
 	PATTERN_WIKI_TAG_without_nowiki = new RegExp('<('
 			+ markup_tags.replace('nowiki|', '')
-			// allow "<br/>"
-			+ ')(\/|\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
+			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
 	/** {RegExp}HTML self closed tags 的匹配模式。 */
 	PATTERN_WIKI_TAG_VOID = new RegExp('<(' + self_close_tags
-			+ ')(\/|\\s[^<>]*)?>', 'ig'),
+	// allow "<br/>"
+	+ ')(\/|\\s[^<>]*)?>', 'ig'),
 	// 在其內部的 wikitext 不會被parse。允許內部採用 table 語法的 tags。例如 [[mw:Manual:Extensions]]
 	no_parse_tags = 'nowiki|pre|source|syntaxhighlight'.split('|').to_hash();
 
@@ -3262,488 +3262,6 @@ function module_code(library_namespace) {
 		// ------------------------------------------------------------------------
 		// parse functions
 
-		// parse attributes
-		function parse_tag_attributes(attributes) {
-			var attribute_hash = Object.create(null);
-			if (typeof attributes === 'string') {
-				var attributes_list = [], matched,
-				// [ all, front, all attributes, name, value, unquoted value ]
-				PATTERN_attribute = /([\s\S]+?)($|([^\s]+)=("[^"]*"|'[^']*'|([^\s]*)))/g;
-				while (matched = PATTERN_attribute.exec(attributes)) {
-					// console.log(matched);
-					attributes_list.push(matched[1]);
-					if (matched[2])
-						attributes_list.push(matched[2]);
-					if (matched[3]) {
-						attribute_hash[matched[3]] = matched[5] || matched[4]
-						// or use JSON.parse()
-						&& matched[4].slice(1, -1).replace(/\\(.)/g, '$1');
-					}
-				}
-				attributes = attributes_list;
-			}
-			attributes = _set_wiki_type(attributes || '', 'tag_attributes');
-			attributes.attributes = attribute_hash;
-			return attributes;
-		}
-
-		function parse_HTML_tag(all, tag, attributes, inner, end_tag) {
-			// console.log('queue start:');
-			// console.log(queue);
-			// console.trace(arguments);
-
-			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
-			var matched = tag !== 'nowiki' && inner.match(new RegExp(
-			// 但這種回溯搜尋不包含 <nowiki>
-			// @see console.log(parser[418]);
-			// https://zh.moegirl.org/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
-			// <nowiki>{{subst:unwiki|<nowiki>{{黑幕|黑幕内容}}</nowiki&gt;}}</nowiki>
-			'<(' + tag + ')(\/|\\s[^<>]*)?>([\\s\\S]*?)$', 'i')), previous;
-			if (matched) {
-				previous = all.slice(0, -matched[0].length
-				// length of </end_tag>
-				- end_tag.length - 3);
-				tag = matched[1];
-				attributes = matched[2];
-				inner = matched[3];
-			} else {
-				previous = '';
-			}
-			library_namespace.debug(previous + ' + <' + tag + '>', 4,
-					'parse_wikitext.tag');
-
-			var is_no_parse_tag = tag.toLowerCase() in no_parse_tags;
-			// 在章節標題、表格 td/th 或 template parameter 結束時，
-			// e.g., "| t || <s>... || </s> ||", "{{t|p=v<s>...|p2=v}}</s>"
-			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
-			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
-			// 此時同階的 table 尚未處理。
-			if (!is_no_parse_tag && /\n[|!]|[|!]{2}/.test(inner)) {
-				// TODO: 應確認此時真在表格中。
-				library_namespace.debug('表格 td/th 或 template parameter 中，'
-						+ '此時視為一般 text，當作未匹配 match HTML tag 成功。', 2,
-						'parse_wikitext.tag');
-				return all;
-			}
-
-			// 2016/9/28 9:7:7
-			// 因為 no_parse_tags 內部可能已解析成其他的單元，因此還是必須parse_wikitext()。
-			// e.g., '<nowiki>-{}-</nowiki>'
-			// 經過改變，需再進一步處理。
-			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
-					'parse_wikitext.tag');
-			attributes = parse_tag_attributes(
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
-			parse_wikitext(attributes, options, queue));
-			inner = parse_wikitext(inner, options, queue);
-
-			// 處理特殊 tags。
-			if (tag === 'nowiki' && Array.isArray(inner)) {
-				library_namespace.debug('-'.repeat(70)
-						+ '\n<nowiki> 中僅留 -{}- 有效用。', 3,
-						'parse_wikitext.transclusion');
-				// console.log(inner);
-				if (inner.type && inner.type !== 'plain') {
-					// 當 inner 本身就是特殊 token 時，先把它包裝起來。
-					inner = _set_wiki_type([ inner ], 'plain');
-				}
-				// TODO: <nowiki><b>-{...}-</b></nowiki>
-				inner.forEach(function(token, index) {
-					// 處理每個子 token。 經測試，<nowiki>中 -{}- 也無效。
-					if (token.type /* && token.type !== 'convert' */)
-						inner[index] = inner[index].toString();
-				});
-				if (inner.length <= 1) {
-					inner = inner[0];
-				}
-				// console.log(inner);
-			}
-			// 若為 <pre> 之內，則不再變換。
-			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
-			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
-			// 因此應避免 <pre> 內有 <pre>。
-			if (false && !is_no_parse_tag) {
-				inner = inner.toString();
-			}
-
-			// [ ... ]: 在 inner 為 Template 之類時，
-			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
-			// 但仍需要設定 type=tag_inner 以應 for_each_token 之需，因此多層[]包覆。
-			inner = _set_wiki_type([ inner || '' ], 'tag_inner');
-			all = [ attributes, inner ];
-
-			if (normalize) {
-				tag = tag.toLowerCase();
-			} else if (tag !== end_tag) {
-				all.end_tag = end_tag;
-			}
-			all.tag = tag;
-			// {String}Element.tagName
-			// all.tagName = tag.toLowerCase();
-
-			all = _set_wiki_type(all, 'tag');
-			// 在遍歷 tag inner 的子 node 時，真正需要的 .parent 是 all tag 而非 inner。
-			// e.g., `special page configuration.js`
-			// if (parent.type === 'tag_inner' && parent.parent.type === 'tag'
-			// && parent.parent.tag === 's') { ... }
-			inner.parent = all;
-			// attributes.parent = all;
-			if (attributes && attributes.attributes) {
-				all.attributes = attributes.attributes;
-				delete attributes.attributes;
-			}
-			queue.push(all);
-			// console.log('queue end:');
-			// console.log(queue);
-			return previous + include_mark + (queue.length - 1) + end_mark;
-		}
-
-		function parse_single_tag(all, tag, attributes) {
-			if (attributes) {
-				if (normalize) {
-					attributes = attributes.replace(/[\s\/]*$/, ' /');
-				}
-				attributes = parse_tag_attributes(
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
-				parse_wikitext(attributes, options, queue));
-				if (false && attributes.type === 'plain') {
-					// assert: 經過 parse_tag_attributes(), 應該不會到這邊。
-					all = attributes;
-				} else
-					all = [ attributes ];
-			} else {
-				// use '' as attributes in case
-				// the .join() in .toString() doesn't work.
-				all = [ '' ];
-			}
-
-			if (normalize) {
-				tag = tag.toLowerCase();
-			}
-			all.tag = tag;
-			// {String}Element.tagName
-			// all.tagName = tag.toLowerCase();
-
-			_set_wiki_type(all, 'tag_single');
-			if (attributes && attributes.attributes) {
-				all.attributes = attributes.attributes;
-				delete attributes.attributes;
-			}
-			queue.push(all);
-			return include_mark + (queue.length - 1) + end_mark;
-		}
-
-		// or use ((PATTERN_transclusion))
-		// PATTERN_template
-		var PATTERN_for_transclusion = /{{([^{}][\s\S]*?)}}/g;
-		function parse_transclusion(all, parameters) {
-			// 自 end_mark 向前回溯。
-			var index = parameters.lastIndexOf('{{'),
-			// 在先的，在前的，前面的； preceding
-			// (previous 反義詞 following, preceding 反義詞 exceeds)
-			previous,
-			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
-			// token.parameters[{String}key] = {String}value
-			_parameters = Object.create(null),
-			// token.index_of[{String}key] = {Integer}index
-			parameter_index_of = Object.create(null);
-			if (index > 0) {
-				previous = '{{' + parameters.slice(0, index);
-				parameters = parameters.slice(index + '}}'.length);
-			} else {
-				previous = '';
-			}
-			library_namespace.debug(
-					'[' + previous + '] + [' + parameters + ']', 4,
-					'parse_wikitext.transclusion');
-
-			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
-			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
-			parameters = parameters.split('|');
-
-			// matched: [ all, functionname token, functionname, argument 1 ]
-			var matched = parameters[0].match(/^([\s\n]*#([a-z]+):)([\s\S]*)$/);
-
-			// if not [[mw:Help:Extension:ParserFunctions]]
-			if (!matched) {
-				index = +parameters[0].between(include_mark, end_mark);
-				if (index && queue[index = +index] && !(queue[index].type in {
-					// incase:
-					// {{Wikipedia:削除依頼/ログ/{{今日}}}}
-					transclusion : true,
-					// incase:
-					// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}
-					'function' : true
-				})) {
-					// console.log(parameters);
-					// console.log(queue[index]);
-
-					// e.g., `{{ {{tl|t}} | p }}` is incalid:
-					// → `{{ {{t}} | p }}`
-					return all;
-				}
-
-				// e.g., token.name ===
-				// 'Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}'
-
-			} else {
-				// console.log(matched);
-
-				// 有特殊 elements 置入其中。
-				// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
-
-				// [[mw:Help:Extension:ParserFunctions]]
-				// [[mw:Extension:StringFunctions]]
-				// [[mw:Help:Magic words#Parser_functions]]
-				// [[w:en:Help:Conditional expressions]]
-
-				// will set latter
-				parameters[0] = '';
-				parameters.splice(1, 0, matched[3]);
-			}
-
-			index = 1;
-			parameters = parameters.map(function(token, _index) {
-				// 預防經過改變，需再進一步處理。
-				token = parse_wikitext(token, Object.assign({
-					inside_transclusion : true
-				}, options), queue);
-
-				if (_index === 0) {
-					// console.log(token);
-					if (typeof token === 'string') {
-						return _set_wiki_type(token.split(normalize ? /\s*:\s*/
-								: ':'), 'page_title');
-					}
-					// 有特殊 elements 置入其中。
-					// e.g., {{ {{t|n}} | a }}
-					return token;
-				}
-
-				var _token = token;
-				// console.log(_token);
-				if (Array.isArray(_token)) {
-					_token = _token[0];
-				}
-				// console.log(JSON.stringify(_token));
-				if (typeof _token === 'string') {
-					_token = _token.trim();
-					// @see function parse_template()
-					var matched = _token.match(/^([^=]+)=([\s\S]*)$/);
-					if (matched) {
-						var key = matched[1].trimEnd(),
-						// key token must accept '\n'. e.g., "key \n = value"
-						value = matched[2].trimStart();
-
-						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
-						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
-						// parser 調用超過一個Template中參數的值，只會使用最後指定的值。
-						if (typeof token === 'string') {
-							// 處理某些特殊屬性的值。
-							if (false && /url$/i.test(key)) {
-								try {
-									// 有些參數值會迴避"="，此時使用decodeURIComponent可能會更好。
-									value = decodeURI(value);
-								} catch (e) {
-									// TODO: handle exception
-								}
-							}
-							parameter_index_of[key] = _index;
-							_parameters[key] = value;
-
-						} else {
-							// assert: Array.isArray(token)
-							if (false) {
-								_token = token.clone();
-								// copy properties
-								Object.keys(token).forEach(function(p) {
-									if (!(p >= 0)) {
-										_token[p] = token[p];
-									}
-								});
-							}
-							// assert: Array.isArray(token)
-							// 因此代表value的_token也採用相同的type。
-							_token = [];
-							// copy properties, including .toString().
-							Object.keys(token).forEach(function(p) {
-								_token[p] = token[p];
-							});
-
-							_token[0] = value;
-							parameter_index_of[key] = _index;
-							_parameters[key] = _token;
-						}
-					} else {
-						parameter_index_of[index] = _index;
-						_parameters[index++]
-						// TODO: token 本身並未 .trim()
-						= typeof token === 'string' ? _token : token;
-					}
-
-				} else {
-					// e.g., {{t|[http://... ...]}}
-					if (library_namespace.is_debug(3)) {
-						library_namespace.error(
-						//
-						'parse_wikitext.transclusion: Can not parse ['
-						//
-						+ token + ']');
-						library_namespace.error(token);
-						// console.log(_token);
-					}
-					// TODO: token 本身並未 .trim()
-					parameter_index_of[index] = _index;
-					_parameters[index++] = token;
-				}
-
-				return token;
-			});
-
-			// add properties
-
-			if (matched) {
-				parameters[0] = matched[1];
-				parameters.name = matched[2];
-				// 若指定 .valueOf = function()，
-				// 會造成 '' + token 執行 .valueOf()。
-				parameters.evaluate = evaluate_parser_function;
-
-			} else {
-				// 'Defaultsort' → 'DEFAULTSORT'
-				parameters.name = typeof parameters[0][0] === 'string'
-				// 後面不允許空白。 must / *DEFAULTSORT:/
-				&& parameters[0][0].trimStart().toUpperCase();
-
-				if (parameters.name
-						&& (parameters.name in Magic_words_hash)
-						// test if token is [[Help:Magic words]]
-						&& (Magic_words_hash[parameters.name] || parameters[0].length > 1)) {
-					// TODO: {{ {{UCFIRST:T}} }}
-					// TODO: {{ :{{UCFIRST:T}} }}
-					// console.log(parameters);
-
-					// 此時以 parameters[0][1] 可獲得首 parameter。
-					parameters.is_magic_word = true;
-				} else {
-					parameters.name = typeof parameters[0][0] === 'string'
-					//
-					&& parameters[0][0].trim().toLowerCase();
-					// console.log(parameters.name);
-					// .page_name
-					parameters.page_title = wiki_API.normalize_title(
-					// incase "{{ DEFAULTSORT : }}"
-					// 正規化 template name。
-					// 'ab/cd' → 'Ab/cd'
-					(parameters.name in wiki_API.namespace.hash ? ''
-					// {{T}}嵌入[[Template:T]]
-					// {{Template:T}}嵌入[[Template:T]]
-					// {{:T}}嵌入[[T]]
-					// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
-					: 'Template:') + parameters[0].toString());
-
-					parameters.name = wiki_API.normalize_title(
-							parameters[0].toString())
-					// 預防 {{Template:name|...}}
-					// PATTERN_template_starts
-					.replace(/^(?:Template|模板|テンプレート|Plantilla|틀):/, '');
-				}
-			}
-			parameters.parameters = _parameters;
-			parameters.index_of = parameter_index_of;
-
-			_set_wiki_type(parameters, matched ? 'function' : 'transclusion');
-			queue.push(parameters);
-			// TODO: parameters.parameters = []
-			return previous + include_mark + (queue.length - 1) + end_mark;
-		}
-
-		// ------------------------------------------------------------------------
-		// parse sequence start / start parse
-
-		// parse 範圍基本上由小到大。
-		// e.g., transclusion 不能包括 table，因此在 table 前。
-
-		// 得先處理完有開闔的標示法，之後才是單一標示。
-		// e.g., "<pre>\n==t==\nw\n</pre>" 不應解析出 section_title。
-
-		// 可順便作正規化/維護清理/修正明顯破壞/修正維基語法/維基化，
-		// 例如修復章節標題 (section title, 節タイトル) 前後 level 不一，
-		// table "|-" 未起新行等。
-
-		// ----------------------------------------------------
-		// 因為<nowiki>可以打斷其他的語法，包括"<!--"，因此必須要首先處理。
-
-		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_of_nowiki,
-				parse_HTML_tag);
-
-		// ----------------------------------------------------
-		// comments: <!-- ... -->
-
-		// TODO: <nowiki> 之優先度更高！置於 <nowiki> 中，
-		// 如 "<nowiki><!-- --></nowiki>" 則雖無功用，但會當作一般文字顯示，而非註解。
-
-		// "<\": for Eclipse JSDoc.
-		if (initialized_fix) {
-			wikitext = wikitext.replace(/<\!--([\s\S]*?)-->/g,
-			// 因為前後標記間所有內容無作用、能置於任何地方（除了 <nowiki> 中，"<no<!-- -->wiki>"
-			// 之類），又無需向前回溯；只需在第一次檢測，不會有遺珠之憾。
-			function(all, parameters) {
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				// e.g., "<!-- <nowiki>...</nowiki> ... -->"
-				parameters = parse_wikitext(parameters, options, queue);
-				// 不再作 parse。
-				parameters = parameters.toString();
-				queue.push(_set_wiki_type(parameters, 'comment'));
-				return include_mark + (queue.length - 1) + end_mark;
-			})
-			// 缺 end mark: "...<!--..."
-			.replace(/<\!--([\s\S]*)$/, function(all, parameters) {
-				if (initialized_fix[1]) {
-					parameters = parameters.slice(0,
-					//
-					-initialized_fix[1].length);
-					initialized_fix[1] = '';
-				}
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				// e.g., "<!-- <nowiki>...</nowiki> ... -->"
-				parameters = parse_wikitext(parameters, options, queue);
-				// 不再作 parse。
-				parameters = parameters.toString();
-				parameters = _set_wiki_type(parameters, 'comment');
-				if (!normalize)
-					parameters.no_end = true;
-				queue.push(parameters);
-				return include_mark + (queue.length - 1) + end_mark;
-			});
-		}
-
-		// ----------------------------------------------------
-
-		// 為了 "{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}"，
-		// 將 -{}-, [], [[]] 等，所有中間可穿插 "|" 的置於 {{{}}}, {{}} 前。
-
-		// ----------------------------------------------------
-		// language conversion -{}- 以後來使用的為主。
-		// TODO: -{R|里}-
-		// TODO: -{zh-hans:<nowiki>...</nowiki>;zh-hant:<nowiki>...</nowiki>;}-
-		// TODO: 特別注意語法中帶有=>的單向轉換規則 [[w:zh:模組:CGroup/IT]]
-		// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
-		// https://zh.wikipedia.org/wiki/Help:中文维基百科的繁简、地区词处理#常用的轉換工具語法
-		// [[w:zh:H:Convert]], [[w:zh:H:AC]]
-		// [[mw:Help:Magic words]], [[mw:Writing systems/LanguageConverter]]
-		// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageConverter_8php_source.html
-		// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
-		// https://doc.wikimedia.org/mediawiki-core/master/php/ZhConversion_8php_source.html
-		// https://github.com/wikimedia/mediawiki/blob/master/languages/data/ZhConversion.php
-		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
-		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
-		// TODO: <source></source>內之-{}-無效。
-		// TODO:
-		// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
-
 		function parse_language_conversion(all, parameters) {
 			// -{...}- 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('-{'), previous;
@@ -3974,24 +3492,6 @@ function module_code(library_namespace) {
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
-
-		wikitext = wikitext.replace_till_stable(/-{(.*?)}-/g,
-				parse_language_conversion);
-
-		// ----------------------------------------------------
-		// wikilink
-		// [[~:~|~]], [[~:~:~|~]]
-
-		// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
-
-		// 注意: [[p|{{tl|t}}]] 不會被解析成 wikilink，因此 wikilink 應該要擺在 transclusion
-		// 前面檢查，或是使 display_text 不包含 {{}}。
-
-		// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
-		// 可以解析成圖片, Caption: "{{tl|t}}"
-
-		// TODO: bug: 正常情況下 "[[ ]]" 不會被 parse，但是本函數還是會 parse 成 link。
-		// TODO: [[::zh:title]] would be rendered as plaintext
 
 		function parse_wikilink(all_link, page_and_section, page_name,
 				section_title, display_text) {
@@ -4303,17 +3803,7 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
-		wikitext = wikitext.replace_till_stable(
-		// or use ((PATTERN_link))
-		PATTERN_wikilink_global, parse_wikilink);
-
-		// ----------------------------------------------------
-		// external link
-		// [http://... ...]
-		// TODO: [{{}} ...]
-		wikitext = wikitext.replace_till_stable(PATTERN_external_link_global,
-		//
-		function(all, URL, delimiter, parameters) {
+		function parse_external_link(all, URL, delimiter, parameters) {
 			URL = [ URL.includes(include_mark)
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 			? parse_wikitext(URL, options, queue)
@@ -4334,16 +3824,9 @@ function module_code(library_namespace) {
 			_set_wiki_type(URL, 'external_link');
 			queue.push(URL);
 			return include_mark + (queue.length - 1) + end_mark;
-		});
+		}
 
-		// ----------------------------------------------------
-		// {{{...}}} 需在 {{...}} 之前解析。
-		// [[w:zh:Help:模板]]
-		// 在模板頁面中，用三個大括弧可以讀取參數。
-		// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
-		wikitext = wikitext.replace_till_stable(
-		//
-		/{{{([^{}][\s\S]*?)}}}/g, function parse_parameters(all, parameters) {
+		function parse_parameters(all, parameters) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('{{{'), previous;
 			if (index > 0) {
@@ -4370,62 +3853,428 @@ function module_code(library_namespace) {
 			_set_wiki_type(parameters, 'parameter');
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark;
-		});
-
-		// ----------------------------------------------------
-		// 模板（英語：Template，又譯作「樣板」、「範本」）
-		// {{Template name|}}
-		wikitext = wikitext.replace_till_stable(
-		//
-		PATTERN_for_transclusion, parse_transclusion);
-
-		// ----------------------------------------------------
-
-		// 由於 <tag>... 可能被 {{Template}} 截斷，因此先處理 {{Template}} 再處理 <t></t>。
-		// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
-
-		// ----------------------------------------------------
-		// [[Help:HTML in wikitext]]
-
-		// <s>不採用 global variable，預防 multitasking 並行處理。</s>
-		// reset PATTERN index
-		// PATTERN_WIKI_TAG.lastIndex = 0;
-
-		// console.log(PATTERN_TAG);
-		// console.log(wikitext);
-		// console.trace(PATTERN_WIKI_TAG_without_nowiki);
-
-		// HTML tags that must be closed.
-		// <pre>...</pre>, <code>int f()</code>
-		wikitext = wikitext.replace_till_stable(
-				PATTERN_WIKI_TAG_without_nowiki, parse_HTML_tag);
-
-		// ----------------------------------------------------
-		// single tags. e.g., <hr />
-		// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
-
-		// reset PATTERN index
-		// PATTERN_WIKI_TAG_VOID.lastIndex = 0;
-
-		// assert: 有 end tag 的皆已處理完畢，到這邊的是已經沒有 end tag 的。
-		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_VOID,
-				parse_single_tag);
-		// 處理有明確標示為 simgle tag 的。
-		// 但 MediaWiki 現在會將 <b /> 轉成 <b>，因此不再處理這部分。
-		if (false) {
-			wikitext = wikitext.replace_till_stable(
-					/<([a-z]+)(\s[^<>]*\/)?>/ig, parse_single_tag);
 		}
 
-		// ----------------------------------------------------
-		// table: \n{| ... \n|}
-		// TODO: 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]]
-		// 因為 table 中較可能包含 {{Template}}，但 {{Template}} 少包含 table，
-		// 因此先處理 {{Template}} 再處理 table。
-		// {|表示表格開始，|}表示表格結束。
-		wikitext = wikitext.replace_till_stable(
-		// [[Help:Table]]
-		/\n{\|([\s\S]*?)\n\|}/g, function(all, parameters) {
+		// or use ((PATTERN_transclusion))
+		// PATTERN_template
+		var PATTERN_for_transclusion = /{{([^{}][\s\S]*?)}}/g;
+		function parse_transclusion(all, parameters) {
+			// 自 end_mark 向前回溯。
+			var index = parameters.lastIndexOf('{{'),
+			// 在先的，在前的，前面的； preceding
+			// (previous 反義詞 following, preceding 反義詞 exceeds)
+			previous,
+			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
+			// token.parameters[{String}key] = {String}value
+			_parameters = Object.create(null),
+			// token.index_of[{String}key] = {Integer}index
+			parameter_index_of = Object.create(null);
+			if (index > 0) {
+				previous = '{{' + parameters.slice(0, index);
+				parameters = parameters.slice(index + '}}'.length);
+			} else {
+				previous = '';
+			}
+			library_namespace.debug(
+					'[' + previous + '] + [' + parameters + ']', 4,
+					'parse_wikitext.transclusion');
+
+			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
+			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
+			parameters = parameters.split('|');
+
+			// matched: [ all, functionname token, functionname, argument 1 ]
+			var matched = parameters[0].match(/^([\s\n]*#([a-z]+):)([\s\S]*)$/);
+
+			// if not [[mw:Help:Extension:ParserFunctions]]
+			if (!matched) {
+				index = +parameters[0].between(include_mark, end_mark);
+				if (index && queue[index = +index] && !(queue[index].type in {
+					// incase:
+					// {{Wikipedia:削除依頼/ログ/{{今日}}}}
+					transclusion : true,
+					// incase:
+					// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}
+					'function' : true
+				})) {
+					// console.log(parameters);
+					// console.log(queue[index]);
+
+					// e.g., `{{ {{tl|t}} | p }}` is incalid:
+					// → `{{ {{t}} | p }}`
+					return all;
+				}
+
+				// e.g., token.name ===
+				// 'Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}'
+
+			} else {
+				// console.log(matched);
+
+				// 有特殊 elements 置入其中。
+				// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
+
+				// [[mw:Help:Extension:ParserFunctions]]
+				// [[mw:Extension:StringFunctions]]
+				// [[mw:Help:Magic words#Parser_functions]]
+				// [[w:en:Help:Conditional expressions]]
+
+				// will set latter
+				parameters[0] = '';
+				parameters.splice(1, 0, matched[3]);
+			}
+
+			index = 1;
+			parameters = parameters.map(function(token, _index) {
+				// 預防經過改變，需再進一步處理。
+				token = parse_wikitext(token, Object.assign({
+					inside_transclusion : true
+				}, options), queue);
+
+				if (_index === 0) {
+					// console.log(token);
+					if (typeof token === 'string') {
+						return _set_wiki_type(token.split(normalize ? /\s*:\s*/
+								: ':'), 'page_title');
+					}
+					// 有特殊 elements 置入其中。
+					// e.g., {{ {{t|n}} | a }}
+					return token;
+				}
+
+				var _token = token;
+				// console.log(_token);
+				if (Array.isArray(_token)) {
+					_token = _token[0];
+				}
+				// console.log(JSON.stringify(_token));
+				if (typeof _token === 'string') {
+					_token = _token.trim();
+					// @see function parse_template()
+					var matched = _token.match(/^([^=]+)=([\s\S]*)$/);
+					if (matched) {
+						var key = matched[1].trimEnd(),
+						// key token must accept '\n'. e.g., "key \n = value"
+						value = matched[2].trimStart();
+
+						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
+						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
+						// parser 調用超過一個Template中參數的值，只會使用最後指定的值。
+						if (typeof token === 'string') {
+							// 處理某些特殊屬性的值。
+							if (false && /url$/i.test(key)) {
+								try {
+									// 有些參數值會迴避"="，此時使用decodeURIComponent可能會更好。
+									value = decodeURI(value);
+								} catch (e) {
+									// TODO: handle exception
+								}
+							}
+							parameter_index_of[key] = _index;
+							_parameters[key] = value;
+
+						} else {
+							// assert: Array.isArray(token)
+							if (false) {
+								_token = token.clone();
+								// copy properties
+								Object.keys(token).forEach(function(p) {
+									if (!(p >= 0)) {
+										_token[p] = token[p];
+									}
+								});
+							}
+							// assert: Array.isArray(token)
+							// 因此代表value的_token也採用相同的type。
+							_token = [];
+							// copy properties, including .toString().
+							Object.keys(token).forEach(function(p) {
+								_token[p] = token[p];
+							});
+
+							_token[0] = value;
+							parameter_index_of[key] = _index;
+							_parameters[key] = _token;
+						}
+					} else {
+						parameter_index_of[index] = _index;
+						_parameters[index++]
+						// TODO: token 本身並未 .trim()
+						= typeof token === 'string' ? _token : token;
+					}
+
+				} else {
+					// e.g., {{t|[http://... ...]}}
+					if (library_namespace.is_debug(3)) {
+						library_namespace.error(
+						//
+						'parse_wikitext.transclusion: Can not parse ['
+						//
+						+ token + ']');
+						library_namespace.error(token);
+						// console.log(_token);
+					}
+					// TODO: token 本身並未 .trim()
+					parameter_index_of[index] = _index;
+					_parameters[index++] = token;
+				}
+
+				return token;
+			});
+
+			// add properties
+
+			if (matched) {
+				parameters[0] = matched[1];
+				parameters.name = matched[2];
+				// 若指定 .valueOf = function()，
+				// 會造成 '' + token 執行 .valueOf()。
+				parameters.evaluate = evaluate_parser_function;
+
+			} else {
+				// 'Defaultsort' → 'DEFAULTSORT'
+				parameters.name = typeof parameters[0][0] === 'string'
+				// 後面不允許空白。 must / *DEFAULTSORT:/
+				&& parameters[0][0].trimStart().toUpperCase();
+
+				if (parameters.name
+						&& (parameters.name in Magic_words_hash)
+						// test if token is [[Help:Magic words]]
+						&& (Magic_words_hash[parameters.name] || parameters[0].length > 1)) {
+					// TODO: {{ {{UCFIRST:T}} }}
+					// TODO: {{ :{{UCFIRST:T}} }}
+					// console.log(parameters);
+
+					// 此時以 parameters[0][1] 可獲得首 parameter。
+					parameters.is_magic_word = true;
+				} else {
+					parameters.name = typeof parameters[0][0] === 'string'
+					//
+					&& parameters[0][0].trim().toLowerCase();
+					// console.log(parameters.name);
+					// .page_name
+					parameters.page_title = wiki_API.normalize_title(
+					// incase "{{ DEFAULTSORT : }}"
+					// 正規化 template name。
+					// 'ab/cd' → 'Ab/cd'
+					(parameters.name in wiki_API.namespace.hash ? ''
+					// {{T}}嵌入[[Template:T]]
+					// {{Template:T}}嵌入[[Template:T]]
+					// {{:T}}嵌入[[T]]
+					// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
+					: 'Template:') + parameters[0].toString());
+
+					parameters.name = wiki_API.normalize_title(
+							parameters[0].toString())
+					// 預防 {{Template:name|...}}
+					// PATTERN_template_starts
+					.replace(/^(?:Template|模板|テンプレート|Plantilla|틀):/, '');
+				}
+			}
+			parameters.parameters = _parameters;
+			parameters.index_of = parameter_index_of;
+
+			_set_wiki_type(parameters, matched ? 'function' : 'transclusion');
+			queue.push(parameters);
+			// TODO: parameters.parameters = []
+			return previous + include_mark + (queue.length - 1) + end_mark;
+		}
+
+		// parse attributes of HTML tags
+		function parse_tag_attributes(attributes) {
+			var attribute_hash = Object.create(null);
+			if (typeof attributes === 'string') {
+				var attributes_list = [], matched,
+				// [ all, front, all attributes, name, value, unquoted value ]
+				PATTERN_attribute = /([\s\S]+?)($|([^\s]+)=("[^"]*"|'[^']*'|([^\s]*)))/g;
+				while (matched = PATTERN_attribute.exec(attributes)) {
+					// console.log(matched);
+					attributes_list.push(matched[1]);
+					if (matched[2])
+						attributes_list.push(matched[2]);
+					if (matched[3]) {
+						attribute_hash[matched[3]] = matched[5] || matched[4]
+						// or use JSON.parse()
+						&& matched[4].slice(1, -1).replace(/\\(.)/g, '$1');
+					}
+				}
+				attributes = attributes_list;
+			}
+			attributes = _set_wiki_type(attributes || '', 'tag_attributes');
+			attributes.attributes = attribute_hash;
+			return attributes;
+		}
+
+		// ------------------------------------------------
+
+		function parse_HTML_tag(all, tag, attributes, inner, end_tag) {
+			// console.log('queue start:');
+			// console.log(queue);
+			// console.trace(arguments);
+
+			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
+			var matched = tag !== 'nowiki' && inner.match(new RegExp(
+			// 但這種回溯搜尋不包含 <nowiki>
+			// @see console.log(parser[418]);
+			// https://zh.moegirl.org/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
+			// <nowiki>{{subst:unwiki|<nowiki>{{黑幕|黑幕内容}}</nowiki&gt;}}</nowiki>
+			'[\\s\\S]*<(' + tag
+			//
+			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)$', 'i')), previous;
+			if (matched) {
+				previous = all.slice(0, -matched[0].length
+				// length of </end_tag>
+				- end_tag.length - 3);
+				tag = matched[1];
+				attributes = matched[2];
+				inner = matched[3];
+			} else {
+				previous = '';
+			}
+			library_namespace.debug(previous + ' + <' + tag + '>', 4,
+					'parse_wikitext.tag');
+
+			var is_no_parse_tag = tag.toLowerCase() in no_parse_tags;
+			// 在章節標題、表格 td/th 或 template parameter 結束時，
+			// e.g., "| t || <s>... || </s> ||", "{{t|p=v<s>...|p2=v}}</s>"
+			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
+			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
+			// 此時同階的 table 尚未處理。
+			if (!is_no_parse_tag && /\n[|!]|[|!]{2}/.test(inner)) {
+				// TODO: 應確認此時真在表格中。
+				if (library_namespace.is_debug()) {
+					library_namespace.warn('parse_wikitext.tag: <' + tag + '>'
+					//
+					+ ' 在表格 td/th 或 template parameter 中，'
+					//
+					+ '此時視為一般 text，當作未匹配 match HTML tag 成功。\n' + previous);
+					library_namespace.info(attributes);
+					library_namespace.log(inner);
+					console.trace(new RegExp('[\\s\\S]*<(' + tag
+							+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)$', 'i'));
+				}
+				return all;
+			}
+
+			if (library_namespace.is_debug()) {
+				library_namespace.info('parse_wikitext.tag: <' + tag
+						+ '> passed:\n' + previous);
+				library_namespace.debug(attributes, 0);
+				library_namespace.log(inner);
+			}
+
+			// 2016/9/28 9:7:7
+			// 因為 no_parse_tags 內部可能已解析成其他的單元，因此還是必須parse_wikitext()。
+			// e.g., '<nowiki>-{}-</nowiki>'
+			// 經過改變，需再進一步處理。
+			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
+					'parse_wikitext.tag');
+			attributes = parse_tag_attributes(
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
+			parse_wikitext(attributes, options, queue));
+			inner = parse_wikitext(inner, options, queue);
+
+			// 處理特殊 tags。
+			if (tag === 'nowiki' && Array.isArray(inner)) {
+				library_namespace.debug('-'.repeat(70)
+						+ '\n<nowiki> 中僅留 -{}- 有效用。', 3,
+						'parse_wikitext.transclusion');
+				// console.log(inner);
+				if (inner.type && inner.type !== 'plain') {
+					// 當 inner 本身就是特殊 token 時，先把它包裝起來。
+					inner = _set_wiki_type([ inner ], 'plain');
+				}
+				// TODO: <nowiki><b>-{...}-</b></nowiki>
+				inner.forEach(function(token, index) {
+					// 處理每個子 token。 經測試，<nowiki>中 -{}- 也無效。
+					if (token.type /* && token.type !== 'convert' */)
+						inner[index] = inner[index].toString();
+				});
+				if (inner.length <= 1) {
+					inner = inner[0];
+				}
+				// console.log(inner);
+			}
+			// 若為 <pre> 之內，則不再變換。
+			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
+			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
+			// 因此應避免 <pre> 內有 <pre>。
+			if (false && !is_no_parse_tag) {
+				inner = inner.toString();
+			}
+
+			// [ ... ]: 在 inner 為 Template 之類時，
+			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
+			// 但仍需要設定 type=tag_inner 以應 for_each_token 之需，因此多層[]包覆。
+			inner = _set_wiki_type([ inner || '' ], 'tag_inner');
+			all = [ attributes, inner ];
+
+			if (normalize) {
+				tag = tag.toLowerCase();
+			} else if (tag !== end_tag) {
+				all.end_tag = end_tag;
+			}
+			all.tag = tag;
+			// {String}Element.tagName
+			// all.tagName = tag.toLowerCase();
+
+			all = _set_wiki_type(all, 'tag');
+			// 在遍歷 tag inner 的子 node 時，真正需要的 .parent 是 all tag 而非 inner。
+			// e.g., `special page configuration.js`
+			// if (parent.type === 'tag_inner' && parent.parent.type === 'tag'
+			// && parent.parent.tag === 's') { ... }
+			inner.parent = all;
+			// attributes.parent = all;
+			if (attributes && attributes.attributes) {
+				all.attributes = attributes.attributes;
+				delete attributes.attributes;
+			}
+			queue.push(all);
+			// console.log('queue end:');
+			// console.log(queue);
+			return previous + include_mark + (queue.length - 1) + end_mark;
+		}
+
+		function parse_single_tag(all, tag, attributes) {
+			if (attributes) {
+				if (normalize) {
+					attributes = attributes.replace(/[\s\/]*$/, ' /');
+				}
+				attributes = parse_tag_attributes(
+				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+				// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
+				parse_wikitext(attributes, options, queue));
+				if (false && attributes.type === 'plain') {
+					// assert: 經過 parse_tag_attributes(), 應該不會到這邊。
+					all = attributes;
+				} else
+					all = [ attributes ];
+			} else {
+				// use '' as attributes in case
+				// the .join() in .toString() doesn't work.
+				all = [ '' ];
+			}
+
+			if (normalize) {
+				tag = tag.toLowerCase();
+			}
+			all.tag = tag;
+			// {String}Element.tagName
+			// all.tagName = tag.toLowerCase();
+
+			_set_wiki_type(all, 'tag_single');
+			if (attributes && attributes.attributes) {
+				all.attributes = attributes.attributes;
+				delete attributes.attributes;
+			}
+			queue.push(all);
+			return include_mark + (queue.length - 1) + end_mark;
+		}
+
+		// ------------------------------------------------
+
+		function parse_table(all, parameters) {
 			// 經測試，table 不會向前回溯。
 
 			// 處理表格標題。
@@ -4622,12 +4471,9 @@ function module_code(library_namespace) {
 			queue.push(parameters);
 			// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
 			return '\n' + include_mark + (queue.length - 1) + end_mark;
-		});
+		}
 
-		// ----------------------------------------------------
-
-		wikitext = wikitext.replace(PATTERN_BEHAVIOR_SWITCH, function(all,
-				switch_word) {
+		function parse_behavior_switch(all, switch_word) {
 			var parameters = _set_wiki_type(switch_word, 'switch');
 			if (!queue.switches) {
 				queue.switches = Object.create(null);
@@ -4640,9 +4486,9 @@ function module_code(library_namespace) {
 			}
 			queue.push(parameters);
 			return include_mark + (queue.length - 1) + end_mark;
-		});
+		}
 
-		function apostrophe_type(all, type, parameters) {
+		function parse_apostrophe_type(all, type, parameters) {
 			// console.log([ all, type, parameters ]);
 			var index = parameters.lastIndexOf(type), previous = '';
 			if (index !== NOT_FOUND) {
@@ -4658,39 +4504,8 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
-		// 若是要處理<b>, <i>這兩項，也必須調整 section_link()。
-
-		// ''''b''''' → <i><b>b</b></i>
-		// 因此先從<b>開始找。
-
-		// '''~''' 不能跨行！ 注意: '''{{font color}}''', '''{{tsl}}'''
-		wikitext = wikitext.replace_till_stable(/(''')([^'\n].*?)\1/g,
-				apostrophe_type);
-		// ''~'' 不能跨行！
-		wikitext = wikitext.replace_till_stable(/('')([^'\n].*?)\1/g,
-				apostrophe_type);
-		// '', ''' 似乎會經過微調: [[n:zh:Special:Permalink/120676]]
-
-		// ~~~, ~~~~, ~~~~~: 不應該出現
-
-		// ----------------------------------------------------
-		// parse_wikitext.section_title
-
-		// TODO: 經測試，"\n== <code>code<code> =="會被當作title，但採用本函數將會解析錯誤。
-		// [[w:zh:Special:Diff/46814116]]
-
-		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
-
-		var PATTERN_section = new RegExp(
-		// @see PATTERN_section
-		/(^|\n)(=+)(.+)\2((?:[ \t]|mark)*)(\n|$)/g.source.replace('mark', CeL
-				.to_RegExp_pattern(include_mark)
-				+ '\\d+' + CeL.to_RegExp_pattern(end_mark)), 'g');
-		// console.log(PATTERN_section);
-		// console.log(JSON.stringify(wikitext));
-
-		wikitext = wikitext.replace_till_stable(PATTERN_section, function(all,
-				previous, section_level, parameters, postfix, last) {
+		function parse_section(all, previous, section_level, parameters,
+				postfix, last) {
 			if (postfix && !/^[ \t]+$/.test(postfix)) {
 				// assert: postfix.includes(include_mark) &&
 				// postfix.includes(end_mark)
@@ -4738,54 +4553,7 @@ function module_code(library_namespace) {
 			// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
 			return previous + include_mark + (queue.length - 1) + end_mark
 					+ last;
-		});
-
-		// console.log('10: ' + JSON.stringify(wikitext));
-
-		if (false) {
-			// another method to parse.
-			wikitext = '{{temp|{{temp2|p{a}r{}}}}}';
-			pattern = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)/g;
-			matched = pattern.exec(wikitext);
-			end_index = wikitext.indexOf('}}', pattern.lastIndex);
-
-			PATTERN_wikilink;
 		}
-
-		// ----------------------------------------------------
-		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
-		// @see [[w:en:Help:Link#Http: and https:]]
-
-		// console.log('11: ' + JSON.stringify(wikitext));
-
-		// 在 transclusion 中不會被當作 bare / plain URL。
-		if (!options.inside_transclusion) {
-			wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL,
-			//
-			function(all, previous, URL) {
-				all = _set_wiki_type(URL, 'url');
-				// 須注意:此裸露 URL 之 type 與 external link 內之type相同！
-				// 因此需要測試 token.is_bare 以確定是否在 external link 內。
-				all.is_bare = true;
-				queue.push(all);
-				return previous + include_mark + (queue.length - 1) + end_mark;
-			});
-		}
-
-		// ----------------------------------------------------
-		// 處理 / parse list @ wikitext
-		// @see [[w:en:MOS:LIST]], [[w:en:Help:Wikitext#Lists]]
-		// 注意: 這裡僅處理在原wikitext中明確指示列表的情況，無法處理以模板型式表現的列表。
-
-		// 列表層級。 e.g., ['#','*','#',':']
-		var list_prefixes_now = [], list_now = [],
-		//
-		lines_without_style = [],
-		//
-		list_conversion = {
-			';' : DEFINITION_LIST,
-			':' : DEFINITION_LIST
-		};
 
 		function parse_list_line(line) {
 			var index = 0, position = 0;
@@ -4922,22 +4690,6 @@ function module_code(library_namespace) {
 			parse_wikitext(line, options, queue));
 		}
 
-		// console.log('12: ' + JSON.stringify(wikitext));
-		// console.log(queue);
-
-		wikitext = wikitext.split('\n');
-		// e.g., for "<b>#ccc</b>"
-		var first_line = !initialized_fix && wikitext.shift();
-
-		wikitext.forEach(parse_list_line);
-		wikitext = lines_without_style;
-
-		// ----------------------------------------------------
-		// parse horizontal rule, line, HTML <hr /> element: ----, -{4,}
-		// @see [[w:en:Help:Wikitext#Horizontal rule]]
-		// Their use in Wikipedia articles is deprecated.
-		// They should never appear in regular article prose.
-
 		function parse_hr_tag(line, index) {
 			var matched = line.match(/^(-{4,})(.*)$/);
 			if (!matched
@@ -4953,16 +4705,6 @@ function module_code(library_namespace) {
 			lines_without_style.push(include_mark + (queue.length - 1)
 					+ end_mark + matched[2]);
 		}
-
-		// reset
-		lines_without_style = [];
-
-		wikitext.forEach(parse_hr_tag);
-		wikitext = lines_without_style;
-
-		// ----------------------------------------------------
-		// parse preformatted text, HTML <pre> element: \n + space
-		// @seealso [[w:en:Help:Wikitext#Pre]]
 
 		function parse_preformatted(line, index) {
 			if (!line.startsWith(' ')
@@ -4991,6 +4733,294 @@ function module_code(library_namespace) {
 			lines_without_style.push(include_mark + (queue.length - 1)
 					+ end_mark);
 		}
+
+		// ------------------------------------------------------------------------
+		// parse sequence start / start parse
+
+		// parse 範圍基本上由小到大。
+		// e.g., transclusion 不能包括 table，因此在 table 前。
+
+		// 得先處理完有開闔的標示法，之後才是單一標示。
+		// e.g., "<pre>\n==t==\nw\n</pre>" 不應解析出 section_title。
+
+		// 可順便作正規化/維護清理/修正明顯破壞/修正維基語法/維基化，
+		// 例如修復章節標題 (section title, 節タイトル) 前後 level 不一，
+		// table "|-" 未起新行等。
+
+		// ----------------------------------------------------
+		// 因為<nowiki>可以打斷其他的語法，包括"<!--"，因此必須要首先處理。
+
+		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_of_nowiki,
+				parse_HTML_tag);
+
+		// ----------------------------------------------------
+		// comments: <!-- ... -->
+
+		// TODO: <nowiki> 之優先度更高！置於 <nowiki> 中，
+		// 如 "<nowiki><!-- --></nowiki>" 則雖無功用，但會當作一般文字顯示，而非註解。
+
+		// "<\": for Eclipse JSDoc.
+		if (initialized_fix) {
+			wikitext = wikitext.replace(/<\!--([\s\S]*?)-->/g,
+			// 因為前後標記間所有內容無作用、能置於任何地方（除了 <nowiki> 中，"<no<!-- -->wiki>"
+			// 之類），又無需向前回溯；只需在第一次檢測，不會有遺珠之憾。
+			function(all, parameters) {
+				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+				// e.g., "<!-- <nowiki>...</nowiki> ... -->"
+				parameters = parse_wikitext(parameters, options, queue);
+				// 不再作 parse。
+				parameters = parameters.toString();
+				queue.push(_set_wiki_type(parameters, 'comment'));
+				return include_mark + (queue.length - 1) + end_mark;
+			})
+			// 缺 end mark: "...<!--..."
+			.replace(/<\!--([\s\S]*)$/, function(all, parameters) {
+				if (initialized_fix[1]) {
+					parameters = parameters.slice(0,
+					//
+					-initialized_fix[1].length);
+					initialized_fix[1] = '';
+				}
+				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+				// e.g., "<!-- <nowiki>...</nowiki> ... -->"
+				parameters = parse_wikitext(parameters, options, queue);
+				// 不再作 parse。
+				parameters = parameters.toString();
+				parameters = _set_wiki_type(parameters, 'comment');
+				if (!normalize)
+					parameters.no_end = true;
+				queue.push(parameters);
+				return include_mark + (queue.length - 1) + end_mark;
+			});
+		}
+
+		// ----------------------------------------------------
+
+		// 為了 "{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}"，
+		// 將 -{}-, [], [[]] 等，所有中間可穿插 "|" 的置於 {{{}}}, {{}} 前。
+
+		// ----------------------------------------------------
+		// language conversion -{}- 以後來使用的為主。
+		// TODO: -{R|里}-
+		// TODO: -{zh-hans:<nowiki>...</nowiki>;zh-hant:<nowiki>...</nowiki>;}-
+		// TODO: 特別注意語法中帶有=>的單向轉換規則 [[w:zh:模組:CGroup/IT]]
+		// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
+		// https://zh.wikipedia.org/wiki/Help:中文维基百科的繁简、地区词处理#常用的轉換工具語法
+		// [[w:zh:H:Convert]], [[w:zh:H:AC]]
+		// [[mw:Help:Magic words]], [[mw:Writing systems/LanguageConverter]]
+		// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageConverter_8php_source.html
+		// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
+		// https://doc.wikimedia.org/mediawiki-core/master/php/ZhConversion_8php_source.html
+		// https://github.com/wikimedia/mediawiki/blob/master/languages/data/ZhConversion.php
+		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
+		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
+		// TODO: <source></source>內之-{}-無效。
+		// TODO:
+		// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
+
+		wikitext = wikitext.replace_till_stable(/-{(.*?)}-/g,
+				parse_language_conversion);
+
+		// ----------------------------------------------------
+		// wikilink
+		// [[~:~|~]], [[~:~:~|~]]
+
+		// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
+
+		// 注意: [[p|{{tl|t}}]] 不會被解析成 wikilink，因此 wikilink 應該要擺在 transclusion
+		// 前面檢查，或是使 display_text 不包含 {{}}。
+
+		// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
+		// 可以解析成圖片, Caption: "{{tl|t}}"
+
+		// TODO: bug: 正常情況下 "[[ ]]" 不會被 parse，但是本函數還是會 parse 成 link。
+		// TODO: [[::zh:title]] would be rendered as plaintext
+
+		wikitext = wikitext.replace_till_stable(
+		// or use ((PATTERN_link))
+		PATTERN_wikilink_global, parse_wikilink);
+
+		// ----------------------------------------------------
+		// external link
+		// [http://... ...]
+		// TODO: [{{}} ...]
+		wikitext = wikitext.replace_till_stable(PATTERN_external_link_global,
+				parse_external_link);
+
+		// ----------------------------------------------------
+		// {{{...}}} 需在 {{...}} 之前解析。
+		// [[w:zh:Help:模板]]
+		// 在模板頁面中，用三個大括弧可以讀取參數。
+		// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
+		wikitext = wikitext.replace_till_stable(/{{{([^{}][\s\S]*?)}}}/g,
+				parse_parameters);
+
+		// ----------------------------------------------------
+		// 模板（英語：Template，又譯作「樣板」、「範本」）
+		// {{Template name|}}
+		wikitext = wikitext.replace_till_stable(
+		//
+		PATTERN_for_transclusion, parse_transclusion);
+
+		// ----------------------------------------------------
+
+		// 由於 <tag>... 可能被 {{Template}} 截斷，因此先處理 {{Template}} 再處理 <t></t>。
+		// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
+
+		// ----------------------------------------------------
+		// [[Help:HTML in wikitext]]
+
+		// <s>不採用 global variable，預防 multitasking 並行處理。</s>
+		// reset PATTERN index
+		// PATTERN_WIKI_TAG.lastIndex = 0;
+
+		// console.log(PATTERN_TAG);
+		// console.log(wikitext);
+		// console.trace(PATTERN_WIKI_TAG_without_nowiki);
+
+		// HTML tags that must be closed.
+		// <pre>...</pre>, <code>int f()</code>
+		wikitext = wikitext.replace_till_stable(
+				PATTERN_WIKI_TAG_without_nowiki, parse_HTML_tag);
+
+		// ----------------------------------------------------
+		// single tags. e.g., <hr />
+		// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
+
+		// reset PATTERN index
+		// PATTERN_WIKI_TAG_VOID.lastIndex = 0;
+
+		// assert: 有 end tag 的皆已處理完畢，到這邊的是已經沒有 end tag 的。
+		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_VOID,
+				parse_single_tag);
+		// 處理有明確標示為 simgle tag 的。
+		// 但 MediaWiki 現在會將 <b /> 轉成 <b>，因此不再處理這部分。
+		if (false) {
+			wikitext = wikitext.replace_till_stable(
+					/<([a-z]+)(\s[^<>]*\/)?>/ig, parse_single_tag);
+		}
+
+		// ----------------------------------------------------
+		// table: \n{| ... \n|}
+		// TODO: 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]]
+		// 因為 table 中較可能包含 {{Template}}，但 {{Template}} 少包含 table，
+		// 因此先處理 {{Template}} 再處理 table。
+		// {|表示表格開始，|}表示表格結束。
+
+		wikitext = wikitext.replace_till_stable(
+		// [[Help:Table]]
+		/\n{\|([\s\S]*?)\n\|}/g, parse_table);
+
+		// ----------------------------------------------------
+
+		wikitext = wikitext.replace(PATTERN_BEHAVIOR_SWITCH,
+				parse_behavior_switch);
+
+		// 若是要處理<b>, <i>這兩項，也必須調整 section_link()。
+
+		// ''''b''''' → <i><b>b</b></i>
+		// 因此先從<b>開始找。
+
+		// '''~''' 不能跨行！ 注意: '''{{font color}}''', '''{{tsl}}'''
+		wikitext = wikitext.replace_till_stable(/(''')([^'\n].*?)\1/g,
+				parse_apostrophe_type);
+		// ''~'' 不能跨行！
+		wikitext = wikitext.replace_till_stable(/('')([^'\n].*?)\1/g,
+				parse_apostrophe_type);
+		// '', ''' 似乎會經過微調: [[n:zh:Special:Permalink/120676]]
+
+		// ~~~, ~~~~, ~~~~~: 不應該出現
+
+		// ----------------------------------------------------
+		// parse_wikitext.section_title
+
+		// TODO: 經測試，"\n== <code>code<code> =="會被當作title，但採用本函數將會解析錯誤。
+		// [[w:zh:Special:Diff/46814116]]
+
+		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
+
+		var PATTERN_section = new RegExp(
+		// @see PATTERN_section
+		/(^|\n)(=+)(.+)\2((?:[ \t]|mark)*)(\n|$)/g.source.replace('mark', CeL
+				.to_RegExp_pattern(include_mark)
+				+ '\\d+' + CeL.to_RegExp_pattern(end_mark)), 'g');
+		// console.log(PATTERN_section);
+		// console.log(JSON.stringify(wikitext));
+
+		wikitext = wikitext.replace_till_stable(PATTERN_section, parse_section);
+
+		// console.log('10: ' + JSON.stringify(wikitext));
+
+		if (false) {
+			// another method to parse.
+			wikitext = '{{temp|{{temp2|p{a}r{}}}}}';
+			pattern = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)/g;
+			matched = pattern.exec(wikitext);
+			end_index = wikitext.indexOf('}}', pattern.lastIndex);
+
+			PATTERN_wikilink;
+		}
+
+		// ----------------------------------------------------
+		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
+		// @see [[w:en:Help:Link#Http: and https:]]
+
+		// console.log('11: ' + JSON.stringify(wikitext));
+
+		// 在 transclusion 中不會被當作 bare / plain URL。
+		if (!options.inside_transclusion) {
+			wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL,
+			//
+			function(all, previous, URL) {
+				all = _set_wiki_type(URL, 'url');
+				// 須注意:此裸露 URL 之 type 與 external link 內之type相同！
+				// 因此需要測試 token.is_bare 以確定是否在 external link 內。
+				all.is_bare = true;
+				queue.push(all);
+				return previous + include_mark + (queue.length - 1) + end_mark;
+			});
+		}
+
+		// ----------------------------------------------------
+		// 處理 / parse list @ wikitext
+		// @see [[w:en:MOS:LIST]], [[w:en:Help:Wikitext#Lists]]
+		// 注意: 這裡僅處理在原wikitext中明確指示列表的情況，無法處理以模板型式表現的列表。
+
+		// 列表層級。 e.g., ['#','*','#',':']
+		var list_prefixes_now = [], list_now = [],
+		//
+		lines_without_style = [],
+		//
+		list_conversion = {
+			';' : DEFINITION_LIST,
+			':' : DEFINITION_LIST
+		};
+
+		// console.log('12: ' + JSON.stringify(wikitext));
+		// console.log(queue);
+
+		wikitext = wikitext.split('\n');
+		// e.g., for "<b>#ccc</b>"
+		var first_line = !initialized_fix && wikitext.shift();
+
+		wikitext.forEach(parse_list_line);
+		wikitext = lines_without_style;
+
+		// ----------------------------------------------------
+		// parse horizontal rule, line, HTML <hr /> element: ----, -{4,}
+		// @see [[w:en:Help:Wikitext#Horizontal rule]]
+		// Their use in Wikipedia articles is deprecated.
+		// They should never appear in regular article prose.
+
+		// reset
+		lines_without_style = [];
+
+		wikitext.forEach(parse_hr_tag);
+		wikitext = lines_without_style;
+
+		// ----------------------------------------------------
+		// parse preformatted text, HTML <pre> element: \n + space
+		// @seealso [[w:en:Help:Wikitext#Pre]]
 
 		// reset
 		lines_without_style = [];
