@@ -1331,6 +1331,7 @@ function module_code(library_namespace) {
 				sup : true,
 				span : true,
 				code : true
+			// nowiki : true
 			}) {
 				// reduce HTML tags. e.g., <b>, <sub>, <sup>, <span>
 				token.tag_attributes = token.shift();
@@ -1352,7 +1353,8 @@ function module_code(library_namespace) {
 			if (token.tag in {
 				// hr : true,
 				// e.g., <br />
-				br : true
+				br : true,
+				nowiki : true
 			}) {
 				return '';
 			}
@@ -2683,8 +2685,8 @@ function module_code(library_namespace) {
 	/** {RegExp}HTML self closed tags 的匹配模式。 */
 	PATTERN_WIKI_TAG_VOID = new RegExp('<(' + self_close_tags
 			+ ')(\/|\\s[^<>]*)?>', 'ig'),
-	// 在其內部的wikitext不會被parse。
-	no_parse_tags = 'pre|nowiki'.split('|').to_hash();
+	// 在其內部的 wikitext 不會被parse。允許內部採用 table 語法的 tags。例如 [[mw:Manual:Extensions]]
+	no_parse_tags = 'nowiki|pre|source|syntaxhighlight'.split('|').to_hash();
 
 	function evaluate_parser_function(options) {
 		var argument_1 = this.parameters[1] && this.parameters[1].toString();
@@ -3288,16 +3290,8 @@ function module_code(library_namespace) {
 		function parse_HTML_tag(all, tag, attributes, inner, end_tag) {
 			// console.log('queue start:');
 			// console.log(queue);
-			var no_parse_tag = tag.toLowerCase() in no_parse_tags;
-			// 在章節標題、表格 td/th 或 template parameter 結束時，
-			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
-			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
-			if (!no_parse_tag && /\n(?:[=|!]|\|})|[|!]{2}/.test(inner)) {
-				library_namespace.debug('表格 td/th 或 template parameter 中，'
-						+ '此時視為一般 text，當作未匹配 match HTML tag 成功。', 4,
-						'parse_wikitext.tag');
-				return all;
-			}
+			// console.trace(arguments);
+
 			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
 			var matched = tag !== 'nowiki' && inner.match(new RegExp(
 			// 但這種回溯搜尋不包含 <nowiki>
@@ -3318,8 +3312,22 @@ function module_code(library_namespace) {
 			library_namespace.debug(previous + ' + <' + tag + '>', 4,
 					'parse_wikitext.tag');
 
+			var is_no_parse_tag = tag.toLowerCase() in no_parse_tags;
+			// 在章節標題、表格 td/th 或 template parameter 結束時，
+			// e.g., "| t || <s>... || </s> ||", "{{t|p=v<s>...|p2=v}}</s>"
+			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
+			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
+			// 此時同階的 table 尚未處理。
+			if (!is_no_parse_tag && /\n[|!]|[|!]{2}/.test(inner)) {
+				// TODO: 應確認此時真在表格中。
+				library_namespace.debug('表格 td/th 或 template parameter 中，'
+						+ '此時視為一般 text，當作未匹配 match HTML tag 成功。', 2,
+						'parse_wikitext.tag');
+				return all;
+			}
+
 			// 2016/9/28 9:7:7
-			// 因為no_parse_tag內部可能已解析成其他的單元，因此還是必須parse_wikitext()。
+			// 因為 no_parse_tags 內部可能已解析成其他的單元，因此還是必須parse_wikitext()。
 			// e.g., '<nowiki>-{}-</nowiki>'
 			// 經過改變，需再進一步處理。
 			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
@@ -3355,7 +3363,7 @@ function module_code(library_namespace) {
 			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
 			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
 			// 因此應避免 <pre> 內有 <pre>。
-			if (false && !no_parse_tag) {
+			if (false && !is_no_parse_tag) {
 				inner = inner.toString();
 			}
 
@@ -4385,6 +4393,7 @@ function module_code(library_namespace) {
 
 		// console.log(PATTERN_TAG);
 		// console.log(wikitext);
+		// console.trace(PATTERN_WIKI_TAG_without_nowiki);
 
 		// HTML tags that must be closed.
 		// <pre>...</pre>, <code>int f()</code>
