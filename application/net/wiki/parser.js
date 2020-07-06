@@ -2675,7 +2675,9 @@ function module_code(library_namespace) {
 	PATTERN_WIKI_TAG = new RegExp('<(' + markup_tags
 			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
 	/** {RegExp}HTML tags 的匹配模式 of <nowiki>。 */
-	PATTERN_WIKI_TAG_of_nowiki = new RegExp('<(' + 'nowiki'
+	PATTERN_WIKI_TAG_of_nowiki = new RegExp('<('
+	// 這些 tag 就算中間置入 "<!--" 也沒作用，必須在 "<!--" 之前解析。
+	+ 'nowiki|source|syntaxhighlight'
 			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
 	/** {RegExp}HTML tags 的匹配模式 without <nowiki>。 */
 	PATTERN_WIKI_TAG_without_nowiki = new RegExp('<('
@@ -2686,7 +2688,7 @@ function module_code(library_namespace) {
 	// allow "<br/>"
 	+ ')(\/|\\s[^<>]*)?>', 'ig'),
 	// 在其內部的 wikitext 不會被parse。允許內部採用 table 語法的 tags。例如 [[mw:Manual:Extensions]]
-	no_parse_tags = 'nowiki|pre|source|syntaxhighlight'.split('|').to_hash();
+	no_parse_tags = 'pre|nowiki|source|syntaxhighlight'.split('|').to_hash();
 
 	function evaluate_parser_function(options) {
 		var argument_1 = this.parameters[1] && this.parameters[1].toString();
@@ -4140,7 +4142,11 @@ function module_code(library_namespace) {
 			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
 			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
 			// 此時同階的 table 尚未處理。
-			if (!is_no_parse_tag && /\n[|!]|[|!]{2}/.test(inner)) {
+			if (!is_no_parse_tag && /\n[|!]|[|!]{2}/.test(inner.replace(
+			// no_parse_tags: not a good idea
+			/<(pre|nowiki|source|syntaxhighlight)(?:\s(?:[^<>]*[^<>/])?)?>[\s\S]*?<\/\1>/g
+			//
+			, ''))) {
 				// TODO: 應確認此時真在表格中。
 				if (library_namespace.is_debug()) {
 					library_namespace.warn('parse_wikitext.tag: <' + tag + '>'
@@ -4875,8 +4881,8 @@ function module_code(library_namespace) {
 		// PATTERN_WIKI_TAG.lastIndex = 0;
 
 		// console.log(PATTERN_TAG);
-		// console.log(wikitext);
 		// console.trace(PATTERN_WIKI_TAG_without_nowiki);
+		// console.trace(wikitext);
 
 		// HTML tags that must be closed.
 		// <pre>...</pre>, <code>int f()</code>
