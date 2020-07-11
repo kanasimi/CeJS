@@ -668,11 +668,10 @@ function module_code(library_namespace) {
 		if (!text)
 			return;
 
-		library_namespace
-				.debug(
-						text.length
-								+ ' characters after remove_support_contents(): [<span style="color:#9b9;">'
-								+ text.replace(/</g, '&lt;') + '</span>]', 2);
+		library_namespace.debug(text.length
+				+ ' characters after remove_support_contents():'
+				+ ' [<span style="color:#9b9;">' + text.replace(/</g, '&lt;')
+				+ '</span>]', 2);
 
 		// 前置處理。
 		if (!library_namespace.is_Object(options)) {
@@ -824,39 +823,33 @@ function module_code(library_namespace) {
 			seldom_count = seldom_character_count[i] || 0;
 
 			denominator = recognized_featured_characters
-					+ character_count['x-CJK'] * .2
-					// 加上 unrecognized 的影響。3: 實為依據經驗而得之 magic number。
-					+ (i in {
-						'ru-RU' : 9
-					} ? 9 : 3) * unrecognized;
+			//
+			+ character_count['x-CJK'] * .2
+			// 加上 unrecognized 的影響。3: 實為依據經驗而得之 magic number。
+			+ (i in {
+				'ru-RU' : 9
+			} ? 9 : 3) * unrecognized;
 
 			// 'ko-KR' 幾乎只用한글(朝鲜字母)，為作平衡加回來。.5: 實為依據經驗而得之 magic number。
-			if (i === 'ko-KR')
+			if (i === 'ko-KR') {
 				denominator += character_count['x-CJK'] * .5;
-			else if (options.contains_JP
-					&& (i === 'cmn-Hant-TW' || i === 'cmn-Hans-CN'))
-				count += character_count['x-CJK'],
-						denominator += character_count['x-CJK'];
+			} else if (options.contains_JP
+					&& (i === 'cmn-Hant-TW' || i === 'cmn-Hans-CN')) {
+				count += character_count['x-CJK'];
+				denominator += character_count['x-CJK'];
+			}
 
 			ratio = (count + seldom_count * guess_text_language.seldom_weight)
 					/ denominator;
-			library_namespace
-					.debug(
-							'test language ['
-									+ i
-									+ ']: '
-									+ count
-									+ ' + '
-									+ seldom_count
-									+ ' / (all featured characters '
-									+ recognized_featured_characters
-									+ (recognized_featured_characters === denominator ? ''
-											: ' → ' + denominator)
-									+ ') ≈ '
-									+ +(ratio.toFixed(3))
-									+ ' (boundary: '
-									+ (language_to_test[i] || guess_text_language.default_boundary)
-									+ ')', 2);
+			library_namespace.debug('test language [' + i + ']: ' + count
+					+ ' + ' + seldom_count + ' / (all featured characters '
+					+ recognized_featured_characters
+					+ (recognized_featured_characters === denominator ? ''
+					//
+					: ' → ' + denominator) + ') ≈ ' + +(ratio.toFixed(3))
+					+ ' (boundary: ' + (language_to_test[i]
+					//
+					|| guess_text_language.default_boundary) + ')', 2);
 			if (return_ratio) {
 				// 設定好 ratio
 				language_to_test[i] = ratio;
@@ -887,7 +880,7 @@ function module_code(library_namespace) {
 
 		// 經過廝殺戰的才當作有其價值。
 		if (!test_all)
-			library_namespace.debug('沒有所佔比例超過門檻，且可以準確判斷的 code。 ', 2,
+			library_namespace.debug('沒有所佔比例超過門檻，且可以準確判斷的 encoding。 ', 2,
 					'guess_text_language');
 		library_namespace.debug('the most probable code [' + most_probable_code
 				+ ']: ' + highest_ratio, 2, 'guess_text_language');
@@ -1008,8 +1001,8 @@ function module_code(library_namespace) {
 		// <a
 		// href="http://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%88%97%E8%A1%A8#.E5.9F.BA.E6.9C.AC.E6.8B.89.E4.B8.81.E5.AD.97.E6.AF.8D.E5.92.8C.E6.8B.89.E4.B8.81.E7.AC.A6.E8.99.9F"
 		// accessdate="2012/3/17 14:7" title="Unicode字符列表">基本 Latin
-		// 拉丁字母和拉丁符號</a>
-		'x-general' : '\u0020-\u007e'
+		// 拉丁字母和拉丁符號</a> ♥♡
+		'x-general' : '\u0020-\u007e×'
 	},
 	// 次常用字, 罕用字
 	seldom_signature = {
