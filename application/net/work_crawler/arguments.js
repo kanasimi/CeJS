@@ -282,6 +282,7 @@ function module_code(library_namespace) {
 			} else {
 				this.get_URL_options.cookie = value;
 			}
+			// console.trace(this.get_URL_options);
 			return;
 
 		case 'timeout':

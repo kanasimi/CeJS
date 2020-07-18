@@ -114,7 +114,7 @@ function (globalThis) {
 		 * @type {String}
 		 * @ignore
 		 */
-		library_version = '3.7.0',
+		library_version = '3.8.0',
 
 
 		/**

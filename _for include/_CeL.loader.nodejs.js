@@ -126,7 +126,9 @@ typeof CeL !== 'function' && (function() {
 	if (typeof CeL !== 'function') {
 		console.error('Failed to load CeL!');
 		console.error('current working directory: ' + process.cwd());
-		console.error('main script: ' + (require.main && require.main.filename));
+		console.error('main script: '
+		//
+		+ (require.main && require.main.filename));
 		console.error('loader path: ' + module.filename);
 	}
 

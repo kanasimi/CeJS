@@ -639,6 +639,8 @@ function module_code(library_namespace) {
 	 *      https://phabricator.wikimedia.org/T135240
 	 */
 	wiki_API_query.default_maxlag = 5;
+
+	// 用戶相關功能，避免延遲回應以使用戶等待。
 	// for manually testing only
 	// delete CeL.wiki.query.default_maxlag;
 

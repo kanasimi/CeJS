@@ -1232,7 +1232,7 @@ function module_code(library_namespace) {
 	category_tree.default_depth = 10;
 	category_tree.default_namespace
 	// 必須包含 'Category'
-	= wiki_API.namespace('Module|Template|Category|main');
+	= wiki_API.namespace('main|file|module|template|category|help');
 	wiki_API.prototype.category_tree = category_tree;
 
 	// ------------------------------------------------------------------------
@@ -1532,7 +1532,7 @@ function module_code(library_namespace) {
 
 	wiki_API.search.default_parameters = {
 		// |portal
-		srnamespace : wiki_API.namespace('Module|Template|Category|main'),
+		srnamespace : wiki_API.namespace('main|file|module|template|category|help'),
 
 		srprop : 'redirecttitle',
 		// srlimit : 10,

@@ -560,8 +560,9 @@ function module_code(library_namespace) {
 	wiki_API_edit.set_stamp = function(options, timestamp) {
 		if (false && options.page_to_edit) {
 			console.trace(options.page_to_edit);
-			if (wiki_API.is_page_data(timestamp))
+			if (wiki_API.is_page_data(timestamp)) {
 				console.trace(options.page_to_edit === timestamp);
+			}
 			// options.baserevid =
 		}
 
@@ -569,8 +570,10 @@ function module_code(library_namespace) {
 		// 在 .page() 會取得 page_data.revisions[0].timestamp
 		&& (timestamp = wiki_API.content_of.revision(timestamp))) {
 			// console.trace(timestamp);
-			if (timestamp.revid)
+			if (timestamp.revid) {
+				// 添加編輯之基準版本號以偵測/避免編輯衝突。
 				options.baserevid = timestamp.revid;
+			}
 			// 自 page_data 取得 timestamp.
 			timestamp = timestamp.timestamp;
 		}

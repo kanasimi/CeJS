@@ -61,13 +61,19 @@ function module_code(library_namespace) {
 			agent.keepAlive = true;
 		}
 
+		if (this.get_URL_options.agent === agent)
+			return;
+
 		if (this.get_URL_options.agent
 		// copy cookie @ mid.js
 		&& this.get_URL_options.agent.last_cookie) {
+			// {Array}.last_cookie
 			if (agent.last_cookie) {
-				library_namespace.error([ 'setup_agent: ', {
-					T : '原先的 agent 已存在 .last_cookie，無法設定！請回報這個錯誤！'
+				library_namespace.debug([ 'setup_agent: ', {
+					T : '原先的 agent 已存在 .last_cookie，將覆蓋設定！請回報這個錯誤！'
 				} ]);
+				// console.log(this.get_URL_options.agent.last_cookie);
+				// console.trace(agent.last_cookie);
 			} else {
 				agent.last_cookie = this.get_URL_options.agent.last_cookie;
 			}

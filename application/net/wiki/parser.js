@@ -5597,6 +5597,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
+	 * @see 使用者簽名將不能再有Lint錯誤和包含一些無效的HTML，嵌套替換引用也不允許，必須包含到使用者頁面、使用者討論頁或使用者貢獻頁之一的連結。
+	 *      https://www.mediawiki.org/wiki/New_requirements_for_user_signatures#Outcome
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics&utf8
 	 *      https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
 	 */

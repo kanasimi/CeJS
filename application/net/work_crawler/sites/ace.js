@@ -2,7 +2,7 @@
  * @name CeL module for downloading YOUNG ACE UP, TYPE-MOON comics.
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載 KADOKAWA CORPORATION webエース ヤングエースUP（アップ）
- *               Webコミック、TYPE-MOONコミックエース 漫畫 的工具。
+ *               Webコミック、TYPE-MOONコミックエース 漫画 的工具。
  * 
  * <code>
 
@@ -18,7 +18,7 @@ CeL.ace({
 
 // More examples:
 // @see
-// https://github.com/kanasimi/work_crawler/blob/master/comic.cmn-Hans-CN/youngaceup.js
+// https://github.com/kanasimi/work_crawler/blob/master/comic.ja-JP/youngaceup.js
 'use strict';
 
 // --------------------------------------------------------------------------------------------

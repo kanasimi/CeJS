@@ -350,6 +350,7 @@ function module_code(library_namespace) {
 				// 前溯查找 node start.
 				// tag_pattern: [ , attributes, first child ]
 				for (var i = index, tag_pattern = new RegExp('<' + matched[2]
+					// TODO: parse "<br/>"
 						+ '(\\s[^<>]*)?>([\\S\\s]*?)$'), tag_matched; i >= 0; i--) {
 					if (typeof nodes[i] !== 'string')
 						continue;

@@ -1219,8 +1219,9 @@ function module_code(library_namespace) {
 		if (!agent.cookie_hash) {
 			agent.cookie_hash = Object.create(null);
 		}
-		if (!agent.cookie_index)
+		if (!agent.cookie_index) {
 			agent.cookie_index = Object.create(null);
+		}
 		// cookie_index[key] = index of agent.last_cookie
 		var cookie_index = agent.cookie_index;
 
