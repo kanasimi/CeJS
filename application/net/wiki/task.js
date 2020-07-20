@@ -1598,6 +1598,8 @@ function module_code(library_namespace) {
 			tags : '',
 			// 設定寫入目標。一般為 debug、test 測試期間用。
 			write_to : '',
+			// 允許內容被清空。白紙化。
+			allow_empty : false,
 			// 採用 skip_nochange 可以跳過實際 edit 的動作。
 			// 對於大部分不會改變頁面的作業，能大幅加快速度。
 			skip_nochange : true

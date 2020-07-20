@@ -4118,7 +4118,7 @@ function module_code(library_namespace) {
 			var matched = tag !== 'nowiki' && inner.match(new RegExp(
 			// 但這種回溯搜尋不包含 <nowiki>
 			// @see console.log(parser[418]);
-			// https://zh.moegirl.org/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
+			// https://zh.moegirl.org.cn/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
 			// <nowiki>{{subst:unwiki|<nowiki>{{黑幕|黑幕内容}}</nowiki&gt;}}</nowiki>
 			'([\\s\\S]*)<(' + tag
 			//

@@ -501,9 +501,10 @@ function module_code(library_namespace) {
 			data = [ wiki_API_edit.cancel ];
 		}
 
+		// data.trim()
 		if (!data && (!options || !options.allow_empty)) {
 			action = [ 'empty', gettext(typeof data === 'string'
-			// 內容被清空
+			// 內容被清空。白紙化。
 			? 'Content is empty' : 'Content is not settled') ];
 
 		} else if (Array.isArray(data) && data[0] === wiki_API_edit.cancel) {
