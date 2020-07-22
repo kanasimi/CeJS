@@ -102,16 +102,9 @@ function module_code(library_namespace) {
 			this.import_args();
 
 		// 在crawler=new CeL.work_crawler({})的情況下可能沒辦法得到準確的檔案路徑，因此這個路徑僅供參考。
-		if (typeof module === 'object') {
-			var _module = module;
-			while (_module = _module.parent) {
-				// console.log('Work_crawler: ' + _module.filename);
-				// 在 electron 中可能會是 index.html 之類的。
-				if (/\.js/i.test(_module.filename)) {
-					this.main_script = _module.filename;
-				}
-			}
-		}
+		var main_script_path = CeL.get_script_base_path(/\.js/i, module);
+		if (main_script_path)
+			this.main_script = main_script_path;
 
 		// this.id 之後將提供給 this.site_id 使用。
 		// 在使用gui_electron含入檔案的情況下，this.id應該稍後在設定。

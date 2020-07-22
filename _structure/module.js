@@ -1104,40 +1104,65 @@ if (typeof CeL === 'function') {
 		 * @example <code>
 		<script type="text/javascript" src="../baseFunc.js"></script>
 		// 引數為本.js檔名。若是更改.js檔名，亦需要同時更動此值！
-		var basePath = get_script_base_path('baseFunc.js');
+		var base_path = CeL.get_script_base_path('baseFunc.js');
+
+		const main_script_path = CeL.get_script_base_path(/\.js/i, module);
 
 		# perl:
 		use File::Basename;
 		</code>
 		 */
-		get_script_base_path = function(JSFN) {
-			// alert('JSFN: '+JSFN);
+		get_script_base_path = function(JSFN, terminal_module) {
+			if (terminal_module === undefined && typeof module === 'object')
+				terminal_module = module;
+
+			// alert('JSFN: ' + JSFN);
 			if (!JSFN) {
-				return (_.is_WWW() ?
-				// unescape(window.location.pathname)
-				unescape(window.location.href)
-						: _.script_host ? WScript.ScriptFullName
-						// 用在把檔案拉到此檔上時不方便
-						// : typeof WshShell === 'object' ?
-						// WshShell.CurrentDirectory
-						: '').replace(/[^\\\/]+$/, '');
+				if (_.is_WWW()) {
+					// unescape(window.location.pathname)
+					JSFN = unescape(window.location.href);
+				} else if (typeof terminal_module === 'object') {
+					// for node.js
+					JSFN = terminal_module.filename;
+				} else if (_.script_host) {
+					JSFN = WScript.ScriptFullName;
+				} else if (false && typeof WshShell === 'object') {
+					// 用在把檔案拉到此檔上時不方便。
+					JSFN = WshShell.CurrentDirectory;
+				}
+				return typeof JSFN === 'string' ? JSFN.replace(/[^\\\/]+$/, '')
+						: '';
 			}
 
-			if (typeof module === 'object') {
-				var _module = module;
-				while (_module) {
-					var filename = _module.filename;
+			// console.log([ typeof require, typeof require.main ]);
+			// console.trace(require.main);
+			if (typeof require === 'function') {
+				// for node.js
+				var _module = require.main, filename = null, test_filename = function(
+						module) {
+					var path = module.filename;
 					if (false)
 						console.log('get_script_base_path: ' + JSFN + ' @ '
-								+ filename);
-					if (filename
+								+ path);
+					if (path
 					// 在 electron 中可能會是 index.html 之類的。
-					// && /\.js/i.test(filename)
-					&& filename.indexOf(JSFN) !== -1) {
-						return filename;
+					// && /\.js/i.test(path)
+					&& (_.is_RegExp(JSFN) ? JSFN.test(path)
+					//
+					: path.indexOf(JSFN) !== -1)) {
+						filename = path;
 					}
-					_module = _module.parent;
+				};
+				while (_module) {
+					test_filename(_module);
+					if (_module === terminal_module)
+						break;
+					_module = _module.children;
 				}
+				if (!filename && terminal_module)
+					test_filename(terminal_module);
+				if (filename)
+					return filename;
 			}
 
 			// We don't use is_Object or so.
