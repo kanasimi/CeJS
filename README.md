@@ -18,13 +18,13 @@ The project aims to develop a JavaScript module framework that is simple to use 
 本計畫目標是建立一個簡單上手的 JavaScript 程式庫架構。<!-- toolkit -->
 
 ## Web page usage / browser 運行方式
-``` HTML
+```HTML
 <script type="text/JavaScript" src="path/to/ce.js">
 	// { "run" : "module name or callback" }
 </script>
 ```
 
-``` JavaScript
+```JavaScript
 // Insert from browser console
 var cejs_node = document.createElement("script");
 cejs_node.setAttribute('src', 'https://kanasimi.github.io/CeJS/ce.js');
@@ -34,7 +34,7 @@ if (!window.CeL) window.CeL = { initializer : function() { CeL.run('interact.DOM
 function initialization() {}
 ```
 
-``` JavaScript
+```JavaScript
 // CeL.run( 'module.name', function callback() { /* ... */ } );
 CeL.run([ 'data.math', 'application.debug.log' ], function() {
 	CeL.assert([ CeL.GCD(4, 6), 2 ]);
@@ -51,16 +51,16 @@ CeL.run([ 'data.math', 'application.debug.log' ], function() {
 2. 下載 GitHub repository 安裝檔 [GitHub.updater.node.js](https://raw.githubusercontent.com/kanasimi/gh-updater/master/GitHub.updater.node.js)
 3. 在[命令行界面](https://zh.wikipedia.org/wiki/%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%95%8C%E9%9D%A2)下，進到 GitHub repository 安裝檔(`GitHub.updater.node.js`)所在的目錄，執行命令以下載 CeJS 程式庫：
 
-   ``` sh
+   ```sh
    node GitHub.updater.node.js
    ```
 
 4. CeJS 程式庫應該已經解壓縮，並且放在安裝檔所在目錄的 CeJS-master 目錄下，可以開始試用：
 
-   ``` sh
+   ```sh
    node
    ```
-   ``` JavaScript
+   ```JavaScript
    // or: require('./CeJS-master/_for include/node.loader.js');
    require('./_CeL.loader.nodejs.js');
    var cejs = require("cejs");
@@ -77,7 +77,7 @@ CeL.run([ 'data.math', 'application.debug.log' ], function() {
 
 1. First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and [install the node.js package](https://nodejs.org/en/download/package-manager/). 請先安裝 [node.js](https://nodejs.org/)。
 2. Then, install the CeJS library: 接著安裝 CeJS library:
-   ``` sh
+   ```sh
    $ npm install cejs
    ```
 * 請注意：採用 `npm` 安裝的可能不是最新版，尚未加入最新功能。建議下載最新版本壓縮檔，解開後配置；而不是直接執行 `npm install` 安裝舊版的程式庫。
@@ -90,13 +90,13 @@ Since the frequent updates of the code, some features may work at the latest ver
 #### Using a setup script:
 1. Install node.js, wget/curl and [7-Zip](https://en.wikipedia.org/wiki/7-Zip). e.g.,
 
-   ``` bash
+   ```bash
    yum -y install nodejs wget p7zip
    ```
 
 2. fetch CeJS updater script. e.g.,
 
-   ``` bash
+   ```bash
    cd /tmp
    mkdir CeJS && cd CeJS
    wget "https://raw.githubusercontent.com/kanasimi/gh-updater/master/GitHub.updater.node.js" || curl -O https://raw.githubusercontent.com/kanasimi/gh-updater/master/GitHub.updater.node.js
@@ -123,7 +123,7 @@ git clean -dfx
 3. Set the path list to search the library base: Write to the repository_path_list_file (`_repository_path_list.txt`), one path per line.
 4. to use in a script file:
 
-   ``` JavaScript
+   ```JavaScript
    //global.use_cejs_mudule = true;
    require('./_CeL.loader.nodejs.js');
    ```
@@ -135,10 +135,10 @@ git clean -dfx
 
 ### Execution
 Let's try it:
-``` sh
+```sh
 $ node
 ```
-``` JavaScript
+```JavaScript
 // Load CeJS library.
 require('cejs');
 
