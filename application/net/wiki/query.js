@@ -361,8 +361,9 @@ function module_code(library_namespace) {
 
 		// console.log('-'.repeat(79));
 		// console.log(options);
-		var get_URL_options = Object.assign(Object.create(null),
-				wiki_API_query.get_URL_options, options.get_URL_options);
+		var get_URL_options = Object
+				.assign(Object.clone(wiki_API_query.get_URL_options),
+						options.get_URL_options);
 
 		if (session) {
 			if (method === 'edit' && POST_data
@@ -622,6 +623,8 @@ function module_code(library_namespace) {
 	}
 
 	wiki_API_query.get_URL_options = {
+		// 連線逾期/失敗時再重新取得頁面次數。
+		default_error_retry : 2,
 		// default timeout: 1 minute
 		timeout : library_namespace.to_millisecond('1 min')
 	};

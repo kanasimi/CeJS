@@ -1729,9 +1729,9 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			// 連線逾期/失敗時再重新取得頁面次數。
 			if (options.error_retry >= 1
 					&& !(options.error_retry <= options.error_count)) {
-				// 連線逾期/失敗時重新再取得一次。
 				if (!options.get_URL_cloned) {
 					// 不動到原來的 options。
 					options = Object.clone(options);
