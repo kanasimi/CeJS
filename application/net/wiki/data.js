@@ -340,6 +340,11 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			/**
+			 * e.g., <code>
+			{"searchinfo":{"search":"Universe"},"search":[{"id":"Q1","title":"Q1","pageid":129,"repository":"wikidata","url":"//www.wikidata.org/wiki/Q1","concepturi":"http://www.wikidata.org/entity/Q1","label":"universe","description":"totality consisting of space, time, matter and energy","match":{"type":"label","language":"en","text":"universe"}}],"search-continue":1,"success":1}
+			</code>
+			 */
 			// console.trace(data);
 			// console.trace(data.search);
 			var list;
@@ -353,7 +358,9 @@ function module_code(library_namespace) {
 					// 自此結果能得到的資訊有限。
 					// label: 'Universe'
 					// match: { type: 'label', language: 'zh', text: '宇宙' }
-					if (item.match && key === item.match.text
+					if (item.match && key.toLowerCase()
+					// .trim()
+					=== item.match.text.toLowerCase()
 					// 通常不會希望取得維基百科消歧義頁。
 					// @see 'Wikimedia disambiguation page' @
 					// [[d:MediaWiki:Gadget-autoEdit.js]]
@@ -1177,6 +1184,7 @@ function module_code(library_namespace) {
 
 				} else {
 					wikidata_search(key, function(id) {
+						// console.trace(id);
 						if (id) {
 							library_namespace.debug(
 							//
@@ -1216,11 +1224,11 @@ function module_code(library_namespace) {
 							callback(undefined, 'no_key');
 						});
 
-					}, {
+					}, Object.assign({
 						API_URL : API_URL,
 						get_id : true,
 						limit : 1
-					});
+					}, options));
 					// Waiting for conversion.
 					return;
 				}
