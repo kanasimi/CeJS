@@ -78,10 +78,11 @@ function module_code(library_namespace) {
 		}
 
 		// 事前轉換表。
-		if (options && options.pre)
+		if (options && options.pre) {
 			text = (new pair(options.pre, {
 				flag : options.flag || REPLACE_FLAG
 			})).convert(text);
+		}
 
 		CN_to_TW.conversions.forEach(function(conversion) {
 			text = conversion.convert(text);
@@ -96,21 +97,35 @@ function module_code(library_namespace) {
 		return text;
 	}
 
-	CN_to_TW.files = 'STPhrases,STCharacters,TWPhrasesName,TWPhrasesIT'
-	// 因此得要一個個 replace。
-	+ ',TWPhrasesOther,TWVariants,TWVariantsRevPhrases';
+	// 長先短後 詞先字後
+	CN_to_TW.files = 'STPhrases,STCharacters'
+			// 因此得要一個個 replace。
+			+ ',TWPhrasesName,TWPhrasesIT,TWVariants,TWVariantsRevPhrases,TWPhrasesOther';
 
 	// 若要篩選或增減 conversion files，可參考範例：
 	// start_downloading() @ CeL.application.net.work_crawler.task
 	CN_to_TW.files = CN_to_TW.files.split(',');
 
 	CN_to_TW.initialization = function() {
-		CN_to_TW.conversions = CN_to_TW.files.map(function(file_name, index) {
-			// 載入 resource。
+		CN_to_TW.conversions = CN_to_TW.files.map(function(file_name) {
 			return new pair(null, {
+				// 載入 resource。
 				path : dictionary_base + file_name + '.txt',
 				item_processor : function(item) {
-					return item.replace(/ .+$/, '');
+					var matched = item.match(/^([^\t]+)\t([^\t]+)$/);
+					if (matched) {
+						if (!matched[1].trim())
+							return;
+						if (/ [^\t]+$/.test(matched[2])) {
+							if (matched[2].startsWith(matched[1] + ' ')) {
+								// console.log('詞有疑意: ' + item);
+								return;
+							}
+							// 必須置換，那就換個最常用的。
+							return item.replace(/ +[^\t]+$/, '');
+						}
+					}
+					return item;
 				}
 			});
 		});
@@ -139,8 +154,10 @@ function module_code(library_namespace) {
 					console.log(conversion);
 					throw conversion.pair.皮膚;
 				}
-				conversion.remove(keys);
+				conversion.remove(remove_keys);
 			});
+			// free
+			remove_keys = null;
 		}
 
 		// 設定事前轉換表。

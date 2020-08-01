@@ -1341,6 +1341,8 @@ function module_code(library_namespace) {
 						if (item_processor) {
 							item = item_processor(/* {String} */item);
 						}
+						if (!item)
+							return;
 						if (typeof item === 'string')
 							item = item.split(separator);
 						var key = item[0], value = item[1];
@@ -1428,24 +1430,35 @@ function module_code(library_namespace) {
 		},
 
 		add_path : function(options) {
+			var path = options.path;
+			if (Array.isArray(path)) {
+				var _options = Object.clone(options);
+				path.forEach(function(path) {
+					_options.path = path;
+					this.add_path(_options);
+				}, this);
+				return this;
+			}
+
 			var source;
 			try {
 				// 注意:此方法不可跨 domain!
-				source = library_namespace.get_file(this.path);
+				source = library_namespace.get_file(path);
 			} catch (e) {
 				// TODO: handle exception
 			}
 			if (source) {
 				if (!options || !options.path)
 					options = Object.assign({
-						path : this.path
+						path : path
 					}, options);
 				// 載入 resource。
 				this.add(source, options);
-			} else
+			} else {
 				library_namespace.warn(
 				//
-				'Pair.add_path: Can not get contents of [' + this.path + ']!');
+				'Pair.add_path: Can not get contents of [' + path + ']!');
+			}
 			return this;
 		},
 
@@ -1609,7 +1622,39 @@ function module_code(library_namespace) {
 		},
 
 		// convert from key to value.
-		convert : function(text) {
+		convert : function convert(text) {
+			text = String(text);
+			var pair = this.pair, replace_flag = this.flag;
+			if (!this.special_keys) {
+				this.special_keys = [];
+				var keys = (this.keys || Object.keys(pair)).filter(
+						function(key) {
+							if (/[.(){}+*?\[\]\|]/.test(key)) {
+								this.special_keys.push(key);
+								return false;
+							}
+							return true;
+						}, this);
+				if (keys.length > 0) {
+					this.convert_pattern = new RegExp(keys.join('|'),
+							replace_flag);
+				}
+				// delete this.keys;
+				// console.log(this.convert_pattern);
+			}
+			if (this.convert_pattern) {
+				text = text.replace(this.convert_pattern, function(token) {
+					return pair[token];
+				});
+			}
+			this.special_keys.forEach(function(key) {
+				var PATTERN = new RegExp(key, replace_flag);
+				text = text.replace(PATTERN, pair[key]);
+			});
+			return text;
+		},
+
+		convert_each : function(text) {
 			text = String(text);
 			var pair = this.pair, replace_flag = this.flag;
 			if (library_namespace.is_debug(3)) {
