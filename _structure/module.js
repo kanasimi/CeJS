@@ -1134,25 +1134,30 @@ if (typeof CeL === 'function') {
 						: '';
 			}
 
+			// ----------------------------------
+
 			// console.log([ typeof require, typeof require.main ]);
 			// console.trace(require.main);
-			if (typeof require === 'function') {
-				// for node.js
-				var _module = require.main, filename = null, test_filename = function(
-						module) {
-					var path = module.filename;
-					if (false)
-						console.log('get_script_base_path: ' + JSFN + ' @ '
-								+ path);
-					if (path
-					// 在 electron 中可能會是 index.html 之類的。
-					// && /\.js/i.test(path)
-					&& (_.is_RegExp(JSFN) ? JSFN.test(path)
-					//
-					: path.indexOf(JSFN) !== -1)) {
-						filename = path;
-					}
-				};
+			var filename, test_filename = function(module) {
+				var path = module.filename;
+				if (false) {
+					console.log('get_script_base_path: ' + JSFN + ' @ ' + path);
+				}
+				if (path
+				// 在 electron 中可能會是 index.html 之類的。
+				// && /\.js/i.test(path)
+				&& (_.is_RegExp(JSFN) ? JSFN.test(path)
+				//
+				: path.indexOf(JSFN) !== -1)) {
+					filename = path;
+				}
+			};
+			if (typeof require === 'function'
+			// There is no `require.main` @ electron 9.2-
+			&& typeof require.main === 'object') {
+				// for node.js 14.7+
+				var _module = require.main;
+				filename = null;
 				while (_module) {
 					test_filename(_module);
 					if (_module === terminal_module)
@@ -1164,6 +1169,22 @@ if (typeof CeL === 'function') {
 				if (filename)
 					return filename;
 			}
+
+			// There is no `module.parent` @ node.js 14.7+
+			if (typeof module === 'object') {
+				// for electron
+				var _module = module;
+				filename = null;
+				while (_module) {
+					// Warning: 此處不計 `terminal_module`!
+					test_filename(_module);
+					_module = _module.parent;
+				}
+				if (filename)
+					return filename;
+			}
+
+			// ----------------------------------
 
 			// We don't use is_Object or so.
 			// 通常會傳入的，都是已經驗證過的值，不會出現需要特殊認證的情況。

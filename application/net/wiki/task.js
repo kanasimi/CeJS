@@ -777,10 +777,11 @@ function module_code(library_namespace) {
 			if (next[2] && next[2].skip_nochange
 			// 採用 skip_nochange 可以跳過實際 edit 的動作。
 			&& next[1] === wiki_API.content_of(next[2].page_to_edit)) {
-				library_namespace
-						.debug('Skip [' + next[2].page_to_edit.title
-								+ ']: The same contents.', 1,
-								'wiki_API.prototype.next');
+				// console.log(next[2]);
+				// console.trace(next[2].page_to_edit.title);
+				library_namespace.debug('Skip [' + next[2].page_to_edit.title
+				// 'nochange', no change
+				+ ']: The same contents.', 1, 'wiki_API.prototype.next');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(this, next[2].page_to_edit.title, 'nochange');

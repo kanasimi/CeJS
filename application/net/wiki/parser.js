@@ -4148,7 +4148,7 @@ function module_code(library_namespace) {
 			//
 			, ''))) {
 				// TODO: 應確認此時真在表格中。
-				if (library_namespace.is_debug()) {
+				if (library_namespace.is_debug(3)) {
 					library_namespace.warn('parse_wikitext.tag: <' + tag + '>'
 					//
 					+ ' 在表格 td/th 或 template parameter 中，'
@@ -4162,7 +4162,7 @@ function module_code(library_namespace) {
 				return all;
 			}
 
-			if (library_namespace.is_debug()) {
+			if (library_namespace.is_debug(3)) {
 				library_namespace.info('parse_wikitext.tag: <' + tag
 						+ '> passed:\n' + previous);
 				library_namespace.debug(attributes, 0);
