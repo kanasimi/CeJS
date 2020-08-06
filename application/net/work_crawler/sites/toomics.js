@@ -58,7 +58,9 @@ function module_code(library_namespace) {
 		// 解析 作品名稱 → 作品id get_work()
 		search_URL : function(work_title) {
 			return [ this.LANG_PREFIX + '/webtoon/ajax_search', {
-				toonData : work_title
+				toonData : work_title,
+				offset : 0,
+				limit : 20
 			} ];
 		},
 		parse_search_result : function(html, get_label) {
@@ -200,12 +202,19 @@ function module_code(library_namespace) {
 				</code>
 				 */
 				.between('<em>', '</em>'),
-				image_list : html.between('<main class="viewer-body">',
-						'</main>').all_between('data-original="', '"')
+				image_list : html
+				// 2019: '<main class="viewer-body">'
+				// 2020/8: '<main class="viewer-body viewer-body-scroll">'
+				.between('<main class="viewer-body', '</main>')
+				// 2019: .all_between('data-original="', '"')
+				// 2020/8: .all_between('data-src="', '"')
+				.all_between('data-src="', '"')
 			});
 
-			if (chapter_data.image_list.length === 0)
-				console.log(html);
+			if (chapter_data.image_list.length === 0) {
+				// 改版?
+				// console.trace(html);
+			}
 
 			// console.log(chapter_data);
 			return chapter_data;
