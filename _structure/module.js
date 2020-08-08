@@ -495,7 +495,7 @@ if (typeof CeL === 'function') {
 
 			// The encoding can be 'utf8', 'ascii', or 'base64'.
 			// http://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
-			_.get_file = function(path, encoding) {
+			_.get_file = function get_file(path, encoding) {
 				// for node.js
 				if (_.platform.Windows && /^\/[a-z]:\//i.test(path)) {
 					// 在 electron package 中，script_base_path 可能形如 '/D:/'...。
@@ -513,11 +513,12 @@ if (typeof CeL === 'function') {
 				if (typeof data !== 'string') {
 					// auto detect encoding
 					l = data.length;
-					tmp = [];
 					if (data[0] === 255 && data[1] === 254) {
 						_.debug(path + ': UTF-16LE', 4);
+						// 去掉 BOM。
 						// pass byte order mark (BOM), the first 2 bytes.
 						i = 2;
+						tmp = [];
 						while (i < l)
 							tmp.push(String.fromCharCode(data[i++] + 256
 									* data[i++]));
@@ -525,6 +526,7 @@ if (typeof CeL === 'function') {
 						_.debug(path + ': UTF-16BE', 4);
 						// pass byte order mark (BOM), the first 2 bytes.
 						i = 2;
+						tmp = [];
 						while (i < l)
 							tmp.push(String.fromCharCode(256 * data[i++]
 									+ data[i++]));
@@ -532,21 +534,36 @@ if (typeof CeL === 'function') {
 							&& data[2] === 191) {
 						// 或許是存成了 UTF-8？
 						// https://en.wikipedia.org/wiki/Byte_order_mark#Representations_of_byte_order_marks_by_encoding
-						_
-								.debug('get_file: Treat file as UTF-8: ['
-										+ path + ']', 2);
-						tmp = null;
-						// http://nodejs.org/api/fs.html#fs_fs_readfilesync_filename_options
-						data = node_read_file(path, 'utf8');
-						// or:
-						// http://hi.baidu.com/hellow3c/item/b699cd1d0170c56b3b176e7b
-						// buffer.toString('utf8', 0, length);
+						_.debug('get_file: Treat file as UTF-8 with BOM: ['
+								+ path + ']', 2);
+						// tmp = null;
+						if (false) {
+							// http://nodejs.org/api/fs.html#fs_fs_readfilesync_filename_options
+							data = node_read_file(path, 'utf8')
+							// pass byte order mark (BOM), the first 1 byte:
+							// \uFEFF.
+							.slice(1);
+						} else {
+							// console.log([ path, data.slice(0, 10) ]);
+							// assert: data.toString().charCodeAt(0) === 65279
+							// data.toString().charAt(0) === \uFEFF
+
+							// buffer.toString('utf8', 0, length);
+							data = data.toString(/* Default: 'utf8' */)
+							// pass byte order mark (BOM), the first 1 byte:
+							// \uFEFF.
+							// 採用 data.toString('utf8', 3)，奇怪的是有時仍然會得到
+							// [65279,...] @ node.js 14.7.0 。
+							// 不如全部 .toString() 之後再 .slice(1)。
+							.slice(1);
+						}
+
 					} else
 						try {
 							i = node_read_file(path, 'utf8');
 							_.debug('get_file: Treat file as UTF-8: [' + path
 									+ ']', 2);
-							tmp = null;
+							// tmp = null;
 							data = i;
 						} catch (e) {
 							// console.warn(e);
@@ -560,6 +577,7 @@ if (typeof CeL === 'function') {
 												+ data[1]);
 							// 當作 ASCII 處理。
 							i = 0;
+							tmp = [];
 							while (i < l)
 								// data.toString('utf-8', 0, length);
 								tmp.push(String.fromCharCode(data[i++]));
