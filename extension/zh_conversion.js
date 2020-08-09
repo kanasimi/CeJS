@@ -131,33 +131,34 @@ function module_code(library_namespace) {
 		});
 
 		// keys_to_remove
-		var remove_keys = Object.create(null);
+		var remove_key_hash = Object.create(null);
 		// 手動修正表。
 		CN_to_TW.conversions.push(new pair(null, {
 			path : dictionary_base
 					.replace(/[^\\\/]+[\\\/]$/, 'corrections.txt'),
-			item_processor : function(item) {
+			item_processor : function(item, options) {
 				var matched = item.match(/^-([^\t\n]{1,30})$/);
 				if (!matched) {
 					return item;
 				}
-				remove_keys[matched[1]] = true;
+				remove_key_hash[matched[1]] = options.path;
 				return '';
 			},
 			remove_comments : true
 		}));
 
-		if (!library_namespace.is_empty_object(remove_keys)) {
-			remove_keys = Object.keys(remove_keys);
+		if (!library_namespace.is_empty_object(remove_key_hash)) {
 			CN_to_TW.conversions.forEach(function(conversion) {
 				if (false && conversion.pair.皮膚) {
 					console.log(conversion);
 					throw conversion.pair.皮膚;
 				}
-				conversion.remove(remove_keys);
+				conversion.remove(remove_key_hash, {
+					remove_matched_path : true
+				});
 			});
 			// free
-			remove_keys = null;
+			remove_key_hash = null;
 		}
 
 		// 設定事前轉換表。
@@ -173,6 +174,8 @@ function module_code(library_namespace) {
 				flag : CN_to_TW.flag || REPLACE_FLAG
 			}));
 		}
+
+		// console.trace(CN_to_TW('签'));
 	};
 
 	CN_to_TW.file = function(from, to, target_encoding) {

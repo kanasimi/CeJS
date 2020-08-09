@@ -1339,10 +1339,16 @@ function module_code(library_namespace) {
 					+ source.length + ' pairs...', 3, 'Pair.add');
 					source.forEach(function(item) {
 						if (item_processor) {
-							item = item_processor(/* {String} */item);
+							item = item_processor(/* {String} */item,
+							//
+							options);
 						}
 						if (!item)
 							return;
+						if (false && typeof item === 'string' && !item.trim()) {
+							console.log(item.charCodeAt(0));
+							console.trace(JSON.stringify(item));
+						}
 						if (typeof item === 'string')
 							item = item.split(separator);
 						var key = item[0], value = item[1];
@@ -1408,20 +1414,33 @@ function module_code(library_namespace) {
 			return this;
 		},
 
-		remove : function(keys, options) {
-			if (!keys)
+		remove : function(key_hash, options) {
+			if (!key_hash)
 				return this;
 
-			if (!Array.isArray(keys))
-				keys = [ keys ];
+			if (typeof key_hash === 'string')
+				key_hash = [ key_hash ];
+			if (Array.isArray(key_hash)) {
+				var tmp = key_hash;
+				key_hash = Object.create(null);
+				for (var i = 0; i < tmp.length; i++)
+					key_hash[tmp[i]] = null;
+			}
 
-			var pair = this.pair, changed;
-			keys.forEach(function(key) {
+			var pair = this.pair, changed, path = this.path;
+			// console.trace(path);
+			for ( var key in key_hash) {
+				// key_hash[key]: ignore path
+				if (key_hash[key] === path) {
+					if (options && options.remove_matched_path)
+						delete key_hash[key];
+					continue;
+				}
 				if (key in pair) {
 					delete pair[key];
 					changed = true;
 				}
-			});
+			}
 
 			if (changed)
 				this.keys = Object.keys(pair);
