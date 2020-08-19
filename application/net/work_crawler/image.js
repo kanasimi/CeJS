@@ -81,14 +81,16 @@ function module_code(library_namespace) {
 		 * 每張圖片都要檢查實際存在的圖片檔案。當之前已存在完整的圖片時，就不再嘗試下載圖片。<br />
 		 * 工作機制：<br />
 		 * 檢核`image_data.file`是否存在。`image_data.file`由圖片的網址URL來判別可能的延伸檔名。猜不出的會採用預設的圖片延伸檔名/副檔名.default_image_extension。
+		 * 
 		 * @see function process_images() @ CeL.application.net.work_crawler.chapter
 		 * 
 		 * 若`image_data.file`不存在，將會檢核所有可接受的圖片類別(.acceptable_types)。
-		 * 每張圖片都要檢核所有可接受的圖片類別，會加大硬碟讀取負擔。
-		 * 會用到 .overwrite_old_file 這個選項的，應該都是需要提報 issue 的，因此這個選項不會列出來。麻煩請在個別網站遇到此情況時提報 issue，列出作品名稱以及圖片類別，以供這邊確認圖片類別。
+		 * 每張圖片都要檢核所有可接受的圖片類別，會加大硬碟讀取負擔。 會用到 .overwrite_old_file 這個選項的，應該都是需要提報
+		 * issue 的，因此這個選項不會列出來。麻煩請在個別網站遇到此情況時提報 issue，列出作品名稱以及圖片類別，以供這邊確認圖片類別。
 		 * 只要存在完整無損害的預設圖片類別或是可接受的圖片類別，就直接跳出，不再嘗試下載這張圖片。否則會重新下載圖片。
 		 * 當下載的圖片以之前的圖片更大時，就會覆蓋原先的圖片。
-		 * 若下載的圖片類別並非預設的圖片類別(.default_image_extension)，例如預設 JPG 但得到 PNG 檔案時，會將副檔名改為實際得到的圖像格式。因此下一次下載時，需要設定 .acceptable_types 才能找得到圖片。
+		 * 若下載的圖片類別並非預設的圖片類別(.default_image_extension)，例如預設 JPG 但得到 PNG
+		 * 檔案時，會將副檔名改為實際得到的圖像格式。因此下一次下載時，需要設定 .acceptable_types 才能找得到圖片。
 		 */
 		var image_downloaded = node_fs.existsSync(image_data.file)
 				|| this.skip_existed_bad_file
@@ -227,7 +229,12 @@ function module_code(library_namespace) {
 				var file_type = library_namespace.file_type(contents);
 				verified_image = file_type && !file_type.damaged;
 				if (verified_image) {
-					if (!(file_type.type in _this.image_types)) {
+					// console.log(_this.image_types);
+					if (!file_type.extensions
+					//
+					|| !file_type.extensions.some(function(extension) {
+						return extension in _this.image_types;
+					})) {
 						verified_image = false;
 						library_namespace.warn({
 							T : [
@@ -236,11 +243,17 @@ function module_code(library_namespace) {
 									file_type.type ]
 						});
 					}
-					if (!image_data.file.endsWith('.' + file_type.extension)
+
+					var original_extension
 					//
-					&& (!file_type.extensions || !file_type.extensions
+					= image_data.file.match(/[^.]*$/)[0].toLowerCase();
+					if (file_type.extensions ?
+					//
+					!image_data.file.endsWith('.' + file_type.extension)
 					// accept '.jpeg' as alias of '.jpg'
-					.includes(image_data.file.match(/[^.]*$/)[0]))) {
+					&& !file_type.extensions.includes(original_extension)
+					// 無法判別圖片檔類型時，若原副檔名為圖片檔案類別則採用之。
+					: !(original_extension in _this.image_types)) {
 						// 依照所驗證的檔案格式改變副檔名。
 						image_data.file = image_data.file.replace(/[^.]+$/,
 						// e.g. .png
@@ -548,7 +561,8 @@ function module_code(library_namespace) {
 
 	// @instance
 	Object.assign(Work_crawler.prototype, {
-		// 可接受的圖片類別（延伸檔名）。以 "|" 字元作分隔，如 "webp|jpg|png"。未設定將不作檢查。輸入 "images" 表示接受所有圖片。
+		// 可接受的圖片類別（延伸檔名）。以 "|" 字元作分隔，如 "webp|jpg|png"。未設定將不作檢查。輸入 "images"
+		// 表示接受所有圖片。
 		// 若下載的圖片不包含在指定類型中，則會視為錯誤。本工具只能下載特定幾種圖片類型。本選項僅供檢查圖片，非用來挑選想下載的圖片類型。
 		// {Array|String}可以接受的圖片類別/圖片延伸檔名/副檔名/檔案類別 acceptable file extensions。
 		// acceptable_types : 'images',

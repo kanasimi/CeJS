@@ -739,6 +739,15 @@ function module_code(library_namespace) {
 			eof : '00 3B',
 			min_size : 800
 		},
+		gif87a : {
+			// Header: GIF87a
+			magic : to_magic_array('GIF87a'),
+			// end of image data + GIF file terminator
+			eof : '00 3B',
+			extensions : [ 'gif' ],
+			extensions_without_type : true,
+			min_size : 800
+		},
 		// PNG圖像
 		// https://www.w3.org/TR/PNG/#11IEND
 		// https://en.wikipedia.org/wiki/PNG
@@ -862,7 +871,9 @@ function module_code(library_namespace) {
 			if (!Array.isArray(magic_data.extensions)) {
 				magic_data.extensions = [ magic_data.extensions ];
 			}
-			if (!magic_data.extensions.includes(type)) {
+			if (!magic_data.extensions_without_type
+			//
+			&& !magic_data.extensions.includes(type)) {
 				// 以 type name 為主
 				magic_data.extensions.unshift(type);
 			}
@@ -928,9 +939,11 @@ function module_code(library_namespace) {
 		}
 
 		var magic_data, damaged;
+		// console.log(Magic_number_data);
 		for (var i = 0, magic_number = 0; i < Math.min(
 				Magic_number_data.length, MAX_magic_byte_count);) {
 			magic_number = magic_number * 0x100 + file_contents[i];
+			// console.log(magic_number);
 			if (Magic_number_data[++i]
 					&& (magic_data = Magic_number_data[i][magic_number])) {
 				break;
