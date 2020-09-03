@@ -323,12 +323,6 @@ function module_code(library_namespace) {
 			get_content = get_content.includes('content');
 		}
 
-		if (options.rvdir) {
-			// e.g., rvdir=newer
-			// Get first revisions
-			action[1] = 'rvdir=' + options.rvdir + '&' + action[1];
-		}
-
 		// 自動搜尋/轉換繁簡標題。
 		if (!('converttitles' in options)) {
 			options.converttitles = wiki_API.site_name(options, {
@@ -339,10 +333,6 @@ function module_code(library_namespace) {
 				delete options.converttitles;
 			}
 		}
-		if (options.converttitles) {
-			action[1] = 'converttitles=' + options.converttitles + '&'
-					+ action[1];
-		}
 
 		// Which properties to get for the queried pages
 		// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規標題。
@@ -350,11 +340,23 @@ function module_code(library_namespace) {
 			if (Array.isArray(options.prop)) {
 				options.prop = options.prop.join('|');
 			}
+		}
 
+		for ( var parameter in {
+			// e.g., rvdir=newer
+			// Get first revisions
+			rvdir : true,
+			rvcontinue : true,
+			converttitles : true,
 			// e.g., prop=info|revisions
 			// e.g., prop=pageprops|revisions
 			// 沒 .pageprops 的似乎大多是沒有 Wikidata entity 的？
-			action[1] = 'prop=' + options.prop + '&' + action[1];
+			prop : true
+		}) {
+			if (parameter in options) {
+				action[1] = parameter + '=' + options[parameter] + '&'
+						+ action[1];
+			}
 		}
 
 		add_parameters(action, options);
@@ -401,6 +403,7 @@ function module_code(library_namespace) {
 			if (false && data.warnings && data.warnings.result
 			/**
 			 * e.g., <code>
+			 * 2017:
 			 * { continue: { rvcontinue: '2421|39477047', continue: '||' },
 			 *   warnings: { result: { '*': 'This result was truncated because it would otherwise  be larger than the limit of 12,582,912 bytes' } },
 			 *   query:
@@ -442,15 +445,16 @@ function module_code(library_namespace) {
 
 			var continue_id;
 			if ('continue' in data) {
+				// console.trace(data['continue']);
 				// page_list['continue'] = data['continue'];
 				if (data['continue']
 				//
 				&& typeof data['continue'].rvcontinue === 'string'
 				//
 				&& (continue_id = data['continue'].rvcontinue
-				// assert: page_list['continue'].rvcontinue = 'id|...'。
-				.match(/^[1-9]\d*/))) {
-					continue_id = Math.floor(continue_id[0]);
+				// assert: page_list['continue'].rvcontinue = 'date|oldid'。
+				.match(/\|([1-9]\d*)$/))) {
+					continue_id = Math.floor(continue_id[1]);
 				}
 				if (false && data.truncated)
 					page_list.truncated = true;
@@ -802,6 +806,89 @@ function module_code(library_namespace) {
 	// @see https://www.mediawiki.org/w/api.php?action=help&modules=query
 	wiki_API_page.auto_converttitles = 'zh,gan,iu,kk,ku,shi,sr,tg,uz'
 			.split(',');
+
+	// ------------------------------------------------------------------------
+
+	// 回溯看看是哪個 revision 增加了標的文字。
+	wiki_API.tracking_revisions = function(title, to_search, callback, options) {
+		options = Object.assign({
+			rvlimit : 20,
+			// multi : false,
+			save_response : true
+		}, options);
+
+		var newer_revision, revision_count, search_found = !!options.search_deleted;
+		function search(revision) {
+			var text = revision.revid ? wiki_API.revision_content(revision)
+					: revision;
+			if (!text || typeof text !== 'string')
+				return;
+			if (typeof to_search === 'function') {
+				// return found;
+				return to_search(text);
+			}
+			if (library_namespace.is_RegExp(to_search)) {
+				return to_search.test(text);
+			}
+			return text.includes(to_search);
+		}
+
+		function search_revisions(page_data, error) {
+			if (error) {
+				callback(null, page_data, error);
+				return;
+			}
+
+			var index = 0, revisions = page_data.revisions;
+			if (!newer_revision) {
+				newer_revision = revisions[index++];
+				// console.trace([search(newer_revision),search_found]);
+				if (search(newer_revision) === search_found) {
+					// 最新版本就已經不符合需求。
+					callback(null, page_data);
+					return;
+				}
+			}
+
+			// console.log(revisions.length);
+			while (index < revisions.length) {
+				var this_revision = revisions[index++];
+				var diff_list = library_namespace.LCS(wiki_API
+						.revision_content(newer_revision), wiki_API
+						.revision_content(this_revision), 'diff');
+				var found = diff_list.some(function(diff) {
+					// var minus = diff[0], plus = diff[1];
+					return search(diff[options.search_deleted ? 0 : 1]);
+				});
+				if (found) {
+					// console.log(diff_list);
+				}
+				// console.trace([this_revision.revid,found,search(this_revision)])
+				if (found || search(this_revision) === search_found) {
+					callback(newer_revision, page_data);
+					return;
+				}
+				newer_revision = this_revision;
+			}
+
+			revision_count += page_data.revisions;
+			if (revision_count > options.limit) {
+				// not found
+				callback(null, page_data);
+				return;
+			}
+
+			// console.trace(page_data.response);
+			// console.trace(page_data.response['continue']);
+			options.rvcontinue = page_data.response['continue'].rvcontinue;
+			// console.trace(options);
+			library_namespace.debug('tracking_revisions: search next '
+					+ options.rvlimit + ' revisions...', 2);
+			wiki_API.page(title, search_revisions, options);
+		}
+
+		wiki_API.page(title, search_revisions, options);
+	};
 
 	// ------------------------------------------------------------------------
 
@@ -1855,6 +1942,7 @@ function module_code(library_namespace) {
 							}
 
 						}, Object.assign({
+							// Deprecated: rvdiffto, rvcontentformat
 							// rvdiffto : 'prev',
 							// rvcontentformat : 'text/javascript',
 							is_id : true,
