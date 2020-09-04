@@ -584,6 +584,7 @@ function module_code(library_namespace) {
 		content_length += boundary.length;
 
 		generated.content_length = content_length;
+		// console.log(generated);
 		return generated;
 	}
 
@@ -658,6 +659,10 @@ function module_code(library_namespace) {
 						+ form_data_new_line;
 				if (MIME_type) {
 					headers += 'Content-Type: ' + MIME_type
+							+ form_data_new_line;
+				}
+				if (is_nodejs && Buffer.isBuffer(content)) {
+					headers += 'Content-Transfer-Encoding: binary'
 							+ form_data_new_line;
 				}
 				headers += form_data_new_line;
@@ -802,16 +807,22 @@ function module_code(library_namespace) {
 			if (typeof value === 'number')
 				value = String(value);
 
+			var headers;
+			if (is_nodejs && typeof value === 'string') {
+				value = Buffer.from(value, 'utf8');
+				headers = 'Content-Type: text/plain; charset=UTF-8'
+						+ form_data_new_line;
+			}
+
 			// 非檔案，屬於普通的表單資料。
 			if (!key) {
-				throw 'No key for value: ' + value;
+				throw new Error('No key for value: ' + value);
 			}
 
 			// @see function push_and_callback(MIME_type, content)
-			var headers = 'Content-Disposition: form-data; name="' + key + '"'
-					+ form_data_new_line + form_data_new_line,
-			//
-			chunk = [ headers, value ];
+			headers = 'Content-Disposition: form-data; name="' + key + '"'
+					+ form_data_new_line + (headers || '') + form_data_new_line;
+			var chunk = [ headers, value ];
 			// 手動設定 Content-Length。
 			chunk.content_length = headers.length + value.length;
 			root_data.push(chunk);

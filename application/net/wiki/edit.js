@@ -1026,15 +1026,19 @@ function module_code(library_namespace) {
 
 		// no really update
 		if (options.test_only) {
-			delete options[KEY_SESSION];
-			delete options.text;
-			action = post_data.text;
-			delete post_data.text;
+			if (options.test_only !== 'no message') {
+				delete options[KEY_SESSION];
+				delete options.text;
+				action = post_data.text;
+				delete post_data.text;
 
-			console.log('-'.repeat(80));
-			console.log(options);
-			console.log(post_data);
-			library_namespace.info('wiki_API.upload: text:\n' + action);
+				console.log('-'.repeat(80));
+				console.log(options);
+				console.log(post_data);
+				library_namespace.info('wiki_API.upload: test edit text:\n'
+						+ action);
+			}
+			callback(null, 'Test edit');
 			return;
 		}
 
