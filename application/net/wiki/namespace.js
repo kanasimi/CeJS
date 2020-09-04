@@ -866,7 +866,7 @@ function module_code(library_namespace) {
 			//
 			: namespace.toLowerCase()
 			// for ',Template,Category', ';Template;Category',
-			// 'main|file|module|template|category|help'
+			// 'main|file|module|template|category|help|portal'
 			// https://www.mediawiki.org/w/api.php?action=help&modules=main#main.2Fdatatypes
 			.split(/(?:[,;|\u001F]|%7C|%1F)/)).forEach(function(n) {
 				if (options.is_page_title && n.startsWith(':')) {
@@ -2033,6 +2033,8 @@ function module_code(library_namespace) {
 			}
 			content = content[flow_view | 0];
 			return revision_content(content);
+		} else if (typeof (content = revision_content(page_data, true)) === 'string') {
+			return content;
 		}
 
 		// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
@@ -2393,6 +2395,10 @@ function module_code(library_namespace) {
 						'adapt_task_configurations');
 				// 有時必須初始設定，還是得執行 configuration_adapter。
 				// return;
+			} else {
+				library_namespace
+						.info('adapt_task_configurations: Get configurations from '
+								+ wiki_API.title_link_of(page_data));
 			}
 
 			if (!options.once) {
@@ -2409,9 +2415,6 @@ function module_code(library_namespace) {
 			session.latest_task_configuration
 			// TODO: valid configuration 檢測數值是否合適。
 			= wiki_API.parse.configuration(page_data);
-			library_namespace
-					.info('adapt_task_configurations: Get configurations from '
-							+ wiki_API.title_link_of(page_data));
 			// console.log(session.latest_task_configuration);
 			if (typeof configuration_adapter === 'function') {
 				// 每次更改過設定之後，重新執行一次。
@@ -2501,13 +2504,16 @@ function module_code(library_namespace) {
 		// default api URL. Use <code>CeL.wiki.API_URL = api_URL('en')</code> to
 		// change it.
 		// see also: application.locale
-		wiki_API.API_URL = library_namespace.is_WWW()
+		wiki_API.API_URL = gettext.guess_language && gettext.guess_language()
+				|| library_namespace.is_WWW()
 				&& (navigator.userLanguage || navigator.language)
 				|| wiki_API.language;
 		if (!(wiki_API.API_URL in valid_language)) {
 			// 'en-US' → 'en'
 			wiki_API.API_URL = wiki_API.API_URL.toLowerCase().replace(/-.+$/,
 					'');
+			if (wiki_API.API_URL === 'cmn')
+				wiki_API.API_URL = 'zh';
 		}
 		wiki_API.API_URL = api_URL(wiki_API.API_URL);
 		library_namespace.debug('wiki_API.API_URL = ' + wiki_API.API_URL, 3,
