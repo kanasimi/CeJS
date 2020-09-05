@@ -201,7 +201,7 @@ function module_code(library_namespace) {
 	 */
 	function create_directory(directories, options) {
 		// var node_fs = require('fs');
-		var error = [];
+		var error = 0;
 		if (typeof directories === 'string') {
 			directories = [ directories ];
 		}
@@ -236,6 +236,8 @@ function module_code(library_namespace) {
 				} catch (e) {
 					if (e.code !== 'EEXIST')
 						;
+					if (!options.no_throw)
+						throw e;
 					library_namespace.warn([ 'create_directory: ', {
 						T : [ '創建目錄 [%1] 失敗：%2', directory_name, String(e) ]
 					} ]);
