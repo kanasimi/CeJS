@@ -166,16 +166,17 @@ function module_code(library_namespace) {
 		// 對舊版本須用到 for (in .next_mark)
 		this.next_mark = Object.create(null);
 
+		if (!API_URL && !('language' in this)
+		// wikidata 不設定 language。
+		&& !this.is_wikidata) {
+			API_URL = wiki_API.language;
+		}
+
+		// console.trace(API_URL);
 		// setup session.
 		if (API_URL) {
 			wiki_API.setup_API_language(this /* session */, API_URL);
 			wiki_API.setup_API_URL(this /* session */, API_URL);
-		}
-
-		if (!('language' in this)
-		// wikidata 不設定 language。
-		&& !this.is_wikidata) {
-			wiki_API.setup_API_language(this /* session */, wiki_API.language);
 		}
 
 		// ------------------------------------------------
