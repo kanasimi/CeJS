@@ -243,12 +243,14 @@ function module_code(library_namespace) {
 			&& (wiki_API.content_of.has_content(next[1])
 			// 除非剛剛才取得，同一個執行緒中不需要再度取得內容。
 			|| next[3] && next[3].allow_missing
-			// && ('missing' in next[1])
-			)) {
+			// 確認真的是不存在的頁面。預防一次擷取的頁面內容太多，或者其他出錯情況，實際上沒能成功取得頁面內容，
+			// next[1].revisions:[]
+			&& ('missing' in next[1]))) {
 				library_namespace.debug('採用所輸入之 '
 						+ wiki_API.title_link_of(next[1])
 						+ ' 作為 this.last_page。', 2, 'wiki_API.prototype.next');
 				this.last_page = next[1];
+				// console.trace(next[1]);
 				if (typeof next[2] === 'function') {
 					// next[2] : callback
 					next[2].call(this, next[1]);
@@ -752,7 +754,7 @@ function module_code(library_namespace) {
 
 			var original_queue,
 			// 必須在最終執行剛好一次 check_next() 以 `this.next()`。
-			check_next = function(no_next) {
+			check_next = function check_next(no_next) {
 				if (original_queue) {
 					// assert: {Array}original_queue.length > 0
 					if (false) {
@@ -766,8 +768,10 @@ function module_code(library_namespace) {
 				// 無論如何都再執行 this.next()，並且設定 this.running。
 				// e.g., for
 				// 20200209.「S.P.A.L.」関連ページの貼り換えのbot作業依頼.js
-				if (!no_next)
+				if (!no_next) {
+					// setTimeout(_this.next.bind(_this), 0);
 					_this.next();
+				}
 			};
 
 			if (typeof next[1] === 'function') {
@@ -2341,6 +2345,7 @@ function module_code(library_namespace) {
 				config.slice | 0, 500)
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		// titles/pageids: Maximum number of values is 50 (500 for bots).
+		// 不想頁面內容過多而被截斷，用400以下較保險。
 		: PATTERN_BOT_NAME.test(this.token && this.token.lgname) ? 500 : 50,
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */
 		work_continue = 0, this_slice_size, setup_target;

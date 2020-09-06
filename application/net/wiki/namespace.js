@@ -1942,7 +1942,7 @@ function module_code(library_namespace) {
 
 	function revision_content(revision, allow_non_string) {
 		if (!revision)
-			return allow_non_string ? undefined : '';
+			return allow_non_string ? revision : '';
 
 		if (revision.slots) {
 			// 2019 API: page_data.revisions[0].slots.main['*']
