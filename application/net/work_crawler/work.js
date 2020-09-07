@@ -1094,7 +1094,7 @@ function module_code(library_namespace) {
 					//
 					'.get_chapter_list()', work_data.title ]
 				} ]);
-				_this.onerror(e, work_data);
+				_this.onerror(error, work_data);
 				typeof callback === 'function' && callback(work_data);
 				return Work_crawler.THROWED;
 			}
