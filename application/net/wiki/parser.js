@@ -1372,6 +1372,7 @@ function module_code(library_namespace) {
 			return '';
 		}
 
+		// TODO: interlanguage links will be treated as normal link!
 		if (token.type === 'link' || token.type === 'category'
 		// e.g., [[:File:file name.jpg]]
 		|| token.type === 'file') {
@@ -1642,6 +1643,8 @@ function module_code(library_namespace) {
 
 			// anchor : anchor.toString().trimEnd(),
 			// display_text : display_text,
+
+			// section.section_title.link.toString()
 			toString : section_link_toString
 		});
 		return link;
@@ -2090,7 +2093,7 @@ function module_code(library_namespace) {
 			});
 		}
 
-		// console.log(for_section);
+		// console.trace(for_section);
 		if (typeof for_section === 'function') {
 			// TODO: return (result === for_each_token.remove_token)
 			// TODO: move section to another page
@@ -2545,6 +2548,7 @@ function module_code(library_namespace) {
 	// [[w:en:Wikipedia:Manual of Style/Layout#Order of article elements]],
 	// [[w:en:Wikipedia:Manual of Style/Lead section]]
 	// [[w:zh:Wikipedia:格式手冊/版面佈局#導言]]
+	// [[w:en:Wikipedia:Talk page layout]]
 	// location: 'hatnote', 'maintenance tag', 'navigation template'
 	function insert_token(token, options) {
 		var location;
@@ -3538,7 +3542,8 @@ function module_code(library_namespace) {
 					// test [[Category:name|order]]
 					.match(PATTERN_category_prefix);
 					// console.log([ page_name, category_matched ]);
-				}
+				} else if (file_matched[1])
+					file_matched = null;
 				if (page_name.includes(include_mark)) {
 					// console.trace(page_name);
 					// 預防有特殊 elements 置入link其中。
@@ -5505,6 +5510,9 @@ function module_code(library_namespace) {
 			date_parser = date_parser_config[options.language]
 			// e.g., 'commons'
 			|| date_parser_config[wiki_API.language];
+		}
+		if (!date_parser) {
+			console.trace([ options.language, wiki_API.language ]);
 		}
 		var PATTERN_date = date_parser[0], matched;
 		date_parser = date_parser[1];

@@ -538,17 +538,26 @@ function module_code(library_namespace) {
 
 	// @see set_default_language(), language_to_site_name()
 	function setup_API_language(session, language_code) {
+		if (!language_code || typeof language_code !== 'string')
+			return;
+
+		language_code = language_code.toLowerCase();
 		if (PATTERN_PROJECT_CODE_i.test(language_code)
 				// 不包括 test2.wikipedia.org 之類。
 				&& !/test|wiki/i.test(language_code)
 				// 排除 'Talk', 'User', 'Help', 'File', ...
 				&& !(session.configurations.namespace_pattern || get_namespace.pattern)
 						.test(language_code)) {
+			// e.g., 'cmn'
+			if (language_code in wiki_API.language_code_to_site_alias)
+				language_code = wiki_API.language_code_to_site_alias[language_code];
+
 			// [[m:List of Wikipedias]]
 			session.language
 			// e.g., 'zh-classical', 'zh-yue', 'zh-min-nan', 'simple'
-			= language_code = language_code.toLowerCase();
+			= language_code;
 			var site_name = wiki_API.site_name(session);
+			// console.trace(site_name);
 			var time_interval_config = wiki_API.query.edit_time_interval;
 			// apply local lag interval rule.
 			if (!(session.edit_time_interval >= 0)
@@ -902,6 +911,7 @@ function module_code(library_namespace) {
 					+ n + '] @ namespace list ' + namespace,
 					//
 					1, 'get_namespace');
+					// console.trace(arguments);
 				} else {
 					list.push(0);
 				}
@@ -1631,8 +1641,8 @@ function module_code(library_namespace) {
 	.source.replace('Tag', library_namespace
 			.ignore_case_pattern(PATTERN_file_prefix));
 
-	// [ all, file name without "File:" ]
-	PATTERN_file_prefix = new RegExp('^ *(?:: *)?(?:' + PATTERN_file_prefix
+	// [ all, ":", file name without "File:" or ":File" ]
+	PATTERN_file_prefix = new RegExp('^ *(: *)?(?:' + PATTERN_file_prefix
 			+ ') *: *([^\\[\\]|#]+)', 'i');
 
 	// "Category" 本身可不分大小寫。
@@ -2441,7 +2451,7 @@ function module_code(library_namespace) {
 	var language_code_to_site_alias = {
 		// als : 'sq',
 		'be-tarask' : 'be-x-old',
-		// cmn : 'zh',
+		cmn : 'zh',
 		// gsw : 'als',
 		// hbs : 'sh',
 		lzh : 'zh-classical',
@@ -2486,6 +2496,7 @@ function module_code(library_namespace) {
 	 * @see setup_API_language()
 	 */
 	function set_default_language(language) {
+		// console.trace(language);
 		if (typeof language !== 'string'
 				|| !PATTERN_PROJECT_CODE_i.test(language)) {
 			if (language) {
@@ -2500,7 +2511,10 @@ function module_code(library_namespace) {
 		}
 
 		// assert: default language is in lower case. See URL_to_wiki_link().
-		wiki_API.language = language.toLowerCase();
+		language = language.toLowerCase();
+		if (language in language_code_to_site_alias)
+			language = language_code_to_site_alias[language];
+		wiki_API.language = language;
 		// default api URL. Use <code>CeL.wiki.API_URL = api_URL('en')</code> to
 		// change it.
 		// see also: application.locale
@@ -2512,9 +2526,12 @@ function module_code(library_namespace) {
 			// 'en-US' → 'en'
 			wiki_API.API_URL = wiki_API.API_URL.toLowerCase().replace(/-.+$/,
 					'');
-			if (wiki_API.API_URL === 'cmn')
-				wiki_API.API_URL = 'zh';
+			// e.g., 'cmn'
+			// Can not use `wiki_API.language_code_to_site_alias`
+			if (wiki_API.API_URL in language_code_to_site_alias)
+				wiki_API.API_URL = language_code_to_site_alias[wiki_API.API_URL];
 		}
+		// console.trace(wiki_API.API_URL);
 		wiki_API.API_URL = api_URL(wiki_API.API_URL);
 		library_namespace.debug('wiki_API.API_URL = ' + wiki_API.API_URL, 3,
 				'set_default_language');
