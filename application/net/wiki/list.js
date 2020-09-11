@@ -1300,13 +1300,9 @@ function module_code(library_namespace) {
 			title = [ from_lang, title ];
 		}
 
-		console.trace(title);
-		CeL.set_debug(9);
 		wiki_API.query(title, typeof callback === 'function'
 		//
 		&& function(data) {
-			CeL.set_debug(0);
-			console.trace(data);
 			if (!data || !data.query || !data.query.pages) {
 				/**
 				 * From version 1.25 onwards, the API returns a batchcomplete
