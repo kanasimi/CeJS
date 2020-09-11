@@ -3542,8 +3542,10 @@ function module_code(library_namespace) {
 					// test [[Category:name|order]]
 					.match(PATTERN_category_prefix);
 					// console.log([ page_name, category_matched ]);
-				} else if (file_matched[1])
+				} else if (file_matched[1]) {
+					// console.trace(file_matched);
 					file_matched = null;
+				}
 				if (page_name.includes(include_mark)) {
 					// console.trace(page_name);
 					// 預防有特殊 elements 置入link其中。
@@ -3785,7 +3787,7 @@ function module_code(library_namespace) {
 					if (file_matched) {
 						parameters.name
 						// set file name without "File:"
-						= wiki_API.normalize_title(file_matched[1]);
+						= wiki_API.normalize_title(file_matched[2]);
 					} else if (category_matched) {
 						parameters.name
 						// set category name without "Category:"
