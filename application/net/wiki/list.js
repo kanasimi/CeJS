@@ -1301,9 +1301,12 @@ function module_code(library_namespace) {
 		}
 
 		console.trace(title);
+		CeL.debug(9);
 		wiki_API.query(title, typeof callback === 'function'
 		//
 		&& function(data) {
+			CeL.debug(0);
+			console.trace(data);
 			if (!data || !data.query || !data.query.pages) {
 				/**
 				 * From version 1.25 onwards, the API returns a batchcomplete
