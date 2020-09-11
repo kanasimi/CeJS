@@ -1301,11 +1301,11 @@ function module_code(library_namespace) {
 		}
 
 		console.trace(title);
-		CeL.debug(9);
+		CeL.set_debug(9);
 		wiki_API.query(title, typeof callback === 'function'
 		//
 		&& function(data) {
-			CeL.debug(0);
+			CeL.set_debug(0);
 			console.trace(data);
 			if (!data || !data.query || !data.query.pages) {
 				/**
