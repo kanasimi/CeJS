@@ -3452,7 +3452,7 @@ function test_wiki() {
 		}, 'zh-cn');
 
 		_setup_test('wiki: CeL.wiki.langlinks()');
-		CeL.wiki.langlinks('文明', function (title) {
+		CeL.wiki.langlinks([ 'zh', '文明' ], function (title) {
 			var test_name = 'wiki: CeL.wiki.langlinks()';
 			assert(['Civilization', title], test_name);
 			_finish_test(test_name);
