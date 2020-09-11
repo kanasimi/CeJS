@@ -2910,8 +2910,8 @@ function test_wiki() {
 		[['Wikipedia:NAME', CeL.wiki.talk_page_to_main('Wikipedia talk:NAME')], 'wiki.talk_page_to_main #6'],
 
 		[['!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
-			//
-			.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3')], 'file_pattern'],
+		//
+		.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3')], 'file_pattern'],
 
 		[[undefined, CeL.wiki.parse.template('a{temp}b', '')], '不包含模板'],
 		[[undefined, CeL.wiki.parse.template('a{{t}}b', 'temp')], '不包含此模板'],
@@ -2995,6 +2995,12 @@ function test_wiki() {
 		assert(['thumb', parsed.format], 'wiki.parse.file #3-3');
 		assert(['a<br/>b', parsed.caption.toString()], 'wiki.parse.file #3-4');
 		assert(['  a<br/>b   ', parsed[3].toString()], 'wiki.parse.file #3-5');
+		wikitext = '[[:File:a.jpg|a]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #4-1');
+		assert(parsed.is_link, 'wiki.parse.file #4-2');
+		wikitext = '[[:Category:cat|sort]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.category #1-1');
+		assert(parsed.is_link, 'wiki.parse.category #1-2');
 
 		wikitext = '{{c|d[[e]]f}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert(['{{c|df}}', CeL.wiki.parser(wikitext).each('link', function (token, parent, index) { return ''; }, true).toString()], 'search all links');
