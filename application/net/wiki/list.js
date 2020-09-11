@@ -1300,6 +1300,7 @@ function module_code(library_namespace) {
 			title = [ from_lang, title ];
 		}
 
+		console.trace(title);
 		wiki_API.query(title, typeof callback === 'function'
 		//
 		&& function(data) {
@@ -1532,7 +1533,8 @@ function module_code(library_namespace) {
 
 	wiki_API.search.default_parameters = {
 		// |portal
-		srnamespace : wiki_API.namespace('main|file|module|template|category|help'),
+		srnamespace : wiki_API
+				.namespace('main|file|module|template|category|help|portal'),
 
 		srprop : 'redirecttitle',
 		// srlimit : 10,
