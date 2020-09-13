@@ -1492,8 +1492,12 @@ function module_code(library_namespace) {
 
 			// 必然包含 page title，因此不處理最後一個。
 			if (index === page_name.length - 1) {
-				// page title: 將首個字母轉成大寫。
-				page_name[index] = upper_case_initial(section);
+				if (options.no_upper_case_initial) {
+					page_name[index] = section.toLowerCase();
+				} else {
+					// page title: 將首個字母轉成大寫。
+					page_name[index] = upper_case_initial(section);
+				}
 				return true;
 			}
 
@@ -1505,7 +1509,8 @@ function module_code(library_namespace) {
 			: /^[a-z][a-z\d\- ]{0,14}$/i).test(section.trimEnd())) {
 				// console.log(section);
 				if (// index < page_name.length - 1 &&
-				session && interwiki_pattern.test(section)) {
+				session && interwiki_pattern.test(section)
+						|| options.no_upper_case_initial) {
 					// e.g., 'EN' → 'en'
 					page_name[index] = section.toLowerCase();
 				} else {
