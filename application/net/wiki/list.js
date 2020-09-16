@@ -801,7 +801,9 @@ function module_code(library_namespace) {
 
 		// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
 		// 基本上同 imageusage。
-		fileusage : [ 'fu', 'prop' ],
+		fileusage : [ 'fu', 'prop', function(title_parameter) {
+			return title_parameter.replace(/^&title=/, '&titles=');
+		} ],
 
 		// 列舉包含指定 URL 的頁面。 [[Special:LinkSearch]]
 		// https://www.mediawiki.org/wiki/API:Exturlusage
