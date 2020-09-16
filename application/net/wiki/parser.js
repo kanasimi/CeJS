@@ -2569,6 +2569,44 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	var font_templates = 'JIS90フォント|JIS2004フォント|CP932フォント|MacJapanese|ARIB外字フォント|絵文字フォント|補助漢字フォント|変体仮名フォント|通貨フォント|拡張漢字';
+	var PATTERN_font_templates = new RegExp('{{ *(?:' + font_templates
+			+ ') *\\|(.+?)}}', 'g');
+	font_templates = font_templates.split('|').to_hash();
+
+	// CeL.wiki.get_plain_display_text(link_token[2]).trim()
+	function get_plain_display_text(display_text, options) {
+		if (Array.isArray(display_text)) {
+			for_each_token.call(display_text, 'template', function(token,
+					index, parent) {
+				if (token.name === 'Lang') {
+					parent[index] = token.parameters[2];
+					return;
+				}
+
+				// for jawiki
+				if (token.name in font_templates) {
+					parent[index] = token.parameters[1];
+					return;
+				}
+
+			});
+		}
+
+		display_text = display_text.toString()
+		// jawiki
+		.replace(/{{ *[lL]ang *\|[a-z ]{2,}\|(.+?)}}/g, '$1')
+		// jawiki
+		.replace(PATTERN_font_templates, '$1')
+		// <span lang="zh" xml:lang="zh">埕</span>
+		.replace(/<span(?: +(?:xml:)?lang="[a-z]*")*>([^<>]*)<\/span>/g, '$1');
+
+		display_text = library_namespace.HTML_to_Unicode(display_text);
+		if (options && options.normalize_title)
+			display_text = wiki_API.normalize_title(display_text);
+		return display_text;
+	}
+
 	/**
 	 * 將特殊標記解譯/還原成 {Array} 組成之結構。
 	 * 
@@ -3599,6 +3637,8 @@ function module_code(library_namespace) {
 						no_resolve : true
 					}, queue);
 
+					parameters.index_of = Object.create(null);
+
 					// [ file namespace, section_title,
 					// parameters 1, parameters 2, parameters..., caption ]
 					var token, file_option,
@@ -3716,7 +3756,11 @@ function module_code(library_namespace) {
 								/^(?:link|alt|lang|page|thumbtime|start|end|class)$/
 										.test(option_name)) {
 							// 以後到的為準。
+							if (option_name === 'link')
+								option_value = wiki_API
+										.normalize_title(option_value);
 							parameters[option_name] = option_value;
+							parameters.index_of[option_name] = parameters.length - 1;
 
 						} else if (has_equal
 								&& /^(?:thumb|thumbnail|upright)$/
@@ -3756,10 +3800,18 @@ function module_code(library_namespace) {
 					}
 
 				} else {
+					var parsed_display_text = parse_wikitext(display_text,
+							options, queue);
 					// 需再進一步處理 {{}}, -{}- 之類。
-					parameters.caption = parse_wikitext(display_text, options,
-							queue);
-					parameters.push(parameters.caption);
+					// [[w:en:Wikipedia:Categorization#Sort keys]]
+					parameters[category_matched ? 'sort_key'
+					// [[w:en:Wikipedia:Piped link]] the displayed text
+					: 'display_text'] = parsed_display_text
+					if (false && !category_matched) {
+						parameters.plain_display_text = get_plain_display_text(
+								display_text, options);
+					}
+					parameters.push(parsed_display_text);
 				}
 			}
 
@@ -5623,7 +5675,7 @@ function module_code(library_namespace) {
 	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *([^\[\]\|{}\n#\/�]+)/i,
 	// [[特殊:功績]]: zh-classical, [[特別:投稿記録]]: ja
 	// matched: [ all, " user name " ]
-	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊|特別) *: *(?:Contributions|Contribs|使用者貢獻|用戶貢獻|用户贡献|投稿記録|功績)\/([^\[\]\|{}\n#\/�]+)/i,
+	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊|特別) *: *(?:Contributions|Contribs|使用者貢獻|用戶貢獻|(?:用户)?贡献|投稿記録|功績)\/([^\[\]\|{}\n#\/�]+)/i,
 	//
 	PATTERN_user_link_all = new RegExp(PATTERN_user_link.source, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
 			PATTERN_user_contributions_link.source, 'ig');
@@ -6840,6 +6892,8 @@ function module_code(library_namespace) {
 		// parse_table(), parse_wikitable()
 		table_to_array : table_to_array,
 		array_to_table : array_to_table,
+
+		get_plain_display_text : get_plain_display_text,
 
 		parse : parse_wikitext,
 		// parser : page_parser,
