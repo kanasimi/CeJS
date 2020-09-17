@@ -2958,6 +2958,10 @@ function test_wiki() {
 
 	all_error_count += CeL.test('CeL.wiki.parser', function (assert) {
 		var wikitext, parsed;
+
+		assert(['深圳', CeL.wiki.get_plain_display_text(CeL.wiki.parse('深{{lang|zh|圳}}'))], 'get_plain_display_text() #1');
+		assert(['森鷗外', CeL.wiki.get_plain_display_text(CeL.wiki.parse('森&#40407;外'))], 'get_plain_display_text() #2');
+
 		wikitext = 't[http://a.b/ x[[l]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link');
 		wikitext = '++\npp:http://h /p n\n++'; parsed = CeL.wiki.parse(wikitext);
