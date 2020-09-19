@@ -4003,16 +4003,38 @@ function module_code(library_namespace) {
 					return token;
 				}
 
-				var _token = token;
+				var _token, remaining_value_index;
 				// console.log(_token);
-				if (Array.isArray(_token)) {
-					_token = _token[0];
+				if (Array.isArray(token)) {
+					_token = true;
+					_token = token.filter(function(t, index) {
+						if (!_token || t.type === 'comment')
+							return false;
+						if (typeof t !== 'string') {
+							remaining_value_index = index;
+							_token = false;
+							return false;
+						}
+						if (t.includes('=')) {
+							remaining_value_index = index + 1;
+							_token = false;
+							return true;
+						}
+						return true;
+					});
+					_token = _token.join('');
+					// console.log([ remaining_value_index, _token ]);
+				} else {
+					_token = token;
 				}
 				// console.log(JSON.stringify(_token));
+
+				// assert: _token: 本參數在非wikitext元素前的所有plaintext
+				// https://test.wikipedia.org/wiki/L
 				if (typeof _token === 'string') {
 					_token = _token.trim();
 					// @see function parse_template()
-					var matched = _token.match(/^([^=]+)=([\s\S]*)$/);
+					var matched = _token.match(/^([^=]*)=([\s\S]*)$/);
 					if (matched) {
 						var key = matched[1].trimEnd(),
 						// key token must accept '\n'. e.g., "key \n = value"
@@ -4048,14 +4070,36 @@ function module_code(library_namespace) {
 							// assert: Array.isArray(token)
 							// 因此代表value的_token也採用相同的type。
 							_token = [];
-							// copy properties, including .toString().
+							// Object.clone(): copy string 之後，後續的values
+							// and properties, including .toString().
 							Object.keys(token).forEach(function(p) {
 								_token[p] = token[p];
 							});
+							// console.trace([ remaining_value_index, _token ]);
+							if (remaining_value_index > 1) {
+								_token.splice(1, remaining_value_index - 1);
+							}
 
-							_token[0] = value;
+							// console.trace([ value, _token ]);
+							if (_token.length === 1) {
+								// e.g., '{{L|p<!-- -->=v}}'
+								// assert: _token.type === 'plain'
+								_token = value;
+							} else {
+								_token[0] = value;
+							}
 							parameter_index_of[key] = _index;
 							_parameters[key] = _token;
+						}
+					} else if (Array.isArray(token) && token.some(function(t) {
+						return typeof t === 'string' && t.includes('=');
+					})) {
+						if (library_namespace.is_debug(3)) {
+							library_namespace.error(
+							//
+							'parse_wikitext.transclusion: Invalid parameter ['
+							//
+							+ token + ']');
 						}
 					} else {
 						parameter_index_of[index] = _index;

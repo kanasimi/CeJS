@@ -3030,6 +3030,27 @@ function test_wiki() {
 		wikitext = '{{#ifexpr: {{{1}}} > 0 and {{{1}}} < 1.0 or {{#ifeq:{{{decimal}}}| yes}} |is decimal |not decimal}}'; parsed = CeL.wiki.parse(wikitext);
 		assert(['function', parsed.type]);
 
+		// https://test.wikipedia.org/wiki/L
+		wikitext = '{{L|=__1|p2|link 1=L_1 | link  1=L__1  | link   1=   L___1   |link2<!-- l2=2 -->=L2|<!-- l3 -->link3=L3|<!-- l4 --> link4 <!-- l4 --> =L4}}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #1-1');
+		parsed = parsed[0];
+		assert(['__1', parsed.parameters['']], 'wiki.parse.transclusion #1-2');
+		assert(['p2', parsed.parameters[1]], 'wiki.parse.transclusion #1-3');
+		assert(['L_1', parsed.parameters['link 1']], 'wiki.parse.transclusion #1-4');
+		assert(['L__1', parsed.parameters['link  1']], 'wiki.parse.transclusion #1-5');
+		assert(['L___1', parsed.parameters['link   1']], 'wiki.parse.transclusion #1-6');
+		assert([, parsed.parameters.link1], 'wiki.parse.transclusion #1-7');
+		assert(['L2', parsed.parameters.link2], 'wiki.parse.transclusion #1-8');
+		wikitext = '{{L|<nowiki>link1</nowiki>=L1|link2<nowiki></nowiki>=L2|link2<nowiki></nowiki>_L2|b|<!-- l3 -->link<!-- l3 -->3=L3|<!-- l4 --> li<!-- l4 -->nk4 <!-- l4 --> =L4}}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #2-1');
+		parsed = parsed[0];
+		assert(['link2<nowiki></nowiki>_L2', parsed.parameters[1].toString()], 'wiki.parse.transclusion #2-2');
+		assert(['b', parsed.parameters[2]], 'wiki.parse.transclusion #2-3');
+		assert([, parsed.parameters.link1], 'wiki.parse.transclusion #2-4');
+		assert([, parsed.parameters.link2], 'wiki.parse.transclusion #2-5');
+		assert(['L3', parsed.parameters.link3], 'wiki.parse.transclusion #2-6');
+		assert(['L4', parsed.parameters.link4], 'wiki.parse.transclusion #2-7');
+
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[link#section]]b'; parsed = CeL.wiki.parser(wikitext).parse();
