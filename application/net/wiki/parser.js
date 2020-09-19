@@ -372,45 +372,13 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		var this_parameter = template_token[index];
 		// 判斷上下文使用的 spaces。
-
-		var attribute_text = template_token[index];
-		if (Array.isArray(attribute_text)) {
-			// 要是有合規的 `parameter_name`，
-			// 則應該是 [ {String} parameter_name + " = ", ... ]。
-			// prevent {{| ...{{...|...=...}}... = ... }}
-			attribute_text = attribute_text[0];
+		var spaces = this_parameter[0];
+		if (Array.isArray(spaces)) {
+			spaces = spaces[0];
 		}
-
-		var matched = attribute_text
-		// extract parameter name
-		// https://www.mediawiki.org/wiki/Help:Templates#Named_parameters
-		// assert: parameter name should these characters
-		// https://test.wikipedia.org/wiki/Test_n
-		// OK in parameter name: ":\\\/#\"'"
-		// NG in parameter name: "=" /\s$/
-		&& attribute_text.toString().match(/^(\s*)([^\s=][^=]*)(=\s*)/);
-		if (matched) {
-			matched[2] = matched[2].match(/^(.*?[^\s])(\s*)$/);
-			// assert: matched[2] !== null, matched[2][1] == parameter_name
-			if (matched[2] && matched[2][1] == parameter_name) {
-				matched[0] = matched[2][2] + matched[3];
-			} else {
-				throw new Error(
-				// e.g., replace parameter_name === 1 of {{tl|A{{=}}B}}
-				'mode_space_of_parameters: Can not found valid parameter ['
-						+ parameter_name + ']: ' + template_token);
-			}
-		} else if (isNaN(parameter_name)) {
-			throw new Error(
-			// This should not have happened.
-			'mode_space_of_parameters: Can not found valid parameter ['
-					+ parameter_name + '] (Should not happen): '
-					+ template_token);
-		} else {
-			// e.g., replace parameter_name === 1 of {{tl|title}}
-			matched = [];
-		}
+		spaces = typeof spaces === 'string' ? spaces.match(/^\s*/)[0] : '';
 
 		/**
 		 * 保留屬性質結尾的排版:多行保留行先頭的空白，但不包括末尾的空白。單行的則留最後一個空白。 preserve spaces for:
@@ -424,8 +392,11 @@ function module_code(library_namespace) {
 
 		</code>
 		 */
-		var spaces = template_token[index].toString().match(/(\n *| ?)$/);
-		spaces = [ matched[1], matched[0], spaces[1] ];
+		// var spaces = template_token[index].toString().match(/(\n *| ?)$/);
+		//
+		// parameter: spaces[0] + key + spaces[1] + value + spaces[2]
+		spaces = [ spaces,/* " = " */this_parameter[1], /* spaces[1] */
+		this_parameter[3] || '' ];
 
 		return spaces;
 	}
@@ -550,14 +521,29 @@ function module_code(library_namespace) {
 					continue;
 				}
 
+				var skip_replacement;
 				if (options.value_only
 						&& (typeof replace_to === 'string' || typeof replace_to === 'number')) {
-					// replace_to = { [replace_from] : replace_to };
-					replace_to = Object.create(null);
-					replace_to[replace_from] = parameter_name[replace_from];
+					var this_parameter = template_token[template_token.index_of[replace_from]];
+					// keep spaces and parameter name.
+					// e.g., "| key<!---->=1 |" → "| key<!---->=2 |"
+					// NOT: "| key<!---->=1 |" → "| key=2 |"
+					this_parameter[2] = replace_to;
+					skip_replacement = 1;
+
+					// @deprecated:
+					// replace_to = { [_replace_from] : replace_to };
+					// replace_to = Object.create(null);
+					// replace_to[replace_from] = replace_to;
 				}
+
 				latest_OK_key = replace_from;
 				next_insert_index = index;
+				// console.trace([ replace_from, replace_to ]);
+				if (skip_replacement) {
+					count += skip_replacement;
+					continue;
+				}
 				count += replace_parameter(template_token, replace_from,
 						replace_to);
 			}
@@ -586,6 +572,8 @@ function module_code(library_namespace) {
 		// 判斷上下文使用的 spaces。
 
 		var spaces = mode_space_of_parameters(template_token, parameter_name);
+		// console.trace(spaces);
+		// console.trace(replace_to);
 
 		// --------------------------------------
 		// 正規化 replace_to。
@@ -606,6 +594,7 @@ function module_code(library_namespace) {
 		}
 
 		// assert: {String}replace_to
+		// console.trace(replace_to);
 
 		if (!spaces[1] && !isNaN(parameter_name)) {
 			var matched = replace_to.match(/^\s*(\d+)\s*=\s*([\s\S]*)$/);
@@ -3956,7 +3945,10 @@ function module_code(library_namespace) {
 					transclusion : true,
 					// incase:
 					// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}
-					'function' : true
+					'function' : true,
+
+					// allow {{tl<!-- t= -->}}
+					comment : true
 				})) {
 					// console.log(parameters);
 					// console.log(queue[index]);
@@ -4003,97 +3995,59 @@ function module_code(library_namespace) {
 					return token;
 				}
 
-				var _token, remaining_value_index;
-				// console.log(_token);
-				if (Array.isArray(token)) {
-					_token = true;
-					_token = token.filter(function(t, index) {
-						if (!_token || t.type === 'comment')
-							return false;
-						if (typeof t !== 'string') {
-							remaining_value_index = index;
-							_token = false;
-							return false;
-						}
-						if (t.includes('=')) {
-							remaining_value_index = index + 1;
-							_token = false;
-							return true;
-						}
-						return true;
-					});
-					_token = _token.join('');
-					// console.log([ remaining_value_index, _token ]);
-				} else {
-					_token = token;
-				}
-				// console.log(JSON.stringify(_token));
+				// 規格書 parse parameters to:
+				// numeral parameter: ['', '', value]
+				// [name, '=', value]: [1, '=', value], ['', '=', value],
+				// [[' name'], ' = ', [value], ' '].key = name
 
-				// assert: _token: 本參數在非wikitext元素前的所有plaintext
+				// {Number}parameter_index =
+				// template_token.index_of[parameter_name];
+				//
+				// parameter_token = template_token[parameter_index];
+				// {String}parameter_name = parameter_token.key;
+				// if (typeof parameter_name !== 'string') throw new
+				// Error('Invalid parameter_token');
+				//
+				// trimmed parameter_value = parameter_token[2].toString();
+
 				// https://test.wikipedia.org/wiki/L
-				if (typeof _token === 'string') {
-					_token = _token.trim();
-					// @see function parse_template()
-					var matched = _token.match(/^([^=]*)=([\s\S]*)$/);
-					if (matched) {
-						var key = matched[1].trimEnd(),
-						// key token must accept '\n'. e.g., "key \n = value"
-						value = matched[2].trimStart();
 
-						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
-						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
-						// parser 調用超過一個Template中參數的值，只會使用最後指定的值。
-						if (typeof token === 'string') {
-							// 處理某些特殊屬性的值。
-							if (false && /url$/i.test(key)) {
-								try {
-									// 有些參數值會迴避"="，此時使用decodeURIComponent可能會更好。
-									value = decodeURI(value);
-								} catch (e) {
-									// TODO: handle exception
-								}
-							}
-							parameter_index_of[key] = _index;
-							_parameters[key] = value;
+				if (typeof token === 'string') {
+					token = _set_wiki_type(token, 'plain');
+				}
 
-						} else {
-							// assert: Array.isArray(token)
-							if (false) {
-								_token = token.clone();
-								// copy properties
-								Object.keys(token).forEach(function(p) {
-									if (!(p >= 0)) {
-										_token[p] = token[p];
-									}
-								});
-							}
-							// assert: Array.isArray(token)
-							// 因此代表value的_token也採用相同的type。
-							_token = [];
-							// Object.clone(): copy string 之後，後續的values
-							// and properties, including .toString().
-							Object.keys(token).forEach(function(p) {
-								_token[p] = token[p];
-							});
-							// console.trace([ remaining_value_index, _token ]);
-							if (remaining_value_index > 1) {
-								_token.splice(1, remaining_value_index - 1);
-							}
+				// assert: Array.isArray(token) && token.type === 'plain'
 
-							// console.trace([ value, _token ]);
-							if (_token.length === 1) {
-								// e.g., '{{L|p<!-- -->=v}}'
-								// assert: _token.type === 'plain'
-								_token = value;
-							} else {
-								_token[0] = value;
-							}
-							parameter_index_of[key] = _index;
-							_parameters[key] = _token;
-						}
-					} else if (Array.isArray(token) && token.some(function(t) {
+				var matched = undefined;
+				// scan
+				token.some(function(t, index) {
+					if (typeof t !== 'string') {
+						return t.type !== 'comment';
+					}
+					if (t.includes('=')) {
+						// index_of_assignment
+						matched = index;
+						return true;
+					}
+				});
+
+				if (matched === undefined) {
+					if (token.length === 1) {
+						// assert: {String}token[0]
+						token.unshift('', '');
+					} else {
+						// assert: token.length > 1
+						token = _set_wiki_type([ '', '', token ], 'plain');
+					}
+
+					var value = token[2];
+					if (Array.isArray(value) && value.some(function(t) {
+						// e.g., {{t|p<nowiki></nowiki>=v}}
 						return typeof t === 'string' && t.includes('=');
 					})) {
+						// has_invalid_key_element
+						token.invalid = true;
+						// token.key = undefined;
 						if (library_namespace.is_debug(3)) {
 							library_namespace.error(
 							//
@@ -4102,33 +4056,101 @@ function module_code(library_namespace) {
 							+ token + ']');
 						}
 					} else {
+						token.key = index;
 						parameter_index_of[index] = _index;
-						_parameters[index++]
-						// TODO: token 本身並未 .trim()
-						= typeof token === 'string' ? _token : token;
+						if (typeof value === 'string')
+							value = value.trim();
+						_parameters[index++] = value;
 					}
-
-				} else {
-					// e.g., {{t|[http://... ...]}}
-					if (library_namespace.is_debug(3)) {
-						library_namespace.error(
-						//
-						'parse_wikitext.transclusion: Can not parse ['
-						//
-						+ token + ']');
-						library_namespace.error(token);
-						// console.log(_token);
-					}
-					// TODO: token 本身並未 .trim()
-					parameter_index_of[index] = _index;
-					_parameters[index++] = token;
+					return token;
 				}
 
+				// extract parameter name
+				// https://www.mediawiki.org/wiki/Help:Templates#Named_parameters
+				// assert: parameter name should these characters
+				// https://test.wikipedia.org/wiki/Test_n
+				// OK in parameter name: ":\\\/#\"'\n"
+				// NG in parameter name: "=" /\s$/
+
+				// 要是有合規的 `parameter_name`，
+				// 則應該是 [ {String} parameter_name + " = ", ... ]。
+				// prevent {{| ...{{...|...=...}}... = ... }}
+
+				matched = token.splice(0, matched + 1);
+				token = _set_wiki_type([ matched,
+				//
+				matched.pop(), token ], 'plain');
+
+				// matched: [ key, value ]
+				// matched = token[1].match(/^([^=]*)=([\s\S]*)$/);
+
+				// trimEnd() of key, trimStart() of value
+				matched = token[1].match(/\s*=\s*/);
+
+				// assert: matched >= 0
+				if (matched.index > 0) {
+					// 將 "=" 前的非空白字元補到 key 去。
+					token[0].push(token[1].slice(0, matched.index));
+				}
+				// key token must accept '\n'. e.g., "key_ \n _key = value"
+				token.key = token[0].filter(function(t) {
+					// 去除 comments
+					// e.g., '{{L|p<!-- -->=v}}'
+					// assert: token[0].type === 'plain'
+					return typeof t === 'string';
+				});
+				matched.k = token.key.join('');
+				if (token.key.length === token[0].length) {
+					// token[0]: all {String}
+					token[0] = matched.k;
+				} else {
+					_set_wiki_type(token[0], 'plain');
+				}
+				token.key = matched.k.trim();
+				matched.i = matched.index + matched[0].length;
+				if (matched.i < token[1].length) {
+					// 將 "=" 後的非空白字元補到 value 去。
+					token[2].unshift(token[1].slice(matched.i));
+				}
+				token[1] = matched[0];
+
+				var value = token[2];
+				parameter_index_of[token.key] = _index;
+				_index = value.length - 1;
+				matched = _index >= 0 && typeof value[_index] === 'string'
+				// trimEnd() of value, push spaces in token[3]
+				&& value[_index].match(/\s+$/);
+				if (matched) {
+					token.push(matched[0]);
+					value[_index] = value[_index].slice(0, matched.index);
+				}
+				if (value.length > 1) {
+					_set_wiki_type(value, 'plain');
+				} else {
+					token[2] = value = value.length === 0 ? '' : value[0];
+					// 處理某些特殊屬性的值。
+					if (false && /url$/i.test(key)) {
+						try {
+							// 有些參數值會迴避"="，此時使用decodeURIComponent可能會更好。
+							value = decodeURI(value);
+						} catch (e) {
+							// TODO: handle exception
+						}
+					}
+				}
+
+				// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
+				// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
+				// parser 調用超過一個Template中參數的值，只會使用最後指定的值。
+
+				// parameter_index_of[token.key] = _index;
+				_parameters[token.key] = value;
 				return token;
 			});
 
 			// add properties
 
+			// console.trace(matched);
 			if (matched) {
 				parameters[0] = matched[1];
 				parameters.name = matched[2];
@@ -4137,43 +4159,62 @@ function module_code(library_namespace) {
 				parameters.evaluate = evaluate_parser_function;
 
 			} else {
-				// 'Defaultsort' → 'DEFAULTSORT'
-				parameters.name = typeof parameters[0][0] === 'string'
+				if (typeof parameters[0] === 'string') {
+					parameters.name = parameters[0];
+				} else {
+					// assert: Array.isArray(parameters.name)
+					parameters.name = parameters[0].filter(function(t) {
+						return t.type !== 'comment';
+					}).join('');
+				}
+				// console.trace(parameters.name);
 				// 後面不允許空白。 must / *DEFAULTSORT:/
-				&& parameters[0][0].trimStart().toUpperCase();
+				parameters.name = parameters.name.trimStart();
+				var namespace = parameters.name.match(/^([^:]+):([\s\S]*)$/);
+				if (!namespace)
+					namespace = [ , parameters.name ];
+				namespace[1] = namespace[1]
+				// 'Defaultsort' → 'DEFAULTSORT'
+				.toUpperCase();
 
-				if (parameters.name
-						&& (parameters.name in Magic_words_hash)
-						// test if token is [[Help:Magic words]]
-						&& (Magic_words_hash[parameters.name] || parameters[0].length > 1)) {
+				if ((namespace[1] in Magic_words_hash)
+				// test if token is [[Help:Magic words]]
+				&& (Magic_words_hash[namespace[1]] || parameters[0].length > 1)) {
 					// TODO: {{ {{UCFIRST:T}} }}
 					// TODO: {{ :{{UCFIRST:T}} }}
 					// console.log(parameters);
 
-					// 此時以 parameters[0][1] 可獲得首 parameter。
+					parameters.name = namespace[1];
+					// 此時以 parameters[0].slice(1) 可獲得首 parameter。
 					parameters.is_magic_word = true;
-				} else {
-					parameters.name = typeof parameters[0][0] === 'string'
-					//
-					&& parameters[0][0].trim().toLowerCase();
-					// console.log(parameters.name);
-					// .page_name
-					parameters.page_title = wiki_API.normalize_title(
-					// incase "{{ DEFAULTSORT : }}"
-					// 正規化 template name。
-					// 'ab/cd' → 'Ab/cd'
-					(parameters.name in wiki_API.namespace.hash ? ''
-					// {{T}}嵌入[[Template:T]]
-					// {{Template:T}}嵌入[[Template:T]]
-					// {{:T}}嵌入[[T]]
-					// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
-					: 'Template:') + parameters[0].toString());
 
-					parameters.name = wiki_API.normalize_title(
-							parameters[0].toString())
+				} else {
+					if (namespace[0]) {
+						parameters.name = namespace[2];
+						namespace = namespace[1].toLowerCase();
+					}
+					parameters.name = wiki_API.normalize_title(parameters.name);
+					// console.log(parameters.name);
+
+					if (/^(?:Template|模板|テンプレート|Plantilla|틀)/i.test(namespace)
 					// 預防 {{Template:name|...}}
 					// PATTERN_template_starts
-					.replace(/^(?:Template|模板|テンプレート|Plantilla|틀):/, '');
+					|| (namespace in wiki_API.namespace.hash)) {
+						// incase "{{ DEFAULTSORT : }}"
+						// 正規化 template name。
+						// 'ab/cd' → 'Ab/cd'
+						parameters.page_title = namespace + ':';
+					} else {
+						// {{T}}嵌入[[Template:T]]
+						// {{Template:T}}嵌入[[Template:T]]
+						// {{:T}}嵌入[[T]]
+						// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
+						parameters.page_title = 'Template:';
+					}
+					parameters.page_title
+					// .page_name
+					= wiki_API.normalize_title(parameters.page_title
+							+ parameters.name);
 				}
 			}
 			parameters.parameters = _parameters;

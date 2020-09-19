@@ -3022,7 +3022,7 @@ function test_wiki() {
 		// CeL.wiki.parser('[[Category:a]]').each('category', function(token) {console.log(token);});0;
 		wikitext = '{{ {{tl|t}} | p }}'; parsed = CeL.wiki.parse(wikitext);
 		assert(['transclusion', parsed.type], 'template in template name #1-1');
-		assert([' p ', parsed[1]], 'template in template name #1-2');
+		assert([' p ', parsed[1][2]], 'template in template name #1-2');
 		assert(['p', parsed.parameters[1]], 'template in template name #1-3');
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{今日}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert(['transclusion', parsed.type], 'template in template name #2-1');
@@ -3041,11 +3041,11 @@ function test_wiki() {
 		assert(['L___1', parsed.parameters['link   1']], 'wiki.parse.transclusion #1-6');
 		assert([, parsed.parameters.link1], 'wiki.parse.transclusion #1-7');
 		assert(['L2', parsed.parameters.link2], 'wiki.parse.transclusion #1-8');
-		wikitext = '{{L|<nowiki>link1</nowiki>=L1|link2<nowiki></nowiki>=L2|link2<nowiki></nowiki>_L2|b|<!-- l3 -->link<!-- l3 -->3=L3|<!-- l4 --> li<!-- l4 -->nk4 <!-- l4 --> =L4}}'; parsed = CeL.wiki.parser(wikitext).parse();
+		wikitext = '{{Temp<!-- t -->late:<!-- t -->L<!-- t -->|<nowiki>link1</nowiki>=L1|link1<nowiki />=L1|link<b>1</b>=L1|link2<nowiki></nowiki>=L2|link2<nowiki></nowiki>_L2|_2|<!-- l3 -->link<!-- l3 -->3=L3|<!-- l4 --> li<!-- l4 -->nk4 <!-- l4 --> =L4}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #2-1');
 		parsed = parsed[0];
 		assert(['link2<nowiki></nowiki>_L2', parsed.parameters[1].toString()], 'wiki.parse.transclusion #2-2');
-		assert(['b', parsed.parameters[2]], 'wiki.parse.transclusion #2-3');
+		assert(['_2', parsed.parameters[2]], 'wiki.parse.transclusion #2-3');
 		assert([, parsed.parameters.link1], 'wiki.parse.transclusion #2-4');
 		assert([, parsed.parameters.link2], 'wiki.parse.transclusion #2-5');
 		assert(['L3', parsed.parameters.link3], 'wiki.parse.transclusion #2-6');
@@ -3292,6 +3292,8 @@ function test_wiki() {
 		token = CeL.wiki.parse('{{t| a= 1| v=4|b=5}}');
 		assert([2, CeL.wiki.parse.replace_parameter(token, { a: 'k =1', b: 'r = 1' })], 'wiki.parse.replace_parameter: #16-1');
 		assert(['{{t|k =1| v=4|r = 1}}', token.toString()], 'wiki.parse.replace_parameter: #16-2');
+		token = CeL.wiki.parse('{{t|p<!-- = -->=v}}');
+		assert(['{{t|p<!-- = -->=V}}', CeL.wiki.parse.replace_parameter(token, {p:'V'}, 'value_only') && token.toString()], 'wiki.parse.replace_parameter: #17');
 
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{#parserfunctions:}} #1');
