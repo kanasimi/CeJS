@@ -3986,7 +3986,7 @@ function module_code(library_namespace) {
 
 				if (_index === 0) {
 					// console.log(token);
-					if (typeof token === 'string') {
+					if (false && typeof token === 'string') {
 						return _set_wiki_type(token.split(normalize ? /\s*:\s*/
 								: ':'), 'page_title');
 					}
@@ -4014,6 +4014,9 @@ function module_code(library_namespace) {
 
 				if (typeof token === 'string') {
 					token = _set_wiki_type(token, 'plain');
+				} else if (token.type !== 'plain') {
+					// e.g., "{{#time:n月j日|2020-09-15|{{PAGELANGUAGE}}}}"
+					token = _set_wiki_type([ token ], 'plain');
 				}
 
 				// assert: Array.isArray(token) && token.type === 'plain'
@@ -4025,7 +4028,7 @@ function module_code(library_namespace) {
 						return t.type !== 'comment';
 					}
 					if (t.includes('=')) {
-						// index_of_assignment
+						// index of "=", index_of_assignment
 						matched = index;
 						return true;
 					}
@@ -4034,6 +4037,7 @@ function module_code(library_namespace) {
 				if (matched === undefined) {
 					if (token.length === 1) {
 						// assert: {String}token[0]
+						// console.trace(token);
 						token.unshift('', '');
 					} else {
 						// assert: token.length > 1
@@ -4115,6 +4119,7 @@ function module_code(library_namespace) {
 				token[1] = matched[0];
 
 				var value = token[2];
+				// assert: Array.isArray(value) && value.type === 'plain'
 				parameter_index_of[token.key] = _index;
 				_index = value.length - 1;
 				matched = _index >= 0 && typeof value[_index] === 'string'
@@ -4124,9 +4129,7 @@ function module_code(library_namespace) {
 					token.push(matched[0]);
 					value[_index] = value[_index].slice(0, matched.index);
 				}
-				if (value.length > 1) {
-					_set_wiki_type(value, 'plain');
-				} else {
+				if (value.length < 2) {
 					token[2] = value = value.length === 0 ? '' : value[0];
 					// 處理某些特殊屬性的值。
 					if (false && /url$/i.test(key)) {
@@ -4162,8 +4165,6 @@ function module_code(library_namespace) {
 				// console.trace(parameters[0]);
 				if (typeof parameters[0] === 'string') {
 					parameters.name = parameters[0];
-				} else if (parameters[0].type === 'page_title') {
-					parameters.name = parameters[0].toString();
 				} else {
 					// assert: Array.isArray(parameters[0]) &&
 					// (parameters[0].type === 'page_title'
@@ -4232,6 +4233,33 @@ function module_code(library_namespace) {
 
 					if (not_template_name) {
 						parameters.name = parameters.page_title;
+					}
+
+					if (true) {
+						;
+					} else if (typeof parameters[0] === 'string') {
+						var index = parameters[0]
+								.indexOf(parameters.page_title);
+						if (index !== NOT_FOUND) {
+							parameters.page_title = _set_wiki_type(
+									parameters.page_title
+											.split(normalize ? /\s*:\s*/ : ':'),
+									'page_title');
+							parameters[0] = [
+									parameters[0].slice(0, index),
+									parameters.page_title,
+									parameters[0].slice(0, index
+											+ parameters.page_title.length) ];
+						} else if (false) {
+							parameters[0] = _set_wiki_type(token
+									.split(normalize ? /\s*:\s*/ : ':'),
+									'page_title');
+						}
+					} else {
+						parameters.page_title = _set_wiki_type(
+								parameters.page_title
+										.split(normalize ? /\s*:\s*/ : ':'),
+								'page_title');
 					}
 				}
 			}
