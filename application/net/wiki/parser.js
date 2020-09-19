@@ -4159,10 +4159,15 @@ function module_code(library_namespace) {
 				parameters.evaluate = evaluate_parser_function;
 
 			} else {
+				// console.trace(parameters[0]);
 				if (typeof parameters[0] === 'string') {
 					parameters.name = parameters[0];
+				} else if (parameters[0].type === 'page_title') {
+					parameters.name = parameters[0].toString();
 				} else {
-					// assert: Array.isArray(parameters.name)
+					// assert: Array.isArray(parameters[0]) &&
+					// (parameters[0].type === 'page_title'
+					// || parameters[0].type = 'plain')
 					parameters.name = parameters[0].filter(function(t) {
 						return t.type !== 'comment';
 					}).join('');
@@ -4171,15 +4176,19 @@ function module_code(library_namespace) {
 				// 後面不允許空白。 must / *DEFAULTSORT:/
 				parameters.name = parameters.name.trimStart();
 				var namespace = parameters.name.match(/^([^:]+):([\s\S]*)$/);
+				// console.trace([ parameters.name, namespace ]);
 				if (!namespace)
 					namespace = [ , parameters.name ];
-				namespace[1] = namespace[1]
+				// incase "{{ DEFAULTSORT : }}"
+				namespace[1] = namespace[1].trim()
 				// 'Defaultsort' → 'DEFAULTSORT'
 				.toUpperCase();
 
 				if ((namespace[1] in Magic_words_hash)
 				// test if token is [[Help:Magic words]]
-				&& (Magic_words_hash[namespace[1]] || parameters[0].length > 1)) {
+				&& (Magic_words_hash[namespace[1]]
+				// 這些需要指定數值. has ":"
+				|| namespace[0])) {
 					// TODO: {{ {{UCFIRST:T}} }}
 					// TODO: {{ :{{UCFIRST:T}} }}
 					// console.log(parameters);
@@ -4191,30 +4200,39 @@ function module_code(library_namespace) {
 				} else {
 					if (namespace[0]) {
 						parameters.name = namespace[2];
-						namespace = namespace[1].toLowerCase();
+						namespace = namespace[1];
+					} else {
+						namespace = null;
 					}
+					// 正規化 template name。
+					// 'ab/cd' → 'Ab/cd'
 					parameters.name = wiki_API.normalize_title(parameters.name);
 					// console.log(parameters.name);
 
-					if (/^(?:Template|模板|テンプレート|Plantilla|틀)/i.test(namespace)
+					// parameters.name: template without "Template:" prefix.
+					// parameters.page_title: page title with "Template:"
+					// prefix.
+
+					var PATTERN_template_namespaces = /^(?:Template|模板|テンプレート|Plantilla|틀)/i;
+					var not_template_name = namespace
 					// 預防 {{Template:name|...}}
-					// PATTERN_template_starts
-					|| (namespace in wiki_API.namespace.hash)) {
-						// incase "{{ DEFAULTSORT : }}"
-						// 正規化 template name。
-						// 'ab/cd' → 'Ab/cd'
-						parameters.page_title = namespace + ':';
-					} else {
-						// {{T}}嵌入[[Template:T]]
-						// {{Template:T}}嵌入[[Template:T]]
-						// {{:T}}嵌入[[T]]
-						// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
-						parameters.page_title = 'Template:';
-					}
+					&& !PATTERN_template_namespaces.test(namespace)
+					// wiki_API.namespace.hash using lower case
+					&& (namespace.toLowerCase() in wiki_API.namespace.hash);
+
+					// {{T}}嵌入[[Template:T]]
+					// {{Template:T}}嵌入[[Template:T]]
+					// {{:T}}嵌入[[T]]
+					// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
 					parameters.page_title
 					// .page_name
-					= wiki_API.normalize_title(parameters.page_title
-							+ parameters.name);
+					= wiki_API.normalize_title((not_template_name ? namespace
+							: 'Template')
+							+ ':' + parameters.name);
+
+					if (not_template_name) {
+						parameters.name = parameters.page_title;
+					}
 				}
 			}
 			parameters.parameters = _parameters;

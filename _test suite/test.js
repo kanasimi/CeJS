@@ -3050,6 +3050,16 @@ function test_wiki() {
 		assert([, parsed.parameters.link2], 'wiki.parse.transclusion #2-5');
 		assert(['L3', parsed.parameters.link3], 'wiki.parse.transclusion #2-6');
 		assert(['L4', parsed.parameters.link4], 'wiki.parse.transclusion #2-7');
+		assert(['L', parsed.name], 'wiki.parse.transclusion #2-8');
+		assert(['Template:L', parsed.page_title], 'wiki.parse.transclusion #2-9');
+		wikitext = '{{Wikipedia:削除依頼/ログ}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #3-1');
+		assert(['Wikipedia:削除依頼/ログ', parsed.name], 'wiki.parse.transclusion #3-2');
+		assert(['Wikipedia:削除依頼/ログ', parsed.page_title], 'wiki.parse.transclusion #3-3');
+		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-1 days +9 hours}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #4-1');
+		assert(['Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-1 days +9 hours}}', parsed.name], 'wiki.parse.transclusion #4-2');
+		assert(['Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-1 days +9 hours}}', parsed.page_title], 'wiki.parse.transclusion #4-3');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
