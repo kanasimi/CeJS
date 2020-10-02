@@ -3345,7 +3345,8 @@ function module_code(library_namespace) {
 			if (!Array.isArray(_unique)) {
 				// return '';
 				// return;
-				return [];
+				return use_String ? '' : _unique;
+				// return [];
 			}
 
 			// _unique = [ from index, to index ]
