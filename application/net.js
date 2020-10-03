@@ -187,7 +187,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}URI
 	 *            URI to parse
-	 * @param {String}[base_url]
+	 * @param {String}[base_uri]
 	 *            當做基底的 URL
 	 * 
 	 * @return parsed object
@@ -204,11 +204,12 @@ function module_code(library_namespace) {
 	 *      https://developer.mozilla.org/en/DOM/window.location, also see
 	 *      batURL.htm
 	 */
-	function parse_URI(URI, base_url) {
+	function parse_URI(URI, base_uri) {
 		if (!URI
 		// 不能用 instanceof String!
-		|| typeof URI !== 'string')
-			return URI;
+		|| typeof URI !== 'string') {
+			return;
+		}
 		var href = URI, matched = href
 				.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Z]:|[^\/#?&\s:]+)([^\s:]*)$/i), tmp, path;
 		if (!matched)
@@ -217,7 +218,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('parse [' + URI + ']: '
 				+ matched.join('<br />\n'), 2);
 
-		URI = base_url && parse_URI(base_url)
+		URI = base_uri && parse_URI(base_uri)
 		//
 		|| (library_namespace.is_WWW() ? {
 			// protocol包含最後的':',search包含'?',hash包含'#'.
@@ -1835,9 +1836,9 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------
 
-	var globalThis = library_namespace.env.global;
+	// var globalThis = library_namespace.env.global;
 	if (library_namespace.is_WWW(true)) {
-		set_method(globalThis, {
+		library_namespace.set_method(library_namespace.env.global, {
 			// defective polyfill for W3C URL(), URLSearchParams()
 			// Warning: parse_URI returns read-only object!
 			URL : function URL(url) {

@@ -3159,7 +3159,8 @@ function module_code(library_namespace) {
 	 * @see 20181016.import_earthquake_shakemap.js
 	 */
 
-	// simple polyfill for fetch API https://github.com/node-fetch/node-fetch
+	// defective polyfill for W3C fetch API
+	// https://github.com/node-fetch/node-fetch
 	// @since 2018/10/16 17:47:12
 	// https://fetch.spec.whatwg.org/#fetch-method
 	// https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API
