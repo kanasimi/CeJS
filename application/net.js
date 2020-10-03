@@ -153,6 +153,8 @@ function module_code(library_namespace) {
 		if (!library_namespace.global.DOMStringMap)
 			library_namespace.global.DOMStringMap = library_namespace.setting_pair;
 
+	// ------------------------------------------------------------------------
+
 	/**
 	 * Parses URI.
 	 * 
@@ -185,8 +187,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}URI
 	 *            URI to parse
-	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項
+	 * @param {String}[base_url]
+	 *            當做基底的 URL
 	 * 
 	 * @return parsed object
 	 * 
@@ -194,6 +196,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @_memberOf _module_
 	 * 
+	 * @see https://developer.mozilla.org/en-US/docs/Web/API/URL_API
 	 * @see RFC 1738, RFC 2396, RFC 3986, Uniform Resource Identifier (URI):
 	 *      Generic Syntax, http://tools.ietf.org/html/rfc3987,
 	 *      http://flanders.co.nz/2009/11/08/a-good-url-regular-expression-repost/,
@@ -201,11 +204,11 @@ function module_code(library_namespace) {
 	 *      https://developer.mozilla.org/en/DOM/window.location, also see
 	 *      batURL.htm
 	 */
-	function parse_URI(URI, options) {
+	function parse_URI(URI, base_url) {
 		if (!URI
 		// 不能用 instanceof String!
 		|| typeof URI !== 'string')
-			return;
+			return URI;
 		var href = URI, matched = href
 				.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Z]:|[^\/#?&\s:]+)([^\s:]*)$/i), tmp, path;
 		if (!matched)
@@ -214,7 +217,9 @@ function module_code(library_namespace) {
 		library_namespace.debug('parse [' + URI + ']: '
 				+ matched.join('<br />\n'), 2);
 
-		URI = library_namespace.is_WWW() ? {
+		URI = base_url && parse_URI(base_url)
+		//
+		|| (library_namespace.is_WWW() ? {
 			// protocol包含最後的':',search包含'?',hash包含'#'.
 			// file|telnet|ftp|https
 			protocol : location.protocol,
@@ -223,10 +228,10 @@ function module_code(library_namespace) {
 			host : location.host,
 			// local file @ IE: C:\xx\xx\ff, others: /C:/xx/xx/ff
 			pathname : location.pathname
-		} : Object.create(null);
-		URI.URI = href;
+		} : Object.create(null));
+		// URI.URI = href;
 
-		tmp = matched[1] || options && options.protocol;
+		tmp = matched[1];
 		if (tmp)
 			URI.protocol = tmp;
 		URI._protocol = URI.protocol.slice(0, -1);
@@ -300,7 +305,8 @@ function module_code(library_namespace) {
 					: matched[2];
 			URI.filename = matched[3];
 			URI.search = matched[4];
-			URI._search = parse_URI.parse_search(matched[5]);
+			// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+			URI.search_params = parse_URI.parse_search(matched[5]);
 			URI.hash = matched[6];
 			URI._hash = matched[7];
 		} else {
@@ -310,29 +316,55 @@ function module_code(library_namespace) {
 		}
 		library_namespace.debug('path: [' + URI.path + ']', 2);
 
+		URI.toString = URI_toString;
+		URI.toString();
+
+		library_namespace.debug('href: [' + URI.href + ']', 2);
+		return URI;
+	}
+
+	function URI_toString() {
+		var URI = this;
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
 		URI.href = (URI.protocol ? URI.protocol + '//' : '')
 				+ (URI.username ? URI.username
 						+ (URI.password ? ':' + URI.password : '') + '@' : '')
 				+ URI.host + URI.pathname + (URI.search || '')
 				+ (URI.hash || '');
-
-		library_namespace.debug('href: [' + URI.href + ']', 2);
-		return URI;
+		return URI.href;
 	}
 
-	parse_URI.parse_search = function parse_search(string, param, options) {
-		var data = typeof string === 'string' ? string.replace(/\+/g, '%20')
-				.split(/&/) : [], i = 0, l = data.length, name, value, matched;
-		if (!library_namespace.is_Object(param))
-			param = Object.create(null);
-		if (!library_namespace.is_Object(options))
-			options = Object.create(null);
+	function params_toString() {
+		var list = [];
+		for ( var key in this) {
+			// Warning: may need remove toString
+			list.push(encodeURIComponent(key) + '='
+					+ encodeURIComponent(this[key]));
+		}
+		list = list.join('&');
+		return list;
+	}
+
+	/**
+	 * 
+	 * @param {String}search_string
+	 * @param {Object}[param]
+	 *            append these parameters
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @see https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+	 */
+	function parse_search(search_string, param, options) {
+		var data = typeof search_string === 'string' ? search_string.replace(
+				/\+/g, '%20').split(/&/) : [], i = 0, l = data.length, name, value, matched;
+		param = library_namespace.setup_options(param);
+		options = library_namespace.setup_options(options);
 
 		for (; i < l; i++)
 			if (data[i]) {
 				if (matched = data[i].match(/^([^=]+)=(.*)$/)) {
-					name = matched[1];
+					name = decodeURIComponent(matched[1]);
 					value = decodeURIComponent(matched[2]);
 				} else {
 					name = data[i];
@@ -377,11 +409,31 @@ function module_code(library_namespace) {
 				if (!Array.isArray(param[name]))
 					param[name] = [ param[name] ];
 
+		Object.defineProperty(param, 'toString', params_toString);
+
 		return param;
-	};
+	}
+
+	parse_URI.parse_search = parse_search;
 
 	_// JSDT:_module_
 	.parse_URI = parse_URI;
+
+	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+	function URLSearchParams_add_parameters(parameters) {
+		if (Array.isArray(parameters))
+			parameters = parameters.join('&');
+		// assert: typeof parameters === 'object'
+		// || typeof parameters === 'string'
+		parameters = new URLSearchParams(parameters);
+
+		var search = this;
+		parameters.forEach(function(value, key) {
+			search.append(key, value);
+		});
+	}
+
+	// ------------------------------------------------------------------------
 
 	/**
 	 * 正規化 file name，排除會導致 error 的字元。 normalize file name
@@ -1090,10 +1142,10 @@ function module_code(library_namespace) {
 								.debug('URI.filename: ' + URI.filename, 2,
 										'get_video');
 						if (URI.filename === 'watch_videos') {
-							matched = URI._search.video_ids.split(',');
-							URI._search.v = matched[URI._search.index | 0];
-							matched[URI._search.index | 0] = '<b style="color:#f80;">'
-									+ URI._search.v + '</b>';
+							matched = URI.search_params.video_ids.split(',');
+							URI.search_params.v = matched[URI.search_params.index | 0];
+							matched[URI.search_params.index | 0] = '<b style="color:#f80;">'
+									+ URI.search_params.v + '</b>';
 							library_namespace
 									.info([
 											'All ',
@@ -1105,7 +1157,8 @@ function module_code(library_namespace) {
 						}
 
 						if (URI.filename === 'playlist') {
-							if (matched = URI._search.list.match(/^PL(.+)/)) {
+							if (matched = URI.search_params.list
+									.match(/^PL(.+)/)) {
 								// 取得 title 並創建 sub-directory。
 								var playlist_id = matched[1], url;
 								if (false) {
@@ -1248,15 +1301,16 @@ function module_code(library_namespace) {
 							}
 
 						} else if (video_info = get_video.get_information(
-								URI._search.v, download_to)) {
+								URI.search_params.v, download_to)) {
 							// TODO: 測試 "list="。
 
 							info_hash[title = video_info.title] = video_info;
 
-							library_namespace.info([ URI._search.v, ' [', {
-								b : title,
-								S : 'color:#f80;'
-							}, ']' ]);
+							library_namespace.info([ URI.search_params.v, ' [',
+									{
+										b : title,
+										S : 'color:#f80;'
+									}, ']' ]);
 
 							if (download_to && video_info.best) {
 								var setting = get_video.getter_setting,
@@ -1268,8 +1322,8 @@ function module_code(library_namespace) {
 												+ (video_info.author ? '['
 														+ video_info.author
 														+ '] ' : '') + title
-												+ ' [' + URI._search.v + ']',
-												true) + '.'
+												+ ' [' + URI.search_params.v
+												+ ']', true) + '.'
 										+ video_info.best.extension;
 								if (FSO.FileExists(target)) {
 									library_namespace.warn('File exists: ['
@@ -1303,7 +1357,7 @@ function module_code(library_namespace) {
 										};
 
 								setting.referer = 'http://www.youtube.com/watch?v='
-										+ URI._search.v;
+										+ URI.search_params.v;
 								setting.temporary_file
 								// 處理 folder 為特殊名稱，因此 curl 或 console 無法 handle
 								// 的情況。
@@ -1312,7 +1366,7 @@ function module_code(library_namespace) {
 										.test(download_to) ? download_to
 										: options.base_directory || '')
 										// e.g., xxxxxxxxxxx.mp4
-										+ URI._search.v
+										+ URI.search_params.v
 										+ '.'
 										+ video_info.best.extension;
 
@@ -1777,6 +1831,26 @@ function module_code(library_namespace) {
 		site.Close();
 
 		return 1;
+	}
+
+	// ---------------------------------------------------------------
+
+	var globalThis = library_namespace.env.global;
+	if (library_namespace.is_WWW(true)) {
+		set_method(globalThis, {
+			// defective polyfill for W3C URL(), URLSearchParams()
+			// Warning: parse_URI returns read-only object!
+			URL : function URL(url) {
+				Object.assign(this, parse_URI(url));
+			},
+			URLSearchParams : function URLSearchParams(search_string) {
+				return new Map(Object.entries(
+				// Warning: new Map() 少了許多必要的功能! 不能完全替代!
+				parse_URI.parse_search(search_string)));
+			}
+		});
+
+		URLSearchParams.prototype.add_parameters = URLSearchParams_add_parameters;
 	}
 
 	return (_// JSDT:_module_
