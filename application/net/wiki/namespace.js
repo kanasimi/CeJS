@@ -48,6 +48,24 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	wiki_API.general_parameters = {
+		format : 'json',
+		// https://www.mediawiki.org/w/api.php?action=help&modules=json
+		// 加上 "&utf8", "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
+		utf8 : 1
+	};
+	wiki_API.general_parameters_normalizer = {
+		// for cross-domain AJAX request (CORS)
+		origin : function(value) {
+			if (value === true)
+				value = '*';
+			return value;
+		},
+
+		format : 'string',
+		utf8 : 'boolean|number|string'
+	};
+
 	/** {String} old key: 'wiki' */
 	var KEY_SESSION = 'session', KEY_HOST_SESSION = 'host';
 
@@ -520,6 +538,9 @@ function module_code(library_namespace) {
 					// Special:ApiFeatureUsage&wpagent=CeJS script_name
 					wiki.get_URL_options.headers['User-Agent'] = library_namespace.get_URL.default_user_agent;
 				}
+			} else {
+				// e.g., using XMLHttpRequest @ WWW
+				session.get_URL_options = {};
 			}
 
 		}

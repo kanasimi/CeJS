@@ -184,6 +184,27 @@ function module_code(library_namespace) {
 		}
 		// console.trace(this);
 
+		this.general_parameters = Object.clone(wiki_API.general_parameters);
+		library_namespace.import_options(options,
+		//
+		wiki_API.general_parameters_normalizer, this.general_parameters);
+		if (library_namespace.is_WWW(true) && window.location
+		// For non-authenticated requests, specify the value *. This
+		// will cause the Access-Control-Allow-Origin header to be set,
+		// but Access-Control-Allow-Credentials will be false and all
+		// user-specific data will be restricted.
+		&& this.general_parameters.origin !== '*') {
+			var host;
+			if (!window.location.host
+			// e.g., locale file: window.location.host===""
+			|| window.location.host !== (host = new URL(this.API_URL).host)
+					&& host !== this.general_parameters.origin) {
+				library_namespace
+						.warn('wiki_API: You may need to set .origin = "'
+								+ host + '"!');
+			}
+		}
+
 		// ------------------------------------------------
 		// pre-loading functions
 

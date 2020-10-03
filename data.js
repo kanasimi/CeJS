@@ -2085,6 +2085,13 @@ function module_code(library_namespace) {
 		return value in this;
 	}
 
+	/**
+	 * 
+	 * @param filter
+	 * @returns
+	 * 
+	 * @see function receive() @ CeL.application.net.wiki.page
+	 */
 	function generate_filter(filter) {
 		if (!filter)
 			return;
@@ -2106,6 +2113,194 @@ function module_code(library_namespace) {
 	}
 
 	_.generate_filter = generate_filter;
+
+	// ---------------------------------------------------------------------//
+
+	function is_natural(value) {
+		return value >= 1 && Math.floor(value) === value;
+	}
+	// is_non_negative
+	function is_natural_or_0(value) {
+		return value >= 0 && Math.floor(value) === value;
+	}
+	function is_integer(value) {
+		return Math.floor(value) === value;
+	}
+	import_options.filters = {
+		number : {
+			range : function in_range(value) {
+				return (typeof this[0] !== 'number' || this[0] <= value)
+						&& (typeof this[1] !== 'number' || value <= this[1]);
+			},
+
+			natural : is_natural,
+			'ℕ' : is_natural,
+			'natural+0' : is_natural_or_0,
+			'ℕ+0' : is_natural_or_0,
+			integer : is_integer
+		}
+	};
+
+	/**
+	 * @inner
+	 */
+	function string_options_to_normalizer(string_normalizer) {
+		var normalizer = Object.create(null);
+
+		string_normalizer.split('|').forEach(function(type) {
+			var matched = type.match(/^([a-z]+):([\s\S]+)$/);
+			if (!matched) {
+				normalizer[type] = true;
+				return;
+			}
+
+			type = matched[1];
+			// condition
+			var _normalizer = matched[2];
+			if (_normalizer in import_options.filters[type]) {
+				_normalizer = import_options.filters[type][_normalizer];
+
+			} else if (type === 'number' && (matched = _normalizer.match(
+			// [ all, min, max ]
+			/([+\-]?\d+(?:\.\d+)?)?[–~]([+\-]?\d+(?:\.\d+)?)?/))) {
+				_normalizer = import_options.filters[type]
+				// this: [ min, max ]
+				.range.bind([ matched[1] && +matched[1],
+				//
+				matched[2] && +matched[2] ]);
+
+			} else if (type === 'string') {
+				matched = _normalizer.match(
+				//		
+				/^\/((?:\\.|[^\/])+)\/([iugms]*)/);
+				if (matched) {
+					_normalizer = new RegExp(matched[1], matched[2]);
+				} else {
+					_normalizer = _normalizer.split(';');
+				}
+
+			} else {
+				library_namespace.warn('import_options: Invalid normalizer: '
+				//
+				+ _normalizer);
+			}
+
+			normalizer[type] = _normalizer;
+		});
+
+		return normalizer;
+	}
+
+	/**
+	 * 將 options 裡面可使用之選項（依照 options_normalizer 之定義），篩選、正規化並提取至 target。
+	 * 
+	 * @param {Object}options
+	 * @param {Object|String|Function}options_normalizer
+	 *            options allowed
+	 * @param {Object}[target]
+	 *            target options to modify
+	 * @returns
+	 * 
+	 * @see function verify_arg(key, value), function
+	 * generate_argument_condition(condition) @ CeL.application.net.work_crawler.arguments
+	 */
+	function import_options(options, options_normalizer, target) {
+		options = library_namespace.setup_options(options);
+		if (!target) {
+			target = Object.create(null);
+		}
+
+		for ( var key in options) {
+			var value = options[key];
+			var normalizer = options_normalizer && options_normalizer[key];
+			if (typeof normalizer === 'string') {
+				// e.g., 'boolean|string:changed;multi_parts_changed'
+				normalizer = string_options_to_normalizer(normalizer);
+				console.trace(normalizer);
+			}
+
+			if (typeof normalizer === 'object') {
+				var type = Array.isArray(value) ? 'Array'
+				//
+				: library_namespace.is_RegExp(value) ? 'RegExp'
+				//
+				: library_namespace.is_Date(value) ? 'Date' : null;
+				if (!type || !(type in normalizer)
+						&& !((type = type.toLowerCase()) in normalizer)) {
+					type = typeof value;
+				}
+
+				if (type in normalizer) {
+					normalizer = normalizer[type];
+				} else {
+					// invalid value type
+					continue;
+				}
+			}
+
+			if (normalizer === undefined && options_normalizer) {
+				// invalid key / parameter name
+				continue;
+			}
+
+			if (typeof normalizer === 'function') {
+				value = normalizer(value);
+			} else if (!import_options.fit(value, normalizer)) {
+				// treat normalizer as filter
+				// invalid value
+				continue;
+			}
+
+			if (value !== import_options.INVALID
+			// && value !== undefined
+			) {
+				target[key] = value;
+			}
+		}
+
+		// console.trace(target);
+		return target;
+	}
+
+	import_options.INVALID = {
+		invalid_value : true
+	};
+
+	/**
+	 * validity value
+	 * 
+	 * @param value
+	 *            value to test
+	 * @param {Function|RegExp|Array}filter
+	 * 
+	 * @see function generate_filter(filter)
+	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern
+	 */
+	import_options.fit = function(value, filter) {
+		if (filter === true)
+			return true;
+		if (false && typeof filter === 'boolean')
+			return filter;
+
+		if (library_namespace.is_RegExp(filter))
+			return filter.test(value);
+
+		if (typeof filter === 'function')
+			return filter(value);
+
+		if (typeof filter === 'string') {
+			return filter === value;
+			// return filter.includes(value);
+		}
+
+		if (Array.isArray(filter))
+			return filter.includes(value);
+
+		if (false && library_namespace.is_Object(filter))
+			return value in filter;
+	};
+
+	_.import_options = import_options;
 
 	// ---------------------------------------------------------------------//
 

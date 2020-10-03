@@ -288,8 +288,12 @@ function module_code(library_namespace) {
 		action[2] ? action[0] + (action[2].startsWith('&') ? '' : '&')
 		//
 		+ action[2] : action[0], Object.create(null) ];
-		if (!action[1].format) {
-			// 加上 "&utf8", "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
+		if (session && session.general_parameters) {
+			// console.trace(session.general_parameters);
+			action[0] = get_URL.add_parameter(action[0],
+					session.general_parameters);
+			// console.trace(action);
+		} else if (!action[1].format) {
 			action[0] = get_URL.add_parameter(action[0], 'format=json&utf8');
 		}
 
