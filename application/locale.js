@@ -831,6 +831,7 @@ function module_code(library_namespace) {
 			// http://stackoverflow.com/questions/1043339/javascript-for-detecting-browser-language-preference
 			return gettext.to_standard(navigator.userLanguage
 					|| navigator.language
+					// || navigator.languages && navigator.languages[0]
 					// IE 11
 					|| navigator.browserLanguage || navigator.systemLanguage);
 		}

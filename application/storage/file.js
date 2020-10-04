@@ -243,20 +243,16 @@ function module_code(library_namespace) {
 	 * TODO: 找出最大連續相同路徑。
 	 * 
 	 * @example <code>
-	 * CeL.run('application.storage.file',function(){CeL.set_debug(2);CeL.log(CeL.get_relative_path('a/b/same/d/file','same/e/'));});
-	 * </code>
-	 * 
-	 * <code>
-	 * CeL.set_debug(2);CeL.get_relative_path('a/b/same/d/f/file','e/r/t/same/e/',1);
-	 * </code>
-	 * 
-	 * <code>
-	 * base_path = CeL.get_relative_path('kanashimi/www/cgi-bin/game/');
-	 * </code>
-	 * 
-	 * <code>
-	 * //	想要保持 Protocol，但卻是不同機器時。	<a href="http://nedbatchelder.com/blog/200710.html#e20071017T215538" accessdate="2011/8/28 0:18" title="Ned Batchelder: October 2007">Http-https transitions and relative URLs</a>
-	 * CeL.get_relative_path('cgi-bin/game/photo/','//lyrics.meicho.com.tw/game/game.pl?seg=diary21',1);
+
+	CeL.run('application.storage.file',function(){CeL.set_debug(2);CeL.log(CeL.get_relative_path('a/b/same/d/file','same/e/'));});
+
+	CeL.set_debug(2);CeL.get_relative_path('a/b/same/d/f/file','e/r/t/same/e/',1);
+
+	base_path = CeL.get_relative_path('kanashimi/www/cgi-bin/game/');
+
+	//	想要保持 Protocol，但卻是不同機器時。	<a href="http://nedbatchelder.com/blog/200710.html#e20071017T215538" accessdate="2011/8/28 0:18" title="Ned Batchelder: October 2007">Http-https transitions and relative URLs</a>
+	CeL.get_relative_path('cgi-bin/game/photo/','//lyrics.meicho.com.tw/game/game.pl?seg=diary21',1);
+
 	 * </code>
 	 * 
 	 * @param {String}

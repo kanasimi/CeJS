@@ -956,7 +956,14 @@ function module_code(library_namespace) {
 		Old_vfd_multi : {
 			names : Old_vfd_multi__names,
 			main_name : Old_vfd_multi__main_name,
-			// CeL.wiki.template_functions.Old_vfd_multi.parse()
+			/**
+			 * @example<code>
+			const item_list = CeL.wiki.template_functions.Old_vfd_multi.parse_page(page_data, {
+				unique: true,
+				additional_parameters
+			});
+			</code>
+			 */
 			parse_page : parse_Old_vfd_multi_page,
 			unique_item_list : Old_vfd_multi__unique_item_list,
 

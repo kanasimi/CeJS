@@ -449,7 +449,7 @@ function module_code(library_namespace) {
 		var language_and_key,
 		// 須與 wikidata_search() 相同!
 		// TODO: 可以 guess_language(key) 猜測語言。
-		language = options.language || wiki_API.site_name(options, {
+		language = options && options.language || wiki_API.site_name(options, {
 			get_all_properties : true
 		}).language,
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities

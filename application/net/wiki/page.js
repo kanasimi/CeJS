@@ -1383,7 +1383,8 @@ function module_code(library_namespace) {
 			if (options.with_diff === true) {
 				options.with_diff = {
 					LCS : true,
-				// line : true,
+					// MediaWiki using line-diff
+					line : true,
 				// line : false,
 				// index : 2,
 				// with_list : true
@@ -1634,6 +1635,7 @@ function module_code(library_namespace) {
 				}
 
 				if (options.filter && rows.length > 0) {
+					// @see import_options.fit @ CeL.data
 					// TODO: 把篩選功能放到 get_recent()，減少資料處理的成本。
 					rows = rows.filter(
 					// 篩選函數。rcprop必須加上篩選函數需要的資料，例如編輯摘要。
@@ -1716,7 +1718,7 @@ function module_code(library_namespace) {
 								page_options.rvendid = row.old_revid;
 							}
 
-							page_options = Object.assign({
+							page_options = {
 								is_id : true,
 								rvlimit : options.with_content >= 3
 								// default: 僅取最近的兩個版本作 diff
@@ -1728,7 +1730,10 @@ function module_code(library_namespace) {
 								// minor:'',anon:''/* e.g., IP user 匿名用戶 */,
 								// bot flag: ('bot' in row)
 								: 'ids|timestamp|content|user|flags|size'
-							}, options.with_diff);
+							};
+							if (false) {
+								Object.assign(page_options, options.with_diff);
+							}
 
 							session.page(row.pageid,
 							//

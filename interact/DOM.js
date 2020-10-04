@@ -6045,6 +6045,8 @@ function module_code(library_namespace) {
 	 * @_memberOf _module_
 	 */
 	function get_style(element, name, options) {
+		// CeL.get_style(element, 'display')
+		// window.getComputedStyle(element).display
 		if (element && typeof element === 'string')
 			element = document.getElementById(element);
 
@@ -9031,10 +9033,10 @@ _
 				C : auto_TOC.CSS_prefix + 'control',
 				title : gettext('expand'),
 				onclick : function() {
-					var expand = toggle_display(TOC_list) !== 'none';
-					// show/hide (顯示/隱藏), 展開/收合目錄
-					this.title = gettext(expand ? 'collapse' : 'expand');
-					if (expand)
+					var expand_now = toggle_display(TOC_list) !== 'none';
+					// show/hide (顯示/隱藏), 展開/收合目錄 click to expand
+					this.title = gettext(expand_now ? 'collapse' : 'expand');
+					if (expand_now)
 						set_height();
 				}
 			}, {

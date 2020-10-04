@@ -1557,8 +1557,9 @@ function finish(name_space) {
 					condition_handler(_c, index);
 				} catch (e) {
 					// 執行 condition 時出錯，throw 時的處置。
-					fatal = true;
+					fatal = e || true;
 					CeL.warn('assert: 執行 condition 時出錯: ' + e.message);
+					// console.trace(e);
 				}
 			});
 
@@ -1862,6 +1863,7 @@ function finish(name_space) {
 					}
 
 				} catch (e) {
+					// console.trace(e);
 					recorder.fatal.push(condition_arguments);
 					return;
 				}
@@ -1990,6 +1992,7 @@ function finish(name_space) {
 						try {
 							test_function(finish_test);
 						} catch (e) {
+							// console.trace(e);
 							recorder.fatal.push(test_name);
 						}
 						finish_test(test_name);
@@ -2021,6 +2024,13 @@ function finish(name_space) {
 						conditions(assert_proxy, setup_test, finish_test);
 					}
 				} catch (e) {
+					// has_console
+					if (typeof console === 'object' && console.error) {
+						// Will show stacks
+						console.error(e);
+					} else {
+						CeL.error(e);
+					}
 					conditions_error(e);
 				}
 			}

@@ -876,7 +876,8 @@ function module_code(library_namespace) {
 			comment : undefined,
 			// must be set to reupload
 			ignorewarnings : undefined,
-			// 無此標籤的話可能會造成 [tags-apply-not-allowed-one]
+			// "tag1|tag2"
+			// 指定不存在的標籤，可能會造成 [tags-apply-not-allowed-one]
 			// The tag "..." is not allowed to be manually applied.
 			tags : undefined,
 			// 如果設置，服務器將臨時藏匿文件而不是加入存儲庫。

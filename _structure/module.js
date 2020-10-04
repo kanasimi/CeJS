@@ -1374,7 +1374,7 @@ if (typeof CeL === 'function') {
 		 *            path 欲轉化之 path
 		 * @returns {String} path
 		 */
-		simplify_path = function(path) {
+		simplify_path = function simplify_path(path) {
 			if (typeof path !== 'string')
 				return path;
 

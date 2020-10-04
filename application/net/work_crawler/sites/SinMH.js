@@ -321,6 +321,8 @@ function module_code(library_namespace) {
 			this.check_filtered(work_data, html, get_label,
 			//
 			latest_chapter_list);
+			// console.log(work_data.chapter_list);
+			// throw work_data.chapter_list.length;
 		},
 		// 注意：在呼叫本函數之前，不可改變 html！
 		check_filtered : function(work_data, html, get_label,
