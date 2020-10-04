@@ -2042,8 +2042,8 @@ function test_net() {
 		[['https://host1.name.org/path/to/file.htm', CeL.get_full_URL('https://host1.name.org/path/to/file.htm', 'https://host.name/root/sub/CGI.pl')], 'get_full_URL() #5'],
 		[['https://host1.name.org/path/to/file.htm', CeL.get_full_URL('https://host1.name.org/path/to/file.htm', 'https://host.name/root/sub/')], 'get_full_URL() #6'],
 
-		[[typeof URL, 'function'], 'parse_URI() #1'],
-		// TODO
+		// TODO:
+		//[[typeof URL, 'function'], 'parse_URI() #1'],
 	]);
 }
 
