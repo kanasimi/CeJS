@@ -765,10 +765,12 @@ function module_code(library_namespace) {
 			 * 
 			 * @see PATTERN_PROJECT_CODE
 			 */
-			// console.log(matched);
+			// console.trace(matched);
+			// console.trace(session);
 			library_namespace.debug(language, 4, 'language_to_site_name');
 			family = family || matched[4];
-			language = matched[3];
+			// incase 'https://test.wikidata.org/w/api.php'
+			language = matched[3] !== 'test' && matched[3] || wiki_API.language;
 		} else if (matched = language.match(/^([a-z\d\-_]+)\.([a-z\d\-_]+)/)) {
 			language = matched[1];
 			family = family || matched[2];

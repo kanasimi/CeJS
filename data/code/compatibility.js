@@ -2978,7 +2978,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------
 
 	/**
-	 * defective polyfill for W3C URL(), URLSearchParams() @ CeL.application.net.
+	 * defective polyfill for W3C URL API, URLSearchParams() @ CeL.application.net.
 	 * 
 	 * defective polyfill for W3C fetch API @ CeL.application.net.Ajax.
 	 */

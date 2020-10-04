@@ -415,7 +415,7 @@ function module_code(library_namespace) {
 	}
 
 	// {Object}parameter hash to String
-	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
 	function parameters_to_String(parameters, charset) {
 		if (!library_namespace.is_Object(parameters)) {
 			if (typeof parameters !== 'string' && parameters !== undefined) {
@@ -448,6 +448,11 @@ function module_code(library_namespace) {
 
 	// parameter String to hash
 	function parse_parameters(parameters) {
+		// TODO:
+		if (false) {
+			return library_namespace.parse_URI.parse_search(parameters);
+		}
+
 		if (library_namespace.is_Object(parameters)) {
 			return parameters;
 		}
@@ -479,29 +484,41 @@ function module_code(library_namespace) {
 		return hash;
 	}
 
-	function add_parameter(URL, search, hash, charset) {
+	function add_parameter(url, search, hash, charset) {
+		// TODO:
+		if (false) {
+			url = new URL(url);
+			url.searchParams.add_parameters(search);
+			if (hash) {
+				url.hash = '#'
+						+ (new URLSearchParams(url.hash.slice(1)))
+								.add_parameters(hash);
+			}
+			return url.toString(charset);
+		}
+
 		if (search || hash) {
-			URL = URL.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+			url = url.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
 			if (search = get_URL.parameters_to_String(search, charset)) {
 				if (search.startsWith('?')) {
-					if (URL[2])
-						search = URL[2] + '&' + search.slice(1);
+					if (url[2])
+						search = url[2] + '&' + search.slice(1);
 				} else
-					search = (URL[2] ? URL[2] + '&' : '?') + search;
+					search = (url[2] ? url[2] + '&' : '?') + search;
 			} else
-				search = URL[2] || '';
+				search = url[2] || '';
 
 			if (hash = get_URL.parameters_to_String(hash, charset)) {
 				if (!hash.startsWith('#'))
 					hash = '#' + hash;
-				hash = (URL[3] || '') + hash;
+				hash = (url[3] || '') + hash;
 			} else
-				hash = URL[3] || '';
+				hash = url[3] || '';
 
-			URL = URL[1] + search + hash;
+			url = url[1] + search + hash;
 		}
 
-		return URL;
+		return url;
 	}
 
 	get_URL.parameters_to_String = parameters_to_String;

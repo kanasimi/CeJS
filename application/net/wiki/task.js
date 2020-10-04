@@ -161,6 +161,8 @@ function module_code(library_namespace) {
 			wiki_API.setup_data_session(this /* session */,
 			// 確保 data_session login 了才執行下一步。
 			function() {
+				// console.trace(_this);
+				// console.trace(_this.data_session);
 				// next[1] : callback of set_data
 				if (typeof next[1] === 'function')
 					next[1].call(_this);
@@ -840,7 +842,7 @@ function module_code(library_namespace) {
 			if (typeof tmp === 'object'
 			// wiki.upload(file_data + options, callback)
 			&& (tmp = tmp.file_path
-			//
+			// Get media from URL first.
 			|| tmp.media_url || tmp.file_url)) {
 				// shift arguments
 				next.splice(1, 0, tmp);
@@ -914,6 +916,7 @@ function module_code(library_namespace) {
 				this.running = false;
 			}
 
+			// wiki.listen(listener, options);
 			wiki_API.listen(next[1],
 			// next[2]: options to call wiki_API.listen()
 			add_session_to_options(this, next[2]));
@@ -962,6 +965,16 @@ function module_code(library_namespace) {
 				// 未設定/不設定 property
 				// shift arguments
 				next.splice(2, 0, null);
+			}
+
+			if (wiki_API.is_entity(next[1])) {
+				this.last_data = next[1];
+				// next[3] : callback
+				if (typeof next[3] === 'function') {
+					next[3].call(this, this.last_data);
+				}
+				this.next();
+				break;
 			}
 
 			// 因為前面利用cache時會檢查KEY_CORRESPOND_PAGE，且KEY_CORRESPOND_PAGE只會設定在page_data，
@@ -2503,7 +2516,7 @@ function module_code(library_namespace) {
 		// console.log(this);
 		wiki_API.query([ session.API_URL,
 		// https://www.mediawiki.org/wiki/API:Tokens
-		// 'query&meta=tokens&type=csrf|login|watch'
+		// 'query&meta=tokens&type=csrf|login|watchlist'
 		'query&meta=tokens' + (type ? '&type=' + type : '') ],
 		//
 		function(data) {

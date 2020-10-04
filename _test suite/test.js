@@ -559,7 +559,7 @@ function test_native() {
 		assert([0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(function (v) { return v.includes('a'); })], 'first_matched() #8');
 
 		assert(['2,8', Array.intersection([2, 3, 5, 6, 8], [1, 2, 4, 8, 9], true).join(',')], 'Array.intersection()');
-		assert(["cmn-Hans-CN", Array.intersection(["cmn-Hant-TW","cmn-Hans-CN","cmn-Hant-HK"], ["cmn-Hans-CN"]).join(',')], 'Array.intersection(string array)');
+		assert(["cmn-Hans-CN", Array.intersection(["cmn-Hant-TW", "cmn-Hans-CN", "cmn-Hant-HK"], ["cmn-Hans-CN"]).join(',')], 'Array.intersection(string array)');
 		assert(["aa ", "aa '''fff'''".remove_head_tail("'''")], 'string.remove_head_tail() #1');
 		assert(["aa f'ff", "aa '''f'ff'''".remove_head_tail("'''", 0, '')], 'string.remove_head_tail() #2');
 		assert(["aa b'b c'c dd ", "aa'''b'b'''c'c'''dd'''".remove_head_tail("'''", 0, ' ')], 'string.remove_head_tail() #3');
@@ -680,7 +680,6 @@ function test_data() {
 		[[2, CeL.count_word(" Abc, def. ")], 'count_word() #5'],
 	]);
 
-	
 }
 
 
@@ -1329,7 +1328,7 @@ function test_math() {
 			// ≈1.5 m @ Chrome/31.0.1640.0
 			var base = 10, limit = parseInt('1111', base) + 2, d = 1, n, numerator, denominator = new CeL.data.math.integer(d, null, base), q;
 
-			for (; d < limit; d++ , denominator.add(1)) {
+			for (; d < limit; d++, denominator.add(1)) {
 				for (n = 0; n < limit; n++) {
 					numerator = new CeL.data.math.integer(n, null, base);
 					q = numerator.division(denominator);
@@ -1560,7 +1559,7 @@ function test_math() {
 			var test_count = 101,
 				factor = 1, power = new CeL.data.math.integer('42364232342234'), I = new CeL.data.math.integer(factor), i = 0;
 			factor = Math.log(factor) / Math.log(power);
-			for (; i < test_count; i++ , I.multiply(power))
+			for (; i < test_count; i++, I.multiply(power))
 				assert([I.log(power), i + factor], 'power ' + i);
 		});
 	}
@@ -2042,6 +2041,9 @@ function test_net() {
 		[['https://host.name/path/to/file.htm', CeL.get_full_URL('/path/to/file.htm', 'https://host.name/root/sub/')], 'get_full_URL() #4'],
 		[['https://host1.name.org/path/to/file.htm', CeL.get_full_URL('https://host1.name.org/path/to/file.htm', 'https://host.name/root/sub/CGI.pl')], 'get_full_URL() #5'],
 		[['https://host1.name.org/path/to/file.htm', CeL.get_full_URL('https://host1.name.org/path/to/file.htm', 'https://host.name/root/sub/')], 'get_full_URL() #6'],
+
+		[[typeof URL, 'function'], 'parse_URI() #1'],
+		// TODO
 	]);
 }
 
@@ -2861,12 +2863,12 @@ function test_wiki() {
 		[['zhwiki', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php')], 'site_name #2'],
 		[['zhmoegirl', CeL.wiki.site_name('https://zh.moegirl.org/api.php')], 'site_name #3'],
 		[['zhmoegirl', CeL.wiki.site_name('https://zh.moegirl.org.cn/api.php')], 'site_name #3.1'],
-		[['wikipedia', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php',{get_all_properties:true}).family], 'site_name #4'],
-		[['zh', CeL.wiki.site_name('https://zh.moegirl.org/api.php',{get_all_properties:true}).language], 'site_name #5'],
-		[['zh', CeL.wiki.site_name('https://zh.moegirl.org.cn/api.php',{get_all_properties:true}).language], 'site_name #5.1'],
-		[['zh', CeL.wiki.site_name('zh.moegirl',{get_all_properties:true}).language], 'site_name #6'],
+		[['wikipedia', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php', { get_all_properties: true }).family], 'site_name #4'],
+		[['zh', CeL.wiki.site_name('https://zh.moegirl.org/api.php', { get_all_properties: true }).language], 'site_name #5'],
+		[['zh', CeL.wiki.site_name('https://zh.moegirl.org.cn/api.php', { get_all_properties: true }).language], 'site_name #5.1'],
+		[['zh', CeL.wiki.site_name('zh.moegirl', { get_all_properties: true }).language], 'site_name #6'],
 		[[CeL.wiki.site_name(), CeL.wiki.site_name('talk')], 'site_name #7'],
-		[['zhmoegirl', CeL.wiki.site_name('zh','moegirl')], 'site_name #8'],
+		[['zhmoegirl', CeL.wiki.site_name('zh', 'moegirl')], 'site_name #8'],
 		[['wikidatawiki', CeL.wiki.site_name('wikidata')], 'site_name #9'],
 		[['commonswiki', CeL.wiki.site_name('commons')], 'site_name #10'],
 	]);
@@ -2910,8 +2912,8 @@ function test_wiki() {
 		[['Wikipedia:NAME', CeL.wiki.talk_page_to_main('Wikipedia talk:NAME')], 'wiki.talk_page_to_main #6'],
 
 		[['!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
-		//
-		.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3')], 'file_pattern'],
+			//
+			.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3')], 'file_pattern'],
 
 		[[undefined, CeL.wiki.parse.template('a{temp}b', '')], '不包含模板'],
 		[[undefined, CeL.wiki.parse.template('a{{t}}b', 'temp')], '不包含此模板'],
@@ -3265,9 +3267,9 @@ function test_wiki() {
 		wikitext = '<b a="A">i</b>'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{=}} #4');
 
-		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1 : 'v1', 2 : 'v2', p1 : 'vp1', p2 : 'vp2' }) ], 'template_object_to_wikitext: #1');
-		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1 : 'v1', 2 : 'v2', 4 : 'v4', p1 : 'vp1' }) ], 'template_object_to_wikitext: #2');
-		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1 : 'v1', 2 : 'v2', p1 : 'vp1', q2 : 'vq2' }, function(text_array) { return text_array.filter(function(text, index) { return !/^q/.test(text); }); }) ], 'template_object_to_wikitext: #3');
+		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', p2: 'vp2' })], 'template_object_to_wikitext: #1');
+		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
+		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function (text_array) { return text_array.filter(function (text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');
 
 		var token;
 		token = CeL.wiki.parse('{{t|1}}');
@@ -3305,7 +3307,7 @@ function test_wiki() {
 		assert([2, CeL.wiki.parse.replace_parameter(token, { a: 'k =1', b: 'r = 1' })], 'wiki.parse.replace_parameter: #16-1');
 		assert(['{{t|k =1| v=4|r = 1}}', token.toString()], 'wiki.parse.replace_parameter: #16-2');
 		token = CeL.wiki.parse('{{t|p<!-- = -->=v}}');
-		assert(['{{t|p<!-- = -->=V}}', CeL.wiki.parse.replace_parameter(token, {p:'V'}, 'value_only') && token.toString()], 'wiki.parse.replace_parameter: #17');
+		assert(['{{t|p<!-- = -->=V}}', CeL.wiki.parse.replace_parameter(token, { p: 'V' }, 'value_only') && token.toString()], 'wiki.parse.replace_parameter: #17');
 
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{#parserfunctions:}} #1');
@@ -3371,7 +3373,7 @@ function test_wiki() {
 		wikitext = "[[A]]-{[[:三宝颜共和国]]}-BB ";
 		assert(["[[#A-%7b三宝颜共和国%7d-BB|A-{三宝颜共和国}-BB]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-2');
 		wikitext = "{{al|A|B}}";
-		assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, {site_name:'zhwiki'}).toString()], 'wiki.section_link #4-1');
+		assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { site_name: 'zhwiki' }).toString()], 'wiki.section_link #4-1');
 
 		wikitext = '#1\n#2\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #1');
@@ -3424,7 +3426,7 @@ function test_wiki() {
 	setup_test('CeL.wiki: asynchronous functions');
 	CeL.test('CeL.wiki: asynchronous functions', function (assert, _setup_test, _finish_test) {
 		var wiki = new CeL.wiki(null, null, 'en');
-		wiki.run(function() {
+		wiki.run(function () {
 			_setup_test('wiki: namespace');
 			assert(wiki.is_talk_namespace(wiki.to_talk_page('A: B')), 'wiki.is_talk_namespace() #1');
 
@@ -3441,18 +3443,18 @@ function test_wiki() {
 			_finish_test('wiki: namespace');
 		});
 
-		wiki.run(function() {
+		wiki.run(function () {
 			_setup_test('wiki: site_name');
 
 			assert(['enwiki', CeL.wiki.site_name(wiki)], 'CeL.wiki.site_name() #1');
-			assert(['zhwiki', CeL.wiki.site_name('zh',wiki)], 'CeL.wiki.site_name() #2');
-			assert(['zh_classicalwiki', CeL.wiki.site_name('lzh',wiki)], 'CeL.wiki.site_name() #3');
-			assert(['cswiki', CeL.wiki.site_name('cz',wiki)], 'CeL.wiki.site_name() #4');
-			assert([CeL.wiki.site_name(null,{session:wiki}), CeL.wiki.site_name('talk',{session:wiki})], 'CeL.wiki.site_name() #5');
-			assert(['https://commons.wikimedia.org/w/api.php', CeL.wiki.site_name('commons',{session:wiki,get_all_properties:true}).API_URL], 'CeL.wiki.site_name() #6');
-			assert(['https://cs.wikipedia.org/w/api.php', CeL.wiki.site_name('cz',{session:wiki,get_all_properties:true}).API_URL], 'CeL.wiki.site_name() #7');
-			assert(['wikidatawiki', CeL.wiki.site_name('wikidata',{session:wiki})], 'CeL.wiki.site_name() #8');
-			assert(['commonswiki', CeL.wiki.site_name('commons',{session:wiki})], 'CeL.wiki.site_name() #9');
+			assert(['zhwiki', CeL.wiki.site_name('zh', wiki)], 'CeL.wiki.site_name() #2');
+			assert(['zh_classicalwiki', CeL.wiki.site_name('lzh', wiki)], 'CeL.wiki.site_name() #3');
+			assert(['cswiki', CeL.wiki.site_name('cz', wiki)], 'CeL.wiki.site_name() #4');
+			assert([CeL.wiki.site_name(null, { session: wiki }), CeL.wiki.site_name('talk', { session: wiki })], 'CeL.wiki.site_name() #5');
+			assert(['https://commons.wikimedia.org/w/api.php', CeL.wiki.site_name('commons', { session: wiki, get_all_properties: true }).API_URL], 'CeL.wiki.site_name() #6');
+			assert(['https://cs.wikipedia.org/w/api.php', CeL.wiki.site_name('cz', { session: wiki, get_all_properties: true }).API_URL], 'CeL.wiki.site_name() #7');
+			assert(['wikidatawiki', CeL.wiki.site_name('wikidata', { session: wiki })], 'CeL.wiki.site_name() #8');
+			assert(['commonswiki', CeL.wiki.site_name('commons', { session: wiki })], 'CeL.wiki.site_name() #9');
 
 			_finish_test('wiki: site_name');
 		});
@@ -3497,7 +3499,7 @@ function test_wiki() {
 		}, 'zh-cn');
 
 		_setup_test('wiki: CeL.wiki.langlinks()');
-		CeL.wiki.langlinks([ 'zh', '文明' ], function (title) {
+		CeL.wiki.langlinks(['zh', '文明'], function (title) {
 			var test_name = 'wiki: CeL.wiki.langlinks()';
 			assert(['Civilization', title], test_name);
 			_finish_test(test_name);
@@ -3765,7 +3767,7 @@ function test_era() {
 	all_error_count += CeL.test('date.format()', [
 		[['3 February 1972', '1972-02-03'.to_Date().format({ locale: 'en', format: '%d %B %Y' })], 'format(1972-02-03)'],
 		// locale:'en-US'
-		[['2020 January 20', '2020-01-20'.to_Date().format({locale:'en',format:'%Y %B %d'})], 'format(2020-01-20)'],
+		[['2020 January 20', '2020-01-20'.to_Date().format({ locale: 'en', format: '%Y %B %d' })], 'format(2020-01-20)'],
 	]);
 
 	// 設計上所要求必須通過之測試範例：測試正確性。

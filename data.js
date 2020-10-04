@@ -2133,11 +2133,31 @@ function module_code(library_namespace) {
 						&& (typeof this[1] !== 'number' || value <= this[1]);
 			},
 
+			// 自然數 natural numbers ℕ*, ℕ+, ℕ>0, ℤ+
 			natural : is_natural,
 			'ℕ' : is_natural,
 			'natural+0' : is_natural_or_0,
+			// 'ℕ0'
 			'ℕ+0' : is_natural_or_0,
-			integer : is_integer
+			// 整數
+			integer : is_integer,
+			'ℤ' : is_integer
+		},
+		string : {
+			IPv4 : /^[12]?\d{1,2}\.[12]?\d{1,2}\.[12]?\d{1,2}\.[12]?\d{1,2}$/,
+
+			// RFC2822 :
+			// http://regexlib.com/DisplayPatterns.aspx
+			// /^(?:[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/,
+			email :
+			// http://www.regular-expressions.info/email.html
+			// /^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+([a-z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b$/i,
+			/^[a-z0-9+_~-]+(\.[a-z0-9+_~-]+)*@([a-z\d]([a-z\d-]*[a-z\d])?\.)+([a-z]{2}|com|org|net)\b$/i,
+
+			// 十進位小數
+			decimal : /^[+\-]?(?:\d+|\d*\.\d+)$/,
+			// 數字
+			digits : library_namespace.is_digits
 		}
 	};
 
@@ -2171,7 +2191,7 @@ function module_code(library_namespace) {
 
 			} else if (type === 'string') {
 				matched = _normalizer.match(
-				//		
+				//
 				/^\/((?:\\.|[^\/])+)\/([iugms]*)/);
 				if (matched) {
 					_normalizer = new RegExp(matched[1], matched[2]);
@@ -2201,8 +2221,9 @@ function module_code(library_namespace) {
 	 *            target options to modify
 	 * @returns
 	 * 
-	 * @see function verify_arg(key, value), function
-	 * generate_argument_condition(condition) @ CeL.application.net.work_crawler.arguments
+	 * @see function verify_arg(key, value)
+	 * @see function generate_argument_condition(condition) @ CeL.application.net.work_crawler.arguments
+	 * @see _.default_verify_pattern @ CeL.interact.form.select_input
 	 */
 	function import_options(options, options_normalizer, target) {
 		options = library_namespace.setup_options(options);
@@ -2282,6 +2303,7 @@ function module_code(library_namespace) {
 		if (false && typeof filter === 'boolean')
 			return filter;
 
+		// 驗證 pattern
 		if (library_namespace.is_RegExp(filter))
 			return filter.test(value);
 

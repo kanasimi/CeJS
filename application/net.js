@@ -210,7 +210,7 @@ function module_code(library_namespace) {
 		|| typeof URI !== 'string') {
 			return;
 		}
-		var href = URI, matched = href
+		var href = library_namespace.simplify_path(URI), matched = href
 				.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Z]:|[^\/#?&\s:]+)([^\s:]*)$/i), tmp, path;
 		if (!matched)
 			return;
@@ -259,6 +259,10 @@ function module_code(library_namespace) {
 				if (tmp[3])
 					URI.password = tmp[3];
 				href = matched[2];
+			} else {
+				// W3C URL API 不論有沒有帳號密碼皆會設定這兩個值
+				URI.password = '';
+				URI.username = '';
 			}
 
 			// 處理 host
@@ -328,7 +332,7 @@ function module_code(library_namespace) {
 		var URI = this;
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
 		URI.href = (URI.protocol ? URI.protocol + '//' : '')
-				+ (URI.username ? URI.username
+				+ (URI.username || URI.password ? (URI.username || '')
 						+ (URI.password ? ':' + URI.password : '') + '@' : '')
 				+ URI.host + URI.pathname + (URI.search || '')
 				+ (URI.hash || '');
@@ -1839,7 +1843,7 @@ function module_code(library_namespace) {
 	// var globalThis = library_namespace.env.global;
 	if (library_namespace.is_WWW(true)) {
 		library_namespace.set_method(library_namespace.env.global, {
-			// defective polyfill for W3C URL(), URLSearchParams()
+			// defective polyfill for W3C URL API, URLSearchParams()
 			// Warning: parse_URI returns read-only object!
 			URL : function URL(url) {
 				Object.assign(this, parse_URI(url));

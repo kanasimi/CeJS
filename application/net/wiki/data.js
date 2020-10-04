@@ -82,7 +82,7 @@ function module_code(library_namespace) {
 
 	function get_data_API_URL(options, default_API_URL) {
 		// library_namespace.debug('options:', 0, 'get_data_API_URL');
-		// console.log(options);
+		// console.trace(options);
 
 		var API_URL;
 		if (options) {
@@ -191,7 +191,13 @@ function module_code(library_namespace) {
 			session.data_session.actions.clear();
 		}
 
-		if (typeof API_URL === 'string' && !/wikidata/i.test(API_URL)
+		if (!API_URL
+		// https://test.wikipedia.org/w/api.php
+		// https://test2.wikipedia.org/w/api.php
+		&& /test\d?\.wikipedia/.test(session.API_URL)) {
+			API_URL = 'test.wikidata';
+
+		} else if (typeof API_URL === 'string' && !/wikidata/i.test(API_URL)
 				&& !PATTERN_PROJECT_CODE_i.test(API_URL)) {
 			// e.g., 'test' → 'test.wikidata'
 			API_URL += '.wikidata';
@@ -229,7 +235,7 @@ function module_code(library_namespace) {
 			library_namespace.error('normalize_wikidata_key: key: '
 					+ JSON.stringify(key));
 			// console.trace(key);
-			throw new Error('normalize_wikidata_key: typeof key is NOT string!');
+			throw new Error('normalize_wikidata_key: key should be string!');
 		}
 		return key.replace(/_/g, ' ').trim();
 	}
@@ -422,7 +428,7 @@ function module_code(library_namespace) {
 
 	// wikidata_search.default_limit = 'max';
 
-	wikidata_search.add_cache = function(key, id, language, is_entity) {
+	wikidata_search.add_cache = function add_cache(key, id, language, is_entity) {
 		var cached_hash = is_entity ? wikidata_search_cache_entity
 				: wikidata_search_cache;
 		language = wiki_API.site_name(language, {
@@ -432,17 +438,18 @@ function module_code(library_namespace) {
 	};
 
 	// wrapper function of wikidata_search().
-	wikidata_search.use_cache = function(key, callback, options) {
+	wikidata_search.use_cache = function use_cache(key, callback, options) {
 		if (!options && library_namespace.is_Object(callback)) {
 			// shift arguments.
 			options = callback;
 			callback = undefined;
 		}
+		// console.trace(options);
 
 		var language_and_key,
 		// 須與 wikidata_search() 相同!
 		// TODO: 可以 guess_language(key) 猜測語言。
-		language = wiki_API.site_name(options, {
+		language = options.language || wiki_API.site_name(options, {
 			get_all_properties : true
 		}).language,
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
@@ -450,9 +457,8 @@ function module_code(library_namespace) {
 		// default_options.type: 'property'
 		wikidata_search.use_cache.default_options.type ? wikidata_search_cache_entity
 				: wikidata_search_cache;
-		// console.trace([ language, options ]);
+		// console.trace([ key, language, options ]);
 
-		// console.log(key);
 		key = normalize_value_of_properties(key, language);
 
 		if (typeof key === 'string') {
@@ -460,6 +466,7 @@ function module_code(library_namespace) {
 			language_and_key = language + ':' + key;
 
 		} else if (Array.isArray(key)) {
+			// console.trace(key);
 			if (is_api_and_title(key, 'language')) {
 				// key.join(':')
 				language_and_key = key[0] + ':'
@@ -2282,7 +2289,7 @@ function module_code(library_namespace) {
 	function normalize_wikidata_properties(properties, callback,
 			exists_property_hash, options) {
 		// console.log(properties);
-		// console.log(options);
+		// console.trace(options);
 		// console.trace('normalize_wikidata_properties');
 
 		if (options.process_sub_property)
@@ -4728,13 +4735,15 @@ function module_code(library_namespace) {
 		var session;
 		if ('session' in options) {
 			session = options[KEY_SESSION];
-			delete options[KEY_SESSION];
+			// set_claims() 中之 get_data_API_URL() 會用到 options[KEY_SESSION];
+			// delete options[KEY_SESSION];
 		}
 
 		// edit實體項目entity
 		action = [
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
 		get_data_API_URL(options), 'wbeditentity' ];
+		// console.trace(options);
 
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
 		delete options.API_URL;
