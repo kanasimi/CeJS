@@ -2037,12 +2037,11 @@ function finish(name_space) {
 						conditions(assert_proxy, setup_test, finish_test);
 					}
 				} catch (e) {
+					CeL.error(e);
 					// has_console
-					if (typeof console === 'object' && console.error) {
+					if (typeof console === 'object' && console.trace) {
 						// Will show stacks
-						console.error(e);
-					} else {
-						CeL.error(e);
+						console.trace(e);
 					}
 					conditions_error(e);
 				}
