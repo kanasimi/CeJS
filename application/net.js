@@ -375,15 +375,6 @@ function module_code(library_namespace) {
 	// {Object}this parameter hash to String
 	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
 	function parameters_toString(options) {
-		var charset;
-		if (typeof options === 'string') {
-			charset = options;
-			options = Object.create(null);
-		} else {
-			options = library_namespace.setup_options(options);
-			charset = options.charset;
-		}
-
 		function append(value) {
 			if (value === undefined) {
 				if (!options.ignore_undefined) {
@@ -403,8 +394,17 @@ function module_code(library_namespace) {
 					+ encode_URI_component(String(value), charset));
 		}
 
-		var search = [], key;
+		var charset;
+		if (typeof options === 'string') {
+			charset = options;
+			options = Object.create(null);
+		} else {
+			options = library_namespace.setup_options(options);
+			charset = options.charset;
+		}
+
 		// Object.keys(parameters).forEach(function(key) {})
+		var search = [], key;
 		for (key in this) {
 			if (ignore_search_properties && (key in ignore_search_properties)) {
 				// Warning: for old environment, may need ignore some keys
