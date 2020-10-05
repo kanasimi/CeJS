@@ -1305,6 +1305,7 @@ function finish(name_space) {
 		function log_front_end_fatal(message, error_to_throw) {
 			if (CeL.is_WWW())
 				try {
+					console.trace(error_to_throw);
 					// 模擬 throw 以 get .stack
 					throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
 							: new Error(error_to_throw || 'Fatal error');
