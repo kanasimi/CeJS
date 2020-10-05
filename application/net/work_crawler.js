@@ -400,7 +400,8 @@ function module_code(library_namespace) {
 	// modify from CeL.application.net
 	// 本函式將使用之 encodeURIComponent()，包含對 charset 之處理。
 	// @see function_placeholder() @ module.js
-	crawler_namespace.encode_URI_component = function(string, encoding) {
+	crawler_namespace.encode_URI_component = function encode_URI_component(
+			string, encoding) {
 		if (library_namespace.character) {
 			library_namespace.debug('採用 ' + library_namespace.Class
 			// 有則用之。 use CeL.data.character.encode_URI_component()

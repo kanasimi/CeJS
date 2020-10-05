@@ -387,11 +387,6 @@ function module_code(library_namespace) {
 		var search = [];
 		// Object.keys(parameters).forEach(function(key) {})
 		for ( var key in this) {
-			if (ignore_search_properties && (key in ignore_search_properties)) {
-				// Warning: for old environment, may need ignore some keys
-				continue;
-			}
-
 			function append(value) {
 				if (value === undefined) {
 					if (!options.ignore_undefined) {
@@ -409,6 +404,11 @@ function module_code(library_namespace) {
 
 				search.push(key + '='
 						+ encode_URI_component(String(value), charset));
+			}
+
+			if (ignore_search_properties && (key in ignore_search_properties)) {
+				// Warning: for old environment, may need ignore some keys
+				continue;
 			}
 
 			var value = this[key];
