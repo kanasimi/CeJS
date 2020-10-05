@@ -384,28 +384,28 @@ function module_code(library_namespace) {
 			charset = options.charset;
 		}
 
-		var search = [];
-		// Object.keys(parameters).forEach(function(key) {})
-		for ( var key in this) {
-			function append(value) {
-				if (value === undefined) {
-					if (!options.ignore_undefined) {
-						// key + '='
-						search.push(key);
-					}
-					return;
+		function append(value) {
+			if (value === undefined) {
+				if (!options.ignore_undefined) {
+					// key + '='
+					search.push(key);
 				}
-
-				if (typeof value !== 'string' && typeof value !== 'number') {
-					library_namespace.debug({
-						T : [ '非字串之參數：[%1]', value ]
-					}, 1, 'parameters_toString');
-				}
-
-				search.push(key + '='
-						+ encode_URI_component(String(value), charset));
+				return;
 			}
 
+			if (typeof value !== 'string' && typeof value !== 'number') {
+				library_namespace.debug({
+					T : [ '非字串之參數：[%1]', value ]
+				}, 1, 'parameters_toString');
+			}
+
+			search.push(key + '='
+					+ encode_URI_component(String(value), charset));
+		}
+
+		var search = [], key;
+		// Object.keys(parameters).forEach(function(key) {})
+		for (key in this) {
 			if (ignore_search_properties && (key in ignore_search_properties)) {
 				// Warning: for old environment, may need ignore some keys
 				continue;
