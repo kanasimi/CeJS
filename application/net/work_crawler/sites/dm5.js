@@ -880,7 +880,7 @@ function module_code(library_namespace) {
 			function get_token(image_NO, run_next) {
 				parameters.page = image_NO;
 				// library_namespace.set_debug(6);
-				// console.log(library_namespace.get_URL.parameters_to_String(parameters));
+				// console.log(new URLSearchParams(parameters).toString());
 				_this.get_URL(_this.chapter_URL(work_data, chapter_NO)
 						+ 'chapterfun.ashx', function(XMLHttp, error) {
 					if (error) {

@@ -370,7 +370,7 @@ function module_code(library_namespace) {
 			// 令牌 @see SMH.utils.getPicUrl() @ ((core_filename))
 			token = '?cid=' + chapter_data.cid + '&'
 			//
-			+ library_namespace.get_URL.parameters_to_String(chapter_data.sl);
+			+ new URLSearchParams(chapter_data.sl);
 			// 漫畫櫃的webp圖像檔案可能是即時生成的? 大小常常不一樣。
 			chapter_data.image_list = chapter_data.files.map(function(url) {
 				return {

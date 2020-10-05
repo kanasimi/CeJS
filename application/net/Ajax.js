@@ -18,7 +18,7 @@ typeof CeL === 'function' && CeL.run({
 	require : 'data.code.compatibility.'
 	// MIME_of()
 	+ '|application.net.MIME.'
-	// for CeL.to_file_name()
+	// for CeL.to_file_name(), CeL.parse_URI.parse_search
 	+ '|application.net.',
 
 	// 設定不匯出的子函式。
@@ -29,22 +29,6 @@ typeof CeL === 'function' && CeL.run({
 });
 
 function module_code(library_namespace) {
-
-	// 本函數亦使用於 CeL.application.net.work_crawler
-	// 本函式將使用之 encodeURIComponent()，包含對 charset 之處理。
-	// @see function_placeholder() @ module.js
-	var encode_URI_component = function(string, encoding) {
-		if (library_namespace.character) {
-			library_namespace.debug('採用 ' + library_namespace.Class
-			// 有則用之。 use CeL.data.character.encode_URI_component()
-			+ '.character.encode_URI_component', 1, library_namespace.Class
-			// module name
-			+ '.application.net.Ajax');
-			encode_URI_component = library_namespace.character.encode_URI_component;
-			return encode_URI_component(string, encoding);
-		}
-		return encodeURIComponent(string);
-	};
 
 	function time_message(millisecond) {
 		if (library_namespace.age_of) {
@@ -259,11 +243,11 @@ function module_code(library_namespace) {
 		// [ origin + pathname, search, hash ]
 		// hrer = [].join('')
 		if (Array.isArray(URL)) {
-			URL = get_URL.add_parameter(URL[0], URL[1], URL[2], charset);
+			URL = add_parameter_with_hash(URL[0], URL[1], URL[2], charset);
 		}
 
 		if (options.search || options.hash) {
-			URL = get_URL.add_parameter(URL, options.search, options.hash,
+			URL = add_parameter_with_hash(URL, options.search, options.hash,
 					charset);
 		}
 
@@ -308,7 +292,8 @@ function module_code(library_namespace) {
 		}
 
 		if (post_data && !options.form_data) {
-			post_data = get_URL.parameters_to_String(post_data, charset);
+			post_data = library_namespace.parse_URI.parse_search(post_data)
+					.toString(charset);
 		}
 
 		if (!onload && typeof options.onchange === 'function') {
@@ -414,77 +399,26 @@ function module_code(library_namespace) {
 
 	}
 
-	// {Object}parameter hash to String
-	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
-	function parameters_to_String(parameters, charset) {
-		if (!library_namespace.is_Object(parameters)) {
-			if (typeof parameters !== 'string' && parameters !== undefined) {
-				library_namespace.debug({
-					T : [ '不處理非字串之參數：[%1]', parameters ]
-				}, 1, 'get_URL.parameters_to_String');
-			}
-			// '' + parameters
-			return parameters && String(parameters) || '';
+	/**
+	 * 
+	 * @param url
+	 * @param search
+	 * @param hash
+	 * @param charset
+	 * @returns
+	 * 
+	 * @inner
+	 */
+	function add_parameter_with_hash(url, search, hash, charset) {
+		url = library_namespace.parse_URI(url);
+		if (hash) {
+			if (!/#/.test(hash))
+				hash = '#' + hash;
+			url.hash = hash;
 		}
+		url.search_params.add_parameters(search);
+		return url.toString(charset);
 
-		var array = [];
-		library_namespace.debug(Object.keys(parameters).join(','), 3,
-				'parameters_to_String');
-		Object.keys(parameters).forEach(function(key) {
-			library_namespace.debug(key, 5, 'parameters_to_String.forEach');
-			array.push(encode_URI_component(key, charset) + '='
-			// TODO: for parameters[key] === undefined
-			+ encode_URI_component(String(parameters[key]), charset));
-		});
-		library_namespace.debug([ {
-			T : [ '共%1個參數：', array.length ]
-		}, '<br />\n', array.map(function(parameters) {
-			return parameters.length > 400 ? parameters.slice(0,
-			//
-			library_namespace.is_debug(6) ? 2000 : 400) + '...' : parameters;
-		}).join('<br />\n') ], 4, 'parameters_to_String');
-		return array.join('&');
-	}
-
-	// parameter String to hash
-	function parse_parameters(parameters) {
-		// TODO:
-		if (false) {
-			return library_namespace.parse_URI.parse_search(parameters);
-		}
-
-		if (library_namespace.is_Object(parameters)) {
-			return parameters;
-		}
-
-		if (!Array.isArray(parameters)) {
-			if (typeof parameters !== 'string') {
-				library_namespace.debug({
-					T : [ '輸入了非字串之參數：[%1]', parameters ]
-				}, 1, 'get_URL.parse_parameters');
-			}
-			// http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
-			// '' + parameters
-			parameters = String(parameters).split('&');
-		}
-
-		var hash = Object.create(null);
-
-		parameters.forEach(function(parameter) {
-			var index = parameter.indexOf('=');
-			if (index === NOT_FOUND) {
-				// e.g., key1&key2&key3
-				// → key1=&key2=&key3=
-				hash[parameter] = '';
-			} else {
-				hash[parameter.slice(0, index)] = parameter.slice(index + 1);
-			}
-		});
-
-		return hash;
-	}
-
-	function add_parameter(url, search, hash, charset) {
 		// TODO:
 		if (false) {
 			url = new URL(url);
@@ -496,34 +430,8 @@ function module_code(library_namespace) {
 			}
 			return url.toString(charset);
 		}
-
-		if (search || hash) {
-			url = url.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
-			if (search = get_URL.parameters_to_String(search, charset)) {
-				if (search.startsWith('?')) {
-					if (url[2])
-						search = url[2] + '&' + search.slice(1);
-				} else
-					search = (url[2] ? url[2] + '&' : '?') + search;
-			} else
-				search = url[2] || '';
-
-			if (hash = get_URL.parameters_to_String(hash, charset)) {
-				if (!hash.startsWith('#'))
-					hash = '#' + hash;
-				hash = (url[3] || '') + hash;
-			} else
-				hash = url[3] || '';
-
-			url = url[1] + search + hash;
-		}
-
-		return url;
 	}
 
-	get_URL.parameters_to_String = parameters_to_String;
-	get_URL.parse_parameters = parse_parameters;
-	get_URL.add_parameter = add_parameter;
 	_.get_URL = get_URL;
 
 	// TODO: 處理 multi requests
@@ -754,7 +662,7 @@ function module_code(library_namespace) {
 			}, 'buffer');
 		}
 
-		parameters = get_URL.parse_parameters(parameters);
+		parameters = library_namespace.parse_URI.parse_search(parameters);
 
 		var root_data = [], keys = Object.keys(parameters), index = 0;
 		root_data.to_Array = form_data_to_Array;
@@ -1435,13 +1343,13 @@ function module_code(library_namespace) {
 		// [ origin + pathname, search, hash ]
 		// hrer = [].join('')
 		if (Array.isArray(URL_to_fetch)) {
-			URL_to_fetch = get_URL.add_parameter(URL_to_fetch[0],
+			URL_to_fetch = add_parameter_with_hash(URL_to_fetch[0],
 					URL_to_fetch[1], URL_to_fetch[2], charset);
 		}
 
 		if (options.search || options.hash) {
-			URL_to_fetch = get_URL.add_parameter(URL_to_fetch, options.search,
-					options.hash, charset);
+			URL_to_fetch = add_parameter_with_hash(URL_to_fetch,
+					options.search, options.hash, charset);
 		}
 
 		library_namespace.debug({
@@ -1486,7 +1394,8 @@ function module_code(library_namespace) {
 				post_data = JSON.stringify(post_data) || FORCE_POST;
 
 			} else {
-				post_data = get_URL.parameters_to_String(post_data, charset)
+				post_data = library_namespace.parse_URI.parse_search(post_data)
+						.toString(charset)
 						|| FORCE_POST;
 			}
 		}

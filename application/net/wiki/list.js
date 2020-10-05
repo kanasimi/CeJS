@@ -1485,9 +1485,9 @@ function module_code(library_namespace) {
 		} else {
 			_options = options;
 		}
-		wiki_API.query([ API_URL, 'query&list=search&'
+		wiki_API.query([ API_URL,
 		//
-		+ library_namespace.get_URL.parameters_to_String(Object.assign({
+		'query&list=search&' + new URLSearchParams(Object.assign({
 			srsearch : key
 		}, wiki_API.search.default_parameters, _options)) ], function(data,
 				error) {

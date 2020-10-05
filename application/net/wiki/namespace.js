@@ -302,9 +302,7 @@ function module_code(library_namespace) {
 		} else if (library_namespace.is_Object(options.parameters)) {
 			var parameters = Object.create(null);
 			// TODO: 篩選掉指定為 false 的
-			action[1] += '&'
-					+ library_namespace.get_URL
-							.parameters_to_String(options.parameters);
+			action[1] += '&' + new URLSearchParams(options.parameters);
 		} else {
 			library_namespace.debug('無法處理之 options.parameters: ['
 					+ options.parameters + ']', 1, 'add_parameters');
@@ -2259,6 +2257,10 @@ function module_code(library_namespace) {
 		}
 
 		var general = configurations.general;
+		// Using `session.latest_site_configurations.general.variants`
+		// to test if langconversion is configured in the site.
+		session.has_languagevariants = general && !!general.variants;
+
 		if (general) {
 			// site_configurations.general = general;
 			'mainpage|sitename|linktrail|legaltitlechars|invalidusernamechars|case|lang|maxarticlesize|timezone|timeoffset|maxuploadsize'
@@ -2273,7 +2275,9 @@ function module_code(library_namespace) {
 			});
 		}
 
-		var interwikimap = configurations.interwikimap;
+		var interwikimap =
+		// session.has_languagevariants &&
+		configurations.interwikimap;
 		if (interwikimap) {
 			// prefix_pattern
 			site_configurations.interwiki_pattern = new RegExp('^('

@@ -3876,7 +3876,7 @@ function module_code(library_namespace) {
 			return include_mark + (queue.length - 1) + end_mark;
 		}
 
-		function parse_parameters(all, parameters) {
+		function parse_template_parameter(all, parameters) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('{{{'), previous;
 			if (index > 0) {
@@ -5049,7 +5049,7 @@ function module_code(library_namespace) {
 		// 在模板頁面中，用三個大括弧可以讀取參數。
 		// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
 		wikitext = wikitext.replace_till_stable(/{{{([^{}][\s\S]*?)}}}/g,
-				parse_parameters);
+				parse_template_parameter);
 
 		// ----------------------------------------------------
 		// 模板（英語：Template，又譯作「樣板」、「範本」）

@@ -27,6 +27,21 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 	'use strict';
 
+	var module_name = this.id;
+	// 本函數亦使用於 CeL.application.net.work_crawler
+	// 本函式將使用之 encodeURIComponent()，包含對 charset 之處理。
+	// @see function_placeholder() @ module.js
+	var encode_URI_component = function(string, encoding) {
+		if (library_namespace.character) {
+			library_namespace.debug('採用 ' + library_namespace.Class
+			// 有則用之。 use CeL.data.character.encode_URI_component()
+			+ '.character.encode_URI_component', 1, module_name);
+			encode_URI_component = library_namespace.character.encode_URI_component;
+			return encode_URI_component(string, encoding);
+		}
+		return encodeURIComponent(string);
+	};
+
 	// requiring
 	var get_WScript_object = this.r('get_WScript_object'), HTML_to_Unicode = this
 			.r('HTML_to_Unicode');
@@ -188,7 +203,7 @@ function module_code(library_namespace) {
 	 * @param {String}URI
 	 *            URI to parse
 	 * @param {String}[base_uri]
-	 *            當做基底的 URL
+	 *            當做基底的 URL。 see CeL.application.storage.get_relative_path()
 	 * 
 	 * @return parsed object
 	 * 
@@ -211,7 +226,7 @@ function module_code(library_namespace) {
 			return;
 		}
 		var href = library_namespace.simplify_path(URI), matched = href
-				.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Z]:|[^\/#?&\s:]+)([^\s:]*)$/i), tmp, path;
+				.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)([^\s:]*)$/i), tmp, path;
 		if (!matched)
 			return;
 
@@ -270,7 +285,7 @@ function module_code(library_namespace) {
 				// host=hostname:port
 				URI.host = URI.hostname = matched[1];
 				if (matched[3])
-					URI.port = parseInt(matched[3], 10);
+					URI.port = String(parseInt(matched[3], 10));
 				else if (tmp = {
 					http : 80,
 					ftp : 21
@@ -309,10 +324,23 @@ function module_code(library_namespace) {
 					.slice(1).replace(/\//g, '\\')
 					: matched[2];
 			URI.filename = matched[3];
-			URI.search = matched[4];
-			// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-			URI.search_params = parse_URI.parse_search(matched[5]);
+			if (Object.defineProperty.not_native) {
+				URI.search = matched[4];
+				URI.search_params = parse_URI.parse_search(matched[5], {
+					URI : URI
+				});
+			} else {
+				Object.defineProperty(URI, 'search', {
+					get : function() {
+						return '?' + this.search_params.toString();
+					},
+					enumerable : true
+				});
+				// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+				URI.search_params = parse_URI.parse_search(matched[5]);
+			}
 			URI.hash = matched[6];
+			// hash without '#'
 			URI._hash = matched[7];
 		} else {
 			if (!href)
@@ -321,108 +349,234 @@ function module_code(library_namespace) {
 		}
 		library_namespace.debug('path: [' + URI.path + ']', 2);
 
-		URI.toString = URI_toString;
+		Object.defineProperty(URI, 'toString', {
+			value : URI_toString
+		});
+		// Generate .href
 		URI.toString();
 
 		library_namespace.debug('href: [' + URI.href + ']', 2);
 		return URI;
 	}
 
-	function URI_toString() {
+	function URI_toString(charset) {
 		var URI = this;
+		// URI.search
+		var search = URI.search_params.toString(charset);
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
 		URI.href = (URI.protocol ? URI.protocol + '//' : '')
 				+ (URI.username || URI.password ? (URI.username || '')
 						+ (URI.password ? ':' + URI.password : '') + '@' : '')
-				+ URI.host + URI.pathname + (URI.search || '')
+				+ URI.host + URI.pathname + (search ? '?' + search : '')
 				+ (URI.hash || '');
 		return URI.href;
 	}
 
-	function params_toString() {
-		var list = [];
-		for ( var key in this) {
-			// Warning: may need remove toString
-			list.push(encodeURIComponent(key) + '='
-					+ encodeURIComponent(this[key]));
+	// {Object}this parameter hash to String
+	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
+	function parameters_toString(options) {
+		var charset;
+		if (typeof options === 'string') {
+			charset = options;
+			options = Object.create(null);
+		} else {
+			options = library_namespace.setup_options(options);
+			charset = options.charset;
 		}
-		list = list.join('&');
-		return list;
+
+		var search = [];
+		// Object.keys(parameters).forEach(function(key) {})
+		for ( var key in this) {
+			if (ignore_search_properties && (key in ignore_search_properties)) {
+				// Warning: for old environment, may need ignore some keys
+				continue;
+			}
+
+			function append(value) {
+				if (value === undefined) {
+					if (!options.ignore_undefined) {
+						// key + '='
+						search.push(key);
+					}
+					return;
+				}
+
+				if (typeof value !== 'string' && typeof value !== 'number') {
+					library_namespace.debug({
+						T : [ '非字串之參數：[%1]', value ]
+					}, 1, 'parameters_toString');
+				}
+
+				search.push(key + '='
+						+ encode_URI_component(String(value), charset));
+			}
+
+			var value = this[key];
+			key = encode_URI_component(key, charset);
+			if (Array.isArray(value)) {
+				value.forEach(append);
+			} else {
+				append(value);
+			}
+		}
+
+		library_namespace.debug([ {
+			T : [ '共%1個參數：', search.length ]
+		}, '<br />\n', search.map(function(parameter) {
+			return parameter.length > 400 ? parameter.slice(0,
+			//
+			library_namespace.is_debug(6) ? 2000 : 400) + '...' : parameter;
+		}).join('<br />\n') ], 4, 'parameters_toString');
+
+		search = search.join('&');
+		if (this[KEY_URL])
+			this[KEY_URL].search = search;
+
+		return search;
 	}
 
 	/**
+	 * append these parameters
+	 */
+	function search_add_parameters(parameters) {
+		parameters = parse_search(parameters);
+		for ( var key in parameters) {
+			var value = parameters[key];
+			if (key in this) {
+				var original_value = this[key];
+				if (Array.isArray(original_value))
+					original_value.push(value);
+				else
+					this[key] = [ original_value, value ];
+			} else {
+				this[key] = value;
+			}
+		}
+		return this;
+	}
+
+	// @private
+	var KEY_URL = !Object.defineProperty.not_native
+			&& typeof Symbol === 'function' ? Symbol('URL') : '\0URL';
+	var search_properties = {
+		add_parameters : {
+			value : search_add_parameters
+		},
+		// valueOf
+		toString : {
+			value : parameters_toString
+		}
+	}, ignore_search_properties;
+	if (Object.defineProperty.not_native) {
+		ignore_search_properties = Object.clone(search_properties);
+		ignore_search_properties[KEY_URL] = true;
+		// alert(Object.keys(ignore_search_properties));
+	}
+
+	/**
+	 * parse_parameters({String}parameter) to hash
 	 * 
 	 * @param {String}search_string
-	 * @param {Object}[param]
-	 *            append these parameters
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @see https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 	 */
-	function parse_search(search_string, param, options) {
-		var data = typeof search_string === 'string' ? search_string.replace(
-				/\+/g, '%20').split(/&/) : [], i = 0, l = data.length, name, value, matched;
-		param = library_namespace.setup_options(param);
+	function parse_search(search_string, options) {
+		// Similar to:
+		// return new URLSearchParams(search_string);
+		// but with charset and forward compatibility
+
+		var parameters = Object.create(null);
 		options = library_namespace.setup_options(options);
+		var data, name, value, matched;
+		if (typeof search_string === 'string') {
+			// http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
+			data = search_string.replace(/\+/g, '%20').split(/&/);
+		} else if (typeof search_string === 'object') {
+			Object.assign(parameters, search_string);
+		} else if (Array.isArray(search_string)) {
+			data = search_string;
+		} else {
+			if (search_string) {
+				// Invalid search
+				library_namespace.debug({
+					T : [ '輸入了非字串之參數：[%1]', search_string ]
+				}, 1, 'parse_search');
+			}
+		}
 
-		for (; i < l; i++)
-			if (data[i]) {
-				if (matched = data[i].match(/^([^=]+)=(.*)$/)) {
-					name = decodeURIComponent(matched[1]);
-					value = decodeURIComponent(matched[2]);
-				} else {
-					name = data[i];
-					value = 'default_value' in options ? options.default_value
-							: name;
-				}
+		for (var i = 0, l = data && data.length || 0; i < l; i++) {
+			if (!data[i])
+				continue;
 
-				if (library_namespace.is_debug(2))
-					library_namespace.debug('['
-							+ (i + 1)
-							+ '/'
-							+ l
-							+ '] '
-							+ (param[name] ? '<span style="color:#888;">('
-									+ param[name].length + ')</span> [' + name
-									+ '] += [' + value + ']' : '[' + name
-									+ '] = [' + value + ']'));
-
-				if (options.split_pattern
-				//
-				&& (matched = value.split(options.split_pattern)).length > 1) {
-					if (name in param)
-						if (Array.isArray(param[name]))
-							Array.prototype.push.apply(param[name], matched);
-						else {
-							matched.unshift(param[name]);
-							param[name] = matched;
-						}
-					else
-						param[name] = matched;
-				} else if (name in param) {
-					if (Array.isArray(param[name]))
-						param[name].push(value);
-					else
-						param[name] = [ param[name], value ];
-				} else
-					param[name] = value;
+			// var index = parameter.indexOf('=');
+			if (matched = data[i].match(/^([^=]+)=(.*)$/)) {
+				name = decodeURIComponent(matched[1]);
+				value = decodeURIComponent(matched[2]);
+			} else {
+				name = decodeURIComponent(data[i]);
+				value = 'default_value' in options ? options.default_value
+						: /* name */undefined;
 			}
 
+			if (library_namespace.is_debug(2)) {
+				library_namespace.debug('[' + (i + 1) + '/' + l + '] '
+				//
+				+ (parameters[name] ? '<span style="color:#888;">('
+				//
+				+ parameters[name].length + ')</span> [' + name
+				//
+				+ '] += [' + value + ']' : '[' + name + '] = ['
+				//
+				+ value + ']'));
+			}
+
+			if (options.split_pattern
+			//
+			&& (matched = value.split(options.split_pattern)).length > 1) {
+				if (name in parameters)
+					if (Array.isArray(parameters[name]))
+						Array.prototype.push.apply(parameters[name], matched);
+					else {
+						matched.unshift(parameters[name]);
+						parameters[name] = matched;
+					}
+				else
+					parameters[name] = matched;
+			} else if (name in parameters) {
+				if (Array.isArray(parameters[name]))
+					parameters[name].push(value);
+				else
+					parameters[name] = [ parameters[name], value ];
+			} else {
+				parameters[name] = value;
+			}
+		}
+
 		if (options.Array_only)
-			for (name in param)
-				if (!Array.isArray(param[name]))
-					param[name] = [ param[name] ];
+			for (name in parameters)
+				if (!Array.isArray(parameters[name]))
+					parameters[name] = [ parameters[name] ];
 
-		Object.defineProperty(param, 'toString', params_toString);
+		Object.defineProperties(parameters, search_properties);
+		if (typeof options.URI === 'object') {
+			Object.defineProperty(parameters, KEY_URL, {
+				value : options.URI
+			});
+		}
 
-		return param;
+		return parameters;
 	}
 
+	// CeL.parse_URI.parse_search()
+	// 新版本與 charset 編碼無關的話，應該使用 new URLSearchParams(parameters).toString()。
 	parse_URI.parse_search = parse_search;
 
 	_// JSDT:_module_
 	.parse_URI = parse_URI;
+
+	// --------------------------------
 
 	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 	function URLSearchParams_add_parameters(parameters) {
@@ -436,6 +590,7 @@ function module_code(library_namespace) {
 		parameters.forEach(function(value, key) {
 			search.append(key, value);
 		});
+		return this;
 	}
 
 	// ------------------------------------------------------------------------
@@ -1464,7 +1619,7 @@ function module_code(library_namespace) {
 
 			library_namespace.debug('parse url_encoded_fmt_stream_map', 2);
 			param.url_encoded_fmt_stream_map.split(',').forEach(function(o) {
-				param_url = parse_URI.parse_search(o, param_url);
+				param_url = new URLSearchParams(param_url).add_parameters(o);
 			});
 
 			// library_namespace.debug('parse url', 2);
@@ -1841,7 +1996,7 @@ function module_code(library_namespace) {
 	// ---------------------------------------------------------------
 
 	// var globalThis = library_namespace.env.global;
-	if (library_namespace.is_WWW(true)) {
+	if (library_namespace.is_WWW(true) || library_namespace.platform.nodejs) {
 		library_namespace.set_method(library_namespace.env.global, {
 			// defective polyfill for W3C URL API, URLSearchParams()
 			// Warning: parse_URI returns read-only object!

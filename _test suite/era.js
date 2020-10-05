@@ -2403,9 +2403,9 @@ function set_era_by_url_data(era) {
 		// #era=景元元年&column=-contemporary&layer=臺灣地震
 		// #hierarchy=中國/東漢/安帝
 		// #hierarchy=中國/清&layer=臺灣地震
-		data = CeL.parse_URI.parse_search(location.search.slice(1),
+		data = new URLSearchParams(location.search.slice(1))
 		//
-		CeL.parse_URI.parse_search(location.hash.slice(1)));
+		.add_parameters(location.hash.slice(1));
 
 		// column=增加此欄,增加此欄
 		if (column = data.column)

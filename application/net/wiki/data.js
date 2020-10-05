@@ -5602,9 +5602,11 @@ function module_code(library_namespace) {
 			parameters = _options;
 		}
 
-		get_URL((options.API_URL || wikidata_PetScan_API_URL) + '?'
-				+ get_URL.parameters_to_String(parameters), function(data,
-				error) {
+		var url = library_namespace.parse_URI(options.API_URL
+				|| wikidata_PetScan_API_URL);
+		url.search_params.add_parameters(parameters);
+
+		get_URL(url.to_String(), function(data, error) {
 			if (error) {
 				callback(undefined, error);
 				return;
