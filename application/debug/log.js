@@ -1309,12 +1309,17 @@ function finish(name_space) {
 					throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
 							: new Error(error_to_throw || 'Fatal error');
 				} catch (e) {
-					// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Error/Stack
-					CeL.error(e.stack ? message
-							+ '<br />stack:<div class="debug_stack">'
-							+ (typeof e.stack === 'string' ? e.stack.replace(
-									/\n/g, '<br />') : e.stack) + '</div>'
-							: message);
+					if (typeof console === 'object' && console.error) {
+						// Will show stacks
+						console.error(e);
+					} else {
+						// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Error/Stack
+						CeL.error(e.stack ? message
+								+ '<br />stack:<div class="debug_stack">'
+								+ (typeof e.stack === 'string' ? e.stack
+										.replace(/\n/g, '<br />') : e.stack)
+								+ '</div>' : message);
+					}
 				}
 			else
 				CeL.error(message);
@@ -1558,8 +1563,12 @@ function finish(name_space) {
 				} catch (e) {
 					// 執行 condition 時出錯，throw 時的處置。
 					fatal = e || true;
-					CeL.warn('assert: 執行 condition 時出錯: ' + e.message);
-					// console.trace(e);
+					if (typeof console === 'object' && console.error) {
+						// Will show stacks
+						console.error(e);
+					} else {
+						CeL.warn('assert: 執行 condition 時出錯: ' + e.message);
+					}
 				}
 			});
 
@@ -1863,7 +1872,12 @@ function finish(name_space) {
 					}
 
 				} catch (e) {
-					// console.trace(e);
+					if (typeof console === 'object' && console.error) {
+						// Will show stacks
+						console.error(e);
+					} else {
+						CeL.error(e);
+					}
 					recorder.fatal.push(condition_arguments);
 					return;
 				}
@@ -1992,7 +2006,12 @@ function finish(name_space) {
 						try {
 							test_function(finish_test);
 						} catch (e) {
-							// console.trace(e);
+							if (typeof console === 'object' && console.error) {
+								// Will show stacks
+								console.error(e);
+							} else {
+								CeL.error(e);
+							}
 							recorder.fatal.push(test_name);
 						}
 						finish_test(test_name);
