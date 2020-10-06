@@ -5788,6 +5788,8 @@ function module_code(library_namespace) {
 	 * 
 	 * match: [[:language_code:user_talk:user_name]]
 	 * 
+	 * TODO: using PATTERN_page_name
+	 * 
 	 * @type {RegExp}
 	 * 
 	 * @see 使用者簽名將不能再有Lint錯誤和包含一些無效的HTML，嵌套替換引用也不允許，必須包含到使用者頁面、使用者討論頁或使用者貢獻頁之一的連結。
@@ -5796,17 +5798,17 @@ function module_code(library_namespace) {
 	 *      https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
 	 */
 	var PATTERN_user_link =
-	// "\/": e.g., [[user talk:user_name/Flow]]
+	// user name do not allow "\/": e.g., [[user talk:user_name/Flow]]
 	// 大小寫無差，但NG: "\n\t"
 	//
 	// https://zh.wikipedia.org/wiki/Wikipedia:互助客栈/其他#增设空间“U：”、“UT：”作为“User：”、“User_talk：”的Alias
 	// https://phabricator.wikimedia.org/T183711
 	// Doesn't conflict with any language code or other interwiki link.
 	// https://gerrit.wikimedia.org/r/#/c/400267/4/wmf-config/InitialiseSettings.php
-	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *([^\[\]\|{}\n#\/�]+)/i,
+	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}\n#�\/])+)/i,
 	// [[特殊:功績]]: zh-classical, [[特別:投稿記録]]: ja
 	// matched: [ all, " user name " ]
-	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊|特別) *: *(?:Contributions|Contribs|使用者貢獻|用戶貢獻|(?:用户)?贡献|投稿記録|功績)\/([^\[\]\|{}\n#\/�]+)/i,
+	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊|特別) *: *(?:Contributions|Contribs|使用者貢獻|用戶貢獻|(?:用户)?贡献|投稿記録|功績)\/((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}\n#�\/])+)/i,
 	//
 	PATTERN_user_link_all = new RegExp(PATTERN_user_link.source, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
 			PATTERN_user_contributions_link.source, 'ig');

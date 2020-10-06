@@ -27,6 +27,9 @@ typeof CeL === 'function' && CeL.run({
 	require : 'data.native.'
 	// for library_namespace.get_URL
 	// + '|application.net.Ajax.'
+
+	// CeL.DOM.HTML_to_Unicode(), CeL.DOM.Unicode_to_HTML()
+	+ '|interact.DOM.'
 	// setup module namespace
 	+ '|application.net.wiki.',
 
@@ -79,7 +82,7 @@ function module_code(library_namespace) {
 		&& session.language;
 	}
 
-	var
+	var PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}\n#�])+)/,
 	/**
 	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_section, page_name,
 	 * section_title, displayed_text ]
@@ -89,7 +92,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see PATTERN_link
 	 */
-	PATTERN_wikilink = /\[\[(([^\[\]\|{}\n#�]+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([\s\S]+?))?\]\]/,
+	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}\n#�])+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([\s\S]+?))?\]\]/,
 	//
 	PATTERN_wikilink_global = new RegExp(PATTERN_wikilink.source, 'g');
 
@@ -1493,6 +1496,8 @@ function module_code(library_namespace) {
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1');
 
+		page_name = library_namespace.HTML_to_Unicode(page_name);
+
 		/** {Boolean}採用 "_" 取代 " "。 */
 		var use_underline = options.use_underline;
 		page_name = use_underline
@@ -1669,13 +1674,14 @@ function module_code(library_namespace) {
 
 	// [ all, ":", file name without "File:" or ":File" ]
 	PATTERN_file_prefix = new RegExp('^ *(: *)?(?:' + PATTERN_file_prefix
-			+ ') *: *([^\\[\\]|#]+)', 'i');
+			+ ') *: *' + PATTERN_page_name.source, 'i');
 
 	// "Category" 本身可不分大小寫。
 	// 分類名稱重複時，排序索引以後出現者為主。
+	// TODO: using PATTERN_page_name
 	var
 	// [ all_category_text, category_name, sort_order, post_space ]
-	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}\n]+)(?:\s*\|\s*([^\[\]\|�]*))?\]\](\s*\n?)/ig,
+	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}\n�]+)(?:\s*\|\s*([^\[\]\|�]*))?\]\](\s*\n?)/ig,
 	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
 	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}\n�]+)/i;
 

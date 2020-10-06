@@ -665,11 +665,11 @@ function module_code(library_namespace) {
 			Map.call(this, search);
 			return;
 		} catch (e) {
-			// node 0.11: Constructor Map requires 'new'
+			// node.js 0.11: Constructor Map requires 'new'
 		}
 
 		search = new Map(search);
-		// Cpoy all properties
+		// Copy all methods
 		Object.assign(search, defective_URLSearchParams.prototype);
 		return search;
 	}
