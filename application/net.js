@@ -658,9 +658,20 @@ function module_code(library_namespace) {
 	}
 
 	function defective_URLSearchParams(search_string, options) {
-		Map.call(this, Object.entries(
 		// Warning: new Map() 少了許多必要的功能! 不能完全替代!
-		parse_URI.parse_search(search_string, options)));
+		var search = Object.entries(parse_URI.parse_search(search_string,
+				options));
+		try {
+			Map.call(this, search);
+			return;
+		} catch (e) {
+			// node 0.11: Constructor Map requires 'new'
+		}
+
+		search = new Map(search);
+		// Cpoy all properties
+		Object.assign(search, defective_URLSearchParams.prototype);
+		return search;
 	}
 
 	// https://developer.mozilla.org/zh-TW/docs/Learn/JavaScript/Objects/Inheritance
