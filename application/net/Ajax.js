@@ -417,6 +417,7 @@ function module_code(library_namespace) {
 			url.hash = hash;
 		}
 		url.search_params.add_parameters(search);
+		//console.trace(url.toString(charset));
 		return url.toString(charset);
 
 		// TODO:

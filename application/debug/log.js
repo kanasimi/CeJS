@@ -2038,11 +2038,16 @@ function finish(name_space) {
 						conditions(assert_proxy, setup_test, finish_test);
 					}
 				} catch (e) {
-					CeL.error(e);
 					// has_console
-					if (typeof console === 'object' && console.trace) {
-						// Will show stacks
-						console.trace(e);
+					if (typeof console === 'object' && console.error) {
+						// Warning: console.error() won't show stacks @ node v0.10
+						// console.trace(e) will show a wrong one.
+						if (e && e.stack && CeL.platform.nodejs && !CeL.platform('node', 8)) {
+							console.error(e.stack);
+						} else {
+							// Will show stacks
+							console.error(e);
+						}
 					}
 					conditions_error(e);
 				}

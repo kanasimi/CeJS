@@ -290,13 +290,12 @@ function module_code(library_namespace) {
 		+ action[2] : action[0], Object.create(null) ];
 		action[0] = new URL(action[0]);
 		if (session && session.general_parameters) {
-			// console.trace(session.general_parameters);
 			action[0].searchParams.add_parameters(session.general_parameters);
-			// console.trace(action);
 		} else if (!action[1].format) {
 			action[0].searchParams.add_parameters('format=json&utf8=1');
 		}
 		action[0] = action[0].toString();
+		//console.trace(action);
 
 		// 一般情況下會重新導向至 https。
 		// 若在 Wikimedia Toolforge 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。

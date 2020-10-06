@@ -412,7 +412,6 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// console.trace(action);
 		wiki_API.query(action,
 		// treat as {Function}callback or {Object}wiki_API.work config.
 		function(data, error) {

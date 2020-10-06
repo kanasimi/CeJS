@@ -226,7 +226,7 @@ function module_code(library_namespace) {
 			return;
 		}
 		var href = library_namespace.simplify_path(URI), matched = href
-				.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)([^\s:]*)$/i), tmp, path;
+				.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)([^\s]*)$/i), tmp, path;
 		if (!matched)
 			return;
 
@@ -338,6 +338,7 @@ function module_code(library_namespace) {
 				});
 				// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 				URI.search_params = parse_URI.parse_search(matched[5]);
+				URI.searchParams = new URLSearchParams(matched[5]);
 			}
 			URI.hash = matched[6];
 			// hash without '#'
@@ -359,10 +360,11 @@ function module_code(library_namespace) {
 		return URI;
 	}
 
+	var using_searchParams = { using_searchParams : true };
 	function URI_toString(charset) {
 		var URI = this;
 		// URI.search
-		var search = URI.search_params.toString(charset);
+		var search = charset === using_searchParams ? URI.searchParams.toString(charset) : URI.search_params.toString(charset);
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
 		URI.href = (URI.protocol ? URI.protocol + '//' : '')
 				+ (URI.username || URI.password ? (URI.username || '')
@@ -592,6 +594,65 @@ function module_code(library_namespace) {
 		});
 		return this;
 	}
+
+	function defective_URL(url) {
+		Object.assign(this, parse_URI(url));
+	}
+
+	defective_URL.prototype.toString = function toString() {
+		return URI_toString.call(this, using_searchParams);
+	};
+
+	function defective_URLSearchParams(search_string) {
+		Map.call(this, Object.entries(
+		// Warning: new Map() 少了許多必要的功能! 不能完全替代!
+		parse_URI.parse_search(search_string)));
+	}
+
+	// https://developer.mozilla.org/zh-TW/docs/Learn/JavaScript/Objects/Inheritance
+	Object.assign(defective_URLSearchParams.prototype = Object.create(Map.prototype), {
+		constructor : defective_URLSearchParams,
+		// Return the first one
+		get : function get(key) {
+			var original_value = Map.prototype.get.call(this, key);
+			if (Array.isArray(original_value))
+				return original_value[0];
+			return original_value;
+		},
+		getAll : function get(key) {
+			if (!this.has(key))
+				return [];
+			var original_value = Map.prototype.get.call(this, key);
+			if (Array.isArray(original_value))
+				return original_value;
+			return [ original_value ];
+		},
+		append : function append(key, value) {
+			if (this.has(key)) {
+				var original_value = Map.prototype.get.call(this, key);
+				if (Array.isArray(original_value))
+					original_value.push(value);
+				else
+					this.set(key, [ original_value, value ]);
+			} else {
+				this.set(key, value);
+			}
+		},
+		toString : function toString() {
+			var list = [];
+			this.forEach(function(value, key) {
+				key = encodeURIComponent(key) + '=';
+				if (Array.isArray(value)) {
+					value.forEach(function(v) {
+						list.push(key + encodeURIComponent(String(v)));
+					});
+				} else {
+					list.push(key + encodeURIComponent(String(value)));
+				}
+			});
+			return list.join('&');
+		}
+	});
 
 	// ------------------------------------------------------------------------
 
@@ -1999,15 +2060,8 @@ function module_code(library_namespace) {
 	if (library_namespace.is_WWW(true) || library_namespace.platform.nodejs) {
 		library_namespace.set_method(library_namespace.env.global, {
 			// defective polyfill for W3C URL API, URLSearchParams()
-			// Warning: parse_URI returns read-only object!
-			URL : function URL(url) {
-				Object.assign(this, parse_URI(url));
-			},
-			URLSearchParams : function URLSearchParams(search_string) {
-				return new Map(Object.entries(
-				// Warning: new Map() 少了許多必要的功能! 不能完全替代!
-				parse_URI.parse_search(search_string)));
-			}
+			URL : defective_URL,
+			URLSearchParams : defective_URLSearchParams
 		});
 
 		URLSearchParams.prototype.add_parameters = URLSearchParams_add_parameters;
