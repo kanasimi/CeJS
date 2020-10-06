@@ -337,7 +337,10 @@ function module_code(library_namespace) {
 					URI : URI
 				};
 			} else {
-				URI[KEY_hash] = matched[6] ? matched[6].slice(1) : '';
+				Object.defineProperty(URI, KEY_hash, {
+					value : matched[6] ? matched[6].slice(1) : '',
+					writable : true
+				});
 				Object.defineProperties(URI, {
 					hash : {
 						enumerable : true,
@@ -435,21 +438,14 @@ function module_code(library_namespace) {
 
 		var search = [], key;
 		function append(value) {
-			if (value === undefined) {
-				if (!options.ignore_undefined) {
-					// key + '='
-					search.push(key);
-				}
-				return;
-			}
-
-			if (typeof value !== 'string' && typeof value !== 'number') {
+			if (typeof value !== 'string' && typeof value !== 'number'
+					&& value !== NO_EQUAL_SIGN) {
 				library_namespace.debug({
 					T : [ '非字串之參數：[%1]', value ]
 				}, 1, 'parameters_toString');
 			}
 
-			search.push(key + '='
+			search.push(value === NO_EQUAL_SIGN ? key : key + '='
 					+ encode_URI_component(String(value), charset));
 		}
 
@@ -496,6 +492,18 @@ function module_code(library_namespace) {
 		return this;
 	}
 
+	function search_add_1_parameter(key, value, options) {
+		if (key in this) {
+			var original_value = this[key];
+			if (Array.isArray(original_value))
+				original_value.push(value);
+			else
+				this[key] = [ original_value, value ];
+		} else {
+			this[key] = value;
+		}
+	}
+
 	/**
 	 * append these parameters
 	 */
@@ -507,16 +515,7 @@ function module_code(library_namespace) {
 				continue;
 			}
 
-			var value = parameters[key];
-			if (key in this) {
-				var original_value = this[key];
-				if (Array.isArray(original_value))
-					original_value.push(value);
-				else
-					this[key] = [ original_value, value ];
-			} else {
-				this[key] = value;
-			}
+			search_add_1_parameter.call(this, key, parameters[key]);
 		}
 		return this;
 	}
@@ -542,6 +541,12 @@ function module_code(library_namespace) {
 		ignore_search_properties[KEY_URL] = true;
 		// alert(Object.keys(ignore_search_properties));
 	}
+
+	var NO_EQUAL_SIGN = typeof Symbol === 'function' ? Symbol('NO_EQUAL_SIGN')
+	//
+	: {
+		NO_EQUAL_SIGN : true
+	};
 
 	/**
 	 * parse_parameters({String}parameter) to hash
@@ -587,7 +592,7 @@ function module_code(library_namespace) {
 			} else {
 				name = decodeURIComponent(data[i]);
 				value = 'default_value' in options ? options.default_value
-						: /* name */undefined;
+						: /* name */NO_EQUAL_SIGN;
 			}
 
 			if (library_namespace.is_debug(2)) {
@@ -602,25 +607,20 @@ function module_code(library_namespace) {
 				+ value + ']'));
 			}
 
-			if (options.split_pattern
+			if (options.split_pattern && typeof value === 'string'
 			//
 			&& (matched = value.split(options.split_pattern)).length > 1) {
-				if (name in parameters)
-					if (Array.isArray(parameters[name]))
+				if (name in parameters) {
+					if (Array.isArray(parameters[name])) {
 						Array.prototype.push.apply(parameters[name], matched);
-					else {
+					} else {
 						matched.unshift(parameters[name]);
 						parameters[name] = matched;
 					}
-				else
+				} else
 					parameters[name] = matched;
-			} else if (name in parameters) {
-				if (Array.isArray(parameters[name]))
-					parameters[name].push(value);
-				else
-					parameters[name] = [ parameters[name], value ];
 			} else {
-				parameters[name] = value;
+				search_add_1_parameter.call(parameters, name, value);
 			}
 		}
 

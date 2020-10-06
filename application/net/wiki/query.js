@@ -291,8 +291,8 @@ function module_code(library_namespace) {
 		action[0] = new URL(action[0]);
 		if (session && session.general_parameters) {
 			action[0].searchParams.add_parameters(session.general_parameters);
-		} else if (!action[1].format) {
-			action[0].searchParams.add_parameters('format=json&utf8=1');
+		} else if (!action[1].format && wiki_API.general_parameters.format) {
+			action[0].searchParams.add_parameters(wiki_API.general_parameters);
 		}
 		action[0] = action[0].toString();
 		// console.trace(action);

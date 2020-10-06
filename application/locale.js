@@ -515,8 +515,10 @@ function module_code(library_namespace) {
 			if (typeof conversion === 'object') {
 				has_object = true;
 				text_list.push(matched[1], conversion);
-			} else
-				text_list.push(matched[1] + conversion);
+			} else {
+				// String(conversion): for Symbol value
+				text_list.push(matched[1] + String(conversion));
+			}
 		}
 
 		text_list.push(text.slice(last_index));

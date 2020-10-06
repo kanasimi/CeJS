@@ -8679,7 +8679,7 @@ _
 			if (value === undefined)
 				delete d[name];
 			else
-				d[name] = value;
+				d[name] = String(value);
 
 			// 同步。保證全程使用此函數時，同時也會設定好 the element's data-* attributes。
 			if (value === undefined)
@@ -8697,7 +8697,7 @@ _
 		} else if ((value = node.getAttribute ? node
 				.getAttribute(to_hyphenated(name)) : node[to_hyphenated(name)]) !== undefined) {
 			// 同步。
-			d[name] = value;
+			d[name] = String(value);
 		}
 
 		return d[name];
@@ -8794,7 +8794,8 @@ _
 				if (value === undefined)
 					delete d[name];
 				else
-					d[name] = value;
+					// String(value): for Symbol value
+					d[name] = String(value);
 
 			else if (library_namespace.is_Object(name)) {
 				// 此時 name = { name : value };
