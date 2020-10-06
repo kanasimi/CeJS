@@ -251,10 +251,9 @@ function module_code(library_namespace) {
 		// URI.URI = href;
 
 		tmp = matched[1];
-		if (tmp)
-			URI.protocol = tmp;
-		URI._protocol = URI.protocol.slice(0, -1);
-		library_namespace.debug('protocol [' + URI._protocol + ']', 2);
+		URI.protocol = tmp || '';
+		// URI._protocol = URI.protocol.slice(0, -1).toLowerCase();
+		// library_namespace.debug('protocol [' + URI._protocol + ']', 2);
 
 		/**
 		 * ** filename 可能歸至m[4]!<br />
@@ -292,7 +291,7 @@ function module_code(library_namespace) {
 				else if (tmp = {
 					http : 80,
 					ftp : 21
-				}[URI._protocol])
+				}[URI.protocol.slice(0, -1).toLowerCase()])
 					URI.host += ':' + (URI.port = tmp);
 			} else
 				return;
@@ -317,9 +316,9 @@ function module_code(library_namespace) {
 			library_namespace.warn('encoding error: [' + path + ']');
 
 		library_namespace.debug('parse path: [' + path + ']', 2);
-		if (path
-				&& (matched = path
-						.match(/^((.*\/)?([^\/#?]*))?(\?([^#]*))?(#(.*))?$/))) {
+		if (path && (matched = path
+		//
+		.match(/^((.*\/)?([^\/#?]*))?(\?([^#]*))?(#(.*))?$/))) {
 			// pathname={path}filename
 			library_namespace.debug('pathname: [' + matched + ']', 2);
 			// .path 會隨不同 OS 之 local file 表示法作變動!
@@ -329,11 +328,9 @@ function module_code(library_namespace) {
 			URI.filename = matched[3];
 			if (Object.defineProperty.not_native) {
 				URI.search = matched[4];
-				if (!options.as_URL) {
-					URI.search_params = parse_URI.parse_search(matched[5], {
-						URI : URI
-					});
-				}
+				tmp = {
+					URI : URI
+				};
 			} else {
 				Object.defineProperty(URI, 'search', {
 					get : function() {
@@ -341,17 +338,17 @@ function module_code(library_namespace) {
 					},
 					enumerable : true
 				});
-				if (!options.as_URL) {
-					URI.search_params = parse_URI.parse_search(matched[5]);
-				}
+				tmp = null;
 			}
 			if (options.as_URL) {
 				// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-				URI.searchParams = new URLSearchParams(matched[5]);
+				URI.searchParams = new URLSearchParams(matched[5], tmp);
+			} else {
+				URI.search_params = parse_URI.parse_search(matched[5], tmp);
 			}
 			URI.hash = matched[6];
-			// hash without '#'
-			URI._hash = matched[7];
+			// hash without '#': using URI.hash.slice(1)
+			// URI._hash = matched[7];
 		} else {
 			if (!href)
 				return;
@@ -613,10 +610,10 @@ function module_code(library_namespace) {
 		});
 	}
 
-	function defective_URLSearchParams(search_string) {
+	function defective_URLSearchParams(search_string, options) {
 		Map.call(this, Object.entries(
 		// Warning: new Map() 少了許多必要的功能! 不能完全替代!
-		parse_URI.parse_search(search_string)));
+		parse_URI.parse_search(search_string, options)));
 	}
 
 	// https://developer.mozilla.org/zh-TW/docs/Learn/JavaScript/Objects/Inheritance
