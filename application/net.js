@@ -221,7 +221,7 @@ function module_code(library_namespace) {
 	 *      https://developer.mozilla.org/en/DOM/window.location, also see
 	 *      batURL.htm
 	 */
-	function parse_URI(URI, base_uri) {
+	function parse_URI(URI, base_uri, options) {
 		options = library_namespace.setup_options(options);
 		if (!URI
 		// 不能用 instanceof String!
@@ -236,9 +236,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('parse [' + URI + ']: '
 				+ matched.join('<br />\n'), 2);
 
-		URI = base_uri && parse_URI(base_uri)
-		//
-		|| options['this']
+		URI = base_uri && parse_URI(base_uri) || options.as_URL
 		//
 		|| (library_namespace.is_WWW() ? {
 			// protocol包含最後的':',search包含'?',hash包含'#'.
@@ -331,9 +329,11 @@ function module_code(library_namespace) {
 			URI.filename = matched[3];
 			if (Object.defineProperty.not_native) {
 				URI.search = matched[4];
-				URI.search_params = parse_URI.parse_search(matched[5], {
-					URI : URI
-				});
+				if (!options.as_URL) {
+					URI.search_params = parse_URI.parse_search(matched[5], {
+						URI : URI
+					});
+				}
 			} else {
 				Object.defineProperty(URI, 'search', {
 					get : function() {
@@ -341,8 +341,12 @@ function module_code(library_namespace) {
 					},
 					enumerable : true
 				});
+				if (!options.as_URL) {
+					URI.search_params = parse_URI.parse_search(matched[5]);
+				}
+			}
+			if (options.as_URL) {
 				// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-				URI.search_params = parse_URI.parse_search(matched[5]);
 				URI.searchParams = new URLSearchParams(matched[5]);
 			}
 			URI.hash = matched[6];
@@ -355,11 +359,9 @@ function module_code(library_namespace) {
 		}
 		library_namespace.debug('path: [' + URI.path + ']', 2);
 
-		if (!options.no_toString) {
-			Object.defineProperty(URI, 'toString', {
-				value : URI_toString
-			});
-		}
+		Object.defineProperty(URI, 'toString', {
+			value : URI_toString
+		});
 		// Generate .href
 		URI.toString();
 
@@ -367,14 +369,11 @@ function module_code(library_namespace) {
 		return URI;
 	}
 
-	var using_searchParams = {
-		using_searchParams : true
-	};
 	function URI_toString(charset) {
 		var URI = this;
 		// URI.search
-		var search = charset === using_searchParams ? URI.searchParams
-				.toString(charset) : URI.search_params.toString(charset);
+		var search = 'search_params' in URI ? URI.search_params
+				.toString(charset) : URI.searchParams.toString();
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
 		URI.href = (URI.protocol ? URI.protocol + '//' : '')
 				+ (URI.username || URI.password ? (URI.username || '')
@@ -610,14 +609,9 @@ function module_code(library_namespace) {
 		// Object.assign(this, parse_URI(url));
 
 		parse_URI(url, null, {
-			'this' : this,
-			no_toString : true
+			as_URL : this
 		});
 	}
-
-	defective_URL.prototype.toString = function toString() {
-		return URI_toString.call(this, using_searchParams);
-	};
 
 	function defective_URLSearchParams(search_string) {
 		Map.call(this, Object.entries(
