@@ -204,6 +204,8 @@ function module_code(library_namespace) {
 	 *            URI to parse
 	 * @param {String}[base_uri]
 	 *            當做基底的 URL。 see CeL.application.storage.get_relative_path()
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @return parsed object
 	 * 
@@ -220,6 +222,7 @@ function module_code(library_namespace) {
 	 *      batURL.htm
 	 */
 	function parse_URI(URI, base_uri) {
+		options = library_namespace.setup_options(options);
 		if (!URI
 		// 不能用 instanceof String!
 		|| typeof URI !== 'string') {
@@ -234,6 +237,8 @@ function module_code(library_namespace) {
 				+ matched.join('<br />\n'), 2);
 
 		URI = base_uri && parse_URI(base_uri)
+		//
+		|| options['this']
 		//
 		|| (library_namespace.is_WWW() ? {
 			// protocol包含最後的':',search包含'?',hash包含'#'.
@@ -350,9 +355,11 @@ function module_code(library_namespace) {
 		}
 		library_namespace.debug('path: [' + URI.path + ']', 2);
 
-		Object.defineProperty(URI, 'toString', {
-			value : URI_toString
-		});
+		if (!options.no_toString) {
+			Object.defineProperty(URI, 'toString', {
+				value : URI_toString
+			});
+		}
 		// Generate .href
 		URI.toString();
 
@@ -360,11 +367,14 @@ function module_code(library_namespace) {
 		return URI;
 	}
 
-	var using_searchParams = { using_searchParams : true };
+	var using_searchParams = {
+		using_searchParams : true
+	};
 	function URI_toString(charset) {
 		var URI = this;
 		// URI.search
-		var search = charset === using_searchParams ? URI.searchParams.toString(charset) : URI.search_params.toString(charset);
+		var search = charset === using_searchParams ? URI.searchParams
+				.toString(charset) : URI.search_params.toString(charset);
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
 		URI.href = (URI.protocol ? URI.protocol + '//' : '')
 				+ (URI.username || URI.password ? (URI.username || '')
@@ -596,7 +606,13 @@ function module_code(library_namespace) {
 	}
 
 	function defective_URL(url) {
-		Object.assign(this, parse_URI(url));
+		// Object.assign() will not copy toString:URI_toString()
+		// Object.assign(this, parse_URI(url));
+
+		parse_URI(url, null, {
+			'this' : this,
+			no_toString : true
+		});
 	}
 
 	defective_URL.prototype.toString = function toString() {
@@ -610,7 +626,8 @@ function module_code(library_namespace) {
 	}
 
 	// https://developer.mozilla.org/zh-TW/docs/Learn/JavaScript/Objects/Inheritance
-	Object.assign(defective_URLSearchParams.prototype = Object.create(Map.prototype), {
+	Object.assign(defective_URLSearchParams.prototype = Object
+			.create(Map.prototype), {
 		constructor : defective_URLSearchParams,
 		// Return the first one
 		get : function get(key) {

@@ -2040,9 +2040,11 @@ function finish(name_space) {
 				} catch (e) {
 					// has_console
 					if (typeof console === 'object' && console.error) {
-						// Warning: console.error() won't show stacks @ node v0.10
+						// Warning: console.error() won't show stacks @ node
+						// v0.10
 						// console.trace(e) will show a wrong one.
-						if (e && e.stack && CeL.platform.nodejs && !CeL.platform('node', 8)) {
+						if (e && e.stack && CeL.platform.nodejs
+								&& !CeL.platform('node', 8)) {
 							console.error(e.stack);
 						} else {
 							// Will show stacks
