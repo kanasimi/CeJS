@@ -173,6 +173,10 @@ function module_code(library_namespace) {
 	/**
 	 * Parses URI.
 	 * 
+	 * 本組函數之目的:<br />
+	 * 1. polyfill for W3C URL API.<br />
+	 * 2. URLSearchParams() 採用{OBject}操作 hash 更方便，且可支援 charset。
+	 * 
 	 * @example <code>
 	alert(parse_URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23#hhh').hostname);
 	 * </code>
@@ -250,8 +254,7 @@ function module_code(library_namespace) {
 		} : Object.create(null));
 		// URI.URI = href;
 
-		tmp = matched[1];
-		URI.protocol = tmp || '';
+		URI.protocol = matched[1] || '';
 		// URI._protocol = URI.protocol.slice(0, -1).toLowerCase();
 		// library_namespace.debug('protocol [' + URI._protocol + ']', 2);
 
@@ -318,7 +321,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('parse path: [' + path + ']', 2);
 		if (path && (matched = path
 		//
-		.match(/^((.*\/)?([^\/#?]*))?(\?([^#]*))?(#(.*))?$/))) {
+		.match(/^((.*\/)?([^\/#?]*))?(\?([^#]*))?(#.*)?$/))) {
 			// pathname={path}filename
 			library_namespace.debug('pathname: [' + matched + ']', 2);
 			// .path 會隨不同 OS 之 local file 表示法作變動!
@@ -327,16 +330,47 @@ function module_code(library_namespace) {
 					: matched[2];
 			URI.filename = matched[3];
 			if (Object.defineProperty.not_native) {
+				// hash without '#': using URI.hash.slice(1)
+				URI.hash = matched[6];
 				URI.search = matched[4];
 				tmp = {
 					URI : URI
 				};
 			} else {
-				Object.defineProperty(URI, 'search', {
-					get : function() {
-						return '?' + this.search_params.toString();
+				URI[KEY_hash] = matched[6] ? matched[6].slice(1) : '';
+				Object.defineProperties(URI, {
+					hash : {
+						enumerable : true,
+						get : function() {
+							if (!this[KEY_hash])
+								return '';
+							return '#' + this[KEY_hash];
+						},
+						set : function(value) {
+							value = String(value);
+							if (value.startsWith('#')) {
+								value = value.slice(1);
+							}
+							this[KEY_hash] = value;
+						}
 					},
-					enumerable : true
+					search : {
+						enumerable : true,
+						get : search_getter,
+						set : function(value) {
+							var search_params = 'search_params' in this
+							//
+							? this.search_params : this.searchParams;
+							search_params.clean();
+
+							value = String(value);
+							if (value.startsWith('?')) {
+								value = value.slice(1);
+							}
+							if (value)
+								search_params.add_parameters(value);
+						}
+					}
 				});
 				tmp = null;
 			}
@@ -346,9 +380,6 @@ function module_code(library_namespace) {
 			} else {
 				URI.search_params = parse_URI.parse_search(matched[5], tmp);
 			}
-			URI.hash = matched[6];
-			// hash without '#': using URI.hash.slice(1)
-			// URI._hash = matched[7];
 		} else {
 			if (!href)
 				return;
@@ -366,17 +397,27 @@ function module_code(library_namespace) {
 		return URI;
 	}
 
+	function search_getter() {
+		var search = 'search_params' in this
+		//
+		? this.search_params.toString() : this.searchParams.toString();
+		return search ? '?' + search : '';
+	}
+
 	function URI_toString(charset) {
 		var URI = this;
-		// URI.search
-		var search = 'search_params' in URI ? URI.search_params
-				.toString(charset) : URI.searchParams.toString();
+		if (Object.defineProperty.not_native) {
+			// normalize properties
+			URI.search = search_getter.call(this);
+			if ((URI.hash = String(URI.hash)) && !URI.hash.startsWith('#')) {
+				URI.hash = '#' + URI.hash;
+			}
+		}
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
 		URI.href = (URI.protocol ? URI.protocol + '//' : '')
-				+ (URI.username || URI.password ? (URI.username || '')
+				+ (URI.username || URI.password ? URI.username
 						+ (URI.password ? ':' + URI.password : '') + '@' : '')
-				+ URI.host + URI.pathname + (search ? '?' + search : '')
-				+ (URI.hash || '');
+				+ URI.host + URI.pathname + URI.search + URI.hash;
 		return URI.href;
 	}
 
@@ -443,12 +484,29 @@ function module_code(library_namespace) {
 		return search;
 	}
 
+	function search_clean_parameters() {
+		for ( var key in this) {
+			if (ignore_search_properties && (key in ignore_search_properties)) {
+				// Warning: for old environment, may need ignore some keys
+				continue;
+			}
+
+			delete this[key];
+		}
+		return this;
+	}
+
 	/**
 	 * append these parameters
 	 */
 	function search_add_parameters(parameters) {
 		parameters = parse_search(parameters);
 		for ( var key in parameters) {
+			if (ignore_search_properties && (key in ignore_search_properties)) {
+				// Warning: for old environment, may need ignore some keys
+				continue;
+			}
+
 			var value = parameters[key];
 			if (key in this) {
 				var original_value = this[key];
@@ -464,9 +522,13 @@ function module_code(library_namespace) {
 	}
 
 	// @private
+	var KEY_hash = typeof Symbol === 'function' ? Symbol('hash') : '\0hash';
 	var KEY_URL = !Object.defineProperty.not_native
 			&& typeof Symbol === 'function' ? Symbol('URL') : '\0URL';
 	var search_properties = {
+		clean : {
+			value : search_clean_parameters
+		},
 		add_parameters : {
 			value : search_add_parameters
 		},
@@ -586,21 +648,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------
 
-	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-	function URLSearchParams_add_parameters(parameters) {
-		if (Array.isArray(parameters))
-			parameters = parameters.join('&');
-		// assert: typeof parameters === 'object'
-		// || typeof parameters === 'string'
-		parameters = new URLSearchParams(parameters);
-
-		var search = this;
-		parameters.forEach(function(value, key) {
-			search.append(key, value);
-		});
-		return this;
-	}
-
 	function defective_URL(url) {
 		// Object.assign() will not copy toString:URI_toString()
 		// Object.assign(this, parse_URI(url));
@@ -620,6 +667,16 @@ function module_code(library_namespace) {
 	Object.assign(defective_URLSearchParams.prototype = Object
 			.create(Map.prototype), {
 		constructor : defective_URLSearchParams,
+
+		clean : function clean() {
+			var search = this;
+			var keys = Array.from(this.keys());
+			keys.forEach(function(key) {
+				search['delete'](key);
+			});
+			return this;
+		},
+
 		// Return the first one
 		get : function get(key) {
 			var original_value = Map.prototype.get.call(this, key);
@@ -2072,7 +2129,22 @@ function module_code(library_namespace) {
 			URLSearchParams : defective_URLSearchParams
 		});
 
-		URLSearchParams.prototype.add_parameters = URLSearchParams_add_parameters;
+		// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+		// URLSearchParams_add_parameters(parameters)
+		URLSearchParams.prototype.add_parameters = function add_parameters(
+				parameters) {
+			if (Array.isArray(parameters))
+				parameters = parameters.join('&');
+			// assert: typeof parameters === 'object'
+			// || typeof parameters === 'string'
+			parameters = new URLSearchParams(parameters);
+
+			var search = this;
+			parameters.forEach(function(value, key) {
+				search.append(key, value);
+			});
+			return this;
+		};
 	}
 
 	return (_// JSDT:_module_

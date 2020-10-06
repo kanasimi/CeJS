@@ -411,26 +411,12 @@ function module_code(library_namespace) {
 	 */
 	function add_parameter_with_hash(url, search, hash, charset) {
 		url = library_namespace.parse_URI(url);
-		if (hash) {
-			if (!/#/.test(hash))
-				hash = '#' + hash;
+		if (hash !== undefined) {
 			url.hash = hash;
 		}
 		url.search_params.add_parameters(search);
 		// console.trace(url.toString(charset));
 		return url.toString(charset);
-
-		// TODO:
-		if (false) {
-			url = new URL(url);
-			url.searchParams.add_parameters(search);
-			if (hash) {
-				url.hash = '#'
-						+ (new URLSearchParams(url.hash.slice(1)))
-								.add_parameters(hash);
-			}
-			return url.toString(charset);
-		}
 	}
 
 	_.get_URL = get_URL;
