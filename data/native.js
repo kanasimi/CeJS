@@ -3282,6 +3282,8 @@ function module_code(library_namespace) {
 	 * 
 	 * Longest Common Subsequence 最長公共子序列
 	 * 
+	 * 警告：在 line_mode，"A \n"→"A\n" 的情況下，"A" 會同時出現在增加與刪除的項目中，此時必須自行檢測排除。
+	 * 
 	 * @param {Array|String}from
 	 *            from text
 	 * @param {Array|String}to
@@ -3302,7 +3304,7 @@ function module_code(library_namespace) {
 		//
 		separator = options.separator || (line_mode ? '\n' : '');
 		library_namespace.debug('separator: ' + JSON.stringify(separator)
-				+ (line_mode ? '，採用行模式' : ''), 3);
+				+ (line_mode ? '，採用行模式。' : ''), 3, 'LCS');
 		if (typeof from === 'string') {
 			from = separator ? from.split(separator) : from.chars();
 		} else if (!from) {

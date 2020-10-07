@@ -41,7 +41,7 @@ function module_code(library_namespace) {
 	 * 正規化定義參數的規範，例如數量包含可選範圍，可用 RegExp。如'number:0~|string:/v\\d/i',
 	 * 'number:1~400|string:item1;item2;item3'。亦可僅使用'number|string'。
 	 * 
-	 * @see import_options.fit @ CeL.data
+	 * @see CeL.data.fit_filter()
 	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern
 	 */
 	function generate_argument_condition(condition) {
@@ -133,7 +133,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Boolean} true: Error occudded
 	 * 
-	 * @see import_options.fit @ CeL.data
+	 * @see CeL.data.fit_filter()
 	 */
 	function verify_arg(key, value) {
 		if (!(key in this.import_arg_hash)) {

@@ -2073,49 +2073,6 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
-	function fit_filter_String(value) {
-		return String(value).includes(this);
-	}
-
-	function fit_filter_RegExp(value) {
-		return this.test(value);
-	}
-
-	function fit_filter_Object(value) {
-		return value in this;
-	}
-
-	/**
-	 * 
-	 * @param filter
-	 * @returns
-	 * 
-	 * @see function receive() @ CeL.application.net.wiki.page
-	 */
-	function generate_filter(filter) {
-		if (!filter)
-			return;
-
-		if (typeof filter === 'function')
-			return filter;
-
-		if (typeof filter === 'string')
-			return fit_filter_String.bind(filter);
-
-		if (library_namespace.is_RegExp(filter))
-			return fit_filter_RegExp.bind(filter);
-
-		if (Array.isArray(filter))
-			return filter.includes.bind(filter);
-
-		if (library_namespace.is_Object(filter))
-			return fit_filter_Object.bind(filter);
-	}
-
-	_.generate_filter = generate_filter;
-
-	// ---------------------------------------------------------------------//
-
 	function is_natural(value) {
 		return value >= 1 && Math.floor(value) === value;
 	}
@@ -2266,7 +2223,7 @@ function module_code(library_namespace) {
 
 			if (typeof normalizer === 'function') {
 				value = normalizer(value);
-			} else if (!import_options.fit(value, normalizer)) {
+			} else if (!fit_filter(normalizer, value)) {
 				// treat normalizer as filter
 				// invalid value
 				continue;
@@ -2287,20 +2244,25 @@ function module_code(library_namespace) {
 		invalid_value : true
 	};
 
+	_.import_options = import_options;
+
 	/**
 	 * validity value
 	 * 
+	 * generate_filter: fit_filter.bind(null, filter)
+	 * 
+	 * @param {Function|RegExp|Array}filter
 	 * @param value
 	 *            value to test
-	 * @param {Function|RegExp|Array}filter
 	 * 
-	 * @see function generate_filter(filter)
+	 * @returns value fits the filter
+	 * 
+	 * @see function receive() @ CeL.application.net.wiki.page
 	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text#pattern
 	 */
-	import_options.fit = function(value, filter) {
-		if (filter === true)
-			return true;
-		if (false && typeof filter === 'boolean')
+	function fit_filter(filter, value) {
+		// if (filter === true) return true;
+		if (typeof filter === 'boolean')
 			return filter;
 
 		// 驗證 pattern
@@ -2313,16 +2275,20 @@ function module_code(library_namespace) {
 		if (typeof filter === 'string') {
 			return filter === value;
 			// return filter.includes(value);
+			// return String(value).includes(filter);
 		}
 
+		// e.g., ['A','B','C']
 		if (Array.isArray(filter))
 			return filter.includes(value);
 
 		if (false && library_namespace.is_Object(filter))
 			return value in filter;
-	};
 
-	_.import_options = import_options;
+		throw new TypeError('Invalid filter');
+	}
+
+	_.fit_filter = fit_filter;
 
 	// ---------------------------------------------------------------------//
 

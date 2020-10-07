@@ -3526,6 +3526,8 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
+		// TODO: 緊接在連結後面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分
+		// https://phabricator.wikimedia.org/T263266
 		function parse_wikilink(all_link, page_and_section, page_name,
 				section_title, display_text) {
 			// 自 end_mark 向前回溯。
@@ -3838,9 +3840,21 @@ function module_code(library_namespace) {
 					parameters.is_link = true;
 				}
 				// decodeURIComponent()
-				parameters.anchor = section_title.toString()
+				section_title.toString()
 				// remove prefix: '#'
 				.slice(1).trimEnd();
+				if (/\.[\dA-F]{2}/.test(section_title)
+				// e.g.,
+				// [[臺灣話#.E5.8F.97.E6.97.A5.E6.9C.AC.E8.AA.9E.E5.BD.B1.E9.9F.BF.E8.80.85|(其他參考資料)]]
+				&& /^(\.[\dA-F]{2}|\w)+$/.test(section_title)) {
+					try {
+						section_title = decodeURIComponent(section_title
+								.replace(/\.([\dA-F]{2})/g, '%$1'));
+					} catch (e) {
+						// TODO: handle exception
+					}
+				}
+				parameters.anchor = section_title;
 				// TODO: [[Special:]]
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
 				_set_wiki_type(parameters, file_matched ? 'file'
@@ -6699,8 +6713,7 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 
-		lua_code = lua_code.replace_till_stable(/([^\w])nil([^\w])/g,
-				'$1null$2');
+		lua_code = lua_code.replace_till_stable(/([\W])nil([\W])/g, '$1null$2');
 
 		// TODO: or, and
 

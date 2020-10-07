@@ -69,7 +69,7 @@ require('../index');
 
 
 function test_base() {
-	all_error_count += CeL.test('set options', function(assert) {
+	all_error_count += CeL.test('set options', function (assert) {
 		assert(CeL.is_digits('0123'), 'CeL.is_digits(0123)');
 		assert(CeL.is_digits('1'), 'CeL.is_digits(1)');
 		assert(CeL.is_digits('1654'), 'CeL.is_digits(1654)');
@@ -90,7 +90,7 @@ function test_base() {
 		assert(CeL.is_empty_object({}), 'CeL.is_Object({})');
 		assert(!CeL.is_empty_object({ a: 1 }), 'CeL.is_Object({})');
 
-		var options = { a: 2, b: 'abc', c: function(a, b) { return a > b; } };
+		var options = { a: 2, b: 'abc', c: function (a, b) { return a > b; } };
 		assert([options, CeL.setup_options(options)], 'CeL.setup_options(options)===options #1');
 		assert([JSON.stringify(options), JSON.stringify(CeL.setup_options(options))], 'CeL.setup_options(options)===options #2');
 
@@ -112,7 +112,7 @@ function test_base() {
 		assert([JSON.stringify(o2), JSON.stringify(o1)], 'CeL.new_options(options) #7');
 	});
 
-	all_error_count += CeL.test('dependency_chain', function(assert) {
+	all_error_count += CeL.test('dependency_chain', function (assert) {
 		var dc = new CeL.dependency_chain;
 		dc.add(1, 2);
 		assert(['1', Array.from(dc.get(2).previous.values()).join()]);
@@ -131,7 +131,7 @@ function test_base() {
 
 function test_compatibility() {
 
-	all_error_count += CeL.test('Set, Map, Array.from()', function(assert) {
+	all_error_count += CeL.test('Set, Map, Array.from()', function (assert) {
 		var a = [1, 2, 3, 1],
 			s = new Set(a),
 			e = s.entries(),
@@ -199,7 +199,7 @@ function test_compatibility() {
 			'Array.from(array.entries())');
 		assert([Array.from({
 			length: 4
-		}, function(v, i) {
+		}, function (v, i) {
 			return i * i;
 		}).join(), "0,1,4,9"], 'Array.from({length:\d})');
 		assert([Array.from(s).join(), "1,2,3,4"], 'Array.from(Set)');
@@ -222,12 +222,12 @@ function test_compatibility() {
 
 	// ----------------------------------------------------
 
-	all_error_count += CeL.test('Math.clz32()', function(assert) {
+	all_error_count += CeL.test('Math.clz32()', function (assert) {
 		var BITS = 32;
 		assert([BITS, Math.clz32(0)], 'Math.clz32(0) === 32');
 		for (var i = BITS, test_number_in_2 = '1'; --i;) {
 			assert([i, Math.clz32(parseInt(test_number_in_2, 2))], i + ': ' + test_number_in_2);
-			test_number_in_2 = test_number_in_2.replace(new RegExp('^.{1,' + (1 + (test_number_in_2.length * Math.random()) | 0) + '}'), function($) {
+			test_number_in_2 = test_number_in_2.replace(new RegExp('^.{1,' + (1 + (test_number_in_2.length * Math.random()) | 0) + '}'), function ($) {
 				return $ + (Math.random() < .5 ? 0 : 1)
 			});
 		}
@@ -369,7 +369,7 @@ function test_native() {
 		[['124|523', '1<b>124</b>42<b>523</b>'.all_between('<b>', '</b>').join('|'), '.all_between()']],
 	]);
 
-	all_error_count += CeL.test('檢驗 find_between()', function(assert) {
+	all_error_count += CeL.test('檢驗 find_between()', function (assert) {
 		var html = '<p></p><h2>title1</h2>abc<h2>title2</h2>\nABC<h2>title3</h2>ABC\n<h2>title4</h2>\nABC\n<h2>title5</h2>',
 			// matched token
 			get_next_between = html.find_between('<h2>', '</h2>'), list = [], text;
@@ -383,20 +383,20 @@ function test_native() {
 		// ------------------------------------------------
 
 		list = [];
-		html.each_between('<h2>', '</h2>', function(token) {
+		html.each_between('<h2>', '</h2>', function (token) {
 			list.push('>' + token);
 		});
 		assert(['>title1|>title2|>title3|>title4|>title5', list.join('|')], 'each_between #1');
 
 		html = '123_456_789_012';
 		list = [];
-		html.each_between(null, '_', function(token) {
+		html.each_between(null, '_', function (token) {
 			list.push(token);
 		});
 		assert(['123|456|789', list.join('|')], 'each_between: null header');
 
 		list = [];
-		html.each_between('_', null, function(token) {
+		html.each_between('_', null, function (token) {
 			list.push(token);
 		});
 		assert(['456|789|012', list.join('|')], 'each_between: null footer');
@@ -464,8 +464,8 @@ function test_native() {
 			&& !b.last, 'SubUint32Array');
 	}
 
-	all_error_count += CeL.test('檢驗 search_sorted_Array() 準確度。', function(assert) {
-		[0, 1, 2, 3, 4, 8, 10, 127, 128, 129, 1023, 1024, 1025].forEach(function(
+	all_error_count += CeL.test('檢驗 search_sorted_Array() 準確度。', function (assert) {
+		[0, 1, 2, 3, 4, 8, 10, 127, 128, 129, 1023, 1024, 1025].forEach(function (
 			amount) {
 			CeL.debug('test ' + amount, 3);
 			var array = this.array, i = array.length, test;
@@ -504,7 +504,7 @@ function test_native() {
 		[[-1, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/e/)], '處理搜尋 {RegExp} 的情況#1-5'],
 	]);
 
-	all_error_count += CeL.test('data.native misc', function(assert) {
+	all_error_count += CeL.test('data.native misc', function (assert) {
 		assert([49, (49.4).to_fixed(0)], 'to_fixed() #1');
 		assert([50, (49.5).to_fixed(0)], 'to_fixed() #2');
 		assert([49.5, (49.5).to_fixed(1)], 'to_fixed() #3');
@@ -556,7 +556,7 @@ function test_native() {
 		assert([-1, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/e/)], 'first_matched() #5');
 		assert([1, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched('b')], 'first_matched() #6');
 		assert([7, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched('d')], 'first_matched() #7');
-		assert([0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(function(v) { return v.includes('a'); })], 'first_matched() #8');
+		assert([0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(function (v) { return v.includes('a'); })], 'first_matched() #8');
 
 		assert(['2,8', Array.intersection([2, 3, 5, 6, 8], [1, 2, 4, 8, 9], true).join(',')], 'Array.intersection()');
 		assert(["cmn-Hans-CN", Array.intersection(["cmn-Hant-TW", "cmn-Hans-CN", "cmn-Hant-HK"], ["cmn-Hans-CN"]).join(',')], 'Array.intersection(string array)');
@@ -616,7 +616,7 @@ function test_native() {
 
 	});
 
-	all_error_count += CeL.test('edit distance & LCS', function(assert) {
+	all_error_count += CeL.test('edit distance & LCS', function (assert) {
 		assert([17, 'correction systems'.edit_distance('spell checkers, correction system')], 'edit_distance() #1');
 		assert([9, 'Levenshtein distance'.edit_distance('edit distance')], 'edit_distance() #2');
 		assert([7, 'spell check'.edit_distance('Spell Check Tool')], 'edit_distance() #3');
@@ -760,7 +760,7 @@ function test_console() {
 		// https://travis-ci.org/kanasimi/CeJS/builds/86612669#L104
 		// https://ci.appveyor.com/project/kanasimi/cejs/build/27/job/xswk33cd13owcrkd#L26
 		var demo = [['fg '], ['bg ']];
-		new Array(8).fill(0).forEach(function(_, index) {
+		new Array(8).fill(0).forEach(function (_, index) {
 			demo[0].push('fg=' + index, index);
 			demo[1].push('bg=' + index, index);
 		});
@@ -803,7 +803,7 @@ function test_locale() {
 	var _;
 
 	//	###including
-	CeL.run('application.locale', function() {
+	CeL.run('application.locale', function () {
 		// alias for CeL.gettext, then we can use _('message').
 		_ = CeL.gettext;
 	});
@@ -811,8 +811,8 @@ function test_locale() {
 
 
 	//	###System message test
-	all_error_count += CeL.test('System message', function(assert) {
-		CeL.gettext.use_domain('TW', function() {
+	all_error_count += CeL.test('System message', function (assert) {
+		CeL.gettext.use_domain('TW', function () {
 			assert(['載入中…', CeL.gettext('Loading...')]);
 			assert(['已載入 20%…', CeL.gettext('Loading %1%...', 20)]);
 			//CeL.info('System message test OK.');
@@ -824,11 +824,11 @@ function test_locale() {
 
 
 	//	###單數複數形式 (plural) test
-	all_error_count += CeL.test('單數複數形式 (plural)', function(assert) {
+	all_error_count += CeL.test('單數複數形式 (plural)', function (assert) {
 		// CeL.gettext.use_domain('en', function() {}, true);
 		var message_id = '已載入 %1 筆資料。';
 		CeL.gettext.set_text({
-			'已載入 %1 筆資料。': function(domain_name, arg) {
+			'已載入 %1 筆資料。': function (domain_name, arg) {
 				// with error detection:
 				//return (arg[1] < 2 ? (arg[1] ? arg[1] === 1 ? 'One' : 'ERROR: %1' : 'No') + ' entry' : '%1 entries') + ' loaded.';
 
@@ -841,7 +841,7 @@ function test_locale() {
 			}
 		}, 'en');
 
-		CeL.gettext.use_domain('en', function() {
+		CeL.gettext.use_domain('en', function () {
 			assert(['No entry loaded.', CeL.gettext(message_id, 0)], '單數複數形式 (plural): 0');
 			assert(['One entry loaded.', CeL.gettext(message_id, 1)], '單數複數形式 (plural): 1');
 			assert(['2 entries loaded.', CeL.gettext(message_id, 2)], '單數複數形式 (plural): 2');
@@ -851,9 +851,9 @@ function test_locale() {
 	});
 
 
-	all_error_count += CeL.test('直接取得特定domain的文字。', function(assert) {
-		CeL.gettext.use_domain('zh-TW', function() {
-			CeL.gettext.use_domain('en', function() {
+	all_error_count += CeL.test('直接取得特定domain的文字。', function (assert) {
+		CeL.gettext.use_domain('zh-TW', function () {
+			CeL.gettext.use_domain('en', function () {
 				assert(['Loading...', CeL.gettext('Loading...')]);
 				assert(['載入中…', CeL.gettext.in_domain('TW', 'Loading...')], '不改變預設domain，直接取得特定domain的轉換過的文字。');
 			}, true);
@@ -863,12 +863,12 @@ function test_locale() {
 
 	//	###basic test
 	CeL.gettext.use_domain('zh-TW', true);
-	CeL.gettext.use_domain('zh-TW', function() {
+	CeL.gettext.use_domain('zh-TW', function () {
 		// callback
 	}, true);
 
 	//	設定欲轉換的文字格式。
-	all_error_count += CeL.test('設定欲轉換的文字格式。', function(assert) {
+	all_error_count += CeL.test('設定欲轉換的文字格式。', function (assert) {
 		CeL.gettext.set_text({
 			'%n1 smart ways to spend %c2': '%Chinese/n1個花%c2的聰明方法'
 		}, 'Traditional Chinese');
@@ -888,10 +888,10 @@ function test_locale() {
 
 
 	//	###test with 貨幣
-	all_error_count += CeL.test('轉換文字 with 貨幣。', function(assert) {
+	all_error_count += CeL.test('轉換文字 with 貨幣。', function (assert) {
 		CeL.gettext.conversion['smart way'] = ['no %n', '1 %n', '%d %ns'];
 		// You can also use this:
-		CeL.gettext.conversion['smart way'] = function(count) {
+		CeL.gettext.conversion['smart way'] = function (count) {
 			var pattern = ['no %n', '1 %n', '%d %ns'];
 			return pattern[count < pattern.length ? count : pattern.length - 1]
 				.replace(/%n/, 'smart way').replace(/%d/, count);
@@ -943,7 +943,7 @@ function test_numeral() {
 	]);
 	// 此步驟頗費時。
 	if (test_level) {
-		all_error_count += CeL.test('中文數字 0 to 1000', function(assert) {
+		all_error_count += CeL.test('中文數字 0 to 1000', function (assert) {
 			for (var natural = 0; natural <= 1000; natural++) {
 				assert([natural, CeL.from_Chinese_numeral(
 					//
@@ -952,7 +952,7 @@ function test_numeral() {
 		});
 	}
 
-	all_error_count += CeL.test('Roman numerals 1 to 1000000', function(assert) {
+	all_error_count += CeL.test('Roman numerals 1 to 1000000', function (assert) {
 		for (var natural = 1; natural < 1e6; natural++) {
 			if (natural % 10000 === 0)
 				CeL.debug(natural + ': ' + CeL.to_Roman_numeral(natural, true), 2);
@@ -1000,7 +1000,7 @@ function test_math() {
 
 	CeL.run('data.math');
 
-	all_error_count += CeL.test('Combinatorics 組合數學', function(assert) {
+	all_error_count += CeL.test('Combinatorics 組合數學', function (assert) {
 		assert([false, [2, 3, 5, 6, 4].is_AP()], 'is_AP(): false');
 		assert([true, [5, 6, 7, 8, 9].is_AP()], 'is_AP(): true');
 		assert([false, [2, 3, 5, 6, 4, 4].combines_AP()], 'combines_AP(): false');
@@ -1009,12 +1009,12 @@ function test_math() {
 		var n = 8260569835;
 		assert(n.is_permutation(3680589526), 'Permutation 排列');
 		n = 1233455;
-		n.for_permutation(function(permutation) {
+		n.for_permutation(function (permutation) {
 			assert(n.is_permutation(permutation), 'Permutation 排列: ' + permutation);
 		});
 	});
 
-	all_error_count += CeL.test('Basic math functions', function(assert) {
+	all_error_count += CeL.test('Basic math functions', function (assert) {
 		assert([CeL.polynomial_value([3, 4, 5, 6], 2),
 		3 + 4 * 2 + 5 * 2 * 2 + 6 * 2 * 2 * 2], 'polynomial value');
 
@@ -1137,11 +1137,11 @@ function test_math() {
 		assert([CeL.data.math.guess_exponent(Math.pow(2 / 3, 1 / 1)).join(','), '2,3,1,1'], '猜測一個數可能的次方數');
 
 
-		assert([Math.pow(CeL.secant_method(function(x) { return x * x; }, 3, 5, 15), 2), 15], { name: 'secant method', error_rate: 1e-15 });
-		assert([CeL.secant_method(function(x) { return x * x * x - 8; }, 5, 4), 2], 'secant method');
+		assert([Math.pow(CeL.secant_method(function (x) { return x * x; }, 3, 5, 15), 2), 15], { name: 'secant method', error_rate: 1e-15 });
+		assert([CeL.secant_method(function (x) { return x * x * x - 8; }, 5, 4), 2], 'secant method');
 
-		assert([Math.pow(CeL.find_root(function(x) { return x * x; }, 3, 5, 15), 2), 15], { name: 'find root of equation', error_rate: 1e-15 });
-		assert([CeL.data.math.find_root(function(x) { return x * x * x - 8; }, 5, 4), 2], 'find root of equation');
+		assert([Math.pow(CeL.find_root(function (x) { return x * x; }, 3, 5, 15), 2), 15], { name: 'find root of equation', error_rate: 1e-15 });
+		assert([CeL.data.math.find_root(function (x) { return x * x * x - 8; }, 5, 4), 2], 'find root of equation');
 
 		// Essentially the same as A001065, but with a(1)=1.
 		// https://oeis.org/A001065
@@ -1209,7 +1209,7 @@ function test_math() {
 
 	// ---------------------------------------------------------------------//
 
-	all_error_count += CeL.test('Basic integer examples', function(assert) {
+	all_error_count += CeL.test('Basic integer examples', function (assert) {
 		assert([(new CeL.data.math.integer(123)).add(2).toString(), '125']);
 		assert([(new CeL.data.math.integer(123)).add(-2).toString(), '121']);
 		assert([new CeL.data.math.integer(967803).digits().join(','), '9,6,7,8,0,3'], '.digits()');
@@ -1252,7 +1252,7 @@ function test_math() {
 
 	// ---------------------------------------------------------------------//
 
-	all_error_count += CeL.test('normal number test. 正常四則運算測試案例。', function(assert) {
+	all_error_count += CeL.test('normal number test. 正常四則運算測試案例。', function (assert) {
 		// ≈11 s @ Chrome/31.0.1640.0
 		// ≈19 s @ Firefox/27.0 nightly
 		// ≈35 s @ Firefox/3.0.19
@@ -1271,7 +1271,7 @@ function test_math() {
 				Math.floor(Number.MAX_SAFE_INTEGER / 2)
 			],
 
-			do_test = function() {
+			do_test = function () {
 				var op, _op, i, m;
 				function test(assignment) {
 					_op = op + (assignment ? '=' : '');
@@ -1295,17 +1295,17 @@ function test_math() {
 				}
 			};
 
-		_OP.forEach(function(op, index) {
+		_OP.forEach(function (op, index) {
 			OP[op] = new Function('a', 'b', 'var v=a' + op + 'b;return v<0?-Math.floor(-v):Math.floor(v)');
 		});
 
-		normal_test_case.forEach(function(va) {
+		normal_test_case.forEach(function (va) {
 			//CeL.log(va);
-			[va, -va].forEach(function(va) {
-				[va, '' + va].forEach(function(va) {
-					normal_test_case.forEach(function(vb) {
-						[vb, -vb].forEach(function(vb) {
-							[vb, '' + vb].forEach(function(vb) {
+			[va, -va].forEach(function (va) {
+				[va, '' + va].forEach(function (va) {
+					normal_test_case.forEach(function (vb) {
+						[vb, -vb].forEach(function (vb) {
+							[vb, '' + vb].forEach(function (vb) {
 								a = va, b = vb, do_test();
 							});
 						});
@@ -1324,7 +1324,7 @@ function test_math() {
 
 	if (test_level) {
 		// 此步驟頗費時。
-		all_error_count += CeL.test('division test', function(assert) {
+		all_error_count += CeL.test('division test', function (assert) {
 			// ≈1.5 m @ Chrome/31.0.1640.0
 			var base = 10, limit = parseInt('1111', base) + 2, d = 1, n, numerator, denominator = new CeL.data.math.integer(d, null, base), q;
 
@@ -1347,7 +1347,7 @@ function test_math() {
 	// @see
 	// http://www.wolframalpha.com/
 
-	all_error_count += CeL.test('Advanced integer examples #1', function(assert) {
+	all_error_count += CeL.test('Advanced integer examples #1', function (assert) {
 		var v = '90846795678256376423066498367647582364097529386948569238664755236548675867234.576856065785675678';
 		assert([(new CeL.data.math.integer(v)).toString(), v], 'assignment');
 		assert([(new CeL.data.math.integer(v)).round().toString(), '90846795678256376423066498367647582364097529386948569238664755236548675867235'], 'round #1');
@@ -1555,7 +1555,7 @@ function test_math() {
 	// ≈14 s @ Firefox/3.0.19
 	// ≈3.5 m @ IE8
 	if (test_level) {
-		all_error_count += CeL.test('power() and log()', function(assert) {
+		all_error_count += CeL.test('power() and log()', function (assert) {
 			var test_count = 101,
 				factor = 1, power = new CeL.data.math.integer('42364232342234'), I = new CeL.data.math.integer(factor), i = 0;
 			factor = Math.log(factor) / Math.log(power);
@@ -1566,7 +1566,7 @@ function test_math() {
 
 	// ---------------------------------------------------------------------//
 
-	all_error_count += CeL.test('square root of small integer', function(assert) {
+	all_error_count += CeL.test('square root of small integer', function (assert) {
 		for (var m = 'test square_root: ', i = 1, I2; i < 100000000; i += 1000000) {
 			I2 = (new CeL.data.math.integer(i)).square();
 			assert([I2.clone().square_root().compare(i), 0], m + i + '^2');
@@ -1576,7 +1576,7 @@ function test_math() {
 	});
 
 
-	all_error_count += CeL.test('square root of big integer', function(assert) {
+	all_error_count += CeL.test('square root of big integer', function (assert) {
 		// ~5 s @ Gecko/20100101 Firefox/35.0
 		var test_count = 200
 		for (var i = test_count, I = new CeL.data.math.integer(1), a = new CeL.data.math.integer('62537864798693472567385647825635478963754675867263725675627835674527634854699999999999'), I2;
@@ -1591,7 +1591,7 @@ function test_math() {
 
 	// ---------------------------------------------------------------------//
 
-	all_error_count += CeL.test('integer', function(assert) {
+	all_error_count += CeL.test('integer', function (assert) {
 		assert([(new CeL.data.math.integer(37)).precise_divide(30).join(','), '1,2,3'], 'precise_divide');
 
 		var d = '2396479263746238964792536748675698343467598263986482', i = new CeL.data.math.integer(1), q = i.division(d, 20);
@@ -1688,7 +1688,7 @@ function test_math() {
 
 	// ---------------------------------------------------------------------//
 
-	all_error_count += CeL.test('rational', function(assert) {
+	all_error_count += CeL.test('rational', function (assert) {
 		var rational = new CeL.rational(2.37);
 		assert([rational.reduce().toString(), '237/100'], 'Rational.assignment(Number)');
 		rational = new CeL.rational(new CeL.data.math.integer('.021'));
@@ -1879,9 +1879,9 @@ function test_quantity() {
 
 function test_code() {
 	return;
-	all_error_count += CeL.test('code', function(assert) {
+	all_error_count += CeL.test('code', function (assert) {
 		var e = CeL.parse_escape('00%M0\\\\\\\\\\%Mg\\a1\\n1\\s1\\a222',
-			function(s) {
+			function (s) {
 				//CeL.log('s: [' + s + ']');
 				return s.replace(/%M/g, '_');
 			});
@@ -1890,7 +1890,7 @@ function test_code() {
 
 		// --------------------------------------------------------------------
 
-		var Camel_test = function(identifier, separator) {
+		var Camel_test = function (identifier, separator) {
 			var _1, _2;
 			if (identifier.indexOf(separator) === -1) {
 				_1 = identifier.to_underscore(separator);
@@ -1936,10 +1936,10 @@ function test_CSV() {
 	]);
 
 	all_error_count += CeL.test('CSV handle_array', [
-		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6', { handle_array: [, function(v) { return ':' + v; }] })[2][0], '_3']],
-		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6', { handle_array: [, function(v) { return ':' + v; }] })[2][1], ':_4']],
-		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6', { handle_array: [, function(v) { return ':' + v; }] })[0][1], 'b']],
-		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6', { handle_array: [, function(v) { return ':' + v; }] })[0][1], 'b']],
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6', { handle_array: [, function (v) { return ':' + v; }] })[2][0], '_3']],
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6', { handle_array: [, function (v) { return ':' + v; }] })[2][1], ':_4']],
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6', { handle_array: [, function (v) { return ':' + v; }] })[0][1], 'b']],
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6', { handle_array: [, function (v) { return ':' + v; }] })[0][1], 'b']],
 	]);
 
 	CeL.set_debug(0);
@@ -2157,14 +2157,14 @@ function test_date() {
 
 	CeL.debug((new Date).format('\\%m\\x61%m/%d/%Y'));
 
-	all_error_count += CeL.test('time zone', function(assert) {
+	all_error_count += CeL.test('time zone', function (assert) {
 		var tmp = '2001/8/7 03:35:8PM';
 		CeL.debug(tmp + ' → ' + tmp.to_Date('CST') + ' → ' + tmp.to_Date('CST').format('%Y年%m月%d日%H時%M分%S秒%f毫秒'), 3);
 		assert(['2001年8月7日15時35分8秒000毫秒', tmp.to_Date('CST').format({ format: '%Y年%m月%d日%H時%M分%S秒%f毫秒', offset: 8 * 60 })]);
 		assert(['2001年08月07日', tmp.to_Date('CST').format({ format: '%Y年%2m月%2d日', offset: 8 * 60 })]);
 	});
 
-	all_error_count += CeL.test('CeL.Julian_day', function(assert) {
+	all_error_count += CeL.test('CeL.Julian_day', function (assert) {
 		for (var JD = 4e6; JD > -1364; JD--) {
 			// Julian calendar, first NG: -1402
 			var date = CeL.Julian_day.to_YMD(JD);
@@ -2192,7 +2192,7 @@ function test_date() {
 
 	CeL.run('data.date');
 
-	all_error_count += CeL.test('Julian date', function(assert) {
+	all_error_count += CeL.test('Julian date', function (assert) {
 		// Date_to_String.no_year_0 = true;
 
 		// leap year @ Julian
@@ -2232,7 +2232,7 @@ function test_date() {
 		'0000/3/1'.to_Date()
 	});
 
-	all_error_count += CeL.test('date Basic tests', function(assert) {
+	all_error_count += CeL.test('date Basic tests', function (assert) {
 		// e.g., UTC+8: -8 * 60 = -480
 		var present_local_minute_offset = (new Date).getTimezoneOffset() || 0;
 		//year = -2010
@@ -2364,7 +2364,7 @@ function test_date() {
 	]);
 
 
-	all_error_count += CeL.test('stem_branch_index', function(assert) {
+	all_error_count += CeL.test('stem_branch_index', function (assert) {
 		for (var i = 0; i < 60; i++) {
 			assert([i, CeL.stem_branch_index(CeL.to_stem_branch(i))]);
 		}
@@ -2381,7 +2381,7 @@ function test_date() {
 function test_character() {
 	var test_name = 'character encoding 文字/字元編碼: ';
 	setup_test(test_name);
-	CeL.character.load(['Big-5', 'GB2312', 'EUCJP', 'Shift JIS'], function() {
+	CeL.character.load(['Big-5', 'GB2312', 'EUCJP', 'Shift JIS'], function () {
 		var text = '2017年 good 世界中の書籍を';
 		all_error_count += CeL.test(test_name + 'Big5', [
 			[['作輩', Buffer.from('A740BDFA', 'hex').toString('Big-5')], 'Big5 #1'],
@@ -2487,7 +2487,7 @@ function test_astronomy() {
 
 	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
 	// p. 219, Example 32.a with full VSOP87
-	CeL.VSOP87.load_terms('Venus', function() {
+	CeL.VSOP87.load_terms('Venus', function () {
 		// corresponds to JD 2448976.5
 		var JD = CeL.Julian_day.from_YMD(1992, 12, 20, 'CE') - .5;
 		console.log(CeL.VSOP87(JD, 'Venus'), {
@@ -2497,7 +2497,7 @@ function test_astronomy() {
 
 	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
 	// p. 221, Example 32.b with full VSOP87
-	CeL.VSOP87.load_terms('Saturn', function() {
+	CeL.VSOP87.load_terms('Saturn', function () {
 		var JD = CeL.Julian_day.from_YMD(1999, 7, 26, 'CE') - .5;
 		console.log(CeL.VSOP87(JD, 'Saturn', {
 			FK5: false,
@@ -2507,7 +2507,7 @@ function test_astronomy() {
 
 	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
 	// p. 225, Example 33.a with full VSOP87
-	CeL.VSOP87.load_terms(['Venus', 'Earth'], function() {
+	CeL.VSOP87.load_terms(['Venus', 'Earth'], function () {
 		var JD = CeL.Julian_day.from_YMD(1992, 12, 20, 'CE') - .5;
 		console.log(CeL.object_coordinates(JD, 'Venus'));
 	});
@@ -2519,7 +2519,7 @@ function test_astronomy() {
 
 	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
 	// p. 95, Example 13.b with full VSOP87
-	CeL.VSOP87.load_terms(['Venus', 'Earth'], function() {
+	CeL.VSOP87.load_terms(['Venus', 'Earth'], function () {
 		var JD = CeL.Julian_day.from_YMD(1987, 4, 10, 'CE') - .5
 			+ CeL.Julian_day.from_HMS(19, 21);
 		console.log(CeL.object_coordinates(JD, 'Venus', {
@@ -2535,7 +2535,7 @@ function test_astronomy() {
 	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
 	// p. 82. Example 11.a
 	// p. 280. Example 40.a
-	CeL.VSOP87.load_terms(['Mars', 'Earth'], function() {
+	CeL.VSOP87.load_terms(['Mars', 'Earth'], function () {
 		var JD = CeL.Julian_day.from_YMD(2003, 8, 28, 'CE') - .5
 			+ CeL.Julian_day.from_HMS(3, 17);
 		console.log(CeL.object_coordinates(JD, 'Mars', {
@@ -2608,7 +2608,7 @@ function test_astronomy() {
 	CeL.assert([2015, CeL.立春年(new Date('2015/2/4'))], '立春年 2015/2/4');
 
 	// 取得 2000/1/1 月亮地心瞬時黃道視黃經 in degrees。
-	CeL.LEA406.load_terms('V', function() {
+	CeL.LEA406.load_terms('V', function () {
 		CeL.format_degrees(CeL.LEA406(CeL.Julian_day.from_YMD(2000, 1, 1,
 			'CE'), 'V', {
 			degrees: true
@@ -2637,7 +2637,7 @@ function test_astronomy() {
 	var 年朔日 = CeL.定朔((new Date).getFullYear(), {
 		月名: true
 	});
-	年朔日.map(function(JD, index) {
+	年朔日.map(function (JD, index) {
 		return 年朔日.月名[index] + ': ' + CeL.JD_to_Date(JD).format('CE');
 	}).join('\n');
 
@@ -2646,7 +2646,7 @@ function test_astronomy() {
 		歲首: '丑',
 		月名: true
 	});
-	年朔日.map(function(d, index) {
+	年朔日.map(function (d, index) {
 		return 年朔日.月名[index] + ': ' + CeL.JD_to_Date(d).format('CE');
 	}).join('\n');
 	// 取得月日
@@ -2704,24 +2704,24 @@ function test_astronomy() {
 	 * <q>["2015/8/6 0:20:29.307", "2015/8/6 5:16:39.667", "2015/8/6 12:20:26.147", "2015/8/6 19:23:35.709"]</q>
 	 */
 	CeL.rise_set([39 + 54 / 60, 116 + 23 / 60, 8],
-		CeL.Julian_day.from_YMD(2015, 8, 6, 'CE')).map(function(JD) {
+		CeL.Julian_day.from_YMD(2015, 8, 6, 'CE')).map(function (JD) {
 			return CeL.JD_to_Date(JD).format('CE');
 		});
 
 	CeL.rise_set([89 + 54 / 60, 116 + 23 / 60, 8],
 		CeL.Julian_day.from_YMD(2015, 8, 6, 'CE'), null, null, true)
-		.map(function(JD) {
+		.map(function (JD) {
 			return CeL.JD_to_Date(JD).format('CE');
 		});
 
 	// 日落
 	CeL.rise_set([25.048592, 121.556940],
-		CeL.Julian_day.from_YMD(2015, 8, 6, 'CE')).map(function(JD) {
+		CeL.Julian_day.from_YMD(2015, 8, 6, 'CE')).map(function (JD) {
 			return CeL.JD_to_Date(JD).format('CE');
 		});
 	// http://aa.usno.navy.mil/rstt/onedaytable?form=2&ID=AA&year=2015&month=8&day=6&place=&lon_sign=1&lon_deg=116&lon_min=23&lat_sign=1&lat_deg=39&lat_min=54&tz=8&tz_sign=1
 	CeL.rise_set([39 + 54 / 60, 116 + 23 / 60],
-		CeL.Julian_day.from_YMD(2015, 8, 6, 'CE')).map(function(JD) {
+		CeL.Julian_day.from_YMD(2015, 8, 6, 'CE')).map(function (JD) {
 			return CeL.JD_to_Date(JD).format('CE');
 		});
 	// 月出
@@ -2730,7 +2730,7 @@ function test_astronomy() {
 	CeL.LEA406.load_terms('R');
 	CeL.rise_set([39 + 54 / 60, 116 + 23 / 60],
 		CeL.Julian_day.from_YMD(2015, 8, 6, 'CE'), null, 'moon').map(
-			function(JD) {
+			function (JD) {
 				return CeL.JD_to_Date(JD).format('CE');
 			});
 
@@ -2739,7 +2739,7 @@ function test_astronomy() {
 	CeL.VSOP87.load_terms('Venus');
 	CeL.rise_set([42 + 20 / 60, -(71 + 5 / 60)],
 		CeL.Julian_day.from_YMD(1988, 3, 20, 'CE'), null, 'Venus').map(
-			function(JD) {
+			function (JD) {
 				return CeL.JD_to_Date(JD).format('CE');
 			});
 
@@ -2788,7 +2788,7 @@ function test_astronomy() {
 	 *
 	 * no FK5 較接近。但仍有誤差 1.4 s
 	 */
-	CeL.find_root(function(TT) {
+	CeL.find_root(function (TT) {
 		return CeL.lunar_coordinates(TT, {
 			FK5: false
 		}).β;
@@ -2958,7 +2958,7 @@ function test_wiki() {
 
 	]);
 
-	all_error_count += CeL.test('CeL.wiki.parser', function(assert) {
+	all_error_count += CeL.test('CeL.wiki.parser', function (assert) {
 		var wikitext, parsed;
 
 		assert(['深圳', CeL.wiki.get_plain_display_text(CeL.wiki.parse('深{{lang|zh|圳}}'))], 'get_plain_display_text() #1');
@@ -2968,13 +2968,13 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link');
 		wikitext = '++\npp:http://h /p n\n++'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #1');
-		assert(['++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function(token) { return '~~'; }, true).toString()], 'wiki.parse: plain url #2');
+		assert(['++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function (token) { return '~~'; }, true).toString()], 'wiki.parse: plain url #2');
 		wikitext = 'http://http://h'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #3');
-		assert(['~~', CeL.wiki.parser(wikitext).each('url', function(token) { return '~~'; }, true).toString()], 'wiki.parse: plain url #4');
+		assert(['~~', CeL.wiki.parser(wikitext).each('url', function (token) { return '~~'; }, true).toString()], 'wiki.parse: plain url #4');
 		wikitext = 'http://http://h{{t}}http://s.r[g]ftp://p.q'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #5');
-		assert(['~~{{t}}~~[g]~~', CeL.wiki.parser(wikitext).each('url', function(token) { return '~~'; }, true).toString()], 'wiki.parse: plain url #6');
+		assert(['~~{{t}}~~[g]~~', CeL.wiki.parser(wikitext).each('url', function (token) { return '~~'; }, true).toString()], 'wiki.parse: plain url #6');
 
 		wikitext = '1{{t|a=\nb\n}}{{p|b}}2'; parsed = CeL.wiki.parser(wikitext);
 		assert(['b', parsed.parse()[1].parameters.a], 'wiki.parse: template .parameters');
@@ -2982,7 +2982,7 @@ function test_wiki() {
 		wikitext = 't<!--='; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[l]]b'; parsed = CeL.wiki.parser(wikitext).parse();
-		assert(['a{{t}}b', parsed.each('link', function(token, parent, index) { return '{{t}}'; }, true).toString()]);
+		assert(['a{{t}}b', parsed.each('link', function (token, parent, index) { return '{{t}}'; }, true).toString()]);
 
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert(['file', parsed[0].type], 'wiki.parse.file #1-1');
@@ -3009,8 +3009,8 @@ function test_wiki() {
 		assert(parsed.is_link, 'wiki.parse.category #1-2');
 
 		wikitext = '{{c|d[[e]]f}}'; parsed = CeL.wiki.parser(wikitext).parse();
-		assert(['{{c|df}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index) { return ''; }, true).toString()], 'search all links');
-		assert(['{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index) { return ''; }, true, 1).toString()], 'only links of level 1');
+		assert(['{{c|df}}', CeL.wiki.parser(wikitext).each('link', function (token, parent, index) { return ''; }, true).toString()], 'search all links');
+		assert(['{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function (token, parent, index) { return ''; }, true, 1).toString()], 'only links of level 1');
 		assert(['file', CeL.wiki.parse('[[FiLe:a]]').type]);
 		assert(['Ab', CeL.wiki.parse('[[FiLe:ab]]').name]);
 		// TODO: 當前解析為 'link', 應為 'text'
@@ -3238,7 +3238,7 @@ function test_wiki() {
 		assert(['b', parsed[1].tag], 'wiki.parse: HTML tag #4');
 		assert([' style="color:#000"  ', String(parsed[1][0]).toString()], 'wiki.parse: HTML tag #5: tag attributes');
 		assert(['tag_inner', parsed[1][1].type], 'wiki.parse: HTML tag #6');
-		assert(['1<b style="color:#000"  ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function(token, parent, index) { return ''; }, true).toString()], 'wiki.parse: HTML tag #7');
+		assert(['1<b style="color:#000"  ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function (token, parent, index) { return ''; }, true).toString()], 'wiki.parse: HTML tag #7');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #1');
@@ -3269,7 +3269,7 @@ function test_wiki() {
 
 		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', p2: 'vp2' })], 'template_object_to_wikitext: #1');
 		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
-		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function(text_array) { return text_array.filter(function(text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');
+		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function (text_array) { return text_array.filter(function (text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');
 
 		var token;
 		token = CeL.wiki.parse('{{t|1}}');
@@ -3312,7 +3312,7 @@ function test_wiki() {
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{#parserfunctions:}} #1');
 		token = [];
-		parsed.each('function', function(t) { token.push(t) });
+		parsed.each('function', function (t) { token.push(t) });
 		assert(['{{#time:Y年Fj日|-7 days +9 hours}}', token.join()], 'wiki.parse: {{#parserfunctions:}} #2');
 		assert(['time', token[0].name], 'wiki.parse: {{#parserfunctions:}} #3');
 		assert(['Y年Fj日', token[0].parameters[1]], 'wiki.parse: {{#parserfunctions:}} #4');
@@ -3424,10 +3424,10 @@ function test_wiki() {
 
 
 	setup_test('CeL.wiki: asynchronous functions');
-	CeL.test('CeL.wiki: asynchronous functions', function(assert, _setup_test, _finish_test) {
+	CeL.test('CeL.wiki: asynchronous functions', function (assert, _setup_test, _finish_test) {
 		//console.trace('Setup wiki tests...');
 		var wiki = new CeL.wiki(null, null, 'en');
-		wiki.run(function() {
+		wiki.run(function () {
 			_setup_test('wiki: namespace');
 			assert(wiki.is_talk_namespace(wiki.to_talk_page('A: B')), 'wiki.is_talk_namespace() #1');
 
@@ -3444,7 +3444,7 @@ function test_wiki() {
 			_finish_test('wiki: namespace');
 		});
 
-		wiki.run(function() {
+		wiki.run(function () {
 			_setup_test('wiki: site_name');
 
 			assert(['enwiki', CeL.wiki.site_name(wiki)], 'CeL.wiki.site_name() #1');
@@ -3461,7 +3461,7 @@ function test_wiki() {
 		});
 
 		_setup_test('wiki: get_creation_Date');
-		wiki.page('Wikipedia:Sandbox', function(page_data) {
+		wiki.page('Wikipedia:Sandbox', function (page_data) {
 			// {Date}page_data.creation_Date
 			assert(['2002-12-20T21:50:14.000Z', page_data && page_data.creation_Date.toISOString()], 'get_creation_Date: [[Wikipedia:Sandbox]]');
 			_finish_test('wiki: get_creation_Date');
@@ -3471,8 +3471,8 @@ function test_wiki() {
 
 
 		_setup_test('wiki: get categorymembers');
-		wiki.categorymembers('Countries in North America', function(list) {
-			assert(list.some(function(page_data) {
+		wiki.categorymembers('Countries in North America', function (list) {
+			assert(list.some(function (page_data) {
 				return page_data.title === 'United States';
 			}), 'get categorymembers: [[Category:Countries in North America]]');
 			_finish_test('wiki: get categorymembers');
@@ -3483,59 +3483,59 @@ function test_wiki() {
 
 
 		_setup_test('wiki: CeL.wiki.convert()');
-		CeL.wiki.convert('中国', function(text) {
+		CeL.wiki.convert('中国', function (text) {
 			var test_name = 'wiki: CeL.wiki.convert() #1';
 			assert(['中國', text], test_name);
 			_finish_test(test_name);
 		});
-		CeL.wiki.convert('  </nowiki><!-- 简体 & " \' &lt;<nowiki> ', function(text) {
+		CeL.wiki.convert('  </nowiki><!-- 简体 & " \' &lt;<nowiki> ', function (text) {
 			var test_name = 'wiki: CeL.wiki.convert() #2';
 			assert(['  </nowiki><!-- 簡體 & " \' &lt;<nowiki> ', text], test_name);
 			_finish_test(test_name);
 		});
-		CeL.wiki.convert(' <!-- 轉換 --> &amp; < >-{華}-<nowiki>-{華}-</nowiki>  ', function(text) {
+		CeL.wiki.convert(' <!-- 轉換 --> &amp; < >-{華}-<nowiki>-{華}-</nowiki>  ', function (text) {
 			var test_name = 'wiki: CeL.wiki.convert() #3';
 			assert([' <!-- 转换 --> &amp; < >-{华}-<nowiki>-{华}-</nowiki>  ', text], test_name);
 			_finish_test(test_name);
 		}, 'zh-cn');
 
 		_setup_test('wiki: CeL.wiki.langlinks()');
-		CeL.wiki.langlinks(['zh', '文明'], function(title) {
+		CeL.wiki.langlinks(['zh', '文明'], function (title) {
 			var test_name = 'wiki: CeL.wiki.langlinks()';
 			assert(['Civilization', title], test_name);
 			_finish_test(test_name);
 		}, 'en');
 
 		_setup_test('wiki: CeL.wiki.data.search()');
-		CeL.wiki.data.search('宇宙', function(data) {
+		CeL.wiki.data.search('宇宙', function (data) {
 			var test_name = 'wiki: CeL.wiki.data.search()';
 			assert(['Q1', data && data[0]], test_name);
 			_finish_test(test_name);
 		}, { get_id: true });
 
 		_setup_test('wiki: CeL.wiki.data.search() limit=1');
-		CeL.wiki.data.search('宇宙', function(entity) {
+		CeL.wiki.data.search('宇宙', function (entity) {
 			var test_name = 'wiki: CeL.wiki.data.search() limit=1';
 			assert(['Q1', entity], test_name);
 			_finish_test(test_name);
 		}, { get_id: true, limit: 1 });
 
 		_setup_test('wiki: CeL.wiki.data.search() property');
-		CeL.wiki.data.search('形狀', function(id) {
+		CeL.wiki.data.search('形狀', function (id) {
 			var test_name = 'wiki: CeL.wiki.data.search() property';
 			assert(['P1419', id], test_name);
 			_finish_test(test_name);
 		}, { get_id: true, type: 'property' });
 
 		_setup_test('wiki: CeL.wiki.data.search().use_cache');
-		CeL.wiki.data.search.use_cache('視訊', function(id) {
+		CeL.wiki.data.search.use_cache('視訊', function (id) {
 			var test_name = 'wiki: CeL.wiki.data.search().use_cache';
 			assert(['P10', id], test_name);
 			_finish_test(test_name);
 		});
 
 		_setup_test('wiki: CeL.wiki.data(basic), wikidata_entity()');
-		CeL.wiki.data('宇宙', '形狀', function(data, error) {
+		CeL.wiki.data('宇宙', '形狀', function (data, error) {
 			var test_name = 'wiki: CeL.wiki.data(basic)';
 			// console.log(data);
 			assert(Array.isArray(data) ? data.includes('宇宙的形狀') : [data, '宇宙的形狀'], test_name);
@@ -3544,7 +3544,7 @@ function test_wiki() {
 
 		_setup_test('wiki: CeL.wiki.data(get property of item)');
 		var test_property_name = '性質';
-		CeL.wiki.data.search.use_cache(test_property_name, function(id_list) {
+		CeL.wiki.data.search.use_cache(test_property_name, function (id_list) {
 			// Get the id of property '性質' first.
 			// and here we get the id of '性質': "P31"
 			var test_name = 'wiki: CeL.wiki.data(get property of item)';
@@ -3552,12 +3552,12 @@ function test_wiki() {
 
 			// 執行剩下的程序. run rest codes.
 			var wiki = CeL.wiki.login(null, null, 'zh');
-			wiki.data('孔子', function(data_JSON) {
-				CeL.wiki.data.search.use_cache(test_property_name, function(id_list) {
+			wiki.data('孔子', function (data_JSON) {
+				CeL.wiki.data.search.use_cache(test_property_name, function (id_list) {
 					data_JSON.value(test_property_name, {
 						// resolve wikibase-item
 						resolve_item: true
-					}, function(entity) {
+					}, function (entity) {
 						assert(/human|person/i.test(entity.value('label', 'en')), 'get "' + test_property_name + '" id of 孔子');
 						_finish_test(test_name);
 					});
@@ -3572,7 +3572,7 @@ function test_wiki() {
 			type: 'property'
 		});
 
-	}, function(recorder, error_count, test_name) {
+	}, function (recorder, error_count, test_name) {
 		// console.log('CeL.wiki: asynchronous functions: ' + _error_count + ' errors');
 		all_error_count += error_count;
 		finish_test('CeL.wiki: asynchronous functions');
@@ -3587,7 +3587,7 @@ function test_wiki() {
 
 	var wiki = CeL.wiki.login('', '', 'zh')
 		// Select page and get the content of page.
-		.page('Wikipedia:沙盒', function(page_data) {
+		.page('Wikipedia:沙盒', function (page_data) {
 			CeL.info(CeL.wiki.title_of(page_data));
 			/** {String}page content, maybe undefined. */
 			var content = CeL.wiki.content_of(page_data);
@@ -3601,7 +3601,7 @@ function test_wiki() {
 			nocreate: 1
 		})
 		// get the content of page, and then modify it.
-		.page('Wikipedia:沙盒').edit(function(page_data) {
+		.page('Wikipedia:沙盒').edit(function (page_data) {
 			return CeL.wiki.content_of(page_data) + '\n\n* [[WP:Sandbox|沙盒]]';
 		}, {
 			summary: '沙盒 test edit',
@@ -3609,7 +3609,7 @@ function test_wiki() {
 			bot: 1
 		})
 		// 執行過 .page() 後，與上一種方法相同。
-		.page(function(page_data) {
+		.page(function (page_data) {
 			CeL.info(CeL.wiki.title_of(page_data));
 			CeL.log(CeL.wiki.content_of(page_data));
 		})
@@ -3618,7 +3618,7 @@ function test_wiki() {
 			summary: 'summary'
 		})
 		// get the content of page, modify it, and set summary.
-		.edit(function(page_data) {
+		.edit(function (page_data) {
 			/** {String}page title */
 			var title = CeL.wiki.title_of(page_data),
 				/** {String}page content, maybe undefined. */
@@ -3628,13 +3628,13 @@ function test_wiki() {
 			summary: 'summary'
 		});
 
-	CeL.wiki.page('Wikipedia:沙盒', function(page_data) {
+	CeL.wiki.page('Wikipedia:沙盒', function (page_data) {
 		CeL.info(CeL.wiki.title_of(page_data));
 		CeL.log(CeL.wiki.content_of(page_data));
 	});
 
 	wiki.page('Wikipedia_talk:Flow_tests')
-		.edit(function(page_data) {
+		.edit(function (page_data) {
 			return '* [[WP:Sandbox|沙盒]]';
 		}, {
 			section: 'new',
@@ -3650,7 +3650,7 @@ function test_wiki() {
 	// --------------------------------
 
 	// 取得完整 embeddedin list 後才作業。
-	CeL.wiki.list('Template:a‎‎', function(pages) {
+	CeL.wiki.list('Template:a‎‎', function (pages) {
 		// console.log(pages);
 		console.log(pages.length + ' pages got.');
 	}, {
@@ -3658,7 +3658,7 @@ function test_wiki() {
 	});
 
 	var wiki = CeL.wiki.login('', '', 'zh.wikisource');
-	wiki.page('史記').edit(function(page_data) {
+	wiki.page('史記').edit(function (page_data) {
 		/** {String}page title */
 		var title = CeL.wiki.title_of(page_data),
 			/** {String}page content, maybe undefined. */
@@ -3668,7 +3668,7 @@ function test_wiki() {
 	});
 	//
 	wiki.work({
-		each: function(page_data) {
+		each: function (page_data) {
 			/** {String}page content, maybe undefined. */
 			var content = CeL.wiki.content_of(page_data);
 		},
@@ -3679,16 +3679,16 @@ function test_wiki() {
 
 	// test for parser, parse_wikitext()
 	var wiki_page = CeL.wiki.parser(page_data);
-	wiki_page.parse().each('plain', function(token) { if (token = token.trim()) CeL.log(token); });
-	wiki_page.each('transclusion', function(token, parent, index) { ; });
+	wiki_page.parse().each('plain', function (token) { if (token = token.trim()) CeL.log(token); });
+	wiki_page.each('transclusion', function (token, parent, index) { ; });
 	//CeL.log('-'.repeat(70) + '\n' + wiki_page.toString());
 
 	CeL.wiki.parse('{{temp|{{temp2|p{a}r{}}}}}');
 	JSON.stringify(CeL.wiki.parse('a{{temp|e{{temp2|p{a}r}}}}b'));
-	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('plain', function(token) { CeL.log(token); });
-	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function(template) { CeL.log(template.toString()); }) && '';
+	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('plain', function (token) { CeL.log(token); });
+	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function (template) { CeL.log(template.toString()); }) && '';
 	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b<!--ff[[r]]-->[[t|e]]\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}[http://r.r ee]').parse();
-	CeL.wiki.parser('{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
+	CeL.wiki.parser('{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function (table) { CeL.log(table); }) && '';
 	var p = CeL.wiki.parser('==[[L]]==\n==[[L|l]]==\n== [[L]] ==').parse(); CeL.log(JSON.stringify(p) + '\n' + p.toString()); p;
 	CeL.wiki.parser('a{{ #expr: {{CURRENTHOUR}}+8}}}}b').parse()[1];
 	CeL.wiki.parser('{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}').parse().toString();
@@ -3696,17 +3696,17 @@ function test_wiki() {
 	// More examples: see /_test suite/test.js
 
 	// Flow support
-	CeL.wiki.Flow('Wikipedia_talk:Flow_tests', function(page_data) {
+	CeL.wiki.Flow('Wikipedia_talk:Flow_tests', function (page_data) {
 		CeL.log(page_data.is_Flow === true);
 	});
-	CeL.wiki.Flow('ABC', function(page_data) {
+	CeL.wiki.Flow('ABC', function (page_data) {
 		CeL.log(page_data.is_Flow === false);
 	});
-	CeL.wiki.Flow('not_exist', function(page_data) {
+	CeL.wiki.Flow('not_exist', function (page_data) {
 		CeL.log(page_data.is_Flow === undefined);
 	});
 
-	CeL.wiki.Flow.page('Wikipedia_talk:Flow_tests', function(page_data) {
+	CeL.wiki.Flow.page('Wikipedia_talk:Flow_tests', function (page_data) {
 		/** {String}page title */
 		var title = CeL.wiki.title_of(page_data),
 			/** {String}page content, maybe undefined. */
@@ -3717,7 +3717,7 @@ function test_wiki() {
 		flow_view: 'header'
 	});
 
-	CeL.wiki.page('Wikipedia_talk:Flow_tests', function(page_data) {
+	CeL.wiki.page('Wikipedia_talk:Flow_tests', function (page_data) {
 		/** {String}page title */
 		var title = CeL.wiki.title_of(page_data),
 			/** {String}page content, maybe undefined. */
@@ -3891,7 +3891,7 @@ function test_era() {
 	]);
 
 
-	all_error_count += CeL.test('參照紀年之演算機制', function(assert) {
+	all_error_count += CeL.test('參照紀年之演算機制', function (assert) {
 		assert([8, CeL.era('明宣宗宣德', { get_era: 1 }).calendar[7].leap], '明宣宗宣德8年閏8月');
 		//setup 8月–, CE~CE
 		CeL.era.set('曆A|1433/8/15~9/13|:宣德');
@@ -4056,11 +4056,11 @@ function do_test() {
 		// 測試期間時需要用到的功能先作測試。這些不可 comment out。
 		'interact.console', 'application.locale',
 		//
-		function() { CeL.set_debug(0); },
+		function () { CeL.set_debug(0); },
 		//
 		test_items,
 		//
-		function() {
+		function () {
 			still_running.all_configured = true;
 			CeL.info('所有測試設定完畢。 Waiting for asynchronous tests...');
 		});

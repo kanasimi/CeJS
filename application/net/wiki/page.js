@@ -24,6 +24,8 @@ typeof CeL === 'function' && CeL.run({
 	name : 'application.net.wiki.page',
 
 	require : 'data.native.'
+	// CeL.data.fit_filter()
+	+ '|data.'
 	// CeL.date.String_to_Date(), Julian_day(), .to_millisecond(): CeL.data.date
 	+ '|data.date.'
 	// for library_namespace.get_URL
@@ -809,30 +811,48 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// 回溯看看是哪個 revision 增加了標的文字。
-	wiki_API.tracking_revisions = function(title, to_search, callback, options) {
+	/**
+	 * 回溯看看是哪個 revision 增加/刪除了標的文字。
+	 * 
+	 * @param {String}title
+	 *            page title
+	 * @param to_search
+	 *            filter / text to search
+	 * @param {Function}callback
+	 *            回調函數。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 */
+	function tracking_revisions(title, to_search, callback, options) {
 		options = Object.assign({
-			rvlimit : 20,
-			// multi : false,
+			rvlimit : 20
+		}, options, {
 			save_response : true
-		}, options);
+		});
 
-		var newer_revision, revision_count, search_found = !!options.search_deleted;
-		function search(revision) {
-			var text = revision.revid ? wiki_API.revision_content(revision)
-					: revision;
-			if (!text || typeof text !== 'string')
-				return;
-			if (typeof to_search === 'function') {
-				// return found;
-				return to_search(text);
-			}
-			if (library_namespace.is_RegExp(to_search)) {
-				return to_search.test(text);
-			}
-			return text.includes(to_search);
+		if (options.search_diff && typeof to_search !== 'function') {
+			throw new TypeError(
+					'Only {Function}filter to search for .search_diff=true!');
 		}
 
+		function search(revision) {
+			var value = revision.revid ? wiki_API.revision_content(revision)
+					: revision;
+
+			if (!value)
+				return;
+
+			if (typeof to_search === 'string')
+				return value.includes(to_search);
+
+			if (options.search_diff)
+				return to_search([ , value ]);
+
+			// return found;
+			return library_namespace.fit_filter(to_search, value);
+		}
+
+		var newer_revision, revision_count = 0;
 		function search_revisions(page_data, error) {
 			if (error) {
 				callback(null, page_data, error);
@@ -842,8 +862,9 @@ function module_code(library_namespace) {
 			var index = 0, revisions = page_data.revisions;
 			if (!newer_revision) {
 				newer_revision = revisions[index++];
-				// console.trace([search(newer_revision),search_found]);
-				if (search(newer_revision) === search_found) {
+				// console.trace([search(newer_revision),options]);
+				if (!options.search_diff && !options.search_deleted
+						&& !search(newer_revision)) {
 					// 最新版本就已經不符合需求。
 					callback(null, page_data);
 					return;
@@ -854,17 +875,25 @@ function module_code(library_namespace) {
 			while (index < revisions.length) {
 				var this_revision = revisions[index++];
 				var diff_list = library_namespace.LCS(wiki_API
-						.revision_content(newer_revision), wiki_API
-						.revision_content(this_revision), 'diff');
-				var found = diff_list.some(function(diff) {
-					// var minus = diff[0], plus = diff[1];
-					return search(diff[options.search_deleted ? 0 : 1]);
+						.revision_content(this_revision), wiki_API
+						.revision_content(newer_revision), {
+					diff : true,
+					// MediaWiki using line-diff
+					line : true
 				});
+				var found = diff_list.some(function(diff) {
+					// console.trace(diff);
+					if (options.search_diff)
+						return to_search(diff, newer_revision);
+					// var minus = diff[0], plus = diff[1];
+					return search(diff[options.search_deleted ? 0 : 1])
+					// 警告：在 line_mode，"A \n"→"A\n" 的情況下，
+					// "A" 會同時出現在增加與刪除的項目中，此時必須自行檢測排除。
+					&& !search(diff[options.search_deleted ? 1 : 0]);
+				});
+				// console.trace([this_revision.revid,found,search(this_revision)])
 				if (found) {
 					// console.log(diff_list);
-				}
-				// console.trace([this_revision.revid,found,search(this_revision)])
-				if (found || search(this_revision) === search_found) {
 					callback(newer_revision, page_data);
 					return;
 				}
@@ -880,15 +909,39 @@ function module_code(library_namespace) {
 
 			// console.trace(page_data.response);
 			// console.trace(page_data.response['continue']);
-			options.rvcontinue = page_data.response['continue'].rvcontinue;
-			// console.trace(options);
-			library_namespace.debug('tracking_revisions: search next '
-					+ options.rvlimit + ' revisions...', 2);
+			var rvcontinue = page_data.response['continue'];
+			if (rvcontinue) {
+				options.rvcontinue = rvcontinue.rvcontinue;
+
+				// console.trace(options);
+				library_namespace.debug('tracking_revisions: search next '
+						+ options.rvlimit
+						+ (options.limit > 0 ? '/' + options.limit : '')
+						+ ' revisions...', 2);
+				get_pages();
+				return;
+			}
+
+			// assert: 'batchcomplete' in page_data.response
+
+			// if no .rvcontinue, append a null revision,
+			// and do not search continued revisions.
+			if (!options.search_deleted && search(newer_revision)) {
+				callback(newer_revision, page_data);
+			} else {
+				// not found
+				callback(null, page_data);
+			}
+		}
+
+		function get_pages() {
 			wiki_API.page(title, search_revisions, options);
 		}
 
-		wiki_API.page(title, search_revisions, options);
-	};
+		get_pages();
+	}
+
+	wiki_API.tracking_revisions = tracking_revisions;
 
 	// ------------------------------------------------------------------------
 
@@ -1089,7 +1142,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var session = options[KEY_SESSION];
+		var session = wiki_API.session_of_options(options);
 		if (session && session.API_URL) {
 			action = [ session.API_URL, action ];
 		}
@@ -1635,7 +1688,7 @@ function module_code(library_namespace) {
 				}
 
 				if (options.filter && rows.length > 0) {
-					// @see import_options.fit @ CeL.data
+					// @see CeL.data.fit_filter()
 					// TODO: 把篩選功能放到 get_recent()，減少資料處理的成本。
 					rows = rows.filter(
 					// 篩選函數。rcprop必須加上篩選函數需要的資料，例如編輯摘要。
