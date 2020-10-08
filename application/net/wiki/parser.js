@@ -3839,8 +3839,7 @@ function module_code(library_namespace) {
 				} else {
 					parameters.is_link = true;
 				}
-				// decodeURIComponent()
-				section_title.toString()
+				section_title = section_title.toString()
 				// remove prefix: '#'
 				.slice(1).trimEnd();
 				if (/\.[\dA-F]{2}/.test(section_title)
