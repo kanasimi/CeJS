@@ -846,7 +846,7 @@ function module_code(library_namespace) {
 				return value.includes(to_search);
 
 			if (options.search_diff)
-				return to_search([ , value ]);
+				return to_search([ , value ], revision);
 
 			// return found;
 			return library_namespace.fit_filter(to_search, value);
@@ -885,7 +885,7 @@ function module_code(library_namespace) {
 					// console.trace(diff);
 					if (options.search_diff)
 						return to_search(diff, newer_revision);
-					// var minus = diff[0], plus = diff[1];
+					// var removed_text = diff[0], added_text = diff[1];
 					return search(diff[options.search_deleted ? 0 : 1])
 					// 警告：在 line_mode，"A \n"→"A\n" 的情況下，
 					// "A" 會同時出現在增加與刪除的項目中，此時必須自行檢測排除。
@@ -1309,7 +1309,10 @@ function module_code(library_namespace) {
 	function add_listener(listener, options) {
 		if (!options) {
 			options = Object.create(null);
-		} else if (options > 0) {
+		} else if (typeof options === 'number' && options > 0) {
+			// typeof options === 'number': 避免
+			// TypeError: Cannot convert object to primitive value
+			// TypeError: Cannot convert a Symbol value to a number
 			options = {
 				interval : options
 			};
@@ -1693,7 +1696,8 @@ function module_code(library_namespace) {
 					rows = rows.filter(
 					// 篩選函數。rcprop必須加上篩選函數需要的資料，例如編輯摘要。
 					typeof options.filter === 'function' ? options.filter
-					// 篩選標題。警告:從API取得的標題不包括"/"之後的文字，因此最好還是等到之後listener處理的時候，才來對標題篩選。
+					// 篩選標題。警告: 從API取得的標題不包括 "/" 之後的文字，因此最好還是等到之後 listener
+					// 處理的時候，才來對標題篩選。
 					: library_namespace.is_RegExp(options.filter)
 					// 篩選PATTERN
 					? function(row) {
@@ -1736,7 +1740,50 @@ function module_code(library_namespace) {
 					rows.unshift(configuration_row);
 				}
 
-				var exit;
+				var quit_listening, waiting_queue = [];
+				var check_result = function check_result(result, run_next) {
+					if (library_namespace.is_thenable(result)) {
+						if (run_next) {
+							// 先執行完本頁面再執行下一個頁面。
+							result.then(run_next, function(error) {
+								console.error(error);
+								run_next();
+							});
+						} else {
+							waiting_queue.push(result);
+						}
+
+					} else {
+						if (result) {
+							last_query_time = new Date;
+							return quit_listening = result;
+						}
+						run_next && run_next();
+					}
+
+				}, check_and_receive_next = function check_and_receive_next(
+						result) {
+					// if listener() return true, the operation will be stopped.
+					if (quit_listening) {
+						library_namespace.debug(
+						//
+						'The listener() returns non-null, quit listening.', 0,
+								'add_listener.check_and_receive_next');
+
+					} else if (waiting_queue.length > 0) {
+						library_namespace.debug('Waiting '
+								+ waiting_queue.length
+								+ ' work(s) and then get next recent pages', 2,
+								'add_listener.check_and_receive_next');
+						Promise.allSettled(waiting_queue).then(receive_next);
+
+					} else {
+						library_namespace.debug('Get next recent pages', 2,
+								'add_listener.check_and_receive_next');
+						receive_next();
+					}
+				};
+
 				if (rows.length > 0) {
 					library_namespace.debug('Get ' + rows.length
 							+ ' recent pages:\n' + rows.map(function(row) {
@@ -1791,7 +1838,7 @@ function module_code(library_namespace) {
 							session.page(row.pageid,
 							//
 							function(page_data, error) {
-								if (exit || !page_data || error) {
+								if (quit_listening || !page_data || error) {
 									if (error)
 										console.error(error);
 									run_next();
@@ -1945,22 +1992,11 @@ function module_code(library_namespace) {
 									return;
 								}
 
-								if (exit = listener.call(options, row, index,
-										rows)) {
-									last_query_time = new Date;
-								}
-
-								run_next();
+								check_result(listener.call(options, row, index,
+										rows), run_next);
 							}, page_options);
 
-						}, function() {
-							if (!exit) {
-								library_namespace.debug(
-										'Get next recent pages', 2,
-										'add_listener.with_diff');
-								receive_next();
-							}
-						});
+						}, check_and_receive_next);
 						return;
 					}
 
@@ -1986,7 +2022,7 @@ function module_code(library_namespace) {
 							page_list.forEach(function(page_data, index) {
 								page_id_hash[page_data.pageid] = page_data;
 							});
-							exit = rows.some(function(row, index) {
+							rows.some(function(row, index) {
 								if (false) {
 									console.log('-'.repeat(40));
 									console.log(JSON.stringify(row));
@@ -2001,13 +2037,13 @@ function module_code(library_namespace) {
 									options.configuration_adapter, 'once');
 									return;
 								}
-								listener.call(options, row, index, rows);
+
+								return check_result(listener.call(options, row,
+										index, rows));
 							});
 							// Release memory. 釋放被占用的記憶體。
 							page_id_hash = page_list = null;
-							if (!exit) {
-								receive_next();
-							}
+							check_and_receive_next();
 
 						}, Object.assign({
 							// Deprecated: rvdiffto, rvcontentformat
@@ -2021,24 +2057,25 @@ function module_code(library_namespace) {
 
 					// 除非設定 options.input_Array，否則單筆單筆輸入。
 					if (options.input_Array) {
-						exit = listener.call(options, rows);
+						check_result(listener.call(options, rows));
 					} else {
-						exit = rows.some(listener, options);
+						rows.some(function(row, index, rows) {
+							return check_result(listener.call(options, row,
+									index, rows));
+						}, options);
 					}
 
 				} else if (options.even_empty) {
 					// default: skip empty, 除非設定 options.even_empty.
-					exit = listener.call(options, options.input_Array ? rows
-					// 模擬rows單筆之結構。
-					: {
+					check_result(listener.call(options,
+					//
+					options.input_Array ? rows : {
+						// 模擬rows單筆之結構。
 						row : Object.create(null)
-					});
+					}));
 				}
 
-				// if listener() return true, the operation will be stopped.
-				if (!exit) {
-					receive_next();
-				}
+				check_and_receive_next();
 
 			}, recent_options);
 		}
