@@ -3482,19 +3482,19 @@ function test_wiki() {
 		});
 
 
-		_setup_test('wiki: CeL.wiki.convert()');
-		CeL.wiki.convert('中国', function (text) {
-			var test_name = 'wiki: CeL.wiki.convert() #1';
+		_setup_test('wiki: CeL.wiki.convert_Chinese()');
+		CeL.wiki.convert_Chinese('中国', function (text) {
+			var test_name = 'wiki: CeL.wiki.convert_Chinese() #1';
 			assert(['中國', text], test_name);
 			_finish_test(test_name);
 		});
-		CeL.wiki.convert('  </nowiki><!-- 简体 & " \' &lt;<nowiki> ', function (text) {
-			var test_name = 'wiki: CeL.wiki.convert() #2';
+		CeL.wiki.convert_Chinese('  </nowiki><!-- 简体 & " \' &lt;<nowiki> ', function (text) {
+			var test_name = 'wiki: CeL.wiki.convert_Chinese() #2';
 			assert(['  </nowiki><!-- 簡體 & " \' &lt;<nowiki> ', text], test_name);
 			_finish_test(test_name);
 		});
-		CeL.wiki.convert(' <!-- 轉換 --> &amp; < >-{華}-<nowiki>-{華}-</nowiki>  ', function (text) {
-			var test_name = 'wiki: CeL.wiki.convert() #3';
+		CeL.wiki.convert_Chinese(' <!-- 轉換 --> &amp; < >-{華}-<nowiki>-{華}-</nowiki>  ', function (text) {
+			var test_name = 'wiki: CeL.wiki.convert_Chinese() #3';
 			assert([' <!-- 转换 --> &amp; < >-{华}-<nowiki>-{华}-</nowiki>  ', text], test_name);
 			_finish_test(test_name);
 		}, 'zh-cn');

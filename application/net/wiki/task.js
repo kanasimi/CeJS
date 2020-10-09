@@ -651,7 +651,9 @@ function module_code(library_namespace) {
 				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 				if (next[2].section !== 'new') {
 					library_namespace
-							.warn('wiki_API.prototype.next: The page to edit is Flow. I can not edit it directly.');
+							.warn('wiki_API.prototype.next: The page to edit is Flow. I can not edit it directly: '
+									+ wiki_API
+											.title_link_of(next[2].page_to_edit));
 					// next[3] : callback
 					if (typeof next[3] === 'function') {
 						// 2017/9/18 Flow已被重新定義為結構化討論 / 結構式討論。
@@ -1561,6 +1563,13 @@ function module_code(library_namespace) {
 		summary : ''
 	});
 
+	var interactive_message = library_namespace.platform.nodejs
+			&& library_namespace.platform.is_interactive ? function interactive_message(
+			message) {
+		process.stdout.write(message + ' ...\r');
+	}
+			: library_namespace.null_function;
+
 	/**
 	 * robot 作業操作之輔助套裝函數。此函數可一次取得50至300個頁面內容再批次處理。<br />
 	 * 不會推入 this.actions queue，即時執行。因此需要先 get list！
@@ -2056,6 +2065,9 @@ function module_code(library_namespace) {
 								error) {
 							// TODO: if (error) {...}
 							// console.log([ page_data, config.page_options ]);
+							interactive_message((index + 1) + '/'
+									+ pages.length + ' '
+									+ wiki_API.title_link_of(page_data));
 							var result = each.call(this, page_data, messages,
 									config);
 							if (messages.quit_operation) {
@@ -2104,6 +2116,12 @@ function module_code(library_namespace) {
 									page_data.title, '-fg', ']]');
 								}
 								library_namespace.sinfo(_messages);
+							} else {
+								interactive_message(
+								//
+								(index + 1) + '/' + pages.length + ' '
+								//
+								+ wiki_API.title_link_of(page_data));
 							}
 							// 以 each() 的回傳作為要改變成什麼內容。
 							var content = each.call(
@@ -2450,7 +2468,7 @@ function module_code(library_namespace) {
 
 				this_slice_size = this_slice.length;
 				work_continue += this_slice_size;
-				// console.log([ 'page_options:', page_options ]);
+				// console.trace([ 'page_options:', page_options ]);
 				this.page(this_slice, main_work, page_options);
 			}).bind(this);
 

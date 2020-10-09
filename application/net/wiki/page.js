@@ -295,12 +295,13 @@ function module_code(library_namespace) {
 			get_content = true;
 		}
 
-		// 2019 API:
-		// https://www.mediawiki.org/wiki/Manual:Slot
-		// https://www.mediawiki.org/wiki/API:Revisions
-		action[1] = 'rvslots=' + (options.rvslots || 'main')
-				+ (action[1] ? '&' + action[1] : '');
 		if (get_content) {
+			// 2019 API:
+			// https://www.mediawiki.org/wiki/Manual:Slot
+			// https://www.mediawiki.org/wiki/API:Revisions
+			action[1] = 'rvslots=' + (options.rvslots || 'main')
+					+ (action[1] ? '&' + action[1] : '');
+
 			// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query
 			// titles/pageids: Maximum number of values is 50 (500 for bots).
@@ -423,7 +424,9 @@ function module_code(library_namespace) {
 				'wiki_API_page: ' + data.warnings.result['*']);
 			}
 
-			if (!data || !data.query || !data.query.pages) {
+			if (!data || !data.query
+			//
+			|| !data.query.pages && !data.query.redirects) {
 				library_namespace.warn('wiki_API_page: Unknown response: ['
 				// e.g., 'wiki_API_page: Unknown response:
 				// [{"batchcomplete":""}]'
@@ -463,6 +466,12 @@ function module_code(library_namespace) {
 
 			}
 
+			// ------------------------
+
+			// https://zh.wikipedia.org/w/api.php?action=query&prop=info&converttitles=zh&titles=A&redirects=&maxlag=5&format=json&utf8=1
+			// 2020/10/9: for [[A]]￫[[B]]￫[[A]], we will get
+			// {"batchcomplete":"","query":{"redirects":[{"from":"A","to":"B"},{"from":"B","to":"A"}]}}
+
 			var redirect_from;
 			if (data.query.redirects) {
 				page_list.redirects = data.query.redirects;
@@ -473,6 +482,27 @@ function module_code(library_namespace) {
 					data.query.redirects.forEach(function(item) {
 						redirect_from[item.to] = item.from;
 					});
+
+					if (!data.query.pages) {
+						data.query.pages = {
+							title : data.query.redirects[0].from
+						};
+						if (data.query.pages.title ===
+						//
+						redirect_from[data.query.redirects[0].to]) {
+							library_namespace.warn(
+							//
+							'wiki_API_page: Redirect loop: '
+							//
+							+ data.query.pages.title + '↔'
+							//
+							+ data.query.redirects[0].to);
+							data.query.pages.redirect_loop = true;
+						}
+						data.query.pages = {
+							'' : data.query.pages
+						};
+					}
 				}
 			}
 
@@ -498,6 +528,8 @@ function module_code(library_namespace) {
 					convert_from[item.to] = item.from;
 				});
 			}
+
+			// ------------------------
 
 			var pages = data.query.pages;
 			// console.log(options);
@@ -559,7 +591,9 @@ function module_code(library_namespace) {
 					});
 				}
 
-				if (redirect_from && redirect_from[page_data.title]) {
+				if (redirect_from && redirect_from[page_data.title]
+				//
+				&& !page_data.redirect_loop) {
 					page_data.original_title = page_data.redirect_from
 					// .from_title, .redirect_from_title
 					= redirect_from[page_data.title];
@@ -874,13 +908,16 @@ function module_code(library_namespace) {
 			// console.log(revisions.length);
 			while (index < revisions.length) {
 				var this_revision = revisions[index++];
-				var diff_list = library_namespace.LCS(wiki_API
+				var diff_list = newer_revision.diff_list
+				//
+				= library_namespace.LCS(wiki_API
 						.revision_content(this_revision), wiki_API
 						.revision_content(newer_revision), {
 					diff : true,
 					// MediaWiki using line-diff
 					line : true
 				});
+
 				var found = diff_list.some(function(diff) {
 					// console.trace(diff);
 					if (options.search_diff)
@@ -891,6 +928,9 @@ function module_code(library_namespace) {
 					// "A" 會同時出現在增加與刪除的項目中，此時必須自行檢測排除。
 					&& !search(diff[options.search_deleted ? 1 : 0]);
 				});
+				if (options.revision_post_processor) {
+					options.revision_post_processor(newer_revision);
+				}
 				// console.trace([this_revision.revid,found,search(this_revision)])
 				if (found) {
 					// console.log(diff_list);
@@ -1191,16 +1231,25 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	if (false) {
-		CeL.wiki.convert('中国', function(text) {
+		CeL.wiki.convert_Chinese('中国', function(text) {
 			text === "中國";
 		});
 	}
 
-	// 繁簡轉換
-	wiki_API.convert = function(text, callback, uselang) {
+	// wiki API 繁簡轉換
+	wiki_API.convert_Chinese = function convert_Chinese(text, callback, options) {
 		if (!text) {
-			callback('');
+			// String(test)
+			callback(text === 0 ? '0' : '');
 			return;
+		}
+
+		if (typeof options === 'string') {
+			options = {
+				uselang : options
+			};
+		} else {
+			options = library_namespace.setup_options(options);
 		}
 
 		// 作基本的 escape。不能用 encodeURIComponent()，這樣會把中文也一同 escape 掉。
@@ -1211,16 +1260,22 @@ function module_code(library_namespace) {
 		// assert: 此時 text 不應包含任何可被 MediaWiki parser 解析的語法。
 
 		// assert: '!' === encodeURIComponent('!')
-		text = '!' + encodeURIComponent(text) + '!';
+		text = '!' + text + '!';
+
+		var post_data = {
+			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
+			contentmodel : 'wikitext',
+			uselang : options.uselang || 'zh-hant',
+			// prop=text|links
+			prop : 'text',
+			text : text
+		};
 
 		// 由於用 [[link]] 也不會自動 redirect，因此直接轉換即可。
-		wiki_API.query([ wiki_API.api_URL('zh'),
-		// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
-		'action=parse&contentmodel=wikitext&uselang=' + (uselang || 'zh-hant')
-		// prop=text|links
-		+ '&prop=text&text=' + text ], function(data, error) {
+		wiki_API.query([ wiki_API.api_URL('zh'), 'action=parse' ], function(
+				data, error) {
 			if (error || !data) {
-				callback('', error);
+				callback(undefined, error);
 				return;
 			}
 			data = data.parse;
@@ -1236,7 +1291,7 @@ function module_code(library_namespace) {
 			} catch (e) {
 				callback(undefined, e);
 			}
-		});
+		}, post_data);
 	};
 
 	// ------------------------------------------------------------------------

@@ -3266,7 +3266,10 @@ function module_code(library_namespace) {
 		if (initialized_fix) {
 			// 初始化。
 			// console.log(wikitext);
-			wikitext = wikitext.replace(/\r\n/g, '\n').replace(
+			wikitext = wikitext
+			// 注意: 2004年5月早期的中文維基百科換行採用 "\r\n"，因此必須保留 "\r"。
+			// .replace(/\r\n/g, '\n')
+			.replace(
 			// 先 escape 掉會造成問題之 characters。
 			new RegExp(include_mark.replace(/([\s\S])/g, '\\$1'), 'g'),
 					include_mark + end_mark);
@@ -3845,7 +3848,7 @@ function module_code(library_namespace) {
 				if (/\.[\dA-F]{2}/.test(section_title)
 				// e.g.,
 				// [[臺灣話#.E5.8F.97.E6.97.A5.E6.9C.AC.E8.AA.9E.E5.BD.B1.E9.9F.BF.E8.80.85|(其他參考資料)]]
-				&& /^(\.[\dA-F]{2}|\w)+$/.test(section_title)) {
+				&& /^(\.[\dA-F]{2}|[\w\-])+$/.test(section_title)) {
 					try {
 						section_title = decodeURIComponent(section_title
 								.replace(/\.([\dA-F]{2})/g, '%$1'));
