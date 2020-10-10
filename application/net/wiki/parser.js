@@ -2596,6 +2596,11 @@ function module_code(library_namespace) {
 		return display_text;
 	}
 
+	// cf. deep resolve_escaped()
+	function shallow_resolve_escaped(text, include_mark, end_mark) {
+		;
+	}
+
 	/**
 	 * 將特殊標記解譯/還原成 {Array} 組成之結構。
 	 * 
@@ -2614,13 +2619,18 @@ function module_code(library_namespace) {
 					'resolve_escaped');
 			console.log('resolve_escaped: ' + JSON.stringify(queue));
 		}
-		queue.forEach(function(item, index) {
+
+		var length = queue.length;
+		for (var index = queue.last_resolved_length | 0; index < length; index++) {
+			var item = queue[index];
 			if (false)
 				library_namespace.debug([ 'item', index, item ], 4,
 						'resolve_escaped');
-			if (typeof item !== 'string')
+			if (typeof item !== 'string') {
+				// already resolved
 				// assert: Array.isArray(item)
-				return;
+				continue;
+			}
 
 			// result queue
 			var result = [];
@@ -2652,7 +2662,8 @@ function module_code(library_namespace) {
 				throw new Error('resolve_escaped: 仍有 include mark 殘留！');
 			}
 			queue[index] = result;
-		});
+		}
+		queue.last_resolved_length = length;
 		// console.log('resolve_escaped end: '+JSON.stringify(queue));
 	}
 
@@ -3294,6 +3305,8 @@ function module_code(library_namespace) {
 			wikitext = options.prefix(wikitext, queue, include_mark, end_mark)
 					|| wikitext;
 		}
+
+		// console.trace(wikitext);
 
 		// ------------------------------------------------------------------------
 		// parse functions
@@ -4514,7 +4527,9 @@ function module_code(library_namespace) {
 			});
 
 			// 添加新行由一個豎線和連字符 "|-" 組成。
-			parameters = parameters.split('\n|-').map(function(token, index) {
+			parameters = parameters.split('\n|-')
+			//
+			.map(function(token, index, _this) {
 				if (typeof JSON === 'object') {
 					library_namespace.debug('parse table_row / row style: '
 					//
@@ -4537,22 +4552,8 @@ function module_code(library_namespace) {
 				// 分隔 <td>, <th>
 				// matched: [ all, inner, delimiter ]
 				// 必須有實體才能如預期作 .exec()。
-				// "\n|| t" === "\n| t"
-				PATTERN_CELL = /([\s\S]*?)(\n(?:\|\|?|!)|\|\||!!|$)/g;
+				PATTERN_CELL = /([\s\S]*?)(\n[|!]|[|!]{2}|$)/g;
 				while (matched = PATTERN_CELL.exec(token)) {
-					if (typeof JSON === 'object') {
-						library_namespace.debug('parse table_cell: '
-						//
-						+ JSON.stringify(matched), 5, 'parse_wikitext.table');
-					}
-					// console.log(matched);
-					if (matched[2].length === 3 && matched[2].charAt(2)
-					// e.g., "\n||| t"
-					=== token.charAt(PATTERN_CELL.lastIndex)) {
-						// 此時 matched 須回退 1字元。
-						matched[2] = matched[2].slice(0, -1);
-						PATTERN_CELL.lastIndex--;
-					}
 					// "|-" 應當緊接著 style，可以是否設定過 row 判斷。
 					// 但若這段有 /[<>]/ 則當作是內容。
 					if (row || /[<>]/.test(matched[1])) {
@@ -4577,7 +4578,11 @@ function module_code(library_namespace) {
 							// assert: cell[2] === '|'
 							cell[1].push(cell[2]);
 
-							cell[3] = parse_wikitext(cell[3], options, queue);
+							if (cell[3].includes(include_mark)) {
+								cell[3] =
+								// 經過改變，需再進一步處理。
+								parse_wikitext(cell[3], options, queue);
+							}
 							if (data_type) {
 								data_type = data_type[1] || data_type[2];
 								if (typeof data_type === 'number') {
@@ -4595,8 +4600,11 @@ function module_code(library_namespace) {
 
 							cell = [ cell[1], cell[3] ];
 						} else {
-							// 經過改變，需再進一步處理。
-							cell = parse_wikitext(matched[1], options, queue);
+							cell = matched[1];
+							if (cell.includes(include_mark)) {
+								// 經過改變，需再進一步處理。
+								cell = parse_wikitext(cell, options, queue);
+							}
 							if (cell.type !== 'plain') {
 								// {String} or other elements
 								cell = [ cell ];
@@ -4619,37 +4627,37 @@ function module_code(library_namespace) {
 							row = [];
 						row.push(cell);
 
-					} else {
-						// assert: matched.index === 0
-						if (matched[1].includes(include_mark)) {
-							// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-							// 注意: caption 也被當作 table_row 看待。
-							cell = parse_wikitext(matched[1], options, queue);
-							// console.trace('cell:');
-							// console.log(cell);
-							if (cell.type === 'plain' && cell[cell.length - 1]
-							//
-							&& cell[cell.length - 1].type === 'caption') {
-								var caption = cell.pop();
-								row = [
-								// the style of whole <table>
-								_set_wiki_type(cell, 'table_style'),
-								//
-								caption ];
-								row.caption = get_caption(caption.join(''));
-							} else {
-								row = [ cell ];
-								if (cell.type === 'caption') {
-									row.caption = get_caption(cell.join(''));
-								}
-							}
+					} else if (matched[1].includes(include_mark)) {
+						// assert: !row && matched.index === 0
 
+						// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+						// 注意: caption 也被當作 table_row 看待。
+						cell = parse_wikitext(matched[1], options, queue);
+						// console.trace('cell:');
+						// console.log(cell);
+						if (cell.type === 'plain' && cell[cell.length - 1]
+						//
+						&& cell[cell.length - 1].type === 'caption') {
+							var caption = cell.pop();
+							row = [
+							// the style of whole <table>
+							_set_wiki_type(cell, 'table_style'),
+							//
+							caption ];
+							row.caption = get_caption(caption.join(''));
 						} else {
-							cell = _set_wiki_type(matched[1],
-							// row style / format modifier (not displayed)
-							'table_style');
 							row = [ cell ];
+							if (cell.type === 'caption') {
+								row.caption = get_caption(cell.join(''));
+							}
 						}
+
+					} else {
+						// assert: !row && matched.index === 0
+						cell = _set_wiki_type(matched[1],
+						// row style / format modifier (not displayed)
+						'table_style');
+						row = [ cell ];
 					}
 
 					// matched[2] 屬於下一 cell。
@@ -4667,9 +4675,12 @@ function module_code(library_namespace) {
 						// 經測試，當此行非 table head 時，會省略 '!!' 不匹配。
 						// 但 '\n!' 仍有作用。
 						var lastIndex = PATTERN_CELL.lastIndex;
-						// console.log("省略 '!!' 不匹配: " +
-						// token.slice(lastIndex));
-						PATTERN_CELL = /([\s\S]*?)(\n(?:\|\|?|!)|\|\||$)/g;
+						if (false) {
+							console.log("省略 '!!' 不匹配: "
+							//
+							+ token.slice(lastIndex));
+						}
+						PATTERN_CELL = /([\s\S]*?)(\n[|!]|[|]{2}|$)/g;
 						PATTERN_CELL.lastIndex = lastIndex;
 					}
 				}
