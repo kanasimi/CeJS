@@ -3277,6 +3277,19 @@ function module_code(library_namespace) {
 
 	_.LCS_length = LCS_length;
 
+	if (false) {
+		var diff_list = library_namespace.LCS(old_text, new_text, {
+			// line : true,
+			diff : true
+		});
+
+		diff_list.forEach(function(diff) {
+			// added_text === inserted_text
+			// const [removed_text, added_text] = diff;
+			var removed_text = diff[0], added_text = diff[1];
+		});
+	}
+
 	/**
 	 * Get LCS / diff
 	 * 
@@ -3303,8 +3316,10 @@ function module_code(library_namespace) {
 				&& (from.includes('\n') || to.includes('\n')),
 		//
 		separator = options.separator || (line_mode ? '\n' : '');
-		library_namespace.debug('separator: ' + JSON.stringify(separator)
-				+ (line_mode ? '，採用行模式。' : ''), 3, 'LCS');
+		if (false) {
+			library_namespace.debug('separator: ' + JSON.stringify(separator)
+					+ (line_mode ? '，採用行模式。' : ''), 3, 'LCS');
+		}
 		if (typeof from === 'string') {
 			from = separator ? from.split(separator) : from.chars();
 		} else if (!from) {
@@ -3377,8 +3392,10 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			library_namespace.debug(JSON.stringify([ from_index, to_index,
-					from_unique, to_unique ]), 3, 'add_to_diff_list');
+			if (false) {
+				library_namespace.debug(JSON.stringify([ from_index, to_index,
+						from_unique, to_unique ]), 3, 'add_to_diff_list');
+			}
 
 			var diff_pair = [ normalize_unique(from_unique, from),
 					normalize_unique(to_unique, to) ];
@@ -3402,26 +3419,35 @@ function module_code(library_namespace) {
 			// RangeError: Maximum call stack size exceeded
 			// 因此必須採用非遞迴呼叫(recursive call)版本。
 			while (true) {
-				library_namespace.debug(String([ from_index, to_index ]), 3,
-						'LCS.backtrack');
-				library_namespace.debug(String([ from_unique, to_unique,
-						diff_list ]), 6, 'LCS.backtrack');
+				if (false) {
+					library_namespace.debug(String([ from_index, to_index ]),
+							3, 'LCS.backtrack');
+					library_namespace.debug(String([ from_unique, to_unique,
+							diff_list ]), 6, 'LCS.backtrack');
+				}
 				if (from_index < 0 || to_index < 0) {
-					library_namespace.debug('→ '
-							+ JSON.stringify([ from_index, to_index,
-									from_unique, to_unique ]), 3);
+					if (false) {
+						library_namespace.debug('→ '
+								+ JSON.stringify([ from_index, to_index,
+										from_unique, to_unique ]), 3);
+					}
 					if (from_index === -1 && to_index === -1) {
 						// assert: from_index === -1 && to_index === -1
-						library_namespace.debug(
-								'LCS starts from the first element of each list, '
-										+ JSON.stringify([ from_index,
-												to_index, from[0], to[0] ]), 3,
-								'LCS.backtrack');
+						if (false) {
+							library_namespace.debug(
+							//
+							'LCS starts from the first element of each list, '
+									+ JSON.stringify([ from_index, to_index,
+											from[0], to[0] ]), 3,
+									'LCS.backtrack');
+						}
 					} else if (to_index === -1) {
-						library_namespace.debug('因為 ' + from_index + ',0→('
-								+ from_index + '|' + (from_index - 1)
-								+ '),-1 時不會處理到 from_unique，只好補處理。', 3,
-								'LCS.backtrack');
+						if (false) {
+							library_namespace.debug('因為 ' + from_index + ',0→('
+									+ from_index + '|' + (from_index - 1)
+									+ '),-1 時不會處理到 from_unique，只好補處理。', 3,
+									'LCS.backtrack');
+						}
 						if (Array.isArray(from_unique)) {
 							// e.g., CeL.LCS('abc123', 'def123', 'diff')
 							from_unique[0] = 0;
@@ -3431,10 +3457,13 @@ function module_code(library_namespace) {
 							from_unique = [ 0, from_index ];
 						}
 					} else if (from_index === -1) {
-						library_namespace.debug('因為 0,' + to_index + ',0→-1,('
-								+ to_index + '|' + (to_index - 1)
-								+ ') 時不會處理到 to_unique，只好補處理。', 3,
-								'LCS.backtrack');
+						if (false) {
+							library_namespace.debug('因為 0,' + to_index
+									+ ',0→-1,(' + to_index + '|'
+									+ (to_index - 1)
+									+ ') 時不會處理到 to_unique，只好補處理。', 3,
+									'LCS.backtrack');
+						}
 						if (Array.isArray(to_unique)) {
 							to_unique[0] = 0;
 						} else {
@@ -3451,9 +3480,11 @@ function module_code(library_namespace) {
 
 				if (from[from_index] === to[to_index]) {
 					// 此元素為 LCS 之一部分。
-					library_namespace.debug('相同元素 @ '
-							+ [ from_index, to_index ] + ': '
-							+ from[from_index], 3, 'LCS.backtrack');
+					if (false) {
+						library_namespace.debug('相同元素 @ '
+								+ [ from_index, to_index ] + ': '
+								+ from[from_index], 3, 'LCS.backtrack');
+					}
 					if (!diff_only) {
 						// get_index = 1: from_index, 2: to_index
 						var common = get_index ? get_index === 2 ? to_index
@@ -3499,47 +3530,61 @@ function module_code(library_namespace) {
 					&& trace_index >= from_length && trace_Array[trace_index]
 					//
 					=== trace_Array[trace_index - from_length]) {
-						library_namespace.debug(trace_Array[trace_index] + ': '
-								+ all_list, 3, 'LCS.backtrack');
+						if (false) {
+							library_namespace.debug(trace_Array[trace_index]
+									+ ': ' + all_list, 3, 'LCS.backtrack');
+						}
 						_all_list = all_list.map(function(result_Array) {
 							return result_Array.clone();
 						});
 						backtrack(from_index, to_index - 1, _all_list);
 					}
 
-					library_namespace.debug('檢測前一個。 '
-							+ [ from_index, to_index ], 3, 'LCS.backtrack');
+					if (false) {
+						library_namespace.debug('檢測前一個。 '
+								+ [ from_index, to_index ], 3, 'LCS.backtrack');
+					}
 					if (get_diff) {
 						if (Array.isArray(from_unique)) {
 							from_unique[0] = from_index;
 						} else {
 							from_unique = [ from_index, from_index ];
 						}
-						library_namespace.debug('from_index: '
-								+ [ from_index, JSON.stringify(from_unique) ],
-								3, 'LCS.backtrack');
+						if (false) {
+							library_namespace.debug(
+							//
+							'from_index: ' + [ from_index,
+							//
+							JSON.stringify(from_unique) ], 3, 'LCS.backtrack');
+						}
 					}
 					backtrack(from_index - 1, to_index, all_list);
 
 					if (get_all) {
-						library_namespace.debug('merge: '
-								+ [ all_list, _all_list ], 3);
+						if (false) {
+							library_namespace.debug('merge: '
+									+ [ all_list, _all_list ], 3);
+						}
 						all_list = unique(all_list.append(_all_list));
 					}
 					return;
 
 				} else {
-					library_namespace.debug('檢測上一排。 '
-							+ [ from_index, to_index ], 3, 'LCS.backtrack');
+					if (false) {
+						library_namespace.debug('檢測上一排。 '
+								+ [ from_index, to_index ], 3, 'LCS.backtrack');
+					}
 					if (get_diff) {
 						if (to_unique) {
 							to_unique[0] = to_index;
 						} else {
 							to_unique = [ to_index, to_index ];
 						}
-						library_namespace.debug('to_index: '
-								+ [ to_index, JSON.stringify(to_unique) ], 3,
-								'LCS.backtrack');
+						if (false) {
+							library_namespace.debug('to_index: '
+									+ [ to_index, JSON.stringify(to_unique) ],
+									3, 'LCS.backtrack');
+						}
 					}
 
 					// backtrack(from_index, to_index - 1, all_list);
