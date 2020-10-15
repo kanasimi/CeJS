@@ -1252,6 +1252,12 @@ function module_code(library_namespace) {
 			options = library_namespace.setup_options(options);
 		}
 
+		var is_JSON;
+		if (typeof text === 'object') {
+			text = JSON.stringify(text);
+			is_JSON = true;
+		}
+
 		// 作基本的 escape。不能用 encodeURIComponent()，這樣會把中文也一同 escape 掉。
 		// 多一層 encoding，避免 MediaWiki parser 解析 HTML。
 		text = escape(text)
@@ -1265,6 +1271,7 @@ function module_code(library_namespace) {
 		var post_data = {
 			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
 			contentmodel : 'wikitext',
+			// 'zh-hans'
 			uselang : options.uselang || 'zh-hant',
 			// prop=text|links
 			prop : 'text',
@@ -1272,6 +1279,7 @@ function module_code(library_namespace) {
 		};
 
 		// 由於用 [[link]] 也不會自動 redirect，因此直接轉換即可。
+		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		wiki_API.query([ wiki_API.api_URL('zh'), 'action=parse' ], function(
 				data, error) {
 			if (error || !data) {
@@ -1287,6 +1295,8 @@ function module_code(library_namespace) {
 			try {
 				// recover special characters
 				text = unescape(text);
+				if (is_JSON)
+					text = JSON.parse(text);
 				callback(text);
 			} catch (e) {
 				callback(undefined, e);
