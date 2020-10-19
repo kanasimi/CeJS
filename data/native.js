@@ -180,7 +180,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {Function|String}
 	 *            function_name function name or function structure
-	 * @param flag
+	 * @param flags
 	 *            =1: reduce
 	 * @return
 	 * @example parsed_data = new parse_function(function_name);
@@ -190,7 +190,7 @@ function module_code(library_namespace) {
 	 * @_memberOf _module_
 	 * @since 2010/5/16 23:04:54
 	 */
-	parse_function = function parse_function(function_name, flag) {
+	parse_function = function parse_function(function_name, flags) {
 		if (!function_name)
 			try {
 				function_name = parse_function.caller;
@@ -402,20 +402,20 @@ function module_code(library_namespace) {
 	 *            pattern text.
 	 * @param {RegExp}[escape_pattern]
 	 *            char pattern need to escape.
-	 * @param {Boolean|String}[RegExp_flag]
+	 * @param {Boolean|String}[RegExp_flags]
 	 *            flags when need to return RegExp object.
 	 * 
 	 * @return {String|RegExp} escaped RegExp pattern or RegExp object.
 	 */
-	function to_RegExp_pattern(pattern, escape_pattern, RegExp_flag) {
+	function to_RegExp_pattern(pattern, escape_pattern, RegExp_flags) {
 		pattern = pattern
 		// 不能用 $0。
 		.replace(escape_pattern || /([.*?+^$|()\[\]\\{}])/g, '\\$1')
 		// 這種方法不完全，例如對 /^\s+|\s+$/g
 		.replace(/^([\^])/, '\\^').replace(/(\$)$/, '\\$');
 
-		return RegExp_flag === undefined ? pattern : new RegExp(pattern,
-				/^[igms]+$/i.test(RegExp_flag) ? RegExp_flag : '');
+		return RegExp_flags === undefined ? pattern : new RegExp(pattern,
+				/^[igms]+$/i.test(RegExp_flags) ? RegExp_flags : '');
 	}
 	_// JSDT:_module_
 	.to_RegExp_pattern = to_RegExp_pattern;
@@ -463,7 +463,7 @@ function module_code(library_namespace) {
 	 * @param {String}pattern
 	 *            欲轉換成 RegExp 的 pattern text。
 	 * @param {Function|String}[unknown_handler]
-	 *            當遇到不明 pattern 時的處理程序。若輸入 ('/..', 'flag') 則會將之當作 flag。
+	 *            當遇到不明 pattern 時的處理程序。若輸入 ('/..', 'flags') 則會將之當作 flags。
 	 * @returns {RegExp} RegExp object。
 	 * 
 	 * @since 2012/10/13 10:22:20
@@ -474,29 +474,30 @@ function module_code(library_namespace) {
 				pattern = String_to_RegExp.preprocessor(pattern);
 
 			if (typeof pattern === 'string' && pattern.length > 1)
+				// pattern.trim()
 				if (pattern.charAt(0) === '/') {
 					library_namespace.debug({
 						T : [ 'Treat [%1] as RegExp.', pattern ]
 					}, 3, 'String_to_RegExp');
-					var m = pattern.match(/^\/(.+)\/([a-z]*)$/),
-					// 設定 flag。
-					flag = m ? m[2]
+					var m = pattern.match(_.PATTERN_RegExp),
+					// 設定 flags。
+					flags = m ? m[2]
 							: typeof unknown_handler === 'string' ? unknown_handler
-									: String_to_RegExp.default_flag;
+									: String_to_RegExp.default_flags;
 
 					try {
 						try {
 							pattern = new RegExp(m ? m[1] : pattern.slice(1),
-									flag);
+									flags);
 						} catch (e) {
 							try {
 								if (m) {
-									// 設定絕對可接受的 flag，或完全不設定。
+									// 設定絕對可接受的 flags，或完全不設定。
 									pattern = new RegExp(m[1]);
 									library_namespace.warn([
 									//
 									'String_to_RegExp: ', {
-										T : [ 'Invalid flags: [%1]', flag ]
+										T : [ 'Invalid flags: [%1]', flags ]
 									} ]);
 								} else
 									throw true;
@@ -544,7 +545,7 @@ function module_code(library_namespace) {
 		return pattern;
 	}
 
-	String_to_RegExp.default_flag = 'i';
+	String_to_RegExp.default_flags = 'i';
 
 	// 前置處理。
 	String_to_RegExp.preprocessor = function(pattern) {
@@ -637,16 +638,6 @@ function module_code(library_namespace) {
 		return flags.join('');
 	};
 
-	RegExp_flags.flags = {
-		// Proposed for ES6
-		// extended : 'x',
-		global : 'g',
-		ignoreCase : 'i',
-		multiline : 'm',
-		unicode : 'u',
-		sticky : 'y'
-	};
-
 	library_namespace.RegExp_flags = RegExp_flags;
 
 	// RegExp.prototype.flags
@@ -660,41 +651,78 @@ function module_code(library_namespace) {
 			}
 		});
 
+	// https://tc39.es/ecma262/#sec-get-regexp.prototype.flags
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/flags
+	RegExp_flags.flags = {
+		// Proposed for ES6
+		// extended : 'x',
+		global : 'g',
+		ignoreCase : 'i',
+		multiline : 'm',
+		dotAll : 's',
+		unicode : 'u',
+		sticky : 'y'
+	};
+
+	if (Object.values) {
+		_.PATTERN_RegExp = Object.values(RegExp_flags.flags);
+	} else {
+		_.PATTERN_RegExp = [];
+		(function() {
+			for ( var f in RegExp_flags.flags)
+				_.PATTERN_RegExp.push(RegExp_flags.flags[g]);
+		})();
+	}
+	// CeL.PATTERN_RegExp
+	// [ all, pattern source, flags ]
+	_.PATTERN_RegExp = new RegExp(
+	// /^\/(.+)\/([iugms]*)$/
+	// /^\/((?:\\.|[^\/])+)\/([gimsuy]*)$/
+	/^\/((?:\\.|[^\/])+)\/([flags]*)$/.source.replace('flags', _.PATTERN_RegExp
+			.join('')));
+
 	/**
 	 * <code>
 
-	use (new RegExp(regexp.source, flag)) instead.
-	or even (new RegExp(regexp, flag)):
+	use (new RegExp(regexp.source, flags)) instead.
+	or even (new RegExp(regexp, flags)):
 	RexExp constructor no longer throws when the first argument is a RegExp and the second argument is present. Instead it creates a new RegExp using the same patterns as the first arguments and the flags supplied by the second argument.
 
 	</code>
 	 */
 
 	/**
-	 * 重新設定 RegExp object 之 flag. change the flag of a RegExp instances.
+	 * 重新設定 RegExp object 之 flags. change the flags of a RegExp instances.
 	 * 
 	 * @param {RegExp}regexp
 	 *            RegExp object to set
-	 * @param {String}flag
-	 *            flag of RegExp
+	 * @param {String}flags
+	 *            flags of RegExp
 	 * @return {RegExp}
 	 * @example <code>
-	 * 附帶 'g' flag 的 RegExp 對相同字串作 .test() 時，第二次並不會重設。因此像下面的 expression 兩次並不會得到相同結果。
-	 * var r=/,/g,t='a,b';
-	 * WScript.Echo(r.test(t)+','+r.test(t));
-	 * 
-	 * //	改成這樣就可以了：
-	 * var r=/,/g,t='a,b',s=renew_RegExp_flag(r,'-g');
-	 * WScript.Echo(s.test(t)+','+s.test(t));
-	 * 
-	 * //	這倒沒問題：
-	 * r=/,/g,a='a,b';
-	 * if(r.test(a))library_namespace.debug(a.replace(r,'_'));
-	 * 
-	 * //	delete r.lastIndex; 無效，得用 r.lastIndex=0; 因此下面的亦可：
-	 * if(r.global)r.lastIndex=0;
-	 * if(r.test(a)){~}
-	 * </code>
+
+	// 附帶 'g' flag 的 RegExp 對相同字串作 .test() 時，第二次並不會重設。
+	// 因此像下面的 expression 兩次並不會得到相同結果。
+	var r = /,/g, t = 'a,b';
+	WScript.Echo(r.test(t) + ',' + r.test(t));
+
+	// 改成這樣就可以了：
+	var r = /,/g, t = 'a,b', s = renew_RegExp_flags(r, '-g');
+	WScript.Echo(s.test(t) + ',' + s.test(t));
+
+	// 這倒沒問題：
+	r = /,/g, a = 'a,b';
+	if (r.test(a))
+		library_namespace.debug(a.replace(r, '_'));
+
+	// delete r.lastIndex; 無效，得用 r.lastIndex = 0; 因此下面的亦可：
+	if (r.global)
+		r.lastIndex = 0;
+	if (r.test(a)) {
+		// ...
+	}
+
+	</code>
 	 * 
 	 * @see http://msdn.microsoft.com/zh-tw/library/x9h97e00(VS.80).aspx,
 	 *      如果規則運算式已經設定了全域旗標，test 將會從 lastIndex 值表示的位置開始搜尋字串。如果未設定全域旗標，則 test
@@ -702,34 +730,29 @@ function module_code(library_namespace) {
 	 *      http://www.aptana.com/reference/html/api/RegExp.html
 	 * @_memberOf _module_
 	 */
-	function renew_RegExp_flag(regexp, flag) {
-		var i, flag_set = {
-			global : 'g',
-			ignoreCase : 'i',
-			multiline : 'm'
-		};
-
-		// 未指定 flag: get flag
-		if (!flag) {
-			flag = '';
-			for (i in flag_set)
+	function renew_RegExp_flags(regexp, flags) {
+		// 未指定 flags: get flags
+		if (!flags) {
+			flags = '';
+			for ( var i in RegExp_flags.flags)
 				if (regexp[i])
-					flag += flag_set[i];
-			return flag;
+					flags += RegExp_flags.flags[i];
+			return flags;
 		}
 
-		var a = flag.charAt(0), F = '', m;
+		var a = flags.charAt(0), F = '', m;
 		a = a === '+' ? 1 : a === '-' ? 0 : (F = 1);
 
-		if (F)
+		if (F) {
 			// 無 [+-]
-			F = flag;
-		else
-			// f: [+-]~ 的情況，parse flag
-			for (i in flag_set)
-				if ((m = flag.indexOf(flag_set[i], 1) !== NOT_FOUND) && a || !m
-						&& regexp[i])
-					F += flag_set[i];
+			F = flags;
+		} else {
+			// f: [+-]~ 的情況，parse flags
+			for ( var i in RegExp_flags.flags)
+				if ((m = flags.indexOf(RegExp_flags.flags[i], 1) !== NOT_FOUND)
+						&& a || !m && regexp[i])
+					F += RegExp_flags.flags[i];
+		}
 
 		// for JScript<=5
 		try {
@@ -740,7 +763,7 @@ function module_code(library_namespace) {
 	}
 
 	_// JSDT:_module_
-	.renew_RegExp_flag = renew_RegExp_flag;
+	.renew_RegExp_flags = renew_RegExp_flags;
 
 	// ---------------------------------------------------------------------//
 
@@ -799,29 +822,29 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String|RegExp}source
 	 *            source of RegExp instance.
-	 * @param {String}[flag]
-	 *            flag of RegExp instance.
+	 * @param {String}[flags]
+	 *            flags of RegExp instance.
 	 * 
 	 * @returns {RegExp}RegExp instance.
 	 */
-	function new_RegExp(source, flag) {
+	function new_RegExp(source, flags) {
 		if (has_Unicode_flag) {
 			try {
-				return new RegExp(source, flag);
+				return new RegExp(source, flags);
 			} catch (e) {
 				// e.g., 自行設定了 Unicode_category
 			}
 		}
 
 		if (library_namespace.is_RegExp(source)) {
-			if (flag === undefined)
-				flag = source.flags;
+			if (flags === undefined)
+				flags = source.flags;
 			source = source.source;
 		}
 
-		if (typeof flag === 'string' && flag.includes('u')) {
+		if (typeof flags === 'string' && flags.includes('u')) {
 			if (!has_Unicode_flag)
-				flag = flag.replace(/u/g, '');
+				flags = flags.replace(/u/g, '');
 
 			// 後處理 Unicode category。
 			source = source.replace(/\\p{([A-Z][A-Za-z_]*)}/g, function(all,
@@ -830,7 +853,7 @@ function module_code(library_namespace) {
 			});
 		}
 
-		return new RegExp(source, flag);
+		return new RegExp(source, flags);
 	}
 
 	new_RegExp.category = Unicode_category;
@@ -859,8 +882,8 @@ function module_code(library_namespace) {
 	p=new RegExp(wildcard_to_RegExp('*.*'))
 
 
-	flag&1	有變化的時候才 return RegExp
-	flag&2	add ^$
+	flags&1	有變化的時候才 return RegExp
+	flags&2	add ^$
 
 
 	萬用字元經常用在檔名的置換。
@@ -886,7 +909,7 @@ function module_code(library_namespace) {
 	// 萬用字元 RegExp source, ReadOnly
 	wildcard_to_RegExp.w_chars = '*?\\[\\]';
 
-	// (pattern, flag)
+	// (pattern, flags)
 	function wildcard_to_RegExp(p, f) {
 
 		if (library_namespace.is_RegExp(p))
@@ -4307,7 +4330,7 @@ function module_code(library_namespace) {
 			// TODO: this.hasOwnProperty()
 			return new RegExp(this.source, this.flags);
 		},
-		reflag : set_bind(renew_RegExp_flag)
+		reflags : set_bind(renew_RegExp_flags)
 	});
 
 	set_method(library_namespace.env.global, {

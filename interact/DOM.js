@@ -3770,7 +3770,7 @@ function module_code(library_namespace) {
 			return;
 
 		if (R.global)
-			R = library_namespace.renew_RegExp_flag(R, '-g');
+			R = library_namespace.renew_RegExp_flags(R, '-g');
 		if (m.length > 1 && (flag == 0
 		// 取最後一個。
 		|| (typeof flag !== 'number' && name && typeof name === 'string')))
@@ -3832,7 +3832,7 @@ function module_code(library_namespace) {
 
 	_// JSDT:_module_
 	.
-	// get_cookie[generateCode.dLK]='renew_RegExp_flag';
+	// get_cookie[generateCode.dLK]='renew_RegExp_flags';
 	get_cookie = get_cookie;
 
 	/**
@@ -6956,8 +6956,9 @@ function module_code(library_namespace) {
 
 	// IDNA ToASCII
 	Punycode.encodeDomain = function(UURL) {
-		var m = UURL.match(/^([\w\d\-]+:\/\/)?([^\/]+)/), UDomain = m ? m[2]
-				: '', i = (m = UDomain) ? UURL.indexOf(m) : 0;
+		var m = UURL.match(/^([\w\-]+:\/\/)?([^\/]+)/), UDomain = m ? m[2] : '', i = (m = UDomain) ? UURL
+				.indexOf(m)
+				: 0;
 		if (false)
 			document.write('<hr />Punycode.encodeDomain UDomain: [' + i + ']['
 					+ m + ']<br />');
@@ -6973,8 +6974,9 @@ function module_code(library_namespace) {
 
 	// IDNA ToUnicode
 	Punycode.decodeDomain = function(PURL) {
-		var m = PURL.match(/^([\w\d\-]+:\/\/)?([^\/]+)/), PDomain = m ? m[2]
-				: '', i = (m = PDomain) ? PURL.indexOf(m) : 0;
+		var m = PURL.match(/^([\w\-]+:\/\/)?([^\/]+)/), PDomain = m ? m[2] : '', i = (m = PDomain) ? PURL
+				.indexOf(m)
+				: 0;
 		if (false)
 			document.write('<hr />Punycode.decodeDomain PDomain: [' + i + ']['
 					+ m + ']<br />');
