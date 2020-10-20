@@ -983,7 +983,7 @@ function module_code(library_namespace) {
 				+ (bytes > 1 ? 's' : '');
 		expression = expression(bytes) + 'B';
 
-		if (type.toLowerCase() === 'html') {
+		if (type && type.toLowerCase() === 'html') {
 			expression = '<span title="' + b + '">' + expression + '</span>';
 		} else if (library_namespace.is_Object(type)) {
 			expression = {
@@ -1144,9 +1144,9 @@ function module_code(library_namespace) {
 	 target_encoding = 'UTF-8';
 
 	 cache_pair = new CeL.pair(null, {
-	 path : cache_file,
-	 encoding : target_encoding,
-	 remove_comments : true
+		path : cache_file,
+		encoding : target_encoding,
+		remove_comments : true
 	 });
 
 	 cache_pair.add([ [ 'key 1', 'value 1' ] ]);
@@ -1436,7 +1436,27 @@ function module_code(library_namespace) {
 						delete key_hash[key];
 					continue;
 				}
-				if (key in pair) {
+
+				var pattern = key.match(library_namespace.PATTERN_RegExp);
+				if (pattern) {
+					if (!pattern[2].includes('g'))
+						pattern[2] += 'g';
+					pattern = new RegExp(pattern[1], pattern[2]);
+					if (false) {
+						console.trace('Remove pattern: ' + pattern + ' of '
+								+ path);
+					}
+					for ( var key in pair) {
+						if (pattern.test(key) || pattern.test(pair[key])) {
+							if (false) {
+								console.trace('Remove ' + key + ' → '
+										+ pair[key]);
+							}
+							delete pair[key];
+							changed = true;
+						}
+					}
+				} else if (key in pair) {
 					delete pair[key];
 					changed = true;
 				}
@@ -2147,9 +2167,7 @@ function module_code(library_namespace) {
 				matched[2] && +matched[2] ]);
 
 			} else if (type === 'string') {
-				matched = _normalizer.match(
-				//
-				/^\/((?:\\.|[^\/])+)\/([iugms]*)/);
+				matched = _normalizer.match(library_namespace.PATTERN_RegExp);
 				if (matched) {
 					_normalizer = new RegExp(matched[1], matched[2]);
 				} else {
