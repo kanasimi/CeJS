@@ -238,7 +238,7 @@ function module_code(library_namespace) {
 					//	test檔案型式：DOS or UNIX.最後一位元已被split掉
 					if (false) line_separator = b.indexOf('\r\n') != -1 ? '\r\n' : b.indexOf('\n') != -1 ? '\n' : '\r';
 					b = b.split(line_separator);
-					if (c = b[0].match(/^\s*([^\w])/)) {
+					if (c = b[0].match(/^\s*([\W])/)) {
 						code_head += b[0].slice(0, RegExp.lastIndex);
 						b[0] = b[0].slice(RegExp.lastIndex);
 						if (s.indexOf(c = c[1]) % 2 == 0)
@@ -667,7 +667,7 @@ function module_code(library_namespace) {
 
 					//				function 才會產生 \r\n 問題，所以先處理掉
 					val = ('' + val).replace(/[\r\n]/g, line_separator);
-					if ((t = val.match(/^\s*function\s*\(/)) || val.match(/^\s*function\s+([\w_]*)([^(]*)\(/))	//	這種判別法不好！
+					if ((t = val.match(/^\s*function\s*\(/)) || val.match(/^\s*function\s+([\w]*)([^(]*)\(/))	//	這種判別法不好！
 						if (t || (t = RegExp.$1) == 'anonymous') {
 							func.push(vName); vType = (typeof t == 'string' ? t : 'no named') + ' ' + vType;
 							if (t === 'anonymous') {

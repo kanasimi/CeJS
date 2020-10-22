@@ -233,7 +233,7 @@ function module_code(library_namespace) {
 			return;
 		}
 		var href = library_namespace.simplify_path(URI), matched = href
-				.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)([^\s]*)$/i), tmp, path;
+				.match(/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)([^\s]*)$/i), tmp, path;
 		if (!matched)
 			return;
 

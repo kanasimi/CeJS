@@ -128,7 +128,7 @@ _.IEA.prototype = {
 	//init_url : 'about:blank',
 	timeout : 3e4, // ms>0
 	setBase : function(URL) {
-		var m = (URL || '').match(/^([\w\d\-]+:\/\/[^\/]+)(.*?)$/);
+		var m = (URL || '').match(/^([\w\-]+:\/\/[^\/]+)(.*?)$/);
 		if (m) {
 			this.baseD = m[1];
 			this.baseP = m[2].slice(0, m[2].lastIndexOf('/') + 1);

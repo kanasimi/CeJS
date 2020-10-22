@@ -1384,8 +1384,8 @@ if (typeof CeL === 'function') {
 			// https://web.archive.org/web/http://site.org
 			// http://site.org?p=//\\#a/b/c
 			// 由於有太多不可不可預測因素，因此需特別處理之。
-			if (/[\w\d]:\/\//.test(path)) {
-				is_URL = path.match(/^((?:(?:[\w\d\-]+:)?\/)?\/)(.*?)$/);
+			if (/[\w\-]:\/\//.test(path)) {
+				is_URL = path.match(/^((?:(?:[\w\-]+:)?\/)?\/)(.*?)$/);
 				if (is_URL) {
 					// e.g.,
 					// 'http://example.org/path/to/'
