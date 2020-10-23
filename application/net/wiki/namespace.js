@@ -930,6 +930,7 @@ function module_code(library_namespace) {
 					return;
 				}
 				if (namespace_hash === get_namespace.hash) {
+					// console.trace(namespace);
 					library_namespace.debug('Invalid namespace: ['
 					//
 					+ n + '] @ namespace list ' + namespace,
@@ -1496,6 +1497,7 @@ function module_code(library_namespace) {
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1');
 
+		// fix "&#39;"
 		page_name = library_namespace.HTML_to_Unicode(page_name);
 
 		/** {Boolean}採用 "_" 取代 " "。 */
@@ -2212,7 +2214,7 @@ function module_code(library_namespace) {
 		}, options);
 
 		var session;
-		if ('session' in options) {
+		if (KEY_SESSION in options) {
 			session = options[KEY_SESSION];
 			delete options[KEY_SESSION];
 		}
