@@ -2075,6 +2075,8 @@ OS='UNIX'; // unknown
 
 	// ---------------------------------------------------------------------//
 	// 處理 styled/stylized messages.
+	// @see
+	// https://stackoverflow.com/questions/22155879/how-do-i-create-formatted-javascript-console-log-messages
 
 	/**
 	 * 將 messages 去掉 style，轉成 plain text messages。

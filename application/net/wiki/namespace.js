@@ -69,7 +69,7 @@ function module_code(library_namespace) {
 		utf8 : 'boolean|number|string'
 	};
 
-	/** {String} old key: 'wiki' */
+	/** {String}KEY_wiki_session old key: 'wiki' */
 	var KEY_SESSION = 'session', KEY_HOST_SESSION = 'host';
 
 	// @inner TODO: MUST re-design

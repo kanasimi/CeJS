@@ -321,6 +321,8 @@ function module_code(library_namespace) {
 				// https://github.com/nodejs/node/pull/29168
 				// fs: add recursive option to fs.rmdir(), fs.rmdirSync(), and
 				// fs.promises.rmdir().
+				// https://github.com/nodejs/node/pull/35171
+				// fs: remove experimental language from rmdir recursive
 				if (library_namespace.platform('node', '12.10')) {
 					// using native function
 					node_fs.rmdirSync(path, {

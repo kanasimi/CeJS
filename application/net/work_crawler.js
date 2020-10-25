@@ -7,6 +7,13 @@
 
 
 TODO:
+
+將設定儲存在系統預設的設定目錄
+Windows: %APPDATA%\work_crawler\
+UNIX: $HOME/.work_crawler/
+
+搜尋已下載作品
+
 save cookie @ CLI
 
 建造可以自動生成index/說明的工具。

@@ -184,7 +184,7 @@ See [compatibility.js](https://github.com/kanasimi/CeJS/blob/master/data/code/co
 * 本 library 將使用到 global 變數 ```CeL```。
 
 ## Concepts 模組概念
-詳細請參閱[概念介紹頁](http://lyrics.meicho.com.tw/game/game.pl?seg=CeJS)。
+詳細請參閱[概念介紹頁](http://lyrics.meicho.com.tw/reviews/review.pl?seg=CeJS)。
 
 ## Contact 聯絡我們
 Contact us at [GitHub](https://github.com/kanasimi/CeJS/issues).

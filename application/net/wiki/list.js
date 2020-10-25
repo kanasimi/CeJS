@@ -1564,7 +1564,7 @@ function module_code(library_namespace) {
 		// redirect_to: 追尋至重定向終點
 
 		wiki_API.page(title, function(page_data, error) {
-			// console.log(page_data);
+			// console.trace([ page_data, error ]);
 
 			callback(
 			// 已經轉換過，毋須 wiki_API.parse.redirect()。
