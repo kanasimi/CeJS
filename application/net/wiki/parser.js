@@ -2596,11 +2596,6 @@ function module_code(library_namespace) {
 		return display_text;
 	}
 
-	// cf. deep resolve_escaped()
-	function shallow_resolve_escaped(text, include_mark, end_mark) {
-		;
-	}
-
 	/**
 	 * 將特殊標記解譯/還原成 {Array} 組成之結構。
 	 * 
@@ -3304,6 +3299,16 @@ function module_code(library_namespace) {
 		if (typeof options.prefix === 'function') {
 			wikitext = options.prefix(wikitext, queue, include_mark, end_mark)
 					|| wikitext;
+		}
+
+		// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+		// cf. deep resolve_escaped()
+		function shallow_resolve_escaped(text) {
+			if (text.includes(include_mark)) {
+				// 經過改變，需再進一步處理。
+				text = parse_wikitext(text, options, queue);
+			}
+			return text;
 		}
 
 		// console.trace(wikitext);
