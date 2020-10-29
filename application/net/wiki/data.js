@@ -4733,7 +4733,7 @@ function module_code(library_namespace) {
 		}
 
 		var session;
-		if ('session' in options) {
+		if (KEY_SESSION in options) {
 			session = options[KEY_SESSION];
 			// set_claims() 中之 get_data_API_URL() 會用到 options[KEY_SESSION];
 			// delete options[KEY_SESSION];
@@ -4790,8 +4790,13 @@ function module_code(library_namespace) {
 					library_namespace.warn('action: '
 					//
 					+ JSON.stringify(action));
-					library_namespace.warn('data to write: '
-							+ JSON.stringify(options));
+					try {
+						library_namespace.warn('data to write: '
+								+ JSON.stringify(options));
+					} catch (e) {
+						// TODO: handle exception
+						// TypeError: Converting circular structure to JSON
+					}
 					callback(undefined, error);
 					return;
 				}
@@ -5314,7 +5319,7 @@ function module_code(library_namespace) {
 				: 'description';
 
 		var session;
-		if ('session' in options) {
+		if (KEY_SESSION in options) {
 			session = options[KEY_SESSION];
 			delete options[KEY_SESSION];
 		}
