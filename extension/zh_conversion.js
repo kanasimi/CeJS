@@ -12,9 +12,6 @@
 	CeL.env.ignore_COM_error = true;
 	// load module for CeL.CN_to_TW('简体')
 	CeL.run('extension.zh_conversion',function () {
-		// 事前事後轉換表須事先設定。
-		//CeL.CN_to_TW.pre = {};
-		//CeL.CN_to_TW.post = {};
 		var text = CeL.CN_to_TW('简体中文文字');
 		CeL.CN_to_TW.file('from.htm', 'to.htm', 'utf-8');
 	});
@@ -36,7 +33,7 @@ typeof CeL === 'function' && CeL.run({
 	require : 'data.pair|application.OS.Windows.file.',
 
 	// 設定不匯出的子函式。
-	// no_extend : '*',
+	no_extend : 'generate_converter',
 
 	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
 	code : module_code
@@ -72,42 +69,15 @@ function module_code(library_namespace) {
 			+ library_namespace.env.path_separator);
 	// console.log('dictionary_base: ' + dictionary_base);
 
-	function CN_to_TW(text, options) {
-		if (!CN_to_TW.conversions) {
-			CN_to_TW.initialization();
-		}
-
-		// 事前轉換表。
-		if (options && options.pre) {
-			text = (new pair(options.pre, {
-				flag : options.flag || REPLACE_FLAG
-			})).convert(text);
-		}
-
-		CN_to_TW.conversions.forEach(function(conversion) {
-			text = conversion.convert(text);
-		});
-
-		// 事後轉換表。
-		if (options && options.post)
-			text = (new pair(options.post, {
-				flag : options.flag || REPLACE_FLAG
-			})).convert(text);
-
-		return text;
+	function Converter(options) {
+		// console.log(options);
+		Object.assign(this, options);
+		// console.trace(this.files);
 	}
 
-	// 長先短後 詞先字後
-	CN_to_TW.files = 'STPhrases,STCharacters'
-			// 因此得要一個個 replace。
-			+ ',TWPhrasesName,TWPhrasesIT,TWVariants,TWVariantsRevPhrases,TWPhrasesOther';
-
-	// 若要篩選或增減 conversion files，可參考範例：
-	// start_downloading() @ CeL.application.net.work_crawler.task
-	CN_to_TW.files = CN_to_TW.files.split(',');
-
-	CN_to_TW.initialization = function() {
-		CN_to_TW.conversions = CN_to_TW.files.map(function(file_name) {
+	function Converter_initialization() {
+		// console.trace(this.files);
+		this.conversions = this.files.map(function(file_name) {
 			return new pair(null, {
 				// 載入 resource。
 				path : dictionary_base + file_name + '.txt',
@@ -130,87 +100,203 @@ function module_code(library_namespace) {
 			});
 		});
 
-		// keys_to_remove
-		var remove_key_hash = Object.create(null);
-		// 手動修正表。
-		CN_to_TW.conversions.push(new pair(null, {
-			path : dictionary_base
-					.replace(/[^\\\/]+[\\\/]$/, 'corrections.txt'),
-			item_processor : function(item, options) {
-				var matched = item.match(/^-([^\t\n]{1,30})$/);
-				if (!matched) {
-					return item;
-				}
-				remove_key_hash[matched[1]] = options.path;
-				return '';
-			},
-			remove_comments : true
-		}));
+		if (this.corrections) {
+			// keys_to_remove
+			var remove_key_hash = Object.create(null);
+			// this.conversions: 手動修正表。提供自行更改的功能。
+			this.conversions.push(new pair(null, {
+				path : dictionary_base.replace(/[^\\\/]+[\\\/]$/,
+						this.corrections),
+				item_processor : function(item, options) {
+					var matched = item.match(/^-([^\t\n]{1,30})$/);
+					if (!matched) {
+						return item;
+					}
+					remove_key_hash[matched[1]] = options.path;
+					return '';
+				},
+				remove_comments : true
+			}));
+			delete this.corrections;
 
-		if (!library_namespace.is_empty_object(remove_key_hash)) {
-			CN_to_TW.conversions.forEach(function(conversion) {
-				if (false && conversion.pair.皮膚) {
-					console.log(conversion);
-					throw conversion.pair.皮膚;
-				}
-				conversion.remove(remove_key_hash, {
-					remove_matched_path : true
+			if (!library_namespace.is_empty_object(remove_key_hash)) {
+				this.conversions.forEach(function(conversion) {
+					if (false && conversion.pair.皮膚) {
+						console.log(conversion);
+						throw conversion.pair.皮膚;
+					}
+					conversion.remove(remove_key_hash, {
+						remove_matched_path : true
+					});
 				});
-			});
-			// free
-			remove_key_hash = null;
+				// free
+				remove_key_hash = null;
+			}
 		}
 
 		// 設定事前轉換表。
-		if (CN_to_TW.pre) {
-			CN_to_TW.conversions.unshift(new pair(CN_to_TW.pre, {
-				flag : CN_to_TW.flag || REPLACE_FLAG
+		if (this.pre) {
+			this.conversions.unshift(new pair(this.pre, {
+				flag : this.flag || REPLACE_FLAG
 			}));
+			delete this.pre;
 		}
 
 		// 設定事後轉換表。
-		if (CN_to_TW.post) {
-			CN_to_TW.conversions.push(new pair(CN_to_TW.post, {
-				flag : CN_to_TW.flag || REPLACE_FLAG
+		if (this.post) {
+			this.conversions.push(new pair(this.post, {
+				flag : this.flag || REPLACE_FLAG
 			}));
+			delete this.post;
 		}
 
-		// console.trace(CN_to_TW('签'));
-	};
+		// console.trace(this('签'));
+	}
 
-	CN_to_TW.file = function(from, to, target_encoding) {
+	// convert text
+	function convert_text(text, options) {
+		if (!this.conversions) {
+			this.initialization();
+		}
+
+		// 事前轉換表。
+		if (options && options.pre) {
+			text = (new pair(options.pre, {
+				flag : options.flag || REPLACE_FLAG
+			})).convert(text);
+		}
+
+		this.conversions.forEach(function(conversion) {
+			text = conversion.convert(text);
+		});
+
+		// 事後轉換表。
+		if (options && options.post) {
+			text = (new pair(options.post, {
+				flag : options.flag || REPLACE_FLAG
+			})).convert(text);
+		}
+
+		return text;
+	}
+
+	// convert text file
+	function convert_file(from, to, target_encoding) {
 		var text = library_namespace.get_file(from);
-		text = CN_to_TW(text);
+		text = this(text);
 		library_namespace.write_file(to, text, target_encoding);
+	}
+
+	Object.assign(Converter.prototype, {
+		initialization : Converter_initialization,
+		convert : convert_text,
+		file : convert_file
+	});
+
+	Converter.options = {
+		CN_to_TW : {
+			// 事前事後轉換表須事先設定。
+			// 不可以 Object.assign(CeL.CN_to_TW.pre = {}, {}) 來新增事前轉換表。
+			// pre : {},
+			// post : {},
+
+			// 長先短後 詞先字後
+			files : ('STPhrases|STCharacters'
+			// 因此得要一個個 replace。
+			+ '|TWPhrasesName|TWPhrasesIT|TWPhrasesOther'
+			// https://github.com/BYVoid/OpenCC/blob/master/data/config/s2twp.json
+			+ '|TWVariants')
+			// 若要篩選或增減 conversion files，可參考範例：
+			// start_downloading() @ CeL.application.net.work_crawler.task
+			.split('|'),
+			corrections : 'corrections_to_TW.txt'
+		},
+		TW_to_CN : {
+			// 事前事後轉換表須事先設定。
+			// pre : {},
+			// post : {},
+
+			// https://github.com/BYVoid/OpenCC/blob/master/data/config/tw2s.json
+			files : ('TWVariantsRevPhrases' + '|TSPhrases|TSCharacters')
+					.split('|')
+		}
 	};
-
-	// 事前事後轉換表須事先設定。
-	// 可以 Object.assign(CeL.CN_to_TW.pre = {}, {}) 來新增事前轉換表。
-	// CN_to_TW.pre = {};
-	// CN_to_TW.post = {};
-
-	// CN_to_TW.conversions: 提供自行更改的功能。
 
 	// ------------------------------------------------------------------------
 
-	var opencc_s2t;
+	function generate_converter(type, files) {
+		if (!(type in Converter.options)) {
+			library_namespace.error(
+			//
+			'generate_converter: Invalid type: ' + type);
+			return;
+		}
 
-	function CN_to_TW_opencc(text, options) {
-		// Sync API
-		return opencc_s2t.convertSync(text);
+		if (files) {
+			if (typeof files === 'function')
+				files = Converter.options[type].files.filter(files);
+			Converter.options[type].files = files;
+		}
+
+		var converter = new Converter(Converter.options[type]);
+		return converter.convert.bind(converter);
+	}
+
+	var cecc;
+	function using_CeCC(force) {
+		if (cecc && !force) {
+			library_namespace.debug('CeCC loaded.');
+			return true;
+		}
+
+		try {
+			cecc = require('cecc');
+		} catch (e) {
+			try {
+				// base_path/CeJS/ce.js
+				// base_path/Chinese_converter/Chinese_converter.js
+				cecc = require(library_namespace
+						.simplify_path(library_namespace
+								.get_module_path()
+								.replace(/[^\\\/]*$/,
+										'../Chinese_converter/Chinese_converter.js')));
+			} catch (e) {
+			}
+		}
+
+		if (cecc) {
+			cecc = new cecc;
+			library_namespace
+					.info('using_CeCC: Using CeCC to convert language.');
+			(library_namespace.CN_to_TW = _.CN_to_TW = cecc.to_TW.bind(cecc)).CeCC = true;
+			(library_namespace.TW_to_CN = _.TW_to_CN = cecc.to_CN.bind(cecc)).CeCC = true;
+			return true;
+		}
 	}
 
 	// ------------------------------------------------------------------------
 	// export
 
+	_.generate_converter = generate_converter;
+	_.using_CeCC = using_CeCC;
+
 	try {
 		var OpenCC = require('opencc');
 		// Load the default Simplified to Traditional config
-		opencc_s2t = new OpenCC('s2t.json');
-		_.CN_to_TW = CN_to_TW_opencc;
+		_.CN_to_TW = new OpenCC('s2t.json');
+		// Sync API
+		_.CN_to_TW = _.CN_to_TW.convertSync.bind(_.CN_to_TW);
+
+		_.TW_to_CN = new OpenCC('t2s.json');
+		_.TW_to_CN = _.TW_to_CN.convertSync.bind(_.TW_to_CN);
+
 	} catch (e) {
-		_.CN_to_TW = CN_to_TW;
+		// CeL.application.net.work_crawler.task will re-generate the functions!
+		_.CN_to_TW = generate_converter('CN_to_TW');
+		_.TW_to_CN = generate_converter('TW_to_CN');
 	}
+
+	// Warning: require('cecc') will overwrite CeL.CN_to_TW, CeL.TW_to_CN !
 
 	return (_// JSDT:_module_
 	);
