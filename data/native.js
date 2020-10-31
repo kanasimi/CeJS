@@ -415,7 +415,7 @@ function module_code(library_namespace) {
 		.replace(/^([\^])/, '\\^').replace(/(\$)$/, '\\$');
 
 		return RegExp_flags === undefined ? pattern : new RegExp(pattern,
-				/^[igms]+$/i.test(RegExp_flags) ? RegExp_flags : '');
+				_.PATTERN_RegExp_flags.test(RegExp_flags) ? RegExp_flags : '');
 	}
 	_// JSDT:_module_
 	.to_RegExp_pattern = to_RegExp_pattern;
@@ -462,13 +462,28 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}pattern
 	 *            欲轉換成 RegExp 的 pattern text。
-	 * @param {Function|String}[unknown_handler]
-	 *            當遇到不明 pattern 時的處理程序。若輸入 ('/..', 'flags') 則會將之當作 flags。
+	 * @param {Object}[options]
+	 *            附加參數/設定特殊功能與選項 options = {<br />
+	 *            {String}flags : RegExp 的 flags。<br />
+	 *            {Function|String}error_handler : 當遇到不明 pattern 時的處理程序。<br /> }
 	 * @returns {RegExp} RegExp object。
 	 * 
 	 * @since 2012/10/13 10:22:20
 	 */
-	function String_to_RegExp(pattern, unknown_handler) {
+	function String_to_RegExp(pattern, options) {
+		// 前置作業。
+		if (typeof options === 'string' && _.PATTERN_RegExp_flags.test(options)) {
+			options = {
+				flags : options
+			};
+		} else if (typeof options === 'function') {
+			options = {
+				error_handler : options
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
+
 		if (typeof pattern === 'string') {
 			if (typeof String_to_RegExp.preprocessor === 'function')
 				pattern = String_to_RegExp.preprocessor(pattern);
@@ -479,21 +494,29 @@ function module_code(library_namespace) {
 					library_namespace.debug({
 						T : [ 'Treat [%1] as RegExp.', pattern ]
 					}, 3, 'String_to_RegExp');
-					var m = pattern.match(_.PATTERN_RegExp),
+					var matched = pattern.match(_.PATTERN_RegExp), replace_to;
+					if (!matched && options.allow_replacement
+					//
+					&& (matched = pattern.match(_.PATTERN_RegExp_replacement))) {
+						replace_to = matched[2];
+						// matched[2] = matched[3];
+						matched.splice(2, 1);
+					}
 					// 設定 flags。
-					flags = m ? m[2]
-							: typeof unknown_handler === 'string' ? unknown_handler
-									: String_to_RegExp.default_flags;
+					var flags = _.PATTERN_RegExp_flags.test(options.flags)
+							&& options.flags
+							|| (matched ? matched[2]
+									: String_to_RegExp.default_flags);
 
 					try {
 						try {
-							pattern = new RegExp(m ? m[1] : pattern.slice(1),
-									flags);
+							pattern = new RegExp(matched ? matched[1] : pattern
+									.slice(1), flags);
 						} catch (e) {
 							try {
-								if (m) {
+								if (matched) {
 									// 設定絕對可接受的 flags，或完全不設定。
-									pattern = new RegExp(m[1]);
+									pattern = new RegExp(matched[1]);
 									library_namespace.warn([
 									//
 									'String_to_RegExp: ', {
@@ -505,7 +528,7 @@ function module_code(library_namespace) {
 								library_namespace.warn([
 								//
 								'String_to_RegExp: ', {
-									T : [ 'Illegal pattern: [%1]', m[1] ]
+									T : [ 'Illegal pattern: [%1]', matched[1] ]
 								} ]);
 							}
 						}
@@ -515,6 +538,9 @@ function module_code(library_namespace) {
 									e.message ]
 						}, 2, 'String_to_RegExp');
 					}
+
+					if (replace_to)
+						pattern.replace_to = replace_to;
 
 				} else if (pattern.charAt(0) === '\\'
 						&& typeof library_namespace.wildcard_to_RegExp === 'function') {
@@ -530,11 +556,11 @@ function module_code(library_namespace) {
 
 			if (typeof pattern === 'string')
 				try {
-					pattern = typeof unknown_handler === 'function' ? unknown_handler(pattern)
-							// default unknown handler.
-							: new RegExp(pattern
-							// .replace(/,/g, '|')
-							);
+					pattern = typeof options.error_handler === 'function'
+					// default unknown handler.
+					? options.error_handler(pattern) : new RegExp(pattern
+					// .replace(/,/g, '|')
+					);
 				} catch (e) {
 					library_namespace.debug({
 						T : [ '無法轉換模式 [%1]！', pattern ]
@@ -665,21 +691,34 @@ function module_code(library_namespace) {
 	};
 
 	if (Object.values) {
-		_.PATTERN_RegExp = Object.values(RegExp_flags.flags);
+		_.PATTERN_RegExp_flags = Object.values(RegExp_flags.flags);
 	} else {
-		_.PATTERN_RegExp = [];
+		_.PATTERN_RegExp_flags = [];
 		(function() {
 			for ( var f in RegExp_flags.flags)
-				_.PATTERN_RegExp.push(RegExp_flags.flags[g]);
+				_.PATTERN_RegExp_flags.push(RegExp_flags.flags[g]);
 		})();
 	}
+	// TODO: flags 只能出現一次!
+	_.PATTERN_RegExp_flags = _.PATTERN_RegExp_flags.join('');
 	// CeL.PATTERN_RegExp
 	// [ all, pattern source, flags ]
 	_.PATTERN_RegExp = new RegExp(
 	// /^\/(.+)\/([iugms]*)$/
 	// /^\/((?:\\.|[^\/])+)\/([gimsuy]*)$/
-	/^\/((?:\\.|[^\/])+)\/([flags]*)$/.source.replace('flags', _.PATTERN_RegExp
-			.join('')));
+	/^\/((?:\\.|[^\/])+)\/([flags]*)$/.source.replace('flags',
+			_.PATTERN_RegExp_flags));
+
+	// CeL.PATTERN_RegExp_replacement
+	// e.g., '/只/隻/i'
+	_.PATTERN_RegExp_replacement = new RegExp(
+	// [ all, pattern source, replace to, flags ]
+	/^\/((?:\\.|[^\/])+)\/((?:\\.|[^\/])+)\/([flags]*)$/.source.replace(
+			'flags', _.PATTERN_RegExp_flags));
+
+	// CeL.PATTERN_RegExp_flags
+	_.PATTERN_RegExp_flags = new RegExp(/^flags+$/.source.replace('flags',
+			_.PATTERN_RegExp_flags));
 
 	/**
 	 * <code>

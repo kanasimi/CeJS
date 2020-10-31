@@ -31,18 +31,18 @@ matrix:
       # sudo apt-get install nodejs @ Ubuntu-16.04.3
       #node_js: 4.2.6
       # LTS
-      node_js: 12
+      node_js: 14
 
     - os: linux
       # Current
-      node_js: 14
+      node_js: 15
 
     #- os: windows
     #  2019/8/14 10:50:35 date error
     #node_js: 12
 
     - os: osx
-      node_js: 14
+      node_js: 15
 
 install:
   - npm install

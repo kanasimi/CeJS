@@ -166,7 +166,26 @@ function module_code(library_namespace) {
 			})).convert(text);
 		}
 
-		this.conversions.forEach(function(conversion) {
+		var for_each_conversion;
+		if (!options) {
+		} else if (options.mode === 'word') {
+			// 僅轉換完全相符的詞彙 key。
+			for_each_conversion = function(conversion) {
+				// console.log(conversion.pair)
+				var convert_to = conversion.get_value(text);
+				if (typeof convert_to === 'string')
+					text = convert_to;
+			};
+		} else if (options.mode === 'word_first') {
+			// 輸入單一詞彙時使用，以期加快速度。
+			for_each_conversion = function(conversion) {
+				var convert_to = conversion.get_value(text);
+				text = typeof convert_to === 'string' ? convert_to : conversion
+						.convert(text);
+			};
+		}
+
+		this.conversions.forEach(for_each_conversion || function(conversion) {
 			text = conversion.convert(text);
 		});
 
@@ -218,7 +237,8 @@ function module_code(library_namespace) {
 
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/tw2s.json
 			files : ('TWVariantsRevPhrases' + '|TSPhrases|TSCharacters')
-					.split('|')
+					.split('|'),
+			corrections : 'corrections_to_CN.txt'
 		}
 	};
 

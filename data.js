@@ -1237,7 +1237,7 @@ function module_code(library_namespace) {
 
 		// 排除/移除注解 (//, /* */)。
 		/**
-		 * strip/remove javascript comments.
+		 * strip/remove javascript comments. CeL.data.pair.remove_comments(text)
 		 * 
 		 * @see http://vrana.github.io/JsShrink/
 		 * @see http://trinithis.awardspace.com/commentStripper/stripper.html
@@ -1247,12 +1247,22 @@ function module_code(library_namespace) {
 		remove_comments : function(text) {
 			// 僅作最簡單之處理，未考量: "// .. /*", "// .. */", "// /* .. */",
 			// 以及 RegExp, "", '' 中注解的情況!
-			return text.replace(/\/\*[\s\S]*?\*\//g, '').replace(
+			return String(text).replace(/\/\*[\s\S]*?\*\//g, '').replace(
 					/\/\/[^\r\n]*/g, '');
+
+			// text.replace(/<!--[\s\S]*?-->/g, '');
+
+			// TODO: /^#/
 		}
 	});
 
 	library_namespace.set_method(Pair.prototype, {
+		get_value : function(key) {
+			var pair = this.pair;
+			if (key in pair)
+				return pair[key];
+		},
+
 		add : function(source, options) {
 			var pair = this.pair, keys = this.keys;
 
@@ -1595,6 +1605,7 @@ function module_code(library_namespace) {
 			return this.keys;
 		},
 
+		// for each pair
 		for_each : function(operator, options) {
 			var pair = this.pair;
 			if (Array.isArray(this.keys)) {
