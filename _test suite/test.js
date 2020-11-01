@@ -3832,7 +3832,10 @@ function test_era() {
 		[['2020/7/31', '民國109年7月31日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '民國紀年 公元日期'],
 
 		// 日本の元号
+		[['645年7月17日', '大化元年六月十九日'.to_Date('era').format({ parser: 'CE', format: '%Y年%m月%d日' })], '日本紀年 公元日期'],
+		[['1868年10月23日', '慶應四年九月初八日'.to_Date('era').format({ parser: 'CE', format: '%Y年%m月%d日' })], '日本紀年 公元日期'],
 		[['1872/5/8', '明治5年4月2日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '明治紀年 公元日期'],
+		[['1872/12/31', '明治五年十二月初二日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '明治紀年 公元日期'],
 		[['1890/6/6', '明治23年6月6日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '明治紀年 公元日期'],
 		[['1917/6/6', '大正6年6月6日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '大正紀年 公元日期'],
 		[['1931/6/6', '昭和6年6月6日'.to_Date('era').format({ parser: 'CE', format: '%Y/%m/%d' })], '昭和紀年 公元日期'],
@@ -3888,6 +3891,8 @@ function test_era() {
 		[["134/8/8", CeL.era('陽嘉3年6月', { get_range: true })[1].format({ parser: 'CE', format: '%Y/%m/%d' })], '陽嘉3年6月.末'],
 		[["135/2/1", CeL.era('陽嘉3年', { get_range: true })[1].format({ parser: 'CE', format: '%Y/%m/%d' })], '陽嘉3年.末'],
 		[["136/2/20", CeL.era('陽嘉', { get_range: true })[1].format({ parser: 'CE', format: '%Y/%m/%d' })], '陽嘉.末'],
+
+		[CeL.era('1872年12月31日').共存紀年.join('|').covers('明治天皇5年12月2日'), '.共存紀年 test: 日本紀年'],
 	]);
 
 

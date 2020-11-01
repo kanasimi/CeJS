@@ -211,16 +211,17 @@ function module_code(library_namespace) {
 					typeof style ]
 		}, min_debug, 'SGR_style_add');
 		if (typeof style === 'string') {
-			if (style.includes(SGR_code.separator))
+			if (style.includes(SGR_code.separator)) {
 				style = style.split(SGR_code.separator);
 
-			else if (isNaN(style)) {
+			} else if (isNaN(style)) {
 				library_namespace.debug({
 					T : [ 'Test if [%1] is "[+-] style name".', style ]
 				}, min_debug, 'SGR_style_add');
-				var matched = style.match(/^([+\-])\s*([^\s].*)$/);
+				// "+bright"
+				var matched = style.match(/^([+\-])([^=]*?)$/);
 				if (matched && (matched[2] = SGR_style_name(matched[2].trim()))) {
-					matched[1] = matched[1] === '+';
+					matched[1] = matched[1] !== '-';
 					if (undefined === SGR_style_value(matched[1], matched[2]))
 						library_namespace.warn([ 'SGR_style_add: ', {
 							T : [ 'Invalid configuration of style: [%1].',

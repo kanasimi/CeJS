@@ -275,11 +275,10 @@ function module_code(library_namespace) {
 			try {
 				// base_path/CeJS/ce.js
 				// base_path/Chinese_converter/Chinese_converter.js
-				cecc = require(library_namespace
-						.simplify_path(library_namespace
-								.get_module_path()
-								.replace(/[^\\\/]*$/,
-										'../Chinese_converter/Chinese_converter.js')));
+				cecc = require(library_namespace.simplify_path(
+				//
+				library_namespace.get_module_path().replace(/[^\\\/]*$/,
+						'../Chinese_converter/Chinese_converter.js')));
 			} catch (e) {
 			}
 		}
@@ -287,9 +286,13 @@ function module_code(library_namespace) {
 		if (cecc) {
 			cecc = new cecc;
 			library_namespace
-					.info('using_CeCC: Using CeCC to convert language.');
-			(library_namespace.CN_to_TW = _.CN_to_TW = cecc.to_TW.bind(cecc)).CeCC = true;
-			(library_namespace.TW_to_CN = _.TW_to_CN = cecc.to_CN.bind(cecc)).CeCC = true;
+					.info('using_CeCC: Using CeCC (synchronous version) to convert language.');
+			(library_namespace.CN_to_TW = _.CN_to_TW
+			//
+			= cecc.to_TW_sync.bind(cecc)).CeCC = true;
+			(library_namespace.TW_to_CN = _.TW_to_CN
+			//
+			= cecc.to_CN_sync.bind(cecc)).CeCC = true;
 			return true;
 		}
 	}

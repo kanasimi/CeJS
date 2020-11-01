@@ -109,7 +109,8 @@ function module_code(library_namespace) {
 			this.import_args();
 
 		// 在crawler=new CeL.work_crawler({})的情況下可能沒辦法得到準確的檔案路徑，因此這個路徑僅供參考。
-		var main_script_path = CeL.get_script_base_path(/\.js/i, module);
+		var main_script_path = library_namespace.get_script_base_path(/\.js/i,
+				module);
 		if (main_script_path)
 			this.main_script = main_script_path;
 
@@ -200,6 +201,31 @@ function module_code(library_namespace) {
 	// @inner static functions
 	var crawler_namespace = Object.create(null);
 	Work_crawler.crawler_namespace = crawler_namespace;
+
+	function text_as_is(text) {
+		return text;
+	}
+	// var convert_text_language = this.language_convertor();
+	// convert_text_language(text)
+	function language_convertor() {
+		if (!this.convert_to_language)
+			return text_as_is;
+
+		if (this.convert_text_language
+				&& this.convert_to_language_cached === this.convert_to_language) {
+			return this.convert_text_language;
+		}
+
+		this.convert_to_language_cached = this.convert_to_language;
+
+		// 結巴中文分詞還太過粗糙，不適合依此做繁簡轉換。
+		library_namespace.using_CeCC();
+
+		// library_namespace.extension.zh_conversion.CN_to_TW();
+		this.convert_text_language = this.convert_to_language === 'TW' ? library_namespace.CN_to_TW
+				: library_namespace.TW_to_CN;
+		return this.convert_text_language;
+	}
 
 	// --------------------------------------------------------------------------------------------
 
@@ -366,6 +392,8 @@ function module_code(library_namespace) {
 		is_finished : is_finished,
 
 		full_URL : full_URL_of_path,
+
+		language_convertor : language_convertor,
 
 		// work_data properties to reset. do not inherit
 		// 設定不繼承哪些作品資訊。

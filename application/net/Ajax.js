@@ -1248,6 +1248,8 @@ function module_code(library_namespace) {
 		FORCE_POST : true
 	};
 
+	var has_native_URL = typeof URL === "function" && !URL.not_native;
+
 	/**
 	 * 讀取 URL via node http/https。<br />
 	 * assert: arguments 必須與 get_URL() 相容！
@@ -1406,15 +1408,28 @@ function module_code(library_namespace) {
 		&& /[^0-9a-zA-Z$\-_.+!*'();\/?:@=&]/.test(source_data.url)) {
 			URL_to_fetch = encodeURI(URL_to_fetch);
 		}
-
-		// console.log(URL_to_fetch);
-		var URL_object_to_fetch = typeof URL_to_fetch === 'string' ? node_url
-				.parse(
+		if (has_native_URL && URL_to_fetch instanceof URL) {
+			// 當輸入 {URL} 時，node_https.request() 似乎不會考慮額外選項
+			// (heads, ...)，只好將 URL 轉成尋常 plain object。
+			URL_to_fetch = URL_to_fetch.toString();
+		}
+		// console.trace(URL_to_fetch);
+		var URL_object_to_fetch;
+		if (typeof URL_to_fetch === 'string') {
+			if (false && has_native_URL) {
+				URL_object_to_fetch = new URL(URL_to_fetch);
+			} else {
+				URL_object_to_fetch = node_url.parse(
 				// 處理 '//domain.org/path' 的情況。
-				URL_to_fetch.startsWith('//') ? (agent && agent.protocol || 'https:')
-						+ URL_to_fetch
-						: URL_to_fetch)
-				: URL_to_fetch;
+				URL_to_fetch.startsWith('//')
+				//
+				? (agent && agent.protocol || 'https:') + URL_to_fetch
+						: URL_to_fetch);
+			}
+
+		} else {
+			URL_object_to_fetch = URL_to_fetch;
+		}
 		var URL_is_https = /^https:?$/i.test(URL_object_to_fetch.protocol);
 
 		/**
@@ -2268,7 +2283,6 @@ function module_code(library_namespace) {
 			'Cache-Control' : 'no-cache'
 		}, options.headers, URL_object_to_fetch.headers);
 		// delete URL_object_to_fetch.headers.Referer;
-		// console.log(URL_object_to_fetch.headers);
 		// console.log(options.headers);
 
 		if (node_zlib.gunzipSync
@@ -2278,6 +2292,7 @@ function module_code(library_namespace) {
 			// 'gzip, deflate, *'
 			URL_object_to_fetch.headers['Accept-Encoding'] = 'gzip, deflate';
 		}
+		// console.log(URL_object_to_fetch.headers);
 
 		if (false) {
 			// @see jQuery
@@ -2328,8 +2343,6 @@ function module_code(library_namespace) {
 
 		// console.log(URL_object_to_fetch);
 		try {
-			// console.log(URL_object_to_fetch);
-
 			// from node.js 10.9.0
 			// http.request(url[, options][, callback])
 			// request: Class: http.ClientRequest

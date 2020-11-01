@@ -1610,22 +1610,33 @@ function finish(name_space) {
 			// --------------------------------
 			// report.
 
+			var MAX_LENGTH = 200;
+
 			function quote(message, add_type) {
 				if (add_type &&
 				// 有些 value 沒必要加上 type。
 				message !== null && message !== undefined
-						&& message === message) {
+				// is not NaN
+				&& message === message) {
 					add_type = '(' + (typeof message) + ') ';
 				} else {
 					add_type = '';
-					if (typeof message !== 'string')
-						message = String(message);
 				}
-				return add_type + (message.length > 200
-				//
-				? '[' + message.slice(0, 200) + ']...' + message.length
-				//
-				: '[' + message + ']');
+
+				if (typeof message === 'string' && add_type
+						&& message.length <= MAX_LENGTH
+						&& typeof JSON === 'object' && JSON.stringify) {
+					message = JSON.stringify(message);
+				} else {
+					message = String(message).replace(/\r/g, '\\r');
+					if (message.length > MAX_LENGTH)
+						message = '[' + message.slice(0, MAX_LENGTH) + ']...'
+								+ message.length;
+					else
+						message = '[' + message + ']';
+				}
+
+				return add_type + message;
 			}
 
 			var test_name = options.name ? quote(options.name) : 'Assertion';
@@ -1723,18 +1734,18 @@ function finish(name_space) {
 
 		CeL.test(test_group_name, conditions, options);
 		// conditions #1: [
-		// [ test value: true / false, 'test_name' ],
-		// [ test value: true / false, {name:'test_name'} ],
+		// [ test value: true / false, 'test_group_name' ],
+		// [ test value: true / false, {name:'test_group_name'} ],
 		// [ test value: true / false, {options} ],
 		// [ test value: true / false ],
 		// test value: true / false,
 		//
-		// [ [ test value 1, test value 2 ], 'test_name' ],
-		// [ [ test value 1, test value 2 ], {name:'test_name'} ],
+		// [ [ test value 1, test value 2 ], 'test_group_name' ],
+		// [ [ test value 1, test value 2 ], {name:'test_group_name'} ],
 		// [ [ test value 1, test value 2 ], {options} ],
 		// [ [ test value 1, test value 2 ] ],
 		//
-		// [ function tester(), 'test_name' ],
+		// [ function tester(), 'test_group_name' ],
 		// [ function tester() ],
 		// [ function tester(callback), {need_callback:true} ],
 		// function tester(),
@@ -1749,10 +1760,10 @@ function finish(name_space) {
 		//
 		// CeL.test(test_group_name, function async_tester(assert, callback), {need_callback:true});
 		//
-		// assert(test value: true / false, 'test_name');
+		// assert(test value: true / false, 'test_group_name');
 		// assert(test value: true / false, options);
 		// assert(test value: true / false);
-		// assert([ test value 1, test value 2 ], 'test_name');
+		// assert([ test value 1, test value 2 ], 'test_group_name');
 		// assert([ test value 1, test value 2 ]);
 
 		CeL.test_finished();
@@ -1760,7 +1771,7 @@ function finish(name_space) {
 
 		</code>
 		 * 
-		 * @param {String}[test_name]
+		 * @param {String}[test_group_name]
 		 *            test name 此次測試名稱。
 		 * @param {Array|Function}conditions
 		 *            condition list passed to assert(): [ [ condition / test
@@ -1770,18 +1781,19 @@ function finish(name_space) {
 		 *            附加參數/設定選擇性/特殊功能與選項。 {<br />
 		 *            {String}name: test name 此次測試名稱。<br />
 		 *            {Object}options: default options for running CeL.assert().<br />
-		 *            {Function}callback: 回調函數。 callback(recorder, test_name)<br /> }
+		 *            {Function}callback: 回調函數。 callback(recorder,
+		 *            test_group_name)<br /> }
 		 * 
 		 * @returns {Integer}有錯誤發生的數量。
 		 * 
 		 * @since 2012/9/19 00:20:49, 2015/10/18 23:8:9 refactoring 重構
 		 */
-		function log_front_end_test(test_name, conditions, options) {
-			if ((Array.isArray(test_name) || typeof test_name === 'function')
+		function log_front_end_test(test_group_name, conditions, options) {
+			if ((Array.isArray(test_group_name) || typeof test_group_name === 'function')
 					&& !options) {
-				// shift arguments: 跳過 test_name。
+				// shift arguments: 跳過 test_group_name。
 				options = conditions;
-				conditions = test_name;
+				conditions = test_group_name;
 			}
 
 			if (!Array.isArray(conditions) && typeof conditions !== 'function') {
@@ -1801,8 +1813,8 @@ function finish(name_space) {
 						callback : options
 					};
 				} else if (typeof options === 'string') {
-					if (!test_name)
-						test_name = options;
+					if (!test_group_name)
+						test_group_name = options;
 					options = undefined;
 				} else if ('options' in options)
 					default_options = options.options;
@@ -1890,20 +1902,37 @@ function finish(name_space) {
 					recorder.ignored.push(condition_arguments);
 					break;
 				}
+
+				return result === true;
 			}
 
 			// 模擬 CeL.assert()
 			function assert_proxy() {
-				handler.call(null, arguments);
+				var sub_test_data = assert_proxy.tests_left[assert_proxy.latest_sub_test_name];
+				if (sub_test_data)
+					sub_test_data.assert_count++;
+				return handler.call(null, arguments);
 			}
 
 			// --------------------------------
 			// report. 當有多個 setup_test()，report() 可能執行多次！
-			var report = function() {
-				var messages = test_name ? [ CeL.to_SGR([ 'Test '
-				// asynchronous operations
-				+ (assert_proxy.asynchronous ? 'asynchronous ' : '') + '[',
-						'fg=cyan', test_name, '-fg', ']: ' ]) ] : [];
+			var report = function(sub_test_name) {
+				var messages;
+				if (test_group_name) {
+					messages = [ 'Test '
+					// asynchronous operations
+					+ (assert_proxy.asynchronous ? 'asynchronous ' : '') + '[',
+							'fg=cyan', test_group_name ];
+					if (sub_test_name) {
+						messages.push('-fg',
+						// ']=>[', ': ', ']→[', '：', ': '
+						': ', 'fg=cyan', sub_test_name);
+					}
+					messages.push('-fg', ']: ');
+					messages = [ CeL.to_SGR(messages) ];
+				} else {
+					messages = [];
+				}
 
 				function join() {
 					if (recorder.ignored.length > 0)
@@ -1933,7 +1962,8 @@ function finish(name_space) {
 					// 因為已 callback，自此後不應改變 recorder，否則不會被 callback 處理。
 					if (options && typeof options.callback === 'function') {
 						setTimeout(function() {
-							options.callback(recorder, error_count, test_name);
+							options.callback(recorder, error_count,
+									test_group_name);
 						}, 0);
 					}
 					return error_count;
@@ -1976,6 +2006,7 @@ function finish(name_space) {
 				return finish();
 			}
 
+			assert_proxy.test_group_name = test_group_name;
 			assert_proxy.report = report;
 			assert_proxy.options = default_options;
 			assert_proxy.starts = Date.now();
@@ -1986,18 +2017,24 @@ function finish(name_space) {
 			if (Array.isArray(conditions)) {
 				conditions.forEach(handler);
 			} else {
-				var tests_left = Object.create(null), tests_count = 0,
+				var tests_count = 0,
+				//
+				tests_left = assert_proxy.tests_left = Object.create(null),
 				// assert: typeof conditions === 'function'
-				setup_test = function setup_test(test_name, test_function) {
+				setup_test = function setup_test(sub_test_name, test_function) {
 					// need wait (pending)
 					assert_proxy.asynchronous = true;
 					tests_count++;
-					if (test_name) {
-						if (test_name in tests_left) {
+					if (sub_test_name) {
+						assert_proxy.latest_sub_test_name = sub_test_name;
+						if (sub_test_name in tests_left) {
 							// 已登記過。
 							return true;
 						}
-						tests_left[test_name] = true;
+						tests_left[sub_test_name] = {
+							// sub_test_data
+							assert_count : 0
+						};
 					}
 					if (typeof test_function === 'function') {
 						try {
@@ -2007,35 +2044,52 @@ function finish(name_space) {
 								// Will show stacks
 								console.trace(e);
 							}
-							recorder.fatal.push(test_name);
+							recorder.fatal.push(sub_test_name);
 						}
-						finish_test(test_name);
+						finish_test(sub_test_name);
 					}
 				},
 				//
-				finish_test = function finish_test(test_name) {
+				finish_test = function finish_test(sub_test_name) {
+					if (!(sub_test_name in tests_left)) {
+						// 重複呼叫?
+						return;
+					}
+					delete tests_left[sub_test_name];
 					tests_count--;
-					delete tests_left[test_name];
 					if (tests_count === 0
 					// && CeL.is_empty_object(tests_left)
 					) {
-						report();
+						if (assert_proxy.tests_loaded)
+							report(sub_test_name);
+						else
+							delete assert_proxy.asynchronous;
 					}
 				}, conditions_error = function(error) {
 					assert_proxy.asynchronous = false;
-					handler([ [ error, "OK" ], test_name ]);
+					handler([ [ error, "OK" ], test_group_name ]);
 				};
 
 				try {
-					if (CeL.is_async_function(conditions)) {
-						// allow async functions
-						// https://github.com/tc39/ecmascript-asyncawait/issues/78
-						eval('(async function() {'
-								+ ' try { await conditions(assert_proxy, setup_test, finish_test); }'
-								+ ' catch(e) { console.trace(e); conditions_error(e); }'
-								+ ' })();');
-					} else {
-						conditions(assert_proxy, setup_test, finish_test);
+					var result = conditions(assert_proxy, setup_test,
+							finish_test, {
+								test_name : test_group_name
+							});
+					// allow async functions
+					if (CeL.is_thenable(result)) {
+						result.then(function() {
+							assert_proxy.tests_loaded = true;
+							// CeL.log('CeL.test: All tests loaded.');
+							if (tests_count > 0) {
+								CeL.error('CeL.test: ' + tests_count
+										+ ' sub test(s) still running: '
+										+ Object.keys(tests_left));
+							}
+							report();
+						}, function(e) {
+							console.trace(e);
+							conditions_error(e);
+						});
 					}
 				} catch (e) {
 					// has_console
@@ -2056,8 +2110,9 @@ function finish(name_space) {
 			}
 
 			if (!assert_proxy.asynchronous) {
-				// waiting
 				return report();
+			} else {
+				// Waiting...
 			}
 		}
 

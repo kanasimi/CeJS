@@ -175,7 +175,7 @@ function module_code(library_namespace) {
 	 * 
 	 * 本組函數之目的:<br />
 	 * 1. polyfill for W3C URL API.<br />
-	 * 2. URLSearchParams() 採用{OBject}操作 hash 更方便，且可支援 charset。
+	 * 2. URLSearchParams() 採用{Object}操作 hash 更方便，且可支援 charset。
 	 * 
 	 * @example <code>
 	alert(parse_URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23#hhh').hostname);
@@ -2134,7 +2134,7 @@ function module_code(library_namespace) {
 
 	// var globalThis = library_namespace.env.global;
 	if (library_namespace.is_WWW(true) || library_namespace.platform.nodejs) {
-		library_namespace.set_method(library_namespace.env.global, {
+		library_namespace.set_method(library_namespace.env.globalThis, {
 			// defective polyfill for W3C URL API, URLSearchParams()
 			URL : defective_URL,
 			URLSearchParams : defective_URLSearchParams

@@ -2386,6 +2386,7 @@ function parsed_text_set_date(add_date) {
 // ---------------------------------------------------------------------//
 
 var set_era_by_url_data_running;
+// 依 location.hash 顯示相應的紀年日期。
 function set_era_by_url_data(era) {
 	if (set_era_by_url_data_running)
 		return;
@@ -2408,17 +2409,17 @@ function set_era_by_url_data(era) {
 		.add_parameters(location.hash.slice(1));
 
 		// column=增加此欄,增加此欄
-		if (column = data.column)
+		if (column = data.get('column'))
 			add_calendar_column(column.split(','), true);
 
 		// era=紀年名稱
-		if (!(era = data.era)
+		if (!(era = data.get('era'))
 				&& !/[&=]/.test(items = location.search.slice(1)
 						|| location.hash.slice(1)))
 			era = items;
 
 		// layer=增加資料圖層,增加資料圖層
-		if (items = data.layer) {
+		if (items = data.get('layer')) {
 			if (!Array.isArray(items))
 				items = items.split(',')
 			items.forEach(function(item) {
@@ -2433,7 +2434,7 @@ function set_era_by_url_data(era) {
 			});
 		} else if (column && era_input_object.setValue())
 			translate_era();
-		else if (items = data.hierarchy)
+		else if (items = data.get('hierarchy'))
 			draw_era(Array.isArray(items) ? items : items.split(/[,\/]/));
 	}
 

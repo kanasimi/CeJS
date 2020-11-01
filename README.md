@@ -18,6 +18,9 @@ The project aims to develop a JavaScript module framework that is simple to use 
 本計畫目標是建立一個簡單上手的 JavaScript 程式庫架構。<!-- toolkit -->
 
 ## Web page usage / browser 運行方式
+<!--
+https://github.com/highlightjs/highlight.js/blob/master/SUPPORTED_LANGUAGES.md
+-->
 ```html
 <script type="text/JavaScript" src="path/to/ce.js">
 	// { "run" : "module name or callback" }
@@ -158,9 +161,9 @@ For further introduction, please see the [wiki](https://github.com/kanasimi/CeJS
 <!-- TODO: screenshot data:image/png;base64, -->
 
 ### 中西曆轉換
-Live demo: [紀年轉換工具](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/era.htm).
+Live demo: [紀年轉換工具](https://kanasimi.github.io/CeJS/_test%20suite/era.htm).
 
-[![紀年轉換工具](https://lh3.googleusercontent.com/N9NilsxV-YIiGqYgzKkQWsKxeGoplKLeJXWo4f-hqgwIT4PHzp1UxI4b-hnFV_Fotr7ENNGcB03uGLZHLvyI6CmmN0DXn2yGzq48gPq9BxPOqtKiqEgcqlK2UNzqCcAoe8dK2V-9lZRJ_HuSGYjbw-lnkdRVTZ1UwhSNHAKO8sg67ICwpkKdZlugrzMxO3x2WQ--oqzAVCQJ_NFsB2oJh8ZZv4U5r85M6eQirL5dNoCo-SoXXRVuAAOJqEG7-ymiOR2_rPTIs1JzAVGiugkoRb2avi8Oi7NjIBwZHXt-Id5C9v5B6T1kejG3GGLt_wWfUcANONgYSsoLKp37AkKZHrvV6M6bDMSqvOwm81hHRUoQS9pDoAw_cLI6oZmmYIFADwgcqFf3Xusf8ZkhVDI0PejCls-laEEeCHBKLI0_s-e__OG-n72oLXHm_cYgLTcmXWaA7U_sG9OxfApHcLRkb1foyY9bcGJV-xpRwA4-gHwMpLlyhbsEYq-92AwYckFT5rzD0kCNfV7tEoG1gqQIM-6gvi4gyD3Y3FDKEKIr9sZA-i7CYvnrKNmVbsrNFj2oJiiE=w1229-h669-no)](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/era.htm)
+[![紀年轉換工具](https://lh3.googleusercontent.com/N9NilsxV-YIiGqYgzKkQWsKxeGoplKLeJXWo4f-hqgwIT4PHzp1UxI4b-hnFV_Fotr7ENNGcB03uGLZHLvyI6CmmN0DXn2yGzq48gPq9BxPOqtKiqEgcqlK2UNzqCcAoe8dK2V-9lZRJ_HuSGYjbw-lnkdRVTZ1UwhSNHAKO8sg67ICwpkKdZlugrzMxO3x2WQ--oqzAVCQJ_NFsB2oJh8ZZv4U5r85M6eQirL5dNoCo-SoXXRVuAAOJqEG7-ymiOR2_rPTIs1JzAVGiugkoRb2avi8Oi7NjIBwZHXt-Id5C9v5B6T1kejG3GGLt_wWfUcANONgYSsoLKp37AkKZHrvV6M6bDMSqvOwm81hHRUoQS9pDoAw_cLI6oZmmYIFADwgcqFf3Xusf8ZkhVDI0PejCls-laEEeCHBKLI0_s-e__OG-n72oLXHm_cYgLTcmXWaA7U_sG9OxfApHcLRkb1foyY9bcGJV-xpRwA4-gHwMpLlyhbsEYq-92AwYckFT5rzD0kCNfV7tEoG1gqQIM-6gvi4gyD3Y3FDKEKIr9sZA-i7CYvnrKNmVbsrNFj2oJiiE=w1229-h669-no)](https://kanasimi.github.io/CeJS/_test%20suite/era.htm)
 
 ### 直式四則運算
 直式四則運算 (elementary arithmetic)，即直式加減乘除、長除法。
@@ -174,9 +177,9 @@ Live demo: [紀年轉換工具](http://lyrics.meicho.com.tw/lib/JS/_test%20suite
 See [compatibility.js](https://github.com/kanasimi/CeJS/blob/master/data/code/compatibility.js) and [native.js](https://github.com/kanasimi/CeJS/blob/master/data/native.js).
 
 ## Demo 線上示範
-* The [live demo page](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/demo.htm) usually takes 10 to 20 seconds to load.
+* The [live demo page](https://kanasimi.github.io/CeJS/_test%20suite/demo.htm) usually takes 10 to 20 seconds to load.
 * 由於頻寬不足，加上載入時須做初始化，本功能示範頁面在載入時得稍微等一下。
-[![live demo page](https://lh3.googleusercontent.com/mnxTEY5szTdGeYdUWjC4Pw18CwzJ4EkflaIA42lsBMQRXGthF8rBHbFSKIZ5LjokCQthIQOnxxmH8_eke4oD3Yr-kU1YzUPzOEINiBwdiCHhazHQVYdYRii4oc966DUmE-MV_B_o8j2Ko1XJ-X7Ro4K-xHA6rGY11Q7WIv3Qne-4Q9tfmgYkgysaYOBxUtsZIOrpKghFCfTXsnjVGVhsiCjc9pyT-x3udMZ-RBs6hF8AxFAprU5WX5utht69g9w6d2inJlLHuImvIHuL1dLNCU9PBHWbleOyRkEs_fUrou5-aqpaxYo07W_cfwmYsGQUVU1_g4eQNydlKMNOUAcuQm21sop7qT-j9LKrTPkGh4fbCi8Fw99PA9GsCMX_KK6PX1HKgnoBzCJDjPFjjQthhx3FCXLGuSZmhYp5Y2FN-Atm1MBQMgtigpLixZ52pQD6UIObrC0Mw33fGmhfe9nfnjDtVvjoXbvNaoZ2ZyKrQ-7peMaExoVRLKtUY_ZN2EwHPfVjBAFFZVKPwCg3hKK5ERM69cSrWUSkfdWlHp7_yIQ74wReMgDtu_bpvqF0D8SffAQu=w506-h297-no)](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/demo.htm)
+[![live demo page](https://lh3.googleusercontent.com/mnxTEY5szTdGeYdUWjC4Pw18CwzJ4EkflaIA42lsBMQRXGthF8rBHbFSKIZ5LjokCQthIQOnxxmH8_eke4oD3Yr-kU1YzUPzOEINiBwdiCHhazHQVYdYRii4oc966DUmE-MV_B_o8j2Ko1XJ-X7Ro4K-xHA6rGY11Q7WIv3Qne-4Q9tfmgYkgysaYOBxUtsZIOrpKghFCfTXsnjVGVhsiCjc9pyT-x3udMZ-RBs6hF8AxFAprU5WX5utht69g9w6d2inJlLHuImvIHuL1dLNCU9PBHWbleOyRkEs_fUrou5-aqpaxYo07W_cfwmYsGQUVU1_g4eQNydlKMNOUAcuQm21sop7qT-j9LKrTPkGh4fbCi8Fw99PA9GsCMX_KK6PX1HKgnoBzCJDjPFjjQthhx3FCXLGuSZmhYp5Y2FN-Atm1MBQMgtigpLixZ52pQD6UIObrC0Mw33fGmhfe9nfnjDtVvjoXbvNaoZ2ZyKrQ-7peMaExoVRLKtUY_ZN2EwHPfVjBAFFZVKPwCg3hKK5ERM69cSrWUSkfdWlHp7_yIQ74wReMgDtu_bpvqF0D8SffAQu=w506-h297-no)](https://kanasimi.github.io/CeJS/_test%20suite/demo.htm)
 * [GitHub Pages](https://kanasimi.github.io/CeJS/) 在線演示。
 
 ## Requirements and dependencies
