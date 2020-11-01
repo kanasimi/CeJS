@@ -2134,7 +2134,7 @@ function module_code(library_namespace) {
 
 	// var globalThis = library_namespace.env.global;
 	if (library_namespace.is_WWW(true) || library_namespace.platform.nodejs) {
-		library_namespace.set_method(library_namespace.env.globalThis, {
+		library_namespace.set_method(library_namespace.env.global, {
 			// defective polyfill for W3C URL API, URLSearchParams()
 			URL : defective_URL,
 			URLSearchParams : defective_URLSearchParams
