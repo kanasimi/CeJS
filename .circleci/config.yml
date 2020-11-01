@@ -32,25 +32,26 @@ jobs:
       # https://circleci.com/docs/2.0/circleci-images/
       # https://hub.docker.com/r/circleci/node/tags/
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
-      - image: circleci/node:current-stretch
+      # 2020/10: failed with image: circleci/node:current-stretch
+      #- image: circleci/node:current-stretch
+      - image: circleci/node:lts-stretch
 
     steps:
       - checkout
       - run:
           name: update-npm
-          # 2020/10: failed
-          #command: 'sudo npm install -g npm@latest'
-          command: 'sudo npm update'
-      #- restore_cache: # special step to restore the dependency cache
-      #    # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
-      #    key: dependency-cache-{{ checksum "package.json" }}
+          command: 'sudo npm install -g npm@latest'
+          #command: 'sudo npm update'
+      - restore_cache: # special step to restore the dependency cache
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          key: dependency-cache-{{ checksum "package.json" }}
       - run:
           name: install-npm-wee
           command: npm install
-      #- save_cache: # special step to save the dependency cache
-      #    key: dependency-cache-{{ checksum "package.json" }}
-      #    paths:
-      #      - ./node_modules
+      - save_cache: # special step to save the dependency cache
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
       - run: # run tests
           name: test
           command: npm test
