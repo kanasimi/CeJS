@@ -666,15 +666,18 @@ function module_code(library_namespace) {
 	// local rule
 	// @see function setup_API_language()
 	wiki_API_query.edit_time_interval = {
-		// [[:ja:WP:bot]]
-		// Botの速度は、おおよそ毎分 6 編集を限度としてください。
-		// e.g., @ User contributions,
-		// Due to high database server lag, changes newer than 30 seconds may
-		// not be shown in this list.
-		// 由於資料庫回應延遲，此清單可能不會顯示最近 30 秒內的變更。
-		// Changes newer than 25 seconds may not be shown in this list.
-		// 此清單可能不會顯示最近 25 秒內的變更。
-		jawiki : 10000
+	// [[:ja:WP:bot]]
+	// Botの速度は、おおよそ毎分 6 編集を限度としてください。
+	// e.g., @ User contributions,
+	// Due to high database server lag, changes newer than 30 seconds may
+	// not be shown in this list.
+	// 由於資料庫回應延遲，此清單可能不會顯示最近 30 秒內的變更。
+	// Changes newer than 25 seconds may not be shown in this list.
+	// 此清單可能不會顯示最近 25 秒內的變更。
+
+	// [[w:ja:Wikipedia‐ノート:Bot#フラグ付きボットの速度制限変更提案]]
+	// 「おおよそ毎分 6 編集」から「おおよそ毎分 12 編集」に緩和する
+	// jawiki : 10000
 	};
 
 	/**
