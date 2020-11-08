@@ -222,7 +222,8 @@ function module_code(library_namespace) {
 			// 長先短後 詞先字後
 			files : ('STPhrases|STCharacters'
 			// 因此得要一個個 replace。
-			+ '|TWPhrasesName|TWPhrasesIT|TWPhrasesOther'
+			// |TWPhrasesIT|TWPhrasesOther: 有太多意外
+			+ '|TWPhrasesName'
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/s2twp.json
 			+ '|TWVariants')
 			// 若要篩選或增減 conversion files，可參考範例：
@@ -244,7 +245,12 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	function generate_converter(type, files) {
+	function set_as_default(method_name, method) {
+		library_namespace[method_name] = _[method_name] = method;
+	}
+
+	function generate_converter(type, options) {
+		options = library_namespace.setup_options(options);
 		if (!(type in Converter.options)) {
 			library_namespace.error(
 			//
@@ -252,30 +258,39 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (files) {
-			if (typeof files === 'function')
-				files = Converter.options[type].files.filter(files);
-			Converter.options[type].files = files;
+		var Converter_options = Object.clone(Converter.options[type]);
+		if (options.files || typeof options.file_filter === 'function') {
+			var files = options.files || Converter_options.files.slice();
+			if (typeof options.file_filter === 'function')
+				files = Converter_options.files.filter(options.file_filter);
+			Converter_options.files = files;
 		}
 
-		var converter = new Converter(Converter.options[type]);
-		return converter.convert.bind(converter);
+		var converter = new Converter(Converter_options);
+		converter = converter.convert.bind(converter);
+		if (options.set_as_default) {
+			set_as_default(type, converter);
+		}
+		return converter;
 	}
 
 	var cecc;
-	function using_CeCC(force) {
-		if (cecc && !force) {
+	function using_CeCC(options) {
+		// 前置處理。
+		options = library_namespace.setup_options(options);
+		if (cecc && !options.force_using_cecc) {
 			library_namespace.debug('CeCC loaded.');
 			return true;
 		}
 
+		var CeCC;
 		try {
-			cecc = require('cecc');
+			CeCC = require('cecc');
 		} catch (e) {
 			try {
 				// base_path/CeJS/ce.js
 				// base_path/Chinese_converter/Chinese_converter.js
-				cecc = require(library_namespace.simplify_path(
+				CeCC = require(library_namespace.simplify_path(
 				//
 				library_namespace.get_module_path().replace(/[^\\\/]*$/,
 						'../Chinese_converter/Chinese_converter.js')));
@@ -283,18 +298,45 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (cecc) {
-			cecc = new cecc;
-			library_namespace
-					.info('using_CeCC: Using CeCC (synchronous version) to convert language.');
-			(library_namespace.CN_to_TW = _.CN_to_TW
-			//
-			= cecc.to_TW_sync.bind(cecc)).CeCC = true;
-			(library_namespace.TW_to_CN = _.TW_to_CN
-			//
-			= cecc.to_CN_sync.bind(cecc)).CeCC = true;
-			return true;
+		if (!CeCC) {
+			return;
 		}
+
+		if (!options.try_LTP_server) {
+			cecc = new CeCC(options);
+			return setup_CeCC_methods(options);
+		}
+
+		return CeCC.has_LTP_server(options).then(function(LTP_URL) {
+			if (!LTP_URL)
+				return;
+
+			options.LTP_URL = LTP_URL;
+			cecc = new CeCC(options);
+			cecc.is_asynchronous = true;
+			return setup_CeCC_methods(options);
+		});
+	}
+
+	function setup_CeCC_methods(options) {
+		library_namespace.info('using_CeCC: Using CeCC ('
+				+ (cecc.is_asynchronous ? 'asynchronous' : 'synchronous')
+				+ ' version) to convert language.');
+		var methods = {
+			CN_to_TW : 'to_TW',
+			TW_to_CN : 'to_TW'
+		};
+		for ( var method_name in methods) {
+			var cecc_name = methods[method_name];
+			if (!cecc.is_asynchronous)
+				cecc_name += '_sync';
+			var method = cecc[cecc_name].bind(cecc);
+			method.CeCC = true;
+			if (cecc.is_asynchronous)
+				method.is_asynchronous = true;
+			set_as_default(method_name, method);
+		}
+		return true;
 	}
 
 	// ------------------------------------------------------------------------
@@ -315,8 +357,12 @@ function module_code(library_namespace) {
 
 	} catch (e) {
 		// CeL.application.net.work_crawler.task will re-generate the functions!
-		_.CN_to_TW = generate_converter('CN_to_TW');
-		_.TW_to_CN = generate_converter('TW_to_CN');
+		generate_converter('CN_to_TW', {
+			set_as_default : true
+		});
+		generate_converter('TW_to_CN', {
+			set_as_default : true
+		});
 	}
 
 	// Warning: require('cecc') will overwrite CeL.CN_to_TW, CeL.TW_to_CN !

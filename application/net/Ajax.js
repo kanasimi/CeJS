@@ -1139,16 +1139,19 @@ function module_code(library_namespace) {
 
 		// remove duplicate cookie
 
-		if (!agent.cookie_hash) {
-			agent.cookie_hash = Object.create(null);
+		// console.log(agent);
+		// console.log(agent.last_cookie.cookie_hash);
+		// console.trace(cookie);
+
+		if (!agent.last_cookie.cookie_hash) {
+			agent.last_cookie.cookie_hash = Object.create(null);
 		}
-		if (!agent.cookie_index) {
-			agent.cookie_index = Object.create(null);
+		if (!agent.last_cookie.cookie_index_of) {
+			agent.last_cookie.cookie_index_of = Object.create(null);
 		}
 		// cookie_index[key] = index of agent.last_cookie
-		var cookie_index = agent.cookie_index;
+		var cookie_index = agent.last_cookie.cookie_index_of;
 
-		// console.trace(cookie);
 		cookie.forEach(function(piece) {
 			piece = piece.trim();
 			if (!piece)
@@ -1168,7 +1171,7 @@ function module_code(library_namespace) {
 				}, ' [' + agent.last_cookie[cookie_index[matched[1]]]
 				//
 				+ ']→[' + piece + ']' ], 3, 'merge_cookie');
-				agent.cookie_hash[matched[1]] = matched[2];
+				agent.last_cookie.cookie_hash[matched[1]] = matched[2];
 				// 直接取代。
 				agent.last_cookie[cookie_index[matched[1]]] = piece;
 			} else {
@@ -1176,20 +1179,24 @@ function module_code(library_namespace) {
 					T : '正常情況。登記已存在之 cookie。'
 				} ], 3, 'merge_cookie');
 				// console.trace(matched);
-				agent.cookie_hash[matched[1]] = matched[2];
+				agent.last_cookie.cookie_hash[matched[1]] = matched[2];
 				cookie_index[matched[1]] = agent.last_cookie.length;
 				agent.last_cookie.push(piece);
 			}
 		});
 
+		// console.trace(agent.last_cookie.cookie_hash);
+		// console.trace(agent);
+
 		// read-only
-		// Object.freeze(agent.cookie_hash);
-		// Object.freeze(agent.cookie_index);
+		// Object.freeze(agent.last_cookie.cookie_hash);
+		// Object.freeze(agent.last_cookie.cookie_index_of);
 
 		library_namespace.debug('array: ' + JSON.stringify(agent.last_cookie),
 				3, 'merge_cookie');
-		library_namespace.debug('hash: ' + JSON.stringify(agent.cookie_hash),
-				3, 'merge_cookie');
+		library_namespace.debug('hash: '
+				+ JSON.stringify(agent.last_cookie.cookie_hash), 3,
+				'merge_cookie');
 		return agent.last_cookie;
 	}
 
@@ -1203,8 +1210,8 @@ function module_code(library_namespace) {
 			library_namespace.debug('agent.last_cookie: '
 					+ JSON.stringify(agent.last_cookie), 3,
 					'set_cookie_to_URL_object');
-			library_namespace.debug('agent.cookie_hash: '
-					+ JSON.stringify(agent.cookie_hash), 3,
+			library_namespace.debug('agent.last_cookie.cookie_hash: '
+					+ JSON.stringify(agent.last_cookie.cookie_hash), 3,
 					'set_cookie_to_URL_object');
 			var cookie = (URL_object_to_fetch.headers.Cookie ? URL_object_to_fetch.headers.Cookie
 					+ ';'

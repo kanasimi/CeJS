@@ -1534,10 +1534,11 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			var ebook;
 			if (_this.need_create_ebook) {
 				// console.log(work_data);
 				// console.trace(JSON.stringify(work_data));
-				crawler_namespace.create_ebook.call(_this, work_data);
+				ebook = crawler_namespace.create_ebook.call(_this, work_data);
 			}
 
 			var message = [
@@ -1577,6 +1578,11 @@ function module_code(library_namespace) {
 				_this.after_download_chapter(work_data, 0);
 			}
 
+			// function create_ebook(work_data)
+			// 中的 this.convert_to_language() 可能是 async 形式，需要待其完成之後，再進行下個階段。
+			function waiting_for_create_ebook() {
+				Promise.resolve(ebook).then(start_to_process_chapter_data);
+			}
 			function start_to_process_chapter_data() {
 				// 開始下載 chapter。
 				crawler_namespace.pre_get_chapter_data.call(_this, work_data,
@@ -1585,10 +1591,9 @@ function module_code(library_namespace) {
 			}
 			if (typeof _this.after_get_work_data === 'function') {
 				// 必須自行保證執行 callback()，不丟出異常、中斷。
-				_this.after_get_work_data(start_to_process_chapter_data,
-						work_data);
+				_this.after_get_work_data(waiting_for_create_ebook, work_data);
 			} else {
-				start_to_process_chapter_data();
+				waiting_for_create_ebook();
 			}
 		}
 

@@ -178,6 +178,15 @@ function module_code(library_namespace) {
 	}
 
 	function create_ebook(work_data) {
+		// return needing to wait language converted
+		var text_list = [ work_data.title, '語言轉換' ];
+		var promise_language_convert = this.cache_converted_text(text_list);
+		if (promise_language_convert) {
+			// console.trace('Convert: ' + text_list);
+			return promise_language_convert.then(create_ebook.bind(this,
+					work_data));
+		}
+
 		if (!this.site_id) {
 			this.site_id = this.id;
 		}
@@ -207,12 +216,6 @@ function module_code(library_namespace) {
 			});
 		}
 
-		var convert_text = this.convert_to_TW ? library_namespace.CN_to_TW
-		//
-		: function(text) {
-			return text;
-		};
-
 		// library_namespace.log('using CeL.application.storage.EPUB');
 		var ebook = new library_namespace.EPUB(ebook_directory, {
 			rebuild : this.hasOwnProperty('rebuild_ebook')
@@ -223,10 +226,14 @@ function module_code(library_namespace) {
 			// 以下為 epub <metadata> 必備之元素。
 			// 小説ID
 			identifier : work_data.id,
-			title : convert_text(work_data.title),
-			language : this.convert_to_TW ? library_namespace.gettext
-					.to_standard('cmn-Hant-TW')
-					&& 'zh-cmn-Hant-TW' : work_data.language || this.language,
+			title : this.convert_text_language(work_data.title, {
+				// Will used in ebook_path()
+				persistence : true
+			}),
+			language : this.convert_to_language ? 'zh-'
+					+ library_namespace.gettext
+							.to_standard(this.convert_to_language)
+					: work_data.language || this.language,
 			// 作品內容最後編輯時間。
 			modified : work_data.last_update_Date
 		}), subject = [];
@@ -240,28 +247,46 @@ function module_code(library_namespace) {
 			if (work_data[type])
 				subject = subject.concat(work_data[type]);
 		});
-		if (this.convert_to_TW) {
-			subject.push(convert_text('語言轉換'),
+		if (this.convert_to_language) {
+			subject.push(this.convert_text_language('語言轉換'),
 			//
-			gettext.get_alias('cmn-Hant-TW'));
+			gettext.get_alias(this.convert_to_language));
 		}
-		subject = subject.unique().map(convert_text);
+		subject = subject.unique();
 
+		var options = {
+			ebook : ebook,
+			subject : subject,
+			description : crawler_namespace.get_label(work_data.description
+			// .description 中不可存在 tag。
+			.replace(/\n*<br[^<>]*>\n*/ig, '\n'))
+		};
+
+		text_list = [ work_data.author, options.description,
+				work_data.site_name ];
+		text_list.append(subject);
+		promise_language_convert = this.cache_converted_text(text_list)
+		// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
+		|| Promise.resolve();
+		return ebook.working_promise = promise_language_convert
+				.then(setup_ebook.bind(this, work_data, options));
+	}
+
+	// @inner only called by create_ebook(work_data)
+	function setup_ebook(work_data, options) {
+		var ebook = options.ebook, subject = options.subject
+				.map(this.convert_text_language.bind(this));
 		ebook.time_zone = work_data.time_zone || this.time_zone;
 
 		// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-opf-dcmes-optional
 		ebook.set({
 			// 作者名
-			creator : convert_text(work_data.author),
+			creator : this.convert_text_language(work_data.author),
 			// 🏷標籤, ジャンル genre, タグ, キーワード
 			subject : subject,
 			// 作品描述: 劇情簡介, synopsis, あらすじ
-			description : convert_text(
-			//
-			crawler_namespace.get_label(work_data.description
-			// .description 中不可存在 tag。
-			.replace(/\n*<br[^<>]*>\n*/ig, '\n'))),
-			publisher : convert_text(work_data.site_name) + ' ('
+			description : this.convert_text_language(options.description),
+			publisher : this.convert_text_language(work_data.site_name) + ' ('
 					+ this.base_URL + ')',
 			// source URL
 			source : work_data.url
@@ -324,16 +349,7 @@ function module_code(library_namespace) {
 		}
 		// assert: !data.title || typeof data.title === 'string'
 
-		var language = work_data.language
-		// e.g., 'cmn-Hans-CN'
-		&& work_data.language.match(/^(ja|(?:zh-)?cmn)(?:$|[^a-z])/);
-		if (language) {
-			language = language[1].replace(/^zh-cmn/, 'cmn');
-		}
-
-		var _this = this,
-		//
-		chapter_data = Array.isArray(work_data.chapter_list)
+		var chapter_data = Array.isArray(work_data.chapter_list)
 				&& work_data.chapter_list[chapter_NO - 1],
 		// 卷篇集幕部冊册本輯/volume/part/book
 		part_title = crawler_namespace.get_label(data.title || chapter_data
@@ -343,18 +359,82 @@ function module_code(library_namespace) {
 				|| chapter_data
 				&& (chapter_data.chapter_title || chapter_data.title) || '');
 
+		var options = {
+			chapter_data : chapter_data,
+			part_title : part_title,
+			chapter_title : chapter_title
+		};
+
+		var convert_options;
+		if (false) {
+			// only for debug CeCC 繁簡轉換。
+			ebook.path.parsed_tag = ebook.path.root + 'parsed_tag/';
+			// console.trace(ebook.path.parsed_tag);
+			library_namespace.create_directory(ebook.path.parsed_tag);
+			convert_options = {
+				save_parsed_tag_to_file : ebook.path.parsed_tag
+						+ 'parsed_tag_'
+						+ (ebook.tag_file_count = (ebook.tag_file_count | 0) + 1)
+								.pad(4) + '.json'
+			};
+		}
+
+		data.text = library_namespace.EPUB.normailize_contents(data.text
+		// <br /> → "\n"
+		.replace(/<br(?:\s[^<>]*)?>/ig, '\n')
+		// .trim()
+		)
+		// convert "&nbsp;"
+		.replace(/&#160;/g, '\u00A0');
+
+		// return needing to wait language converted
+		var text_list = [ part_title, chapter_title, data.text ];
+		var promise_language_convert = this.cache_converted_text(text_list,
+				convert_options);
+		if (promise_language_convert) {
+			return ebook.working_promise = ebook.working_promise
+					.then(function() {
+						return promise_language_convert
+								.then(add_ebook_chapter_actual_work.bind(this,
+										work_data, chapter_NO, data, options));
+					}.bind(this));
+		} else {
+			// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
+			return ebook.working_promise = ebook.working_promise
+					.then(add_ebook_chapter_actual_work.bind(this, work_data,
+							chapter_NO, data, options));
+		}
+	}
+
+	// @inner only called by add_ebook_chapter(work_data, chapter_NO, data)
+	function add_ebook_chapter_actual_work(work_data, chapter_NO, data, options) {
+		var chapter_data = options.chapter_data, part_title = options.part_title, chapter_title = options.chapter_title;
+
 		// @see epub_hans_to_hant.js
-		if (this.convert_to_TW) {
-			part_title = library_namespace.CN_to_TW(part_title);
-			chapter_title = library_namespace.CN_to_TW(chapter_title);
-			process.stdout.write(gettext('將簡體中文轉換成繁體中文：《%1》', chapter_title)
+		if (this.convert_to_language) {
+			part_title = this.convert_text_language(part_title);
+			chapter_title = this.convert_text_language(chapter_title);
+			process.stdout.write(gettext(
+					this.convert_to_language === 'TW' ? '將簡體中文轉換成繁體中文：《%1》'
+							: '将繁体中文转换成简体中文：《%1》', chapter_title)
 					+ '...\r');
-			// library_namespace.extension.zh_conversion.CN_to_TW();
-			data.text = library_namespace.CN_to_TW(data.text)
+			process.title = gettext(
+					this.convert_to_language === 'TW' ? '繁化: %1' : '简化: %1',
+					chapter_title)
+					+ ' @ ' + this.id;
+			data.original_text = data.text;
+			data.text = this.convert_text_language(data.text)
 			// TODO: 把半形標點符號轉換為全形標點符號
 			.replace(/["'](?:zh-(?:cmn-)?|cmn-)?(?:Hans-)?CN["']/ig,
 			// "zh-TW"
-			'"zh-cmn-Hant-TW"');
+			'"zh-cmn-Hant-TW"')
+			// recover 換行
+			.replace(/\n/g, '<br />');
+			this.clear_converted_text_cache({
+				text : data.original_text
+			});
+			// free
+			delete data.original_text;
 		}
 
 		var file_title = chapter_NO.pad(3)
@@ -379,6 +459,14 @@ function module_code(library_namespace) {
 			}, this.get_URL_options),
 			words_so_far : work_data.words_so_far
 		};
+
+		var _this = this;
+		var language = work_data.language
+		// e.g., 'cmn-Hans-CN'
+		&& work_data.language.match(/^(ja|(?:zh-)?cmn)(?:$|[^a-z])/);
+		if (language) {
+			language = language[1].replace(/^zh-cmn/, 'cmn');
+		}
 
 		var item = {
 			title : part_title,
@@ -418,6 +506,7 @@ function module_code(library_namespace) {
 		};
 		// library_namespace.log('file_title: ' + file_title);
 
+		var ebook = work_data && work_data[this.KEY_EBOOK];
 		item = ebook.add(item_data, item);
 
 		// 登記本作品到本章節總計的字數。
@@ -597,10 +686,7 @@ function module_code(library_namespace) {
 					'(一般小説) [',
 					work_data.author,
 					'] ',
-					this.convert_to_TW
-					//
-					? library_namespace.CN_to_TW(work_data.title)
-							: work_data.title,
+					this.convert_text_language(work_data.title),
 					' [',
 					work_data.site_name,
 					' ',
@@ -614,10 +700,10 @@ function module_code(library_namespace) {
 					this.RTL_writing ? ' ('
 							+ (/^ja/.test(work_data.language) ? '縦書き' : '縱書')
 							+ ')' : '',
-					this.convert_to_TW ? ' ('
-					//
-					+ library_namespace.gettext.to_standard('cmn-Hant-TW')
-							+ ')' : '', '.',
+					this.convert_to_language ? ' ('
+							+ library_namespace.gettext.to_standard(
+							//
+							this.convert_to_language) + ')' : '', '.',
 					typeof work_data.directory_id === 'function'
 					// 自行指定作品放置目錄與 ebook 用的 work id。
 					&& work_data.directory_id() || work_data.id, '.epub' ];
@@ -639,16 +725,25 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		process.title = gettext('打包 epub 電子書：%1', work_data.title + ' @ '
-				+ this.id);
+		return ebook.working_promise = ebook.working_promise.then(pack_up_ebook
+				.bind(this, work_data, file_name));
+	}
+
+	function pack_up_ebook(work_data, file_name) {
 		var file_path = ebook_path.call(this, work_data, file_name);
 
+		this.clear_converted_text_cache(true);
+
+		process.title = gettext('打包 epub 電子書：%1', work_data.title) + ' @ '
+				+ this.id;
 		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
 		library_namespace.debug({
 			T : [ '打包 epub 電子書：%1', file_path[1] ]
 		}, 1, 'pack_ebook');
 
-		// this: this_site
+		var ebook = work_data && work_data[this.KEY_EBOOK];
+
+		// this: this_work_crawler
 		ebook.pack(file_path, this.remove_ebook_directory, remove_old_ebooks
 				.bind(this, work_data.id));
 		// 等待打包...

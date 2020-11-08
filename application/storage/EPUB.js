@@ -106,6 +106,8 @@ function module_code(library_namespace) {
 	metadata_prefix = 'dc:',
 	// key for additional information / configuration data
 	KEY_DATA = 'item data',
+	// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 .pack()。
+	KEY_working_queue = 'working queue',
 
 	/** {String}path separator. e.g., '/', '\' */
 	path_separator = library_namespace.env.path_separator;
@@ -279,6 +281,8 @@ function module_code(library_namespace) {
 		}
 		this.set_raw_data(raw_data && JSON.from_XML(raw_data.toString()),
 				options);
+
+		this[KEY_working_queue] = Promise.resolve();
 	}
 
 	// 先準備好目錄結構。
@@ -1061,6 +1065,7 @@ function module_code(library_namespace) {
 				library_namespace.error({
 					T : [ '項目資訊無效：%1', JSON.stringify(item_data) ]
 				});
+				console.error(item_data);
 				return;
 			}
 
@@ -1208,18 +1213,24 @@ function module_code(library_namespace) {
 	}
 
 	// 正規化 XHTML 書籍章節內容。
+	// assert: normailize_contents(contents) ===
+	// normailize_contents(normailize_contents(contents))
 	function normailize_contents(contents) {
 		library_namespace.debug({
 			T : [ '正規化 XHTML 書籍章節內容：%1', contents ]
 		}, 6);
-		contents = contents.replace(/\r\n?/g, '\n')
+		contents = contents
+		// 去掉 "\r"，全部轉為 "\n"。
+		.replace(/\r\n?/g, '\n')
+		// 最多允許兩個 "\n" 以為分段。
+		.replace(/\n{3,}/g, '\n\n')
 		// .replace(/<br \/>\n/g, '\n')
 		// .replace(/\n/g, '\r\n')
 
 		//
-		.replace(/<hr *>/ig, '<hr />')
+		.replace(/<hr(?:\s[^<>]*)?>/ig, '<hr />')
 		// <BR> → <br />
-		.replace(/<br *>/ig, '<br />')
+		.replace(/<br(?:\s[^<>]*)?>/ig, '<br />')
 
 		// .trim(), remove head/tail <BR>
 		.replace(/^(?:<br *\/>|[\s\n]|&nbsp;|&#160;)+/ig, '')
@@ -1264,6 +1275,8 @@ function module_code(library_namespace) {
 		}, 6);
 		return contents;
 	}
+
+	Ebook.normailize_contents = normailize_contents;
 
 	// 註冊 callback
 	function add_listener(event, listener) {
@@ -1738,9 +1751,9 @@ function module_code(library_namespace) {
 
 				// ------------------------------
 
+				html.push(
 				// 將作品資訊欄位置右。
-				html
-						.push('<div id="chapter_information" style="float:right;">');
+				'<div id="chapter_information" style="float:right;">');
 
 				if (item_data.date) {
 					// 掲載日/掲載開始日, 最新投稿/最終投稿日
@@ -2346,7 +2359,8 @@ function module_code(library_namespace) {
 		if (!this.TOC
 		// TODO: check if the TOC file exists.
 		) {
-			this.add({
+			// 不能用 this.add()，因為當 .pack() 時，必須在 archive 前先 add_chapter()。
+			add_chapter.call(this, {
 				title : 'TOC',
 				TOC : true
 			}, this.generate_TOC());
@@ -2599,12 +2613,24 @@ function module_code(library_namespace) {
 		// book.set_cover({url:'url',file:'file_name'})
 		// book.set_cover(file_name, contents)
 		set_cover : set_cover_image,
-		arrange : function() {
+		arrange : function arrange() {
 			rebuild_index_of_id.call(this, false, true);
 			rebuild_index_of_id.call(this, true, true);
 		},
-		add : add_chapter,
-		remove : remove_chapter,
+		add : function add(item_data, contents) {
+			// console.trace(item_data);
+			return this[KEY_working_queue] = this[KEY_working_queue]
+			// clean error
+			['catch'](library_namespace.null_function).then(
+					add_chapter.bind(this, item_data, contents));
+		},
+		remove : function remove(item_data, contents) {
+			return this[KEY_working_queue] = this[KEY_working_queue]
+			// clean error
+			['catch'](library_namespace.null_function)
+			//
+			.then(remove_chapter.bind(this, title, preserve_data, is_resource));
+		},
 
 		add_listener : add_listener,
 
@@ -2615,9 +2641,14 @@ function module_code(library_namespace) {
 		// preserve additional properties
 		preserve_attributes : 'meta,url,file,type,date,word_count'.split(','),
 		pack : function(target_file, remove, callback) {
-			this.flush(function() {
-				this.archive(target_file, remove, callback);
-			}.bind(this));
+			// console.trace(target_file);
+			return this[KEY_working_queue] = this[KEY_working_queue]
+			// clean error
+			['catch'](library_namespace.null_function).then(
+					write_chapters.bind(this))
+			// clean error
+			['catch'](library_namespace.null_function).then(
+					archive_to_ZIP.bind(this, target_file, remove, callback));
 		}
 	};
 

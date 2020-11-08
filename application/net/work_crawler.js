@@ -202,29 +202,121 @@ function module_code(library_namespace) {
 	var crawler_namespace = Object.create(null);
 	Work_crawler.crawler_namespace = crawler_namespace;
 
-	function text_as_is(text) {
-		return text;
-	}
-	// var convert_text_language = this.language_convertor();
-	// convert_text_language(text)
-	function language_convertor() {
-		if (!this.convert_to_language)
-			return text_as_is;
+	// ------------------------------------------
 
-		if (this.convert_text_language
-				&& this.convert_to_language_cached === this.convert_to_language) {
-			return this.convert_text_language;
+	// return needing to wait language converted
+	// var promise_language = this.cache_converted_text(text_list);
+	// if (promise_language) { return promise_language.then(); }
+	function cache_converted_text(text_list, options) {
+		if (!this.convert_to_language)
+			return;
+
+		var initializated = this.convert_text_language_using
+				&& this.convert_to_language_using === this.convert_to_language;
+		if (initializated && !this.convert_text_language_using.is_asynchronous) {
+			// 無須 cache，直接用 this.convert_text_language(text) 取得繁簡轉換過的文字即可。
+			return;
 		}
 
-		this.convert_to_language_cached = this.convert_to_language;
+		if (!this.converted_text_cache) {
+			this.converted_text_cache = Object.create(null);
+			this.converted_text_cache_persisted = Object.create(null);
+		}
 
-		// 結巴中文分詞還太過粗糙，不適合依此做繁簡轉換。
-		library_namespace.using_CeCC();
+		if (!Array.isArray(text_list))
+			text_list = [ text_list ];
 
-		// library_namespace.extension.zh_conversion.CN_to_TW();
-		this.convert_text_language = this.convert_to_language === 'TW' ? library_namespace.CN_to_TW
-				: library_namespace.TW_to_CN;
-		return this.convert_text_language;
+		var _this = this;
+		text_list = text_list.filter(function(text) {
+			return text && text.trim()
+			//
+			&& !(text in _this.converted_text_cache);
+		});
+		if (text_list.length === 0) {
+			// Already cached all text.
+			return;
+		}
+
+		// console.trace(text_list.length + ' text to be converted.');
+		if (initializated) {
+			return this.convert_text_language_using(text_list, options)
+			// assert: .convert_text_language_using() return thenable
+			.then(function set_text_list(converted_text_list) {
+				text_list.forEach(function(text, index) {
+					_this.converted_text_cache[text]
+					//
+					= converted_text_list[index];
+				});
+				// console.trace(_this.converted_text_cache);
+			});
+		}
+
+		// console.trace('cache_converted_text: 初始化 initialization');
+
+		return Promise.resolve(library_namespace.using_CeCC({
+			// 結巴中文分詞還太過粗糙，不適合依此做繁簡轉換。
+			try_LTP_server : true
+		})).then(function() {
+			_this.convert_to_language_using = _this.convert_to_language;
+
+			_this.convert_text_language_using
+			// setup this.convert_text_language_using
+			= _this.convert_to_language === 'TW'
+			// library_namespace.extension.zh_conversion.CN_to_TW();
+			? library_namespace.CN_to_TW : library_namespace.TW_to_CN;
+		}).then(cache_converted_text.bind(this, text_list));
+	}
+
+	// free
+	function clear_converted_text_cache(options) {
+		if (!this.convert_to_language)
+			return;
+
+		// console.trace(options);
+		if (options === true) {
+			options = {
+				including_persistence : true
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
+
+		if (options.text) {
+			delete this.converted_text_cache[options.text];
+		} else {
+			// console.trace(options);
+			delete this.converted_text_cache;
+		}
+
+		if (options.including_persistence)
+			delete this.converted_text_cache_persisted;
+	}
+
+	function convert_text_language(text, options) {
+		if (!text || !text.trim() || !this.convert_to_language)
+			return text;
+
+		if (!this.convert_text_language_using.is_asynchronous)
+			return this.convert_text_language_using(text);
+
+		if (text in this.converted_text_cache) {
+			var converted_text = this.converted_text_cache[text];
+			if (false && text.length !== converted_text.length) {
+				throw new Error('Different length:\n' + text + '\n'
+						+ converted_text);
+			}
+			if (options && options.persistence)
+				this.converted_text_cache_persisted[text] = converted_text;
+			return converted_text;
+		}
+
+		if (text in this.converted_text_cache_persisted) {
+			return this.converted_text_cache_persisted[text];
+		}
+
+		// console.trace(this.converted_text_cache);
+		throw new Error(
+				'You should run this.cache_converted_text(text_list) first!');
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -393,7 +485,9 @@ function module_code(library_namespace) {
 
 		full_URL : full_URL_of_path,
 
-		language_convertor : language_convertor,
+		convert_text_language : convert_text_language,
+		cache_converted_text : cache_converted_text,
+		clear_converted_text_cache : clear_converted_text_cache,
 
 		// work_data properties to reset. do not inherit
 		// 設定不繼承哪些作品資訊。
