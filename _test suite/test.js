@@ -3339,12 +3339,13 @@ function test_wiki() {
 		assert([test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'en'), 'en').toISOString()], 'wiki.parse.date: en #3: ' + test_date);
 		assert([test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'ja'), 'ja').toISOString()], 'wiki.parse.date: ja #3: ' + test_date);
 
-		wikitext = '==t==\nw\n==t2==  \nw\n\n==nt== <b></b>\nw\n==t3== <!--c--> \nw\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		wikitext = '==0==\nw\n==t==\nw\n==t2==  \nw\n\n==nt== <b></b>\nw\n==t3== <!--c--> \nw\n==t4 <!--c--> == <!--c--> \nw\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: section_title #1');
-		assert([3, parsed.each_section().sections.length], 'wiki.parse: section_title #2');
-		assert(['==t==', parsed.each_section().sections[0].section_title.toString()], 'wiki.parse: section_title #3');
-		assert(['==t2==  ', parsed.each_section().sections[1].section_title.toString()], 'wiki.parse: section_title #4');
-		assert(['==t3== <!--c--> ', parsed.each_section().sections[2].section_title.toString()], 'wiki.parse: section_title #5');
+		assert([5, parsed.each_section().sections.length], 'wiki.parse: section_title #2');
+		assert(['==t==', parsed.each_section().sections[1].section_title.toString()], 'wiki.parse: section_title #3');
+		assert(['==t2==  ', parsed.each_section().sections[2].section_title.toString()], 'wiki.parse: section_title #4');
+		assert(['==t3== <!--c--> ', parsed.each_section().sections[3].section_title.toString()], 'wiki.parse: section_title #5');
+		assert(['t4', parsed.each_section().sections[4].section_title.title], 'wiki.parse: section_title #6');
 
 		wikitext = '\nabc\n123\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([undefined, parsed.each_section().sections[0].section_title], 'wiki.parser.each_section #1-1: 沒有章節標題的文章');
@@ -4036,15 +4037,15 @@ function do_test() {
 	// 即時顯示，不延遲顯示
 	CeL.Log.interval = 0;
 
-	//console.log(process.argv);
+	//console.log(CeL.env.argv);
 	var test_items = [];
-	if (process.argv.length === 2) {
+	if (CeL.env.argv.length === 2) {
 		for (var item in all_test_items)
 			test_items.push(item);
 	} else {
 		//`node "_test suite\test.js" wiki`
-		for (var index = 2; index < process.argv.length; index++) {
-			var item = process.argv[index];
+		for (var index = 2; index < CeL.env.argv.length; index++) {
+			var item = CeL.env.argv[index];
 			if (item in all_test_items)
 				test_items.push(item);
 		}

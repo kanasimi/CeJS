@@ -1301,6 +1301,10 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (token.type === 'comment') {
+			return '';
+		}
+
 		// console.log(token);
 		if (token.type === 'tag'/* || token.type === 'tag_single' */) {
 			// token: [ tag_attributes, tag_inner ]
@@ -1555,11 +1559,18 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(parse_wikitext(section_title, null, []));
-		var parsed_title = preprocess_section_link_tokens(
-		// []: 避免被當作 <pre>
-		parse_wikitext(section_title, null, []), options),
-		// 注意: 當這空白字園出現在功能性token中時，可能會出錯。
-		id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
+		var parsed_title = section_title.toString()
+		// 先把前頭的空白字元提取出來，避免被當作 <pre>。
+		.match(/^(\s*)([\s\S]*)$/);
+		parsed_title[2] = preprocess_section_link_tokens(
+				parse_wikitext(parsed_title[2]), options);
+		// assert: tokens.type === 'plain'
+		if (parsed_title[1])
+			parsed_title[2].unshift(parsed_title[1]);
+		parsed_title = parsed_title[2];
+
+		// 注意: 當這空白字字出現在功能性token中時，可能會出錯。
+		var id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
 		// anchor: 可以直接拿來做 wikilink anchor 的章節標題。
 		// 有多個完全相同的 anchor 時，後面的會加上"_2", "_3",...。
 		// 這個部分的處理請見 function for_each_section()
@@ -1624,8 +1635,9 @@ function module_code(library_namespace) {
 		// console.log(link);
 		Object.assign(link, {
 			// link.id = {String}id
+			// section title, NOT including "<!-- -->"
 			id : id,
-			// original section title
+			// original section title, including "<!-- -->"
 			title : section_title,
 			// only for debug
 			// parsed_title : parsed_title,
