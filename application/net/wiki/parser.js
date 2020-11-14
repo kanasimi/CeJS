@@ -1402,6 +1402,10 @@ function module_code(library_namespace) {
 				return token;
 			}
 
+			if (token.name === 'Anchor') {
+				return '';
+			}
+
 			// TODO: [[Template:User link]], [[Template:U]]
 
 			// TODO: [[Template:疑問]], [[Template:Block]]
