@@ -1277,6 +1277,8 @@ function module_code(library_namespace) {
 	// @inner
 	function preprocess_section_link_token(token, options) {
 		// console.trace(token);
+
+		// 前置作業: 處理模板之類特殊節點。
 		if (typeof options.preprocess_section_link_token === 'function') {
 			token = options.preprocess_section_link_token(token, options);
 		}
@@ -1300,6 +1302,8 @@ function module_code(library_namespace) {
 				}
 			}
 		}
+
+		// ------------------------
 
 		if (token.type === 'comment') {
 			return '';
@@ -1334,8 +1338,22 @@ function module_code(library_namespace) {
 				return token;
 			}
 
-			// reduce HTML tags. e.g., <ref>
 			// console.log(token);
+
+			// 其他 HTML tag 大多無法精確轉換。
+			options.root_token_list.imprecise_tokens.push(token);
+
+			if (token.tag in {
+				// 這些都不能簡單解析出來。
+				ref : true,
+				math : true
+			}) {
+				return token;
+			}
+
+			// token that may be handlable 請檢查是否可處理此標題。
+			options.root_token_list.some_tokens_maybe_handlable = true;
+			// reduce HTML tags. e.g., <ref>
 			var new_token = preprocess_section_link_tokens(token[1] || '',
 					options);
 			new_token.tag = token.tag;
@@ -1351,6 +1369,11 @@ function module_code(library_namespace) {
 			}) {
 				return '';
 			}
+
+			// token that may be handlable 請檢查是否可處理此標題。
+			options.root_token_list.some_tokens_maybe_handlable = true;
+			options.root_token_list.imprecise_tokens.push(token);
+			return token;
 		}
 
 		if (false && token.type === 'convert') {
@@ -1411,6 +1434,7 @@ function module_code(library_namespace) {
 			// TODO: [[Template:疑問]], [[Template:Block]]
 
 			// 警告: 在遇到標題包含模板時，因為不能解析連模板最後產出的結果，會產生錯誤結果。
+			options.root_token_list.imprecise_tokens.push(token);
 			return token;
 		}
 
@@ -1423,10 +1447,12 @@ function module_code(library_namespace) {
 				return preprocess_section_link_tokens(token[1], options);
 			}
 			// TODO: error: 用在[URL]無標題連結會失效。需要計算外部連結的序號。
+			options.root_token_list.imprecise_tokens.push(token);
 			return token;
 		}
 
 		if (token.type === 'switch') {
+			options.root_token_list.imprecise_tokens.push(token);
 			return '';
 		}
 
@@ -1453,6 +1479,9 @@ function module_code(library_namespace) {
 			return token;
 		}
 
+		// token that may be handlable 請檢查是否可處理此標題。
+		options.root_token_list.some_tokens_maybe_handlable = true;
+		options.root_token_list.imprecise_tokens.push(token);
 		return token;
 	}
 
@@ -1467,11 +1496,26 @@ function module_code(library_namespace) {
 			console.log(tokens);
 		}
 		// console.trace(tokens);
+
+		if (!tokens.imprecise_tokens) {
+			// options.root_token_list.imprecise_tokens
+			tokens.imprecise_tokens = [];
+		}
+
+		if (!options.root_token_list)
+			options.root_token_list = tokens;
+
 		for_each_token.call(tokens, function(token, index, parent) {
 			return preprocess_section_link_token(token, options);
 		}, true);
 		return tokens;
 	}
+
+	function extract_plain_text_of_wikitext(wikitext, options) {
+		;
+	}
+
+	// --------------------------------
 
 	function section_link_escape(text, is_uri) {
 		// escape wikitext control characters,
@@ -1637,6 +1681,12 @@ function module_code(library_namespace) {
 		// display_text / label 要顯示的連結文字 default: section_title ]
 		var link = [ options && options.page_title, anchor, display_text ];
 		// console.log(link);
+		if (parsed_title.imprecise_tokens
+				&& parsed_title.imprecise_tokens.length > 0) {
+			link.imprecise_tokens = parsed_title.imprecise_tokens;
+			if (parsed_title.some_tokens_maybe_handlable)
+				link.some_tokens_maybe_handlable = parsed_title.some_tokens_maybe_handlable;
+		}
 		Object.assign(link, {
 			// link.id = {String}id
 			// section title, NOT including "<!-- -->"
