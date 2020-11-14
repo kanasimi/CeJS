@@ -1348,11 +1348,13 @@ function module_code(library_namespace) {
 				ref : true,
 				math : true
 			}) {
+				// trick: 不再遍歷子節點。避免被進一步的處理。
+				token.is_atom = true;
 				return token;
 			}
 
 			// token that may be handlable 請檢查是否可處理此標題。
-			options.root_token_list.some_tokens_maybe_handlable = true;
+			options.root_token_list.tokens_maybe_handlable.push(token);
 			// reduce HTML tags. e.g., <ref>
 			var new_token = preprocess_section_link_tokens(token[1] || '',
 					options);
@@ -1371,7 +1373,7 @@ function module_code(library_namespace) {
 			}
 
 			// token that may be handlable 請檢查是否可處理此標題。
-			options.root_token_list.some_tokens_maybe_handlable = true;
+			options.root_token_list.tokens_maybe_handlable.push(token);
 			options.root_token_list.imprecise_tokens.push(token);
 			return token;
 		}
@@ -1429,12 +1431,16 @@ function module_code(library_namespace) {
 				return '';
 			}
 
+			// TODO: {{Visible anchor}} === {{vanchor}}
+
 			// TODO: [[Template:User link]], [[Template:U]]
 
 			// TODO: [[Template:疑問]], [[Template:Block]]
 
 			// 警告: 在遇到標題包含模板時，因為不能解析連模板最後產出的結果，會產生錯誤結果。
 			options.root_token_list.imprecise_tokens.push(token);
+			// trick: 不再遍歷子節點。避免被進一步的處理。
+			token.is_atom = true;
 			return token;
 		}
 
@@ -1471,7 +1477,7 @@ function module_code(library_namespace) {
 
 			token = library_namespace.HTML_to_Unicode(token);
 			if (/[^\s]/.test(token)) {
-				// 避免被進一步的處理，例如"&amp;amp;"。
+				// trick: 不再遍歷子節點。避免被進一步的處理，例如"&amp;amp;"。
 				token = [ token ];
 				token.is_atom = true;
 				token.is_plain = true;
@@ -1479,8 +1485,9 @@ function module_code(library_namespace) {
 			return token;
 		}
 
+		// console.trace(token);
 		// token that may be handlable 請檢查是否可處理此標題。
-		options.root_token_list.some_tokens_maybe_handlable = true;
+		options.root_token_list.tokens_maybe_handlable.push(token);
 		options.root_token_list.imprecise_tokens.push(token);
 		return token;
 	}
@@ -1500,6 +1507,7 @@ function module_code(library_namespace) {
 		if (!tokens.imprecise_tokens) {
 			// options.root_token_list.imprecise_tokens
 			tokens.imprecise_tokens = [];
+			tokens.tokens_maybe_handlable = [];
 		}
 
 		if (!options.root_token_list)
@@ -1682,10 +1690,13 @@ function module_code(library_namespace) {
 		var link = [ options && options.page_title, anchor, display_text ];
 		// console.log(link);
 		if (parsed_title.imprecise_tokens
-				&& parsed_title.imprecise_tokens.length > 0) {
+		// section_title_token.link.imprecise_tokens
+		&& parsed_title.imprecise_tokens.length > 0) {
 			link.imprecise_tokens = parsed_title.imprecise_tokens;
-			if (parsed_title.some_tokens_maybe_handlable)
-				link.some_tokens_maybe_handlable = parsed_title.some_tokens_maybe_handlable;
+			// section_title_token.link.tokens_maybe_handlable
+			if (parsed_title.tokens_maybe_handlable
+					&& parsed_title.tokens_maybe_handlable.length > 0)
+				link.tokens_maybe_handlable = parsed_title.tokens_maybe_handlable;
 		}
 		Object.assign(link, {
 			// link.id = {String}id
