@@ -1324,9 +1324,16 @@ function module_code(library_namespace) {
 				b : true,
 				i : true,
 				q : true,
+				s : true,
+				u : true,
+				big : true,
+				small : true,
 				sub : true,
 				sup : true,
 				span : true,
+				em : true,
+				strike : true,
+				strong : true,
 				code : true
 			// nowiki : true
 			}) {
