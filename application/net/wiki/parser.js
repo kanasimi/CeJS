@@ -1350,6 +1350,7 @@ function module_code(library_namespace) {
 			}) {
 				// trick: 不再遍歷子節點。避免被進一步的處理。
 				token.is_atom = true;
+				token.unconvertible = true;
 				return token;
 			}
 
@@ -1441,6 +1442,7 @@ function module_code(library_namespace) {
 			options.root_token_list.imprecise_tokens.push(token);
 			// trick: 不再遍歷子節點。避免被進一步的處理。
 			token.is_atom = true;
+			token.unconvertible = true;
 			return token;
 		}
 
@@ -1480,6 +1482,7 @@ function module_code(library_namespace) {
 				// trick: 不再遍歷子節點。避免被進一步的處理，例如"&amp;amp;"。
 				token = [ token ];
 				token.is_atom = true;
+				token.unconvertible = true;
 				token.is_plain = true;
 			}
 			return token;
@@ -1488,7 +1491,8 @@ function module_code(library_namespace) {
 		// console.trace(token);
 		// token that may be handlable 請檢查是否可處理此標題。
 		options.root_token_list.tokens_maybe_handlable.push(token);
-		options.root_token_list.imprecise_tokens.push(token);
+		if (!token.unconvertible)
+			options.root_token_list.imprecise_tokens.push(token);
 		return token;
 	}
 
