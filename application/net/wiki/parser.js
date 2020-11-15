@@ -1490,9 +1490,9 @@ function module_code(library_namespace) {
 
 		// console.trace(token);
 		// token that may be handlable 請檢查是否可處理此標題。
-		options.root_token_list.tokens_maybe_handlable.push(token);
 		if (!token.unconvertible)
-			options.root_token_list.imprecise_tokens.push(token);
+			options.root_token_list.tokens_maybe_handlable.push(token);
+		options.root_token_list.imprecise_tokens.push(token);
 		return token;
 	}
 
