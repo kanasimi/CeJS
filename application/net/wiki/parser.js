@@ -1380,9 +1380,22 @@ function module_code(library_namespace) {
 				return '';
 			}
 
+			options.root_token_list.imprecise_tokens.push(token);
+
+			// 從上方 `token.type === 'tag'` 複製過來的。
+			if (token.tag in {
+				// 這些都不能簡單解析出來。
+				ref : true,
+				math : true
+			}) {
+				// trick: 不再遍歷子節點。避免被進一步的處理。
+				token.is_atom = true;
+				token.unconvertible = true;
+				return token;
+			}
+
 			// token that may be handlable 請檢查是否可處理此標題。
 			options.root_token_list.tokens_maybe_handlable.push(token);
-			options.root_token_list.imprecise_tokens.push(token);
 			return token;
 		}
 
