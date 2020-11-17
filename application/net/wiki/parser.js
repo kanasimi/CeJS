@@ -1361,6 +1361,8 @@ function module_code(library_namespace) {
 				return token;
 			}
 
+			// TODO: <a>
+
 			// token that may be handlable 請檢查是否可處理此標題。
 			options.root_token_list.tokens_maybe_handlable.push(token);
 			// reduce HTML tags. e.g., <ref>
@@ -1508,7 +1510,12 @@ function module_code(library_namespace) {
 			return token;
 		}
 
+		if (token.type === 'plain') {
+			return token;
+		}
+
 		// console.trace(token);
+
 		// token that may be handlable 請檢查是否可處理此標題。
 		if (!token.unconvertible)
 			options.root_token_list.tokens_maybe_handlable.push(token);
@@ -1603,6 +1610,29 @@ function module_code(library_namespace) {
 	//
 	section_link_END_CONVERT_reg = new RegExp(section_link_END_CONVERT, 'g');
 
+	function pre_parse_section_title(parameters, options, queue) {
+		parameters = parameters.toString()
+		// 先把前頭的空白字元提取出來，避免被當作 <pre>。
+		// 先把前頭的列表字元提取出來，避免被當作 list。
+		// 這些會被當作普通文字。
+		.match(/^([*#;:=\s]*)([\s\S]*)$/);
+		// console.trace(parameters);
+		var prefix = parameters[1];
+		// 經過改變，需再進一步處理。
+		parameters = parse_wikitext(parameters[2], options, queue);
+		// console.trace(parameters);
+		if (parameters.type !== 'plain') {
+			parameters = set_wiki_type([ parameters ], 'plain');
+		}
+		if (prefix) {
+			if (typeof parameters[0] === 'string')
+				parameters[0] = prefix + parameters[0];
+			else
+				parameters.unshift(prefix);
+		}
+		return parameters;
+	}
+
 	/**
 	 * 從話題/議題/章節標題產生連結到章節標題的wikilink。
 	 * 
@@ -1639,15 +1669,8 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(parse_wikitext(section_title, null, []));
-		var parsed_title = section_title.toString()
-		// 先把前頭的空白字元提取出來，避免被當作 <pre>。
-		.match(/^(\s*)([\s\S]*)$/);
-		parsed_title[2] = preprocess_section_link_tokens(
-				parse_wikitext(parsed_title[2]), options);
-		// assert: tokens.type === 'plain'
-		if (parsed_title[1])
-			parsed_title[2].unshift(parsed_title[1]);
-		parsed_title = parsed_title[2];
+		var parsed_title = pre_parse_section_title(section_title, options);
+		parsed_title = preprocess_section_link_tokens(parsed_title, options);
 
 		// 注意: 當這空白字字出現在功能性token中時，可能會出錯。
 		var id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
@@ -3384,7 +3407,7 @@ function module_code(library_namespace) {
 			// /\n([*#:;]+|[= ]|{\|)/:
 			// https://www.mediawiki.org/wiki/Markup_spec/BNF/Article#Wiki-page
 			// https://www.mediawiki.org/wiki/Markup_spec#Start_of_line_only
-			/^(?:[*#;:= ]|{\|)/.test(wikitext))
+			/^(?:[*#;:=\s]|{\|)/.test(wikitext))
 				wikitext = (initialized_fix[0] = '\n') + wikitext;
 			if (!wikitext.endsWith('\n'))
 				wikitext += (initialized_fix[1] = '\n');
@@ -3975,6 +3998,7 @@ function module_code(library_namespace) {
 						// TODO: handle exception
 					}
 				}
+				section_title = section_title.replace(/_/g, ' ');
 				parameters.anchor = section_title;
 				// TODO: [[Special:]]
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
@@ -4855,11 +4879,8 @@ function module_code(library_namespace) {
 			if (normalize) {
 				parameters = parameters.trim();
 			}
-			// 經過改變，需再進一步處理。
-			parameters = parse_wikitext(parameters, options, queue);
-			if (parameters.type !== 'plain') {
-				parameters = [ parameters ];
-			}
+
+			parameters = pre_parse_section_title(parameters, options, queue);
 			parameters = _set_wiki_type(parameters, 'section_title');
 
 			// Use plain section_title instead of title with wikitext.
@@ -4867,7 +4888,10 @@ function module_code(library_namespace) {
 			// parameters.title = parameters.toString().trim();
 			parameters.link = section_link(parameters.toString(),
 			// for options.language
-			options);
+			Object.assign(Object.clone(options), {
+				// 避免污染。
+				target_array : null
+			}));
 			/** {String}section title in wikitext */
 			parameters.title = parameters.link.id;
 
