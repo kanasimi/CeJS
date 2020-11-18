@@ -4790,12 +4790,10 @@ function module_code(library_namespace) {
 					library_namespace.warn('action: '
 					//
 					+ JSON.stringify(action));
-					try {
+					if (false) {
+						// TypeError: Converting circular structure to JSON
 						library_namespace.warn('data to write: '
 								+ JSON.stringify(options));
-					} catch (e) {
-						// TODO: handle exception
-						// TypeError: Converting circular structure to JSON
 					}
 					callback(undefined, error);
 					return;
