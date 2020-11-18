@@ -1274,6 +1274,14 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
+	// 這些都不能簡單解析出來。
+	var untextify_tags = {
+		ref : true,
+		// e.g., <references group="gg"/>
+		references : true,
+		math : true
+	};
+
 	// @inner
 	function preprocess_section_link_token(token, options) {
 		// console.trace(token);
@@ -1350,11 +1358,7 @@ function module_code(library_namespace) {
 			// 其他 HTML tag 大多無法精確轉換。
 			options.root_token_list.imprecise_tokens.push(token);
 
-			if (token.tag in {
-				// 這些都不能簡單解析出來。
-				ref : true,
-				math : true
-			}) {
+			if (token.tag in untextify_tags) {
 				// trick: 不再遍歷子節點。避免被進一步的處理。
 				token.is_atom = true;
 				token.unconvertible = true;
@@ -1385,11 +1389,7 @@ function module_code(library_namespace) {
 			options.root_token_list.imprecise_tokens.push(token);
 
 			// 從上方 `token.type === 'tag'` 複製過來的。
-			if (token.tag in {
-				// 這些都不能簡單解析出來。
-				ref : true,
-				math : true
-			}) {
+			if (token.tag in untextify_tags) {
 				// trick: 不再遍歷子節點。避免被進一步的處理。
 				token.is_atom = true;
 				token.unconvertible = true;
