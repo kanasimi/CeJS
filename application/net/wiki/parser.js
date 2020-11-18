@@ -1478,6 +1478,9 @@ function module_code(library_namespace) {
 			}
 			// TODO: error: 用在[URL]無標題連結會失效。需要計算外部連結的序號。
 			options.root_token_list.imprecise_tokens.push(token);
+			// trick: 不再遍歷子節點。避免被進一步的處理。
+			token.is_atom = true;
+			token.unconvertible = true;
 			return token;
 		}
 
@@ -1510,7 +1513,7 @@ function module_code(library_namespace) {
 			return token;
 		}
 
-		if (token.type === 'plain') {
+		if (token.type === 'plain' || token.type === 'tag_inner') {
 			return token;
 		}
 
@@ -4886,10 +4889,13 @@ function module_code(library_namespace) {
 			// Use plain section_title instead of title with wikitext.
 			// 因為尚未resolve_escaped()，直接使用未parse_wikitext()者會包含未解碼之code!
 			// parameters.title = parameters.toString().trim();
+
+			// section_link() 會更動 parse_wikitext() 之結果，
+			// 因此不直接傳入 parsed，而是 .toString() 另外再傳一次。
 			parameters.link = section_link(parameters.toString(),
 			// for options.language
 			Object.assign(Object.clone(options), {
-				// 避免污染。
+				// 重新造一個 options 以避免污染。
 				target_array : null
 			}));
 			/** {String}section title in wikitext */
