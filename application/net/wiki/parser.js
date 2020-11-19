@@ -1513,7 +1513,12 @@ function module_code(library_namespace) {
 			return token;
 		}
 
-		if (token.type === 'plain' || token.type === 'tag_inner') {
+		if (token.type in {
+			url : true,
+			tag_inner : true,
+			plain : true
+		}) {
+			// 其他可處理的節點。
 			return token;
 		}
 
