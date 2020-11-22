@@ -1342,6 +1342,7 @@ function module_code(library_namespace) {
 				em : true,
 				strike : true,
 				strong : true,
+				font : true,
 				code : true,
 				// container
 				span : true,
@@ -1680,6 +1681,7 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(parse_wikitext(section_title, null, []));
+		// TODO: "==''==text==''==\n"
 		var parsed_title = pre_parse_section_title(section_title, options);
 		parsed_title = preprocess_section_link_tokens(parsed_title, options);
 
@@ -6129,10 +6131,11 @@ function module_code(library_namespace) {
 	parse_user.all = parse_all_user_links;
 
 	// 由使用者名稱來檢測匿名使用者/未註冊用戶 [[WP:IP]]
-	function is_IP_user(user_name, IPv6) {
-		// for IPv4
-		return !IPv6 && /^[12]?\d{1,2}(?:\.[12]?\d{1,2}){3}$/.test(user_name)
-		// for IPv6
+	function is_IP_user(user_name, IPv6_only) {
+		return !IPv6_only
+		// for IPv4 addresses
+		&& /^[12]?\d{1,2}(?:\.[12]?\d{1,2}){3}$/.test(user_name)
+		// for IPv6 addresses
 		|| /^[\da-f]{1,4}(?::[\da-f]{1,4}){7}$/i.test(user_name);
 	}
 
