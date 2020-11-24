@@ -327,6 +327,7 @@ function module_code(library_namespace) {
 		if (options)
 			library_namespace.debug('#1: ' + Object.keys(options).join(','), 4,
 					'wiki_API_edit');
+		// 前置處理。
 		if (is_undo) {
 			options = library_namespace.setup_options(options);
 		} else {
@@ -840,7 +841,6 @@ function module_code(library_namespace) {
 
 		return this;
 	}
-	;
 
 	wiki_API_edit.copy_from = wiki_API_prototype_copy_from;
 
@@ -902,6 +902,7 @@ function module_code(library_namespace) {
 			filename : undefined
 		};
 
+		// 前置處理。
 		options = library_namespace.new_options(options);
 		if (options.summary) {
 			// 錯置?
@@ -1043,11 +1044,11 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		wiki_API.query(action, upload_callback.bind(null, callback,
-				options.show_message), post_data, options);
+		wiki_API.query(action, upload_callback.bind(null, callback, options),
+				post_data, options);
 	};
 
-	function upload_callback(callback, show_message, data, error) {
+	function upload_callback(callback, options, data, error) {
 		if (error || !data || (error = data.error)
 		/**
 		 * <code>
@@ -1062,7 +1063,7 @@ function module_code(library_namespace) {
 		|| !(data = data.upload) || data.result !== 'Success') {
 			// console.error(error);
 			error = error || data && data.result || 'Error on uploading';
-			if (show_message) {
+			if (options.show_message) {
 				console.log(data);
 				library_namespace.error(typeof error === 'object' ? JSON
 						.stringify(error) : error);
@@ -1072,13 +1073,29 @@ function module_code(library_namespace) {
 					// library_namespace.warn(JSON.stringify(data));
 				}
 			}
+
+			if (!options.file_text_updater) {
+				typeof callback === 'function' && callback(data, error);
+				return;
+			}
+
+			// TODO: update text for a existed file
+			library_namespace
+					.info('upload_callback: options.file_text_updater');
+			console.log(JSON.stringify(data));
+			console.trace(options);
+			if (false) {
+				wiki_API_edit(title, options.file_text_updater, token, options,
+						callback, timestamp);
+			}
 			typeof callback === 'function' && callback(data, error);
 			return;
 		}
 
-		if (show_message) {
+		if (options.show_message) {
 			console.log(data);
 		}
+
 		typeof callback === 'function' && callback(data);
 	}
 
