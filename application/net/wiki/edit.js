@@ -1096,15 +1096,17 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// TODO: update description text for a existed file
+		// update description text for a existed file
 		if (!options.summary && options.comment) {
 			options.summary = options.comment;
 		}
-		library_namespace.info('upload_callback: options.file_text_updater');
-		console.log(JSON.stringify(data));
-		console.trace(options);
+		delete options.form_data;
 		var session = wiki_API.session_of_options(options);
 		var file_path = 'File:' + data.filename;
+		library_namespace.info('upload_callback: options.file_text_updater');
+		console.log(JSON.stringify(data));
+		console.log('has session: ' + !!session);
+		console.trace(options);
 		wiki_API.edit(
 				session && session.API_URL ? [ session.API_URL, file_path ]
 						: file_path, options.file_text_updater, options.token,
