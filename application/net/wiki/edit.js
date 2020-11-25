@@ -904,6 +904,13 @@ function module_code(library_namespace) {
 
 		// 前置處理。
 		options = library_namespace.new_options(options);
+
+		if (options.file_text_updater) {
+			// https://www.mediawiki.org/w/api.php?action=help&modules=upload
+			// A "csrf" token retrieved from action=query&meta=tokens
+			options.token = token;
+		}
+
 		if (options.summary) {
 			// 錯置?
 			// options.comment = options.summary;
@@ -975,9 +982,8 @@ function module_code(library_namespace) {
 		}
 		post_data.token = token;
 
-		var session;
+		var session = wiki_API.session_of_options(options);
 		if (KEY_SESSION in options) {
-			session = options[KEY_SESSION];
 			// delete options[KEY_SESSION];
 		}
 
@@ -1090,15 +1096,16 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// TODO: update text for a existed file
+		// TODO: update description text for a existed file
 		library_namespace.info('upload_callback: options.file_text_updater');
 		console.log(JSON.stringify(data));
 		console.trace(options);
-		if (false) {
-			wiki_API_edit(title, options.file_text_updater, token, options,
-					callback, timestamp);
-		}
-		typeof callback === 'function' && callback(data);
+		var session = wiki_API.session_of_options(options);
+		var file_path = 'File:' + data.filename;
+		wiki_API.edit(
+				session && session.API_URL ? [ session.API_URL, file_path ]
+						: file_path, options.file_text_updater, options.token,
+				options, callback);
 	}
 
 	// ------------------------------------------------------------------------
