@@ -911,9 +911,9 @@ function module_code(library_namespace) {
 			options.token = token;
 		}
 
-		if (options.summary) {
+		if (!options.comment && options.summary) {
 			// 錯置?
-			// options.comment = options.summary;
+			options.comment = options.summary;
 		}
 
 		if (!options.text) {
@@ -1097,6 +1097,9 @@ function module_code(library_namespace) {
 		}
 
 		// TODO: update description text for a existed file
+		if (!options.summary && options.comment) {
+			options.summary = options.comment;
+		}
 		library_namespace.info('upload_callback: options.file_text_updater');
 		console.log(JSON.stringify(data));
 		console.trace(options);
