@@ -1074,20 +1074,6 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (!options.file_text_updater) {
-				typeof callback === 'function' && callback(data, error);
-				return;
-			}
-
-			// TODO: update text for a existed file
-			library_namespace
-					.info('upload_callback: options.file_text_updater');
-			console.log(JSON.stringify(data));
-			console.trace(options);
-			if (false) {
-				wiki_API_edit(title, options.file_text_updater, token, options,
-						callback, timestamp);
-			}
 			typeof callback === 'function' && callback(data, error);
 			return;
 		}
@@ -1096,6 +1082,22 @@ function module_code(library_namespace) {
 			console.log(data);
 		}
 
+		if (!options.file_text_updater
+		// uploaded a new version
+		// {result:'Success',filename:'file_name',warnings:{exists:'file_name'},imageinfo:{...}}
+		|| !data.warnings || !data.warnings.exists) {
+			typeof callback === 'function' && callback(data);
+			return;
+		}
+
+		// TODO: update text for a existed file
+		library_namespace.info('upload_callback: options.file_text_updater');
+		console.log(JSON.stringify(data));
+		console.trace(options);
+		if (false) {
+			wiki_API_edit(title, options.file_text_updater, token, options,
+					callback, timestamp);
+		}
 		typeof callback === 'function' && callback(data);
 	}
 
