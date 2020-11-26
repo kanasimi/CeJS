@@ -2107,7 +2107,8 @@ function module_code(library_namespace) {
 							console.log('user_list: ' + user_list);
 						}
 
-						// 判別一行內有多個使用者名稱的情況。取最後一個簽名。
+						// 判別一行內有多個使用者名稱的情況。
+						// 當一行內有多個使用者名稱的情況，會取最後一個簽名。
 						if (user_list.length > 0) {
 							this_user = user_list[user_list.length - 1];
 							// ↑ 這個使用者名稱可能為 bot。
@@ -2844,7 +2845,9 @@ function module_code(library_namespace) {
 	// https://www.w3.org/TR/html5/syntax.html#void-elements
 	// @see [[phab:T134423]]
 	// https://www.mediawiki.org/wiki/Manual:OutputPage.php
-	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr',
+	//
+	// templatestyles: https://www.mediawiki.org/wiki/Extension:TemplateStyles
+	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr|templatestyles',
 	/** {RegExp}HTML tags 的匹配模式。 */
 	PATTERN_WIKI_TAG = new RegExp('<(' + markup_tags
 			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
@@ -2858,7 +2861,7 @@ function module_code(library_namespace) {
 			+ markup_tags.replace('nowiki|', '')
 			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
 	/** {RegExp}HTML self closed tags 的匹配模式。 */
-	PATTERN_WIKI_TAG_VOID = new RegExp('<(' + self_close_tags
+	PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_close_tags
 	// allow "<br/>"
 	+ ')(\/|\\s[^<>]*)?>', 'ig'),
 	// 在其內部的 wikitext 不會被parse。允許內部採用 table 語法的 tags。例如 [[mw:Manual:Extensions]]
@@ -3137,7 +3140,7 @@ function module_code(library_namespace) {
 		tag_single : function() {
 			// this: [ {String}attributes ].tag
 			// 欲取得 .tagName，請用 this.tag.toLowerCase();
-			return '<' + this.tag + this.join('') + '>';
+			return '<' + (this.slash || '') + this.tag + this.join('') + '>';
 		},
 
 		// comments: <!-- ... -->
@@ -4604,7 +4607,7 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
-		function parse_single_tag(all, tag, attributes) {
+		function parse_single_tag(all, slash, tag, attributes) {
 			if (attributes) {
 				if (normalize) {
 					attributes = attributes.replace(/[\s\/]*$/, ' /');
@@ -4627,6 +4630,8 @@ function module_code(library_namespace) {
 			if (normalize) {
 				tag = tag.toLowerCase();
 			}
+			// prefix slash
+			all.slash = slash;
 			all.tag = tag;
 			// {String}Element.tagName
 			// all.tagName = tag.toLowerCase();
@@ -5266,7 +5271,7 @@ function module_code(library_namespace) {
 		// 但 MediaWiki 現在會將 <b /> 轉成 <b>，因此不再處理這部分。
 		if (false) {
 			wikitext = wikitext.replace_till_stable(
-					/<([a-z]+)(\s[^<>]*\/)?>/ig, parse_single_tag);
+					/<(\/)?([a-z]+)(\s[^<>]*\/)?>/ig, parse_single_tag);
 		}
 
 		// ----------------------------------------------------
