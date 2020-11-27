@@ -3908,9 +3908,11 @@ function module_code(library_namespace) {
 								/^(?:link|alt|lang|page|thumbtime|start|end|class)$/
 										.test(option_name)) {
 							// 以後到的為準。
-							if (option_name === 'link')
-								option_value = wiki_API
-										.normalize_title(option_value);
+							if (option_name === 'link') {
+								// pass .session
+								option_value = wiki_API.normalize_title(
+										option_value, options);
+							}
 							parameters[option_name] = option_value;
 							parameters.index_of[option_name] = parameters.length - 1;
 
@@ -5866,7 +5868,7 @@ function module_code(library_namespace) {
 		// <s>去掉</s>skip年分前之雜項。
 		// <s>去掉</s>skip星期與其後之雜項。
 		var date_parser;
-		if (options.language in wiki_API.api_URL.wikimedia) {
+		if ((options.language || wiki_API.language) in wiki_API.api_URL.wikimedia) {
 			// all wikimedia using English in default.
 			date_parser = date_parser_config.en;
 		} else {
