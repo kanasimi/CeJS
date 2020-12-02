@@ -1106,6 +1106,7 @@ function module_code(library_namespace) {
 		library_namespace.info('upload_callback: options.file_text_updater');
 		console.log(JSON.stringify(data));
 		console.log('has session: ' + !!session);
+		console.log(file_path);
 		console.trace(options);
 		wiki_API.edit(
 				session && session.API_URL ? [ session.API_URL, file_path ]

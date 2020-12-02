@@ -1315,6 +1315,7 @@ function module_code(library_namespace) {
 		// console.log(JSON.stringify(options));
 		// console.log(options.form_data);
 		if (options.form_data && options.form_data !== to_form_data_generated) {
+			console.trace(options);
 			// TODO: charset for post_data
 			to_form_data(post_data, function(data) {
 				// console.log(data.toString().slice(0,800));
@@ -2266,7 +2267,7 @@ function module_code(library_namespace) {
 			// needs 'Accept-Language' to search!
 			'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
 
-			DNT : 1,
+			// DNT : 1,
 			Connection : 'keep-alive',
 			'Upgrade-Insecure-Requests' : 1,
 
@@ -2491,7 +2492,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {String}
 	 */
-	get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
+	get_URL_node.default_user_agent = library_namespace.Class + '/'
+			+ library_namespace.version + ' (https://github.com/kanasimi/CeJS)';
 
 	// 逾時ms數: 20 minutes
 	get_URL_node.default_timeout = 20 * 60 * 1000;
