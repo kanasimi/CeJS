@@ -1100,6 +1100,7 @@ function module_code(library_namespace) {
 		if (!options.summary && options.comment) {
 			options.summary = options.comment;
 		}
+		delete options.text;
 		delete options.form_data;
 		if (wiki_API.Variable_Map.is_Variable_Map(options.file_text_updater)) {
 			options.file_text_updater = options.file_text_updater
