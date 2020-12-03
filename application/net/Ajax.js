@@ -529,7 +529,7 @@ function module_code(library_namespace) {
 				}
 			}
 		}
-		throw 'give_boundary: ' + 'Retry too many times!';
+		throw new Error('give_boundary: ' + 'Retry too many times!');
 	}
 
 	var to_form_data_generated = {

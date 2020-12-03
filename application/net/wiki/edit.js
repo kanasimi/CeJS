@@ -1114,6 +1114,73 @@ function module_code(library_namespace) {
 				options, callback);
 	}
 
+	// ------------------------------------------
+
+	function Variable_Map(iterable) {
+		if (library_namespace.is_Object(iterable))
+			iterable = Object.entries(iterable);
+		Map.call(this, iterable);
+	}
+	Variable_Map.prototype = Object.assign(Object.create(Map.prototype), {
+		format : Variable_Map_format,
+		update : Variable_Map_update,
+		to_file_text_updater : Variable_Map_to_file_text_updater,
+		constructor : Variable_Map
+	});
+
+	// @inner
+	function Variable_Map_format(variable_name) {
+		return '<!-- update '
+				+ variable_name
+				+ ': Text inside update comments will be auto-replaced by bot -->'
+				+ (this.has(variable_name) ? this.get(variable_name) : '')
+				+ '<!-- update end: ' + variable_name + ' -->';
+	}
+
+	// [ all_mark, variable_name ]
+	var Variable_Map__PATTERN_mark = /<!--\s*update ([^():]+)[\s\S]*?-->[\s\S]+?<!--\s*update end:\s*\1(?:\W[\s\S]*)?-->/g;
+
+	// @inner
+	function Variable_Map_update(wikitext) {
+		var variable_Map = this;
+		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, function(
+				all_mark, variable_name) {
+			if (variable_Map.has(variable_name))
+				return variable_Map.format(variable_name);
+			return all;
+		});
+		return wikitext;
+	}
+
+	function Variable_Map__file_text_updater(page_data) {
+		// console.trace(page_data);
+		/** {String}page title = page_data.title */
+		var title = wiki_API.title_of(page_data),
+		/**
+		 * {String}page content, maybe undefined. 條目/頁面內容 =
+		 * CeL.wiki.revision_content(revision)
+		 */
+		content = wiki_API.content_of(page_data);
+
+		// typeof content !== 'string'
+		if (!content) {
+			content = 'No contents: ' + wiki_API.title_link_of(page_data)
+			// or: 此頁面不存在/已刪除。
+			+ '! 沒有頁面內容！';
+			// library_namespace.log(content);
+			return [ wiki_API.edit.cancel, content ];
+		}
+
+		return this.update(content);
+	}
+	function Variable_Map_to_file_text_updater() {
+		return Variable_Map__file_text_updater.bind(this);
+	}
+
+	Variable_Map.plain_text = function plain_text(wikitext) {
+		return wiki_link.replace(/<!--[\s\S]*?-->/g, '');
+	};
+
 	// ------------------------------------------------------------------------
 
 	// export 導出.
