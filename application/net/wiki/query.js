@@ -389,7 +389,7 @@ function module_code(library_namespace) {
 						'wiki_API_query');
 				setup_API_URL(session, true);
 			}
-			// 不汙染 session.get_URL_options
+			// 避免污染，重新造一個 options。不汙染 session.get_URL_options
 			get_URL_options = Object.clone(session.get_URL_options);
 		}
 

@@ -1101,6 +1101,10 @@ function module_code(library_namespace) {
 			options.summary = options.comment;
 		}
 		delete options.form_data;
+		if (wiki_API.Variable_Map.is_Variable_Map(options.file_text_updater)) {
+			options.file_text_updater = options.file_text_updater
+					.to_file_text_updater();
+		}
 		var session = wiki_API.session_of_options(options);
 		var file_path = 'File:' + data.filename;
 		library_namespace.info('upload_callback: options.file_text_updater');
@@ -1119,7 +1123,17 @@ function module_code(library_namespace) {
 	function Variable_Map(iterable) {
 		if (library_namespace.is_Object(iterable))
 			iterable = Object.entries(iterable);
-		Map.call(this, iterable);
+		try {
+			Map.call(this, iterable);
+			return;
+		} catch (e) {
+			// node.js 0.11: Constructor Map requires 'new'
+		}
+
+		iterable = new Map(iterable);
+		// Copy all methods
+		Object.assign(iterable, Variable_Map.prototype);
+		return iterable;
 	}
 	Variable_Map.prototype = Object.assign(Object.create(Map.prototype), {
 		format : Variable_Map_format,
@@ -1127,6 +1141,10 @@ function module_code(library_namespace) {
 		to_file_text_updater : Variable_Map_to_file_text_updater,
 		constructor : Variable_Map
 	});
+
+	Variable_Map.is_Variable_Map = function is_Variable_Map(value) {
+		return value && value.constructor === Variable_Map;
+	};
 
 	// @inner
 	function Variable_Map_format(variable_name) {
@@ -1180,6 +1198,8 @@ function module_code(library_namespace) {
 	Variable_Map.plain_text = function plain_text(wikitext) {
 		return wiki_link.replace(/<!--[\s\S]*?-->/g, '');
 	};
+
+	wiki_API.Variable_Map = Variable_Map;
 
 	// ------------------------------------------------------------------------
 
