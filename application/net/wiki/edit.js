@@ -1135,12 +1135,12 @@ function module_code(library_namespace) {
 		Object.assign(iterable, Variable_Map.prototype);
 		return iterable;
 	}
-	Variable_Map.prototype = Object.assign(Object.create(Map.prototype), {
+	Variable_Map.prototype = {
 		format : Variable_Map_format,
 		update : Variable_Map_update,
 		to_file_text_updater : Variable_Map_to_file_text_updater,
 		constructor : Variable_Map
-	});
+	};
 
 	Variable_Map.is_Variable_Map = function is_Variable_Map(value) {
 		return value && value.constructor === Variable_Map;
@@ -1148,23 +1148,27 @@ function module_code(library_namespace) {
 
 	// @inner
 	function Variable_Map_format(variable_name) {
-		return '<!-- update '
+		var start_mark = '<!-- update '
 				+ variable_name
-				+ ': Text inside update comments will be auto-replaced by bot -->'
+				+ ': Text inside update comments will be auto-replaced by bot -->';
+		var end_mark = '<!-- update end: ' + variable_name + ' -->';
+		return start_mark
 				+ (this.has(variable_name) ? this.get(variable_name) : '')
-				+ '<!-- update end: ' + variable_name + ' -->';
+				+ end_mark;
 	}
 
-	// [ all_mark, variable_name ]
-	var Variable_Map__PATTERN_mark = /<!--\s*update ([^():]+)[\s\S]*?-->[\s\S]+?<!--\s*update end:\s*\1(?:\W[\s\S]*)?-->/g;
+	// [ all_mark, start_mark, variable_name, end_mark ]
+	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)[\s\S]+?(<!--\s*update end:\s*\1(?:\W[\s\S]*)?-->)/g;
 
 	// @inner
 	function Variable_Map_update(wikitext) {
 		var variable_Map = this;
 		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, function(
-				all_mark, variable_name) {
-			if (variable_Map.has(variable_name))
-				return variable_Map.format(variable_name);
+				all_mark, start_mark, variable_name, end_mark) {
+			if (variable_Map.has(variable_name)) {
+				// preserve start_mark, end_mark
+				return start_mark + variable_Map.get(variable_name) + end_mark;
+			}
 			return all;
 		});
 		return wikitext;
