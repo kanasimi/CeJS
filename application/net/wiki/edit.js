@@ -1108,10 +1108,10 @@ function module_code(library_namespace) {
 		var session = wiki_API.session_of_options(options);
 		var file_path = 'File:' + data.filename;
 		library_namespace.info('upload_callback: options.file_text_updater');
-		console.log(JSON.stringify(data));
-		console.log('has session: ' + !!session);
-		console.log(file_path);
-		console.trace(options);
+		// console.log(JSON.stringify(data));
+		// console.log('has session: ' + !!session);
+		// console.log(file_path);
+		// console.trace(options);
 		wiki_API.edit(
 				session && session.API_URL ? [ session.API_URL, file_path ]
 						: file_path, options.file_text_updater, options.token,
@@ -1125,6 +1125,7 @@ function module_code(library_namespace) {
 			iterable = Object.entries(iterable);
 		try {
 			Map.call(this, iterable);
+			// Object.assign(iterable, Map.prototype);
 			return;
 		} catch (e) {
 			// node.js 0.11: Constructor Map requires 'new'
@@ -1171,6 +1172,7 @@ function module_code(library_namespace) {
 			}
 			return all;
 		});
+		console.trace(wikitext);
 		return wikitext;
 	}
 
@@ -1193,6 +1195,7 @@ function module_code(library_namespace) {
 			return [ wiki_API.edit.cancel, content ];
 		}
 
+		console.trace(content);
 		return this.update(content);
 	}
 	function Variable_Map_to_file_text_updater() {
