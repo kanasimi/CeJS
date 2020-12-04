@@ -1473,7 +1473,10 @@ function module_code(library_namespace) {
 			// 已下載完本 chapter。
 
 			// 紀錄最後下載的章節計數。
-			work_data.last_download.chapter = chapter_NO;
+			work_data.last_download.chapter = work_data.last_download.start_chapter_next_time
+					|| chapter_NO;
+			// 欲限制/指定下次下載的 chapter_NO，可使用
+			// work_data.chapter_list.truncate(chapter_NO);
 
 			// 記錄下載錯誤的檔案。
 			// TODO: add timestamp, work/chapter/NO, {Array}error code
