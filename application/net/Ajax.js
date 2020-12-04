@@ -1315,7 +1315,7 @@ function module_code(library_namespace) {
 		// console.log(JSON.stringify(options));
 		// console.log(options.form_data);
 		if (options.form_data && options.form_data !== to_form_data_generated) {
-			console.trace(options);
+			// console.trace(options);
 			// TODO: charset for post_data
 			to_form_data(post_data, function(data) {
 				// console.log(data.toString().slice(0,800));
