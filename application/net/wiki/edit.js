@@ -1180,15 +1180,17 @@ function module_code(library_namespace) {
 	// @inner
 	function Variable_Map_update(wikitext) {
 		var variable_Map = this;
+		console.trace(variable_Map);
 		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, function(
 				all_mark, start_mark, variable_name, end_mark) {
+			console.trace(all_mark);
 			if (variable_Map.has(variable_name)) {
 				// preserve start_mark, end_mark
 				return start_mark + variable_Map.get(variable_name) + end_mark;
 			}
 			return all;
 		});
-		console.trace(wikitext);
+		// console.trace(wikitext);
 		return wikitext;
 	}
 
@@ -1211,7 +1213,7 @@ function module_code(library_namespace) {
 			return [ wiki_API.edit.cancel, content ];
 		}
 
-		console.trace(content);
+		// console.trace(content);
 		return this.update(content);
 	}
 	function Variable_Map_to_file_text_updater() {
