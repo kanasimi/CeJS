@@ -931,6 +931,20 @@ function module_code(library_namespace) {
 						|| options['other versions'],
 				other_fields : options.other_fields || options['other fields']
 			};
+
+			var variable_Map = options.variable_Map;
+			if (variable_Map) {
+				// 自動將每次更新可能會改變的值轉成可更新標記。
+				for ( var property in options.text) {
+					if (!variable_Map.has(property) && options.text[property]
+							&& [ 'date', 'source' ].includes(property)) {
+						variable_Map.set(property, options.text[property]);
+					}
+					if (variable_Map.has(property))
+						options.text[property] = variable_Map.format(property);
+				}
+			}
+
 			options.text = [ '== {{int:filedesc}} ==',
 			//
 			wiki_API.template_text(options.text, {
@@ -1149,13 +1163,14 @@ function module_code(library_namespace) {
 	};
 
 	// @inner
-	function Variable_Map_format(variable_name) {
+	function Variable_Map_format(variable_name, default_value) {
 		var start_mark = '<!-- update '
 				+ variable_name
 				+ ': Text inside update comments will be auto-replaced by bot -->';
 		var end_mark = '<!-- update end: ' + variable_name + ' -->';
 		return start_mark
-				+ (this.has(variable_name) ? this.get(variable_name) : '')
+				+ (this.has(variable_name) ? this.get(variable_name)
+						: default_value === undefined ? '' : default_value)
 				+ end_mark;
 	}
 
