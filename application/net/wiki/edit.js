@@ -934,10 +934,10 @@ function module_code(library_namespace) {
 
 			var variable_Map = options.variable_Map;
 			if (variable_Map) {
-				// 自動將每次更新可能會改變的值轉成可更新標記。
 				for ( var property in options.text) {
 					if (!variable_Map.has(property) && options.text[property]
-							&& [ 'date', 'source' ].includes(property)) {
+					// 自動將每次更新可能會改變的值轉成可更新標記。
+					&& [ 'date', 'source' ].includes(property)) {
 						variable_Map.set(property, options.text[property]);
 					}
 					if (variable_Map.has(property))
@@ -1175,7 +1175,7 @@ function module_code(library_namespace) {
 	}
 
 	// [ all_mark, start_mark, variable_name, end_mark ]
-	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)[\s\S]+?(<!--\s*update end:\s*\1(?:\W[\s\S]*)?-->)/g;
+	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)[\s\S]+?(<!--\s*update end:\s*\2(?:\W[\s\S]*)?-->)/g;
 
 	// @inner
 	function Variable_Map_update(wikitext) {
