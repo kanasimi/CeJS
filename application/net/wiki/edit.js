@@ -1183,8 +1183,9 @@ function module_code(library_namespace) {
 		console.trace(variable_Map);
 		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, function(
 				all_mark, start_mark, variable_name, end_mark) {
-			console.trace(all_mark);
-			console.log(variable_Map);
+			console.trace([ all_mark, variable_name,
+					variable_Map.has(variable_name) ]);
+			// console.log(variable_Map);
 			if (variable_Map.has(variable_name)) {
 				// preserve start_mark, end_mark
 				return start_mark + variable_Map.get(variable_name) + end_mark;
