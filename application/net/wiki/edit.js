@@ -1122,7 +1122,7 @@ function module_code(library_namespace) {
 		}
 		var session = wiki_API.session_of_options(options);
 		var file_path = 'File:' + data.filename;
-		library_namespace.info('upload_callback: options.file_text_updater');
+		// library_namespace.info('upload_callback: options.file_text_updater');
 		// console.log(JSON.stringify(data));
 		// console.log('has session: ' + !!session);
 		// console.log(file_path);
@@ -1184,6 +1184,7 @@ function module_code(library_namespace) {
 		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, function(
 				all_mark, start_mark, variable_name, end_mark) {
 			console.trace(all_mark);
+			console.log(variable_Map);
 			if (variable_Map.has(variable_name)) {
 				// preserve start_mark, end_mark
 				return start_mark + variable_Map.get(variable_name) + end_mark;
