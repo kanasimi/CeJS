@@ -938,7 +938,9 @@ function module_code(library_namespace) {
 					1, 'get_namespace');
 					// console.trace(arguments);
 				} else {
-					list.push(0);
+					// options.is_page_title === false 亦即
+					// options.is_namespace === true
+					list.push(options.is_page_title === false ? undefined : 0);
 				}
 			});
 			if (list.length === 0) {
@@ -1175,7 +1177,9 @@ function module_code(library_namespace) {
 				is_page_title : true
 			}, options));
 		}
-		return page_ns === get_namespace(namespace, options);
+		return page_ns === get_namespace(namespace, Object.assign({
+			is_page_title : false
+		}, options));
 	}
 
 	function convert_page_title_to_namespace(page_title, options) {

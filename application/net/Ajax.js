@@ -1117,6 +1117,8 @@ function module_code(library_namespace) {
 	 * secure。<br />
 	 * 為增加效率，不檢查 agent.last_cookie 本身之重複的 cookie。
 	 * 
+	 * TODO: create class Cookie
+	 * 
 	 * @param {Object}agent
 	 *            node_http_agent / node_https_agent
 	 * @param {Array}cookie
@@ -1127,9 +1129,12 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function merge_cookie(agent, cookie) {
-		// normalize
-		if (!Array.isArray(agent.last_cookie))
-			agent.last_cookie = agent.last_cookie ? [ agent.last_cookie ] : [];
+		// 初始化 initialization + 正規化 normalization
+		var last_cookie = agent.last_cookie;
+		if (!Array.isArray(last_cookie)) {
+			last_cookie = agent.last_cookie = agent.last_cookie ? [ agent.last_cookie ]
+					: [];
+		}
 		if (!cookie) {
 			cookie = [];
 		} else if (typeof cookie === 'string') {
@@ -1137,67 +1142,85 @@ function module_code(library_namespace) {
 		}
 		// assert: Array.isArray(cookie)
 
-		// remove duplicate cookie
-
 		// console.log(agent);
-		// console.log(agent.last_cookie.cookie_hash);
+		// console.log(last_cookie.cookie_hash);
 		// console.trace(cookie);
 
-		if (!agent.last_cookie.cookie_hash) {
-			agent.last_cookie.cookie_hash = Object.create(null);
+		// cookie_index_of[key] = index of last_cookie
+		var cookie_index_of = last_cookie.cookie_index_of;
+		if (!cookie_index_of) {
+			if (last_cookie.length > 0) {
+				// regenerate agent.last_cookie
+				delete agent.last_cookie;
+				last_cookie = merge_cookie(agent, last_cookie);
+				// assert: last_cookie === agent.last_cookie
+			} else {
+				last_cookie.cookie_index_of = Object.create(null);
+				last_cookie.cookie_hash = Object.create(null);
+			}
+			cookie_index_of = last_cookie.cookie_index_of;
 		}
-		if (!agent.last_cookie.cookie_index_of) {
-			agent.last_cookie.cookie_index_of = Object.create(null);
-		}
-		// cookie_index[key] = index of agent.last_cookie
-		var cookie_index = agent.last_cookie.cookie_index_of;
+		var cookie_hash = last_cookie.cookie_hash;
+		// assert: !!cookie_hash === true
 
-		cookie.forEach(function(piece) {
+		cookie.forEach(function for_each_cookie_piece(piece) {
 			piece = piece.trim();
 			if (!piece)
 				return;
-			// [ cookie, key, value ]
-			var matched = piece.match(/^([^=;]+)(?:=([^;]+))?/);
-			library_namespace.debug('last_cookie: ' + agent.last_cookie, 3,
+			// [ cookie value without path / domain / expires,
+			// key, value, extra ]
+			var matched = piece.match(/^([^=;]+)(?:=([^;]+))?(.*)$/);
+			library_namespace.debug('last_cookie: ' + last_cookie, 3,
 					'merge_cookie');
-			if (!matched) {
+			// console.log(matched);
+			var key, value;
+			if (matched) {
+				key = matched[1];
+				value = matched[2];
+
+			} else {
 				library_namespace.warn([ 'merge_cookie: ', {
 					T : 'Invalid cookie?'
 				}, ' [' + piece + ']' ]);
-				agent.last_cookie.push(piece);
-			} else if (matched[1] in cookie_index) {
+				// treat cookie piece as key
+				key = piece;
+				value = '';
+			}
+
+			if (!key)
+				return;
+
+			cookie_hash[key] = value;
+
+			if (key in cookie_index_of) {
+				// assert: (key in cookie_hash) === true
 				library_namespace.debug([ {
 					T : 'cookie 名稱重複！以後來/新出現者為準。'
-				}, ' [' + agent.last_cookie[cookie_index[matched[1]]]
+				}, ' [' + last_cookie[cookie_index_of[key]]
 				//
 				+ ']→[' + piece + ']' ], 3, 'merge_cookie');
-				agent.last_cookie.cookie_hash[matched[1]] = matched[2];
-				// 直接取代。
-				agent.last_cookie[cookie_index[matched[1]]] = piece;
+				// remove duplicate cookie: 直接取代。
+				last_cookie[cookie_index_of[key]] = piece;
+
 			} else {
+				// assert: (key in cookie_hash) === false
 				library_namespace.debug([ {
 					T : '正常情況。登記已存在之 cookie。'
 				} ], 3, 'merge_cookie');
 				// console.trace(matched);
-				agent.last_cookie.cookie_hash[matched[1]] = matched[2];
-				cookie_index[matched[1]] = agent.last_cookie.length;
-				agent.last_cookie.push(piece);
+				cookie_index_of[key] = last_cookie.length;
+				last_cookie.push(piece);
 			}
 		});
 
-		// console.trace(agent.last_cookie.cookie_hash);
-		// console.trace(agent);
+		// console.trace(cookie_hash);
+		// console.trace(last_cookie);
 
-		// read-only
-		// Object.freeze(agent.last_cookie.cookie_hash);
-		// Object.freeze(agent.last_cookie.cookie_index_of);
-
-		library_namespace.debug('array: ' + JSON.stringify(agent.last_cookie),
-				3, 'merge_cookie');
-		library_namespace.debug('hash: '
-				+ JSON.stringify(agent.last_cookie.cookie_hash), 3,
+		library_namespace.debug('array: ' + JSON.stringify(last_cookie), 3,
 				'merge_cookie');
-		return agent.last_cookie;
+		library_namespace.debug('hash: ' + JSON.stringify(cookie_hash), 3,
+				'merge_cookie');
+		return last_cookie;
 	}
 
 	_.merge_cookie = merge_cookie;
@@ -1697,6 +1720,7 @@ function module_code(library_namespace) {
 					options.error_retry, localize_error(error) ]
 				} ]);
 				// console.error(error);
+				// library_namespace.set_debug(3);
 				get_URL_node(options, onload, charset, post_data);
 				return;
 			}
@@ -1751,6 +1775,7 @@ function module_code(library_namespace) {
 					} ]);
 					// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 					// console.error(error);
+					// console.error(options);
 				}
 			}
 			// 在出現錯誤時，將 onload 當作 callback。並要確保 {Object}response

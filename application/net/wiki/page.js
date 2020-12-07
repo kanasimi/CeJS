@@ -1521,7 +1521,7 @@ function module_code(library_namespace) {
 		//
 		// {Date}options.start: 從這個時間點開始回溯。
 		// {Natural}options.start: 回溯 millisecond 數。
-		// {Natural}options.delay > 0: 延遲時間,等待 millisecond 數。
+		// {Natural}options.delay > 0: 檢查的延遲時間。等待 millisecond 數。
 
 		var delay_ms = library_namespace.to_millisecond(options.delay),
 		//
@@ -1545,6 +1545,11 @@ function module_code(library_namespace) {
 
 		if (!(delay_ms > 0))
 			delay_ms = 0;
+
+		if (options.delay && !('start' in options)) {
+			// e.g., 指定延遲兩分鐘時，就直接檢查兩分鐘前開始的資料。
+			options.start = options.delay;
+		}
 
 		if (library_namespace.is_Date(options.start)) {
 			last_query_time = isNaN(options.start.getTime()) ? new Date
