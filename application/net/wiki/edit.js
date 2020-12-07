@@ -1175,7 +1175,7 @@ function module_code(library_namespace) {
 	}
 
 	// [ all_mark, start_mark, variable_name, end_mark ]
-	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)[\s\S]+?(<!--\s*update end:\s*\2(?:\W[\s\S]*)?-->)/g;
+	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)[\s\S]+?(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)/g;
 
 	// @inner
 	function Variable_Map_update(wikitext) {
