@@ -3397,7 +3397,7 @@ function test_wiki() {
 		assert(['*1\n*2\n*3', parsed[2].toString()], 'wiki.parse: list #2-2');
 		assert(['*', parsed[2].list_type], 'wiki.parse: list #2-3');
 		assert([3, parsed[2].length], 'wiki.parse: list #2-4');
-		assert(['2', parsed[2][1]], 'wiki.parse: list #2-5');
+		assert(['2', parsed[2][1].toString()], 'wiki.parse: list #2-5');
 		wikitext = 'a\n#1\n#2\n##31\n##32\n#4\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #3');
 		wikitext = 'a{{T|\n*1\n*2\n}}f'; parsed = CeL.wiki.parser(wikitext).parse();

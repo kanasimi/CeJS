@@ -98,9 +98,14 @@ function module_code(library_namespace) {
 			token = [ token ];
 		} else if (!Array.isArray(token)) {
 			library_namespace.warn('set_wiki_type: The token is not Array!');
-		} else if (token.type && token.type !== 'plain') {
-			// 預防token本來就已經有設定類型。
-			token = [ token ];
+		} else if (token.type) {
+			if (token.type === type) {
+				return token;
+			}
+			if (token.type !== 'plain') {
+				// 預防token本來就已經有設定類型。
+				token = [ token ];
+			}
 		}
 		// assert: Array.isArray(token)
 		token.type = type;
@@ -579,8 +584,15 @@ function module_code(library_namespace) {
 		// 正規化 replace_to。
 
 		if (library_namespace.is_Object(replace_to)) {
+			// console.trace(replace_to);
 			replace_to = Object.keys(replace_to).map(function(key) {
 				var value = replace_to[key];
+				if (!key) {
+					library_namespace.warn('Including empty key: '
+					//
+					+ JSON.stringify(replace_to));
+					key = parameter_name;
+				}
 				// TODO: using is_valid_parameters_value(value)
 				return spaces[1] ? spaces[0] + key + spaces[1] + value
 				//
@@ -603,6 +615,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('auto remove numbered parameter: '
 				// https://www.mediawiki.org/wiki/Help:Templates#Numbered_parameters
 				+ parameter_name, 3, 'replace_parameter');
+				// console.trace([ replace_to, matched ]);
 				replace_to = matched[2];
 			}
 		}
@@ -612,7 +625,8 @@ function module_code(library_namespace) {
 			replace_to += spaces[2];
 		}
 
-		if (template_token[index] === replace_to) {
+		if (template_token[index]
+				&& template_token[index].toString() === replace_to) {
 			// 不處理沒有變更的情況。
 			return 0;
 		}
@@ -781,7 +795,7 @@ function module_code(library_namespace) {
 	 *            若 processor 的回傳值為{String}wikitext，則將指定類型節點替換/replace作此回傳值。
 	 *            注意：即使設定為 false，回傳 .remove_token 依然會刪除當前 token！
 	 * @param {Natural}[max_depth]
-	 *            最大深度。
+	 *            最大深度。1: 僅到第1層(底層)。2: 僅到第2層(開始遍歷子節點)。 0||NaN: 遍歷所有子節點。
 	 * 
 	 * @returns {wiki page parser}
 	 * 
@@ -3176,6 +3190,27 @@ function module_code(library_namespace) {
 		}
 	};
 
+	// list_token.splice()
+	// @inner
+	function list_splice(start, deleteCount) {
+		var list_prefix = this.list_prefix;
+		var args = Array.prototype.slice.call(arguments);
+		var prefix_args = args.clone();
+		var first_prefix, prefix = start > 0 && list_prefix[start - 1]
+				|| list_prefix[start] || this.list_type + ' ';
+		if (!prefix.startsWith('\n')) {
+			first_prefix = prefix;
+			prefix = '\n' + prefix;
+		}
+		for (var index = 2; index < args.length; index++) {
+			args[index] = set_wiki_type(args[index], 'plain');
+			prefix_args[index] = start === 0 && index === 2 ? first_prefix
+					|| prefix.replace(/^\n/, '') : prefix;
+		}
+		Array.prototype.splice.apply(list_prefix, prefix_args);
+		return Array.prototype.splice.apply(this, args);
+	}
+
 	// const , for <dl>
 	var DEFINITION_LIST = 'd';
 	function get_item_prefix() {
@@ -4932,6 +4967,18 @@ function module_code(library_namespace) {
 		}
 
 		function parse_list_line(line) {
+			function push_list_item(item, no_parse) {
+				if (!no_parse) {
+					// 經過改變，需再進一步處理。
+					item = parse_wikitext(item, options, queue);
+				}
+				// console.trace(item);
+				if (item.type !== 'plain')
+					item = _set_wiki_type([ item ], 'plain');
+				latest_list.push(item);
+				return item;
+			}
+
 			var index = 0, position = 0;
 			while (index < list_prefixes_now.length
 			// 確認本行與上一行有多少相同的列表層級。
@@ -4974,18 +5021,14 @@ function module_code(library_namespace) {
 
 						// search "; title : definition"
 						if (matched = line.match(/^(.*)(:\s*)(.*)$/)) {
-							latest_list.push(
-							// 經過改變，需再進一步處理。
-							parse_wikitext(matched[1], options, queue));
+							push_list_item(matched[1]);
 							// 將空白字元放在 .list_prefix 可以減少很多麻煩。
 							latest_list.list_prefix.push(matched[2]);
 							line = matched[3];
 						}
 					}
 
-					latest_list.push(
-					// 經過改變，需再進一步處理。
-					parse_wikitext(line, options, queue));
+					push_list_item(line);
 				} else {
 					// 非列表。
 					// assert: position === -1
@@ -5008,6 +5051,7 @@ function module_code(library_namespace) {
 			list_symbols.forEach(function handle_list_item(list_type) {
 				// 處理多層選單。
 				var list = _set_wiki_type([], 'list');
+				list.splice = list_splice;
 				// .list_prefix: for ";#a\n:#b"
 				list.list_prefix = [ list_type ];
 				// 注意: 在以 API 取得頁面列表時，也會設定 pages.list_type。
@@ -5052,18 +5096,14 @@ function module_code(library_namespace) {
 
 				// search "; title : definition"
 				if (matched = line.match(/^(.*)(:\s*)(.*)$/)) {
-					latest_list.push(
-					// 經過改變，需再進一步處理。
-					parse_wikitext(matched[1], options, queue));
+					push_list_item(matched[1]);
 					// 將空白字元放在 .list_prefix 可以減少很多麻煩。
 					latest_list.list_prefix.push(matched[2]);
 					line = matched[3];
 				}
 			}
 
-			latest_list.push(
-			// 經過改變，需再進一步處理。
-			parse_wikitext(line, options, queue));
+			push_list_item(line);
 		}
 
 		function parse_hr_tag(line, index) {
