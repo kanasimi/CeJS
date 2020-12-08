@@ -98,14 +98,12 @@ function module_code(library_namespace) {
 			token = [ token ];
 		} else if (!Array.isArray(token)) {
 			library_namespace.warn('set_wiki_type: The token is not Array!');
-		} else if (token.type) {
-			if (token.type === type) {
-				return token;
-			}
-			if (token.type !== 'plain') {
-				// 預防token本來就已經有設定類型。
-				token = [ token ];
-			}
+		} else if (token.type && token.type !== 'plain') {
+			// 就算 token.type !== type，可能是 <span> 中嵌套 <span> 的形式，
+			// 不該直接 `return token` 。
+
+			// 預防token本來就已經有設定類型。
+			token = [ token ];
 		}
 		// assert: Array.isArray(token)
 		token.type = type;
@@ -3190,6 +3188,13 @@ function module_code(library_namespace) {
 		}
 	};
 
+	// const , for <dl>
+	var DEFINITION_LIST = 'd';
+	function get_item_prefix() {
+		if (!this.parent)
+			return this.list_type;
+		return this.parent.get_item_prefix() + this.list_type;
+	}
 	// list_token.splice()
 	// @inner
 	function list_splice(start, deleteCount) {
@@ -3202,6 +3207,7 @@ function module_code(library_namespace) {
 			first_prefix = prefix;
 			prefix = '\n' + prefix;
 		}
+		// assert: /^\n[*#:;]+/.test(prefix) && /^[*#:;]+/.test(first_prefix)
 		for (var index = 2; index < args.length; index++) {
 			args[index] = set_wiki_type(args[index], 'plain');
 			prefix_args[index] = start === 0 && index === 2 ? first_prefix
@@ -3209,14 +3215,6 @@ function module_code(library_namespace) {
 		}
 		Array.prototype.splice.apply(list_prefix, prefix_args);
 		return Array.prototype.splice.apply(this, args);
-	}
-
-	// const , for <dl>
-	var DEFINITION_LIST = 'd';
-	function get_item_prefix() {
-		if (!this.parent)
-			return this.list_type;
-		return this.parent.get_item_prefix() + this.list_type;
 	}
 
 	var Magic_words_hash = Object.create(null);
@@ -4905,9 +4903,16 @@ function module_code(library_namespace) {
 			}
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 			parameters = parse_wikitext(parameters, options, queue);
+			// console.log(parameters);
 			// 注意: parameters.length 可能大於1
-			parameters = _set_wiki_type(parameters, type === "''" ? 'italic'
-					: 'bold');
+			if (type === "'''''") {
+				// e.g., "''''''t''''''"
+				parameters = [ _set_wiki_type(parameters, 'bold') ];
+				type = 'italic';
+			} else {
+				type = type === "''" ? 'italic' : 'bold';
+			}
+			parameters = _set_wiki_type(parameters, type);
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
@@ -5338,10 +5343,8 @@ function module_code(library_namespace) {
 		// 因此先從<b>開始找。
 
 		// '''~''' 不能跨行！ 注意: '''{{font color}}''', '''{{tsl}}'''
-		wikitext = wikitext.replace_till_stable(/(''')([^'\n].*?)\1/g,
-				parse_apostrophe_type);
 		// ''~'' 不能跨行！
-		wikitext = wikitext.replace_till_stable(/('')([^'\n].*?)\1/g,
+		wikitext = wikitext.replace_till_stable(/('''''|'''?)([^'\n].*?'*)\1/g,
 				parse_apostrophe_type);
 		// '', ''' 似乎會經過微調: [[n:zh:Special:Permalink/120676]]
 

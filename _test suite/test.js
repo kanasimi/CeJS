@@ -3170,6 +3170,12 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()]);
 		assert(['italic', parsed[0].type], "'''''t''''' will render as <i><b>t</b></i>");
 		assert(['bold', parsed[0][0].type]);
+		wikitext = "'''''''t'''''''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(["''", parsed[0]]);
+		assert(['italic', parsed[1].type], "'''''''t''''''' will render as ''<i><b>t''</b></i>");
+		assert(['bold', parsed[1][0].type]);
+		assert(["t''", parsed[1][0][0]]);
 		wikitext = "a '''''b''''' c's ''d'' e ''f'' g ''h''."; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[t|\'\'\' <span>T</span>\'\'\']].'; parsed = CeL.wiki.parser(wikitext).parse();
