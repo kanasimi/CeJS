@@ -620,6 +620,10 @@ function module_code(library_namespace) {
 	/**
 	 * 測試頁面是否允許機器人帳戶訪問，遵守[[Template:Bots]]。機器人另須考慮{{Personal announcement}}的情況。
 	 * 
+	 * [[Special:Log/massmessage]] Delivery of "message" to [[User talk:user]]<br />
+	 * was skipped because the target has opted-out of message delivery<br />
+	 * failed with an error code of protectedpage / contenttoobig
+	 * 
 	 * @param {String}content
 	 *            page contents 頁面內容。
 	 * @param {String}bot_id
@@ -1180,11 +1184,13 @@ function module_code(library_namespace) {
 	// @inner
 	function Variable_Map_update(wikitext) {
 		var variable_Map = this;
-		console.trace(variable_Map);
+		// console.trace(variable_Map);
 		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, function(
 				all_mark, start_mark, variable_name, end_mark) {
-			console.trace([ all_mark, variable_name,
-					variable_Map.has(variable_name) ]);
+			if (false) {
+				console.trace([ all_mark, variable_name,
+						variable_Map.has(variable_name) ]);
+			}
 			// console.log(variable_Map);
 			if (variable_Map.has(variable_name)) {
 				// preserve start_mark, end_mark
