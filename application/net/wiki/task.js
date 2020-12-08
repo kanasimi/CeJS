@@ -1563,6 +1563,7 @@ function module_code(library_namespace) {
 		summary : ''
 	});
 
+	// console_message()
 	var interactive_message = library_namespace.platform.nodejs
 			&& library_namespace.platform.is_interactive ? function interactive_message(
 			message) {
@@ -2511,6 +2512,7 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Btokens
 	wiki_API.prototype.get_token = function(callback, options) {
 		// assert: this (session) 已登入成功， callback 已設定好。
+		// 前置處理。
 		if (typeof options === 'string') {
 			options = {
 				type : options

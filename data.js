@@ -977,7 +977,7 @@ function module_code(library_namespace) {
 	}
 
 	// 不可以 `byte` 為變數名: JsDoc 會失會失效。
-	function show_KiB(bytes, type, use_KB) {
+	function to_KiB(bytes, type, use_KB) {
 		var expression = use_KB ? library_namespace.to_1000_prefix
 				: library_namespace.to_1024_prefix, b = bytes + ' byte'
 				+ (bytes > 1 ? 's' : '');
@@ -996,12 +996,13 @@ function module_code(library_namespace) {
 
 		return expression;
 	}
-	function show_KB(bytes, type) {
-		return show_KiB(bytes, type, true);
+	function to_KB(bytes, type) {
+		return to_KiB(bytes, type, true);
 	}
 
-	_.show_KiB = show_KiB;
-	_.show_KB = show_KB;
+	// old alias: CeL.show_KiB(), CeL.show_KB()
+	_.to_KiB = to_KiB;
+	_.to_KB = to_KB;
 
 	// 設定 lazy evaluation。
 	library_namespace.set_initializor(to_1000_prefix);
