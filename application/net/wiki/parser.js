@@ -1352,6 +1352,8 @@ function module_code(library_namespace) {
 				sub : true,
 				sup : true,
 				em : true,
+				ins : true,
+				del : true,
 				strike : true,
 				strong : true,
 				font : true,
@@ -1530,6 +1532,7 @@ function module_code(library_namespace) {
 		}
 
 		if (token.type in {
+			convert : true,
 			url : true,
 			tag_inner : true,
 			plain : true
@@ -3172,6 +3175,9 @@ function module_code(library_namespace) {
 			}).join('');
 
 			return this.list_type + this.join('\n' + this.get_item_prefix());
+		},
+		list_item : function() {
+			return this.join('');
 		},
 		pre : function() {
 			return ' ' + this.join('\n ');
@@ -4979,7 +4985,8 @@ function module_code(library_namespace) {
 				}
 				// console.trace(item);
 				if (item.type !== 'plain')
-					item = _set_wiki_type([ item ], 'plain');
+					item = [ item ];
+				_set_wiki_type(item, 'list_item');
 				latest_list.push(item);
 				return item;
 			}
