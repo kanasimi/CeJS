@@ -948,29 +948,28 @@ function module_code(library_namespace) {
 	// 萬用字元 RegExp source, ReadOnly
 	wildcard_to_RegExp.w_chars = '*?\\[\\]';
 
-	// (pattern, flags)
-	function wildcard_to_RegExp(p, f) {
+	function wildcard_to_RegExp(pattern, flags) {
 
-		if (library_namespace.is_RegExp(p))
-			return p;
-		if (!p || typeof p !== 'string')
+		if (library_namespace.is_RegExp(pattern))
+			return pattern;
+		if (!pattern || typeof pattern !== 'string')
 			return;
 
 		var ic = wildcard_to_RegExp.w_chars, r;
-		if ((f & 1) && !new RegExp('[' + ic + ']').test(p))
-			return p;
+		if ((flags & 1) && !new RegExp('[' + ic + ']').test(pattern))
+			return pattern;
 
 		ic = '[^' + ic + ']';
 		if (false) {
 			// old: 考慮 \
-			r = p.replace(/(\\*)(\*+|\?+|\.)/g, function($0, $1, $2) {
+			r = pattern.replace(/(\\*)(\*+|\?+|\.)/g, function($0, $1, $2) {
 				var c = $2.charAt(0);
 				return $1.length % 2 ? $0 : $1
 						+ (c == '*' ? ic + '*' : c == '?' ? ic + '{'
 								+ $2.length + '}' : '\\' + $2);
 			})
 		}
-		r = p
+		r = pattern
 
 		// 處理目錄分隔字元：多轉一，'/' → '\\' 或相反
 		.replace(/[\\\/]+/g, library_namespace.env.path_separator)
@@ -996,15 +995,18 @@ function module_code(library_namespace) {
 		.replace(/\[!([^\]]*)\]/g, '[^$1]');
 
 		// 有變化的時候才 return RegExp
-		if (!(f & 1) || p !== r)
+		if (!(flags & 1) || pattern !== r) {
 			try {
-				p = new RegExp(f & 2 ? '^' + r + '$' : r, 'i');
+				pattern = new RegExp(flags & 2 ? '^' + r + '$' : r, 'i');
 			} catch (e) {
 				// 輸入了不正確的 RegExp：未預期的次數符號等
 			}
+		}
 
-		return p;
+		return pattern;
 	}
+
+	_.wildcard_to_RegExp = wildcard_to_RegExp;
 
 	function remove_Object_value(object, value) {
 		for ( var i in object)
@@ -2733,14 +2735,14 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定特殊功能與選項 options = {<br />
 	 *            found : found_callback(index, not_found:
-	 *            closed/未準確相符合，僅為趨近、近似),<br />
+	 *            closed/is_near/未準確相符合，僅為趨近、近似),<br />
 	 *            near : not_found_callback(較小的 index, not_found),<br />
 	 *            start : start index,<br />
 	 *            last : last/end index,<br />
 	 *            length : search length.<br />
 	 *            <em>last 與 length 二選一。</em><br /> }
 	 * 
-	 * @returns 未設定 options 時，未找到為 NOT_FOUND(-1)，找到為 index。
+	 * @returns default: 未設定 options 時，未找到為 NOT_FOUND(-1)，找到為 index。
 	 * 
 	 * @since 2013/3/3 19:30:2 create.<br />
 	 */
@@ -2845,7 +2847,9 @@ function module_code(library_namespace) {
 		callback = not_found && options.near || options.found;
 		// console.log([ not_found, callback, index ]);
 
-		return Array.isArray(callback) ? callback[index]
+		return Array.isArray(callback)
+		// treat options.found as mapper
+		? callback[index]
 		//
 		: typeof callback === 'function' ? callback.call(array, index,
 				not_found)
@@ -2855,7 +2859,9 @@ function module_code(library_namespace) {
 		|| library_namespace.is_RegExp(value)
 		// assert: 此時 index === 0 or array.length-1
 		// 這樣會判別並回傳首個匹配的。
-		&& (index === 0 && comparator(array[index]) > 0)) ? NOT_FOUND : index;
+		&& (index === 0 && comparator(array[index]) > 0)) ? NOT_FOUND
+		// default: return index of value
+		: index;
 	}
 
 	search_sorted_Array.default_comparator = general_ascending;
@@ -3620,6 +3626,9 @@ function module_code(library_namespace) {
 							JSON.stringify(from_unique) ], 3, 'LCS.backtrack');
 						}
 					}
+					// TODO: 對於比較長的結構，這裡常出現
+					// RangeError: Maximum call stack size exceeded
+					// workaround: 現在只能以重跑程式、跳過這篇文章繞過。
 					backtrack(from_index - 1, to_index, all_list);
 
 					if (get_all) {
@@ -3668,7 +3677,12 @@ function module_code(library_namespace) {
 					+ ') || isNaN(' + to_index + ')');
 			throw new Error('LCS: isNaN(from_index) || isNaN(to_index)');
 		}
-		backtrack(from_index, to_index, all_list);
+		try {
+			backtrack(from_index, to_index, all_list);
+		} catch (e) {
+			throw new RangeError(
+					'Maximum call stack size exceeded @ backtrack()');
+		}
 
 		// 以下為後續處理。
 		if (get_all) {
@@ -4306,6 +4320,11 @@ function module_code(library_namespace) {
 
 	// ------------------------------------
 
+	var has_native_Math_imul = Math.imul
+			&& !Math.imul[library_namespace.env.not_native_keyword];
+
+	// ------------------------------------
+
 	set_method(String.prototype, {
 		covers : function(string) {
 			return this.length >= string.length
@@ -4352,7 +4371,31 @@ function module_code(library_namespace) {
 		edit_distance : set_bind(Levenshtein_distance),
 		diff_with : diff_with_String,
 
-		display_width : set_bind(String_display_width)
+		display_width : set_bind(String_display_width),
+
+		// https://docs.oracle.com/javase/10/docs/api/java/lang/String.html#hashCode()
+		hashCode : has_native_Math_imul
+		// https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0
+		? function hashCode_imul() {
+			var hash = 0;
+			for (var index = 0, length = this.length; index < length; index++) {
+				hash = (Math.imul(31, hash) + this.charCodeAt(index))
+				// Convert to 32bit integer
+				| 0;
+			}
+			return hash;
+		}
+		// https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+		// https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
+		: function hashCode_left_shift() {
+			var hash = 0;
+			for (var index = 0, length = this.length; index < length; index++) {
+				hash = ((hash << 5) - hash + this.charCodeAt(index))
+				// Convert to 32bit integer
+				| 0;
+			}
+			return hash;
+		}
 	});
 
 	set_method(Number.prototype, {

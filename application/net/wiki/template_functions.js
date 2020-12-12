@@ -857,6 +857,7 @@ function module_code(library_namespace) {
 		return parsed.toString();
 	}
 
+	// @see https://en.wikipedia.org/wiki/Wikipedia:Wikipedia_Signpost/2008-03-24/Dispatches
 	function parse_Article_history_token(token, item_list) {
 		if (!(token.name in Article_history__names))
 			return;

@@ -3395,15 +3395,15 @@ function test_wiki() {
 		wikitext = '#1\n#2\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #1');
 		assert(['#1\n#2', parsed[0].toString()], 'wiki.parse: list #1-1');
-		assert(['#', parsed[0].list_type], 'wiki.parse: list #1-1');
-		assert([2, parsed[0].length], 'wiki.parse: list #1-2');
+		assert(['#', parsed[0].list_type], 'wiki.parse: list #1-2');
+		assert([2, parsed[0].length], 'wiki.parse: list #1-3');
 		wikitext = 'a\n*1\n*2\n*3\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #2');
 		assert(['\n', parsed[1]], 'wiki.parse: list #2-1');
 		assert(['*1\n*2\n*3', parsed[2].toString()], 'wiki.parse: list #2-2');
 		assert(['*', parsed[2].list_type], 'wiki.parse: list #2-3');
 		assert([3, parsed[2].length], 'wiki.parse: list #2-4');
-		assert(['2', parsed[2][1].toString()], 'wiki.parse: list #2-5');
+		assert(['2', parsed[2][1][0].toString()], 'wiki.parse: list #2-5');
 		wikitext = 'a\n#1\n#2\n##31\n##32\n#4\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #3');
 		wikitext = 'a{{T|\n*1\n*2\n}}f'; parsed = CeL.wiki.parser(wikitext).parse();
@@ -3457,6 +3457,9 @@ function test_wiki() {
 			assert(['w:en:2001: A Space Odyssey', wiki.normalize_title('w:en:2001: A Space Odyssey')], 'wiki.normalize_title() #7');
 			assert(['w:en:2001: A Space Odyssey', wiki.normalize_title('w:EN:2001: A Space Odyssey')], 'wiki.normalize_title() #8');
 			assert(['ArXiv', wiki.normalize_title('arXiv')], 'wiki.normalize_title() #9');
+
+			assert(wiki.is_namespace('2001: A Space Odyssey', 0), 'wiki.is_namespace() #1');
+			assert(wiki.is_namespace('Talk:ABC', 'talk'), 'wiki.is_namespace() #2');
 
 			_finish_test('wiki: namespace');
 		});

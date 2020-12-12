@@ -904,6 +904,7 @@ function module_code(library_namespace) {
 				if (!type
 				// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
 				|| type === (Array.isArray(token) ? token.type : 'plain')) {
+					// options.set_index
 					if (options.add_index && typeof token !== 'string') {
 						// 假如需要自動設定 .parent, .index 則必須特別指定。
 						// token.parent[token.index] === token
@@ -1542,6 +1543,12 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(token);
+		if (token.type in {
+			'function' : true,
+			parameter : true
+		}) {
+			token.unconvertible = true;
+		}
 
 		// token that may be handlable 請檢查是否可處理此標題。
 		if (!token.unconvertible)
@@ -2096,9 +2103,15 @@ function module_code(library_namespace) {
 					token = buffer.length > 0 ? buffer.shift()
 							: section[section_index++];
 					while (/* token && */token.type === 'list') {
+						var list_item = token.shift();
 						// 因為使用習慣問題，每個列表必須各別計算使用者留言次數。
-						Array.prototype.unshift.apply(buffer, token.slice(1));
-						token = token[0];
+						Array.prototype.unshift.apply(buffer, token);
+						if (list_item.length === 1
+								&& list_item[0].type === 'list') {
+							token = list_item[0];
+						} else {
+							token = list_item;
+						}
 					}
 
 					if (typeof token === 'string') {
@@ -3169,15 +3182,10 @@ function module_code(library_namespace) {
 			return this.join('\n');
 		},
 		list : function() {
-			var list_prefix = this.list_prefix;
-			return this.map(function(item, index) {
-				return (list_prefix && list_prefix[index] || '') + item;
-			}).join('');
-
-			return this.list_type + this.join('\n' + this.get_item_prefix());
+			return this.join('');
 		},
 		list_item : function() {
-			return this.join('');
+			return this.list_prefix + this.join('');
 		},
 		pre : function() {
 			return ' ' + this.join('\n ');
@@ -3196,32 +3204,6 @@ function module_code(library_namespace) {
 
 	// const , for <dl>
 	var DEFINITION_LIST = 'd';
-	function get_item_prefix() {
-		if (!this.parent)
-			return this.list_type;
-		return this.parent.get_item_prefix() + this.list_type;
-	}
-	// list_token.splice()
-	// @inner
-	function list_splice(start, deleteCount) {
-		var list_prefix = this.list_prefix;
-		var args = Array.prototype.slice.call(arguments);
-		var prefix_args = args.clone();
-		var first_prefix, prefix = start > 0 && list_prefix[start - 1]
-				|| list_prefix[start] || this.list_type + ' ';
-		if (!prefix.startsWith('\n')) {
-			first_prefix = prefix;
-			prefix = '\n' + prefix;
-		}
-		// assert: /^\n[*#:;]+/.test(prefix) && /^[*#:;]+/.test(first_prefix)
-		for (var index = 2; index < args.length; index++) {
-			args[index] = set_wiki_type(args[index], 'plain');
-			prefix_args[index] = start === 0 && index === 2 ? first_prefix
-					|| prefix.replace(/^\n/, '') : prefix;
-		}
-		Array.prototype.splice.apply(list_prefix, prefix_args);
-		return Array.prototype.splice.apply(this, args);
-	}
 
 	var Magic_words_hash = Object.create(null);
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=functionhooks&utf8&format=json
@@ -4978,16 +4960,18 @@ function module_code(library_namespace) {
 		}
 
 		function parse_list_line(line) {
-			function push_list_item(item, no_parse) {
+			function push_list_item(item, list_prefix, no_parse) {
 				if (!no_parse) {
 					// 經過改變，需再進一步處理。
 					item = parse_wikitext(item, options, queue);
 				}
 				// console.trace(item);
-				if (item.type !== 'plain')
-					item = [ item ];
-				_set_wiki_type(item, 'list_item');
-				latest_list.push(item);
+				item = _set_wiki_type(item, 'list_item');
+				// 將 .list_prefix 結合在 list_item 之上。
+				// (list_item_token.list_prefix)。
+				item.list_prefix = list_prefix;
+				if (latest_list)
+					latest_list.push(item);
 				return item;
 			}
 
@@ -5006,7 +4990,7 @@ function module_code(library_namespace) {
 			list_prefixes_now.truncate(position);
 			list_now.truncate(position);
 
-			var prefix,
+			var list_prefix,
 			// is <dt>
 			is_dt,
 			// latest_list === list_now[list_now.length - 1]
@@ -5016,31 +5000,31 @@ function module_code(library_namespace) {
 			if (!matched) {
 				if (position > 0) {
 					// console.log([ position, line ]);
-					var prefix = line.slice(0, position);
-					is_dt = prefix.endsWith(';');
+					// '\n': from `wikitext.split('\n')`
+					list_prefix = '\n' + line.slice(0, position);
+					is_dt = list_prefix.endsWith(';');
 					line = line.slice(position);
 					matched = line.match(/^\s+/);
 					if (matched) {
 						// 將空白字元放在 .list_prefix 可以減少很多麻煩。
-						prefix += matched[0];
+						list_prefix += matched[0];
 						line = line.slice(matched[0].length);
 					}
-					// '\n': from `wikitext.split('\n')`
-					latest_list.list_prefix.push('\n' + prefix);
 
 					if (is_dt) {
-						latest_list.dt_index.push(latest_list.length);
+						latest_list.dt_index.push(latest_list.length
+						// -'\n'.length
+						- 1);
 
 						// search "; title : definition"
 						if (matched = line.match(/^(.*)(:\s*)(.*)$/)) {
-							push_list_item(matched[1]);
-							// 將空白字元放在 .list_prefix 可以減少很多麻煩。
-							latest_list.list_prefix.push(matched[2]);
+							push_list_item(matched[1], list_prefix);
+							list_prefix = matched[2];
 							line = matched[3];
 						}
 					}
 
-					push_list_item(line);
+					push_list_item(line, list_prefix);
 				} else {
 					// 非列表。
 					// assert: position === -1
@@ -5050,38 +5034,39 @@ function module_code(library_namespace) {
 			}
 
 			if (position > 0) {
-				prefix = line.slice(0, position);
 				// '\n': from `wikitext.split('\n')`
-				latest_list.list_prefix.push('\n' + prefix);
-				if (prefix.endsWith(';')) {
-					latest_list.dt_index.push(latest_list.length);
+				list_prefix = '\n' + line.slice(0, position);
+				if (list_prefix.endsWith(';')) {
+					latest_list.dt_index.push(latest_list.length
+					// -'\n'.length
+					- 1);
 				}
+			} else {
+				list_prefix = '';
 			}
 
 			var list_symbols = matched[1].split('');
 			line = matched[3];
 			list_symbols.forEach(function handle_list_item(list_type) {
-				// 處理多層選單。
+				// 處理直接上多層選單的情況。
+				// e.g., ";#a\n:#b"
 				var list = _set_wiki_type([], 'list');
-				list.splice = list_splice;
-				// .list_prefix: for ";#a\n:#b"
-				list.list_prefix = [ list_type ];
 				// 注意: 在以 API 取得頁面列表時，也會設定 pages.list_type。
-				list.list_type = list_type = list_conversion[list_type]
-						|| list_type;
+				list.list_type = list_conversion[list_type] || list_type;
 				if (list.list_type === DEFINITION_LIST) {
 					// list[list.dt_index[NO]] 為 ";"。
 					list.dt_index = [];
 				}
-				// .get_item_prefix() 會回溯 parent list，使得節點搬動時也能夠顯示出正確的前綴。
-				// 然而這不能應付像 ";#a\n:#b" 這樣子的特殊情況，因此最後採用 .list_prefix 的方法。
-				// list.get_item_prefix = get_item_prefix;
 
 				if (latest_list) {
-					list.index = latest_list.length;
-					list.parent = latest_list;
-					latest_list.push(list);
+					var list_item = push_list_item([ list ],
+					//
+					list_prefix, true);
+					list_item.index = latest_list.length - 1;
+					list_item.parent = latest_list;
+					list_prefix = list_type;
 				} else {
+					list_prefix += list_type;
 					queue.push(list);
 					lines_without_style.push(
 					//
@@ -5090,13 +5075,14 @@ function module_code(library_namespace) {
 
 				latest_list = list;
 				list_now.push(list);
-				list_prefixes_now.push(list_type);
+				list_prefixes_now.push(list.list_type);
 			});
 
-			is_dt = latest_list.list_prefix[0].endsWith(';');
+			// console.trace(latest_list);
+			is_dt = list_prefix.endsWith(';');
 
 			// matched[2]: 將空白字元放在 .list_prefix 可以減少很多麻煩。
-			latest_list.list_prefix[0] += matched[2];
+			list_prefix += matched[2];
 
 			// is <dt>, should use: ';' ===
 			// latest_list.list_prefix[latest_list.list_prefix.length - 1]
@@ -5108,14 +5094,13 @@ function module_code(library_namespace) {
 
 				// search "; title : definition"
 				if (matched = line.match(/^(.*)(:\s*)(.*)$/)) {
-					push_list_item(matched[1]);
-					// 將空白字元放在 .list_prefix 可以減少很多麻煩。
-					latest_list.list_prefix.push(matched[2]);
+					push_list_item(matched[1], list_prefix);
+					list_prefix = matched[2];
 					line = matched[3];
 				}
 			}
 
-			push_list_item(line);
+			push_list_item(line, list_prefix);
 		}
 
 		function parse_hr_tag(line, index) {
