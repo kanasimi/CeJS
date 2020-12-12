@@ -256,12 +256,16 @@ function module_code(library_namespace) {
 			wiki_API.page(title, function(page_data) {
 				if (options && (!options.ignore_denial && wiki_API_edit
 				// TODO: 每經過固定時間，或者編輯特定次數之後，就再檢查一次。
-				.denied(page_data, options.bot_id, options.notification))) {
+				.denied(page_data, options.bot_id,
+				// 若您不想接受關注度提醒，請使用{{bots|optout=notification_name}}模板。
+				// Please using {{bots|optout=notification_name}},
+				// the bot will skip this page.
+				options.notification_name))) {
 					library_namespace.warn(
 					// Permission denied
 					'wiki_API_edit: Denied to edit '
 							+ wiki_API.title_link_of(page_data) + ': '
-							+ options.notification);
+							+ options.notification_name);
 					callback(page_data, 'denied');
 
 				} else {
@@ -628,12 +632,14 @@ function module_code(library_namespace) {
 	 *            page contents 頁面內容。
 	 * @param {String}bot_id
 	 *            機器人帳戶名稱。
-	 * @param {String}notification
+	 * @param {String}notification_name
 	 *            message notifications of action. 按通知種類而過濾(optout)。
+	 *            ignore_opted_out allows /[a-z\d\-\_]+/ that will not affects
+	 *            RegExp. ignore_opted_out will splits with /[,|]/.
 	 * 
 	 * @returns {Boolean|String}封鎖機器人帳戶訪問。
 	 */
-	wiki_API_edit.denied = function(content, bot_id, notification) {
+	wiki_API_edit.denied = function(content, bot_id, notification_name) {
 		if (!content)
 			return;
 		var page_data;
@@ -651,32 +657,36 @@ function module_code(library_namespace) {
 		denied, allow_bot;
 
 		if (bots) {
-			library_namespace.debug('test ' + bot_id + '/' + notification, 3,
-					'wiki_API_edit.denied');
+			library_namespace.debug('test ' + bot_id + '/' + notification_name,
+					3, 'wiki_API_edit.denied');
 			// botlist 以半形逗號作間隔。
 			bot_id = (bot_id = bot_id && bot_id.toLowerCase()) ? new RegExp(
 					'(?:^|[\\s,])(?:all|' + bot_id + ')(?:$|[\\s,])', 'i')
 					: wiki_API_edit.denied.all;
 
-			if (notification) {
-				if (typeof notification === 'string'
+			if (notification_name) {
+				if (typeof notification_name === 'string'
 				// optout 以半形逗號作間隔。
-				&& notification.includes(','))
-					notification = notification.split(',');
-				if (Array.isArray(notification))
-					notification = notification.join('|');
-				if (typeof notification === 'string')
+				&& notification_name.includes(',')) {
+					notification_name = notification_name.split(',');
+				}
+				if (Array.isArray(notification_name)) {
+					notification_name = notification_name.map(function(name) {
+						return name.trim();
+					}).join('|');
+				}
+				if (typeof notification_name === 'string') {
 					// 預設必須包含 optout=all
-					notification = new RegExp('(?:^|[\\s,])(?:all|'
-							+ notification.toLowerCase() + ')(?:$|[\\s,])');
-				else if (!library_namespace.is_RegExp(notification)) {
+					notification_name = new RegExp('(?:^|[\\s,])(?:all|'
+							+ notification_name.trim() + ')(?:$|[\\s,])');
+				} else if (!library_namespace.is_RegExp(notification_name)) {
 					library_namespace.warn(
 					//
-					'wiki_API_edit.denied: Invalid notification: ['
-							+ notification + ']');
-					notification = null;
+					'wiki_API_edit.denied: Invalid notification_name: ['
+							+ notification_name + ']');
+					notification_name = null;
 				}
-				// 自訂 {RegExp}notification 可能頗危險。
+				// 警告: 自訂 {RegExp}notification_name 可能頗危險。
 			}
 
 			bots.some(function(data) {
@@ -690,10 +700,10 @@ function module_code(library_namespace) {
 
 				// 過濾機器人所發出的通知/提醒
 				// 頁面/用戶以bots模板封鎖通知
-				if (notification) {
+				if (notification_name) {
 					PATTERN = /(?:^|\|)[\s\n]*optout[\s\n]*=[\s\n]*([^|]+)/ig;
 					while (matched = PATTERN.exec(data)) {
-						if (notification.test(matched[1])) {
+						if (notification_name.test(matched[1])) {
 							// 一被拒絕即跳出。
 							return denied = 'Opt out of ' + matched[1];
 						}

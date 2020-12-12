@@ -3751,7 +3751,7 @@ function test_wiki() {
 	// edit flow page
 	var wiki = CeL.wiki.login('', '');
 	wiki.page('Wikipedia talk:Flow tests').edit('test edit', {
-		notification: 'afd',
+		notification_name: 'afd',
 		section: 'new',
 		sectiontitle: 'test {{bot}}'
 	});

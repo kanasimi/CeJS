@@ -687,7 +687,7 @@ function module_code(library_namespace) {
 				if ((!next[2] || !next[2].ignore_denial)
 						&& wiki_API.edit.denied(next[2].page_to_edit,
 								this.token.lgname, next[2]
-										&& next[2].notification)) {
+										&& next[2].notification_name)) {
 					// {{bot}} support for flow page
 					// 採用 next[2].page_to_edit 的方法，
 					// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
@@ -740,7 +740,8 @@ function module_code(library_namespace) {
 
 			if ((!next[2] || !next[2].ignore_denial)
 					&& wiki_API.edit.denied(next[2].page_to_edit,
-							this.token.lgname, next[2] && next[2].notification)) {
+							this.token.lgname, next[2]
+									&& next[2].notification_name)) {
 				// 採用 next[2].page_to_edit 的方法，
 				// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 				library_namespace

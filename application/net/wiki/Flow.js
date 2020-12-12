@@ -346,7 +346,7 @@ function module_code(library_namespace) {
 
 		// default parameters
 		var _options = {
-			// notification : 'flow',
+			// notification_name : 'flow',
 			submodule : 'new-topic',
 			page : title,
 			nttopic : topic,
