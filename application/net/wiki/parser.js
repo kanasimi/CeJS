@@ -2106,15 +2106,13 @@ function module_code(library_namespace) {
 					token = buffer.length > 0 ? buffer.shift()
 							: section[section_index++];
 					while (/* token && */token.type === 'list') {
-						var list_item = token.shift();
-						// 因為使用習慣問題，每個列表必須各別計算使用者留言次數。
-						Array.prototype.unshift.apply(buffer, token);
-						if (list_item.length === 1
-								&& list_item[0].type === 'list') {
-							token = list_item[0];
-						} else {
-							token = list_item;
-						}
+						var _buffer = [];
+						token.forEach(function(list_item) {
+							// 因為使用習慣問題，每個列表必須各別計算使用者留言次數。
+							_buffer.append(list_item);
+						});
+						token = _buffer.shift();
+						Array.prototype.unshift.apply(buffer, _buffer);
 					}
 
 					if (typeof token === 'string') {
@@ -4229,9 +4227,7 @@ function module_code(library_namespace) {
 
 				// https://test.wikipedia.org/wiki/L
 
-				if (typeof token === 'string') {
-					token = _set_wiki_type(token, 'plain');
-				} else if (token.type !== 'plain') {
+				if (token.type !== 'plain') {
 					// e.g., "{{#time:n月j日|2020-09-15|{{PAGELANGUAGE}}}}"
 					token = _set_wiki_type([ token ], 'plain');
 				}
