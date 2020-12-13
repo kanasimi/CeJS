@@ -2029,6 +2029,9 @@ function module_code(library_namespace) {
 			: level === 2)) {
 				// console.log(section_title_token);
 				add_root_section(section_title_index);
+			} else {
+				// library_namespace.warn('Ignore ' + section_title_token);
+				// console.log([ parent_token === _this, level ]);
 			}
 
 			// ----------------------------------
@@ -4136,25 +4139,40 @@ function module_code(library_namespace) {
 
 			// if not [[mw:Help:Extension:ParserFunctions]]
 			if (!matched) {
-				index = +parameters[0].between(include_mark, end_mark);
-				if (index && queue[index = +index] && !(queue[index].type in {
-					// incase:
-					// {{Wikipedia:削除依頼/ログ/{{今日}}}}
-					transclusion : true,
-					// incase:
-					// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}
-					'function' : true,
+				parameters[0].each_between(include_mark, end_mark, function(
+						index) {
+					if (index && queue[index = +index]
+					//
+					&& !(queue[index].type in {
+						// incase:
+						// {{Wikipedia:削除依頼/ログ/{{今日}}}}
+						transclusion : true,
+						// incase:
+						// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日
+						// |-7 days +9 hours}}}}
+						'function' : true,
+						// {{tl{{{1|}}}|p}}
+						'parameter' : true,
 
-					// allow {{tl<!-- t= -->}}
-					comment : true
-				})) {
+						// allow {{tl<!-- t= -->}}
+						comment : true
+					})) {
+						// console.log(queue[index]);
+						matched = true;
+					}
+				});
+
+				if (matched
+				// {{t<!-- -->{|p}}
+				|| /[{}]/.test(parameters[0])) {
 					// console.log(parameters);
-					// console.log(queue[index]);
 
 					// e.g., `{{ {{tl|t}} | p }}` is incalid:
 					// → `{{ {{t}} | p }}`
 					return all;
 				}
+
+				// console.log(JSON.stringify(parameters[0]));
 
 				// e.g., token.name ===
 				// 'Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}'
@@ -4184,6 +4202,7 @@ function module_code(library_namespace) {
 
 				if (_index === 0) {
 					// console.log(token);
+
 					if (false && typeof token === 'string') {
 						return _set_wiki_type(token.split(normalize ? /\s*:\s*/
 								: ':'), 'page_title');
@@ -4395,6 +4414,14 @@ function module_code(library_namespace) {
 					parameters.name = namespace[1];
 					// 此時以 parameters[0].slice(1) 可獲得首 parameter。
 					parameters.is_magic_word = true;
+
+					if (parameters.length === 1) {
+						var matched = parameters[0].match(/^(\w+:)([\s\S]*)$/);
+						if (matched) {
+							parameters[0] = matched[1];
+							parameters.push(matched[2]);
+						}
+					}
 
 				} else {
 					if (namespace[0]) {
@@ -7215,6 +7242,88 @@ function module_code(library_namespace) {
 		});
 
 		return table.join('\n|-\n') + '\n|}';
+	}
+
+	// ------------------------------------------------------------------------
+
+	// render_template('{{{1|}}} {{{2|}}}', '{{t|a|b}}');
+	function render_template(template_code, template_arguments, options) {
+		var caller_template_token = wiki_API.parse(template_arguments
+				.toString());
+		if (!caller_template_token
+				|| caller_template_token.type !== 'transclusion') {
+			return template_arguments;
+		}
+
+		var parsed = wiki_API.parse(template_code.toString());
+		parsed.each('tag', function(tag_token) {
+			if (tag_token.tag === 'noinclude') {
+				return '';
+			}
+		}, true);
+
+		function render_parameter(parameter_token) {
+			var name = parameter_token[0].toString().trim();
+			if (name in caller_template_token.parameters) {
+				return caller_template_token.parameters[name];
+			}
+
+			name = parameter_token[1];
+			if (!name) {
+				// e.g., {{{class|}}}
+				return name.length === 1 ? this.toString() : name;
+			}
+
+			;
+		}
+		function render_all_parameters(token) {
+			if (Array.isArray(token))
+				for_each_token.call(token, 'parameter', render_parameter, true);
+		}
+		function render_result_of_parameter(name) {
+			name = function_token[function_token.index_of[name]];
+			render_all_parameters(name);
+			return name.toString().trim();
+		}
+
+		// [[mw:Help:Magic words § Parser functions]],
+		// [[mw:Help:Extension:ParserFunctions]], [[Help:Magic words]]
+		parsed.each('function', function(function_token, index, parent) {
+			switch (function_token.name) {
+			case 'if':
+				var name = render_result_of_parameter(1);
+				return function_token[name ? 2 : 3]
+				// e.g., {{#if:|v}}
+				|| '';
+
+			case 'switch':
+				var name = render_result_of_parameter(1);
+				if (name in function_token.parameters)
+					return function_token.parameters[name];
+
+				// TODO: {{#switch:v|{{#expr:2*3}}=six}}
+				for (var index = 2; index < function_token.length; index++) {
+					if (name !== render_result_of_parameter(index))
+						continue;
+					// found
+					var index_of = function_token.index_of[index];
+					while ((++index in function_token.parameters)
+							&& index === ++index_of)
+						;
+					return function_token[function_token.index_of[index]];
+				}
+
+				return function_token.parameters['#default'] || '';
+
+			case 'UCFIRST':
+				// {{ucfirst:value}}
+				return wiki_API.upper_case_initial(function_token[1] || '');
+
+			}
+		}, true);
+
+		// 解碼剩下的 parameters。
+		render_all_parameters(parsed);
 	}
 
 	// ------------------------------------------------------------------------

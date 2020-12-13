@@ -3283,6 +3283,28 @@ function test_wiki() {
 		wikitext = '<b a="A">i</b>'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{=}} #4');
 
+		wikitext = '{{ns:1} {{ucfirst:102}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{function}} #1');
+
+		wikitext = '{{t{{T}}<nowiki>{{{</nowiki>{-{}-{T|1}}{{T|2}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #1');
+		assert(['{{t', parsed[0]], 'wiki.parse: {{invalid}} #1-1');
+		wikitext = '{{t{{T}}{-{}-{T}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #2');
+		assert(['{{t', parsed[0]], 'wiki.parse: {{invalid}} #2-1');
+		wikitext = '{{t{{T}}-{}-}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #3');
+		assert(['{{t', parsed[0]], 'wiki.parse: {{invalid}} #3-1');
+		wikitext = '{{t-{}-|p}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #4');
+		assert(['{{t', parsed[0]], 'wiki.parse: {{invalid}} #4-1');
+		wikitext = '{{t<!-- -->{|p}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #5');
+		assert(['{{t', parsed[0]], 'wiki.parse: {{invalid}} #5-1');
+		wikitext = '{{tl{{{1|}}}|p}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #6');
+		assert(['transclusion', parsed.type], 'wiki.parse: {{invalid}} #6-1');
+
 		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', p2: 'vp2' })], 'template_object_to_wikitext: #1');
 		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
 		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function (text_array) { return text_array.filter(function (text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');

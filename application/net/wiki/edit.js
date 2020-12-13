@@ -257,7 +257,7 @@ function module_code(library_namespace) {
 				if (options && (!options.ignore_denial && wiki_API_edit
 				// TODO: 每經過固定時間，或者編輯特定次數之後，就再檢查一次。
 				.denied(page_data, options.bot_id,
-				// 若您不想接受關注度提醒，請使用{{bots|optout=notification_name}}模板。
+				// 若您不想接受機器人的通知、提醒或警告，請使用{{bots|optout=notification_name}}模板。
 				// Please using {{bots|optout=notification_name}},
 				// the bot will skip this page.
 				options.notification_name))) {
