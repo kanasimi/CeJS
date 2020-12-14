@@ -915,7 +915,7 @@ function module_code(library_namespace) {
 					return;
 				}
 				if (!options.is_page_title && (!isNaN(_n)
-				// 要指定所有值，請使用*。
+				// 要指定所有值，請使用*。 To specify all values, use *.
 				|| _n === '*')) {
 					// {Integer}_n
 					list.push(_n);
@@ -2466,15 +2466,28 @@ function module_code(library_namespace) {
 				});
 			}
 			// latest raw task raw configuration
-			session.latest_task_configuration
+			var configuration = wiki_API.parse.configuration(page_data);
+			// console.log(configuration);
 			// TODO: valid configuration 檢測數值是否合適。
-			= wiki_API.parse.configuration(page_data);
-			// console.log(session.latest_task_configuration);
+			session.latest_task_configuration = configuration;
+
+			// 本地化 Localization: load localized messages.
+			// e.g., [[w:en:User:Cewbot/log/20150916/configuration]]
+			if (library_namespace.is_Object(configuration.L10n)) {
+				var language = session.language || wiki_API.language;
+				gettext.set_text(configuration.L10n, language);
+				library_namespace.info('adapt_configuration: Load '
+						+ Object.keys(configuration.L10n).length + ' '
+						+ language + ' messages.');
+				// console.trace(configuration.L10n);
+				// free
+				// delete configuration.L10n;
+			}
+
 			if (typeof configuration_adapter === 'function') {
 				// 每次更改過設定之後，重新執行一次。
 				// 檢查從網頁取得的設定，檢測數值是否合適。
-				configuration_adapter.call(session,
-						session.latest_task_configuration);
+				configuration_adapter.call(session, configuration);
 			}
 		}
 	}

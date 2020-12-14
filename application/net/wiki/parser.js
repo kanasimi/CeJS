@@ -3186,7 +3186,7 @@ function module_code(library_namespace) {
 			return this.join('');
 		},
 		list_item : function() {
-			return this.list_prefix + this.join('');
+			return (this.list_prefix || '') + this.join('');
 		},
 		pre : function() {
 			return ' ' + this.join('\n ');
@@ -4411,7 +4411,8 @@ function module_code(library_namespace) {
 					// 此時以 parameters[0].slice(1) 可獲得首 parameter。
 					parameters.is_magic_word = true;
 
-					if (parameters.length === 1) {
+					if (parameters.length === 1
+							&& typeof parameters[0] === 'string') {
 						var matched = parameters[0].match(/^(\w+:)([\s\S]*)$/);
 						if (matched) {
 							parameters[0] = matched[1];
@@ -6483,15 +6484,17 @@ function module_code(library_namespace) {
 							cell = normalize_value(cell.join(''));
 						} else {
 							has_list = null;
+							// console.trace(cell);
 							cell.forEach(function(token) {
-								if (token.type === 'list')
+								if (token.type === 'list') {
 									if (has_list) {
 										has_list.append(token
 												.map(normalize_value));
 									} else {
 										has_list = token.map(normalize_value);
 									}
-								// assert: token.trim() === ''
+								}
+								// 只取 list 中的值。
 							});
 							cell = has_list;
 						}
