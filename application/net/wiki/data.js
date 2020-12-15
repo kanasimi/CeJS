@@ -217,7 +217,8 @@ function module_code(library_namespace) {
 					data_config[1], data_config[2]);
 		} else {
 			session.data_session = new wiki_API(data_config[0], data_config[1],
-					data_config[2]);
+			// 警告: 可能需要設定 options.is_running
+			data_config[2]);
 		}
 
 		library_namespace.debug('Setup 宿主 host session.', 2,

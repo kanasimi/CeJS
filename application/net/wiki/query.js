@@ -187,11 +187,12 @@ function module_code(library_namespace) {
 
 		// 處理 action
 		library_namespace.debug('action: ' + action, 2, 'wiki_API_query');
-		if (typeof action === 'string')
+		if (typeof action === 'string') {
 			action = [ , action ];
-		else if (!Array.isArray(action))
+		} else if (!Array.isArray(action)) {
 			library_namespace.error('wiki_API_query: Invalid action: ['
 					+ action + ']');
+		}
 		library_namespace.debug('api URL: ('
 				+ (typeof action[0])
 				+ ') ['
@@ -203,7 +204,7 @@ function module_code(library_namespace) {
 		action[0] = wiki_API.api_URL(action[0]);
 
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
-		if (!/^[a-z]+=/.test(action[1]))
+		if (!/^[a-z]+=/.test(action[1]) && !options.post_data_only)
 			action[1] = 'action=' + action[1];
 
 		var session = wiki_API.session_of_options(options);
@@ -506,6 +507,7 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(action);
+		// console.log(POST_data);
 		get_URL(action, function(XMLHttp, error) {
 			var status_code, response;
 			if (error) {

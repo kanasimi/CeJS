@@ -120,7 +120,7 @@ function module_code(library_namespace) {
 	 * @param {String}password
 	 *            user password
 	 * @param {String}[API_URL]
-	 *            language code or API URL
+	 *            language code or API Endpoint URL
 	 * 
 	 * @returns {wiki_API} wiki site API
 	 * @template wiki_API
@@ -161,6 +161,12 @@ function module_code(library_namespace) {
 
 		// action queue 佇列。應以 append，而非整個換掉的方式更改。
 		this.actions = [];
+		if (options.is_running) {
+			// login 前便執行其他作業，可能導致 Session=deleted。 e.g., running
+			// options.configuration_adapter() @ 20201008.fix_anchor.js
+			this.actions.unshift([ options.is_running ]);
+			this.running = true;
+		}
 
 		// 紀錄各種後續檢索用索引值。應以 append，而非整個換掉的方式更改。
 		// 對舊版本須用到 for (in .next_mark)

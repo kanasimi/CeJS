@@ -197,6 +197,15 @@ function module_code(library_namespace) {
 			library_namespace
 					.error('Please use .query_API() instead of only .query()!');
 		case 'query_API':
+			// wiki_API.query(post_data, callback, options)
+			if (next[4] === undefined && library_namespace.is_Object(next[3])
+					&& next[3].post_data_only) {
+				// shift arguments
+				next[4] = next[3];
+				next[3] = next[1];
+				next[1] = '';
+			}
+
 			// wiki_API.query(action, callback, post_data, options)
 			wiki_API.query(next[1], function query_API_callback(data, error) {
 				if (typeof next[2] === 'function') {
@@ -2592,7 +2601,9 @@ function module_code(library_namespace) {
 			library_namespace.debug('已登入 [' + session.token.lgname
 					+ ']。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
 			// popup 'login'.
-			session.actions.shift();
+			// assert: session.actions[0] === ['login']
+			if (session.actions[0] && session.actions[0][0] === 'login')
+				session.actions.shift();
 			session.next();
 		}
 
@@ -2683,13 +2694,16 @@ function module_code(library_namespace) {
 			};
 		} else {
 			// 前置處理。
-			options = library_namespace.setup_options(options);
+			options = library_namespace.new_options(options);
 		}
 		// besure {Function}callback
 		callback = typeof callback === 'function' && callback;
 
-		if (!session) {
+		if (session) {
+			delete options.is_running;
+		} else {
 			// 初始化 session 與 agent。這裡 callback 當作 API_URL。
+			options.is_running = 'login';
 			session = new wiki_API(user_name, password, options);
 		}
 		if (!user_name || !password) {
@@ -2708,7 +2722,9 @@ function module_code(library_namespace) {
 		if (!('login_mark' in options) || options.login_mark) {
 			// hack: 這表示正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。
 			// @see wiki_API.prototype.next
-			if (options.login_mark) {
+			if (options.is_running) {
+				// assert: session.actions === [ 'login' ]
+			} else if (options.login_mark) {
 				// 將 'login' 置於工作佇列最前頭。
 				session.actions.unshift([ 'login' ]);
 			} else {
@@ -2727,6 +2743,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('準備登入 [' + user_name + ']。', 1,
 				'wiki_API.login');
 		wiki_API.query(action, function(data) {
+			// console.trace(data);
 			// 確認尚未登入，才作登入動作。
 			if (data === '' && !options.force) {
 				// 您已登入。
@@ -2743,7 +2760,8 @@ function module_code(library_namespace) {
 			// Fetching a token via "action=login" is deprecated.
 			// Use "action=query&meta=tokens&type=login" instead.
 			'query&meta=tokens&type=login' ], function(data, _error) {
-				// console.log([ data, error ]);
+				// console.trace(data);
+				// error && console.error(error);
 				if (_error || !data || !data.query || !data.query.tokens
 						|| !data.query.tokens.logintoken) {
 					library_namespace.error(
@@ -2781,6 +2799,8 @@ function module_code(library_namespace) {
 			wiki_API.query([ session.API_URL,
 			// 'query&meta=tokens&type=login|csrf'
 			'login' ], function(data, error) {
+				// console.trace(data);
+				// error && console.error(error);
 				if (data && data.login && data.login.result === 'NeedToken') {
 					token.lgtoken = session.token.lgtoken = data.login.token;
 					wiki_API.query([ session.API_URL, 'login' ], _done, token,

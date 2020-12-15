@@ -2475,8 +2475,9 @@ function module_code(library_namespace) {
 			// e.g., [[w:en:User:Cewbot/log/20150916/configuration]]
 			if (library_namespace.is_Object(configuration.L10n)) {
 				var language = session.language || wiki_API.language;
+				/** {Object}L10n messages. 符合當地語言的訊息內容。 */
 				gettext.set_text(configuration.L10n, language);
-				library_namespace.info('adapt_configuration: Load '
+				library_namespace.info('adapt_task_configurations: Load '
 						+ Object.keys(configuration.L10n).length + ' '
 						+ language + ' messages.');
 				// console.trace(configuration.L10n);
@@ -2488,7 +2489,9 @@ function module_code(library_namespace) {
 				// 每次更改過設定之後，重新執行一次。
 				// 檢查從網頁取得的設定，檢測數值是否合適。
 				configuration_adapter.call(session, configuration);
+				// configuration === wiki_session.latest_task_configuration
 			}
+			// Object.seal(configuration);
 		}
 	}
 
