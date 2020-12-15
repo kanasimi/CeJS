@@ -628,6 +628,9 @@ function module_code(library_namespace) {
 
 		if (library_namespace.from_Chinese_numeral)
 			title = library_namespace.from_Chinese_numeral(title);
+		// for youngaceup.js, 黄昏メアレス -魔法使いと黒猫のウィズ Chronicle-
+		// {Number}title
+		title = title.toString();
 
 		// 因為中間的章節可能已經被下架，因此依章節標題來定章節編號。
 		// \d{1,4}: e.g., http://www.moae.jp/comic/otonanosonnayatsu
