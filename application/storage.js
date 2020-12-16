@@ -40,7 +40,7 @@ function detect_require(library_namespace) {
 		return 'application.OS.Windows.file.';
 	}
 
-	throw new Error('It seems I am running on a unknown OS.');
+	library_namespace.error('It seems I am running on an unknown OS.');
 }
 
 function module_code(library_namespace) {
@@ -276,14 +276,41 @@ function module_code(library_namespace) {
 
 	_.append_path_separator = append_path_separator;
 
+	function extract_wildcard(pattern, options) {
+		var matched = library_namespace.simplify_path(pattern).match(
+				/^([\s\S]*[\\\/])?([^\\\/]+)$/);
+		if (!matched)
+			return [ pattern ];
+
+		var directory = matched[1] || '.' + path_separator;
+		pattern = library_namespace.wildcard_to_RegExp(matched[2]);
+		// console.trace(pattern);
+
+		var fso_list = library_namespace.read_directory(directory);
+		// console.trace(fso_list);
+		fso_list = fso_list.filter(function(fso_name) {
+			return pattern.test(fso_name);
+		});
+		// console.trace(fso_list);
+
+		if (!options || !options.get_name) {
+			fso_list = fso_list.map(function(fso_name) {
+				return directory + fso_name;
+			});
+		}
+		return fso_list;
+	}
+
+	_.extract_wildcard = extract_wildcard;
+
 	// 決定預設的主要下載目錄。
 	// macOS dmg APP 中無法將檔案儲存在APP目錄下。
 	// 另外安裝包也比較適合放在 home directory 之下。
 	// test_current_directory: 先嘗試下載於當前目錄下。
 	function determin_download_directory(test_current_directory) {
 		var download_directory = test_current_directory
-				&& library_namespace.platform.nodejs
-				&& require.main && require.main.filename;
+				&& library_namespace.platform.nodejs && require.main
+				&& require.main.filename;
 		if (download_directory
 		// macOS dmg electron APP 中: require.main.filename 例如為
 		// /Applications/work_crawler.app/Contents/Resources/app.asar/gui_electron/gui_electron.html

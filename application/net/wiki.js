@@ -164,7 +164,8 @@ function module_code(library_namespace) {
 		if (options.is_running) {
 			// login 前便執行其他作業，可能導致 Session=deleted。 e.g., running
 			// options.configuration_adapter() @ 20201008.fix_anchor.js
-			this.actions.unshift([ options.is_running ]);
+			if (typeof options.is_running === 'string')
+				this.actions.unshift([ options.is_running ]);
 			this.running = true;
 		}
 

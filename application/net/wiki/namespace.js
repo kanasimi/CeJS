@@ -2268,6 +2268,12 @@ function module_code(library_namespace) {
 			wiki_API.prototype.configurations);
 		}
 
+		if (!configurations) {
+			library_namespace
+					.error('adapt_site_configurations: No configurations got!');
+			return;
+		}
+
 		var general = configurations.general;
 		// Using `session.latest_site_configurations.general.variants`
 		// to test if langconversion is configured in the site.

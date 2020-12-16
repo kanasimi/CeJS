@@ -413,9 +413,8 @@ function module_code(library_namespace) {
 	 */
 	function show_value(object, name, filter) {
 		if (has_native_log) {
-			if (name)
-				console.log(name + ':');
-			console.log(object);
+			// if (name) console.log(name + ':');
+			// console.log(object);
 			return;
 		}
 		if (name === undefined && typeof object !== 'object'

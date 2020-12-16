@@ -80,7 +80,12 @@ function module_code(library_namespace) {
 			// console.trace(result);
 
 			if (!library_namespace.platform.nodejs) {
-				throw new Error('check_session_badtoken: Not using node.js!');
+				// throw new Error('check_session_badtoken: Not using
+				// node.js!');
+				library_namespace
+						.warn('check_session_badtoken: Not using node.js!');
+				callback(result);
+				return;
 			}
 			// 下面的 workaround 僅適用於 node.js。
 			if (!session.token.lgpassword) {
