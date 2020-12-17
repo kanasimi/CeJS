@@ -3049,7 +3049,7 @@ function test_wiki() {
 		wikitext = 't<!--='; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[l]]b'; parsed = CeL.wiki.parser(wikitext).parse();
-		assert(['a{{t}}b', parsed.each('link', function (token, parent, index) { return '{{t}}'; }, true).toString()]);
+		assert(['a{{t}}b', parsed.each('link', function (token, index, parent) { return '{{t}}'; }, true).toString()]);
 
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert(['file', parsed[0].type], 'wiki.parse.file #1-1');
@@ -3076,8 +3076,8 @@ function test_wiki() {
 		assert(parsed.is_link, 'wiki.parse.category #1-2');
 
 		wikitext = '{{c|d[[e]]f}}'; parsed = CeL.wiki.parser(wikitext).parse();
-		assert(['{{c|df}}', CeL.wiki.parser(wikitext).each('link', function (token, parent, index) { return ''; }, true).toString()], 'search all links');
-		assert(['{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function (token, parent, index) { return ''; }, true, 1).toString()], 'only links of level 1');
+		assert(['{{c|df}}', CeL.wiki.parser(wikitext).each('link', function (token, index, parent) { return ''; }, true).toString()], 'search all links');
+		assert(['{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function (token, index, parent) { return ''; }, true, 1).toString()], 'only links of level 1');
 		assert(['file', CeL.wiki.parse('[[FiLe:a]]').type]);
 		assert(['Ab', CeL.wiki.parse('[[FiLe:ab]]').name]);
 		// TODO: 當前解析為 'link', 應為 'text'
@@ -3321,7 +3321,7 @@ function test_wiki() {
 		assert(['b', parsed[1].tag], 'wiki.parse: HTML tag #4');
 		assert([' style="color:#000"  ', String(parsed[1][0]).toString()], 'wiki.parse: HTML tag #5: tag attributes');
 		assert(['tag_inner', parsed[1][1].type], 'wiki.parse: HTML tag #6');
-		assert(['1<b style="color:#000"  ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function (token, parent, index) { return ''; }, true).toString()], 'wiki.parse: HTML tag #7');
+		assert(['1<b style="color:#000"  ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function (token, index, parent) { return ''; }, true).toString()], 'wiki.parse: HTML tag #7');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #1');
@@ -3789,7 +3789,7 @@ function test_wiki() {
 	// test for parser, parse_wikitext()
 	var wiki_page = CeL.wiki.parser(page_data);
 	wiki_page.parse().each('plain', function (token) { if (token = token.trim()) CeL.log(token); });
-	wiki_page.each('transclusion', function (token, parent, index) { ; });
+	wiki_page.each('transclusion', function (token, index, parent) { ; });
 	//CeL.log('-'.repeat(70) + '\n' + wiki_page.toString());
 
 	CeL.wiki.parse('{{temp|{{temp2|p{a}r{}}}}}');
