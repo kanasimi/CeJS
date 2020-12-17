@@ -2839,10 +2839,10 @@ function generate_wiki_parser_token(token, wikitext) {
 
 	var document = [];
 	if (wikitext) {
-		var nonstyled = wikitext.replace(/</g, '&lt;');
+		var nonstyled = wikitext.replace(/</g, '&lt;').replace(/ /g, '&nbsp;');
 		document.push('wikitext:<br /><code class="wikitext">', wikitext.includes('\n') ? nonstyled.replace(/\n(\s*)/g, function($0, spaces) {
 			return '<br />' + '&nbsp;'.repeat(spaces.length);
-		}) : nonstyled, '</code><br />', 'result:');
+		}) : nonstyled, '</code><br />', 'result of `CeL.wiki.parse(wikitext)`:');
 	}
 
 	document.push('<table class="content_pairs">');
