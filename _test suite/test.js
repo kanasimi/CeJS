@@ -2833,7 +2833,7 @@ function generate_wiki_parser_token(token, wikitext) {
 	function push_pair(name, value) {
 		document.push(
 			'<tr><td><div class="property_name">' + name + '</div></td>',
-			'<td><div class="property_value">' + value + '</div></td></tr>',
+			'<td><div class="property_value">' + value + '</div></td></tr>'
 			);
 	}
 
