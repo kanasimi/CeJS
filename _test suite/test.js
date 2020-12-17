@@ -2873,8 +2873,15 @@ function generate_wiki_parser_section(configuration) {
 
 function generate_wiki_parser_document() {
 	var base_directory = module.path + '/../application/net/wiki/';
+	var template_file = base_directory + 'parser.template.html';
 	CeL.run('application.storage');
-	var template_text = CeL.read_file(base_directory + 'parser.template.html').toString();
+	var template_text = CeL.read_file(template_file);
+	if (!template_text) {
+		CeL.error('generate_wiki_parser_document: Can not read template file: ' + template_file);
+		return;
+	}
+
+	template_text = template_text.toString();
 	//console.trace(template_text);
 	template_text = template_text.replace(/(<div class="parser_sample">)([\s\S]+?)(<\/div>)/g, function(all, header, code, tail) {
 		var matched = code.match(/^([^:]+):([\s\S]+)$/);
