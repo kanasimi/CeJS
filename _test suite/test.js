@@ -2826,12 +2826,79 @@ function test_astronomy() {
 
 //============================================================================================================================================================
 
+function generate_wiki_parser_token(token, wikitext) {
+	if (!Array.isArray(token))
+		return JSON.stringify(token).replace(/ /g, '&nbsp;');
+
+	function push_pair(name, value) {
+		document.push(
+			'<tr><td><div class="property_name">' + name + '</div></td>',
+			'<td><div class="property_value">' + value + '</div></td></tr>',
+			);
+	}
+
+	var document = [];
+	if (wikitext) {
+		var nonstyled = wikitext.replace(/</g, '&lt;');
+		document.push('wikitext:<br /><code class="wikitext">', wikitext.includes('\n') ? nonstyled.replace(/\n(\s*)/g, function($0, spaces) {
+			return '<br />' + '&nbsp;'.repeat(spaces.length);
+		}) : nonstyled, '</code><br />', 'result:');
+	}
+
+	document.push('<table class="content_pairs">');
+	for (var index = 0; index < token.length; index++) {
+		push_pair(index, generate_wiki_parser_token(token[index]));
+	}
+	document.push('</table>');
+
+	document.push('properties of result:', '<table class="property_pairs">');
+	for (var property_name in token) {
+		if (isNaN(property_name) && property_name !== 'toString') {
+			push_pair(property_name, JSON.stringify(token[property_name]));
+		}
+	}
+	document.push('</table>');
+
+	return document.join('\n');
+}
+
+function generate_wiki_parser_section(configuration) {
+	var title = configuration.title, wikitext = configuration.wikitext;
+	var document = [];
+	// '<div class="section_title">' + title + '</div>'
+	var parsed = CeL.wiki.parse(wikitext);
+	document.push(generate_wiki_parser_token(parsed, wikitext));
+	return document.join('\n');
+}
+
+function generate_wiki_parser_document() {
+	var base_directory = module.path + '/../application/net/wiki/';
+	CeL.run('application.storage');
+	var template_text = CeL.read_file(base_directory + 'parser.template.html').toString();
+	//console.trace(template_text);
+	template_text = template_text.replace(/(<div class="parser_sample">)([\s\S]+?)(<\/div>)/g, function(all, header, code, tail) {
+		var matched = code.match(/^([^:]+):([\s\S]+)$/);
+		if (matched) {
+			var title = matched[1];
+			return '<h3 id="' + title + '" class="section_title">' + title + '</h3>'
+			+ header + generate_wiki_parser_section({
+				title : title,
+				wikitext : matched[2].trim().replace(/\r/g, '')
+			}) + tail;
+		}
+		return all;
+	});
+	CeL.write_file(base_directory + 'parser.html', template_text);
+}
+
 
 function test_wiki() {
 	// Set default language. 改變預設之語言。 e.g., 'zh'
 	CeL.wiki.set_language('zh');
 	// Just for test
 	delete CeL.wiki.query.default_maxlag;
+
+	generate_wiki_parser_document();
 
 	all_error_count += CeL.test('wiki: regular functions', [
 
