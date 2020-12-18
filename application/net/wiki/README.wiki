@@ -15,7 +15,7 @@ const util = require('util'); new util.promisify(CeL.wiki)(...)
 * [https://github.com/kanasimi/wikiapi JavaScript MediaWiki API for ECMAScript 2017+] / [https://github.com/kanasimi/wikiapi/blob/master/wikiapi.js wikiapi.js]
 * [https://github.com/kanasimi/wikibot Wikipedia bots demo] / [https://github.com/kanasimi/wikibot/blob/master/wiki%20loader.js wiki loader.js]
 * [[/_test suite/test.js|test.js]]
-* [https://kanasimi.github.io/CeJS/application/net/wiki/parser.html Wikitext parser examples. Wikitext 解析器使用例子]
+* [https://kanasimi.github.io/CeJS/_test%20suite/wikitext_parser.html Wikitext parser examples. Wikitext 解析器使用例子]
 
 == History ==
 {| class="wikitable"
