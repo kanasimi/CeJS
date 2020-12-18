@@ -2965,7 +2965,20 @@ function test_wiki() {
 		assert(['森鷗外', CeL.wiki.get_plain_display_text(CeL.wiki.parse('森&#40407;外'))], 'get_plain_display_text() #2');
 
 		wikitext = 't[http://a.b/ x[[l]]'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: external link');
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #1');
+		wikitext = "[http://a.b/ disply text]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #2');
+		assert(['disply text', parsed[1].toString()], 'wiki.parse: external link #2-1');
+		wikitext = "[http://a.b/''disply text'']"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #3');
+		assert(["''disply text''", parsed[1].toString()], 'wiki.parse: external link #3-1');
+		wikitext = "[http://a.b/''disply'' text]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #4');
+		assert(["''disply'' text", parsed[1].toString()], 'wiki.parse: external link #4-1');
+		wikitext = "[http://a.b/''dt]t"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #5');
+		assert(["''dt", parsed[0][1].toString()], 'wiki.parse: external link #5-1');
+
 		wikitext = '++\npp:http://h /p n\n++'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #1');
 		assert(['++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function (token) { return '~~'; }, true).toString()], 'wiki.parse: plain url #2');

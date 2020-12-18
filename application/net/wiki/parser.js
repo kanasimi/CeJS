@@ -3001,7 +3001,9 @@ function module_code(library_namespace) {
 		},
 		// 外部連結 external link, external web link
 		external_link : function() {
-			return '[' + this.join(this.delimiter || ' ') + ']';
+			return '[' + this.join(
+			// this.delimiter ?? ' '
+			this.delimiter === undefined ? ' ' : this.delimiter) + ']';
 		},
 		url : function() {
 			return this.join('');
@@ -4053,12 +4055,21 @@ function module_code(library_namespace) {
 		}
 
 		function parse_external_link(all, URL, delimiter, parameters) {
+			// assert: all === URL + delimiter + parameters
+			// including "'''"
+			var matched = URL.match(/^(.+?)(''.*)$/);
+			if (matched) {
+				URL = matched[1];
+				parameters = matched[2] + (delimiter || '')
+						+ (parameters || '');
+				delimiter = '';
+			}
 			URL = [ URL.includes(include_mark)
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 			? parse_wikitext(URL, options, queue)
 			// 以 token[0].toString() 取得 URL。
 			: _set_wiki_type(URL, 'url') ];
-			if (delimiter) {
+			if (delimiter || parameters) {
 				if (normalize) {
 					parameters = parameters.trim();
 				} else {

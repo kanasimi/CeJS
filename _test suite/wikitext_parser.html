@@ -116,6 +116,12 @@ function add_parser_sample(wikitext, title, panel) {
 		div: node_list,
 		C: 'parser_sample'
 	}];
+	if (parsed.toString() !== wikitext) {
+		node_list.unshift({
+			div: 'Error: Failed to rebuild wikitext! Please report the wikitext!',
+			C: 'error'
+		});
+	}
 	CeL.new_node(node_list, [panel || 'parser_sample_panel', 2]);
 }
 
@@ -144,11 +150,16 @@ function generate_wiki_parser_token(token, wikitext) {
 
 	const document = [];
 	if (wikitext) {
-		const nonstyled = wikitext.replace(/</g, '&lt;').replace(/ /g, '\xa0');
+		let nonstyled = wikitext.replace(/</g, '&lt;').replace(/ /g, '\xa0');
+		if (wikitext.includes('\n')) {
+			nonstyled = nonstyled.split(/\n/);
+			const list = [];
+			nonstyled.forEach(token => list.push(token, { br: null }));
+			list.pop();
+			nonstyled = list;
+		}
 		document.push('wikitext:', { br: null }, {
-			code: wikitext.includes('\n') ? nonstyled.replace(/\n(\s*)/g, function ($0, spaces) {
-				return '<br />' + '&nbsp;'.repeat(spaces.length);
-			}) : nonstyled,
+			code: nonstyled,
 			C: "wikitext"
 		}, { br: null }, 'result of `CeL.wiki.parse(wikitext)`:');
 	}
@@ -168,7 +179,7 @@ function generate_wiki_parser_token(token, wikitext) {
 			push_pair(property_name, JSON.stringify(token[property_name]), sub_document);
 		}
 	}
-	document.push('additional properties of result:', { table: sub_document, C: "property_pairs" });
+	document.push('additional properties' + (wikitext ? ' of result:' : ':'), { table: sub_document, C: "property_pairs" });
 
 	return document;
 }
@@ -243,7 +254,15 @@ td {
 }
 
 table .content_pairs:hover, table .property_pairs:hover {
-	background-color: #444;
+	background-color: #111;
+}
+
+table table .content_pairs:hover, table table .property_pairs:hover {
+	background-color: #333;
+}
+
+table table table .content_pairs:hover, table table table .property_pairs:hover {
+	background-color: #222;
 }
 
 #parser_test_wikitext {
@@ -251,6 +270,11 @@ table .content_pairs:hover, table .property_pairs:hover {
 	background-color: #222;
 	width: 95%;
 	height: 8em;
+}
+
+.error{
+	color: red;
+	font-size: 2em;
 }
 </style>
 <title>Wikitext parser examples. Wikitext 解析器使用例子</title>
@@ -276,14 +300,18 @@ table .content_pairs:hover, table .property_pairs:hover {
 		.
 	</p>
 
-	<!-- 
-[https://github.com/earwig/mwparserfromhell/''issues/40'']
+	<!--
+https://github.com/5j9/wikitextparser
+[https://github.com/earwig/mwparserfromhell/''issues/40]vv
+[https://github.com/earwig/mwparserfromhell/ ''issues/40]vv
 https://github.com/earwig/mwparserfromhell/''issues/40''
+
 vv''foo'''bar''baz'''bb
 vv''foo{{tl|baz''}}bb
 vv'''bb<span style="color:red">bb'''vv'''bb</span>bb
 vv<span style="color:red">rr'''bb</span>bb<span style="color:red">bb'''vv'''bb</sapn>bb
 vv
+<code>c<code>
 -->
 	<textarea id="parser_test_wikitext"
 		placeholder="Input wikitext here..."></textarea>
