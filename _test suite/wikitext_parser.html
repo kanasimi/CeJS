@@ -121,7 +121,7 @@ function add_parser_sample(wikitext, title, panel) {
 
 function generate_wiki_parser_token(token, wikitext) {
 	if (!Array.isArray(token)){
-		return JSON.stringify(token)
+		return JSON.stringify(token).replace(/</g, '&lt;​')
 		// &nbsp;
 		.replace(/ /g, '\xa0');
 	}
@@ -144,7 +144,7 @@ function generate_wiki_parser_token(token, wikitext) {
 
 	const document = [];
 	if (wikitext) {
-		const nonstyled = wikitext;
+		const nonstyled = wikitext.replace(/</g, '&lt;').replace(/ /g, '\xa0');
 		document.push('wikitext:', { br: null }, {
 			code: wikitext.includes('\n') ? nonstyled.replace(/\n(\s*)/g, function ($0, spaces) {
 				return '<br />' + '&nbsp;'.repeat(spaces.length);
@@ -279,9 +279,11 @@ table .content_pairs:hover, table .property_pairs:hover {
 	<!-- 
 [https://github.com/earwig/mwparserfromhell/''issues/40'']
 https://github.com/earwig/mwparserfromhell/''issues/40''
-aa''foo'''bar''baz'''bb
-aa''foo{{tl|baz''}}bb
-gg
+vv''foo'''bar''baz'''bb
+vv''foo{{tl|baz''}}bb
+vv'''bb<span style="color:red">bb'''vv'''bb</span>bb
+vv<span style="color:red">rr'''bb</span>bb<span style="color:red">bb'''vv'''bb</sapn>bb
+vv
 -->
 	<textarea id="parser_test_wikitext"
 		placeholder="Input wikitext here..."></textarea>
@@ -290,7 +292,7 @@ gg
 	<div id="parser_test_panel"></div>
 	<hr />
 
-	<div id="parser_sample_panel"></div>
+	<div id="parser_sample_panel" title="parser samples"></div>
 
 </body>
 </html>

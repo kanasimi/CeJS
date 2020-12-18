@@ -2150,7 +2150,9 @@ function module_code(library_namespace) {
 						// '­' (hyphen) 這符號(連字符)可以自動斷行，並在斷行時自動加上個橫槓。在顯示長整數時較有用。
 						.replace(/(\d{60})/g, '$1­');
 
-						if (n.indexOf('<') === -1) {
+						if (n.indexOf('<') === -1
+						// e.g., "&CounterClockwiseContourIntegral;"
+						&& !/&(?:#\d{1,8}|#x[a-f\d]{4,8}|\w{1,50});/i.test(n)) {
 							if (t === 'option' && !l.value)
 								l.value = n;
 							try {
@@ -7880,10 +7882,10 @@ function module_code(library_namespace) {
 		s = s.replace(/&#0*(\d{2,7});/g, function($0, $1) {
 			return String.fromCharCode($1);
 		});
-		// 預防error之版本,~10FFFF=1114111
+		// 預防 error 之版本
 		if (false) {
 			s = s.replace(/&#0*(\d{2,7});/g, function($0, $1) {
-				return $1 > 1114111 ? $0 : String.fromCharCode($1);
+				return $1 > 0x10FFFF ? $0 : String.fromCharCode($1);
 			});
 
 			if (mode == 'x')
@@ -7893,7 +7895,7 @@ function module_code(library_namespace) {
 				});
 			s = s.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function($0, $1) {
 				var t = parseInt($1, 16);
-				return t > 1114111 ? $0 : String.fromCharCode(t);
+				return t > 0x10FFFF ? $0 : String.fromCharCode(t);
 			});
 		}
 
@@ -8178,6 +8180,8 @@ function module_code(library_namespace) {
 	 *            only_digital
 	 * @returns
 	 * @_memberOf _module_
+	 * 
+	 * @see function escape_ampersand(text) @ CeL.application.storage.EPUB
 	 */
 	HTML_to_Unicode = function(HTML, only_digital) {
 		// 使用\0可能會 Warning: non-octal digit in an escape sequence that
@@ -8185,24 +8189,25 @@ function module_code(library_namespace) {
 		// match a back-reference
 		var t = HTML.valueOf();
 
-		if (!only_digital)
+		if (!only_digital) {
 			// 處理常用的 HTML Entities。
 			t = t
-			// 自動clip null character
-			.replace(/\0\0/g, '').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<')
-					.replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+			// 自動 clip null character
+			.replace(/\0\0/g, '').replace(/&nbsp;/g, '\xA0').replace(/&lt;/g,
+					'<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
 			// .replace(/&apos;/g, "'")
 			;
+		}
 
 		t = t
-		// 預防&#38;：&#38;=&
+		// 預防 &#38;：&#38;=&
 		.replace(/&#(0*38|[xX]0*26);/g, "\0\0")
-		// 預防error之版本,~10FFFF=1114111
+		// 預防 error 之版本
 		.replace(/&#0*(\d{2,7});/g, function($0, $1) {
-			return $1 > 1114111 ? $0 : String.fromCharCode($1);
+			return $1 > 0x10FFFF ? $0 : String.fromCharCode($1);
 		}).replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function($0, $1) {
 			var t = parseInt($1, 16);
-			return t > 1114111 ? $0 : String.fromCharCode(t);
+			return t > 0x10FFFF ? $0 : String.fromCharCode(t);
 		}).replace(/%([a-fA-F\d]{2})/g, function($0, $1) {
 			return String.fromCharCode(parseInt($1, 16));
 		});
@@ -8214,10 +8219,11 @@ function module_code(library_namespace) {
 			});
 		}
 
-		if (!only_digital)
+		if (!only_digital) {
 			t = t
 			// 預防&#38;回復
 			.replace(/\0\0/g, "&").replace(/&amp;/g, '&');
+		}
 
 		return t;
 	};
@@ -8587,9 +8593,9 @@ _
 				.replace(/[\s\n]*<\meta[\s\n][^>]+>[\s\n]*/ig, '')
 
 				// from HTML_to_Unicode()
-				// 預防error之版本,~10FFFF=1114111
+				// 預防 error 之版本
 				.replace(/&#0*(\d{2,7});/ig, function($0, $1) {
-					return $1 > 1114111 ? $0 : String.fromCharCode($1);
+					return $1 > 0x10FFFF ? $0 : String.fromCharCode($1);
 				}).replace(/([\s\n]+|&nbsp;)+$|^([\s\n]+|&nbsp;)+/g, '');
 
 		if (has_RegExp_group) {

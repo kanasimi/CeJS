@@ -3124,11 +3124,11 @@ function module_code(library_namespace) {
 		},
 		// italic type
 		italic : function() {
-			return "''" + this.join('') + "''";
+			return "''" + this.join('') + (this.no_end ? '' : "''");
 		},
 		// emphasis
 		bold : function() {
-			return "'''" + this.join('') + "'''";
+			return "'''" + this.join('') + (this.no_end ? '' : "'''");
 		},
 
 		// section title / section name
@@ -4906,27 +4906,34 @@ function module_code(library_namespace) {
 			return include_mark + (queue.length - 1) + end_mark;
 		}
 
-		function parse_apostrophe_type(all, type, parameters) {
-			// console.log([ all, type, parameters ]);
-			var index = parameters.lastIndexOf(type), previous = '';
+		function parse_apostrophe_type(all, apostrophes, parameters, postfix) {
+			// console.log([ all, apostrophes, parameters, postfix ]);
+			var index = parameters.lastIndexOf(apostrophes), previous = '';
 			if (index !== NOT_FOUND) {
-				previous = type + parameters.slice(0, index);
-				parameters = parameters.slice(index + type.length);
+				previous = apostrophes + parameters.slice(0, index);
+				parameters = parameters.slice(index + apostrophes.length);
 			}
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 			parameters = parse_wikitext(parameters, options, queue);
 			// console.log(parameters);
 			// 注意: parameters.length 可能大於1
-			if (type === "'''''") {
+			var type;
+			if (apostrophes === "'''''") {
 				// e.g., "''''''t''''''"
 				parameters = [ _set_wiki_type(parameters, 'bold') ];
 				type = 'italic';
 			} else {
-				type = type === "''" ? 'italic' : 'bold';
+				type = apostrophes === "''" ? 'italic' : 'bold';
 			}
 			parameters = _set_wiki_type(parameters, type);
+			if (apostrophes === postfix) {
+				postfix = '';
+			} else {
+				parameters.no_end = true;
+			}
 			queue.push(parameters);
-			return previous + include_mark + (queue.length - 1) + end_mark;
+			return previous + include_mark + (queue.length - 1) + end_mark
+					+ postfix;
 		}
 
 		function parse_section(all, previous, section_level, parameters,
@@ -5360,8 +5367,14 @@ function module_code(library_namespace) {
 
 		// '''~''' 不能跨行！ 注意: '''{{font color}}''', '''{{tsl}}'''
 		// ''~'' 不能跨行！
-		wikitext = wikitext.replace_till_stable(/('''''|'''?)([^'\n].*?'*)\1/g,
-				parse_apostrophe_type);
+		wikitext = wikitext.replace_till_stable(
+				/('''''|'''?)([^'\n].*?'*)(\1)/g, parse_apostrophe_type);
+		if (false) {
+			// \n, $ 都會截斷 italic, bold
+			// <tag> 不會截斷 italic, bold
+			wikitext = wikitext.replace_till_stable(
+					/('''''|'''?)([^'\n].*?)($|\n)/g, parse_apostrophe_type);
+		}
 		// '', ''' 似乎會經過微調: [[n:zh:Special:Permalink/120676]]
 
 		// ~~~, ~~~~, ~~~~~: 不應該出現

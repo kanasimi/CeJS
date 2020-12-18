@@ -1612,13 +1612,43 @@ function finish(name_space) {
 
 			var MAX_LENGTH = 200;
 
+			function get_type_of(value, with_quote) {
+				var type, is_native_type;
+				if (Array.isArray(value)) {
+					type = 'Array';
+					is_native_type = true;
+				} else if (CeL.is_Object(value)) {
+					type = 'Object';
+					is_native_type = true;
+				} else if (CeL.is_RegExp(value)) {
+					type = 'RegExp';
+					is_native_type = true;
+				} else if (CeL.is_Date(value)) {
+					type = 'Date';
+					is_native_type = true;
+				} else if (value instanceof Error) {
+					type = 'Error';
+					is_native_type = true;
+				} else {
+					type = typeof value;
+					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof
+					if ([ 'string', 'number', 'boolean', 'function', 'symbol',
+							'bigint' ].includes(type)) {
+						is_native_type = true;
+						type = type.charAt(0).toUpperCase() + type.slice(1);
+					}
+				}
+				return with_quote ? is_native_type ? '{' + type + '}' : '('
+						+ type + ')' : type;
+			}
+
 			function quote(message, add_type) {
 				if (add_type &&
 				// 有些 value 沒必要加上 type。
 				message !== null && message !== undefined
 				// is not NaN
 				&& message === message) {
-					add_type = '(' + (typeof message) + ') ';
+					add_type = get_type_of(message, true) + ' ';
 				} else {
 					add_type = '';
 				}
