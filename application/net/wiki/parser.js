@@ -3001,9 +3001,11 @@ function module_code(library_namespace) {
 		},
 		// 外部連結 external link, external web link
 		external_link : function() {
-			return '[' + this.join(
-			// this.delimiter ?? ' '
-			this.delimiter === undefined ? ' ' : this.delimiter) + ']';
+			return '[' + (this.length > 1 ? this[0] + (
+			// allows ''. (this.delimiter ?? ' ')
+			this.delimiter === undefined ? ' ' : this.delimiter)
+			//
+			+ this[1] : this[0]) + ']';
 		},
 		url : function() {
 			return this.join('');
@@ -4055,8 +4057,8 @@ function module_code(library_namespace) {
 		}
 
 		function parse_external_link(all, URL, delimiter, parameters) {
-			// assert: all === URL + delimiter + parameters
-			// including "'''"
+			// assert: all === URL + (delimiter || '') + (parameters || '')
+			// including "'''". e.g., [http://a.b/''t'']
 			var matched = URL.match(/^(.+?)(''.*)$/);
 			if (matched) {
 				URL = matched[1];

@@ -1631,9 +1631,11 @@ function finish(name_space) {
 					is_native_type = true;
 				} else {
 					type = typeof value;
+					if (type === 'object') {
+						type = CeL.is_type(value) || type;
+					} else if ([ 'string', 'number', 'boolean', 'function', 'symbol',
 					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof
-					if ([ 'string', 'number', 'boolean', 'function', 'symbol',
-							'bigint' ].includes(type)) {
+					'bigint' ].includes(type)) {
 						is_native_type = true;
 						type = type.charAt(0).toUpperCase() + type.slice(1);
 					}

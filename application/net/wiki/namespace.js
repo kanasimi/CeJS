@@ -2056,6 +2056,13 @@ function module_code(library_namespace) {
 
 		// 檢測一般頁面。
 		if (wiki_API.is_page_data(page_data)) {
+			// ('missing' in page_data): 此頁面不存在/已刪除。
+			// e.g., { ns: 0, title: 'title', missing: '' }
+			// TODO: 提供此頁面的刪除和移動日誌以便參考。
+			if (('missing' in page_data) || ('invalid' in page_data)) {
+				return;
+			}
+
 			// @see get_page_content.revision
 			content = library_namespace.is_Object(page_data)
 			//
@@ -2088,11 +2095,7 @@ function module_code(library_namespace) {
 		// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
 		// : typeof page_data === 'string' ? page_data
 
-		// ('missing' in page_data): 此頁面不存在/已刪除。
-		// e.g., { ns: 0, title: 'title', missing: '' }
-		// TODO: 提供此頁面的刪除和移動日誌以便參考。
-		return ('missing' in page_data) || ('invalid' in page_data) ? undefined
-				: String(page_data || '');
+		return String(page_data || '');
 	}
 
 	/**

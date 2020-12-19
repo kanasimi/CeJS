@@ -2978,6 +2978,9 @@ function test_wiki() {
 		wikitext = "[http://a.b/''dt]t"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #5');
 		assert(["''dt", parsed[0][1].toString()], 'wiki.parse: external link #5-1');
+		wikitext = "[http://a.b/]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #6');
+		assert(["http://a.b/", parsed[0][0].toString()], 'wiki.parse: external link #6-1');
 
 		wikitext = '++\npp:http://h /p n\n++'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #1');
