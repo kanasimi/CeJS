@@ -2966,21 +2966,21 @@ function test_wiki() {
 
 		wikitext = 't[http://a.b/ x[[l]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #1');
-		wikitext = "[http://a.b/ disply text]"; parsed = CeL.wiki.parse(wikitext);
+		wikitext = "[http://a.b/  disply text]"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #2');
-		assert(['disply text', parsed[1].toString()], 'wiki.parse: external link #2-1');
+		assert(['disply text', parsed[2].toString()], 'wiki.parse: external link #2-1');
 		wikitext = "[http://a.b/''disply text'']"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #3');
-		assert(["''disply text''", parsed[1].toString()], 'wiki.parse: external link #3-1');
+		assert(["''disply text''", parsed[2].toString()], 'wiki.parse: external link #3-1');
 		wikitext = "[http://a.b/''disply'' text]"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #4');
-		assert(["''disply'' text", parsed[1].toString()], 'wiki.parse: external link #4-1');
+		assert(["''disply'' text", parsed[2].toString()], 'wiki.parse: external link #4-1');
 		wikitext = "[http://a.b/''dt]t"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #5');
-		assert(["''dt", parsed[0][1].toString()], 'wiki.parse: external link #5-1');
+		assert(["''dt", parsed[0][2].toString()], 'wiki.parse: external link #5-1');
 		wikitext = "[http://a.b/]"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #6');
-		assert(["http://a.b/", parsed[0][0].toString()], 'wiki.parse: external link #6-1');
+		assert(["http://a.b/", parsed[0].toString()], 'wiki.parse: external link #6-1');
 
 		wikitext = '++\npp:http://h /p n\n++'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #1');

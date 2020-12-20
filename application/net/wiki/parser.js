@@ -1490,10 +1490,10 @@ function module_code(library_namespace) {
 		if (token.type === 'external_link') {
 			// escape external link
 			// console.log('>> ' + token);
-			// console.log(token[1]);
-			// console.log(preprocess_section_link_tokens(token[1], options));
-			if (token[1]) {
-				return preprocess_section_link_tokens(token[1], options);
+			// console.log(token[2]);
+			// console.log(preprocess_section_link_tokens(token[2], options));
+			if (token[2]) {
+				return preprocess_section_link_tokens(token[2], options);
 			}
 			// TODO: error: 用在[URL]無標題連結會失效。需要計算外部連結的序號。
 			options.root_token_list.imprecise_tokens.push(token);
@@ -2857,7 +2857,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=protocols&utf8&format=json
 	 */
-	PATTERN_external_link_global = /\[((?:https?:|ftps?:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:(\s)([^\]]*))?\]/ig,
+	PATTERN_external_link_global = /\[((?:https?:|ftps?:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:([^\S\r\n]+)([^\]]*))?\]/ig,
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
 	markup_tags = 'br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark'
 			// [[Help:Parser tag]], [[Help:Extension tag]]
@@ -3001,11 +3001,10 @@ function module_code(library_namespace) {
 		},
 		// 外部連結 external link, external web link
 		external_link : function() {
-			return '[' + (this.length > 1 ? this[0] + (
-			// allows ''. (this.delimiter ?? ' ')
-			this.delimiter === undefined ? ' ' : this.delimiter)
-			//
-			+ this[1] : this[0]) + ']';
+			// assert: this.length === 1 or 3
+			// assert: this.length === 3
+			// && this[1].trim() === ''&& this[2] === this[2].trimStart()
+			return '[' + this.join('') + ']';
 		},
 		url : function() {
 			return this.join('');
@@ -4062,8 +4061,12 @@ function module_code(library_namespace) {
 			var matched = URL.match(/^(.+?)(''.*)$/);
 			if (matched) {
 				URL = matched[1];
-				parameters = matched[2] + (delimiter || '')
-						+ (parameters || '');
+				if (delimiter) {
+					parameters = matched[2] + delimiter + parameters;
+				} else {
+					// assert: parameters === undefined
+					parameters = matched[2];
+				}
 				delimiter = '';
 			}
 			URL = [ URL.includes(include_mark)
@@ -4072,16 +4075,20 @@ function module_code(library_namespace) {
 			// 以 token[0].toString() 取得 URL。
 			: _set_wiki_type(URL, 'url') ];
 			if (delimiter || parameters) {
+				// assert: /^\s*$/.test(delimiter)
+				// && typeof delimiter === 'string'
+				// && typeof parameters === 'string'
+				// assert: parameters 已去除最前面的 delimiter (space)。
 				if (normalize) {
-					parameters = parameters.trim();
-				} else {
-					// 紀錄 delimiter，否則 .toString() 時 .join() 後會與原先不同。
-					if (delimiter !== ' ')
-						URL.delimiter = delimiter;
-					// parameters 已去除最前面的 delimiter (space)。
+					parameters = parameters.trimEnd();
+					if (delimiter)
+						delimiter = ' ';
 				}
+				// 紀錄 delimiter as {String}token[1]，
+				// 否則 .toString() 時 .join() 後會與原先不同。
+				URL.push(delimiter,
 				// 經過改變，需再進一步處理。
-				URL.push(parse_wikitext(parameters, options, queue));
+				parse_wikitext(parameters, options, queue));
 			}
 			_set_wiki_type(URL, 'external_link');
 			queue.push(URL);
