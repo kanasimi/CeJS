@@ -3,7 +3,7 @@ http://stackshare.io/continuous-integration
 -->
 [![npm version](https://badge.fury.io/js/cejs.svg)](https://www.npmjs.com/package/cejs)
 [![npm downloads](https://img.shields.io/npm/dm/cejs.svg)](https://www.npmjs.com/package/cejs)
-[![Travis CI Build Status](https://travis-ci.org/kanasimi/CeJS.svg?branch=master)](https://travis-ci.org/kanasimi/CeJS)
+[![Travis CI Build Status](https://travis-ci.com/kanasimi/CeJS.svg?branch=master)](https://travis-ci.com/kanasimi/CeJS)
 [![AppVeyor CI Build status](https://ci.appveyor.com/api/projects/status/ny0vr4x2uesiumm0?svg=true)](https://ci.appveyor.com/project/kanasimi/cejs)
 [![CircleCI Build status](https://circleci.com/gh/kanasimi/CeJS.svg?style=svg)](https://circleci.com/gh/kanasimi/CeJS)
 [![scrutinizer Build status](https://scrutinizer-ci.com/g/kanasimi/CeJS/badges/build.png?b=master)](https://scrutinizer-ci.com/g/kanasimi/CeJS/)

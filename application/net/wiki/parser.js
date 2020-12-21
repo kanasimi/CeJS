@@ -161,6 +161,8 @@ function module_code(library_namespace) {
 	 * @returns {wiki page parser}
 	 */
 	function page_parser(wikitext, options) {
+		// console.log(wikitext);
+		// console.log(wiki_API.is_page_data(wikitext));
 		if (typeof wikitext === 'string') {
 			wikitext = [ wikitext ];
 		} else if (wiki_API.is_page_data(wikitext)) {
@@ -169,8 +171,11 @@ function module_code(library_namespace) {
 			if (!page_data.parsed
 			// re-parse
 			|| options && (options.reparse || options.wikitext)) {
-				page_data.parsed = wikitext = [ options && options.wikitext
-						|| wiki_API.content_of(page_data, options || 0) ];
+				wikitext = options && options.wikitext
+						|| wiki_API.content_of(page_data, options || 0);
+				// prevent wikitext === undefined (missing: '')
+				wikitext = wikitext ? [ wikitext ] : [];
+				page_data.parsed = wikitext;
 				wikitext.page = page_data;
 			} else {
 				return page_data.parsed;
@@ -193,6 +198,7 @@ function module_code(library_namespace) {
 		// copy prototype methods
 		Object.assign(wikitext, page_parser.parser_prototype);
 		set_wiki_type(wikitext, 'plain');
+		// console.trace(wikitext);
 		return wikitext;
 	}
 
@@ -2368,7 +2374,10 @@ function module_code(library_namespace) {
 				target_array : this
 			}, this.options, options));
 			// library_namespace.log(parsed);
-			if (!Array.isArray(parsed) || parsed.type !== 'plain') {
+			// console.trace(parsed);
+			if (parsed
+			// for parsed === undefined (missing: '')
+			&& (!Array.isArray(parsed) || parsed.type !== 'plain')) {
 				this[0] = parsed;
 			}
 			this.parsed = true;
@@ -6436,6 +6445,7 @@ function module_code(library_namespace) {
 			variable_name = wikitext.title;
 			configuration_page_title = variable_name;
 			parsed = page_parser(wikitext).parse();
+			// console.trace(parsed);
 			// wikitext = wiki_API.content_of(wikitext);
 		} else {
 			// assert: typeof wikitext === 'string'
@@ -6450,7 +6460,7 @@ function module_code(library_namespace) {
 		}
 
 		// 僅處理第一階層。
-		parsed.forEach(function(token) {
+		parsed.forEach(function(token/* , index, parent */) {
 			if (token.type === 'section_title') {
 				variable_name = normalize_value(token.title);
 				return;

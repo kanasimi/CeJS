@@ -6,7 +6,7 @@ Main initial point: [[../wiki.js]]
 
 ; Essential 必要: [[../wiki.js]] → [[namespace.js]] → [[parser.js]], [[query.js]], [[page.js]], [[Flow.js]], [[list.js]], [[edit.js]], [[task.js]]
 ; Optional 可選功能: [[data.js]], [[admin.js]], [[cache.js]], [[Toolforge.js]]
-; Change with wikiproject page contents 隨各 wikiproject 頁面內容變化之功能: [[template_functions.js]]
+; Change with wikiproject page contents 隨各 wikiproject 頁面內容變化之功能: [[template_functions.js]], [[featured_content.js]]
 
 More examples: 使用範例可參照：
 <!--
