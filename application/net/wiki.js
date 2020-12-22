@@ -215,6 +215,10 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 		// pre-loading functions
 
+		// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
+		// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
+		// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
+
 		this.siteinfo();
 
 		// console.log(options);

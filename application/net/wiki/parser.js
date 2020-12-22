@@ -4013,12 +4013,13 @@ function module_code(library_namespace) {
 
 				for (var index = 2; index < parameters.length; index++) {
 					// recover missed '|' before display_text
-					if (typeof parameters[index] === 'string')
+					if (typeof parameters[index] === 'string') {
 						parameters[index] = '|' + parameters[index];
-					else if (parameters[index].type === 'plain')
+					} else if (parameters[index].type === 'plain') {
 						parameters[index].unshift('|');
-					else
+					} else {
 						parameters[index] = [ '|', parameters[index] ];
+					}
 				}
 
 				parameters = parameters.flat();

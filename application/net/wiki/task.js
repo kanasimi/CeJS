@@ -174,10 +174,6 @@ function module_code(library_namespace) {
 		// account
 
 		case 'login':
-			// 注意: wiki_session.login() 後之操作，應該採 wiki_session.run()
-			// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
-			// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
-
 			library_namespace.debug(
 					'正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。', 2,
 					'wiki_API.prototype.next');
@@ -2601,7 +2597,11 @@ function module_code(library_namespace) {
 	wiki_API.login = function(user_name, password, options) {
 		var error;
 		function _next() {
-			callback && callback(session.token.lgname, error);
+			callback
+			// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
+			// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
+			// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
+			&& session.run(callback.bind(session, session.token.lgname, error));
 			library_namespace.debug('已登入 [' + session.token.lgname
 					+ ']。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
 			// popup 'login'.
@@ -2714,7 +2714,7 @@ function module_code(library_namespace) {
 			library_namespace
 					.warn('wiki_API.login: The user name or password is not provided. Abandon login attempt.');
 			// console.trace('Stop login');
-			callback && callback();
+			callback && session.run(callback.bind(session));
 			return session;
 		}
 
@@ -2773,7 +2773,9 @@ function module_code(library_namespace) {
 					'wiki_API.login: 無法 login！ Abort! Response:');
 					error = _error;
 					library_namespace.error(error || data);
-					callback && callback(null, error || data);
+					callback
+							&& session.run(callback.bind(session, null, error
+									|| data));
 					return;
 				}
 
@@ -2814,7 +2816,8 @@ function module_code(library_namespace) {
 					//		
 					'wiki_API.login: 無法 login！ Abort! Response:');
 					library_namespace.error(data);
-					callback && callback(null, data);
+					if (callback)
+						session.run(callback.bind(session, null, data));
 				}
 			}, token, session);
 
