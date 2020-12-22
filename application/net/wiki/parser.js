@@ -1368,7 +1368,9 @@ function module_code(library_namespace) {
 				// container
 				span : true,
 				div : true,
-			// nowiki : true
+
+				// nowiki : true,
+				langconvert : true
 			}) {
 				// reduce HTML tags. e.g., <b>, <sub>, <sup>, <span>
 				token.tag_attributes = token.shift();
@@ -2871,6 +2873,8 @@ function module_code(library_namespace) {
 	markup_tags = 'br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark'
 			// [[Help:Parser tag]], [[Help:Extension tag]]
 			+ '|includeonly|noinclude|onlyinclude'
+			// https://phabricator.wikimedia.org/T263082
+			+ '|langconvert'
 			// [[Special:Version#mw-version-parser-extensiontags]]
 			// <ce> is deprecated, using <chem>
 			// Replace all usages of <ce> with <chem> on wiki
@@ -5072,9 +5076,10 @@ function module_code(library_namespace) {
 					}
 
 					if (is_dt) {
-						latest_list.dt_index.push(latest_list.length
-						// -'\n'.length
-						- 1);
+						// line is not push_list_item() still,
+						// when the `line` push_list_item(), its index will be
+						// latest_list.length.
+						latest_list.dt_index.push(latest_list.length);
 
 						// search "; title : definition"
 						if (matched = line.match(/^(.*)(:\s*)(.*)$/)) {
@@ -5097,9 +5102,10 @@ function module_code(library_namespace) {
 				// '\n': from `wikitext.split('\n')`
 				list_prefix = '\n' + line.slice(0, position);
 				if (list_prefix.endsWith(';')) {
-					latest_list.dt_index.push(latest_list.length
-					// -'\n'.length
-					- 1);
+					// line is not push_list_item() still,
+					// when the `line` push_list_item(), its index will be
+					// latest_list.length.
+					latest_list.dt_index.push(latest_list.length);
 				}
 			} else {
 				list_prefix = '';

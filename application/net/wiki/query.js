@@ -371,9 +371,9 @@ function module_code(library_namespace) {
 
 		// console.log('-'.repeat(79));
 		// console.log(options);
-		var get_URL_options = Object
-				.assign(Object.clone(wiki_API_query.get_URL_options),
-						options.get_URL_options);
+		var get_URL_options = Object.assign(
+		// 避免污染，重新造一個 options。不汙染 wiki_API_query.get_URL_options
+		Object.clone(wiki_API_query.get_URL_options), options.get_URL_options);
 
 		if (session) {
 			if (method === 'edit' && POST_data
@@ -395,8 +395,7 @@ function module_code(library_namespace) {
 						'wiki_API_query');
 				setup_API_URL(session, true);
 			}
-			// 避免污染，重新造一個 options。不汙染 session.get_URL_options
-			get_URL_options = Object.clone(session.get_URL_options);
+			Object.assign(get_URL_options, session.get_URL_options);
 		}
 
 		if (options.form_data) {
@@ -528,9 +527,11 @@ function module_code(library_namespace) {
 				if (typeof get_URL_options.onfail === 'function') {
 					get_URL_options.onfail(error || status_code);
 				} else if (typeof callback === 'function') {
+					// console.trace(get_URL_options);
 					library_namespace.warn(
-					//
-					'wiki_API_query: Get error ' + status_code + ': '
+					// Get error:
+					// status_code maybe 'Error' for connect ETIMEDOUT
+					'wiki_API_query: ' + status_code + ': '
 					// 避免 TypeError:
 					// Cannot convert object to primitive value
 					+ JSON.stringify(action));

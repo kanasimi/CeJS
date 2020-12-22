@@ -3372,9 +3372,6 @@ function test_wiki() {
 		assert(['Y年Fj日', token[0].parameters[1]], 'wiki.parse: {{#parserfunctions:}} #4');
 		assert(['-7 days +9 hours', token[0].parameters[2]], 'wiki.parse: {{#parserfunctions:}} #5');
 
-		wikitext = 't\n**a[[L#{{t:p}}|l]]b\n**a[[L#{{t:p}}]]b\n'; parsed = CeL.wiki.parser(wikitext).parse();
-		assert([wikitext, parsed.toString()], 'wiki.parse: list #1');
-
 		wikitext = '\n--user 2017年9月3日 (日) 02:06 (UTC)~~\n';
 		assert(['2017-09-03T02:06:00.000Z', CeL.wiki.parse.date(wikitext, 'zh').toISOString()], 'wiki.parse.date: zh #1');
 		assert(['2017年9月3日 (日) 02:06 (UTC)', CeL.wiki.parse.date.to_String(new Date('2017-09-03T02:06:00.000Z'), 'zh')], 'wiki.parse.date: zh #2');
@@ -3456,6 +3453,11 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #8');
 		wikitext = "a{{t\n|1=\n'''r'''\n:* 1\n:* 2}}b"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #9');
+		wikitext = ";dt1\n:dd1\n;dt2\n:dd2\n;dt2\n:dd2\n"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: list #10');
+		assert(['0,2,4', parsed[0].dt_index.join()], 'wiki.parse: list #10-1');
+		wikitext = 't\n**a[[L#{{t:p}}|l]]b\n**a[[L#{{t:p}}]]b\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: list #11');
 
 		wikitext = 'a\n p\n  2\n {{t}}\n  [[a]]\nb'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: pre #1');

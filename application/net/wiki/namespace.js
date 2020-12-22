@@ -2017,16 +2017,27 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
-	 * @param {String}flow_view
-	 *            對 flow page，所欲取得之頁面內容項目。<br />
-	 *            default: 'header'
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @returns {String|Undefined}content of page, maybe undefined.
 	 */
-	function get_page_content(page_data, flow_view) {
+	function get_page_content(page_data, options) {
 		if (!page_data) {
 			// e.g., page_data === undefined
 			return page_data;
+		}
+
+		if (typeof options === 'string') {
+			options = {
+				flow_view : options
+			};
+		} else if (typeof options === 'number') {
+			options = {
+				revision_index : options
+			};
+		} else {
+			options = library_namespace.setup_options(options);
 		}
 
 		// for flow page: 因為 page_data 可能符合一般頁面標準，
@@ -2036,7 +2047,7 @@ function module_code(library_namespace) {
 		// page_data.revision: 由 Flow_page()=CeL.wiki.Flow.page 取得。
 		var content =
 		// page_data.is_Flow &&
-		(page_data[flow_view] || page_data['header'] || page_data).revision;
+		(page_data[options.flow_view] || page_data['header'] || page_data).revision;
 		if (content && (content = content.content)) {
 			// page_data.revision.content.content
 			return content.content;
@@ -2045,7 +2056,9 @@ function module_code(library_namespace) {
 		if (page_data.expandtemplates
 		// 若有則用之，否則最起碼回傳一般的內容。
 		&& ('wikitext' in page_data.expandtemplates)) {
-			if (flow_view === 'expandtemplates')
+			// {String}options.flow_view 對 flow page，所欲取得之頁面內容項目。<br />
+			// default: 'header'
+			if (options.flow_view === 'expandtemplates')
 				return String(page_data.expandtemplates.wikitext || '');
 
 			library_namespace.debug(wiki_API.title_link_of(page_data)
@@ -2060,7 +2073,7 @@ function module_code(library_namespace) {
 			// e.g., { ns: 0, title: 'title', missing: '' }
 			// TODO: 提供此頁面的刪除和移動日誌以便參考。
 			if (('missing' in page_data) || ('invalid' in page_data)) {
-				return;
+				return options.allow_non_String ? undefined : '';
 			}
 
 			// @see get_page_content.revision
@@ -2073,7 +2086,8 @@ function module_code(library_namespace) {
 				// 警告：可能回傳 null or undefined，尚未規範。
 				return '';
 			}
-			if (content.length > 1 && typeof flow_view !== 'number') {
+			if (content.length > 1
+					&& typeof options.revision_index !== 'number') {
 				// 有多個版本的情況：因為此狀況極少，不統一處理。
 				// 一般說來caller自己應該知道自己設定了rvlimit>1，因此此處不警告。
 				// 警告：但多版本的情況需要自行偵測是否回傳{Array}！
@@ -2081,12 +2095,12 @@ function module_code(library_namespace) {
 					return revision_content(revision);
 				});
 			}
-			// treat flow_view as revision_index
-			if (flow_view < 0) {
+			// treat options.revision_index as revision_index
+			if (options.revision_index < 0) {
 				// e.g., -1: select the oldest revision.
-				flow_view += content.length;
+				options.revision_index += content.length;
 			}
-			content = content[flow_view | 0];
+			content = content[options.revision_index | 0];
 			return revision_content(content);
 		} else if (typeof (content = revision_content(page_data, true)) === 'string') {
 			return content;

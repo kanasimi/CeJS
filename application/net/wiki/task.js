@@ -174,6 +174,10 @@ function module_code(library_namespace) {
 		// account
 
 		case 'login':
+			// 注意: wiki_session.login() 後之操作，應該採 wiki_session.run()
+			// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
+			// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
+
 			library_namespace.debug(
 					'正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。', 2,
 					'wiki_API.prototype.next');
