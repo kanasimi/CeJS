@@ -3103,6 +3103,10 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[:file:abc.jpg]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
+		wikitext = '[[File:a[[b]].jpg|thumb|t]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = '[[File:a[[b]].jpg|thumb|t[[a]]{{t}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[#]]b'; parsed = CeL.wiki.parser(wikitext).parse();

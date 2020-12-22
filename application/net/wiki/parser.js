@@ -4011,10 +4011,14 @@ function module_code(library_namespace) {
 				// console.trace(parameters);
 				// parameters.is_link = false;
 
-				if (file_matched ? display_text
-				// recover missed '|' before display_text
-				: typeof display_text === 'string') {
-					parameters[1] += '|';
+				for (var index = 2; index < parameters.length; index++) {
+					// recover missed '|' before display_text
+					if (typeof parameters[index] === 'string')
+						parameters[index] = '|' + parameters[index];
+					else if (parameters[index].type === 'plain')
+						parameters[index].unshift('|');
+					else
+						parameters[index] = [ '|', parameters[index] ];
 				}
 
 				parameters = parameters.flat();
