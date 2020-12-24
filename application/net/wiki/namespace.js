@@ -938,9 +938,10 @@ function module_code(library_namespace) {
 					1, 'get_namespace');
 					// console.trace(arguments);
 				} else {
+					list.push(options.is_page_title === false
 					// options.is_page_title === false 亦即
 					// options.is_namespace === true
-					list.push(options.is_page_title === false ? undefined : 0);
+					&& _n !== 'main' ? undefined : 0);
 				}
 			});
 			if (list.length === 0) {
@@ -1443,6 +1444,8 @@ function module_code(library_namespace) {
 	 * 
 	 * TODO: 簡化。
 	 * 
+	 * TODO: normalize namespace
+	 * 
 	 * 這種規範化只能通用於本 library 內。Wikipedia 並未硬性設限。<br />
 	 * 依照
 	 * [https://www.mediawiki.org/w/api.php?action=query&titles=Wikipedia_talk:Flow&prop=info]，
@@ -1513,17 +1516,24 @@ function module_code(library_namespace) {
 		page_name = page_name.split(':');
 		var has_language;
 		var session = session_of_options(options);
-		var no_session_namespace_hash = !session
-				|| !session.configurations.namespace_hash;
 		var interwiki_pattern = session
 				&& session.configurations.interwiki_pattern
 				|| /^[a-z][a-z_\-]+$/i;
+		var template_alias = options.normalize_template_name && session
+				&& session.template_alias;
+		var no_session_namespace_hash = !session
+				|| !session.configurations.namespace_hash;
+
 		page_name.some(function(section, index) {
 			section = use_underline ? section.replace(/^[\s_]+/, '') : section
 					.trimStart();
 
 			// 必然包含 page title，因此不處理最後一個。
 			if (index === page_name.length - 1) {
+				if (template_alias) {
+					section = template_alias[upper_case_initial(section)]
+							|| section;
+				}
 				if (options.no_upper_case_initial) {
 					page_name[index] = section.toLowerCase();
 				} else {
@@ -2649,6 +2659,32 @@ function module_code(library_namespace) {
 				.test(site_or_language);
 	}
 
+	// ------------------------------------------------------------------------
+
+	function normalize_template_name(template_name, options) {
+		if (!template_name)
+			return template_name;
+
+		if (typeof template_name === 'string') {
+			template_name = this.remove_namespace(this
+					.normalize_title(template_name));
+		} else if (template_name.type === 'transclusion') {
+			// treat template_name as template token
+			// assert: token.name is normalized
+			template_name = template_name.name;
+		}
+
+		return this.template_alias[template_name] || template_name;
+	}
+
+	function is_template(template_name, token, options) {
+		template_name = this.normalize_template_name(template_name, options);
+		token = this.normalize_template_name(token, options);
+
+		// console.trace([ template_name, token ]);
+		return template_name === token;
+	}
+
 	// --------------------------------------------------------------------------------------------
 
 	// extract session from options, get_session_from_options
@@ -2672,6 +2708,9 @@ function module_code(library_namespace) {
 
 	// @instance 實例相關函數。
 	Object.assign(wiki_API.prototype, {
+		normalize_template_name : normalize_template_name,
+		is_template : is_template,
+
 		// @see function get_continue(), get_list()
 		show_next : typeof JSON === 'object' && JSON.stringify
 		//

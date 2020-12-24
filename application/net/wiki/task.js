@@ -453,6 +453,67 @@ function module_code(library_namespace) {
 		// case 'category_tree':
 		// @see wiki_API.prototype.category_tree @ application.net.wiki.list
 
+		case 'register_template_alias':
+			if (Array.isArray(next[1])) {
+				next[1].reverse();
+				_this.actions.unshift([ next[0], next[1].shift(), next[2],
+						next[3] ]);
+				// remove callback
+				next[2] = undefined;
+				next[1].forEach(function(template_name) {
+					var _next = next.clone();
+					_next[1] = template_name;
+					_this.actions.unshift(_next);
+				});
+				next = _this.actions.shift();
+			}
+
+			// next[1]: template_name
+			next[1] = this.to_namespace(next[1], 'Template');
+			if (this.normalize_template_name(next[1]) in this.template_alias) {
+				// have registered
+				break;
+			}
+
+			wiki_API.redirects_here(next[1], function(root_page_data,
+					redirect_list, error) {
+				if (error) {
+					// next[2] : callback(redirect_list, error)
+					next[2] && next[2](null, error);
+					_this.next();
+					return;
+				}
+
+				// assert: root_page_data.redirects === redirect_list
+				// console.trace(root_page_data);
+				// console.trace(redirect_list);
+
+				var main_template_name = _this
+						.remove_namespace(redirect_list[0].title);
+				redirect_list.forEach(function(page_data) {
+					_this.template_alias[
+					// assert: page_data.title ===
+					// _this.normalize_title(page_data.title)
+					_this.remove_namespace(page_data.title)
+					//
+					] = main_template_name;
+				});
+
+				// console.trace(_this.template_alias);
+
+				// next[2] : callback(redirect_list, error)
+				next[2] && next[2](redirect_list);
+				_this.next();
+			},
+			// next[3] : options
+			Object.assign({
+				// [KEY_SESSION]
+				session : this,
+				// redirect_list[0] === root_page_data
+				include_root : true
+			}, next[3]));
+			break;
+
 		case 'search':
 			wiki_API.search([ this.API_URL, next[1] ],
 			//
@@ -1348,7 +1409,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|register_template_alias|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------

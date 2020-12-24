@@ -215,6 +215,12 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 		// pre-loading functions
 
+		// wiki_session.template_alias[alias]
+		// = main page title without "Template:" prefix
+		// @see CeL.application.net.wiki.task ,
+		// CeL.application.net.wiki.namespace
+		this.template_alias = Object.create(null);
+
 		// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
 		// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
 		// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
