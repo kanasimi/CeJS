@@ -114,7 +114,7 @@ function (globalThis) {
 		 * @type {String}
 		 * @ignore
 		 */
-		library_version = '3.9.0',
+		library_version = '4.0.0',
 
 
 		/**
@@ -475,12 +475,16 @@ function (globalThis) {
 	 * 重新造出可被更改的選項。當會更改到 options 時，再使用此函數。
 	 * 
 	 * @example<code>
-	   //	// 前導作業/前置處理。
-	   //	if (!library_namespace.is_Object(options))
-	   //		options = Object.create(null);
-	   // →
-	   //	options = library_namespace.new_options(options);
-	 * </code>
+
+	// 前導作業/前置處理。
+	if (!library_namespace.is_Object(options))
+		options = Object.create(null);
+	// →
+	options = library_namespace.new_options(options);
+	// 使用新語法。
+	options = { ...options };
+
+	</code>
 	 * 
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項。
@@ -1552,12 +1556,12 @@ OS='UNIX'; // unknown
 		env.external_directory_name = 'external';
 
 		/**
-		 * library 之資源文件 (resource files) 放置地。 純目錄名，不加目錄分隔。
+		 * library 之資源文件 (resource files) 放置地。 純目錄名，不加目錄分隔。 resources/
 		 * 
-		 * @name CeL.env.resource_directory_name
+		 * @name CeL.env.resources_directory_name
 		 * @type {String}
 		 */
-		env.resource_directory_name = 'resource';
+		env.resources_directory_name = 'resources';
 
 		/**
 		 * 預設 module name separator。

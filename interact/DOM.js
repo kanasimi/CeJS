@@ -700,6 +700,7 @@ function module_code(library_namespace) {
 	 * toggle/swap display and visibility.<br />
 	 * display:none or visibility:hidden.
 	 * 
+	 * TODO: use element.classList.toggle(className);
 	 * TODO: use computed style
 	 * 
 	 * @param element
@@ -1223,6 +1224,8 @@ function module_code(library_namespace) {
 			}
 			return node;
 		}, fire_event = function(event_id) {
+			// TODO: using event.initEvent()
+			// https://www.webhek.com/apps/you-do-not-need-jquery/#trigger_native
 			if (node[event_id]
 			// 不一定都是 function?
 			// && typeof node[event_id] === 'function'
@@ -3352,7 +3355,7 @@ function module_code(library_namespace) {
 				o.value = t;
 			else {
 				if (O)
-					o.value = O.innerText;
+					o.value = O.textContent || O.innerText;
 				if (m == 3)
 					t = o.value;
 			}
@@ -3372,7 +3375,10 @@ function module_code(library_namespace) {
 			if (m != 3)
 				t = o.value;
 			if (O)
-				O.innerText = o.value;
+				if (O.textContent !== undefined)
+					O.textContent  = o.value;
+				else
+					O.innerText = o.value;
 			return t;
 		}
 
@@ -3514,7 +3520,7 @@ function module_code(library_namespace) {
 		r.execCommand('Paste');
 		t = h ? r.htmlText : r.text;
 		this.end_op();
-		return h ? o.innerHTML : o.innerText;
+		return h ? o.innerHTML : o.textContent || o.innerText;
 	};
 	clipB.cut_from = function(o) {
 		o = this.get_obj(o);
@@ -4826,6 +4832,9 @@ function module_code(library_namespace) {
 	 * 3. 用 +/- 設定。<br />
 	 * 4. https://developer.mozilla.org/en/DOM/element.classList
 	 * 
+	 * TODO: using element.classList
+	 * https://www.webhek.com/post/you-do-not-need-jquery.html
+	 * 
 	 * @param element
 	 *            HTML elements
 	 * @param class_name
@@ -6021,10 +6030,12 @@ function module_code(library_namespace) {
 	 * get current computed style property of specified HTML element. TODO: 整合
 	 * get_node_offset, _.set_style
 	 * 
+	 * TODO: using getComputedStyle(element)[name]
+	 * 
 	 * @param element
 	 *            HTML element
 	 * @param name
-	 *            W3C style property name (e.g., no '-webkit-background-clip')
+	 *            W3C style property name, rule_name (e.g., no '-webkit-background-clip')
 	 * @return
 	 * @see http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug,
 	 *      http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,
@@ -9074,8 +9085,8 @@ _
 			// 作 cache。
 			TOC_list = get_element(TOC_list);
 
-			// 載入 CSS resource。
-			// include resource of module.
+			// 載入 CSS resource(s)。
+			// include resources of module.
 			library_namespace.run(library_namespace.get_module_path(
 					module_name, 'auto_TOC.css'));
 		} else

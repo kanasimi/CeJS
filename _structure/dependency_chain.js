@@ -1750,10 +1750,10 @@ if (typeof CeL === 'function')
 					code_required = code_required.split('|');
 
 				if (Array.isArray(code_required)) {
-					// 挑出所有需要的 resource，
+					// 挑出所有需要的 resources，
 					// 把需要的 variable 填入 variable_hash 中，
 					// 並去除重複。
-					var require_resource = Object.create(null),
+					var require_resources = Object.create(null),
 					// required variables.
 					// variable_hash = {
 					// variable name : variable full name
@@ -1776,16 +1776,16 @@ if (typeof CeL === 'function')
 								= library_namespace.to_module_name(
 								//
 								matched[1], '.') + '.' + matched[2];
-							require_resource[matched[1]] = null;
+							require_resources[matched[1]] = null;
 						} else {
 							// URL/path?
-							require_resource[variable] = null;
+							require_resources[variable] = null;
 						}
 					});
 
 					// cache. 作個紀錄。
-					declaration.require_resource = code_required = [];
-					for ( var i in require_resource)
+					declaration.require_resources = code_required = [];
+					for ( var i in require_resources)
 						code_required.push(i);
 
 					// 處理完把待處理清單消掉。
@@ -1833,7 +1833,7 @@ if (typeof CeL === 'function')
 				.create(null), TO_FINISH = Object.create(null),
 		// 需要修補 load events on linking elements?
 		no_sheet_onload = library_namespace.is_WWW(true) && navigator.userAgent,
-		// external resource tester.
+		// external resources tester.
 		external_RegExp = library_namespace.env.module_name_separator,
 		// Node.js 有比較特殊的 global scope 處理方法。
 		is_nodejs = library_namespace.platform.nodejs,
@@ -1844,7 +1844,7 @@ if (typeof CeL === 'function')
 			img : [ 'src', 'png|jpg|gif' ]
 		};
 		external_RegExp = new RegExp('(?:^|\\' + external_RegExp + ')'
-				+ library_namespace.env.resource_directory_name + '\\'
+				+ library_namespace.env.resources_directory_name + '\\'
 				+ external_RegExp + '|^(?:' + library_namespace.Class + '\\'
 				+ external_RegExp + ')?'
 				+ library_namespace.env.external_directory_name + '\\'
@@ -2905,7 +2905,7 @@ if (typeof CeL === 'function')
 				delete declaration.code;
 				delete declaration.finish;
 				delete declaration.last_call;
-				delete declaration.require_resource;
+				delete declaration.require_resources;
 				delete declaration.variable_hash;
 				// delete declaration.use;
 
@@ -3804,6 +3804,7 @@ if (typeof CeL === 'function')
 				}
 			}
 
+			library_namespace.env.library_base_path = library_base_path;
 			// console.log(library_base_path);
 			return library_base_path;
 		};
@@ -4052,7 +4053,7 @@ if (typeof CeL === 'function')
 		 * @param {String}URL_attribute
 		 *            attribute name of the tag.
 		 */
-		function check_resource(tag, URL_attribute) {
+		function check_resources(tag, URL_attribute) {
 			if (URL_attribute || (URL_attribute = URL_of_tag[tag]))
 				library_namespace.get_tag_list(tag).forEach(
 						function(node) {
@@ -4064,18 +4065,18 @@ if (typeof CeL === 'function')
 								library_namespace.debug(
 								//
 								'add included: [' + URL.id + ']', 2,
-										'check_resource');
+										'check_resources');
 								URL.included = true;
 							}
 						});
 			else
 				library_namespace.warn(
 				//
-				'check_resource: 無法判別 tag [' + tag + '] 之 URL attribute！');
+				'check_resources: 無法判別 tag [' + tag + '] 之 URL attribute！');
 		}
 
 		// export.
-		library_namespace.check_resource = check_resource;
+		library_namespace.check_resources = check_resources;
 
 		/**
 		 * 設定 library 之初始化程序。
@@ -4092,7 +4093,7 @@ if (typeof CeL === 'function')
 					});
 				}
 				[ 'script', 'link' ].forEach(function(tag) {
-					check_resource(tag);
+					check_resources(tag);
 				});
 			}
 

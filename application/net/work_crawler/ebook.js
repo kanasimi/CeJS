@@ -178,6 +178,23 @@ function module_code(library_namespace) {
 	}
 
 	function create_ebook(work_data) {
+		var cecc = this.convert_text_language_using
+				&& this.convert_text_language_using.cecc;
+		// console.trace(cecc);
+		if (cecc && cecc.load_text_to_check) {
+			var promise_load_text_to_check = cecc.load_text_to_check({
+				work_title : work_data.title,
+				convert_to_language : this.convert_to_language
+			}, {
+				reset : true
+			});
+			if (library_namespace.is_thenable(promise_load_text_to_check)) {
+				// console.trace(promise_load_text_to_check);
+				return promise_load_text_to_check.then(create_ebook.bind(this,
+						work_data));
+			}
+		}
+
 		// return needing to wait language converted
 		var text_list = [ work_data.title, '語言轉換' ];
 		var promise_language_convert = this.cache_converted_text(text_list);
@@ -365,27 +382,24 @@ function module_code(library_namespace) {
 			chapter_title : chapter_title
 		};
 
-		var convert_options;
-		if (false) {
+		var convert_options = {
 			// only for debug CeCC 繁簡轉換。
-			ebook.path.parsed_tag = ebook.path.root + 'parsed_tag/';
-			// console.trace(ebook.path.parsed_tag);
-			library_namespace.create_directory(ebook.path.parsed_tag);
-			convert_options = {
-				save_parsed_tag_to_file : ebook.path.parsed_tag
-						+ 'parsed_tag_'
-						+ (ebook.tag_file_count = (ebook.tag_file_count | 0) + 1)
-								.pad(4) + '.json'
-			};
-		}
+			cache_directory : work_data.directory + '繁簡轉換 cache'
+					+ library_namespace.env.path_separator,
+			// 超過此長度才 cache。
+			min_cache_length : 20
+		};
+		// console.trace(convert_options);
 
-		data.text = library_namespace.EPUB.normailize_contents(data.text
+		data.text = library_namespace.HTML_to_Unicode(
+		//
+		library_namespace.EPUB.normailize_contents(data.text
+		// remove all '\n
+		.replace(/[\r\n]/g, '')
 		// <br /> → "\n"
 		.replace(/<br(?:\s[^<>]*)?>/ig, '\n')
 		// .trim()
-		)
-		// convert "&nbsp;"
-		.replace(/&#160;/g, '\u00A0');
+		), true);
 
 		// return needing to wait language converted
 		var text_list = [ part_title, chapter_title, data.text ];
@@ -510,9 +524,17 @@ function module_code(library_namespace) {
 		item = ebook.add(item_data, item);
 
 		// 登記本作品到本章節總計的字數。
-		if (item && !item.error && item_data.word_count > 0) {
-			work_data.words_so_far = (work_data.words_so_far || 0)
-					+ item_data.word_count;
+		function count_words_so_far(item) {
+			if (item && !item.error && item_data.word_count > 0) {
+				work_data.words_so_far = (work_data.words_so_far || 0)
+						+ item_data.word_count;
+			}
+			// console.trace(work_data.words_so_far);
+		}
+		if (library_namespace.is_thenable(item)) {
+			item = item.then(count_words_so_far);
+		} else {
+			count_words_so_far(item);
 		}
 
 		return item;
@@ -733,6 +755,14 @@ function module_code(library_namespace) {
 		var file_path = ebook_path.call(this, work_data, file_name);
 
 		this.clear_converted_text_cache(true);
+		var cecc = this.convert_text_language_using
+				&& this.convert_text_language_using.cecc;
+		// console.trace(cecc);
+		if (cecc && cecc.report_text_to_check) {
+			cecc.report_text_to_check({
+				convert_to_language : this.convert_to_language
+			});
+		}
 
 		process.title = gettext('打包 epub 電子書：%1', work_data.title) + ' @ '
 				+ this.id;

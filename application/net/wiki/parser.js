@@ -5302,7 +5302,7 @@ function module_code(library_namespace) {
 		// TODO:
 		// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
 
-		wikitext = wikitext.replace_till_stable(/-{(.*?)}-/g,
+		wikitext = wikitext.replace_till_stable(/-{(|[^{].*?)}-/g,
 				parse_language_conversion);
 
 		// ----------------------------------------------------

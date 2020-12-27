@@ -545,8 +545,8 @@ function module_code(library_namespace) {
 			if (is_controller(item)) {
 				if (controller) {
 					if (!cloned) {
-						controller = cloned = Object.assign(Object.create(null),
-								controller);
+						controller = cloned = Object.assign(
+								Object.create(null), controller);
 						// cloned = true;
 					}
 					Object.assign(controller, item);
@@ -588,8 +588,8 @@ function module_code(library_namespace) {
 
 		return unnested_formatter_convert_Array(format_structure, this,
 				initial_controller
-						&& unnested_formatter_change_status(Object.create(null),
-								initial_controller, this),
+						&& unnested_formatter_change_status(
+								Object.create(null), initial_controller, this),
 				typeof item_processor === 'function' && item_processor);
 	}
 

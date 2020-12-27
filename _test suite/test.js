@@ -795,10 +795,10 @@ function test_locale() {
 
 	//	###usage 2014/2/5
 
-	//	for i18n: define gettext() user domain resource location.
+	//	for i18n: define gettext() user domain resources path / location.
 	//	gettext() will auto load (CeL.env.domain_location + language + '.js').
-	//	e.g., resource/cmn-Hant-TW.js, resource/ja-JP.js
-	CeL.env.domain_location = CeL.env.resource_directory_name + '/';
+	//	e.g., resources/cmn-Hant-TW.js, resources/ja-JP.js
+	CeL.env.domain_location = CeL.env.resources_directory_name + '/';
 	//	declaration for gettext()
 	var _;
 
@@ -3144,6 +3144,9 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a [[:en<!-- c -->:b{{=}}]] d'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
+		wikitext = '--{{unsigned|user}}--'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['transclusion', parsed[1].type]);
 		wikitext = 'a \n==[[:en<!--comments-->:link{{=}}<!--comments-->]] ==\n d'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = '{|\n|-\n|[[{{t}}]]\n|}'; parsed = CeL.wiki.parser(wikitext).parse();

@@ -693,10 +693,11 @@ function module_code(library_namespace) {
 	if (Object.values) {
 		_.PATTERN_RegExp_flags = Object.values(RegExp_flags.flags);
 	} else {
+		// e.g., @ WSH (Windows Script Host)
 		_.PATTERN_RegExp_flags = [];
 		(function() {
-			for ( var f in RegExp_flags.flags)
-				_.PATTERN_RegExp_flags.push(RegExp_flags.flags[g]);
+			for ( var flag in RegExp_flags.flags)
+				_.PATTERN_RegExp_flags.push(RegExp_flags.flags[flag]);
 		})();
 	}
 	// TODO: flags 只能出現一次!

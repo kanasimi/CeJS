@@ -1502,7 +1502,7 @@ function module_code(library_namespace) {
 					options = Object.assign({
 						path : path
 					}, options);
-				// 載入 resource。
+				// 載入 resources。
 				this.add(source, options);
 			} else {
 				library_namespace.warn(

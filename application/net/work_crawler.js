@@ -496,6 +496,7 @@ function module_code(library_namespace) {
 			// work_data.recheck
 			recheck : true,
 			download_chapter_NO_list : true,
+			// work_data.last_download
 			last_download : true,
 
 			error_images : true,

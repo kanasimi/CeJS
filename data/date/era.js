@@ -8534,8 +8534,8 @@ function module_code(library_namespace) {
 		// .replace(/\\{2,}/g, '\\')
 		];
 		if (library_namespace.is_WWW(true))
-			// 載入 CSS resource。
-			// include resource of module.
+			// 載入 CSS resource(s)。
+			// include resources of module.
 			queue.unshift(library_namespace.get_module_path(this.id).replace(
 					/[^.]+$/, 'css'));
 		// library_namespace.log(queue);

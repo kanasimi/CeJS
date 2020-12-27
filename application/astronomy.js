@@ -2386,8 +2386,8 @@ function module_code(library_namespace) {
 			'VSOP87_load_terms: ' + (failed
 			//
 			? 'Failed to load [' + failed + ']'
-			//
-			: 'resource file of [' + objects + '] loaded.'));
+			// resources
+			: 'resource files of [' + objects + '] loaded.'));
 			if (typeof callback === 'function')
 				callback(failed);
 		});
@@ -3598,16 +3598,15 @@ function module_code(library_namespace) {
 		var name = LEA406_name + type + '-' + term_name;
 		library_namespace.run(library_namespace.get_module_path(module_name
 		//
-		+ library_namespace.env.path_separator + name), [
-				function() {
-					library_namespace.info(
-					//
-					'LEA406_load_terms: resource file of [' + name
-							+ '] loaded, '
-							+ LEA406_terms[term_name + type].length
-							// Poisson series
-							+ ' terms.');
-				}, callback ]);
+		+ library_namespace.env.path_separator + name), [ function() {
+			library_namespace.info(
+			// resources
+			'LEA406_load_terms: resource files of [' + name
+			//
+			+ '] loaded, ' + LEA406_terms[term_name + type].length
+			// Poisson series
+			+ ' terms.');
+		}, callback ]);
 	}
 
 	LEA406.load_terms = LEA406_load_terms;

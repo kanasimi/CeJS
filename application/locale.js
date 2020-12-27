@@ -333,7 +333,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 為各種不同 domain 轉換文字（句子）、轉成符合當地語言的訊息內容。包括但不僅限於各種語系。<br />
-	 * 需要確認系統相應 domain resource 已載入時，請利用 gettext.use_domain(domain, callback)。
+	 * 需要確認系統相應 domain resources 已載入時，請利用 gettext.use_domain(domain, callback)。
 	 * TODO: using localStorage.
 	 * 
 	 * @example <code>
@@ -526,7 +526,7 @@ function module_code(library_namespace) {
 	}
 
 	// 不改變預設domain，直接取得特定domain的轉換過的文字。
-	// 警告：需要確保系統相應 domain resource 已載入並設定好。
+	// 警告：需要確保系統相應 domain resources 已載入並設定好。
 	gettext.in_domain = function(domain_name, text_id) {
 		var options = typeof domain_name === 'object' ? domain_name
 		//
@@ -561,7 +561,7 @@ function module_code(library_namespace) {
 	 *            設定/登記是否尚未載入之資源類型。
 	 * @returns {Boolean} 此 type 是否已 loaded。
 	 */
-	function gettext_check_resource(domain_name, type, is_loaded) {
+	function gettext_check_resources(domain_name, type, is_loaded) {
 		if (!domain_name)
 			domain_name = gettext_domain_name;
 
@@ -573,7 +573,7 @@ function module_code(library_namespace) {
 			if (type = [ , 'system', 'user' ][type]) {
 				if (typeof is_loaded === 'boolean') {
 					library_namespace.debug('登記 [' + domain_name + '] 已經載入資源 ['
-							+ type + ']。', 2, 'gettext_check_resource');
+							+ type + ']。', 2, 'gettext_check_resources');
 					domain[type] = is_loaded;
 				}
 			} else
@@ -625,7 +625,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 設定如何載入指定 domain resource，如語系檔。
+	 * 設定如何載入指定 domain resources，如語系檔。
 	 * 
 	 * @param {String|Function}path
 	 *            (String) prefix of path to load.<br />
@@ -634,8 +634,8 @@ function module_code(library_namespace) {
 	gettext.use_domain_location = function(path) {
 		if (typeof path === 'string') {
 			gettext_domain_location = path;
-			// 重設 user domain resource。
-			gettext_check_resource('', 2, false);
+			// 重設 user domain resources path。
+			gettext_check_resources('', 2, false);
 		}
 		return gettext_domain_location;
 	};
@@ -671,16 +671,16 @@ function module_code(library_namespace) {
 		var need_to_load = [];
 		// TODO: use <a href="http://en.wikipedia.org/wiki/JSONP"
 		// accessdate="2012/9/14 23:50">JSONP</a>
-		if (!gettext_check_resource(domain_name, 1)) {
-			library_namespace.debug('準備載入系統相應 domain resource。', 2, 'gettext');
+		if (!gettext_check_resources(domain_name, 1)) {
+			library_namespace.debug('準備載入系統相應 domain resources。', 2, 'gettext');
 			need_to_load.push(library_namespace.get_module_path(module_name,
-			// resource/
-			CeL.env.resource_directory_name + '/' + domain_name + '.js'),
+			// resources/
+			CeL.env.resources_directory_name + '/' + domain_name + '.js'),
 			//
 			function() {
-				library_namespace.debug('Resource of module included.', 2,
+				library_namespace.debug('Resources of module included.', 2,
 						'gettext');
-				gettext_check_resource(domain_name, 1, true);
+				gettext_check_resources(domain_name, 1, true);
 			});
 		}
 
@@ -690,16 +690,16 @@ function module_code(library_namespace) {
 
 		if (typeof gettext_domain_location === 'string'
 		//
-		&& !gettext_check_resource(domain_name, 2)) {
-			library_namespace.debug('準備載入 user 指定 domain resource，如語系檔。', 2,
+		&& !gettext_check_resources(domain_name, 2)) {
+			library_namespace.debug('準備載入 user 指定 domain resources，如語系檔。', 2,
 					'gettext');
 			need_to_load.push(typeof gettext_domain_location === 'string'
 			// TODO: .json
 			? gettext_domain_location + domain_name + '.js'
 					: gettext_domain_location(domain_name), function() {
-				library_namespace.debug('User-defined resource included.', 2,
+				library_namespace.debug('User-defined resources included.', 2,
 						'gettext');
-				gettext_check_resource(domain_name, 2, true);
+				gettext_check_resources(domain_name, 2, true);
 			});
 		}
 
@@ -714,7 +714,7 @@ function module_code(library_namespace) {
 					});
 		} else {
 			library_namespace.debug('Nothing to load.');
-			gettext_check_resource(domain_name, 2, true);
+			gettext_check_resources(domain_name, 2, true);
 		}
 	}
 
@@ -725,11 +725,11 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
-	// for i18n: define gettext() user domain resource location.
+	// for i18n: define gettext() user domain resources path / location.
 	// gettext() will auto load (CeL.env.domain_location + language + '.js').
-	// e.g., resource/cmn-Hant-TW.js, resource/ja-JP.js
+	// e.g., resources/cmn-Hant-TW.js, resources/ja-JP.js
 	CeL.gettext.use_domain_location(module.filename.replace(/[^\\\/]*$/,
-			'resource' + CeL.env.path_separator));
+			'resources' + CeL.env.path_separator));
 
 	CeL.gettext.use_domain('GUESS', true);
 
@@ -768,9 +768,9 @@ function module_code(library_namespace) {
 		if (is_loaded) {
 			gettext_domain_name = domain_name;
 			library_namespace.debug({
-				T : [ '已載入過 [%1]，直接設定 user domain resource。', domain_name ]
+				T : [ '已載入過 [%1]，直接設定使用者自訂資源。', domain_name ]
 			}, 2, 'gettext.use_domain');
-			gettext_check_resource(domain_name, 2, true);
+			gettext_check_resources(domain_name, 2, true);
 			typeof callback === 'function' && callback(domain_name);
 
 		} else if (force && domain_name) {
@@ -1821,8 +1821,8 @@ function module_code(library_namespace) {
 	// hant : ['cmn-Hant-TW']
 	}
 			&& Object.create(null), gettext_texts = Object.create(null), gettext_domain_name,
-	// CeL.env.domain_location = CeL.env.resource_directory_name + '/';
-	// CeL.gettext.use_domain_location(CeL.env.resource_directory_name + '/');
+	// CeL.env.domain_location = CeL.env.resources_directory_name + '/';
+	// CeL.gettext.use_domain_location(CeL.env.resources_directory_name + '/');
 	gettext_domain_location = library_namespace.env.domain_location, gettext_resource = Object
 			.create(null);
 

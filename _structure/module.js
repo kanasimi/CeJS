@@ -815,8 +815,8 @@ if (typeof CeL === 'function') {
 
 		/**
 		 * 以同時依序(synchronously)的方式，載入最基本之資源取得功能。<br />
-		 * Get file resource by {@link XMLHttpRequest}.<br />
-		 * 依序載入 resource，用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br />
+		 * Get resource files by {@link XMLHttpRequest}.<br />
+		 * 依序載入 resources，用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br />
 		 * 除 Ajax，本函數亦可用在 CScript 執行中。<br />
 		 * see also: .application.net.Ajax.get_URL()
 		 * 
@@ -1348,20 +1348,21 @@ if (typeof CeL === 'function') {
 		 * 
 		 * TODO: 現在還有很大問題!
 		 * 
-		 * @param {String}
-		 *            resource_string resource to test
+		 * @param {String}resource_String
+		 *            resource to test
 		 * @returns {Boolean} resource 是否為 module (true: is module, false: is
 		 *          URL?)
 		 */
-		match_module_name_pattern = function(resource_string) {
-			return typeof resource_string !== 'string'
-					|| resource_string.charAt(0) === '.'
-					|| resource_string.charAt(0) === '/'
-					|| resource_string.indexOf(':') !== -1
-					// || resource_string.indexOf('%')!==-1
-					|| /\.(js|css)$/i.test(resource_string) ? false : /\.$/
-					.test(resource_string)
-					|| _.is_module_pattern(resource_string);
+		match_module_name_pattern = function match_module_name_pattern(
+				resource_String) {
+			return typeof resource_String !== 'string'
+					|| resource_String.charAt(0) === '.'
+					|| resource_String.charAt(0) === '/'
+					|| resource_String.indexOf(':') !== -1
+					// || resource_String.indexOf('%')!==-1
+					|| /\.(js|css)$/i.test(resource_String) ? false : /\.$/
+					.test(resource_String)
+					|| _.is_module_pattern(resource_String);
 		};
 
 		_// JSDT:_module_

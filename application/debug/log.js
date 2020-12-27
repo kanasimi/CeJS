@@ -1086,7 +1086,7 @@ function finish(name_space) {
 	if (false)
 		code_for_including[generateCode.dLK] = '*var Debug={log:code_for_including()};';
 
-	// include resource of module.
+	// include resources of module.
 	CeL.run(CeL.get_module_path(module_name, 'log.css'));
 
 	// 為本 library 用

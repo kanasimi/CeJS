@@ -79,7 +79,7 @@ function module_code(library_namespace) {
 		// console.trace(this.files);
 		this.conversions = this.files.map(function(file_name) {
 			return new pair(null, {
-				// 載入 resource。
+				// 載入 resources。
 				path : dictionary_base + file_name + '.txt',
 				item_processor : function(item) {
 					var matched = item.match(/^([^\t]+)\t([^\t]+)$/);
@@ -331,7 +331,8 @@ function module_code(library_namespace) {
 			if (!cecc.is_asynchronous)
 				cecc_name += '_sync';
 			var method = cecc[cecc_name].bind(cecc);
-			method.CeCC = true;
+			method.is_CeCC = true;
+			method.cecc = cecc;
 			if (cecc.is_asynchronous)
 				method.is_asynchronous = true;
 			set_as_default(method_name, method);

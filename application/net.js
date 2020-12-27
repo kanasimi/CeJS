@@ -441,7 +441,8 @@ function module_code(library_namespace) {
 			if (typeof value !== 'string' && typeof value !== 'number'
 					&& value !== NO_EQUAL_SIGN) {
 				library_namespace.debug({
-					T : [ '非字串之參數：[%1]', value ]
+					T : [ '設定 %1 成非字串之參數：%2', JSON.stringify(key),
+							JSON.stringify(value) ]
 				}, 1, 'parameters_toString');
 			}
 
@@ -596,15 +597,18 @@ function module_code(library_namespace) {
 			}
 
 			if (library_namespace.is_debug(2)) {
-				library_namespace.debug('[' + (i + 1) + '/' + l + '] '
-				//
-				+ (parameters[name] ? '<span style="color:#888;">('
-				//
-				+ parameters[name].length + ')</span> [' + name
-				//
-				+ '] += [' + value + ']' : '[' + name + '] = ['
-				//
-				+ value + ']'));
+				try {
+					library_namespace.debug('[' + (i + 1) + '/' + l + '] '
+					//
+					+ (parameters[name] ? '<span style="color:#888;">('
+					//
+					+ parameters[name].length + ')</span> [' + name
+					//
+					+ '] += [' + value + ']' : '[' + name + '] = ['
+					//
+					+ value + ']'));
+				} catch (e) {
+				}
 			}
 
 			if (options.split_pattern && typeof value === 'string'
@@ -663,6 +667,7 @@ function module_code(library_namespace) {
 				options));
 		try {
 			Map.call(this, search);
+			// Object.assign(search, Map.prototype);
 			return;
 		} catch (e) {
 			// node.js 0.11: Constructor Map requires 'new'
@@ -733,6 +738,21 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
+	 * <code>
+	https://pubs.opengroup.org/onlinepubs/007908799/xbd/notation.html
+	The following table lists escape sequences and associated actions on display devices capable of the action.
+
+	https://pubs.opengroup.org/onlinepubs/007908799/xcu/printf.html
+	the escape sequences listed in the XBD specification, File Format Notation  (\\, \a, \b, \f, \n, \r, \t, \v), which will be converted to the characters they represent
+	</code>
+	 */
+	var to_file_name_escape_sequences = {
+		'\n' : '＼n',
+		'\r' : '＼r',
+		'\t' : '＼t'
+	};
+
+	/**
 	 * 正規化 file name，排除會導致 error 的字元。 normalize file name
 	 * 
 	 * @param {String}file_name
@@ -759,6 +779,9 @@ function module_code(library_namespace) {
 		// else: make result readable.
 
 		file_name = file_name.replace(/[\0-\x1f]/g, function($0) {
+			if ($0 in to_file_name_escape_sequences)
+				return to_file_name_escape_sequences[$0];
+
 			var c = $0.charCodeAt(0).toString(16), l = c.length;
 			if (l === 1 || l === 3)
 				c = '0' + c;

@@ -273,26 +273,26 @@ function module_code(library_namespace) {
 
 		encoding_list = encoding_list.map(normalize_encoding_name);
 
-		// resource need to load
-		var resource_path_list = [];
+		// resources need to load
+		var resources_path_list = [];
 
 		encoding_list.forEach(function(encoding) {
 			if (!(encoding in map_set)) {
-				resource_path_list.push(library_namespace.get_module_path(
+				resources_path_list.push(library_namespace.get_module_path(
 						module_name, encoding + '.js'));
 			}
 		})
 
-		if (resource_path_list.length === 0) {
+		if (resources_path_list.length === 0) {
 			callback && callback();
 			return true;
 		}
 
-		if (resource_path_list.length === 1) {
-			resource_path_list = resource_path_list[0];
+		if (resources_path_list.length === 1) {
+			resources_path_list = resources_path_list[0];
 		}
-		library_namespace.debug(resource_path_list, 1, 'load_code_map');
-		library_namespace.run(resource_path_list, callback);
+		library_namespace.debug(resources_path_list, 1, 'load_code_map');
+		library_namespace.run(resources_path_list, callback);
 	}
 
 	_.load = load_code_map;

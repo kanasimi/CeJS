@@ -3145,7 +3145,7 @@ function module_code(library_namespace) {
 						 */
 						content = CeL.wiki.content_of(page_data);
 
-						// 當取得了多個版本:
+						// 當取得了多個版本，欲取得最新的一個版本：
 						// content = CeL.wiki.content_of(page_data, 0);
 
 						// 似乎沒 !page_data.title 這種問題。
@@ -3183,6 +3183,9 @@ function module_code(library_namespace) {
 						var parsed = CeL.wiki.parser(page_data).parse();
 						// debug 用.
 						// check parser, test if parser working properly.
+						CeL.assert([ content, parsed.toString() ],
+								'wikitext parser check for '
+										+ CeL.wiki.title_link_of(page_data));
 						if (CeL.wiki.content_of(page_data) !== parsed
 								.toString()) {
 							console.log(CeL.LCS(CeL.wiki.content_of(page_data),

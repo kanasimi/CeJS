@@ -75,6 +75,7 @@ function module_code(library_namespace) {
 				// console.log(this.get_URL_options.agent.last_cookie);
 				// console.trace(agent.last_cookie);
 			} else {
+				// copy cookies
 				agent.last_cookie = this.get_URL_options.agent.last_cookie;
 			}
 		}
@@ -226,12 +227,14 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (this.convert_to_TW) {
+		if (this.convert_to_language) {
 			// CeL.CN_to_TW('简体')
 			library_namespace.run('extension.zh_conversion', function() {
-				library_namespace.CN_to_TW.files
+				library_namespace.zh_conversion.CN_to_TW
+				//
+				= library_namespace.CN_to_TW = library_namespace.zh_conversion
 				// 小說不需要轉換資訊科技相關字詞。
-				= library_namespace.CN_to_TW.files.filter(function(file) {
+				.generate_converter('CN_to_TW', function(file) {
 					return file !== 'TWPhrasesIT';
 				});
 			});

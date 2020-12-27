@@ -3,6 +3,7 @@
  * @fileoverview 本檔案包含了 date / time 的功能。
  * 
  * TODO: http://momentjs.com/
+ * @see Moment.js https://momentjs.com/
  * @since
  */
 

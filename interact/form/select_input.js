@@ -57,7 +57,8 @@ function module_code(library_namespace, load_arguments) {
 	var get_node_offset = this.r('get_node_offset');
 	//var parse_URI = this.r('parse_URI');
 
-	// include resource of module.
+	// 載入 CSS resource(s)。
+	// include resources of module.
 	library_namespace.run(library_namespace.get_module_path(this.id, 'select_input.css'));
 
 

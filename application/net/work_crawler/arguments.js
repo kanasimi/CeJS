@@ -454,7 +454,7 @@ function module_code(library_namespace) {
 			overwrite_old_file : 'boolean',
 			vertical_writing : 'boolean|string',
 			// RTL_writing : 'boolean',
-			convert_to_TW : 'boolean',
+			convert_to_language : 'string:TW;CN',
 
 			user_agent : 'string',
 			// 代理伺服器 proxy_server: "username:password@hostname:port"

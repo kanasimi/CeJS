@@ -639,7 +639,8 @@ convert_MathML.handler['default'] = convert_MathML.handler.mathml;
 // TODO: "~"
 convert_MathML.RELATIONSHIP_PATTERN = '=><∝≁-⊋⋀-⋭';
 
-convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-±' + convert_MathML.RELATIONSHIP_PATTERN + ',;\r\n';
+// https://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
+convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-−±' + convert_MathML.RELATIONSHIP_PATTERN + ',;\r\n';
 
 // operator : [ pattern, handler, object_to_add ]
 // 運算子優先順序最高到最低
@@ -653,10 +654,10 @@ convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-±' + convert
 	return [ '[]', $1 ];
 } ],
 // exponents.
-[ /(\S*)\^([+\-±]?\S+)/, function($0, $1, $2) {
+[ /(\S*)\^([+\-−±]?\S+)/, function($0, $1, $2) {
 	// [ , base, power ]
 	return [ '^', $1, $2 ];
-} ], [ /([√∛])([+\-±]?\S+)/, function($0, $1, $2) {
+} ], [ /([√∛])([+\-−±]?\S+)/, function($0, $1, $2) {
 	// [ , base, power ]
 	return [ $1, $2 ];
 } ],
@@ -668,7 +669,7 @@ convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-±' + convert
 	return [ $2, $1, $3 ];
 } ],
 // addition and subtraction
-[ /(\S+)([+\-±])(\S+)/, function($0, $1, $2, $3) {
+[ /(\S+)([+\-−±])(\S+)/, function($0, $1, $2, $3) {
 	return [ $2, $1, $3 ];
 } ],
 // relationships, assignment, equalities
@@ -796,8 +797,8 @@ convert_MathML.parse = function(text, queue) {
 	return text;
 };
 
-// (?:[+\-±]?\d+(?:\.\d+)?[°∘%％‰‱]?|pi|PI|Pi|[eiKπδφγλΩ∞ℵ])
-var PATTERN_numeric = /[+\-±]?\d+(?:\.\d+)?[°∘%％‰‱]?/;
+// (?:[+\-−±]?\d+(?:\.\d+)?[°∘%％‰‱]?|pi|PI|Pi|[eiKπδφγλΩ∞ℵ])
+var PATTERN_numeric = /[+\-−±]?\d+(?:\.\d+)?[°∘%％‰‱]?/;
 // [ , 純數, 識別元 ]
 convert_MathML.PATTERN_numeric_prefix = new RegExp('^(' + PATTERN_numeric.source + ')([^\d].*)?$' + '$');
 convert_MathML.is_numeric_prefix = function(expression) {
@@ -837,7 +838,7 @@ convert_MathML.resolve = function(text, queue) {
 		var pre_text = null;
 		if (matched.index > lastIndex) {
 			pre_text = text.substring(lastIndex, matched.index);
-			if (/(?:^\s*[+\-±]?|\s)\d+(?:\.\d+)?(?:\s|$)/.test(pre_text))
+			if (/(?:^\s*[+\-−±]?|\s)\d+(?:\.\d+)?(?:\s|$)/.test(pre_text))
 				// e.g., "log 3.3"
 				changed = true, Array.prototype.push.apply(array, pre_text
 						.split(/\s+/));
@@ -1053,7 +1054,7 @@ convert_MathML.reduce = function(structure, node, handler) {
 		// e.g., sin^-1 2π
 		if (typeof structure[2] === 'string'
 				&& (matched = structure[2]
-						.match(/^([+\-±]?\d+(?:\.\d+)?)\s+([\S]+)$/))) {
+						.match(/^([+\-−±]?\d+(?:\.\d+)?)\s+([\S]+)$/))) {
 			structure[2] = matched[1];
 			structure = [ , structure, matched[2] ];
 		}

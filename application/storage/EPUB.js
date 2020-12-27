@@ -1212,6 +1212,24 @@ function module_code(library_namespace) {
 				&& item1.href === item2.href;
 	}
 
+	function escape_ampersand(text) {
+		// https://stackoverflow.com/questions/12566098/what-are-the-longest-and-shortest-html-character-entity-names
+		return text.replace(/&([^&;]{0,50})([^&]?)/g, function(entity, postfix,
+				semicolon) {
+			if (semicolon === ';' && (/^#\d{1,10}$/.test(postfix)
+			// "&CounterClockwiseContourIntegral;"
+			|| /^[a-z]\w{0,49}$/i.test(postfix))) {
+				return entity;
+			}
+			// TODO: &copy, &shy
+			return '&amp;' + postfix + semicolon;
+		});
+	}
+
+	function to_XHTML_URL(url) {
+		return escape_ampersand(encodeURI(url));
+	}
+
 	// 正規化 XHTML 書籍章節內容。
 	// assert: normailize_contents(contents) ===
 	// normailize_contents(normailize_contents(contents))
@@ -1264,9 +1282,9 @@ function module_code(library_namespace) {
 		// [[non-breaking space]]
 		// EpubCheck 不認識 HTML character entity，
 		// 但卻又不允許 <!DOCTYPE html> 加入其他宣告。
-		.replace(/&nbsp;/g, '&#160;')
-		//
-		.replace(/&([^#a-z])/ig, '&amp;$1');
+		.replace(/&nbsp;/g, '&#160;');
+
+		contents = escape_ampersand(contents);
 
 		// contents = contents.replace(/<script[^<>]*>[\s\S]*?<\/script>/g, '');
 
@@ -1646,8 +1664,8 @@ function module_code(library_namespace) {
 					});
 					return matched ? ' title="'
 					// recover url
-					+ encodeURI(url).replace(/&/g, '&amp;') + '" '
-							+ attribute_name + '="' + href + '"' : all;
+					+ to_XHTML_URL(url) + '" ' + attribute_name + '="' + href
+							+ '"' : all;
 				});
 
 				contents = contents.replace(/<a ([^<>]+)>([^<>]+)<\/a>/ig,
@@ -1706,15 +1724,14 @@ function module_code(library_namespace) {
 				// content="text/html; charset=UTF-8" />
 				'<meta charset="UTF-8" />' ];
 
-				this.resources
-						.forEach(function(resource) {
-							if (resource['media-type'] === 'text/css') {
-								// add all styles
-								html
-										.push('<link rel="stylesheet" type="text/css" href="'
-												+ resource.href + '" />');
-							}
-						});
+				this.resources.forEach(function(resource) {
+					if (resource['media-type'] === 'text/css') {
+						html.push(
+						// add all styles
+						'<link rel="stylesheet" type="text/css" href="'
+								+ resource.href + '" />');
+					}
+				});
 
 				// console.log([ contents.title, contents.sub_title ]);
 				html.push('<title>', [ contents.title, contents.sub_title ]
@@ -1727,7 +1744,7 @@ function module_code(library_namespace) {
 
 				// 設定item_data.url可以在閱讀電子書時，直接點選標題就跳到網路上的來源。
 				var url_header = item_data.url
-						&& ('<a href="' + encodeURI(item_data.url) + '">'), title_layer = [];
+						&& ('<a href="' + to_XHTML_URL(item_data.url) + '">'), title_layer = [];
 				// 卷標題 part/episode > chapter > section
 				if (contents.title) {
 					title_layer
@@ -1945,7 +1962,7 @@ function module_code(library_namespace) {
 		}
 
 		var gettext = library_namespace.gettext.in_domain
-		// @see application/locale/resource/locale.csv
+		// @see application/locale/resources/locale.csv
 		? library_namespace.gettext.in_domain.bind(null, language)
 				: library_namespace.gettext;
 

@@ -1426,8 +1426,8 @@ function module_code(library_namespace) {
 			to_kana_pair = new library_namespace.pair(null, {
 				path : library_namespace.get_module_path(module_name.replace(
 						/[^.]+$/, ''),
-				// 'resource/kana romaji.txt'
-				library_namespace.env.resource_directory_name
+				// 'resources/kana romaji.txt'
+				library_namespace.env.resources_directory_name
 						+ '/kana romaji.txt'),
 				encoding : 'UTF-8',
 				remove_comments : true

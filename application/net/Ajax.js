@@ -1117,7 +1117,8 @@ function module_code(library_namespace) {
 	 * secure。<br />
 	 * 為增加效率，不檢查 agent.last_cookie 本身之重複的 cookie。
 	 * 
-	 * TODO: create class Cookie
+	 * TODO: create class Cookie, Cookie.prototype.merge(),
+	 * Cookie.prototype.clone()
 	 * 
 	 * @param {Object}agent
 	 *            node_http_agent / node_https_agent
