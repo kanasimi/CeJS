@@ -8,7 +8,7 @@ workflows:
   test:
     jobs:
       # https://discuss.circleci.com/t/run-tests-on-multiple-versions-of-python/15462/2
-      - test-latest
+      - test-latest-temporarily-LTS
       - test-LTS
       # Wikimedia Tool Labs: v0.10.25
       - test-old
@@ -26,14 +26,14 @@ jobs:
           name: test
           command: npm test
 
-  test-latest:
+  test-latest-temporarily-LTS:
     #<<: *test-template
     docker:
       # https://circleci.com/docs/2.0/circleci-images/
       # https://hub.docker.com/r/circleci/node/tags/
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
       # 2020/10-12: failed with image: circleci/node:current-stretch
-	  ## npm ERR! EISDIR: illegal operation on a directory, copyfile '/usr/local/lib/node_modules/npm' -> '/usr/local/lib/node_modules/.npm-i9nnxROI'
+      ## npm ERR! EISDIR: illegal operation on a directory, copyfile '/usr/local/lib/node_modules/npm' -> '/usr/local/lib/node_modules/.npm-i9nnxROI'
       #- image: circleci/node:current-stretch
       - image: circleci/node:lts-stretch
 

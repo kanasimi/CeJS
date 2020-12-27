@@ -492,6 +492,12 @@ function module_code(library_namespace) {
 			data = JSON.stringify(data);
 		}
 
+		if (options && options.changed_only) {
+			var original_data = fs_readFileSync(file_path, options);
+			if (String(data) === String(original_data))
+				return new Error('Nothing changed');
+		}
+
 		try {
 			node_fs.writeFileSync(file_path, data, options);
 		} catch (e) {
