@@ -32,9 +32,10 @@ jobs:
       # https://circleci.com/docs/2.0/circleci-images/
       # https://hub.docker.com/r/circleci/node/tags/
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
-      # 2020/10: failed with image: circleci/node:current-stretch
-      - image: circleci/node:current-stretch
-      #- image: circleci/node:lts-stretch
+      # 2020/10-12: failed with image: circleci/node:current-stretch
+	  ## npm ERR! EISDIR: illegal operation on a directory, copyfile '/usr/local/lib/node_modules/npm' -> '/usr/local/lib/node_modules/.npm-i9nnxROI'
+      #- image: circleci/node:current-stretch
+      - image: circleci/node:lts-stretch
 
     steps:
       - checkout
