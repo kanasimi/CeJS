@@ -104,7 +104,7 @@ function module_code(library_namespace) {
 	</code>
 	 */
 
-	// main module
+	// main module of OS adapted functions
 	var storage_module;
 
 	if (library_namespace.platform.nodejs) {
@@ -172,6 +172,64 @@ function module_code(library_namespace) {
 
 		// others done @ CeL.application.OS.Windows.file
 
+	}
+
+	// ----------------------------------------------------
+
+	function write_file(file_path, data, options) {
+		// options = library_namespace.new_options(options);
+		if (library_namespace.is_Object(data)
+		// JSON.stringify() 放在 try 外面。這樣出現 circular structure 的時候才知道要處理。
+		&& /.json$/i.test(file_path)) {
+			// 自動將資料轉成 string。
+			data = JSON.stringify(data);
+		}
+
+		if (options && options.changed_only) {
+			var original_data = _.read_file(file_path, options);
+			if (String(data) === String(original_data))
+				return new Error('Nothing changed');
+			// delete options.changed_only;
+		}
+
+		if (options && options.backup && _.file_exists(file_path)) {
+			var backup_options = typeof options.backup === 'string' ? /[\\\/]/
+					.test(options.backup) ? {
+				directory : options.backup
+			} : {
+				directory_name : options.backup
+			} : library_namespace.new_options(options.backup);
+
+			if (!backup_options.directory && backup_options.directory_name) {
+				// 設定備份目錄於與檔案相同的目錄下。
+				backup_options.directory = file_path.replace(/[^\\\/]+$/, '')
+						+ backup_options.directory_name;
+			}
+
+			var backup_file_path = backup_options.directory
+			//
+			? append_path_separator(backup_options.directory,
+			// get file name only
+			file_path.match(/[^\\\/]+$/)[0])
+			// append file name extension
+			: backup_options.extension ? file_path + backup_options.extension
+			// preserve original file name extension
+			: file_path.replace(/(\.\w+)$/,
+					(backup_options.file_name_mark || '.bak') + '$1');
+
+			// Create backup
+			if (backup_options.directory)
+				_.create_directory(backup_options.directory);
+			_.remove_file(backup_file_path);
+			_.move_file(file_path, backup_file_path);
+		}
+
+		return _.write_file__OS_adapted(file_path, data, options);
+	}
+
+	if (_.write_file) {
+		_.write_file__OS_adapted = _.write_file;
+		_.write_file = write_file;
 	}
 
 	// ----------------------------------------------------

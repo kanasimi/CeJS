@@ -485,19 +485,6 @@ function module_code(library_namespace) {
 	 * @returns error
 	 */
 	function fs_writeFileSync(file_path, data, options) {
-		if (library_namespace.is_Object(data)
-		// JSON.stringify() 放在 try 外面。這樣出現 circular structure 的時候才知道要處理。
-		&& /.json$/i.test(file_path)) {
-			// 自動將資料轉成 string。
-			data = JSON.stringify(data);
-		}
-
-		if (options && options.changed_only) {
-			var original_data = fs_readFileSync(file_path, options);
-			if (String(data) === String(original_data))
-				return new Error('Nothing changed');
-		}
-
 		try {
 			node_fs.writeFileSync(file_path, data, options);
 		} catch (e) {
