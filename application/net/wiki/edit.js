@@ -645,12 +645,17 @@ function module_code(library_namespace) {
 		var page_data;
 		if (wiki_API.is_page_data(content)) {
 			page_data = content;
-			if (!(content = wiki_API.content_of(content)))
-				return;
+			content = wiki_API.content_of(content);
 		}
+		// assert: !content || typeof content === 'string'
 
-		content = content.replace(/<!--[\s\S]*-->/g, '').replace(
-				/<nowiki\s*>[\s\S]*<\/nowiki>/g, '');
+		if (typeof content === 'string') {
+			content = content.replace(/<!--[\s\S]*-->/g, '').replace(
+					/<nowiki\s*>[\s\S]*<\/nowiki>/g, '');
+		}
+		if (!content)
+			return;
+
 		library_namespace.debug('contents to test: [' + content + ']', 3,
 				'wiki_API_edit.denied');
 
