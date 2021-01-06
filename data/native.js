@@ -451,6 +451,12 @@ function module_code(library_namespace) {
 	_// JSDT:_module_
 	.ignore_case_pattern = ignore_case_pattern;
 
+	function pattern_replace(string) {
+		// assert: {RegExp}this pattern
+		// assert: pattern has .replace_to
+		return String(string).replace(this, this.replace_to);
+	}
+
 	/**
 	 * 將 String pattern (e.g., "/a+/g") 轉成 RegExp。<br />
 	 * TODO:<br />
@@ -539,8 +545,15 @@ function module_code(library_namespace) {
 						}, 2, 'String_to_RegExp');
 					}
 
-					if (replace_to)
+					if (replace_to) {
 						pattern.replace_to = replace_to;
+						if (false) {
+							pattern.replace = function replace(string) {
+								return string.replace(pattern, replace_to);
+							};
+						}
+						pattern.replace = pattern_replace;
+					}
 
 				} else if (pattern.charAt(0) === '\\'
 						&& typeof library_namespace.wildcard_to_RegExp === 'function') {
@@ -3893,6 +3906,70 @@ function module_code(library_namespace) {
 		return diff_with_Array.call((this || '').split('\n'),
 				Array.isArray(to) ? to : (to || '').split('\n'), options);
 	}
+
+	// ---------------------------------------------------------------------//
+
+	if (false) {
+		styled_list = CeL.coloring_diff('a b c d', 'a a c c', {
+			headers : [ 'header 1', 'header 2' ],
+			print : true
+		});
+	}
+
+	// 為 diff 著色。
+	function coloring_diff(from, to, options) {
+		options = library_namespace.new_options(options);
+		var diff_list = library_namespace.LCS(from, to, {
+			diff : true
+		});
+		from = [ from /* , { reset : true } */];
+		to = [ to /* , { reset : true } */];
+		var diff, normal_style = options.normal_style || {
+			// bold : false,
+			fg : 'white',
+			bg : 'black'
+		}, diff_style = options.diff_style || {
+			// bold : true,
+			fg : 'red',
+			bg : 'white'
+		};
+
+		function add_diff(styled_list, diff_index) {
+			if (!diff_index) {
+				// e.g., 只有義方有多東西。
+				return;
+			}
+
+			var next_index = diff_index[1] + 1, this_slice = styled_list
+					.shift();
+			styled_list.unshift(this_slice.slice(0, diff_index[0]), diff_style,
+					this_slice.slice(diff_index[0], next_index), normal_style,
+					this_slice.slice(next_index));
+		}
+
+		while (diff = diff_list.pop()) {
+			var from_index = diff.index[0], to_index = diff.index[1];
+			add_diff(from, from_index);
+			add_diff(to, to_index);
+		}
+
+		var headers = Array.isArray(options.headers) ? options.headers : [];
+		from.unshift(headers[0] || '', normal_style);
+		to.unshift(headers[1] || '', normal_style);
+		if (options.header_style) {
+			from.unshift('', options.header_style);
+			to.unshift('', options.header_style);
+		}
+
+		if (options.print) {
+			library_namespace.slog(from);
+			library_namespace.slog(to);
+		}
+		// 注意: from.length 不一定等於 to.length
+		return [ from, to ];
+	}
+
+	_.coloring_diff = coloring_diff;
 
 	// ---------------------------------------------------------------------//
 

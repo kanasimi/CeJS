@@ -512,7 +512,7 @@ function module_code(library_namespace) {
 		var text_now = '', style = [], matched, lastIndex = 0,
 		// 
 		pattern = new RegExp(to_RegExp_pattern(options.CSI || SGR_code.CSI)
-				+ '([\\d{1,2}\\s\\' + (options.separator || SGR_code.separator)
+				+ '([\\d{1,3}\\s\\' + (options.separator || SGR_code.separator)
 				+ ']*)'
 				+ to_RegExp_pattern(options.end_code || SGR_code.end_code), 'g');
 
