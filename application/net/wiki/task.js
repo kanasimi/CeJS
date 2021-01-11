@@ -475,6 +475,7 @@ function module_code(library_namespace) {
 				break;
 			}
 
+			// next[1]: template_name
 			wiki_API.redirects_here(next[1], function(root_page_data,
 					redirect_list, error) {
 				if (error) {
@@ -499,6 +500,10 @@ function module_code(library_namespace) {
 					] = main_template_name;
 				});
 
+				if (next[1] !== main_template_name) {
+					library_namespace.info('register_template_alias: '
+							+ next[1] + ' → ' + main_template_name);
+				}
 				// console.trace(_this.template_alias);
 
 				// next[2] : callback(redirect_list, error)
