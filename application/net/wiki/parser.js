@@ -183,9 +183,9 @@ function module_code(library_namespace) {
 		} else if (!wikitext) {
 			library_namespace.warn('page_parser: No wikitext specified.');
 			wikitext = [];
-		} else {
-			throw new Error('page_parser: Unknown wikitext: [' + wikitext
-					+ '].');
+		} else if (!Array.isArray(wikitext)) {
+			throw new Error('page_parser: Unknown wikitext: {'
+					+ typeof wikitext + '} ' + JSON.stringify(wikitext) + '.');
 		}
 
 		if (typeof options === 'string') {
@@ -1965,6 +1965,7 @@ function module_code(library_namespace) {
 		section_hierarchy = [ this.subsections = [] ],
 		// `section link anchor` in section_title_hash: had this title
 		section_title_hash = Object.create(null);
+		// this.section_title_hash = section_title_hash;
 
 		// to test: 沒有章節標題的文章, 以章節標題開頭的文章, 以章節標題結尾的文章, 章節標題+章節標題。
 
@@ -2014,11 +2015,13 @@ function module_code(library_namespace) {
 				var index = 2, base_anchor = anchor;
 				// 有多個完全相同的 anchor 時，後面的會加上 "_2", "_3", ...。
 				while ((anchor = base_anchor + '_' + index)
-				// 測試是否有重複的標題。
+				// 測試是否有重複的標題 duplicated section title。
 				in section_title_hash) {
 					index++;
 				}
 				section_title_token.link[1] = anchor;
+				// 用以獲得實際有效的 anchor。
+				section_title_token.anchor_postfix = ' ' + index;
 			}
 			// 登記已有之 anchor。
 			section_title_hash[anchor] = null;
@@ -2874,13 +2877,16 @@ function module_code(library_namespace) {
 			// [[Help:Parser tag]], [[Help:Extension tag]]
 			+ '|includeonly|noinclude|onlyinclude'
 			// https://phabricator.wikimedia.org/T263082
+			// 會讀取目標語言的 MediaWiki 轉換表
+			// [[w:zh:Wikipedia:互助客栈/技术#新的语言转换语法已经启用]]
+			// 使用 <langconvert> 的頁面，優先級順序大概是：-{}- 頁面語言切換 > <langconvert> > 轉換組？
 			+ '|langconvert'
 			// [[Special:Version#mw-version-parser-extensiontags]]
 			// <ce> is deprecated, using <chem>
 			// Replace all usages of <ce> with <chem> on wiki
 			// https://phabricator.wikimedia.org/T155125
 			+ '|categorytree|ce|chem|charinsert|gallery|graph|hiero|imagemap|indicator|inputbox|nowiki|mapframe|maplink|math|poem|quiz|ref|references|score|section|source|syntaxhighlight|templatedata|templatestyles|timeline',
-	// MediaWiki可接受的 HTML void elements 標籤.
+	// MediaWiki 可接受的 HTML void elements 標籤.
 	// NO b|span|sub|sup|li|dt|dd|center|small
 	// 包含可使用，亦可不使用 self-closing 的 tags。
 	// self-closing: void elements + foreign elements
