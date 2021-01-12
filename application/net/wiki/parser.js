@@ -841,12 +841,21 @@ function module_code(library_namespace) {
 
 		// console.log('max_depth: ' + max_depth);
 
+		var session = wiki_API.session_of_options(options);
+		var token_name;
 		if (type || type === '') {
 			if (typeof type !== 'string') {
 				library_namespace.warn('for_each_token: Invalid type [' + type
 						+ ']');
 				return this;
 			}
+
+			var token_name = type.match(/^(Template):(.+)$/g);
+			if (token_name) {
+				type = token_name[0];
+				token_name = wiki_API.normalize_title(token_name[1]);
+			}
+
 			// normalize type
 			// assert: typeof type === 'string'
 			type = type.toLowerCase().replace(/\s/g, '_');
@@ -907,9 +916,11 @@ function module_code(library_namespace) {
 					console.log(token);
 				}
 
-				if (!type
+				if ((!type
 				// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
-				|| type === (Array.isArray(token) ? token.type : 'plain')) {
+				|| type === (Array.isArray(token) ? token.type : 'plain'))
+						&& (!token_name || (session ? session.is_template(
+								token_name, token) : token.name === token_name))) {
 					// options.set_index
 					if (options.add_index && typeof token !== 'string') {
 						// 假如需要自動設定 .parent, .index 則必須特別指定。

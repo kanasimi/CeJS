@@ -453,29 +453,33 @@ function module_code(library_namespace) {
 		// case 'category_tree':
 		// @see wiki_API.prototype.category_tree @ application.net.wiki.list
 
-		case 'register_template_alias':
+		// register page alias
+		case 'register_redirects':
 			if (Array.isArray(next[1])) {
 				next[1].reverse();
 				_this.actions.unshift([ next[0], next[1].shift(), next[2],
 						next[3] ]);
 				// remove callback
 				next[2] = undefined;
-				next[1].forEach(function(template_name) {
+				next[1].forEach(function(page_title) {
 					var _next = next.clone();
-					_next[1] = template_name;
+					_next[1] = page_title;
 					_this.actions.unshift(_next);
 				});
 				next = _this.actions.shift();
 			}
 
-			// next[1]: template_name
-			next[1] = this.to_namespace(next[1], 'Template');
-			if (this.normalize_template_name(next[1]) in this.template_alias) {
+			// next[1]: page_title
+			if (next[3] && next[3].namespace)
+				next[1] = this.to_namespace(next[1], next[3].namespace);
+			if (this.normalize_title(next[1]) in this.redirects_data) {
 				// have registered
 				break;
 			}
 
-			// next[1]: template_name
+			// console.trace(next[1]);
+
+			// next[1]: page_title
 			wiki_API.redirects_here(next[1], function(root_page_data,
 					redirect_list, error) {
 				if (error) {
@@ -489,22 +493,22 @@ function module_code(library_namespace) {
 				// console.trace(root_page_data);
 				// console.trace(redirect_list);
 
-				var main_template_name = _this
-						.remove_namespace(redirect_list[0].title);
+				var target_page_title = redirect_list[0].title;
 				redirect_list.forEach(function(page_data) {
-					_this.template_alias[
+					_this.redirects_data[page_data.title]
 					// assert: page_data.title ===
 					// _this.normalize_title(page_data.title)
-					_this.remove_namespace(page_data.title)
-					//
-					] = main_template_name;
+					// the namespace of page_data.title is normalized
+					= target_page_title;
 				});
 
-				if (next[1] !== main_template_name) {
-					library_namespace.info('register_template_alias: '
-							+ next[1] + ' → ' + main_template_name);
-				}
-				// console.trace(_this.template_alias);
+				library_namespace.info('register_redirects: '
+						+ (next[1] === target_page_title ? '' : wiki_API
+								.title_link_of(next[1])
+								+ ' → ')
+						+ wiki_API.title_link_of(target_page_title) + ': All '
+						+ (redirect_list.length - 1) + ' redirect(s)');
+				// console.trace(_this.redirects_data);
 
 				// next[2] : callback(redirect_list, error)
 				next[2] && next[2](redirect_list);
@@ -1414,7 +1418,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|register_template_alias|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|register_redirects|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------

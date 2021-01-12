@@ -1159,6 +1159,7 @@ function module_code(library_namespace) {
 		if (matched) {
 			// namespace_pattern matched: [ , namespace, title ]
 			return (matched ? matched[2] : page_title).trim();
+			// do not normalize page title.
 		}
 		// Leave untouched
 		return page_title;
@@ -1519,8 +1520,6 @@ function module_code(library_namespace) {
 		var interwiki_pattern = session
 				&& session.configurations.interwiki_pattern
 				|| /^[a-z][a-z_\-]+$/i;
-		var template_alias = options.normalize_template_name && session
-				&& session.template_alias;
 		var no_session_namespace_hash = !session
 				|| !session.configurations.namespace_hash;
 
@@ -1530,10 +1529,6 @@ function module_code(library_namespace) {
 
 			// 必然包含 page title，因此不處理最後一個。
 			if (index === page_name.length - 1) {
-				if (template_alias) {
-					section = template_alias[upper_case_initial(section)]
-							|| section;
-				}
 				if (options.no_upper_case_initial) {
 					page_name[index] = section.toLowerCase();
 				} else {
@@ -2661,25 +2656,71 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	function normalize_template_name(template_name, options) {
-		if (!template_name)
-			return template_name;
+	if (false) {
+		wiki_session.register_redirects([ template_name_1, template_name_2,
+				template_name_3 ], {
+			namespace : 'Template'
+		});
 
-		if (typeof template_name === 'string') {
-			template_name = this.remove_namespace(this
-					.normalize_title(template_name));
-		} else if (template_name.type === 'transclusion') {
-			// treat template_name as template token
-			// assert: token.name is normalized
-			template_name = template_name.name;
-		}
+		// ...
 
-		return this.template_alias[template_name] || template_name;
+		wiki_session.page(page_title, function(page_data) {
+			/** {Array} parsed page content 頁面解析後的結構。 */
+			var parsed = CeL.wiki.parser(page_data).parse();
+			parsed.each('Template:template_name',
+					function(token, index, parent) {
+						// ...
+					});
+
+			// or:
+
+			parsed.each('template', function(token, index, parent) {
+				if (wiki_session.is_template(template_name_1, token)) {
+					// ...
+
+				} else if (wiki_session.is_template(template_name_2, token)) {
+					// ...
+				}
+
+				// or:
+				switch (wiki_session.redirect_target_of(token)) {
+				case wiki_session.redirect_target_of(template_name_1):
+					break;
+				case wiki_session.redirect_target_of(template_name_2):
+					break;
+				case wiki_session.redirect_target_of(template_name_3):
+					break;
+				}
+			});
+		});
+	}
+
+	// wiki_session.normalize_alias(page_title)
+	function redirect_target_of(page_title, options) {
+		if (!page_title)
+			return page_title;
+
+		if (options && options.namespace)
+			page_title = this.to_namespace(page_title, options.namespace);
+		page_title = this.normalize_title(page_title);
+
+		return this.redirects_data[page_title] || page_title;
 	}
 
 	function is_template(template_name, token, options) {
-		template_name = this.normalize_template_name(template_name, options);
-		token = this.normalize_template_name(token, options);
+		options = Object.assign({
+			namespace : 'Template'
+		}, options);
+
+		// normalize template name
+		template_name = this.redirect_target_of(template_name, options);
+
+		if (token.type === 'transclusion') {
+			// treat token as template token
+			// assert: token.name is normalized
+			token = token.name;
+		}
+		token = this.redirect_target_of(token, options);
 
 		// console.trace([ template_name, token ]);
 		return template_name === token;
@@ -2708,7 +2749,7 @@ function module_code(library_namespace) {
 
 	// @instance 實例相關函數。
 	Object.assign(wiki_API.prototype, {
-		normalize_template_name : normalize_template_name,
+		redirect_target_of : redirect_target_of,
 		is_template : is_template,
 
 		// @see function get_continue(), get_list()
