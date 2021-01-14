@@ -1788,7 +1788,10 @@ function module_code(library_namespace) {
 
 		// link = [ page title 頁面標題, anchor / section title 章節標題,
 		// display_text / label 要顯示的連結文字 default: section_title ]
-		var link = [ options && options.page_title, anchor, display_text ];
+		var link = [ options && options.page_title,
+		// Warning: anchor, display_text are with "&amp;",
+		// id is not with "&amp;".
+		anchor, display_text ];
 		// console.log(link);
 		if (parsed_title.imprecise_tokens
 		// section_title_token.link.imprecise_tokens
@@ -1801,9 +1804,10 @@ function module_code(library_namespace) {
 		}
 		Object.assign(link, {
 			// link.id = {String}id
-			// section title, NOT including "<!-- -->"
+			// section title, NOT including "<!-- -->" and "&amp;"
 			id : id,
-			// original section title, including "<!-- -->"
+			// original section title, including "<!-- -->",
+			// not including "&amp;".
 			title : section_title,
 			// only for debug
 			// parsed_title : parsed_title,
@@ -1814,6 +1818,8 @@ function module_code(library_namespace) {
 			// section.section_title.link.toString()
 			toString : section_link_toString
 		});
+		// 用以獲得實際有效的 anchor。 effect anchor: parsed.each_section()
+		// and then section_title_token.link.id
 		return link;
 	}
 
@@ -2016,26 +2022,34 @@ function module_code(library_namespace) {
 		this.each('section_title', function(section_title_token,
 		// section 的 index of parser。
 		section_title_index, parent_token) {
+			var section_link = section_title_token.link;
 			if (page_title) {
 				// [0]: page title
-				section_title_token.link[0] = page_title;
+				section_link[0] = page_title;
 			}
-			var anchor = section_title_token.link[1];
-			if (anchor in section_title_hash) {
+			var id = section_link.id;
+			if (id in section_title_hash) {
 				// The index of 2nd title starts from 2
-				var index = 2, base_anchor = anchor;
+				var duplicate_NO = 2, base_anchor = id;
 				// 有多個完全相同的 anchor 時，後面的會加上 "_2", "_3", ...。
-				while ((anchor = base_anchor + '_' + index)
+				// [[w:en:Help:Section#Section linking]]
+				while ((id = base_anchor + ' ' + duplicate_NO)
 				// 測試是否有重複的標題 duplicated section title。
 				in section_title_hash) {
-					index++;
+					duplicate_NO++;
 				}
-				section_title_token.link[1] = anchor;
-				// 用以獲得實際有效的 anchor。
-				section_title_token.anchor_postfix = ' ' + index;
+				if (!section_link.duplicate_NO) {
+					section_link.duplicate_NO = duplicate_NO;
+					if (Array.isArray(section_link[1]))
+						section_link[1].push('_' + duplicate_NO);
+					else
+						section_link[1] += '_' + duplicate_NO;
+					// 用以獲得實際有效的 anchor。 effect anchor
+					section_link.id = id;
+				}
 			}
 			// 登記已有之 anchor。
-			section_title_hash[anchor] = null;
+			section_title_hash[id] = null;
 
 			var level = section_title_token.level;
 			// console.log([ level, options.level_filter ]);
