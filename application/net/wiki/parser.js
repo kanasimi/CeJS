@@ -2022,12 +2022,12 @@ function module_code(library_namespace) {
 		this.each('section_title', function(section_title_token,
 		// section 的 index of parser。
 		section_title_index, parent_token) {
-			var section_link = section_title_token.link;
+			var section_title_link = section_title_token.link;
 			if (page_title) {
 				// [0]: page title
-				section_link[0] = page_title;
+				section_title_link[0] = page_title;
 			}
-			var id = section_link.id;
+			var id = section_title_link.id;
 			if (id in section_title_hash) {
 				// The index of 2nd title starts from 2
 				var duplicate_NO = 2, base_anchor = id;
@@ -2038,14 +2038,15 @@ function module_code(library_namespace) {
 				in section_title_hash) {
 					duplicate_NO++;
 				}
-				if (!section_link.duplicate_NO) {
-					section_link.duplicate_NO = duplicate_NO;
-					if (Array.isArray(section_link[1]))
-						section_link[1].push('_' + duplicate_NO);
+				if (!section_title_link.duplicate_NO) {
+					section_title_link.duplicate_NO = duplicate_NO;
+					// hack
+					if (Array.isArray(section_title_link[1]))
+						section_title_link[1].push('_' + duplicate_NO);
 					else
-						section_link[1] += '_' + duplicate_NO;
+						section_title_link[1] += '_' + duplicate_NO;
 					// 用以獲得實際有效的 anchor。 effect anchor
-					section_link.id = id;
+					section_title_link.id = id;
 				}
 			}
 			// 登記已有之 anchor。
@@ -4083,14 +4084,16 @@ function module_code(library_namespace) {
 				// e.g.,
 				// [[臺灣話#.E5.8F.97.E6.97.A5.E6.9C.AC.E8.AA.9E.E5.BD.B1.E9.9F.BF.E8.80.85|(其他參考資料)]]
 				&& /^(\.[\dA-F]{2}|[\w\-])+$/.test(section_title)) {
-					try {
-						section_title = decodeURIComponent(section_title
-								.replace(/\.([\dA-F]{2})/g, '%$1'));
-					} catch (e) {
-						// TODO: handle exception
-					}
+					section_title = section_title.replace(/\.([\dA-F]{2})/g,
+							'%$1');
+				}
+				try {
+					section_title = decodeURIComponent(section_title);
+				} catch (e) {
+					// TODO: handle exception
 				}
 				section_title = section_title.replace(/_/g, ' ');
+				// wikilink_token.anchor
 				parameters.anchor = section_title;
 				// TODO: [[Special:]]
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
