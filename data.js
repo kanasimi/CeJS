@@ -1372,7 +1372,8 @@ function module_code(library_namespace) {
 						+ String(value) + ']', source.length > 200 ? 3 : 2,
 								'Pair.add');
 						if (key === value) {
-							library_namespace.debug('沒有改變的項目：[' + key + ']');
+							library_namespace.debug('key 與 value 相同，項目沒有改變：['
+									+ key + ']');
 							if (unique)
 								return;
 							// 可能是為了確保不被改變而設定。
@@ -1390,7 +1391,7 @@ function module_code(library_namespace) {
 						}
 
 						if (key in pair) {
-							if (value == pair[key])
+							if (value === pair[key])
 								return;
 							// 後來的覆蓋前面的。
 							library_namespace
@@ -1450,26 +1451,23 @@ function module_code(library_namespace) {
 
 				var pattern = key.match(library_namespace.PATTERN_RegExp);
 				if (pattern) {
-					if (!pattern[2].includes('g'))
-						pattern[2] += 'g';
 					pattern = new RegExp(pattern[1], pattern[2]);
-					if (false) {
-						console.trace('Remove pattern: ' + pattern + ' of '
-								+ path);
-					}
-					for ( var key in pair) {
+					library_namespace.debug('Remove pattern: ' + pattern
+							+ ' of ' + path, 1);
+					(this.keys || Object.keys(pair)).forEach(function(key) {
 						if (pattern.test(key) || pattern.test(pair[key])) {
-							if (false) {
-								console.trace('Remove ' + key + ' → '
-										+ pair[key]);
-							}
+							library_namespace.debug(path + '\tRemove ' + key
+									+ ' → ' + pair[key], 2);
 							delete pair[key];
 							changed = true;
 						}
-					}
+					});
+
 				} else if (key in pair) {
 					delete pair[key];
 					changed = true;
+				} else {
+					// Not exists key
 				}
 			}
 
@@ -2292,7 +2290,8 @@ function module_code(library_namespace) {
 	 */
 	function fit_filter(filter, value) {
 		// if (filter === true) return true;
-		if (typeof filter === 'boolean')
+		if (typeof filter === 'boolean' || filter === null
+				|| typeof filter === 'undefined')
 			return filter;
 
 		// 驗證 pattern
