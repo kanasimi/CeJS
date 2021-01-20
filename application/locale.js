@@ -452,9 +452,11 @@ function module_code(library_namespace) {
 		// || %\w(conversion format specifier)\d{1,2}(index)
 		// || %[conversion specifications@]index
 		//
-		// 不採用 global pattern，因為可能有 multithreading 的問題。
+		// 警告: index 以 "|" 終結會被視為 patten 明確終結，並且 "|" 將被吃掉。
+		// TODO: 改成 %{index}
+		//
+		// 採用 local variable，因為可能有 multithreading 的問題。
 		conversion_pattern = /([\s\S]*?)%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?(\d{1,2})\|?)/g;
-		// index 可以 "|" 終結。
 
 		while (matched = conversion_pattern.exec(text)) {
 			last_index = conversion_pattern.lastIndex;
