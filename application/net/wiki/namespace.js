@@ -69,6 +69,7 @@ function module_code(library_namespace) {
 		utf8 : 'boolean|number|string'
 	};
 
+	// CeL.wiki.KEY_SESSION
 	/** {String}KEY_wiki_session old key: 'wiki' */
 	var KEY_SESSION = 'session', KEY_HOST_SESSION = 'host';
 
@@ -2712,15 +2713,22 @@ function module_code(library_namespace) {
 			namespace : 'Template'
 		}, options);
 
-		// normalize template name
-		template_name = this.redirect_target_of(template_name, options);
+		var session = wiki_API.session_of_options(options)
+				|| wiki_API.is_wiki_API(this) && this;
+
+		if (session) {
+			// normalize template name
+			template_name = session.redirect_target_of(template_name, options);
+		}
 
 		if (token.type === 'transclusion') {
 			// treat token as template token
 			// assert: token.name is normalized
 			token = token.name;
 		}
-		token = this.redirect_target_of(token, options);
+		if (session) {
+			token = session.redirect_target_of(token, options);
+		}
 
 		// console.trace([ template_name, token ]);
 		return template_name === token;
@@ -2883,6 +2891,8 @@ function module_code(library_namespace) {
 		plain_text : wikitext_to_plain_text,
 
 		template_text : to_template_wikitext,
+
+		is_template : is_template,
 
 		escape_text : escape_text,
 

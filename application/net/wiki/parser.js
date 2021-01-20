@@ -1728,7 +1728,7 @@ function module_code(library_namespace) {
 
 		// 注意: 當這空白字字出現在功能性token中時，可能會出錯。
 		var id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
-		// anchor: 可以直接拿來做 wikilink anchor 的章節標題。
+		// anchor 網頁錨點: 可以直接拿來做 wikilink anchor 的章節標題。
 		// 有多個完全相同的 anchor 時，後面的會加上"_2", "_3",...。
 		// 這個部分的處理請見 function for_each_section()
 		anchor = section_link_escape(id
@@ -1786,7 +1786,7 @@ function module_code(library_namespace) {
 		.replace(section_link_START_CONVERT_reg, '-{').replace(
 				section_link_END_CONVERT_reg, '}-');
 
-		// link = [ page title 頁面標題, anchor / section title 章節標題,
+		// link = [ page title 頁面標題, anchor 網頁錨點 / section title 章節標題,
 		// display_text / label 要顯示的連結文字 default: section_title ]
 		var link = [ options && options.page_title,
 		// Warning: anchor, display_text are with "&amp;",
@@ -1818,7 +1818,7 @@ function module_code(library_namespace) {
 			// section.section_title.link.toString()
 			toString : section_link_toString
 		});
-		// 用以獲得實際有效的 anchor。 effect anchor: parsed.each_section()
+		// 用以獲得實際有效的 anchor 網頁錨點。 effect anchor: parsed.each_section()
 		// and then section_title_token.link.id
 		return link;
 	}
@@ -2040,12 +2040,12 @@ function module_code(library_namespace) {
 				}
 				if (!section_title_link.duplicate_NO) {
 					section_title_link.duplicate_NO = duplicate_NO;
-					// hack
+					// hack for [[w:en:WP:DUPSECTNAME|Duplicate section names]]
 					if (Array.isArray(section_title_link[1]))
 						section_title_link[1].push('_' + duplicate_NO);
 					else
 						section_title_link[1] += '_' + duplicate_NO;
-					// 用以獲得實際有效的 anchor。 effect anchor
+					// 用以獲得實際有效的 anchor 網頁錨點。 effect anchor
 					section_title_link.id = id;
 				}
 			}
@@ -2415,6 +2415,138 @@ function module_code(library_namespace) {
 		}
 		return this;
 	}
+
+	// ------------------------------------------------------------------------
+
+	function normalize_anchor(anchor) {
+		return anchor.toString().replace(/_/g, ' ');
+	}
+
+	if (false) {
+		wiki.register_redirects([ 'Anchor', 'Anchors', 'Visible anchor',
+				'Citation', 'RFD' ]);
+
+		// ...
+
+		var anchor_list = CeL.wiki.parse.anchor(wikitext, {
+			// [KEY_SESSION]: wiki
+			session : wiki
+		});
+
+		// ------------------
+
+		// bad method: work without session
+		var anchor_list = CeL.wiki.parse.anchor(wikitext);
+	}
+
+	// CeL.wiki.parse.anchor(wikitext, options)
+	function get_all_anchor(wikitext, options) {
+		// const
+		var anchor_list = [];
+
+		if (!wikitext) {
+			return anchor_list;
+		}
+
+		// const
+		/** {Array} parsed page content 頁面解析後的結構。 */
+		var parsed = page_parser(wikitext).parse();
+		if (false) {
+			library_namespace.assert([ wikitext, parsed.toString() ],
+					'wikitext parser check for wikitext');
+			console.log(parsed);
+		}
+
+		var session = wiki_API.session_of_options(options);
+		// console.log(wiki_API.site_name(session));
+
+		parsed.each_section();
+		parsed.each('section_title', function(section_title_token) {
+			// console.log(section_title_token);
+			// const
+			var section_title_link = section_title_token.link;
+			// TODO: 忽略包含不合理元素的編輯，例如 url。
+			if (!section_title_link.imprecise_tokens) {
+				// `section_title_token.title` will not transfer "[", "]"
+				anchor_list.push(section_title_link.id);
+
+			} else if (section_title_link.tokens_maybe_handlable) {
+				// exclude "=={{T}}=="
+				library_namespace.warn('Title maybe handlable 請檢查是否可處理此標題: '
+						+ section_title_token.title);
+				console.log(section_title_link.tokens_maybe_handlable);
+				console.trace(section_title_token);
+			}
+		});
+
+		// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
+		parsed.each('transclusion', function(template_token) {
+			// {{Anchor|anchor|別名1|別名2}}
+			if (wiki_API.is_template('Anchor', template_token, options)
+					|| wiki_API.is_template('Anchors', template_token, options)
+					|| wiki_API.is_template('Visible anchor', template_token,
+							options)) {
+				for (/* let */var index = 1;
+				//
+				index < template_token.length; index++) {
+					// const
+					var anchor = template_token.parameters[index];
+					if (anchor)
+						anchor_list.push(normalize_anchor(anchor));
+				}
+				return;
+			}
+
+			// e.g., {{Cite
+			// book|和書|author=[[戸高一成]]|coauthors=|year=2013|month=9|title=[証言録]
+			// 海軍反省会5|publisher=株式会社PHP研究所|isbn=978-4-569-81339-4|ref=海軍反省会五}}
+			// @ [[日本の原子爆弾開発]]
+
+			// {{Cite journal |和書 |journal=[[BugBug]] |volume=<!-- 23
+			// -->|issue=<!-- 1 -->2014年1月号 |publisher=[[マガジン・マガジン]]
+			// |date=2013-12-03 |ref=bugbug_201401 }}
+			if (/^Cite [a-z]+/.test(template_token.name)
+			// {{Citation |和書
+			// |url=https://www.city.maibara.lg.jp/soshiki/keizai_kankyo/kankyo/shizen/mizu/1836.html
+			// |format=PDF |accessdate=2020-11-29 |editor=仁連孝昭
+			// |title=スローウォーターなくらし - 未来へ受け継ぐ水源の里まいばらの水文化 |date=2012-07-13
+			// |publisher=[[米原市]]経済環境部環境保全課 |ref=Niren}}
+			|| wiki_API.is_template('Citation', template_token, options)) {
+				// const
+				var anchor = template_token.parameters.ref;
+				if (anchor)
+					anchor_list.push(normalize_anchor(anchor));
+				return;
+			}
+
+			// 転送先のアンカーはTemplate:RFDの中に納まっている
+			// e.g., {{RFD notice
+			// |'''対象リダイレクト:'''[[Wikipedia:リダイレクトの削除依頼/受付#RFD長崎市電|長崎市電（受付依頼）]]|...}}
+			if (wiki_API.site_name(session) === 'jawiki'
+					&& wiki_API.is_template('RFD', template_token, options)) {
+				// const
+				var anchor = 'RFD' + template_token.parameters[1];
+				anchor_list.push(normalize_anchor(anchor));
+				return;
+			}
+		});
+
+		// 處理 <span class="anchor" id="anchor"></span>, <ref name="anchor">
+		parsed.each('tag', function(tag_token) {
+			// const
+			var anchor = tag_token.attributes.id || tag_token.attributes.name;
+			if (anchor)
+				anchor_list.push(normalize_anchor(anchor));
+		});
+
+		if (options && options.print_anchors) {
+			console.trace(anchor_list.length > 100 ? JSON
+					.stringify(anchor_list) : anchor_list);
+		}
+		return anchor_list.unique();
+	}
+
+	// ------------------------------------------------------------------------
 
 	// parse <ref> of page
 	// TODO: <ref group="">
@@ -3021,7 +3153,7 @@ function module_code(library_namespace) {
 		// link 的變體。但可採用 .name 取得 file name。
 		file : function() {
 			return '[[' + this[0]
-			// anchor
+			// anchor 網頁錨點
 			+ this[1]
 			//
 			+ (this.length > 2 ? '|' + this.slice(2).join('|') : '') + ']]';
@@ -3029,7 +3161,7 @@ function module_code(library_namespace) {
 		// link 的變體。但可採用 .name 取得 category name。
 		category : function() {
 			return '[[' + this[0]
-			// anchor
+			// anchor 網頁錨點
 			+ this[1]
 			//
 			+ (this.length > 2 ? '|' + this.slice(2).join('|') : '') + ']]';
@@ -3840,7 +3972,7 @@ function module_code(library_namespace) {
 				section_title = parse_wikitext(section_title, options, queue);
 			}
 
-			// [ page_name, #section_title|anchor, display_text ]
+			// [ page_name, section_title / #anchor 網頁錨點, display_text ]
 			var parameters = [ page_name, section_title ];
 
 			// assert: 'a'.match(/(b)?/)[1]===undefined
@@ -4081,6 +4213,7 @@ function module_code(library_namespace) {
 				// remove prefix: '#'
 				.slice(1).trimEnd();
 				if (/\.[\dA-F]{2}/.test(section_title)
+				// [[w:en:Help:Link#Section linking (anchors)]]
 				// e.g.,
 				// [[臺灣話#.E5.8F.97.E6.97.A5.E6.9C.AC.E8.AA.9E.E5.BD.B1.E9.9F.BF.E8.80.85|(其他參考資料)]]
 				&& /^(\.[\dA-F]{2}|[\w\-])+$/.test(section_title)) {
@@ -4092,9 +4225,8 @@ function module_code(library_namespace) {
 				} catch (e) {
 					// TODO: handle exception
 				}
-				section_title = section_title.replace(/_/g, ' ');
-				// wikilink_token.anchor
-				parameters.anchor = section_title;
+				// wikilink_token.anchor 網頁錨點
+				parameters.anchor = normalize_anchor(section_title);
 				// TODO: [[Special:]]
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
 				_set_wiki_type(parameters, file_matched ? 'file'
@@ -7122,6 +7254,8 @@ function module_code(library_namespace) {
 		user : parse_user,
 		// CeL.wiki.parse.redirect , wiki_API.parse.redirect
 		redirect : parse_redirect,
+
+		anchor : get_all_anchor,
 
 		configuration : parse_configuration,
 
