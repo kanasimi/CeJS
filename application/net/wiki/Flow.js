@@ -230,9 +230,10 @@ function module_code(library_namespace) {
 
 		title[1] = 'page=' + encodeURIComponent(wiki_API.title_of(title[1]));
 
-		if (options && options.redirects)
-			// 毋須 '&redirects=1'
-			title[1] += '&redirects';
+		if (options && options.redirects) {
+			// 舊版毋須 '&redirects=1'，'&redirects' 即可。
+			title[1] += '&redirects=1';
+		}
 
 		// e.g., { flow_view : 'header' }
 		var view = options && options.flow_view

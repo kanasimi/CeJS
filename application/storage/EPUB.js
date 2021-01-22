@@ -1688,7 +1688,7 @@ function module_code(library_namespace) {
 						attributes) {
 					return '<img ' + attributes.replace(
 					// <img> 中不能使用 name="" 之類
-					/(?:^|\s)(?:name|border|onmouse[a-z]+|onload)=[^\s]+/ig,
+					/(?:^|\s)(?:name|border|onmouse[a-z]+|onload)\s*=\s*\S+/ig,
 					//
 					'').trim() + '>';
 				});
@@ -2067,7 +2067,7 @@ function module_code(library_namespace) {
 				// if (library_namespace.locale.gettext)
 				if (library_namespace.locale) {
 					values = values.map(function(value) {
-						if (/^https?:\/\/[^\s]+$/.test(value)) {
+						if (/^https?:\/\/\S+$/.test(value)) {
 							value = '<a href="' + value + '">'
 							//
 							+ value + '</a>';

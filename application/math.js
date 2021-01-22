@@ -1054,7 +1054,7 @@ convert_MathML.reduce = function(structure, node, handler) {
 		// e.g., sin^-1 2π
 		if (typeof structure[2] === 'string'
 				&& (matched = structure[2]
-						.match(/^([+\-−±]?\d+(?:\.\d+)?)\s+([\S]+)$/))) {
+						.match(/^([+\-−±]?\d+(?:\.\d+)?)\s+(\S+)$/))) {
 			structure[2] = matched[1];
 			structure = [ , structure, matched[2] ];
 		}

@@ -693,14 +693,19 @@ function module_code(library_namespace) {
 					wiki_API.redirects_here(title, function(root_page_data,
 							redirect_list) {
 						if (!operation.keep_redirects && redirect_list
-								&& redirect_list[0])
+								&& redirect_list[0]) {
+							if (false) {
+								console.assert(redirect_list[0].redirects
+								//
+								.join() === redirect_list.slice(1).join());
+							}
 							// cache 中不需要此累贅之資料。
-							// redirect_list[0].redirects
-							// === redirect_list.slice(1)
 							delete redirect_list[0].redirects;
+							delete redirect_list[0].redirect_list;
+						}
 						callback(redirect_list);
 					}, Object.assign({
-						// The first one is the redirect target.
+						// Making .redirect_list[0] the redirect target.
 						include_root : true
 					}, _this, operation));
 				};
@@ -714,11 +719,11 @@ function module_code(library_namespace) {
 					wiki_API.list(title, function(pages) {
 						if (!options.for_each || options.get_list) {
 							library_namespace.log(list_type
-									// allpages 不具有 title。
-									+ (title ? ' '
-											+ wiki_API.title_link_of(title)
-											: '') + ': ' + pages.length
-									+ ' page(s).');
+							// allpages 不具有 title。
+							+ (title ? ' '
+							//
+							+ wiki_API.title_link_of(title) : '') + ': '
+									+ pages.length + ' page(s).');
 						}
 						pages.query_title = title;
 						// page list, title page_data

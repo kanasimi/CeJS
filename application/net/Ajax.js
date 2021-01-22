@@ -1700,7 +1700,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// 連線逾期/失敗時再重新取得頁面次數。
+			// 連線逾期/失敗時再重新取得頁面之重試次數。
 			if (options.error_retry >= 1
 					&& !(options.error_retry <= options.error_count)) {
 				if (!options.get_URL_cloned) {

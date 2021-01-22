@@ -833,6 +833,17 @@ function module_code(library_namespace) {
 
 	// export
 	_.SGR = SGR_code;
+	_.SGR_style = SGR_style;
+
+	if (false) {
+		var SGR_style = CeL.interact.console.SGR_style;
+		console.log('Showing ' + (new SGR_style('fg=blue')).toString() + 'blue'
+				+ (new SGR_style({
+					reset : true
+				})).toString() + ' text');
+
+		// for SGR: @see test.js
+	}
 
 	// ----------------------------------------------------------------------------------------------------------------
 

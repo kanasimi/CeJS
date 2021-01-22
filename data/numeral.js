@@ -509,7 +509,7 @@ function module_code(library_namespace) {
 			Chinese_numerals_Normal_pattern, function($0) {
 				// console.log('-- ' + JSON.stringify($0));
 				// 避免前後空格被吃掉。
-				var token = $0.match(/^(\s*)([^\s].*?)(\s*)$/);
+				var token = $0.match(/^(\s*)(\S.*?)(\s*)$/);
 				if (!token) {
 					// 可能會是" "
 					return $0;
@@ -693,7 +693,7 @@ function module_code(library_namespace) {
 			//
 			/[+\-]?(?:\d+(?:\.\d*)?|(?:\d*\.)?\d+)/g, function($0) {
 				// 避免前後空格被吃掉。
-				var token = $0.match(/^(\s*)([^\s].*?)(\s*)$/);
+				var token = $0.match(/^(\s*)(\S.*?)(\s*)$/);
 				if (!token) {
 					// 可能會是" "
 					return $0;

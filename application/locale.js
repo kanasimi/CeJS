@@ -453,6 +453,8 @@ function module_code(library_namespace) {
 		// || %[conversion specifications@]index
 		//
 		// 警告: index 以 "|" 終結會被視為 patten 明確終結，並且 "|" 將被吃掉。
+		// e.g., gettest("%1|123", 321) === "321123"
+		// gettest("%1||123", 321) === "321|123"
 		// TODO: 改成 %{index}
 		//
 		// 採用 local variable，因為可能有 multithreading 的問題。

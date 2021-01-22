@@ -605,7 +605,7 @@ function module_code(library_namespace) {
 	 */
 	wiki_API_edit.get_bot = function(content) {
 		// TODO: use parse_template(content, 'bots')
-		var bots = [], matched, PATTERN = /{{[\s\n]*bots[\s\n]*([\S][\s\S]*?)}}/ig;
+		var bots = [], matched, PATTERN = /{{[\s\n]*bots[\s\n]*(\S[\s\S]*?)}}/ig;
 		while (matched = PATTERN.exec(content)) {
 			library_namespace.debug(matched.join('<br />'), 1,
 					'wiki_API_edit.get_bot');

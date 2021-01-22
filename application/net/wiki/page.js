@@ -443,6 +443,8 @@ function module_code(library_namespace) {
 			}
 
 			var page_list = [],
+			//
+			index_of_title = page_list.index_of_title = Object.create(null),
 			// library_namespace.storage.write_file()
 			page_cache_prefix = library_namespace.write_file
 			//
@@ -630,6 +632,7 @@ function module_code(library_namespace) {
 						= convert_from[page_data.original_title];
 					}
 				}
+				index_of_title[page_data.title] = page_list.length;
 				page_list.push(page_data);
 			}
 
@@ -756,7 +759,7 @@ function module_code(library_namespace) {
 				}
 
 				// copy attributes form original page_list
-				[ 'OK_length', 'truncated', 'normalized',
+				[ 'OK_length', 'truncated', 'normalized', 'index_of_title',
 				//
 				'redirects', 'redirect_from', 'converted', 'convert_from' ]
 				// 需要注意page_list可能帶有一些已經設定的屬性值，因此不能夠簡單的直接指派到另外一個值。
@@ -1357,7 +1360,7 @@ function module_code(library_namespace) {
 
 	// 一定會提供的功能。
 	wiki_API.recent_via_API = get_recent_via_API;
-	// 預防已經被設定成 `get_recent_via_databases`。
+	// 預防已經被設定成 `get_recent_via_databases` @ CeL.application.net.wiki.Toolforge。
 	if (!wiki_API.recent) {
 		// 可能會因環境而不同的功能。讓 wiki_API.recent 採用較有效率的實現方式。
 		wiki_API.recent =
@@ -1746,6 +1749,8 @@ function module_code(library_namespace) {
 				}).join(', ') : ''), 1);
 
 				// 使 wiki.listen() 可隨時監視設定頁面與緊急停止頁面的變更。
+				// 警告: 對於設定頁面的監聽，僅限於設定頁面也在監聽範圍中時方起作用。
+				// 例如設定了 namespace，可能就監聽不到設定頁面的變更。
 				var configuration_row;
 				if (configuration_page_title) {
 					// 檢測看看是否有 configuration_page_title
@@ -2389,8 +2394,7 @@ function module_code(library_namespace) {
 			</code>
 			 */
 			// [ all, downloaded, percentage, speed, remaining 剩下時間 ]
-			var matched = data
-					.match(/([^\n\.]+)[.\s]+(\d+%)\s+([^\s]+)\s+([^\s]+)/);
+			var matched = data.match(/([^\n\.]+)[.\s]+(\d+%)\s+(\S+)\s+(\S+)/);
 			if (matched) {
 				data = matched[2] + '  ' + matched[1] + '  ' + matched[4]
 						+ '                    \r';

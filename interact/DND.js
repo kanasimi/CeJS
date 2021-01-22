@@ -2,7 +2,7 @@
 /**
  * @name	CeL function for drag-and-drop
  * @fileoverview
- * 本檔案包含了 web 物件的拖曳 functions。
+ * 本檔案包含了 web 物件的滑鼠拖曳 functions。
  * @since	
  */
 

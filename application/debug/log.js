@@ -1633,9 +1633,9 @@ function finish(name_space) {
 					type = typeof value;
 					if (type === 'object') {
 						type = CeL.is_type(value) || type;
-					} else if ([ 'string', 'number', 'boolean', 'function', 'symbol',
+					} else if ([ 'string', 'number', 'boolean', 'function',
 					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof
-					'bigint' ].includes(type)) {
+					'bigint', 'symbol' ].includes(type)) {
 						is_native_type = true;
 						type = type.charAt(0).toUpperCase() + type.slice(1);
 					}
@@ -1981,8 +1981,8 @@ function finish(name_space) {
 							+ ((elapsed = recorder.all.length / elapsed) < 1
 							// Hz
 							? (1000 * elapsed).to_fixed(2) + ' tests/s.'
-							//
-							: elapsed.to_fixed(2) + ' tests/ms.'));
+									: elapsed.to_fixed(2) + ' tests/ms.'));
+					// console.trace(messages);
 					return messages.join('');
 				}
 
@@ -2032,7 +2032,9 @@ function finish(name_space) {
 					log_controller[2](join());
 				} else {
 					// CeL.error(join());
-					log_controller[3](join());
+					log_controller[3](join()
+					// hack: fg=whilte → fg=red
+					.replace(/\x1B\[37m/g, '\x1B[31m'));
 				}
 
 				return finish();

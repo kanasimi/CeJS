@@ -1324,7 +1324,7 @@ function module_code(library_namespace) {
 			//	當每一行都去除\n也可時方能使用！否則會出現「需要;」的錯誤！
 			code = code
 				.replace(
-					/([^\s]?)\s*\n+\s*([^\s]?)/g,
+					/(\S?)\s*\n+\s*(\S?)/g,
 					function ($0, $1, $2) {
 						var a = $1, b = $2;
 						return a
@@ -2022,7 +2022,7 @@ function module_code(library_namespace) {
 						tmp_code.push(line);
 
 						//	判別
-						if (line.indexOf('*/') !== -1 || (m = line.match(/^\s+\*\s+@([_a-zA-Z\d\$.]+)(\s+([^\s].*)?\s*)?$/))) {
+						if (line.indexOf('*/') !== -1 || (m = line.match(/^\s+\*\s+@([_a-zA-Z\d\$.]+)(\s+(\S.*)?\s*)?$/))) {
 							//	設定 name = various
 							various = various.join(line_separator);
 							//	'return': eclipse JSDT 內定使用，'returns': jsdoc-toolkit 內定使用。JSDT 尚未改正。@2011/8/20 16:22:28
@@ -2040,7 +2040,7 @@ function module_code(library_namespace) {
 							name = m[1], various = [m[3]];
 
 						} else
-							various.push((m = line.match(/^\s+\*\s+([^\s].+)$/)) ? m[1] : line.replace(/^(.*)\/\*\*/, ''));
+							various.push((m = line.match(/^\s+\*\s+(\S.+)$/)) ? m[1] : line.replace(/^(.*)\/\*\*/, ''));
 
 						line = code[++i];
 					}
@@ -2049,7 +2049,7 @@ function module_code(library_namespace) {
 					if (m = line.match(/(.*?\*\/)/)) {
 						line = line.replace(/(.*?)\*\//, '');
 						while (i < l
-							&& !/=\s*[^\s]|{/.test(line = line.replace(
+							&& !/=\s*\S|{/.test(line = line.replace(
 								/\s*\/\/[^\n]*/g, '').replace(
 									/\/\*[\s\S]*?\*\//g, '')))
 							line += code[++i];

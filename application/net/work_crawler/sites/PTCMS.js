@@ -19,6 +19,7 @@
  * 
  * @see https://github.com/LZ0211/Wedge/tree/master/lib/Sites/plugins
  *      https://github.com/lufengfan/NovelDownloader
+ *      https://github.com/unclezs/NovelHarvester
  * @see http://www.sodu.cc/default.html
  *      https://kknews.cc/zh-tw/culture/oqyx5.html https://tw.hjwzw.com/
  * @see http://www.76wx.com/ http://www.xssk.net/
@@ -209,8 +210,10 @@ function module_code(library_namespace) {
 			// [ all, tag name, attributes, 連結內容 HTML ]
 			PATTERN_chapter = /<(li|dd|dt)([^<>]*)>([\s\S]*?)<\/\1>/g;
 			while (matched = PATTERN_chapter.exec(html)) {
-				// delete matched.input;
-				// console.log(matched);
+				if (false) {
+					delete matched.input;
+					console.log(matched);
+				}
 
 				if (matched[1] === 'dt' ||
 				// e.g., 88dushu.js
@@ -233,7 +236,9 @@ function module_code(library_namespace) {
 						// 從href取得章節的網址。
 						url : matched.between('href="', '"')
 						// xbiquge.js: 交錯使用 "", ''
-						|| matched.between("href='", "'"),
+						|| matched.between("href='", "'")
+						// booktxt.js: 交錯使用 "", ''
+						|| matched.between('href ="', '"'),
 						part_title : part_title,
 						// 從title/顯示的文字取得章節的標題。
 						title : matched.between('title="', '"')

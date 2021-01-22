@@ -152,8 +152,8 @@ library_namespace.set_initializor(get_HTA, _);
 
 function parse_command_line(command_line, no_command_name){
 	//	TODO: "" 中的判別仍有問題。
-	var args = [], re = no_command_name ? /\s+("([^"]*)"|([^\s]+))/g
-			: /\s*("([^"]*)"|([^\s]+))/g, result;
+	var args = [], re = no_command_name ? /\s+("([^"]*)"|(\S+))/g
+			: /\s*("([^"]*)"|(\S+))/g, result;
 
 	// commandLine 第一引數為 full script name
 	while (result = re.exec(command_line))

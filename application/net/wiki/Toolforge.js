@@ -187,8 +187,8 @@ function module_code(library_namespace) {
 		}
 
 		// 應該用 parser。
-		var user = config.match(/\n\s*user\s*=\s*([^\s]+)/), password;
-		if (!user || !(password = config.match(/\n\s*password\s*=\s*([^\s]+)/)))
+		var user = config.match(/\n\s*user\s*=\s*(\S+)/), password;
+		if (!user || !(password = config.match(/\n\s*password\s*=\s*(\S+)/)))
 			return;
 
 		return new_SQL_config(wiki_API.language, user[1], password[1]);
@@ -817,7 +817,7 @@ function module_code(library_namespace) {
 				// pass session = options[KEY_SESSION]
 				? wiki_API.namespace.name_of(row.rc_namespace, options) + ':'
 						: '';
-				// 基本上API盡可能與recentchanges一致。
+				// 基本上 API 盡可能模擬 recentchanges，與之一致。
 				result.push({
 					type : ENUM_rc_type[row.rc_type],
 					// namespace

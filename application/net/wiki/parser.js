@@ -5,7 +5,6 @@
  * 
  * TODO:<code>
 
-parser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
 parser 所有子頁面加入白名單 white-list
 parser 所有node當前之level層級
 parser 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起來。
@@ -1541,7 +1540,7 @@ function module_code(library_namespace) {
 			// console.log(parent);
 
 			token = library_namespace.HTML_to_Unicode(token);
-			if (/[^\s]/.test(token)) {
+			if (/\S/.test(token)) {
 				// trick: 不再遍歷子節點。避免被進一步的處理，例如"&amp;amp;"。
 				token = [ token ];
 				token.is_atom = true;
@@ -2423,15 +2422,13 @@ function module_code(library_namespace) {
 	}
 
 	if (false) {
-		wiki.register_redirects([ 'Anchor', 'Anchors', 'Visible anchor',
-				'Citation', 'RFD' ]);
+		wiki_session.register_redirects([ 'Anchor', 'Anchors',
+				'Visible anchor', 'Citation', 'RFD' ]);
 
 		// ...
 
-		var anchor_list = CeL.wiki.parse.anchor(wikitext, {
-			// [KEY_SESSION]: wiki
-			session : wiki
-		});
+		var anchor_list = CeL.wiki.parse.anchor(wikitext, CeL.wiki
+				.add_session_to_options(wiki_session));
 
 		// ------------------
 
@@ -2439,7 +2436,6 @@ function module_code(library_namespace) {
 		var anchor_list = CeL.wiki.parse.anchor(wikitext);
 	}
 
-	// CeL.wiki.parse.anchor(wikitext, options)
 	function get_all_anchor(wikitext, options) {
 		// const
 		var anchor_list = [];
@@ -2497,20 +2493,10 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// e.g., {{Cite
-			// book|和書|author=[[戸高一成]]|coauthors=|year=2013|month=9|title=[証言録]
-			// 海軍反省会5|publisher=株式会社PHP研究所|isbn=978-4-569-81339-4|ref=海軍反省会五}}
-			// @ [[日本の原子爆弾開発]]
-
-			// {{Cite journal |和書 |journal=[[BugBug]] |volume=<!-- 23
-			// -->|issue=<!-- 1 -->2014年1月号 |publisher=[[マガジン・マガジン]]
-			// |date=2013-12-03 |ref=bugbug_201401 }}
+			// e.g., {{Cite book|...|ref=anchor}} @ [[日本の原子爆弾開発]]
+			// {{Cite journal|...|ref=anchor}}
 			if (/^Cite [a-z]+/.test(template_token.name)
-			// {{Citation |和書
-			// |url=https://www.city.maibara.lg.jp/soshiki/keizai_kankyo/kankyo/shizen/mizu/1836.html
-			// |format=PDF |accessdate=2020-11-29 |editor=仁連孝昭
-			// |title=スローウォーターなくらし - 未来へ受け継ぐ水源の里まいばらの水文化 |date=2012-07-13
-			// |publisher=[[米原市]]経済環境部環境保全課 |ref=Niren}}
+			// {{Citation|...|ref=anchor}}
 			|| wiki_API.is_template('Citation', template_token, options)) {
 				// const
 				var anchor = template_token.parameters.ref;
@@ -2736,14 +2722,17 @@ function module_code(library_namespace) {
 			var layout_index = session.configuration.layout_index;
 			if (!layout_index[layout])
 				layout_index[layout] = Object.create(null);
-			// assert: root_page_data.redirects === redirect_list
-			// console.log([root_page_data, redirect_list]);
+			if (false) {
+				console.assert(!redirect_list
+						|| redirect_list === root_page_data.redirect_list);
+				console.log([ root_page_data, redirect_list ]);
+			}
 			redirect_list.forEach(function(page_data) {
 				layout_index[layout][page_data.title] = null;
 			});
 			callback();
 		}, Object.assign({
-			// redirect_list[0] === root_page_data
+			// Making .redirect_list[0] the redirect target.
 			include_root : true
 		}, options));
 	}
@@ -3405,7 +3394,7 @@ function module_code(library_namespace) {
 	// (\s{2,}): 最後的單一/\s/會被轉換為"&#160;"
 	// matched: [ all, 指定轉換字串, 指定轉換詞, spaces,
 	// this language code, colon, this language token, last spaces ]
-	var PATTERN_conversion = /^(([\s\S]+?)=>)?(\s*)(zh(?:-(?:cn|tw|hk|mo|sg|my|hant|hans))?)(\s*:|:\s*)([^\s].*?)(\s{2,})?$/;
+	var PATTERN_conversion = /^(([\s\S]+?)=>)?(\s*)(zh(?:-(?:cn|tw|hk|mo|sg|my|hant|hans))?)(\s*:|:\s*)(\S.*?)(\s{2,})?$/;
 
 	// 狀態開關: [[mw:Help:Magic words#Behavior switches]]
 	var PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
@@ -4703,8 +4692,13 @@ function module_code(library_namespace) {
 			var attribute_hash = Object.create(null);
 			if (typeof attributes === 'string') {
 				var attributes_list = [], matched,
+				// parser 標籤中的空屬性現根據HTML5規格進行解析。
+				// <pages from= to= section=1>
+				// 將解析為 <pages from="to=" section="1">
+				// 而不是像以前那樣的 <pages from="" to="" section="1">。
+				// 請改用 <pages from="" to="" section=1> or <pages section=1>。
 				// [ all, front, all attributes, name, value, unquoted value ]
-				PATTERN_attribute = /([\s\S]+?)($|([^\s]+)=("[^"]*"|'[^']*'|([^\s]*)))/g;
+				PATTERN_attribute = /([\s\S]+?)($|(\S[^=]*?)\s*=\s*("[^"]*"|'[^']*'|(\S*)))/g;
 				while (matched = PATTERN_attribute.exec(attributes)) {
 					// console.log(matched);
 					attributes_list.push(matched[1]);
@@ -4926,166 +4920,196 @@ function module_code(library_namespace) {
 			});
 
 			// 添加新行由一個豎線和連字符 "|-" 組成。
-			parameters = parameters.split('\n|-')
-			//
-			.map(function(token, index, _this) {
-				if (typeof JSON === 'object') {
-					library_namespace.debug('parse table_row / row style: '
+			parameters = parameters
+					.split('\n|-')
 					//
-					+ JSON.stringify(token), 5, 'parse_wikitext.table');
-				}
-				if (index === 0
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				&& !token.includes(include_mark)
-				// 含有 delimiter 的話，即使位在 "{|" 之後，依舊會被當作 row。
-				&& !/\n[!|]|!!|\|\|/.test(token)) {
-					// table style / format modifier (not displayed)
-					// "\n|-" 後面的 string
-					token = _set_wiki_type(token, 'table_style');
-					if (false && index === 0)
-						token = _set_wiki_type(token, 'table_row');
-					return token;
-				}
-
-				var row, matched, delimiter,
-				// 分隔 <td>, <th>
-				// matched: [ all, inner, delimiter ]
-				// 必須有實體才能如預期作 .exec()。
-				PATTERN_CELL = /([\s\S]*?)(\n[|!]|[|!]{2}|$)/g;
-				while (matched = PATTERN_CELL.exec(token)) {
-					// "|-" 應當緊接著 style，可以是否設定過 row 判斷。
-					// 但若這段有 /[<>]/ 則當作是內容。
-					if (row || /[<>]/.test(matched[1])) {
-						var cell = matched[1].match(/^([^|]+)(\|)([\s\S]*)$/);
-						if (cell) {
-							// TODO: data-sort-type in table head
-
-							var data_type = cell[1]
-							// @see
-							// [[w:en:Help:Sorting#Configuring the sorting]]
-							// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
-							.match(/data-sort-type=(["']([^"']+)["']|[^\s]+)/);
-
-							if (cell[1].includes(include_mark)) {
-								cell[1] = [
+					.map(
+							function(token, index, _this) {
+								if (typeof JSON === 'object') {
+									library_namespace.debug(
+											'parse table_row / row style: '
+											//
+											+ JSON.stringify(token), 5,
+											'parse_wikitext.table');
+								}
+								if (index === 0
 								// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-								parse_wikitext(cell[1], options, queue) ];
-							}
-							cell[1] = _set_wiki_type(cell[1],
-							// cell style / format modifier (not displayed)
-							'table_style');
-							// assert: cell[2] === '|'
-							cell[1].push(cell[2]);
+								&& !token.includes(include_mark)
+								// 含有 delimiter 的話，即使位在 "{|" 之後，依舊會被當作 row。
+								&& !/\n[!|]|!!|\|\|/.test(token)) {
+									// table style / format modifier (not
+									// displayed)
+									// "\n|-" 後面的 string
+									token = _set_wiki_type(token, 'table_style');
+									if (false && index === 0)
+										token = _set_wiki_type(token,
+												'table_row');
+									return token;
+								}
 
-							if (cell[3].includes(include_mark)) {
-								cell[3] =
-								// 經過改變，需再進一步處理。
-								parse_wikitext(cell[3], options, queue);
-							}
-							if (data_type) {
-								data_type = data_type[1] || data_type[2];
-								if (typeof data_type === 'number') {
-									data_type = +cell[3];
-									if (!isNaN(data_type)) {
-										// cell[3] = data_type;
+								var row, matched, delimiter,
+								// 分隔 <td>, <th>
+								// matched: [ all, inner, delimiter ]
+								// 必須有實體才能如預期作 .exec()。
+								PATTERN_CELL = /([\s\S]*?)(\n[|!]|[|!]{2}|$)/g;
+								while (matched = PATTERN_CELL.exec(token)) {
+									// "|-" 應當緊接著 style，可以是否設定過 row 判斷。
+									// 但若這段有 /[<>]/ 則當作是內容。
+									if (row || /[<>]/.test(matched[1])) {
+										var cell = matched[1]
+												.match(/^([^|]+)(\|)([\s\S]*)$/);
+										if (cell) {
+											// TODO: data-sort-type in table
+											// head
+
+											var data_type = cell[1]
+													// @see
+													// [[w:en:Help:Sorting#Configuring
+													// the sorting]]
+													// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
+													.match(/data-sort-type\s*=\s*(["']([^"']+)["']|\S+)/);
+
+											if (cell[1].includes(include_mark)) {
+												cell[1] = [
+												// 預防有特殊 elements 置入其中。此時將之當作普通
+												// element 看待。
+												parse_wikitext(cell[1],
+														options, queue) ];
+											}
+											cell[1] = _set_wiki_type(cell[1],
+											// cell style / format modifier (not
+											// displayed)
+											'table_style');
+											// assert: cell[2] === '|'
+											cell[1].push(cell[2]);
+
+											if (cell[3].includes(include_mark)) {
+												cell[3] =
+												// 經過改變，需再進一步處理。
+												parse_wikitext(cell[3],
+														options, queue);
+											}
+											if (data_type) {
+												data_type = data_type[1]
+														|| data_type[2];
+												if (typeof data_type === 'number') {
+													data_type = +cell[3];
+													if (!isNaN(data_type)) {
+														// cell[3] = data_type;
+													}
+												} else if (typeof data_type === 'isoDate') {
+													data_type = Date
+															.parse(cell[3]);
+													if (!isNaN(data_type)) {
+														// cell[3] = new
+														// Date(data_type);
+													}
+												}
+											}
+
+											cell = [ cell[1], cell[3] ];
+										} else {
+											cell = matched[1];
+											if (cell.includes(include_mark)) {
+												// 經過改變，需再進一步處理。
+												cell = parse_wikitext(cell,
+														options, queue);
+											}
+											if (cell.type !== 'plain') {
+												// {String} or other elements
+												cell = [ cell ];
+											}
+										}
+
+										_set_wiki_type(cell, 'table_cell');
+
+										if (delimiter) {
+											cell.delimiter = delimiter;
+											// is_header
+											cell.is_head = delimiter
+													.startsWith('\n')
+											// TODO: .is_head, .table_type 擇一。
+											? delimiter.endsWith('!')
+													: row.is_head;
+											// is cell <th> or <td> ?
+											cell.table_type = cell.is_head ? 'th'
+													: 'td';
+										}
+
+										if (!row)
+											row = [];
+										row.push(cell);
+
+									} else if (matched[1]
+											.includes(include_mark)) {
+										// assert: !row && matched.index === 0
+
+										// 預防有特殊 elements 置入其中。此時將之當作普通 element
+										// 看待。
+										// 注意: caption 也被當作 table_row 看待。
+										cell = parse_wikitext(matched[1],
+												options, queue);
+										// console.trace('cell:');
+										// console.log(cell);
+										if (cell.type === 'plain'
+												&& cell[cell.length - 1]
+												//
+												&& cell[cell.length - 1].type === 'caption') {
+											var caption = cell.pop();
+											row = [
+													// the style of whole
+													// <table>
+													_set_wiki_type(cell,
+															'table_style'),
+													//
+													caption ];
+											row.caption = get_caption(caption
+													.join(''));
+										} else {
+											row = [ cell ];
+											if (cell.type === 'caption') {
+												row.caption = get_caption(cell
+														.join(''));
+											}
+										}
+
+									} else {
+										// assert: !row && matched.index === 0
+										cell = _set_wiki_type(matched[1],
+										// row style / format modifier (not
+										// displayed)
+										'table_style');
+										row = [ cell ];
 									}
-								} else if (typeof data_type === 'isoDate') {
-									data_type = Date.parse(cell[3]);
-									if (!isNaN(data_type)) {
-										// cell[3] = new Date(data_type);
+
+									// matched[2] 屬於下一 cell。
+									delimiter = matched[2];
+									if (!delimiter) {
+										// assert: /$/, no separator, ended.
+										break;
+									}
+
+									// assert: !!delimiter === true, and is the
+									// first time
+									// matched.
+									if (!('is_head' in row)
+									// 初始設定本行之 type: <th> or <td>。
+									&& !(row.is_head = delimiter.includes('!'))) {
+										// 經測試，當此行非 table head 時，會省略 '!!' 不匹配。
+										// 但 '\n!' 仍有作用。
+										var lastIndex = PATTERN_CELL.lastIndex;
+										if (false) {
+											console.log("省略 '!!' 不匹配: "
+											//
+											+ token.slice(lastIndex));
+										}
+										PATTERN_CELL = /([\s\S]*?)(\n[|!]|[|]{2}|$)/g;
+										PATTERN_CELL.lastIndex = lastIndex;
 									}
 								}
-							}
-
-							cell = [ cell[1], cell[3] ];
-						} else {
-							cell = matched[1];
-							if (cell.includes(include_mark)) {
-								// 經過改變，需再進一步處理。
-								cell = parse_wikitext(cell, options, queue);
-							}
-							if (cell.type !== 'plain') {
-								// {String} or other elements
-								cell = [ cell ];
-							}
-						}
-
-						_set_wiki_type(cell, 'table_cell');
-
-						if (delimiter) {
-							cell.delimiter = delimiter;
-							// is_header
-							cell.is_head = delimiter.startsWith('\n')
-							// TODO: .is_head, .table_type 擇一。
-							? delimiter.endsWith('!') : row.is_head;
-							// is cell <th> or <td> ?
-							cell.table_type = cell.is_head ? 'th' : 'td';
-						}
-
-						if (!row)
-							row = [];
-						row.push(cell);
-
-					} else if (matched[1].includes(include_mark)) {
-						// assert: !row && matched.index === 0
-
-						// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-						// 注意: caption 也被當作 table_row 看待。
-						cell = parse_wikitext(matched[1], options, queue);
-						// console.trace('cell:');
-						// console.log(cell);
-						if (cell.type === 'plain' && cell[cell.length - 1]
-						//
-						&& cell[cell.length - 1].type === 'caption') {
-							var caption = cell.pop();
-							row = [
-							// the style of whole <table>
-							_set_wiki_type(cell, 'table_style'),
-							//
-							caption ];
-							row.caption = get_caption(caption.join(''));
-						} else {
-							row = [ cell ];
-							if (cell.type === 'caption') {
-								row.caption = get_caption(cell.join(''));
-							}
-						}
-
-					} else {
-						// assert: !row && matched.index === 0
-						cell = _set_wiki_type(matched[1],
-						// row style / format modifier (not displayed)
-						'table_style');
-						row = [ cell ];
-					}
-
-					// matched[2] 屬於下一 cell。
-					delimiter = matched[2];
-					if (!delimiter) {
-						// assert: /$/, no separator, ended.
-						break;
-					}
-
-					// assert: !!delimiter === true, and is the first time
-					// matched.
-					if (!('is_head' in row)
-					// 初始設定本行之 type: <th> or <td>。
-					&& !(row.is_head = delimiter.includes('!'))) {
-						// 經測試，當此行非 table head 時，會省略 '!!' 不匹配。
-						// 但 '\n!' 仍有作用。
-						var lastIndex = PATTERN_CELL.lastIndex;
-						if (false) {
-							console.log("省略 '!!' 不匹配: "
-							//
-							+ token.slice(lastIndex));
-						}
-						PATTERN_CELL = /([\s\S]*?)(\n[|!]|[|]{2}|$)/g;
-						PATTERN_CELL.lastIndex = lastIndex;
-					}
-				}
-				// assert: Array.isArray(row)
-				return _set_wiki_type(row, 'table_row');
-			});
+								// assert: Array.isArray(row)
+								return _set_wiki_type(row, 'table_row');
+							});
 
 			_set_wiki_type(parameters, 'table');
 			if (main_caption !== undefined)
@@ -6637,152 +6661,185 @@ function module_code(library_namespace) {
 		}
 
 		// 僅處理第一階層。
-		parsed.forEach(function(token/* , index, parent */) {
-			if (token.type === 'section_title') {
-				variable_name = normalize_value(token.title);
-				return;
-			}
-
-			// parse table
-			// @see wiki_API.table_to_array
-			if (token.type === 'table' && (token.caption || variable_name)) {
-				var value_hash = Object.create(null);
-				token.forEach(function(line) {
-					if (line.type !== 'table_row'
-					// 注意: caption 也被當作 table_row 看待。
-					|| line.caption) {
+		parsed
+				.forEach(function(token/* , index, parent */) {
+					if (token.type === 'section_title') {
+						variable_name = normalize_value(token.title);
 						return;
 					}
-					if (line.is_head) {
-						// TODO: using the data
-						return;
-					}
-					var row = [];
-					line.forEach(function(cell) {
-						if (cell.type !== 'table_cell') {
-							return;
-						}
 
-						// TODO: data-sort-type in table head
-
-						var data_type, has_list, has_non_empty_token;
-						// console.log(cell);
-						cell = cell.filter(function(token) {
-							if (token.type !== 'table_style') {
-								if (token.type === 'list') {
-									has_list = true;
-								} else {
-									has_non_empty_token
-									//
-									= !!token.toString().trim();
-								}
-								return true;
-							}
-
-							// console.log(token);
-							data_type = token.toString()
-							// @see
-							// [[w:en:Help:Sorting#Configuring the sorting]]
-							// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
-							.match(/data-sort-type=(["']([^"']+)["']|[^\s]+)/);
-							if (data_type) {
-								data_type = data_type[2] || data_type[1];
-							}
-						}).map(filter_tags);
-						if (!has_list) {
-							// console.log(cell);
-							cell.toString = function() {
-								return this.join('');
-							};
-							cell = normalize_value(cell);
-						} else if (has_non_empty_token) {
-							// 有些不合格之 token。
-							cell.forEach(function(token, index) {
-								if (token.type === 'list')
-									cell[index] = token.value;
-							});
-							cell = normalize_value(cell.join(''));
-						} else {
-							has_list = null;
-							// console.trace(cell);
-							cell.forEach(function(token) {
-								if (token.type === 'list') {
-									if (has_list) {
-										has_list.append(token
-												.map(normalize_value));
-									} else {
-										has_list = token.map(normalize_value);
+					// parse table
+					// @see wiki_API.table_to_array
+					if (token.type === 'table'
+							&& (token.caption || variable_name)) {
+						var value_hash = Object.create(null);
+						token
+								.forEach(function(line) {
+									if (line.type !== 'table_row'
+									// 注意: caption 也被當作 table_row 看待。
+									|| line.caption) {
+										return;
 									}
-								}
-								// 只取 list 中的值。
-							});
-							cell = has_list;
-						}
+									if (line.is_head) {
+										// TODO: using the data
+										return;
+									}
+									var row = [];
+									line
+											.forEach(function(cell) {
+												if (cell.type !== 'table_cell') {
+													return;
+												}
 
-						// console.log([ data_type, cell ]);
-						if (data_type === 'number') {
-							// console.log(cell);
-							if (!isNaN(data_type = +cell))
-								cell = data_type;
-						} else if (data_type === 'isoDate') {
-							data_type = Date.parse(cell
-									.replace(/<[^<>]+>/g, ''));
-							if (!isNaN(data_type))
-								cell = new Date(data_type);
-						} else if (data_type) {
-							library_namespace.warn('Invalid type: ['
-									+ data_type + '] ' + cell);
-						}
+												// TODO: data-sort-type in table
+												// head
 
-						// console.log(cell);
-						row.push(cell);
-					});
-					// console.log(line);
-					if (row.length >= 2) {
-						// ! 變數名 (不可更改) !! 變數值 !! 注解說明
-						var name = row[NAME_INDEX];
-						if (name && typeof name === 'string') {
-							// TODO: "false" → false
-							value_hash[name] = row[VALUE_INDEX];
-						}
+												var data_type, has_list, has_non_empty_token;
+												// console.log(cell);
+												cell = cell
+														.filter(
+																function(token) {
+																	if (token.type !== 'table_style') {
+																		if (token.type === 'list') {
+																			has_list = true;
+																		} else {
+																			has_non_empty_token
+																			//
+																			= !!token
+																					.toString()
+																					.trim();
+																		}
+																		return true;
+																	}
+
+																	// console.log(token);
+																	data_type = token
+																			.toString()
+																			// @see
+																			// [[w:en:Help:Sorting#Configuring
+																			// the
+																			// sorting]]
+																			// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
+																			.match(
+																					/data-sort-type\s*=\s*(["']([^"']+)["']|\S+)/);
+																	if (data_type) {
+																		data_type = data_type[2]
+																				|| data_type[1];
+																	}
+																}).map(
+																filter_tags);
+												if (!has_list) {
+													// console.log(cell);
+													cell.toString = function() {
+														return this.join('');
+													};
+													cell = normalize_value(cell);
+												} else if (has_non_empty_token) {
+													// 有些不合格之 token。
+													cell
+															.forEach(function(
+																	token,
+																	index) {
+																if (token.type === 'list')
+																	cell[index] = token.value;
+															});
+													cell = normalize_value(cell
+															.join(''));
+												} else {
+													has_list = null;
+													// console.trace(cell);
+													cell
+															.forEach(function(
+																	token) {
+																if (token.type === 'list') {
+																	if (has_list) {
+																		has_list
+																				.append(token
+																						.map(normalize_value));
+																	} else {
+																		has_list = token
+																				.map(normalize_value);
+																	}
+																}
+																// 只取 list 中的值。
+															});
+													cell = has_list;
+												}
+
+												// console.log([ data_type, cell
+												// ]);
+												if (data_type === 'number') {
+													// console.log(cell);
+													if (!isNaN(data_type = +cell))
+														cell = data_type;
+												} else if (data_type === 'isoDate') {
+													data_type = Date
+															.parse(cell
+																	.replace(
+																			/<[^<>]+>/g,
+																			''));
+													if (!isNaN(data_type))
+														cell = new Date(
+																data_type);
+												} else if (data_type) {
+													library_namespace
+															.warn('Invalid type: ['
+																	+ data_type
+																	+ '] '
+																	+ cell);
+												}
+
+												// console.log(cell);
+												row.push(cell);
+											});
+									// console.log(line);
+									if (row.length >= 2) {
+										// ! 變數名 (不可更改) !! 變數值 !! 注解說明
+										var name = row[NAME_INDEX];
+										if (name && typeof name === 'string') {
+											// TODO: "false" → false
+											value_hash[name] = row[VALUE_INDEX];
+										}
+									}
+								});
+						value_hash[KEY_ORIGINAL_ARRAY] = token;
+						configuration[token.caption || variable_name] = value_hash;
+						// 僅採用第一個列表。
+						if (!token.caption)
+							variable_name = null;
 					}
+
+					if (token.type !== 'list')
+						return;
+
+					if (token.list_type !== DEFINITION_LIST) {
+						if (variable_name) {
+							configuration[variable_name] = token
+									.map(normalize_value);
+							// 僅採用一個列表。
+							variable_name = null;
+						}
+						return;
+					}
+
+					token.dt_index.forEach(function(dt_index, index) {
+						variable_name = normalize_value(token[dt_index]);
+						if (!variable_name)
+							return;
+						var next_dt_index = token.dt_index[index + 1]
+								|| token.length;
+						configuration[variable_name]
+						// 變數的值
+						= dt_index + 2 === next_dt_index
+						// 僅僅提供單一數值。
+						? normalize_value(token[dt_index + 1])
+						// 提供了一個列表。
+						: token.slice(dt_index + 1, next_dt_index)
+						//
+						.map(normalize_value);
+					});
+					variable_name = null;
 				});
-				value_hash[KEY_ORIGINAL_ARRAY] = token;
-				configuration[token.caption || variable_name] = value_hash;
-				// 僅採用第一個列表。
-				if (!token.caption)
-					variable_name = null;
-			}
-
-			if (token.type !== 'list')
-				return;
-
-			if (token.list_type !== DEFINITION_LIST) {
-				if (variable_name) {
-					configuration[variable_name] = token.map(normalize_value);
-					// 僅採用一個列表。
-					variable_name = null;
-				}
-				return;
-			}
-
-			token.dt_index.forEach(function(dt_index, index) {
-				variable_name = normalize_value(token[dt_index]);
-				if (!variable_name)
-					return;
-				var next_dt_index = token.dt_index[index + 1] || token.length;
-				configuration[variable_name]
-				// 變數的值
-				= dt_index + 2 === next_dt_index
-				// 僅僅提供單一數值。
-				? normalize_value(token[dt_index + 1])
-				// 提供了一個列表。
-				: token.slice(dt_index + 1, next_dt_index)
-				//
-				.map(normalize_value);
-			});
-			variable_name = null;
-		});
 
 		// 避免被覆蓋。保證用 configuration.configuration_page_title 可以檢查是否由頁面取得了設定。
 		// 注意: 當設定頁面為空的時候，無法獲得這個值。

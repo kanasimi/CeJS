@@ -221,7 +221,7 @@ function module_code(library_namespace) {
 			return;
 		var matched,
 		//
-		attribute_pattern = /([^\s=]+)\s*(?:=\s*(?:"((?:\\.|[^"\\]+)+)"|'((?:\\.|[^'\\]+)+)'|([^\s]+)))?/g;
+		attribute_pattern = /([^\s=]+)\s*(?:=\s*(?:"((?:\\.|[^"\\]+)+)"|'((?:\\.|[^'\\]+)+)'|(\S+)))?/g;
 		while (matched = attribute_pattern.exec(attributes)) {
 			var value = matched[2] || matched[3];
 			// unescape

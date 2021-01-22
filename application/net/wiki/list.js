@@ -375,8 +375,10 @@ function module_code(library_namespace) {
 		//
 		? '&' + prefix + 'namespace=' + options.namespace : '');
 
-		if (options.redirects)
+		if (options.redirects) {
+			// 舊版毋須 '&redirects=1'，'&redirects' 即可。
 			action[1] += '&redirects=1';
+		}
 		if (options.converttitles)
 			action[1] += '&converttitles=1';
 
@@ -1564,14 +1566,23 @@ function module_code(library_namespace) {
 		// redirect_to: 追尋至重定向終點
 
 		wiki_API.page(title, function(page_data, error) {
-			// console.trace([ page_data, error ]);
+			// console.trace(title);
+			// console.trace(page_data);
+			// console.trace(error);
 
-			callback(
 			// 已經轉換過，毋須 wiki_API.parse.redirect()。
 			// wiki_API.parse.redirect(wiki_API.content_of(page_data)) ||
 
 			// 若是 convert 過則採用新的 title。
-			page_data.title || title, page_data, error);
+			if (Array.isArray(page_data)) {
+				title = page_data.map(function(_page_data) {
+					return _page_data.title;
+				});
+			} else {
+				title = page_data.title || title
+			}
+
+			callback(title, page_data, error);
 		}, options);
 	};
 
@@ -1627,6 +1638,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// console.trace(title);
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
 			throw 'wiki_API.redirects_here: Invalid title: '
@@ -1637,6 +1649,7 @@ function module_code(library_namespace) {
 		if (!action[0])
 			action = action[1];
 
+		// console.trace(action);
 		wiki_API.query(action, typeof callback === 'function'
 		//
 		&& function(data) {
@@ -1654,8 +1667,9 @@ function module_code(library_namespace) {
 				 */
 				if (data.warnings && data.warnings.query
 				//
-				&& data.warnings.query['*'])
+				&& data.warnings.query['*']) {
 					library_namespace.warn(data.warnings.query['*']);
+				}
 				callback(null, null, error);
 				return;
 			}
@@ -1677,10 +1691,9 @@ function module_code(library_namespace) {
 			}
 
 			data = data.query.pages;
-			var pages = [];
+			var pages = [], page_data = options.page_data;
 			for ( var pageid in data) {
 				var page = data[pageid];
-				pages.push(page);
 				// 僅處理第一頁。
 				if (!wiki_API.content_of.page_exists(page)) {
 					// 此頁面不存在/已刪除。Page does not exist. Deleted?
@@ -1692,46 +1705,61 @@ function module_code(library_namespace) {
 					//
 					: ' id ' + page.pageid));
 				}
-				break;
+
+				// page 之 structure 將按照 wiki API 本身之 return！
+				// page = {pageid,ns,title,redirects:[{},{}]}
+				var redirect_list = page.redirects || [];
+				library_namespace.debug(
+				//
+				wiki_API.title_of(page) + ': 有 ' + redirect_list.length
+				//
+				+ ' 個同名頁面(重定向至此頁面)。', 2, 'wiki_API.redirects_here');
+				if (options.include_root) {
+					// 避免修改或覆蓋 pages.redirects。
+					redirect_list = redirect_list.slice();
+					// Making .redirect_list[0] the redirect target.
+					redirect_list.unshift(page);
+					// page_data.redirects
+					page.redirect_list = redirect_list;
+				}
+
+				var _page_data = page_data && page_data.index_of_title
+				//
+				&& page_data[page_data.index_of_title[page.title]] ||
+				// wiki_API.is_page_data(page_data) &&
+				page_data;
+				if (_page_data) {
+					// console.assert(wiki_API.is_page_data(_page_data));
+					// console.assert(_page_data.pageid === page.pageid);
+					page = Object.assign(_page_data, page);
+				}
+				redirect_list.query_title =
+				//
+				_page_data && (_page_data.original_title || _page_data.title)
+				//
+				|| options.query_title;
+
+				library_namespace.debug('redirects (alias) of '
+				//
+				+ wiki_API.title_link_of(page) + ': (' + redirect_list.length
+				//
+				+ ') [' + redirect_list.slice(0, 3)
+				// CeL.wiki.title_of(page_data)
+				.map(wiki_API.title_of) + ']...',
+				//
+				1, 'wiki_API.redirects_here');
+				pages.push(page);
 			}
 
-			pages = pages[0];
-			if (wiki_API.is_page_data(options.page_data)
-			//
-			&& wiki_API.is_page_data(pages)
-			//
-			&& options.page_data.pageid === pages.pageid) {
-				pages = Object.assign(options.page_data, pages);
+			if (pages.length > 1) {
+				callback(pages);
+
+			} else {
+				pages = pages[0];
+				// callback(root_page_data 本名, redirect_list 別名 alias list)
+				callback(pages, pages.redirect_list || page.redirects);
 			}
 
-			// page 之 structure 將按照 wiki API 本身之 return！
-			// page = {pageid,ns,title,redirects:[{},{}]}
-			var redirect_list = pages.redirects || [];
-			library_namespace.debug(
-			//
-			wiki_API.title_of(pages) + ': 有 ' + redirect_list.length
-			//
-			+ ' 個同名頁面(重定向至此頁面)。', 2, 'wiki_API.redirects_here');
-			if (options.include_root) {
-				// 避免修改或覆蓋 pages.redirects。
-				redirect_list = redirect_list.slice();
-				// The first one is the redirect target.
-				redirect_list.unshift(pages);
-			}
-
-			if (options.query_title)
-				redirect_list.query_title = options.query_title;
-
-			library_namespace.debug(
-			//
-			'redirects (alias) of ' + wiki_API.title_link_of(pages) + ': ('
-			//
-			+ redirect_list.length + ') [' + redirect_list.slice(0, 3)
-			// CeL.wiki.title_of(page_data)
-			.map(wiki_API.title_of) + ']...', 1, 'wiki_API.redirects_here');
-
-			// callback(root_page_data 本名, redirect_list 別名 alias list)
-			callback(pages, redirect_list);
 		}, null, options);
 	};
 

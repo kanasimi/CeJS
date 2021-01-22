@@ -150,7 +150,7 @@ function module_code(library_namespace) {
 		if ((t = simpleRead(f = p + f)) && t.match(/Server:/)
 				&& t.match(/Address:\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/)) {
 			t = t.slice(RegExp.lastIndex);
-			host = t.match(/Name:\s*([^\s]+)/) ? RegExp.$1 : 0;
+			host = t.match(/Name:\s*(\S+)/) ? RegExp.$1 : 0;
 			IP = t.match(/Address:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/) ? RegExp.$1
 					: 0;
 			// library_namespace.debug(host + '\n' + IP);
@@ -233,7 +233,7 @@ function module_code(library_namespace) {
 			return;
 		}
 		var href = library_namespace.simplify_path(URI), matched = href
-				.match(/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)([^\s]*)$/i), tmp, path;
+				.match(/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)(\S*)$/i), tmp, path;
 		if (!matched)
 			return;
 

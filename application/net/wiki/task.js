@@ -455,7 +455,7 @@ function module_code(library_namespace) {
 
 		// register page alias
 		case 'register_redirects':
-			if (Array.isArray(next[1])) {
+			if (false && Array.isArray(next[1])) {
 				next[1].reverse();
 				_this.actions.unshift([ next[0], next[1].shift(), next[2],
 						next[3] ]);
@@ -478,7 +478,6 @@ function module_code(library_namespace) {
 			}
 
 			// console.trace(next[1]);
-
 			// next[1]: page_title
 			wiki_API.redirects_here(next[1], function(root_page_data,
 					redirect_list, error) {
@@ -489,25 +488,63 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				// assert: root_page_data.redirects === redirect_list
-				// console.trace(root_page_data);
-				// console.trace(redirect_list);
+				if (false) {
+					console.trace(root_page_data);
+					console.trace(redirect_list);
+					console.assert(!redirect_list
+							|| redirect_list === root_page_data.redirect_list);
+				}
 
-				var target_page_title = redirect_list[0].title;
-				redirect_list.forEach(function(page_data) {
-					_this.redirects_data[page_data.title]
-					// assert: page_data.title ===
-					// _this.normalize_title(page_data.title)
-					// the namespace of page_data.title is normalized
-					= target_page_title;
-				});
+				function register_redirect_list(page_title, redirect_list) {
+					var is_missing = 'missing' in redirect_list[0];
+					var target_page_title = redirect_list[0].title;
+					if (!is_missing) {
+						redirect_list.forEach(function(page_data) {
+							_this.redirects_data[page_data.title]
+							// assert: page_data.title ===
+							// _this.normalize_title(page_data.title)
+							// the namespace of page_data.title is normalized
+							= target_page_title;
+						});
+					}
 
-				library_namespace.info('register_redirects: '
-						+ (next[1] === target_page_title ? '' : wiki_API
-								.title_link_of(next[1])
-								+ ' → ')
-						+ wiki_API.title_link_of(target_page_title) + ': All '
-						+ (redirect_list.length - 1) + ' redirect(s)');
+					var message = 'register_redirects: '
+							+ (page_title === target_page_title ? '' : wiki_API
+									.title_link_of(page_title)
+									+ ' → ')
+							+ wiki_API.title_link_of(target_page_title) + ': ';
+
+					if (is_missing) {
+						message += 'Missing';
+						library_namespace.warn(message);
+						return;
+					}
+
+					message += redirect_list.length === 1 ? 'No redirect'
+							: 'All ' + (redirect_list.length - 1)
+									+ ' redirect(s)';
+					if (1 < redirect_list.length && redirect_list.length < 6) {
+						message += ': '
+						//
+						+ redirect_list.slice(1).map(function(page_data) {
+							// return page_data.title;
+							return wiki_API.title_link_of(page_data);
+						}).join(', ');
+					}
+					library_namespace.info(message);
+				}
+
+				if (redirect_list) {
+					register_redirect_list(next[1], redirect_list);
+				} else {
+					root_page_data.forEach(function(page_data) {
+						// console.trace(page_data.redirect_list);
+						register_redirect_list(page_data.original_title
+								|| page_data.title, page_data.redirect_list
+								|| [ page_data ]);
+					});
+				}
+
 				// console.trace(_this.redirects_data);
 
 				// next[2] : callback(redirect_list, error)
@@ -518,7 +555,7 @@ function module_code(library_namespace) {
 			Object.assign({
 				// [KEY_SESSION]
 				session : this,
-				// redirect_list[0] === root_page_data
+				// Making .redirect_list[0] the redirect target.
 				include_root : true
 			}, next[3]));
 			break;
@@ -1757,8 +1794,9 @@ function module_code(library_namespace) {
 						})) {
 							// 即使設定 minor=0 似乎也會當作設定了，得完全消滅才行。
 							delete options[callback];
-						} else
+						} else {
 							options[callback] = config[callback];
+						}
 					}
 				}
 			}

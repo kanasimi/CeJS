@@ -281,8 +281,8 @@ function module_code(library_namespace) {
 		action[1] = wiki_API.query.title_param(action[1], true, options.is_id);
 
 		if (options.redirects) {
-			// 毋須 '&redirects=1'
-			action[1] += '&redirects';
+			// 舊版毋須 '&redirects=1'，'&redirects' 即可。
+			action[1] += '&redirects=1';
 		}
 
 		return action;
@@ -1188,10 +1188,21 @@ function module_code(library_namespace) {
 	function convert_page_title_to_namespace(page_title, options) {
 		var namespace = !options ? 0 : !isNaN(options) ? +options
 				: typeof options === 'string' ? options : options.namespace;
-		page_title = wiki_API.normalize_title(page_title, options);
-		return get_namespace(namespace, Object.assign({
+		namespace = get_namespace(namespace, Object.assign({
 			get_name : true
-		}, options)) + ':' + remove_page_title_namespace(page_title, options);
+		}, options)) + ':';
+
+		page_title = wiki_API.normalize_title(page_title, options);
+		// console.trace(page_title);
+
+		function to_namespace(page_title) {
+			return namespace + remove_page_title_namespace(page_title, options);
+		}
+
+		if (Array.isArray(page_title)) {
+			return page_title.map(to_namespace);
+		}
+		return to_namespace(page_title);
 	}
 
 	// ------------------------------------------
@@ -1430,7 +1441,7 @@ function module_code(library_namespace) {
 		return words.charAt(0).toUpperCase() + words.slice(1);
 
 		// method 2
-		return words.replace(/^[^\s]/g, function(initial_char) {
+		return words.replace(/^\S/g, function(initial_char) {
 			return initial_char.toUpperCase();
 		});
 	}
@@ -1465,6 +1476,12 @@ function module_code(library_namespace) {
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
 	 */
 	function normalize_page_name(page_name, options) {
+		if (Array.isArray(page_name)) {
+			return page_name.map(function(_page_name) {
+				return normalize_page_name(_page_name, options);
+			});
+		}
+
 		if (wiki_API.is_page_data(page_name)) {
 			page_name = page_name.title;
 		}

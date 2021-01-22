@@ -1561,9 +1561,9 @@ function module_code(library_namespace) {
 	 * <code>
 
 	var alias={
-		//	'child' || 'c' || '$' || '0' || ..
+		//	'child' || 'c' || '$' || '0' || ...
 		$:'childNode',
-		//	class: 'className' || 'c' ..
+		//	class: 'className' || 'c' ...
 		c:'className'
 		s:'style'
 	};
@@ -1611,7 +1611,7 @@ function module_code(library_namespace) {
 	 * 
 	 * NOTE: table 需要加 tbody.
 	 * 
-	 * TODO: 分割功能(set_attrib, add_child, ..), 簡化. insertAdjacentHTML /
+	 * TODO: 分割功能(set_attrib, add_child, ...), 簡化. insertAdjacentHTML /
 	 * insertAdjacentText
 	 * 
 	 * @param {Object|Array}
@@ -2280,9 +2280,9 @@ function module_code(library_namespace) {
 	http://www.blogjava.net/tim-wu/archive/2006/05/29/48729.html
 	為預防IE Cross-Page Leaks，
 	use:
-	XML_node(++, ++, [XML_node(.., .., [meta])]);
+	XML_node(++, ++, [XML_node(..., ..., [meta])]);
 	instead of:
-	XML_node(.., .., [meta], XML_node(++, ++));
+	XML_node(..., ..., [meta], XML_node(++, ++));
 	P.S. 2007/11/11 似乎已修正？
 
 
@@ -2502,7 +2502,7 @@ function module_code(library_namespace) {
 	 * TODO: 最佳化.
 	 * 
 	 * @param {String}selector
-	 *            CSS selector, XPath, ..
+	 *            CSS selector, XPath, ...
 	 * @param {String|HTMLLIElement}[base_space]
 	 *            base document/context
 	 * @returns node
@@ -4839,11 +4839,11 @@ function module_code(library_namespace) {
 	 *            HTML elements
 	 * @param class_name
 	 *            class name || TODO: {class name 1: true, class name 2: false,
-	 *            ..}
+	 *            ...}
 	 * @param options
 	 *            default: just add the specified className options.reset: reset
 	 *            className (else just add) options.status: return {className1:,
-	 *            className2:, ..} options.remove: remove className
+	 *            className2:, ...} options.remove: remove className
 	 * @return
 	 * @see <a
 	 *      href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-95362176"
@@ -6134,7 +6134,7 @@ function module_code(library_namespace) {
 				value = '';
 		}
 
-		// 處理 px, pt, em, ..
+		// 處理 px, pt, em, ...
 
 		library_namespace.debug((library_namespace.node_description
 		//
@@ -8726,7 +8726,7 @@ _
 	 * 同步 / synchronize / update / prepare dataset。<br /> //
 	 * https://github.com/remy/polyfills/blob/master/dataset.js //
 	 * https://github.com/eligrey/Xccessors We won't use
-	 * Element.prototype.__defineGetter__('dataset', ..): IE 7 have no
+	 * Element.prototype.__defineGetter__('dataset', ...): IE 7 have no
 	 * Object.prototype.__defineGetter__ or Object.defineProperty.
 	 * 
 	 * TODO: remove attribute.

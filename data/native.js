@@ -461,7 +461,7 @@ function module_code(library_namespace) {
 	 * 將 String pattern (e.g., "/a+/g") 轉成 RegExp。<br />
 	 * TODO:<br />
 	 * and, or, not.<br />
-	 * (?:(^|\s*\|)\s*(!)?(\/(?:[^\/]+|\\\/)(\/([a-z]*))?|\\([^\s]+)|[^\s]+))+<br />
+	 * (?:(^|\s*\|)\s*(!)?(\/(?:[^\/]+|\\\/)(\/([a-z]*))?|\\(\S+)|\S+))+<br />
 	 * {Object|Array}preprocessor<br />
 	 * 
 	 * cf. CeL.to_RegExp_pattern()
@@ -644,6 +644,8 @@ function module_code(library_namespace) {
 	 * @returns 是否 matched。
 	 * 
 	 * @since 2012/10/13 10:22:20
+	 * 
+	 * @see CeL.data.fit_filter()
 	 */
 	function is_matched(pattern, text, unknown_handler) {
 		pattern = String_to_RegExp(pattern, unknown_handler);
