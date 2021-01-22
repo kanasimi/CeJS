@@ -74,16 +74,34 @@ function module_code(library_namespace) {
 		server_URL : 'js/config.js',
 		parse_server_list : function(html) {
 			var server_list = [], SinConf;
-			html = html.replace('var ', '').replace(/(}\(\))[\s\S]*/, '$1');
+			// console.trace(html);
+			if (/^\s*var cars/.test(html)) {
+				// for manhuaniu.js 2021/1/19 改版
+				html = html.replace('var SinConf', 'SinConf').replace(
+						/\n}\(\);[\s\S]*/, '}();SinConf.cars=cars;');
+			} else {
+				html = html.replace('var ', '').replace(/(}\(\))[\s\S]*/, '$1');
+			}
+			// console.trace(html);
 			eval(html);
+
+			function append_path(host) {
+				return host.endsWith('/') ? host : host + '/';
+			}
 			SinConf.resHost.map(function(data) {
-				server_list.append(data.domain.map(function(host) {
-					return host.endsWith('/') ? host : host + '/';
-				}));
+				server_list.append(data.domain.map(append_path));
 			});
+			if (SinConf.cars) {
+				server_list.append(SinConf.cars.map(append_path));
+			}
 			server_list = server_list.unique();
+			// for manhuaniu.js 2021/1/19 改版
+			server_list = server_list.filter(function(server) {
+				return !server.includes('restp.dongqiniqin');
+			});
 			server_list.conf = SinConf;
 			// console.log(SinConf);
+			// console.log(server_list);
 			return server_list;
 		},
 
@@ -490,7 +508,10 @@ function module_code(library_namespace) {
 			// <!--全站头部导航 结束-->\n<script>
 			chapter_data_code = html
 			// 930mh.js: Error on http://www.duzhez.com/manhua/449/245193.html
-			&& html.match(/<script>(;var [\s\S]+?)<\/script>/);
+			&& (html.match(/<script>(;var [\s\S]+?)<\/script>/)
+			// for manhuaniu.js 2021/1/19 改版
+			|| html.match(/<script>(var siteName = "";[\s\S]+?)<\/script>/));
+			// console.trace(chapter_data_code);
 			if (!chapter_data_code) {
 				library_namespace.warn({
 					T : [ '無法解析《%1》§%2 之章節資料！', work_data.title, chapter_NO ]
@@ -498,11 +519,14 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			// console.trace(chapter_data_code[1]);
 			// eval(chapter_data_code[1].replace(/;var /g, ';chapter_data.'));
 			chapter_data_code[1].split(';var ').forEach(function(token) {
 				if (!token.includes('='))
 					return;
 
+				token = token.replace(/^\s*var\s/, '');
+				// console.trace(token);
 				try {
 					eval('chapter_data.' + token);
 				} catch (e) {
