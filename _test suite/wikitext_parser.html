@@ -38,9 +38,9 @@ function add_sapmles() {
 		`template with parameters:{{t|p_a=va| p_b = vb |p1| p2 }}`,
 		`magic words:{{PAGENAME}}`,
 		`function:{{ucfirst:function}}`,
-		`single tag:<br />`,
-		`tag:<b>bold tag</b>`,
-		`tag with style:<i id="id" style="color:#eee">tag with style</i>`,
+		`HTML single tag:<br />`,
+		`HTML tag:<b>bold tag</b>`,
+		`HTML tag with style:<i id="id" style="color:#eee">tag with style</i>`,
 		`comment tag:<nowiki>nowiki</nowiki>`,
 		`comment:<!-- text: comment -->`,
 		`hr:
@@ -120,8 +120,13 @@ function add_parser_sample(wikitext, title, panel) {
 	}];
 	if (parsed.toString() !== wikitext) {
 		node_list.unshift({
-			div: 'Error: Failed to rebuild wikitext! Please report the wikitext!',
+			div: `Error: ${title ? title + ': ' : ''}Failed to rebuild wikitext! Please report the wikitext!`,
 			C: 'error'
+		}, { T: 'original: ', S: 'display: inline-block; width: 3.5em;' }, {
+			code: JSON.stringify(wikitext).replace(/</g, '&lt;').slice(1, -1)
+		}, { br: null },
+			{ T: 'parsed: ', S: 'display: inline-block; width: 3.5em;' }, {
+			code: JSON.stringify(parsed.toString()).replace(/</g, '&lt;').slice(1, -1)
 		});
 	}
 	CeL.new_node(node_list, [panel || 'parser_sample_panel', 2]);
@@ -151,7 +156,7 @@ function generate_wiki_parser_token(token, wikitext) {
 	}
 
 	const document = [];
-	if (wikitext) {
+	if (typeof wikitext === 'string') {
 		let nonstyled = wikitext.replace(/</g, '&lt;').replace(/ /g, '\xa0');
 		if (wikitext.includes('\n')) {
 			nonstyled = nonstyled.split(/\n/);
@@ -166,14 +171,21 @@ function generate_wiki_parser_token(token, wikitext) {
 		}, { br: null }, 'result of `CeL.wiki.parse(wikitext)`:');
 	}
 
-	let sub_document = [];
-	for (let index = 0; index < token.length; index++) {
-		push_pair(index, generate_wiki_parser_token(token[index]), sub_document);
+	if (token.length > 0) {
+		let sub_document = [];
+		for (let index = 0; index < token.length; index++) {
+			push_pair(index, generate_wiki_parser_token(token[index]), sub_document);
+		}
+		document.push({
+			table: sub_document,
+			C: "content_pairs"
+		});
+	} else {
+		document.push({
+			// "[]"
+			div: JSON.stringify(token)
+		});
 	}
-	document.push({
-		table: sub_document,
-		C: "content_pairs"
-	});
 
 	sub_document = [];
 	for (const property_name in token) {

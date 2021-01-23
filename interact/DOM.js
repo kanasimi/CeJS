@@ -3267,7 +3267,7 @@ function module_code(library_namespace) {
 		if (!table_element)
 			return;
 
-		function add_TR(tr, is_head) {
+		function add_TR(tr, is_header) {
 			var i = 0, childNodes = tr.childNodes, length = childNodes.length, tag, list = [];
 			for (; i < length; i++) {
 				tag = childNodes[i].tagName.toLowerCase();
@@ -3275,8 +3275,8 @@ function module_code(library_namespace) {
 					list.push(childNodes[i].innerHTML);
 			}
 			if (list.length > 0) {
-				if (is_head)
-					list.is_head = true;
+				if (is_header)
+					list.is_header = true;
 				array.push(list);
 			}
 		}

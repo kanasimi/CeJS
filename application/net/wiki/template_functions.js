@@ -10,6 +10,8 @@
 
 template_functions/zhwiki.js
 
+合併 `special page configuration.js`
+
 </code>
  * 
  * @since 2019/12/4 7:16:34
@@ -19,6 +21,25 @@ template_functions/zhwiki.js
 // Wikipedia bots demo: https://github.com/kanasimi/wikibot
 'use strict';
 // 'use asm';
+
+// TODO:
+(function() {
+	CeL.run([/* ..., */'application.net.wiki.template_functions' ]);
+
+	// will auto-load functions @ template_functions
+	var wiki = new CeL.wiki();
+
+	wiki.page('title', function(page_data) {
+		/** {Array} parsed page content 頁面解析後的結構。 */
+		var parsed = CeL.wiki.parser(page_data).parse();
+		parsed.each('template:Al', function(token) {
+			// ...
+		}, {
+			// auto-loading functions @ template_functions
+			bind_template_functions : true
+		});
+	});
+});
 
 // --------------------------------------------------------------------------------------------
 
@@ -125,15 +146,16 @@ function module_code(library_namespace) {
 				&& page_data.title.startsWith('MediaWiki:Conversiontable/')) {
 			// assert: page_data.ns === NS_MediaWiki
 			parsed = wiki_API.parser(page_data.wikitext.replace(
-					/-{([\s\S]+?)}-/g, function(all, inner) {
-						return '-{H|' + inner
-						// trim any trailling comments starting with '//'
-						.replace(/\/\/[^\n]+/g, '')
-						// 每條轉換須用如下格式書寫：* abc => xyz //blah blah ;
-						.replace(/["'*#\n]/g, '').replace(/=>/g, '=>'
-						// language code
-						+ page_data.title.match(/\/([^\/]+)/)[1] + ':') + '}-';
-					}));
+			//
+			/-{([\s\S]+?)}-/g, function(all, inner) {
+				return '-{H|' + inner
+				// trim any trailling comments starting with '//'
+				.replace(/\/\/[^\n]+/g, '')
+				// 每條轉換須用如下格式書寫：* abc => xyz //blah blah ;
+				.replace(/["'*#\n]/g, '').replace(/=>/g, '=>'
+				// language code
+				+ page_data.title.match(/\/([^\/]+)/)[1] + ':') + '}-';
+			}));
 
 		} else {
 			// e.g., page_data.ns === NS_Template
@@ -857,7 +879,8 @@ function module_code(library_namespace) {
 		return parsed.toString();
 	}
 
-	// @see https://en.wikipedia.org/wiki/Wikipedia:Wikipedia_Signpost/2008-03-24/Dispatches
+	// @see
+	// https://en.wikipedia.org/wiki/Wikipedia:Wikipedia_Signpost/2008-03-24/Dispatches
 	function parse_Article_history_token(token, item_list) {
 		if (!(token.name in Article_history__names))
 			return;

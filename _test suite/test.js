@@ -3155,6 +3155,16 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()]);
 		wikitext = '{|\n!|t\n|-\n|[[{{t|p}}]]\n|}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
+		wikitext = '{|\n||1||2\n|-\n|3\n|}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = '{|\n|-\n|1\n|2\n|\n|-\n|t|-a\n|-\n|}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = '{|class=\"wikitable\" || text that will be ignored\n|-\n|text\n|}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = '{|class="wikitable" id="id_t"\n|+ id="id_c" | c\n|- id="id_hr"\n! id="id_h" | h\n|- id="id_r"\n| id="id_c" | d\n|}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = '{|class=\"wikitable\"\n|-\n| f !! tt || rr\n! hh || yy !! tt\n| 11 !! 22\n|}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
 		wikitext = 'a\n{|\n!|t\n|-\n|t\n|[[{{t|p}}]]<!-- c -->\n|}\nb'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = '<div>\n{|\n|<div>A</div>\n|}\n</div>'; parsed = CeL.wiki.parser(wikitext).parse();

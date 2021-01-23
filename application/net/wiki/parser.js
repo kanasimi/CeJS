@@ -218,9 +218,10 @@ function module_code(library_namespace) {
 	page_parser.type_alias = {
 		wikilink : 'link',
 		weblink : 'external_link',
+		table_caption : 'caption',
 		row : 'table_row',
 		tr : 'table_row',
-		// table_cell 包含 th + td，須自行判別！
+		// 注意: table_cell 包含 th + td，須自行判別！
 		th : 'table_cell',
 		td : 'table_cell',
 		template : 'transclusion',
@@ -745,7 +746,7 @@ function module_code(library_namespace) {
 		}
 
 		parent_token[index] = combined_tail;
-		// return index;
+		return index;
 	}
 
 	page_parser.remove_heading_spaces = remove_heading_spaces;
@@ -764,8 +765,16 @@ function module_code(library_namespace) {
 		var token = parent_token[index];
 		parent_token[index] = '';
 
-		remove_heading_spaces(parent_token, index + 1, max_length,
-				do_not_preserve_tail_spaces);
+		var next_index = remove_heading_spaces(parent_token, index + 1,
+				max_length, do_not_preserve_tail_spaces);
+
+		if (index > 0 && /\n$/.test(parent_token[index - 1])
+				&& /^\n/.test(parent_token[next_index])) {
+			// e.g., "\n{{t}}\n==t==\n" → "\n\n==t==\n"
+			// → "\n==t==\n"
+			parent_token[next_index] = parent_token[next_index].replace(/^\n/,
+					'');
+		}
 
 		// console.log(parent_token.slice(index - 2, i + 2));
 		return token;
@@ -2517,10 +2526,13 @@ function module_code(library_namespace) {
 			}
 		});
 
-		// 處理 <span class="anchor" id="anchor"></span>, <ref name="anchor">
-		parsed.each('tag', function(tag_token) {
+		// 處理 <span class="anchor" id="anchor"></span>, <ref name="anchor">,
+		// id in table cell attribute
+		parsed.each('tag_attributes', function(attribute_token) {
+			// console.log(attribute_token.attributes);
 			// const
-			var anchor = tag_token.attributes.id || tag_token.attributes.name;
+			var anchor = attribute_token.attributes.id
+					|| attribute_token.attributes.name;
 			if (anchor)
 				anchor_list.push(normalize_anchor(anchor));
 		});
@@ -3186,19 +3198,24 @@ function module_code(library_namespace) {
 		'function' : function() {
 			return '{{' + this[0] + this.slice(1).join('|') + '}}';
 		},
+
 		// [[Help:Table]]
 		table : function() {
 			// this: [ table style, row, row, ... ]
-			return '{|' + this.join('\n|-') + '\n|}';
+			return '{|' + this.join('') + '\n|}';
+		},
+		// table attributes / styles, old name before 2021/1/24: table_style
+		table_attributes : function() {
+			return this.join('');
 		},
 		// table caption
 		caption : function() {
 			// this: [ main caption, invalid caption, ... ]
-			return '\n|+' + this.join('||');
+			return (this.delimiter || '') + this.join('');
 		},
 		table_row : function() {
 			// this: [ row style, cell, cell, ... ]
-			return this.join('');
+			return (this.delimiter || '') + this.join('');
 		},
 		table_cell : function() {
 			// this: [ contents ]
@@ -3206,10 +3223,7 @@ function module_code(library_namespace) {
 			// /\n[!|]|!!|\|\|/ or undefined (在 style/第一區間就已當作 cell)
 			return (this.delimiter || '') + this.join('');
 		},
-		// attributes, styles
-		table_style : function() {
-			return this.join('');
-		},
+
 		// 手工字詞轉換 language conversion -{}-
 		convert : function(language, lang_fallbacks, force_show) {
 			if (!language) {
@@ -3471,6 +3485,10 @@ function module_code(library_namespace) {
 		}
 
 		return array;
+	}
+
+	function is_parsed_element(value) {
+		return Array.isArray(value) && value.type;
 	}
 
 	/**
@@ -4697,19 +4715,40 @@ function module_code(library_namespace) {
 				// 將解析為 <pages from="to=" section="1">
 				// 而不是像以前那樣的 <pages from="" to="" section="1">。
 				// 請改用 <pages from="" to="" section=1> or <pages section=1>。
-				// [ all, front, all attributes, name, value, unquoted value ]
-				PATTERN_attribute = /([\s\S]+?)($|(\S[^=]*?)\s*=\s*("[^"]*"|'[^']*'|(\S*)))/g;
-				while (matched = PATTERN_attribute.exec(attributes)) {
+
+				// [ all attributes, name, value, unquoted value,
+				// text without "=" ]
+				PATTERN_attribute = /\s*(\S[^=]*?)\s*=\s*("[^"]*"|'[^']*'|(\S*))|\s*(\S*)/g;
+				while ((matched = PATTERN_attribute.exec(attributes))
+						&& matched[0]) {
 					// console.log(matched);
-					attributes_list.push(matched[1]);
-					if (matched[2])
-						attributes_list.push(matched[2]);
-					if (matched[3]) {
-						attribute_hash[matched[3]] = matched[5] || matched[4]
-						// or use JSON.parse()
-						&& matched[4].slice(1, -1).replace(/\\(.)/g, '$1');
+					attributes_list.push(shallow_resolve_escaped(matched[0]));
+					var name = matched[1];
+					if (!name) {
+						// console.assert(!!matched[4]);
+						if (matched[4]) {
+							name = shallow_resolve_escaped(matched[4]);
+							attribute_hash[name] = name;
+						}
+						continue;
 					}
+
+					// parse attributes
+					name = shallow_resolve_escaped(name);
+					var value = matched[3]
+					// 去掉 "", ''
+					|| matched[2].slice(1, -1);
+					if (library_namespace.HTML_to_wikitext)
+						value = library_namespace.HTML_to_wikitext(value);
+					value = shallow_resolve_escaped(value);
+					attribute_hash[name] = value;
 				}
+				if (false) {
+					console
+							.assert(PATTERN_attribute.lastIndex === attributes.length);
+				}
+				// reset PATTERN index
+				// PATTERN_attribute.lastIndex = 0;
 				attributes = attributes_list;
 			}
 			attributes = _set_wiki_type(attributes || '', 'tag_attributes');
@@ -4844,7 +4883,7 @@ function module_code(library_namespace) {
 			// attributes.parent = all;
 			if (attributes && attributes.attributes) {
 				all.attributes = attributes.attributes;
-				delete attributes.attributes;
+				// delete attributes.attributes;
 			}
 			queue.push(all);
 			// console.log('queue end:');
@@ -4895,226 +4934,218 @@ function module_code(library_namespace) {
 		function parse_table(all, parameters) {
 			// 經測試，table 不會向前回溯。
 
-			// 處理表格標題。
-			function get_caption(caption) {
-				// .toString(): 可能會包括 include_mark, end_mark，應去除之！
-				return caption.toString().trim();
+			function append_table_cell(table_cell, delimiter, table_row_token) {
+				if (!table_cell && !delimiter) {
+					// e.g., '' after 'style=""' in `{|\n|-style=""\n|t\n|}`
+					return;
+				}
+
+				if (false && typeof delimiter !== 'string') {
+					// e.g., 'ss' and 'ee' in
+					// `{|class="wikitable"\n|-\nss||f\n|-\nee\n|}`
+					table_row_token.push(shallow_resolve_escaped(table_cell));
+					return;
+				}
+
+				var PATTERN_table_cell_content = /^([^|]+)\|([\s\S]*)$/;
+				// cell attributes /
+				// cell style / format modifier (not displayed)
+				var table_cell_attributes = table_cell
+						.match(PATTERN_table_cell_content);
+				var data_type, value;
+				if (table_cell_attributes) {
+					// parse cell attributes
+					table_cell = table_cell_attributes[2];
+					table_cell_attributes = _set_wiki_type(
+							parse_tag_attributes(table_cell_attributes[1]),
+							'table_attributes');
+					data_type = table_cell_attributes.attributes
+					// @see
+					// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
+					&& table_cell_attributes.attributes['data-sort-type'];
+				}
+
+				var table_cell_token = _set_wiki_type(
+						shallow_resolve_escaped(table_cell), 'table_cell');
+				if (table_row_token.type === 'caption') {
+					table_cell_token.caption = table_cell_token.toString()
+							.trim();
+					// 表格標題以首次出現的為主。
+					if (!table_row_token.caption) {
+						table_row_token.caption = table_cell_token.caption;
+					}
+				}
+				if (table_cell_attributes) {
+					table_cell_token.unshift(table_cell_attributes,
+					// '|': from PATTERN_table_cell_content
+					'|');
+				}
+				if (delimiter)
+					table_cell_token.delimiter = delimiter;
+
+				data_type = data_type && data_type.trim();
+				if (data_type === 'number') {
+					if (library_namespace.is_digits(table_cell)) {
+						value = +table_cell;
+					}
+				} else if (data_type === 'isoDate') {
+					value = Date.parse(table_cell);
+				}
+				if (value || value === 0)
+					table_cell_token.value = value;
+
+				if (table_cell_token.is_header = table_row_token.cell_is_header_now) {
+					// TODO: data-sort-type in table header
+					// @see
+					// [[w:en:Help:Sorting#Configuring the sorting]]
+
+					table_row_token.header_count++;
+				} else {
+					table_row_token.data_count++;
+				}
+				if (false) {
+					// is cell <th> or <td> ?
+					table_cell_token.table_cell_type = table_cell_token.is_header ? 'th'
+							: 'td';
+				}
+
+				table_row_token.push(table_cell_token);
 			}
 
-			var main_caption;
-			parameters = parameters.replace(/\n\|\+(.*)/g, function(all,
-					caption) {
-				// '||': 應採用 /\n(?:\|\|?|!)|\|\||!!/
-				caption = caption.split('||').map(function(piece) {
-					return parse_wikitext(piece, options, queue);
-				});
-				if (main_caption === undefined) {
-					// 表格標題以首次出現的為主。
-					// console.log(caption);
-					main_caption = get_caption(caption.join(''));
+			// 分隔 <td>, <th>
+			// 必須有實體才能如預期作 .exec()。
+			// matched: [ all, inner, delimiter ]
+			var PATTERN_table_cell;
+			// invalid:
+			// | cell !! cell
+			// valid:
+			// ! header !! header
+			// ! header || header
+			// | cell || cell
+			var PATTERN_table_cell_th = /([\s\S]*?)(\n[|!]|[|!]{2}|$)/g;
+			// default pattern for normal row.
+			var PATTERN_table_cell_td = /([\s\S]*?)(\n[|!]|\|\||$)/g;
+			function append_table_row(table_row, delimiter, table_token) {
+				if (!table_row && !delimiter) {
+					// e.g., '' after 'style=""' in `{|\nstyle=""\n|-\n|}`
+					return;
 				}
-				// 'table_caption'
-				caption = _set_wiki_type(caption, 'caption');
-				queue.push(caption);
-				return include_mark + (queue.length - 1) + end_mark;
-			});
 
-			// 添加新行由一個豎線和連字符 "|-" 組成。
-			parameters = parameters
-					.split('\n|-')
+				if (typeof JSON === 'object') {
+					library_namespace.debug('parse table_row / row style: '
 					//
-					.map(
-							function(token, index, _this) {
-								if (typeof JSON === 'object') {
-									library_namespace.debug(
-											'parse table_row / row style: '
-											//
-											+ JSON.stringify(token), 5,
-											'parse_wikitext.table');
-								}
-								if (index === 0
-								// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-								&& !token.includes(include_mark)
-								// 含有 delimiter 的話，即使位在 "{|" 之後，依舊會被當作 row。
-								&& !/\n[!|]|!!|\|\|/.test(token)) {
-									// table style / format modifier (not
-									// displayed)
-									// "\n|-" 後面的 string
-									token = _set_wiki_type(token, 'table_style');
-									if (false && index === 0)
-										token = _set_wiki_type(token,
-												'table_row');
-									return token;
-								}
+					+ JSON.stringify(table_row), 5, 'parse_wikitext.table');
+				}
 
-								var row, matched, delimiter,
-								// 分隔 <td>, <th>
-								// matched: [ all, inner, delimiter ]
-								// 必須有實體才能如預期作 .exec()。
-								PATTERN_CELL = /([\s\S]*?)(\n[|!]|[|!]{2}|$)/g;
-								while (matched = PATTERN_CELL.exec(token)) {
-									// "|-" 應當緊接著 style，可以是否設定過 row 判斷。
-									// 但若這段有 /[<>]/ 則當作是內容。
-									if (row || /[<>]/.test(matched[1])) {
-										var cell = matched[1]
-												.match(/^([^|]+)(\|)([\s\S]*)$/);
-										if (cell) {
-											// TODO: data-sort-type in table
-											// head
+				// 注意: caption 不被當作 table_row 看待。
+				var type = delimiter === '\n|+' ?
+				// 'table_caption'
+				'caption' : 'table_row';
+				var table_row_token = _set_wiki_type([], type);
+				table_row_token.delimiter = delimiter;
+				// Warning:
+				// only using table_row_token.header_count may lost some td
+				// <th> counter
+				table_row_token.header_count = 0;
+				// <td> counter
+				table_row_token.data_count = 0;
 
-											var data_type = cell[1]
-													// @see
-													// [[w:en:Help:Sorting#Configuring
-													// the sorting]]
-													// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
-													.match(/data-sort-type\s*=\s*(["']([^"']+)["']|\S+)/);
+				PATTERN_table_cell = PATTERN_table_cell_td;
+				table_row_token.cell_is_header_now = false;
 
-											if (cell[1].includes(include_mark)) {
-												cell[1] = [
-												// 預防有特殊 elements 置入其中。此時將之當作普通
-												// element 看待。
-												parse_wikitext(cell[1],
-														options, queue) ];
-											}
-											cell[1] = _set_wiki_type(cell[1],
-											// cell style / format modifier (not
-											// displayed)
-											'table_style');
-											// assert: cell[2] === '|'
-											cell[1].push(cell[2]);
+				var last_delimiter;
+				// caption allow `{|\n|+style|caption 1||caption 2\n|}`
+				var matched = type !== 'caption' && table_row.match(/^.+/);
+				if (matched) {
+					// "\n|-" 後面緊接著，換行前的 string 為
+					// table row style / format modifier (not displayed)
+					table_row_token.push(_set_wiki_type(
+							parse_tag_attributes(matched[0]),
+							'table_attributes'));
+					PATTERN_table_cell.lastIndex = matched[0].length;
+				} else {
+					// reset PATTERN index
+					PATTERN_table_cell.lastIndex = 0;
+				}
 
-											if (cell[3].includes(include_mark)) {
-												cell[3] =
-												// 經過改變，需再進一步處理。
-												parse_wikitext(cell[3],
-														options, queue);
-											}
-											if (data_type) {
-												data_type = data_type[1]
-														|| data_type[2];
-												if (typeof data_type === 'number') {
-													data_type = +cell[3];
-													if (!isNaN(data_type)) {
-														// cell[3] = data_type;
-													}
-												} else if (typeof data_type === 'isoDate') {
-													data_type = Date
-															.parse(cell[3]);
-													if (!isNaN(data_type)) {
-														// cell[3] = new
-														// Date(data_type);
-													}
-												}
-											}
+				while (matched = PATTERN_table_cell.exec(table_row)) {
+					// console.log(matched);
+					append_table_cell(matched[1], last_delimiter,
+							table_row_token);
+					if (!matched[2]) {
+						// assert: /$/, no separator, ended.
+						if (false) {
+							console
+									.assert(PATTERN_table_cell.lastIndex === table_row.length);
+						}
+						// reset PATTERN index
+						// PATTERN_table_cell.lastIndex = 0;
+						break;
+					}
+					// matched[2] 屬於下一 cell。
+					last_delimiter = matched[2];
+					if (/^\n/.test(last_delimiter)
+					//
+					&& table_row_token.cell_is_header_now !==
+					// !!matched: convert to header
+					(matched = last_delimiter === '\n!')) {
+						// switch pattern
+						var lastIndex = PATTERN_table_cell.lastIndex;
+						table_row_token.cell_is_header_now = matched;
+						PATTERN_table_cell = matched ? PATTERN_table_cell_th
+								: PATTERN_table_cell_td;
+						PATTERN_table_cell.lastIndex = lastIndex;
+					}
+				}
 
-											cell = [ cell[1], cell[3] ];
-										} else {
-											cell = matched[1];
-											if (cell.includes(include_mark)) {
-												// 經過改變，需再進一步處理。
-												cell = parse_wikitext(cell,
-														options, queue);
-											}
-											if (cell.type !== 'plain') {
-												// {String} or other elements
-												cell = [ cell ];
-											}
-										}
+				// 處理表格標題。
+				if (table_row_token.caption
+				// 表格標題以首次出現的為主。
+				&& !table_token.caption) {
+					table_token.caption = table_row_token.caption;
+				}
+				delete table_row_token.cell_is_header_now;
+				table_token.push(table_row_token);
+			}
 
-										_set_wiki_type(cell, 'table_cell');
+			var table_token = _set_wiki_type([], 'table');
+			// 添加新行由一個豎線和連字符 "|-" 組成。
+			var PATTERN_table_row = /([\s\S]*?)(\n\|[\-+]|$)/g;
+			// default: table_row. try `{|\n||1||2\n|-\n|3\n|}`
+			var last_delimiter;
+			var matched = parameters.match(/^.+/);
+			if (matched) {
+				// the style of whole <table>
+				table_token.push(_set_wiki_type(
+						parse_tag_attributes(matched[0]), 'table_attributes'));
+				PATTERN_table_row.lastIndex = matched[0].length;
+			}
+			while (matched = PATTERN_table_row.exec(parameters)) {
+				// console.log(matched);
+				append_table_row(matched[1], last_delimiter, table_token);
+				if (!matched[2]) {
+					// assert: /$/, no separator, ended.
+					if (false) {
+						console
+								.assert(PATTERN_table_row.lastIndex === parameters.length);
+					}
+					// reset PATTERN index
+					// PATTERN_table_row.lastIndex = 0;
+					break;
+				}
+				// matched[2] 屬於下一 row。
+				last_delimiter = matched[2];
+			}
 
-										if (delimiter) {
-											cell.delimiter = delimiter;
-											// is_header
-											cell.is_head = delimiter
-													.startsWith('\n')
-											// TODO: .is_head, .table_type 擇一。
-											? delimiter.endsWith('!')
-													: row.is_head;
-											// is cell <th> or <td> ?
-											cell.table_type = cell.is_head ? 'th'
-													: 'td';
-										}
+			if (false) {
+				console.assert(table_token.every(function(table_row_token) {
+					return table_row_token.type === 'table_attributes'
+							|| table_row_token.type === 'caption'
+							|| table_row_token.type === 'table_row';
+				}));
+			}
 
-										if (!row)
-											row = [];
-										row.push(cell);
-
-									} else if (matched[1]
-											.includes(include_mark)) {
-										// assert: !row && matched.index === 0
-
-										// 預防有特殊 elements 置入其中。此時將之當作普通 element
-										// 看待。
-										// 注意: caption 也被當作 table_row 看待。
-										cell = parse_wikitext(matched[1],
-												options, queue);
-										// console.trace('cell:');
-										// console.log(cell);
-										if (cell.type === 'plain'
-												&& cell[cell.length - 1]
-												//
-												&& cell[cell.length - 1].type === 'caption') {
-											var caption = cell.pop();
-											row = [
-													// the style of whole
-													// <table>
-													_set_wiki_type(cell,
-															'table_style'),
-													//
-													caption ];
-											row.caption = get_caption(caption
-													.join(''));
-										} else {
-											row = [ cell ];
-											if (cell.type === 'caption') {
-												row.caption = get_caption(cell
-														.join(''));
-											}
-										}
-
-									} else {
-										// assert: !row && matched.index === 0
-										cell = _set_wiki_type(matched[1],
-										// row style / format modifier (not
-										// displayed)
-										'table_style');
-										row = [ cell ];
-									}
-
-									// matched[2] 屬於下一 cell。
-									delimiter = matched[2];
-									if (!delimiter) {
-										// assert: /$/, no separator, ended.
-										break;
-									}
-
-									// assert: !!delimiter === true, and is the
-									// first time
-									// matched.
-									if (!('is_head' in row)
-									// 初始設定本行之 type: <th> or <td>。
-									&& !(row.is_head = delimiter.includes('!'))) {
-										// 經測試，當此行非 table head 時，會省略 '!!' 不匹配。
-										// 但 '\n!' 仍有作用。
-										var lastIndex = PATTERN_CELL.lastIndex;
-										if (false) {
-											console.log("省略 '!!' 不匹配: "
-											//
-											+ token.slice(lastIndex));
-										}
-										PATTERN_CELL = /([\s\S]*?)(\n[|!]|[|]{2}|$)/g;
-										PATTERN_CELL.lastIndex = lastIndex;
-									}
-								}
-								// assert: Array.isArray(row)
-								return _set_wiki_type(row, 'table_row');
-							});
-
-			_set_wiki_type(parameters, 'table');
-			if (main_caption !== undefined)
-				parameters.caption = main_caption;
-			queue.push(parameters);
+			queue.push(table_token);
 			// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
 			return '\n' + include_mark + (queue.length - 1) + end_mark;
 		}
@@ -5166,19 +5197,26 @@ function module_code(library_namespace) {
 
 		function parse_section(all, previous, section_level, parameters,
 				postfix, last) {
-			if (postfix && !/^[ \t]+$/.test(postfix)) {
-				// assert: postfix.includes(include_mark) &&
-				// postfix.includes(end_mark)
-				// console.log(JSON.stringify(postfix));
+			function not_only_comments(token) {
+				return typeof token === 'string' ? !/^[ \t]+$/.test(token)
+				//
+				: token.type !== 'comment';
+			}
+			if (postfix && postfix.includes(include_mark)) {
+				if (false) {
+					console.assert(postfix.includes(include_mark)
+							&& postfix.includes(end_mark))
+					console.log(JSON.stringify(postfix));
+				}
 				var tail = parse_wikitext(postfix, options, queue);
 				// console.log(tail);
-				if (!Array.isArray(tail) || tail.some(function(token) {
-					return typeof token === 'string' ? !/^[ \t]+$/.test(token)
-					//
-					: token.type !== 'comment';
-				})) {
+				if (not_only_comments(tail) && (!is_parsed_element(tail)
+				//
+				|| tail.type === 'plain' && tail.some(not_only_comments))) {
+					// console.log(all);
 					return all;
 				}
+				// tail = "<!-- ... -->", "\s+" or ["<!-- ... -->", "\s+", ...]
 				postfix = tail;
 			}
 
@@ -5619,9 +5657,9 @@ function module_code(library_namespace) {
 
 		var PATTERN_section = new RegExp(
 		// @see PATTERN_section
-		/(^|\n)(=+)(.+)\2((?:[ \t]|mark)*)(\n|$)/g.source.replace('mark', CeL
-				.to_RegExp_pattern(include_mark)
-				+ '\\d+' + CeL.to_RegExp_pattern(end_mark)), 'g');
+		/(^|\n)(={1,6})(.+)\2((?:[ \t]|mark)*)(\n|$)/g.source.replace('mark',
+				CeL.to_RegExp_pattern(include_mark) + '\\d+'
+						+ CeL.to_RegExp_pattern(end_mark)), 'g');
 		// console.log(PATTERN_section);
 		// console.log(JSON.stringify(wikitext));
 
@@ -6661,185 +6699,153 @@ function module_code(library_namespace) {
 		}
 
 		// 僅處理第一階層。
-		parsed
-				.forEach(function(token/* , index, parent */) {
-					if (token.type === 'section_title') {
-						variable_name = normalize_value(token.title);
+		parsed.forEach(function(token/* , index, parent */) {
+			if (token.type === 'section_title') {
+				variable_name = normalize_value(token.title);
+				return;
+			}
+
+			// parse table
+			// @see wiki_API.table_to_array
+			if (token.type === 'table' && (token.caption || variable_name)) {
+				var value_hash = Object.create(null);
+				token.forEach(function(line) {
+					if (line.type !== 'table_row') {
 						return;
 					}
-
-					// parse table
-					// @see wiki_API.table_to_array
-					if (token.type === 'table'
-							&& (token.caption || variable_name)) {
-						var value_hash = Object.create(null);
-						token
-								.forEach(function(line) {
-									if (line.type !== 'table_row'
-									// 注意: caption 也被當作 table_row 看待。
-									|| line.caption) {
-										return;
-									}
-									if (line.is_head) {
-										// TODO: using the data
-										return;
-									}
-									var row = [];
-									line
-											.forEach(function(cell) {
-												if (cell.type !== 'table_cell') {
-													return;
-												}
-
-												// TODO: data-sort-type in table
-												// head
-
-												var data_type, has_list, has_non_empty_token;
-												// console.log(cell);
-												cell = cell
-														.filter(
-																function(token) {
-																	if (token.type !== 'table_style') {
-																		if (token.type === 'list') {
-																			has_list = true;
-																		} else {
-																			has_non_empty_token
-																			//
-																			= !!token
-																					.toString()
-																					.trim();
-																		}
-																		return true;
-																	}
-
-																	// console.log(token);
-																	data_type = token
-																			.toString()
-																			// @see
-																			// [[w:en:Help:Sorting#Configuring
-																			// the
-																			// sorting]]
-																			// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
-																			.match(
-																					/data-sort-type\s*=\s*(["']([^"']+)["']|\S+)/);
-																	if (data_type) {
-																		data_type = data_type[2]
-																				|| data_type[1];
-																	}
-																}).map(
-																filter_tags);
-												if (!has_list) {
-													// console.log(cell);
-													cell.toString = function() {
-														return this.join('');
-													};
-													cell = normalize_value(cell);
-												} else if (has_non_empty_token) {
-													// 有些不合格之 token。
-													cell
-															.forEach(function(
-																	token,
-																	index) {
-																if (token.type === 'list')
-																	cell[index] = token.value;
-															});
-													cell = normalize_value(cell
-															.join(''));
-												} else {
-													has_list = null;
-													// console.trace(cell);
-													cell
-															.forEach(function(
-																	token) {
-																if (token.type === 'list') {
-																	if (has_list) {
-																		has_list
-																				.append(token
-																						.map(normalize_value));
-																	} else {
-																		has_list = token
-																				.map(normalize_value);
-																	}
-																}
-																// 只取 list 中的值。
-															});
-													cell = has_list;
-												}
-
-												// console.log([ data_type, cell
-												// ]);
-												if (data_type === 'number') {
-													// console.log(cell);
-													if (!isNaN(data_type = +cell))
-														cell = data_type;
-												} else if (data_type === 'isoDate') {
-													data_type = Date
-															.parse(cell
-																	.replace(
-																			/<[^<>]+>/g,
-																			''));
-													if (!isNaN(data_type))
-														cell = new Date(
-																data_type);
-												} else if (data_type) {
-													library_namespace
-															.warn('Invalid type: ['
-																	+ data_type
-																	+ '] '
-																	+ cell);
-												}
-
-												// console.log(cell);
-												row.push(cell);
-											});
-									// console.log(line);
-									if (row.length >= 2) {
-										// ! 變數名 (不可更改) !! 變數值 !! 注解說明
-										var name = row[NAME_INDEX];
-										if (name && typeof name === 'string') {
-											// TODO: "false" → false
-											value_hash[name] = row[VALUE_INDEX];
-										}
-									}
-								});
-						value_hash[KEY_ORIGINAL_ARRAY] = token;
-						configuration[token.caption || variable_name] = value_hash;
-						// 僅採用第一個列表。
-						if (!token.caption)
-							variable_name = null;
-					}
-
-					if (token.type !== 'list')
-						return;
-
-					if (token.list_type !== DEFINITION_LIST) {
-						if (variable_name) {
-							configuration[variable_name] = token
-									.map(normalize_value);
-							// 僅採用一個列表。
-							variable_name = null;
-						}
+					if (line.header_count > 0) {
+						// TODO: using the heaser data
 						return;
 					}
-
-					token.dt_index.forEach(function(dt_index, index) {
-						variable_name = normalize_value(token[dt_index]);
-						if (!variable_name)
+					var row = [];
+					line.forEach(function(cell) {
+						if (cell.type !== 'table_cell') {
+							// e.g., cell.type !== 'table_attributes'
 							return;
-						var next_dt_index = token.dt_index[index + 1]
-								|| token.length;
-						configuration[variable_name]
-						// 變數的值
-						= dt_index + 2 === next_dt_index
-						// 僅僅提供單一數值。
-						? normalize_value(token[dt_index + 1])
-						// 提供了一個列表。
-						: token.slice(dt_index + 1, next_dt_index)
-						//
-						.map(normalize_value);
+						}
+
+						// TODO: data-sort-type in table head
+
+						var data_type, has_list, has_non_empty_token;
+						// console.log(cell);
+						cell = cell.filter(function(token) {
+							if (token.type !== 'table_attributes') {
+								if (token.type === 'list') {
+									has_list = true;
+								} else {
+									has_non_empty_token
+									//
+									= !!token.toString().trim();
+								}
+								return true;
+							}
+
+							// console.log(token);
+							data_type = token.toString()
+							// @see
+							// [[w:en:Help:Sorting#Configuring the sorting]]
+							// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
+							.match(
+							//
+							/data-sort-type\s*=\s*(["']([^"']+)["']|\S+)/);
+							if (data_type) {
+								data_type = data_type[2] || data_type[1];
+							}
+						}).map(filter_tags);
+						if (!has_list) {
+							// console.log(cell);
+							cell.toString = function() {
+								return this.join('');
+							};
+							cell = normalize_value(cell);
+						} else if (has_non_empty_token) {
+							// 有些不合格之 token。
+							cell.forEach(function(token, index) {
+								if (token.type === 'list')
+									cell[index] = token.value;
+							});
+							cell = normalize_value(cell.join(''));
+						} else {
+							has_list = null;
+							// console.trace(cell);
+							cell.forEach(function(token) {
+								if (token.type === 'list') {
+									if (has_list) {
+										has_list.append(token
+												.map(normalize_value));
+									} else {
+										has_list = token.map(normalize_value);
+									}
+								}
+								// 只取 list 中的值。
+							});
+							cell = has_list;
+						}
+
+						// console.log([ data_type, cell ]);
+						if (data_type === 'number') {
+							// console.log(cell);
+							if (!isNaN(data_type = +cell))
+								cell = data_type;
+						} else if (data_type === 'isoDate') {
+							data_type = Date.parse(cell
+									.replace(/<[^<>]+>/g, ''));
+							if (!isNaN(data_type))
+								cell = new Date(data_type);
+						} else if (data_type) {
+							library_namespace.warn('Invalid type: ['
+									+ data_type + '] ' + cell);
+						}
+
+						// console.log(cell);
+						row.push(cell);
 					});
-					variable_name = null;
+					// console.log(line);
+					if (row.length >= 2) {
+						// ! 變數名 (不可更改) !! 變數值 !! 注解說明
+						var name = row[NAME_INDEX];
+						if (name && typeof name === 'string') {
+							// TODO: "false" → false
+							value_hash[name] = row[VALUE_INDEX];
+						}
+					}
 				});
+				value_hash[KEY_ORIGINAL_ARRAY] = token;
+				configuration[token.caption || variable_name] = value_hash;
+				// 僅採用第一個列表。
+				if (!token.caption)
+					variable_name = null;
+			}
+
+			if (token.type !== 'list')
+				return;
+
+			if (token.list_type !== DEFINITION_LIST) {
+				if (variable_name) {
+					configuration[variable_name] = token.map(normalize_value);
+					// 僅採用一個列表。
+					variable_name = null;
+				}
+				return;
+			}
+
+			token.dt_index.forEach(function(dt_index, index) {
+				variable_name = normalize_value(token[dt_index]);
+				if (!variable_name)
+					return;
+				var next_dt_index = token.dt_index[index + 1] || token.length;
+				configuration[variable_name]
+				// 變數的值
+				= dt_index + 2 === next_dt_index
+				// 僅僅提供單一數值。
+				? normalize_value(token[dt_index + 1])
+				// 提供了一個列表。
+				: token.slice(dt_index + 1, next_dt_index)
+				//
+				.map(normalize_value);
+			});
+			variable_name = null;
+		});
 
 		// 避免被覆蓋。保證用 configuration.configuration_page_title 可以檢查是否由頁面取得了設定。
 		// 注意: 當設定頁面為空的時候，無法獲得這個值。
@@ -7416,22 +7422,16 @@ function module_code(library_namespace) {
 				//
 				+ node.index + ',' + node.type, 3);
 				node.forEach(function(row) {
-					var cells = [], is_head;
+					var cells = [];
 					row.forEach(function(cell) {
-						if (cell.type === 'table_style') {
+						if (cell.type === 'table_attributes') {
 							// 不計入style
 							return;
 						}
 						// return cell.toString().replace(/^[\n\|]+/, '');
 
-						if (cell.is_head) {
-							// 將以本列最後一個 cell 之 type 判定本列是否算作標題列。
-							// 亦可用 row.is_head
-							is_head = cell.is_head;
-						}
-
 						var append_cells;
-						if (cell[0].type === 'table_style') {
+						if (cell[0].type === 'table_attributes') {
 							append_cells = cell[0].toString()
 							// 檢測要增加的null cells
 							.match(/[^a-z\d_]colspan=(?:"\s*)?(\d{1,2})/i);
@@ -7465,8 +7465,9 @@ function module_code(library_namespace) {
 						}
 					});
 					if (cells.length > 0) {
-						if (is_head) {
-							// 對於 table head，不加入 section title 資訊。
+						// 將以本列 .header_count 判定本列是否算作標題列。
+						if (row.header_count > 0) {
+							// 對於 table header，不加入 section title 資訊。
 							cells.unshift('', '');
 						} else {
 							cells.unshift(heads[2] || '', heads[3] || '');
