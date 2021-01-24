@@ -1609,8 +1609,10 @@ if (typeof CeL === 'function')
 					declaration.URL = id;
 				}
 			}
-			if (declaration.module && declaration.module !== declaration.id)
-				id = declaration.id = declaration.module;
+			if (false && declaration.module_name
+					&& declaration.module_name !== declaration.id) {
+				id = declaration.id = declaration.module_name;
+			}
 
 			if (library_namespace.is_Object(setup_declaration) &&
 			// 已載入過則 pass。
@@ -2387,7 +2389,7 @@ if (typeof CeL === 'function')
 								}
 								// Release memory. 釋放被占用的記憶體.
 								file_contents = !!file_contents;
-								if (!declaration.module)
+								if (!declaration.module_name)
 									declaration.included = true;
 
 							} else {
@@ -2568,14 +2570,14 @@ if (typeof CeL === 'function')
 								// 有可能本次載入失敗，但之前已成功過；
 								// 這情況下不設定 declaration.included。
 								if (!declaration.included) {
-									if (!declaration.module)
+									if (!declaration.module_name) {
 										// 為 URL/path，只要載入就算成功。
 										declaration.included = !failed;
-									else if (!is_external(failed))
-										if (failed)
+									} else if (!is_external(failed)) {
+										if (failed) {
 											// 載入卻沒設定 included，算失敗。
 											declaration.included = false;
-										else if (!declaration.variable_hash) {
+										} else if (!declaration.variable_hash) {
 											library_namespace.warn(
 											//
 											'load_named: [<a href="'
@@ -2589,17 +2591,20 @@ if (typeof CeL === 'function')
 											// 因此除了藉由載入時間，無法分辨檔案到底存不存在。
 											declaration.included = UNKNOWN;
 										} else if (library_namespace
-												.is_debug(2))
+												.is_debug(2)) {
 											library_namespace
 													.warn('load_named: 未能直接載入 (load) ['
 															+ id
 															+ ']！可能因為 code 還有其他未能掌控，且尚未載入的相依性。');
+										}
+									}
 
 									if (('included' in declaration)
-											&& !declaration.included)
+											&& !declaration.included) {
 										// error callback 僅在每次真正嘗試過後才執行。
 										// 預防還有沒處理的 error callback。
 										run_callback('error_handler');
+									}
 								}
 
 								if ((declaration.included || item.skip_error)
@@ -3007,7 +3012,11 @@ if (typeof CeL === 'function')
 			 */
 			code : function(library_namespace) {
 				/**
-				 * full module name.
+				 * full module name starts with library name
+				 * `library_namespace.Class` (CeL).
+				 * 
+				 * If you want module name without library name prefix in module
+				 * code, using `this.module_name` instead.
 				 * 
 				 * @type {String}
 				 */
@@ -3244,6 +3253,7 @@ if (typeof CeL === 'function')
 			// 設定好 options。
 			this.set_options(options, true);
 
+			// @see function check_and_run_register()
 			this.register(initial_Array);
 		}
 
@@ -3407,8 +3417,9 @@ if (typeof CeL === 'function')
 			case 'string':
 				// 包括 module/URL/path/變數/數值名。
 				if (is_controller(name = get_named(item))
-						|| typeof name === 'function')
+						|| typeof name === 'function') {
 					return name;
+				}
 				name = undefined;
 				break;
 
@@ -3450,10 +3461,11 @@ if (typeof CeL === 'function')
 				return item;
 
 			// 其他都將被忽略!
-			if (item)
+			if (item) {
 				library_namespace
 						.warn('check_and_run.normalize: Unknown item: ('
 								+ (typeof item) + ') [' + item + ']!');
+			}
 
 		}
 
@@ -3535,10 +3547,11 @@ if (typeof CeL === 'function')
 									&& !item.force))
 						continue;
 
-					if (!is_controller(item) || item === array[i])
+					if (!is_controller(item) || item === array[i]) {
 						// 若輸入的是純量 option，會造成每次都創建新的 Object。
 						// 這會讓此 Array 總是有 something_new。
 						something_new = true;
+					}
 
 					if (previous !== undefined)
 						// 需登記相依性之 array 至 relation map。
@@ -3659,9 +3672,9 @@ if (typeof CeL === 'function')
 								library_namespace.debug('嘗試'
 										+ (is_included(item.id) ? '重新' : '')
 										+ '載入 '
-										+ (item.module ? 'module' : 'resource')
-										+ ' [' + item.id + ']。', 5,
-										this.debug_id + '.run');
+										+ (item.module_name ? 'module'
+												: 'resource') + ' [' + item.id
+										+ ']。', 5, this.debug_id + '.run');
 							// include module/URL resource.
 							var result = load_named(item, options, this.run);
 							// force 僅使用一次。預防已經重複處理。
@@ -4008,19 +4021,19 @@ if (typeof CeL === 'function')
 		 * 
 		 * 正確:<br />
 		 * <code>
-		 * CeL.run('code.log', function() {
-		 * 	CeL.warn('WARNING message');
-		 * });
-		 * </code>
+		CeL.run('code.log', function() {
+			CeL.warn('WARNING message');
+		});
+		</code>
 		 * 
 		 * 錯誤:<br />
 		 * <code>
-		 * CeL.run('code.log');
-		 * //	注意：以下的 code 中，CeL.warn() 不一定會被執行（可能會、可能不會），因為執行時 log 可能尚未被 include。
-		 * //	在已經 included 的情況下有可能直接就執行下去。
-		 * //	此時應該改用 CeL.run();
-		 * CeL.warn('WARNING message');
-		 * </code>
+		CeL.run('code.log');
+		//	注意：以下的 code 中，CeL.warn() 不一定會被執行（可能會、可能不會），因為執行時 log 可能尚未被 include。
+		//	在已經 included 的情況下有可能直接就執行下去。
+		//	此時應該改用 CeL.run();
+		CeL.warn('WARNING message');
+		</code>
 		 * 
 		 * TODO:<br />
 		 * 進度改變時之 handle：一次指定多個 module 時可以知道進度，全部 load 完才 callback()。
@@ -4028,13 +4041,15 @@ if (typeof CeL === 'function')
 		 */
 		function normal_run() {
 			if (arguments.length > 1 || arguments[0]) {
-				if (library_namespace.is_debug(2) && library_namespace.is_WWW())
+				if (library_namespace.is_debug(2) && library_namespace.is_WWW()) {
 					library_namespace.debug('初始登記/處理 ' + arguments.length
 							+ ' items。', 2, 'normal_run');
+				}
 				var to_run = Array.prototype.slice.call(arguments);
-				if (to_run.length > 1)
+				if (to_run.length > 1) {
 					// 預設 options 為依序處理。（按順序先後，盡可能同時執行。）
 					to_run.unshift(SEQUENTIAL);
+				}
 
 				to_run = new check_and_run(to_run);
 
@@ -4055,25 +4070,25 @@ if (typeof CeL === 'function')
 		 *            attribute name of the tag.
 		 */
 		function check_resources(tag, URL_attribute) {
-			if (URL_attribute || (URL_attribute = URL_of_tag[tag]))
-				library_namespace.get_tag_list(tag).forEach(
-						function(node) {
-							var URL = node[URL_attribute];
-							if (typeof URL === 'string'
-									&& URL
-									&& is_controller(URL = get_named(URL
-											.replace(/#[^#?]*$/, '')))) {
-								library_namespace.debug(
-								//
-								'add included: [' + URL.id + ']', 2,
-										'check_resources');
-								URL.included = true;
-							}
-						});
-			else
+			if (URL_attribute || (URL_attribute = URL_of_tag[tag])) {
+				library_namespace.get_tag_list(tag).forEach(function(node) {
+					var URL = node[URL_attribute];
+					if (typeof URL === 'string' && URL && is_controller(URL
+					//
+					= get_named(URL.replace(/#[^#?]*$/, '')))) {
+						library_namespace.debug(
+						//
+						'add included: [' + URL.id + ']',
+						//
+						2, 'check_resources');
+						URL.included = true;
+					}
+				});
+			} else {
 				library_namespace.warn(
 				//
 				'check_resources: 無法判別 tag [' + tag + '] 之 URL attribute！');
+			}
 		}
 
 		// export.

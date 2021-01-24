@@ -981,11 +981,14 @@ function module_code(library_namespace) {
 			throw new Error('Can not get site_name!');
 
 		if (false) {
-			console.trace(library_namespace.to_module_name(module_name + '/'
-					+ site_name));
+			console.trace(library_namespace.to_module_name(module_name
+					+ library_namespace.env.module_name_separator + site_name));
 			console.trace(module_name
 					+ library_namespace.env.module_name_separator + site_name);
 		}
+		// 注意: 因為已經設定 `CeL.application.net.wiki.template_functions.zhwiki`，
+		// 因此不能採用匯添加 prefix `library_namespace.Class` 的
+		// library_namespace.to_module_name()，否則會被忽略，不載入！
 		library_namespace.run(module_name
 				+ library_namespace.env.module_name_separator + site_name,
 				initialize_session.bind(this));
