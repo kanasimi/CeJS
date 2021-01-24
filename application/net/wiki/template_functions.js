@@ -2,7 +2,7 @@
  * @name CeL function for MediaWiki (Wikipedia / 維基百科):
  *       常用模板特設功能。本工具檔放置的是幾乎所有wiki計畫通用的模板，或者少數wiki計畫特有、且大量使用的著名模板。對各wiki有不同用途的模板，應放置於個別namespace下。
  * 
- * 注意: 本程式庫必須應各wiki模板內容改動而改寫。
+ * 注意: 本程式庫必須應各 wiki project 模板內容改動而改寫。
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用程式庫的子程式庫。
  * 
@@ -22,19 +22,34 @@ template_functions/zhwiki.js
 'use strict';
 // 'use asm';
 
-// TODO:
+// @examples
 (function() {
 	CeL.run([/* ..., */'application.net.wiki.template_functions' ]);
 
-	// will auto-load functions @ template_functions
-	var wiki = new CeL.wiki();
+	// will auto-load functions @ template_functions/site_name.js
+	// e.g., template_functions/zhwiki.js
+	var wiki = new CeL.wiki({});
 
-	wiki.page('title', function(page_data) {
-		/** {Array} parsed page content 頁面解析後的結構。 */
-		var parsed = CeL.wiki.parser(page_data).parse();
+	wiki.page('title').parse(function for_parsed(parsed) {
+		// var page_data = parsed.page;
 		parsed.each('template:Al', function(token) {
 			// ...
 		}, {
+			// auto-loading functions @ template_functions
+			bind_template_functions : true
+		});
+	});
+
+	// or:
+
+	wiki.page('title', function for_page(page_data) {
+		/** {Array} parsed page content 頁面解析後的結構。 */
+		var parsed = wiki.parse(page_data);
+		parsed.each('template:Al', function(token) {
+			// ...
+		}, {
+			// [KEY_SESSION]
+			session : wiki,
 			// auto-loading functions @ template_functions
 			bind_template_functions : true
 		});
@@ -70,6 +85,8 @@ function module_code(library_namespace) {
 	// normalize_title_parameter = wiki_API.normalize_title_parameter;
 
 	var to_exit = wiki_API.parser.parser_prototype.each.exit;
+
+	var module_name = this.module_name;
 
 	// --------------------------------------------------------------------------------------------
 
@@ -937,6 +954,49 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// initialization_queue[site_name] = [ functions to run ]
+	var initialization_queue = Object.create(null);
+
+	function initialize_session(session) {
+		var session = this;
+		var site_name = wiki_API.site_name(session);
+		var work_queue = initialization_queue[site_name];
+		if (!work_queue) {
+			library_namespace.debug('Nothing to register for this site: '
+					+ site_name);
+			return;
+		}
+
+		if (typeof work_queue === 'function')
+			work_queue = [ work_queue ];
+
+		work_queue.forEach(function(initializer) {
+			initializer(session);
+		});
+	}
+
+	function load_template_functions() {
+		var site_name = wiki_API.site_name(this);
+		if (!site_name)
+			throw new Error('Can not get site_name!');
+
+		if (false) {
+			console.trace(library_namespace.to_module_name(module_name + '/'
+					+ site_name));
+			console.trace(module_name
+					+ library_namespace.env.module_name_separator + site_name);
+		}
+		library_namespace.run(module_name
+				+ library_namespace.env.module_name_separator + site_name,
+				initialize_session.bind(this));
+	}
+
+	library_namespace.set_method(wiki_API.prototype, {
+		load_template_functions : load_template_functions
+	});
+
+	// --------------------------------------------------------------------------------------------
+
 	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 	function set_expand_template(template_name, wiki_project) {
 		var base_namespace = template_functions;
@@ -952,6 +1012,10 @@ function module_code(library_namespace) {
 
 	// export 導出.
 	Object.assign(template_functions, {
+		initialization_queue : initialization_queue,
+
+		// ----------------------------
+
 		parse_conversion_item : parse_conversion_item,
 		NoteTA : {
 			names : NoteTA_names,

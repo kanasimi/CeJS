@@ -1546,12 +1546,12 @@ if (typeof CeL === 'function')
 			}
 
 			// 再看看是否為 named source code。
-			if (is_module)
+			if (is_module) {
 				// 正規化 name。登記 full module name。e.g., 'CeL.data.code'.
 				id = declaration || library_namespace.to_module_name(name);
+			} else if (!/^(?:[a-z\-]+:[\/\\]{2}|(?:[.]{2}[\/\\])+)?(?:[^.]+(?:\.[^.]+)*[\/\\])*[^.]+(?:\.[^.]+)*$/i
 			// 最後看是否為 resource。
-			else if (!/^(?:[a-z\-]+:[\/\\]{2}|(?:[.]{2}[\/\\])+)?(?:[^.]+(?:\.[^.]+)*[\/\\])*[^.]+(?:\.[^.]+)*$/i
-					.test(id = library_namespace.simplify_path(name))
+			.test(id = library_namespace.simplify_path(name))
 					&& library_namespace.is_debug())
 				library_namespace.warn('get_named: 輸入可能有誤的 URL/path: [' + id
 						+ ']');
@@ -1598,7 +1598,8 @@ if (typeof CeL === 'function')
 				if (is_module) {
 					library_namespace.debug('treat resource [' + name
 							+ '] as module.', 5, 'get_named');
-					declaration.module = id;
+					// declaration.module = id;
+					declaration.module_name = name;
 					// 若是先 call URL，再 call module，這時需要補充登記。
 					if (!(id in named_code))
 						named_code[id] = declaration;
@@ -2032,16 +2033,16 @@ if (typeof CeL === 'function')
 									+ id + '</b>]。執行 module 初始設定函式。', 2,
 							'load_named');
 
-					var initializator, error_Object;
+					var initializer, error_Object;
 					if (library_namespace.env.no_catch) {
 						// {Function}declaration.code:
 						// function module_code(library_namespace) {}
-						initializator = declaration.code(library_namespace);
+						initializer = declaration.code(library_namespace);
 					} else {
 						try {
 							// 真正執行 module 初始設定函式 / class template。
 							// 因為 module 常會用到 library，因此將之當作 argument。
-							initializator = declaration.code(library_namespace);
+							initializer = declaration.code(library_namespace);
 						} catch (e) {
 							error_Object = e;
 							library_namespace.error('load_named: [' + id
@@ -2050,11 +2051,11 @@ if (typeof CeL === 'function')
 						}
 					}
 
-					if (Array.isArray(initializator)) {
+					if (Array.isArray(initializer)) {
 						library_namespace.debug('初始設定函式回傳 Array，先轉成 Object。',
 								1, 'load_named');
-						var list = initializator;
-						initializator = Object.create(null);
+						var list = initializer;
+						initializer = Object.create(null);
 						list.forEach(function(method) {
 							var name = typeof method === 'function'
 									&& library_namespace
@@ -2062,7 +2063,7 @@ if (typeof CeL === 'function')
 							if (name) {
 								library_namespace.debug('設定 method：[' + name
 										+ ']。', 2, 'load_named');
-								initializator[name] = method;
+								initializer[name] = method;
 							} else {
 								library_namespace
 										.warn('load_named: 非函式之初始設定值：['
@@ -2071,8 +2072,8 @@ if (typeof CeL === 'function')
 						});
 					}
 
-					if (typeof initializator === 'function'
-							|| library_namespace.is_Object(initializator)) {
+					if (typeof initializer === 'function'
+							|| library_namespace.is_Object(initializer)) {
 
 						library_namespace.debug('預先一層一層定義、準備好 [' + id
 								+ '] 之上層 name-space。', 2, 'load_named');
@@ -2112,7 +2113,7 @@ if (typeof CeL === 'function')
 								// ** WARNING:
 								// 須注意是否因 name_space 為 function，預設會當作 function
 								// 處理，而出問題！
-								Object.assign(initializator, name_space[name]);
+								Object.assign(initializer, name_space[name]);
 							} else {
 								library_namespace.warn(
 								//
@@ -2126,7 +2127,7 @@ if (typeof CeL === 'function')
 
 						library_namespace.debug('[' + id
 								+ '] 順利執行到最後，準備作 hook 設定。', 3, 'load_named');
-						name_space[name] = initializator;
+						name_space[name] = initializer;
 
 						// 載入 module 時執行 extend 工作。
 						var no_extend,
@@ -2192,7 +2193,7 @@ if (typeof CeL === 'function')
 								l = extend_to[name];
 								// 只處理雙方皆為 Object 的情況。
 								if (typeof l === 'object'
-										&& typeof initializator === 'object') {
+										&& typeof initializer === 'object') {
 									library_namespace.debug('標的基底 [' + l.Class
 											+ '] 已有 [' + name + ']，將合併/搬移成員。',
 											1, 'load_named');
@@ -2201,14 +2202,14 @@ if (typeof CeL === 'function')
 										extend_to[name] = l = Object.assign({
 											reconstructed : true
 										}, l);
-									for (i in initializator) {
+									for (i in initializer) {
 										if (i in l)
 											library_namespace.debug(
 											//
 											'標的基底 [' + name + '] 已有 [' + i
 													+ ']，將取代之。', 1,
 													'load_named');
-										l[i] = initializator[i];
+										l[i] = initializer[i];
 									}
 
 								} else {
@@ -2218,18 +2219,18 @@ if (typeof CeL === 'function')
 										// 標的基底已有 (l)，將直接以新的 module (id) 取代之。
 										'load_named: 將以 ('
 										// 未來 extend_to[name] 將代表 (id).
-										+ (typeof initializator) + ') [' + id
+										+ (typeof initializer) + ') [' + id
 												+ '] 取代擴充標的基底之同名 module ('
 												+ (typeof l) + ') ['
 												+ (l.Class || name) + ']。');
-									extend_to[name] = initializator;
+									extend_to[name] = initializer;
 								}
 							}
 
 							if (!('*' in no_extend))
-								for (i in initializator) {
+								for (i in initializer) {
 									if ((i in no_extend)
-											|| extend_to[i] === initializator[i])
+											|| extend_to[i] === initializer[i])
 										continue;
 
 									if ((i in extend_to)
@@ -2244,7 +2245,7 @@ if (typeof CeL === 'function')
 										//
 										+ extend_to[i] + ']' : '') + '。');
 
-									extend_to[i] = initializator[i];
+									extend_to[i] = initializer[i];
 								}
 						} else
 							library_namespace.debug('跳過擴充 member 之工作。', 5,
@@ -2258,15 +2259,15 @@ if (typeof CeL === 'function')
 						 *      title="JavaScript类和继承：constructor属性 -
 						 *      51CTO.COM">JavaScript类和继承：constructor属性</a>
 						 */
-						if (typeof initializator === 'function') {
-							if (!initializator.prototype.constructor)
-								initializator.prototype.constructor = initializator;
+						if (typeof initializer === 'function') {
+							if (!initializer.prototype.constructor)
+								initializer.prototype.constructor = initializer;
 						}
-						if (!initializator.Class)
-							initializator.Class = id;
+						if (!initializer.Class)
+							initializer.Class = id;
 
 						if (false)
-							initializator.toString = function() {
+							initializer.toString = function() {
 								return '[class ' + name + ']';
 							};
 
@@ -2276,7 +2277,7 @@ if (typeof CeL === 'function')
 						// 除非是其他 domain 的。
 						declaration.included = true;
 
-					} else if (initializator === library_namespace.env.not_to_extend_keyword) {
+					} else if (initializer === library_namespace.env.not_to_extend_keyword) {
 						// assert: module 本身已經做好相關設定。目的僅在執行 module_code。
 						// e.g., CeL.application.net.wiki.admin
 						library_namespace
@@ -2294,7 +2295,7 @@ if (typeof CeL === 'function')
 							library_namespace.error(error_Object = new Error(
 									'load_named: [' + id
 											+ '] 之初始設定函式執行成功，但回傳無法處理之值：['
-											+ initializator + ']！'));
+											+ initializer + ']！'));
 						declaration.included = false;
 						// error callback 僅在每次真正嘗試過後才執行。
 						run_callback('error_handler', error_Object);
@@ -3894,7 +3895,7 @@ if (typeof CeL === 'function')
 		 * TODO:<br />
 		 * thread-safe<br />
 		 * initial_arguments 繼承時的 initial arguments。<br />
-		 * initializator
+		 * initializer
 		 * 
 		 * @param child
 		 *            繼承的子類別。

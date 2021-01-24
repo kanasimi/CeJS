@@ -334,9 +334,19 @@ function module_code(library_namespace) {
 			break;
 
 		case 'parse':
-			// e.g., wiki.page('title').parse();
-			// next[1] : options
-			wiki_API.parser(this.last_page, next[1]);
+			// e.g., wiki.page('title', options).parse(callback, options);
+			if (library_namespace.is_Object(next[1]) && !next[2]) {
+				// 直接輸入 options，未輸入 callback。
+				next.splice(1, 0, null);
+			}
+
+			// next[2] : options
+			var parsed = wiki_API.parser(this.last_page,
+					add_session_to_options(this, next[2])).parse();
+			if (next[1]) {
+				// next[3] : callback
+				next[1](parsed);
+			}
 			this.next();
 			break;
 
@@ -455,7 +465,16 @@ function module_code(library_namespace) {
 
 		// register page alias
 		case 'register_redirects':
-			if (false && Array.isArray(next[1])) {
+			// wiki.register_redirects(template_list, callback, options)
+			// wiki.register_redirects(template_list, options)
+			if (library_namespace.is_Object(next[2]) && !next[3]) {
+				// 未設定/不設定 callback
+				// shift arguments
+				next.splice(2, 0, undefined);
+			}
+
+			// next[3] : options
+			if (next[3] && next[3].one_by_one && Array.isArray(next[1])) {
 				next[1].reverse();
 				_this.actions.unshift([ next[0], next[1].shift(), next[2],
 						next[3] ]);
@@ -509,9 +528,11 @@ function module_code(library_namespace) {
 					}
 
 					var message = 'register_redirects: '
-							+ (page_title === target_page_title ? '' : wiki_API
-									.title_link_of(page_title)
-									+ ' → ')
+							+ (page_title === target_page_title ? ''
+									: (wiki_API.title_link_of(page_title)
+									// JSON.stringify(page_title)
+									// Should not go to here
+									|| page_title) + ' → ')
 							+ wiki_API.title_link_of(target_page_title) + ': ';
 
 					if (is_missing) {
@@ -535,10 +556,14 @@ function module_code(library_namespace) {
 				}
 
 				if (redirect_list) {
-					register_redirect_list(next[1], redirect_list);
+					// console.trace([ next[1], root_page_data ]);
+					register_redirect_list(Array.isArray(next[1])
+					// assert: next[1].length === 1
+					? next[1][0] : next[1], redirect_list);
 				} else {
 					root_page_data.forEach(function(page_data) {
 						// console.trace(page_data.redirect_list);
+						// console.trace(page_data.original_title);
 						register_redirect_list(page_data.original_title
 								|| page_data.title, page_data.redirect_list
 								|| [ page_data ]);

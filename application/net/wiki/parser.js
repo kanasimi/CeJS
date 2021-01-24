@@ -197,6 +197,10 @@ function module_code(library_namespace) {
 		// copy prototype methods
 		Object.assign(wikitext, page_parser.parser_prototype);
 		set_wiki_type(wikitext, 'plain');
+		var session = wiki_API.session_of_options(options);
+		if (session) {
+			wiki_API.add_session_to_options(session, wikitext);
+		}
 		// console.trace(wikitext);
 		return wikitext;
 	}
@@ -849,7 +853,8 @@ function module_code(library_namespace) {
 
 		// console.log('max_depth: ' + max_depth);
 
-		var session = wiki_API.session_of_options(options);
+		var session = wiki_API.session_of_options(options)
+				|| wiki_API.session_of_options(this);
 		var token_name;
 		if (type || type === '') {
 			if (typeof type !== 'string') {
@@ -858,10 +863,16 @@ function module_code(library_namespace) {
 				return this;
 			}
 
-			var token_name = type.match(/^(Template):(.+)$/g);
+			token_name = type.match(/^(Template):(.+)$/g);
 			if (token_name) {
-				type = token_name[0];
-				token_name = wiki_API.normalize_title(token_name[1]);
+				if (session) {
+					token_name = session.redirect_target_of(type);
+					token_name = session.remove_namespace(token_name);
+				} else {
+					// type = token_name[0];
+					token_name = wiki_API.normalize_title(token_name[1]);
+				}
+				type = 'transclusion';
 			}
 
 			// normalize type
@@ -875,6 +886,9 @@ function module_code(library_namespace) {
 						+ ']');
 			}
 		}
+
+		var template_processor = session
+				&& session.template_functions_data[token_name];
 
 		// options.slice: range index: {Number}start index
 		// || {Array}[ {Number}start index, {Number}end index ]
@@ -937,6 +951,11 @@ function module_code(library_namespace) {
 						token.index = index;
 						token.parent = _this;
 					}
+
+					if (template_processor) {
+						template_processor(token, index, _this, depth);
+					}
+
 					// get result. 須注意: 此 token 可能為 Array, string, undefined！
 					// for_each_token(
 					// token, token_index, parent_of_token, depth)
@@ -4706,6 +4725,8 @@ function module_code(library_namespace) {
 		}
 
 		// parse attributes of HTML tags
+		// Warning: `{|\n|-\n!id="h style=color:red|h\n|}`
+		// will get id==="h_style=color:red", NOT id==="h"!
 		function parse_tag_attributes(attributes) {
 			var attribute_hash = Object.create(null);
 			if (typeof attributes === 'string') {

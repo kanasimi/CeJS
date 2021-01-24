@@ -220,6 +220,7 @@ function module_code(library_namespace) {
 		// @see CeL.application.net.wiki.task ,
 		// CeL.application.net.wiki.namespace
 		this.redirects_data = Object.create(null);
+		this.template_functions_data = Object.create(null);
 
 		// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
 		// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
@@ -232,6 +233,10 @@ function module_code(library_namespace) {
 			this.adapt_task_configurations(options.task_configuration_page,
 					options.configuration_adapter);
 		}
+
+		// @see CeL.application.net.wiki.template_functions
+		if (this.load_template_functions)
+			this.load_template_functions();
 	}
 
 	/**
