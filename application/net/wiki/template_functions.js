@@ -86,8 +86,6 @@ function module_code(library_namespace) {
 
 	var to_exit = wiki_API.parser.parser_prototype.each.exit;
 
-	var module_name = this.module_name;
-
 	// --------------------------------------------------------------------------------------------
 
 	function template_functions() {
@@ -106,8 +104,6 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 	// template names: The first one is the main template name. 首個名稱為正式名稱。
-
-	var zhwiki_Al_names = 'Al'.split('|').to_hash();
 
 	var Hat_names = 'TalkendH|Talkendh|Delh|Closereq|Hat|Hidden archive top'
 			.split('|').to_hash();
@@ -319,42 +315,6 @@ function module_code(library_namespace) {
 	}
 
 	// ------------------------------------------
-
-	// [[w:zh:Template:Al]]
-	function zhwiki_Al_toString() {
-		return this.join('、');
-	}
-
-	function parse_zhwiki_Al_token(token, options) {
-		if (!token || token.type !== 'transclusion'
-				|| !(token.name in zhwiki_Al_names))
-			return;
-
-		var index = 0, page_title_list = [];
-		// allow `{{al||title}}`
-		while (index < token.length) {
-			var page_title = token.parameters[++index];
-			if (page_title)
-				page_title_list.push(page_title);
-		}
-		page_title_list.toString = zhwiki_Al_toString;
-		return page_title_list;
-	}
-
-	function expand_zhwiki_Al_token(token, options) {
-		var page_title_list = parse_zhwiki_Al_token(token, options);
-		return page_title_list.map(function(title) {
-			return wiki_API.title_link_of(title);
-		}).join('、');
-	}
-
-	function expand_zhwiki_A_token(token, options) {
-		return '[[' + token.parameters[1]
-		//
-		+ (token.parameters.name ? '#' + token.parameters.name : '')
-		//
-		+ (token.parameters[2] ? '|' + token.parameters[2] : '') + ']]';
-	}
 
 	// https://zh.wikipedia.org/wiki/Template:TalkendH
 	// [0]: 正式名稱。
@@ -975,34 +935,33 @@ function module_code(library_namespace) {
 		});
 	}
 
-	function load_template_functions() {
-		var site_name = wiki_API.site_name(this);
+	var module_name = this.id;
+
+	function load_template_functions(session) {
+		var site_name = typeof session === 'string' ? session : wiki_API
+				.site_name(session);
 		if (!site_name)
 			throw new Error('Can not get site_name!');
 
-		if (false) {
-			console.trace(library_namespace.to_module_name(module_name
-					+ library_namespace.env.module_name_separator + site_name));
-			console.trace(module_name
-					+ library_namespace.env.module_name_separator + site_name);
-		}
-		// 注意: 因為已經設定 `CeL.application.net.wiki.template_functions.zhwiki`，
-		// 因此不能採用匯添加 prefix `library_namespace.Class` 的
+		// 注意: 若已設定 `CeL.application.net.wiki.template_functions.zhwiki`，
+		// 則不能採用匯添加 prefix `library_namespace.Class` 的
 		// library_namespace.to_module_name()，否則會被忽略，不載入！
-		library_namespace.run(module_name
-				+ library_namespace.env.module_name_separator + site_name,
-				initialize_session.bind(this));
+		library_namespace.run(library_namespace.to_module_name(module_name
+				+ library_namespace.env.module_name_separator + site_name),
+				initialize_session.bind(session));
 	}
 
 	library_namespace.set_method(wiki_API.prototype, {
-		load_template_functions : load_template_functions
+		load_template_functions : function() {
+			load_template_functions(this);
+		}
 	});
 
 	// --------------------------------------------------------------------------------------------
 
 	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 	function set_expand_template(template_name, wiki_project) {
-		var base_namespace = template_functions;
+		var base_namespace = wiki_API.template_functions;
 		if (wiki_project)
 			base_namespace = base_namespace[wiki_project];
 		var expand_function = base_namespace[template_name].expand;
@@ -1013,9 +972,14 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 	Object.assign(template_functions, {
 		initialization_queue : initialization_queue,
+		load_template_functions : load_template_functions,
+
+		set_expand_template : set_expand_template,
 
 		// ----------------------------
 
@@ -1028,16 +992,6 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 
-		zhwiki : {
-			Al : {
-				names : zhwiki_Al_names,
-				expand : expand_zhwiki_Al_token,
-				parse : parse_zhwiki_Al_token
-			},
-			A : {
-				expand : expand_zhwiki_A_token
-			}
-		},
 		Hat : {
 			names : Hat_names,
 			text_of : text_of_Hat_flag,
@@ -1072,9 +1026,6 @@ function module_code(library_namespace) {
 		}
 
 	});
-
-	set_expand_template('Al', 'zhwiki');
-	set_expand_template('A', 'zhwiki');
 
 	return template_functions;
 }

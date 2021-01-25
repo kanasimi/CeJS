@@ -2014,7 +2014,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * <code>
-	var sourceF=WScript.ScriptName,targetF='test.js';simpleWrite('tmp.js',alert+'\n'+simpleRead+'\n'+simpleWrite+'\nvar t="",ForReading=1,ForWriting=2,ForAppending=8\n,TristateUseDefault=-2,TristateTrue=-1,TristateFalse=0\n,WshShell=WScript.CreateObject("WScript.Shell"),fso=WScript.CreateObject("Scripting.FileSystemObject");\nt='+dQuote(simpleRead(sourceF),80)+';\nsimpleWrite("'+targetF+'",t);//eval(t);\nalert(simpleRead("'+sourceF+'")==simpleRead("'+targetF+'")?"The same (test dQuote OK!)":"Different!");');//WshShell.Run('"'+getFolder(WScript.ScriptFullName)+targetF+'"');
+	var sourceF=WScript.ScriptName,targetF='test.js';simpleWrite('tmp.js',alert+'\n'+simpleRead+'\n'+simpleWrite+'\nvar t="",ForReading=1,ForWriting=2,ForAppending=8\n,TristateUseDefault=-2,TristateTrue=-1,TristateFalse=0\n,WshShell=WScript.CreateObject("WScript.Shell"),fso=WScript.CreateObject("Scripting.FileSystemObject");\nt='+'data.native'(simpleRead(sourceF),80)+';\nsimpleWrite("'+targetF+'",t);//eval(t);\nalert(simpleRead("'+sourceF+'")==simpleRead("'+targetF+'")?"The same (test dQuote OK!)":"Different!");');//WshShell.Run('"'+getFolder(WScript.ScriptFullName)+targetF+'"');
 
 	//	determine quotation mark:輸入字串，傳回已加'或"之字串。
 	dQuote.qc=function(c,C){
@@ -2025,6 +2025,8 @@ function module_code(library_namespace) {
 	use JSON.stringify()
 
 	</code>
+	
+	@see JSON.stringify()
 	 */
 	// string,分割長度(會採用'~'+"~"的方式),separator(去除末尾用)
 	function dQuote(s, len, sp) {
@@ -2083,6 +2085,8 @@ function module_code(library_namespace) {
 		}
 		return q + s + q;
 	}
+
+	_.dQuote = dQuote;
 
 	// ----------------------------------------------------
 	// 可以處理 circular 的 JSON.stringify()，以及可以復原的 JSON.parse()。

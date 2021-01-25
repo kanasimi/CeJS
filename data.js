@@ -540,7 +540,7 @@ function module_code(library_namespace) {
 	 * @_memberOf _module_
 	 */
 	set_Object_value = function(obj, value, type, mode) {
-		if (!value || typeof o !== 'string')
+		if (!value || typeof obj !== 'string')
 			return;
 
 		var a, b, i = 0, p = '=', sp = ',', e = "if(typeof " + obj
@@ -614,8 +614,11 @@ function module_code(library_namespace) {
 					|| isNaN(b = parseFloat(a[1])))
 				b = a[1];
 			a = a[0];
-			e += obj + '[' + (!type || isNaN(a) ? dQuote(a) : a) + ']='
-					+ (!type || isNaN(b) ? dQuote(b) : b) + ';';
+			e += obj + '['
+					+ (!type || isNaN(a) ? library_namespace.dQuote(a) : a)
+					+ ']='
+					+ (!type || isNaN(b) ? library_namespace.dQuote(b) : b)
+					+ ';';
 		}
 
 		try {

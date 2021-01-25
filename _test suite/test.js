@@ -3441,8 +3441,6 @@ function test_wiki() {
 		assert(["[[#-%7b三宝颜共和国%7d-|-{三宝颜共和国}-]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-1');
 		wikitext = "[[A]]-{[[:三宝颜共和国]]}-BB ";
 		assert(["[[#A-%7b三宝颜共和国%7d-BB|A-{三宝颜共和国}-BB]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-2');
-		wikitext = "{{al|A|B}}";
-		assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { site_name: 'zhwiki' }).toString()], 'wiki.section_link #4-1');
 
 		wikitext = '#1\n#2\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #1');
@@ -3500,45 +3498,45 @@ function test_wiki() {
 	setup_test('CeL.wiki: asynchronous functions');
 	CeL.test('CeL.wiki: asynchronous functions', function (assert, _setup_test, _finish_test) {
 		//console.trace('Setup wiki tests...');
-		var wiki = new CeL.wiki(null, null, 'en');
-		wiki.run(function () {
+		var enwiki = new CeL.wiki(null, null, 'en');
+		enwiki.run(function () {
 			_setup_test('wiki: namespace');
-			assert(wiki.is_talk_namespace(wiki.to_talk_page('A: B')), 'wiki.is_talk_namespace() #1');
+			assert(enwiki.is_talk_namespace(enwiki.to_talk_page('A: B')), 'wiki.is_talk_namespace() #1');
 
-			assert(['2001: A Space Odyssey', wiki.normalize_title('2001: A Space Odyssey')], 'wiki.normalize_title() #1');
-			assert(['2001: A Space Odyssey', wiki.normalize_title(':2001: A Space Odyssey')], 'wiki.normalize_title() #2');
-			assert(['en:2001: A Space Odyssey', wiki.normalize_title('en:2001: A Space Odyssey')], 'wiki.normalize_title() #3');
-			assert(['en:2001: A Space Odyssey', wiki.normalize_title('EN:2001: A Space Odyssey')], 'wiki.normalize_title() #4');
-			assert(['w:2001: A Space Odyssey', wiki.normalize_title('w:2001: A Space Odyssey')], 'wiki.normalize_title() #5');
-			assert(['w:2001: A Space Odyssey', wiki.normalize_title('W:2001: A Space Odyssey')], 'wiki.normalize_title() #6');
-			assert(['w:en:2001: A Space Odyssey', wiki.normalize_title('w:en:2001: A Space Odyssey')], 'wiki.normalize_title() #7');
-			assert(['w:en:2001: A Space Odyssey', wiki.normalize_title('w:EN:2001: A Space Odyssey')], 'wiki.normalize_title() #8');
-			assert(['ArXiv', wiki.normalize_title('arXiv')], 'wiki.normalize_title() #9');
+			assert(['2001: A Space Odyssey', enwiki.normalize_title('2001: A Space Odyssey')], 'wiki.normalize_title() #1');
+			assert(['2001: A Space Odyssey', enwiki.normalize_title(':2001: A Space Odyssey')], 'wiki.normalize_title() #2');
+			assert(['en:2001: A Space Odyssey', enwiki.normalize_title('en:2001: A Space Odyssey')], 'wiki.normalize_title() #3');
+			assert(['en:2001: A Space Odyssey', enwiki.normalize_title('EN:2001: A Space Odyssey')], 'wiki.normalize_title() #4');
+			assert(['w:2001: A Space Odyssey', enwiki.normalize_title('w:2001: A Space Odyssey')], 'wiki.normalize_title() #5');
+			assert(['w:2001: A Space Odyssey', enwiki.normalize_title('W:2001: A Space Odyssey')], 'wiki.normalize_title() #6');
+			assert(['w:en:2001: A Space Odyssey', enwiki.normalize_title('w:en:2001: A Space Odyssey')], 'wiki.normalize_title() #7');
+			assert(['w:en:2001: A Space Odyssey', enwiki.normalize_title('w:EN:2001: A Space Odyssey')], 'wiki.normalize_title() #8');
+			assert(['ArXiv', enwiki.normalize_title('arXiv')], 'wiki.normalize_title() #9');
 
-			assert(wiki.is_namespace('2001: A Space Odyssey', 0), 'wiki.is_namespace() #1');
-			assert(wiki.is_namespace('Talk:ABC', 'talk'), 'wiki.is_namespace() #2');
+			assert(enwiki.is_namespace('2001: A Space Odyssey', 0), 'wiki.is_namespace() #1');
+			assert(enwiki.is_namespace('Talk:ABC', 'talk'), 'wiki.is_namespace() #2');
 
 			_finish_test('wiki: namespace');
 		});
 
-		wiki.run(function () {
+		enwiki.run(function () {
 			_setup_test('wiki: site_name');
 
-			assert(['enwiki', CeL.wiki.site_name(wiki)], 'CeL.wiki.site_name() #1');
-			assert(['zhwiki', CeL.wiki.site_name('zh', wiki)], 'CeL.wiki.site_name() #2');
-			assert(['zh_classicalwiki', CeL.wiki.site_name('lzh', wiki)], 'CeL.wiki.site_name() #3');
-			assert(['cswiki', CeL.wiki.site_name('cz', wiki)], 'CeL.wiki.site_name() #4');
-			assert([CeL.wiki.site_name(null, { session: wiki }), CeL.wiki.site_name('talk', { session: wiki })], 'CeL.wiki.site_name() #5');
-			assert(['https://commons.wikimedia.org/w/api.php', CeL.wiki.site_name('commons', { session: wiki, get_all_properties: true }).API_URL], 'CeL.wiki.site_name() #6');
-			assert(['https://cs.wikipedia.org/w/api.php', CeL.wiki.site_name('cz', { session: wiki, get_all_properties: true }).API_URL], 'CeL.wiki.site_name() #7');
-			assert(['wikidatawiki', CeL.wiki.site_name('wikidata', { session: wiki })], 'CeL.wiki.site_name() #8');
-			assert(['commonswiki', CeL.wiki.site_name('commons', { session: wiki })], 'CeL.wiki.site_name() #9');
+			assert(['enwiki', CeL.wiki.site_name(enwiki)], 'CeL.wiki.site_name() #1');
+			assert(['zhwiki', CeL.wiki.site_name('zh', enwiki)], 'CeL.wiki.site_name() #2');
+			assert(['zh_classicalwiki', CeL.wiki.site_name('lzh', enwiki)], 'CeL.wiki.site_name() #3');
+			assert(['cswiki', CeL.wiki.site_name('cz', enwiki)], 'CeL.wiki.site_name() #4');
+			assert([CeL.wiki.site_name(null, { session: enwiki }), CeL.wiki.site_name('talk', { session: enwiki })], 'CeL.wiki.site_name() #5');
+			assert(['https://commons.wikimedia.org/w/api.php', CeL.wiki.site_name('commons', { session: enwiki, get_all_properties: true }).API_URL], 'CeL.wiki.site_name() #6');
+			assert(['https://cs.wikipedia.org/w/api.php', CeL.wiki.site_name('cz', { session: enwiki, get_all_properties: true }).API_URL], 'CeL.wiki.site_name() #7');
+			assert(['wikidatawiki', CeL.wiki.site_name('wikidata', { session: enwiki })], 'CeL.wiki.site_name() #8');
+			assert(['commonswiki', CeL.wiki.site_name('commons', { session: enwiki })], 'CeL.wiki.site_name() #9');
 
 			_finish_test('wiki: site_name');
 		});
 
 		_setup_test('wiki: get_creation_Date');
-		wiki.page('Wikipedia:Sandbox', function (page_data) {
+		enwiki.page('Wikipedia:Sandbox', function (page_data) {
 			// {Date}page_data.creation_Date
 			assert(['2002-12-20T21:50:14.000Z', page_data && page_data.creation_Date.toISOString()], 'get_creation_Date: [[Wikipedia:Sandbox]]');
 			_finish_test('wiki: get_creation_Date');
@@ -3548,7 +3546,7 @@ function test_wiki() {
 
 
 		_setup_test('wiki: get categorymembers');
-		wiki.categorymembers('Countries in North America', function (list) {
+		enwiki.categorymembers('Countries in North America', function (list) {
 			assert(list.some(function (page_data) {
 				return page_data.title === 'United States';
 			}), 'get categorymembers: [[Category:Countries in North America]]');
@@ -3558,6 +3556,17 @@ function test_wiki() {
 			namespace: '0'
 		});
 
+		var zhwiki = new CeL.wiki(null, null, 'zh');
+		zhwiki.run(function () {
+			_setup_test('wiki: template_functions');
+
+			var wikitext = "{{al|A|B}}";
+			// 下面這個測試只能在含入 CeL.application.net.wiki.template_functions.zhwiki 後才能使用。
+			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { session: zhwiki }).toString()], 'wiki.section_link+template_functions #1-1');
+			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { site_name: 'zhwiki' }).toString()], 'wiki.section_link+template_functions #1-2');
+
+			_finish_test('wiki: template_functions');
+		});
 
 		_setup_test('wiki: CeL.wiki.convert_Chinese()');
 		CeL.wiki.convert_Chinese('中国', function (text) {

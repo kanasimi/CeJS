@@ -700,8 +700,7 @@ function module_code(library_namespace) {
 	 * toggle/swap display and visibility.<br />
 	 * display:none or visibility:hidden.
 	 * 
-	 * TODO: use element.classList.toggle(className);
-	 * TODO: use computed style
+	 * TODO: use element.classList.toggle(className); TODO: use computed style
 	 * 
 	 * @param element
 	 *            HTML element
@@ -3376,7 +3375,7 @@ function module_code(library_namespace) {
 				t = o.value;
 			if (O)
 				if (O.textContent !== undefined)
-					O.textContent  = o.value;
+					O.textContent = o.value;
 				else
 					O.innerText = o.value;
 			return t;
@@ -5054,46 +5053,58 @@ function module_code(library_namespace) {
 		</code>
 		 */
 
-		var i, j, o = library_namespace.get_tag_list(tag), tp;
+		var i, j, o = library_namespace.get_tag_list(tag), popup_window_type;
 		set_up_popup.list = [];
 		if (o.length)
 			for (i = 0; i < o.length; i++) {
 				if (classN && !has_class(o[i], classN) || func && func(o[i]))
 					continue;
 				// 測試是否有特定標籤
-				for (j = 0, tp = ''; j < sPopP.allTypes.length; j++)
+				for (j = 0, popup_window_type = ''; j < sPopP.allTypes.length; j++)
 					if (o[i][sPopP.allTypes[j]]) {
-						tp = sPopP.allTypes[j];
+						popup_window_type = sPopP.allTypes[j];
 						break;
 					}
-				// 有的話設定event
-				if (tp && (tp = sPop(o[i], sPopF[tp] | sPopF.nopop))) {
+				if (popup_window_type
+						// 有的話設定 event。
+						&& (popup_window_type = sPop(o[i],
+								sPopF[popup_window_type] | sPopF.nopop))) {
 					if (false)
 						o[i].innerHTML += '<b style="color:peru">['
-								+ sPopP.types[tp] + ']<\/b>';
+								+ sPopP.types[popup_window_type] + ']<\/b>';
 
 					set_up_popup.list.push(o[i]);
-					if (tp == sPopF.window) {
-						if (!o[i].onclick)
-							o[i].onclick = new Function('sPop(this,' + tp
-									+ ');'), o[i].style.cursor = 'pointer';
-					} else if (tp == sPopF.popup) {
+					if (popup_window_type == sPopF.window) {
+						if (!o[i].onclick) {
+							o[i].popup_type = popup_window_type;
+							o[i].onclick = function() {
+								sPop(this, this.popup_type);
+							};
+							o[i].style.cursor = 'pointer';
+						}
+					} else if (popup_window_type == sPopF.popup) {
 						if (!o[i].onmouseover) {
-							// o[i].ruby=o[i].popup='';
-							o[i].onmouseover = new Function('sPop(this,' + tp
-									+ ');');
+							// o[i].ruby = o[i].popup = '';
+							o[i].onmouseover = function() {
+								sPop(this, this.popup_type);
+							};
 							if (!o[i].onmouseout)
-								o[i].onmouseout = new Function(
-										'sPop(this,sPopF.clearPop);');
-							if (!o[i].onclick)
-								o[i].onclick = new Function(
-										'this.onmouseout=null;sPop(this,' + tp
-												+ ');'),
-										o[i].style.cursor = 'pointer';
-						} else if (false)
-							alert(tp + '\n' + sPopF[tp] + '\n'
+								o[i].onmouseout = function() {
+									sPop(this, sPopF.clearPop);
+								};
+							if (!o[i].onclick) {
+								o[i].onclick = function() {
+									this.onmouseout = null;
+									sPop(this, popup_window_type);
+								};
+								o[i].style.cursor = 'pointer';
+							}
+						} else if (false) {
+							alert(popup_window_type + '\n'
+									+ sPopF[popup_window_type] + '\n'
 									+ typeof o[i].onmouseover + '\n'
 									+ o[i].onmouseover);
+						}
 					}
 				}
 			}
@@ -5225,11 +5236,11 @@ function module_code(library_namespace) {
 		sPopP.commentTitle = 'Comment';
 		sPopP.commentTitlePattern = sPopP.commentTitle + ' of %s';
 		// close message: 關閉視窗或popup
-		sPopP.closeM = 'Close';
+		sPopP.close_message = 'Close';
 		// bigger message: 放大
-		sPopP.biggerM = 'Bigger';
+		sPopP.bigger_message = 'Bigger';
 		// reset size message: 回復原大小
-		sPopP.resetM = 'Reset size';
+		sPopP.reset_message = 'Reset size';
 	}
 	sPopInit();
 
@@ -5277,7 +5288,7 @@ function module_code(library_namespace) {
 			sPopP.functionName = '';
 
 		var repopMark = 'repop', repop = oPos === repopMark, nopop = flag
-				& sPopF.nopop, tp = flag & 7, useAttbTxt = false,
+				& sPopF.nopop, popup_window_type = flag & 7, useAttbTxt = false,
 		// 轉成br用
 		brReg = /\r*\n/g, brT = '<br />\n';
 
@@ -5288,7 +5299,7 @@ function module_code(library_namespace) {
 				return;
 			// 重新 pop up 時不作其他判別處置
 			oPos = sPopP.popObj;
-			tp = sPopF.popup;
+			popup_window_type = sPopF.popup;
 		} else {
 
 			// 處理 object
@@ -5315,7 +5326,7 @@ function module_code(library_namespace) {
 
 			// (自動)判別使用的type
 			var useAutoTxt;
-			if (tp == sPopF.auto) {
+			if (popup_window_type == sPopF.auto) {
 				// 設定oTxt 2/4 : 知道是自動判別後先設定
 				if (typeof oPos == 'object' && (!oTxt || oTxt == 0))
 					if (oPos[sPopP.types[0]])
@@ -5339,25 +5350,25 @@ function module_code(library_namespace) {
 										// .replace(/<[a-z][^<>]*>/g, '')
 										)).length))) {
 					// ruby的條件
-					tp = 'ruby';
+					popup_window_type = 'ruby';
 				} else if (sPopP.window && len < 300) {
-					tp = 'popup';
+					popup_window_type = 'popup';
 					if (typeof oPos == 'object' && oPos.title === oTxt)
 						oPos[sPopP.types[0]] = oTxt, oPos.title = '';
 				} else
-					tp = 'window';
+					popup_window_type = 'window';
 
 				// 設定oTxt 3/4 & type
 				if (typeof oPos == 'object' && (!oTxt || oTxt == 0))
-					if (oPos[tp])
-						oTxt = oPos[tp], useAutoTxt = true;
+					if (oPos[popup_window_type])
+						oTxt = oPos[popup_window_type], useAutoTxt = true;
 
-				tp = sPopF[tp];
+				popup_window_type = sPopF[popup_window_type];
 			}
 
 			// 設定oTxt 4/4
 			if (!oTxt || oTxt == 0 && typeof oPos != 'object')
-				if ((oTxt = oPos[sPopP.types[tp]])
+				if ((oTxt = oPos[sPopP.types[popup_window_type]])
 						|| (oTxt = oPos[sPopP.types[0]]) || (oTxt = oPos.title))
 					useAutoTxt = true;
 				else
@@ -5373,11 +5384,11 @@ function module_code(library_namespace) {
 					sPopP.left += event.offsetX, sPopP.top += event.offsetY;
 				} catch (e) {
 				}
-			else if (!oPos.className && sPopP.DclassName[tp]) {
+			else if (!oPos.className && sPopP.DclassName[popup_window_type]) {
 				if (!classN && (classN = document.body.className)
 						&& !sPopP.bgS[classN])
 					classN = 0;
-				oPos.className = sPopP.DclassName[tp]
+				oPos.className = sPopP.DclassName[popup_window_type]
 						+ (classN ? '_' + classN : '');
 				var w, s = oPos.style;
 				if (!s.fontWeight && (w = oPos.parentNode.style.fontWeight))
@@ -5387,21 +5398,22 @@ function module_code(library_namespace) {
 		}
 
 		// 修正
-		if (tp == sPopF.popup && !sPopP.window && !(flag & sPopF.force))
+		if (popup_window_type == sPopF.popup && !sPopP.window
+				&& !(flag & sPopF.force))
 			// Mozilla中無法顯示popup
-			tp = sPopF.window;
+			popup_window_type = sPopF.window;
 
 		if (false)
-			alert(sPopP.types[tp] + ',' + (sPopP.window || flag & sPopF.force)
-					+ ',' + oTxt);
+			alert(sPopP.types[popup_window_type] + ','
+					+ (sPopP.window || flag & sPopF.force) + ',' + oTxt);
 		// 處理pop
-		if (tp == sPopF.ruby) {
+		if (popup_window_type == sPopF.ruby) {
 			if (typeof oPos != 'object' || !oPos.innerHTML)
 				// oPop非HTML element就return
 				return;
 			if (oPos.doneRuby)
 				// 已經處理過<ruby>就pass
-				return tp;
+				return popup_window_type;
 			// 處理repeat
 			if (flag & sPopF.repeat || sPopP.RepeatC.indexOf(oTxt) !== -1) {
 				oPos.title = '';
@@ -5436,9 +5448,9 @@ function module_code(library_namespace) {
 			}
 			oPos.doneRuby = true;
 
-		} else if (tp == sPopF.popup) {
+		} else if (popup_window_type == sPopF.popup) {
 			if (nopop || !sPopP.window)
-				return tp;
+				return popup_window_type;
 			if (!repop) {
 				if (useAutoTxt)
 					oTxt = oTxt.replace(brReg, brT);
@@ -5448,16 +5460,16 @@ function module_code(library_namespace) {
 				'<div style="'
 						+ sPopP.popupS
 						+ '" onblur="parent.sPopP.window.hide();" title="reference">[<b style="color:peru;cursor:pointer;" onclick="parent.sPopP.window.hide();">'
-						+ sPopP.closeMessage
+						+ sPopP.close_message
 						+ '<\/b>] [<b style="color:green;cursor:pointer;" onclick="parent.sPopP.width+=100,parent.sPopP.height+=50,parent.'
 						+ sPopP.functionName
 						+ '(\''
 						+ repopMark
 						+ '\');">'
-						+ sPopP.biggerM
+						+ sPopP.bigger_message
 						+ '<\/b>] [<b style="color:orange;cursor:pointer;" onclick="parent.sPopP.width=parent.sPopP.height=0,parent.'
 						+ sPopP.functionName + '(\'' + repopMark + '\');">'
-						+ sPopP.resetM
+						+ sPopP.reset_message
 						+ '<\/b>]<hr style="color:purple;height:1px" />'
 						+ oTxt.replace(/'/g, '&#39;') + '<\/div>';
 				// object handling now(for popup:repop)
@@ -5476,9 +5488,9 @@ function module_code(library_namespace) {
 				sPopP.window.show(sPopP.left, sPopP.top, sPopP.width,
 						sPopP.height, oPos || document.body);
 
-		} else if (tp == sPopF.window) {
+		} else if (popup_window_type == sPopF.window) {
 			if (nopop)
-				return tp;
+				return popup_window_type;
 			if (false)
 				if (typeof netscape == 'object')
 					// 創造無邊框視窗:titlebar=no dependent:ns only 全螢幕：channelmode
@@ -5500,14 +5512,17 @@ function module_code(library_namespace) {
 			window.showModalDialog(), window.showModelessDialog(): IE only. 不如用Ajax
 			</code>
 			 */
-			var w = window
-					.open(
-							'',
-							'comment',
-							'titlebar=no,dependent,resizable=1,menubar=0,toolbar=0,location=0,scrollbars=1,width=550,height=400'/* ,fullscreen */,
-							false),
+			var w = 'titlebar=no,dependent,resizable=1,menubar=0,toolbar=0,location=0,scrollbars=1,width=550,height=400'// ,fullscreen
+			;
+			try {
+				// old IE
+				w = window.open('', 'comment', w, false);
+			} catch (e) {
+				// Chrome/89.0.4389.9
+				w = window.open('', 'comment', w);
+			}
 			// head
-			t = sPopP.commentTitle,
+			var t = sPopP.commentTitle,
 			// document.title
 			_t = oPos.innerHTML && oPos.innerHTML.length < 9 ? sPopP.commentTitlePattern
 					.replace(/%s/, oPos.innerHTML)
@@ -5545,7 +5560,7 @@ function module_code(library_namespace) {
 							// 以不換行(pre)的方式顯示.patch
 							.replace(/ /g, '&nbsp;')
 							+ '\n<\/div><hr />[ <b style="cursor:pointer;color:#40f;" onclick="javascript:opener.focus();self.close();">'
-							+ sPopP.closeMessage + '<\/b> ]'
+							+ sPopP.close_message + '<\/b> ]'
 					// + '</body></html>'
 					);
 			w.document.close();
@@ -5555,10 +5570,10 @@ function module_code(library_namespace) {
 			// http://www.blogjava.net/tim-wu/archive/2006/05/29/48729.html
 			w = null;
 		} else if (false)
-			alert('type error: ' + tp + '!');
+			alert('type error: ' + popup_window_type + '!');
 
 		// 回傳決定的type
-		return tp;
+		return popup_window_type;
 	}
 
 	/**
@@ -5742,6 +5757,41 @@ function module_code(library_namespace) {
 		}
 	};
 
+	var VBalert_flags = {
+		ret : 0,
+
+		// http://msdn.microsoft.com/library/en-us/script56/html/vsfctmsgbox.asp
+		vbOK : 1,
+		vbCancel : 2,
+		vbAbort : 3,
+		vbRetry : 4,
+		vbIgnore : 5,
+		vbYes : 6,
+		vbNo : 7,
+
+		vbOKOnly : 0,
+		vbOKCancel : 1,
+		vbAbortRetryIgnore : 2,
+		vbYesNoCancel : 3,
+		vbYesNo : 4,
+		vbRetryCancel : 5,
+
+		// Critical Message icon (x)
+		vbCritical : 16,
+		// Warning Query icon (?)
+		vbQuestion : 32,
+		// Warning Message icon (!)
+		vbExclamation : 48,
+		// Information Message icon(i)
+		vbInformation : 64,
+
+		vbDefaultButton1 : 0,
+		vbDefaultButton2 : 256,
+		vbDefaultButton3 : 512,
+		vbDefaultButton4 : 768,
+		vbApplicationModal : 0,
+		vbSystemModal : 4096
+	};
 	/**
 	 * <code>	MsgBox, InputBox Titlebars Prefixed with 'VBScript'	http://support.microsoft.com/default.aspx?scid=kb;en-us;234742
 		http://asp.programmershelp.co.uk/vbscriptmsgbox.php
@@ -5749,7 +5799,7 @@ function module_code(library_namespace) {
 	請加入下面一段中介function
 	<script type="text/vbscript">
 	Function VBalert_vbf()
-	 VBalert_f.ret=MsgBox(VBalert_f.prompt,VBalert_f.buttons,VBalert_f.title,VBalert_f.helpfile,VBalert_f.context)
+		VBalert_flags.ret = MsgBox(VBalert_flags.prompt, VBalert_flags.buttons, VBalert_flags.title, VBalert_flags.helpfile, VBalert_flags.context)
 	End Function
 	</script>
 
@@ -5757,46 +5807,30 @@ function module_code(library_namespace) {
 	window.execScript( sExpression, sLanguage );
 	</code>
 	 */
-	// init
-	// var VBalert_f;VBalert();
 	function VBalert(prompt, buttons, title, helpfile, context) {
-		if (typeof VBalert_f != 'object')
-					VBalert_f = Object.create(null),
-					library_namespace
-							.set_Object_value(
-									'VBalert_f',
-									'ret=0,'
-											// http://msdn.microsoft.com/library/en-us/script56/html/vsfctmsgbox.asp
-											+ 'vbOK=1,vbCancel=2,vbAbort=3,vbRetry=4,vbIgnore=5,vbYes=6,vbNo=7,'
-											+ 'vbOKOnly=0,vbOKCancel=1,vbAbortRetryIgnore=2,vbYesNoCancel=3,vbYesNo=4,vbRetryCancel=5,'
-											// Critical Message icon (x)
-											+ 'vbCritical=16,'
-											// Warning Query icon (?)
-											+ 'vbQuestion=32,'
-											// Warning Message icon (!)
-											+ 'vbExclamation=48,'
-											// Information Message icon(i)
-											+ 'vbInformation=64,'
-											+ 'vbDefaultButton1=0,vbDefaultButton2=256,vbDefaultButton3=512,vbDefaultButton4=768,vbApplicationModal=0,vbSystemModal=4096',
-									'int');
 		if (typeof prompt == 'undefined')
 			return;
-		VBalert_f.prompt = prompt || '', VBalert_f.buttons = buttons || 0,
-				VBalert_f.title = title || '';
+
+		VBalert_flags.prompt = prompt || '',
+				VBalert_flags.buttons = buttons || 0,
+				VBalert_flags.title = title || '';
 		// Not available on 16-bit platforms.
 		// http://msdn.microsoft.com/library/en-us/script56/html/vsfctmsgbox.asp
-		VBalert_f.helpfile = helpfile || '', VBalert_f.context = context || 0;
+		VBalert_flags.helpfile = helpfile || '',
+				VBalert_flags.context = context || 0;
 		try {
 			VBScript: VBalert_vbf();
-			return VBalert_f.ret;
+			return VBalert_flags.ret;
 		} catch (e) {
 			// alert('VBalert error:' + e.message);
-			alert(VBalert_f.prompt);
+			alert(VBalert_flags.prompt);
 		}
 	}
+	// initialization.
+	// VBalert();
 	if (false)
-		alert(VBalert('12', VBalert_f.vbInformation
-				+ VBalert_f.vbDefaultButton3));
+		alert(VBalert('12', VBalert_flags.vbInformation
+				+ VBalert_flags.vbDefaultButton3));
 
 	// TODO: get_size(node = window) = Object.create(null);
 
@@ -6035,7 +6069,8 @@ function module_code(library_namespace) {
 	 * @param element
 	 *            HTML element
 	 * @param name
-	 *            W3C style property name, rule_name (e.g., no '-webkit-background-clip')
+	 *            W3C style property name, rule_name (e.g., no
+	 *            '-webkit-background-clip')
 	 * @return
 	 * @see http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug,
 	 *      http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,
