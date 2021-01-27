@@ -71,13 +71,18 @@ function module_code(library_namespace) {
 		// e.g., success:1 @ wikidata
 		&& !result.success) : result === '') {
 			// Invalid token
-			library_namespace.warn(
-			//
-			'check_session_badtoken: ' + wiki_API.site_name(session)
-			//
-			+ ': It seems we lost the token. 似乎丟失了 token。');
+			session.badtoken_count = (session.badtoken_count | 0) + 1;
+			library_namespace.warn('check_session_badtoken: ' + (new Date)
+					+ ' ' + wiki_API.site_name(session)
+					+ ': It seems we lost the token. 似乎丟失了 token。 ('
+					+ session.badtoken_count + ')');
 			// console.trace(options);
 			// console.trace(result);
+
+			if (session.badtoken_count > 2) {
+				throw new Error(
+						'check_session_badtoken: Too many badtoken errors! Please re-execute the program!');
+			}
 
 			if (!library_namespace.platform.nodejs) {
 				// throw new Error('check_session_badtoken: Not using
