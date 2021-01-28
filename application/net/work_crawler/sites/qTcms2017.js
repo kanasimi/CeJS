@@ -294,8 +294,10 @@ function module_code(library_namespace) {
 
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
 			// modify from mh160.js
+			// console.log(html);
 
 			var chapter_data = html.between('qTcms_S_m_murl_e="', '"');
+			// console.log(chapter_data);
 			if (chapter_data) {
 				// 對於非utf-8編碼之中文，不能使用 atob()
 				// e.g., http://www.aikanmh.cn/xuanhuan/zhutianji/499631.html
@@ -317,10 +319,9 @@ function module_code(library_namespace) {
 			// @see
 			// http://m.88bag.net/template/wap1/css/d7s/js/show.20170501.js?20190722091626
 			if (chapter_data.length === 1
-					&& (chapter_data[0].startsWith('+http://') || chapter_data[0]
-							.startsWith('--http://'))) {
+					&& /^(--|+)https?:\/\//.test(chapter_data[0])) {
 				chapter_data = {
-					limited : chapter_data[0].startsWith('+http://') ? '对不起,该章节已经下架!!本站仅提供检索服务,请尊重作品版权'
+					limited : chapter_data[0].startsWith('+') ? '对不起,该章节已经下架!!本站仅提供检索服务,请尊重作品版权'
 							: '请点击下方链接开始观看本期漫画：' + chapter_data[0].slice(2)
 				};
 				return chapter_data;
@@ -362,7 +363,9 @@ function module_code(library_namespace) {
 						// http://www.nokiacn.net/lianai/caozuo100/134257.html
 						url = url.replace(/\?/gi, "a1a1")
 								.replace(/&/gi, "b1b1").replace(/%/gi, "c1c1");
-						url = (html.between('qTcms_m_indexurl="', '"') || '/')
+						url = (this.qTcms_m_indexurl
+						// this.qTcms_m_indexurl: e.g., 517.js
+						|| html.between('qTcms_m_indexurl="', '"') || '/')
 								+ "statics/pic/?p="
 								+ escape(url)
 								+ "&picid="
