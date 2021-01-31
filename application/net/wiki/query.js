@@ -82,6 +82,7 @@ function module_code(library_namespace) {
 			if (session.badtoken_count > 2) {
 				throw new Error(
 						'check_session_badtoken: Too many badtoken errors! Please re-execute the program!');
+				// delete session.badtoken_count;
 			}
 
 			if (!library_namespace.platform.nodejs) {
@@ -160,6 +161,9 @@ function module_code(library_namespace) {
 			if ('retry_login' in session) {
 				// 已成功 edit，去除 retry flag。
 				delete session.retry_login;
+			}
+			if ('badtoken_count' in session) {
+				delete session.badtoken_count;
 			}
 			// run next action
 			callback(result);

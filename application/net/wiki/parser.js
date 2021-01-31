@@ -8,9 +8,7 @@
 parser 所有子頁面加入白名單 white-list
 parser 所有node當前之level層級
 parser 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起來。
-parser [[WP:維基化]]
-https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
-https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
+parser [[WP:維基化]] [[w:en:Wikipedia:AutoWikiBrowser/General fixes]] [[w:en:Wikipedia:WikiProject Check Wikipedia]]
 https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 
 </code>
@@ -1686,9 +1684,11 @@ function module_code(library_namespace) {
 	// 必須是標題裡面不會存在的字串，並且也不會被section_link_escape()轉換。
 	var section_link_START_CONVERT = '\0\x01', section_link_END_CONVERT = '\0\x02',
 	//
-	section_link_START_CONVERT_reg = new RegExp(section_link_START_CONVERT, 'g'),
+	section_link_START_CONVERT_reg = new RegExp(library_namespace
+			.to_RegExp_pattern(section_link_START_CONVERT), 'g'),
 	//
-	section_link_END_CONVERT_reg = new RegExp(section_link_END_CONVERT, 'g');
+	section_link_END_CONVERT_reg = new RegExp(library_namespace
+			.to_RegExp_pattern(section_link_END_CONVERT), 'g');
 
 	function pre_parse_section_title(parameters, options, queue) {
 		parameters = parameters.toString()
@@ -1761,6 +1761,9 @@ function module_code(library_namespace) {
 		anchor = section_link_escape(id
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1').replace(/&/g, '&amp;'), true);
+
+		var session = wiki_API.session_of_options(options);
+		// TODO: for zhwiki, the anchor should NOT includes "-{", "}-"
 
 		// console.log(parsed_title);
 		for_each_token.call(parsed_title, function(token, index, parent) {

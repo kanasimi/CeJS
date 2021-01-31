@@ -168,7 +168,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 */
-	wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
+	wiki_API.check_stop.pattern = /\n=(.+?)=\n/;
 
 	// ------------------------------------------------------------------------
 
@@ -254,9 +254,9 @@ function module_code(library_namespace) {
 			}
 
 			wiki_API.page(title, function(page_data) {
-				if (options && (!options.ignore_denial && wiki_API_edit
+				if (options && (!options.ignore_denial
 				// TODO: 每經過固定時間，或者編輯特定次數之後，就再檢查一次。
-				.denied(page_data, options.bot_id,
+				&& wiki_API_edit.denied(page_data, options.bot_id,
 				// 若您不想接受機器人的通知、提醒或警告，請使用{{bots|optout=notification_name}}模板。
 				// Please using {{bots|optout=notification_name}},
 				// the bot will skip this page.
@@ -747,7 +747,11 @@ function module_code(library_namespace) {
 			denied = 'Ban all compliant bots.';
 
 		if (denied) {
-			library_namespace.warn('wiki_API_edit.denied: ' + denied);
+			// console.trace(content);
+			library_namespace.warn('wiki_API_edit.denied: '
+			//
+			+ (page_data ? wiki_API.title_link_of(page_data) + ' ' : '')
+					+ denied);
 			return denied;
 		}
 

@@ -1412,7 +1412,8 @@ function module_code(library_namespace) {
 			// trim tail
 			return space.replace(/[^\n]{2,}/g, ' ')
 			// 避免連\n都被刪掉。
-			.replace(/[^\n]+\n/g, '\n').replace(/\n{3,}/g, '\n\n');
+			// /[^\n]+\n/ or /.*[\r\n]+/: /./.test('\r') === false
+			.replace(/[\s\S]+\n/g, '\n').replace(/\n{3,}/g, '\n\n');
 		}).replace(/[(（] /g, '(').replace(/ [）)]/g, ')');
 
 		return wikitext;

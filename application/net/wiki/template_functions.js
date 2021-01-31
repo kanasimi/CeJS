@@ -40,7 +40,7 @@ template_functions/zhwiki.js
 		});
 	});
 
-	// or:
+	// alternative method:
 
 	wiki.page('title', function for_page(page_data) {
 		/** {Array} parsed page content 頁面解析後的結構。 */
