@@ -900,7 +900,7 @@ function module_code(library_namespace) {
 			//
 			: namespace.toLowerCase()
 			// for ',Template,Category', ';Template;Category',
-			// 'main|file|module|template|category|help|portal'
+			// 'main|file|module|template|category|help|portal|プロジェクト'
 			// https://www.mediawiki.org/w/api.php?action=help&modules=main#main.2Fdatatypes
 			.split(/(?:[,;|\u001F]|%7C|%1F)/)).forEach(function(n) {
 				if (options.is_page_title && n.startsWith(':')) {

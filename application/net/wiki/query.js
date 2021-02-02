@@ -50,6 +50,9 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 	// 以下皆泛用，無須 wiki_API instance。
 
+	// badtoken 超過這個次數則直接跳出。
+	var max_badtoken_count = 2;
+
 	function check_session_badtoken(result, callback, options) {
 		var session = wiki_API.session_of_options(options);
 		if (!session) {
@@ -79,7 +82,7 @@ function module_code(library_namespace) {
 			// console.trace(options);
 			// console.trace(result);
 
-			if (session.badtoken_count > 2) {
+			if (session.badtoken_count >= max_badtoken_count) {
 				throw new Error(
 						'check_session_badtoken: Too many badtoken errors! Please re-execute the program!');
 				// delete session.badtoken_count;

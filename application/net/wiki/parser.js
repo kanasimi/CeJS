@@ -6105,7 +6105,7 @@ function module_code(library_namespace) {
 				// e.g., "01:20, 9 September 2017 (UTC)"
 				// [, time(hh:mm), d, m, Y, timezone ]
 				/([0-2]?\d:[0-6]?\d)[, ]+([0-3]?\d) ([a-z]{3,9}) ([12]\d{3})(?: \(([A-Z]{3})\))?/ig,
-				function(matched) {
+				function(matched, options) {
 					return matched[2] + ' ' + matched[3] + ' ' + +matched[4]
 							+ ' ' + matched[1] + ' ' + (matched[6] || 'UTC');
 				}, {
@@ -6130,14 +6130,14 @@ function module_code(library_namespace) {
 		'zh-classical' : [
 				// Warning: need CeL.data.numeral
 				/([一二][〇一二三四五六七八九]{3})年([[〇一]?[〇一二三四五六七八九])月([〇一二三]?[〇一二三四五六七八九])日 （([日一二三四五六])）( [〇一二三四五六七八九]{1,2}時[〇一二三四五六七八九]{1,2})分(?: \(([A-Z]{3})\))?/g,
-				function(matched) {
+				function(matched, options) {
 					return library_namespace
 							.from_positional_Chinese_numeral(matched[1] + '/'
 									+ matched[2] + '/' + matched[3]
 									+ matched[5].replace('時', ':'))
 							+ ' ' + (matched[6] || 'UTC+8');
 				},
-				function(date) {
+				function(date, options) {
 					return library_namespace.to_positional_Chinese_numeral(date
 							.format({
 								format : '%Y年%m月%d日 （%a） %2H時%2M分 (UTC)',
@@ -6153,12 +6153,14 @@ function module_code(library_namespace) {
 				// "2016年8月1日 (一) 00:00 (CST)"
 				// [, Y, m, d, week, time(hh:mm), timezone ]
 				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日一二三四五六])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
-				function(matched) {
+				function(matched, options) {
 					return matched[1] + '/' + matched[2] + '/' + matched[3]
 					//
 					+ matched[5] + ' '
-					// new Date('2017/12/1 0:0 CST') !==
-					// new Date('2017/12/1 0:0 UTC+8')
+					// new Date('2017/12/1 0:0 CST'):
+					// Central Standard Time (North America)
+					// === new Date('2017/12/1 0:0 UTC-6')
+					// !== new Date('2017/12/1 0:0 UTC+8')
 					+ (!matched[6] || matched[6] === 'CST' ? 'UTC+8'
 					//
 					: matched[6]);
@@ -6173,6 +6175,50 @@ function module_code(library_namespace) {
 	// warning: number_to_signed(-0) === "+0"
 	function number_to_signed(number) {
 		return number < 0 ? number : '+' + number;
+	}
+
+	// @inner
+	function normalize_parse_date_options(options) {
+		if (options === true) {
+			options = {
+				get_timevalue : true
+			};
+		} else if (typeof options === 'string'
+				&& (options in date_parser_config)) {
+			options = {
+				language : options
+			};
+		} else {
+			options = library_namespace.new_options(options);
+		}
+
+		var session = wiki_API.session_of_options(options);
+		if (session) {
+			if (!options.language)
+				options.language = session.language;
+			if (!options.timeoffset) {
+				// e.g., 480
+				options.timeoffset = session.configurations.timeoffset;
+			}
+		}
+		options.timeoffset |= 0;
+
+		if (!options.language) {
+			options.language = wiki_API.language;
+			options.date_parser_config = date_parser_config[wiki_API.language];
+		} else if (options.language in wiki_API.api_URL.wikimedia) {
+			// all wikimedia using English in default.
+			options.date_parser_config = date_parser_config.en;
+		} else {
+			options.date_parser_config = date_parser_config[options.language]
+			// e.g., 'commons'
+			|| date_parser_config[wiki_API.language];
+		}
+		if (!options.date_parser_config) {
+			console.trace([ options.language, wiki_API.language ]);
+		}
+
+		return options;
 	}
 
 	/**
@@ -6204,21 +6250,7 @@ function module_code(library_namespace) {
 	 *      [[en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
 	 */
 	function parse_date(wikitext, options) {
-		if (options === true) {
-			options = {
-				get_timevalue : true
-			};
-		} else if (typeof options === 'string'
-				&& (options in date_parser_config)) {
-			options = {
-				language : options
-			};
-		} else {
-			options = library_namespace.setup_options(options);
-			if (!options.language && options[KEY_SESSION]) {
-				options.language = options[KEY_SESSION].language;
-			}
-		}
+		options = normalize_parse_date_options(options);
 
 		var date_list;
 		if (options.get_all_list) {
@@ -6231,20 +6263,8 @@ function module_code(library_namespace) {
 
 		// <s>去掉</s>skip年分前之雜項。
 		// <s>去掉</s>skip星期與其後之雜項。
-		var date_parser;
-		if ((options.language || wiki_API.language) in wiki_API.api_URL.wikimedia) {
-			// all wikimedia using English in default.
-			date_parser = date_parser_config.en;
-		} else {
-			date_parser = date_parser_config[options.language]
-			// e.g., 'commons'
-			|| date_parser_config[wiki_API.language];
-		}
-		if (!date_parser) {
-			console.trace([ options.language, wiki_API.language ]);
-		}
-		var PATTERN_date = date_parser[0], matched;
-		date_parser = date_parser[1];
+		var date_parser = options.date_parser_config[1];
+		var PATTERN_date = options.date_parser_config[0], matched;
 		// console.log('Using PATTERN_date: ' + PATTERN_date);
 
 		var min_timevalue, max_timevalue;
@@ -6254,7 +6274,7 @@ function module_code(library_namespace) {
 			// console.log(matched);
 			// Warning:
 			// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date()功能大多了。
-			var date = date_parser(matched);
+			var date = date_parser(matched, options);
 			// console.log(date);
 
 			// Date.parse('2019/11/6 16:11 JST') === NaN
@@ -6298,25 +6318,44 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 日期的格式。時間戳跟標準簽名日期格式一樣，讓時間轉換的小工具起效用。
+	 * 產生時間戳記。日期格式跟標準簽名一樣，讓時間轉換的小工具起效用。
 	 * 
 	 * assert: the same as "~~~~~".
 	 * 
 	 * @example <code>
 
-	CeL.wiki.parse.date.to_String(new Date);
+	CeL.wiki.parse.date.to_String(new Date, session);
 
 	</code>
 	 */
-	function to_wiki_date(date, language) {
-		if (wiki_API.is_wiki_API(language)) {
-			language = language.language;
-		}
+	function to_wiki_date(date, options) {
+		options = normalize_parse_date_options(options);
+
 		// console.log(language || wiki_API.language);
-		var to_String = date_parser_config[language || wiki_API.language][2];
-		return library_namespace.is_Object(to_String)
-		// treat to_String as date format
-		? date.format(to_String) : to_String(date);
+		var to_String = options.date_parser_config[2];
+
+		if (typeof to_String === 'function') {
+			date = to_String(date, options);
+		} else {
+			// treat `to_String` as date format
+			// assert: library_namespace.is_Object(to_String)
+			if (options.timeoffset && to_String.zone !== options.timeoffset) {
+				to_String = Object.clone(to_String);
+				to_String.zone = options.timeoffset / 60;
+				if (to_String.zone) {
+					to_String.format = to_String.format
+					// 顯示的時間跟隨 session.configurations.timeoffset。
+					.replace(/\(UTC(?:+0)?\)/, '(UTC'
+					//
+					+ (to_String.zone < 0 ? to_String.zone
+					//
+					: '+' + to_String.zone) + ')');
+				}
+			}
+			// console.trace(to_String);
+			date = date.format(to_String);
+		}
+		return date;
 	}
 
 	parse_date.to_String = to_wiki_date;
@@ -6502,6 +6541,8 @@ function module_code(library_namespace) {
 	parse_user.all = parse_all_user_links;
 
 	// 由使用者名稱來檢測匿名使用者/未註冊用戶 [[WP:IP]]
+	// [[m:Special:MyLanguage/Tech/News/2021/05]]
+	// 在diffs中，IPv6位址被寫成了小寫字母。這導致了死連結，因為Special:使用者貢獻只接受大寫的IP。這個問題已經被修正。
 	function is_IP_user(user_name, IPv6_only) {
 		return !IPv6_only
 		// for IPv4 addresses

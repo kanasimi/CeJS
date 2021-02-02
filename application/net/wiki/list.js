@@ -1534,7 +1534,7 @@ function module_code(library_namespace) {
 	};
 
 	wiki_API.search.default_parameters = {
-		// |portal
+		// |プロジェクト
 		srnamespace : wiki_API
 				.namespace('main|file|module|template|category|help|portal'),
 
