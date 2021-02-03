@@ -215,6 +215,9 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 		// pre-loading functions
 
+		// https://stackoverflow.com/questions/39007637/javascript-set-vs-array-performance
+		// https://jsbench.me/3pkjlwzhbr/1
+
 		// wiki_session.redirects_data[redirect_from] = {String}redirect_to
 		// = main page title without "Template:" prefix
 		// @see CeL.application.net.wiki.task ,

@@ -392,7 +392,8 @@ function module_code(library_namespace) {
 		// console.trace(convert_options);
 
 		data.text = library_namespace.HTML_to_Unicode(
-		//
+		// 處理 HTML tags 以減少其對 this.convert_text_language() 的影響。
+		// TODO: <p> @ qidian.js
 		library_namespace.EPUB.normailize_contents(data.text
 		// remove all '\n
 		.replace(/[\r\n]/g, '')
@@ -400,6 +401,7 @@ function module_code(library_namespace) {
 		.replace(/<br(?:\s[^<>]*)?>/ig, '\n')
 		// .trim()
 		), true);
+		// console.log(data.text);
 
 		// return needing to wait language converted
 		var text_list = [ part_title, chapter_title, data.text ];
@@ -441,15 +443,17 @@ function module_code(library_namespace) {
 			// TODO: 把半形標點符號轉換為全形標點符號
 			.replace(/["'](?:zh-(?:cmn-)?|cmn-)?(?:Hans-)?CN["']/ig,
 			// "zh-TW"
-			'"zh-cmn-Hant-TW"')
-			// recover 換行
-			.replace(/\n/g, '<br />');
+			'"zh-cmn-Hant-TW"');
 			this.clear_converted_text_cache({
 				text : data.original_text
 			});
 			// free
 			delete data.original_text;
 		}
+
+		data.text = data.text
+		// recover HTML tags
+		.replace(/\n/g, '<br />');
 
 		var file_title = chapter_NO.pad(3)
 				+ ' '
