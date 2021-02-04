@@ -64,6 +64,8 @@ function module_code(library_namespace) {
 		if (result ? result.error
 		// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
 		? result.error.code === 'badtoken'
+		// The "token" parameter must be set.
+		|| result.error.code === 'notoken'
 		// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
 		: options.rollback_action && !options.get_page_before_undo
 		//
@@ -74,11 +76,14 @@ function module_code(library_namespace) {
 		// e.g., success:1 @ wikidata
 		&& !result.success) : result === '') {
 			// Invalid token
-			session.badtoken_count = (session.badtoken_count | 0) + 1;
+			if (session.badtoken_count > 0)
+				session.badtoken_count++;
+			else
+				session.badtoken_count = 1;
 			library_namespace.warn('check_session_badtoken: ' + (new Date)
 					+ ' ' + wiki_API.site_name(session)
 					+ ': It seems we lost the token. 似乎丟失了 token。 ('
-					+ session.badtoken_count + ')');
+					+ session.badtoken_count + '/' + max_badtoken_count + ')');
 			// console.trace(options);
 			// console.trace(result);
 

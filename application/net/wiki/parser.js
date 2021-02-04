@@ -2045,7 +2045,7 @@ function module_code(library_namespace) {
 			all_root_section_list.push(section);
 		}
 
-		// get topics using for_each_token()
+		// get topics / section title / stanza title using for_each_token()
 		// 讀取每一個章節的資料: 標題,內容
 		// TODO: 不必然是章節，也可以有其它不同的分割方法。
 		// TODO: 可以讀取含入的子頁面
