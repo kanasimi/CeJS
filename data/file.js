@@ -237,18 +237,18 @@ function module_code(library_namespace) {
 	 * TODO: follow link
 	 * 
 	 * @example <code>
-	 * //	列出指定目錄下所有壓縮檔。
-	 * CeL.run('data.file', function() {
-	 * 	var folder = new CeL.file_system_structure('D:\\a', { file_filter : /\.(zip|rar|7z|exe)$/i });
-	 * 	folder.each(function(fso, info) {
-	 * 		CeL[info.is_file ? 'log' : 'info']([ info.index, '/', info.length, '[', fso.Path, ']' ]); }, {
-	 * 			// filter : 'f',
-	 * 			max_count : 5,
-	 * 			'final' : function() { CeL.log([ this.count.filtered_file, ' done']); }
-	 * 		}
-	 * 	);
-	 * });
-	 * </code>
+	//	列出指定目錄下所有壓縮檔。
+	CeL.run('data.file', function() {
+		var folder = new CeL.file_system_structure('D:\\a', { file_filter : /\.(zip|rar|7z|exe)$/i });
+		folder.each(function(fso, info) {
+			CeL[info.is_file ? 'log' : 'info']([ info.index, '/', info.length, '[', fso.Path, ']' ]); }, {
+				// filter : 'f',
+				max_count : 5,
+				'final' : function() { CeL.log([ this.count.filtered_file, ' done']); }
+			}
+		);
+	});
+	</code>
 	 * 
 	 * @param {String|Array}path
 	 *            指定之目標路徑。<br />
@@ -553,8 +553,8 @@ function module_code(library_namespace) {
 									'add_path');
 							base[FILES][name] = file_data_fields
 							//
-							? fill_data(item, file_data_fields, Object.create(null))
-									: null;
+							? fill_data(item, file_data_fields, Object
+									.create(null)) : null;
 							// 預防 callback 動到 item，排在最後才處理。
 							if (callback = callback_Array
 							//

@@ -384,8 +384,8 @@ function module_code(library_namespace) {
 
 		var convert_options = {
 			// only for debug CeCC 繁簡轉換。
-			cache_directory : work_data.directory + '繁簡轉換 cache'
-					+ library_namespace.env.path_separator,
+			cache_directory : library_namespace
+					.append_path_separator(work_data.directory + '繁簡轉換 cache'),
 			// 超過此長度才 cache。
 			min_cache_length : 20
 		};

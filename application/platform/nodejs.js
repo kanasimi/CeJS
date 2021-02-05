@@ -537,16 +537,22 @@ function module_code(library_namespace) {
 		}, /\.js$/);
 	}
 
+	var KEY_root_process = typeof Symbol === 'function' ? Symbol('KEY_root_process')
+			: '\0KEY_root_process';
+
 	// https://github.com/coolaj86/node-walk
 	// https://github.com/oleics/node-filewalker/blob/master/lib/filewalker.js
 	function traverse_file_system(path, handler, options, depth) {
 		// 前置處理。
-		if (library_namespace.is_RegExp(options)) {
-			options = {
-				filter : options
-			};
-		} else if (!library_namespace.is_Object(options)) {
-			options = Object.create(null);
+		if (!options || !options[KEY_root_process]) {
+			if (library_namespace.is_RegExp(options)) {
+				options = {
+					filter : options
+				};
+			} else {
+				options = library_namespace.new_options(options);
+			}
+			options[KEY_root_process] = true;
 		}
 
 		if (isNaN(depth)) {
@@ -559,10 +565,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var filter = library_namespace.is_RegExp(options.filter)
-				&& options.filter,
-		//
-		list;
+		var list;
 		try {
 			list = node_fs.readdirSync(path);
 		} catch (e) {
@@ -571,52 +574,73 @@ function module_code(library_namespace) {
 			});
 			return;
 		}
+		// console.log(list);
 		// treat path as directory
 		path = append_path_separator(path);
 
+		var filter = library_namespace.is_RegExp(options.filter)
+				&& options.filter;
 		// console.log([ depth, filter ]);
-		// console.log(list);
 
-		list.forEach(function(fso_name) {
-			try {
-				var full_path = path + fso_name,
-				// https://nodejs.org/api/fs.html#fs_class_fs_stats
-				fso_status = node_fs.lstatSync(full_path),
-				// else: e.g., is file
-				is_directory = fso_status.isDirectory();
+		var callback = options.callback;
+		if (callback)
+			delete options.callback;
 
-				// 設定額外的屬性以供利用。
-				fso_status.name = fso_name;
-				fso_status.directory = path;
+		if (!(options.file_count > 0))
+			options.file_count = 0;
 
-				// Depth-first search (DFS)
-				if (is_directory) {
-					traverse_file_system(full_path, handler, options, depth);
-				}
+		function process_next_fso(promise, fso_name) {
+			var full_path = path + fso_name,
+			// https://nodejs.org/api/fs.html#fs_class_fs_stats
+			fso_status = node_fs.lstatSync(full_path),
+			// else: e.g., is file
+			is_directory = fso_status.isDirectory();
 
-				if (!filter || filter.test(fso_name)) {
-					handler(full_path, fso_status, is_directory);
-				}
+			// 設定額外的屬性以供利用。
+			fso_status.name = fso_name;
+			fso_status.directory = path;
 
-			} catch (e) {
-				// https://nodejs.org/api/errors.html
-				if (e.code === 'EPERM') {
-					// TODO: .chmodSync(path, 666) @ Windows??
-					;
-				}
-				if (e.code === 'EBUSY') {
-					// TODO
-					;
-				}
-				if (e.code !== 'ENOENT') {
-					;
-				}
+			// console.log(full_path);
+
+			// Depth-first search (DFS)
+			if (is_directory) {
+				return promise.then(traverse_file_system.bind(null, full_path,
+						handler, options, depth));
 			}
+
+			if (!filter || filter.test(fso_name)) {
+				options.file_count++;
+				return promise.then(handler.bind(null, full_path, fso_status,
+						is_directory, options));
+			}
+		}
+
+		return list.reduce(process_next_fso, Promise.resolve())
+		//
+		['catch'](function(error) {
+			// https://nodejs.org/api/errors.html
+			if (error.code === 'EPERM') {
+				// TODO: .chmodSync(path, 666) @ Windows??
+				// return;
+			}
+			if (error.code === 'EBUSY') {
+				// TODO
+				// return;
+			}
+			if (error.code !== 'ENOENT') {
+				// return;
+			}
+
+			throw error;
+		}).then(function(error) {
+			if (callback)
+				callback(error);
+
+			library_namespace.debug({
+				T : [ '處理完畢：%1', path ]
+			}, 2, 'traverse_file_system');
 		});
 
-		library_namespace.debug({
-			T : [ '處理完畢：%1', path ]
-		}, 2, 'traverse_file_system');
 	}
 
 	_.traverse_file_system = traverse_file_system;

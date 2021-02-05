@@ -97,11 +97,15 @@ function module_code(library_namespace) {
 			var id_list = [], id_data = [];
 			html.each_between('<li>', '</li>', function(token) {
 				var matched = token.match(
+				// pufei.js: <dt><a href="/manhua/32695/index.html"
+				// title="我靠美食来升级">我靠美食来升级</a></dt>
+				/<dt><a href="\/(?:mh|manhua)\/(\d+)(?:\/index\.html)?" title="([^"]+)">/
 				//
-				/<dt><a href="\/(?:mh|manhua)\/(\d+)" title="([^"]+)">/);
+				);
 				id_list.push(matched[1]);
 				id_data.push(matched[2]);
 			});
+			// console.log([ id_list, id_data ]);
 			return [ id_list, id_data ];
 		},
 
