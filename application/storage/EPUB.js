@@ -2531,11 +2531,7 @@ function module_code(library_namespace) {
 		}),
 		// 改變後的檔案長度必須要和原先的相同，這樣比較保險，不會更改到檔案結構。
 		mimetype_first_order_name = mimetype_filename.replace(/^./, '!');
-
-		// assert: mimetype_filename.length===mimetype_first_order_name.length
-
-		// 請注意： rename 必須先安裝 7-Zip **16.04 以上的版本**。
-		archive_file.rename([ mimetype_filename, mimetype_first_order_name ]);
+		// assert: mimetype_filename.length === mimetype_first_order_name.length
 
 		// https://support.microsoft.com/en-us/help/830473/command-prompt-cmd-exe-command-line-string-limitation
 		// On computers running Microsoft Windows XP or later, the maximum
@@ -2545,18 +2541,28 @@ function module_code(library_namespace) {
 			library_namespace.warn({
 				T : '檔案列表過長，改成壓縮整個目錄。'
 			});
-			file_list = null;
-			// archive all directory
+			// 當 epub 電子書非本工具產生時，可能有不同的目錄，必須重新讀取。
+			file_list = library_namespace.read_directory(this.path.root)
+			// archive all directory without mimetype
+			.filter(function(fso_name) {
+				return fso_name !== mimetype_filename;
+			});
+
+		} else if (!file_list) {
+			file_list = [ container_directory_name,
+					Ebook.prototype.root_directory_name ]
 		}
 
+		// 請注意： rename 必須先安裝 7-Zip **16.04 以上的版本**。
+		archive_file.rename([ mimetype_filename, mimetype_first_order_name ]);
+
+		// console.log([ this.path, file_list ]);
 		library_namespace.storage.archive.archive_under(this.path.root,
 		// archive others.
 		archive_file, {
 			// set MAX lavel
 			level : 9,
-			files : file_list
-					|| [ container_directory_name,
-							Ebook.prototype.root_directory_name ],
+			files : file_list,
 			recurse : true,
 			extra : (remove ? '-sdel ' : ''),
 			type : 'zip'

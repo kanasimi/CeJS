@@ -586,8 +586,8 @@ function module_code(library_namespace) {
 		if (callback)
 			delete options.callback;
 
-		if (!(options.file_count > 0))
-			options.file_count = 0;
+		if (!(options.all_file_count > 0))
+			options.all_file_count = 0;
 
 		function process_next_fso(promise, fso_name) {
 			var full_path = path + fso_name,
@@ -609,7 +609,7 @@ function module_code(library_namespace) {
 			}
 
 			if (!filter || filter.test(fso_name)) {
-				options.file_count++;
+				options.all_file_count++;
 				return promise.then(handler.bind(null, full_path, fso_status,
 						is_directory, options));
 			}
