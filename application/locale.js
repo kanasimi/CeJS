@@ -452,20 +452,25 @@ function module_code(library_namespace) {
 		// || %\w(conversion format specifier)\d{1,2}(index)
 		// || %[conversion specifications@]index
 		//
-		// 警告: index 以 "|" 終結會被視為 patten 明確終結，並且 "|" 將被吃掉。
+		// 警告: index 以 "|" 終結，後接數字會被視為 patten 明確終結，並且 "|" 將被吃掉。
 		// e.g., gettest("%1|123", 321) === "321123"
-		// gettest("%1||123", 321) === "321|123"
+		// gettest("%1||123", 321) === "321||123"
 		// TODO: 改成 %{index}
 		//
 		// 採用 local variable，因為可能有 multithreading 的問題。
-		conversion_pattern = /([\s\S]*?)%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?(\d{1,2})\|?)/g;
+		conversion_pattern = /([\s\S]*?)%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?(\d{1,2})(\|\d)?)/g;
 
 		while (matched = conversion_pattern.exec(text)) {
+			if (matched[7]) {
+				// 回吐最後一個 \d
+				conversion_pattern.lastIndex--;
+			}
 			last_index = conversion_pattern.lastIndex;
 
 			// matched:
-			// 0: conversion, 1: prefix, 2: is_escaped, 3: domain_specified,
-			// 4: format, 5: object_name, 6: argument NO.
+			// 0: prefix + conversion, 1: prefix, 2: is_escaped "%",
+			// 3: domain_specified, 4: format, 5: object_name, 6: argument NO,
+			// 7: "|" + \d.
 			var conversion = matched[0];
 
 			if (matched[2]) {
