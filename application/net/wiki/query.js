@@ -507,7 +507,7 @@ function module_code(library_namespace) {
 						+ agent.last_cookie.length + ']。', 1, 'wiki_API_query');
 			}
 
-			var language = session && session.language;
+			var language = wiki_API.get_first_domain_name_of_session(session);
 			if (!language) {
 				library_namespace.debug('未設定 session，自 API_URL 擷取 language: ['
 						+ action[0] + ']。', 1, 'wiki_API_query');

@@ -1596,6 +1596,8 @@ function module_code(library_namespace) {
 	 *            max length in bytes
 	 * 
 	 * @returns {Number}邊際index。
+	 * 
+	 * @inner
 	 */
 	function check_max_length(piece_list, limit, limit_length) {
 		// 8000: 8192 - (除了 piece_list 外必要之字串長)。
@@ -1655,6 +1657,28 @@ function module_code(library_namespace) {
 		return index;
 	}
 
+	// @inner
+	function max_slice_size(session, config, this_slice) {
+		var max_size = session.slow_query_limit || (
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query
+		// titles/pageids: Maximum number of values is 50 (500 for bots).
+		// 不想頁面內容過多而被截斷，用400以下較保險。
+		PATTERN_BOT_NAME.test(session.token && session.token.lgname)
+		// https://www.mediawiki.org/w/api.php
+		// slow queries: 500; fast queries: 5000
+		// The limits for slow queries also apply to multivalue parameters.
+		? 500 : 50);
+		if (config && (config.slice | 0) >= 1) {
+			max_size = Math.min(config.slice | 0, max_size);
+		}
+		// 自動判別最大可用 index，預防 "414 Request-URI Too Long"。
+		// 因為 8000/500-3 = 13 > 最長 page id，因此即使 500頁也不會超過。
+		// 為提高效率，不作 check。
+		if (this_slice && !config.is_id)
+			max_size = check_max_length(this_slice, max_size);
+		return max_size;
+	}
+
 	// unescaped syntaxes in summary
 	function summary_to_wikitext(summary) {
 		// unescaped_summary
@@ -1705,7 +1729,7 @@ function module_code(library_namespace) {
 		summary : ''
 	});
 
-	// console_message()
+	// temporary message, console_message()
 	var interactive_message = library_namespace.platform.nodejs
 			&& library_namespace.platform.is_interactive ? function interactive_message(
 			message) {
@@ -2516,12 +2540,9 @@ function module_code(library_namespace) {
 			multi : true
 		},
 		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
-		config.page_options), slice_size = (config.slice | 0) >= 1 ? Math.min(
-				config.slice | 0, 500)
-		// https://www.mediawiki.org/w/api.php?action=help&modules=query
-		// titles/pageids: Maximum number of values is 50 (500 for bots).
-		// 不想頁面內容過多而被截斷，用400以下較保險。
-		: PATTERN_BOT_NAME.test(this.token && this.token.lgname) ? 500 : 50,
+		config.page_options),
+		//
+		slice_size = max_slice_size(this, config),
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */
 		work_continue = 0, this_slice_size, setup_target;
 
@@ -2566,12 +2587,8 @@ function module_code(library_namespace) {
 			// Split when length is too long. 分割過長的 list。
 			setup_target = (function() {
 				var this_slice = target.slice(work_continue, work_continue
-						+ slice_size),
-				// 自動判別最大可用 index，預防 "414 Request-URI Too Long"。
-				// 因為 8000/500-3 = 13 > 最長 page id，因此即使 500頁也不會超過。
-				// 為提高效率，不作 check。
-				max_size = config.is_id ? 500 : check_max_length(this_slice,
-						500);
+						+ slice_size);
+				var max_size = max_slice_size(this, config, this_slice);
 
 				if (false) {
 					console.log([ 'max_size:', max_size, this_slice.length,
@@ -2647,6 +2664,39 @@ function module_code(library_namespace) {
 	// 以下皆泛用，無須 wiki_API instance。
 
 	// ------------------------------------------------------------------------
+
+	wiki_API.assert_user_right = function(assert_type, callback, options) {
+		TODO;
+
+		// besure {Function}callback
+		callback = typeof callback === 'function' && callback;
+
+		var session = wiki_API.session_of_options(options);
+		// 支援斷言編輯功能。
+		var action = 'assert=' + (assert_type || 'user');
+		if (session.API_URL) {
+			library_namespace.debug('API URL: [' + session.API_URL + ']。', 3,
+					'wiki_API.assert_user_right');
+			action = [ session.API_URL, action ];
+		}
+		library_namespace.debug('action: [' + action + ']。', 3,
+				'wiki_API.assert_user_right');
+
+		library_namespace.debug('準備確認權限。', 1, 'wiki_API.assert_user_right');
+		wiki_API.query(action, function(data) {
+			// console.trace(data);
+			// 確認尚未登入，才作登入動作。
+			if (data === '') {
+				// 您已登入。
+				library_namespace.debug('You are already logged in.', 1,
+						'wiki_API.assert_user_right');
+				callback(data);
+				return;
+			}
+
+			callback(data);
+		});
+	};
 
 	// 未登錄/anonymous時的token
 	var BLANK_TOKEN = '+\\';
@@ -2806,9 +2856,8 @@ function module_code(library_namespace) {
 			session.get_token(_next);
 		}
 
-		// 支援斷言編輯功能。
-		var action = 'assert=user', callback, session, API_URL;
-		if (!API_URL && !password && user_name && typeof user_name === 'object') {
+		var callback, session, API_URL;
+		if (!password && user_name && typeof user_name === 'object') {
 			// session = CeL.wiki.login(options);
 			options = user_name;
 			// console.log(options);
@@ -2869,6 +2918,8 @@ function module_code(library_namespace) {
 				session.actions.push([ 'login' ]);
 			}
 		}
+		// 支援斷言編輯功能。
+		var action = 'assert=user';
 		if (session.API_URL) {
 			library_namespace.debug('API URL: [' + session.API_URL + ']。', 3,
 					'wiki_API.login');

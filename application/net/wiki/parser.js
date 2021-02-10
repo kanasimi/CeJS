@@ -6179,6 +6179,7 @@ function module_code(library_namespace) {
 
 	// @inner
 	function normalize_parse_date_options(options) {
+		var session = wiki_API.session_of_options(options);
 		if (options === true) {
 			options = {
 				get_timevalue : true
@@ -6192,10 +6193,17 @@ function module_code(library_namespace) {
 			options = library_namespace.new_options(options);
 		}
 
-		var session = wiki_API.session_of_options(options);
+		var language = wiki_API.get_first_domain_name_of_session(options);
 		if (session) {
-			if (!options.language)
-				options.language = session.language;
+			if (!language) {
+				language = wiki_API.get_first_domain_name_of_session(session);
+			}
+			if (!date_parser_config[language]) {
+				// e.g., https://simple.wikipedia.org/ →
+				// wiki_API.get_first_domain_name_of_session(session) ===
+				// 'simple' && session.language === 'en'
+				language = session.language;
+			}
 			if (!options.timeoffset) {
 				// e.g., 480
 				options.timeoffset = session.configurations.timeoffset;
@@ -6203,19 +6211,20 @@ function module_code(library_namespace) {
 		}
 		options.timeoffset |= 0;
 
-		if (!options.language) {
-			options.language = wiki_API.language;
+		if (!language) {
+			language = wiki_API.language;
 			options.date_parser_config = date_parser_config[wiki_API.language];
-		} else if (options.language in wiki_API.api_URL.wikimedia) {
+		} else if (language in wiki_API.api_URL.wikimedia) {
 			// all wikimedia using English in default.
 			options.date_parser_config = date_parser_config.en;
 		} else {
-			options.date_parser_config = date_parser_config[options.language]
+			options.date_parser_config = date_parser_config[language]
 			// e.g., 'commons'
 			|| date_parser_config[wiki_API.language];
 		}
 		if (!options.date_parser_config) {
-			console.trace([ options.language, wiki_API.language ]);
+			// console.log(session);
+			console.trace([ language, wiki_API.language ]);
 		}
 
 		return options;

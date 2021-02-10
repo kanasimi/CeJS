@@ -80,6 +80,7 @@ function module_code(library_namespace) {
 		&& session.family === 'wikimedia'
 		// https://meta.wikimedia.org/wiki/Special:SiteMatrix
 		// TODO: using session.project_name or something others
+		// using get_first_domain_name_of_session()
 		&& session.language;
 	}
 
@@ -571,13 +572,19 @@ function module_code(library_namespace) {
 				// 排除 'Talk', 'User', 'Help', 'File', ...
 				&& !(session.configurations.namespace_pattern || get_namespace.pattern)
 						.test(language_code)) {
-			// e.g., 'cmn'
-			if (language_code in wiki_API.language_code_to_site_alias)
+			if (language_code === 'simple') {
+				session.first_damain_name = language_code;
+				// [[w:en:Basic English]]
+				// language_code = 'en-basiceng';
+				language_code = 'en';
+			} else if (language_code in wiki_API.language_code_to_site_alias) {
+				// e.g., 'cmn'
 				language_code = wiki_API.language_code_to_site_alias[language_code];
+			}
 
 			// [[m:List of Wikipedias]]
 			session.language
-			// e.g., 'zh-classical', 'zh-yue', 'zh-min-nan', 'simple'
+			// e.g., 'zh-classical', 'zh-yue', 'zh-min-nan'
 			= language_code;
 			var site_name = wiki_API.site_name(session);
 			// console.trace(site_name);
@@ -595,6 +602,22 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
+
+	// @inner
+	function get_first_domain_name_of_session(session) {
+		var first_damain_name;
+		if (session) {
+			first_damain_name =
+			// e.g., 'simple'
+			session.first_damain_name
+			// assert: typeof session.API_URL === 'string'
+			// 注意:在取得 page 後，中途更改過 API_URL 的話，session.language 會取得錯誤的資訊！
+			|| session.language
+			// 應該採用來自宿主 host session 的 language. @see setup_data_session()
+			|| get_first_domain_name_of_session(session[KEY_HOST_SESSION]);
+		}
+		return first_damain_name;
+	}
 
 	// [[en:Help:Interwikimedia_links]] [[Special:Interwiki]]
 	// https://zh.wikipedia.org/wiki/Special:GoToInterwiki/testwiki:
@@ -649,12 +672,10 @@ function module_code(library_namespace) {
 			// treat language as options with session.
 			session = wiki_API.session_of_options(language);
 			// options.language 較 session 的設定優先。
-			language = language.language || session && (
-			// assert: typeof session.API_URL === 'string'
-			// 注意:在取得 page 後，中途更改過 API_URL 的話，session.language 會取得錯誤的資訊！
-			session.language
-			// 應該採用來自宿主 host session 的 language. @see setup_data_session()
-			|| session[KEY_HOST_SESSION] && session[KEY_HOST_SESSION].language)
+			// language.language
+			language = get_first_domain_name_of_session(language)
+			// session.language
+			|| get_first_domain_name_of_session(session)
 			// || language
 			;
 			if (false && typeof language === 'object')
@@ -696,11 +717,9 @@ function module_code(library_namespace) {
 		// console.trace(language);
 		// console.trace(in_session);
 		// 正規化。
-		language = String(language || in_session && (in_session.language
-		//
-		|| in_session[KEY_HOST_SESSION]
-		//
-		&& in_session[KEY_HOST_SESSION].language)
+		language = String(language
+		// in_session.language
+		|| get_first_domain_name_of_session(in_session)
 		// else use default language
 		// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
 		|| wiki_API.language).trim().toLowerCase().replace(/[_ ]/g, '-');
@@ -1988,9 +2007,12 @@ function module_code(library_namespace) {
 		if (!title) {
 			return '';
 		}
-		if (session && session.language && !project_prefixed) {
+		var first_domain_name
+		//
+		= wiki_API.get_first_domain_name_of_session(session);
+		if (first_domain_name && !project_prefixed) {
 			// e.g., [[w:zh:title]]
-			title = session.language + ':' + title;
+			title = first_domain_name + ':' + title;
 			if (session.family
 					&& (session.family in api_URL.shortcut_of_project)) {
 				title = api_URL.shortcut_of_project[session.family] + ':'
@@ -2521,12 +2543,12 @@ function module_code(library_namespace) {
 			// 本地化 Localization: load localized messages.
 			// e.g., [[w:en:User:Cewbot/log/20150916/configuration]]
 			if (library_namespace.is_Object(configuration.L10n)) {
-				var language = session.language || wiki_API.language;
 				/** {Object}L10n messages. 符合當地語言的訊息內容。 */
-				gettext.set_text(configuration.L10n, language);
+				gettext.set_text(configuration.L10n);
 				library_namespace.info('adapt_task_configurations: Load '
 						+ Object.keys(configuration.L10n).length + ' '
-						+ language + ' messages.');
+						+ gettext.get_domain_name() + ' messages for '
+						+ wiki_API.site_name(session) + '.');
 				// console.trace(configuration.L10n);
 				// free
 				// delete configuration.L10n;
@@ -2889,6 +2911,8 @@ function module_code(library_namespace) {
 		set_language : set_default_language,
 		// site_name_of
 		site_name : language_to_site_name,
+		// @inner
+		get_first_domain_name_of_session : get_first_domain_name_of_session,
 
 		LTR_SCRIPTS : LTR_SCRIPTS,
 		PATTERN_LTR : PATTERN_LTR,

@@ -395,10 +395,24 @@ function module_code(library_namespace) {
 				 */
 				if (data.warnings && data.warnings.query
 				//
-				&& data.warnings.query['*'])
+				&& data.warnings.query['*']) {
 					library_namespace.warn(
 					//
 					'wiki_API_page: ' + data.warnings.query['*']);
+				}
+				if (error.code === 'toomanyvalues' && error.limit > 0) {
+					var session = wiki_API.session_of_options(options);
+					if (session) {
+						library_namespace.warn({
+							T : [ '調降取得頁面的上限，改成每次最多 %1 個頁面。', error.limit ]
+						});
+						// https://www.mediawiki.org/w/api.php
+						// slow queries: 500; fast queries: 5000
+						// The limits for slow queries also apply to multivalue
+						// parameters.
+						session.slow_query_limit = error.limit;
+					}
+				}
 				callback(undefined, error);
 				return;
 			}
