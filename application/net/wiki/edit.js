@@ -697,9 +697,9 @@ function module_code(library_namespace) {
 			}
 
 			bots.some(function(data) {
+				// data = data.toLowerCase();
 				library_namespace.debug('test [' + data + ']', 1,
 						'wiki_API_edit.denied');
-				data = data.toLowerCase();
 
 				var matched,
 				/** {RegExp}封鎖機器人訪問之 pattern。 */

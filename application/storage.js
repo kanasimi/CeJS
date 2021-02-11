@@ -341,13 +341,17 @@ function module_code(library_namespace) {
 			return [ pattern ];
 
 		var directory = matched[1] || '.' + path_separator;
-		pattern = library_namespace.wildcard_to_RegExp(matched[2]);
+		matched = matched[2];
+		pattern = library_namespace.wildcard_to_RegExp(matched);
 		// console.trace(pattern);
 
 		var fso_list = library_namespace.read_directory(directory);
 		// console.trace(fso_list);
 		fso_list = fso_list.filter(function(fso_name) {
-			return pattern.test(fso_name);
+			// console.trace([ fso_name, pattern, pattern.test(fso_name) ]);
+			return pattern.test(fso_name)
+			// e.g., 包含 "[", "]" 時。
+			|| fso_name === matched;
 		});
 		// console.trace(fso_list);
 

@@ -586,8 +586,11 @@ function module_code(library_namespace) {
 		if (callback)
 			delete options.callback;
 
-		if (!(options.all_file_count > 0))
+		if (!(options.all_file_count > 0)) {
+			// Warning: options.all_file_count will auto-added
+			// after read new directory.
 			options.all_file_count = 0;
+		}
 
 		function process_next_fso(promise, fso_name) {
 			var full_path = path + fso_name,

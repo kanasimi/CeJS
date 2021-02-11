@@ -2543,13 +2543,16 @@ function module_code(library_namespace) {
 			// 本地化 Localization: load localized messages.
 			// e.g., [[w:en:User:Cewbot/log/20150916/configuration]]
 			if (library_namespace.is_Object(configuration.L10n)) {
+				// `gettext.get_domain_name()` for default language
+				var language = gettext.to_standard(session.language
+						|| wiki_API.language);
 				/** {Object}L10n messages. 符合當地語言的訊息內容。 */
-				gettext.set_text(configuration.L10n);
+				gettext.set_text(configuration.L10n, language);
+				// console.trace(configuration.L10n);
 				library_namespace.info('adapt_task_configurations: Load '
 						+ Object.keys(configuration.L10n).length + ' '
-						+ gettext.get_domain_name() + ' messages for '
+						+ language + ' messages for '
 						+ wiki_API.site_name(session) + '.');
-				// console.trace(configuration.L10n);
 				// free
 				// delete configuration.L10n;
 			}

@@ -6157,7 +6157,8 @@ function module_code(library_namespace) {
 					return matched[1] + '/' + matched[2] + '/' + matched[3]
 					//
 					+ matched[5] + ' '
-					// new Date('2017/12/1 0:0 CST'):
+					// 'CST' in zh should be China Standard Time.
+					// But `new Date('2017/12/1 0:0 CST')` using
 					// Central Standard Time (North America)
 					// === new Date('2017/12/1 0:0 UTC-6')
 					// !== new Date('2017/12/1 0:0 UTC+8')
@@ -6204,12 +6205,18 @@ function module_code(library_namespace) {
 				// 'simple' && session.language === 'en'
 				language = session.language;
 			}
-			if (!options.timeoffset) {
-				// e.g., 480
-				options.timeoffset = session.configurations.timeoffset;
+			if (!isNaN(options.timeoffset)) {
+				options.zone = options.timeoffset / 60;
+			} else if (!('timeoffset' in options)) {
+				// e.g., 480 : UTC+8
+				options.zone = session.configurations.timeoffset / 60;
+			} else {
+				library_namespace
+						.warn('normalize_parse_date_options: Invalid timeoffset: '
+								+ options.timeoffset);
 			}
 		}
-		options.timeoffset |= 0;
+		options.zone |= 0;
 
 		if (!language) {
 			language = wiki_API.language;
@@ -6348,20 +6355,17 @@ function module_code(library_namespace) {
 		} else {
 			// treat `to_String` as date format
 			// assert: library_namespace.is_Object(to_String)
-			if (options.timeoffset && to_String.zone !== options.timeoffset) {
+			var zone = options.zone;
+			if (!isNaN(zone) && to_String.zone !== zone) {
+				// 不污染原型。
 				to_String = Object.clone(to_String);
-				to_String.zone = options.timeoffset / 60;
-				if (to_String.zone) {
-					to_String.format = to_String.format
-					// 顯示的時間跟隨 session.configurations.timeoffset。
-					.replace(/\(UTC(?:+0)?\)/, '(UTC'
-					//
-					+ (to_String.zone < 0 ? to_String.zone
-					//
-					: '+' + to_String.zone) + ')');
-				}
+				to_String.zone = zone;
+				to_String.format = to_String.format
+				// 顯示的時間跟隨 session.configurations.timeoffset。
+				.replace(/\(UTC(?:[+\-]\d)?\)/, '(UTC'
+						+ (zone < 0 ? zone : zone ? '+' + zone : '') + ')');
 			}
-			// console.trace(to_String);
+			// console.trace([ date, date.format(to_String), to_String ]);
 			date = date.format(to_String);
 		}
 		return date;

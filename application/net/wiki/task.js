@@ -2801,6 +2801,9 @@ function module_code(library_namespace) {
 				delete session.token.lgpassword;
 			}
 
+			// reset query limit for login as bot.
+			delete session.slow_query_limit;
+
 			// console.log(JSON.stringify(data));
 			if (data && data.warnings) {
 				// console.log(JSON.stringify(data.warnings));

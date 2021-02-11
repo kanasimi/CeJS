@@ -87,7 +87,9 @@ function module_code(library_namespace) {
 			// console.trace(options);
 			// console.trace(result);
 
-			if (session.badtoken_count >= max_badtoken_count) {
+			if (session.badtoken_count >= (isNaN(session.max_badtoken_count) ? max_badtoken_count
+					// 設定 `session.max_badtoken_count = 0` ，那麼只要登入一出問題就直接跳出。
+					: session.max_badtoken_count)) {
 				throw new Error(
 						'check_session_badtoken: Too many badtoken errors! Please re-execute the program!');
 				// delete session.badtoken_count;

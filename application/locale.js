@@ -464,6 +464,8 @@ function module_code(library_namespace) {
 			if (matched[7]) {
 				// 回吐最後一個 \d
 				conversion_pattern.lastIndex--;
+				// conversion_pattern.lastIndex -= matched[7].length
+				// - '|'.length;
 			}
 			last_index = conversion_pattern.lastIndex;
 
@@ -966,10 +968,11 @@ function module_code(library_namespace) {
 		// normalize domain
 		if (!(domain in gettext_texts))
 			domain = gettext.to_standard(domain);
+		// console.trace(domain);
 
-		if (clean_and_replace || !(domain in gettext_texts))
+		if (clean_and_replace || !(domain in gettext_texts)) {
 			gettext_texts[domain] = text_Object;
-		else {
+		} else {
 			// specify a new domain.
 			// gettext_texts[domain] = Object.create(null);
 

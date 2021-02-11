@@ -2538,9 +2538,9 @@ function module_code(library_namespace) {
 		// length of the string that you can use at the command prompt is 8191
 		// characters.
 		if (Array.isArray(file_list) && file_list.join('" "').length > 7800) {
-			library_namespace.warn({
+			library_namespace.warn([ archive_to_ZIP.name + ': ', {
 				T : '檔案列表過長，改成壓縮整個目錄。'
-			});
+			} ]);
 			// 當 epub 電子書非本工具產生時，可能有不同的目錄，必須重新讀取。
 			file_list = library_namespace.read_directory(this.path.root)
 			// archive all directory without mimetype
