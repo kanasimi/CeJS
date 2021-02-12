@@ -962,7 +962,8 @@ function module_code(library_namespace) {
 	 */
 
 	// 萬用字元 RegExp source, ReadOnly
-	wildcard_to_RegExp.w_chars = '*?\\[\\]';
+	// wildcard_to_RegExp.w_chars = '*?\\[\\]';
+	wildcard_to_RegExp.w_chars = '*?';
 
 	function wildcard_to_RegExp(pattern, flags) {
 
@@ -981,10 +982,11 @@ function module_code(library_namespace) {
 			r = pattern.replace(/(\\*)(\*+|\?+|\.)/g, function($0, $1, $2) {
 				var c = $2.charAt(0);
 				return $1.length % 2 ? $0 : $1
-						+ (c == '*' ? ic + '*' : c == '?' ? ic + '{'
+						+ (c === '*' ? ic + '*' : c === '?' ? ic + '{'
 								+ $2.length + '}' : '\\' + $2);
 			})
 		}
+
 		r = pattern
 
 		// 處理目錄分隔字元：多轉一，'/' → '\\' 或相反
@@ -1001,14 +1003,20 @@ function module_code(library_namespace) {
 			return '\0{' + $0.length + '}';
 		})
 
+		// [ ] 代表選擇其中一個字元
+		// pass
+		.replace(/([\[\]])/g, '\\$1')
+
+		// [! ] 代表除外的一個字元
+		// pass
+		// .replace(/\[!([^\]]*)\]/g, '[^$1]')
+
 		// translate wildcard characters
 		.replace(/\0+/g, ic)
 
-		// [ ] 代表選擇其中一個字元
-		// pass
+		;
 
-		// [! ] 代表除外的一個字元
-		.replace(/\[!([^\]]*)\]/g, '[^$1]');
+		// console.trace(r);
 
 		// 有變化的時候才 return RegExp
 		if (!(flags & 1) || pattern !== r) {
@@ -2025,8 +2033,8 @@ function module_code(library_namespace) {
 	use JSON.stringify()
 
 	</code>
-	
-	@see JSON.stringify()
+	 * 
+	 * @see JSON.stringify()
 	 */
 	// string,分割長度(會採用'~'+"~"的方式),separator(去除末尾用)
 	function dQuote(s, len, sp) {

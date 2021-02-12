@@ -616,6 +616,8 @@ function module_code(library_namespace) {
 				return promise.then(handler.bind(null, full_path, fso_status,
 						is_directory, options));
 			}
+
+			return promise;
 		}
 
 		return list.reduce(process_next_fso, Promise.resolve())
