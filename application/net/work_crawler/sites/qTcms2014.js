@@ -158,7 +158,7 @@ function module_code(library_namespace) {
 			}
 		},
 
-		parse_chapter_data : function(html, work_data) {
+		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
 			function decode(packed) {
 				var photosr = [];
 				// decode chapter data @ every picture page
@@ -180,11 +180,19 @@ function module_code(library_namespace) {
 			if (typeof this.postfix_image_url === 'function')
 				chapter_data = chapter_data.map(this.postfix_image_url);
 
+			chapter_data = Object.assign(
 			// 設定必要的屬性。
-			chapter_data = {
+			work_data.chapter_list[chapter_NO - 1], {
 				image_list : chapter_data
-			};
+			});
 			// console.log(JSON.stringify(chapter_data));
+
+			if (typeof this.postfix_chapter_data === 'function') {
+				// e.g., taduo.js 因为版权或其他问题，我们将对所有章节进行屏蔽！
+				chapter_data = this.postfix_chapter_data(chapter_data,
+						work_data)
+						|| chapter_data;
+			}
 
 			return chapter_data;
 		}
