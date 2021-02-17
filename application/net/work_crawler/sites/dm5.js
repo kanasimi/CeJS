@@ -74,7 +74,7 @@ function module_code(library_namespace) {
 		search_URL : function(work_title) {
 			return 'search.ashx?d=' + new Date().getTime()
 			//
-			+ '&t=' + work_title + '&language=1';
+			+ '&t=' + encodeURIComponent(work_title) + '&language=1';
 			// @see 搜索框文本改变 function SearchInputChange() @
 			// http://css122us.cdndm5.com/v201801302028/dm5/js/search.js
 			return [ 'search.ashx?d=' + new Date().getTime(), {
@@ -884,7 +884,15 @@ function module_code(library_namespace) {
 				_this.get_URL(_this.chapter_URL(work_data, chapter_NO)
 						+ 'chapterfun.ashx', function(XMLHttp, error) {
 					if (error) {
-						_this.onerror(error, work_data);
+						if (this.skip_error) {
+							try {
+								_this.onerror(error, work_data);
+							} catch (e) {
+								// TODO: handle exception
+							}
+						} else {
+							_this.onerror(error, work_data);
+						}
 						run_next();
 						return;
 					}
@@ -940,9 +948,22 @@ function module_code(library_namespace) {
 			// --------------------------------------
 
 			function get_image_file(image_NO, image_list, run_next) {
+				// console.trace(encodeURI(image_list[0]));
 				library_namespace.get_URL_cache(encodeURI(image_list[0]),
 				//
-				function() {
+				function(data, error, XMLHttp) {
+					// console.trace([ XMLHttp, error ]);
+					if (error) {
+						if (this.skip_error) {
+							try {
+								_this.onerror(error, image_list[0]);
+							} catch (e) {
+								// TODO: handle exception
+							}
+						} else {
+							_this.onerror(error, image_list[0]);
+						}
+					}
 					run_next();
 				}, {
 					file_name : image_file_path_of(image_NO),

@@ -48,7 +48,7 @@ function module_code(library_namespace) {
 	// "Error: read ECONNRESET"
 	// {errno: 'ECONNRESET', code: 'ECONNRESET', syscall: 'read'}
 	// Error: getaddrinfo ENOTFOUND domain
-	// "BAD STATUS"
+	// ERROR_BAD_STSTUS
 	// Error: Timeout 30s
 	function localize_error(error) {
 		var message = String(error);
@@ -327,7 +327,7 @@ function module_code(library_namespace) {
 				XMLHttp.timeout = options.timeout;
 				if (typeof options.onfail === 'function')
 					XMLHttp.ontimeout = function(e) {
-						options.onfail(e || 'Timeout');
+						options.onfail.call(XMLHttp, e || 'Timeout');
 					};
 			}
 			// TODO: 處理有 onload 下之 timeout 逾時ms數
@@ -357,7 +357,7 @@ function module_code(library_namespace) {
 			if (charset && XMLHttp.overrideMimeType)
 				XMLHttp.overrideMimeType(charset);
 
-			if (onload)
+			if (onload) {
 				XMLHttp.onreadystatechange = function() {
 					if (XMLHttp.readyState === readyState_done)
 						return onload(XMLHttp);
@@ -370,6 +370,7 @@ function module_code(library_namespace) {
 						options.onfail(XMLHttp);
 					}
 				};
+			}
 
 			// 若檔案不存在，會 throw。
 			XMLHttp.send(post_data || null);
@@ -1279,6 +1280,8 @@ function module_code(library_namespace) {
 		FORCE_POST : true
 	};
 
+	var ERROR_BAD_STSTUS = 'BAD STATUS';
+
 	var has_native_URL = typeof URL === "function" && !URL.not_native;
 
 	/**
@@ -1696,13 +1699,15 @@ function module_code(library_namespace) {
 		// on failed
 		_onfail = function(error) {
 			if (unregister()) {
-				// 預防 timeout 時重複執行。
+				// console.log('exit: 預防 timeout 時重複執行。');
 				return;
 			}
 
+			// console.trace([ options.error_count, options.error_retry ]);
 			// 連線逾期/失敗時再重新取得頁面之重試次數。
 			if (options.error_retry >= 1
-					&& !(options.error_retry <= options.error_count)) {
+			// 例如當遇到 404 或 502 時，再多嘗試一下。
+			&& !(options.error_retry <= options.error_count)) {
 				if (!options.get_URL_cloned) {
 					// 不動到原來的 options。
 					options = Object.clone(options);
@@ -1723,11 +1728,12 @@ function module_code(library_namespace) {
 				// console.error(error);
 				// library_namespace.set_debug(3);
 				get_URL_node(options, onload, charset, post_data);
+				// console.trace(options);
 				return;
 			}
 
 			if (typeof options.onfail === 'function') {
-				options.onfail(error);
+				options.onfail.call(result_Object, error);
 				return;
 			}
 
@@ -1804,8 +1810,11 @@ function module_code(library_namespace) {
 			merge_cookie(options.agent || agent, response.headers['set-cookie']);
 			// 先合併完cookie之後才能轉址，否則會漏失掉須設定的cookie。
 
-			// console.log('response:');
-			// console.log(response);
+			if (false && response.complete
+					&& (response.statusCode / 100 | 0) !== 2) {
+				console.log('response:');
+				console.log(response);
+			}
 			if ((response.statusCode / 100 | 0) === 3
 					&& response.headers.location
 					&& response.headers.location !== URL_to_fetch
@@ -2067,10 +2076,11 @@ function module_code(library_namespace) {
 				// 基本檢測。
 
 				if ((response.statusCode / 100 | 0) !== 2
-						&& options.error_retry >= 1
-						// 例如當遇到404或502時，再多嘗試一下。
-						&& !(options.error_retry <= options.error_count)) {
-					_onfail('BAD STATUS');
+				// 例如當遇到 404 或 502 時，再多嘗試一下。
+				&& options.error_retry >= 1
+				// 本條件參考 _onfail。
+				&& !(options.error_retry <= options.error_count)) {
+					_onfail(ERROR_BAD_STSTUS);
 					return;
 				}
 
@@ -2165,6 +2175,36 @@ function module_code(library_namespace) {
 					}
 				}
 
+				// ------------------------------
+				// setup data of result_Object
+
+				result_Object.buffer = data;
+				// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/response
+				result_Object.response = data;
+				// non-standard 非標準: 設定 charset = 'buffer' 的話，將回傳 {Buffer}。
+				if (data && charset !== 'buffer') {
+					// 未設定 charset 的話，default charset: UTF-8.
+					// buffer.toString(null) will throw!
+					data = data.toString(charset || undefined/* || 'utf8' */);
+				}
+
+				if (library_namespace.is_debug(4)) {
+					library_namespace.debug(
+					//
+					'BODY: ' + data, 1, 'get_URL_node');
+				}
+				// result_Object模擬 XMLHttp。
+				result_Object.responseText = data;
+
+				// ------------------------------
+
+				if ((response.statusCode / 100 | 0) !== 2) {
+					// ssert: options.error_retry >= 1 ? 最後一次 error
+					// : BAD STATUS and get something in `this.response`
+					_onfail(ERROR_BAD_STSTUS);
+					return;
+				}
+
 				if (unregister()) {
 					// 預防 timeout 時重複執行。
 					return;
@@ -2234,24 +2274,6 @@ function module_code(library_namespace) {
 					// ({Buffer}contains, URL, status)
 					data, URL_to_fetch, response.statusCode);
 				}
-
-				result_Object.buffer = data;
-				// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/response
-				result_Object.response = data;
-				// non-standard 非標準: 設定 charset = 'buffer' 的話，將回傳 {Buffer}。
-				if (data && charset !== 'buffer') {
-					// 未設定 charset 的話，default charset: UTF-8.
-					// buffer.toString(null) will throw!
-					data = data.toString(charset || undefined/* || 'utf8' */);
-				}
-
-				if (library_namespace.is_debug(4)) {
-					library_namespace.debug(
-					//
-					'BODY: ' + data, 1, 'get_URL_node');
-				}
-				// result_Object模擬 XMLHttp。
-				result_Object.responseText = data;
 
 				if (typeof options.check_reget === 'function'
 				// check_reget(XMLHttp)
@@ -2995,7 +3017,7 @@ function module_code(library_namespace) {
 						//
 						URL, localize_error(error) ]
 					} ]);
-					// WARNING: XMLHttp 僅在重新取得URL時提供。
+					// WARNING: XMLHttp 僅在重新取得 URL 時提供。
 					onload(undefined, error, XMLHttp);
 					return;
 				}
