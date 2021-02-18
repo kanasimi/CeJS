@@ -207,8 +207,11 @@ function module_code(library_namespace) {
 				delete page_data.revisions;
 				// 若有需要順便取得頁面內容，需要手動設定如:
 				// {get_creation_Date:true,prop:'revisions'}
-				if (options.query_props || options.prop) {
-					wiki_API_page(title, callback, options);
+				if (('query_props' in options) || ('prop' in options)) {
+					wiki_API_page(title, function(_page_data, error) {
+						// console.trace(title);
+						callback(Object.assign(page_data, _page_data), error);
+					}, options);
 				} else {
 					callback(page_data);
 				}
