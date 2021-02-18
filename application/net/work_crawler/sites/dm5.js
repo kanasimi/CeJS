@@ -884,7 +884,7 @@ function module_code(library_namespace) {
 				_this.get_URL(_this.chapter_URL(work_data, chapter_NO)
 						+ 'chapterfun.ashx', function(XMLHttp, error) {
 					if (error) {
-						if (this.skip_error) {
+						if (_this.skip_error) {
 							try {
 								_this.onerror(error, work_data);
 							} catch (e) {
@@ -954,7 +954,7 @@ function module_code(library_namespace) {
 				function(data, error, XMLHttp) {
 					// console.trace([ XMLHttp, error ]);
 					if (error) {
-						if (this.skip_error) {
+						if (_this.skip_error) {
 							try {
 								_this.onerror(error, image_list[0]);
 							} catch (e) {
