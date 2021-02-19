@@ -1579,9 +1579,10 @@ function module_code(library_namespace) {
 					return _page_data.title;
 				});
 			} else {
-				title = page_data.title || title
+				title = page_data && page_data.title || title
 			}
 
+			// console.error(error);
 			callback(title, page_data, error);
 		}, options);
 	};

@@ -406,7 +406,7 @@ function module_code(library_namespace) {
 				}
 				if (error.code === 'toomanyvalues' && error.limit > 0) {
 					var session = wiki_API.session_of_options(options);
-					if (session) {
+					if (session && !(session.slow_query_limit < error.limit)) {
 						library_namespace.warn([ 'wiki_API_page: ', {
 							T : [ '調降取得頁面的上限，改成每次最多 %1 個頁面。', error.limit ]
 						} ]);
@@ -415,6 +415,19 @@ function module_code(library_namespace) {
 						// The limits for slow queries also apply to multivalue
 						// parameters.
 						session.slow_query_limit = error.limit;
+					}
+
+					// 嘗試自動將所要求的 query 切成小片。
+					// TODO: 此功能應放置於 wiki_API.query() 中。
+					if (options.try_cut_slice && Array.isArray(title)
+					// 2: 避免 is_api_and_title(title)
+					&& title.length > 2) {
+						// TODO: 將 title 切成 slice，重新 request。
+						options.multi = true;
+						options.slice_size = error.limit;
+						// console.trace(title);
+						wiki_API_page(title, callback, options);
+						return;
 					}
 				}
 				callback(undefined, error);
@@ -799,6 +812,9 @@ function module_code(library_namespace) {
 			}
 
 			if (options.expandtemplates) {
+				if (options.titles_left)
+					throw new Error('There are options.titles_left!');
+
 				// 需要expandtemplates的情況。
 				if (!Array.isArray(page_list)) {
 					// TODO: test
@@ -844,11 +860,34 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			if (options.titles_left) {
+				if (options.titles_buffer) {
+					options.titles_buffer.append(page_list);
+					page_list.truncate();
+					library_namespace.error(
+					//
+					'wiki_API_page: Lost properties: '
+					//
+					+ Object.keys(page_list).join(', '));
+				} else {
+					options.titles_buffer = page_list;
+				}
+				if (false) {
+					console.trace('get next page slices ('
+					//
+					+ options.slice_size + '): ' + options.titles_left);
+				}
+				wiki_API_page(null, callback, options);
+				return;
+			}
+
 			// 一般正常回傳。
 
 			if (false && page_list && page_list.title) {
 				console.trace('Get page and callback: ' + page_list.title);
 			}
+			if (options.titles_buffer)
+				page_list = options.titles_buffer.append(page_list);
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
 			callback(page_list);
@@ -1292,6 +1331,7 @@ function module_code(library_namespace) {
 		.replace(/%u[\dA-F]{4}/g, unescape);
 		// assert: 此時 text 不應包含任何可被 MediaWiki parser 解析的語法。
 
+		// + {{int:Conversionname}}
 		// assert: '!' === encodeURIComponent('!')
 		text = '!' + text + '!';
 

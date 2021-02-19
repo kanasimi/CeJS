@@ -265,8 +265,47 @@ function module_code(library_namespace) {
 				// 即便設定 options.multi，也不該有 /^https?:\/\/.+\.php/i 的標題。
 				&& !/^https?:\/\/.+\.php$/.test(title[0])
 				|| !is_api_and_title(title, true) ? [ , title ]
-		// 不改變原 title。
-		: title.clone();
+		// title.clone(): 不改變原 title。
+		: Array.isArray(title) ? title.clone() : [];
+
+		if (options.slice_size >= 1) {
+			// console.trace(action);
+			if (Array.isArray(action[1])) {
+				if (action[1].length > options.slice_size) {
+					var titles_left = action[1].splice(options.slice_size,
+							action[1].length);
+					if (Array.isArray(options.titles_left)) {
+						Array.prototype.unshift.apply(options.titles_left,
+								titles_left);
+					} else {
+						if (options.titles_left) {
+							throw new Error(
+							// Warning:
+							'normalize_title_parameter: Invalid usage: options.titles_left is not {Array}!');
+							titles_left.push(options.titles_left);
+						}
+						options.titles_left = titles_left;
+						library_namespace
+								.warn('normalize_title_parameter: 將 title list 切分成 slice: '
+										+ action[1].length
+										+ ' + '
+										+ options.titles_left.length + '。');
+					}
+				}
+			} else if (!action[1] && Array.isArray(options.titles_left)) {
+				action[1] = options.titles_left.splice(0, options.slice_size);
+				library_namespace
+						.log('normalize_title_parameter: 接續取得 title list slice: '
+								+ action[1].length
+								+ ' + '
+								+ options.titles_left.length + '。');
+			}
+		}
+		if (Array.isArray(options.titles_left)
+				&& options.titles_left.length === 0) {
+			delete options.titles_left;
+		}
+
 		// console.trace([ title, action ]);
 		if (!is_api_and_title(action, false, options)) {
 			// console.trace('normalize_title_parameter: Invalid title!');
@@ -450,6 +489,9 @@ function module_code(library_namespace) {
 	// https://noc.wikimedia.org/conf/highlight.php?file=InitialiseSettings.php
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	// @see [[Special:Interwiki]] 跨維基資料 跨 wiki 字首
+	// @see two-letter project code shortcuts
+	// [[m:Requests_for_comment/Set_short_project_namespace_aliases_by_default_globally]]
+
 	api_URL.alias = {
 		// project with language prefix
 		// project: language.*.org
