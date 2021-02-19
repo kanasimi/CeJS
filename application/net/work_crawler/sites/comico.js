@@ -272,6 +272,7 @@ function module_code(library_namespace) {
 				throw new Error(work_data.title + ': ' + 'Total page is '
 						+ html.totalPageCnt + ', not 1!');
 			}
+			// 作品改變 titleNo 時，舊 id 可能會回傳 `{"result":{}}`
 			html.list.forEach(function(chapter_data, index) {
 				chapter_data.url = chapter_data.articleDetailUrl;
 				// 原先都將標題設在 subtitle，title 沒東西。
@@ -481,7 +482,7 @@ function module_code(library_namespace) {
 				return chapter_data;
 			}
 
-			var image_url_list = html.between(
+			var matched, image_url_list = html.between(
 			// TW: <div class="locked-episode__kv _lockedEpisodeKv"
 			// コミコ: <div class="locked-episode locked-episode--show-kv">
 			'<div class="locked-episode', '</div>');
@@ -552,6 +553,13 @@ function module_code(library_namespace) {
 					// コミコ 日文版一般漫畫將所有圖片放在這之間，無 cmnData.imageData。
 					cmnData.imageData = image_url_list;
 				}
+
+			} else if (matched = html
+			// e.g., https://www.comico.jp/detail.nhn?titleNo=4235&articleNo=219
+			.match(/<h2 class="[^"<>]*o-txt-error[^"<>]*">([\s\S]+?)<\/h2>/)) {
+				var message = get_label(matched[1]);
+				throw new Error(work_data.title + ' §' + chapter_NO + ': '
+						+ message);
 
 			} else if (html.includes('<p class="error-section__ttl">')) {
 				var message = get_label(html.between(
