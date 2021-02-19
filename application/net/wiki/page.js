@@ -1281,8 +1281,8 @@ function module_code(library_namespace) {
 
 		var is_JSON;
 		if (typeof text === 'object') {
+			is_JSON = text;
 			text = JSON.stringify(text);
-			is_JSON = true;
 		}
 
 		// 作基本的 escape。不能用 encodeURIComponent()，這樣會把中文也一同 escape 掉。
@@ -1316,17 +1316,25 @@ function module_code(library_namespace) {
 				return;
 			}
 			data = data.parse;
-			text = data.text['*']
+			data = data.text['*']
 			// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
 			.replace(/<!--[\s\S]*?-->/g, '')
 			// 去掉前後包覆。 e.g., <p> or <pre>
 			.replace(/![^!]*$/, '').replace(/^[^!]*!/, '');
 			try {
 				// recover special characters
-				text = unescape(text);
-				if (is_JSON)
-					text = JSON.parse(text);
-				callback(text);
+				data = unescape(data);
+				if (is_JSON) {
+					data = JSON.parse(data);
+					if (Array.isArray(is_JSON)
+							&& is_JSON.length !== data.length) {
+						throw new Error(
+						//
+						'wiki_API.convert_Chinese: fault on {Array}: '
+								+ is_JSON.length + ' !== ' + data.length);
+					}
+				}
+				callback(data);
 			} catch (e) {
 				callback(undefined, e);
 			}

@@ -2749,7 +2749,32 @@ function module_code(library_namespace) {
 			page_title = this.to_namespace(page_title, options.namespace);
 		page_title = this.normalize_title(page_title);
 
+		if (Array.isArray(page_title)) {
+			return page_title.map(function(title) {
+				return this.redirect_target_of(title, options);
+			}, this);
+		}
+
 		return this.redirects_data[page_title] || page_title;
+	}
+
+	function aliases_of_page(page_title, options) {
+		page_title = this.normalize_title(page_title);
+		options = library_namespace.setup_options(options);
+		if (Array.isArray(page_title)) {
+			var list = [];
+			page_title.forEach(function(title) {
+				list.append(this.aliases_of_page(title, options));
+			}, this);
+			return list;
+		}
+
+		return this.redirects_data[page_title] ? Object.keys(
+				this.redirects_data).filter(function(_page_title) {
+			return (!options.alias_only || _page_title !== page_title)
+			//
+			&& this.redirects_data[_page_title] === page_title;
+		}, this) : [ page_title ];
 	}
 
 	function is_template(template_name, token, options) {
@@ -2802,6 +2827,7 @@ function module_code(library_namespace) {
 	// @instance 實例相關函數。
 	Object.assign(wiki_API.prototype, {
 		redirect_target_of : redirect_target_of,
+		aliases_of_page : aliases_of_page,
 		is_template : is_template,
 
 		// @see function get_continue(), get_list()

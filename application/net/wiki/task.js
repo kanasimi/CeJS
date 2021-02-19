@@ -474,7 +474,17 @@ function module_code(library_namespace) {
 			}
 
 			// next[3] : options
-			if (next[3] && next[3].one_by_one && Array.isArray(next[1])) {
+			next[3] = Object.assign({
+				// [KEY_SESSION]
+				session : this,
+				// Making .redirect_list[0] the redirect target.
+				include_root : true,
+				// converttitles: 1,
+				multi : Array.isArray(next[1]) && next[1].length > 1
+			}, next[3]);
+
+			// next[3] : options
+			if (next[3].one_by_one && Array.isArray(next[1])) {
 				next[1].reverse();
 				_this.actions.unshift([ next[0], next[1].shift(), next[2],
 						next[3] ]);
@@ -489,29 +499,22 @@ function module_code(library_namespace) {
 			}
 
 			// next[1]: page_title
-			if (next[3] && next[3].namespace)
+			if (next[3].namespace)
 				next[1] = this.to_namespace(next[1], next[3].namespace);
 			next[1] = this.normalize_title(next[1]);
-			if (Array.isArray(next[1])) {
+			if (next[3].reget) {
+			} else if (Array.isArray(next[1])) {
 				next[1] = next[1].filter(function(page_title) {
 					return !(page_title in _this.redirects_data);
 				}).unique();
 			} else if (next[1] in this.redirects_data) {
+				// 已處理過。
 				// have registered
 				break;
 			}
 
-			// next[3] : options
-			next[3] = Object.assign({
-				// [KEY_SESSION]
-				session : this,
-				// Making .redirect_list[0] the redirect target.
-				include_root : true,
-				// converttitles: 1,
-				multi : Array.isArray(next[1]) && next[1].length > 1
-			}, next[3]);
-
-			// console.trace(next[1]);
+			// console.trace(JSON.stringify(next[1]));
+			// 解析出所有 next[1] 別名
 			// next[1]: page_title
 			wiki_API.redirects_here(next[1], function(root_page_data,
 					redirect_list, error) {
@@ -532,28 +535,45 @@ function module_code(library_namespace) {
 				var registered_page_list = Array.isArray(next[1]) ? next[1]
 						: [ next[1] ];
 				function register_title(from, to) {
-					if (!from || (from in _this.redirects_data))
+					if (!from
+					// || (from in _this.redirects_data)
+					) {
 						return;
+					}
 					// assert: from ===
 					// _this.normalize_title(from)
 					// the namespace of from, to is normalized
 					_this.redirects_data[from] = to;
 					registered_page_list.push(from);
 				}
-				function register_redirect_list(page_title, redirect_list) {
-					var is_missing = ('missing' in redirect_list[0])
-							|| ('invalid' in redirect_list[0]);
+				function register_root_alias(page_data) {
+					if (page_data.original_title) {
+						// console.trace(page_data);
+						register_title(page_data.original_title,
+						//
+						page_data.title);
+					}
+					if (page_data.redirect_from) {
+						register_title(page_data.redirect_from,
+						//
+						page_data.title);
+					}
+				}
+				function register_redirect_list(redirect_list, page_title) {
+					// console.trace(redirect_list);
+					// 本名
 					var target_page_title = redirect_list[0].title;
+					var is_missing = !target_page_title
+							|| ('missing' in redirect_list[0])
+							|| ('invalid' in redirect_list[0]);
 					if (!is_missing) {
 						redirect_list.forEach(function(page_data) {
 							register_title(page_data.title, target_page_title);
-							// TODO: 處理 converttitles。
-							// e.g., for 'Template:專家'
-							register_title(page_data.original_title,
-									target_page_title);
-							register_title(page_data.redirect_from,
-									target_page_title);
 						});
+					}
+
+					if (next[3].no_message) {
+						return;
 					}
 
 					var message = 'register_redirects: '
@@ -587,17 +607,21 @@ function module_code(library_namespace) {
 				if (redirect_list) {
 					// e.g., wiki_API.redirects_here({String})
 					// console.trace([ next[1], root_page_data ]);
-					register_redirect_list(Array.isArray(next[1])
+					register_redirect_list(redirect_list,
+					//
+					Array.isArray(next[1]) ?
 					// assert: next[1].length === 1
-					? next[1][0] : next[1], redirect_list);
+					next[1][0] : next[1]);
+					register_root_alias(root_page_data);
 				} else {
 					// e.g., wiki_API.redirects_here({Array})
 					root_page_data.forEach(function(page_data) {
 						// console.trace(page_data.redirect_list);
 						// console.trace(page_data.original_title);
-						register_redirect_list(page_data.original_title
-								|| page_data.title, page_data.redirect_list
-								|| [ page_data ]);
+						register_redirect_list(page_data.redirect_list
+								|| [ page_data ], page_data.original_title
+								|| page_data.title);
+						register_root_alias(page_data);
 					});
 				}
 
@@ -612,16 +636,20 @@ function module_code(library_namespace) {
 					return;
 				}
 
+				// 處理 converttitles。
 				// console.trace('處理繁簡轉換問題: ' + registered_page_list);
 				// console.trace(root_page_data);
+				// console.trace(JSON.stringify(_this.redirects_data));
 				function register_redirect_list_via_mapper(original_list,
 						list_to_mapper) {
+					// console.trace(next[3].uselang + ': ' + list_to_mapper);
 					list_to_mapper.forEach(function(map_from, index) {
-						if (!(map_from in _this.redirects_data)) {
-							_this.redirects_data[map_from]
-							//
-							= _this.redirects_data[original_list[index]];
-						}
+						// if (map_from in _this.redirects_data) return;
+						var map_to
+						//
+						= _this.redirects_data[original_list[index]];
+						// console.log(map_from + ' → ' + map_to);
+						_this.redirects_data[map_from] = map_to;
 					});
 				}
 
