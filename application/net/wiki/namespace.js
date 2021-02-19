@@ -253,7 +253,7 @@ function module_code(library_namespace) {
 	 * 
 	 * setup [ {String}API_URL, title ]
 	 * 
-	 * @param {String}title
+	 * @param {String|Array}title
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @see api_URL
@@ -267,6 +267,7 @@ function module_code(library_namespace) {
 				|| !is_api_and_title(title, true) ? [ , title ]
 		// 不改變原 title。
 		: title.clone();
+		// console.trace([ title, action ]);
 		if (!is_api_and_title(action, false, options)) {
 			// console.trace('normalize_title_parameter: Invalid title!');
 			library_namespace.warn(

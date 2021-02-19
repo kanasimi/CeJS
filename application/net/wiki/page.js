@@ -268,6 +268,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// console.trace(title);
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
 			library_namespace.error('wiki_API_page: Invalid title: '
@@ -1251,8 +1252,14 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	if (false) {
-		CeL.wiki.convert_Chinese('中国', function(text) {
-			text === "中國";
+		CeL.wiki.convert_Chinese('中国', function(converted_text) {
+			converted_text === "中國";
+		});
+
+		CeL.wiki.convert_Chinese([ '繁體', '簡體' ], function(converted_hans) {
+			converted_hans[0] === "繁体";
+		}, {
+			uselang : 'zh-hans'
 		});
 	}
 
@@ -1298,10 +1305,12 @@ function module_code(library_namespace) {
 			text : text
 		};
 
+		var session = wiki_API.session_of_options(options);
+
 		// 由於用 [[link]] 也不會自動 redirect，因此直接轉換即可。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
-		wiki_API.query([ wiki_API.api_URL('zh'), 'action=parse' ], function(
-				data, error) {
+		wiki_API.query([ session && session.API_URL || wiki_API.api_URL('zh'),
+				'action=parse' ], function(data, error) {
 			if (error || !data) {
 				callback(undefined, error);
 				return;
@@ -1364,7 +1373,7 @@ function module_code(library_namespace) {
 	// 監視最近更改的頁面。
 
 	function get_recent_via_API(callback, options) {
-		var session = options && options[KEY_SESSION];
+		var session = wiki_API.session_of_options(options);
 		if (!session) {
 			// 先設定一個以方便操作。
 			session = new wiki_API(null, null, options.language
@@ -1423,7 +1432,7 @@ function module_code(library_namespace) {
 			options.rvlimit = 'max';
 		}
 
-		var session = options[KEY_SESSION],
+		var session = wiki_API.session_of_options(options),
 		// @see .SQL_config
 		where = options.SQL_options
 		//
@@ -3070,7 +3079,7 @@ function module_code(library_namespace) {
 
 		function cache__for_each_page() {
 			// 有設定 config[KEY_SESSION] 才能獲得如 bot 之類，一次讀取/操作更多頁面的好處。
-			var session = config[KEY_SESSION]
+			var session = wiki_API.session_of_options(config)
 			//
 			|| new wiki_API(config.user, config.password, config.language);
 			// includes redirection 包含重新導向頁面.

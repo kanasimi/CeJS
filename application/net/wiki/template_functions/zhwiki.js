@@ -111,6 +111,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// for {{簡繁轉換}} @ [[w:zh:簡繁轉換一對多列表]]
+	// @see wiki_API.convert_Chinese()
 	function for_template_簡繁轉換(template_token) {
 		function convert_to_string(parameter) {
 			var words = template_token.parameters[parameter];
@@ -154,7 +155,7 @@ function module_code(library_namespace) {
 					.test(words)) {
 				// words.charCodeAt(0).toString(16)
 				console.log([ words, words.replace(
-				//
+				// 匹配中文字符的正則表達式
 				/[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u2E80-\u2EFF]/g,
 				//
 				'') ]);

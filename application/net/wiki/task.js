@@ -491,17 +491,32 @@ function module_code(library_namespace) {
 			// next[1]: page_title
 			if (next[3] && next[3].namespace)
 				next[1] = this.to_namespace(next[1], next[3].namespace);
-			if (this.normalize_title(next[1]) in this.redirects_data) {
+			next[1] = this.normalize_title(next[1]);
+			if (Array.isArray(next[1])) {
+				next[1] = next[1].filter(function(page_title) {
+					return !(page_title in _this.redirects_data);
+				}).unique();
+			} else if (next[1] in this.redirects_data) {
 				// have registered
 				break;
 			}
+
+			// next[3] : options
+			next[3] = Object.assign({
+				// [KEY_SESSION]
+				session : this,
+				// Making .redirect_list[0] the redirect target.
+				include_root : true,
+				// converttitles: 1,
+				multi : Array.isArray(next[1]) && next[1].length > 1
+			}, next[3]);
 
 			// console.trace(next[1]);
 			// next[1]: page_title
 			wiki_API.redirects_here(next[1], function(root_page_data,
 					redirect_list, error) {
 				if (error) {
-					// next[2] : callback(redirect_list, error)
+					// next[2] : callback(root_page_data, error)
 					next[2] && next[2](null, error);
 					_this.next();
 					return;
@@ -514,16 +529,30 @@ function module_code(library_namespace) {
 							|| redirect_list === root_page_data.redirect_list);
 				}
 
+				var registered_page_list = Array.isArray(next[1]) ? next[1]
+						: [ next[1] ];
+				function register_title(from, to) {
+					if (!from || (from in _this.redirects_data))
+						return;
+					// assert: from ===
+					// _this.normalize_title(from)
+					// the namespace of from, to is normalized
+					_this.redirects_data[from] = to;
+					registered_page_list.push(from);
+				}
 				function register_redirect_list(page_title, redirect_list) {
-					var is_missing = 'missing' in redirect_list[0];
+					var is_missing = ('missing' in redirect_list[0])
+							|| ('invalid' in redirect_list[0]);
 					var target_page_title = redirect_list[0].title;
 					if (!is_missing) {
 						redirect_list.forEach(function(page_data) {
-							_this.redirects_data[page_data.title]
-							// assert: page_data.title ===
-							// _this.normalize_title(page_data.title)
-							// the namespace of page_data.title is normalized
-							= target_page_title;
+							register_title(page_data.title, target_page_title);
+							// TODO: 處理 converttitles。
+							// e.g., for 'Template:專家'
+							register_title(page_data.original_title,
+									target_page_title);
+							register_title(page_data.redirect_from,
+									target_page_title);
 						});
 					}
 
@@ -556,11 +585,13 @@ function module_code(library_namespace) {
 				}
 
 				if (redirect_list) {
+					// e.g., wiki_API.redirects_here({String})
 					// console.trace([ next[1], root_page_data ]);
 					register_redirect_list(Array.isArray(next[1])
 					// assert: next[1].length === 1
 					? next[1][0] : next[1], redirect_list);
 				} else {
+					// e.g., wiki_API.redirects_here({Array})
 					root_page_data.forEach(function(page_data) {
 						// console.trace(page_data.redirect_list);
 						// console.trace(page_data.original_title);
@@ -572,17 +603,46 @@ function module_code(library_namespace) {
 
 				// console.trace(_this.redirects_data);
 
-				// next[2] : callback(redirect_list, error)
-				next[2] && next[2](redirect_list);
-				_this.next();
+				if (next[3].no_languagevariants || !_this.has_languagevariants
+				// || !/[\u4e00-\u9fa5]/.test(next[1])
+				) {
+					// next[2] : callback(root_page_data, error)
+					next[2] && next[2](root_page_data);
+					_this.next();
+					return;
+				}
+
+				// console.trace('處理繁簡轉換問題: ' + registered_page_list);
+				// console.trace(root_page_data);
+				function register_redirect_list_via_mapper(original_list,
+						list_to_mapper) {
+					list_to_mapper.forEach(function(map_from, index) {
+						if (!(map_from in _this.redirects_data)) {
+							_this.redirects_data[map_from]
+							//
+							= _this.redirects_data[original_list[index]];
+						}
+					});
+				}
+
+				// next[3] : options
+				next[3].uselang = 'zh-hant';
+				wiki_API.convert_Chinese(registered_page_list, function(
+						converted_hant) {
+					register_redirect_list_via_mapper(registered_page_list,
+							converted_hant);
+					next[3].uselang = 'zh-hans';
+					wiki_API.convert_Chinese(registered_page_list, function(
+							converted_hans) {
+						register_redirect_list_via_mapper(registered_page_list,
+								converted_hans);
+						next[2] && next[2](root_page_data);
+						_this.next();
+					}, next[3]);
+				}, next[3]);
 			},
 			// next[3] : options
-			Object.assign({
-				// [KEY_SESSION]
-				session : this,
-				// Making .redirect_list[0] the redirect target.
-				include_root : true
-			}, next[3]));
+			next[3]);
 			break;
 
 		case 'search':
