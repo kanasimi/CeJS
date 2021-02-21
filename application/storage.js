@@ -410,7 +410,7 @@ function module_code(library_namespace) {
 
 			} else {
 				library_namespace.debug(
-				// 家目錄
+				// 家目錄 @see os.userInfo().homedir , os.homedir()
 				'預設的主要下載目錄設置於用戶個人文件夾  home directory 下: ' + download_directory,
 						1, 'determin_download_directory');
 			}

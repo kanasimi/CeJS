@@ -1581,11 +1581,13 @@ function module_code(library_namespace) {
 			if (options.with_diff === true) {
 				options.with_diff = {
 					LCS : true,
+
+					// line : false,
+					// index : 2,
+					// with_list : true
+
 					// MediaWiki using line-diff
-					line : true,
-				// line : false,
-				// index : 2,
-				// with_list : true
+					line : true
 				};
 			}
 			options.with_diff.diff = true;

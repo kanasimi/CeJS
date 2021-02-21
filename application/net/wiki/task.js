@@ -483,34 +483,49 @@ function module_code(library_namespace) {
 				multi : Array.isArray(next[1]) && next[1].length > 1
 			}, next[3]);
 
-			// next[3] : options
-			if (next[3].one_by_one && Array.isArray(next[1])) {
-				next[1].reverse();
-				_this.actions.unshift([ next[0], next[1].shift(), next[2],
-						next[3] ]);
-				// remove callback
-				next[2] = undefined;
-				next[1].forEach(function(page_title) {
-					var _next = next.clone();
-					_next[1] = page_title;
-					_this.actions.unshift(_next);
-				});
-				next = _this.actions.shift();
-			}
-
 			// next[1]: page_title
 			if (next[3].namespace)
 				next[1] = this.to_namespace(next[1], next[3].namespace);
 			next[1] = this.normalize_title(next[1]);
+
 			if (next[3].reget) {
 			} else if (Array.isArray(next[1])) {
 				next[1] = next[1].filter(function(page_title) {
 					return !(page_title in _this.redirects_data);
 				}).unique();
+				if (next[1].length === 0) {
+					// next[2] : callback(root_page_data, error)
+					next[2] && next[2]();
+					this.next();
+					break;
+				}
+
 			} else if (next[1] in this.redirects_data) {
 				// 已處理過。
 				// have registered
+				// next[2] : callback(root_page_data, error)
+				next[2] && next[2]();
+				this.next();
 				break;
+			}
+
+			if (Array.isArray(next[1])) {
+				// next[3] : options
+				var slice_size = next[3].one_by_one ? 1
+				// 50: 避免 HTTP status 414: Request-URI Too Long
+				: next[3].slice_size >= 1 ? Math.min(50, next[3].slice_size)
+						: 50;
+				while (next[1].length > slice_size) {
+					_this.actions.unshift([ next[0],
+					// keep request order
+					slice_size === 1 ? next[1].pop()
+					//
+					: next[1].splice(next[1].length - slice_size, slice_size),
+							next[2], next[3] ]);
+					// remove callback: only run callback at the latest
+					// time.
+					next[2] = undefined;
+				}
 			}
 
 			// console.trace(JSON.stringify(next[1]));

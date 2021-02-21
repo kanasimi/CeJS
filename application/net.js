@@ -237,6 +237,7 @@ function module_code(library_namespace) {
 		if (!matched)
 			return;
 
+		// console.log(href);
 		library_namespace.debug('parse [' + URI + ']: '
 				+ matched.join('<br />\n'), 2);
 
@@ -378,6 +379,7 @@ function module_code(library_namespace) {
 				tmp = null;
 			}
 			if (options.as_URL) {
+				// library_namespace.debug('search: [' + matched[5] + ']', 2);
 				// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 				URI.searchParams = new URLSearchParams(matched[5], tmp);
 			} else {
@@ -393,25 +395,29 @@ function module_code(library_namespace) {
 		Object.defineProperty(URI, 'toString', {
 			value : URI_toString
 		});
-		// Generate .href
+		library_namespace.debug('Generate .href of URI by URI_toString()', 2);
 		URI.toString();
 
 		library_namespace.debug('href: [' + URI.href + ']', 2);
 		return URI;
 	}
 
-	function search_getter() {
-		var search = 'search_params' in this
+	function search_getter(URI) {
+		// library_namespace.debug('normalize properties by search_getter');
+		// library_namespace.debug(this.search_params);
+		URI = URI || this;
+		var search = 'search_params' in URI
 		//
-		? this.search_params.toString() : this.searchParams.toString();
+		? URI.search_params.toString()
+		// options.as_URL?
+		: URI.searchParams.toString();
 		return search ? '?' + search : '';
 	}
 
 	function URI_toString(charset) {
 		var URI = this;
 		if (Object.defineProperty.not_native) {
-			// normalize properties
-			URI.search = search_getter.call(this);
+			URI.search = search_getter(URI);
 			if ((URI.hash = String(URI.hash)) && !URI.hash.startsWith('#')) {
 				URI.hash = '#' + URI.hash;
 			}
@@ -662,12 +668,20 @@ function module_code(library_namespace) {
 	}
 
 	function defective_URLSearchParams(search_string, options) {
+		// library_namespace.debug(search_string);
 		// Warning: new Map() 少了許多必要的功能! 不能完全替代!
-		var search = Object.entries(parse_URI.parse_search(search_string,
-				options));
+		var search = Object.entries(
+		//
+		parse_URI.parse_search(search_string, options)).filter(function(entry) {
+			return !(entry[0] in ignore_search_properties);
+		});
+		// library_namespace.info(search.length);
+
+		// alert(Array.isArray(search));
 		try {
 			Map.call(this, search);
-			// Object.assign(search, Map.prototype);
+			if (!this.forEach)
+				throw 1;
 			return;
 		} catch (e) {
 			// node.js 0.11: Constructor Map requires 'new'
@@ -709,6 +723,7 @@ function module_code(library_namespace) {
 			return [ original_value ];
 		},
 		append : function append(key, value) {
+			// defective_URLSearchParams.prototype.toString
 			if (this.has(key)) {
 				var original_value = Map.prototype.get.call(this, key);
 				if (Array.isArray(original_value))
@@ -720,6 +735,7 @@ function module_code(library_namespace) {
 			}
 		},
 		toString : function toString() {
+			// defective_URLSearchParams.prototype.toString
 			var list = [];
 			this.forEach(function(value, key) {
 				key = encodeURIComponent(key) + '=';

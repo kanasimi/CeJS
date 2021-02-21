@@ -301,6 +301,7 @@ function test_compatibility() {
 		[['https://github.com/kanasimi/CeJS', CeL.simplify_path('https://github.com/kanasimi/a/../CeJS')], 'simplify_path http://-2'],
 		[['https://github.com/kanasimi/CeJS', CeL.simplify_path('https://github.com/kanasimi/a/b/../../CeJS')], 'simplify_path http://-3'],
 		[['https://github.com/kanasimi/http://CeJS', CeL.simplify_path('https://github.com/kanasimi/http://a/b/../../CeJS')], 'simplify_path http://-4'],
+		[['http://a.b/?w=4', CeL.simplify_path('http://a.b/?w=4')], 'simplify_path http:// no path'],
 		[['/p/a/http://d.o/p/a', CeL.simplify_path('/p/a/http://d.o/p/a')], 'simplify_path /http://#1'],
 		[['/p/a/http://d.o/p/a', CeL.simplify_path('/p/a/http://d.o//p/a')], 'simplify_path /http://#2'],
 		[['https://d.o/p/a/http://d.o/p/a', CeL.simplify_path('https://d.o/p/a/http://d.o/p/a')], 'simplify_path /http://#3'],
@@ -2044,6 +2045,8 @@ function test_net() {
 
 		// TODO:
 		//[[typeof URL, 'function'], 'parse_URI() #1'],
+		[['a.b', CeL.net.parse_URI('http://a.b/?w=4').hostname], 'parse_URI() #1'],
+		[['a.b', CeL.net.parse_URI('http://a.b/p?w=4').hostname], 'parse_URI() #2'],
 	]);
 }
 

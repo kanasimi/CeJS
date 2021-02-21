@@ -24,6 +24,8 @@ typeof CeL === 'function' && CeL.run({
 	name : 'application.net.wiki.query',
 
 	require : 'application.net.Ajax.get_URL'
+	// URLSearchParams()
+	+ '|application.net.'
 	// library_namespace.age_of()
 	+ '|data.date.' + '|application.net.wiki.'
 	// load MediaWiki module basic functions
@@ -211,6 +213,13 @@ function module_code(library_namespace) {
 
 		// 處理 action
 		library_namespace.debug('action: ' + action, 2, 'wiki_API_query');
+		if (false) {
+			// TODO
+			if (action instanceof URLSearchParams) {
+			}
+			if (action instanceof URL) {
+			}
+		}
 		if (typeof action === 'string') {
 			action = [ , action ];
 		} else if (!Array.isArray(action)) {

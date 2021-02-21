@@ -466,6 +466,7 @@ if (typeof CeL === 'function') {
 					: 'node';
 			_.platform.version = process.versions.electron
 					|| process.versions.node;
+			// @see os.version()
 			_.platform.OS = process.platform;
 			// shortcut for Windows
 			_.platform.Windows = _.platform.is_Windows();
@@ -1398,11 +1399,15 @@ if (typeof CeL === 'function') {
 					// e.g., '/path/to/http://example.org/path/to/'
 				}
 				is_URL = true;
-				if (tail = path.match(/^([^#?]+)([#?].*?)$/) || '')
-					path = tail[1], tail = tail[2];
-				if (/\/$/.test(path))
+				if (tail = path.match(/^([^#?]+)([#?].*?)$/) || '') {
+					path = tail[1];
+					tail = tail[2];
+				}
+				if (/\/$/.test(path)) {
 					// 保存 path 最後的 '/'。
-					path = path.slice(0, -1), tail = '/' + tail;
+					path = path.slice(0, -1);
+					tail = '/' + tail;
+				}
 				path = path.replace(/:\/\//g, encodeURIComponent(':/') + '/');
 			} else {
 				path = path.replace(
@@ -1419,9 +1424,10 @@ if (typeof CeL === 'function') {
 					path = tail[1], tail = tail[2].charAt(0);
 			}
 
-			var separator_matched = path.match(/[\\\/]/);
+			var separator_matched = path.match(/[\\\/]/)
+					|| tail.match(/^[\\\/]/);
 			if (!separator_matched)
-				return head ? head + path : path || '.';
+				return (head || '') + path + tail || '.';
 			path = path.split(/[\\\/]+/);
 
 			for (var i = 0, length = path.length; i < length; i++) {

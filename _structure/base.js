@@ -1074,6 +1074,7 @@ function (globalThis) {
 		// {[System.Environment]::OSVersion.Version}"`
 
 		// Windows: process.platform.toLowerCase().startsWith('win')
+		// @see os.version()
 		return platform.OS && platform.OS.toLowerCase().indexOf('win') === 0;
 	};
 
@@ -1450,7 +1451,20 @@ function (globalThis) {
 			var node_os = require('os');
 
 			if (!env.home
+			// home directory 用戶個人文件夾 家目錄
 			&& !(env.home = typeof node_os.homedir === 'function' && node_os.homedir()
+			/**
+			 * @see https://nodejs.org/api/os.html#os_os_userinfo_options
+			 * 
+			 * The value of homedir returned by os.userInfo() is provided by the
+			 * operating system. This differs from the result of os.homedir(),
+			 * which queries environment variables for the home directory before
+			 * falling back to the operating system response.
+			 * 
+			 * os.userInfo() Throws a SystemError if a user has no username or
+			 * homedir.
+			 */
+			|| typeof node_os.userInfo === 'function' && node_os.userInfo() && node_os.userInfo().homedir
 			// http://stackoverflow.com/questions/9080085/node-js-find-home-directory-in-platform-agnostic-way
 			|| process.env.HOME || process.env.USERPROFILE)
 			// e.g., Windows 10
@@ -1501,7 +1515,7 @@ OS='UNIX'; // unknown
 		 * @type {String}
 		 */
 		env.OS = OS = OS_type || OS
-				//
+				// @see os.version()
 				|| platform.nodejs && process.platform
 				// 假如未設定則由 path 判斷。
 				|| (_.get_script_full_name().indexOf('\\') !== -1 ? 'Windows' : 'UNIX')

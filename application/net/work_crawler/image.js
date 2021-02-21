@@ -201,7 +201,7 @@ function module_code(library_namespace) {
 		// library_namespace.set_debug(3);
 
 		this.get_URL(image_url, function(XMLHttp) {
-			// console.log(XMLHttp);
+			// console.trace(XMLHttp.status);
 			// console.log(image_data);
 			if (image_data.url !== XMLHttp.responseURL) {
 				// 紀錄最後實際下載的圖片網址。

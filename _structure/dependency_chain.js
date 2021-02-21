@@ -550,23 +550,40 @@ if (typeof CeL === 'function')
 						if (iterable)
 							// initialization. 為 Map 所作的初始化工作。
 							try {
-								if (Array.isArray(iterable))
+								if (Array.isArray(iterable)) {
 									// "key+value"
-									iterable.forEach(function(entry) {
+									for (var index = 0; index < iterable.length; index++) {
+										var entry = iterable[index];
 										this.set(entry[0], entry[1]);
-									}, this);
-								else if (iterable.forEach)
+									}
+								} else if (iterable.forEach) {
+									var _this = this;
 									iterable.forEach(function(v, k) {
-										this.set(k, v);
-									}, this);
-								else {
+										_this.set(k, v);
+									});
+								} else {
 									throw 1;
 									for ( var k in iterable)
 										this.set(k, iterable[k]);
 								}
 							} catch (e) {
+								if (false) {
+									library_namespace.info('' + this.set);
+									library_namespace.info(Array
+											.isArray(iterable) ? 'isArray'
+											: iterable.forEach ? 'forEach'
+													: 'throw');
+									library_namespace.error(e);
+								}
 								throw new TypeError(
-										'Input value is not iterable.');
+								//
+								'Map: Input value is not iterable: '
+								//
+								+ (library_namespace.is_Object(iterable)
+								//
+								? library_namespace.is_type(iterable)
+								//
+								: iterable));
 							}
 					}
 
@@ -938,16 +955,24 @@ if (typeof CeL === 'function')
 						if (iterable)
 							// initialization. 為 Set 所作的初始化工作。
 							try {
-								if (iterable.forEach)
+								if (iterable.forEach) {
 									iterable.forEach(function(v) {
 										this.add(v);
 									}, this);
-								else
+								} else {
 									for ( var i in iterable)
 										this.add(iterable[i]);
+								}
 							} catch (e) {
 								throw new TypeError(
-										'Input value is not iterable.');
+								//
+								'Set: Input value is not iterable: '
+								//
+								+ (library_namespace.is_Object(iterable)
+								//
+								? library_namespace.is_type(iterable)
+								//
+								: iterable));
 							}
 					}
 
