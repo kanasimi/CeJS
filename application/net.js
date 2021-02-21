@@ -672,9 +672,12 @@ function module_code(library_namespace) {
 		// Warning: new Map() 少了許多必要的功能! 不能完全替代!
 		var search = Object.entries(
 		//
-		parse_URI.parse_search(search_string, options)).filter(function(entry) {
-			return !(entry[0] in ignore_search_properties);
-		});
+		parse_URI.parse_search(search_string, options));
+		if (ignore_search_properties) {
+			search = search.filter(function(entry) {
+				return !(entry[0] in ignore_search_properties);
+			});
+		}
 		// library_namespace.info(search.length);
 
 		// alert(Array.isArray(search));

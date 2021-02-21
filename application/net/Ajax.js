@@ -413,6 +413,7 @@ function module_code(library_namespace) {
 	function add_parameter_with_hash(url, search, hash, charset) {
 		url = library_namespace.parse_URI(url);
 		if (hash !== undefined) {
+			// if (!/^#/.test(hash)) hash = '#' + hash;
 			url.hash = hash;
 		}
 		url.search_params.add_parameters(search);

@@ -415,9 +415,10 @@ function module_code(library_namespace) {
 	 *      TODO:
 	 *      https://zh.wikipedia.org/wiki/Wikipedia:%E5%A7%8A%E5%A6%B9%E8%AE%A1%E5%88%92#.E9.93.BE.E6.8E.A5.E5.9E.8B
 	 */
-	function api_URL(project) {
+	function api_URL(project, options) {
 		if (!project) {
-			return wiki_API.API_URL;
+			var session = wiki_API.session_of_options(options);
+			return session && session.API_URL || wiki_API.API_URL;
 		}
 
 		project = String(project);

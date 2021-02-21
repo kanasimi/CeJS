@@ -182,6 +182,14 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// TODO: accept action:
+	// {URL}
+	// {URLSearchParams}parameters will get API_URL from options
+	// [ {String}API, {Object}parameters ]
+	// [ {String}API, {String}parameters ]
+	// {Object}parameters will get API_URL from options
+	// {String}parameters will get API_URL from options
+
 	/**
 	 * 實際執行 query 操作，直接 call API 之核心函數。 wiki_API.query()
 	 * 
@@ -234,7 +242,7 @@ function module_code(library_namespace) {
 				+ (action[0] === wiki_API.api_URL(action[0]) ? '' : ' → ['
 						+ wiki_API.api_URL(action[0]) + ']'), 3,
 				'wiki_API_query');
-		action[0] = wiki_API.api_URL(action[0]);
+		action[0] = wiki_API.api_URL(action[0], options);
 
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		if (!/^[a-z]+=/.test(action[1]) && !options.post_data_only)
