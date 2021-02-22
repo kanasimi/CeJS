@@ -576,7 +576,18 @@ function module_code(library_namespace) {
 			// http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
 			data = search_string.replace(/\+/g, '%20').split(/&/);
 		} else if (typeof search_string === 'object') {
-			Object.assign(parameters, search_string);
+			// https://github.com/whatwg/url/issues/27
+			// Creation of URLSearchParams from Object/Map
+			if (library_namespace.is_Map(search_string)) {
+				// input {Map}.
+				Array.from(search_string.entries()).forEach(function(entry) {
+					parameters[entry[0]] = entry[1];
+				});
+			} else {
+				// input {Object}.
+				// assert: library_namespace.is_Object(search_string)
+				Object.assign(parameters, search_string);
+			}
 		} else if (Array.isArray(search_string)) {
 			data = search_string;
 		} else {

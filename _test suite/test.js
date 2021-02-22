@@ -266,6 +266,7 @@ function test_compatibility() {
 
 	// sample to test:
 	all_error_count += CeL.test('library base functions', [
+		[['aa.js', CeL.simplify_path('aa.js')], 'simplify_path #1-0'],
 		[['js.js', CeL.simplify_path('./aaa///./../js.js')], 'simplify_path #1-1'],
 		[['js.js', CeL.simplify_path('./aaa/../js.js')], 'simplify_path #1-2'],
 		[['js.js', CeL.simplify_path('aaa/../js.js')], 'simplify_path #1-3'],

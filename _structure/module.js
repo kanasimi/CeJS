@@ -1425,9 +1425,9 @@ if (typeof CeL === 'function') {
 			}
 
 			var separator_matched = path.match(/[\\\/]/)
-					|| tail.match(/^[\\\/]/);
+					|| tail && tail.match(/^[\\\/]/);
 			if (!separator_matched)
-				return (head || '') + path + tail || '.';
+				return (head || '') + path + (tail || '') || '.';
 			path = path.split(/[\\\/]+/);
 
 			for (var i = 0, length = path.length; i < length; i++) {
@@ -1449,9 +1449,10 @@ if (typeof CeL === 'function') {
 			// '/../path' to '/path'
 			|| path[0] === '..' && head)
 				path.shift();
-			while (path.length > 0 && !path[path.length - 1])
+			while (path.length > 0 && !path[path.length - 1]) {
 				// 因為有 separator 結尾的話，應該都放在 tail 了；因此此處能去掉所有的空結尾。
 				path.pop();
+			}
 
 			path = path.join(separator_matched[0])
 			// 對 archive.org 之類的網站，不可以簡化 '://'。
