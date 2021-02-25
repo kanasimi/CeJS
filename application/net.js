@@ -171,15 +171,26 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * Parses URI.
+	 * URI class.
 	 * 
 	 * 本組函數之目的:<br />
 	 * 1. polyfill for W3C URL API.<br />
-	 * 2. URLSearchParams() 採用{Object}操作 hash 更方便，且可支援 charset。
+	 * 2. CeL.parse_URI.parse_search() 採用{Object}操作 hash 更方便，且可支援 charset。
+	 * 
+	 * new URLSearchParams() 會將數值轉成字串。 想二次利用 {Object}, {Array}，得採用
+	 * CeL.parse_URI.parse_search() 而非 new URL()。
 	 * 
 	 * @example <code>
-	alert(parse_URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23#hhh').hostname);
-	 * </code>
+
+	// 警告: 這不能保證 a 和 fg 的順序!! 僅保證 fg=23 → fg=24。欲保持不同名稱 parameters 間的順序，請採用 {String}parameter+parameter。
+	var url = CeL.parse_URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23&a=2&fg=24#hhh');
+	alert(url.hostname);
+	// to URL()
+	new URL(url).toString() === url.toString()
+	// parameters to URLSearchParams() 
+	new URLSearchParams(url.search_params.toString()).toString() === url.search_params.toString();
+	
+	</code>
 	 * 
 	 * <code>
 
@@ -191,9 +202,8 @@ function module_code(library_namespace) {
 	//www.whatwg.org/specs/web-apps/current-work/#attr-input-pattern
 
 	TODO:
-	.fileName:
 	file:///D:/USB/cgi-bin/lib/JS/_test_suit/test.htm
-	->
+	→ .file_path:
 	D:\USB\cgi-bin\lib\JS\_test_suit\test.htm
 
 	eURI : /^((file|telnet|ftp|https?)\:\/\/|~?\/)?(\w+(:\w+)?@)?(([-\w]+\.)+([a-z]{2}|com|org|net))?(:\d{1,5})?(\/([-\w~!$+|.,=]|%[a-f\d]{2})*)?(\?(([-\w~!$+|.,*:]|%[a-f\d{2}])+(=([-\w~!$+|.,*:=]|%[a-f\d]{2})*)?&?)*)?(#([-\w~!$+|.,*:=]|%[a-f\d]{2})*)?$/i,
@@ -204,7 +214,7 @@ function module_code(library_namespace) {
 
 	 * </code>
 	 * 
-	 * @param {String}URI
+	 * @param {String}uri
 	 *            URI to parse
 	 * @param {String}[base_uri]
 	 *            當做基底的 URL。 see CeL.application.storage.get_relative_path()
@@ -225,25 +235,28 @@ function module_code(library_namespace) {
 	 *      https://developer.mozilla.org/en/DOM/window.location, also see
 	 *      batURL.htm
 	 */
-	function parse_URI(URI, base_uri, options) {
+	function URI(uri, base_uri, options) {
 		options = library_namespace.setup_options(options);
-		if (!URI
+		if (!uri
 		// 不能用 instanceof String!
-		|| typeof URI !== 'string') {
-			return;
+		|| typeof uri !== 'string') {
+			throw new Error('Invalid URI');
 		}
-		var href = library_namespace.simplify_path(URI), matched = href
-				.match(/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)(\S*)$/i), tmp, path;
+		var href = library_namespace.simplify_path(uri), matched = href
+				// [ all, 1: protocol, 2: , 3: href, 4: path, ]
+				.match(/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)?(\S*)$/i), tmp, path;
 		if (!matched)
-			return;
+			throw new Error('Invalid URI');
 
 		// console.log(href);
-		library_namespace.debug('parse [' + URI + ']: '
+		library_namespace.debug('parse [' + uri + ']: '
 				+ matched.join('<br />\n'), 2);
 
-		URI = base_uri && parse_URI(base_uri) || options.as_URL
+		uri = Object.assign(this,
 		//
-		|| (library_namespace.is_WWW() ? {
+		base_uri && parse_URI(base_uri) || options.as_URL
+		//
+		|| library_namespace.is_WWW() && {
 			// protocol包含最後的':',search包含'?',hash包含'#'.
 			// file|telnet|ftp|https
 			protocol : location.protocol,
@@ -252,12 +265,13 @@ function module_code(library_namespace) {
 			host : location.host,
 			// local file @ IE: C:\xx\xx\ff, others: /C:/xx/xx/ff
 			pathname : location.pathname
-		} : Object.create(null));
-		// URI.URI = href;
+		});
+		// uri.uri = href;
 
-		URI.protocol = matched[1] || '';
-		// URI._protocol = URI.protocol.slice(0, -1).toLowerCase();
-		// library_namespace.debug('protocol [' + URI._protocol + ']', 2);
+		if (matched[1])
+			uri.protocol = matched[1];
+		// uri._protocol = uri.protocol.slice(0, -1).toLowerCase();
+		// library_namespace.debug('protocol [' + uri._protocol + ']', 2);
 
 		/**
 		 * ** filename 可能歸至m[4]!<br />
@@ -267,8 +281,8 @@ function module_code(library_namespace) {
 		 * gsh.sdf.df?dhfjk filename<br />
 		 * gsh.sdf.df filename<br />
 		 */
-		href = matched[3];
-		path = matched[4];
+		href = matched[3] || '';
+		path = matched[4] || '';
 		if (href && !/^\/[A-Z]:$/i.test(href)
 				&& (path.charAt(0) === '/' || /[@:]/.test(href))) {
 			// 處理 username:password
@@ -276,34 +290,35 @@ function module_code(library_namespace) {
 				tmp = matched[1].match(/^([^:]+)(:(.*))?$/);
 				if (!tmp)
 					return;
-				URI.username = tmp[1];
+				uri.username = tmp[1];
 				if (tmp[3])
-					URI.password = tmp[3];
+					uri.password = tmp[3];
 				href = matched[2];
 			} else {
 				// W3C URL API 不論有沒有帳號密碼皆會設定這兩個值
-				URI.password = '';
-				URI.username = '';
+				uri.password = '';
+				uri.username = '';
 			}
 
 			// 處理 host
 			if (matched = href.match(/^([^\/#?&\s:]+)(:(\d{1,5}))?$/)) {
 				// host=hostname:port
-				URI.host = URI.hostname = matched[1];
+				uri.host = uri.hostname = matched[1];
 				if (matched[3])
-					URI.port = String(parseInt(matched[3], 10));
+					uri.port = String(parseInt(matched[3], 10));
 				else if (tmp = {
+					https : 443,
 					http : 80,
 					ftp : 21
-				}[URI.protocol.slice(0, -1).toLowerCase()])
-					URI.host += ':' + (URI.port = tmp);
+				}[uri.protocol.slice(0, -1).toLowerCase()])
+					uri.host += ':' + (uri.port = tmp);
 			} else
 				return;
 
 			// TODO: port?
-			URI.origin = URI.protocol + '//' + URI.hostname;
+			uri.origin = uri.protocol + '//' + uri.hostname;
 		} else {
-			// test URI.protocol === 'file:'
+			// test uri.protocol === 'file:'
 			path = href + path;
 			href = '';
 		}
@@ -326,81 +341,83 @@ function module_code(library_namespace) {
 			// pathname={path}filename
 			library_namespace.debug('pathname: [' + matched + ']', 2);
 			// .path 會隨不同 OS 之 local file 表示法作變動!
-			URI.path = /^\/[A-Z]:/i.test(URI.pathname = matched[1]) ? matched[2]
+			uri.path = /^\/[A-Z]:/i.test(uri.pathname = matched[1] || '') ? matched[2]
 					.slice(1).replace(/\//g, '\\')
 					: matched[2];
-			URI.filename = matched[3];
+			uri.filename = matched[3];
 			if (Object.defineProperty.not_native) {
-				// hash without '#': using URI.hash.slice(1)
-				URI.hash = matched[6];
-				URI.search = matched[4];
-				tmp = {
-					URI : URI
-				};
+				// hash without '#': using uri.hash.slice(1)
+				uri.hash = matched[6];
+				uri.search = matched[4];
+				tmp = Object.assign({
+					// @see (typeof options.URI === 'object')
+					URI : uri
+				}, options);
 			} else {
-				Object.defineProperty(URI, KEY_hash, {
+				Object.defineProperty(uri, KEY_hash, {
 					value : matched[6] ? matched[6].slice(1) : '',
 					writable : true
 				});
-				Object.defineProperties(URI, {
-					hash : {
-						enumerable : true,
-						get : function() {
-							if (!this[KEY_hash])
-								return '';
-							return '#' + this[KEY_hash];
-						},
-						set : function(value) {
-							value = String(value);
-							if (value.startsWith('#')) {
-								value = value.slice(1);
-							}
-							this[KEY_hash] = value;
-						}
-					},
-					search : {
-						enumerable : true,
-						get : search_getter,
-						set : function(value) {
-							var search_params = 'search_params' in this
-							//
-							? this.search_params : this.searchParams;
-							search_params.clean();
-
-							value = String(value);
-							if (value.startsWith('?')) {
-								value = value.slice(1);
-							}
-							if (value)
-								search_params.add_parameters(value);
-						}
-					}
-				});
-				tmp = null;
+				tmp = options;
 			}
 			if (options.as_URL) {
 				// library_namespace.debug('search: [' + matched[5] + ']', 2);
 				// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-				URI.searchParams = new URLSearchParams(matched[5], tmp);
+				uri.searchParams = new URLSearchParams(matched[5], tmp);
 			} else {
-				URI.search_params = parse_URI.parse_search(matched[5], tmp);
+				uri.search_params = parse_URI.parse_search(matched[5], tmp);
 			}
 		} else {
 			if (!href)
 				return;
-			URI.path = URI.pathname.replace(/[^\/]+$/, '');
+			uri.path = uri.pathname.replace(/[^\/]+$/, '');
 		}
-		library_namespace.debug('path: [' + URI.path + ']', 2);
+		library_namespace.debug('path: [' + uri.path + ']', 2);
 
-		Object.defineProperty(URI, 'toString', {
-			value : URI_toString
-		});
 		library_namespace.debug('Generate .href of URI by URI_toString()', 2);
-		URI.toString();
+		uri.toString();
 
-		library_namespace.debug('href: [' + URI.href + ']', 2);
-		return URI;
+		library_namespace.debug('href: [' + uri.href + ']', 2);
+		// return uri;
 	}
+
+	Object.defineProperties(URI.prototype, {
+		hash : {
+			enumerable : true,
+			get : function get() {
+				if (!this[KEY_hash])
+					return '';
+				return '#' + this[KEY_hash];
+			},
+			set : function set(value) {
+				value = String(value);
+				if (value.startsWith('#')) {
+					value = value.slice(1);
+				}
+				this[KEY_hash] = value;
+			}
+		},
+		search : {
+			enumerable : true,
+			get : search_getter,
+			set : function set(value) {
+				var search_params = 'search_params' in this
+				//
+				? this.search_params : this.searchParams;
+				search_params.clean_parameters();
+
+				value = String(value);
+				if (value.startsWith('?')) {
+					value = value.slice(1);
+				}
+				if (value)
+					search_params.add_parameters(value);
+			}
+		},
+		toString : {
+			value : URI_toString
+		}
+	});
 
 	function search_getter(URI) {
 		// library_namespace.debug('normalize properties by search_getter');
@@ -429,6 +446,31 @@ function module_code(library_namespace) {
 				+ URI.host + URI.pathname + URI.search + URI.hash;
 		return URI.href;
 	}
+
+	/**
+	 * Parses URI.
+	 */
+	function parse_URI(uri, base_uri, options) {
+		try {
+			return new URI(uri, base_uri, options);
+		} catch (e) {
+			// TODO: handle exception
+		}
+	}
+
+	function is_URI(value) {
+		return value instanceof URI;
+	}
+
+	URI.is_URI = is_URI;
+
+	_// JSDT:_module_
+	.URI = URI;
+
+	_// JSDT:_module_
+	.parse_URI = parse_URI;
+
+	// ------------------------------------------------------------------------
 
 	// {Object}this parameter hash to String
 	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
@@ -459,6 +501,7 @@ function module_code(library_namespace) {
 		// Object.keys(parameters).forEach(function(key) {})
 		for (key in this) {
 			if (ignore_search_properties && (key in ignore_search_properties)) {
+				throw new Error(key + ' is a reserved keyword!');
 				// Warning: for old environment, may need ignore some keys
 				continue;
 			}
@@ -490,6 +533,7 @@ function module_code(library_namespace) {
 	function search_clean_parameters() {
 		for ( var key in this) {
 			if (ignore_search_properties && (key in ignore_search_properties)) {
+				throw new Error(key + ' is a reserved keyword!');
 				// Warning: for old environment, may need ignore some keys
 				continue;
 			}
@@ -518,6 +562,7 @@ function module_code(library_namespace) {
 		parameters = parse_search(parameters);
 		for ( var key in parameters) {
 			if (ignore_search_properties && (key in ignore_search_properties)) {
+				throw new Error(key + ' is a reserved keyword!');
 				// Warning: for old environment, may need ignore some keys
 				continue;
 			}
@@ -532,7 +577,7 @@ function module_code(library_namespace) {
 	var KEY_URL = !Object.defineProperty.not_native
 			&& typeof Symbol === 'function' ? Symbol('URL') : '\0URL';
 	var search_properties = {
-		clean : {
+		clean_parameters : {
 			value : search_clean_parameters
 		},
 		add_parameters : {
@@ -545,6 +590,9 @@ function module_code(library_namespace) {
 	}, ignore_search_properties;
 	if (Object.defineProperty.not_native) {
 		ignore_search_properties = Object.clone(search_properties);
+		// 因為會採用 (key in ignore_search_properties) 的方法，因此 KEY_URL 必須是 {String}。
+		if (typeof KEY_URL !== 'string')
+			KEY_URL = String(KEY_URL);
 		ignore_search_properties[KEY_URL] = true;
 		// alert(Object.keys(ignore_search_properties));
 	}
@@ -557,6 +605,8 @@ function module_code(library_namespace) {
 
 	/**
 	 * parse_parameters({String}parameter) to hash
+	 * 
+	 * CeL.parse_URI.parse_search()
 	 * 
 	 * @param {String}search_string
 	 * @param {Object}[options]
@@ -575,6 +625,8 @@ function module_code(library_namespace) {
 		if (typeof search_string === 'string') {
 			// http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
 			data = search_string.replace(/\+/g, '%20').split(/&/);
+		} else if (Array.isArray(search_string)) {
+			data = search_string;
 		} else if (typeof search_string === 'object') {
 			// https://github.com/whatwg/url/issues/27
 			// Creation of URLSearchParams from Object/Map
@@ -588,8 +640,6 @@ function module_code(library_namespace) {
 				// assert: library_namespace.is_Object(search_string)
 				Object.assign(parameters, search_string);
 			}
-		} else if (Array.isArray(search_string)) {
-			data = search_string;
 		} else {
 			if (search_string) {
 				// Invalid search
@@ -669,6 +719,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------
 
+	// 有缺陷的 URL()
 	function defective_URL(url) {
 		// Object.assign() will not copy toString:URI_toString()
 		// Object.assign(this, parse_URI(url));
@@ -678,6 +729,7 @@ function module_code(library_namespace) {
 		});
 	}
 
+	// 有缺陷的 URLSearchParams()
 	function defective_URLSearchParams(search_string, options) {
 		// library_namespace.debug(search_string);
 		// Warning: new Map() 少了許多必要的功能! 不能完全替代!
@@ -721,14 +773,39 @@ function module_code(library_namespace) {
 			return this;
 		},
 
+		// URLSearchParams() 會存成字串，不會保留原先的資料結構。
+		set : function set(key, value) {
+			key = String(key);
+			value = String(value);
+			Map.prototype.set.call(this, key, value);
+		},
+		append : function append(key, value) {
+			key = String(key);
+			value = String(value);
+			// defective_URLSearchParams.prototype.toString
+			if (this.has(key)) {
+				var original_value = Map.prototype.get.call(this, key);
+				if (Array.isArray(original_value)) {
+					original_value.push(value);
+				} else {
+					Map.prototype.set
+							.call(this, key, [ original_value, value ]);
+				}
+			} else {
+				Map.prototype.set.call(this, key, value);
+			}
+		},
+
 		// Return the first one
 		get : function get(key) {
+			key = String(key);
 			var original_value = Map.prototype.get.call(this, key);
 			if (Array.isArray(original_value))
 				return original_value[0];
 			return original_value;
 		},
-		getAll : function get(key) {
+		getAll : function getAll(key) {
+			key = String(key);
 			if (!this.has(key))
 				return [];
 			var original_value = Map.prototype.get.call(this, key);
@@ -736,18 +813,7 @@ function module_code(library_namespace) {
 				return original_value;
 			return [ original_value ];
 		},
-		append : function append(key, value) {
-			// defective_URLSearchParams.prototype.toString
-			if (this.has(key)) {
-				var original_value = Map.prototype.get.call(this, key);
-				if (Array.isArray(original_value))
-					original_value.push(value);
-				else
-					this.set(key, [ original_value, value ]);
-			} else {
-				this.set(key, value);
-			}
-		},
+
 		toString : function toString() {
 			// defective_URLSearchParams.prototype.toString
 			var list = [];
