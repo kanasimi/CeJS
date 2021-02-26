@@ -190,7 +190,7 @@ function module_code(library_namespace) {
 	 * @example <code>
 
 	// 警告: 這不能保證 a 和 fg 的順序!! 僅保證 fg=23 → fg=24。欲保持不同名稱 parameters 間的順序，請採用 {String}parameter+parameter。
-	var url = CeL.parse_URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23&a=2&fg=24#hhh');
+	var url = new CeL.URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23&a=2&fg=24#hhh');
 	alert(url.hostname);
 	// to URL()
 	new URL(url).toString() === url.toString()
@@ -232,6 +232,8 @@ function module_code(library_namespace) {
 	 * @return parsed object
 	 * 
 	 * @since 2010/4/13 23:53:14 from parseURI+parseURL
+	 * @since 2021/2/27 6:10:25 Parses URI, function parse_URI(uri) → new
+	 *        URI(uri)
 	 * 
 	 * @_memberOf _module_
 	 * 
@@ -245,6 +247,19 @@ function module_code(library_namespace) {
 	 */
 	function URI(uri, base_uri, options) {
 		options = library_namespace.setup_options(options);
+		if (!this) {
+			// Call URI(value), like String(value)
+			if (is_URI(uri))
+				return uri;
+
+			try {
+				return new URI(uri, base_uri, options);
+			} catch (e) {
+				// TODO: handle exception
+			}
+			return;
+		}
+
 		if (uri instanceof URL) {
 			// uri.href
 			uri = uri.toString();
@@ -268,7 +283,7 @@ function module_code(library_namespace) {
 
 		uri = Object.assign(this,
 		//
-		base_uri && parse_URI(base_uri) || options.as_URL
+		base_uri && URI(base_uri) || options.as_URL
 		//
 		|| library_namespace.is_WWW() && {
 			// protocol包含最後的':',search包含'?',hash包含'#'.
@@ -473,14 +488,7 @@ function module_code(library_namespace) {
 	 * Parses URI.
 	 */
 	function parse_URI(uri, base_uri, options) {
-		if (is_URI(uri))
-			return uri;
-
-		try {
-			return new URI(uri, base_uri, options);
-		} catch (e) {
-			// TODO: handle exception
-		}
+		return URI(uri, base_uri, options);
 	}
 
 	function is_URI(value) {
@@ -748,7 +756,7 @@ function module_code(library_namespace) {
 	// 有缺陷的 URL()
 	function defective_URL(url) {
 		// Object.assign() will not copy toString:URI_toString()
-		// Object.assign(this, parse_URI(url));
+		// Object.assign(this, URI(url));
 
 		return new URI(url, null, {
 			// 盡可能模擬 W3C URL()
@@ -942,6 +950,7 @@ function module_code(library_namespace) {
 		// 限制長度.
 		// http://en.wikipedia.org/wiki/Filename#Length_restrictions
 		// http://msdn.microsoft.com/en-us/library/aa365247.aspx#maxpath
+		// https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
 		if (file_name.length > 255) {
 			library_namespace
 					.warn('to_file_name: The file name will be cutted! ['
@@ -1496,10 +1505,13 @@ function module_code(library_namespace) {
 	_// JSDT:_module_
 	.get_URI = get_URI;
 
+	// @since 2021/2/27 6:29:0 remove get_video() for 下載 Youtube 影片檔案與播放清單:
+	// 年久失修且網站改版，無法使用且沒想要維護了。
+
 	// get_video[generateCode.dLK]='initialization_WScript_Objects,get_URI,getU,HTMLToUnicode';
 	/**
 	 * for serial get Youtube video.<br />
-	 * 下載影片檔案與播放清單。<br />
+	 * 下載 Youtube 影片檔案與播放清單。<br />
 	 * <br /> ** 會改變 options!
 	 * 
 	 * TODO:<br />
@@ -1554,7 +1566,7 @@ function module_code(library_namespace) {
 		/**
 		 * for message show
 		 */
-		file_message, title, matched, URI;
+		file_message, title, matched, _uri;
 
 		if (download_to && typeof download_to === 'string'
 				&& !/[\\\/]$/.test(download_to)) {
@@ -1578,17 +1590,16 @@ function module_code(library_namespace) {
 				// http://youtu.be/_id_
 				// →
 				// https://www.youtube.com/watch?v=_id_&feature=youtu.be
-				if (URI = parse_URI(video_url[i].replace('//youtu.be/',
+				if (_uri = new URI(video_url[i].replace('//youtu.be/',
 						'//www.youtube.com/watch?v='))) {
-					if (URI.hostname.toLowerCase().includes('youtube')) {
-						library_namespace
-								.debug('URI.filename: ' + URI.filename, 2,
-										'get_video');
-						if (URI.filename === 'watch_videos') {
-							matched = URI.search_params.video_ids.split(',');
-							URI.search_params.v = matched[URI.search_params.index | 0];
-							matched[URI.search_params.index | 0] = '<b style="color:#f80;">'
-									+ URI.search_params.v + '</b>';
+					if (_uri.hostname.toLowerCase().includes('youtube')) {
+						library_namespace.debug('_uri.filename: '
+								+ _uri.filename, 2, 'get_video');
+						if (_uri.filename === 'watch_videos') {
+							matched = _uri.search_params.video_ids.split(',');
+							_uri.search_params.v = matched[_uri.search_params.index | 0];
+							matched[_uri.search_params.index | 0] = '<b style="color:#f80;">'
+									+ _uri.search_params.v + '</b>';
 							library_namespace
 									.info([
 											'All ',
@@ -1599,8 +1610,8 @@ function module_code(library_namespace) {
 											']' ]);
 						}
 
-						if (URI.filename === 'playlist') {
-							if (matched = URI.search_params.list
+						if (_uri.filename === 'playlist') {
+							if (matched = _uri.search_params.list
 									.match(/^PL(.+)/)) {
 								// 取得 title 並創建 sub-directory。
 								var playlist_id = matched[1], url;
@@ -1744,13 +1755,13 @@ function module_code(library_namespace) {
 							}
 
 						} else if (video_info = get_video.get_information(
-								URI.search_params.v, download_to)) {
+								_uri.search_params.v, download_to)) {
 							// TODO: 測試 "list="。
 
 							info_hash[title = video_info.title] = video_info;
 
-							library_namespace.info([ URI.search_params.v, ' [',
-									{
+							library_namespace.info([ _uri.search_params.v,
+									' [', {
 										b : title,
 										S : 'color:#f80;'
 									}, ']' ]);
@@ -1765,7 +1776,7 @@ function module_code(library_namespace) {
 												+ (video_info.author ? '['
 														+ video_info.author
 														+ '] ' : '') + title
-												+ ' [' + URI.search_params.v
+												+ ' [' + _uri.search_params.v
 												+ ']', true) + '.'
 										+ video_info.best.extension;
 								if (FSO.FileExists(target)) {
@@ -1778,7 +1789,7 @@ function module_code(library_namespace) {
 								setting.title = title;
 								setting.target = target;
 								setting.callback = options.callback
-										|| function(save_to, URI, result,
+										|| function(save_to, uri, result,
 												setting) {
 											var t = (new Date - setting('start_time')) / 1000;
 											t = t < 60 ? t.toFixed(2)
@@ -1800,7 +1811,7 @@ function module_code(library_namespace) {
 										};
 
 								setting.referer = 'http://www.youtube.com/watch?v='
-										+ URI.search_params.v;
+										+ _uri.search_params.v;
 								setting.temporary_file
 								// 處理 folder 為特殊名稱，因此 curl 或 console 無法 handle
 								// 的情況。
@@ -1809,7 +1820,7 @@ function module_code(library_namespace) {
 										.test(download_to) ? download_to
 										: options.base_directory || '')
 										// e.g., xxxxxxxxxxx.mp4
-										+ URI.search_params.v
+										+ _uri.search_params.v
 										+ '.'
 										+ video_info.best.extension;
 
@@ -2170,7 +2181,7 @@ function module_code(library_namespace) {
 	// setupCuteFTPSite[generateCode.dLK]='parse_URI';
 	function setupCuteFTPSite(targetS, site) {
 		if (typeof targetS === 'string')
-			targetS = parse_URI(targetS, {
+			targetS = new URI(targetS, {
 				protocol : 'ftp:'
 			});
 		if (!targetS)
@@ -2233,10 +2244,9 @@ function module_code(library_namespace) {
 			// local to local?
 			return;
 		lF = parsePath(isD ? to_URI : from_URI);
-		CuteFTPSite = setupCuteFTPSite(rP = parse_URI(isD ? from_URI : to_URI,
-				{
-					protocol : 'ftp:'
-				}));
+		CuteFTPSite = setupCuteFTPSite(rP = new URI(isD ? from_URI : to_URI, {
+			protocol : 'ftp:'
+		}));
 		if (!CuteFTPSite || !CuteFTPSite.IsConnected)
 			return;
 
