@@ -2448,13 +2448,17 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// CeL.wiki.parse.anchor.normalize_anchor()
 	function normalize_anchor(anchor) {
 		return anchor.toString().replace(/_/g, ' ');
 	}
+	get_all_anchor.normalize_anchor = normalize_anchor;
 
 	if (false) {
-		wiki_session.register_redirects([ 'Anchor', 'Anchors',
-				'Visible anchor', 'Citation', 'RFD' ]);
+		wiki_session.register_redirects(
+				CeL.wiki.parse.anchor.essential_templates, {
+					namespace : 'Template'
+				});
 
 		// ...
 
@@ -2467,12 +2471,19 @@ function module_code(library_namespace) {
 		var anchor_list = CeL.wiki.parse.anchor(wikitext);
 	}
 
+	// CeL.wiki.parse.anchor()
 	function get_all_anchor(wikitext, options) {
-		// const
-		var anchor_list = [];
-
 		if (!wikitext) {
-			return anchor_list;
+			return [];
+		}
+
+		// const
+		var anchor_hash = Object.create(null);
+		function register_anchor(anchor, token) {
+			if (!anchor)
+				return;
+			anchor = normalize_anchor(anchor);
+			anchor_hash[anchor] = token;
 		}
 
 		// const
@@ -2495,7 +2506,7 @@ function module_code(library_namespace) {
 			// TODO: 忽略包含不合理元素的編輯，例如 url。
 			if (!section_title_link.imprecise_tokens) {
 				// `section_title_token.title` will not transfer "[", "]"
-				anchor_list.push(section_title_link.id);
+				register_anchor(section_title_link.id, section_title_token);
 
 			} else if (section_title_link.tokens_maybe_handlable) {
 				// exclude "=={{T}}=="
@@ -2518,21 +2529,32 @@ function module_code(library_namespace) {
 				index < template_token.length; index++) {
 					// const
 					var anchor = template_token.parameters[index];
-					if (anchor)
-						anchor_list.push(normalize_anchor(anchor));
+					register_anchor(anchor, template_token);
 				}
 				return;
 			}
 
 			// e.g., {{Cite book|...|ref=anchor}} @ [[日本の原子爆弾開発]]
 			// {{Cite journal|...|ref=anchor}}
-			if (/^Cite [a-z]+/.test(template_token.name)
+			if (/^Cite \w+/.test(template_token.name)
 			// {{Citation|...|ref=anchor}}
 			|| wiki_API.is_template('Citation', template_token, options)) {
+				// console.trace(JSON.stringify(template_token.name));
 				// const
 				var anchor = template_token.parameters.ref;
-				if (anchor)
-					anchor_list.push(normalize_anchor(anchor));
+				// console.trace(JSON.stringify(anchor));
+				if (typeof anchor === 'string')
+					register_anchor(anchor, template_token);
+				return;
+			}
+
+			if (wiki_API.is_template('SfnRef', template_token, options)) {
+				var anchor = 'CITEREF';
+				// console.trace(template_token);
+				for (var index = 1; index <= 5; index++)
+					if (template_token.parameters[index])
+						anchor += template_token.parameters[index];
+				register_anchor(anchor, template_token);
 				return;
 			}
 
@@ -2543,7 +2565,7 @@ function module_code(library_namespace) {
 					&& wiki_API.is_template('RFD', template_token, options)) {
 				// const
 				var anchor = 'RFD' + template_token.parameters[1];
-				anchor_list.push(normalize_anchor(anchor));
+				register_anchor(anchor, template_token);
 				return;
 			}
 		});
@@ -2555,16 +2577,22 @@ function module_code(library_namespace) {
 			// const
 			var anchor = attribute_token.attributes.id
 					|| attribute_token.attributes.name;
-			if (anchor)
-				anchor_list.push(normalize_anchor(anchor));
+			register_anchor(anchor, attribute_token);
 		});
 
+		var anchor_list = Object.keys(anchor_hash);
 		if (options && options.print_anchors) {
+			console.log('anchors:');
 			console.trace(anchor_list.length > 100 ? JSON
 					.stringify(anchor_list) : anchor_list);
 		}
-		return anchor_list.unique();
+		return anchor_list;
 	}
+
+	// CeL.wiki.parse.anchor.essential_templates
+	// required, indispensable
+	get_all_anchor.essential_templates = [ 'Anchor', 'Anchors',
+			'Visible anchor', 'Citation', 'RFD', 'SfnRef', 'Sfn' ];
 
 	// ------------------------------------------------------------------------
 

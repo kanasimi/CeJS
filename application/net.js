@@ -43,6 +43,7 @@ function module_code(library_namespace) {
 	};
 
 	// requiring
+	var KEY_not_native = library_namespace.env.not_native_keyword;
 	var get_WScript_object = this.r('get_WScript_object'), HTML_to_Unicode = this
 			.r('HTML_to_Unicode');
 
@@ -170,6 +171,12 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	var port_of_protocol = {
+		https : 443,
+		http : 80,
+		ftp : 21
+	};
+
 	/**
 	 * URI class.
 	 * 
@@ -177,8 +184,8 @@ function module_code(library_namespace) {
 	 * 1. polyfill for W3C URL API.<br />
 	 * 2. CeL.parse_URI.parse_search() 採用{Object}操作 hash 更方便，且可支援 charset。
 	 * 
-	 * new URLSearchParams() 會將數值轉成字串。 想二次利用 {Object}, {Array}，得採用
-	 * CeL.parse_URI.parse_search() 而非 new URL()。
+	 * new URLSearchParams() 會將數值轉成字串。 想二次利用 {Object}, {Array}，得採用 new CeL.URI()
+	 * 而非 new URL()。
 	 * 
 	 * @example <code>
 
@@ -209,6 +216,7 @@ function module_code(library_namespace) {
 	eURI : /^((file|telnet|ftp|https?)\:\/\/|~?\/)?(\w+(:\w+)?@)?(([-\w]+\.)+([a-z]{2}|com|org|net))?(:\d{1,5})?(\/([-\w~!$+|.,=]|%[a-f\d]{2})*)?(\?(([-\w~!$+|.,*:]|%[a-f\d{2}])+(=([-\w~!$+|.,*:=]|%[a-f\d]{2})*)?&?)*)?(#([-\w~!$+|.,*:=]|%[a-f\d]{2})*)?$/i,
 
 	TODO:
+	[ host + path, search, hash ]
 	URI, IRI, XRI
 	WHATWG URL parser
 
@@ -237,11 +245,17 @@ function module_code(library_namespace) {
 	 */
 	function URI(uri, base_uri, options) {
 		options = library_namespace.setup_options(options);
+		if (uri instanceof URL) {
+			// uri.href
+			uri = uri.toString();
+		}
+
 		if (!uri
 		// 不能用 instanceof String!
 		|| typeof uri !== 'string') {
 			throw new Error('Invalid URI');
 		}
+
 		var href = library_namespace.simplify_path(uri), matched = href
 				// [ all, 1: protocol, 2: , 3: href, 4: path, ]
 				.match(/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)?(\S*)$/i), tmp, path;
@@ -300,23 +314,29 @@ function module_code(library_namespace) {
 				uri.username = '';
 			}
 
-			// 處理 host
-			if (matched = href.match(/^([^\/#?&\s:]+)(:(\d{1,5}))?$/)) {
-				// host=hostname:port
-				uri.host = uri.hostname = matched[1];
-				if (matched[3])
-					uri.port = String(parseInt(matched[3], 10));
-				else if (tmp = {
-					https : 443,
-					http : 80,
-					ftp : 21
-				}[uri.protocol.slice(0, -1).toLowerCase()])
-					uri.host += ':' + (uri.port = tmp);
-			} else
+			matched = href.match(/^([^\/#?&\s:]+)(:(\d{1,5}))?$/);
+			if (!matched) {
 				return;
+			}
 
-			// TODO: port?
-			uri.origin = uri.protocol + '//' + uri.hostname;
+			// 處理 host
+			// host=hostname:port
+			uri.hostname = uri.host = matched[1];
+			if (matched[3]
+					&& matched[3] != port_of_protocol[uri.protocol.slice(0, -1)
+							.toLowerCase()]) {
+				// uri[KEY_port] = parseInt(matched[3], 10);
+				uri.port = String(parseInt(matched[3], 10));
+				tmp = ':' + uri.port;
+				uri.host += tmp;
+			} else if (false) {
+				uri[KEY_port] = parseInt(matched[3]
+						|| port_of_protocol[uri.protocol.slice(0, -1)
+								.toLowerCase()]);
+			}
+
+			uri.origin = uri.protocol + '//' + uri.host;
+
 		} else {
 			// test uri.protocol === 'file:'
 			path = href + path;
@@ -345,7 +365,7 @@ function module_code(library_namespace) {
 					.slice(1).replace(/\//g, '\\')
 					: matched[2];
 			uri.filename = matched[3];
-			if (Object.defineProperty.not_native) {
+			if (Object.defineProperty[KEY_not_native]) {
 				// hash without '#': using uri.hash.slice(1)
 				uri.hash = matched[6];
 				uri.search = matched[4];
@@ -361,11 +381,13 @@ function module_code(library_namespace) {
 				tmp = options;
 			}
 			if (options.as_URL) {
+				// 盡可能模擬 W3C URL()
 				// library_namespace.debug('search: [' + matched[5] + ']', 2);
 				// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 				uri.searchParams = new URLSearchParams(matched[5], tmp);
 			} else {
-				uri.search_params = parse_URI.parse_search(matched[5], tmp);
+				// do not set uri.search_params directly.
+				uri.search_params = new Search_parameters(matched[5], tmp);
 			}
 		} else {
 			if (!href)
@@ -433,7 +455,7 @@ function module_code(library_namespace) {
 
 	function URI_toString(charset) {
 		var URI = this;
-		if (Object.defineProperty.not_native) {
+		if (Object.defineProperty[KEY_not_native]) {
 			URI.search = search_getter(URI);
 			if ((URI.hash = String(URI.hash)) && !URI.hash.startsWith('#')) {
 				URI.hash = '#' + URI.hash;
@@ -451,6 +473,9 @@ function module_code(library_namespace) {
 	 * Parses URI.
 	 */
 	function parse_URI(uri, base_uri, options) {
+		if (is_URI(uri))
+			return uri;
+
 		try {
 			return new URI(uri, base_uri, options);
 		} catch (e) {
@@ -472,137 +497,6 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// {Object}this parameter hash to String
-	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
-	function parameters_toString(options) {
-		var charset;
-		if (typeof options === 'string') {
-			charset = options;
-			options = Object.create(null);
-		} else {
-			options = library_namespace.setup_options(options);
-			charset = options.charset;
-		}
-
-		var search = [], key;
-		function append(value) {
-			if (typeof value !== 'string' && typeof value !== 'number'
-					&& value !== NO_EQUAL_SIGN) {
-				library_namespace.debug({
-					T : [ '設定 %1 成非字串之參數：%2', JSON.stringify(key),
-							JSON.stringify(value) ]
-				}, 1, 'parameters_toString');
-			}
-
-			search.push(value === NO_EQUAL_SIGN ? key : key + '='
-					+ encode_URI_component(String(value), charset));
-		}
-
-		// Object.keys(parameters).forEach(function(key) {})
-		for (key in this) {
-			if (ignore_search_properties && (key in ignore_search_properties)) {
-				throw new Error(key + ' is a reserved keyword!');
-				// Warning: for old environment, may need ignore some keys
-				continue;
-			}
-
-			var value = this[key];
-			key = encode_URI_component(key, charset);
-			if (Array.isArray(value)) {
-				value.forEach(append);
-			} else {
-				append(value);
-			}
-		}
-
-		library_namespace.debug([ {
-			T : [ '共%1個參數：', search.length ]
-		}, '<br />\n', search.map(function(parameter) {
-			return parameter.length > 400 ? parameter.slice(0,
-			//
-			library_namespace.is_debug(6) ? 2000 : 400) + '...' : parameter;
-		}).join('<br />\n') ], 4, 'parameters_toString');
-
-		search = search.join('&');
-		if (this[KEY_URL])
-			this[KEY_URL].search = search;
-
-		return search;
-	}
-
-	function search_clean_parameters() {
-		for ( var key in this) {
-			if (ignore_search_properties && (key in ignore_search_properties)) {
-				throw new Error(key + ' is a reserved keyword!');
-				// Warning: for old environment, may need ignore some keys
-				continue;
-			}
-
-			delete this[key];
-		}
-		return this;
-	}
-
-	function search_add_1_parameter(key, value, options) {
-		if (key in this) {
-			var original_value = this[key];
-			if (Array.isArray(original_value))
-				original_value.push(value);
-			else
-				this[key] = [ original_value, value ];
-		} else {
-			this[key] = value;
-		}
-	}
-
-	/**
-	 * append these parameters
-	 */
-	function search_add_parameters(parameters) {
-		parameters = parse_search(parameters);
-		for ( var key in parameters) {
-			if (ignore_search_properties && (key in ignore_search_properties)) {
-				throw new Error(key + ' is a reserved keyword!');
-				// Warning: for old environment, may need ignore some keys
-				continue;
-			}
-
-			search_add_1_parameter.call(this, key, parameters[key]);
-		}
-		return this;
-	}
-
-	// @private
-	var KEY_hash = typeof Symbol === 'function' ? Symbol('hash') : '\0hash';
-	var KEY_URL = !Object.defineProperty.not_native
-			&& typeof Symbol === 'function' ? Symbol('URL') : '\0URL';
-	var search_properties = {
-		clean_parameters : {
-			value : search_clean_parameters
-		},
-		add_parameters : {
-			value : search_add_parameters
-		},
-		// valueOf
-		toString : {
-			value : parameters_toString
-		}
-	}, ignore_search_properties;
-	if (Object.defineProperty.not_native) {
-		ignore_search_properties = Object.clone(search_properties);
-		// 因為會採用 (key in ignore_search_properties) 的方法，因此 KEY_URL 必須是 {String}。
-		if (typeof KEY_URL !== 'string')
-			KEY_URL = String(KEY_URL);
-		ignore_search_properties[KEY_URL] = true;
-		// alert(Object.keys(ignore_search_properties));
-	}
-
-	var NO_EQUAL_SIGN = typeof Symbol === 'function' ? Symbol('NO_EQUAL_SIGN')
-	//
-	: {
-		NO_EQUAL_SIGN : true
-	};
-
 	/**
 	 * parse_parameters({String}parameter) to hash
 	 * 
@@ -614,13 +508,13 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 	 */
-	function parse_search(search_string, options) {
+	function Search_parameters(search_string, options) {
 		// Similar to:
 		// return new URLSearchParams(search_string);
 		// but with charset and forward compatibility
 
-		var parameters = Object.create(null);
 		options = library_namespace.setup_options(options);
+		var parameters = this;
 		var data, name, value, matched;
 		if (typeof search_string === 'string') {
 			// http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
@@ -635,8 +529,15 @@ function module_code(library_namespace) {
 				Array.from(search_string.entries()).forEach(function(entry) {
 					parameters[entry[0]] = entry[1];
 				});
+			} else if (search_string instanceof URLSearchParams) {
+				Array.from(search_string.keys()).unique().forEach(
+						function(key) {
+							var values = search_string.getAll(key);
+							parameters[key] = values.length > 1 ? values
+									: values[0];
+						});
 			} else {
-				// input {Object}.
+				// {Object}search_string.
 				// assert: library_namespace.is_Object(search_string)
 				Object.assign(parameters, search_string);
 			}
@@ -645,7 +546,7 @@ function module_code(library_namespace) {
 				// Invalid search
 				library_namespace.debug({
 					T : [ '輸入了非字串之參數：[%1]', search_string ]
-				}, 1, 'parse_search');
+				}, 1, 'Search_parameters');
 			}
 		}
 
@@ -700,22 +601,147 @@ function module_code(library_namespace) {
 				if (!Array.isArray(parameters[name]))
 					parameters[name] = [ parameters[name] ];
 
-		Object.defineProperties(parameters, search_properties);
 		if (typeof options.URI === 'object') {
 			Object.defineProperty(parameters, KEY_URL, {
 				value : options.URI
 			});
 		}
+	}
 
-		return parameters;
+	function search_add_1_parameter(key, value, options) {
+		if (key in this) {
+			var original_value = this[key];
+			if (Array.isArray(original_value))
+				original_value.push(value);
+			else
+				this[key] = [ original_value, value ];
+		} else {
+			this[key] = value;
+		}
+	}
+
+	/**
+	 * append these parameters
+	 */
+	function search_add_parameters(parameters, options) {
+		parameters = new Search_parameters(parameters);
+		Object.keys(parameters).forEach(function(key) {
+			search_add_1_parameter.call(this, key, parameters[key], options);
+		}, this);
+		return this;
+	}
+
+	function search_clean_parameters() {
+		var _this = this;
+		Object.keys(this).forEach(function(key) {
+			// if (ignore_search_properties && (key in
+			// ignore_search_properties)) {...}
+			delete _this[key];
+		});
+		return this;
+	}
+
+	// {Object}this parameter hash to String
+	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
+	function parameters_toString(options) {
+		var charset;
+		if (typeof options === 'string') {
+			charset = options;
+			options = Object.create(null);
+		} else {
+			options = library_namespace.setup_options(options);
+			charset = options.charset;
+		}
+
+		var search = [], key;
+		function append(value) {
+			if (typeof value !== 'string' && typeof value !== 'number'
+					&& value !== NO_EQUAL_SIGN) {
+				library_namespace.debug({
+					T : [ '設定 %1 成非字串之參數：%2', JSON.stringify(key),
+							JSON.stringify(value) ]
+				}, 1, 'parameters_toString');
+			}
+
+			search.push(value === NO_EQUAL_SIGN ? key : key + '='
+					+ encode_URI_component(String(value), charset));
+		}
+
+		// Object.keys(parameters).forEach(function(key) {})
+		for (key in this) {
+			if (ignore_search_properties && (key in ignore_search_properties)) {
+				// Warning: for old environment, may need ignore some keys
+				continue;
+			}
+
+			var value = this[key];
+			key = encode_URI_component(key, charset);
+			if (Array.isArray(value)) {
+				value.forEach(append);
+			} else {
+				append(value);
+			}
+		}
+
+		library_namespace.debug([ {
+			T : [ '共%1個參數：', search.length ]
+		}, '<br />\n', search.map(function(parameter) {
+			return parameter.length > 400 ? parameter.slice(0,
+			//
+			library_namespace.is_debug(6) ? 2000 : 400) + '...' : parameter;
+		}).join('<br />\n') ], 4, 'parameters_toString');
+
+		search = search.join('&');
+		if (this[KEY_URL])
+			this[KEY_URL].search = search;
+
+		return search;
+	}
+
+	// @private
+	var KEY_hash = typeof Symbol === 'function' ? Symbol('hash') : '\0hash';
+	var KEY_URL = !Object.defineProperty[KEY_not_native]
+			&& typeof Symbol === 'function' ? Symbol('URL') : '\0URL';
+	// search_properties
+	Object.assign(Search_parameters.prototype, {
+		clean_parameters : search_clean_parameters,
+		add_parameters : search_add_parameters,
+		// valueOf
+		toString : parameters_toString
+	});
+	var ignore_search_properties;
+	if (Object.defineProperty[KEY_not_native]) {
+		ignore_search_properties = Object.clone(Search_parameters.prototype);
+		// 因為會採用 (key in ignore_search_properties) 的方法，因此 KEY_URL 必須是 {String}。
+		if (typeof KEY_URL !== 'string')
+			KEY_URL = String(KEY_URL);
+		ignore_search_properties[KEY_URL] = true;
+		// alert(Object.keys(ignore_search_properties));
+	}
+
+	var NO_EQUAL_SIGN = typeof Symbol === 'function' ? Symbol('NO_EQUAL_SIGN')
+	//
+	: {
+		NO_EQUAL_SIGN : true
+	};
+
+	function parse_search(search_string, options) {
+		if (is_Search_parameters(search_string))
+			return search_string;
+		return new Search_parameters(search_string, options);
 	}
 
 	// CeL.parse_URI.parse_search()
 	// 新版本與 charset 編碼無關的話，應該使用 new URLSearchParams(parameters).toString()。
 	parse_URI.parse_search = parse_search;
 
-	_// JSDT:_module_
-	.parse_URI = parse_URI;
+	function is_Search_parameters(value) {
+		return value instanceof Search_parameters;
+	}
+
+	Search_parameters.is_Search_parameters = is_Search_parameters;
+
+	_.Search_parameters = Search_parameters;
 
 	// --------------------------------
 
@@ -724,8 +750,9 @@ function module_code(library_namespace) {
 		// Object.assign() will not copy toString:URI_toString()
 		// Object.assign(this, parse_URI(url));
 
-		parse_URI(url, null, {
-			as_URL : this
+		return new URI(url, null, {
+			// 盡可能模擬 W3C URL()
+			as_URL : true
 		});
 	}
 
@@ -735,7 +762,7 @@ function module_code(library_namespace) {
 		// Warning: new Map() 少了許多必要的功能! 不能完全替代!
 		var search = Object.entries(
 		//
-		parse_URI.parse_search(search_string, options));
+		new Search_parameters(search_string, options));
 		if (ignore_search_properties) {
 			search = search.filter(function(entry) {
 				return !(entry[0] in ignore_search_properties);
@@ -1865,7 +1892,7 @@ function module_code(library_namespace) {
 			}
 
 			library_namespace.debug('解析 data.', 2);
-			param = parse_URI.parse_search(html);
+			param = new Search_parameters(html);
 
 			if ('errorcode' in param) {
 				library_namespace.error('[' + video_hash + ']: '
@@ -1879,7 +1906,7 @@ function module_code(library_namespace) {
 			});
 
 			// library_namespace.debug('parse url', 2);
-			// param = parse_URI.parse_search(param.url, param);
+			// param = new Search_parameters(param.url, param);
 
 			library_namespace.debug('檢測是否有 error.', 2);
 			if (html.includes('status=ok')) {

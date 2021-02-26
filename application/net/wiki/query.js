@@ -221,11 +221,38 @@ function module_code(library_namespace) {
 
 		// 處理 action
 		library_namespace.debug('action: ' + action, 2, 'wiki_API_query');
+		// new URLSearchParams() 會將數值轉成字串。 想二次利用 {Object}, {Array}，得採用
+		// new CeL.URI() 而非 new URL()。
 		if (false) {
 			// TODO
-			if (action instanceof URLSearchParams) {
+			if (typeof action === 'string'
+					|| (action instanceof URLSearchParams)
+					|| library_namespace.is_Search_parameters(action)) {
+				action = [ , action ];
 			}
-			if (action instanceof URL) {
+			if (Array.isArray(action)) {
+				if (!library_namespace.is_Search_parameters(action[1])) {
+					// https://www.mediawiki.org/w/api.php?action=help&modules=query
+					if (!/^[a-z]+=/.test(action[1]) && !options.post_data_only)
+						action[1] = 'action=' + action[1];
+					action[1] = library_namespace.parse_URI
+							.parse_search(action[1]);
+				}
+				library_namespace.debug('api URL: ('
+						+ (typeof action[0])
+						+ ') ['
+						+ action[0]
+						+ ']'
+						+ (action[0] === wiki_API.api_URL(action[0]) ? ''
+								: ' → [' + wiki_API.api_URL(action[0]) + ']'),
+						3, 'wiki_API_query');
+				action[0] = wiki_API.api_URL(action[0], options);
+				action[0] = library_namespace.parse_URI(action[0]);
+				action[0].search_params.add_parameters(action[1]);
+				action = action[0];
+			} else {
+				// {URL|CeL.URI}action
+				action = library_namespace.parse_URI(action);
 			}
 		}
 		if (typeof action === 'string') {
@@ -247,6 +274,8 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		if (!/^[a-z]+=/.test(action[1]) && !options.post_data_only)
 			action[1] = 'action=' + action[1];
+
+		// ------------------------------------------------
 
 		var session = wiki_API.session_of_options(options);
 		// respect maxlag
@@ -341,7 +370,7 @@ function module_code(library_namespace) {
 
 		// 一般情況下會重新導向至 https。
 		// 若在 Wikimedia Toolforge 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。
-		if (wiki_API.wmflabs && wiki_API.use_Varnish) {
+		if (false && wiki_API.wmflabs && wiki_API.use_Varnish) {
 			// UA → nginx → Varnish:80 → Varnish:3128 → Apache → HHVM → database
 			// https://wikitech.wikimedia.org/wiki/LVS_and_Varnish
 			library_namespace.debug('connect to Varnish:3128 directly.', 3,

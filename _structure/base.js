@@ -2589,14 +2589,18 @@ OS='UNIX'; // unknown
 	 * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty
 	 */
 	function defineProperty(object, propertyKey, attributes) {
-		if ('value' in attributes)
+		if ('value' in attributes) {
 			object[propertyKey] = attributes.value;
 
-		else if (typeof attributes.get === 'function') {
-			object[propertyKey] = attributes.get();
-			if (_.is_debug(2))
-				_.warn('Object.defineProperty: 將設定成 get() 所得之值 ['
-						+ object[propertyKey] + ']！');
+		} else if (typeof attributes.get === 'function') {
+			try {
+				object[propertyKey] = attributes.get();
+				if (_.is_debug(2))
+					_.warn('Object.defineProperty: 將設定成 get() 所得之值 ['
+							+ object[propertyKey] + ']！');
+			} catch (error) {
+				// TODO: handle exception
+			}
 			// ignore .set
 		}
 		// else: nothing to set.
@@ -2605,10 +2609,10 @@ OS='UNIX'; // unknown
 	}
 	defineProperty[KEY_not_native] = true;
 
-	if (typeof Object.defineProperty !== 'function')
+	if (typeof Object.defineProperty !== 'function') {
 		// 會動到原來的 Object.defineProperty。
 		Object.defineProperty = defineProperty;
-	else
+	} else {
 		try {
 			(function () {
 				// workaround for Object.defineProperty @ IE8
@@ -2642,9 +2646,10 @@ OS='UNIX'; // unknown
 				return defineProperty(target, propertyKey, attributes);
 			})[KEY_not_native] = true;
 		}
+	}
 
 	// 確認 Object.defineProperty() 是否能正確設值。
-	if (!Object.defineProperty[KEY_not_native])
+	if (!Object.defineProperty[KEY_not_native]) {
 		try {
 			(function() {
 				var i, value = 7, old_value = value,
@@ -2684,6 +2689,7 @@ OS='UNIX'; // unknown
 			// Don't have standard Object.defineProperty()!
 			Object.defineProperty[KEY_not_native] = true;
 		}
+	}
 
 	// ---------------------------------------------------------------------------//
 	// 這裡添加本 library base 會用到的，或重要的，過於基本的 native function
@@ -2911,6 +2917,8 @@ OS='UNIX'; // unknown
 				} catch (e) {
 					value[not_native_keyword] = true;
 				}
+			} else if (typeof value === 'function') {
+				value[not_native_keyword] = true;
 			}
 
 			// Warning: 由於執行時可能處於 log() stack 中，若 log() 會用到 set_method()，這邊又
