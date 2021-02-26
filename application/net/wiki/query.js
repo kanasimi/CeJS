@@ -210,6 +210,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @see api source:
 	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/includes/api
+	 * 
+	 * @since 2021/2/27 6:13:20 remove wiki_API.use_Varnish: 這方式已被 blocked。
 	 */
 	function wiki_API_query(action, callback, POST_data, options) {
 		// 前置處理。
@@ -367,37 +369,6 @@ function module_code(library_namespace) {
 		}
 		action[0] = action[0].toString();
 		// console.trace(action);
-
-		// 一般情況下會重新導向至 https。
-		// 若在 Wikimedia Toolforge 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。
-		if (false && wiki_API.wmflabs && wiki_API.use_Varnish) {
-			// UA → nginx → Varnish:80 → Varnish:3128 → Apache → HHVM → database
-			// https://wikitech.wikimedia.org/wiki/LVS_and_Varnish
-			library_namespace.debug('connect to Varnish:3128 directly.', 3,
-					'wiki_API_query');
-			// [[User:Antigng/https expected]]
-			var HOST;
-			action[0] = action[0].replace(
-			// @see PATTERN_PROJECT_CODE
-			/^https?:\/\/([a-z][a-z\d\-]{0,14}\.wikipedia\.org)\//,
-			//
-			function(all, host) {
-				HOST = host;
-				// Warning: 這方式已被 blocked。
-				// @see https://phabricator.wikimedia.org/T137707
-				return 'http://cp1008.wikimedia.org:3128/';
-			});
-			if (HOST) {
-				action = {
-					URL : action,
-					headers : {
-						HOST : HOST,
-						'X-Forwarded-For' : '127.0.0.1',
-						'X-Forwarded-Proto' : 'https'
-					}
-				};
-			}
-		}
 
 		/**
 		 * TODO: 簡易的泛用先期處理程式。

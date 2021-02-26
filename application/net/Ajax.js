@@ -1945,10 +1945,6 @@ function module_code(library_namespace) {
 				}
 			}
 
-			// 為預防字元編碼破碎，因此不能設定 response.setEncoding()？
-			// 但經測試，Wikipedia 有時似乎會有回傳字元錯位之情形？
-			// 2016/4/9 9:9:7 藉由 delete wiki_API.use_Varnish 似可解決。
-
 			// listener must be a function
 			if (typeof onload !== 'function'
 			//
