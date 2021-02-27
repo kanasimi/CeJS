@@ -246,8 +246,7 @@ function module_code(library_namespace) {
 	 *      batURL.htm
 	 */
 	function URI(uri, base_uri, options) {
-		options = library_namespace.setup_options(options);
-		if (!this) {
+		if (!is_URI(this)) {
 			// Call URI(value), like String(value)
 			if (is_URI(uri))
 				return uri;
@@ -260,7 +259,8 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (uri instanceof URL) {
+		options = library_namespace.setup_options(options);
+		if ((uri instanceof URL) || is_URI(uri)) {
 			// uri.href
 			uri = uri.toString();
 		}
@@ -268,14 +268,17 @@ function module_code(library_namespace) {
 		if (!uri
 		// 不能用 instanceof String!
 		|| typeof uri !== 'string') {
-			throw new Error('Invalid URI');
+			throw new Error('Invalid URI type: (' + (typeof uri) + ') ' + uri);
 		}
 
-		var href = library_namespace.simplify_path(uri), matched = href
-				// [ all, 1: protocol, 2: , 3: href, 4: path, ]
-				.match(/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)?(\S*)$/i), tmp, path;
-		if (!matched)
-			throw new Error('Invalid URI');
+		var href = library_namespace.simplify_path(uri), matched = href.match(
+		// [ all, 1: protocol, 2: , 3: href, 4: path, ]
+		/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)?(\S*)$/i
+		//
+		), tmp, path;
+		if (!matched) {
+			throw new Error('Invalid URI: (' + (typeof uri) + ') ' + uri);
+		}
 
 		// console.log(href);
 		library_namespace.debug('parse [' + uri + ']: '
@@ -441,14 +444,18 @@ function module_code(library_namespace) {
 				var search_params = 'search_params' in this
 				//
 				? this.search_params : this.searchParams;
-				search_params.clean_parameters();
+
+				// search_params.clean_parameters();
+				search_clean_parameters(search_params);
 
 				value = String(value);
 				if (value.startsWith('?')) {
 					value = value.slice(1);
 				}
-				if (value)
-					search_params.add_parameters(value);
+				if (value) {
+					// search_params.add_parameters(value);
+					search_add_parameters.call(search_params, value);
+				}
 			}
 		},
 		toString : {
@@ -476,6 +483,7 @@ function module_code(library_namespace) {
 				URI.hash = '#' + URI.hash;
 			}
 		}
+		// console.trace(URI.search);
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
 		URI.href = (URI.protocol ? URI.protocol + '//' : '')
 				+ (URI.username || URI.password ? URI.username
@@ -630,21 +638,34 @@ function module_code(library_namespace) {
 
 	/**
 	 * append these parameters
+	 * 
+	 * @inner
 	 */
 	function search_add_parameters(parameters, options) {
 		parameters = new Search_parameters(parameters);
+		// Object.keys() 不會取得 Search_parameters.prototype 的屬性。
 		Object.keys(parameters).forEach(function(key) {
-			search_add_1_parameter.call(this, key, parameters[key], options);
+			if (!ignore_search_properties
+			// Warning: for old environment, may need ignore some keys
+			|| !(key in ignore_search_properties)) {
+				search_add_1_parameter.call(this,
+				//
+				key, parameters[key], options);
+			}
 		}, this);
 		return this;
 	}
 
-	function search_clean_parameters() {
-		var _this = this;
-		Object.keys(this).forEach(function(key) {
-			// if (ignore_search_properties && (key in
-			// ignore_search_properties)) {...}
-			delete _this[key];
+	// @inner
+	function search_clean_parameters(object) {
+		// if (!object)
+		object = this;
+		Object.keys(object).forEach(function(key) {
+			if (!ignore_search_properties
+			// Warning: for old environment, may need ignore some keys
+			|| !(key in ignore_search_properties)) {
+				delete object[key];
+			}
 		});
 		return this;
 	}
@@ -666,8 +687,12 @@ function module_code(library_namespace) {
 			if (typeof value !== 'string' && typeof value !== 'number'
 					&& value !== NO_EQUAL_SIGN) {
 				library_namespace.debug({
-					T : [ '設定 %1 成非字串之參數：%2', JSON.stringify(key),
-							JSON.stringify(value) ]
+					T : [
+							'設定 %1 成非字串之參數：%2',
+							typeof JSON === 'object' ? JSON.stringify(key)
+									: String(key),
+							typeof JSON === 'object' ? JSON.stringify(value)
+									: String(value) ]
 				}, 1, 'parameters_toString');
 			}
 
@@ -675,8 +700,8 @@ function module_code(library_namespace) {
 					+ encode_URI_component(String(value), charset));
 		}
 
-		// Object.keys(parameters).forEach(function(key) {})
-		for (key in this) {
+		for (var index = 0, key_list = Object.keys(this); index < key_list.length; index++) {
+			key = key_list[index];
 			if (ignore_search_properties && (key in ignore_search_properties)) {
 				// Warning: for old environment, may need ignore some keys
 				continue;
@@ -684,6 +709,7 @@ function module_code(library_namespace) {
 
 			var value = this[key];
 			key = encode_URI_component(key, charset);
+			// console.log(key + ' = ' + value);
 			if (Array.isArray(value)) {
 				value.forEach(append);
 			} else {
@@ -719,8 +745,13 @@ function module_code(library_namespace) {
 	});
 	var ignore_search_properties;
 	if (Object.defineProperty[KEY_not_native]) {
-		ignore_search_properties = Object.clone(Search_parameters.prototype);
-		// 因為會採用 (key in ignore_search_properties) 的方法，因此 KEY_URL 必須是 {String}。
+		// 皆已採用 Object.keys(), Object.entries()
+		// Object.keys() 不會取得 Search_parameters.prototype 的屬性。
+		// ignore_search_properties = Object.clone(Search_parameters.prototype);
+		ignore_search_properties = Object.create(null);
+
+		// @ WScript.exe 會採用 (key in ignore_search_properties) 的方法，
+		// 因此 KEY_URL 必須是 {String}。
 		if (typeof KEY_URL !== 'string')
 			KEY_URL = String(KEY_URL);
 		ignore_search_properties[KEY_URL] = true;
@@ -1697,7 +1728,7 @@ function module_code(library_namespace) {
 		// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 		// URLSearchParams_add_parameters(parameters)
 		URLSearchParams.prototype.add_parameters = function add_parameters(
-				parameters) {
+				parameters, options) {
 			if (Array.isArray(parameters))
 				parameters = parameters.join('&');
 			// assert: typeof parameters === 'object'

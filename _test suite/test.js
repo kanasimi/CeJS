@@ -2043,12 +2043,21 @@ function test_net() {
 		[['https://host.name/path/to/file.htm', CeL.get_full_URL('/path/to/file.htm', 'https://host.name/root/sub/')], 'get_full_URL() #4'],
 		[['https://host1.name.org/path/to/file.htm', CeL.get_full_URL('https://host1.name.org/path/to/file.htm', 'https://host.name/root/sub/CGI.pl')], 'get_full_URL() #5'],
 		[['https://host1.name.org/path/to/file.htm', CeL.get_full_URL('https://host1.name.org/path/to/file.htm', 'https://host.name/root/sub/')], 'get_full_URL() #6'],
-
-		// TODO:
-		//[[typeof URL, 'function'], 'parse_URI() #1'],
-		[['a.b', CeL.net.parse_URI('http://a.b/?w=4').hostname], 'parse_URI() #1'],
-		[['a.b', CeL.net.parse_URI('http://a.b/p?w=4').hostname], 'parse_URI() #2'],
 	]);
+
+	all_error_count += CeL.test('CeL.net.URI()', function (assert) {
+		assert([typeof URL, 'function'], 'CeL.URI() #0');
+		assert(['a.b', (new CeL.URI('http://a.b/?w=4')).hostname], 'CeL.net.URI() #1');
+		assert(['a.b', (new CeL.URI('http://a.b/p?w=4')).hostname], 'CeL.net.URI() #2');
+
+		var href = 'ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23&a=2&fg2=24#hhh';
+		var url = new URL(href);
+		var uri = new CeL.URI(href);
+		assert([href, uri.toString()], 'CeL.net.URI() #3-1');
+		assert([href, url.toString()], 'CeL.net.URI() #3-2');
+		assert([href, (new URL(uri)).toString()], 'CeL.net.URI() #3-3');
+		assert([href, (new CeL.URI(url)).toString()], 'CeL.net.URI() #3-4');
+	});
 }
 
 
