@@ -55,7 +55,6 @@ function module_code(library_namespace, load_arguments) {
 
 	// requiring
 	var get_node_offset = this.r('get_node_offset');
-	//var parse_URI = this.r('parse_URI');
 
 	// 載入 CSS resource(s)。
 	// include resources of module.
@@ -896,7 +895,7 @@ function module_code(library_namespace, load_arguments) {
 		IPv4: /^[12]?\d{1,2}\.[12]?\d{1,2}\.[12]?\d{1,2}\.[12]?\d{1,2}$/,
 
 		URI: function (k) {
-			//return !!parse_URI(k);
+			//return !!library_namespace.URI(k);
 			try {
 				return !!new URL(k);
 			} catch (e) { }

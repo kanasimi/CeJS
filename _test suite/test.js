@@ -2057,6 +2057,8 @@ function test_net() {
 		assert([href, url.toString()], 'CeL.net.URI() #3-2');
 		assert([href, (new URL(uri)).toString()], 'CeL.net.URI() #3-3');
 		assert([href, (new CeL.URI(url)).toString()], 'CeL.net.URI() #3-4');
+		assert([uri, CeL.URI(uri)], 'CeL.net.URI() #3-5');
+		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #3-6');
 	});
 }
 

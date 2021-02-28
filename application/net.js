@@ -182,7 +182,7 @@ function module_code(library_namespace) {
 	 * 
 	 * 本組函數之目的:<br />
 	 * 1. polyfill for W3C URL API.<br />
-	 * 2. CeL.parse_URI.parse_search() 採用{Object}操作 hash 更方便，且可支援 charset。
+	 * 2. CeL.Search_parameters() 採用{Object}操作 hash 更方便重複利用，且可支援 charset。
 	 * 
 	 * new URLSearchParams() 會將數值轉成字串。 想二次利用 {Object}, {Array}，得採用 new CeL.URI()
 	 * 而非 new URL()。
@@ -492,13 +492,6 @@ function module_code(library_namespace) {
 		return URI.href;
 	}
 
-	/**
-	 * Parses URI.
-	 */
-	function parse_URI(uri, base_uri, options) {
-		return URI(uri, base_uri, options);
-	}
-
 	function is_URI(value) {
 		return value instanceof URI;
 	}
@@ -508,15 +501,14 @@ function module_code(library_namespace) {
 	_// JSDT:_module_
 	.URI = URI;
 
-	_// JSDT:_module_
-	.parse_URI = parse_URI;
-
 	// ------------------------------------------------------------------------
 
 	/**
 	 * parse_parameters({String}parameter) to hash
 	 * 
-	 * CeL.parse_URI.parse_search()
+	 * CeL.net.Search_parameters()
+	 * 
+	 * 新版本與 charset 編碼無關的話，應該使用 new URLSearchParams(parameters).toString()。
 	 * 
 	 * @param {String}search_string
 	 * @param {Object}[options]
@@ -528,6 +520,14 @@ function module_code(library_namespace) {
 		// Similar to:
 		// return new URLSearchParams(search_string);
 		// but with charset and forward compatibility
+		// and re-usable {Object} data structure.
+
+		if (!is_Search_parameters(this)) {
+			// `CeL.Search_parameters(search_string)`
+			if (is_Search_parameters(search_string))
+				return search_string;
+			return new Search_parameters(search_string, options);
+		}
 
 		options = library_namespace.setup_options(options);
 		var parameters = this;
@@ -580,6 +580,12 @@ function module_code(library_namespace) {
 						: /* name */NO_EQUAL_SIGN;
 			}
 
+			if (ignore_search_properties
+			// Warning: for old environment, may need ignore some keys
+			&& (name in ignore_search_properties)) {
+				continue;
+			}
+
 			if (library_namespace.is_debug(2)) {
 				try {
 					library_namespace.debug('[' + (i + 1) + '/' + l + '] '
@@ -612,10 +618,16 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (options.Array_only)
-			for (name in parameters)
-				if (!Array.isArray(parameters[name]))
-					parameters[name] = [ parameters[name] ];
+		if (options.Array_only) {
+			Object.keys(parameters).forEach(function(key) {
+				if (!ignore_search_properties
+				// Warning: for old environment, may need ignore some keys
+				|| !(key in ignore_search_properties)) {
+					if (!Array.isArray(parameters[name]))
+						parameters[name] = [ parameters[name] ];
+				}
+			});
+		}
 
 		if (typeof options.URI === 'object') {
 			Object.defineProperty(parameters, KEY_URL, {
@@ -763,16 +775,6 @@ function module_code(library_namespace) {
 	: {
 		NO_EQUAL_SIGN : true
 	};
-
-	function parse_search(search_string, options) {
-		if (is_Search_parameters(search_string))
-			return search_string;
-		return new Search_parameters(search_string, options);
-	}
-
-	// CeL.parse_URI.parse_search()
-	// 新版本與 charset 編碼無關的話，應該使用 new URLSearchParams(parameters).toString()。
-	parse_URI.parse_search = parse_search;
 
 	function is_Search_parameters(value) {
 		return value instanceof Search_parameters;

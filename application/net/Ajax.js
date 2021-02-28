@@ -18,7 +18,7 @@ typeof CeL === 'function' && CeL.run({
 	require : 'data.code.compatibility.'
 	// MIME_of()
 	+ '|application.net.MIME.'
-	// for CeL.to_file_name(), CeL.parse_URI.parse_search
+	// for CeL.to_file_name(), CeL.URI, CeL.Search_parameters
 	+ '|application.net.',
 
 	// 設定不匯出的子函式。
@@ -292,7 +292,7 @@ function module_code(library_namespace) {
 		}
 
 		if (post_data && !options.form_data) {
-			post_data = library_namespace.parse_URI.parse_search(post_data)
+			post_data = library_namespace.Search_parameters(post_data)
 					.toString(charset);
 		}
 
@@ -411,7 +411,7 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function add_parameter_with_hash(url, search, hash, charset) {
-		url = library_namespace.parse_URI(url);
+		url = library_namespace.URI(url);
 		if (hash !== undefined) {
 			// if (!/^#/.test(hash)) hash = '#' + hash;
 			url.hash = hash;
@@ -651,7 +651,7 @@ function module_code(library_namespace) {
 			}, 'buffer');
 		}
 
-		parameters = library_namespace.parse_URI.parse_search(parameters);
+		parameters = library_namespace.Search_parameters(parameters);
 
 		var root_data = [], keys = Object.keys(parameters), index = 0;
 		root_data.to_Array = form_data_to_Array;
@@ -1419,7 +1419,7 @@ function module_code(library_namespace) {
 				post_data = JSON.stringify(post_data) || FORCE_POST;
 
 			} else {
-				post_data = library_namespace.parse_URI.parse_search(post_data)
+				post_data = library_namespace.Search_parameters(post_data)
 						.toString(charset)
 						|| FORCE_POST;
 			}

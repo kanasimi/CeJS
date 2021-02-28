@@ -237,8 +237,7 @@ function module_code(library_namespace) {
 					// https://www.mediawiki.org/w/api.php?action=help&modules=query
 					if (!/^[a-z]+=/.test(action[1]) && !options.post_data_only)
 						action[1] = 'action=' + action[1];
-					action[1] = library_namespace.parse_URI
-							.parse_search(action[1]);
+					action[1] = library_namespace.Search_parameters(action[1]);
 				}
 				library_namespace.debug('api URL: ('
 						+ (typeof action[0])
@@ -249,12 +248,12 @@ function module_code(library_namespace) {
 								: ' → [' + wiki_API.api_URL(action[0]) + ']'),
 						3, 'wiki_API_query');
 				action[0] = wiki_API.api_URL(action[0], options);
-				action[0] = library_namespace.parse_URI(action[0]);
+				action[0] = library_namespace.URI(action[0]);
 				action[0].search_params.add_parameters(action[1]);
 				action = action[0];
 			} else {
 				// {URL|CeL.URI}action
-				action = library_namespace.parse_URI(action);
+				action = library_namespace.URI(action);
 			}
 		}
 		if (typeof action === 'string') {

@@ -5606,7 +5606,7 @@ function module_code(library_namespace) {
 			parameters = _options;
 		}
 
-		var url = library_namespace.parse_URI(options.API_URL
+		var url = new library_namespace.URI(options.API_URL
 				|| wikidata_PetScan_API_URL);
 		url.search_params.add_parameters(parameters);
 
