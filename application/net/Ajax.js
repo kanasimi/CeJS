@@ -155,6 +155,9 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
+	var KEY_URL = typeof Symbol === 'function' ? Symbol('URL')
+			: '\0URL to fetch';
+
 	if (false)
 		// default arguments
 		var get_URL_arguments = {
@@ -204,7 +207,7 @@ function module_code(library_namespace) {
 	/**
 	 * 讀取 URL via XMLHttpRequest。
 	 * 
-	 * @param {String|Object}URL
+	 * @param {String|Object}URL_to_fetch
 	 *            欲請求之目的 URL or options
 	 * @param {Function}[onload]
 	 *            callback when successful loaded
@@ -221,7 +224,7 @@ function module_code(library_namespace) {
 	 * @see https://developer.mozilla.org/zh-TW/docs/DOM/XMLHttpRequest
 	 *      http://msdn.microsoft.com/en-us/library/ie/ms535874.aspx
 	 */
-	function get_URL(URL, onload, charset, post_data, options) {
+	function get_URL(URL_to_fetch, onload, charset, post_data, options) {
 		// 前導作業。
 		if (library_namespace.is_Object(charset)) {
 			post_data = charset;
@@ -229,36 +232,47 @@ function module_code(library_namespace) {
 		}
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
-		if (library_namespace.is_Object(URL) && URL.URL) {
-			Object.assign(options, URL);
+
+		// ------------------------------------------------------
+
+		if (library_namespace.is_Object(URL_to_fetch) && URL_to_fetch[KEY_URL]) {
+			Object.assign(options, URL_to_fetch);
 			// 注意: options.onload 另有用途!
 			// https://xhr.spec.whatwg.org/#handler-xhr-onloadstart
 			// onload = options.onload || onload;
 			post_data = options.post || post_data;
 			charset = options.charset || charset;
-			URL = options.URL;
+			URL_to_fetch = options[KEY_URL];
 		}
 
 		// https://developer.mozilla.org/en-US/docs/Web/API/URL
 		// [ origin + pathname, search, hash ]
 		// hrer = [].join('')
-		if (Array.isArray(URL)) {
-			URL = add_parameter_with_hash(URL[0], URL[1], URL[2], charset);
+		if (Array.isArray(URL_to_fetch)) {
+			URL_to_fetch = add_parameter_with_hash(URL_to_fetch[0],
+					URL_to_fetch[1], URL_to_fetch[2], charset);
 		}
 
 		if (options.search || options.hash) {
-			URL = add_parameter_with_hash(URL, options.search, options.hash,
-					charset);
+			URL_to_fetch = add_parameter_with_hash(URL_to_fetch,
+					options.search, options.hash, charset);
 		}
 
-		library_namespace.debug('URL: (' + (typeof URL) + ') [' + URL + ']', 3,
-				'get_URL');
+		library_namespace.debug({
+			T : [ 'Fetching URL: %1', '{' + (typeof URL_to_fetch) + '} ['
+			//
+			+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+			//
+			: URL_to_fetch && URL_to_fetch[KEY_URL]
+			//
+			|| URL_to_fetch.toString()) + ']' ]
+		}, 1, 'get_URL');
 
 		if (typeof onload === 'object') {
 			library_namespace.debug(
 					'Trying to JSONP, insert page, need callback.', 3,
 					'get_URL');
-			// library_namespace.run(URL);
+			// library_namespace.run(URL_to_fetch);
 			for ( var callback_param in onload) {
 				library_namespace.debug('Trying ('
 						+ (typeof onload[callback_param]) + ') ['
@@ -270,7 +284,7 @@ function module_code(library_namespace) {
 					for (charset = 0; (callback_name = 'cb' + charset) in library_namespace;)
 						charset++;
 					library_namespace[callback_name] = function(data) {
-						library_namespace.debug('[' + URL
+						library_namespace.debug('[' + URL_to_fetch
 								+ ']: callback 完自動移除 .js。', 2, 'get_URL');
 						document_head.removeChild(node);
 						// Release memory. 釋放被占用的記憶體.
@@ -279,7 +293,7 @@ function module_code(library_namespace) {
 						onload[callback_param](data);
 					};
 					// callback_param: callback parameter
-					node.src = URL + '&' + callback_param + '='
+					node.src = URL_to_fetch + '&' + callback_param + '='
 							+ library_namespace.Class + '.' + callback_name;
 					library_namespace.debug('Use script node: [' + node.src
 							+ ']', 3, 'get_URL');
@@ -316,8 +330,9 @@ function module_code(library_namespace) {
 			// 還會 readystatechange;
 			// Gecko 亦會 throw error
 			// IE 10 中，local file 光 .open() 就 throw 了。
-			XMLHttp.open(options.method || (post_data ? 'POST' : 'GET'), URL,
-					!!onload, options.user || '', options.password || '');
+			XMLHttp.open(options.method || (post_data ? 'POST' : 'GET'),
+					URL_to_fetch, !!onload, options.user || '',
+					options.password || '');
 
 			// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/response
 			// XMLHttp.responseType = 'blob';
@@ -346,7 +361,7 @@ function module_code(library_namespace) {
 				// old: 'text/xml;charset=' + charset
 				// 但這樣會被當作 XML 解析，產生語法錯誤。
 				// TODO: try:
-				// 'text/'+(/\.x(ht)?ml$/i.test(URL)?'xml':'plain')+';charset='
+				// 'text/'+(/\.x(ht)?ml$/i.test(URL_to_fetch)?'xml':'plain')+';charset='
 				// + charset;
 				charset = 'application/json;charset=' + charset;
 
@@ -824,9 +839,9 @@ function module_code(library_namespace) {
 		if (f.post)
 			f.method = 'POST', f.sendDoc = f.post;
 
-		if (!f.URL
+		if (!f[KEY_URL]
 				|| !(_f.XMLHttp = library_namespace.new_XMLHttp(f.enc,
-						!/\.x(?:ht)?ml$/i.test(f.URL))))
+						!/\.x(?:ht)?ml$/i.test(f[KEY_URL]))))
 			// throw
 			return;
 
@@ -850,9 +865,9 @@ function module_code(library_namespace) {
 				// queue
 				_f.i = {}, _f.q = [];
 			// ** 沒有考慮到 POST 時 URL 相同的情況!
-			_f.i[f.URL] = _f.q.length;
+			_f.i[f[KEY_URL]] = _f.q.length;
 			_f.q.push({
-				uri : f.URL,
+				uri : f[KEY_URL],
 				XMLHttp : _f.XMLHttp,
 				func : f.fn,
 				start : _f.startTime = new Date
@@ -862,9 +877,10 @@ function module_code(library_namespace) {
 
 		// for Gecko Error: uncaught exception: Permission denied to call method
 		// XMLHttpRequest.open
-		if (f.URL.indexOf('://') !== NOT_FOUND && typeof netscape === 'object')
+		if (f[KEY_URL].indexOf('://') !== NOT_FOUND
+				&& typeof netscape === 'object')
 			if (_f.asked > 2) {
-				_f.clean(f.URL);
+				_f.clean(f[KEY_URL]);
 				return;
 			} else
 				try {
@@ -877,7 +893,7 @@ function module_code(library_namespace) {
 					.enablePrivilege('UniversalXPConnect');
 				} catch (e) {
 					_f.asked++;
-					_f.clean(f.URL);
+					_f.clean(f[KEY_URL]);
 					return;
 				}
 
@@ -914,9 +930,9 @@ function module_code(library_namespace) {
 				: 'application/x-www-form-urlencoded');
 			}
 			_f.XMLHttp.abort();
-			_f.XMLHttp.open(f.method || 'GET', f.URL, f.async, f.user || null,
-					f.passwd || null);
-			// alert((f.method||'GET')+','+f.URL+','+f.async);
+			_f.XMLHttp.open(f.method || 'GET', f[KEY_URL], f.async, f.user
+					|| null, f.passwd || null);
+			// alert((f.method||'GET')+','+f[KEY_URL]+','+f.async);
 			/**
 			 * @see http://www.javaworld.com.tw/jute/post/view?bid=49&id=170177&sty=3&age=0&tpg=1&ppg=1
 			 *      根據 W3C的 XMLHttpRequest 規格書上說，①在呼叫 open
@@ -936,14 +952,15 @@ function module_code(library_namespace) {
 				_f.XMLHttp.onreadystatechange = typeof f.fn === 'function'
 				//
 				? f.fn : function(e) {
-					_f.HandleStateChange(e, f.URL, f.fn);
+					_f.HandleStateChange(e, f[KEY_URL], f.fn);
 				}
 				// ||null
 				;
 				// 應加 clearTimeout( )
 				setTimeout('try{deprecated_get_URL.'
-				//
-				+ (_f.multi_request ? 'q[' + _f.i[f.URL] + ']' : 'XMLHttp')
+						//
+						+ (_f.multi_request ? 'q[' + _f.i[f[KEY_URL]] + ']'
+								: 'XMLHttp')
 						+ '.onreadystatechange();}catch(e){}',
 				// 5*60*1000;
 				_f.timeout || 3e5);
@@ -1356,15 +1373,14 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------------
 
-		if (library_namespace.is_Object(URL_to_fetch) && URL_to_fetch.URL) {
-			// URL_to_fetch.URL: @see `options.URL = URL_to_fetch`
+		if (library_namespace.is_Object(URL_to_fetch) && URL_to_fetch[KEY_URL]) {
 			Object.assign(options, URL_to_fetch);
 			// 注意: options.onload 另有用途!
 			// https://xhr.spec.whatwg.org/#handler-xhr-onloadstart
 			// onload = options.onload || onload;
 			post_data = options.post || post_data;
 			charset = options.charset || charset;
-			URL_to_fetch = options.URL;
+			URL_to_fetch = options[KEY_URL];
 		}
 
 		// https://developer.mozilla.org/en-US/docs/Web/API/URL
@@ -1376,7 +1392,6 @@ function module_code(library_namespace) {
 		}
 
 		if (options.search || options.hash) {
-			console.log([ options.search, options.hash ])
 			URL_to_fetch = add_parameter_with_hash(URL_to_fetch,
 					options.search, options.hash, charset);
 		}
@@ -1386,7 +1401,7 @@ function module_code(library_namespace) {
 			//
 			+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
 			//
-			: URL_to_fetch && URL_to_fetch.URL
+			: URL_to_fetch && URL_to_fetch[KEY_URL]
 			//
 			|| URL_to_fetch.toString()) + ']' ]
 		}, 1, 'get_URL_node');
@@ -1448,7 +1463,7 @@ function module_code(library_namespace) {
 		// 有中文字日文字之類。
 		// https://github.com/kevva/url-regex/blob/master/index.js
 		// https://perishablepress.com/stop-using-unsafe-characters-in-urls/
-		&& /[^\w\d$\-_.+!*'();\/?:@=&]/.test(source_data.url)) {
+		&& /[^\w$\-_.+!*'();\/?:@=&]/.test(source_data.url)) {
 			URL_to_fetch = encodeURI(URL_to_fetch);
 		}
 		if (has_native_URL && URL_to_fetch instanceof URL) {
@@ -1536,7 +1551,7 @@ function module_code(library_namespace) {
 				//
 				typeof URL_to_fetch === 'string' ? URL_to_fetch
 				//
-				: URL_to_fetch && URL_to_fetch.URL || 'url' ]
+				: URL_to_fetch && URL_to_fetch[KEY_URL] || 'url' ]
 			}, 2, 'get_URL_node');
 			// ... just add the special agent:
 			proxy_original_agent = proxy_server.agent = agent;
@@ -1560,7 +1575,7 @@ function module_code(library_namespace) {
 				//
 				typeof URL_to_fetch === 'string' ? URL_to_fetch
 				//
-				: URL_to_fetch && URL_to_fetch.URL || 'url' ]
+				: URL_to_fetch && URL_to_fetch[KEY_URL] || 'url' ]
 			}, 2, 'get_URL_node');
 			// https://www.proxynova.com/proxy-server-list/country-tw/
 			// proxy_server.URL_to_fetch = URL_to_fetch;
@@ -1693,15 +1708,15 @@ function module_code(library_namespace) {
 						+ time_message(timeout)
 						+ ' ['
 						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL) + ']', 3,
-						'get_URL_node');
+								: URL_to_fetch && URL_to_fetch[KEY_URL]) + ']',
+						3, 'get_URL_node');
 				// console.trace('clear timeout ' + URL_to_fetch);
 				clearTimeout(timeout_id);
 			}
 			if (false && !get_URL_node_connection_Set['delete'](URL_to_fetch)) {
 				library_namespace.warn('get_URL_node: URL not exists in Set: ['
 						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL)
+								: URL_to_fetch && URL_to_fetch[KEY_URL])
 						+ ']. 之前同時間重複請求？');
 			}
 		},
@@ -1727,7 +1742,7 @@ function module_code(library_namespace) {
 				} else {
 					options.error_count = 1;
 				}
-				options.URL = URL_to_fetch;
+				options[KEY_URL] = URL_to_fetch;
 				// Failed to get [' + URL_to_fetch + '].
 				library_namespace.log([ 'get_URL_node: ', {
 					T : [ 'Retry %1/%2: %3', options.error_count,
@@ -1755,7 +1770,7 @@ function module_code(library_namespace) {
 						//
 						typeof URL_to_fetch === 'string' ? URL_to_fetch
 						//
-						: URL_to_fetch && URL_to_fetch.URL ]
+						: URL_to_fetch && URL_to_fetch[KEY_URL] ]
 					} ]);
 				} else if (error.code === 'EPROTO'
 						&& require('tls').DEFAULT_MIN_VERSION === 'TLSv1.2'
@@ -1770,7 +1785,7 @@ function module_code(library_namespace) {
 						+ ' first!'
 					}, ' [' + (typeof URL_to_fetch === 'string' ? URL_to_fetch
 					//
-					: URL_to_fetch && URL_to_fetch.URL) + ']' ]);
+					: URL_to_fetch && URL_to_fetch[KEY_URL]) + ']' ]);
 					/**
 					 * <code>
 					To solve:
@@ -1785,7 +1800,7 @@ function module_code(library_namespace) {
 						//
 						typeof URL_to_fetch === 'string' ? URL_to_fetch
 						//
-						: URL_to_fetch && URL_to_fetch.URL,
+						: URL_to_fetch && URL_to_fetch[KEY_URL],
 						//
 						localize_error(error) ]
 					} ]);
@@ -1845,14 +1860,15 @@ function module_code(library_namespace) {
 					options = Object.clone(options);
 					options.get_URL_cloned = true;
 				}
-				options.URL = new URL(response.headers.location, URL_to_fetch);
+				options[KEY_URL] = new URL(response.headers.location,
+						URL_to_fetch);
 				library_namespace.debug({
 					T : [
 							'%1 Redirecting to [%2] ← [%3]',
 							response.statusCode,
-							options.URL,
+							options[KEY_URL],
 							typeof URL_to_fetch === 'string' ? URL_to_fetch
-									: URL_to_fetch && URL_to_fetch.URL ]
+									: URL_to_fetch && URL_to_fetch[KEY_URL] ]
 				}, 1, 'get_URL_node');
 				get_URL_node(options, onload, charset
 				// 重新導向的時候去掉 post data 不傳送。
@@ -1871,7 +1887,7 @@ function module_code(library_namespace) {
 							'HTTP status code: %1 %2',
 							response.statusCode,
 							typeof URL_to_fetch === 'string' ? URL_to_fetch
-									: URL_to_fetch && URL_to_fetch.URL ]
+									: URL_to_fetch && URL_to_fetch[KEY_URL] ]
 				}, 2, 'get_URL_node');
 			} else if (!options.no_warning) {
 				library_namespace.warn([ 'get_URL_node: ', {
@@ -1879,7 +1895,7 @@ function module_code(library_namespace) {
 					//
 					typeof URL_to_fetch === 'string' ? URL_to_fetch
 					//
-					: URL_to_fetch && URL_to_fetch.URL ]
+					: URL_to_fetch && URL_to_fetch[KEY_URL] ]
 				} ]);
 			}
 
@@ -1963,7 +1979,7 @@ function module_code(library_namespace) {
 					//
 					typeof URL_to_fetch === 'string' ? URL_to_fetch
 					//
-					: URL_to_fetch && URL_to_fetch.URL ]
+					: URL_to_fetch && URL_to_fetch[KEY_URL] ]
 				} ]);
 				// console.log(response);
 				return;
@@ -1973,7 +1989,7 @@ function module_code(library_namespace) {
 				T : [
 						'等待接收從網址 [%1] 傳輸回的資料……',
 						typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL ]
+								: URL_to_fetch && URL_to_fetch[KEY_URL] ]
 			}, 3, 'get_URL_node');
 
 			var flow_encoding = response.headers['content-encoding'];
@@ -2015,7 +2031,7 @@ function module_code(library_namespace) {
 						+ ' KiB/s)' ];
 				message.push(': '
 						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL));
+								: URL_to_fetch && URL_to_fetch[KEY_URL]));
 				library_namespace.debug('receive BODY.length: '
 						+ message.join(''), 4, 'get_URL_node');
 				if (options.show_progress && length !== total_length) {
@@ -2048,7 +2064,7 @@ function module_code(library_namespace) {
 			response.on('end', function() {
 				library_namespace.debug('end(): '
 						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL), 2,
+								: URL_to_fetch && URL_to_fetch[KEY_URL]), 2,
 						'get_URL_node');
 
 				// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
@@ -2141,13 +2157,14 @@ function module_code(library_namespace) {
 							// get_URL_node: Error: node_zlib.gunzipSync():
 							// Error: unexpected end of file [http://...]
 							'get_URL_node: Error: node_zlib.gunzipSync(): '
-							//
-							+ localize_error(error)
-							//
-							+ ' [' + (typeof URL_to_fetch === 'string'
-							//
-							? URL_to_fetch : URL_to_fetch && URL_to_fetch.URL)
-									+ ']');
+									//
+									+ localize_error(error)
+									//
+									+ ' ['
+									+ (typeof URL_to_fetch === 'string'
+									//
+									? URL_to_fetch : URL_to_fetch
+											&& URL_to_fetch[KEY_URL]) + ']');
 							if (false) {
 								console.log(error);
 								console.log(URL_options_to_fetch);
@@ -2282,7 +2299,7 @@ function module_code(library_namespace) {
 				if (typeof options.check_reget === 'function'
 				// check_reget(XMLHttp)
 				&& options.check_reget(result_Object, options)) {
-					options.URL = URL_to_fetch;
+					options[KEY_URL] = URL_to_fetch;
 					get_URL_node(options, onload, charset, post_data);
 					return;
 				}
@@ -2503,7 +2520,7 @@ function module_code(library_namespace) {
 						'Add timeout %1: [%2]',
 						time_message(timeout),
 						typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch.URL ]
+								: URL_to_fetch && URL_to_fetch[KEY_URL] ]
 			}, 2, 'get_URL_node');
 		} else if (timeout) {
 			library_namespace.warn([ 'get_URL_node: ', {
