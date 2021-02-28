@@ -46,7 +46,7 @@ function module_code(library_namespace) {
 	// requiring
 	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
-	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, add_parameters = wiki_API.add_parameters;
+	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, set_parameters = wiki_API.set_parameters;
 
 	// ------------------------------------------------------------------------
 
@@ -394,7 +394,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		add_parameters(action, options);
+		set_parameters(action, options);
 
 		// TODO: 直接以是不是 .startsWith(prefix) 來判定是不是該加入 parameters。
 

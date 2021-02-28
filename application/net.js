@@ -260,7 +260,17 @@ function module_code(library_namespace) {
 		}
 
 		options = library_namespace.setup_options(options);
-		if ((uri instanceof URL) || is_URI(uri)) {
+		if (Array.isArray(uri)) {
+			// https://developer.mozilla.org/en-US/docs/Web/API/URL
+			// [ origin + pathname, search, hash ]
+			// href = {Array}URL_to_fetch.join('')
+			if (uri[1])
+				this.additional_search = uri[1];
+			if (uri[2])
+				this._hash = uri[2];
+			uri = uri[0].toString();
+
+		} else if ((uri instanceof URL) || is_URI(uri)) {
 			// uri.href
 			uri = uri.toString();
 		}
@@ -275,7 +285,7 @@ function module_code(library_namespace) {
 		// [ all, 1: protocol, 2: , 3: href, 4: path, ]
 		/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)?(\S*)$/i
 		//
-		), tmp, path;
+		), path;
 		if (!matched) {
 			throw new Error('Invalid URI: (' + (typeof uri) + ') ' + uri);
 		}
@@ -319,12 +329,12 @@ function module_code(library_namespace) {
 				&& (path.charAt(0) === '/' || /[@:]/.test(href))) {
 			// 處理 username:password
 			if (matched = href.match(/^([^@]*)@(.+)$/)) {
-				tmp = matched[1].match(/^([^:]+)(:(.*))?$/);
-				if (!tmp)
+				matched.user_passwords = matched[1].match(/^([^:]+)(:(.*))?$/);
+				if (!matched.user_passwords)
 					return;
-				uri.username = tmp[1];
-				if (tmp[3])
-					uri.password = tmp[3];
+				uri.username = matched.user_passwords[1];
+				if (matched.user_passwords[3])
+					uri.password = matched.user_passwords[3];
 				href = matched[2];
 			} else {
 				// W3C URL API 不論有沒有帳號密碼皆會設定這兩個值
@@ -345,8 +355,7 @@ function module_code(library_namespace) {
 							.toLowerCase()]) {
 				// uri[KEY_port] = parseInt(matched[3], 10);
 				uri.port = String(parseInt(matched[3], 10));
-				tmp = ':' + uri.port;
-				uri.host += tmp;
+				uri.host += ':' + uri.port;
 			} else if (false) {
 				uri[KEY_port] = parseInt(matched[3]
 						|| port_of_protocol[uri.protocol.slice(0, -1)
@@ -376,18 +385,27 @@ function module_code(library_namespace) {
 		if (path && (matched = path
 		//
 		.match(/^((.*\/)?([^\/#?]*))?(\?([^#]*))?(#.*)?$/))) {
-			// pathname={path}filename
 			library_namespace.debug('pathname: [' + matched + ']', 2);
-			// .path 會隨不同 OS 之 local file 表示法作變動!
-			uri.path = /^\/[A-Z]:/i.test(uri.pathname = matched[1] || '') ? matched[2]
+			// pathname={path}filename
+			uri.pathname = matched[1] || '';
+			// .directory_path 會隨不同 OS 之 local file 表示法作變動!
+			uri.directory_path = /^\/[A-Z]:/i.test(uri.pathname) ? matched[2]
 					.slice(1).replace(/\//g, '\\')
-					: matched[2];
+			// e.g., 'file:///D:/directory/file.name'
+			// → D:\directory\
+			: /^[A-Z]:(?:\/([^\/]|$)|$)/i.test(uri.pathname) ? matched[2]
+					.replace(/\//g, '\\') : matched[2];
 			uri.filename = matched[3];
+			// request path used @ node.js http.request(options)
+			// uri.path = uri.pathname + uri.search
+			// uri.path = uri.pathname + (matched[5] ? '?' + matched[5] : '');
+
+			var _options;
 			if (Object.defineProperty[KEY_not_native]) {
 				// hash without '#': using uri.hash.slice(1)
 				uri.hash = matched[6];
 				uri.search = matched[4];
-				tmp = Object.assign({
+				_options = Object.assign({
 					// @see (typeof options.URI === 'object')
 					URI : uri
 				}, options);
@@ -396,23 +414,34 @@ function module_code(library_namespace) {
 					value : matched[6] ? matched[6].slice(1) : '',
 					writable : true
 				});
-				tmp = options;
+				_options = options;
 			}
 			if (options.as_URL) {
 				// 盡可能模擬 W3C URL()
 				// library_namespace.debug('search: [' + matched[5] + ']', 2);
 				// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-				uri.searchParams = new URLSearchParams(matched[5], tmp);
+				uri.searchParams = new URLSearchParams(matched[5], _options);
 			} else {
 				// do not set uri.search_params directly.
-				uri.search_params = new Search_parameters(matched[5], tmp);
+				uri.search_params = new Search_parameters(matched[5], _options);
 			}
 		} else {
 			if (!href)
 				return;
-			uri.path = uri.pathname.replace(/[^\/]+$/, '');
+			uri.directory_path = uri.pathname.replace(/[^\/]+$/, '');
+			// uri.path = uri.pathname;
 		}
 		library_namespace.debug('path: [' + uri.path + ']', 2);
+
+		if (this.additional_search) {
+			(uri.searchParams || uri.search_params)
+					.set_parameters(this.additional_search);
+			delete this.additional_search;
+		}
+		if (this._hash) {
+			this.hash = this._hash;
+			delete this._hash;
+		}
 
 		library_namespace.debug('Generate .href of URI by URI_toString()', 2);
 		uri.toString();
@@ -453,8 +482,8 @@ function module_code(library_namespace) {
 					value = value.slice(1);
 				}
 				if (value) {
-					// search_params.add_parameters(value);
-					search_add_parameters.call(search_params, value);
+					// search_params.set_parameters(value);
+					search_set_parameters.call(search_params, value);
 				}
 			}
 		},
@@ -653,7 +682,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @inner
 	 */
-	function search_add_parameters(parameters, options) {
+	function search_set_parameters(parameters, options) {
 		parameters = new Search_parameters(parameters);
 		// Object.keys() 不會取得 Search_parameters.prototype 的屬性。
 		Object.keys(parameters).forEach(function(key) {
@@ -751,7 +780,7 @@ function module_code(library_namespace) {
 	// search_properties
 	Object.assign(Search_parameters.prototype, {
 		clean_parameters : search_clean_parameters,
-		add_parameters : search_add_parameters,
+		set_parameters : search_set_parameters,
 		// valueOf
 		toString : parameters_toString
 	});
@@ -1728,8 +1757,8 @@ function module_code(library_namespace) {
 		});
 
 		// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-		// URLSearchParams_add_parameters(parameters)
-		URLSearchParams.prototype.add_parameters = function add_parameters(
+		// URLSearchParams_set_parameters(parameters)
+		URLSearchParams.prototype.set_parameters = function set_parameters(
 				parameters, options) {
 			if (Array.isArray(parameters))
 				parameters = parameters.join('&');

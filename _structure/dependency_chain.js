@@ -320,7 +320,7 @@ if (typeof CeL === 'function')
 		var is_Set, is_Map, has_Set, has_Map,
 		//
 		KEY_not_native = library_namespace.env.not_native_keyword,
-		// use Object.defineProperty.not_native to test
+		// use Object.defineProperty[library_namespace.env.not_native_keyword] to test
 		// if the browser don't have native support for Object.defineProperty().
 		has_native_Object_defineProperty = !Object.defineProperty[KEY_not_native];
 

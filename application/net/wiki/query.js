@@ -249,7 +249,7 @@ function module_code(library_namespace) {
 						3, 'wiki_API_query');
 				action[0] = wiki_API.api_URL(action[0], options);
 				action[0] = library_namespace.URI(action[0]);
-				action[0].search_params.add_parameters(action[1]);
+				action[0].search_params.set_parameters(action[1]);
 				action = action[0];
 			} else {
 				// {URL|CeL.URI}action
@@ -362,9 +362,9 @@ function module_code(library_namespace) {
 		+ action[2] : action[0], Object.create(null) ];
 		action[0] = new URL(action[0]);
 		if (session && session.general_parameters) {
-			action[0].searchParams.add_parameters(session.general_parameters);
+			action[0].searchParams.set_parameters(session.general_parameters);
 		} else if (!action[1].format && wiki_API.general_parameters.format) {
-			action[0].searchParams.add_parameters(wiki_API.general_parameters);
+			action[0].searchParams.set_parameters(wiki_API.general_parameters);
 		}
 		action[0] = action[0].toString();
 		// console.trace(action);

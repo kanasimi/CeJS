@@ -412,11 +412,11 @@ function module_code(library_namespace) {
 	 */
 	function add_parameter_with_hash(url, search, hash, charset) {
 		url = library_namespace.URI(url);
-		if (hash !== undefined) {
+		if (hash || hash === '') {
 			// if (!/^#/.test(hash)) hash = '#' + hash;
 			url.hash = hash;
 		}
-		url.search_params.add_parameters(search);
+		url.search_params.set_parameters(search);
 		// console.trace(url.toString(charset));
 		return url.toString(charset);
 	}
@@ -1228,7 +1228,7 @@ function module_code(library_namespace) {
 
 	_.merge_cookie = merge_cookie;
 
-	function set_cookie_to_URL_object(URL_object_to_fetch, agent) {
+	function set_cookie_to_URL_object(URL_options_to_fetch, agent) {
 		// console.trace('agent.last_cookie:');
 		// console.log(agent.last_cookie);
 		if (agent.last_cookie) {
@@ -1239,7 +1239,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('agent.last_cookie.cookie_hash: '
 					+ JSON.stringify(agent.last_cookie.cookie_hash), 3,
 					'set_cookie_to_URL_object');
-			var cookie = (URL_object_to_fetch.headers.Cookie ? URL_object_to_fetch.headers.Cookie
+			var cookie = (URL_options_to_fetch.headers.Cookie ? URL_options_to_fetch.headers.Cookie
 					+ ';'
 					: '')
 					// cookie is Array @ Wikipedia
@@ -1250,19 +1250,18 @@ function module_code(library_namespace) {
 						return cookie.replace(/;.*/, '');
 					}).join('; ') : agent.last_cookie);
 			if (cookie) {
-				URL_object_to_fetch.headers.Cookie = cookie;
+				URL_options_to_fetch.headers.Cookie = cookie;
 			} else {
-				delete URL_object_to_fetch.headers.Cookie;
+				delete URL_options_to_fetch.headers.Cookie;
 			}
 		}
 		library_namespace.debug('Set cookie: '
-				+ JSON.stringify(URL_object_to_fetch.headers.Cookie), 3,
+				+ JSON.stringify(URL_options_to_fetch.headers.Cookie), 3,
 				'set_cookie_to_URL_object');
-		library_namespace.debug(
-				'Set protocol: ' + URL_object_to_fetch.protocol, 3,
-				'set_cookie_to_URL_object');
+		library_namespace.debug('Set protocol: '
+				+ URL_options_to_fetch.protocol, 3, 'set_cookie_to_URL_object');
 		library_namespace.debug('Set headers: '
-				+ JSON.stringify(URL_object_to_fetch.headers), 3,
+				+ JSON.stringify(URL_options_to_fetch.headers), 3,
 				'set_cookie_to_URL_object');
 	}
 
@@ -1283,7 +1282,8 @@ function module_code(library_namespace) {
 
 	var ERROR_BAD_STSTUS = 'BAD STATUS';
 
-	var has_native_URL = typeof URL === "function" && !URL.not_native;
+	var has_native_URL = typeof URL === "function"
+			&& !URL[library_namespace.env.not_native_keyword];
 
 	/**
 	 * 讀取 URL via node http/https。<br />
@@ -1319,7 +1319,7 @@ function module_code(library_namespace) {
 				T : [ 'Waiting %1/%2 connections: %3',
 				// 避免同時開過多 connections 的機制。
 				get_URL_node_connections, get_URL_node_requests,
-						JSON.stringify(URL_to_fetch) ]
+						String(URL_to_fetch) ]
 			}, 3, 'get_URL_node');
 			var _arguments = arguments;
 			setTimeout(function() {
@@ -1354,7 +1354,10 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// ------------------------------------------------------
+
 		if (library_namespace.is_Object(URL_to_fetch) && URL_to_fetch.URL) {
+			// URL_to_fetch.URL: @see `options.URL = URL_to_fetch`
 			Object.assign(options, URL_to_fetch);
 			// 注意: options.onload 另有用途!
 			// https://xhr.spec.whatwg.org/#handler-xhr-onloadstart
@@ -1366,13 +1369,14 @@ function module_code(library_namespace) {
 
 		// https://developer.mozilla.org/en-US/docs/Web/API/URL
 		// [ origin + pathname, search, hash ]
-		// hrer = [].join('')
+		// href = {Array}URL_to_fetch.join('')
 		if (Array.isArray(URL_to_fetch)) {
 			URL_to_fetch = add_parameter_with_hash(URL_to_fetch[0],
 					URL_to_fetch[1], URL_to_fetch[2], charset);
 		}
 
 		if (options.search || options.hash) {
+			console.log([ options.search, options.hash ])
 			URL_to_fetch = add_parameter_with_hash(URL_to_fetch,
 					options.search, options.hash, charset);
 		}
@@ -1382,7 +1386,9 @@ function module_code(library_namespace) {
 			//
 			+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
 			//
-			: URL_to_fetch && URL_to_fetch.URL) + ']' ]
+			: URL_to_fetch && URL_to_fetch.URL
+			//
+			|| URL_to_fetch.toString()) + ']' ]
 		}, 1, 'get_URL_node');
 
 		if (typeof onload === 'object') {
@@ -1439,9 +1445,10 @@ function module_code(library_namespace) {
 		var agent = options.agent;
 
 		if (false && (typeof URL_to_fetch === 'string')
+		// 有中文字日文字之類。
 		// https://github.com/kevva/url-regex/blob/master/index.js
 		// https://perishablepress.com/stop-using-unsafe-characters-in-urls/
-		&& /[^0-9a-zA-Z$\-_.+!*'();\/?:@=&]/.test(source_data.url)) {
+		&& /[^\w\d$\-_.+!*'();\/?:@=&]/.test(source_data.url)) {
 			URL_to_fetch = encodeURI(URL_to_fetch);
 		}
 		if (has_native_URL && URL_to_fetch instanceof URL) {
@@ -1450,23 +1457,24 @@ function module_code(library_namespace) {
 			URL_to_fetch = URL_to_fetch.toString();
 		}
 		// console.trace(URL_to_fetch);
-		var URL_object_to_fetch;
+		var URL_options_to_fetch;
 		if (typeof URL_to_fetch === 'string') {
-			if (false && has_native_URL) {
-				URL_object_to_fetch = new URL(URL_to_fetch);
-			} else {
-				URL_object_to_fetch = node_url.parse(
-				// 處理 '//domain.org/path' 的情況。
-				URL_to_fetch.startsWith('//')
-				//
-				? (agent && agent.protocol || 'https:') + URL_to_fetch
-						: URL_to_fetch);
-			}
+			// url.parse() is deprecated
+			URL_options_to_fetch = new library_namespace.URI(
+			// 處理 '//domain.org/path' 的情況。
+			URL_to_fetch.startsWith('//')
+			//
+			? (agent && agent.protocol || 'https:') + URL_to_fetch
+					: URL_to_fetch);
+			// node_http.request(options): options needs a .path
+			// https://nodejs.org/dist/latest/docs/api/http.html#http_http_request_options_callback
+			URL_options_to_fetch.path = URL_options_to_fetch.pathname
+					+ URL_options_to_fetch.search;
 
 		} else {
-			URL_object_to_fetch = URL_to_fetch;
+			URL_options_to_fetch = URL_to_fetch;
 		}
-		var URL_is_https = /^https:?$/i.test(URL_object_to_fetch.protocol);
+		var URL_is_https = /^https:?$/i.test(URL_options_to_fetch.protocol);
 
 		/**
 		 * <code>
@@ -1542,8 +1550,8 @@ function module_code(library_namespace) {
 			// ALPN is supported by Node.js >= v5.
 			// attempt to negotiate http/1.1 for proxy servers that support
 			// http/2
-			if (!('ALPNProtocols' in URL_object_to_fetch)) {
-				URL_object_to_fetch.ALPNProtocols = [ 'http 1.1' ];
+			if (!('ALPNProtocols' in URL_options_to_fetch)) {
+				URL_options_to_fetch.ALPNProtocols = [ 'http 1.1' ];
 			}
 
 		} else {
@@ -1561,11 +1569,11 @@ function module_code(library_namespace) {
 			// https://stackoverflow.com/questions/3862813/how-can-i-use-an-http-proxy-with-node-js-http-client
 			// https://cnodejs.org/topic/530f41e75adfcd9c0f1c8c16
 
-			URL_object_to_fetch = get_proxy_URL(proxy_server,
-					URL_object_to_fetch, URL_to_fetch);
+			URL_options_to_fetch = get_proxy_URL(proxy_server,
+					URL_options_to_fetch, URL_to_fetch);
 		}
-		if (false && proxy_server && URL_object_to_fetch.host
-				&& URL_object_to_fetch.path) {
+		if (false && proxy_server && URL_options_to_fetch.host
+				&& URL_options_to_fetch.path) {
 			// https://github.com/TooTallNate/node-https-proxy-agent/blob/master/index.js
 			/**
 			 * if both a `host` and `path` are specified then it's most likely
@@ -1573,15 +1581,15 @@ function module_code(library_namespace) {
 			 * `path` portion so that `net.connect()` doesn't attempt to open
 			 * that as a unix socket file.
 			 */
-			delete URL_object_to_fetch.path;
-			delete URL_object_to_fetch.pathname;
+			delete URL_options_to_fetch.path;
+			delete URL_options_to_fetch.pathname;
 		}
 
-		if (!URL_object_to_fetch.protocol) {
-			URL_object_to_fetch.protocol = agent && agent.protocol
+		if (!URL_options_to_fetch.protocol) {
+			URL_options_to_fetch.protocol = agent && agent.protocol
 			// 直接設定。 default: https://
 			|| (proxy_server ? 'http:' : 'https:');
-			URL_is_https = URL_object_to_fetch.protocol === 'https:';
+			URL_is_https = URL_options_to_fetch.protocol === 'https:';
 		}
 
 		if (agent) {
@@ -1594,11 +1602,11 @@ function module_code(library_namespace) {
 						: new node_http.Agent;
 			} else if (agent.protocol
 			// agent.protocol 可能是 undefined。
-			&& agent.protocol !== URL_object_to_fetch.protocol) {
+			&& agent.protocol !== URL_options_to_fetch.protocol) {
 				var message = {
 					T : [ '自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定：%1',
 					//
-					agent.protocol + ' !== ' + URL_object_to_fetch.protocol ]
+					agent.protocol + ' !== ' + URL_options_to_fetch.protocol ]
 				};
 				if (options.no_protocol_warn) {
 					library_namespace.debug(message, 3, 'get_URL_node');
@@ -1637,7 +1645,7 @@ function module_code(library_namespace) {
 			// url : URL_to_fetch,
 
 			// deprecated: XMLHttp.URL
-			// URL : URL_object_to_fetch,
+			// URL : URL_options_to_fetch,
 
 			// https://developer.mozilla.org/zh-TW/docs/Web/API/Response
 			// .useFinalURL @ fetch()
@@ -1818,7 +1826,7 @@ function module_code(library_namespace) {
 			}
 			if ((response.statusCode / 100 | 0) === 3
 					&& response.headers.location
-					&& response.headers.location !== URL_to_fetch
+					&& response.headers.location !== String(URL_to_fetch)
 					&& !options.no_redirect) {
 				if (unregister()) {
 					// 預防 timeout 時重複執行。
@@ -1837,8 +1845,7 @@ function module_code(library_namespace) {
 					options = Object.clone(options);
 					options.get_URL_cloned = true;
 				}
-				options.URL = node_url.resolve(URL_to_fetch,
-						response.headers.location);
+				options.URL = new URL(response.headers.location, URL_to_fetch);
 				library_namespace.debug({
 					T : [
 							'%1 Redirecting to [%2] ← [%3]',
@@ -2143,7 +2150,7 @@ function module_code(library_namespace) {
 									+ ']');
 							if (false) {
 								console.log(error);
-								console.log(URL_object_to_fetch);
+								console.log(URL_options_to_fetch);
 								console.log(node_zlib);
 								console.log(data);
 								console.trace(
@@ -2294,9 +2301,9 @@ function module_code(library_namespace) {
 
 		// https://fetch.spec.whatwg.org/#forbidden-header-name
 		// 必要的 headers: User-Agent, Accept-Language。其他是為了模擬得更真實點。
-		URL_object_to_fetch.headers = Object.assign({
+		URL_options_to_fetch.headers = Object.assign({
 			// 網站的主機名稱。
-			Host : URL_object_to_fetch.host,
+			Host : URL_options_to_fetch.host,
 
 			// User Agent
 			'User-Agent' : get_URL_node.default_user_agent,
@@ -2328,14 +2335,14 @@ function module_code(library_namespace) {
 			// Transfer-Encoding: trailers，那麼同時也必須返回另一個響應標頭 Trailer，
 			// TE : 'Trailers',
 
-			// Origin : URL_object_to_fetch.protocol + '://' +
-			// URL_object_to_fetch.host
+			// Origin : URL_options_to_fetch.protocol + '://' +
+			// URL_options_to_fetch.host
 
 			Pragma : 'no-cache',
 			// 'max-age=0'
 			'Cache-Control' : 'no-cache'
-		}, options.headers, URL_object_to_fetch.headers);
-		// delete URL_object_to_fetch.headers.Referer;
+		}, options.headers, URL_options_to_fetch.headers);
+		// delete URL_options_to_fetch.headers.Referer;
 		// console.log(options.headers);
 
 		if (node_zlib.gunzipSync
@@ -2343,27 +2350,27 @@ function module_code(library_namespace) {
 		) {
 			// 早期 node v0.10.25 無 zlib.gunzipSync。Added in: v0.11.12
 			// 'gzip, deflate, *'
-			URL_object_to_fetch.headers['Accept-Encoding'] = 'gzip, deflate';
+			URL_options_to_fetch.headers['Accept-Encoding'] = 'gzip, deflate';
 		}
-		// console.log(URL_object_to_fetch.headers);
+		// console.log(URL_options_to_fetch.headers);
 
 		if (false) {
 			// @see jQuery
 			if (!options.crossDomain
-					&& !URL_object_to_fetch.headers["X-Requested-With"]) {
-				URL_object_to_fetch.headers["X-Requested-With"] = "XMLHttpRequest";
+					&& !URL_options_to_fetch.headers["X-Requested-With"]) {
+				URL_options_to_fetch.headers["X-Requested-With"] = "XMLHttpRequest";
 			}
 		}
 
 		if (post_data) {
-			URL_object_to_fetch.method = 'POST';
+			URL_options_to_fetch.method = 'POST';
 			var _post_data = post_data === FORCE_POST ? '' : post_data;
 			if (false && options.form_data) {
 				// console.log('-'.repeat(79));
 				// console.log(_post_data.to_Array().content_length);
 				// console.log(_post_data);
 			}
-			Object.assign(URL_object_to_fetch.headers, {
+			Object.assign(URL_options_to_fetch.headers, {
 				'Content-Type' : options.headers
 				//
 				&& options.headers['Content-Type']
@@ -2382,25 +2389,25 @@ function module_code(library_namespace) {
 		}
 		if (options.method) {
 			// e.g., 'HEAD'
-			URL_object_to_fetch.method = options.method;
+			URL_options_to_fetch.method = options.method;
 		}
 
-		URL_object_to_fetch.agent = agent;
-		set_cookie_to_URL_object(URL_object_to_fetch, agent);
+		URL_options_to_fetch.agent = agent;
+		set_cookie_to_URL_object(URL_options_to_fetch, agent);
 		if (library_namespace.is_debug(3)) {
 			library_namespace.debug('Set headers: '
-					+ JSON.stringify(URL_object_to_fetch.headers), 3,
+					+ JSON.stringify(URL_options_to_fetch.headers), 3,
 					'get_URL_node');
-			console.log(URL_object_to_fetch.headers);
+			console.log(URL_options_to_fetch.headers);
 		}
 
-		// console.log(URL_object_to_fetch);
+		// console.log(URL_options_to_fetch);
 		try {
 			// from node.js 10.9.0
 			// http.request(url[, options][, callback])
 			// request: Class: http.ClientRequest
-			request = URL_is_https ? node_https.request(URL_object_to_fetch,
-					_onload) : node_http.request(URL_object_to_fetch, _onload);
+			request = URL_is_https ? node_https.request(URL_options_to_fetch,
+					_onload) : node_http.request(URL_options_to_fetch, _onload);
 		} catch (e) {
 			// e.g., _http_client.js:52
 			if (false) {
@@ -2626,16 +2633,16 @@ function module_code(library_namespace) {
 		return matched;
 	}
 
-	function get_proxy_URL(proxy_server, URL_object_to_fetch, URL_to_fetch) {
+	function get_proxy_URL(proxy_server, URL_options_to_fetch, URL_to_fetch) {
 		var proxy_URL = {
 			host : proxy_server.hostname,
 			port : proxy_server.port
-					|| (URL_object_to_fetch.protocol === 'https:' ? 443 : 80),
+					|| (URL_options_to_fetch.protocol === 'https:' ? 443 : 80),
 			path : URL_to_fetch,
-			protocol : URL_object_to_fetch.protocol,
+			protocol : URL_options_to_fetch.protocol,
 			// method: 'GET',
 			headers : {
-				Host : URL_object_to_fetch.host
+				Host : URL_options_to_fetch.host
 			}
 		};
 		if (proxy_server.agent) {
@@ -3168,7 +3175,7 @@ function module_code(library_namespace) {
 						initial_URL : options.initial_URL || input
 					});
 
-					url = node_url.resolve(url, response.headers.location);
+					url = new URL(response.headers.location, url);
 					library_namespace.debug({
 						T : [ '%1 Redirecting to [%2] ← [%3]',
 								response.statusCode, url, input ]

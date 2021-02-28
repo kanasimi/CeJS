@@ -244,7 +244,7 @@ function module_code(library_namespace) {
 	}
 
 	// 僅添加有效的 parameters。基本上等同於 Object.assign()，只是不添加無效值。
-	function add_parameters_to_template_object(template_object, parameters,
+	function set_template_object_parameters(template_object, parameters,
 			value_mapper) {
 		if (!template_object)
 			template_object = Object.create(null);
@@ -2548,6 +2548,15 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			if (wiki_API.is_template('Wikicite', template_token, options)) {
+				// const
+				var anchor = template_token.parameters.ref
+						|| template_token.parameters.id
+						&& ('Reference-' + template_token.parameters.id);
+				register_anchor(anchor, template_token);
+				return;
+			}
+
 			if (wiki_API.is_template('SfnRef', template_token, options)) {
 				var anchor = 'CITEREF';
 				// console.trace(template_token);
@@ -2592,7 +2601,7 @@ function module_code(library_namespace) {
 	// CeL.wiki.parse.anchor.essential_templates
 	// required, indispensable
 	get_all_anchor.essential_templates = [ 'Anchor', 'Anchors',
-			'Visible anchor', 'Citation', 'RFD', 'SfnRef', 'Sfn' ];
+			'Visible anchor', 'Citation', 'RFD', 'Wikicite', 'SfnRef', 'Sfn' ];
 
 	// ------------------------------------------------------------------------
 
@@ -7413,7 +7422,7 @@ function module_code(library_namespace) {
 	// TODO: 統合於 CeL.wiki.parser 之中。
 	Object.assign(parse_wikitext, {
 		template : parse_template,
-		add_parameters_to_template_object : add_parameters_to_template_object,
+		set_template_object_parameters : set_template_object_parameters,
 		template_object_to_wikitext : template_object_to_wikitext,
 		// CeL.wiki.parse.replace_parameter()
 		replace_parameter : replace_parameter,

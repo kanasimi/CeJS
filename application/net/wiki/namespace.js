@@ -330,14 +330,14 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * append additional parameters of MediaWiki API.
+	 * set / append additional parameters of MediaWiki API.
 	 * 
 	 * @param {Array}action
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @inner
 	 */
-	function add_parameters(action, options) {
+	function set_parameters(action, options) {
 		if (!options.parameters) {
 			return;
 		}
@@ -350,7 +350,7 @@ function module_code(library_namespace) {
 			action[1] += '&' + new URLSearchParams(options.parameters);
 		} else {
 			library_namespace.debug('無法處理之 options.parameters: ['
-					+ options.parameters + ']', 1, 'add_parameters');
+					+ options.parameters + ']', 1, 'set_parameters');
 		}
 	}
 
@@ -2961,7 +2961,7 @@ function module_code(library_namespace) {
 		API_URL_of_options : API_URL_of_options,
 		is_api_and_title : is_api_and_title,
 		normalize_title_parameter : normalize_title_parameter,
-		add_parameters : add_parameters,
+		set_parameters : set_parameters,
 		is_wikidata_site : is_wikidata_site,
 		language_code_to_site_alias : language_code_to_site_alias,
 

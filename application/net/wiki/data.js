@@ -5608,7 +5608,7 @@ function module_code(library_namespace) {
 
 		var url = new library_namespace.URI(options.API_URL
 				|| wikidata_PetScan_API_URL);
-		url.search_params.add_parameters(parameters);
+		url.search_params.set_parameters(parameters);
 
 		get_URL(url.to_String(), function(data, error) {
 			if (error) {

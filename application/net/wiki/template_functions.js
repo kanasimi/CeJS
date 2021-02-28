@@ -551,7 +551,7 @@ function module_code(library_namespace) {
 						item[parameter] = token.parameters[parameter];
 				});
 			}
-			item = wiki_API.parse.add_parameters_to_template_object(
+			item = wiki_API.parse.set_template_object_parameters(
 			//
 			null, item);
 			item_list.push(item);
@@ -569,7 +569,7 @@ function module_code(library_namespace) {
 				if (!item.result) {
 					item.result = default_result_of__Old_vfd_multi;
 				}
-				item = wiki_API.parse.add_parameters_to_template_object(null,
+				item = wiki_API.parse.set_template_object_parameters(null,
 						item);
 				item_list.push(item);
 				if (index > 5) {
@@ -647,7 +647,7 @@ function module_code(library_namespace) {
 
 		var page_title = wiki_API.title_of(page_data);
 
-		var add_parameters = wiki_API.parse.add_parameters_to_template_object;
+		var set_parameters = wiki_API.parse.set_template_object_parameters;
 		item_list.forEach(function(item, index) {
 			if (index === 0) {
 				var parameters = {
@@ -661,7 +661,7 @@ function module_code(library_namespace) {
 				additional_parameters.forEach(function(parameter_name) {
 					parameters[parameter_name] = item[parameter_name];
 				});
-				add_parameters(template_object, parameters);
+				set_parameters(template_object, parameters);
 				return;
 			}
 
@@ -682,7 +682,7 @@ function module_code(library_namespace) {
 			if (!force_set_page && item.page === page_title) {
 				delete mapper.page;
 			}
-			add_parameters(template_object, mapper, item);
+			set_parameters(template_object, mapper, item);
 		});
 
 		return template_object;

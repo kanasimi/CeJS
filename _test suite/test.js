@@ -4145,9 +4145,12 @@ function do_test() {
 	} else {
 		//`node "_test suite\test.js" wiki`
 		for (var index = 2; index < CeL.env.argv.length; index++) {
-			var item = CeL.env.argv[index];
-			if (item in all_test_items)
+			var item = CeL.env.argv[index], matched;
+			if (item in all_test_items) {
 				test_items.push(item);
+			} else if (matched = item.match(/^(?:set_)?debug=(\d)$/)) {
+				CeL.set_debug(+matched[1]);
+			}
 		}
 	}
 
@@ -4162,7 +4165,7 @@ function do_test() {
 		// 測試期間時需要用到的功能先作測試。這些不可 comment out。
 		'interact.console', 'application.locale',
 		//
-		function () { CeL.set_debug(0); },
+		//function () { CeL.set_debug(0); },
 		//
 		test_items,
 		//
