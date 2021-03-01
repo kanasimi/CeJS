@@ -434,7 +434,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('path: [' + uri.path + ']', 2);
 
 		if (this.additional_search) {
-			(uri.searchParams || uri.search_params)
+			(uri.search_params || uri.searchParams)
 					.set_parameters(this.additional_search);
 			delete this.additional_search;
 		}
@@ -470,9 +470,10 @@ function module_code(library_namespace) {
 			enumerable : true,
 			get : search_getter,
 			set : function set(value) {
-				var search_params = 'search_params' in this
-				//
-				? this.search_params : this.searchParams;
+				var search_params = this.search_params || this.searchParams;
+				if (false && this.search_params) {
+					this.search_params[KEY_URL] = this;
+				}
 
 				// search_params.clean_parameters();
 				search_clean_parameters(search_params);
@@ -492,22 +493,28 @@ function module_code(library_namespace) {
 		}
 	});
 
-	function search_getter(URI) {
+	function search_getter(options) {
 		// library_namespace.debug('normalize properties by search_getter');
 		// library_namespace.debug(this.search_params);
-		URI = URI || this;
+
+		if (false && this.search_params) {
+			this.search_params[KEY_URL] = this;
+		}
+
+		var URI = this;
 		var search = 'search_params' in URI
-		//
-		? URI.search_params.toString()
+		// function parameters_toString(options)
+		? URI.search_params.toString(options)
 		// options.as_URL?
 		: URI.searchParams.toString();
 		return search ? '?' + search : '';
 	}
 
-	function URI_toString(charset) {
+	// options: 'charset'
+	function URI_toString(options) {
 		var URI = this;
 		if (Object.defineProperty[KEY_not_native]) {
-			URI.search = search_getter(URI);
+			URI.search = search_getter.call(URI, options);
 			if ((URI.hash = String(URI.hash)) && !URI.hash.startsWith('#')) {
 				URI.hash = '#' + URI.hash;
 			}
@@ -683,7 +690,8 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function search_set_parameters(parameters, options) {
-		parameters = new Search_parameters(parameters);
+		if (!library_namespace.is_Object(parameters))
+			parameters = Search_parameters(parameters);
 		// Object.keys() 不會取得 Search_parameters.prototype 的屬性。
 		Object.keys(parameters).forEach(function(key) {
 			if (!ignore_search_properties
@@ -721,6 +729,9 @@ function module_code(library_namespace) {
 		} else {
 			options = library_namespace.setup_options(options);
 			charset = options.charset;
+		}
+		if (charset === undefined) {
+			charset = this.charset || this[KEY_URL] && this[KEY_URL].charset;
 		}
 
 		var search = [], key;

@@ -249,12 +249,12 @@ function module_code(library_namespace) {
 		// [ origin + pathname, search, hash ]
 		// hrer = [].join('')
 		if (Array.isArray(URL_to_fetch)) {
-			URL_to_fetch = add_parameter_with_hash(URL_to_fetch[0],
+			URL_to_fetch = set_parameters_and_hash(URL_to_fetch[0],
 					URL_to_fetch[1], URL_to_fetch[2], charset);
 		}
 
 		if (options.search || options.hash) {
-			URL_to_fetch = add_parameter_with_hash(URL_to_fetch,
+			URL_to_fetch = set_parameters_and_hash(URL_to_fetch,
 					options.search, options.hash, charset);
 		}
 
@@ -425,7 +425,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @inner
 	 */
-	function add_parameter_with_hash(url, search, hash, charset) {
+	function set_parameters_and_hash(url, search, hash, charset) {
 		url = library_namespace.URI(url);
 		if (hash || hash === '') {
 			// if (!/^#/.test(hash)) hash = '#' + hash;
@@ -1387,12 +1387,12 @@ function module_code(library_namespace) {
 		// [ origin + pathname, search, hash ]
 		// href = {Array}URL_to_fetch.join('')
 		if (Array.isArray(URL_to_fetch)) {
-			URL_to_fetch = add_parameter_with_hash(URL_to_fetch[0],
+			URL_to_fetch = set_parameters_and_hash(URL_to_fetch[0],
 					URL_to_fetch[1], URL_to_fetch[2], charset);
 		}
 
 		if (options.search || options.hash) {
-			URL_to_fetch = add_parameter_with_hash(URL_to_fetch,
+			URL_to_fetch = set_parameters_and_hash(URL_to_fetch,
 					options.search, options.hash, charset);
 		}
 
