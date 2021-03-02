@@ -372,12 +372,11 @@ function module_code(library_namespace) {
 		// exclude {key: false}
 		Object.keys(options).forEach(function(key) {
 			var value = options[key];
-			if (key && typeof key === 'string' && (value || value === 0))
+			if (typeof key === 'string' && (value || value === 0))
 				post_data[key] = value;
 		});
-		if (post_data[KEY_SESSION]) {
-			delete post_data[KEY_SESSION];
-		}
+		delete post_data[''];
+		delete post_data[KEY_SESSION];
 
 		wiki_API.query(action, function(data, error) {
 			// console.log(data);
