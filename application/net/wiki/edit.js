@@ -368,12 +368,15 @@ function module_code(library_namespace) {
 		library_namespace.debug('#2: ' + Object.keys(options).join(','), 4,
 				'wiki_API_edit');
 
-		var post_data;
-		if (options[KEY_SESSION]) {
-			post_data = Object.clone(options);
+		var post_data = Object.create(null);
+		// exclude {key: false}
+		Object.keys(options).forEach(function(key) {
+			var value = options[key];
+			if (key && typeof key === 'string' && (value || value === 0))
+				post_data[key] = value;
+		});
+		if (post_data[KEY_SESSION]) {
 			delete post_data[KEY_SESSION];
-		} else {
-			post_data = options;
 		}
 
 		wiki_API.query(action, function(data, error) {
@@ -461,7 +464,8 @@ function module_code(library_namespace) {
 			}
 			if (typeof callback === 'function') {
 				// assert: wiki_API.is_page_data(title)
-				// BUT title IS NOT latest page data! It contains only basic page information,
+				// BUT title IS NOT latest page data! It contains only basic
+				// page information,
 				// e.g., .pageid, .ns, .title
 				// title.title === wiki_API.title_of(title)
 				callback(title, error, data);
