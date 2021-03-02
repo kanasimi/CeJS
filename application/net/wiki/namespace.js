@@ -323,7 +323,7 @@ function module_code(library_namespace) {
 
 		if (options.redirects) {
 			// 舊版毋須 '&redirects=1'，'&redirects' 即可。
-			action[1] += '&redirects=1';
+			action[1].redirects = 1;
 		}
 
 		return action;
@@ -342,16 +342,13 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (typeof options.parameters === 'string') {
-			action[1] += '&' + options.parameters;
-		} else if (library_namespace.is_Object(options.parameters)) {
-			var parameters = Object.create(null);
-			// TODO: 篩選掉指定為 false 的
-			action[1] += '&' + new URLSearchParams(options.parameters);
-		} else {
-			library_namespace.debug('無法處理之 options.parameters: ['
-					+ options.parameters + ']', 1, 'set_parameters');
+		if (typeof action[1] === 'string' && !/^[a-z]+=/.test(action[1])) {
+			library_namespace.warn('Did not set action!');
+			console.trace(action);
+			action[1] = 'action=' + action[1];
 		}
+		action[1] = library_namespace.Search_parameters(action[1]);
+		action[1].set_parameters(options.parameters);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -2330,7 +2327,7 @@ function module_code(library_namespace) {
 			delete options[KEY_SESSION];
 		}
 
-		var action = 'action=' + 'query',
+		var action = 'action=query',
 		//
 		API_URL = session && session.API_URL;
 		if (API_URL) {

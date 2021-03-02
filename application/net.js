@@ -581,7 +581,7 @@ function module_code(library_namespace) {
 			}
 		} else {
 			if (search_string) {
-				// Invalid search
+				// Invalid search 無法處理之 parameters
 				library_namespace.debug({
 					T : [ '輸入了非字串之參數：[%1]', search_string ]
 				}, 1, 'Search_parameters');
@@ -759,10 +759,13 @@ function module_code(library_namespace) {
 			var value = this[key];
 			key = encode_URI_component(key, charset);
 			// console.log(key + ' = ' + value);
-			if (Array.isArray(value)) {
-				value.forEach(append);
-			} else {
+			if (!Array.isArray(value)) {
 				append(value);
+			} else if (Object.getOwnPropertyDescriptor(value, 'toString')) {
+				// assert: 自行定義 {Function}.toString()
+				append(value.toString());
+			} else {
+				value.forEach(append);
 			}
 		}
 

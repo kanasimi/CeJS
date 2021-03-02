@@ -1234,8 +1234,12 @@ function module_code(library_namespace) {
 					continue;
 				}
 
-				if (token.name === 'R') {
-					// Skip reference
+				if (token.name in {
+					R : true,
+					NoteTag : true,
+					Cfn : true,
+				}) {
+					// Skip references
 					continue;
 				}
 

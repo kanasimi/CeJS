@@ -2832,8 +2832,8 @@ function module_code(library_namespace) {
 		// console.log(this);
 		wiki_API.query([ session.API_URL,
 		// https://www.mediawiki.org/wiki/API:Tokens
-		// 'query&meta=tokens&type=csrf|login|watchlist'
-		'query&meta=tokens' + (type ? '&type=' + type : '') ],
+		// 'action=query&meta=tokens&type=csrf|login|watchlist'
+		'action=query&meta=tokens' + (type ? '&type=' + type : '') ],
 		//
 		function(data) {
 			if (data && data.query && data.query.tokens) {
@@ -3053,7 +3053,7 @@ function module_code(library_namespace) {
 			wiki_API.query([ session.API_URL,
 			// Fetching a token via "action=login" is deprecated.
 			// Use "action=query&meta=tokens&type=login" instead.
-			'query&meta=tokens&type=login' ], function(data, _error) {
+			'action=query&meta=tokens&type=login' ], function(data, _error) {
 				// console.trace(data);
 				// error && console.error(error);
 				if (_error || !data || !data.query || !data.query.tokens
@@ -3079,8 +3079,9 @@ function module_code(library_namespace) {
 						token[parameter] = session.token[key];
 				}
 				// console.log(token);
-				wiki_API.query([ session.API_URL, 'login' ], _done, token,
-						session);
+				wiki_API.query([ session.API_URL, {
+					action : 'login'
+				} ], _done, token, session);
 			}, null, session);
 
 			return;
@@ -3093,14 +3094,14 @@ function module_code(library_namespace) {
 			// .csrftoken 是本函式為 cache 加上的，非正規 parameter。
 			delete token.csrftoken;
 			wiki_API.query([ session.API_URL,
-			// 'query&meta=tokens&type=login|csrf'
-			'login' ], function(data, error) {
+			// 'action=query&meta=tokens&type=login|csrf'
+			'action=login' ], function(data, error) {
 				// console.trace(data);
 				// error && console.error(error);
 				if (data && data.login && data.login.result === 'NeedToken') {
 					token.lgtoken = session.token.lgtoken = data.login.token;
-					wiki_API.query([ session.API_URL, 'login' ], _done, token,
-							session);
+					wiki_API.query([ session.API_URL, 'action=login' ], _done,
+							token, session);
 				} else {
 					library_namespace.error(
 					//		
@@ -3135,7 +3136,7 @@ function module_code(library_namespace) {
 	wiki_API.logout = function(session, callback) {
 		var API_URL = typeof session === 'string' ? session : wiki_API
 				.API_URL_of_options(session);
-		wiki_API.query([ API_URL, 'logout' ], function(data) {
+		wiki_API.query([ API_URL, 'action=logout' ], function(data) {
 			// data: {}
 			// console.log(data);
 			delete session.token;

@@ -315,7 +315,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		action = 'edit';
+		action = 'action=edit';
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (Array.isArray(title))
 			action = [ title[0], action ], title = title[1];
@@ -463,8 +463,8 @@ function module_code(library_namespace) {
 			}
 			if (typeof callback === 'function') {
 				// assert: wiki_API.is_page_data(title)
-				// BUT title IS NOT latest page data! It contains only basic
-				// page information,
+				// BUT title IS NOT latest page data!
+				// It contains only basic page information,
 				// e.g., .pageid, .ns, .title
 				// title.title === wiki_API.title_of(title)
 				callback(title, error, data);
@@ -1072,7 +1072,7 @@ function module_code(library_namespace) {
 			// @see 20181016.import_earthquake_shakemap.js
 		}
 
-		action = 'upload';
+		action = 'action=upload';
 		if (session && session.API_URL) {
 			action = [ session.API_URL, action ];
 		}

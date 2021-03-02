@@ -569,8 +569,8 @@ function module_code(library_namespace) {
 				if (!item.result) {
 					item.result = default_result_of__Old_vfd_multi;
 				}
-				item = wiki_API.parse.set_template_object_parameters(null,
-						item);
+				item = wiki_API.parse
+						.set_template_object_parameters(null, item);
 				item_list.push(item);
 				if (index > 5) {
 					library_namespace.warn('parse_Old_vfd_multi: '

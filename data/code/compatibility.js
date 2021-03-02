@@ -245,6 +245,7 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// Object.getOwnPropertyDescriptor(object, 'property')
 	function hasOwnProperty(key) {
 		try {
 			return (key in this)

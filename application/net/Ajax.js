@@ -1414,6 +1414,7 @@ function module_code(library_namespace) {
 		var URL_options_to_fetch = normalize_URL_to_fetch(URL_to_fetch,
 				charset, options);
 		// assert: library_namespace.is_URI(URL_options_to_fetch)
+		// console.trace([ URL_to_fetch, URL_options_to_fetch ]);
 
 		if (typeof onload === 'object') {
 			library_namespace.debug(

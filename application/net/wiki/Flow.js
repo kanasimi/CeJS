@@ -77,11 +77,9 @@ function module_code(library_namespace) {
 		}
 
 		// [[mw:Extension:StructuredDiscussions/API#Detection]]
-		// 'prop=flowinfo' is deprecated. use 'query&prop=info'.
+		// 'prop=flowinfo' is deprecated. use 'action=query&prop=info'.
 		// The content model will be 'flow-board' if it's enabled.
-		action[1] = 'query&prop=info&' + action[1];
-		if (!action[0])
-			action = action[1];
+		action[1] = 'action=query&prop=info&' + action[1];
 
 		wiki_API.query(action, typeof callback === 'function'
 		//
@@ -239,7 +237,7 @@ function module_code(library_namespace) {
 		var view = options && options.flow_view
 		//
 		|| Flow_page.default_flow_view;
-		title[1] = 'flow&submodule=view-' + view + '&v'
+		title[1] = 'action=flow&submodule=view-' + view + '&v'
 				+ (Flow_abbreviation[view] || view.charAt(0).toLowerCase())
 				+ 'format=' + (options && options.format || 'wikitext') + '&'
 				+ title[1];
@@ -320,7 +318,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var action = 'flow';
+		var action = 'action=flow';
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (Array.isArray(title)) {
 			action = [ title[0], action ];

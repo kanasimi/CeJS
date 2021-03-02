@@ -225,10 +225,16 @@ function module_code(library_namespace) {
 		library_namespace.debug('action: ' + action, 2, 'wiki_API_query');
 		// new URLSearchParams() 會將數值轉成字串。 想二次利用 {Object}, {Array}，得採用
 		// new CeL.URI() 而非 new URL()。
-		if (typeof action === 'string' || (action instanceof URLSearchParams)
-				|| library_namespace.is_Search_parameters(action)) {
+		if (typeof action === 'string' && /^https?:\/\//.test(action)) {
+			action = new library_namespace.URI(action);
+		} else if (typeof action === 'string'
+				|| (action instanceof URLSearchParams)
+				|| library_namespace.is_Search_parameters(action)
+		// || library_namespace.is_Object(action)
+		) {
 			action = [ , action ];
 		}
+		// console.trace(action);
 		if (Array.isArray(action)) {
 			// [ {String}api URL, {String}action, {Object}other parameters ]
 			// → {URI}URL
@@ -236,6 +242,8 @@ function module_code(library_namespace) {
 				if (typeof action[1] === 'string'
 				// https://www.mediawiki.org/w/api.php?action=help&modules=query
 				&& !/^[a-z]+=/.test(action[1]) && !options.post_data_only) {
+					library_namespace.warn('Did not set action!');
+					console.trace(action);
 					action[1] = 'action=' + action[1];
 				}
 				action[1] = library_namespace.Search_parameters(action[1]);
@@ -657,8 +665,8 @@ function module_code(library_namespace) {
 
 	/**
 	 * 取得 page_data 之 title parameter。<br />
-	 * e.g., {pageid:8,title:'abc'} → (no change)<br />
-	 * {title:'abc'} → (no change)<br />
+	 * e.g., page_data({pageid:8,title:'abc'}) → is_id?{pageid:8}:{title:'abc'}<br />
+	 * page_data({title:'abc'}) → {title:'abc'}<br />
 	 * 'abc' → {title:'abc'}<br />
 	 * ['abc','def] → {title:['abc','def]}<br />
 	 * 
@@ -706,13 +714,14 @@ function module_code(library_namespace) {
 					// assert: page && typeof page === 'string'
 					: page) || '';
 				});
+				pageid.toString = join_pages;
 				if (is_id) {
-					pageid = pageid.join('|');
+					// Warning: using .title
 				} else {
-					page_data = pageid.join('|');
+					page_data = pageid;
 					pageid = undefined;
 				}
-				library_namespace.debug(pageid || page_data, 2,
+				library_namespace.debug((pageid || page_data).toString(), 2,
 						'wiki_API_query.title_param');
 			}
 
@@ -737,13 +746,13 @@ function module_code(library_namespace) {
 			// console.warn(page_data);
 		}
 
-		multi = multi ? 's=' : '=';
-
-		return pageid === undefined
-		//
-		? (param_name || 'title' + multi) + encodeURIComponent(page_data)
-		//
-		: 'pageid' + multi + pageid;
+		var parameters = new library_namespace.Search_parameters();
+		if (pageid !== undefined) {
+			parameters[multi ? 'pageids' : 'pageid'] = pageid;
+		} else if (page_data) {
+			parameters[param_name || (multi ? 'titles' : 'title')] = page_data;
+		}
+		return parameters;
 	};
 
 	/**

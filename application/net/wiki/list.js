@@ -357,7 +357,7 @@ function module_code(library_namespace) {
 		}
 		// console.trace(action);
 
-		action[1] = 'query&' + parameter + '=' + type + action[1]
+		action[1] = 'action=query&' + parameter + '=' + type + action[1]
 		// 處理數目限制 limit。
 		// No more than 500 (5,000 for bots) allowed.
 		+ (options.limit > 0 || options.limit === 'max'
@@ -1288,7 +1288,7 @@ function module_code(library_namespace) {
 			from_lang = title[0];
 			title = title[1];
 		}
-		title = 'query&prop=langlinks&'
+		title = 'action=query&prop=langlinks&'
 				+ wiki_API.query.title_param(title, true, options
 						&& options.is_id);
 		if (to_lang) {
@@ -1488,7 +1488,7 @@ function module_code(library_namespace) {
 		}
 		wiki_API.query([ API_URL,
 		//
-		'query&list=search&' + new URLSearchParams(Object.assign({
+		'action=query&list=search&' + new URLSearchParams(Object.assign({
 			srsearch : key
 		}, wiki_API.search.default_parameters, _options)) ], function(data,
 				error) {
@@ -1646,7 +1646,7 @@ function module_code(library_namespace) {
 					+ wiki_API.title_link_of(title);
 		}
 
-		action[1] = 'query&prop=redirects&rdlimit=max&' + action[1];
+		action[1] = 'action=query&prop=redirects&rdlimit=max&' + action[1];
 		if (!action[0])
 			action = action[1];
 

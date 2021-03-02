@@ -314,7 +314,7 @@ function module_code(library_namespace) {
 			get_all_properties : true
 		}).language;
 
-		var action = 'wbsearchentities'
+		var action = 'action=wbsearchentities'
 		// search. e.g.,
 		// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
 		+ '&search=' + encodeURIComponent(key)
@@ -1316,7 +1316,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('action: [' + action + ']', 2,
 				'wikidata_entity');
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
-		action = [ API_URL, 'wbgetentities&' + action ];
+		action = [ API_URL, 'action=wbgetentities&' + action ];
 
 		if (property && !('props' in options)) {
 			options.props = 'claims';
@@ -1644,7 +1644,7 @@ function module_code(library_namespace) {
 
 		var action = [ get_data_API_URL(options),
 		// https://www.wikidata.org/w/api.php?action=wbgetentities&props=datatype&ids=P7
-		'wbgetentities&props=datatype&ids=' + property ];
+		'action=wbgetentities&props=datatype&ids=' + property ];
 		wiki_API.query(action, function handle_result(data, error) {
 			error = error || (data ? data.error : new Error('No data get!'));
 			// 檢查伺服器回應是否有錯誤資訊。
@@ -2991,7 +2991,7 @@ function module_code(library_namespace) {
 
 		append_parameters(POST_data, options);
 
-		wiki_API.query([ API_URL, 'wbsetqualifier' ],
+		wiki_API.query([ API_URL, 'action=wbsetqualifier' ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetqualifier
 		function handle_result(data, error) {
 			error = error || (data ? data.error : new Error('No data get!'));
@@ -3036,7 +3036,7 @@ function module_code(library_namespace) {
 		append_parameters(POST_data, options);
 		// console.trace(session.token);
 
-		wiki_API.query([ API_URL, 'wbremovequalifiers' ],
+		wiki_API.query([ API_URL, 'action=wbremovequalifiers' ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbremovequalifiers
 		function handle_result(data, error) {
 			error = error || (data ? data.error : new Error('No data get!'));
@@ -3140,7 +3140,7 @@ function module_code(library_namespace) {
 
 		append_parameters(POST_data, options);
 
-		wiki_API.query([ API_URL, 'wbsetreference' ],
+		wiki_API.query([ API_URL, 'action=wbsetreference' ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
 		function handle_result(data, error) {
 			error = error || (data ? data.error : new Error('No data get!'));
@@ -3177,7 +3177,7 @@ function module_code(library_namespace) {
 		// console.trace(session.token);
 		// console.trace(POST_data);
 
-		wiki_API.query([ API_URL, 'wbremovereferences' ],
+		wiki_API.query([ API_URL, 'action=wbremovereferences' ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbremovereferences
 		function handle_result(data, error) {
 			error = error || (data ? data.error : new Error('No data get!'));
@@ -3336,19 +3336,20 @@ function module_code(library_namespace) {
 
 		append_parameters(POST_data, options);
 
-		wiki_API.query([ API_URL, 'wbremoveclaims' ], function handle_result(
-				data, error) {
-			error = error || (data ? data.error : new Error('No data get!'));
-			// console.log(data);
-			// 檢查伺服器回應是否有錯誤資訊。
-			if (error) {
-				library_namespace.error('remove_claims: [' + error.code + '] '
-						+ (error.info || error.message));
-			}
-			// data =
-			// {pageinfo:{lastrevid:1},success:1,claims:['Q1$123-ABC']}
-			callback(data);
-		}, POST_data, session);
+		wiki_API.query([ API_URL, 'action=wbremoveclaims' ],
+				function handle_result(data, error) {
+					error = error
+							|| (data ? data.error : new Error('No data get!'));
+					// console.log(data);
+					// 檢查伺服器回應是否有錯誤資訊。
+					if (error) {
+						library_namespace.error('remove_claims: [' + error.code
+								+ '] ' + (error.info || error.message));
+					}
+					// data =
+					// {pageinfo:{lastrevid:1},success:1,claims:['Q1$123-ABC']}
+					callback(data);
+				}, POST_data, session);
 	}
 
 	/**
@@ -3385,7 +3386,7 @@ function module_code(library_namespace) {
 		},
 		// action to set properties. 創建Wikibase陳述。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
-		claim_action = [ get_data_API_URL(options), 'wbcreateclaim' ],
+		claim_action = [ get_data_API_URL(options), 'action=wbcreateclaim' ],
 		// process to what index of {Array}claims
 		claim_index = 0;
 
@@ -4195,7 +4196,7 @@ function module_code(library_namespace) {
 
 		var index = 0,
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetlabel
-		action = [ get_data_API_URL(options), 'wbsetlabel' ];
+		action = [ get_data_API_URL(options), 'action=wbsetlabel' ];
 
 		function set_next_labels() {
 			if (index === labels_to_set.length) {
@@ -4360,7 +4361,7 @@ function module_code(library_namespace) {
 
 		var
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetaliases
-		action = [ get_data_API_URL(options), 'wbsetaliases' ];
+		action = [ get_data_API_URL(options), 'action=wbsetaliases' ];
 
 		function set_next_aliases() {
 			if (aliases_queue.length === 0) {
@@ -4531,7 +4532,7 @@ function module_code(library_namespace) {
 
 		var description_keys = Object.keys(descriptions),
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetdescription
-		action = [ get_data_API_URL(options), 'wbsetdescription' ];
+		action = [ get_data_API_URL(options), 'action=wbsetdescription' ];
 
 		function set_next_descriptions() {
 			if (description_keys.length === 0) {
@@ -4743,7 +4744,7 @@ function module_code(library_namespace) {
 		// edit實體項目entity
 		action = [
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
-		get_data_API_URL(options), 'wbeditentity' ];
+		get_data_API_URL(options), 'action=wbeditentity' ];
 		// console.trace(options);
 
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
@@ -5323,7 +5324,7 @@ function module_code(library_namespace) {
 			delete options[KEY_SESSION];
 		}
 
-		var action = 'wbmergeitems&fromid=' + from + '&toid=' + to;
+		var action = 'action=wbmergeitems&fromid=' + from + '&toid=' + to;
 		if (ignoreconflicts) {
 			action += '&ignoreconflicts=' + ignoreconflicts;
 		}

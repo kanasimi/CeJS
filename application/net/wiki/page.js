@@ -282,12 +282,7 @@ function module_code(library_namespace) {
 
 		// console.log(action);
 		var post_data;
-		if (false && action[1].length > 4000) {
-			// 2019/12 NG: wiki api.php 似乎不接受 POST？
-			// 將過長的標題列表改至 POST，預防 "414 Request-URI Too Long"。
-			post_data = action[1];
-			action[1] = '';
-		}
+		// TODO: 將過長的標題列表改至 POST，預防 "414 Request-URI Too Long"。
 
 		var get_content;
 		if ('prop' in options) {
@@ -303,20 +298,20 @@ function module_code(library_namespace) {
 			// 2019 API:
 			// https://www.mediawiki.org/wiki/Manual:Slot
 			// https://www.mediawiki.org/wiki/API:Revisions
-			action[1] = 'rvslots=' + (options.rvslots || 'main')
-					+ (action[1] ? '&' + action[1] : '');
+			action[1].rvslots = options.rvslots || 'main';
 
 			// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query
 			// titles/pageids: Maximum number of values is 50 (500 for bots).
 			if ('rvlimit' in options) {
 				if (options.rvlimit > 0 || options.rvlimit === 'max')
-					action[1] += '&rvlimit=' + options.rvlimit;
-			} else if (!action[1].includes('|')
-			//
-			&& !action[1].includes(encodeURIComponent('|')))
+					action[1].rvlimit = options.rvlimit;
+			} else if (!action[1].titles && !action[1].pageids) {
+				// assert: action[1].title || action[1].pageid
+				// || action[1].pageid === 0
 				// default: 僅取得單一 revision。
-				action[1] += '&rvlimit=1';
+				action[1].rvlimit = 1;
+			}
 
 			// Which properties to get for each revision
 			get_content = (Array.isArray(options.rvprop)
@@ -325,7 +320,7 @@ function module_code(library_namespace) {
 			//
 			|| wiki_API_page.rvprop;
 
-			action[1] = 'rvprop=' + get_content + '&' + action[1];
+			action[1].rvprop = get_content;
 
 			get_content = get_content.includes('content');
 		}
@@ -343,10 +338,8 @@ function module_code(library_namespace) {
 
 		// Which properties to get for the queried pages
 		// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規標題。
-		if (options.prop) {
-			if (Array.isArray(options.prop)) {
-				options.prop = options.prop.join('|');
-			}
+		if (Array.isArray(options.prop)) {
+			options.prop = options.prop.join('|');
 		}
 
 		for ( var parameter in {
@@ -361,18 +354,13 @@ function module_code(library_namespace) {
 			prop : true
 		}) {
 			if (parameter in options) {
-				action[1] = parameter + '=' + options[parameter] + '&'
-						+ action[1];
+				action[1][parameter] = options[parameter];
 			}
 		}
 
 		set_parameters(action, options);
 
-		action[1] = 'query&' + action[1];
-
-		if (!action[0]) {
-			action = action[1];
-		}
+		action[1].action = 'query';
 
 		library_namespace.debug('get url token: ' + action, 5, 'wiki_API_page');
 
@@ -1057,7 +1045,7 @@ function module_code(library_namespace) {
 
 		// POST_parameters
 		var post_data = action[1];
-		action[1] = 'purge';
+		action[1] = 'action=purge';
 		if (!action[0]) {
 			action = action[1];
 		}
@@ -1228,7 +1216,7 @@ function module_code(library_namespace) {
 	 * @see wiki_API.protect
 	 */
 	function wiki_API_expandtemplates(wikitext, callback, options) {
-		var action = 'expandtemplates', post_data = {
+		var action = 'action=expandtemplates', post_data = {
 			text : wikitext,
 			prop : 'wikitext'
 		};
