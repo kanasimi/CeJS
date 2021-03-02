@@ -260,17 +260,7 @@ function module_code(library_namespace) {
 		}
 
 		options = library_namespace.setup_options(options);
-		if (Array.isArray(uri)) {
-			// https://developer.mozilla.org/en-US/docs/Web/API/URL
-			// [ origin + pathname, search, hash ]
-			// href = {Array}URL_to_fetch.join('')
-			if (uri[1])
-				this.additional_search = uri[1];
-			if (uri[2])
-				this._hash = uri[2];
-			uri = uri[0].toString();
-
-		} else if ((uri instanceof URL) || is_URI(uri)) {
+		if ((uri instanceof URL) || is_URI(uri)) {
 			// uri.href
 			uri = uri.toString();
 		}
@@ -433,16 +423,6 @@ function module_code(library_namespace) {
 		}
 		library_namespace.debug('path: [' + uri.path + ']', 2);
 
-		if (this.additional_search) {
-			(uri.search_params || uri.searchParams)
-					.set_parameters(this.additional_search);
-			delete this.additional_search;
-		}
-		if (this._hash) {
-			this.hash = this._hash;
-			delete this._hash;
-		}
-
 		library_namespace.debug('Generate .href of URI by URI_toString()', 2);
 		uri.toString();
 
@@ -528,16 +508,22 @@ function module_code(library_namespace) {
 		return URI.href;
 	}
 
+	_// JSDT:_module_
+	.URI = URI;
+
 	function is_URI(value) {
 		return value instanceof URI;
 	}
 
-	URI.is_URI = is_URI;
-
-	_// JSDT:_module_
-	.URI = URI;
+	_.is_URI = is_URI;
 
 	// ------------------------------------------------------------------------
+
+	var NO_EQUAL_SIGN = typeof Symbol === 'function' ? Symbol('NO_EQUAL_SIGN')
+	//
+	: {
+		NO_EQUAL_SIGN : true
+	};
 
 	/**
 	 * parse_parameters({String}parameter) to hash
@@ -606,15 +592,19 @@ function module_code(library_namespace) {
 			if (!data[i])
 				continue;
 
+			// Warning: Search_parameters() 僅接受 UTF-8。
+			// 欲設定 charset，必須自行先處理 .search！
+
 			// var index = parameter.indexOf('=');
 			if (matched = data[i].match(/^([^=]+)=(.*)$/)) {
-				name = decodeURIComponent(matched[1]);
+				name = matched[1];
 				value = decodeURIComponent(matched[2]);
 			} else {
-				name = decodeURIComponent(data[i]);
+				name = data[i];
 				value = 'default_value' in options ? options.default_value
 						: /* name */NO_EQUAL_SIGN;
 			}
+			name = decodeURIComponent(name);
 
 			if (ignore_search_properties
 			// Warning: for old environment, may need ignore some keys
@@ -680,12 +670,14 @@ function module_code(library_namespace) {
 			else
 				this[key] = [ original_value, value ];
 		} else {
+			// Warning: if Array.isArray(value),
+			// next value will push to the value!
 			this[key] = value;
 		}
 	}
 
 	/**
-	 * append these parameters
+	 * set / append these parameters
 	 * 
 	 * @inner
 	 */
@@ -697,9 +689,14 @@ function module_code(library_namespace) {
 			if (!ignore_search_properties
 			// Warning: for old environment, may need ignore some keys
 			|| !(key in ignore_search_properties)) {
-				search_add_1_parameter.call(this,
-				//
-				key, parameters[key], options);
+				var value = parameters[key];
+				if (options && options.append) {
+					search_add_1_parameter.call(this,
+					//
+					key, value, options);
+				} else {
+					this[key] = value;
+				}
 			}
 		}, this);
 		return this;
@@ -810,19 +807,13 @@ function module_code(library_namespace) {
 		// alert(Object.keys(ignore_search_properties));
 	}
 
-	var NO_EQUAL_SIGN = typeof Symbol === 'function' ? Symbol('NO_EQUAL_SIGN')
-	//
-	: {
-		NO_EQUAL_SIGN : true
-	};
+	_.Search_parameters = Search_parameters;
 
 	function is_Search_parameters(value) {
 		return value instanceof Search_parameters;
 	}
 
-	Search_parameters.is_Search_parameters = is_Search_parameters;
-
-	_.Search_parameters = Search_parameters;
+	_.is_Search_parameters = is_Search_parameters;
 
 	// --------------------------------
 

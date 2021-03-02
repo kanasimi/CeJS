@@ -460,6 +460,9 @@ function module_code(library_namespace) {
 						+ wiki_API.title_link_of(title) + ': no change');
 			}
 			if (typeof callback === 'function') {
+				// assert: wiki_API.is_page_data(title)
+				// BUT title IS NOT latest page data! It contains only basic page information,
+				// e.g., .pageid, .ns, .title
 				// title.title === wiki_API.title_of(title)
 				callback(title, error, data);
 			}

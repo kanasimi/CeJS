@@ -158,6 +158,69 @@ function module_code(library_namespace) {
 	var KEY_URL = typeof Symbol === 'function' ? Symbol('URL')
 			: '\0URL to fetch';
 
+	/**
+	 * 
+	 * @param URL_to_fetch
+	 * @param search
+	 * @param hash
+	 * @returns
+	 * 
+	 * @inner
+	 */
+	function set_parameters_and_hash(URL_to_fetch, search, hash) {
+		// URL_to_fetch = library_namespace.URI(URL_to_fetch);
+		// assert: library_namespace.is_URI(URL_to_fetch)
+		if (hash || hash === '') {
+			if (Object.defineProperty[KEY_not_native] && !/^#/.test(hash))
+				hash = '#' + hash;
+			URL_to_fetch.hash = hash;
+		}
+		URL_to_fetch.search_params.set_parameters(search);
+		// console.trace(URL_to_fetch.toString(charset));
+		return URL_to_fetch;
+	}
+
+	function normalize_URL_to_fetch(URL_to_fetch, charset, options) {
+		// console.trace(URL_to_fetch);
+
+		// https://developer.mozilla.org/en-US/docs/Web/API/URL
+		// [ origin + pathname, search, hash ]
+		// hrer = [].join('')
+		if (Array.isArray(URL_to_fetch)) {
+			URL_to_fetch = set_parameters_and_hash(library_namespace
+					.URI(URL_to_fetch[0]), URL_to_fetch[1], URL_to_fetch[2]);
+		} else {
+			// 當輸入 {URL} 時，node_https.request() 會將 {URL} 轉成
+			// {Object}options，不會考慮額外選項 (heads, ...)。
+			// 且必須處理 charset，乾脆直接將 {URL} 轉成尋常 plain object / {URI}。
+			// https://nodejs.org/api/http.html#http_http_request_url_options_callback
+			// If url is a string, it is automatically parsed with new URL(). If
+			// it is a URL object, it will be automatically converted to an
+			// ordinary options object.
+			URL_to_fetch = library_namespace.URI(URL_to_fetch);
+		}
+		// assert: library_namespace.is_URI(URL_to_fetch)
+		if (charset)
+			URL_to_fetch.charset = charset;
+
+		if (options.search || options.hash) {
+			URL_to_fetch = set_parameters_and_hash(URL_to_fetch,
+					options.search, options.hash);
+		}
+
+		library_namespace.debug({
+			T : [ 'Fetching URL: %1', '{' + (typeof URL_to_fetch) + '} ['
+			//
+			+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
+			//
+			: URL_to_fetch && URL_to_fetch[KEY_URL]
+			//
+			|| URL_to_fetch.toString(charset)) + ']' ]
+		}, 1, 'normalize_URL_to_fetch');
+
+		return URL_to_fetch;
+	}
+
 	if (false)
 		// default arguments
 		var get_URL_arguments = {
@@ -245,28 +308,8 @@ function module_code(library_namespace) {
 			URL_to_fetch = options[KEY_URL];
 		}
 
-		// https://developer.mozilla.org/en-US/docs/Web/API/URL
-		// [ origin + pathname, search, hash ]
-		// hrer = [].join('')
-		if (Array.isArray(URL_to_fetch)) {
-			URL_to_fetch = set_parameters_and_hash(URL_to_fetch[0],
-					URL_to_fetch[1], URL_to_fetch[2], charset);
-		}
-
-		if (options.search || options.hash) {
-			URL_to_fetch = set_parameters_and_hash(URL_to_fetch,
-					options.search, options.hash, charset);
-		}
-
-		library_namespace.debug({
-			T : [ 'Fetching URL: %1', '{' + (typeof URL_to_fetch) + '} ['
-			//
-			+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-			//
-			: URL_to_fetch && URL_to_fetch[KEY_URL]
-			//
-			|| URL_to_fetch.toString()) + ']' ]
-		}, 1, 'get_URL');
+		URL_to_fetch = normalize_URL_to_fetch(URL_to_fetch, charset, options);
+		// assert: library_namespace.is_URI(URL_to_fetch)
 
 		if (typeof onload === 'object') {
 			library_namespace.debug(
@@ -293,8 +336,9 @@ function module_code(library_namespace) {
 						onload[callback_param](data);
 					};
 					// callback_param: callback parameter
-					node.src = URL_to_fetch + '&' + callback_param + '='
-							+ library_namespace.Class + '.' + callback_name;
+					URL_to_fetch.search_params[callback_param] = library_namespace.Class
+							+ '.' + callback_name;
+					node.src = URL_to_fetch.toString();
 					library_namespace.debug('Use script node: [' + node.src
 							+ ']', 3, 'get_URL');
 					document_head.appendChild(node);
@@ -331,7 +375,7 @@ function module_code(library_namespace) {
 			// Gecko 亦會 throw error
 			// IE 10 中，local file 光 .open() 就 throw 了。
 			XMLHttp.open(options.method || (post_data ? 'POST' : 'GET'),
-					URL_to_fetch, !!onload, options.user || '',
+					URL_to_fetch.toString(), !!onload, options.user || '',
 					options.password || '');
 
 			// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/response
@@ -354,16 +398,17 @@ function module_code(library_namespace) {
 					XMLHttp.setRequestHeader(key, options.head[key]);
 				});
 
-			if (options.mime)
+			if (options.mime) {
 				// ignore charset!
 				charset = options.mime;
-			else if (charset)
+			} else if (charset) {
 				// old: 'text/xml;charset=' + charset
 				// 但這樣會被當作 XML 解析，產生語法錯誤。
 				// TODO: try:
 				// 'text/'+(/\.x(ht)?ml$/i.test(URL_to_fetch)?'xml':'plain')+';charset='
 				// + charset;
 				charset = 'application/json;charset=' + charset;
+			}
 
 			// 有些版本的 Mozilla 瀏覽器在伺服器送回的資料未含 XML mime-type
 			// 檔頭（header）時會出錯。為了避免這個問題，可以用下列方法覆寫伺服器傳回的檔頭，以免傳回的不是 text/xml。
@@ -413,27 +458,6 @@ function module_code(library_namespace) {
 			}
 		}
 
-	}
-
-	/**
-	 * 
-	 * @param url
-	 * @param search
-	 * @param hash
-	 * @param charset
-	 * @returns
-	 * 
-	 * @inner
-	 */
-	function set_parameters_and_hash(url, search, hash, charset) {
-		url = library_namespace.URI(url);
-		if (hash || hash === '') {
-			// if (!/^#/.test(hash)) hash = '#' + hash;
-			url.hash = hash;
-		}
-		url.search_params.set_parameters(search);
-		// console.trace(url.toString(charset));
-		return url.toString(charset);
 	}
 
 	_.get_URL = get_URL;
@@ -1285,9 +1309,6 @@ function module_code(library_namespace) {
 	// ---------------------------------------------------------------------//
 
 	// 正處理中之 connections
-	// var get_URL_node_connection_Set = new Set;
-
-	// 正處理中之 connections
 	var get_URL_node_connections = 0,
 	// 所有 requests
 	get_URL_node_requests = 0;
@@ -1299,8 +1320,8 @@ function module_code(library_namespace) {
 
 	var ERROR_BAD_STSTUS = 'BAD STATUS';
 
-	var has_native_URL = typeof URL === "function"
-			&& !URL[library_namespace.env.not_native_keyword];
+	var KEY_not_native = library_namespace.env.not_native_keyword;
+	var has_native_URL = typeof URL === "function" && !URL[KEY_not_native];
 
 	/**
 	 * 讀取 URL via node http/https。<br />
@@ -1383,37 +1404,28 @@ function module_code(library_namespace) {
 			URL_to_fetch = options[KEY_URL];
 		}
 
-		// https://developer.mozilla.org/en-US/docs/Web/API/URL
-		// [ origin + pathname, search, hash ]
-		// href = {Array}URL_to_fetch.join('')
-		if (Array.isArray(URL_to_fetch)) {
-			URL_to_fetch = set_parameters_and_hash(URL_to_fetch[0],
-					URL_to_fetch[1], URL_to_fetch[2], charset);
+		// 不改變 options。
+		var agent = options.agent;
+		if (typeof URL_to_fetch === 'string' && URL_to_fetch.startsWith('//')) {
+			// 處理 '//domain.org/path' 的情況。
+			URL_to_fetch = (agent && agent.protocol || 'https:') + URL_to_fetch;
 		}
 
-		if (options.search || options.hash) {
-			URL_to_fetch = set_parameters_and_hash(URL_to_fetch,
-					options.search, options.hash, charset);
-		}
-
-		library_namespace.debug({
-			T : [ 'Fetching URL: %1', '{' + (typeof URL_to_fetch) + '} ['
-			//
-			+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-			//
-			: URL_to_fetch && URL_to_fetch[KEY_URL]
-			//
-			|| URL_to_fetch.toString()) + ']' ]
-		}, 1, 'get_URL_node');
+		var URL_options_to_fetch = normalize_URL_to_fetch(URL_to_fetch,
+				charset, options);
+		// assert: library_namespace.is_URI(URL_options_to_fetch)
 
 		if (typeof onload === 'object') {
-			// use JSONP.
-			// need callback.
+			library_namespace.debug(
+					'Trying to JSONP, insert page, need callback.', 3,
+					'get_URL_node');
+			// library_namespace.run(URL_options_to_fetch);
 			for ( var callback_param in onload) {
 				if (callback_param
 						&& typeof onload[callback_param] === 'function') {
 					// 模擬 callback。
-					URL_to_fetch += '&' + callback_param + '=cb';
+					// callback_param: callback parameter
+					URL_options_to_fetch.search_params[callback_param] = 'cb';
 					onload = onload[callback_param];
 					break;
 				}
@@ -1421,15 +1433,6 @@ function module_code(library_namespace) {
 		}
 
 		// assert: 自此開始不會改變 URL，也不會中途 exit 本函數。
-		if (false) {
-			if (get_URL_node_connection_Set.has(URL_to_fetch)) {
-				library_namespace.warn([ 'get_URL_node: ', {
-					T : [ '正下載 URL [%1] 中。同時間重複請求？', URL_to_fetch ]
-				} ]);
-			} else {
-				get_URL_node_connection_Set.add(URL_to_fetch);
-			}
-		}
 
 		if (post_data && !options.form_data) {
 			if (library_namespace.is_Object(post_data)
@@ -1456,40 +1459,17 @@ function module_code(library_namespace) {
 			onload = false;
 		}
 
-		// 不改到 options。
-		var agent = options.agent;
+		// console.trace(URL_options_to_fetch);
+		// node_http.request(options): options needs a .path
+		// https://nodejs.org/dist/latest/docs/api/http.html#http_http_request_options_callback
+		URL_options_to_fetch.path = URL_options_to_fetch.pathname
+				+ URL_options_to_fetch.search;
 
-		if (false && (typeof URL_to_fetch === 'string')
-		// 有中文字日文字之類。
-		// https://github.com/kevva/url-regex/blob/master/index.js
-		// https://perishablepress.com/stop-using-unsafe-characters-in-urls/
-		&& /[^\w$\-_.+!*'();\/?:@=&]/.test(source_data.url)) {
-			URL_to_fetch = encodeURI(URL_to_fetch);
-		}
-		if (has_native_URL && URL_to_fetch instanceof URL) {
-			// 當輸入 {URL} 時，node_https.request() 似乎不會考慮額外選項
-			// (heads, ...)，只好將 URL 轉成尋常 plain object。
-			URL_to_fetch = URL_to_fetch.toString();
-		}
-		// console.trace(URL_to_fetch);
-		var URL_options_to_fetch;
-		if (typeof URL_to_fetch === 'string') {
-			// url.parse() is deprecated
-			URL_options_to_fetch = new library_namespace.URI(
-			// 處理 '//domain.org/path' 的情況。
-			URL_to_fetch.startsWith('//')
-			//
-			? (agent && agent.protocol || 'https:') + URL_to_fetch
-					: URL_to_fetch);
-			// node_http.request(options): options needs a .path
-			// https://nodejs.org/dist/latest/docs/api/http.html#http_http_request_options_callback
-			URL_options_to_fetch.path = URL_options_to_fetch.pathname
-					+ URL_options_to_fetch.search;
-
-		} else {
-			URL_options_to_fetch = URL_to_fetch;
-		}
 		var URL_is_https = /^https:?$/i.test(URL_options_to_fetch.protocol);
+
+		URL_to_fetch = URL_options_to_fetch.toString();
+		// assert: {String}URL_to_fetch,
+		// library_namespace.is_URI(URL_options_to_fetch)
 
 		/**
 		 * <code>
@@ -1537,21 +1517,16 @@ function module_code(library_namespace) {
 		// https://superuser.com/questions/876100/https-proxy-vs-https-proxy
 		// https://docs.oracle.com/cd/E56344_01/html/E54018/gmgas.html
 		// https://stackoverflow.com/questions/32824819/difference-between-http-proxy-https-proxy-and-proxy
-		|| typeof URL_to_fetch === 'string' && /^https:/i.test(URL_to_fetch)
-				&& process.env.HTTPS_PROXY
-				// `set http_proxy=http://127.0.0.1:8080`
-				|| process.env.http_proxy);
+		|| URL_is_https && process.env.HTTPS_PROXY
+		// `set http_proxy=http://127.0.0.1:8080`
+		|| process.env.http_proxy);
 
 		if (!proxy_server) {
 			;
 
 		} else if (URL_is_https) {
 			library_namespace.debug({
-				T : [ 'Using HTTPS proxy to get URL: %1',
-				//
-				typeof URL_to_fetch === 'string' ? URL_to_fetch
-				//
-				: URL_to_fetch && URL_to_fetch[KEY_URL] || 'url' ]
+				T : [ 'Using HTTPS proxy to get URL: %1', URL_to_fetch ]
 			}, 2, 'get_URL_node');
 			// ... just add the special agent:
 			proxy_original_agent = proxy_server.agent = agent;
@@ -1571,11 +1546,7 @@ function module_code(library_namespace) {
 
 		} else {
 			library_namespace.debug({
-				T : [ 'Using HTTP proxy to get URL: %1',
-				//
-				typeof URL_to_fetch === 'string' ? URL_to_fetch
-				//
-				: URL_to_fetch && URL_to_fetch[KEY_URL] || 'url' ]
+				T : [ 'Using HTTP proxy to get URL: %1', URL_to_fetch ]
 			}, 2, 'get_URL_node');
 			// https://www.proxynova.com/proxy-server-list/country-tw/
 			// proxy_server.URL_to_fetch = URL_to_fetch;
@@ -1586,18 +1557,6 @@ function module_code(library_namespace) {
 
 			URL_options_to_fetch = get_proxy_URL(proxy_server,
 					URL_options_to_fetch, URL_to_fetch);
-		}
-		if (false && proxy_server && URL_options_to_fetch.host
-				&& URL_options_to_fetch.path) {
-			// https://github.com/TooTallNate/node-https-proxy-agent/blob/master/index.js
-			/**
-			 * if both a `host` and `path` are specified then it's most likely
-			 * the result of a `url.parse()` call... we need to remove the
-			 * `path` portion so that `net.connect()` doesn't attempt to open
-			 * that as a unix socket file.
-			 */
-			delete URL_options_to_fetch.path;
-			delete URL_options_to_fetch.pathname;
 		}
 
 		if (!URL_options_to_fetch.protocol) {
@@ -1659,9 +1618,6 @@ function module_code(library_namespace) {
 			// .url @ fetch()
 			// url : URL_to_fetch,
 
-			// deprecated: XMLHttp.URL
-			// URL : URL_options_to_fetch,
-
 			// https://developer.mozilla.org/zh-TW/docs/Web/API/Response
 			// .useFinalURL @ fetch()
 			// useFinalURL : URL_to_fetch,
@@ -1673,11 +1629,6 @@ function module_code(library_namespace) {
 		// assert: 必定從 _onfail 或 _onload 作結，以確保會註銷登記。
 		// 本函數unregister()應該放在所有本執行緒會執行到onload的程式碼中。
 		unregister = function() {
-			if (false) {
-				library_namespace.info('unregister [' + URL_to_fetch + ']'
-						+ (finished ? ': had done!' : '') + ' '
-						+ get_URL_node_requests + ' requests left.');
-			}
 			/**
 			 * @see http://stackoverflow.com/questions/24667122/http-request-timeout-callback-in-node-js
 			 * 
@@ -1694,30 +1645,14 @@ function module_code(library_namespace) {
 			// 註銷登記。
 			finished = true;
 
-			// 有時還需要處理 'error' event，因此不可 .removeListener()
-			if (false && request) {
-				// Sometimes request === undefined
-				timeout > 0 && request.removeListener('timeout', _ontimeout);
-				request.removeListener('error', _onfail);
-			}
-
 			get_URL_node_requests--;
 			get_URL_node_connections--;
 			if (timeout_id) {
 				library_namespace.debug('clear timeout '
-						+ time_message(timeout)
-						+ ' ['
-						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch[KEY_URL]) + ']',
-						3, 'get_URL_node');
+						+ time_message(timeout) + ' [' + URL_to_fetch + ']', 3,
+						'get_URL_node');
 				// console.trace('clear timeout ' + URL_to_fetch);
 				clearTimeout(timeout_id);
-			}
-			if (false && !get_URL_node_connection_Set['delete'](URL_to_fetch)) {
-				library_namespace.warn('get_URL_node: URL not exists in Set: ['
-						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch[KEY_URL])
-						+ ']. 之前同時間重複請求？');
 			}
 		},
 		// on failed
@@ -1766,11 +1701,7 @@ function module_code(library_namespace) {
 			&& error.code !== 'TIMEOUT') {
 				if (error.code === 'ENOTFOUND') {
 					library_namespace.error([ 'get_URL_node: ', {
-						T : [ 'URL not found: [%1]',
-						//
-						typeof URL_to_fetch === 'string' ? URL_to_fetch
-						//
-						: URL_to_fetch && URL_to_fetch[KEY_URL] ]
+						T : [ 'URL not found: [%1]', URL_to_fetch ]
 					} ]);
 				} else if (error.code === 'EPROTO'
 						&& require('tls').DEFAULT_MIN_VERSION === 'TLSv1.2'
@@ -1783,9 +1714,7 @@ function module_code(library_namespace) {
 						T : 'Please set tls.DEFAULT_MIN_VERSION = "TLSv1"'
 						//
 						+ ' first!'
-					}, ' [' + (typeof URL_to_fetch === 'string' ? URL_to_fetch
-					//
-					: URL_to_fetch && URL_to_fetch[KEY_URL]) + ']' ]);
+					}, ' [' + URL_to_fetch + ']' ]);
 					/**
 					 * <code>
 					To solve:
@@ -1795,15 +1724,12 @@ function module_code(library_namespace) {
 					</code>
 					 */
 				} else {
-					library_namespace.error([ 'get_URL_node: ', {
-						T : [ 'Got error when retrieving [%1]: %2',
-						//
-						typeof URL_to_fetch === 'string' ? URL_to_fetch
-						//
-						: URL_to_fetch && URL_to_fetch[KEY_URL],
-						//
-						localize_error(error) ]
-					} ]);
+					library_namespace.error([
+							'get_URL_node: ',
+							{
+								T : [ 'Got error when retrieving [%1]: %2',
+										URL_to_fetch, localize_error(error) ]
+							} ]);
 					// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 					// console.error(error);
 					// console.error(options);
@@ -1841,7 +1767,7 @@ function module_code(library_namespace) {
 			}
 			if ((response.statusCode / 100 | 0) === 3
 					&& response.headers.location
-					&& response.headers.location !== String(URL_to_fetch)
+					&& response.headers.location !== URL_to_fetch
 					&& !options.no_redirect) {
 				if (unregister()) {
 					// 預防 timeout 時重複執行。
@@ -1863,12 +1789,8 @@ function module_code(library_namespace) {
 				options[KEY_URL] = new URL(response.headers.location,
 						URL_to_fetch);
 				library_namespace.debug({
-					T : [
-							'%1 Redirecting to [%2] ← [%3]',
-							response.statusCode,
-							options[KEY_URL],
-							typeof URL_to_fetch === 'string' ? URL_to_fetch
-									: URL_to_fetch && URL_to_fetch[KEY_URL] ]
+					T : [ '%1 Redirecting to [%2] ← [%3]', response.statusCode,
+							options[KEY_URL], URL_to_fetch ]
 				}, 1, 'get_URL_node');
 				get_URL_node(options, onload, charset
 				// 重新導向的時候去掉 post data 不傳送。
@@ -1883,20 +1805,16 @@ function module_code(library_namespace) {
 			// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
 			if (options.onfail || (response.statusCode / 100 | 0) === 2) {
 				library_namespace.debug({
-					T : [
-							'HTTP status code: %1 %2',
-							response.statusCode,
-							typeof URL_to_fetch === 'string' ? URL_to_fetch
-									: URL_to_fetch && URL_to_fetch[KEY_URL] ]
+					T : [ 'HTTP status code: %1 %2', response.statusCode,
+							URL_to_fetch ]
 				}, 2, 'get_URL_node');
 			} else if (!options.no_warning) {
-				library_namespace.warn([ 'get_URL_node: ', {
-					T : [ '異常 HTTP 狀態碼 %1：%2', response.statusCode,
-					//
-					typeof URL_to_fetch === 'string' ? URL_to_fetch
-					//
-					: URL_to_fetch && URL_to_fetch[KEY_URL] ]
-				} ]);
+				library_namespace.warn([
+						'get_URL_node: ',
+						{
+							T : [ '異常 HTTP 狀態碼 %1：%2', response.statusCode,
+									URL_to_fetch ]
+						} ]);
 			}
 
 			library_namespace.debug({
@@ -1974,22 +1892,18 @@ function module_code(library_namespace) {
 			&& !options.write_to && !options.write_to_directory) {
 				// 照理unregister()應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				unregister();
-				library_namespace.warn([ 'get_URL_node: ', {
-					T : [ 'Got URL [%1], but there is no listener!',
-					//
-					typeof URL_to_fetch === 'string' ? URL_to_fetch
-					//
-					: URL_to_fetch && URL_to_fetch[KEY_URL] ]
-				} ]);
+				library_namespace.warn([
+						'get_URL_node: ',
+						{
+							T : [ 'Got URL [%1], but there is no listener!',
+									URL_to_fetch ]
+						} ]);
 				// console.log(response);
 				return;
 			}
 
 			library_namespace.debug({
-				T : [
-						'等待接收從網址 [%1] 傳輸回的資料……',
-						typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch[KEY_URL] ]
+				T : [ '等待接收從網址 [%1] 傳輸回的資料……', URL_to_fetch ]
 			}, 3, 'get_URL_node');
 
 			var flow_encoding = response.headers['content-encoding'];
@@ -2029,9 +1943,7 @@ function module_code(library_namespace) {
 						+ (length / 1.024 / (/* Date.now() */(new Date)
 								.getTime() - start_time)).toFixed(2)
 						+ ' KiB/s)' ];
-				message.push(': '
-						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch[KEY_URL]));
+				message.push(': ' + URL_to_fetch);
 				library_namespace.debug('receive BODY.length: '
 						+ message.join(''), 4, 'get_URL_node');
 				if (options.show_progress && length !== total_length) {
@@ -2062,9 +1974,7 @@ function module_code(library_namespace) {
 
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			response.on('end', function() {
-				library_namespace.debug('end(): '
-						+ (typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch[KEY_URL]), 2,
+				library_namespace.debug('end(): ' + URL_to_fetch, 2,
 						'get_URL_node');
 
 				// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
@@ -2157,14 +2067,8 @@ function module_code(library_namespace) {
 							// get_URL_node: Error: node_zlib.gunzipSync():
 							// Error: unexpected end of file [http://...]
 							'get_URL_node: Error: node_zlib.gunzipSync(): '
-									//
-									+ localize_error(error)
-									//
-									+ ' ['
-									+ (typeof URL_to_fetch === 'string'
-									//
-									? URL_to_fetch : URL_to_fetch
-											&& URL_to_fetch[KEY_URL]) + ']');
+									+ localize_error(error) + ' ['
+									+ URL_to_fetch + ']');
 							if (false) {
 								console.log(error);
 								console.log(URL_options_to_fetch);
@@ -2516,11 +2420,8 @@ function module_code(library_namespace) {
 			// {Object}timeout_id @ node.js
 			timeout_id = setTimeout(_ontimeout, timeout);
 			library_namespace.debug({
-				T : [
-						'Add timeout %1: [%2]',
-						time_message(timeout),
-						typeof URL_to_fetch === 'string' ? URL_to_fetch
-								: URL_to_fetch && URL_to_fetch[KEY_URL] ]
+				T : [ 'Add timeout %1: [%2]', time_message(timeout),
+						URL_to_fetch ]
 			}, 2, 'get_URL_node');
 		} else if (timeout) {
 			library_namespace.warn([ 'get_URL_node: ', {
@@ -2571,7 +2472,6 @@ function module_code(library_namespace) {
 	get_URL_node.get_status = function(item) {
 		var status = {
 			connections : get_URL_node_connections,
-			// connection_list : Array.from(get_URL_node_connection_Set),
 			requests : get_URL_node_requests
 		};
 		return item ? status[item] : status;
