@@ -320,8 +320,8 @@ function test_compatibility() {
 
 		[[Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(.)/ig)).join(';'), "a1,a,1;A3,A,3;a5,a,5"], 'String.prototype.matchAll(/ /g)'],
 		// TypeError: String.prototype.matchAll called with a non-global RegExp argument
-		//[[Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(.)/i)).join(';'), "a1,a,1"], 'String.prototype.matchAll(/ /)'],
-		//[[Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(a)/i)).join(';'), ""], 'String.prototype.matchAll(/ /) NOT matched'],
+		//[[Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(.)/ig)).join(';'), "a1,a,1"], 'String.prototype.matchAll(/ /)'],
+		//[[Array.from('_a1b2A3B4a5cc'.matchAll(/(a)(a)/ig)).join(';'), ""], 'String.prototype.matchAll(/ /) NOT matched'],
 		[[Array.from('_a1b2A3B4a5cc'.matchAll('aa')).join(';'), ""], 'String.prototype.matchAll("") NOT matched'],
 		[[Array.from('_a1b2A1B4a1cc'.matchAll('a1')).join(';'), "a1;a1"], 'String.prototype.matchAll("")'],
 

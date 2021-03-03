@@ -885,7 +885,7 @@ function (globalThis) {
 	_// JSDT:_module_
 	.
 	/**
-	 * Test if the value is a native ECMAScript Object. is an ordinary object.<br />
+	 * Test if the value is a native ECMAScript Object / plain {Object}. is an ordinary object.<br />
 	 * 去除 null, undefined。 TODO:<br />
 	 * test null<br />
 	 * BUG: IE8 中 is_Object(ELEMENT_NODE) === true！
@@ -902,17 +902,21 @@ function (globalThis) {
 		// Object.prototype.toString.call(undefined) === '[object Object]'
 		// Object.prototype.toString.call(null) === '[object Object]'
 		get_object_type(null) === '[object Object]' || get_object_type(undefined) === '[object Object]' ?
-		function (v) {
+		function is_Object(v) {
 			// &&: 除非為必要條件，否則越難達到、評估成本越小的應擺前面。
 			return get_object_type(v) === '[object Object]'
-					// && typeof v !== 'undefined' && v !== null
-					&& v;
+			// && typeof v !== 'undefined' && v !== null
+			&& v
+			// incase CeL.is_Object(new CeL.URI())
+			&& (!v.__proto__ || v.__proto__.constructor === Object);
 		}
 		:
 		// _.type_tester('Object');
-		function (v) {
+		function is_Object(v) {
 			// 非如此不得與 jQuery 平起平坐…
-			return get_object_type(v) === '[object Object]';
+			return get_object_type(v) === '[object Object]'
+			// incase CeL.is_Object(new CeL.URI())
+			&& (!v.__proto__ || v.__proto__.constructor === Object);
 		};
 
 	_// JSDT:_module_

@@ -317,8 +317,10 @@ function module_code(library_namespace) {
 
 		action = 'action=edit';
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (Array.isArray(title))
-			action = [ title[0], action ], title = title[1];
+		if (Array.isArray(title)) {
+			action = [ title[0], action ];
+			title = title[1];
+		}
 		if (options && options.write_to) {
 			// 設定寫入目標。一般為 debug、test 測試期間用。
 			// e.g., write_to:'Wikipedia:沙盒',

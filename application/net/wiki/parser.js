@@ -1235,9 +1235,9 @@ function module_code(library_namespace) {
 				}
 
 				if (token.name in {
-					R : true,
-					NoteTag : true,
 					Cfn : true,
+					NoteTag : true,
+					R : true
 				}) {
 					// Skip references
 					continue;

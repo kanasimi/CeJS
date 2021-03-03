@@ -343,7 +343,8 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof action[1] === 'string' && !/^[a-z]+=/.test(action[1])) {
-			library_namespace.warn('Did not set action!');
+			library_namespace
+					.warn('Did not set action! Will auto add "action=".');
 			console.trace(action);
 			action[1] = 'action=' + action[1];
 		}
@@ -2842,6 +2843,71 @@ function module_code(library_namespace) {
 		// console.trace([ template_name, token ]);
 		return template_name === token;
 	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// if (wiki_API.need_get_API_parameters('path', caller, arguments, options))
+	// return;
+
+	function need_get_API_parameters(path, caller, _arguments, options) {
+		var session = wiki_API.session_of_options(options);
+		if (!session)
+			return;
+		if (session.API_parameters[modules.path])
+			return false;
+		get_API_parameters(modules, options, function() {
+			caller.apply(null, _arguments);
+		});
+		return true;
+	}
+
+	wiki_API.need_get_API_parameters = need_get_API_parameters;
+
+	if (false) {
+		CeL.wiki.get_API_parameters('query+revisions', {
+			session : wiki
+		}, function(modules, error, data) {
+			console.log([ modules, error ]);
+		});
+	}
+
+	var KEY_API_parameters_prefix = typeof Symbol === 'function' ? Symbol('API prefix')
+			: '\0API prefix';
+	function get_API_parameters(modules, options, callback) {
+		wiki_API.query([ , {
+			action : 'paraminfo',
+			// helpformat : 'wikitext',
+			modules : modules
+		} ], function(data, error) {
+			var modules = !error && data && data.paraminfo
+					&& Array.isArray(data.paraminfo.modules)
+					&& data.paraminfo.modules[0];
+			if (!modules && !error) {
+				error = new Error('Unknown query result');
+			}
+
+			var session = wiki_API.session_of_options(options);
+			if (session) {
+				var prefix = modules.prefix || '';
+				var parameters = session.API_parameters[modules.path]
+						|| (session.API_parameters[modules.path] = Object
+								.create(null));
+				if (modules.prefix)
+					parameters[KEY_API_parameters_prefix] = modules.prefix;
+				modules.parameters.forEach(function(parameter_data) {
+					var key = parameter_data.name;
+					if (parameters[key])
+						Object.assign(parameters[key], parameter_data);
+					else
+						parameters[key] = parameter_data;
+				});
+			}
+			if (callback)
+				callback(modules, null, data);
+		}, null, options);
+	}
+
+	wiki_API.get_API_parameters = get_API_parameters;
 
 	// --------------------------------------------------------------------------------------------
 

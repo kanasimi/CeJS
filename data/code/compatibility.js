@@ -1546,7 +1546,7 @@ function module_code(library_namespace) {
 					list.push(matched);
 				}
 			} else if (matched = regexp.exec(this)) {
-				// e.g., 'a1b2A3B4a5cc'.matchAll(/(a)(.)/i)
+				// e.g., 'a1b2A3B4a5cc'.matchAll(/(a)(.)/ig)
 				list.push(matched);
 			}
 

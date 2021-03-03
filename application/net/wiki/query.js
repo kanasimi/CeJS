@@ -182,20 +182,25 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// TODO: accept action:
-	// {URL}
-	// {URLSearchParams}parameters will get API_URL from options
-	// [ {String}API, {Object}parameters ]
-	// [ {String}API, {String}parameters ]
-	// {Object}parameters will get API_URL from options
-	// {String}parameters will get API_URL from options
-
 	/**
 	 * 實際執行 query 操作，直接 call API 之核心函數。 wiki_API.query()
 	 * 
 	 * 所有會利用到 wiki_API.prototype.work ← wiki_API.prototype.next ← <br />
 	 * wiki_API.page, wiki_API.edit, ... ← wiki_API_query ← get_URL ← <br />
 	 * need standalone http agent 的功能，都需要添附 session 參數。
+	 * 
+	 * -----------------------------------------
+	 * 
+	 * accept action: {URL}
+	 * 
+	 * action: {Search_parameters|URLSearchParams}parameters:<br />
+	 * will get API_URL from options for undefined API
+	 * 
+	 * action: [ {String|Undefined}API,
+	 * {Object|Search_parameters|URLSearchParams|String}parameters ]:<br />
+	 * will get API_URL from options for undefined API
+	 * 
+	 * -----------------------------------------
 	 * 
 	 * @param {String|Array}action
 	 *            {String}action or [ {String}api URL, {String}action,
@@ -222,16 +227,19 @@ function module_code(library_namespace) {
 		}
 
 		// 處理 action
+		// console.trace(action);
 		library_namespace.debug('action: ' + action, 2, 'wiki_API_query');
 		// new URLSearchParams() 會將數值轉成字串。 想二次利用 {Object}, {Array}，得採用
 		// new CeL.URI() 而非 new URL()。
-		if (typeof action === 'string' && /^https?:\/\//.test(action)) {
+		if (library_namespace.is_URI(action)) {
+			// Skip
+		} else if (typeof action === 'string' && /^https?:\/\//.test(action)) {
 			action = new library_namespace.URI(action);
 		} else if (typeof action === 'string'
 				|| (action instanceof URLSearchParams)
 				|| library_namespace.is_Search_parameters(action)
-		// || library_namespace.is_Object(action)
-		) {
+				// check if `action` is plain {Object}
+				|| library_namespace.is_Object(action)) {
 			action = [ , action ];
 		}
 		// console.trace(action);
@@ -242,7 +250,8 @@ function module_code(library_namespace) {
 				if (typeof action[1] === 'string'
 				// https://www.mediawiki.org/w/api.php?action=help&modules=query
 				&& !/^[a-z]+=/.test(action[1]) && !options.post_data_only) {
-					library_namespace.warn('Did not set action!');
+					library_namespace
+							.warn('Did not set action! Will auto add "action=".');
 					console.trace(action);
 					action[1] = 'action=' + action[1];
 				}
@@ -269,6 +278,7 @@ function module_code(library_namespace) {
 			action = library_namespace.URI(action);
 		}
 		// assert: library_namespace.is_URI(action)
+		// console.trace(action);
 
 		// additional parameters
 		if (options.additional) {
@@ -683,7 +693,7 @@ function module_code(library_namespace) {
 		var pageid;
 
 		if (Array.isArray(page_data)) {
-			// auto detect multi
+			// auto detect multi pages
 			if (multi === undefined) {
 				multi = pageid && pageid.length > 1;
 			}
