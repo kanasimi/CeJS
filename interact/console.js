@@ -261,7 +261,7 @@ function module_code(library_namespace) {
 			style |= 0;
 		}
 
-		if (library_namespace.is_Object(style)) {
+		if (library_namespace.is_Object(style) || style instanceof SGR_style) {
 			library_namespace.debug({
 				T : [
 						'Parse {%2} [%1] if it is a object.',
@@ -674,6 +674,10 @@ function module_code(library_namespace) {
 					CSI : options
 				};
 
+		if (false) {
+			console.trace([ text, library_namespace.is_Object(text), options,
+					library_namespace.is_Object(options) ]);
+		}
 		if (library_namespace.is_Object(text) && !options) {
 			// 把 text 當作 options。
 			options = text;

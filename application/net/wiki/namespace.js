@@ -2846,18 +2846,40 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// if (wiki_API.need_get_API_parameters('path', caller, arguments, options))
-	// return;
-
-	function need_get_API_parameters(path, caller, _arguments, options) {
-		var session = wiki_API.session_of_options(options);
-		if (!session)
+	if (false) {
+		// Place in front of function caller() code:
+		if (wiki_API.need_get_API_parameters('path+path', options, caller,
+				arguments)) {
 			return;
-		if (session.API_parameters[modules.path])
+		}
+		// @see function wiki_API_edit()
+	}
+
+	function need_get_API_parameters(path, options, caller, caller_arguments) {
+		var session = wiki_API.session_of_options(options);
+		if (!session) {
+			library_namespace
+					.error('need_get_API_parameters: Must set session to check the necessity.');
+			return;
+		}
+		if (session.API_parameters[path]) {
+			// needless
 			return false;
-		get_API_parameters(modules, options, function() {
-			caller.apply(null, _arguments);
-		});
+		}
+
+		if (caller) {
+			library_namespace.debug(
+					'Will execute caller later after get API parameters of ['
+							+ path + ']...', 0, 'need_get_API_parameters');
+			// console.trace(path);
+			get_API_parameters(path,
+			// `options` 是用在原先的函數 caller()，包含許多額外的 parameters，
+			// 會影響 wiki_API.query() @ get_API_parameters()，因此這邊只取 session。
+			add_session_to_options(session), function(modules, error, data) {
+				// console.trace(data);
+				caller.apply(null, caller_arguments);
+			});
+		}
 		return true;
 	}
 
@@ -2873,12 +2895,14 @@ function module_code(library_namespace) {
 
 	var KEY_API_parameters_prefix = typeof Symbol === 'function' ? Symbol('API prefix')
 			: '\0API prefix';
-	function get_API_parameters(modules, options, callback) {
+	function get_API_parameters(path, options, callback) {
+		// console.trace([ path, options ]);
 		wiki_API.query([ , {
 			action : 'paraminfo',
 			// helpformat : 'wikitext',
-			modules : modules
+			modules : path
 		} ], function(data, error) {
+			// console.trace([ data, error ]);
 			var modules = !error && data && data.paraminfo
 					&& Array.isArray(data.paraminfo.modules)
 					&& data.paraminfo.modules[0];
@@ -2886,6 +2910,8 @@ function module_code(library_namespace) {
 				error = new Error('Unknown query result');
 			}
 
+			// assert: path === modules.path
+			// console.trace([ path, modules.path ]);
 			var session = wiki_API.session_of_options(options);
 			if (session) {
 				var prefix = modules.prefix || '';
@@ -2908,6 +2934,86 @@ function module_code(library_namespace) {
 	}
 
 	wiki_API.get_API_parameters = get_API_parameters;
+
+	// @inner
+	function extract_path_from_options(options) {
+		if (options.path)
+			return options.path;
+		if (Array.isArray(options)) {
+			// [ API, parameters ]
+			options = options[1];
+		}
+		if (!library_namespace.is_Object(options))
+			return;
+		var path = options.action;
+		if (!path)
+			return;
+		// for action=query&prop=... , list=... , meta=...
+		[ 'prop', 'meta', 'list' ].some(function(submodule) {
+			if (options[submodule]) {
+				path += '+' + options[submodule];
+				return true;
+			}
+		});
+		return path;
+	}
+
+	// extract_parameters_from_options
+	function extract_parameters(extract_from, options) {
+		options = library_namespace.setup_options(options);
+		var extract_to = options.extract_to || Object.create(null);
+		var path = extract_path_from_options(options)
+				|| extract_path_from_options(extract_from);
+		var limited_parameters;
+		var session = wiki_API.session_of_options(options)
+				|| wiki_API.session_of_options(extract_from);
+		if (session && path) {
+			limited_parameters = session.API_parameters[path];
+		} else {
+			library_namespace.warn('No session or no path settled!');
+			console.trace([ session, path, extract_from ]);
+		}
+		var parameters = options.parameters || Object.keys(extract_from);
+		var prefix = limited_parameters
+				&& limited_parameters[KEY_API_parameters_prefix];
+		// exclude {key: false}
+		parameters.forEach(function(key) {
+			// if (typeof key !== 'string') return;
+			var _key;
+			if (limited_parameters) {
+				if (prefix && ((_key = prefix + key) in limited_parameters)) {
+					if (_key in extract_to) {
+						// 以準確名稱為準。
+						return;
+					}
+				} else if (!(key in limited_parameters)) {
+					return;
+				}
+			}
+			var value = extract_from[key];
+			if (value || value === 0
+			// e.g., .text === ''
+			|| value === '') {
+				if (typeof value === 'object' && !Array.isArray(value)) {
+					// Do not includes {Object}value
+					library_namespace.debug('Invalid value? ' + value);
+				}
+				if (!_key) {
+					_key = key;
+				}
+				if (limited_parameters && limited_parameters[_key].deprecated) {
+					library_namespace.warn('Using deprecated parameter: '
+							+ path + ':' + _key);
+				}
+				extract_to[_key] = value;
+			}
+		});
+		delete extract_to[''];
+		delete extract_to[KEY_SESSION];
+		return extract_to;
+	}
+
+	wiki_API.extract_parameters = extract_parameters;
 
 	// --------------------------------------------------------------------------------------------
 

@@ -227,22 +227,26 @@ function module_code(library_namespace) {
 		}
 
 		// 處理 action
-		// console.trace(action);
+		// console.trace([action, POST_data]);
 		library_namespace.debug('action: ' + action, 2, 'wiki_API_query');
 		// new URLSearchParams() 會將數值轉成字串。 想二次利用 {Object}, {Array}，得採用
 		// new CeL.URI() 而非 new URL()。
-		if (library_namespace.is_URI(action)) {
-			// Skip
+		if ((action instanceof URL) || library_namespace.is_URI(action)) {
+			// Skip normalized URL
 		} else if (typeof action === 'string' && /^https?:\/\//.test(action)) {
 			action = new library_namespace.URI(action);
 		} else if (typeof action === 'string'
-				|| (action instanceof URLSearchParams)
+		// TODO: {Map}, {Set}
+		|| (action instanceof URLSearchParams)
 				|| library_namespace.is_Search_parameters(action)
 				// check if `action` is plain {Object}
 				|| library_namespace.is_Object(action)) {
 			action = [ , action ];
+		} else if (!Array.isArray(action)) {
+			library_namespace.warn('wiki_API_query: Invalid URL? ['
+					+ typeof action + '] ' + action);
+			console.trace(action);
 		}
-		// console.trace(action);
 		if (Array.isArray(action)) {
 			// [ {String}api URL, {String}action, {Object}other parameters ]
 			// → {URI}URL
@@ -776,18 +780,21 @@ function module_code(library_namespace) {
 	 * @see get_page_title === wiki_API.title_of
 	 */
 	wiki_API_query.id_of_page = function(page_data, title_only) {
-		if (Array.isArray(page_data))
+		if (Array.isArray(page_data)) {
 			return page_data.map(function(page) {
 				wiki_API_query.id_of_page(page, title_only);
 			});
-		if (library_namespace.is_Object(page_data))
+		}
+		if (library_namespace.is_Object(page_data)) {
 			// 有 pageid 則使用之，以加速。
 			return !title_only && page_data.pageid || page_data.title;
+		}
 
-		if (!page_data)
+		if (!page_data) {
 			library_namespace
 					.error('wiki_API_query.id_of_page: Invalid title: ['
 							+ page_data + ']');
+		}
 		return page_data;
 	};
 

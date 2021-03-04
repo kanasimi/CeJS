@@ -1521,6 +1521,11 @@ function module_code(library_namespace) {
 				return '';
 			}
 
+			if (token.name === 'Lang') {
+				return preprocess_section_link_token(token.parameters[2],
+						options);
+			}
+
 			// TODO: {{Visible anchor}} === {{vanchor}}
 
 			// TODO: [[Template:User link]], [[Template:U]]

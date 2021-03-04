@@ -1045,10 +1045,9 @@ function module_code(library_namespace) {
 
 		// POST_parameters
 		var post_data = action[1];
-		action[1] = 'action=purge';
-		if (!action[0]) {
-			action = action[1];
-		}
+		action[1] = {
+			action : 'purge'
+		};
 
 		wiki_API.query(action, typeof callback === 'function'
 		//
@@ -1216,7 +1215,7 @@ function module_code(library_namespace) {
 	 * @see wiki_API.protect
 	 */
 	function wiki_API_expandtemplates(wikitext, callback, options) {
-		var action = 'action=expandtemplates', post_data = {
+		var post_data = {
 			text : wikitext,
 			prop : 'wikitext'
 		};
@@ -1230,12 +1229,9 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var session = wiki_API.session_of_options(options);
-		if (session && session.API_URL) {
-			action = [ session.API_URL, action ];
-		}
-
-		wiki_API.query(action, function(data) {
+		wiki_API.query({
+			action : 'expandtemplates'
+		}, function(data) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
@@ -1338,7 +1334,9 @@ function module_code(library_namespace) {
 		// 由於用 [[link]] 也不會自動 redirect，因此直接轉換即可。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		wiki_API.query([ session && session.API_URL || wiki_API.api_URL('zh'),
-				'action=parse' ], function(data, error) {
+				{
+					action : 'parse'
+				} ], function(data, error) {
 			if (error || !data) {
 				callback(undefined, error);
 				return;

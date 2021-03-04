@@ -206,6 +206,11 @@ function module_code(library_namespace) {
 	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=edit
 	 */
 	function wiki_API_edit(title, text, token, options, callback, timestamp) {
+		if (wiki_API.need_get_API_parameters('edit', options, wiki_API_edit,
+				arguments)) {
+			return;
+		}
+
 		// console.trace(title);
 		// console.log(text);
 		if (library_namespace.is_thenable(text)) {
@@ -315,7 +320,9 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		action = 'action=edit';
+		action = {
+			action : 'edit'
+		};
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (Array.isArray(title)) {
 			action = [ title[0], action ];
@@ -330,9 +337,10 @@ function module_code(library_namespace) {
 		}
 
 		// 造出可 modify 的 options。
-		if (options)
+		if (options) {
 			library_namespace.debug('#1: ' + Object.keys(options).join(','), 4,
 					'wiki_API_edit');
+		}
 		// 前置處理。
 		if (is_undo) {
 			options = library_namespace.setup_options(options);
@@ -370,15 +378,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('#2: ' + Object.keys(options).join(','), 4,
 				'wiki_API_edit');
 
-		var post_data = Object.create(null);
-		// exclude {key: false}
-		Object.keys(options).forEach(function(key) {
-			var value = options[key];
-			if (typeof key === 'string' && (value || value === 0))
-				post_data[key] = value;
-		});
-		delete post_data[''];
-		delete post_data[KEY_SESSION];
+		var post_data = wiki_API.extract_parameters(options, action);
 
 		wiki_API.query(action, function(data, error) {
 			// console.log(data);
