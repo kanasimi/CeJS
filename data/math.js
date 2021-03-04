@@ -178,8 +178,11 @@ function module_code(library_namespace) {
 			var i = 9, f = n2;
 			while (i--) {
 				// 以整數運算比較快！這樣會造成整數多4%，浮點數多1/3倍的時間，但仍值得。
-				if (f *= DEFAULT_BASE, c *= DEFAULT_BASE, Number.isInteger(c)) {
-					n1 = c, n2 = f;
+				f *= DEFAULT_BASE;
+				c *= DEFAULT_BASE;
+				if (Number.isInteger(c)) {
+					n1 = c;
+					n2 = f;
 					break;
 				}
 			}
@@ -194,7 +197,8 @@ function module_code(library_namespace) {
 				n1 = -n1;
 
 			q.push(-(1 + (n1 - (c = n1 % n2)) / n2));
-			n1 = n2, n2 -= c;
+			n1 = n2;
+			n2 -= c;
 		}
 
 		// old:
@@ -202,7 +206,10 @@ function module_code(library_namespace) {
 			while (b && n--) {
 				// 2.08s@10000
 				// 可能因為少設定（=）一次c所以較快。但（若輸入不為整數）不確保d為整數？用Math.floor((a-(c=a%b))/b)可確保，速度與下式一樣快。
-				d.push((a - (c = a % b)) / b), a = b, b = c;
+				c = a % b;
+				d.push((a - c) / b);
+				a = b;
+				b = c;
 				// 2.14s@10000:mutual_division(.142857)
 				// d.push(c=Math.floor(a/b)),c=a-b*c,a=b,b=c;
 				// 2.2s@10000
@@ -215,9 +222,12 @@ function module_code(library_namespace) {
 		// 2.4s@10000
 		// 可能因為少設定（=）一次c所以較快。但（若輸入不為整數）不確保d為整數？用Math.floor((a-(c=a%b))/b)可確保，速度與下式一樣快。
 		while (times--)
-			if (n2)
-				q.push((n1 - (c = n1 % n2)) / n2), n1 = n2, n2 = c;
-			else {
+			if (n2) {
+				c = n1 % n2;
+				q.push((n1 - c) / n2);
+				n1 = n2;
+				n2 = c;
+			} else {
 				// [ ... , done mark, (最後非零的餘數。若原 n1, n2 皆為整數，則此值為
 				// GCD。但請注意:這邊是已經經過前面為了以整數運算，增加倍率過的數值!!) ]
 				q.push(_.mutual_division.done, n1);
@@ -275,16 +285,22 @@ function module_code(library_namespace) {
 			max_no = sequence.length;
 
 		var a, b;
-		if (max_no % 2)
-			b = 1, a = 0;
-		else
-			a = 1, b = 0;
+		if (max_no % 2) {
+			b = 1;
+			a = 0;
+		} else {
+			a = 1;
+			b = 0;
+		}
 		if (false) {
 			sequence[max_no++] = 1;
-			if (--max_no % 2)
-				b = sequence[max_no], a = s[--max_no];
-			else
-				a = sequence[max_no], b = sequence[--max_no];
+			if (--max_no % 2) {
+				b = sequence[max_no];
+				a = s[--max_no];
+			} else {
+				a = sequence[max_no];
+				b = sequence[--max_no];
+			}
 		}
 
 		if (false)
@@ -317,8 +333,11 @@ function module_code(library_namespace) {
 			D = 1;
 		if (!m)
 			m = 1;
-		else if (m < 0)
-			m = -m, i = -i, D = -D;
+		else if (m < 0) {
+			m = -m;
+			i = -i;
+			D = -D;
+		}
 
 		// (m√r + i) / D
 		// = (√(r m^2) + i) / D

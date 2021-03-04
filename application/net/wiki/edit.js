@@ -206,7 +206,10 @@ function module_code(library_namespace) {
 	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=edit
 	 */
 	function wiki_API_edit(title, text, token, options, callback, timestamp) {
-		if (wiki_API.need_get_API_parameters('edit', options, wiki_API_edit,
+		var action = {
+			action : 'edit'
+		};
+		if (wiki_API.need_get_API_parameters(action, options, wiki_API_edit,
 				arguments)) {
 			return;
 		}
@@ -310,19 +313,16 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var action = !is_undo
+		var not_passed = !is_undo
 				&& wiki_API_edit.check_data(text, title, options,
 						'wiki_API_edit');
-		if (action) {
+		if (not_passed) {
 			library_namespace.debug('直接執行 callback。', 2, 'wiki_API_edit');
-			// console.trace(action);
-			callback(title, action);
+			// console.trace(not_passed);
+			callback(title, not_passed);
 			return;
 		}
 
-		action = {
-			action : 'edit'
-		};
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (Array.isArray(title)) {
 			action = [ title[0], action ];

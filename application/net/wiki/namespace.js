@@ -2846,6 +2846,31 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// @inner
+	function extract_path_from_options(options) {
+		if (typeof options === 'string')
+			return options;
+		if (options.path)
+			return options.path;
+		if (Array.isArray(options)) {
+			// [ API, parameters ]
+			options = options[1];
+		}
+		if (!library_namespace.is_Object(options))
+			return;
+		var path = options.action;
+		if (!path)
+			return;
+		// for action=query&prop=... , list=... , meta=...
+		[ 'prop', 'meta', 'list' ].some(function(submodule) {
+			if (options[submodule]) {
+				path += '+' + options[submodule];
+				return true;
+			}
+		});
+		return path;
+	}
+
 	if (false) {
 		// Place in front of function caller() code:
 		if (wiki_API.need_get_API_parameters('path+path', options, caller,
@@ -2862,6 +2887,7 @@ function module_code(library_namespace) {
 					.error('need_get_API_parameters: Must set session to check the necessity.');
 			return;
 		}
+		path = extract_path_from_options(path);
 		if (session.API_parameters[path]) {
 			// needless
 			return false;
@@ -2870,14 +2896,19 @@ function module_code(library_namespace) {
 		if (caller) {
 			library_namespace.debug(
 					'Will execute caller later after get API parameters of ['
-							+ path + ']...', 0, 'need_get_API_parameters');
+							+ path + ']...', 1, 'need_get_API_parameters');
 			// console.trace(path);
 			get_API_parameters(path,
 			// `options` 是用在原先的函數 caller()，包含許多額外的 parameters，
 			// 會影響 wiki_API.query() @ get_API_parameters()，因此這邊只取 session。
 			add_session_to_options(session), function(modules, error, data) {
 				// console.trace(data);
-				caller.apply(null, caller_arguments);
+				if (Array.isArray(caller) && caller_arguments === undefined) {
+					// [ caller, caller_arguments, _this ]
+					caller[0].apply(caller[2], caller[1]);
+				} else {
+					caller.apply(null, caller_arguments);
+				}
 			});
 		}
 		return true;
@@ -2886,6 +2917,7 @@ function module_code(library_namespace) {
 	wiki_API.need_get_API_parameters = need_get_API_parameters;
 
 	if (false) {
+		// usage:
 		CeL.wiki.get_API_parameters('query+revisions', {
 			session : wiki
 		}, function(modules, error, data) {
@@ -2896,6 +2928,7 @@ function module_code(library_namespace) {
 	var KEY_API_parameters_prefix = typeof Symbol === 'function' ? Symbol('API prefix')
 			: '\0API prefix';
 	function get_API_parameters(path, options, callback) {
+		path = extract_path_from_options(path);
 		// console.trace([ path, options ]);
 		wiki_API.query([ , {
 			action : 'paraminfo',
@@ -2935,30 +2968,8 @@ function module_code(library_namespace) {
 
 	wiki_API.get_API_parameters = get_API_parameters;
 
-	// @inner
-	function extract_path_from_options(options) {
-		if (options.path)
-			return options.path;
-		if (Array.isArray(options)) {
-			// [ API, parameters ]
-			options = options[1];
-		}
-		if (!library_namespace.is_Object(options))
-			return;
-		var path = options.action;
-		if (!path)
-			return;
-		// for action=query&prop=... , list=... , meta=...
-		[ 'prop', 'meta', 'list' ].some(function(submodule) {
-			if (options[submodule]) {
-				path += '+' + options[submodule];
-				return true;
-			}
-		});
-		return path;
-	}
-
 	// extract_parameters_from_options
+	// 應盡量少用混雜的方法，如此可能有安全疑慮(security problem)。
 	function extract_parameters(extract_from, options) {
 		options = library_namespace.setup_options(options);
 		var extract_to = options.extract_to || Object.create(null);
