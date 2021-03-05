@@ -2555,7 +2555,9 @@ function module_code(library_namespace) {
 		var proxy_URL = {
 			host : proxy_server.hostname,
 			port : proxy_server.port
-					|| (URL_options_to_fetch.protocol === 'https:' ? 443 : 80),
+					|| library_namespace.net.port_of_protocol[URL_options_to_fetch.protocol
+							.replace(/:$/, '')]
+					|| library_namespace.net.port_of_protocol.https,
 			path : URL_to_fetch,
 			protocol : URL_options_to_fetch.protocol,
 			// method: 'GET',

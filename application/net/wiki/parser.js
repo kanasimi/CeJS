@@ -7457,6 +7457,10 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.HTML_to_wikitext(HTML)
 	// TODO: 應該 parse HTML。
+	// @see
+	// https://www.mediawiki.org/w/api.php?action=help&modules=flow-parsoid-utils
+	// https://www.mediawiki.org/w/api.php?action=help&modules=parse
+	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 	function HTML_to_wikitext(HTML, options) {
 		return HTML
 		//

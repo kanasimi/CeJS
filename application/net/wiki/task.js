@@ -2909,7 +2909,7 @@ function module_code(library_namespace) {
 			if (session.token.lgname) {
 				// https://www.mediawiki.org/w/api.php?action=help&modules=login
 				var matched = session.token.lgname.match(/@(.+)$/);
-				// 機器人名稱： bot_name
+				// 機器人名稱： user name or pure bot name
 				session.token.login_user_name = matched
 				// e.g., "Kanashimi@cewbot" → "cewbot"
 				? matched[1].trim() : session.token.lgname;

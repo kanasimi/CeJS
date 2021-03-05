@@ -177,6 +177,8 @@ function module_code(library_namespace) {
 		ftp : 21
 	};
 
+	_.port_of_protocol = port_of_protocol;
+
 	/**
 	 * URI class.
 	 * 
@@ -219,7 +221,6 @@ function module_code(library_namespace) {
 	input [ host + path, search, hash ]
 	URI, IRI, XRI
 	WHATWG URL parser
-	new URL('a.htm',"file:///C:/d/b.htm").toString() === "file:///C:/d/a.htm"
 
 	 * </code>
 	 * 
@@ -363,17 +364,50 @@ function module_code(library_namespace) {
 								.toLowerCase()]);
 			}
 
-			uri.origin = uri.protocol + '//' + uri.host;
-
 		} else {
 			// test uri.protocol === 'file:'
 			path = href + path;
 			href = '';
+			// uri.protocol === 'file:'
+			uri.port = uri.port || '';
+			uri.host = uri.host || '';
+			uri.hostname = uri.hostname || '';
+			uri.username = uri.username || '';
+			uri.password = uri.password || '';
+		}
+
+		uri.origin = uri.protocol + '//' + uri.host;
+
+		// Normalize Windows path
+		// "d:\\p\\" → "d:/p/"
+		path = path.replace(/\\/g, '/');
+		if (/^[A-Z]:/i.test(path)) {
+			// "d:/p/" → "/d:/p/"
+			path = '/' + path;
 		}
 		if (!href) {
-			library_namespace.warn('URI: 將 [' + path + '] 當作 pathname!');
+			if (!/^\/[A-Z]:/i.test(path)) {
+				library_namespace.warn('URI: 將 [' + path + '] 當作 pathname!');
+				if (uri.pathname) {
+					if (/^\//.test(path)) {
+						// path 為 absolute path
+						matched = !/^\/[A-Z]:/i.test(path)
+								&& uri.pathname.match(/^\/[A-Z]:/i);
+						if (matched)
+							path = matched[0] + path;
+					} else {
+						// 僅取 uri.pathname 之 directory path
+						path = uri.pathname.replace(/[^\\\/]+$/, '') + path;
+					}
+					path = library_namespace.simplify_path(path);
+				}
+			}
 			// console.trace(path);
 		}
+		// upper-cased driver letter: "/d:/p/" → "/D:/p/"
+		path = path.replace(/^\/[a-z]:/g, function($0) {
+			return $0.toUpperCase();
+		});
 		if (library_namespace.is_WWW()) {
 			library_namespace.debug('local file: [' + location.pathname + ']',
 					2, 'URI');

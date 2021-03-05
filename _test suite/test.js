@@ -288,14 +288,15 @@ function test_compatibility() {
 		[['a/', CeL.simplify_path('a/b/../')], 'simplify_path #1-19'],
 		[['.', CeL.simplify_path('a/..')], 'simplify_path #1-20'],
 		[['./', CeL.simplify_path('a/../')], 'simplify_path #1-21'],
-		[['../c', CeL.simplify_path('./a/b/../../../a.b/../c')], 'simplify_path #1-21'],
-		[['../../../c', CeL.simplify_path('../../../a.b/../c')], 'simplify_path #1-22'],
-		[['/a/b/js.js', CeL.simplify_path('/a//c///../b////js.js')], 'simplify_path #1-23'],
-		[['/a/b/js.js', CeL.simplify_path('/a/b/js.js')], 'simplify_path #1-24'],
-		[['../../js.js', CeL.simplify_path("aa/../b/..//../c///../../js.js")], 'simplify_path #1-25'],
-		[['/js.js', CeL.simplify_path("/../../js.js")], 'simplify_path #1-26'],
-		[['a/b/', CeL.simplify_path('a/b/.//')], 'simplify_path #1-27'],
-		[['a/b', CeL.simplify_path('a/b/.')], 'simplify_path #1-28'],
+		[['../c', CeL.simplify_path('./a/b/../../../a.b/../c')], 'simplify_path #1-22'],
+		[['../../../c', CeL.simplify_path('../../../a.b/../c')], 'simplify_path #1-23'],
+		[['/a/b/js.js', CeL.simplify_path('/a//c///../b////js.js')], 'simplify_path #1-24'],
+		[['/a/b/js.js', CeL.simplify_path('/a/b/js.js')], 'simplify_path #1-25'],
+		[['../../js.js', CeL.simplify_path("aa/../b/..//../c///../../js.js")], 'simplify_path #1-26'],
+		[['/js.js', CeL.simplify_path("/../../js.js")], 'simplify_path #1-27'],
+		[['a/b/', CeL.simplify_path('a/b/.//')], 'simplify_path #1-28'],
+		[['a/b', CeL.simplify_path('a/b/.')], 'simplify_path #1-29'],
+		[['/a.txt', CeL.simplify_path('/a.txt')], 'simplify_path #1-30'],
 		[['c:\\aa\\bb\\js.js', CeL.simplify_path('c:\\aa\\bb\\js.js')], 'simplify_path #3-1'],
 		[['c:\\aa\\bb\\js.js', CeL.simplify_path('c:\\aa\\cc\\..\\\\bb\\js.js')], 'simplify_path #3-2'],
 		[['https://github.com/kanasimi/CeJS', CeL.simplify_path('https://github.com/kanasimi/CeJS')], 'simplify_path http://-1'],
@@ -307,6 +308,7 @@ function test_compatibility() {
 		[['/p/a/http://d.o/p/a', CeL.simplify_path('/p/a/http://d.o//p/a')], 'simplify_path /http://#2'],
 		[['https://d.o/p/a/http://d.o/p/a', CeL.simplify_path('https://d.o/p/a/http://d.o/p/a')], 'simplify_path /http://#3'],
 		[['https://d.o/p/a/http://d.o/p/a/', CeL.simplify_path('https://d.o//p/a/http://d.o//p//a/')], 'simplify_path /http://#4'],
+		[['file:///C:/path/file.txt', CeL.simplify_path('file:///C:/path/file.txt')], 'simplify_path file:///C:/path/file.txt #1'],
 	]);
 
 	all_error_count += CeL.test('compatibility', [
@@ -2049,6 +2051,10 @@ function test_net() {
 		assert([typeof URL, 'function'], 'CeL.URI() #0');
 		assert(['a.b', (new CeL.URI('http://a.b/?w=4')).hostname], 'CeL.net.URI() #1');
 		assert(['a.b', (new CeL.URI('http://a.b/p?w=4')).hostname], 'CeL.net.URI() #2');
+		assert(['file:///C:/d/a.htm', (new CeL.URI('a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #1');
+		assert(['file:///C:/a.htm', (new CeL.URI('/a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #2');
+		assert(['file:///D:/a.htm', (new CeL.URI('/d:/a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #3');
+		assert(['file:///D:/a.htm', (new CeL.URI('d:\\a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #4');
 
 		var href = 'ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23&a=2&fg2=24#hhh';
 		var url = new URL(href);

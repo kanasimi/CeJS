@@ -1412,7 +1412,8 @@ if (typeof CeL === 'function') {
 			// http://site.org?p=//\\#a/b/c
 			// 由於有太多不可不可預測因素，因此需特別處理之。
 			if (/[\w\-]:\/\//.test(path)) {
-				is_URL = path.match(/^((?:(?:[\w\-]+:)?\/)?\/)(.*?)$/);
+				// [ all, protocol + ://, path ]
+				is_URL = path.match(/^((?:(?:file:\/|[\w\-]+:)?\/)?\/)(.*?)$/);
 				if (is_URL) {
 					// e.g.,
 					// 'http://example.org/path/to/'
@@ -1473,8 +1474,9 @@ if (typeof CeL === 'function') {
 				}
 			}
 
+			// '//path' → '/path', '///path' → '/path'
 			while (path.length > 0 && !path[0]
-			// '/../path' to '/path'
+			// '/../path' → '/path'
 			|| path[0] === '..' && head)
 				path.shift();
 			while (path.length > 0 && !path[path.length - 1]) {
