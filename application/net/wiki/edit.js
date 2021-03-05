@@ -461,7 +461,8 @@ function module_code(library_namespace) {
 			} else if (data.edit && ('nochange' in data.edit)) {
 				// 在極少的情況下，data.edit === undefined。
 				library_namespace.info('wiki_API_edit: '
-						+ wiki_API.title_link_of(title) + ': no change');
+				// no change
+				+ wiki_API.title_link_of(title) + ': no difference');
 			}
 			if (typeof callback === 'function') {
 				// assert: wiki_API.is_page_data(title)
