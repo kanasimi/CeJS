@@ -930,7 +930,7 @@ function module_code(library_namespace) {
 
 				if ((!next[2] || !next[2].ignore_denial)
 						&& wiki_API.edit.denied(next[2].page_to_edit,
-								this.token.lgname, next[2]
+								this.token.login_user_name, next[2]
 										&& next[2].notification_name)) {
 					// {{bot}} support for flow page
 					// 採用 next[2].page_to_edit 的方法，
@@ -984,7 +984,7 @@ function module_code(library_namespace) {
 
 			if ((!next[2] || !next[2].ignore_denial)
 					&& wiki_API.edit.denied(next[2].page_to_edit,
-							this.token.lgname, next[2]
+							this.token.login_user_name, next[2]
 									&& next[2].notification_name)) {
 				// 採用 next[2].page_to_edit 的方法，
 				// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
@@ -1766,7 +1766,7 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		// titles/pageids: Maximum number of values is 50 (500 for bots).
 		// 不想頁面內容過多而被截斷，用400以下較保險。
-		PATTERN_BOT_NAME.test(session.token && session.token.lgname)
+		PATTERN_BOT_NAME.test(session.token && session.token.login_user_name)
 		// https://www.mediawiki.org/w/api.php
 		// slow queries: 500; fast queries: 5000
 		// The limits for slow queries also apply to multivalue parameters.
@@ -1970,10 +1970,10 @@ function module_code(library_namespace) {
 		// 是為 Robot 運作。
 		? PATTERN_BOT_NAME.test(callback) ? callback
 		// Robot: 若用戶名包含 'bot'，則直接引用之。
-		: (this.token.lgname && this.token.lgname.length < 9
-				&& PATTERN_BOT_NAME.test(this.token.lgname)
+		: (this.token.login_user_name && this.token.login_user_name.length < 9
+				&& PATTERN_BOT_NAME.test(this.token.login_user_name)
 		//
-		? this.token.lgname : 'Robot')
+		? this.token.login_user_name : 'Robot')
 				+ ': ' + callback
 		// 未設置時，一樣添附 Robot。
 		: 'Robot';
@@ -2540,7 +2540,8 @@ function module_code(library_namespace) {
 
 				var log_to = 'log_to' in config ? config.log_to
 				// default log_to
-				: this.token.lgname ? 'User:' + this.token.lgname + '/log/'
+				: this.token.login_user_name ? 'User:'
+						+ this.token.login_user_name + '/log/'
 						+ (new Date).format('%4Y%2m%2d') : null,
 				// options for summary.
 				options = {
@@ -2551,9 +2552,10 @@ function module_code(library_namespace) {
 							+ (new Date).format(config.date_format
 									|| this.date_format) + ']' + count_summary,
 					// Robot: 若用戶名包含 'bot'，則直接引用之。
-					// 注意: this.token.lgname 可能為 undefined！
-					summary : (this.token.lgname
-							&& PATTERN_BOT_NAME.test(this.token.lgname) ? this.token.lgname
+					// 注意: this.token.login_user_name 可能為 undefined！
+					summary : (this.token.login_user_name
+							&& PATTERN_BOT_NAME
+									.test(this.token.login_user_name) ? this.token.login_user_name
 							: 'Robot')
 							+ ': ' + config.summary + count_summary,
 					// Throw an error if the page doesn't exist.
@@ -2585,13 +2587,13 @@ function module_code(library_namespace) {
 							//
 							+ ']! Try to write to [' + 'User:'
 							//
-							+ this.token.lgname + ']');
+							+ this.token.login_user_name + ']');
 							library_namespace.log(
 							//
 							'\nlog:<br />\n' + messages.join('<br />\n'));
 							// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
 							// TODO: bug: 當分批時，只會寫入最後一次。
-							this.page('User:' + this.token.lgname)
+							this.page('User:' + this.token.login_user_name)
 							//
 							.edit(messages.join('\n'), options);
 						}
@@ -2902,6 +2904,15 @@ function module_code(library_namespace) {
 			if (!session.preserve_password) {
 				// 捨棄 password。
 				delete session.token.lgpassword;
+			}
+
+			if (session.token.lgname) {
+				// https://www.mediawiki.org/w/api.php?action=help&modules=login
+				var matched = session.token.lgname.match(/@(.+)$/);
+				// 機器人名稱： bot_name
+				session.token.login_user_name = matched
+				// e.g., "Kanashimi@cewbot" → "cewbot"
+				? matched[1].trim() : session.token.lgname;
 			}
 
 			// reset query limit for login as bot.

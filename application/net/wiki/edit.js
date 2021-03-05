@@ -159,7 +159,8 @@ function module_code(library_namespace) {
 	 * @returns {String}
 	 */
 	wiki_API.check_stop.title = function(token) {
-		return 'User_talk:' + token.lgname + '/Stop';
+		return token.login_user_name ? 'User talk:' + token.login_user_name
+				+ '/Stop' : '';
 	};
 
 	/**
