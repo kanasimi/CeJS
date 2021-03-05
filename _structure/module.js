@@ -1383,8 +1383,7 @@ if (typeof CeL === 'function') {
 		 * @since 2009/11/23 22:32:52
 		 */
 		simplify_path = function simplify_path(path, options) {
-			library_namespace.debug('[' + typeof path + '] [' + path + ']', 2,
-					'simplify_path');
+			_.debug('[' + typeof path + '] [' + path + ']', 2, 'simplify_path');
 			if (false && typeof path !== 'string')
 				return path;
 			// path = '' + path;
@@ -1509,7 +1508,7 @@ if (typeof CeL === 'function') {
 				path = path.replace(/[^\\\/]+$/, '');
 			}
 
-			library_namespace.debug('→ [' + path + ']', 2, 'simplify_path');
+			_.debug('→ [' + path + ']', 2, 'simplify_path');
 			return path;
 		};
 
