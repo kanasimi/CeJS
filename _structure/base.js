@@ -885,7 +885,8 @@ function (globalThis) {
 	_// JSDT:_module_
 	.
 	/**
-	 * Test if the value is a native ECMAScript Object / plain {Object}. is an ordinary object.<br />
+	 * Test if the value is a native ECMAScript Object / plain {Object}. is an
+	 * ordinary object.<br />
 	 * 去除 null, undefined。 TODO:<br />
 	 * test null<br />
 	 * BUG: IE8 中 is_Object(ELEMENT_NODE) === true！
@@ -916,6 +917,7 @@ function (globalThis) {
 			// 非如此不得與 jQuery 平起平坐…
 			return get_object_type(v) === '[object Object]'
 			// incase CeL.is_Object(new CeL.URI())
+			// (!v.__proto__ || v instanceof Object)
 			&& (!v.__proto__ || v.__proto__.constructor === Object);
 		};
 

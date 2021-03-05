@@ -1369,16 +1369,42 @@ if (typeof CeL === 'function') {
 		_// JSDT:_module_
 		.
 		/**
-		 * 轉化所有 /., /.., //
+		 * reduce path. 減縮 path. 轉化所有 /., /.., // 尚未處理：: * ?
 		 * 
-		 * @since 2009/11/23 22:32:52
-		 * @param {String}
-		 *            path 欲轉化之 path
+		 * @example <code>
+
+		CeL.simplify_path('http://hostname.org/pp/../aaa/bbb/../ccc/../ddd');
+
+		</code>
+		 * 
+		 * @param {String}path
+		 *            欲轉化之 path
 		 * @returns {String} path
+		 * @since 2009/11/23 22:32:52
 		 */
-		simplify_path = function simplify_path(path) {
-			if (typeof path !== 'string')
+		simplify_path = function simplify_path(path, options) {
+			library_namespace.debug('[' + typeof path + '] [' + path + ']', 2,
+					'simplify_path');
+			if (false && typeof path !== 'string')
 				return path;
+			// path = '' + path;
+			path = String(path);
+			if (!path)
+				return;
+			if (/^"([^"]+)"$|^'([^']+)'$/.test(path)) {
+				// JSON.parse(path);
+				path = path.slice(1, -1);
+			}
+
+			// Windows environment variables 在真實 path 前,尚未測試！
+			// Using function ExpandEnvironmentStrings(string) @
+			// CeL.application.platform.nodejs instead!
+			if (false && typeof WinEnvironment === 'object'
+					&& (t = path.match(/%(.+)%/g))) {
+				for ( var i in t)
+					if (WinEnvironment[i])
+						path.replace(new RegExp(i, "ig"), WinEnvironment[i]);
+			}
 
 			// 有 head 表示 is absolute
 			var head, tail, is_URL;
@@ -1424,17 +1450,20 @@ if (typeof CeL === 'function') {
 					path = tail[1], tail = tail[2].charAt(0);
 			}
 
-			var separator_matched = path.match(/[\\\/]/)
-					|| tail && tail.match(/^[\\\/]/);
+			var separator_matched = path.match(/[\\\/]/) || tail
+					&& tail.match(/^[\\\/]/);
 			if (!separator_matched)
 				return (head || '') + path + (tail || '') || '.';
 			path = path.split(/[\\\/]+/);
 
 			for (var i = 0, length = path.length; i < length; i++) {
-				if (path[i] === '.')
+				if (path[i] === '.') {
+					// ./ → ''
+					// /./ → /
 					path[i] = '';
 
-				else if (path[i] === '..') {
+				} else if (path[i] === '..') {
+					// xx/../ → ''
 					var j = i;
 					while (j > 0)
 						if (path[--j] && path[j] !== '..') {
@@ -1473,6 +1502,14 @@ if (typeof CeL === 'function') {
 			if (tail)
 				path += tail;
 
+			if (false && options && options.directory_only) {
+				// 去除檔名，只餘目錄。如輸入 http://hostname.org/aaa/bbb/ccc，得到
+				// http://hostname.org/aaa/bbb/
+				// 假如輸入sss/ddd，會把ddd除去！需輸入sss/ddd/以標示ddd為目錄.
+				path = path.replace(/[^\\\/]+$/, '');
+			}
+
+			library_namespace.debug('→ [' + path + ']', 2, 'simplify_path');
 			return path;
 		};
 

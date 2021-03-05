@@ -216,16 +216,18 @@ function module_code(library_namespace) {
 	eURI : /^((file|telnet|ftp|https?)\:\/\/|~?\/)?(\w+(:\w+)?@)?(([-\w]+\.)+([a-z]{2}|com|org|net))?(:\d{1,5})?(\/([-\w~!$+|.,=]|%[a-f\d]{2})*)?(\?(([-\w~!$+|.,*:]|%[a-f\d{2}])+(=([-\w~!$+|.,*:=]|%[a-f\d]{2})*)?&?)*)?(#([-\w~!$+|.,*:=]|%[a-f\d]{2})*)?$/i,
 
 	TODO:
-	[ host + path, search, hash ]
+	input [ host + path, search, hash ]
 	URI, IRI, XRI
 	WHATWG URL parser
+	new URL('a.htm',"file:///C:/d/b.htm").toString() === "file:///C:/d/a.htm"
 
 	 * </code>
 	 * 
 	 * @param {String}uri
 	 *            URI to parse
 	 * @param {String}[base_uri]
-	 *            當做基底的 URL。 see CeL.application.storage.get_relative_path()
+	 *            當做基底的 URL。 see
+	 *            CeL.application.storage.file.get_relative_path()
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
@@ -272,7 +274,7 @@ function module_code(library_namespace) {
 		}
 
 		var href = library_namespace.simplify_path(uri), matched = href.match(
-		// [ all, 1: protocol, 2: , 3: href, 4: path, ]
+		// [ all, 1: `protocol:`, 2: '//', 3: href, 4: path ]
 		/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)?(\S*)$/i
 		//
 		), path;
@@ -284,6 +286,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('parse [' + uri + ']: '
 				+ matched.join('<br />\n'), 2);
 
+		// console.trace([ matched, base_uri, options ]);
 		uri = Object.assign(this,
 		//
 		base_uri && URI(base_uri) || options.as_URL
@@ -300,11 +303,6 @@ function module_code(library_namespace) {
 		});
 		// uri.uri = href;
 
-		if (matched[1])
-			uri.protocol = matched[1];
-		// uri._protocol = uri.protocol.slice(0, -1).toLowerCase();
-		// library_namespace.debug('protocol [' + uri._protocol + ']', 2);
-
 		/**
 		 * ** filename 可能歸至m[4]!<br />
 		 * 判斷準則:<br />
@@ -315,6 +313,18 @@ function module_code(library_namespace) {
 		 */
 		href = matched[3] || '';
 		path = matched[4] || '';
+		if (/(?:\w+\.)+(?:com|org)$/i.test(href)) {
+			// e.g., URI("www.example.com")
+			path = path || '/';
+			if (uri.protocol === 'file:')
+				uri.protocol = 'https:';
+		}
+
+		if (matched[1])
+			uri.protocol = matched[1];
+		// uri._protocol = uri.protocol.slice(0, -1).toLowerCase();
+		// library_namespace.debug('protocol [' + uri._protocol + ']', 2);
+
 		if (href && !/^\/[A-Z]:$/i.test(href)
 				&& (path.charAt(0) === '/' || /[@:]/.test(href))) {
 			// 處理 username:password
@@ -332,22 +342,23 @@ function module_code(library_namespace) {
 				uri.username = '';
 			}
 
-			matched = href.match(/^([^\/#?&\s:]+)(:(\d{1,5}))?$/);
+			// [ all, host, (integer)port ]
+			matched = href.match(/^([^\/#?&\s:]+)(?::(\d{1,5}))?$/);
 			if (!matched) {
-				return;
+				throw new Error('Invalid host: ' + href);
 			}
 
 			// 處理 host
 			// host=hostname:port
 			uri.hostname = uri.host = matched[1];
-			if (matched[3]
-					&& matched[3] != port_of_protocol[uri.protocol.slice(0, -1)
+			if (matched[2]
+					&& matched[2] != port_of_protocol[uri.protocol.slice(0, -1)
 							.toLowerCase()]) {
-				// uri[KEY_port] = parseInt(matched[3], 10);
-				uri.port = String(parseInt(matched[3], 10));
+				// uri[KEY_port] = parseInt(matched[2], 10);
+				uri.port = String(parseInt(matched[2], 10));
 				uri.host += ':' + uri.port;
 			} else if (false) {
-				uri[KEY_port] = parseInt(matched[3]
+				uri[KEY_port] = parseInt(matched[2]
 						|| port_of_protocol[uri.protocol.slice(0, -1)
 								.toLowerCase()]);
 			}
@@ -359,18 +370,23 @@ function module_code(library_namespace) {
 			path = href + path;
 			href = '';
 		}
-		if (!href)
-			library_namespace.warn('將 [' + path + '] 當作 pathname!');
-		if (library_namespace.is_WWW())
+		if (!href) {
+			library_namespace.warn('URI: 將 [' + path + '] 當作 pathname!');
+			// console.trace(path);
+		}
+		if (library_namespace.is_WWW()) {
 			library_namespace.debug('local file: [' + location.pathname + ']',
-					2);
+					2, 'URI');
+		}
 
 		// NG: /^([^%]+|%[a-f\d]{2})+$/
 		// prevent catastrophic backtracking. e.g., '.'.repeat(300)+'%'
 		// Thanks for James Davis
-		if (!/^(?:[^%]|%[a-f\d]{2})+$/i.test(path))
-			library_namespace.warn('encoding error: [' + path + ']');
+		if (path && !/^(?:[^%]|%[a-f\d]{2})+$/i.test(path)) {
+			library_namespace.warn('URI: encoding error: [' + path + ']');
+		}
 
+		// console.trace([ href, path, uri ]);
 		library_namespace.debug('parse path: [' + path + ']', 2);
 		if (path && (matched = path
 		//
@@ -416,15 +432,19 @@ function module_code(library_namespace) {
 				uri.search_params = new Search_parameters(matched[5], _options);
 			}
 		} else {
-			if (!href)
-				return;
-			uri.directory_path = uri.pathname.replace(/[^\/]+$/, '');
-			// uri.path = uri.pathname;
+			if (!href) {
+				throw new Error('Invalid URI: ' + uri);
+			}
+			if (uri.pathname) {
+				uri.directory_path = uri.pathname.replace(/[^\/]+$/, '');
+				// uri.path = uri.pathname;
+			}
 		}
 		library_namespace.debug('path: [' + uri.path + ']', 2);
 
 		library_namespace.debug('Generate .href of URI by URI_toString()', 2);
 		uri.toString();
+		// console.trace(uri);
 
 		library_namespace.debug('href: [' + uri.href + ']', 2);
 		// return uri;

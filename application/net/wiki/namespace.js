@@ -2846,10 +2846,14 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	var API_path_separator = '+';
 	// @inner
 	function extract_path_from_options(options) {
+		if (Array.isArray(options))
+			options = options.join(API_path_separator);
 		if (typeof options === 'string')
 			return options;
+
 		if (options.path)
 			return options.path;
 		if (Array.isArray(options)) {
@@ -2861,10 +2865,11 @@ function module_code(library_namespace) {
 		var path = options.action;
 		if (!path)
 			return;
+
 		// for action=query&prop=... , list=... , meta=...
 		[ 'prop', 'meta', 'list' ].some(function(submodule) {
 			if (options[submodule]) {
-				path += '+' + options[submodule];
+				path += API_path_separator + options[submodule];
 				return true;
 			}
 		});
@@ -2914,8 +2919,7 @@ function module_code(library_namespace) {
 		return true;
 	}
 
-	wiki_API.need_get_API_parameters = need_get_API_parameters;
-
+	wiki_API.need_get_API_parameters = need_get_API_parameters
 	if (false) {
 		// usage:
 		CeL.wiki.get_API_parameters('query+revisions', {
@@ -2930,6 +2934,7 @@ function module_code(library_namespace) {
 	function get_API_parameters(path, options, callback) {
 		path = extract_path_from_options(path);
 		// console.trace([ path, options ]);
+		// https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo
 		wiki_API.query([ , {
 			action : 'paraminfo',
 			// helpformat : 'wikitext',
@@ -3002,22 +3007,61 @@ function module_code(library_namespace) {
 				}
 			}
 			var value = extract_from[key];
-			if (value || value === 0
+			if (!value && value !== 0
 			// e.g., .text === ''
-			|| value === '') {
-				if (typeof value === 'object' && !Array.isArray(value)) {
-					// Do not includes {Object}value
-					library_namespace.debug('Invalid value? ' + value);
-				}
-				if (!_key) {
-					_key = key;
-				}
-				if (limited_parameters && limited_parameters[_key].deprecated) {
+			&& value !== '') {
+				return;
+			}
+
+			if (typeof value === 'object' && !Array.isArray(value)) {
+				// Do not includes {Object}value
+				library_namespace.debug('Invalid value? ' + value);
+			}
+			if (!_key) {
+				_key = key;
+			}
+			var information = limited_parameters && limited_parameters[_key];
+			if (information) {
+				// 基本的檢測。
+				if ('deprecated' in information) {
 					library_namespace.warn('Using deprecated parameter: '
 							+ path + ':' + _key);
 				}
-				extract_to[_key] = value;
+
+				switch (information.type) {
+				case 'string':
+					// value = String(value);
+					break;
+				case 'boolean':
+					if (!value) {
+						// return;
+					} else {
+						// value = 1;
+					}
+					break;
+				case 'limit':
+					if (value === 'max')
+						break;
+				case 'integer':
+					if (!library_namespace.is_digits(value)) {
+						library_namespace.warn('Should be a integer: ' + _key
+								+ '=' + value);
+					}
+					break;
+				case 'timestamp':
+					break;
+				case 'user':
+					break;
+				case 'expiry':
+					break;
+				default:
+					if (('multi' in information)
+							&& Array.isArray(information.type)) {
+						// TODO
+					}
+				}
 			}
+			extract_to[_key] = value;
 		});
 		delete extract_to[''];
 		delete extract_to[KEY_SESSION];

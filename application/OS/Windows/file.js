@@ -2251,7 +2251,7 @@ function show_path(path) {
 				+ path;
 
 	working_path = show_path.last_path = path = library_namespace
-			.reduce_path(path);
+			.simplify_path(path);
 	library_namespace.debug('path: [' + path + ']', 2, 'show_path');
 
 	var path_array = path.split(library_namespace.env.path_separator),

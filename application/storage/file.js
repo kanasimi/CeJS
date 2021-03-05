@@ -52,74 +52,7 @@ function module_code(library_namespace) {
 	// ---------------------------------------------------------------
 	// path處理
 
-	/**
-	 * 減縮 path. 尚未處理：: * ?
-	 * 
-	 * @example <code>
-	 * reduce_path('http://hostname/../aaa/bbb/../ccc/../ddd',1);
-	 * </code>
-	 * 
-	 * @param {String}
-	 *            path
-	 * @param {Number}
-	 *            mode =1: 去除檔名，只餘目錄。如輸入 http://hostname/aaa/bbb/ccc，得到
-	 *            http://hostname/aaa/bbb/
-	 * @returns
-	 */
-	function reduce_path(path, mode) {
-		library_namespace.debug('[' + typeof path + '] [' + path + ']', 2,
-				'reduce_path');
-		if (!(path = '' + path))
-			return;
-
-		var t;
-		if (t = path.match(/^"([^"]*)/))
-			path = t[1];
-		if (t = path.match(/(.*)\|<>/))
-			path = t[1];
-
-		// Windows environment variables 在真實 path 前,尚未測試！
-		if (typeof WinEnvironment === 'object' && (t = path.match(/%(.+)%/g)))
-			for (i in t)
-				if (WinEnvironment[i])
-					path.replace(new RegExp(i, "ig"), WinEnvironment[i]);
-
-		var path_separator = library_namespace.env.path_separator,
-		//
-		path_separator_pattern = library_namespace.env.path_separator_pattern;
-
-		path = path.replace(new RegExp(path_separator === '/' ? '\\\\' : '/',
-				"g"), path_separator);
-
-		if (mode && (t = path.lastIndexOf(path_separator)) !== -1
-				&& t + 1 !== path.length)
-			// 去除檔名：假如輸入sss/ddd，會把ddd除去！需輸入sss/ddd/以標示ddd為目錄.
-			path = path.slice(0, t + 1);
-
-		// \\→\，未考慮到'\\pictures\scenic\canyon.bmp'的情況
-		if (false)
-			path = path.replace(
-					new RegExp(path_separator + path_separator, 'g'),
-					path_separator);
-
-		path = path
-		// .\→''
-		.replace(new RegExp('^(\\.' + path_separator_pattern + ')+'), '')
-		// \.\→\
-		.replace(
-				new RegExp(path_separator_pattern + '(\\.'
-						+ path_separator_pattern + ')+', 'g'), path_separator)
-		// xx\..\→''
-		.replace(
-				new RegExp('[^.' + path_separator_pattern + ']+'
-						+ path_separator_pattern + '\\.\\.'
-						+ path_separator_pattern, 'g'), '');
-		library_namespace.debug('→ [' + path + ']', 2, 'reduce_path');
-		return path;
-	}
-
-	_// JSDT:_module_
-	.reduce_path = reduce_path;
+	// @see CeL.simplify_path()
 
 	// 去除hostname等，如輸入http://hostname/aaa/bbb/ccc得到aaa/bbb/ccc/
 	// 假如輸入的格式不正確，可能得出不預期的回應值！
@@ -266,7 +199,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @since 2003/10/1 15:57
 	 * @since 2011/8/28 00:16:40
-	 * @requres reduce_path,getPathOnly,library_namespace.env.path_separator,library_namespace.env.path_separator_pattern
+	 * @requres getPathOnly,library_namespace.env.path_separator,library_namespace.env.path_separator_pattern
 	 * @_memberOf _module_
 	 */
 	get_relative_path = function(base_path, working_path, get_full_path) {
@@ -278,8 +211,7 @@ function module_code(library_namespace) {
 		if (!working_path)
 			working_path = library_namespace.get_script_base_path();
 		else
-			// if (reduce_path)
-			working_path = reduce_path(working_path);
+			working_path = library_namespace.simplify_path(working_path);
 
 		if (!working_path)
 			return;
@@ -291,8 +223,7 @@ function module_code(library_namespace) {
 									// TODO: path_separator_candidates
 									: '').replace(/[^\/\\]+$/, '');
 		else
-			// if (reduce_path)
-			base_path = reduce_path(base_path);
+			base_path = library_namespace.simplify_path(base_path);
 
 		if (!base_path
 		// base_path 需要是絕對路徑
@@ -458,12 +389,13 @@ function module_code(library_namespace) {
 		return p;
 	}
 
-	// get_file_path[generateCode.dLK]='reduce_path,is_absolute_path,getPathOnly,get_relative_path';
+	// get_file_path[generateCode.dLK]='is_absolute_path,getPathOnly,get_relative_path';
 	/**
 	 * 傳回包括檔名之絕對/相對路徑，假如是資料夾，也會回傳資料夾路徑。可包含'.','..'等 the return value include ? #
 	 * of URI<br />
 	 * 在Win/DOS下輸入'\'..會加上base driver。<br />
-	 * 若只要相對路徑，可用reduce_path()。取得如'..\out'的絕對路徑可用 get_file_path('../out',1)
+	 * 若只要相對路徑，可用 library_namespace.simplify_path()。取得如'..\out'的絕對路徑可用
+	 * get_file_path('../out',1)
 	 * 
 	 * @param {String}path
 	 *            路徑
@@ -492,13 +424,14 @@ function module_code(library_namespace) {
 						/^(\\\\|[A-Z]:)/i)))
 			path = matched[1] + path;
 
-		path = reduce_path(path);
+		path = library_namespace.simplify_path(path);
 		if (mode === 1) {
 			// 當為相對路徑時前置 base path。
 			if (!is_absolute_path(path))
-				path = reduce_path((base_path ? getPathOnly(base_path)
-						: get_relative_path())
-						+ path);
+				path = library_namespace
+						.simplify_path((base_path ? getPathOnly(base_path)
+								: get_relative_path())
+								+ path);
 		} else if (mode === 2 && is_absolute_path(path))
 			path = get_relative_path(base_path, path, 1);
 
