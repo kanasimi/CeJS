@@ -3073,17 +3073,17 @@ function module_code(library_namespace) {
 	// https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API
 	// TODO: fetch 預設上不傳送或接收任何 cookies，如果網站依賴 session 會導致請求回傳未經認證，需要使用 cookies
 	// 必須額外設定 credentials。
-	/* async */function fetch_node(input, init) {
+	/* async */function node_fetch(input, init) {
 		// TODO: input is a Request object.
 
-		var url = node_url.parse(input), options = library_namespace
+		var url = library_namespace.URI(input), options = library_namespace
 				.new_options(init);
 
 		function executor(resolve, reject) {
 			function callback(response) {
 				if ((response.statusCode / 100 | 0) === 3
 						&& response.headers.location
-						&& response.headers.location !== url.format()) {
+						&& response.headers.location !== url.toString()) {
 					try {
 						// request.abort();
 						request.destroy();
@@ -3095,12 +3095,13 @@ function module_code(library_namespace) {
 						initial_URL : options.initial_URL || input
 					});
 
-					url = new URL(response.headers.location, url);
+					url = new library_namespace.URI(response.headers.location,
+							url);
 					library_namespace.debug({
 						T : [ '%1 Redirecting to [%2] ← [%3]',
-								response.statusCode, url, input ]
+								response.statusCode, url.toString(), input ]
 					}, 1, 'fetch');
-					fetch(url, options);
+					node_fetch(url, options);
 					return;
 				}
 
@@ -3111,16 +3112,14 @@ function module_code(library_namespace) {
 					length += chunk.length;
 					library_namespace.debug('receive BODY '
 					//
-					+ chunk.length + '/' + length + ': ' + url.format(), 4,
-							'fetch');
+					+ chunk.length + '/' + length + ': ' + url, 4, 'fetch');
 					data.push(chunk);
 				});
 
 				response.on('end', function() {
-					library_namespace.debug('end(): ' + url.format(), 2,
-							'fetch');
+					library_namespace.debug('end(): ' + url, 2, 'fetch');
 
-					// console.log('No more data in response: ' + url.format());
+					// console.log('No more data in response: ' + url);
 					// it is faster to provide the length explicitly.
 					data = Buffer.concat(data, length);
 
@@ -3133,7 +3132,7 @@ function module_code(library_namespace) {
 						statusText : response.statusMessage,
 						ok : (response.statusCode / 100 | 0) === 2,
 						redirected : !!options.redirected,
-						useFinalURL : url.format(),
+						useFinalURL : url.toString(),
 
 						_buffer : data,
 
@@ -3165,8 +3164,8 @@ function module_code(library_namespace) {
 
 			// https://nodejs.org/api/http.html
 			var request = url.protocol === 'http:' ? node_http.request(url
-					.format(), options, callback) : node_https.request(url
-					.format(), options, callback);
+					.toString(), options, callback) : node_https.request(url
+					.toString(), options, callback);
 			request.on('error', reject);
 			if (options.body)
 				request.write(options.body);
@@ -3177,7 +3176,7 @@ function module_code(library_namespace) {
 	}
 
 	if (is_nodejs) {
-		_.fetch = fetch_node;
+		_.fetch = node_fetch;
 	}
 
 	// ---------------------------------------------------------------------//

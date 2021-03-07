@@ -1155,16 +1155,13 @@ function module_code(library_namespace) {
 			options.file_text_updater = options.file_text_updater
 					.to_file_text_updater();
 		}
-		var session = wiki_API.session_of_options(options);
 		var file_path = 'File:' + data.filename;
 		// library_namespace.info('upload_callback: options.file_text_updater');
 		// console.log(JSON.stringify(data));
 		// console.log('has session: ' + !!session);
 		// console.log(file_path);
 		// console.trace(options);
-		wiki_API.edit(
-				session && session.API_URL ? [ session.API_URL, file_path ]
-						: file_path, options.file_text_updater, options.token,
+		wiki_API.edit(file_path, options.file_text_updater, options.token,
 				options, callback);
 	}
 
