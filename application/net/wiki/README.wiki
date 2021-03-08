@@ -2,6 +2,22 @@
 = CeJS MediaWiki module =
 MediaWiki 自動化作業程式庫，主要用於編寫[[維基百科:機器人]]。
 
+
+== Usage in [mediawiki user script](Manual:Interface/JavaScript) ==
+<syntaxhighlight lang="javascript" start="1">
+if (!window.CeL) {
+	window.CeL = { initializer() { CeL.run('application.net.wiki', initialization); } };
+	mw.loader.load('https://kanasimi.github.io/CeJS/ce.js');
+}
+function initialization() {
+	const parsed = CeL.wiki.parser('{{tl|t}}');
+	parsed.each('template', token => console.log(token.name));
+}
+</syntaxhighlight>
+Also refer to [https://kanasimi.github.io/CeJS/_test%20suite/wikitext_parser.html the wikitext parser examples].
+
+
+== Operation mechanism 運作機制 ==
 Main initial point: [[../wiki.js]]
 
 ; Essential 必要: [[../wiki.js]] → [[namespace.js]] → [[parser.js]], [[query.js]], [[page.js]], [[Flow.js]], [[list.js]], [[edit.js]], [[task.js]]
@@ -17,6 +33,7 @@ const util = require('util'); new util.promisify(CeL.wiki)(...)
 * [[/_test suite/test.js|test.js]]
 * [https://kanasimi.github.io/CeJS/_test%20suite/wikitext_parser.html Wikitext parser examples. Wikitext 解析器使用例子]
 
+
 == History ==
 {| class="wikitable"
 |+ History 沿革
@@ -30,6 +47,7 @@ const util = require('util'); new util.promisify(CeL.wiki)(...)
 |-
 | 2020/5/24 || 分拆 wiki.js。基本功能僅需要 `CeL.run('application.net.wiki')`。
 |}
+
 
 == See also ==
 * [https://www.mediawiki.org/w/api.php MediaWiki API help]

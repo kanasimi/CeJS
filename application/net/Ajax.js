@@ -3076,7 +3076,7 @@ function module_code(library_namespace) {
 	/* async */function node_fetch(input, init) {
 		// TODO: input is a Request object.
 
-		var url = library_namespace.URI(input), options = library_namespace
+		var url = input instanceof URL ? input : new URL(input.toString()), options = library_namespace
 				.new_options(init);
 
 		function executor(resolve, reject) {
@@ -3095,8 +3095,7 @@ function module_code(library_namespace) {
 						initial_URL : options.initial_URL || input
 					});
 
-					url = new library_namespace.URI(response.headers.location,
-							url);
+					url = new URL(response.headers.location, url);
 					library_namespace.debug({
 						T : [ '%1 Redirecting to [%2] ← [%3]',
 								response.statusCode, url.toString(), input ]

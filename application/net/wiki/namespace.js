@@ -2826,18 +2826,19 @@ function module_code(library_namespace) {
 		var session = wiki_API.session_of_options(options)
 				|| wiki_API.is_wiki_API(this) && this;
 
-		if (session) {
-			// normalize template name
-			template_name = session.redirect_target_of(template_name, options);
-		}
-
 		if (token.type === 'transclusion') {
 			// treat token as template token
 			// assert: token.name is normalized
 			token = token.name;
 		}
+
 		if (session) {
+			// normalize template name
+			template_name = session.redirect_target_of(template_name, options);
 			token = session.redirect_target_of(token, options);
+		} else {
+			template_name = wiki_API.normalize_title(template_name, options);
+			token = wiki_API.normalize_title(token, options);
 		}
 
 		// console.trace([ template_name, token ]);
