@@ -310,7 +310,7 @@ function module_code(library_namespace) {
 					wiki_API_edit(title, text, token, options, callback,
 							timestamp);
 				}
-			}, _options);
+			}, _options || options);
 			return;
 		}
 
@@ -1158,7 +1158,6 @@ function module_code(library_namespace) {
 		var file_path = 'File:' + data.filename;
 		// library_namespace.info('upload_callback: options.file_text_updater');
 		// console.log(JSON.stringify(data));
-		// console.log('has session: ' + !!session);
 		// console.log(file_path);
 		// console.trace(options);
 		wiki_API.edit(file_path, options.file_text_updater, options.token,

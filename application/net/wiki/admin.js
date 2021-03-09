@@ -145,7 +145,6 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var session = options[KEY_SESSION];
 		// TODO: 若是頁面不存在/已刪除，那就直接跳出。
 
 		if (action === 'move') {
@@ -153,13 +152,9 @@ function module_code(library_namespace) {
 					+ ' → ' + parameters.to, 1, 'wiki_operator.move');
 		}
 
-		var _action = 'action=' + action;
-		var API_URL = session && session.API_URL;
-		if (API_URL) {
-			_action = [ API_URL, action ];
-		}
-
-		wiki_API.query(_action, function(response, error) {
+		wiki_API.query({
+			action : action
+		}, function(response, error) {
 			// console.log(JSON.stringify(response));
 			error = error || response && response.error;
 			if (error) {
@@ -167,7 +162,7 @@ function module_code(library_namespace) {
 			} else {
 				callback(response[action]);
 			}
-		}, parameters, session);
+		}, parameters, options);
 	}
 
 	// ================================================================================================================
@@ -265,7 +260,7 @@ function module_code(library_namespace) {
 	// rollback 僅能快速撤銷/回退/還原某一頁面最新版本之作者(最後一位使用者)一系列所有編輯至另一作者的編輯
 	// The rollback revision will be marked as minor.
 	wiki_API.rollback = function(options, callback) {
-		var session = options[KEY_SESSION];
+		var session = wiki_API.session_of_options(options);
 
 		if (session && !session.token.rollbacktoken) {
 			session.get_token(function() {
@@ -339,18 +334,15 @@ function module_code(library_namespace) {
 			parameters.markbot = options.bot;
 		}
 
-		var action = 'action=rollback';
-		if (session && session.API_URL) {
-			action = [ session.API_URL, action ];
-		}
-
 		/**
 		 * response: <code>
 		{"rollback":{"title":"title","pageid":1,"summary":"","revid":9,"old_revid":7,"last_revid":1,"messageHtml":"<p></p>"}}
 		{"servedby":"mw1190","error":{"code":"badtoken","info":"Invalid token","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
 		 * </code>
 		 */
-		wiki_API.query(action, function(response) {
+		wiki_API.query({
+			action : 'rollback'
+		}, function(response) {
 			var error = response && response.error;
 			if (error) {
 				callback(response, error);
@@ -361,7 +353,7 @@ function module_code(library_namespace) {
 				// 如果回滾不會改變的頁面，沒有新修訂而成。在這種情況下，revid將等於old_revid。
 				callback(response.rollback);
 			}
-		}, parameters, session);
+		}, parameters, options);
 	};
 
 	// ----------------------------------------------------
