@@ -2986,6 +2986,7 @@ function module_code(library_namespace) {
 				|| wiki_API.session_of_options(extract_from);
 		if (session && path) {
 			limited_parameters = session.API_parameters[path];
+			console.trace(limited_parameters);
 		} else {
 			library_namespace.warn('No session or no path settled!');
 			console.trace([ session, path, extract_from ]);
@@ -3016,7 +3017,16 @@ function module_code(library_namespace) {
 
 			if (typeof value === 'object' && !Array.isArray(value)) {
 				// Do not includes {Object}value
-				library_namespace.debug('Invalid value? ' + value);
+				// e.g., key: page_to_edit
+				try {
+					library_namespace
+							.warn('extract_parameters: Invalid value of ['
+									+ key + ']? ' + value);
+				} catch (e) {
+					library_namespace
+							.warn('extract_parameters: Invalid value of ['
+									+ key + ']?');
+				}
 			}
 			if (!_key) {
 				_key = key;
