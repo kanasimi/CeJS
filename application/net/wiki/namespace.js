@@ -2966,6 +2966,8 @@ function module_code(library_namespace) {
 					else
 						parameters[key] = parameter_data;
 				});
+				library_namespace.info('get_API_parameters: Set path=' + path);
+				console.trace(Object.keys(parameters));
 			}
 			if (callback)
 				callback(modules, null, data);
@@ -2986,7 +2988,7 @@ function module_code(library_namespace) {
 				|| wiki_API.session_of_options(extract_from);
 		if (session && path) {
 			limited_parameters = session.API_parameters[path];
-			console.trace(limited_parameters);
+			// console.trace(limited_parameters);
 		} else {
 			library_namespace.warn('No session or no path settled!');
 			console.trace([ session, path, extract_from ]);
