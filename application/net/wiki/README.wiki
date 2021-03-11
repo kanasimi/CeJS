@@ -3,17 +3,19 @@
 MediaWiki 自動化作業程式庫，主要用於編寫[[維基百科:機器人]]。
 
 
-== Usage in [mediawiki user script](Manual:Interface/JavaScript) ==
+== Usage in [mediawiki user script](https://www.mediawiki.org/wiki/Manual:Interface/JavaScript) ==
 <code lang="javascript" start="1">
 if (!window.CeL) {
-	window.CeL = { initializer() { CeL.run('application.net.wiki', initialization); } };
+	window.CeL = { initializer: function() { CeL.run('application.net.wiki', initialization); } };
 	mw.loader.load('https://kanasimi.github.io/CeJS/ce.js');
 }
 function initialization() {
 	const parsed = CeL.wiki.parser('{{tl|t}}');
-	parsed.each('template', token => console.log(token.name));
+	parsed.each('template', function(token) { console.log(token.name); });
 }
 </code>
+(At 2021, The JavaScript parser of MediaWiki loader can not read ECMAScript 2016 syntax.)
+
 Also refer to [https://kanasimi.github.io/CeJS/_test%20suite/wikitext_parser.html the wikitext parser examples].
 
 

@@ -183,9 +183,11 @@ function module_code(library_namespace) {
 			return false;
 		}
 
+		var API_URL = value[0];
+
 		if (type === true) {
 			// type === true: simple test, do not test more.
-			return true;
+			return !API_URL || typeof API_URL === 'string';
 		}
 
 		var title = value[1];
@@ -204,8 +206,6 @@ function module_code(library_namespace) {
 					'is_api_and_title');
 			return false;
 		}
-
-		var API_URL = value[0];
 
 		// test API_URL: {String}API_URL/language
 		if (!API_URL) {
@@ -2850,8 +2850,15 @@ function module_code(library_namespace) {
 	var API_path_separator = '+';
 	// @inner
 	function extract_path_from_options(options) {
-		if (Array.isArray(options))
-			options = options.join(API_path_separator);
+		if (Array.isArray(options)) {
+			if (is_api_and_title(options, true)) {
+				// e.g., [ 'ja', {action:'edit'} ]
+				options = options[1];
+			} else {
+				// e.g., [ 'query', 'revisions' ]
+				options = options.join(API_path_separator);
+			}
+		}
 		if (typeof options === 'string')
 			return options;
 
@@ -2966,8 +2973,11 @@ function module_code(library_namespace) {
 					else
 						parameters[key] = parameter_data;
 				});
-				library_namespace.info('get_API_parameters: Set path=' + path);
-				console.trace(Object.keys(parameters));
+				library_namespace.info(
+				//
+				'get_API_parameters: Set session.API_parameters for path='
+						+ path);
+				// console.trace(Object.keys(parameters));
 			}
 			if (callback)
 				callback(modules, null, data);
@@ -2988,6 +2998,8 @@ function module_code(library_namespace) {
 				|| wiki_API.session_of_options(extract_from);
 		if (session && path) {
 			limited_parameters = session.API_parameters[path];
+			if (!limited_parameters)
+				library_namespace.error('No API parameters for: ' + path);
 			// console.trace(limited_parameters);
 		} else {
 			library_namespace.warn('No session or no path settled!');
@@ -3020,6 +3032,7 @@ function module_code(library_namespace) {
 			if (typeof value === 'object' && !Array.isArray(value)) {
 				// Do not includes {Object}value
 				// e.g., key: page_to_edit
+				// console.trace(limited_parameters);
 				try {
 					library_namespace
 							.warn('extract_parameters: Invalid value of ['
