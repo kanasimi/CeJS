@@ -84,7 +84,7 @@ function module_code(library_namespace) {
 		 * 
 		 * @see function process_images() @ CeL.application.net.work_crawler.chapter
 		 * 
-		 * 若`image_data.file`不存在，將會檢核所有可接受的圖片類別(.acceptable_types)。
+		 * 若`image_data.file`不存在，將會檢核所有可接受的圖片類別副檔名(.acceptable_types)。
 		 * 每張圖片都要檢核所有可接受的圖片類別，會加大硬碟讀取負擔。 會用到 .overwrite_old_file 這個選項的，應該都是需要提報
 		 * issue 的，因此這個選項不會列出來。麻煩請在個別網站遇到此情況時提報 issue，列出作品名稱以及圖片類別，以供這邊確認圖片類別。
 		 * 只要存在完整無損害的預設圖片類別或是可接受的圖片類別，就直接跳出，不再嘗試下載這張圖片。否則會重新下載圖片。

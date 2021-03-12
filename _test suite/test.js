@@ -3400,6 +3400,12 @@ function test_wiki() {
 		assert(['{{t|k =1| v=4|r = 1}}', token.toString()], 'wiki.parse.replace_parameter: #16-2');
 		token = CeL.wiki.parse('{{t|p<!-- = -->=v}}');
 		assert(['{{t|p<!-- = -->=V}}', CeL.wiki.parse.replace_parameter(token, { p: 'V' }, 'value_only') && token.toString()], 'wiki.parse.replace_parameter: #17');
+		var KEY_remove_parameter = CeL.wiki.parse.replace_parameter.KEY_remove_parameter;
+		token = CeL.wiki.parse('{{t|a=1|b=2|1|2|3}}');
+		assert(['{{t|a=1|b=2|1||3}}', CeL.wiki.parse.replace_parameter(token, 2, KEY_remove_parameter) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #1');
+		assert(['{{t|a=1|b=2|1}}', CeL.wiki.parse.replace_parameter(token, 3, KEY_remove_parameter) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #2');
+		assert(['{{t|b=2|1}}', CeL.wiki.parse.replace_parameter(token, 'a', KEY_remove_parameter) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #3');
+		assert(['{{t|1}}', CeL.wiki.parse.replace_parameter(token, {b:KEY_remove_parameter}, {parameter_name_only:true}) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #4');
 
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{#parserfunctions:}} #1');

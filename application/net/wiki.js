@@ -267,6 +267,12 @@ function module_code(library_namespace) {
 		is_wiki_API : is_wiki_API
 	});
 
+	if (library_namespace.is_WWW(true) && typeof mw === 'object' && mw
+			&& typeof mw.config === 'object'
+			&& typeof mw.config.get === 'function') {
+		wiki_API.mw_web_session = true;
+	}
+
 	// 等執行再包含入必須的模組。
 	this.finish = function(name_space, waiting) {
 		var sub_modules = [ 'namespace', 'parser', 'query', 'page', 'Flow',
@@ -304,9 +310,22 @@ function module_code(library_namespace) {
 		var module_name_prefix = this.id + '.';
 		library_namespace.run(sub_modules.map(function(module) {
 			return module_name_prefix + module;
-		}),
-		// function() { library_namespace.info('wiki_API: Loaded.'); },
-		waiting);
+		}), function() {
+			if (wiki_API.mw_web_session) {
+				wiki_API.mw_web_session = new wiki_API(null, null, mw.config
+						.get('wgContentLanguage'));
+				// fill tokens
+				for ( var token_name in mw.user.tokens.values) {
+					wiki_API.mw_web_session.token[
+					// 'csrfToken' → 'csrftoken'
+					token_name.toLowerCase()]
+					//
+					= mw.user.tokens.values[token_name];
+				}
+				// TODO: fill cookies
+			}
+			library_namespace.debug('All modules loaded.', 1, 'wiki_API');
+		}, waiting);
 		return true;
 	};
 

@@ -2311,7 +2311,7 @@ function module_code(library_namespace) {
 	 * @see `return {...object}` :
 	 *      https://juejin.im/post/5b2a186cf265da596d04a648
 	 */
-	var Object_clone = function clone(object, deep) {
+	var Object_clone = function clone(object, deep, copy_to) {
 		if (!object || typeof object !== 'object') {
 			// 純量。
 			return object;
@@ -2331,12 +2331,12 @@ function module_code(library_namespace) {
 			return JSON.parse(JSON.stringify(object));
 		}
 
-		if (clone_Object) {
+		if (clone_Object && !copy_to) {
 			return clone_Object(object);
 		}
 
 		// shallow clone Object.
-		return Object.assign(Object.create(
+		return Object.assign(copy_to || Object.create(
 		// copy prototype
 		Object.getPrototypeOf(object)), object);
 	};

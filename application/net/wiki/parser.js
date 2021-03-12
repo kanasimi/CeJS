@@ -350,18 +350,33 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
+	var KEY_remove_parameter = {
+		remove_parameter : true
+	};
+	replace_parameter.KEY_remove_parameter = KEY_remove_parameter;
+
 	function to_parameter_name_only(parameter_name_pairs) {
 		var config = Object.create(null);
-		Object.keys(parameter_name_pairs).forEach(function(key) {
-			var parameter_name = parameter_name_pairs[key];
-			if (typeof parameter_name === 'string'
+		Object.keys(parameter_name_pairs)
+		//
+		.forEach(function(from_parameter_name) {
+			var to_parameter_name = parameter_name_pairs[from_parameter_name];
+			if (typeof to_parameter_name === 'string'
 			//
-			|| typeof parameter_name === 'number') {
-				config[key] = function(value) {
+			|| typeof to_parameter_name === 'number') {
+				config[from_parameter_name] = function(value) {
 					var config = Object.create(null);
-					config[parameter_name] = value;
+					config[to_parameter_name] = value;
 					return config;
 				};
+			} else if (to_parameter_name === KEY_remove_parameter) {
+				config[from_parameter_name] = to_parameter_name;
+			} else {
+				library_namespace.error(
+				//
+				'to_parameter_name_only: Replace to invalid parameter name: '
+				//
+				+ to_parameter_name);
 			}
 		});
 		return config;
@@ -577,6 +592,22 @@ function module_code(library_namespace) {
 
 		if (replace_to === undefined) {
 			return 0;
+		}
+
+		if (replace_to === KEY_remove_parameter) {
+			if (isNaN(parameter_name)) {
+				// remove the parameter
+				template_token.splice(index, 1);
+				replace_to = parse_wikitext(template_token.toString());
+				Object.clone(replace_to, false, template_token);
+			} else {
+				// For numeral parameter_name, just replace to empty value.
+				template_token[index] = '';
+				// Warning: this will NOT change .index_of , .parameters !
+				while (!template_token[template_token.length - 1])
+					template_token.pop();
+			}
+			return 1;
 		}
 
 		// --------------------------------------

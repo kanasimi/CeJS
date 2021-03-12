@@ -691,6 +691,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String}Wikidata API 可使用之 site name parameter。
 	 * 
+	 * @see mw.config.get('wgWikiID')
+	 *      https://www.mediawiki.org/wiki/ResourceLoader/Core_modules#mediaWiki.config
 	 * @see set_default_language()
 	 * @see [[:en:Help:Interwiki linking#Project titles and shortcuts]],
 	 *      [[:zh:Help:跨语言链接#出現在正文中的連結]]
@@ -2720,7 +2722,11 @@ function module_code(library_namespace) {
 	}
 
 	// 設定預設之語言。 English
-	set_default_language('en');
+	set_default_language(
+	// `wiki_API.mw_web_session` is not initialized at this time.
+	wiki_API.mw_web_session &&
+	// mw.user.options.get('language') === 'zh-tw'
+	mw.config.get('wgContentLanguage') || 'en');
 
 	// [[:en:right-to-left#RTL Wikipedia languages]]
 	// 找出使用了由右至左的文字，可用於{{lang}}模板。
