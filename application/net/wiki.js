@@ -312,8 +312,15 @@ function module_code(library_namespace) {
 			return module_name_prefix + module;
 		}), function() {
 			if (wiki_API.mw_web_session) {
-				wiki_API.mw_web_session = new wiki_API(null, null, mw.config
-						.get('wgContentLanguage'));
+				wiki_API.mw_web_session = new wiki_API({
+					API_URL :
+					// mw.config.get('wgServer')
+					location.origin
+					// https://www.mediawiki.org/wiki/Manual:$wgScriptPath
+					+ mw.config.get('wgScriptPath')
+					// https://www.mediawiki.org/wiki/Manual:Api.php
+					+ '/api.php'
+				});
 				// fill tokens
 				for ( var token_name in mw.user.tokens.values) {
 					wiki_API.mw_web_session.token[
@@ -322,7 +329,7 @@ function module_code(library_namespace) {
 					//
 					= mw.user.tokens.values[token_name];
 				}
-				// TODO: fill cookies
+				// 預設對所有網站會使用相同的 cookie
 			}
 			library_namespace.debug('All modules loaded.', 1, 'wiki_API');
 		}, waiting);
