@@ -2361,8 +2361,8 @@ function module_code(library_namespace) {
 			if (session) {
 				if (session.localStorage_prefix) {
 					// cache siteinfo
-					localStorage.set(session.localStorage_prefix + 'siteinfo',
-							JSON.stringify(siteinfo));
+					localStorage.setItem(session.localStorage_prefix
+							+ 'siteinfo', JSON.stringify(siteinfo));
 				}
 				adapt_site_configurations(session, siteinfo);
 			}
