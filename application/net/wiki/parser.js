@@ -892,7 +892,7 @@ function module_code(library_namespace) {
 				return this;
 			}
 
-			token_name = type.match(/^(Template):(.+)$/g);
+			token_name = type.match(/^(Template):(.+)$/i);
 			if (token_name) {
 				if (session) {
 					token_name = session.redirect_target_of(type);
@@ -1542,7 +1542,7 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {
 			// 各語言 wiki 常用 template-linking templates:
-			// {{Tl}}, {{Tlx}}, {{Tls}}, {{T1}}, ...
+			// {{Tl}}, {{Tlg}}, {{Tlx}}, {{Tls}}, {{T1}}, ...
 			if (/^(?:T[l1n][a-z]{0,3}[23]?)$/.test(token.name)) {
 				token.shift();
 				return token;
