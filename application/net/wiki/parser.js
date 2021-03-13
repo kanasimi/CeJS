@@ -899,7 +899,7 @@ function module_code(library_namespace) {
 					token_name = session.remove_namespace(token_name);
 				} else {
 					// type = token_name[0];
-					token_name = wiki_API.normalize_title(token_name[1]);
+					token_name = wiki_API.normalize_title(token_name[2]);
 				}
 				type = 'transclusion';
 			}
