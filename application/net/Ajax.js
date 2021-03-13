@@ -393,10 +393,12 @@ function module_code(library_namespace) {
 			// Ajax 程式應該考慮到 server 沒有回應時之處置
 
 			if (library_namespace.is_Object(options.head)
-					&& XMLHttp.setRequestHeader)
+			// https://developer.mozilla.org/zh-TW/docs/Web/API/XMLHttpRequest/setRequestHeader
+			&& XMLHttp.setRequestHeader) {
 				Object.keys(options.head).forEach(function(key) {
 					XMLHttp.setRequestHeader(key, options.head[key]);
 				});
+			}
 
 			if (options.mime) {
 				// ignore charset!

@@ -604,6 +604,9 @@ function module_code(library_namespace) {
 	}
 
 	wiki_API_query.get_URL_options = {
+		head : {
+			'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8'
+		},
 		// default error retry 連線逾期/失敗時再重新取得頁面之重試次數。
 		error_retry : 4,
 		// default timeout: 1 minute
