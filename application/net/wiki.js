@@ -321,6 +321,11 @@ function module_code(library_namespace) {
 					// https://www.mediawiki.org/wiki/Manual:Api.php
 					+ '/api.php'
 				});
+				if (typeof localStorage === 'object') {
+					wiki_API.mw_web_session.localStorage_prefix
+					//
+					= 'mw_web_session.';
+				}
 				// fill tokens
 				for ( var token_name in mw.user.tokens.values) {
 					wiki_API.mw_web_session.token[

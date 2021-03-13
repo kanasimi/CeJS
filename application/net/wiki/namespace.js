@@ -2324,20 +2324,29 @@ function module_code(library_namespace) {
 		// + '|functionhooks|variables'
 		}, options);
 
-		var session;
-		if (KEY_SESSION in options) {
-			session = options[KEY_SESSION];
-			delete options[KEY_SESSION];
+		var session = wiki_API.session_of_options(options);
+		if (session.localStorage_prefix) {
+			var siteinfo = localStorage.getItem(session.localStorage_prefix
+					+ 'siteinfo');
+			try {
+				siteinfo = JSON.parse(siteinfo);
+				siteinfo.retrieve_date = new Date(siteinfo.retrieve_date);
+				if (Date.now() - siteinfo.retrieve_date < library_namespace
+						.to_millisecond('1w')) {
+					adapt_site_configurations(session, siteinfo);
+					callback(siteinfo);
+					return;
+				}
+			} catch (e) {
+			}
+			// Get flash siteinfo instead
 		}
 
-		var action = 'action=query',
-		//
-		API_URL = session && session.API_URL;
-		if (API_URL) {
-			action = [ API_URL, action ];
-		}
+		// ------------------------------------------------
 
-		wiki_API.query(action, function(response, error) {
+		wiki_API.query({
+			action : 'query'
+		}, function(response, error) {
 			// console.log(JSON.stringify(response));
 			error = error || response && response.error;
 			if (error) {
@@ -2345,11 +2354,19 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			response = response.query;
+			var siteinfo = Object.assign(response.query, {
+				retrieve_date : new Date,
+				siprop : options.siprop
+			});
 			if (session) {
-				adapt_site_configurations(session, response);
+				if (session.localStorage_prefix) {
+					// cache siteinfo
+					localStorage.set(session.localStorage_prefix + 'siteinfo',
+							JSON.stringify(siteinfo));
+				}
+				adapt_site_configurations(session, siteinfo);
 			}
-			callback(response);
+			callback(siteinfo);
 		}, options, session);
 	}
 
