@@ -330,6 +330,9 @@ function module_code(library_namespace) {
 					= mw.user.tokens.values[token_name];
 				}
 				// 預設對所有網站會使用相同的 cookie
+
+				// @see
+				// https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.Api
 			}
 			library_namespace.debug('All modules loaded.', 1, 'wiki_API');
 		}, waiting);

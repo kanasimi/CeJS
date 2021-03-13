@@ -605,6 +605,7 @@ function module_code(library_namespace) {
 
 	wiki_API_query.get_URL_options = {
 		head : {
+			// for mw_web_session use
 			'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8'
 		},
 		// default error retry 連線逾期/失敗時再重新取得頁面之重試次數。
