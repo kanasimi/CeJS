@@ -761,7 +761,8 @@ function module_code(library_namespace) {
 		// if (!object)
 		object = this;
 		if (!object) {
-			// @ node.js 0.10
+			// @ node.js v0.10.48
+			// https://github.com/kanasimi/CeJS/runs/2105831296?check_suite_focus=true
 			return this;
 		}
 
