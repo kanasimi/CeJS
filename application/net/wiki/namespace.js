@@ -2874,7 +2874,7 @@ function module_code(library_namespace) {
 	wiki_API.has_storage = typeof localStorage === 'object'
 			&& library_namespace.is_type(localStorage, 'Storage');
 	// retrieve_date
-	var KEY_storage_date = 'storage_date';
+	var KEY_storage_date = 'storage date';
 
 	function get_storage(key) {
 		var session = this;
@@ -2915,7 +2915,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	var API_path_separator = '+';
+	var API_path_separator = '+', KEY_API_parameters = 'API parameters';
 	// @inner
 	function extract_path_from_parameters(parameters) {
 		if (Array.isArray(parameters)) {
@@ -2980,7 +2980,8 @@ function module_code(library_namespace) {
 
 		path = extract_path_from_parameters(path);
 		if (wiki_API.has_storage && !session.API_parameters[KEY_storage_date]) {
-			session.API_parameters = session.get_storage('API_parameters')
+			debugger;
+			session.API_parameters = session.get_storage(KEY_API_parameters)
 					|| session.API_parameters;
 			if (false && !session.API_parameters[KEY_storage_date]) {
 				throw new Error('storage error!');
@@ -3061,9 +3062,10 @@ function module_code(library_namespace) {
 					else
 						parameters[key] = parameter_data;
 				});
-				// session.get_storage('API_parameters') @
+				session.set_storage(KEY_API_parameters,
+				// session.get_storage(KEY_API_parameters) @
 				// need_get_API_parameters()
-				session.set_storage('API_parameters', session.API_parameters);
+				session.API_parameters);
 				library_namespace.info('get_API_parameters: Set '
 						+ wiki_API.site_name(session) + ': path=' + path);
 				// console.trace(Object.keys(parameters));

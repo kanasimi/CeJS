@@ -324,7 +324,7 @@ function module_code(library_namespace) {
 				if (wiki_API.has_storage) {
 					wiki_API.mw_web_session.localStorage_prefix
 					//
-					= 'mw_web_session.';
+					= library_namespace.Class + '.mw_web_session.';
 				}
 				// fill tokens
 				for ( var token_name in mw.user.tokens.values) {
