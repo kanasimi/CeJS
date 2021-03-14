@@ -2980,7 +2980,7 @@ function module_code(library_namespace) {
 
 		path = extract_path_from_parameters(path);
 		if (wiki_API.has_storage && !session.API_parameters[KEY_storage_date]) {
-			debugger;
+			// debugger;
 			session.API_parameters = session.get_storage(KEY_API_parameters)
 					|| session.API_parameters;
 			if (false && !session.API_parameters[KEY_storage_date]) {

@@ -214,7 +214,8 @@ function module_code(library_namespace) {
 
 		if (options.localStorage_prefix_key && wiki_API.has_storage) {
 			this.localStorage_prefix = [ library_namespace.Class,
-					wiki_API.site_name(this), options.localStorage_prefix_key ]
+					wiki_API.site_name(this), options.localStorage_prefix_key,
+					'' ]
 			// '.'
 			.join(library_namespace.env.module_name_separator);
 		}
