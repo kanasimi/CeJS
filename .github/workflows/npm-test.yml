@@ -17,7 +17,9 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 0.10.x, 0.12.x, 14.x, 15.x ]
+	    # 0.12.x will cause `Fatal error in ../deps/v8/src/lookup.cc, line 47`
+		# https://github.com/kanasimi/CeJS/runs/2105877783?check_suite_focus=true
+        node-version: [ 0.10.x, 14.x, 15.x ]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
