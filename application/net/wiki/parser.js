@@ -3646,6 +3646,7 @@ function module_code(library_namespace) {
 	 *      https://www.mediawiki.org/wiki/Wikitext
 	 *      https://doc.wikimedia.org/mediawiki-core/master/php/html/Parser_8php.html
 	 *      Parser.php: PHP parser that converts wiki markup to HTML.
+	 *      https://mwparserfromhell.readthedocs.io/
 	 */
 	function parse_wikitext(wikitext, options, queue) {
 		if (!wikitext) {
