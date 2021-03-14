@@ -856,10 +856,14 @@ function module_code(library_namespace) {
 				|| api_URL(language + '.' + family);
 		// console.trace(API_URL);
 
-		var site;
+		var site, project;
 		if (family === 'wikidata') {
 			// wikidatawiki_p
 			site = family + 'wiki';
+		} else if (family === 'wikimedia') {
+			// e.g., https://commons.wikimedia.org/
+			project = API_URL.match(/\/\/([\w]+)\./)[1];
+			site = project + 'wiki';
 		} else {
 			site = language.toLowerCase().replace(/-/g, '_')
 			// e.g., 'zh' + 'wikinews' → 'zhwikinews'
@@ -870,7 +874,7 @@ function module_code(library_namespace) {
 		// console.trace(site);
 		library_namespace.debug(site, 3, 'language_to_site_name');
 
-		var project = language === 'www' ? family
+		project = project || language === 'www' ? family
 				: language in wiki_API.api_URL.wikimedia ? language : null;
 		if (project) {
 			// e.g., get from API_URL
