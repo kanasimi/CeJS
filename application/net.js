@@ -760,6 +760,11 @@ function module_code(library_namespace) {
 	function search_clean_parameters(object) {
 		// if (!object)
 		object = this;
+		if (!object) {
+			// @ node.js 0.10
+			return this;
+		}
+
 		Object.keys(object).forEach(function(key) {
 			if (!ignore_search_properties
 			// Warning: for old environment, may need ignore some keys
