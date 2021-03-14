@@ -394,7 +394,8 @@ function module_code(library_namespace) {
 
 			if (library_namespace.is_Object(options.head)
 			// https://developer.mozilla.org/zh-TW/docs/Web/API/XMLHttpRequest/setRequestHeader
-			&& XMLHttp.setRequestHeader) {
+			// `!!XMLHttp.setRequestHeader` will throw @ HTA (HTML Application)
+			&& ('setRequestHeader' in XMLHttp)) {
 				Object.keys(options.head).forEach(function(key) {
 					XMLHttp.setRequestHeader(key, options.head[key]);
 				});

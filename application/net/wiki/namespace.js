@@ -860,9 +860,12 @@ function module_code(library_namespace) {
 		if (family === 'wikidata') {
 			// wikidatawiki_p
 			site = family + 'wiki';
-		} else if (family === 'wikimedia') {
-			// e.g., https://commons.wikimedia.org/
+		} else if (family === 'wikimedia' && language === 'en') {
+			// e.g., console @ https://commons.wikimedia.org/
 			project = API_URL.match(/\/\/([\w]+)\./)[1];
+			// assert: (project in wiki_API.api_URL.wikimedia)
+
+			// 'commonswiki'
 			site = project + 'wiki';
 		} else {
 			site = language.toLowerCase().replace(/-/g, '_')
@@ -2976,6 +2979,14 @@ function module_code(library_namespace) {
 		}
 
 		path = extract_path_from_parameters(path);
+		if (wiki_API.has_storage && !session.API_parameters[KEY_storage_date]) {
+			session.API_parameters = session.get_storage('API_parameters')
+					|| session.API_parameters;
+			if (false && !session.API_parameters[KEY_storage_date]) {
+				throw new Error('storage error!');
+				session.API_parameters[KEY_storage_date] = new Date;
+			}
+		}
 		if (session.API_parameters[path]) {
 			library_namespace.debug('Needless to get ' + path, 3,
 					'need_get_API_parameters');
@@ -3050,7 +3061,8 @@ function module_code(library_namespace) {
 					else
 						parameters[key] = parameter_data;
 				});
-				// session.get_storage('API_parameters') @ function wiki_API()
+				// session.get_storage('API_parameters') @
+				// need_get_API_parameters()
 				session.set_storage('API_parameters', session.API_parameters);
 				library_namespace.info('get_API_parameters: Set '
 						+ wiki_API.site_name(session) + ': path=' + path);
