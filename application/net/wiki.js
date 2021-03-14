@@ -212,6 +212,13 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (options.localStorage_prefix_key && wiki_API.has_storage) {
+			this.localStorage_prefix = [ library_namespace.Class,
+					wiki_API.site_name(this), options.localStorage_prefix_key ]
+			// '.'
+			.join(library_namespace.env.module_name_separator);
+		}
+
 		// ------------------------------------------------
 		// pre-loading functions
 
@@ -231,7 +238,10 @@ function module_code(library_namespace) {
 		// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
 		// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
 		// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
+		this.run(initialize_wiki_API.bind(this, options));
+	}
 
+	function initialize_wiki_API(options) {
 		this.siteinfo();
 
 		// console.log(options);
@@ -307,7 +317,8 @@ function module_code(library_namespace) {
 		// Essential dependency chain
 		library_namespace.debug('載入操作維基百科的主要功能 / 必要的依賴鍊。', 1, 'wiki_API');
 		// library_namespace.set_debug(2);
-		var module_name_prefix = this.id + '.';
+		var module_name_prefix = this.id
+				+ library_namespace.env.module_name_separator;
 		library_namespace.run(sub_modules.map(function(module) {
 			return module_name_prefix + module;
 		}), function() {
@@ -319,13 +330,9 @@ function module_code(library_namespace) {
 					// https://www.mediawiki.org/wiki/Manual:$wgScriptPath
 					+ mw.config.get('wgScriptPath')
 					// https://www.mediawiki.org/wiki/Manual:Api.php
-					+ '/api.php'
+					+ '/api.php',
+					localStorage_prefix_key : 'mw_web_session'
 				});
-				if (wiki_API.has_storage) {
-					wiki_API.mw_web_session.localStorage_prefix
-					//
-					= library_namespace.Class + '.mw_web_session.';
-				}
 				// fill tokens
 				for ( var token_name in mw.user.tokens.values) {
 					wiki_API.mw_web_session.token[
