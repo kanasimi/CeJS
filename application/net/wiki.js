@@ -220,7 +220,8 @@ function module_code(library_namespace) {
 
 		// .API_parameters[modules.path] = parameter_hash
 		// @see get_API_parameters()
-		this.API_parameters = Object.create(null);
+		this.API_parameters = this.get_storage('API_parameters')
+				|| Object.create(null);
 		// wiki_session.redirects_data[redirect_from] = {String}redirect_to
 		// = main page title without "Template:" prefix
 		// @see CeL.application.net.wiki.task ,
@@ -321,7 +322,7 @@ function module_code(library_namespace) {
 					// https://www.mediawiki.org/wiki/Manual:Api.php
 					+ '/api.php'
 				});
-				if (typeof localStorage === 'object') {
+				if (wiki_API.has_storage) {
 					wiki_API.mw_web_session.localStorage_prefix
 					//
 					= 'mw_web_session.';
