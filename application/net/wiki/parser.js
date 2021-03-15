@@ -239,9 +239,12 @@ function module_code(library_namespace) {
 
 	function is_valid_parameters_value(value) {
 		return value
+		// e.g., .text === ''
 		// String(value) === ''
 		|| value === '' || value === 0;
 	}
+
+	wiki_API.is_valid_parameters_value = is_valid_parameters_value;
 
 	// 僅添加有效的 parameters。基本上等同於 Object.assign()，只是不添加無效值。
 	function set_template_object_parameters(template_object, parameters,
@@ -429,7 +432,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 將 parse_wikitext() 獲得之 template_token 中的指定 parameter 換成 replace_to。
-	 * replace_template_parameter()
+	 * replace_template_parameter(), set_parameter()
 	 * 
 	 * WARNING: 若不改變 parameter name，只變更 value，<br />
 	 * 則應該使用 { value_only: true }，<br />
@@ -439,8 +442,8 @@ function module_code(library_namespace) {
 
 	// replace value only
 	CeL.wiki.parse.replace_parameter(token, {
-		parameter_name : 'replace_to_value',
-		parameter_name_2 : 'replace_to_value_2',
+		parameter_name : 'parameter name 3=replace to value',
+		parameter_name_2 : 'parameter name 4=replace to value_2',
 	}, 'value_only');
 
 	CeL.wiki.parse.replace_parameter(token, {
@@ -3280,7 +3283,7 @@ function module_code(library_namespace) {
 		external_link : function() {
 			// assert: this.length === 1 or 3
 			// assert: this.length === 3
-			// && this[1].trim() === ''&& this[2] === this[2].trimStart()
+			// && this[1].trim() === '' && this[2] === this[2].trimStart()
 			return '[' + this.join('') + ']';
 		},
 		url : function() {

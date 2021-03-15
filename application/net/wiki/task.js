@@ -1547,10 +1547,18 @@ function module_code(library_namespace) {
 			break;
 
 		case 'run':
-			// next[1] : callback
 			if (typeof next[1] === 'function') {
-				// pass arguments
-				next[1].apply(this, next.slice(2));
+				// next[1] : callback
+				if (this.run_after_initializing
+						&& !next[1].is_initializing_process) {
+					library_namespace.debug(
+							'It is now initializing. Push function into queue: '
+									+ next[1], 1);
+					this.run_after_initializing.push(next);
+				} else {
+					// pass arguments
+					next[1].apply(this, next.slice(2));
+				}
 			}
 			this.next();
 			break;
@@ -1582,6 +1590,8 @@ function module_code(library_namespace) {
 	 * NG: ,login
 	 * 
 	 * @type {Array}
+	 * 
+	 * @see function wiki_API_prototype_methods()
 	 */
 	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|register_redirects|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
 			.split('|');

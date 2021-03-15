@@ -3127,9 +3127,7 @@ function module_code(library_namespace) {
 				}
 			}
 			var value = from_parameters[key];
-			if (!value && value !== 0
-			// e.g., .text === ''
-			&& value !== '') {
+			if (!wiki_API.is_valid_parameters_value(value)) {
 				return;
 			}
 

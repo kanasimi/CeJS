@@ -236,24 +236,34 @@ function module_code(library_namespace) {
 		this.redirects_data = Object.create(null);
 		this.template_functions_data = Object.create(null);
 
+		this.run_after_initializing = [];
 		// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
 		// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
 		// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
-		this.run(initialize_wiki_API.bind(this, options));
+		this.run(initialize_wiki_API, options);
 	}
 
 	function initialize_wiki_API(options) {
-		this.siteinfo();
-
-		// console.log(options);
-		if (options.task_configuration_page) {
-			this.adapt_task_configurations(options.task_configuration_page,
-					options.configuration_adapter);
-		}
+		// if (this.API_URL)
+		this.siteinfo(initialization_complete);
 
 		// @see CeL.application.net.wiki.template_functions
 		if (this.load_template_functions)
 			this.load_template_functions();
+
+		// console.trace(options);
+		if (options.task_configuration_page) {
+			this.adapt_task_configurations(options.task_configuration_page,
+					options.configuration_adapter);
+		}
+	}
+	initialize_wiki_API.is_initializing_process = true;
+
+	function initialization_complete() {
+		library_namespace.debug('初始化程序登錄完畢。添加之前登錄的 ' + this.actions.length
+				+ ' 個程序', 1, 'initialization_complete');
+		this.actions.append(this.run_after_initializing);
+		delete this.run_after_initializing;
 	}
 
 	/**
