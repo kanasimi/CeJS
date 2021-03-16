@@ -131,6 +131,11 @@ function module_code(library_namespace) {
 	var NS_Module = wiki_API.namespace('Module');
 	// var NS_Template = wiki_API.namespace('Template');
 
+	var PATTERN_Item_function = /(\W)Item\s*\(arg,arg(?:,arg)?\)/g;
+	PATTERN_Item_function = new RegExp(PATTERN_Item_function.source.replace(
+			/arg/g, /\s*(nil|"(?:\\"|[^"]+)*"|'(?:\\'|[^']+)*')\s*/.source),
+			'g');
+
 	// 汲取 page_data 中所有全局轉換（全頁面語言轉換），並交給 processor 處理。
 	// processor({type: 'item', rule: '', original: ''})
 	// Warning: Will modify `page_data.parsed`
@@ -140,7 +145,25 @@ function module_code(library_namespace) {
 			return conversion_item_list;
 
 		if (page_data.ns === NS_Module) {
-			var object = wiki_API.parse.lua_object(page_data);
+			if (false) {
+				library_namespace.info('parse_conversion_item: '
+						+ page_data.title);
+			}
+			var object = wiki_API.content_of(page_data);
+			if (/function Item\s*\(/.test(object)) {
+				// remove local function Item(o, r)
+				object = object.replace(
+						/(?:\w* )*function Item\s*\([\s\S]+?[\n ]end *\n/, '');
+				// convert `Item('Alec', 'zh-cn:亚历克; zh-tw:亞歷;')`
+				object = object.replace(PATTERN_Item_function, function(item,
+						prefix, original, rule, desc) {
+					return prefix + "{type='item',original=" + original
+							+ ",rule=" + rule + (desc ? ",desc=" + desc : '')
+							+ "}";
+				});
+			}
+			object = wiki_API.parse.lua_object(object);
+
 			object = object && object.content;
 			if (!Array.isArray(object)) {
 				library_namespace
@@ -158,7 +181,8 @@ function module_code(library_namespace) {
 		if (page_data.title
 				&& page_data.title.startsWith('MediaWiki:Conversiontable/')) {
 			// assert: page_data.ns === NS_MediaWiki
-			parsed = wiki_API.parser(page_data.wikitext.replace(
+			parsed = wiki_API.content_of(page_data);
+			parsed = wiki_API.parser(parsed.replace(
 			//
 			/-{([\s\S]+?)}-/g, function(all, inner) {
 				return '-{H|' + inner
@@ -272,13 +296,13 @@ function module_code(library_namespace) {
 		return conversion_item_list;
 	}
 
-	// [[w:zh:Template:NoteTA]]
+	// [[w:zh:Module:NoteTA]]
 	function parse_NoteTA_token(token, options) {
 		if (!token || !(token.name in NoteTA_names)) {
 			return;
 		}
 
-		var convertion = Object.assign([], {
+		var convertion_list = Object.assign([], {
 			// 固定轉換規則
 			// fixed : [],
 
@@ -289,7 +313,7 @@ function module_code(library_namespace) {
 		var index, value = token.parameters.T;
 		if (value) {
 			// 標題轉換
-			convertion.title = value;
+			convertion_list.title = value;
 		}
 
 		// TODO: {{NoteTA}} 使用「1=」可以同時轉換標題和正文？
@@ -297,21 +321,21 @@ function module_code(library_namespace) {
 			value = token.parameters[index];
 			if (!value)
 				continue;
-			convertion.push(value);
+			convertion_list.push(value);
 			// [[w:zh:模組:NoteTA]]
 			value = wiki_API.parse('-{H|' + value + '}-', 'with_properties');
 			// console.log(value);
 		}
 
-		for (index = 1; index <= 10; index++) {
+		for (index = 1; index <= 30; index++) {
 			value = token.parameters['G' + index];
 			if (!value)
 				continue;
-			convertion.groups.push(value);
+			convertion_list.groups.push(value);
 			// TODO
 		}
 
-		return convertion;
+		return convertion_list;
 	}
 
 	// ------------------------------------------

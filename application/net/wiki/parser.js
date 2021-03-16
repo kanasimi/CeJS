@@ -7405,8 +7405,17 @@ function module_code(library_namespace) {
 		lua_code = lua_code.replace(/\t/g, '\\t');
 
 		// console.log(JSON.stringify(lua_code));
-		// console.log(JSON.stringify(lua_code.slice(6700)));
-		lua_code = JSON.parse(lua_code);
+		try {
+			lua_code = JSON.parse(lua_code);
+		} catch (e) {
+			library_namespace.error('parse_lua_object_code: Can not parse: '
+			//
+			+ JSON.stringify(lua_code
+			// .slice(0)
+			));
+			// TODO: handle exception
+			return;
+		}
 		// console.log(lua_code);
 
 		return lua_code;

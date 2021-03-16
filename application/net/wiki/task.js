@@ -2349,7 +2349,7 @@ function module_code(library_namespace) {
 							interactive_message((index + 1) + '/'
 									+ pages.length + ' '
 									+ wiki_API.title_link_of(page_data));
-							var result = each.call(this, page_data, messages,
+							var result = each.call(config, page_data, messages,
 									config);
 							if (messages.quit_operation) {
 								clear_work.call(this);
@@ -2408,6 +2408,7 @@ function module_code(library_namespace) {
 							var content = each.call(
 							// 注意: this === work_options
 							// @see wiki_API.edit()
+							// NOT `config`!
 							this, page_data, messages, config);
 							if (messages.quit_operation) {
 								clear_work.call(this);
