@@ -981,9 +981,9 @@ function module_code(library_namespace) {
 						token.parent = _this;
 					}
 
-					var template_processor =
+					var template_processor = wiki_API.template_functions
 					//
-					wiki_API.template_functions.get_function_of(token_name,
+					&& (wiki_API.template_functions.get_function_of(token_name,
 					//
 					wiki_API.add_session_to_options({
 						no_normalize : true
@@ -991,7 +991,7 @@ function module_code(library_namespace) {
 					//
 					|| wiki_API.template_functions.get_function_of(token,
 					//
-					wiki_API.add_session_to_options());
+					wiki_API.add_session_to_options()));
 					if (template_processor) {
 						template_processor(token, index, _this, depth);
 					}

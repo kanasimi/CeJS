@@ -899,23 +899,28 @@ function module_code(library_namespace) {
 		var site_name = options.site_name || wiki_API.site_name(session);
 		var functions_of_site = template_functions.functions_of_site[site_name];
 
-		var template_name = typeof template === 'string' ? template
-				: template.name;
+		var template_name = typeof template === 'string' ? template : template
+				&& template.name;
 
-		var template_parser = functions_of_site
-				&& functions_of_site[template_name]
-				|| template_functions.functions_of_all_sites[template_name];
-		if (template_parser)
+		var template_parser;
+		function get_template_parser() {
+			return template_parser = functions_of_site
+					&& functions_of_site[template_name]
+					|| template_functions.functions_of_all_sites[template_name];
+		}
+
+		if (get_template_parser())
 			return template_parser;
 
-		if (session && !options.no_normalize) {
-			options.no_normalize = true;
-			// normalize_template_name()
-			template_name = session.remove_namespace(session
-					.redirect_target_of(session.to_namespace(template_name,
-							'Template'), options), options);
-			return get_function_of(template, options);
+		if (!session || options.no_normalize) {
+			return;
 		}
+
+		// normalize_template_name()
+		template_name = session.remove_namespace(session.redirect_target_of(
+				session.to_namespace(template_name, 'Template'), options),
+				options);
+		return get_template_parser();
 	}
 
 	function initialize_session() {
