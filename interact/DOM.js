@@ -7895,66 +7895,6 @@ function module_code(library_namespace) {
 
 	// for string encoding
 	// -------------------------------------------------------
-	// 將HTML:&#ddd; → Unicode text
-	// 此函數只能用一次，為輸入資料良好之情況下使用。完整版： HTML_to_Unicode
-	// turnUnicode[generateCode.dLK]='setTool,getText';
-	function turnUnicode(b) {
-		if (false) {
-			// 行不通
-			s = s.replace(/&#(\d+);/g, String.fromCharCode("$1"));
-		}
-		var s = this.valueOf().replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<')
-				.replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(
-						/&apos;/g, "'"), m, t;
-
-		// 舊版本
-		if (false) {
-			if (m = s.match(/&#(\d{2,7});/g))
-				for (var i = 0; i < m.length; i++) {
-					s = s.replace(m[i], String.fromCharCode(parseInt(m[i]
-							.slice(2, -1))));
-				}
-		}
-
-		if (false) {
-			// 預防&#38;：&#38;=&
-			s = s.replace(/&#(0*38|[xX]0*26);/g, "\0")
-
-			.replace(/&#0*38;([^\d;]|$)/g, "\0$1").replace(
-					/&#[xX]0*26;?([^a-fA-F\d;]|$)/g, "\0$1");
-		}
-
-		// JScript 5.5~
-		s = s.replace(/&#0*(\d{2,7});/g, function($0, $1) {
-			return String.fromCharCode($1);
-		});
-		// 預防 error 之版本
-		if (false) {
-			s = s.replace(/&#0*(\d{2,7});/g, function($0, $1) {
-				return $1 > 0x10FFFF ? $0 : String.fromCharCode($1);
-			});
-
-			if (mode == 'x')
-				// $x111;之版本
-				s = s.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function($0, $1) {
-					return String.fromCharCode(parseInt($1, 16));
-				});
-			s = s.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function($0, $1) {
-				var t = parseInt($1, 16);
-				return t > 0x10FFFF ? $0 : String.fromCharCode(t);
-			});
-		}
-
-		// 預防&#38;回復
-		s = s.replace(/\0/g, "&");
-		if (b)
-			s = s.gText();
-		return s;
-	}
-
-	// 可適用perl: HTML::Entities::encode_entities()
-	// 需要escape的: [\<\>\"\'\%\;\)\(\&\+], tr/A-Za-z0-9\ //dc
-	// http://www.cert.org/tech_tips/malicious_code_mitigation.html
 
 	// @see
 	// https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
@@ -8215,10 +8155,14 @@ function module_code(library_namespace) {
 		"diams" : "♦"
 	};
 
+	// 可適用perl: HTML::Entities::encode_entities()
+	// 需要escape的: [\<\>\"\'\%\;\)\(\&\+], tr/A-Za-z0-9\ //dc
+	// http://www.cert.org/tech_tips/malicious_code_mitigation.html
+
 	_// JSDT:_module_
 	.
 	/**
-	 * Translate HTML code to Unicode text.
+	 * Translate HTML code to Unicode text. 將 HTML:&#ddd; → Unicode text
 	 * 
 	 * @param {String}
 	 *            HTML HTML code
@@ -8245,6 +8189,7 @@ function module_code(library_namespace) {
 			;
 		}
 
+		// .replace(): JScript 5.5~
 		t = t
 		// 預防 &#38;：&#38;=&
 		.replace(/&#(0*38|[xX]0*26);/g, "\0\0")
@@ -8252,6 +8197,7 @@ function module_code(library_namespace) {
 		.replace(/&#0*(\d{2,7});/g, function($0, $1) {
 			return $1 > 0x10FFFF ? $0 : String.fromCharCode($1);
 		}).replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function($0, $1) {
+			// $x111;之版本
 			var t = parseInt($1, 16);
 			return t > 0x10FFFF ? $0 : String.fromCharCode(t);
 		}).replace(/%([a-fA-F\d]{2})/g, function($0, $1) {
@@ -8262,6 +8208,7 @@ function module_code(library_namespace) {
 			// HTML Entities (HTML character entity)
 			t = t.replace(/&([a-z]{2,8});/ig, function(entity, name) {
 				return (name in HTML_Entities) ? HTML_Entities[name] : entity;
+				// name = name.toLowerCase();
 			});
 		}
 

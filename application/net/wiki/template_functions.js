@@ -893,12 +893,42 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function get_function_of(template, options) {
+		options = library_namespace.setup_options(options);
+		var session = wiki_API.session_of_options(options);
+		var site_name = options.site_name || wiki_API.site_name(session);
+		var functions_of_site = template_functions.functions_of_site[site_name];
+
+		var template_name = typeof template === 'string' ? template
+				: template.name;
+
+		var template_parser = functions_of_site
+				&& functions_of_site[template_name]
+				|| template_functions.functions_of_all_sites[template_name];
+		if (template_parser)
+			return template_parser;
+
+		if (session && !options.no_normalize) {
+			options.no_normalize = true;
+			// normalize_template_name()
+			template_name = session.remove_namespace(session
+					.redirect_target_of(session.to_namespace(template_name,
+							'Template'), options), options);
+			return get_function_of(template, options);
+		}
+	}
+
 	function initialize_session() {
 		var session = this;
 		var site_name = wiki_API.site_name(session);
+		var function_name_list = Object
+				.keys(template_functions.functions_of_all_sites);
 		var functions_of_site = template_functions.functions_of_site[site_name];
 		if (functions_of_site) {
-			session.register_redirects(Object.keys(functions_of_site), {
+			function_name_list.append(Object.keys(functions_of_site));
+		}
+		if (function_name_list.length > 0) {
+			session.register_redirects(function_name_list, {
 				namespace : 'Template'
 			});
 		}
@@ -937,10 +967,10 @@ function module_code(library_namespace) {
 
 	Object.assign(template_functions, {
 		// functions_of_site[site_name] = { template_name:
-		// parse_template_token(template_token){} }
-		functions_of_site : {
-			'*' : Object.create(null)
-		},
+		// parse_template_token(template_token, index, parsent, depth){} }
+		functions_of_site : Object.create(null),
+		functions_of_all_sites : Object.create(null),
+		get_function_of : get_function_of,
 
 		// ----------------------------
 

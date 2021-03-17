@@ -4426,7 +4426,7 @@ function module_code(library_namespace) {
 
 		count_of : set_bind(count_occurrence, true),
 		// gText : getText,
-		// turnU : turnUnicode,
+		// HTML_to_Unicode : HTML_to_Unicode,
 
 		// split_by : split_String_by_length,
 		chunk : chunk,

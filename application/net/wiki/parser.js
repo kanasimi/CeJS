@@ -919,10 +919,6 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var functions_of_site = wiki_API.template_functions
-				&& wiki_API.template_functions.functions_of_site[options.site_name
-						|| wiki_API.site_name(session)];
-
 		// options.slice: range index: {Number}start index
 		// || {Array}[ {Number}start index, {Number}end index ]
 		var slice = options.slice, exit;
@@ -985,19 +981,17 @@ function module_code(library_namespace) {
 						token.parent = _this;
 					}
 
-					var template_processor = functions_of_site
+					var template_processor =
 					//
-					&& (token_name ? functions_of_site[token_name]
+					wiki_API.template_functions.get_function_of(token_name,
 					//
-					: functions_of_site[token.name] || session
+					wiki_API.add_session_to_options({
+						no_normalize : true
+					}))
 					//
-					&& functions_of_site[session.remove_namespace(
+					|| wiki_API.template_functions.get_function_of(token,
 					//
-					session.redirect_target_of(
-					//
-					session.to_namespace(token.name, 'Template'), options),
-					//
-					options)]);
+					wiki_API.add_session_to_options());
 					if (template_processor) {
 						template_processor(token, index, _this, depth);
 					}
