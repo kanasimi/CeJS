@@ -919,8 +919,9 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var template_processor = session
-				&& session.template_functions_data[token_name];
+		var functions_of_site = wiki_API.template_functions
+				&& wiki_API.template_functions.functions_of_site[options.site_name
+						|| wiki_API.site_name(session)];
 
 		// options.slice: range index: {Number}start index
 		// || {Array}[ {Number}start index, {Number}end index ]
@@ -984,6 +985,19 @@ function module_code(library_namespace) {
 						token.parent = _this;
 					}
 
+					var template_processor = functions_of_site
+					//
+					&& (token_name ? functions_of_site[token_name]
+					//
+					: functions_of_site[token.name] || session
+					//
+					&& functions_of_site[session.remove_namespace(
+					//
+					session.redirect_target_of(
+					//
+					session.to_namespace(token.name, 'Template'), options),
+					//
+					options)]);
 					if (template_processor) {
 						template_processor(token, index, _this, depth);
 					}
@@ -1385,23 +1399,11 @@ function module_code(library_namespace) {
 		}
 		// console.log(token);
 
-		if (token.type === 'transclusion' && wiki_API.template_functions) {
+		if (token.type === 'transclusion' && typeof token.expand === 'function') {
 			// console.log(options);
-			// console.log(wiki_API.template_functions);
-			var expand_template = wiki_API.template_functions[options.site_name
-					|| wiki_API.site_name(options)];
-			expand_template = expand_template
-					&& expand_template.expand_template;
-			if (expand_template && (token.name in expand_template)) {
-				token = parse_wikitext(expand_template[token.name](token,
-						options));
-			} else {
-				expand_template = wiki_API.template_functions.expand_template;
-				if (expand_template && (token.name in expand_template)) {
-					token = parse_wikitext(expand_template[token.name](token,
-							options));
-				}
-			}
+			// expand template, .expand_template(), .to_wikitext()
+			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
+			token = parse_wikitext(token.expand(options));
 		}
 
 		// ------------------------
@@ -1537,8 +1539,7 @@ function module_code(library_namespace) {
 		}
 
 		// 這邊僅處理常用模板。需要先保證這些模板存在，並且具有預期的功能。
-		// 其他常用 template 可加在
-		// wiki.template_functions[wiki_project].expand_template 中。
+		// 其他常用 template 可加在 wiki.template_functions[site_name] 中。
 		//
 		// 模板這個部分除了解析模板之外沒有好的方法。
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
@@ -1667,7 +1668,7 @@ function module_code(library_namespace) {
 
 		for_each_token.call(tokens, function(token, index, parent) {
 			return preprocess_section_link_token(token, options);
-		}, true);
+		}, options);
 		return tokens;
 	}
 
@@ -1790,6 +1791,9 @@ function module_code(library_namespace) {
 		} else {
 			options = library_namespace.setup_options(options);
 		}
+
+		// for for_each_token @ preprocess_section_link_tokens()
+		options.modify = true;
 
 		// console.trace(parse_wikitext(section_title, null, []));
 		// TODO: "==''==text==''==\n"
@@ -3830,6 +3834,10 @@ function module_code(library_namespace) {
 			// console.log('parameters: ' + JSON.stringify(parameters));
 			parameters = parameters.split(';');
 			parameters.forEach(function(converted, index) {
+				if (normalize) {
+					// remove spaces
+					converted = converted.trim();
+				}
 				if (PATTERN_conversion.test(converted)
 				// e.g., "-{ a; zh-tw: tw }-" 之 " a"
 				|| conversion_list.length === 0

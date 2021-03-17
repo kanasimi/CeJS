@@ -234,7 +234,6 @@ function module_code(library_namespace) {
 		// @see CeL.application.net.wiki.task ,
 		// CeL.application.net.wiki.namespace
 		this.redirects_data = Object.create(null);
-		this.template_functions_data = Object.create(null);
 
 		this.run_after_initializing = [];
 		// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()

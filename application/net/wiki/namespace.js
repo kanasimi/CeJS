@@ -689,7 +689,7 @@ function module_code(library_namespace) {
 	 *            options.get_all_properties: return
 	 *            {language,family,site,API_URL}
 	 * 
-	 * @returns {String}Wikidata API 可使用之 site name parameter。
+	 * @returns {String}wiki_project, Wikidata API 可使用之 site name parameter。
 	 * 
 	 * @see mw.config.get('wgWikiID')
 	 *      https://www.mediawiki.org/wiki/ResourceLoader/Core_modules#mediaWiki.config

@@ -549,6 +549,7 @@ function module_code(library_namespace) {
 
 				var registered_page_list = Array.isArray(next[1]) ? next[1]
 						: [ next[1] ];
+				// from: alias, to: 正式名稱
 				function register_title(from, to) {
 					if (!from
 					// || (from in _this.redirects_data)

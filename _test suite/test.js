@@ -3587,10 +3587,18 @@ function test_wiki() {
 		zhwiki.run(function () {
 			_setup_test('wiki: template_functions');
 
-			var wikitext = "{{al|A|B}}";
+			var wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
+			var parsed = CeL.wiki.parser(wikitext, { session: zhwiki }).parse();
+			parsed.each('tempLate:NoteTA', function(token) {
+				// console.log(token.convertion_list);
+				assert(["-{A|zh-cn:巴颜喀拉山脉;zh-hk:巴顏喀拉山脈;zh-tw:巴顏喀喇山}-", token.convertion_list.toString()], 'template_functions: remove spaces');
+				assert(["巴顏喀拉山脈", token.convertion_list[0].toString('zh-hk')], "template_functions: .toString('zh-hk')");
+			});
+
+			wikitext = "{{al|A|B}}";
 			// 下面這個測試只能在含入 CeL.application.net.wiki.template_functions.zhwiki 後才能使用。
-			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { session: zhwiki }).toString()], 'wiki.section_link+template_functions #1-1');
-			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { site_name: 'zhwiki' }).toString()], 'wiki.section_link+template_functions #1-2');
+			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { session: zhwiki }).toString()], 'wiki.section_link + template_functions #1-1');
+			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { site_name: 'zhwiki' }).toString()], 'wiki.section_link + template_functions #1-2');
 
 			_finish_test('wiki: template_functions');
 		});

@@ -108,9 +108,6 @@ function module_code(library_namespace) {
 	var Hat_names = 'TalkendH|Talkendh|Delh|Closereq|Hat|Hidden archive top'
 			.split('|').to_hash();
 
-	var NoteTA_names = 'NoteTA|TA|NoteAT|NOTETA|Note TA|Noteta|NoteTa'.split(
-			'|').to_hash();
-
 	var Multidel_names = 'Multidel'.split('|').to_hash();
 
 	var Old_vfd_multi__names = 'Old vfd multi|Oldafdfull|Vfd-kept|存廢討論被保留|頁面存廢討論被保留'
@@ -228,14 +225,14 @@ function module_code(library_namespace) {
 		// console.log(parsed.toString());
 
 		function for_each_template(token) {
-			var item = parse_NoteTA_token(token, options);
-			if (item) {
+			if (token.convertion_list) {
+				// assert: is {{NoteTA}}
 				// conversion_item_list.push(item);
 				return;
 			}
 
 			// console.log(token);
-			item = {
+			var item = {
 				type : 'item'
 			};
 			switch (token.name) {
@@ -294,48 +291,6 @@ function module_code(library_namespace) {
 		parsed.each('template', for_each_template);
 
 		return conversion_item_list;
-	}
-
-	// [[w:zh:Module:NoteTA]]
-	function parse_NoteTA_token(token, options) {
-		if (!token || !(token.name in NoteTA_names)) {
-			return;
-		}
-
-		var convertion_list = Object.assign([], {
-			// 固定轉換規則
-			// fixed : [],
-
-			// 公共轉換組
-			groups : []
-		});
-
-		var index, value = token.parameters.T;
-		if (value) {
-			// 標題轉換
-			convertion_list.title = value;
-		}
-
-		// TODO: {{NoteTA}} 使用「1=」可以同時轉換標題和正文？
-		for (index = 1; index <= 30; index++) {
-			value = token.parameters[index];
-			if (!value)
-				continue;
-			convertion_list.push(value);
-			// [[w:zh:模組:NoteTA]]
-			value = wiki_API.parse('-{H|' + value + '}-', 'with_properties');
-			// console.log(value);
-		}
-
-		for (index = 1; index <= 30; index++) {
-			value = token.parameters['G' + index];
-			if (!value)
-				continue;
-			convertion_list.groups.push(value);
-			// TODO
-		}
-
-		return convertion_list;
 	}
 
 	// ------------------------------------------
@@ -938,30 +893,21 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// initialization_queue[site_name] = [ functions to run ]
-	var initialization_queue = Object.create(null);
-
-	function initialize_session(session) {
+	function initialize_session() {
 		var session = this;
 		var site_name = wiki_API.site_name(session);
-		var work_queue = initialization_queue[site_name];
-		if (!work_queue) {
-			library_namespace.debug('Nothing to register for this site: '
-					+ site_name);
-			return;
+		var functions_of_site = template_functions.functions_of_site[site_name];
+		if (functions_of_site) {
+			session.register_redirects(Object.keys(functions_of_site), {
+				namespace : 'Template'
+			});
 		}
-
-		if (typeof work_queue === 'function')
-			work_queue = [ work_queue ];
-
-		work_queue.forEach(function(initializer) {
-			initializer(session);
-		});
 	}
 
 	var module_name = this.id;
 
 	function load_template_functions(session) {
+		session = session || this;
 		var site_name = typeof session === 'string' ? session : wiki_API
 				.site_name(session);
 		if (!site_name)
@@ -975,44 +921,30 @@ function module_code(library_namespace) {
 				initialize_session.bind(session));
 	}
 
-	library_namespace.set_method(wiki_API.prototype, {
-		load_template_functions : function() {
-			load_template_functions(this);
-		}
-	});
-
 	// --------------------------------------------------------------------------------------------
 
-	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
-	function set_expand_template(template_name, wiki_project) {
-		var base_namespace = wiki_API.template_functions;
-		if (wiki_project)
-			base_namespace = base_namespace[wiki_project];
-		var expand_function = base_namespace[template_name].expand;
-		var export_to = base_namespace.expand_template
-				|| (base_namespace.expand_template = Object.create(null));
-		for ( var name in base_namespace[template_name].names) {
-			export_to[name] = expand_function;
-		}
-	}
-
-	// --------------------------------------------------------------------------------------------
+	// TODO:?
+	// template_functions[KEY_subdomain_for_project][site_name]
+	// var KEY_subdomain_for_project;
+	// template_functions[KEY_common_templates].template_name
+	// var KEY_common_templates;
 
 	// export 導出.
-	Object.assign(template_functions, {
-		initialization_queue : initialization_queue,
-		load_template_functions : load_template_functions,
 
-		set_expand_template : set_expand_template,
+	library_namespace.set_method(wiki_API.prototype, {
+		load_template_functions : load_template_functions
+	});
+
+	Object.assign(template_functions, {
+		// functions_of_site[site_name] = { template_name:
+		// parse_template_token(template_token){} }
+		functions_of_site : {
+			'*' : Object.create(null)
+		},
 
 		// ----------------------------
 
 		parse_conversion_item : parse_conversion_item,
-		NoteTA : {
-			names : NoteTA_names,
-			parse : parse_NoteTA_token,
-			parse_page : parse_conversion_item
-		},
 
 		// ----------------------------
 

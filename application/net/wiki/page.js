@@ -1360,10 +1360,11 @@ function module_code(library_namespace) {
 								+ is_JSON.length + ' !== ' + data.length);
 					}
 				}
-				callback(data);
 			} catch (e) {
 				callback(undefined, e);
+				return;
 			}
+			callback(data);
 		}, post_data);
 	};
 
