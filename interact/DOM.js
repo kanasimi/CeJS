@@ -7896,264 +7896,266 @@ function module_code(library_namespace) {
 	// for string encoding
 	// -------------------------------------------------------
 
+	var HTML_Entities_predefined = {
+		quot : '"',
+		amp : '&',
+		apos : "'",
+		lt : '<',
+		gt : '>'
+	}, HTML_Entities_predefined_values = Object
+			.values(HTML_Entities_predefined),
 	// @see
 	// https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
-	var HTML_Entities = {
-		"quot" : "\"",
-		// 這在 HTML_to_Unicode() 不能先處理!
-		// amp : '&',
-		"apos" : "'",
-		"lt" : "<",
-		"gt" : ">",
-		"nbsp" : " ",
-		"iexcl" : "¡",
-		"cent" : "¢",
-		"pound" : "£",
-		"curren" : "¤",
-		"yen" : "¥",
-		"brvbar" : "¦",
-		"sect" : "§",
-		"uml" : "¨",
-		"copy" : "©",
-		"ordf" : "ª",
-		"laquo" : "«",
-		"not" : "¬",
-		"shy" : "­",
-		"reg" : "®",
-		"macr" : "¯",
-		"deg" : "°",
-		"plusmn" : "±",
-		"sup2" : "²",
-		"sup3" : "³",
-		"acute" : "´",
-		"micro" : "µ",
-		"para" : "¶",
-		"middot" : "·",
-		"cedil" : "¸",
-		"sup1" : "¹",
-		"ordm" : "º",
-		"raquo" : "»",
-		"frac14" : "¼",
-		"frac12" : "½",
-		"frac34" : "¾",
-		"iquest" : "¿",
-		"Agrave" : "À",
-		"Aacute" : "Á",
-		"Acirc" : "Â",
-		"Atilde" : "Ã",
-		"Auml" : "Ä",
-		"Aring" : "Å",
-		"AElig" : "Æ",
-		"Ccedil" : "Ç",
-		"Egrave" : "È",
-		"Eacute" : "É",
-		"Ecirc" : "Ê",
-		"Euml" : "Ë",
-		"Igrave" : "Ì",
-		"Iacute" : "Í",
-		"Icirc" : "Î",
-		"Iuml" : "Ï",
-		"ETH" : "Ð",
-		"Ntilde" : "Ñ",
-		"Ograve" : "Ò",
-		"Oacute" : "Ó",
-		"Ocirc" : "Ô",
-		"Otilde" : "Õ",
-		"Ouml" : "Ö",
-		"times" : "×",
-		"Oslash" : "Ø",
-		"Ugrave" : "Ù",
-		"Uacute" : "Ú",
-		"Ucirc" : "Û",
-		"Uuml" : "Ü",
-		"Yacute" : "Ý",
-		"THORN" : "Þ",
-		"szlig" : "ß",
-		"agrave" : "à",
-		"aacute" : "á",
-		"acirc" : "â",
-		"atilde" : "ã",
-		"auml" : "ä",
-		"aring" : "å",
-		"aelig" : "æ",
-		"ccedil" : "ç",
-		"egrave" : "è",
-		"eacute" : "é",
-		"ecirc" : "ê",
-		"euml" : "ë",
-		"igrave" : "ì",
-		"iacute" : "í",
-		"icirc" : "î",
-		"iuml" : "ï",
-		"eth" : "ð",
-		"ntilde" : "ñ",
-		"ograve" : "ò",
-		"oacute" : "ó",
-		"ocirc" : "ô",
-		"otilde" : "õ",
-		"ouml" : "ö",
-		"divide" : "÷",
-		"oslash" : "ø",
-		"ugrave" : "ù",
-		"uacute" : "ú",
-		"ucirc" : "û",
-		"uuml" : "ü",
-		"yacute" : "ý",
-		"thorn" : "þ",
-		"yuml" : "ÿ",
-		"OElig" : "Œ",
-		"oelig" : "œ",
-		"Scaron" : "Š",
-		"scaron" : "š",
-		"Yuml" : "Ÿ",
-		"fnof" : "ƒ",
-		"circ" : "ˆ",
-		"tilde" : "˜",
-		"Alpha" : "Α",
-		"Beta" : "Β",
-		"Gamma" : "Γ",
-		"Delta" : "Δ",
-		"Epsilon" : "Ε",
-		"Zeta" : "Ζ",
-		"Eta" : "Η",
-		"Theta" : "Θ",
-		"Iota" : "Ι",
-		"Kappa" : "Κ",
-		"Lambda" : "Λ",
-		"Mu" : "Μ",
-		"Nu" : "Ν",
-		"Xi" : "Ξ",
-		"Omicron" : "Ο",
-		"Pi" : "Π",
-		"Rho" : "Ρ",
-		"Sigma" : "Σ",
-		"Tau" : "Τ",
-		"Upsilon" : "Υ",
-		"Phi" : "Φ",
-		"Chi" : "Χ",
-		"Psi" : "Ψ",
-		"Omega" : "Ω",
-		"alpha" : "α",
-		"beta" : "β",
-		"gamma" : "γ",
-		"delta" : "δ",
-		"epsilon" : "ε",
-		"zeta" : "ζ",
-		"eta" : "η",
-		"theta" : "θ",
-		"iota" : "ι",
-		"kappa" : "κ",
-		"lambda" : "λ",
-		"mu" : "μ",
-		"nu" : "ν",
-		"xi" : "ξ",
-		"omicron" : "ο",
-		"pi" : "π",
-		"rho" : "ρ",
-		"sigmaf" : "ς",
-		"sigma" : "σ",
-		"tau" : "τ",
-		"upsilon" : "υ",
-		"phi" : "φ",
-		"chi" : "χ",
-		"psi" : "ψ",
-		"omega" : "ω",
-		"thetasym" : "ϑ",
-		"upsih" : "ϒ",
-		"piv" : "ϖ",
-		"ensp" : " ",
-		"emsp" : " ",
-		"thinsp" : " ",
-		"zwnj" : "‌",
-		"zwj" : "‍",
-		"lrm" : "‎",
-		"rlm" : "‏",
-		"ndash" : "–",
-		"mdash" : "—",
-		"lsquo" : "‘",
-		"rsquo" : "’",
-		"sbquo" : "‚",
-		"ldquo" : "“",
-		"rdquo" : "”",
-		"bdquo" : "„",
-		"dagger" : "†",
-		"Dagger" : "‡",
-		"bull" : "•",
-		"hellip" : "…",
-		"permil" : "‰",
-		"prime" : "′",
-		"Prime" : "″",
-		"lsaquo" : "‹",
-		"rsaquo" : "›",
-		"oline" : "‾",
-		"frasl" : "⁄",
-		"euro" : "€",
-		"image" : "ℑ",
-		"weierp" : "℘",
-		"real" : "ℜ",
-		"trade" : "™",
-		"alefsym" : "ℵ",
-		"larr" : "←",
-		"uarr" : "↑",
-		"rarr" : "→",
-		"darr" : "↓",
-		"harr" : "↔",
-		"crarr" : "↵",
-		"lArr" : "⇐",
-		"uArr" : "⇑",
-		"rArr" : "⇒",
-		"dArr" : "⇓",
-		"hArr" : "⇔",
-		"forall" : "∀",
-		"part" : "∂",
-		"exist" : "∃",
-		"empty" : "∅",
-		"nabla" : "∇",
-		"isin" : "∈",
-		"notin" : "∉",
-		"ni" : "∋",
-		"prod" : "∏",
-		"sum" : "∑",
-		"minus" : "−",
-		"lowast" : "∗",
-		"radic" : "√",
-		"prop" : "∝",
-		"infin" : "∞",
-		"ang" : "∠",
-		"and" : "∧",
-		"or" : "∨",
-		"cap" : "∩",
-		"cup" : "∪",
-		"int" : "∫",
-		"there4" : "∴",
-		"sim" : "∼",
-		"cong" : "≅",
-		"asymp" : "≈",
-		"ne" : "≠",
-		"equiv" : "≡",
-		"le" : "≤",
-		"ge" : "≥",
-		"sub" : "⊂",
-		"sup" : "⊃",
-		"nsub" : "⊄",
-		"sube" : "⊆",
-		"supe" : "⊇",
-		"oplus" : "⊕",
-		"otimes" : "⊗",
-		"perp" : "⊥",
-		"sdot" : "⋅",
-		"lceil" : "⌈",
-		"rceil" : "⌉",
-		"lfloor" : "⌊",
-		"rfloor" : "⌋",
-		"lang" : "〈",
-		"rang" : "〉",
-		"loz" : "◊",
-		"spades" : "♠",
-		"clubs" : "♣",
-		"hearts" : "♥",
-		"diams" : "♦"
-	};
+	HTML_Entities = Object.assign({
+		nbsp : ' ',
+		iexcl : '¡',
+		cent : '¢',
+		pound : '£',
+		curren : '¤',
+		yen : '¥',
+		brvbar : '¦',
+		sect : '§',
+		uml : '¨',
+		copy : '©',
+		ordf : 'ª',
+		laquo : '«',
+		not : '¬',
+		shy : '­',
+		reg : '®',
+		macr : '¯',
+		deg : '°',
+		plusmn : '±',
+		sup2 : '²',
+		sup3 : '³',
+		acute : '´',
+		micro : 'µ',
+		para : '¶',
+		middot : '·',
+		cedil : '¸',
+		sup1 : '¹',
+		ordm : 'º',
+		raquo : '»',
+		frac14 : '¼',
+		frac12 : '½',
+		frac34 : '¾',
+		iquest : '¿',
+		Agrave : 'À',
+		Aacute : 'Á',
+		Acirc : 'Â',
+		Atilde : 'Ã',
+		Auml : 'Ä',
+		Aring : 'Å',
+		AElig : 'Æ',
+		Ccedil : 'Ç',
+		Egrave : 'È',
+		Eacute : 'É',
+		Ecirc : 'Ê',
+		Euml : 'Ë',
+		Igrave : 'Ì',
+		Iacute : 'Í',
+		Icirc : 'Î',
+		Iuml : 'Ï',
+		ETH : 'Ð',
+		Ntilde : 'Ñ',
+		Ograve : 'Ò',
+		Oacute : 'Ó',
+		Ocirc : 'Ô',
+		Otilde : 'Õ',
+		Ouml : 'Ö',
+		times : '×',
+		Oslash : 'Ø',
+		Ugrave : 'Ù',
+		Uacute : 'Ú',
+		Ucirc : 'Û',
+		Uuml : 'Ü',
+		Yacute : 'Ý',
+		THORN : 'Þ',
+		szlig : 'ß',
+		agrave : 'à',
+		aacute : 'á',
+		acirc : 'â',
+		atilde : 'ã',
+		auml : 'ä',
+		aring : 'å',
+		aelig : 'æ',
+		ccedil : 'ç',
+		egrave : 'è',
+		eacute : 'é',
+		ecirc : 'ê',
+		euml : 'ë',
+		igrave : 'ì',
+		iacute : 'í',
+		icirc : 'î',
+		iuml : 'ï',
+		eth : 'ð',
+		ntilde : 'ñ',
+		ograve : 'ò',
+		oacute : 'ó',
+		ocirc : 'ô',
+		otilde : 'õ',
+		ouml : 'ö',
+		divide : '÷',
+		oslash : 'ø',
+		ugrave : 'ù',
+		uacute : 'ú',
+		ucirc : 'û',
+		uuml : 'ü',
+		yacute : 'ý',
+		thorn : 'þ',
+		yuml : 'ÿ',
+		OElig : 'Œ',
+		oelig : 'œ',
+		Scaron : 'Š',
+		scaron : 'š',
+		Yuml : 'Ÿ',
+		fnof : 'ƒ',
+		circ : 'ˆ',
+		tilde : '˜',
+		Alpha : 'Α',
+		Beta : 'Β',
+		Gamma : 'Γ',
+		Delta : 'Δ',
+		Epsilon : 'Ε',
+		Zeta : 'Ζ',
+		Eta : 'Η',
+		Theta : 'Θ',
+		Iota : 'Ι',
+		Kappa : 'Κ',
+		Lambda : 'Λ',
+		Mu : 'Μ',
+		Nu : 'Ν',
+		Xi : 'Ξ',
+		Omicron : 'Ο',
+		Pi : 'Π',
+		Rho : 'Ρ',
+		Sigma : 'Σ',
+		Tau : 'Τ',
+		Upsilon : 'Υ',
+		Phi : 'Φ',
+		Chi : 'Χ',
+		Psi : 'Ψ',
+		Omega : 'Ω',
+		alpha : 'α',
+		beta : 'β',
+		gamma : 'γ',
+		delta : 'δ',
+		epsilon : 'ε',
+		zeta : 'ζ',
+		eta : 'η',
+		theta : 'θ',
+		iota : 'ι',
+		kappa : 'κ',
+		lambda : 'λ',
+		mu : 'μ',
+		nu : 'ν',
+		xi : 'ξ',
+		omicron : 'ο',
+		pi : 'π',
+		rho : 'ρ',
+		sigmaf : 'ς',
+		sigma : 'σ',
+		tau : 'τ',
+		upsilon : 'υ',
+		phi : 'φ',
+		chi : 'χ',
+		psi : 'ψ',
+		omega : 'ω',
+		thetasym : 'ϑ',
+		upsih : 'ϒ',
+		piv : 'ϖ',
+		ensp : ' ',
+		emsp : ' ',
+		thinsp : ' ',
+		zwnj : '‌',
+		zwj : '‍',
+		lrm : '‎',
+		rlm : '‏',
+		ndash : '–',
+		mdash : '—',
+		lsquo : '‘',
+		rsquo : '’',
+		sbquo : '‚',
+		ldquo : '“',
+		rdquo : '”',
+		bdquo : '„',
+		dagger : '†',
+		Dagger : '‡',
+		bull : '•',
+		hellip : '…',
+		permil : '‰',
+		prime : '′',
+		Prime : '″',
+		lsaquo : '‹',
+		rsaquo : '›',
+		oline : '‾',
+		frasl : '⁄',
+		euro : '€',
+		image : 'ℑ',
+		weierp : '℘',
+		real : 'ℜ',
+		trade : '™',
+		alefsym : 'ℵ',
+		larr : '←',
+		uarr : '↑',
+		rarr : '→',
+		darr : '↓',
+		harr : '↔',
+		crarr : '↵',
+		lArr : '⇐',
+		uArr : '⇑',
+		rArr : '⇒',
+		dArr : '⇓',
+		hArr : '⇔',
+		forall : '∀',
+		part : '∂',
+		exist : '∃',
+		empty : '∅',
+		nabla : '∇',
+		isin : '∈',
+		notin : '∉',
+		ni : '∋',
+		prod : '∏',
+		sum : '∑',
+		minus : '−',
+		lowast : '∗',
+		radic : '√',
+		prop : '∝',
+		infin : '∞',
+		ang : '∠',
+		and : '∧',
+		or : '∨',
+		cap : '∩',
+		cup : '∪',
+		int : '∫',
+		there4 : '∴',
+		sim : '∼',
+		cong : '≅',
+		asymp : '≈',
+		ne : '≠',
+		equiv : '≡',
+		le : '≤',
+		ge : '≥',
+		sub : '⊂',
+		sup : '⊃',
+		nsub : '⊄',
+		sube : '⊆',
+		supe : '⊇',
+		oplus : '⊕',
+		otimes : '⊗',
+		perp : '⊥',
+		sdot : '⋅',
+		lceil : '⌈',
+		rceil : '⌉',
+		lfloor : '⌊',
+		rfloor : '⌋',
+		lang : '〈',
+		rang : '〉',
+		loz : '◊',
+		spades : '♠',
+		clubs : '♣',
+		hearts : '♥',
+		diams : '♦'
+	}, HTML_Entities_predefined);
 
 	// 可適用perl: HTML::Entities::encode_entities()
 	// 需要escape的: [\<\>\"\'\%\;\)\(\&\+], tr/A-Za-z0-9\ //dc
@@ -8166,59 +8168,82 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}
 	 *            HTML HTML code
-	 * @param {Boolean}
-	 *            only_digital
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項 or {Boolean}only_numeric
 	 * @returns
 	 * @_memberOf _module_
 	 * 
 	 * @see function escape_ampersand(text) @ CeL.application.storage.EPUB
 	 */
-	HTML_to_Unicode = function(HTML, only_digital) {
-		// 使用\0可能會 Warning: non-octal digit in an escape sequence that
-		// doesn't
-		// match a back-reference
-		var t = HTML.valueOf();
-
-		if (!only_digital) {
-			// 處理常用的 HTML Entities。
-			t = t
-			// 自動 clip null character
-			.replace(/\0\0/g, '').replace(/&nbsp;/g, '\xA0').replace(/&lt;/g,
-					'<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
-			// .replace(/&apos;/g, "'")
-			;
+	HTML_to_Unicode = function HTML_to_Unicode(HTML, options) {
+		if (options === true) {
+			options = {
+				entity : true,
+				numeric : true
+			};
+		} else if (!options) {
+			options = {
+				predefined : true,
+				entity : true,
+				numeric : true
+			};
+		} else {
+			options = library_namespace.setup_options(options);
 		}
 
-		// .replace(): JScript 5.5~
-		t = t
-		// 預防 &#38;：&#38;=&
-		.replace(/&#(0*38|[xX]0*26);/g, "\0\0")
-		// 預防 error 之版本
-		.replace(/&#0*(\d{2,7});/g, function($0, $1) {
-			return $1 > 0x10FFFF ? $0 : String.fromCharCode($1);
-		}).replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function($0, $1) {
-			// $x111;之版本
-			var t = parseInt($1, 16);
-			return t > 0x10FFFF ? $0 : String.fromCharCode(t);
-		}).replace(/%([a-fA-F\d]{2})/g, function($0, $1) {
-			return String.fromCharCode(parseInt($1, 16));
-		});
+		// 使用\0可能會 Warning: non-octal digit in an escape sequence that
+		// does not
+		// match a back-reference
+		var unicode_text = HTML.valueOf();
 
-		if (!only_digital) {
+		// --------------------------------------
+		// numeric character references
+
+		function convert_digital(all, digital) {
+			// digital: &#111; 之版本
+			if (digital > 0x10FFFF)
+				return all;
+			var char = String.fromCharCode(digital);
+			return !options.predefined
+			//
+			&& HTML_Entities_predefined_values.includes(char) ? all : char;
+		}
+		function convert_hex(all, hex) {
+			// &#x11; 之版本
+			var digital = parseInt(hex, 16);
+			return convert_digital(all, digital);
+		}
+		if (options.numeric) {
+			unicode_text = unicode_text
+			// .replace(): JScript 5.5~
+			.replace(/&#0*(\d{2,7});/g, convert_digital)
+			//
+			.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, convert_hex)
+			//
+			.replace(/%([a-fA-F\d]{2})/g, convert_hex);
+		}
+
+		// --------------------------------------
+		// named character references, named entities
+
+		if (options.entity) {
 			// HTML Entities (HTML character entity)
-			t = t.replace(/&([a-z]{2,8});/ig, function(entity, name) {
-				return (name in HTML_Entities) ? HTML_Entities[name] : entity;
+			// "&CounterClockwiseContourIntegral;"
+			unicode_text = unicode_text.replace(/&([a-z]\w{0,49});/ig,
+			//
+			function(entity, name) {
+				return (options.predefined
+				//
+				|| !(name in HTML_Entities_predefined))
+				//
+				&& (name in HTML_Entities) ? HTML_Entities[name]
+				//
+				: entity;
 				// name = name.toLowerCase();
 			});
 		}
 
-		if (!only_digital) {
-			t = t
-			// 預防&#38;回復
-			.replace(/\0\0/g, "&").replace(/&amp;/g, '&');
-		}
-
-		return t;
+		return unicode_text;
 	};
 
 	_.HTML_to_Unicode.entities = HTML_Entities;

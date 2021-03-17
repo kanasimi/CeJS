@@ -890,7 +890,7 @@ function module_code(library_namespace) {
 			// for wiki_API.template_functions.adapt_function()
 			wiki_API.add_session_to_options(session, options);
 		}
-		;
+
 		var token_name;
 		if (type || type === '') {
 			if (typeof type !== 'string') {

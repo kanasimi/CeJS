@@ -402,8 +402,6 @@ function module_code(library_namespace) {
 		// .trim()
 		), true);
 		// console.log(data.text);
-		if(/emsp/.test(data.text))
-			console.log(data.text);
 
 		// return needing to wait language converted
 		var text_list = [ part_title, chapter_title, data.text ];

@@ -2033,6 +2033,23 @@ function test_XML() {
 }
 
 
+//============================================================================================================================================================
+
+
+function test_DOM() {
+	all_error_count += CeL.test('CeL.HTML_to_Unicode()', function (assert) {
+		assert(['ABC', CeL.HTML_to_Unicode('ABC')], 'CeL.HTML_to_Unicode() #1');
+		var HTML = 'A&lt;p&gt;B</p>C', unicode_text = 'A<p>B</p>C';
+		assert([unicode_text, CeL.HTML_to_Unicode(unicode_text)], 'CeL.HTML_to_Unicode() #2');
+		assert([unicode_text, CeL.HTML_to_Unicode(HTML)], 'CeL.HTML_to_Unicode() #3');
+		assert([HTML, CeL.HTML_to_Unicode(HTML, true)], 'CeL.HTML_to_Unicode() #4');
+		HTML = '<b>&nbsp;&copy;2100</b>';
+		unicode_text = '<b>\xA0©2100</b>';
+		assert([unicode_text, CeL.HTML_to_Unicode(HTML)], 'CeL.HTML_to_Unicode() #5');
+		assert([unicode_text, CeL.HTML_to_Unicode(HTML, true)], 'CeL.HTML_to_Unicode() #6');
+	});
+}
+
 
 //============================================================================================================================================================
 
@@ -4137,6 +4154,7 @@ var all_test_items = {
 	quantity: ['data.quantity', test_quantity],
 	CSV: ['data.CSV', test_CSV],
 	XML: ['data.XML', test_XML],
+	DOM: ['interact.DOM', test_DOM],
 	numeral: ['data.numeral', test_numeral],
 	net: ['application.net', test_net],
 	astronomy: ['application.astronomy', test_astronomy],
