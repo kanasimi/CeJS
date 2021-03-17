@@ -885,8 +885,12 @@ function module_code(library_namespace) {
 
 		// console.log('max_depth: ' + max_depth);
 
-		var session = wiki_API.session_of_options(options)
-				|| wiki_API.session_of_options(this);
+		var session = wiki_API.session_of_options(options);
+		if (!session && (session = wiki_API.session_of_options(this))) {
+			// for wiki_API.template_functions.adapt_function()
+			wiki_API.add_session_to_options(session, options);
+		}
+		;
 		var token_name;
 		if (type || type === '') {
 			if (typeof type !== 'string') {
@@ -981,19 +985,9 @@ function module_code(library_namespace) {
 						token.parent = _this;
 					}
 
-					var template_processor = wiki_API.template_functions
-					//
-					&& (wiki_API.template_functions.get_function_of(token_name,
-					//
-					wiki_API.add_session_to_options({
-						no_normalize : true
-					}))
-					//
-					|| wiki_API.template_functions.get_function_of(token,
-					//
-					wiki_API.add_session_to_options()));
-					if (template_processor) {
-						template_processor(token, index, _this, depth);
+					if (wiki_API.template_functions) {
+						wiki_API.template_functions.adapt_function(token,
+								index, _this, options);
 					}
 
 					// get result. 須注意: 此 token 可能為 Array, string, undefined！

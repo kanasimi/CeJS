@@ -71,7 +71,8 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	function expand_zhwiki_A_token(token, options) {
+	function expand_template_A(token) {
+		var token = this;
 		return '[[' + token.parameters[1]
 		//
 		+ (token.parameters.name ? '#' + token.parameters.name : '')
@@ -79,14 +80,15 @@ function module_code(library_namespace) {
 		+ (token.parameters[2] ? '|' + token.parameters[2] : '') + ']]';
 	}
 
-	function parse_template_A(token, options) {
-		token.expand = expand_zhwiki_A_token.bind(null, token, options);
+	function parse_template_A(token) {
+		token.expand = expand_template_A;
 	}
 
 	// --------------------------------------------------------------------------------------------
 
 	// [[w:zh:Template:Al]]
-	function expand_zhwiki_Al_token(token, options) {
+	function expand_template_Al(token) {
+		var token = this;
 		return token.page_title_list.map(function(title) {
 			return wiki_API.title_link_of(title);
 		}).join('、');
@@ -103,7 +105,7 @@ function module_code(library_namespace) {
 
 		Object.assign(token, {
 			page_title_list : page_title_list,
-			expand : expand_zhwiki_Al_token.bind(null, token, options)
+			expand : expand_template_Al
 		});
 		return page_title_list;
 	}

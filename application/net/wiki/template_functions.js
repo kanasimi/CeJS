@@ -902,6 +902,7 @@ function module_code(library_namespace) {
 		var template_name = typeof template === 'string' ? template : template
 				&& template.name;
 
+		// template_processor
 		var template_parser;
 		function get_template_parser() {
 			return template_parser = functions_of_site
@@ -922,6 +923,18 @@ function module_code(library_namespace) {
 				options);
 		return get_template_parser();
 	}
+
+	function adapt_function(template_token, index, parent, options) {
+		if (!template_token || template_token.type !== 'transclusion')
+			return;
+
+		// template_processor()
+		var template_parser = get_function_of(template_token, options);
+		if (template_parser)
+			template_parser(template_token, index, parent, options);
+	}
+
+	// ------------------------------------------
 
 	function initialize_session() {
 		var session = this;
@@ -972,10 +985,10 @@ function module_code(library_namespace) {
 
 	Object.assign(template_functions, {
 		// functions_of_site[site_name] = { template_name:
-		// parse_template_token(template_token, index, parsent, depth){} }
+		// parse_template_token(template_token, index, parsent, options){} }
 		functions_of_site : Object.create(null),
 		functions_of_all_sites : Object.create(null),
-		get_function_of : get_function_of,
+		adapt_function : adapt_function,
 
 		// ----------------------------
 
