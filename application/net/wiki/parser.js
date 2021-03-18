@@ -1370,7 +1370,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
-	// 這些都不能簡單解析出來。
+	// 這些 <tag> 都不能簡單解析出來。
 	var untextify_tags = {
 		ref : true,
 		// e.g., <references group="gg"/>
@@ -1655,14 +1655,28 @@ function module_code(library_namespace) {
 		if (!options.root_token_list)
 			options.root_token_list = tokens;
 
+		options.modify = true;
+
+		// console.trace(tokens);
 		for_each_token.call(tokens, function(token, index, parent) {
-			return preprocess_section_link_token(token, options);
+			// console.trace(token);
+			token = preprocess_section_link_token(token, options);
+			// console.trace(token);
+			return token;
 		}, options);
+		// console.trace(tokens);
 		return tokens;
 	}
 
+	// TODO: The method now is NOT a good way!
 	function extract_plain_text_of_wikitext(wikitext, options) {
-		;
+		options = library_namespace.new_options(options);
+
+		wikitext = wiki_API.parse(String(wikitext));
+		// console.trace(wikitext);
+		wikitext = preprocess_section_link_tokens(wikitext, options);
+		// console.trace(wikitext);
+		return wikitext.toString();
 	}
 
 	// --------------------------------
@@ -1780,9 +1794,6 @@ function module_code(library_namespace) {
 		} else {
 			options = library_namespace.setup_options(options);
 		}
-
-		// for for_each_token @ preprocess_section_link_tokens()
-		options.modify = true;
 
 		// console.trace(parse_wikitext(section_title, null, []));
 		// TODO: "==''==text==''==\n"
@@ -2565,6 +2576,10 @@ function module_code(library_namespace) {
 				index < template_token.length; index++) {
 					// const
 					var anchor = template_token.parameters[index];
+					if (typeof anchor !== 'string') {
+						// e.g., [[終着駅シリーズ]]: {{Anchor|[[牛尾正直]]}}
+						anchor = extract_plain_text_of_wikitext(anchor);
+					}
 					register_anchor(anchor, template_token);
 				}
 				return;
