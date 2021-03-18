@@ -114,7 +114,7 @@ function module_code(library_namespace) {
 
 	// [[w:zh:Template:NoteTA]]
 	function parse_template_NoteTA(token, options) {
-		var convertion_list = Object.assign([], {
+		var conversion_list = Object.assign([], {
 			// 固定轉換規則
 			// fixed : [],
 
@@ -125,37 +125,38 @@ function module_code(library_namespace) {
 		var index, value = token.parameters.T;
 		if (value) {
 			// 標題轉換
-			convertion_list.title = value;
+			conversion_list.title = value;
 		}
 
 		// TODO: {{NoteTA}} 使用「1=」可以同時轉換標題和正文？
-		for (index = 1; index <= 30; index++) {
+		for (index = 1; index < token.length; index++) {
 			value = token.parameters[index];
 			if (!value)
 				continue;
 			// [[w:zh:模組:NoteTA]]
+			// @see function item_to_conversion(item)
 			value = wiki_API.parse('-{A|' + value + '}-', {
 				normalize : true,
 				with_properties : true
 			});
 			// console.log(value);
-			convertion_list.push(value);
+			conversion_list.push(value);
 		}
 
 		// [[w:zh:Module:NoteTA]]
-		for (index = 1; index <= 30; index++) {
+		for (index = 1; index < token.length; index++) {
 			value = token.parameters['G' + index];
 			if (!value)
 				continue;
-			convertion_list.groups.push(value);
+			conversion_list.groups.push(value);
 			// TODO
 		}
 
 		Object.assign(token, {
-			convertion_list : convertion_list,
+			conversion_list : conversion_list,
 			expand : empty_string
 		});
-		return convertion_list;
+		return conversion_list;
 	}
 
 	// --------------------------------------------------------------------------------------------

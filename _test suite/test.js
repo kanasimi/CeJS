@@ -3607,9 +3607,9 @@ function test_wiki() {
 			var wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
 			var parsed = CeL.wiki.parser(wikitext, { session: zhwiki }).parse();
 			parsed.each('tempLate:NoteTA', function(token) {
-				// console.log(token.convertion_list);
-				assert(["-{A|zh-cn:巴颜喀拉山脉;zh-hk:巴顏喀拉山脈;zh-tw:巴顏喀喇山}-", token.convertion_list.toString()], 'template_functions: remove spaces');
-				assert(["巴顏喀拉山脈", token.convertion_list[0].toString('zh-hk')], "template_functions: .toString('zh-hk')");
+				// console.log(token.conversion_list);
+				assert(["-{A|zh-cn:巴颜喀拉山脉;zh-hk:巴顏喀拉山脈;zh-tw:巴顏喀喇山}-", token.conversion_list.toString()], 'template_functions: remove spaces');
+				assert(["巴顏喀拉山脈", token.conversion_list[0].toString('zh-hk')], "template_functions: .toString('zh-hk')");
 			});
 
 			wikitext = "{{al|A|B}}";

@@ -133,18 +133,27 @@ function module_code(library_namespace) {
 			/arg/g, /\s*(nil|"(?:\\"|[^"]+)*"|'(?:\\'|[^']+)*')\s*/.source),
 			'g');
 
+	function item_to_conversion(item) {
+		// assert: item = {type: 'item', rule: '', original: ''}
+		var conversion = wiki_API.parse('-{A|' + item.rule + '}-', {
+			normalize : true,
+			with_properties : true
+		});
+		conversion.item = item;
+		return conversion;
+	}
+
 	// 汲取 page_data 中所有全局轉換（全頁面語言轉換），並交給 processor 處理。
 	// processor({type: 'item', rule: '', original: ''})
 	// Warning: Will modify `page_data.parsed`
-	function parse_conversion_item(page_data, options) {
-		var conversion_item_list = [];
+	function parse_conversions(page_data, options) {
+		var conversion_list = [];
 		if (!page_data)
-			return conversion_item_list;
+			return conversion_list;
 
 		if (page_data.ns === NS_Module) {
 			if (false) {
-				library_namespace.info('parse_conversion_item: '
-						+ page_data.title);
+				library_namespace.info('parse_conversions: ' + page_data.title);
 			}
 			var object = wiki_API.content_of(page_data);
 			if (/function Item\s*\(/.test(object)) {
@@ -164,12 +173,15 @@ function module_code(library_namespace) {
 			object = object && object.content;
 			if (!Array.isArray(object)) {
 				library_namespace
-						.error('parse_conversion_item: Invalid conversion group: '
+						.error('parse_conversions: Invalid conversion group: '
 								+ wiki_API.title_link_of(page_data));
-				return conversion_item_list;
+				return conversion_list;
 			}
 			// console.log(object);
-			return object;
+			conversion_list = object.filter(function(item) {
+				return item && item.rule;
+			}).map(item_to_conversion);
+			return conversion_list;
 		}
 
 		// console.log(page_data);
@@ -208,7 +220,8 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			token = token.join(';');
+			// get conversion rule only
+			token = token.toString('rule');
 			if (!token)
 				return;
 
@@ -225,9 +238,9 @@ function module_code(library_namespace) {
 		// console.log(parsed.toString());
 
 		function for_each_template(token) {
-			if (token.convertion_list) {
+			if (token.conversion_list) {
 				// assert: is {{NoteTA}}
-				// conversion_item_list.push(item);
+				// conversion_list.push({item:item});
 				return;
 			}
 
@@ -284,13 +297,12 @@ function module_code(library_namespace) {
 				});
 			}
 
-			// item = {type: 'item', rule: '', original: ''}
-			conversion_item_list.push(item);
+			conversion_list.push(item_to_conversion(item));
 		}
 
 		parsed.each('template', for_each_template);
 
-		return conversion_item_list;
+		return conversion_list;
 	}
 
 	// ------------------------------------------
@@ -992,7 +1004,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 
-		parse_conversion_item : parse_conversion_item,
+		parse_conversions : parse_conversions,
 
 		// ----------------------------
 

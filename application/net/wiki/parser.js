@@ -3322,8 +3322,13 @@ function module_code(library_namespace) {
 		convert : function(language, lang_fallbacks, force_show) {
 			if (!language) {
 				return '-{' + ('_flag' in this ? this._flag + '|' : '')
-				// this.join(';') gets the rule of conversion
+				//
 				+ this.join(';') + '}-';
+			}
+
+			if (language === 'rule') {
+				// gets the rule of conversion only
+				return this.join(';');
 			}
 
 			var flag = this.flag;
@@ -3791,11 +3796,12 @@ function module_code(library_namespace) {
 				}).filter(function(f) {
 					return !!f;
 				});
-				if (flag.lengthy === 0) {
+				if (flag.length === 0) {
 					flag = null;
 				} else {
 					// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
-					[ 'R', 'N', '-', 'T', 'H', 'D', 'A' ].some(function(f) {
+					// 僅取首先符合者。
+					[ 'R', 'N', '-', 'T', 'H', 'A', 'D' ].some(function(f) {
 						if (flag_hash[f]) {
 							flag = f;
 							return true;
@@ -3958,6 +3964,15 @@ function module_code(library_namespace) {
 				// console.log(JSON.stringify(token));
 				return token;
 			});
+			conversion_list = conversion_list.filter(function(token) {
+				return !!token;
+			});
+			if (options.normalize) {
+				conversion_list.sort(function(_1, _2) {
+					// assert: {Array} _1, _2
+					return _1[0] < _2[0] ? -1 : _1[0] > _2[0] ? 1 : 0;
+				});
+			}
 			// console.log(conversion_list);
 			parameters = _set_wiki_type(conversion_list, 'convert');
 			parameters.conversion = conversion;
