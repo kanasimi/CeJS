@@ -139,6 +139,8 @@ function module_code(library_namespace) {
 				normalize : true,
 				with_properties : true
 			});
+			// value.parameter_name = index;
+			value.index = token.index_of[index];
 			// console.log(value);
 			conversion_list.push(value);
 		}

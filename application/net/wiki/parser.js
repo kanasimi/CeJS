@@ -1004,6 +1004,7 @@ function module_code(library_namespace) {
 						break;
 					}
 
+					// `return parsed.each.remove_token;`
 					if (result === for_each_token.remove_token) {
 						if (_this.type === 'list') {
 							// for <ol>, <ul>: 直接消掉整個 item token。
@@ -3395,7 +3396,9 @@ function module_code(library_namespace) {
 			}
 
 			return convert_to
-			// 在手动语言转换规则中检测到错误
+			//
+			|| typeof this.converted === 'string' && this.converted
+			// [[MediaWiki:Converter-manual-rule-error]]: 在手动语言转换规则中检测到错误
 			|| 'converter-manual-rule-error';
 		},
 
@@ -3964,10 +3967,11 @@ function module_code(library_namespace) {
 				// console.log(JSON.stringify(token));
 				return token;
 			});
-			conversion_list = conversion_list.filter(function(token) {
-				return !!token;
-			});
 			if (options.normalize) {
+				// 正規化後可以不保留 -{...;}- 最後的 ';'
+				conversion_list = conversion_list.filter(function(token) {
+					return !!token;
+				});
 				conversion_list.sort(function(_1, _2) {
 					// assert: {Array} _1, _2
 					return _1[0] < _2[0] ? -1 : _1[0] > _2[0] ? 1 : 0;
