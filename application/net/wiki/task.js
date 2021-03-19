@@ -828,13 +828,11 @@ function module_code(library_namespace) {
 			&& next[2] && next[2].section !== 'new'
 			//
 			&& !wiki_API.content_of.had_fetch_content(next[2].page_to_edit)) {
-				if (false) {
-					library_namespace
-							.warn('wiki_API.prototype.next: 有多個執行緒互相競爭？本執行緒將會直接跳出，等待另一個取得頁面內容的執行緒完成後，由其處理。');
-					console.trace(next);
-				}
 				console.log(next);
 				throw new Error('wiki_API.prototype.next: 有多個執行緒互相競爭？');
+				library_namespace
+						.warn('wiki_API.prototype.next: 有多個執行緒互相競爭？本執行緒將會直接跳出，等待另一個取得頁面內容的執行緒完成後，由其處理。');
+				console.trace(next);
 				break;
 			}
 

@@ -1455,7 +1455,7 @@ function module_code(library_namespace) {
 	function fromCodePoint() {
 		var result = '';
 		for (var index = 0, length = arguments.length; index < length; index++) {
-			var char_code = arguments[index] | 0;
+			var char_code = +arguments[index];
 			if (char_code < 0x10000) {
 				result += String.fromCharCode(char_code);
 			} else {

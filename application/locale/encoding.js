@@ -1458,7 +1458,7 @@ function module_code(library_namespace) {
 		for (; i < text.length; i++) {
 			t = c.charCodeAt(0);
 			// 某次破解 Windows Installer 所用的資料
-			// H+=String.fromCharCode(t>61300?t-48977:t);
+			// H += String.fromCharCode(t > 61300 ? t - 48977 : t);
 			H.push(t === 63219 ? 'ー' : String.fromCharCode(
 			// ひらがな
 			t >= 63223 && t <= 63305 ? t - 50870 :

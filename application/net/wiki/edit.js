@@ -242,6 +242,10 @@ function module_code(library_namespace) {
 				&& (options.undo_count || is_undo
 						&& (is_undo < wiki_API_edit.undo_count_limit && is_undo));
 
+		if (wiki_API.Variable_Map.is_Variable_Map(text)) {
+			text = text.to_page_text_updater();
+		}
+
 		if (undo_count || typeof text === 'function') {
 			library_namespace.debug('先取得內容再 edit / undo '
 					+ wiki_API.title_link_of(title) + '。', 1, 'wiki_API_edit');
@@ -260,6 +264,9 @@ function module_code(library_namespace) {
 					// 無須 content，盡量減少索求的資料量。
 					: 'ids|timestamp';
 				}
+			} else {
+				_options = Object.clone(options);
+				delete _options.rollback_action;
 			}
 
 			wiki_API.page(title, function(page_data) {
@@ -310,7 +317,7 @@ function module_code(library_namespace) {
 					wiki_API_edit(title, text, token, options, callback,
 							timestamp);
 				}
-			}, _options || options);
+			}, _options);
 			return;
 		}
 
@@ -940,7 +947,7 @@ function module_code(library_namespace) {
 		// 前置處理。
 		options = library_namespace.new_options(options);
 
-		if (options.file_text_updater) {
+		if (options.page_text_updater) {
 			// https://www.mediawiki.org/w/api.php?action=help&modules=upload
 			// A "csrf" token retrieved from action=query&meta=tokens
 			options.token = token;
@@ -1137,7 +1144,7 @@ function module_code(library_namespace) {
 			console.log(data);
 		}
 
-		if (!options.file_text_updater
+		if (!options.page_text_updater
 		// uploaded a new version
 		// {result:'Success',filename:'file_name',warnings:{exists:'file_name'},imageinfo:{...}}
 		|| !data.warnings || !data.warnings.exists) {
@@ -1151,20 +1158,38 @@ function module_code(library_namespace) {
 		}
 		delete options.text;
 		delete options.form_data;
-		if (wiki_API.Variable_Map.is_Variable_Map(options.file_text_updater)) {
-			options.file_text_updater = options.file_text_updater
-					.to_file_text_updater();
+		if (wiki_API.Variable_Map.is_Variable_Map(options.page_text_updater)) {
+			options.page_text_updater = options.page_text_updater
+					.to_page_text_updater();
 		}
 		var file_path = 'File:' + data.filename;
-		// library_namespace.info('upload_callback: options.file_text_updater');
+		// library_namespace.info('upload_callback: options.page_text_updater');
 		// console.log(JSON.stringify(data));
 		// console.log(file_path);
 		// console.trace(options);
-		wiki_API.edit(file_path, options.file_text_updater, options.token,
+		wiki_API.edit(file_path, options.page_text_updater, options.token,
 				options, callback);
 	}
 
 	// ------------------------------------------
+	// 使用於需要多次更新頁面內容的情況。
+
+	if (false) {
+		(function() {
+			// TODO:
+			var update_Variable_Map = new CeL.wiki.Variable_Map;
+			update_Variable_Map.set('variable_name', value);
+			update_Variable_Map.set('timestamp', {
+				wikitext : '<onlyinclude>~~~~~</onlyinclude>',
+				// .may_not_update: 可以不更新。 e.g., timestamp
+				may_not_update : true
+			});
+			update_Variable_Map.template = '...\n' + '*date: '
+					+ update_Variable_Map.format('timestamp') + '\n'
+					+ update_Variable_Map.format('variable_name') + '...';
+			wiki.edit(page, update_Variable_Map, options);
+		})();
+	}
 
 	function Variable_Map(iterable) {
 		if (library_namespace.is_Object(iterable))
@@ -1185,7 +1210,7 @@ function module_code(library_namespace) {
 	Variable_Map.prototype = {
 		format : Variable_Map_format,
 		update : Variable_Map_update,
-		to_file_text_updater : Variable_Map_to_file_text_updater,
+		to_page_text_updater : Variable_Map_to_page_text_updater,
 		constructor : Variable_Map
 	};
 
@@ -1193,24 +1218,29 @@ function module_code(library_namespace) {
 		return value && value.constructor === Variable_Map;
 	};
 
-	// @inner
 	function Variable_Map_format(variable_name, default_value) {
 		var start_mark = '<!-- update '
 				+ variable_name
 				+ ': Text inside update comments will be auto-replaced by bot -->';
 		var end_mark = '<!-- update end: ' + variable_name + ' -->';
-		return start_mark
-				+ (this.has(variable_name) ? this.get(variable_name)
-						: default_value === undefined ? '' : default_value)
-				+ end_mark;
+		var value;
+		if (this.has(variable_name)) {
+			value = this.get(variable_name);
+			if (library_namespace.is_Object(value)) {
+				// TODO: value.wikitext === undefined
+				value = value.wikitext;
+			}
+		} else {
+			value = default_value === undefined ? '' : default_value;
+		}
+		return start_mark + value + end_mark;
 	}
 
 	// [ all_mark, start_mark, variable_name, end_mark ]
 	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)[\s\S]+?(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)/g;
 
-	// @inner
 	function Variable_Map_update(wikitext) {
-		var variable_Map = this;
+		var changed, variable_Map = this;
 		// console.trace(variable_Map);
 		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, function(
 				all_mark, start_mark, variable_name, end_mark) {
@@ -1220,39 +1250,58 @@ function module_code(library_namespace) {
 			}
 			// console.log(variable_Map);
 			if (variable_Map.has(variable_name)) {
+				var value = variable_Map.get(variable_name);
+				if (library_namespace.is_Object(value)) {
+					// .may_not_update: 可以不更新。 e.g., timestamp
+					if (!value.may_not_update)
+						changed = true;
+					value = value.wikitext;
+				} else {
+					changed = true;
+				}
 				// preserve start_mark, end_mark
-				return start_mark + variable_Map.get(variable_name) + end_mark;
+				return start_mark + value + end_mark;
 			}
-			return all;
+			return all_mark;
 		});
+		if (!changed)
+			return [ wiki_API.edit.cancel, 'skip' ];
 		// console.trace(wikitext);
 		return wikitext;
 	}
 
-	function Variable_Map__file_text_updater(page_data) {
+	// @inner
+	function Variable_Map__page_text_updater(page_data) {
 		// console.trace(page_data);
-		/** {String}page title = page_data.title */
-		var title = wiki_API.title_of(page_data),
 		/**
 		 * {String}page content, maybe undefined. 條目/頁面內容 =
 		 * CeL.wiki.revision_content(revision)
 		 */
-		content = wiki_API.content_of(page_data);
+		var content = wiki_API.content_of(page_data);
+		// console.trace(content);
 
-		// typeof content !== 'string'
-		if (!content) {
+		if (content) {
+			// console.trace(content);
+			// console.trace(this.update(content))
+			return this.update(content);
+		}
+
+		if (this.template) {
+			return this.template = this.update(this.template);
+		}
+
+		if (false) {
 			content = 'No contents: ' + wiki_API.title_link_of(page_data)
 			// or: 此頁面不存在/已刪除。
 			+ '! 沒有頁面內容！';
-			// library_namespace.log(content);
-			return [ wiki_API.edit.cancel, content ];
 		}
-
-		// console.trace(content);
-		return this.update(content);
+		content = wiki_API.title_link_of(page_data)
+				+ ': No Variable_Map#template specified.';
+		// library_namespace.log(content);
+		return [ wiki_API_edit.cancel, content ];
 	}
-	function Variable_Map_to_file_text_updater() {
-		return Variable_Map__file_text_updater.bind(this);
+	function Variable_Map_to_page_text_updater() {
+		return Variable_Map__page_text_updater.bind(this);
 	}
 
 	Variable_Map.plain_text = function plain_text(wikitext) {

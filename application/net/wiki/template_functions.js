@@ -156,16 +156,24 @@ function module_code(library_namespace) {
 				library_namespace.info('parse_conversions: ' + page_data.title);
 			}
 			var object = wiki_API.content_of(page_data);
-			if (/function Item\s*\(/.test(object)) {
+			// local function Item
+			if (/function\s+Item\s*\(/.test(object)
+			// `local Item = require('Module:CGroup/core').Item;`
+			|| /local\s+Item\s*=/.test(object)) {
 				// remove local function Item(o, r)
 				object = object.replace(
-						/(?:\w* )*function Item\s*\([\s\S]+?[\n ]end *\n/, '');
+						/(?:\w* )*function Item\s*\([\s\S]+?[\n ]end *\n/, '')
+						.replace(/local\s+Item\s*=[^\n;]+/, '');
 				// convert `Item('Alec', 'zh-cn:亚历克; zh-tw:亞歷;')`
 				object = object.replace(PATTERN_Item_function, function(item,
-						prefix, original, rule, desc) {
+						prefix, original, rule, additional) {
+					if (additional) {
+						library_namespace.warn(
+						//
+						'There is additional parameter: ' + item.trim());
+					}
 					return prefix + "{type='item',original=" + original
-							+ ",rule=" + rule + (desc ? ",desc=" + desc : '')
-							+ "}";
+							+ ",rule=" + rule + "}";
 				});
 			}
 			object = wiki_API.parse.lua_object(object);
@@ -208,8 +216,6 @@ function module_code(library_namespace) {
 			parsed = get_parsed(page_data);
 		}
 
-		var need_reparse;
-		// Convert -{}- to more infomational template
 		parsed.each('convert', function(token, index, parent) {
 			if (parent.type === 'convert' || !(token.flag in {
 				// add rule for convert code (but no display in placed code)
@@ -221,21 +227,14 @@ function module_code(library_namespace) {
 			}
 
 			// get conversion rule only
-			token = token.toString('rule');
-			if (!token)
-				return;
-
-			need_reparse = true;
-			// Warning: Will modify `page_data.parsed`
-			return '{{CItem|' + token.replace(/=/g, '{{=}}') + '}}';
-		}, true);
-		if (need_reparse) {
-			// console.log(parsed.toString());
-
-			// re-parse page
-			parsed = wiki_API.parser(parsed.toString());
-		}
-		// console.log(parsed.toString());
+			var rule = token.toString('rule');
+			if (rule) {
+				conversion_list.push(item_to_conversion({
+					type : 'item',
+					rule : rule
+				}));
+			}
+		});
 
 		function for_each_template(token) {
 			if (token.conversion_list) {

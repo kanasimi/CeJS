@@ -1388,7 +1388,8 @@ function module_code(library_namespace) {
 		}
 		// console.log(token);
 
-		if (token.type === 'transclusion' && typeof token.expand === 'function') {
+		while (token.type === 'transclusion'
+				&& typeof token.expand === 'function') {
 			// console.log(options);
 			// expand template, .expand_template(), .to_wikitext()
 			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
@@ -1541,16 +1542,39 @@ function module_code(library_namespace) {
 				return token;
 			}
 
-			if (token.name === 'Anchor') {
-				return '';
-			}
-
 			if (token.name === 'Lang') {
 				return preprocess_section_link_token(token.parameters[2],
 						options);
 			}
 
+			if (token.name === 'Anchor') {
+				return '';
+			}
+
 			// TODO: {{Visible anchor}} === {{vanchor}}
+
+			// jawiki
+			if (token.name === '拡張漢字') {
+				return preprocess_section_link_token(token.parameters[2]
+						|| token.parameters[1], options);
+			}
+
+			// jawiki
+			if (token.name in {
+				ARIB外字フォント : true,
+				CP932フォント : true,
+				JIS90フォント : true,
+				JIS2004フォント : true,
+				MacJapanese : true,
+				変体仮名フォント : true,
+				拡張漢字 : true,
+				絵文字フォント : true,
+				補助漢字フォント : true,
+				通貨フォント : true
+			}) {
+				return preprocess_section_link_token(token.parameters[1],
+						options);
+			}
 
 			// TODO: [[Template:User link]], [[Template:U]]
 
@@ -1669,7 +1693,8 @@ function module_code(library_namespace) {
 	}
 
 	// TODO: The method now is NOT a good way!
-	function extract_plain_text_of_wikitext(wikitext, options) {
+	// extract_plain_text_of_wikitext(), get_plain_display_text()
+	function wikitext_to_plain_text(wikitext, options) {
 		options = library_namespace.new_options(options);
 
 		wikitext = wiki_API.parse(String(wikitext));
@@ -2578,7 +2603,8 @@ function module_code(library_namespace) {
 					var anchor = template_token.parameters[index];
 					if (typeof anchor !== 'string') {
 						// e.g., [[終着駅シリーズ]]: {{Anchor|[[牛尾正直]]}}
-						anchor = extract_plain_text_of_wikitext(anchor);
+						// {{Anchor|A[[B]]}} → "AB"
+						anchor = wikitext_to_plain_text(anchor);
 					}
 					register_anchor(anchor, template_token);
 				}
@@ -3007,44 +3033,6 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
-
-	var font_templates = 'JIS90フォント|JIS2004フォント|CP932フォント|MacJapanese|ARIB外字フォント|絵文字フォント|補助漢字フォント|変体仮名フォント|通貨フォント|拡張漢字';
-	var PATTERN_font_templates = new RegExp('{{ *(?:' + font_templates
-			+ ') *\\|(.+?)}}', 'g');
-	font_templates = font_templates.split('|').to_hash();
-
-	// CeL.wiki.get_plain_display_text(link_token[2]).trim()
-	function get_plain_display_text(display_text, options) {
-		if (Array.isArray(display_text)) {
-			for_each_token.call(display_text, 'template', function(token,
-					index, parent) {
-				if (token.name === 'Lang') {
-					parent[index] = token.parameters[2];
-					return;
-				}
-
-				// for jawiki
-				if (token.name in font_templates) {
-					parent[index] = token.parameters[1];
-					return;
-				}
-
-			});
-		}
-
-		display_text = display_text.toString()
-		// jawiki
-		.replace(/{{ *[lL]ang *\|[a-z ]{2,}\|(.+?)}}/g, '$1')
-		// jawiki
-		.replace(PATTERN_font_templates, '$1')
-		// <span lang="zh" xml:lang="zh">埕</span>
-		.replace(/<span(?: +(?:xml:)?lang="[a-z]*")*>([^<>]*)<\/span>/g, '$1');
-
-		display_text = library_namespace.HTML_to_Unicode(display_text);
-		if (options && options.normalize_title)
-			display_text = wiki_API.normalize_title(display_text);
-		return display_text;
-	}
 
 	/**
 	 * 將特殊標記解譯/還原成 {Array} 組成之結構。
@@ -4304,7 +4292,7 @@ function module_code(library_namespace) {
 					// [[w:en:Wikipedia:Piped link]] the displayed text
 					: 'display_text'] = parsed_display_text
 					if (false && !category_matched) {
-						parameters.plain_display_text = get_plain_display_text(
+						parameters.plain_display_text = wikitext_to_plain_text(
 								display_text, options);
 					}
 					parameters.push(parsed_display_text);
@@ -7240,8 +7228,8 @@ function module_code(library_namespace) {
 	// TODO: secutity check
 	function parse_lua_object_code(lua_code) {
 		lua_code = wiki_API.content_of(lua_code);
-		if (!/^[\s\n]*return[\s\n]*{/.test(lua_code.replace(
-				/(\n|^)\s*--[^\n]*/g, ''))) {
+		if (!/^[;\s\n]*return[\s\n]*{/.test(lua_code.replace(
+				/(\n|^)[;\s]*--[^\n]*/g, ''))) {
 			library_namespace.warn('parse_lua_object_code: Invalid lua code? '
 			//
 			+ (typeof lua_code === 'string' && lua_code.length > 200
@@ -7431,7 +7419,7 @@ function module_code(library_namespace) {
 		});
 		// lua_code = eval('(function(){' + lua_code + '})()');
 
-		lua_code = lua_code.replace(/^\s*return([\s\n{])/, '$1');
+		lua_code = lua_code.replace(/^[;\s\n]*return[\s\n]*{/, '{');
 		lua_code = lua_code.replace(/\t/g, '\\t');
 
 		// console.log(JSON.stringify(lua_code));
@@ -7822,6 +7810,7 @@ function module_code(library_namespace) {
 		file_options : file_options,
 
 		HTML_to_wikitext : HTML_to_wikitext,
+		wikitext_to_plain_text : wikitext_to_plain_text,
 
 		DEFINITION_LIST : DEFINITION_LIST,
 
@@ -7830,8 +7819,6 @@ function module_code(library_namespace) {
 		// parse_table(), parse_wikitable()
 		table_to_array : table_to_array,
 		array_to_table : array_to_table,
-
-		get_plain_display_text : get_plain_display_text,
 
 		parse : parse_wikitext,
 		// parser : page_parser,

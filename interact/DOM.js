@@ -8203,7 +8203,7 @@ function module_code(library_namespace) {
 			// digital: &#111; 之版本
 			if (digital > 0x10FFFF)
 				return all;
-			var char = String.fromCharCode(digital);
+			var char = String.fromCodePoint(digital);
 			return !options.predefined
 			//
 			&& HTML_Entities_predefined_values.includes(char) ? all : char;
