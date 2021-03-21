@@ -169,7 +169,7 @@ function module_code(library_namespace) {
 						prefix, original, rule, additional) {
 					if (additional) {
 						library_namespace.warn(
-						//
+						// 含有未知參數 [[:Category:Unknown parameters]]
 						'There is additional parameter: ' + item.trim());
 					}
 					return prefix + "{type='item',original=" + original

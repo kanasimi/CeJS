@@ -592,6 +592,12 @@ function module_code(library_namespace) {
 			options.all_file_count = 0;
 		}
 
+		if (!(options.all_directory_count > 0)) {
+			// Warning: options.all_directory_count will auto-added
+			// after read new directory.
+			options.all_directory_count = 0;
+		}
+
 		function process_next_fso(promise, fso_name) {
 			var full_path = path + fso_name,
 			// https://nodejs.org/api/fs.html#fs_class_fs_stats
@@ -607,6 +613,11 @@ function module_code(library_namespace) {
 
 			// Depth-first search (DFS)
 			if (is_directory) {
+				if (!filter || filter.test(fso_name)) {
+					options.all_directory_count++;
+					promise = promise.then(handler.bind(null, full_path,
+							fso_status, is_directory, options));
+				}
 				return promise.then(traverse_file_system.bind(null, full_path,
 						handler, options, depth));
 			}

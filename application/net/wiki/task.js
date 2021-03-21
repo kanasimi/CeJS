@@ -1841,7 +1841,7 @@ function module_code(library_namespace) {
 		summary : ''
 	});
 
-	// temporary message, console_message()
+	// temporary message, console_message(), log_status(), log_temporary()
 	var interactive_message = library_namespace.platform.nodejs
 			&& library_namespace.platform.is_interactive ? function interactive_message(
 			message) {

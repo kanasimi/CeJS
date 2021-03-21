@@ -195,9 +195,19 @@ function module_code(library_namespace) {
 			}
 		}
 
+		work_data.convert_options = {
+			// only for debug CeCC 繁簡轉換。
+			cache_directory : library_namespace
+					.append_path_separator(work_data.directory + '繁簡轉換 cache'),
+			cache_file_for_short_sentences : true,
+			// 超過此長度才 cache。
+			min_cache_length : 20
+		};
+
 		// return needing to wait language converted
 		var text_list = [ work_data.title, '語言轉換' ];
-		var promise_language_convert = this.cache_converted_text(text_list);
+		var promise_language_convert = this.cache_converted_text(text_list,
+				work_data.convert_options);
 		if (promise_language_convert) {
 			// console.trace('Convert: ' + text_list);
 			return promise_language_convert.then(create_ebook.bind(this,
@@ -282,9 +292,10 @@ function module_code(library_namespace) {
 		text_list = [ work_data.author, options.description,
 				work_data.site_name ];
 		text_list.append(subject);
-		promise_language_convert = this.cache_converted_text(text_list)
-		// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
-		|| Promise.resolve();
+		promise_language_convert = this.cache_converted_text(text_list,
+				work_data.convert_options)
+				// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
+				|| Promise.resolve();
 		return ebook.working_promise = promise_language_convert
 				.then(setup_ebook.bind(this, work_data, options));
 	}
@@ -382,14 +393,7 @@ function module_code(library_namespace) {
 			chapter_title : chapter_title
 		};
 
-		var convert_options = {
-			// only for debug CeCC 繁簡轉換。
-			cache_directory : library_namespace
-					.append_path_separator(work_data.directory + '繁簡轉換 cache'),
-			// 超過此長度才 cache。
-			min_cache_length : 20
-		};
-		// console.trace(convert_options);
+		// console.trace(work_data.convert_options);
 
 		data.text = library_namespace.HTML_to_Unicode(
 		// 處理 HTML tags 以減少其對 this.convert_text_language() 的影響。
@@ -406,7 +410,7 @@ function module_code(library_namespace) {
 		// return needing to wait language converted
 		var text_list = [ part_title, chapter_title, data.text ];
 		var promise_language_convert = this.cache_converted_text(text_list,
-				convert_options);
+				work_data.convert_options);
 		if (promise_language_convert) {
 			return ebook.working_promise = ebook.working_promise
 					.then(function() {

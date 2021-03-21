@@ -477,6 +477,7 @@ function (globalThis) {
 	 * @example<code>
 
 	// 前導作業/前置處理。
+	// 重新造一個 options 以避免污染。
 	if (!library_namespace.is_Object(options))
 		options = Object.create(null);
 	// →
@@ -2575,6 +2576,11 @@ OS='UNIX'; // unknown
 	_.debug_console.warn = _.warn;
 	_.debug_console.error = _.error;
 	_.debug_console.debug = _.debug;
+
+	// CeL.log_temporary(): temporary message
+	// console_message(), log_status(), interactive_message()
+	// Will re-set @ set_initializor() @ module.js
+	_.log_temporary = _.null_function;
 
 	// ---------------------------------------------------------------------//
 	// 補強 (shim, polyfill) 用的 functions。

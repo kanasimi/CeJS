@@ -490,6 +490,12 @@ if (typeof CeL === 'function') {
 			// Windows 7 to Windows 10
 			|| process.env.SESSIONNAME === 'Console';
 
+			if (_.platform.is_interactive) {
+				_.log_temporary = function log_temporary(message) {
+					process.stdout.write(message + ' ...\r');
+				};
+			}
+
 			// TODO:
 			// https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
 			var node_read_file = _.new_XMLHttp = _.new_XMLHttp.readFileSync;
