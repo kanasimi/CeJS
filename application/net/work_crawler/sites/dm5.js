@@ -617,10 +617,9 @@ function module_code(library_namespace) {
 			}
 			if (iterator === library_namespace.run_parallel) {
 				// actually image_count - 1
-				process.stdout.write('Get ' + image_count
+				library_namespace.log_temporary('Get ' + image_count
 						+ ' image data pages. '
-						+ _this.estimated_message(work_data, chapter_NO)
-						+ '...\r');
+						+ _this.estimated_message(work_data, chapter_NO));
 			}
 			iterator(function(run_next, image_NO) {
 				// @see https://manhua.wzlzs.com/muban/mh/js/p.js?20181207
@@ -662,11 +661,10 @@ function module_code(library_namespace) {
 				}
 
 				if (iterator === library_namespace.run_serial) {
-					process.stdout.write('Get image data page of §'
+					library_namespace.log_temporary('Get image data page of §'
 							+ chapter_NO + ': ' + image_NO + '/' + image_count
 							+ '. '
-							+ _this.estimated_message(work_data, chapter_NO)
-							+ '...\r');
+							+ _this.estimated_message(work_data, chapter_NO));
 				}
 
 				// Should use POST?
@@ -844,8 +842,8 @@ function module_code(library_namespace) {
 					run_next();
 					return;
 				}
-				process.stdout.write('圖 ' + image_NO + '/' + DM5.IMAGE_COUNT
-						+ '...\r');
+				library_namespace.log_temporary('圖 ' + image_NO + '/'
+						+ DM5.IMAGE_COUNT);
 
 				get_token(image_NO, run_next);
 				return;

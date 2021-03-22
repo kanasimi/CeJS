@@ -1841,14 +1841,6 @@ function module_code(library_namespace) {
 		summary : ''
 	});
 
-	// temporary message, console_message(), log_status(), log_temporary()
-	var interactive_message = library_namespace.platform.nodejs
-			&& library_namespace.platform.is_interactive ? function interactive_message(
-			message) {
-		process.stdout.write(message + ' ...\r');
-	}
-			: library_namespace.null_function;
-
 	/**
 	 * robot 作業操作之輔助套裝函數。此函數可一次取得50至300個頁面內容再批次處理。<br />
 	 * 不會推入 this.actions queue，即時執行。因此需要先 get list！
@@ -2345,7 +2337,7 @@ function module_code(library_namespace) {
 								error) {
 							// TODO: if (error) {...}
 							// console.log([ page_data, config.page_options ]);
-							interactive_message((index + 1) + '/'
+							library_namespace.log_temporary((index + 1) + '/'
 									+ pages.length + ' '
 									+ wiki_API.title_link_of(page_data));
 							var result = each.call(config, page_data, messages,
@@ -2397,7 +2389,7 @@ function module_code(library_namespace) {
 								}
 								library_namespace.sinfo(_messages);
 							} else {
-								interactive_message(
+								library_namespace.log_temporary(
 								//
 								(index + 1) + '/' + pages.length + ' '
 								//

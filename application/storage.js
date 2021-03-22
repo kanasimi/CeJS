@@ -394,7 +394,7 @@ function module_code(library_namespace) {
 		_.working_directory().replace(/[\\\/]+$/, ''))) {
 			;
 
-		} else if (download_directory = library_namespace.env('home')) {
+		} else if (download_directory = library_namespace.env.home) {
 			if ([ 'Downloads', '下載' ]
 			// '下載': Linux Mint
 			.some(function(user_download_directory) {

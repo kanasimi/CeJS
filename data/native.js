@@ -684,7 +684,7 @@ function module_code(library_namespace) {
 	// RegExp.prototype.flags
 	// 注意: 本 shim 實際上應放置於 data.code.compatibility。惟其可能會被省略執行，因此放置於此。
 	if (!('flags' in RegExp.prototype)
-	// library_namespace.env('not_native_keyword')
+	//
 	&& !Object.defineProperty[library_namespace.env.not_native_keyword])
 		Object.defineProperty(RegExp.prototype, 'flags', {
 			get : function() {
@@ -3999,6 +3999,13 @@ function module_code(library_namespace) {
 	 * @see https://stackoverflow.com/questions/1916218/find-the-longest-common-starting-substring-in-a-set-of-strings/1917041#1917041
 	 */
 	function longest_common_starting_length(string_list) {
+		string_list = string_list.filter(function(string) {
+			return typeof string === 'string';
+		});
+		if (string_list.length <= 1) {
+			return string_list[0] ? string_list[0].length : 0;
+		}
+
 		var char_index = 0;
 		for (var last = string_list[0].length; char_index < last; char_index++) {
 			var char_now = string_list[0].charAt(char_index);

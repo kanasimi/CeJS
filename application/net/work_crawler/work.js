@@ -633,12 +633,12 @@ function module_code(library_namespace) {
 			var chapter_time_interval = _this.get_chapter_time_interval(
 					work_URL, work_data);
 			if (chapter_time_interval > 0) {
-				process.stdout.write('get_work_page: '
+				library_namespace.log_temporary('get_work_page: '
 						+ gettext('等待 %2 之後取得作品資訊頁面：%1', work_URL,
 								library_namespace.age_of(0,
 										chapter_time_interval, {
 											digits : 1
-										})) + '...\r');
+										})));
 				setTimeout(function() {
 					_this.get_URL(work_URL, process_work_data);
 				}, chapter_time_interval);

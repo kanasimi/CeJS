@@ -492,7 +492,8 @@ if (typeof CeL === 'function') {
 
 			if (_.platform.is_interactive) {
 				_.log_temporary = function log_temporary(message) {
-					process.stdout.write(message + ' ...\r');
+					// message + ' ...\r'
+					process.stdout.write('\r' + message + '  \r');
 				};
 			}
 
@@ -1336,12 +1337,13 @@ if (typeof CeL === 'function') {
 		 * @returns {Boolean} 是否符合 module pattern
 		 */
 		is_module_pattern = function(test_string) {
-			var r = _.env.module_identifier_RegExp;
+			var env = _.env;
+			var r = env.module_identifier_RegExp;
 			if (!r) {
 				// initial module_identifier_RegExp
-				r = _.env.identifier_RegExp.source;
-				r = _.env.module_identifier_RegExp = new RegExp('^' + r
-						+ '(\\.' + r + ')*$');
+				r = env.identifier_RegExp.source;
+				r = env.module_identifier_RegExp = new RegExp('^' + r + '(\\.'
+						+ r + ')*$');
 			}
 
 			return r.test(test_string);
@@ -1589,10 +1591,6 @@ if (typeof CeL === 'function') {
 			return (_.is_local = _.constant_function(!_.is_WWW()
 					|| window.location.protocol === 'file:'))();
 		};
-
-		// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
-
-		_.reset_env();
 
 	}
 	// 不用 apply()，因為比較舊的瀏覽器沒有 apply()。

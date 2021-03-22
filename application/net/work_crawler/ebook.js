@@ -235,9 +235,10 @@ function module_code(library_namespace) {
 						+ ebook_file_path[1])) {
 			var ebook_archive = new library_namespace.storage.archive(
 					ebook_file_path[0] + ebook_file_path[1]);
-			process.stdout.write(gettext('Extract ebook as cache: [%1]',
-			// ebook_archive.archive_file_path
-			ebook_file_path[1]) + '...\r');
+			library_namespace.log_temporary(gettext(
+					'Extract ebook as cache: [%1]',
+					// ebook_archive.archive_file_path
+					ebook_file_path[1]));
 			ebook_archive.extract({
 				output : ebook_directory
 			});
@@ -434,10 +435,9 @@ function module_code(library_namespace) {
 		if (this.convert_to_language) {
 			part_title = this.convert_text_language(part_title);
 			chapter_title = this.convert_text_language(chapter_title);
-			process.stdout.write(gettext(
+			library_namespace.log_temporary(gettext(
 					this.convert_to_language === 'TW' ? '將簡體中文轉換成繁體中文：《%1》'
-							: '将繁体中文转换成简体中文：《%1》', chapter_title)
-					+ '...\r');
+							: '将繁体中文转换成简体中文：《%1》', chapter_title));
 			process.title = gettext(
 					this.convert_to_language === 'TW' ? '繁化: %1' : '简化: %1',
 					chapter_title)

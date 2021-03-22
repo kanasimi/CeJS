@@ -1259,41 +1259,11 @@ function (globalThis) {
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// 環境變數處理。
 
-
 	_// JSDT:_module_
 	.
 	/**
-	 * 取得/設定環境變數 enumeration<br />
-	 * （雖然不喜歡另開 name-space，但以 2009 當下的 JsDoc Toolkit 來說，似乎沒辦法創造 enumeration。）
-	 * 
-	 * @class 環境變數 (environment variables) 與程式會用到的 library 相關變數 / configuration。
-	 * 
-	 * @param {String}name
-	 *            環境變數名稱
-	 * @param value
-	 *            環境變數之值
-	 * 
-	 * @returns 舊環境變數之值
-	 * @_memberOf _module_
-	 */
-	env = function env(name, value) {
-		if (!name)
-			// return;
-			return undefined;
-
-		// typeof value !== 'undefined'
-		if (arguments.length > 1)
-			env[name] = value;
-
-		// isNaN(env[name]) ? String(env[name]) : +env[name];
-		return env[name];
-	};
-
-
-	_// JSDT:_module_
-	.
-	/**
-	 * Setup environment variables
+	 * Setup environment variables. 重新設定環境變數 (environment variables) enumeration
+	 * 與程式會用到的 library 相關變數 / configuration。
 	 * 
 	 * @param {String}[OS_type]
 	 *            type of OS
@@ -1302,11 +1272,9 @@ function (globalThis) {
 	 * 
 	 * @returns {Object} environment variables set
 	 */
-	reset_env = function (OS_type, reset) {
-		if (reset)
-			this.env = Object.create(null);
-
-		var OS, env = this.env,
+	reset_env = function reset_env(OS_type, reset) {
+		// CeL.env[環境變數名稱]=環境變數之值. this === _ === library_namespace
+		var OS, env = !reset && this.env || (this.env = Object.create(null)),
 		//
 		win_env_keys = 'PROMPT|HOME|PUBLIC|SESSIONNAME|LOCALAPPDATA|OS|Path|PROCESSOR_IDENTIFIER|SystemDrive|SystemRoot|TEMP|TMP|USERNAME|USERPROFILE|ProgramData|ProgramFiles|ProgramFiles(x86)|ProgramW6432|windir'.split('|');
 
@@ -1700,6 +1668,8 @@ OS='UNIX'; // unknown
 
 		return env;
 	};
+
+	_.reset_env();
 
 
 	_// JSDT:_module_
@@ -2866,7 +2836,7 @@ OS='UNIX'; // unknown
 
 		function setter() {
 			// !_.is_Function()
-			var value = filter, not_native_keyword = _.env('not_native_keyword') || KEY_not_native;
+			var value = filter, not_native_keyword = _.env.not_native_keyword || KEY_not_native;
 			if (_.is_Object(filter))
 				if (key in properties)
 					value = filter[key];

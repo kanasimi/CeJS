@@ -774,6 +774,10 @@ function module_code(library_namespace) {
 			if (!key) {
 				throw new Error('No key for value: ' + value);
 			}
+			if (!value && value !== '') {
+				// e.g., token=undefined
+				throw new TypeError('Invalid type of ' + key + ': ' + typeof value);
+			}
 
 			// @see function push_and_callback(MIME_type, content)
 			headers = 'Content-Disposition: form-data; name="' + key + '"'
@@ -1954,7 +1958,7 @@ function module_code(library_namespace) {
 					if (!(options.show_progress > 1)) {
 						message.pop();
 					}
-					process.stdout.write(message.join('') + ' ...\r');
+					library_namespace.log_temporary(message.join(''));
 				}
 
 				if (length > options.MAX_BUFFER_SIZE) {

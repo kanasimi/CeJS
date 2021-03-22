@@ -938,7 +938,7 @@ function module_code(library_namespace) {
 		if (this.rtl) {
 			bar_text.reverse();
 		}
-		process.stdout.write('\r' + bar_text.join('\n'));
+		library_namespace.log_temporary(bar_text.join('\n'));
 	}
 
 	function tick_progress(delta, post_text, pre_text) {

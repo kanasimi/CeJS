@@ -338,7 +338,7 @@ function module_code(library_namespace) {
 				message.push(estimated_message);
 			}
 			message.push('...\r');
-			process.stdout.write(message.join(''));
+			library_namespace.log_temporary(message.join(''));
 			setTimeout(actual_operation, chapter_time_interval);
 		}).bind(this) : actual_operation;
 
@@ -840,12 +840,12 @@ function module_code(library_namespace) {
 		function get_data() {
 			var estimated_message = _this.estimated_message(work_data,
 					chapter_NO);
-			process.stdout.write(gettext('Getting data of chapter %1',
-					chapter_NO
+			library_namespace.log_temporary(gettext(
+					'Getting data of chapter %1', chapter_NO
 							+ (typeof _this.pre_chapter_URL === 'function' ? ''
 									: '/' + work_data.chapter_count))
 					+ (estimated_message ? gettext(', %1', estimated_message)
-							: '') + '...\r');
+							: ''));
 
 			// default: 置於 work_data.directory 下。
 			var chapter_file_name = work_data.directory
@@ -895,18 +895,16 @@ function module_code(library_namespace) {
 						// In Max OS: 直接解開圖片壓縮檔以避免麻煩。
 						// Max OS 中，壓縮檔內的檔案路徑包括了目錄名稱，行為表現與其他的應用程式不一致，因此不容易判別。
 						// 另外 Max OS 中的壓縮程式缺乏了某些功能。
-						process.stdout.write(gettext('解開圖片壓縮檔：%1',
-								images_archive.file_name)
-								+ '...\r');
+						library_namespace.log_temporary(gettext('解開圖片壓縮檔：%1',
+								images_archive.file_name));
 						images_archive.extract({
 							cwd : images_archive
 						});
 					} else {
 						// detect if images archive file is existed.
 						images_archive.file_existed = true;
-						process.stdout.write(gettext('讀取圖片壓縮檔：%1',
-								images_archive.file_name)
-								+ '...\r');
+						library_namespace.log_temporary(gettext('讀取圖片壓縮檔：%1',
+								images_archive.file_name));
 						images_archive.info();
 						if (false && typeof _this.check_images_archive === 'function')
 							_this.check_images_archive(images_archive);
@@ -1079,11 +1077,10 @@ function module_code(library_namespace) {
 				//
 				get_next_image = function() {
 					// assert: image_list.index < image_list.length
-					process.stdout.write(gettext('下載圖 %1',
+					library_namespace.log_temporary(gettext('下載圖 %1',
 							(image_list.index + 1)
 									+ (_this.dynamical_count_images ? '' : '/'
-											+ image_list.length))
-							+ '...\r');
+											+ image_list.length)));
 					var image_data = normalize_image_data(
 							image_list[image_list.index], image_list.index);
 					if (time_interval > 0)
@@ -1104,12 +1101,12 @@ function module_code(library_namespace) {
 							return;
 						}
 
-						process.stdout.write('process_images: '
+						library_namespace.log_temporary('process_images: '
 								+ gettext('下載第%2張圖前先等待%1。', library_namespace
 										.age_of(0, time_interval, {
 											digits : 1
 										}), image_list.index + '/'
-										+ image_list.length) + '...\r');
+										+ image_list.length));
 						setTimeout(get_next_image, time_interval);
 					}, images_archive);
 				};
@@ -1223,13 +1220,15 @@ function module_code(library_namespace) {
 						//
 						: chapter_time_interval > 0 ? '等待 %2 之後再取得章節內容頁面：%1'
 								: '取得章節內容頁面：%1';
-						process.stdout.write('process_chapter_data: '
-						// TODO: Array.isArray(chapter_URL)
-						+ gettext(message, chapter_URL,
-						//
-						library_namespace.age_of(0, chapter_time_interval, {
-							digits : 1
-						})) + '...\r');
+						library_namespace
+								.log_temporary('process_chapter_data: '
+										// TODO: Array.isArray(chapter_URL)
+										+ gettext(message, chapter_URL,
+										//
+										library_namespace.age_of(0,
+												chapter_time_interval, {
+													digits : 1
+												})));
 						if (chapter_time_interval > 0) {
 							setTimeout(reget_chapter_data,
 									chapter_time_interval);
@@ -1449,7 +1448,7 @@ function module_code(library_namespace) {
 			if (_this.one_by_one && _this.dynamical_count_images) {
 				left = image_list.length - image_list.index - 1;
 			} else if (Array.isArray(image_list) && image_list.length > 1) {
-				process.stdout.write(gettext('剩 %1 張圖...', left) + '\r');
+				library_namespace.log_temporary(gettext('剩 %1 張圖...', left));
 				library_namespace.debug([ chapter_label + ': ', {
 					T : [ '剩 %1 張圖...', left ]
 				} ], 3, 'check_if_done');
@@ -1535,12 +1534,11 @@ function module_code(library_namespace) {
 				return image_data.has_error;
 			}))) {
 				if (images_archive.to_remove.length > 0) {
-					process.stdout.write(gettext(
+					library_namespace.log_temporary(gettext(
 							'從圖片壓縮檔刪除%1張本次下載成功、上次下載失敗的損壞圖片：%2',
 							images_archive.to_remove.length,
 							// images_archive.archive_file_path
-							images_archive.file_name)
-							+ '...\r');
+							images_archive.file_name));
 					images_archive.remove(images_archive.to_remove.unique());
 				}
 
@@ -1558,13 +1556,12 @@ function module_code(library_namespace) {
 					}
 					library_namespace.remove_directory(chapter_directory);
 				} else {
-					process.stdout.write(
+					library_namespace.log_temporary(
 					// create/update image archive: 漫畫下載完畢後壓縮圖片檔案。
 					gettext(images_archive.file_existed ? '更新圖片壓縮檔：%1'
 							: '創建圖片壓縮檔：%1',
 					// images_archive.archive_file_path
-					images_archive.file_name)
-							+ '...\r');
+					images_archive.file_name));
 					images_archive.update(chapter_directory, {
 						// 壓縮圖片檔案之後，刪掉原先的圖片檔案。
 						remove : _this.remove_images_after_archive,

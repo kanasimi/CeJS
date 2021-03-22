@@ -2443,7 +2443,7 @@ function module_code(library_namespace) {
 		 * equivalent code \033[0G:
 		 */
 		child.stdout.on('data', function(data) {
-			process.stdout.write(data);
+			library_namespace.log_temporary(data);
 		});
 
 		child.stderr.on('data', function(data) {

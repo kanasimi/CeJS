@@ -421,13 +421,17 @@ function module_code(library_namespace) {
 					callback(output);
 				} catch (e) {
 					if (false) {
-						console
-								.trace('archive_file_execute: Callback execution error!');
+						console.trace('archive_file_execute: '
+								+ 'Callback execution error!');
 					}
 					library_namespace.error([ 'archive_file_execute: ', {
 						T : 'Callback execution error!'
 					} ]);
-					library_namespace.error(e);
+					if (library_namespace.platform.nodejs) {
+						console.error(e);
+					} else {
+						library_namespace.error(e);
+					}
 				}
 			return output;
 		} catch (e) {
@@ -442,7 +446,13 @@ function module_code(library_namespace) {
 			library_namespace.error([ 'archive_file_execute: ', {
 				T : [ '%1 execution error!', this.program_type ]
 			} ]);
-			library_namespace.error(e);
+			if (library_namespace.platform.nodejs) {
+				console.error(e);
+				if (e.output)
+					console.error(e.output.toString());
+			} else {
+				library_namespace.error(e);
+			}
 			if (typeof callback === 'function')
 				callback(null, e);
 			return;
@@ -680,32 +690,36 @@ function module_code(library_namespace) {
 			FSO_data_lines.split(/\r?\n|\r/).forEach(function(line) {
 				var matched = line.match(/^([a-z\s]+)=(.*)$/i);
 				if (matched) {
-					FSO_data[matched[1].trim().toLowerCase()]
-					//
-					= matched[2].trim();
+					matched[2] = matched[2].trim();
+					if (false && matched[2] === '-') {
+						// e.g., .folder, .encrypted
+						matched[2] = false;
+					}
+					// FSO_data[matched[1].trim().toLowerCase()] =
+					FSO_data[matched[1].trim()] = matched[2];
 				}
 			});
 			// console.log(FSO_data);
-			if (!FSO_data.path) {
+			if (!FSO_data.Path) {
 				;
 
 			} else if (this.information) {
 				this.fso_status_list.push(FSO_data);
-				if (this.fso_path_hash[FSO_data.path]) {
-					CeL.warn('Duplicate FSO path: ' + FSO_data.path);
+				if (this.fso_path_hash[FSO_data.Path]) {
+					CeL.warn('Duplicate FSO path: ' + FSO_data.Path);
 				}
 				// FSO status hash get from archive_file.info()
 				// archive_file.fso_path_hash = { FSO path : {FSO data}, ... }
-				this.fso_path_hash[FSO_data.path] = FSO_data;
+				this.fso_path_hash[FSO_data.Path] = FSO_data;
 
 			} else {
 				// assert: the first item is the archive file itself
 				// archive_file.information = { archive information }
 				this.information = FSO_data;
 
-				// 對於壓縮檔案應該有的大小 'physical size' 不同於真正大小的情況，
-				// 'tail size' 會記錄著壓縮檔案之後的尾端大小，
-				// ['physical size']+.offset+['tail size']=壓縮檔案真正的大小。
+				// 對於壓縮檔案應該有的大小 'Physical Size' 不同於真正大小的情況，
+				// 'Tail Size' 會記錄著壓縮檔案之後的尾端大小，
+				// ['Physical Size']+.offset+['Tail Size']=壓縮檔案真正的大小。
 			}
 		}, this);
 
