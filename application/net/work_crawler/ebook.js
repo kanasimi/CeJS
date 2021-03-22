@@ -236,9 +236,8 @@ function module_code(library_namespace) {
 			var ebook_archive = new library_namespace.storage.archive(
 					ebook_file_path[0] + ebook_file_path[1]);
 			library_namespace.log_temporary(gettext(
-					'Extract ebook as cache: [%1]',
-					// ebook_archive.archive_file_path
-					ebook_file_path[1]));
+			// ebook_archive.archive_file_path
+			'Extract ebook as cache: [%1]', ebook_file_path[1]));
 			ebook_archive.extract({
 				output : ebook_directory
 			});

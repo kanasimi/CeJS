@@ -343,9 +343,9 @@ function (globalThis) {
 		 * Mozilla/SpiderMonkey eval() takes an optional second argument which
 		 * is the scope object for new symbols.
 		 */
-		if(false) {
-			this.debug(globalThis.eval, 2);
-			this.debug(globalThis.eval && globalThis.eval !== arguments.callee);
+		if (false) {
+			_.debug(globalThis.eval, 2);
+			_.debug(globalThis.eval && globalThis.eval !== arguments.callee);
 		}
 		// NO globalThis.eval.call(global, code) :
 		// http://perfectionkills.com/global-eval-what-are-the-options/
@@ -576,7 +576,7 @@ function (globalThis) {
 			// return variable_name: 預防 value_of(null/undefined/NaN)
 			return variable_name;
 
-		// this.debug('get value of [' + variable_name + ']');
+		// _.debug('get value of [' + variable_name + ']');
 		if (_.is_Function(modify_function)) {
 			if (variable_name in modify_function_hash)
 				modify_function_hash[variable_name].push(modify_function);
@@ -596,14 +596,14 @@ function (globalThis) {
 		// do set value
 		do_set = arguments.length > 3;
 		if (false)
-			this.debug('globalThis.' + this.Class + ' = ' + this.env.global[this.Class]);
+			_.debug('globalThis.' + _.Class + ' = ' + _.env.global[_.Class]);
 
 		if (do_set)
 			l--;
 
 		try {
 			while (i < l) {
-				// this.debug('to [' + variable_name_array[i] + ']: ' +
+				// _.debug('to [' + variable_name_array[i] + ']: ' +
 				// v[variable_name_array[i]]),
 				if (variable_name_array[i] in v)
 					v = v[variable_name_array[i++]];
@@ -626,9 +626,9 @@ function (globalThis) {
 		} catch (e) {
 			variable_name_array[i] = '<em>' + variable_name_array[i] + '</em><span class="debug_weaken">';
 			if (false)
-				alert(this.log.buffer.length + ',' + this.log.max_length + '\n'
-						+ this.debug);
-			this.debug('Cannot ' + (do_set ? 'set' : 'get') +
+				alert(_.log.buffer.length + ',' + _.log.max_length + '\n'
+						+ _.debug);
+			_.debug('Cannot ' + (do_set ? 'set' : 'get') +
 					' variable [<span title="' + variable_name + '">' + variable_name_array.join('.') + '</span></span>]!', 2, 'value_of');
 			// throw
 			return undefined;
@@ -774,11 +774,11 @@ function (globalThis) {
 						// 若 value 為 function 且無 Class，或為 object 時，測試其
 						// constructor 之 Class。
 						type = get_Class.Class;
-					else if (get_Class = this.get_function_name(get_Class))
+					else if (get_Class = _.get_function_name(get_Class))
 						// get Class by function name
 						type = get_Class;
 			} catch (e) {
-				this.error(this.Class + '.is_type: Fault to get ths class name of value!');
+				_.error(_.Class + '.is_type: Fault to get ths class name of value!');
 			}
 
 		if (type !== 'object')
@@ -788,7 +788,7 @@ function (globalThis) {
 		try {
 			get_Class = get_object_type(value);
 		} catch (e) {
-			this.error(this.Class + '.is_type: Fault to get object type of value!');
+			_.error(_.Class + '.is_type: Fault to get object type of value!');
 			get_Class = '';
 		}
 
@@ -811,7 +811,7 @@ function (globalThis) {
 	 * 
 	 * @example<code>
 	 * // 大量驗證時，推薦另外在本身 scope 中造出捷徑：
-	 * this.OtS = Object.prototype.toString;
+	 * _.OtS = Object.prototype.toString;
 	 * var is_Person = CeL.type_tester('Person', 'OtS');
 	 * // test
 	 * if(is_Person(value))
@@ -1274,7 +1274,7 @@ function (globalThis) {
 	 */
 	reset_env = function reset_env(OS_type, reset) {
 		// CeL.env[環境變數名稱]=環境變數之值. this === _ === library_namespace
-		var OS, env = !reset && this.env || (this.env = Object.create(null)),
+		var OS, env = !reset && _.env || (_.env = Object.create(null)),
 		//
 		win_env_keys = 'PROMPT|HOME|PUBLIC|SESSIONNAME|LOCALAPPDATA|OS|Path|PROCESSOR_IDENTIFIER|SystemDrive|SystemRoot|TEMP|TMP|USERNAME|USERPROFILE|ProgramData|ProgramFiles|ProgramFiles(x86)|ProgramW6432|windir'.split('|');
 
@@ -1371,7 +1371,7 @@ function (globalThis) {
 		 * @name CeL.env.registry_base
 		 * @type {String}
 		 */
-		env.registry_base = 'HKCU\\Software\\' + env.organization + '\\' + this.Class
+		env.registry_base = 'HKCU\\Software\\' + env.organization + '\\' + _.Class
 					+ '\\';
 		/**
 		 * 在 registry 中存放 library 在 File System 中的 base path 的 key name
@@ -1399,7 +1399,7 @@ function (globalThis) {
 			// 去除 filename
 			// .replace(/[^\\\/]+$/, '')
 			;
-			// this.debug(env.registry_path);
+			// _.debug(env.registry_path);
 
 			// @see getEnvironment() @ CeL.application.OS.Windows
 			var WshEnvironment = WshShell.Environment("Process");
@@ -1410,7 +1410,7 @@ function (globalThis) {
 			}
 
 		} catch (e) {
-			// this.warn(e.message);
+			// _.warn(e.message);
 		}
 
 		if (platform.nodejs) {
@@ -1565,8 +1565,8 @@ OS='UNIX'; // unknown
 		 * @name CeL.env.path_separator_pattern
 		 * @type {String}
 		 */
-		env.path_separator_pattern = this.to_RegExp_pattern ?
-				this.to_RegExp_pattern(env.path_separator)
+		env.path_separator_pattern = _.to_RegExp_pattern ?
+				_.to_RegExp_pattern(env.path_separator)
 				: (env.path_separator === '\\' ? '\\' : '') + env.path_separator;
 		/**
 		 * 預設語系。<br />
@@ -1587,7 +1587,7 @@ OS='UNIX'; // unknown
 		 * @name CeL.env.script_name
 		 * @type {String}
 		 */
-		env.script_name = this.get_script_name();
+		env.script_name = _.get_script_name();
 		/**
 		 * base path of script.
 		 * 
@@ -1597,7 +1597,7 @@ OS='UNIX'; // unknown
 		 * @name CeL.env.script_base_path
 		 * @type {String}
 		 */
-		env.script_base_path = this.get_script_full_name()
+		env.script_base_path = _.get_script_full_name()
 			// 去除 filename
 			.replace(/[^\\\/]+$/, '');
 
@@ -1676,7 +1676,7 @@ OS='UNIX'; // unknown
 	.
 	// TODO
 	get_identifier_RegExp = function (pattern, flag, add_for_first_letter, add_for_all_letter) {
-		var s = this.env.identifier_String;
+		var s = _.env.identifier_String;
 		if (add_for_first_letter)
 			s = s.replace(/_/g, add_for_first_letter);
 		if (add_for_all_letter)
@@ -1855,7 +1855,7 @@ OS='UNIX'; // unknown
 		var l = text.length, take = 30, from = .3;
 		from = Math.floor(l * from);
 		if (false)
-			this.log(from + '~' + l + ': '
+			_.log(from + '~' + l + ': '
 					+ (l - from < take ? text : text.substr(from, take)));
 		return l - from < take ? text : text.substr(from, take);
 	};
@@ -1978,7 +1978,7 @@ OS='UNIX'; // unknown
 					function_name_pattern(ft)
 					: 0;
 		if (m) {
-			// this.debug('matched ' + m, 1, this.Class + '.get_function_name');
+			// _.debug('matched ' + m, 1, _.Class + '.get_function_name');
 			return m;
 		}
 		// 無法從 function code 本身得到 name 之資訊。
@@ -1992,16 +1992,16 @@ OS='UNIX'; // unknown
 			get_function_name.b = b = Object.create(null), get_function_name.ns = load = Object.create(null);
 
 		if (!ns)
-			ns = this;
+			ns = _;
 
 		// cache functions
 		if ((_.is_Function(ns) || _.is_Object(ns)) && ns.Class
 						&& (force_load || !load[ns.Class])) {
 			for (i in ns)
 				if (typeof ns[i] === 'function') {
-					k = this._get_hash_key(String(ns[i]));
-					m = ns.Class + this.env.module_name_separator + i;
-					// this.debug(m + ': ' + k + (', ' + ns[i]).slice(0, 200));
+					k = _._get_hash_key(String(ns[i]));
+					m = ns.Class + _.env.module_name_separator + i;
+					// _.debug(m + ': ' + k + (', ' + ns[i]).slice(0, 200));
 					if (!(m in load)) {
 						load[m] = 1;
 						if (!b[k])
@@ -2014,7 +2014,7 @@ OS='UNIX'; // unknown
 
 		// 將函數與 cache 比對以獲得函數名。
 		// TODO: Array.prototype.indexOf()
-		m = b[this._get_hash_key(ft)];
+		m = b[_._get_hash_key(ft)];
 		if (m)
 			for (i = 0; i < m.length; i++) {
 				b = m[i][1];
@@ -3040,12 +3040,14 @@ OS='UNIX'; // unknown
 					&& typeof callbackfn.call === 'function';
 				index < length; index++)
 				// 為允許 delete，先作 check。
-				if (index in this)
-					if (use_call)
+				if (index in this) {
+					if (use_call) {
 						callbackfn.call(thisArg, this[index], index, this);
-					else
+					} else {
 						// 少一道手續。
 						callbackfn(this[index], index, this);
+					}
+				}
 		}
 	});
 
