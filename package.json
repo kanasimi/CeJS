@@ -1,7 +1,7 @@
 {
 	"name": "cejs",
 	"title": "CeJS",
-	"version": "4.1.12",
+	"version": "4.1.13",
 	"description": "A JavaScript module framework that is simple to use.",
 	"keywords": [
 		"arbitrary-precision",

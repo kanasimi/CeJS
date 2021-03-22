@@ -256,7 +256,8 @@ function (globalThis) {
 	 */
 	Class = library_name;
 
-
+	_.env = old_namespace && old_namespace[library_name] && old_namespace[library_name].env
+		|| Object.create && Object.create(null) || {};
 
 	var is_WWW = typeof window === 'object'
 		&& globalThis === window
@@ -1669,8 +1670,6 @@ OS='UNIX'; // unknown
 		return env;
 	};
 
-	_.reset_env();
-
 
 	_// JSDT:_module_
 	.
@@ -2144,8 +2143,8 @@ OS='UNIX'; // unknown
 	var
 	/** {RegExp}是否具有 caller。能辨識紀錄之 caller。須排除"C:\"之類。 */
 	PATTERN_log_caller = /^([a-z_\d.]{2,}:\s*)(.+)$/i,
-	/** {Boolean}使用 style 紀錄。 */
-	using_style = _.env.no_log_style,
+	/** {Boolean}使用 styled 紀錄。 */
+	using_style = !_.env.no_log_style,
 	/** {Object}default style of console. */
 	default_style = {
 		// trace : '',
@@ -2208,9 +2207,9 @@ OS='UNIX'; // unknown
 	if (platform.nodejs && process.versions) {
 		process.versions[library_name.toLowerCase()] = library_version;
 		if (using_style === undefined) {
-			// 若為 nodejs，預設使用 style 紀錄。
+			// 若為 nodejs，預設使用 styled 紀錄。
 			// using_style = _.platform.nodejs
-			using_style = process.versions.node;
+			using_style = !!process.versions.node;
 		}
 	}
 
