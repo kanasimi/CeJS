@@ -256,9 +256,6 @@ function (globalThis) {
 	 */
 	Class = library_name;
 
-	_.env = old_namespace && old_namespace[library_name] && old_namespace[library_name].env
-		|| Object.create && Object.create(null) || {};
-
 	var is_WWW = typeof window === 'object'
 		&& globalThis === window
 		// 由條件嚴苛的開始。
@@ -1259,6 +1256,9 @@ function (globalThis) {
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// 環境變數處理。
+
+	// 先建一個出來以利使用。
+	_.env = Object.create(null);
 
 	_// JSDT:_module_
 	.
