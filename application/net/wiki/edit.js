@@ -210,8 +210,8 @@ function module_code(library_namespace) {
 		var action = {
 			action : 'edit'
 		};
-		if (wiki_API.need_get_API_parameters(action, options, wiki_API_edit,
-				arguments)) {
+		if (wiki_API.need_get_API_parameters(action, options,
+				wiki_API[action.action], arguments)) {
 			return;
 		}
 
@@ -909,9 +909,17 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback(page_data, error, result)
 	 */
 	wiki_API.upload = function upload(file_path, token, options, callback) {
+		var action = {
+			action : 'upload'
+		};
+		if (wiki_API.need_get_API_parameters(action, options,
+				wiki_API[action.action], arguments)) {
+			return;
+		}
+
 		// https://commons.wikimedia.org/w/api.php?action=help&modules=upload
 		// https://www.mediawiki.org/wiki/API:Upload
-		var action, post_data = {
+		var post_data = {
 			// upload_text: media description
 			text : undefined,
 			// 備註 comment won't accept templates and external links
@@ -973,22 +981,30 @@ function module_code(library_namespace) {
 						|| options['other versions'],
 				other_fields : options.other_fields || options['other fields']
 			};
+		}
 
+		if (library_namespace.is_Object(options.text)) {
 			var variable_Map = options.variable_Map;
 			if (variable_Map) {
 				for ( var property in options.text) {
-					if (!variable_Map.has(property) && options.text[property]
+					var value = options.text[property];
+					if (!variable_Map.has(property)
+					//
+					&& wiki_API.is_valid_parameters_value(value)
+					//
+					&& !Variable_Map__PATTERN_mark.test(value)
 					// 自動將每次更新可能會改變的值轉成可更新標記。
 					&& [ 'date', 'source' ].includes(property)) {
-						variable_Map.set(property, options.text[property]);
+						variable_Map.set(property, value);
 					}
-					if (variable_Map.has(property))
+					if (variable_Map.has(property)) {
 						options.text[property] = variable_Map.format(property);
+					}
 				}
 			}
 
 			options.text = [ '== {{int:filedesc}} ==',
-			//
+			// 將 .text 當作文件資訊。
 			wiki_API.template_text(options.text, {
 				name : 'Information',
 				separator : '\n|'
@@ -998,6 +1014,10 @@ function module_code(library_namespace) {
 				options.text.push('', '== {{int:license-header}} ==',
 				//
 				wiki_API.template_text.join_array(options.license));
+			}
+
+			if (options.additional_text) {
+				options.text.push('', options.additional_text.trim());
 			}
 
 			// add categories
@@ -1018,15 +1038,9 @@ function module_code(library_namespace) {
 			}
 
 			options.text = options.text.join('\n');
-
-		} else if (library_namespace.is_Object(options.text)) {
-			options.text = '== {{int:filedesc}} ==\n'
-			// 將 .text 當作文件資訊。
-			+ wiki_API.template_text(options.text, {
-				name : 'Information',
-				separator : '\n|'
-			});
 		}
+
+		// assert: typeof options.text === 'string'
 
 		// TODO: check {{Information|permission=license}}
 		for (action in post_data) {
@@ -1083,10 +1097,9 @@ function module_code(library_namespace) {
 			// @see 20181016.import_earthquake_shakemap.js
 		}
 
-		action = 'action=upload';
-		if (session && session.API_URL) {
-			action = [ session.API_URL, action ];
-		}
+		action = {
+			action : 'upload'
+		};
 
 		// no really update
 		if (options.test_only) {
@@ -1178,11 +1191,11 @@ function module_code(library_namespace) {
 		(function() {
 			// TODO:
 			var update_Variable_Map = new CeL.wiki.Variable_Map;
-			update_Variable_Map.set('variable_name', value);
+			update_Variable_Map.set('variable_name', wikitext_value);
 			update_Variable_Map.set('timestamp', {
-				wikitext : '<onlyinclude>~~~~~</onlyinclude>',
 				// .may_not_update: 可以不更新。 e.g., timestamp
-				may_not_update : true
+				may_not_update : true,
+				wikitext : '<onlyinclude>~~~~~</onlyinclude>'
 			});
 			update_Variable_Map.template = '...\n' + '*date: '
 					+ update_Variable_Map.format('timestamp') + '\n'

@@ -1559,6 +1559,14 @@ function module_code(library_namespace) {
 						|| token.parameters[1], options);
 			}
 
+			if (token.name === 'Enlink') {
+				return ' ('
+				// for [[ja:Template:Enlink]]
+				// @see [[ja:景観ガイドライン]]
+				+ preprocess_section_link_token(token.parameters[1], options)
+						+ ')';
+			}
+
 			// jawiki
 			if (token.name in {
 				ARIB外字フォント : true,

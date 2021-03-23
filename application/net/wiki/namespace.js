@@ -2325,7 +2325,7 @@ function module_code(library_namespace) {
 			meta : 'siteinfo'
 		};
 		if (wiki_API.need_get_API_parameters(action, options,
-				wiki_API_siteinfo, arguments)) {
+				wiki_API[action.meta], arguments)) {
 			return;
 		}
 
@@ -3006,8 +3006,8 @@ function module_code(library_namespace) {
 			add_session_to_options(session), function(modules, error, data) {
 				// console.trace(data);
 				if (Array.isArray(caller) && caller_arguments === undefined) {
-					// [ caller, caller_arguments, _this ]
-					caller[0].apply(caller[2], caller[1]);
+					// [ caller, _this, caller_arguments ]
+					caller[0].apply(caller[1], caller[2]);
 				} else {
 					caller.apply(null, caller_arguments);
 				}

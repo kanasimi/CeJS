@@ -1531,8 +1531,7 @@ OS='UNIX'; // unknown
 			platform.nodejs && require('path') && require('path').sep
 			|| (is_UNIX ? '/' : '\\');
 
-		if (// env.home && !/[\\\/]$/.test(env.home)
-		/[^\\\/]$/.test(env.home)) {
+		if (env.home && !/[\\\/]$/.test(env.home)) {
 			// CeL.append_path_separator(CeL.env.home)
 			env.home += env.path_separator;
 		}
