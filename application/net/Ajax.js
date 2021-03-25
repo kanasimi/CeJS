@@ -636,7 +636,7 @@ function module_code(library_namespace) {
 				if (is_nodejs) {
 					try {
 						// get {Buffer}
-						content = fs.readFileSync(value);
+						content = node_fs.readFileSync(value);
 					} catch (e) {
 						library_namespace.error([ 'to_form_data: ', {
 							T : [ 'Failed to get file: [%1]', value ]
@@ -776,7 +776,8 @@ function module_code(library_namespace) {
 			}
 			if (!value && value !== '') {
 				// e.g., token=undefined
-				throw new TypeError('Invalid type of ' + key + ': ' + typeof value);
+				throw new TypeError('Invalid type of ' + key + ': '
+						+ typeof value);
 			}
 
 			// @see function push_and_callback(MIME_type, content)
@@ -1713,7 +1714,7 @@ function module_code(library_namespace) {
 					} ]);
 				} else if (error.code === 'EPROTO'
 						&& require('tls').DEFAULT_MIN_VERSION === 'TLSv1.2'
-						&& parseInt(library_namespace.platform.nodejs) >= 12) {
+						&& library_namespace.platform('node', 12)) {
 					library_namespace.error([ 'get_URL_node: ', {
 						T : 'Node.js v12 and later versions '
 						//
