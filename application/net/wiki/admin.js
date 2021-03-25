@@ -159,6 +159,11 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(response));
 			error = error || response && response.error;
 			if (error) {
+				if (typeof error === 'string') {
+					error = new Error(error);
+				} else if (library_namespace.is_Object(error)) {
+					error = new Error(JSON.stringify(error));
+				}
 				callback(response, error);
 			} else {
 				callback(response[action]);

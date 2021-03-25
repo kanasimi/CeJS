@@ -1093,7 +1093,16 @@ function module_code(library_namespace) {
 		 */
 		|| !(data = data.upload) || data.result !== 'Success') {
 			// console.error(error);
-			error = error || data && data.result || 'Error on uploading';
+			if (!error) {
+				if (data && data.result) {
+					error = data.result;
+					if (data.warnings) {
+						error += ': ' + JSON.stringify(data.warnings);
+					}
+				} else {
+					error = 'Error on uploading';
+				}
+			}
 			if (options.show_message) {
 				console.log(data);
 				library_namespace.error(typeof error === 'object' ? JSON
@@ -1103,6 +1112,12 @@ function module_code(library_namespace) {
 				} else {
 					// library_namespace.warn(JSON.stringify(data));
 				}
+			}
+			// @see function wiki_operator()
+			if (typeof error === 'string') {
+				error = new Error(error);
+			} else if (library_namespace.is_Object(error)) {
+				error = new Error(JSON.stringify(error));
 			}
 
 			typeof callback === 'function' && callback(data, error);
