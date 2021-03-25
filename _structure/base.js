@@ -961,7 +961,12 @@ function (globalThis) {
 			}
 			version_now = version_now.split('.');
 			if (!version_to_test) {
-				// 數字化版本號
+				// 數字化版本號 function digitize_version(version)
+				// v0.9 → 0.09
+				// v0.10 → 0.10
+				// v0.12 → 0.12
+				// v15.12.0 → 15.12
+				// v16.1 → 16.01
 				// 預防: +1.9 > +1.10 == 1.1
 				return +version_now[0] + version_now[1] / 100;
 			}
@@ -1062,7 +1067,8 @@ function (globalThis) {
 			&& typeof process === 'object' && typeof process.versions === 'object'
 			//
 			&& typeof console === 'object' && typeof console.log === 'function'
-			//
+			// use `CeL.platform('node', version_to_test)`
+			// if you want to test the version
 			&& process.versions.node;
 	} catch(e) {
 		// require('fs') error?
@@ -2952,6 +2958,11 @@ OS='UNIX'; // unknown
 	});
 
 
+	// Warning: 在 node v0.10.48 下，對於以 set/get 來設定 target[key]
+	// 的情況，可能造成設定完後 process, console 變成未定義之變數。
+	// node v0.12.18 下沒有這個問題。
+	_.need_avoid_assign_to_setter = platform.nodejs && !platform('node', 0.12);
+
 	set_method(Object, {
 		// Object.defineProperties()
 		defineProperties : function defineProperties(object, properties) {
@@ -3015,8 +3026,11 @@ OS='UNIX'; // unknown
 			target = Object(target);
 			for (var index = 1, length = arguments.length, key; index < length;) {
 				source = Object(arguments[index++]);
-				for (key in source)
+				for (key in source) {
+					// Warning: 可能得注意 `need_avoid_assign_to_setter`
+					// @see CeL.application.net.URI()
 					target[key] = source[key];
+				}
 				if (need_to_check_in_for_in)
 					for (key in need_to_check_in_for_in)
 						// assert: !== 須由左至右運算。

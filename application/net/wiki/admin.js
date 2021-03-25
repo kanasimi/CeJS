@@ -162,7 +162,10 @@ function module_code(library_namespace) {
 				if (typeof error === 'string') {
 					error = new Error(error);
 				} else if (library_namespace.is_Object(error)) {
-					error = new Error(JSON.stringify(error));
+					if (error.code && error.info)
+						error = new Error(error.code + ': ' + error.info);
+					else
+						error = new Error(JSON.stringify(error));
 				}
 				callback(response, error);
 			} else {

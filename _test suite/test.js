@@ -8,6 +8,13 @@
  *
  * @example <code>
 
+# npm test wiki
+
+# cd "_test suite"
+# node-v0.10.48.exe test.js
+
+-----------------------------------------------------------
+
 # npm test
 
 (git push)

@@ -847,7 +847,9 @@ function module_code(library_namespace) {
 			 * zh-classical.wikipedia.org
 			 */
 			family = family || matched[1];
-			language = matched[0] || wiki_API.language;
+			// incase 'https://test.wikidata.org/w/api.php'
+			language = !/test|wiki/i.test(matched[0]) && matched[0]
+					|| wiki_API.language;
 		} else if (matched = language.match(/^([a-z\d\-_]+)\.([a-z\d\-_]+)/)) {
 			language = matched[1];
 			family = family || matched[2];

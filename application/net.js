@@ -305,9 +305,7 @@ function module_code(library_namespace) {
 				+ matched.join('<br />\n'), 2);
 
 		// console.trace([ matched, base_uri, options ]);
-		uri = Object.assign(this,
-		//
-		base_uri && URI(base_uri) || options.as_URL
+		uri = base_uri && URI(base_uri) || options.as_URL
 		//
 		|| library_namespace.is_WWW() && {
 			// protocol包含最後的':',search包含'?',hash包含'#'.
@@ -318,7 +316,19 @@ function module_code(library_namespace) {
 			host : location.host,
 			// local file @ IE: C:\xx\xx\ff, others: /C:/xx/xx/ff
 			pathname : location.pathname
-		});
+		};
+		if (library_namespace.need_avoid_assign_to_setter) {
+			for ( var key in uri) {
+				if (key !== 'search'
+				// &&key !== 'hash'
+				) {
+					this[key] = uri[key];
+				}
+			}
+			uri = this;
+		} else {
+			uri = Object.assign(this, uri);
+		}
 		// uri.uri = href;
 
 		/**
@@ -563,6 +573,8 @@ function module_code(library_namespace) {
 		? URI.search_params.toString(options)
 		// options.as_URL?
 		: URI.searchParams.toString();
+		if (Object.ttt)
+			console.trace(typeof process);
 		return search ? '?' + search : '';
 	}
 
