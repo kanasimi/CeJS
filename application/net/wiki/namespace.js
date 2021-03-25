@@ -27,6 +27,8 @@ typeof CeL === 'function' && CeL.run({
 	require : 'data.native.'
 	// for library_namespace.get_URL
 	// + '|application.net.Ajax.'
+	// for library_namespace.URI()
+	+ '|application.net.'
 
 	// CeL.DOM.HTML_to_Unicode(), CeL.DOM.Unicode_to_HTML()
 	+ '|interact.DOM.'
@@ -389,6 +391,8 @@ function module_code(library_namespace) {
 	 * 3: 第一 domain name (e.g., language code / project),<br />
 	 * 4: 第二 domain name (e.g., family: 'wikipedia') ]
 	 * 
+	 * @deprecated using wiki_API.hostname_of_API_URL() or wiki_API.site_name()
+	 * 
 	 * @type {RegExp}
 	 * 
 	 * @see PATTERN_PROJECT_CODE
@@ -397,6 +401,14 @@ function module_code(library_namespace) {
 	 *      PATTERN_external_link_global
 	 */
 	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z][a-z\d\-]{0,14})\.([a-z]+)+(?:\.[a-z]+)+)/i;
+
+	// @see wiki_API.api_URL()
+	function hostname_of_API_URL(API_URL) {
+		if (!/\/api\.php$/.test(API_URL))
+			return;
+		var url = new library_namespace.URI(API_URL);
+		return url && url.hostname;
+	}
 
 	/**
 	 * Get the API URL of specified project.
@@ -449,15 +461,18 @@ function module_code(library_namespace) {
 			project += '.org';
 		}
 
-		var matched = project.match(PATTERN_wiki_project_URL);
-		if (matched) {
+		// console.trace(wiki_API.API_URL);
+		var url = new library_namespace.URI(project,
+		//
+		/:\/\//.test(wiki_API.API_URL) && wiki_API.API_URL);
+		if (url && url.hostname) {
 			// 先測試是否為自訂 API。
-			return /\.php$/i.test(project) ? project
-			// e.g., 'https://zh.wikipedia.org/'
+			return /\/api\.php$/.test(project) ? project
+			// e.g., '//zh.wikipedia.org/'
 			// e.g., 'https://www.mediawiki.org/w/api.php'
 			// e.g., 'https://www.mediawiki.org/wiki/'
-			: (matched[1] || api_URL.default_protocol || 'https:') + '//'
-					+ matched[2] + '/w/api.php';
+			: (url.protocol || api_URL.default_protocol || 'https:') + '//'
+					+ url.hostname + '/w/api.php';
 		}
 
 		library_namespace.error('api_URL: Unknown project: [' + project
@@ -526,6 +541,7 @@ function module_code(library_namespace) {
 	api_URL.family = 'wikipedia|wikibooks|wikinews|wikiquote|wikisource|wikiversity|wikivoyage|wiktionary'
 			.split('|').to_hash();
 
+	// api_URL.shortcut_of_project[project] = alias
 	api_URL.shortcut_of_project = Object.create(null);
 	Object.keys(api_URL.alias).forEach(function(shortcut) {
 		api_URL.shortcut_of_project[api_URL.alias[shortcut]] = shortcut;
@@ -591,14 +607,13 @@ function module_code(library_namespace) {
 		}
 
 		// TODO: 這只是簡陋的判別方法。
-		var matched = session.API_URL
-				&& session.API_URL.match(PATTERN_wiki_project_URL);
+		var matched = wiki_API.site_name(session, {
+			get_all_properties : true
+		});
 		// console.trace(matched);
-		if (matched
-				&& !/test|wiki/i.test(matched[3])
-				&& ((matched = matched[4].toLowerCase()) in api_URL.shortcut_of_project)) {
+		if (matched && (matched.family in api_URL.family)) {
 			// e.g., "wikipedia"
-			session.family = matched;
+			session.family = matched.family;
 		}
 	}
 
@@ -801,6 +816,7 @@ function module_code(library_namespace) {
 			language = session.API_URL;
 		}
 
+		var site, project;
 		matched = language
 		// e.g., 'zh-min-nan' → 'zh_min_nan'
 		.replace(/-/g, '_').match(PATTERN_SITE);
@@ -817,25 +833,21 @@ function module_code(library_namespace) {
 			}
 			// console.trace([ language, family ]);
 
-		} else if (matched = language.match(PATTERN_wiki_project_URL)) {
+		} else if (matched = wiki_API.hostname_of_API_URL(language)) {
 			// treat language as API_URL.
-			API_URL = /api\.php$/.test(language) ? language : null;
-			/**
-			 * 去掉 '.org' 之類。 language-code.wikipedia.org e.g.,
-			 * zh-classical.wikipedia.org
-			 * 
-			 * matched: [ 0: protocol + host name, 1: protocol, 2: host name,<br />
-			 * 3: 第一 domain name (e.g., language code / family / project),<br />
-			 * 4: 第二 domain name (e.g., family: 'wikipedia') ]
-			 * 
-			 * @see PATTERN_PROJECT_CODE
-			 */
+			API_URL = language;
 			// console.trace(matched);
 			// console.trace(session);
 			library_namespace.debug(language, 4, 'language_to_site_name');
-			family = family || matched[4];
-			// incase 'https://test.wikidata.org/w/api.php'
-			language = matched[3] !== 'test' && matched[3] || wiki_API.language;
+			// We can not get information from IP.
+			matched = library_namespace.is_IP(matched) ? [ matched.replace(
+					/\./g, '_') ] : matched.split('.');
+			/**
+			 * 去掉 '.org' 之類。 language-code.wikipedia.org e.g.,
+			 * zh-classical.wikipedia.org
+			 */
+			family = family || matched[1];
+			language = matched[0] || wiki_API.language;
 		} else if (matched = language.match(/^([a-z\d\-_]+)\.([a-z\d\-_]+)/)) {
 			language = matched[1];
 			family = family || matched[2];
@@ -856,12 +868,11 @@ function module_code(library_namespace) {
 				|| api_URL(language + '.' + family);
 		// console.trace(API_URL);
 
-		var site, project;
 		if (family === 'wikidata') {
 			// wikidatawiki_p
 			site = family + 'wiki';
 		} else if (family === 'wikimedia' && language === 'en') {
-			// e.g., console @ https://commons.wikimedia.org/
+			// e.g., @ console @ https://commons.wikimedia.org/
 			project = API_URL.match(/\/\/([\w]+)\./)[1];
 			// assert: (project in wiki_API.api_URL.wikimedia)
 
@@ -2064,10 +2075,8 @@ function module_code(library_namespace) {
 		if (first_domain_name && !project_prefixed) {
 			// e.g., [[w:zh:title]]
 			title = first_domain_name + ':' + title;
-			if (session.family
-					&& (session.family in api_URL.shortcut_of_project)) {
-				title = api_URL.shortcut_of_project[session.family] + ':'
-						+ title;
+			if (session.family && (session.family in api_URL.family)) {
+				title = api_URL.family[session.family] + ':' + title;
 			} else {
 				need_escape = true;
 			}
@@ -3005,6 +3014,8 @@ function module_code(library_namespace) {
 			// 會影響 wiki_API.query() @ get_API_parameters()，因此這邊只取 session。
 			add_session_to_options(session), function(modules, error, data) {
 				// console.trace(data);
+				if (error)
+					throw error;
 				if (Array.isArray(caller) && caller_arguments === undefined) {
 					// [ caller, _this, caller_arguments ]
 					caller[0].apply(caller[1], caller[2]);
@@ -3041,8 +3052,11 @@ function module_code(library_namespace) {
 			var modules = !error && data && data.paraminfo
 					&& Array.isArray(data.paraminfo.modules)
 					&& data.paraminfo.modules[0];
-			if (!modules && !error) {
-				error = new Error('Unknown query result');
+			if (!modules) {
+				callback(undefined, error
+				//
+				|| new Error('Unknown query result'));
+				return;
 			}
 
 			// assert: path === modules.path
@@ -3344,14 +3358,14 @@ function module_code(library_namespace) {
 		PATTERN_URL_WITH_PROTOCOL_GLOBAL : PATTERN_URL_WITH_PROTOCOL_GLOBAL,
 		PATTERN_category_prefix : PATTERN_category_prefix,
 
-		PATTERN_PROJECT_CODE_i : PATTERN_PROJECT_CODE_i,
-		PATTERN_wiki_project_URL : PATTERN_wiki_project_URL
+		PATTERN_PROJECT_CODE_i : PATTERN_PROJECT_CODE_i
 	});
 
 	// ------------------------------------------
 
 	// @static
 	Object.assign(wiki_API, {
+		hostname_of_API_URL : hostname_of_API_URL,
 		api_URL : api_URL,
 		set_language : set_default_language,
 		// site_name_of

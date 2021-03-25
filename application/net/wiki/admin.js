@@ -149,7 +149,8 @@ function module_code(library_namespace) {
 
 		if (action === 'move') {
 			library_namespace.is_debug((parameters.fromid || parameters.from)
-					+ ' → ' + parameters.to, 1, 'wiki_operator.move');
+			// .move_to_title
+			+ ' → ' + parameters.to, 1, 'wiki_operator.move');
 		}
 
 		wiki_API.query({
@@ -192,7 +193,6 @@ function module_code(library_namespace) {
 	wiki_API.move_to = function(options, callback) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=move
 		var default_parameters = {
-			// move_to_title
 			to : true,
 			reason : false,
 			movetalk : false,

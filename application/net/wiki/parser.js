@@ -6660,20 +6660,6 @@ function module_code(library_namespace) {
 	// CeL.wiki.parse.user.all()
 	parse_user.all = parse_all_user_links;
 
-	// 由使用者名稱來檢測匿名使用者/未註冊用戶 [[WP:IP]]
-	// [[m:Special:MyLanguage/Tech/News/2021/05]]
-	// 在diffs中，IPv6位址被寫成了小寫字母。這導致了死連結，因為Special:使用者貢獻只接受大寫的IP。這個問題已經被修正。
-	function is_IP_user(user_name, IPv6_only) {
-		return !IPv6_only
-		// for IPv4 addresses
-		&& /^[12]?\d{1,2}(?:\.[12]?\d{1,2}){3}$/.test(user_name)
-		// for IPv6 addresses
-		|| /^[\da-f]{1,4}(?::[\da-f]{1,4}){7}$/i.test(user_name);
-	}
-
-	// CeL.wiki.parse.user.is_IP()
-	parse_user.is_IP = is_IP_user;
-
 	//
 	/**
 	 * redirect/重定向頁所符合的匹配模式。 Note that the redirect link must be explicit – it

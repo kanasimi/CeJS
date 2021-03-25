@@ -2072,16 +2072,39 @@ function test_net() {
 		assert(['file:///C:/a.htm', (new CeL.URI('/a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #2');
 		assert(['file:///D:/a.htm', (new CeL.URI('/d:/a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #3');
 		assert(['file:///D:/a.htm', (new CeL.URI('d:\\a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #4');
+		assert(['http:', CeL.URI('//zh.wikipedia.org', 'http://www.example.com').protocol], 'CeL.net.URI(, base) #4');
 
-		var href = 'ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23&a=2&fg2=24#hhh';
-		var url = new URL(href);
-		var uri = new CeL.URI(href);
+		var href, url, uri;
+		href = 'ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23&a=2&fg2=24#hhh'; url = new URL(href); uri = new CeL.URI(href);
 		assert([href, uri.toString()], 'CeL.net.URI() #3-1');
 		assert([href, url.toString()], 'CeL.net.URI() #3-2');
 		assert([href, (new URL(uri)).toString()], 'CeL.net.URI() #3-3');
 		assert([href, (new CeL.URI(url)).toString()], 'CeL.net.URI() #3-4');
 		assert([uri, CeL.URI(uri)], 'CeL.net.URI() #3-5');
 		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #3-6');
+
+		assert(['https://www.example.com/pP/qQ', CeL.URI('HTTPS://WWW.EXAMPLE.COM/pP/qQ').toString()], 'CeL.net.URI(upper case)');
+
+		// https://github.com/kanasimi/wikiapi/issues/20
+		href = 'http://localhost/api.php'; url = new URL(href); uri = new CeL.URI(href);
+		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #1 of ' + href);
+		assert([href, url.toString()], 'CeL.net.URI() #2 of ' + href);
+		assert(['localhost', uri.hostname], 'CeL.net.URI() #3 of ' + href);
+
+		href = 'http://127.0.0.1/api.php'; url = new URL(href); uri = new CeL.URI(href);
+		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #1 of ' + href);
+		assert([href, url.toString()], 'CeL.net.URI() #2 of ' + href);
+		assert(['127.0.0.1', uri.hostname], 'CeL.net.URI() #3 of ' + href);
+
+		href = 'https://www.example.com:8080/api.php'; url = new URL(href); uri = new CeL.URI(href);
+		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #1 of ' + href);
+		assert([href, url.toString()], 'CeL.net.URI() #2 of ' + href);
+		assert(['www.example.com', uri.hostname], 'CeL.net.URI() #3 of ' + href);
+
+		href = 'http://hostname.wiki/api.php'; url = new URL(href); uri = new CeL.URI(href);
+		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #1 of ' + href);
+		assert([href, url.toString()], 'CeL.net.URI() #2 of ' + href);
+		assert(['hostname.wiki', uri.hostname], 'CeL.net.URI() #3 of ' + href);
 	});
 }
 
@@ -2909,7 +2932,33 @@ function test_wiki() {
 		[['zhmoegirl', CeL.wiki.site_name('zh', 'moegirl')], 'site_name #8'],
 		[['wikidatawiki', CeL.wiki.site_name('wikidata')], 'site_name #9'],
 		[['commonswiki', CeL.wiki.site_name('commons')], 'site_name #10'],
+		[['localhostwiki', CeL.wiki.site_name('http://localhost/api.php')], 'site_name #11'],
 	]);
+
+	all_error_count += CeL.test('wiki: CeL.wiki.namespace', function (assert) {
+		var href;
+
+		href = 'https://www.mediawiki.org/w/api.php';
+		assert([href, CeL.wiki.api_URL(href)], 'CeL.wiki.api_URL(): #1 of' + href);
+		assert([href, CeL.wiki.api_URL('https://www.mediawiki.org/wiki/')], 'CeL.wiki.api_URL(): #2 of ' + href);
+		assert([href, CeL.wiki.api_URL('//www.mediawiki.org/')], 'CeL.wiki.api_URL(): #3 of ' + href);
+
+		href = 'https://zh.wikipedia.org/w/api.php';
+		assert([href, CeL.wiki.api_URL('//zh.wikipedia.org/')], 'CeL.wiki.api_URL(): ' + href);
+
+		// https://github.com/kanasimi/wikiapi/issues/20
+		href = 'http://localhost/api.php';
+		assert([href, CeL.wiki.api_URL(href)], 'CeL.wiki.api_URL(): ' + href);
+
+		href = 'http://127.0.0.1/api.php';
+		assert([href, CeL.wiki.api_URL(href)], 'CeL.wiki.api_URL(): ' + href);
+
+		href = 'https://www.example.com:8080/api.php';
+		assert([href, CeL.wiki.api_URL(href)], 'CeL.wiki.api_URL(): ' + href);
+
+		href = 'http://hostname.wiki/api.php';
+		assert([href, CeL.wiki.api_URL(href)], 'CeL.wiki.api_URL(): ' + href);
+	});
 
 	all_error_count += CeL.test('wiki: CeL.wiki.plain_text() basic test', [
 		[['エアポート快特', CeL.wiki.plain_text('<font lang="ja">エアポート快特</font>')]],
@@ -2996,7 +3045,7 @@ function test_wiki() {
 
 	]);
 
-	all_error_count += CeL.test('CeL.wiki.parser', function (assert) {
+	all_error_count += CeL.test('wiki: CeL.wiki.parser()', function (assert) {
 		var wikitext, parsed;
 
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('深{{lang|zh|圳}}')], 'wikitext_to_plain_text() #1');
@@ -3542,7 +3591,6 @@ function test_wiki() {
 		wikitext = '{|\n!{{t}}|t\n|}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #2');
 	});
-
 
 	setup_test('CeL.wiki: asynchronous functions');
 	CeL.test('CeL.wiki: asynchronous functions', function (assert, _setup_test, _finish_test) {

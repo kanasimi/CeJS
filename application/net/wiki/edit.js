@@ -801,10 +801,7 @@ function module_code(library_namespace) {
 			options = undefined;
 		}
 
-		options = Object.assign({
-			// [KEY_SESSION]
-			session : this
-		}, options);
+		options = wiki_API.add_session_to_options(this, options);
 
 		var _this = this, copy_from_wiki;
 		function edit() {
@@ -907,6 +904,9 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @param {Function}[callback]
 	 *            回調函數。 callback(page_data, error, result)
+	 * 
+	 * @see https://commons.wikimedia.org/w/api.php?action=help&modules=upload
+	 *      https://www.mediawiki.org/wiki/API:Upload
 	 */
 	wiki_API.upload = function upload(file_path, token, options, callback) {
 		var action = {
@@ -917,40 +917,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// https://commons.wikimedia.org/w/api.php?action=help&modules=upload
-		// https://www.mediawiki.org/wiki/API:Upload
-		var post_data = {
-			// upload_text: media description
-			text : undefined,
-			// 備註 comment won't accept templates and external links
-			comment : undefined,
-			// must be set to reupload
-			ignorewarnings : undefined,
-			// "tag1|tag2"
-			// 指定不存在的標籤，可能會造成 [tags-apply-not-allowed-one]
-			// The tag "..." is not allowed to be manually applied.
-			tags : undefined,
-			// 如果設置，服務器將臨時藏匿文件而不是加入存儲庫。
-			stash : undefined,
-			// 在可能的情況下讓潛在的大型檔案非同步處理。
-			async : undefined,
-			checkstatus : undefined,
-
-			// Upload the file in pieces
-			filesize : undefined,
-			// leavemessage : undefined,
-			// 只檢索指定文件密鑰的上傳狀態。
-			chunk : undefined,
-			offset : undefined,
-			// Complete an earlier upload
-			filekey : undefined,
-
-			url : undefined,
-			asyncdownload : undefined,
-			// statuskey : undefined,
-
-			filename : undefined
-		};
+		// must set options.ignorewarnings to reupload
 
 		// 前置處理。
 		options = library_namespace.new_options(options);
@@ -961,11 +928,13 @@ function module_code(library_namespace) {
 			options.token = token;
 		}
 
+		// 備註 comment won't accept templates and external links
 		if (!options.comment && options.summary) {
 			// 錯置?
 			options.comment = options.summary;
 		}
 
+		// upload_text: media description
 		if (!options.text) {
 			// 從 options / file_data / media_data 自動抽取出文件資訊。
 			options.text = {
@@ -1043,19 +1012,9 @@ function module_code(library_namespace) {
 		// assert: typeof options.text === 'string'
 
 		// TODO: check {{Information|permission=license}}
-		for (action in post_data) {
-			if (action in options) {
-				post_data[action] = options[action];
-			} else {
-				delete post_data[action];
-			}
-		}
-		post_data.token = token;
+		var post_data = wiki_API.extract_parameters(options, action);
 
-		var session = wiki_API.session_of_options(options);
-		if (KEY_SESSION in options) {
-			// delete options[KEY_SESSION];
-		}
+		post_data.token = token;
 
 		// One of the parameters "filekey", "file" and "url" is required.
 		if (false && file_path.includes('://')) {
@@ -1092,14 +1051,11 @@ function module_code(library_namespace) {
 					+ wiki_API.title_link_of('File:' + post_data.filename));
 		}
 
+		var session = wiki_API.session_of_options(options);
 		if (session && session.API_URL && options.check_media) {
 			// TODO: Skip exists file
 			// @see 20181016.import_earthquake_shakemap.js
 		}
-
-		action = {
-			action : 'upload'
-		};
 
 		// no really update
 		if (options.test_only) {

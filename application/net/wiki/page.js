@@ -146,7 +146,7 @@ function module_code(library_namespace) {
 	 * 
 	 * 前文有 wiki.page() 範例。
 	 * 
-	 * 注意: 用太多 CeL.wiki.page() 並列處理，會造成 error.code "EMFILE"。
+	 * 注意: 用太多 CeL.wiki.page() 並行處理，會造成 error.code "EMFILE"。
 	 * 
 	 * TODO:
 	 * https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates

@@ -1908,6 +1908,8 @@ function module_code(library_namespace) {
 			// 標記此編輯為機器人編輯。[[WP:AL|機器人對其他使用者對話頁的小修改將不會觸發新訊息提示]]。
 			bot : 1,
 			// [[Special:tags]]
+			// 指定不存在的標籤，可能會造成 [tags-apply-not-allowed-one]
+			// The tag "..." is not allowed to be manually applied.
 			// tags : 'bot|test|bot trial',
 			tags : '',
 			// 設定寫入目標。一般為 debug、test 測試期間用。

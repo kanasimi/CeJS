@@ -463,8 +463,10 @@ function module_code(library_namespace) {
 				library_namespace.debug('未設定 session，自 API_URL 擷取 language: ['
 						+ action[0] + ']。', 1, 'wiki_API_query');
 				// TODO: 似乎不能真的擷取到所需 language。
-				language = action.origin.match(PATTERN_wiki_project_URL);
-				language = language && language[3] || wiki_API.language;
+				language = wiki_API.site_name(action.origin, {
+					get_all_properties : true
+				});
+				language = language && language.language || wiki_API.language;
 				// e.g., wiki_API_query: Get "ja" from
 				// ["https://ja.wikipedia.org/w/api.php?action=edit&format=json&utf8",{}]
 				library_namespace.debug(

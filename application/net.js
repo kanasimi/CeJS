@@ -66,6 +66,18 @@ function module_code(library_namespace) {
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 	var NOT_FOUND = ''.indexOf('_');
 
+	// ------------------------------------------------------------------------
+
+	function is_IP(host, IPv6_only) {
+		return !IPv6_only
+		// for IPv4 addresses
+		&& /^[12]?\d{1,2}(?:\.[12]?\d{1,2}){3}$/.test(host)
+		// for IPv6 addresses
+		|| /^[\da-f]{1,4}(?::[\da-f]{1,4}){7}$/i.test(host);
+	}
+
+	_.is_IP = is_IP;
+
 	/**
 	 * get full path.
 	 */
@@ -274,8 +286,13 @@ function module_code(library_namespace) {
 			throw new Error('Invalid URI type: (' + (typeof uri) + ') ' + uri);
 		}
 
-		var href = library_namespace.simplify_path(uri), matched = href.match(
-		// [ all, 1: `protocol:`, 2: '//', 3: href, 4: path ]
+		var href = library_namespace.simplify_path(uri);
+		if (/^\/\//.test(uri)) {
+			// CeL.simplify_path('//hostname') === '/hostname'
+			href = '/' + href;
+		}
+		var matched = href.match(
+		// [ all, 1: `protocol:`, 2: '//', 3: host, 4: path ]
 		/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)?(\S*)$/i
 		//
 		), path;
@@ -312,9 +329,11 @@ function module_code(library_namespace) {
 		 * gsh.sdf.df?dhfjk filename<br />
 		 * gsh.sdf.df filename<br />
 		 */
-		href = matched[3] || '';
+		href = matched[3] && matched[3].toLowerCase() || '';
 		path = matched[4] || '';
-		if (/(?:\w+\.)+(?:com|org)$/i.test(href)) {
+		// 可辨識出為 domain 的這個 hostname. e.g., gTLD
+		// https://en.wikipedia.org/wiki/Generic_top-level_domain
+		if (/(?:\w+\.)+(?:com|org|net|info)$/i.test(href)) {
 			// e.g., URI("www.example.com")
 			path = path || '/';
 			if (uri.protocol === 'file:')
@@ -322,7 +341,7 @@ function module_code(library_namespace) {
 		}
 
 		if (matched[1])
-			uri.protocol = matched[1];
+			uri.protocol = matched[1].toLowerCase();
 		// uri._protocol = uri.protocol.slice(0, -1).toLowerCase();
 		// library_namespace.debug('protocol [' + uri._protocol + ']', 2);
 
@@ -386,8 +405,11 @@ function module_code(library_namespace) {
 			path = '/' + path;
 		}
 		if (!href) {
+			// test /C:/path
 			if (!/^\/[A-Z]:/i.test(path)) {
-				library_namespace.warn('URI: 將 [' + path + '] 當作 pathname!');
+				library_namespace.warn(
+				// 將 [' + path + '] 當作 pathname! not hostname!
+				'URI: Treat [' + path + '] as pathname!');
 				if (uri.pathname) {
 					if (/^\//.test(path)) {
 						// path 為 absolute path
