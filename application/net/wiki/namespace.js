@@ -706,7 +706,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String}wiki_project, Wikidata API 可使用之 site name parameter。
 	 * 
-	 * @see mw.config.get('wgWikiID')
+	 * @see mediaWiki.config.get('wgWikiID')
 	 *      https://www.mediawiki.org/wiki/ResourceLoader/Core_modules#mediaWiki.config
 	 * @see set_default_language()
 	 * @see [[:en:Help:Interwiki linking#Project titles and shortcuts]],
@@ -931,24 +931,6 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
-
-	var user_language;
-	if (typeof mediaWiki === "object" && typeof mw === "object"
-			&& mediaWiki === mw) {
-		// mw.config
-		// wgULSCurrentAutonym: "中文（台灣）‎"
-		user_language = mediaWiki.config.get('wgPreferredVariant')
-				|| mediaWiki.config.get('wgUserVariant')
-				|| mediaWiki.config.get('wgUserLanguage')
-				|| mediaWiki.config.get('wgPageContentLanguage')
-		if (false) {
-			// {Array}
-			user_language = mediaWiki.config.get('wgULSAcceptLanguageList')
-					|| mediaWiki.config.get('wgULSBabelLanguages');
-		}
-	}
-
-	// ------------------------------------------------------------------------
 
 	/**
 	 * get NO of namespace
@@ -2753,9 +2735,18 @@ function module_code(library_namespace) {
 	// 設定預設之語言。 English
 	set_default_language(
 	// `wiki_API.mw_web_session` is not initialized at this time.
-	wiki_API.mw_web_session &&
-	// mw.user.options.get('language') === 'zh-tw'
-	mw.config.get('wgContentLanguage') || 'en');
+	wiki_API.mw_web_session && (
+	// mediaWiki.user.options.get('language') === 'zh-tw'
+	mediaWiki.config.get('wgContentLanguage')
+	// wgULSCurrentAutonym: "中文（台灣）‎"
+	// || mediaWiki.config.get('wgPreferredVariant')
+	// || mediaWiki.config.get('wgUserVariant')
+	// || mediaWiki.config.get('wgUserLanguage')
+	// || mediaWiki.config.get('wgPageContentLanguage')
+	// {Array} wgULSAcceptLanguageList
+	// || mediaWiki.config.get('wgULSAcceptLanguageList')
+	// || mediaWiki.config.get('wgULSBabelLanguages')
+	) || 'en');
 
 	// [[:en:right-to-left#RTL Wikipedia languages]]
 	// 找出使用了由右至左的文字，可用於{{lang}}模板。

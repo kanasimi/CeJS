@@ -965,13 +965,14 @@ function (globalThis) {
 				// v0.9 → 0.09
 				// v0.10 → 0.10
 				// v0.12 → 0.12
+				// v4.9 → 4.09
 				// v15.12.0 → 15.12
 				// v16.1 → 16.01
 				// 預防: +1.9 > +1.10 == 1.1
 				return +version_now[0] + version_now[1] / 100;
 			}
-			version_to_test = version_to_test.split('.');
 
+			version_to_test = version_to_test.split('.');
 			var diff = version_now[0] - version_to_test[0];
 			if (diff)
 				return diff > 0;
@@ -2958,10 +2959,10 @@ OS='UNIX'; // unknown
 	});
 
 
-	// Warning: 在 node v0.10.48 下，對於以 set/get 來設定 target[key]
+	// Warning: 在 node.js v0.10.48 下，對於以 set/get 來設定 target[key]
 	// 的情況，可能造成設定完後 process, console 變成未定義之變數。
-	// node v0.12.18 下沒有這個問題。
-	_.need_avoid_assign_to_setter = platform.nodejs && !platform('node', 0.12);
+	// node.js v0.12.18 下沒有這個問題。
+	_.need_avoid_assign_to_setter = platform.nodejs && !platform('node', '0.12');
 
 	set_method(Object, {
 		// Object.defineProperties()

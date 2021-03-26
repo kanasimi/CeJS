@@ -317,17 +317,19 @@ if (typeof CeL === 'function')
 		// ---------------------------------------------------------------------//
 		// 測試是否具有標準的 ES6 Set/Map collections (ECMAScript 6 中的集合類型)。
 
-		var is_Set, is_Map, has_Set, has_Map,
+		var is_Set, is_Map, has_native_Set, has_native_Map,
 		//
 		KEY_not_native = library_namespace.env.not_native_keyword,
-		// use Object.defineProperty[library_namespace.env.not_native_keyword] to test
-		// if the browser don't have native support for Object.defineProperty().
+		// use Object.defineProperty[library_namespace.env.not_native_keyword]
+		// to test if the browser don't have native support for
+		// Object.defineProperty().
 		has_native_Object_defineProperty = !Object.defineProperty[KEY_not_native];
 
 		try {
-			has_Set = !!(new Set());
-			has_Map = !!(new Map());
+			has_native_Set = !!(new Set());
+			has_native_Map = !!(new Map());
 
+			// TODO: use library_namespace.type_tester()
 			is_Set = function(value) {
 				return Object.prototype.toString.call(value) === "[object Set]";
 			};
@@ -349,7 +351,8 @@ if (typeof CeL === 'function')
 			// delete a.s;/* .. */alert(g());
 			// https://code.google.com/p/es-lab/source/browse/trunk/src/ses/WeakMap.js
 
-			if (!has_native_Object_defineProperty || !has_Set || !has_Map)
+			if (!has_native_Object_defineProperty || !has_native_Set
+					|| !has_native_Map)
 				(function() {
 					library_namespace
 							.debug('完全使用本 library 提供的 ES6 collections 實作功能。');
@@ -1905,6 +1908,16 @@ if (typeof CeL === 'function')
 		// TODO: watchdog for link.onload
 		// function link_watchdog() {}
 
+		function all_requires_loaded(declaration) {
+			var require_resources = declaration.require_resources;
+			return !Array.isArray(require_resources)
+			//
+			|| require_resources.every(function(module_name) {
+				var item = get_named(module_name);
+				return item && item.included;
+			});
+		}
+
 		/**
 		 * 載入 named source code（具名程式碼: module/URL）。<br />
 		 * Include / requires specified module.<br />
@@ -2034,7 +2047,11 @@ if (typeof CeL === 'function')
 
 				// Release memory. 釋放被占用的記憶體. 早點 delete 以釋放記憶體空間/資源。
 				// assert: declaration.error_handler 為 Set。
-				declaration.error_handler.clear();
+				if (declaration.error_handler) {
+					// @ work.hta
+					// 有可能已經載入，因此 `delete declaration.error_handler;` 了。
+					declaration.error_handler.clear();
+				}
 
 				if (need_waiting.length > 0) {
 					need_waiting.forEach(function(cb) {
@@ -2050,7 +2067,26 @@ if (typeof CeL === 'function')
 			// 存在 .included 表示已經處理過（無論成功失敗）。
 			// URL 已嵌入/含入/掛上/module registered/函數已執行。
 			if (force || !('included' in declaration)) {
-				if (declaration.code) {
+				if (!options.finish_only && declaration.is_waiting_now
+				// 在網頁環境插入 <script> 時，可能因相依的模組尚未載入，先行跳出，但此時已具有
+				// declaration.code。在所依賴的模組載入前，若另一個線程載入本模組，因為已有
+				// declaration.code，若不檢查則可能直接就開始執行，造成依賴的函式不存在。
+				//
+				// e.g., CeL.application.net.wiki.namespace 需要
+				// CeL.application.net，會先載入 CeL.application.net，並等待
+				// CeL.application.net 依賴的模組載入。
+				// 但 CeL.application.net.wiki 以 .finish + CeL.run() 載入
+				// CeL.application.net.wiki.namespace ，此 CeL.run() 線程中
+				// CeL.application.net.wiki.namespace 獨立，且已有
+				// declaration.code，但實際上 CeL.application.net 尚未載入。
+				&& !all_requires_loaded(declaration)) {
+					if (caller)
+						declaration.callback.add(caller);
+
+					// 因無法即時載入，先行退出。
+					return INCLUDING;
+
+				} else if (declaration.code) {
 					// ---------------------------------------
 					// including code.
 					// TODO: 拆開。
@@ -2615,12 +2651,14 @@ if (typeof CeL === 'function')
 											// 'complete'，執行到這邊。
 											// 因此除了藉由載入時間，無法分辨檔案到底存不存在。
 											declaration.included = UNKNOWN;
-										} else if (library_namespace
-												.is_debug(2)) {
-											library_namespace
-													.warn('load_named: 未能直接載入 (load) ['
-															+ id
-															+ ']！可能因為 code 還有其他未能掌控，且尚未載入的相依性。');
+										} else {
+											declaration.is_waiting_now = true;
+											if (library_namespace.is_debug(2)) {
+												library_namespace
+														.warn('load_named: 未能直接載入 (load) ['
+																+ id
+																+ ']！可能因為 code 還有其他未能掌控，且尚未載入的相依性。');
+											}
 										}
 									}
 
@@ -2938,6 +2976,9 @@ if (typeof CeL === 'function')
 				delete declaration.last_call;
 				delete declaration.require_resources;
 				delete declaration.variable_hash;
+				delete declaration.callback;
+				delete declaration.error_handler;
+				delete declaration.is_waiting_now;
 				// delete declaration.use;
 
 				// TODO: destroy item。
@@ -3612,11 +3653,15 @@ if (typeof CeL === 'function')
 						relation_map.add(item, next);
 				}
 
-			if (!something_new)
+			if (!something_new) {
 				// 沒東西。skip.
 				return PROCESSED;
-			else if (sequential)
+			}
+
+			if (sequential) {
+				// array 的每個元素都載入後，才能處理陣列本身。
 				relation_map.add(previous, array);
+			}
 		}
 
 		/**
@@ -3902,7 +3947,7 @@ if (typeof CeL === 'function')
 		library_namespace.get_module_path = get_module_path;
 
 		// check from newer to older
-		if (has_Set
+		if (has_native_Set
 		// node 10.19.0 does not has `globalThis`
 		&& typeof globalThis !== 'undefined' && globalThis
 		//
@@ -4076,6 +4121,8 @@ if (typeof CeL === 'function')
 					to_run.unshift(SEQUENTIAL);
 				}
 
+				// 注意: 每次執行 CeL.run() 都會創出新的1組 check_and_run() 與
+				// dependency_chain
 				to_run = new check_and_run(to_run);
 
 				library_namespace.debug('做完初始登記，開始跑程序。', 2, 'normal_run');

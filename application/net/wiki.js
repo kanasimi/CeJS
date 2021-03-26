@@ -56,7 +56,7 @@ gadgets 小工具 [[Wikipedia:Tools]], [[Category:Wikipedia scripts]], [[mw:Reso
 // ---------------------------------------------------------
 
 // https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.loader
-mw.loader.load('https://kanasimi.github.io/CeJS/ce.js')
+mediaWiki.loader.load('https://kanasimi.github.io/CeJS/ce.js')
 CeL.run('application.net.wiki');
 CeL.wiki.page('Wikipedia:機器人',function(page_data){console.log(page_data);},{redirects:true,section:0})
 
@@ -289,7 +289,8 @@ function module_code(library_namespace) {
 
 	if (library_namespace.is_WWW(true) && typeof mw === 'object' && mw
 			&& typeof mw.config === 'object'
-			&& typeof mw.config.get === 'function') {
+			&& typeof mw.config.get === 'function'
+			&& typeof mediaWiki === "object" && mediaWiki === mw) {
 		wiki_API.mw_web_session = true;
 	}
 
@@ -335,21 +336,21 @@ function module_code(library_namespace) {
 			if (wiki_API.mw_web_session) {
 				wiki_API.mw_web_session = new wiki_API({
 					API_URL :
-					// mw.config.get('wgServer')
+					// mediaWiki.config.get('wgServer')
 					location.origin
 					// https://www.mediawiki.org/wiki/Manual:$wgScriptPath
-					+ mw.config.get('wgScriptPath')
+					+ mediaWiki.config.get('wgScriptPath')
 					// https://www.mediawiki.org/wiki/Manual:Api.php
 					+ '/api.php',
 					localStorage_prefix_key : 'mw_web_session'
 				});
 				// fill tokens
-				for ( var token_name in mw.user.tokens.values) {
+				for ( var token_name in mediaWiki.user.tokens.values) {
 					wiki_API.mw_web_session.token[
 					// 'csrfToken' → 'csrftoken'
 					token_name.toLowerCase()]
 					//
-					= mw.user.tokens.values[token_name];
+					= mediaWiki.user.tokens.values[token_name];
 				}
 				// 預設對所有網站會使用相同的 cookie
 
