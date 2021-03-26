@@ -3087,6 +3087,7 @@ function module_code(library_namespace) {
 
 	// extract_parameters_from_options
 	// 應盡量少用混雜的方法，如此可能有安全疑慮(security problem)。
+	// @see ibrary_namespace.import_options()
 	function extract_parameters(from_parameters, action,/* use GET */
 	extract_to_action) {
 		action = library_namespace.setup_options(action);

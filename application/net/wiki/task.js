@@ -2977,34 +2977,41 @@ function module_code(library_namespace) {
 			session.get_token(_next);
 		}
 
+		// ------------------------------------------------
+
 		var callback, session, API_URL;
-		if (!password && user_name && typeof user_name === 'object') {
+		if (!options && !password && library_namespace.is_Object(user_name)) {
+			// .login(option); treat user_name as option
+
 			// session = CeL.wiki.login(options);
-			options = user_name;
+			options = Object.clone(user_name);
 			// console.log(options);
 			user_name = options.user_name;
 			// user_password
 			password = options.password;
 		}
 		if (library_namespace.is_Object(options)) {
-			API_URL = options.API_URL;
-			session = options[KEY_SESSION];
-			callback = options.callback;
+			API_URL = options.API_URL/* || options.project */;
+			session = wiki_API.session_of_options(options);
+			// besure {Function}callback
+			callback = typeof options.callback === 'function'
+					&& options.callback;
 		} else if (typeof options === 'function') {
 			callback = options;
 			// 前置處理。
 			options = Object.create(null);
 		} else if (typeof options === 'string') {
 			// treat options as API_URL
-			options = {
-				API_URL : API_URL = options
-			};
+			API_URL = options;
+			options = Object.create(null);
 		} else {
 			// 前置處理。
 			options = library_namespace.new_options(options);
 		}
-		// besure {Function}callback
-		callback = typeof callback === 'function' && callback;
+
+		// console.trace([ user_name, password, API_URL ]);
+		library_namespace.debug('API_URL: ' + API_URL + ', default language: '
+				+ wiki_API.language, 3, 'wiki_API.login');
 
 		if (session) {
 			delete options.is_running;

@@ -115,6 +115,9 @@ function module_code(library_namespace) {
 	 * web Wikipedia / 維基百科 用的 functions。<br />
 	 * 可執行環境: node.js, JScript。
 	 * 
+	 * TODO: new wiki_API(API_URL || options);<br />
+	 * wiki_session.login(user_name, password, API_URL);
+	 * 
 	 * @param {String}user_name
 	 *            user name
 	 * @param {String}password
@@ -128,6 +131,12 @@ function module_code(library_namespace) {
 	 * @constructor
 	 */
 	function wiki_API(user_name, password, API_URL) {
+		if (!this || this.constructor !== wiki_API) {
+			return wiki_API.query.apply(null, arguments);
+		}
+
+		// TODO: this.login(user_name, password, API_URL);
+
 		var options;
 		if (API_URL && typeof API_URL === 'object') {
 			// session = new wiki_API(user_name, password, options);
@@ -148,19 +157,10 @@ function module_code(library_namespace) {
 		// console.trace([ user_name, password, API_URL ]);
 		library_namespace.debug('API_URL: ' + API_URL + ', default language: '
 				+ wiki_API.language, 3, 'wiki_API');
-		if (!this || this.constructor !== wiki_API) {
-			return wiki_API.query.apply(null, arguments);
-		}
-
-		this.token = {
-			// lgusername
-			lgname : user_name,
-			// user_password
-			lgpassword : password
-		};
 
 		// action queue 佇列。應以 append，而非整個換掉的方式更改。
 		this.actions = [];
+		// @see wiki_API.prototype.next
 		if (options.is_running) {
 			// login 前便執行其他作業，可能導致 Session=deleted。 e.g., running
 			// options.configuration_adapter() @ 20201008.fix_anchor.js
@@ -173,11 +173,23 @@ function module_code(library_namespace) {
 		// 對舊版本須用到 for (in .next_mark)
 		this.next_mark = Object.create(null);
 
+		this.token = {
+			// lgusername
+			lgname : user_name,
+			// user_password
+			lgpassword : password
+		};
+
 		// console.trace(API_URL);
 		if (!API_URL && !('language' in this)
 		// wikidata 不設定 language。
 		&& !this.is_wikidata) {
 			API_URL = wiki_API.language;
+			// 假若未設定 API_URL 或 user_name，那就不初始化。等 .login 才初始化。
+			// 若想基本的初始化，最起碼必須設定 API_URL。
+			options.need_initialize = password && user_name;
+		} else if (!('need_initialize' in options)) {
+			options.need_initialize = true;
 		}
 
 		// console.trace(API_URL);
@@ -193,7 +205,7 @@ function module_code(library_namespace) {
 
 		this.general_parameters = Object.clone(wiki_API.general_parameters);
 		library_namespace.import_options(options,
-		//
+		// @see CeL.application.net.wiki.namespace
 		wiki_API.general_parameters_normalizer, this.general_parameters);
 		if (library_namespace.is_WWW(true) && window.location
 		// For non-authenticated requests, specify the value *. This
@@ -204,7 +216,8 @@ function module_code(library_namespace) {
 			var host;
 			if (!window.location.host
 			// e.g., locale file: window.location.host===""
-			|| window.location.host !== (host = new URL(this.API_URL).host)
+			|| (host = new URL(this.API_URL).host)
+					&& host !== window.location.host
 					&& host !== this.general_parameters.origin) {
 				library_namespace
 						.warn('wiki_API: You may need to set .origin = "'
@@ -213,6 +226,8 @@ function module_code(library_namespace) {
 		}
 
 		if (options.localStorage_prefix_key && wiki_API.has_storage) {
+			// assert: typeof options.localStorage_prefix_key === 'string' ||
+			// typeof options.localStorage_prefix_key === 'number'
 			this.localStorage_prefix = [ library_namespace.Class,
 					wiki_API.site_name(this), options.localStorage_prefix_key,
 					'' ]
@@ -235,11 +250,16 @@ function module_code(library_namespace) {
 		// CeL.application.net.wiki.namespace
 		this.redirects_data = Object.create(null);
 
-		this.run_after_initializing = [];
-		// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
-		// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
-		// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
-		this.run(initialize_wiki_API, options);
+		if (options.need_initialize) {
+			this.run_after_initializing = [];
+			// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
+			// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
+			// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
+			this.run(initialize_wiki_API, options);
+		} else {
+			// e.g.,
+			// wiki = new CeL.wiki; ...; wiki.login(options);
+		}
 	}
 
 	function initialize_wiki_API(options) {
