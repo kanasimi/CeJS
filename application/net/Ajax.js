@@ -638,18 +638,23 @@ function module_code(library_namespace) {
 						// get {Buffer}
 						content = node_fs.readFileSync(value);
 					} catch (e) {
-						library_namespace.error([ 'to_form_data: ', {
-							T : [ 'Failed to get file: [%1]', value ]
-						} ]);
-						// Skip this one.
-						callback();
-						return;
+						// When we can not read, it will throw now.
+						throw e;
 					}
 				} else {
 					// node.js 之下此方法不能處理 binary data。
 					content = library_namespace
 							.get_file(value/* , 'binary' */);
 				}
+				if (!content) {
+					library_namespace.error([ 'to_form_data: ', {
+						T : [ 'Failed to get file: [%1]', value ]
+					} ]);
+					// Skip this one.
+					callback();
+					return;
+				}
+
 				if (options && options.file_post_processor) {
 					options.file_post_processor(value, content);
 				}
