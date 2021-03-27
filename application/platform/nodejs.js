@@ -601,6 +601,7 @@ function module_code(library_namespace) {
 		function process_next_fso(promise, fso_name) {
 			var full_path = path + fso_name,
 			// https://nodejs.org/api/fs.html#fs_class_fs_stats
+			// maybe throw
 			fso_status = node_fs.lstatSync(full_path),
 			// else: e.g., is file
 			is_directory = fso_status.isDirectory();

@@ -93,8 +93,8 @@ function module_code(library_namespace) {
 		if (typeof title === 'function') {
 			title = title(options.token);
 		}
-		if (!title) {
-			title = wiki_API.check_stop.title(options.token);
+		if (!title && !(title = wiki_API.check_stop.title(options.token))) {
+			callback();
 		}
 
 		library_namespace.debug('檢查緊急停止頁面 ' + wiki_API.title_link_of(title), 1,
@@ -106,7 +106,14 @@ function module_code(library_namespace) {
 			// default: NOT stopped
 			stopped = false, PATTERN;
 
-			if (typeof options.checker === 'function') {
+			if (!content) {
+				library_namespace.info([ {
+					T : 'The page to stop operation is not found.'
+				}, {
+					T : 'The operation will continue as usual.'
+				} ]);
+
+			} else if (typeof options.checker === 'function') {
 				// 以 options.checker 的回傳來設定是否stopped。
 				stopped = options.checker(content);
 				if (stopped) {
@@ -930,7 +937,9 @@ function module_code(library_namespace) {
 
 		// 備註 comment won't accept templates and external links
 		if (!options.comment && options.summary) {
+			library_namespace.warn(
 			// 錯置?
+			'wiki_API.upload: Please use .comment instead of .summary!');
 			options.comment = options.summary;
 		}
 
@@ -976,7 +985,7 @@ function module_code(library_namespace) {
 			// 將 .text 當作文件資訊。
 			wiki_API.template_text(options.text, {
 				name : 'Information',
-				separator : '\n|'
+				separator : '\n| '
 			}) ];
 
 			if (options.license) {
