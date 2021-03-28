@@ -506,9 +506,20 @@ function module_code(library_namespace) {
 	 *            {parameter_1 = value, parameter_2 = value} ||<br />
 	 *            function replace_to(value, parameter_name, template_token)
 	 * 
-	 * @returns {ℕ⁰:Natural+0} count of successful replacement
+	 * @returns {ℕ⁰:Natural+0} count of templates successful replaced
 	 */
 	function replace_parameter(template_token, parameter_name, replace_to) {
+		function convert_replace_to(parameter_name) {
+			if (typeof replace_to === 'function') {
+				// function replace_to(value, parameter_name, template_token) {
+				// return 'replace to value'; }
+				replace_to = replace_to(
+						template_token.parameters[parameter_name],
+						parameter_name, template_token);
+			}
+			return replace_to;
+		}
+
 		if (library_namespace.is_Object(parameter_name)) {
 			// treat `replace_to` as options
 			var options = library_namespace.setup_options(replace_to);
@@ -517,9 +528,12 @@ function module_code(library_namespace) {
 				parameter_name = to_parameter_name_only(parameter_name);
 			}
 
-			var count = 0, latest_OK_key, key_of_spaces, spaces, next_insert_index;
+			var operated_template_count = 0, latest_OK_key, key_of_spaces, spaces, next_insert_index;
 			for ( var replace_from in parameter_name) {
 				replace_to = parameter_name[replace_from];
+				if (convert_replace_to(replace_from) === undefined) {
+					continue;
+				}
 				var index = template_token.index_of[replace_from];
 				if (!(index >= 0)) {
 					// 不存在此 parameter name 可 replace。
@@ -546,6 +560,7 @@ function module_code(library_namespace) {
 						} else {
 							template_token.push(replace_to);
 						}
+						operated_template_count = 1;
 					}
 					continue;
 				}
@@ -570,13 +585,13 @@ function module_code(library_namespace) {
 				next_insert_index = index;
 				// console.trace([ replace_from, replace_to ]);
 				if (skip_replacement) {
-					count += skip_replacement;
+					operated_template_count += skip_replacement;
 					continue;
 				}
-				count += replace_parameter(template_token, replace_from,
-						replace_to);
+				operated_template_count += replace_parameter(template_token,
+						replace_from, replace_to);
 			}
-			return count;
+			return operated_template_count;
 		}
 
 		// --------------------------------------
@@ -587,13 +602,7 @@ function module_code(library_namespace) {
 			return 0;
 		}
 
-		if (typeof replace_to === 'function') {
-			// function replace_to(value, parameter_name, template_token)
-			replace_to = replace_to(template_token.parameters[parameter_name],
-					parameter_name, template_token);
-		}
-
-		if (replace_to === undefined) {
+		if (convert_replace_to(parameter_name) === undefined) {
 			return 0;
 		}
 
