@@ -3243,6 +3243,9 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a [[:en<!-- c -->:b{{=}}]] d'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
+		wikitext = '[[エヴァンゲリオン (架空の兵器)#Mark.09|Mark.09]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['Mark.09', parsed[0].anchor]);
 		wikitext = '--{{unsigned|user}}--'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['transclusion', parsed[1].type]);

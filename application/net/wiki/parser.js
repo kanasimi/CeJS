@@ -4057,8 +4057,8 @@ function module_code(library_namespace) {
 			} else {
 				previous = '';
 			}
-			library_namespace.debug(previous + ' + ' + all_link, 4,
-					'parse_wikitext.link');
+			library_namespace.debug('[' + previous + '] + [' + all_link + ']',
+					4, 'parse_wikitext.link');
 
 			var file_matched, category_matched;
 			if (!page_name) {
@@ -4357,19 +4357,30 @@ function module_code(library_namespace) {
 				section_title = section_title.toString()
 				// remove prefix: '#'
 				.slice(1).trimEnd();
-				if (/\.[\dA-F]{2}/.test(section_title)
+				var original_hash = section_title;
+				// https://en.wikipedia.org/wiki/Percent-encoding#Types_of_URI_characters
+				if (/^([\w\-~!*'();:@&=+$,/?#\[\]]|\.[\dA-F]{2})+$/
 				// [[w:en:Help:Link#Section linking (anchors)]]
 				// e.g.,
 				// [[臺灣話#.E5.8F.97.E6.97.A5.E6.9C.AC.E8.AA.9E.E5.BD.B1.E9.9F.BF.E8.80.85|(其他參考資料)]]
-				&& /^(\.[\dA-F]{2}|[\w\-])+$/.test(section_title)) {
+				.test(section_title)) {
 					section_title = section_title.replace(/\.([\dA-F]{2})/g,
 							'%$1');
 				}
+				// console.log([ original_hash, section_title ]);
 				try {
+					// if
+					// (/^([\w\-.~!*'();:@&=+$,/?#\[\]]|%[\dA-F]{2})+$/.test(section_title))
 					section_title = decodeURIComponent(section_title);
+					if (/[\x00-\x1F\x7F]/.test(section_title)) {
+						// e.g. [[w:ja:エヴァンゲリオン (架空の兵器)#Mark.09]]
+						section_title = original_hash;
+					}
 				} catch (e) {
-					// TODO: handle exception
+					// e.g., error after convert /\.([\dA-F]{2})/g
+					section_title = original_hash;
 				}
+				// console.log(section_title);
 				// wikilink_token.anchor 網頁錨點
 				parameters.anchor = normalize_anchor(section_title);
 				// TODO: [[Special:]]
@@ -4377,6 +4388,7 @@ function module_code(library_namespace) {
 				_set_wiki_type(parameters, file_matched ? 'file'
 						: category_matched ? 'category' : 'link');
 			}
+			// console.trace(parameters);
 
 			// [ page_name, section_title, display_text without '|' ]
 			// section_title && section_title.startsWith('#')
