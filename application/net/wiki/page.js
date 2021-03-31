@@ -1431,7 +1431,7 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
-	// 監視最近更改的頁面。
+	// Listen to page modification. 監視最近更改的頁面。
 	// 注意: 會改變 options！
 	// 注意: options之屬性名不可與 wiki_API.recent 衝突！
 	// 警告: 同時間只能有一隻程式在跑，否則可能會造成混亂！

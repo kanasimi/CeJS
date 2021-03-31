@@ -988,34 +988,33 @@ function module_code(library_namespace) {
 				separator : '\n| '
 			}) ];
 
-			if (options.license) {
-				options.text.push('', '== {{int:license-header}} ==',
-				//
-				wiki_API.template_text.join_array(options.license));
-			}
-
-			if (options.additional_text) {
-				options.text.push('', options.additional_text.trim());
-			}
-
-			// add categories
-			if (options.categories) {
-				options.text.push('',
-				//
-				wiki_API.template_text.join_array(options.categories
-				//
-				.map(function(category_name) {
-					if (!category_name.includes('[[')) {
-						if (!PATTERN_category_prefix.test(category_name))
-							category_name = 'Category:' + category_name;
-						// NG: CeL.wiki.title_link_of()
-						category_name = '[[' + category_name + ']]';
-					}
-					return category_name;
-				})));
-			}
-
 			options.text = options.text.join('\n');
+		}
+
+		if (options.license) {
+			options.text += '\n== {{int:license-header}} ==\n'
+					+ wiki_API.template_text.join_array(options.license);
+		}
+
+		if (options.additional_text) {
+			options.text += '\n' + options.additional_text.trim();
+		}
+
+		// append categories
+		if (options.categories) {
+			options.text += '\n'
+			//
+			+ wiki_API.template_text.join_array(options.categories
+			//
+			.map(function(category_name) {
+				if (!category_name.includes('[[')) {
+					if (!PATTERN_category_prefix.test(category_name))
+						category_name = 'Category:' + category_name;
+					// NG: CeL.wiki.title_link_of()
+					category_name = '[[' + category_name + ']]';
+				}
+				return category_name;
+			}));
 		}
 
 		// assert: typeof options.text === 'string'
