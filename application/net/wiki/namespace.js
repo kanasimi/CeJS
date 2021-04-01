@@ -733,7 +733,8 @@ function module_code(library_namespace) {
 			// options.language 較 session 的設定優先。
 			// language.language
 			language = get_first_domain_name_of_session(language)
-			// session.language
+			// wikidata 沒有 session.language，會用
+			// session[KEY_HOST_SESSION].language。
 			|| get_first_domain_name_of_session(session)
 			// || language
 			;
@@ -810,7 +811,8 @@ function module_code(library_namespace) {
 		} else if (language in language_code_to_site_alias) {
 			// e.g., 'lzh' → 'zh-classical'
 			language = language_code_to_site_alias[language];
-		} else if (!family && session && !session.family && session.API_URL) {
+		} else if (!family && session && !session.family
+				&& !session.is_wikidata && session.API_URL) {
 			// e.g., API_URL: 'https://zh.moegirl.org.cn/api.php'
 			// console.trace([ language, family ]);
 			language = session.API_URL;

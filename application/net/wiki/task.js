@@ -463,10 +463,10 @@ function module_code(library_namespace) {
 		// case 'category_tree':
 		// @see wiki_API.prototype.category_tree @ application.net.wiki.list
 
-		// register page alias
+		// register page alias. usually used for templates
 		case 'register_redirects':
-			// wiki.register_redirects(template_list, callback, options)
-			// wiki.register_redirects(template_list, options)
+			// wiki.register_redirects(page_title_list, callback, options)
+			// wiki.register_redirects(page_title_list, options)
 			if (library_namespace.is_Object(next[2]) && !next[3]) {
 				// 未設定/不設定 callback
 				// shift arguments

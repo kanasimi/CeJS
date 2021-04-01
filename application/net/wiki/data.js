@@ -282,6 +282,7 @@ function module_code(library_namespace) {
 
 		var language = options.language;
 		var type = options.type;
+		// console.trace([ key, is_api_and_title(key, 'language') ]);
 		if (is_api_and_title(key, 'language')) {
 			if (is_wikidata_site(key[0])) {
 				wikidata_entity(key, function(entity, error) {
@@ -314,22 +315,23 @@ function module_code(library_namespace) {
 			get_all_properties : true
 		}).language;
 
-		var action = 'action=wbsearchentities'
-		// search. e.g.,
-		// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
-		+ '&search=' + encodeURIComponent(key)
-		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
-		+ '&language=' + language;
+		var action = {
+			action : 'wbsearchentities',
+			// search. e.g.,
+			// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
+			search : encodeURIComponent(key),
+			// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
+			language : language
+		};
 
 		if (options.limit || wikidata_search.default_limit) {
-			action += '&limit='
-					+ (options.limit || wikidata_search.default_limit);
+			action.limit = options.limit || wikidata_search.default_limit;
 		}
 
 		if (type) {
 			// item|property
 			// 預設值：item
-			action += '&type=' + type;
+			action.type = type;
 		}
 
 		if (options['continue'] > 0)
