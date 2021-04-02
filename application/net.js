@@ -41,6 +41,16 @@ function module_code(library_namespace) {
 		}
 		return encodeURIComponent(string);
 	};
+	var decode_URI_component = function(string, encoding) {
+		if (library_namespace.character) {
+			library_namespace.debug('採用 ' + library_namespace.Class
+			// 有則用之。 use CeL.data.character.decode_URI_component()
+			+ '.character.decode_URI_component', 0, module_name);
+			decode_URI_component = library_namespace.character.decode_URI_component;
+			return decode_URI_component(string, encoding);
+		}
+		return decodeURIComponent(string);
+	};
 
 	// requiring
 	var KEY_not_native = library_namespace.env.not_native_keyword;
@@ -266,15 +276,14 @@ function module_code(library_namespace) {
 			if (is_URI(uri))
 				return uri;
 
-			try {
-				return new URI(uri, base_uri, options);
-			} catch (e) {
-				// TODO: handle exception
-			}
-			return;
+			return new URI(uri, base_uri, options);
 		}
 
-		options = library_namespace.setup_options(options);
+		options = library_namespace.new_options(options);
+		if (options.charset === 'buffer') {
+			// Although the content is buffer, the URI itself should be not.
+			delete options.charset;
+		}
 		if ((uri instanceof URL) || is_URI(uri)) {
 			// uri.href
 			uri = uri.toString();
@@ -488,6 +497,7 @@ function module_code(library_namespace) {
 				});
 				_options = options;
 			}
+			// console.trace([ matched[5], _options ]);
 			if (options.as_URL) {
 				// 盡可能模擬 W3C URL()
 				// library_namespace.debug('search: [' + matched[5] + ']', 2);
@@ -506,6 +516,9 @@ function module_code(library_namespace) {
 				// uri.path = uri.pathname;
 			}
 		}
+		if (options.charset)
+			uri.charset = options.charset;
+
 		library_namespace.debug('path: [' + uri.path + ']', 2);
 
 		library_namespace.debug('Generate .href of URI by URI_toString()', 2);
@@ -641,6 +654,9 @@ function module_code(library_namespace) {
 
 		options = library_namespace.setup_options(options);
 		var parameters = this;
+		var charset = options.charset;
+		if (charset)
+			parameters.charset = charset;
 		var data, name, value, matched;
 		if (typeof search_string === 'string') {
 			// http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
@@ -686,13 +702,22 @@ function module_code(library_namespace) {
 			// var index = parameter.indexOf('=');
 			if (matched = data[i].match(/^([^=]+)=(.*)$/)) {
 				name = matched[1];
-				value = decodeURIComponent(matched[2]);
+				value = matched[2];
+				try {
+					value = decode_URI_component(value, charset);
+				} catch (e) {
+					// TODO: handle exception
+				}
 			} else {
 				name = data[i];
 				value = 'default_value' in options ? options.default_value
 						: /* name */NO_EQUAL_SIGN;
 			}
-			name = decodeURIComponent(name);
+			try {
+				name = decode_URI_component(name, charset);
+			} catch (e) {
+				// TODO: handle exception
+			}
 
 			if (ignore_search_properties
 			// Warning: for old environment, may need ignore some keys

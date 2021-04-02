@@ -189,6 +189,8 @@ function module_code(library_namespace) {
 		if (Array.isArray(URL_to_fetch)) {
 			URL_to_fetch = set_parameters_and_hash(library_namespace
 					.URI(URL_to_fetch[0]), URL_to_fetch[1], URL_to_fetch[2]);
+			if (charset)
+				URL_to_fetch.charset = charset;
 		} else {
 			// 當輸入 {URL} 時，node_https.request() 會將 {URL} 轉成
 			// {Object}options，不會考慮額外選項 (heads, ...)。
@@ -197,11 +199,12 @@ function module_code(library_namespace) {
 			// If url is a string, it is automatically parsed with new URL(). If
 			// it is a URL object, it will be automatically converted to an
 			// ordinary options object.
-			URL_to_fetch = library_namespace.URI(URL_to_fetch);
+			URL_to_fetch = library_namespace.URI(URL_to_fetch, null, {
+				charset : charset
+			});
 		}
 		// assert: library_namespace.is_URI(URL_to_fetch)
-		if (charset)
-			URL_to_fetch.charset = charset;
+		// console.trace(URL_to_fetch);
 
 		if (options.search || options.hash) {
 			URL_to_fetch = set_parameters_and_hash(URL_to_fetch,
