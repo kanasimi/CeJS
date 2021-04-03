@@ -45,7 +45,7 @@ function module_code(library_namespace) {
 		if (library_namespace.character) {
 			library_namespace.debug('採用 ' + library_namespace.Class
 			// 有則用之。 use CeL.data.character.decode_URI_component()
-			+ '.character.decode_URI_component', 0, module_name);
+			+ '.character.decode_URI_component', 1, module_name);
 			decode_URI_component = library_namespace.character.decode_URI_component;
 			return decode_URI_component(string, encoding);
 		}
@@ -654,9 +654,6 @@ function module_code(library_namespace) {
 
 		options = library_namespace.setup_options(options);
 		var parameters = this;
-		var charset = options.charset;
-		if (charset)
-			parameters.charset = charset;
 		var data, name, value, matched;
 		if (typeof search_string === 'string') {
 			// http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
@@ -691,6 +688,9 @@ function module_code(library_namespace) {
 				}, 1, 'Search_parameters');
 			}
 		}
+
+		// 不可設置 parameters.charset，會加在 request URL 裡面。
+		var charset = options.charset;
 
 		for (var i = 0, l = data && data.length || 0; i < l; i++) {
 			if (!data[i])
