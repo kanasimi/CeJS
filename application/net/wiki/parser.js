@@ -1556,11 +1556,16 @@ function module_code(library_namespace) {
 						options);
 			}
 
-			if (token.name === 'Anchor') {
+			if (token.name === 'Anchor' || token.name === 'Anchors') {
+				// 何も表示はされませんが、リンク先が、そこに作られます。
 				return '';
 			}
-
-			// TODO: {{Visible anchor}} === {{vanchor}}
+			// TODO: {{Visible anchor}} === {{Vanchor}}, {{Vanc}}
+			if (token.name === 'Visible anchor') {
+				// {{Visible anchor}}（別名{{Vanc}}）は似たテンプレートですが、1個目のリンク先が表示されます。
+				return preprocess_section_link_token(token.parameters[1],
+						options);
+			}
 
 			// jawiki
 			if (token.name === '拡張漢字') {
@@ -2685,7 +2690,7 @@ function module_code(library_namespace) {
 
 		var anchor_list = Object.keys(anchor_hash);
 		if (options && options.print_anchors) {
-			console.log('anchors:');
+			library_namespace.info('get_all_anchor: anchors:');
 			console.trace(anchor_list.length > 100 ? JSON
 					.stringify(anchor_list) : anchor_list);
 		}
