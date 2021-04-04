@@ -550,7 +550,7 @@ function module_code(library_namespace) {
 	// 選出 data.generated 不包含之 string
 	function give_boundary(data_Array) {
 		function not_includes_in(item) {
-			// console.log(item);
+			// console.trace([ typeof item, item ]);
 			return Array.isArray(item) ? item.every(not_includes_in)
 			// item: Should be {String} or {Buffer}
 			: !item.includes(boundary);
