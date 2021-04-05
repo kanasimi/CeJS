@@ -763,9 +763,11 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// 預防有{Number}之類。
-			if (typeof value === 'number')
+			// 預防有 null, undefined, {Number}, true 之類。
+			if (!value || typeof value === 'number'
+					|| typeof value === 'boolean') {
 				value = String(value);
+			}
 
 			var headers;
 			if (is_nodejs && typeof value === 'string') {
