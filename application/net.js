@@ -194,9 +194,17 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	var port_of_protocol = {
-		https : 443,
+		// https://tools.ietf.org/html/rfc1928#section-3
+		// The SOCKS service is conventionally located on TCP port 1080.
+		// https://github.com/TooTallNate/node-socks-proxy-agent/blob/master/src/agent.ts
+		socks4 : 1080,
+		socks4a : 1080,
+		socks5 : 1080,
+		socks : 1080,
+		socks5h : 1080,
+		ftp : 21,
 		http : 80,
-		ftp : 21
+		https : 443
 	};
 
 	_.port_of_protocol = port_of_protocol;
@@ -303,7 +311,7 @@ function module_code(library_namespace) {
 		var matched = href.match(
 		// [ all, 1: `protocol:`, 2: '//', 3: host, 4: path ]
 		/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)?(\S*)$/i
-		//
+		// /^(?:(https?:)\/\/)?(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/
 		), path;
 		if (!matched) {
 			throw new Error('Invalid URI: (' + (typeof uri) + ') ' + uri);
@@ -497,16 +505,8 @@ function module_code(library_namespace) {
 				});
 				_options = options;
 			}
-			// console.trace([ matched[5], _options ]);
-			if (options.as_URL) {
-				// 盡可能模擬 W3C URL()
-				// library_namespace.debug('search: [' + matched[5] + ']', 2);
-				// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-				uri.searchParams = new URLSearchParams(matched[5], _options);
-			} else {
-				// do not set uri.search_params directly.
-				uri.search_params = new Search_parameters(matched[5], _options);
-			}
+			matched = matched[5];
+			// console.trace([ matched, _options ]);
 		} else {
 			if (!href) {
 				throw new Error('Invalid URI: ' + uri);
@@ -515,7 +515,19 @@ function module_code(library_namespace) {
 				uri.directory_path = uri.pathname.replace(/[^\/]+$/, '');
 				// uri.path = uri.pathname;
 			}
+			matched = '';
 		}
+
+		if (options.as_URL) {
+			// 盡可能模擬 W3C URL()
+			// library_namespace.debug('search: [' + matched[5] + ']', 2);
+			// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+			uri.searchParams = new URLSearchParams(matched, _options);
+		} else {
+			// do not set uri.search_params directly.
+			uri.search_params = new Search_parameters(matched, _options);
+		}
+
 		if (options.charset)
 			uri.charset = options.charset;
 

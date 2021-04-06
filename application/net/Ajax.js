@@ -1487,6 +1487,20 @@ function module_code(library_namespace) {
 		// library_namespace.is_URI(URL_options_to_fetch)
 
 		/**
+		 * https://stackoverflow.com/questions/53593182/client-network-socket-disconnected-before-secure-tls-connection-was-established
+		 * mh160.js 必須使用 request，https-proxy-agent 才能正常工作
+		 * TODO: socks-proxy-agent
+		 * 
+		 * <code>
+
+		// https://techcult.com/free-proxy-software-for-windows-10/#1_Ultrasurf
+		> SET http_proxy=http://127.0.0.1:9666
+		> node u17.js 镇魂街
+
+		</code>
+		 */
+
+		/**
 		 * <code>
 
 		// http://anonproxyserver.sourceforge.net/
@@ -1527,16 +1541,17 @@ function module_code(library_namespace) {
 
 		var proxy_original_agent,
 		// using_proxy_server
-		proxy_server = parse_proxy_server(options.proxy
+		proxy_server = options.proxy
 		// https://curl.haxx.se/docs/manpage.html
 		// https://superuser.com/questions/876100/https-proxy-vs-https-proxy
 		// https://docs.oracle.com/cd/E56344_01/html/E54018/gmgas.html
 		// https://stackoverflow.com/questions/32824819/difference-between-http-proxy-https-proxy-and-proxy
 		|| URL_is_https && process.env.HTTPS_PROXY
-		// `set http_proxy=http://127.0.0.1:8080`
-		|| process.env.http_proxy);
+		// `SET http_proxy=http://127.0.0.1:8080`
+		|| process.env.http_proxy;
 
-		if (!proxy_server) {
+		if (!proxy_server
+				|| !(proxy_server = library_namespace.URI(proxy_server))) {
 			;
 
 		} else if (URL_is_https) {
@@ -2539,6 +2554,12 @@ function module_code(library_namespace) {
 	// ---------------------------------------------------------------------//
 
 	function parse_proxy_server(proxy_server) {
+		// console.log(proxy_server);
+		proxy_server = library_namespace.URI(proxy_server);
+		proxy_server.proxy = proxy_server.href;
+		// console.log(proxy_server);
+		return proxy_server;
+
 		if (typeof proxy_server !== 'string') {
 			return proxy_server;
 		}
@@ -2616,7 +2637,9 @@ function module_code(library_namespace) {
 
 		this.options = Object.assign({}, options);
 
-		proxy_server = parse_proxy_server(proxy_server);
+		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
+		// 代理伺服器 proxy_server: "username:password@hostname:port"
+		proxy_server = library_namespace.URI(proxy_server);
 		if (!proxy_server) {
 			throw new Error('Must specify proxy server: hostname:port')
 		}
@@ -2814,6 +2837,13 @@ function module_code(library_namespace) {
 		// call connect_proxy_server()
 		this_agent.createConnection(options, oncreate);
 	};
+
+	// ---------------------------------------------------------------------//
+
+	// https://github.com/TooTallNate/node-socks-proxy-agent
+	function SocksProxyAgent() {
+		TODO;
+	}
 
 	// ---------------------------------------------------------------------//
 	// TODO: for non-nodejs
