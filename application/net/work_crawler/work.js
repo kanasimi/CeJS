@@ -72,6 +72,7 @@ function module_code(library_namespace) {
 		library_namespace.info({
 			T : show_work_data.prefix + 'description'
 		});
+		// 概要 synopsis
 		library_namespace.log(library_namespace.value_of('description', null,
 				work_data)
 				+ '\n');

@@ -1256,6 +1256,21 @@ function module_code(library_namespace) {
 					return Work_crawler.THROWED;
 				}
 
+				// this.is_limited_image_url(image_data)
+				if (typeof _this.is_limited_image_url === 'function'
+				// 處理特殊圖片: 遇到下架章節時會顯示特殊圖片。避免下載到下架圖片。
+				&& chapter_data.image_list.some(_this.is_limited_image_url)) {
+					// e.g., taduo.js 因为版权或其他问题，我们将对所有章节进行屏蔽！
+					chapter_data.limited = true;
+					if (chapter_data.image_list
+							.every(_this.is_limited_image_url)) {
+						// 所有圖片皆為 limited image。
+						// chapter_data.image_length =
+						// chapter_data.image_list.length;
+						delete chapter_data.image_list;
+					}
+				}
+
 				// console.log(JSON.stringify(chapter_data));
 				if (!(image_list = chapter_data.image_list)
 				//

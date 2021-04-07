@@ -187,13 +187,6 @@ function module_code(library_namespace) {
 			});
 			// console.log(JSON.stringify(chapter_data));
 
-			if (typeof this.postfix_chapter_data === 'function') {
-				// e.g., taduo.js 因为版权或其他问题，我们将对所有章节进行屏蔽！
-				chapter_data = this.postfix_chapter_data(chapter_data,
-						work_data)
-						|| chapter_data;
-			}
-
 			return chapter_data;
 		}
 
