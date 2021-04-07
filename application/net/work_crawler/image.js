@@ -209,27 +209,28 @@ function module_code(library_namespace) {
 			}
 
 			/** {Buffer}圖片數據的內容。 */
-			var contents = undefined;
-			if (typeof _this.is_limited_image_url === 'function'
-			// 處理特殊圖片: 檢查是否下載到 padding 用的 404 檔案。
-			&& _this.is_limited_image_url(XMLHttp.responseURL)) {
-				// left contents undefined
-			} else {
-				if (_this.image_preprocessor) {
-					// 圖片前處理程序 預處理器 image pre-processing
-					// 例如修正圖片結尾非正規格式之情況。
-					// 必須自行確保不會 throw，需檢查 contents 是否非 {Buffer}。
-					contents = _this.image_preprocessor(XMLHttp.buffer,
-							image_data);
-					// if _this.image_preprocessor() returns `false`,
-					// will treat as bad file.
-				}
+			var contents = XMLHttp.buffer;
+			if (_this.image_preprocessor) {
+				// 圖片前處理程序 預處理器 image pre-processing
+				// 例如修正圖片結尾非正規格式之情況。
+				// 必須自行確保不會 throw，需檢查 contents 是否非 {Buffer}。
+				contents = _this.image_preprocessor(contents, image_data);
+				// if _this.image_preprocessor() returns `false`,
+				// will treat as bad file.
 				if (contents === undefined)
 					contents = XMLHttp.buffer;
 			}
 
 			var has_error = !contents || !(contents.length >= _this.MIN_LENGTH)
 					|| (XMLHttp.status / 100 | 0) !== 2, verified_image;
+
+			// console.trace([ image_url, XMLHttp.responseURL ]);
+			if (typeof _this.is_limited_image_url === 'function'
+			// 處理特殊圖片: 檢查是否下載到 padding 用的 404 檔案。
+			&& _this.is_limited_image_url(XMLHttp.responseURL, image_data)) {
+				has_error = true;
+			}
+
 			if (!has_error) {
 				image_data.file_length.push(contents.length);
 				library_namespace.debug({

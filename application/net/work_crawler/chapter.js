@@ -495,16 +495,32 @@ function module_code(library_namespace) {
 				T : [ '《%1》：轉成由舊至新之順序。', work_data.title ]
 			}, 3, 'reverse_chapter_list_order');
 			chapter_list.reverse();
+		} else {
+			return;
 		}
 		// console.log(chapter_list);
 
-		if (!(chapter_list.part_NO >= 1)) {
+		// 即使只有一個 part，也得處理 NO_in_part, chapter_NO 的問題。
+		if (false && !(chapter_list.part_NO >= 1)) {
 			return;
 		}
+		if (!chapter_list.part_NO)
+			chapter_list.part_NO = 1;
 
-		// 調整 NO
+		// reverse chapter_NO
+		var chapter_NO_list = chapter_list.map(function(chapter_data) {
+			return chapter_data.chapter_NO;
+		});
+		chapter_NO_list.reverse();
+
+		// 調整 NO_in_part
 		var part_title_now, parts_count_plus_1 = chapter_list.part_NO + 1, chapter_count_plus_1;
 		chapter_list.forEach(function(chapter_data, index) {
+			if (chapter_NO_list[index] > 0) {
+				chapter_data.chapter_NO = chapter_NO_list[index];
+				// should be: chapter_data.chapter_NO === index + 1
+			}
+
 			if (!(chapter_data.NO_in_part >= 1)) {
 				this.onerror('reverse_chapter_list_order: '
 						+ gettext('Invalid NO_in_part: ',
@@ -1256,14 +1272,22 @@ function module_code(library_namespace) {
 					return Work_crawler.THROWED;
 				}
 
-				// this.is_limited_image_url(image_data)
-				if (typeof _this.is_limited_image_url === 'function'
+				var test_limited_image_url =
+				//
+				typeof _this.is_limited_image_url === 'function'
+				// this.is_limited_image_url(image_url, image_data)
+				&& function(image_data) {
+					if (!image_data)
+						return true;
+					var image_url = image_data.url || image_data;
+					return _this.is_limited_image_url(image_url, image_data);
+				};
+				if (test_limited_image_url
 				// 處理特殊圖片: 遇到下架章節時會顯示特殊圖片。避免下載到下架圖片。
-				&& chapter_data.image_list.some(_this.is_limited_image_url)) {
+				&& chapter_data.image_list.some(test_limited_image_url)) {
 					// e.g., taduo.js 因为版权或其他问题，我们将对所有章节进行屏蔽！
 					chapter_data.limited = true;
-					if (chapter_data.image_list
-							.every(_this.is_limited_image_url)) {
+					if (chapter_data.image_list.every(test_limited_image_url)) {
 						// 所有圖片皆為 limited image。
 						// chapter_data.image_length =
 						// chapter_data.image_list.length;
