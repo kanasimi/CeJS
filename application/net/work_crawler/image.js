@@ -228,7 +228,7 @@ function module_code(library_namespace) {
 			if (typeof _this.is_limited_image_url === 'function'
 			// 處理特殊圖片: 檢查是否下載到 padding 用的 404 檔案。
 			&& _this.is_limited_image_url(XMLHttp.responseURL, image_data)) {
-				has_error = true;
+				image_data.is_bad = true;
 			}
 
 			if (!has_error) {
