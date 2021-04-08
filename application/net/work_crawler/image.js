@@ -225,7 +225,9 @@ function module_code(library_namespace) {
 					|| (XMLHttp.status / 100 | 0) !== 2, verified_image;
 
 			// console.trace([ image_url, XMLHttp.responseURL ]);
-			if (typeof _this.is_limited_image_url === 'function'
+			if (!image_data.is_bad
+			// image_data.is_bad may be set by _this.image_preprocessor()
+			&& typeof _this.is_limited_image_url === 'function'
 			// 處理特殊圖片: 檢查是否下載到 padding 用的 404 檔案。
 			&& _this.is_limited_image_url(XMLHttp.responseURL, image_data)) {
 				image_data.is_bad = 'is limited image';

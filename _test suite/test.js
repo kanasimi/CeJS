@@ -2075,6 +2075,7 @@ function test_net() {
 		assert([typeof URL, 'function'], 'CeL.URI() #0');
 		assert(['a.b', (new CeL.URI('http://a.b/?w=4')).hostname], 'CeL.net.URI() #1');
 		assert(['a.b', (new CeL.URI('http://a.b/p?w=4')).hostname], 'CeL.net.URI() #2');
+		assert(["8080", (CeL.URI('http://127.0.0.1:8080')).port], 'CeL.net.URI() #2');
 		assert(['file:///C:/d/a.htm', (new CeL.URI('a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #1');
 		assert(['file:///C:/a.htm', (new CeL.URI('/a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #2');
 		assert(['file:///D:/a.htm', (new CeL.URI('/d:/a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #3');

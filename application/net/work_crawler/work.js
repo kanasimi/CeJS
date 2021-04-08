@@ -702,15 +702,15 @@ function module_code(library_namespace) {
 					// 需要重新讀取頁面。e.g., 502
 					var chapter_time_interval = _this
 							.get_chapter_time_interval(work_URL, work_data);
-					process.stdout
-							.write('process_work_data: '
+					library_namespace
+							.log_temporary('process_work_data: '
 									+ gettext(
 											chapter_time_interval > 0 ? '等待 %2 之後再重新取得作品資訊頁面：%1'
 													: '重新取得作品資訊頁面：%1',
 											work_URL, library_namespace.age_of(
 													0, chapter_time_interval, {
 														digits : 1
-													})) + '...\r');
+													})));
 					if (chapter_time_interval > 0) {
 						setTimeout(get_work_page, chapter_time_interval);
 					} else {

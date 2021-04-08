@@ -1217,6 +1217,8 @@ function module_code(library_namespace) {
 					chapter_data = _this.parse_chapter_data
 							&& _this.parse_chapter_data(html, work_data,
 									crawler_namespace.get_label, chapter_NO)
+							// e.g., 已在 this.pre_parse_chapter_data() 設定完
+							// {Array}chapter_data.image_list
 							|| Array.isArray(work_data.chapter_list)
 							// default chapter_data
 							&& work_data.chapter_list[chapter_NO - 1];
@@ -1727,7 +1729,7 @@ function module_code(library_namespace) {
 		// .check_downloaded_chapters() 必須先確保已獲得最終之 chapter_data.title。
 		check_downloaded_chapters : check_downloaded_chapters,
 		// 應該改成.check_downloaded_chapters()，檢查磁碟上面是否真的有已經下載的檔案。
-		check_downloaded_chapter_url : check_downloaded_chapter_url,
+		// check_downloaded_chapter_url : check_downloaded_chapter_url,
 
 		// tools of this.get_chapter_list()
 		set_part : set_part_title,

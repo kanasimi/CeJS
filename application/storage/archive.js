@@ -296,8 +296,8 @@ function module_code(library_namespace) {
 
 	// 注意: 這邊添加引號的目的主要只是escape空白字元space "\u0020"，不能偵測原先輸入中的引號!
 	function add_fso_path_quote(arg) {
-		if (library_namespace.is_Object(arg) && arg.path) {
-			arg = arg.path;
+		if (library_namespace.is_Object(arg) && arg.Path) {
+			arg = arg.Path;
 		}
 		if (!arg)
 			return arg;
@@ -307,8 +307,8 @@ function module_code(library_namespace) {
 	}
 
 	function remove_fso_path_quote(arg) {
-		if (library_namespace.is_Object(arg) && arg.path) {
-			arg = arg.path;
+		if (library_namespace.is_Object(arg) && arg.Path) {
+			arg = arg.Path;
 		}
 		if (!arg)
 			return arg;
@@ -779,19 +779,19 @@ function module_code(library_namespace) {
 			FSO_data.modified = FSO_data.date + ' ' + FSO_data.time;
 
 			// console.log(FSO_data);
-			if (!FSO_data.path) {
+			if (!FSO_data.Path) {
 				;
 
 			} else {
 				this.fso_status_list.push(FSO_data);
-				if (this.fso_path_hash[FSO_data.path]) {
+				if (this.fso_path_hash[FSO_data.Path]) {
 					CeL.warn({
-						T : [ 'Duplicate FSO path: %1', FSO_data.path ]
+						T : [ 'Duplicate FSO path: %1', FSO_data.Path ]
 					});
 				}
 				// FSO status hash get from archive_file.info()
 				// archive_file.fso_path_hash = { FSO path : {FSO data}, ... }
-				this.fso_path_hash[FSO_data.path] = FSO_data;
+				this.fso_path_hash[FSO_data.Path] = FSO_data;
 			}
 		}, this);
 
