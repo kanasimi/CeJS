@@ -1319,9 +1319,14 @@ function module_code(library_namespace) {
 					var old_chapter_data
 					//
 					= work_data.old_data.chapter_list[index];
-					if (!old_chapter_data
-							|| chapter_data.url !== old_chapter_data.url
-							|| chapter_data.title !== old_chapter_data.title) {
+					if (!library_namespace.is_Object(old_chapter_data)
+					// 檢核是否有資料比較的基本條件。
+					|| !chapter_data.url || !chapter_data.title) {
+						return true;
+					}
+					if (chapter_data.url !== old_chapter_data.url
+					// 檢核基本資料是否相同。
+					|| chapter_data.title !== old_chapter_data.title) {
 						// recheck_flag = true;
 						return true;
 					}
