@@ -64,6 +64,7 @@ function module_code(library_namespace) {
 	// https://cf.hamreus.com/scripts/core_C0683FDCDEE69940232A703BDEB0F64F.js
 	// https://cf.hamreus.com/scripts_tw/core_C0683FDCDEE69940232A703BDEB0F64F.js
 	var core_filename = 'core_C0683FDCDEE69940232A703BDEB0F64F.js',
+	// https://raw.githubusercontent.com/pieroxy/lz-string/master/libs/lz-string.js
 	// 2017: main_3A454149B2D2500411BC344B15DB58A4.js'
 	// 2018/2:
 	// http://c.3qfm.com/scripts/config_25855B4C08F7A6545A30D049ABD0F9EE.js
