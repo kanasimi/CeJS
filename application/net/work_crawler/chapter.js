@@ -1088,7 +1088,7 @@ function module_code(library_namespace) {
 
 				// 只有在 this.one_by_one===true 這個時候才會設定 image_list.index
 				image_list.index = 0;
-				var time_interval = _this.one_by_one !== true
+				var image_time_interval = _this.one_by_one !== true
 						&& library_namespace.to_millisecond(_this.one_by_one),
 				//
 				get_next_image = function() {
@@ -1099,8 +1099,8 @@ function module_code(library_namespace) {
 											+ image_list.length)));
 					var image_data = normalize_image_data(
 							image_list[image_list.index], image_list.index);
-					if (time_interval > 0)
-						image_data.time_interval = time_interval;
+					if (image_time_interval > 0)
+						image_data.time_interval = image_time_interval;
 					_this.get_image(image_data, function(image_data, status) {
 						check_if_done(image_data, status);
 
@@ -1109,7 +1109,7 @@ function module_code(library_namespace) {
 							return;
 						}
 
-						if (!(time_interval > 0)
+						if (!(image_time_interval > 0)
 						// 沒有實際下載動作時，就不用等待了。
 						|| status === 'image_downloaded'
 								|| status === 'invalid_data') {
@@ -1119,11 +1119,11 @@ function module_code(library_namespace) {
 
 						library_namespace.log_temporary('process_images: '
 								+ gettext('下載第%2張圖前先等待%1。', library_namespace
-										.age_of(0, time_interval, {
+										.age_of(0, image_time_interval, {
 											digits : 1
 										}), image_list.index + '/'
 										+ image_list.length));
-						setTimeout(get_next_image, time_interval);
+						setTimeout(get_next_image, image_time_interval);
 					}, images_archive);
 				};
 				get_next_image();
@@ -1640,7 +1640,7 @@ function module_code(library_namespace) {
 		// 紀錄最後成功下載章節或者圖片日期。
 		work_data.last_saved = (new Date).toISOString();
 		// 紀錄已下載完之 chapter。
-		this.save_work_data(work_data);
+		this.save_work_data(work_data, 'continue_next_chapter');
 
 		if (typeof this.after_download_chapter === 'function') {
 			this.after_download_chapter(work_data, chapter_NO);

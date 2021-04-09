@@ -723,7 +723,7 @@ function module_code(library_namespace) {
 				+ (new Date).format());
 		work_data.archived = new Date;
 		// backup
-		this.save_work_data(work_data);
+		this.save_work_data(work_data, 'check_and_archive_old_work');
 
 		// 將舊的作品搬移到 .archive_directory_name 資料夾內
 		// @see function remove_old_ebooks(only_id) @ work_crawler/ebook.js

@@ -122,7 +122,7 @@ function module_code(library_namespace) {
 	}
 
 	// 儲存本次作業到現在的作品資訊到檔案。 cache / save work data file
-	function save_work_data_file(work_data) {
+	function save_work_data_file(work_data, save_event) {
 		if (!work_data.data_file)
 			return;
 
@@ -133,6 +133,10 @@ function module_code(library_namespace) {
 		// 為了預防 TypeError: Converting circular structure to JSON
 		// ebook 結構中可能會有 circular。
 		delete work_data[this.KEY_EBOOK];
+
+		if (this.on_save_work_data_file)
+			this.on_save_work_data_file(work_data, save_event);
+
 		// 避免當 work_data 過大而出現崩潰的情況，造成資料檔案被清空。因此先試試 JSON.stringify()。
 		var data_to_write = Buffer.from(JSON.stringify(work_data));
 		if (this.backup_work_data) {
@@ -150,6 +154,7 @@ function module_code(library_namespace) {
 			} ]);
 			library_namespace.error(e);
 		}
+
 		// revert
 		if (ebook)
 			work_data[this.KEY_EBOOK] = ebook;
@@ -212,7 +217,7 @@ function module_code(library_namespace) {
 		function finish_up(work_data) {
 			if (work_data && work_data.title) {
 				// 最後紀錄。
-				_this.save_work_data(work_data);
+				_this.save_work_data(work_data, 'finish_up');
 				if (_this.need_create_ebook
 				// 未找到時沒有 work_data。
 				&& work_data.chapter_count >= 1) {
@@ -891,6 +896,10 @@ function module_code(library_namespace) {
 
 			var matched = library_namespace.get_JSON(work_data.data_file);
 			if (matched) {
+				delete matched.old_data;
+				// cache old data
+				work_data.old_data = matched;
+
 				// work_data properties to reset. do not inherit
 				// 設定不繼承哪些作品資訊。
 				var skip_cache = Object.assign({
@@ -1303,6 +1312,25 @@ function module_code(library_namespace) {
 				&& chapter_list.part_NO > 1 && 'changed';
 			}
 
+			if (chapter_list && work_data.old_data
+			// copy old chapter data. e.g., chapter_data.image_list
+			&& Array.isArray(work_data.old_data.chapter_list)) {
+				chapter_list.some(function(chapter_data, index) {
+					var old_chapter_data
+					//
+					= work_data.old_data.chapter_list[index];
+					if (!old_chapter_data
+							|| chapter_data.url !== old_chapter_data.url
+							|| chapter_data.title !== old_chapter_data.title) {
+						// recheck_flag = true;
+						return true;
+					}
+					// assert: chapter_list[index] === chapter_data
+					chapter_list[index] = Object.assign(old_chapter_data,
+							chapter_data);
+				});
+			}
+
 			if (recheck_flag
 			// _this.get_chapter_list() 中
 			// 可能重新設定過 work_data.last_download.chapter。
@@ -1492,6 +1520,9 @@ function module_code(library_namespace) {
 				work_data.last_download.chapter = _this.start_chapter_NO;
 			}
 
+			// remove cache of old work_data
+			delete work_data.old_data;
+
 			if (typeof callback === 'function' && callback.options
 					&& callback.options.get_data_only) {
 				// 最終廢棄動作，防止執行 work_data[this.KEY_EBOOK].pack()。
@@ -1504,14 +1535,14 @@ function module_code(library_namespace) {
 				}
 
 				// backup
-				_this.save_work_data(work_data);
+				_this.save_work_data(work_data, 'process_chapter_list_data');
 
 				callback(work_data);
 				return;
 			}
 
 			// backup
-			_this.save_work_data(work_data);
+			_this.save_work_data(work_data, 'process_chapter_list_data');
 
 			if (!work_data.reget_chapter
 			//
