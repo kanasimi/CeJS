@@ -106,8 +106,10 @@ function module_code(library_namespace) {
 				return;
 			}
 			// 下面的 workaround 僅適用於 node.js。
-			if (!session.token.lgpassword) {
+			var login_token = (session[wiki_API.KEY_HOST_SESSION] || session).token;
+			if (!login_token.lgpassword) {
 				// console.log(result);
+				// console.trace(session);
 				// 死馬當活馬醫，仍然嘗試重新取得 token... 沒有密碼無效。
 				throw new Error(
 						'check_session_badtoken: No password preserved!');
@@ -149,7 +151,7 @@ function module_code(library_namespace) {
 					throw new Error(
 					// 當錯誤 login 太多次時，直接跳出。
 					'check_session_badtoken: Too many failed login attempts: ['
-							+ session.token.lgname + ']');
+							+ login_token.lgname + ']');
 				}
 				library_namespace.info('check_session_badtoken: Retry '
 						+ session.retry_login);
@@ -159,9 +161,9 @@ function module_code(library_namespace) {
 
 			library_namespace.info('check_session_badtoken: '
 					+ 'Try to get token again. 嘗試重新取得 token。');
-			wiki_API.login(session.token.lgname,
+			wiki_API.login(login_token.lgname,
 			//
-			session.token.lgpassword, {
+			login_token.lgpassword, {
 				force : true,
 				// [KEY_SESSION]
 				session : session,
@@ -643,6 +645,7 @@ function module_code(library_namespace) {
 	wiki_API_query.default_edit_time_interval = 5000;
 
 	// Only respect maxlag. 因為數量太多，只好增快速度。
+	// The user is waiting online.
 	// CeL.wiki.query.default_edit_time_interval = 0;
 	// wiki_session.edit_time_interval = 0;
 
@@ -772,6 +775,7 @@ function module_code(library_namespace) {
 		} else if (page_data) {
 			parameters[param_name || (multi ? 'titles' : 'title')] = page_data;
 		}
+
 		return parameters;
 	};
 
