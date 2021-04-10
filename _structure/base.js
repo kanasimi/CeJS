@@ -131,7 +131,8 @@ function (globalThis) {
 		&& (typeof console.log === 'function'
 		// in IE 8, typeof console.log === 'object'.
 		|| typeof console.log === 'object')
-		&& typeof console.error === typeof console.log,
+		&& typeof console.error === typeof console.log
+		&& typeof console.trace === typeof console.log,
 
 
 		old_namespace,
@@ -1118,10 +1119,11 @@ function (globalThis) {
 			var tmp = navigator.product;
 			if (matched = userAgent
 					.match(/(Gecko|WebKit|Blink|KHTML|Presto|Trident)[\/ ](\d+(?:\.\d+))/i)) {
-				if (tmp && tmp !== matched[1] && has_console)
+				if (tmp && tmp !== matched[1] && has_console) {
 					// e.g., IE 11
 					console.error('platform: navigator engine error! [' + tmp
 							+ '] != [' + matched[1] + ']');
+				}
 				platform.engine = matched[1];
 				platform.engine_version = +matched[2];
 			} else
@@ -2415,6 +2417,8 @@ OS='UNIX'; // unknown
 	// temporary decoration of debug console,
 	// in case we call for nothing and raise error
 	if (has_console) {
+		_.env.has_console = has_console;
+
 		// 利用原生 console 來 debug。
 		// 不直接指定 console.*: 預防 'Uncaught TypeError: Illegal invocation'.
 

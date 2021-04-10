@@ -2365,6 +2365,25 @@ function module_code(library_namespace) {
 		return true;
 	}
 
+	// Object.clean() 從 object 中移除所有項目。
+	// 通常用於釋放記憶體。 Usually used to release memory.
+	// cf. array.truncate()
+	// {Boolean|Natural}deepth=1: 清理到 object 底下底幾層。
+	function Object_clean(object, deepth) {
+		if (!object || typeof object !== 'object')
+			return;
+
+		if (deepth > 0 && deepth !== true)
+			deepth--;
+
+		Object.keys(object).forEach(function(key) {
+			// 當有引用重要物件時，不應該採用 deep。
+			if (deepth)
+				Object_clean(object[key], deepth);
+			delete object[key];
+		});
+	}
+
 	// Object.reverse_key_value({a:b}) → {b:a}
 	function Object_reverse_key_value(object) {
 		var new_object = Object.create(null);
@@ -2409,6 +2428,7 @@ function module_code(library_namespace) {
 		filter : Object_filter,
 		clone : Object_clone,
 		is_empty : Object_is_empty,
+		clean : Object_clean,
 		reverse_key_value : Object_reverse_key_value,
 		size : Object_size
 	});

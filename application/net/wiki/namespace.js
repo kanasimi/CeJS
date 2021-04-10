@@ -3075,7 +3075,7 @@ function module_code(library_namespace) {
 				// session.get_storage(KEY_API_parameters) @
 				// need_get_API_parameters()
 				session.API_parameters);
-				library_namespace.info('get_API_parameters: Set '
+				library_namespace.info('get_API_parameters: Cache '
 						+ wiki_API.site_name(session) + ': path=' + path);
 				// console.trace(Object.keys(parameters));
 				// console.trace(session.API_parameters);

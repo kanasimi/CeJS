@@ -691,7 +691,9 @@ function module_code(library_namespace) {
 					if (is_api_and_title(title, true)) {
 						title = title[1];
 					}
-					if (wiki_API.is_page_data(title)) {
+					if (!options.do_not_import_original_page_data
+					//
+					&& wiki_API.is_page_data(title)) {
 						// 去除掉可能造成誤判的錯誤標記 'missing'。
 						// 即使真有錯誤，也由page_list提供即可。
 						if ('missing' in title) {

@@ -4,6 +4,7 @@ http://stackshare.io/continuous-integration
 [![npm version](https://badge.fury.io/js/cejs.svg)](https://www.npmjs.com/package/cejs)
 [![npm downloads](https://img.shields.io/npm/dm/cejs.svg)](https://www.npmjs.com/package/cejs)
 [![Known Vulnerabilities](https://snyk.io/test/github/kanasimi/CeJS/badge.svg?targetFile=package.json)](https://snyk.io/test/github/kanasimi/CeJS?targetFile=package.json)
+[![GitHub Actions workflow build status](https://github.com/kanasimi/CeJS/actions/workflows/npm-test.yml/badge.svg)](https://github.com/kanasimi/CeJS/actions)
 <!--
 [![Travis CI Build Status](https://travis-ci.com/kanasimi/CeJS.svg?branch=master)](https://travis-ci.com/kanasimi/CeJS)
 [![AppVeyor CI Build status](https://ci.appveyor.com/api/projects/status/ny0vr4x2uesiumm0?svg=true)](https://ci.appveyor.com/project/kanasimi/cejs)

@@ -3699,7 +3699,10 @@ if (typeof CeL === 'function')
 							//
 							'check_and_run.run: Error to run function: '
 									+ e.message);
-							// console.trace(e);
+							if (library_namespace.env.has_console) {
+								// console.trace(e);
+								console.error(e);
+							}
 							library_namespace.debug('<code>'
 									+ ('' + item).replace(/</g, '&lt;')
 											.replace(/\n/g, '<br />')
