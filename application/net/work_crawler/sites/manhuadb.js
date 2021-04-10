@@ -265,7 +265,9 @@ function module_code(library_namespace) {
 				// assert: Array.isArray(chapter_data.image_list);
 				.map(function(image_data) {
 					return {
-						url : image_prefix + (image_data.img || image_data)
+						url : encodeURI(image_prefix
+						//
+						+ (image_data.img || image_data))
 					};
 				});
 				// console.log(chapter_data.image_list);

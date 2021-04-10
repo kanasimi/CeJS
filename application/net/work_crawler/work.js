@@ -1330,6 +1330,14 @@ function module_code(library_namespace) {
 						// recheck_flag = true;
 						return true;
 					}
+					[ 'limited', 'skip_this_chapter',
+					// 'image_length', 'image_count', 'images_downloaded',
+					// 'part_NO', 'NO_in_part', 'chapter_NO',
+					'chapter_title', 'part_title' ]
+					// 去掉每次可能有變化、應該即時更新的屬性。
+					.forEach(function(property) {
+						delete old_chapter_data[property];
+					});
 					// assert: chapter_list[index] === chapter_data
 					chapter_list[index] = Object.assign(old_chapter_data,
 							chapter_data);

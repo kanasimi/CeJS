@@ -498,6 +498,7 @@ function module_code(library_namespace) {
 			download_chapter_NO_list : true,
 			// work_data.last_download
 			last_download : true,
+			start_chapter_NO_next_time : true,
 
 			error_images : true,
 			chapter_count : true,

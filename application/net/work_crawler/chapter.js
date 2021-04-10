@@ -1118,11 +1118,12 @@ function module_code(library_namespace) {
 						}
 
 						library_namespace.log_temporary('process_images: '
-								+ gettext('下載第%2張圖前先等待%1。', library_namespace
-										.age_of(0, image_time_interval, {
-											digits : 1
-										}), image_list.index + '/'
-										+ image_list.length));
+						//
+						+ gettext('下載第 %2 張圖前先等待 %1。',
+						//
+						library_namespace.age_of(0, image_time_interval, {
+							digits : 1
+						}), image_list.index + '/' + image_list.length));
 						setTimeout(get_next_image, image_time_interval);
 					}, images_archive);
 				};
@@ -1516,8 +1517,10 @@ function module_code(library_namespace) {
 			// 已下載完本 chapter。
 
 			// 紀錄最後下載的章節計數。
-			work_data.last_download.chapter = work_data.last_download.start_chapter_next_time
-					|| chapter_NO;
+			work_data.last_download.chapter =
+			// `work_data.start_chapter_NO_next_time` 為本次執行時設定的 chapter_NO。
+			work_data.start_chapter_NO_next_time || chapter_NO;
+
 			// 欲限制/指定下次下載的 chapter_NO，可使用
 			// work_data.chapter_list.truncate(chapter_NO);
 
