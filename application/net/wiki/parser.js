@@ -728,6 +728,9 @@ function module_code(library_namespace) {
 	// remove heading spaces from parent_token[index]
 	function remove_heading_spaces(parent_token, index, max_length,
 			do_not_preserve_tail_spaces) {
+		if (index >= parent_token.length)
+			return;
+
 		max_length = typeof max_length === 'number' && max_length >= 0 ? Math
 				.min(max_length, parent_token.length) : parent_token.length;
 
@@ -819,6 +822,41 @@ function module_code(library_namespace) {
 			// → "\n==t==\n"
 			parent_token[next_index] = parent_token[next_index].replace(/^\n/,
 					'');
+		}
+
+		var list_token = parent_token.parent;
+		// assert: list_token.type === 'list'
+		if (parent_token.type === 'list_item' && list_token
+		// remove all empty / blank list_item
+		&& parent_token.every(function(token) {
+			// token maybe undefined
+			if (!token)
+				return token !== 0;
+			if (typeof token === 'string')
+				return /^[\s\n]*$/.test(token);
+			if (token.type === 'transclusion') {
+				// e.g., {{zh-tw}}
+				return /^Zh(-[a-z]+)?$/.test(token.name);
+			}
+			return token.type === 'comment';
+		})) {
+			// TODO: fix removing "*{{T|1}}\n*{{T|2}}\n" in one operation,
+			// see [[w:zh:Special:Diff/65133690/65133727|香港巴士迷文化]]
+			parent_token.index = list_token.indexOf(parent_token);
+			if (parent_token.index + 1 < list_token.length) {
+				var next_list_item = list_token[parent_token.index + 1];
+				// assert: next_list_item.type === 'list_item'
+				var new_lines = parent_token.list_prefix.match(/^\n*/)[0];
+				// shift new_lines
+				next_list_item.list_prefix = next_list_item.list_prefix
+						.replace(/^\n*/, new_lines);
+			}
+			list_token.splice(parent_token.index, 1);
+		} else if (parent_token.type === 'list_item') {
+			console.trace(parent_token);
+			throw new Error(
+			// e.g., "，見{{evchk}}。"
+			'清除 token (如模板)時，還遺留具意涵的元素，未能完全清除掉此所在的列表項目。可能需要手動修飾語句。');
 		}
 
 		// console.log(parent_token.slice(index - 2, i + 2));
@@ -3524,7 +3562,7 @@ function module_code(library_namespace) {
 		Magic_words_hash[Magic_words] = false;
 	});
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=variables&utf8&format=json
-	'CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME'
+	'!|=|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME'
 	// 這些不用指定數值.
 	.split('|').forEach(function name(Magic_words) {
 		Magic_words_hash[Magic_words] = true;
@@ -4851,6 +4889,7 @@ function module_code(library_namespace) {
 					}
 				}
 			}
+			// 參數有分大小寫。
 			parameters.parameters = _parameters;
 			parameters.index_of = parameter_index_of;
 
@@ -5424,8 +5463,12 @@ function module_code(library_namespace) {
 				// 將 .list_prefix 結合在 list_item 之上。
 				// (list_item_token.list_prefix)。
 				item.list_prefix = list_prefix;
-				if (latest_list)
+				if (latest_list) {
+					// Will be used by function remove_token_from_parent()
+					item.parent = latest_list;
+					item.index = latest_list.length;
 					latest_list.push(item);
+				}
 				return item;
 			}
 
