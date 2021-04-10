@@ -866,14 +866,20 @@ function module_code(library_namespace) {
 		function append(value) {
 			if (typeof value !== 'string' && typeof value !== 'number'
 					&& value !== NO_EQUAL_SIGN) {
-				library_namespace.debug({
-					T : [
-							'設定 %1 成非字串之參數：%2',
-							typeof JSON === 'object' ? JSON.stringify(key)
-									: String(key),
-							typeof JSON === 'object' ? JSON.stringify(value)
-									: String(value) ]
-				}, 1, 'parameters_toString');
+				try {
+					library_namespace.debug({
+						T : [
+								'設定 %1 成非字串之參數：%2',
+								typeof JSON === 'object' ? JSON.stringify(key)
+										: String(key),
+								typeof JSON === 'object' ?
+								// TypeError:
+								// Converting circular structure to JSON
+								JSON.stringify(value) : String(value) ]
+					}, 1, 'parameters_toString');
+				} catch (e) {
+					// TODO: handle exception
+				}
 			}
 
 			search.push(value === NO_EQUAL_SIGN ? key : key + '='
