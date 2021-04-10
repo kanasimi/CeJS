@@ -115,18 +115,22 @@ function module_code(library_namespace) {
 						'check_session_badtoken: No password preserved!');
 			}
 
-			if (typeof options.rollback_action !== 'function') {
-				var message = 'check_session_badtoken: Did not set options.rollback_action()!';
-				throw new Error(message);
-				library_namespace.error(message);
-				console.trace(options);
-			}
-
 			if (options.rollback_action) {
 				// rollback action
 				options.rollback_action();
 			} else {
 				options.requery();
+			}
+
+			return;
+
+			// ----------------------------------
+
+			if (typeof options.rollback_action !== 'function') {
+				var message = 'check_session_badtoken: Did not set options.rollback_action()!';
+				throw new Error(message);
+				library_namespace.error(message);
+				console.trace(options);
 			}
 
 			// reset node agent.
