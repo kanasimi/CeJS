@@ -1275,9 +1275,9 @@ function module_code(library_namespace) {
 					return Work_crawler.THROWED;
 				}
 
-				var test_limited_image_url =
+				var test_limited_image_url = chapter_data.image_list
 				//
-				typeof _this.is_limited_image_url === 'function'
+				&& typeof _this.is_limited_image_url === 'function'
 				// this.is_limited_image_url(image_url, image_data)
 				&& function(image_data) {
 					if (!image_data)
