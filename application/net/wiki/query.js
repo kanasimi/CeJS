@@ -115,6 +115,9 @@ function module_code(library_namespace) {
 						'check_session_badtoken: No password preserved!');
 			}
 
+			console.log(result);
+			console.log(options.action);
+			console.trace(session);
 			library_namespace.set_debug(3);
 			if (typeof options.rollback_action === 'function') {
 				// rollback action
@@ -602,6 +605,7 @@ function module_code(library_namespace) {
 			}
 			// console.trace(action);
 			// callback(response);
+			options.action = action;
 			check_session_badtoken(response, callback, options);
 
 		}, null, POST_data, get_URL_options);
