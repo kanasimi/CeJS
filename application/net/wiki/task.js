@@ -1899,13 +1899,14 @@ function module_code(library_namespace) {
 		options = config.options || {
 			// 預設會取得大量頁面。
 			multi : true,
-			// Throw an error if the page doesn't exist.
-			// 若頁面不存在/已刪除，則產生錯誤。
+			// prevent creating new pages
+			// Throw an error if the page doesn't exist. 若頁面不存在/已刪除，則產生錯誤。
 			// 要取消這項，須注意在重定向頁之對話頁操作之可能。
 			nocreate : 1,
 			// 該編輯是一個小修訂 (minor edit)。
 			minor : 1,
-			// 標記此編輯為機器人編輯。[[WP:AL|機器人對其他使用者對話頁的小修改將不會觸發新訊息提示]]。
+			// denotes this is a bot edit. 標記此編輯為機器人編輯。
+			// [[WP:AL|機器人對其他使用者對話頁的小修改將不會觸發新訊息提示]]。
 			bot : 1,
 			// [[Special:tags]]
 			// 指定不存在的標籤，可能會造成 [tags-apply-not-allowed-one]
@@ -1914,7 +1915,7 @@ function module_code(library_namespace) {
 			tags : '',
 			// 設定寫入目標。一般為 debug、test 測試期間用。
 			write_to : '',
-			// 允許內容被清空。白紙化。
+			// Allow content to be emptied. 允許內容被清空。白紙化。
 			allow_empty : false,
 			// 採用 skip_nochange 可以跳過實際 edit 的動作。
 			// 對於大部分不會改變頁面的作業，能大幅加快速度。
@@ -2121,35 +2122,6 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (false && data.length !== this_slice_size) {
-				// @deprecated: using pages.OK_length
-
-				// assert: data.length < this_slice_size
-				if (data.truncated) {
-					if (setup_target) {
-						// 處理有時可能連 data 都是 trimmed 過的。
-						// -this_slice_size: 先回溯到 pages 開頭之 index。
-						work_continue -= this_slice_size - data.length;
-						library_namespace.debug('一次取得大量頁面時，回傳內容超過限度而被截斷。將回退 '
-								+ (this_slice_size - data.length) + '頁。', 0,
-								'wiki_API.work');
-
-					} else if (library_namespace.is_debug(0)) {
-						library_namespace.warn(
-						//
-						'wiki_API.work: query 所得之 length (' + data.length
-						//
-						+ ') !== this slice size (' + this_slice_size + ') ！');
-					}
-
-				} else if (!config.no_warning) {
-					// TODO: 此時應該沒有 .continue。
-					library_namespace.warn('wiki_API.work: 取得 ' + data.length
-							+ '/' + this_slice_size + ' 個頁面，應有 '
-							+ (this_slice_size - data.length) + ' 個不存在或重複頁面。');
-				}
-			}
-
 			// 傳入標題列表，則由程式自行控制，毋須設定後續檢索用索引值。
 			if (!messages.input_title_list
 					// config.continue_session:
@@ -2205,60 +2177,6 @@ function module_code(library_namespace) {
 				// .before(messages, pages, titles) → .before(messages, pages)
 				// 按照需求程度編排 arguments，並改變適合之函數名。
 				config.before.call(this, messages, pages);
-			}
-
-			/**
-			 * 處理回傳超過 limit (12 MB)，被截斷之情形。
-			 * 
-			 * @deprecated: 已經在 wiki_API.page 處理。
-			 */
-			if (false && ('continue' in pages)) {
-				if (setup_target) {
-					var continue_id = pages['continue'].rvcontinue
-					// assert: pages['continue'].rvcontinue = 'id|...'。
-					.match(/^\d+/)[0],
-					// -pages.length: 先回溯到 pages 開頭之 index。
-					effect_length = -(work_continue - pages.length);
-					/**
-					 * 找到 pages.continue 所指之 index。
-					 */
-					if (config.is_id) {
-						// 須注意 type，有 number 1 !== string '1' 之問題。
-						if (typeof target[--work_continue] === 'number')
-							continue_id |= 0;
-						// 從後頭搜尋比較快。
-						work_continue = target.lastIndexOf(continue_id,
-								work_continue);
-						if (work_continue === NOT_FOUND) {
-							throw new Error('page id not found: ' + continue_id);
-						}
-						// assert: 一定找得到。
-						// work_continue≥pages開頭之index=(原work_continue)-pages.length
-					} else {
-						continue_id |= 0;
-						while (pages[--work_continue].pageid !== continue_id)
-							;
-					}
-					effect_length += work_continue;
-					if (false) {
-						console.log([ effect_length, pages.length,
-								work_continue ]);
-					}
-
-					// assert: 0 < effect_length < pages.length
-					library_namespace.debug('一次取得大量頁面時，回傳內容過長而被截斷。將回退 '
-							+ (pages.length - effect_length) + '頁，下次將自 '
-							+ effect_length + '/' + pages.length + ' '
-							//
-							+ wiki_API.title_link_of
-							//
-							(pages[effect_length]) + ' id ' + continue_id
-							+ ' 開始。', 1, 'wiki_API.work');
-					pages = pages.slice(0, effect_length);
-
-				} else {
-					library_namespace.error('wiki_API.work: 回傳內容過長而被截斷！');
-				}
 			}
 
 			/**
@@ -2469,15 +2387,18 @@ function module_code(library_namespace) {
 					library_namespace.debug('收尾。', 1, 'wiki_API.work');
 					var count_summary;
 
+					// pages: this_slice, this piece
 					if (config.no_edit) {
-						if (pages.length === target.length)
+						if (pages.length === initial_target_length) {
+							// 一次取得所有頁面。
 							count_summary = '';
-						else
+						} else
 							count_summary = pages.length + '/';
-					} else if (pages.length === target.length) {
-						if (done === pages.length)
+					} else if (pages.length === initial_target_length) {
+						if (done === pages.length) {
+							// 一次取得所有頁面。
 							count_summary = '';
-						else
+						} else
 							count_summary = done + '/';
 					} else {
 						if (done === pages.length)
@@ -2486,14 +2407,15 @@ function module_code(library_namespace) {
 							count_summary = done + '/' + pages.length + '//';
 					}
 
-					if (work_continue && work_continue < target.length) {
+					if (work_continue && work_continue < initial_target_length) {
 						count_summary += ' '
 						//
-						+ work_continue + '/' + target.length + ' ('
+						+ work_continue + '/' + initial_target_length + ' ('
 						// 紀錄整體進度
-						+ (100 * work_continue / target.length | 0) + '%)';
+						+ (100 * work_continue / initial_target_length | 0)
+								+ '%)';
 					} else {
-						count_summary += target.length;
+						count_summary += initial_target_length;
 					}
 
 					count_summary = ': '
@@ -2562,10 +2484,11 @@ function module_code(library_namespace) {
 									.test(this.token.login_user_name) ? this.token.login_user_name
 							: 'Robot')
 							+ ': ' + config.summary + count_summary,
+					// prevent creating new pages
 					// Throw an error if the page doesn't exist.
 					// 若頁面不存在/已刪除，則產生錯誤。
 					nocreate : 1,
-					// 標記此編輯為機器人編輯。
+					// denotes this is a bot edit. 標記此編輯為機器人編輯。
 					bot : 1,
 					// 就算設定停止編輯作業，仍強制編輯。一般僅針對測試頁面或自己的頁面，例如寫入 log。
 					skip_stopped : true
@@ -2607,9 +2530,38 @@ function module_code(library_namespace) {
 							+ messages.join('<br />\n'));
 				}
 
-				if (setup_target && work_continue < target.length) {
+				// --------------------
+				// 處理記憶體洩漏問題 @ 20191129.check_language_convention.js
+				// console.log(process.memoryUsage());
+				// delete this.last_pages;
+				if (Array.isArray(pages)) {
+					// console.log(pages[0]);
+					// free:
+					// 必須要主動清理 page_data.parsed 才能釋放記憶體。
+					// @ 20191129.check_language_convention.js
+					// 不曉得是哪個環節索引了 page_data。
+					pages.forEach(function(page_data, index) {
+						if (page_data.parsed) {
+							page_data.parsed.truncate();
+							delete page_data.parsed;
+						}
+						// 以下效果不顯著。
+						// Object.clean(page_data.parsed);
+						// Object.clean(page_data);
+						// delete pages[index];
+					});
+				}
+				// `node --expose-gc *.js`
+				// global.gc && global.gc();
+				// console.trace([ target.length, process.memoryUsage(), this
+				// ]);
+				// --------------------
+
+				if (setup_target
+						&& (config.untouch_page_list ? work_continue : 0) < target.length) {
 					// 繼續下一批。
-					setup_target();
+					// setup_target();
+					setTimeout(setup_target, 0);
 					return;
 				}
 
@@ -2639,24 +2591,27 @@ function module_code(library_namespace) {
 		}).bind(this);
 
 		var target = pages,
-		// 首先取得多個頁面內容所用之 options。
-		// e.g., page_options:{rvprop:'ids|content|timestamp'}
-		// @see
-		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
-		page_options = Object.assign({
-			allow_missing : config.no_warning,
-			is_id : config.is_id,
-			multi : true
-		},
-		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
-		config.page_options),
+		// const
+		initial_target_length = target.length,
 		//
 		slice_size = max_slice_size(this, config),
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */
 		work_continue = 0, this_slice_size, setup_target;
 
+		// 首先取得多個頁面內容所用之 options。
+		// e.g., page_options:{rvprop:'ids|content|timestamp'}
+		// @see
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
+		var page_options = Object.assign({
+			// 為了降低記憶體使用，不把所有屬性添附至原有的 {Object}page_data 資料結構中。
+			do_not_import_original_page_data : true,
+			allow_missing : config.no_warning,
+			multi : true
+		},
+		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
+		config.page_options);
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
-		[ 'redirects', 'converttitles' ].forEach(function(parameter) {
+		[ 'is_id', 'redirects', 'converttitles' ].forEach(function(parameter) {
 			if (config[parameter]) {
 				library_namespace.debug('Copy [' + parameter
 						+ '] to page_options', 2, 'wiki_API.work');
@@ -2693,36 +2648,49 @@ function module_code(library_namespace) {
 		// console.log(pages===target);
 		// console.log(JSON.stringify(target));
 		if (Array.isArray(target)) {
-			// Split when length is too long. 分割過長的 list。
+			if (!config.untouch_page_list) {
+				// 避免 read-only page list。
+				target = target.slice();
+			}
+			// Split when length is too long. 分割過長的 page list。
 			setup_target = (function() {
-				var this_slice = target.slice(work_continue, work_continue
-						+ slice_size);
+				var this_slice = config.untouch_page_list ? target.slice(
+						work_continue, work_continue + slice_size)
+				// 執行完一批就刪除一批，以減少記憶體使用。
+				: target.splice(0, slice_size);
 				var max_size = max_slice_size(this, config, this_slice);
 
 				if (false) {
-					console.log([ 'max_size:', max_size, this_slice.length,
-							target.length, config.is_id, work_continue ]);
+					console
+							.log([ 'max_size:', max_size, this_slice.length,
+									initial_target_length, config.is_id,
+									work_continue ]);
 				}
 				if (max_size < slice_size) {
+					if (!config.untouch_page_list) {
+						// 回填本次無法處理之 pages。
+						Array.prototype.unshift.apply(target, this_slice
+								.slice(max_size));
+					}
 					this_slice = this_slice.slice(0, max_size);
 				}
-				if (work_continue === 0 && max_size === target.length) {
-					library_namespace.debug('設定一次先取得所有 ' + target.length
+				if (work_continue === 0 && max_size === initial_target_length) {
+					library_namespace.debug('設定一次先取得所有 ' + max_size
 							+ ' 個頁面之 revisions (page contents 頁面內容)。', 2,
 							'wiki_API.work');
 				} else {
-					nochange_count = target.length;
 					// "Process %1"
 					done = '處理分塊 ' + (work_continue + 1) + '–' + (work_continue
 					// start–end/all
-					+ Math.min(max_size, nochange_count)) + '/'
-							+ nochange_count;
+					+ Math.min(max_size, initial_target_length)) + '/'
+							+ initial_target_length;
 					// Add percentage message.
-					if (nochange_count > 1e4
+					if (initial_target_length > 1e4
 					// 數量太大或執行時間過長時，就顯示剩餘時間訊息。
 					|| Date.now() - config.start_working_time > 2 * 60 * 1000) {
 						done += estimated_message(work_continue,
-								nochange_count, config.start_working_time);
+								initial_target_length,
+								config.start_working_time);
 					}
 					// done += '。';
 					nochange_count = 'wiki_API.work: ';
@@ -2738,8 +2706,14 @@ function module_code(library_namespace) {
 
 				this_slice_size = this_slice.length;
 				work_continue += this_slice_size;
+				this_slice = this_slice.map(function(page_data) {
+					return wiki_API.is_page_data(page_data) ? page_data.pageid
+							: page_data;
+				});
 				// console.trace([ 'page_options:', page_options ]);
-				this.page(this_slice, main_work, page_options);
+				this.page(this_slice, main_work, Object.assign({
+					is_id : true
+				}, page_options));
 			}).bind(this);
 
 			config.start_working_time = Date.now();
@@ -2749,7 +2723,6 @@ function module_code(library_namespace) {
 			// assert: target is {String}title or {Object}page_data
 			library_namespace.debug('取得單一頁面之 (page contents 頁面內容)。', 2,
 					'wiki_API.work');
-			this_slice_size = target.length;
 			this.page(target, main_work, page_options);
 		}
 	};
@@ -3140,7 +3113,7 @@ function module_code(library_namespace) {
 	};
 
 	/** {Natural}登入失敗時最多重新嘗試下載的次數。 */
-	wiki_API.login.MAX_ERROR_RETRY = 8;
+	wiki_API.login.MAX_ERROR_RETRY = 2;
 
 	wiki_API.login.parameters = {
 		lgname : 'lgname',
