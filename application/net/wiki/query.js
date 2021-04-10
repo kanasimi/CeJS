@@ -115,18 +115,14 @@ function module_code(library_namespace) {
 						'check_session_badtoken: No password preserved!');
 			}
 
-			if (options.rollback_action) {
+			library_namespace.set_debug(3);
+			if (typeof options.rollback_action === 'function') {
 				// rollback action
 				options.rollback_action();
+			} else if (options.requery) {
+				// hack: 登入後重新執行
+				session.actions.unshift([ 'run', options.requery ]);
 			} else {
-				options.requery();
-			}
-
-			return;
-
-			// ----------------------------------
-
-			if (typeof options.rollback_action !== 'function') {
 				var message = 'check_session_badtoken: Did not set options.rollback_action()!';
 				throw new Error(message);
 				library_namespace.error(message);
@@ -593,7 +589,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (!options.rollback_action) {
+			if (typeof options.rollback_action !== 'function') {
 				if (need_check_edit_time_interval
 						&& (!POST_data || !POST_data.token)) {
 					throw new Error(
