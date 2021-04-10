@@ -1228,36 +1228,40 @@ function module_code(library_namespace) {
 		return start_mark + value + end_mark;
 	}
 
-	// [ all_mark, start_mark, variable_name, end_mark ]
-	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)[\s\S]+?(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)/g;
+	// [ all_mark, start_mark, variable_name, original_value, end_mark ]
+	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)([\s\S]+?)(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)/g;
 
 	function Variable_Map_update(wikitext) {
 		var changed, variable_Map = this;
 		// console.trace(variable_Map);
 		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, function(
-				all_mark, start_mark, variable_name, end_mark) {
+				all_mark, start_mark, variable_name, original_value, end_mark) {
 			if (false) {
 				console.trace([ all_mark, variable_name,
 						variable_Map.has(variable_name) ]);
 			}
-			// console.log(variable_Map);
+			// console.trace(variable_Map);
 			if (variable_Map.has(variable_name)) {
-				var value = variable_Map.get(variable_name);
+				var value = variable_Map.get(variable_name), may_not_update;
 				if (library_namespace.is_Object(value)) {
+					// console.trace([ variable_name, value.may_not_update ]);
 					// .may_not_update: 可以不更新。 e.g., timestamp
-					if (!value.may_not_update)
-						changed = true;
+					may_not_update = value.may_not_update;
 					value = value.wikitext;
-				} else {
-					changed = true;
 				}
-				// preserve start_mark, end_mark
-				return start_mark + value + end_mark;
+				if (value !== original_value) {
+					if (!may_not_update)
+						changed = variable_name;
+					// preserve start_mark, end_mark
+					return start_mark + value + end_mark;
+				}
 			}
 			return all_mark;
 		});
-		if (!changed)
+		// console.trace(changed);
+		if (!changed) {
 			return [ wiki_API.edit.cancel, 'skip' ];
+		}
 		// console.trace(wikitext);
 		return wikitext;
 	}
