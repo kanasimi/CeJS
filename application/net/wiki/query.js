@@ -105,9 +105,12 @@ function module_code(library_namespace) {
 				callback(result);
 				return;
 			}
+
 			// 下面的 workaround 僅適用於 node.js。
-			var login_token = (session[wiki_API.KEY_HOST_SESSION] || session).token;
-			if (!login_token.lgpassword) {
+
+			// 不應該利用 `session[wiki_API.KEY_HOST_SESSION].token.lgpassword`，
+			// 而是該設定 `session.preserve_password`。
+			if (!session.token.lgpassword) {
 				// console.log(result);
 				// console.trace(session);
 				// 死馬當活馬醫，仍然嘗試重新取得 token... 沒有密碼無效。
@@ -115,10 +118,10 @@ function module_code(library_namespace) {
 						'check_session_badtoken: No password preserved!');
 			}
 
-			console.log(result);
-			console.log(options.action);
-			console.trace(session);
-			library_namespace.set_debug(3);
+			// console.log(result);
+			// console.log(options.action);
+			// console.trace(session);
+			// library_namespace.set_debug(3);
 			if (typeof options.rollback_action === 'function') {
 				// rollback action
 				options.rollback_action();
@@ -154,7 +157,7 @@ function module_code(library_namespace) {
 					throw new Error(
 					// 當錯誤 login 太多次時，直接跳出。
 					'check_session_badtoken: Too many failed login attempts: ['
-							+ login_token.lgname + ']');
+							+ session.token.lgname + ']');
 				}
 				library_namespace.info('check_session_badtoken: Retry '
 						+ session.retry_login);
@@ -164,9 +167,9 @@ function module_code(library_namespace) {
 
 			library_namespace.info('check_session_badtoken: '
 					+ 'Try to get token again. 嘗試重新取得 token。');
-			wiki_API.login(login_token.lgname,
+			wiki_API.login(session.token.lgname,
 			//
-			login_token.lgpassword, {
+			session.token.lgpassword, {
 				force : true,
 				// [KEY_SESSION]
 				session : session,

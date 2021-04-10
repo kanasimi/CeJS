@@ -203,22 +203,23 @@ function module_code(library_namespace) {
 			API_URL += '.wikidata';
 		}
 
-		// set Wikidata session
-		var data_config = [ session.token.lgname,
-		// wiki.set_data(host session, password)
-		password || session.token.lgpassword,
-		// API_URL: host session
-		typeof API_URL === 'string' && wiki_API.api_URL(API_URL)
-		//
-		|| wikidata_API_URL ];
-		// console.trace(data_config);
-		if (data_config[0] && data_config[1]) {
-			session.data_session = wiki_API.login(data_config[0],
-					data_config[1], data_config[2]);
+		// data_configuration: set Wikidata session
+		var data_login_options = {
+			user_name : session.token.lgname,
+			// wiki.set_data(host session, password)
+			password : password || session.token.lgpassword,
+			// API_URL: host session
+			API_URL : typeof API_URL === 'string' && wiki_API.api_URL(API_URL)
+			//
+			|| wikidata_API_URL,
+			preserve_password : session.preserve_password
+		};
+		// console.trace(data_login_options);
+		if (data_login_options.user_name && data_login_options.password) {
+			session.data_session = wiki_API.login(data_login_options);
 		} else {
-			session.data_session = new wiki_API(data_config[0], data_config[1],
 			// 警告: 可能需要設定 options.is_running
-			data_config[2]);
+			session.data_session = new wiki_API(data_login_options);
 		}
 
 		library_namespace.debug('Setup 宿主 host session.', 2,
