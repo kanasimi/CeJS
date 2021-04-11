@@ -3573,7 +3573,7 @@ function module_code(library_namespace) {
 	// (\s{2,}): 最後的單一/\s/會被轉換為"&#160;"
 	// matched: [ all, 指定轉換字串, 指定轉換詞, spaces,
 	// this language code, colon, this language token, last spaces ]
-	var PATTERN_conversion = /^(([\s\S]+?)=>)?(\s*)(zh(?:-(?:cn|tw|hk|mo|sg|my|hant|hans))?)(\s*:|:\s*)(\S.*?)(\s{2,})?$/;
+	var PATTERN_conversion_slice = /^(([\s\S]+?)=>)?(\s*)(zh(?:-(?:cn|tw|hk|mo|sg|my|hant|hans))?)(\s*:|:\s*)(\S.*?)(\s{2,})?$/;
 
 	// 狀態開關: [[mw:Help:Magic words#Behavior switches]]
 	var PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
@@ -3898,7 +3898,7 @@ function module_code(library_namespace) {
 					// remove spaces
 					converted = converted.trim();
 				}
-				if (PATTERN_conversion.test(converted)
+				if (PATTERN_conversion_slice.test(converted)
 				// e.g., "-{ a; zh-tw: tw }-" 之 " a"
 				|| conversion_list.length === 0
 				// 最後一個是空白。
@@ -3912,7 +3912,10 @@ function module_code(library_namespace) {
 			});
 			// console.log(conversion_list);
 			var convert_from_hash = conversion_table && Object.create(null);
+			var unidirectional = [];
 			/**
+			 * [[Help:高级字词转换语法#基本语法]]
+			 * 
 			 * <code>
 
 			-{zh-cn:cn; zh-tw:tw;}-
@@ -3939,7 +3942,7 @@ function module_code(library_namespace) {
 			 */
 			// TODO: 剖析不出任何對應規則的話，則為 R 旗標轉換，即是停用字詞轉換，顯示原文（R stands for raw）。
 			conversion_list = conversion_list.map(function(token) {
-				var matched = token.match(PATTERN_conversion);
+				var matched = token.match(PATTERN_conversion_slice);
 				// console.log(matched);
 				if (!matched
 				// e.g., -{A|=>zh-tw:tw}-
@@ -3968,9 +3971,15 @@ function module_code(library_namespace) {
 				if (!matched[2]) {
 					matched.splice(2, 1);
 				}
-				var specified_from;
+				// 指定僅轉換某些特殊詞彙。
+				// unidirectional_convert_from
+				var uniconvert_from;
 				if (matched[0]) {
-					specified_from = matched[1];
+					uniconvert_from = matched[1].trim();
+					if (!uniconvert_from) {
+						// if $from is empty, strtr() could return a wrong
+						// result.
+					}
 					matched.splice(1, 1);
 				} else {
 					matched.splice(0, 2);
@@ -3980,29 +3989,31 @@ function module_code(library_namespace) {
 
 				if (!conversion_table) {
 					;
-				} else if (specified_from) {
-					if (!conversion_table[specified_from]) {
-						conversion_table[specified_from]
+				} else if (uniconvert_from) {
+					// 單向轉換 unidirectional convert
+					unidirectional.push(uniconvert_from);
+					if (!conversion_table[uniconvert_from]) {
+						conversion_table[uniconvert_from]
 						// Initialization
 						= Object.create(null);
-					} else if (conversion_table[specified_from].conversion) {
-						conversion_table[specified_from] = Object.clone(
+					} else if (conversion_table[uniconvert_from].conversion) {
+						conversion_table[uniconvert_from] = Object.clone(
 						// assert:
-						// conversion_table[specified_from].type==='convert'
-						conversion_table[specified_from].conversion);
+						// conversion_table[uniconvert_from].type==='convert'
+						conversion_table[uniconvert_from].conversion);
 					}
 
 					if (false && options.conflict_conversion
 					// overwrite
-					&& conversion_table[specified_from][language_code]) {
+					&& conversion_table[uniconvert_from][language_code]) {
 						options.conflict_conversion.call(conversion_table,
-								specified_from, language_code,
-								conversion_table[specified_from]
+								uniconvert_from, language_code,
+								conversion_table[uniconvert_from]
 								//
 								[language_code], convert_to);
 					}
 
-					conversion_table[specified_from][language_code]
+					conversion_table[uniconvert_from][language_code]
 					// settle
 					= convert_to;
 
@@ -4010,6 +4021,7 @@ function module_code(library_namespace) {
 					// 後面的設定會覆蓋先前的設定。
 					convert_from_hash[language_code] = convert_to;
 				} else if (convert_to && convert_to.type === 'plain') {
+					// 雙向轉換 bidirectional convert
 					// -{H|zh-cn:俄-{匊}-斯;zh-tw:俄-{匊}-斯;zh-hk:俄-{匊}-斯;}-
 					// 當作 "俄匊斯"
 					var not_all_string;
@@ -4043,6 +4055,8 @@ function module_code(library_namespace) {
 			// console.log(conversion_list);
 			parameters = _set_wiki_type(conversion_list, 'convert');
 			parameters.conversion = conversion;
+			if (unidirectional.length > 0)
+				parameters.unidirectional = unidirectional.unique();
 			if (typeof _flag === 'string') {
 				parameters._flag = _flag;
 				parameters.flag = flag;

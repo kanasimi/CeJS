@@ -608,7 +608,7 @@ function module_code(library_namespace) {
 			}
 			// console.trace(action);
 			// callback(response);
-			options.action = action;
+			// options.action = action;
 			check_session_badtoken(response, callback, options);
 
 		}, null, POST_data, get_URL_options);
