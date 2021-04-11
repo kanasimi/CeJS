@@ -4794,9 +4794,13 @@ function module_code(library_namespace) {
 					+ (options.id ? options.id + ': ' : '')
 					// [readonly] The wiki is currently in read-only mode
 					+ '[' + error.code + '] ' + (error.info || error.message));
-					library_namespace.warn('action: '
-					//
-					+ JSON.stringify(action));
+					try {
+						console.error(action);
+					} catch (e) {
+						library_namespace.warn('action: '
+						//
+						+ JSON.stringify(action));
+					}
 					if (false) {
 						// TypeError: Converting circular structure to JSON
 						library_namespace.warn('data to write: '
