@@ -2569,6 +2569,7 @@ function module_code(library_namespace) {
 
 		// setup_configuration()
 		function adapt_configuration(page_data) {
+			// console.trace(page_data);
 			if (!wiki_API.content_of.page_exists(page_data)) {
 				library_namespace.debug('No configuration page: '
 						+ wiki_API.title_link_of(page_data), 1,
@@ -2617,7 +2618,13 @@ function module_code(library_namespace) {
 			if (typeof configuration_adapter === 'function') {
 				// 每次更改過設定之後，重新執行一次。
 				// 檢查從網頁取得的設定，檢測數值是否合適。
+
+				// cache actions, 盡可能即時適用新的設定。
+				var old_actions = session.actions.splice(0,
+						session.actions.length);
 				configuration_adapter.call(session, configuration);
+				session.actions.append(old_actions);
+				// console.trace(session.actions);
 				// configuration === wiki_session.latest_task_configuration
 			}
 			// Object.seal(configuration);
@@ -2814,8 +2821,13 @@ function module_code(library_namespace) {
 		if (!page_title)
 			return page_title;
 
-		if (options && options.namespace)
+		if (options && options.namespace) {
 			page_title = this.to_namespace(page_title, options.namespace);
+		} else if (Array.isArray(page_title)
+				&& page_title.type === 'transclusion') {
+			// treat `page_title` as template token
+			page_title = this.to_namespace(page_title.name, 'Template');
+		}
 		page_title = this.normalize_title(page_title);
 
 		if (Array.isArray(page_title)) {
@@ -2855,7 +2867,7 @@ function module_code(library_namespace) {
 				|| wiki_API.is_wiki_API(this) && this;
 
 		if (token.type === 'transclusion') {
-			// treat token as template token
+			// treat `token` as template token
 			// assert: token.name is normalized
 			token = token.name;
 		}
@@ -2870,7 +2882,9 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace([ template_name, token ]);
-		return template_name === token;
+		return Array.isArray(template_name) ? template_name.includes(token)
+				: Array.isArray(token) ? token.includes(template_name)
+						: template_name === token;
 	}
 
 	// --------------------------------------------------------------------------------------------

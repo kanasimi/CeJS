@@ -880,6 +880,7 @@ function module_code(library_namespace) {
 				} catch (e) {
 					library_namespace.error(e);
 					console.error(e);
+					console.trace([ key, value ]);
 				}
 			}
 
