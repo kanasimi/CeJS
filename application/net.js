@@ -878,7 +878,8 @@ function module_code(library_namespace) {
 								JSON.stringify(value) : String(value) ]
 					}, 1, 'parameters_toString');
 				} catch (e) {
-					// TODO: handle exception
+					library_namespace.error(e);
+					console.error(e);
 				}
 			}
 

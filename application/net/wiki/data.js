@@ -320,7 +320,7 @@ function module_code(library_namespace) {
 			action : 'wbsearchentities',
 			// search. e.g.,
 			// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
-			search : encodeURIComponent(key),
+			search : key,
 			// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 			language : language
 		};
@@ -336,7 +336,7 @@ function module_code(library_namespace) {
 		}
 
 		if (options['continue'] > 0)
-			action += '&continue=' + options['continue'];
+			action['continue'] = options['continue'];
 
 		action = [ API_URL_of_options(options) || wikidata_API_URL, action ];
 
@@ -4720,7 +4720,7 @@ function module_code(library_namespace) {
 
 		} else if (wiki_API.is_page_data(id)) {
 			options.site = wiki_API.site_name(options);
-			options.title = encodeURIComponent(id.title);
+			options.title = id.title;
 
 		} else if (id === 'item' || id === 'property') {
 			options['new'] = id;
@@ -4747,7 +4747,9 @@ function module_code(library_namespace) {
 		// edit實體項目entity
 		action = [
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
-		get_data_API_URL(options), 'action=wbeditentity' ];
+		get_data_API_URL(options), {
+			action : 'wbeditentity'
+		} ];
 		// console.trace(options);
 
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！

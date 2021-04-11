@@ -3385,9 +3385,10 @@ function module_code(library_namespace) {
 		// 手工字詞轉換 language conversion -{}-
 		convert : function(language, lang_fallbacks, force_show) {
 			if (!language) {
-				return '-{' + ('_flag' in this ? this._flag + '|' : '')
+				return '-{'
 				//
-				+ this.join(';') + '}-';
+				+ ('flag' in this ? (this._flag || this.flag) + '|' : '')
+						+ this.join(';') + '}-';
 			}
 
 			if (language === 'rule') {
@@ -3863,7 +3864,7 @@ function module_code(library_namespace) {
 					return !!f;
 				});
 				if (flag.length === 0) {
-					flag = null;
+					flag = '';
 				} else {
 					// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
 					// 僅取首先符合者。
@@ -4058,7 +4059,8 @@ function module_code(library_namespace) {
 			if (unidirectional.length > 0)
 				parameters.unidirectional = unidirectional.unique();
 			if (typeof _flag === 'string') {
-				parameters._flag = _flag;
+				if (_flag !== flag)
+					parameters._flag = _flag;
 				parameters.flag = flag;
 				if (flag === 'T')
 					options.conversion_title = parameters;
