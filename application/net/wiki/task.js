@@ -2706,14 +2706,24 @@ function module_code(library_namespace) {
 
 				this_slice_size = this_slice.length;
 				work_continue += this_slice_size;
-				this_slice = this_slice.map(function(page_data) {
-					return wiki_API.is_page_data(page_data) ? page_data.pageid
-							: page_data;
-				});
-				// console.trace([ 'page_options:', page_options ]);
-				this.page(this_slice, main_work, Object.assign({
-					is_id : true
-				}, page_options));
+
+				// 2021/4/12 13:14:31 failed on `20170915.topic_list.js
+				// use_language=ja`
+				// [badinteger] Invalid value
+				// "Wikipedia:井戸端/subj/同じ人に何度も書き込みを削除される時の対応方法" for integer
+				// parameter "pageids".
+				if (false) {
+					this_slice = this_slice
+							.map(function(page_data) {
+								return wiki_API.is_page_data(page_data) ? page_data.pageid
+										: page_data;
+							});
+					// console.trace([ 'page_options:', page_options ]);
+					this.page(this_slice, main_work, Object.assign({
+						is_id : true
+					}, page_options));
+				}
+				this.page(this_slice, main_work, page_options);
 			}).bind(this);
 
 			config.start_working_time = Date.now();
