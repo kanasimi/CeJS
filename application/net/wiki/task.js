@@ -2318,8 +2318,8 @@ function module_code(library_namespace) {
 							// 以 each() 的回傳作為要改變成什麼內容。
 							var content = each.call(
 							// 注意: this === work_options
+							// 注意: this !== work_config === `config`
 							// @see wiki_API.edit()
-							// NOT `config`!
 							this, page_data, messages, config);
 							if (messages.quit_operation) {
 								clear_work.call(this);
@@ -2707,22 +2707,7 @@ function module_code(library_namespace) {
 				this_slice_size = this_slice.length;
 				work_continue += this_slice_size;
 
-				// 2021/4/12 13:14:31 failed on `20170915.topic_list.js
-				// use_language=ja`
-				// [badinteger] Invalid value
-				// "Wikipedia:井戸端/subj/同じ人に何度も書き込みを削除される時の対応方法" for integer
-				// parameter "pageids".
-				if (false) {
-					this_slice = this_slice
-							.map(function(page_data) {
-								return wiki_API.is_page_data(page_data) ? page_data.pageid
-										: page_data;
-							});
-					// console.trace([ 'page_options:', page_options ]);
-					this.page(this_slice, main_work, Object.assign({
-						is_id : true
-					}, page_options));
-				}
+				// 假如想要全部轉換成 pageids，必須考量有些頁面可能沒有 pageid 的問題。
 				this.page(this_slice, main_work, page_options);
 			}).bind(this);
 

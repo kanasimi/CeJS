@@ -846,10 +846,12 @@ function module_code(library_namespace) {
 		stem_branch_date_pattern = date_pattern;
 	})();
 
+	// [ all, start month, end month, year ]
+	var PATTERN_EN_MONTH_YEAR = /^(?:([a-z]+)[–\-])?([a-z]+)\s+(\d{1,4})$/i,
 	// U+2212 '−': minus sign
 	// 為了 calendar 測試，年分需要能 parse 0–9999。
 	// [ all, .*年, \d+, [百千] ]
-	var PATTERN_YEAR_ONLY = /^[^\d\/:\-−‐前日月年]*(\d{3,4}|([\-−‐前]?\d{1,4})([百千]?)年|[\-−‐前]\d{1,4})[^\d\/:\-−‐前日月年]*$/,
+	PATTERN_YEAR_ONLY = /^[^\d\/:\-−‐前日月年]*(\d{3,4}|([\-−‐前]?\d{1,4})([百千]?)年|[\-−‐前]\d{1,4})[^\d\/:\-−‐前日月年]*$/,
 	//
 	PATTERN_BCE = /(?:^|[^a-z.])B\.?C\.?E?(?:[^a-z.]|$)/i, time_boundary = new Date(
 			0, 0, 1);
@@ -902,6 +904,30 @@ function module_code(library_namespace) {
 			minute_offset = tmp;
 			// 留下此 pattern 在 match 時會出錯。
 			date_string = date_string.replace(UTC_PATTERN, '').trim();
+		}
+
+		matched = date_string.match(PATTERN_EN_MONTH_YEAR);
+		// [ all, start month, end month, year ]
+		if (matched) {
+			// e.g., 'May–June 1998'
+			var date_value;
+			if (period_end) {
+				date_value = new Date(matched[2] + ' ' + matched[3]);
+				date_value.setMonth(date_value.getMonth() + 1);
+			} else {
+				if (false && matched[1]) {
+					library_namespace.warn('Cannot handle date range: '
+							+ date_string);
+				}
+				date_value = new Date((matched[1] || matched[2]) + ' '
+						+ matched[3]);
+			}
+			if (!isNaN(date_value.getTime())) {
+				date_value.precision = 'month';
+				return date_value;
+			}
+			// Cannot parse "month year"
+			return;
 		}
 
 		if (matched = date_string.match(PATTERN_YEAR_ONLY)) {
@@ -1068,7 +1094,6 @@ function module_code(library_namespace) {
 			tmp -= present_local_minute_offset + minute_offset;
 		}
 
-		var date_value;
 		if (year < 100 && year >= 0) {
 			// 僅使用 new Date(0) 的話，會含入 timezone offset (.getTimezoneOffset)。
 			// 因此得使用 new Date(0, 0)。
