@@ -927,8 +927,16 @@ function module_code(library_namespace) {
 				return date_value;
 			}
 			// Cannot parse "month year"
+			library_namespace.debug('無法 parse: [' + date_string + ']', 2,
+					'String_to_Date_default_parser');
 			return;
 		}
+
+		// TODO:
+		// e.g., '10.12', '10/12'
+		// e.g., '10/12, 2001'
+		// e.g., '10 12, 2001'
+		// e.g., '2001 10 12'
 
 		if (matched = date_string.match(PATTERN_YEAR_ONLY)) {
 			// 僅有 xxx/1xxx/2xxx 年(year) 時。
