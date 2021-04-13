@@ -852,13 +852,19 @@ function module_code(library_namespace) {
 			// incase 'https://test.wikidata.org/w/api.php'
 			language = !/test|wiki/i.test(matched[0]) && matched[0]
 					|| wiki_API.language;
+
 		} else if (matched = language.match(/^([a-z\d\-_]+)\.([a-z\d\-_]+)/)) {
 			language = matched[1];
 			family = family || matched[2];
+
 		} else {
 			library_namespace.error('language_to_site_name: Invalid language: '
 					+ language);
-			// console.trace(language);
+			if (false) {
+				console.trace([ language,
+						wiki_API.hostname_of_API_URL(language), session,
+						in_session ]);
+			}
 		}
 
 		// console.trace(family);
