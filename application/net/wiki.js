@@ -181,12 +181,13 @@ function module_code(library_namespace) {
 		};
 
 		// console.trace(API_URL);
-		if (API_URL) {
-			if (!('use_SQL' in options) && API_URL.includes('://')) {
-				// assert: Not MediaWiki server. Is outer server.
-				this.use_SQL = false;
-			}
-		} else if (!API_URL && !('language' in this)
+		if (!('use_SQL' in options) && API_URL
+		// assert: typeof API_URL === 'string'
+		&& API_URL.includes('://')) {
+			// assert: Not MediaWiki server. Is outer server.
+			this.use_SQL = false;
+		}
+		if (!API_URL && !('language' in this)
 		// wikidata 不設定 language。
 		&& !this.is_wikidata) {
 			API_URL = wiki_API.language;
