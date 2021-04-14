@@ -181,12 +181,6 @@ function module_code(library_namespace) {
 		};
 
 		// console.trace(API_URL);
-		if (!('use_SQL' in options) && API_URL
-		// assert: typeof API_URL === 'string'
-		&& API_URL.includes('://')) {
-			// assert: Not MediaWiki server. Is outer server.
-			this.use_SQL = false;
-		}
 		if (!API_URL && !('language' in this)
 		// wikidata 不設定 language。
 		&& !this.is_wikidata) {
@@ -196,6 +190,15 @@ function module_code(library_namespace) {
 			options.need_initialize = password && user_name;
 		} else if (!('need_initialize' in options)) {
 			options.need_initialize = true;
+		}
+
+		if ('use_SQL' in options) {
+			this.use_SQL = options.use_SQL;
+		} else if (API_URL
+		// assert: typeof API_URL === 'string'
+		&& API_URL.includes('://')) {
+			// assert: Not MediaWiki server. Is outer server.
+			this.use_SQL = false;
 		}
 
 		// console.trace(API_URL);

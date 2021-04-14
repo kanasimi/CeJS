@@ -1828,7 +1828,8 @@ function module_code(library_namespace) {
 		after : function after(messages, pages) {
 		},
 		// run this at last. 在 wiki_API.prototype.work() 工作最後執行此 config.last()。
-		last : function last() {
+		last : function last(error) {
+			// this: options
 		},
 		// 不作編輯作業。
 		no_edit : true,
@@ -1984,7 +1985,7 @@ function module_code(library_namespace) {
 
 		// assert: 因為要作排程，為預防衝突與不穩定的操作結果，自此以後不再 modify options。
 
-		var done = 0,
+		var done = 0, session = this, error_to_return,
 		//
 		log_item = Object.assign(Object.create(null),
 				wiki_API.prototype.work.log_item, config.log_item), messages = [];
@@ -2021,6 +2022,7 @@ function module_code(library_namespace) {
 						error = gettext('no change');
 						result = 'nochange';
 					} else {
+						error_to_return = error_to_return || error;
 						// 有錯誤發生。
 						// e.g., [protectedpage]
 						// The "editprotected" right is required to edit this
@@ -2100,7 +2102,8 @@ function module_code(library_namespace) {
 			});
 		}
 
-		var main_work = (function(data, error) {
+		var session = this;
+		var main_work = function(data, error) {
 			if (error) {
 				library_namespace.error('wiki_API.work: Get error: '
 						+ (error.info || error));
@@ -2127,20 +2130,20 @@ function module_code(library_namespace) {
 					// config.continue_session:
 					// 後續檢索用索引值存儲所在的 {wiki_API}，將會以此 instance 之值寫入 log。
 					&& (pages = 'continue_session' in config ? config.continue_session
-							: this)
+							: session)
 					// pages: 後續檢索用索引值之暫存值。
 					&& (pages = pages.show_next())) {
 				// 當有 .continue_session 時，其實用不到 log page 之 continue_key。
-				if (!config.continue_session && !this
+				if (!config.continue_session && !session
 				// 忽略表示完結的紀錄，避免每個工作階段都顯示相同訊息。
 				|| pages !== '{}'
 				// e.g., 後続の索引: {"continue":"-||"}
 				&& !/^{"[^"]+":"[\-|]{0,9}"}$/.test(pages)) {
 					// console.log(config);
 					// console.log(options);
-					// console.log(this.continue_key + ':' +
+					// console.log(session.continue_key + ':' +
 					// JSON.stringify(pages));
-					messages.add(this.continue_key + ': ' + pages);
+					messages.add(session.continue_key + ': ' + pages);
 				}
 			}
 
@@ -2176,7 +2179,7 @@ function module_code(library_namespace) {
 				// 2019/8/7 change API 應用程式介面變更:
 				// .before(messages, pages, titles) → .before(messages, pages)
 				// 按照需求程度編排 arguments，並改變適合之函數名。
-				config.before.call(this, messages, pages);
+				config.before.call(session, messages, pages);
 			}
 
 			/**
@@ -2215,7 +2218,51 @@ function module_code(library_namespace) {
 			library_namespace.debug('for each page: 主要機制是把工作全部推入 queue。', 2,
 					'wiki_API.work');
 			// 剩下的頁面數量 pages remaining. cf. ((done))
-			var promises = [];
+			var promises = [], fulfilled = Object.create(null);
+			function check_if_result_is_thenable(result) {
+				// session.next() will wait for result.then() calling back
+				// if CeL.is_thenable(result).
+				// e.g., async function for_each_list_page(list_page_data)
+				// @ 20200122.update_vital_articles.js
+				// So we need to run `session.next()` manually.
+
+				// Promise.isPromise()
+				if (!library_namespace.is_thenable(result)) {
+					return;
+				}
+
+				promises.push(result);
+
+				// https://stackoverflow.com/questions/30564053/how-can-i-synchronously-determine-a-javascript-promises-state
+				// https://github.com/kudla/promise-status-async/blob/master/lib/promiseState.js
+				/**
+				 * <code>
+				Promise.race([result, fulfilled]).then(v => { status = v === t ? "pending" : "fulfilled" }, () => { status = "rejected" });
+				</code>
+				 */
+				Promise.race([ result, fulfilled ])
+				//
+				.then(function(first_fulfilled) {
+					// session.running === true
+					// console.trace('session.running = ' + session.running);
+					if (first_fulfilled === fulfilled) {
+						/**
+						 * assert: result is pending. e.g., <code>
+						await wiki.for_each_page(need_check_redirected_list, ...)
+						@ await wiki.for_each_page(vital_articles_list, for_each_list_page, ...)
+						@ 20200122.update_vital_articles.js
+						</code>
+						 */
+
+						// console.trace('call session.next()');
+						session.next();
+					}
+				}, function() {
+					// Do not catch error here.
+				});
+				return true;
+			}
+
 			if (pages.length > 0) {
 				var pages_left = 0, pages_rationed = false;
 				pages.forEach(function for_each_page(page, index) {
@@ -2231,19 +2278,19 @@ function module_code(library_namespace) {
 
 					function clear_work() {
 						// 警告: 直接清空 .actions 不安全！
-						// this.actions.clear();
+						// session.actions.clear();
 						work_continue = target.length;
 
 						var next;
-						while (next = this.actions[0]) {
+						while (next = session.actions[0]) {
 							next = next[0];
 							if (next === 'page' || next === 'edit')
-								this.actions.shift();
+								session.actions.shift();
 							else
 								break;
 						}
 						library_namespace.debug('清空 actions queue: 剩下'
-								+ this.actions.length + ' actions。', 1,
+								+ session.actions.length + ' actions。', 1,
 								'wiki_API.work');
 					}
 
@@ -2252,23 +2299,35 @@ function module_code(library_namespace) {
 						// 不作編輯作業。
 						// 取得頁面內容。
 						// console.log(page);
-						// console.trace(this.running);
-						this.page(page, function work_page_callback(page_data,
-								error) {
+						// console.trace(session.running);
+						session.page(page, function work_page_callback(
+								page_data, error) {
 							// TODO: if (error) {...}
 							// console.log([ page_data, config.page_options ]);
 							library_namespace.log_temporary((index + 1) + '/'
 									+ pages.length + ' '
 									+ wiki_API.title_link_of(page_data));
-							var result = each.call(config, page_data, messages,
-									config);
-							if (messages.quit_operation) {
-								clear_work.call(this);
-							} else if (library_namespace.is_thenable(result)) {
-								promises.push(result);
+							var result;
+							try {
+								result = each.call(config, page_data, messages,
+										config);
+							} catch (e) {
+								error_to_return = error_to_return || e;
+								if (typeof e === 'object') {
+									console.error(e);
+								} else {
+									library_namespace.error(
+									//
+									'wiki_API.work: Catched error: ' + e);
+								}
 							}
+
+							if (messages.quit_operation) {
+								clear_work();
+							}
+							check_if_result_is_thenable(result);
 							if (--pages_left === 0 && pages_rationed) {
-								finish_up.call(this, promises);
+								finish_up(promises);
 							}
 						}, single_page_options);
 
@@ -2278,7 +2337,7 @@ function module_code(library_namespace) {
 						var work_options = Object.clone(options);
 						// console.log(work_options);
 						// 取得頁面內容。一頁頁處理。
-						this.page(page, null, single_page_options)
+						session.page(page, null, single_page_options)
 						// 編輯頁面內容。
 						.edit(function(page_data) {
 							if (('missing' in page_data)
@@ -2316,16 +2375,29 @@ function module_code(library_namespace) {
 								+ wiki_API.title_link_of(page_data));
 							}
 							// 以 each() 的回傳作為要改變成什麼內容。
-							var content = each.call(
-							// 注意: this === work_options
-							// 注意: this !== work_config === `config`
-							// @see wiki_API.edit()
-							this, page_data, messages, config);
-							if (messages.quit_operation) {
-								clear_work.call(this);
-							} else if (library_namespace.is_thenable(content)) {
-								promises.push(content);
+							var content;
+							try {
+								content = each.call(
+								// 注意: this === work_options
+								// 注意: this !== work_config === `config`
+								// @see wiki_API.edit()
+								this, page_data, messages, config);
+							} catch (e) {
+								error_to_return = error_to_return || e;
+								if (typeof e === 'object') {
+									console.error(e);
+								} else {
+									library_namespace.error(
+									//
+									'wiki_API.work: Catched error: ' + e);
+								}
+
+								// return [wiki_API.edit.cancel, 'skip'];
 							}
+							if (messages.quit_operation) {
+								clear_work();
+							}
+							check_if_result_is_thenable(content);
 							// console.trace(content);
 							return content;
 						}, work_options, function work_edit_callback(
@@ -2333,33 +2405,34 @@ function module_code(library_namespace) {
 						) {
 							// console.trace(arguments);
 							// nomally call do_batch_work_summary()
-							callback.apply(this, arguments);
+							callback.apply(session, arguments);
 							if (--pages_left === 0 && pages_rationed) {
-								finish_up.call(this, promises);
+								finish_up(promises);
 							}
 						});
 					}
-				}, this);
+				});
 				// 工作配給完畢。
 				pages_rationed = true;
 				if (pages_left === 0) {
 					// 前面已經同步處理完畢了，卻還沒執行 finish_up()。
-					finish_up.call(this);
+					finish_up();
 				}
 
 			} else {
 				// 都沒有東西的時候依然應該執行收尾。
-				finish_up.call(this);
+				finish_up();
 			}
 
 			// 警告：不可省略，只為避免 clear_work()誤刪！
-			this.run(function wikiAPI_work__waiting_for_winding_up() {
+			session.run(function wikiAPI_work__waiting_for_winding_up() {
 				library_namespace.debug('工作配給完畢，等待 callback 結束，準備收尾。', 3,
 						'wiki_API.work');
 			});
 
 			// 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
-			function finish_up(promises) {
+			function finish_up(promises, error) {
+				error_to_return = error_to_return || error;
 				if (promises && promises.length > 0) {
 					// e.g., check_deletion_page() @
 					// 20191214.maintain_historical_deletion_records.js
@@ -2368,18 +2441,8 @@ function module_code(library_namespace) {
 							'wiki_API.work');
 					// console.log(promises);
 					Promise.allSettled(promises).then(
-							finish_up.bind(this, null),
-							finish_up.bind(this, null));
-					return;
-
-					var _this = this;
-					Promise.allSettled(promises)
-					// finish_up.bind(this, null)
-					.then(function(result) {
-						finish_up.call(_this);
-					}, function(error) {
-						finish_up.call(_this);
-					});
+							finish_up.bind(null, null, null),
+							finish_up.bind(null, null));
 					return;
 				}
 
@@ -2437,7 +2500,7 @@ function module_code(library_namespace) {
 						//
 						messages.start.age(new Date)));
 					}
-					if (this.stopped) {
+					if (session.stopped) {
 						messages
 								.add(gettext("'''Stopped''', give up editing."));
 					}
@@ -2461,13 +2524,13 @@ function module_code(library_namespace) {
 					// 2019/8/7 change API 應用程式介面變更:
 					// .after(messages, pages, titles) → .after(messages, pages)
 					// 按照需求程度編排 arguments，並改變適合之函數名。
-					config.after.call(this, messages, pages);
+					config.after.call(session, messages, pages);
 				}
 
 				var log_to = 'log_to' in config ? config.log_to
 				// default log_to
-				: this.token.login_user_name ? 'User:'
-						+ this.token.login_user_name + '/log/'
+				: session.token.login_user_name ? 'User:'
+						+ session.token.login_user_name + '/log/'
 						+ (new Date).format('%4Y%2m%2d') : null,
 				// options for summary.
 				options = {
@@ -2476,12 +2539,13 @@ function module_code(library_namespace) {
 					// 新章節的標題。
 					sectiontitle : '['
 							+ (new Date).format(config.date_format
-									|| this.date_format) + ']' + count_summary,
+									|| session.date_format) + ']'
+							+ count_summary,
 					// Robot: 若用戶名包含 'bot'，則直接引用之。
-					// 注意: this.token.login_user_name 可能為 undefined！
-					summary : (this.token.login_user_name
+					// 注意: session.token.login_user_name 可能為 undefined！
+					summary : (session.token.login_user_name
 							&& PATTERN_BOT_NAME
-									.test(this.token.login_user_name) ? this.token.login_user_name
+									.test(session.token.login_user_name) ? session.token.login_user_name
 							: 'Robot')
 							+ ': ' + config.summary + count_summary,
 					// prevent creating new pages
@@ -2501,7 +2565,7 @@ function module_code(library_namespace) {
 				|| config.log_nochange)) {
 					// console.trace(log_to);
 					// CeL.set_debug(6);
-					this.page(log_to)
+					session.page(log_to)
 					// 將 robot 運作記錄、log summary 報告結果寫入 log 頁面。
 					// TODO: 以表格呈現。
 					.edit(messages.join('\n'), options,
@@ -2510,17 +2574,19 @@ function module_code(library_namespace) {
 						if (error) {
 							library_namespace.warn(
 							//
-							'wiki_API.work: Can not write log to [' + log_to
+							'wiki_API.work: Can not write log to ['
 							//
-							+ ']! Try to write to [' + 'User:'
+							+ log_to + ']! Try to write to [' + 'User:'
 							//
-							+ this.token.login_user_name + ']');
-							library_namespace.log(
+							+ session.token.login_user_name + ']');
+							library_namespace.log('\nlog:<br />\n'
 							//
-							'\nlog:<br />\n' + messages.join('<br />\n'));
+							+ messages.join('<br />\n'));
 							// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
 							// TODO: bug: 當分批時，只會寫入最後一次。
-							this.page('User:' + this.token.login_user_name)
+							session.page('User:'
+							//
+							+ session.token.login_user_name)
 							//
 							.edit(messages.join('\n'), options);
 						}
@@ -2533,7 +2599,7 @@ function module_code(library_namespace) {
 				// --------------------
 				// 處理記憶體洩漏問題 @ 20191129.check_language_convention.js
 				// console.log(process.memoryUsage());
-				// delete this.last_pages;
+				// delete session.last_pages;
 				if (Array.isArray(pages)) {
 					// console.log(pages[0]);
 					// free:
@@ -2553,7 +2619,7 @@ function module_code(library_namespace) {
 				}
 				// `node --expose-gc *.js`
 				// global.gc && global.gc();
-				// console.trace([ target.length, process.memoryUsage(), this
+				// console.trace([ target.length, process.memoryUsage(), session
 				// ]);
 				// --------------------
 
@@ -2574,11 +2640,12 @@ function module_code(library_namespace) {
 				// .after() → .last()
 				// 改變適合之函數名。
 				if (typeof config.last === 'function') {
-					this.run(config.last.bind(options));
+					// last(error)
+					session.run(config.last.bind(options, error_to_return));
 				}
 
 				if (!config.no_message) {
-					this.run(function() {
+					session.run(function() {
 						library_namespace.log(
 						// 已完成作業
 						'wiki_API.work: 結束 .work() 作業'
@@ -2588,7 +2655,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-		}).bind(this);
+		};
 
 		var target = pages,
 		// const

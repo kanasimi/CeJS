@@ -108,7 +108,7 @@ function module_code(library_namespace) {
 
 			if (!content) {
 				library_namespace.info([ {
-					T : 'The page to stop operation is not found.'
+					T : 'The page to stop operation is not found. '
 				}, {
 					T : 'The operation will continue as usual.'
 				} ]);
