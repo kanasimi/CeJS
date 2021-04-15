@@ -865,13 +865,41 @@ function module_code(library_namespace) {
 
 	page_parser.remove_token = remove_token_from_parent;
 
-	if (false) {
+	// ------------------------------------------------------------------------
+
+	(function() {
 		wikitext = 'a\n[[File:f.jpg|thumb|d]]\nb';
-		CeL.wiki.parser(wikitext).parse().each('namespaced_title',
-				function(token, index, parent) {
-					console.log([ index, token, parent ]);
-				}, true).toString();
+		parsed = CeL.wiki.parser(wikitext).parse();
+
+		parsed.each('namespaced_title', function(token, index, parent) {
+			console.log([ index, token, parent ]);
+		}, true);
+
+		parsed.each('namespaced_title', function(token, index, parent) {
+			if (CeL.wiki.parse.token_is_children_of(token, function(parent) {
+				return parent.tag === 'ref' || parent.tag === 'gallery';
+			})) {
+				console.log([ index, token, parent ]);
+			}
+		}, {
+			add_index : 'all'
+		});
+
+		parsed.toString();
+	});
+
+	// 注意: 必須配合 `parsed.each(, {add_index : 'all'})` 使用
+	function token_is_children_of(token, parent_filter) {
+		var parent;
+		while (token && (parent = token.parent)) {
+			if (parent_filter(parent))
+				return true;
+			token = parent;
+		}
 	}
+
+	// CeL.wiki.parser.token_is_children_of()
+	page_parser.token_is_children_of = token_is_children_of;
 
 	/**
 	 * 對所有指定類型 type，皆執行特定作業 processor。
@@ -892,13 +920,13 @@ function module_code(library_namespace) {
 	 * @param {Natural}[max_depth]
 	 *            最大深度。1: 僅到第1層(底層)。2: 僅到第2層(開始遍歷子節點)。 0||NaN: 遍歷所有子節點。
 	 * 
-	 * @returns {wiki page parser}
+	 * @returns {Promise|Undefine}
 	 * 
 	 * @see page_parser.type_alias
 	 */
 	function for_each_token(type, processor, modify_by_return, max_depth) {
 		if (!this) {
-			return this;
+			return;
 		}
 
 		if (typeof type === 'function' && max_depth === undefined) {
@@ -943,7 +971,7 @@ function module_code(library_namespace) {
 			if (typeof type !== 'string') {
 				library_namespace.warn('for_each_token: Invalid type [' + type
 						+ ']');
-				return this;
+				return;
 			}
 
 			token_name = type.match(/^(Template):(.+)$/i);
@@ -989,31 +1017,61 @@ function module_code(library_namespace) {
 			this.parse();
 		}
 
-		var ref_list_to_remove = [];
+		if (!Array.isArray(this)) {
+			return;
+		}
 
 		// ----------------------------------------------------------
 
+		var ref_list_to_remove = [], promise;
+		function set_promise(operator) {
+			promise = promise.then(operator);
+			// promise.operator = operator;
+		}
+		function check_if_result_is_thenable(result) {
+			if (library_namespace.is_thenable(result)) {
+				promise = promise ? promise.then(function() {
+					return result;
+				}) : result;
+				// promise._result = result;
+				return true;
+			}
+		}
+
 		// 遍歷 tokens。
-		function traversal_tokens(_this, depth) {
+		function traversal_tokens(parent_token, depth, resolve) {
+			// depth: depth of parent_token
 			var index, length;
 			if (slice && depth === 0) {
 				// 若有 slice，則以更快的方法遍歷 tokens。
 				// TODO: 可以設定多個範圍，而不是只有一個 range。
 				index = slice[0] | 0;
-				length = slice[1] >= 0 ? Math.min(slice[1] | 0, _this.length)
-						: _this.length;
-				// for (; index < length; index++) { ... }
+				length = slice[1] >= 0 ? Math.min(slice[1] | 0,
+						parent_token.length) : parent_token.length;
 			} else {
-				// console.log(_this);
+				// console.log(parent_token);
 				index = 0;
-				length = _this.length;
-				// _this.some(for_token);
+				length = parent_token.length;
+				// parent_token.some(for_token);
 			}
 
-			for (; index < length && !exit; index++) {
-				var token = _this[index];
+			function traversal_next_sibling() {
+				if (promise) {
+					// console.trace([ index + '/' + length, depth, exit ]);
+				}
+				if (exit || index === length) {
+					// 已遍歷所有本階層節點，或已設定 exit 跳出。
+					if (promise) {
+						set_promise(resolve);
+						// console.trace([ promise, resolve ]);
+					}
+					return;
+				}
+
+				var token = parent_token[index];
 				if (false) {
-					console.log('token depth ' + depth + '/' + max_depth
+					console.log('token depth ' + depth
+							+ (max_depth ? '/' + max_depth : '')
 							+ (exit ? ' (exit)' : '') + ':');
 					console.log(token);
 				}
@@ -1029,128 +1087,234 @@ function module_code(library_namespace) {
 						// token.parent[token.index] === token
 						// .index_of_parent
 						token.index = index;
-						token.parent = _this;
+						token.parent = parent_token;
 					}
 
 					if (wiki_API.template_functions) {
 						wiki_API.template_functions.adapt_function(token,
-								index, _this, options);
+								index, parent_token, options);
 					}
 
 					// get result. 須注意: 此 token 可能為 Array, string, undefined！
-					// for_each_token(
-					// token, token_index, parent_of_token, depth)
-					var result = processor(token, index, _this, depth);
+					// for_each_token(token, token_index, parent_of_token,
+					// depth)
+					var result = processor(token, index, parent_token, depth);
 					// console.log(modify_by_return);
-					// console.log(result);
-					if (result === for_each_token.exit) {
-						library_namespace.debug('Abort the operation', 3,
-								'for_each_token');
-						// exit: 直接跳出。
-						exit = true;
-						break;
+					// console.trace(result);
+					if (false && token.toString().includes('Internetquelle'))
+						console.trace([ index + '/' + length + ' ' + token,
+								result, promise ]);
+					if (check_if_result_is_thenable(result) || promise) {
+						set_promise(function _check_result(
+								result_after_promise_resolved) {
+							if (false && token.toString().includes(
+									'Internetquelle'))
+								console.trace([
+								//
+								index + '/' + length + ' ' + token,
+								//
+								parent_token.toString(),
+								//
+								result_after_promise_resolved,
+								//
+								promise, depth, exit ]);
+							check_result(token, result_after_promise_resolved);
+						});
+					} else {
+						// assert: !promise || (promise is resolved)
+						// if (promise) console.trace(promise);
+						check_result(token, result);
 					}
-
-					// `return parsed.each.remove_token;`
-					if (result === for_each_token.remove_token) {
-						if (_this.type === 'list') {
-							// for <ol>, <ul>: 直接消掉整個 item token。
-							// index--: 刪除完後，本 index 必須再遍歷一次。
-							_this.splice(index--, 1);
-							length--;
-
-						} else {
-							if (token.type === 'tag' && token.tag === 'ref'
-									&& token.attributes
-									&& token.attributes.name) {
-								// @see wikibot/20190913.move_link.js
-								library_namespace.debug(
-										'將刪除可能被引用的 <ref>，並嘗試自動刪除所有引用。您仍須自行刪除非{{r|name}}型態的模板參考引用: '
-												+ token.toString(), 1,
-										'for_each_token');
-								ref_list_to_remove.push(token.attributes.name);
-							}
-
-							remove_token_from_parent(_this, index, length);
-							token = '';
-						}
-
-					} else if (modify_by_return) {
-						// 換掉整個 parent[index] token 的情況。
-						// `return undefined;` 不會替換，應該 return
-						// .each.remove_token; 以清空。
-						// 小技巧: 可以用 return [ inner ].is_atom = true 來避免進一步的
-						// parse 或者處理。
-						if (typeof result === 'string') {
-							// {String}wikitext to ( {Object}element or '' )
-							result = parse_wikitext(result, null, []);
-						}
-						if (typeof result === 'string'
-						//
-						|| Array.isArray(result)) {
-							// 將指定類型節點替換作此回傳值。
-							_this[index] = token = result;
-						}
-					}
-
-				} else if (options.add_index === 'all'
-						&& typeof token === 'object') {
-					token.index = index;
-					token.parent = _this;
+					return;
 				}
 
+				if (options.add_index === 'all' && typeof token === 'object') {
+					token.index = index;
+					token.parent = parent_token;
+				}
+
+				if (promise) {
+					// NG:
+					// set_promise(traversal_children(null, token, null));
+				}
+				return traversal_children(token);
+			}
+
+			function check_result(token, result) {
+				// assert: !promise || (promise is resolved)
+				if (result === for_each_token.exit) {
+					library_namespace.debug('Abort the operation', 3,
+							'for_each_token');
+					// exit: 直接跳出。
+					exit = true;
+					return traversal_children();
+				}
+
+				// `return parsed.each.remove_token;`
+				if (result === for_each_token.remove_token) {
+					if (parent_token.type === 'list') {
+						// for <ol>, <ul>: 直接消掉整個 item token。
+						// index--: 刪除完後，本 index 必須再遍歷一次。
+						parent_token.splice(index--, 1);
+						length--;
+
+					} else {
+						if (token.type === 'tag' && token.tag === 'ref'
+								&& token.attributes && token.attributes.name) {
+							// @see wikibot/20190913.move_link.js
+							library_namespace.debug(
+									'將刪除可能被引用的 <ref>，並嘗試自動刪除所有引用。您仍須自行刪除非{{r|name}}型態的模板參考引用: '
+											+ token.toString(), 1,
+									'for_each_token');
+							ref_list_to_remove.push(token.attributes.name);
+						}
+
+						remove_token_from_parent(parent_token, index, length);
+						token = '';
+					}
+
+				} else if (modify_by_return) {
+					// 換掉整個 parent[index] token 的情況。
+					// `return undefined;` 不會替換，應該 return
+					// .each.remove_token; 以清空。
+					// 小技巧: 可以用 return [ inner ].is_atom = true 來避免進一步的
+					// parse 或者處理。
+					if (typeof result === 'string') {
+						// {String}wikitext to ( {Object}element or '' )
+						result = parse_wikitext(result, null, []);
+					}
+					if (typeof result === 'string'
+					//
+					|| Array.isArray(result)) {
+						// 將指定類型節點替換作此回傳值。
+						parent_token[index] = token = result;
+					}
+				}
+
+				return traversal_children(token, result);
+			}
+
+			function traversal_children(token, result) {
+				// assert: !promise || (promise is resolved)
+
 				// depth-first search (DFS) 向下層巡覽，再進一步處理。
+				// 這樣最符合token在文本中的出現順序。
 				// Skip inner tokens, skip children.
 				if (result !== for_each_token.skip_inner
 				// is_atom: 不包含可 parse 之要素，不包含 text。
 				&& Array.isArray(token) && !token.is_atom
+				// 最起碼必須執行一次 `traversal_next_sibling()`。
+				&& token.length > 0 && !exit
 				// comment 可以放在任何地方，因此能滲透至任一層。
 				// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 				// && type !== 'comment'
 				&& (!max_depth || depth + 1 < max_depth)) {
-					traversal_tokens(token, depth + 1);
+					traversal_tokens(token, depth + 1, _traversal_next_sibling);
+				} else if (promise) {
+					_traversal_next_sibling();
+				}
+
+				if (false && promise) {
+					console.trace([ index + '/' + length, depth, promise,
+							modify_by_return ]);
+					promise.then(function(r) {
+						console
+								.trace([ r, index + '/' + length, depth,
+										promise ]);
+					});
 				}
 			}
 
+			function _traversal_next_sibling() {
+				index++;
+				if (false)
+					console.trace([ index + '/' + length, depth, promise,
+							modify_by_return ]);
+
+				if (true) {
+					traversal_next_sibling();
+				} else {
+					// also work:
+					set_promise(traversal_next_sibling);
+				}
+			}
+
+			// 一旦 processor() 回傳 is_thenable，那麼就直接跳出迴圈，自此由 promise 接手。
+			// 否則就可以持續迴圈，以降低呼叫層數。
+			while (index < length && !exit) {
+				// console.trace([index, length, depth]);
+				// 最起碼必須執行一次 `traversal_next_sibling()`
+				traversal_next_sibling();
+				if (promise)
+					break;
+				index++;
+			}
 		}
 
 		// ----------------------------------------------------------
 
-		if (Array.isArray(this)) {
-			traversal_tokens(this, 0);
+		function check_ref_list_to_remove() {
+			// if (promise) console.trace(promise);
+			if (ref_list_to_remove.length === 0) {
+				return;
+			}
 
-			if (ref_list_to_remove.length > 0) {
-				for_each_token.call(this, 'tag_single', function(token, index,
-						parent) {
-					if (token.tag === 'ref' && token.attributes
-					// 嘗試自動刪除所有引用。
-					&& ref_list_to_remove.includes(token.attributes.name)) {
+			var result;
+			result = for_each_token.call(this, 'tag_single', function(token,
+					index, parent) {
+				if (token.tag === 'ref' && token.attributes
+				// 嘗試自動刪除所有引用。
+				&& ref_list_to_remove.includes(token.attributes.name)) {
+					library_namespace.debug('Also remove: ' + token.toString(),
+							3, 'for_each_token');
+					return for_each_token.remove_token;
+				}
+			});
+			check_if_result_is_thenable(result);
+
+			result = for_each_token.call(this, 'transclusion',
+			// also remove {{r|name}}
+			function(token, index, parent) {
+				if (for_each_token.ref_name_templates.includes(token.name)
+				// 嘗試自動刪除所有引用。
+				&& ref_list_to_remove.includes(token.parameters['1'])) {
+					if (token.parameters['2']) {
+						library_namespace
+								.warn('for_each_token: Can not remove: '
+										+ token.toString());
+					} else {
 						library_namespace.debug('Also remove: '
 								+ token.toString(), 3, 'for_each_token');
 						return for_each_token.remove_token;
 					}
-				});
-				for_each_token.call(this, 'transclusion',
-				// also remove {{r|name}}
-				function(token, index, parent) {
-					if (for_each_token.ref_name_templates.includes(token.name)
-					// 嘗試自動刪除所有引用。
-					&& ref_list_to_remove.includes(token.parameters['1'])) {
-						if (token.parameters['2']) {
-							library_namespace
-									.warn('for_each_token: Can not remove: '
-											+ token.toString());
-						} else {
-							library_namespace.debug('Also remove: '
-									+ token.toString(), 3, 'for_each_token');
-							return for_each_token.remove_token;
-						}
-					}
-				});
-			}
+				}
+			});
+			check_if_result_is_thenable(result);
 		}
 
-		return this;
+		var overall_resolve, overall_reject;
+		function finish_up() {
+			// console.trace([ 'finish_up()', promise ]);
+			promise = promise.then(check_ref_list_to_remove).then(
+					overall_resolve, overall_reject);
+			if (false)
+				promise.then(function() {
+					console.trace([ '** finish_up()', promise ]);
+				});
+		}
+
+		// var parsed = this;
+		traversal_tokens(this, 0, finish_up);
+
+		if (!promise) {
+			return check_ref_list_to_remove();
+		}
+		// console.trace(promise);
+
+		return new Promise(function(resolve, reject) {
+			overall_resolve = resolve;
+			overall_reject = reject;
+		});
 	}
 
 	Object.assign(for_each_token, {
@@ -3555,6 +3719,8 @@ function module_code(library_namespace) {
 	// const , for <dl>
 	var DEFINITION_LIST = 'd';
 
+	// TODO: [[mw:Help:Substitution]]
+	// {{subst:FULLPAGENAME}} {{safesubst:FULLPAGENAME}}
 	var Magic_words_hash = Object.create(null);
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=functionhooks&utf8&format=json
 	'DISPLAYTITLE|DEFAULTSORT|デフォルトソート|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
@@ -7567,6 +7733,7 @@ function module_code(library_namespace) {
 		return new Date(timestamp);
 	}
 
+	// CeL.wiki.parse.*
 	// CeL.wiki.parser(wikitext) 傳回 parser，可作 parser.parse()。
 	// CeL.wiki.parse.*(wikitext) 僅處理單一 token，傳回 parse 過的 data。
 	// TODO: 統合於 CeL.wiki.parser 之中。

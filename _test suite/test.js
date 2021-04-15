@@ -3090,13 +3090,17 @@ function test_wiki() {
 
 		wikitext = '++\npp:http://h /p n\n++'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #1');
-		assert(['++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function (token) { return '~~'; }, true).toString()], 'wiki.parse: plain url #2');
+		parsed = CeL.wiki.parser(wikitext);
+		parsed.each('url', function (token) { return '~~'; }, true);
+		assert(['++\npp:~~ /p n\n++', parsed.toString()], 'wiki.parse: plain url #2');
 		wikitext = 'http://http://h'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #3');
-		assert(['~~', CeL.wiki.parser(wikitext).each('url', function (token) { return '~~'; }, true).toString()], 'wiki.parse: plain url #4');
+		(parsed = CeL.wiki.parser(wikitext)).each('url', function (token) { return '~~'; }, true);
+		assert(['~~', parsed.toString()], 'wiki.parse: plain url #4');
 		wikitext = 'http://http://h{{t}}http://s.r[g]ftp://p.q'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #5');
-		assert(['~~{{t}}~~[g]~~', CeL.wiki.parser(wikitext).each('url', function (token) { return '~~'; }, true).toString()], 'wiki.parse: plain url #6');
+		(parsed = CeL.wiki.parser(wikitext)).each('url', function (token) { return '~~'; }, true);
+		assert(['~~{{t}}~~[g]~~', parsed.toString()], 'wiki.parse: plain url #6');
 
 		wikitext = '1{{t|a=\nb\n}}{{p|b}}2'; parsed = CeL.wiki.parser(wikitext);
 		assert(['b', parsed.parse()[1].parameters.a], 'wiki.parse: template .parameters');
@@ -3104,7 +3108,8 @@ function test_wiki() {
 		wikitext = 't<!--='; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[l]]b'; parsed = CeL.wiki.parser(wikitext).parse();
-		assert(['a{{t}}b', parsed.each('link', function (token, index, parent) { return '{{t}}'; }, true).toString()]);
+		parsed.each('link', function (token, index, parent) { return '{{t}}'; }, true);
+		assert(['a{{t}}b', parsed.toString()]);
 
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert(['file', parsed[0].type], 'wiki.parse.file #1-1');
@@ -3131,8 +3136,10 @@ function test_wiki() {
 		assert(parsed.is_link, 'wiki.parse.category #1-2');
 
 		wikitext = '{{c|d[[e]]f}}'; parsed = CeL.wiki.parser(wikitext).parse();
-		assert(['{{c|df}}', CeL.wiki.parser(wikitext).each('link', function (token, index, parent) { return ''; }, true).toString()], 'search all links');
-		assert(['{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function (token, index, parent) { return ''; }, true, 1).toString()], 'only links of level 1');
+		parsed.each('link', function (token, index, parent) { return ''; }, true);
+		assert(['{{c|df}}', parsed.toString()], 'search all links');
+		(parsed = CeL.wiki.parser(wikitext)).each('link', function (token, index, parent) { return ''; }, true, 1);
+		assert(['{{c|d[[e]]f}}',parsed.toString()], 'only links of level 1');
 		assert(['file', CeL.wiki.parse('[[FiLe:a]]').type]);
 		assert(['Ab', CeL.wiki.parse('[[FiLe:ab]]').name]);
 		// TODO: 當前解析為 'link', 應為 'text'
@@ -3396,7 +3403,8 @@ function test_wiki() {
 		assert(['b', parsed[1].tag], 'wiki.parse: HTML tag #4');
 		assert([' style="color:#000"  ', String(parsed[1][0]).toString()], 'wiki.parse: HTML tag #5: tag attributes');
 		assert(['tag_inner', parsed[1][1].type], 'wiki.parse: HTML tag #6');
-		assert(['1<b style="color:#000"  ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function (token, index, parent) { return ''; }, true).toString()], 'wiki.parse: HTML tag #7');
+		(parsed = CeL.wiki.parser(wikitext)).each('tag_inner', function (token, index, parent) { return ''; }, true);
+		assert(['1<b style="color:#000"  ></b>2', parsed.toString()], 'wiki.parse: HTML tag #7');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #1');

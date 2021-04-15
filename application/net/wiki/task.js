@@ -2412,7 +2412,8 @@ function module_code(library_namespace) {
 						});
 					}
 				});
-				// 工作配給完畢。
+				library_namespace.debug('工作配給完畢，' + pages_left + ' 頁面待處理。', 2,
+						'wiki_API.work');
 				pages_rationed = true;
 				if (pages_left === 0) {
 					// 前面已經同步處理完畢了，卻還沒執行 finish_up()。
