@@ -875,7 +875,8 @@ function module_code(library_namespace) {
 			console.log([ index, token, parent ]);
 		}, true);
 
-		parsed.each('namespaced_title', function(token, index, parent) {
+		// @see 20210414.翻訳用出典テンプレートのsubst展開.js
+		parsed.each('template:cite', function(token, index, parent) {
 			if (CeL.wiki.parse.token_is_children_of(token, function(parent) {
 				return parent.tag === 'ref' || parent.tag === 'gallery';
 			})) {
@@ -1601,7 +1602,7 @@ function module_code(library_namespace) {
 
 		while (token.type === 'transclusion'
 				&& typeof token.expand === 'function') {
-			// console.log(options);
+			// console.trace(options);
 			// expand template, .expand_template(), .to_wikitext()
 			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 			token = parse_wikitext(token.expand(options));
@@ -1751,6 +1752,12 @@ function module_code(library_namespace) {
 			if (/^(?:T[l1n][a-z]{0,3}[23]?)$/.test(token.name)) {
 				token.shift();
 				return token;
+			}
+
+			if (token.name === 'Lj') {
+				// {{Lj|...}} 是日語{{lang|ja|...}}的縮寫 @ zh.moegirl
+				return preprocess_section_link_token(parse_wikitext('-{'
+						+ token.parameters[1] + '}-'), options);
 			}
 
 			if (token.name === 'Lang') {
@@ -3528,7 +3535,7 @@ function module_code(library_namespace) {
 		},
 		// table attributes / styles, old name before 2021/1/24: table_style
 		table_attributes : function() {
-			return this.join('');
+			return this.join('') + (this.suffix || '');
 		},
 		// table caption
 		caption : function() {
@@ -5086,7 +5093,7 @@ function module_code(library_namespace) {
 		// will get id==="h_style=color:red", NOT id==="h"!
 		function parse_tag_attributes(attributes) {
 			var attribute_hash = Object.create(null);
-			if (typeof attributes === 'string') {
+			if (attributes && typeof attributes === 'string') {
 				var attributes_list = [], matched,
 				// parser 標籤中的空屬性現根據HTML5規格進行解析。
 				// <pages from= to= section=1>
@@ -5325,7 +5332,7 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				var PATTERN_table_cell_content = /^([^|]+)\|([\s\S]*)$/;
+				var PATTERN_table_cell_content = /^([^|]*)\|([\s\S]*)$/;
 				// cell attributes /
 				// cell style / format modifier (not displayed)
 				var table_cell_attributes = table_cell
@@ -5337,6 +5344,8 @@ function module_code(library_namespace) {
 					table_cell_attributes = _set_wiki_type(
 							parse_tag_attributes(table_cell_attributes[1]),
 							'table_attributes');
+					// '|': from PATTERN_table_cell_content
+					table_cell_attributes.suffix = '|';
 					data_type = table_cell_attributes.attributes
 					// @see
 					// [[w:en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
@@ -5354,9 +5363,7 @@ function module_code(library_namespace) {
 					}
 				}
 				if (table_cell_attributes) {
-					table_cell_token.unshift(table_cell_attributes,
-					// '|': from PATTERN_table_cell_content
-					'|');
+					table_cell_token.unshift(table_cell_attributes);
 				}
 				if (delimiter)
 					table_cell_token.delimiter = delimiter;
@@ -7801,6 +7808,8 @@ function module_code(library_namespace) {
 	/**
 	 * 把表格型列表頁面轉為原生陣列。 wikitext table to array table, to table
 	 * 
+	 * CeL.wiki.parse.table()
+	 * 
 	 * TODO: 按標題統合內容。
 	 * 
 	 * @param {Object}page_data
@@ -7858,10 +7867,13 @@ function module_code(library_namespace) {
 				//
 				+ node.index + ',' + node.type, 3);
 				node.forEach(function(row) {
+					if (row.type === 'table_attributes')
+						return;
+
 					var cells = [];
 					row.forEach(function(cell) {
 						if (cell.type === 'table_attributes') {
-							// 不計入style
+							// 不計入 row style。
 							return;
 						}
 						// return cell.toString().replace(/^[\n\|]+/, '');
@@ -7869,16 +7881,16 @@ function module_code(library_namespace) {
 						var append_cells;
 						if (cell[0].type === 'table_attributes') {
 							append_cells = cell[0].toString()
-							// 檢測要增加的null cells
-							.match(/[^a-z\d_]colspan=(?:"\s*)?(\d{1,2})/i);
+							// 檢測要橫向增加的 null cells。
+							.match(/(?:^|\W)colspan=(?:"\s*)?(\d{1,2})/i);
 							if (append_cells) {
 								// -1: 不算入自身。
 								append_cells = append_cells[1] - 1;
 							}
 
 							var matched = cell[0].toString()
-							//
-							.match(/[^a-z\d_]rowspan=(?:"\s*)?(\d{1,2})/i);
+							// 垂直向增加的 null cells。
+							.match(/(?:^|\W)rowspan=(?:"\s*)?(\d{1,2})/i);
 
 							if (matched && matched[1] > 1) {
 								library_namespace.error(
@@ -7888,12 +7900,18 @@ function module_code(library_namespace) {
 
 							// 去掉style
 							// 注意: 本函式操作時不可更動到原資料。
-							var toString = cell.toString;
-							cell = cell.clone();
-							cell.shift();
-							cell.toString = toString;
+							if (false) {
+								var toString = cell.toString;
+								cell = cell.clone();
+								cell.shift();
+								cell.toString = toString;
+							}
+							// remove table_attributes without lose information
+							// @see toString of table_cell
+							cell = cell.slice(1);
 						}
-						cells.push(cell && cell.toString()
+						// .join(''): no delimiter
+						cells.push(cell && cell.join('')
 						//
 						.replace(/^[\|\s]+/, '').trim() || '');
 						if (append_cells > 0) {
@@ -7901,12 +7919,14 @@ function module_code(library_namespace) {
 						}
 					});
 					if (cells.length > 0) {
-						// 將以本列 .header_count 判定本列是否算作標題列。
-						if (row.header_count > 0) {
-							// 對於 table header，不加入 section title 資訊。
-							cells.unshift('', '');
-						} else {
-							cells.unshift(heads[2] || '', heads[3] || '');
+						if (options && options.add_section_header) {
+							// 將以本列 .header_count 判定本列是否算作標題列。
+							if (row.header_count > 0) {
+								// 對於 table header，不加入 section title 資訊。
+								cells.unshift('', '');
+							} else {
+								cells.unshift(heads[2] || '', heads[3] || '');
+							}
 						}
 						if (processor) {
 							cells = processor(cells);
