@@ -282,6 +282,11 @@ function module_code(library_namespace) {
 					// console.log(next);
 				}
 
+				// 準備擷取新的頁面。為了預防舊的頁面資料被誤用，因此將此將其刪除。
+				// 例如在 .edit() 的callback中再呼叫 .edit():
+				// wiki.page().edit(,()=>wiki.page().edit(,))
+				delete this.last_page;
+
 				// this.page(title, callback, options)
 				// next[1] : title
 				// next[3] : options
@@ -799,6 +804,7 @@ function module_code(library_namespace) {
 			// `next[2].page_to_edit`: 手動指定要編輯的頁面。
 			if (!next[2].page_to_edit) {
 				next[2].page_to_edit = this.last_page;
+				// console.trace(next[2]);
 			}
 			// console.trace(next[2]);
 			// console.trace(next);
@@ -814,7 +820,7 @@ function module_code(library_namespace) {
 
 			if (!next[2].page_to_edit) {
 				library_namespace
-						.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first!');
+						.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first! 另請注意: 您不能在 callback 中呼叫 .edit() 之類的 wiki 函數！請在 callback 執行完畢後再執行新的 wiki 函數！例如放在 setTimeout() 中。');
 				// next[3] : callback
 				if (typeof next[3] === 'function') {
 					next[3].call(_this, undefined, 'no page');
@@ -829,7 +835,8 @@ function module_code(library_namespace) {
 			//
 			&& !wiki_API.content_of.had_fetch_content(next[2].page_to_edit)) {
 				console.log(next);
-				throw new Error('wiki_API.prototype.next: 有多個執行緒互相競爭？');
+				throw new Error(
+						'wiki_API.prototype.next: There are multiple threads competing with each other? 有多個執行緒互相競爭？');
 				library_namespace
 						.warn('wiki_API.prototype.next: 有多個執行緒互相競爭？本執行緒將會直接跳出，等待另一個取得頁面內容的執行緒完成後，由其處理。');
 				console.trace(next);
@@ -2601,7 +2608,9 @@ function module_code(library_namespace) {
 				// 處理記憶體洩漏問題 @ 20191129.check_language_convention.js
 				// console.log(process.memoryUsage());
 				// delete session.last_pages;
-				if (Array.isArray(pages)) {
+				// 警告: 預設處理程序會清理掉解析後的資料。這可能造成嚴重錯誤，例如頁面被清空！
+				if (!options.do_not_clean_parsed && Array.isArray(pages)) {
+					// console.trace('主動清理 page_data.parsed 以釋放記憶體。');
 					// console.log(pages[0]);
 					// free:
 					// 必須要主動清理 page_data.parsed 才能釋放記憶體。
@@ -2922,7 +2931,7 @@ function module_code(library_namespace) {
 	// {zhwikiSession,centralauth_User,centralauth_Token,centralauth_Session,wikidatawikiSession,wikidatawikiUserID,wikidatawikiUserName}
 	//
 	// TODO: https://www.mediawiki.org/w/api.php?action=help&modules=clientlogin
-	wiki_API.login = function(user_name, password, options) {
+	wiki_API.login = function(user_name, password, login_options) {
 		var error;
 		function _next() {
 			callback
@@ -3016,33 +3025,34 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 
 		var callback, session, API_URL;
-		if (!options && !password && library_namespace.is_Object(user_name)) {
+		if (!login_options && !password
+				&& library_namespace.is_Object(user_name)) {
 			// .login(option); treat user_name as option
 
-			// session = CeL.wiki.login(options);
-			options = Object.clone(user_name);
-			// console.log(options);
-			user_name = options.user_name;
+			// session = CeL.wiki.login(login_options);
+			login_options = Object.clone(user_name);
+			// console.log(login_options);
+			user_name = login_options.user_name;
 			// user_password
-			password = options.password;
+			password = login_options.password;
 		}
-		if (library_namespace.is_Object(options)) {
-			API_URL = options.API_URL/* || options.project */;
-			session = wiki_API.session_of_options(options);
+		if (library_namespace.is_Object(login_options)) {
+			API_URL = login_options.API_URL/* || login_options.project */;
+			session = wiki_API.session_of_options(login_options);
 			// besure {Function}callback
-			callback = typeof options.callback === 'function'
-					&& options.callback;
-		} else if (typeof options === 'function') {
-			callback = options;
+			callback = typeof login_options.callback === 'function'
+					&& login_options.callback;
+		} else if (typeof login_options === 'function') {
+			callback = login_options;
 			// 前置處理。
-			options = Object.create(null);
-		} else if (typeof options === 'string') {
-			// treat options as API_URL
-			API_URL = options;
-			options = Object.create(null);
+			login_options = Object.create(null);
+		} else if (typeof login_options === 'string') {
+			// treat login_options as API_URL
+			API_URL = login_options;
+			login_options = Object.create(null);
 		} else {
 			// 前置處理。
-			options = library_namespace.new_options(options);
+			login_options = library_namespace.new_options(login_options);
 		}
 
 		// console.trace([ user_name, password, API_URL ]);
@@ -3050,11 +3060,11 @@ function module_code(library_namespace) {
 				+ wiki_API.language, 3, 'wiki_API.login');
 
 		if (session) {
-			delete options.is_running;
+			delete login_options.is_running;
 		} else {
 			// 初始化 session 與 agent。這裡 callback 當作 API_URL。
-			options.is_running = 'login';
-			session = new wiki_API(user_name, password, options);
+			login_options.is_running = 'login';
+			session = new wiki_API(user_name, password, login_options);
 		}
 		if (!user_name || !password) {
 			library_namespace
@@ -3065,16 +3075,15 @@ function module_code(library_namespace) {
 		}
 
 		// copy configurations
-		if (options.preserve_password) {
-			session.preserve_password = options.preserve_password;
-		}
+		library_namespace.import_options(login_options, copy_login_options,
+				session);
 
-		if (!('login_mark' in options) || options.login_mark) {
+		if (!('login_mark' in login_options) || login_options.login_mark) {
 			// hack: 這表示正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。
 			// @see wiki_API.prototype.next
-			if (options.is_running) {
+			if (login_options.is_running) {
 				// assert: session.actions === [ 'login' ]
-			} else if (options.login_mark) {
+			} else if (login_options.login_mark) {
 				// 將 'login' 置於工作佇列最前頭。
 				session.actions.unshift([ 'login' ]);
 			} else {
@@ -3083,7 +3092,9 @@ function module_code(library_namespace) {
 			}
 		}
 		// 支援斷言編輯功能。
-		var action = 'assert=user';
+		var action = {
+			assert : 'user'
+		};
 		if (session.API_URL) {
 			library_namespace.debug('API URL: [' + session.API_URL + ']。', 3,
 					'wiki_API.login');
@@ -3097,7 +3108,7 @@ function module_code(library_namespace) {
 		wiki_API.query(action, function(data) {
 			// console.trace(data);
 			// 確認尚未登入，才作登入動作。
-			if (data === '' && !options.force) {
+			if (data === '' && !login_options.force) {
 				// 您已登入。
 				library_namespace.debug('You are already logged in.', 1,
 						'wiki_API.login');
@@ -3107,11 +3118,14 @@ function module_code(library_namespace) {
 
 			delete session.token.csrftoken;
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Btokens
-			// wiki_API.query(action, callback, post_data, options)
-			wiki_API.query([ session.API_URL,
-			// Fetching a token via "action=login" is deprecated.
-			// Use "action=query&meta=tokens&type=login" instead.
-			'action=query&meta=tokens&type=login' ], function(data, _error) {
+			// wiki_API.query(action, callback, post_data, login_options)
+			wiki_API.query([ session.API_URL, {
+				// Fetching a token via "action=login" is deprecated.
+				// Use "action=query&meta=tokens&type=login" instead.
+				action : 'query',
+				meta : 'tokens',
+				type : 'login'
+			} ], function(data, _error) {
 				// console.trace(data);
 				// error && console.error(error);
 				if (_error || !data || !data.query || !data.query.tokens
@@ -3183,6 +3197,11 @@ function module_code(library_namespace) {
 		lgpassword : 'lgpassword',
 		lgtoken : 'logintoken',
 		lgdomain : 'lgdomain'
+	};
+
+	var copy_login_options = {
+		preserve_password : 'boolean',
+		template_functions_site_name : 'string'
 	};
 
 	/** {Array}欲 copy 至 session.token 之 keys。 */
