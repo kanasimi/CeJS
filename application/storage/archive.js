@@ -301,9 +301,16 @@ function module_code(library_namespace) {
 		}
 		if (!arg)
 			return arg;
+
+		if (typeof arg !== 'string') {
+			library_namespace
+					.error('add_fso_path_quote: Should input string but get '
+							+ (typeof arg) + ':');
+			console.error(arg);
+		}
+		return /^"(\\.|[^\\\n])*"$/.test(arg) ? arg :
 		// JSON.stringify()
-		return /^"(\\.|[^\\\n])*"$/.test(arg) ? arg : '"'
-				+ String(arg).replace(/"/g, '\\"') + '"';
+		'"' + String(arg).replace(/"/g, '\\"') + '"';
 	}
 
 	function remove_fso_path_quote(arg) {
