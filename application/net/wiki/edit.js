@@ -108,9 +108,10 @@ function module_code(library_namespace) {
 
 			if (!content) {
 				library_namespace.info([ {
-					T : 'The page to stop operation is not found. '
-				}, {
-					T : 'The operation will continue as usual.'
+					T : [
+							'The page to stop operation is not found ([[%1]]). '
+									+ 'The operation will continue as usual.',
+							title ]
 				} ]);
 
 			} else if (typeof options.checker === 'function') {
@@ -476,7 +477,7 @@ function module_code(library_namespace) {
 			} else if (data.edit && ('nochange' in data.edit)) {
 				// 在極少的情況下，data.edit === undefined。
 				library_namespace.info('wiki_API_edit: '
-				// no change
+				// The contents are the same. Nothing changed. NG: no change
 				+ wiki_API.title_link_of(title) + ': no difference');
 			}
 			if (typeof callback === 'function') {

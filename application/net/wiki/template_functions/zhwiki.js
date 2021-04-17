@@ -70,6 +70,9 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// token.expand() 可將模板轉換成一般 wiki 語法。
+	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
+	// 用於 function preprocess_section_link_token()。
 
 	function expand_template_A(token) {
 		var token = this;
@@ -108,6 +111,20 @@ function module_code(library_namespace) {
 			expand : expand_template_Al
 		});
 		return page_title_list;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// {{Lang|ja|參數值}} → -{參數值}-
+	function expand_template_Lang(token) {
+		return /^(?:zh|gan)/.test(token.parameters[1]) ? token.parameters[2]
+				: '-{' + token.parameters[2] + '}-';
+	}
+
+	function parse_template_Lang(token, options) {
+		Object.assign(token, {
+			expand : expand_template_Lang
+		});
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -230,6 +247,7 @@ function module_code(library_namespace) {
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
 		A : parse_template_A,
 		Al : parse_template_Al,
+		Lang : parse_template_Lang,
 		NoteTA : parse_template_NoteTA,
 		簡繁轉換 : parse_template_簡繁轉換
 	};

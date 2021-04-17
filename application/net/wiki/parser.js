@@ -213,7 +213,10 @@ function module_code(library_namespace) {
 		each : for_each_token,
 		parse : parse_page,
 		parse_references : parse_references,
-		insert_before : insert_before
+
+		insert_before : insert_before,
+		// has_template
+		find_template : find_template
 	};
 
 	/** {Object}alias name of type */
@@ -1754,7 +1757,8 @@ function module_code(library_namespace) {
 				return token;
 			}
 
-			if (token.name === 'Lj') {
+			if (token.name === 'Lj'
+					&& wiki_API.site_name(wiki_API.session_of_options(options)) === 'zhmoegirl') {
 				// {{Lj|...}} 是日語{{lang|ja|...}}的縮寫 @ zh.moegirl
 				return preprocess_section_link_token(parse_wikitext('-{'
 						+ token.parameters[1] + '}-'), options);
@@ -2054,6 +2058,7 @@ function module_code(library_namespace) {
 		// console.trace(parse_wikitext(section_title, null, []));
 		// TODO: "==''==text==''==\n"
 		var parsed_title = pre_parse_section_title(section_title, options);
+		// pass session.
 		parsed_title = preprocess_section_link_tokens(parsed_title, options);
 
 		// 注意: 當這空白字字出現在功能性token中時，可能會出錯。
@@ -2789,9 +2794,10 @@ function module_code(library_namespace) {
 			anchor_hash[anchor] = token;
 		}
 
+		// options: pass session. for options.language
 		// const
 		/** {Array} parsed page content 頁面解析後的結構。 */
-		var parsed = page_parser(wikitext).parse();
+		var parsed = page_parser(wikitext, options).parse();
 		if (false) {
 			library_namespace.assert([ wikitext, parsed.toString() ],
 					'wikitext parser check for wikitext');
@@ -2910,6 +2916,21 @@ function module_code(library_namespace) {
 	// required, indispensable
 	get_all_anchor.essential_templates = [ 'Anchor', 'Anchors',
 			'Visible anchor', 'Citation', 'RFD', 'Wikicite', 'SfnRef', 'Sfn' ];
+
+	// ------------------------------------------------------------------------
+
+	function find_template(template_name, options) {
+		var template_token;
+
+		template_name = template_name.replace(/^Template:/i, '');
+
+		this.each('Template:' + template_name, function(token) {
+			template_token = token;
+			return for_each_token.exit;
+		}, options);
+
+		return template_token;
+	}
 
 	// ------------------------------------------------------------------------
 
@@ -5620,7 +5641,7 @@ function module_code(library_namespace) {
 			// section_link() 會更動 parse_wikitext() 之結果，
 			// 因此不直接傳入 parsed，而是 .toString() 另外再傳一次。
 			parameters.link = section_link(parameters.toString(),
-			// for options.language
+			// options: pass session. for options.language
 			Object.assign(Object.clone(options), {
 				// 重新造一個 options 以避免污染。
 				target_array : null

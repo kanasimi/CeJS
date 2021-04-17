@@ -24,7 +24,9 @@ template_functions/zhwiki.js
 
 // @examples
 (function() {
-	CeL.run([/* ..., */'application.net.wiki.template_functions' ]);
+	CeL.run([ 'application.net.wiki',
+	//
+	'application.net.wiki.template_functions' ]);
 
 	// will auto-load functions @ template_functions/site_name.js
 	// e.g., template_functions/zhwiki.js
@@ -904,10 +906,16 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function template_functions_site_name(session, options) {
+		return options && options.site_name || session
+				&& session.template_functions_site_name
+				|| wiki_API.site_name(session);
+	}
+
 	function get_function_of(template, options) {
 		options = library_namespace.setup_options(options);
 		var session = wiki_API.session_of_options(options);
-		var site_name = options.site_name || wiki_API.site_name(session);
+		var site_name = template_functions_site_name(session, options);
 		var functions_of_site = template_functions.functions_of_site[site_name];
 
 		var template_name = typeof template === 'string' ? template : template
@@ -942,14 +950,14 @@ function module_code(library_namespace) {
 		// template_processor()
 		var template_parser = get_function_of(template_token, options);
 		if (template_parser)
-			template_parser(template_token, index, parent, options);
+			return template_parser(template_token, index, parent, options);
 	}
 
 	// ------------------------------------------
 
 	function initialize_session() {
 		var session = this;
-		var site_name = wiki_API.site_name(session);
+		var site_name = template_functions_site_name(session);
 		var function_name_list = Object
 				.keys(template_functions.functions_of_all_sites);
 		var functions_of_site = template_functions.functions_of_site[site_name];
@@ -969,8 +977,29 @@ function module_code(library_namespace) {
 		session = session || this;
 		var site_name = typeof session === 'string' ? session : wiki_API
 				.site_name(session);
-		if (!site_name)
-			throw new Error('Can not get site_name!');
+
+		if (false)
+			console.trace([ site_name,
+					session && session.template_functions_site_name ]);
+		if (session && session.template_functions_site_name
+		// e.g., zhmoegirl 設定 .template_functions_site_name = 'zhwiki'，
+		// 採用 zhwiki 的模板特設功能設定。
+		&& session.template_functions_site_name !== site_name) {
+			library_namespace.info('load_template_functions: 設定 ' + site_name
+					+ ' 採用 ' + session.template_functions_site_name
+					+ ' 的模板特設功能。');
+			site_name = session.template_functions_site_name;
+
+		} else if (!site_name
+		//
+		&& (site_name = session && session.latest_site_configurations
+		//
+		&& session.latest_site_configurations.general.lang)) {
+			site_name += 'wiki';
+
+		} else if (!site_name) {
+			throw new Error('Cannot get site_name!');
+		}
 
 		// 注意: 若已設定 `CeL.application.net.wiki.template_functions.zhwiki`，
 		// 則不能採用匯添加 prefix `library_namespace.Class` 的
@@ -999,6 +1028,7 @@ function module_code(library_namespace) {
 		// parse_template_token(template_token, index, parsent, options){} }
 		functions_of_site : Object.create(null),
 		functions_of_all_sites : Object.create(null),
+		template_functions_site_name : template_functions_site_name,
 		adapt_function : adapt_function,
 
 		// ----------------------------
