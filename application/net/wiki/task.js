@@ -1932,6 +1932,10 @@ function module_code(library_namespace) {
 		/** {ℕ⁰:Natural+0}全無變更頁面數。 */
 		nochange_count = 0;
 
+		if (library_namespace.is_Set(pages)) {
+			pages = Array.from(pages);
+		}
+
 		if (Array.isArray(pages) && pages.length === 0) {
 			if (!config.no_warning) {
 				library_namespace.info('wiki_API.work: 列表中沒有項目，快速完結。');

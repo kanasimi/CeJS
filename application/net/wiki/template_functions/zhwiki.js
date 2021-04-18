@@ -65,7 +65,8 @@ function module_code(library_namespace) {
 	// e.g., 'zhwiki'
 	var module_site_name = this.id.match(/[^.]+$/)[0];
 
-	function empty_string() {
+	function empty_string(/* options */) {
+		// var token = this;
 		return '';
 	}
 
@@ -74,7 +75,7 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 	// 用於 function preprocess_section_link_token()。
 
-	function expand_template_A(token) {
+	function expand_template_A(options) {
 		var token = this;
 		return '[[' + token.parameters[1]
 		//
@@ -90,7 +91,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// [[w:zh:Template:Al]]
-	function expand_template_Al(token) {
+	function expand_template_Al(options) {
 		var token = this;
 		return token.page_title_list.map(function(title) {
 			return wiki_API.title_link_of(title);
@@ -116,7 +117,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// {{Lang|ja|參數值}} → -{參數值}-
-	function expand_template_Lang(token) {
+	function expand_template_Lang(options) {
+		var token = this;
 		return /^(?:zh|gan)/.test(token.parameters[1]) ? token.parameters[2]
 				: '-{' + token.parameters[2] + '}-';
 	}

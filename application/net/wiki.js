@@ -115,7 +115,7 @@ function module_code(library_namespace) {
 	 * web Wikipedia / 維基百科 用的 functions。<br />
 	 * 可執行環境: node.js, JScript。
 	 * 
-	 * TODO: new wiki_API(API_URL || options);<br />
+	 * TODO: new wiki_API(API_URL || login_options);<br />
 	 * wiki_session.login(user_name, password, API_URL);
 	 * 
 	 * @param {String}user_name
@@ -137,21 +137,21 @@ function module_code(library_namespace) {
 
 		// TODO: this.login(user_name, password, API_URL);
 
-		var options;
+		var login_options;
 		if (API_URL && typeof API_URL === 'object') {
-			// session = new wiki_API(user_name, password, options);
-			options = API_URL;
-			API_URL = options.API_URL/* || options.project */;
+			// session = new wiki_API(user_name, password, login_options);
+			login_options = API_URL;
+			API_URL = login_options.API_URL/* || login_options.project */;
 		} else if (!API_URL && !password && user_name
 				&& typeof user_name === 'object') {
-			// session = new wiki_API(options);
-			options = user_name;
-			// console.log(options);
-			user_name = options.user_name;
-			password = options.password;
-			API_URL = options.API_URL/* || options.project */;
+			// session = new wiki_API(login_options);
+			login_options = user_name;
+			// console.log(login_options);
+			user_name = login_options.user_name;
+			password = login_options.password;
+			API_URL = login_options.API_URL/* || login_options.project */;
 		} else {
-			options = Object.create(null);
+			login_options = Object.create(null);
 		}
 
 		// console.trace([ user_name, password, API_URL ]);
@@ -161,11 +161,11 @@ function module_code(library_namespace) {
 		// action queue 佇列。應以 append，而非整個換掉的方式更改。
 		this.actions = [];
 		// @see wiki_API.prototype.next
-		if (options.is_running) {
+		if (login_options.is_running) {
 			// login 前便執行其他作業，可能導致 Session=deleted。 e.g., running
-			// options.configuration_adapter() @ 20201008.fix_anchor.js
-			if (typeof options.is_running === 'string')
-				this.actions.unshift([ options.is_running ]);
+			// login_options.configuration_adapter() @ 20201008.fix_anchor.js
+			if (typeof login_options.is_running === 'string')
+				this.actions.unshift([ login_options.is_running ]);
 			this.running = true;
 		}
 
@@ -187,13 +187,13 @@ function module_code(library_namespace) {
 			API_URL = wiki_API.language;
 			// 假若未設定 API_URL 或 user_name，那就不初始化。等 .login 才初始化。
 			// 若想基本的初始化，最起碼必須設定 API_URL。
-			options.need_initialize = password && user_name;
-		} else if (!('need_initialize' in options)) {
-			options.need_initialize = true;
+			login_options.need_initialize = password && user_name;
+		} else if (!('need_initialize' in login_options)) {
+			login_options.need_initialize = true;
 		}
 
-		if ('use_SQL' in options) {
-			this.use_SQL = options.use_SQL;
+		if ('use_SQL' in login_options) {
+			this.use_SQL = login_options.use_SQL;
 		} else if (API_URL
 		// assert: typeof API_URL === 'string'
 		&& API_URL.includes('://')) {
@@ -213,7 +213,7 @@ function module_code(library_namespace) {
 		// console.trace(this);
 
 		this.general_parameters = Object.clone(wiki_API.general_parameters);
-		library_namespace.import_options(options,
+		library_namespace.import_options(login_options,
 		// @see CeL.application.net.wiki.namespace
 		wiki_API.general_parameters_normalizer, this.general_parameters);
 		if (library_namespace.is_WWW(true) && window.location
@@ -234,12 +234,13 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (options.localStorage_prefix_key && wiki_API.has_storage) {
-			// assert: typeof options.localStorage_prefix_key === 'string' ||
-			// typeof options.localStorage_prefix_key === 'number'
+		if (login_options.localStorage_prefix_key && wiki_API.has_storage) {
+			// assert: typeof login_options.localStorage_prefix_key === 'string'
+			// ||
+			// typeof login_options.localStorage_prefix_key === 'number'
 			this.localStorage_prefix = [ library_namespace.Class,
-					wiki_API.site_name(this), options.localStorage_prefix_key,
-					'' ]
+					wiki_API.site_name(this),
+					login_options.localStorage_prefix_key, '' ]
 			// '.'
 			.join(library_namespace.env.module_name_separator);
 		}
@@ -259,15 +260,15 @@ function module_code(library_namespace) {
 		// CeL.application.net.wiki.namespace
 		this.redirects_data = Object.create(null);
 
-		if (options.need_initialize) {
+		if (login_options.need_initialize) {
 			this.run_after_initializing = [];
 			// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
 			// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
 			// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
-			this.run(initialize_wiki_API, options);
+			this.run(initialize_wiki_API, login_options);
 		} else {
 			// e.g.,
-			// wiki = new CeL.wiki; ...; wiki.login(options);
+			// wiki = new CeL.wiki; ...; wiki.login(login_options);
 		}
 	}
 
@@ -275,6 +276,7 @@ function module_code(library_namespace) {
 		// if (this.API_URL)
 		this.siteinfo(initialization_complete);
 
+		// console.trace(this);
 		// @see CeL.application.net.wiki.template_functions
 		if (this.load_template_functions)
 			this.load_template_functions();

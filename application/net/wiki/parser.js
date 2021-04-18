@@ -1760,18 +1760,6 @@ function module_code(library_namespace) {
 				return token;
 			}
 
-			if (token.name === 'Lj'
-					&& wiki_API.site_name(wiki_API.session_of_options(options)) === 'zhmoegirl') {
-				// {{Lj|...}} 是日語{{lang|ja|...}}的縮寫 @ zh.moegirl
-				return preprocess_section_link_token(parse_wikitext('-{'
-						+ token.parameters[1] + '}-'), options);
-			}
-
-			if (token.name === 'Lang') {
-				return preprocess_section_link_token(token.parameters[2],
-						options);
-			}
-
 			if (token.name === 'Anchor' || token.name === 'Anchors') {
 				// 何も表示はされませんが、リンク先が、そこに作られます。
 				return '';
@@ -1781,6 +1769,23 @@ function module_code(library_namespace) {
 				// {{Visible anchor}}（別名{{Vanc}}）は似たテンプレートですが、1個目のリンク先が表示されます。
 				return preprocess_section_link_token(token.parameters[1],
 						options);
+			}
+
+			if (token.name in {
+				// {{lang|語言標籤|內文}}
+				Lang : true,
+				// {{color|英文顏色名稱或是RGB 16進制編碼|文字}}
+				Color : true
+			}) {
+				return preprocess_section_link_token(token.parameters[2],
+						options);
+			}
+
+			if (token.name === 'Lj'
+					&& wiki_API.site_name(wiki_API.session_of_options(options)) === 'zhmoegirl') {
+				// {{Lj|...}} 是日語{{lang|ja|...}}的縮寫 @ zh.moegirl
+				return preprocess_section_link_token(parse_wikitext('-{'
+						+ token.parameters[1] + '}-'), options);
 			}
 
 			// jawiki

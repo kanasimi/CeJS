@@ -1219,9 +1219,14 @@ function module_code(library_namespace) {
 
 			}
 
-			library_namespace.debug('Get categorymembers of '
-					+ wiki_API.title_link_of(category) + '...', 1,
-					'category_tree');
+			if (library_namespace.is_debug()) {
+				library_namespace.debug('Get categorymembers of '
+						+ wiki_API.title_link_of(category) + '...', 1,
+						'category_tree');
+			} else {
+				library_namespace.log_temporary('Get categorymembers of '
+						+ wiki_API.title_link_of(category));
+			}
 
 			wiki_API.list(category, for_category_list, list_options);
 		}

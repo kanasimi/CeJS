@@ -59,6 +59,7 @@ function module_code(library_namespace) {
 		// 加上 "&utf8", "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
 		utf8 : 1
 	};
+	// 設定可被匯入 general_parameters 的屬性。
 	wiki_API.general_parameters_normalizer = {
 		// for cross-domain AJAX request (CORS)
 		origin : function(value) {
@@ -66,6 +67,8 @@ function module_code(library_namespace) {
 				value = '*';
 			return value;
 		},
+
+		template_functions_site_name : 'string',
 
 		format : 'string',
 		utf8 : 'boolean|number|string'
@@ -262,6 +265,9 @@ function module_code(library_namespace) {
 	 */
 	function normalize_title_parameter(title, options) {
 		options = library_namespace.setup_options(options);
+		if (false && library_namespace.is_Set(title)) {
+			title = Array.from(title);
+		}
 		var action = options.multi && Array.isArray(title)
 				&& title.length === 2
 				// 即便設定 options.multi，也不該有 /^https?:\/\/.+\.php/i 的標題。
@@ -270,6 +276,9 @@ function module_code(library_namespace) {
 		// title.clone(): 不改變原 title。
 		: Array.isArray(title) ? title.clone() : [];
 
+		if (false && library_namespace.is_Set(action[1])) {
+			action[1] = Array.from(action[1]);
+		}
 		if (options.slice_size >= 1) {
 			// console.trace(action);
 			if (Array.isArray(action[1])) {
@@ -909,33 +918,43 @@ function module_code(library_namespace) {
 		}
 
 		// throw site;
-		return options && options.get_all_properties ? {
-			// en, zh
-			language : language,
-			// family: 'wikipedia' (default), 'wikimedia',
-			// wikibooks|wiktionary|wikiquote|wikisource|wikinews|wikiversity|wikivoyage
-			family : family,
-			// Wikimedia project name: wikidata, commons, zh.wikipedia
-			project : project,
+		if (options && options.get_all_properties) {
+			site = {
+				// en, zh
+				language : language,
+				// family: 'wikipedia' (default), 'wikimedia',
+				// wikibooks|wiktionary|wikiquote|wikisource|wikinews|wikiversity|wikivoyage
+				family : family,
+				// Wikimedia project name: wikidata, commons, zh.wikipedia
+				project : project,
 
-			// wikidata API 所須之 site name parameter。 wikiID
-			// site_namewiki for Wikidata API. e.g., zh-classical →
-			// zh_classicalwiki
+				// wikidata API 所須之 site name parameter。 wikiID
+				// site_namewiki for Wikidata API. e.g., zh-classical →
+				// zh_classicalwiki
 
-			// for database: e.g., zh-classical → zh_classicalwiki_p
-			// e.g., 'zhwiki'. `.wikiid` @ siteinfo
+				// for database: e.g., zh-classical → zh_classicalwiki_p
+				// e.g., 'zhwiki'. `.wikiid` @ siteinfo
 
-			// Also for dump: e.g., 'zhwikinews'
-			// https://dumps.wikimedia.org/backup-index.html
+				// Also for dump: e.g., 'zhwikinews'
+				// https://dumps.wikimedia.org/backup-index.html
 
-			// @see wikidatawiki_p.wb_items_per_site.ips_site_id
-			// wikidatawiki, commonswiki, zhwiki
-			site : site,
-			// API URL (default): e.g.,
-			// https://en.wikipedia.org/w/api.php
-			// https://www.wikidata.org/w/api.php
-			API_URL : API_URL
-		} : site;
+				// @see wikidatawiki_p.wb_items_per_site.ips_site_id
+				// wikidatawiki, commonswiki, zhwiki
+				site : site,
+				// API URL (default): e.g.,
+				// https://en.wikipedia.org/w/api.php
+				// https://www.wikidata.org/w/api.php
+				API_URL : API_URL
+			};
+
+			var project = session && session.latest_site_configurations
+					&& session.latest_site_configurations.general.wikiid;
+			if (project) {
+				site.wikiid = project;
+			}
+		}
+
+		return site;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -2921,6 +2940,7 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// 不常改變的資料可以存放在 localStorage。
 	function set_storage(key, value) {
 		var session = this;
 		if (!session.localStorage_prefix)
@@ -3073,7 +3093,8 @@ function module_code(library_namespace) {
 		return true;
 	}
 
-	wiki_API.need_get_API_parameters = need_get_API_parameters
+	wiki_API.need_get_API_parameters = need_get_API_parameters;
+
 	if (false) {
 		// usage:
 		CeL.wiki.get_API_parameters('query+revisions', {

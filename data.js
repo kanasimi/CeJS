@@ -2225,7 +2225,7 @@ function module_code(library_namespace) {
 			if (typeof normalizer === 'string') {
 				// e.g., 'boolean|string:changed;multi_parts_changed'
 				normalizer = string_options_to_normalizer(normalizer);
-				console.trace(normalizer);
+				// console.trace(normalizer);
 			}
 
 			if (typeof normalizer === 'object') {
