@@ -214,6 +214,9 @@ function module_code(library_namespace) {
 		parse : parse_page,
 		parse_references : parse_references,
 
+		analysis_layout_indices : analysis_layout_indices,
+		insert_layout_token : insert_layout_token,
+
 		insert_before : insert_before,
 		// has_template
 		find_template : find_template
@@ -3256,32 +3259,183 @@ function module_code(library_namespace) {
 	// introduction
 	};
 
-	// @inner
-	function insert_maintenance_tag(token, options) {
-		// this;
-	}
+	// ------------------------------------------------------------------------
 
-	// TODO: 定位版面布局元素 search anchor tokens of elements @ [[WP:LAY]],
+	var default_layout_order = [
+	// header
+	'short_description', 'hatnote_templates', 'deletion_templates',
+			'protection_templates', 'dispute_templates',
+			'maintenance_templates', 'infobox_templates',
+			//
+			'content', 'content_end',
+			//
+			'footer', 'succession_templates', 'navigation_templates',
+			'authority_control_templates', 'coord_templates',
+			'featured_template', 'DEFAULTSORT', 'categories', 'stub_templates',
+			//
+			'page_end' ];
+
+	var single_layout_types = [ 'short_description',
+			'authority_control_templates', 'featured_template', 'DEFAULTSORT' ];
+
+	// TODO: analysis wiki page layout 定位版面布局元素
+	// search anchor tokens of elements @ [[WP:LAY]],
 	// [[w:en:Wikipedia:Manual of Style/Layout#Order of article elements]],
 	// [[w:en:Wikipedia:Manual of Style/Lead section]]
 	// [[w:zh:Wikipedia:格式手冊/版面佈局#導言]]
 	// [[w:en:Wikipedia:Talk page layout]]
 	// location: 'hatnote', 'maintenance tag', 'navigation template'
-	function insert_token(token, options) {
+	function analysis_layout_indices(options) {
+		var parsed = this;
+		if (parsed.layout_indices)
+			return parsed.layout_indices;
+
+		// The start index of layout elements
+		var layout_indices = Object.create(null);
+
+		var index = 0;
+		function set_index(layout_type) {
+			if (!(layout_indices[layout_type] >= 0)) {
+				layout_indices[layout_type] = index;
+				return true;
+			} else if (single_layout_types.includes(layout_type)) {
+				library_namespace.error(
+				//
+				'analysis_layout_indices: There are more than one '
+				//
+				+ layout_type + ' in ' + CeL.wiki.title_link_of(parsed.page));
+			}
+		}
+
+		// Only detects level 1 tokens
+		for (; index < parsed.length; index++) {
+			var token = parsed[index];
+			if (!token)
+				continue;
+			if (typeof token === 'string') {
+				if (!token.trim()) {
+					continue;
+				}
+				// treat as 正文 Article content, Lead section
+				set_index('content');
+				continue;
+			}
+
+			switch (token.type) {
+			case 'transclusion':
+				if (token.name === 'Short description') {
+					set_index('short_description');
+				} else if (/^(?:(?:About|For|Further|Main|Other|Redirect|See)(?:\w+|([\s\-]?\w+)+)?|Distinguish|Qnote)$/
+				// [[Category:Hatnote templates]]
+				.test(token.name)) {
+					set_index('hatnote_templates');
+				} else if (/^(?:Db-\w+)$|^(?:Proposed deletion|Article for deletion)/
+						.test(token.name)) {
+					set_index('deletion_templates');
+					delete layout_indices.content;
+				} else if (/^Pp/.test(token.name)) {
+					set_index('protection_templates');
+				} else if (/^Dispute/.test(token.name)) {
+					set_index('dispute_templates');
+				} else if (/^Infobox/.test(token.name)) {
+					set_index('infobox_templates');
+				} else if (/^Coord/.test(token.name)) {
+					// Geographical coordinates
+					set_index('coord_templates');
+				} else if (set_index('maintenance_templates')) {
+					// maintenance tag
+				} else if (layout_indices.content_end >= 0) {
+					set_index('footer');
+					if (/^(?:Succession|S-)$/.test(token.name)) {
+						set_index('succession_templates');
+					} else if (token.name === 'Authority control') {
+						set_index('authority_control_templates');
+					} else if (set_index('navigation_templates')) {
+						;
+					} else if (/^(?:Featured list|Featured article|Good article)$/
+							.test(token.name)) {
+						set_index('featured_template');
+					} else if (/^Stub/.test(token.name)
+							|| layout_indices.categories >= 0
+							|| layout_indices.DEFAULTSORT >= 0) {
+						set_index('stub_templates');
+					}
+				}
+				break;
+
+			case 'function':
+				if (token.name === 'DEFAULTSORT')
+					set_index('DEFAULTSORT');
+				break;
+
+			case 'category':
+				// categories
+				set_index('categories');
+				break;
+
+			default:
+				// e.g. '''title''' is ...
+				set_index('content');
+				layout_indices.content_end = index + 1;
+				delete layout_indices.navigation_templates;
+				delete layout_indices.footer;
+			}
+		}
+
+		// 設置所有必要的 footer index 為頁面結尾。
+		// assert: index === parsed.length
+		set_index('content_end');
+		set_index('footer');
+		set_index('page_end');
+
+		// 設置所有必要的 header index 為頁面開頭。
+		index = 0;
+		set_index('content');
+
+		// console.trace(layout_indices);
+		return parsed.layout_indices = layout_indices;
+	}
+
+	function insert_layout_token(token, options) {
 		var location;
 		if (typeof options === 'string') {
 			location = options;
 			options = Object.create(null);
+			// options.location = location;
 		} else {
 			options = library_namespace.setup_options(options);
 			location = options.location;
 		}
 
-		if (location === 'maintenance tag') {
-			return insert_maintenance_tag.call(this, token, options);
+		var parsed = this;
+		var layout_indices = parsed.analysis_layout_indices(options);
+
+		var index = layout_indices[location], location_index;
+		if (!(index >= 0)) {
+			location_index = default_layout_order.indexOf(location);
+			if (location_index >= 0) {
+				// insert before next layout element
+				while (++location_index < default_layout_order.length) {
+					index = layout_indices[default_layout_order[location_index]];
+					if (index >= 0)
+						break;
+				}
+			}
 		}
 
-		throw new Error('Can not insert as ' + location);
+		if (index >= 0) {
+			if (typeof token === 'function') {
+				token = token.call(this, !(location_index >= 0)
+						&& parsed[index], index, parsed);
+			}
+			if (is_valid_parameters_value(token)) {
+				parsed[index] = token + '\n' + (parsed[index] || '');
+			}
+			return;
+		}
+
+		throw new Error('insert_layout_token: Can not insert token as '
+				+ location);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -8110,8 +8264,7 @@ function module_code(library_namespace) {
 		parse : parse_wikitext,
 		// parser : page_parser,
 
-		setup_layout_elements : setup_layout_elements,
-		insert_token : insert_token
+		setup_layout_elements : setup_layout_elements
 	});
 
 	return page_parser;
