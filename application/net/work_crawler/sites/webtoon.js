@@ -180,7 +180,7 @@ function module_code(library_namespace) {
 
 			while (matched = PATTERN_image.exec(html)) {
 				chapter_data.image_list.push({
-					url : matched[1]
+					url : encodeURI(matched[1])
 				});
 			}
 
