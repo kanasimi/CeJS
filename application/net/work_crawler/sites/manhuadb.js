@@ -368,14 +368,32 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	function new_manhuadb_comics_crawler(configuration) {
+	function new_manhuadb_comics_crawler(configuration, callback, initializer) {
 		configuration = configuration ? Object.assign(Object.create(null),
 				default_configuration, configuration) : default_configuration;
 
 		// 每次呼叫皆創建一個新的實體。
 		var crawler = new library_namespace.work_crawler(configuration);
 
-		return crawler;
+		if (typeof initializer === 'function') {
+			initializer(crawler);
+		}
+
+		if (!crawler.decoder_URL) {
+			return crawler;
+		}
+
+		var LZString;
+		library_namespace.get_URL_cache(crawler.decoder_URL, function(contents,
+				error) {
+			contents = contents.replace(/var\s+(LZString)/, '$1');
+			eval(contents);
+			crawler.LZString = LZString;
+			callback(crawler);
+		}, {
+			directory : crawler.main_directory
+		});
+
 	}
 
 	return new_manhuadb_comics_crawler;

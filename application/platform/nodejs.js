@@ -869,10 +869,19 @@ function module_code(library_namespace) {
 	// 為 electron-builder 📦安裝包/發行版
 	var is_installation_package = process.env.Apple_PubSub_Socket_Render;
 	if (!is_installation_package) {
-		is_installation_package = require.main && require.main.filename;
+		is_installation_package = require.main && require.main.filename
+		// 2021/4/20 11:36:5 require.main===undefined @ new electron-builder
+		// package
+		// may use `module.filename`
+		|| module.filename;
 		is_installation_package = is_installation_package
-				&& is_installation_package.replace(/[\\\/]app\.asar.+/, '') === process.resourcesPath
-				&& library_namespace.platform.OS;
+		// in electron-builder package: e.g.,
+		// "C:\Users\user_name\AppData\Local\Programs\work_crawler\resources\app.asar\gui_electron\gui_electron.html"
+// NOT in electron-builder package: e.g.,
+		// "/program/work_crawler/gui_electron/gui_electron.html"
+		&& is_installation_package.replace(/[\\\/]app\.asar.+/, '')
+		//
+		=== process.resourcesPath && library_namespace.platform.OS;
 	}
 
 	if (false) {

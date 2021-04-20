@@ -1171,6 +1171,9 @@ function (globalThis) {
 		script_full_path = WScript.ScriptFullName || script_full_path;
 
 	} else if (platform.nodejs) {
+		// 2021/4/20 11:36:5 require.main===undefined @ new electron-builder
+		// package
+		// may use `module.filename`
 		if (require.main) {
 			// for newer node.js. 須放置於 ((__filename)) 判斷前!
 			script_full_path = require.main.filename || script_full_path;

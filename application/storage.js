@@ -385,6 +385,14 @@ function module_code(library_namespace) {
 		//
 		// Windows 10 中 electron: require.main.filename 例如為
 		// ...\work_crawler\gui_electron\gui_electron.html
+		//
+		// 2021/4/20 11:36:5 require.main===undefined @ new electron-builder
+		// package
+		// may use `module.filename`
+		// in electron-builder package: e.g.,
+		// "C:\Users\user_name\AppData\Local\Programs\work_crawler\resources\app.asar\gui_electron\gui_electron.html"
+// NOT in electron-builder package: e.g.,
+		// "/program/work_crawler/gui_electron/gui_electron.html"
 		&& !/\.html?$/i.test(download_directory)) {
 			download_directory = download_directory.match(/[^\\\/]+$/)[0]
 					.replace(/\.js$/i, '');
