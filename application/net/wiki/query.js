@@ -356,28 +356,6 @@ function module_code(library_namespace) {
 		}
 		// console.trace(action);
 
-		/**
-		 * TODO: 簡易的泛用先期處理程式。
-		 * 
-		 * @inner
-		 */
-		function response_handler(response) {
-			if (library_namespace.is_debug(3)
-			// .show_value() @ interact.DOM, application.debug
-			&& library_namespace.show_value)
-				library_namespace.show_value(data, 'wiki_API_query: data');
-
-			var error = data && data.error;
-			// 檢查伺服器回應是否有錯誤資訊。
-			if (error) {
-				library_namespace.error('wiki_API_query: ['
-				//
-				+ error.code + '] ' + error.info);
-			}
-
-			callback(response);
-		}
-
 		// 開始處理 query request。
 		if (!POST_data && wiki_API_query.allow_JSONP) {
 			library_namespace.debug(
@@ -490,7 +468,31 @@ function module_code(library_namespace) {
 
 		// console.trace(action);
 		// console.log(POST_data);
-		get_URL(action, function(XMLHttp, error) {
+
+		/**
+		 * TODO: 簡易的泛用先期處理程式。
+		 * 
+		 * @inner
+		 */
+		function response_handler(response) {
+			if (library_namespace.is_debug(3)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+				library_namespace.show_value(data, 'wiki_API_query: data');
+
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.error('wiki_API_query: ['
+				//
+				+ error.code + '] ' + error.info);
+			}
+
+			callback(response);
+		}
+
+		var latest_response;
+		function XMLHttp_handler(XMLHttp, error) {
 			var status_code, response;
 			if (error) {
 				// assert: !!XMLHttp === false
@@ -539,6 +541,7 @@ function module_code(library_namespace) {
 					response = library_namespace.HTML_to_Unicode(response);
 			}
 
+			// console.trace(response);
 			// library_namespace.log(response);
 			// library_namespace.log(library_namespace.HTML_to_Unicode(response));
 			if (response) {
@@ -595,6 +598,50 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			if (false && latest_response) {
+				console.trace([ latest_response, JSON.stringify(response) ]);
+			}
+
+			if (false && !response.error && ('continue' in response)) {
+				// 2021/4/20 6:55:23 不曉得為什麼，在
+				// 20210416.Sorting_category_and_sort_key_of_Thai_names.js 嘗試
+				// wbentityusage 的時候似乎會一直跑一直跑跑不完，基本上一次平移一篇文章，只好放棄了。
+
+				// console.trace([ action, POST_data ]);
+
+				// merge response to latest_response
+				if (latest_response) {
+					// TODO
+				} else {
+					response.action = action;
+					response.POST_data = POST_data;
+					latest_response = response;
+				}
+				// Do not touch original action and POST_data.
+				action = new library_namespace.URI(latest_response.action);
+				POST_data = library_namespace
+						.is_Object(latest_response.POST_data)
+						&& Object.clone(latest_response.POST_data);
+				// delete response['continue']['continue'];
+				// response['continue'].rawcontinue = 1;
+				for ( var continue_key in response['continue']) {
+					var value = response['continue'][continue_key];
+					action.search_params[continue_key] = value;
+					if (action.href.length > 2000) {
+						delete action.search_params[continue_key];
+						if (!POST_data)
+							POST_data = Object.create(null);
+						POST_data[continue_key] = value;
+					}
+				}
+				// reget next data
+				get_URL(action, XMLHttp_handler, null, POST_data,
+						get_URL_options);
+				return;
+			}
+
+			// ----------------------------------
+
 			if (typeof options.rollback_action !== 'function') {
 				if (need_check_edit_time_interval
 						&& (!POST_data || !POST_data.token)) {
@@ -606,12 +653,14 @@ function module_code(library_namespace) {
 				options.requery = wiki_API_query.bind(null, original_action,
 						callback, POST_data, options);
 			}
+
 			// console.trace(action);
 			// callback(response);
 			// options.action = action;
 			check_session_badtoken(response, callback, options);
+		}
 
-		}, null, POST_data, get_URL_options);
+		get_URL(action, XMLHttp_handler, null, POST_data, get_URL_options);
 	}
 
 	wiki_API_query.get_URL_options = {
