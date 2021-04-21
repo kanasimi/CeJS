@@ -930,6 +930,10 @@ function module_code(library_namespace) {
 		// 前置處理。
 		options = library_namespace.new_options(options);
 
+		if (!('page_text_updater' in options) && options.variable_Map) {
+			// auto set options.page_text_updater
+			options.page_text_updater = options.variable_Map;
+		}
 		if (options.page_text_updater) {
 			// https://www.mediawiki.org/w/api.php?action=help&modules=upload
 			// A "csrf" token retrieved from action=query&meta=tokens
@@ -960,6 +964,17 @@ function module_code(library_namespace) {
 						|| options['other versions'],
 				other_fields : options.other_fields || options['other fields']
 			};
+		} else {
+			[ "description", "date", "source", "author", "permission",
+					"other_versions", "other_fields" ]
+					.forEach(function(parameter) {
+						if (parameter in options) {
+							library_namespace
+									.error('wiki_API.upload: Cannot assign both options.text and options.'
+											+ parameter
+											+ '! Maybe you want to change options.text to options.additional_text?');
+						}
+					});
 		}
 
 		if (library_namespace.is_Object(options.text)) {
@@ -997,6 +1012,7 @@ function module_code(library_namespace) {
 					+ wiki_API.template_text.join_array(options.license);
 		}
 
+		// Additional wikitext to place before categories.
 		if (options.additional_text) {
 			options.text += '\n' + options.additional_text.trim();
 		}
