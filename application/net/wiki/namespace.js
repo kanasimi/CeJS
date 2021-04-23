@@ -1258,10 +1258,18 @@ function module_code(library_namespace) {
 		return page_title;
 	}
 
+	function namespace_of_options(options) {
+		// 必須預防 {Object}options。
+		var namespace = !options ? 0 : typeof options === 'number' ? options
+				: typeof options === 'string' ? library_namespace
+						.is_digits(options) ? +options : options
+						: options.namespace;
+		return namespace;
+	}
+
 	// TODO: is_namespace(page_title, 'Wikipedia|User')
 	function page_title_is_namespace(page_title, options) {
-		var namespace = !options ? 0 : !isNaN(options) ? +options
-				: typeof options === 'string' ? options : options.namespace;
+		var namespace = namespace_of_options(options);
 		var page_ns;
 		if (wiki_API.is_page_data(page_title)) {
 			page_ns = page_title.ns;
@@ -1278,8 +1286,7 @@ function module_code(library_namespace) {
 	}
 
 	function convert_page_title_to_namespace(page_title, options) {
-		var namespace = !options ? 0 : !isNaN(options) ? +options
-				: typeof options === 'string' ? options : options.namespace;
+		var namespace = namespace_of_options(options);
 		namespace = get_namespace(namespace, Object.assign({
 			get_name : true
 		}, options)) + ':';
@@ -3308,7 +3315,7 @@ function module_code(library_namespace) {
 	}
 
 	function add_session_to_options(session, options) {
-		options = library_namespace.setup_options(options);
+		options = library_namespace.new_options(options);
 		options[KEY_SESSION] = session;
 		return options;
 	}
