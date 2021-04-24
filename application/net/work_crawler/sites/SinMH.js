@@ -339,6 +339,7 @@ function module_code(library_namespace) {
 			this.check_filtered(work_data, html, get_label,
 			//
 			latest_chapter_list);
+			work_data.inverted_order = this.chapter_inverted_order;
 			// console.log(work_data.chapter_list);
 			// throw work_data.chapter_list.length;
 		},
