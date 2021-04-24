@@ -8,7 +8,7 @@
  * 
  * TODO:<code>
 
-template_functions/zhwiki.js
+Read https://www.mediawiki.org/wiki/Help:TemplateData
 
 合併 `special page configuration.js`
 
@@ -102,6 +102,70 @@ function module_code(library_namespace) {
 		? page_data : wiki_API.parser(page_data);
 
 		return parsed;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// usage:
+	if (false) {
+		// ...
+		var parsed = page_data.parse();
+		if (parsed.is_biography()) {
+			// ...
+		}
+	}
+
+	template_functions.biographical_templates = [
+	//
+	'birth date', 'birth date and age', 'birth year and age',
+	//
+	'death date', 'death date and age', 'death year and age'
+	//
+	].map(function(template_name) {
+		return 'Template:' + template_name;
+	});
+
+	/**
+	 * Test if `page_data` is biography of a person. 頁面為人物傳記。
+	 * 
+	 * @param {Object}page_data
+	 *            page data
+	 * 
+	 * @returns {Boolean} `page_data` is biography of a person.
+	 */
+	function page_is_biography() {
+		// var page_data = this;
+		// console.log(page_data);
+		// var parsed = CeL.wiki.parser(page_data).parse();
+
+		var parsed = this;
+		var session = wiki_API.session_of_options(parsed)
+		// needed in 20210422.Sorting_category_and_sort_key_of_Thai_names.js
+		|| wiki_API.session_of_options(parsed.options);
+		var is_biography;
+		parsed.each('template', function(token) {
+			if (session.is_template(template_functions.biographical_templates,
+					token)) {
+				is_biography = true;
+				return parsed.each.exit;
+			}
+		});
+		if (is_biography)
+			return true;
+
+		parsed.each('category', function(token) {
+			if ([ 'Living people' ].includes(token.name)
+			// e.g., [[Category:2000 births]] [[Category:2000 deaths]]
+			|| /^\d+ (?:births|deaths)$/.test(token.name)) {
+				is_biography = true;
+				return parsed.each.exit;
+			}
+		});
+		if (is_biography)
+			return true;
+
+		library_namespace.debug(wiki_API.title_link_of(page_data)
+				+ ' is ot biography?', 3, 'page_is_biography');
 	}
 
 	// ------------------------------------------------------------------------
@@ -964,11 +1028,19 @@ function module_code(library_namespace) {
 		if (functions_of_site) {
 			function_name_list.append(Object.keys(functions_of_site));
 		}
-		if (function_name_list.length > 0) {
-			session.register_redirects(function_name_list, {
-				namespace : 'Template'
-			});
-		}
+		function_name_list.append(template_functions.biographical_templates);
+		// assert: (function_name_list.length > 0),
+		// because template_functions.biographical_templates.length > 0
+		session.register_redirects(function_name_list, function() {
+			session.biographical_templates
+			//
+			= session.redirect_target_of(
+			//
+			template_functions.biographical_templates);
+			// console.trace(session.biographical_templates);
+		}, {
+			namespace : 'Template'
+		});
 	}
 
 	var module_name = this.id;
@@ -1022,6 +1094,13 @@ function module_code(library_namespace) {
 	library_namespace.set_method(wiki_API.prototype, {
 		load_template_functions : load_template_functions
 	});
+
+	// wiki_API.parser.parser_prototype 會被複製到 instance 上。
+	// 採用 library_namespace.set_method() 會無法列舉與複製，會出問題。
+	Object.assign(wiki_API.parser.parser_prototype, {
+		is_biography : page_is_biography
+	});
+	// console.trace(wiki_API.parser.parser_prototype.is_biography);
 
 	Object.assign(template_functions, {
 		// functions_of_site[site_name] = { template_name:
