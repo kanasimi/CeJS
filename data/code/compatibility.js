@@ -443,6 +443,22 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// Array.*
 
+	// Array.prototype.at(), String.prototype.at(), typed_array.at()
+	// https://github.com/tc39/proposal-relative-indexing-method#polyfill
+	function Item_at(index) {
+		index = ToInteger(index);
+		var length = this.length;
+		// Allow negative indexing from the end
+		if (index < 0)
+			index += length;
+		// incase (a=[])[-3]=3;a.at(-3);
+		if (0 <= index && index < length) {
+			// typeof this === 'object' @ HTA (HTML Application) @ Windows 10
+			// return this instanceof String ? this.charAt(index) : this[index];
+			return this.charAt ? this.charAt(index) : this[index];
+		}
+	}
+
 	// 稀疏矩陣 (sparse matrix) 用的 Array.prototype.some()
 	// 要到 index > 1e7 比較感覺得出來。
 	// e.g.,
@@ -574,6 +590,10 @@ function module_code(library_namespace) {
 	set_method(Array.prototype, {
 		/** <code>Array.prototype.copyWithin(target, start [ , end ])</code> */
 		copyWithin : copyWithin,
+
+		// https://github.com/tc39/proposal-relative-indexing-method#polyfill
+		at : Item_at,
+
 		// Array.prototype.includes()
 		// part of the Harmony (ECMAScript 7) proposal.
 		// http://www.2ality.com/2016/01/ecmascript-2016.html
@@ -802,7 +822,7 @@ function module_code(library_namespace) {
 		(function() {
 			var Array_prototype = Array.prototype,
 			// TODO: .slice() and others
-			typed_array_methods = 'copyWithin,entries,every,fill,filter,find,findIndex,forEach,includes,indexOf,join,keys,lastIndexOf,map,reduce,reduceRight,reverse,set,slice,some,subarray,values'
+			typed_array_methods = 'copyWithin,entries,every,fill,filter,find,findIndex,forEach,includes,indexOf,join,keys,lastIndexOf,map,reduce,reduceRight,reverse,set,slice,some,subarray,values,at'
 					.split(',');
 			'Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array'
 			//
@@ -842,7 +862,10 @@ function module_code(library_namespace) {
 	// cf. value | 0
 	/** <code>((Number.MAX_SAFE_INTEGER / 4) | 0) < 0, 0 < ((Number.MAX_SAFE_INTEGER / 5) | 0)</code> */
 	function ToInteger(value) {
+		return Math.trunc(value) || 0;
+
 		// return value >> 0;
+
 		// https://tc39.es/ecma262/#sec-tointeger
 		value = Number(value);
 		return value > 0 ? Math.floor(value) : value < 0 ? -Math.floor(value)
@@ -1134,6 +1157,7 @@ function module_code(library_namespace) {
 
 		clz32 : clz32,
 
+		// Math.trunc()
 		trunc : function trunc(value) {
 			// value >= 0 ? Math.floor(value) : Math.ceil(value)
 			return value > 0 ? Math.floor(value)
@@ -1553,6 +1577,7 @@ function module_code(library_namespace) {
 			return list;
 		},
 
+		at : Item_at,
 		codePointAt : codePointAt
 	});
 
