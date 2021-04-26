@@ -245,7 +245,7 @@ function module_code(library_namespace) {
 		_.guess_path_separator(working_path);
 
 		working_path = working_path.split(path_separator);
-		if (!working_path[working_path.length - 1])
+		if (!working_path.at(-1))
 			// 防止輸入 a/b/c/ 而非 a/b/c 的情況。
 			working_path.pop();
 		base_path = base_path.split(_.guess_path_separator(base_path));

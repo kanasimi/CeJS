@@ -368,7 +368,7 @@ function module_code(library_namespace) {
 
 		library_namespace.debug('get url token: ' + action, 5, 'wiki_API_page');
 
-		// console.log(action);
+		// console.trace(action);
 		wiki_API.query(action, typeof callback === 'function'
 		//
 		&& function process_page(data) {
@@ -1520,6 +1520,11 @@ function module_code(library_namespace) {
 			recent_options = Object.clone(options);
 			if (!recent_options.parameters)
 				recent_options.parameters = Object.create(null);
+			if (recent_options.rcprop) {
+				if (!recent_options.parameters.rcprop)
+					recent_options.parameters.rcprop = recent_options.rcprop;
+				delete recent_options.rcprop;
+			}
 			// console.log(recent_options);
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
 			Object.assign(recent_options.parameters, {
@@ -1664,6 +1669,7 @@ function module_code(library_namespace) {
 			// TypeError: Converting circular structure to JSON
 			+ JSON.stringify(recent_options), 1, 'add_listener');
 		}
+		// console.trace(recent_options);
 
 		// 取得頁面資料。
 		function receive() {
@@ -1794,7 +1800,7 @@ function module_code(library_namespace) {
 						}
 
 						// cache the lastest record
-						last_query_time = rows[rows.length - 1];
+						last_query_time = rows.at(-1);
 						// 紀錄/標記本次處理到哪。
 						// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
 						last_query_revid = last_query_time.revid;
@@ -2033,7 +2039,7 @@ function module_code(library_namespace) {
 									var from = revisions.length >= 2
 											&& wiki_API.revision_content(
 											// select the oldest revision.
-											revisions[revisions.length - 1])
+											revisions.at(-1))
 											|| '',
 									// 解析頁面結構。
 									to = wiki_API.revision_content(
@@ -2099,14 +2105,14 @@ function module_code(library_namespace) {
 										//
 										wiki_API.revision_content(
 										//
-										revisions[revisions.length - 1])
+										revisions.at(-1))
 										//
 										!== from.join('')) {
 											console.log(library_namespace.LCS(
 											//
 											wiki_API.revision_content(
 											//
-											revisions[revisions.length - 1]),
+											revisions.at(-1)),
 											//
 											from.join(''), 'diff'));
 											throw new Error(
@@ -2592,7 +2598,7 @@ function module_code(library_namespace) {
 		else
 			delete revision.minor;
 
-		// page 之 structure 按照 wiki API 本身之 return
+		// page_data 之 structure 按照 wiki API 本身之 return
 		// page_data = {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
 		// includes redirection 包含重新導向頁面.
 		// includes non-ns0.

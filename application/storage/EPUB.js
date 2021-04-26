@@ -2191,7 +2191,7 @@ function module_code(library_namespace) {
 				 */
 				while (parent_list.length > 0) {
 					// get the last <li>
-					var anchor = parent_list[parent_list.length - 1];
+					var anchor = parent_list.at(-1);
 					var part_title = (Array.isArray(anchor.li) ? anchor.li[0]
 							: anchor.li).a[0];
 					// @see chapter with part

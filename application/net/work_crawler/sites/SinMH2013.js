@@ -262,7 +262,7 @@ function module_code(library_namespace) {
 			chapter_data.title = get_label(html.between('<h2>', '</h2>'));
 			chapter_data.image_count = chapter_data.fc;
 			chapter_data.image_list = chapter_data.fs;
-			if (!chapter_data.fs[chapter_data.fs.length - 1]) {
+			if (!chapter_data.fs.at(-1)) {
 				// for http://www.5qmh.com/6908/0296.html?p=9
 				chapter_data.fs.pop();
 				chapter_data.image_count--;

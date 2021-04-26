@@ -209,7 +209,7 @@ function parse_converted_file(file_path_list) {
 		// remove BOM
 		.trimStart().split(default_config.new_line),
 		//
-		line = code_lines[code_lines.length - 1],
+		line = code_lines.at(-1),
 		//
 		config = Object.clone(default_config);
 		if (line.replace(/\r$/, '') === '') {
@@ -292,7 +292,7 @@ function parse_converted_file(file_path_list) {
 	var main_file_path = file_path_list[0].replace(/\..+/g, '.js');
 	// assert: total_char_length[0]===0
 	total_char_length.shift();
-	while (total_char_length[total_char_length.length - 1] === 0) {
+	while (total_char_length.at(-1) === 0) {
 		total_char_length.pop();
 	}
 	CeL.log(main_file_path + ': ' + total_char_length.join('+') + ' = '
@@ -350,9 +350,7 @@ function parse_converted_data(code_lines, convert_map, config) {
 					} else {
 						// character與之前的沒有連續。
 						add_slice();
-						if (typeof _last_convert_to
-						//
-						[_last_convert_to.length - 1] === 'string') {
+						if (typeof _last_convert_to.at(-1) === 'string') {
 							_last_convert_to
 							//
 							[_last_convert_to.length - 1] += character;

@@ -1488,8 +1488,8 @@ function module_code(library_namespace) {
 
 		/**
 		 * https://stackoverflow.com/questions/53593182/client-network-socket-disconnected-before-secure-tls-connection-was-established
-		 * mh160.js 必須使用 request，https-proxy-agent 才能正常工作
-		 * TODO: socks-proxy-agent
+		 * mh160.js 必須使用 request，https-proxy-agent 才能正常工作 TODO:
+		 * socks-proxy-agent
 		 * 
 		 * <code>
 
@@ -2303,7 +2303,7 @@ function module_code(library_namespace) {
 			// 'gzip, deflate, *'
 			URL_options_to_fetch.headers['Accept-Encoding'] = 'gzip, deflate';
 		}
-		// console.log(URL_options_to_fetch.headers);
+		// console.trace(URL_options_to_fetch.headers);
 
 		if (false) {
 			// @see jQuery

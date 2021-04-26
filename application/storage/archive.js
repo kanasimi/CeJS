@@ -766,7 +766,7 @@ function module_code(library_namespace) {
 		//
 		PATTERN = new RegExp('^\\s*'
 				+ '([^\\s]+)\\s+'.repeat(headers.length - 1) + '(.+)$');
-		if (headers[headers.length - 1] === 'name') {
+		if (headers.at(-1) === 'name') {
 			// 這邊應該會被執行到，否則恐怕是不一樣版本的zip，無法解析。
 			headers[headers.length - 1] = 'path';
 		}

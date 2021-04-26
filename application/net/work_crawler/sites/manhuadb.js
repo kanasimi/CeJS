@@ -380,12 +380,14 @@ function module_code(library_namespace) {
 		}
 
 		if (!crawler.decoder_URL) {
+			// e.g., comic.cmn-Hans-CN/manhuadb.js
 			return crawler;
 		}
 
-		var LZString;
+		// e.g., comic.cmn-Hans-CN/manhuacat.js
 		library_namespace.get_URL_cache(crawler.decoder_URL, function(contents,
 				error) {
+			var LZString;
 			contents = contents.replace(/var\s+(LZString)/, '$1');
 			eval(contents);
 			crawler.LZString = LZString;

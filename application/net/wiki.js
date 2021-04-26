@@ -67,6 +67,8 @@ CeL.wiki.page('Wikipedia:機器人',function(page_data){console.log(page_data);}
 你可以在維基媒體的wiki網站URL最後增加?safemode=1來關閉你個人的CSS和JavaScript。範例：https://zh.wikipedia.org/wiki/文學?safemode=1。上面一行意思是你可以測試是否是你的使用者腳本或套件造成問題，而不必解除安裝。
 
 </code>
+ * 
+ * @see https://github.com/siddharthvp/mwn
  */
 
 // More examples: see /_test suite/test.js
@@ -327,8 +329,8 @@ function module_code(library_namespace) {
 
 	// 等執行再包含入必須的模組。
 	this.finish = function(name_space, waiting) {
-		var sub_modules = [ 'namespace', 'parser', 'query', 'page', 'Flow',
-				'list', 'edit', 'task' ];
+		var sub_modules = [ 'namespace', 'parser', 'query', 'page',
+				'page.Page', 'Flow', 'list', 'edit', 'task' ];
 
 		// ------------------------------------------------------------------------
 		// auto import SQL 相關函數 @ Toolforge。

@@ -996,7 +996,7 @@ function module_code(library_namespace) {
 					bars = bars[0];
 					// bar : 最後一個元素。
 					bar = bars.pop();
-					bars.end = bars[bars.length - 1].end;
+					bars.end = bars.at(-1).end;
 					bars.weight -= bar.end - bar.start;
 					// 重建新的 bar。
 					(bars = [ bar ]).weight -= bar.end - bar.start;
@@ -3309,7 +3309,7 @@ function module_code(library_namespace) {
 
 		// ---------------------------------------
 		// 出廠前檢測。
-		year_start_time = year_start_time[year_start_time.length - 1];
+		year_start_time = year_start_time.at(-1);
 		if (year_start_time === this_end) {
 			;
 		} else if (紀年曆數 && this_end < year_start_time) {

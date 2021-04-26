@@ -702,7 +702,9 @@ function module_code(library_namespace) {
 		multiline : 'm',
 		dotAll : 's',
 		unicode : 'u',
-		sticky : 'y'
+		sticky : 'y',
+		// https://github.com/tc39/proposal-regexp-match-indices
+		indices : 'd'
 	};
 
 	if (Object.values) {
@@ -2692,7 +2694,7 @@ function module_code(library_namespace) {
 	// setup inheritance
 	var new_instance = Array.derive(SubArray);
 	// setup SubArray.prototype
-	SubArray.prototype.last = function () { return this[this.length - 1]; };
+	SubArray.prototype.last = function () { return this.at(-1); };
 
 	var a = new SubArray(2, 7, 4), b = [4]; a[6] = 3; a.push(8);
 	if (Object.setPrototypeOf && !(a instanceof SubArray) || !(a instanceof Array) || a[1] !== 7 || a.length !== 8 || a.last() !== 8 || b.last) console.error('failed');
@@ -2710,7 +2712,7 @@ function module_code(library_namespace) {
 	// setup inheritance
 	SubUint32Array.new_instance = Array.derive(SubUint32Array, Uint32Array);
 	// setup SubUint32Array.prototype
-	SubUint32Array.prototype.last = function () { return this[this.length - 1]; };
+	SubUint32Array.prototype.last = function () { return this.at(-1); };
 
 	var a = new SubUint32Array(8, 7, 4), b = new Uint32Array(4); a[6] = 3; a[7] = 5; a[8] = 4;
 	if (Object.setPrototypeOf && !(a instanceof SubUint32Array) || !(a instanceof Uint32Array) || a[8] || a[6] !== 3 || a.length !== 8 || a.last() !== 5 || b.last) console.error('failed');
@@ -3882,7 +3884,7 @@ function module_code(library_namespace) {
 				}
 				var trace_Array = LCS_length(from_item, to_item, true),
 				// const
-				this_LCS_length = trace_Array[trace_Array.length - 1];
+				this_LCS_length = trace_Array.at(-1);
 				if (max_LCS_length < this_LCS_length) {
 					max_LCS_length = this_LCS_length;
 					max_LCS_data = [ to_index, trace_Array, to_item ];

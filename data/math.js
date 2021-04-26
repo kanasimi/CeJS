@@ -275,7 +275,7 @@ function module_code(library_namespace) {
 		if (!Array.isArray(sequence) || !sequence.length)
 			return sequence;
 
-		if (sequence[sequence.length - 2] === _.mutual_division.done)
+		if (sequence.at(-2) === _.mutual_division.done)
 			sequence.length -= 2;
 
 		if (sequence.length < 1)
@@ -437,7 +437,7 @@ function module_code(library_namespace) {
 							+
 							// 連分數表示 (continued fraction)
 							(d.length > 1
-									&& d[d.length - 2] === _.mutual_division.done ? '='
+									&& d.at(-2) === _.mutual_division.done ? '='
 									+ ' [<em>'
 									+ d[0]
 									+ ';'
@@ -1667,7 +1667,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Natural}
 	 */
-	last_prime_tested = primes[primes.length - 1];
+	last_prime_tested = primes.at(-1);
 
 	// https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
 	// the sieve of Eratosthenes 篩法
@@ -1697,7 +1697,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		last_prime_tested = primes[primes.length - 1];
+		last_prime_tested = primes.at(-1);
 		return primes;
 	}
 

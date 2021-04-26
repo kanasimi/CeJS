@@ -935,7 +935,7 @@ function module_code(library_namespace) {
 					//
 					+ (pages.length > 1 ? '–'
 					//
-					+ wiki_API.title_link_of(pages[pages.length - 1])
+					+ wiki_API.title_link_of(pages.at(-1))
 					//
 					: '') : ''));
 				} else {

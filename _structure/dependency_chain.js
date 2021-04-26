@@ -3964,7 +3964,8 @@ if (typeof CeL === 'function')
 		// node 6.2.2 does not has Object.values(), Object.entries()
 		&& Object.entries
 		// node 4 does not has Array.prototype.includes()
-		&& Array.prototype.includes
+		// node 16 does not has Array.prototype.at()
+		&& Array.prototype.at
 		// Chrome/73.0.3683.20, Firefox/67.0 has .matchAll(),
 		// node 11.9 DO NOT has .matchAll().
 		&& String.prototype.matchAll) {

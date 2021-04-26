@@ -450,9 +450,9 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (skip_spaces && nodes.length > 0
-				&& typeof nodes[nodes.length - 1] === 'string'
-				&& !(nodes[nodes.length - 1] = nodes[nodes.length - 1].trim())) {
+		if (skip_spaces
+				&& typeof nodes.at(-1) === 'string'
+				&& !(nodes[nodes.length - 1] = nodes.at(-1).trim())) {
 			// 最後一個 node 為 spaces。
 			nodes.pop();
 		}

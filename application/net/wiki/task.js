@@ -1949,32 +1949,32 @@ function module_code(library_namespace) {
 		if (typeof config.each === 'function') {
 			// {Function}
 			each = [ config.each ];
-			if (!config.options) {
-				// 直接將 config 的設定導入 options。
-				// e.g., write_to
-				for (callback in options) {
-					if (callback in config) {
-						if (!config[callback] && (callback in {
-							nocreate : 1,
-							minor : 1,
-							bot : 1,
-							tags : 1
-						})) {
-							// 即使設定 minor=0 似乎也會當作設定了，得完全消滅才行。
-							delete options[callback];
-						} else {
-							options[callback] = config[callback];
-						}
+		} else if (Array.isArray(config.each)) {
+			// assert: config.each = [ function for_each_page,
+			// append to this / assign to this @ each(), callback ]
+			each = config.each;
+		} else {
+			throw new Error('wiki_API.work: Invalid function for each page!');
+		}
+
+		if (!config.options) {
+			// 直接將 config 的設定導入 options。
+			// e.g., write_to
+			for (callback in options) {
+				if (callback in config) {
+					if (!config[callback] && (callback in {
+						nocreate : 1,
+						minor : 1,
+						bot : 1,
+						tags : 1
+					})) {
+						// 即使設定 minor=0 似乎也會當作設定了，得完全消滅才行。
+						delete options[callback];
+					} else {
+						options[callback] = config[callback];
 					}
 				}
 			}
-
-		} else if (Array.isArray(config.each)) {
-			each = config;
-		} else {
-			library_namespace.error(
-			//
-			'wiki_API.work: Invalid function for each page!');
 		}
 
 		if (each[1]) {
@@ -2691,6 +2691,7 @@ function module_code(library_namespace) {
 		},
 		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
 		config.page_options);
+		// console.trace(page_options);
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		[ 'is_id', 'redirects', 'converttitles' ].forEach(function(parameter) {
 			if (config[parameter]) {

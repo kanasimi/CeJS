@@ -63,10 +63,15 @@ function module_code(library_namespace) {
 
 		// TODO:
 
-		(page.revision() || page.fetch() || page.read() || page.wikitext())
-				.then();
+		typeof await(page.content() || page.read()) === 'string';
 
-		page.is_biography().then();
+		typeof page.wikitext === 'string';
+
+		// page.fetch() is asyncIterator 泛用方法 相當於 wiki.query()
+
+		// page.revisions() is asyncIterator
+
+		typeof await(page.is_biography()) === 'boolean';
 	}
 
 	function Page(page_title, options, session) {

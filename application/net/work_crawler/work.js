@@ -1152,8 +1152,7 @@ function module_code(library_namespace) {
 					work_data.chapter_count = chapter_list.length;
 				}
 
-				var last_chapter_data = chapter_list.length > 0
-						&& chapter_list[chapter_list.length - 1],
+				var last_chapter_data = chapter_list.at(-1),
 				//
 				set_attribute = function(attribute, value) {
 					if (!value)

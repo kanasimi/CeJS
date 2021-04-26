@@ -242,7 +242,7 @@ function module_code(library_namespace) {
 						main_encode_map[character] = char_code;
 						main_map[char_code++] = character;
 					});
-					last_char_code = char_list[char_list.length - 1]
+					last_char_code = char_list.at(-1)
 							.codePointAt(0);
 					return;
 				}

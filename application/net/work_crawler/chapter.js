@@ -1383,6 +1383,12 @@ function module_code(library_namespace) {
 									.warn({
 										T : '原先的章節資料設定了分部標題，但 .parse_chapter_data() 傳回的章節資料缺少了分部標題。或許您可以沿用原先的章節資料。'
 									});
+							// e.g.,
+							if (false) {
+								chapter_data = Object.assign(
+										work_data.chapter_list[chapter_NO - 1],
+										chapter_data);
+							}
 						}
 					}
 				}

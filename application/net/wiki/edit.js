@@ -307,7 +307,7 @@ function module_code(library_namespace) {
 						}
 						options.undoafter = page_data.revisions
 						// get the oldest revision
-						[page_data.revisions.length - 1].parentid;
+						.at(-1).parentid;
 					}
 
 					// 這裡不直接指定 text，是為了使(回傳要編輯資料的)設定值函數能即時依page_data變更 options。
@@ -930,6 +930,8 @@ function module_code(library_namespace) {
 		// 前置處理。
 		options = library_namespace.new_options(options);
 
+		// When set .variable_Map, after successful update, the content of file
+		// page will be auto-updated too.
 		if (!('page_text_updater' in options) && options.variable_Map) {
 			// auto set options.page_text_updater
 			options.page_text_updater = options.variable_Map;
@@ -1024,7 +1026,7 @@ function module_code(library_namespace) {
 			+ wiki_API.template_text.join_array(options.categories
 			//
 			.map(function(category_name) {
-				if (!category_name.includes('[[')) {
+				if (category_name && !category_name.includes('[[')) {
 					if (!PATTERN_category_prefix.test(category_name))
 						category_name = 'Category:' + category_name;
 					// NG: CeL.wiki.title_link_of()
@@ -1200,6 +1202,14 @@ function module_code(library_namespace) {
 		})();
 	}
 
+	/**
+	 * <code>CeL.wiki.Variable_Map</code> is used to update content when
+	 * update pages or files. It will insert comments around the value, prevent
+	 * others from accidentally editing the text that will be overwritten.
+	 * 
+	 * @param {Array}iterable
+	 *            initial values
+	 */
 	function Variable_Map(iterable) {
 		if (library_namespace.is_Object(iterable))
 			iterable = Object.entries(iterable);

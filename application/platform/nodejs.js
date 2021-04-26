@@ -261,16 +261,16 @@ function module_code(library_namespace) {
 	 * 
 	 * @inner
 	 */
-	function remove_fso_list(list, recurse, parent) {
+	function remove_fso_list(list, recursive, parent) {
 		if (parent) {
 			parent = append_path_separator(parent);
 		}
 
 		var error;
 		list.some(function(fso_name) {
-			// recurse, iterative method
+			// recursive, iterative method
 			return error = remove_fso(parent ? parent + fso_name : fso_name,
-					recurse);
+					recursive);
 		});
 		return error;
 	}
@@ -289,12 +289,20 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://github.com/isaacs/rimraf/blob/master/rimraf.js
 	 */
-	function remove_fso(path, recurse) {
+	function remove_fso(path, recursive) {
 		if (Array.isArray(path)) {
-			return remove_fso_list(path, recurse);
+			return remove_fso_list(path, recursive);
 		}
 
 		try {
+			// fs.rmSync(path[, options]) Added in: v14.14.0
+			if (typeof fs.rmSync === 'function') {
+				fs.rmSync(path, {
+					recursive : recursive
+				});
+				return;
+			}
+
 			/**
 			 * The lstat() system call is like stat() except in the case where
 			 * the named file is a symbolic link, in which case lstat() returns
@@ -312,8 +320,8 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// 設定 recurse/force 時才會遞迴操作。
-			if (recurse) {
+			// 設定 recursive/force 時才會遞迴操作。
+			if (recursive) {
 				library_namespace.debug({
 					T : [ 'Recursively removing subdirectories of %1', path ]
 				}, 2, 'remove_fso');
@@ -334,8 +342,8 @@ function module_code(library_namespace) {
 				}
 
 				var error
-				// recurse, iterative method
-				= remove_fso_list(node_fs.readdirSync(path), recurse, path);
+				// recursive, iterative method
+				= remove_fso_list(node_fs.readdirSync(path), recursive, path);
 				if (error) {
 					return error;
 				}

@@ -307,11 +307,13 @@ function module_code(library_namespace) {
 			break;
 
 		case 'Referer':
-			if (!value) {
+			if (!value
+			// value === '': Unset Referer
+			&& value !== '') {
 				return 'Referer 不可為 undefined。';
 			}
 			library_namespace.debug({
-				T : [ '設定 Referer：%1', value ]
+				T : [ '設定 Referer：%1', JSON.stringify(value) ]
 			}, 2);
 			this.get_URL_options.headers.Referer = value;
 			// console.log(this.get_URL_options);

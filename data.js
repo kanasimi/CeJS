@@ -1917,7 +1917,7 @@ function module_code(library_namespace) {
 				if (tmp.d)
 					tmp = list_to_Object(tmp);
 				// assert: queue.length > 0
-				(object_now = queue[queue.length - 1]).push(tmp);
+				(object_now = queue.at(-1)).push(tmp);
 			}
 		}
 
@@ -2031,7 +2031,7 @@ function module_code(library_namespace) {
 
 		if (queue.length > 1)
 			library_namespace.warn('Illegal data: 有錯誤或缺陷!');
-		while (queue.length > 1 && Array.isArray(queue[queue.length - 1]))
+		while (queue.length > 1 && Array.isArray(queue.at(-1)))
 			make_end();
 
 		if (status)

@@ -1879,7 +1879,7 @@ if (typeof CeL === 'function')
 					// assert: numerator >= 0
 				}
 
-				if (get_nearest && base <= 2 * this[this.length - 1]) {
+				if (get_nearest && base <= 2 * this.at(-1)) {
 					quotient[0]++;
 					if (get_nearest === REVERSE_REMAINDER) {
 						N = base;
@@ -2335,7 +2335,7 @@ if (typeof CeL === 'function')
 				if (0 < (negative_exponent |= 0) && Number.isSafeInteger(negative_exponent))
 					shift_digits(this, -negative_exponent * 2 - this[KEY_EXPONENT]);
 
-				// assert: this[this.length - 1] > 0
+				// assert: this.at(-1) > 0
 				var index = this.length, index_sr = --index / 2 | 0, base = this[KEY_BASE];
 				if (!index_sr)
 					// assert: this.length <= 2
@@ -2450,7 +2450,7 @@ if (typeof CeL === 'function')
 				if (0 < (negative_exponent |= 0) && Number.isSafeInteger(negative_exponent))
 					shift_digits(this, -negative_exponent * 2 - this[KEY_EXPONENT]);
 
-				// assert: this[this.length - 1] > 0
+				// assert: this.at(-1) > 0
 				var index = this.length, index_sr = --index / 2 | 0, base = this[KEY_BASE];
 				if (!index_sr)
 					// assert: this.length <= 2
@@ -2686,7 +2686,7 @@ if (typeof CeL === 'function')
 				else
 					digits = [zero];
 
-				if (digits[digits.length - 1] === radix_point)
+				if (digits.at(-1) === radix_point)
 					digits.push(zero);
 				if (this[KEY_NEGATIVE])
 					// minus sign
@@ -3181,22 +3181,22 @@ if (typeof CeL === 'function')
 					power = power.division(to_add);
 				//let 1 <= power < 2 以加速 main loop 運算。
 				//先使 power 首位 [power.length - 1] < 2。
-				while (power[power.length - 1] > 1) {
+				while (power.at(-1) > 1) {
 					if (power[0] % 2 === 1)
 						//預防失去精度。
 						shift_digits(power, -1);
 					b++, power = power.division(2);
 				}
-				// assert: 1 <= power[power.length - 1]
+				// assert: 1 <= power.at(-1)
 
 				//至此處理完 2 ^ b 的部分。
 
-				//再使 power 首位 [power.length - 1] 之 exponent 為 0。
+				//再使 power 首位 power.at(-1) 之 exponent 為 0。
 				if (to_add = (index = power.length - 1) + power[KEY_EXPONENT]) {
 					d += to_add * DECIMAL_BASE_LENGTH;
 					power[KEY_EXPONENT] = -index;
 				}
-				// assert: 1 <= power < 2,  power[power.length - 1] === ZERO_EXPONENT === 1
+				// assert: 1 <= power < 2,  power.at(-1) === ZERO_EXPONENT === 1
 
 				if (d)
 					d = Integer_LN10(precision + error_digits * DECIMAL_BASE_LENGTH).multiply(d);
@@ -3210,7 +3210,7 @@ if (typeof CeL === 'function')
 				if (!index)
 					return to_add ? to_add.to_precision(-error_digits * DECIMAL_BASE_LENGTH) : new Integer(0, DEFAULT_RADIX);
 
-				// assert: 1 < power < 2,  power[power.length - 1] === ZERO_EXPONENT === 1
+				// assert: 1 < power < 2,  power.at(-1) === ZERO_EXPONENT === 1
 
 
 				d = power.clone();

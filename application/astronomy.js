@@ -3259,7 +3259,7 @@ function module_code(library_namespace) {
 		index = data[0].search_sorted(remainder, data[1]), NOm1;
 		if (!index && remainder < data[0][0])
 			// 若是比最小的還小，則當作最後一個。
-			index = data[1][data[1].length - 1];
+			index = data[1].at(-1);
 		if (index && 0 <=
 		// NOm1: #NO - 1
 		(NOm1 = Math.round((TT_JD - index[1]) / saros_days))

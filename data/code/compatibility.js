@@ -445,7 +445,7 @@ function module_code(library_namespace) {
 
 	// Array.prototype.at(), String.prototype.at(), typed_array.at()
 	// https://github.com/tc39/proposal-relative-indexing-method#polyfill
-	function Item_at(index) {
+	function get_item_at(index) {
 		index = ToInteger(index);
 		var length = this.length;
 		// Allow negative indexing from the end
@@ -592,7 +592,7 @@ function module_code(library_namespace) {
 		copyWithin : copyWithin,
 
 		// https://github.com/tc39/proposal-relative-indexing-method#polyfill
-		at : Item_at,
+		at : get_item_at,
 
 		// Array.prototype.includes()
 		// part of the Harmony (ECMAScript 7) proposal.
@@ -1577,7 +1577,7 @@ function module_code(library_namespace) {
 			return list;
 		},
 
-		at : Item_at,
+		at : get_item_at,
 		codePointAt : codePointAt
 	});
 
@@ -1738,7 +1738,7 @@ function module_code(library_namespace) {
 		}
 		// 去掉最後一組的 ',' 並作結。
 		, closeB = function(c) {
-			var v = expC[expC.length - 1];
+			var v = expC.at(-1);
 			if (v.charAt(v.length - 1) == ',')
 				expC[expC.length - 1] = v.slice(0, v.length - 1);
 			addE(c);

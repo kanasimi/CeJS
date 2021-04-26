@@ -823,7 +823,7 @@ function module_code(library_namespace) {
 
 		if (LIFO_stack.length > 0) {
 			var callback, index;
-			stack = LIFO_stack[LIFO_stack.length - 1];
+			stack = LIFO_stack.at(-1);
 			// 若有設定 stack.path，必以 path_separator 作結。
 			base_path = stack.path || '';
 
@@ -1004,7 +1004,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('已處理過 folder [' + base_path
 					+ '] 本身與 sub-files。expand sub-folders.', 2,
 					'travel_handler');
-			stack = LIFO_stack[LIFO_stack.length - 1];
+			stack = LIFO_stack.at(-1);
 			// depth: 正處理之 folder 本身的深度。
 			depth = stack.depth;
 			if (!base_space) {
@@ -1065,7 +1065,7 @@ function module_code(library_namespace) {
 		}
 
 		// 檢查本 stack 是否已處理完畢。
-		while ((stack = LIFO_stack[LIFO_stack.length - 1])
+		while ((stack = LIFO_stack.at(-1))
 		//
 		.index === stack.length) {
 			library_namespace.debug('Move up. stack.length = '
