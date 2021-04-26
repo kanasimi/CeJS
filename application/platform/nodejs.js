@@ -294,15 +294,34 @@ function module_code(library_namespace) {
 			return remove_fso_list(path, recursive);
 		}
 
-		try {
-			// fs.rmSync(path[, options]) Added in: v14.14.0
-			if (typeof fs.rmSync === 'function') {
-				fs.rmSync(path, {
-					recursive : recursive
+		// fs.rmSync(path[, options]) Added in: v14.14.0
+		if (typeof node_fs.rmSync === 'function') {
+			try {
+				node_fs.rmSync(path, {
+					recursive : !!recursive
 				});
 				return;
+			} catch (e) {
+				if (e.code !== 'ERR_FS_EISDIR') {
+					return e;
+				}
+				// Will try node_fs.rmdirSync(path); later
 			}
 
+			// `path` should be empty directory, or should set recursive flag.
+			library_namespace.debug({
+				T : [ 'Removing directory: %1', path ]
+			}, 1, 'remove_fso');
+			// delete directory itself.
+			try {
+				node_fs.rmdirSync(path);
+			} catch (e) {
+				return e;
+			}
+			return;
+		}
+
+		try {
 			/**
 			 * The lstat() system call is like stat() except in the case where
 			 * the named file is a symbolic link, in which case lstat() returns

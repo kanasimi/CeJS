@@ -350,8 +350,8 @@ function module_code(library_namespace) {
 				// 前溯查找 node start.
 				// tag_pattern: [ , attributes, first child ]
 				for (var i = index, tag_pattern = new RegExp('<' + matched[2]
-					// TODO: parse "<br/>"
-						+ '(\\s[^<>]*)?>([\\S\\s]*?)$'), tag_matched; i >= 0; i--) {
+				// TODO: parse "<br/>"
+				+ '(\\s[^<>]*)?>([\\S\\s]*?)$'), tag_matched; i >= 0; i--) {
 					if (typeof nodes[i] !== 'string')
 						continue;
 
@@ -450,8 +450,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (skip_spaces
-				&& typeof nodes.at(-1) === 'string'
+		if (skip_spaces && typeof nodes.at(-1) === 'string'
 				&& !(nodes[nodes.length - 1] = nodes.at(-1).trim())) {
 			// 最後一個 node 為 spaces。
 			nodes.pop();

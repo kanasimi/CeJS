@@ -2039,8 +2039,7 @@ function module_code(library_namespace) {
 									var from = revisions.length >= 2
 											&& wiki_API.revision_content(
 											// select the oldest revision.
-											revisions.at(-1))
-											|| '',
+											revisions.at(-1)) || '',
 									// 解析頁面結構。
 									to = wiki_API.revision_content(
 									//

@@ -431,34 +431,31 @@ function module_code(library_namespace) {
 				break;
 
 		if (false)
-			library_namespace
-					.debug(number
-							+ ' '
-							+
-							// 連分數表示 (continued fraction)
-							(d.length > 1
-									&& d.at(-2) === _.mutual_division.done ? '='
+			library_namespace.debug(number
+					+ ' '
+					+
+					// 連分數表示 (continued fraction)
+					(d.length > 1 && d.at(-2) === _.mutual_division.done ? '='
+							+ ' [<em>'
+							+ d[0]
+							+ ';'
+							+ d.slice(1, i).join(', ')
+							+ '</em>'
+							+ (i < d.length - 2 ? ', '
+									+ d.slice(i, -2).join(', ') : '')
+							+ '] ... ' + d.slice(-1)
+							:
+							// 約等於的符號是≈或≒，不等於的符號是≠。
+							// https://zh.wikipedia.org/wiki/%E7%AD%89%E4%BA%8E
+							'≈'
 									+ ' [<em>'
 									+ d[0]
 									+ ';'
 									+ d.slice(1, i).join(', ')
 									+ '</em>'
-									+ (i < d.length - 2 ? ', '
-											+ d.slice(i, -2).join(', ') : '')
-									+ '] ... ' + d.slice(-1)
-									:
-									// 約等於的符號是≈或≒，不等於的符號是≠。
-									// https://zh.wikipedia.org/wiki/%E7%AD%89%E4%BA%8E
-									'≈'
-											+ ' [<em>'
-											+ d[0]
-											+ ';'
-											+ d.slice(1, i).join(', ')
-											+ '</em>'
-											+ (i < d.length ? ', '
-													+ d.slice(i).join(', ')
-													: '') + ']: ' + d.length
-											+ ',' + i + ',' + d[i]));
+									+ (i < d.length ? ', '
+											+ d.slice(i).join(', ') : '')
+									+ ']: ' + d.length + ',' + i + ',' + d[i]));
 		d = _.continued_fraction(d, i);
 		if (d[1] < 0) {
 			d[0] = -d[0];
