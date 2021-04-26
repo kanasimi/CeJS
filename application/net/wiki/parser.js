@@ -243,6 +243,8 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// @see Nullish coalescing operator (??)
+	// exclude NaN, null, undefined
 	function is_valid_parameters_value(value) {
 		return value
 		// e.g., .text === ''
@@ -340,8 +342,7 @@ function module_code(library_namespace) {
 			var value = template_object[key];
 			if (is_valid_parameters_value(value)) {
 				value = String(value);
-				if (value.includes('\n')
-						&& !text_array[text_array.length - 1].endsWith('\n')) {
+				if (value.includes('\n') && !text_array.at(-1).endsWith('\n')) {
 					text_array[text_array.length - 1] += '\n';
 				}
 				text_array.push(key + '=' + value);
@@ -622,7 +623,7 @@ function module_code(library_namespace) {
 				// For numeral parameter_name, just replace to empty value.
 				template_token[index] = '';
 				// Warning: this will NOT change .index_of , .parameters !
-				while (!template_token[template_token.length - 1])
+				while (!template_token.at(-1))
 					template_token.pop();
 			}
 			return 1;
@@ -2336,7 +2337,8 @@ function module_code(library_namespace) {
 		function add_root_section(next_section_title_index) {
 			// assert: _this.type === 'plain'
 			// section_title === parser[section.range[0] - 1]
-			var this_section_title_index = all_root_section_list.length > 0 ? all_root_section_list[all_root_section_list.length - 1].range[1]
+			var this_section_title_index = all_root_section_list.length > 0 ? all_root_section_list
+					.at(-1).range[1]
 					: undefined,
 			// range: 本 section inner 在 root parsed 中的 index.
 			// parsed[range[0]] to parsed[range[1]] - 1
@@ -2522,7 +2524,7 @@ function module_code(library_namespace) {
 						// 判別一行內有多個使用者名稱的情況。
 						// 當一行內有多個使用者名稱的情況，會取最後一個簽名。
 						if (user_list.length > 0) {
-							this_user = user_list[user_list.length - 1];
+							this_user = user_list.at(-1);
 							// ↑ 這個使用者名稱可能為 bot。
 							if (options.ignore_bot
 									&& PATTERN_BOT_NAME.test(this_user)) {
@@ -3434,13 +3436,73 @@ function module_code(library_namespace) {
 						&& parsed[index], index, parsed);
 			}
 			if (is_valid_parameters_value(token)) {
-				parsed[index] = token + '\n' + (parsed[index] || '');
+				// index maybe parsed.length
+				parsed[index] = location_index >= 0 ? token + '\n'
+						+ (parsed[index] || '')
+				// parse_wikitext(token)
+				: token;
 			}
 			return;
 		}
 
 		throw new Error('insert_layout_token: Can not insert token as '
 				+ location);
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	/**
+	 * excluding the disambiguator, and remove diacritics of page_title
+	 * 
+	 * @param {String}page_title
+	 *            頁面標題。
+	 * @param {Boolean}to_lower_case
+	 *            for case-insensitive compare
+	 * 
+	 * @returns {String} sort key
+	 */
+	function page_title_to_sort_key(page_title, to_lower_case) {
+		if (!page_title)
+			return;
+		if (page_title.title) {
+			// input page_data
+			page_title = page_title.title;
+		}
+		// excluding the disambiguator
+		// e.g., [[Abdoul Karim Sylla (footballer, born 1981)]]
+		// → "Abdoul Karim Sylla"
+		var sort_key = page_title.toString().replace(/ \([^()]+\)$/, '');
+		if (sort_key.normalize) {
+			// with diacritics removed. to Latin alphabet
+			// https://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript
+			sort_key = sort_key.normalize("NFD")
+					.replace(/[\u0300-\u036f]/g, "");
+		}
+		if (to_lower_case)
+			sort_key = sort_key.toLowerCase();
+		return sort_key;
+	}
+
+	// TODO: check the sort_key is the same as page title or DEFAULTSORT
+	function set_sort_key_of_category(sort_key) {
+		var category_token = this;
+		// const
+		var old_sort_key = category_token.sort_key
+				&& page_title_to_sort_key(category_token.sort_key);
+		if (old_sort_key) {
+			if (old_sort_key === sort_key) {
+				// Nothing changed
+				return;
+			}
+			if (old_sort_key.length > sort_key
+					|| !old_sort_key.startsWith(sort_key))
+				library_namespace.debug('The sort key of <code><nowiki>'
+						+ category_token + '</nowiki></code> will be set to '
+						+ JSON.stringify(sort_key) + '!', 1,
+						'set_sort_key_of_category');
+		}
+		category_token[2] = sort_key;
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -4476,6 +4538,7 @@ function module_code(library_namespace) {
 			if (!page_name) {
 				// assert: [[#section_title]]
 				page_name = '';
+				// anchor, fragment
 				section_title = page_and_section;
 			} else {
 				if (!section_title) {
@@ -4553,7 +4616,7 @@ function module_code(library_namespace) {
 					// [ file namespace, section_title,
 					// parameters 1, parameters 2, parameters..., caption ]
 					var token, file_option,
-					// parameters 有分大小寫，並且各種類會以首先符合的為主。
+					// parameters 有分大小寫與繁簡體，並且各種類會以首先符合的為主。
 					PATTERN = /([^\|]*?)(\||$)/ig;
 					// assert: 這會將剩下來的全部分完。
 					while (token = PATTERN.exec(display_text)) {
@@ -4630,7 +4693,7 @@ function module_code(library_namespace) {
 						while (!file_option[0]) {
 							file_option.shift();
 						}
-						while (!file_option[file_option.length - 1]) {
+						while (!file_option.at(-1)) {
 							file_option.pop();
 						}
 						if (file_option.length === 1) {
@@ -4799,6 +4862,8 @@ function module_code(library_namespace) {
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
 				_set_wiki_type(parameters, file_matched ? 'file'
 						: category_matched ? 'category' : 'link');
+				if (category_matched)
+					parameters.set_sort_key = set_sort_key_of_category;
 			}
 			// console.trace(parameters);
 
@@ -5258,7 +5323,7 @@ function module_code(library_namespace) {
 					}
 				}
 			}
-			// 參數有分大小寫。
+			// 參數有分大小寫與繁簡體。
 			parameters.parameters = _parameters;
 			parameters.index_of = parameter_index_of;
 
@@ -5953,7 +6018,7 @@ function module_code(library_namespace) {
 			list_prefix += matched[2];
 
 			// is <dt>, should use: ';' ===
-			// latest_list.list_prefix[latest_list.list_prefix.length - 1]
+			// latest_list.list_prefix.at(-1)
 			// assert: latest_list.length === latest_list.list_prefix.length - 1
 			if (is_dt) {
 				// assert: latest_list.length === 0
@@ -6390,7 +6455,7 @@ function module_code(library_namespace) {
 		}
 		resolve_escaped(queue, include_mark, end_mark);
 
-		wikitext = queue[queue.length - 1];
+		wikitext = queue.at(-1);
 		// console.log(wikitext);
 		if (initialized_fix
 		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
@@ -8137,6 +8202,8 @@ function module_code(library_namespace) {
 
 	function array_to_table(array, options) {
 		options = library_namespace.setup_options(options);
+		if (!array.length && options.no_header)
+			return '';
 
 		var table = [ '{|' + ' class="' + (options['class'] || 'wikitable')
 				+ '"' ];
@@ -8268,6 +8335,8 @@ function module_code(library_namespace) {
 
 		parse : parse_wikitext,
 		// parser : page_parser,
+
+		page_title_to_sort_key : page_title_to_sort_key,
 
 		setup_layout_elements : setup_layout_elements
 	});
