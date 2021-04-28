@@ -441,6 +441,9 @@ function module_code(library_namespace) {
 		return get_site_configurations(this);
 	};
 
+	// callback(wiki.FC_data_hash);
+	// e.g.,
+	// wiki.FC_data_hash[title]={type:'GA',types:['GA','FFA'],is_former:true,is_list:false}
 	wiki_API.prototype.get_featured_content = function get_featured_content(
 			options, callback) {
 		var FC_configurations = this.get_featured_content_configurations();

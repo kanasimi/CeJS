@@ -8,7 +8,7 @@
  * 
  * TODO:<code>
 
-Read https://www.mediawiki.org/wiki/Help:TemplateData
+Read https://www.mediawiki.org/wiki/Extension:TemplateData https://www.mediawiki.org/wiki/Help:TemplateData
 
 合併 `special page configuration.js`
 

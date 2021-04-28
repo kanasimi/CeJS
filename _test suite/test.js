@@ -3153,8 +3153,9 @@ function test_wiki() {
 		// CeL.wiki.parser('[[Category:a]]').each('category', function(token) {console.log(token);});0;
 		wikitext = '{{ {{tl|t}} | p }}'; parsed = CeL.wiki.parse(wikitext);
 		assert(['transclusion', parsed.type], 'template in template name #1-1');
-		assert([' p ', parsed[1][2]], 'template in template name #1-2');
-		assert(['p', parsed.parameters[1]], 'template in template name #1-3');
+		assert([' p', parsed[1][2]], 'template in template name #1-2');
+		assert([' ', parsed[1][3]], 'template in template name #1-3');
+		assert(['p', parsed.parameters[1]], 'template in template name #1-4');
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{今日}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert(['transclusion', parsed.type], 'template in template name #2-1');
 		assert(['transclusion', parsed[0][1].type], 'template in template name #2-2');

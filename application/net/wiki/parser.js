@@ -392,6 +392,7 @@ function module_code(library_namespace) {
 		return config;
 	}
 
+	// @inner
 	function mode_space_of_parameters(template_token, parameter_name) {
 		if (false) {
 			template_token.forEach(function(parameter, index) {
@@ -409,6 +410,8 @@ function module_code(library_namespace) {
 		}
 
 		var this_parameter = template_token[index];
+		// this_parameter = [ key, " = ", value ] || [ "", "", value ]
+
 		// 判斷上下文使用的 spaces。
 		var spaces = this_parameter[0];
 		if (Array.isArray(spaces)) {
@@ -431,7 +434,8 @@ function module_code(library_namespace) {
 		// var spaces = template_token[index].toString().match(/(\n *| ?)$/);
 		//
 		// parameter: spaces[0] + key + spaces[1] + value + spaces[2]
-		spaces = [ spaces,/* " = " */this_parameter[1], /* spaces[1] */
+		spaces = [ spaces,/* " = " */this_parameter[1],
+		/* tail spaces */
 		this_parameter[3] || '' ];
 
 		return spaces;
@@ -448,15 +452,28 @@ function module_code(library_namespace) {
 	 * @example<code>
 
 	// replace value only
-	CeL.wiki.parse.replace_parameter(token, {
+	token = CeL.wiki.parse('{{t|parameter_name=12|parameter_name_2=32}}');
+	changed_count = CeL.wiki.parse.replace_parameter(token, {
+		parameter_name : 'replace to value',
+		parameter_name_2 : 'replace to value_2',
+	}, 'value_only');
+	token.toString();
+
+	// replace value and parameter name
+	token = CeL.wiki.parse('{{t|parameter_name=12|parameter_name_2=32}}');
+	changed_count = CeL.wiki.parse.replace_parameter(token, {
 		parameter_name : 'parameter name 3=replace to value',
 		parameter_name_2 : 'parameter name 4=replace to value_2',
-	}, 'value_only');
+	});
+	token.toString();
 
+	// force_add
+	token = CeL.wiki.parse('{{t}}');
 	CeL.wiki.parse.replace_parameter(token, {
 		parameter_name : 'replace_to_value',
 		parameter_name_2 : 'replace_to_value_2',
 	}, { value_only : true, force_add : true, append_key_value : true });
+	token.toString();
 
 	// replace value only: old style 舊格式
 	CeL.wiki.parse.replace_parameter(token, parameter_name,
@@ -2313,7 +2330,11 @@ function module_code(library_namespace) {
 	</code>
 	 */
 	function for_each_section(for_section, options) {
-		options = library_namespace.setup_options(options);
+		options = library_namespace.new_options(options);
+		if (!options[KEY_SESSION] && this.options && this.options[KEY_SESSION]) {
+			// for `var date = parse_date(token, options);`
+			options[KEY_SESSION] = this.options[KEY_SESSION];
+		}
 
 		// this: parsed
 		var _this = this, page_title = this.page && this.page.title,
@@ -3403,6 +3424,16 @@ function module_code(library_namespace) {
 		return parsed.layout_indices = layout_indices;
 	}
 
+	if (false) {
+		parsed = page_data.parse();
+		parsed.insert_layout_token('{{maintenance_template}}',
+				'maintenance_templates');
+		parsed.insert_layout_token('[[Category:category name]]');
+		// TODO:
+		parsed.insert_layout_token('{{DEFAULTSORT:sort key}}');
+		return parsed.toString();
+	}
+
 	function insert_layout_token(token, options) {
 		var location;
 		if (typeof options === 'string') {
@@ -3414,35 +3445,45 @@ function module_code(library_namespace) {
 			location = options.location;
 		}
 
+		if (!location) {
+			if (typeof token === 'string')
+				token = parse_wikitext(token);
+			if (token.type === 'category') {
+				location = 'categories';
+			}
+		}
+
 		var parsed = this;
 		var layout_indices = parsed.analysis_layout_indices(options);
 
-		var index = layout_indices[location], location_index;
-		if (!(index >= 0)) {
-			location_index = default_layout_order.indexOf(location);
-			if (location_index >= 0) {
+		var parsed_index = layout_indices[location],
+		// Only set when no exactly index of location got.
+		layout_index;
+		if (!(parsed_index >= 0)) {
+			layout_index = default_layout_order.indexOf(location);
+			if (layout_index >= 0) {
 				// insert before next layout element
-				while (++location_index < default_layout_order.length) {
-					index = layout_indices[default_layout_order[location_index]];
-					if (index >= 0)
+				while (++layout_index < default_layout_order.length) {
+					parsed_index = layout_indices[default_layout_order[layout_index]];
+					if (parsed_index >= 0)
 						break;
 				}
 			}
 		}
 
-		if (index >= 0) {
+		if (parsed_index >= 0) {
 			if (typeof token === 'function') {
-				token = token.call(this, !(location_index >= 0)
-						&& parsed[index], index, parsed);
+				token = token.call(this, !(layout_index >= 0)
+				// 只有 location 完全相符才會傳入 token。
+				&& parsed[parsed_index], parsed_index, parsed);
 			}
 			if (is_valid_parameters_value(token)) {
-				// index maybe parsed.length
-				parsed[index] = location_index >= 0 ? token + '\n'
-						+ (parsed[index] || '')
-				// parse_wikitext(token)
-				: token;
+				// insert, instead of replace.
+				parsed[parsed_index] = token + '\n'
+				// `parsed_index` maybe parsed.length
+				+ (parsed[parsed_index] || '');
 			}
-			return;
+			return true;
 		}
 
 		throw new Error('insert_layout_token: Can not insert token as '
@@ -5031,6 +5072,11 @@ function module_code(library_namespace) {
 
 			index = 1;
 			parameters = parameters.map(function(token, _index) {
+				// trimEnd() of value, will push spaces in token[3].
+				var tail_spaces = token.match(/[\s\n]*$/)[0];
+				if (_index > 0 && tail_spaces) {
+					token = token.slice(0, -tail_spaces.length);
+				}
 				// 預防經過改變，需再進一步處理。
 				token = parse_wikitext(token, Object.assign({
 					inside_transclusion : true
@@ -5093,6 +5139,10 @@ function module_code(library_namespace) {
 					} else {
 						// assert: token.length > 1
 						token = _set_wiki_type([ '', '', token ], 'plain');
+					}
+					// assert: token === [ '', '', value ]
+					if (tail_spaces) {
+						token.push(tail_spaces);
 					}
 
 					var value = token[2];
@@ -5169,19 +5219,18 @@ function module_code(library_namespace) {
 				}
 				token[1] = matched[0];
 
+				parameter_index_of[token.key] = _index;
+
 				var value = token[2];
 				// assert: Array.isArray(value) && value.type === 'plain'
-				parameter_index_of[token.key] = _index;
-				_index = value.length - 1;
-				matched = _index >= 0 && typeof value[_index] === 'string'
-				// trimEnd() of value, push spaces in token[3]
-				&& value[_index].match(/\s+$/);
-				if (matched) {
-					token.push(matched[0]);
-					value[_index] = value[_index].slice(0, matched.index);
-				}
 				if (value.length < 2) {
 					token[2] = value = value.length === 0 ? '' : value[0];
+					if (!value && (matched = tail_spaces.match(/^[^\n]+/))) {
+						// tail spaces: 刪掉 \n 前的所有 spaces。
+						// [p, ' =', '', ' \n '] → [p, ' = ', '', '\n ']
+						token[1] += matched[0];
+						tail_spaces = tail_spaces.slice(matched[0].length);
+					}
 					// 處理某些特殊屬性的值。
 					if (false && /url$/i.test(key)) {
 						try {
@@ -5191,6 +5240,10 @@ function module_code(library_namespace) {
 							// TODO: handle exception
 						}
 					}
+				}
+				// assert: token.length === 2
+				if (tail_spaces) {
+					token.push(tail_spaces);
 				}
 
 				// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]

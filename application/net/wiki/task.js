@@ -2943,7 +2943,9 @@ function module_code(library_namespace) {
 			// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
 			// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
 			// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
-			&& session.run(callback.bind(session, session.token.login_user_name, error));
+			&& session.run(callback.bind(session,
+			// instead of session.token.lgname
+			session.token.login_user_name, error));
 			library_namespace.debug('已登入 [' + session.token.lgname
 					+ ']。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
 			// popup 'login'.
