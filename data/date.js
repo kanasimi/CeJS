@@ -2916,7 +2916,7 @@ function module_code(library_namespace) {
 
 	indicate_date_time.general_format = '%Y-%2m-%2d %2H:%2M';
 
-	_.indicate_date_time;
+	_.indicate_date_time = indicate_date_time;
 
 	// ------------------------------------------
 	// {String}日期及時間表達式 → {Natural}timevalue in milliseconds

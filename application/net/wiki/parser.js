@@ -986,7 +986,9 @@ function module_code(library_namespace) {
 		// console.log('max_depth: ' + max_depth);
 
 		var session = wiki_API.session_of_options(options);
-		if (!session && (session = wiki_API.session_of_options(this))) {
+		if (!session
+				&& (session = wiki_API.session_of_options(this)
+						|| wiki_API.session_of_options(this.options))) {
 			// for wiki_API.template_functions.adapt_function()
 			wiki_API.add_session_to_options(session, options);
 		}

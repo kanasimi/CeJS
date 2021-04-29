@@ -648,6 +648,10 @@ function module_code(library_namespace) {
 
 				// console.trace(_this.redirects_data);
 
+				if (false) {
+					console.trace([ next[3].no_languagevariants,
+							!_this.has_languagevariants ]);
+				}
 				if (next[3].no_languagevariants || !_this.has_languagevariants
 				// || !/[\u4e00-\u9fa5]/.test(next[1])
 				) {
@@ -725,6 +729,109 @@ function module_code(library_namespace) {
 			// `wiki_API_prototype_copy_from`
 			wiki_API.edit.copy_from.apply(this, next.slice(1));
 			// TODO: callback: this.next();
+			break;
+
+		case 'download':
+			// download file to local path.
+
+			// wiki_session.download(file_title, local_path / options,
+			// callback);
+			if (typeof next[1] === 'string') {
+				next[1] = [ next[1] ];
+			} else if (!Array.isArray(next[1])) {
+				next[3] && next[3](null, new Error('Invalid file_title!'));
+				this.next();
+				break;
+			}
+
+			if (typeof next[2] === 'string') {
+				next[2] = next[1].length > 1 ? {
+					directory : next[2]
+				} : {
+					file_name : next[2]
+				};
+			} else {
+				next[2] = library_namespace.new_options(next[2]);
+			}
+			function download_next_file(data, error, XMLHttp) {
+				if (error) {
+					// assert: next[2].index > 0
+					var page_data = next[1][next[2].index - 1];
+					page_data.error = error;
+					next[1].error_titles.push(page_data.title);
+					library_namespace.error('Cannot download '
+							+ page_data.title + ': ' + error);
+				}
+				if (next[2].index >= next[1].length) {
+					next[3]
+							&& next[3](next[1], next[1].error_titles.length > 0
+									&& next[1].error_titles);
+					_this.next();
+					return;
+				}
+
+				var page_data = next[1][next[2].index++];
+				// assert: !!page_data === true
+				var imageinfo = page_data.imageinfo && page_data.imageinfo[0];
+				if (!imageinfo) {
+					next[1].error_titles.push(page_data.title);
+					library_namespace.error('Cannot download '
+							+ page_data.title);
+					download_next_file();
+					return;
+				}
+
+				// console.trace(page_data);
+				library_namespace.get_URL_cache(imageinfo.thumburl
+						|| imageinfo.url, download_next_file, next[2]);
+			}
+			next[1] = next[1].map(function(page) {
+				// assert: page title starts with "File:"
+				return _this.normalize_title(page.title || page);
+			}).filter(function(page_title) {
+				return page_title;
+			}).unique();
+			if (next[1].length > 50) {
+				library_namespace
+						.error('wiki_API.prototype.next: Cannot download too many files one time!');
+			}
+			// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bimageinfo
+			next[2].imageinfo_options = Object.assign({
+				action : 'query',
+				prop : 'imageinfo',
+				iiprop : 'url|size|mime',
+				titles : next[1].join('|')
+			}, next[2].imageinfo_options);
+			if (next[2].width > 0)
+				next[2].imageinfo_options.iiurlwidth = next[2].width;
+			if (next[2].height > 0)
+				next[2].imageinfo_options.iiurlheight = next[2].height;
+			// page title to raw data URL
+			wiki_API.query(next[2].imageinfo_options, function(data) {
+				var page_hash = Object.create(null);
+				// console.trace(data.query.pages);
+				for ( var pageid in data.query.pages) {
+					var page_data = data.query.pages[pageid];
+					page_hash[page_data.title] = page_data;
+				}
+				var page_list = [];
+				next[1].forEach(function(page_title) {
+					if (page_hash[page_title]) {
+						page_list.push(page_hash[page_title]);
+						delete page_hash[page_title];
+					} else {
+						// File name alterated?
+					}
+				});
+				// 把剩下還沒處理的全放進 page_list。
+				for ( var page_title in page_hash) {
+					page_list.push(page_hash[page_title]);
+				}
+				next[1] = page_list;
+				next[2].index = 0;
+				next[1].error_titles = [];
+				download_next_file();
+			}, null, add_session_to_options(this));
 			break;
 
 		// ----------------------------------------------------------------------------------------
@@ -1599,7 +1706,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see function wiki_API_prototype_methods()
 	 */
-	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|edit|upload|cache|listen|category_tree|register_redirects|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|download|edit|upload|cache|listen|category_tree|register_redirects|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------
