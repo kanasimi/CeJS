@@ -1505,14 +1505,17 @@ function module_code(library_namespace) {
 			if (token.type === 'transclusion') {
 				if (token.name === 'NoteTA') {
 					// preserve 轉換用詞
-					// introduction_section.push(token);
+					introduction_section.push(token);
 					continue;
 				}
 
 				if (token.name in {
 					Cfn : true,
+					Sfn : true,
+					Efn : true,
 					NoteTag : true,
-					R : true
+					R : true,
+					Clear : true
 				}) {
 					// Skip references
 					continue;
@@ -1540,6 +1543,13 @@ function module_code(library_namespace) {
 
 			if ((token.type === 'tag' || token.type === 'tag_single')
 					&& token.tag === 'ref') {
+				// 去掉所有參考資料。
+				continue;
+			}
+
+			if (token.type === 'table'
+			// e.g., __TOC__
+			|| token.type === 'switch') {
 				// 去掉所有參考資料。
 				continue;
 			}

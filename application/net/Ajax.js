@@ -3050,6 +3050,7 @@ function module_code(library_namespace) {
 						}, 3, 'get_URL_cache_node');
 					}
 					node_fs.writeFileSync(file_name, data, encoding);
+					XMLHttp.file_name = file_name;
 				}
 
 				// set file modify date

@@ -3210,7 +3210,399 @@ function module_code(library_namespace) {
 
 		return return_string;
 	}
-	;
+
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+	// @inner
+	function serial_token_list_toString() {
+		return this.join('');
+	}
+
+	// @inner
+	function to_serial_token_list(item, options) {
+		var serial_token_list = [];
+		if (!item && item !== 0)
+			return serial_token_list;
+
+		serial_token_list.toString = serial_token_list_toString;
+		var PATTERN_serial_token = /([^\d]+)(0*)([1-9]\d*)?/g;
+		var max_serial_length = options.max_serial_length;
+
+		item = String(item);
+		var matched = item.match(/^\d+/);
+		if (matched) {
+			matched = matched[0];
+			if (matched.length > max_serial_length) {
+				serial_token_list.push(matched.slice(0, -max_serial_length),
+						matched.slice(-max_serial_length));
+			} else {
+				serial_token_list.push('', matched);
+			}
+			PATTERN_serial_token.lastIndex = matched.length;
+		}
+
+		while (matched = PATTERN_serial_token.exec(item)) {
+			if (!matched[3])
+				matched[3] = '';
+			var diff = max_serial_length - matched[3].length;
+			if (matched[2].length <= diff) {
+				serial_token_list.push(matched[1], matched[2] + matched[3]);
+			} else if (0 <= diff) {
+				serial_token_list.push(matched[1] + matched[2].slice(0, -diff),
+						'0'.repeat(diff) + matched[3]);
+			} else {
+				serial_token_list.push(matched[0], '');
+			}
+		}
+
+		// assert: item === serial_token_list.join('')
+
+		// return pairs: [
+		// non-serial, digits (maybe serial),
+		// non-serial, digits (maybe serial),
+		// ... ]
+		return serial_token_list;
+	}
+
+	// @inner
+	function generator_toString(serial, date) {
+		var list = this.clone();
+		if (typeof date === 'string') {
+			date = date.to_Date() || date;
+		} else if (typeof date === 'number') {
+			date = new Date(date);
+		}
+		if (!library_namespace.is_Date(date) || !date.getTime()) {
+			if (date) {
+				library_namespace.error('generator_toString: Invalid date: '
+						+ date);
+			}
+			date = new Date;
+		}
+
+		for (var arg_index = 1, index = 1; index < list.length; index++) {
+			var operator = list[index];
+			if (Number.isSafeInteger(serial)) {
+				if (typeof operator === 'number') {
+					list[index] = operator ? serial.pad(operator) : serial;
+				} else {
+					list[index] = operator ? date.format(operator) :
+					// assert: operator === ''
+					'';
+				}
+			} else {
+				list[index] = typeof operator === 'number' ? '%' + arg_index++
+						: operator;
+			}
+		}
+		return list.join('');
+	}
+
+	// @inner
+	function get_pattern_and_generator(serial_token_list, options) {
+		var pattern = serial_token_list.clone();
+		var generator = serial_token_list.clone();
+		generator.toString = generator_toString;
+		for (var index = 1; index < pattern.length; index++) {
+			var token = pattern[index];
+			if (index % 2 === 0) {
+				// assert: generator[index] === token;
+				pattern[index]
+				//
+				= library_namespace.to_RegExp_pattern(token);
+				continue;
+			}
+
+			if (!token)
+				continue;
+
+			var fixed_length = options.fixed_length || token.startsWith(0);
+			generator[index] = fixed_length ? token.length : 0;
+			pattern[index] = fixed_length
+			//
+			? '(\\d{' + token.length + '})'
+			//
+			: '(\\d{1,' + options.max_serial_length + '})';
+		}
+
+		// assert: new RegExp('^'+pattern+'$').test(serial_token_list.join(''))
+		// === true
+
+		// assert: CeL.gettext(generator, index, index.pad()) may generate
+		// serial_token_list.join('')
+
+		return [ pattern, generator ];
+	}
+
+	// digital serial
+	function detect_serial_pattern(items, options) {
+		options = library_namespace.new_options(options);
+		if (!(options.max_serial_length > 0)) {
+			// 4: year length
+			options.max_serial_length = 4;
+		}
+
+		var pattern_hash = Object.create(null);
+		function add_serial_token_list(serial_token_list) {
+			var pattern = get_pattern_and_generator(serial_token_list, options);
+			var generator = pattern[1];
+			pattern = pattern[0];
+			var pattern_String = pattern.join('');
+			if (!pattern_hash[pattern_String]) {
+				(pattern_hash[pattern_String] = []).generator = generator;
+			}
+			pattern_hash[pattern_String].push(serial_token_list);
+		}
+
+		// 創建 pattern_hash
+		items.forEach(function(item) {
+			var serial_token_list = to_serial_token_list(item, options);
+			add_serial_token_list(serial_token_list);
+		});
+
+		// 掃描: 有相同 digits 的不應歸為 serial。
+		Object.entries(pattern_hash).forEach(function(pair) {
+			// var pattern = pair[0];
+			var lists = pair[1];
+			var need_to_resettle = [];
+			for (var index = 1; index < lists.length; index += 2) {
+				for (var digits_hash = Object.create(null), index_of_lists = 0;
+				//
+				index_of_lists < lists.length; index_of_lists++) {
+					var serial_token_list = lists[index_of_lists];
+					var digits = serial_token_list[index];
+					if (!digits) {
+						// assert: lists[*][index] === ''
+						break;
+					}
+					if (!(digits in digits_hash)) {
+						digits_hash[digits] = index_of_lists;
+						continue;
+					}
+					// 有相同 digits 的不應歸為 serial。
+					// e.g., "A1B1", "A1B2"
+					// 僅有 A1B<b>1</b>, A1B<b>2</b> 可歸為 serial。
+					// A<b>1</b> ["A", "1", ... ] 應改為 ["A1", "", ... ]
+					serial_token_list[index - 1] += digits;
+					serial_token_list[index] = '';
+					if (!need_to_resettle.includes(index_of_lists))
+						need_to_resettle.push(index_of_lists);
+					if (digits_hash[digits] >= 0) {
+						serial_token_list = lists[digits_hash[digits]];
+						serial_token_list[index - 1] += digits;
+						serial_token_list[index] = '';
+						need_to_resettle.unshift(digits_hash[digits]);
+						// 下次不再處理。
+						digits_hash[digits] = -1;
+					}
+				}
+			}
+
+			if (need_to_resettle.length > 0) {
+				need_to_resettle.sort(library_namespace.descending)
+				//
+				.forEach(function(index_of_lists) {
+					var serial_token_list = lists.splice(index_of_lists, 1)[0];
+					// rebulid pattern_hash
+					add_serial_token_list(serial_token_list);
+				});
+			}
+		});
+
+		// 把 pattern '(\\d{1,' + max_serial_length + '})'
+		// 搬到 '(\\d{' + token.length + '})'
+		Object.entries(pattern_hash).forEach(function(pair) {
+			var pattern = pair[0], lists = pair[1];
+			if (lists.length === 0) {
+				// Nothing left after "有相同 digits 的不應歸為 serial。".
+				delete pattern_hash[pattern];
+				return;
+			}
+			if (!pattern.includes('(\\d{1,')) {
+				// Not target.
+				return;
+			}
+			var _options = Object.clone(options);
+			_options.fixed_length = true;
+			for (var index_of_lists = 0;
+			//
+			index_of_lists < lists.length; index_of_lists++) {
+				var serial_token_list = lists[index_of_lists];
+				var pattern = get_pattern_and_generator(serial_token_list,
+				//
+				_options);
+				// var generator = pattern[1];
+				pattern = pattern[0];
+				var pattern_String = pattern.join('');
+				if (pattern_hash[pattern_String]) {
+					lists.splice(index_of_lists--, 1);
+					pattern_hash[pattern_String].push(serial_token_list);
+				}
+			}
+		});
+
+		Object.keys(pattern_hash).forEach(function(pattern) {
+			if (pattern_hash[pattern].length === 0)
+				delete pattern_hash[pattern];
+		});
+
+		// 把符合日期的數字以日期標示
+		Object.values(pattern_hash).forEach(function(lists) {
+			var generator = lists.generator;
+			for (var index = 1,
+			// assert: length === generator.length
+			length = generator.length; index < length; index += 2) {
+				var digits_list = [];
+				if (lists.some(function(serial_token_list) {
+					var digits = serial_token_list[index];
+					if (!digits)
+						return true;
+					// assert: digits_list.includes(digits) === false
+					digits_list.push(digits);
+				})) {
+					continue;
+				}
+
+				// checker = [ typical generator label, checker,
+				// has digits without 0-prefix ]
+				var checker_list = [ [ '%Y', function(digits) {
+					return 1900 <= digits && digits <= 2200;
+				} ], [ '%m', function(digits) {
+					if (1 <= digits && digits <= 12) {
+						if (digits < 10 && digits.length < 2)
+							this[2] = true;
+						return true;
+					}
+				} ], [ '%d', function(digits) {
+					if (1 <= digits && digits <= 31) {
+						if (digits < 10 && digits.length < 2)
+							this[2] = true;
+						return true;
+					}
+				} ] ];
+
+				checker_list = checker_list.filter(function(checker) {
+					return digits_list.every(function(digits) {
+						return checker[1](digits);
+					});
+				});
+
+				if (checker_list.length === 0) {
+					// No matched, use generator default operator
+					// assert: typeof generator[index] === 'number'
+					continue;
+				}
+
+				// assert: typeof generator[index] === 'number'
+				generator[index] = [ generator[index] ]
+				// 登記所有相符的。
+				.append(checker_list);
+
+				switch (checker_list = checker_list[0][0]) {
+				case '%Y':
+				case '%m':
+					generator['has_' + checker_list] = true;
+					break;
+				}
+			}
+
+			for (var index = 1; index < generator.length; index += 2) {
+				var operator = generator[index];
+				if (Array.isArray(operator)) {
+					var digits_length = operator[0];
+					// best checker
+					operator = operator[1];
+					generator[index] = operator[0] === '%Y'
+					// assert: generator[index] = [ number, [checker] ]
+					|| generator['has_%Y'] && operator[0] === '%m'
+					//
+					|| generator['has_%m'] && operator[0] === '%d'
+					//
+					? digits_length || operator[2]
+					// "%m" → "%2m"
+					? operator[0].replace('%', '%' + digits_length)
+					//
+					: operator[0] : digits_length;
+				}
+			}
+		});
+
+		var pattern_group_hash = Object.create(null);
+		Object.keys(pattern_hash).forEach(function(pattern) {
+			var generalized = pattern.replace(/\\d{\d{1,2}}/g, '\\d{1,'
+			//
+			+ options.max_serial_length + '}');
+			if (!pattern_group_hash[generalized]) {
+				pattern_group_hash[generalized] = [ pattern ];
+				return;
+			}
+
+			// move items of %m to %2m
+
+			var pattern_to = pattern_hash[pattern].generator.toString();
+			var index_in_group_hash;
+			var pattern_from = pattern_group_hash[generalized]
+			// 找出所有與 pattern 等價的
+			.filter(function(_pattern, index) {
+				_pattern = pattern_hash[_pattern].generator.toString();
+				if (/%\d([md])/.test(_pattern)
+				//
+				!== /%\d([md])/.test(pattern_to)
+				//
+				&& _pattern.replace(/%\d([md])/g, '%$1')
+				//
+				=== pattern_to.replace(/%\d([md])/g, '%$1')) {
+					if (!(index_in_group_hash >= 0))
+						index_in_group_hash = index;
+					return true;
+				}
+			});
+			if (pattern_from.length === 0) {
+				// Warning: 可能導致出現錯誤
+				pattern_group_hash[generalized].push(pattern);
+				return;
+			}
+
+			pattern_from = pattern_from[0];
+			var pattern_to;
+			if (/%\d([md])/.test(pattern_to)) {
+				pattern_group_hash[generalized].splice(index_in_group_hash, 1);
+				pattern_group_hash[generalized].push(pattern_to);
+				pattern_to = pattern;
+			} else {
+				// switch from, to
+				pattern_to = pattern_from;
+				pattern_from = pattern;
+			}
+			// assert: !/%\d([md])/.test(pattern_from)
+			// && /%\d([md])/.test(pattern_to)
+
+			// var lists_from = pattern_hash[pattern_from];
+			// var lists_to = pattern_hash[pattern_to];
+			pattern_hash[pattern_to].append(pattern_hash[pattern_from]);
+			delete pattern_hash[pattern_from];
+		});
+
+		var pattern_list = [];
+		for ( var pattern in pattern_hash) {
+			var lists = pattern_hash[pattern];
+			// assert (lists.length > 0)
+			pattern_list.push({
+				pattern : new RegExp('^' + pattern + '$'),
+				generator : lists.generator,
+				items : lists,
+				count : lists.length
+			});
+		}
+		// count 從大到小排序
+		pattern_list.sort(function(_1, _2) {
+			return _2.count - _1.count;
+		});
+
+		return pattern_list;
+	}
+
+	_.detect_serial_pattern = detect_serial_pattern;
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// 組織 period list，以做後續檢索。

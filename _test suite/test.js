@@ -880,21 +880,19 @@ function test_locale() {
 
 	//	設定欲轉換的文字格式。
 	all_error_count += CeL.test('設定欲轉換的文字格式。', function (assert) {
+		var message_id = '%n1 smart ways to spend %c2';
 		CeL.gettext.set_text({
 			'%n1 smart ways to spend %c2': '%Chinese/n1個花%c2的聰明方法'
 		}, 'Traditional Chinese');
 
 		assert(['十個花新臺幣柒萬圓整的聰明方法',
-			CeL.gettext('%n1 smart ways to spend %c2', 10, 70000)],
-			'test it with 貨幣/currency#1');
+			CeL.gettext(message_id, 10, 70000)], 'gettext: 貨幣/currency#1');
 
 		assert(['二十五個花新臺幣捌拾億捌萬圓整的聰明方法',
-			CeL.gettext('%n1 smart ways to spend %c2', 25, 8000080000)],
-			'test it with 貨幣/currency#2');
+			CeL.gettext(message_id, 25, 8000080000)], 'gettext: 貨幣/currency#2');
 
 		assert(['四萬〇三十五個花新臺幣伍佰玖拾捌萬陸仟玖佰貳拾捌圓整的聰明方法',
-			CeL.gettext('%n1 smart ways to spend %c2', 40035, 5986928)],
-			'test it with 貨幣/currency#3');
+			CeL.gettext(message_id, 40035, 5986928)], 'gettext: 貨幣/currency#3');
 	});
 
 
@@ -2222,6 +2220,16 @@ function test_date() {
 		[[0, new Date(tmp = '2010/1/2 5:0') - tmp.to_Date()]],
 		[[0, new Date(tmp = '2010/1/2 5:0') - tmp.to_Date('CE')]],
 	]);
+
+	all_error_count += CeL.test('detect serial pattern', function (assert) {
+		assert(['A7', CeL.detect_serial_pattern(['A1','A2'])[0].generator.toString(7)], 'detect_serial_pattern: A1');
+		assert(['A200', CeL.detect_serial_pattern(['filler 1', 'A5','A6'])[0].generator.toString(200)], 'detect_serial_pattern: A5');
+		assert(['A8000K', CeL.detect_serial_pattern(['filler', 'A1K','A2K'])[0].generator.toString(8000)], 'detect_serial_pattern: A1K');
+		assert(['A1B12', CeL.detect_serial_pattern(['A1B1','A1B2', 'filler 1 ABC'])[0].generator.toString(12)], 'detect_serial_pattern: A1B1');
+		assert(['2100', CeL.detect_serial_pattern(['filler 1 ABC 1', 1999,2010])[0].generator.toString(0, '2100/1/1')], 'detect_serial_pattern: year');
+		assert(['2100/8', CeL.detect_serial_pattern(['1 filler', '1999/1','2010/12'])[0].generator.toString(0, '2100/8/1')], 'detect_serial_pattern: %Y/%m');
+		assert(['2100/08', CeL.detect_serial_pattern(['1999/12','2010/01', '22 filler'])[0].generator.toString(0, '2100/8/1')], 'detect_serial_pattern: %Y/%2m');
+	});
 
 
 	// Date.parse('100/2/29')===Date.parse('100/3/1')

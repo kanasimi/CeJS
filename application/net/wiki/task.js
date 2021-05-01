@@ -732,10 +732,16 @@ function module_code(library_namespace) {
 			break;
 
 		case 'download':
-			// download file to local path.
+			// Download file to local path.
+			// TODO: wiki_session.download('Category:');
 
-			// wiki_session.download(file_title, local_path / options,
+			// wiki_session.download(file_title, local_path || options,
 			// callback);
+
+			// Download non-vector version of .svg
+			// @see https://phabricator.wikimedia.org/T60663
+			// wiki_session.download('File:Example.svg',{width:100});
+
 			if (typeof next[1] === 'string') {
 				next[1] = [ next[1] ];
 			} else if (!Array.isArray(next[1])) {
@@ -753,15 +759,24 @@ function module_code(library_namespace) {
 			} else {
 				next[2] = library_namespace.new_options(next[2]);
 			}
-			function download_next_file(data, error, XMLHttp) {
-				if (error) {
-					// assert: next[2].index > 0
-					var page_data = next[1][next[2].index - 1];
-					page_data.error = error;
-					next[1].error_titles.push(page_data.title);
-					library_namespace.error('Cannot download '
-							+ page_data.title + ': ' + error);
+			// Cannot use function download_next_file() here @ node.js v0.10.x
+			var download_next_file = function(data, error, XMLHttp) {
+				var page_data;
+				if (next[2].index > 0
+						&& (page_data = next[1][next[2].index - 1])) {
+					// cache file name really writed to
+					// @see function get_URL_cache_node()
+					if (XMLHttp && XMLHttp.file_name) {
+						page_data.file_name = XMLHttp.file_name;
+					}
+					if (error) {
+						page_data.error = error;
+						next[1].error_titles.push(page_data.title);
+						library_namespace.error('Cannot download '
+								+ page_data.title + ': ' + error);
+					}
 				}
+
 				if (next[2].index >= next[1].length) {
 					next[3]
 							&& next[3](next[1], next[1].error_titles.length > 0
@@ -770,7 +785,7 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				var page_data = next[1][next[2].index++];
+				page_data = next[1][next[2].index++];
 				// assert: !!page_data === true
 				var imageinfo = page_data.imageinfo && page_data.imageinfo[0];
 				if (!imageinfo) {
@@ -784,7 +799,7 @@ function module_code(library_namespace) {
 				// console.trace(page_data);
 				library_namespace.get_URL_cache(imageinfo.thumburl
 						|| imageinfo.url, download_next_file, next[2]);
-			}
+			};
 			next[1] = next[1].map(function(page) {
 				// assert: page title starts with "File:"
 				return _this.normalize_title(page.title || page);
@@ -799,8 +814,7 @@ function module_code(library_namespace) {
 			next[2].imageinfo_options = Object.assign({
 				action : 'query',
 				prop : 'imageinfo',
-				iiprop : 'url|size|mime',
-				titles : next[1].join('|')
+				iiprop : 'url|size|mime'
 			}, next[2].imageinfo_options);
 			if (next[2].width > 0)
 				next[2].imageinfo_options.iiurlwidth = next[2].width;
@@ -831,7 +845,9 @@ function module_code(library_namespace) {
 				next[2].index = 0;
 				next[1].error_titles = [];
 				download_next_file();
-			}, null, add_session_to_options(this));
+			}, {
+				titles : next[1].join('|')
+			}, add_session_to_options(this));
 			break;
 
 		// ----------------------------------------------------------------------------------------
