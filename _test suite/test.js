@@ -2222,13 +2222,17 @@ function test_date() {
 	]);
 
 	all_error_count += CeL.test('detect serial pattern', function (assert) {
-		assert(['A7', CeL.detect_serial_pattern(['A1','A2'])[0].generator.toString(7)], 'detect_serial_pattern: A1');
-		assert(['A200', CeL.detect_serial_pattern(['filler 1', 'A5','A6'])[0].generator.toString(200)], 'detect_serial_pattern: A5');
-		assert(['A8000K', CeL.detect_serial_pattern(['filler', 'A1K','A2K'])[0].generator.toString(8000)], 'detect_serial_pattern: A1K');
-		assert(['A1B12', CeL.detect_serial_pattern(['A1B1','A1B2', 'filler 1 ABC'])[0].generator.toString(12)], 'detect_serial_pattern: A1B1');
-		assert(['2100', CeL.detect_serial_pattern(['filler 1 ABC 1', 1999,2010])[0].generator.toString(0, '2100/1/1')], 'detect_serial_pattern: year');
-		assert(['2100/8', CeL.detect_serial_pattern(['1 filler', '1999/1','2010/12'])[0].generator.toString(0, '2100/8/1')], 'detect_serial_pattern: %Y/%m');
-		assert(['2100/08', CeL.detect_serial_pattern(['1999/12','2010/01', '22 filler'])[0].generator.toString(0, '2100/8/1')], 'detect_serial_pattern: %Y/%2m');
+		assert(['A7', CeL.detect_serial_pattern(['A1','A2'])[0].generator(7)], 'detect_serial_pattern: A1');
+		assert(['A200', CeL.detect_serial_pattern(['filler 1', 'A5','A6'])[0].generator(200)], 'detect_serial_pattern: A5');
+		assert(['A8000K', CeL.detect_serial_pattern(['filler', 'A1K','A2K'])[0].generator(8000)], 'detect_serial_pattern: A1K');
+		assert(['A1B12', CeL.detect_serial_pattern(['A1B1','A1B2', 'filler 1 ABC'])[0].generator(12)], 'detect_serial_pattern: A1B1');
+		assert(['2100', CeL.detect_serial_pattern(['filler 1 ABC 1', 1999,2010])[0].generator(0, '2100/1/1')], 'detect_serial_pattern: year');
+		assert(['2100/8', CeL.detect_serial_pattern(['1 filler', '1999/1','2010/12'])[0].generator(0, '2100/8/1')], 'detect_serial_pattern: %Y/%m');
+		assert(['2100/08', CeL.detect_serial_pattern(['1999/12','2010/01', '22 filler'])[0].generator(0, '2100/8/1')], 'detect_serial_pattern: %Y/%2m');
+
+		assert(['AA 3 KK', CeL.detect_serial_pattern.parse_generator('AA %1 KK')(3)], 'parse_generator: %1');
+		assert([(new Date('2014/8/9')).format('* %Y/%2m'), CeL.detect_serial_pattern.parse_generator('* %Y/%2m')(0, '2014/8/9')], 'parse_generator: %Y/%2m');
+		assert([(new Date('2000/12/31')).format('* %Y/%2m - 8'), CeL.detect_serial_pattern.parse_generator('* %Y/%2m - %1')(8, '2000/12/31')], 'parse_generator: %1 + %Y/%2m');
 	});
 
 

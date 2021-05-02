@@ -3302,7 +3302,7 @@ function module_code(library_namespace) {
 	function get_pattern_and_generator(serial_token_list, options) {
 		var pattern = serial_token_list.clone();
 		var generator = serial_token_list.clone();
-		generator.toString = generator_toString;
+
 		for (var index = 1; index < pattern.length; index++) {
 			var token = pattern[index];
 			if (index % 2 === 0) {
@@ -3334,7 +3334,34 @@ function module_code(library_namespace) {
 		return [ pattern, generator ];
 	}
 
-	// digital serial
+	// @inner
+	function new_generator(generator_array) {
+		return generator_toString.bind(generator_array);
+	}
+
+	// generator string (e.g., including "%1", "%Y") to generator
+	function parse_generator(generator_string) {
+		// matched: [ operator, pad, date, argument_NO ]
+		var PATTERN_operator = new RegExp(
+				/%(?:(\d?)(conversion)|(1)|(\d?)№)/.source.replace(
+						'conversion', Object.keys(strftime.default_conversion)
+								.join('|')), 'g');
+		var matched, generator = [], lastIndex = 0;
+		while (matched = PATTERN_operator.exec(generator_string)) {
+			generator.push(generator_string.slice(lastIndex, matched.index),
+					matched[3] ? 0 : matched[4] ? +matched[4] : matched[0]);
+			lastIndex = PATTERN_operator.lastIndex;
+		}
+		if (lastIndex < generator_string.length)
+			generator.push(generator_string.slice(lastIndex));
+
+		// assert: generator.toString() === generator_string
+		return new_generator(generator);
+	}
+
+	detect_serial_pattern.parse_generator = parse_generator;
+
+	// digital serial instance to pattern and generator
 	function detect_serial_pattern(items, options) {
 		options = library_namespace.new_options(options);
 		if (!(options.max_serial_length > 0)) {
@@ -3361,9 +3388,7 @@ function module_code(library_namespace) {
 		});
 
 		// 掃描: 有相同 digits 的不應歸為 serial。
-		Object.entries(pattern_hash).forEach(function(pair) {
-			// var pattern = pair[0];
-			var lists = pair[1];
+		Object.values(pattern_hash).forEach(function(lists) {
 			var need_to_resettle = [];
 			for (var index = 1; index < lists.length; index += 2) {
 				for (var digits_hash = Object.create(null), index_of_lists = 0;
@@ -3411,8 +3436,8 @@ function module_code(library_namespace) {
 
 		// 把 pattern '(\\d{1,' + max_serial_length + '})'
 		// 搬到 '(\\d{' + token.length + '})'
-		Object.entries(pattern_hash).forEach(function(pair) {
-			var pattern = pair[0], lists = pair[1];
+		Object.keys(pattern_hash).forEach(function(pattern) {
+			var lists = pattern_hash[pattern];
 			if (lists.length === 0) {
 				// Nothing left after "有相同 digits 的不應歸為 serial。".
 				delete pattern_hash[pattern];
@@ -3446,7 +3471,7 @@ function module_code(library_namespace) {
 				delete pattern_hash[pattern];
 		});
 
-		// 把符合日期的數字以日期標示
+		// 把符合日期的數字以日期標示。
 		Object.values(pattern_hash).forEach(function(lists) {
 			var generator = lists.generator;
 			for (var index = 1,
@@ -3519,7 +3544,7 @@ function module_code(library_namespace) {
 					|| generator['has_%m'] && operator[0] === '%d'
 					//
 					? digits_length || operator[2]
-					// "%m" → "%2m"
+					// digits_length: "%m" → "%2m", operator[2]: "%m" → "%0m"
 					? operator[0].replace('%', '%' + digits_length)
 					//
 					: operator[0] : digits_length;
@@ -3527,6 +3552,7 @@ function module_code(library_namespace) {
 			}
 		});
 
+		// move items of %m to %2m, %d to %2d
 		var pattern_group_hash = Object.create(null);
 		Object.keys(pattern_hash).forEach(function(pattern) {
 			var generalized = pattern.replace(/\\d{\d{1,2}}/g, '\\d{1,'
@@ -3537,14 +3563,12 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// move items of %m to %2m
-
-			var pattern_to = pattern_hash[pattern].generator.toString();
+			var pattern_to = pattern_hash[pattern].generator.join('');
 			var index_in_group_hash;
 			var pattern_from = pattern_group_hash[generalized]
 			// 找出所有與 pattern 等價的
 			.filter(function(_pattern, index) {
-				_pattern = pattern_hash[_pattern].generator.toString();
+				_pattern = pattern_hash[_pattern].generator.join('');
 				if (/%\d([md])/.test(_pattern)
 				//
 				!== /%\d([md])/.test(pattern_to)
@@ -3584,16 +3608,25 @@ function module_code(library_namespace) {
 		});
 
 		var pattern_list = [];
-		for ( var pattern in pattern_hash) {
+		Object.keys(pattern_hash).forEach(function(pattern) {
 			var lists = pattern_hash[pattern];
+			var generator = lists.generator;
+			// recover superfluous "0" (by "%m" → "%0m" above)
+			for (var index = 1; index < generator.length; index += 2) {
+				if (typeof generator[index] === 'string') {
+					generator[index] = generator[index]
+					// "%0m" → "%m"
+					.replace(/^%0([md])$/g, '%$1');
+				}
+			}
 			// assert (lists.length > 0)
 			pattern_list.push({
 				pattern : new RegExp('^' + pattern + '$'),
-				generator : lists.generator,
+				generator : new_generator(generator),
 				items : lists,
 				count : lists.length
 			});
-		}
+		});
 		// count 從大到小排序
 		pattern_list.sort(function(_1, _2) {
 			return _2.count - _1.count;

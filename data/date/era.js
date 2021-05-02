@@ -1587,7 +1587,7 @@ function module_code(library_namespace) {
 	// 月次，歲次或名稱與序號 (index) 之互換。
 
 	// 歲序(index: start from 0)
-	// →歲次(ordinal/serial/NO: start with START_YEAR)
+	// →歲次(ordinal/serial/NO № #序數: start with START_YEAR)
 	// →歲名(name)
 	function year_index_to_name(歲序) {
 		var 歲名 = this.calendar[NAME_KEY];

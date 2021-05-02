@@ -2865,9 +2865,11 @@ function module_code(library_namespace) {
 						remaining++;
 						then.call(item, function(item) {
 							remaining--;
+							some_fulfilled = true;
 							onFulfilled(item);
 						}, function(item) {
 							// TODO: check what to onRejected()
+							// TODO: Using AggregateError object
 							if (--remaining === 0 && waiting)
 								onRejected(item);
 						});
@@ -2875,7 +2877,7 @@ function module_code(library_namespace) {
 						onFulfilled(item);
 					}
 				} catch (e) {
-					// Skip error
+					// ignores rejections. Ignore error
 				}
 			});
 			if (remaining > 0)
@@ -2920,6 +2922,11 @@ function module_code(library_namespace) {
 	}
 
 	// Promise.allSettled()
+	//
+	// Cannot catch Promise.allSettled(). Only use Using Promise.allSettled()
+	// when you do not care errors. Or using `Promise.all().then(, cacher)`
+	// before Promise.allSettled() to catch error.
+	//
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
 	// https://github.com/es-shims/Promise.allSettled/blob/master/implementation.js
 	function Promise_allSettled(iterable) {

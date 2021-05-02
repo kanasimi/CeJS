@@ -564,9 +564,11 @@ function module_code(library_namespace) {
 				// 按照需求程度編配/編排 arguments。
 				// 因為 callback 所欲知最重要的資訊是 pages，因此將 pages 置於第一 argument。
 				if (promises.length > 0) {
-					Promise.allSettled(promises)['catch'](function(e) {
+					Promise.all(promises)['catch'](function(e) {
+						// `error` will record the first error.
 						error = error || e;
-					})['then'](function(result) {
+					});
+					Promise.allSettled(promises).then(function(result) {
 						callback(pages, error);
 					});
 				} else {

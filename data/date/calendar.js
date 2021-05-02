@@ -109,7 +109,7 @@ function _time(year, month, date, hour) {
 Date_to_Calendar({Date}, {Object}options)
 
 options.format = 'serial':
-	return 數字序號 (numerical serial) [ {Integer}year, {Natural}month, {Natural}date ]
+	return 數字序號 (numerical serial №) [ {Integer}year, {Natural}month, {Natural}date ]
 
 options.format = 'item':
 	一般會:

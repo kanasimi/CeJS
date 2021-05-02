@@ -2391,7 +2391,7 @@ function module_code(library_namespace) {
 						// console.trace('call session.next()');
 						session.next();
 					}
-				}, function() {
+				}, function(error) {
 					// Do not catch error here.
 				});
 				return true;
@@ -2574,10 +2574,14 @@ function module_code(library_namespace) {
 					library_namespace.debug(
 							'Waiting for all promises settled...', 1,
 							'wiki_API.work');
-					// console.log(promises);
+					// console.trace(promises);
+					// Cannot cache Promise.allSettled().
+					Promise.all(promises)['catch'](function(error) {
+						// `error_to_return` will record the first error.
+						error_to_return = error_to_return || error;
+					});
 					Promise.allSettled(promises).then(
-							finish_up.bind(null, null, null),
-							finish_up.bind(null, null));
+							finish_up.bind(null, null, null));
 					return;
 				}
 

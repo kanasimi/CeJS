@@ -2314,6 +2314,9 @@ function module_code(library_namespace) {
 		return section_list;
 	}
 
+	var KEY_page_data = typeof Symbol === 'function' ? Symbol('page data')
+			: 'page data';
+
 	/**
 	 * 為每一個章節(討論串)執行特定作業 for_section(section)
 	 * 
@@ -2374,14 +2377,14 @@ function module_code(library_namespace) {
 					.at(-1).range[1]
 					: undefined,
 			// range: 本 section inner 在 root parsed 中的 index.
-			// parsed[range[0]] to parsed[range[1]] - 1
+			// parsed[range[0]] to parsed[range[1] - 1]
 			range = [ this_section_title_index >= 0
 			// +1: 這個範圍不包括 section_title。
 			? this_section_title_index + 1 : 0, next_section_title_index ],
 			//
 			section = _this.slice(range[0], range[1]);
 			if (this_section_title_index >= 0) {
-				// section.section_title === parsed[section.range[0] - 1]
+				// page_data.parsed[section.range[0]-1]===section.section_title
 				section.section_title = _this[this_section_title_index];
 			}
 			// 添加常用屬性與方法。
@@ -2389,10 +2392,14 @@ function module_code(library_namespace) {
 			Object.assign(section, {
 				type : 'section',
 				// section = parsed.slice(range[0], range[1]);
+				// assert: parsed[range[0]] === '\n',
+				// is the tail '\n' of "==title== "
 				range : range,
 				each : for_each_token,
+				replace_by : replace_section_by,
 				toString : _this.toString
 			});
+			section[KEY_page_data] = _this.page;
 			all_root_section_list.push(section);
 		}
 
@@ -2697,6 +2704,31 @@ function module_code(library_namespace) {
 		return this;
 	}
 
+	function replace_section_by(wikitext, options) {
+		options = library_namespace.setup_options(options);
+		var parsed = this[KEY_page_data].parsed;
+		// assert: parsed[range[0]] === '\n',
+		// is the tail '\n' of "==title== "
+		var index = this.range[0];
+		if (typeof wikitext === 'string')
+			wikitext = wikitext.trim();
+		if (options.preserve_section_title === undefined
+		// 未設定 options.preserve_section_title，則預設若有 wikitext，則保留 section title。
+		? !wikitext : !options.preserve_section_title) {
+			// - 1: point to section_title
+			index--;
+		}
+		if (wikitext) {
+			parsed[index] += wikitext + '\n\n';
+		} else {
+			parsed[index] = '';
+		}
+		while (++index < this.range[1]) {
+			// 清空到本章節末尾。
+			parsed[index] = '';
+		}
+	}
+
 	// var section_index_filter =
 	// CeL.wiki.parser.parser_prototype.each_section.index_filter;
 	for_each_section.index_filter = function filter_users_of_section(section,
@@ -2962,6 +2994,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// TODO: templates
 	function find_template(template_name, options) {
 		var template_token;
 
