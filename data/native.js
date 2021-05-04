@@ -457,6 +457,14 @@ function module_code(library_namespace) {
 		return String(string).replace(this, this.replace_to);
 	}
 
+	if (false) {
+		pattern = '/move from/g'.to_RegExp();
+		pattern = '/move from/replace to/g'.to_RegExp({
+			allow_replacement : true
+		});
+		pattern.replace('*move from*') === '*replace to*';
+	}
+
 	/**
 	 * 將 String pattern (e.g., "/a+/g") 轉成 RegExp。<br />
 	 * TODO:<br />
@@ -472,6 +480,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定特殊功能與選項 options = {<br />
 	 *            {String}flags : RegExp 的 flags。<br />
 	 *            {Function|String}error_handler : 當遇到不明 pattern 時的處理程序。<br /> }
+	 * 
 	 * @returns {RegExp} RegExp object。
 	 * 
 	 * @since 2012/10/13 10:22:20
@@ -3244,8 +3253,12 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
+	if (false) {
+		CeL.edit_distance('from A', 'from B');
+	}
+
 	// Levenshtein distance (edit distance)
-	// @see
+	// @see LCS()
 	// https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_two_matrix_rows
 	// http://www.codeproject.com/Articles/13525/Fast-memory-efficient-Levenshtein-algorithm
 	// http://locutus.io/php/strings/levenshtein/
@@ -3405,6 +3418,15 @@ function module_code(library_namespace) {
 			// added_text === inserted_text
 			// const [removed_text, added_text] = diff;
 			var removed_text = diff[0], added_text = diff[1];
+		});
+	}
+
+	if (false) {
+		CeL.LCS('from A', 'from B', {
+			diff : true
+		});
+		CeL.LCS('from A', 'from B', {
+			with_diff : true
 		});
 	}
 
@@ -4471,7 +4493,8 @@ function module_code(library_namespace) {
 		replace_check_near : set_bind(replace_check_near, true),
 
 		pad : set_bind(pad, true),
-		toRegExp : set_bind(String_to_RegExp, true),
+		// 2021/5/4: ''.toRegExp() remane to → ''.to_RegExp()
+		to_RegExp : set_bind(String_to_RegExp, true),
 		toTitleCase : toTitleCase,
 		between : function(head, foot, index, return_data) {
 			// 確保可用 string.between().between() 的方法來作簡易篩選。
