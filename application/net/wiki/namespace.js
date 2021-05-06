@@ -2041,20 +2041,22 @@ function module_code(library_namespace) {
 	// 'Category:category'→'[[:Category:category]]'
 	// TODO: [[link|<span style="color: #000;">title</span>]]
 	// TODO: 與 URL_to_wiki_link() 整合。
-	// TODO: #section name
+	// TODO: #section name: [page_data, section name]
 	// TODO: 複製到非維基項目外的私人維基，例如moegirl時，可能需要用到[[zhwiki:]]這樣的prefix。
-	function get_page_title_link(page_data, session, display_text) {
+	function get_page_title_link(page_data, display_text, options) {
 		var title,
 		// e.g., is_category
 		need_escape, project_prefixed;
 
-		if (session && display_text === undefined
-				&& !wiki_API.is_wiki_API(session)) {
-			// e.g., `CeL.wiki.title_link_of(page_data, display_text)`
+		if (options === undefined && (wiki_API.is_wiki_API(display_text)
+		// e.g., `CeL.wiki.title_link_of(page_data, wiki_session)`
+		|| library_namespace.is_Object(display_text))) {
 			// shift arguments
-			display_text = session;
-			session = null;
+			options = display_text;
+			display_text = null;
 		}
+
+		var session = wiki_API.session_of_options(options);
 
 		// console.trace(session);
 		var namespace_hash = session && session.configurations.namespace_hash
@@ -2065,7 +2067,15 @@ function module_code(library_namespace) {
 			need_escape = page_data.ns === namespace_hash.category
 					|| page_data.ns === namespace_hash.file;
 			title = page_data.title;
-		} else if ((title = get_page_title(page_data))
+		} else if (Array.isArray(page_data) && (page_data.type === 'link'
+		//
+		|| page_data.type === 'file' || page_data.type === 'category')
+		// Input wikilink token
+		&& (title = page_data[0] + page_data[1])
+		//
+		? (display_text = display_text || page_data.caption || page_data[2])
+		//
+		: (title = get_page_title(page_data))
 		// 通常應該:
 		// is_api_and_title(page_data) || typeof page_data === 'string'
 		&& typeof title === 'string') {
@@ -2093,8 +2103,11 @@ function module_code(library_namespace) {
 		if (first_domain_name && !project_prefixed) {
 			// e.g., [[w:zh:title]]
 			title = first_domain_name + ':' + title;
-			if (session.family && (session.family in api_URL.family)) {
-				title = api_URL.family[session.family] + ':' + title;
+			if (session.family
+					&& (session.family in /* api_URL.family */api_URL.shortcut_of_project)) {
+				title = api_URL.shortcut_of_project[session.family] + ':'
+						+ title;
+				need_escape = false;
 			} else {
 				need_escape = true;
 			}
@@ -3303,6 +3316,17 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function URL_of_page(page_title) {
+		page_title = this.normalize_title(page_title, {
+			use_underline : true
+		});
+		return this.latest_site_configurations.general.server
+				+ this.latest_site_configurations.general.articlepath.replace(
+						'$1', page_title);
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// extract session from options, get_session_from_options
 	// var session = session_of_options(options);
 	function session_of_options(options) {
@@ -3315,7 +3339,9 @@ function module_code(library_namespace) {
 	}
 
 	function add_session_to_options(session, options) {
-		options = library_namespace.new_options(options);
+		// Warning: Will append to original options!!
+		// function for_each_token() needs assigning to original options.
+		options = library_namespace.setup_options(options);
 		options[KEY_SESSION] = session;
 		return options;
 	}
@@ -3400,6 +3426,8 @@ function module_code(library_namespace) {
 			return normalize_page_name(page_title, add_session_to_options(this,
 					options));
 		},
+
+		URL_of_page : URL_of_page,
 
 		toString : function wiki_API_toString(type) {
 			return get_page_content(this.last_page) || '';

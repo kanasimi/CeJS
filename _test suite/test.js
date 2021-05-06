@@ -2942,6 +2942,7 @@ function test_wiki() {
 		[['en:2001: A Space Odyssey', CeL.wiki.normalize_title('en:2001: A Space Odyssey')], 'normalize_title #17'],
 
 		[['[[User:Adam/test]]', CeL.wiki.title_link_of('User:Adam/test')], 'title_link_of #1'],
+
 		[['Adam', CeL.wiki.parse.user('[[User:Adam/test]]')], 'parse.user #1'],
 		[['Adam', CeL.wiki.parse.user('[[en:User:Adam/test]]')], 'parse.user #2: 連接到其他維基媒體站點上的用戶頁面'],
 		[[true, CeL.wiki.parse.user('[[User:Adam/test]]', 'adam')], 'parse.user #3'],
@@ -3650,6 +3651,16 @@ function test_wiki() {
 
 			assert(enwiki.is_namespace('2001: A Space Odyssey', 0), 'wiki.is_namespace() #1');
 			assert(enwiki.is_namespace('Talk:ABC', 'talk'), 'wiki.is_namespace() #2');
+
+			var link = CeL.wiki.parse('[[Page title#anchor|display text]]');
+			assert(['[[Page title#anchor|display text]]', CeL.wiki.title_link_of(link)], 'CeL.wiki.title_link_of(link) #1');
+			assert(['[[Page title#anchor|DD]]', CeL.wiki.title_link_of(link, 'DD')], 'CeL.wiki.title_link_of(link) #2');
+			assert(['[[w:en:Page title#anchor|KK]]', CeL.wiki.title_link_of(link, 'KK', enwiki)], 'CeL.wiki.title_link_of(link) #3');
+
+			link = CeL.wiki.parse('[[File:File name|caption]]');
+			assert(['[[:File:File name|caption]]', CeL.wiki.title_link_of(link)], 'CeL.wiki.title_link_of(file link) #1');
+			assert(['[[:File:File name|ALT]]', CeL.wiki.title_link_of(link, 'ALT')], 'CeL.wiki.title_link_of(file link) #2');
+			assert(['[[w:en:File:File name|ALT]]', CeL.wiki.title_link_of(link, 'ALT', enwiki)], 'CeL.wiki.title_link_of(file link) #3');
 
 			_finish_test('wiki: namespace');
 		});

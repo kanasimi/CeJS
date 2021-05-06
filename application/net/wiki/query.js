@@ -491,7 +491,6 @@ function module_code(library_namespace) {
 			callback(response);
 		}
 
-		var latest_response;
 		function XMLHttp_handler(XMLHttp, error) {
 			var status_code, response;
 			if (error) {
@@ -598,30 +597,26 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (false && latest_response) {
-				console.trace([ latest_response, JSON.stringify(response) ]);
-			}
-
-			if (false && !response.error && ('continue' in response)) {
+			// console.trace(response);
+			if (options.handle_continue_response && !response.error
+					&& ('continue' in response)) {
 				// 2021/4/20 6:55:23 不曉得為什麼，在
 				// 20210416.Sorting_category_and_sort_key_of_Thai_names.js 嘗試
 				// wbentityusage 的時候似乎會一直跑一直跑跑不完，基本上一次平移一篇文章，只好放棄了。
 
 				// console.trace([ action, POST_data ]);
 
-				// merge response to latest_response
-				if (latest_response) {
-					// TODO
-				} else {
-					response.action = action;
-					response.POST_data = POST_data;
-					latest_response = response;
+				// console.trace([ response, JSON.stringify(response) ]);
+
+				// e.g., merge response to cached data
+				options.handle_continue_response(response, action, POST_data);
+
+				if (false) {
+					// Do not touch original action and POST_data.
+					action = new library_namespace.URI(action);
+					POST_data = library_namespace.is_Object(POST_data)
+							&& Object.clone(POST_data) || POST_data;
 				}
-				// Do not touch original action and POST_data.
-				action = new library_namespace.URI(latest_response.action);
-				POST_data = library_namespace
-						.is_Object(latest_response.POST_data)
-						&& Object.clone(latest_response.POST_data);
 				// delete response['continue']['continue'];
 				// response['continue'].rawcontinue = 1;
 				for ( var continue_key in response['continue']) {

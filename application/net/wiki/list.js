@@ -1485,20 +1485,38 @@ function module_code(library_namespace) {
 			options.srnamespace = wiki_API.namespace(options.srnamespace);
 		}
 
-		var _options;
+		var _options = Object.clone(options);
 		// 避免 session 也被帶入 parameters。
-		if (KEY_SESSION in options) {
-			_options = Object.clone(options);
-			delete _options[KEY_SESSION];
-		} else {
-			_options = options;
-		}
-		wiki_API.query([ API_URL,
-		//
-		'action=query&list=search&' + new URLSearchParams(Object.assign({
+		delete _options[KEY_SESSION];
+
+		// 2021/5/4 17:32:39 看來 intitle: 最多只能取得 10000 pages，再多必須多加搜尋條件。
+		// 編輯頁面後重新執行，或許可以取得不同的頁面清單。
+		var cached_list;
+		options.handle_continue_response = function(response, action, POST_data) {
+			// console.log(response);
+			var list;
+			if (action.search_params.action === 'query'
+			//
+			&& Array.isArray(list = response.query[action.search_params.prop
+			//
+			|| action.search_params.list || action.search_params.meta])) {
+				// console.log(list);
+				if (cached_list)
+					cached_list.append(list);
+				else
+					cached_list = list;
+			}
+
+		};
+
+		var action = library_namespace.URI(API_URL);
+		Object.assign(action.search_params, {
+			action : 'query',
+			list : 'search',
 			srsearch : key
-		}, wiki_API.search.default_parameters, _options)) ], function(data,
-				error) {
+		}, wiki_API.search.default_parameters, _options);
+
+		wiki_API.query(action, function(data, error) {
 			// console.log(data);
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
@@ -1515,6 +1533,9 @@ function module_code(library_namespace) {
 			options = data && (data['continue'] || data['query-continue']);
 			// var totalhits;
 			if (data && (data = data.query)) {
+				if (cached_list) {
+					data.search = cached_list.append(data.search);
+				}
 				if (options) {
 					// data.search.sroffset = options.search.sroffset;
 					Object.assign(data.search, options.search);

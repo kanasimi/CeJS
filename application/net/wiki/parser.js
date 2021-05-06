@@ -1100,7 +1100,7 @@ function module_code(library_namespace) {
 					console.log('token depth ' + depth
 							+ (max_depth ? '/' + max_depth : '')
 							+ (exit ? ' (exit)' : '') + ':');
-					console.log(token);
+					console.trace([ type, token ]);
 				}
 
 				if ((!type
@@ -1118,6 +1118,7 @@ function module_code(library_namespace) {
 					}
 
 					if (wiki_API.template_functions) {
+						// console.trace(options);
 						wiki_API.template_functions.adapt_function(token,
 								index, parent_token, options);
 					}
@@ -1330,6 +1331,7 @@ function module_code(library_namespace) {
 				});
 		}
 
+		// console.trace([ this, type ]);
 		// var parsed = this;
 		traversal_tokens(this, 0, finish_up);
 
@@ -1512,6 +1514,7 @@ function module_code(library_namespace) {
 				if (token.name in {
 					Cfn : true,
 					Sfn : true,
+					Sfnp : true,
 					Efn : true,
 					NoteTag : true,
 					R : true,
@@ -1679,6 +1682,9 @@ function module_code(library_namespace) {
 				strong : true,
 				font : true,
 				code : true,
+				ruby : true,
+				rb : true,
+				rt : true,
 				// container
 				span : true,
 				div : true,
@@ -2020,7 +2026,7 @@ function module_code(library_namespace) {
 				: display_text : '';
 
 		return wiki_API.title_link_of((page_title || this[0] || '') + '#'
-				+ anchor, null, display_text);
+				+ anchor, display_text);
 		return '[[' + (page_title || this[0] || '') + '#' + anchor + '|'
 				+ display_text + ']]';
 	}
@@ -2932,8 +2938,25 @@ function module_code(library_namespace) {
 				// const
 				var anchor = template_token.parameters.ref;
 				// console.trace(JSON.stringify(anchor));
-				if (typeof anchor === 'string')
+				if (typeof anchor === 'string') {
 					register_anchor(anchor, template_token);
+					return;
+				}
+				var year = template_token.parameters.year;
+				if (!year) {
+					year = template_token.parameters.date;
+					year = year && year.toString().match(/\d{4}/);
+					if (year)
+						year = year[0];
+				}
+				if (year && template_token.parameters.last) {
+					// @see [[Module:Citation/CS1]]
+					// local function make_citeref_id (namelist, year)
+					anchor = 'CITEREF'
+							+ template_token.parameters.last.toString().trim()
+							+ year.toString().trim();
+					register_anchor(anchor, template_token);
+				}
 				return;
 			}
 
@@ -3336,8 +3359,8 @@ function module_code(library_namespace) {
 
 	var default_layout_order = [
 	// header
-	'short_description', 'hatnote_templates', 'deletion_templates',
-			'protection_templates', 'dispute_templates',
+	'page_begin', 'short_description', 'hatnote_templates',
+			'deletion_templates', 'protection_templates', 'dispute_templates',
 			'maintenance_templates', 'infobox_templates',
 			//
 			'content', 'content_end',
@@ -3379,6 +3402,9 @@ function module_code(library_namespace) {
 				+ layout_type + ' in ' + CeL.wiki.title_link_of(parsed.page));
 			}
 		}
+
+		// as index = 0
+		set_index('page_begin');
 
 		// Only detects level 1 tokens
 		for (; index < parsed.length; index++) {
@@ -3523,6 +3549,8 @@ function module_code(library_namespace) {
 				&& parsed[parsed_index], parsed_index, parsed);
 			}
 			if (is_valid_parameters_value(token)) {
+				if (!/\n$/.test(parsed[parsed_index - 1]) && !/\n$/.test(token))
+					token = '\n' + token;
 				// insert, instead of replace.
 				parsed[parsed_index] = token + '\n'
 				// `parsed_index` maybe parsed.length

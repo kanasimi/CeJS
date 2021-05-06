@@ -132,6 +132,8 @@ function module_code(library_namespace) {
 	 *            page data
 	 * 
 	 * @returns {Boolean} `page_data` is biography of a person.
+	 * 
+	 * @see {{WikiProject Biography}}
 	 */
 	function page_is_biography() {
 		// var page_data = this;
@@ -981,6 +983,7 @@ function module_code(library_namespace) {
 		var session = wiki_API.session_of_options(options);
 		var site_name = template_functions_site_name(session, options);
 		var functions_of_site = template_functions.functions_of_site[site_name];
+		// console.trace([site_name, functions_of_site, options]);
 
 		var template_name = typeof template === 'string' ? template : template
 				&& template.name;
@@ -1050,9 +1053,10 @@ function module_code(library_namespace) {
 		var site_name = typeof session === 'string' ? session : wiki_API
 				.site_name(session);
 
-		if (false)
+		if (library_namespace.is_debug()) {
 			console.trace([ site_name,
 					session && session.template_functions_site_name ]);
+		}
 		if (session && session.template_functions_site_name
 		// e.g., zhmoegirl 設定 .template_functions_site_name = 'zhwiki'，
 		// 採用 zhwiki 的模板特設功能設定。

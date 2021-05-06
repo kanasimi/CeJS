@@ -181,6 +181,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// [[Help:Edit summary]] actual limit is 500 [[Unicode codepoint]]s.
 	function add_section_to_summary(summary, section_title) {
 		if (!section_title)
 			return summary || '';
