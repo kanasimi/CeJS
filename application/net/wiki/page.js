@@ -905,7 +905,9 @@ function module_code(library_namespace) {
 	 * @param {String}title
 	 *            page title
 	 * @param to_search
-	 *            filter / text to search
+	 *            filter / text to search.<br />
+	 *            to_search(diff, revision, old_revision):<br />
+	 *            `diff` 為從舊的版本 `old_revision` 改成 `revision` 時的差異。
 	 * @param {Function}callback
 	 *            回調函數。
 	 * @param {Object}[options]
@@ -923,7 +925,7 @@ function module_code(library_namespace) {
 					'Only {Function}filter to search for .search_diff=true!');
 		}
 
-		function search(revision) {
+		function search(revision, old_revision) {
 			var value = revision.revid ? wiki_API.revision_content(revision)
 					: revision;
 
@@ -934,7 +936,7 @@ function module_code(library_namespace) {
 				return value.includes(to_search);
 
 			if (options.search_diff)
-				return to_search([ , value ], revision);
+				return to_search([ , value ], revision, old_revision);
 
 			// return found;
 			return library_namespace.fit_filter(to_search, value);
@@ -950,6 +952,8 @@ function module_code(library_namespace) {
 			var index = 0, revisions = page_data.revisions;
 			if (!newer_revision) {
 				newer_revision = revisions[index++];
+				newer_revision.lines = wiki_API
+						.revision_content(newer_revision).split('\n');
 				// console.trace([search(newer_revision),options]);
 				if (!options.search_diff && !options.search_deleted
 						&& !search(newer_revision)) {
@@ -962,20 +966,25 @@ function module_code(library_namespace) {
 			// console.log(revisions.length);
 			while (index < revisions.length) {
 				var this_revision = revisions[index++];
+				// MediaWiki using line-diff
+				this_revision.lines = wiki_API.revision_content(this_revision)
+						.split('\n');
 				var diff_list = newer_revision.diff_list
 				//
-				= library_namespace.LCS(wiki_API
-						.revision_content(this_revision), wiki_API
-						.revision_content(newer_revision), {
+				= library_namespace.LCS(this_revision.lines,
+				//
+				newer_revision.lines, {
 					diff : true,
 					// MediaWiki using line-diff
-					line : true
+					line : true,
+					treat_as_String : true
 				});
 
 				var found = diff_list.some(function(diff) {
 					// console.trace(diff);
-					if (options.search_diff)
-						return to_search(diff, newer_revision);
+					if (options.search_diff) {
+						return to_search(diff, newer_revision, this_revision);
+					}
 					// var removed_text = diff[0], added_text = diff[1];
 					return search(diff[options.search_deleted ? 0 : 1])
 					// 警告：在 line_mode，"A \n"→"A\n" 的情況下，
@@ -985,14 +994,17 @@ function module_code(library_namespace) {
 				if (options.revision_post_processor) {
 					options.revision_post_processor(newer_revision);
 				}
+				delete newer_revision.lines;
 				// console.trace([this_revision.revid,found,search(this_revision)])
 				if (found) {
+					delete this_revision.lines;
 					// console.log(diff_list);
 					callback(newer_revision, page_data);
 					return;
 				}
 				newer_revision = this_revision;
 			}
+			delete this_revision.lines;
 
 			revision_count += page_data.revisions;
 			if (revision_count > options.limit) {

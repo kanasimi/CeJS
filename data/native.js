@@ -3450,9 +3450,10 @@ function module_code(library_namespace) {
 		// 前置作業。
 		options = library_namespace.setup_options(options);
 
-		var use_String = typeof from === 'string' && typeof to === 'string',
+		var treat_as_String = 'treat_as_String' in options ? options.treat_as_String
+				: typeof from === 'string' && typeof to === 'string',
 		// options.line : 強制採用行模式，連輸入{String|Array}都會以'\n'結合。
-		line_mode = 'line' in options ? options.line : use_String
+		line_mode = 'line' in options ? options.line : treat_as_String
 				&& (from.includes('\n') || to.includes('\n')),
 		//
 		separator = options.separator || (line_mode ? '\n' : '');
@@ -3502,7 +3503,7 @@ function module_code(library_namespace) {
 			if (!Array.isArray(_unique)) {
 				// return '';
 				// return;
-				return use_String ? '' : _unique;
+				return treat_as_String ? '' : _unique;
 				// return [];
 			}
 
@@ -3523,7 +3524,7 @@ function module_code(library_namespace) {
 
 			_unique = _this.slice(index, _unique[1] + 1);
 
-			return use_String ? _unique.join(separator) : _unique;
+			return treat_as_String ? _unique.join(separator) : _unique;
 		}
 
 		function add_to_diff_list(from_index, to_index) {
@@ -3542,6 +3543,7 @@ function module_code(library_namespace) {
 			if (false && to_unique) {
 				diff_pair.push(normalize_unique(to_unique, to));
 			}
+			// Array.isArray(to_unique) && from_unique===undefined 代表本段落為新增文字。
 			// diff_pair.index = [ from_index, to_index ];
 			// _index = [ start_index, end_index ]
 			diff_pair.index = [ from_unique, to_unique ];
@@ -3762,7 +3764,7 @@ function module_code(library_namespace) {
 			all_list = unique(all_list);
 		}
 
-		if (use_String || !get_index) {
+		if (treat_as_String || !get_index) {
 			all_list = all_list
 			// index → 元素
 			.map(function(result_Array) {
@@ -3771,15 +3773,15 @@ function module_code(library_namespace) {
 						return get_index === 2 ? to[index] : from[index];
 					});
 				}
-				return use_String && !options.index
+				return treat_as_String && !options.index
 				// 特別指定 options.index 時，即使輸入{String}亦保持index，不轉換為{String}。
 				? result_Array.join(separator) : result_Array;
 			});
 		}
 
 		if (get_diff && !diff_only) {
-			// 應為 use_String
-			if (use_String) {
+			// 應為 treat_as_String
+			if (treat_as_String) {
 				// 為了能設定 .diff。
 				// assert: diff_list 設定在 all_list[0] 上，
 				// 且不因前面 unique(all_list) 而改變。
@@ -4598,8 +4600,8 @@ function module_code(library_namespace) {
 			if (index !== NOT_FOUND)
 				return this.splice(index, 1);
 		},
-		// remove all.
-		// value 很多的話，應該用 delete + 去除 blank。
+		// remove all. https://esdiscuss.org/topic/array-prototype-remove-item
+		// value 很多的話，應該用 Set, 或 delete + 去除 blank。
 		remove : function(value) {
 			var index = 0;
 			while ((index = this.indexOf(value, index)) !== NOT_FOUND)

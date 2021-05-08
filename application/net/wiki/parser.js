@@ -180,7 +180,12 @@ function module_code(library_namespace) {
 		} else if (!wikitext) {
 			library_namespace.warn('page_parser: No wikitext specified.');
 			wikitext = [];
-		} else if (!Array.isArray(wikitext)) {
+		} else if (Array.isArray(wikitext) && wikitext.type === 'plain') {
+			// assert: already parsed
+			if (wikitext.options)
+				return wikitext;
+		} else {
+			// console.trace(wikitext);
 			throw new Error('page_parser: Unknown wikitext: {'
 					+ typeof wikitext + '} ' + JSON.stringify(wikitext) + '.');
 		}
@@ -1792,6 +1797,8 @@ function module_code(library_namespace) {
 			// 各語言 wiki 常用 template-linking templates:
 			// {{Tl}}, {{Tlg}}, {{Tlx}}, {{Tls}}, {{T1}}, ...
 			if (/^(?:T[l1n][a-z]{0,3}[23]?)$/.test(token.name)) {
+				// TODO: should expand as
+				// "&#123;&#123;[[Template:{{{1}}}|{{{1}}}]]&#125;&#125;"
 				token.shift();
 				return token;
 			}
@@ -2839,7 +2846,9 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.parse.anchor.normalize_anchor()
 	function normalize_anchor(anchor) {
-		return anchor.toString().replace(/_/g, ' ');
+		return anchor && anchor.toString().replace(/_/g, ' ')
+		// " a " → "a"
+		.trim();
 	}
 	get_all_anchor.normalize_anchor = normalize_anchor;
 
@@ -2869,10 +2878,10 @@ function module_code(library_namespace) {
 		// const
 		var anchor_hash = Object.create(null);
 		function register_anchor(anchor, token) {
-			if (!anchor)
-				return;
 			anchor = normalize_anchor(anchor);
-			anchor_hash[anchor] = token;
+			// 以首個出現的為準。
+			if (anchor && !('anchor' in anchor_hash))
+				anchor_hash[anchor] = token;
 		}
 
 		// options: pass session. for options.language
@@ -2993,12 +3002,17 @@ function module_code(library_namespace) {
 
 		// 處理 <span class="anchor" id="anchor"></span>, <ref name="anchor">,
 		// id in table cell attribute
-		parsed.each('tag_attributes', function(attribute_token) {
+		parsed.each('tag_attributes', function(attribute_token, index, parent) {
 			// console.log(attribute_token.attributes);
 			// const
 			var anchor = attribute_token.attributes.id
 					|| attribute_token.attributes.name;
-			register_anchor(anchor, attribute_token);
+			// console.log(parent);
+			// <ref name="..."> 會轉成 id="cite_re-..."
+			if (parent.tag && parent.tag.toLowerCase() !== 'ref') {
+				// e.g., <span id="">, <div id="">
+				register_anchor(anchor, attribute_token);
+			}
 		});
 
 		var anchor_list = Object.keys(anchor_hash);
