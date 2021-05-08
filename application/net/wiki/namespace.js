@@ -1307,6 +1307,12 @@ function module_code(library_namespace) {
 	// ------------------------------------------
 
 	function is_talk_namespace(namespace, options) {
+		// wiki_API.is_page_data(namespace, options) ||
+		// wiki_API.is_Page(namespace)
+		if (typeof namespace === 'object') {
+			namespace = namespace.ns >= 0 ? namespace.ns : namespace.title;
+		}
+
 		if (typeof namespace === 'string') {
 			namespace = wiki_API.normalize_title(namespace, options)
 					.toLowerCase();
@@ -1374,7 +1380,7 @@ function module_code(library_namespace) {
 			return;
 
 		// console.log([ namespace, page_title ]);
-		if (namespace % 2 === 1/* is_talk_namespace(namespace, options) */) {
+		if (is_talk_namespace(namespace, options)) {
 			library_namespace.debug('Is already talk page: ' + page_title, 3,
 					'to_talk_page');
 			return page_title;
