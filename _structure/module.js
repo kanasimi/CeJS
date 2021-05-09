@@ -1391,7 +1391,7 @@ if (typeof CeL === 'function') {
 		 * @since 2009/11/23 22:32:52
 		 */
 		simplify_path = function simplify_path(path, options) {
-			_.debug('[' + typeof path + '] [' + path + ']', 2, 'simplify_path');
+			_.debug('[' + typeof path + '] [' + path + ']', 8, 'simplify_path');
 			if (false && typeof path !== 'string')
 				return path;
 			// path = '' + path;
@@ -1518,7 +1518,7 @@ if (typeof CeL === 'function') {
 				path = path.replace(/[^\\\/]+$/, '');
 			}
 
-			_.debug('→ [' + path + ']', 2, 'simplify_path');
+			_.debug('→ [' + path + ']', 8, 'simplify_path');
 			return path;
 		};
 

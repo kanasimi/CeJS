@@ -2850,7 +2850,7 @@ function module_code(library_namespace) {
 		// " a " → "a"
 		.trim();
 	}
-	get_all_anchor.normalize_anchor = normalize_anchor;
+	get_all_anchors.normalize_anchor = normalize_anchor;
 
 	if (false) {
 		wiki_session.register_redirects(
@@ -2870,7 +2870,7 @@ function module_code(library_namespace) {
 	}
 
 	// CeL.wiki.parse.anchor()
-	function get_all_anchor(wikitext, options) {
+	function get_all_anchors(wikitext, options) {
 		if (!wikitext) {
 			return [];
 		}
@@ -2998,6 +2998,16 @@ function module_code(library_namespace) {
 				register_anchor(anchor, template_token);
 				return;
 			}
+
+			if (wiki_API.site_name(session) === 'zhmoegirl'
+					&& wiki_API.is_template('A', template_token, options)) {
+				// const
+				var anchor = template_token.parameters[2]
+				// {{a|显示文字|锚点名称}}
+				|| template_token.parameters[1];
+				register_anchor(anchor, template_token);
+				return;
+			}
 		});
 
 		// 處理 <span class="anchor" id="anchor"></span>, <ref name="anchor">,
@@ -3017,7 +3027,7 @@ function module_code(library_namespace) {
 
 		var anchor_list = Object.keys(anchor_hash);
 		if (options && options.print_anchors) {
-			library_namespace.info('get_all_anchor: anchors:');
+			library_namespace.info('get_all_anchors: anchors:');
 			console.trace(anchor_list.length > 100 ? JSON
 					.stringify(anchor_list) : anchor_list);
 		}
@@ -3026,7 +3036,7 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.parse.anchor.essential_templates
 	// required, indispensable
-	get_all_anchor.essential_templates = [ 'Anchor', 'Anchors',
+	get_all_anchors.essential_templates = [ 'Anchor', 'Anchors',
 			'Visible anchor', 'Citation', 'RFD', 'Wikicite', 'SfnRef', 'Sfn' ];
 
 	// ------------------------------------------------------------------------
@@ -7486,7 +7496,7 @@ function module_code(library_namespace) {
 			// Remove comments
 			.replace(/<!--[\s\S]*?-->/g, '');
 			try {
-				// e.g., true / false / number
+				// e.g., 'true' / 'false' / number
 				value = JSON.parse(value);
 				// TODO: 應避免安全問題。
 			} catch (e) {
@@ -8150,7 +8160,7 @@ function module_code(library_namespace) {
 		// CeL.wiki.parse.redirect , wiki_API.parse.redirect
 		redirect : parse_redirect,
 
-		anchor : get_all_anchor,
+		anchor : get_all_anchors,
 
 		configuration : parse_configuration,
 

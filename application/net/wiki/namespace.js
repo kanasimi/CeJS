@@ -68,8 +68,6 @@ function module_code(library_namespace) {
 			return value;
 		},
 
-		template_functions_site_name : 'string',
-
 		format : 'string',
 		utf8 : 'boolean|number|string'
 	};

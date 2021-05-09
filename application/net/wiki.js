@@ -275,28 +275,44 @@ function module_code(library_namespace) {
 	}
 
 	function initialize_wiki_API(options) {
-		// if (this.API_URL)
-		this.siteinfo(initialization_complete);
+		var session = this;
+		// if (session.API_URL)
+		session.siteinfo(load_template_functions);
 
-		// console.trace(this);
-		// @see CeL.application.net.wiki.template_functions
-		if (this.load_template_functions)
-			this.load_template_functions();
+		function load_template_functions() {
+			// console.trace(session);
+			// @see CeL.application.net.wiki.template_functions
+			if (session.load_template_functions)
+				session.load_template_functions(null,
+				//
+				adapt_task_configurations);
+			else
+				adapt_task_configurations();
+		}
 
-		// console.trace(options);
-		if (options.task_configuration_page) {
-			this.adapt_task_configurations(options.task_configuration_page,
-					options.configuration_adapter);
+		function adapt_task_configurations() {
+			// console.trace(options);
+			if (options.task_configuration_page) {
+				session.adapt_task_configurations(
+						options.task_configuration_page,
+						function(configuration) {
+							options.configuration_adapter(configuration);
+							initialization_complete();
+						});
+			} else {
+				initialization_complete();
+			}
+		}
+
+		function initialization_complete() {
+			library_namespace.debug('初始化程序登錄完畢。添加之前登錄的 '
+					+ session.actions.length + ' 個程序', 1,
+					'initialization_complete');
+			session.actions.append(session.run_after_initializing);
+			delete session.run_after_initializing;
 		}
 	}
 	initialize_wiki_API.is_initializing_process = true;
-
-	function initialization_complete() {
-		library_namespace.debug('初始化程序登錄完畢。添加之前登錄的 ' + this.actions.length
-				+ ' 個程序', 1, 'initialization_complete');
-		this.actions.append(this.run_after_initializing);
-		delete this.run_after_initializing;
-	}
 
 	/**
 	 * 檢查若 value 為 session。

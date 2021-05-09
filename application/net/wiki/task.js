@@ -3251,6 +3251,7 @@ function module_code(library_namespace) {
 			}
 
 			delete session.token.csrftoken;
+			// Credentials type: Password-based authentication
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Btokens
 			// wiki_API.query(action, callback, post_data, login_options)
 			wiki_API.query([ session.API_URL, {
@@ -3334,8 +3335,7 @@ function module_code(library_namespace) {
 	};
 
 	var copy_login_options = {
-		preserve_password : 'boolean',
-		template_functions_site_name : 'string'
+		preserve_password : 'boolean'
 	};
 
 	/** {Array}欲 copy 至 session.token 之 keys。 */

@@ -973,9 +973,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function template_functions_site_name(session, options) {
-		return options && options.site_name || session
-				&& session.template_functions_site_name
-				|| wiki_API.site_name(session);
+		return options && options.site_name || wiki_API.site_name(session);
 	}
 
 	function get_function_of(template, options) {
@@ -1022,9 +1020,95 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
-	function initialize_session() {
+	var KEY_dependent_on = typeof Symbol === 'function' ? Symbol('KEY_dependent_on')
+			: '\0dependent on';
+	// dependency_hash[site_name] = [ sites dependent on site_name ]
+	var dependency_hash = Object.create(null);
+	// loaded_sites = { 已經處理過的 site_name }
+	var loaded_sites = Object.create(null);
+
+	// 檢查所有依賴於 site_name_loaded 的。
+	function initialize_functions_of_site(site_name_loaded) {
+		// console.trace(dependency_hash);
+		var dependency_list = dependency_hash[site_name_loaded];
+		if (!dependency_list) {
+			return;
+		}
+
+		// free
+		delete dependency_hash[site_name_loaded];
+
+		dependency_list.forEach(function(_site_name) {
+			// _site_name 依賴於 site_name_loaded。
+			var functions_of_site
+			//
+			= template_functions.functions_of_site[_site_name];
+			// console.trace(functions_of_site);
+			var dependent_on = functions_of_site
+					&& functions_of_site[KEY_dependent_on];
+			if (!dependent_on || dependent_on.some(function(__site_name) {
+				if (!(__site_name in loaded_sites)) {
+					// __site_name 所依賴的 __site_name 尚未 loaded。
+					// assert: __site_name is loading now
+					return true;
+				}
+			})) {
+				return;
+			}
+
+			// console.trace('All dependency loaded.');
+			dependent_on.forEach(function(__site_name) {
+				var _dependent_on
+				//
+				= template_functions.functions_of_site[__site_name];
+				if (!_dependent_on)
+					return;
+
+				var function_name_list = Object.keys(_dependent_on);
+				function_name_list.forEach(function(function_name) {
+					if (!(function_name in functions_of_site)) {
+						library_namespace.debug('設定 ' + _site_name + '.'
+								+ function_name + '=' + __site_name + '.'
+								+ function_name, 2,
+								'initialize_functions_of_site');
+						functions_of_site[function_name]
+						// 不覆蓋已經存在的 function。
+						= _dependent_on[function_name];
+					}
+				})
+			});
+		});
+	}
+
+	// @inner
+	function initialize_session_template_functions(site_name, callback) {
 		var session = this;
-		var site_name = template_functions_site_name(session);
+		var this_site_name = template_functions_site_name(session);
+		site_name = site_name || template_functions_site_name(session);
+		if (Array.isArray(site_name)) {
+			site_name.forEach(function(_site_name) {
+				initialize_session_template_functions
+				//
+				.call(session, _site_name);
+			});
+			callback && callback.call(session);
+			return;
+		}
+
+		// assert: typeof site_name === 'string'
+
+		// --------------------------------------
+
+		// 登記好 site_name 以供 initialize_functions_of_site() 使用
+		loaded_sites[site_name] = true;
+
+		// --------------------------------------
+
+		if (library_namespace.is_debug()) {
+			library_namespace
+					.info('initialize_session_template_functions: register redirects of '
+							+ site_name);
+		}
 		var function_name_list = Object
 				.keys(template_functions.functions_of_all_sites);
 		var functions_of_site = template_functions.functions_of_site[site_name];
@@ -1044,29 +1128,42 @@ function module_code(library_namespace) {
 		}, {
 			namespace : 'Template'
 		});
+
+		// --------------------------------------
+
+		initialize_functions_of_site(site_name);
+
+		// --------------------------------------
+
+		var dependent_on = functions_of_site
+				&& functions_of_site[KEY_dependent_on];
+		if (!dependent_on) {
+			callback && callback.call(session);
+			return;
+		}
+
+		if (library_namespace.is_debug()) {
+			library_namespace.info('initialize_session_template_functions: 設定 '
+					+ site_name + ' 採用 ' + dependent_on + ' 的模板特設功能。');
+		}
+		(Array.isArray(dependent_on) ? dependent_on : [ dependent_on ])
+		//
+		.forEach(function(_site_name) {
+			if (!dependency_hash[_site_name])
+				dependency_hash[_site_name] = [];
+			dependency_hash[_site_name].push(site_name);
+		});
+		// console.trace(dependency_hash);
+		session.load_template_functions(dependent_on, callback, true);
 	}
 
 	var module_name = this.id;
 
-	function load_template_functions(session) {
-		session = session || this;
-		var site_name = typeof session === 'string' ? session : wiki_API
-				.site_name(session);
+	function load_template_functions(site_name, callback) {
+		var session = this;
+		site_name = site_name || wiki_API.site_name(session);
 
-		if (library_namespace.is_debug()) {
-			console.trace([ site_name,
-					session && session.template_functions_site_name ]);
-		}
-		if (session && session.template_functions_site_name
-		// e.g., zhmoegirl 設定 .template_functions_site_name = 'zhwiki'，
-		// 採用 zhwiki 的模板特設功能設定。
-		&& session.template_functions_site_name !== site_name) {
-			library_namespace.info('load_template_functions: 設定 ' + site_name
-					+ ' 採用 ' + session.template_functions_site_name
-					+ ' 的模板特設功能。');
-			site_name = session.template_functions_site_name;
-
-		} else if (!site_name
+		if (!site_name
 		//
 		&& (site_name = session && session.latest_site_configurations
 		//
@@ -1074,15 +1171,28 @@ function module_code(library_namespace) {
 			site_name += 'wiki';
 
 		} else if (!site_name) {
-			throw new Error('Cannot get site_name!');
+			throw new Error('load_template_functions: Cannot get site_name!');
 		}
+
+		var submodules = Array.isArray(site_name) ? site_name : [ site_name ];
+		submodules = submodules.map(function(_site_name) {
+			if (!_site_name
+			// have been loaded
+			|| template_functions.functions_of_site[_site_name]) {
+				return;
+			}
+
+			return library_namespace.to_module_name(module_name
+			//
+			+ library_namespace.env.module_name_separator + _site_name);
+		});
+		// console.trace([ site_name, submodules ]);
 
 		// 注意: 若已設定 `CeL.application.net.wiki.template_functions.zhwiki`，
 		// 則不能採用匯添加 prefix `library_namespace.Class` 的
 		// library_namespace.to_module_name()，否則會被忽略，不載入！
-		library_namespace.run(library_namespace.to_module_name(module_name
-				+ library_namespace.env.module_name_separator + site_name),
-				initialize_session.bind(session));
+		library_namespace.run(submodules, initialize_session_template_functions
+				.bind(session, site_name, callback));
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1111,7 +1221,10 @@ function module_code(library_namespace) {
 		// parse_template_token(template_token, index, parsent, options){} }
 		functions_of_site : Object.create(null),
 		functions_of_all_sites : Object.create(null),
-		template_functions_site_name : template_functions_site_name,
+		// wiki_API.template_functions.KEY_dependent_on
+		// e.g., zhmoegirl 設定 dependent on [ 'zhwiki' ]
+		// 必須是模板名稱不可能使用到的 key 值。
+		KEY_dependent_on : KEY_dependent_on,
 		adapt_function : adapt_function,
 
 		// ----------------------------

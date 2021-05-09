@@ -319,7 +319,7 @@ function module_code(library_namespace) {
 
 		// console.log(href);
 		library_namespace.debug('parse [' + uri + ']: '
-				+ matched.join('<br />\n'), 2);
+				+ matched.join('<br />\n'), 8, 'URI');
 
 		// console.trace([ matched, base_uri, options ]);
 		uri = base_uri && URI(base_uri) || options.as_URL
@@ -459,7 +459,7 @@ function module_code(library_namespace) {
 		});
 		if (library_namespace.is_WWW()) {
 			library_namespace.debug('local file: [' + location.pathname + ']',
-					2, 'URI');
+					9, 'URI');
 		}
 
 		// NG: /^([^%]+|%[a-f\d]{2})+$/
@@ -470,11 +470,11 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace([ href, path, uri ]);
-		library_namespace.debug('parse path: [' + path + ']', 2);
+		library_namespace.debug('parse path: [' + path + ']', 9);
 		if (path && (matched = path
 		//
 		.match(/^((.*\/)?([^\/#?]*))?(\?([^#]*))?(#.*)?$/))) {
-			library_namespace.debug('pathname: [' + matched + ']', 2);
+			library_namespace.debug('pathname: [' + matched + ']', 9);
 			// pathname={path}filename
 			uri.pathname = matched[1] || '';
 			// .directory_path 會隨不同 OS 之 local file 表示法作變動!
@@ -531,13 +531,13 @@ function module_code(library_namespace) {
 		if (options.charset)
 			uri.charset = options.charset;
 
-		library_namespace.debug('path: [' + uri.path + ']', 2);
+		library_namespace.debug('path: [' + uri.path + ']', 9);
 
-		library_namespace.debug('Generate .href of URI by URI_toString()', 2);
+		library_namespace.debug('Generate .href of URI by URI_toString()', 10);
 		uri.toString();
 		// console.trace(uri);
 
-		library_namespace.debug('href: [' + uri.href + ']', 2);
+		library_namespace.debug('href: [' + uri.href + ']', 8);
 		// return uri;
 	}
 
@@ -876,7 +876,7 @@ function module_code(library_namespace) {
 								// TypeError:
 								// Converting circular structure to JSON
 								JSON.stringify(value) : String(value) ]
-					}, 1, 'parameters_toString');
+					}, 9, 'parameters_toString');
 				} catch (e) {
 					library_namespace.error(e);
 					console.error(e);
@@ -914,7 +914,7 @@ function module_code(library_namespace) {
 			return parameter.length > 400 ? parameter.slice(0,
 			//
 			library_namespace.is_debug(6) ? 2000 : 400) + '...' : parameter;
-		}).join('<br />\n') ], 4, 'parameters_toString');
+		}).join('<br />\n') ], 9, 'parameters_toString');
 
 		search = search.join('&');
 		if (this[KEY_URL])

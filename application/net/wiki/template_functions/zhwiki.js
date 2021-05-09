@@ -18,6 +18,7 @@
 'use strict';
 // 'use asm';
 
+// @examples
 (function() {
 	require('./wiki loader.js');
 	CeL.run('application.net.wiki.template_functions');
@@ -28,7 +29,7 @@
 			console.log(token.简 + '⇄' + token.繁);
 		});
 	});
-})
+});
 
 // --------------------------------------------------------------------------------------------
 
@@ -37,13 +38,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.template_functions.zhwiki',
 
-	require : 'data.native.' + '|application.net.wiki.'
-	// load MediaWiki module basic functions
-	+ '|application.net.wiki.namespace.'
-	//
-	+ '|application.net.wiki.parser.'
-	//
-	+ '|application.net.wiki.template_functions.',
+	require : 'data.native.'
+	// Should also load essential MediaWiki modules
+	+ '|application.net.wiki.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',
@@ -74,6 +71,8 @@ function module_code(library_namespace) {
 	// token.expand() 可將模板轉換成一般 wiki 語法。
 	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 	// 用於 function preprocess_section_link_token()。
+
+	// --------------------------------------------------------------------------------------------
 
 	function expand_template_A(options) {
 		var token = this;
