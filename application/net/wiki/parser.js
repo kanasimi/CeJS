@@ -7476,7 +7476,7 @@ function module_code(library_namespace) {
 			// console.trace(JSON.stringify(filter_tags(value)));
 			value = filter_tags(value).toString().trim();
 			// console.log(JSON.stringify(value));
-			return value
+			value = value
 			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
 			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
 			// <source lang="cpp">
@@ -7485,6 +7485,14 @@ function module_code(library_namespace) {
 			.replace(/^\[\[([^\[\]\|{}\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1')
 			// Remove comments
 			.replace(/<!--[\s\S]*?-->/g, '');
+			try {
+				// e.g., true / false / number
+				value = JSON.parse(value);
+				// TODO: 應避免安全問題。
+			} catch (e) {
+				// TODO: handle exception
+			}
+			return value;
 		}
 
 		/** {Object}設定頁面/文字所獲得之個人化設定/手動設定 manual settings。 */
