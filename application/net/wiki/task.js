@@ -3066,7 +3066,7 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=login
 		var matched = lgname.match(/@(.+)$/);
 		// 機器人名稱： user name or pure bot name
-		return login_user_name = wiki_API.normalize_title(matched
+		return wiki_API.normalize_title(matched
 		// e.g., "alias_bot_name@main_bot_name" → "main_bot_name"
 		? matched[1].trim() : lgname);
 
