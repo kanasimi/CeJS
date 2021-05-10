@@ -3056,6 +3056,23 @@ function module_code(library_namespace) {
 		return this;
 	};
 
+	if (false) {
+		login_user_name = CeL.wiki
+				.extract_login_user_name(login_options.user_name);
+		user_name === CeL.wiki.normalize_title(wiki.token.login_user_name);
+	}
+	// "owner_name@user_name" → "user_name"
+	wiki_API.extract_login_user_name = function(lgname) {
+		// https://www.mediawiki.org/w/api.php?action=help&modules=login
+		var matched = lgname.match(/@(.+)$/);
+		// 機器人名稱： user name or pure bot name
+		return login_user_name = wiki_API.normalize_title(matched
+		// e.g., "alias_bot_name@main_bot_name" → "main_bot_name"
+		? matched[1].trim() : lgname);
+
+		return wiki_API.normalize_title(lgname.replace(/^[^@]+@/, '').trim());
+	};
+
 	// 登入認證用。
 	// https://www.mediawiki.org/wiki/API:Login
 	// https://www.mediawiki.org/wiki/API:Edit
@@ -3090,12 +3107,9 @@ function module_code(library_namespace) {
 			}
 
 			if (session.token.lgname) {
-				// https://www.mediawiki.org/w/api.php?action=help&modules=login
-				var matched = session.token.lgname.match(/@(.+)$/);
-				// 機器人名稱： user name or pure bot name
-				session.token.login_user_name = matched
-				// e.g., "Kanashimi@cewbot" → "cewbot"
-				? matched[1].trim() : session.token.lgname;
+				session.token.login_user_name
+				//
+				= wiki_API.extract_login_user_name(session.token.lgname);
 			}
 
 			// reset query limit for login as bot.

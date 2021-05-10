@@ -2611,6 +2611,7 @@ function module_code(library_namespace) {
 		fetch_configuration();
 
 		function fetch_configuration() {
+			// library_namespace.set_debug(6);
 			session.page(task_configuration_page, adapt_configuration, {
 				redirects : 1
 			});
@@ -2619,6 +2620,7 @@ function module_code(library_namespace) {
 		// setup_configuration()
 		function adapt_configuration(page_data) {
 			// console.trace(page_data);
+			// console.trace(wiki_API.content_of(page_data));
 			if (!wiki_API.content_of.page_exists(page_data)) {
 				library_namespace.debug('No configuration page: '
 						+ wiki_API.title_link_of(page_data), 1,
@@ -2643,7 +2645,7 @@ function module_code(library_namespace) {
 			}
 			// latest raw task raw configuration
 			var configuration = wiki_API.parse.configuration(page_data);
-			// console.log(configuration);
+			// console.trace(configuration);
 			// TODO: valid configuration 檢測數值是否合適。
 			session.latest_task_configuration = configuration;
 
