@@ -296,7 +296,9 @@ function module_code(library_namespace) {
 				session.adapt_task_configurations(
 						options.task_configuration_page,
 						function(configuration) {
-							options.configuration_adapter(configuration);
+							// console.trace(configuration);
+							if (options.configuration_adapter)
+								options.configuration_adapter(configuration);
 							initialization_complete();
 						});
 			} else {
@@ -305,9 +307,9 @@ function module_code(library_namespace) {
 		}
 
 		function initialization_complete() {
-			library_namespace.debug('初始化程序登錄完畢。添加之前登錄的 '
-					+ session.actions.length + ' 個程序', 1,
-					'initialization_complete');
+			library_namespace.debug(wiki_API.site_name(session)
+					+ ': 初始化程序登錄完畢。添加之前登錄的 ' + session.actions.length + ' 個程序',
+					1, 'initialization_complete');
 			session.actions.append(session.run_after_initializing);
 			delete session.run_after_initializing;
 		}

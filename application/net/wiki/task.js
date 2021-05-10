@@ -1924,7 +1924,7 @@ function module_code(library_namespace) {
 	// unescaped syntaxes in summary
 	function summary_to_wikitext(summary) {
 		// unescaped_summary
-		var wikitext = summary.replace(/</g, '&lt;').replace(
+		var wikitext = summary.toString().replace(/</g, '&lt;').replace(
 		// 避免 wikitext 添加 Category。
 		// 在編輯摘要中加上使用者連結，似乎還不至於驚擾到使用者。因此還不用特別處理。
 		// @see PATTERN_category @ CeL.wiki
@@ -2017,7 +2017,7 @@ function module_code(library_namespace) {
 		if (config.summary) {
 			// '開始處理 ' + config.summary + ' 作業'
 			library_namespace.sinfo([ 'wiki_API.work: Start [', 'fg=yellow',
-					config.summary, '-fg', ']' ]);
+					String(config.summary), '-fg', ']' ]);
 		}
 
 		/**
@@ -2904,7 +2904,7 @@ function module_code(library_namespace) {
 					// done += '。';
 					nochange_count = 'wiki_API.work: ';
 					done = config.summary ? [ nochange_count, 'fg=green',
-							config.summary, '-fg', ': ' + done ]
+							String(config.summary), '-fg', ': ' + done ]
 							: [ nochange_count + done ];
 					library_namespace.sinfo(done);
 				}
