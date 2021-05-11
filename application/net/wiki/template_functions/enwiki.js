@@ -62,9 +62,9 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_Tl(options) {
-		var token = this;
-		return '&#123;&#123;[[Template:' + token.parameters[1] + '|'
-				+ token.parameters[1] + ']]&#125;&#125;';
+		var parameters = this.parameters;
+		return '&#123;&#123;[[Template:' + parameters[1] + '|'
+				+ parameters[1] + ']]&#125;&#125;';
 	}
 
 	function parse_template_Tl(token) {

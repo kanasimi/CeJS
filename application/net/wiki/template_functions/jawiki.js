@@ -62,8 +62,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_拡張漢字(options) {
-		var token = this;
-		return token.parameters[2] || token.parameters[1];
+		var parameters = this.parameters;
+		return parameters[2] || parameters[1];
 	}
 
 	function parse_template_拡張漢字(token) {
@@ -72,10 +72,29 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// for get_all_anchors()
+	// 転送先のアンカーはTemplate:RFDの中に納まっている
+	// e.g., {{RFD notice
+	// |'''対象リダイレクト:'''[[Wikipedia:リダイレクトの削除依頼/受付#RFD長崎市電|長崎市電（受付依頼）]]|...}}
+	function expand_template_RFD(options) {
+		var parameters = this.parameters;
+		// {{RFD|リダイレクト元ページ名|リダイレクト先ページ名}}
+		return '<span id="RFD'+ parameters[1]+'"></span>'
+		// TODO: + ...
+		;
+	}
+
+	function parse_template_RFD(token) {
+		token.expand = expand_template_RFD;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
-		拡張漢字 : parse_template_拡張漢字
+		拡張漢字 : parse_template_拡張漢字,
+		RFD : parse_template_RFD
 	};
 
 	// --------------------------------------------------------------------------------------------

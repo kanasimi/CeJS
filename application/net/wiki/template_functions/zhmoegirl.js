@@ -61,10 +61,12 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// for get_all_anchors()
 	function expand_template_A(options) {
-		var token = this;
-		return '<span id="' + (token.parameters[2] || token.parameters[1])
-				+ '">' + token.parameters[1] + '</span>';
+		var parameters = this.parameters;
+		// {{a|显示文字|锚点名称}}
+		return '<span id="' + (parameters[2] || parameters[1])
+				+ '">' + parameters[1] + '</span>';
 	}
 
 	function parse_template_A(token) {
@@ -73,10 +75,36 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// for get_all_anchors() @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
+	function expand_template_ARGONAVIS_Icon(options) {
+		return '';
+	}
+
+	function parse_template_ARGONAVIS_Icon(token) {
+		token.expand = expand_template_ARGONAVIS_Icon;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// for get_all_anchors() @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
+	function expand_template_Coloredlink(options) {
+		var parameters = this.parameters;
+		return '[[:' + parameters[2] + '|<span style="color:' + parameters[1] + '">' + (parameters[3] || parameters[2])
+		+ '</span>]]';
+	}
+
+	function parse_template_Coloredlink(token) {
+		token.expand = expand_template_Coloredlink;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
-		A : parse_template_A
+		A : parse_template_A,
+		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon,
+		Coloredlink:parse_template_Coloredlink
 	};
 
 	// library_namespace.info(module_site_name + ': 採用 zhwiki 的模板特設功能設定。');

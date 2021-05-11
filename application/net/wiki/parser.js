@@ -2918,6 +2918,13 @@ function module_code(library_namespace) {
 
 		// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
 		parsed.each('transclusion', function(template_token) {
+			if (template_token.expand) {
+				// const
+				var anchor = get_all_anchors(template_token.expand(), options);
+				register_anchor(anchor, template_token);
+				return;
+			}
+
 			// {{Anchor|anchor|別名1|別名2}}
 			if (wiki_API.is_template('Anchor', template_token, options)
 					|| wiki_API.is_template('Anchors', template_token, options)
@@ -2926,7 +2933,6 @@ function module_code(library_namespace) {
 				for (/* let */var index = 1;
 				//
 				index < template_token.length; index++) {
-					// const
 					var anchor = template_token.parameters[index];
 					if (typeof anchor !== 'string') {
 						// e.g., [[終着駅シリーズ]]: {{Anchor|[[牛尾正直]]}}
@@ -2944,7 +2950,6 @@ function module_code(library_namespace) {
 			// {{Citation|...|ref=anchor}}
 			|| wiki_API.is_template('Citation', template_token, options)) {
 				// console.trace(JSON.stringify(template_token.name));
-				// const
 				var anchor = template_token.parameters.ref;
 				// console.trace(JSON.stringify(anchor));
 				if (typeof anchor === 'string') {
@@ -2970,7 +2975,6 @@ function module_code(library_namespace) {
 			}
 
 			if (wiki_API.is_template('Wikicite', template_token, options)) {
-				// const
 				var anchor = template_token.parameters.ref
 						|| template_token.parameters.id
 						&& ('Reference-' + template_token.parameters.id);
@@ -2984,27 +2988,6 @@ function module_code(library_namespace) {
 				for (var index = 1; index <= 5; index++)
 					if (template_token.parameters[index])
 						anchor += template_token.parameters[index];
-				register_anchor(anchor, template_token);
-				return;
-			}
-
-			// 転送先のアンカーはTemplate:RFDの中に納まっている
-			// e.g., {{RFD notice
-			// |'''対象リダイレクト:'''[[Wikipedia:リダイレクトの削除依頼/受付#RFD長崎市電|長崎市電（受付依頼）]]|...}}
-			if (wiki_API.site_name(session) === 'jawiki'
-					&& wiki_API.is_template('RFD', template_token, options)) {
-				// const
-				var anchor = 'RFD' + template_token.parameters[1];
-				register_anchor(anchor, template_token);
-				return;
-			}
-
-			if (wiki_API.site_name(session) === 'zhmoegirl'
-					&& wiki_API.is_template('A', template_token, options)) {
-				// const
-				var anchor = template_token.parameters[2]
-				// {{a|显示文字|锚点名称}}
-				|| template_token.parameters[1];
 				register_anchor(anchor, template_token);
 				return;
 			}
@@ -3037,7 +3020,7 @@ function module_code(library_namespace) {
 	// CeL.wiki.parse.anchor.essential_templates
 	// required, indispensable
 	get_all_anchors.essential_templates = [ 'Anchor', 'Anchors',
-			'Visible anchor', 'Citation', 'RFD', 'Wikicite', 'SfnRef', 'Sfn' ];
+			'Visible anchor', 'Citation', 'Wikicite', 'SfnRef', 'Sfn' ];
 
 	// ------------------------------------------------------------------------
 

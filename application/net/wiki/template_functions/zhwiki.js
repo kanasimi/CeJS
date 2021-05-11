@@ -75,12 +75,12 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_A(options) {
-		var token = this;
-		return '[[' + token.parameters[1]
+		var parameters = this.parameters;
+		return '[[' + parameters[1]
 		//
-		+ (token.parameters.name ? '#' + token.parameters.name : '')
+		+ (parameters.name ? '#' + parameters.name : '')
 		//
-		+ (token.parameters[2] ? '|' + token.parameters[2] : '') + ']]';
+		+ (parameters[2] ? '|' + parameters[2] : '') + ']]';
 	}
 
 	function parse_template_A(token) {
@@ -117,9 +117,9 @@ function module_code(library_namespace) {
 
 	// {{Lang|ja|參數值}} → -{參數值}-
 	function expand_template_Lang(options) {
-		var token = this;
-		return /^(?:zh|gan)/.test(token.parameters[1]) ? token.parameters[2]
-				: '-{' + token.parameters[2] + '}-';
+		var parameters = this.parameters;
+		return /^(?:zh|gan)/.test(parameters[1]) ? parameters[2]
+				: '-{' + parameters[2] + '}-';
 	}
 
 	function parse_template_Lang(token, options) {
