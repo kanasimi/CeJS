@@ -40,8 +40,6 @@ function module_code(library_namespace) {
 
 	// requiring
 	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
-	// @inner
-	var is_wikidata_site = wiki_API.is_wikidata_site;
 
 	// ------------------------------------------------------------------------
 	// SQL 相關函數 @ Toolforge。

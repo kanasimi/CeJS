@@ -578,11 +578,9 @@ function module_code(library_namespace) {
 		// && wiki_API.is_wiki_API(session)
 		) {
 			session.API_URL = api_URL(API_URL);
-			// is data session. e.g., "test.wikidata.org"
-			session.is_wikidata = /\.wikidata\./i.test(API_URL);
 			// remove cache
 			delete session.last_page;
-			delete session.last_data;
+			delete session[KEY_HOST_SESSION];
 			// force to login again: see wiki_API.login
 			// 據測試，不同 projects 間之 token 不能通用。
 			delete session.token.csrftoken;
@@ -819,7 +817,7 @@ function module_code(library_namespace) {
 			// e.g., 'lzh' → 'zh-classical'
 			language = language_code_to_site_alias[language];
 		} else if (!family && session && !session.family
-				&& !session.is_wikidata && session.API_URL) {
+				&& !session[KEY_HOST_SESSION] && session.API_URL) {
 			// e.g., API_URL: 'https://zh.moegirl.org.cn/api.php'
 			// console.trace([ language, family ]);
 			language = session.API_URL;
@@ -2818,10 +2816,11 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	function is_wikidata_site(site_or_language) {
+	// is site using wikidata nomenclature 命名法
+	function is_wikidata_site_nomenclature(site_or_language) {
 		// TODO: 不是有包含'wiki'的全都是site。
 		library_namespace.debug('Test ' + site_or_language, 3,
-				'is_wikidata_site');
+				'is_wikidata_site_nomenclature');
 		return /^[a-z_\d]{2,20}?(?:wiki(?:[a-z]{4,7})?|wiktionary)$/
 				.test(site_or_language);
 	}
@@ -3457,7 +3456,7 @@ function module_code(library_namespace) {
 		is_api_and_title : is_api_and_title,
 		normalize_title_parameter : normalize_title_parameter,
 		set_parameters : set_parameters,
-		is_wikidata_site : is_wikidata_site,
+		is_wikidata_site_nomenclature : is_wikidata_site_nomenclature,
 		language_code_to_site_alias : language_code_to_site_alias,
 
 		PATTERN_URL_prefix : PATTERN_URL_prefix,

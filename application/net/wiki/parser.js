@@ -6915,6 +6915,9 @@ function module_code(library_namespace) {
 					locale : 'cmn-Hant-TW'
 				} ]
 	};
+	// all wikimedia using English in default.
+	// e.g., wikidata, commons
+	date_parser_config.multilingual = date_parser_config.en;
 
 	// warning: number_to_signed(-0) === "+0"
 	function number_to_signed(number) {
@@ -6940,7 +6943,10 @@ function module_code(library_namespace) {
 		var language = wiki_API.get_first_domain_name_of_session(options);
 		if (session) {
 			if (!language) {
-				language = wiki_API.get_first_domain_name_of_session(session);
+				language = wiki_API.site_name(session, {
+					get_all_properties : true
+				});
+				language = language && language.language;
 			}
 			if (!date_parser_config[language]) {
 				// e.g., https://simple.wikipedia.org/ →
@@ -6961,20 +6967,12 @@ function module_code(library_namespace) {
 		}
 		options.zone |= 0;
 
-		if (!language) {
-			language = wiki_API.language;
-			options.date_parser_config = date_parser_config[wiki_API.language];
-		} else if (language in wiki_API.api_URL.wikimedia) {
-			// all wikimedia using English in default.
-			options.date_parser_config = date_parser_config.en;
-		} else {
-			options.date_parser_config = date_parser_config[language]
-			// e.g., 'commons'
-			|| date_parser_config[wiki_API.language];
-		}
+		options.date_parser_config = date_parser_config[language];
 		if (!options.date_parser_config) {
+			library_namespace.error('normalize_parse_date_options: Invalid language: ' + language);
 			// console.log(session);
-			console.trace([ language, wiki_API.language ]);
+			// console.trace([ language, wiki_API.language ]);
+			options.date_parser_config = date_parser_config[wiki_API.language];
 		}
 
 		return options;

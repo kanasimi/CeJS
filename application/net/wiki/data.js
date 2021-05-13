@@ -51,7 +51,7 @@ function module_code(library_namespace) {
 	// requiring
 	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION, KEY_HOST_SESSION = wiki_API.KEY_HOST_SESSION;
 	// @inner
-	var API_URL_of_options = wiki_API.API_URL_of_options, is_api_and_title = wiki_API.is_api_and_title, is_wikidata_site = wiki_API.is_wikidata_site, language_code_to_site_alias = wiki_API.language_code_to_site_alias;
+	var API_URL_of_options = wiki_API.API_URL_of_options, is_api_and_title = wiki_API.is_api_and_title, is_wikidata_site_nomenclature = wiki_API.is_wikidata_site_nomenclature, language_code_to_site_alias = wiki_API.language_code_to_site_alias;
 	var KEY_CORRESPOND_PAGE = wiki_API.KEY_CORRESPOND_PAGE, PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i;
 
 	var get_URL = this.r('get_URL');
@@ -91,7 +91,8 @@ function module_code(library_namespace) {
 				if (session.data_session) {
 					API_URL = session.data_session.API_URL;
 				}
-				if (!API_URL && session.is_wikidata) {
+				if (!API_URL && session[KEY_HOST_SESSION]) {
+					// is data session. e.g., https://test.wikidata.org/w/api.php
 					API_URL = session.API_URL;
 				}
 			} else {
@@ -285,7 +286,7 @@ function module_code(library_namespace) {
 		var type = options.type;
 		// console.trace([ key, is_api_and_title(key, 'language') ]);
 		if (is_api_and_title(key, 'language')) {
-			if (is_wikidata_site(key[0])) {
+			if (is_wikidata_site_nomenclature(key[0])) {
 				wikidata_entity(key, function(entity, error) {
 					// console.log(entity);
 					var id = !error && entity && entity.id;
@@ -1187,7 +1188,7 @@ function module_code(library_namespace) {
 
 		if (Array.isArray(key)) {
 			if (is_api_and_title(key)) {
-				if (is_wikidata_site(key[0])) {
+				if (is_wikidata_site_nomenclature(key[0])) {
 					key = {
 						site : key[0],
 						title : key[1]

@@ -185,7 +185,7 @@ function module_code(library_namespace) {
 		// console.trace(API_URL);
 		if (!API_URL && !('language' in this)
 		// wikidata 不設定 language。
-		&& !this.is_wikidata) {
+		&& !this[wiki_API.KEY_HOST_SESSION]) {
 			API_URL = wiki_API.language;
 			// 假若未設定 API_URL 或 user_name，那就不初始化。等 .login 才初始化。
 			// 若想基本的初始化，最起碼必須設定 API_URL。
