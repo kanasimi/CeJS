@@ -1650,7 +1650,7 @@ function module_code(library_namespace) {
 			// 必然包含 page title，因此不處理最後一個。
 			if (index === page_name.length - 1) {
 				if (options.no_upper_case_initial) {
-					page_name[index] = section.toLowerCase();
+					page_name[index] = section;
 				} else {
 					// page title: 將首個字母轉成大寫。
 					page_name[index] = upper_case_initial(section);
@@ -1669,7 +1669,7 @@ function module_code(library_namespace) {
 				session && interwiki_pattern.test(section)
 						|| options.no_upper_case_initial) {
 					// e.g., 'EN' → 'en'
-					page_name[index] = section.toLowerCase();
+					page_name[index] = section;
 				} else {
 					// page title: 將首個字母轉成大寫。
 					page_name[index] = upper_case_initial(section);
