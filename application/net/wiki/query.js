@@ -469,6 +469,53 @@ function module_code(library_namespace) {
 		// console.trace(action);
 		// console.log(POST_data);
 
+		// merge `options.cached_response` to `response`
+		// 以 cached_response 為基礎，後設定者為準。
+		function merge_cached_response(response) {
+			// console.trace([ this.cached_response, response ]);
+			this.cached_response = library_namespace.deep_merge_object(
+					this.cached_response, response);
+			if (false) {
+				// console.trace(JSON.stringify(this.cached_response));
+				console.trace([ this.cached_response.query.pages[75032],
+						response.query.pages[75032] ]);
+			}
+			return this.cached_response;
+		}
+
+		// 2021/5/4 17:32:39 看來 intitle: 最多只能取得 10000 pages，再多必須多加排除條件，例如
+		// -incategory:""。
+		// 編輯頁面後重新執行，或許可以取得不同的頁面清單。
+		if (options.handle_continue_response === 'merge_response') {
+			options.handle_continue_response = merge_cached_response;
+		} else if (options.handle_continue_response === true) {
+			options.handle_continue_response = function default_handle_continue_response(
+					response, action, POST_data) {
+				// console.trace([ action, POST_data ]);
+				// console.trace([ response, JSON.stringify(response) ]);
+				// console.log(response);
+
+				if (!action.search_params.action === 'query') {
+					return;
+				}
+
+				var list = response.query[
+				// e.g., prop: 'revisions'
+				action.search_params.prop
+				//
+				|| action.search_params.list || action.search_params.meta];
+				if (Array.isArray(list)) {
+					// console.log(list);
+					if (this.cached_list) {
+						// assert: Array.isArray(this.cached_list)
+						this.cached_list.append(list);
+					} else {
+						this.cached_list = list;
+					}
+				}
+			};
+		}
+
 		/**
 		 * TODO: 簡易的泛用先期處理程式。
 		 * 
@@ -605,7 +652,6 @@ function module_code(library_namespace) {
 				// wbentityusage 的時候似乎會一直跑一直跑跑不完，基本上一次平移一篇文章，只好放棄了。
 
 				// console.trace([ action, POST_data ]);
-
 				// console.trace([ response, JSON.stringify(response) ]);
 
 				// e.g., merge response to cached data
@@ -633,6 +679,12 @@ function module_code(library_namespace) {
 				get_URL(action, XMLHttp_handler, null, POST_data,
 						get_URL_options);
 				return;
+			}
+
+			if (options.handle_continue_response === merge_cached_response) {
+				response = options.handle_continue_response(response);
+				delete response['continue'];
+				// console.trace(response.query.pages[75032]);
 			}
 
 			// ----------------------------------

@@ -691,6 +691,11 @@ function test_data() {
 		[[2, CeL.count_word(" Abc, def. ")], 'count_word() #5'],
 	]);
 
+	all_error_count += CeL.test('CeL.data', function (assert) {
+		assert(['{"a":1,"b":2}', JSON.stringify(Object.clone({a:1,b:2}))], 'Object.clone()');
+		assert(['{"a":2,"b":[1,2,3,4,5],"c":{"a":1,"b":2,"c":3,"d":4},"d":"d","e":{"a":[1,2,3,4],"b":{"i":1,"j":2,"k":3,"l":4}},"f":4}', JSON.stringify(CeL.deep_merge_object({a:1,b:[1,2],c:{a:1,b:2},d:'d',e:{a:[1,2],b:{i:1,j:1}}},{a:2,b:[3,4,5],c:{c:3,d:4},e:{b:{j:2,k:3,l:4},a:[3,4]},f:4}))], 'CeL.deep_merge_object() #1');
+		assert(['{"k":{"a":"","b":4,"c":[1],"d":{"a":1}}}', JSON.stringify(CeL.deep_merge_object({k:{a:1,b:4}},{k:{a:'',c:[1],d:{a:1}}}))], 'CeL.deep_merge_object() #2');
+	});
 }
 
 

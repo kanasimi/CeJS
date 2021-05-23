@@ -2398,7 +2398,9 @@ function module_code(library_namespace) {
 			}
 
 			if (pages.length > 0) {
-				var pages_left = 0, pages_rationed = false;
+				var pages_left = 0,
+				/** {Boolean}工作配給完畢 */
+				pages_rationed = false;
 				pages.forEach(function for_each_page(page, index) {
 					if (library_namespace.is_debug(2)
 					// .show_value() @ interact.DOM, application.debug
@@ -2408,6 +2410,12 @@ function module_code(library_namespace) {
 						// nochange_count++;
 						// Skip invalid page. 預防如 .work(['']) 的情況。
 						return;
+					}
+
+					if (false && !wiki_API.content_of.has_content(page)) {
+						// Should not go to here
+						console.log(pages);
+						console.log(page);
 					}
 
 					function clear_work() {
@@ -2813,6 +2821,7 @@ function module_code(library_namespace) {
 		var page_options = Object.assign({
 			// 為了降低記憶體使用，不把所有屬性添附至原有的 {Object}page_data 資料結構中。
 			do_not_import_original_page_data : true,
+			handle_continue_response : 'merge_response',
 			allow_missing : config.no_warning,
 			multi : true
 		},

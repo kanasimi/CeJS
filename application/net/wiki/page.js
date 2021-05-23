@@ -428,15 +428,23 @@ function module_code(library_namespace) {
 
 			if (false && data.warnings && data.warnings.result
 			/**
-			 * e.g., <code>
-			 * 2017:
-			 * { continue: { rvcontinue: '2421|39477047', continue: '||' },
-			 *   warnings: { result: { '*': 'This result was truncated because it would otherwise  be larger than the limit of 12,582,912 bytes' } },
-			 *   query:
-			 *    { pages:
-			 *       { '13': [Object],
-			 *       ...
-			 * </code>
+			 * <code>
+			// e.g., 2021/5/23:
+			{
+			  continue: { rvcontinue: '74756|83604874', continue: '||' },
+			  warnings: {
+			    result: {
+			      '*': 'This result was truncated because it would otherwise be larger than the limit of 12,582,912 bytes.'
+			    }
+			  },
+			  query: {
+			    pages: {
+			      '509': [Object],
+			      ...
+			    }
+			  }
+			}
+			</code>
 			 * limit: 12 MB. 此時應該有 .continue。
 			 */
 			&& data.warnings.result['*']) {
@@ -448,7 +456,7 @@ function module_code(library_namespace) {
 			}
 
 			if (!data || !data.query
-			//
+			// assert: data.cached_response && data.query.pages
 			|| !data.query.pages && !data.query.redirects) {
 				library_namespace.warn('wiki_API_page: Unknown response: ['
 				// e.g., 'wiki_API_page: Unknown response:

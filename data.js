@@ -130,6 +130,101 @@ function module_code(library_namespace) {
 	_// JSDT:_module_
 	.clone = clone;
 
+	// merge `new_data` to `old_data`, and return merged old_data
+	// merge 時，各屬性值以 `old_data` 為基礎，`new_data` 後設定者為準。
+	// Will modify old_data!
+	function deep_merge_object(old_data, options) {
+		var new_data;
+		if (Array.isArray(old_data)) {
+			// deep_merge_object([old_data, new_data, newer_data, ...,
+			// latest data ], options);
+			old_data.forEach(function(data, index) {
+				if (index === 0) {
+					old_data = data;
+				} else if (index === this.length - 1) {
+					new_data = data;
+				} else {
+					old_data = deep_merge_object([ old_data, data ], options);
+				}
+			});
+		} else {
+			// deep_merge_object(old_data, new_data);
+			new_data = options;
+		}
+
+		// ----------------------------
+
+		if (typeof old_data !== 'object' || old_data === null || !new_data) {
+			return new_data || old_data;
+		}
+
+		// ----------------------------
+
+		function merge_property_of_object(sub_new_data, sub_old_data) {
+			for ( var property in sub_new_data) {
+				// 將 property in sub_new_data 設定至
+				// old_value=sub_old_data[property];
+				merge_property(property, sub_new_data, sub_old_data);
+			}
+			return sub_old_data;
+		}
+
+		// 以 sub_old_data[property] 為基礎，將 sub_new_data[property] merge/overwrite
+		// 到 sub_old_data[property]
+		// 最終指定 sub_new_data[property] = old_value;
+		function merge_property(property, sub_new_data, sub_old_data) {
+			// assert: property in sub_new_data
+			var new_value = sub_new_data[property];
+
+			// assert: typeof old_value === 'object'
+			if (typeof new_value !== 'object' || !(property in sub_old_data)) {
+				// using new_value, overwrite old value
+				sub_old_data[property] = new_value;
+				return;
+			}
+
+			// assert: property in sub_old_data
+			var old_value = sub_old_data[property];
+
+			if (Array.isArray(new_value)) {
+				if (Array.isArray(old_value)) {
+					// 對於 {Object}old_value 先複製到 `old_value`
+					Object.keys(new_value).forEach(
+					// merge 像 new_value.a=1
+					function(sub_property) {
+						if (!library_namespace.is_digits(sub_property)) {
+							merge_property(sub_property, new_value, old_value);
+						}
+					});
+
+					old_value.append(new_value);
+				} else if (typeof old_value === 'object') {
+					// assert: library_namespace.is_Object(old_value)
+					merge_property_of_object(new_value, old_value);
+				} else {
+					// new_value.push(old_value);
+					sub_old_data[property] = new_value;
+				}
+				return;
+			}
+
+			// assert: library_namespace.is_Object(old_value) &&
+			// library_namespace.is_Object(new_value)
+
+			if (typeof old_value !== 'object') {
+				// 考慮 new_value 與 old_value 型態不同的情況。
+				sub_old_data[property] = new_value;
+			} else {
+				merge_property_of_object(new_value, old_value);
+			}
+		}
+
+		// assert: library_namespace.is_Object(old_data)
+		return merge_property_of_object(new_data, old_data);
+	}
+
+	_.deep_merge_object = deep_merge_object;
+
 	/**
 	 * get the quote index of specified string.<br />
 	 * 輸入('"','dh"fdgfg')得到2:指向"的位置.
