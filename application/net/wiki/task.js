@@ -242,6 +242,7 @@ function module_code(library_namespace) {
 			break;
 
 		case 'page':
+			// console.trace(next);
 			// this.page(page data, callback, options);
 			if (library_namespace.is_Object(next[2]) && !next[3]) {
 				// 直接輸入 options，未輸入 callback。
@@ -2237,6 +2238,11 @@ function module_code(library_namespace) {
 		}
 
 		var session = this;
+		var maybe_nested_thread = session.running
+				&& session.actions.length === 0;
+		if (false)
+			console.trace([ maybe_nested_thread, session.running,
+					session.actions.length ]);
 		var main_work = function(data, error) {
 			if (error) {
 				library_namespace.error('wiki_API.work: Get error: '
@@ -2349,11 +2355,10 @@ function module_code(library_namespace) {
 						+ (this_slice_size - pages.length) + ' 個不存在或重複頁面。');
 			}
 
-			library_namespace.debug('for each page: 主要機制是把工作全部推入 queue。', 2,
-					'wiki_API.work');
-			// 剩下的頁面數量 pages remaining. cf. ((done))
-			var promises = [], fulfilled = Object.create(null);
-			function check_if_result_is_thenable(result) {
+			// --------------------------------------------
+
+			var fulfilled = Object.create(null);
+			function check_result_and_process_next(result) {
 				// session.next() will wait for result.then() calling back
 				// if CeL.is_thenable(result).
 				// e.g., async function for_each_list_page(list_page_data)
@@ -2362,10 +2367,28 @@ function module_code(library_namespace) {
 
 				// Promise.isPromise()
 				if (!library_namespace.is_thenable(result)) {
+					process_next_page();
 					return;
 				}
 
-				promises.push(result);
+				// console.trace([ session.running, session.actions.length ]);
+				result.then(process_next_page, function(error) {
+					// `error_to_return` will record the first error.
+					error_to_return = error_to_return || error;
+					process_next_page();
+				})
+				/**
+				 * <code>
+				.then(function() {
+					console.trace(page_index + '/' + pages.length
+					//
+					+ ' result finished '
+					//
+					+ [ session.running, session.actions.length ]);
+				})
+				</code>
+				 */
+				;
 
 				// https://stackoverflow.com/questions/30564053/how-can-i-synchronously-determine-a-javascript-promises-state
 				// https://github.com/kudla/promise-status-async/blob/master/lib/promiseState.js
@@ -2388,211 +2411,177 @@ function module_code(library_namespace) {
 						</code>
 						 */
 
-						// console.trace('call session.next()');
-						session.next();
+						if (false) {
+							console.trace(
+							// replace/20220101.replace_template.js 多任務:
+							// [false,0]
+							// should not session.next();
+							'test if need to call session.next(): '
+
+							// 20200122.update_vital_articles.js: [true,1]
+							// and MUST session.next();
+							+ [ page_index, maybe_nested_thread,
+							//
+							session.running, session.actions.length,
+							//
+							session.actions.map(function(action) {
+								return action.slice(0, 2);
+							}) ]);
+						}
+						if (!maybe_nested_thread && session.running
+						// 1: this.page()
+						&& session.actions.length === 1) {
+							session.next();
+						}
 					}
 				}, function(error) {
 					// Do not catch error here.
 				});
-				return true;
 			}
 
-			if (pages.length > 0) {
-				var pages_left = 0,
-				/** {Boolean}工作配給完畢 */
-				pages_rationed = false;
-				pages.forEach(function for_each_page(page, index) {
-					if (library_namespace.is_debug(2)
-					// .show_value() @ interact.DOM, application.debug
-					&& library_namespace.show_value)
-						library_namespace.show_value(page, 'page');
-					if (!page) {
-						// nochange_count++;
-						// Skip invalid page. 預防如 .work(['']) 的情況。
-						return;
-					}
-
-					if (false && !wiki_API.content_of.has_content(page)) {
-						// Should not go to here
-						console.log(pages);
-						console.log(page);
-					}
-
-					function clear_work() {
-						// 警告: 直接清空 .actions 不安全！
-						// session.actions.clear();
-						work_continue = target.length;
-
-						var next;
-						while (next = session.actions[0]) {
-							next = next[0];
-							if (next === 'page' || next === 'edit')
-								session.actions.shift();
-							else
-								break;
-						}
-						library_namespace.debug('清空 actions queue: 剩下'
-								+ session.actions.length + ' actions。', 1,
-								'wiki_API.work');
-					}
-
-					pages_left++;
-					if (config.no_edit) {
-						// 不作編輯作業。
-						// 取得頁面內容。
-						// console.log(page);
-						// console.trace(session.running);
-						session.page(page, function work_page_callback(
-								page_data, error) {
-							// TODO: if (error) {...}
-							// console.log([ page_data, config.page_options ]);
-							library_namespace.log_temporary((index + 1) + '/'
-									+ pages.length + ' '
-									+ wiki_API.title_link_of(page_data));
-							var result;
-							try {
-								result = each.call(config, page_data, messages,
-										config);
-							} catch (e) {
-								error_to_return = error_to_return || e;
-								if (typeof e === 'object') {
-									console.error(e);
-								} else {
-									library_namespace.error(
-									//
-									'wiki_API.work: Catched error: ' + e);
-								}
-							}
-
-							if (messages.quit_operation) {
-								clear_work();
-							}
-							check_if_result_is_thenable(result);
-							if (--pages_left === 0 && pages_rationed) {
-								finish_up(promises);
-							}
-						}, single_page_options);
-
-					} else {
-						// clone() 是為了能個別改變 summary。
-						// 例如: each() { options.summary += " -- ..."; }
-						var work_options = Object.clone(options);
-						// console.log(work_options);
-						// 取得頁面內容。一頁頁處理。
-						session.page(page, null, single_page_options)
-						// 編輯頁面內容。
-						.edit(function(page_data) {
-							if (('missing' in page_data)
-							//
-							|| ('invalid' in page_data)) {
-								// return [ wiki_API.edit.cancel, 'skip' ];
-							}
-
-							// edit/process
-							if (!config.no_message) {
-								var _messages = [
-								//
-								'wiki_API.work: edit '
-								//
-								+ (index + 1) + '/' + pages.length + ' ' ];
-								if ('missing' in page_data) {
-									_messages.push(
-									//
-									'fg=yellow', 'missing page');
-								} else if ('invalid' in page_data) {
-									_messages.push(
-									//
-									'fg=yellow', 'invalid page title');
-								} else {
-									_messages.push('', '[[', 'fg=yellow',
-									//
-									page_data.title, '-fg', ']]');
-								}
-								library_namespace.sinfo(_messages);
-							} else {
-								library_namespace.log_temporary(
-								//
-								(index + 1) + '/' + pages.length + ' '
-								//
-								+ wiki_API.title_link_of(page_data));
-							}
-							// 以 each() 的回傳作為要改變成什麼內容。
-							var content;
-							try {
-								content = each.call(
-								// 注意: this === work_options
-								// 注意: this !== work_config === `config`
-								// @see wiki_API.edit()
-								this, page_data, messages, config);
-							} catch (e) {
-								error_to_return = error_to_return || e;
-								if (typeof e === 'object') {
-									console.error(e);
-								} else {
-									library_namespace.error(
-									//
-									'wiki_API.work: Catched error: ' + e);
-								}
-
-								// return [wiki_API.edit.cancel, 'skip'];
-							}
-							if (messages.quit_operation) {
-								clear_work();
-							}
-							check_if_result_is_thenable(content);
-							// console.trace(content);
-							return content;
-						}, work_options, function work_edit_callback(
-						// title, error, result
-						) {
-							// console.trace(arguments);
-							// nomally call do_batch_work_summary()
-							callback.apply(session, arguments);
-							if (--pages_left === 0 && pages_rationed) {
-								finish_up(promises);
-							}
-						});
-					}
-				});
-				library_namespace.debug('工作配給完畢，' + pages_left + ' 頁面待處理。', 2,
-						'wiki_API.work');
-				pages_rationed = true;
-				if (pages_left === 0) {
-					// 前面已經同步處理完畢了，卻還沒執行 finish_up()。
-					finish_up();
+			var page_index = 0;
+			// for each page: 主要機制是一頁頁處理。
+			function process_next_page() {
+				if (false)
+					console.trace('process_next_page: ' + page_index + '/'
+							+ pages.length);
+				if (messages.quit_operation) {
+					// 警告: 直接清空 .actions 不安全！
+					// session.actions.clear();
+					work_continue = target.length;
+					page_index = pages.length;
 				}
-
-			} else {
-				// 都沒有東西的時候依然應該執行收尾。
-				finish_up();
-			}
-
-			// 警告：不可省略，只為避免 clear_work()誤刪！
-			session.run(function wikiAPI_work__waiting_for_winding_up() {
-				library_namespace.debug('工作配給完畢，等待 callback 結束，準備收尾。', 3,
-						'wiki_API.work');
-			});
-
-			// 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
-			function finish_up(promises, error) {
-				error_to_return = error_to_return || error;
-				if (promises && promises.length > 0) {
-					// e.g., check_deletion_page() @
-					// 20191214.maintain_historical_deletion_records.js
-					library_namespace.debug(
-							'Waiting for all promises settled...', 1,
-							'wiki_API.work');
-					// console.trace(promises);
-					// Cannot cache Promise.allSettled().
-					Promise.all(promises)['catch'](function(error) {
-						// `error_to_return` will record the first error.
-						error_to_return = error_to_return || error;
-					});
-					Promise.allSettled(promises).then(
-							finish_up.bind(null, null, null));
+				if (!(page_index < pages.length)) {
+					// 處理完畢了。
+					finish_up();
 					return;
 				}
 
+				// ------------------------------
+
+				var page = pages[page_index++];
+				if (library_namespace.is_debug(2)
+				// .show_value() @ interact.DOM, application.debug
+				&& library_namespace.show_value)
+					library_namespace.show_value(page, 'page');
+				if (!page) {
+					// nochange_count++;
+					// Skip invalid page. 預防如 .work(['']) 的情況。
+					process_next_page();
+					return;
+				}
+
+				function work_page_callback(page_data, error) {
+					// TODO: if (error) {...}
+					// console.log([ page_data, config.page_options ]);
+					library_namespace.log_temporary(page_index + '/'
+							+ pages.length + ' '
+							+ wiki_API.title_link_of(page_data));
+					var result;
+					try {
+						result = each.call(config, page_data, messages, config);
+					} catch (e) {
+						error_to_return = error_to_return || e;
+						if (typeof e === 'object') {
+							console.error(e);
+						} else {
+							library_namespace.error(
+							//
+							'wiki_API.work: Catched error: ' + e);
+						}
+					}
+
+					check_result_and_process_next(result);
+				}
+
+				// console.log(page);
+				// console.trace(session.running);
+				// 設定頁面內容。
+				session.page(page, config.no_edit && work_page_callback,
+						single_page_options);
+
+				if (config.no_edit) {
+					// 不作編輯作業。
+					return;
+				}
+
+				// clone() 是為了能個別改變 summary。
+				// 例如: each() { options.summary += " -- ..."; }
+				var work_options = Object.clone(options);
+				// console.log(work_options);
+				// 編輯頁面內容。
+				session.edit(function(page_data) {
+					if (('missing' in page_data)
+					//
+					|| ('invalid' in page_data)) {
+						// return [ wiki_API.edit.cancel, 'skip' ];
+					}
+
+					// edit/process
+					if (!config.no_message) {
+						var _messages = [ 'wiki_API.work: edit '
+						//
+						+ page_index + '/' + pages.length + ' ' ];
+						if ('missing' in page_data) {
+							_messages.push(
+							//
+							'fg=yellow', 'missing page');
+						} else if ('invalid' in page_data) {
+							_messages.push(
+							//
+							'fg=yellow', 'invalid page title');
+						} else {
+							_messages.push('', '[[', 'fg=yellow',
+							//
+							page_data.title, '-fg', ']]');
+						}
+						library_namespace.sinfo(_messages);
+					} else {
+						library_namespace.log_temporary(
+						//
+						page_index + '/' + pages.length + ' '
+						//
+						+ wiki_API.title_link_of(page_data));
+					}
+					// 以 each() 的回傳作為要改變成什麼內容。
+					var content;
+					try {
+						content = each.call(
+						// 注意: this === work_options
+						// 注意: this !== work_config === `config`
+						// @see wiki_API.edit()
+						this, page_data, messages, config);
+					} catch (e) {
+						error_to_return = error_to_return || e;
+						if (typeof e === 'object') {
+							console.error(e);
+						} else {
+							library_namespace.error(
+							//
+							'wiki_API.work: Catched error: ' + e);
+						}
+
+						// return [wiki_API.edit.cancel, 'skip'];
+					}
+					check_result_and_process_next(content);
+					// console.trace(content);
+					return content;
+				}, work_options, function work_edit_callback(
+				// title, error, result
+				) {
+					// console.trace(arguments);
+					// nomally call do_batch_work_summary()
+					callback.apply(session, arguments);
+				});
+
+			}
+
+			process_next_page();
+
+			// 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
+			function finish_up() {
+				if (false)
+					console.trace(pages.length + ' pages done');
 				if (!config.no_message) {
 					library_namespace.debug('收尾。', 1, 'wiki_API.work');
 					var count_summary;
@@ -2863,7 +2852,7 @@ function module_code(library_namespace) {
 		}
 
 		// console.log(JSON.stringify(pages));
-		// console.log(pages===target);
+		// console.log(pages === target);
 		// console.log(JSON.stringify(target));
 		if (Array.isArray(target)) {
 			if (!config.untouch_page_list) {
@@ -2926,6 +2915,10 @@ function module_code(library_namespace) {
 				work_continue += this_slice_size;
 
 				// 假如想要全部轉換成 pageids，必須考量有些頁面可能沒有 pageid 的問題。
+				if (false)
+					console.trace('一次取得本 slice 所有頁面內容。'
+							+ [ maybe_nested_thread, session.running,
+									session.actions.length ]);
 				this.page(this_slice, main_work, page_options);
 			}).bind(this);
 

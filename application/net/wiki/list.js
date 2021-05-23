@@ -1039,7 +1039,7 @@ function module_code(library_namespace) {
 						+ this.thread_count + ',' + this.actions.length + ')'
 						// ，直接跳出。
 						+ this.actions.slice(0, 9).map(function(action) {
-							return action[0];
+							return action.slice(0, 1);
 						}), 3, 'wiki_API_prototype_methods');
 					}
 					if (library_namespace.is_debug(6)) {

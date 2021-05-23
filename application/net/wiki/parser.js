@@ -6969,7 +6969,11 @@ function module_code(library_namespace) {
 
 		options.date_parser_config = date_parser_config[language];
 		if (!options.date_parser_config) {
-			library_namespace.error('normalize_parse_date_options: Invalid language: ' + language);
+			if (language) {
+				library_namespace.error(
+				//
+				'normalize_parse_date_options: Invalid language: ' + language);
+			}
 			// console.log(session);
 			// console.trace([ language, wiki_API.language ]);
 			options.date_parser_config = date_parser_config[wiki_API.language];
