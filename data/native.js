@@ -451,6 +451,8 @@ function module_code(library_namespace) {
 	_// JSDT:_module_
 	.ignore_case_pattern = ignore_case_pattern;
 
+	// pattern.replace(string)
+	// 警告: 必須自行檢查 string! 否則會出現 pattern.replace(undefined) === 'undefined'
 	function pattern_replace(string) {
 		// assert: {RegExp}this pattern
 		// assert: pattern has .replace_to

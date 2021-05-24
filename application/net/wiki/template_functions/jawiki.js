@@ -79,7 +79,7 @@ function module_code(library_namespace) {
 	function expand_template_RFD(options) {
 		var parameters = this.parameters;
 		// {{RFD|リダイレクト元ページ名|リダイレクト先ページ名}}
-		return '<span id="RFD'+ parameters[1]+'"></span>'
+		return '<span id="RFD' + parameters[1] + '"></span>'
 		// TODO: + ...
 		;
 	}

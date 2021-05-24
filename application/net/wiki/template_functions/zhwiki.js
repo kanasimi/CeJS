@@ -118,8 +118,8 @@ function module_code(library_namespace) {
 	// {{Lang|ja|參數值}} → -{參數值}-
 	function expand_template_Lang(options) {
 		var parameters = this.parameters;
-		return /^(?:zh|gan)/.test(parameters[1]) ? parameters[2]
-				: '-{' + parameters[2] + '}-';
+		return /^(?:zh|gan)/.test(parameters[1]) ? parameters[2] : '-{'
+				+ parameters[2] + '}-';
 	}
 
 	function parse_template_Lang(token, options) {

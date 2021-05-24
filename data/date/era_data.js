@@ -10,6 +10,8 @@ TODO:
 任意線圖階層，不只(紀年名稱索引值)所示。
 
 
+https://cs.wikipedia.org/wiki/Seznam_p%C5%99edstavitel%C5%AF_%C4%8Desk%C3%A9ho_st%C3%A1tu
+
 https://en.wikipedia.org/wiki/Lists_of_rulers_of_Greece
 
 https://en.wikipedia.org/wiki/Ancient_history

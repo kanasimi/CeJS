@@ -65,8 +65,8 @@ function module_code(library_namespace) {
 	function expand_template_A(options) {
 		var parameters = this.parameters;
 		// {{a|显示文字|锚点名称}}
-		return '<span id="' + (parameters[2] || parameters[1])
-				+ '">' + parameters[1] + '</span>';
+		return '<span id="' + (parameters[2] || parameters[1]) + '">'
+				+ parameters[1] + '</span>';
 	}
 
 	function parse_template_A(token) {
@@ -89,8 +89,8 @@ function module_code(library_namespace) {
 	// for get_all_anchors() @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_Coloredlink(options) {
 		var parameters = this.parameters;
-		return '[[:' + parameters[2] + '|<span style="color:' + parameters[1] + '">' + (parameters[3] || parameters[2])
-		+ '</span>]]';
+		return '[[:' + parameters[2] + '|<span style="color:' + parameters[1]
+				+ '">' + (parameters[3] || parameters[2]) + '</span>]]';
 	}
 
 	function parse_template_Coloredlink(token) {
@@ -104,7 +104,7 @@ function module_code(library_namespace) {
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
 		A : parse_template_A,
 		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon,
-		Coloredlink:parse_template_Coloredlink
+		Coloredlink : parse_template_Coloredlink
 	};
 
 	// library_namespace.info(module_site_name + ': 採用 zhwiki 的模板特設功能設定。');

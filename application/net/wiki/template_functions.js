@@ -1217,8 +1217,18 @@ function module_code(library_namespace) {
 	// console.trace(wiki_API.parser.parser_prototype.is_biography);
 
 	Object.assign(template_functions, {
-		// functions_of_site[site_name] = { template_name:
-		// parse_template_token(template_token, index, parsent, options){} }
+		/**
+		 * <code>
+		functions_of_site[site_name] = {
+			template_name : parse_template_token(template_token, index, parsent, options) {
+				// parse and create corresponding attributes
+				token.property = ...
+				// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
+				token.expand = expandtemplates
+			}
+		}
+		<code>
+		 */
 		functions_of_site : Object.create(null),
 		functions_of_all_sites : Object.create(null),
 		// wiki_API.template_functions.KEY_dependent_on
