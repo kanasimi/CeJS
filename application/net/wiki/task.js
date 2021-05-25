@@ -2420,7 +2420,7 @@ function module_code(library_namespace) {
 
 							// 20200122.update_vital_articles.js: [true,1]
 							// and MUST session.next();
-							+ [ page_index, maybe_nested_thread,
+							+ [ page_index, pages.length, maybe_nested_thread,
 							//
 							session.running, session.actions.length,
 							//
@@ -2430,7 +2430,11 @@ function module_code(library_namespace) {
 						}
 						if (!maybe_nested_thread && session.running
 						// 1: this.page()
-						&& session.actions.length === 1) {
+						&& (session.actions.length === 1
+						// 僅編輯了一筆，處理完畢了。最後要 finish_up() 的時候。
+						|| session.actions.length === 0
+						//
+						&& !(page_index < pages.length))) {
 							session.next();
 						}
 					}
