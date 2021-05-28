@@ -648,8 +648,17 @@ function module_code(library_namespace) {
 			session.language
 			// e.g., 'zh-classical', 'zh-yue', 'zh-min-nan'
 			= language_code;
-			var site_name = wiki_API.site_name(session);
-			// console.trace(site_name);
+			var site_name = wiki_API.site_name(session, {
+				get_all_properties : true
+			});
+			// console.trace([ language_code, site_name ]);
+			if (site_name.language === 'multilingual'
+			// e.g., language_code === 'commons'
+			&& language_code === site_name.project) {
+				// default: English
+				session.language = 'en';
+			}
+			site_name = site_name.site;
 			var time_interval_config = wiki_API.query.edit_time_interval;
 			// apply local lag interval rule.
 			if (!(session.edit_time_interval >= 0)
