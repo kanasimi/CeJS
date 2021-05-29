@@ -1705,7 +1705,7 @@ function module_code(library_namespace) {
 				return token;
 			}
 
-			// console.log(token);
+			// console.trace(token);
 
 			// 其他 HTML tag 大多無法精確轉換。
 			options.root_token_list.imprecise_tokens.push(token);
@@ -1866,6 +1866,8 @@ function module_code(library_namespace) {
 
 			// TODO: [[Template:疑問]], [[Template:Block]]
 
+			// console.trace(token);
+
 			// 警告: 在遇到標題包含模板時，因為不能解析連模板最後產出的結果，會產生錯誤結果。
 			options.root_token_list.imprecise_tokens.push(token);
 			// trick: 不再遍歷子節點。避免被進一步的處理。
@@ -1916,6 +1918,7 @@ function module_code(library_namespace) {
 				token.unconvertible = true;
 				token.is_plain = true;
 			}
+			// console.trace(token);
 			return token;
 		}
 
@@ -1937,10 +1940,15 @@ function module_code(library_namespace) {
 			token.unconvertible = true;
 		}
 
+		// console.trace(token);
+
 		// token that may be handlable 請檢查是否可處理此標題。
 		if (!token.unconvertible)
 			options.root_token_list.tokens_maybe_handlable.push(token);
-		options.root_token_list.imprecise_tokens.push(token);
+		if (!token.is_plain) {
+			// `token.is_plain`: 由 {String} 轉換而成。
+			options.root_token_list.imprecise_tokens.push(token);
+		}
 		return token;
 	}
 
@@ -2904,6 +2912,7 @@ function module_code(library_namespace) {
 			var section_title_link = section_title_token.link;
 			// TODO: 忽略包含不合理元素的編輯，例如 url。
 			if (!section_title_link.imprecise_tokens) {
+				// console.log(section_title_link);
 				// `section_title_token.title` will not transfer "[", "]"
 				register_anchor(section_title_link.id, section_title_token);
 
@@ -2913,14 +2922,20 @@ function module_code(library_namespace) {
 						+ section_title_token.title);
 				console.log(section_title_link.tokens_maybe_handlable);
 				console.trace(section_title_token);
+			} else {
+				console.trace(section_title_link);
 			}
 		});
 
+		var _options = Object.clone(options);
+		delete _options.print_anchors;
 		// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
 		parsed.each('transclusion', function(template_token) {
 			if (template_token.expand) {
 				// const
-				var anchor = get_all_anchors(template_token.expand(), options);
+				var anchor = get_all_anchors(template_token.expand(),
+				//
+				_options);
 				register_anchor(anchor, template_token);
 				return;
 			}
@@ -3008,6 +3023,8 @@ function module_code(library_namespace) {
 			}
 		});
 
+		// 警告: 實際上的網頁錨點應該要 .replace(/ /g, '_')
+		// 但由於wiki頁面中使用[[#P Q]]與[[#P_Q]]效果相同，都會產生<a href="#P_Q">，因此採用"P Q"。
 		var anchor_list = Object.keys(anchor_hash);
 		if (options && options.print_anchors) {
 			library_namespace.info('get_all_anchors: anchors:');
