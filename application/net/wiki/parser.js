@@ -2928,7 +2928,8 @@ function module_code(library_namespace) {
 		});
 
 		var _options = Object.clone(options);
-		delete _options.print_anchors;
+		if (options)
+			delete _options.print_anchors;
 		// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
 		parsed.each('transclusion', function(template_token) {
 			if (template_token.expand) {
@@ -3018,7 +3019,21 @@ function module_code(library_namespace) {
 			// console.log(parent);
 			// <ref name="..."> 會轉成 id="cite_re-..."
 			if (parent.tag && parent.tag.toLowerCase() !== 'ref') {
-				// e.g., <span id="">, <div id="">
+				// e.g., <span id="anchor">, <div id="anchor">
+				if (Array.isArray(anchor)) {
+					if (anchor.type !== 'plain') {
+						// token = _set_wiki_type([ token ], 'plain');
+						anchor = [ anchor ];
+					}
+					anchor = anchor.map(function(token) {
+						if (token.type === 'function'
+						// && token.is_magic_word
+						&& token.name === 'ANCHORENCODE') {
+							return token[1];
+						}
+						return token;
+					});
+				}
 				register_anchor(anchor, attribute_token);
 			}
 		});
@@ -4110,16 +4125,16 @@ function module_code(library_namespace) {
 	// {{subst:FULLPAGENAME}} {{safesubst:FULLPAGENAME}}
 	var Magic_words_hash = Object.create(null);
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=functionhooks&utf8&format=json
-	'DISPLAYTITLE|DEFAULTSORT|デフォルトソート|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
+	'ns|urlencode|anchorencode|DISPLAYTITLE|DEFAULTSORT|デフォルトソート|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
 	// 這些需要指定數值. e.g., {{DEFAULTSORT:1}}: OK, {{DEFAULTSORT}}: NG
 	.split('|').forEach(function name(Magic_words) {
-		Magic_words_hash[Magic_words] = false;
+		Magic_words_hash[Magic_words.toUpperCase()] = false;
 	});
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=variables&utf8&format=json
 	'!|=|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME'
 	// 這些不用指定數值.
 	.split('|').forEach(function name(Magic_words) {
-		Magic_words_hash[Magic_words] = true;
+		Magic_words_hash[Magic_words.toUpperCase()] = true;
 	});
 
 	// parse 手動轉換語法的轉換標籤的語法
@@ -5483,56 +5498,64 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
+		function extract_tag_attributes(attributes) {
+			// assert: typeof attributes === 'string'
+			var attribute_hash = Object.create(null),
+			//
+			attributes_list = [], matched,
+			// parser 標籤中的空屬性現根據HTML5規格進行解析。
+			// <pages from= to= section=1>
+			// 將解析為 <pages from="to=" section="1">
+			// 而不是像以前那樣的 <pages from="" to="" section="1">。
+			// 請改用 <pages from="" to="" section=1> or <pages section=1>。
+
+			// [ all attributes, name, value, unquoted value, text without "=" ]
+			PATTERN_attribute = /\s*(\S[^=]*?)\s*(?:=|{{\s*=\s*(?:\|[\s\S]*?)?}})\s*("[^"]*"|'[^']*'|(\S*))|\s*(\S*)/g;
+			while ((matched = PATTERN_attribute.exec(attributes)) && matched[0]) {
+				// console.log(matched);
+				attributes_list.push(parse_wikitext(matched[0]));
+				var name = matched[1];
+				if (!name) {
+					// console.assert(!!matched[4]);
+					if (matched[4]) {
+						name = parse_wikitext(matched[4]);
+						// assert: name.toString() === matched[4]
+						attribute_hash[/* name.toString() */matched[4]] = name;
+					}
+					continue;
+				}
+
+				// parse attributes
+				// name = parse_wikitext(name);
+				var value = matched[3]
+				// 去掉 "", ''
+				|| matched[2].slice(1, -1);
+				if (library_namespace.HTML_to_wikitext)
+					value = library_namespace.HTML_to_wikitext(value);
+				value = parse_wikitext(value);
+				attribute_hash[name] = value;
+			}
+			if (false) {
+				console
+						.assert(PATTERN_attribute.lastIndex === attributes.length);
+			}
+			// reset PATTERN index
+			// PATTERN_attribute.lastIndex = 0;
+
+			return attribute_hash;
+		}
+
 		// parse attributes of HTML tags
 		// Warning: `{|\n|-\n!id="h style=color:red|h\n|}`
 		// will get id==="h_style=color:red", NOT id==="h"!
 		function parse_tag_attributes(attributes) {
-			var attribute_hash = Object.create(null);
-			if (attributes && typeof attributes === 'string') {
-				var attributes_list = [], matched,
-				// parser 標籤中的空屬性現根據HTML5規格進行解析。
-				// <pages from= to= section=1>
-				// 將解析為 <pages from="to=" section="1">
-				// 而不是像以前那樣的 <pages from="" to="" section="1">。
-				// 請改用 <pages from="" to="" section=1> or <pages section=1>。
-
-				// [ all attributes, name, value, unquoted value,
-				// text without "=" ]
-				PATTERN_attribute = /\s*(\S[^=]*?)\s*=\s*("[^"]*"|'[^']*'|(\S*))|\s*(\S*)/g;
-				while ((matched = PATTERN_attribute.exec(attributes))
-						&& matched[0]) {
-					// console.log(matched);
-					attributes_list.push(shallow_resolve_escaped(matched[0]));
-					var name = matched[1];
-					if (!name) {
-						// console.assert(!!matched[4]);
-						if (matched[4]) {
-							name = shallow_resolve_escaped(matched[4]);
-							attribute_hash[name] = name;
-						}
-						continue;
-					}
-
-					// parse attributes
-					name = shallow_resolve_escaped(name);
-					var value = matched[3]
-					// 去掉 "", ''
-					|| matched[2].slice(1, -1);
-					if (library_namespace.HTML_to_wikitext)
-						value = library_namespace.HTML_to_wikitext(value);
-					value = shallow_resolve_escaped(value);
-					attribute_hash[name] = value;
-				}
-				if (false) {
-					console
-							.assert(PATTERN_attribute.lastIndex === attributes.length);
-				}
-				// reset PATTERN index
-				// PATTERN_attribute.lastIndex = 0;
-				attributes = attributes_list;
-			}
-			attributes = _set_wiki_type(attributes || '', 'tag_attributes');
-			attributes.attributes = attribute_hash;
+			// assert: typeof attributes === 'string'
+			attributes = _set_wiki_type(
+			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
+			shallow_resolve_escaped(attributes || '', options, queue),
+					'tag_attributes');
+			attributes.attributes = extract_tag_attributes(attributes
+					.toString());
 			return attributes;
 		}
 
@@ -5604,10 +5627,7 @@ function module_code(library_namespace) {
 			// 經過改變，需再進一步處理。
 			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
 					'parse_wikitext.tag');
-			attributes = parse_tag_attributes(
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
-			parse_wikitext(attributes, options, queue));
+			attributes = parse_tag_attributes(attributes);
 			inner = parse_wikitext(inner, options, queue);
 
 			// 處理特殊 tags。
@@ -5676,10 +5696,7 @@ function module_code(library_namespace) {
 				if (normalize) {
 					attributes = attributes.replace(/[\s\/]*$/, ' /');
 				}
-				attributes = parse_tag_attributes(
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
-				parse_wikitext(attributes, options, queue));
+				attributes = parse_tag_attributes(attributes);
 				if (false && attributes.type === 'plain') {
 					// assert: 經過 parse_tag_attributes(), 應該不會到這邊。
 					all = attributes;

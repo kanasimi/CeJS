@@ -2751,9 +2751,12 @@ function module_code(library_namespace) {
 	 */
 	function set_default_language(language) {
 		// console.trace(language);
+		if (wiki_API.is_wiki_API(language))
+			language = language.language;
 		if (typeof language !== 'string'
 				|| !PATTERN_PROJECT_CODE_i.test(language)) {
 			if (language) {
+				// console.trace(language);
 				library_namespace.warn(
 				//
 				'set_default_language: Invalid language: [' + language

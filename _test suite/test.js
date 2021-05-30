@@ -3424,6 +3424,9 @@ function test_wiki() {
 		assert(['tag_inner', parsed[1][1].type], 'wiki.parse: HTML tag #6');
 		(parsed = CeL.wiki.parser(wikitext)).each('tag_inner', function (token, index, parent) { return ''; }, true);
 		assert(['1<b style="color:#000"  ></b>2', parsed.toString()], 'wiki.parse: HTML tag #7');
+		wikitext = '<b style {{ = | a=1}} "color:red" id = "{{anchorencode:id1}}">bold</b>'; parsed = CeL.wiki.parse(wikitext);
+		assert(['{{anchorencode:id1}}',	parsed.attributes.id	&& parsed.attributes.id.toString()], 'wiki.parse: HTML tag #8');
+		assert(['color:red',			parsed.attributes.style	&& parsed.attributes.style.toString()], 'wiki.parse: HTML tag #9');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #1');
@@ -3634,6 +3637,9 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #1');
 		wikitext = '{|\n!{{t}}|t\n|}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #2');
+
+		wikitext = ' <span id="{{anchorencode:id_abc}}">ABC</span> <span id{{=}}"{{anchorencode:id 123}}">ABC</span> ';
+		assert(['id abc,id 123', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #1');
 	});
 
 	setup_test('CeL.wiki: asynchronous functions');
