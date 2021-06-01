@@ -3410,6 +3410,7 @@ function module_code(library_namespace) {
 			//
 			'page_end' ];
 
+	// 整個頁面只能有單一個這種元素。
 	var single_layout_types = [ 'short_description',
 			'authority_control_templates', 'featured_template', 'DEFAULTSORT' ];
 
@@ -3539,12 +3540,14 @@ function module_code(library_namespace) {
 		parsed.insert_layout_token('{{maintenance_template}}',
 				'maintenance_templates');
 		parsed.insert_layout_token('[[Category:category name]]');
+		parsed.insert_layout_token('{{DEFAULTSORT:sort key}}', 'DEFAULTSORT');
 		// TODO:
 		parsed.insert_layout_token('{{DEFAULTSORT:sort key}}');
 		return parsed.toString();
 	}
 
 	function insert_layout_token(token, options) {
+		/** {String}layout_type */
 		var location;
 		if (typeof options === 'string') {
 			location = options;
@@ -3568,11 +3571,13 @@ function module_code(library_namespace) {
 
 		var parsed_index = layout_indices[location],
 		// Only set when no exactly index of location got.
+		// 僅有當無法取得準確的 layout token 時，才會尋覽應插入之點，
+		// 並設定插入於 default_layout_order[layout_index] 之前。
 		layout_index;
 		if (!(parsed_index >= 0)) {
 			layout_index = default_layout_order.indexOf(location);
 			if (layout_index >= 0) {
-				// insert before next layout element
+				// insert before next layout element 尋覽應插入之點
 				while (++layout_index < default_layout_order.length) {
 					parsed_index = layout_indices[default_layout_order[layout_index]];
 					if (parsed_index >= 0)
@@ -3581,25 +3586,60 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (parsed_index >= 0) {
-			if (typeof token === 'function') {
-				token = token.call(this, !(layout_index >= 0)
-				// 只有 location 完全相符才會傳入 token。
-				&& parsed[parsed_index], parsed_index, parsed);
-			}
-			if (is_valid_parameters_value(token)) {
-				if (!/\n$/.test(parsed[parsed_index - 1]) && !/\n$/.test(token))
-					token = '\n' + token;
-				// insert, instead of replace.
-				parsed[parsed_index] = token + '\n'
-				// `parsed_index` maybe parsed.length
-				+ (parsed[parsed_index] || '');
-			}
-			return true;
+		if (!(parsed_index >= 0)) {
+			throw new Error('insert_layout_token: Can not insert token as '
+					+ location);
 		}
 
-		throw new Error('insert_layout_token: Can not insert token as '
-				+ location);
+		// ----------------------------
+
+		// 當 location 不完全相符 (layout_index >= 0)
+		var append_original_layout_token = layout_index >= 0
+		// 或可有多個 layout_token，則將 original_layout_token === parsed[parsed_index]
+		// 添附於 token 後，並且不傳入原先的 original_layout_token。
+		|| !single_layout_types.includes(location);
+
+		if (typeof token === 'function') {
+			token = token.call(this, !append_original_layout_token
+			// 傳入 original_layout_token，用於直接 replace。
+			&& /* original_layout_token */parsed[parsed_index], parsed_index,
+					parsed);
+		}
+
+		if (!is_valid_parameters_value(token)) {
+			// e.g., token === undefined
+			return;
+			throw new Error('insert_layout_token: Invalid token ' + token);
+		}
+
+		// ----------------------------
+
+		if (!/^\n/.test(token)) {
+			// 檢查前一個有東西的 token 是否以 "\n" 作結。
+			for (var index = parsed_index; index > 0;) {
+				var previous_token = parsed[--index];
+				if (previous_token) {
+					if (!/\n$/.test(previous_token)) {
+						// layout_token 應該都獨立成行，因此加個換行前綴。
+						token = '\n' + token;
+					}
+					break;
+				}
+			}
+		}
+
+		if (append_original_layout_token
+		// `parsed_index` maybe parsed.length
+		&& parsed[parsed_index]) {
+			// insert before the original token,
+			// instead of replace the original token.
+			token += '\n' + parsed[parsed_index];
+		}
+
+		parsed[parsed_index] = token;
+
+		// return changed
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------
