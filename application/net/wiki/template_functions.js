@@ -125,6 +125,9 @@ function module_code(library_namespace) {
 		return 'Template:' + template_name;
 	});
 
+	template_functions.biographical_categories = [ 'Living people',
+			'Year of birth missing', 'Year of death missing' ];
+
 	/**
 	 * Test if `page_data` is biography of a person. 頁面為人物傳記。
 	 * 
@@ -156,9 +159,11 @@ function module_code(library_namespace) {
 			return true;
 
 		parsed.each('category', function(token) {
-			if ([ 'Living people' ].includes(token.name)
-			// e.g., [[Category:2000 births]] [[Category:2000 deaths]]
-			|| /^\d+ (?:births|deaths)$/.test(token.name)) {
+			if (template_functions.biographical_categories.includes(token.name)
+			// e.g., en: [[Category:2000 births]] [[Category:2000 deaths]]
+			// zh: [[Category:2000年出生]] [[Category:2000年逝世]]
+			// ja: [[Category:2000年生]] [[Category:2000年没]]
+			|| /^\d+(?: births| deaths|年出生|年逝世|年生|年没)$/.test(token.name)) {
 				is_biography = true;
 				return parsed.each.exit;
 			}
@@ -166,7 +171,7 @@ function module_code(library_namespace) {
 		if (is_biography)
 			return true;
 
-		library_namespace.debug(wiki_API.title_link_of(page_data)
+		library_namespace.debug(wiki_API.title_link_of(parsed.page)
 				+ ' is ot biography?', 3, 'page_is_biography');
 	}
 

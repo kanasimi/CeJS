@@ -2102,7 +2102,9 @@ function module_code(library_namespace) {
 		}
 
 		if (each[1]) {
-			Object.assign(options, each[1]);
+			// library_namespace.info('wiki_API.work: Set append_to_this:');
+			// console.trace(each[1]);
+			Object.assign(config.no_edit ? config : options, each[1]);
 		}
 		callback = config.summary;
 		// 採用 {{tlx|template_name}} 時，[[Special:RecentChanges]]頁面無法自動解析成 link。
@@ -2431,7 +2433,7 @@ function module_code(library_namespace) {
 						if (!maybe_nested_thread && session.running
 						// 1: this.page()
 						&& (session.actions.length === 1
-						// 僅編輯了一筆，處理完畢了。最後要 finish_up() 的時候。
+						// replace_tool.js 僅編輯了一批，處理完畢，最後要 finish_up() 的時候。
 						|| session.actions.length === 0
 						//
 						&& !(page_index < pages.length))) {
@@ -2457,7 +2459,7 @@ function module_code(library_namespace) {
 				}
 				if (!(page_index < pages.length)) {
 					// 處理完畢了。
-					finish_up();
+					session.run(finish_up);
 					return;
 				}
 
@@ -2512,7 +2514,7 @@ function module_code(library_namespace) {
 				// clone() 是為了能個別改變 summary。
 				// 例如: each() { options.summary += " -- ..."; }
 				var work_options = Object.clone(options);
-				// console.log(work_options);
+				// console.trace(work_options);
 				// 編輯頁面內容。
 				session.edit(function(page_data) {
 					if (('missing' in page_data)
