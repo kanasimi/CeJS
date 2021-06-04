@@ -34,10 +34,15 @@ try {
 	(function() {
 		// 若非 absolute path，則將之改為 absolute path，
 		// 否則 setup_library_base_path() 會抓不到。
-		if (!/^([A-Z]:)?[\\\/]/i.test(CeL.library_path))
+		if (!/^([A-Z]:)?[\\\/]/i.test(CeL.library_path)
+		// @snowpack: 例如 __filename ===
+		// /pwikiapi-test-main\node_moduleswikiapi\node_modulescejs_for include
+		// && /\.js/.test(__filename)
+		) {
 			// 這裡 __filename 是 loader 本身之 path。
 			CeL.library_path = __filename
 					.replace(/[^\\\/]+$/, CeL.library_path);
+		}
 
 		var script_code = [], fs = require('fs'),
 		// http://nodejs.org/api/fs.html#fs.readFileSync
