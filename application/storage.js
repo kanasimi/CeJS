@@ -182,7 +182,16 @@ function module_code(library_namespace) {
 		// JSON.stringify() 放在 try 外面。這樣出現 circular structure 的時候才知道要處理。
 		&& /.json$/i.test(file_path)) {
 			// 自動將資料轉成 string。
-			data = JSON.stringify(data);
+			try {
+				data = JSON.stringify(data);
+			} catch (e) {
+				// data 可能很長，擺在首位。
+				library_namespace.debug(data);
+				library_namespace.error('write_file: Failed to write to '
+						+ file_path + ': ' + e);
+				library_namespace.error(e);
+				throw e;
+			}
 		}
 
 		if (options && options.changed_only) {
