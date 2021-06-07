@@ -2459,7 +2459,7 @@ function module_code(library_namespace) {
 				}
 				if (!(page_index < pages.length)) {
 					// 處理完畢了。
-					session.run(finish_up);
+					finish_up();
 					return;
 				}
 
