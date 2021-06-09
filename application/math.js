@@ -402,7 +402,7 @@ function convert_MathML(handler) {
 		node = nodes[i];
 		if (!_.support_MathML) {
 			if (!node.title && node.getAttribute(convert_MathML.default_attribute)) {
-				// useless...
+				// useless... Chrome 不會像 <span> 一般顯示 .title。
 				node.setAttribute('title', node.getAttribute(convert_MathML.default_attribute));
 			}
 			continue;
@@ -422,9 +422,13 @@ function convert_MathML(handler) {
 		//
 		structure = node.getAttribute(attribute) || node.getAttribute(attribute = 'title');
 		if (structure) {
-			// 當可以使用 <math> 時，把原先展示的內容物 .childNodes 轉而擺到 .title 去。注意：這可能覆蓋原先的 .title。
+			// 當可以使用 <math> 時，把原先展示的內容物 .childNodes 轉而擺到 .title 去。
 			// 使用例： <math alt="e^(-)" title="e-">電子</math>, <math alt="H_2 O" title="水 H2O">水分子</math>
-			node.setAttribute('title', text);
+
+			// 避免覆蓋原先的 .title。.title 通常擺更詳細的資訊。
+			if (!node.getAttribute(attribute = 'title')) {
+				node.setAttribute('title', text);
+			}
 			text = '\n' + structure;
 		}
 		if (!node.getAttribute('xmlns')) {
