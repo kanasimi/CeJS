@@ -180,7 +180,9 @@ function module_code(library_namespace) {
 
 			while (matched = PATTERN_image.exec(html)) {
 				chapter_data.image_list.push({
-					url : encodeURI(matched[1])
+					url : encodeURI(matched[1]
+					// 去掉?type=q70s的部分 畫質較好
+					.replace(/type=q\d{2}s?(?:&|$)/, ''))
 				});
 			}
 
