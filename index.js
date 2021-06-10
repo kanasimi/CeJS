@@ -35,6 +35,11 @@ if (typeof window !== "object") {
 	 * 
 	 * @example <code>
 
+	// Since Snowpack cannot read utf-8 or utf-16 script file now,
+	// you MUST create a web server, and set main_script_URL.
+	//window.CeL = { main_script_URL: 'https://localhost/path/to/ce.js' };
+	// Default URL to ce.js is https://kanasimi.github.io/CeJS/ce.js
+
 	import cejs from 'cejs';
 	cejs.then(CeL_module => import('wikiapi')).then(Wikiapi_module => main_process(Wikiapi_module.default));
 	
@@ -46,7 +51,7 @@ if (typeof window !== "object") {
 
 	 * </code>
 	 * 
-	 * @since 2015/10/17 14:5:49
+	 * @since 2021/6/5 7:57:26
 	 */
 
 	var cejs_node = document.createElement("script");
@@ -60,6 +65,7 @@ if (typeof window !== "object") {
 			// console.log('CeL loaded');
 			cejs_node.resolve(CeL);
 			// free
+			cejs_node.resolve = null;
 			cejs_node = null;
 		}
 	};
