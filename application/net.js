@@ -579,10 +579,25 @@ function module_code(library_namespace) {
 				}
 			}
 		},
+		href : {
+			enumerable : true,
+			get : function get() {
+				return URI_toString.call(this);
+			},
+			set : function set(href) {
+				URI.call(this, href);
+			}
+		},
 		toString : {
 			value : URI_toString
 		}
 	});
+
+	if (Object.defineProperties[library_namespace.env.not_native_keyword]) {
+		//
+	}
+	var need_set_href = Object.getOwnPropertyDescriptor(URI.prototype, 'href');
+	need_set_href = !need_set_href || typeof need_set_href.set !== 'function';
 
 	function search_getter(options) {
 		// library_namespace.debug('normalize properties by search_getter');
@@ -592,33 +607,33 @@ function module_code(library_namespace) {
 			this.search_params[KEY_URL] = this;
 		}
 
-		var URI = this;
-		var search = 'search_params' in URI
+		var uri = this;
+		var search = 'search_params' in uri
 		// function parameters_toString(options)
-		? URI.search_params.toString(options)
+		? uri.search_params.toString(options)
 		// options.as_URL?
-		: URI.searchParams.toString();
-		if (Object.ttt)
-			console.trace(typeof process);
+		: uri.searchParams.toString();
 		return search ? '?' + search : '';
 	}
 
 	// options: 'charset'
 	function URI_toString(options) {
-		var URI = this;
+		var uri = this;
 		if (Object.defineProperty[KEY_not_native]) {
-			URI.search = search_getter.call(URI, options);
-			if ((URI.hash = String(URI.hash)) && !URI.hash.startsWith('#')) {
-				URI.hash = '#' + URI.hash;
+			uri.search = search_getter.call(uri, options);
+			if ((uri.hash = String(uri.hash)) && !uri.hash.startsWith('#')) {
+				uri.hash = '#' + uri.hash;
 			}
 		}
-		// console.trace(URI.search);
+		// console.trace(uri.search);
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
-		URI.href = (URI.protocol ? URI.protocol + '//' : '')
-				+ (URI.username || URI.password ? URI.username
-						+ (URI.password ? ':' + URI.password : '') + '@' : '')
-				+ URI.host + URI.pathname + URI.search + URI.hash;
-		return URI.href;
+		var href = (uri.protocol ? uri.protocol + '//' : '')
+				+ (uri.username || uri.password ? uri.username
+						+ (uri.password ? ':' + uri.password : '') + '@' : '')
+				+ uri.host + uri.pathname + uri.search + uri.hash;
+		if (need_set_href)
+			uri.href = href;
+		return href;
 	}
 
 	_// JSDT:_module_
