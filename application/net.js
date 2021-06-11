@@ -209,6 +209,12 @@ function module_code(library_namespace) {
 
 	_.port_of_protocol = port_of_protocol;
 
+	var PATTERN_URI =
+	// [ all, 1: `protocol:`, 2: '//', 3: host, 4: path ]
+	/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&:]+(?::\d{1,5})?)?([\s\S]*)$/i
+	// /^(?:(https?:)\/\/)?(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/
+	;
+
 	/**
 	 * URI class.
 	 * 
@@ -308,11 +314,7 @@ function module_code(library_namespace) {
 			// CeL.simplify_path('//hostname') === '/hostname'
 			href = '/' + href;
 		}
-		var matched = href.replace(/ /g, '%20').match(
-		// [ all, 1: `protocol:`, 2: '//', 3: host, 4: path ]
-		/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)?(\S*)$/i
-		// /^(?:(https?:)\/\/)?(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/
-		), path;
+		var matched = href.match(PATTERN_URI), path;
 		if (!matched) {
 			throw new Error('Invalid URI: (' + (typeof uri) + ') ' + uri);
 		}
@@ -533,8 +535,11 @@ function module_code(library_namespace) {
 
 		library_namespace.debug('path: [' + uri.path + ']', 9);
 
-		library_namespace.debug('Generate .href of URI by URI_toString()', 10);
-		uri.toString();
+		if (Object.defineProperty[KEY_not_native]) {
+			library_namespace.debug('Generate .href of URI by URI_toString()',
+					10);
+			uri.toString();
+		}
 		// console.trace(uri);
 
 		library_namespace.debug('href: [' + uri.href + ']', 8);
@@ -581,23 +586,17 @@ function module_code(library_namespace) {
 		},
 		href : {
 			enumerable : true,
-			get : function get() {
-				return URI_toString.call(this);
-			},
+			get : Object.defineProperty[KEY_not_native] ? URI_toString
+					: URI_href,
 			set : function set(href) {
 				URI.call(this, href);
 			}
 		},
 		toString : {
-			value : URI_toString
+			value : Object.defineProperty[KEY_not_native] ? URI_toString
+					: URI_href
 		}
 	});
-
-	if (Object.defineProperties[library_namespace.env.not_native_keyword]) {
-		//
-	}
-	var need_set_href = Object.getOwnPropertyDescriptor(URI.prototype, 'href');
-	need_set_href = !need_set_href || typeof need_set_href.set !== 'function';
 
 	function search_getter(options) {
 		// library_namespace.debug('normalize properties by search_getter');
@@ -616,24 +615,25 @@ function module_code(library_namespace) {
 		return search ? '?' + search : '';
 	}
 
+	function URI_href() {
+		var uri = this;
+		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
+		return (uri.protocol ? uri.protocol + '//' : '')
+				+ (uri.username || uri.password ? uri.username
+						+ (uri.password ? ':' + uri.password : '') + '@' : '')
+				+ uri.host + encodeURI(uri.pathname) + uri.search + uri.hash;
+	}
+
 	// options: 'charset'
 	function URI_toString(options) {
 		var uri = this;
-		if (Object.defineProperty[KEY_not_native]) {
-			uri.search = search_getter.call(uri, options);
-			if ((uri.hash = String(uri.hash)) && !uri.hash.startsWith('#')) {
-				uri.hash = '#' + uri.hash;
-			}
+		// assert: !!Object.defineProperty[KEY_not_native] === true
+		uri.search = search_getter.call(uri, options);
+		if ((uri.hash = String(uri.hash)) && !uri.hash.startsWith('#')) {
+			uri.hash = '#' + uri.hash;
 		}
 		// console.trace(uri.search);
-		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
-		var href = (uri.protocol ? uri.protocol + '//' : '')
-				+ (uri.username || uri.password ? uri.username
-						+ (uri.password ? ':' + uri.password : '') + '@' : '')
-				+ uri.host + uri.pathname + uri.search + uri.hash;
-		if (need_set_href)
-			uri.href = href;
-		return href;
+		return uri.href = URI_href.call(uri);
 	}
 
 	_// JSDT:_module_
