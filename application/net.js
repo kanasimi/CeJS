@@ -308,7 +308,7 @@ function module_code(library_namespace) {
 			// CeL.simplify_path('//hostname') === '/hostname'
 			href = '/' + href;
 		}
-		var matched = href.match(
+		var matched = href.replace(/ /g, '%20').match(
 		// [ all, 1: `protocol:`, 2: '//', 3: host, 4: path ]
 		/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&\s:]+(?::\d{1,5})?)?(\S*)$/i
 		// /^(?:(https?:)\/\/)?(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/
