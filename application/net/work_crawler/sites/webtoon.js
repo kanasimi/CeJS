@@ -182,6 +182,8 @@ function module_code(library_namespace) {
 				matched = new library_namespace.URI(matched[1]);
 				// 去掉?type=q70s的部分 畫質較好 q70是手機版 q90是電腦版
 				delete matched.search_params.type;
+				// 去除?x-oss-process=image/quality,q_90 可會有更高的畫質
+				delete matched.search_params['x-oss-process'];
 				chapter_data.image_list.push({
 					url : matched.toString()
 				});
