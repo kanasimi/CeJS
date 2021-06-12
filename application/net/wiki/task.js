@@ -2141,6 +2141,9 @@ function module_code(library_namespace) {
 			callback = config.no_message ? library_namespace.null_function
 			// default logger.
 			: function do_batch_work_summary(title, error, result) {
+				if (false)
+					console.trace([ done, nochange_count,
+							title && title.title || title ]);
 				if (error) {
 					// ((return [ CeL.wiki.edit.cancel, 'skip' ];))
 					// 來跳過 (skip) 本次編輯動作，不特別顯示或處理。
@@ -2359,7 +2362,6 @@ function module_code(library_namespace) {
 
 			// --------------------------------------------
 
-			var fulfilled = Object.create(null);
 			function check_result_and_process_next(result) {
 				// session.next() will wait for result.then() calling back
 				// if CeL.is_thenable(result).
@@ -2369,15 +2371,13 @@ function module_code(library_namespace) {
 
 				// Promise.isPromise()
 				if (!library_namespace.is_thenable(result)) {
-					process_next_page();
 					return;
 				}
 
 				// console.trace([ session.running, session.actions.length ]);
-				result.then(process_next_page, function(error) {
+				result.then(library_namespace.null_function, function(error) {
 					// `error_to_return` will record the first error.
 					error_to_return = error_to_return || error;
-					process_next_page();
 				})
 				/**
 				 * <code>
@@ -2392,56 +2392,49 @@ function module_code(library_namespace) {
 				 */
 				;
 
-				// https://stackoverflow.com/questions/30564053/how-can-i-synchronously-determine-a-javascript-promises-state
-				// https://github.com/kudla/promise-status-async/blob/master/lib/promiseState.js
-				/**
-				 * <code>
-				Promise.race([result, fulfilled]).then(v => { status = v === t ? "pending" : "fulfilled" }, () => { status = "rejected" });
-				</code>
-				 */
-				Promise.race([ result, fulfilled ])
+				library_namespace.status_of_thenable(result,
 				//
-				.then(function(first_fulfilled) {
+				function(fulfilled) {
 					// session.running === true
 					// console.trace('session.running = ' + session.running);
-					if (first_fulfilled === fulfilled) {
-						/**
-						 * assert: result is pending. e.g., <code>
-						await wiki.for_each_page(need_check_redirected_list, ...)
-						@ await wiki.for_each_page(vital_articles_list, for_each_list_page, ...)
-						@ 20200122.update_vital_articles.js
-						</code>
-						 */
+					if (fulfilled)
+						return;
 
-						if (false) {
-							console.trace(
-							// replace/20220101.replace_template.js 多任務:
-							// [false,0]
-							// should not session.next();
-							'test if need to call session.next(): '
+					/**
+					 * assert: result is pending. e.g., <code>
+					await wiki.for_each_page(need_check_redirected_list, ...)
+					@ await wiki.for_each_page(vital_articles_list, for_each_list_page, ...)
+					@ 20200122.update_vital_articles.js
+					</code>
+					 */
 
-							// 20200122.update_vital_articles.js: [true,1]
-							// and MUST session.next();
-							+ [ page_index, pages.length, maybe_nested_thread,
-							//
-							session.running, session.actions.length,
-							//
-							session.actions.map(function(action) {
-								return action.slice(0, 2);
-							}) ]);
-						}
-						if (!maybe_nested_thread && session.running
-						// 1: this.page()
-						&& (session.actions.length === 1
-						// replace_tool.js 僅編輯了一批，處理完畢，最後要 finish_up() 的時候。
-						|| session.actions.length === 0
+					if (false) {
+						console.trace(
+						// replace/20220101.replace_template.js 多任務:
+						// [false,0]
+						// should not session.next();
+						'test if need to call session.next(): '
+
+						// 20200122.update_vital_articles.js: [true,1]
+						// and MUST session.next();
+						+ [ page_index, pages.length, maybe_nested_thread,
 						//
-						&& !(page_index < pages.length))) {
-							session.next();
-						}
+						session.running, session.actions.length,
+						//
+						session.actions.map(function(action) {
+							return action.slice(0, 2);
+						}) ]);
 					}
-				}, function(error) {
-					// Do not catch error here.
+
+					if (!maybe_nested_thread && session.running
+					// 1: this.page()
+					&& (session.actions.length === 1
+					// replace_tool.js 僅編輯了一批，處理完畢，最後要 finish_up() 的時候。
+					|| session.actions.length === 0
+					//
+					&& !(page_index < pages.length))) {
+						session.next();
+					}
 				});
 			}
 
@@ -2458,7 +2451,7 @@ function module_code(library_namespace) {
 					page_index = pages.length;
 				}
 				if (!(page_index < pages.length)) {
-					// 處理完畢了。
+					// console.trace('process_next_page: 處理完畢了。');
 					finish_up();
 					return;
 				}
@@ -2478,6 +2471,8 @@ function module_code(library_namespace) {
 				}
 
 				function work_page_callback(page_data, error) {
+					// `error_to_return` will record the first error.
+					error_to_return = error_to_return || error;
 					// TODO: if (error) {...}
 					// console.log([ page_data, config.page_options ]);
 					library_namespace.log_temporary(page_index + '/'
@@ -2498,6 +2493,7 @@ function module_code(library_namespace) {
 					}
 
 					check_result_and_process_next(result);
+					process_next_page();
 				}
 
 				// console.log(page);
@@ -2572,12 +2568,15 @@ function module_code(library_namespace) {
 					check_result_and_process_next(content);
 					// console.trace(content);
 					return content;
-				}, work_options, function work_edit_callback(
-				// title, error, result
-				) {
+				}, work_options, function work_edit_callback(title, error,
+						result) {
+					// `error_to_return` will record the first error.
+					error_to_return = error_to_return || error;
+
 					// console.trace(arguments);
 					// nomally call do_batch_work_summary()
 					callback.apply(session, arguments);
+					process_next_page();
 				});
 
 			}
@@ -2587,7 +2586,7 @@ function module_code(library_namespace) {
 			// 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
 			function finish_up() {
 				if (false)
-					console.trace(pages.length + ' pages done');
+					console.trace(gettext('%1 pages done', pages.length));
 				if (!config.no_message) {
 					library_namespace.debug('收尾。', 1, 'wiki_API.work');
 					var count_summary;

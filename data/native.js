@@ -4794,6 +4794,34 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
+	var fulfilled = Object.create(null);
+	// assert: needs Promise.race()!
+	// then(value is fulfilled)
+	function status_of_thenable(value, then) {
+		// Promise.isPromise()
+		if (!library_namespace.is_thenable(value)) {
+			then(true);
+			return true;
+		}
+
+		// https://stackoverflow.com/questions/30564053/how-can-i-synchronously-determine-a-javascript-promises-state
+		// https://github.com/kudla/promise-status-async/blob/master/lib/promiseState.js
+		/**
+		 * <code>
+		Promise.race([value, fulfilled]).then(v => { status = v === t ? "pending" : "fulfilled" }, () => { status = "rejected" });
+		</code>
+		 */
+		Promise.race([ value, fulfilled ]).then(function(first_fulfilled) {
+			then(first_fulfilled !== fulfilled);
+		}, function(error) {
+			// Do not catch error here.
+		});
+	}
+
+	_.status_of_thenable = status_of_thenable;
+
+	// ---------------------------------------------------------------------//
+
 	return (_// JSDT:_module_
 	);
 }
