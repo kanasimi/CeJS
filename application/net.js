@@ -474,8 +474,8 @@ function module_code(library_namespace) {
 		// console.trace([ href, path, uri ]);
 		library_namespace.debug('parse path: [' + path + ']', 9);
 		if (path && (matched = path
-		//
-		.match(/^((.*\/)?([^\/#?]*))?(\?([^#]*))?(#.*)?$/))) {
+		// https://cdn.dongmanmanhua.cn/16189006774011603165.jpg?x-oss-process=image/quality,q_90
+		.match(/^(([^#?]*\/)?([^\/#?]*))?(\?([^#]*))?(#.*)?$/))) {
 			library_namespace.debug('pathname: [' + matched + ']', 9);
 			// pathname={path}filename
 			uri.pathname = matched[1] || '';
