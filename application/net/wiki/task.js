@@ -2162,6 +2162,7 @@ function module_code(library_namespace) {
 						error = gettext('no change');
 						result = 'nochange';
 					} else {
+						// console.trace([ error_to_return, error ]);
 						error_to_return = error_to_return || error;
 						// 有錯誤發生。
 						// e.g., [protectedpage]
@@ -2475,8 +2476,6 @@ function module_code(library_namespace) {
 				}
 
 				function work_page_callback(page_data, error) {
-					// `error_to_return` will record the first error.
-					error_to_return = error_to_return || error;
 					// TODO: if (error) {...}
 					// console.log([ page_data, config.page_options ]);
 					library_namespace.log_temporary(page_index + '/'
@@ -2574,8 +2573,8 @@ function module_code(library_namespace) {
 					return content;
 				}, work_options, function work_edit_callback(title, error,
 						result) {
-					// `error_to_return` will record the first error.
-					error_to_return = error_to_return || error;
+					// Do not set `error_to_return` here: `error` maybe 'skip'.
+					// console.trace([ error_to_return, error ]);
 
 					// console.trace(arguments);
 					// nomally call do_batch_work_summary()
