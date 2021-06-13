@@ -2414,11 +2414,10 @@ function module_code(library_namespace) {
 						// [false,0]
 						// should not session.next();
 						'test if need to call session.next(): '
-
+						//
+						+ [ page_index, pages.length, maybe_nested_thread,
 						// 20200122.update_vital_articles.js: [true,1]
 						// and MUST session.next();
-						+ [ page_index, pages.length, maybe_nested_thread,
-						//
 						session.running, session.actions.length,
 						//
 						session.actions.map(function(action) {
@@ -2427,12 +2426,17 @@ function module_code(library_namespace) {
 					}
 
 					if (!maybe_nested_thread && session.running
-					// 1: this.page()
+					// e.g., 20200122.update_vital_articles.js
 					&& (session.actions.length === 1
-					// replace_tool.js 僅編輯了一批，處理完畢，最後要 finish_up() 的時候。
-					|| session.actions.length === 0
-					//
+					// 1: this.page()
+					&& session.actions[0][0] === 'page'
+					// e.g., replace_tool.js 編輯了一批，處理完畢，最後要 finish_up() 的時候。
+					|| false && session.actions.length === 0
+					// Trace: 1,1,false,true,0,
 					&& !(page_index < pages.length))) {
+						if (false)
+							console.trace(session.actions[0]
+									&& session.actions[0][0]);
 						session.next();
 					}
 				});
@@ -2452,7 +2456,7 @@ function module_code(library_namespace) {
 				}
 				if (!(page_index < pages.length)) {
 					// console.trace('process_next_page: 處理完畢了。');
-					finish_up();
+					session.run(finish_up);
 					return;
 				}
 
@@ -2493,7 +2497,7 @@ function module_code(library_namespace) {
 					}
 
 					check_result_and_process_next(result);
-					process_next_page();
+					session.run(process_next_page);
 				}
 
 				// console.log(page);
@@ -2576,7 +2580,7 @@ function module_code(library_namespace) {
 					// console.trace(arguments);
 					// nomally call do_batch_work_summary()
 					callback.apply(session, arguments);
-					process_next_page();
+					session.run(process_next_page);
 				});
 
 			}
