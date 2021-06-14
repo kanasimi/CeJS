@@ -178,7 +178,13 @@ function module_code(library_namespace) {
 				return page_data.parsed;
 			}
 		} else if (!wikitext) {
-			library_namespace.warn('page_parser: No wikitext specified.');
+			if (wikitext === 0) {
+				wikitext = String(wikitext);
+			} else if (!is_valid_parameters_value(wikitext)) {
+				library_namespace.warn('page_parser: Null wikitext: '
+						+ wikitext);
+				// console.trace(wikitext);
+			}
 			wikitext = [];
 		} else if (Array.isArray(wikitext) && wikitext.type === 'plain') {
 			// assert: already parsed
