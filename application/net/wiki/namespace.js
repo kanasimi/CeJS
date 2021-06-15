@@ -895,13 +895,17 @@ function module_code(library_namespace) {
 		if (family === 'wikidata') {
 			// wikidatawiki_p
 			site = family + 'wiki';
-		} else if (family === 'wikimedia' && language === 'en') {
+		} else if (family === 'wikimedia' && language === 'en'
+		//
+		|| (site = API_URL.match(/\/\/([\w]+)\./))
+		// e.g., API_URL === 'https://test.wikipedia.org/w/api.php'
+		&& /test/i.test(site = site[1])) {
 			// e.g., @ console @ https://commons.wikimedia.org/
-			project = API_URL.match(/\/\/([\w]+)\./)[1];
+			project = site;
 			// assert: (project in wiki_API.api_URL.wikimedia)
 
 			// 'commonswiki'
-			site = project + 'wiki';
+			site += 'wiki';
 		} else {
 			site = language.toLowerCase().replace(/-/g, '_')
 			// e.g., 'zh' + 'wikinews' → 'zhwikinews'

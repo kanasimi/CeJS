@@ -2454,7 +2454,7 @@ function module_code(library_namespace) {
 						}).join('\n') ]);
 					}
 
-					if (!maybe_nested_thread && session.running
+					if (/* !maybe_nested_thread && */session.running
 					// e.g., 20200122.update_vital_articles.js
 					&& (session.actions.length > 0
 					// from this.page(this_slice, main_work, page_options) below
