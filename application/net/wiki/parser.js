@@ -694,7 +694,9 @@ function module_code(library_namespace) {
 
 		if (!spaces[1] && !isNaN(parameter_name)) {
 			var matched = replace_to.match(/^\s*(\d+)\s*=\s*([\s\S]*)$/);
-			if (matched && matched[1] == parameter_name) {
+			if (matched && matched[1] == parameter_name
+			// 假如包含 "=" 就不能省略數字指定 prefix
+			&& !matched[2].replace(/{{ *= *(?:\|[^{}]*)?}}/g, '').includes('=')) {
 				// e.g., replace [2] to non-named 'value' in {{t|1|2}}
 				library_namespace.debug('auto remove numbered parameter: '
 				// https://www.mediawiki.org/wiki/Help:Templates#Numbered_parameters
