@@ -84,20 +84,19 @@ function module_code(library_namespace) {
 		// library_namespace.debug('options:', 0, 'get_data_API_URL');
 		// console.trace(options);
 
-		var API_URL;
-		if (options) {
-			var session = options[KEY_SESSION];
-			if (wiki_API.is_wiki_API(session)) {
-				if (session.data_session) {
-					API_URL = session.data_session.API_URL;
-				}
-				if (!API_URL && session[KEY_HOST_SESSION]) {
-					// is data session. e.g., https://test.wikidata.org/w/api.php
-					API_URL = session.API_URL;
-				}
-			} else {
-				API_URL = API_URL_of_options(options);
+		var API_URL, session;
+		if (!options || (API_URL = options.data_API_URL)) {
+			;
+		} else if (wiki_API.is_wiki_API(session = options[KEY_SESSION])) {
+			if (session.data_session) {
+				API_URL = session.data_session.API_URL;
 			}
+			if (!API_URL && session[KEY_HOST_SESSION]) {
+				// is data session. e.g., https://test.wikidata.org/w/api.php
+				API_URL = session.API_URL;
+			}
+		} else {
+			API_URL = API_URL_of_options(options);
 		}
 
 		// console.trace(API_URL);
@@ -1402,9 +1401,9 @@ function module_code(library_namespace) {
 						data = data[props];
 					} else {
 						if (wiki_API.is_page_data(key)) {
-							library_namespace.debug(data.id + ' 對應頁面: '
-									+ wiki_API.title_link_of(key), 1,
-									'wikidata_entity');
+							library_namespace.debug('id - ' + data.id
+									+ ' 對應頁面: ' + wiki_API.title_link_of(key),
+									1, 'wikidata_entity');
 							data[KEY_CORRESPOND_PAGE] = key;
 							if (false && !data.lastrevid) {
 								library_namespace
@@ -2140,6 +2139,10 @@ function module_code(library_namespace) {
 		modified : '2000-01-01T00:00:00Z',
 		type : 'item',
 		id : 'Q1',
+
+		// [[commons:Commons:Structured_data]]
+		// statements : [],
+
 		labels : [],
 		descriptions : [],
 		aliases : [],
@@ -2559,7 +2562,7 @@ function module_code(library_namespace) {
 			}
 
 			// 跳過要刪除的。
-			function property_to_remove(property_data) {
+			function is_property_to_remove(property_data) {
 				if (!('remove' in property_data)
 						&& property_data[KEY_property_options]
 						&& ('remove' in property_data[KEY_property_options])) {
@@ -2607,6 +2610,8 @@ function module_code(library_namespace) {
 					var value = property_value(property_data),
 					//
 					exists_property_list = exists_property_hash[property_id];
+					// console.trace(exists_property_hash);
+					// console.trace(property_id);
 					// console.trace(property_data);
 					// console.trace(exists_property_list);
 
@@ -2621,19 +2626,20 @@ function module_code(library_namespace) {
 						}
 					}
 
-					// console.trace('Check property_to_remove(property_data)');
-					if (property_to_remove(property_data)) {
-						library_namespace.debug('刪除時，需要存在此 property 才有必要處置。',
-								1, 'normalize_wikidata_properties');
+					// console.trace('Check
+					// is_property_to_remove(property_data)');
+					if (is_property_to_remove(property_data)) {
+						library_namespace.debug(
+								'test 刪除時，需要存在此 property 才有必要處置。', 1,
+								'normalize_wikidata_properties');
+						// console.trace(exists_property_list);
 						if (!exists_property_list) {
-							library_namespace.debug(
-							//
-							'normalize_wikidata_properties: Skip '
+							library_namespace.debug('Skip '
 							//
 							+ property_id
 							//
 							+ (value ? '=' + JSON.stringify(value) : '')
-									+ ': 無此屬性id，無法刪除。', 1,
+									+ ': 無此屬性 id，無法刪除。', 1,
 									'normalize_wikidata_properties');
 							return false;
 						}
@@ -2682,7 +2688,8 @@ function module_code(library_namespace) {
 						var duplicate_index = wikidata_datavalue.get_index(
 								exists_property_list, value, -1);
 						// console.log(exists_property_list);
-						// console.log(duplicate_index);
+						// console.log(value);
+						// console.trace(duplicate_index);
 
 						if (duplicate_index !== NOT_FOUND) {
 							// delete property_data.value;
@@ -2696,7 +2703,7 @@ function module_code(library_namespace) {
 						//
 						+ (value ? '=' + JSON.stringify(value)
 						//
-						+ ': 此屬性無此值，無法刪除。' : ': 無此屬性id，無法刪除。')
+						+ ': 此屬性無此值，無法刪除。' : ': 無此屬性 id，無法刪除。')
 						//
 						, 1, 'normalize_wikidata_properties');
 						if (false) {
@@ -2758,7 +2765,7 @@ function module_code(library_namespace) {
 
 			var index = 0,
 			//
-			normalize_next_value = function() {
+			normalize_next_value = function normalize_next_value() {
 				library_namespace.debug(index + '/' + properties.length, 3,
 						'normalize_next_value');
 				if (index === properties.length) {
@@ -2770,7 +2777,7 @@ function module_code(library_namespace) {
 				}
 
 				var property_data = properties[index++];
-				if (property_to_remove(property_data)) {
+				if (is_property_to_remove(property_data)) {
 					// 跳過要刪除的。
 					normalize_next_value();
 					return;
@@ -3420,9 +3427,9 @@ function module_code(library_namespace) {
 				options, session, entity && entity.claims ? entity : _entity);
 			},
 			// 若是未輸入 entity，那就取得 entity 內容以幫助檢查是否已存在相同屬性值。
-			entity && entity.claims ? {
+			Object.assign(entity && entity.claims ? {
 				props : ''
-			} : null);
+			} : Object.create(null), options));
 			return;
 		}
 
@@ -3558,7 +3565,7 @@ function module_code(library_namespace) {
 			}
 
 			// console.log(JSON.stringify(POST_data));
-			// console.log(POST_data);
+			// console.trace(POST_data);
 
 			wiki_API.query(claim_action, function handle_result(_data, error) {
 				function process_references() {
@@ -3590,12 +3597,16 @@ function module_code(library_namespace) {
 					 * set_next_claim: [invalid-entity-id] Invalid entity ID. (The serialization "読み仮名" is not recognized by the configured id builders)
 					 * </code>
 					 */
-					library_namespace.error('set_next_claim: [' + error.code
-							+ '] ' + (error.info || error.message));
-					library_namespace.warn('claim_action: '
-							+ JSON.stringify(claim_action));
-					library_namespace.warn('data to write: '
-							+ JSON.stringify(POST_data));
+					try {
+						library_namespace.error('set_next_claim: ['
+								+ error.code + '] '
+								+ (error.info || error.message));
+						library_namespace.warn('claim_action: '
+								+ JSON.stringify(claim_action));
+						library_namespace.warn('data to write: '
+								+ JSON.stringify(POST_data));
+					} catch (e) {
+					}
 					// console.log(claim_index);
 					// console.log(claims);
 					claim_index++;
@@ -4688,6 +4699,7 @@ function module_code(library_namespace) {
 		if (is_entity(id)) {
 			// 輸入 id 為實體項目 entity
 			entity = id;
+			options.id = options.id || entity.id;
 			if (!options.baserevid) {
 				if (id.lastrevid > 0) {
 					// 檢測編輯衝突用。
@@ -4734,8 +4746,9 @@ function module_code(library_namespace) {
 			options.site = wiki_API.site_name(id[0]);
 			options.title = id[1];
 
-		} else {
+		} else if (!options.id || options.id !== id) {
 			library_namespace.warn('wikidata_edit: Invalid id: ' + id);
+			// console.trace(id);
 		}
 
 		var session;
@@ -4745,13 +4758,14 @@ function module_code(library_namespace) {
 			// delete options[KEY_SESSION];
 		}
 
-		// edit實體項目entity
+		// edit 實體項目 entity
 		action = [
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
 		get_data_API_URL(options), {
 			action : 'wbeditentity'
 		} ];
 		// console.trace(options);
+		// console.log(action);
 
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
 		delete options.API_URL;
@@ -4771,17 +4785,21 @@ function module_code(library_namespace) {
 				callback(data);
 				return;
 			}
+
+			var POST_data = Object.clone(options);
+			delete POST_data.data_API_URL;
 			// data 會在 set_claims() 被修改，因此不能提前設定。
-			options.data = JSON.stringify(data);
+			POST_data.data = JSON.stringify(data);
 			if (library_namespace.is_debug(2)) {
-				library_namespace.debug('options.data: ' + options.data, 2,
+				library_namespace.debug('POST_data.data: ' + POST_data.data, 2,
 						'wikidata_edit.do_wbeditentity');
 				console.log(data);
 			}
 
 			// the token should be sent as the last parameter.
-			options.token = token;
+			POST_data.token = token;
 
+			// console.trace(POST_data);
 			wiki_API.query(action, function handle_result(data, error) {
 				error = error
 						|| (data ? data.error : new Error('No data get!'));
@@ -4792,7 +4810,7 @@ function module_code(library_namespace) {
 					// Mediawiki is in read-only mode during maintenance
 					'wikidata_edit.do_wbeditentity: '
 					//
-					+ (options.id ? options.id + ': ' : '')
+					+ (POST_data.id ? POST_data.id + ': ' : '')
 					// [readonly] The wiki is currently in read-only mode
 					+ '[' + error.code + '] ' + (error.info || error.message));
 					try {
@@ -4805,7 +4823,7 @@ function module_code(library_namespace) {
 					if (false) {
 						// TypeError: Converting circular structure to JSON
 						library_namespace.warn('data to write: '
-								+ JSON.stringify(options));
+								+ JSON.stringify(POST_data));
 					}
 					callback(undefined, error);
 					return;
@@ -4815,7 +4833,7 @@ function module_code(library_namespace) {
 					data = data.entity;
 				}
 				callback(data);
-			}, options, session);
+			}, POST_data, session);
 		}
 
 		if (false && Array.isArray(data)) {
@@ -4830,8 +4848,9 @@ function module_code(library_namespace) {
 		// TODO: 創建實體項目重定向。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
 
-		// console.log(data);
-		// console.trace(options);
+		// console.trace(data);
+		// console.log(options);
+		// console.log(entity);
 
 		// TODO: 避免 callback hell: using ES7 async/await?
 		// TODO: 用更簡單的方法統合這幾個函數。

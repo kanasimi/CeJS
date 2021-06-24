@@ -1824,9 +1824,10 @@ function module_code(library_namespace) {
 		message = message.trim();
 		if (message) {
 			if (title) {
+				var namespace = wiki_API.namespace(title, this[KEY_SESSION]);
 				title = wiki_API.title_link_of(title);
 				if (title) {
-					if (/^\[\[[^\[\]\|{}\n#�:]*:/.test(title)) {
+					if (namespace !== 0) {
 						// 對於非條目作特殊處理。
 						title = "'''" + title + "'''";
 					}
@@ -2145,6 +2146,7 @@ function module_code(library_namespace) {
 		//
 		log_item = Object.assign(Object.create(null),
 				wiki_API.prototype.work.log_item, config.log_item), messages = [];
+		messages[KEY_SESSION] = this;
 		/** config.no_message: {Boolean}console 不顯示訊息，也不處理 {Array}messages。 */
 		messages.add = config.no_message ? library_namespace.null_function
 				: add_message;
@@ -2439,7 +2441,7 @@ function module_code(library_namespace) {
 
 					if (false) {
 						console.trace(
-						// replace/20220101.replace_template.js 多任務:
+						// replace/general_replace.js 多任務:
 						// [false,0]
 						// should not session.next();
 						'test if need to call session.next(): '
@@ -2457,6 +2459,12 @@ function module_code(library_namespace) {
 					if (/* !maybe_nested_thread && */session.running
 					// e.g., 20200122.update_vital_articles.js
 					&& (session.actions.length > 0
+					// 所有操作執行完畢後，不應該有需要手動session.next()的問題。
+					// 這是因為 .edit() 可能直接執行 callback，然後又不間斷執行 finish_up。
+					// 這時 .actions[0] 應該是 edit log。
+					// e.g., Trace: test if need to call session.next():
+					// 31,31,false,true,3,
+					&& page_index < pages.length
 					// from this.page(this_slice, main_work, page_options) below
 					// && session.actions[0][0] === 'page'
 					// session.actions[0][3]: options of .page()
@@ -2464,10 +2472,17 @@ function module_code(library_namespace) {
 					// page_options.call_from_wiki_API__work
 					// && session.actions[0][3].call_from_wiki_API__work
 
-					// e.g., replace_tool.js 編輯了一批，處理完畢，最後要 finish_up() 的時候。
-					|| false && session.actions.length === 0
-					// Trace: 1,1,false,true,0,
-					&& !(page_index < pages.length))) {
+					// e.g., replace/general_replace.js 編輯了一批，處理完畢，最後要
+					// finish_up() 的時候。
+					// Trace: test if need to call session.next():
+					// 1,1,false,true,0,
+
+					// e.g., replace/20210624.test_subst_Template.js
+					// Trace: test if need to call session.next():
+					// 1,2,false,true,0,
+					|| session.actions.length === 0
+					//
+					&& page_index < pages.length)) {
 						// await wiki.for_each_page(need_check_redirected_list,
 						// ... @ 20200122.update_vital_articles.js:
 						// 從這邊 return 之後，會回到 function wiki_API_edit()。
@@ -2481,7 +2496,9 @@ function module_code(library_namespace) {
 									session.running,
 									session.actions[0]
 											&& session.actions[0].slice(0, 2),
-									session.actions[0][3] ]);
+									session.actions[0]
+									//
+									&& session.actions[0][3] ]);
 						}
 						// assert: result.then() 依賴於本 thread
 						session.next();
