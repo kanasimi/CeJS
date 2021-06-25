@@ -87,6 +87,7 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.prototype.set_promise_relying = function set_promise_relying(
 			promise) {
+		// Promise.isPromise()
 		if (library_namespace.is_thenable(promise)) {
 			// assert: promise 依賴於本 wiki_API action thread。
 			library_namespace.debug('設定依賴於本 wiki_API action 的 promise。', 3,
@@ -104,6 +105,7 @@ function module_code(library_namespace) {
 	wiki_API.prototype.test_promise_relying = function test_promise_relying() {
 		// this.actions.promise_relying is relying on this action.
 		// 為了偵測這些promise是否已fulfilled，必須先this.running，預防其他執行緒鑽空隙。
+
 		this.running = true;
 
 		var _this = this;
@@ -133,6 +135,22 @@ function module_code(library_namespace) {
 				}
 				return;
 			}
+
+			// incase session.next() will wait for this.actions.promise_relying
+			// calling back if CeL.is_thenable(result).
+			// e.g., await wiki.for_each_page(need_check_redirected_list,
+			// ... @ 20200122.update_vital_articles.js
+			// So we need to run `session.next()` manually.
+
+			// await wiki.for_each_page(need_check_redirected_list,
+			// ... @ 20200122.update_vital_articles.js:
+			// 從 function work_page_callback() return 之後，會回到 function
+			// wiki_API_edit()。
+			// `this_thenable` 會等待 push 進 session.actions 的
+			// this.page(this_slice, main_work, page_options)，
+			// 但 return 的話，會保持 session.running === true &&
+			// session.actions.length > 0
+			// 並且 abort。執行不到 this_thenable.then()。
 
 			if (0 < _this.actions.length) {
 				// 有些 promise 依賴於本 wiki_API action，假如停下來的話將會導致直接 exit跳出。
@@ -2486,6 +2504,8 @@ function module_code(library_namespace) {
 
 			/**
 			 * 應付 promise 的情形。
+			 * 
+			 * @deprecated
 			 */
 			function check_result_and_process_next(result) {
 				// session.next() will wait for result.then() calling back
