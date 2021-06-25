@@ -77,6 +77,86 @@ function module_code(library_namespace) {
 	// instance 實例相關函數。
 
 	/**
+	 * Register promise relying on wiki session actions. 設定依賴於本 wiki_API action
+	 * 的 promise。
+	 * 
+	 * @param promise
+	 *            promise to set
+	 * 
+	 * @example session.set_promise_relying(result);
+	 */
+	wiki_API.prototype.set_promise_relying = function set_promise_relying(
+			promise) {
+		if (library_namespace.is_thenable(promise)) {
+			// assert: promise 依賴於本 wiki_API action thread。
+			library_namespace.debug('設定依賴於本 wiki_API action 的 promise。', 3,
+					'set_promise_relying');
+			// console.trace(promise);
+			// console.trace([this.running,this.actions]);
+			this.actions.promise_relying = library_namespace
+					.is_thenable(this.actions.promise_relying) ? this.actions.promise_relying
+					.then(promise)
+					: promise;
+			return true;
+		}
+	};
+
+	wiki_API.prototype.test_promise_relying = function test_promise_relying() {
+		// this.actions.promise_relying is relying on this action.
+		// 為了偵測這些promise是否已fulfilled，必須先this.running，預防其他執行緒鑽空隙。
+		this.running = true;
+
+		var _this = this;
+		function status_of_thenable(fulfilled, this_thenable) {
+			if (this_thenable !== _this.actions.promise_relying) {
+				library_namespace.debug(
+						'有其他執行緒鑽空隙，執行了 .set_promise_relying()。需要再檢測一次。', 3,
+						'test_promise_relying');
+				_this.test_promise_relying();
+				return;
+			}
+
+			if (fulfilled) {
+				delete _this.actions.promise_relying;
+				if (0 < _this.actions.length) {
+					// assert: other threads added _this.actions
+					// after library_namespace.status_of_thenable()
+					library_namespace.debug('有其他執行緒鑽空隙，設定了 .actions。', 3,
+							'test_promise_relying');
+					_this.next();
+				} else {
+					library_namespace
+							.debug(
+									'依賴於本 wiki_API action 的 promise 皆已 fulfilled。本 action 結束。',
+									3, 'test_promise_relying');
+					_this.running = false;
+				}
+				return;
+			}
+
+			if (0 < _this.actions.length) {
+				// 有些 promise 依賴於本 wiki_API action，假如停下來的話將會導致直接 exit跳出。
+				if (false) {
+					console
+							.trace('test_promise_relying: Calling wiki_API.prototype.next() '
+									+ [ _this.running, _this.actions.length ]);
+				}
+				_this.next();
+			} else {
+				if (false) {
+					console.trace('test_promise_relying: No .actions left! '
+							+ [ _this.running, _this.actions.length ]);
+				}
+				// delete _this.actions.promise_relying;
+				_this.running = false;
+			}
+		}
+
+		library_namespace.status_of_thenable(this.actions.promise_relying,
+				status_of_thenable);
+	};
+
+	/**
 	 * 設定工作/添加新的工作。
 	 * 
 	 * 注意: 每個 callback 皆應在最後執行 session.next()。
@@ -86,25 +166,27 @@ function module_code(library_namespace) {
 	 * 工作原理: 每個實體會hold住一個queue ({Array}this.actions)。 當設定工作時，就把工作推入佇列中。
 	 * 另外內部會有另一個行程負責依序執行每一個工作。
 	 */
-	wiki_API.prototype.next = function next(latest_result_to_wait) {
-		var next;
-		if (library_namespace.is_thenable(latest_result_to_wait)) {
-			// assert: latest_result_to_wait 不依賴於本 thread。
-			console.trace([ this.running, this.actions.length ]);
-			next = wiki_API.prototype.next.bind(this);
-			latest_result_to_wait.then(next, next);
-			return;
-		}
+	wiki_API.prototype.next = function next(latest_result_relying_on_this) {
+		if (latest_result_relying_on_this)
+			this.set_promise_relying(latest_result_relying_on_this);
 
 		this.running = 0 < this.actions.length;
 		if (!this.running) {
-			// this.thread_count = 0;
-			// delete this.current_action;
-			library_namespace.debug('The queue is empty.', 2,
-					'wiki_API.prototype.next');
-			// console.warn(this);
+			if (library_namespace.is_thenable(this.actions.promise_relying)) {
+				this.test_promise_relying();
+			} else {
+				// this.thread_count = 0;
+				// delete this.current_action;
+				library_namespace.debug('The queue is empty.', 2,
+						'wiki_API.prototype.next');
+				// console.warn(this);
+			}
 			return;
 		}
+
+		// 繼續執行接下來的行動。
+
+		// ------------------------------------------------
 
 		library_namespace.debug('剩餘 ' + this.actions.length + ' action(s)', 2,
 				'wiki_API.prototype.next');
@@ -112,10 +194,9 @@ function module_code(library_namespace) {
 		// .show_value() @ interact.DOM, application.debug
 		&& library_namespace.show_value)
 			library_namespace.show_value(this.actions.slice(0, 10));
-		next = this.actions.shift();
-		var _this = this,
+		var next = this.actions.shift();
 		// 不改動 next。
-		type = next[0], list_type;
+		var type = next[0], list_type;
 		if (// type in get_list.type
 		wiki_API.list.type_list.includes(type)) {
 			list_type = type;
@@ -146,6 +227,8 @@ function module_code(library_namespace) {
 		}
 
 		// ------------------------------------------------
+
+		var _this = this;
 
 		// 若需改變，需同步更改 wiki_API.prototype.next.methods
 		switch (type) {
@@ -275,7 +358,7 @@ function module_code(library_namespace) {
 				// console.trace(next[1]);
 				if (typeof next[2] === 'function') {
 					// next[2] : callback
-					next[2].call(this, next[1]);
+					this.set_promise_relying(next[2].call(this, next[1]));
 				}
 				this.next();
 				break;
@@ -286,7 +369,7 @@ function module_code(library_namespace) {
 			if (typeof next[1] === 'function') {
 				// this.page(callback): callback(last_page)
 				// next[1] : callback
-				next[1].call(this, this.last_page);
+				this.set_promise_relying(next[1].call(this, this.last_page));
 				this.next();
 				break;
 			}
@@ -334,7 +417,8 @@ function module_code(library_namespace) {
 				= Array.isArray(page_data) ? page_data[0] : page_data;
 				// next[2] : callback
 				if (typeof next[2] === 'function')
-					next[2].call(_this, page_data, error);
+					_this.set_promise_relying(next[2].call(_this, page_data,
+							error));
 				_this.next();
 			},
 			// next[3] : options
@@ -945,6 +1029,7 @@ function module_code(library_namespace) {
 			next[2] = library_namespace.setup_options(next[2]);
 			// `next[2].page_to_edit`: 手動指定要編輯的頁面。
 			if (!next[2].page_to_edit) {
+				// console.trace(this.last_page);
 				next[2].page_to_edit = this.last_page;
 				// console.trace(next[2]);
 			}
@@ -965,7 +1050,8 @@ function module_code(library_namespace) {
 						.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first! 另請注意: 您不能在 callback 中呼叫 .edit() 之類的 wiki 函數！請在 callback 執行完畢後再執行新的 wiki 函數！例如放在 setTimeout() 中。');
 				// next[3] : callback
 				if (typeof next[3] === 'function') {
-					next[3].call(_this, undefined, 'no page');
+					this.set_promise_relying(next[3].call(_this, undefined,
+							'no page'));
 				}
 				this.next();
 				break;
@@ -1032,8 +1118,10 @@ function module_code(library_namespace) {
 				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯'
 						+ wiki_API.title_link_of(next[2].page_to_edit) + '！');
 				// next[3] : callback
-				if (typeof next[3] === 'function')
-					next[3].call(this, next[2].page_to_edit.title, '已停止作業');
+				if (typeof next[3] === 'function') {
+					this.set_promise_relying(next[3].call(this,
+							next[2].page_to_edit.title, '已停止作業'));
+				}
 				this.next();
 				break;
 			}
@@ -1043,15 +1131,15 @@ function module_code(library_namespace) {
 				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 				if (next[2].section !== 'new') {
 					library_namespace
-							.warn('wiki_API.prototype.next: The page to edit is Flow. I can not edit it directly: '
+							.warn('wiki_API.prototype.next: The page to edit is Flow. I cannot edit it directly: '
 									+ wiki_API
 											.title_link_of(next[2].page_to_edit));
 					// next[3] : callback
 					if (typeof next[3] === 'function') {
 						// 2017/9/18 Flow已被重新定義為結構化討論 / 結構式討論。
 						// is [[mw:Structured Discussions]].
-						next[3].call(this, next[2].page_to_edit.title,
-								'is Flow');
+						this.set_promise_relying(next[3].call(this,
+								next[2].page_to_edit.title, 'is Flow'));
 					}
 					this.next();
 					break;
@@ -1065,7 +1153,8 @@ function module_code(library_namespace) {
 					wiki_API.Flow.page(next[2].page_to_edit, function() {
 						// next[3] : callback
 						if (typeof next[3] === 'function')
-							next[3].call(this, next[2].page_to_edit.title);
+							_this.set_promise_relying(next[3].call(this,
+									next[2].page_to_edit.title));
 						check_and_delete_revisions();
 						_this.next();
 					}, {
@@ -1088,10 +1177,10 @@ function module_code(library_namespace) {
 									+ wiki_API
 											.title_link_of(next[2].page_to_edit));
 					// next[3] : callback
-					if (typeof next[3] === 'function')
-						next[3]
-								.call(this, next[2].page_to_edit.title,
-										'denied');
+					if (typeof next[3] === 'function') {
+						this.set_promise_relying(next[3].call(this,
+								next[2].page_to_edit.title, 'denied'));
+					}
 					this.next();
 					break;
 				}
@@ -1122,8 +1211,10 @@ function module_code(library_namespace) {
 				add_session_to_options(this, next[2]), function(title, error,
 						result) {
 					// next[3] : callback
-					if (typeof next[3] === 'function')
-						next[3].call(_this, title, error, result);
+					if (typeof next[3] === 'function') {
+						_this.set_promise_relying(next[3].call(_this, title,
+								error, result));
+					}
 					check_and_delete_revisions();
 					_this.next();
 				});
@@ -1140,8 +1231,10 @@ function module_code(library_namespace) {
 						.warn('wiki_API.prototype.next: Denied to edit '
 								+ wiki_API.title_link_of(next[2].page_to_edit));
 				// next[3] : callback
-				if (typeof next[3] === 'function')
-					next[3].call(this, next[2].page_to_edit.title, 'denied');
+				if (typeof next[3] === 'function') {
+					this.set_promise_relying(next[3].call(this,
+							next[2].page_to_edit.title, 'denied'));
+				}
 				this.next();
 				break;
 			}
@@ -1152,6 +1245,7 @@ function module_code(library_namespace) {
 			var original_queue,
 			// 必須在最終執行剛好一次 check_next() 以 `this.next()`。
 			check_next = function check_next(result, no_next) {
+				_this.set_promise_relying(result);
 				if (original_queue) {
 					// assert: {Array}original_queue.length > 0
 					if (false) {
@@ -1168,7 +1262,7 @@ function module_code(library_namespace) {
 				if (!no_next) {
 					// console.trace([ _this.running, _this.actions.length ]);
 					// setTimeout(_this.next.bind(_this), 0);
-					_this.next(result && null);
+					_this.next();
 				}
 			};
 
@@ -1225,9 +1319,12 @@ function module_code(library_namespace) {
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					result = next[3].apply(_this, arguments);
-				// assert: 應該有 next[2].page_to_edit。
+				// console.trace('assert: 應該有 next[2].page_to_edit。');
+				// console.trace(next[2].page_to_edit);
 				check_and_delete_revisions();
 				check_next(result);
+				// console.trace(title);
+				// console.trace(_this.actions);
 			});
 			break;
 
@@ -2387,6 +2484,9 @@ function module_code(library_namespace) {
 
 			// --------------------------------------------
 
+			/**
+			 * 應付 promise 的情形。
+			 */
 			function check_result_and_process_next(result) {
 				// session.next() will wait for result.then() calling back
 				// if CeL.is_thenable(result).
@@ -2520,10 +2620,14 @@ function module_code(library_namespace) {
 				}
 				if (!(page_index < pages.length)) {
 					if (false) {
-						console.trace('process_next_page: ' + pages.length
-								+ ' 頁面處理完畢。');
+						// pages.length + ' 頁面處理完畢。'
+						console.trace(gettext('%1 pages done', pages.length));
 					}
-					session.run(finish_up);
+					// setTimeout(): 跳出exit
+					// callback。避免在callback中呼叫session.next()的問題。
+					setTimeout(function() {
+						session.run(finish_up);
+					}, 0);
 					return;
 				}
 
@@ -2564,19 +2668,19 @@ function module_code(library_namespace) {
 					}
 
 					if (library_namespace.is_thenable(result)) {
-						result.then(
-						//
-						session.run.bind(session, process_next_page),
-						//
-						function(error) {
+						result.then(function() {
+							session.run(process_next_page);
+						}, function(error) {
 							error_to_return = error_to_return || error;
 							session.run(process_next_page);
 						});
 					} else {
 						// console.trace('session.run(process_next_page) ');
-						session.run(process_next_page);
+						setTimeout(function() {
+							session.run(process_next_page);
+						}, 0);
 					}
-					// return result;
+					return result;
 				}
 
 				// console.log(page);
@@ -2648,9 +2752,23 @@ function module_code(library_namespace) {
 
 						// return [wiki_API.edit.cancel, 'skip'];
 					}
-					check_result_and_process_next(content);
+
+					// check_result_and_process_next(content);
+					if (library_namespace.is_thenable(content)) {
+						content.then(library_namespace.null_function, function(
+								error) {
+							// console.trace([ error_to_return, error ]);
+							// console.log([ 'session.running = ' +
+							// session.running,
+							// session.actions.length ]);
+							// `error_to_return` will record the first error.
+							error_to_return = error_to_return || error;
+						});
+					}
+
 					// console.trace(content);
 					return content;
+
 				}, work_options, function work_edit_callback(title, error,
 						result) {
 					// Do not set `error_to_return` here: `error` maybe 'skip'.
@@ -2800,11 +2918,15 @@ function module_code(library_namespace) {
 						if (error) {
 							library_namespace.warn(
 							//
-							'wiki_API.work: Can not write log to ['
+							'wiki_API.work: Cannot write log to '
 							//
-							+ log_to + ']! Try to write to [' + 'User:'
+							+ wiki_API.title_link_of(log_to)
 							//
-							+ session.token.login_user_name + ']');
+							+ '! Try to write to '
+							//
+							+ wiki_API.title_link_of('User:'
+							//
+							+ session.token.login_user_name));
 							library_namespace.log('\nlog:<br />\n'
 							//
 							+ messages.join('<br />\n'));

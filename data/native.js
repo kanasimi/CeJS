@@ -2326,7 +2326,7 @@ function module_code(library_namespace) {
 	 */
 	var Object_clone = function clone(object, deep, copy_to) {
 		if (!object || typeof object !== 'object') {
-			// 純量。
+			// assert: object is 純量。
 			return object;
 		}
 
@@ -4796,12 +4796,16 @@ function module_code(library_namespace) {
 
 	var fulfilled = Object.create(null);
 	// assert: needs Promise.race()!
-	// then(value is fulfilled)
-	function status_of_thenable(value, then) {
+	//
+	// status_handler(value is fulfilled && ('not thenable' || 'resolved' ||
+	// 'rejected'), value: this_thenable)
+	//
+	// return promise to wait for the result
+	function status_of_thenable(value, status_handler) {
 		// Promise.isPromise()
 		if (!library_namespace.is_thenable(value)) {
-			then(true);
-			return true;
+			status_handler('not thenable', value);
+			return;
 		}
 
 		// https://stackoverflow.com/questions/30564053/how-can-i-synchronously-determine-a-javascript-promises-state
@@ -4811,10 +4815,18 @@ function module_code(library_namespace) {
 		Promise.race([value, fulfilled]).then(v => { status = v === t ? "pending" : "fulfilled" }, () => { status = "rejected" });
 		</code>
 		 */
-		Promise.race([ value, fulfilled ]).then(function(first_fulfilled) {
-			then(first_fulfilled !== fulfilled);
-		}, function(error) {
-			// Do not catch error here.
+		return Promise.race([ value, fulfilled ])
+		//
+		.then(function(first_fulfilled) {
+			var result = first_fulfilled !== fulfilled && 'resolved';
+			status_handler(result, value);
+			return result;
+		}, function(error_reason) {
+			// assert: first_fulfilled !== fulfilled
+			// 因為 fulfilled 不會 throw
+			var result = 'rejected';
+			status_handler(result, value);
+			return result;
 		});
 	}
 

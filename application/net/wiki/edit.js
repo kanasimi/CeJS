@@ -227,13 +227,30 @@ function module_code(library_namespace) {
 		// console.trace(title);
 		// console.log(text);
 		if (library_namespace.is_thenable(text)) {
+			// console.trace(text);
 			text.then(function(text) {
+				// console.trace(text);
 				wiki_API_edit(title, text, token, options, callback,
 				//
 				timestamp);
 			}, function(error) {
 				callback(title, error);
 			});
+			var session = wiki_API.session_of_options(options);
+			if (session && session.running) {
+				session.set_promise_relying(text);
+				if (false) {
+					console.trace(session.actions);
+					console.trace(session.actions[0]);
+					console
+							.trace('wiki_API_edit: Calling wiki_API.prototype.next() '
+									+ [ session.running, session.actions.length ]);
+					text.then(function(text) {
+						console.trace(text);
+					});
+				}
+				session.next();
+			}
 			return;
 		}
 
@@ -488,6 +505,7 @@ function module_code(library_namespace) {
 				// e.g., .pageid, .ns, .title
 				// title.title === wiki_API.title_of(title)
 				callback(title, error, data);
+				// console.trace(title);
 			}
 		}, post_data, options);
 	}
