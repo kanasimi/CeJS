@@ -88,7 +88,10 @@ function module_code(library_namespace) {
 	wiki_API.prototype.set_promise_relying = function set_promise_relying(
 			promise) {
 		// Promise.isPromise()
-		if (library_namespace.is_thenable(promise)) {
+		if (library_namespace.is_thenable(promise)
+		// no rely on wiki_API
+		// && !promise.not_relying_on_wiki_API
+		) {
 			// assert: promise 依賴於本 wiki_API action thread。
 			library_namespace.debug('設定依賴於本 wiki_API action 的 promise。', 3,
 					'set_promise_relying');
@@ -2501,130 +2504,6 @@ function module_code(library_namespace) {
 			}
 
 			// --------------------------------------------
-
-			/**
-			 * 應付 promise 的情形。
-			 * 
-			 * @deprecated
-			 */
-			function check_result_and_process_next(result) {
-				// session.next() will wait for result.then() calling back
-				// if CeL.is_thenable(result).
-				// e.g., await wiki.for_each_page(need_check_redirected_list,
-				// ... @ 20200122.update_vital_articles.js
-				// So we need to run `session.next()` manually.
-
-				// Promise.isPromise()
-				if (!library_namespace.is_thenable(result)) {
-					return;
-				}
-
-				// console.trace([ 'session.running = ' + session.running,
-				// session.actions.length ]);
-				result.then(library_namespace.null_function, function(error) {
-					// console.trace([ error_to_return, error ]);
-					// console.log([ 'session.running = ' + session.running,
-					// session.actions.length ]);
-					// `error_to_return` will record the first error.
-					error_to_return = error_to_return || error;
-				})
-				/**
-				 * <code>
-				.then(function() {
-					console.trace(page_index + '/' + pages.length
-					//
-					+ ' result finished '
-					//
-					+ [ session.running, session.actions.length ]);
-				})
-				</code>
-				 */
-				;
-
-				// console.trace(result);
-				library_namespace.status_of_thenable(result,
-				//
-				function(fulfilled) {
-					// session.running === true
-					// console.trace('session.running = ' + session.running);
-					// console.log(fulfilled);
-					if (fulfilled)
-						return;
-
-					/**
-					 * assert: result is pending. e.g., <code>
-					await wiki.for_each_page(need_check_redirected_list, ...)
-					@ await wiki.for_each_page(vital_articles_list, for_each_list_page, ...)
-					@ 20200122.update_vital_articles.js
-					</code>
-					 */
-
-					if (false) {
-						console.trace(
-						// replace/general_replace.js 多任務:
-						// [false,0]
-						// should not session.next();
-						'test if need to call session.next(): '
-						//
-						+ [ page_index, pages.length, maybe_nested_thread,
-						// 20200122.update_vital_articles.js: [true,1]
-						// and MUST session.next();
-						session.running, session.actions.length,
-						//
-						'\n' + session.actions.map(function(action) {
-							return action.slice(0, 2);
-						}).join('\n') ]);
-					}
-
-					if (/* !maybe_nested_thread && */session.running
-					// e.g., 20200122.update_vital_articles.js
-					&& (session.actions.length > 0
-					// 所有操作執行完畢後，不應該有需要手動session.next()的問題。
-					// 這是因為 .edit() 可能直接執行 callback，然後又不間斷執行 finish_up。
-					// 這時 .actions[0] 應該是 edit log。
-					// e.g., Trace: test if need to call session.next():
-					// 31,31,false,true,3,
-					&& page_index < pages.length
-					// from this.page(this_slice, main_work, page_options) below
-					// && session.actions[0][0] === 'page'
-					// session.actions[0][3]: options of .page()
-					// && session.actions[0][3]
-					// page_options.call_from_wiki_API__work
-					// && session.actions[0][3].call_from_wiki_API__work
-
-					// e.g., replace/general_replace.js 編輯了一批，處理完畢，最後要
-					// finish_up() 的時候。
-					// Trace: test if need to call session.next():
-					// 1,1,false,true,0,
-
-					// e.g., replace/20210624.test_subst_Template.js
-					// Trace: test if need to call session.next():
-					// 1,2,false,true,0,
-					|| session.actions.length === 0
-					//
-					&& page_index < pages.length)) {
-						// await wiki.for_each_page(need_check_redirected_list,
-						// ... @ 20200122.update_vital_articles.js:
-						// 從這邊 return 之後，會回到 function wiki_API_edit()。
-						// `result` 會等待 push 進 session.actions 的
-						// this.page(this_slice, main_work, page_options)，
-						// 但這邊 return 的話，會保持 session.running === true &&
-						// session.actions.length > 0
-						// 並且 about。執行不到 result.then()。
-						if (false) {
-							console.trace([
-									session.running,
-									session.actions[0]
-											&& session.actions[0].slice(0, 2),
-									session.actions[0]
-									//
-									&& session.actions[0][3] ]);
-						}
-						// assert: result.then() 依賴於本 thread
-						session.next();
-					}
-				});
-			}
 
 			var page_index = 0;
 			// for each page: 主要機制是一頁頁處理。
