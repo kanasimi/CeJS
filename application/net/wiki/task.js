@@ -53,6 +53,15 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// get_data_key(), get_data_page()
+	function get_wikibase_key(id) {
+		if (!id)
+			return;
+		if (id[KEY_CORRESPOND_PAGE])
+			id = id[KEY_CORRESPOND_PAGE];
+		return id.site && id.title && id;
+	}
+
 	// check if session.last_data is usable, 非過期資料。
 	function last_data_is_usable(session) {
 		// When "servers are currently under maintenance", session.last_data is
@@ -189,9 +198,16 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.prototype.next = function next(callback_result_relying_on_this) {
 		if (typeof callback_result_relying_on_this === 'function') {
-			callback_result_relying_on_this = callback_result_relying_on_this
-			// this.next(callback, ...callback_arguments);
-			.apply(this, Array.prototype.slice.call(arguments, 1));
+			try {
+				callback_result_relying_on_this = callback_result_relying_on_this
+				// this.next(callback, ...callback_arguments);
+				.apply(this, Array.prototype.slice.call(arguments, 1));
+			} catch (e) {
+				if (library_namespace.env.has_console)
+					console.error(e);
+				else
+					library_namespace.error(e);
+			}
 		}
 		if (callback_result_relying_on_this) {
 			this.set_promise_relying(callback_result_relying_on_this);
@@ -1289,9 +1305,10 @@ function module_code(library_namespace) {
 			//
 			function wiki_API_next_edit_callback(title, error, result) {
 				// next[3] : callback
-				if (typeof next[3] === 'function')
+				if (typeof next[3] === 'function') {
 					callback_result_relying_on_this = next[3].apply(_this,
 							arguments);
+				}
 				// console.trace('assert: 應該有 next[2].page_to_edit。');
 				// console.trace(next[2].page_to_edit);
 				check_and_delete_revisions();
@@ -1413,7 +1430,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('last data 不能用。', 3,
 						'wiki_API.prototype.next.data');
 				// delete this.last_data;
-				if (!this.last_page) {
+				if (!wiki_API.is_page_data(this.last_page)) {
 					this.next(next[1], undefined, {
 						code : 'no_id',
 						message : 'Did not set id! 未設定欲取得之特定實體 id。'
@@ -1551,6 +1568,7 @@ function module_code(library_namespace) {
 			}
 
 			// next = [ 'edit_data', id, data[, options, callback] ]
+
 			if (typeof next[3] === 'function' && !next[4]) {
 				// 未輸入 options，但輸入 callback。
 				next.splice(3, 0, null);
@@ -1619,6 +1637,182 @@ function module_code(library_namespace) {
 				// next[2] : callback
 				_this.next(next[2], data);
 			}, next[3]);
+			break;
+
+		// ------------------------------------------------
+		// [[commons:Commons:Structured data]]
+		// 共享資源後端使用維基庫（Wikibase），與維基數據（Wikidate）使用的技術相同。
+
+		case 'structured_data':
+			// session.structured_data('File:media_file_name', (entity, error)
+			// => {});
+			// session.structured_data('File:media_file_name', property,
+			// (entity, error) => {}, options);
+
+			if (typeof next[1] === 'function') {
+				library_namespace.debug('直接取得 last_page 之 data: ' + next[1], 3,
+						'wiki_API.prototype.next.structured_data');
+				if (!wiki_API.is_page_data(this.last_page)) {
+					this.next(next[1], undefined, {
+						code : 'no_id',
+						message : 'Did not set id! 未設定欲取得之特定實體 id。'
+					});
+					break;
+				}
+				next.splice(1, 0, this.last_page);
+			}
+
+			if (!is_api_and_title(next[1]) && !get_wikibase_key(next[1])) {
+				next[1] = [ wiki_API.site_name(this), next[1] ];
+			}
+
+			if (next[1][get_wikibase_key(next[1]) ? 'site' : 0] !== 'commonswiki') {
+				library_namespace
+						.warn('wiki_API.prototype.next.structured_data: Should only using on commonswiki!');
+			}
+
+			if (wiki_API.is_entity(next[1][1])
+					&& wiki_API.is_page_data(next[1][1])) {
+				library_namespace.debug('直接將 next[1] 輸入 callback: '
+						+ next[1][1], 3,
+						'wiki_API.prototype.next.edit_structured_data');
+				this.last_page = next[1][1];
+				// next[3] : callback
+				this.next(next[3], this.last_page);
+				break;
+			}
+
+			if (wiki_API.is_page_data(next[1][1])) {
+				next[1][1] = wiki_API.title_of(next[1][1]);
+			}
+
+			if (typeof next[2] === 'function') {
+				// 未設定/不設定 property
+				// shift arguments
+				next.splice(2, 0, null);
+			}
+
+			// wikidata_entity(key, property, callback, options)
+			wiki_API.data(next[1], next[2], function(data, error) {
+				// console.trace([data, error]);
+				if (data) {
+					// e.g.,
+					// {pageid:,ns:,title:,type:'mediainfo',id:'M000',labels:{},descriptions:{},statements:{}}
+					// {id:'M000',missing:''}
+					if (wiki_API.is_page_data(next[1][1])) {
+						_this.last_page = Object.assign(
+						//
+						wiki_API.is_page_data(next[1][1]), data);
+						_this.last_page[KEY_CORRESPOND_PAGE]
+						//
+						= data[KEY_CORRESPOND_PAGE];
+					} else {
+						_this.last_page = data;
+					}
+				} else {
+					_this.last_page = {
+						title : wiki_API.title_of(next[1][1]),
+						error : error
+					};
+				}
+				// next[3] : callback
+				_this.next(next[3], data, error);
+			},
+			// next[4] : options
+			add_session_to_options(this, {
+				data_API_URL : wiki.API_URL
+			}, next[4]));
+			break;
+
+		case 'edit_structured_data':
+			// wiki.edit_structured_data(['File:media_file_name', ]data[,
+			// options, callback]);
+			// wiki.structured_data('File:media_file_name').edit_structured_data(data[,
+			// options, callback]);
+			// wiki.page('File:media_file_name').edit_structured_data(data[,
+			// options, callback]);
+
+			if (typeof next[1] === 'string') {
+				// next[1]: title
+				next[1] = [ wiki_API.site_name(this), next[1] ];
+
+			} else if (typeof next[1] === 'function'
+			//
+			|| library_namespace.is_Object(next[1])
+					&& !wiki_API.is_entity(next[1])
+					&& !get_wikibase_key(next[1])) {
+				library_namespace.debug('未設定/不設定 id，第一個 next[1] 即為 data。', 6,
+						'wiki_API.next.edit_structured_data');
+				// console.trace(next);
+				next.splice(1, 0, this.last_page);
+			}
+
+			// next = ['edit_structured_data', id, data[, options, callback]]
+
+			if (typeof next[3] === 'function') {
+				// shift arguments
+				next.splice(3, 0, null);
+			}
+
+			// next = ['edit_structured_data', id, data, options, callback]
+
+			if (wiki_API.is_entity(next[1])) {
+				library_namespace.debug('沿用原有 entity。', 6,
+						'wiki_API.next.edit_structured_data');
+
+			} else if (get_wikibase_key(next[1])
+			// 有 [KEY_CORRESPOND_PAGE] 代表已經 .structured_data() 過。
+			&& next[1][KEY_CORRESPOND_PAGE]) {
+				next[1] = get_wikibase_key(next[1]);
+
+			} else {
+				// console.trace(next[1]);
+				if (wiki_API.is_page_data(next[1]) || is_api_and_title(next[1])) {
+					library_namespace.debug('先取得 last_page 之 data: ' + next[1],
+							3, 'wiki_API.prototype.next.edit_structured_data');
+					this.actions.unshift([ 'structured_data', next[1] ], next);
+					// Will be replace by `this.last_page` later.
+					next.splice(1, 1);
+					this.next();
+				} else if (get_wikibase_key(next[1])) {
+					// e.g., media 沒設定過 structured data。
+					// {id:'M000',missing:''}
+					this.actions.unshift([ 'structured_data',
+							get_wikibase_key(next[1]) ], next);
+					// Will be replace by `this.last_page` later.
+					next.splice(1, 1);
+					this.next();
+				} else {
+					this.next(next[4], undefined, {
+						code : 'no_id',
+						message : 'Did not set id! 未設定欲取得之特定實體 id。'
+					});
+				}
+				break;
+			}
+
+			// assert: wiki_API.is_entity(next[1])
+
+			// console.trace(next[1]);
+			next[1] = Object.clone(next[1]);
+
+			if (!next[1].claims && next[1].statements) {
+				next[1].claims = next[1].statements;
+				delete next[1].statements;
+			}
+
+			// console.trace(next);
+			// wikidata_edit(id, data, token, options, callback)
+			wiki_API.edit_data(next[1], next[2], this.token,
+			// next[3] : options
+			add_session_to_options(this, {
+				data_API_URL : wiki.API_URL
+			}, next[3]),
+			// callback
+			function(data, error) {
+				// next[4] : callback
+				_this.next(next[4], data, error);
+			});
 			break;
 
 		// ------------------------------------------------
@@ -1762,11 +1956,19 @@ function module_code(library_namespace) {
 			break;
 
 		case 'run_async':
-			// ** MUST call `this.next();` in the callback function!
+			var is_function = false;
 			// next[1] : callback
 			if (typeof next[1] === 'function') {
+				is_function = true;
 				// pass arguments
-				next[1].apply(this, next.slice(2));
+				next[1] = next[1].apply(this, next.slice(2));
+			}
+
+			if (library_namespace.is_thenable(next[1])) {
+				var callback = this.next.bind(this);
+				next[1].then(callback, callback);
+			} else if (is_function) {
+				// ** MUST call `this.next();` in the callback function!
 			} else {
 				this.next();
 			}
@@ -1792,7 +1994,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see function wiki_API_prototype_methods()
 	 */
-	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|download|edit|upload|cache|listen|category_tree|register_redirects|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|query'
+	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|download|edit|upload|cache|listen|category_tree|register_redirects|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|structured_data|edit_structured_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------

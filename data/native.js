@@ -2333,19 +2333,21 @@ function module_code(library_namespace) {
 		// for read-only??
 		// return Object.create(object);
 
-		if (Array.isArray(object)) {
-			// TODO: for {Array}
-			// return [...object]
-		}
-
 		if (deep) {
 			// @see
 			// http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
 			return JSON.parse(JSON.stringify(object));
 		}
 
-		if (clone_Object && !copy_to) {
-			return clone_Object(object);
+		if (!copy_to) {
+			if (Array.isArray(object)) {
+				// for {Array}
+				return object.clone();
+			}
+
+			if (clone_Object) {
+				return clone_Object(object);
+			}
 		}
 
 		// shallow clone Object.

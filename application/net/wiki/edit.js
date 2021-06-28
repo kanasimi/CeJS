@@ -238,7 +238,6 @@ function module_code(library_namespace) {
 			});
 			var session = wiki_API.session_of_options(options);
 			if (session && session.running) {
-				session.set_promise_relying(text);
 				if (false) {
 					console.trace(session.actions);
 					console.trace(session.actions[0]);
@@ -249,7 +248,7 @@ function module_code(library_namespace) {
 						console.trace(text);
 					});
 				}
-				session.next();
+				session.next(text);
 			}
 			return;
 		}

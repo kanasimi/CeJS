@@ -1426,9 +1426,10 @@ function module_code(library_namespace) {
 			}
 
 			if (property && data) {
-				property = data.claims
-				//
-				? data.claims[property] : data[property];
+				property = (data.claims
+				// session.structured_data()
+				// [[commons:Commons:Structured data]]
+				|| data.statements || data)[property];
 			}
 			if (property) {
 				wikidata_datavalue(property, callback, options);
