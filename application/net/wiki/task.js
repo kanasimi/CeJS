@@ -1692,6 +1692,9 @@ function module_code(library_namespace) {
 				next.splice(2, 0, null);
 			}
 
+			// next[4] : options
+			next[4].data_API_URL = wiki.API_URL;
+
 			// wikidata_entity(key, property, callback, options)
 			wiki_API.data(next[1], next[2], function(data, error) {
 				// console.trace([data, error]);
@@ -1719,9 +1722,7 @@ function module_code(library_namespace) {
 				_this.next(next[3], data, error);
 			},
 			// next[4] : options
-			add_session_to_options(this, {
-				data_API_URL : wiki.API_URL
-			}, next[4]));
+			add_session_to_options(this, next[4]));
 			break;
 
 		case 'edit_structured_data':
@@ -1801,13 +1802,14 @@ function module_code(library_namespace) {
 				delete next[1].statements;
 			}
 
+			// next[3] : options
+			next[3].data_API_URL = wiki.API_URL;
+
 			// console.trace(next);
 			// wikidata_edit(id, data, token, options, callback)
 			wiki_API.edit_data(next[1], next[2], this.token,
 			// next[3] : options
-			add_session_to_options(this, {
-				data_API_URL : wiki.API_URL
-			}, next[3]),
+			add_session_to_options(this, next[3]),
 			// callback
 			function(data, error) {
 				// next[4] : callback
