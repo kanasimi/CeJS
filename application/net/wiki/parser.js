@@ -1399,6 +1399,8 @@ function module_code(library_namespace) {
 	/**
 	 * 快速取得第一個標題 lead section / first section / introduction 序言 導入文 文字用。
 	 * 
+	 * TODO: expandtemplates for cascading protection
+	 * 
 	 * @example <code>
 
 	CeL.wiki.lead_text(content);
@@ -1520,6 +1522,9 @@ function module_code(library_namespace) {
 			if (token.type === 'transclusion') {
 				if (token.name === 'NoteTA') {
 					// preserve 轉換用詞
+					// TODO:
+					// 因為該頁會嵌入首頁，所以請不要使用{{noteTA}}進行繁簡轉換；請用-{zh-hans:簡體字;zh-hant:繁體字}-進行單個詞彙轉換。
+					// [[繁體字]] → [[繁體字|-{zh-hans:簡體字;zh-hant:繁體字}-]]
 					introduction_section.push(token);
 					continue;
 				}
@@ -1579,6 +1584,14 @@ function module_code(library_namespace) {
 				// title_piece
 				introduction_section.title_token = token;
 			}
+
+			if (token.type === 'link') {
+				if (!token[0] && token[1]) {
+					// 將[[#章節|文字]]的章節連結改為[[條目名#章節|文字]]的形式。
+					token[0] = title;
+				}
+			}
+
 			// console.log('Add token:');
 			// console.log(token);
 			introduction_section.push(token);
