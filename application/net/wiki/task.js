@@ -1670,6 +1670,11 @@ function module_code(library_namespace) {
 				library_namespace
 						.warn('wiki_API.prototype.next.structured_data: Should only using on commonswiki!');
 			}
+			if (!/^File:/i
+					.test(next[1][get_wikibase_key(next[1]) ? 'title' : 1])) {
+				library_namespace
+						.warn('wiki_API.prototype.next.structured_data: Should only using on files!');
+			}
 
 			if (wiki_API.is_entity(next[1][1])
 					&& wiki_API.is_page_data(next[1][1])) {
@@ -1693,7 +1698,8 @@ function module_code(library_namespace) {
 			}
 
 			// next[4] : options
-			next[4].data_API_URL = wiki.API_URL;
+			next[4] = add_session_to_options(this, next[4]);
+			next[4].data_API_URL = this.API_URL;
 
 			// wikidata_entity(key, property, callback, options)
 			wiki_API.data(next[1], next[2], function(data, error) {
@@ -1722,7 +1728,7 @@ function module_code(library_namespace) {
 				_this.next(next[3], data, error);
 			},
 			// next[4] : options
-			add_session_to_options(this, next[4]));
+			next[4]);
 			break;
 
 		case 'edit_structured_data':
@@ -1803,13 +1809,14 @@ function module_code(library_namespace) {
 			}
 
 			// next[3] : options
-			next[3].data_API_URL = wiki.API_URL;
+			next[3] = add_session_to_options(this, next[3]);
+			next[3].data_API_URL = this.API_URL;
 
 			// console.trace(next);
 			// wikidata_edit(id, data, token, options, callback)
 			wiki_API.edit_data(next[1], next[2], this.token,
 			// next[3] : options
-			add_session_to_options(this, next[3]),
+			next[3],
 			// callback
 			function(data, error) {
 				// next[4] : callback

@@ -4667,6 +4667,9 @@ function module_code(library_namespace) {
 					// TypeError: Converting circular structure to JSON
 					'Get id from ' + JSON.stringify(id), 3, 'wikidata_edit');
 				}
+				// console.trace(id);
+				// console.trace(options);
+				// library_namespace.set_debug(6)
 				wikidata_entity(id, options.props, function(entity, error) {
 					if (error) {
 						library_namespace.debug('Get error '
@@ -4686,10 +4689,11 @@ function module_code(library_namespace) {
 
 					delete options.props;
 					delete options.languages;
+					// console.trace(entity);
+
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
-					data = data.call(options, is_entity(entity) ? entity
-					// error?
-					: undefined);
+					// entity 可能是 {id:'M000',missing:''}
+					data = data.call(options, entity, error);
 					wikidata_edit(id, data, token, options, callback);
 				}, options);
 				return;
