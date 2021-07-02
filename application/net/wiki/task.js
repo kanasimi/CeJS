@@ -1862,8 +1862,8 @@ function module_code(library_namespace) {
 			// wiki.page(from).move_to(to, callback)
 			// wiki.page(from).move_to(to)
 
+			var move_to_title = null;
 			if (type === 'move_to') {
-				var move_to_title;
 				if (typeof next[1] === 'string') {
 					move_to_title = next[1];
 					// shift arguments

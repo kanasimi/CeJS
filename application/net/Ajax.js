@@ -1823,9 +1823,9 @@ function module_code(library_namespace) {
 							options[KEY_URL], URL_to_fetch ]
 				}, 1, 'get_URL_node');
 				get_URL_node(options, onload, charset
-				// 重新導向的時候去掉 post data 不傳送。
-				// , post_data
-				);
+				// 重新導向的時候亦傳送 post data。For wiki API
+				// e.g., https://github.com/kanasimi/CeJS/issues/12
+				, post_data);
 				return;
 			}
 
