@@ -2148,6 +2148,11 @@ function module_code(library_namespace) {
 		descriptions : [],
 		aliases : [],
 		claims : [],
+
+		// https://www.wikidata.org/wiki/Wikidata:Glossary
+		// snak: property + value
+		// snaks : [],
+
 		sitelinks : []
 	},
 	//
@@ -2346,6 +2351,7 @@ function module_code(library_namespace) {
 		// 把正規化之後的放入 properties。
 		properties = [];
 		old_properties.forEach(function(property) {
+			// console.trace(property);
 			if (!property) {
 				// Skip null property.
 				return;
@@ -2361,7 +2367,7 @@ function module_code(library_namespace) {
 			// assert: library_namespace.is_Object(property)
 
 			// * 若某項有 .mainsnak 或 .snaktype 則當作輸入了已正規化、全套完整的資料，不處理此項。
-			if (property.mainsnak || property.snaktype) {
+			if (property.mainsnak || property.snaktype || property.snaks) {
 				properties.push(property);
 				// Skip it.
 				return;
@@ -2510,6 +2516,7 @@ function module_code(library_namespace) {
 		// console.trace(demands);
 		wikidata_search.use_cache(demands, function(property_id_list) {
 			// console.trace(property_id_list);
+			// console.trace(property_corresponding);
 
 			// 將{Array}屬性名稱列表轉換成{Array}屬性 id 列表 →
 			if (property_id_list.length !== property_corresponding.length) {
@@ -2539,6 +2546,14 @@ function module_code(library_namespace) {
 					return;
 				}
 
+				if (Array.isArray(id) && id.length > 0) {
+					library_namespace.error(
+					//
+					'normalize_wikidata_properties: Get multi properties: '
+							+ id + ' for ' + JSON.stringify(property_data));
+					return;
+				}
+
 				// 沒找到的時候，id 為 undefined。
 				if (/^[PQ]\d{1,10}$/.test(id)) {
 					if (!('value' in property_data)) {
@@ -2552,9 +2567,8 @@ function module_code(library_namespace) {
 
 				library_namespace.error(
 				//
-				'normalize_wikidata_properties: Invalid property key: '
+				'normalize_wikidata_properties: Skip invalid property key: '
 						+ JSON.stringify(property_data));
-
 			});
 
 			function property_value(property_data) {
@@ -2597,6 +2611,7 @@ function module_code(library_namespace) {
 				}
 			}
 
+			// console.trace(exists_property_hash);
 			// 去掉 exists_property_hash 已有、重複者。
 			if (exists_property_hash) {
 				// console.trace(exists_property_hash);
@@ -2764,6 +2779,7 @@ function module_code(library_namespace) {
 				});
 			}
 
+			// console.trace(properties);
 			var index = 0,
 			//
 			normalize_next_value = function normalize_next_value() {
@@ -2781,6 +2797,15 @@ function module_code(library_namespace) {
 				if (is_property_to_remove(property_data)) {
 					// 跳過要刪除的。
 					normalize_next_value();
+					return;
+				}
+
+				// * 若某項有 .mainsnak 或 .snaktype 則當作輸入了已正規化、全套完整的資料，不處理此項。
+				if (property_data.mainsnak || property_data.snaktype
+						|| property_data.snaks) {
+					// console.trace(property_data);
+					normalize_next_value();
+					// Skip it.
 					return;
 				}
 
@@ -3152,7 +3177,9 @@ function module_code(library_namespace) {
 
 		append_parameters(POST_data, options);
 
-		wiki_API.query([ API_URL, 'action=wbsetreference' ],
+		wiki_API.query([ API_URL, {
+			action : 'wbsetreference'
+		} ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
 		function handle_result(data, error) {
 			error = error || (data ? data.error : new Error('No data get!'));
@@ -3160,9 +3187,9 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(data));
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				// e.g., set_references: [failed-save] Edit conflict.
-				library_namespace.error('set_references: [' + error.code + '] '
-						+ (error.info || error.message));
+				// e.g., set_single_references: [failed-save] Edit conflict.
+				library_namespace.error('set_single_references: [' + error.code
+						+ '] ' + (error.info || error.message));
 			}
 			// data =
 			// {"pageinfo":{"lastrevid":1},"success":1,"reference":{"hash":"123abc..","snaks":{...},"snaks-order":[]}}
@@ -3233,6 +3260,8 @@ function module_code(library_namespace) {
 			// console.trace(references);
 			// console.trace(exists_references);
 
+			// ----------------------------------
+
 			// e.g., references:[{P1:'',language:'zh'},{P2:'',references:{}}]
 			property_data.references = references;
 
@@ -3241,33 +3270,8 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(property_data.references));
 			// console.log(property_data.references);
 
-			var reference_index = 0, references_to_remove = [];
-			var latest_data_with_claim = exists_references;
-			function remove_next_references(data, error) {
-				if (error) {
-					callback(data || latest_data_with_claim, error);
-					return;
-				}
-
-				if (reference_index === references_to_remove.length) {
-					if (library_namespace.is_empty_object(references)) {
-						callback(data || latest_data_with_claim, error);
-					} else {
-						set_single_references(GUID, references, callback,
-								options, API_URL, session, exists_references);
-					}
-					return;
-				}
-
-				latest_data_with_claim = data;
-				remove_references(GUID,
-						references_to_remove[reference_index++],
-						remove_next_references, options, API_URL, session,
-						exists_references);
-			}
-
-			references = Object.create(null);
-			property_data.references.forEach(function(reference_data) {
+			var references_snaks = [];
+			function serialize_reference(reference_data) {
 				if (value_is_to_remove(reference_data)) {
 					if (!exists_references || exists_references.length === 0) {
 						library_namespace.error(
@@ -3295,10 +3299,68 @@ function module_code(library_namespace) {
 					references_to_remove.push(reference_data);
 					return;
 				}
-				references[reference_data.property] = [ reference_data ];
-			});
 
+				if (reference_data.snaks) {
+					// reference_data.snaks.forEach(serialize_reference);
+					references_snaks.push(reference_data.snaks);
+				} else if (!reference_data.property) {
+					library_namespace
+							.error('set_references: Invalid references: '
+									+ JSON.stringify(reference_data));
+				} else if (references[reference_data.property]) {
+					references[reference_data.property].push(reference_data);
+				} else {
+					references[reference_data.property] = [ reference_data ];
+				}
+			}
+
+			references = Object.create(null);
+			property_data.references.forEach(serialize_reference);
+
+			// ----------------------------------
+
+			var reference_index = 0, references_to_remove = [];
+			var latest_data_with_claim = exists_references;
+			function remove_next_references(data, error) {
+				if (error) {
+					callback(data || latest_data_with_claim, error);
+					return;
+				}
+
+				latest_data_with_claim = data;
+				if (reference_index === references_to_remove.length) {
+					process_next_references_snaks();
+					return;
+				}
+
+				remove_references(GUID,
+						references_to_remove[reference_index++],
+						remove_next_references, options, API_URL, session,
+						exists_references);
+			}
+
+			// console.trace(references);
 			remove_next_references();
+
+			// ----------------------------------
+
+			function process_next_references_snaks(data, error) {
+				if (references_snaks.length > 0) {
+					set_single_references(GUID, references_snaks.shift(),
+							process_next_references_snaks, options, API_URL,
+							session, exists_references);
+					return;
+				}
+
+				if (library_namespace.is_empty_object(references)) {
+					callback(data || latest_data_with_claim, error);
+					return;
+				}
+
+				latest_data_with_claim = data;
+				set_single_references(GUID, references, callback, options,
+						API_URL, session, exists_references);
+			}
 
 		}, exists_references && exists_references[0].snaks
 		// 確保會設定 .remove / .exists_index = duplicate_index。
@@ -3348,20 +3410,20 @@ function module_code(library_namespace) {
 
 		append_parameters(POST_data, options);
 
-		wiki_API.query([ API_URL, 'action=wbremoveclaims' ],
-				function handle_result(data, error) {
-					error = error
-							|| (data ? data.error : new Error('No data get!'));
-					// console.log(data);
-					// 檢查伺服器回應是否有錯誤資訊。
-					if (error) {
-						library_namespace.error('remove_claims: [' + error.code
-								+ '] ' + (error.info || error.message));
-					}
-					// data =
-					// {pageinfo:{lastrevid:1},success:1,claims:['Q1$123-ABC']}
-					callback(data);
-				}, POST_data, session);
+		wiki_API.query([ API_URL, {
+			action : 'wbremoveclaims'
+		} ], function handle_result(data, error) {
+			error = error || (data ? data.error : new Error('No data get!'));
+			// console.log(data);
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.error('remove_claims: [' + error.code + '] '
+						+ (error.info || error.message));
+			}
+			// data =
+			// {pageinfo:{lastrevid:1},success:1,claims:['Q1$123-ABC']}
+			callback(data);
+		}, POST_data, session);
 	}
 
 	/**
@@ -3398,7 +3460,9 @@ function module_code(library_namespace) {
 		},
 		// action to set properties. 創建Wikibase陳述。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
-		claim_action = [ get_data_API_URL(options), 'action=wbcreateclaim' ],
+		claim_action = [ get_data_API_URL(options), {
+			action : 'wbcreateclaim'
+		} ],
 		// process to what index of {Array}claims
 		claim_index = 0;
 
@@ -3449,6 +3513,7 @@ function module_code(library_namespace) {
 		var set_next_claim = function() {
 			var claims = data.claims;
 			// assert: {Array}claims
+			// console.trace(data.claims);
 			library_namespace.debug('claims: ' + JSON.stringify(claims), 3,
 					'set_next_claim');
 			// console.log(claim_index + '-'.repeat(60));
@@ -3467,8 +3532,10 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			var property_data = claims[claim_index], property_id = property_data.property, exists_property_list = entity
+			var property_data = claims[claim_index], mainsnak = property_data.mainsnak
+					|| property_data, property_id = mainsnak.property, exists_property_list = entity
 					&& entity.claims && entity.claims[property_id];
+			// console.trace([ property_id, mainsnak, property_data ]);
 
 			if (property_data.remove === wikidata_edit.remove_all) {
 				// assert: 有此屬性id
@@ -3557,9 +3624,9 @@ function module_code(library_namespace) {
 
 			POST_data.property = property_id;
 			// 照 datavalue 修改 POST_data。
-			POST_data.snaktype = property_data.snaktype;
+			POST_data.snaktype = mainsnak.snaktype;
 			if (POST_data.snaktype === 'value') {
-				POST_data.value = JSON.stringify(property_data.datavalue.value);
+				POST_data.value = JSON.stringify(mainsnak.datavalue.value);
 			} else {
 				// 不直接刪掉 POST_data.value，因為此值為 placeholder 佔位符。
 				POST_data.value = '';
@@ -4596,6 +4663,136 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	/**
+	 * @example<code>
+	//	2021/7/3 18:9:28
+
+	language_string	=	{language:'zh-tw', value:''}
+	// simplify → value
+
+	sitelink = {
+		site:			'zhwiki',
+		title:			'',
+		//badges:		['Q17437798']
+	}
+	// simplify → title??
+
+	snak = {
+		snaktype:'value',
+		property:		'P00',
+		//hash:'R/O',
+		datavalue: {
+			value:'', type:'string'
+			//value:{'entity-type':'item','id':'Q000'}, type:'wikibase-entityid'
+		},
+		//datatype:	'可省略'
+	}
+	// simplify → string, {Date}, number, ...
+
+	snaks = {
+		//hash:'R/O'
+		snaks:			[ snak, ],
+		//snaks-order:	[ 'P00', ]
+	}
+
+	claim = {
+		mainsnak:		snak,
+		type:			'statement',
+		qualifiers:		[ snak, ],
+		//qualifiers-order: [ 'P00', ],
+		//id:'R/O: Q00$...',
+		//rank:			'normal|preferred|deprecated',
+		references:		[ snaks, ],
+	}
+
+	//data_to_modify
+	entity = {
+		//id:			'Q000',
+		labels:			[ language_string, ],
+		aliases:		[ language_string, ],
+		descriptions:	[ language_string, ],
+		claims:			[ claim, ],
+		sitelinks:		[ sitelink, ],
+		type:	'item'
+	}
+
+	// ------------------------------------------
+
+	// TODO:
+	entity = await new Entity('Q000', options)
+	entity = await new Entity([language,value], options)
+
+	entity.add_label(value, options)
+	entity.get_label(language, options): language_string
+
+	entity.add_alias(value, options)
+	entity.get_aliases(language, options): [ language_string, ]
+
+	entity.add_description(value, options)
+	entity.get_description(language, options): language_string
+
+	await entity.add_sitelink(title, options)
+	entity.get_sitelink(site, options): {Sitelink}
+
+	await entity.add_claim(Claim)
+	entity.get_claims(property): [ Claim, ]
+
+	// publish, 寫入網路上的wiki伺服器
+	await entity.write()
+	// reget, 取得最新版本
+	await entity.refresh()
+
+	await claim.set_mainsnak(Snak)
+	//claim.get_mainsnak(): Snak===claim.mainsnak
+
+	await claim.add_qualifier(Snak)
+	claim.get_qualifier(property): Snak
+
+	await claim.add_references([ Snak, ])
+	claim.get_references(filter): [ Snak, ]
+
+	snak.get_value(): String, number, Date, ...
+
+	// ------------------------------------------
+
+	// TODO:
+	//data_to_modify
+	.edit_data({
+		//new:		'item',
+		id:			Q_label,
+
+		labels:			{ language: ''  , },
+		aliases:		{ language:['',], },
+		descriptions:	{ language: ''  , },
+		claims:	{
+			P_label: [ {
+				mainsnak || value:	snak_value,
+				qualifiers:	{P_label:snak_value,},
+				//qualifiers-order: [ 'P00', ],
+				//rank:	'normal|preferred|deprecated',
+				references:	[
+					[
+						{P_label:snak_value,},
+						//{snaks-order:[ 'P00', ]}
+					],
+				],
+			}, ],
+		},
+		sitelinks:	{
+			site:		'',
+			site:		{title:'',badges:['',]}
+		}
+	});
+
+	Q_label: 'Q000'	|| 'language:title'
+	P_label: 'P00'	|| 'language:title'
+	snak_value:	'Q000' || 'string value' || 123 || Date()
+		|| {value:'', type:'string'}
+		|| {datavalue: {value:'', type:'string'}, datatype:''}
+
+	</code>
+	 */
+
+	/**
 	 * Creates or modifies Wikibase entity. 創建或編輯Wikidata實體。
 	 * 
 	 * 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
@@ -4603,6 +4800,11 @@ function module_code(library_namespace) {
 	 * @example<code>
 
 	 wiki = Wiki(true, 'test.wikidata');
+
+	// Create new item.
+	wiki.edit_data({},{new:'item',bot:1,summary:'Create new item'});
+	wiki.edit_data({labels:{en:"Evolution in Mendelian Populations"},P698:"17246615",P932:"1201091"},{bot:1,summary:'Test edit'});
+
 	 // TODO:
 	 wiki.page('宇宙').data(function(entity){result=entity;console.log(entity);}).edit(function(){return '';}).edit_data(function(){return {};});
 	 wiki.page('宇宙').edit_data(function(entity){result=entity;console.log(entity);});
@@ -4786,13 +4988,14 @@ function module_code(library_namespace) {
 					delete data[key];
 				}
 			}
-			if (library_namespace.is_empty_object(data)) {
+			if (library_namespace.is_empty_object(data) && !options['new']) {
 				callback(data);
 				return;
 			}
 
 			var POST_data = Object.clone(options);
 			delete POST_data.data_API_URL;
+			delete POST_data[KEY_SESSION];
 			// data 會在 set_claims() 被修改，因此不能提前設定。
 			POST_data.data = JSON.stringify(data);
 			if (library_namespace.is_debug(2)) {
@@ -4854,8 +5057,16 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
 
 		// console.trace(data);
-		// console.log(options);
-		// console.log(entity);
+		// console.trace(options);
+		// console.trace(entity);
+
+		if (!entity && options['new'] || options.wbeditentity_only) {
+			// 直接呼叫 wbeditentity
+			do_wbeditentity();
+			return;
+		}
+
+		delete options['new'];
 
 		// TODO: 避免 callback hell: using ES7 async/await?
 		// TODO: 用更簡單的方法統合這幾個函數。
@@ -5496,7 +5707,7 @@ function module_code(library_namespace) {
 	 * @param {String}query
 	 *            查詢語句。
 	 * @param {Function}[callback]
-	 *            回調函數。 callback(轉成JavaScript的值. e.g., {Array}list)
+	 *            回調函數。 callback(轉成JavaScript的值. e.g., {Array}list, error)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
