@@ -1822,10 +1822,11 @@ function module_code(library_namespace) {
 					T : [ '%1 Redirecting to [%2] ← [%3]', response.statusCode,
 							options[KEY_URL], URL_to_fetch ]
 				}, 1, 'get_URL_node');
-				get_URL_node(options, onload, charset
+				get_URL_node(options, onload, charset,
 				// 重新導向的時候亦傳送 post data。For wiki API
 				// e.g., https://github.com/kanasimi/CeJS/issues/12
-				, post_data);
+				// 但piaotian.js搜索作品名稱直接302導向時，加入post_data會產生 405 Not Allowed
+				response.statusCode != 302 && post_data);
 				return;
 			}
 
