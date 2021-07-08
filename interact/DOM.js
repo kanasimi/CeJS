@@ -794,11 +794,17 @@ function module_code(library_namespace) {
 		if (node && typeof node === 'string')
 			node = document.getElementById(node);
 
+		if (node && !html && typeof node.replaceChildren === 'function') {
+			// https://developer.mozilla.org/en-US/docs/Web/API/Element/replaceChildren
+			node.replaceChildren();
+			return node;
+		}
+
 		// _.is_ELEMENT_NODE(<math>) === false ("[object Element]" @
 		// Firefox/37.0)
 		if (false)
 			if (!_.is_ELEMENT_NODE(node))
-				return;
+				return node;
 		if (!node || !node.innerHTML)
 			return node;
 
@@ -1979,7 +1985,7 @@ function module_code(library_namespace) {
 		// layer 處理: 插入document中: 0<layer>1...2</layer>3。default: 2.
 		if (typeof layer !== 'undefined' && layer !== null) {
 			// 正規化 layer
-			// for_each: type→handle function
+			// for_each: type→handler function
 			if (library_namespace.is_Function(layer))
 				for_each = layer;
 			else {
@@ -2072,7 +2078,7 @@ function module_code(library_namespace) {
 							library_namespace.error(e);
 							library_namespace.error(
 							//
-							'new_node: handle function execution error for node Array['
+							'new_node: handler function execution error for node Array['
 									+ i + '/' + l + ']!<br />' + for_each);
 						}
 				}
@@ -2091,7 +2097,7 @@ function module_code(library_namespace) {
 				} catch (e) {
 					library_namespace.error(e);
 					library_namespace
-							.error('new_node: handle function execution error!<br />'
+							.error('new_node: handler function execution error!<br />'
 									+ for_each);
 				}
 
