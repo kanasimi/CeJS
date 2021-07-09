@@ -87,7 +87,8 @@ function module_code(library_namespace) {
 		&& session.language;
 	}
 
-	var PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}\n#�])+)/,
+	// https://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_(technical_restrictions)#Forbidden_characters
+	var PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}<>\n#�])+)/,
 	/**
 	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_section, page_name,
 	 * section_title, displayed_text ]
@@ -97,7 +98,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see PATTERN_link
 	 */
-	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}\n#�])+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([\s\S]+?))?\]\]/,
+	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}<>\n#�])+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([\s\S]+?))?\]\]/,
 	//
 	PATTERN_wikilink_global = new RegExp(PATTERN_wikilink.source, 'g');
 
@@ -980,7 +981,12 @@ function module_code(library_namespace) {
 	 */
 	function get_namespace(namespace, options) {
 		options = library_namespace.setup_options(options);
-		if (!options.is_page_title && (namespace == Math.floor(namespace))) {
+		var is_page_title = options.is_page_title;
+		if (wiki_API.is_page_data(namespace)) {
+			namespace = namespace.title;
+			is_page_title = true;
+		}
+		if (!is_page_title && (namespace == Math.floor(namespace))) {
 			// {Integer}namespace
 			return namespace;
 		}
@@ -997,14 +1003,14 @@ function module_code(library_namespace) {
 			var list = [];
 			// e.g., 'User_talk' → 'User talk'
 			namespace = namespace.replace(/[\s_]+/g, ' ');
-			(options.is_page_title ? [ namespace.toLowerCase() ]
+			(is_page_title ? [ namespace.toLowerCase() ]
 			//
 			: namespace.toLowerCase()
 			// for ',Template,Category', ';Template;Category',
 			// 'main|file|module|template|category|help|portal|プロジェクト'
 			// https://www.mediawiki.org/w/api.php?action=help&modules=main#main.2Fdatatypes
 			.split(/(?:[,;|\u001F]|%7C|%1F)/)).forEach(function(n) {
-				if (options.is_page_title && n.startsWith(':')) {
+				if (is_page_title && n.startsWith(':')) {
 					// e.g., [[:title]]
 					n = n.slice(1);
 				}
@@ -1016,7 +1022,7 @@ function module_code(library_namespace) {
 					list.push(0);
 					return;
 				}
-				if (!options.is_page_title && (!isNaN(_n)
+				if (!is_page_title && (!isNaN(_n)
 				// 要指定所有值，請使用*。 To specify all values, use *.
 				|| _n === '*')) {
 					// {Integer}_n
@@ -1027,7 +1033,7 @@ function module_code(library_namespace) {
 					list.push(namespace_hash[_n]);
 					return;
 				}
-				if (options.is_page_title) {
+				if (is_page_title) {
 					list.push(0);
 					return;
 				}
@@ -1040,8 +1046,8 @@ function module_code(library_namespace) {
 					1, 'get_namespace');
 					// console.trace(arguments);
 				} else {
-					list.push(options.is_page_title === false
-					// options.is_page_title === false 亦即
+					list.push(is_page_title === false
+					// is_page_title === false 亦即
 					// options.is_namespace === true
 					&& _n !== 'main' ? undefined : 0);
 				}
@@ -1413,7 +1419,7 @@ function module_code(library_namespace) {
 		// assert: namespace === undefined
 
 		var matched = page_title
-				.match(/^([^:]+):(.+)$/ && /^([a-z _]+):(.+)$/i);
+				.match(/^([^\[\]\|{}<>\n#�:]+):(\S.*)$/ && /^([a-z_ ]+):(.+)$/i);
 		// console.log([matched,page_title]);
 		if (!matched
 				|| /^[a-z _]+$/i.test(namespace = matched[1])
@@ -1825,9 +1831,9 @@ function module_code(library_namespace) {
 	// TODO: using PATTERN_page_name
 	var
 	// [ all_category_text, category_name, sort_order, post_space ]
-	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}\n�]+)(?:\s*\|\s*([^\[\]\|�]*))?\]\](\s*\n?)/ig,
+	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}<>\n�]+)(?:\s*\|\s*([^\[\]\|�]*))?\]\](\s*\n?)/ig,
 	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
-	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}\n�]+)/i;
+	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}<>\n�]+)/i;
 
 	// ------------------------------------------------------------------------
 

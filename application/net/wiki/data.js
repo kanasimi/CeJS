@@ -4718,8 +4718,10 @@ function module_code(library_namespace) {
 	// ------------------------------------------
 
 	// TODO:
-	entity = await new Entity('Q000', options)
-	entity = await new Entity([language,value], options)
+	
+	// 目的在製造出方便存取組成成分，並且其值能直接用在 wbeditentity 的 object。
+	entity = await CeL.wiki.data.Entity('Q000', options)
+	entity = await CeL.wiki.data.Entity([language,value], options)
 
 	entity.add_label(value, options)
 	entity.get_label(language, options): language_string
@@ -5874,7 +5876,9 @@ function module_code(library_namespace) {
 			PATTERN =
 			// [ all, title, sitelink, miscellaneous ]
 			// TODO: use PATTERN_wikilink
-			/\n\|\s*\[\[([^\[\]\|{}\n�]+)\|([^\[\]\n]*?)\]\]\s*\|\|([^\n]+)/g;
+			/\n\|\s*\[\[([^\[\]\|{}<>\n�]+)\|([^\[\]\n]*?)\]\]\s*\|\|([^\n]+)/g
+			//
+			;
 			while (matched = PATTERN.exec(data)) {
 				var miscellaneous = matched[3].split(/\s*\|\|\s*/),
 				//
@@ -5891,7 +5895,7 @@ function module_code(library_namespace) {
 				}
 				if ((matched = miscellaneous[4])
 				//
-				&& (matched = matched.match(/\[\[:d:([^\[\]\|{}\n#�:]+)/))) {
+				&& (matched = matched.match(/\[\[:d:([^\[\]\|{}<>\n#�:]+)/))) {
 					item.wikidata = matched[1];
 				}
 				items.push(item);
