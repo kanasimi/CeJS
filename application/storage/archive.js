@@ -707,6 +707,13 @@ function module_code(library_namespace) {
 				}
 			});
 			// console.log(FSO_data);
+
+			FSO_data.is_folder
+			// 7-Zip read .rar
+			= FSO_data.Folder === '+'
+			// 7-Zip read .7z
+			|| FSO_data.Attributes === 'D';
+
 			if (!FSO_data.Path) {
 				;
 
