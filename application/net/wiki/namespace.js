@@ -90,8 +90,8 @@ function module_code(library_namespace) {
 	// https://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_(technical_restrictions)#Forbidden_characters
 	var PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}<>\n#�])+)/,
 	/**
-	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_section, page_name,
-	 * section_title, displayed_text ]
+	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_anchor, page_name,
+	 * anchor / section_title, displayed_text ]
 	 * 
 	 * 頁面標題不可包含無效的字元：[\n\[\]{}�]，經測試 anchor 亦不可包含[\n\[\]{}]，但 display text 可以包含
 	 * [\n]
@@ -1515,9 +1515,9 @@ function module_code(library_namespace) {
 		// 警告：應處理 "[[text | [[ link ]] ]]", "[[ link | a[1] ]]" 之特殊情況
 		.replace(
 				PATTERN_wikilink_global,
-				function(all_link, page_and_section, page_name, section_title,
+				function(all_link, page_and_anchor, page_name, section_title,
 						displayed_text) {
-					return displayed_text || page_and_section;
+					return displayed_text || page_and_anchor;
 				})
 		// e.g., "ABC (英文)" → "ABC "
 		// e.g., "ABC （英文）" → "ABC "
@@ -1626,7 +1626,8 @@ function module_code(library_namespace) {
 
 		// true === /^\s$/.test('\uFEFF')
 
-		page_name = page_name
+		// [[A&quot;A]]→[[A"A]]
+		page_name = library_namespace.HTML_to_Unicode(page_name)
 		// '\u200E', '\u200F' 在當作 title 時會被濾掉。
 		// 對於標題，無論前後加幾個"\u200E"(LEFT-TO-RIGHT MARK)都會被視為無物。
 		// "\u200F" 亦不被視作 /\s/，但經測試會被 wiki 忽視。

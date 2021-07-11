@@ -1931,6 +1931,7 @@ function module_code(library_namespace) {
 			// console.log('>> [' + index + '] ' + token);
 			// console.log(parent);
 
+			// decode '&quot;', '%00', ...
 			token = library_namespace.HTML_to_Unicode(token);
 			if (/\S/.test(token)) {
 				// trick: 不再遍歷子節點。避免被進一步的處理，例如"&amp;amp;"。
@@ -2015,12 +2016,14 @@ function module_code(library_namespace) {
 		wikitext = wiki_API.parse(String(wikitext));
 		// console.trace(wikitext);
 		wikitext = preprocess_section_link_tokens(wikitext, options);
+
 		// console.trace(wikitext);
 		return wikitext.toString();
 	}
 
 	// --------------------------------
 
+	// 用在 summary 必須設定 is_uri !
 	function section_link_escape(text, is_uri) {
 		// escape wikitext control characters,
 		// including language conversion -{}-
@@ -2028,11 +2031,12 @@ function module_code(library_namespace) {
 			text = text.replace(
 			// 盡可能減少字元的使用量，因此僅處理開頭，不處理結尾。
 			// @see [[w:en:Help:Wikitext#External links]]
-			is_uri ? /[\|{}\[\]<]/g
+			// @see PATTERN_page_name
+			is_uri ? /[\[\]\|{}<]/g
 			// 為了容許一些特定標籤能夠顯示格式，"<>"已經在preprocess_section_link_token(),section_link()裡面處理過了。
 			// display_text 在 "[[", "]]" 中，不可允許 "[]"
-			: /[\|{}<>]/g && /[\|{\[\]]/g,
-			// 經測試 anchor 亦不可包含[{}\[\]\n�]。
+			: /[\|{}<>]/g && /[\[\]\|{]/g,
+			// 經測試 anchor 亦不可包含[\[\]{}\n�]。
 			function(character) {
 				if (is_uri) {
 					return '%' + character.charCodeAt(0).toString(16);
@@ -4724,8 +4728,8 @@ function module_code(library_namespace) {
 
 		// TODO: 緊接在連結後面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分
 		// https://phabricator.wikimedia.org/T263266
-		function parse_wikilink(all_link, page_and_section, page_name,
-				section_title, display_text) {
+		function parse_wikilink(all_link, page_and_anchor, page_name, anchor,
+				display_text) {
 			// 自 end_mark 向前回溯。
 			var previous;
 			if (display_text && display_text.includes('[[')) {
@@ -4733,9 +4737,10 @@ function module_code(library_namespace) {
 				previous = all_link.slice(0, index);
 				all_link = all_link.slice(index);
 				if (index = all_link.match(PATTERN_wikilink)) {
-					page_and_section = index[1];
+					page_and_anchor = index[1];
+					// `{{NAMESPACE}}:{{PAGENAME}}`
 					page_name = index[2];
-					section_title = index[3];
+					anchor = index[3];
 					display_text = index[4];
 				} else {
 					// revert
@@ -4750,13 +4755,13 @@ function module_code(library_namespace) {
 
 			var file_matched, category_matched;
 			if (!page_name) {
-				// assert: [[#section_title]]
+				// assert: [[#anchor]]
 				page_name = '';
-				// anchor, fragment
-				section_title = page_and_section;
+				// anchor, fragment, section_title
+				anchor = page_and_anchor;
 			} else {
-				if (!section_title) {
-					section_title = '';
+				if (!anchor) {
+					anchor = '';
 				}
 				if (normalize) {
 					page_name = page_name.trim();
@@ -4777,8 +4782,8 @@ function module_code(library_namespace) {
 					// 預防有特殊 elements 置入link其中。
 					page_name = parse_wikitext(page_name, options, queue);
 					if (false) {
-						console.log([ all_link, page_and_section, page_name,
-								section_title, display_text ]);
+						console.log([ all_link, page_and_anchor, page_name,
+								anchor, display_text ]);
 					}
 					if (page_name.some(function(token) {
 						return token.is_link;
@@ -4797,17 +4802,22 @@ function module_code(library_namespace) {
 				page_name = _set_wiki_type(page_name, 'namespaced_title');
 			}
 			if (normalize) {
-				// assert: section_title && section_title.startsWith('#')
-				section_title = section_title.trimEnd();
+				// assert: anchor && anchor.startsWith('#')
+				anchor = anchor.trimEnd();
 			}
-			if (section_title) {
+			if (anchor) {
 				// 經過改變，需再進一步處理。
 				// e.g., '[[t#-{c}-]]'
-				section_title = parse_wikitext(section_title, options, queue);
+				anchor = parse_wikitext(anchor, options, queue);
 			}
 
 			// [ page_name, section_title / #anchor 網頁錨點, display_text ]
-			var parameters = [ page_name, section_title ];
+			var parameters = [ page_name, anchor ];
+			if (false) {
+				// page_title, full_page_name, {{FULLPAGENAME}}:
+				// `{{NAMESPACE}}:{{PAGENAME}}`
+				parameters.page_name = wiki_API.normalize_title(page_name);
+			}
 
 			// assert: 'a'.match(/(b)?/)[1]===undefined
 			if (typeof display_text === 'string') {
@@ -4827,7 +4837,7 @@ function module_code(library_namespace) {
 
 					parameters.index_of = Object.create(null);
 
-					// [ file namespace, section_title,
+					// [ file namespace, anchor / section_title,
 					// parameters 1, parameters 2, parameters..., caption ]
 					var token, file_option,
 					// parameters 有分大小寫與繁簡體，並且各種類會以首先符合的為主。
@@ -5043,35 +5053,34 @@ function module_code(library_namespace) {
 				} else {
 					parameters.is_link = true;
 				}
-				section_title = section_title.toString()
+				anchor = anchor.toString()
 				// remove prefix: '#'
 				.slice(1).trimEnd();
-				var original_hash = section_title;
+				var original_hash = anchor;
 				// https://en.wikipedia.org/wiki/Percent-encoding#Types_of_URI_characters
 				if (/^([\w\-~!*'();:@&=+$,/?#\[\]]|\.[\dA-F]{2})+$/
-				// [[w:en:Help:Link#Section linking (anchors)]]
+				// [[w:en:Help:Link#Section linking (anchors)]], section_title
 				// e.g.,
 				// [[臺灣話#.E5.8F.97.E6.97.A5.E6.9C.AC.E8.AA.9E.E5.BD.B1.E9.9F.BF.E8.80.85|(其他參考資料)]]
-				.test(section_title)) {
-					section_title = section_title.replace(/\.([\dA-F]{2})/g,
-							'%$1');
+				.test(anchor)) {
+					anchor = anchor.replace(/\.([\dA-F]{2})/g, '%$1');
 				}
-				// console.log([ original_hash, section_title ]);
+				// console.log([ original_hash, anchor ]);
 				try {
 					// if
-					// (/^([\w\-.~!*'();:@&=+$,/?#\[\]]|%[\dA-F]{2})+$/.test(section_title))
-					section_title = decodeURIComponent(section_title);
-					if (/[\x00-\x1F\x7F]/.test(section_title)) {
+					// (/^([\w\-.~!*'();:@&=+$,/?#\[\]]|%[\dA-F]{2})+$/.test(anchor))
+					anchor = decodeURIComponent(anchor);
+					if (/[\x00-\x1F\x7F]/.test(anchor)) {
 						// e.g. [[w:ja:エヴァンゲリオン (架空の兵器)#Mark.09]]
-						section_title = original_hash;
+						anchor = original_hash;
 					}
 				} catch (e) {
 					// e.g., error after convert /\.([\dA-F]{2})/g
-					section_title = original_hash;
+					anchor = original_hash;
 				}
-				// console.log(section_title);
-				// wikilink_token.anchor 網頁錨點
-				parameters.anchor = normalize_anchor(section_title);
+				// console.log(anchor);
+				// wikilink_token.anchor without "#" 網頁錨點 section_title
+				parameters.anchor = normalize_anchor(anchor);
 				// TODO: [[Special:]]
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
 				_set_wiki_type(parameters, file_matched ? 'file'
@@ -5081,8 +5090,8 @@ function module_code(library_namespace) {
 			}
 			// console.trace(parameters);
 
-			// [ page_name, section_title, display_text without '|' ]
-			// section_title && section_title.startsWith('#')
+			// [ page_name, anchor / section_title, display_text without '|' ]
+			// anchor && anchor.startsWith('#')
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
@@ -8566,6 +8575,7 @@ function module_code(library_namespace) {
 		DEFINITION_LIST : DEFINITION_LIST,
 
 		section_link : section_link,
+		section_link_escape : section_link_escape,
 
 		// parse_table(), parse_wikitable()
 		table_to_array : table_to_array,

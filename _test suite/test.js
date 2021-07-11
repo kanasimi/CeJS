@@ -2945,6 +2945,7 @@ function test_wiki() {
 		[['2001: A Space Odyssey', CeL.wiki.normalize_title('2001: A Space Odyssey')], 'normalize_title #15'],
 		[['2001: A Space Odyssey', CeL.wiki.normalize_title(':2001: A Space Odyssey')], 'normalize_title #16'],
 		[['en:2001: A Space Odyssey', CeL.wiki.normalize_title('en:2001: A Space Odyssey')], 'normalize_title #17'],
+		[['D［di:］;', CeL.wiki.normalize_title('D%EF%BC%BBdi:%EF%BC%BD%3B')], 'normalize_title #18'],
 
 		[['[[User:Adam/test]]', CeL.wiki.title_link_of('User:Adam/test')], 'title_link_of #1'],
 
