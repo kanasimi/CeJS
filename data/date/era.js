@@ -6470,8 +6470,15 @@ function module_code(library_namespace) {
 
 				// 依照習慣，前置多為(通常應為)紀年。
 				tmp2 = tmp[1].replace(to_era_Date.ignore_pattern, '');
-				if (tmp2 = numeralize_time(tmp2))
-					偵測集.push(tmp2);
+				if (tmp2 = numeralize_time(tmp2)) {
+					if (tmp2 === numeralized.replace(/\s*\d+年[\s\S]*$/, '')) {
+						// assert: 紀年名稱包含這個之類的數字，被正規化之後反而出錯。
+						// e.g., "江戸朝廷後西天皇万治" 正規化→ "江戸朝廷後西天皇萬治"
+						偵測集.push(date.replace(/\s*\d+年[\s\S]*$/, ''));
+					} else {
+						偵測集.push(tmp2);
+					}
+				}
 				// 依照習慣，後置多為(通常應為)時間。
 				tmp2 = tmp[5].replace(to_era_Date.ignore_pattern, '');
 				if (tmp2 = numeralize_time(tmp2))
