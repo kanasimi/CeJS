@@ -2507,7 +2507,11 @@ function module_code(library_namespace) {
 					// 紀錄使用時間, 歷時, 費時, elapsed time
 					messages.last.age(new Date), (messages.last = new Date)
 					//
-					.format(config.date_format || this.date_format), error);
+					.format({
+						zone : session.configurations.timeoffset / 60,
+						// config.date_format || this.date_format
+						format : config.date_format || session.date_format
+					}), error);
 
 					// 對各個條目的紀錄加入計數。
 					messages.add(error, title, true);
@@ -2922,14 +2926,17 @@ function module_code(library_namespace) {
 				: session.token.login_user_name ? 'User:'
 						+ session.token.login_user_name + '/log/'
 						+ (new Date).format('%4Y%2m%2d') : null,
+				// e.g., 480 : UTC+8
+				timezone = session.configurations.timeoffset / 60,
 				// options for summary.
 				options = {
 					// new section. append 章節/段落 after all, at bottom.
 					section : 'new',
 					// 新章節的標題。
-					sectiontitle : '['
-							+ (new Date).format(config.date_format
-									|| session.date_format) + ']'
+					sectiontitle : '[' + (new Date).format({
+						zone : timezone,
+						format : config.date_format || session.date_format
+					}) + ' UTC' + (timezone < 0 ? '' : '+') + timezone + ']'
 							+ count_summary,
 					// Robot: 若用戶名包含 'bot'，則直接引用之。
 					// 注意: session.token.login_user_name 可能為 undefined！
