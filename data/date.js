@@ -847,7 +847,7 @@ function module_code(library_namespace) {
 	})();
 
 	// [ all, start month, end month, year ]
-	var PATTERN_EN_MONTH_YEAR = /^(?:([a-z]+)\s*[\-–－—─~～〜﹣])?\s*([a-z]+)\s+(\d{1,4})$/i,
+	var PATTERN_EN_MONTH_YEAR = /^(?:([a-z]{3,9})\s*[.\/\-–－—─~～〜﹣])?\s*([a-z]{3,9})\s+(\d{1,4})$/i,
 	// U+2212 '−': minus sign
 	// 為了 calendar 測試，年分需要能 parse 0–9999。
 	// [ all, .*年, \d+, [百千] ]
@@ -1338,7 +1338,7 @@ function module_code(library_namespace) {
 			date = accuracy[1].trim();
 			accuracy = accuracy[0];
 		}
-		if (/^[a-z]+\s+-?\d+$/i.test(date)) {
+		if (/^[a-z]{3,9}\s+-?\d+$/i.test(date)) {
 			date = '1 ' + date;
 			accuracy = date;
 		}
