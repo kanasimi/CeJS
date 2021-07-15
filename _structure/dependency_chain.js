@@ -2565,7 +2565,9 @@ if (typeof CeL === 'function')
 							+ ']! 以 .get_file() 依序載入的方法失敗：' + e.message
 									+ (id === URL ? '' : ' (' + URL + ')'), 2,
 									'load_named');
-							if (is_nodejs && library_namespace.is_debug()) {
+							if (is_nodejs
+									&& (e instanceof SyntaxError || library_namespace
+											.is_debug())) {
 								console.error(e);
 							}
 
