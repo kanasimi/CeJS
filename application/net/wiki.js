@@ -13,6 +13,7 @@ wiki_API.page() 整合各 action=query 至單一公用 function。
 [[mw:Help:OAuth]]
 https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 https://meta.wikimedia.org/wiki/Steward_requests/Miscellaneous#OAuth_permissions
+[[m:Special:OAuthConsumerRegistration/propose]] (using an owner-only consumers) get (consumer_key, consumer_secret, access_token, access_secret)
 
 Wikimedia REST API
 https://www.mediawiki.org/wiki/RESTBase
@@ -212,6 +213,9 @@ function module_code(library_namespace) {
 			wiki_API.setup_API_language(this /* session */, API_URL);
 			wiki_API.setup_API_URL(this /* session */, API_URL);
 		}
+
+		if (login_options.site_name)
+			this.site_name = login_options.site_name;
 		// console.trace(this);
 
 		this.general_parameters = Object.clone(wiki_API.general_parameters);

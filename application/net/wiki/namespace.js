@@ -957,6 +957,9 @@ function module_code(library_namespace) {
 				API_URL : API_URL
 			};
 
+			if (session && session.site_name)
+				site.site_name = session.site_name;
+
 			var project = session && session.latest_site_configurations
 					&& session.latest_site_configurations.general.wikiid;
 			if (project) {
@@ -964,7 +967,8 @@ function module_code(library_namespace) {
 			}
 		}
 
-		return site;
+		// assert: {String}site
+		return session && session.site_name || site;
 	}
 
 	// --------------------------------------------------------------------------------------------
