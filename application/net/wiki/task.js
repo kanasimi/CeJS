@@ -2875,8 +2875,8 @@ function module_code(library_namespace) {
 						count_summary += initial_target_length;
 					}
 
-					count_summary = ': '
-							+ gettext('%1 pages done', count_summary);
+					count_summary = ': ' + (new Date).format('%4Y%2m%2d')
+							+ ': ' + gettext('%1 pages done', count_summary);
 					// console.trace(count_summary);
 
 					if (log_item.report) {
