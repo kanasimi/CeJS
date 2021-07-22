@@ -3641,6 +3641,12 @@ function test_wiki() {
 
 		wikitext = ' <span id="{{anchorencode:id_abc}}">ABC</span> <span id{{=}}"{{anchorencode:id 123}}">ABC</span> ';
 		assert(['id abc,id 123', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #1');
+
+
+		wikitext = '{{color|red|text}}'; parsed = CeL.wiki.parser(wikitext).parse();
+		// Create template_token.expand()
+		parsed.each('template', CeL.null_function);
+		assert(['<span style="color:red">text</span>', parsed[0].expand()], 'CeL.wiki.template_functions.functions_of_all_sites #1');
 	});
 
 	setup_test('CeL.wiki: asynchronous functions');

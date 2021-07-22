@@ -1283,5 +1283,12 @@ function module_code(library_namespace) {
 
 	});
 
+	// 等執行再包含入必須的模組。
+	this.finish = function(name_space, waiting) {
+		var module_name_prefix = this.id
+				+ library_namespace.env.module_name_separator;
+		library_namespace.run(module_name_prefix + 'general_functions');
+	};
+
 	return template_functions;
 }

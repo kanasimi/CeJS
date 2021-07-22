@@ -8172,6 +8172,9 @@ function module_code(library_namespace) {
 	/**
 	 * Translate HTML code to Unicode text. 將 HTML:&#ddd; → Unicode text
 	 * 
+	 * 警告: CeL.DOM.HTML_to_Unicode('%EF%BC%BB %EF%BC%BD') !==
+	 * decodeURIComponent('%EF%BC%BB %EF%BC%BD')
+	 * 
 	 * @param {String}
 	 *            HTML HTML code
 	 * @param {Object}[options]
@@ -8220,6 +8223,7 @@ function module_code(library_namespace) {
 			return convert_digital(all, digital);
 		}
 		if (options.numeric) {
+			// decodeURIComponent()
 			unicode_text = unicode_text
 			// .replace(): JScript 5.5~
 			.replace(/&#0*(\d{2,7});/g, convert_digital)

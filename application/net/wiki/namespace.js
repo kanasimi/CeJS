@@ -1631,7 +1631,12 @@ function module_code(library_namespace) {
 		// true === /^\s$/.test('\uFEFF')
 
 		// [[A&quot;A]]→[[A"A]]
-		page_name = library_namespace.HTML_to_Unicode(page_name)
+		page_name = library_namespace.HTML_to_Unicode(
+		// 必須先採用 decodeURIComponent()，CeL.HTML_to_Unicode() 僅為了解碼 &#*。
+		// CeL.DOM.HTML_to_Unicode('%EF%BC%BB %EF%BC%BD')
+		// !== decodeURIComponent('%EF%BC%BB %EF%BC%BD')
+		decodeURIComponent(page_name))
+
 		// '\u200E', '\u200F' 在當作 title 時會被濾掉。
 		// 對於標題，無論前後加幾個"\u200E"(LEFT-TO-RIGHT MARK)都會被視為無物。
 		// "\u200F" 亦不被視作 /\s/，但經測試會被 wiki 忽視。
