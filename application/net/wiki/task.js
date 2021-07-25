@@ -2058,12 +2058,13 @@ function module_code(library_namespace) {
 	// "Maintenance script", "MediaWiki default", "MediaWiki message delivery"
 
 	/**
-	 * default date format. 預設的日期格式 '%4Y%2m%2dT%2H%2M%2S'
+	 * default date format for work task. 預設的日期格式 '%4Y%2m%2dT%2H%2M%2S'
 	 * 
 	 * @type {String}
 	 * @see ISO 8601
 	 */
-	wiki_API.prototype.date_format = '%H:%M:%S';
+	wiki_API.prototype.work_date_format = '%H:%M:%S';
+	wiki_API.prototype.work_title_date_format = '%4Y-%2m-%2d %H:%M:%S';
 
 	/**
 	 * 規範 log 之格式。(for wiki_API.prototype.work)
@@ -2509,8 +2510,9 @@ function module_code(library_namespace) {
 					//
 					.format({
 						zone : session.configurations.timeoffset / 60,
-						// config.date_format || this.date_format
-						format : config.date_format || session.date_format
+						// config.work_date_format || this.work_date_format
+						format : config.work_date_format
+								|| session.work_date_format
 					}), error);
 
 					// 對各個條目的紀錄加入計數。
@@ -2875,8 +2877,9 @@ function module_code(library_namespace) {
 						count_summary += initial_target_length;
 					}
 
-					count_summary = ': ' + (new Date).format('%4Y%2m%2d')
-							+ ': ' + gettext('%1 pages done', count_summary);
+					count_summary = ': '
+					// + (new Date).format('%4Y%2m%2d') + ': '
+					+ gettext('%1 pages done', count_summary);
 					// console.trace(count_summary);
 
 					if (log_item.report) {
@@ -2935,9 +2938,14 @@ function module_code(library_namespace) {
 					// 新章節的標題。
 					sectiontitle : '[' + (new Date).format({
 						zone : timezone,
-						format : config.date_format || session.date_format
+						format : config.work_title_date_format
+						//
+						|| session.work_title_date_format
 					}) + ' UTC' + (timezone < 0 ? '' : '+') + timezone + ']'
-							+ count_summary,
+					//
+					+ count_summary + (config.log_section_title_postfix
+					//
+					? ' ' + config.log_section_title_postfix : ''),
 					// Robot: 若用戶名包含 'bot'，則直接引用之。
 					// 注意: session.token.login_user_name 可能為 undefined！
 					summary : (session.token.login_user_name
