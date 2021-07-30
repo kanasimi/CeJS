@@ -301,73 +301,77 @@ CeL.run([
 });
 
 // <html>
-<math>α=r×β</math>
-<math>5%*6=30%</math>
-<math>3*5/7</math>
-<math>3*(5/7)</math>
-<math>(4+5)/2</math>
-<math>5^4*3+2-4^2/5</math>
-<math>(a/b)/(c/d)</math>
-<math>資本收入=資本收益率×資本</math>
-<math>資本收入/國民年收入=資本收益率×(資本存量/國民年收入)</math>
+<math>α=r×β</math><hr />
+<math>5%*6=30%</math><hr />
+<math>3*5/7</math><hr />
+<math>3*(5/7)</math><hr />
+<math>(4+5)/2</math><hr />
+<math>5^4*3+2-4^2/5</math><hr />
+<math>(a/b)/(c/d)</math><hr />
+<math>資本收入=資本收益率×資本</math><hr />
+<math>資本收入/國民年收入=資本收益率×(資本存量/國民年收入)</math><hr />
 <math>
 1/2+(1+2)/(2+3%)+((2+3))/((3+4))
-</math>
+</math><hr />
 <math>
 43+(54+5*(3+4)/3)*2
-</math>
-<math>x_2^4</math>
-<math>x^2+y_1+z_12^34</math>
+</math><hr />
+<math>x_2^4</math><hr />
+<math>x^2+y_1+z_12^34</math><hr />
 <math>
 x_2^4 = 3/2,   y = 4/3,   z = 5/4
-</math>
+</math><hr />
 <math>
 x_2^4 = 3/2
 y = 4/3
 z = 5/4
-</math>
-<math>4^(1/7)</math>
-<math>√453</math>
-<math>√4e</math>
-<math>√-4e</math>
-<math>√(4e+3)</math>
-<math>∛45</math>
-<math>3&lt;4</math>
-<math>log_4(45+2)</math>
-<math>log_4 452</math>
-<math>log_e 452</math>
-<math>sin(π/2) = sin(pi/2) = sin(90°)</math>
-<math>sin π/2 = (sin π)/2</math>
-<math>sin(34π) = sin 34π</math>
-<math>sin^-1(2π) = sin^-1 2π = sin^(-1)(2 pi)</math>
-<math>log_4^2 452</math>
-<math>log_4^2(34+2)</math>
-<math>2e+3^2π+4π</math>
-<math>-4e</math>
-<math>(5+3)⁄(5-4)</math>
-<math>7^(1/4) , 4√7</math>
-<math>{ a; b; c, d, e }</math>
-<math>{{4, 5, 6}, {7, 8, 9}, {1, 2, 3}}×((3,4,5),(5,6,7),(7,8,9))</math>
-<math>{{1,2},{3,4}}((5),(6))</math>
-<math>x_y^2 x^2+2^(1/3)^8+4^(1/7)^6</math>
-<math>1+(b^2-4a c)^(1/5)</math>
-<math>x=(-b±√(b^2-4a c))/2a</math>
+</math><hr />
+<math>4^(1/7)</math><hr />
 
-<math>(^2)Fe</math>
-<math>(^12)C</math>
-<math>(_6^12)C</math>
-<math>(_6)C</math>
-<math>(_2^1)x_4^3</math>
-<math>(_2^1)x_4</math>
+<math>√453</math><hr />
+<math>√4e</math><hr />
+<math>√-4e</math><hr />
+<math>√(4e+3)</math><hr />
+<math>∛45</math><hr />
+<math>x=1/√3</math><hr />
 
+<math>3&lt;4</math><hr />
+<math>log_4(45+2)</math><hr />
+<math>log_4 452</math><hr />
+<math>log_e 452</math><hr />
+<math>sin(π/2) = sin(pi/2) = sin(90°)</math><hr />
+<math>sin π/2 = (sin π)/2</math><hr />
+<math>sin(34π) = sin 34π</math><hr />
+<math>sin^-1(2π) = sin^-1 2π = sin^(-1)(2 pi)</math><hr />
+<math>log_4^2 452</math><hr />
+<math>log_4^2(34+2)</math><hr />
+<math>2e+3^2π+4π</math><hr />
+<math>-4e</math><hr />
+<math>(5+3)⁄(5-4)</math><hr />
+<math>7^(1/4) , 4√7</math><hr />
+<math>x_y^2 x^2+2^(1/3)^8+4^(1/7)^6</math><hr />
+<math>1+(b^2-4a c)^(1/5)</math><hr />
+<math>x=(-b±√(b^2-4a c))/2a</math><hr />
+<math>y=x(x^2-1)</math><hr />
+
+<math>(^2)Fe</math><hr />
+<math>(^12)C</math><hr />
+<math>(_6^12)C</math><hr />
+<math>(_6)C</math><hr />
+<math>(_2^1)x_4^3</math><hr />
+<math>(_2^1)x_4</math><hr />
 
 
 // TODO:
-<math>x_y^2 x^2 2^(1/3)^8 4^(1/7)^6</math>
-<math>(_(a+b))x</math>
+<math>{ a; b; c, d, e }</math><hr />
+<math>{{4, 5, 6}, {7, 8, 9}, {1, 2, 3}}×((3,4,5),(5,6,7),(7,8,9))</math><hr />
+<math>{{1,2},{3,4}}((5),(6))</math><hr />
+
+<math>x_y^2 x^2 2^(1/3)^8 4^(1/7)^6</math><hr />
+<math>(_(a+b))x</math><hr />
 
 munderover
-<math>∫_2^4 dy/dx</math>
+<math>∫_2^4 dy/dx</math><hr />
 
 
 // reference
@@ -466,6 +470,19 @@ _.convert_MathML = convert_MathML;
 
 convert_MathML.default_attribute = 'alt';
 
+convert_MathML.reduce_quote = function(operand) {
+	var row = operand.mrow;
+	if (!row || !Array.isArray(row) || row.length !== 3) {
+		return operand;
+	}
+	var operator = row[0].mo + row[2].mo;
+	if (operator === '{}' || operator === '()') {
+		// assert: Array.isArray(row[1].mrow)
+		return row[1];
+	}
+	return operand;
+};
+
 convert_MathML.handler = {
 	// toString()
 	// 運算元,運算子,運算元(操作符/算符/算子)
@@ -499,16 +516,28 @@ convert_MathML.handler = {
 		switch (operator) {
 		case '{}':
 		case '()':
-			if (typeof operand_1 !== 'object')
+			if (typeof operand_1 !== 'object') {
 				operand_1 = convert_MathML.parse_scalar(operand_1);
-			// !operand_1.mfrac: "(1/2)" → "1/2"
-			else if (!operand_1.mfrac) {
+
+			} else if (!operand_1.mfrac && Array.isArray(operand_1)) {
+				operand_1 = [ {
+					mo : operator === '{}' ? '{' : '('
+				}, {
+					mrow : operand_1
+				}, {
+					mo : operator === '{}' ? '}' : ')'
+				} ];
+			} else if (false && !operand_1.mfrac) {
+				// for !operand_1.mfrac: "(1/2)" → "1/2"
 				operand_1 = {
+					// deprecated MathML <mfenced> element
 					mfenced : operand_1,
 					separators : ''
 				};
-				if (operator === '{}')
-					operand_1.open = '{', operand_1.close = '}';
+				if (operator === '{}') {
+					operand_1.open = '{';
+					operand_1.close = '}';
+				}
 			}
 			return operand_1;
 
@@ -568,12 +597,18 @@ convert_MathML.handler = {
 			// ↑ Division slash
 			operand_1 = convert_MathML.parse_scalar(operand_1);
 			operand_2 = convert_MathML.parse_scalar(operand_2);
-			if (operand_1.mfenced)
-				// "(1)/(2)" → "1/2"
-				operand_1 = convert_MathML.parse_scalar(operand_1.mfenced);
-			if (operand_2.mfenced)
-				// "(1)/(2)" → "1/2"
-				operand_2 = convert_MathML.parse_scalar(operand_2.mfenced);
+			// "(1)/(2)" → "1/(2)"
+			operand_1 = convert_MathML.reduce_quote(operand_1);
+			// "(1)/(2)" → "(1)/2"
+			operand_2 = convert_MathML.reduce_quote(operand_2);
+			if (false) {
+				if (operand_1.mfenced)
+					// "(1)/(2)" → "1/2"
+					operand_1 = convert_MathML.parse_scalar(operand_1.mfenced);
+				if (operand_2.mfenced)
+					// "(1)/(2)" → "1/2"
+					operand_2 = convert_MathML.parse_scalar(operand_2.mfenced);
+			}
 			// <mfrac> <mi>numerator</mi> <mi>denominator</mi> </mfrac>
 			operand_1 = {
 				mfrac : [ operand_1, operand_2 ]
@@ -866,10 +901,11 @@ convert_MathML.resolve = function(text, queue) {
 
 // 處理純量與變數。
 convert_MathML.parse_scalar = function(text, no_MathML) {
-	if (typeof text === 'object')
+	if (typeof text === 'object') {
 		return !no_MathML && Array.isArray(text) ? {
 			mrow : text
 		} : text;
+	}
 	if (no_MathML)
 		return text;
 
