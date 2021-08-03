@@ -1830,9 +1830,23 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// {Number}response.statusCode
-			// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
-			result_Object.status = response.statusCode;
+			library_namespace.debug({
+				T : [ 'response HEADERS: %1',
+				//
+				JSON.stringify(response.headers) ]
+			}, 4, 'get_URL_node._onload');
+			// 模擬 Response of fetch()
+			// https://developer.mozilla.org/zh-TW/docs/Web/API/Response
+			Object.assign(result_Object, {
+				redirected : !!options.get_URL_cloned,
+				// {Number}response.statusCode
+				// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
+				status : response.statusCode,
+				statusText : response.statusMessage,
+				// XMLHttp.headers['content-type']==='text/html; charset=utf-8'
+				headers : response.headers
+			});
+
 			// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
 			if (options.onfail || (response.statusCode / 100 | 0) === 2) {
 				library_namespace.debug({
@@ -1847,14 +1861,6 @@ function module_code(library_namespace) {
 									URL_to_fetch ]
 						} ]);
 			}
-
-			library_namespace.debug({
-				T : [ 'response HEADERS: %1',
-				//
-				JSON.stringify(response.headers) ]
-			}, 4, 'get_URL_node._onload');
-			// XMLHttp.headers['content-type']==='text/html; charset=utf-8'
-			result_Object.headers = response.headers;
 
 			// node.js會自動把headers轉成小寫。
 			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition
@@ -3095,35 +3101,12 @@ function module_code(library_namespace) {
 	// ---------------------------------------------------------------------//
 
 	/**
-	 * <code>
-	
-	var fetch = CeL.fetch;
-
-	fetch(url).then(function(response) {
-		return response.json();
-	}).then(function(json) {
-		console.log(json);
-	});
-
-	fetch(url).then(function(response) {
-		return response.text();
-	}).then(function(html) {
-		console.log(html);
-	});
-
-	</code>
+	 * defective polyfill for W3C fetch API
 	 * 
-	 * @see 20181016.import_earthquake_shakemap.js
+	 * @since 2018/10/16 17:47:12
+	 * @deprecated
 	 */
-
-	// defective polyfill for W3C fetch API
-	// https://github.com/node-fetch/node-fetch
-	// @since 2018/10/16 17:47:12
-	// https://fetch.spec.whatwg.org/#fetch-method
-	// https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API
-	// TODO: fetch 預設上不傳送或接收任何 cookies，如果網站依賴 session 會導致請求回傳未經認證，需要使用 cookies
-	// 必須額外設定 credentials。
-	/* async */function node_fetch(input, init) {
+	function node_fetch(input, init) {
 		// TODO: input is a Request object.
 
 		var url = input instanceof URL ? input : new URL(input.toString()), options = library_namespace
@@ -3211,10 +3194,8 @@ function module_code(library_namespace) {
 				});
 			}
 
-			_.get_URL(input, callback, null, init && init.body, init);
-			return;
-
-			// @deprecated
+			// TODO: add normal headers
+			// CloudFlare 必須設定好headers才能才會才允許回傳資料。
 
 			if (library_namespace.is_debug(9)
 					&& library_namespace.env.has_console) {
@@ -3234,8 +3215,100 @@ function module_code(library_namespace) {
 		return new Promise(executor);
 	}
 
+	/**
+	 * defective polyfill for W3C fetch API
+	 * 
+	 * 必須額外設定 credentials。
+	 * 
+	 * TODO: fetch 預設上不傳送或接收任何 cookies，如果網站依賴 session 會導致請求回傳未經認證，需要使用 cookies
+	 * 
+	 * @examples <code>
+	
+	var fetch = CeL.fetch;
+
+	fetch(url).then(function(response) {
+		return response.json();
+	}).then(function(json) {
+		console.log(json);
+	});
+
+	fetch(url).then(function(response) {
+		return response.text();
+	}).then(function(html) {
+		console.log(html);
+	});
+
+	</code>
+	 * 
+	 * @see 20181016.import_earthquake_shakemap.js
+	 * @see https://fetch.spec.whatwg.org/#fetch-method
+	 *      https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API
+	 *      https://github.com/node-fetch/node-fetch
+	 * 
+	 * @since 2021/8/4 6:6:45
+	 */
+	function fetch__get_URL(input, init) {
+		function executor(resolve, reject) {
+			function callback(XMLHttp, error) {
+				if (error) {
+					reject(error);
+					return;
+				}
+
+				// console.trace(XMLHttp);
+				var result_Object = {
+					// https://developer.mozilla.org/zh-TW/docs/Web/API/Response
+					// https://nodejs.org/api/http.html#http_http_get_options_callback
+					headers : XMLHttp.headers,
+					ok : (XMLHttp.status / 100 | 0) === 2,
+					redirected : XMLHttp.redirected,
+					status : XMLHttp.status,
+					statusText : XMLHttp.statusText,
+
+					// 重定向後獲得的最終 URL。
+					url : XMLHttp.responseURL,
+					redirected : XMLHttp.redirected,
+					useFinalURL : true,
+
+					_buffer : XMLHttp.buffer,
+
+					// TODO: body : new ReadableStream()
+					// methods of
+					// https://developer.mozilla.org/en-US/docs/Web/API/Body
+					// https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
+
+					text : function text() {
+						try {
+							return Promise.resolve(
+							//
+							this._buffer.toString());
+						} catch (e) {
+							return Promise.reject(e);
+						}
+					},
+					json : function json() {
+						return this.text().then(JSON.parse);
+					},
+					arrayBuffer : function arrayBuffer() {
+						return Promise.resolve(this._buffer.buffer);
+					}
+				};
+
+				resolve(result_Object);
+			}
+
+			// CloudFlare 必須設定好 headers 才能才會才允許回傳資料。
+			// get_URL() 可自動設定 headers。
+			_.get_URL(input, callback, null, init && init.body, Object.assign({
+				onfail : reject
+			}, init));
+		}
+
+		return new Promise(executor);
+	}
+
 	if (is_nodejs) {
-		_.fetch = node_fetch;
+		_.fetch = fetch__get_URL;
 	}
 
 	// ---------------------------------------------------------------------//
