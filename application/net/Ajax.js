@@ -2261,15 +2261,17 @@ function module_code(library_namespace) {
 			'User-Agent' : get_URL_node.default_user_agent,
 
 			// https://developer.mozilla.org/zh-CN/docs/Glossary/Quality_values
-			Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
-					+ 'image/webp,*/*;q=0.8',
+			Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9'
+					+ ',image/webp,*/*;q=0.8'
+			// + ',application/signed-exchange;v=b3;q=0.9'
+			,
 			// Accept : 'application/json, text/plain, */*',
 
 			// 為了防止 Cloudflare bot protection(?) 阻擋，必須加上 Accept-Language。
 			// TODO: get language from system infomation
 			// dm5.js using "Microsoft-IIS/8.5",
 			// needs 'Accept-Language' to search!
-			'Accept-Language' : 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7',
+			'Accept-Language' : 'zh-TW,zh;q=0.9' + ',ja;q=0.8' + ',en;q=0.7',
 
 			// DNT : 1,
 			Connection : 'keep-alive',
@@ -2355,11 +2357,13 @@ function module_code(library_namespace) {
 
 		// console.log(URL_options_to_fetch);
 		try {
+			// request scheme
+			request = URL_is_https ? node_https : node_http;
+
 			// from node.js 10.9.0
 			// http.request(url[, options][, callback])
 			// request: Class: http.ClientRequest
-			request = URL_is_https ? node_https.request(URL_options_to_fetch,
-					_onload) : node_http.request(URL_options_to_fetch, _onload);
+			request = request.request(URL_options_to_fetch, _onload);
 		} catch (e) {
 			// e.g., _http_client.js:52
 			if (false) {
@@ -3205,6 +3209,16 @@ function module_code(library_namespace) {
 
 					resolve(result_Object);
 				});
+			}
+
+			_.get_URL(input, callback, null, init && init.body, init);
+			return;
+
+			// @deprecated
+
+			if (library_namespace.is_debug(9)
+					&& library_namespace.env.has_console) {
+				console.trace([ url.toString(), options ]);
 			}
 
 			// https://nodejs.org/api/http.html
