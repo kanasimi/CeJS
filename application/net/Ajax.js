@@ -3267,7 +3267,6 @@ function module_code(library_namespace) {
 
 					// 重定向後獲得的最終 URL。
 					url : XMLHttp.responseURL,
-					redirected : XMLHttp.redirected,
 					useFinalURL : true,
 
 					_buffer : XMLHttp.buffer,
