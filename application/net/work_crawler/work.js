@@ -552,8 +552,12 @@ function module_code(library_namespace) {
 			// <meta name="Keywords" content="~" />
 			// <meta property="og:site_name" name="application-name"
 			// content="卡提諾論壇"/>
+
+			// qiman5.js: <meta itemprop="actor" property="og:author"
+			// content="阅文漫画" />
+
 			// matched: [ all tag, key, value ]
-			/<meta\s+(?:property|name)=["'](?:[^<>"']+:)?([^<>"':]+)["']\s[^<>]*?content=["']([^<>"']+)/g;
+			/<meta\s+[^<>]*?(?:property|name)=["'](?:[^<>"']+:)?([^<>"':]+)["']\s[^<>]*?content=["']([^<>"']+)/g;
 			html = html.between(null, '</head>') || html;
 		}
 
@@ -972,7 +976,7 @@ function module_code(library_namespace) {
 			if (_this.chapter_list_URL) {
 				work_data.chapter_list_URL = work_URL = _this.full_URL(
 						_this.chapter_list_URL, work_id, work_data);
-				// console.log(work_URL);
+				// console.trace(work_URL);
 				var post_data = null;
 				if (Array.isArray(work_URL)) {
 					post_data = work_URL[1];
