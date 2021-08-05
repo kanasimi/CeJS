@@ -187,7 +187,7 @@ function module_code(library_namespace) {
 			// 警告:僅適用於單一頁面。
 			wiki_API_page(title, function(page_data, error) {
 				if (error || !wiki_API.content_of.page_exists(page_data)) {
-					// error? 此頁面不存在/已刪除。
+					// console.trace('error? 此頁面不存在/已刪除。');
 					callback(page_data, error);
 					return;
 				}
@@ -217,6 +217,7 @@ function module_code(library_namespace) {
 						callback(Object.assign(page_data, _page_data), error);
 					}, options);
 				} else {
+					// console.trace(title);
 					callback(page_data);
 				}
 
@@ -274,6 +275,7 @@ function module_code(library_namespace) {
 
 		// console.trace(title);
 		var action = normalize_title_parameter(title, options);
+		// console.trace(action);
 		if (!action) {
 			library_namespace.error('wiki_API_page: Invalid title: '
 					+ JSON.stringify(title));
@@ -368,6 +370,7 @@ function module_code(library_namespace) {
 
 		library_namespace.debug('get url token: ' + action, 5, 'wiki_API_page');
 
+		// console.trace(wiki_API.session_of_options(options));
 		// console.trace(action);
 		wiki_API.query(action, typeof callback === 'function'
 		//
@@ -743,7 +746,11 @@ function module_code(library_namespace) {
 			&& is_api_and_title(title, true)
 			//
 			&& Array.isArray(title[1]) && title[1].length >= 2) {
-				var order_hash = title[1].to_hash(), ordered_list = [];
+				var order_hash = title[1].map(function(page_data) {
+					return options.is_id ? page_data.pageid
+					//
+					|| page_data : wiki_API.title_of(page_data);
+				}).to_hash(), ordered_list = [];
 				// console.log(title[1].join('|'));
 				// console.log(order_hash);
 
@@ -775,10 +782,14 @@ function module_code(library_namespace) {
 					if (original_title in order_hash) {
 						ordered_list[order_hash[original_title]] = page_data;
 					} else {
+						console.log(order_hash);
+						console.log(original_title);
+						console.log('-'.repeat(70));
+						console.log('Page list:');
+						console.log(title[1].map(function(page_data) {
+							return wiki_API.title_of(page_data);
+						}).join('\n'));
 						console.log(page_data);
-						console.log('-'.repeat(70)
-						//
-						+ '\nPage list:\n' + title[1].join('\n'));
 						throw new Error('wiki_API_page: 取得了未指定的頁面: '
 						//
 						+ wiki_API.title_link_of(original_title));
@@ -1072,6 +1083,8 @@ function module_code(library_namespace) {
 		// POST_parameters
 		var post_data = action[1];
 		action[1] = {
+			// forcelinkupdate : 1,
+			// forcerecursivelinkupdate : 1,
 			action : 'purge'
 		};
 
