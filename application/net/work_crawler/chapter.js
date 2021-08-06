@@ -486,32 +486,40 @@ function module_code(library_namespace) {
 	// @see work_crawler/hhcool.js
 	function reverse_chapter_list_order(work_data) {
 		var chapter_list = work_data.chapter_list;
-		if (!Array.isArray(chapter_list) || chapter_list.length === 0) {
-			return;
-		}
-
-		if (chapter_list.length > 1) {
-			library_namespace.debug({
-				T : [ '《%1》：轉成由舊至新之順序。', work_data.title ]
-			}, 3, 'reverse_chapter_list_order');
-			chapter_list.reverse();
-		} else {
+		if (!Array.isArray(chapter_list) || !(chapter_list.length > 1)) {
 			return;
 		}
 		// console.log(chapter_list);
 
 		// 即使只有一個 part，也得處理 NO_in_part, chapter_NO 的問題。
-		if (false && !(chapter_list.part_NO >= 1)) {
-			return;
-		}
 		if (!chapter_list.part_NO)
 			chapter_list.part_NO = 1;
 
 		// reverse chapter_NO
-		var chapter_NO_list = chapter_list.map(function(chapter_data) {
+		var chapter_NO_list = chapter_list.map(function(chapter_data, index) {
+			if (!(chapter_data.NO_in_part >= 1)
+					&& !chapter_list.some_chapter_without_NO_in_part) {
+				chapter_list.some_chapter_without_NO_in_part = true;
+				if (library_namespace.is_debug()) {
+					this.onwarning('reverse_chapter_list_order: '
+					//
+					+ gettext('Invalid NO_in_part: %1',
+					//
+					'chapter_list[' + index + ']: '
+					//
+					+ JSON.stringify(chapter_data)), work_data);
+				}
+			}
 			return chapter_data.chapter_NO;
-		});
-		chapter_NO_list.reverse();
+		}, this);
+
+		library_namespace.debug({
+			T : [ '《%1》：轉成由舊至新之順序。', work_data.title ]
+		}, 3, 'reverse_chapter_list_order');
+		chapter_list.reverse();
+
+		if (chapter_list.some_chapter_without_NO_in_part)
+			return;
 
 		// 調整 NO_in_part
 		var part_title_now, parts_count_plus_1 = chapter_list.part_NO + 1, chapter_count_plus_1;
@@ -519,16 +527,6 @@ function module_code(library_namespace) {
 			if (chapter_NO_list[index] > 0) {
 				chapter_data.chapter_NO = chapter_NO_list[index];
 				// should be: chapter_data.chapter_NO === index + 1
-			}
-
-			if (!(chapter_data.NO_in_part >= 1)) {
-				this.onerror('reverse_chapter_list_order: '
-						+ gettext('Invalid NO_in_part: ',
-						//
-						'chapter_list[' + index + ']: '
-								+ JSON.stringify(chapter_data)), work_data);
-				typeof callback === 'function' && callback(work_data);
-				return Work_crawler.THROWED;
 			}
 
 			if (part_title_now !== chapter_data.part_title
@@ -781,7 +779,7 @@ function module_code(library_namespace) {
 	function get_chapter_data(work_data, chapter_NO, callback) {
 		function get_chapter_URL() {
 			var chapter_URL = _this.chapter_URL(work_data, chapter_NO);
-			// console.log(work_data);
+			// console.trace(work_data);
 			// console.log('chapter_URL: ' + chapter_URL);
 			if (chapter_URL !== Work_crawler.SKIP_THIS_CHAPTER) {
 				chapter_URL = chapter_URL && _this.full_URL(chapter_URL);
