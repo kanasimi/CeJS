@@ -3080,7 +3080,7 @@ function module_code(library_namespace) {
 		// e.g., page_options:{rvprop:'ids|content|timestamp'}
 		// @see
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
-		var page_options = Object.assign({
+		var page_options = {
 			// call_from_wiki_API__work : 1 + Math.random(),
 
 			// 為了降低記憶體使用，不把所有屬性添附至原有的 {Object}page_data 資料結構中。
@@ -3088,18 +3088,23 @@ function module_code(library_namespace) {
 			handle_continue_response : 'merge_response',
 			allow_missing : config.no_warning,
 			multi : true
-		},
-		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
-		config.page_options);
+		};
 		// console.trace(page_options);
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
-		[ 'is_id', 'redirects', 'converttitles' ].forEach(function(parameter) {
-			if (config[parameter]) {
+		Object.keys(page_options).append(
+				[ 'is_id', 'redirects', 'converttitles' ])
+		//
+		.forEach(function(parameter) {
+			if (parameter in config) {
 				library_namespace.debug('Copy [' + parameter
-						+ '] to page_options', 2, 'wiki_API.work');
+				//
+				+ '] to page_options', 2, 'wiki_API.work');
 				page_options[parameter] = config[parameter];
 			}
 		});
+		Object.assign(page_options,
+		// 可以之處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
+		config.page_options);
 
 		// 個別頁面會採用的 page options 選項。
 		var single_page_options = Object.assign({
