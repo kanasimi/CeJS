@@ -1275,12 +1275,14 @@ function module_code(library_namespace) {
 
 	// [ all_mark, start_mark, variable_name, original_value, end_mark ]
 	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)([\s\S]+?)(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)/g;
+	var Variable_Map__PATTERN_template_mark = /({{Auto-generate\s*\|([^{}|]+)}})([\s\S]+?)({{Auto-generate\s*\|\2\|end}})/;
 
 	function Variable_Map_update(wikitext) {
 		var changed, variable_Map = this;
 		// console.trace(variable_Map);
-		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, function(
-				all_mark, start_mark, variable_name, original_value, end_mark) {
+
+		function replacer(all_mark, start_mark, variable_name, original_value,
+				end_mark) {
 			if (false) {
 				console.trace([ all_mark, variable_name,
 						variable_Map.has(variable_name) ]);
@@ -1302,7 +1304,12 @@ function module_code(library_namespace) {
 				}
 			}
 			return all_mark;
-		});
+		}
+
+		// TODO:
+		wikitext = wikitext.replace(Variable_Map__PATTERN_template_mark,
+				replacer);
+		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, replacer);
 		// console.trace(changed);
 		if (!changed) {
 			return [ wiki_API.edit.cancel, 'skip' ];
