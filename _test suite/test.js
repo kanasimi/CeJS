@@ -3434,6 +3434,7 @@ function test_wiki() {
 		assert(['<pre class="c">\n==t==\nw\n</pre>', parsed[1].toString()], 'wiki.parse: HTML tag pre #2');
 		assert([' class="c"', parsed[1][0].toString()], 'wiki.parse: HTML tag pre #3');
 		assert(['\n==t==\nw\n', parsed[1][1].toString()], 'wiki.parse: HTML tag pre #4');
+
 		wikitext = '1<nowiki>\n==t==\nw\n</nowiki>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #1');
 		assert(['<nowiki>\n==t==\nw\n</nowiki>', parsed[1].toString()], 'wiki.parse: nowiki #2');
@@ -3442,6 +3443,10 @@ function test_wiki() {
 		wikitext = '1<nowiki><!--</nowiki>2-->'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #5');
 		assert(['<nowiki><!--</nowiki>', parsed[1].toString()], 'wiki.parse: nowiki #6');
+
+		wikitext = "aa<br>\nbb</br>\ncc"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: self_close_tags: br #1');
+		assert(parsed.includes('bb') , 'wiki.parse: self_close_tags: br #2');
 
 		wikitext = '1<!--<nowiki><!--</nowiki>2-->3'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: comments #1');
