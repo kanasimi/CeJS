@@ -3032,6 +3032,12 @@ function module_code(library_namespace) {
 				register_anchor(anchor, template_token);
 				return;
 			}
+
+			if (false && options && options.print_anchors) {
+				library_namespace
+						.warn('get_all_anchors: Cannot expand template: '
+								+ template_token);
+			}
 		});
 
 		// 處理 <span class="anchor" id="anchor"></span>, <ref name="anchor">,
@@ -3820,8 +3826,9 @@ function module_code(library_namespace) {
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=protocols&utf8&format=json
 	 */
 	PATTERN_external_link_global = /\[((?:https?:|ftps?:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:([^\S\r\n]+)([^\]]*))?\]/ig,
+	// 若包含 br|hr| 會導致 "aa<br>\nbb</br>\ncc" 解析錯誤！
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
-	markup_tags = 'br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark'
+	markup_tags = 'bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark'
 			// [[Help:Parser tag]], [[Help:Extension tag]]
 			+ '|includeonly|noinclude|onlyinclude'
 			// https://phabricator.wikimedia.org/T263082
@@ -5781,8 +5788,10 @@ function module_code(library_namespace) {
 			if (normalize) {
 				tag = tag.toLowerCase();
 			}
-			// prefix slash
-			all.slash = slash;
+			if (slash) {
+				// prefix slash: This is invalid.
+				all.slash = slash;
+			}
 			all.tag = tag;
 			// {String}Element.tagName
 			// all.tagName = tag.toLowerCase();
