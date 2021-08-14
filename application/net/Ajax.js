@@ -677,7 +677,7 @@ function module_code(library_namespace) {
 					library_namespace.error([ 'to_form_data: ', {
 						T : [ 'Got error when retrieving [%1]: %2',
 						//
-						URL, localize_error(error) ]
+						value, localize_error(error) ]
 					} ]);
 					// Skip this one.
 					callback();
