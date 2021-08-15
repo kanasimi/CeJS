@@ -3317,6 +3317,9 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()]);
 		wikitext = '==t==\n[[w:t/t#a-{c}-]] \n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
+		wikitext = '[[A|B]\n==T==\n<code>[[]]</code>'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['[[A|B]', parsed[0]]);
 		wikitext = 'a<br/>b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = '</br>'; parsed = CeL.wiki.parser(wikitext).parse();

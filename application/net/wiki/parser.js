@@ -4757,6 +4757,13 @@ function module_code(library_namespace) {
 			} else {
 				previous = '';
 			}
+
+			if (/\n=+[^=]=+/.test(display_text)) {
+				// incase '[[A|B]\n==T==\n<code>[[]]</code>'
+				// TODO: fix '[[A|B]<code>]]'
+				return all_link;
+			}
+
 			library_namespace.debug('[' + previous + '] + [' + all_link + ']',
 					4, 'parse_wikitext.link');
 
