@@ -295,30 +295,38 @@ function module_code(library_namespace) {
 		}
 
 		// fs.rmSync(path[, options]) Added in: v14.14.0
-		if (typeof node_fs.rmSync === 'function') {
-			try {
-				node_fs.rmSync(path, {
-					recursive : !!recursive
-				});
-				return;
-			} catch (e) {
-				if (e.code !== 'ERR_FS_EISDIR') {
-					return e;
-				}
-				// Will try node_fs.rmdirSync(path); later
+		try {
+			if (recursive) {
+				library_namespace.debug({
+					T : [ 'Recursively removing subdirectories of %1', path ]
+				}, 2, 'remove_fso');
 			}
-
-			// `path` should be empty directory, or should set recursive flag.
-			library_namespace.debug({
-				T : [ 'Removing directory: %1', path ]
-			}, 1, 'remove_fso');
-			// delete directory itself.
-			try {
-				node_fs.rmdirSync(path);
-			} catch (e) {
+			node_fs.rmSync(path, {
+				recursive : !!recursive
+			});
+			return;
+		} catch (e) {
+			if (e.code !== 'ERR_FS_EISDIR') {
 				return e;
 			}
-			return;
+			// Will try node_fs.rmdirSync(path); later
+		}
+
+		// `path` should be empty directory, or should set recursive flag.
+		library_namespace.debug({
+			T : [ 'Removing directory: %1', path ]
+		}, 1, 'remove_fso');
+		// delete directory itself.
+		try {
+			node_fs.rmdirSync(path);
+		} catch (e) {
+			return e;
+		}
+	}
+
+	function old_remove_fso(path, recursive) {
+		if (Array.isArray(path)) {
+			return remove_fso_list(path, recursive);
 		}
 
 		try {
@@ -392,11 +400,11 @@ function module_code(library_namespace) {
 				return e;
 			}
 		}
-
-		return;
 	}
 	// _.fs_delete, _.fs_rmdir
-	_.fs_remove = remove_fso;
+	_.fs_remove =
+	// fs.rmSync(path[, options]) Added in: v14.14.0
+	typeof node_fs.rmSync === 'function' ? remove_fso : old_remove_fso;
 
 	var KEY_auto_detect_encoding = 'auto',
 	// https://en.wikipedia.org/wiki/Byte_order_mark#Byte_order_marks_by_encoding
