@@ -673,7 +673,7 @@ function module_code(library_namespace) {
 				var value = replace_to[key];
 				if (!key) {
 					library_namespace.warn('Including empty key: '
-					//
+					// TODO: allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
 					+ JSON.stringify(replace_to));
 					key = parameter_name;
 				}
@@ -5180,6 +5180,7 @@ function module_code(library_namespace) {
 		}
 
 		// or use ((PATTERN_transclusion))
+		// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
 		// PATTERN_template
 		var PATTERN_for_transclusion = /{{([^{}][\s\S]*?)}}/g;
 		function parse_transclusion(all, parameters) {
@@ -5320,6 +5321,7 @@ function module_code(library_namespace) {
 					if (typeof t !== 'string') {
 						return t.type !== 'comment';
 					}
+					// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
 					if (t.includes('=')) {
 						// index of "=", index_of_assignment
 						matched = index;
@@ -6451,7 +6453,8 @@ function module_code(library_namespace) {
 		// [[w:zh:Help:模板]]
 		// 在模板頁面中，用三個大括弧可以讀取參數。
 		// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
-		wikitext = wikitext.replace_till_stable(/{{{([^{}][\s\S]*?)}}}/g,
+		// allow "{{{}}}", e.g., [[w:zh:Template:Policy]]
+		wikitext = wikitext.replace_till_stable(/{{{(|[^{}][\s\S]*?)}}}/g,
 				parse_template_parameter);
 
 		// ----------------------------------------------------
