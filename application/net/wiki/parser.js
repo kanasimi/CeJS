@@ -2655,9 +2655,14 @@ function module_code(library_namespace) {
 						// 繼續解析日期，預防有類似 "<b>[[User:]] date</b>" 的情況。
 					}
 
+					if (!this_user) {
+						continue;
+					}
 					var date = parse_date(token, options);
 					// console.log([ this_user, date ]);
-					if (!date || !this_user) {
+					if (!date
+					// 允許未來時間
+					|| !options.allow_future && !(Date.now() - date > 0)) {
 						continue;
 					}
 					// 同時添加使用者與日期。
