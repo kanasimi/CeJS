@@ -1744,50 +1744,79 @@ function module_code(library_namespace) {
 	 *            array 1
 	 * @param {Array}array_2
 	 *            array 2
+	 * @param {Function}[key_of_item]
+	 *            Function to get key of item.
 	 * @param {Boolean}[sorted]
-	 *            array_1, array_2 are sorted.
+	 *            true: array_1, array_2 are sorted.
 	 * 
 	 * @returns {Array}intersection of array_1 and array_2
 	 */
-	function Array_intersection(array_1, array_2, sorted) {
+	function Array_intersection(array_1, array_2, key_of_item, sorted) {
+		if (key_of_item === true) {
+			sorted = true;
+			key_of_item = null;
+		}
 		if (!sorted) {
-			array_1 = array_1.clone().sort(general_ascending);
-			array_2 = array_2.clone().sort(general_ascending);
+			var sort_function = typeof key_of_item === 'function' ? function(
+					_1, _2) {
+				return general_ascending(key_of_item(_1), key_of_item(_2));
+			} : general_ascending;
+			array_1 = array_1.clone().sort(sort_function);
+			array_2 = array_2.clone().sort(sort_function);
 		}
 		// console.log([array_1, array_2]);
 
-		var index_of_array_1 = 0, index_a2 = 0,
+		var index_of_array_1 = 0, index_of_array_2 = 0,
 		// Object.create(array_1)
 		result = [];
-		for (; index_of_array_1 < array_1.length && index_a2 < array_2.length; index_of_array_1++) {
+		for (; index_of_array_1 < array_1.length
+				&& index_of_array_2 < array_2.length; index_of_array_1++) {
 			var item = array_1[index_of_array_1];
-			while (array_2[index_a2] < item)
-				index_a2++;
-			if (array_2[index_a2] === item) {
-				// 相同元素最多取 array_1, array_2 之最小個數。
-				index_a2++;
-				result.push(item);
-			}
+			if (key_of_item)
+				item = key_of_item(item);
+
+			do {
+				var item_2 = array_2[index_of_array_2];
+				if (key_of_item)
+					item_2 = key_of_item(item_2);
+				if (item_2 < item) {
+					index_of_array_2++;
+					continue;
+				}
+				if (item_2 === item) {
+					// 相同元素最多取 array_1, array_2 之最小個數。
+					index_of_array_2++;
+					result.push(item);
+				}
+				break;
+			} while (index_of_array_2 < array_2.length);
 		}
 		return result;
 	}
 
 	var has_native_Map = !Map[library_namespace.env.not_native_keyword];
-	function Array_intersection_Map(array_1, array_2, sorted) {
+	// 警告: 相同的 key 只會留下一個 item！
+	function Array_intersection_Map(array_1, array_2, key_of_item, sorted) {
+		if (key_of_item === true) {
+			sorted = true;
+			key_of_item = null;
+		}
 		if (sorted)
-			return Array_intersection(array_1, array_2, sorted);
+			return Array_intersection(array_1, array_2, key_of_item, sorted);
 
 		// @see function unique_Array()
 		var map = new Map;
 		function set_item(item) {
-			if (!map['has'](item))
-				map['set'](item, null);
+			var key = key_of_item ? key_of_item(item) : item;
+			if (!map['has'](key))
+				map['set'](key, /* item */null);
 		}
 		array_1.forEach(set_item);
-		var array = array_2.filter(function(item) {
-			return map['has'](item);
+		var result = array_2.filter(function(item) {
+			var key = key_of_item ? key_of_item(item) : item;
+			return map['has'](key);
 		});
-		return array;
+		return result;
 	}
 
 	/**
