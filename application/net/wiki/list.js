@@ -701,6 +701,45 @@ function module_code(library_namespace) {
 		// Wikimedia Toolforge，當改用 database。
 		allpages : 'ap',
 
+		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Ballimages
+		// .allimages(['2011-08-01T01:39:45Z','2011-08-01T01:45:45Z'])
+		// .allimages('2011-08-01T01:39:45Z')
+		// .allimages([,'2011-08-01T01:45:45Z'])
+		allimages : [ 'ai', , function(title_parameter) {
+			// console.trace([title_parameter]);
+			// e.g., .allimages('2011-08-01T01:39:45Z'):
+			// '&aititle=2011-08-01T01%3A39%3A45Z'
+			// .allimages(['2011-08-01T01:39:45Z','2011-08-01T01:45:45Z']):
+			// '&aititle=2011-08-01T01%3A39%3A45Z%7C2011-08-01T01%3A45%3A45Z'
+			return title_parameter.replace(/^&aititle=([^&]+)/,
+			//
+			function(all, parameter) {
+				parameter = decodeURIComponent(parameter);
+				var matched = parameter.split('|');
+				if (matched.length !== 1 && matched.length !== 2) {
+					return all;
+				}
+				if (matched[0] && !Date.parse(matched[0])
+				//
+				|| matched[1] && !Date.parse(matched[1])) {
+					return (matched[0] ? '&aifrom='
+					//
+					+ encodeURIComponent(matched[0]) : '')
+					//
+					+ (matched[1] ? '&aito='
+					//
+					+ encodeURIComponent(matched[1]) : '');
+				}
+				return '&aisort=timestamp' + (matched[0] ? '&aistart='
+				//
+				+ new Date(matched[0]).toISOString() : '')
+				//
+				+ (matched[1] ? '&aiend='
+				//
+				+ new Date(matched[1]).toISOString() : '');
+			});
+		} ],
+
 		// https://www.mediawiki.org/wiki/API:Alllinks
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Balllinks
 		alllinks : 'al',
@@ -760,8 +799,11 @@ function module_code(library_namespace) {
 		// @see [[mw:Help:Tracking categories|追蹤分類]]
 		categorymembers : [ 'cm', , function(title_parameter) {
 			// 要列舉的分類（必需）。必須包括Category:前綴。不能與cmpageid一起使用。
-			if (/^&cmtitle=[Cc]ategory%3A/.test(title_parameter))
+			if (/^&cmtitle=(Category|分類|分类|カテゴリ|분류)%3A/ig
+			// @see PATTERN_category @ CeL.wiki
+			.test(title_parameter)) {
 				return title_parameter;
+			}
 			return title_parameter.replace(/^&cmtitle=/, '&cmtitle=Category:');
 		} ],
 
@@ -1031,6 +1073,13 @@ function module_code(library_namespace) {
 				// || this.actions.length === 1
 				) {
 					// this.thread_count = (this.thread_count || 0) + 1;
+					if (false) {
+						console.trace(
+						//
+						'wiki_API_prototype_methods: Calling wiki_API.prototype.next() '
+						//
+						+ [ this.running, this.actions.length ]);
+					}
 					this.next();
 				} else {
 					if (this.actions.length > 1) {
@@ -1099,13 +1148,15 @@ function module_code(library_namespace) {
 			};
 		} else if (typeof options === 'number'
 		// ([1,2]|0)>=0
-		&& (options | 0) >= 0) {
+		&& options >= 0) {
 			options = {
-				depth : options | 0
+				depth : options
 			};
 		} else {
 			// including options.namespace
 			Object.assign(list_options, options);
+			// 採用 page_filter 會與 get_list() 中之 page_filter 衝突。
+			delete list_options.page_filter;
 			list_options.namespace = 'namespace' in list_options
 			// 確保一定有 NS_Category。
 			? wiki_API.namespace(wiki_API.namespace(list_options.namespace)
@@ -1120,7 +1171,7 @@ function module_code(library_namespace) {
 		var page_filter = options.page_filter || options.filter, category_filter = options.category_filter
 				|| options.filter;
 
-		// 處理遞迴結構。
+		// cache: 處理遞迴結構。
 		var tree_of_category = Object.create(null);
 
 		function get_categorymembers(category, callback, depth) {
@@ -1155,17 +1206,21 @@ function module_code(library_namespace) {
 						// console.log(page_data);
 						// console.log(page_filter(page_data));
 						try {
-							if (page_filter && !page_filter(page_data))
+							if (page_filter && !page_filter(page_data)) {
+								// console.log(page_data.title);
 								return false;
+							}
 							if (options.for_each_page) {
 								options.for_each_page(page_data);
 							}
 						} catch (e) {
 							library_namespace.error(e);
 						}
+						// console.log(page_data.title);
 						return true;
 					}
 
+					// TODO: using .to_namespace()
 					if (category_filter && !category_filter(page_data)) {
 						// library_namespace.log('Skip ' + page_data.title);
 						return false;
@@ -1194,8 +1249,12 @@ function module_code(library_namespace) {
 						subcategories[page_name] = tree_of_category[page_name]
 						//
 						= sub_list;
-						if (--remaining === 0)
+						if (--remaining === 0) {
+							// got all categorymembers
+							if (options.get_flated)
+								list.flated_subcategories = tree_of_category;
 							callback(options.no_list || list);
+						}
 					}, depth);
 					return false;
 				}
@@ -1209,12 +1268,12 @@ function module_code(library_namespace) {
 					list[wiki_API.KEY_subcategories] = subcategories;
 					// waiting for get_categorymembers() @ process_all_pages()
 				} else {
-					if (depth === 0
-					//
-					&& !library_namespace.is_empty_object(subcategories)) {
-						list[wiki_API.KEY_subcategories] = subcategories;
-					} else {
-						// No subcategory
+					if (depth === 0) {
+						if (!library_namespace.is_empty_object(subcategories)) {
+							list[wiki_API.KEY_subcategories] = subcategories;
+						} else {
+							// No subcategory
+						}
 					}
 					callback(options.no_list || list);
 				}
@@ -1233,10 +1292,11 @@ function module_code(library_namespace) {
 			wiki_API.list(category, for_category_list, list_options);
 		}
 
+		// console.trace(options);
 		get_categorymembers(root_category, callback
 				|| library_namespace.null_function,
-				((typeof options === 'number' ? options : options.depth) | 0)
-						|| category_tree.default_depth);
+				(options.depth >= 0 ? options.depth
+						: category_tree.default_depth) | 0);
 	}
 
 	category_tree.default_depth = 10;
