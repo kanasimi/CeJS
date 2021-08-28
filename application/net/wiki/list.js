@@ -511,8 +511,6 @@ function module_code(library_namespace) {
 			if (wiki_API.is_page_data(title)) {
 				title = title.title;
 			}
-			// 紀錄 title。
-			pages.title = title;
 
 			if (!data || !data.query) {
 				library_namespace.error('get_list: Unknown response: ['
@@ -627,25 +625,44 @@ function module_code(library_namespace) {
 			// console.log(data.query);
 			data = data.query.pages;
 			for ( var pageid in data) {
-				if (pages.length > 0) {
-					library_namespace.warn('get_list: More than 1 page got!');
-					run_for_each(new Error('More than 1 page got!'));
-				} else {
-					var page = data[pageid];
-					if (Array.isArray(page[type])) {
-						pages = Object.assign(page[type], pages);
-					}
-
-					library_namespace.debug('[' + page.title + ']: '
-							+ pages.length + ' page(s)', 1, 'get_list');
-					pages.title = page.title;
-					run_for_each();
+				var page = data[pageid], page_list = page[type];
+				if (!Array.isArray(page_list)) {
+					// error!
+					continue;
 				}
+
+				// page_list.title = page.title;
+				Object.assign(page_list, page);
+				delete page_list[type];
+
+				pages.push(page_list);
+				library_namespace.debug('[' + page.title + ']: '
+						+ page_list.length + ' page(s)', 1, 'get_list');
+			}
+
+			if (pages.length === 1) {
+				// Object.assign(pages[0], pages);
+				Object.keys(pages).forEach(function(key) {
+					if (key !== '0')
+						pages[0][key] = pages[key];
+				});
+				pages = pages[0];
+				run_for_each();
 				return;
 			}
 
-			library_namespace.error('get_list: No page got!');
-			callback(pages/* , new Error('No page got!') */);
+			if (pages.length === 0) {
+				library_namespace.error('get_list: No page got!');
+				callback(pages/* , new Error('No page got!') */);
+				return;
+			}
+
+			// For multi-page-list
+			library_namespace.debug('get_list: More than 1 pages got!', 1,
+					'get_list');
+			// 紀錄 titles。 .original_title
+			pages.titles = title;
+			run_for_each();
 
 		}, null, options);
 	}
@@ -702,6 +719,9 @@ function module_code(library_namespace) {
 		allpages : 'ap',
 
 		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Ballimages
+		// .allimages(['from','to'])
+		// .allimages('from')
+		// .allimages([,'to'])
 		// .allimages(['2011-08-01T01:39:45Z','2011-08-01T01:45:45Z'])
 		// .allimages('2011-08-01T01:39:45Z')
 		// .allimages([,'2011-08-01T01:45:45Z'])
@@ -805,6 +825,12 @@ function module_code(library_namespace) {
 				return title_parameter;
 			}
 			return title_parameter.replace(/^&cmtitle=/, '&cmtitle=Category:');
+		} ],
+
+		// List all categories the pages belong to.
+		categories : [ 'cl', 'prop', function(title_parameter, options) {
+			// console.trace(title_parameter);
+			return title_parameter.replace(/^&title=/, '&titles=');
 		} ],
 
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
@@ -1172,7 +1198,9 @@ function module_code(library_namespace) {
 				|| options.filter;
 
 		// cache: 處理遞迴結構。
-		var tree_of_category = Object.create(null);
+		var tree_of_category = Object.create(null),
+		// subcategory_count===Object.keys(tree_of_category).length
+		subcategory_count = 0;
 
 		function get_categorymembers(category, callback, depth) {
 			function for_category_list(list/* , target, options */) {
@@ -1246,12 +1274,13 @@ function module_code(library_namespace) {
 					remaining++;
 					// assert: get_categorymembers() won't return soon
 					get_categorymembers(page_data, function(sub_list, error) {
+						subcategory_count++;
 						subcategories[page_name] = tree_of_category[page_name]
 						//
 						= sub_list;
 						if (--remaining === 0) {
 							// got all categorymembers
-							if (options.get_flated)
+							if (options.get_flated_subcategories)
 								list.flated_subcategories = tree_of_category;
 							callback(options.no_list || list);
 						}
@@ -1286,7 +1315,9 @@ function module_code(library_namespace) {
 						'category_tree');
 			} else {
 				library_namespace.log_temporary('Get categorymembers of '
-						+ wiki_API.title_link_of(category));
+						+ wiki_API.title_link_of(category) + ' ('
+						+ subcategory_count + ' subcategories, ' + depth
+						+ ' levels left)');
 			}
 
 			wiki_API.list(category, for_category_list, list_options);
