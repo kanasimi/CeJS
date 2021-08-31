@@ -248,10 +248,14 @@ function module_code(library_namespace) {
 			}
 		}
 
-		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		var action = is_api_and_title(title, true) ? title.clone()
-		// assert: {String}title
-		: [ , title ];
+		var action;
+		if (is_api_and_title(title, true)) {
+			// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
+			action = title.clone();
+		} else {
+			// assert: {String}title
+			action = [ , title ];
+		}
 
 		var continue_from = prefix + 'continue',
 		// {wiki_API}options.continue_session: 藉以取得後續檢索用索引值之 {wiki_API}。
@@ -339,6 +343,62 @@ function module_code(library_namespace) {
 					+ (title ? ' ' + wiki_API.title_link_of(title) : '')
 					+ ': start from ' + continue_from, 2, 'get_list');
 		}
+
+		// ------------------------------------------------
+
+		// 處理輸入過長的列表。
+		if (Array.isArray(action[1])
+		// TODO: using POST data
+		&& encodeURIComponent(action[1].map(function(page_data) {
+			return wiki_API.title_of(page_data);
+		}).join('|')).length > get_list.slice_chars) {
+			options.next_title_index = 0;
+			var get_next_batch = function(pages, error) {
+				if (error) {
+					callback(null, error);
+					return;
+				}
+
+				if (!pages) {
+					// The first time running
+				} else if (options.overall_pages) {
+					options.overall_pages.append(pages);
+				} else {
+					pages.titles = action[1];
+					options.overall_pages = pages;
+				}
+				var latest_batch_title_index = options.next_title_index;
+				if (!(latest_batch_title_index < action[1].length)) {
+					pages = options.overall_pages;
+					delete options.overall_pages;
+					callback(pages);
+					return;
+				}
+
+				var slice_chars = 0;
+				do {
+					slice_chars += encodeURIComponent(wiki_API
+							.title_of(action[1][options.next_title_index++])
+							+ '|').length;
+					if (slice_chars > get_list.slice_chars) {
+						options.next_title_index--;
+						if (latest_batch_title_index === options.next_title_index) {
+							library_namespace.error('第一個元素的長度過長!');
+							options.next_title_index++;
+						}
+						break;
+					}
+				} while (options.next_title_index < action[1].length);
+				library_namespace.log_temporary('get_list: Get ' + type + ' '
+						+ options.next_title_index + '/' + action[1].length);
+				get_list(type, action[1].slice(latest_batch_title_index,
+						options.next_title_index), get_next_batch, options);
+			};
+			get_next_batch();
+			return;
+		}
+
+		// ------------------------------------------------
 
 		action[1] = action[1] ? '&'
 		// allpages 不具有 title。
@@ -658,7 +718,7 @@ function module_code(library_namespace) {
 			}
 
 			// For multi-page-list
-			library_namespace.debug('get_list: More than 1 pages got!', 1,
+			library_namespace.debug(pages.length + ' ' + type + ' got!', 1,
 					'get_list');
 			// 紀錄 titles。 .original_title
 			pages.titles = title;
@@ -666,6 +726,8 @@ function module_code(library_namespace) {
 
 		}, null, options);
 	}
+
+	get_list.slice_chars = 7800;
 
 	get_list.post_processor = {
 		usercontribs : function(item, index, pages) {
@@ -736,6 +798,7 @@ function module_code(library_namespace) {
 			function(all, parameter) {
 				parameter = decodeURIComponent(parameter);
 				var matched = parameter.split('|');
+				// console.trace(matched);
 				if (matched.length !== 1 && matched.length !== 2) {
 					return all;
 				}
@@ -828,6 +891,7 @@ function module_code(library_namespace) {
 		} ],
 
 		// List all categories the pages belong to.
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bcategories
 		categories : [ 'cl', 'prop', function(title_parameter, options) {
 			// console.trace(title_parameter);
 			return title_parameter.replace(/^&title=/, '&titles=');
@@ -1136,6 +1200,20 @@ function module_code(library_namespace) {
 	// export 子分類 subcategory
 	wiki_API.KEY_subcategories = 'subcategories';
 
+	// Get category only
+	function get_category_tree() {
+		var subcategories = this && this[wiki_API.KEY_subcategories];
+		if (!subcategories)
+			return;
+
+		var tree = Object.create(null);
+		for ( var category_name in subcategories) {
+			tree[category_name] = get_category_tree
+					.call(subcategories[category_name]);
+		}
+		return tree;
+	}
+
 	/**
 	 * traversal root_category, get all categorymembers and subcategories in
 	 * [CeL.wiki.KEY_subcategories]
@@ -1254,9 +1332,8 @@ function module_code(library_namespace) {
 						return false;
 					}
 
-					var page_name = page_data.title.replace(
-					// @see PATTERN_category @ CeL.wiki
-					/^(Category|分類|分类|カテゴリ|분류):/ig, '');
+					var page_name = wiki_API.remove_namespace(page_data,
+							options);
 
 					if (tree_of_category[page_name]) {
 						// using cache
@@ -1278,6 +1355,7 @@ function module_code(library_namespace) {
 						subcategories[page_name] = tree_of_category[page_name]
 						//
 						= sub_list;
+						list.get_category_tree = get_category_tree;
 						if (--remaining === 0) {
 							// got all categorymembers
 							if (options.get_flated_subcategories)
@@ -1300,6 +1378,7 @@ function module_code(library_namespace) {
 					if (depth === 0) {
 						if (!library_namespace.is_empty_object(subcategories)) {
 							list[wiki_API.KEY_subcategories] = subcategories;
+							list.get_category_tree = get_category_tree;
 						} else {
 							// No subcategory
 						}
