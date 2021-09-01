@@ -353,6 +353,7 @@ function module_code(library_namespace) {
 			return wiki_API.title_of(page_data);
 		}).join('|')).length > get_list.slice_chars) {
 			options.next_title_index = 0;
+			options.multi = true;
 			var get_next_batch = function(pages, error) {
 				if (error) {
 					callback(null, error);
@@ -371,6 +372,7 @@ function module_code(library_namespace) {
 				if (!(latest_batch_title_index < action[1].length)) {
 					pages = options.overall_pages;
 					delete options.overall_pages;
+					// delete options.multi;
 					callback(pages);
 					return;
 				}
@@ -391,8 +393,11 @@ function module_code(library_namespace) {
 				} while (options.next_title_index < action[1].length);
 				library_namespace.log_temporary('get_list: Get ' + type + ' '
 						+ options.next_title_index + '/' + action[1].length);
-				get_list(type, action[1].slice(latest_batch_title_index,
-						options.next_title_index), get_next_batch, options);
+				get_list(type, [
+						action[0],
+						action[1].slice(latest_batch_title_index,
+								options.next_title_index) ], get_next_batch,
+						options);
 			};
 			get_next_batch();
 			return;
@@ -700,7 +705,7 @@ function module_code(library_namespace) {
 						+ page_list.length + ' page(s)', 1, 'get_list');
 			}
 
-			if (pages.length === 1) {
+			if (pages.length === 1 && !options.multi) {
 				// Object.assign(pages[0], pages);
 				Object.keys(pages).forEach(function(key) {
 					if (key !== '0')
