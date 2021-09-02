@@ -576,6 +576,8 @@ function module_code(library_namespace) {
 			if (wiki_API.is_page_data(title)) {
 				title = title.title;
 			}
+			if (!Array.isArray(title))
+				pages.title = title;
 
 			if (!data || !data.query) {
 				library_namespace.error('get_list: Unknown response: ['
@@ -1360,11 +1362,8 @@ function module_code(library_namespace) {
 						subcategories[page_name] = tree_of_category[page_name]
 						//
 						= sub_list;
-						list.get_category_tree = get_category_tree;
+						// console.trace(remaining);
 						if (--remaining === 0) {
-							// got all categorymembers
-							if (options.get_flated_subcategories)
-								list.flated_subcategories = tree_of_category;
 							callback(options.no_list || list);
 						}
 					}, depth);
@@ -1376,18 +1375,20 @@ function module_code(library_namespace) {
 				list = list.filter(process_all_pages);
 				// recovery attributes
 				list.title = title;
+				// console.trace(subcategories);
+				// console.trace(remaining);
 				if (remaining > 0) {
 					list[wiki_API.KEY_subcategories] = subcategories;
 					// waiting for get_categorymembers() @ process_all_pages()
 				} else {
-					if (depth === 0) {
-						if (!library_namespace.is_empty_object(subcategories)) {
-							list[wiki_API.KEY_subcategories] = subcategories;
-							list.get_category_tree = get_category_tree;
-						} else {
-							// No subcategory
-						}
+					if (depth === 0
+					//
+					&& !library_namespace.is_empty_object(subcategories)) {
+						list[wiki_API.KEY_subcategories] = subcategories;
+					} else {
+						// No subcategory
 					}
+					// console.trace(depth);
 					callback(options.no_list || list);
 				}
 
@@ -1408,8 +1409,18 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(options);
-		get_categorymembers(root_category, callback
-				|| library_namespace.null_function,
+		get_categorymembers(root_category, callback ? function(list) {
+			if (options.no_list) {
+				callback(options.no_list);
+				return;
+			}
+			list.list_type = 'category_tree';
+			list.get_category_tree = get_category_tree;
+			// got all categorymembers
+			if (options.get_flated_subcategories)
+				list.flated_subcategories = tree_of_category;
+			callback(list);
+		} : library_namespace.null_function,
 				(options.depth >= 0 ? options.depth
 						: category_tree.default_depth) | 0);
 	}
