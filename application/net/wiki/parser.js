@@ -570,7 +570,7 @@ function module_code(library_namespace) {
 					continue;
 				}
 				var index = template_token.index_of[replace_from];
-				if (!(index >= 0)) {
+				if (!(index >= 1)) {
 					// 不存在此 parameter name 可 replace。
 					if (options.value_only && options.force_add) {
 						if ((!key_of_spaces || key_of_spaces !== latest_OK_key)
@@ -587,7 +587,7 @@ function module_code(library_namespace) {
 						replace_to = spaces && spaces[1] ? spaces[0]
 								+ replace_from + spaces[1] + replace_to
 								+ spaces[2] : replace_from + '=' + replace_to;
-						if (options.append_key_value && next_insert_index >= 0) {
+						if (options.append_key_value && next_insert_index >= 1) {
 							// 警告: 這會使 template_token[next_insert_index]
 							// 不合正規格式！但能插入在最接近前一個插入點之後。
 							template_token[next_insert_index] += '|'
@@ -632,7 +632,7 @@ function module_code(library_namespace) {
 		// --------------------------------------
 
 		var index = template_token.index_of[parameter_name];
-		if (!(index >= 0)) {
+		if (!(index >= 1)) {
 			// 不存在此 parameter name 可 replace。
 			return 0;
 		}
@@ -2661,7 +2661,7 @@ function module_code(library_namespace) {
 					var date = parse_date(token, options);
 					// console.log([ this_user, date ]);
 					if (!date
-					// 允許未來時間
+					// 預設不允許未來時間。
 					|| !options.allow_future && !(Date.now() - date > 0)) {
 						continue;
 					}
@@ -3438,7 +3438,7 @@ function module_code(library_namespace) {
 			'deletion_templates', 'protection_templates', 'dispute_templates',
 			'maintenance_templates', 'infobox_templates',
 			//
-			'content', 'content_end',
+			'lead_templates_end', 'content', 'content_end',
 			//
 			'footer', 'succession_templates', 'navigation_templates',
 			'authority_control_templates', 'coord_templates',
@@ -3465,12 +3465,27 @@ function module_code(library_namespace) {
 		// The start index of layout elements
 		var layout_indices = Object.create(null);
 
-		var index = 0;
-		function set_index(layout_type) {
-			if (!(layout_indices[layout_type] >= 0)) {
-				layout_indices[layout_type] = index;
+		var index = 0, BACKTRACKING_SPACES = {};
+		function set_index(layout_type, _index, force) {
+			if (_index === BACKTRACKING_SPACES) {
+				// 回溯上一個非空白的 token。
+				_index = index;
+				while (--_index >= 0 && typeof parsed[_index] === 'string'
+				// 回溯上一個非空白的 token。
+				&& !parsed[_index].trim())
+					;
+				if (false && /\n{2}$/.test(parsed[_index])) {
+					// TODO: 避免多個換行。
+					// 這問題似乎不會發生，因為換行都被移到新 token 了。
+				}
+				// 向後移一位，落點在第一個空白 token 上。
+				_index++;
+			}
+			if (force || !(layout_indices[layout_type] >= 0)) {
+				layout_indices[layout_type] = _index >= 0 ? _index : index;
 				return true;
-			} else if (single_layout_types.includes(layout_type)) {
+			}
+			if (single_layout_types.includes(layout_type)) {
 				library_namespace.error(
 				//
 				'analysis_layout_indices: There are more than one '
@@ -3492,6 +3507,7 @@ function module_code(library_namespace) {
 					continue;
 				}
 				// treat as 正文 Article content, Lead section
+				// e.g., 首段即有內容。
 				set_index('content');
 				continue;
 			}
@@ -3538,6 +3554,12 @@ function module_code(library_namespace) {
 				}
 				break;
 
+			case 'section_title':
+				// 第一個有標題的段落亦可算作 content。
+				set_index('content');
+				set_index('lead_section_end', BACKTRACKING_SPACES);
+				break;
+
 			case 'function':
 				if (token.name === 'DEFAULTSORT')
 					set_index('DEFAULTSORT');
@@ -3556,6 +3578,8 @@ function module_code(library_namespace) {
 				delete layout_indices.footer;
 			}
 		}
+		// 到這邊依然未設定 'content'，可能是像僅有 hatnote_templates 的 talk page。
+		set_index('content');
 
 		// 設置所有必要的 footer index 為頁面結尾。
 		// assert: index === parsed.length
@@ -3563,9 +3587,13 @@ function module_code(library_namespace) {
 		set_index('footer');
 		set_index('page_end');
 
-		// 設置所有必要的 header index 為頁面開頭。
-		index = 0;
-		set_index('content');
+		if (!('lead_section_end' in layout_indices)) {
+			set_index('lead_section_end', BACKTRACKING_SPACES);
+		}
+
+		index = layout_indices['content'];
+		// 添加在首段文字或首個 section_title 前，最後一個 hatnote template 後。
+		set_index('lead_templates_end', BACKTRACKING_SPACES);
 
 		// console.trace(layout_indices);
 		return parsed.layout_indices = layout_indices;
@@ -3620,11 +3648,17 @@ function module_code(library_namespace) {
 						break;
 				}
 			}
-		}
-
-		if (!(parsed_index >= 0)) {
-			throw new Error('insert_layout_token: Can not insert token as '
-					+ location);
+			if (!(parsed_index >= 0)) {
+				if (options.force_insert) {
+					// Nothing matched: Insert as the latest element
+					// 添加在頁面最後面。
+					parsed_index = parsed.length;
+				} else {
+					throw new Error(
+							'insert_layout_token: Can not insert token as '
+									+ location);
+				}
+			}
 		}
 
 		// ----------------------------
@@ -3669,7 +3703,11 @@ function module_code(library_namespace) {
 		&& parsed[parsed_index]) {
 			// insert before the original token,
 			// instead of replace the original token.
-			token += '\n' + parsed[parsed_index];
+			if (!/\n$/.test(token) && !/^\n/.test(parsed[parsed_index]))
+				token += '\n';
+			token += parsed[parsed_index];
+		} else if (!/\n$/.test(token) && !/^\n/.test(parsed[parsed_index + 1])) {
+			token += '\n';
 		}
 
 		parsed[parsed_index] = token;
@@ -7572,7 +7610,11 @@ function module_code(library_namespace) {
 			// console.log(token);
 			if (token.type === 'tag' /* || token.type === 'tag_single' */) {
 				// console.log(token);
-				if (token.tag == 'nowiki') {
+				if (token.tag in {
+					nowiki : true,
+					code : true,
+					syntaxhighlight : true
+				}) {
 					// assert: token[1].type === 'tag_inner'
 					// do not show type: 'tag_attributes' when .join('')
 					token[0][0] = '';
@@ -7603,7 +7645,7 @@ function module_code(library_namespace) {
 			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
 			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
 			// <source lang="cpp">
-			.replace(/<\/?(?:nowiki|code)>/g, '')
+			.replace(/<\/?(?:nowiki|code|syntaxhighlight)>/g, '')
 			// link → page title
 			.replace(/^\[\[([^\[\]\|{}<>\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1')
 			// Remove comments
