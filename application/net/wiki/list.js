@@ -719,7 +719,9 @@ function module_code(library_namespace) {
 			}
 
 			if (pages.length === 0) {
-				library_namespace.error('get_list: No page got!');
+				library_namespace.debug('No [' + type + '] of '
+						+ wiki_API.title_link_of(title), 1, 'get_list');
+				// console.trace(data);
 				callback(pages/* , new Error('No page got!') */);
 				return;
 			}
