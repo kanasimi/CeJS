@@ -5323,6 +5323,10 @@ function module_code(library_namespace) {
 		.replace(PATTERN_common_characters_FW, '').toLowerCase()
 		// 去掉複數。 TODO: 此法過於簡略。
 		.replace(/s$/, '')
+		// 當有大小寫轉換後相同的標籤時應跳過。
+		// should not append the alias when the alias is the same with label
+		// after lower cased.
+		.toLowerCase()
 		// 保證回傳 {String}。 TODO: {Number}0
 		|| '';
 	}
