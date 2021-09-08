@@ -3893,25 +3893,33 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/wiki/Manual:OutputPage.php
 	//
 	// templatestyles: https://www.mediawiki.org/wiki/Extension:TemplateStyles
-	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr|templatestyles',
-	/** {RegExp}HTML tags 的匹配模式。 */
-	PATTERN_WIKI_TAG = new RegExp('<(' + markup_tags
-			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
-	/** {RegExp}HTML tags 的匹配模式 of <nowiki>。 */
-	PATTERN_WIKI_TAG_of_nowiki = new RegExp('<('
-	// 這些 tag 就算中間置入 "<!--" 也沒作用，必須在 "<!--" 之前解析。
-	+ 'nowiki|source|syntaxhighlight'
-			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
-	/** {RegExp}HTML tags 的匹配模式 without <nowiki>。 */
-	PATTERN_WIKI_TAG_without_nowiki = new RegExp('<('
-			+ markup_tags.replace('nowiki|', '')
-			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
-	/** {RegExp}HTML self closed tags 的匹配模式。 */
+	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr|templatestyles';
+	var /** {RegExp}HTML self closed tags 的匹配模式。 */
 	PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_close_tags
 	// allow "<br/>"
-	+ ')(\/|\\s[^<>]*)?>', 'ig'),
-	// 在其內部的 wikitext 不會被parse。允許內部採用 table 語法的 tags。例如 [[mw:Manual:Extensions]]
-	no_parse_tags = 'pre|nowiki|source|syntaxhighlight'.split('|').to_hash();
+	+ ')(\/|\\s[^<>]*)?>', 'ig');
+	/** {RegExp}HTML tags 的匹配模式。 */
+	var PATTERN_WIKI_TAG = function(tags) {
+		return new RegExp('<(' + tags
+		//
+		+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1(?:\\s[^<>]*)?)>', 'ig');
+	};
+	// 在其內部的 wikitext 不會被 parse。允許內部採用 table 語法的 tags。例如
+	// [[mw:Manual:Extensions]]
+	var no_parse_tags = 'pre|nowiki|source|syntaxhighlight',
+	/**
+	 * {RegExp}HTML tags 的匹配模式 of <nowiki>。這些 tag 就算中間置入 "<!--" 也不會被當作
+	 * comments，必須在 "<!--" 之前解析。
+	 */
+	PATTERN_WIKI_TAG_of_no_parse = PATTERN_WIKI_TAG(no_parse_tags);
+	no_parse_tags = no_parse_tags.split('|');
+	/** {RegExp}HTML tags 的匹配模式 without <nowiki>。 */
+	var PATTERN_WIKI_TAG_with_parse = PATTERN_WIKI_TAG(markup_tags.split('|')
+			.filter(function(tag) {
+				return !no_parse_tags.includes(tag);
+			}).join('|'));
+	PATTERN_WIKI_TAG = PATTERN_WIKI_TAG(markup_tags);
+	no_parse_tags = no_parse_tags.to_hash();
 
 	function evaluate_parser_function(options) {
 		var argument_1 = this.parameters[1] && this.parameters[1].toString();
@@ -6394,7 +6402,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// 因為<nowiki>可以打斷其他的語法，包括"<!--"，因此必須要首先處理。
 
-		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_of_nowiki,
+		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_of_no_parse,
 				parse_HTML_tag);
 
 		// ----------------------------------------------------
@@ -6520,13 +6528,13 @@ function module_code(library_namespace) {
 		// PATTERN_WIKI_TAG.lastIndex = 0;
 
 		// console.log(PATTERN_TAG);
-		// console.trace(PATTERN_WIKI_TAG_without_nowiki);
+		// console.trace(PATTERN_WIKI_TAG_with_parse);
 		// console.trace(wikitext);
 
 		// HTML tags that must be closed.
 		// <pre>...</pre>, <code>int f()</code>
-		wikitext = wikitext.replace_till_stable(
-				PATTERN_WIKI_TAG_without_nowiki, parse_HTML_tag);
+		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_with_parse,
+				parse_HTML_tag);
 
 		// ----------------------------------------------------
 		// single tags. e.g., <hr />
