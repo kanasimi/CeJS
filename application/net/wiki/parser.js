@@ -695,7 +695,8 @@ function module_code(library_namespace) {
 		if (!spaces[1] && !isNaN(parameter_name)) {
 			var matched = replace_to.match(/^\s*(\d+)\s*=\s*([\s\S]*)$/);
 			if (matched && matched[1] == parameter_name
-			// 假如包含 "=" 就不能省略數字指定 prefix
+			// 假如包含 "=" 就不能省略數字指定 prefix。
+			// TODO: template 本身假如會產出 "a=b" 這樣的字串，恐怕會造成問題。
 			&& !matched[2].replace(/{{ *= *(?:\|[^{}]*)?}}/g, '').includes('=')) {
 				// e.g., replace [2] to non-named 'value' in {{t|1|2}}
 				library_namespace.debug('auto remove numbered parameter: '
@@ -2164,10 +2165,25 @@ function module_code(library_namespace) {
 				// return token.join(';');
 				token.toString = function() {
 					var converted = this.converted;
+					if (converted === undefined) {
+						// e.g., get display_text of
+						// '==「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」=='
+						return section_link_START_CONVERT
+						// @see wiki_toString.convert
+						+ this.join(';') + section_link_END_CONVERT;
+					}
 					if (Array.isArray(converted)) {
-						converted = section_link(
 						// e.g., '==-{[[:三宝颜共和国]]}-=='
-						converted.toString(), options)[2];
+						converted = converted.toString()
+						// e.g.,
+						// '==「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」=='
+						// recover language conversion -{}-
+						.replace(section_link_START_CONVERT_reg, '-{').replace(
+								section_link_END_CONVERT_reg, '}-');
+						var _options = Object.clone(options);
+						// recursion, self-calling, 遞迴呼叫
+						_options.is_recursive = true;
+						converted = section_link(converted, _options)[2];
 					}
 					return section_link_START_CONVERT
 					// + this.join(';')
@@ -2200,13 +2216,16 @@ function module_code(library_namespace) {
 			}
 		}, true);
 		// console.log(parsed_title);
-		// console.log(parsed_title.toString().trim());
+		// console.trace(parsed_title.toString().trim());
 
 		// display_text 應該是對已經正規化的 section_title 再作的變化。
-		var display_text = section_link_escape(parsed_title.toString().trim())
-		// recover language conversion -{}-
-		.replace(section_link_START_CONVERT_reg, '-{').replace(
-				section_link_END_CONVERT_reg, '}-');
+		var display_text = parsed_title.toString().trim();
+		display_text = section_link_escape(display_text);
+		if (!options.is_recursive) {
+			// recover language conversion -{}-
+			display_text = display_text.replace(section_link_START_CONVERT_reg,
+					'-{').replace(section_link_END_CONVERT_reg, '}-');
+		}
 
 		// link = [ page title 頁面標題, anchor 網頁錨點 / section title 章節標題,
 		// display_text / label 要顯示的連結文字 default: section_title ]
@@ -2381,6 +2400,7 @@ function module_code(library_namespace) {
 		}
 		console.log('#' + section.section_title);
 		console.log([ section.users, section.dates ]);
+		return parsed.each.exit;
 	}, {
 		level_filter : [ 2, 3 ],
 		get_users : true,
@@ -2418,7 +2438,7 @@ function module_code(library_namespace) {
 		// 加入 **上一個** section, "this_section"
 		function add_root_section(next_section_title_index) {
 			// assert: _this.type === 'plain'
-			// section_title === parser[section.range[0] - 1]
+			// section_title === parsed[section.range[0] - 1]
 			var this_section_title_index = all_root_section_list.length > 0 ? all_root_section_list
 					.at(-1).range[1]
 					: undefined,
@@ -2454,7 +2474,7 @@ function module_code(library_namespace) {
 		// TODO: 不必然是章節，也可以有其它不同的分割方法。
 		// TODO: 可以讀取含入的子頁面
 		this.each('section_title', function(section_title_token,
-		// section 的 index of parser。
+		// section 的 index of parsed。
 		section_title_index, parent_token) {
 			var section_title_link = section_title_token.link;
 			if (page_title) {
@@ -2693,9 +2713,9 @@ function module_code(library_namespace) {
 						}));
 
 				if (false) {
-					parser.each_section();
+					parsed.each_section();
 					// scan / traversal section templates:
-					parser.each.call(parser.sections[section_index],
+					parsed.each.call(parsed.sections[section_index],
 							'template', function(token) {
 								;
 							});
@@ -2703,7 +2723,7 @@ function module_code(library_namespace) {
 
 				if (false) {
 					// 首位發言者, 發起人 index
-					section.initiator_index = parser.each_section.index_filter(
+					section.initiator_index = parsed.each_section.index_filter(
 							section, true, 'first');
 				}
 
@@ -2749,7 +2769,13 @@ function module_code(library_namespace) {
 						});
 			} else {
 				// for_section(section, section_index)
-				all_root_section_list.some(for_section);
+				all_root_section_list.some(function(section, section_index,
+						list) {
+					// return parsed.each.exit;
+					var result = for_section.call(this, section, section_index,
+							list);
+					return result === for_each_token.exit;
+				}, this);
 			}
 		}
 		return this;
@@ -6168,6 +6194,7 @@ function module_code(library_namespace) {
 			// 因為尚未resolve_escaped()，直接使用未parse_wikitext()者會包含未解碼之code!
 			// parameters.title = parameters.toString().trim();
 
+			// console.trace(options);
 			// section_link() 會更動 parse_wikitext() 之結果，
 			// 因此不直接傳入 parsed，而是 .toString() 另外再傳一次。
 			parameters.link = section_link(parameters.toString(),
@@ -6759,6 +6786,7 @@ function module_code(library_namespace) {
 			console.log('='.repeat(80));
 			console.log(queue);
 			console.log(JSON.stringify(wikitext));
+			console.log(options);
 		}
 		resolve_escaped(queue, include_mark, end_mark);
 
@@ -7623,19 +7651,36 @@ function module_code(library_namespace) {
 					code : true,
 					syntaxhighlight : true
 				}) {
+					// console.trace(token);
+					// console.trace(token[1].toString());
 					// assert: token[1].type === 'tag_inner'
 					// do not show type: 'tag_attributes' when .join('')
 					token[0][0] = '';
 					// token = token[1];
 					// token.is_nowiki = true;
-					// console.log(token);
 					return token;
 				}
 				// `<b>value</b>` -> `value`
 				return filter_tags(token[1]);
 			}
 			if (Array.isArray(token)) {
-				var value = token.toString.call(token.map(filter_tags));
+				var value = token.map(filter_tags);
+				if (false) {
+					// 去掉前後的空白字元。
+					while (typeof value[0] === 'string' && !value[0].trim())
+						value.shift();
+					while (typeof value.at(-1) === 'string'
+							&& !value.at(-1).trim())
+						value.pop();
+					// console.trace(value);
+					if (value.length === 1
+							&& value[0].tag === 'syntaxhighlight'
+							// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight#Other_markup
+							&& /^JSON/i.test(value[0].attributes.lang)) {
+						return value[0];
+					}
+				}
+				value = token.toString.call(value);
 				if (token.type === 'list')
 					token.value = value;
 				else
@@ -7645,9 +7690,20 @@ function module_code(library_namespace) {
 		}
 
 		function normalize_value(value) {
+			// console.trace(value);
 			// console.trace(JSON.stringify(value));
 			// console.trace(JSON.stringify(filter_tags(value)));
-			value = filter_tags(value).toString().trim();
+			value = filter_tags(value);
+			value = value.toString().trim();
+			if (false) {
+				var token = parse_wikitext(value);
+				if (token.type === 'tag' && token.tag === 'syntaxhighlight'
+						&& /^JSON/i.test(token.attributes.lang)) {
+					console.trace(token[1].toString());
+					return JSON.parse(token[1].toString());
+				}
+			}
+
 			// console.log(JSON.stringify(value));
 			value = value
 			// TODO: <syntaxhighlight lang="JavaScript" line start="55">

@@ -839,7 +839,7 @@ function test_locale() {
 
 
 
-	//	###單數複數形式 (plural) test
+	//	###單數複數形式 Singular and plural nouns / Grammatical number test
 	all_error_count += CeL.test('單數複數形式 (plural)', function (assert) {
 		// CeL.gettext.use_domain('en', function() {}, true);
 		var message_id = '已載入 %1 筆資料。';
@@ -867,11 +867,11 @@ function test_locale() {
 	});
 
 
-	all_error_count += CeL.test('直接取得特定domain的文字。', function (assert) {
+	all_error_count += CeL.test('直接取得特定 domain 的文字。', function (assert) {
 		CeL.gettext.use_domain('zh-TW', function () {
 			CeL.gettext.use_domain('en', function () {
 				assert(['Loading...', CeL.gettext('Loading...')]);
-				assert(['載入中…', CeL.gettext.in_domain('TW', 'Loading...')], '不改變預設domain，直接取得特定domain的轉換過的文字。');
+				assert(['載入中…', CeL.gettext.in_domain('TW', 'Loading...')], '不改變預設 domain，直接取得特定 domain 的轉換過的文字。');
 			}, true);
 		}, true);
 	});
@@ -3437,6 +3437,8 @@ function test_wiki() {
 		assert(['<pre class="c">\n==t==\nw\n</pre>', parsed[1].toString()], 'wiki.parse: HTML tag pre #2');
 		assert([' class="c"', parsed[1][0].toString()], 'wiki.parse: HTML tag pre #3');
 		assert(['\n==t==\nw\n', parsed[1][1].toString()], 'wiki.parse: HTML tag pre #4');
+		wikitext = '<pre> <!-- a --></pre class>'; parsed = CeL.wiki.parse(wikitext);
+		assert([' <!-- a -->', parsed[1][0]], 'wiki.parse: HTML tag pre #5');
 
 		wikitext = '1<nowiki>\n==t==\nw\n</nowiki>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #1');
@@ -3595,6 +3597,8 @@ function test_wiki() {
 		assert(["[[#-%7b三宝颜共和国%7d-|-{三宝颜共和国}-]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-1');
 		wikitext = "[[A]]-{[[:三宝颜共和国]]}-BB ";
 		assert(["[[#A-%7b三宝颜共和国%7d-BB|A-{三宝颜共和国}-BB]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-2');
+		wikitext = "「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」";
+		assert(["[[#「-%7bXX-%7bzh-hans:纳; zh-hant:納%7d-克%7d-→-%7bXX-%7b奈%7d-克%7d-」|「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #4-1');
 
 		wikitext = '#1\n#2\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #1');
