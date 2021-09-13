@@ -2482,7 +2482,8 @@ function module_code(library_namespace) {
 	 *            指定日干支。
 	 * @param {Date}date_value
 	 *            基準日。
-	 * @param [options]
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @returns
 	 */
 	function convert_stem_branch_date(stem_branch, date_value, end_date_diff) {
@@ -2723,6 +2724,7 @@ function module_code(library_namespace) {
 	 * @param {Date|Number}start
 	 * @param {Date|Number}[end]
 	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function age_of(start, end, options) {
 		if (!end) {
@@ -2826,12 +2828,17 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/wiki/MediaWiki:Gadget-CommentsinLocalTime.js
 	function indicate_date_time(date, options) {
 		options = library_namespace.setup_options(options);
+		if (!is_Date(date)) {
+			// e.g., time value, ISO string
+			// console.trace(date);
+			date = new Date(date);
+		}
 		var date_value_diff = date - Date.now();
 		if (isNaN(date_value_diff)) {
 			// something wrong
 			return;
 		}
-		if (Math.abs(date_value_diff) > (options.max_interval || 7 * ONE_DAY_LENGTH_VALUE)) {
+		if (Math.abs(date_value_diff) > (options.max_interval || 35 * ONE_DAY_LENGTH_VALUE)) {
 			return date.format(options.general_format
 					|| indicate_date_time.general_format);
 		}
@@ -2849,8 +2856,12 @@ function module_code(library_namespace) {
 		// → seconds
 		date_value_diff /= 1000;
 
+		if (date_value_diff < 1) {
+			return gettext('now');
+		}
+
 		if (date_value_diff < 10) {
-			return passed ? 'several seconds ago' : 'soon';
+			return gettext(passed ? 'several seconds ago' : 'soon');
 		}
 		if (date_value_diff < 60) {
 			return gettext(passed ? '%1 seconds ago' : '%1 seconds later', Math
@@ -3032,6 +3043,71 @@ function module_code(library_namespace) {
 	parse_period.PATTERN = /^(.+[^a-z]|[^\d]*\d.+)[\-–－—─~～〜﹣]\s*([^\-].+)$/i;
 
 	_.parse_period = parse_period;
+
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+	// count=1: 1–31
+	// count=2: 1–15, 16–31
+	// count=3: 1–10, 11–20, 21–31
+	// count=4: 1–7, 8–14, 15–21, 22–31
+	// count=5: 1–6, ...
+	/**
+	 * 將`date`所屬的月份以日子為單位平均切割成`count`個slice，回傳`date`所在slice的首尾日期。
+	 * 
+	 * @param {Array}date
+	 *            基準日期: [year, month, date]。assert: 必須為合理日期，不可輸入[2001,1,32]之類。
+	 * @param {Natural}count
+	 *            將`date`所屬的月份以日子為單位平均切割成`count`個slice。 assert: count<=31
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns `date`所在slice的首尾日期: {Array}[起始日期, 結束日期]
+	 */
+	function get_date_range_via_cutting_month(date, count, options) {
+		if (!Array.isArray(date)) {
+			if (!is_Date(date)) {
+				date = new Date(date);
+			}
+			date = Julian_day(date);
+			date = Julian_day.to_YMD(date, 'CE');
+		}
+		// assert: Array.isArray(date)
+		var year = date[0], month = date[1];
+		date = date[2];
+
+		var days_in_this_month = Julian_day.from_YMD(year, month + 1, 1, 'CE')
+				- Julian_day.from_YMD(year, month, 1, 'CE');
+
+		// const
+		var slice_days = days_in_this_month / count | 0;
+		var index = (date - 1) / slice_days | 0;
+		if (index >= count)
+			index = count - 1;
+		var slice_start_date = index * slice_days + 1;
+		var slice_end_date = slice_start_date + slice_days
+		// 從下一個片段第一天移到本片段最後一天。
+		- 1;
+		if (slice_days === 0) {
+			slice_start_date = slice_end_date = date;
+		} else if (index === count - 1) {
+			// assert: date 處在最後一個片段。
+			// 最後一個片段必須包含到最後一天。
+			slice_end_date = days_in_this_month;
+		}
+
+		if (options && options.to_Date) {
+			slice_start_date = Julian_day.YMD_to_Date(year, month,
+					slice_start_date, 'CE');
+			slice_end_date = Julian_day.YMD_to_Date(year, month,
+					slice_end_date, 'CE');
+		} else if (options && options.get_full_date) {
+			slice_start_date = [ year, month, slice_start_date ];
+			slice_end_date = [ year, month, slice_end_date ];
+		}
+		return [ slice_start_date, slice_end_date ];
+	}
+
+	_.get_date_range_via_cutting_month = get_date_range_via_cutting_month;
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -3272,7 +3348,7 @@ function module_code(library_namespace) {
 		} else if (typeof date === 'number') {
 			date = new Date(date);
 		}
-		if (!library_namespace.is_Date(date) || !date.getTime()) {
+		if (!is_Date(date) || !date.getTime()) {
 			if (date) {
 				library_namespace.error('generator_toString: Invalid date: '
 						+ date);
