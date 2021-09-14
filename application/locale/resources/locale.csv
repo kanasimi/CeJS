@@ -53,6 +53,7 @@
 	"data.date: age_of()"	"%1 min"	"minutes"	"%1分"		"%1 min"	"%1分"		
 	"data.date: age_of()"	"%1 hr"	"hours"	"%1小時"		"%1 hr"	"%1時間"		
 	"data.date: age_of()"	"%1 d"	"days"	"%1天"		"%1 d"	"%1日"		
+	"data.date: indicate_date_time()"	"now"		"現在"		"now"	"今"		
 	"data.date: indicate_date_time()"	"several seconds ago"		"幾秒前"		"several seconds ago"	"数秒前"		
 	"data.date: indicate_date_time()"	"soon"		"馬上"		"soon"	"直ぐ"		
 	"data.date: indicate_date_time()"	"%1 seconds ago"	"剛剛"	"%1秒前"		"%1 seconds ago"	"%1秒前"		

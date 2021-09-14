@@ -455,7 +455,7 @@ function module_code(library_namespace) {
 		// 警告: index 以 "|" 終結，後接數字會被視為 patten 明確終結，並且 "|" 將被吃掉。
 		// e.g., gettest("%1|123", 321) === "321123"
 		// gettest("%1||123", 321) === "321||123"
-		// TODO: 改成 %{index}
+		// TODO: 改成 %{index}, %{var_id}
 		//
 		// 採用 local variable，因為可能有 multithreading 的問題。
 		conversion_pattern = /([\s\S]*?)%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?(\d{1,2})(\|\d)?)/g;
@@ -1659,7 +1659,8 @@ function module_code(library_namespace) {
 		'cmn' : '日一二三四五六'.split('')
 	});
 
-	// 日期
+	// 日期, 用於 strftime.default_conversion @ CeL.data.date
+	// or: CeL.gettext('%d1', new Date())
 	gettext.date = function(date, domain_name) {
 		domain_name = domain_name_for_conversion(domain_name);
 		if (date && !is_Date(date) && date.to_Date)
@@ -1816,11 +1817,15 @@ function module_code(library_namespace) {
 		// ppm (parts-per-million, 10–6), ppb (parts-per-billion, 10–9),
 		// ppt (parts-per-trillion, 10–12), ppq (parts-per-quadrillion, 10–15).
 
+		// CeL.gettext('%d1', new Date())
 		d : gettext.date,
+		// CeL.gettext('%t1', new Date())
 		t : gettext.time,
+		// CeL.gettext('%T1', new Date())
 		T : gettext.datetime,
 		n : gettext.numeral,
 		o : gettext.ordinal,
+		// CeL.gettext('%c1', 1000000)
 		c : gettext.currency
 	};
 

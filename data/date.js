@@ -3095,7 +3095,7 @@ function module_code(library_namespace) {
 			slice_end_date = days_in_this_month;
 		}
 
-		if (options && options.to_Date) {
+		if (options && options.get_Date) {
 			slice_start_date = Julian_day.YMD_to_Date(year, month,
 					slice_start_date, 'CE');
 			slice_end_date = Julian_day.YMD_to_Date(year, month,

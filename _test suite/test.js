@@ -2127,6 +2127,21 @@ function test_net() {
 function test_date() {
 	CeL.run('data.date');
 
+	all_error_count += CeL.test('get_date_range_via_cutting_month', function (assert) {
+		assert(['2001/3/1–2001/3/10', CeL.get_date_range_via_cutting_month([2001,3,5],3,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1');
+		assert(['2001/3/21–2001/3/31', CeL.get_date_range_via_cutting_month([2001,3,25],3,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #2');
+		assert(['2001/2/1–2001/2/14', CeL.get_date_range_via_cutting_month([2001,2,14],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #3');
+		assert(['2001/2/15–2001/2/28', CeL.get_date_range_via_cutting_month([2001,2,15],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #4');
+		assert(['2001/1/16–2001/1/31', CeL.get_date_range_via_cutting_month([2001,1,31],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #5');
+		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,30],30).join('–')], 'get_date_range_via_cutting_month() #6');
+		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,31],30).join('–')], 'get_date_range_via_cutting_month() #7');
+		assert(['30–30', CeL.get_date_range_via_cutting_month([2001,1,30],31).join('–')], 'get_date_range_via_cutting_month() #8');
+		assert(['31–31', CeL.get_date_range_via_cutting_month([2001,1,31],31).join('–')], 'get_date_range_via_cutting_month() #9');
+		assert(['30–30', CeL.get_date_range_via_cutting_month([2001,1,30],32).join('–')], 'get_date_range_via_cutting_month() #10');
+		assert(['31–31', CeL.get_date_range_via_cutting_month([2001,1,31],32).join('–')], 'get_date_range_via_cutting_month() #11');
+	});
+
+
 	all_error_count += CeL.test('parse date', [
 		[[0, new Date('May 5 2022') - 'May 5 2022'.to_Date()], '.to_Date(): 無法 parse 的值'],
 		[[0, new Date('May 5 2022 UTC+09:00') - 'May 5 2022'.to_Date({ zone: 'UTC+9' })], '.to_Date(): 無法 parse 的值+TZ@options'],
