@@ -122,9 +122,11 @@ function module_code(library_namespace) {
 		 */
 		last_index = 0,
 		/**
-		 * <a href="http://en.wikipedia.org/wiki/Escape_character"
-		 * accessdate="2012/3/24 11:16" title="Escape character">escape
-		 * character</a>
+		 * escape_character
+		 * 
+		 * @see <a href="http://en.wikipedia.org/wiki/Escape_character"
+		 *      accessdate="2012/3/24 11:16" title="Escape character">escape
+		 *      character</a>
 		 * 
 		 * @type {character}
 		 */
@@ -152,9 +154,11 @@ function module_code(library_namespace) {
 		/**
 		 * Single Character Escape Sequences
 		 * 
+		 * !see https://en.wikipedia.org/wiki/Escape_sequences_in_C
+		 * 
 		 * @type {Object}
 		 */
-		s_c_e_s = {
+		escape_sequences = {
 			u : to_char,
 			U : to_char,
 			x : to_char,
@@ -174,8 +178,8 @@ function module_code(library_namespace) {
 		 */
 		e_s_handler = function(s, a) {
 			library_namespace.debug(s + ': additional [' + a + '], ', 6);
-			if (s in s_c_e_s) {
-				var f = s_c_e_s[s];
+			if (s in escape_sequences) {
+				var f = escape_sequences[s];
 				s = typeof f === 'function' ? f(s, a) : f;
 			}
 			return s;
@@ -269,6 +273,49 @@ function module_code(library_namespace) {
 
 	_// JSDT:_module_
 	.parse_escape = parse_escape;
+
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+	if (false) {
+		'2A1B' === CeL.extract_literals('${a}A${b}B', {
+			a : 2,
+			b : 1
+		});
+	}
+
+	/**
+	 * 模仿樣板字面值（Template literals）
+	 * 
+	 * TODO: extract_literals('${ ({$:1})["$"] }')
+	 * 
+	 * @param {String}template_string
+	 *            樣板字串（template strings）
+	 * @param {Object}key_value_pairs
+	 *            變數值 {key:value}
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+	 */
+	function extract_literals(template_string, key_value_pairs, options) {
+		if (library_namespace.gettext)
+			template_string = library_namespace.gettext(template_string);
+
+		template_string = template_string.replace_till_stable(/\${([^{}]+?)}/,
+		//
+		function(all, expression) {
+			expression = expression.trim();
+			if (expression in key_value_pairs) {
+				return key_value_pairs[expression];
+			}
+			return all;
+		});
+
+		return template_string;
+	}
+
+	_// JSDT:_module_
+	.extract_literals = extract_literals;
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// TODO
