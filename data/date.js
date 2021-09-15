@@ -459,7 +459,8 @@ function module_code(library_namespace) {
 	Julian_day.YMD_to_Date = function(year, month, date, type, get_value,
 			no_year_0) {
 		var JDN = Julian_day.from_YMD(year, month, date, type, no_year_0);
-		return Julian_day.to_Date(JDN, false, get_value);
+		// 當作 JD 才方便 date.format() 得到正確結果。
+		return Julian_day.to_Date(JDN, true, get_value);
 	};
 
 	/**
@@ -3064,6 +3065,12 @@ function module_code(library_namespace) {
 	 * @returns `date`所在slice的首尾日期: {Array}[起始日期, 結束日期]
 	 */
 	function get_date_range_via_cutting_month(date, count, options) {
+		if (!options && !(count >= 1)) {
+			options = library_namespace.setup_options(count);
+			count = options.count;
+		} else {
+			options = library_namespace.setup_options(options);
+		}
 		if (!Array.isArray(date)) {
 			if (!is_Date(date)) {
 				date = new Date(date);
@@ -3079,7 +3086,18 @@ function module_code(library_namespace) {
 				- Julian_day.from_YMD(year, month, 1, 'CE');
 
 		// const
-		var slice_days = days_in_this_month / count | 0;
+		var slice_days;
+		if (options.slice_days >= 1 && !count) {
+			slice_days = options.slice_days;
+			count = days_in_this_month / slice_days | 0;
+		} else {
+			slice_days = days_in_this_month / count | 0;
+			if (days_in_this_month - count * slice_days > 2 * slice_days) {
+				// 預防最後一區塊太大。
+				// e.g., ([2000,2,28], 10)
+				slice_days++;
+			}
+		}
 		var index = (date - 1) / slice_days | 0;
 		if (index >= count)
 			index = count - 1;
@@ -3095,12 +3113,16 @@ function module_code(library_namespace) {
 			slice_end_date = days_in_this_month;
 		}
 
-		if (options && options.get_Date) {
+		if (options.get_Date) {
+			if (false) {
+				console.trace([ [ year, month, slice_start_date ],
+						[ year, month, slice_end_date ] ]);
+			}
 			slice_start_date = Julian_day.YMD_to_Date(year, month,
 					slice_start_date, 'CE');
 			slice_end_date = Julian_day.YMD_to_Date(year, month,
 					slice_end_date, 'CE');
-		} else if (options && options.get_full_date) {
+		} else if (options.get_full_date) {
 			slice_start_date = [ year, month, slice_start_date ];
 			slice_end_date = [ year, month, slice_end_date ];
 		}

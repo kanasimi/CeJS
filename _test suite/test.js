@@ -1892,8 +1892,7 @@ function test_quantity() {
 
 
 function test_code() {
-	return;
-	all_error_count += CeL.test('code', function (assert) {
+	all_error_count += CeL.test('parse_escape', function (assert) {
 		var e = CeL.parse_escape('00%M0\\\\\\\\\\%Mg\\a1\\n1\\s1\\a222',
 			function (s) {
 				//CeL.log('s: [' + s + ']');
@@ -1901,9 +1900,16 @@ function test_code() {
 			});
 		//CeL.info(e.replace(/\n/g, '<br />'));
 		assert(e === '00_0\\\\%Mga1\n1s1a222', 'parse_escape()');
+	});
 
-		// --------------------------------------------------------------------
+	all_error_count += CeL.test('extract_literals', function (assert) {
+		assert(['2A1B', CeL.extract_literals('${a}A${b}B', {
+			a : 2,
+			b : 1
+		})], 'extract_literals()');
+	});
 
+	all_error_count += CeL.test('Camel', function (assert) {
 		var Camel_test = function (identifier, separator) {
 			var _1, _2;
 			if (identifier.indexOf(separator) === -1) {
@@ -2128,17 +2134,30 @@ function test_date() {
 	CeL.run('data.date');
 
 	all_error_count += CeL.test('get_date_range_via_cutting_month', function (assert) {
-		assert(['2001/3/1–2001/3/10', CeL.get_date_range_via_cutting_month([2001,3,5],3,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1');
-		assert(['2001/3/21–2001/3/31', CeL.get_date_range_via_cutting_month([2001,3,25],3,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #2');
-		assert(['2001/2/1–2001/2/14', CeL.get_date_range_via_cutting_month([2001,2,14],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #3');
-		assert(['2001/2/15–2001/2/28', CeL.get_date_range_via_cutting_month([2001,2,15],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #4');
-		assert(['2001/1/16–2001/1/31', CeL.get_date_range_via_cutting_month([2001,1,31],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #5');
-		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,30],30).join('–')], 'get_date_range_via_cutting_month() #6');
-		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,31],30).join('–')], 'get_date_range_via_cutting_month() #7');
-		assert(['30–30', CeL.get_date_range_via_cutting_month([2001,1,30],31).join('–')], 'get_date_range_via_cutting_month() #8');
-		assert(['31–31', CeL.get_date_range_via_cutting_month([2001,1,31],31).join('–')], 'get_date_range_via_cutting_month() #9');
-		assert(['30–30', CeL.get_date_range_via_cutting_month([2001,1,30],32).join('–')], 'get_date_range_via_cutting_month() #10');
-		assert(['31–31', CeL.get_date_range_via_cutting_month([2001,1,31],32).join('–')], 'get_date_range_via_cutting_month() #11');
+		assert(['2001/3/1–2001/3/10', CeL.get_date_range_via_cutting_month([2001,3,5],3,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1-1');
+		assert(['2001/3/21–2001/3/31', CeL.get_date_range_via_cutting_month([2001,3,25],3,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1-2');
+		assert(['2001/2/1–2001/2/14', CeL.get_date_range_via_cutting_month([2001,2,14],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1-3');
+		assert(['2001/2/15–2001/2/28', CeL.get_date_range_via_cutting_month([2001,2,15],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1-4');
+		assert(['2001/1/16–2001/1/31', CeL.get_date_range_via_cutting_month([2001,1,31],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1-5');
+		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,30],30).join('–')], 'get_date_range_via_cutting_month() #1-6');
+		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,31],30).join('–')], 'get_date_range_via_cutting_month() #1-7');
+		assert(['30–30', CeL.get_date_range_via_cutting_month([2001,1,30],31).join('–')], 'get_date_range_via_cutting_month() #1-8');
+		assert(['31–31', CeL.get_date_range_via_cutting_month([2001,1,31],31).join('–')], 'get_date_range_via_cutting_month() #1-9');
+		assert(['30–30', CeL.get_date_range_via_cutting_month([2001,1,30],32).join('–')], 'get_date_range_via_cutting_month() #1-10');
+		assert(['31–31', CeL.get_date_range_via_cutting_month([2001,1,31],32).join('–')], 'get_date_range_via_cutting_month() #1-11');
+
+		assert(['28–31', CeL.get_date_range_via_cutting_month([2001,1,30],10).join('–')], 'get_date_range_via_cutting_month() #1-12');
+		assert(['28–28', CeL.get_date_range_via_cutting_month([2001,2,28],10).join('–')], 'get_date_range_via_cutting_month() #1-13');
+		assert(['29–31', CeL.get_date_range_via_cutting_month([2001,1,30],15).join('–')], 'get_date_range_via_cutting_month() #1-14');
+		assert(['27–28', CeL.get_date_range_via_cutting_month([2001,2,28],15).join('–')], 'get_date_range_via_cutting_month() #1-15');
+		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,30],30).join('–')], 'get_date_range_via_cutting_month() #1-16');
+		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,31],30).join('–')], 'get_date_range_via_cutting_month() #1-17');
+		assert(['28–28', CeL.get_date_range_via_cutting_month([2001,2,28],30).join('–')], 'get_date_range_via_cutting_month() #1-18');
+
+		var date_range = CeL.get_date_range_via_cutting_month(new Date('2021-08-31'), 2, { get_Date: true });
+		assert(['2021-08-16–2021-08-31', date_range[0].format({ format: '%Y-%2m-%2d', zone: 0 }) + '–' + date_range[1].format({ format: '%Y-%2m-%2d', zone: 0 })], 'get_date_range_via_cutting_month() #2-1');
+		date_range = CeL.get_date_range_via_cutting_month(new Date('2021-08-1'), 2, { get_Date: true });
+		assert(['2021-08-01–2021-08-15', date_range[0].format({ format: '%Y-%2m-%2d', zone: 0 }) + '–' + date_range[1].format({ format: '%Y-%2m-%2d', zone: 0 })], 'get_date_range_via_cutting_month() #2-1');
 	});
 
 
