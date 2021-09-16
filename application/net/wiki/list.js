@@ -1210,15 +1210,28 @@ function module_code(library_namespace) {
 	wiki_API.KEY_subcategories = 'subcategories';
 
 	// Get category only
-	function get_category_tree() {
+	function get_category_tree(options) {
 		var subcategories = this && this[wiki_API.KEY_subcategories];
 		if (!subcategories)
 			return;
 
 		var tree = Object.create(null);
+		// category_name_hash: 避免造成 JavaScript heap out of memory
+		var category_name_hash = options.category_name_hash;
+		if (!library_namespace.is_Object(category_name_hash)) {
+			category_name_hash = options.category_name_hash = Object
+					.create(null);
+		}
 		for ( var category_name in subcategories) {
-			tree[category_name] = get_category_tree
-					.call(subcategories[category_name]);
+			if (category_name in category_name_hash) {
+				// .circular_mark should be primitive value
+				// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#primitive_values
+				tree[category_name] = 'circular_mark' in options ? options.circular_mark
+						: category_name_hash[category_name];
+			} else {
+				tree[category_name] = category_name_hash[category_name] = get_category_tree
+						.call(subcategories[category_name], options);
+			}
 		}
 		return tree;
 	}
