@@ -1216,23 +1216,27 @@ function module_code(library_namespace) {
 			return;
 
 		var tree = Object.create(null);
-		// category_name_hash: 避免造成 JavaScript heap out of memory
-		var category_name_hash = options.category_name_hash;
-		if (!library_namespace.is_Object(category_name_hash)) {
-			category_name_hash = options.category_name_hash = Object
-					.create(null);
+		options = library_namespace.new_options(options);
+		// category_hash: 避免造成 JavaScript heap out of memory
+		var category_hash = options.category_hash;
+		if (!library_namespace.is_Object(category_hash)) {
+			category_hash = options.category_hash = Object.create(null);
 		}
+
 		for ( var category_name in subcategories) {
-			if (category_name in category_name_hash) {
+			if (category_name in category_hash) {
+				// 預防 JSON.stringify() 出現 "TypeError: Converting circular
+				// structure to JSON" 用。
 				// .circular_mark should be primitive value
 				// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#primitive_values
 				tree[category_name] = 'circular_mark' in options ? options.circular_mark
-						: category_name_hash[category_name];
+						: category_hash[category_name];
 			} else {
-				tree[category_name] = category_name_hash[category_name] = get_category_tree
+				tree[category_name] = category_hash[category_name] = get_category_tree
 						.call(subcategories[category_name], options);
 			}
 		}
+
 		return tree;
 	}
 
