@@ -3080,7 +3080,9 @@ function module_code(library_namespace) {
 					|| attribute_token.attributes.name;
 			// console.log(parent);
 			// <ref name="..."> 會轉成 id="cite_re-..."
-			if (parent.tag && parent.tag.toLowerCase() !== 'ref') {
+			if (parent.tag ? parent.tag.toLowerCase() !== 'ref'
+			// e.g., @ [[w:en:Daniel Ricciardo]]
+			: parent.type === 'table_attributes') {
 				// e.g., <span id="anchor">, <div id="anchor">
 				if (Array.isArray(anchor)) {
 					if (anchor.type !== 'plain') {
