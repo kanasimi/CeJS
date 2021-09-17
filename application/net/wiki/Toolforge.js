@@ -83,14 +83,6 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (language === 'meta') {
-			// @see /usr/bin/sql 's7'+domain
-			this.host = 's7.labsdb';
-			// https://wikitech.wikimedia.org/wiki/Help:Toolforge/Database#Metadata_database
-			this.database = 'meta_p';
-			return;
-		}
-
 		if (language === TOOLSDB) {
 			this.host = language;
 			// delete this.database;
@@ -102,7 +94,7 @@ function module_code(library_namespace) {
 		// TODO: 'zh.news'
 		// 警告: this.language 可能包含 'zhwikinews' 之類。
 
-		this.host = site + '.labsdb';
+		this.host = site + set_SQL_config_language.hostname_postfix;
 		/**
 		 * The database names themselves consist of the mediawiki project name,
 		 * suffixed with _p
@@ -113,6 +105,10 @@ function module_code(library_namespace) {
 
 		// console.log(this);
 	}
+
+	// https://wikitech.wikimedia.org/wiki/Help:Toolforge/Database#Connecting_to_the_database_replicas
+	// .analytics.db.svc.wikimedia.cloud
+	set_SQL_config_language.hostname_postfix = '.web.db.svc.wikimedia.cloud';
 
 	/**
 	 * return new SQL config
