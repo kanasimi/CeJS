@@ -1226,33 +1226,41 @@ function module_code(library_namespace) {
 	wiki_API.KEY_subcategories = 'subcategories';
 
 	// Get category only
-	function get_category_tree(options) {
+	function get_category_tree(options, page_name, category_path) {
 		var subcategories = this && this[wiki_API.KEY_subcategories];
 		if (!subcategories)
 			return;
 
+		options = library_namespace.setup_options(options);
 		var category_tree = Object.create(null);
-		options = library_namespace.new_options(options);
-		// tree_of_category: 避免造成 JavaScript heap out of memory
-		var tree_of_category = options.tree_of_category;
-		if (!library_namespace.is_Object(tree_of_category)) {
-			tree_of_category = options.tree_of_category = Object.create(null);
+
+		if (page_name || this.title
+		//
+		&& (page_name = wiki_API.remove_namespace(this.title, options))) {
+			if (category_path) {
+				category_path = Object.clone(category_path);
+			} else {
+				category_path = Object.create(null);
+			}
+			category_path[page_name] = category_tree;
+		} else if (!category_path) {
+			category_path = Object.create(null);
 		}
 
 		for ( var category_name in subcategories) {
-			if (category_name in tree_of_category) {
-				// cache: 以處理遞迴結構。預防 JSON.stringify() 出現
+			if (category_name in category_path) {
+				// 處理遞迴結構。預防 JSON.stringify() 出現
 				// "TypeError: Converting circular structure to JSON" 用。
-				// .circular_mark should be primitive value
+				// .circular_mark should give primitive value
 				// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#primitive_values
-				category_tree[category_name] = ('circular_mark' in options)
-						&& tree_of_category[category_name] ? typeof options.circular_mark === 'function' ? options
-						.circular_mark(category_name, tree_of_category)
+				category_tree[category_name] = 'circular_mark' in options ? typeof options.circular_mark === 'function' ? options
+						.circular_mark(category_name, category_path)
 						: options.circular_mark
-						: tree_of_category[category_name];
+						: category_path[category_name];
 			} else {
-				category_tree[category_name] = tree_of_category[category_name] = get_category_tree
-						.call(subcategories[category_name], options);
+				category_tree[category_name] = get_category_tree.call(
+						subcategories[category_name], options, category_name,
+						category_path);
 			}
 		}
 
@@ -1286,11 +1294,14 @@ function module_code(library_namespace) {
 			callback = null;
 		}
 
-		var session = this, categorymembers_options = {
+		var session = this,
+		/** {Object}執行 categorymembers 查詢時使用的選項。 */
+		categorymembers_options = {
 			// [KEY_SESSION]
 			session : session,
 			type : 'categorymembers'
-		}, categoryinfo_options = {
+		}, /** {Object}執行 categoryinfo 查詢時使用的選項。 */
+		categoryinfo_options = {
 			multi : true,
 			// [KEY_SESSION]
 			session : session,
@@ -1322,15 +1333,20 @@ function module_code(library_namespace) {
 			options = library_namespace.new_options(options);
 		}
 
+		// console.trace(options);
+		// console.trace(categorymembers_options);
+
 		if (!Array.isArray(root_category_list)) {
-			(root_category_list = [ root_category_list ]).single = true;
+			root_category_list = [ root_category_list ];
+			options.multi = false;
 		}
 		if (root_category_list.length < 1) {
 			callback(root_category_list);
 			return;
 		}
-
-		// console.log(categorymembers_options);
+		root_category_list = root_category_list.map(function(root_category) {
+			return session.to_namespace(root_category, NS_Category);
+		});
 
 		if (options.cmtype) {
 			if (typeof options.cmtype === 'string')
@@ -1351,406 +1367,377 @@ function module_code(library_namespace) {
 		}
 		// console.trace(cmtypes_hash);
 
-		var page_filter = options.page_filter || options.filter, category_filter = options.category_filter
-				|| options.filter;
+		/** {Function}分類頁面篩選器。 */
+		var category_filter = options.category_filter || options.filter,
+		/** {Function}非分類頁面之篩選器。 */
+		page_filter = options.page_filter || options.filter;
 
-		// cache 已經取得的資料: 以避免重複獲取，以及處理遞迴結構、預防無窮執行。
+		/** {Object}cache 已經取得的資料: 以避免重複獲取，以及處理遞迴結構、預防無窮執行。 */
 		var tree_of_category = Object.create(null),
 		// subcategory_count === Object.keys(tree_of_category).length
 		subcategory_count = 0;
 
-		// Using .categoryinfo(category_list) to filter empty category first.
-		function filter_category_list(category_list, for_category) {
-			// 先去掉已經處理過的 category。
-			var new_category_list = category_list.filter(function(category) {
-				var page_name = wiki_API.remove_namespace(category, options);
-				return !(page_name in tree_of_category);
-			});
+		// 登記準備要取得的資料。避免重複執行 categorymembers。
+		/** {Object}本次要處理的分類列表。 this_category_queue = [ category, category, ... ] */
+		var this_category_queue = root_category_list,
+		/** {Object}下次要處理的分類。 next_category_queue = { page_name:, page_name:, ... } */
+		next_category_queue;
 
-			function do_for_category() {
-				category_list.forEach(for_category);
+		/** {Natural+0}當前執行階層數。depth 越大時，獲得的資訊越少。 */
+		var depth = 0,
+		/**
+		 * {Natural+0}最大查詢階層數。<br />
+		 * 0: 只包含 root_category 本身的檔案與子類別資訊。<br />
+		 * 1: 包含 1 層子類別的檔案與子類別資訊。以此類推。
+		 */
+		max_depth = (options.depth >= 0 ? options.depth
+				: category_tree.default_depth) | 0;
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Recovering list attributes.
+		 * 
+		 * @param {Array}from_list
+		 *            Copy from list
+		 * @param {Array}to_list
+		 *            Copy to list
+		 */
+		function copy_list_attributes(from_list, to_list) {
+			// Object.assign(to_list, category_page_data); to_list.trimcate();
+			Object.keys(from_list).forEach(function(key) {
+				if (isNaN(key))
+					to_list[key] = from_list[key];
+			});
+			return to_list;
+		}
+
+		function add_tree_list(tree_list, page_name) {
+			console.assert(page_name in tree_of_category === false);
+
+			tree_list.depth = depth;
+			subcategory_count++;
+			tree_of_category[page_name] = tree_list;
+
+			// 警告: 一個分頁只會執行一次。
+			if (options.for_each_category) {
+				try {
+					options.for_each_category(list);
+				} catch (e) {
+					library_namespace.error(e);
+				}
 			}
+		}
+
+		/**
+		 * 分配、篩選頁面。<br />
+		 * 留下非分類頁面。<br />
+		 * 直接剔除掉已經查詢過的分頁頁面，即 tree_of_category 已經有的。<br />
+		 * 其他 unique 之後放到 next_category_queue。
+		 * 
+		 * 不可動到 this_category_queue!
+		 * 
+		 * @param {Array}page_list
+		 *            頁面列表。
+		 */
+		function filter_and_assign_category_pages(page_list) {
+			function all_page_filter(page_data) {
+				// console.log(page_data)
+				if (!session.is_namespace(page_data, NS_Category)) {
+					// console.log(page_data);
+					// console.log(page_filter(page_data));
+					try {
+						if (page_filter && !page_filter(page_data)) {
+							// console.log(page_data.title);
+							return false;
+						}
+						// 警告: 只要頁面存在於多個查詢到的分類中，就會多次執行。
+						if (options.for_each_page) {
+							options.for_each_page(page_data);
+						}
+					} catch (e) {
+						library_namespace.error(e);
+					}
+					// console.log(page_data.title);
+					return true;
+				}
+
+				// All categories must return false.
+
+				var page_name = session.remove_namespace(page_data, options);
+				var cached_tree_list = tree_of_category[page_name];
+
+				if (category_filter && !category_filter(page_data)) {
+					// 直接除名。
+					// library_namespace.log('Skip not eligibled category: ' +
+					// page_data.title);
+					return false;
+				}
+
+				// 登記 subcategory。將會在 build_category_tree() 重新指定。
+				subcategories[page_name] = null;
+
+				if (cached_tree_list) {
+					// using cache: 已取得 tree_of_category[page_name] 的資料。
+					return false;
+				}
+
+				// 註記需要取得這個 subcategory 的資料。
+				if (!next_category_queue[page_name]
+						|| typeof page_data === 'object') {
+					next_category_queue[page_name] = page_data;
+				}
+				return false;
+			}
+
+			var subcategories = Object.create(null);
+			var filtered_page_list = page_list.filter(all_page_filter);
+			copy_list_attributes(page_list, filtered_page_list);
+			if (!library_namespace.is_empty_object(subcategories))
+				filtered_page_list[wiki_API.KEY_subcategories] = subcategories;
+
+			return filtered_page_list;
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * 剔除 this_category_queue 中，空的、不符資格的 category。<br />
+		 * Eliminate empty and ineligible categories.<br />
+		 * Using .categoryinfo(category_list) to filter empty category first.
+		 */
+		function eliminate_empty_categories() {
+			next_category_queue = Object.create(null);
+			// 先去掉已經處理過的 category。
+			filter_and_assign_category_pages(this_category_queue);
+			// setup this_category_queue.
+			this_category_queue = Object.values(next_category_queue);
 
 			// 0, 1 個 category 執行 categoryinfo 不划算。
-			if (new_category_list.length < 2) {
-				do_for_category();
-				return;
-			}
-
-			function for_category_info_list(category_info_list, error) {
-				// console.trace(category_info_list);
-				if (category_info_list) {
-					// var filtered_page_name = [];
-					category_info_list.forEach(function(category_info) {
-						if (page_name in tree_of_category) {
-							if (false && tree_of_category[page_name]
-							// 有時會有同一 category 多次 for_category_info_list()。
-							&& !tree_of_category[page_name].categoryinfo) {
-								console
-										.trace(tree_of_category[page_name],
-												list);
-							}
-							return;
-						}
-
-						var categoryinfo = category_info.categoryinfo;
-						for ( var types in cmtypes_hash) {
-							if (categoryinfo[types] > 0) {
-								// need get, cannot skip
-								return;
-							}
-						}
-
-						// console.trace(category_info);
-						var page_name = wiki_API.remove_namespace(
-								category_info, options);
-						// 模擬空的 category tree
-						var list = [];
-						// Object.assign([], category_info);
-						list.title = category_info.title;
-						if (categoryinfo.subcats > 0)
-							list[KEY_subcategories] = Object.create(null);
-						list.depth = 0;
-						list.parents = [];
-						list.categoryinfo = category_info.categoryinfo;
-						// filtered_page_name.push(page_name);
-						subcategory_count++;
-						tree_of_category[page_name] = list;
-						fire_listeners(page_name);
-					});
-					if (false) {
-						console.trace([ new_category_list.length,
-								filtered_page_name ]);
-					}
-				}
-				do_for_category();
-			}
-
-			wiki_API.list(new_category_list, for_category_info_list,
-					categoryinfo_options);
-		}
-
-		// 登記準備要取得的資料。避免重複執行 categorymembers。
-		// queued_category[page_name] = [ depth:depth, listener, listener... ]
-		var queued_category = Object.create(null);
-		function fire_listeners(page_name, depth) {
-			// assert: (page_name in tree_of_category)
-			var listeners = queued_category[page_name];
-			library_namespace.debug(page_name + ': '
-					+ (listeners && listeners.length) + ' listener(s), depth '
-					+ (listeners && listeners.depth) + ' vs. ' + depth + ', '
-					+ Object.keys(queued_category).length + ' left.', 0,
-					'fire_listeners');
-			if (Object.keys(queued_category).length < 50)
-				console.log(Object.keys(queued_category).slice(0, 3).join('|'));
-			if (listeners && !(listeners.depth < depth)) {
-				delete queued_category[page_name];
-				listeners.forEach(function(listener) {
-					listener();
-				});
-			}
-		}
-
-		function get_categorymembers(category, callback, depth) {
-			var page_name = wiki_API.remove_namespace(category, options);
-			if (!queued_category[page_name]) {
-				(queued_category[page_name] = []).depth = depth;
-			} else {
-				if (queued_category[page_name].depth > depth) {
-					// 先前已預訂要取得資訊。.depth 深度越小，獲得的資訊越多。
-					// 不動到原先就有資料的 listeners，只設定資訊更多的 .depth。
-					queued_category[page_name].depth = depth;
-				}
-				queued_category[page_name].push(get_categorymembers.bind(null,
-						category, callback, depth));
+			if (this_category_queue.length < 2) {
+				get_all_categorymembers();
 				return;
 			}
 
 			// --------------------------------------------
 
-			function for_category_list(list/* , target, options */) {
-				// assert: Array.isArray(list)
-				if (list.error) {
-					callback(null, list.error);
-					return;
-				}
-
-				// ----------------------------------------
-
-				library_namespace.debug(wiki_API.title_link_of(category)
-						+ ': Get ' + list.length + ' item(s).', 1,
-						'category_tree');
-				// console.log(list);
-				if (options.for_each_category) {
-					try {
-						options.for_each_category(list);
-					} catch (e) {
-						library_namespace.error(e);
-					}
-				}
-
-				// ----------------------------------------
-
-				// console.log(list);
-				function process_all_pages(page_data) {
-					// console.log(page_data)
-					if (page_data.ns !== NS_Category) {
-						// console.log(page_data);
-						// console.log(page_filter(page_data));
-						try {
-							if (page_filter && !page_filter(page_data)) {
-								// console.log(page_data.title);
-								return false;
-							}
-							if (options.for_each_page) {
-								options.for_each_page(page_data);
-							}
-						} catch (e) {
-							library_namespace.error(e);
-						}
-						// console.log(page_data.title);
-						return true;
-					}
-
-					// All categories must return false
-
-					var page_name = wiki_API.remove_namespace(page_data,
-							options);
-					var cached_tree_list = tree_of_category[page_name];
-
-					// TODO: using .to_namespace()
-					if (category_filter && !category_filter(page_data)) {
-						// library_namespace.log('Skip ' + page_data.title);
-						if (cached_tree_list && !cached_tree_list.not_eligible) {
-							subcategory_count--;
-							cached_tree_list.not_eligible = true;
-						}
-						return false;
-					}
-
-					if (page_name in tree_of_category) {
-						// using cache
-						subcategories[page_name] = cached_tree_list;
-						cached_tree_list.parents.push(subcategories);
-						return false;
-					}
-
-					if (depth > max_depth) {
-						// 註記有這個 subcategory。
-						// move subcategory to `subcategories`
-						subcategories[page_name] = null;
-						return false;
-					}
-
-					// library_namespace.log('Process ' + page_data.title);
-					subcategories_to_get.push(page_data);
-					return false;
-				}
-
-				var subcategories_to_get = [], subcategories = Object
-						.create(null);
-				var title = list.title;
-
-				if (queued_category[page_name]
-						&& queued_category[page_name].depth >= 0) {
-					if (false) {
-						console
-								.assert(queued_category[page_name].depth <= depth);
-					}
-					if (!(queued_category[page_name].depth <= depth)) {
-						library_namespace.error('for_category_list: '
-								+ [ queued_category[page_name].depth, depth ]);
-					}
-					depth = queued_category[page_name].depth;
-				}
-				depth++;
-
-				list = list.filter(process_all_pages);
-				// recovery attributes
-				list.title = title;
-				// console.trace(subcategories);
-				// console.trace(subcategories_to_get.length);
-				if (subcategories_to_get.length === 0) {
-					if (// depth > max_depth &&
-					//
-					!library_namespace.is_empty_object(subcategories)) {
-						list[wiki_API.KEY_subcategories] = subcategories;
-					} else {
-						// No subcategory
-					}
-					// console.trace(depth);
-					callback(options.no_list || list);
-					return;
-				}
-
-				// console.assert(subcategories_to_get.length > 0);
-				if (!(subcategories_to_get.length > 0)) {
-					library_namespace.error('for_category_list: '
-							+ subcategories_to_get.length);
-				}
-				list[wiki_API.KEY_subcategories] = subcategories;
-				// waiting for get_categorymembers() @ process_all_pages()
-				subcategories_to_get.count = 0;
-				// assert: get_categorymembers() won't return soon
-				filter_category_list(subcategories_to_get, function(
-						subcategory_page_data) {
-					var page_name = wiki_API.remove_namespace(
-							subcategory_page_data, options);
-					var cached_tree_list = tree_of_category[page_name];
-
-					function set_subcategories(cached_tree_list) {
-						subcategories[page_name] = cached_tree_list;
-						cached_tree_list.parents.push(subcategories);
-
-						fire_listeners(page_name, depth);
-
-						// console.trace(subcategories_to_get.count);
-						if (++subcategories_to_get.count
-						//
-						=== subcategories_to_get.length) {
-							callback(options.no_list || list);
-						}
-					}
-
-					if (page_name in tree_of_category) {
-						// filter_category_list() 或其他執行緒已取得
-						// tree_of_category[page_name] 的資料。
-						set_subcategories(cached_tree_list);
-						return;
-					}
-
-					get_categorymembers(subcategory_page_data,
-					//
-					function(sub_list, error) {
-						var cached_tree_list = tree_of_category[page_name];
-						if (cached_tree_list
-						// .depth 越大，獲得的資訊越少。
-						&& cached_tree_list.depth <= depth) {
-							// 採用 cached_tree_list。
-							if (cached_tree_list.depth === depth) {
-								console.trace(cached_tree_list, sub_list);
-							}
-							set_subcategories(cached_tree_list);
-							return;
-						}
-
-						// 採用 sub_list。
-						sub_list.depth = depth;
-						if (page_name in tree_of_category) {
-							// assert: 本次取得了資訊更多的資料。
-							if (false) {
-								console.assert(!cached_tree_list
-								//
-								|| isNaN(cached_tree_list.depth)
-								//
-								|| cached_tree_list.depth > depth);
-							}
-							if (!(!cached_tree_list
-							//
-							|| isNaN(cached_tree_list.depth)
-							//
-							|| cached_tree_list.depth > depth)) {
-								library_namespace.error('for_category_list: '
-								//
-								+ [ cached_tree_list
-								//
-								&& cached_tree_list.depth, depth ]);
-							}
-							(sub_list.parents
-							//
-							= cached_tree_list.parents)
-							// 改採用資訊較多的資料。
-							.forEach(function(parent) {
-								parent[page_name] = sub_list;
-							});
-						} else {
-							sub_list.parents = [];
-							subcategory_count++;
-						}
-						tree_of_category[page_name] = sub_list;
-						set_subcategories(sub_list);
-					}, depth);
-				});
-			}
-
+			var message = 'Get categoryinfo of ' + this_category_queue.length
+					+ ' categories.';
 			if (library_namespace.is_debug()) {
-				library_namespace.debug('Get categorymembers of '
-						+ wiki_API.title_link_of(category) + '...', 1,
-						'category_tree');
+				library_namespace.debug(message, 1,
+						'eliminate_empty_categories');
 			} else {
-				library_namespace.log_temporary('Get categorymembers of '
-						+ wiki_API.title_link_of(category) + ' ('
-						+ subcategory_count + ' subcategories, '
-						+ (max_depth - depth) + ' levels left)');
+				library_namespace.log_temporary(message);
 			}
 
-			wiki_API.list(category, for_category_list, categorymembers_options);
+			wiki_API.list(this_category_queue, for_category_info_list,
+					categoryinfo_options);
 		}
 
-		// 0: 只包含 root_category 本身的檔案與子類別資訊。
-		// 1: 包含 1 層子類別的檔案與子類別資訊。以此類推。
-		var max_depth = (options.depth >= 0 ? options.depth
-				: category_tree.default_depth) | 0;
-		function process_root_category(root_category, callback) {
-			get_categorymembers(root_category,
+		function for_category_info_list(category_info_list) {
+			// console.trace(category_info_list);
+			console.assert(Array.isArray(category_info_list));
+			if (category_info_list.error) {
+				library_namespace.error('for_category_info_list: '
+						+ category_info_list.error);
+				get_all_categorymembers();
+				return;
+			}
+
+			// ----------------------------------------
+
+			next_category_queue = Object.create(null);
+			category_info_list.forEach(for_category_info);
+
+			// setup this_category_queue.
+			this_category_queue = Object.values(next_category_queue);
+			get_all_categorymembers();
+		}
+
+		function for_category_info(category_page_data) {
+			// console.trace(category_page_data);
+			var page_name = wiki_API.remove_namespace(category_page_data,
+					options);
+			if (page_name in tree_of_category) {
+				if (false && tree_of_category[page_name]
+				// 有時會有同一 category 多次 for_category_info_list()。
+				&& !tree_of_category[page_name].categoryinfo) {
+					console.trace(tree_of_category[page_name],
+							category_info_list);
+				}
+				return;
+			}
+
+			var categoryinfo = category_page_data.categoryinfo;
+			for ( var types in cmtypes_hash) {
+				if (categoryinfo[types] > 0) {
+					// need get, cannot skip
+					next_category_queue[page_name] = category_page_data;
+					return;
+				}
+			}
+
+			// 記錄空的、不符資格的 category。
+
+			// 模擬空的 category tree。
+			var tree_list = copy_list_attributes(category_page_data, []);
+			if (categoryinfo.subcats > 0)
+				tree_list[wiki_API.KEY_subcategories] = Object.create(null);
+			add_tree_list(tree_list, page_name);
+		}
+
+		// --------------------------------------------------------------------
+
+		function get_all_categorymembers() {
+			next_category_queue = Object.create(null);
+			// console.trace([depth, max_depth, this_category_queue.length]);
+			if (this_category_queue.length === 0) {
+				build_category_tree();
+				return;
+			}
+
+			var message = 'Get categorymembers of '
+					+ this_category_queue.length + ' categories. ('
+					+ subcategory_count + ' subcategories got, '
+					+ (max_depth - depth) + ' levels left)';
+			if (library_namespace.is_debug()) {
+				library_namespace.debug(message, 1, 'get_all_categorymembers');
+			} else {
+				library_namespace.log_temporary(message);
+			}
+
+			this_category_queue.count = 0;
+			this_category_queue.forEach(get_categorymembers);
+		}
+
+		function get_categorymembers(category_page_data) {
+			wiki_API.list(category_page_data, for_categorymember_list,
+					categorymembers_options);
+		}
+
+		function for_categorymember_list(categorymember_list
+		// , target, options
+		) {
+			// console.trace(categorymember_list);
+			console.assert(Array.isArray(categorymember_list));
+			if (categorymember_list.error) {
+				library_namespace.error('for_categorymember_list: '
+						+ categorymember_list.error);
+				check_categorymember();
+				return;
+			}
+
+			// ----------------------------------------
+
+			var page_name = wiki_API.remove_namespace(
+					categorymember_list.title, options);
+			var message = 'Depth ' + (depth + 1) + '/' + max_depth + ': '
+					+ (this_category_queue.count + 1) + '/'
+					+ this_category_queue.length + ' ' + page_name + ': '
+					+ categorymember_list.length + ' item(s).';
+			if (library_namespace.is_debug()) {
+				library_namespace.debug(message, 1, 'for_categorymember_list');
+			} else {
+				library_namespace.log_temporary(message);
+			}
+			// free
+			message = null;
+
+			categorymember_list = filter_and_assign_category_pages(categorymember_list);
+			// console.trace(categorymember_list);
+			add_tree_list(categorymember_list, page_name);
+			check_categorymember();
+		}
+
+		function check_categorymember() {
+			if (++this_category_queue.count < this_category_queue.length) {
+				return;
+			}
+
+			// assert: got all categorymembers of this_category_queue
+			console
+					.assert(this_category_queue.count === this_category_queue.length);
+
+			// setup this_category_queue.
+			this_category_queue = Object.values(next_category_queue);
+			if (depth++ === max_depth || this_category_queue.length === 0) {
+				build_category_tree();
+				return;
+			}
+			console.assert(depth <= max_depth);
+
+			// Start next depth loop.
+			eliminate_empty_categories();
+		}
+
+		// --------------------------------------------------------------------
+
+		function build_category_tree() {
+			// assert: got all categorymembers
+			if (options.no_list) {
+				callback && callback(options.no_list);
+				return;
+			}
+
+			Object.keys(tree_of_category).forEach(clean_up_tree_list);
+			// console.trace(tree_of_category);
+
+			root_category_list = root_category_list
 			//
-			callback ? function(list, error) {
-				if (error) {
-					callback(null, error);
+			.map(function(root_category) {
+				var category_name = session.remove_namespace(root_category,
+						options);
+				var cached_tree_list = tree_of_category[category_name];
+				if (!cached_tree_list) {
+					library_namespace.error(
+					//
+					'category_tree: Cannot get data of ' + category_name);
 					return;
 				}
+				console.assert(cached_tree_list.depth === 0);
+				cached_tree_list.list_type = 'category_tree';
+				cached_tree_list.get_category_tree = get_category_tree;
+				cached_tree_list.flated_subcategories = tree_of_category;
+				return cached_tree_list;
+			});
 
-				if (options.no_list) {
-					callback(options.no_list);
-					return;
-				}
-
-				list.list_type = 'category_tree';
-				list.get_category_tree = get_category_tree;
-				// got all categorymembers
-				Object.keys(tree_of_category)
-				//
-				.forEach(function(category_name) {
-					var cached_tree_list = tree_of_category[category_name];
-					if (cached_tree_list.not_eligible) {
-						// 直接除名。
-						delete tree_of_category[category_name];
-					} else {
-						// 清理多餘標記。
-						delete cached_tree_list.depth;
-						delete cached_tree_list.parents;
-					}
-				});
-				list.flated_subcategories = tree_of_category;
-				callback(list);
-			} : library_namespace.null_function, 0);
+			if (!options.multi && root_category_list.length < 2) {
+				root_category_list = root_category_list[0];
+			}
+			callback && callback(root_category_list);
 		}
 
-		root_category_list.count = 0;
-		filter_category_list(root_category_list,
-		//
-		function(root_category, index) {
-			process_root_category(root_category, function(list) {
-				console
-						.trace([ subcategory_count,
-								Object.keys(tree_of_category).length,
-								queued_category ]);
-				root_category_list[index] = list;
-				if (++root_category_list.count
-				//
-				=== root_category_list.length) {
-					if (root_category_list.single
-							&& root_category_list.length === 1) {
-						root_category_list = root_category_list[0];
-					} else {
-						delete root_category_list.count;
-					}
-					callback(root_category_list);
-				}
-			});
-		});
+		function clean_up_tree_list(category_name) {
+			var cached_tree_list = tree_of_category[category_name];
 
-		// console.trace(options);
+			// 清理多餘標記。
+			// delete cached_tree_list.depth;
+
+			var subcategories = cached_tree_list[wiki_API.KEY_subcategories];
+			if (!subcategories)
+				return;
+
+			for ( var subcategory_name in subcategories) {
+				var subcategory_tree_list = subcategories[subcategory_name] = tree_of_category[subcategory_name];
+				if (!subcategory_tree_list) {
+					// assert: 已達 max_depth。
+					continue;
+				}
+
+				if (!options.set_attributes) {
+					continue;
+				}
+
+				console
+						.assert(subcategory_tree_list.depth <= cached_tree_list.depth + 1);
+
+				if (!subcategory_tree_list.parents)
+					subcategory_tree_list.parents = [];
+				subcategory_tree_list.parents.push(cached_tree_list);
+			}
+		}
+
+		eliminate_empty_categories();
 	}
 
 	category_tree.default_depth = 10;
