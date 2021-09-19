@@ -1345,9 +1345,22 @@ function module_code(library_namespace) {
 				});
 		}
 
+		if (options.use_global_index) {
+			if (!slice && this[KEY_page_data].parsed) {
+				slice = [ this.range[0], this.range[1] ];
+				if (slice[0] > 0) {
+					// 加入 .section_title。
+					slice[0]--;
+				}
+			} else {
+				delete options.use_global_index;
+			}
+		}
+
 		// console.trace([ this, type ]);
 		// var parsed = this;
-		traversal_tokens(this, 0, finish_up);
+		traversal_tokens(options.use_global_index ? this[KEY_page_data].parsed
+				: this, 0, finish_up);
 
 		if (!promise) {
 			return check_ref_list_to_remove();
@@ -2400,6 +2413,16 @@ function module_code(library_namespace) {
 		}
 		console.log('#' + section.section_title);
 		console.log([ section.users, section.dates ]);
+		console.log([section_index, section.toString()]);
+
+		section.each('link', function(token) {
+			console.log(token.toString());
+		}, {
+			// 採用 parsed 的 index，而非 section 的 index。
+			// 警告: 會從 section_title 開始遍歷 traverse！
+			use_global_index : true
+		});
+
 		return parsed.each.exit;
 	}, {
 		level_filter : [ 2, 3 ],
@@ -3209,7 +3232,7 @@ function module_code(library_namespace) {
 	});
 
 	// return
-	// {Natural+0}: nodes listed in order_list
+	// {ℕ⁰:Natural+0}: nodes listed in order_list
 	// undefined: comments / <nowiki> or text may ignored ('\n') or other texts
 	// NOT_FOUND < 0: unknown node
 	function footer_order(node_to_test, order_list) {
