@@ -206,7 +206,7 @@ function module_code(library_namespace) {
 		&& (!(title > 0)
 		// 注意：這情況下即使是{Natural}page_id 也會pass!
 		|| typeof ignore_api !== 'object' || !ignore_api.is_id)) {
-			library_namespace.debug('輸入的是問題頁面title: ' + title, 2,
+			library_namespace.debug('輸入的是問題頁面 title: ' + title, 2,
 					'is_api_and_title');
 			return false;
 		}
@@ -991,8 +991,13 @@ function module_code(library_namespace) {
 			is_page_title = true;
 		}
 		if (!is_page_title && (namespace == Math.floor(namespace))) {
-			// {Integer}namespace
-			return namespace;
+			if (options.get_name) {
+				// e.g., `wiki.namespace(NS_Category, {get_name: true});`
+				namespace = String(namespace);
+			} else {
+				// {Integer}namespace
+				return namespace;
+			}
 		}
 		var session = session_of_options(options);
 		var namespace_hash = options.namespace_hash || session
@@ -1595,7 +1600,7 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * @returns {String}規範後之頁面名稱。
+	 * @returns {String}規範後之頁面名稱。canonicaltitle。
 	 * 
 	 * @see [[Wikipedia:命名常規]]
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
@@ -2412,6 +2417,8 @@ function module_code(library_namespace) {
 			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|specialpagealiases|magicwords|extensiontags|protocols&utf8&format=json
 			+ '|languagevariants|extensiontags|protocols'
 		// + '|functionhooks|variables'
+		// 工作隊列lag
+		// + '|statistics|dbrepllag'
 		}, options);
 
 		var session = wiki_API.session_of_options(options);
