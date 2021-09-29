@@ -787,8 +787,18 @@ function module_code(library_namespace) {
 		var type = value.type;
 		// TODO: type 可能為 undefined!
 
-		if ('value' in value)
-			value = value.value;
+		if ('value' in value) {
+			if (type === 'literal'
+			// e.g., SPARQL: get ?linkcount of:
+			// ?item wikibase:sitelinks ?linkcount
+			&& value.datatype === 'http://www.w3.org/2001/XMLSchema#integer') {
+				// assert: typeof value.value === 'string'
+				// Math.floor()
+				value = +value.value;
+			} else {
+				value = value.value;
+			}
+		}
 
 		if (typeof value !== 'object') {
 			// e.g., typeof value === 'string'
