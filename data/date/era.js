@@ -4389,7 +4389,7 @@ function module_code(library_namespace) {
 	Object.assign(sign_note, {
 		// 預設會 copy 的紀年曆注。
 		// "精"會特別處理。
-		// 據: 根據/出典/原始參考文獻/資料引用來源/典拠。
+		// 據: 依據/根據/出典/原始參考文獻/資料引用來源/典拠。
 		copy_attributes : to_list('據,準,疑,傳說,曆法,'
 				+ '君主名,表字,君主號,諱,諡,廟號,生,卒,君主性別,在位,年號'),
 		// 曆注, note

@@ -1584,7 +1584,7 @@ function draw_era(hierarchy) {
 					add_tag.show(data[period]);
 			periods.push({
 				b : [ group === draw_era.default_group ? [ '(', {
-					T : 'general'
+					T : 'general data layer'
 				}, ')' ] : {
 					T : group
 				}, {
