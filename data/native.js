@@ -1105,8 +1105,8 @@ function module_code(library_namespace) {
 
 		// string_1 = string_1.replace(/\s+/g, ' ');
 
-		string_1 = string_1.chars();
-		string_2 = string_2.chars();
+		string_1 = string_1.chars(true);
+		string_2 = string_2.chars(true);
 
 		var string_1_index = 0, string_2_index = 0, character_1 = string_1[0],
 		// comparer
@@ -1253,6 +1253,12 @@ function module_code(library_namespace) {
 	// if ('unicode' in RegExp.prototype) {}
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp
 
+	var has_spread_syntax;
+	try {
+		has_spread_syntax = eval("[...'ab'].join(',')==='a,b'");
+	} catch (e) {
+	}
+
 	var PATTERN_char, PATTERN_char_with_combined, split_by_code_point;
 	try {
 		// using [\s\S] or [^] or /./s
@@ -1275,6 +1281,7 @@ function module_code(library_namespace) {
 		 *      http://teppeis.hatenablog.com/entry/2014/01/surrogate-pair-in-javascript
 		 */
 		split_by_code_point = function(with_combined) {
+			// if (has_spread_syntax && !with_combined) return [...this];
 			return this.match(with_combined ? PATTERN_char_with_combined
 					: PATTERN_char)
 					|| [];
@@ -3299,8 +3306,8 @@ function module_code(library_namespace) {
 	// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance
 	// http://jsperf.com/levenshtein-distance-2
 	function Levenshtein_distance(string_1, string_2) {
-		string_1 = string_1.chars();
-		string_2 = string_2.chars();
+		string_1 = string_1.chars(true);
+		string_2 = string_2.chars(true);
 
 		var length_1 = string_1 && string_1.length || 0, length_2 = string_2
 				&& string_2.length || 0;
@@ -3371,9 +3378,9 @@ function module_code(library_namespace) {
 	 */
 	function LCS_length(from, to, get_trace_array) {
 		if (typeof from === 'string')
-			from = from.chars();
+			from = from.chars(true);
 		if (typeof to === 'string')
-			to = to.chars();
+			to = to.chars(true);
 		// assert: Array.isArray(from) && Array.isArray(from)
 
 		var get_length_only = !get_trace_array,
@@ -3495,12 +3502,12 @@ function module_code(library_namespace) {
 					+ (line_mode ? '，採用行模式。' : ''), 3, 'LCS');
 		}
 		if (typeof from === 'string') {
-			from = separator ? from.split(separator) : from.chars();
+			from = separator ? from.split(separator) : from.chars(true);
 		} else if (!from) {
 			from = [];
 		}
 		if (typeof to === 'string') {
-			to = separator ? to.split(separator) : to.chars();
+			to = separator ? to.split(separator) : to.chars(true);
 		} else if (!to) {
 			to = [];
 		}
@@ -3927,7 +3934,7 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof from_item === 'string') {
-				from_item = from_item.chars();
+				from_item = from_item.chars(true);
 			}
 			// use LCS() again
 			var max_LCS_length = 0,
@@ -3937,7 +3944,7 @@ function module_code(library_namespace) {
 				// assert: from_item, to_item 皆無 "\n"
 				// console.log(to_item);
 				if (typeof to_item === 'string') {
-					to_item = to_item.chars();
+					to_item = to_item.chars(true);
 				}
 				var trace_Array = LCS_length(from_item, to_item, true),
 				// const
@@ -4004,7 +4011,7 @@ function module_code(library_namespace) {
 
 	if (false) {
 		styled_list = CeL.coloring_diff('a b c d', 'a a c c', {
-			headers : [ 'header 1', 'header 2' ],
+			headers : [ 'header 1: ', 'header 2: ' ],
 			print : true
 		});
 	}
@@ -4025,9 +4032,15 @@ function module_code(library_namespace) {
 			// bold : true,
 			fg : 'red',
 			bg : 'white'
+		},
+		// 用在多出來的文字的格式。
+		insertion_style = options.insertion_style || {
+			// bold : true,
+			fg : 'white',
+			bg : 'green'
 		};
 
-		function add_diff(styled_list, diff_index) {
+		function add_diff(styled_list, diff_index, is_insertion) {
 			if (!diff_index) {
 				// e.g., 只有義方有多東西。
 				return;
@@ -4035,15 +4048,17 @@ function module_code(library_namespace) {
 
 			var next_index = diff_index[1] + 1, this_slice = styled_list
 					.shift();
-			styled_list.unshift(this_slice.slice(0, diff_index[0]), diff_style,
-					this_slice.slice(diff_index[0], next_index), normal_style,
+			styled_list.unshift(this_slice.slice(0, diff_index[0]),
+					is_insertion ? insertion_style : diff_style, this_slice
+							.slice(diff_index[0], next_index), normal_style,
 					this_slice.slice(next_index));
 		}
 
 		while (diff = diff_list.pop()) {
 			var from_index = diff.index[0], to_index = diff.index[1];
-			add_diff(from, from_index);
-			add_diff(to, to_index);
+			// console.trace([ from, from_index, to, to_index ]);
+			add_diff(from, from_index, !to_index);
+			add_diff(to, to_index, !from_index);
 		}
 
 		var headers = Array.isArray(options.headers) ? options.headers : [];

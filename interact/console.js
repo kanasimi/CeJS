@@ -562,18 +562,31 @@ function module_code(library_namespace) {
 	 * @param {integer}index
 	 *            index of text
 	 * @param {Object|String|Boolean}[style]
-	 *            the style to set
+	 *            the style to set.<br />
+	 *            undefined: 從頭遍歷，取得某一 index 的 style。比起 `true` 取得的更準確。<br />
+	 *            0: reset style (e.g., normal color)<br />
+	 *            null: remove style<br />
+	 *            true: 單純取得某一 index 的 style，不從頭遍歷。如此取得的可能是錯誤的 style。<br />
+	 *            others: 設定 style。
 	 * @param {integer}[to_index]
 	 * 
 	 * @returns {SGR_style}
 	 */
 	function SGR_style_at(index, style, to_index) {
 		index |= 0;
-		if (style === true)
+		if (style === null) {
+			// e.g., .style_at(index, null)
+			delete this.style[index];
+			return;
+		}
+
+		if (style === true) {
+			// e.g., .style_at(index, true)
 			return this.style[index];
+		}
 
 		var style_now;
-		// 遍歷
+		// 從頭遍歷。
 		library_namespace.debug('Start traversing to ' + index, min_debug,
 				'SGR_style_at');
 		this.style.some(function(this_style, this_index) {
@@ -614,8 +627,11 @@ function module_code(library_namespace) {
 						})
 					}
 			}
-		} else if (is_reset_style(style))
+		} else if (is_reset_style(style)) {
 			this.style[index] = style_now.add(0);
+		} else {
+			// e.g., .style_at(index)
+		}
 
 		return style_now;
 	}
