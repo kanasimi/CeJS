@@ -157,6 +157,10 @@ function module_code(library_namespace) {
 				normalize : true,
 				with_properties : true
 			});
+			if (typeof value === 'string') {
+				// 遇到無法轉換的值別 throw。 e.g., "a\nb"
+				continue;
+			}
 			// value.parameter_name = index;
 			value.index = token.index_of[index];
 			// console.log(value);
