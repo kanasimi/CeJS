@@ -1240,6 +1240,13 @@ function module_code(library_namespace) {
 		contents = contents
 		// 去掉 "\r"，全部轉為 "\n"。
 		.replace(/\r\n?/g, '\n')
+		// 去除 '\b', '\f' 之類無效的 XML字元 https://www.w3.org/TR/REC-xml/#NT-Char
+		// e.g., http://www.alphapolis.co.jp/content/sentence/213451/
+		// e.g., "，干笑一声" @ https://www.ptwxz.com/html/9/9503/7886636.html
+		// ""==="\b"
+		// .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, '')
+		// 已去掉 "\r"，全部轉為 "\n"。
+		.replace(/[\x00-\x08\x0b-\x1f]/g, '')
 		// 最多允許兩個 "\n" 以為分段。
 		.replace(/\n{3,}/g, '\n\n')
 		// .replace(/<br \/>\n/g, '\n')
@@ -1274,10 +1281,6 @@ function module_code(library_namespace) {
 
 		// e.g., id="text" → id="text"
 		// .replace(/ ([a-z]+)=([a-z]+)/g, ' $1="$2"')
-
-		// '\f': 無效的 XML字元
-		// e.g., http://www.alphapolis.co.jp/content/sentence/213451/
-		.replace(/\x0c/g, '')
 
 		// [[non-breaking space]]
 		// EpubCheck 不認識 HTML character entity，
