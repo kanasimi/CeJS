@@ -30,7 +30,7 @@ archive_file.information = { archive information }
 archive_file.info(options, callback);
 archive_file.info(options, callback);
 
-// compress / add new FSOs to archive_file
+// compress / create / add new FSOs to archive_file
 // {Object|String}options.switches: additional command line switches
 archive_file.update([ file/folder list to compress, add, update ], options, callback);
 archive_file.update([ file/folder list to compress, add, update ], {
@@ -283,7 +283,7 @@ function module_code(library_namespace) {
 		// this.constructor = Archive_file;
 
 		if (typeof callback === 'function')
-			callback(this, this.unknown_type && new Error('UNKNOWN_TYPE'));
+			callback(this, null, this.unknown_type && new Error('UNKNOWN_TYPE'));
 	}
 
 	function is_Archive_file(value) {
@@ -303,9 +303,8 @@ function module_code(library_namespace) {
 			return arg;
 
 		if (typeof arg !== 'string') {
-			library_namespace
-					.error('add_fso_path_quote: Should input string but get '
-							+ (typeof arg) + ':');
+			library_namespace.error('add_fso_path_quote: '
+					+ 'Should input string but get ' + (typeof arg) + ':');
 			console.error(arg);
 		}
 		return /^"(\\.|[^\\\n])*"$/.test(arg) ? arg :
@@ -324,8 +323,50 @@ function module_code(library_namespace) {
 				/\\(["'])/g, '$1') : arg;
 	}
 
+	// @inner
+	function check_modify_time(switches, callback, FSO_list, operation, options) {
+		if (false) {
+			console.assert(operation === 'update'
+					&& !!options.only_when_newer_exists === true);
+		}
+
+		function check_time(FSO_list_newest_data) {
+			var archive_file_data = library_namespace
+					.get_newest_fso(this.archive_file_path);
+			// console.trace([ FSO_list_newest_data, archive_file_data ]);
+			if (FSO_list_newest_data && archive_file_data
+			//
+			&& FSO_list_newest_data[0] < archive_file_data[0]) {
+				// 當沒有新的檔案時直接跳出，可節省時間。
+				// e.g., CeL.application.net.work_crawler.ebook
+				library_namespace.debug('沒有新的檔案，直接跳出。', 1, 'check_modify_time');
+				if (options.remove) {
+					library_namespace.remove_file(FSO_list, true);
+				}
+			} else {
+				library_namespace.debug('回歸正常操作 ' + operation + '。', 1,
+						'check_modify_time');
+				delete options.only_when_newer_exists;
+				archive_file_execute.call(this, switches, callback, FSO_list,
+						operation, options);
+			}
+		}
+
+		Promise.resolve(
+				library_namespace.get_newest_fso(FSO_list,
+						options.only_when_newer_exists)).then(
+				check_time.bind(this));
+	}
+
 	function archive_file_execute(switches, callback, FSO_list, operation,
 			options) {
+		// console.trace([ switches, callback, FSO_list, operation, options ]);
+		if (operation === 'update' && options.only_when_newer_exists) {
+			check_modify_time.call(this, switches, callback, FSO_list,
+					operation, options);
+			return;
+		}
+
 		var command = [ this.program ], standard_input;
 		if (Array.isArray(switches)) {
 			standard_input = switches.standard_input;
@@ -422,7 +463,7 @@ function module_code(library_namespace) {
 				// recover working directory.
 				process.chdir(original_working_directory);
 			// console.log(output.toString());
-			if (typeof callback === 'function')
+			if (typeof callback === 'function') {
 				try {
 					// 預防 callback throw
 					callback(output);
@@ -440,6 +481,7 @@ function module_code(library_namespace) {
 						library_namespace.error(e);
 					}
 				}
+			}
 			return output;
 		} catch (e) {
 			if (original_working_directory) {
@@ -558,6 +600,10 @@ function module_code(library_namespace) {
 
 	var apply_switches_handler = {
 		'7z' : {
+			yes : function(value) {
+				// assume Yes on all queries
+				return '-y';
+			},
 			type : function(value) {
 				return '-t' + value;
 			},
@@ -845,7 +891,7 @@ function module_code(library_namespace) {
 			// TODO: Localization
 			error = this.program_type + ' has no operation: ' + operation;
 			error = new Error(error);
-			callback && callback(error);
+			callback && callback(null, error);
 			return error;
 		}
 

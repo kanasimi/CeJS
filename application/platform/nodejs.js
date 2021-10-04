@@ -699,6 +699,78 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
+	/**
+	 * 取得目錄或檔案中最新的目錄或檔案。
+	 * 
+	 * @param {String|Array}path
+	 *            目錄或檔案路徑
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns {Undefined|Array} newest_fso_data = [newest_modify_time, path,
+	 *          file_status ]
+	 */
+	function get_newest_fso(path, options) {
+		if (typeof options === 'string') {
+			options = {
+				fso_type : options
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
+
+		function modify_time_of_fso_status(fso_status) {
+			return fso_status.mtimeMs || fso_status.mtime - 0;
+		}
+
+		if (Array.isArray(path)) {
+			return Promise.allSettled(path.map(function(_path) {
+				return get_newest_fso(_path, options);
+			})).then(function(results) {
+				var newest_modify_time, newest_fso_data;
+				results.forEach(function(result) {
+					result = result.status === "fulfilled" && result.value;
+					if (result && result[0] > 0
+					//
+					&& !(newest_modify_time >= result[0])) {
+						newest_modify_time = result[0];
+						newest_fso_data = result;
+					}
+				});
+				return newest_fso_data;
+			});
+		}
+
+		var fso_type = options.fso_type;
+		if (library_namespace.file_exists(path)) {
+			if (fso_type === 'directory')
+				return;
+			var file_status = library_namespace.fso_status(path);
+			var mtimeMs = modify_time_of_fso_status(file_status);
+			// console.trace([ mtimeMs, path, file_status ]);
+			return [ mtimeMs, path, file_status ];
+		}
+
+		var newest_modify_time, newest_fso_data;
+		return Promise.resolve(library_namespace.traverse_file_system(path,
+		//
+		function(path, fso_status, is_directory) {
+			if (is_directory ? fso_type === 'file' : fso_type === 'directory')
+				return;
+			var mtimeMs = modify_time_of_fso_status(fso_status);
+			if (mtimeMs > 0 && !(newest_modify_time >= mtimeMs)) {
+				newest_modify_time = mtimeMs;
+				newest_fso_data = [ newest_modify_time, path, fso_status ];
+			}
+		}, options)).then(function() {
+			return newest_fso_data;
+		});
+	}
+
+	_.get_newest_fso = get_newest_fso;
+
+	// --------------------------------------------
+
 	// e.g., '123', '-123', '+12.34', '-.123'
 	var PATTERN_number_string = /^[+\-]?(?:\d{1,20}(?:\.\d{1,20})?|\.\d{1,20})$/,
 	// 在命令列設定這些值時，將會被轉換為所指定的值。

@@ -147,6 +147,62 @@ function module_code(library_namespace) {
 	// 本段功能須配合 CeL.application.storage.EPUB 並且做好事前設定。
 	// 可參照 https://github.com/kanasimi/work_crawler
 
+	// extract "繁簡轉換 cache.7z" or "繁簡轉換 cache.zip"
+	function extract_convert_cache_directory(work_data) {
+		var cache_directory = work_data.convert_options.cache_directory
+				.replace(/[\\\/]$/, '');
+		if (library_namespace.directory_exists(cache_directory)) {
+			library_namespace.info('extract_convert_cache_directory: '
+			// 語言轉換
+			+ gettext('將覆寫繁簡轉換 cache 目錄 [%1] 中的檔案。', cache_directory));
+		}
+
+		var cache_archive_file = cache_directory + '.7z';
+		if (!library_namespace.file_exists(cache_archive_file)
+				&& !library_namespace.file_exists(
+				//
+				cache_archive_file = cache_directory + '.zip')) {
+			return;
+		}
+
+		cache_archive_file = new library_namespace.storage.archive(
+				cache_archive_file);
+		return new Promise(function(resolve, reject) {
+			library_namespace.log_temporary(gettext('解開繁簡轉換 cache 檔案: [%1]。',
+					cache_archive_file.archive_file_path));
+			cache_archive_file.extract({
+				// 解壓縮 "!short_sentences_word_list.json" 時會跳出 prompt。
+				yes : true,
+				output : work_data.directory
+			}, function(data, error) {
+				error ? reject(error) : resolve(data);
+			});
+		});
+	}
+
+	function archive_convert_cache_directory(work_data) {
+		var cache_directory = work_data.convert_options.cache_directory
+				.replace(/[\\\/]$/, '');
+		var cache_archive_file = cache_directory + '.7z';
+
+		cache_archive_file = new library_namespace.storage.archive(
+				cache_archive_file);
+		return new Promise(function(resolve, reject) {
+			library_namespace.log_temporary(gettext('壓縮繁簡轉換 cache 檔案: [%1]。',
+					cache_archive_file.archive_file_path));
+			cache_archive_file.update(cache_directory, {
+				only_when_newer_exists : 'file',
+				level : 'max',
+				remove : true,
+				recurse : true
+			}, function(data, error) {
+				error ? reject(error) : resolve(data);
+			});
+		});
+	}
+
+	// ----------------------------------------------------
+
 	function set_last_update_Date(work_data, force) {
 		if (!library_namespace.is_Date(work_data.last_update_Date)
 				&& typeof work_data.last_update === 'string'
@@ -178,6 +234,7 @@ function module_code(library_namespace) {
 	}
 
 	function create_ebook(work_data) {
+		// 檢查 ebook 先備條件。 check_ebook_prerequisites
 		var cecc = this.convert_text_language_using
 				&& this.convert_text_language_using.cecc;
 		// console.trace(cecc);
@@ -190,6 +247,7 @@ function module_code(library_namespace) {
 			});
 			if (library_namespace.is_thenable(promise_load_text_to_check)) {
 				// console.trace(promise_load_text_to_check);
+				// 先初始化完畢後再重新執行。
 				return promise_load_text_to_check.then(create_ebook.bind(this,
 						work_data));
 			}
@@ -200,9 +258,21 @@ function module_code(library_namespace) {
 			cache_directory : library_namespace
 					.append_path_separator(work_data.directory + '繁簡轉換 cache'),
 			cache_file_for_short_sentences : true,
-			// 超過此長度才 cache。
+			// 超過此長度才創建個別的 cache 檔案，否則會放在 .cache_file_for_short_sentences。
 			min_cache_length : 20
 		};
+
+		if (this.convert_to_language) {
+			extract_convert_cache_directory(work_data);
+			if (false) {
+				var promise_extract_convert_cache_directory = extract_convert_cache_directory(work_data);
+				if (promise_extract_convert_cache_directory) {
+					// 先初始化完畢後再重新執行。
+					return promise_extract_convert_cache_directory
+							.then(create_ebook.bind(this, work_data));
+				}
+			}
+		}
 
 		// return needing to wait language converted
 		var text_list = [ work_data.title, '語言轉換' ];
@@ -210,9 +280,13 @@ function module_code(library_namespace) {
 				work_data.convert_options);
 		if (promise_language_convert) {
 			// console.trace('Convert: ' + text_list);
+			// 先初始化完畢後再重新執行。
 			return promise_language_convert.then(create_ebook.bind(this,
 					work_data));
 		}
+
+		// ebook 先備條件檢查完畢。
+		// ------------------------------------------------
 
 		if (!this.site_id) {
 			this.site_id = this.id;
@@ -292,9 +366,9 @@ function module_code(library_namespace) {
 		text_list = [ work_data.author, options.description,
 				work_data.site_name ];
 		text_list.append(subject);
+		// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
 		promise_language_convert = this.cache_converted_text(text_list,
 				work_data.convert_options)
-				// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
 				|| Promise.resolve();
 		return ebook.working_promise = promise_language_convert
 				.then(setup_ebook.bind(this, work_data, options));
@@ -399,8 +473,8 @@ function module_code(library_namespace) {
 		// 處理 HTML tags 以減少其對 this.convert_text_language() 的影響。
 		// TODO: <p> @ qidian.js
 		library_namespace.EPUB.normailize_contents(data.text
-		// remove all '\n
-		.replace(/[\r\n]/g, '')
+		// remove all new-lines
+		.replace(/[\r\n]+/g, '')
 		// <br /> → "\n"
 		.replace(/<br(?:\s[^<>]*)?>/ig, '\n')
 		// .trim()
@@ -413,11 +487,12 @@ function module_code(library_namespace) {
 				work_data.convert_options);
 		if (promise_language_convert) {
 			return ebook.working_promise = ebook.working_promise
-					.then(function() {
-						return promise_language_convert
-								.then(add_ebook_chapter_actual_work.bind(this,
-										work_data, chapter_NO, data, options));
-					}.bind(this));
+			//
+			.then(function() {
+				return promise_language_convert
+						.then(add_ebook_chapter_actual_work.bind(this,
+								work_data, chapter_NO, data, options));
+			}.bind(this));
 		} else {
 			// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
 			return ebook.working_promise = ebook.working_promise
@@ -754,8 +829,15 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		return ebook.working_promise = ebook.working_promise.then(pack_up_ebook
-				.bind(this, work_data, file_name));
+		ebook.working_promise = ebook.working_promise.then(pack_up_ebook.bind(
+				this, work_data, file_name));
+
+		if (this.convert_to_language) {
+			ebook.working_promise = ebook.working_promise
+					.then(archive_convert_cache_directory.bind(this, work_data));
+		}
+
+		return ebook.working_promise;
 	}
 
 	function pack_up_ebook(work_data, file_name) {
