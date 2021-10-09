@@ -11,6 +11,12 @@ parser 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起�
 parser [[WP:維基化]] [[w:en:Wikipedia:AutoWikiBrowser/General fixes]] [[w:en:Wikipedia:WikiProject Check Wikipedia]]
 https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 
+#這個會計數到1
+#:這個不會計數到
+#這個會計數到2
+##這個會計數到2-1
+#這個會計數到3
+
 </code>
  * 
  * @since 2019/10/10 拆分自 CeL.application.net.wiki
@@ -892,9 +898,12 @@ function module_code(library_namespace) {
 			list_token.splice(parent_token.index, 1);
 		} else if (parent_token.type === 'list_item') {
 			console.trace(parent_token);
-			throw new Error(
+			// console.trace(list_token);
+			// throw new Error();
 			// e.g., "，見{{evchk}}。"
-			'清除 token (如模板)時，還遺留具意涵的元素，未能完全清除掉此所在的列表項目。可能需要手動修飾語句。');
+			library_namespace
+					.error('remove_token_from_parent: 清除 token (如模板)時，還遺留具意涵的元素，未能完全清除掉此 token 所在的列表項目。可能需要手動修飾語句。');
+
 		}
 
 		// console.log(parent_token.slice(index - 2, i + 2));
@@ -2418,6 +2427,8 @@ function module_code(library_namespace) {
 		section.each('link', function(token) {
 			console.log(token.toString());
 		}, {
+			// for section.users, section.dates
+			get_users : true,
 			// 採用 parsed 的 index，而非 section 的 index。
 			// 警告: 會從 section_title 開始遍歷 traverse！
 			use_global_index : true
@@ -8604,28 +8615,35 @@ function module_code(library_namespace) {
 
 	function array_to_table(array, options) {
 		options = library_namespace.setup_options(options);
-		if (!array.length && options.no_header)
+		if (!array.length && options.is_header === false)
 			return '';
 
-		var table = [ '{|' + ' class="' + (options['class'] || 'wikitable')
-				+ '"' ];
-		if (options.caption)
+		var table = [ '{|' + ' class="'
+				+ (array['class'] || options['class'] || 'wikitable') + '"' ];
+		if (array.style || options.style) {
+			table[0] += ' style="' + (array.style || options.style) + '"';
+		}
+		if (options.caption) {
 			table[0] += '\n|+ ' + options.caption;
+		}
 
-		array.forEach(function(line, index) {
-			if (!options.no_header && index === 0) {
-				if (Array.isArray(line))
-					line = line.join(' !! ');
-				table.push('! ' + line);
-				return;
+		array.forEach(function(row, index) {
+			var separator = options.is_header === true
+					|| options.is_header === undefined
+					&& (index === 0 || row['class'] === 'sortbottom') ? '!'
+					: '|';
+			if (Array.isArray(row))
+				row = row.join(' ' + separator + separator + ' ');
+
+			var _style = row['class'] ? ' class="' + row['class'] + '"' : '';
+			if (row.style) {
+				_style += ' style="' + row.style + '"';
 			}
 
-			if (Array.isArray(line))
-				line = line.join(' || ');
-			table.push('| ' + line);
+			table.push(_style + '\n' + separator + ' ' + row);
 		});
 
-		return table.join('\n|-\n') + '\n|}';
+		return table.join('\n|-') + '\n|}';
 	}
 
 	// ------------------------------------------------------------------------
