@@ -199,6 +199,29 @@ function module_code(library_namespace) {
 	 * 2016/7/17 18:55:24<br />
 	 * 當採用 section=new 時，minor=1 似乎無效？
 	 * 
+	 * @example <code>
+
+	// 2021/10/7 13:29:12
+
+	// Create new page with template.
+	const variable_Map = new CeL.wiki.Variable_Map({ FC_list: '* 1\n* 2' });
+	variable_Map.template = function (page_data) {
+		// Will run at the page created.
+		// assert: !wiki_API.content_of(page_data) === true;
+		return 'FC_list:\n' + this.format('FC_list');
+	};
+	await wiki.edit_page(new_page_title, variable_Map, { summary: 'test' });
+
+
+	// Update page only (must setup manually first)
+	const variable_Map = new CeL.wiki.Variable_Map({ FC_list: '* 1\n* 2' });
+	// setup manually
+	await wiki.edit_page('Wikipedia:沙盒', p => p.wikitext + '\nFC_list:\n' + variable_Map.format('FC_list'), { summary: 'test' });
+	variable_Map.set('FC_list', '*2\n*3');
+	await wiki.edit_page('Wikipedia:沙盒', variable_Map, { summary: 'test' });
+
+	</code>
+	 * 
 	 * @param {String|Array}title
 	 *            page title 頁面標題。 {String}title or [ {String}API_URL,
 	 *            {String}title or {Object}page_data ]
@@ -268,6 +291,7 @@ function module_code(library_namespace) {
 						&& (is_undo < wiki_API_edit.undo_count_limit && is_undo));
 
 		if (wiki_API.Variable_Map.is_Variable_Map(text)) {
+			// 對於新創或空白頁面，應已設定 {String}text.template。
 			text = text.to_page_text_updater();
 		}
 
@@ -346,13 +370,15 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// assert: typeof text === 'string'
+
 		var not_passed = !is_undo
 				&& wiki_API_edit.check_data(text, title, options,
 						'wiki_API_edit');
 		if (not_passed) {
 			library_namespace.debug('直接執行 callback。', 2, 'wiki_API_edit');
-			// console.trace(not_passed);
-			callback(title, not_passed);
+			// console.trace([not_passed, text]);
+			callback(title, options.error_with_symbol ? text : not_passed);
 			return;
 		}
 
@@ -1312,7 +1338,8 @@ function module_code(library_namespace) {
 		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, replacer);
 		// console.trace(changed);
 		if (!changed) {
-			return [ wiki_API.edit.cancel, 'skip' ];
+			return [ wiki_API.edit.cancel,
+					'Variable_Map_update: Nothing to update' ];
 		}
 		// console.trace(wikitext);
 		return wikitext;
@@ -1328,23 +1355,26 @@ function module_code(library_namespace) {
 		var content = wiki_API.content_of(page_data);
 		// console.trace(content);
 
+		if (!content) {
+			content = this.template;
+			if (typeof content === 'function')
+				content = this.template(page_data);
+		}
+
 		if (content) {
 			// console.trace(content);
 			// console.trace(this.update(content))
 			return this.update(content);
 		}
 
-		if (this.template) {
-			return this.template = this.update(this.template);
-		}
-
 		if (false) {
-			content = 'No contents: ' + wiki_API.title_link_of(page_data)
+			content = 'No contents set: ' + wiki_API.title_link_of(page_data)
 			// or: 此頁面不存在/已刪除。
 			+ '! 沒有頁面內容！';
 		}
-		content = wiki_API.title_link_of(page_data)
-				+ ': No Variable_Map#template specified.';
+		content = 'Variable_Map__page_text_updater: '
+				+ wiki_API.title_link_of(page_data)
+				+ ': No .template specified.';
 		// library_namespace.log(content);
 		return [ wiki_API_edit.cancel, content ];
 	}
