@@ -18,6 +18,7 @@
 
  </code>
  * @see https://github.com/BYVoid/OpenCC https://zhconvert.org/
+ *      https://en.wiktionary.org/wiki/Module:zh
  * @since 2014/6/17 22:39:16
  */
 
@@ -30,7 +31,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'extension.zh_conversion',
 
-	require : 'data.pair|application.OS.Windows.file.',
+	require : 'data.Pair|application.OS.Windows.file.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'generate_converter',
@@ -41,7 +42,7 @@ typeof CeL === 'function' && CeL.run({
 
 function module_code(library_namespace) {
 	// requiring
-	var pair = this.r('pair');
+	var Pair = this.r('Pair');
 
 	/**
 	 * null module constructor
@@ -78,7 +79,7 @@ function module_code(library_namespace) {
 	function Converter_initialization() {
 		// console.trace(this.files);
 		this.conversions = this.files.map(function(file_name) {
-			return new pair(null, {
+			return new Pair(null, {
 				// 載入 resources。
 				path : dictionary_base + file_name + '.txt',
 				item_processor : function(item) {
@@ -104,7 +105,7 @@ function module_code(library_namespace) {
 			// keys_to_remove
 			var remove_key_hash = Object.create(null);
 			// this.conversions: 手動修正表。提供自行更改的功能。
-			this.conversions.push(new pair(null, {
+			this.conversions.push(new Pair(null, {
 				path : dictionary_base.replace(/[^\\\/]+[\\\/]$/,
 						this.corrections),
 				item_processor : function(item, options) {
@@ -136,7 +137,7 @@ function module_code(library_namespace) {
 
 		// 設定事前轉換表。
 		if (this.pre) {
-			this.conversions.unshift(new pair(this.pre, {
+			this.conversions.unshift(new Pair(this.pre, {
 				flag : this.flag || REPLACE_FLAG
 			}));
 			delete this.pre;
@@ -144,7 +145,7 @@ function module_code(library_namespace) {
 
 		// 設定事後轉換表。
 		if (this.post) {
-			this.conversions.push(new pair(this.post, {
+			this.conversions.push(new Pair(this.post, {
 				flag : this.flag || REPLACE_FLAG
 			}));
 			delete this.post;
@@ -161,7 +162,7 @@ function module_code(library_namespace) {
 
 		// 事前轉換表。
 		if (options && options.pre) {
-			text = (new pair(options.pre, {
+			text = (new Pair(options.pre, {
 				flag : options.flag || REPLACE_FLAG
 			})).convert(text);
 		}
@@ -191,7 +192,7 @@ function module_code(library_namespace) {
 
 		// 事後轉換表。
 		if (options && options.post) {
-			text = (new pair(options.post, {
+			text = (new Pair(options.post, {
 				flag : options.flag || REPLACE_FLAG
 			})).convert(text);
 		}

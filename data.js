@@ -1232,7 +1232,7 @@ function module_code(library_namespace) {
 	 * @example <code>
 
 	 // example 1
-	 var conversion_pair = new CeL.pair(CeL.get_file(path));
+	 var conversion_pair = new CeL.data.Pair(CeL.get_file(path));
 	 text = conversion_pair.convert(text);
 
 
@@ -1242,7 +1242,7 @@ function module_code(library_namespace) {
 	 // target encoding
 	 target_encoding = 'UTF-8';
 
-	 cache_pair = new CeL.pair(null, {
+	 cache_pair = new CeL.data.Pair(null, {
 		path : cache_file,
 		encoding : target_encoding,
 		remove_comments : true
@@ -1320,7 +1320,7 @@ function module_code(library_namespace) {
 	}
 
 	library_namespace.set_method(Pair, {
-		is_pair : is_Pair,
+		is_Pair : is_Pair,
 
 		KEY_REMOVE : typeof Symbol === 'function' ? Symbol('remove the key')
 		//
@@ -1336,7 +1336,7 @@ function module_code(library_namespace) {
 
 		// 排除/移除注解 (//, /* */)。
 		/**
-		 * strip/remove javascript comments. CeL.data.pair.remove_comments(text)
+		 * strip/remove javascript comments. CeL.data.Pair.remove_comments(text)
 		 * 
 		 * @see http://vrana.github.io/JsShrink/
 		 * @see http://trinithis.awardspace.com/commentStripper/stripper.html
@@ -1885,7 +1885,7 @@ function module_code(library_namespace) {
 		flag : 'g'
 	});
 
-	_.pair = Pair;
+	_.Pair = Pair;
 
 	// ---------------------------------------------------------------------//
 	// UTF-8 char and bytes.

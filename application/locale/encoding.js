@@ -14,7 +14,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.locale.encoding',
 
-	// initialize_kana_romaji() need CeL.data.pair()
+	// initialize_kana_romaji() need CeL.data.Pair()
 	require : 'data.|data.native.'
 	//
 	+ '|application.OS.Windows.new_COM'
@@ -1423,7 +1423,7 @@ function module_code(library_namespace) {
 	 */
 	function initialize_kana_romaji(function_name) {
 		if (!to_kana_pair) {
-			to_kana_pair = new library_namespace.pair(null, {
+			to_kana_pair = new library_namespace.data.Pair(null, {
 				path : library_namespace.get_module_path(module_name.replace(
 						/[^.]+$/, ''),
 				// 'resources/kana romaji.txt'

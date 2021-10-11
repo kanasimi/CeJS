@@ -50,7 +50,7 @@ CeL.assert([(new CeL.quantity('500平方公尺')).convert_to('a').toString('繁�
 if (typeof CeL === 'function')
 	CeL.run({
 		name : 'data.quantity',
-		// data.pair
+		// data.Pair
 		// |data.native.
 		require : 'data.|data.numeral.',
 		code : function(library_namespace) {
@@ -95,7 +95,7 @@ if (typeof CeL === 'function')
 			, 'gi'),
 
 			// exponent_to_prefix.pair[6] === 'M'
-			exponent_to_prefix = new library_namespace.pair(
+			exponent_to_prefix = new library_namespace.data.Pair(
 			// https://en.wikipedia.org/wiki/Metric_prefix
 			'24=Y,21=Z,18=E,15=P,12=T,9=G,6=M,3=k,2=h,1=da,'
 			//
@@ -109,7 +109,7 @@ if (typeof CeL === 'function')
 					+ ')([^\\s]+)$'),
 
 			// prefix name. prefix_name.pair.M === 'mega'.
-			prefix_name = new library_namespace.pair(
+			prefix_name = new library_namespace.data.Pair(
 			//
 			'Y=yotta,Z=zetta,E=exa,P=peta,T=tera,'
 			//
