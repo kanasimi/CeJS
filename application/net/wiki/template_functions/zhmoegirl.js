@@ -75,7 +75,21 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// for get_all_anchors() @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
+	// for get_all_anchors() @ [[ACGN作品中出場的鐵路車站列表]]
+	function expand_template_铁路车站名(options) {
+		var parameters = this.parameters;
+		return '<span id="' + (parameters.name || parameters[1]) + '">'
+		// TODO: the content is skipped
+		+ '</span>';
+	}
+
+	function parse_template_铁路车站名(token) {
+		token.expand = expand_template_铁路车站名;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// for get_all_anchors() as section title @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_ARGONAVIS_Icon(options) {
 		return '';
 	}
@@ -102,8 +116,12 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
+		// 一些會添加 anchors 的特殊模板。
 		A : parse_template_A,
+		铁路车站名 : parse_template_铁路车站名,
+
 		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon,
+
 		Coloredlink : parse_template_Coloredlink
 	};
 
