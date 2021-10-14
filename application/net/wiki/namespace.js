@@ -1821,7 +1821,7 @@ function module_code(library_namespace) {
 						flag || 'g');
 	}
 
-	// [[維基百科:名字空間#文件名字空间]]
+	// [[維基百科:命名空間#文件名字空间]]
 	// [[Media:image.png]]：產生一個指向檔案本身的連結
 	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/settings/zhwiki-configuration.xml
 	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/scala/org/dbpedia/extraction/wikiparser/impl/wikipedia/Namespaces.scala
@@ -2736,18 +2736,20 @@ function module_code(library_namespace) {
 	// @see [[en:Wikimedia_project#Project_codes]]
 	var language_code_to_site_alias = {
 		// als : 'sq',
-		'be-tarask' : 'be-x-old',
+		'be-x-old' : 'be-tarask',
 		cmn : 'zh',
 		// gsw : 'als',
 		// hbs : 'sh',
 		lzh : 'zh-classical',
 		nan : 'zh-min-nan',
-		// nb : 'no',
+		nb : 'no',
+		nob : 'no',
 		rup : 'roa-rup',
 		sgs : 'bat-smg',
 		vro : 'fiu-vro',
 		// 為粵文維基百科特別處理。
 		yue : 'zh-yue',
+		bih : 'bh',
 
 		// 為日文特別修正: 'jp' is wrong!
 		jp : 'ja'
