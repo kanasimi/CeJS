@@ -897,12 +897,14 @@ function module_code(library_namespace) {
 			}
 			list_token.splice(parent_token.index, 1);
 		} else if (parent_token.type === 'list_item') {
-			console.trace(parent_token);
+			// console.trace(parent_token);
 			// console.trace(list_token);
 			// throw new Error();
 			// e.g., "，見{{evchk}}。"
 			library_namespace
-					.error('remove_token_from_parent: 清除 token (如模板)時，還遺留具意涵的元素，未能完全清除掉此 token 所在的列表項目。可能需要手動修飾語句。');
+					.debug(
+							'清除 token (如模板)時，還遺留具意涵的元素，未能完全清除掉此 token 所在的列表項目。可能需要手動修飾語句。',
+							1, 'remove_token_from_parent');
 
 		}
 

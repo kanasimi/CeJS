@@ -108,6 +108,7 @@ function module_code(library_namespace) {
 
 	// https://wikitech.wikimedia.org/wiki/Help:Toolforge/Database#Connecting_to_the_database_replicas
 	// .analytics.db.svc.wikimedia.cloud
+	// @seealso https://phabricator.wikimedia.org/T142807
 	set_SQL_config_language.hostname_postfix = '.web.db.svc.wikimedia.cloud';
 
 	/**

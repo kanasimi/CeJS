@@ -3553,6 +3553,7 @@ function module_code(library_namespace) {
 			wiki_API.query([ session.API_URL, {
 				// Fetching a token via "action=login" is deprecated.
 				// Use "action=query&meta=tokens&type=login" instead.
+				// https://www.mediawiki.org/wiki/MediaWiki_1.37/Deprecation_of_legacy_API_token_parameters
 				action : 'query',
 				meta : 'tokens',
 				type : 'login'

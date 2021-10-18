@@ -799,7 +799,7 @@ function module_code(library_namespace) {
 		// 'type name' : 'abbreviation 縮寫 / prefix' (parameter :
 		// get_list.default_parameter)
 
-		// 按標題排序列出指定的名字空間的頁面 title。
+		// 按標題排序列出指定的 namespace 的頁面 title。
 		// 可用來遍歷所有頁面。
 		// includes redirection 包含重定向頁面.
 		// @see traversal_pages()
@@ -1367,9 +1367,9 @@ function module_code(library_namespace) {
 		}
 		// console.trace(cmtypes_hash);
 
-		/** {Function}分類頁面篩選器。 */
+		/** {Function|Undefined}分類頁面篩選器。 */
 		var category_filter = options.category_filter || options.filter,
-		/** {Function}非分類頁面之篩選器。 */
+		/** {Function|Undefined}非分類頁面之篩選器。 */
 		page_filter = options.page_filter || options.filter;
 
 		/** {Object}cache 已經取得的資料: 以避免重複獲取，以及處理遞迴結構、預防無窮執行。 */
@@ -1378,15 +1378,15 @@ function module_code(library_namespace) {
 		subcategory_count = 0;
 
 		// 登記準備要取得的資料。避免重複執行 categorymembers。
-		/** {Object}本次要處理的分類列表。 this_category_queue = [ category, category, ... ] */
+		/** {Array}本次要處理的分類列表。 this_category_queue = [ category, category, ... ] */
 		var this_category_queue = root_category_list,
 		/** {Object}下次要處理的分類。 next_category_queue = { page_name:, page_name:, ... } */
 		next_category_queue;
 
-		/** {Natural+0}當前執行階層數。depth 越大時，獲得的資訊越少。 */
+		/** {ℕ⁰:Natural+0}當前執行階層數。depth 越大時，獲得的資訊越少。 */
 		var depth = 0,
 		/**
-		 * {Natural+0}最大查詢階層數。<br />
+		 * {ℕ⁰:Natural+0}最大查詢階層數。<br />
 		 * 0: 只包含 root_category 本身的檔案與子類別資訊。<br />
 		 * 1: 包含 1 層子類別的檔案與子類別資訊。以此類推。
 		 */
@@ -1394,6 +1394,7 @@ function module_code(library_namespace) {
 				: category_tree.default_depth) | 0;
 
 		// --------------------------------------------------------------------
+		// 工具函數。
 
 		/**
 		 * Recovering list attributes.
@@ -1413,7 +1414,7 @@ function module_code(library_namespace) {
 		}
 
 		function add_tree_list(tree_list, page_name) {
-			console.assert(page_name in tree_of_category === false);
+			// console.assert(page_name in tree_of_category === false);
 
 			tree_list.depth = depth;
 			subcategory_count++;
@@ -1469,8 +1470,8 @@ function module_code(library_namespace) {
 
 				if (category_filter && !category_filter(page_data)) {
 					// 直接除名。
-					// library_namespace.log('Skip not eligibled category: ' +
-					// page_data.title);
+					library_namespace.debug('Skip not eligibled category: '
+							+ page_data.title, 1, 'category_tree');
 					return false;
 				}
 
@@ -1500,11 +1501,11 @@ function module_code(library_namespace) {
 		}
 
 		// --------------------------------------------------------------------
+		// phase 1: Using .categoryinfo(category_list) to filter empty category.
 
 		/**
 		 * 剔除 this_category_queue 中，空的、不符資格的 category。<br />
 		 * Eliminate empty and ineligible categories.<br />
-		 * Using .categoryinfo(category_list) to filter empty category first.
 		 */
 		function eliminate_empty_categories() {
 			next_category_queue = Object.create(null);
@@ -1536,7 +1537,7 @@ function module_code(library_namespace) {
 
 		function for_category_info_list(category_info_list) {
 			// console.trace(category_info_list);
-			console.assert(Array.isArray(category_info_list));
+			// console.assert(Array.isArray(category_info_list));
 			if (category_info_list.error) {
 				library_namespace.error('for_category_info_list: '
 						+ category_info_list.error);
@@ -1587,6 +1588,9 @@ function module_code(library_namespace) {
 		}
 
 		// --------------------------------------------------------------------
+		// phase 2: 對包含子類別的 category，一個個取得其 categorymembers。
+		// 取得所有這一層的類別資料後，若還有子類別或深度(depth)未達 max_depth，則回到 phase 1。
+		// 否則進入 phase 3。
 
 		function get_all_categorymembers() {
 			next_category_queue = Object.create(null);
@@ -1619,7 +1623,7 @@ function module_code(library_namespace) {
 		// , target, options
 		) {
 			// console.trace(categorymember_list);
-			console.assert(Array.isArray(categorymember_list));
+			// console.assert(Array.isArray(categorymember_list));
 			if (categorymember_list.error) {
 				library_namespace.error('for_categorymember_list: '
 						+ categorymember_list.error);
@@ -1655,8 +1659,10 @@ function module_code(library_namespace) {
 			}
 
 			// assert: got all categorymembers of this_category_queue
-			console
-					.assert(this_category_queue.count === this_category_queue.length);
+			if (false) {
+				console
+						.assert(this_category_queue.count === this_category_queue.length);
+			}
 
 			// setup this_category_queue.
 			this_category_queue = Object.values(next_category_queue);
@@ -1664,13 +1670,14 @@ function module_code(library_namespace) {
 				build_category_tree();
 				return;
 			}
-			console.assert(depth <= max_depth);
+			// console.assert(depth <= max_depth);
 
 			// Start next depth loop.
 			eliminate_empty_categories();
 		}
 
 		// --------------------------------------------------------------------
+		// phase 3: 最後從 tree_of_category 重建起 category tree。
 
 		function build_category_tree() {
 			// assert: got all categorymembers
@@ -1694,7 +1701,7 @@ function module_code(library_namespace) {
 					'category_tree: Cannot get data of ' + category_name);
 					return;
 				}
-				console.assert(cached_tree_list.depth === 0);
+				// console.assert(cached_tree_list.depth === 0);
 				cached_tree_list.list_type = 'category_tree';
 				cached_tree_list.get_category_tree = get_category_tree;
 				cached_tree_list.flated_subcategories = tree_of_category;
@@ -1728,8 +1735,10 @@ function module_code(library_namespace) {
 					continue;
 				}
 
-				console
-						.assert(subcategory_tree_list.depth <= cached_tree_list.depth + 1);
+				if (false) {
+					console
+							.assert(subcategory_tree_list.depth <= cached_tree_list.depth + 1);
+				}
 
 				if (!subcategory_tree_list.parents)
 					subcategory_tree_list.parents = [];

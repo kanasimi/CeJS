@@ -5764,21 +5764,21 @@ function module_code(library_namespace) {
 		});
 	}
 
+	var default_item_name = 'item';
 	function for_erach_SPARQL_item_process_id(processor, item_list, item_name) {
 		item_list = item_list || this;
-		item_list.forEach(function(item) {
-			var matched = item[item_name];
+		item_list.forEach(function(item, index) {
+			var matched = item[item_name || default_item_name];
 			if (matched && matched.type === "uri") {
 				matched = matched.value && matched.value.match(/Q\d+$/);
 				if (matched) {
-					// processor(id)
-					processor(matched[0]);
+					// processor('Q000', item, index, item_list)
+					processor(matched[0], item, index, item_list);
 					return;
 				}
 			}
 			// Unknown item.
-			// processor(item)
-			processor(item);
+			processor(undefined, item, index, item_list);
 		});
 	}
 
@@ -5789,9 +5789,10 @@ function module_code(library_namespace) {
 			};
 		}
 		var id_list = [];
-		for_erach_SPARQL_item_process_id(function(id) {
+		for_erach_SPARQL_item_process_id(function(id, item) {
+			//console.trace([ id, item ]);
 			id_list.push(id);
-		}, this, options && options.item_name || 'item');
+		}, this, options && options.item_name || default_item_name);
 		return id_list;
 	}
 

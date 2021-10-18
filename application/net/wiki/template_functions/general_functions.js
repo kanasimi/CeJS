@@ -58,6 +58,16 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function expand_template_Void(options) {
+		return '';
+	}
+
+	function parse_template_Void(token) {
+		token.expand = expand_template_Void;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	function expand_template_Color(options) {
 		var parameters = this.parameters;
 		return '<span style="color:' + (parameters[1] || '') + '">'
@@ -73,6 +83,7 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_all_sites = {
+		Void : parse_template_Void,
 		Color : parse_template_Color
 	};
 

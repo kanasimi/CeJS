@@ -1855,6 +1855,10 @@ function module_code(library_namespace) {
 				}).join(', ') + '. title: ' + rows.map(function(row) {
 					return row.title;
 				}).join(', ') : ''), 1);
+				library_namespace.log_temporary('add_listener: '
+						+ last_query_time + ' ('
+						+ library_namespace.indicate_date_time(last_query_time)
+						+ ')');
 
 				// 使 wiki.listen() 可隨時監視設定頁面與緊急停止頁面的變更。
 				// 警告: 對於設定頁面的監聽，僅限於設定頁面也在監聽範圍中時方起作用。
@@ -2028,6 +2032,7 @@ function module_code(library_namespace) {
 									return;
 								}
 
+								// console.log(wiki_API.title_link_of(page_data));
 								var revisions = page_data.revisions;
 								if (latest_only && (!revisions || !revisions[0]
 								// 確定是最新版本 revisions[0].revid。

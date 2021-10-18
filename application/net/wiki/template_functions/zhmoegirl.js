@@ -89,7 +89,8 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// for get_all_anchors() as section title @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
+	// for get_all_anchors() as section title
+	// @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_ARGONAVIS_Icon(options) {
 		return '';
 	}

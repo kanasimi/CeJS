@@ -97,8 +97,18 @@ function module_code(library_namespace) {
 			},
 			get_FC : /* get_zhwiki_FC_via_list_page */get_FC_via_category
 		},
+		jawiki : {
+			// @see [[ja:Category:記事の選考]]
+			list_source : {
+				FA : 'ウィキペディア 秀逸な記事',
+				FL : 'ウィキペディア 秀逸な一覧',
+				FP : 'ウィキペディア 秀逸な画像',
+				GA : 'ウィキペディア 良質な記事'
+			},
+			get_FC : get_FC_via_category
+		},
 		enwiki : {
-			// @see [[Category:Featured content]]
+			// @see [[en:Category:Featured content]]
 			list_source : {
 				FFA : {
 					page : 'Wikipedia:Former featured articles',
@@ -449,6 +459,8 @@ function module_code(library_namespace) {
 		var FC_configurations = this.get_featured_content_configurations();
 		var get_FC_function = FC_configurations && FC_configurations.get_FC;
 		if (!get_FC_function) {
+			library_namespace
+					.error('get_featured_content: Did not configured how to get featured content!');
 			return;
 		}
 
