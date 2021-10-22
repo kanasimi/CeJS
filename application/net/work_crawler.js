@@ -299,6 +299,7 @@ function module_code(library_namespace) {
 		if (!this.convert_text_language_using.is_asynchronous)
 			return this.convert_text_language_using(text);
 
+		// 當無法取得文章內容時，可能出現 this.converted_text_cache === undefined
 		if (text in this.converted_text_cache) {
 			var converted_text = this.converted_text_cache[text];
 			if (false && text.length !== converted_text.length) {
@@ -350,7 +351,7 @@ function module_code(library_namespace) {
 		auto_import_args : true,
 
 		// {String}瀏覽器識別 navigator.userAgent 模擬 Chrome。
-		user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
+		user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4676.0 Safari/537.36'
 		// 並且每次更改不同的 user agent。
 		.replace(/( Chrome\/\d+\.\d+\.)(\d+)/,
 		//
@@ -564,6 +565,10 @@ function module_code(library_namespace) {
 
 		// combine urls
 		if (typeof url === 'string' && !url.includes('://')) {
+			if (/^https?:\/\//.test(url)) {
+				return url;
+			}
+
 			if (url.startsWith('/')) {
 				if (url.startsWith('//')) {
 					// 借用 base_URL 之 protocol。
@@ -621,6 +626,9 @@ function module_code(library_namespace) {
 	}
 
 	function is_finished(work_data) {
+		if (!work_data)
+			return;
+
 		if ('is_finished' in work_data) {
 			return work_data.is_finished;
 		}
