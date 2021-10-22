@@ -1162,6 +1162,8 @@ if (typeof CeL === 'function') {
 
 			// ----------------------------------
 
+			// TODO: using import.meta.url
+
 			// console.log([ typeof require, typeof require.main ]);
 			// console.trace(require.main);
 			var filename, test_filename = function(module) {

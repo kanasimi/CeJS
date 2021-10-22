@@ -1533,6 +1533,8 @@ function module_code(library_namespace) {
 
 	// 工具函數。
 
+	// https://commons.wikimedia.org/wiki/Module:I18n/complex_date
+
 	function year_name(ordinal, domain_name) {
 		domain_name = domain_name_for_conversion(domain_name, allow_Chinese);
 		switch (domain_name) {

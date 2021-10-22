@@ -468,8 +468,7 @@ function module_code(library_namespace) {
 							rearrange_list(parsed);
 						} else {
 							// comment out this work title / work id
-							parsed[parsed.length - 1] = '#'
-									+ parsed.at(-1);
+							parsed[parsed.length - 1] = '#' + parsed.at(-1);
 						}
 					}
 				}

@@ -114,7 +114,7 @@ function (globalThis) {
 		 * @type {String}
 		 * @ignore
 		 */
-		library_version = '4.2.0',
+		library_version = '4.3.0',
 
 
 		/**
@@ -3074,6 +3074,7 @@ OS='UNIX'; // unknown
 	// ---------------------------------------------------------------------//
 
 	// @see CeL.data.code.compatibility.is_thenable()
+	// cf. Promise.isPromise()
 	function is_thenable(value) {
 		return value
 		// https://github.com/then/is-promise/blob/master/index.js
