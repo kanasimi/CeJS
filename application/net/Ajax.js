@@ -2030,16 +2030,6 @@ function module_code(library_namespace) {
 					proxy_original_agent.last_cookie = agent.last_cookie;
 				}
 
-				if (response.statusCode === 503 && data
-						&& data.toString().includes(' id="jschl-answer"')) {
-					// console.log(data.toString());
-					library_namespace.error({
-						// https://github.com/Anorov/cloudflare-scrape
-						T : // TODO: https://github.com/codemanki/cloudscraper
-						'You need to bypass the DDoS protection by Cloudflare!'
-					});
-				}
-
 				// 基本檢測。
 
 				if ((response.statusCode / 100 | 0) !== 2
@@ -2135,6 +2125,21 @@ function module_code(library_namespace) {
 						} ]);
 						break;
 					}
+				}
+
+				// ------------------------------
+
+				if (data && response.statusCode === 403
+				//
+				&& data.toString().includes('Cloudflare')
+				//
+				&& data.toString().includes(' id="captcha-bypass"')) {
+					// console.log(data.toString());
+					library_namespace.error([ 'get_URL_node: ', {
+						// https://github.com/Anorov/cloudflare-scrape
+						T : // TODO: https://github.com/codemanki/cloudscraper
+						'You need to bypass the DDoS protection by Cloudflare!'
+					} ]);
 				}
 
 				// ------------------------------
