@@ -233,7 +233,7 @@ function module_code(library_namespace) {
 		return work_data.last_update_Date;
 	}
 
-	function create_ebook(work_data) {
+	function create_ebook(work_data, forced_recreate) {
 		// 檢查 ebook 先備條件。 check_ebook_prerequisites
 		var cecc = this.convert_text_language_using
 				&& this.convert_text_language_using.cecc;
@@ -262,8 +262,11 @@ function module_code(library_namespace) {
 			min_cache_length : 20
 		};
 
-		if (this.convert_to_language) {
+		if (this.convert_to_language
+				// 本次執行（10秒內）不再重複解開 cache 檔。
+				&& !(Date.now() - work_data.convert_cache_directory_extracted < 10 * 1000)) {
 			extract_convert_cache_directory(work_data);
+			work_data.convert_cache_directory_extracted = Date.now();
 			if (false) {
 				var promise_extract_convert_cache_directory = extract_convert_cache_directory(work_data);
 				if (promise_extract_convert_cache_directory) {
