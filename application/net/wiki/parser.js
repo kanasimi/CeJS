@@ -4537,6 +4537,9 @@ function module_code(library_namespace) {
 			delete options.no_resolve;
 		}
 
+		var section_title_hierarchy = options.section_title_hierarchy
+				|| (options.section_title_hierarchy = []);
+
 		if (/\d/.test(end_mark) || include_mark.includes(end_mark))
 			throw new Error('Error end of include_mark!');
 
@@ -6196,7 +6199,7 @@ function module_code(library_namespace) {
 		}
 
 		function parse_section(all, previous, section_level, parameters,
-				postfix, last) {
+				postfix) {
 			function not_only_comments(token) {
 				return typeof token === 'string' ? !/^[ \t]+$/.test(token)
 				//
@@ -6249,12 +6252,25 @@ function module_code(library_namespace) {
 			var level = section_level.length;
 			// assert: level >= 1
 			parameters.level = level;
+
+			parameters.child_section_titles = [];
+			section_title_hierarchy.truncate(level);
+			section_title_hierarchy[level] = parameters;
+			while (level > 1) {
+				var parent_section_title = section_title_hierarchy[--level];
+				if (parent_section_title) {
+					// Create linkages
+					parameters.parent_section_title = parent_section_title;
+					parent_section_title.child_section_titles.push(parameters);
+					break;
+				}
+			}
+
 			// parse_wiki 處理時不一定按照先後順序，因此這邊還不能設定 section_hierarchy。
 			// 請改用 parsed.each_section()。
 			queue.push(parameters);
 			// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
-			return previous + include_mark + (queue.length - 1) + end_mark
-					+ last;
+			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
 		function parse_list_line(line) {
@@ -6662,8 +6678,8 @@ function module_code(library_namespace) {
 		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
 
 		var PATTERN_section = new RegExp(
-		// @see PATTERN_section
-		/(^|\n)(={1,6})(.+)\2((?:[ \t]|mark)*)(\n|$)/g.source.replace('mark',
+		// @see PATTERN_section 採用 (?=\n|$) 是為了循序匹配 section title，不跳過任何一個。
+		/(^|\n)(={1,6})(.+)\2((?:[ \t]|mark)*)(?=\n|$)/g.source.replace('mark',
 				CeL.to_RegExp_pattern(include_mark) + '\\d+'
 						+ CeL.to_RegExp_pattern(end_mark)), 'g');
 		// console.log(PATTERN_section);
