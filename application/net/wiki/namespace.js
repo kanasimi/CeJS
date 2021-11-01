@@ -452,7 +452,7 @@ function module_code(library_namespace) {
 			} else if (lower_case in api_URL.family) {
 				// (wiki_API.language || 'www') + '.' + project
 				project = wiki_API.language + '.' + project;
-			} else if (/wik/i.test(project)) {
+			} else if (/wik[it]/i.test(project)) {
 				// e.g., 'mediawiki' → 'www.mediawiki'
 				// e.g., 'wikidata' → 'www.wikidata'
 				project = 'www.' + project;
@@ -631,7 +631,7 @@ function module_code(library_namespace) {
 		language_code = language_code.toLowerCase();
 		if (PATTERN_PROJECT_CODE_i.test(language_code)
 				// 不包括 test2.wikipedia.org 之類。
-				&& !/test|wiki/i.test(language_code)
+				&& !/test|wik[it]/i.test(language_code)
 				// 排除 'Talk', 'User', 'Help', 'File', ...
 				&& !(session.configurations.namespace_pattern || get_namespace.pattern)
 						.test(language_code)) {
@@ -865,7 +865,7 @@ function module_code(library_namespace) {
 			 */
 			family = family || matched[1];
 			// incase 'https://test.wikidata.org/w/api.php'
-			language = !/test|wiki/i.test(matched[0]) && matched[0]
+			language = !/test|wik[it]/i.test(matched[0]) && matched[0]
 					|| wiki_API.language;
 
 		} else if (matched = language.match(/^([a-z\d\-_]+)\.([a-z\d\-_]+)/)) {
