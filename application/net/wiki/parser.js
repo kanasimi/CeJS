@@ -2458,6 +2458,9 @@ function module_code(library_namespace) {
 		// parsed.sections[0]: 常常是設定與公告區，或者放置維護模板/通知模板。
 		all_root_section_list = this.sections = [],
 		/**
+		 * TODO: .parent_section 歸於 .parent_section_title
+		 * .subsections 歸於 .child_section_titles
+		 * 
 		 * If you want to get **every** sections, please using
 		 * `parsed..each('section_title', ...)` or traversals
 		 * `parsed.section_hierarchy` instead of enumerating `parsed.sections`.
@@ -6257,6 +6260,7 @@ function module_code(library_namespace) {
 			section_title_hierarchy.truncate(level);
 			section_title_hierarchy[level] = parameters;
 			while (level > 1) {
+				// 注意：可能 level 2 跳到 4，不一定連續！
 				var parent_section_title = section_title_hierarchy[--level];
 				if (parent_section_title) {
 					// Create linkages
@@ -6677,15 +6681,17 @@ function module_code(library_namespace) {
 
 		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
 
+		// @see PATTERN_section
 		var PATTERN_section = new RegExp(
-		// @see PATTERN_section 採用 (?=\n|$) 是為了循序匹配 section title，不跳過任何一個。
+		// 採用 positive lookahead (?=\n|$) 是為了循序匹配 section title，不跳過任何一個。
 		/(^|\n)(={1,6})(.+)\2((?:[ \t]|mark)*)(?=\n|$)/g.source.replace('mark',
 				CeL.to_RegExp_pattern(include_mark) + '\\d+'
 						+ CeL.to_RegExp_pattern(end_mark)), 'g');
 		// console.log(PATTERN_section);
 		// console.log(JSON.stringify(wikitext));
 
-		wikitext = wikitext.replace_till_stable(PATTERN_section, parse_section);
+		// 應該一次遍歷就找出所有的 section title，否則 section_title_hierarchy 會出錯。
+		wikitext = wikitext.replace(PATTERN_section, parse_section);
 
 		// console.log('10: ' + JSON.stringify(wikitext));
 
