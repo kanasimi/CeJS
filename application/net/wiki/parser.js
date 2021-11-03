@@ -2409,6 +2409,12 @@ function module_code(library_namespace) {
 	/**
 	 * 為每一個章節(討論串)執行特定作業 for_section(section)
 	 * 
+	 * If you want to get **every** sections, please using
+	 * `parsed..each('section_title', ...)` or traversals hierarchy of
+	 * `parsed.child_section_titles` instead of enumerating `parsed.sections`.
+	 * `parsed.sections` do NOT include titles like this:
+	 * {{Columns-list|\n==title==\n...}}
+	 * 
 	 * CeL.wiki.parser.parser_prototype.each_section
 	 * 
 	 * TODO: 這會漏算沒有日期標示的簽名
@@ -2456,24 +2462,19 @@ function module_code(library_namespace) {
 		// this: parsed
 		var _this = this, page_title = this.page && this.page.title,
 		// parsed.sections[0]: 常常是設定與公告區，或者放置維護模板/通知模板。
-		all_root_section_list = this.sections = [],
+		all_root_section_list = this.sections = [];
+
 		/**
-		 * TODO: .parent_section 歸於 .parent_section_title
-		 * .subsections 歸於 .child_section_titles
-		 * 
-		 * If you want to get **every** sections, please using
-		 * `parsed..each('section_title', ...)` or traversals
-		 * `parsed.section_hierarchy` instead of enumerating `parsed.sections`.
-		 * `parsed.sections` will not including title like this:
-		 * {{Columns-list|\n==title==\n...}}
+		 * 2021/11/3 18:23:24: .parent_section 歸於 .parent_section_title，
+		 * .subsections 歸於 .child_section_titles。
 		 */
-		section_hierarchy = [ this.subsections = [] ],
-		// `section link anchor` in section_title_hash: had this title
-		section_title_hash = Object.create(null);
+		// var section_hierarchy = [ this.subsections = [] ];
+		//
+		/** `section link anchor` in section_title_hash: had this title */
+		var section_title_hash = Object.create(null);
 		// this.section_title_hash = section_title_hash;
 
 		// to test: 沒有章節標題的文章, 以章節標題開頭的文章, 以章節標題結尾的文章, 章節標題+章節標題。
-
 		// 加入 **上一個** section, "this_section"
 		function add_root_section(next_section_title_index) {
 			// assert: _this.type === 'plain'
@@ -2566,32 +2567,38 @@ function module_code(library_namespace) {
 
 			// ----------------------------------
 
-			if (section_hierarchy.length > level) {
-				// 去尾。
-				section_hierarchy.length = level;
-			}
-			section_hierarchy[level] = section_title_token;
-			// console.log(section_hierarchy);
-			while (--level >= 0) {
-				// 注意: level 1 的 subsections 可能包含 level 3!
-				var parent_section = section_hierarchy[level];
-				if (parent_section) {
-					if (parent_section.subsections) {
-						if (false) {
-							library_namespace.log(parent_section + ' → '
-									+ section_title_token);
-						}
-						parent_section.subsections.push(section_title_token);
-						section_title_token.parent_section = parent_section;
-					} else {
-						// assert: is root section list, parent_section ===
-						// this.subsections === section_hierarchy[0]
-						parent_section.push(section_title_token);
-					}
-					break;
+			if (false) {
+				// 此段已搬到 parse_section() 中。
+				if (section_hierarchy.length > level) {
+					// 去尾。
+					section_hierarchy.length = level;
 				}
+				section_hierarchy[level] = section_title_token;
+				// console.log(section_hierarchy);
+				while (--level >= 0) {
+					// 注意: level 1 的 subsections 可能包含 level 3!
+					var parent_section = section_hierarchy[level];
+					if (parent_section) {
+						if (parent_section.subsections) {
+							if (false) {
+								library_namespace.log(parent_section + ' → '
+										+ section_title_token);
+							}
+							parent_section.subsections
+									.push(section_title_token);
+							section_title_token
+							//
+							.parent_section = parent_section;
+						} else {
+							// assert: is root section list, parent_section ===
+							// this.subsections === section_hierarchy[0]
+							parent_section.push(section_title_token);
+						}
+						break;
+					}
+				}
+				section_title_token.subsections = [];
 			}
-			section_title_token.subsections = [];
 
 		}, Object.assign({
 			// 不可只檢查第一層之章節標題。就算在 template 中的 section title 也會被記入 TOC。
@@ -4542,6 +4549,12 @@ function module_code(library_namespace) {
 
 		var section_title_hierarchy = options.section_title_hierarchy
 				|| (options.section_title_hierarchy = []);
+		if (!section_title_hierarchy[0]) {
+			// As root
+			section_title_hierarchy[0] = {
+				child_section_titles : []
+			};
+		}
 
 		if (/\d/.test(end_mark) || include_mark.includes(end_mark))
 			throw new Error('Error end of include_mark!');
@@ -6257,21 +6270,32 @@ function module_code(library_namespace) {
 			parameters.level = level;
 
 			parameters.child_section_titles = [];
+			// 去尾。
 			section_title_hierarchy.truncate(level);
 			section_title_hierarchy[level] = parameters;
-			while (level > 1) {
+			// console.log(section_title_hierarchy);
+			while (level > 0) {
 				// 注意：可能 level 2 跳到 4，不一定連續！
+				// level 1 的 child_section_titles 可能包含 level 3!
 				var parent_section_title = section_title_hierarchy[--level];
 				if (parent_section_title) {
 					// Create linkages
-					parameters.parent_section_title = parent_section_title;
+					if (level > 0) {
+						if (false) {
+							library_namespace.log(parent_section_title + ' → '
+									+ parameters);
+						}
+						parameters.parent_section_title = parent_section_title;
+					} else {
+						// assert: is root section list, parent_section_title
+						// === parsed.child_section_titles
+						// === section_title_hierarchy[0]
+					}
 					parent_section_title.child_section_titles.push(parameters);
 					break;
 				}
 			}
 
-			// parse_wiki 處理時不一定按照先後順序，因此這邊還不能設定 section_hierarchy。
-			// 請改用 parsed.each_section()。
 			queue.push(parameters);
 			// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
 			return previous + include_mark + (queue.length - 1) + end_mark;
@@ -6684,6 +6708,8 @@ function module_code(library_namespace) {
 		// @see PATTERN_section
 		var PATTERN_section = new RegExp(
 		// 採用 positive lookahead (?=\n|$) 是為了循序匹配 section title，不跳過任何一個。
+		// 不採用則 parse_wiki 處理時若遇到連續章節，不會按照先後順序，造成這邊還不能設定
+		// section_title_hierarchy，只能在 parsed.each_section() 設定。
 		/(^|\n)(={1,6})(.+)\2((?:[ \t]|mark)*)(?=\n|$)/g.source.replace('mark',
 				CeL.to_RegExp_pattern(include_mark) + '\\d+'
 						+ CeL.to_RegExp_pattern(end_mark)), 'g');
@@ -6878,6 +6904,8 @@ function module_code(library_namespace) {
 
 		// Release memory. 釋放被占用的記憶體。
 		queue = null;
+
+		Object.assign(wikitext, section_title_hierarchy[0]);
 
 		if (initialized_fix
 		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
