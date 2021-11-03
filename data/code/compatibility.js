@@ -396,16 +396,16 @@ function module_code(library_namespace) {
 			return false;
 		},
 
-		// Object.is(): Return SameValue(value1, value2).
+		// Object.is(): Return SameValue(value_1, value_2).
 		// 以 SameValue Algorithm 判斷。
-		is : function is(value1, value2) {
-			return value1 === value2 ? value1 !== 0
+		is : function is(value_1, value_2) {
+			return value_1 === value_2 ? value_1 !== 0
 			// check +0 and -0
-			|| 1 / value1
+			|| 1 / value_1
 			// 為 JsDoc 換行。
-			=== 1 / value2
+			=== 1 / value_2
 			// check NaN. May use Number.isNaN() as well.
-			: value1 !== value1 && value2 !== value2;
+			: value_1 !== value_1 && value_2 !== value_2;
 		},
 
 		// Object.fromEntries()
@@ -1018,30 +1018,31 @@ function module_code(library_namespace) {
 	//
 	Math_hypot_down_boundary = Math.sqrt(Number.MIN_VALUE);
 
-	// Math.hypot(value1 , value2, value3 = 0)
+	// Math.hypot(value_1 , value_2, value_3 = 0)
 	// TODO: 增進效率。
 	// http://en.wikipedia.org/wiki/Hypot
-	function hypot(value1, value2, value3) {
-		var r, MAX = Math.max(value1 = Math.abs(value1),
+	function hypot(value_1, value_2, value_3) {
+		var r, MAX = Math.max(value_1 = Math.abs(value_1),
 		// 轉正
-		value2 = Math.abs(value2),
+		value_2 = Math.abs(value_2),
 		//
-		value3 = value3 === undefined ? 0 : Math.abs(value3));
+		value_3 = value_3 === undefined ? 0 : Math.abs(value_3));
 		if (!MAX || !Number.isFinite(MAX))
 			return MAX;
 
 		if (MAX < Math_hypot_up_boundary
 				// avoid underflow
-				&& Math_hypot_down_boundary < Math.min(value1, value2, value3)
+				&& Math_hypot_down_boundary < Math.min(value_1, value_2,
+						value_3)
 				// avoid overflow, minimise rounding errors (預防本該為整數的出現小數).
-				&& Number.isFinite(r = value1 * value1 + value2 * value2
-						+ value3 * value3))
+				&& Number.isFinite(r = value_1 * value_1 + value_2 * value_2
+						+ value_3 * value_3))
 			return Math.sqrt(r);
 
 		return MAX
-				* Math.sqrt((value1 ? (value1 /= MAX) * value1 : 0)
-						+ (value2 ? (value2 /= MAX) * value2 : 0)
-						+ (value3 ? (value3 /= MAX) * value3 : 0));
+				* Math.sqrt((value_1 ? (value_1 /= MAX) * value_1 : 0)
+						+ (value_2 ? (value_2 /= MAX) * value_2 : 0)
+						+ (value_3 ? (value_3 /= MAX) * value_3 : 0));
 	}
 
 	set_method(Math, {

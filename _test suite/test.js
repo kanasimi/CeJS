@@ -96,6 +96,8 @@ function test_base() {
 
 		assert(CeL.is_empty_object({}), 'CeL.is_Object({})');
 		assert(!CeL.is_empty_object({ a: 1 }), 'CeL.is_Object({})');
+		assert(!CeL.is_empty_object({ a: undefined }), 'CeL.is_Object({})');
+		assert(!CeL.is_empty_object({ a: null }), 'CeL.is_Object({})');
 
 		var options = { a: 2, b: 'abc', c: function (a, b) { return a > b; } };
 		assert([options, CeL.setup_options(options)], 'CeL.setup_options(options)===options #1');
@@ -516,6 +518,25 @@ function test_native() {
 	]);
 
 	all_error_count += CeL.test('data.native misc', function (assert) {
+		assert(Object.is_empty({}), 'Object.is_empty() #1');
+		assert(!Object.is_empty({a:1}), 'Object.is_empty() #2');
+
+		assert(Object.the_same_content(1, 1), 'Object.the_same_content() #1');
+		assert(Object.the_same_content(0, -0), 'Object.the_same_content() #2');
+		assert(Object.the_same_content('0', '0'), 'Object.the_same_content() #3');
+		assert(!Object.the_same_content(0, '0'), 'Object.the_same_content() #4');
+		assert(Object.the_same_content(null, null), 'Object.the_same_content() #5');
+		assert(Object.the_same_content(undefined, undefined), 'Object.the_same_content() #6');
+		assert(Object.the_same_content(NaN, NaN), 'Object.the_same_content() #7');
+		assert(Object.the_same_content([1,2], [1,2]), 'Object.the_same_content() #8');
+		assert(!Object.the_same_content([1,2], [2,1]), 'Object.the_same_content() #9');
+		assert(Object.the_same_content({a:1,b:2}, {a:1,b:2}), 'Object.the_same_content() #10');
+		assert(!Object.the_same_content({a:1,b:2,c:undefined}, {a:1,b:2,v:4}), 'Object.the_same_content() #11');
+		assert(Object.the_same_content({a:1,b:2}, {b:2,a:1}), 'Object.the_same_content() #12');
+		assert(Object.the_same_content({a:{a:1,b:2},b:3}, {b:3,a:{b:2,a:1}}), 'Object.the_same_content() #13');
+		assert(!Object.the_same_content({a:{a:1,b:2},b:3}, {b:3,a:{b:2,a:1,f:{}}}), 'Object.the_same_content() #14');
+		assert(Object.the_same_content([1,2,{a:4}], [1,2,{a:4}]), 'Object.the_same_content() #15');
+
 		assert([49, (49.4).to_fixed(0)], 'to_fixed() #1');
 		assert([50, (49.5).to_fixed(0)], 'to_fixed() #2');
 		assert([49.5, (49.5).to_fixed(1)], 'to_fixed() #3');

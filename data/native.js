@@ -2404,6 +2404,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Boolean}the object is empty.
 	 * 
+	 * @see CeL.is_empty_object()
 	 * @see http://stackoverflow.com/questions/3426979/javascript-checking-if-an-object-has-no-properties-or-if-a-map-associative-arra
 	 */
 	function Object_is_empty(object) {
@@ -2475,10 +2476,37 @@ function module_code(library_namespace) {
 		return count;
 	}
 
+	function the_same_content(value_1, value_2) {
+		if (value_1 === value_2)
+			return true;
+		// @see Object.is()
+		// check NaN. May use Number.isNaN() as well.
+		if (value_1 !== value_1 && value_2 !== value_2)
+			return true;
+		if (typeof value_1 !== 'object' || typeof value_2 !== 'object')
+			return false;
+
+		// TODO: adapt for Map, Set, ...
+
+		var keys_1 = Object.keys(value_1), keys_2 = Object.keys(value_2);
+		if (keys_1.length !== keys_2.length)
+			return false;
+
+		for (var index = 0; index < keys_1.length; index++) {
+			var key = keys_1[index];
+			if (!(key in value_2)
+					|| !the_same_content(value_1[key], value_2[key]))
+				return false;
+		}
+
+		return true;
+	}
+
 	set_method(Object, {
 		filter : Object_filter,
 		clone : Object_clone,
 		is_empty : Object_is_empty,
+		the_same_content : the_same_content,
 		clean : Object_clean,
 		reverse_key_value : Object_reverse_key_value,
 		size : Object_size
