@@ -940,7 +940,8 @@ function module_code(library_namespace) {
 			// IE:404會throw error, timeout除了throw error, 還會readystatechange;
 			// Gecko亦會throw error
 			try {
-				_f.XMLHttp.setRequestHeader("Accept-Encoding", "gzip, deflate");
+				_f.XMLHttp.setRequestHeader("Accept-Encoding",
+						"gzip, deflate, br");
 			} catch (e) {
 			}
 			// Set header so the called script knows that it's an XMLHttpRequest
@@ -1163,9 +1164,9 @@ function module_code(library_namespace) {
 
 	// @see https://github.com/request/request
 
-	var node_url, node_http, node_https,
+	var node_url, node_http, node_http2, node_https,
 	// reuse the sockets (keep-alive connection).
-	node_http_agent, node_https_agent,
+	node_http_agent, node_http2_agent, node_https_agent,
 	//
 	node_zlib;
 
@@ -2117,6 +2118,11 @@ function module_code(library_namespace) {
 								+ ' bytes...', 2, 'get_URL_node');
 						data = node_zlib.deflateSync(data);
 						break;
+					case 'br':
+						library_namespace.debug('brotli data ' + data.length
+								+ ' bytes...', 2, 'get_URL_node');
+						data = node_zlib.brotliDecompressSync(data);
+						break;
 					default:
 						library_namespace.warn([ 'get_URL_node: ', {
 							T : [ 'Unknown HTTP compression method: [%1]',
@@ -2272,8 +2278,8 @@ function module_code(library_namespace) {
 			'User-Agent' : get_URL_node.default_user_agent,
 
 			// https://developer.mozilla.org/zh-CN/docs/Glossary/Quality_values
-			Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9'
-					+ ',image/webp,*/*;q=0.8'
+			Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
+					+ 'image/avif,' + 'image/webp,*/*;q=0.8'
 			// + ',application/signed-exchange;v=b3;q=0.9'
 			,
 			// Accept : 'application/json, text/plain, */*',
@@ -2290,9 +2296,10 @@ function module_code(library_namespace) {
 
 			// 為了順暢使用 Cloudflare，必須加上 Sec-Fetch-headers？ e.g., mymhh.js
 			// https://blog.kalan.dev/fetch-metadata-request-headers/
-			// 'Sec-Fetch-Dest': 'document',
-			// 'Sec-Fetch-Mode': 'navigate',
-			// 'Sec-Fetch-Site': 'none',
+			'Sec-Fetch-Dest' : 'document',
+			'Sec-Fetch-Mode' : 'navigate',
+			'Sec-Fetch-Site' : 'none',
+			'Sec-Fetch-User' : '?1',
 
 			// TE 請求型頭部用來指定用戶代理希望使用的傳輸編碼類型。
 			// 可以將其非正式稱為 Accept-Transfer-Encoding，這個名稱顯得更直觀一些。
@@ -2315,7 +2322,9 @@ function module_code(library_namespace) {
 		) {
 			// 早期 node v0.10.25 無 zlib.gunzipSync。Added in: v0.11.12
 			// 'gzip, deflate, *'
-			URL_options_to_fetch.headers['Accept-Encoding'] = 'gzip, deflate';
+			URL_options_to_fetch.headers['Accept-Encoding'] = 'gzip, deflate'
+			// Added in: v11.7.0, v10.16.0
+			+ (node_zlib.brotliDecompressSync ? ', br' : '');
 		}
 		// console.trace(URL_options_to_fetch.headers);
 
@@ -2534,6 +2543,8 @@ function module_code(library_namespace) {
 			node_http = require('http');
 			node_https = require('https');
 			node_zlib = require('zlib');
+
+			node_http2 = require('http2');
 
 			_.get_URL = library_namespace
 					.copy_properties(get_URL, get_URL_node);
