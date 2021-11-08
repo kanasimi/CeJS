@@ -3611,6 +3611,11 @@ function module_code(library_namespace) {
 				} else if (/^Coord/.test(token.name)) {
 					// Geographical coordinates
 					set_index('coord_templates');
+				} else if (/^(?:\w[ _])?Talk:/.test(token.name)) {
+					// 嵌入包含了其他頁面。
+					// e.g., [[w:en:Talk:Cuvier's dwarf caiman]]
+					set_index('content');
+					set_index('lead_section_end', BACKTRACKING_SPACES);
 				} else if (set_index('maintenance_templates')) {
 					// maintenance tag
 				} else if (layout_indices.content_end >= 0) {
@@ -4554,15 +4559,6 @@ function module_code(library_namespace) {
 			delete options.no_resolve;
 		}
 
-		var section_title_hierarchy = options.section_title_hierarchy
-				|| (options.section_title_hierarchy = []);
-		if (!section_title_hierarchy[0]) {
-			// As root
-			section_title_hierarchy[0] = {
-				child_section_titles : []
-			};
-		}
-
 		if (/\d/.test(end_mark) || include_mark.includes(end_mark))
 			throw new Error('Error end of include_mark!');
 
@@ -4584,13 +4580,22 @@ function module_code(library_namespace) {
 				wikitext = (initialized_fix[0] = '\n') + wikitext;
 			if (!wikitext.endsWith('\n'))
 				wikitext += (initialized_fix[1] = '\n');
-			// temporary queue
+			// setup temporary queue
 			queue = [];
 		}
 
-		if (!options.conversion_table) {
+		var section_title_hierarchy = queue.section_title_hierarchy
+				|| (queue.section_title_hierarchy = []);
+		if (!section_title_hierarchy[0]) {
+			// As root
+			section_title_hierarchy[0] = options.target_array
+					|| Object.create(null);
+			section_title_hierarchy[0].child_section_titles = [];
+		}
+
+		if (!queue.conversion_table) {
 			// [[MediaWiki:Conversiontable/zh-hant]]
-			options.conversion_table = Object.create(null);
+			queue.conversion_table = Object.create(null);
 		}
 
 		if (typeof options.prefix === 'function') {
@@ -4671,7 +4676,7 @@ function module_code(library_namespace) {
 				H : true,
 				// add rule for convert code (all text convert)
 				A : true
-			}) && options.conversion_table;
+			}) && queue.conversion_table;
 
 			// console.log('parameters: ' + JSON.stringify(parameters));
 			parameters = parameters.split(';');
@@ -6903,16 +6908,14 @@ function module_code(library_namespace) {
 			if (queue.switches)
 				wikitext.switches = queue.switches;
 
-			if (!library_namespace.is_empty_object(options.conversion_table))
-				wikitext.conversion_table = options.conversion_table;
+			if (!library_namespace.is_empty_object(queue.conversion_table))
+				wikitext.conversion_table = queue.conversion_table;
 			if (options.conversion_title)
-				wikitext.conversion_title = options.conversion_title;
+				wikitext.conversion_title = queue.conversion_title;
 		}
 
 		// Release memory. 釋放被占用的記憶體。
 		queue = null;
-
-		Object.assign(wikitext, section_title_hierarchy[0]);
 
 		if (initialized_fix
 		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
@@ -6977,6 +6980,10 @@ function module_code(library_namespace) {
 					}
 				}
 			}
+
+			// console.trace(section_title_hierarchy[0]);
+			if (!options.target_array)
+				Object.assign(wikitext, section_title_hierarchy[0]);
 		}
 
 		if (false) {
