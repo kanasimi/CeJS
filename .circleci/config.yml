@@ -8,9 +8,9 @@ workflows:
   test:
     jobs:
       # https://discuss.circleci.com/t/run-tests-on-multiple-versions-of-python/15462/2
-      - test-latest-temporarily-LTS
+      #- test-latest-temporarily-LTS
+      - test-latest
       - test-LTS
-      # Wikimedia Tool Labs: v0.10.25
       - test-old
 
 # a collection of steps
@@ -26,7 +26,8 @@ jobs:
           name: test
           command: npm test
 
-  test-latest-temporarily-LTS:
+  #test-latest-temporarily-LTS:
+  test-latest:
     #<<: *test-template
     docker:
       # https://circleci.com/docs/2.0/circleci-images/
@@ -34,8 +35,8 @@ jobs:
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
       # 2020/10-12: failed with image: circleci/node:current-stretch
       ## npm ERR! EISDIR: illegal operation on a directory, copyfile '/usr/local/lib/node_modules/npm' -> '/usr/local/lib/node_modules/.npm-i9nnxROI'
-      #- image: circleci/node:current-stretch
-      - image: circleci/node:lts-stretch
+      - image: circleci/node:current-stretch
+      #- image: circleci/node:lts-stretch
 
     steps:
       - checkout
@@ -60,10 +61,13 @@ jobs:
   test-old:
     #<<: *test-template
     docker:
-      # NG:
+      # NG: old Wikimedia Tool Labs: v0.10.25
       #- image: circleci/node:0.10.25
+      # certificate has expired:
+      #- image: circleci/node:4.8.7
+      # 2020 or 2021? Wikimedia Tool Labs: `/usr/bin/node -v`: v8.11.1
       # OK:
-      - image: circleci/node:4.8.7
+      - image: circleci/node:8.11.1
 
       # NG:
       # https://github.com/anmonteiro/lumo/blob/master/.circleci/config.yml
