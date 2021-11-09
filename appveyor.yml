@@ -11,7 +11,7 @@ environment:
     # LTS
     - nodejs_version: "14"
     # Current
-    - nodejs_version: "17"
+    - nodejs_version: "16"
 
 platform:
   - x86
