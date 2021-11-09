@@ -63,11 +63,16 @@ jobs:
     docker:
       # NG: old Wikimedia Tool Labs: v0.10.25
       #- image: circleci/node:0.10.25
+
       # certificate has expired:
       #- image: circleci/node:4.8.7
+
       # 2020 or 2021? Wikimedia Tool Labs: `/usr/bin/node -v`: v8.11.1
+      # certificate has expired:
+      #- image: circleci/node:8.11.1
+
       # OK:
-      - image: circleci/node:8.11.1
+      - image: circleci/node:12.22.7
 
       # NG:
       # https://github.com/anmonteiro/lumo/blob/master/.circleci/config.yml
