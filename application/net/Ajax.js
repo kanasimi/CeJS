@@ -2544,7 +2544,11 @@ function module_code(library_namespace) {
 			node_https = require('https');
 			node_zlib = require('zlib');
 
-			node_http2 = require('http2');
+			try {
+				node_http2 = require('http2');
+			} catch(e) {
+				// Is old version. Added in: v8.4.0
+			}
 
 			_.get_URL = library_namespace
 					.copy_properties(get_URL, get_URL_node);
