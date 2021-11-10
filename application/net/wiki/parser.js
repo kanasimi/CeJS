@@ -1776,7 +1776,7 @@ function module_code(library_namespace) {
 
 		if (token.type === 'tag_single') {
 			if (token.tag in {
-				// For {{#section:}}, {{#lst}}
+				// For {{#lst}}, {{#section:}}
 				// [[w:en:Help:Labeled section transclusion]]
 				// e.g., @ [[w:en:Island Line, Isle of Wight]]
 				section : true,
@@ -3061,6 +3061,8 @@ function module_code(library_namespace) {
 						// {{Anchor|A[[B]]}} → "AB"
 						anchor = wikitext_to_plain_text(anchor);
 					}
+					// 多空格、斷行會被轉成單一 " "。
+					anchor = anchor.replace(/[\s\n]{2,}/g, ' ');
 					register_anchor(anchor, template_token);
 				}
 				return;
@@ -3977,8 +3979,10 @@ function module_code(library_namespace) {
 	//
 	// templatestyles: https://www.mediawiki.org/wiki/Extension:TemplateStyles
 	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr|templatestyles'
-			// For {{#section:}}, {{#lst}}
+			// Parser extension tags @ [[Special:Version]]
+			// For {{#lst}}, {{#section:}}
 			// [[w:en:Help:Labeled section transclusion]]
+			// TODO: 標簽（tag）現在可以本地化
 			+ '|section';
 	var /** {RegExp}HTML self closed tags 的匹配模式。 */
 	PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_close_tags
