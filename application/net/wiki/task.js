@@ -1036,8 +1036,9 @@ function module_code(library_namespace) {
 			next[2] = library_namespace.setup_options(next[2]);
 			// `next[2].page_to_edit`: 手動指定要編輯的頁面。
 			if (!next[2].page_to_edit) {
-				// console.trace(this.last_page);
-				next[2].page_to_edit = this.last_page;
+				// console.trace([ next, this.last_page ]);
+				// e.g., page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
+				next[2].page_to_edit = this.last_page || next[2].task_page_data;
 				// console.trace(next[2]);
 			}
 			// console.trace(next[2]);
@@ -1055,10 +1056,12 @@ function module_code(library_namespace) {
 			if (!next[2].page_to_edit) {
 				library_namespace
 						.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first! 另請注意: 您不能在 callback 中呼叫 .edit() 之類的 wiki 函數！請在 callback 執行完畢後再執行新的 wiki 函數！例如放在 setTimeout() 中。');
+				// console.trace([ this.actions.length, next ]);
 				// next[3] : callback
 				this.next(next[3], undefined, 'no page');
 				break;
 			}
+			// assert: wiki_API.is_page_data(next[2].page_to_edit)
 
 			if (typeof next[1] !== 'string'
 			// @see check_and_delete_revisions
@@ -2262,7 +2265,8 @@ function module_code(library_namespace) {
 	 * 注意: arguments 與 get_list() 之 callback 連動。
 	 * 
 	 * @param {Object}config
-	 *            configuration. { page_options: { rvprop: 'ids|timestamp|user' } }
+	 *            configuration. { page_options: { prop: 'revisions', rvprop:
+	 *            'ids|timestamp|user' } }
 	 * @param {Array}pages
 	 *            page data list
 	 */
@@ -2412,6 +2416,7 @@ function module_code(library_namespace) {
 		/** config.no_message: {Boolean}console 不顯示訊息，也不處理 {Array}messages。 */
 		messages.add = config.no_message ? library_namespace.null_function
 				: add_message;
+		// config.no_message: no_log
 		messages.reset = config.no_message ? library_namespace.null_function
 				: reset_messages;
 		messages.reset();
@@ -2749,6 +2754,8 @@ function module_code(library_namespace) {
 				// clone() 是為了能個別改變 summary。
 				// 例如: each() { options.summary += " -- ..."; }
 				var work_options = Object.clone(options);
+				// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
+				work_options.task_page_data = page;
 				// console.trace(work_options);
 				// 編輯頁面內容。
 				session.edit(function(page_data) {
@@ -3199,6 +3206,7 @@ function module_code(library_namespace) {
 					console.trace('一次取得本 slice 所有頁面內容。'
 							+ [ maybe_nested_thread, session.running,
 									session.actions.length ]);
+				//console.trace(page_options);
 				this.page(this_slice, main_work, page_options);
 			}).bind(this);
 

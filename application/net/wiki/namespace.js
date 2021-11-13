@@ -354,7 +354,7 @@ function module_code(library_namespace) {
 
 		if (typeof action[1] === 'string' && !/^[a-z]+=/.test(action[1])) {
 			library_namespace
-					.warn('Did not set action! Will auto add "action=".');
+					.warn('set_parameters: Did not set action! Will auto add "action=".');
 			console.trace(action);
 			action[1] = 'action=' + action[1];
 		}
@@ -3093,6 +3093,7 @@ function module_code(library_namespace) {
 		// assert: library_namespace.is_Object(session.API_parameters[path])
 		// && Array.isArray(callback_queue[path])
 		callback_queue[path].forEach(function(caller) {
+			// console.trace(caller);
 			// [ caller, _this, caller_arguments ]
 			caller[0].apply(caller[1], caller[2]);
 		});
@@ -3190,6 +3191,7 @@ function module_code(library_namespace) {
 			var modules = !error && data && data.paraminfo
 					&& Array.isArray(data.paraminfo.modules)
 					&& data.paraminfo.modules[0];
+			// console.trace(modules);
 			if (!modules) {
 				callback(undefined, error
 				//
@@ -3205,9 +3207,13 @@ function module_code(library_namespace) {
 				var parameters = session.API_parameters[modules.path]
 						|| (session.API_parameters[modules.path] = Object
 								.create(null));
-				if (modules.prefix)
+				// console.trace([ parameters, modules ]);
+
+				// For path='query', modules.prefix=''.
+				if ('prefix' in modules)
 					parameters[KEY_API_parameters_prefix] = modules.prefix;
 				modules.parameters.forEach(function(parameter_data) {
+					// assert: library_namespace.is_Object(parameter_data)
 					var key = parameter_data.name;
 					if (parameters[key])
 						Object.assign(parameters[key], parameter_data);

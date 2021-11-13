@@ -111,7 +111,7 @@ function module_code(library_namespace) {
 			// rvprop : 'ids|timestamp',
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Binfo
 			// https://www.mediawiki.org/wiki/API:Info
-			additional : 'inprop=talkid|subjectid'
+			additional_query : 'inprop=talkid|subjectid'
 					+ '|preload|displaytitle|varianttitles'
 		});
 
@@ -123,7 +123,7 @@ function module_code(library_namespace) {
 		}, {
 			prop : 'info',
 			// https://www.mediawiki.org/wiki/API:Info
-			additional : 'inprop=intestactions&intestactions=read'
+			additional_query : 'inprop=intestactions&intestactions=read'
 		// + '&intestactionsdetail=full'
 		});
 
@@ -140,6 +140,22 @@ function module_code(library_namespace) {
 	var KEY_KEEP_INDEX = 'keep index',
 	// assert: !!KEY_KEEP_ORDER === true
 	KEY_KEEP_ORDER = 'keep order';
+
+	// https://www.mediawiki.org/wiki/API:Query#Query_modules
+	function setup_query_modules(title, callback, options) {
+		var session = wiki_API.session_of_options(options);
+		// console.trace(session.API_parameters.query);
+		wiki_API_page.query_modules = Object.keys(session.API_parameters.query)
+		// Should be [ 'prop', 'list', 'meta' ]
+		.filter(function(key) {
+			var parameters = session.API_parameters.query[key];
+			return parameters.limit && parameters.submodules;
+		});
+		library_namespace.info('setup_query_modules: Get query modules: '
+				+ wiki_API_page.query_modules);
+
+		wiki_API_page.apply(this, arguments);
+	}
 
 	/**
 	 * 讀取頁面內容，取得頁面源碼。可一次處理多個標題。
@@ -169,6 +185,14 @@ function module_code(library_namespace) {
 	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 	 */
 	function wiki_API_page(title, callback, options) {
+		var action = {
+			action : 'query'
+		};
+		if (wiki_API.need_get_API_parameters(action, options,
+				setup_query_modules, arguments)) {
+			return;
+		}
+
 		if (typeof callback === 'object' && options === undefined) {
 			// shift arguments
 			options = callback;
@@ -274,7 +298,7 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(title);
-		var action = normalize_title_parameter(title, options);
+		action = normalize_title_parameter(title, options);
 		// console.trace(action);
 		if (!action) {
 			library_namespace.error('wiki_API_page: Invalid title: '
@@ -287,19 +311,16 @@ function module_code(library_namespace) {
 		}
 
 		// console.log(action);
-		var post_data;
-		// TODO: 將過長的標題列表改至 POST，預防 "414 Request-URI Too Long"。
 
-		var get_content;
-		if ('prop' in options) {
-			get_content = options.prop
-			// {String|Array}
-			&& options.prop.includes('revisions');
-		} else {
+		if (!wiki_API_page.query_modules.some(function(module) {
+			return options[module];
+		})) {
 			options.prop = 'revisions';
-			get_content = true;
 		}
 
+		var get_content = options.prop
+		// {String|Array}
+		&& options.prop.includes('revisions');
 		if (get_content) {
 			// 2019 API:
 			// https://www.mediawiki.org/wiki/Manual:Slot
@@ -320,11 +341,11 @@ function module_code(library_namespace) {
 			}
 
 			// Which properties to get for each revision
-			get_content = (Array.isArray(options.rvprop)
+			get_content = Array.isArray(options.rvprop)
 			//
-			&& options.rvprop.join('|') || options.rvprop)
+			&& options.rvprop.join('|')
 			//
-			|| wiki_API_page.rvprop;
+			|| options.rvprop || wiki_API_page.default_rvprop;
 
 			action[1].rvprop = get_content;
 
@@ -369,6 +390,10 @@ function module_code(library_namespace) {
 		action[1].action = 'query';
 
 		library_namespace.debug('get url token: ' + action, 5, 'wiki_API_page');
+		// console.trace([ action, options ]);
+
+		var post_data;
+		// TODO: 將過長的標題列表改至 POST，預防 "414 Request-URI Too Long"。
 
 		// console.trace(wiki_API.session_of_options(options));
 		// console.trace(action);
@@ -910,7 +935,7 @@ function module_code(library_namespace) {
 
 	// default properties of revisions
 	// ids, timestamp 是為了 wiki_API_edit.set_stamp 檢查編輯衝突用。
-	wiki_API_page.rvprop = 'ids|timestamp|content';
+	wiki_API_page.default_rvprop = 'ids|timestamp|content';
 
 	// @see https://www.mediawiki.org/w/api.php?action=help&modules=query
 	wiki_API_page.auto_converttitles = 'zh,gan,iu,kk,ku,shi,sr,tg,uz'
@@ -1423,7 +1448,7 @@ function module_code(library_namespace) {
 		// rvprop : 'ids|timestamp',
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Binfo
 		// https://www.mediawiki.org/wiki/API:Info#inprop.3Dprotection
-		additional : 'inprop=protection'
+		additional_query : 'inprop=protection'
 	});
 
 	 </code>
