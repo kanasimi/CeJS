@@ -2009,16 +2009,13 @@ function module_code(library_namespace) {
 		}, wiki_API.search.default_parameters, _options);
 
 		wiki_API.query(action, function(data, error) {
-			// console.log(data);
+			// console.log([ data, error ]);
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value)
 				library_namespace.show_value(data, 'wiki_API.search');
 
-			if (error) {
-				if (typeof callback === 'function') {
-					callback(data, error);
-				}
+			if (wiki_API.query.handle_error(data, error, callback)) {
 				return;
 			}
 
@@ -2128,7 +2125,7 @@ function module_code(library_namespace) {
 	 * @param {String}title
 	 *            頁面名。
 	 * @param {Function}callback
-	 *            callback(root_page_data, redirect_list) { redirect_list = [
+	 *            callback(root_page_data, redirect_list, error) { redirect_list = [
 	 *            page_data, page_data, ... ]; }
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項. 此 options 可能會被變更！<br />
@@ -2174,11 +2171,11 @@ function module_code(library_namespace) {
 		// console.trace(action);
 		wiki_API.query(action, typeof callback === 'function'
 		//
-		&& function(data) {
+		&& function(data, error) {
 			// copy from wiki_API.page()
 
-			var error = data && data.error;
-			// 檢查伺服器回應是否有錯誤資訊。
+			error = data && data.error;
+			// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
 			if (error) {
 				library_namespace.error(
 				//
@@ -2192,6 +2189,7 @@ function module_code(library_namespace) {
 				&& data.warnings.query['*']) {
 					library_namespace.warn(data.warnings.query['*']);
 				}
+				// callback(root_page_data, redirect_list, error)
 				callback(null, null, error);
 				return;
 			}

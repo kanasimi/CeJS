@@ -185,6 +185,7 @@ function module_code(library_namespace) {
 	function add_section_to_summary(summary, section_title) {
 		if (!section_title)
 			return summary || '';
+		// 所有"/*錨點*/"註解都會 .trim() 後轉成網頁錨點連結。
 		return '/* ' + section_title + ' */ ' + (summary || '');
 	}
 
@@ -443,7 +444,7 @@ function module_code(library_namespace) {
 			// console.log(data);
 			if (error) {
 			} else if (data.error) {
-				// 檢查伺服器回應是否有錯誤資訊。
+				// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
 				error = data.error;
 				error.toString = edit_error_toString;
 			} else if (data.edit && data.edit.result !== 'Success') {

@@ -187,6 +187,7 @@ function module_code(library_namespace) {
 			}
 			// run next action
 			callback(result);
+			// 注意: callback() 必須採用 handle_error() 來測試是否出問題!
 		}
 	}
 
@@ -515,28 +516,6 @@ function module_code(library_namespace) {
 					}
 				}
 			};
-		}
-
-		/**
-		 * TODO: 簡易的泛用先期處理程式。
-		 * 
-		 * @inner
-		 */
-		function response_handler(response) {
-			if (library_namespace.is_debug(3)
-			// .show_value() @ interact.DOM, application.debug
-			&& library_namespace.show_value)
-				library_namespace.show_value(data, 'wiki_API_query: data');
-
-			var error = data && data.error;
-			// 檢查伺服器回應是否有錯誤資訊。
-			if (error) {
-				library_namespace.error('wiki_API_query: ['
-				//
-				+ error.code + '] ' + error.info);
-			}
-
-			callback(response);
 		}
 
 		function XMLHttp_handler(XMLHttp, error) {
@@ -911,6 +890,75 @@ function module_code(library_namespace) {
 		}
 		return page_data;
 	};
+
+	// ------------------------------------------------------------------------
+
+	if (false) {
+		// 注意: callback() 必須採用下列方法來測試是否出問題!
+		if (wiki_API.query.handle_error(data, error, callback)) {
+			return;
+		}
+	}
+
+	/**
+	 * 泛用先期處理程式。 response_handler(response)
+	 */
+	function handle_error(/* result of wiki_API.query() */data, error,
+			callback) {
+		// console.log([ data, error ]);
+		if (library_namespace.is_debug(3)
+		// .show_value() @ interact.DOM, application.debug
+		&& library_namespace.show_value)
+			library_namespace.show_value(data, 'wiki_API_query.handle_error');
+
+		if (error) {
+			if (typeof callback === 'function') {
+				callback(data, error);
+			}
+			return;
+		}
+
+		if (!data) {
+			return;
+		}
+
+		if (data.warnings) {
+			for ( var action in data.warnings) {
+				library_namespace.warn('handle_error: '
+						+ data.warnings[action]['*']);
+			}
+			console.trace(data.warnings);
+		}
+
+		// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
+		var error = data.error;
+		if (!error) {
+			return;
+		}
+
+		// e.g., {code:'',info:'','*':''}
+		if (error.code) {
+			if (false) {
+				library_namespace.error('wiki_API_query: ['
+				//
+				+ error.code + '] ' + error.info);
+			}
+
+			var message = '[' + error.code + ']';
+			if (error.info)
+				message += ' ' + error.info;
+			error = new Error(message);
+			error.message = message;
+			error.code = data.error.code;
+		}
+
+		if (typeof callback === 'function') {
+			callback(data, error);
+		}
+		return error;
+	}
+
+	wiki_API_query.handle_error = handle_error;
 
 	// ------------------------------------------------------------------------
 

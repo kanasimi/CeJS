@@ -408,7 +408,7 @@ function module_code(library_namespace) {
 			}
 
 			var error = data && data.error;
-			// 檢查伺服器回應是否有錯誤資訊。
+			// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
 			if (error) {
 				library_namespace.error('wiki_API_page: ['
 				//
@@ -450,7 +450,7 @@ function module_code(library_namespace) {
 						return;
 					}
 				}
-				callback(undefined, error);
+				callback(data, error);
 				return;
 			}
 
@@ -1115,20 +1115,10 @@ function module_code(library_namespace) {
 
 		wiki_API.query(action, typeof callback === 'function'
 		//
-		&& function(data) {
+		&& function(data, error) {
 			// copy from wiki_API.redirects_here()
 
-			var error = data && data.error;
-			// 檢查伺服器回應是否有錯誤資訊。
-			if (error) {
-				library_namespace.error(
-				//
-				'wiki_API.purge: [' + error.code + '] ' + error.info);
-				if (data.warnings && data.warnings.query
-				//
-				&& data.warnings.query['*'])
-					library_namespace.warn(data.warnings.query['*']);
-				callback(undefined, error);
+			if (wiki_API.query.handle_error(data, error, callback)) {
 				return;
 			}
 
@@ -1295,16 +1285,8 @@ function module_code(library_namespace) {
 
 		wiki_API.query({
 			action : 'expandtemplates'
-		}, function(data) {
-			var error = data && data.error;
-			// 檢查伺服器回應是否有錯誤資訊。
-			if (error) {
-				library_namespace.error('wiki_API_expandtemplates: ['
-				//
-				+ error.code + '] ' + error.info);
-				typeof callback === 'function'
-				//
-				&& callback(undefined, errpr);
+		}, function(data, error) {
+			if (wiki_API.query.handle_error(data, error, callback)) {
 				return;
 			}
 
