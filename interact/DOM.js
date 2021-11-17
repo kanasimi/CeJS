@@ -9028,6 +9028,9 @@ _
 					// T : '↑Back to TOC',
 					R : back_title,
 					target : '_self'
+				// TODO: element 本身可能是浮動的，因此應跳到下一個內文本文的元素，並採用
+				// .nextElementSibling.scrollIntoView()。
+				// @see function go_to_anchor(anchor) @ reviews.original.js
 				}, [ node, 1 ]);
 			}
 

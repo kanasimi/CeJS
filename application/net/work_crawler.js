@@ -351,7 +351,7 @@ function module_code(library_namespace) {
 		auto_import_args : true,
 
 		// {String}瀏覽器識別 navigator.userAgent 模擬 Chrome。
-		user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4676.0 Safari/537.36'
+		user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36'
 		// 並且每次更改不同的 user agent。
 		.replace(/( Chrome\/\d+\.\d+\.)(\d+)/,
 		//

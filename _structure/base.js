@@ -258,7 +258,10 @@ function (globalThis) {
 	Class = library_name;
 
 	var is_WWW = typeof window === 'object'
-		&& globalThis === window
+		&& (globalThis === window
+			// 2021/11/16 e.g., under https://web.archive.org/
+			// `window is {Proxy} of `globalThis`
+			|| window.window === window && _ === window[library_name])
 		// 由條件嚴苛的開始。
 		&& typeof navigator === 'object'
 			// Internet Explorer 6.0 (6.00.2900.2180),

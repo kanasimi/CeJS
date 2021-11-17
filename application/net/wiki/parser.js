@@ -3927,6 +3927,7 @@ function module_code(library_namespace) {
 
 	// 經測試發現 {{...}} 名稱中不可有 [{}<>\[\]]
 	// while(/{{{[^{}\[\]]+}}}/g.exec(wikitext));
+	// [|{}] or [|{}=]
 	// 但允許 "{{\n name}}"
 	// 模板名#後的內容會忽略。
 	/** {RegExp}模板的匹配模式。 */
