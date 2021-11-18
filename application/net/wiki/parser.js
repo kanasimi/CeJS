@@ -1874,9 +1874,10 @@ function module_code(library_namespace) {
 						options);
 			}
 
-			if (token.name === 'Lj'
+			// moved to CeL.application.net.wiki.template_functions.zhmoegirl
+			if (false
+					&& token.name === 'Lj'
 					&& wiki_API.site_name(wiki_API.session_of_options(options)) === 'zhmoegirl') {
-				// {{Lj|...}} 是日語{{lang|ja|...}}的縮寫 @ zh.moegirl
 				return preprocess_section_link_token(parse_wikitext('-{'
 						+ token.parameters[1] + '}-'), options);
 			}
@@ -2061,14 +2062,16 @@ function module_code(library_namespace) {
 			// 盡可能減少字元的使用量，因此僅處理開頭，不處理結尾。
 			// @see [[w:en:Help:Wikitext#External links]]
 			// @see PATTERN_page_name
-			is_uri ? /[\[\]\|{}<]/g
+			is_uri ? /[\|{}<>\[\]]/g
 			// 為了容許一些特定標籤能夠顯示格式，"<>"已經在preprocess_section_link_token(),section_link()裡面處理過了。
 			// display_text 在 "[[", "]]" 中，不可允許 "[]"
-			: /[\|{}<>]/g && /[\[\]\|{]/g,
+			: /[\|{}<>]/g && /[\|{}\[\]]/g,
 			// 經測試 anchor 亦不可包含[\[\]{}\n�]。
 			function(character) {
 				if (is_uri) {
-					return '%' + character.charCodeAt(0).toString(16);
+					return '%' + character.charCodeAt(0)
+					// 會比 '&#' 短一點。
+					.toString(16).toUpperCase();
 				}
 				return '&#' + character.charCodeAt(0) + ';';
 			}).replace(/[ \n]{2,}/g, ' ');
@@ -2422,6 +2425,9 @@ function module_code(library_namespace) {
 	 * CeL.wiki.parser.parser_prototype.each_section
 	 * 
 	 * TODO: 這會漏算沒有日期標示的簽名
+	 * 
+	 * TODO: includeing
+	 * <h2>...</h2>
 	 * 
 	 * @example <code>
 

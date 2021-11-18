@@ -75,6 +75,19 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// for preprocess_section_link_token()
+	// {{Lj|...}} 是日語{{lang|ja|...}}的縮寫 @ zh.moegirl
+	function expand_template_Lj(options) {
+		var parameters = this.parameters;
+		return '-{' + parameters[1] + '}-';
+	}
+
+	function parse_template_Lj(token) {
+		token.expand = expand_template_Lj;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// for get_all_anchors() @ [[ACGN作品中出場的鐵路車站列表]]
 	function expand_template_铁路车站名(options) {
 		var parameters = this.parameters;
@@ -120,6 +133,8 @@ function module_code(library_namespace) {
 		// 一些會添加 anchors 的特殊模板。
 		A : parse_template_A,
 		铁路车站名 : parse_template_铁路车站名,
+
+		Lj : parse_template_Lj,
 
 		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon,
 
