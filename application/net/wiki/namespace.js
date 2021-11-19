@@ -629,6 +629,15 @@ function module_code(library_namespace) {
 			return;
 
 		language_code = language_code.toLowerCase();
+		var site_name = wiki_API.site_name(language_code,
+				add_session_to_options(session, {
+					get_all_properties : true
+				}));
+		if (site_name && site_name.language) {
+			// e.g., API_URL=zh.wiktionary
+			language_code = site_name.language;
+		}
+
 		if (PATTERN_PROJECT_CODE_i.test(language_code)
 				// 不包括 test2.wikipedia.org 之類。
 				&& !/test|wik[it]/i.test(language_code)
@@ -649,7 +658,7 @@ function module_code(library_namespace) {
 			session.language
 			// e.g., 'zh-classical', 'zh-yue', 'zh-min-nan'
 			= language_code;
-			var site_name = wiki_API.site_name(session, {
+			site_name = wiki_API.site_name(session, {
 				get_all_properties : true
 			});
 			// console.trace([ language_code, site_name ]);
@@ -836,7 +845,9 @@ function module_code(library_namespace) {
 		var site, project;
 		matched = language
 		// e.g., 'zh-min-nan' → 'zh_min_nan'
-		.replace(/-/g, '_').match(PATTERN_SITE);
+		.replace(/-/g, '_')
+		// 'zhwikinews' → zh.wikinews
+		.match(PATTERN_SITE);
 		if (matched) {
 			language = matched[1];
 			family = family || matched[2];
