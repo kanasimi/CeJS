@@ -115,6 +115,18 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// for get_all_anchors() @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
+	function expand_template_Font(options) {
+		var parameters = this.parameters;
+		return parameters[1] ? parameters[1].toString() : '';
+	}
+
+	function parse_template_Font(token) {
+		token.expand = expand_template_Font;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// for get_all_anchors() @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_Coloredlink(options) {
 		var parameters = this.parameters;
 		return '[[:' + parameters[2] + '|<span style="color:' + parameters[1]
@@ -138,6 +150,7 @@ function module_code(library_namespace) {
 
 		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon,
 
+		Font : parse_template_Font,
 		Coloredlink : parse_template_Coloredlink
 	};
 

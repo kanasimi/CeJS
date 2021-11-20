@@ -778,7 +778,9 @@ function module_code(library_namespace) {
 				// 過濾機器人所發出的通知/提醒
 				// 頁面/用戶以bots模板封鎖通知
 				if (notification_name) {
-					PATTERN = /(?:^|\|)[\s\n]*optout[\s\n]*=[\s\n]*([^|]+)/ig;
+					PATTERN =
+					//
+					/(?:^|\|)[\s\n]*optout[\s\n]*=[\s\n]*([^{}|]+)/ig;
 					while (matched = PATTERN.exec(data)) {
 						if (notification_name.test(matched[1])) {
 							// 一被拒絕即跳出。

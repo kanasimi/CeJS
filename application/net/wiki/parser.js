@@ -2426,10 +2426,10 @@ function module_code(library_namespace) {
 	 * 
 	 * TODO: 這會漏算沒有日期標示的簽名
 	 * 
-	 * TODO: includeing
-	 * <h2>...</h2>
-	 * 
 	 * @example <code>
+
+	// TODO: includeing `<h2>...</h2>`, `==<h2>...</h2>==`
+
 
 	parsed = CeL.wiki.parser(page_data);
 	parsed.each_section(function(section, section_index) {
@@ -3046,9 +3046,10 @@ function module_code(library_namespace) {
 		parsed.each('transclusion', function(template_token) {
 			if (template_token.expand) {
 				// const
-				var anchor = get_all_anchors(template_token.expand(),
-				//
-				_options);
+				var anchor = template_token.expand();
+				if (!anchor || typeof anchor.toString !== 'function')
+					return;
+				anchor = get_all_anchors(anchor.toString(), _options);
 				register_anchor(anchor, template_token);
 				return;
 			}
@@ -4575,7 +4576,15 @@ function module_code(library_namespace) {
 
 		if (initialized_fix) {
 			// 初始化。
-			// console.log(wikitext);
+			if (!wikitext.replace) {
+				if (Array.isArray(wikitext) && wikitext.type) {
+					library_namespace.debug('Treat [' + wikitext
+							+ '] as parsed token anf return directly!', 1,
+							'parse_wikitext');
+					return wikitext;
+				}
+				console.trace(wikitext);
+			}
 			wikitext = wikitext
 			// 注意: 2004年5月早期的中文維基百科換行採用 "\r\n"，因此必須保留 "\r"。
 			// .replace(/\r\n/g, '\n')
