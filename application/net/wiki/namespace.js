@@ -633,7 +633,8 @@ function module_code(library_namespace) {
 				add_session_to_options(session, {
 					get_all_properties : true
 				}));
-		if (site_name && site_name.language) {
+		if (site_name && site_name.language
+				&& site_name.language !== 'multilingual') {
 			// e.g., API_URL=zh.wiktionary
 			language_code = site_name.language;
 		}
