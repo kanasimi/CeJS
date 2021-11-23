@@ -3618,13 +3618,18 @@ function test_wiki() {
 		assert([test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'en'), 'en').toISOString()], 'wiki.parse.date: en #3: ' + test_date);
 		assert([test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'ja'), 'ja').toISOString()], 'wiki.parse.date: ja #3: ' + test_date);
 
+		wikitext = '==0==[[category:cat]]\n==1==<!--c-->\n==2== <!-- c -->\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: section_title #1-1');
+		assert(['==0==', parsed[0].toString()], 'wiki.parse: section_title #1-2');
+		assert(['category', parsed[1].type], 'wiki.parse: section_title #1-3');
+
 		wikitext = '==0==\nw\n==t==\nw\n==t2==  \nw\n\n==nt== <b></b>\nw\n==t3== <!--c--> \nw\n==t4 <!--c--> == <!--c--> \nw\n'; parsed = CeL.wiki.parser(wikitext).parse();
-		assert([wikitext, parsed.toString()], 'wiki.parse: section_title #1');
-		assert([5, parsed.each_section().sections.length], 'wiki.parse: section_title #2');
-		assert(['==t==', parsed.each_section().sections[1].section_title.toString()], 'wiki.parse: section_title #3');
-		assert(['==t2==  ', parsed.each_section().sections[2].section_title.toString()], 'wiki.parse: section_title #4');
-		assert(['==t3== <!--c--> ', parsed.each_section().sections[3].section_title.toString()], 'wiki.parse: section_title #5');
-		assert(['t4', parsed.each_section().sections[4].section_title.title], 'wiki.parse: section_title #6');
+		assert([wikitext, parsed.toString()], 'wiki.parse: section_title #2-1');
+		assert([5, parsed.each_section().sections.length], 'wiki.parse: section_title #2-2');
+		assert(['==t==', parsed.each_section().sections[1].section_title.toString()], 'wiki.parse: section_title #2-3');
+		assert(['==t2==  ', parsed.each_section().sections[2].section_title.toString()], 'wiki.parse: section_title #2-4');
+		assert(['==t3== <!--c--> ', parsed.each_section().sections[3].section_title.toString()], 'wiki.parse: section_title #2-5');
+		assert(['t4', parsed.each_section().sections[4].section_title.title], 'wiki.parse: section_title #2-6');
 
 		wikitext = '\nabc\n123\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([undefined, parsed.each_section().sections[0].section_title], 'wiki.parser.each_section #1-1: 沒有章節標題的文章');
@@ -3643,17 +3648,18 @@ function test_wiki() {
 
 		// [[n:zh:Special:Permalink/121433]]
 		wikitext = " <> >< <title> '''<试>'''  ''ii'' <i>iii</i> <b>bbb</b>   [[File:YesCheck_BlueLinear.svg|20px]] [[:Category:中国]] & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos; <nowiki>  & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos;  '''bbb''' <b>bbb</b> <i>iii</i> <ref /> {{VOA}} {{tl|VOA}}</nowiki> '''[[abc]]'''  <b>[[w:abc]]</b>  '''<i>[[w :  123   #  cba]]</i>''' [[ABC|ab'c]] [[ABC|ab''c'']] __NOINDEX__ ____  ___ __ __  _ {{tl|VOA}} [[template:VOA]] [https://zh.wikipedia.org zh''wiki''] __TOC__ -{}- C-{樂}-D A-{  这  }-B  '''<nowiki>''< nowiki>''</nowiki>'''  <span style=\"color:green\">green</span> ";
-		// console.log(JSON.stringify(link+''))
-		assert(["[[#%3c> >%3c %3ctitle> %3c试> ii iii bbb Category:中国 &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; '''bbb''' %3cb>bbb%3c/b> %3ci>iii%3c/i> %3cref /> %7b%7bVOA%7d%7d %7b%7btl%7cVOA%7d%7d abc w:abc w : 123 # cba ab'c abc %7b%7bVOA%7d%7d template:VOA zhwiki -%7b%7d- C-%7b樂%7d-D A-%7b 这 %7d-B ''%3c nowiki>'' green|&lt;> >&lt; &lt;title> '''&lt;试>''' ''ii'' <i>iii</i> <b>bbb</b> Category:中国 &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &apos;&apos;&apos;bbb&apos;&apos;&apos; &lt;b>bbb&lt;/b> &lt;i>iii&lt;/i> &lt;ref /> &#123;&#123;VOA}} &#123;&#123;tl&#124;VOA}} '''abc''' <b>w:abc</b> '''<i>w : 123 # cba</i>''' ab&apos;c ab''c'' ____ ___ __ __ _ &#123;&#123;VOA}} template:VOA zh''wiki'' -{}- C-{樂}-D A-{ 这 }-B '''&apos;&apos;&lt; nowiki>&apos;&apos;''' <span style=\"color:green\">green</span>]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #1-1');
+		// console.log(JSON.stringify(link+''));
+		// console.log(JSON.stringify(CeL.wiki.section_link(wikitext).toString()));
+		assert(["[[#%3C%3E %3E%3C %3Ctitle%3E %3C试%3E ii iii bbb Category:中国 &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; '''bbb''' %3Cb%3Ebbb%3C/b%3E %3Ci%3Eiii%3C/i%3E %3Cref /%3E %7B%7BVOA%7D%7D %7B%7Btl%7CVOA%7D%7D abc w:abc w : 123 # cba ab'c abc %7B%7BVOA%7D%7D template:VOA zhwiki -%7B%7D- C-%7B樂%7D-D A-%7B 这 %7D-B ''%3C nowiki%3E'' green|&lt;&gt; &gt;&lt; &lt;title&gt; '''&lt;试&gt;''' ''ii'' <i>iii</i> <b>bbb</b> Category:中国 &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &apos;&apos;&apos;bbb&apos;&apos;&apos; &lt;b&gt;bbb&lt;/b&gt; &lt;i&gt;iii&lt;/i&gt; &lt;ref /&gt; &#123;&#123;VOA&#125;&#125; &#123;&#123;tl&#124;VOA&#125;&#125; '''abc''' <b>w:abc</b> '''<i>w : 123 # cba</i>''' ab&apos;c ab''c'' ____ ___ __ __ _ &#123;&#123;VOA&#125;&#125; template:VOA zh''wiki'' -{}- C-{樂}-D A-{ 这 }-B '''&apos;&apos;&lt; nowiki&gt;&apos;&apos;''' <span style=\"color:green\">green</span>]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #1-1');
 		// [[w:zh:Special:Permalink/46747219]]
 		wikitext = " [[:File:title.jpg]] [[:File:title.jpg|abc]] [[:File:title.jpg| 20px |def]]";
-		assert(["[[#File:title.jpg abc 20px %7cdef|File:title.jpg abc 20px &#124;def]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #2-1');
+		assert(["[[#File:title.jpg abc 20px %7Cdef|File:title.jpg abc 20px &#124;def]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #2-1');
 		wikitext = "-{[[:三宝颜共和国]]}-";
-		assert(["[[#-%7b三宝颜共和国%7d-|-{三宝颜共和国}-]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-1');
+		assert(["[[#-%7B三宝颜共和国%7D-|-{三宝颜共和国}-]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-1');
 		wikitext = "[[A]]-{[[:三宝颜共和国]]}-BB ";
-		assert(["[[#A-%7b三宝颜共和国%7d-BB|A-{三宝颜共和国}-BB]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-2');
+		assert(["[[#A-%7B三宝颜共和国%7D-BB|A-{三宝颜共和国}-BB]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-2');
 		wikitext = "「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」";
-		assert(["[[#「-%7bXX-%7bzh-hans:纳; zh-hant:納%7d-克%7d-→-%7bXX-%7b奈%7d-克%7d-」|「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #4-1');
+		assert(["[[#「-%7BXX-%7Bzh-hans:纳; zh-hant:納%7D-克%7D-→-%7BXX-%7B奈%7D-克%7D-」|「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #4-1');
 
 		wikitext = '#1\n#2\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #1');

@@ -2043,7 +2043,7 @@ function module_code(library_namespace) {
 	function wikitext_to_plain_text(wikitext, options) {
 		options = library_namespace.new_options(options);
 
-		wikitext = wiki_API.parse(String(wikitext));
+		wikitext = wiki_API.parse(String(wikitext), options);
 		// console.trace(wikitext);
 		wikitext = preprocess_section_link_tokens(wikitext, options);
 
@@ -2230,20 +2230,21 @@ function module_code(library_namespace) {
 					token.unshift(token.tag_attributes);
 				}
 			} else if (token.type === 'tag' || token.type === 'tag_single') {
-				parent[index] = token.toString().replace(/</g, '&lt;');
+				parent[index] = token.toString().replace(/</g, '&lt;').replace(
+						/>/g, '&gt;');
 
 			} else if (token.is_plain) {
 				if (false) {
-					// @see use library_namespace.DOM.Unicode_to_HTML()
+					// use library_namespace.DOM.Unicode_to_HTML()
 					token[0] = library_namespace.Unicode_to_HTML(token[0])
 					// reduce size
 					.replace(/&gt;/g, '>');
 				}
 				// 僅作必要的轉換
 				token[0] = token[0].replace(/&/g, '&amp;')
-				// 這邊也必須 escape "<>"
-				.replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g,
-						"&apos;");
+				// 這邊也必須 escape "<>"。這邊可用 "%3C", "%3E"。
+				.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g,
+						'&quot;').replace(/'/g, "&apos;");
 			}
 		}, true);
 		// console.log(parsed_title);
@@ -6250,7 +6251,7 @@ function module_code(library_namespace) {
 				postfix) {
 			function not_only_comments(token) {
 				return typeof token === 'string' ? !/^[ \t]+$/.test(token)
-				//
+				// assert: is_parsed_element(tail)
 				: token.type !== 'comment';
 			}
 			if (postfix && postfix.includes(include_mark)) {
@@ -6261,9 +6262,9 @@ function module_code(library_namespace) {
 				}
 				var tail = parse_wikitext(postfix, options, queue);
 				// console.log(tail);
-				if (not_only_comments(tail) && (!is_parsed_element(tail)
+				if (is_parsed_element(tail) && (tail.type === 'plain'
 				//
-				|| tail.type === 'plain' && tail.some(not_only_comments))) {
+				? tail.some(not_only_comments) : not_only_comments(tail))) {
 					// console.log(all);
 					return all;
 				}
