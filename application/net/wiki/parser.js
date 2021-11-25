@@ -231,6 +231,9 @@ function module_code(library_namespace) {
 		parse : parse_page,
 		parse_references : parse_references,
 
+		get_categories : get_categories,
+		append_category : register_and_append_category,
+
 		analysis_layout_indices : analysis_layout_indices,
 		insert_layout_token : insert_layout_token,
 
@@ -3196,6 +3199,125 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// @inner
+	function do_append_category(category_token) {
+		// this: parser
+		if (!/\n$/.test(this.at(-1))) {
+			this.push('\n');
+		}
+		this.push(category_token, '\n');
+	}
+
+	// parsed.append_category()
+	function register_and_append_category(category_token, options) {
+		// console.trace(category_token.name);
+		// console.trace(category_token);
+
+		options = library_namespace.setup_options(options);
+
+		if (typeof category_token === 'string') {
+			category_token = category_token.trim();
+			if (!category_token.startsWith('[[')) {
+				// `Category:name` or `Category:name|sort_key`
+				var matched = category_token.match(/^([^|]+)(\|.*)$/);
+				var _options = library_namespace.new_options(options);
+				_options.namespace = 'category';
+				if (matched) {
+					matched[1] = wiki_API.to_namespace(matched[1], _options);
+					category_token = matched[1] + matched[2];
+					// free
+					matched = null;
+				} else {
+					category_token = wiki_API.to_namespace(category_token,
+							_options);
+				}
+				// console.trace(category_token);
+				category_token = '[[' + category_token + ']]';
+			}
+			category_token = parse_wikitext(category_token, options);
+		}
+		// console.assert(category_token.type === 'category');
+
+		// const 例如可設定成繁簡轉換後的 key
+		// @see 20211119.維基詞典展開語言標題模板.js
+		var category_name = options.category_name
+				|| typeof options.get_key === 'function'
+				&& options.get_key(category_token, options)
+				|| category_token.name;
+
+		// this: parser
+		if (!this.category_Map) {
+			this.get_categories(options);
+		}
+
+		if (!this.category_Map.has(category_name)) {
+			this.category_Map.set(category_name, category_token);
+			if (!options.is_existed)
+				do_append_category.call(this, category_token);
+			return;
+		}
+
+		// console.trace(category_token);
+
+		if (!category_token.sort_key) {
+			// 保留 old_category_token，跳過沒有新資訊的。
+			return;
+		}
+
+		// const
+		var old_category_token = this.category_Map.get(category_name);
+		// console.trace(old_category_token);
+		if (old_category_token.sort_key) {
+			library_namespace.warn('register_and_append_category: '
+					+ library_namespace.wiki.title_link_of(this.page)
+					+ ': Multiple sort key: ' + old_category_token + ', '
+					+ category_token);
+			if (options.do_not_overwrite_sort_key) {
+				if (!options.is_existed) {
+					// Will overwrite the sort key
+					do_append_category.call(this, category_token);
+				}
+				return;
+			}
+			// default: Will overwrite the sort key.
+		}
+
+		if (false && !old_category_token.set_sort_key) {
+			console.trace(old_category_token);
+		}
+		// reuse old category_token
+		old_category_token.set_sort_key(category_token.sort_key);
+		if (options.is_existed) {
+			// 移除重複的/同時存在繁體簡體的 category_token。
+			return this.each.remove_token;
+		}
+	}
+
+	// parsed.get_categories()
+	function get_categories(options) {
+		if (!this.category_Map) {
+			this.category_Map = new Map;
+
+			options = library_namespace.new_options(options);
+			options.is_existed = true;
+			delete options.category_name;
+			var parsed = this;
+
+			// 先從頭登記一次現有的 Category。
+			this.each('Category', function(category_token, index, parent) {
+				// for remove
+				// category_token.index = index;
+				// category_token.parent = parent;
+				return parsed.append_category(category_token, options);
+			}, options.remove_existed_duplicated);
+		}
+
+		// 警告: 重複的 category 只會取得首個出現的。
+		return Array.from(this.category_Map.values());
+	}
+
+	// ------------------------------------------------------------------------
+
 	// parse <ref> of page
 	// TODO: <ref group="">
 	// TODO: <ref> in template
@@ -3578,7 +3700,7 @@ function module_code(library_namespace) {
 				//
 				'analysis_layout_indices: There are more than one '
 				//
-				+ layout_type + ' in ' + CeL.wiki.title_link_of(parsed.page));
+				+ layout_type + ' in ' + wiki_API.title_link_of(parsed.page));
 			}
 		}
 
@@ -3845,6 +3967,9 @@ function module_code(library_namespace) {
 
 	// TODO: check the sort_key is the same as page title or DEFAULTSORT
 	function set_sort_key_of_category(sort_key) {
+		if (typeof sort_key === 'undefined' || sort_key === null)
+			return;
+
 		var category_token = this;
 		// const
 		var old_sort_key = category_token.sort_key
@@ -3855,13 +3980,14 @@ function module_code(library_namespace) {
 				return;
 			}
 			if (old_sort_key.length > sort_key
-					|| !old_sort_key.startsWith(sort_key))
+					|| !old_sort_key.startsWith(sort_key)) {
 				library_namespace.debug('The sort key of <code><nowiki>'
 						+ category_token + '</nowiki></code> will be set to '
 						+ JSON.stringify(sort_key) + '!', 1,
 						'set_sort_key_of_category');
+			}
 		}
-		category_token[2] = sort_key;
+		category_token[2] = category_token.sort_key = sort_key;
 		return true;
 	}
 
@@ -6744,8 +6870,8 @@ function module_code(library_namespace) {
 		// 不採用則 parse_wiki 處理時若遇到連續章節，不會按照先後順序，造成這邊還不能設定
 		// section_title_hierarchy，只能在 parsed.each_section() 設定。
 		/(^|\n)(={1,6})(.+)\2((?:[ \t]|mark)*)(?=\n|$)/g.source.replace('mark',
-				CeL.to_RegExp_pattern(include_mark) + '\\d+'
-						+ CeL.to_RegExp_pattern(end_mark)), 'g');
+				library_namespace.to_RegExp_pattern(include_mark) + '\\d+'
+						+ library_namespace.to_RegExp_pattern(end_mark)), 'g');
 		// console.log(PATTERN_section);
 		// console.log(JSON.stringify(wikitext));
 

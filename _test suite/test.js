@@ -3205,11 +3205,26 @@ function test_wiki() {
 		wikitext = '[[:File:a.jpg|a]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #4-1');
 		assert(parsed.is_link, 'wiki.parse.file #4-2');
-		wikitext = '[[:Category:cat|sort]]'; parsed = CeL.wiki.parse(wikitext);
+
+		wikitext = '[[:Category:cat|sort_key]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.category #1-1');
 		assert(parsed.is_link, 'wiki.parse.category #1-2');
 
+		wikitext = '[[Category:cat0]][[Category:Cat1|sort_key1]]\n==t=='; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(parsed.get_categories().some(function(category_token){return category_token.name==='Cat1'&&category_token.sort_key==='sort_key1';}), 'wiki.parse.category #2-1');
+		parsed.append_category('cat0|key0');
+		parsed.append_category('cat1|key1-1');
+		parsed.append_category('cat2');
+		parsed.append_category('cat3|sort3');
+		//console.trace(parsed);
+		assert(parsed.get_categories().some(function(category_token){return category_token.name==='Cat2';}), 'wiki.parse.category #2-2');
+		assert(parsed.get_categories().some(function(category_token){return category_token.name==='Cat3'&&category_token.sort_key==='sort3';}), 'wiki.parse.category #2-3');
+		assert(parsed.get_categories().some(function(category_token){return category_token.name==='Cat0'&&category_token.sort_key==='key0';}), 'wiki.parse.category #2-4');
+		assert(parsed.get_categories().some(function(category_token){return category_token.name==='Cat1'&&category_token.sort_key==='key1-1';}), 'wiki.parse.category #2-5');
+
 		wikitext = '{{c|d[[e]]f}}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
 		parsed.each('link', function (token, index, parent) { return ''; }, true);
 		assert(['{{c|df}}', parsed.toString()], 'search all links');
 		(parsed = CeL.wiki.parser(wikitext)).each('link', function (token, index, parent) { return ''; }, true, 1);
