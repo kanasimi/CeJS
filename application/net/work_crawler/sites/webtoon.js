@@ -41,6 +41,13 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// 2021/12/4 Error: unable to verify the first certificate
+	//
+	// https://stackoverflow.com/questions/20082893/unable-to-verify-leaf-signature
+	// for Error: unable to verify the first certificate
+	// code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
+	process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+
 	var default_configuration = {
 
 		// one_by_one : true,
