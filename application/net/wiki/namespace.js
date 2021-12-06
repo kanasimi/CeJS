@@ -788,7 +788,31 @@ function module_code(library_namespace) {
 			family = options && options.family;
 		}
 
-		var matched = wiki_API.namespace(language, options);
+		var page_name;
+		var matched = typeof language === 'string' && !language.includes('://')
+				&& language.match(/^[:\s]*(\w+):(?:(\w+):)?(.*)/);
+		if (matched) {
+			matched.family = api_URL.alias[matched[1]];
+			page_name = matched[3];
+			if (matched.family) {
+				if (matched[2]) {
+					// e.g., "n:zh:title"
+					language = matched[2];
+				} else {
+					// e.g., "n:", "n:zh", "n:title"
+					language = matched[3];
+				}
+			} else if (matched.family = api_URL.alias[matched[2]]) {
+				// e.g., "zh:n:title"
+				language = matched[1];
+			} else {
+				// e.g., "zh:title"
+				language = matched[1];
+			}
+			family = family || matched.family;
+		}
+
+		matched = wiki_API.namespace(language, options);
 		// console.trace([ matched, language ]);
 		if (matched && !isNaN(matched)
 		//
@@ -803,11 +827,13 @@ function module_code(library_namespace) {
 		// console.trace(in_session);
 		// 正規化。
 		language = String(language
-		// in_session.language
+		// || in_session && in_session.language
 		|| get_first_domain_name_of_session(in_session)
 		// else use default language
 		// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
-		|| wiki_API.language).trim().toLowerCase().replace(/[_ ]/g, '-');
+		|| wiki_API.language).trim().toLowerCase()
+		// zh_yue → zh-yue
+		.replace(/[_ ]/g, '-');
 		// console.trace(language);
 
 		var API_URL;
@@ -941,12 +967,16 @@ function module_code(library_namespace) {
 
 		// throw site;
 		if (options && options.get_all_properties) {
+			var family_prefix = wiki_API.api_URL.shortcut_of_project[family];
 			site = {
 				// en, zh
 				language : language,
 				// family: 'wikipedia' (default), 'wikimedia',
 				// wikibooks|wiktionary|wikiquote|wikisource|wikinews|wikiversity|wikivoyage
 				family : family,
+				family_prefix : family_prefix,
+				// interwikimap prefix
+				interwiki_prefix : family_prefix + ':' + language + ':',
 				// Wikimedia project name: wikidata, commons, zh.wikipedia
 				project : project,
 
@@ -976,6 +1006,9 @@ function module_code(library_namespace) {
 					&& session.latest_site_configurations.general.wikiid;
 			if (project) {
 				site.wikiid = project;
+			}
+			if (page_name) {
+				site.page_name = page_name;
 			}
 		}
 
@@ -1647,16 +1680,20 @@ function module_code(library_namespace) {
 
 		// true === /^\s$/.test('\uFEFF')
 
+		page_name = page_name.replace(/<!--[\s\S]*-->/g, '')
+		// e.g., "Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-1 days +9 hours}}"
 		try {
-			// 必須先採用 decodeURIComponent()，CeL.HTML_to_Unicode() 僅為了解碼 &#*。
-			// CeL.DOM.HTML_to_Unicode('%EF%BC%BB %EF%BC%BD')
-			// !== decodeURIComponent('%EF%BC%BB %EF%BC%BD')
-			page_name = decodeURIComponent(page_name);
+			// Negative lookbehind assertion
+			page_name = page_name.replace(/(?<!{{)#.*/, '');
 		} catch (e) {
-			// URIError: URI malformed
+			page_name = page_name.replace(/([^#]*)#.*/, function(all, prefix) {
+				return /{{$/.test(prefix) ? all : prefix;
+			});
 		}
+		// assert: /[#|{}]/.test(page_name)===false
 
 		// [[A&quot;A]]→[[A"A]]
+		// fix "&#39;"
 		page_name = library_namespace.HTML_to_Unicode(page_name)
 
 		// '\u200E', '\u200F' 在當作 title 時會被濾掉。
@@ -1676,8 +1713,11 @@ function module_code(library_namespace) {
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1');
 
-		// fix "&#39;"
-		page_name = library_namespace.HTML_to_Unicode(page_name);
+		// {{int:MediaWiki page name}}
+		if (/^int:.+/i.test(page_name)) {
+			// 4 === 'int:'.length
+			page_name = 'MediaWiki:' + page_name.slice(4).trimStart();
+		}
 
 		/** {Boolean}採用 "_" 取代 " "。 */
 		var use_underline = options.use_underline;
@@ -2422,15 +2462,26 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|specialpagealiases|magicwords|extensiontags|protocols&utf8&format=json
 		options = Object.assign({
 			siprop : 'general|namespaces|namespacealiases|specialpagealiases'
+
 			// magicwords: #重定向 interwikimap, thumb %1px center,
-			+ '|magicwords|interwikimap'
-			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|specialpagealiases|magicwords|extensiontags|protocols&utf8&format=json
-			+ '|languagevariants|extensiontags|protocols'
-		// + '|functionhooks|variables'
-		// 工作隊列lag
-		// + '|statistics|dbrepllag'
+			+ '|magicwords|functionhooks|variables'
+
+			// + '|languages'
+			+ '|interwikimap|languagevariants'
+
+			// 工作隊列lag
+			// + '|statistics|dbrepllag'
+
+			// + '|usergroups'
+			+ '|restrictions'
+			// + '|defaultoptions'
+			+ '|uploaddialog|skins|rightsinfo'
+
+			// + '|showhooks|libraries|extensions'
+			+ '|extensiontags|protocols|fileextensions'
 		}, options);
 
 		var session = wiki_API.session_of_options(options);
@@ -2522,6 +2573,8 @@ function module_code(library_namespace) {
 					+ interwikimap.map(function(interwiki) {
 						return interwiki.prefix;
 					}).join('|') + ')(?::(.*))?$', 'i');
+			// free
+			// delete configurations.interwikimap;
 		}
 
 		var languagevariants = configurations.languagevariants;
@@ -2535,7 +2588,52 @@ function module_code(library_namespace) {
 			for ( var lang_code in languagevariants.zh) {
 				site_configurations.lang_fallbacks[lang_code] = languagevariants.zh[lang_code].fallbacks;
 			}
+			// free
+			// delete configurations.languagevariants;
 		}
+
+		// --------------------------------------------------------------------
+
+		var magic_words_hash = Object.create(null);
+		site_configurations.magic_words_hash = magic_words_hash;
+
+		configurations.functionhooks
+		//
+		&& configurations.functionhooks.forEach(function(magic_word) {
+			magic_words_hash[magic_word.toUpperCase()] = false;
+		});
+		// free
+		// delete configurations.functionhooks;
+
+		configurations.variables
+		// 可能在 .functionhooks 已設定，但以此處為主。
+		// 例如 {{Fullurl}} 應被視作 template。
+		// {{PAGENAME}}, {{NAMESPACE}}, {{NAMESPACENUMBER}} 之類可以引用當前頁面為參數
+		// argument。
+		&& configurations.variables.forEach(function(magic_word) {
+			magic_words_hash[magic_word.toUpperCase()] = true;
+		});
+		// free
+		// delete configurations.variables;
+
+		configurations.magicwords
+		//
+		&& configurations.magicwords.forEach(function(magic_word_data) {
+			var name = magic_word_data.name.toUpperCase();
+			var mapper_to;
+			if (name in magic_words_hash) {
+				// 在 .variables, .functionhooks 已設定，以先前設定為主。
+				mapper_to = magic_words_hash[name];
+			} else {
+				// 無法自此處判斷是否需要參數。皆設定為需要參數。
+				magic_words_hash[name] = mapper_to = name;
+			}
+			magic_word_data.aliases.forEach(function(magic_word) {
+				magic_words_hash[magic_word.toUpperCase()] = mapper_to;
+			});
+		});
+		// free
+		// delete configurations.magicwords;
 
 		// --------------------------------------------------------------------
 
@@ -2563,13 +2661,17 @@ function module_code(library_namespace) {
 					namespace_hash[namespace_data.canonical.toLowerCase()] = namespace_data.id;
 				}
 			}
-			namespacealiases
-					.forEach(function(namespace_data) {
-						namespace_hash[namespace_data['*'].toLowerCase()] = namespace_data.id;
-					});
+			namespacealiases.forEach(function(namespace_data) {
+				namespace_hash[namespace_data['*'].toLowerCase()]
+				//
+				= namespace_data.id;
+			});
 			site_configurations.namespace_pattern = generate_namespace_pattern(
 					namespace_hash, []);
 		}
+		// free
+		// delete configurations.namespaces;
+		// delete configurations.namespacealiases;
 	}
 
 	// ----------------------------------------------------
@@ -3458,10 +3560,15 @@ function module_code(library_namespace) {
 					add_session_to_options(this, options));
 		},
 		is_namespace : function is_namespace(page_title, options) {
-			if (typeof options !== 'object')
+			if (typeof options !== 'object') {
 				options = {
 					namespace : options || 0
 				}
+			} else if (wiki_API.is_page_data(options)) {
+				options = {
+					namespace : options.ns
+				}
+			}
 			return page_title_is_namespace(page_title, add_session_to_options(
 					this, options));
 		},

@@ -1514,7 +1514,7 @@ function module_code(library_namespace) {
 				title = wiki_API.title_of(first_section);
 			parsed = page_parser(first_section).parse();
 			parsed.each_section(function(section, index) {
-				if (index === 0) {
+				if (!section.section_title) {
 					first_section = section;
 				}
 			});
@@ -1989,7 +1989,7 @@ function module_code(library_namespace) {
 
 		// console.trace(token);
 		if (token.type in {
-			'function' : true,
+			magic_word_function : true,
 			parameter : true
 		}) {
 			token.unconvertible = true;
@@ -2437,7 +2437,7 @@ function module_code(library_namespace) {
 
 	parsed = CeL.wiki.parser(page_data);
 	parsed.each_section(function(section, section_index) {
-		if (section_index === 0) {
+		if (!section.section_title) {
 			// first_section = section;
 			// Skip lead section / first section / introduction.
 			return;
@@ -2523,6 +2523,17 @@ function module_code(library_namespace) {
 			all_root_section_list.push(section);
 		}
 
+		// max_section_level
+		var level_filter
+		// 要篩選的章節標題層級 e.g., {level_filter:[1,2]}
+		= Array.isArray(options.level_filter)
+		// assert: 必須皆為 {Number}
+		? (Math.max.apply(null, options.level_filter) | 0) || 2
+		// e.g., { level_filter : 3 }
+		: 1 <= options.level_filter && (options.level_filter | 0)
+		// default: level 2. 僅處理階級2的章節標題。
+		|| 2;
+
 		// get topics / section title / stanza title using for_each_token()
 		// 讀取每一個章節的資料: 標題,內容
 		// TODO: 不必然是章節，也可以有其它不同的分割方法。
@@ -2561,17 +2572,13 @@ function module_code(library_namespace) {
 			section_title_hash[id] = null;
 
 			var level = section_title_token.level;
-			// console.log([ level, options.level_filter ]);
+			// console.trace([ level, level_filter, id ]);
 			if (parent_token === _this
 			// ↑ root sections only. Do not include
 			// {{Columns-list|\n==title==\n...}}
-			&& (Array.isArray(options.level_filter)
-			// 要篩選的章節標題層級 e.g., {level_filter:[1,2]}
-			? options.level_filter.includes(level)
-			// e.g., {level_filter:3}
-			: 1 <= options.level_filter ? level === options.level_filter
-			// default: level 2. 僅處理階級2的章節標題。
-			: level === 2)) {
+
+			// level_filter: max_section_level
+			&& level <= level_filter) {
 				// console.log(section_title_token);
 				add_root_section(section_title_index);
 			} else {
@@ -2628,6 +2635,8 @@ function module_code(library_namespace) {
 		add_root_section(this.length);
 		if (all_root_section_list[0].range[1] === 0) {
 			// 第一個章節為空。 e.g., 以章節標題開頭的文章。
+			// 警告：此時應該以是否有 section.section_title 來判斷是否為 lead_section，
+			// 而非以 section_index === 0 判定！
 			all_root_section_list.shift();
 		}
 
@@ -2753,6 +2762,7 @@ function module_code(library_namespace) {
 				}
 
 				var min_timevalue, max_timevalue;
+				// console.trace(section.dates);
 				section.dates.forEach(function(date) {
 					if (!date || isNaN(date = +date)) {
 						return;
@@ -2762,15 +2772,18 @@ function module_code(library_namespace) {
 					else if (!(max_timevalue >= date))
 						max_timevalue = date;
 				});
+				// console.trace([ min_timevalue, max_timevalue ]);
 				if (min_timevalue) {
 					section.dates.min_timevalue = min_timevalue;
 					section.dates.max_timevalue = max_timevalue
 							|| min_timevalue;
 				}
-				section.dates.max_timevalue = Math.max.apply(null,
-						section.dates.map(function(date) {
-							return date.getTime();
-						}));
+				if (false) {
+					section.dates.max_timevalue = Math.max.apply(null,
+							section.dates.map(function(date) {
+								return date.getTime();
+							}));
+				}
 
 				if (false) {
 					parsed.each_section();
@@ -2807,12 +2820,32 @@ function module_code(library_namespace) {
 
 		// console.trace(for_section);
 		if (typeof for_section === 'function') {
+			level_filter
+			// 要篩選的章節標題層級 e.g., {level_filter:[1,2]}
+			= Array.isArray(options.level_filter) ? options.level_filter
+			// e.g., { level_filter : 3 }
+			: 1 <= options.level_filter && (options.level_filter | 0)
+			// default: level 2. 僅處理階級2的章節標題。
+			|| 2;
+
+			var section_filter = function(section) {
+				var section_title = section.section_title;
+				if (!section_title)
+					return true;
+				if (Array.isArray(level_filter))
+					return level_filter.includes(section_title.level);
+				return level_filter === section_title.level;
+			};
+
 			// TODO: return (result === for_each_token.remove_token)
 			// TODO: move section to another page
 			if (library_namespace.is_async_function(for_section)) {
 				// console.log(all_root_section_list);
-				return Promise.allSettled(all_root_section_list
-						.map(for_section));
+				return Promise.allSettled(all_root_section_list.map(function(
+						section, section_index) {
+					return section_filter(section)
+							&& for_section.apply(this, arguments);
+				}));
 
 				// @deprecated
 				all_root_section_list
@@ -2822,6 +2855,8 @@ function module_code(library_namespace) {
 								// section_title.toString(true): get inner
 								&& section.section_title.toString(true));
 							}
+							if (!section_filter(section))
+								return;
 							return eval('(async function() {'
 									+ ' try { return await for_section(section, section_index); }'
 									+ ' catch(e) { library_namespace.error(e); }'
@@ -2829,12 +2864,11 @@ function module_code(library_namespace) {
 						});
 			} else {
 				// for_section(section, section_index)
-				all_root_section_list.some(function(section, section_index,
-						list) {
+				all_root_section_list.some(function(section) {
 					// return parsed.each.exit;
-					var result = for_section.call(this, section, section_index,
-							list);
-					return result === for_each_token.exit;
+					return section_filter(section) && (for_each_token.exit ===
+					// exit if the result calls exit
+					for_section.apply(this, arguments));
 				}, this);
 			}
 		}
@@ -3153,7 +3187,7 @@ function module_code(library_namespace) {
 						anchor = [ anchor ];
 					}
 					anchor = anchor.map(function(token) {
-						if (token.type === 'function'
+						if (token.type === 'magic_word_function'
 						// && token.is_magic_word
 						&& token.name === 'ANCHORENCODE') {
 							return token[1];
@@ -3309,7 +3343,9 @@ function module_code(library_namespace) {
 				// category_token.index = index;
 				// category_token.parent = parent;
 				return parsed.append_category(category_token, options);
-			}, options.remove_existed_duplicated);
+			}, {
+				modify : options.remove_existed_duplicated
+			});
 		}
 
 		// 警告: 重複的 category 只會取得首個出現的。
@@ -3775,13 +3811,15 @@ function module_code(library_namespace) {
 				set_index('lead_section_end', BACKTRACKING_SPACES);
 				break;
 
-			case 'function':
+			case 'magic_word_function':
 				if (token.name === 'DEFAULTSORT')
 					set_index('DEFAULTSORT');
+				set_index('footer', BACKTRACKING_SPACES);
 				break;
 
 			case 'category':
 				// categories
+				set_index('footer', BACKTRACKING_SPACES);
 				set_index('categories');
 				break;
 
@@ -4267,7 +4305,7 @@ function module_code(library_namespace) {
 		transclusion : function() {
 			return '{{' + this.join('|') + '}}';
 		},
-		'function' : function() {
+		magic_word_function : function() {
 			return '{{' + this[0] + this.slice(1).join('|') + '}}';
 		},
 
@@ -4469,20 +4507,32 @@ function module_code(library_namespace) {
 	// const , for <dl>
 	var DEFINITION_LIST = 'd';
 
-	// TODO: [[mw:Help:Substitution]]
-	// {{subst:FULLPAGENAME}} {{safesubst:FULLPAGENAME}}
-	var Magic_words_hash = Object.create(null);
+	// !!default_magic_words_hash[magic_word] === 不用指定數值
+	var default_magic_words_hash = Object.create(null);
+	// https://www.mediawiki.org/wiki/Help:Magic_words
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=functionhooks&utf8&format=json
-	'ns|urlencode|anchorencode|DISPLAYTITLE|DEFAULTSORT|デフォルトソート|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
-	// 這些需要指定數值. e.g., {{DEFAULTSORT:1}}: OK, {{DEFAULTSORT}}: NG
-	.split('|').forEach(function name(Magic_words) {
-		Magic_words_hash[Magic_words.toUpperCase()] = false;
+	('DISPLAYTITLE|DEFAULTSORT|デフォルトソート'
+			+ '|ns|nse|lc|lcfirst|uc|ucfirst|urlencode|anchorencode'
+			+ '|LOCALURL|FULLURL|FILEPATH'
+			// TODO: [[mw:Help:Substitution]]
+			// {{subst:FULLPAGENAME}} {{safesubst:FULLPAGENAME}}
+
+			// https://www.mediawiki.org/wiki/Help:Magic_words#Transclusion_modifiers
+			// https://en.wikipedia.org/wiki/Help:Transclusion#Transclusion_modifiers
+			+ '|int|msg|raw|msgnw|subst|safesubst'
+	// 這些需要指定數值。 e.g., {{NS:1}}: OK, {{NS}} will get " ", {{NS:}} will get ""
+	).split('|').forEach(function name(magic_word) {
+		default_magic_words_hash[magic_word.toUpperCase()] = false;
 	});
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=variables&utf8&format=json
-	'!|=|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME'
-	// 這些不用指定數值.
-	.split('|').forEach(function name(Magic_words) {
-		Magic_words_hash[Magic_words.toUpperCase()] = true;
+	('!|='
+			+ '|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP'
+			+ '|NAMESPACE|NAMESPACENUMBER'
+			+ '|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|ARTICLEPAGENAME|TALKPAGENAME|ROOTPAGENAME'
+			+ '|FULLPAGENAMEE|PAGENAMEE|BASEPAGENAMEE|SUBPAGENAMEE|SUBJECTPAGENAMEE|ARTICLEPAGENAMEE|TALKPAGENAMEE|ROOTPAGENAMEE'
+	// 這些不用指定數值。
+	).split('|').forEach(function name(magic_word) {
+		default_magic_words_hash[magic_word.toUpperCase()] = true;
 	});
 
 	// parse 手動轉換語法的轉換標籤的語法
@@ -4660,6 +4710,8 @@ function module_code(library_namespace) {
 		// 每個parse_wikitext()都需要新的options，需要全新的。
 		// options = Object.assign({}, options);
 		options = library_namespace.setup_options(options);
+
+		var session = wiki_API.session_of_options(options);
 
 		if (false) {
 			// assert: false>=0, (undefined>=0)
@@ -5472,6 +5524,10 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
+		var magic_words_hash = session
+				&& session.configurations.magic_words_hash
+				|| default_magic_words_hash;
+
 		// or use ((PATTERN_transclusion))
 		// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
 		// PATTERN_template
@@ -5517,9 +5573,9 @@ function module_code(library_namespace) {
 						// incase:
 						// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日
 						// |-7 days +9 hours}}}}
-						'function' : true,
+						magic_word_function : true,
 						// {{tl{{{1|}}}|p}}
-						'parameter' : true,
+						parameter : true,
 
 						// allow {{tl<!-- t= -->}}
 						comment : true
@@ -5780,10 +5836,11 @@ function module_code(library_namespace) {
 				// 'Defaultsort' → 'DEFAULTSORT'
 				.toUpperCase();
 
-				if ((namespace[1] in Magic_words_hash)
+				if ((namespace[1] in magic_words_hash)
+				// 例如 {{Fullurl}} 應被視作 template。
 				// test if token is [[Help:Magic words]]
-				&& (Magic_words_hash[namespace[1]]
-				// 這些需要指定數值. has ":"
+				&& (magic_words_hash[namespace[1]]
+				// 這些需要指定數值。 has ":"
 				|| namespace[0])) {
 					// TODO: {{ {{UCFIRST:T}} }}
 					// TODO: {{ :{{UCFIRST:T}} }}
@@ -5871,7 +5928,8 @@ function module_code(library_namespace) {
 			parameters.parameters = _parameters;
 			parameters.index_of = parameter_index_of;
 
-			_set_wiki_type(parameters, matched ? 'function' : 'transclusion');
+			_set_wiki_type(parameters, matched ? 'magic_word_function'
+					: 'transclusion');
 			queue.push(parameters);
 			// TODO: parameters.parameters = []
 			return previous + include_mark + (queue.length - 1) + end_mark;
@@ -7783,9 +7841,9 @@ function module_code(library_namespace) {
 	});
 
 	wiki.page(title, function(page_data) {
-		var is_redirect = CeL.wiki.is_protected(page_data);
+		var is_protected = CeL.wiki.is_protected(page_data);
 		// `true` or `undefined`
-		console.log(is_redirect);
+		console.log(is_protected);
 	}, {
 		prop : 'info'
 	});
@@ -8903,7 +8961,8 @@ function module_code(library_namespace) {
 
 		// [[mw:Help:Magic words § Parser functions]],
 		// [[mw:Help:Extension:ParserFunctions]], [[Help:Magic words]]
-		parsed.each('function', function(function_token, index, parent) {
+		parsed.each('magic_word_function', function(function_token, index,
+				parent) {
 			switch (function_token.name) {
 			case 'if':
 				var name = render_result_of_parameter(1);

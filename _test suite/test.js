@@ -3021,6 +3021,13 @@ function test_wiki() {
 		[['wikidatawiki', CeL.wiki.site_name('wikidata')], 'site_name #9'],
 		[['commonswiki', CeL.wiki.site_name('commons')], 'site_name #10'],
 		[['localhostwiki', CeL.wiki.site_name('http://localhost/api.php')], 'site_name #11'],
+		[['zhwikinews', CeL.wiki.site_name('n:zh:qqq')], 'site_name #12'],
+		[['jawikisource', CeL.wiki.site_name('ja:s:p ps')], 'site_name #13'],
+		[['enwikiversity', CeL.wiki.site_name('v:en:')], 'site_name #14'],
+		[['arwiki', CeL.wiki.site_name('w:ar')], 'site_name #15'],
+		[['dewikisource', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).site], 'site_name #16'],
+		[['s:de:', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).interwiki_prefix], 'site_name #17'],
+		[['dewikinews', CeL.wiki.site_name('de:ttt', { family : 'wikinews' })], 'site_name #18'],
 	]);
 
 	all_error_count += CeL.test('wiki: CeL.wiki.namespace', function (assert) {
@@ -3249,7 +3256,7 @@ function test_wiki() {
 		assert(['transclusion', parsed.type], 'template in template name #2-1');
 		assert(['transclusion', parsed[0][1].type], 'template in template name #2-2');
 		wikitext = '{{#ifexpr: {{{1}}} > 0 and {{{1}}} < 1.0 or {{#ifeq:{{{decimal}}}| yes}} |is decimal |not decimal}}'; parsed = CeL.wiki.parse(wikitext);
-		assert(['function', parsed.type]);
+		assert(['magic_word_function', parsed.type]);
 
 		// https://test.wikipedia.org/wiki/L
 		wikitext = '{{L|=__1|p2|link 1=L_1 | link  1=L__1  | link   1=   L___1   |link2<!-- l2=2 -->=L2|<!-- l3 -->link3=L3|<!-- l4 --> link4 <!-- l4 --> =L4}}'; parsed = CeL.wiki.parser(wikitext).parse();
@@ -3609,7 +3616,7 @@ function test_wiki() {
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{#parserfunctions:}} #1');
 		token = [];
-		parsed.each('function', function (t) { token.push(t) });
+		parsed.each('magic_word_function', function (t) { token.push(t) });
 		assert(['{{#time:Y年Fj日|-7 days +9 hours}}', token.join()], 'wiki.parse: {{#parserfunctions:}} #2');
 		assert(['time', token[0].name], 'wiki.parse: {{#parserfunctions:}} #3');
 		assert(['Y年Fj日', token[0].parameters[1]], 'wiki.parse: {{#parserfunctions:}} #4');
