@@ -75,6 +75,37 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// [[Module:Ruby]]
+	function expand_module_Ruby(parameters) {
+		// converted wikitext
+		var wikitext = [];
+		wikitext.push('<ruby'
+				+ (parameters.id ? ' id="' + parameters.id + '"' : '') + '>');
+		wikitext.push('<rb'
+				+ (parameters.rbid ? ' id="' + parameters.rbid + '"' : '')
+				+ '>' + (parameters[1] || '') + '</rb>');
+		wikitext.push('（');
+		wikitext.push('<rt'
+				+ (parameters.rtid ? ' id="' + parameters.rtid + '"' : '')
+				+ '>' + (parameters[2] || '') + '</rt>');
+		wikitext.push('）');
+		wikitext.push('</ruby>');
+		return wikitext.join('');
+	}
+
+	// for get_all_anchors()
+	function expand_template_Ruby(options) {
+		var parameters = this.parameters;
+		// {{Ruby|文字|注音|文字的語言标签|注音的語言标签}}
+		return expand_module_Ruby(parameters);
+	}
+
+	function parse_template_Ruby(token, index, parent, options) {
+		token.expand = expand_template_Ruby;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// for preprocess_section_link_token()
 	// {{Lj|...}} 是日語{{lang|ja|...}}的縮寫 @ zh.moegirl
 	function expand_template_Lj(options) {
@@ -144,6 +175,7 @@ function module_code(library_namespace) {
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
 		// 一些會添加 anchors 的特殊模板。
 		A : parse_template_A,
+		Ruby : parse_template_Ruby,
 		铁路车站名 : parse_template_铁路车站名,
 
 		Lj : parse_template_Lj,
