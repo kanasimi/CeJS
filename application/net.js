@@ -1273,7 +1273,7 @@ function module_code(library_namespace) {
 		if (m) {
 			return URI_accessor.regularize_file_name(
 			// 因為 escape 會多出不必要符號，因此不 escape。
-			HTML_to_Unicode(decodeURIComponent(m[3] || m[1])), false);
+			HTML_to_Unicode(m[3] || m[1]), false);
 		}
 	};
 

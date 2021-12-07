@@ -8172,9 +8172,6 @@ function module_code(library_namespace) {
 	/**
 	 * Translate HTML code to Unicode text. 將 HTML:&#ddd; → Unicode text
 	 * 
-	 * 警告: CeL.DOM.HTML_to_Unicode('%EF%BC%BB %EF%BC%BD') !==
-	 * decodeURIComponent('%EF%BC%BB %EF%BC%BD')
-	 * 
 	 * @param {String}
 	 *            HTML HTML code
 	 * @param {Object}[options]
@@ -8204,6 +8201,16 @@ function module_code(library_namespace) {
 		// does not
 		// match a back-reference
 		var unicode_text = HTML.valueOf();
+
+		try {
+			// 必須先採用 decodeURIComponent()，CeL.HTML_to_Unicode() 往後的程式碼僅為了解碼 &#*。
+			// 否則
+			// CeL.DOM.HTML_to_Unicode('%EF%BC%BB %EF%BC%BD')
+			// !== decodeURIComponent('%EF%BC%BB %EF%BC%BD')
+			unicode_text = decodeURIComponent(unicode_text);
+		} catch (e) {
+			// URIError: URI malformed
+		}
 
 		// --------------------------------------
 		// numeric character references

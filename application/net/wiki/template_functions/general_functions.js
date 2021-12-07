@@ -62,7 +62,7 @@ function module_code(library_namespace) {
 		return '';
 	}
 
-	function parse_template_Void(token) {
+	function parse_template_Void(token, index, parent, options) {
 		token.expand = expand_template_Void;
 	}
 

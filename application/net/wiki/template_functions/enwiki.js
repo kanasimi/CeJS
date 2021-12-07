@@ -67,8 +67,22 @@ function module_code(library_namespace) {
 				+ ']]&#125;&#125;';
 	}
 
-	function parse_template_Tl(token) {
+	function parse_template_Tl(token, index, parent, options) {
 		token.expand = expand_template_Tl;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	function parse_template_Pin_message(token, index, parent, options) {
+		var parameters = this.parameters, message_expire_date;
+		if (parameters[1]) {
+			options = library_namespace.new_options(options);
+			options.get_timevalue = true;
+			message_expire_date = wiki_API.parse.date(parameters[1], {
+				get_timevalue : true,
+			});
+		}
+		token.message_expire_date = message_expire_date || Infinity;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -76,6 +90,8 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
+		'Pin message' : parse_template_Pin_message,
+
 		Tl : parse_template_Tl
 	};
 

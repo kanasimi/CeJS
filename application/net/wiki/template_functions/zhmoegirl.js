@@ -69,7 +69,7 @@ function module_code(library_namespace) {
 				+ parameters[1] + '</span>';
 	}
 
-	function parse_template_A(token) {
+	function parse_template_A(token, index, parent, options) {
 		token.expand = expand_template_A;
 	}
 

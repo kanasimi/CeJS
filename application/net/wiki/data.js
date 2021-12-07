@@ -1313,10 +1313,11 @@ function module_code(library_namespace) {
 		var action;
 		// 不採用 wiki_API.is_page_data(key)
 		// 以允許自行設定 {title:title,language:language}。
+		// console.trace(key);
 		if (key.title) {
 			if (false) {
-				console
-						.trace([ wiki_API.site_name(key.language, options), key ]);
+				console.trace([ key.site,
+						wiki_API.site_name(key.language, options), key ]);
 			}
 			action = 'sites=' + (key.site ||
 			// 在 options 包含之 wiki session 中之 key.language。
@@ -4670,6 +4671,37 @@ function module_code(library_namespace) {
 		set_next_descriptions();
 	}
 
+	function set_sitelinks(data, token, callback, options, session, entity) {
+		// console.trace(data);
+		var sitelinks = data.sitelinks;
+		if (library_namespace.is_Object(sitelinks)) {
+			// Convert to {Array}
+			data.sitelinks = Object.keys(sitelinks).map(function(sitelink) {
+				var sitelink_data = sitelinks[sitelink];
+				if (typeof sitelink_data === 'string') {
+					return {
+						site : sitelink,
+						title : sitelink_data
+					};
+				}
+				// assert: library_namespace.is_Object(sitelink_data)
+				// e.g., {title:'',badges:['',],new:'item'}
+				if (!sitelink_data.site) {
+					sitelink_data.site = sitelink;
+				} else {
+					// assert: sitelink_data.site === sitelink
+				}
+				return sitelink_data;
+			});
+		}
+		// console.trace(data);
+
+		// TODO:
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetsitelink
+
+		callback();
+	}
+
 	// ----------------------------------------------------
 
 	/**
@@ -5090,8 +5122,12 @@ function module_code(library_namespace) {
 				set_aliases(data, token, function() {
 					library_namespace.debug('Run set_descriptions', 2,
 							'wikidata_edit');
-					set_descriptions(data, token, do_wbeditentity, options,
-							session, entity);
+					set_descriptions(data, token, function() {
+						library_namespace.debug('Run set_sitelinks', 2,
+								'wikidata_edit');
+						set_sitelinks(data, token, do_wbeditentity, options,
+								session, entity);
+					}, options, session, entity);
 				}, options, session, entity);
 			}, options, session, entity);
 		}, options, session, entity);
@@ -5790,7 +5826,7 @@ function module_code(library_namespace) {
 		}
 		var id_list = [];
 		for_erach_SPARQL_item_process_id(function(id, item) {
-			//console.trace([ id, item ]);
+			// console.trace([ id, item ]);
 			id_list.push(id);
 		}, this, options && options.item_name || default_item_name);
 		return id_list;

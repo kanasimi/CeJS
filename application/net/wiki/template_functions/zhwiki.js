@@ -83,7 +83,7 @@ function module_code(library_namespace) {
 		+ (parameters[2] ? '|' + parameters[2] : '') + ']]';
 	}
 
-	function parse_template_A(token) {
+	function parse_template_A(token, index, parent, options) {
 		token.expand = expand_template_A;
 	}
 
@@ -97,7 +97,7 @@ function module_code(library_namespace) {
 		}).join('、');
 	}
 
-	function parse_template_Al(token, options) {
+	function parse_template_Al(token, index, parent, options) {
 		var index = 0, page_title_list = [];
 		while (index < token.length) {
 			var page_title = token.parameters[++index];
@@ -112,6 +112,11 @@ function module_code(library_namespace) {
 		});
 		return page_title_list;
 	}
+	// --------------------------------------------------------------------------------------------
+
+	function parse_template_不存檔(token, index, parent, options) {
+		token.message_expire_date = Infinity;
+	}
 
 	// --------------------------------------------------------------------------------------------
 
@@ -122,7 +127,7 @@ function module_code(library_namespace) {
 				+ parameters[2] + '}-';
 	}
 
-	function parse_template_Lang(token, options) {
+	function parse_template_Lang(token, index, parent, options) {
 		Object.assign(token, {
 			expand : expand_template_Lang
 		});
@@ -252,6 +257,10 @@ function module_code(library_namespace) {
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
 		A : parse_template_A,
 		Al : parse_template_Al,
+
+		// {{Do not archive}}
+		不存檔 : parse_template_不存檔,
+
 		Lang : parse_template_Lang,
 		NoteTA : parse_template_NoteTA,
 		簡繁轉換 : parse_template_簡繁轉換
