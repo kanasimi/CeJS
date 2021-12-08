@@ -68,6 +68,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// {{color|英文顏色名稱或是RGB 16進制編碼|文字}}
 	function expand_template_Color(options) {
 		var parameters = this.parameters;
 		return '<span style="color:' + (parameters[1] || '') + '">'
@@ -79,10 +80,85 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// 一些會添加 anchors 的特殊模板。
+
+	// {{Anchor|anchor|別名1|別名2}}
+	function expand_template_Anchor(options) {
+		var parameters = this.parameters;
+		var wikitext = [];
+		for (/* let */var index = 1; index < this.length; index++) {
+			var anchor = parameters[index];
+			if (typeof anchor !== 'string') {
+				// old jawiki {{Anchor}}
+				// e.g., [[終着駅シリーズ]]: {{Anchor|[[牛尾正直]]}}
+				// {{Anchor|A[[B]]}} → "AB"
+				// anchor = wiki_API.wikitext_to_plain_text(anchor);
+			}
+			if (anchor) {
+				// 多空格、斷行會被轉成單一 " "。
+				anchor = anchor.replace(/[\s\n]{2,}/g, ' ');
+				if (library_namespace.HTML_to_wikitext)
+					anchor = library_namespace.HTML_to_wikitext(anchor);
+				// class="anchor"
+				wikitext.push('<span id="' + anchor + '"></span>');
+			}
+		}
+		return wikitext.join('');
+	}
+
+	function parse_template_Anchor(token, index, parent, options) {
+		token.expand = expand_template_Anchor;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	function expand_template_Visible_anchor(options) {
+		var parameters = this.parameters;
+		// {{Visible anchor}}（別名{{Vanc}}）は似たテンプレートですが、1個目のリンク先が表示されます。
+		return expand_template_Anchor.call(this, options)
+		// + '<span class="vanchor-text">'
+		+ (parameters.text || parameters[1] || '')
+		// + '</span>'
+		;
+	}
+
+	function parse_template_Visible_anchor(token, index, parent, options) {
+		token.expand = expand_template_Visible_anchor;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	function expand_template_Term(options) {
+		var parameters = this.parameters;
+		var wikitext = '<dt id="'
+				+ wiki_API.wikitext_to_plain_text(
+				//
+				parameters.id || parameters.term || parameters[1] || '')
+						.replace(/"/g, '').toLowerCase()
+				+ '">'
+				+ (parameters.content || parameters[2] || parameters.term
+						|| parameters[1] || '') + '</dt>';
+		// console.log(wikitext);
+		return wikitext;
+	}
+
+	function parse_template_Term(token, index, parent, options) {
+		token.expand = expand_template_Term;
+	}
+
+	// --------------------------------------------------------------------------------------------
 
 	// export 導出.
 
+	// general_functions 必須在個別 wiki profiles 之前載入。
+	// 如 CeL.application.net.wiki.template_functions.jawiki 依賴於
+	// general_functions！
 	wiki_API.template_functions.functions_of_all_sites = {
+		// 一些會添加 anchors 的特殊模板。
+		Anchor : parse_template_Anchor,
+		'Visible anchor' : parse_template_Visible_anchor,
+		Term : parse_template_Term,
+
 		Void : parse_template_Void,
 		Color : parse_template_Color
 	};

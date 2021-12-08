@@ -1856,22 +1856,9 @@ function module_code(library_namespace) {
 				return token;
 			}
 
-			if (token.name === 'Anchor' || token.name === 'Anchors') {
-				// 何も表示はされませんが、リンク先が、そこに作られます。
-				return '';
-			}
-			// TODO: {{Visible anchor}} === {{Vanchor}}, {{Vanc}}
-			if (token.name === 'Visible anchor') {
-				// {{Visible anchor}}（別名{{Vanc}}）は似たテンプレートですが、1個目のリンク先が表示されます。
-				return preprocess_section_link_token(token.parameters[1],
-						options);
-			}
-
 			if (token.name in {
 				// {{lang|語言標籤|內文}}
-				Lang : true,
-				// {{color|英文顏色名稱或是RGB 16進制編碼|文字}}
-				Color : true
+				Lang : true
 			}) {
 				return preprocess_section_link_token(token.parameters[2],
 						options);
@@ -2043,6 +2030,7 @@ function module_code(library_namespace) {
 
 	// TODO: The method now is NOT a good way!
 	// extract_plain_text_of_wikitext(), get_plain_display_text()
+	// @see [[w:en:Module:Delink]]
 	function wikitext_to_plain_text(wikitext, options) {
 		options = library_namespace.new_options(options);
 
@@ -3004,7 +2992,10 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.parse.anchor.normalize_anchor()
 	function normalize_anchor(anchor) {
-		return anchor && anchor.toString().replace(/_/g, ' ')
+		return anchor && anchor.toString()
+		// 警告: 實際上的網頁錨點應該要 .replace(/ /g, '_')
+		// 但由於 wiki 頁面中使用[[#P Q]]與[[#P_Q]]效果相同，都會產生<a href="#P_Q">，因此採用"P Q"。
+		.replace(/_/g, ' ')
 		// " a " → "a"
 		.trim();
 	}
@@ -3038,7 +3029,7 @@ function module_code(library_namespace) {
 		function register_anchor(anchor, token) {
 			anchor = normalize_anchor(anchor);
 			// 以首個出現的為準。
-			if (anchor && !('anchor' in anchor_hash))
+			if (anchor && !(anchor in anchor_hash))
 				anchor_hash[anchor] = token;
 		}
 
@@ -3083,33 +3074,16 @@ function module_code(library_namespace) {
 		// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
 		parsed.each('transclusion', function(template_token) {
 			if (template_token.expand) {
+				// 處理包括 {{Anchor}}, {{Anchors}}, {{Visible anchor}}, {{term}}
 				// const
 				var anchor = template_token.expand();
 				if (!anchor || typeof anchor.toString !== 'function')
 					return;
 				anchor = get_all_anchors(anchor.toString(), _options);
-				register_anchor(anchor, template_token);
-				return;
-			}
-
-			// {{Anchor|anchor|別名1|別名2}}
-			if (wiki_API.is_template('Anchor', template_token, options)
-					|| wiki_API.is_template('Anchors', template_token, options)
-					|| wiki_API.is_template('Visible anchor', template_token,
-							options)) {
-				for (/* let */var index = 1;
-				//
-				index < template_token.length; index++) {
-					var anchor = template_token.parameters[index];
-					if (typeof anchor !== 'string') {
-						// e.g., [[終着駅シリーズ]]: {{Anchor|[[牛尾正直]]}}
-						// {{Anchor|A[[B]]}} → "AB"
-						anchor = wikitext_to_plain_text(anchor);
-					}
-					// 多空格、斷行會被轉成單一 " "。
-					anchor = anchor.replace(/[\s\n]{2,}/g, ' ');
+				// console.trace(anchor);
+				anchor.forEach(function(anchor) {
 					register_anchor(anchor, template_token);
-				}
+				});
 				return;
 			}
 
@@ -3171,11 +3145,12 @@ function module_code(library_namespace) {
 		// 處理 <span class="anchor" id="anchor"></span>, <ref name="anchor">,
 		// id in table cell attribute
 		parsed.each('tag_attributes', function(attribute_token, index, parent) {
+			// console.log(parent);
 			// console.log(attribute_token.attributes);
 			// const
 			var anchor = attribute_token.attributes.id
 					|| attribute_token.attributes.name;
-			// console.log(parent);
+			// console.trace(anchor);
 			// <ref name="..."> 會轉成 id="cite_re-..."
 			if (parent.tag ? parent.tag.toLowerCase() !== 'ref'
 			// e.g., @ [[w:en:Daniel Ricciardo]]
@@ -3199,8 +3174,6 @@ function module_code(library_namespace) {
 			}
 		});
 
-		// 警告: 實際上的網頁錨點應該要 .replace(/ /g, '_')
-		// 但由於wiki頁面中使用[[#P Q]]與[[#P_Q]]效果相同，都會產生<a href="#P_Q">，因此採用"P Q"。
 		var anchor_list = Object.keys(anchor_hash);
 		if (options && options.print_anchors) {
 			library_namespace.info('get_all_anchors: anchors:');
@@ -3212,8 +3185,8 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.parse.anchor.essential_templates
 	// required, indispensable
-	get_all_anchors.essential_templates = [ 'Anchor', 'Anchors',
-			'Visible anchor', 'Citation', 'Wikicite', 'SfnRef', 'Sfn' ];
+	get_all_anchors.essential_templates = [ 'Citation', 'Wikicite', 'SfnRef',
+			'Sfn' ];
 
 	// ------------------------------------------------------------------------
 
@@ -4141,7 +4114,9 @@ function module_code(library_namespace) {
 			// <ce> is deprecated, using <chem>
 			// Replace all usages of <ce> with <chem> on wiki
 			// https://phabricator.wikimedia.org/T155125
-			+ '|categorytree|ce|chem|charinsert|gallery|graph|hiero|imagemap|indicator|inputbox|nowiki|mapframe|maplink|math|poem|quiz|ref|references|score|section|source|syntaxhighlight|templatedata|templatestyles|timeline',
+			+ '|categorytree|ce|chem|charinsert|gallery|graph|hiero|imagemap|indicator|inputbox|nowiki|mapframe|maplink|math|poem|quiz|ref|references|score|section|source|syntaxhighlight|templatedata|templatestyles|timeline'
+			// [[w:en:Template:Term]]
+			+ '|li|dt|dd',
 	// MediaWiki 可接受的 HTML void elements 標籤.
 	// NO b|span|sub|sup|li|dt|dd|center|small
 	// 包含可使用，亦可不使用 self-closing 的 tags。

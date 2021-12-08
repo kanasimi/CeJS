@@ -93,6 +93,9 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
+		// 一些會添加 anchors 的特殊模板。
+		Anchors : wiki_API.template_functions.functions_of_all_sites.Anchor,
+
 		拡張漢字 : parse_template_拡張漢字,
 		RFD : parse_template_RFD
 	};

@@ -1287,6 +1287,9 @@ function module_code(library_namespace) {
 	this.finish = function(name_space, waiting) {
 		var module_name_prefix = this.id
 				+ library_namespace.env.module_name_separator;
+		// general_functions 必須在個別 wiki profiles 之前載入。
+		// 如 CeL.application.net.wiki.template_functions.jawiki 依賴於
+		// general_functions！
 		library_namespace.run(module_name_prefix + 'general_functions');
 	};
 
