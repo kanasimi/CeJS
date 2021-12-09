@@ -1131,7 +1131,8 @@ function module_code(library_namespace) {
 			template_functions.biographical_templates);
 			// console.trace(session.biographical_templates);
 		}, {
-			namespace : 'Template'
+			namespace : 'Template',
+			no_message : true
 		});
 
 		// --------------------------------------

@@ -3093,45 +3093,42 @@ function module_code(library_namespace) {
 			// {{Citation|...|ref=anchor}}
 			|| wiki_API.is_template('Citation', template_token, options)) {
 				// console.trace(JSON.stringify(template_token.name));
-				var anchor = template_token.parameters.ref;
+				var parameters = template_token.parameters;
+				var anchor = parameters.ref;
 				// console.trace(JSON.stringify(anchor));
-				if (typeof anchor === 'string') {
-					register_anchor(anchor, template_token);
+				if (anchor) {
+					if (anchor !== 'none') {
+						// e.g., {{SfnRef|...}}
+						anchor = wikitext_to_plain_text(anchor);
+						register_anchor(anchor, template_token);
+					}
 					return;
 				}
-				var year = template_token.parameters.year;
+
+				// https://en.wikipedia.org/wiki/Template:Citation/doc#Anchors_for_Harvard_referencing_templates
+				anchor = '';
+				if (parameters.last)
+					anchor += parameters.last.toString().trim();
+				// @see [[w:en:Module:Citation/CS1]]
+				// local function make_citeref_id (namelist, year)
+				for (var index = 1; index <= 4; index++) {
+					if (parameters['last' + index])
+						anchor += parameters['last' + index].toString().trim();
+				}
+
+				var year = parameters.year;
 				if (!year) {
-					year = template_token.parameters.date;
-					year = year && year.toString().match(/\d{4}/);
+					year = parameters.date;
+					// TODO: extract year
+					year = year && year.toString().match(/[12]\d{3}/);
 					if (year)
 						year = year[0];
 				}
-				if (year && template_token.parameters.last) {
-					// @see [[Module:Citation/CS1]]
-					// local function make_citeref_id (namelist, year)
-					anchor = 'CITEREF'
-							+ template_token.parameters.last.toString().trim()
-							+ year.toString().trim();
-					register_anchor(anchor, template_token);
-				}
-				return;
-			}
+				if (year)
+					anchor += year.toString().trim();
 
-			if (wiki_API.is_template('Wikicite', template_token, options)) {
-				var anchor = template_token.parameters.ref
-						|| template_token.parameters.id
-						&& ('Reference-' + template_token.parameters.id);
-				register_anchor(anchor, template_token);
-				return;
-			}
-
-			if (wiki_API.is_template('SfnRef', template_token, options)) {
-				var anchor = 'CITEREF';
-				// console.trace(template_token);
-				for (var index = 1; index <= 5; index++)
-					if (template_token.parameters[index])
-						anchor += template_token.parameters[index];
-				register_anchor(anchor, template_token);
+				if (anchor)
+					register_anchor('CITEREF' + anchor, template_token);
 				return;
 			}
 
@@ -3185,8 +3182,9 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.parse.anchor.essential_templates
 	// required, indispensable
-	get_all_anchors.essential_templates = [ 'Citation', 'Wikicite', 'SfnRef',
-			'Sfn' ];
+	get_all_anchors.essential_templates = [ 'Citation',
+	// TODO: cite_ref-FOOTNOTE*
+	'Sfn' ];
 
 	// ------------------------------------------------------------------------
 

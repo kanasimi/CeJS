@@ -148,6 +148,42 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function expand_template_Wikicite(options) {
+		var parameters = this.parameters;
+		// class="citation wikicite"
+		var wikitext = '<cite id='
+				+ (parameters.ref || parameters.id
+						&& ('"Reference-' + parameters.id + '"')) + '>'
+				+ parameters.reference + '</cite>';
+		// console.log(wikitext);
+		return wikitext;
+	}
+
+	function parse_template_Wikicite(token, index, parent, options) {
+		token.expand = expand_template_Wikicite;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	function expand_template_SfnRef(options) {
+		var parameters = this.parameters;
+		var anchor = 'CITEREF';
+		for (var index = 1; index <= 5; index++) {
+			if (parameters[index])
+				anchor += parameters[index].toString().trim();
+			else
+				return anchor;
+		}
+		// TODO: test year
+		return anchor;
+	}
+
+	function parse_template_SfnRef(token, index, parent, options) {
+		token.expand = expand_template_SfnRef;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 
 	// general_functions 必須在個別 wiki profiles 之前載入。
@@ -158,6 +194,8 @@ function module_code(library_namespace) {
 		Anchor : parse_template_Anchor,
 		'Visible anchor' : parse_template_Visible_anchor,
 		Term : parse_template_Term,
+		Wikicite : parse_template_Wikicite,
+		SfnRef : parse_template_SfnRef,
 
 		Void : parse_template_Void,
 		Color : parse_template_Color
