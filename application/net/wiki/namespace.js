@@ -1181,6 +1181,17 @@ function module_code(library_namespace) {
 		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
 		wikipedia : 4,
 
+		// https://meta.wikimedia.org/wiki/Requests_for_comment/Set_short_project_namespace_aliases_by_default_globally
+		// [[w:ja:Wikipedia:バグの報告#WPショートカットが機能しない]]
+		// https://noc.wikimedia.org/conf/highlight.php?file=InitialiseSettings.php
+		wp : 4,
+		wb : 4,
+		wv : 4,
+		ws : 4,
+		wn : 4,
+		wq : 4,
+		wt : 4,
+
 		// ----------------------------
 
 		// Varies between wikis

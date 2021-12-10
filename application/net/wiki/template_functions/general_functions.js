@@ -51,6 +51,10 @@ function module_code(library_namespace) {
 		return '';
 	}
 
+	function trim_param(param) {
+		return param.toString().trim();
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// token.expand() 可將模板轉換成一般 wiki 語法。
 	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
@@ -168,18 +172,61 @@ function module_code(library_namespace) {
 	function expand_template_SfnRef(options) {
 		var parameters = this.parameters;
 		var anchor = 'CITEREF';
-		for (var index = 1; index <= 5; index++) {
-			if (parameters[index])
-				anchor += parameters[index].toString().trim();
-			else
-				return anchor;
+		for (var index = 1; index <= 5 && parameters[index]; index++) {
+			anchor += trim_param(parameters[index]);
 		}
 		// TODO: test year
+
+		// anchor = anchor.replace(/\s+/g, ' ');
+
 		return anchor;
 	}
 
 	function parse_template_SfnRef(token, index, parent, options) {
 		token.expand = expand_template_SfnRef;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// @see local function sfn (frame) @
+	// https://en.wikipedia.org/wiki/Module:Footnotes
+	function expand_template_Sfn(options) {
+		var parameters = this.parameters;
+		var anchor = 'cite_ref-FOOTNOTE';
+		for (var index = 1; index <= 5 && parameters[index]; index++) {
+			anchor += trim_param(parameters[index]);
+		}
+
+		if (parameters.p)
+			anchor += trim_param(parameters.p);
+		if (parameters.pp)
+			anchor += trim_param(parameters.pp);
+		if (parameters.loc)
+			anchor += trim_param(parameters.loc);
+
+		anchor = anchor.replace(/\s+/g, ' ');
+
+		var wikitext = [];
+		var reference_index = 1;
+		var pointer_index = 0;
+		// TODO: 這個數值必須按照 reference_index 遞增。
+		var ref_anchor = anchor + '-' + reference_index;
+		wikitext.push('<ref name="' + ref_anchor + '">'
+		// TODO: + content
+		+ '</ref>',
+
+		//
+		'<a id="' + anchor + '_' + reference_index + '-'
+		// TODO: 這個數值必須按照 pointer_index 遞增。
+		+ pointer_index + '" href="#' + ref_anchor + '">'
+		// TODO: 這個數值必須按照 reference_index 遞增。
+		+ '[' + reference_index + ']' + '</a>');
+
+		return wikitext.join('');
+	}
+
+	function parse_template_Sfn(token, index, parent, options) {
+		token.expand = expand_template_Sfn;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -196,6 +243,7 @@ function module_code(library_namespace) {
 		Term : parse_template_Term,
 		Wikicite : parse_template_Wikicite,
 		SfnRef : parse_template_SfnRef,
+		// Sfn : parse_template_Sfn,
 
 		Void : parse_template_Void,
 		Color : parse_template_Color

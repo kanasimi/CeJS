@@ -3091,7 +3091,7 @@ function module_code(library_namespace) {
 			// {{Cite journal|...|ref=anchor}}
 			if (/^Cite \w+/.test(template_token.name)
 			// {{Citation|...|ref=anchor}}
-			|| wiki_API.is_template('Citation', template_token, options)) {
+			|| session.is_template('Citation', template_token, options)) {
 				// console.trace(JSON.stringify(template_token.name));
 				var parameters = template_token.parameters;
 				var anchor = parameters.ref;
@@ -3182,9 +3182,7 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.parse.anchor.essential_templates
 	// required, indispensable
-	get_all_anchors.essential_templates = [ 'Citation',
-	// TODO: cite_ref-FOOTNOTE*
-	'Sfn' ];
+	get_all_anchors.essential_templates = [ 'Citation' ];
 
 	// ------------------------------------------------------------------------
 
@@ -3192,6 +3190,7 @@ function module_code(library_namespace) {
 	function find_template(template_name, options) {
 		var template_token;
 
+		// TODO: using session.remove_namespace()
 		template_name = template_name.replace(/^Template:/i, '');
 
 		this.each('Template:' + template_name, function(token) {
