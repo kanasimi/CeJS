@@ -2567,6 +2567,7 @@ function module_code(library_namespace) {
 		if (Array.isArray(list) && (index ? 0 < (index = parseInt(index))
 		//
 		&& index < list.length : list.length)) {
+			// 警告: 當 list 太大時可能產生 RangeError: Maximum call stack size exceeded
 			Array.prototype.push.apply(this, index ? Array.prototype.slice
 					.call(list, index) : list);
 			// this = this.concat(list);

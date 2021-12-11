@@ -1252,7 +1252,7 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/w/api.php?action=help&modules=flow-parsoid-utils
 
 	/**
-	 * 展開內容
+	 * 展開 template 內容
 	 * 
 	 * 這種方法不能展開 module
 	 * 

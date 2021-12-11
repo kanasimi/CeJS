@@ -2294,6 +2294,9 @@ function module_code(library_namespace) {
 			Connection : 'keep-alive',
 			'Upgrade-Insecure-Requests' : 1,
 
+			// 'sec-ch-ua-mobile' : '?0',
+			// 'sec-ch-ua-platform' : 'Windows',
+
 			// 為了順暢使用 Cloudflare，必須加上 Sec-Fetch-headers？ e.g., mymhh.js
 			// https://blog.kalan.dev/fetch-metadata-request-headers/
 			'Sec-Fetch-Dest' : 'document',
@@ -2316,6 +2319,14 @@ function module_code(library_namespace) {
 		}, options.headers, URL_options_to_fetch.headers);
 		// delete URL_options_to_fetch.headers.Referer;
 		// console.log(options.headers);
+
+		if (false && /Chrome\//.test(get_URL_node.default_user_agent)) {
+			Object.assign(URL_options_to_fetch.headers, {
+				'sec-ch-ua' :
+				//
+				'" Not A;Brand";v="99", "Chromium";v="98", "Google Chrome";v="98"'
+			});
+		}
 
 		if (node_zlib.gunzipSync
 		// && node_zlib.deflateSync
@@ -2546,7 +2557,7 @@ function module_code(library_namespace) {
 
 			try {
 				node_http2 = require('http2');
-			} catch(e) {
+			} catch (e) {
 				// Is old version. Added in: v8.4.0
 			}
 

@@ -2824,11 +2824,11 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
-	var recent_date_name = [ '2 days before yesterday', 'the day before yesterday',
-					'yesterday', 'today', 'tomorrow', 'the day after tomorrow',
-					'2 days after tomorrow'
-			// , '3 days after tomorrow'
-			], recent_date_name_today_index = recent_date_name.indexOf('today');
+	var recent_date_name = [ '2 days before yesterday',
+			'the day before yesterday', 'yesterday', 'today', 'tomorrow',
+			'the day after tomorrow', '2 days after tomorrow'
+	// , '3 days after tomorrow'
+	], recent_date_name_today_index = recent_date_name.indexOf('today');
 
 	// @see https://en.wikipedia.org/wiki/Wikipedia:Comments_in_Local_Time
 	// https://en.wikipedia.org/wiki/User:Gary/comments_in_local_time.js
@@ -2897,8 +2897,10 @@ function module_code(library_namespace) {
 		if (date_value_diff <= 3) {
 			// the day of the month
 			var message = /* date_of_month */date.getDate()
-					- /* date_now */(new Date).getDate() + recent_date_name_today_index;
-			// console.log([date_value_diff, message, (new Date).getDate(), date.getDate()]);
+					- /* date_now */(new Date).getDate()
+					+ recent_date_name_today_index;
+			// console.log([date_value_diff, message, (new Date).getDate(),
+			// date.getDate()]);
 			if (message > recent_date_name.length) {
 				// assert: (new Date) 於本月初，date 於上月底。
 				date_value_diff = new Date;
