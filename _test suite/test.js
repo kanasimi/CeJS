@@ -3758,6 +3758,8 @@ function test_wiki() {
 		enwiki.run(function () {
 			_setup_test('wiki: namespace');
 			assert(enwiki.is_talk_namespace(enwiki.to_talk_page('A: B')), 'wiki.is_talk_namespace() #1');
+			assert(['zhwiki', CeL.wiki.site_name('zh', enwiki)], 'site_name(, enwiki) #1');
+			assert(['zhwiki', CeL.wiki.site_name('zh', {session : enwiki})], 'site_name(, enwiki) #2');
 
 			assert(['2001: A Space Odyssey', enwiki.normalize_title('2001: A Space Odyssey')], 'wiki.normalize_title() #1');
 			assert(['2001: A Space Odyssey', enwiki.normalize_title(':2001: A Space Odyssey')], 'wiki.normalize_title() #2');

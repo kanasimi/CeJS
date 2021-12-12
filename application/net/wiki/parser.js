@@ -3089,9 +3089,9 @@ function module_code(library_namespace) {
 
 			// e.g., {{Cite book|...|ref=anchor}} @ [[日本の原子爆弾開発]]
 			// {{Cite journal|...|ref=anchor}}
-			if (/^Cite \w+/.test(template_token.name)
+			if (/^Cite \w+/.test(template_token.name) || (session || wiki_API)
 			// {{Citation|...|ref=anchor}}
-			|| session.is_template('Citation', template_token, options)) {
+			.is_template('Citation', template_token, options)) {
 				// console.trace(JSON.stringify(template_token.name));
 				var parameters = template_token.parameters;
 				var anchor = parameters.ref;

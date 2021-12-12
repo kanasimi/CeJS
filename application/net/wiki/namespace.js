@@ -745,6 +745,7 @@ function module_code(library_namespace) {
 	 *        language_to_site_name()
 	 */
 	function language_to_site_name(language, options) {
+		// console.trace(language);
 		var session;
 
 		// 擷取出維基姊妹項目各種 type: 先要能擷取出 language code + family
@@ -787,6 +788,7 @@ function module_code(library_namespace) {
 			in_session = wiki_API.session_of_options(options);
 			family = options && options.family;
 		}
+		// console.trace(language);
 
 		var page_name;
 		var matched = typeof language === 'string' && !language.includes('://')
@@ -811,6 +813,7 @@ function module_code(library_namespace) {
 			}
 			family = family || matched.family;
 		}
+		// console.trace(language);
 
 		matched = wiki_API.namespace(language, options);
 		// console.trace([ matched, language ]);
@@ -1167,6 +1170,17 @@ function module_code(library_namespace) {
 		// Varies between wikis
 		project : 4,
 
+		// https://meta.wikimedia.org/wiki/Requests_for_comment/Set_short_project_namespace_aliases_by_default_globally
+		// [[w:ja:Wikipedia:バグの報告#WPショートカットが機能しない]]
+		// https://noc.wikimedia.org/conf/highlight.php?file=InitialiseSettings.php
+		wp : 4,
+		wb : 4,
+		wv : 4,
+		ws : 4,
+		wn : 4,
+		wq : 4,
+		wt : 4,
+
 		// WD : 4,
 		wikidata : 4,
 		// [[commons:title]] @ enwiki 會造成混亂
@@ -1180,17 +1194,6 @@ function module_code(library_namespace) {
 		// WP : 4,
 		// 正規名稱必須擺在最後一個，供 function namespace_text_of_NO() 使用。
 		wikipedia : 4,
-
-		// https://meta.wikimedia.org/wiki/Requests_for_comment/Set_short_project_namespace_aliases_by_default_globally
-		// [[w:ja:Wikipedia:バグの報告#WPショートカットが機能しない]]
-		// https://noc.wikimedia.org/conf/highlight.php?file=InitialiseSettings.php
-		wp : 4,
-		wb : 4,
-		wv : 4,
-		ws : 4,
-		wn : 4,
-		wq : 4,
-		wt : 4,
 
 		// ----------------------------
 
@@ -2622,7 +2625,10 @@ function module_code(library_namespace) {
 		// {{PAGENAME}}, {{NAMESPACE}}, {{NAMESPACENUMBER}} 之類可以引用當前頁面為參數
 		// argument。
 		&& configurations.variables.forEach(function(magic_word) {
-			magic_words_hash[magic_word.toUpperCase()] = true;
+			// https://harrypotter.fandom.com/api.php?action=query&meta=siteinfo&siprop=variables&utf8&format=json
+			// [{"id":"wgLanguageCode","*":"en"},{"id":"wgCityId","*":509}]
+			if (typeof magic_word === 'string')
+				magic_words_hash[magic_word.toUpperCase()] = true;
 		});
 		// free
 		// delete configurations.variables;
