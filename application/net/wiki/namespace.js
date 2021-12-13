@@ -1166,12 +1166,14 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 
+		// NS_PROJECT
 		// the project namespace for matters about the project
 		// Varies between wikis
 		project : 4,
 
 		// https://meta.wikimedia.org/wiki/Requests_for_comment/Set_short_project_namespace_aliases_by_default_globally
 		// [[w:ja:Wikipedia:バグの報告#WPショートカットが機能しない]]
+		// [[phab:rOMWCa30603ab09d162fd30ff4081f85054df81a0ae49]]
 		// https://noc.wikimedia.org/conf/highlight.php?file=InitialiseSettings.php
 		wp : 4,
 		wb : 4,
@@ -1635,6 +1637,14 @@ function module_code(library_namespace) {
 		});
 	}
 
+	var PATTERN_anchor_of_page_title;
+	try {
+		// Negative lookbehind assertion
+		PATTERN_anchor_of_page_title = new RegExp('(?<!{{)#.*');
+	} catch (e) {
+		// TODO: handle exception
+	}
+
 	/**
 	 * 規範/正規化頁面名稱 page name。
 	 * 
@@ -1696,10 +1706,9 @@ function module_code(library_namespace) {
 
 		page_name = page_name.replace(/<!--[\s\S]*-->/g, '')
 		// e.g., "Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-1 days +9 hours}}"
-		try {
-			// Negative lookbehind assertion
-			page_name = page_name.replace(/(?<!{{)#.*/, '');
-		} catch (e) {
+		if (PATTERN_anchor_of_page_title) {
+			page_name = page_name.replace(PATTERN_anchor_of_page_title, '');
+		} else {
 			page_name = page_name.replace(/([^#]*)#.*/, function(all, prefix) {
 				return /{{$/.test(prefix) ? all : prefix;
 			});
@@ -2535,6 +2544,14 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function get_PATTERN_full_tag(tags) {
+		if (Array.isArray(tags))
+			tags = tags.join('|');
+		return new RegExp('<(' + tags
+		//
+		+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1(?:\\s[^<>]*)?)>', 'ig');
+	}
+
 	// default_site_configurations
 	wiki_API.prototype.configurations = {
 	//
@@ -2651,6 +2668,28 @@ function module_code(library_namespace) {
 		});
 		// free
 		// delete configurations.magicwords;
+
+		// --------------------------------------------------------------------
+
+		var extensiontag_list = [];
+
+		configurations.extensiontags
+		//
+		&& configurations.extensiontags.forEach(function(extensiontag) {
+			extensiontag = extensiontag.replace(/^</, '').replace(/>$/, '');
+			extensiontag_list.push(extensiontag.toLowerCase());
+		});
+
+		site_configurations.extensiontag_hash = extensiontag_list.to_hash();
+
+		site_configurations.PATTERN_extensiontags = wiki_API
+				.get_PATTERN_full_tag(extensiontag_list);
+
+		site_configurations.PATTERN_non_extensiontags = wiki_API
+				.get_PATTERN_full_tag(wiki_API.markup_tags
+						.filter(function(tag) {
+							return !extensiontag_list.includes(tag);
+						}));
 
 		// --------------------------------------------------------------------
 
@@ -3530,7 +3569,8 @@ function module_code(library_namespace) {
 		// Warning: Will append to original options!!
 		// function for_each_token() needs assigning to original options.
 		options = library_namespace.setup_options(options);
-		options[KEY_SESSION] = session;
+		if (session)
+			options[KEY_SESSION] = session;
 		return options;
 	}
 
@@ -3672,6 +3712,8 @@ function module_code(library_namespace) {
 		LTR_SCRIPTS : LTR_SCRIPTS,
 		PATTERN_LTR : PATTERN_LTR,
 		PATTERN_category : PATTERN_category,
+
+		get_PATTERN_full_tag : get_PATTERN_full_tag,
 
 		upper_case_initial : upper_case_initial,
 

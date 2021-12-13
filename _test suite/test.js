@@ -3565,6 +3565,10 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #6');
 		assert(['transclusion', parsed.type], 'wiki.parse: {{invalid}} #6-1');
 
+		wikitext = '{{t|p=<gallery>\na.png|text\n</gallery>}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{t|<gallery>}} #1');
+		assert(['<gallery>\na.png|text\n</gallery>', parsed.parameters.p.toString()], 'wiki.parse: {{t|<gallery>}} #2');
+
 		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', p2: 'vp2' })], 'template_object_to_wikitext: #1');
 		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
 		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function (text_array) { return text_array.filter(function (text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');

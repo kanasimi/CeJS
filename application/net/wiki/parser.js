@@ -1237,7 +1237,7 @@ function module_code(library_namespace) {
 					// parse 或者處理。
 					if (typeof result === 'string') {
 						// {String}wikitext to ( {Object}element or '' )
-						result = parse_wikitext(result, null, []);
+						result = parse_wikitext(result, options, []);
 					}
 					if (typeof result === 'string'
 					//
@@ -1698,7 +1698,7 @@ function module_code(library_namespace) {
 			// console.trace(options);
 			// expand template, .expand_template(), .to_wikitext()
 			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
-			token = parse_wikitext(token.expand(options));
+			token = parse_wikitext(token.expand(options), options);
 		}
 
 		// ------------------------
@@ -3461,8 +3461,8 @@ function module_code(library_namespace) {
 		// 其他都不管了。
 	}
 
-	function insert_before(before_node, to_insert) {
-		var order_needed = parse_wikitext(before_node, null, []), order_list = this.order_list;
+	function insert_before(before_node, to_insert, options) {
+		var order_needed = parse_wikitext(before_node, options, []), order_list = this.order_list;
 		if (order_needed) {
 			order_needed = footer_order(order_needed, order_list);
 		}
@@ -3847,7 +3847,7 @@ function module_code(library_namespace) {
 
 		if (!location) {
 			if (typeof token === 'string')
-				token = parse_wikitext(token);
+				token = parse_wikitext(token, options);
 			if (token.type === 'category') {
 				location = 'categories';
 			}
@@ -4129,32 +4129,31 @@ function module_code(library_namespace) {
 			// [[w:en:Help:Labeled section transclusion]]
 			// TODO: 標簽（tag）現在可以本地化
 			+ '|section';
-	var /** {RegExp}HTML self closed tags 的匹配模式。 */
-	PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_close_tags
+	/** {RegExp}HTML self closed tags 的匹配模式。 */
+	var PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_close_tags
 	// allow "<br/>"
 	+ ')(\/|\\s[^<>]*)?>', 'ig');
-	/** {RegExp}HTML tags 的匹配模式。 */
-	var PATTERN_WIKI_TAG = function(tags) {
-		return new RegExp('<(' + tags
-		//
-		+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1(?:\\s[^<>]*)?)>', 'ig');
-	};
+
 	// 在其內部的 wikitext 不會被 parse。允許內部採用 table 語法的 tags。例如
 	// [[mw:Manual:Extensions]]
-	var no_parse_tags = 'pre|nowiki|source|syntaxhighlight',
+	// configurations.extensiontags
+	var wiki_extensiontags = 'pre|nowiki|gallery|indicator|langconvert|timeline|hiero|imagemap|source|syntaxhighlight|poem|quiz|score|templatestyles|templatedata|graph|maplink|mapframe|charinsert|ref|references|inputbox|categorytree|section|math|ce|chem';
 	/**
 	 * {RegExp}HTML tags 的匹配模式 of <nowiki>。這些 tag 就算中間置入 "<!--" 也不會被當作
-	 * comments，必須在 "<!--" 之前解析。
+	 * comments，必須在 "<!--" 之前解析。 PATTERN_WIKI_TAG_of_wiki_extensiontags
 	 */
-	PATTERN_WIKI_TAG_of_no_parse = PATTERN_WIKI_TAG(no_parse_tags);
-	no_parse_tags = no_parse_tags.split('|');
+	var PATTERN_wiki_extensiontags = wiki_API
+			.get_PATTERN_full_tag(wiki_extensiontags);
+	/** {RegExp}HTML tags 的匹配模式。 */
+	// var PATTERN_WIKI_TAG = wiki_API.get_PATTERN_full_tag(markup_tags);
+	wiki_extensiontags = wiki_extensiontags.split('|');
+	markup_tags = markup_tags.split('|');
 	/** {RegExp}HTML tags 的匹配模式 without <nowiki>。 */
-	var PATTERN_WIKI_TAG_with_parse = PATTERN_WIKI_TAG(markup_tags.split('|')
-			.filter(function(tag) {
-				return !no_parse_tags.includes(tag);
-			}).join('|'));
-	PATTERN_WIKI_TAG = PATTERN_WIKI_TAG(markup_tags);
-	no_parse_tags = no_parse_tags.to_hash();
+	var PATTERN_non_wiki_extensiontags = wiki_API
+			.get_PATTERN_full_tag(markup_tags.filter(function(tag) {
+				return !wiki_extensiontags.includes(tag);
+			}));
+	wiki_extensiontags = wiki_extensiontags.to_hash();
 
 	function evaluate_parser_function(options) {
 		var argument_1 = this.parameters[1] && this.parameters[1].toString();
@@ -5496,9 +5495,25 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
+		// console.trace(session.configurations);
 		var magic_words_hash = session
 				&& session.configurations.magic_words_hash
 				|| default_magic_words_hash;
+
+		var extensiontag_hash = session
+				&& session.configurations.extensiontag_hash
+				|| wiki_extensiontags;
+		var PATTERN_extensiontags = session
+				&& session.configurations.PATTERN_extensiontags
+				|| PATTERN_wiki_extensiontags;
+		// PATTERN_extensiontags 正在使用中，避免污染。
+		// For old version:
+		// new RegExp(PATTERN_extensiontags.source,
+		// PATTERN_extensiontags.flags || 'ig')
+		var PATTERN_extensiontags_duplicated = new RegExp(PATTERN_extensiontags);
+		var PATTERN_non_extensiontags = session
+				&& session.configurations.PATTERN_non_extensiontags
+				|| PATTERN_non_wiki_extensiontags;
 
 		// or use ((PATTERN_transclusion))
 		// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
@@ -5922,12 +5937,12 @@ function module_code(library_namespace) {
 			PATTERN_attribute = /\s*(\S[^=]*?)\s*(?:=|{{\s*=\s*(?:\|[\s\S]*?)?}})\s*("[^"]*"|'[^']*'|(\S*))|\s*(\S*)/g;
 			while ((matched = PATTERN_attribute.exec(attributes)) && matched[0]) {
 				// console.log(matched);
-				attributes_list.push(parse_wikitext(matched[0]));
+				attributes_list.push(parse_wikitext(matched[0], options));
 				var name = matched[1];
 				if (!name) {
 					// console.assert(!!matched[4]);
 					if (matched[4]) {
-						name = parse_wikitext(matched[4]);
+						name = parse_wikitext(matched[4], options);
 						// assert: name.toString() === matched[4]
 						attribute_hash[/* name.toString() */matched[4]] = name;
 					}
@@ -5935,13 +5950,13 @@ function module_code(library_namespace) {
 				}
 
 				// parse attributes
-				// name = parse_wikitext(name);
+				// name = parse_wikitext(name, options);
 				var value = matched[3]
 				// 去掉 "", ''
 				|| matched[2].slice(1, -1);
 				if (library_namespace.HTML_to_wikitext)
 					value = library_namespace.HTML_to_wikitext(value);
-				value = parse_wikitext(value);
+				value = parse_wikitext(value, options);
 				attribute_hash[name] = value;
 			}
 			if (false) {
@@ -5997,17 +6012,15 @@ function module_code(library_namespace) {
 			library_namespace.debug(previous + ' + <' + tag + '>', 4,
 					'parse_wikitext.tag');
 
-			var is_no_parse_tag = tag.toLowerCase() in no_parse_tags;
+			var is_wiki_extensiontags = tag.toLowerCase() in extensiontag_hash;
 			// 在章節標題、表格 td/th 或 template parameter 結束時，
 			// e.g., "| t || <s>... || </s> ||", "{{t|p=v<s>...|p2=v}}</s>"
 			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
 			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
 			// 此時同階的 table 尚未處理。
-			if (!is_no_parse_tag && /\n[|!]|[|!]{2}/.test(inner.replace(
-			// no_parse_tags: not a good idea
-			/<(pre|nowiki|source|syntaxhighlight)(?:\s(?:[^<>]*[^<>/])?)?>[\s\S]*?<\/\1>/g
-			//
-			, ''))) {
+			if (!is_wiki_extensiontags && /\n[|!]|[|!]{2}/.test(inner.replace(
+			// PATTERN_extensiontags 正在使用中，避免污染。
+			PATTERN_extensiontags_duplicated, ''))) {
 				// TODO: 應確認此時真在表格中。
 				if (library_namespace.is_debug(3)) {
 					library_namespace.warn('parse_wikitext.tag: <' + tag + '>'
@@ -6031,7 +6044,8 @@ function module_code(library_namespace) {
 			}
 
 			// 2016/9/28 9:7:7
-			// 因為 no_parse_tags 內部可能已解析成其他的單元，因此還是必須parse_wikitext()。
+			// 因為 wiki_extensiontags 內部可能已解析成其他的單元，
+			// 因此還是必須 parse_wikitext()。
 			// e.g., '<nowiki>-{}-</nowiki>'
 			// 經過改變，需再進一步處理。
 			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
@@ -6064,7 +6078,7 @@ function module_code(library_namespace) {
 			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
 			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
 			// 因此應避免 <pre> 內有 <pre>。
-			if (false && !is_no_parse_tag) {
+			if (false && !is_wiki_extensiontags) {
 				inner = inner.toString();
 			}
 
@@ -6700,7 +6714,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// 因為<nowiki>可以打斷其他的語法，包括"<!--"，因此必須要首先處理。
 
-		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_of_no_parse,
+		wikitext = wikitext.replace_till_stable(PATTERN_extensiontags,
 				parse_HTML_tag);
 
 		// ----------------------------------------------------
@@ -6826,12 +6840,12 @@ function module_code(library_namespace) {
 		// PATTERN_WIKI_TAG.lastIndex = 0;
 
 		// console.log(PATTERN_TAG);
-		// console.trace(PATTERN_WIKI_TAG_with_parse);
+		// console.trace(PATTERN_non_extensiontags);
 		// console.trace(wikitext);
 
 		// HTML tags that must be closed.
 		// <pre>...</pre>, <code>int f()</code>
-		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_with_parse,
+		wikitext = wikitext.replace_till_stable(PATTERN_non_extensiontags,
 				parse_HTML_tag);
 
 		// ----------------------------------------------------
@@ -7919,7 +7933,7 @@ function module_code(library_namespace) {
 	 *      [[w:en:Template:Auto_archiving_notice]],
 	 *      [[w:en:Template:Setup_auto_archiving]]
 	 */
-	function parse_configuration(wikitext) {
+	function parse_configuration(wikitext, options) {
 		// 忽略 <span> 之類。
 		function filter_tags(token) {
 			// console.log(token);
@@ -7975,7 +7989,7 @@ function module_code(library_namespace) {
 			value = filter_tags(value);
 			value = value.toString().trim();
 			if (false) {
-				var token = parse_wikitext(value);
+				var token = parse_wikitext(value, options);
 				if (token.type === 'tag' && token.tag === 'syntaxhighlight'
 						&& /^JSON/i.test(token.attributes.lang)) {
 					console.trace(token[1].toString());
@@ -8018,7 +8032,7 @@ function module_code(library_namespace) {
 			// wikitext = wiki_API.content_of(wikitext);
 		} else {
 			// assert: typeof wikitext === 'string'
-			parsed = parse_wikitext(wikitext);
+			parsed = parse_wikitext(wikitext, options);
 		}
 
 		if (!Array.isArray(parsed)) {
@@ -8985,6 +8999,8 @@ function module_code(library_namespace) {
 
 		// {Object} file option hash
 		file_options : file_options,
+
+		markup_tags : markup_tags,
 
 		HTML_to_wikitext : HTML_to_wikitext,
 		wikitext_to_plain_text : wikitext_to_plain_text,
