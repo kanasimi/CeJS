@@ -1285,13 +1285,13 @@ function module_code(library_namespace) {
 	});
 
 	// 等執行再包含入必須的模組。
-	this.finish = function(name_space, waiting) {
-		var module_name_prefix = this.id
-				+ library_namespace.env.module_name_separator;
+	this.finish = function(name_space, waiting, sub_modules_to_full_module_path) {
 		// general_functions 必須在個別 wiki profiles 之前載入。
 		// 如 CeL.application.net.wiki.template_functions.jawiki 依賴於
 		// general_functions！
-		library_namespace.run(module_name_prefix + 'general_functions');
+		library_namespace.run(
+				sub_modules_to_full_module_path('general_functions'), waiting);
+		return waiting;
 	};
 
 	return template_functions;

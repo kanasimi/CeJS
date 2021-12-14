@@ -1970,7 +1970,10 @@ if (typeof CeL === 'function')
 			if (!library_namespace.is_Object(options))
 				options = Object.create(null);
 
-			// waiting handler
+			/**
+			 * need waiting callback / handler: .finish() 回傳此值會使其中的 .run() 執行到了
+			 * waiting 之後才繼續載入其他組件。
+			 */
 			function waiting() {
 				return load_named(item, {
 					finish_only : TO_FINISH
@@ -2950,7 +2953,17 @@ if (typeof CeL === 'function')
 					// 初始設定函式本身定義的 callback，.finish() 應該先執行。
 					if (run_callback('finish',
 					// 傳入 module name space。
-					library_namespace.value_of(id), waiting)) {
+					library_namespace.value_of(id), waiting,
+					//
+					function sub_modules_to_full_module_path(sub_modules) {
+						if (Array.isArray(sub_modules)) {
+							return sub_modules
+									.map(sub_modules_to_full_module_path);
+						}
+						// library_namespace.get_module_path(...)
+						return id + library_namespace.env.module_name_separator
+								+ sub_modules;
+					})) {
 						if (library_namespace.is_debug(2)
 								&& library_namespace.is_WWW()) {
 							library_namespace.debug('[' + id
@@ -3033,13 +3046,8 @@ if (typeof CeL === 'function')
 			 * 
 			 * 因為需要經過特別處理，本設定不可直接匯入！
 			 */
-			finish : function(name_space, waiting) {
-				// in this scope, this === declaration;
-
-				// 若 return waiting 表示需要等待，例如 asynchronous。
-				// 這時*必須*在完成操作最後自行呼叫 waiting() 以喚醒剩下的作業！
-				library_namespace.run([], waiting);
-				return true;
+			finish : function() {
+				// @see this.finish = function() below
 			},
 			/**
 			 * 執行失敗後之異常/例外處理函式。<br />
@@ -3132,8 +3140,21 @@ if (typeof CeL === 'function')
 				};
 
 				// 收尾工作。
-				this.finish = function(name_space, waiting) {
+				this.finish = function(name_space, waiting,
+						sub_modules_to_full_module_path) {
 					// in this scope, this === declaration;
+
+					var sub_modules = [ 'sub_module_1', 'sub_module_2' ];
+					var sub_sub_modules = [ 'sub_module.sub_sub_module' ];
+
+					// 若 return waiting 表示需要等待，例如 asynchronous。
+					// 這時*必須*在完成操作最後自行呼叫 waiting() 以喚醒剩下的作業！
+					library_namespace.run(
+							sub_modules_to_full_module_path(sub_modules),
+							sub_modules_to_full_module_path(sub_sub_modules),
+							waiting);
+					// need waiting
+					return waiting;
 				};
 
 				return to_export;

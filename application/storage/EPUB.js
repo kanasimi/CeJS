@@ -32,6 +32,7 @@ The EPUB 2 NCX file for navigation is now marked for removal in EPUB 3.1.
 TODO:
 スタイル設定
 
+split epubs based on groups / size
 
  </code>
  * 

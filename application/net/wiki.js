@@ -350,9 +350,10 @@ function module_code(library_namespace) {
 	}
 
 	// 等執行再包含入必須的模組。
-	this.finish = function(name_space, waiting) {
+	this.finish = function(name_space, waiting, sub_modules_to_full_module_path) {
 		var sub_modules = [ 'namespace', 'parser', 'query', 'page',
-				'page.Page', 'Flow', 'list', 'edit', 'task' ];
+				'page.Page', 'Flow', 'list', 'edit', 'task', 'parser.wikitext',
+				'parser.misc' ];
 
 		// ------------------------------------------------------------------------
 		// auto import SQL 相關函數 @ Toolforge。
@@ -383,11 +384,9 @@ function module_code(library_namespace) {
 		// Essential dependency chain
 		library_namespace.debug('載入操作維基百科的主要功能 / 必要的依賴鍊。', 1, 'wiki_API');
 		// library_namespace.set_debug(2);
-		var module_name_prefix = this.id
-				+ library_namespace.env.module_name_separator;
-		library_namespace.run(sub_modules.map(function(module) {
-			return module_name_prefix + module;
-		}), function() {
+		library_namespace.run(sub_modules_to_full_module_path(sub_modules),
+		//
+		function() {
 			if (wiki_API.mw_web_session) {
 				wiki_API.mw_web_session = new wiki_API({
 					API_URL :
@@ -412,9 +411,9 @@ function module_code(library_namespace) {
 				// @see
 				// https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.Api
 			}
-			library_namespace.debug('All modules loaded.', 1, 'wiki_API');
+			library_namespace.debug('All wiki modules loaded.', 1, 'wiki_API');
 		}, waiting);
-		return true;
+		return waiting;
 	};
 
 	return wiki_API;
