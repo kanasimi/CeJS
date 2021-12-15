@@ -47,9 +47,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
-	// @inner
-	var PATTERN_BOT_NAME = wiki_API.PATTERN_BOT_NAME;
+	var wiki_API = library_namespace.application.net.wiki;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */

@@ -8,12 +8,6 @@
 parser [[WP:維基化]] [[w:en:Wikipedia:AutoWikiBrowser/General fixes]] [[w:en:Wikipedia:WikiProject Check Wikipedia]]
 https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 
-#這個會計數到1
-#:這個不會計數到
-#這個會計數到2
-##這個會計數到2-1
-#這個會計數到3
-
 </code>
  * 
  * @since 2021/12/14 18:53:43 拆分自 CeL.application.net.wiki.parser
@@ -46,7 +40,6 @@ function module_code(library_namespace) {
 	var wiki_API = library_namespace.application.net.wiki;
 	// @inner
 	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
-	var for_each_token = wiki_API.parser.parser_prototype.each;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -2746,7 +2739,15 @@ function module_code(library_namespace) {
 				if (latest_list) {
 					// Will be used by function remove_token_from_parent()
 					item.parent = latest_list;
+					// concole.assert(item.parent[item.index] === item);
 					item.index = latest_list.length;
+					item.list_index = latest_list.length ? latest_list.at(-1).list_index + 1
+							: 0;
+					if (latest_list.list_type === '#') {
+						item.serial = item.list_index
+								+ (isNaN(item.start_serial) ? 1
+										: item.start_serial);
+					}
 					latest_list.push(item);
 				}
 				return item;
@@ -2841,8 +2842,17 @@ function module_code(library_namespace) {
 					var list_item = push_list_item([ list ],
 					//
 					list_prefix, true);
-					list_item.index = latest_list.length - 1;
-					list_item.parent = latest_list;
+					if (false) {
+						// is setup @ push_list_item()
+						// list_item.parent = latest_list;
+						// concole.assert(list_item.parent[list_item.index] ===
+						// list_item);
+						// list_item.index = latest_list.length - 1;
+					}
+					// 要算在上一個。
+					list_item.list_index--;
+					list_item.serial > 1 && list_item.serial--;
+					list_item.no_need_to_count = true;
 					list_prefix = list_type;
 				} else {
 					list_prefix += list_type;

@@ -3148,8 +3148,6 @@ function test_wiki() {
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('<span lang="zh">深圳</span>')], 'wikitext_to_plain_text() #3');
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('<span xml:lang="zh">深圳</span>')], 'wikitext_to_plain_text() #4');
 		assert(['大稻埕', CeL.wiki.wikitext_to_plain_text('大<span lang="zh" xml:lang="zh">稻埕</span>')], 'wikitext_to_plain_text() #5');
-		assert(['文字列', CeL.wiki.wikitext_to_plain_text('{{JIS90フォント|文字}}列')], 'wikitext_to_plain_text() #6');
-		assert(['⺬・𩙿・⻍ 吉', CeL.wiki.wikitext_to_plain_text('{{拡張漢字|部首|⺬}}・{{拡張漢字|B|&#x2967F;}}・{{拡張漢字|部首|⻍}} {{拡張漢字|吉}}')], 'wikitext_to_plain_text() #7');
 
 		wikitext = 't[http://a.b/ x[[l]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #1');
@@ -3718,6 +3716,12 @@ function test_wiki() {
 		assert(['0,2,4', parsed[0].dt_index.join()], 'wiki.parse: list #10-1');
 		wikitext = 't\n**a[[L#{{t:p}}|l]]b\n**a[[L#{{t:p}}]]b\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #11');
+		wikitext = '#i1\n#i\n#i2'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: list #12');
+		assert([3, parsed[2].serial], 'wiki.parse: list #13');
+		wikitext = '#i1\n#*i\n#i2'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: list #14');
+		assert([2, parsed[2].serial], 'wiki.parse: list #15');
 
 		wikitext = 'a\n p\n  2\n {{t}}\n  [[a]]\nb'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: pre #1');
@@ -3763,7 +3767,7 @@ function test_wiki() {
 			_setup_test('wiki: namespace');
 			assert(enwiki.is_talk_namespace(enwiki.to_talk_page('A: B')), 'wiki.is_talk_namespace() #1');
 			assert(['zhwiki', CeL.wiki.site_name('zh', enwiki)], 'site_name(, enwiki) #1');
-			assert(['zhwiki', CeL.wiki.site_name('zh', {session : enwiki})], 'site_name(, enwiki) #2');
+			assert(['zhwiki', CeL.wiki.site_name('zh', CeL.wiki.add_session_to_options(enwiki))], 'site_name(, enwiki) #2');
 
 			assert(['2001: A Space Odyssey', enwiki.normalize_title('2001: A Space Odyssey')], 'wiki.normalize_title() #1');
 			assert(['2001: A Space Odyssey', enwiki.normalize_title(':2001: A Space Odyssey')], 'wiki.normalize_title() #2');
@@ -3828,12 +3832,26 @@ function test_wiki() {
 			namespace: '0'
 		});
 
+
+		var jawiki = new CeL.wiki(null, null, 'ja');
+
+		_setup_test('wiki: get categorymembers');
+		jawiki.run(function () {
+			_setup_test('wiki: jawiki template_functions');
+
+			assert(['文字列', CeL.wiki.wikitext_to_plain_text('{{JIS90フォント|文字}}列', CeL.wiki.add_session_to_options(jawiki))], 'jawiki template_functions #1');
+			assert(['⺬・𩙿・⻍ 吉', CeL.wiki.wikitext_to_plain_text('{{拡張漢字|部首|⺬}}・{{拡張漢字|B|&#x2967F;}}・{{拡張漢字|部首|⻍}} {{拡張漢字|吉}}', CeL.wiki.add_session_to_options(jawiki))], 'jawiki template_functions #2');
+
+			_finish_test('wiki: jawiki template_functions');
+		});
+
+
 		var zhwiki = new CeL.wiki(null, null, 'zh');
 		zhwiki.run(function () {
 			_setup_test('wiki: template_functions');
 
 			var wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
-			var parsed = CeL.wiki.parser(wikitext, { session: zhwiki }).parse();
+			var parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();
 			parsed.each('tempLate:NoteTA', function(token) {
 				// console.log(token.conversion_list);
 				assert(["-{A|zh-cn:巴颜喀拉山脉;zh-hk:巴顏喀拉山脈;zh-tw:巴顏喀喇山}-", token.conversion_list.toString()], 'template_functions: remove spaces');
@@ -3842,7 +3860,7 @@ function test_wiki() {
 
 			wikitext = "{{al|A|B}}";
 			// 下面這個測試只能在含入 CeL.application.net.wiki.template_functions.zhwiki 後才能使用。
-			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { session: zhwiki }).toString()], 'wiki.section_link + template_functions #1-1');
+			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, CeL.wiki.add_session_to_options(zhwiki)).toString()], 'wiki.section_link + template_functions #1-1');
 			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { site_name: 'zhwiki' }).toString()], 'wiki.section_link + template_functions #1-2');
 
 			_finish_test('wiki: template_functions');

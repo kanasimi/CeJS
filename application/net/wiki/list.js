@@ -2212,6 +2212,7 @@ function module_code(library_namespace) {
 
 			data = data.query.pages;
 			var pages = [], page_data = options.page_data;
+			var session = wiki_API.session_of_options(options);
 			for ( var pageid in data) {
 				var page = data[pageid];
 				// 僅處理第一頁。
@@ -2219,7 +2220,9 @@ function module_code(library_namespace) {
 					// 此頁面不存在/已刪除。Page does not exist. Deleted?
 					library_namespace.warn(
 					//
-					'wiki_API.redirects_here: Not exists: '
+					'wiki_API.redirects_here: Not exists in '
+					//
+					+ wiki_API.site_name(session) + ': '
 					//
 					+ (page.title ? wiki_API.title_link_of(page)
 					//

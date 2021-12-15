@@ -3565,6 +3565,7 @@ function module_code(library_namespace) {
 		|| wiki_API.is_wiki_API(options) && options);
 	}
 
+	// CeL.wiki.add_session_to_options()
 	function add_session_to_options(session, options) {
 		// Warning: Will append to original options!!
 		// function for_each_token() needs assigning to original options.

@@ -8,7 +8,7 @@
 
 </code>
  * 
- * @since 2021/12/14 18:53:43 拆分自 CeL.application.net.wiki.parser
+ * @since 2021/12/15 6:7:47 拆分自 CeL.application.net.wiki.parser 等
  */
 
 // More examples: see /_test suite/test.js
@@ -37,15 +37,10 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.application.net.wiki;
-	// @inner
-	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
-	var for_each_token = wiki_API.parser.parser_prototype.each;
-
-	// requiring
 	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var PATTERN_BOT_NAME = wiki_API.PATTERN_BOT_NAME;
+	var for_each_token = wiki_API.parser.parser_prototype.each;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -54,6 +49,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// 這些 <tag> 都不能簡單解析出來。
+	// @see wiki_extensiontags
 	var untextify_tags = {
 		ref : true,
 		// e.g., <references group="gg"/>
@@ -249,37 +245,6 @@ function module_code(library_namespace) {
 					&& wiki_API.site_name(wiki_API.session_of_options(options)) === 'zhmoegirl') {
 				return preprocess_section_link_token(wiki_API.parse('-{'
 						+ token.parameters[1] + '}-'), options);
-			}
-
-			// jawiki
-			if (token.name === '拡張漢字') {
-				return preprocess_section_link_token(token.parameters[2]
-						|| token.parameters[1], options);
-			}
-
-			if (token.name === 'Enlink') {
-				return ' ('
-				// for [[ja:Template:Enlink]]
-				// @see [[ja:景観ガイドライン]]
-				+ preprocess_section_link_token(token.parameters[1], options)
-						+ ')';
-			}
-
-			// jawiki
-			if (token.name in {
-				ARIB外字フォント : true,
-				CP932フォント : true,
-				JIS90フォント : true,
-				JIS2004フォント : true,
-				MacJapanese : true,
-				変体仮名フォント : true,
-				拡張漢字 : true,
-				絵文字フォント : true,
-				補助漢字フォント : true,
-				通貨フォント : true
-			}) {
-				return preprocess_section_link_token(token.parameters[1],
-						options);
 			}
 
 			// TODO: [[Template:User link]], [[Template:U]]
@@ -1082,17 +1047,17 @@ function module_code(library_namespace) {
 		return parsed.each.exit;
 	}, {
 		level_filter : [ 2, 3 ],
-		get_users : true,
-		// set options[KEY_SESSION] for wiki_API.parse.date()
-		session : wiki
+		get_users : true
 	});
 
 	</code>
 	 */
 	function for_each_section(for_section, options) {
 		options = library_namespace.new_options(options);
+		// this.options is from function page_parser(wikitext, options)
 		if (!options[KEY_SESSION] && this.options && this.options[KEY_SESSION]) {
-			// for `var date = wiki_API.parse.date(token, options);`
+			// set options[KEY_SESSION] for
+			// `var date = wiki_API.parse.date(token, options);`
 			options[KEY_SESSION] = this.options[KEY_SESSION];
 		}
 

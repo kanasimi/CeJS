@@ -61,6 +61,47 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function expand_template_Enlink(options) {
+		var parameters = this.parameters;
+		var lang = parameters[3] || 'en';
+		var wikitext;
+		if (parameters.a === 'on') {
+			wikitext = lang;
+		} else {
+			wikitext = (parameters[3] ? parameters[3] + ':' : '')
+					+ (parameters[2] || parameters[1]);
+			if (parameters.i === 'on')
+				wikitext = "''" + wikitext + "''";
+		}
+
+		wikitext = '[[:' + lang + ':' + parameters[1]
+		//
+		+ '|' + wikitext + ']]';
+
+		if (!parameters.p || parameters.p === 'on')
+			wikitext = '&nbsp;(' + wikitext + '&nbsp;';
+		if (!parameters.s || parameters.s === 'on')
+			wikitext = '<small>' + wikitext + '</small>';
+		return ' (' + parameters[1] + ')';
+	}
+
+	function parse_template_Enlink(token) {
+		token.expand = expand_template_Enlink;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	function expand_template_to_display_language(options) {
+		var parameters = this.parameters;
+		return parameters[1];
+	}
+
+	function parse_template_to_display_language(token) {
+		token.expand = expand_template_to_display_language;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	function expand_template_拡張漢字(options) {
 		var parameters = this.parameters;
 		return parameters[2] || parameters[1];
@@ -96,7 +137,19 @@ function module_code(library_namespace) {
 		// 一些會添加 anchors 的特殊模板。
 		Anchors : wiki_API.template_functions.functions_of_all_sites.Anchor,
 
+		Enlink : parse_template_Enlink,
+
+		ARIB外字フォント : parse_template_to_display_language,
+		CP932フォント : parse_template_to_display_language,
+		JIS90フォント : parse_template_to_display_language,
+		JIS2004フォント : parse_template_to_display_language,
+		MacJapanese : parse_template_to_display_language,
+		変体仮名フォント : parse_template_to_display_language,
+		絵文字フォント : parse_template_to_display_language,
+		補助漢字フォント : parse_template_to_display_language,
+		通貨フォント : parse_template_to_display_language,
 		拡張漢字 : parse_template_拡張漢字,
+
 		RFD : parse_template_RFD
 	};
 
