@@ -2725,6 +2725,7 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
+		// @see {{Ordered list}}
 		function parse_list_line(line) {
 			function push_list_item(item, list_prefix, no_parse) {
 				if (!no_parse) {
@@ -2745,8 +2746,8 @@ function module_code(library_namespace) {
 							: 0;
 					if (latest_list.list_type === '#') {
 						item.serial = item.list_index
-								+ (isNaN(item.start_serial) ? 1
-										: item.start_serial);
+						// (isNaN(item.start_serial) ? 1 : item.start_serial)
+						+ 1;
 					}
 					latest_list.push(item);
 				}
