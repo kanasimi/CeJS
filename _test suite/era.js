@@ -4866,25 +4866,16 @@ function affairs() {
 		// 編年法/編年方法。
 		'Year numbering' : '以不重複數字計算年份的方法',
 
-		Minguo : [ {
+		民國 : [ {
 			a : {
 				T : '民國'
 			},
 			R : '民國紀年',
 			href : 'https://zh.wikipedia.org/wiki/民國紀年'
 		}, Year_numbering(-1911) ],
-
-		Dangi : [ {
-			a : {
-				T : '단군기원'
-			},
-			R : '단군기원(檀君紀元) 또는 단기(檀紀)',
-			href : 'https://ko.wikipedia.org/wiki/단군기원'
-		}, Year_numbering(2333) ],
-
 		// TODO: 黃帝紀元應以農曆為主!
 		// 1912年1月1日，中華民國臨時政府成立，臨時大總統孫中山當日就通電：「中華民國改用陽曆，以黃帝紀元四千六百零九年十一月十三日為中華民國元年元旦。」
-		Huangdi : [
+		黃帝 : [
 				{
 					a : {
 						T : '黃帝紀元'
@@ -4894,7 +4885,15 @@ function affairs() {
 					S : 'font-size:.8em;'
 				}, Year_numbering(2698) ],
 
-		Koki : [
+		火空海 : [ {
+			a : {
+				T : '火空海'
+			},
+			R : '藏曆繞迥紀年始於公元1027年，即時輪經傳入西藏的年代，之前的403年使用火空海紀年。',
+			href : 'https://zh.wikipedia.org/wiki/火空海'
+		}, Year_numbering(-623, true) ],
+
+		皇紀 : [
 				{
 					a : {
 						T : '皇紀'
@@ -4924,6 +4923,21 @@ function affairs() {
 					return date_index.join('/');
 
 				} ],
+
+		檀紀 : [ {
+			a : {
+				T : '단군기원'
+			},
+			R : '단군기원(檀君紀元) 또는 단기(檀紀)',
+			href : 'https://ko.wikipedia.org/wiki/단군기원'
+		}, Year_numbering(2333) ],
+		開國 : [ {
+			a : {
+				T : '開國'
+			},
+			R : '朝鮮王朝開國紀年 개국',
+			href : 'https://ko.wikipedia.org/wiki/개국_(조선)'
+		}, Year_numbering(-1391) ],
 
 		Thai_Buddhist : [ {
 			a : {
@@ -4959,14 +4973,6 @@ function affairs() {
 				});
 			return numeral;
 		} ],
-
-		火空海 : [ {
-			a : {
-				T : '火空海'
-			},
-			R : '藏曆繞迥紀年始於公元1027年，即時輪經傳入西藏的年代，之前的403年使用火空海紀年。',
-			href : 'https://zh.wikipedia.org/wiki/火空海'
-		}, Year_numbering(-623, true) ],
 
 		AUC : [ {
 			a : {
