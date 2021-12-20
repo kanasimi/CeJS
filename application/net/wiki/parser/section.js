@@ -1002,9 +1002,6 @@ function module_code(library_namespace) {
 		return section_list;
 	}
 
-	var KEY_page_data = typeof Symbol === 'function' ? Symbol('page data')
-			: 'page data';
-
 	/**
 	 * 為每一個章節(討論串)執行特定作業 for_section(section)
 	 * 
@@ -1107,7 +1104,7 @@ function module_code(library_namespace) {
 				replace_by : replace_section_by,
 				toString : _this.toString
 			});
-			section[KEY_page_data] = _this.page;
+			section[wiki_API.KEY_page_data] = _this.page;
 			all_root_section_list.push(section);
 		}
 
@@ -1465,7 +1462,7 @@ function module_code(library_namespace) {
 
 	function replace_section_by(wikitext, options) {
 		options = library_namespace.setup_options(options);
-		var parsed = this[KEY_page_data].parsed;
+		var parsed = this[wiki_API.KEY_page_data].parsed;
 		// assert: parsed[range[0]] === '\n',
 		// is the tail '\n' of "==title== "
 		var index = this.range[0];
