@@ -192,7 +192,8 @@ function module_code(library_namespace) {
 		};
 
 		this.setup_value('timeout', this.timeout);
-		this.setup_value('user_agent', this.user_agent);
+		this.setup_value('user_agent', this.user_agent
+				|| this.regenerate_user_agent());
 
 		// console.log(this.get_URL_options);
 		this.default_agent = this.setup_agent();
@@ -350,14 +351,8 @@ function module_code(library_namespace) {
 		// 預設自動匯入 .env.arg_hash
 		auto_import_args : true,
 
-		// {String}瀏覽器識別 navigator.userAgent 模擬 Chrome。
-		user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36'
-		// 並且每次更改不同的 user agent。
-		.replace(/( Chrome\/\d+\.\d+\.)(\d+)/,
-		//
-		function(all, main_ver, sub_ver) {
-			return main_ver + (Math.random() * 1e4 | 0);
-		}),
+		default_user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+		regenerate_user_agent : regenerate_user_agent,
 
 		/**
 		 * {Natural|String}timeout for get_URL()
@@ -510,6 +505,28 @@ function module_code(library_namespace) {
 	Object.assign(Work_crawler.prototype, Work_crawler_prototype);
 	// Release memory. 釋放被占用的記憶體。
 	Work_crawler_prototype = null;
+
+	// --------------------------------------------------------------------------------------------
+
+	/**
+	 * 重設瀏覽器識別 navigator.userAgent
+	 * 
+	 * work_crawler.regenerate_user_agent()
+	 * 
+	 * @return {String}瀏覽器識別
+	 */
+	function regenerate_user_agent() {
+		// 模擬 Chrome。
+		this.user_agent = this.default_user_agent
+		// 並且每次更改不同的 user agent。
+		.replace(/( Chrome\/\d+\.\d+\.)(\d+)/,
+		//
+		function(all, main_ver, sub_ver) {
+			return main_ver + (Math.random() * 1e4 | 0);
+		});
+
+		return this.user_agent;
+	}
 
 	// --------------------------------------------------------------------------------------------
 
