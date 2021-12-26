@@ -198,6 +198,7 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.prototype.next = function next(callback_result_relying_on_this) {
 		if (typeof callback_result_relying_on_this === 'function') {
+			// console.trace(Array.prototype.slice.call(arguments, 1));
 			try {
 				callback_result_relying_on_this = callback_result_relying_on_this
 				// this.next(callback, ...callback_arguments);
@@ -860,9 +861,11 @@ function module_code(library_namespace) {
 			// @see https://phabricator.wikimedia.org/T60663
 			// wiki_session.download('File:Example.svg',{width:100});
 
-			if (typeof next[1] === 'string') {
+			// console.trace(next);
+			if (typeof next[1] === 'string' || wiki_API.is_page_data(next[1])) {
 				next[1] = [ next[1] ];
 			} else if (!Array.isArray(next[1])) {
+				// next[3]: callback
 				this.next(next[3], null, new Error('Invalid file_title!'));
 				break;
 			}
@@ -876,6 +879,7 @@ function module_code(library_namespace) {
 			} else {
 				next[2] = library_namespace.new_options(next[2]);
 			}
+
 			// Cannot use function download_next_file() here @ node.js v0.10.x
 			var download_next_file = function(data, error, XMLHttp) {
 				var page_data;
@@ -916,6 +920,7 @@ function module_code(library_namespace) {
 				library_namespace.get_URL_cache(imageinfo.thumburl
 						|| imageinfo.url, download_next_file, next[2]);
 			};
+
 			next[1] = next[1].map(function(page) {
 				// assert: page title starts with "File:"
 				return _this.normalize_title(page.title || page);
@@ -926,6 +931,7 @@ function module_code(library_namespace) {
 				library_namespace
 						.error('wiki_API.prototype.next: Cannot download too many files one time!');
 			}
+
 			// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bimageinfo
 			next[2].imageinfo_options = Object.assign({
 				action : 'query',
@@ -936,6 +942,8 @@ function module_code(library_namespace) {
 				next[2].imageinfo_options.iiurlwidth = next[2].width;
 			if (next[2].height > 0)
 				next[2].imageinfo_options.iiurlheight = next[2].height;
+
+			// console.trace(next[2].imageinfo_options);
 			// page title to raw data URL
 			wiki_API.query(next[2].imageinfo_options, function(data) {
 				var page_hash = Object.create(null);
@@ -3206,7 +3214,7 @@ function module_code(library_namespace) {
 					console.trace('一次取得本 slice 所有頁面內容。'
 							+ [ maybe_nested_thread, session.running,
 									session.actions.length ]);
-				//console.trace(page_options);
+				// console.trace(page_options);
 				this.page(this_slice, main_work, page_options);
 			}).bind(this);
 

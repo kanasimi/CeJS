@@ -63,7 +63,10 @@ function module_code(library_namespace) {
 		if (library_namespace.append_path_separator)
 			return (append_path_separator = library_namespace.append_path_separator)
 					.apply(null, arguments);
-		return directory_path + path_separator + (file_name || '');
+
+		file_name = file_name || file_name === 0 ? String(file_name).replace(
+				/^(\.{0,2}[\\\/])+/, '') : '';
+		return directory_path + path_separator + file_name;
 	};
 
 	// set/get current working directory. 設定/取得目前工作目錄。

@@ -2971,6 +2971,7 @@ function module_code(library_namespace) {
 				// 去掉 "&amp;" 之類。
 				file_name = library_namespace.HTML_to_Unicode(file_name);
 			}
+			file_name = library_namespace.to_file_name(file_name);
 			library_namespace.debug([ {
 				T : [ '自 URL 取得檔名：%1', URL ]
 			}, '\n→ ' + file_name ], 1, 'get_URL_cache_node');
@@ -2984,7 +2985,8 @@ function module_code(library_namespace) {
 		}
 
 		if (options.directory) {
-			file_name = options.directory + file_name;
+			file_name = library_namespace.append_path_separator(
+					options.directory, file_name);
 		}
 
 		library_namespace.debug([
@@ -3091,7 +3093,11 @@ function module_code(library_namespace) {
 							data && JSON.stringify(data).slice(0, 190) ]
 						}, 3, 'get_URL_cache_node');
 					}
-					node_fs.writeFileSync(file_name, data, encoding);
+					try {
+						node_fs.writeFileSync(file_name, data, encoding);
+					} catch (error) {
+						onload(data.toString(), error, XMLHttp);
+					}
 					XMLHttp.file_name = file_name;
 				}
 

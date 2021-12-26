@@ -338,6 +338,8 @@ function module_code(library_namespace) {
 		}
 
 		// library_namespace.simplify_path()
+		if (file_name || file_name === 0)
+			file_name = String(file_name).replace(/^(\.{0,2}[\\\/])+/, '');
 		return file_name ? directory_path + file_name : directory_path;
 	}
 
