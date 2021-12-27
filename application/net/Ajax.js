@@ -637,9 +637,14 @@ function module_code(library_namespace) {
 				var content;
 				// read file contents
 				if (is_nodejs) {
-					// get {Buffer}
-					content = node_fs.readFileSync(value);
-					// When we can not read, it will throw now.
+					try {
+						// get {Buffer}
+						content = node_fs.readFileSync(value);
+					} catch (e) {
+						// When we can not read, it will throw now.
+						// e.g., Error: ENOENT: no such file or directory, open
+						// 'value'
+					}
 				} else {
 					// node.js 之下此方法不能處理 binary data。
 					content = library_namespace
