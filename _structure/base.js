@@ -1473,7 +1473,7 @@ function (globalThis) {
 
 			env.line_separator = node_os.EOL || env.line_separator;
 
-			// free
+			// Release memory. 釋放被占用的記憶體。
 			node_os = null;
 		}
 

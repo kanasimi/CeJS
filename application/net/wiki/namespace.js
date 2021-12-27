@@ -1637,12 +1637,13 @@ function module_code(library_namespace) {
 		});
 	}
 
+	/** @inner */
 	var PATTERN_anchor_of_page_title;
 	try {
 		// Negative lookbehind assertion
 		PATTERN_anchor_of_page_title = new RegExp('(?<!{{)#.*');
 	} catch (e) {
-		// TODO: handle exception
+		// Will use old methos @ normalize_page_name()
 	}
 
 	/**
@@ -1706,12 +1707,17 @@ function module_code(library_namespace) {
 
 		page_name = page_name.replace(/<!--[\s\S]*-->/g, '')
 		// e.g., "Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-1 days +9 hours}}"
-		if (PATTERN_anchor_of_page_title) {
-			page_name = page_name.replace(PATTERN_anchor_of_page_title, '');
-		} else {
-			page_name = page_name.replace(/([^#]*)#.*/, function(all, prefix) {
-				return /{{$/.test(prefix) ? all : prefix;
-			});
+		if (!options.keep_anchor/* .preserve_anchor */) {
+			// Warning: The anchor will be removed!
+			if (PATTERN_anchor_of_page_title) {
+				page_name = page_name.replace(PATTERN_anchor_of_page_title, '');
+			} else {
+				// old method
+				page_name = page_name.replace(/([^#]*)#.*/, function(all,
+						prefix) {
+					return /{{$/.test(prefix) ? all : prefix;
+				});
+			}
 		}
 		// assert: /[#|{}]/.test(page_name)===false
 
@@ -2604,7 +2610,7 @@ function module_code(library_namespace) {
 					+ interwikimap.map(function(interwiki) {
 						return interwiki.prefix;
 					}).join('|') + ')(?::(.*))?$', 'i');
-			// free
+			// Release memory. 釋放被占用的記憶體。
 			// delete configurations.interwikimap;
 		}
 
@@ -2619,7 +2625,7 @@ function module_code(library_namespace) {
 			for ( var lang_code in languagevariants.zh) {
 				site_configurations.lang_fallbacks[lang_code] = languagevariants.zh[lang_code].fallbacks;
 			}
-			// free
+			// Release memory. 釋放被占用的記憶體。
 			// delete configurations.languagevariants;
 		}
 
@@ -2633,7 +2639,7 @@ function module_code(library_namespace) {
 		&& configurations.functionhooks.forEach(function(magic_word) {
 			magic_words_hash[magic_word.toUpperCase()] = false;
 		});
-		// free
+		// Release memory. 釋放被占用的記憶體。
 		// delete configurations.functionhooks;
 
 		configurations.variables
@@ -2647,7 +2653,7 @@ function module_code(library_namespace) {
 			if (typeof magic_word === 'string')
 				magic_words_hash[magic_word.toUpperCase()] = true;
 		});
-		// free
+		// Release memory. 釋放被占用的記憶體。
 		// delete configurations.variables;
 
 		configurations.magicwords
@@ -2666,7 +2672,7 @@ function module_code(library_namespace) {
 				magic_words_hash[magic_word.toUpperCase()] = mapper_to;
 			});
 		});
-		// free
+		// Release memory. 釋放被占用的記憶體。
 		// delete configurations.magicwords;
 
 		// --------------------------------------------------------------------
@@ -2725,7 +2731,7 @@ function module_code(library_namespace) {
 			site_configurations.namespace_pattern = generate_namespace_pattern(
 					namespace_hash, []);
 		}
-		// free
+		// Release memory. 釋放被占用的記憶體。
 		// delete configurations.namespaces;
 		// delete configurations.namespacealiases;
 	}
@@ -2871,7 +2877,7 @@ function module_code(library_namespace) {
 						+ Object.keys(configuration.L10n).length + ' '
 						+ language + ' messages for '
 						+ wiki_API.site_name(session) + '.');
-				// free
+				// Release memory. 釋放被占用的記憶體。
 				// delete configuration.L10n;
 			}
 

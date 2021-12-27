@@ -193,7 +193,7 @@ function module_code(library_namespace) {
 
 		this.setup_value('timeout', this.timeout);
 		this.setup_value('user_agent', this.user_agent
-				|| this.regenerate_user_agent());
+				|| crawler_namespace.regenerate_user_agent(this));
 
 		// console.log(this.get_URL_options);
 		this.default_agent = this.setup_agent();
@@ -268,7 +268,7 @@ function module_code(library_namespace) {
 		}).then(cache_converted_text.bind(this, text_list));
 	}
 
-	// free
+	// Release memory. 釋放被占用的記憶體。
 	function clear_converted_text_cache(options) {
 		if (!this.convert_to_language)
 			return;
@@ -351,8 +351,9 @@ function module_code(library_namespace) {
 		// 預設自動匯入 .env.arg_hash
 		auto_import_args : true,
 
+		// 下載每個作品更換一次 user agent。
+		// regenerate_user_agent : 'work',
 		default_user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
-		regenerate_user_agent : regenerate_user_agent,
 
 		/**
 		 * {Natural|String}timeout for get_URL()
@@ -511,13 +512,13 @@ function module_code(library_namespace) {
 	/**
 	 * 重設瀏覽器識別 navigator.userAgent
 	 * 
-	 * work_crawler.regenerate_user_agent()
+	 * CeL.work_crawler.regenerate_user_agent(crawler)
 	 * 
 	 * @return {String}瀏覽器識別
 	 */
-	function regenerate_user_agent() {
+	function regenerate_user_agent(crawler) {
 		// 模擬 Chrome。
-		this.user_agent = this.default_user_agent
+		crawler.user_agent = crawler.default_user_agent
 		// 並且每次更改不同的 user agent。
 		.replace(/( Chrome\/\d+\.\d+\.)(\d+)/,
 		//
@@ -525,7 +526,7 @@ function module_code(library_namespace) {
 			return main_ver + (Math.random() * 1e4 | 0);
 		});
 
-		return this.user_agent;
+		return crawler.user_agent;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -711,6 +712,7 @@ function module_code(library_namespace) {
 		// @see CeL.application.net.wiki
 		PATTERN_non_CJK : /^[\u0000-\u2E7F]*$/i,
 		get_label : get_label,
+		regenerate_user_agent : regenerate_user_agent,
 		null_XMLHttp : {
 			responseText : ''
 		}

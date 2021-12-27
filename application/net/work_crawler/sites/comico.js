@@ -3,6 +3,8 @@
  * 
  * @fileoverview 本檔案包含了解析並處理、批量下載 韓國 NHN comico Corp. 漫畫 的工具。
  * 
+ * 2021/12/22 改版
+ * 
  * <code>
 
 CeL.comico(configuration, function(crawler) {

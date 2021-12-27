@@ -742,7 +742,7 @@ function module_code(library_namespace) {
 		if (parsed) {
 			introduction_section.page = parsed.page;
 			introduction_section.title = title;
-			// free
+			// Release memory. 釋放被占用的記憶體。
 			parsed = null;
 		}
 		introduction_section.toString = first_section.toString;
@@ -1019,8 +1019,8 @@ function module_code(library_namespace) {
 
 	// TODO: includeing `<h2>...</h2>`, `==<h2>...</h2>==`
 
-
 	parsed = CeL.wiki.parser(page_data);
+
 	parsed.each_section(function(section, section_index) {
 		if (!section.section_title) {
 			// first_section = section;
@@ -1046,6 +1046,9 @@ function module_code(library_namespace) {
 		level_filter : [ 2, 3 ],
 		get_users : true
 	});
+
+	parsed.each_section();
+	parsed.sections.forEach(...);
 
 	</code>
 	 */
@@ -1629,6 +1632,9 @@ function module_code(library_namespace) {
 				console.log(section_title_link.tokens_maybe_handlable);
 				console.trace(section_title_token);
 			} else {
+				library_namespace
+						.warn('若包含的是模板，請檢查是否可於 template_functions 添加此標題中的模板: '
+								+ section_title_token.title);
 				console.trace(section_title_link);
 			}
 		});

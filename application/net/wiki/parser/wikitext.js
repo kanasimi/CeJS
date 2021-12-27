@@ -331,6 +331,10 @@ function module_code(library_namespace) {
 			// Replace all usages of <ce> with <chem> on wiki
 			// https://phabricator.wikimedia.org/T155125
 			+ '|categorytree|ce|chem|charinsert|gallery|graph|hiero|imagemap|indicator|inputbox|nowiki|mapframe|maplink|math|poem|quiz|ref|references|score|section|source|syntaxhighlight|templatedata|templatestyles|timeline'
+
+			// https://www.mediawiki.org/wiki/Extension:DynamicPageList_(Wikimedia)
+			// + '|DynamicPageList'
+
 			// [[w:en:Template:Term]]
 			+ '|li|dt|dd',
 	// MediaWiki 可接受的 HTML void elements 標籤.
@@ -3242,7 +3246,7 @@ function module_code(library_namespace) {
 		wikitext.forEach(parse_preformatted);
 		wikitext = lines_without_style;
 
-		// free
+		// Release memory. 釋放被占用的記憶體。
 		lines_without_style = null;
 
 		if (!initialized_fix) {

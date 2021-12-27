@@ -46,7 +46,7 @@ function module_code(library_namespace) {
 	// 初始化 agent。
 	// create and keep a new agent. 維持一個獨立的 agent。
 	// 以不同 agent 應對不同 host。
-	function setup_agent(URL) {
+	function setup_agent(URL, reset_cookie) {
 		var agent;
 		if (Array.isArray(URL)) {
 			// [ url, post_data, options ]
@@ -61,22 +61,33 @@ function module_code(library_namespace) {
 			agent.keepAlive = true;
 		}
 
-		if (this.get_URL_options.agent === agent)
-			return;
+		var this_agent = this.get_URL_options.agent;
+		// 處理 cookie。
+		if (this_agent && this_agent.last_cookie) {
+			if (reset_cookie) {
+				delete this_agent.last_cookie;
 
-		if (this.get_URL_options.agent
-		// copy cookie @ mid.js
-		&& this.get_URL_options.agent.last_cookie) {
-			// {Array}.last_cookie
-			if (agent.last_cookie) {
-				library_namespace.debug([ 'setup_agent: ', {
-					T : '原先的 agent 已存在 .last_cookie，將覆蓋設定！請回報這個錯誤！'
-				} ]);
-				// console.log(this.get_URL_options.agent.last_cookie);
-				// console.trace(agent.last_cookie);
+			} else if (this_agent === agent) {
+				// return agent;
+
 			} else {
+				// assert: !!this_agent.last_cookie === true
+
+				// copy cookie @ mid.js
+
+				// {Array}.last_cookie
+				if (agent.last_cookie) {
+					library_namespace.debug([ 'setup_agent: ', {
+						T : '原先的 agent 已存在 .last_cookie，將覆蓋設定！請回報這個錯誤！'
+					} ]);
+					// console.log(this_agent.last_cookie);
+					// console.trace(agent.last_cookie);
+
+					// TODO: 合併 cookie。
+				}
+
 				// copy cookies
-				agent.last_cookie = this.get_URL_options.agent.last_cookie;
+				agent.last_cookie = this_agent.last_cookie;
 			}
 		}
 

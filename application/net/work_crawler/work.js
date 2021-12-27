@@ -398,7 +398,12 @@ function module_code(library_namespace) {
 		}
 
 		// console.log(search_url_data);
-		this.setup_agent(search_URL_string);
+		var regenerate_user_agent = this.regenerate_user_agent === true
+				|| this.regenerate_user_agent === 'work';
+		this.setup_agent(search_URL_string, regenerate_user_agent);
+		if (regenerate_user_agent) {
+			crawler_namespace.regenerate_user_agent(this);
+		}
 
 		this.get_URL(search_URL_string, function(XMLHttp) {
 			_this.setup_agent();

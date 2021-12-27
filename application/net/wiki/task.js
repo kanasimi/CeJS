@@ -866,7 +866,7 @@ function module_code(library_namespace) {
 				next[1] = [ next[1] ];
 			} else if (!Array.isArray(next[1])) {
 				// next[3]: callback
-				this.next(next[3], null, new Error('Invalid file_title!'));
+				this.next(next[3], next[1], new Error('Invalid file_title!'));
 				break;
 			}
 

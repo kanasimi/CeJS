@@ -917,7 +917,7 @@ function module_code(library_namespace) {
 				if (matched) {
 					matched[1] = wiki_API.to_namespace(matched[1], _options);
 					category_token = matched[1] + matched[2];
-					// free
+					// Release memory. 釋放被占用的記憶體。
 					matched = null;
 				} else {
 					category_token = wiki_API.to_namespace(category_token,
