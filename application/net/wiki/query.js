@@ -374,7 +374,7 @@ function module_code(library_namespace) {
 		// console.log('-'.repeat(79));
 		// console.log(options);
 		var get_URL_options = Object.assign(
-		// 避免污染，重新造一個 options。不汙染 wiki_API_query.get_URL_options
+		// 防止汙染，重新造一個 options。不汙染 wiki_API_query.get_URL_options
 		Object.clone(wiki_API_query.get_URL_options), options.get_URL_options);
 
 		if (session) {

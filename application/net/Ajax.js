@@ -2067,7 +2067,7 @@ function module_code(library_namespace) {
 						}
 					}
 				} else if (data.length === 0) {
-					// 若是容許空內容，應該特別指定options.allow_empty。
+					// 若是容許空內容，應該特別指定 options.allow_empty。
 					if (!options.allow_empty) {
 						_onfail('EMPTY');
 						return;
@@ -2994,6 +2994,18 @@ function module_code(library_namespace) {
 					options.directory, file_name);
 		}
 
+		var file_status = node_fs.statSync(file_name);
+		if (!options.get_contents && options.web_resource_date && file_status) {
+			// download newer only
+			if ((file_status.mtimeMs || file_status.mtime)
+			//
+			- Date.parse(options.web_resource_date) > -1) {
+				// File on web is old.
+				onload();
+				return;
+			}
+		}
+
 		library_namespace.debug([
 				{
 					T : [ '下載 %1', URL ]
@@ -3007,9 +3019,21 @@ function module_code(library_namespace) {
 		node_fs.readFile(file_name, encoding,
 		//
 		function(error, data) {
+			// options.force_download
 			if (!options.reget) {
-				if (!error
-				// 若是容許空內容，應該特別指定options.allow_empty。
+				if (!error && options.web_resource_date && file_status) {
+					// download newer only
+					if ((file_status.mtimeMs || file_status.mtime)
+					//
+					- Date.parse(options.web_resource_date) > -1) {
+						// File on web is old.
+						onload(data);
+						return;
+					}
+				}
+
+				if (!error && !options.preserve_newer
+				// 若是容許空內容，應該特別指定 options.allow_empty。
 				&& (data || options.allow_empty)) {
 					library_namespace.debug({
 						T : 'Using cached data.'
@@ -3079,6 +3103,18 @@ function module_code(library_namespace) {
 					}
 				}
 
+				var URL_date = XMLHttp.headers['date'];
+				if (URL_date && options.preserve_newer && file_status) {
+					// data.length === stat.size
+					if ((file_status.mtimeMs || file_status.mtime)
+					//
+					- Date.parse(URL_date) > -1) {
+						// Local file is newer than file on web.
+						onload(data.toString(), undefined, XMLHttp);
+						return;
+					}
+				}
+
 				/**
 				 * 寫入cache。
 				 * 
@@ -3098,18 +3134,19 @@ function module_code(library_namespace) {
 							data && JSON.stringify(data).slice(0, 190) ]
 						}, 3, 'get_URL_cache_node');
 					}
+					XMLHttp.file_name = file_name;
 					try {
 						node_fs.writeFileSync(file_name, data, encoding);
 					} catch (error) {
 						onload(data.toString(), error, XMLHttp);
+						return;
 					}
-					XMLHttp.file_name = file_name;
 				}
 
 				// set file modify date
 				// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Date
 				// https://tools.ietf.org/html/rfc7231#section-7.1.1.2
-				if (XMLHttp.headers['date']) {
+				if (URL_date) {
 					try {
 						// The "Date" header field represents the date
 						// and time at which the message was originated
@@ -3118,7 +3155,7 @@ function module_code(library_namespace) {
 						// atime: the last time this file was accessed
 						node_fs.utimesSync(file_name, new Date,
 						// mtime: the last time this file was modified
-						XMLHttp.headers['date']);
+						URL_date);
 					} catch (e) {
 						// TODO: handle exception
 					}

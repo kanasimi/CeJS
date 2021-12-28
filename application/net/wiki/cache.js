@@ -679,7 +679,7 @@ function module_code(library_namespace) {
 				to_get_data = function(title, callback) {
 					library_namespace.log('wiki_API_cache: Get content of '
 							+ wiki_API.title_link_of(title));
-					// 避免汙染。
+					// 防止汙染。
 					var _options = library_namespace.new_options(_this,
 							operation);
 					// 包含 .list 時，wiki_API.page() 不會自動添加 .prop。

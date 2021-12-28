@@ -916,6 +916,10 @@ function module_code(library_namespace) {
 					return;
 				}
 
+				// download newer only
+				// console.trace(imageinfo);
+				next[2].web_resource_date = imageinfo.timestamp;
+
 				// console.trace(page_data);
 				library_namespace.get_URL_cache(imageinfo.thumburl
 						|| imageinfo.url, download_next_file, next[2]);
@@ -925,7 +929,7 @@ function module_code(library_namespace) {
 				// assert: page title starts with "File:"
 				return _this.normalize_title(page.title || page);
 			}).filter(function(page_title) {
-				return page_title;
+				return !!page_title;
 			}).unique();
 			if (next[1].length > 50) {
 				library_namespace
@@ -936,7 +940,7 @@ function module_code(library_namespace) {
 			next[2].imageinfo_options = Object.assign({
 				action : 'query',
 				prop : 'imageinfo',
-				iiprop : 'url|size|mime'
+				iiprop : 'url|size|mime|timestamp'
 			}, next[2].imageinfo_options);
 			if (next[2].width > 0)
 				next[2].imageinfo_options.iiurlwidth = next[2].width;
@@ -965,6 +969,7 @@ function module_code(library_namespace) {
 				for ( var page_title in page_hash) {
 					page_list.push(page_hash[page_title]);
 				}
+
 				next[1] = page_list;
 				next[2].index = 0;
 				next[1].error_titles = [];
