@@ -3589,25 +3589,6 @@ function module_code(library_namespace) {
 		aliases_of_page : aliases_of_page,
 		is_template : is_template,
 
-		// @see function get_continue(), get_list()
-		show_next : typeof JSON === 'object' && JSON.stringify
-		//
-		? function show_next() {
-			return this.next_mark && JSON.stringify(this.next_mark);
-		} : function old_show_next() {
-			if (!this.next_mark)
-				return;
-			var line = [], value;
-			for ( var name in this.next_mark) {
-				value = this.next_mark[name];
-				line.push(name + ':' + (typeof value === 'string'
-				//
-				? '"' + value.replace(/"/g, '\\"') + '"' : value));
-			}
-			if (line.length > 0)
-				return '{' + line.join(',') + '}';
-		},
-
 		get_storage : wiki_API.has_storage ? get_storage
 				: library_namespace.null_function,
 		set_storage : wiki_API.has_storage ? set_storage

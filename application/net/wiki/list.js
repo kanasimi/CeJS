@@ -257,59 +257,40 @@ function module_code(library_namespace) {
 			action = [ , title ];
 		}
 
-		if (options.next_mark) {
-			// e.g., called by function wiki_API_list()
-			// console.log([ type, title, options.next_mark ]);
-		} else {
+		var continue_from = prefix + 'continue';
+		var session = wiki_API.session_of_options(options);
+		// 注意: 這裡會改變 options！
+		if (!options.next_mark) {
+			library_namespace.debug('未傳入後續檢索用索引值。', 4, 'get_list');
 			// initialization
 			options.next_mark = Object.create(null);
-		}
-
-		var continue_from = prefix + 'continue',
-		// {wiki_API}options.continue_session: 藉以取得後續檢索用索引值之 {wiki_API}。
-		// 若未設定 .next_mark，才會自 options.get_continue 取得後續檢索用索引值。
-		continue_session = options.continue_session;
-		if (continue_session) {
-			if (continue_session.constructor === wiki_API) {
-				library_namespace.debug(
-						'直接傳入了 {wiki_API}；可延續使用上次的後續檢索用索引值，避免重複 loading page。',
-						4, 'get_list');
-				// usage:
-				// options: { continue_session : wiki_API instance ,
-				// get_continue : log_to }
-				// 注意: 這裡會改變 options！
-				// assert: {Object}continue_session.next_mark
-				if (continue_from in options.next_mark) {
-					// {String}continue_session.next_mark[continue_from]:
-					// 後續檢索用索引值。
-					options[continue_from] = options.next_mark[continue_from];
-					// 經由,經過,通過來源
-					library_namespace.debug('continue from ['
-							+ options[continue_from] + '] via options', 1,
-							'get_list');
-					// 刪掉標記，避免無窮迴圈。
-					delete options.get_continue;
-				} else if (false && (continue_from in continue_session.next_mark)) {
-					// {String}continue_session.next_mark[continue_from]:
-					// 後續檢索用索引值。
-					options[continue_from] = continue_session.next_mark[continue_from];
-					// 經由,經過,通過來源
-					library_namespace.debug('continue from ['
-							+ options[continue_from] + '] via {wiki_API}', 1,
-							'get_list');
-					// 刪掉標記，避免無窮迴圈。
-					delete options.get_continue;
-				} else {
-					// 設定好 options.get_continue，以進一步從 page 取得後續檢索用索引值。
-					if (typeof options.get_continue === 'string')
-						// 採用 continue_session 之 domain。
-						options.get_continue = [ continue_session.API_URL,
-								options.get_continue ];
-				}
-			} else {
-				library_namespace.debug('傳入的不是 {wiki_API}。 ', 4, 'get_list');
-				continue_session = undefined;
+		} else {
+			// assert: library_namespace.is_Object(options.next_mark)
+			// e.g., called by function wiki_API_list()
+			// console.log([ type, title, options.next_mark ]);
+			library_namespace
+					.debug(
+							'直接傳入了 options.next_mark；可延續使用上次的後續檢索用索引值，避免重複 loading page。',
+							4, 'get_list');
+			// usage:
+			// options: { next_mark : {} , get_continue : log_to }
+			if (continue_from in options.next_mark) {
+				// {String}options.next_mark[continue_from]:
+				// 後續檢索用索引值。後続の索引。
+				options[continue_from] = options.next_mark[continue_from];
+				// 經由,經過,通過來源
+				library_namespace.debug('continue from ['
+						+ options[continue_from] + '] via options', 1,
+						'get_list');
+				// 刪掉標記，避免無窮迴圈。
+				delete options.get_continue;
 			}
+		}
+		// 若未設定 .next_mark，才會自 options.get_continue 取得後續檢索用索引值。
+		if (typeof options.get_continue === 'string') {
+			// 設定好 options.get_continue，以進一步從 page 取得後續檢索用索引值。
+			// 採用 session 之 domain。
+			options.get_continue = [ session.API_URL, options.get_continue ];
 		}
 
 		// options.get_continue: 用以取用後續檢索用索引值之 title。
@@ -320,11 +301,8 @@ function module_code(library_namespace) {
 			//
 			? options.get_continue : [ action[0], options.get_continue ], {
 				type : type,
-				// [KEY_SESSION]
-				session : continue_session || options[KEY_SESSION],
-				continue_key : (continue_session || options[KEY_SESSION])
-				//
-				.continue_key,
+				session : session,
+				continue_key : session.continue_key,
 				callback : function(continuation_data) {
 					if (continuation_data = continuation_data[continue_from]) {
 						library_namespace.info('get_list: continue from ['
@@ -336,15 +314,7 @@ function module_code(library_namespace) {
 						options.next_mark
 						//
 						[continue_from] = continuation_data;
-						if (true) {
-							// console.trace(options.next_mark);
-						} else if (continue_session) {
-							continue_session.next_mark
-							//
-							[continue_from] = continuation_data;
-						} else {
-							options[continue_from] = continuation_data;
-						}
+						// console.trace(options.next_mark);
 						get_list(type, title, callback, options);
 
 					} else {
@@ -369,14 +339,16 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------
 
-		// if (options.no_post_data)
-
 		// 處理輸入過長的列表。
-		if (Array.isArray(action[1])
-		// TODO: using POST data
-		&& encodeURIComponent(action[1].map(function(page_data) {
+		if (Array.isArray(action[1]) && (options.no_post_data
+		//
+		? encodeURIComponent(action[1].map(function(page_data) {
 			return wiki_API.title_of(page_data);
-		}).join('|')).length > get_list.slice_chars) {
+		}).join('|')).length > get_list.slice_chars
+		//
+		: action[1].length >
+		//
+		wiki_API.max_slice_size(session, options, action[1]))) {
 			options.next_title_index = 0;
 			options.multi = true;
 			var get_next_batch = function(pages, error) {
@@ -403,19 +375,28 @@ function module_code(library_namespace) {
 				}
 
 				var slice_chars = 0;
-				do {
-					slice_chars += encodeURIComponent(wiki_API
-							.title_of(action[1][options.next_title_index++])
-							+ '|').length;
-					if (slice_chars > get_list.slice_chars) {
-						options.next_title_index--;
-						if (latest_batch_title_index === options.next_title_index) {
-							library_namespace.error('第一個元素的長度過長!');
-							options.next_title_index++;
+				if (options.no_post_data) {
+					do {
+						slice_chars += encodeURIComponent(wiki_API
+								.title_of(action[1][options.next_title_index++])
+								+ '|').length;
+						if (slice_chars > get_list.slice_chars) {
+							options.next_title_index--;
+							if (latest_batch_title_index === options.next_title_index) {
+								library_namespace.error('第一個元素的長度過長!');
+								options.next_title_index++;
+							}
+							break;
 						}
-						break;
-					}
-				} while (options.next_title_index < action[1].length);
+					} while (options.next_title_index < action[1].length);
+				} else {
+					options.next_title_index += wiki_API.max_slice_size(
+							session, options);
+					if (options.next_title_index > action[1].length)
+						options.next_title_index = action[1].length;
+				}
+
+				// TODO: use wiki_API.estimated_message()
 				library_namespace.log_temporary('get_list: Get ' + type + ' '
 						+ options.next_title_index + '/' + action[1].length);
 				get_list(type, [
@@ -531,19 +512,8 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/API:Query#Backwards_compatibility_of_continue
 			// {Object}next_index: 後續檢索用索引值。
 			next_index = data && (data['continue'] || data['query-continue']);
-			if (!continue_session) {
-				continue_session = options[KEY_SESSION];
-				// assert: continue_session &&
-				// library_namespace.is_Object(continue_session.next_mark)
-			}
 			if (library_namespace.is_Object(next_index)) {
 				pages.next_index = next_index;
-				library_namespace.debug(
-				//
-				'因為 continue_session 可能與作業中之 wiki_API instance 不同，'
-				//
-				+ '因此需要在本函數 function get_list() 中設定好。', 4, 'get_list');
-				// console.log(continue_session);
 
 				if ('query-continue' in data) {
 					// style of 2014 CE. 例如:
@@ -563,28 +533,6 @@ function module_code(library_namespace) {
 				library_namespace.debug('next index of ' + type + ': '
 						+ JSON.stringify(options.next_mark), 2, 'get_list');
 
-				if (false && continue_session) {
-					// console.log(continue_session.next_mark);
-					// console.log(next_index);
-					// console.log(continue_session);
-					if ('query-continue' in data) {
-						// style of 2014 CE. 例如:
-						// {backlinks:{blcontinue:'[0|12]'}}
-						for ( var type_index in next_index) {
-							Object.assign(continue_session.next_mark,
-									next_index[type_index]);
-						}
-					} else {
-						// 2021 CE. e.g.,
-						// {continue: { blcontinue: '0|123', continue: '-||' }}
-						Object.assign(options.next_mark, next_index);
-						// options.next_mark = next_index;
-						Object.assign(continue_session.next_mark, next_index);
-					}
-					library_namespace.debug('next index of ' + type + ': '
-							+ continue_session.show_next());
-				}
-
 				if (library_namespace.is_debug(2)
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value) {
@@ -603,7 +551,7 @@ function module_code(library_namespace) {
 
 			} else if (library_namespace.is_Object(data)
 			// ↑ 在 503 的時候 data 可能是字串。
-			&& ('batchcomplete' in data) && continue_session) {
+			&& ('batchcomplete' in data)) {
 				// ↑ check "batchcomplete"
 				var keyword_continue = get_list.type[type];
 				if (keyword_continue) {
@@ -617,14 +565,6 @@ function module_code(library_namespace) {
 								'get_list');
 						// needless.
 						delete options.next_mark[keyword_continue];
-					}
-					if (false
-					//
-					&& (keyword_continue in continue_session.next_mark)) {
-						library_namespace.debug('去除已經不需要的檢索用索引值。', 3,
-								'get_list');
-						// needless.
-						delete continue_session.next_mark[keyword_continue];
 					}
 				}
 			}
@@ -1127,37 +1067,12 @@ function module_code(library_namespace) {
 		if (!options.limit)
 			options.limit = 'max';
 
-		options.continue_session = session;
-
-		// needless. and untested.
-		if (false && Array.isArray(target)
-		//
-		&& target.length > wiki_API.max_slice_size(session, options, target)) {
-			target = target.clone();
-			target.total_length = target.length;
-			options[KEY_page_list] = [];
-			var process_next_slice = function() {
-				if (target.length === 0) {
-					callback(options[KEY_page_list], target, options);
-					return;
-				}
-
-				var this_slice = target.splice(0, wiki_API.max_slice_size(
-						session, options, target));
-				library_namespace.info('wiki_API_list: process target '
-						+ options[KEY_page_list].length + '–'
-						+ (options[KEY_page_list].length + this_slice.length)
-						+ '/' + target.total_length);
-				wiki_API_list(this_slice, process_next_slice, options);
-			};
-			process_next_slice();
-			return;
-		}
-
 		if (!options.next_mark) {
 			// initialization
 			options.next_mark = Object.create(null);
 		}
+
+		// 對於太大的 {Array}target，會在 get_list() 中自行處理。
 
 		session[options.type](target,
 		// 注意: arguments 與 get_list() 之 callback 連動。
@@ -1596,7 +1511,7 @@ function module_code(library_namespace) {
 
 				if (category_filter && !category_filter(page_data)) {
 					// 直接除名。
-					library_namespace.debug('Skip non eligibled category:'
+					library_namespace.debug('Skip non-eligibled category:'
 							+ page_name, 1, 'category_tree');
 					return false;
 				}

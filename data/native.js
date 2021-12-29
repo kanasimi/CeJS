@@ -2565,13 +2565,20 @@ function module_code(library_namespace) {
 	 */
 	function append_to_Array(list, index) {
 		if (Array.isArray(list) && (index ? 0 < (index = parseInt(index))
-		//
-		&& index < list.length : list.length)) {
+		// TODO: for index < 0
+		&& index < list.length : list.length > 0)) {
+			if (index > 0) {
+				list = Array.prototype.slice.call(list, index);
+			}
 			// 警告: 當 list 太大時可能產生 RangeError: Maximum call stack size exceeded
-			Array.prototype.push.apply(this, index ? Array.prototype.slice
-					.call(list, index) : list);
-			// this = this.concat(list);
-			// this = Array.prototype.concat.apply(this, arguments);
+			try {
+				Array.prototype.push.apply(this, list);
+			} catch (e) {
+				while (index < list.length)
+					Array.prototype.push.call(this, list[index++]);
+			}
+			// return this.concat(list);
+			// return Array.prototype.concat.apply(this, arguments);
 		}
 
 		return this;

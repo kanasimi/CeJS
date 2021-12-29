@@ -858,134 +858,6 @@ function module_code(library_namespace) {
 			wiki_API.download.apply(this, next.slice(1));
 			break;
 
-			// Download file to local path.
-			// TODO: wiki_session.download('Category:');
-
-			// wiki_session.download(file_title, local_path || options,
-			// callback);
-
-			// Download non-vector version of .svg
-			// @see https://phabricator.wikimedia.org/T60663
-			// wiki_session.download('File:Example.svg',{width:100});
-
-			// console.trace(next);
-			if (typeof next[1] === 'string' || wiki_API.is_page_data(next[1])) {
-				next[1] = [ next[1] ];
-			} else if (!Array.isArray(next[1])) {
-				// next[3]: callback
-				this.next(next[3], next[1], new Error('Invalid file_title!'));
-				break;
-			}
-
-			if (typeof next[2] === 'string') {
-				next[2] = next[1].length > 1 ? {
-					directory : next[2]
-				} : {
-					file_name : next[2]
-				};
-			} else {
-				next[2] = library_namespace.new_options(next[2]);
-			}
-
-			// Cannot use function download_next_file() here @ node.js v0.10.x
-			var download_next_file = function(data, error, XMLHttp) {
-				var page_data;
-				if (next[2].index > 0
-						&& (page_data = next[1][next[2].index - 1])) {
-					// cache file name really writed to
-					// @see function get_URL_cache_node()
-					if (XMLHttp && XMLHttp.file_name) {
-						page_data.file_name = XMLHttp.file_name;
-					}
-					if (error) {
-						page_data.error = error;
-						next[1].error_titles.push(page_data.title);
-						library_namespace.error('Cannot download '
-								+ page_data.title + ': ' + error);
-					}
-				}
-
-				if (next[2].index >= next[1].length) {
-					_this.next(next[3], next[1],
-							next[1].error_titles.length > 0
-									&& next[1].error_titles);
-					return;
-				}
-
-				page_data = next[1][next[2].index++];
-				// assert: !!page_data === true
-				var imageinfo = page_data.imageinfo && page_data.imageinfo[0];
-				if (!imageinfo) {
-					next[1].error_titles.push(page_data.title);
-					library_namespace.error('Cannot download '
-							+ page_data.title);
-					download_next_file();
-					return;
-				}
-
-				// download newer only
-				// console.trace(imageinfo);
-				next[2].web_resource_date = imageinfo.timestamp;
-
-				// console.trace(page_data);
-				library_namespace.get_URL_cache(imageinfo.thumburl
-						|| imageinfo.url, download_next_file, next[2]);
-			};
-
-			next[1] = next[1].map(function(page) {
-				// assert: page title starts with "File:"
-				return _this.normalize_title(page.title || page);
-			}).filter(function(page_title) {
-				return !!page_title;
-			}).unique();
-			if (next[1].length > 50) {
-				library_namespace
-						.error('wiki_API.prototype.next: Cannot download too many files one time!');
-			}
-
-			// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bimageinfo
-			next[2].imageinfo_options = Object.assign({
-				action : 'query',
-				prop : 'imageinfo',
-				iiprop : 'url|size|mime|timestamp'
-			}, next[2].imageinfo_options);
-			if (next[2].width > 0)
-				next[2].imageinfo_options.iiurlwidth = next[2].width;
-			if (next[2].height > 0)
-				next[2].imageinfo_options.iiurlheight = next[2].height;
-
-			// console.trace(next[2].imageinfo_options);
-			// page title to raw data URL
-			wiki_API.query(next[2].imageinfo_options, function(data) {
-				var page_hash = Object.create(null);
-				// console.trace(data.query.pages);
-				for ( var pageid in data.query.pages) {
-					var page_data = data.query.pages[pageid];
-					page_hash[page_data.title] = page_data;
-				}
-				var page_list = [];
-				next[1].forEach(function(page_title) {
-					if (page_hash[page_title]) {
-						page_list.push(page_hash[page_title]);
-						delete page_hash[page_title];
-					} else {
-						// File name alterated?
-					}
-				});
-				// 把剩下還沒處理的全放進 page_list。
-				for ( var page_title in page_hash) {
-					page_list.push(page_hash[page_title]);
-				}
-
-				next[1] = page_list;
-				next[2].index = 0;
-				next[1].error_titles = [];
-				download_next_file();
-			}, {
-				titles : next[1].join('|')
-			}, add_session_to_options(this));
-			break;
-
 		// ----------------------------------------------------------------------------------------
 
 		case 'check':
@@ -2216,14 +2088,17 @@ function module_code(library_namespace) {
 		// slow queries: 500; fast queries: 5000
 		// The limits for slow queries also apply to multivalue parameters.
 		? 500 : 50);
+
 		if (config && (config.slice | 0) >= 1) {
 			max_size = Math.min(config.slice | 0, max_size);
 		}
+
 		// 自動判別最大可用 index，預防 "414 Request-URI Too Long"。
 		// 因為 8000/500-3 = 13 > 最長 page id，因此即使 500頁也不會超過。
 		// 為提高效率，不作 check。
-		if (this_slice && !config.is_id)
+		if (this_slice && (!config || !config.is_id))
 			max_size = check_max_length(this_slice, max_size);
+
 		return max_size;
 	}
 
@@ -2593,14 +2468,12 @@ function module_code(library_namespace) {
 
 			// 傳入標題列表，則由程式自行控制，毋須設定後續檢索用索引值。
 			if (!messages.input_title_list
-					// config.continue_session:
-					// 後續檢索用索引值存儲所在的 {wiki_API}，將會以此 instance 之值寫入 log。
-					&& (pages = 'continue_session' in config ? config.continue_session
-							: session)
-					// pages: 後續檢索用索引值之暫存值。
-					&& (pages = pages.show_next())) {
-				// 當有 .continue_session 時，其實用不到 log page 之 continue_key。
-				if (!config.continue_session && !session
+			// 後續檢索用索引值存儲所在的 options.next_mark，將會以此值寫入 log。
+			&& (pages = config.next_mark)
+			// pages: 後續檢索用索引值之暫存值。
+			&& (pages = JSON.stringify(pages))) {
+				// 當有 .next_mark 時，其實用不到 log page 之 continue_key。
+				if (!session
 				// 忽略表示完結的紀錄，避免每個工作階段都顯示相同訊息。
 				|| pages !== '{}'
 				// e.g., 後続の索引: {"continue":"-||"}
@@ -3688,6 +3561,8 @@ function module_code(library_namespace) {
 
 	// @inner
 	library_namespace.set_method(wiki_API, {
+		max_slice_size : max_slice_size,
+
 		BLANK_TOKEN : BLANK_TOKEN
 	});
 
@@ -3695,8 +3570,6 @@ function module_code(library_namespace) {
 
 	// @static
 	Object.assign(wiki_API, {
-		max_slice_size : max_slice_size,
-
 		estimated_message : estimated_message,
 
 		PATTERN_BOT_NAME : PATTERN_BOT_NAME
