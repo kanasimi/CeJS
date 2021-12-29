@@ -257,6 +257,14 @@ function module_code(library_namespace) {
 			action = [ , title ];
 		}
 
+		if (options.next_mark) {
+			// e.g., called by function wiki_API_list()
+			// console.log([ type, title, options.next_mark ]);
+		} else {
+			// initialization
+			options.next_mark = Object.create(null);
+		}
+
 		var continue_from = prefix + 'continue',
 		// {wiki_API}options.continue_session: 藉以取得後續檢索用索引值之 {wiki_API}。
 		// 若未設定 .next_mark，才會自 options.get_continue 取得後續檢索用索引值。
@@ -271,7 +279,17 @@ function module_code(library_namespace) {
 				// get_continue : log_to }
 				// 注意: 這裡會改變 options！
 				// assert: {Object}continue_session.next_mark
-				if (continue_from in continue_session.next_mark) {
+				if (continue_from in options.next_mark) {
+					// {String}continue_session.next_mark[continue_from]:
+					// 後續檢索用索引值。
+					options[continue_from] = options.next_mark[continue_from];
+					// 經由,經過,通過來源
+					library_namespace.debug('continue from ['
+							+ options[continue_from] + '] via options', 1,
+							'get_list');
+					// 刪掉標記，避免無窮迴圈。
+					delete options.get_continue;
+				} else if (false && (continue_from in continue_session.next_mark)) {
 					// {String}continue_session.next_mark[continue_from]:
 					// 後續檢索用索引值。
 					options[continue_from] = continue_session.next_mark[continue_from];
@@ -315,7 +333,12 @@ function module_code(library_namespace) {
 						// 刪掉標記，避免無窮迴圈。
 						delete options.get_continue;
 						// 設定/紀錄後續檢索用索引值，避免無窮迴圈。
-						if (continue_session) {
+						options.next_mark
+						//
+						[continue_from] = continuation_data;
+						if (true) {
+							// console.trace(options.next_mark);
+						} else if (continue_session) {
 							continue_session.next_mark
 							//
 							[continue_from] = continuation_data;
@@ -345,6 +368,8 @@ function module_code(library_namespace) {
 		}
 
 		// ------------------------------------------------
+
+		// if (options.no_post_data)
 
 		// 處理輸入過長的列表。
 		if (Array.isArray(action[1])
@@ -479,6 +504,12 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// console.log(action);
+		var post_data;
+		if (!options.no_post_data) {
+			post_data = action[1];
+			action[1] = undefined;
+		}
 		wiki_API.query(action,
 		// treat as {Function}callback or {Object}wiki_API.work config.
 		function(data, error) {
@@ -513,24 +544,47 @@ function module_code(library_namespace) {
 				//
 				+ '因此需要在本函數 function get_list() 中設定好。', 4, 'get_list');
 				// console.log(continue_session);
-				if (continue_session) {
+
+				if ('query-continue' in data) {
+					// style of 2014 CE. 例如:
+					// {backlinks:{blcontinue:'[0|12]'}}
+					for ( var type_index in next_index) {
+						Object
+								.assign(options.next_mark,
+										next_index[type_index]);
+					}
+				} else {
+					// 2021 CE. e.g.,
+					// {continue: { blcontinue: '0|123', continue: '-||' }}
+					Object.assign(options.next_mark, next_index);
+					// 因為新的 options.next_mark 無法傳遞到 caller，因此不可使用：
+					// options.next_mark = next_index;
+				}
+				library_namespace.debug('next index of ' + type + ': '
+						+ JSON.stringify(options.next_mark), 2, 'get_list');
+
+				if (false && continue_session) {
 					// console.log(continue_session.next_mark);
 					// console.log(next_index);
 					// console.log(continue_session);
 					if ('query-continue' in data) {
 						// style of 2014 CE. 例如:
 						// {backlinks:{blcontinue:'[0|12]'}}
-						for ( var type_index in next_index)
+						for ( var type_index in next_index) {
 							Object.assign(continue_session.next_mark,
 									next_index[type_index]);
+						}
 					} else {
-						// nowadays. e.g.,
+						// 2021 CE. e.g.,
 						// {continue: { blcontinue: '0|123', continue: '-||' }}
+						Object.assign(options.next_mark, next_index);
+						// options.next_mark = next_index;
 						Object.assign(continue_session.next_mark, next_index);
 					}
 					library_namespace.debug('next index of ' + type + ': '
 							+ continue_session.show_next());
 				}
+
 				if (library_namespace.is_debug(2)
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value) {
@@ -558,7 +612,15 @@ function module_code(library_namespace) {
 					}
 					// e.g., "cmcontinue"
 					keyword_continue += 'continue';
-					if (keyword_continue in continue_session.next_mark) {
+					if (keyword_continue in options.next_mark) {
+						library_namespace.debug('去除已經不需要的檢索用索引值。', 3,
+								'get_list');
+						// needless.
+						delete options.next_mark[keyword_continue];
+					}
+					if (false
+					//
+					&& (keyword_continue in continue_session.next_mark)) {
 						library_namespace.debug('去除已經不需要的檢索用索引值。', 3,
 								'get_list');
 						// needless.
@@ -744,7 +806,7 @@ function module_code(library_namespace) {
 			pages.titles = title;
 			run_for_each();
 
-		}, null, options);
+		}, post_data, options);
 	}
 
 	get_list.slice_chars = 7800;
@@ -903,6 +965,9 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/wiki/API:Imageusage
 		imageusage : 'iu',
 
+		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bimageinfo
+		imageinfo : [ 'ii', 'prop', title_to_plural ],
+
 		// 列出在指定分類中的所有頁面。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bcategorymembers
 		// @see [[mw:Help:Tracking categories|追蹤分類]]
@@ -1030,6 +1095,9 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	var KEY_page_list = typeof Symbol === 'function' ? Symbol('page list')
+			: 'page list';
+
 	/**
 	 * 取得完整 list 後才作業。
 	 * 
@@ -1044,10 +1112,11 @@ function module_code(library_namespace) {
 		// 前置處理。
 		options = library_namespace.new_options(options);
 
+		var session = wiki_API.session_of_options(options);
 		if (!options.initialized) {
 			// console.trace(options);
-			if (!options[KEY_SESSION]) {
-				options[KEY_SESSION] = new wiki_API;
+			if (!session) {
+				session = new wiki_API;
 			}
 			if (!options.type) {
 				options.type = wiki_API_list.default_type;
@@ -1058,11 +1127,42 @@ function module_code(library_namespace) {
 		if (!options.limit)
 			options.limit = 'max';
 
-		options.continue_session = options[KEY_SESSION];
+		options.continue_session = session;
 
-		options[KEY_SESSION][options.type](target,
+		// needless. and untested.
+		if (false && Array.isArray(target)
+		//
+		&& target.length > wiki_API.max_slice_size(session, options, target)) {
+			target = target.clone();
+			target.total_length = target.length;
+			options[KEY_page_list] = [];
+			var process_next_slice = function() {
+				if (target.length === 0) {
+					callback(options[KEY_page_list], target, options);
+					return;
+				}
+
+				var this_slice = target.splice(0, wiki_API.max_slice_size(
+						session, options, target));
+				library_namespace.info('wiki_API_list: process target '
+						+ options[KEY_page_list].length + '–'
+						+ (options[KEY_page_list].length + this_slice.length)
+						+ '/' + target.total_length);
+				wiki_API_list(this_slice, process_next_slice, options);
+			};
+			process_next_slice();
+			return;
+		}
+
+		if (!options.next_mark) {
+			// initialization
+			options.next_mark = Object.create(null);
+		}
+
+		session[options.type](target,
 		// 注意: arguments 與 get_list() 之 callback 連動。
 		function wiki_API_list_callback(pages, error) {
+			// console.trace([ target, pages ]);
 			if (pages) {
 				library_namespace.debug('Get ' + pages.length + ' '
 						+ options.type + ' pages of ' + pages.title, 2,
@@ -1082,13 +1182,20 @@ function module_code(library_namespace) {
 			}
 			// 設定了 options.for_each 時，callback() 不會傳入 list！
 			// 用意在省記憶體。options.for_each() 執行過就不用再記錄了。
-			if (Array.isArray(options.pages)) {
+			if (Array.isArray(options[KEY_page_list])) {
 				if (!options.for_each || options.get_list) {
-					// Array.prototype.push.apply(options.pages, pages);
-					options.pages.append(pages);
+					// Array.prototype.push.apply(options[KEY_page_list],
+					// pages);
+					options[KEY_page_list].append(pages);
 					library_namespace.info('[' + options.type + '] '
 					//
-					+ options.pages.length + ' pages: +' + pages.length
+					+ (Array.isArray(target) ? target.length + ' targets:'
+					//
+					: wiki_API.title_link_of(target)) + ' '
+					//
+					+ options[KEY_page_list].length
+					//
+					+ ' results: +' + pages.length
 					//
 					+ (pages.title ? ' ' + wiki_API.title_link_of(pages[0])
 					//
@@ -1099,9 +1206,10 @@ function module_code(library_namespace) {
 					: '') : ''));
 				} else {
 					// Only preserve length property.
-					options.pages.length += pages.length;
+					options[KEY_page_list].length += pages.length;
 				}
-			} else if (!options.pages) {
+			} else if (!options[KEY_page_list]
+					|| options[KEY_page_list].length === 0) {
 				if (!options.for_each || options.get_list) {
 				} else {
 					// Only preserve length property.
@@ -1109,27 +1217,45 @@ function module_code(library_namespace) {
 					pages.truncate();
 					pages.length = length;
 				}
-				options.pages = pages;
+				if (!options[KEY_page_list]) {
+					options[KEY_page_list] = pages;
+				} else {
+					// assert: options[KEY_page_list].length === 0
+					Object.assign(options[KEY_page_list], pages);
+				}
 			} else if (!pages.error) {
-				pages.error = new Error('options.pages has been set up!');
+				pages.error = new Error(
+						'options[KEY_page_list] has been set up!');
 			}
 
+			// console.log(pages.next_index);
+			// console.log(options.next_mark);
 			if (pages.next_index && !options.abort_operation
-					&& !(options.pages.length >= options.limit)) {
-				library_namespace.debug('尚未取得所有清單，因此繼續取得下一階段清單。', 2,
-						'wiki_API_list');
+					&& !(options[KEY_page_list].length >= options.limit)) {
+				library_namespace.debug(wiki_API.title_link_of(target)
+				//
+				+ ': 尚未取得所有清單，因此繼續取得下一階段清單。', 1, 'wiki_API_list');
+				if (false) {
+					console.trace([ wiki_API.title_link_of(target),
+							options.next_mark ]);
+				}
 				setImmediate(wiki_API_list, target, callback, options);
 			} else {
-				library_namespace.debug(
-						'run callback after all list got or abort operation.',
-						2, 'wiki_API_list');
+				library_namespace.debug(wiki_API.title_link_of(target)
+				//
+				+ ': run callback after all list got or abort operation.', 1,
+						'wiki_API_list');
+				// reset .next_mark
+				// session.next_mark = Object.create(null);
 				// console.trace(options.for_each);
+
+				// 警告: options[KEY_page_list] 與 target 並非完全一對一對應!
 				if (!options.for_each) {
-					callback(options.pages, target, options);
+					callback(options[KEY_page_list], target, options);
 				} else {
 					// `options.for_each` 可能還在執行中，例如正在取得頁面內容；
 					// 等到 `options.for_each` 完成之後才執行 callback。
-					options[KEY_SESSION].run(callback, options.pages, target,
+					session.run(callback, options[KEY_page_list], target,
 							options);
 				}
 			}
@@ -1361,8 +1487,8 @@ function module_code(library_namespace) {
 		} else {
 			cmtypes_hash = {
 				pages : true,
-				subcats : true,
-				files : true
+				files : true,
+				subcats : true
 			};
 		}
 		// console.trace(cmtypes_hash);
@@ -1470,8 +1596,8 @@ function module_code(library_namespace) {
 
 				if (category_filter && !category_filter(page_data)) {
 					// 直接除名。
-					library_namespace.debug('Skip not eligibled category: '
-							+ page_data.title, 1, 'category_tree');
+					library_namespace.debug('Skip non eligibled category:'
+							+ page_name, 1, 'category_tree');
 					return false;
 				}
 
@@ -1485,7 +1611,8 @@ function module_code(library_namespace) {
 
 				// 註記需要取得這個 subcategory 的資料。
 				if (!next_category_queue[page_name]
-						|| typeof page_data === 'object') {
+				// wiki_API.is_page_data(page_data)
+				|| typeof page_data === 'object') {
 					next_category_queue[page_name] = page_data;
 				}
 				return false;
@@ -1570,6 +1697,10 @@ function module_code(library_namespace) {
 			}
 
 			var categoryinfo = category_page_data.categoryinfo;
+			// categoryinfo: { size: 0, pages: 0, files: 0, subcats: 0 }
+			// console.log(categoryinfo);
+			// console.log(category_page_data);
+			// console.log(cmtypes_hash);
 			for ( var types in cmtypes_hash) {
 				if (categoryinfo[types] > 0) {
 					// need get, cannot skip
@@ -1635,8 +1766,11 @@ function module_code(library_namespace) {
 
 			var page_name = wiki_API.remove_namespace(
 					categorymember_list.title, options);
-			var message = 'Depth ' + (depth + 1) + '/' + max_depth + ': '
-					+ (this_category_queue.count + 1) + '/'
+			var message = 'Depth ' + (depth + 1)
+			//
+			+ (this_category_queue.length === 0 ? '/' + (depth + 1) : '')
+			//
+			+ '/' + max_depth + ': ' + (this_category_queue.count + 1) + '/'
 					+ this_category_queue.length + ' ' + page_name + ': '
 					+ categorymember_list.length + ' item(s).';
 			if (library_namespace.is_debug()) {
@@ -1715,12 +1849,14 @@ function module_code(library_namespace) {
 		}
 
 		function clean_up_tree_list(category_name) {
+			// page_list_of_category
 			var cached_tree_list = tree_of_category[category_name];
 
 			// 清理多餘標記。
 			// delete cached_tree_list.depth;
 
 			var subcategories = cached_tree_list[wiki_API.KEY_subcategories];
+			// console.trace([ category_name, subcategories ]);
 			if (!subcategories)
 				return;
 
@@ -1740,9 +1876,9 @@ function module_code(library_namespace) {
 							.assert(subcategory_tree_list.depth <= cached_tree_list.depth + 1);
 				}
 
-				if (!subcategory_tree_list.parents)
-					subcategory_tree_list.parents = [];
-				subcategory_tree_list.parents.push(cached_tree_list);
+				if (!subcategory_tree_list.parent_categories)
+					subcategory_tree_list.parent_categories = [];
+				subcategory_tree_list.parent_categories.push(cached_tree_list);
 			}
 		}
 

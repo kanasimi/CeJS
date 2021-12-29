@@ -845,12 +845,19 @@ function module_code(library_namespace) {
 			break;
 
 		case 'copy_from':
+			// Will soon stop after break.
+			this.running = false;
 			// `wiki_API_prototype_copy_from`
 			wiki_API.edit.copy_from.apply(this, next.slice(1));
 			// TODO: callback: this.next();
 			break;
 
 		case 'download':
+			// Will soon stop after break.
+			this.running = false;
+			wiki_API.download.apply(this, next.slice(1));
+			break;
+
 			// Download file to local path.
 			// TODO: wiki_session.download('Category:');
 
@@ -3688,6 +3695,8 @@ function module_code(library_namespace) {
 
 	// @static
 	Object.assign(wiki_API, {
+		max_slice_size : max_slice_size,
+
 		estimated_message : estimated_message,
 
 		PATTERN_BOT_NAME : PATTERN_BOT_NAME

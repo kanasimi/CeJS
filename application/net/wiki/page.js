@@ -3765,10 +3765,139 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// Download file to local path.
+	// TODO: wiki_session.download('Category:');
+
+	// wiki_API.download()
+	// wiki_session.download(file_title, local_path || options, callback);
+	function wiki_API_download(titles, options, callback) {
+		// Download non-vector version of .svg
+		// @see https://phabricator.wikimedia.org/T60663
+		// wiki_session.download('File:Example.svg',{width:100});
+
+		// assert: this: session
+		var session = this;
+
+		// console.trace(next);
+		if (typeof titles === 'string' || wiki_API.is_page_data(titles)) {
+			titles = [ titles ];
+		} else if (!Array.isArray(titles)) {
+			session.next(callback, titles, new Error('Invalid file_title!'));
+			return;
+		}
+
+		if (typeof options === 'string') {
+			options = titles.length > 1 ? {
+				directory : options
+			} : {
+				file_name : options
+			};
+		} else {
+			options = library_namespace.new_options(options);
+		}
+
+		// Cannot use function download_next_file() here @ node.js v0.10.x
+		function download_next_file(data, error, XMLHttp) {
+			var page_data;
+			if (options.index > 0 && (page_data = titles[options.index - 1])) {
+				// cache file name really writed to
+				// @see function get_URL_cache_node()
+				if (XMLHttp && XMLHttp.file_name) {
+					page_data.file_name = XMLHttp.file_name;
+				}
+				if (error) {
+					page_data.error = error;
+					titles.error_titles.push(page_data.title);
+					library_namespace.error('Cannot download '
+							+ page_data.title + ': ' + error);
+				}
+			}
+
+			if (options.index >= titles.length) {
+				session.next(callback, titles, titles.error_titles.length > 0
+						&& titles.error_titles);
+				return;
+			}
+
+			page_data = titles[options.index++];
+			// console.trace([ options.index, page_data ]);
+			// assert: !!page_data === true
+			var imageinfo = page_data && page_data[0];
+			if (!imageinfo) {
+				titles.error_titles.push(page_data.title);
+				library_namespace.error('Cannot download ' + page_data.title
+						+ (error ? ': ' + error : ''));
+				download_next_file();
+				return;
+			}
+
+			// download newer only
+			// console.trace(imageinfo);
+			options.web_resource_date = imageinfo.timestamp;
+
+			// !see options.file_name_processor @ function get_URL_cache_node()
+			if (typeof options.download_file_to === 'function') {
+				options.file_name = options.download_file_to(page_data,
+						options.index, titles, options);
+			}
+
+			// console.trace(page_data);
+			library_namespace.get_URL_cache(
+					imageinfo.thumburl || imageinfo.url, download_next_file,
+					options);
+		}
+
+		if (false && titles.length < 5000) {
+			// 不處理這個部分以節省資源。
+			titles = titles.map(function(page) {
+				// assert: page title starts with "File:"
+				return session.normalize_title(page.title || page);
+			}).filter(function(page_title) {
+				return !!page_title;
+			}).unique();
+		}
+
+		if (titles.length === 0) {
+			library_namespace.debug('No file to download.', 1,
+					'wiki_API_download');
+			session.next(callback, titles);
+			return;
+		}
+
+		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bimageinfo
+		var imageinfo_options = Object.assign({
+			type : 'imageinfo',
+			iiprop : 'url|size|mime|timestamp'
+		}, options.imageinfo_options);
+		if (options.width > 0)
+			imageinfo_options.iiurlwidth = options.width;
+		if (options.height > 0)
+			imageinfo_options.iiurlheight = options.height;
+
+		// console.trace(imageinfo_options);
+		// page title to raw data URL
+		wiki_API.list(titles, function(pages, target) {
+			// console.trace([pages, target, options]);
+			if (pages.error) {
+				session.next(callback, titles, pages.error);
+				return;
+			}
+			titles = pages;
+			options.index = 0;
+			titles.error_titles = [];
+			// console.trace(titles);
+			download_next_file();
+		}, wiki_API.add_session_to_options(session, imageinfo_options));
+	}
+
+	// ------------------------------------------------------------------------
+
 	// export 導出.
 
 	// @static
 	Object.assign(wiki_API, {
+		download : wiki_API_download,
+
 		parse_dump_xml : parse_dump_xml,
 		traversal : traversal_pages,
 

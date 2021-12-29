@@ -2531,6 +2531,8 @@ function module_code(library_namespace) {
 	 * default user agent. for some server, (e.g., tools.wmflabs.org)
 	 * <q>Requests must have a user agent</q>.
 	 * 
+	 * @see https://meta.wikimedia.org/wiki/User-Agent_policy
+	 * 
 	 * @type {String}
 	 */
 	get_URL_node.default_user_agent = library_namespace.Class + '/'
@@ -2981,7 +2983,7 @@ function module_code(library_namespace) {
 				T : [ '自 URL 取得檔名：%1', URL ]
 			}, '\n→ ' + file_name ], 1, 'get_URL_cache_node');
 		}
-		if (options.file_name_processor) {
+		if (typeof options.file_name_processor === 'function') {
 			file_name = options.file_name_processor(file_name);
 		}
 		if (!file_name) {
@@ -2994,13 +2996,22 @@ function module_code(library_namespace) {
 					options.directory, file_name);
 		}
 
-		var file_status = node_fs.statSync(file_name);
+		var file_status;
+		try {
+			file_status = node_fs.statSync(file_name);
+		} catch (e) {
+			// TODO: handle exception
+		}
 		if (!options.get_contents && options.web_resource_date && file_status) {
 			// download newer only
 			if ((file_status.mtimeMs || file_status.mtime)
 			//
 			- Date.parse(options.web_resource_date) > -1) {
-				// File on web is old.
+				library_namespace.debug('File on web ('
+						+ options.web_resource_date
+						+ ') is not newer than local file ('
+						+ file_status.mtime + '): ' + file_name + '', 0,
+						'get_URL_cache_node');
 				onload();
 				return;
 			}
