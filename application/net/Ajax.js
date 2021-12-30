@@ -3010,7 +3010,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('File on web ('
 						+ options.web_resource_date
 						+ ') is not newer than local file ('
-						+ file_status.mtime + '): ' + file_name + '', 0,
+						+ file_status.mtime + '): ' + file_name + '', 1,
 						'get_URL_cache_node');
 				onload();
 				return;

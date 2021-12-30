@@ -582,10 +582,7 @@ function module_code(library_namespace) {
 				_this.next(callback_result_relying_on_this);
 			},
 			// next[3] : options
-			Object.assign({
-				// [KEY_SESSION]
-				session : this
-			}, this.next_mark, next[3]));
+			add_session_to_options(this, next[3]));
 			break;
 
 		// case 'category_tree':
@@ -817,6 +814,8 @@ function module_code(library_namespace) {
 			break;
 
 		case 'search':
+			if (!next[3].next_mark)
+				next[3].next_mark = Object.create(null);
 			wiki_API.search([ this.API_URL, next[1] ],
 			//
 			function wiki_API_search_callback(pages, error) {
@@ -825,8 +824,9 @@ function module_code(library_namespace) {
 				// 設定/紀錄後續檢索用索引值。
 				// 若是將錯誤的改正之後，應該重新自 offset 0 開始 search。
 				// 因此這種情況下基本上不應該使用此值。
-				if (pages && pages.sroffset)
-					_this.next_mark.sroffset = pages.sroffset;
+				if (pages && pages.sroffset) {
+					next[3].next_mark.sroffset = pages.sroffset;
+				}
 
 				if (typeof next[2] === 'function') {
 					callback_result_relying_on_this
@@ -1905,7 +1905,7 @@ function module_code(library_namespace) {
 
 	// e.g., " (99%): 0.178 page/ms, 1.5 minutes estimated."
 	function estimated_message(processed_amount, total_amount, starting_time,
-			page_count, unit) {
+			pages_processed, unit) {
 		/** {Natural}ms */
 		var time_elapsed = Date.now() - starting_time;
 		// estimated time of completion 估計時間 預計剩下時間 預估剩餘時間 預計完成時間還要多久
@@ -1921,12 +1921,12 @@ function module_code(library_namespace) {
 		}
 
 		var speed;
-		if (page_count > 0) {
+		if (pages_processed > 0) {
 			if (!unit) {
 				// page(s)
 				unit = 'page';
 			}
-			speed = page_count / time_elapsed;
+			speed = pages_processed / time_elapsed;
 			speed = speed < 1 ? (1e3 * speed).toFixed(2) + ' ' + unit + '/s'
 					: speed.toFixed(3) + ' ' + unit + '/ms';
 			speed = ': ' + speed;
@@ -1934,8 +1934,10 @@ function module_code(library_namespace) {
 			speed = '';
 		}
 
-		return (page_count > 0 ? page_count === total_amount ? processed_amount
-				+ '/' + total_amount : page_count : '')
+		return (pages_processed > 0 ? pages_processed === total_amount ? processed_amount
+				+ '/' + total_amount
+				: pages_processed + ' '
+				: /* Need add message yourself */'')
 				+ ' ('
 				+ (100 * processed_amount / total_amount | 0)
 				+ '%)'

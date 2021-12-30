@@ -3765,8 +3765,18 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// Download file to local path.
-	// TODO: wiki_session.download('Category:');
+	if (false) {
+		wiki_session.download('Category:name', {
+			directory : './'
+		}, function(file_data_list, error) {
+		});
+		wiki_session.download('File:name', {
+			directory : './'
+		}, function(file_data, error) {
+		});
+	}
+
+	// Download files to local path.
 
 	// wiki_API.download()
 	// wiki_session.download(file_title, local_path || options, callback);
@@ -3780,9 +3790,89 @@ function module_code(library_namespace) {
 
 		// console.trace(next);
 		if (typeof titles === 'string' || wiki_API.is_page_data(titles)) {
+			if (session.is_namespace(titles, 'Category')) {
+				session.category_tree(titles, function(list, error) {
+					if (error) {
+						callback(undefined, error);
+					} else {
+						// assert: list.list_type === 'category_tree'
+						wiki_API_download
+								.call(session, list, options, callback);
+					}
+				}, {
+					namespace : 'File',
+					set_attributes : true
+				});
+				return;
+			}
+
 			titles = [ titles ];
 		} else if (!Array.isArray(titles)) {
 			session.next(callback, titles, new Error('Invalid file_title!'));
+			return;
+		}
+
+		if (titles.list_type === 'category_tree' && !options.no_category_tree) {
+			// Will create directory structure.
+			var file_list = [], file_list_Map = new Map;
+			Object.values(titles.flated_subcategories)
+			//
+			.forEach(function(page_list_of_category) {
+				page_list_of_category.forEach(function(page_data) {
+					if (!page_data.category
+					//
+					|| page_data.category.depth > page_list_of_category.depth)
+						page_data.category = page_list_of_category;
+					file_list_Map.set(page_data.pageid, page_data);
+				});
+				file_list.append(page_list_of_category);
+			});
+			options.download_file_to
+			//
+			= function(page_data, index, titles, options) {
+				var category = file_list_Map.get(page_data.pageid).category;
+				// console.trace([page_data, category]);
+				var path = [ session.remove_namespace(category.title) ];
+				while (category.parent_categories) {
+					var _category = category.parent_categories[0];
+					category.parent_categories.forEach(function(__category) {
+						if (__category.depth < _category.depth)
+							_category = __category;
+					});
+					category = _category;
+					path.unshift(session.remove_namespace(category.title));
+				}
+				var directory = path.join(library_namespace.env.path_separator);
+				if (options.directory) {
+					directory = library_namespace.append_path_separator(
+							options.directory, directory);
+				}
+				library_namespace.create_directory(directory, {
+					recursive : true
+				});
+				path.push(session.remove_namespace(page_data.title));
+				path = path.join(library_namespace.env.path_separator);
+				// console.trace([ directory, path ]);
+				return path;
+			};
+			wiki_API_download.call(session, file_list, options, callback);
+			return;
+		}
+
+		if (false && titles.length < 5000) {
+			// 不處理這個部分以節省資源。
+			titles = titles.map(function(page) {
+				// assert: page title starts with "File:"
+				return session.normalize_title(page.title || page);
+			}).filter(function(page_title) {
+				return !!page_title;
+			}).unique();
+		}
+
+		if (titles.length === 0) {
+			library_namespace.debug('No file to download.', 1,
+					'wiki_API_download');
+			session.next(callback, titles);
 			return;
 		}
 
@@ -3796,7 +3886,8 @@ function module_code(library_namespace) {
 			options = library_namespace.new_options(options);
 		}
 
-		// Cannot use function download_next_file() here @ node.js v0.10.x
+		// ----------------------------------------------------------
+
 		function download_next_file(data, error, XMLHttp) {
 			var page_data;
 			if (options.index > 0 && (page_data = titles[options.index - 1])) {
@@ -3845,23 +3936,6 @@ function module_code(library_namespace) {
 			library_namespace.get_URL_cache(
 					imageinfo.thumburl || imageinfo.url, download_next_file,
 					options);
-		}
-
-		if (false && titles.length < 5000) {
-			// 不處理這個部分以節省資源。
-			titles = titles.map(function(page) {
-				// assert: page title starts with "File:"
-				return session.normalize_title(page.title || page);
-			}).filter(function(page_title) {
-				return !!page_title;
-			}).unique();
-		}
-
-		if (titles.length === 0) {
-			library_namespace.debug('No file to download.', 1,
-					'wiki_API_download');
-			session.next(callback, titles);
-			return;
 		}
 
 		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bimageinfo

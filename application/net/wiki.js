@@ -172,10 +172,6 @@ function module_code(library_namespace) {
 			this.running = true;
 		}
 
-		// 紀錄各種後續檢索用索引值。應以 append，而非整個換掉的方式更改。
-		// 對舊版本須用到 for (in .next_mark)
-		this.next_mark = Object.create(null);
-
 		this.token = {
 			// lgusername
 			lgname : user_name,

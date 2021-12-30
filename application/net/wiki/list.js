@@ -225,7 +225,7 @@ function module_code(library_namespace) {
 			parameter = get_list.default_parameter;
 		}
 
-		if (typeof options === 'string' || !isNaN(options)) {
+		if (typeof options === 'string' || typeof options === 'number') {
 			// 當作 namespace。
 			options = {
 				// {ℕ⁰:Natural+0|String|Object}namespace
@@ -261,6 +261,8 @@ function module_code(library_namespace) {
 		var session = wiki_API.session_of_options(options);
 		// 注意: 這裡會改變 options！
 		if (!options.next_mark) {
+			// 紀錄各種後續檢索用索引值。應以 append，而非整個換掉的方式更改。
+			// 對舊版本須用到 for (in .next_mark)
 			library_namespace.debug('未傳入後續檢索用索引值。', 4, 'get_list');
 			// initialization
 			options.next_mark = Object.create(null);
@@ -348,9 +350,10 @@ function module_code(library_namespace) {
 		//
 		: action[1].length >
 		//
-		wiki_API.max_slice_size(session, options, action[1]))) {
+		wiki_API.max_slice_size(session, options/* , action[1] */))) {
 			options.next_title_index = 0;
 			options.multi = true;
+			options.starting_time = Date.now();
 			var get_next_batch = function(pages, error) {
 				if (error) {
 					callback(null, error);
@@ -374,8 +377,8 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				var slice_chars = 0;
 				if (options.no_post_data) {
+					var slice_chars = 0;
 					do {
 						slice_chars += encodeURIComponent(wiki_API
 								.title_of(action[1][options.next_title_index++])
@@ -396,9 +399,14 @@ function module_code(library_namespace) {
 						options.next_title_index = action[1].length;
 				}
 
-				// TODO: use wiki_API.estimated_message()
-				library_namespace.log_temporary('get_list: Get ' + type + ' '
-						+ options.next_title_index + '/' + action[1].length);
+				library_namespace.log_temporary('get_list: '
+						+ type
+						+ ' '
+						+ latest_batch_title_index
+						+ '/'
+						+ action[1].length
+						+ wiki_API.estimated_message(latest_batch_title_index,
+								action[1].length, options.starting_time));
 				get_list(type, [
 						action[0],
 						action[1].slice(latest_batch_title_index,
@@ -1337,17 +1345,14 @@ function module_code(library_namespace) {
 
 		var session = this,
 		/** {Object}執行 categorymembers 查詢時使用的選項。 */
-		categorymembers_options = {
-			// [KEY_SESSION]
-			session : session,
+		categorymembers_options = wiki_API.add_session_to_options(session, {
 			type : 'categorymembers'
-		}, /** {Object}執行 categoryinfo 查詢時使用的選項。 */
-		categoryinfo_options = {
+		}),
+		/** {Object}執行 categoryinfo 查詢時使用的選項。 */
+		categoryinfo_options = wiki_API.add_session_to_options(session, {
 			multi : true,
-			// [KEY_SESSION]
-			session : session,
 			type : 'categoryinfo'
-		}, cmtypes_hash;
+		}), cmtypes_hash;
 
 		if (typeof options === 'function') {
 			options = {
@@ -1682,8 +1687,6 @@ function module_code(library_namespace) {
 			var page_name = wiki_API.remove_namespace(
 					categorymember_list.title, options);
 			var message = 'Depth ' + (depth + 1)
-			//
-			+ (this_category_queue.length === 0 ? '/' + (depth + 1) : '')
 			//
 			+ '/' + max_depth + ': ' + (this_category_queue.count + 1) + '/'
 					+ this_category_queue.length + ' ' + page_name + ': '
