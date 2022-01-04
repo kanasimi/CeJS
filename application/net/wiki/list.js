@@ -419,47 +419,58 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------
 
-		action[1] = action[1] ? '&'
-		// allpages 不具有 title。
-		+ (parameter === get_list.default_parameter ? prefix : '')
-		// 不能設定 wiki_API.query.title_param(action, true)，有些用 title 而不用 titles。
-		// e.g., 20150916.Multiple_issues.v2.js
-		+ wiki_API.query.title_param(action[1]/* , true, options.is_id */)
-				: '';
+		if (!library_namespace.is_Object(action[1])
+				|| wiki_API.is_page_data(action[1])) {
+			action[1] = action[1] ? '&'
+			// allpages 不具有 title。
+			+ (parameter === get_list.default_parameter ? prefix : '')
+			// 不能設定 wiki_API.query.title_param(action, true)，有些用 title 而不用
+			// titles。
+			// e.g., 20150916.Multiple_issues.v2.js
+			+ wiki_API.query.title_param(action[1]/* , true, options.is_id */)
+					: '';
 
-		if (typeof title_preprocessor === 'function') {
-			// title_preprocessor(title_parameter)
-			library_namespace.debug('title_parameter: [' + action[1] + ']', 3,
-					'get_list');
-			action[1] = title_preprocessor(action[1], options);
-			library_namespace.debug('→ [' + action[1] + ']', 3, 'get_list');
+			if (typeof title_preprocessor === 'function') {
+				// title_preprocessor(title_parameter)
+				library_namespace.debug('title_parameter: [' + action[1] + ']',
+						3, 'get_list');
+				action[1] = title_preprocessor(action[1], options);
+				library_namespace.debug('→ [' + action[1] + ']', 3, 'get_list');
+			}
 		}
+		action[1] = library_namespace.Search_parameters(action[1]);
 		// console.trace(action);
 
-		action[1] = 'action=query&' + parameter + '=' + type + action[1]
+		action[1].action = 'query';
+		action[1][parameter] = type;
 		// 處理數目限制 limit。
 		// No more than 500 (5,000 for bots) allowed.
-		+ (options.limit >= 0 || options.limit === 'max'
-		// @type integer or 'max'
-		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
-		? '&' + prefix + 'limit=' + options.limit : '')
+		if (options.limit >= 0 || options.limit === 'max') {
+			// @type integer or 'max'
+			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
+			action[1][prefix + 'limit'] = options.limit;
+		}
+
 		// next start from here.
-		+ (continue_from ?
-		// allpages 的 apcontinue 為 title，需要 encodeURIComponent()。
-		'&' + prefix + 'continue='
-		// 未處理allpages 的 escape 可能造成 HTTP status 400。
-		+ encodeURIComponent(continue_from) : '')
-		//
-		+ ('namespace' in options
-		//
-		? '&' + prefix + 'namespace=' + options.namespace : '');
+		if (continue_from) {
+			// allpages 的 apcontinue 為 title，需要 encodeURIComponent()。
+			action[1][prefix + 'continue']
+			// 未處理 allpages 的 escape 可能造成 HTTP status 400。
+			// = encodeURIComponent(continue_from);
+			continue_from;
+		}
+
+		if ('namespace' in options) {
+			action[1][prefix + 'namespace'] = options.namespace;
+		}
 
 		if (options.redirects) {
 			// 舊版毋須 '&redirects=1'，'&redirects' 即可。
-			action[1] += '&redirects=1';
+			action[1].redirects = 1;
 		}
-		if (options.converttitles)
-			action[1] += '&converttitles=1';
+		if (options.converttitles) {
+			action[1].converttitles = 1;
+		}
 
 		for ( var parameter in options) {
 			if (parameter.startsWith(prefix)) {
@@ -468,12 +479,14 @@ function module_code(library_namespace) {
 					// https://www.mediawiki.org/w/api.php?action=help&modules=main#main/datatype/timestamp
 					value = value.toISOString();
 				}
-				value = encodeURIComponent(value);
-				action[1] += '&' + parameter + '=' + value;
+				// value = encodeURIComponent(value);
+				action[1][parameter] = value;
 			}
 		}
+		// console.trace(action);
 
 		set_parameters(action, options);
+		// console.trace(action);
 
 		// TODO: 直接以是不是 .startsWith(prefix) 來判定是不是該加入 parameters。
 
@@ -580,6 +593,8 @@ function module_code(library_namespace) {
 			// 紀錄清單類型。
 			// assert: overwrite 之屬性不應該是原先已經存在之屬性。
 			pages.list_type = type;
+			if ('namespace' in options)
+				pages.namespace = options.namespace;
 			if (is_api_and_title(title, true)) {
 				title = title[1];
 			}
@@ -751,7 +766,8 @@ function module_code(library_namespace) {
 			library_namespace.debug(pages.length + ' ' + type + ' got!', 1,
 					'get_list');
 			// 紀錄 titles。 .original_title
-			pages.titles = title;
+			if (pages.title !== title)
+				pages.titles = title;
 			run_for_each();
 
 		}, post_data, options);
@@ -1406,10 +1422,28 @@ function module_code(library_namespace) {
 
 		} else {
 			cmtypes_hash = {
-				pages : true,
-				files : true,
 				subcats : true
 			};
+
+			if (options.namespace) {
+				// console.trace(session.namespace(options.namespace));
+				// console.trace(session.namespace('File|Category'));
+				String(session.namespace(options.namespace)).split('|')
+				//
+				.forEach(function(_namespace) {
+					_namespace = +_namespace;
+					if (_namespace === session.namespace('File'))
+						cmtypes_hash.files = true;
+					else if (_namespace >= 0 && _namespace !== NS_Category)
+						cmtypes_hash.pages = true;
+				});
+				// console.trace(cmtypes_hash);
+			} else {
+				Object.assign(cmtypes_hash, {
+					pages : true,
+					files : true
+				});
+			}
 		}
 		// console.trace(cmtypes_hash);
 
@@ -1578,6 +1612,7 @@ function module_code(library_namespace) {
 				library_namespace.log_temporary(message);
 			}
 
+			// console.trace(this_category_queue);
 			wiki_API.list(this_category_queue, for_category_info_list,
 					categoryinfo_options);
 		}
@@ -1666,6 +1701,7 @@ function module_code(library_namespace) {
 		}
 
 		function get_categorymembers(category_page_data) {
+			// 每次只能處理單一個 category。
 			wiki_API.list(category_page_data, for_categorymember_list,
 					categorymembers_options);
 		}
