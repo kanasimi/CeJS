@@ -3858,7 +3858,7 @@ function module_code(library_namespace) {
 					recursive : true
 				};
 				options.download_file_to
-				//
+				// Will create directory structure for download files.
 				= function(page_data, index, pages, options) {
 					// console.trace(pages);
 					// console.trace(titles.flated_subcategories);
@@ -3892,38 +3892,6 @@ function module_code(library_namespace) {
 						limit : 'max'
 					}), options, wiki_API_download.bind(session, titles,
 					options, callback));
-			return;
-		}
-
-		if (false && titles.list_type === 'category_tree'
-				&& !options.no_category_tree) {
-			// Will create directory structure.
-			var file_list = [], file_list_Map = new Map;
-			Object.values(titles.flated_subcategories)
-			//
-			.forEach(function(page_list_of_category) {
-				page_list_of_category.forEach(function(page_data) {
-					if (!page_data.category
-					//
-					|| page_data.category.depth > page_list_of_category.depth)
-						page_data.category = page_list_of_category;
-					file_list_Map.set(page_data.pageid, page_data);
-				});
-				file_list.append(page_list_of_category);
-			});
-			options.download_file_to
-			//
-			= function(page_data, index, pages, options) {
-				var category = file_list_Map.get(page_data.pageid).category;
-				// console.trace([page_data, category]);
-				return get_path_of_category.call(category, page_data.title,
-						Object.assign({
-							create_directory : {
-								recursive : true
-							}
-						}, options));
-			};
-			wiki_API_download.call(session, file_list, options, callback);
 			return;
 		}
 
