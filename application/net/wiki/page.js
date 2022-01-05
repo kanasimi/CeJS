@@ -3765,6 +3765,38 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	function get_path_of_category(file_name, options) {
+		options = library_namespace.setup_options(options);
+		var category = this;
+		var session = wiki_API.session_of_options(options);
+
+		var path = [ session.remove_namespace(category.title) ];
+		while (category.parent_categories) {
+			var _category = category.parent_categories[0];
+			category.parent_categories.forEach(function(__category) {
+				if (__category.depth < _category.depth)
+					_category = __category;
+			});
+			category = _category;
+			path.unshift(session.remove_namespace(category.title));
+		}
+
+		var directory = path.join(library_namespace.env.path_separator);
+		if (options.directory) {
+			directory = library_namespace.append_path_separator(
+					options.directory, directory);
+		}
+		if (options.create_directory)
+			library_namespace.create_directory(directory,
+					options.create_directory);
+
+		if (file_name)
+			path.push(session.remove_namespace(file_name));
+		path = path.join(library_namespace.env.path_separator);
+		// console.trace([ directory, path ]);
+		return path;
+	}
+
 	if (false) {
 		wiki_session.download('Category:name', {
 			directory : './'
@@ -3800,19 +3832,71 @@ function module_code(library_namespace) {
 								.call(session, list, options, callback);
 					}
 				}, {
-					namespace : 'File',
+					namespace : 'Category',
 					set_attributes : true
 				});
 				return;
 			}
 
 			titles = [ titles ];
-		} else if (!Array.isArray(titles)) {
+		} else if (!Array.isArray(titles)
+				&& !(library_namespace.is_Object(titles) && titles[wiki_API.KEY_generator_title])) {
 			session.next(callback, titles, new Error('Invalid file_title!'));
 			return;
 		}
 
-		if (titles.list_type === 'category_tree' && !options.no_category_tree) {
+		if (titles.list_type === 'category_tree' && !options.no_category_tree
+		// && session.is_namespace(titles.namespace, 'Category')
+		) {
+			if (!titles.categors_to_process) {
+				titles.categors_to_process = Object
+						.values(titles.flated_subcategories);
+				titles.categors_to_process.total_length = titles.categors_to_process.length;
+				// options = library_namespace.new_options(options);
+				wiki_API.add_session_to_options(session, options);
+				options.create_directory = {
+					recursive : true
+				};
+				options.download_file_to
+				//
+				= function(page_data, index, pages, options) {
+					// console.trace(pages);
+					// console.trace(titles.flated_subcategories);
+					// console.trace(pages.title);
+					// console.trace(session.remove_namespace(pages.title[wiki_API.KEY_generator_title]));
+					var category = titles.flated_subcategories[session
+							.remove_namespace(pages.title[wiki_API.KEY_generator_title])];
+					// console.trace([page_data, category]);
+					var file_path = get_path_of_category.call(category,
+							page_data.title, options);
+					// console.trace(file_path);
+					return file_path;
+				};
+			}
+			if (titles.categors_to_process.length === 0) {
+				session.next(callback, titles);
+				return;
+			}
+			var categors_to_process = titles.categors_to_process.pop();
+			library_namespace
+					.info('wiki_API_download: '
+							+ (titles.categors_to_process.total_length - titles.categors_to_process.length)
+							+ '/' + titles.categors_to_process.total_length
+							+ ' '
+							+ wiki_API.title_link_of(categors_to_process.title)
+							+ '	of ' + wiki_API.title_link_of(titles.title));
+			wiki_API_download.call(session, wiki_API.generator_parameters(
+					'categorymembers', {
+						title : categors_to_process.title,
+						namespace : wiki.namespace('File'),
+						limit : 'max'
+					}), options, wiki_API_download.bind(session, titles,
+					options, callback));
+			return;
+		}
+
+		if (false && titles.list_type === 'category_tree'
+				&& !options.no_category_tree) {
 			// Will create directory structure.
 			var file_list = [], file_list_Map = new Map;
 			Object.values(titles.flated_subcategories)
@@ -3829,31 +3913,15 @@ function module_code(library_namespace) {
 			});
 			options.download_file_to
 			//
-			= function(page_data, index, titles, options) {
+			= function(page_data, index, pages, options) {
 				var category = file_list_Map.get(page_data.pageid).category;
 				// console.trace([page_data, category]);
-				var path = [ session.remove_namespace(category.title) ];
-				while (category.parent_categories) {
-					var _category = category.parent_categories[0];
-					category.parent_categories.forEach(function(__category) {
-						if (__category.depth < _category.depth)
-							_category = __category;
-					});
-					category = _category;
-					path.unshift(session.remove_namespace(category.title));
-				}
-				var directory = path.join(library_namespace.env.path_separator);
-				if (options.directory) {
-					directory = library_namespace.append_path_separator(
-							options.directory, directory);
-				}
-				library_namespace.create_directory(directory, {
-					recursive : true
-				});
-				path.push(session.remove_namespace(page_data.title));
-				path = path.join(library_namespace.env.path_separator);
-				// console.trace([ directory, path ]);
-				return path;
+				return get_path_of_category.call(category, page_data.title,
+						Object.assign({
+							create_directory : {
+								recursive : true
+							}
+						}, options));
 			};
 			wiki_API_download.call(session, file_list, options, callback);
 			return;
@@ -3911,6 +3979,7 @@ function module_code(library_namespace) {
 			}
 
 			page_data = titles[options.index++];
+			// console.trace(titles);
 			// console.trace([ options.index, page_data ]);
 			// assert: !!page_data === true
 			var imageinfo = page_data && page_data[0];
@@ -3928,8 +3997,15 @@ function module_code(library_namespace) {
 
 			// !see options.file_name_processor @ function get_URL_cache_node()
 			if (typeof options.download_file_to === 'function') {
-				options.file_name = options.download_file_to(page_data,
-						options.index, titles, options);
+				try {
+					options.file_name = options.download_file_to(page_data,
+							options.index, titles, options);
+				} catch (e) {
+					console.error(e);
+					titles.error_titles.push(page_data.title);
+					download_next_file();
+					return;
+				}
 			}
 
 			// console.trace(page_data);
@@ -3941,7 +4017,9 @@ function module_code(library_namespace) {
 		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bimageinfo
 		var imageinfo_options = Object.assign({
 			type : 'imageinfo',
-			iiprop : 'url|size|mime|timestamp'
+			// 'url|size|mime|timestamp'
+			iiprop : 'url|timestamp',
+			multi : true
 		}, options.imageinfo_options);
 		if (options.width > 0)
 			imageinfo_options.iiurlwidth = options.width;

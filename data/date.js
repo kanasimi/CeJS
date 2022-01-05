@@ -3409,6 +3409,9 @@ function module_code(library_namespace) {
 
 	// @inner
 	function get_pattern_and_generator(serial_token_list, options) {
+		if (!serial_token_list)
+			return;
+
 		var pattern = serial_token_list.clone();
 		var generator = serial_token_list.clone();
 
@@ -3481,6 +3484,8 @@ function module_code(library_namespace) {
 		var pattern_hash = Object.create(null);
 		function add_serial_token_list(serial_token_list) {
 			var pattern = get_pattern_and_generator(serial_token_list, options);
+			if (!pattern)
+				return;
 			var generator = pattern[1];
 			pattern = pattern[0];
 			var pattern_String = pattern.join('');

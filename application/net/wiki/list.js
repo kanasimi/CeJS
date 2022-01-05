@@ -50,6 +50,49 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	var KEY_generator_title = typeof Symbol === 'function' ? Symbol('generator title')
+			: 'generator title';
+	function generator_parameters(generator, options) {
+		if (typeof options === 'string') {
+			options = {
+				title : options
+			};
+		}
+
+		var parameters = {
+			generator : generator
+		};
+		var prefix = get_list.type[generator];
+		if (Array.isArray(prefix))
+			prefix = prefix[0];
+
+		for ( var parameter in options) {
+			var value = options[parameter];
+			if (parameter.startsWith('g' + prefix)) {
+				parameters[parameter] = value;
+				continue;
+			}
+			if (parameter.startsWith(prefix) && !(('g' + parameter) in options)) {
+				parameters['g' + parameter] = value;
+				continue;
+			}
+			parameter = 'g' + prefix + parameter;
+			if (!(parameter in parameters))
+				parameters[parameter] = value;
+		}
+
+		// using (KEY_generator_title in parameters) to test if parameters is a
+		// generator title.
+		parameters[KEY_generator_title] = parameters['g' + prefix + 'title'];
+
+		return parameters;
+	}
+
+	wiki_API.generator_parameters = generator_parameters;
+	wiki_API.KEY_generator_title = KEY_generator_title;
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * 自 title 頁面取得後續檢索用索引值 (continuation data)。<br />
 	 * e.g., 'continue'
@@ -266,17 +309,36 @@ function module_code(library_namespace) {
 			library_namespace.debug('未傳入後續檢索用索引值。', 4, 'get_list');
 			// initialization
 			options.next_mark = Object.create(null);
-		} else {
+		} else if (false && Object.keys(options.next_mark).length > 0) {
 			// assert: library_namespace.is_Object(options.next_mark)
 			// e.g., called by function wiki_API_list()
-			// console.log([ type, title, options.next_mark ]);
+			// console.trace([ type, title, options.next_mark ]);
 			library_namespace
 					.debug(
 							'直接傳入了 options.next_mark；可延續使用上次的後續檢索用索引值，避免重複 loading page。',
 							4, 'get_list');
+
+			// Object.assign(options, options.next_mark);
+			for ( var next_mark_key in options.next_mark) {
+				if (next_mark_key !== 'continue') {
+					options[next_mark_key]
+					// {String}options.next_mark[next_mark_key]:
+					// 後續檢索用索引值。後続の索引。
+					= options.next_mark[next_mark_key];
+					// 經由,經過,通過來源
+					library_namespace.debug('continue from ['
+							+ options[next_mark_key] + '] via options', 1,
+							'get_list');
+				}
+				delete options.next_mark[next_mark_key];
+			}
+			// 刪掉標記，避免無窮迴圈。
+			delete options.get_continue;
+			console.trace(options);
+
 			// usage:
 			// options: { next_mark : {} , get_continue : log_to }
-			if (continue_from in options.next_mark) {
+			if (false && (continue_from in options.next_mark)) {
 				// {String}options.next_mark[continue_from]:
 				// 後續檢索用索引值。後続の索引。
 				options[continue_from] = options.next_mark[continue_from];
@@ -333,7 +395,8 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (continue_from = options[continue_from]) {
+		continue_from = options[continue_from];
+		if (false) {
 			library_namespace.debug(type
 					+ (title ? ' ' + wiki_API.title_link_of(title) : '')
 					+ ': start from ' + continue_from, 2, 'get_list');
@@ -437,6 +500,10 @@ function module_code(library_namespace) {
 				action[1] = title_preprocessor(action[1], options);
 				library_namespace.debug('→ [' + action[1] + ']', 3, 'get_list');
 			}
+		} else if (!(KEY_generator_title in action[1])) {
+			// Should be a generator title
+			library_namespace
+					.error('get_list: You should use generator_parameters() to create a  generator title!');
 		}
 		action[1] = library_namespace.Search_parameters(action[1]);
 		// console.trace(action);
@@ -452,12 +519,18 @@ function module_code(library_namespace) {
 		}
 
 		// next start from here.
-		if (continue_from) {
+		if (false && continue_from) {
 			// allpages 的 apcontinue 為 title，需要 encodeURIComponent()。
 			action[1][prefix + 'continue']
 			// 未處理 allpages 的 escape 可能造成 HTTP status 400。
 			// = encodeURIComponent(continue_from);
 			continue_from;
+		}
+		for (continue_from in options.next_mark) {
+			if (continue_from !== 'continue') {
+				action[1][continue_from] = options.next_mark[continue_from];
+			}
+			delete options.next_mark[continue_from];
 		}
 
 		if ('namespace' in options) {
@@ -601,8 +674,10 @@ function module_code(library_namespace) {
 			if (wiki_API.is_page_data(title)) {
 				title = title.title;
 			}
-			if (!Array.isArray(title))
+			if (!Array.isArray(title)) {
+				// 包含 {generator:'categorymembers',gcmtitle:'Category:name'}
 				pages.title = title;
+			}
 
 			if (!data || !data.query) {
 				library_namespace.error('get_list: Unknown response: ['
@@ -1123,26 +1198,35 @@ function module_code(library_namespace) {
 			// 用意在省記憶體。options.for_each() 執行過就不用再記錄了。
 			if (Array.isArray(options[KEY_page_list])) {
 				if (!options.for_each || options.get_list) {
-					// Array.prototype.push.apply(options[KEY_page_list],
-					// pages);
 					options[KEY_page_list].append(pages);
-					library_namespace.info('[' + options.type + '] '
+					// console.trace([ pages.title, pages[0],
+					// wiki_API.title_link_of(pages[0]) ]);
+					var message = '[' + options.type + '] ';
+					if (Array.isArray(target)) {
+						message += target.length + ' targets:';
+					} else if (target[wiki_API.KEY_generator_title]) {
+						message += 'of [' + target.generator + '] '
+						//
+						+ wiki_API.title_link_of(
+						//
+						target[wiki_API.KEY_generator_title]);
+					} else {
+						message += wiki_API.title_link_of(target);
+					}
+					message += ' ' + options[KEY_page_list].length
 					//
-					+ (Array.isArray(target) ? target.length + ' targets:'
-					//
-					: wiki_API.title_link_of(target)) + ' '
-					//
-					+ options[KEY_page_list].length
-					//
-					+ ' results: +' + pages.length
-					//
-					+ (pages.title ? ' ' + wiki_API.title_link_of(pages[0])
-					//
-					+ (pages.length > 1 ? '–'
-					//
-					+ wiki_API.title_link_of(pages.at(-1))
-					//
-					: '') : ''));
+					+ ' results: +' + pages.length;
+					if (pages.title && pages.length > 0) {
+						message += ' ' + wiki_API.title_link_of(
+						//
+						pages[0].title || pages[0]);
+						if (pages.length > 1) {
+							message += '–' + wiki_API.title_link_of(
+							//
+							pages.at(-1).title || pages.at(-1));
+						}
+					}
+					library_namespace.info(message);
 				} else {
 					// Only preserve length property.
 					options[KEY_page_list].length += pages.length;
