@@ -3888,7 +3888,7 @@ function module_code(library_namespace) {
 			wiki_API_download.call(session, wiki_API.generator_parameters(
 					'categorymembers', {
 						title : categors_to_process.title,
-						namespace : wiki.namespace('File'),
+						namespace : session.namespace('File'),
 						limit : 'max'
 					}), options, wiki_API_download.bind(session, titles,
 					options, callback));

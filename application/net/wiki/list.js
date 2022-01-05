@@ -235,6 +235,9 @@ function module_code(library_namespace) {
 	 * 
 	 * TODO: options.get_sub options.ns
 	 * 
+	 * TODO: using iterable protocol
+	 * https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Iteration_protocols
+	 * 
 	 * @param {String}type
 	 *            one of get_list.type
 	 * @param {String}[title]
