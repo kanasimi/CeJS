@@ -3848,10 +3848,10 @@ function module_code(library_namespace) {
 		if (titles.list_type === 'category_tree' && !options.no_category_tree
 		// && session.is_namespace(titles.namespace, 'Category')
 		) {
-			if (!titles.categors_to_process) {
-				titles.categors_to_process = Object
-						.values(titles.flated_subcategories);
-				titles.categors_to_process.total_length = titles.categors_to_process.length;
+			if (!titles.categories_to_process) {
+				titles.categories_to_process = Object
+						.values(titles.flat_subcategories);
+				titles.categories_to_process.total_length = titles.categories_to_process.length;
 				// options = library_namespace.new_options(options);
 				wiki_API.add_session_to_options(session, options);
 				options.create_directory = {
@@ -3861,10 +3861,10 @@ function module_code(library_namespace) {
 				// Will create directory structure for download files.
 				= function(page_data, index, pages, options) {
 					// console.trace(pages);
-					// console.trace(titles.flated_subcategories);
+					// console.trace(titles.flat_subcategories);
 					// console.trace(pages.title);
 					// console.trace(session.remove_namespace(pages.title[wiki_API.KEY_generator_title]));
-					var category = titles.flated_subcategories[session
+					var category = titles.flat_subcategories[session
 							.remove_namespace(pages.title[wiki_API.KEY_generator_title])];
 					// console.trace([page_data, category]);
 					var file_path = get_path_of_category.call(category,
@@ -3873,21 +3873,23 @@ function module_code(library_namespace) {
 					return file_path;
 				};
 			}
-			if (titles.categors_to_process.length === 0) {
+			if (titles.categories_to_process.length === 0) {
 				session.next(callback, titles);
 				return;
 			}
-			var categors_to_process = titles.categors_to_process.pop();
+			var categories_to_process = titles.categories_to_process.pop();
 			library_namespace
 					.info('wiki_API_download: '
-							+ (titles.categors_to_process.total_length - titles.categors_to_process.length)
-							+ '/' + titles.categors_to_process.total_length
+							+ (titles.categories_to_process.total_length - titles.categories_to_process.length)
+							+ '/'
+							+ titles.categories_to_process.total_length
 							+ ' '
-							+ wiki_API.title_link_of(categors_to_process.title)
+							+ wiki_API
+									.title_link_of(categories_to_process.title)
 							+ '	of ' + wiki_API.title_link_of(titles.title));
 			wiki_API_download.call(session, wiki_API.generator_parameters(
 					'categorymembers', {
-						title : categors_to_process.title,
+						title : categories_to_process.title,
 						namespace : session.namespace('File'),
 						limit : 'max'
 					}), options, wiki_API_download.bind(session, titles,

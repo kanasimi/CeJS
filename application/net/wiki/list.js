@@ -529,6 +529,7 @@ function module_code(library_namespace) {
 			// = encodeURIComponent(continue_from);
 			continue_from;
 		}
+		// console.trace(options.next_mark);
 		for (continue_from in options.next_mark) {
 			if (continue_from !== 'continue') {
 				action[1][continue_from] = options.next_mark[continue_from];
@@ -1229,6 +1230,20 @@ function module_code(library_namespace) {
 							pages.at(-1).title || pages.at(-1));
 						}
 					}
+					if (pages.length === 0 && options.next_mark) {
+						// 增加辨識度。
+						for ( var continue_from in options.next_mark) {
+							if (continue_from !== 'continue') {
+								message += ' (' + continue_from + ': '
+								//
+								+ String(options.next_mark[continue_from])
+								//
+								.replace(/^(.{10})[\s\S]*?(.{8})$/, '$1...$2')
+										+ ')';
+								break;
+							}
+						}
+					}
 					library_namespace.info(message);
 				} else {
 					// Only preserve length property.
@@ -1879,7 +1894,7 @@ function module_code(library_namespace) {
 				// console.assert(cached_tree_list.depth === 0);
 				cached_tree_list.list_type = 'category_tree';
 				cached_tree_list.get_category_tree = get_category_tree;
-				cached_tree_list.flated_subcategories = tree_of_category;
+				cached_tree_list.flat_subcategories = tree_of_category;
 				return cached_tree_list;
 			});
 
