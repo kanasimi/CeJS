@@ -271,6 +271,15 @@ function module_code(library_namespace) {
 			parameter = get_list.default_parameter;
 		}
 
+		var action = {
+			action : 'query'
+		};
+		action[parameter] = type;
+		if (wiki_API.need_get_API_parameters(action, options, get_list,
+				arguments)) {
+			return;
+		}
+
 		if (typeof options === 'string' || typeof options === 'number') {
 			// 當作 namespace。
 			options = {
@@ -294,7 +303,6 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var action;
 		if (is_api_and_title(title, true)) {
 			// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 			action = title.clone();
@@ -563,6 +571,7 @@ function module_code(library_namespace) {
 		// console.trace(action);
 
 		set_parameters(action, options);
+		// wiki_API.extract_parameters(options, action, true);
 		// console.trace(action);
 
 		// TODO: 直接以是不是 .startsWith(prefix) 來判定是不是該加入 parameters。

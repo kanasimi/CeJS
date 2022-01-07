@@ -722,6 +722,16 @@ function module_code(library_namespace) {
 		for (var i = 0, l = data && data.length || 0; i < l; i++) {
 			if (!data[i])
 				continue;
+			if (library_namespace.is_Object(data[i])) {
+				this.set_parameters(data[i], options);
+				continue;
+			}
+			if (typeof data[i] !== 'string') {
+				library_namespace
+						.error('Must input {String} as search parameter!');
+				console.error(data[i]);
+				return;
+			}
 
 			// Warning: Search_parameters() 僅接受 UTF-8。
 			// 欲設定 charset，必須自行先處理 .search！

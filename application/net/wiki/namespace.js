@@ -352,12 +352,14 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// Should use wiki_API.extract_parameters(options, action, true);
 		if (typeof action[1] === 'string' && !/^[a-z]+=/.test(action[1])) {
 			library_namespace
 					.warn('set_parameters: Did not set action! Will auto add "action=".');
 			console.trace(action);
 			action[1] = 'action=' + action[1];
 		}
+		// wiki_API.extract_parameters(options.parameters, action[1], true);
 		action[1] = library_namespace.Search_parameters(action[1]);
 		action[1].set_parameters(options.parameters);
 	}
@@ -3233,14 +3235,16 @@ function module_code(library_namespace) {
 			return;
 
 		if (path === 'query') {
+			(wiki_API.page.query_modules
 			// for action=query&prop=... , &list=... , &meta=...
-			[ 'prop', 'meta', 'list' ].some(function(submodule) {
+			|| [ 'prop', 'meta', 'list' ]).some(function(submodule) {
 				if (parameters[submodule]) {
 					path += API_path_separator + parameters[submodule];
 					return true;
 				}
 			});
 		}
+		// console.trace(path);
 		return path;
 	}
 
@@ -3417,14 +3421,22 @@ function module_code(library_namespace) {
 	// @see ibrary_namespace.import_options()
 	function extract_parameters(from_parameters, action,/* use GET */
 	extract_to_action) {
-		action = library_namespace.setup_options(action);
-		var extract_to = extract_to_action ? action : /* use POST */Object
-				.create(null);
-		var path = extract_path_from_parameters(action)
-				|| extract_path_from_parameters(from_parameters);
-		var limited_parameters;
+		if (is_api_and_title(action))
+			action = action[1];
 		var session = wiki_API.session_of_options(action)
 				|| wiki_API.session_of_options(from_parameters);
+		var path = extract_path_from_parameters(action)
+				|| extract_path_from_parameters(from_parameters);
+
+		// action = library_namespace.setup_options(action);
+		action = library_namespace.Search_parameters(action);
+
+		var extract_to = extract_to_action ? action
+		// use POST
+		// : Object.create(null)
+		: new library_namespace.Search_parameters();
+
+		var limited_parameters;
 		if (session && path) {
 			limited_parameters = session.API_parameters[path];
 			if (!limited_parameters)
@@ -3441,7 +3453,7 @@ function module_code(library_namespace) {
 		// exclude {key: false}
 		parameters.forEach(function(key) {
 			// if (typeof key !== 'string') return;
-			if (key === KEY_API_parameters_prefix)
+			if (key === KEY_API_parameters_prefix || key === KEY_SESSION)
 				return;
 
 			/** Normalized key, used in `limited_parameters`. */
@@ -3476,11 +3488,11 @@ function module_code(library_namespace) {
 				// console.trace(limited_parameters);
 				try {
 					library_namespace
-							.warn('extract_parameters: Invalid value of ['
+							.warn('extract_parameters: Invalid value of key: ['
 									+ key + ']? ' + value);
 				} catch (e) {
 					library_namespace
-							.warn('extract_parameters: Invalid value of ['
+							.warn('extract_parameters: Invalid value of key: ['
 									+ key + ']?');
 				}
 			}

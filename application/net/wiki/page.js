@@ -3786,9 +3786,13 @@ function module_code(library_namespace) {
 			directory = library_namespace.append_path_separator(
 					options.directory, directory);
 		}
-		if (options.create_directory)
+		if (options.create_directory !== false
+				&& !library_namespace.fso_exists(directory)) {
 			library_namespace.create_directory(directory,
-					options.create_directory);
+					options.create_directory || {
+						recursive : true
+					});
+		}
 
 		if (file_name)
 			path.push(session.remove_namespace(file_name));
@@ -3854,9 +3858,6 @@ function module_code(library_namespace) {
 				titles.categories_to_process.total_length = titles.categories_to_process.length;
 				// options = library_namespace.new_options(options);
 				wiki_API.add_session_to_options(session, options);
-				options.create_directory = {
-					recursive : true
-				};
 				options.download_file_to
 				// Will create directory structure for download files.
 				= function(page_data, index, pages, options) {
