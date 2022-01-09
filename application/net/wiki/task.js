@@ -1218,7 +1218,7 @@ function module_code(library_namespace) {
 		case 'upload':
 			var tmp = next[1];
 			if (typeof tmp === 'object'
-			// wiki.upload(file_data + options, callback)
+			// wiki.upload({Object}file_data + options, callback)
 			&& (tmp = tmp.file_path
 			// Get media from URL first.
 			|| tmp.media_url || tmp.file_url)) {

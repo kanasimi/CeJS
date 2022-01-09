@@ -1120,12 +1120,14 @@ function module_code(library_namespace) {
 			.replace(/#/g, '-');
 			// https://www.mediawiki.org/wiki/Manual:$wgFileExtensions
 		}
+		var session = wiki_API.session_of_options(options);
 		if (options.show_message && post_data.file.url) {
 			library_namespace.log(file_path + '\nUpload to → '
-					+ wiki_API.title_link_of('File:' + post_data.filename));
+					+ wiki_API.title_link_of(session.to_namespace(
+					// 'File:' +
+					post_data.filename, 'File')));
 		}
 
-		var session = wiki_API.session_of_options(options);
 		if (session && session.API_URL && options.check_media) {
 			// TODO: Skip exists file
 			// @see 20181016.import_earthquake_shakemap.js
@@ -1163,6 +1165,7 @@ function module_code(library_namespace) {
 		{upload:{result:'Success',filename:'',imageinfo:{}}}
 
 		{"error":{"code":"fileexists-no-change","info":"The upload is an exact duplicate of the current version of [[:File:name.jpg]].","stasherrors":[{"message":"uploadstash-exception","params":["UploadStashBadPathException","Path doesn't exist."],"code":"uploadstash-exception","type":"error"}],"*":"See https://test.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1279"}
+		{"error":{"code":"verification-error","info":"File extension \".gif\" does not match the detected MIME type of the file (image/jpeg).","details":["filetype-mime-mismatch","gif","image/jpeg"],"*":"See https://commons.wikimedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/postorius/lists/mediawiki-api-announce.lists.wikimedia.org/&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1450"}
 		</code>
 		 */
 		|| !(data = data.upload) || data.result !== 'Success') {
@@ -1220,7 +1223,9 @@ function module_code(library_namespace) {
 			options.page_text_updater = options.page_text_updater
 					.to_page_text_updater();
 		}
-		var file_path = 'File:' + data.filename;
+		var session = wiki_API.session_of_options(options);
+		// 'File:' +
+		var file_path = session.to_namespace(data.filename, 'File');
 		// library_namespace.info('upload_callback: options.page_text_updater');
 		// console.log(JSON.stringify(data));
 		// console.log(file_path);
