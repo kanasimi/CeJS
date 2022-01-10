@@ -784,22 +784,30 @@ function module_code(library_namespace) {
 					}
 
 					pages = Object.assign(data, pages);
+					// console.assert(Array.isArray(pages));
 				} else if (data.results) {
 					// e.g.,
 					// https://en.wikipedia.org/w/api.php?action=query&list=querypage&qppage=MediaStatistics&qplimit=max&format=json&utf8
 					pages = Object.assign(data.results, pages);
 					pages.data = data;
+					// console.assert(Array.isArray(pages));
 				} else {
 					// e.g., .userinfo('*')
 					pages = Object.assign(data, pages);
+					// console.assert(library_namespace.is_Object(pages));
 				}
 
 				if (get_list.post_processor[type]) {
-					pages.forEach(get_list.post_processor[type]);
+					if (Array.isArray(pages))
+						pages.forEach(get_list.post_processor[type]);
+					else
+						get_list.post_processor[type](pages);
 				}
 
-				library_namespace.debug(wiki_API.title_link_of(title) + ': '
-						+ pages.length + ' page(s)', 2, 'get_list');
+				if (Array.isArray(pages)) {
+					library_namespace.debug(wiki_API.title_link_of(title)
+							+ ': ' + pages.length + ' page(s)', 2, 'get_list');
+				}
 
 				run_for_each();
 				return;

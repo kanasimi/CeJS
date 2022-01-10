@@ -2090,8 +2090,8 @@ function module_code(library_namespace) {
 		} else {
 			if (session.login_user_info
 					&& Array.isArray(session.login_user_info.rights)) {
-				// PATTERN_BOT_NAME.test(session.token &&
-				// session.token.login_user_name)
+				// session.token &&
+				// PATTERN_BOT_NAME.test(session.token.login_user_name)
 				max_size = session.login_user_info.rights
 						.includes('apihighlimits');
 			} else {
@@ -2798,9 +2798,7 @@ function module_code(library_namespace) {
 						count_summary += initial_target_length;
 					}
 
-					count_summary = ': '
-					// + (new Date).format('%4Y%2m%2d') + ': '
-					+ gettext('%1 pages done', count_summary);
+					count_summary = gettext('%1 pages done', count_summary);
 					// console.trace(count_summary);
 
 					if (log_item.report) {
@@ -2856,13 +2854,13 @@ function module_code(library_namespace) {
 				options = {
 					// new section. append 章節/段落 after all, at bottom.
 					section : 'new',
-					// 新章節的標題。
-					sectiontitle : '[' + (new Date).format({
+					// 新章節的標題。章節標題盡量使用可被引用的格式。
+					sectiontitle : (new Date).format({
 						zone : timezone,
 						format : config.work_title_date_format
 						//
 						|| session.work_title_date_format
-					}) + ' UTC' + (timezone < 0 ? '' : '+') + timezone + ']'
+					}) + ' UTC' + (timezone < 0 ? '' : '+') + timezone + ': '
 					//
 					+ count_summary + (config.log_section_title_postfix
 					//
@@ -3298,7 +3296,7 @@ function module_code(library_namespace) {
 			|| session.login_user_info.name !== session.token.login_user_name)) {
 				session.running = false;
 				session.userinfo('rights|blockinfo|centralids', function(
-						userinfo) {
+						userinfo, error) {
 					// console.trace(userinfo);
 					session.login_user_info = userinfo;
 					_next();
