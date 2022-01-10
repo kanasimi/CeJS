@@ -3280,6 +3280,7 @@ function module_code(library_namespace) {
 		delete callback_queue[path];
 	}
 
+	// TODO: 'query+*'
 	function need_get_API_parameters(path, options, caller, caller_arguments) {
 		var session = wiki_API.session_of_options(options);
 		if (!session) {

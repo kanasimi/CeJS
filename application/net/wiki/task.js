@@ -2025,7 +2025,7 @@ function module_code(library_namespace) {
 		// 8000: 8192 - (除了 piece_list 外必要之字串長)。
 		//
 		// 8192: https://httpd.apache.org/docs/current/mod/core.html
-		// defaule LimitRequestLine: 8190
+		// default LimitRequestLine: 8190
 		//
 		// assert: 除了 piece_list 外必要之字串長 < 192
 		// e.g.,
@@ -2079,17 +2079,36 @@ function module_code(library_namespace) {
 		return index;
 	}
 
+	// https://www.mediawiki.org/w/api.php
+	// Use higher limits in API queries (slow queries: 500; fast queries: 5000).
+
 	// @inner
 	function max_slice_size(session, config, this_slice) {
-		var max_size = session.slow_query_limit || (
-		// https://www.mediawiki.org/w/api.php?action=help&modules=query
-		// titles/pageids: Maximum number of values is 50 (500 for bots).
-		// 不想頁面內容過多而被截斷，用400以下較保險。
-		PATTERN_BOT_NAME.test(session.token && session.token.login_user_name)
-		// https://www.mediawiki.org/w/api.php
-		// slow queries: 500; fast queries: 5000
-		// The limits for slow queries also apply to multivalue parameters.
-		? 500 : 50);
+		var max_size;
+		if (session.slow_query_limit > 0) {
+			max_size = session.slow_query_limit;
+		} else {
+			if (session.login_user_info
+					&& Array.isArray(session.login_user_info.rights)) {
+				// PATTERN_BOT_NAME.test(session.token &&
+				// session.token.login_user_name)
+				max_size = session.login_user_info.rights
+						.includes('apihighlimits');
+			} else {
+				// default: max_size = 50;
+			}
+
+			var prop = 'query+siteinfo';
+			prop = session.API_parameters && session.API_parameters[prop]
+			prop = prop && prop.prop;
+			// console.trace([max_size, prop]);
+
+			max_size = max_size ? prop && prop.highlimit || 500
+			// https://www.mediawiki.org/w/api.php?action=help&modules=query
+			// Maximum number of values is 50 (500 for clients allowed higher
+			// limits).
+			: prop && prop.lowlimit || 50;
+		}
 
 		if (config && (config.slice | 0) >= 1) {
 			max_size = Math.min(config.slice | 0, max_size);
@@ -3247,6 +3266,7 @@ function module_code(library_namespace) {
 		user_name === CeL.wiki.normalize_title(wiki.token.login_user_name);
 	}
 	// "owner_name@user_name" → "user_name"
+	// Should use session.login_user_info.name
 	wiki_API.extract_login_user_name = function(lgname) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=login
 		var matched = lgname.match(/@(.+)$/);
@@ -3268,6 +3288,24 @@ function module_code(library_namespace) {
 	wiki_API.login = function(user_name, password, login_options) {
 		var error;
 		function _next() {
+			// popup 'login'.
+			// assert: session.actions[0] === ['login']
+			if (session.actions[0] && session.actions[0][0] === 'login')
+				session.actions.shift();
+
+			if (!error && (!session.login_user_info
+			// get the user right to check 'apihighlimits'
+			|| session.login_user_info.name !== session.token.login_user_name)) {
+				session.running = false;
+				session.userinfo('rights|blockinfo|centralids', function(
+						userinfo) {
+					// console.trace(userinfo);
+					session.login_user_info = userinfo;
+					_next();
+				});
+				return;
+			}
+
 			callback
 			// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
 			// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
@@ -3277,10 +3315,6 @@ function module_code(library_namespace) {
 			session.token.login_user_name, error));
 			library_namespace.debug('已登入 [' + session.token.lgname
 					+ ']。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
-			// popup 'login'.
-			// assert: session.actions[0] === ['login']
-			if (session.actions[0] && session.actions[0][0] === 'login')
-				session.actions.shift();
 			session.next();
 		}
 

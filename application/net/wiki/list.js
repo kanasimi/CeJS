@@ -789,6 +789,9 @@ function module_code(library_namespace) {
 					// https://en.wikipedia.org/w/api.php?action=query&list=querypage&qppage=MediaStatistics&qplimit=max&format=json&utf8
 					pages = Object.assign(data.results, pages);
 					pages.data = data;
+				} else {
+					// e.g., .userinfo('*')
+					pages = Object.assign(data, pages);
 				}
 
 				if (get_list.post_processor[type]) {
@@ -1138,6 +1141,12 @@ function module_code(library_namespace) {
 		// 取得有關使用者清單的資訊。
 		users : [ 'us', , function(title_parameter) {
 			return title_parameter.replace(/^&ustitle=/, '&ususers=');
+		} ],
+
+		// .userinfo(['rights'])
+		userinfo : [ 'ui', 'meta', function(title_parameter) {
+			// console.trace(title_parameter);
+			return title_parameter.replace(/^&title=/, '&uiprop=');
 		} ],
 
 		// 從日誌中獲取事件。
