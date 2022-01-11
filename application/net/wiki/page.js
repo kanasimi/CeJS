@@ -28,6 +28,8 @@ typeof CeL === 'function' && CeL.run({
 	+ '|data.'
 	// CeL.date.String_to_Date(), Julian_day(), .to_millisecond(): CeL.data.date
 	+ '|data.date.'
+	// for library_namespace.directory_exists
+	+ '|application.storage.'
 	// for library_namespace.get_URL
 	+ '|application.net.Ajax.' + '|application.net.wiki.'
 	// load MediaWiki module basic functions
@@ -3787,7 +3789,7 @@ function module_code(library_namespace) {
 					options.directory, directory);
 		}
 		if (options.create_directory !== false
-				&& !library_namespace.fso_exists(directory)) {
+				&& !library_namespace.directory_exists(directory)) {
 			library_namespace.create_directory(directory,
 					options.create_directory || {
 						recursive : true
