@@ -33,7 +33,7 @@
 	"application.net.wiki"	"no change"	"Used as log message. 無更動 沒有變更 No modification made"	"無改變"		"no change"	"無変更"		
 	"application.net.wiki"	"finished"	"Used as log message."	"完成"		"finished"	"完成"		
 	"application.net.wiki"	"finished: %1"	"Used as log message."	"結束：%1"		"finished: %1"	"終了：%1"		
-	"application.net.wiki"	"First, use %1 to get %2 pages."	"Used as log message. Showing elapsed time. e.g., First, use 2 s to get 20 pages."	"首先使用 %1 以取得 %2 個頁面內容。"		"First, use %1 to get %2 pages."	"まずは %1 かかって、%2 ページを取得する。"		
+	"application.net.wiki"	"First, it takes %1 to get %2 pages."	"Used as log message. Showing elapsed time. e.g., First, use 2 s to get 20 pages."	"首先使用 %1 以取得 %2 個頁面內容。"		"First, it takes %1 to get %2 pages."	"まずは %1 かかって、%2 ページを取得する。"		
 	"application.net.wiki"	"%1 pages done"	"Used as log message at task report page title and section title."	"完成 %1 條目"		"%1 pages done"	"%1 本の記事処理済み"		
 	"application.net.wiki"	", %1%2 pages no change"	"Used as log message at report."	"，%1%2 條目未作變更"		", %1%2 pages no change"	"。%1%2 本の記事変更なし"		
 	"application.net.wiki"	"all "	"Used as log message at report."	"所有 "		"all "	"全 "		
