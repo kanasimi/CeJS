@@ -2202,6 +2202,9 @@ function module_code(library_namespace) {
 			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
 			shallow_resolve_escaped(attributes || '', options, queue),
 					'tag_attributes');
+			// 注意: attribute_token.attributes 中的 template 都不包含
+			// template_token.expand() !
+			// 可利用 for_each_token() 設定 template_token.expand()。
 			attributes.attributes = extract_tag_attributes(attributes
 					.toString());
 			return attributes;

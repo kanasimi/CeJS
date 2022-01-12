@@ -1597,8 +1597,9 @@ function module_code(library_namespace) {
 		function register_anchor(anchor, token) {
 			anchor = normalize_anchor(anchor);
 			// 以首個出現的為準。
-			if (anchor && !(anchor in anchor_hash))
+			if (anchor && !(anchor in anchor_hash)) {
 				anchor_hash[anchor] = token;
+			}
 		}
 
 		// options: pass session. for options.language
@@ -1729,6 +1730,14 @@ function module_code(library_namespace) {
 						// token = _set_wiki_type([ token ], 'plain');
 						anchor = [ anchor ];
 					}
+					// e.g., {{Wikicite|ref={{sfnref|...}} }} .expand() 之後，
+					// 解析 id="{{sfnref|...}}"
+					for_each_token.call(anchor, 'transclusion', function(
+							template_token, index, parent) {
+						// replace by expanded text
+						if (template_token.expand)
+							parent[index] = template_token.expand();
+					}, _options);
 					anchor = anchor.map(function(token) {
 						if (token.type === 'magic_word_function'
 						// && token.is_magic_word
@@ -1737,6 +1746,10 @@ function module_code(library_namespace) {
 						}
 						return token;
 					});
+				}
+				if (false && /{{/.test(normalize_anchor(anchor))) {
+					// Should not go to here.
+					console.trace([ anchor, attribute_token ]);
 				}
 				register_anchor(anchor, attribute_token);
 			}
