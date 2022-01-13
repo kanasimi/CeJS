@@ -1387,14 +1387,21 @@ function module_code(library_namespace) {
 	 */
 	function trim() {
 		// The repeat function is intentionally generic
-		return String(this)
+		var string = String(this)
+
+		// https://blog.stevenlevithan.com/archives/faster-trim-javascript
+		.replace(/^\s\s*/, '');
+		var PATTERN_SPACE = /\s/, index = string.length;
+		while (PATTERN_SPACE.test(string.charAt(--index)))
+			;
+		return string.slice(0, index + 1);
 
 		// .replace(/\s+$|^\s+/g, '');
 		// .replace(/^\s+|\s+$/g, '');
 
 		// The definition of white space is the union of WhiteSpace and
 		// LineTerminator.
-		.replace(/[\s\n]+$|^[\s\n]+/g, '');
+		// .replace(/[\s\n]+$|^[\s\n]+/g, '');
 	}
 
 	// String.prototype.trimStart(), String.prototype.trimLeft()
