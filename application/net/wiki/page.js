@@ -3810,11 +3810,12 @@ function module_code(library_namespace) {
 		wiki_API_download() will:
 		# Get category tree without files, using session.category_tree(). session.category_tree() will use categoryinfo and categorymembers (category only) to increase speed.
 		# Back to wiki_API_download(). For each category, get imageinfo (with URL, latest date) with generator:categorymembers to get files in category.
-		# For each file, check timestamp and download new file.
+		# For each file, check timestamp and download new file with options.max_threads. (function download_next_file)
 		</code>
 		 */
 		wiki_session.download('Category:name', {
-			directory : './'
+			directory : './',
+			max_threads : 4
 		}, function(file_data_list, error) {
 		});
 		wiki_session.download('File:name', {
@@ -3942,6 +3943,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------------
 
+		var threads_now = 0;
 		// For each file, check timestamp and download new file.
 		function download_next_file(data, error, XMLHttp) {
 			var page_data;
@@ -3951,7 +3953,9 @@ function module_code(library_namespace) {
 				if (XMLHttp && XMLHttp.file_name) {
 					page_data.file_name = XMLHttp.file_name;
 				}
-				if (error) {
+				if (error === library_namespace.get_URL_cache.NO_NEWS) {
+					page_data.no_new_data = true;
+				} else if (error) {
 					page_data.error = error;
 					titles.error_titles.push(page_data.title);
 					library_namespace.error('Cannot download '
@@ -3959,11 +3963,14 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (options.index >= titles.length) {
+			if (threads_now === 0 && options.index >= titles.length) {
 				session.next(callback, titles, titles.error_titles.length > 0
 						&& titles.error_titles);
 				return;
 			}
+
+			// ----------------------------------
+			// prepare to download
 
 			page_data = titles[options.index++];
 			// console.trace(titles);
@@ -3995,10 +4002,22 @@ function module_code(library_namespace) {
 				}
 			}
 
+			// ----------------------------------
+			// downloading
+
+			threads_now++;
 			// console.trace(page_data);
 			library_namespace.get_URL_cache(
-					imageinfo.thumburl || imageinfo.url, download_next_file,
-					options);
+			//
+			imageinfo.thumburl || imageinfo.url, function() {
+				threads_now--;
+				download_next_file.apply(null, arguments);
+			}, options);
+
+			if (options.index < titles.length ? threads_now < options.max_threads
+					: threads_now === 0) {
+				download_next_file();
+			}
 		}
 
 		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bimageinfo
