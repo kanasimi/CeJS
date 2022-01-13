@@ -3804,6 +3804,15 @@ function module_code(library_namespace) {
 	}
 
 	if (false) {
+		/**
+		 * <code>
+		When executing `session.download('Category:name', ...)`,
+		wiki_API_download() will:
+		# Get category tree without files, using session.category_tree(). session.category_tree() will use categoryinfo and categorymembers (category only) to increase speed.
+		# Back to wiki_API_download(). For each category, get imageinfo (with URL, latest date) with generator:categorymembers to get files in category.
+		# For each file, check timestamp and download new file.
+		</code>
+		 */
 		wiki_session.download('Category:name', {
 			directory : './'
 		}, function(file_data_list, error) {
@@ -3829,6 +3838,8 @@ function module_code(library_namespace) {
 		// console.trace(next);
 		if (typeof titles === 'string' || wiki_API.is_page_data(titles)) {
 			if (session.is_namespace(titles, 'Category')) {
+				// Get category tree without files, using
+				// session.category_tree().
 				session.category_tree(titles, function(list, error) {
 					if (error) {
 						callback(undefined, error);
@@ -3854,6 +3865,8 @@ function module_code(library_namespace) {
 		if (titles.list_type === 'category_tree' && !options.no_category_tree
 		// && session.is_namespace(titles.namespace, 'Category')
 		) {
+			// For each category, get imageinfo (with URL, latest date) with
+			// generator:categorymembers to get files in category.
 			if (!titles.categories_to_process) {
 				titles.categories_to_process = Object
 						.values(titles.flat_subcategories);
@@ -3929,6 +3942,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------------
 
+		// For each file, check timestamp and download new file.
 		function download_next_file(data, error, XMLHttp) {
 			var page_data;
 			if (options.index > 0 && (page_data = titles[options.index - 1])) {
