@@ -3816,6 +3816,10 @@ function module_code(library_namespace) {
 		wiki_session.download('Category:name', {
 			directory : './',
 			max_threads : 4,
+			// depth of category
+			depth : 4,
+			// A function to filter result pages. Return `true` if you want to
+			// keep the element.
 			page_filter : function(page_data) {
 				return page_data.title.includes('word');
 			}
@@ -3853,10 +3857,12 @@ function module_code(library_namespace) {
 						wiki_API_download
 								.call(session, list, options, callback);
 					}
-				}, {
+				},
+				// pass options.depth: depth of category
+				Object.assign({
 					namespace : 'Category',
 					set_attributes : true
-				});
+				}, options));
 				return;
 			}
 
