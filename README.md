@@ -93,6 +93,7 @@ CeL.run([ 'data.math', 'application.debug.log' ], function() {
 Since the frequent updates of the code, some features may work at the latest version only; it's recommended download the latest version at GitHub, and then configure the library.
 
 #### Using a setup script:
+For using the alpha version of CeJS, you can set `{ "dependencies": {"cejs": "github:kanasimi/cejs"}}` in the package.json, or use a setup script:
 1. Install node.js, wget/curl and [7-Zip](https://en.wikipedia.org/wiki/7-Zip). e.g.,
 
    ```bash
