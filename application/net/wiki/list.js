@@ -571,7 +571,7 @@ function module_code(library_namespace) {
 		// console.trace(action);
 
 		set_parameters(action, options);
-		// wiki_API.extract_parameters(options, action, true);
+		// action = wiki_API.extract_parameters(options, action, true);
 		// console.trace(action);
 
 		// TODO: 直接以是不是 .startsWith(prefix) 來判定是不是該加入 parameters。

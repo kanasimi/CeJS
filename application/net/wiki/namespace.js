@@ -352,13 +352,15 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// Should use wiki_API.extract_parameters(options, action, true);
+		// Should use
+		// `action = wiki_API.extract_parameters(options, action, true);`
 		if (typeof action[1] === 'string' && !/^[a-z]+=/.test(action[1])) {
 			library_namespace
 					.warn('set_parameters: Did not set action! Will auto add "action=".');
 			console.trace(action);
 			action[1] = 'action=' + action[1];
 		}
+		// action[1] =
 		// wiki_API.extract_parameters(options.parameters, action[1], true);
 		action[1] = library_namespace.Search_parameters(action[1]);
 		action[1].set_parameters(options.parameters);
@@ -2526,8 +2528,8 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------
 
-		wiki_API.extract_parameters(options, action, true);
-		// console.trace(action);
+		action = wiki_API.extract_parameters(options, action, true);
+		// console.trace([ options, action ]);
 
 		wiki_API.query(action, function(response, error) {
 			// console.log(JSON.stringify(response));
@@ -2612,8 +2614,7 @@ function module_code(library_namespace) {
 					+ interwikimap.map(function(interwiki) {
 						return interwiki.prefix;
 					}).join('|') + ')(?::(.*))?$', 'i');
-			// Release memory. 釋放被占用的記憶體。
-			// delete configurations.interwikimap;
+			// 不可刪除 configurations.interwikimap: 還會用到。
 		}
 
 		var languagevariants = configurations.languagevariants;
@@ -3258,7 +3259,7 @@ function module_code(library_namespace) {
 		// ...
 
 		// Place in front of function wiki_API.query() code for GET:
-		wiki_API.extract_parameters(options, action, true);
+		action = wiki_API.extract_parameters(options, action, true);
 		// or for POST:
 		// var post_data = wiki_API.extract_parameters(options, action);
 
@@ -3421,7 +3422,7 @@ function module_code(library_namespace) {
 	// 應盡量少用混雜的方法，如此可能有安全疑慮(security problem)。
 	// @see ibrary_namespace.import_options()
 	function extract_parameters(from_parameters, action,/* use GET */
-	extract_to_action) {
+	return_new_action) {
 		if (is_api_and_title(action))
 			action = action[1];
 		var session = wiki_API.session_of_options(action)
@@ -3429,10 +3430,20 @@ function module_code(library_namespace) {
 		var path = extract_path_from_parameters(action)
 				|| extract_path_from_parameters(from_parameters);
 
-		// action = library_namespace.setup_options(action);
-		action = library_namespace.Search_parameters(action);
+		if (return_new_action) {
+			// 必須採用:
+			// action = wiki_API.extract_parameters(options, action, true);
+			// 或者:
+			// post_data = wiki_API.extract_parameters(options, action);
 
-		var extract_to = extract_to_action ? action
+			// 而非單純 `wiki_API.extract_parameters(options, action, true);`
+			// 這樣可能不會更新 action !
+		} else {
+			// action = library_namespace.setup_options(action);
+			action = library_namespace.Search_parameters(action);
+		}
+
+		var extract_to = return_new_action ? action
 		// use POST
 		// : Object.create(null)
 		: new library_namespace.Search_parameters();
@@ -3449,12 +3460,15 @@ function module_code(library_namespace) {
 		}
 		var parameters = action.parameters || Object.keys(from_parameters);
 		// console.trace(parameters);
+		// console.trace(limited_parameters);
 		var prefix = limited_parameters
 				&& limited_parameters[KEY_API_parameters_prefix];
 		// exclude {key: false}
 		parameters.forEach(function(key) {
 			// if (typeof key !== 'string') return;
-			if (key === KEY_API_parameters_prefix || key === KEY_SESSION)
+
+			// !key || key === KEY_SESSION will be deleted later
+			if (key === KEY_API_parameters_prefix)
 				return;
 
 			/** Normalized key, used in `limited_parameters`. */
@@ -3465,7 +3479,7 @@ function module_code(library_namespace) {
 					if (key.startsWith(prefix)) {
 						_key = key.slice(prefix.length);
 					} else if ((prefix + key) in extract_to) {
-						// 以準確名稱為準。
+						// Skip this: 以準確名稱為準。
 						return;
 					}
 				}
@@ -3553,6 +3567,7 @@ function module_code(library_namespace) {
 			}
 			extract_to[key] = value;
 		});
+
 		delete extract_to[''];
 		delete extract_to[KEY_SESSION];
 		return extract_to;

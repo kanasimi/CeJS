@@ -3012,7 +3012,7 @@ function module_code(library_namespace) {
 						+ ') is not newer than local file ('
 						+ file_status.mtime + '): ' + file_name + '', 1,
 						'get_URL_cache_node');
-				onload();
+				onload(undefined, _.get_URL_cache.NO_NEWS);
 				return;
 			}
 		}
@@ -3037,7 +3037,7 @@ function module_code(library_namespace) {
 					if ((file_status.mtimeMs || file_status.mtime)
 					//
 					- Date.parse(options.web_resource_date) > -1) {
-						// File on web is old.
+						// No new file on web.
 						onload(data);
 						return;
 					}
@@ -3187,6 +3187,11 @@ function module_code(library_namespace) {
 	if (is_nodejs) {
 		_.get_URL_cache = get_URL_cache_node;
 	}
+
+	_.get_URL_cache.NO_NEWS = typeof Symbol === 'function' ? Symbol('no news')
+			: {
+				'no news' : true
+			};
 
 	// ---------------------------------------------------------------------//
 
