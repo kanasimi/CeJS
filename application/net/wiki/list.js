@@ -771,7 +771,7 @@ function module_code(library_namespace) {
 					// || options.filter
 					;
 					if (page_filter) {
-						// console.log(page_filter);
+						// console.trace(page_filter);
 					}
 					if (typeof page_filter === 'function') {
 						// function page_filter(page_data){return passed;}
@@ -788,6 +788,10 @@ function module_code(library_namespace) {
 				} else if (data.results) {
 					// e.g.,
 					// https://en.wikipedia.org/w/api.php?action=query&list=querypage&qppage=MediaStatistics&qplimit=max&format=json&utf8
+					if (typeof page_filter === 'function') {
+						// function page_filter(page_data){return passed;}
+						data.results = data.results.filter(page_filter);
+					}
 					pages = Object.assign(data.results, pages);
 					pages.data = data;
 					// console.assert(Array.isArray(pages));
@@ -818,8 +822,13 @@ function module_code(library_namespace) {
 			// console.log(data.query);
 			data = data.query.pages;
 			// console.trace(data);
+			// console.trace(options.page_filter);
 			for ( var pageid in data) {
 				var page = data[pageid];
+				if (typeof options.page_filter === 'function'
+						&& !options.page_filter(page)) {
+					continue;
+				}
 				if (!(type in page)) {
 					// error!
 					continue;

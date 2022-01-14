@@ -3810,12 +3810,15 @@ function module_code(library_namespace) {
 		wiki_API_download() will:
 		# Get category tree without files, using session.category_tree(). session.category_tree() will use categoryinfo and categorymembers (category only) to increase speed.
 		# Back to wiki_API_download(). For each category, get imageinfo (with URL, latest date) with generator:categorymembers to get files in category.
-		# For each file, check timestamp and download new file with options.max_threads. (function download_next_file)
+		# For each file, check the file name and timestamp (get from generator:categorymembers), only download new file. (function download_next_file with options.max_threads)
 		</code>
 		 */
 		wiki_session.download('Category:name', {
 			directory : './',
-			max_threads : 4
+			max_threads : 4,
+			page_filter : function(page_data) {
+				return page_data.title.includes('word');
+			}
 		}, function(file_data_list, error) {
 		});
 		wiki_session.download('File:name', {
@@ -3825,6 +3828,7 @@ function module_code(library_namespace) {
 	}
 
 	// Download files to local path.
+	// TODO: 鏡像: 從本地目錄中刪除遠端不存在的文件
 
 	// wiki_API.download()
 	// wiki_session.download(file_title, local_path || options, callback);
@@ -3944,7 +3948,8 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------------
 
 		var threads_now = 0;
-		// For each file, check timestamp and download new file.
+		// For each file, check the file name and timestamp (get from
+		// generator:categorymembers), only download new file.
 		function download_next_file(data, error, XMLHttp) {
 			var page_data;
 			if (options.index > 0 && (page_data = titles[options.index - 1])) {
@@ -3963,6 +3968,7 @@ function module_code(library_namespace) {
 				}
 			}
 
+			// console.trace([ threads_now, options.index, titles.length ]);
 			if (threads_now === 0 && options.index >= titles.length) {
 				session.next(callback, titles, titles.error_titles.length > 0
 						&& titles.error_titles);
@@ -4031,6 +4037,8 @@ function module_code(library_namespace) {
 			imageinfo_options.iiurlwidth = options.width;
 		if (options.height > 0)
 			imageinfo_options.iiurlheight = options.height;
+		if (options.page_filter)
+			imageinfo_options.page_filter = options.page_filter;
 
 		// console.trace(imageinfo_options);
 		// page title to raw data URL
@@ -4040,6 +4048,7 @@ function module_code(library_namespace) {
 				session.next(callback, titles, pages.error);
 				return;
 			}
+			// console.trace([ pages, imageinfo_options ]);
 			titles = pages;
 			options.index = 0;
 			titles.error_titles = [];
