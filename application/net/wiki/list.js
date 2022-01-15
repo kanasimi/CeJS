@@ -246,7 +246,9 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback(pages, error)<br />
 	 *            注意: arguments 與 get_list() 之 callback 連動。
 	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項
+	 *            附加參數/設定選擇性/特殊功能與選項. options.page_filter(): A function to
+	 *            filter result pages. Return `true` if you want to keep the
+	 *            element. filter result pages.
 	 */
 	function get_list(type, title, callback, options) {
 		// console.trace(title);
@@ -426,6 +428,7 @@ function module_code(library_namespace) {
 		//
 		wiki_API.max_slice_size(session, options/* , action[1] */))) {
 			options.next_title_index = 0;
+			// multiple pages
 			options.multi = true;
 			options.starting_time = Date.now();
 			var get_next_batch = function(pages, error) {
@@ -1039,6 +1042,11 @@ function module_code(library_namespace) {
 
 		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bimageinfo
 		imageinfo : [ 'ii', 'prop', title_to_plural ],
+		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bstashimageinfo
+		stashimageinfo : [ 'sii', 'prop', title_to_plural ],
+		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bvideoinfo
+		videoinfo : [ 'vi', 'prop', title_to_plural ],
+		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Btranscodestatus
 
 		// 列出在指定分類中的所有頁面。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bcategorymembers
@@ -1603,7 +1611,7 @@ function module_code(library_namespace) {
 		/** {ℕ⁰:Natural+0}當前執行階層數。depth 越大時，獲得的資訊越少。 */
 		var depth = 0,
 		/**
-		 * {ℕ⁰:Natural+0}最大查詢階層數。<br />
+		 * {ℕ⁰:Natural+0}最大查詢階層數。 depth of categories<br />
 		 * 0: 只包含 root_category 本身的檔案與子類別資訊。<br />
 		 * 1: 包含 1 層子類別的檔案與子類別資訊。以此類推。
 		 */
@@ -1697,6 +1705,7 @@ function module_code(library_namespace) {
 
 				if (cached_tree_list) {
 					// using cache: 已取得 tree_of_category[page_name] 的資料。
+					// The shallowest category will be selected.
 					return false;
 				}
 

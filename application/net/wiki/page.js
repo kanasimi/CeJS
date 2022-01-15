@@ -3809,15 +3809,19 @@ function module_code(library_namespace) {
 		When executing `session.download('Category:name', ...)`,
 		wiki_API_download() will:
 		# Get category tree without files, using session.category_tree(). session.category_tree() will use categoryinfo and categorymembers (category only) to increase speed.
-		# Back to wiki_API_download(). For each category, get imageinfo (with URL, latest date) with generator:categorymembers to get files in category.
+		# Back to wiki_API_download(). For each category, get file_info (imageinfo with URL, latest date) with generator:categorymembers to get files in category.
 		# For each file, check the file name and timestamp (get from generator:categorymembers), only download new file. (function download_next_file with options.max_threads)
 		</code>
 		 */
 		wiki_session.download('Category:name', {
 			directory : './',
 			max_threads : 4,
-			// depth of category
+			// depth of categories
 			depth : 4,
+			// Only download files with these formats.
+			// download_derivatives : ['wav', 'mp3', 'ogg'],
+			// Warning: Will skip downloading if there is no new file!
+			download_derivatives : 'mp3',
 			// A function to filter result pages. Return `true` if you want to
 			// keep the element.
 			page_filter : function(page_data) {
@@ -3832,7 +3836,12 @@ function module_code(library_namespace) {
 	}
 
 	// Download files to local path.
-	// TODO: 鏡像: 從本地目錄中刪除遠端不存在的文件
+
+	// TODO:
+	// 鏡像: 從本地目錄中刪除遠端不存在的文件
+	// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bvideoinfo
+	// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Btranscodestatus
+	// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bstashimageinfo
 
 	// wiki_API.download()
 	// wiki_session.download(file_title, local_path || options, callback);
@@ -3858,7 +3867,7 @@ function module_code(library_namespace) {
 								.call(session, list, options, callback);
 					}
 				},
-				// pass options.depth: depth of category
+				// pass options.depth: depth of categories
 				Object.assign({
 					namespace : 'Category',
 					set_attributes : true
@@ -3876,8 +3885,9 @@ function module_code(library_namespace) {
 		if (titles.list_type === 'category_tree' && !options.no_category_tree
 		// && session.is_namespace(titles.namespace, 'Category')
 		) {
-			// For each category, get imageinfo (with URL, latest date) with
-			// generator:categorymembers to get files in category.
+			// Back to wiki_API_download(). For each category, get file_info
+			// (imageinfo with URL, latest date) with generator:categorymembers
+			// to get files in category.
 			if (!titles.categories_to_process) {
 				titles.categories_to_process = Object
 						.values(titles.flat_subcategories);
@@ -3886,7 +3896,7 @@ function module_code(library_namespace) {
 				wiki_API.add_session_to_options(session, options);
 				options.download_file_to
 				// Will create directory structure for download files.
-				= function(page_data, index, pages, options) {
+				= function(file_url, page_data, index, pages, options) {
 					// console.trace(pages);
 					// console.trace(titles.flat_subcategories);
 					// console.trace(pages.title);
@@ -3894,8 +3904,10 @@ function module_code(library_namespace) {
 					var category = titles.flat_subcategories[session
 							.remove_namespace(pages.title[wiki_API.KEY_generator_title])];
 					// console.trace([page_data, category]);
-					var file_path = get_path_of_category.call(category,
-							page_data.title, options);
+					var file_path = decodeURIComponent(file_url
+							.match(/[^\\\/]+$/)[0]);
+					file_path = get_path_of_category.call(category, file_path,
+							options);
 					// console.trace(file_path);
 					return file_path;
 				};
@@ -3953,6 +3965,13 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------------
 
+		var file_info_type = options.file_info_type
+				|| (options.download_derivatives ? 'videoinfo' : 'imageinfo');
+		if (options.download_derivatives && file_info_type !== 'videoinfo') {
+			library_namespace
+					.warn('wiki_API_download: You should set options.file_info_type = "videoinfo" for downloading derivatives!');
+		}
+
 		var threads_now = 0;
 		// For each file, check the file name and timestamp (get from
 		// generator:categorymembers), only download new file.
@@ -3968,16 +3987,20 @@ function module_code(library_namespace) {
 					page_data.no_new_data = true;
 				} else if (error) {
 					page_data.error = error;
-					titles.error_titles.push(page_data.title);
+					titles.error_titles.push([ page_data.title, error ]);
 					library_namespace.error('Cannot download '
 							+ page_data.title + ': ' + error);
 				}
 			}
 
 			// console.trace([ threads_now, options.index, titles.length ]);
-			if (threads_now === 0 && options.index >= titles.length) {
-				session.next(callback, titles, titles.error_titles.length > 0
-						&& titles.error_titles);
+			if (options.index >= titles.length) {
+				if (threads_now === 0) {
+					// All titles downloaded.
+					session.next(callback, titles,
+							titles.error_titles.length > 0
+									&& titles.error_titles);
+				}
 				return;
 			}
 
@@ -3988,65 +4011,130 @@ function module_code(library_namespace) {
 			// console.trace(titles);
 			// console.trace([ options.index, page_data ]);
 			// assert: !!page_data === true
-			var imageinfo = page_data && page_data[0];
-			if (!imageinfo) {
-				titles.error_titles.push(page_data.title);
-				library_namespace.error('Cannot download ' + page_data.title
-						+ (error ? ': ' + error : ''));
+			var file_info = page_data && page_data[0];
+			if (!file_info) {
+				if (page_data) {
+					titles.error_titles.push([ page_data && page_data.title,
+							'No file_info get' ]);
+					library_namespace.error('Cannot download '
+							+ page_data.title + (error ? ': ' + error : ''));
+				}
 				download_next_file();
 				return;
 			}
 
 			// download newer only
-			// console.trace(imageinfo);
-			options.web_resource_date = imageinfo.timestamp;
+			// console.trace(file_info);
+			options.web_resource_date = file_info.timestamp;
 
+			// console.trace(page_data);
+			// console.trace(file_info);
+			var file_url = file_info.thumburl || file_info.url;
+			var file_url_list = options.download_derivatives;
+
+			if (!file_url_list || !Array.isArray(file_info.derivatives)) {
+				download_file(file_url, true);
+				return;
+			}
+
+			// --------------------------------------------
+
+			// console.trace([ file_url_list, file_info ]);
+			if (typeof file_url_list === 'function')
+				file_url_list = file_url_list(page_data);
+
+			file_url = Array.isArray(file_url_list) ? file_url_list
+					: [ file_url_list ];
+			file_url_list = [];
+			file_url.forEach(function(file_url) {
+				if (typeof file_url !== 'string')
+					return;
+
+				if (file_url.startsWith('https://')) {
+					file_url_list.push(file_url);
+					return;
+				}
+
+				file_url = file_url.toLowerCase();
+				file_info.derivatives.forEach(function(media_info) {
+					// e.g., type: 'audio/ogg; codecs="vorbis"'
+					if (media_info.type.toLowerCase().startsWith(file_url)
+					// e.g., shorttitle: 'WAV source'
+					|| media_info.shorttitle.toLowerCase()
+					// e.g., shorttitle: 'Ogg Vorbis'
+					.startsWith(file_url) || media_info.transcodekey
+					// e.g., transcodekey: 'mp3'
+					&& media_info.transcodekey.toLowerCase() === file_url) {
+						file_url_list.push(media_info.src);
+					}
+				});
+			});
+			// console.trace(file_url_list);
+
+			if (file_url_list.length === 0) {
+				// 放棄下載本檔案。
+				download_next_file();
+				return;
+			}
+
+			// Release memory. 釋放被占用的記憶體。
+			file_url = null;
+
+			// 警告: 這邊會自動產生多線程下載!
+			file_url_list.forEach(function(file_url, index) {
+				download_file(file_url,
+				//
+				index === file_url_list.length);
+			});
+		}
+
+		function download_file(file_url, multi_threads) {
+			// console.trace([ file_url, options ]);
+
+			var error;
 			// !see options.file_name_processor @ function get_URL_cache_node()
 			if (typeof options.download_file_to === 'function') {
+				var index = options.index - 1;
 				try {
-					options.file_name = options.download_file_to(page_data,
-							options.index, titles, options);
+					options.file_name = options.download_file_to(file_url,
+							titles[index], index, titles, options);
 				} catch (e) {
+					error = e;
 					console.error(e);
-					titles.error_titles.push(page_data.title);
-					download_next_file();
-					return;
+					titles.error_titles.push([ page_data.title, e ]);
 				}
 			}
 
-			// ----------------------------------
-			// downloading
+			if (!error) {
+				threads_now++;
+				library_namespace.get_URL_cache(file_url, function() {
+					threads_now--;
+					download_next_file.apply(null, arguments);
+				}, options);
+			}
 
-			threads_now++;
-			// console.trace(page_data);
-			library_namespace.get_URL_cache(
-			//
-			imageinfo.thumburl || imageinfo.url, function() {
-				threads_now--;
-				download_next_file.apply(null, arguments);
-			}, options);
-
-			if (options.index < titles.length ? threads_now < options.max_threads
-					: threads_now === 0) {
+			if (multi_threads
+					&& (options.index < titles.length ? threads_now < options.max_threads
+							: threads_now === 0)) {
 				download_next_file();
 			}
 		}
 
 		// https://commons.wikimedia.org/w/api.php?action=help&modules=query%2Bimageinfo
-		var imageinfo_options = Object.assign({
-			type : 'imageinfo',
+		var file_info_options = Object.assign({
+			type : file_info_type,
 			// 'url|size|mime|timestamp'
 			iiprop : 'url|timestamp',
+			viprop : 'url|timestamp|derivatives',
+			page_filter : options.page_filter,
 			multi : true
-		}, options.imageinfo_options);
+		}, options.file_info_options);
 		if (options.width > 0)
-			imageinfo_options.iiurlwidth = options.width;
+			file_info_options.iiurlwidth = options.width;
 		if (options.height > 0)
-			imageinfo_options.iiurlheight = options.height;
-		if (options.page_filter)
-			imageinfo_options.page_filter = options.page_filter;
+			file_info_options.iiurlheight = options.height;
 
-		// console.trace(imageinfo_options);
+		// console.trace(file_info_options);
 		// page title to raw data URL
 		wiki_API.list(titles, function(pages, target) {
 			// console.trace([pages, target, options]);
@@ -4054,13 +4142,13 @@ function module_code(library_namespace) {
 				session.next(callback, titles, pages.error);
 				return;
 			}
-			// console.trace([ pages, imageinfo_options ]);
+			// console.trace([ pages, file_info_options ]);
 			titles = pages;
 			options.index = 0;
 			titles.error_titles = [];
 			// console.trace(titles);
 			download_next_file();
-		}, wiki_API.add_session_to_options(session, imageinfo_options));
+		}, wiki_API.add_session_to_options(session, file_info_options));
 	}
 
 	// ------------------------------------------------------------------------

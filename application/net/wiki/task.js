@@ -605,6 +605,7 @@ function module_code(library_namespace) {
 				// Making .redirect_list[0] the redirect target.
 				include_root : true,
 				// converttitles: 1,
+				// multiple pages
 				multi : Array.isArray(next[1]) && next[1].length > 1
 			}, next[3]);
 
@@ -814,8 +815,11 @@ function module_code(library_namespace) {
 			break;
 
 		case 'search':
+			if (!next[3])
+				next[3] = Object.create(null);
 			if (!next[3].next_mark)
 				next[3].next_mark = Object.create(null);
+
 			wiki_API.search([ this.API_URL, next[1] ],
 			//
 			function wiki_API_search_callback(pages, error) {
@@ -2231,7 +2235,7 @@ function module_code(library_namespace) {
 		var each,
 		// options 在此暫時作為 default options。
 		options = config.options || {
-			// 預設會取得大量頁面。
+			// 預設會取得大量頁面。 multiple pages
 			multi : true,
 			// prevent creating new pages
 			// Throw an error if the page doesn't exist. 若頁面不存在/已刪除，則產生錯誤。
@@ -3006,6 +3010,7 @@ function module_code(library_namespace) {
 			do_not_import_original_page_data : true,
 			handle_continue_response : 'merge_response',
 			allow_missing : config.no_warning,
+			// multiple pages
 			multi : true
 		};
 		// console.trace(page_options);
