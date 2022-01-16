@@ -1216,10 +1216,13 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// 在 session.next() 中執行 wiki_API_prototype_method() 必要的措施。
-			// 本段程式碼將直接跳出，執行權交給下一段程式碼。
-			session.running = false;
+			// 不該在 session.next() 中執行 wiki_API_prototype_method()。
+			// 直接執行無效，設定`session.running = false;` 會執行兩次。
+			session.run(edit_structured_data, data, error);
 
+		}, options), post_data, options);
+
+		function edit_structured_data(data, error) {
 			session.edit_structured_data(session.to_namespace(
 			// 'File:' + data.filename
 			post_data.filename, 'File'),
@@ -1270,7 +1273,7 @@ function module_code(library_namespace) {
 				}
 				callback(data, error || _error);
 			});
-		}, options), post_data, options);
+		}
 
 	};
 

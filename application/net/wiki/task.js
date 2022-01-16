@@ -1850,6 +1850,8 @@ function module_code(library_namespace) {
 			break;
 
 		case 'run':
+			// session.run(function)
+			// session.run(function, argunent_1, argunent_2, ...)
 			if (typeof next[1] === 'function') {
 				// next[1] : callback
 				if (this.run_after_initializing
@@ -1859,9 +1861,13 @@ function module_code(library_namespace) {
 									+ next[1], 1);
 					this.run_after_initializing.push(next);
 				} else {
-					// pass arguments
-					callback_result_relying_on_this = next[1].apply(this, next
-							.slice(2));
+					try {
+						// pass arguments
+						callback_result_relying_on_this = next[1].apply(this,
+								next.slice(2));
+					} catch (e) {
+						// TODO: handle exception
+					}
 				}
 			}
 			this.next(callback_result_relying_on_this);
