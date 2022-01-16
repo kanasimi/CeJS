@@ -2055,7 +2055,7 @@ function module_code(library_namespace) {
 	// 2017/1/18 18:46:2
 	// TODO: escape special characters
 	function to_template_wikitext(parameters, options) {
-		var keys = Object.keys(parameters), template_name, is_continue = true;
+		var template_name, is_continue = true;
 		if (options) {
 			if (typeof options === 'string') {
 				template_name = options;
@@ -2063,9 +2063,24 @@ function module_code(library_namespace) {
 				template_name = options.name;
 			}
 		}
+		var parameters_is_Array = Array.isArray(parameters);
+		if (!template_name && (!options || !options.is_slice)
+				&& parameters_is_Array && parameters[0]) {
+			// CeL.wiki.template_text([name, p1, p2]);
+			template_name = parameters[0];
+			delete parameters[0];
+		}
 
-		var wikitext = [];
-		keys.forEach(function(key) {
+		var wikitext;
+		if (template_name) {
+			wikitext = [ template_name ];
+			wikitext.toString = to_template_wikitext_toString;
+		} else {
+			wikitext = [];
+			wikitext.toString = to_template_wikitext_toString_slice;
+		}
+
+		Object.keys(parameters).forEach(function(key) {
 			var value = parameters[key], ignore_key = is_continue
 			//
 			&& (is_continue = library_namespace.is_digits(key));
@@ -2080,17 +2095,16 @@ function module_code(library_namespace) {
 			} else {
 				value = to_template_wikitext_join_array(value);
 			}
-			if (!ignore_key)
-				value = key + '=' + value;
 
-			wikitext.push(value);
+			if (parameters_is_Array && template_name && !parameters[0]) {
+				wikitext[key] = value;
+			} else {
+				if (!ignore_key)
+					value = key + '=' + value;
+				wikitext.push(value);
+			}
 		});
-		if (template_name) {
-			wikitext.unshift(template_name);
-			wikitext.toString = to_template_wikitext_toString;
-		} else {
-			wikitext.toString = to_template_wikitext_toString_slice;
-		}
+
 		return options && options.to_Array ? wikitext
 		//
 		: wikitext.toString(options && options.separator);

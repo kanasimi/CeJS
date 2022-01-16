@@ -3137,6 +3137,9 @@ function test_wiki() {
 		[['param_1=abc|p2=123', CeL.wiki.template_text({ param_1: 'abc', p2: 123 })], 'to_template_wikitext #1'],
 		[['{{pp|p1=pqr|p 2=234}}', CeL.wiki.template_text({ p1: 'pqr', 'p 2': 234 }, 'pp')], 'to_template_wikitext #2'],
 		[['{{p|1|w|4}}', CeL.wiki.template_text([1, 'w', 4], 'p')], 'to_template_wikitext #3'],
+		[['{{n|5.0|0}}', CeL.wiki.template_text([, '5.0', 0], 'n')], 'to_template_wikitext #4'],
+		[['{{Tl|w|4}}', CeL.wiki.template_text(['Tl', 'w', 4])], 'to_template_wikitext #5'],
+		[['{{Tl|w||4}}', CeL.wiki.template_text(['Tl', 'w', , 4])], 'to_template_wikitext #6'],
 
 	]);
 
@@ -3849,6 +3852,9 @@ function test_wiki() {
 		var zhwiki = new CeL.wiki(null, null, 'zh');
 		zhwiki.run(function () {
 			_setup_test('wiki: template_functions');
+
+			assert(["Template:Tl", zhwiki.normalize_title('t:tl')], 'wiki.normalize_title() #1-1');
+			assert(["Wikipedia:小作品", zhwiki.normalize_title('WP:小作品')], 'wiki.normalize_title() #1-2');
 
 			var wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
 			var parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();

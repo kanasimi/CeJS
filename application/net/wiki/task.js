@@ -195,6 +195,8 @@ function module_code(library_namespace) {
 	 * 
 	 * 工作原理: 每個實體會hold住一個queue ({Array}this.actions)。 當設定工作時，就把工作推入佇列中。
 	 * 另外內部會有另一個行程負責依序執行每一個工作。
+	 * 
+	 * @see wiki_API_prototype_method() @ CeL.application.net.wiki.list
 	 */
 	wiki_API.prototype.next = function next(callback_result_relying_on_this) {
 		if (typeof callback_result_relying_on_this === 'function') {
@@ -1569,10 +1571,12 @@ function module_code(library_namespace) {
 				library_namespace
 						.warn('wiki_API.prototype.next.structured_data: Should only using on commonswiki!');
 			}
-			if (!/^File:/i
-					.test(next[1][get_wikibase_key(next[1]) ? 'title' : 1])) {
+			if (!this.is_namespace(next[1][get_wikibase_key(next[1]) ? 'title'
+					: 1], 'File')) {
 				library_namespace
-						.warn('wiki_API.prototype.next.structured_data: Should only using on files!');
+						.warn('wiki_API.prototype.next.structured_data: Should only using on files! ('
+								+ next[1][get_wikibase_key(next[1]) ? 'title'
+										: 1] + ')');
 			}
 
 			if (wiki_API.is_entity(next[1][1])

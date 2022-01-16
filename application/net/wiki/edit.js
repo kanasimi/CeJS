@@ -997,6 +997,9 @@ function module_code(library_namespace) {
 			options.comment = options.summary;
 		}
 
+		var structured_data = library_namespace
+				.new_options(options.structured_data);
+
 		// upload_text: media description
 		if (!options.text) {
 			// 從 options / file_data / media_data 自動抽取出文件資訊。
@@ -1013,6 +1016,8 @@ function module_code(library_namespace) {
 						|| options['other versions'],
 				other_fields : options.other_fields || options['other fields']
 			};
+			if (!structured_data.date)
+				structured_data.date = options.text.date;
 		} else {
 			[ "description", "date", "source", "author", "permission",
 					"other_versions", "other_fields" ]
@@ -1024,6 +1029,23 @@ function module_code(library_namespace) {
 											+ '! Maybe you want to change options.text to options.additional_text?');
 						}
 					});
+		}
+
+		// options.location: [latitude, longitude, altitude / height / -depth ]
+		if (options.location) {
+			if (isNaN(options.location[0]) || isNaN(options.location[1])) {
+				delete options.location;
+			} else if (!structured_data.location) {
+				structured_data.location = options.location;
+			}
+		}
+		if (options.location && options.variable_Map) {
+			if (options.location[0] && !options.variable_Map.has('latitude'))
+				options.variable_Map.set('latitude', options.location[0]);
+			if (options.location[1] && !options.variable_Map.has('longitude'))
+				options.variable_Map.set('longitude', options.location[1]);
+			if (options.location[2] && !options.variable_Map.has('altitude'))
+				options.variable_Map.set('altitude', options.location[2]);
 		}
 
 		if (library_namespace.is_Object(options.text)) {
@@ -1052,6 +1074,18 @@ function module_code(library_namespace) {
 				name : 'Information',
 				separator : '\n| '
 			}) ];
+
+			// https://commons.wikimedia.org/wiki/Commons:Geocoding#Adding_a_location_template
+			// If the image page has an {{Information}} template, or similar,
+			// the {{Location}} template should come immediately after it.
+			if (options.location) {
+				options.text.push(wiki_API.template_text([
+						options.location_template_name || 'Location',
+						variable_Map ? variable_Map.format('latitude')
+								: options.location[0],
+						variable_Map ? variable_Map.format('longitude')
+								: options.location[1] ]));
+			}
 
 			options.text = options.text.join('\n');
 		}
@@ -1151,9 +1185,124 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		wiki_API.query(action, upload_callback.bind(null, callback, options),
-				post_data, options);
+		wiki_API.query(action, upload_callback.bind(null,
+		//
+		function(data, error) {
+			// console.trace([ data, error ]);
+
+			if (!structured_data.date) {
+				structured_data.date = options.date;
+			}
+			if (structured_data.location
+			// assert: Array.isArray(structured_data.location)
+			&& !structured_data.location.precision) {
+				structured_data.location.precision = .1;
+			}
+			// normalize structured_data
+			Object.keys(structured_data).forEach(function(name) {
+				if (structured_data[name] === undefined) {
+					delete structured_data[name];
+					return;
+				}
+				var property_id = structured_data_mapper[name];
+				if (property_id && !(property_id in structured_data)) {
+					structured_data[property_id] = structured_data[name];
+					delete structured_data[name];
+				}
+			});
+			// console.trace(structured_data);
+			if (library_namespace.is_empty_object(structured_data)) {
+				callback(data, error);
+				return;
+			}
+
+			// 在 session.next() 中執行 wiki_API_prototype_method() 必要的措施。
+			// 本段程式碼將直接跳出，執行權交給下一段程式碼。
+			session.running = false;
+
+			session.edit_structured_data(session.to_namespace(
+			// 'File:' + data.filename
+			post_data.filename, 'File'),
+			//
+			function fill_structured_data(entity) {
+				var summary_list = [], data = Object.create(null);
+				for ( var property_id in structured_data) {
+					if (entity.claims
+					//
+					&& wiki_API.data.value_of(entity.claims[property_id])) {
+						if (false) {
+							console.log([ property_id, wiki_API.data.value_of(
+							//
+							entity.claims[property_id]) ]);
+						}
+						continue;
+					}
+
+					var value = structured_data[property_id];
+					data[property_id] = value;
+					var config = structured_data_config[property_id];
+					var summary_name = config && config[KEY_summary_name]
+							|| property_id;
+					summary_name = wiki_API.title_link_of('d:Property:'
+							+ property_id, summary_name);
+					summary_list.push(summary_name + '=' + value);
+				}
+
+				// console.log(entity.claims);
+				// console.trace([ summary_list, data ]);
+
+				if (summary_list.length === 0)
+					return [ wiki_API.edit.cancel, 'skip' ];
+
+				this.summary += summary_list.join(', ');
+				return data;
+
+			}, {
+				// 標記此編輯為機器人編輯。
+				bot : options.bot,
+				summary : 'Modify structured data: '
+			}, function(_data, _error) {
+				// console.trace([ _data, error, _error ]);
+				if (error) {
+					if (data && data.error
+							&& data.error.code === 'fileexists-no-change')
+						;
+				}
+				callback(data, error || _error);
+			});
+		}, options), post_data, options);
+
 	};
+
+	var KEY_summary_name = 'summary_name',
+	// {inner} alias
+	structured_data_mapper = {
+		// 描述地坐標 (P9149) [[Commons:Structured data/Modeling/Location]]
+		location : 'P9149',
+		// 描繪內容 (P180) [[Commons:Structured data/Modeling/Depiction]]
+		depicts : 'P180',
+
+		// [[Commons:Structured data/Modeling/Properties table]]
+		// TODO: 文件格式 (P2701)
+		'file format' : 'P2701',
+		// TODO: 資料大小 (P3575)
+		'data size' : 'P3575',
+
+		// 成立或建立時間 (P571) [[Commons:Structured data/Modeling/Date]]
+		'created datetime' : 'P571',
+		date : 'P571'
+	}, structured_data_config = Object.create(null);
+	Object.keys(structured_data_mapper).forEach(function(name) {
+		var property_id = structured_data_mapper[name];
+		var property_config = structured_data_config[property_id];
+		if (!property_config) {
+			structured_data_config[property_id]
+			//
+			= property_config = Object.create(null);
+		}
+		if (!property_config[KEY_summary_name])
+			property_config[KEY_summary_name] = name;
+	});
 
 	function upload_callback(callback, options, data, error) {
 		if (error || !data || (error = data.error)
@@ -1163,6 +1312,7 @@ function module_code(library_namespace) {
 		{upload:{result:'Warning',warnings:{"duplicate":["file_name"]}}
 		{upload:{result:'Warning',warnings:{"was-deleted":"file_name","duplicate-archive":"file_name"}}
 		{upload:{result:'Success',filename:'',imageinfo:{}}}
+		{upload:{result:'Success',filename:'',warnings:{duplicate:['.jpg','.jpg']},imageinfo:{}}}
 
 		{"error":{"code":"fileexists-no-change","info":"The upload is an exact duplicate of the current version of [[:File:name.jpg]].","stasherrors":[{"message":"uploadstash-exception","params":["UploadStashBadPathException","Path doesn't exist."],"code":"uploadstash-exception","type":"error"}],"*":"See https://test.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1279"}
 		{"error":{"code":"verification-error","info":"File extension \".gif\" does not match the detected MIME type of the file (image/jpeg).","details":["filetype-mime-mismatch","gif","image/jpeg"],"*":"See https://commons.wikimedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/postorius/lists/mediawiki-api-announce.lists.wikimedia.org/&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1450"}

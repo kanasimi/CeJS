@@ -404,6 +404,7 @@ function module_code(library_namespace) {
 					return item.id;
 				});
 			}
+			// multiple pages
 			if (!options.multi && (
 			// options.limit <= 1
 			list.length <= 1)) {
@@ -970,6 +971,7 @@ function module_code(library_namespace) {
 		}
 
 		property_list = wikidata_datavalue(property_list, undefined, {
+			// multiple
 			multi : true
 		}).map(to_comparable);
 
@@ -1990,8 +1992,10 @@ function module_code(library_namespace) {
 			value = {
 				latitude : +value[0],
 				longitude : +value[1],
+				// altitude / height / -depth
 				altitude : typeof value[2] === 'number' ? value[2] : null,
-				precision : options.precision || 0.000001,
+				// 1: 整個地球?
+				precision : value.precision || options.precision || 0.000001,
 				globe : options.globe || 'http://www.wikidata.org/entity/Q2'
 			};
 			break;
@@ -4904,7 +4908,8 @@ function module_code(library_namespace) {
 				library_namespace.debug('餵給(回傳要編輯資料的)設定值函數 ' + id.id + ' ('
 						+ (get_entity_label(id) || get_entity_link(id)) + ')。',
 						2, 'wikidata_edit');
-				// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
+				// .call(options,):
+				// 使(回傳要編輯資料的)設定值函數能以 `this` 即時變更 options.summary。
 				data = data.call(options, id);
 
 			} else {
@@ -4937,7 +4942,8 @@ function module_code(library_namespace) {
 					delete options.languages;
 					// console.trace(entity);
 
-					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
+					// .call(options,):
+					// 使(回傳要編輯資料的)設定值函數能以 `this` 即時變更 options.summary。
 					// entity 可能是 {id:'M000',missing:''}
 					data = data.call(options, entity, error);
 					wikidata_edit(id, data, token, options, callback);
