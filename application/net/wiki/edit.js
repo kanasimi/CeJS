@@ -1210,19 +1210,14 @@ function module_code(library_namespace) {
 					delete structured_data[name];
 				}
 			});
-			// console.trace(structured_data);
+			// console.trace([ post_data.filename, structured_data ]);
 			if (library_namespace.is_empty_object(structured_data)) {
 				callback(data, error);
 				return;
 			}
 
-			// 不該在 session.next() 中執行 wiki_API_prototype_method()。
-			// 直接執行無效，設定`session.running = false;` 會執行兩次。
-			session.run(edit_structured_data, data, error);
+			// --------------------------------------------
 
-		}, options), post_data, options);
-
-		function edit_structured_data(data, error) {
 			session.edit_structured_data(session.to_namespace(
 			// 'File:' + data.filename
 			post_data.filename, 'File'),
@@ -1273,7 +1268,14 @@ function module_code(library_namespace) {
 				}
 				callback(data, error || _error);
 			});
-		}
+
+			// 不該在 session.next() 中執行 wiki_API_prototype_method()。
+			// 直接執行無效，設定`session.running = false;` 會執行兩次。
+			// console.trace(1, session.actions);
+			session.next();
+			// console.trace(2, session.actions);
+
+		}, options), post_data, options);
 
 	};
 

@@ -229,7 +229,7 @@ function module_code(library_namespace) {
 				// delete this.current_action;
 				library_namespace.debug('The queue is empty.', 2,
 						'wiki_API.prototype.next');
-				// console.warn(this);
+				// console.trace(this.actions);
 			}
 			return;
 		}
@@ -1867,6 +1867,7 @@ function module_code(library_namespace) {
 								next.slice(2));
 					} catch (e) {
 						// TODO: handle exception
+						library_namespace.error(e);
 					}
 				}
 			}
