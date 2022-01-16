@@ -1604,6 +1604,7 @@ function module_code(library_namespace) {
 			next[4] = add_session_to_options(this, next[4]);
 			next[4].data_API_URL = this.API_URL;
 
+			// console.trace(this.actions.length, next);
 			// wikidata_entity(key, property, callback, options)
 			wiki_API.data(next[1], next[2], function(data, error) {
 				// console.trace([data, error]);
@@ -1629,6 +1630,7 @@ function module_code(library_namespace) {
 				}
 				// next[3] : callback
 				_this.next(next[3], data, error);
+				// console.trace(_this.actions.length, _this.actions);
 			},
 			// next[4] : options
 			next[4]);
@@ -1677,6 +1679,7 @@ function module_code(library_namespace) {
 
 			} else {
 				// console.trace(next[1]);
+				// console.trace(this.actions.length, next);
 				if (wiki_API.is_page_data(next[1]) || is_api_and_title(next[1])) {
 					library_namespace.debug('先取得 last_page 之 data: ' + next[1],
 							3, 'wiki_API.prototype.next.edit_structured_data');
