@@ -186,6 +186,10 @@ function module_code(library_namespace) {
 				status_of_thenable);
 	};
 
+	// @inner
+	wiki_API.KEY_waiting_callback_result_relying_on_this = typeof Symbol === 'function' ? Symbol('waiting callback_result_relying_on_this')
+			: '\0waiting callback_result_relying_on_this';
+
 	/**
 	 * 設定工作/添加新的工作。
 	 * 
@@ -199,7 +203,34 @@ function module_code(library_namespace) {
 	 * @see wiki_API_prototype_method() @ CeL.application.net.wiki.list
 	 */
 	wiki_API.prototype.next = function next(callback_result_relying_on_this) {
+		if (this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this]) {
+			// assert: 此時為 session.next() 中執行 callback。
+
+			// callback_result_relying_on_this 執行中應該只能 push 進
+			// session.actions，不可執行 session.next()!
+			callback_result_relying_on_this = Array.prototype.slice
+					.call(arguments);
+			callback_result_relying_on_this.unshift('run');
+			this.actions.push(callback_result_relying_on_this);
+			// e.g., 'edit_structured_data' 之 callback 直接採用
+			// _this.next(next[4], data, error);
+			// 若 next[4] 會再次 call session.edit_structured_data()，
+			// 可能造成執行 callback_result_relying_on_this 後，
+			// 到 'structured_data' 跳出準備 wiki_API.data()，
+			// 回到 callback_result_relying_on_this 主程序
+			// 就直接跑到 'edit_structured_data' 這邊來，結果選了錯誤的 this.last_page。
+			// e.g., check_structured_data() @ CeL.application.net.wiki.edit
+			library_namespace
+					.debug(
+							'在 callback_result_relying_on_this 中 call this.next() 並且 waiting callback 而跳出。為避免造成多執行序，將執行權交予 call callback_result_relying_on_this() 之母執行序，子執行序這邊跳出。',
+							1, 'wiki_API.prototype.next');
+			// console.trace(this.actions.length);
+			return;
+		}
+
 		if (typeof callback_result_relying_on_this === 'function') {
+			this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this] = true;
+
 			// console.trace(Array.prototype.slice.call(arguments, 1));
 			try {
 				callback_result_relying_on_this = callback_result_relying_on_this
@@ -211,7 +242,10 @@ function module_code(library_namespace) {
 				else
 					library_namespace.error(e);
 			}
+
+			delete this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this];
 		}
+
 		if (callback_result_relying_on_this) {
 			this.set_promise_relying(callback_result_relying_on_this);
 			// reset
@@ -453,6 +487,8 @@ function module_code(library_namespace) {
 				_this.last_page
 				// 正常情況。確保this.last_page為單頁面。需要使用callback以取得result。
 				= Array.isArray(page_data) ? page_data[0] : page_data;
+				// console.trace(next[2] + '', page_data, error);
+				// console.trace(_this.actions);
 				// next[2] : callback
 				_this.next(next[2], page_data, error);
 			},
@@ -925,6 +961,8 @@ function module_code(library_namespace) {
 					summary : next[2]
 				};
 			}
+
+			// console.trace(next, this.last_page);
 
 			// 在多執行緒的情況下，例如下面
 			// `next[1] = next[1].call(next[2], next[2].page_to_edit)`
@@ -1751,18 +1789,8 @@ function module_code(library_namespace) {
 			// callback
 			function(data, error) {
 				// console.trace(_this.actions.length, next);
-
-				// 這裡直接採用 _this.next(next[4], data, error);
-				// 若 next[4] 會再次 call session.edit_structured_data()，
-				// 可能造成執行 callback_result_relying_on_this 後，
-				// 到 'structured_data' 跳出準備 wiki_API.data()，
-				// 回到 callback_result_relying_on_this 主程序
-				// 就直接跑到 'edit_structured_data' 這邊來，結果選了錯誤的 this.last_page。
-				// e.g., check_structured_data() @ CeL.application.net.wiki.edit
-
 				// next[4] : callback
-				_this.run(next[4], data, error);
-				_this.next();
+				_this.next(next[4], data, error);
 			});
 			break;
 
