@@ -1218,8 +1218,10 @@ function module_code(library_namespace) {
 
 			// --------------------------------------------
 
+			// Error.stackTraceLimit = 100;
 			var need_run_manually = session.running
 					&& session.actions.length > 0;
+			// console.trace(1, need_run_manually, session.actions);
 			session.edit_structured_data(session.to_namespace(
 			// 'File:' + data.filename
 			post_data.filename, 'File'),
@@ -1261,7 +1263,7 @@ function module_code(library_namespace) {
 				// 標記此編輯為機器人編輯。
 				bot : options.bot,
 				summary : 'Modify structured data: '
-			}, function(_data, _error) {
+			}, function structured_data_callback(_data, _error) {
 				// console.trace([ _data, error, _error ]);
 				if (error) {
 					if (data && data.error
@@ -1273,10 +1275,10 @@ function module_code(library_namespace) {
 
 			// 不該在 session.next() 中執行 wiki_API_prototype_method()。
 			// 直接執行無效，設定`session.running = false;` 會執行兩次。
-			// console.trace(1, session.actions);
+			// console.trace(2, need_run_manually, session.actions);
 			if (need_run_manually)
 				session.next();
-			// console.trace(2, session.actions);
+			// console.trace(3, need_run_manually, session.actions);
 
 		}, options), post_data, options);
 
