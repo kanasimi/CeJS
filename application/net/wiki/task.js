@@ -1564,6 +1564,8 @@ function module_code(library_namespace) {
 			}
 
 			if (!is_api_and_title(next[1]) && !get_wikibase_key(next[1])) {
+				// e.g., wiki_API.is_page_data(next[1]) ||
+				// is_api_and_title(next[1]) || get_wikibase_key(next[1])
 				next[1] = [ wiki_API.site_name(this), next[1] ];
 			}
 
@@ -1577,6 +1579,12 @@ function module_code(library_namespace) {
 						.warn('wiki_API.prototype.next.structured_data: Should only using on files! ('
 								+ next[1][get_wikibase_key(next[1]) ? 'title'
 										: 1] + ')');
+			}
+
+			if (typeof next[2] === 'function') {
+				// 未設定/不設定 property
+				// shift arguments
+				next.splice(2, 0, null);
 			}
 
 			if (wiki_API.is_entity(next[1][1])
@@ -1594,10 +1602,11 @@ function module_code(library_namespace) {
 				next[1][1] = wiki_API.title_of(next[1][1]);
 			}
 
-			if (typeof next[2] === 'function') {
-				// 未設定/不設定 property
-				// shift arguments
-				next.splice(2, 0, null);
+			if (wiki_API.is_entity(this.last_page)
+					&& next[1][1] === this.last_page.title) {
+				// next[3] : callback
+				this.next(next[3], this.last_page);
+				break;
 			}
 
 			// next[4] : options
@@ -1630,8 +1639,7 @@ function module_code(library_namespace) {
 					};
 				}
 				// next[3] : callback
-				_this.run(next[3], data, error);
-				_this.next();
+				_this.next(next[3], data, error);
 				// console.trace(_this.actions.length, _this.actions);
 			},
 			// next[4] : options
@@ -1659,6 +1667,15 @@ function module_code(library_namespace) {
 						'wiki_API.next.edit_structured_data');
 				// console.trace(next);
 				next.splice(1, 0, this.last_page);
+			}
+
+			if (wiki_API.is_entity(this.last_page)
+					&& next[1]
+					&& this.last_page.title === (is_api_and_title(next[1]) ? next[1][1]
+							: get_wikibase_key(next[1]) ? get_wikibase_key(next[1]).title
+									// wiki_API.is_page_data(next[1])
+									: next[1].title)) {
+				next[1] = this.last_page;
 			}
 
 			// next = ['edit_structured_data', id, data[, options, callback]]
@@ -1694,22 +1711,21 @@ function module_code(library_namespace) {
 					library_namespace.debug('先取得 last_page 之 data: ' + next[1],
 							3, 'wiki_API.prototype.next.edit_structured_data');
 					this.actions.unshift([ 'structured_data', next[1] ], next);
-					// Will be replace by `this.last_page` later.
-					next.splice(1, 1);
+					// next[1] will be replace by `this.last_page` later.
+					this.next();
 				} else if (get_wikibase_key(next[1])) {
 					// e.g., media 沒設定過 structured data。
 					// {id:'M000',missing:''}
 					this.actions.unshift([ 'structured_data',
 							get_wikibase_key(next[1]) ], next);
-					// Will be replace by `this.last_page` later.
-					next.splice(1, 1);
+					// next[1] will be replace by `this.last_page` later.
+					this.next();
 				} else {
-					this.run(next[4], undefined, {
+					this.next(next[4], undefined, {
 						code : 'no_id',
 						message : 'Did not set id! 未設定欲取得之特定實體 id。'
 					});
 				}
-				this.next();
 				break;
 			}
 
@@ -1735,6 +1751,15 @@ function module_code(library_namespace) {
 			// callback
 			function(data, error) {
 				// console.trace(_this.actions.length, next);
+
+				// 這裡直接採用 _this.next(next[4], data, error);
+				// 若 next[4] 會再次 call session.edit_structured_data()，
+				// 可能造成執行 callback_result_relying_on_this 後，
+				// 到 'structured_data' 跳出準備 wiki_API.data()，
+				// 回到 callback_result_relying_on_this 主程序
+				// 就直接跑到 'edit_structured_data' 這邊來，結果選了錯誤的 this.last_page。
+				// e.g., check_structured_data() @ CeL.application.net.wiki.edit
+
 				// next[4] : callback
 				_this.run(next[4], data, error);
 				_this.next();
