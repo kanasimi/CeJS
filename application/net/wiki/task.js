@@ -208,10 +208,7 @@ function module_code(library_namespace) {
 
 			// callback_result_relying_on_this 執行中應該只能 push 進
 			// session.actions，不可執行 session.next()!
-			callback_result_relying_on_this = Array.prototype.slice
-					.call(arguments);
-			callback_result_relying_on_this.unshift('run');
-			this.actions.push(callback_result_relying_on_this);
+
 			// e.g., 'edit_structured_data' 之 callback 直接採用
 			// _this.next(next[4], data, error);
 			// 若 next[4] 會再次 call session.edit_structured_data()，
@@ -220,6 +217,12 @@ function module_code(library_namespace) {
 			// 回到 callback_result_relying_on_this 主程序
 			// 就直接跑到 'edit_structured_data' 這邊來，結果選了錯誤的 this.last_page。
 			// e.g., check_structured_data() @ CeL.application.net.wiki.edit
+
+			callback_result_relying_on_this = Array.prototype.slice
+					.call(arguments);
+			callback_result_relying_on_this.unshift('run');
+			this.actions.push(callback_result_relying_on_this);
+
 			library_namespace
 					.debug(
 							'在 callback_result_relying_on_this 中 call this.next() 並且 waiting callback 而跳出。為避免造成多執行序，將執行權交予 call callback_result_relying_on_this() 之母執行序，子執行序這邊跳出。',
@@ -253,6 +256,8 @@ function module_code(library_namespace) {
 		}
 		// assert: false ===
 		// library_namespace.is_thenable(callback_result_relying_on_this)
+
+		// ------------------------------------------------------------------------------
 
 		this.running = 0 < this.actions.length;
 		if (!this.running) {

@@ -1388,9 +1388,15 @@ function module_code(library_namespace) {
 					// TODO: handle exception
 				}
 				this.actions.push(args);
+				// console.trace([ this.running, this.actions.length, args ]);
+
 				// TODO: 不應該僅以this.running判定，
 				// 因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
-				if (!this.running
+				if (!this.running && !this.actions[
+				// callback_result_relying_on_this 執行中應該只能 push 進
+				// session.actions，不可執行 session.next()!
+				wiki_API.KEY_waiting_callback_result_relying_on_this]
+
 				// 當只剩下剛剛.push()進的operation時，表示已經不會再執行，則還是實行this.next()。
 				// TODO: 若是其他執行序會操作this.actions、主動執行this.next()，
 				// 或.next()正執行之其他操作會執行this.next()，可能造成重複執行的結果！

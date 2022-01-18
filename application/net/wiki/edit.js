@@ -1187,7 +1187,7 @@ function module_code(library_namespace) {
 
 		wiki_API.query(action, upload_callback.bind(null,
 		//
-		function(data, error) {
+		function check_structured_data(data, error) {
 			// console.trace([ data, error ]);
 
 			if (!structured_data.date) {
@@ -1218,10 +1218,9 @@ function module_code(library_namespace) {
 
 			// --------------------------------------------
 
-			// Error.stackTraceLimit = 100;
-			var need_run_manually = session.running
-					&& session.actions.length > 0;
-			// console.trace(1, need_run_manually, session.actions);
+			// 確保不會直接執行 session.edit_structured_data()，而是將之推入 session.actions。
+			session.running = true;
+
 			session.edit_structured_data(session.to_namespace(
 			// 'File:' + data.filename
 			post_data.filename, 'File'),
@@ -1273,12 +1272,8 @@ function module_code(library_namespace) {
 				callback(data, error || _error);
 			});
 
-			// 不該在 session.next() 中執行 wiki_API_prototype_method()。
-			// 直接執行無效，設定`session.running = false;` 會執行兩次。
-			// console.trace(2, need_run_manually, session.actions);
-			if (need_run_manually)
-				session.next();
-			// console.trace(3, need_run_manually, session.actions);
+			// 本執行序擁有執行權，因此必須手動執行 session.next()，否則會中途跳出。
+			session.next();
 
 		}, options), post_data, options);
 
