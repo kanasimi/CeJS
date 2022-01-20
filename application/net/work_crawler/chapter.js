@@ -1337,6 +1337,10 @@ function module_code(library_namespace) {
 
 					// 模擬已經下載完最後一張圖。
 					left = 1;
+					if (work_data.start_chapter_NO_next_time > 0) {
+						// 直接跳過本漫畫！放棄下載
+						chapter_NO = work_data.start_chapter_NO_next_time;
+					}
 					check_if_done();
 					return;
 				}
