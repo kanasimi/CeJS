@@ -468,7 +468,7 @@ function module_code(library_namespace) {
 
 	_.get_URL = get_URL;
 
-	// TODO: 處理 multi requests
+	// TODO: 處理 multiple requests
 	function get_URLs() {
 	}
 
@@ -1137,6 +1137,7 @@ function module_code(library_namespace) {
 
 	// 在MP模式下清乾淨queue
 	deprecated_get_URL.clean = function(i, force) {
+		// multiple requests
 		if (force || deprecated_get_URL.multi_request)
 			if (!i && isNaN(i)) {
 				if (deprecated_get_URL.q)
@@ -3186,12 +3187,11 @@ function module_code(library_namespace) {
 
 	if (is_nodejs) {
 		_.get_URL_cache = get_URL_cache_node;
+		_.get_URL_cache.NO_NEWS = typeof Symbol === 'function' ? Symbol('no news')
+				: {
+					'no news' : true
+				};
 	}
-
-	_.get_URL_cache.NO_NEWS = typeof Symbol === 'function' ? Symbol('no news')
-			: {
-				'no news' : true
-			};
 
 	// ---------------------------------------------------------------------//
 
