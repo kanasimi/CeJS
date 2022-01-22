@@ -433,6 +433,8 @@ function module_code(library_namespace) {
 
 	// wikidata_search.default_limit = 'max';
 
+	// TODO: add more types: form, item, lexeme, property, sense, sense
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 	wikidata_search.add_cache = function add_cache(key, id, language, is_entity) {
 		var cached_hash = is_entity ? wikidata_search_cache_entity
 				: wikidata_search_cache;
@@ -450,6 +452,9 @@ function module_code(library_namespace) {
 			callback = undefined;
 		}
 		// console.trace(options);
+		if (options.must_callback && !callback) {
+			library_namespace.warn('設定 options.must_callback，卻無 callback!');
+		}
 
 		var language_and_key,
 		// 須與 wikidata_search() 相同!
@@ -465,6 +470,7 @@ function module_code(library_namespace) {
 		// console.trace([ key, language, options ]);
 
 		key = normalize_value_of_properties(key, language);
+		var entity_type = key && key.type;
 
 		if (typeof key === 'string') {
 			key = normalize_wikidata_key(key);
@@ -505,7 +511,7 @@ function module_code(library_namespace) {
 					Object.assign({
 						API_URL : get_data_API_URL(options)
 					}, wikidata_search.use_cache.default_options, {
-						// 警告:若是設定must_callback=false，會造成程序不callback而中途跳出!
+						// 警告: 若是設定 must_callback=false，會造成程序不 callback 而中途跳出!
 						must_callback : true
 					}, options));
 				};
@@ -559,7 +565,12 @@ function module_code(library_namespace) {
 			options = Object.assign({
 				get_id : true
 			}, options);
+		} else if (entity_type) {
+			options = Object.clone(options);
 		}
+
+		if (entity_type)
+			options.type = entity_type;
 
 		// console.log(arguments);
 		wikidata_search(key, function(id, error) {
@@ -1327,6 +1338,12 @@ function module_code(library_namespace) {
 			wiki_API.site_name(key.language, options)) + '&titles='
 					+ encodeURIComponent(key.title);
 		} else {
+			if (typeof key === 'object') {
+				console.trace(key);
+				callback(undefined,
+						'wikidata_entity: Input object instead of string');
+				return;
+			}
 			action = 'ids=' + key;
 		}
 		library_namespace.debug('action: [' + action + ']', 2,
@@ -1820,14 +1837,18 @@ function module_code(library_namespace) {
 			wikidata_datatype(options.property, function(datatype) {
 				var matched = datatype
 						&& datatype.match(/^wikibase-(item|property)$/);
-				if (matched && !/^[PQ]\d{1,10}$/.test(value)) {
+				var entity_id = library_namespace.is_Object(value)
+						&& value.value || value;
+				if (matched && entity_id && !/^[PQ]\d{1,10}$/.test(entity_id)) {
 					if (typeof value === 'object') {
 						library_namespace.error(
 						//
-						'normalize_wikidata_value: Invalid value!');
-						console.trace(value);
-						throw new Error(
-								'normalize_wikidata_value: Invalid value!');
+						'normalize_wikidata_value: Invalid object value!');
+						console.trace([ value, datatype, options.property ]);
+						normalize_wikidata_value(
+								'normalize_wikidata_value: Invalid value!',
+								datatype, options, to_pass);
+						return;
 					}
 
 					library_namespace.debug('將屬性名稱轉換成 id (' + datatype + '): '
@@ -1837,16 +1858,14 @@ function module_code(library_namespace) {
 					wikidata_search.use_cache(value, function(id, error) {
 						// console.trace(options);
 						// console.trace('' + options.callback);
-						normalize_wikidata_value(id ||
-						//
-						'normalize_wikidata_value: Nothing found: ['
-						//
-						+ value + ']', datatype, options, to_pass);
+						normalize_wikidata_value(id
+								|| 'normalize_wikidata_value: Nothing found: ['
+								+ value + ']', datatype, options, to_pass);
 					}, Object.assign(Object.create(null),
 					// 因wikidata_search.use_cache.default_options包含.type設定，必須將特殊type設定放在匯入default_options後!
 					wikidata_search.use_cache.default_options, {
 						type : matched[1],
-						// 警告:若是設定must_callback=false，會造成程序不callback而中途跳出!
+						// 警告: 若是設定 must_callback=false，會造成程序不 callback 而中途跳出!
 						must_callback : true
 					}, options));
 				} else {
@@ -2395,7 +2414,8 @@ function module_code(library_namespace) {
 			check = function(property_data) {
 				// console.trace(property_data);
 				var language = get_property(property_data, 'language')
-						|| options_language, value = property_data.value
+						|| options_language;
+				var value = property_data.value
 				//
 				= normalize_value_of_properties(property_data.value, language);
 				if (is_api_and_title(value, 'language')) {
@@ -2414,8 +2434,15 @@ function module_code(library_namespace) {
 					// console.log(options);
 					// console.trace(language);
 					// throw language;
-					demands.push(language ? [ language, property_key ]
-							: property_key);
+					if (language) {
+						property_key = [ language, property_key ];
+					} else {
+						property_key = [ , property_key ];
+					}
+					// e.g., qualifiers: { 'series ordinal': 1 }
+					// The 'series ordinal' is property name.
+					property_key.type = 'property';
+					demands.push(property_key);
 					property_corresponding.push(property_data);
 				}
 
@@ -2828,7 +2855,9 @@ function module_code(library_namespace) {
 				var language = get_property(property_data, 'language')
 						|| options_language,
 				//
-				_options = Object.assign({
+				_options = Object.assign(Object.clone(options),
+				//
+				property_data[KEY_property_options], {
 					// multi : false,
 					callback : function(normalized_value) {
 						// console.trace(options);
@@ -2915,7 +2944,7 @@ function module_code(library_namespace) {
 								if (qualifiers || references) {
 									library_namespace.warn(
 									//
-									'normalize_next_value: Skip exists value: ['
+									'normalize_next_value: Skip exists value with qualifiers or references: ['
 									//
 									+ value + '] ('
 									//
@@ -2970,10 +2999,12 @@ function module_code(library_namespace) {
 						// console.trace(normalized_value);
 
 						if (typeof qualifiers === 'object') {
+							// {Array|Object}
 							normalized_value.qualifiers = qualifiers;
 						}
 
 						if (typeof references === 'object') {
+							// {Array|Object}
 							normalized_value.references = references;
 						}
 
@@ -2981,7 +3012,7 @@ function module_code(library_namespace) {
 						normalize_next_value();
 					},
 					property : property_data.property
-				}, options, property_data[KEY_property_options]);
+				});
 				if (language) {
 					_options.language = language;
 				}
@@ -3043,14 +3074,20 @@ function module_code(library_namespace) {
 
 		append_parameters(POST_data, options);
 
+		library_namespace.debug(GUID + ': Set ' + qualifier.property + '='
+				+ qualifier.datavalue.value, 1, 'set_single_qualifier');
 		wiki_API.query([ API_URL, 'action=wbsetqualifier' ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetqualifier
 		function handle_result(data, error) {
+			// console.trace([ GUID, data, error ]);
 			error = error || (data ? data.error : new Error('No data get!'));
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.error('set_single_qualifier: [' + error.code
-						+ '] ' + (error.info || error.message));
+				library_namespace.error('set_single_qualifier: Set '
+						+ qualifier.property + '=' + qualifier.datavalue.value
+						+ ': [' + error.code + '] '
+						+ (error.info || error.message));
+				// console.trace([ GUID, qualifier ]);
 			}
 			// data:
 			// {"pageinfo":{"lastrevid":1},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","hash":"","datavalue":{"value":{"entity-type":"item","numeric-id":1,"id":"Q1"},"type":"wikibase-entityid"},"datatype":"wikibase-item"},"type":"statement","qualifiers":{"P1":[{"snaktype":"value","property":"P1111","hash":"050a39e5b316e486dc21d365f7af9cde9ad25a3e","datavalue":{"value":{"amount":"+8937","unit":"1","upperBound":"+8937","lowerBound":"+8937"},"type":"quantity"},"datatype":"quantity"}]},"qualifiers-order":["P1"],"id":"","rank":"normal"}}
@@ -3132,11 +3169,11 @@ function module_code(library_namespace) {
 
 			var qualifier_index = 0, latest_data_with_claim;
 			function set_next_qualifier(data, error) {
+				// console.trace([ qualifier_index, qualifiers, error ]);
 				if (data && data.claim)
 					latest_data_with_claim = data;
 				if (error || qualifier_index === qualifiers.length) {
-					// console.trace(data);
-					// console.trace(error);
+					// console.trace([ data, error ]);
 					callback(data, error);
 					return;
 				}
@@ -3547,8 +3584,16 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			var property_data = claims[claim_index], mainsnak = property_data.mainsnak
-					|| property_data, property_id = mainsnak.property, exists_property_list = entity
+			var property_data = claims[claim_index];
+			if (!property_data) {
+				// Should not go to here!
+				library_namespace
+						.error('set_next_claim: No property_data get!');
+				console.trace([ claim_index, claims ]);
+				shift_to_next();
+				return;
+			}
+			var mainsnak = property_data.mainsnak || property_data, property_id = mainsnak.property, exists_property_list = entity
 					&& entity.claims && entity.claims[property_id];
 			// console.trace([ property_id, mainsnak, property_data ]);
 
@@ -3598,6 +3643,7 @@ function module_code(library_namespace) {
 					// 因為此時 qualifiers / references 可能為好幾組設定，不容易分割排除重複
 					// qualifiers / references，結果將會造成重複輸入。
 					shift_to_next();
+					return;
 				}
 
 				var process_references = function process_references() {
@@ -3715,7 +3761,7 @@ function module_code(library_namespace) {
 			var claims = data.claims;
 			library_namespace.debug(claim_index + '/' + claims.length, 3,
 					'shift_to_next');
-			// 排掉能處理且已經處理完畢的claim。
+			// 排掉能處理且已經處理完畢的 claim。
 			if (claim_index === 0) {
 				claims.shift();
 			} else {
@@ -5072,7 +5118,7 @@ function module_code(library_namespace) {
 					// [readonly] The wiki is currently in read-only mode
 					+ '[' + error.code + '] ' + (error.info || error.message));
 					try {
-						console.error(action);
+						console.trace([ action, POST_data ]);
 					} catch (e) {
 						library_namespace.warn('action: '
 						//
@@ -5110,7 +5156,9 @@ function module_code(library_namespace) {
 		// console.trace(options);
 		// console.trace(entity);
 
-		if (!entity && options['new'] || options.wbeditentity_only) {
+		if (!entity && options['new']
+		// combine_edit_queries
+		|| options.wbeditentity_only) {
 			// 直接呼叫 wbeditentity
 			do_wbeditentity();
 			return;
@@ -5758,7 +5806,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
-	 CeL.wiki.SPARQL('SELECT ?item ?itemLabel WHERE { ?item wdt:P31 wd:Q146 . SERVICE wikibase:label { bd:serviceParam wikibase:language "en" } }', function(list) {result=list;console.log(list);})
+	 CeL.wiki.SPARQL('SELECT ?item ?itemLabel ?itemDescription WHERE { ?item wdt:P31 wd:Q146 . SERVICE wikibase:label { bd:serviceParam wikibase:language "en" } }', function(list) {result=list;console.log(list);})
 
 	 </code>
 	 * 
@@ -5801,6 +5849,7 @@ function module_code(library_namespace) {
 			// 正常情況
 			items.for_id = for_erach_SPARQL_item_process_id;
 			// e.g., items.id_list('item'); items.id_list();
+			// .get_item_ids()
 			items.id_list = get_SPARQL_id_list;
 			callback(items);
 		});
