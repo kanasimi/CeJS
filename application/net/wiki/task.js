@@ -1664,7 +1664,7 @@ function module_code(library_namespace) {
 				if (data) {
 					// e.g.,
 					// {pageid:,ns:,title:,type:'mediainfo',id:'M000',labels:{},descriptions:{},statements:{}}
-					// {id:'M000',missing:''}
+					// {id:'M123456',missing:''}
 					if (wiki_API.is_page_data(next[1][1])) {
 						_this.last_page = Object.assign(
 						//
@@ -1718,6 +1718,12 @@ function module_code(library_namespace) {
 							: get_wikibase_key(next[1]) ? get_wikibase_key(next[1]).title
 									// wiki_API.is_page_data(next[1])
 									: next[1].title)) {
+				next[1] = this.last_page;
+			} else if (this.last_page.id && ('missing' in this.last_page)
+					&& get_wikibase_key(this.last_page)
+					&& get_wikibase_key(this.last_page).title === next[1][1]) {
+				// 完全還沒設定過 structured data 的檔案是長這樣子:
+				// {id:'M123456',missing:''}
 				next[1] = this.last_page;
 			}
 
