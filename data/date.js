@@ -725,6 +725,7 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// console.trace(date_string);
 		if (library_namespace.is_RegExp(options.pattern)
 		//
 		&& (matched = date_string.match(options.pattern))) {
@@ -743,6 +744,7 @@ function module_code(library_namespace) {
 			// 長度3時當作年月日，否則當作自訂處理。
 			tmp.length === 3 ? '/' : '');
 		}
+		// console.trace(date_string);
 
 		// 設定指定 time zone 之 offset in minutes.
 		tmp = options.zone;
@@ -776,6 +778,7 @@ function module_code(library_namespace) {
 		if (library_namespace.is_Function(tmp)) {
 			library_namespace.debug('use customize parser to parse ('
 					+ typeof date_string + ') [' + date_string + '].', 2);
+			// console.trace(date_string);
 			if (tmp = tmp(date_string,
 			// assert: parser 亦負責 parse time zone offset.
 			minute_offset, options)) {
@@ -847,8 +850,10 @@ function module_code(library_namespace) {
 		stem_branch_date_pattern = date_pattern;
 	})();
 
-	// [ all, start month, end month, year ]
-	var PATTERN_EN_MONTH_YEAR = /^(?:([a-z]{3,9})\s*[.\/\-–－—─~～〜﹣])?\s*([a-z]{3,9})\s+(\d{1,4})$/i,
+	// [ all, start month, end month, year, misc ]
+	var PATTERN_EN_MONTH_YEAR = /^(?:([a-z]{3,9})\s*[.\/\-–－—─~～〜﹣])?\s*([a-z]{3,9}),?\s+(\d{1,4})( +\D.*)?$/i,
+	// [ all, year, start month, end month, misc ]
+	PATTERN_EN_YEAR_MONTH = /^(\d{1,4})\s+(?:([a-z]{3,9})\s*[.\/\-–－—─~～〜﹣])?\s*([a-z]{3,9})( +\D.*)?$/i,
 	// U+2212 '−': minus sign
 	// 為了 calendar 測試，年分需要能 parse 0–9999。
 	// [ all, .*年, \d+, [百千] ]
@@ -879,6 +884,7 @@ function module_code(library_namespace) {
 	 *      accessdate="2012/3/23 20:51">PHP: date - Manual</a>
 	 */
 	function String_to_Date_default_parser(date_string, minute_offset, options) {
+		// console.trace(date_string);
 		if (is_Date(date_string)) {
 			return date_string;
 		}
@@ -900,37 +906,57 @@ function module_code(library_namespace) {
 		date_string = date_string.trim()
 		// 注意:"紀"會轉換成結束時間。
 		.replace(/世[紀纪]/g, '百年').replace(/千[紀纪]/g, '千年');
+
+		// ------------------------------------------------
+
+		// [ all, start month, end month, year, misc ]
+		matched = date_string.match(PATTERN_EN_MONTH_YEAR);
+		if (!matched && (matched = date_string.match(PATTERN_EN_YEAR_MONTH))) {
+			matched.splice(4, 0, matched[1]);
+			matched.splice(1, 1);
+		}
+		if (matched) {
+			// e.g., 'May–June 1998', 'June 1998 UTC+6'
+			// console.trace(period_end, matched);
+			var date_value = Date.parse(
+			//
+			(!period_end && matched[1] || matched[2]) + ' ' + matched[3]
+			// matched[4]: e.g., 'UTC+8'
+			+ (matched[4] || ''));
+			if (isNaN(date_value)) {
+				// Cannot parse "month year"
+				library_namespace.debug('無法 parse: [' + date_string + ']', 2,
+						'String_to_Date_default_parser');
+				return;
+			}
+
+			if (!/UTC(?:\W|$)/.test(matched[4])
+			//
+			&& !isNaN(minute_offset) && minute_offset !== DEFAULT_TIME_ZONE) {
+				date_value -= (present_local_minute_offset + minute_offset)
+						* ONE_MINTE_LENGTH_VALUE;
+			}
+			date_value = new Date(date_value);
+			if (period_end) {
+				date_value.setMonth(date_value.getMonth() + 1);
+			} else if (false && matched[1]) {
+				library_namespace.warn('Cannot handle date range: '
+						+ date_string);
+			}
+
+			// .precision 將會影響 function wikidata_datavalue() @
+			// CeL.application.net.wiki.data
+			date_value.precision = 'month';
+			return date_value;
+		}
+
+		// ------------------------------------------------
+
 		if (isNaN(minute_offset)
 				&& !isNaN(tmp = get_minute_offset(date_string))) {
 			minute_offset = tmp;
 			// 留下此 pattern 在 match 時會出錯。
 			date_string = date_string.replace(UTC_PATTERN, '').trim();
-		}
-
-		matched = date_string.match(PATTERN_EN_MONTH_YEAR);
-		// [ all, start month, end month, year ]
-		if (matched) {
-			// e.g., 'May–June 1998'
-			var date_value;
-			if (period_end) {
-				date_value = new Date(matched[2] + ' ' + matched[3]);
-				date_value.setMonth(date_value.getMonth() + 1);
-			} else {
-				if (false && matched[1]) {
-					library_namespace.warn('Cannot handle date range: '
-							+ date_string);
-				}
-				date_value = new Date((matched[1] || matched[2]) + ' '
-						+ matched[3]);
-			}
-			if (!isNaN(date_value.getTime())) {
-				date_value.precision = 'month';
-				return date_value;
-			}
-			// Cannot parse "month year"
-			library_namespace.debug('無法 parse: [' + date_string + ']', 2,
-					'String_to_Date_default_parser');
-			return;
 		}
 
 		// TODO:

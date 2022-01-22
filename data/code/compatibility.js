@@ -1623,10 +1623,21 @@ function module_code(library_namespace) {
 	}
 
 	set_method(Date, {
+		// Date.UTC()
+		UTC : function UTC(year, month, day, hour, minute, second,
+		//
+		millisecond) {
+			var date = new Date(year || 0, month || 0, isNaN(day) ? 1 : day,
+					hour || 0, minute || 0, second || 0, millisecond || 0);
+			return date.getTime() - 60 * 1000 * date.getTimezoneOffset();
+		},
 		// Date.now()
 		now : function now() {
-			// (new Date()).getTime()
-			return new Date - 0;
+			return new Date().getTime();
+		},
+		// Date.parse()
+		parse : function parse(string) {
+			return new Date(string).getTime();
 		}
 	});
 

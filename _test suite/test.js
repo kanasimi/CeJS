@@ -2250,10 +2250,16 @@ function test_date() {
 		[[20067000, CeL.to_millisecond('5:34:27')], 'time_interval_to_millisecond() #10'],
 
 		[["1998/5/1", 'May–June 1998'.to_Date().format('%Y/%m/%d')]],
+		[["1998/7/1", 'May–June 1998'.to_Date({period_end:true}).format('%Y/%m/%d')]],
+		[["1998/5/1", '1998 May'.to_Date().format('%Y/%m/%d')]],
+		[["1998/6/1", '1998 May'.to_Date({period_end:true}).format('%Y/%m/%d')]],
+		[['1998 May UTC+3'.to_Date().getTime(), '1998 May'.to_Date({zone:3}).getTime()]],
 		[["2000/7/1 0:0:0.000", 'May–June 2000'.to_Date({ period_end: true }).format()]],
 		[["1998/6/1 0:0:0.000", 'June 1998'.to_Date().format()]],
 		[["month", 'June 1998'.to_Date().precision]],
 		[["month", 'May–June 1998'.to_Date().precision]],
+		[["month", '1998 June'.to_Date().precision]],
+		[["month", '1998 May-June'.to_Date().precision]],
 
 	]);
 
