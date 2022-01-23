@@ -1337,10 +1337,6 @@ function module_code(library_namespace) {
 
 					// 模擬已經下載完最後一張圖。
 					left = 1;
-					if (work_data.start_chapter_NO_next_time > 0) {
-						// 直接跳過本漫畫！放棄下載
-						chapter_NO = work_data.start_chapter_NO_next_time;
-					}
 					check_if_done();
 					return;
 				}
@@ -1527,9 +1523,10 @@ function module_code(library_namespace) {
 			// 已下載完本 chapter。
 
 			// 紀錄最後下載的章節計數。
-			work_data.last_download.chapter =
+			work_data.last_download.chapter = work_data.start_chapter_NO_next_time >= 0
 			// `work_data.start_chapter_NO_next_time` 為本次執行時設定的 chapter_NO。
-			work_data.start_chapter_NO_next_time || chapter_NO;
+			// cf. work_data.jump_to_chapter
+			? work_data.start_chapter_NO_next_time : chapter_NO;
 
 			// 欲限制/指定下次下載的 chapter_NO，可使用
 			// work_data.chapter_list.truncate(chapter_NO);
@@ -1663,10 +1660,11 @@ function module_code(library_namespace) {
 		chapter_NO = crawler_namespace.get_next_chapter_NO_item(work_data,
 				chapter_NO + 1);
 
-		if ('jump_to_chapter' in work_data) {
+		if (work_data.jump_to_chapter >= 0) {
+			// cf. work_data.start_chapter_NO_next_time
 			if (work_data.jump_to_chapter !== chapter_NO) {
 				// work_data.jump_to_chapter 可用來手動設定下一個要獲取的章節號碼。
-				// 跳到章節
+				// 一次性的設定跳到指定的章節。
 				library_namespace.info({
 					T : [ '%2: jump to chapter %1',
 							work_data.jump_to_chapter + ' ← ' + chapter_NO,
