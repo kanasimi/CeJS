@@ -2264,6 +2264,21 @@ function test_date() {
 	]);
 
 
+	CeL.gettext.use_domain('zh', true);
+
+	all_error_count += CeL.test('date name', [
+		[['20年', CeL.date.age_of(new Date(2000, 1, 1), new Date(2020, 1, 1))]],
+		[['20分', CeL.date.age_of(-20*60*1000, 0)]],
+		[['18小時', CeL.date.age_of(0, 18*60*60*1000)]],
+
+		[['30分前', CeL.date.indicate_date_time(0, { base_date : 30*60*1000 })]],
+		[['大後天0時0分', CeL.date.indicate_date_time(new Date(2000,1,4), { base_date : new Date(2000,1,1) })]],
+		[['後天20時3分', CeL.date.indicate_date_time(new Date(2000,1,3,20,3), { base_date : new Date(2000,1,1) })]],
+		[['47秒後', CeL.date.indicate_date_time(47*1000, { base_date : 0 })]],
+		[['47分後', CeL.date.indicate_date_time(47*60*1000, { base_date : 0 })]],
+	]);
+
+
 	var tmp;
 	all_error_count += CeL.test('to_Date(CE)', [
 		[["1582/10/15 0:0:0.000", '1582/10/5'.to_Date({ parser: 'CE', no_year_0: false }).format()]],

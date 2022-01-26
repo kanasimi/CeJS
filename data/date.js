@@ -2756,7 +2756,7 @@ function module_code(library_namespace) {
 	function age_of(start, end, options) {
 		if (!end) {
 			// count till now.
-			end = new Date;
+			end = end === 0 ? new Date(0) : new Date;
 		}
 		var difference = end - start, diff, diff2,
 		//
@@ -2866,11 +2866,19 @@ function module_code(library_namespace) {
 			// console.trace(date);
 			date = new Date(date);
 		}
-		var date_value_diff = date - Date.now();
+
+		var base_date = options.base_date;
+		if (isNaN(base_date) && !is_Date(base_date)) {
+			base_date = typeof options.base_date === 'string' ? Date
+					.parse(options.base_date) : Date.now();
+		}
+
+		var date_value_diff = date - base_date;
 		if (isNaN(date_value_diff)) {
 			// something wrong
 			return;
 		}
+
 		if (Math.abs(date_value_diff) > (options.max_interval || 35 * ONE_DAY_LENGTH_VALUE)) {
 			return date.format(options.general_format
 					|| indicate_date_time.general_format);
@@ -2923,8 +2931,8 @@ function module_code(library_namespace) {
 		if (date_value_diff <= 3) {
 			// the day of the month
 			var message = /* date_of_month */date.getDate()
-					- /* date_now */(new Date).getDate()
-					+ recent_date_name_today_index;
+					- (is_Date(base_date) ? base_date : new Date(base_date))
+							.getDate() + recent_date_name_today_index;
 			// console.log([date_value_diff, message, (new Date).getDate(),
 			// date.getDate()]);
 			if (message > recent_date_name.length) {
