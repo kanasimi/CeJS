@@ -72,7 +72,8 @@ function module_code(library_namespace) {
 			return '[' + (href ? href[1] : '#') + ' ' + innerHTML + ']';
 		})
 		//
-		.replace(/<br(?: [^<>]*)?>\n*/ig, '\n').replace(/<p ?\/>\n*/ig, '\n\n')
+		.replace(/\s*<br(?:[^\w<>][^<>]*)?>[\r\n]*/ig, '\n').replace(
+				/<p ?\/>\n*/ig, '\n\n')
 		// ignore style, remove <p style="...">...</p>
 		// .replace(/<p[^<>]*>([^<>]*)<\/p>[\s\n]*/g, '$1\n\n')
 		.replace(/<p>([\s\S]+?)<\/p>\n*/g, '$1\n\n')
@@ -701,7 +702,8 @@ function module_code(library_namespace) {
 	// const , for <dl>
 	var DEFINITION_LIST = 'd';
 
-	// !!default_magic_words_hash[magic_word] === 不用指定數值
+	// !!default_magic_words_hash[magic_word] === 必須指定數值，採用 {{#MW:value}}
+	// else 可單用 {{MW}}
 	var default_magic_words_hash = Object.create(null);
 	// https://www.mediawiki.org/wiki/Help:Magic_words
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=functionhooks&utf8&format=json
@@ -716,7 +718,7 @@ function module_code(library_namespace) {
 			+ '|int|msg|raw|msgnw|subst|safesubst'
 	// 這些需要指定數值。 e.g., {{NS:1}}: OK, {{NS}} will get " ", {{NS:}} will get ""
 	).split('|').forEach(function name(magic_word) {
-		default_magic_words_hash[magic_word.toUpperCase()] = false;
+		default_magic_words_hash[magic_word.toUpperCase()] = true;
 	});
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=variables&utf8&format=json
 	('!|='
@@ -726,7 +728,7 @@ function module_code(library_namespace) {
 			+ '|FULLPAGENAMEE|PAGENAMEE|BASEPAGENAMEE|SUBPAGENAMEE|SUBJECTPAGENAMEE|ARTICLEPAGENAMEE|TALKPAGENAMEE|ROOTPAGENAMEE'
 	// 這些不用指定數值。
 	).split('|').forEach(function name(magic_word) {
-		default_magic_words_hash[magic_word.toUpperCase()] = true;
+		default_magic_words_hash[magic_word.toUpperCase()] = false;
 	});
 
 	// parse 手動轉換語法的轉換標籤的語法
@@ -1769,7 +1771,8 @@ function module_code(library_namespace) {
 			parameters = parameters.split('|');
 
 			// matched: [ all, functionname token, functionname, argument 1 ]
-			var matched = parameters[0].match(/^([\s\n]*#([a-z]+):)([\s\S]*)$/);
+			var matched = parameters[0]
+					.match(/^([\s\n]*#([a-z]+):)([\s\S]*)$/i);
 
 			// if not [[mw:Help:Extension:ParserFunctions]]
 			if (!matched) {
@@ -2050,7 +2053,7 @@ function module_code(library_namespace) {
 				if ((namespace[1] in magic_words_hash)
 				// 例如 {{Fullurl}} 應被視作 template。
 				// test if token is [[Help:Magic words]]
-				&& (magic_words_hash[namespace[1]]
+				&& (!magic_words_hash[namespace[1]]
 				// 這些需要指定數值。 has ":"
 				|| namespace[0])) {
 					// TODO: {{ {{UCFIRST:T}} }}

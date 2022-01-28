@@ -1579,7 +1579,8 @@ function module_code(library_namespace) {
 		// "ロイ・トーマス<!-- 曖昧さ回避ページ -->"
 		.replace(/<\!--[\s\S]*?-->/g, '')
 		// 沒先處理的話，也會去除 <br />
-		.replace(/<br(?:\s[^<>]*)?>/ig, '\n').replace(/<\/?[a-z][^>]*>/g, '')
+		.replace(/\s*<br(?:[^\w<>][^<>]*)?>/ig, '\n').replace(
+				/<\/?[a-z][^>]*>/g, '')
 		// "{{=}}" → "="
 		.replace(/{{=\s*}}/ig, '=')
 		// e.g., remove "{{En icon}}"
@@ -2654,7 +2655,7 @@ function module_code(library_namespace) {
 		configurations.functionhooks
 		//
 		&& configurations.functionhooks.forEach(function(magic_word) {
-			magic_words_hash[magic_word.toUpperCase()] = false;
+			magic_words_hash[magic_word.toUpperCase()] = true;
 		});
 		// Release memory. 釋放被占用的記憶體。
 		// delete configurations.functionhooks;
@@ -2668,7 +2669,7 @@ function module_code(library_namespace) {
 			// https://harrypotter.fandom.com/api.php?action=query&meta=siteinfo&siprop=variables&utf8&format=json
 			// [{"id":"wgLanguageCode","*":"en"},{"id":"wgCityId","*":509}]
 			if (typeof magic_word === 'string')
-				magic_words_hash[magic_word.toUpperCase()] = true;
+				magic_words_hash[magic_word.toUpperCase()] = false;
 		});
 		// Release memory. 釋放被占用的記憶體。
 		// delete configurations.variables;
@@ -2677,16 +2678,22 @@ function module_code(library_namespace) {
 		//
 		&& configurations.magicwords.forEach(function(magic_word_data) {
 			var name = magic_word_data.name.toUpperCase();
-			var mapper_to;
+			var map_to;
 			if (name in magic_words_hash) {
 				// 在 .variables, .functionhooks 已設定，以先前設定為主。
-				mapper_to = magic_words_hash[name];
+				map_to = magic_words_hash[name];
 			} else {
 				// 無法自此處判斷是否需要參數。皆設定為需要參數。
-				magic_words_hash[name] = mapper_to = name;
+				magic_words_hash[name] = map_to = name;
 			}
 			magic_word_data.aliases.forEach(function(magic_word) {
-				magic_words_hash[magic_word.toUpperCase()] = mapper_to;
+				magic_word = magic_word.toUpperCase();
+				// Do not overwrite value
+				if (!(magic_word in magic_words_hash)
+				// TODO: 另外處理這些特別的 magic words
+				&& !/[#:]|\$\d/.test(magic_word)) {
+					magic_words_hash[magic_word] = map_to;
+				}
 			});
 		});
 		// Release memory. 釋放被占用的記憶體。
