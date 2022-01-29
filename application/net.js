@@ -211,7 +211,7 @@ function module_code(library_namespace) {
 
 	var PATTERN_URI =
 	// [ all, 1: `protocol:`, 2: '//', 3: host, 4: path ]
-	/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&:]+(?::\d{1,5})?)?([\s\S]*)$/i
+	/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&:.][^\/#?&:]+(?::\d{1,5})?)?(.*)$/i
 	// /^(?:(https?:)\/\/)?(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/
 	;
 
@@ -436,9 +436,11 @@ function module_code(library_namespace) {
 		if (!href) {
 			// test /C:/path
 			if (!/^\/[A-Z]:/i.test(path)) {
-				library_namespace.warn(
-				// 將 [' + path + '] 當作 pathname! not hostname!
-				'URI: Treat [' + path + '] as pathname!');
+				if (!base_uri) {
+					library_namespace.debug(
+					// 將 [' + path + '] 當作 pathname! not hostname!
+					'Treat [' + path + '] as pathname!', 1, 'URI');
+				}
 				if (uri.pathname) {
 					if (/^\//.test(path)) {
 						// path 為 absolute path

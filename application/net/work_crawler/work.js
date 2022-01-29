@@ -212,6 +212,21 @@ function module_code(library_namespace) {
 		this.running = true;
 		var _this = this;
 
+		if (this.must_browse_first && !this.had_browsed) {
+			// e.g., novel.cmn-Hans-CN/biqugse.js 用以設定 cookie。
+			this.get_URL(this.base_URL, function(XMLHttp, error) {
+				this.had_browsed = Date.now();
+				if (typeof this.must_browse_first === 'number'
+						&& this.must_browse_first >= 0) {
+					setTimeout(get_work.bind(_this, work_title, callback),
+							this.must_browse_first);
+				} else {
+					get_work.call(_this, work_title, callback);
+				}
+			});
+			return;
+		}
+
 		// 執行順序: finish() → finish_up()
 		// 若在this.finish_up()中處理work_data，則必須執行`this.save_work_data(work_data)`才能保存變更過的work_data。
 		function finish_up(work_data) {
@@ -224,8 +239,8 @@ function module_code(library_namespace) {
 					_this.pack_ebook(work_data);
 				}
 				if (false && _this.need_create_ebook && !_this.preserve_cache) {
-					// 注意: 若是刪除ebook目錄，也會把media資源檔刪掉。
-					// 因此只能刪除造出來的HTML網頁檔案。
+					// 注意: 若是刪除 ebook 目錄，也會把 media 資源檔刪掉。
+					// 因此只能刪除造出來的 HTML 網頁檔案。
 					library_namespace.fs_remove(
 					// @see CeL.application.storage.EPUB
 					work_data[this.KEY_EBOOK].path.root, true);
@@ -1587,11 +1602,12 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			var ebook;
+			var ebook_promise;
 			if (_this.need_create_ebook) {
 				// console.log(work_data);
 				// console.trace(JSON.stringify(work_data));
-				ebook = crawler_namespace.create_ebook.call(_this, work_data);
+				ebook_promise = crawler_namespace.create_ebook.call(_this,
+						work_data);
 			}
 
 			var message = [
@@ -1634,7 +1650,12 @@ function module_code(library_namespace) {
 			// function create_ebook(work_data)
 			// 中的 this.convert_to_language() 可能是 async 形式，需要待其完成之後，再進行下個階段。
 			function waiting_for_create_ebook() {
-				Promise.resolve(ebook).then(start_to_process_chapter_data);
+				library_namespace
+						.log_temporary('Waiting for connecting to language-converting server...');
+				// Will wait for the get_URL() @ function get_LTP_data(options)
+				// @ Chinese_converter/Chinese_converter.js
+				Promise.resolve(ebook_promise).then(
+						start_to_process_chapter_data);
 			}
 			function start_to_process_chapter_data() {
 				// 開始下載 chapter。

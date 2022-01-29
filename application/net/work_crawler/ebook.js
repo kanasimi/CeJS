@@ -56,48 +56,25 @@ function module_code(library_namespace) {
 			return;
 
 		// 去掉開頭的 "./"。
-		next_url = next_url[1].replace(/^(\.\/)+/,
+		next_url = new library_namespace.URI(next_url[1],
 		// TODO: {Array}this.chapter_URL()
-		this.chapter_URL(work_data, chapter_NO).replace(/[^\/]+$/, '')).trim();
+		this.chapter_URL(work_data, chapter_NO).replace(/[^\/]+$/, ''))
+				.toString();
 		if (!next_url)
 			return;
 
-		var next_chapter = work_data.chapter_list[chapter_NO],
+		var full_next_url = this.full_URL(next_url),
+		//
+		next_chapter = work_data.chapter_list[chapter_NO],
 		// chapter_data.url
 		next_chapter_url = next_chapter && next_chapter.url;
 
-		// 有些在目錄上面的章節連結到了錯誤的頁面，只能靠下一頁來取得正確頁面。
-		if (next_url === next_chapter_url
+		if (full_next_url === work_data.url
 		// 許多網站會把最新章節的下一頁設成章節列表，因此必須排除章節列表的網址。
-		|| next_url === work_data.url
-		// || next_url === './'
-		|| next_url === 'index.html')
+		|| full_next_url === work_data.chapter_list_URL
+		// 有些在目錄上面的章節連結到了錯誤的頁面，只能靠下一頁來取得正確頁面。
+		|| full_next_url === this.full_URL(next_chapter_url)) {
 			return;
-
-		if (next_chapter_url) {
-			if (false) {
-				console
-						.trace([ work_data.base_url, next_url, next_chapter_url ]);
-			}
-			// 符合這些條件的，依然是相同的網址。
-			// 照理來說.startsWith()本陳述應該皆為真。
-			if (next_url.startsWith(work_data.base_url)) {
-				var base_length = work_data.base_url.length;
-				// 檢查正規化規範連結之後是否與本章節相同。
-				if (next_url.length < next_chapter_url.length
-				// 檢查去除 work_data.base_url 後是否相同。
-				? next_url === next_chapter_url.slice(base_length)
-				//
-				: next_chapter_url === next_url.slice(base_length))
-					return;
-
-			} else if (next_url.length < next_chapter_url.length
-			//
-			? next_chapter_url.endsWith(next_url)
-			// 
-			: next_url.endsWith(next_chapter_url)) {
-				return;
-			}
 		}
 
 		if (false) {
@@ -109,7 +86,8 @@ function module_code(library_namespace) {
 		}
 
 		if (work_data.chapter_list.some(function(chapter_data) {
-			return chapter_data.url === next_url;
+			return chapter_data.url === next_url
+					|| chapter_data.url === full_next_url;
 		})) {
 			// url 已經在 chapter_list 裡面。
 			return;
@@ -153,7 +131,7 @@ function module_code(library_namespace) {
 				.replace(/[\\\/]$/, '');
 		if (library_namespace.directory_exists(cache_directory)) {
 			library_namespace.info('extract_convert_cache_directory: '
-			// 語言轉換
+			// 語言轉換 TAG_text_converted
 			+ gettext('將覆寫繁簡轉換 cache 目錄 [%1] 中的檔案。', cache_directory));
 		}
 
@@ -233,7 +211,10 @@ function module_code(library_namespace) {
 		return work_data.last_update_Date;
 	}
 
-	function create_ebook(work_data, forced_recreate) {
+	var TAG_text_converted = '語言轉換';
+	function create_ebook(work_data, options) {
+		// var forced_recreate = options && options.forced_recreate;
+
 		// 檢查 ebook 先備條件。 check_ebook_prerequisites
 		var cecc = this.convert_text_language_using
 				&& this.convert_text_language_using.cecc;
@@ -263,29 +244,35 @@ function module_code(library_namespace) {
 		};
 
 		if (this.convert_to_language
-				// 本次執行（10秒內）不再重複解開 cache 檔。
-				&& !(Date.now() - work_data.convert_cache_directory_extracted < 10 * 1000)) {
+				&& (!options || !options.no_extract_convert_cache_directory)) {
 			extract_convert_cache_directory(work_data);
-			work_data.convert_cache_directory_extracted = Date.now();
+			// work_data.convert_cache_directory_extracted = Date.now();
 			if (false) {
 				var promise_extract_convert_cache_directory = extract_convert_cache_directory(work_data);
 				if (promise_extract_convert_cache_directory) {
 					// 先初始化完畢後再重新執行。
 					return promise_extract_convert_cache_directory
-							.then(create_ebook.bind(this, work_data));
+							.then(create_ebook.bind(this, work_data, {
+								no_extract_convert_cache_directory : true
+							}));
 				}
 			}
 		}
 
 		// return needing to wait language converted
-		var text_list = [ work_data.title, '語言轉換' ];
+		var text_list = [ work_data.title, TAG_text_converted ];
+		// console.trace(text_list);
 		var promise_language_convert = this.cache_converted_text(text_list,
 				work_data.convert_options);
 		if (promise_language_convert) {
 			// console.trace('Convert: ' + text_list);
 			// 先初始化完畢後再重新執行。
+			// 注意: 這會造成 create_ebook() 這邊之前的程式碼執行兩遍!
 			return promise_language_convert.then(create_ebook.bind(this,
-					work_data));
+			// 本次執行不再重複解開 cache 檔。
+			work_data, {
+				no_extract_convert_cache_directory : true
+			}));
 		}
 
 		// ebook 先備條件檢查完畢。
@@ -352,13 +339,13 @@ function module_code(library_namespace) {
 				subject = subject.concat(work_data[type]);
 		});
 		if (this.convert_to_language) {
-			subject.push(this.convert_text_language('語言轉換'),
+			subject.push(this.convert_text_language(TAG_text_converted),
 			//
 			gettext.get_alias(this.convert_to_language));
 		}
 		subject = subject.unique();
 
-		var options = {
+		var setup_ebook_options = {
 			ebook : ebook,
 			subject : subject,
 			description : crawler_namespace.get_label(work_data.description
@@ -366,7 +353,7 @@ function module_code(library_namespace) {
 			.replace(/\n*<br[^<>]*>\n*/ig, '\n'))
 		};
 
-		text_list = [ work_data.author, options.description,
+		text_list = [ work_data.author, setup_ebook_options.description,
 				work_data.site_name ];
 		text_list.append(subject);
 		// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
@@ -374,7 +361,7 @@ function module_code(library_namespace) {
 				work_data.convert_options)
 				|| Promise.resolve();
 		return ebook.working_promise = promise_language_convert
-				.then(setup_ebook.bind(this, work_data, options));
+				.then(setup_ebook.bind(this, work_data, setup_ebook_options));
 	}
 
 	// @inner only called by create_ebook(work_data)
@@ -478,8 +465,8 @@ function module_code(library_namespace) {
 		library_namespace.EPUB.normailize_contents(data.text
 		// remove all new-lines
 		.replace(/[\r\n]+/g, '')
-		// <br /> → "\n"
-		.replace(/<br(?:\s[^<>]*)?>/ig, '\n')
+		// "<br />", "<br/>" → "\n"
+		.replace(/\s*<br(?:[^\w<>][^<>]*)?>[\r\n]*/ig, '\n')
 		// .trim()
 		), true);
 		// console.log(data.text);
@@ -492,9 +479,10 @@ function module_code(library_namespace) {
 			return ebook.working_promise = ebook.working_promise
 			//
 			.then(function() {
-				return promise_language_convert
-						.then(add_ebook_chapter_actual_work.bind(this,
-								work_data, chapter_NO, data, options));
+				return promise_language_convert.then(
+				// TODO: 這邊失敗，例如 timeout 的話，會直接跳到最後一章並且出現錯誤。
+				add_ebook_chapter_actual_work.bind(this, work_data, chapter_NO,
+						data, options));
 			}.bind(this));
 		} else {
 			// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
@@ -549,7 +537,7 @@ function module_code(library_namespace) {
 			file : library_namespace.to_file_name(file_title + '.xhtml'),
 			// 一般說來必須設定 work_data.chapter_list。
 			date : data.date || chapter_data && chapter_data.date,
-			// 設定item_data.url可以在閱讀電子書時，直接點選標題就跳到網路上的來源。
+			// 設定 item_data.url 可以在閱讀電子書時，直接點選標題就跳到網路上的來源。
 			url : data.url
 					|| this.full_URL(this.chapter_URL(work_data, chapter_NO)),
 			// pass Referer, User-Agent
@@ -839,6 +827,14 @@ function module_code(library_namespace) {
 			ebook.working_promise = ebook.working_promise
 					.then(archive_convert_cache_directory.bind(this, work_data));
 		}
+
+		ebook.working_promise = ebook.working_promise.then(
+		//
+		library_namespace.null_function, function(error) {
+			library_namespace.error(error);
+			// re-throw
+			throw error;
+		});
 
 		return ebook.working_promise;
 	}

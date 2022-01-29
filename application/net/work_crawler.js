@@ -38,6 +38,9 @@ parse 圖像。
 檢核章節內容。
 考慮 search_URL 搜尋的頁數，當搜索獲得太多結果時也要包含所有結果
 
+detect encoded data:
+https://gchq.github.io/CyberChef/
+
 </code>
  */
 
@@ -282,7 +285,8 @@ function module_code(library_namespace) {
 			options = library_namespace.setup_options(options);
 		}
 
-		if (options.text) {
+		// ('text' in options)
+		if (typeof options.text === 'string') {
 			delete this.converted_text_cache[options.text];
 		} else {
 			// console.trace(options);
@@ -317,8 +321,10 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(this.converted_text_cache);
+		// console.trace(text);
+		// console.trace(this);
 		throw new Error(
-				'You should run this.cache_converted_text(text_list) first!');
+				'You should run `this.cache_converted_text(text_list)` first!');
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -536,7 +542,7 @@ function module_code(library_namespace) {
 		return html ? library_namespace.HTML_to_Unicode(
 				html.replace(/<!--[\s\S]*?-->/g, '').replace(
 						/<(script|style)[^<>]*>[\s\S]*?<\/\1>/g, '').replace(
-						/\s*<br(?:\/| [^<>]*)?>/ig, '\n').replace(
+						/\s*<br(?:[^\w<>][^<>]*)?>[\r\n]*/ig, '\n').replace(
 						/<\/?[a-z][^<>]*>/g, '')
 				// incase 以"\r"為主。 e.g., 起点中文网
 				.replace(/\r\n?/g, '\n')).trim().replace(

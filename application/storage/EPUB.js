@@ -1256,7 +1256,7 @@ function module_code(library_namespace) {
 		//
 		.replace(/<hr(?:\s[^<>]*)?>/ig, '<hr />')
 		// <BR> → <br />
-		.replace(/<br(?:\s[^<>]*)?>/ig, '<br />')
+		.replace(/<br(?:[^\w<>][^<>]*)?>/ig, '<br />')
 
 		// .trim(), remove head/tail <BR>
 		.replace(/^(?:<br *\/>|[\s\n]|&nbsp;|&#160;)+/ig, '')
@@ -1765,7 +1765,7 @@ function module_code(library_namespace) {
 					library_namespace.warn([ 'add_chapter: ', {
 						T : [ '未設定標題：%1……',
 						//
-						String(contents.text).slice(0, 200) ]
+						String(contents.text).slice(0, 200) || '(無內容)' ]
 					} ]);
 				}
 				// console.log(title_layer);
