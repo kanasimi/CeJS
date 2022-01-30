@@ -5397,9 +5397,11 @@ function module_code(library_namespace) {
 				oPos.className = sPopP.DclassName[popup_window_type]
 						+ (classN ? '_' + classN : '');
 				var w, s = oPos.style;
-				if (!s.fontWeight && (w = oPos.parentNode.style.fontWeight))
+				if (!s.fontWeight && (w = oPos.parentNode)
+						&& (w = w.style.fontWeight)) {
 					// 除非有明確設定font-weight，否則通常不會有效
 					s.fontWeight = w;
+				}
 			}
 		}
 
