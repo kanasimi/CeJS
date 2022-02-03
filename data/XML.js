@@ -210,25 +210,28 @@ function module_code(library_namespace) {
 	 *            已設定過 tag name 之 node
 	 * @param {String}attributes
 	 *            attributes to set
-	 * @param {Function}[numeralize]
-	 *            only needed if you want to numeralize the properties
+	 * @param {Function}[normalizer]
+	 *            only needed if you want to normalize the properties
 	 * 
 	 * @inner
 	 */
-	function set_attributes(node, attributes, numeralize) {
-		if (!attributes)
+	function set_attributes(node, attributes, normalizer) {
+		if (!attributes) {
 			// 可能為 undefined
 			return;
+		}
+
 		var matched,
 		//
 		attribute_pattern = /([^\s=]+)\s*(?:=\s*(?:"((?:\\.|[^"\\]+)+)"|'((?:\\.|[^'\\]+)+)'|(\S+)))?/g;
 		while (matched = attribute_pattern.exec(attributes)) {
 			var value = matched[2] || matched[3];
 			// unescape
-			value ? value.replace(/\\(.)/g, '$1') : matched[4];
-			if (numeralize)
-				value = numeralize(value);
-			node[matched[1]] = value;
+			// value ? value.replace(/\\(.)/g, '$1') : matched[4];
+			if (normalizer)
+				value = normalizer(value);
+			if (value || value === 0)
+				node[matched[1]] = value;
 		}
 	}
 
@@ -273,20 +276,48 @@ function module_code(library_namespace) {
 	// 無 end-tag 之 node (empty-element tag) pattern。
 	// http://www.w3.org/TR/REC-xml/#sec-starttags
 	// [ , tag name, attributes ]
-	PATTERN_EMPTY = /<([^\0-\-;->\s]+)(\s[^<>]*?)?\/>/,
-	// end-tag 之 pattern
+	PATTERN_EMPTY = /<([^\0-\,;->\s]+)(\s[^<>]*?)?\/>/,
+	// end-tag 之 pattern。必須允許 ":","-"。
 	// [ , last children, tag name ]
-	PATTERN_END = /^([\S\s]*?)<\/([^\0-\-;->\s]+)\s*>/;
+	PATTERN_END = /^([\S\s]*?)<\/([^\0-\,;->\s]+)\s*>/,
+	//
+	KEY_default_tag_name_mark = typeof Symbol === 'function' ? Symbol('tag name')
+			: '$';
+
+	_.KEY_default_tag_name_mark = KEY_default_tag_name_mark;
 
 	/**
 	 * parse XML to JSON.
 	 * 
+	 * TODO: new CeL.XML_Object(XML string), convert XML string to list of
+	 * normal tag node: { type:'tag', tag_name:'', attributes:['
+	 * attribute="value"',' attribute="value"'],
+	 * attribute_hash:{attribute:"value", ...},
+	 * child_nodes:['spaces',{child_node},'plain text', ...] }
+	 * 
+	 * commet node: { type:'commets', inner_text:'' }
+	 * 
 	 * @param {String}XML
-	 *            XML text
+	 *            XML string
 	 * @param {Object}[options]
-	 *            options<br />
-	 *            {Boolean|Function}options.numeralize(text): only needed if you
-	 *            want to numeralize the properties
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns {Array|Object|String} XML nodes
+	 */
+	function XML_Object(XML, options) {
+		TODO;
+	}
+
+	/**
+	 * parse XML to JSON. Will trim spaces.
+	 * 
+	 * @param {String}XML
+	 *            XML string
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項<br />
+	 *            {Boolean}options.node_normalizer(text): only needed if you
+	 *            want to normalize the properties, {Boolean}options.numeralize:
+	 *            only needed if you want to numeralize the properties
 	 * 
 	 * @returns {Array|Object|String} XML nodes
 	 */
@@ -296,8 +327,10 @@ function module_code(library_namespace) {
 		}
 
 		// 前置處理。
-		if (!library_namespace.is_Object(options)) {
-			options = Object.create(null);
+		options = library_namespace.setup_options(options);
+		var tag_name_mark = options.tag_name_mark;
+		if (tag_name_mark === true) {
+			tag_name_mark = KEY_default_tag_name_mark;
 		}
 
 		// console.log(XML);
@@ -308,149 +341,209 @@ function module_code(library_namespace) {
 
 		var nodes = [ XML ],
 		//
-		numeralize = options.numeralize,
+		normalizer = options.node_normalizer,
 		//
-		skip_spaces = options.skip_spaces;
+		remove_spaces = !options.preserve_spaces;
 
-		if (numeralize && typeof numeralize !== 'function') {
-			numeralize = function(string) {
+		if (typeof normalizer !== 'function') {
+			if (normalizer) {
+				library_namespace.error('XML_to_JSON: Invalid normalizer: '
+						+ normalizer);
+			}
+			normalizer = typeof options.numeralize === 'function'
+			// treat as normalizer
+			? options.numeralize
+			// assert: normalizer === true
+			: options.numeralize ? function(string) {
 				return isNaN(string) ? string : +string;
+			} : null;
+		} else if (options.numeralize) {
+			library_namespace
+					.error('XML_to_JSON: Please numeralize node value in the options.node_normalizer!'
+							+ normalizer);
+		}
+		if (remove_spaces) {
+			normalizer = normalizer ? function(string) {
+				return typeof string === 'string' ? string.trim()
+						&& this(string) : string;
+			}.bind(normalizer) : function(string) {
+				return (typeof string !== 'string' || string.trim()) && string;
 			};
 		}
 
 		for (var index = 0, matched; index < nodes.length; index++) {
-			if (typeof nodes[index] !== 'string')
+			var this_node = nodes[index];
+			if (typeof this_node !== 'string') {
+				// assert: processed node
 				continue;
+			}
 
-			// 'f<n/>e' → 'f', {n:null}, 'e'
-			if (matched = nodes[index].match(PATTERN_EMPTY)) {
+			// 'f<n/>e' → [ 'f', {n:null}, 'e' ]
+			if (matched = this_node.match(PATTERN_EMPTY)) {
 				// 本次要建構的 node。
 				var node = {},
 				//
-				tail = nodes[index].slice(matched.index + matched[0].length);
-				if (tail)
-					nodes.splice(index + 1, 0, node,
-							numeralize ? numeralize(tail) : tail);
+				tail = this_node.slice(matched.index + matched[0].length);
+				if (normalizer)
+					tail = normalizer(tail);
+				if (tail || tail === 0)
+					nodes.splice(index + 1, 0, node, tail);
 				else
 					nodes.splice(index + 1, 0, node);
-				if (tail = nodes[index].slice(0, matched.index))
-					nodes[index] = numeralize ? numeralize(tail) : tail;
+				tail = nodes[index].slice(0, matched.index);
+				if (normalizer)
+					tail = normalizer(tail);
+				if (tail || tail === 0)
+					nodes[index] = tail;
 				else
 					nodes.splice(index, 1);
 				node[matched[1]] = null;
-				set_attributes(node, matched[2], numeralize);
+				if (tag_name_mark)
+					node[tag_name_mark] = matched[1];
+				set_attributes(node, matched[2], normalizer);
 				// reset index to search next one
 				index--;
 				continue;
 			}
 
-			// 'f<n>c</n>e' → 'f', {n:'c'}, 'e'
-			// 'f<N>', {n:'c'}, '</N>e' → 'f', {N : {n:'c'}}, 'e'
-			if (matched = nodes[index].match(PATTERN_END)) {
-				// 前溯查找 node start.
-				// tag_pattern: [ , attributes, first child ]
-				for (var i = index, tag_pattern = new RegExp('<' + matched[2]
-				// TODO: parse "<br/>"
-				+ '(\\s[^<>]*)?>([\\S\\s]*?)$'), tag_matched; i >= 0; i--) {
-					if (typeof nodes[i] !== 'string')
-						continue;
+			matched = this_node.match(PATTERN_END);
+			if (!matched) {
+				if (remove_spaces && !this_node.trim()) {
+					nodes.splice(index--, 1);
+				}
+				// assert: no-function text. leave it alone.
+				if (false && /[<>]/.test(this_node)) {
+					library_namespace.error('XML_to_JSON: parse error: '
+							+ this_node);
+				}
+				continue;
+			}
 
-					if (tag_matched = (i === index ? matched[1] : nodes[i])
-							.match(tag_pattern)) {
-						// assert: tail <= 0
-						var tail = matched[0].length - nodes[index].length;
+			// 'f<n>c</n>e' → [ 'f', {n:'c'}, 'e' ]
+			// [ 'f<N>', {n:'c'}, '</N>e' ] → [ 'f', {N : {n:'c'}}, 'e' ]
 
-						// 設定好 node's 殘餘值。
+			// 前溯查找 node start.
+			// tag_pattern: [ , attributes, first child ]
+			for (var i = index, tag_pattern = new RegExp('<' + matched[2]
+			// TODO: parse "<br />"
+			+ '(\\s[^<>]*)?>([\\S\\s]*?)$'); i >= 0; i--) {
+				this_node = nodes[i];
+				if (typeof this_node !== 'string')
+					continue;
 
-						// 檢查是否需切割。
+				var tag_matched = (i === index ? matched[1] : this_node)
+						.match(tag_pattern);
+				if (!tag_matched) {
+					// 再往前找。
+					continue;
+				}
 
-						// 切割 end: 'f</n>e'
-						// → matched[1] = 'f' | matched[1].length
-						// | '</n>' | matched[0].length
-						// | nodes[index] = 'e'
-						if (tail < 0) {
-							// -(tail length) → {String}tail
-							tail = nodes[index].slice(tail);
-							if (numeralize)
-								tail = numeralize(tail);
-							if (i === index)
-								// 直接添加一個當下一 node。
-								nodes.splice(i + 1, 0, tail);
-							else
-								nodes[index] = tail;
-							if (tail === 0)
-								// 預防之後的判斷失誤。
-								tail = String(tail);
-						}
-						// 切割 start: 'f<n>e'
-						// → nodes[i] = 'f' | tag_matched.index
-						// | tag_matched[1] = '<n>' | nodes[i].length -
-						// tag_matched[2].length
-						// | tag_matched[2] = 'e'
-						// 盡量晚點 copy。
-						if (tag_matched.index > 0) {
-							// has head
-							nodes[i] = nodes[i].slice(0, tag_matched.index);
-							if (numeralize)
-								nodes[i] = numeralize(nodes[i]);
-						}
+				// assert: tail <= 0
+				var tail = matched[0].length - nodes[index].length;
 
-						// 本次要建構的 node。
-						var node = {},
-						// 切割出 node
-						children = nodes.splice(
-						// 自此添加新 node。
-						i + (tag_matched.index === 0 ? 0 : 1),
-						// 前後皆無東西，使其整組消失。
-						index - i
-						// 使 head 整組消失。
-						+ (tag_matched.index === 0 ? 1 : 0)
-						// 不同 node 且有 tail 則少刪一個。
-						- (i !== index && tail ? 1 : 0), node);
-						// 去掉頭尾多切割出的部分。
-						if (tag_matched.index === 0) {
-							// head srction 從一開始就是 tag，因此直接將之除掉。
-							children.shift();
-						}
-						if (i !== index && !tail) {
-							// end srction 到結尾都是 end tag，因此直接將之除掉。
-							children.pop();
-						}
+				// 設定好 node's 殘餘值。
 
-						// setup tag name & children
-						if (skip_spaces) {
-							tag_matched[2] = tag_matched[2].trim();
-							matched[1] = matched[1].trim();
-						}
-						if (tag_matched[2]) {
-							// add first children @ last of head srction
-							children
-									.unshift(numeralize ? numeralize(tag_matched[2])
-											: tag_matched[2]);
-						}
-						if (i !== index && matched[1]) {
-							// add last children @ head of end srction
-							children.push(numeralize ? numeralize(matched[1])
-									: matched[1]);
-						}
-						// node's first property: node[tag name] = children
-						node[matched[2]] = children.length === 0 ? null
-								: children.length === 1 ? children[0]
-										: children;
-						set_attributes(node, tag_matched[1], numeralize);
-						// reset index to search next one
-						index = i + (tag_matched.index === 0 ? 0 : 1);
-						break;
+				// 檢查是否需切割。
+
+				// 切割 end: 'f</n>e'
+				// → matched[1] = 'f' | matched[1].length
+				// | '</n>' | matched[0].length
+				// | nodes[index] = 'e'
+				if (tail < 0) {
+					// -(tail length) → {String}tail
+					tail = nodes[index].slice(tail);
+					if (normalizer)
+						tail = normalizer(tail);
+					if (i === index)
+						// 直接添加一個當下一 node。
+						nodes.splice(i + 1, 0, tail);
+					else
+						nodes[index] = tail;
+					if (tail === 0) {
+						// 預防之後的判斷失誤。
+						tail = String(tail);
 					}
-					// else: 再往前找。
 				}
-				if (false && i < 0) {
-					library_namespace.error('parse error: ' + nodes[i]);
+
+				var tag_start_from_head = tag_matched.index === 0;
+
+				// 切割 start: 'f<n>e'
+				// → nodes[i] = 'f' | tag_matched.index
+				// | tag_matched[1] = '<n>' | nodes[i].length -
+				// tag_matched[2].length
+				// | tag_matched[2] = 'e'
+				// 盡量晚點 copy。
+				if (!tag_start_from_head) {
+					// assert: tag_matched.index > 0
+					// has head
+					this_node = nodes[i].slice(0, tag_matched.index);
+					if (normalizer) {
+						this_node = normalizer(this_node);
+					}
+					if (this_node || this_node === 0) {
+						nodes[i] = this_node;
+					} else {
+						// 前面是空白，可以切掉。
+						tag_start_from_head = true;
+					}
 				}
+
+				// 本次要建構的 node。
+				var node = {},
+				// 切割出 node
+				children = nodes.splice(
+				// 自此添加新 node。
+				i + (tag_start_from_head ? 0 : 1),
+				// 前後皆無東西，使其整組消失。
+				index - i
+				// 使 head 整組消失。
+				+ (tag_start_from_head ? 1 : 0)
+				// 不同 node 且有 tail 則少刪一個。
+				- (i !== index && tail ? 1 : 0), node);
+				// 去掉頭尾多切割出的部分。
+				if (tag_start_from_head) {
+					// head srction 從一開始就是 tag，因此直接將之除掉。
+					children.shift();
+				}
+				if (i !== index && !tail) {
+					// end srction 到結尾都是 end tag，因此直接將之除掉。
+					children.pop();
+				}
+
+				// setup tag name & children
+				if (remove_spaces) {
+					tag_matched[2] = tag_matched[2].trim();
+					matched[1] = matched[1].trim();
+				}
+				if ((this_node = tag_matched[2])
+						&& (!normalizer || (this_node = normalizer(this_node)) || this_node === 0)) {
+					// add first children @ last of head srction
+					children.unshift(this_node);
+				}
+				if (i !== index
+						&& (this_node = matched[1])
+						&& (!normalizer || (this_node = normalizer(this_node)) || this_node === 0)) {
+					// add last children @ head of end srction
+					children.push(this_node);
+				}
+				// node's first property: node[tag name] = children
+				node[matched[2]] = children.length === 0 ? null
+						: children.length === 1 ? children[0] : children;
+				if (tag_name_mark)
+					node[tag_name_mark] = matched[2];
+				set_attributes(node, tag_matched[1], normalizer);
+				// reset index to search next one
+				index = i + (tag_start_from_head ? 0 : 1);
+				break;
+			}
+
+			if (false && i < 0) {
+				library_namespace
+						.error('XML_to_JSON: parse error: ' + nodes[i]);
 			}
 		}
 
-		if (skip_spaces && typeof nodes.at(-1) === 'string'
+		if (remove_spaces && typeof nodes.at(-1) === 'string'
 				&& !(nodes[nodes.length - 1] = nodes.at(-1).trim())) {
 			// 最後一個 node 為 spaces。
 			nodes.pop();
@@ -458,7 +551,7 @@ function module_code(library_namespace) {
 		if (nodes.length === 0)
 			nodes = null;
 		else if (nodes.length === 1)
-			nodes = numeralize ? numeralize(nodes[0]) : nodes[0];
+			nodes = normalizer ? normalizer(nodes[0]) : nodes[0];
 
 		if (options.tag_as_attribute)
 			nodes = tag_to_attribute(nodes);
