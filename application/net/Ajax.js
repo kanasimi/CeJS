@@ -3031,6 +3031,9 @@ function module_code(library_namespace) {
 		node_fs.readFile(file_name, encoding,
 		//
 		function(error, data) {
+			// console.trace([ error, !!data, options.reget ]);
+			// 警告: 對於從 HTTP 標頭獲得文件名的情況，就算不設定 options.reget 也沒用，還是會重新獲取檔案。
+
 			// options.force_download
 			if (!options.reget) {
 				if (!error && options.web_resource_date && file_status) {
@@ -3133,6 +3136,24 @@ function module_code(library_namespace) {
 				 * 若出現錯誤，則不寫入cache。
 				 */
 				if (data && /[^\\\/]$/.test(file_name)) {
+					XMLHttp.cached_file_path = file_name;
+					if (!file_status) {
+						try {
+							file_status = node_fs.statSync(file_name);
+							if (file_status && !options.reget) {
+								library_namespace.info([
+										'get_URL_cache_node.cache: ',
+										{
+											T : [ '重新獲取檔案後發現原檔案已存在，跳過不覆寫：[%1]',
+													file_name ]
+										} ]);
+								onload(data.toString(), undefined, XMLHttp);
+								return;
+							}
+						} catch (e) {
+							// TODO: handle exception
+						}
+					}
 					if (!options.no_write_info) {
 						library_namespace.info([
 								'get_URL_cache_node.cache: ',
@@ -3146,7 +3167,6 @@ function module_code(library_namespace) {
 							data && JSON.stringify(data).slice(0, 190) ]
 						}, 3, 'get_URL_cache_node');
 					}
-					XMLHttp.file_name = file_name;
 					try {
 						node_fs.writeFileSync(file_name, data, encoding);
 					} catch (error) {
