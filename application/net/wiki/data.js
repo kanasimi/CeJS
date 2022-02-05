@@ -658,6 +658,12 @@ function module_code(library_namespace) {
 		+ ', ' + Marh.abs(this[1]) + ' ' + (this[1] < 0 ? 'W' : 'E');
 	}
 
+	// https://www.wikidata.org/wiki/Help:Statements
+	// https://www.mediawiki.org/wiki/Wikibase/DataModel#Statements
+	// statement = claim + rank + references
+	// claim = snak + qualifiers
+	// snak: data type + value
+
 	/**
 	 * 將特定的屬性值轉為 JavaScript 的物件。
 	 * 
@@ -2098,6 +2104,7 @@ function module_code(library_namespace) {
 				error = 'Invalid Date';
 			}
 
+			// console.trace([ value, precision ]);
 			if (isNaN(precision)) {
 				if (precision in INDEX_OF_PRECISION) {
 					precision = INDEX_OF_PRECISION[precision];
@@ -2973,11 +2980,23 @@ function module_code(library_namespace) {
 								if (rank || qualifiers || references) {
 									library_namespace.warn(
 									//
-									'normalize_next_value: Skip exists value with rank, qualifiers or references: '
+									'normalize_next_value: 跳過 '
 									//
-									+ message + ' for no '
+									+ property_data.property + ' = ' + message
 									//
-									+ 'options.force_add_sub_properties set'
+									+ ' 之 ' + [ rank ? 'rank' : 0,
+									//
+									qualifiers ? 'qualifiers' : 0,
+									//
+									references ? 'references' : 0
+									//
+									].filter(function(v) {
+										return !!v;
+									}).join(', ')
+									//
+									+ ' 設定，因數值已存在且未設定'
+									//
+									+ ' options.force_add_sub_properties'
 									//
 									);
 								} else {
@@ -3167,9 +3186,10 @@ function module_code(library_namespace) {
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				library_namespace.error('set_single_qualifier: Set '
-						+ qualifier.property + '=' + qualifier.datavalue.value
-						+ ': [' + error.code + '] '
-						+ (error.info || error.message));
+						+ qualifier.property + '='
+						// e.g., ""
+						+ JSON.stringify(qualifier.datavalue.value) + ': ['
+						+ error.code + '] ' + (error.info || error.message));
 				// console.trace([ GUID, qualifier ]);
 			}
 			// data:

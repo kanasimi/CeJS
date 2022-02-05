@@ -3849,14 +3849,14 @@ function module_code(library_namespace) {
 	function note_五行(date, using_地支) {
 		var index = date.年干支序;
 		if (using_地支) {
-			// mapper
-			index = note_五行.地支_mapper[index % note_五行.地支_mapper.length];
+			// mapping
+			index = note_五行.地支_mapping[index % note_五行.地支_mapping.length];
 		}
 		return index >= 0 ? (index % 2 ? '陰' : '陽')
 		// http://zh.wikipedia.org/wiki/五行#五行與干支表
 		+ 陰陽五行_LIST[(index >> 1) % 陰陽五行_LIST.length] : '';
 	}
-	note_五行.地支_mapper = [ 8, 5, 0, 1, 4, 3, 2, 5, 6, 7, 4, 9 ];
+	note_五行.地支_mapping = [ 8, 5, 0, 1, 4, 3, 2, 5, 6, 7, 4, 9 ];
 
 	function note_繞迥(date) {
 		var 生肖 = note_生肖(date),

@@ -260,7 +260,9 @@ function module_code(library_namespace) {
 		}
 
 		// return needing to wait language converted
-		var text_list = [ work_data.title, TAG_text_converted ];
+		var text_list = [ work_data.title, TAG_text_converted,
+		// 執行到這邊可能還沒取得這兩個數值。
+		work_data.author, work_data.site_name ];
 		// console.trace(text_list);
 		var promise_language_convert = this.cache_converted_text(text_list,
 				work_data.convert_options);
@@ -288,7 +290,9 @@ function module_code(library_namespace) {
 		// + ' ebook'
 		, ebook_files = library_namespace.read_directory(ebook_directory),
 		//
-		ebook_file_path = ebook_path.call(this, work_data);
+		ebook_file_path = ebook_path.call(this, work_data, null, {
+		// allow_non_cache : true
+		});
 		// ebook_file_path = ebook_file_path[0] + ebook_file_path[1];
 
 		if ((!Array.isArray(ebook_files) || !ebook_files.includes('mimetype'))
@@ -774,16 +778,24 @@ function module_code(library_namespace) {
 	}
 
 	// ebook_path.call(this, work_data, file_name)
-	function ebook_path(work_data, file_name) {
+	function ebook_path(work_data, file_name, options) {
 		if (!file_name) {
+			if (!work_data.author || !work_data.site_name) {
+				library_namespace
+						.error('ebook_path: 尚未設定作者或下載站點，可能導致先前 cache 無用。');
+			}
 			// e.g., "(一般小説) [author] title [site 20170101 1話].id.epub"
 			file_name = [
 					'(一般小説) [',
-					work_data.author,
+					this.convert_text_language(work_data.author
+					// , options
+					),
 					'] ',
 					this.convert_text_language(work_data.title),
 					' [',
-					work_data.site_name,
+					this.convert_text_language(work_data.site_name
+					// , options
+					),
 					' ',
 					work_data.last_update_Date.format('%Y%2m%2d'),
 					work_data.chapter_count >= 1

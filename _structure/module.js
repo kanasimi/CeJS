@@ -1145,8 +1145,14 @@ if (typeof CeL === 'function') {
 			// alert('JSFN: ' + JSFN);
 			if (!JSFN) {
 				if (_.is_WWW()) {
-					// unescape(window.location.pathname)
-					JSFN = unescape(window.location.href);
+					// window.location.pathname
+					JSFN = window.location.href.replace(/#.*$/, '');
+					try {
+						JSFN = typeof decodeURI === 'function' ? decodeURI(JSFN)
+								: unescape(JSFN);
+					} catch (e) {
+						// TODO: handle exception
+					}
 				} else if (typeof terminal_module === 'object') {
 					// for node.js
 					JSFN = terminal_module.filename;

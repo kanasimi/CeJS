@@ -129,7 +129,7 @@ function module_code(library_namespace) {
 		// console.log(this.container.toString());
 		if (this.container
 				&& (this.container = JSON.from_XML(this.container.toString(), {
-					skip_spaces : true
+					preserve_spaces : false
 				}))) {
 			// console.log(this.container);
 			// parse container

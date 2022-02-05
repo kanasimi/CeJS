@@ -1779,13 +1779,16 @@ function module_code(library_namespace) {
 		return array;
 	}
 
+	// TODO: array_to_JSON()
+	// https://commons.wikimedia.org/wiki/Data:Sandbox/Smalyshev/test.tab
 	function array_to_table(array, options) {
 		options = library_namespace.setup_options(options);
 		if (!array.length && options.is_header === false)
 			return '';
 
 		var table = [ '{|' + ' class="'
-				+ (array['class'] || options['class'] || 'wikitable') + '"' ];
+		// { class: 'wikitable sortable' }
+		+ (array['class'] || options['class'] || 'wikitable') + '"' ];
 		if (array.style || options.style) {
 			table[0] += ' style="' + (array.style || options.style) + '"';
 		}

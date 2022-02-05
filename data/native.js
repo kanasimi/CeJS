@@ -2525,6 +2525,8 @@ function module_code(library_namespace) {
 				return this.slice(0);
 			};
 	})();
+	// or use Array.from(): https://kknews.cc/zh-tw/code/x625ppg.html
+	// Array.prototype.clone = function() { return Array.from(this); };
 
 	// 將 element_toPush 加入 array_pushTo 並篩選重複的（本來已經加入的並不會變更）
 	// array_reverse[value of element_toPush]=index of element_toPush
@@ -3263,8 +3265,17 @@ function module_code(library_namespace) {
 					'run_serial_asynchronous');
 			// 先增加 index，預防 callback 直接 call run_next()。
 			var _index = index++;
-			for_each.call(_this, run_next, list ? list[_index] : _index,
-					_index, list);
+			var _arguments = [ run_next, list ? list[_index] : _index, _index,
+					list ];
+			if (_this && _this.run_interval >= 0) {
+				library_namespace.log_temporary(index + '/' + last
+						+ ' Waiting ' + _this.run_interval + ' ms to run');
+				setTimeout(function() {
+					for_each.apply(_this, _arguments);
+				}, _this.run_interval);
+			} else {
+				for_each.apply(_this, _arguments);
+			}
 		}
 
 		if (!parallelly
@@ -4009,7 +4020,7 @@ function module_code(library_namespace) {
 				scan_list(from_item, from_index);
 			}
 		}
-		// 檢查是否有被移到前方的，確保回傳的真正是unique的。在只有少量增加時較有效率。
+		// 檢查是否有被移到前方的，確保回傳的真正是 unique 的。在只有少量增加時較有效率。
 		from_added.forEach(scan_list);
 
 		from_added = from_added.filter(function(item) {

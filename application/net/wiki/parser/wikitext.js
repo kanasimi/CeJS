@@ -2053,7 +2053,7 @@ function module_code(library_namespace) {
 				if ((namespace[1] in magic_words_hash)
 				// 例如 {{Fullurl}} 應被視作 template。
 				// test if token is [[Help:Magic words]]
-				&& (!magic_words_hash[namespace[1]]
+				&& (magic_words_hash[namespace[1]] === false
 				// 這些需要指定數值。 has ":"
 				|| namespace[0])) {
 					// TODO: {{ {{UCFIRST:T}} }}

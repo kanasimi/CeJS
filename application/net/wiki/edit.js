@@ -1204,7 +1204,7 @@ function module_code(library_namespace) {
 					delete structured_data[name];
 					return;
 				}
-				var property_id = structured_data_mapper[name];
+				var property_id = structured_data_mapping[name];
 				if (property_id && !(property_id in structured_data)) {
 					structured_data[property_id] = structured_data[name];
 					delete structured_data[name];
@@ -1281,7 +1281,7 @@ function module_code(library_namespace) {
 
 	var KEY_summary_name = 'summary_name',
 	// {inner} alias
-	structured_data_mapper = {
+	structured_data_mapping = {
 		// 描述地坐標 (P9149) [[Commons:Structured data/Modeling/Location]]
 		location : 'P9149',
 		// 描繪內容 (P180) [[Commons:Structured data/Modeling/Depiction]]
@@ -1297,8 +1297,8 @@ function module_code(library_namespace) {
 		'created datetime' : 'P571',
 		date : 'P571'
 	}, structured_data_config = Object.create(null);
-	Object.keys(structured_data_mapper).forEach(function(name) {
-		var property_id = structured_data_mapper[name];
+	Object.keys(structured_data_mapping).forEach(function(name) {
+		var property_id = structured_data_mapping[name];
 		var property_config = structured_data_config[property_id];
 		if (!property_config) {
 			structured_data_config[property_id]

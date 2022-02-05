@@ -1102,6 +1102,8 @@ function module_code(library_namespace) {
 	_.to_KiB = to_KiB;
 	_.to_KB = to_KB;
 
+	// TODO: accept '300K' as 300 KiB
+
 	// 設定 lazy evaluation。
 	library_namespace.set_initializor(to_1000_prefix);
 	library_namespace.set_initializor(to_1024_prefix);

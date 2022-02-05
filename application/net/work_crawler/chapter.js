@@ -191,7 +191,8 @@ function module_code(library_namespace) {
 			// ">=": work_data.download_chapter_NO_list 有可能為空，造成一開始就等於了。
 			if (work_data.download_chapter_NO_list.index >= work_data.download_chapter_NO_list.length)
 				return work_data.chapter_count + 1;
-			chapter_NO = work_data.download_chapter_NO_list[work_data.download_chapter_NO_list.index++];
+
+			return work_data.download_chapter_NO_list[work_data.download_chapter_NO_list.index++];
 		}
 
 		return chapter_NO;
@@ -1128,8 +1129,9 @@ function module_code(library_namespace) {
 				get_next_image();
 			}
 
-			function process_chapter_data(XMLHttp) {
-				XMLHttp = XMLHttp || this;
+			function process_chapter_data(error) {
+				var XMLHttp = this && this.responseURL && this
+						|| Object.create(null);
 				// 因為隱私問題？有些瀏覽器似乎會隱藏網址，只要輸入host即可？
 				if (/(?:\.html?|\/)$/.test(XMLHttp.responseURL))
 					_this.setup_value('Referer', XMLHttp.responseURL);
@@ -1403,7 +1405,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-			function pre_parse_chapter_data(XMLHttp) {
+			function pre_parse_chapter_data(XMLHttp, error) {
 				// 可能是從 library_namespace.get_URL_cache() 過來的。
 				if (XMLHttp && XMLHttp.responseURL) {
 					_this.last_fetch_time = Date.now();
@@ -1416,9 +1418,9 @@ function module_code(library_namespace) {
 					// 必須自行保證執行 callback()，不丟出異常、中斷。
 					_this.pre_parse_chapter_data(XMLHttp, work_data,
 					// pre_parse_chapter_data:function(XMLHttp,work_data,callback,chapter_NO){;callback();},
-					process_chapter_data.bind(XMLHttp), chapter_NO);
+					process_chapter_data.bind(XMLHttp, error), chapter_NO);
 				} else {
-					process_chapter_data(XMLHttp);
+					process_chapter_data.call(XMLHttp, error);
 				}
 			}
 
@@ -1660,6 +1662,8 @@ function module_code(library_namespace) {
 		chapter_NO = crawler_namespace.get_next_chapter_NO_item(work_data,
 				chapter_NO + 1);
 
+		// 欲直接跳過本作品，可設定：
+		// <code>work_data.jump_to_chapter = work_data.chapter_count + 1;</code>
 		if (work_data.jump_to_chapter >= 0) {
 			// cf. work_data.start_chapter_NO_next_time
 			if (work_data.jump_to_chapter !== chapter_NO) {

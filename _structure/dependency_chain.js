@@ -251,7 +251,7 @@ if (typeof CeL === 'function')
 				return array;
 			}
 
-			if (typeof mapfn !== 'function')
+			if (typeof mapfn !== 'function') {
 				try {
 					// for IE, Array.prototype.slice.call('ab').join() !== 'a,b'
 					return typeof items === 'string' ? items.split('')
@@ -261,17 +261,20 @@ if (typeof CeL === 'function')
 						throw e;
 					mapfn = null;
 				}
+			}
 
 			var length = items && items.length | 0;
 			array = [];
-			if (mapfn)
-				for (i = 0; i < length; i++)
+			if (mapfn) {
+				for (i = 0; i < length; i++) {
 					array.push(thisArg ? mapfn.call(thisArg, items[i], i)
 					// 不採用 .call() 以加速執行。
 					: mapfn(items[i], i));
-			else
+				}
+			} else {
 				while (i < length)
 					array.push(items[i++]);
+			}
 
 			return array;
 		}

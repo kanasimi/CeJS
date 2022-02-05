@@ -114,7 +114,7 @@ function (globalThis) {
 		 * @type {String}
 		 * @ignore
 		 */
-		library_version = '4.4.0',
+		library_version = '4.5.0',
 
 
 		/**
@@ -1844,6 +1844,11 @@ OS='UNIX'; // unknown
 
 		else if (typeof debug_level === 'undefined' && !debug)
 			debug = 1;
+
+		if (Error.stackTraceLimit > 0) {
+			// Node.js: default: 10
+			Error.stackTraceLimit = debug > 2 ? 100 : debug > 0 ? 15 : 10;
+		}
 
 		return debug;
 	};

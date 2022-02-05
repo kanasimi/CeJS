@@ -2111,6 +2111,8 @@ function test_net() {
 		assert(['file:///D:/a.htm', (new CeL.URI('/d:/a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #3');
 		assert(['file:///D:/a.htm', (new CeL.URI('d:\\a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #4');
 		assert(['http:', CeL.URI('//zh.wikipedia.org', 'http://www.example.com').protocol], 'CeL.net.URI(, base) #4');
+		assert(['http://www.example.com/path/ff.htm', CeL.URI('./../ff.htm', 'http://www.example.com/path/to/file').toString()], 'CeL.net.URI(, base) #5');
+		assert(['http://www.example.com/path/to/ff.htm', CeL.URI('./../ff.htm', 'http://www.example.com/path/to/file/').toString()], 'CeL.net.URI(, base) #6');
 
 		var href, url, uri;
 		href = 'ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23&a=2&fg2=24#hhh'; url = new URL(href); uri = new CeL.URI(href);

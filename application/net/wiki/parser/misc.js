@@ -54,14 +54,14 @@ function module_code(library_namespace) {
 
 	// 僅添加有效的 parameters。基本上等同於 Object.assign()，只是不添加無效值。
 	function set_template_object_parameters(template_object, parameters,
-			value_mapper) {
+			value_mapping) {
 		if (!template_object)
 			template_object = Object.create(null);
 
 		for ( var key in parameters) {
 			var value = parameters[key];
-			if (value_mapper)
-				value = value_mapper[value];
+			if (value_mapping)
+				value = value_mapping[value];
 			// 不添加無效值。
 			if (is_valid_parameters_value(value)) {
 				template_object[key] = value;

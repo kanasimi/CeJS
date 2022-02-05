@@ -320,6 +320,10 @@ function module_code(library_namespace) {
 			return this.converted_text_cache_persisted[text];
 		}
 
+		if (options && options.allow_non_cache) {
+			return text;
+		}
+
 		// console.trace(this.converted_text_cache);
 		// console.trace(text);
 		// console.trace(this);

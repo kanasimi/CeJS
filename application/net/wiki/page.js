@@ -3980,8 +3980,8 @@ function module_code(library_namespace) {
 			if (options.index > 0 && (page_data = titles[options.index - 1])) {
 				// cache file name really writed to
 				// @see function get_URL_cache_node()
-				if (XMLHttp && XMLHttp.file_name) {
-					page_data.file_name = XMLHttp.file_name;
+				if (XMLHttp && XMLHttp.cached_file_path) {
+					page_data.cached_file_path = XMLHttp.cached_file_path;
 				}
 				if (error === library_namespace.get_URL_cache.NO_NEWS) {
 					page_data.no_new_data = true;
@@ -4029,6 +4029,10 @@ function module_code(library_namespace) {
 
 			// console.trace(page_data);
 			// console.trace(file_info);
+
+			// @see
+			// [[Commons:FAQ#What_are_the_strangely_named_components_in_file_paths?]]
+			// to get the URL directly.
 			var file_url = file_info.thumburl || file_info.url;
 			var file_url_list = options.download_derivatives;
 

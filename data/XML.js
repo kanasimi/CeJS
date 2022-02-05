@@ -538,6 +538,7 @@ function module_code(library_namespace) {
 			}
 
 			if (false && i < 0) {
+				// 回溯到第一個 node 都沒找到開始標記。
 				library_namespace
 						.error('XML_to_JSON: parse error: ' + nodes[i]);
 			}

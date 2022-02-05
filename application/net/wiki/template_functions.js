@@ -732,20 +732,20 @@ function module_code(library_namespace) {
 				template_object.multi = 1;
 			}
 
-			var mapper = {
+			var mapping = {
 				date : 'date' + index,
 				result : 'result' + index,
 				page : 'page' + index,
 				target : 'target' + index
 			};
 			additional_parameters.forEach(function(parameter_name) {
-				mapper[parameter_name] = parameter_name + index;
+				mapping[parameter_name] = parameter_name + index;
 			});
-			mapper = Object.reverse_key_value(mapper);
+			mapping = Object.reverse_key_value(mapping);
 			if (!force_set_page && item.page === page_title) {
-				delete mapper.page;
+				delete mapping.page;
 			}
-			set_parameters(template_object, mapper, item);
+			set_parameters(template_object, mapping, item);
 		});
 
 		return template_object;

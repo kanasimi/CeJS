@@ -3114,7 +3114,7 @@ CeL.era.pass_on = {
 		'/成泰帝/成泰|1889/2/2~|:Âm lịch|注=Ngày 2 tháng 2 năm 1889 Bửu Lân lên ngôi lấy hiệu là Thành Thái.',
 		'/維新帝/維新|1907/9/5~|:Âm lịch|注=Ngày 5 tháng 9 năm 1907, Vĩnh San lên ngôi lấy niên hiệu là Duy Tân.',
 		'/弘宗/啟定|1916/5/18~|:Âm lịch|注=Ngày 18 tháng 5 năm 1916, Nguyễn Phúc Bửu Đảo lên ngôi lấy niên hiệu là Khải Định.',
-		'/保大帝/=|Âm lịch 1926~|:Âm lịch|注=Vua Khải Định mất ngày 6 tháng 11 năm 1925, Vĩnh Thụy về nước thọ tang vua cha và ngày 8 tháng 1 năm 1926, Vĩnh Thụy được tôn lên kế vị làm vua lấy niên hiệu Bảo Đại.',
+		'/保大帝/=|君主名=阮福永瑞|Âm lịch 1926~|:Âm lịch|注=Vua Khải Định mất ngày 6 tháng 11 năm 1925, Vĩnh Thụy về nước thọ tang vua cha và ngày 8 tháng 1 năm 1926, Vĩnh Thụy được tôn lên kế vị làm vua lấy niên hiệu Bảo Đại.',
 		'/保大|Âm lịch 1926~|:Âm lịch',
 		'帝國越南/皇帝保大|1945/3/11~8/23|:CE|注=未確定是否使用公曆！|時期=法越戰爭|注=1925/11/6~1945/8/30在位|注=1945年3月11日（保大二十年農曆正月廿七日）上午，日本大使橫山前往順化，在太和殿覲見保大， 以「亞洲歸亞洲人」鼓動保大，於是在當天下午，保大就召集六部尚書和王公親貴，發布《獨立宣言》，宣布廢除越南與法國1884年簽訂的不平等條約，脫離法國保護，宣告越南成立獨立自主的國家，並加入以日本為首的「大東亞共榮圈」，決定與日本政府合作。4月17日任命著名歷史學家陳仲金為越南歷史上首位內閣總長〈亦即首相〉。',
 

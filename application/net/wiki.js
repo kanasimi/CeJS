@@ -158,8 +158,8 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace([ user_name, password, API_URL ]);
-		library_namespace.debug('API_URL: ' + API_URL + ', default language: '
-				+ wiki_API.language, 3, 'wiki_API');
+		library_namespace.debug('URL of service endpoint: ' + API_URL
+				+ ', default language: ' + wiki_API.language, 3, 'wiki_API');
 
 		// action queue 佇列。應以 append，而非整個換掉的方式更改。
 		this.actions = [];

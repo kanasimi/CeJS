@@ -370,7 +370,7 @@ function module_code(library_namespace) {
 	 *      http://wiki.ecmascript.org/doku.php?id=strawman:string_format,
 	 *      http://wiki.ecmascript.org/doku.php?id=strawman:string_format_take_two
 	 */
-	function gettext(text_id) {
+	function gettext(text_id/* , ...value_list */) {
 		// 轉換 / convert function.
 		function convert(text_id, domain_specified) {
 			// 未設定個別 domain 者，將以此訊息(text_id)顯示。
@@ -385,8 +385,8 @@ function module_code(library_namespace) {
 				text_id = domain[text_id];
 			}
 
-			return typeof text_id === 'function' ? text_id(domain_name, args,
-					domain_specified) : text_id;
+			return typeof text_id === 'function' ? text_id(domain_name,
+					value_list, domain_specified) : text_id;
 		}
 
 		function try_domain(_domain_name, recover) {
@@ -407,7 +407,7 @@ function module_code(library_namespace) {
 			return _text;
 		}
 
-		var args = arguments, length = args.length, using_default,
+		var value_list = arguments, length = value_list.length, using_default,
 		// this: 本次轉換之特殊設定。
 		domain_name = this && this.domain_name || gettext_domain_name,
 		//
@@ -498,13 +498,13 @@ function module_code(library_namespace) {
 								+ '→' + domain_specified, 6);
 						domain_name = domain_specified;
 						domain = domain_used;
-						conversion = convert(args[NO], domain_specified);
+						conversion = convert(value_list[NO], domain_specified);
 						library_namespace.debug('回存/回復 domain: ' + domain_name
 								+ '→' + origin_domain_name, 6);
 						domain_name = origin_domain_name;
 						domain = origin_domain;
 					} else {
-						conversion = convert(args[NO]);
+						conversion = convert(value_list[NO]);
 					}
 				}
 
@@ -556,9 +556,9 @@ function module_code(library_namespace) {
 			return gettext.call(options, text_id);
 		}
 
-		var args = Array.prototype.slice.call(arguments);
-		args.shift();
-		return gettext.apply(options, args);
+		var value_list = Array.prototype.slice.call(arguments);
+		value_list.shift();
+		return gettext.apply(options, value_list);
 	};
 
 	/**
@@ -849,15 +849,15 @@ function module_code(library_namespace) {
 					|| navigator.browserLanguage || navigator.systemLanguage);
 		}
 
-		function exec(command, PATTERN, mapper) {
+		function exec(command, PATTERN, mapping) {
 			try {
 				var code = require('child_process').execSync(command, {
 					stdio : 'pipe'
 				}).toString();
 				if (PATTERN)
 					code = code.match(PATTERN)[1];
-				if (mapper)
-					code = mapper[code];
+				if (mapping)
+					code = mapping[code];
 				return gettext.to_standard(code);
 			} catch (e) {
 				// TODO: handle exception
@@ -876,17 +876,17 @@ function module_code(library_namespace) {
 			return exec(
 					// https://docs.microsoft.com/zh-tw/powershell/module/international/get-winsystemlocale?view=win10-ps
 					'PowerShell.exe -Command "& {Get-WinSystemLocale | Select-Object LCID}"',
-					/(\d+)[^\d]*$/, guess_language.LCID_mapper)
+					/(\d+)[^\d]*$/, guess_language.LCID_mapping)
 					// WMIC is deprecated.
 					// https://stackoverflow.com/questions/1610337/how-can-i-find-the-current-windows-language-from-cmd
 					// get 非 Unicode 應用程式的語言與系統地區設定所定義的語言
 					|| exec('WMIC.EXE OS GET CodeSet', /(\d+)[^\d]*$/,
-							guess_language.code_page_mapper)
+							guess_language.code_page_mapping)
 					// using windows active console code page
 					// https://docs.microsoft.com/en-us/windows/console/console-code-pages
 					// CHCP may get 65001, so we do not use this at first.
 					|| exec('CHCP', /(\d+)[^\d]*$/,
-							guess_language.code_page_mapper);
+							guess_language.code_page_mapping);
 		}
 
 		/**
@@ -918,7 +918,7 @@ function module_code(library_namespace) {
 	}
 
 	// https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/chcp
-	guess_language.code_page_mapper = {
+	guess_language.code_page_mapping = {
 		437 : 'en-US',
 		866 : 'ru-RU',
 		932 : 'ja-JP',
@@ -931,7 +931,7 @@ function module_code(library_namespace) {
 	};
 
 	// https://zh.wikipedia.org/wiki/区域设置#列表
-	guess_language.LCID_mapper = {
+	guess_language.LCID_mapping = {
 		1028 : 'cmn-Hant-TW',
 		1033 : 'en-US',
 		1041 : 'ja-JP',

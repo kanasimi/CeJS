@@ -711,11 +711,11 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
 	 *      https://www.mediawiki.org/wiki/API:Etiquette 禮儀
-	 *      https://phabricator.wikimedia.org/T135240
+	 *      https://grafana.wikimedia.org/d/000000170/wikidata-edits
 	 */
 	wiki_API_query.default_maxlag = 5;
 
-	// 用戶相關功能，避免延遲回應以使用戶等待。
+	// 用戶相關功能，避免延遲回應以使用戶等待。 The user is waiting online.
 	// for manually testing only
 	// delete CeL.wiki.query.default_maxlag;
 
@@ -727,8 +727,8 @@ function module_code(library_namespace) {
 	 */
 	wiki_API_query.default_edit_time_interval = 5000;
 
+	// 用戶相關功能，避免延遲回應以使用戶等待。 The user is waiting online.
 	// Only respect maxlag. 因為數量太多，只好增快速度。
-	// The user is waiting online.
 	// CeL.wiki.query.default_edit_time_interval = 0;
 	// wiki_session.edit_time_interval = 0;
 
@@ -789,7 +789,7 @@ function module_code(library_namespace) {
 		var pageid;
 
 		if (Array.isArray(page_data)) {
-			// auto detect multi pages
+			// auto detect multiple pages
 			if (multi === undefined) {
 				multi = pageid && pageid.length > 1;
 			}

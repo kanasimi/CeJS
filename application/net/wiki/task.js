@@ -826,9 +826,9 @@ function module_code(library_namespace) {
 				// console.trace(root_page_data);
 				// console.trace(JSON.stringify(_this.redirects_data));
 				function register_redirect_list_via_mapper(original_list,
-						list_to_mapper) {
-					// console.trace(next[3].uselang + ': ' + list_to_mapper);
-					list_to_mapper.forEach(function(map_from, index) {
+						list_to_map) {
+					// console.trace(next[3].uselang + ': ' + list_to_map);
+					list_to_map.forEach(function(map_from, index) {
 						// if (map_from in _this.redirects_data) return;
 						var map_to
 						//

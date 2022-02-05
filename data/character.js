@@ -192,7 +192,7 @@ function module_code(library_namespace) {
 					if (main_encode_map[character]) {
 						library_namespace.debug(code_name
 						// http://founder.acgvlyric.org/iu/doku.php/%E9%80%A0%E5%AD%97:%E5%BA%8F_%E5%B8%B8%E7%94%A8%E9%A6%99%E6%B8%AF%E5%A4%96%E5%AD%97%E8%A1%A8
-						+ ': character mapper ['
+						+ ': character mapping ['
 						// 除了少數幾個特殊的字之外，其他大部分都對應到後來指定的字碼。
 						+ character + ']: 0x'
 						// @see data/character/Big5.js
