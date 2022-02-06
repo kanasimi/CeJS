@@ -1129,9 +1129,14 @@ function module_code(library_namespace) {
 				get_next_image();
 			}
 
-			function process_chapter_data(error) {
-				var XMLHttp = this && this.responseURL && this
-						|| Object.create(null);
+			function process_chapter_data(error, XMLHttp, _error) {
+				error = _error || error;
+				// XMLHttp: 經過 this.pre_parse_chapter_data() 取得了新資源。
+				if (!XMLHttp) {
+					// 沒新資源，直接使用舊的。
+					XMLHttp = this && this.responseURL && this
+							|| Object.create(null);
+				}
 				// 因為隱私問題？有些瀏覽器似乎會隱藏網址，只要輸入host即可？
 				if (/(?:\.html?|\/)$/.test(XMLHttp.responseURL))
 					_this.setup_value('Referer', XMLHttp.responseURL);
