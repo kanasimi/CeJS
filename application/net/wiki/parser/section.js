@@ -1560,7 +1560,9 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.parse.anchor.normalize_anchor()
 	function normalize_anchor(anchor) {
-		return anchor && anchor.toString()
+		return anchor
+		// '&#39;' → "'"
+		&& library_namespace.HTML_to_Unicode(anchor.toString())
 		// 警告: 實際上的網頁錨點應該要 .replace(/ /g, '_')
 		// 但由於 wiki 頁面中使用[[#P Q]]與[[#P_Q]]效果相同，都會產生<a href="#P_Q">，因此採用"P Q"。
 		.replace(/_/g, ' ')
