@@ -94,6 +94,7 @@ function module_code(library_namespace) {
 						[ get_label(html.between('og:title" content="', '"')) ] ];
 			}
 
+			// console.trace(html);
 			var id_list = [], id_data = [];
 			html.each_between('<li>', '</li>', function(text) {
 				matched = text.match(
@@ -108,9 +109,30 @@ function module_code(library_namespace) {
 				// xbiquge.js:
 				<span class="s2"><a href="http://www.xbiquge.cc/book/24276/">元尊</a></span>
 
+
+				// xbiquke.js
+				<span class="s1">1</span>
+				<span class="s2">
+				    <a href="/29_29775/" target="_blank">
+				        我真不是邪神走狗
+				    </a>
+				</span>
+				<span class="s4">
+				    <a href="/author/29775/">
+				        万劫火
+				    </a>
+				</span>
+				<span class="s3">
+				    <a style="color: Red;" href="/29_29775/22709468.html" target="_blank" title="番外·童年（一）">
+				    番外·童年（一）</a>
+				</span>
+				
+				<span class="s6">2021-11-26 02:30:39</span>
+
+
 				</code>
 				 */
-				/<a href="[^<>"]+?\/(?:\d+_)?(\d+)\/"[^<>]*>([\s\S]+?)<\/a>/);
+				/<a href="[^<>"]*?\/(?:\d+_)?(\d+)\/"[^<>]*>([\s\S]+?)<\/a>/);
 				// console.log([ text, matched ]);
 				if (matched) {
 					id_list.push(+matched[1]);
@@ -172,6 +194,12 @@ function module_code(library_namespace) {
 
 			if (is_server_error(work_data.title)) {
 				return this.REGET_PAGE;
+			}
+
+			if (this.extract_work_data) {
+				// e.g., xbiquke.js
+				this.extract_work_data(work_data, html, get_label,
+						extract_work_data);
 			}
 
 			if (/^\d{1,2}-\d{1,2}$/.test(work_data.last_update)) {
@@ -317,8 +345,9 @@ function module_code(library_namespace) {
 		configuration = configuration ? Object.assign(Object.create(null),
 				default_configuration, configuration) : default_configuration;
 
-		if (configuration.parse_search_result === 'biquge')
+		if (configuration.parse_search_result === 'biquge') {
 			configuration.parse_search_result = configuration.parse_search_result_biquge;
+		}
 
 		// 每次呼叫皆創建一個新的實體。
 		return new library_namespace.work_crawler(configuration);

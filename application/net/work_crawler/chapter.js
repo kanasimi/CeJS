@@ -1129,14 +1129,8 @@ function module_code(library_namespace) {
 				get_next_image();
 			}
 
-			function process_chapter_data(error, XMLHttp, _error) {
-				error = _error || error;
-				// XMLHttp: 經過 this.pre_parse_chapter_data() 取得了新資源。
-				if (!XMLHttp) {
-					// 沒新資源，直接使用舊的。
-					XMLHttp = this && this.responseURL && this
-							|| Object.create(null);
-				}
+			function process_chapter_data(XMLHttp, error) {
+				XMLHttp = XMLHttp || Object.create(null);
 				// 因為隱私問題？有些瀏覽器似乎會隱藏網址，只要輸入host即可？
 				if (/(?:\.html?|\/)$/.test(XMLHttp.responseURL))
 					_this.setup_value('Referer', XMLHttp.responseURL);
@@ -1423,9 +1417,17 @@ function module_code(library_namespace) {
 					// 必須自行保證執行 callback()，不丟出異常、中斷。
 					_this.pre_parse_chapter_data(XMLHttp, work_data,
 					// pre_parse_chapter_data:function(XMLHttp,work_data,callback,chapter_NO){;callback();},
-					process_chapter_data.bind(XMLHttp, error), chapter_NO);
+					function(new_XMLHttp, new_error) {
+						if (new_XMLHttp) {
+							// XMLHttp: 經過 this.pre_parse_chapter_data() 取得了新資源。
+							process_chapter_data(new_XMLHttp, new_error);
+						} else {
+							// 沒新資源，直接使用舊的。
+							process_chapter_data(XMLHttp, error);
+						}
+					}, chapter_NO);
 				} else {
-					process_chapter_data.call(XMLHttp, error);
+					process_chapter_data(XMLHttp, error);
 				}
 			}
 
