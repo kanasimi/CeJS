@@ -5437,6 +5437,7 @@ function module_code(library_namespace) {
 	// {{tsl|ja|オメガクインテット|*ω*Quintet}}
 	// {{tsl|en|Tamara de Lempicka|Tamara Łempicka}}
 	// {{link-en|Željko Ivanek|Zeljko Ivanek}}
+	// @see sPopP.RepeatC @ CeL.interact.DOM
 	/** {RegExp}常用字母的匹配模式。應該是英語也能接受的符號。 */
 	PATTERN_common_characters = /[\s\d_,.:;'"!()\-+\&<>\\\/\?–`@#$%^&*=~×☆★♪♫♬♩○●©®℗™℠]+/g,
 	// 不能用來判別語言、不能表達意義的泛用符號/字元。無關緊要（不造成主要意義）的字元。

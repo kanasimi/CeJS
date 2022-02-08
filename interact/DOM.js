@@ -5126,7 +5126,7 @@ function module_code(library_namespace) {
 		<b onmouseover="sPop(this,sPopF._type_,'注釋')">txt</b>
 		<b onmouseover="sPop(this,sPopF._type_)" title="注釋">txt</b>
 		window.onload="set_up_popup()"; + <b title="注釋">txt</b>,<b sPop="注釋">txt</b>
-		<b onmouseover="sPop('．',this)">txt</b>	在每個字旁邊加上[．]或[。]
+		<b onmouseover="sPop('●',this)">txt</b>	在每個字旁邊加上[[w:ja:圏点]] [●]或[○]
 		sPop('txt')	popup txt(自動設成sPopF.popup)
 		sPop('txt',sPopF.window)	popup txt by window
 
@@ -5207,7 +5207,8 @@ function module_code(library_namespace) {
 		// popup window style
 		sPopP.popupS = "color:blue;padding:.5em;overflow:auto;position:absolute;top:0;left:0;width:100%;height:100%;scrollbar-face-color:khaki;scrollbar-arrow-color:teal;border:1px solid green;font:normal 10pt tahoma;filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#ffd700, EndColorStr=#ffffff);";
 		// chars to repeat(for ruby)
-		sPopP.RepeatC = '‧．。ヽ○●◎☆★※＊＃▽▼△▲◆◇□■↓↑'
+		// https://ja.wikipedia.org/wiki/圏点
+		sPopP.RepeatC = '‧•◦．。ヽ﹅﹆○●◎◉☆★※＊＃▽▼△▲◆◇□■↓↑'
 		// .turnU()
 		;
 		// types:auto,這些attribute可被處理，且將被視為自動選取type。

@@ -536,6 +536,80 @@ function module_code(library_namespace) {
 		return has_object ? text_list : text_list.join('');
 	}
 
+	// ------------------------------------------------------------------------
+
+	// 應對多個句子在不同語言下結合時使用。
+	function Sentence_combination(sentence) {
+		// call super constructor.
+		// Array.call(this);
+
+		var sentence_combination = this;
+		if (sentence) {
+			sentence_combination.push(sentence);
+		}
+	}
+
+	function deep_convert(text) {
+		if (!Array.isArray(text)) {
+			return gettext(text);
+		}
+
+		// e.g., [ '%1 elapsed.', ['%1 s', 2] ]
+		var converted = [ text[0] ];
+		for (var index = 1; index < text.length; index++) {
+			converted[index] = deep_convert(text[index]);
+		}
+		return gettext.apply(null, converted);
+	}
+
+	function Sentence_combination_converting() {
+		var converted_list = [];
+		this.forEach(function(sentence) {
+			sentence = deep_convert(sentence);
+			if (sentence)
+				converted_list.push(sentence);
+		});
+
+		return converted_list;
+	}
+
+	function Sentence_combination_join(separator) {
+		var converted_list = this.converting();
+		if (separator)
+			return converted_list.join(separator);
+
+		converted_list.forEach(function(converted, index) {
+			// @see CeL.data.count_word()
+			if (/[\s—…、，；。！？：()（）「」『』“”‘’]$/.test(converted)) {
+				// 這些標點符號和下一句中間可以不用接空白字元。
+				return;
+			}
+			var next = converted_list[index + 1];
+			if (next && !/^\s/.test(next)) {
+				converted_list[index] += ' ';
+			}
+		});
+		return converted_list.join('');
+	}
+
+	// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Object/create
+	Sentence_combination.prototype
+	// 繼承一個父類別
+	= Object.assign(Object.create(Array.prototype), {
+		// 重新指定建構式
+		constructor : Sentence_combination,
+		converting : Sentence_combination_converting,
+		join : Sentence_combination_join,
+		toString : Sentence_combination_join
+	});
+
+	// messages = new gettext.Sentence_combination();
+	// messages.push([message]);
+	// messages.toString();
+	gettext.Sentence_combination = Sentence_combination;
+
+	// ------------------------------------------------------------------------
+
 	// 不改變預設domain，直接取得特定domain的轉換過的文字。
 	// 警告：需要確保系統相應 domain resources 已載入並設定好。
 	gettext.in_domain = function(domain_name, text_id) {

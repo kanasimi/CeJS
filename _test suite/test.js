@@ -961,6 +961,22 @@ function test_locale() {
 		[["女人四十1枝花", CeL.gettext('女人%數1|1枝花', 40)], 'index 可以 "|" 終結#2'],
 	]);
 
+	all_error_count += CeL.test('locale - system messages', function (assert) {
+		var messages = new CeL.gettext.Sentence_combination('No changes.');
+		messages.push('no page modified,', ['%1 elapsed.', ['%1 min', 2]]);
+
+		CeL.gettext.use_domain('zh', true);
+		assert(['全無變更。未改變任何條目。共費時 2分。', messages.toString()]);
+
+		CeL.gettext.use_domain('en', true);
+		assert(['No changes. no page modified, 2 min elapsed.', messages.toString()]);
+		messages.truncate(1);
+		assert(['No changes.', messages.toString()]);
+
+		CeL.gettext.use_domain('zh', true);
+		assert(['全無變更。', messages.toString()]);
+	});
+
 
 }
 

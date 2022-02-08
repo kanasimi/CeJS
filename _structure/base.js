@@ -397,9 +397,16 @@ function (globalThis) {
 
 	// 2019/6/3 18:16:44 CeL.null_Object() → Object.create(null)
 	if (typeof Object.create !== 'function') {
+		// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Object/create
 		// 先暫時給一個，用於 `Object.create(null)`。
-		(Object.create = function() {
-			return {};
+		(Object.create = function create(proto, propertiesObject) {
+			// new Object();
+			var new_Object = {};
+			new_Object.__proto__ = proto;
+			if(typeof propertiesObject === "object") {
+				Object.defineProperties(new_Object, propertiesObject);
+			}
+	        return new_Object;
 		})[KEY_not_native] = true;
 	}
 
@@ -1358,6 +1365,8 @@ function (globalThis) {
 		/**
 		 * 本 library source 檔案使用之 encoding。<br />
 		 * Windows 中不使用會產生語法錯誤!
+		 * 
+		 * e.g., 'UTF-16', 'UTF-8'
 		 * 
 		 * @name CeL.env.source_encoding
 		 * @type {String}

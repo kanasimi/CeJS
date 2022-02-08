@@ -2685,7 +2685,8 @@ function module_code(library_namespace) {
 				if (!(page_index < pages.length)) {
 					if (false) {
 						// pages.length + ' 頁面處理完畢。'
-						console.trace(gettext('%1 pages done', pages.length));
+						console.trace(gettext('%1 page(s) processed.',
+								pages.length));
 					}
 					// setTimeout(): 跳出exit
 					// callback。避免在callback中呼叫session.next()的問題。
@@ -2853,7 +2854,9 @@ function module_code(library_namespace) {
 			// 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
 			function finish_up() {
 				if (false) {
-					console.trace(gettext('%1 pages done', pages.length));
+					console
+							.trace(gettext('%1 page(s) processed.',
+									pages.length));
 					console.log(pages[0].title);
 				}
 				if (!config.no_message) {
@@ -2891,30 +2894,31 @@ function module_code(library_namespace) {
 						count_summary += initial_target_length;
 					}
 
-					count_summary = gettext('%1 pages done', count_summary);
+					count_summary = new gettext.Sentence_combination([
+							'%1 page(s) processed,', count_summary ]);
 					// console.trace(count_summary);
 
 					if (log_item.report) {
-						messages.unshift(count_summary + (nochange_count > 0
-						//
-						? gettext(', %1%2 pages no change',
-						//
-						done === nochange_count
-						// 未改變任何條目。
-						? gettext('all ')
-						//
-						: '', nochange_count) : '')
-						// 使用時間, 歷時, 費時, elapsed time
-						+ gettext(', %1 elapsed.',
-						//
-						messages.start.age(new Date)));
+						if (nochange_count > 0) {
+							count_summary.push(done === nochange_count
+							// 未改變任何條目。 No pages have been changed
+							? 'no page modified,' : [
+									'%1 page(s) have not changed,',
+									nochange_count ]);
+						}
+						// 使用時間, 歷時, 前後總共費時, elapsed time
+						count_summary.push([ '%1 elapsed.',
+								messages.start.age(new Date) ]);
+						messages.unshift(count_summary.toString());
+						count_summary.truncate(1);
 					}
+					count_summary = count_summary.toString();
 					if (session.stopped) {
 						messages
 								.add(gettext("'''Stopped''', give up editing."));
 					}
 					if (done === nochange_count && !config.no_edit) {
-						messages.add(gettext('Nothing change.'));
+						messages.add(gettext('No changes.'));
 					}
 					if (log_item.title && config.summary) {
 						messages.unshift(summary_to_wikitext(config.summary));
