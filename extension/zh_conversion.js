@@ -8,13 +8,13 @@
  * @fileoverview 本檔案包含了繁體/簡體中文轉換的 functions。
  * @example <code>
 
-	// 在非 Windows 平台上避免 fatal 錯誤。
-	CeL.env.ignore_COM_error = true;
-	// load module for CeL.CN_to_TW('简体')
-	CeL.run('extension.zh_conversion',function () {
-		var text = CeL.CN_to_TW('简体中文文字');
-		CeL.CN_to_TW.file('from.htm', 'to.htm', 'utf-8');
-	});
+// 在非 Windows 平台上避免 fatal 錯誤。
+CeL.env.ignore_COM_error = true;
+// load module for CeL.CN_to_TW('简体')
+CeL.run('extension.zh_conversion', function() {
+	var text = CeL.CN_to_TW('简体中文文字');
+	CeL.CN_to_TW.file('from.htm', 'to.htm', 'utf-8');
+});
 
  </code>
  * @see https://github.com/BYVoid/OpenCC https://zhconvert.org/
@@ -31,7 +31,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'extension.zh_conversion',
 
-	require : 'data.Pair|application.OS.Windows.file.',
+	require : 'data.|data.Convert_Pairs.|application.OS.Windows.file.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'generate_converter',
@@ -42,7 +42,7 @@ typeof CeL === 'function' && CeL.run({
 
 function module_code(library_namespace) {
 	// requiring
-	var Pair = this.r('Pair');
+	var Convert_Pairs = library_namespace.data.Convert_Pairs;
 
 	/**
 	 * null module constructor
@@ -63,7 +63,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// new RegExp(key, REPLACE_FLAG);
-	var REPLACE_FLAG = 'gi',
+	var REPLACE_FLAG = undefined,
 	// using BYVoid / OpenCC 開放中文轉換 (Open Chinese Convert) table.
 	// https://github.com/BYVoid/OpenCC/tree/master/data/dictionary
 	dictionary_base = library_namespace.get_module_path(this.id, 'OpenCC'
@@ -72,50 +72,71 @@ function module_code(library_namespace) {
 
 	function Converter(options) {
 		// console.log(options);
+
+		// e.g., .files, .file_filter
 		Object.assign(this, options);
 		// console.trace(this.files);
 	}
 
 	function Converter_initialization() {
 		// console.trace(this.files);
-		this.conversions = this.files.map(function(file_name) {
-			return new Pair(null, {
-				// 載入 resources。
-				path : dictionary_base + file_name + '.txt',
-				item_processor : function(item) {
-					var matched = item.match(/^([^\t]+)\t([^\t]+)$/);
-					if (matched) {
-						if (!matched[1].trim())
-							return;
-						if (/ [^\t]+$/.test(matched[2])) {
-							if (matched[2].startsWith(matched[1] + ' ')) {
-								// console.log('詞有疑意: ' + item);
-								return;
-							}
-							// 必須置換，那就換個最常用的。
-							return item.replace(/ +[^\t]+$/, '');
-						}
+
+		function item_processor(item) {
+			var matched = item.match(/^([^\t]+)\t([^\t]+)$/);
+			if (matched) {
+				if (!matched[1].trim())
+					return;
+				if (/ [^\t]+$/.test(matched[2])) {
+					if (matched[2].startsWith(matched[1] + ' ')) {
+						// console.log('詞有疑意: ' + item);
+						return;
 					}
-					return item;
+					// 必須置換，那就換個最常用的。
+					return item.replace(/ +[^\t]+$/, '');
 				}
+			}
+			return item;
+		}
+
+		function corrections_item_processor(item, options) {
+			var matched = item.match(/^-([^\t\n]{1,30})$/);
+			if (!matched) {
+				return item;
+			}
+			remove_key_hash[matched[1]] = options.path;
+			return '';
+		}
+
+		this.conversions = this.files.map(function(file_name) {
+			return new Convert_Pairs(null, {
+				path : (Array.isArray(file_name) ? file_name : [ file_name ])
+				// 載入 resources。
+				.map(function(file_path) {
+					return /[\\\/]/.test(file_path) ? file_path
+							: dictionary_base + file_path + '.txt';
+				}),
+				file_filter : this.file_filter,
+
+				// no_the_same_key_value : !Array.isArray(file_name)
+				// || file_name.length < 2,
+
+				item_processor : item_processor
 			});
-		});
+		}, this);
+		delete this.file_filter;
+		// console.log(this.conversions);
+		// console.trace(this.conversions[0].pair_Map.size);
+
+		// --------------------------------------
 
 		if (this.corrections) {
 			// keys_to_remove
 			var remove_key_hash = Object.create(null);
 			// this.conversions: 手動修正表。提供自行更改的功能。
-			this.conversions.push(new Pair(null, {
+			this.conversions.push(new Convert_Pairs(null, {
 				path : dictionary_base.replace(/[^\\\/]+[\\\/]$/,
 						this.corrections),
-				item_processor : function(item, options) {
-					var matched = item.match(/^-([^\t\n]{1,30})$/);
-					if (!matched) {
-						return item;
-					}
-					remove_key_hash[matched[1]] = options.path;
-					return '';
-				},
+				item_processor : corrections_item_processor,
 				remove_comments : true
 			}));
 			delete this.corrections;
@@ -136,19 +157,20 @@ function module_code(library_namespace) {
 		}
 
 		// 設定事前轉換表。
-		if (this.pre) {
-			this.conversions.unshift(new Pair(this.pre, {
-				flag : this.flag || REPLACE_FLAG
-			}));
-			delete this.pre;
+		if (this.prefix_conversions) {
+			this.conversions.unshift(new Convert_Pairs(this.prefix_conversions,
+					{
+						flags : this.flags || REPLACE_FLAG
+					}));
+			delete this.prefix_conversions;
 		}
 
 		// 設定事後轉換表。
-		if (this.post) {
-			this.conversions.push(new Pair(this.post, {
-				flag : this.flag || REPLACE_FLAG
+		if (this.postfix_conversions) {
+			this.conversions.push(new Convert_Pairs(this.postfix_conversions, {
+				flags : this.flags || REPLACE_FLAG
 			}));
-			delete this.post;
+			delete this.postfix_conversions;
 		}
 
 		// console.trace(this('签'));
@@ -161,9 +183,9 @@ function module_code(library_namespace) {
 		}
 
 		// 事前轉換表。
-		if (options && options.pre) {
-			text = (new Pair(options.pre, {
-				flag : options.flag || REPLACE_FLAG
+		if (options && options.prefix_conversions) {
+			text = (new Convert_Pairs(options.prefix_conversions, {
+				flags : options.flags || REPLACE_FLAG
 			})).convert(text);
 		}
 
@@ -191,9 +213,9 @@ function module_code(library_namespace) {
 		});
 
 		// 事後轉換表。
-		if (options && options.post) {
-			text = (new Pair(options.post, {
-				flag : options.flag || REPLACE_FLAG
+		if (options && options.postfix_conversions) {
+			text = (new Convert_Pairs(options.postfix_conversions, {
+				flags : options.flags || REPLACE_FLAG
 			})).convert(text);
 		}
 
@@ -216,30 +238,29 @@ function module_code(library_namespace) {
 	Converter.options = {
 		CN_to_TW : {
 			// 事前事後轉換表須事先設定。
-			// 不可以 Object.assign(CeL.CN_to_TW.pre = {}, {}) 來新增事前轉換表。
-			// pre : {},
-			// post : {},
+			// 不可以 Object.assign(CeL.CN_to_TW.prefix_conversions = {}, {})
+			// 來新增事前轉換表。
+			// prefix_conversions : {},
+			// postfix_conversions : {},
 
-			// 長先短後 詞先字後
-			files : ('STPhrases|STCharacters'
-			// 因此得要一個個 replace。
+			files : [ [ 'STPhrases', 'STCharacters' ],
+			// 下面的是上面詞彙與單字轉換後的再轉換。
 			// |TWPhrasesIT|TWPhrasesOther: 有太多意外
-			+ '|TWPhrasesName'
+			'TWPhrasesName',
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/s2twp.json
-			+ '|TWVariants')
+			'TWVariants'
 			// 若要篩選或增減 conversion files，可參考範例：
 			// start_downloading() @ CeL.application.net.work_crawler.task
-			.split('|'),
+			],
 			corrections : 'corrections_to_TW.txt'
 		},
 		TW_to_CN : {
 			// 事前事後轉換表須事先設定。
-			// pre : {},
-			// post : {},
+			// prefix_conversions : {},
+			// postfix_conversions : {},
 
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/tw2s.json
-			files : ('TWVariantsRevPhrases' + '|TSPhrases|TSCharacters')
-					.split('|'),
+			files : [ 'TWVariantsRevPhrases', [ 'TSPhrases', 'TSCharacters' ] ],
 			corrections : 'corrections_to_CN.txt'
 		}
 	};
@@ -259,15 +280,8 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var Converter_options = Object.clone(Converter.options[type]);
-		if (options.files || typeof options.file_filter === 'function') {
-			var files = options.files || Converter_options.files.slice();
-			if (typeof options.file_filter === 'function')
-				files = Converter_options.files.filter(options.file_filter);
-			Converter_options.files = files;
-		}
-
-		var converter = new Converter(Converter_options);
+		var converter = new Converter(Object.assign(Object
+				.clone(Converter.options[type]), options));
 		converter = converter.convert.bind(converter);
 		if (options.set_as_default) {
 			set_as_default(type, converter);

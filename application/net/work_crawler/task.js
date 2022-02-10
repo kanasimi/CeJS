@@ -245,8 +245,10 @@ function module_code(library_namespace) {
 				//
 				= library_namespace.CN_to_TW = library_namespace.zh_conversion
 				// 小說不需要轉換資訊科技相關字詞。
-				.generate_converter('CN_to_TW', function(file) {
-					return file !== 'TWPhrasesIT';
+				.generate_converter('CN_to_TW', {
+					file_filter : function(file) {
+						return !file.includes('TWPhrasesIT');
+					}
 				});
 			});
 		}

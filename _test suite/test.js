@@ -2600,7 +2600,7 @@ function test_character() {
 function test_encoding() {
 	all_error_count += CeL.test('ロマ字↔仮名', [
 		[['わたし', CeL.to_kana('watasi')], 'convert romaji to kana. ロマ字→仮名.'],
-		// TODO: Pair.reverse 對 duplicated key 不穩定。
+		// TODO: Convert_Pairs.reverse 對 duplicated key 不穩定。
 		// [[ 'watasi', CeL.to_romaji('わたし') ], 'convert romaji to kana. 仮名→ロマ字.'],
 	]);
 }

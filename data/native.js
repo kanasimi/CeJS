@@ -4927,6 +4927,50 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
+	// reverse key and value, 改成 value → key
+	function Map__reverse_key_value(options) {
+		// 前置處理。
+		options = library_namespace.setup_options(options);
+		var preserve_older = options.preserve_older,
+		// original key is number
+		key_is_number = options.key_is_number,
+		//
+		ignore_null_value = options.ignore_null_value;
+
+		// if (library_namespace.env.has_for_of)
+		var reversed_Map = new Map;
+		this.forEach(preserve_older === false ? function(key, value) {
+			if (ignore_null_value && !key)
+				return;
+			if (key_is_number)
+				value = +value;
+			// newer will overwrite older
+			reversed_Map.set(key, value);
+		} : function(key, value) {
+			if (ignore_null_value && !key)
+				return;
+			if (key_is_number)
+				value = +value;
+			if (reversed_Map.has(key)) {
+				if (!preserve_older) {
+					// ignore exists
+					return;
+				}
+				library_namespace
+						.warn('Map__reverse_key_value: duplicated key [' + key
+								+ ']: ' + reversed_Map.get(key) + '→' + value);
+			}
+			reversed_Map.set(key, value);
+		});
+		return reversed_Map;
+	}
+
+	set_method(Map.prototype, {
+		reverse_key_value : Map__reverse_key_value
+	});
+
+	// ------------------------------------
+
 	return (_// JSDT:_module_
 	);
 }

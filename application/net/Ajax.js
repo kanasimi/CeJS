@@ -193,7 +193,7 @@ function module_code(library_namespace) {
 				URL_to_fetch.charset = charset;
 		} else {
 			// 當輸入 {URL} 時，node_https.request() 會將 {URL} 轉成
-			// {Object}options，不會考慮額外選項 (heads, ...)。
+			// {Object}options，不會考慮額外選項 (headers, ...)。
 			// 且必須處理 charset，乾脆直接將 {URL} 轉成尋常 plain object / {URI}。
 			// https://nodejs.org/api/http.html#http_http_request_url_options_callback
 			// If url is a string, it is automatically parsed with new URL(). If
@@ -231,14 +231,14 @@ function module_code(library_namespace) {
 			charset : '',
 			// HTTP方法，如"GET", "POST", HEAD, "PUT", "DELETE"等。
 			method : 'GET',
-			post : {},
+			post_data : {},
 			async : true,
 			// user name. 驗證用使用者名稱。
 			user : '',
 			// 驗證用密碼。
 			password : '',
 			// header
-			head : {
+			headers : {
 				contentType : 'text/xml'
 			},
 			// location.search
@@ -1033,7 +1033,7 @@ function module_code(library_namespace) {
 	/**
 	 * agent handle function
 	 * 
-	 * e: object Error, handle_function: function(return text, heads,
+	 * e: object Error, handle_function: function(return text, headers,
 	 * XMLHttpRequest object, URL) | [ function, (default|NULL:responseText,
 	 * others:responseXML) ]
 	 */

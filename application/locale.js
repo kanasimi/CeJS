@@ -564,7 +564,7 @@ function module_code(library_namespace) {
 		return gettext.apply(null, converted);
 	}
 
-	function Sentence_combination_converting() {
+	function Sentence_combination__converting() {
 		var converted_list = [];
 		this.forEach(function(sentence) {
 			sentence = deep_convert(sentence);
@@ -575,7 +575,7 @@ function module_code(library_namespace) {
 		return converted_list;
 	}
 
-	function Sentence_combination_join(separator) {
+	function Sentence_combination__join(separator) {
 		var converted_list = this.converting();
 		if (separator)
 			return converted_list.join(separator);
@@ -600,9 +600,9 @@ function module_code(library_namespace) {
 	= Object.assign(Object.create(Array.prototype), {
 		// 重新指定建構式
 		constructor : Sentence_combination,
-		converting : Sentence_combination_converting,
-		join : Sentence_combination_join,
-		toString : Sentence_combination_join
+		converting : Sentence_combination__converting,
+		join : Sentence_combination__join,
+		toString : Sentence_combination__join
 	});
 
 	// messages = new gettext.Sentence_combination();
