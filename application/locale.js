@@ -334,7 +334,9 @@ function module_code(library_namespace) {
 	/**
 	 * 為各種不同 domain 轉換文字（句子）、轉成符合當地語言的訊息內容。包括但不僅限於各種語系。<br />
 	 * 需要確認系統相應 domain resources 已載入時，請利用 gettext.use_domain(domain, callback)。
-	 * TODO: using localStorage.
+	 * 
+	 * TODO: using localStorage.<br />
+	 * https://translatewiki.net/wiki/Plural
 	 * 
 	 * @example <code>
 

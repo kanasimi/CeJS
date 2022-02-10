@@ -1162,7 +1162,8 @@ function finish(name_space) {
 					'class' : 'debug_icon',
 					src : icon_path + level + '.png',
 					alt : '[' + log_icon[level] + ']',
-					title : log_icon[level] + ' ' + CeL.gettext(level)
+					title : log_icon[level] + ' '
+							+ CeL.gettext('log-type-' + level)
 				};
 			}
 			return '';

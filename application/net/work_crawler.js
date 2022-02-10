@@ -361,6 +361,8 @@ function module_code(library_namespace) {
 		// 預設自動匯入 .env.arg_hash
 		auto_import_args : true,
 
+		// 本工具下載時預設的使用者代理為 Chrome，所以下載的檔案格式基本上依循用 Chrome 瀏覽時的檔案格式。
+		// https://github.com/kanasimi/work_crawler/issues/548
 		// 下載每個作品更換一次 user agent。
 		// regenerate_user_agent : 'work',
 		default_user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
