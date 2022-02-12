@@ -66,7 +66,7 @@ if (_.no_COM = !_.new_COM && 'No Component Object Model support!') {
 	(_.new_COM = function(id) {
 		// 忽略沒有 Windows Component Object Model 的錯誤。
 		if (!library_namespace.env.ignore_COM_error)
-			throw new Error('new_COM: No method to get Microsoft <a href="http://en.wikipedia.org/wiki/Component_Object_Model" target="_blank">Component Object Model</a> (COM): [' + id + ']!');
+			throw new Error('new_COM: No method to get Microsoft <a href="http://en.wikipedia.org/wiki/Component_Object_Model" target="_blank">Component Object Model</a> (COM): [' + id + ']! You may need to set `CeL.env.ignore_COM_error = true`!');
 	});
 
 	return _;

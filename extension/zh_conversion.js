@@ -78,7 +78,7 @@ function module_code(library_namespace) {
 		// console.trace(this.files);
 	}
 
-	function Converter_initialization() {
+	function Converter_initialization(options) {
 		// console.trace(this.files);
 
 		function item_processor(item) {
@@ -89,7 +89,8 @@ function module_code(library_namespace) {
 				if (/ [^\t]+$/.test(matched[2])) {
 					if (matched[2].startsWith(matched[1] + ' ')) {
 						// console.log('詞有疑意: ' + item);
-						return;
+						// 但像是"小丑"之類的還是必須保留。
+						// return;
 					}
 					// 必須置換，那就換個最常用的。
 					return item.replace(/ +[^\t]+$/, '');
@@ -107,21 +108,50 @@ function module_code(library_namespace) {
 			return '';
 		}
 
-		this.conversions = this.files.map(function(file_name) {
-			return new Convert_Pairs(null, {
-				path : (Array.isArray(file_name) ? file_name : [ file_name ])
-				// 載入 resources。
-				.map(function(file_path) {
-					return /[\\\/]/.test(file_path) ? file_path
-							: dictionary_base + file_path + '.txt';
-				}),
+		function to_full_file_path(file_path) {
+			return /[\\\/]/.test(file_path) ? file_path : dictionary_base
+					+ file_path + '.txt';
+		}
+
+		this.conversions = [];
+		this.files.map(function(file_list) {
+			var _options = {
 				file_filter : this.file_filter,
 
-				// no_the_same_key_value : !Array.isArray(file_name)
-				// || file_name.length < 2,
+				// no_the_same_key_value : !Array.isArray(file_list)
+				// || file_list.length < 2,
 
-				item_processor : item_processor
+				item_processor : item_processor,
+				// 在開始轉換之後就不會再修改字典檔，因此可移除 .pair_Map。
+				may_remove_pair_Map : !options || !options.mode
+			};
+
+			if (!Array.isArray(file_list))
+				file_list = [ file_list ];
+
+			_options.path = file_list
+			// 載入 resources。
+			.map(function(file_path) {
+				if (typeof file_path === 'string')
+					return to_full_file_path(file_path);
+				// assert: library_namespace.is_Object(file_path)
+				var __options = file_path;
+				// e.g., for .remove_comments
+				if (!__options.file_path && !__options.path
+				//
+				&& __options.file_name) {
+					__options.file_path
+					//
+					= to_full_file_path(__options.file_name);
+				}
+				// assert: !!__options.file_path === true
+				return __options;
 			});
+
+			var convert_Pairs = new Convert_Pairs(null, _options);
+			if (convert_Pairs.pair_Map.size > 0) {
+				this.conversions.push(convert_Pairs);
+			}
 		}, this);
 		delete this.file_filter;
 		// console.log(this.conversions);
@@ -179,7 +209,7 @@ function module_code(library_namespace) {
 	// convert text
 	function convert_text(text, options) {
 		if (!this.conversions) {
-			this.initialization();
+			this.initialization(options);
 		}
 
 		// 事前轉換表。
@@ -210,7 +240,9 @@ function module_code(library_namespace) {
 
 		this.conversions.forEach(for_each_conversion || function(conversion) {
 			text = conversion.convert(text);
+			// console.trace(text);
 		});
+		// console.trace(text);
 
 		// 事後轉換表。
 		if (options && options.postfix_conversions) {
@@ -243,12 +275,21 @@ function module_code(library_namespace) {
 			// prefix_conversions : {},
 			// postfix_conversions : {},
 
-			files : [ [ 'STPhrases', 'STCharacters' ],
-			// 下面的是上面詞彙與單字轉換後的再轉換。
-			// |TWPhrasesIT|TWPhrasesOther: 有太多意外
+			files : [ [ 'STPhrases', 'STCharacters',
+			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的字典檔。
+			'additional.to_TW.auto-generated',
+			// 後來的會覆蓋前面的。
+			{
+				file_name : 'additional.to_TW',
+				remove_comments : true
+			} ],
+			// ------------------------------------------------------
+			// ** 下面的是上面詞彙與單字轉換後的再轉換。
 			'TWPhrasesName',
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/s2twp.json
-			'TWVariants'
+			'TWVariants',
+			// 下兩個有許多常用詞彙，在 corrections_to_TW.txt 取消。
+			'TWPhrasesIT', 'TWPhrasesOther'
 			// 若要篩選或增減 conversion files，可參考範例：
 			// start_downloading() @ CeL.application.net.work_crawler.task
 			],
@@ -260,7 +301,16 @@ function module_code(library_namespace) {
 			// postfix_conversions : {},
 
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/tw2s.json
-			files : [ 'TWVariantsRevPhrases', [ 'TSPhrases', 'TSCharacters' ] ],
+			files : [ 'TWVariantsRevPhrases', [ 'TSPhrases', 'TSCharacters',
+			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的字典檔。
+			'additional.to_CN.auto-generated',
+			// 後來的會覆蓋前面的。
+			{
+				file_name : 'additional.to_CN',
+				remove_comments : true
+			} ] ],
+			// ------------------------------------------------------
+			// ** 下面的是上面詞彙與單字轉換後的再轉換。
 			corrections : 'corrections_to_CN.txt'
 		}
 	};

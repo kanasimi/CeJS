@@ -77,12 +77,13 @@ function module_code(library_namespace) {
 		// 前置處理。
 		options = library_namespace.setup_options(options);
 
+		var _this = this;
 		function copy_properties_from_options() {
 			// 單一 instance 僅能設定一個 replace_flags。
 			// Convert_Pairs.prototype.add() 不設定 this.flags。
-			[ 'flags' ].forEach(function(property) {
+			[ 'flags', 'may_remove_pair_Map' ].forEach(function(property) {
 				if (options[property]) {
-					this[property] = options[property];
+					_this[property] = options[property];
 				}
 			});
 		}
@@ -170,6 +171,9 @@ function module_code(library_namespace) {
 		if (typeof source === 'string') {
 			if (options.remove_comments)
 				source = Convert_Pairs.remove_comments(source);
+			// console.trace([ source ]);
+			if (!source.trim())
+				return;
 			// 順便正規化。
 			var separator = options.field_separator
 			//
@@ -217,7 +221,7 @@ function module_code(library_namespace) {
 		if (!separator && typeof source[0] === 'string') {
 			// 遍歷 source 以偵測是 key=value,key=value，
 			// 或 key \t value \n key \t value
-			for (var i = 0; i < length; i++)
+			for (var i = 0; i < length; i++) {
 				if (typeof source[i] === 'string'
 						&& (separator = source[i].match(/[^\n]([\t=])[^\n]/))) {
 					separator = separator[1];
@@ -225,9 +229,12 @@ function module_code(library_namespace) {
 							+ new RegExp(separator), 3, 'Convert_Pairs.add');
 					break;
 				}
-			if (!separator)
+			}
+			if (!separator) {
+				// console.trace(source);
 				throw new Error(
 						'Convert_Pairs.add: No assignment sign detected! 請手動指定！');
+			}
 		}
 
 		library_namespace.debug('Add ' + source.length + ' pairs...', 3,
@@ -256,8 +263,11 @@ function module_code(library_namespace) {
 					'Convert_Pairs.add');
 			if (key === value) {
 				library_namespace.debug('key 與 value 相同，項目沒有改變：[' + key + ']');
-				if (no_the_same_key_value)
+				if (no_the_same_key_value
+				// 長度為1的沒有轉換必要。
+				|| no_the_same_key_value !== false && key.length === 1) {
 					return;
+				}
 				// 可能是為了確保不被改變而設定。
 			}
 
@@ -277,7 +287,7 @@ function module_code(library_namespace) {
 			if (false && pair_Map.has(key)) {
 				if (value === pair_Map.get(key))
 					return;
-				// 後來的覆蓋前面的。
+				// 後來的會覆蓋前面的。
 				library_namespace.warn('Convert_Pairs.add: Duplicated key ['
 						+ key + '], value will be changed: [' + pair_Map[key]
 						+ '] → [' + String(value) + ']');
@@ -351,10 +361,16 @@ function module_code(library_namespace) {
 			if (path.length < 2) {
 				path = path[0];
 			} else {
-				options = library_namespace.new_options(options);
-				path.forEach(function(path) {
-					options.path = path;
-					this.add_path(options);
+				path.forEach(function(file_path) {
+					var _options = library_namespace.new_options(options);
+					if (library_namespace.is_Object(file_path)) {
+						// e.g., for .remove_comments
+						Object.assign(_options, file_path);
+						file_path = file_path.file_path || file_path.path;
+					}
+
+					_options.path = file_path;
+					this.add_path(_options);
 				}, this);
 				return this;
 			}
@@ -458,17 +474,17 @@ function module_code(library_namespace) {
 		//
 		pair_Map = this.pair_Map;
 		pair_Map.forEach(function(value, key) {
-			if (!/[.(){}+*?\[\]\|]/.test(key)) {
+			if (!/[.(){}+*?\[\]\|\\\/]/.test(key)) {
 				normal_keys.push(key);
 				return;
 			}
 
 			try {
-				special_keys_Map.set(key, new RegExp(key, flags));
+				special_keys_Map.set(key, [ new RegExp(key, flags), value ]);
 			} catch (e) {
 				library_namespace.error('Convert_Pairs__pattern: '
 				// Error key?
-				+ (reg || '[' + key + ']') + ' → ['
+				+ '[' + key + '] → ['
 				// Cannot convert a Symbol value to a string
 				+ String(value) + ']: ' + e.message);
 
@@ -568,7 +584,9 @@ function module_code(library_namespace) {
 	}
 
 	function convert_using_pair_Map_by_length(text) {
-		var pair_Map_by_length = this.pair_Map_by_length, max_key_length = pair_Map_by_length.length, converted_text = [];
+		var pair_Map_by_length = this.pair_Map_by_length, max_key_length = pair_Map_by_length.length,
+		// TODO: test if use converted_text = '' and converted_text += ''
+		converted_text = [];
 
 		// @see
 		// https://github.com/tongwentang/tongwen-core/blob/master/src/converter/map/convert-phrase.ts
@@ -580,8 +598,10 @@ function module_code(library_namespace) {
 				var this_slice_length = this_slice.length;
 				var map = pair_Map_by_length[this_slice_length];
 				if (map && map.has(this_slice)) {
-					// library_namespace.info(this_slice + '→' +
-					// map.get(this_slice));
+					if (false) {
+						library_namespace.info(this_slice + '→'
+								+ map.get(this_slice));
+					}
 					converted_text.push(map.get(this_slice));
 					break;
 				}
@@ -599,29 +619,39 @@ function module_code(library_namespace) {
 			index += this_slice_length;
 		}
 
+		// console.trace(converted_text);
 		return converted_text.join('');
 	}
 
 	var using_pair_Map_by_length = true;
 	function Convert_Pairs__convert(text) {
 		text = String(text);
-		var pair_Map = this.pair_Map, replace_flags = this.flags;
-		library_namespace.debug('Convert ' + text.length
-				+ ' characters, using ' + pair_Map.size
-				+ ' pairs with replace_flags [' + replace_flags + '].', 3,
-				'Convert_Pairs.convert');
+		if (false && this.pair_Map) {
+			library_namespace.debug(
+					'Convert ' + text.length + ' characters, using '
+							+ this.pair_Map.size
+							+ ' pairs with replace_flags ['
+							+ this.replace_flags + '].', 3,
+					'Convert_Pairs.convert');
+		}
 
 		if (!this.special_keys_Map) {
 			this.pattern({
-				flags : replace_flags,
+				flags : this.replace_flags,
 				generate_pair_Map_by_length : using_pair_Map_by_length
 			});
+			if (this.may_remove_pair_Map) {
+				library_namespace.debug('在開始轉換之後就不會再修改字典檔，因此可移除 .pair_Map。', 1,
+						'Convert_Pairs.convert');
+				delete this.pair_Map;
+			}
 		}
 		// console.trace(this.convert_pattern);
 		// console.trace(this.special_keys_Map);
 
 		// 長先短後 詞先字後
 		if (this.pair_Map_by_length) {
+			// console.trace(text);
 			text = convert_using_pair_Map_by_length.call(this, text);
 
 		} else if (this.convert_pattern) {
@@ -632,7 +662,8 @@ function module_code(library_namespace) {
 		}
 
 		this.special_keys_Map.forEach(function(value, key) {
-			text = text.replace(value, pair_Map.get(key));
+			// var pattern = value[0], replace_to = value[1];
+			text = text.replace(value[0], value[1]);
 		});
 
 		return text;
