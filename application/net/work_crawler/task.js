@@ -249,7 +249,9 @@ function module_code(library_namespace) {
 					file_filter : function(file) {
 						return !file.includes('TWPhrasesIT');
 					}
-				});
+				}
+				// 2022/2/12 修改字典之後可用 TWPhrasesIT。
+				&& null);
 			});
 		}
 

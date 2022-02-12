@@ -263,9 +263,14 @@ function module_code(library_namespace) {
 					'Convert_Pairs.add');
 			if (key === value) {
 				library_namespace.debug('key 與 value 相同，項目沒有改變：[' + key + ']');
-				if (no_the_same_key_value
-				// 長度為1的沒有轉換必要。
-				|| no_the_same_key_value !== false && key.length === 1) {
+				if (no_the_same_key_value) {
+					return;
+				}
+				// 長度為 1 的沒有轉換必要。
+				if (no_the_same_key_value !== false && key.length === 1) {
+					// 後來的會覆蓋前面的。
+					if (pair_Map.has(key))
+						pair_Map['delete'](key);
 					return;
 				}
 				// 可能是為了確保不被改變而設定。
@@ -585,7 +590,7 @@ function module_code(library_namespace) {
 
 	function convert_using_pair_Map_by_length(text) {
 		var pair_Map_by_length = this.pair_Map_by_length, max_key_length = pair_Map_by_length.length,
-		// TODO: test if use converted_text = '' and converted_text += ''
+		// node.js 採用字串的方法 converted_text += '' 與採用陣列的方法速度差不多。
 		converted_text = [];
 
 		// @see

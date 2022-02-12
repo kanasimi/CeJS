@@ -285,14 +285,14 @@ function module_code(library_namespace) {
 			} ],
 			// ------------------------------------------------------
 			// ** 下面的是上面詞彙與單字轉換後的再轉換。
-			'TWPhrasesName',
-			// https://github.com/BYVoid/OpenCC/blob/master/data/config/s2twp.json
-			'TWVariants',
-			// 下兩個有許多常用詞彙，在 corrections_to_TW.txt 取消。
-			'TWPhrasesIT', 'TWPhrasesOther'
+			[ 'TWPhrasesIT',
+			// ↑ TWPhrasesIT.txt 有許多常用詞彙，在 corrections_to_TW.txt 取消。
+			'TWPhrasesName', 'TWPhrasesOther'
 			// 若要篩選或增減 conversion files，可參考範例：
 			// start_downloading() @ CeL.application.net.work_crawler.task
 			],
+			// https://github.com/BYVoid/OpenCC/blob/master/data/config/s2twp.json
+			'TWVariants' ],
 			corrections : 'corrections_to_TW.txt'
 		},
 		TW_to_CN : {

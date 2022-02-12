@@ -43,6 +43,8 @@
 // "徵调"的使用率過低
 -徵調
 
+泡面	方便面
+
 // reverse of TWPhrasesIT.txt
 软体	软件
 软体动物	软体动物
