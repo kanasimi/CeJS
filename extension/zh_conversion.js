@@ -223,25 +223,26 @@ function module_code(library_namespace) {
 		if (!options) {
 		} else if (options.mode === 'word') {
 			// 僅轉換完全相符的詞彙 key。
-			for_each_conversion = function(conversion) {
+			for_each_conversion = function(_text, conversion) {
 				// console.log(conversion.pair)
-				var convert_to = conversion.get_value(text);
-				if (typeof convert_to === 'string')
-					text = convert_to;
+				var convert_to = conversion.get_value(_text);
+				return typeof convert_to === 'string' ? convert_to : _text;
 			};
-		} else if (options.mode === 'word_first') {
-			// 輸入單一詞彙時使用，以期加快速度。
-			for_each_conversion = function(conversion) {
-				var convert_to = conversion.get_value(text);
-				text = typeof convert_to === 'string' ? convert_to : conversion
-						.convert(text);
+		} else if (false && options.mode === 'word_first') {
+			// 輸入單一詞彙時使用，以期加快速度...可惜沒有。
+			// node.js: 直接開 `conversion.convert(text)` 速度相同，且還包含
+			// .special_keys_Map 的轉換，較完整。
+			for_each_conversion = function(_text, conversion) {
+				var convert_to = conversion.get_value(_text);
+				return typeof convert_to === 'string' ? convert_to : conversion
+						.convert(_text);
 			};
 		}
 
-		this.conversions.forEach(for_each_conversion || function(conversion) {
-			text = conversion.convert(text);
-			// console.trace(text);
-		});
+		text = this.conversions.reduce(for_each_conversion
+				|| function(_text, conversion) {
+					return conversion.convert(_text);
+				}, text);
 		// console.trace(text);
 
 		// 事後轉換表。

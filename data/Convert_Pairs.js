@@ -147,8 +147,23 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------------------------------------
 
+	function get_pair_Map_of_key(key) {
+		// assert: typeof key === 'string'
+		var pair_Map_by_length = this.special_keys_Map
+				&& this.pair_Map_by_length, pair_Map;
+		if (pair_Map_by_length) {
+			pair_Map = pair_Map_by_length[key.length];
+			if (!pair_Map)
+				return;
+		} else {
+			pair_Map = this.pair_Map;
+		}
+	}
+
 	function Convert_Pairs__get_value(key) {
-		return this.pair_Map.get(key);
+		// assert: typeof key === 'string'
+		var pair_Map = get_pair_Map_of_key.call(this, key);
+		return pair_Map && pair_Map.get(key);
 	}
 
 	function Convert_Pairs__add(source, options) {
@@ -216,7 +231,9 @@ function module_code(library_namespace) {
 		value_is_number = options.value_is_number,
 		//
 		item_processor = typeof options.item_processor === 'function'
-				&& options.item_processor;
+				&& options.item_processor,
+		//
+		dictionary_path = this.path;
 
 		if (!separator && typeof source[0] === 'string') {
 			// 遍歷 source 以偵測是 key=value,key=value，
@@ -262,7 +279,10 @@ function module_code(library_namespace) {
 			+ String(value) + ']', source.length > 200 ? 3 : 2,
 					'Convert_Pairs.add');
 			if (key === value) {
-				library_namespace.debug('key 與 value 相同，項目沒有改變：[' + key + ']');
+				library_namespace.debug('key 與 value 相同，項目沒有改變：[' + key + ']'
+				//
+				+ (dictionary_path ? ' (' + dictionary_path + ')' : ''), 2,
+						'Convert_Pairs.add');
 				if (no_the_same_key_value) {
 					return;
 				}
@@ -289,13 +309,25 @@ function module_code(library_namespace) {
 			if (value_is_number && !isNaN(value))
 				value = +value;
 
-			if (false && pair_Map.has(key)) {
-				if (value === pair_Map.get(key))
+			if (pair_Map.has(key)) {
+				if (value === pair_Map.get(key)) {
+					library_namespace.info('Convert_Pairs.add: 重複設定相同的['
+					//
+					+ key + ']=[' + value + ']'
+					//
+					+ (dictionary_path ? ' (' + dictionary_path + ')' : ''));
 					return;
+				}
 				// 後來的會覆蓋前面的。
-				library_namespace.warn('Convert_Pairs.add: Duplicated key ['
-						+ key + '], value will be changed: [' + pair_Map[key]
-						+ '] → [' + String(value) + ']');
+				if (library_namespace.is_debug(2)) {
+					library_namespace.warn(
+					//
+					'Convert_Pairs.add: Duplicated key [' + key
+					//
+					+ '], value will be changed: [' + pair_Map.get(key)
+					//
+					+ '] → [' + String(value) + ']');
+				}
 			}
 			pair_Map.set(key, value);
 		});
@@ -320,7 +352,7 @@ function module_code(library_namespace) {
 
 		var remove_matched_path = options && options.remove_matched_path;
 		var pair_Map = this.pair_Map, path = this.path, changed;
-		// console.trace(path);
+		// console.trace([ path, key_hash ]);
 		for ( var search_key in key_hash) {
 			// key_hash[key]: ignore path
 			if (key_hash[search_key] === path) {
@@ -331,23 +363,28 @@ function module_code(library_namespace) {
 
 			var pattern = search_key.match(library_namespace.PATTERN_RegExp);
 			if (pattern) {
-				pattern = new RegExp(pattern[1], pattern[2] || this.flags);
+				pattern = new RegExp(pattern[1], pattern[2] || options.flags);
 				library_namespace.debug('Remove pattern: ' + pattern + ' of '
-						+ path, 1);
+						+ path, 2, 'Convert_Pairs__remove');
+				var keys_to_remove = [];
 				pair_Map.forEach(function(value, key) {
-					if (!pattern.test(key) && !pattern.test(value))
-						return;
-
-					library_namespace.debug(path + '\tRemove ' + key
-					//
-					+ ' → ' + value, 2);
-					pair_Map['delete'](key);
+					if (pattern.test(key) || pattern.test(value))
+						keys_to_remove.push(key);
 				});
+				if (keys_to_remove.length > 0) {
+					library_namespace.debug(path + '\tRemove '
+							+ keys_to_remove.length + ' keys.', 2,
+							'Convert_Pairs__remove');
+					// console.trace(keys_to_remove);
+					keys_to_remove.forEach(function(key) {
+						pair_Map['delete'](key);
+					});
+					changed = true;
+				}
 
 			} else {
-				pair_Map['delete'](search_key);
+				changed = pair_Map['delete'](search_key);
 			}
-			changed = true;
 		}
 
 		if (changed)
@@ -527,6 +564,8 @@ function module_code(library_namespace) {
 			}
 		}
 		// console.log(this.convert_pattern);
+		// 2022/2/13: 17
+		// console.trace('最長的轉換 key.length=' + pair_Map_by_length.length);
 
 		if (options.get_normal_keys)
 			return normal_keys;
@@ -543,8 +582,6 @@ function module_code(library_namespace) {
 
 	// select the first fitted
 	function Convert_Pairs__select(selector, options) {
-		var pair_Map = this.pair_Map;
-
 		if (typeof selector !== 'function') {
 			var target = selector || options && options.target;
 			if (!target)
@@ -552,8 +589,9 @@ function module_code(library_namespace) {
 
 			library_namespace.debug('target: ' + target + ', options: '
 					+ options, 3);
-			if (options === true)
-				return pair_Map.get(target);
+			if (options === true) {
+				return this.get_value(target);
+			}
 
 			if (library_namespace.is_RegExp(target)) {
 				selector = function(key, value) {
@@ -581,7 +619,7 @@ function module_code(library_namespace) {
 		}
 
 		// TODO: use `for (const key of this.pair_Map.keys())`
-		for (var keys = Array.from(pair_Map.keys()), index = 0; index < keys.length; index++) {
+		for (var pair_Map = this.pair_Map, keys = Array.from(pair_Map.keys()), index = 0; index < keys.length; index++) {
 			var key = keys[index], value = selector(key, pair_Map.get(key));
 			if (value)
 				return value;
@@ -592,6 +630,10 @@ function module_code(library_namespace) {
 		var pair_Map_by_length = this.pair_Map_by_length, max_key_length = pair_Map_by_length.length,
 		// node.js 採用字串的方法 converted_text += '' 與採用陣列的方法速度差不多。
 		converted_text = [];
+
+		if (Array.isArray(text)) {
+			// TODO
+		}
 
 		// @see
 		// https://github.com/tongwentang/tongwen-core/blob/master/src/converter/map/convert-phrase.ts

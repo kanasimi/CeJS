@@ -1,5 +1,5 @@
 /**
- * 合併新同文堂和 ConvertZZ 的字典檔用。
+ * 整合繁簡轉換各家辭典: 合併新同文堂和 ConvertZZ 的字典檔用。
  */
 
 // node generate_additional_table.js to_CN
