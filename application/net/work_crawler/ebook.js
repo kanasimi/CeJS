@@ -239,6 +239,14 @@ function module_code(library_namespace) {
 			cache_directory : library_namespace
 					.append_path_separator(work_data.directory + '繁簡轉換 cache'),
 			cache_file_for_short_sentences : true,
+
+			// default or true: 結合未符合分詞字典規則之詞一併轉換。
+			// 'word': 每個解析出的詞單獨作 zh_conversion。
+			// forced_convert_mode : 'word',
+
+			// 檢查字典檔的規則。debug 用，會拖累效能。
+			// check_dictionary : true,
+
 			// 超過此長度才創建個別的 cache 檔案，否則會放在 .cache_file_for_short_sentences。
 			min_cache_length : 20
 		};
@@ -477,6 +485,7 @@ function module_code(library_namespace) {
 
 		// return needing to wait language converted
 		var text_list = [ part_title, chapter_title, data.text ];
+		// console.trace(work_data.convert_options);
 		var promise_language_convert = this.cache_converted_text(text_list,
 				work_data.convert_options);
 		if (promise_language_convert) {

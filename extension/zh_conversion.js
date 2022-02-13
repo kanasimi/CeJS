@@ -235,13 +235,13 @@ function module_code(library_namespace) {
 			for_each_conversion = function(_text, conversion) {
 				var convert_to = conversion.get_value(_text);
 				return typeof convert_to === 'string' ? convert_to : conversion
-						.convert(_text);
+						.convert(_text, options);
 			};
 		}
 
 		text = this.conversions.reduce(for_each_conversion
 				|| function(_text, conversion) {
-					return conversion.convert(_text);
+					return conversion.convert(_text, options);
 				}, text);
 		// console.trace(text);
 

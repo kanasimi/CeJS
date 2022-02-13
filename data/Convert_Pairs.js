@@ -626,56 +626,95 @@ function module_code(library_namespace) {
 		}
 	}
 
-	function convert_using_pair_Map_by_length(text) {
+	function generate_demarcation_points(text_list) {
+		var index = 0, demarcation_points = [];
+		text_list.forEach(function(text_slice) {
+			demarcation_points.push(index += text_slice.length);
+		});
+		return demarcation_points;
+	}
+
+	function convert_using_pair_Map_by_length(text, options) {
 		var pair_Map_by_length = this.pair_Map_by_length, max_key_length = pair_Map_by_length.length,
-		// node.js 採用字串的方法 converted_text += '' 與採用陣列的方法速度差不多。
-		converted_text = [];
+		// node.js 採用字串的方法 converted_text_slice += '' 與採用陣列的方法 .push() 速度差不多。
+		converted_text_list, converted_text_slice = '',
+		// show_hitted
+		show_matched = options && options.show_matched,
+		// 分界點。
+		demarcation_points;
 
 		if (Array.isArray(text)) {
-			// TODO
+			demarcation_points = generate_demarcation_points(text);
+			// console.log([ text, demarcation_points ]);
+			converted_text_list = [];
+			text = text.join('');
+		} else {
+			text = String(text);
 		}
 
 		// @see
 		// https://github.com/tongwentang/tongwen-core/blob/master/src/converter/map/convert-phrase.ts
 		for (var index = 0, length = text.length; index < length;) {
-			var this_slice = text.slice(index, Math.min(length, index
+			var text_to_convert = text.slice(index, Math.min(length, index
 					+ max_key_length));
 
+			var text_to_convert_length;
 			while (true) {
-				var this_slice_length = this_slice.length;
-				var map = pair_Map_by_length[this_slice_length];
-				if (map && map.has(this_slice)) {
-					if (false) {
-						library_namespace.info(this_slice + '→'
-								+ map.get(this_slice));
+				text_to_convert_length = text_to_convert.length;
+				var map = pair_Map_by_length[text_to_convert_length];
+				if (map && map.has(text_to_convert)) {
+					if (show_matched) {
+						library_namespace.info(text_to_convert + '→'
+								+ map.get(text_to_convert));
 					}
-					converted_text.push(map.get(this_slice));
+					converted_text_slice += map.get(text_to_convert);
 					break;
 				}
 
-				if (this_slice_length === 1) {
+				if (text_to_convert_length === 1) {
 					// Nothing matched.
-					converted_text.push(this_slice);
+					converted_text_slice += text_to_convert;
 					break;
 				}
 
 				// 長先短後 詞先字後
-				this_slice = this_slice.slice(0, -1);
+				text_to_convert = text_to_convert.slice(0, -1);
 			}
 
-			index += this_slice_length;
+			index += text_to_convert_length;
+			if (!demarcation_points) {
+				continue;
+			}
+
+			while (true) {
+				// 先計算還不夠的長度。
+				var _length = demarcation_points[converted_text_list.length]
+						- index;
+				if (!(_length <= 0)) {
+					break;
+				}
+				// 已經累積足夠的 converted_text_slice。
+				_length += converted_text_slice.length;
+				converted_text_list
+						.push(converted_text_slice.slice(0, _length));
+				converted_text_slice = converted_text_slice.slice(_length);
+			}
 		}
 
-		// console.trace(converted_text);
-		return converted_text.join('');
+		// console.trace(converted_text_list || converted_text_slice);
+		if (converted_text_list) {
+			// assert: converted_text_slice === ''
+			return converted_text_list;
+		}
+
+		return converted_text_slice;
 	}
 
 	var using_pair_Map_by_length = true;
-	function Convert_Pairs__convert(text) {
-		text = String(text);
+	function Convert_Pairs__convert(text, options) {
 		if (false && this.pair_Map) {
 			library_namespace.debug(
-					'Convert ' + text.length + ' characters, using '
+					'Convert ' + String(text).length + ' characters, using '
 							+ this.pair_Map.size
 							+ ' pairs with replace_flags ['
 							+ this.replace_flags + '].', 3,
@@ -699,19 +738,41 @@ function module_code(library_namespace) {
 		// 長先短後 詞先字後
 		if (this.pair_Map_by_length) {
 			// console.trace(text);
-			text = convert_using_pair_Map_by_length.call(this, text);
+			text = convert_using_pair_Map_by_length.call(this, text, options);
 
 		} else if (this.convert_pattern) {
-			text = text.replace(this.convert_pattern, function(token) {
-				// library_namespace.info(token + '→' + pair_Map.get(token));
+			text = String(text).replace(this.convert_pattern, function(token) {
+				// library_namespace.info(token + '→' +
+				// pair_Map.get(token));
 				return pair_Map.get(token);
 			});
 		}
 
-		this.special_keys_Map.forEach(function(value, key) {
-			// var pattern = value[0], replace_to = value[1];
-			text = text.replace(value[0], value[1]);
-		});
+		if (this.special_keys_Map.size === 0) {
+			;
+		} else if (typeof text === 'string') {
+			var demarcation_points;
+			if (Array.isArray(text)) {
+				demarcation_points = generate_demarcation_points(text);
+				text = text.join('');
+			}
+			this.special_keys_Map.forEach(function(value, key) {
+				// var pattern = value[0], replace_to = value[1];
+				text = text.replace(value[0], value[1]);
+			});
+			if (demarcation_points) {
+				if (demarcation_points.at(-1) !== text.length) {
+					library_namespace.warn('Convert_Pairs__convert: 長度從'
+							+ demarcation_points.at(-1) + '變成' + text.length
+							+ '，可能有分割錯誤的問題！');
+				}
+				var _text = text;
+				text = demarcation_points.map(function(i, index) {
+					return _text.slice(
+							index > 0 ? demarcation_points[index - 1] : 0, i);
+				});
+			}
+		}
 
 		return text;
 	}
