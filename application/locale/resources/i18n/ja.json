@@ -1,6 +1,8 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"MirukuPC"
+		]
 	},
 	"loading": "読み込み中…",
 	"load-failed": "読み込みに失敗しました",
@@ -28,7 +30,7 @@
 	"log-type-debug": "デバッグ",
 	"log-type-trace": "トレース",
 	"language": "言語",
-	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": "指定されたドメインがまだロードされていません。必要があるなら、強制ロードフラグを設定して下さい。",
+	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": "指定されたドメイン [%1] はまだロードされていません。FORCE フラグを設定する必要がある場合があります。",
 	"$1-elapsed-$3-at-$2": "%1 後、%2 %3",
 	"no-change": "無変更",
 	"finished": "完成",
