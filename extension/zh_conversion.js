@@ -245,6 +245,15 @@ function module_code(library_namespace) {
 				}, text);
 		// console.trace(text);
 
+		if (!(this.max_convert_word_length >= 0)) {
+			this.max_convert_word_length = this.conversions.reduce(function(length, conversion) {
+				return Math.max(length, conversion.pair_Map_by_length.length);
+			}, 0);
+			//console.trace(this);
+			if (this['interface'])
+				this['interface'].max_convert_word_length = this.max_convert_word_length;
+		}
+
 		// 事後轉換表。
 		if (options && options.postfix_conversions) {
 			text = (new Convert_Pairs(options.postfix_conversions, {
@@ -333,11 +342,12 @@ function module_code(library_namespace) {
 
 		var converter = new Converter(Object.assign(Object
 				.clone(Converter.options[type]), options));
-		converter = converter.convert.bind(converter);
+		var converter_interface = converter.convert.bind(converter);
+		converter['interface'] = converter_interface;
 		if (options.set_as_default) {
-			set_as_default(type, converter);
+			set_as_default(type, converter_interface);
 		}
-		return converter;
+		return converter_interface;
 	}
 
 	var cecc;

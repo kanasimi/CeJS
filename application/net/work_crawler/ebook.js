@@ -240,9 +240,10 @@ function module_code(library_namespace) {
 					.append_path_separator(work_data.directory + '繁簡轉換 cache'),
 			cache_file_for_short_sentences : true,
 
-			// default or true: 結合未符合分詞字典規則之詞一併轉換。
-			// 'word': 每個解析出的詞單獨作 zh_conversion。
-			// forced_convert_mode : 'word',
+			// default (undefined) or 'word': 每個解析出的詞單獨作 zh_conversion。
+			// 'combine': 結合未符合分詞字典規則之詞一併轉換。converter 必須有提供輸入陣列的功能。
+			// false: 按照原始輸入，不作 zh_conversion。
+			forced_convert_mode : 'combine',
 
 			// 檢查字典檔的規則。debug 用，會拖累效能。
 			// check_dictionary : true,

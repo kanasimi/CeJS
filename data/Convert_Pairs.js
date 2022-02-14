@@ -636,7 +636,7 @@ function module_code(library_namespace) {
 
 	function convert_using_pair_Map_by_length(text, options) {
 		var pair_Map_by_length = this.pair_Map_by_length, max_key_length = pair_Map_by_length.length,
-		// node.js 採用字串的方法 converted_text_slice += '' 與採用陣列的方法 .push() 速度差不多。
+		// node.js v17.4.0 採用字串的方法 converted_text_slice += '' 與採用陣列的方法 .push() 速度差不多。
 		converted_text_list, converted_text_slice = '',
 		// show_hitted
 		show_matched = options && options.show_matched,
