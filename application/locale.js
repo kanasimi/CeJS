@@ -781,7 +781,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('準備載入 user 指定 domain resources，如語系檔。', 2,
 					'gettext');
 			need_to_load.push(typeof gettext_domain_location === 'string'
-			// TODO: .json
+			// 因 same-origin policy，採 .js 而非其他 file type 如 .json。
 			? gettext_domain_location + domain_name + '.js'
 					: gettext_domain_location(domain_name), function() {
 				library_namespace.debug('User-defined resources included.', 2,

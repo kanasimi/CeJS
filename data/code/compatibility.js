@@ -1936,6 +1936,201 @@ function module_code(library_namespace) {
 	json.separator = ' ';
 
 	// --------------------------------------------
+	// JSON polyfill
+
+	function JSON_parse(text, reviver) {
+
+		function parse_next_value() {
+			/**
+			 * <code>
+			[...
+			{...
+			"...
+			00000
+			null
+			<code>
+			 */
+			var matched = text.match(/^\s*([\[{"]|null|\d+)/);
+			if (!matched) {
+				// SyntaxError
+				return;
+			}
+
+			text = text.slice(/* matched.index(=0) + */matched[0].length);
+
+			if (matched[1] === 'null' || /^\d/.test(matched[1])) {
+				return matched[1] === 'null' ? null : +matched[1];
+			}
+
+			// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/JSON
+			if (matched[1] === '"') {
+				matched = text.match(/^(?:\\"|[^"])*"/);
+				text = text.slice(matched[0].length);
+
+				return matched[0].slice(0, -1)
+				//
+				.replace(/\\u([0-9a-f]{4})/ig, function(code) {
+					return String.fromCharCode(parseInt(code, 16));
+				}).replace(/\\([\s\S]|$)/g, function(escape_char) {
+					// /\\(["\\\/\b\f\t\r\n])/g
+					var escaped = {
+						'"' : '"',
+						'\\' : '\\',
+						b : '\b',
+						f : '\f',
+						t : '\t',
+						r : '\r',
+						n : '\n'
+					}[escape_char];
+					if (!escaped) {
+						throw new SyntaxError('Unexpected token \\'
+						//
+						+ escape_char + ' in JSON');
+					}
+					return escaped
+				});
+			}
+
+			if (matched[1] === '[') {
+				var array = [];
+				matched = text.match(/^\s*\]/);
+				if (matched) {
+					// "{}"
+					text = text.slice(matched[0].length);
+					return array;
+				}
+				while (true) {
+					var next_value = parse_next_value();
+					if (next_value === undefined)
+						return;
+					array.push(next_value);
+					matched = text.match(/^\s*([,\]])/);
+					if (!matched) {
+						// SyntaxError
+						return;
+					}
+					text = text.slice(matched[0].length);
+					if (matched[1] === ']') {
+						break;
+					}
+				}
+				return array;
+			}
+
+			// assert: matched[1] === '{'
+			var object = {};
+			matched = text.match(/^\s*}/);
+			if (matched) {
+				// "{}"
+				text = text.slice(matched[0].length);
+				return object;
+			}
+			while (true) {
+				var next_key = parse_next_value();
+				if (typeof next_key !== 'string') {
+					throw new SyntaxError('Unexpected token in JSON: '
+							+ next_key + '; ' + text);
+				}
+				matched = text.match(/^\s*:/);
+				if (!matched) {
+					// SyntaxError
+					return;
+				}
+				text = text.slice(matched[0].length);
+				var next_value = parse_next_value();
+				if (next_value === undefined)
+					return;
+				matched = text.match(/^\s*([,}])/);
+				if (!matched) {
+					// SyntaxError
+					return;
+				}
+				object[next_key] = next_value;
+				text = text.slice(matched[0].length);
+				if (matched[1] === '}') {
+					break;
+				}
+			}
+			return object;
+		}
+
+		text = String(text);
+
+		var result = parse_next_value();
+		if (text.trim())
+			throw new SyntaxError('Unexpected token in JSON: ' + text);
+
+		return result;
+	}
+
+	function JSON_stringify(value, replacer, space) {
+		var object_Set = new Set;
+
+		function stringify(object, key, obj) {
+			if (object && typeof object.toJSON === 'function') {
+				// e.g., {Date}
+				object = object.toJSON(key);
+			}
+
+			if (replacer)
+				object = replacer.call(obj, key, value);
+
+			if (typeof object === 'string')
+				return '"' + object.replace(/["\\\/\b\f\t\r\n]/g, '\\"') + '"';
+
+			if (!object || typeof object !== 'object') {
+				if (object === undefined) {
+					if (!key)
+						return;
+					object = null;
+				}
+				object = String(object);
+				return object;
+			}
+
+			var output = [];
+			if (Array.isArray(object)) {
+				for (var index = 0; index < object.length; index++) {
+					var value = object[index];
+					if (object_Set.has(value)) {
+						throw new Error(
+						// Too much recursion?\n循環參照？
+						'Converting circular structure to JSON: [' + index
+								+ ']');
+					}
+					if (value === undefined)
+						value = null;
+					output.push(stringify(value, key, object));
+				}
+				return '[' + output.join(',') + ']';
+			}
+
+			var keys = Object.keys(object);
+			for (var index = 0; index < keys.length; index++) {
+				var key = keys[index], value = object[key];
+				if (object_Set.has(value)) {
+					throw new Error('Converting circular structure to JSON: .'
+							+ key);
+				}
+				if (value === undefined)
+					continue;
+				output.push(stringify(key) + ':'
+						+ stringify(value, key, object));
+			}
+			return '{' + output.join(',') + '}';
+		}
+
+		return stringify(value);
+	}
+
+	if (!globalThis.JSON) {
+		globalThis.JSON = {
+			parse : JSON_parse,
+			stringify : JSON_stringify
+		};
+	}
+
+	// --------------------------------------------
 	// for old node.js
 
 	function Buffer_from(source, encoding) {
@@ -2000,10 +2195,10 @@ function module_code(library_namespace) {
 
 	promise.then(r_,R_)
 	promise: pending, fulfilled, rejected
-		r_ retrun value	value→return
+		r_ return value	value→return
 			(p=new Promise(function(r){throw 2})).then(null,function(){});console.log(p)
 				Promise {<rejected>: 2}
-		r_ retrun promise	p→promise→return
+		r_ return promise	p→promise→return
 			p=Promise.resolve(2).then(function(){return Promise.resolve(4)});console.log(p)
 				p: Promise {<pending>}
 				→ Promise {<resolved>: 4}
@@ -2023,7 +2218,7 @@ function module_code(library_namespace) {
 				5
 				6
 				p → Promise {<resolved>: 6}
-		r_ retrun thenable	p→thenable→returned
+		r_ return thenable	p→thenable→returned
 			p=Promise.resolve(2).then(function(){return {then:function(r,R){r(4)}}});console.log(p)
 				p: Promise {<pending>}
 				→ Promise {<resolved>: 4}
@@ -2034,15 +2229,15 @@ function module_code(library_namespace) {
 			p=Promise.resolve(2).then(function(){return {then:function(r,R){setTimeout(function(){r(4)},2);}}});console.log(p)
 				p: Promise {<pending>}
 				→ Promise {<resolved>: 4}
-		R_ retrun value
+		R_ return value
 			(p=new Promise(function(r,R){R(2)})).then(null,function(){});console.log(p)
 				Promise {<rejected>: 2}
-		R_ retrun promise
+		R_ return promise
 			(p=new Promise(function(r,R){R(Promise.resolve(2))})).then(null,function(){});console.log(p)
 				Promise {<rejected>: Promise}
 			(q=Promise.reject(2)).then(null,function(){});(p=new Promise(function(r,R){R(q)})).then(null,function(){});console.log(p)
 				Promise {<rejected>: Promise}
-		R_ retrun thenable
+		R_ return thenable
 			(p=new Promise(function(r,R){R({then:function(r,R){R(2)}})})).then(null,function(){});console.log(p)
 				Promise {<rejected>: {…}}
 
