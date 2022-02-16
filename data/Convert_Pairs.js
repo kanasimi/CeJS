@@ -636,7 +636,8 @@ function module_code(library_namespace) {
 
 	function convert_using_pair_Map_by_length(text, options) {
 		var pair_Map_by_length = this.pair_Map_by_length, max_key_length = pair_Map_by_length.length,
-		// node.js v17.4.0 採用字串的方法 converted_text_slice += '' 與採用陣列的方法 .push() 速度差不多。
+		// node.js v17.4.0 採用字串的方法 converted_text_slice += '' 與採用陣列的方法 .push()
+		// 速度差不多。
 		converted_text_list, converted_text_slice = '',
 		// show_hitted
 		show_matched = options && options.show_matched,
@@ -735,6 +736,9 @@ function module_code(library_namespace) {
 		// console.trace(this.convert_pattern);
 		// console.trace(this.special_keys_Map);
 
+		// show_hitted
+		var show_matched = options && options.show_matched;
+
 		// 長先短後 詞先字後
 		if (this.pair_Map_by_length) {
 			// console.trace(text);
@@ -748,30 +752,59 @@ function module_code(library_namespace) {
 			});
 		}
 
+		// console.trace([ text, this.special_keys_Map ]);
 		if (this.special_keys_Map.size === 0) {
-			;
-		} else if (typeof text === 'string') {
-			var demarcation_points;
-			if (Array.isArray(text)) {
-				demarcation_points = generate_demarcation_points(text);
-				text = text.join('');
-			}
+			// Nothing to do.
+		} else if (Array.isArray(text)) {
+			var demarcation_points = generate_demarcation_points(text);
+			text = text.join('');
+			var converted_text = text;
 			this.special_keys_Map.forEach(function(value, key) {
 				// var pattern = value[0], replace_to = value[1];
+				if (show_matched && value[0].test(converted_text)) {
+					library_namespace.info(value[0] + ': '
+					//
+					+ converted_text + '→'
+							+ converted_text.replace(value[0], value[1]));
+				}
+				// TODO:
+				// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter
+				converted_text = converted_text.replace(value[0], value[1]);
+			});
+
+			// assert: demarcation_points.at(-1) === text.length
+			var increased = converted_text.length - demarcation_points.at(-1);
+			if (increased !== 0) {
+				library_namespace.warn('Convert_Pairs__convert: 長度從 '
+						+ demarcation_points.at(-1) + ' 變成 '
+						+ converted_text.length + ' ('
+						+ (increased < 0 ? '' : '+') + increased
+						+ ')，可能分割錯誤，造成顯示錯位。');
+
+				// TODO: 正確的分割
+				var diff = library_namespace.LCS(text, converted_text, {
+					line : false,
+					diff : true
+				});
+				console.trace(diff);
+
+			}
+			var _text = converted_text;
+			text = demarcation_points.map(function(i, index) {
+				return _text.slice(index > 0 ? demarcation_points[index - 1]
+						: 0, i);
+			});
+
+		} else {
+			// assert: typeof text === 'string'
+			this.special_keys_Map.forEach(function(value, key) {
+				// var pattern = value[0], replace_to = value[1];
+				if (show_matched && value[0].test(text)) {
+					library_namespace.info(value[0] + ': ' + text + '→'
+							+ text.replace(value[0], value[1]));
+				}
 				text = text.replace(value[0], value[1]);
 			});
-			if (demarcation_points) {
-				if (demarcation_points.at(-1) !== text.length) {
-					library_namespace.warn('Convert_Pairs__convert: 長度從'
-							+ demarcation_points.at(-1) + '變成' + text.length
-							+ '，可能有分割錯誤的問題！');
-				}
-				var _text = text;
-				text = demarcation_points.map(function(i, index) {
-					return _text.slice(
-							index > 0 ? demarcation_points[index - 1] : 0, i);
-				});
-			}
 		}
 
 		return text;
