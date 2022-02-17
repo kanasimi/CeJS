@@ -1,6 +1,9 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"Hzy980512",
+			"ShuyanW"
+		]
 	},
 	"loading": "载入中…",
 	"load-failed": "载入失败",
@@ -10,7 +13,7 @@
 	"contents": "目录",
 	"↑back-to-toc": "↑回到目录",
 	"expand": "展开",
-	"collapse": "收合",
+	"collapse": "收起",
 	"number": "数字",
 	"function": "函数",
 	"date": "日期",
@@ -325,7 +328,7 @@
 	"timezone": "时区：",
 	"latitude": "经度：",
 	"longitude": "纬度：",
-	"famous-places": "着名地点：",
+	"famous-places": "著名地点：",
 	"data-layer": "资料图层",
 	"please-select-the-layer-you-want-to-load": "请选择所欲载入之资料图层。",
 	"general-data-layer": "通用",
