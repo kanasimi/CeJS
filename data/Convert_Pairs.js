@@ -711,6 +711,86 @@ function module_code(library_namespace) {
 		return converted_text_slice;
 	}
 
+	function split_text_by_demarcation_points(text, converted_text,
+			demarcation_points) {
+		// 分割 converted_text: 因為 converted_text 可能經過多重 this.special_keys_Map 轉換，
+		// 在 this.special_keys_Map.forEach() 裡面處理 indexes 將會非常複雜。是故採用 CeL.LCS()。
+		var diff_list = library_namespace.LCS(text, converted_text, {
+			line : false,
+			diff : true
+		});
+		var index_of_demarcation_points = 0, increased_index = 0;
+		// console.trace(diff_list);
+		// console.trace(demarcation_points);
+
+		diff_list.forEach(function(diff_pair) {
+			var from_index = diff_pair.index[0];
+			var to_index = diff_pair.index[1];
+			// console.trace(from_index, to_index, diff_pair.last_index);
+			var increased_in_this_diff = to_index && from_index
+			//
+			? to_index[1] - from_index[1] - increased_index
+			//
+			: to_index ? to_index[1] - diff_pair.last_index[1]
+					: -(from_index[1] - diff_pair.last_index[0]);
+			// console.trace(increased_in_this_diff, from_index, to_index,
+			// diff_pair.last_index);
+			// 開始的索引差距應該跟上一個結尾的索引差距相同。
+			// assert: increased_index === to_index[0] - from_index[0]
+			var from_start = from_index ? from_index[0]
+					: diff_pair.last_index[0] + 1;
+			var from_end = from_index ? from_index[1] + 1
+					: diff_pair.last_index[0] + 1;
+			while (demarcation_points[index_of_demarcation_points]
+			//
+			< from_end) {
+				if (increased_in_this_diff
+				//
+				&& demarcation_points[index_of_demarcation_points]
+				//
+				> from_start) {
+					// e.g., a,a → bbb；不能決定到底是 b,bb 還是 bb,b。
+					var old_index
+					//
+					= demarcation_points[index_of_demarcation_points];
+					var _diff = old_index - from_start;
+					// converted_text 切割的 index。
+					var to_i = to_index[0] + _diff;
+					library_namespace.info('Convert_Pairs__convert: 將 ['
+					//
+					+ text.slice(from_start, old_index) + ','
+					//
+					+ text.slice(old_index, from_end) + '] 分割成 ['
+					//
+					+ converted_text.slice(to_index[0], to_i) + ','
+					//
+					+ converted_text.slice(to_i, to_index[1] + 1) + ']');
+				}
+				demarcation_points[index_of_demarcation_points++]
+				// 這樣會將本次增加的 (increased_in_this_diff) 全部排到最後一個。
+				+= increased_index;
+			}
+
+			// 結尾的索引差距。
+			increased_index += increased_in_this_diff;
+		});
+
+		// console.trace(increased_index, index_of_demarcation_points,
+		// demarcation_points);
+		if (increased_index) {
+			while (index_of_demarcation_points < demarcation_points.length)
+				demarcation_points[index_of_demarcation_points++] += increased_index;
+		}
+		// console.trace(demarcation_points);
+
+		text = demarcation_points.map(function(i, index) {
+			return converted_text.slice(
+					index > 0 ? demarcation_points[index - 1] : 0, i);
+		});
+
+		return text;
+	}
+
 	var using_pair_Map_by_length = true;
 	function Convert_Pairs__convert(text, options) {
 		if (false && this.pair_Map) {
@@ -719,7 +799,8 @@ function module_code(library_namespace) {
 							+ this.pair_Map.size
 							+ ' pairs with replace_flags ['
 							+ this.replace_flags + '].', 3,
-					'Convert_Pairs.convert');
+					// Convert_Pairs.convert
+					'Convert_Pairs__convert');
 		}
 
 		if (!this.special_keys_Map) {
@@ -729,7 +810,7 @@ function module_code(library_namespace) {
 			});
 			if (this.may_remove_pair_Map) {
 				library_namespace.debug('在開始轉換之後就不會再修改字典檔，因此可移除 .pair_Map。', 1,
-						'Convert_Pairs.convert');
+						'Convert_Pairs__convert');
 				delete this.pair_Map;
 			}
 		}
@@ -752,50 +833,13 @@ function module_code(library_namespace) {
 			});
 		}
 
+		// ----------------------------------------------------------
+
 		// console.trace([ text, this.special_keys_Map ]);
-		if (this.special_keys_Map.size === 0) {
-			// Nothing to do.
-		} else if (Array.isArray(text)) {
-			var demarcation_points = generate_demarcation_points(text);
-			text = text.join('');
-			var converted_text = text;
-			this.special_keys_Map.forEach(function(value, key) {
-				// var pattern = value[0], replace_to = value[1];
-				if (show_matched && value[0].test(converted_text)) {
-					library_namespace.info(value[0] + ': '
-					//
-					+ converted_text + '→'
-							+ converted_text.replace(value[0], value[1]));
-				}
-				// TODO:
-				// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter
-				converted_text = converted_text.replace(value[0], value[1]);
-			});
 
-			// assert: demarcation_points.at(-1) === text.length
-			var increased = converted_text.length - demarcation_points.at(-1);
-			if (increased !== 0) {
-				library_namespace.warn('Convert_Pairs__convert: 長度從 '
-						+ demarcation_points.at(-1) + ' 變成 '
-						+ converted_text.length + ' ('
-						+ (increased < 0 ? '' : '+') + increased
-						+ ')，可能分割錯誤，造成顯示錯位。');
-
-				// TODO: 正確的分割
-				var diff = library_namespace.LCS(text, converted_text, {
-					line : false,
-					diff : true
-				});
-				console.trace(diff);
-
-			}
-			var _text = converted_text;
-			text = demarcation_points.map(function(i, index) {
-				return _text.slice(index > 0 ? demarcation_points[index - 1]
-						: 0, i);
-			});
-
-		} else {
+		if (!Array.isArray(text)
+		// Nothing to do.
+		|| this.special_keys_Map.size === 0) {
 			// assert: typeof text === 'string'
 			this.special_keys_Map.forEach(function(value, key) {
 				// var pattern = value[0], replace_to = value[1];
@@ -805,9 +849,32 @@ function module_code(library_namespace) {
 				}
 				text = text.replace(value[0], value[1]);
 			});
+			return text;
 		}
 
-		return text;
+		// assert: Array.isArray(text)
+		// console.trace([ text, this.special_keys_Map ]);
+
+		var demarcation_points = generate_demarcation_points(text);
+		text = text.join('');
+		var converted_text = text;
+		this.special_keys_Map.forEach(function(value, key) {
+			// var pattern = value[0], replace_to = value[1];
+			if (show_matched && value[0].test(converted_text)) {
+				library_namespace.info(value[0] + ': '
+				//
+				+ converted_text + '→'
+						+ converted_text.replace(value[0], value[1]));
+			}
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter
+			converted_text = converted_text.replace(value[0], value[1]);
+			// 在這裡呼叫 split_text_by_demarcation_points() 可增加精準度，但大大降低效能。
+		});
+
+		// assert: demarcation_points.at(-1) === text.length
+
+		return split_text_by_demarcation_points(text, converted_text,
+				demarcation_points);
 	}
 
 	// reverse conversion, 改成 value → key

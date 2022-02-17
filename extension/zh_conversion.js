@@ -246,10 +246,11 @@ function module_code(library_namespace) {
 		// console.trace(text);
 
 		if (!(this.max_convert_word_length >= 0)) {
-			this.max_convert_word_length = this.conversions.reduce(function(length, conversion) {
+			this.max_convert_word_length = this.conversions.reduce(function(
+					length, conversion) {
 				return Math.max(length, conversion.pair_Map_by_length.length);
 			}, 0);
-			//console.trace(this);
+			// console.trace(this);
 			if (this['interface'])
 				this['interface'].max_convert_word_length = this.max_convert_word_length;
 		}

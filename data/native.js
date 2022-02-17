@@ -3633,6 +3633,7 @@ function module_code(library_namespace) {
 			// Array.isArray(to_unique) && from_unique===undefined 代表本段落為新增文字。
 			// diff_pair.index = [ from_index, to_index ];
 			// _index = [ start_index, end_index ]
+			// .indexes
 			diff_pair.index = [ from_unique, to_unique ];
 			// diff_pair.last_index: 上一個相同元素的 index。
 			// 警告: diff_pair.last_index 在 _unique 最初的一個 index 可能不準確!
