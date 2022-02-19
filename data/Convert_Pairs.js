@@ -682,6 +682,7 @@ function module_code(library_namespace) {
 				text_to_convert = text_to_convert.slice(0, -1);
 			}
 
+			// console.log(index + '→' + (index + text_to_convert_length));
 			index += text_to_convert_length;
 			if (!demarcation_points) {
 				continue;

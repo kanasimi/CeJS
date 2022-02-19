@@ -312,6 +312,7 @@ function module_code(library_namespace) {
 			// postfix_conversions : {},
 
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/tw2s.json
+			// https://github.com/BYVoid/OpenCC/blob/master/node/dicts.gypi
 			files : [ 'TWVariantsRevPhrases', [ 'TSPhrases', 'TSCharacters',
 			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的字典檔。
 			'additional.to_CN.auto-generated',
