@@ -3430,6 +3430,7 @@ function module_code(library_namespace) {
 			to = to.chars(true);
 		// assert: Array.isArray(from) && Array.isArray(from)
 
+		// console.trace([ from.length, to.length ]);
 		var get_length_only = !get_trace_array,
 		//
 		from_length = from.length, to_length = to.length,

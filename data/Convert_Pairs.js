@@ -626,6 +626,7 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// @inner
 	function generate_demarcation_points(text_list) {
 		var index = 0, demarcation_points = [];
 		text_list.forEach(function(text_slice) {
@@ -634,6 +635,7 @@ function module_code(library_namespace) {
 		return demarcation_points;
 	}
 
+	// @inner
 	function convert_using_pair_Map_by_length(text, options) {
 		var pair_Map_by_length = this.pair_Map_by_length, max_key_length = pair_Map_by_length.length,
 		// node.js v17.4.0 採用字串的方法 converted_text_slice += '' 與採用陣列的方法 .push()
@@ -712,11 +714,12 @@ function module_code(library_namespace) {
 		return converted_text_slice;
 	}
 
-	function split_text_by_demarcation_points(text, converted_text,
+	// @inner
+	function split_text_by_demarcation_points(text_String, converted_text,
 			demarcation_points) {
 		// 分割 converted_text: 因為 converted_text 可能經過多重 this.special_keys_Map 轉換，
 		// 在 this.special_keys_Map.forEach() 裡面處理 indexes 將會非常複雜。是故採用 CeL.LCS()。
-		var diff_list = library_namespace.LCS(text, converted_text, {
+		var diff_list = library_namespace.LCS(text_String, converted_text, {
 			line : false,
 			diff : true
 		});
@@ -759,9 +762,9 @@ function module_code(library_namespace) {
 					var to_i = to_index[0] + _diff;
 					library_namespace.info('Convert_Pairs__convert: 將 ['
 					//
-					+ text.slice(from_start, old_index) + ','
+					+ text_String.slice(from_start, old_index) + ','
 					//
-					+ text.slice(old_index, from_end) + '] 分割成 ['
+					+ text_String.slice(old_index, from_end) + '] 分割成 ['
 					//
 					+ converted_text.slice(to_index[0], to_i) + ','
 					//
@@ -784,24 +787,63 @@ function module_code(library_namespace) {
 		}
 		// console.trace(demarcation_points);
 
-		text = demarcation_points.map(function(i, index) {
+		text_String = demarcation_points.map(function(i, index) {
 			return converted_text.slice(
 					index > 0 ? demarcation_points[index - 1] : 0, i);
 		});
 
-		return text;
+		return text_String;
 	}
+
+	// @inner
+	function adapt_special_keys_Map(text_Array, options) {
+		// show_hitted
+		var show_matched = options && options.show_matched;
+
+		var demarcation_points = generate_demarcation_points(text_Array);
+		var text_String = text_Array.join('');
+		var converted_text = text_String;
+		this.special_keys_Map.forEach(function(value, key) {
+			// var pattern = value[0], replace_to = value[1];
+			if (show_matched && value[0].test(converted_text)) {
+				library_namespace.info(value[0] + ': '
+				//
+				+ converted_text + '→'
+						+ converted_text.replace(value[0], value[1]));
+			}
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter
+			converted_text = converted_text.replace(value[0], value[1]);
+			// 在這裡呼叫 split_text_by_demarcation_points() 可增加精準度，但大大降低效能。
+		});
+
+		// assert: demarcation_points.at(-1) === text_String.length
+		if (text_String === converted_text) {
+			return text_Array;
+		}
+
+		return split_text_by_demarcation_points(text_String, converted_text,
+				demarcation_points);
+	}
+
+	// @see function LCS_length()
+	// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
+	// 設定小一點，LCS() 的時候才不會浪費太多時間。
+	var SOFT_SLICE_LIMIT = 1000;
+	// HARD_SLICE_LIMIT < 65536 但必須預防有些轉換把長度拉長了。
+	var HARD_SLICE_LIMIT = 65530;
+	// console.assert(SOFT_SLICE_LIMIT < HARD_SLICE_LIMIT);
+	// console.assert(HARD_SLICE_LIMIT ** 2 < 2 ** 32 - 1);
 
 	var using_pair_Map_by_length = true;
 	function Convert_Pairs__convert(text, options) {
 		if (false && this.pair_Map) {
 			library_namespace.debug(
-					'Convert ' + String(text).length + ' characters, using '
-							+ this.pair_Map.size
-							+ ' pairs with replace_flags ['
-							+ this.replace_flags + '].', 3,
-					// Convert_Pairs.convert
-					'Convert_Pairs__convert');
+			//
+			'Convert ' + String(text).length + ' characters, using '
+					+ this.pair_Map.size + ' pairs with replace_flags ['
+					+ this.replace_flags + '].', 3,
+			// Convert_Pairs.convert
+			'Convert_Pairs__convert');
 		}
 
 		if (!this.special_keys_Map) {
@@ -856,26 +898,35 @@ function module_code(library_namespace) {
 		// assert: Array.isArray(text)
 		// console.trace([ text, this.special_keys_Map ]);
 
-		var demarcation_points = generate_demarcation_points(text);
-		text = text.join('');
-		var converted_text = text;
-		this.special_keys_Map.forEach(function(value, key) {
-			// var pattern = value[0], replace_to = value[1];
-			if (show_matched && value[0].test(converted_text)) {
-				library_namespace.info(value[0] + ': '
-				//
-				+ converted_text + '→'
-						+ converted_text.replace(value[0], value[1]));
+		var converted_text = [];
+		// 避免 RangeError: Invalid typed array length:
+		// @see function LCS_length()
+		for (var index = 0; index < text.length;) {
+			var latest_index = index, this_slice_length = 0;
+			// 限制長度在這個之內。
+			while (index < text.length && this_slice_length < SOFT_SLICE_LIMIT)
+				this_slice_length += text[index++].length;
+			while (index < text.length) {
+				this_slice_length += text[index].length;
+				if (this_slice_length >= HARD_SLICE_LIMIT) {
+					// 真的太長還是得強制截斷。警告: 這可能造成沒有辦法匹配的錯誤情況。
+					break;
+				}
+				// 延伸到句子結尾。
+				if (/(?:[。？！…」]|\/>)[\s\n]*$/.test(text[index]))
+					break;
+				index++;
 			}
-			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter
-			converted_text = converted_text.replace(value[0], value[1]);
-			// 在這裡呼叫 split_text_by_demarcation_points() 可增加精準度，但大大降低效能。
-		});
-
-		// assert: demarcation_points.at(-1) === text.length
-
-		return split_text_by_demarcation_points(text, converted_text,
-				demarcation_points);
+			if (false) {
+				console.log(text.slice(index - 20, index));
+				console.trace(latest_index + '-' + index + '/' + text.length
+						+ ': ' + this_slice_length);
+			}
+			converted_text.append(adapt_special_keys_Map.call(this, text.slice(
+					latest_index, index), options));
+		}
+		// console.assert(converted_text.length === text.length);
+		return converted_text;
 	}
 
 	// reverse conversion, 改成 value → key
