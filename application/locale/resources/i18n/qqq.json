@@ -25,7 +25,7 @@
 	"illegal-$1-$2": "Used as error message. (scope: interact.integrate.SVG)",
 	"debug-level": "Used as debugging message. (scope: [https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log])",
 	"log-type-fatal": "Used as debugging message. (scope: [https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log])",
-	"log-type-error": "Used as debugging message. (scope: [https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log])",
+	"log-type-error": "Used as debugging message. (scope: [https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log])\n\n{{Identical|Error}}",
 	"log-type-warn": "Used as debugging message. (scope: [https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log])",
 	"log-type-em": "Used as debugging message, to express this is an emphasized message. (scope: [https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log])",
 	"log-type-info": "Used as debugging message. (scope: [https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log])",
