@@ -241,11 +241,11 @@ function module_code(library_namespace) {
 			cache_file_for_short_sentences : true,
 
 			// default (undefined) or 'word': 每個解析出的詞單獨作 zh_conversion。
-			// 'combine': 結合未符合分詞字典規則之詞一併轉換。converter 必須有提供輸入陣列的功能。
+			// 'combine': 結合未符合分詞辭典規則之詞一併轉換。converter 必須有提供輸入陣列的功能。
 			// false: 按照原始輸入，不作 zh_conversion。
 			forced_convert_mode : 'combine',
 
-			// 檢查字典檔的規則。debug 用，會拖累效能。
+			// 檢查辭典檔的規則。debug 用，會拖累效能。
 			// check_dictionary : true,
 
 			// 超過此長度才創建個別的 cache 檔案，否則會放在 .cache_file_for_short_sentences。

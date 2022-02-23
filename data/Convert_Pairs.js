@@ -852,7 +852,7 @@ function module_code(library_namespace) {
 				generate_pair_Map_by_length : using_pair_Map_by_length
 			});
 			if (this.may_remove_pair_Map) {
-				library_namespace.debug('在開始轉換之後就不會再修改字典檔，因此可移除 .pair_Map。', 1,
+				library_namespace.debug('在開始轉換之後就不會再修改辭典檔，因此可移除 .pair_Map。', 1,
 						'Convert_Pairs__convert');
 				delete this.pair_Map;
 			}

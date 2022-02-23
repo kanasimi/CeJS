@@ -122,7 +122,7 @@ function module_code(library_namespace) {
 				// || file_list.length < 2,
 
 				item_processor : item_processor,
-				// 在開始轉換之後就不會再修改字典檔，因此可移除 .pair_Map。
+				// 在開始轉換之後就不會再修改辭典檔，因此可移除 .pair_Map。
 				may_remove_pair_Map : !options || !options.mode
 			};
 
@@ -287,7 +287,7 @@ function module_code(library_namespace) {
 			// postfix_conversions : {},
 
 			files : [ [ 'STPhrases', 'STCharacters',
-			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的字典檔。
+			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的辭典檔。
 			'additional.to_TW.auto-generated',
 			// 後來的會覆蓋前面的。
 			{
@@ -314,7 +314,7 @@ function module_code(library_namespace) {
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/tw2s.json
 			// https://github.com/BYVoid/OpenCC/blob/master/node/dicts.gypi
 			files : [ 'TWVariantsRevPhrases', [ 'TSPhrases', 'TSCharacters',
-			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的字典檔。
+			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的辭典檔。
 			'additional.to_CN.auto-generated',
 			// 後來的會覆蓋前面的。
 			{
