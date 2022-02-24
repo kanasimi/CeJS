@@ -134,5 +134,19 @@
 	"batch": "MUGG",
 	"tagging": "TICHËTTADURA",
 	"development": "DËSVLUP",
-	"feedback": "REASSION"
+	"feedback": "REASSION",
+	"no-calendar-to-list": "Gnun calendari da buté an lista!",
+	"try-to-append-date": "Ch'a preuva a gionté na dàita",
+	"calendar-date": "dàita ëd calendari",
+	"$1-records": "%1 argistrassion",
+	"$1-years": "%1 agn",
+	"$1-$2-$3": "%3/%2/%1",
+	"$1-bce": "%1 anans G.C.",
+	"$1-ce": "%1 apress G.C.",
+	"era-date": "Dàita d'era",
+	"calendar-used": "Calendari dovrà",
+	"data-source": "Sorgiss ëd dàit",
+	"note": "Nòta",
+	"showing-timeline": "Smon-e la linia cronològica",
+	"personal-name": "Nòm përsonal"
 }
