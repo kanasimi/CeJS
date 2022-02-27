@@ -108,7 +108,7 @@ function module_code(library_namespace) {
 		'Pin message' : parse_template_Pin_message,
 
 		// 一些會添加 anchors 的特殊模板。
-		'Football_box' : parse_template_Football_box,
+		'Football box' : parse_template_Football_box,
 
 		Tl : parse_template_Tl
 	};

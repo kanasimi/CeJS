@@ -1647,6 +1647,7 @@ function module_code(library_namespace) {
 			delete _options.print_anchors;
 		// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
 		parsed.each('transclusion', function(template_token) {
+			// console.trace([ template_token.name, template_token.expand ]);
 			if (template_token.expand) {
 				// 處理包括 {{Anchor}}, {{Anchors}}, {{Visible anchor}}, {{term}}
 				// const

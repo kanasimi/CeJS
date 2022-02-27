@@ -122,7 +122,7 @@ function module_code(library_namespace) {
 	'death date', 'death date and age', 'death year and age'
 	//
 	].map(function(template_name) {
-		return 'Template:' + template_name;
+		return wiki_API.normalize_title('Template:' + template_name);
 	});
 
 	template_functions.biographical_categories = [ 'Living people',
@@ -1121,6 +1121,19 @@ function module_code(library_namespace) {
 			function_name_list.append(Object.keys(functions_of_site));
 		}
 		function_name_list.append(template_functions.biographical_templates);
+		// console.trace(function_name_list);
+		function_name_list.forEach(function(template_name) {
+			var normalized_name = session.normalize_title(template_name);
+			if (template_name !== normalized_name) {
+				library_namespace.error([
+						'initialize_session_template_functions: ',
+						{
+							T : [ '%1 必須更名為 %2 才能起作用！',
+									JSON.stringify(template_name),
+									JSON.stringify(normalized_name) ]
+						} ]);
+			}
+		});
 		// assert: (function_name_list.length > 0),
 		// because template_functions.biographical_templates.length > 0
 		session.register_redirects(function_name_list, function() {
