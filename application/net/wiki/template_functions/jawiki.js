@@ -113,7 +113,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// for get_all_anchors()
+	// Not completed! Only for get_all_anchors().
 	// 転送先のアンカーはTemplate:RFDの中に納まっている
 	// e.g., {{RFD notice
 	// |'''対象リダイレクト:'''[[Wikipedia:リダイレクトの削除依頼/受付#RFD長崎市電|長崎市電（受付依頼）]]|...}}

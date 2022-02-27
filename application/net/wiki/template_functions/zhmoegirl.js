@@ -119,11 +119,11 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// for get_all_anchors() @ [[ACGN作品中出場的鐵路車站列表]]
+	// Not completed! Only for get_all_anchors() @ [[ACGN作品中出場的鐵路車站列表]]
 	function expand_template_铁路车站名(options) {
 		var parameters = this.parameters;
 		return '<span id="' + (parameters.name || parameters[1]) + '">'
-		// TODO: the content is skipped
+		// TODO: The content is skipped.
 		+ '</span>';
 	}
 
@@ -133,9 +133,10 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// for get_all_anchors() as section title
+	// Not completed! Only for get_all_anchors() as section title
 	// @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_ARGONAVIS_Icon(options) {
+		// TODO: The content is skipped.
 		return '';
 	}
 
@@ -145,7 +146,8 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// for get_all_anchors() @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
+	// Not completed! Only for get_all_anchors()
+	// @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_Font(options) {
 		var parameters = this.parameters;
 		return parameters[1] ? parameters[1].toString() : '';
@@ -157,7 +159,8 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// for get_all_anchors() @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
+	// Not completed! Only for get_all_anchors()
+	// @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_Coloredlink(options) {
 		var parameters = this.parameters;
 		return '[[:' + parameters[2] + '|<span style="color:' + parameters[1]

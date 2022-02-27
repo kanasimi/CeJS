@@ -220,14 +220,12 @@ function module_code(library_namespace) {
 		// [[w:zh:Unicode字符平面映射]]
 		// http://ubuntu-rubyonrails.blogspot.com/2009/06/unicode.html
 
+		words = words.replace(
 		// 發音用 Pinyin diacritic-vowel combinations:
 		// \u00E0-\u00FC [[w:en:Latin-1 Supplement (Unicode block)]]
 		// \u0100-\u017F [[w:en:Latin Extended-A]]
 		// \u01CD-\u01DC [[w:en:Latin Extended-B]]
-		words = words
-				.replace(
-						/[（），、a-z\u00E0-\u00FC\u0100-\u017F\u01CD-\u01DC\uD800-\uDFFF]/g,
-						'');
+		/[（），、a-z\u00E0-\u00FC\u0100-\u017F\u01CD-\u01DC\uD800-\uDFFF]/g, '');
 		if (false && /[^\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u2E80-\u2EFF]/
 				.test(words)) {
 			// words.charCodeAt(0).toString(16)

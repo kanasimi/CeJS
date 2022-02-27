@@ -87,10 +87,28 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// Not completed! Only for get_all_anchors().
+	function expand_template_Football_box(options) {
+		var parameters = this.parameters;
+		// [[Module:Football box]]
+		return '<div id="' + (parameters.id || '') + '">'
+		// TODO: The content is skipped.
+		+ '</div>';
+	}
+
+	function parse_template_Football_box(token, index, parent, options) {
+		token.expand = expand_template_Football_box;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
 		'Pin message' : parse_template_Pin_message,
+
+		// 一些會添加 anchors 的特殊模板。
+		'Football_box' : parse_template_Football_box,
 
 		Tl : parse_template_Tl
 	};
