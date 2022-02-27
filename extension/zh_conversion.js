@@ -150,6 +150,7 @@ function module_code(library_namespace) {
 
 			var convert_Pairs = new Convert_Pairs(null, _options);
 			if (convert_Pairs.pair_Map.size > 0) {
+				// console.trace([ convert_Pairs.pair_Map.get('猜拳斗酒') ]);
 				this.conversions.push(convert_Pairs);
 			}
 		}, this);
@@ -173,9 +174,10 @@ function module_code(library_namespace) {
 
 			if (!library_namespace.is_empty_object(remove_key_hash)) {
 				this.conversions.forEach(function(conversion) {
-					if (false && conversion.pair.皮膚) {
+					// console.trace(conversion.pair_Map.get('猜拳斗酒'));
+					if (false && conversion.pair_Map.get('猜拳斗酒')) {
 						console.log(conversion);
-						throw conversion.pair.皮膚;
+						throw conversion.pair_Map.get('猜拳斗酒');
 					}
 					conversion.remove(remove_key_hash, {
 						remove_matched_path : true

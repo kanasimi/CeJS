@@ -271,7 +271,13 @@ function module_code(library_namespace) {
 				item = item.split(separator);
 			var key = item[0], value = item[1];
 			if (!key) {
+				library_namespace.warn('Convert_Pairs.add: 未設定 key: '
+						+ item.join(separator));
 				return;
+			}
+			if (!value) {
+				library_namespace.warn('Convert_Pairs.add: 轉換時將刪除 key: '
+						+ JSON.stringify(key));
 			}
 
 			library_namespace.debug('adding [' + key + '] → ['

@@ -543,7 +543,7 @@ function module_code(library_namespace) {
 									throw true;
 							} catch (e) {
 								library_namespace.warn([
-								//
+								// Illegal pattern: /%1/
 								'String_to_RegExp: ', {
 									T : [ 'Illegal pattern: [%1]', matched[1] ]
 								} ]);
