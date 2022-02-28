@@ -2163,9 +2163,18 @@ function module_code(library_namespace) {
 			// 請改用 <pages from="" to="" section=1> or <pages section=1>。
 
 			// [ all attributes, name, value, unquoted value, text without "=" ]
-			PATTERN_attribute = /\s*(\S[^=]*?)\s*(?:=|{{\s*=\s*(?:\|[\s\S]*?)?}})\s*("[^"]*"|'[^']*'|(\S*))|\s*(\S*)/g;
+			PATTERN_attribute = /\s*(\w+)(?:=|{{\s*=\s*(?:\|[\s\S]*?)?}})("[^"]*"|'[^']*'|([^\s"'{}\|]*))|\s*([^\s"'{}\|]*)/g;
+
+			// TODO: parse for templates
+			if (attributes.replace(/{{\s*=\s*(?:\|[\s\S]*?)?}}/g, '').includes(
+					'{{')) {
+				library_namespace.debug('Skip tag attributes with template: '
+						+ attributes);
+				return attribute_hash;
+			}
+
 			while ((matched = PATTERN_attribute.exec(attributes)) && matched[0]) {
-				// console.log(matched);
+				// console.trace(matched);
 				attributes_list.push(parse_wikitext(matched[0], options));
 				var name = matched[1];
 				if (!name) {

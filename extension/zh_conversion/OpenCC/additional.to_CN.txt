@@ -85,6 +85,8 @@
 // proper noun, 專有名詞.
 義大利	意大利
 
+坎特伯里	坎特伯雷
+
 
 // TWPhrasesIT.txt
 高畫質	高清

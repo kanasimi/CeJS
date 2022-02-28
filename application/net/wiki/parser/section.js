@@ -1598,6 +1598,11 @@ function module_code(library_namespace) {
 		var anchor_hash = Object.create(null);
 		function register_anchor(anchor, token) {
 			anchor = normalize_anchor(anchor);
+			if (typeof anchor === 'string' && anchor.length > 1000) {
+				// console.trace(token);
+				// console.trace(anchor);
+				throw new Error('Invalid anchor!');
+			}
 			// 以首個出現的為準。
 			if (anchor && !(anchor in anchor_hash)) {
 				anchor_hash[anchor] = token;
@@ -1718,6 +1723,7 @@ function module_code(library_namespace) {
 		// id in table cell attribute
 		parsed.each('tag_attributes', function(attribute_token, index, parent) {
 			// console.log(parent);
+			// console.trace(attribute_token);
 			// console.log(attribute_token.attributes);
 			// const
 			var anchor = attribute_token.attributes.id
