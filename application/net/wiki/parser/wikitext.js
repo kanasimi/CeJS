@@ -2151,21 +2151,32 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
+		// parser 標籤中的空屬性現根據HTML5規格進行解析。
+		// <pages from= to= section=1>
+		// 將解析為 <pages from="to=" section="1">
+		// 而不是像以前那樣的 <pages from="" to="" section="1">。
+		// 請改用 <pages from="" to="" section=1> or <pages section=1>。
+
+		// [ all attributes, name, value, unquoted value, text without "=" ]
+		var PATTERN_tag_attribute = /\s*(\w+)(?:=|{{\s*=\s*(?:\|[\s\S]*?)?}})("[^"]*"|'[^']*'|([^\s"'{}\|]*))|\s*([^\s"'{}\|]*)/g;
+
 		function extract_tag_attributes(attributes) {
 			// assert: typeof attributes === 'string'
-			var attribute_hash = Object.create(null),
-			//
-			attributes_list = [], matched,
-			// parser 標籤中的空屬性現根據HTML5規格進行解析。
-			// <pages from= to= section=1>
-			// 將解析為 <pages from="to=" section="1">
-			// 而不是像以前那樣的 <pages from="" to="" section="1">。
-			// 請改用 <pages from="" to="" section=1> or <pages section=1>。
+			var attribute_hash = Object.create(null);
 
-			// [ all attributes, name, value, unquoted value, text without "=" ]
-			PATTERN_attribute = /\s*(\w+)(?:=|{{\s*=\s*(?:\|[\s\S]*?)?}})("[^"]*"|'[^']*'|([^\s"'{}\|]*))|\s*([^\s"'{}\|]*)/g;
+			/**
+			 * TODO: parse for templates <code>
 
-			// TODO: parse for templates
+			對於 [[w:en:Template:Infobox aircraft begin]]
+			{|{{Infobox aircraft begin
+			 |parameters go here
+			}}
+			|}
+
+			可能把整個模板內容全部當作 attributes。
+			
+			</code>
+			 */
 			if (attributes.replace(/{{\s*=\s*(?:\|[\s\S]*?)?}}/g, '').includes(
 					'{{')) {
 				library_namespace.debug('Skip tag attributes with template: '
@@ -2173,7 +2184,9 @@ function module_code(library_namespace) {
 				return attribute_hash;
 			}
 
-			while ((matched = PATTERN_attribute.exec(attributes)) && matched[0]) {
+			var attributes_list = [], matched;
+			while ((matched = PATTERN_tag_attribute.exec(attributes))
+					&& matched[0]) {
 				// console.trace(matched);
 				attributes_list.push(parse_wikitext(matched[0], options));
 				var name = matched[1];
@@ -2199,10 +2212,10 @@ function module_code(library_namespace) {
 			}
 			if (false) {
 				console
-						.assert(PATTERN_attribute.lastIndex === attributes.length);
+						.assert(PATTERN_tag_attribute.lastIndex === attributes.length);
 			}
 			// reset PATTERN index
-			// PATTERN_attribute.lastIndex = 0;
+			PATTERN_tag_attribute.lastIndex = 0;
 
 			return attribute_hash;
 		}
