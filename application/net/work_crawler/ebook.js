@@ -262,6 +262,7 @@ function module_code(library_namespace) {
 					// 先初始化完畢後再重新執行。
 					return promise_extract_convert_cache_directory
 							.then(create_ebook.bind(this, work_data, {
+								// 跳過不需要的前置作業。
 								no_extract_convert_cache_directory : true
 							}));
 				}
@@ -272,18 +273,22 @@ function module_code(library_namespace) {
 		var text_list = [ work_data.title, TAG_text_converted,
 		// 執行到這邊可能還沒取得這兩個數值。
 		work_data.author, work_data.site_name ];
-		// console.trace(text_list);
+		// console.trace('Convert: ' + text_list);
+		// 先測試是否使用 asynchronous 的 LTP server。
 		var promise_language_convert = this.cache_converted_text(text_list,
-				work_data.convert_options);
+		// 盡可能只使用 cache，不去動到 LTP server。
+		Object.assign({
+			skip_server_test : true
+		}, work_data.convert_options));
 		if (promise_language_convert) {
-			// console.trace('Convert: ' + text_list);
 			// 先初始化完畢後再重新執行。
 			// 注意: 這會造成 create_ebook() 這邊之前的程式碼執行兩遍!
 			return promise_language_convert.then(create_ebook.bind(this,
-			// 本次執行不再重複解開 cache 檔。
-			work_data, {
+			// 跳過不需要的前置作業。本次執行不再重複解開 cache 檔，但仍需要
+			// cecc.load_text_to_check() 以載入作品的特設檢核。
+			work_data, Object.assign({
 				no_extract_convert_cache_directory : true
-			}));
+			}, options)));
 		}
 
 		// ebook 先備條件檢查完畢。
@@ -377,7 +382,7 @@ function module_code(library_namespace) {
 				.then(setup_ebook.bind(this, work_data, setup_ebook_options));
 	}
 
-	// @inner only called by create_ebook(work_data)
+	// @inner only called by create_ebook()
 	function setup_ebook(work_data, options) {
 		var ebook = options.ebook, subject = options.subject
 				.map(this.convert_text_language.bind(this));

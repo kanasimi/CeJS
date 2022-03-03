@@ -323,6 +323,7 @@ function module_code(library_namespace) {
 			magic_word_function : true,
 			parameter : true
 		}) {
+			// TODO: return token.evaluate()
 			token.unconvertible = true;
 		}
 

@@ -915,6 +915,7 @@ function module_code(library_namespace) {
 					+ encode_URI_component(String(value), charset));
 		}
 
+		// console.trace(this);
 		for (var index = 0, key_list = Object.keys(this); index < key_list.length; index++) {
 			key = key_list[index];
 			if (ignore_search_properties && (key in ignore_search_properties)) {

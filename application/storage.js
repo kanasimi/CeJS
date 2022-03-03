@@ -72,6 +72,7 @@ function module_code(library_namespace) {
 	CeL.storage.working_directory([change_to_directory])
 
 	CeL.storage.fso_status(fso_path)
+	CeL.storage.fso_attribute(fso_path, options)
 	CeL.storage.fso_exists(file_path)
 	CeL.storage.file_exists(file_path)
 	// get the contents of file

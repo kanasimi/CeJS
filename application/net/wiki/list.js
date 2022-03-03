@@ -2249,6 +2249,8 @@ function module_code(library_namespace) {
 			list : 'search',
 			srsearch : key
 		}, wiki_API.search.default_parameters, _options);
+		// e.g., 20220303.セミコロン1つに変更する.js
+		delete action.search_params.next_mark;
 
 		wiki_API.query(action, function(data, error) {
 			// console.log([ data, error ]);

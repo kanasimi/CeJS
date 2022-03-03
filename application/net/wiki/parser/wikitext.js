@@ -8,8 +8,6 @@
 parser [[WP:維基化]] [[w:en:Wikipedia:AutoWikiBrowser/General fixes]] [[w:en:Wikipedia:WikiProject Check Wikipedia]]
 https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 
-parse output of {{#if:text|...}}, {{#if:text||...}}
-
 </code>
  * 
  * @since 2021/12/14 18:53:43 拆分自 CeL.application.net.wiki.parser
@@ -417,6 +415,9 @@ function module_code(library_namespace) {
 				.replace(/d/g, argument_2.getUTCDate().pad(2));
 				// TODO
 			}
+
+		case 'if':
+			// TODO: parse output of {{#if:text|...}}, {{#if:text||...}}
 
 			// TODO
 		}

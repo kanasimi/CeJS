@@ -1,0 +1,13 @@
+﻿
+== 簡介 ==
+現行本土化訊息存放在三個地方。
+# 程式執行時實際採用的是 application/locale/resources/[IETF language tag].js，這些檔案將由 _build/build.nodejs.js 自動生成。
+# [https://translatewiki.net/w/i.php?title=Special:Translate&group=cejs cejs@translatewiki] 每個禮拜會匯入兩次本土化訊息至 application/locale/resources/i18n/[ISO 639-1 language tag].json 。
+# 原始程式碼必須包含 // gettext_config:{} 標記，在換行之前的內容會被視為 JSON 解析。例如 { id:"", note:"", demo:"URL", demo:"[URL title]", scope:"" }。在其後第一個字串會被視為原始訊息。
+_build/build.nodejs.js 生成 application/locale/resources/ 下的 .js 檔時，會以原先的 .js 為基礎、將之當作舊版本，參考 translatewiki 匯入的本土化訊息與原始碼的訊息來更新，將所有3處內容更新為後兩者修改過的訊息。因此在執行 build.nodejs.js 前，必須先更新 translatewiki 匯入的訊息。若 translatewiki 和原始碼有衝突，則會跳出錯誤。翻譯說明 qqq 的產生模式為：
+<code>
+${note}
+; demo: ${demo} (demo page)
+; scope: ${scope} (will be auto-generated)
+additional information (e.g., {{identical|...}})
+</code>

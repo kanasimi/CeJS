@@ -344,7 +344,9 @@ function module_code(library_namespace) {
 		// @see 20210414.翻訳用出典テンプレートのsubst展開.js
 		parsed.each('template:cite', function(token, index, parent) {
 			if (CeL.wiki.parse.token_is_children_of(token, function(parent) {
-				return parent.tag === 'ref' || parent.tag === 'gallery';
+				return parent.tag === 'ref' || parent.tag === 'gallery'
+				// e.g., @ [[w:ja:Template:Round corners]]
+				|| parent.tag === 'includeonly';
 			})) {
 				console.log([ index, token, parent ]);
 			}

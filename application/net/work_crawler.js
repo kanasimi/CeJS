@@ -237,7 +237,7 @@ function module_code(library_namespace) {
 			&& !(text in _this.converted_text_cache);
 		});
 		if (text_list.length === 0) {
-			// Already cached all text.
+			// Already cached all text needed.
 			return;
 		}
 
@@ -258,6 +258,8 @@ function module_code(library_namespace) {
 		// console.trace('cache_converted_text: 初始化 initialization');
 
 		return Promise.resolve(library_namespace.using_CeCC({
+			// e.g., @ function create_ebook()
+			skip_server_test : options.skip_server_test,
 			// 結巴中文分詞還太過粗糙，不適合依此做繁簡轉換。
 			try_LTP_server : true
 		})).then(function() {
@@ -268,7 +270,7 @@ function module_code(library_namespace) {
 			= _this.convert_to_language === 'TW'
 			// library_namespace.extension.zh_conversion.CN_to_TW();
 			? library_namespace.CN_to_TW : library_namespace.TW_to_CN;
-		}).then(cache_converted_text.bind(this, text_list));
+		}).then(cache_converted_text.bind(this, text_list, options));
 	}
 
 	// Release memory. 釋放被占用的記憶體。
