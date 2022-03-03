@@ -166,5 +166,21 @@
 	"prefix": "prefiss",
 	"add-the-column": "Gionté la colòna",
 	"remove-the-column": "Gavé la colòna",
-	"remove-all": "Gavé TUT"
+	"remove-all": "Gavé TUT",
+	"pin": "Taché",
+	"unpin": "Dëstaché",
+	"group": "Argropé",
+	"calendar-note": "Nòta ëd calendari",
+	"week-day": "Di dla sman-a",
+	"gregorian-calendar": "Celendari gregorian",
+	"julian-calendar": "Calendari giulian",
+	"jd": "JD",
+	"julian-date": "Dàita giulian-a",
+	"jdn": "JDN",
+	"julian-day-number": "Nùmer ëd di giulian",
+	"ordinal-date": "Dàita ordinal",
+	"week-date": "Dàita ebdomadaria",
+	"astronomy": "astronomìa",
+	"calendar": "calendari",
+	"east-asian-calendar": "calendari asiàtich oriental"
 }
