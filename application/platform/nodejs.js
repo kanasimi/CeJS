@@ -99,6 +99,14 @@ function module_code(library_namespace) {
 				&& (fso_status.isFile() || fso_status.isSymbolicLink());
 	};
 
+	_.chmod = function chmodSync(path, mode) {
+		try {
+			node_fs.chmodSync(path, mode);
+		} catch (e) {
+			return e;
+		}
+	};
+
 	function directory_exists(directory_path) {
 		var fso_status = fs_status(directory_path);
 		return fso_status && fso_status.isDirectory();
@@ -413,14 +421,13 @@ function module_code(library_namespace) {
 	typeof node_fs.rmSync === 'function' ? remove_fso : old_remove_fso;
 
 	var KEY_auto_detect_encoding = 'auto',
+	// https://github.com/nodejs/node/blob/master/lib/buffer.js
 	// https://en.wikipedia.org/wiki/Byte_order_mark#Byte_order_marks_by_encoding
 	// TODO: more detecting, @see guess_encoding()
 	// "binary", "iso2022", "iso88591", "usascii", "utf7"
 	BOM_to_encoding = {
 		// e.g., Excel 將活頁簿儲存成 "Unicode 文字"時的正常編碼為 UTF-16LE
 		fffe : 'utf16le',
-		// byte order mark (BOM) of UTF-16BE Unicode Big-endian
-		feff : 'utf16be',
 		// byte order mark (BOM) of UTF-8: 0xEF,0xBB,0xBF
 		efbbbf : 'utf8'
 	}, BOM_list = Object.keys(BOM_to_encoding),
@@ -429,6 +436,11 @@ function module_code(library_namespace) {
 		// assert: (BOM.length / 2 | 0) === BOM.length / 2
 		return Math.max(length, Math.ceil(BOM.length / 2));
 	}, 0);
+
+	// https://nodejs.org/docs/latest/api/buffer.html#buffers-and-character-encodings
+	_.file_utf16le_mapping = {
+		'UTF-16' : 'utf16le'
+	};
 
 	/**
 	 * fs.readFileSync() without throw.
@@ -463,8 +475,13 @@ function module_code(library_namespace) {
 						return true;
 					// 去掉 BOM
 					// assert: (BOM.length / 2 | 0) === BOM.length / 2
-					buffer = buffer.slice(BOM_key.length / 2).toString(
-							BOM_to_encoding[BOM_key]);
+					buffer = buffer.slice(BOM_key.length / 2)
+					if (BOM_key === 'feff') {
+						// byte order mark (BOM) of UTF-16BE Unicode Big-endian
+						BOM_key = 'fffe';
+						buffer.swap(16);
+					}
+					buffer = buffer.toString(BOM_to_encoding[BOM_key]);
 				})) {
 					buffer = buffer.toString();
 				}
@@ -526,6 +543,37 @@ function module_code(library_namespace) {
 	 * @returns error
 	 */
 	function fs_writeFileSync(file_path, data, options) {
+		if (options) {
+			var encoding;
+			if (typeof options === 'string') {
+				encoding = options;
+			} else {
+				encoding = options.encoding;
+			}
+
+			if (options.BOM) {
+				if (Buffer.isBuffer(data)) {
+					data = Buffer.concat([
+							Buffer(encoding === 'UTF-16BE' ? [ 0xfe, 0xff ] : [
+									0xff, 0xfe ]), data ]);
+				} else {
+					data = '\ufffe' + data;
+				}
+			}
+
+			if (!Buffer.isBuffer(data) && encoding === 'UTF-16BE') {
+				// encoding = 'UTF-16';
+				data = Buffer.from(data, _.file_utf16le_mapping[encoding])
+				// conversion between UTF-16 little-endian and UTF-16 big-endian
+				.swap16();
+			}
+			if (!Buffer.isBuffer(data) && (encoding in _.file_utf16le_mapping)) {
+				options = typeof options === 'string' ? Object.create(null)
+						: Object.clone(options);
+				options.encoding = encoding = _.file_utf16le_mapping[encoding];
+			}
+		}
+
 		try {
 			node_fs.writeFileSync(file_path, data, options);
 		} catch (e) {

@@ -235,6 +235,7 @@ function module_code(library_namespace) {
 		}
 
 		work_data.convert_options = {
+			work_title : work_data.title,
 			// only for debug CeCC 繁簡轉換。
 			cache_directory : library_namespace
 					.append_path_separator(work_data.directory + '繁簡轉換 cache'),

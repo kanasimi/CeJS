@@ -103,7 +103,7 @@ function build_main_script() {
 	//console.log([CeL.env.source_encoding, main_structure_file, library_main_script_content]);
 
 	try {
-		if (library_main_script_content === CeL.read_file(library_main_script_file_path).toString('utf16le'))
+		if (library_main_script_content === CeL.read_file(library_main_script_file_path, 'auto'))
 			return;
 	} catch { }
 
@@ -112,13 +112,9 @@ function build_main_script() {
 	CeL.move_file(library_base_directory + library_main_script, library_base_directory + backup_directory + library_main_script);
 	return;
 
-	try {
-		node_fs.chmodSync(library_main_script_file_path, 0o600);
-	} catch { }
-	CeL.write_file(library_main_script_file_path, Buffer.from(library_main_script_content, 'utf16le'));
-	try {
-		node_fs.chmodSync(library_main_script_file_path, 0o400);
-	} catch { }
+	CeL.chmod(library_main_script_file_path, 0o600);
+	CeL.write_file(library_main_script_file_path, library_main_script_content, CeL.env.source_encoding);
+	CeL.chmod(library_main_script_file_path, 0o400);
 }
 
 build_main_script();

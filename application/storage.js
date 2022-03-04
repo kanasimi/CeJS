@@ -72,7 +72,7 @@ function module_code(library_namespace) {
 	CeL.storage.working_directory([change_to_directory])
 
 	CeL.storage.fso_status(fso_path)
-	CeL.storage.fso_attribute(fso_path, options)
+	CeL.storage.chmod(fso_path, options)
 	CeL.storage.fso_exists(file_path)
 	CeL.storage.file_exists(file_path)
 	// get the contents of file
@@ -122,6 +122,8 @@ function module_code(library_namespace) {
 		// .file_stats()
 		// Not exist: will return false.
 		_.fso_status = storage_module.fs_status;
+
+		_.chmod = storage_module.chmod;
 
 		_.file_exists = storage_module.file_exists;
 		_.directory_exists = storage_module.directory_exists;
