@@ -19,7 +19,7 @@
 	"number": "Name of type/object (scope: interact.integrate.SVG)",
 	"function": "Name of type/object (scope: interact.integrate.SVG)",
 	"date": "Name of type/object (scope: interact.integrate.SVG, CeL.application.storage.EPUB: generate_TOC())\n{{identical|Date}}",
-	"time": "Name of type/object (scope: interact.integrate.SVG)\n{{identical|Time}}",
+	"time": "Name of type/object\n; scope: interact.integrate.SVG\n{{identical|Time}}",
 	"module": "Name of type/object (scope: interact.integrate.SVG)",
 	"constructor": "Name of type/object (scope: interact.integrate.SVG)",
 	"illegal-$1-$2": "Used as error message. (scope: interact.integrate.SVG)",

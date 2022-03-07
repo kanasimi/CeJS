@@ -341,12 +341,11 @@ function module_code(library_namespace) {
 		action = [ API_URL_of_options(options) || wikidata_API_URL, action ];
 
 		wiki_API.query(action, function handle_result(data, error) {
-			error = error || (data ? data.error : new Error('No data get!'));
+			error = wiki_API.query.handle_error(data, error);
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.error('wikidata_search: [' + error.code
-						+ '] ' + (error.info || error.message));
-				callback(undefined, error);
+				library_namespace.error('wikidata_search: ' + error);
+				callback(data, error);
 				return;
 			}
 
@@ -1400,10 +1399,10 @@ function module_code(library_namespace) {
 		var _arguments = arguments;
 		// TODO:
 		wiki_API.query(action, function handle_result(data, error) {
-			error = error || (data ? data.error : new Error('No data get!'));
+			error = wiki_API.query.handle_error(data, error);
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				if (error.code === 'param-missing') {
+				if (data.error && data.error.code === 'param-missing') {
 					library_namespace.error(
 					/**
 					 * 可能是錯把 "category" 之類當作 sites name??
@@ -1415,13 +1414,9 @@ function module_code(library_namespace) {
 					'wikidata_entity: 未設定欲取得之特定實體 id。請確定您的要求，尤其是 sites 存在: '
 							+ decodeURI(action[0]));
 				} else {
-					library_namespace.error('wikidata_entity: '
-					//
-					+ (error.code ? '[' + error.code + '] '
-					//
-					+ (error.info || error.message) : error));
+					library_namespace.error('wikidata_entity: ' + error);
 				}
-				callback(undefined, error);
+				callback(data, error);
 				return;
 			}
 
@@ -1691,13 +1686,11 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=wbgetentities&props=datatype&ids=P7
 		'action=wbgetentities&props=datatype&ids=' + property ];
 		wiki_API.query(action, function handle_result(data, error) {
-			error = error || (data ? data.error : new Error('No data get!'));
+			error = wiki_API.query.handle_error(data, error);
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.error('wikidata_datatype: ['
-				//
-				+ error.code + '] ' + (error.info || error.message));
-				callback(undefined, error);
+				library_namespace.error('wikidata_datatype: ' + error);
+				callback(data, error);
 				return;
 			}
 
@@ -1705,8 +1698,9 @@ function module_code(library_namespace) {
 			// {"entities":{"P7":{"type":"property","datatype":"wikibase-item","id":"P7"}},"success":1}
 			// data.entities[property].datatype
 			if (!(data = data.entities) || !(data = data[property])) {
-				callback(undefined, 'Invalid/Unknown return for [' + property
-						+ ']');
+				callback(data, 'Invalid/Unknown return for ['
+				//
+				+ property + ']');
 				return;
 			}
 
@@ -3146,11 +3140,10 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetclaim
 		function handle_result(data, error) {
 			// console.trace([ GUID, data, error ]);
-			error = error || (data ? data.error : new Error('No data get!'));
+			error = wiki_API.query.handle_error(data, error);
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.error('set_rank: ' + message + ': ['
-						+ error.code + '] ' + (error.info || error.message));
+				library_namespace.error('set_rank: ' + message + ': ' + error);
 				// recover
 				exists_property_data.rank = original_rank;
 			}
@@ -3182,14 +3175,14 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetqualifier
 		function handle_result(data, error) {
 			// console.trace([ GUID, data, error ]);
-			error = error || (data ? data.error : new Error('No data get!'));
+			error = wiki_API.query.handle_error(data, error);
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				library_namespace.error('set_single_qualifier: Set '
 						+ qualifier.property + '='
 						// e.g., ""
-						+ JSON.stringify(qualifier.datavalue.value) + ': ['
-						+ error.code + '] ' + (error.info || error.message));
+						+ JSON.stringify(qualifier.datavalue.value) + ': '
+						+ error);
 				// console.trace([ GUID, qualifier ]);
 			}
 			// data:
@@ -3231,11 +3224,10 @@ function module_code(library_namespace) {
 		wiki_API.query([ API_URL, 'action=wbremovequalifiers' ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbremovequalifiers
 		function handle_result(data, error) {
-			error = error || (data ? data.error : new Error('No data get!'));
+			error = wiki_API.query.handle_error(data, error);
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.error('remove_qualifiers: [' + error.code
-						+ '] ' + (error.info || error.message));
+				library_namespace.error('remove_qualifiers: ' + error);
 			}
 			// console.trace(data);
 			// console.trace(JSON.stringify(data));
@@ -3337,14 +3329,13 @@ function module_code(library_namespace) {
 		} ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
 		function handle_result(data, error) {
-			error = error || (data ? data.error : new Error('No data get!'));
+			error = wiki_API.query.handle_error(data, error);
 			// console.log(data);
 			// console.log(JSON.stringify(data));
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				// e.g., set_single_references: [failed-save] Edit conflict.
-				library_namespace.error('set_single_references: [' + error.code
-						+ '] ' + (error.info || error.message));
+				library_namespace.error('set_single_references: ' + error);
 			}
 			// data =
 			// {"pageinfo":{"lastrevid":1},"success":1,"reference":{"hash":"123abc..","snaks":{...},"snaks-order":[]}}
@@ -3374,11 +3365,10 @@ function module_code(library_namespace) {
 		wiki_API.query([ API_URL, 'action=wbremovereferences' ],
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbremovereferences
 		function handle_result(data, error) {
-			error = error || (data ? data.error : new Error('No data get!'));
+			error = wiki_API.query.handle_error(data, error);
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.error('remove_referencess: [' + error.code
-						+ '] ' + (error.info || error.message));
+				library_namespace.error('remove_referencess: ' + error);
 			}
 			// console.trace(data);
 			// console.trace(JSON.stringify(data));
@@ -3568,16 +3558,15 @@ function module_code(library_namespace) {
 		wiki_API.query([ API_URL, {
 			action : 'wbremoveclaims'
 		} ], function handle_result(data, error) {
-			error = error || (data ? data.error : new Error('No data get!'));
+			error = wiki_API.query.handle_error(data, error);
 			// console.log(data);
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.error('remove_claims: [' + error.code + '] '
-						+ (error.info || error.message));
+				library_namespace.error('remove_claims: ' + error);
 			}
 			// data =
 			// {pageinfo:{lastrevid:1},success:1,claims:['Q1$123-ABC']}
-			callback(data);
+			callback(data, error);
 		}, POST_data, session);
 	}
 
@@ -3873,8 +3862,7 @@ function module_code(library_namespace) {
 					}
 				}
 
-				error = error
-						|| (_data ? _data.error : new Error('No data get!'));
+				error = wiki_API.query.handle_error(data, error);
 				// console.trace([ error, property_data ]);
 				// console.trace(data);
 				POST_data.language = data.language;
@@ -3882,13 +3870,11 @@ function module_code(library_namespace) {
 				if (error) {
 					/**
 					 * e.g., <code>
-					 * set_next_claim: [invalid-entity-id] Invalid entity ID. (The serialization "読み仮名" is not recognized by the configured id builders)
-					 * </code>
+					set_next_claim: [invalid-entity-id] Invalid entity ID. (The serialization "読み仮名" is not recognized by the configured id builders)
+					</code>
 					 */
 					try {
-						library_namespace.error('set_next_claim: ['
-								+ error.code + '] '
-								+ (error.info || error.message));
+						library_namespace.error('set_next_claim: ' + error);
 						library_namespace.warn('claim_action: '
 								+ JSON.stringify(claim_action));
 						library_namespace.warn('data to write: '
@@ -4518,17 +4504,15 @@ function module_code(library_namespace) {
 
 			// 設定單一 Wikibase 實體的標籤。
 			wiki_API.query(action, function handle_result(data, error) {
-				error = error
-						|| (data ? data.error : new Error('No data get!'));
+				error = wiki_API.query.handle_error(data, error);
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					/**
 					 * e.g., <code>
-					 * 
-					 * </code>
+
+					</code>
 					 */
-					library_namespace.error('set_next_labels: [' + error.code
-							+ '] ' + (error.info || error.message));
+					library_namespace.error('set_next_labels: ' + error);
 				} else {
 					// successful done.
 					delete data_labels[label.language];
@@ -4689,17 +4673,15 @@ function module_code(library_namespace) {
 
 			// 設定單一 Wikibase 實體的標籤。
 			wiki_API.query(action, function handle_result(data, error) {
-				error = error
-						|| (data ? data.error : new Error('No data get!'));
+				error = wiki_API.query.handle_error(data, error);
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					/**
 					 * e.g., <code>
-					 * 
-					 * </code>
+
+					</code>
 					 */
-					library_namespace.error('set_next_aliases: [' + error.code
-							+ '] ' + (error.info || error.message));
+					library_namespace.error('set_next_aliases: ' + error);
 				} else {
 					// successful done.
 				}
@@ -4848,18 +4830,19 @@ function module_code(library_namespace) {
 
 			// 設定單一 Wikibase 實體的標籤。
 			wiki_API.query(action, function handle_result(data, error) {
-				error = error
-						|| (data ? data.error : new Error('No data get!'));
+				error = wiki_API.query.handle_error(data, error);
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					/**
 					 * e.g., <code>
-					 * 
-					 * </code>
+
+					{"error":{"code":"failed-save","info":"The save has failed.","messages":[{"name":"wikibase-api-failed-save","parameters":[],"html":{"*":"The save has failed."}},{"name":"abusefilter-warning","parameters":["Adding non-latin script language description in latin script","48"],"html":{"*":"..."}}],"*":"See https://www.wikidata.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/postorius/lists/mediawiki-api-announce.lists.wikimedia.org/&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1377"}
+
+					</code>
 					 */
-					library_namespace
-							.error('set_next_descriptions: [' + error.code
-									+ '] ' + (error.info || error.message));
+					library_namespace.error('set_next_descriptions: '
+							+ language + '=' + JSON.stringify(POST_data.value)
+							+ ': ' + error);
 				} else {
 					// successful done.
 				}
@@ -5256,8 +5239,7 @@ function module_code(library_namespace) {
 
 			// console.trace(POST_data);
 			wiki_API.query(action, function handle_result(data, error) {
-				error = error
-						|| (data ? data.error : new Error('No data get!'));
+				error = wiki_API.query.handle_error(data, error);
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					library_namespace.error(
@@ -5267,7 +5249,7 @@ function module_code(library_namespace) {
 					//
 					+ (POST_data.id ? POST_data.id + ': ' : '')
 					// [readonly] The wiki is currently in read-only mode
-					+ '[' + error.code + '] ' + (error.info || error.message));
+					+ error);
 					try {
 						console.trace([ action, POST_data ]);
 					} catch (e) {
@@ -5280,7 +5262,7 @@ function module_code(library_namespace) {
 						library_namespace.warn('data to write: '
 								+ JSON.stringify(POST_data));
 					}
-					callback(undefined, error);
+					callback(data, error);
 					return;
 				}
 
@@ -5845,15 +5827,13 @@ function module_code(library_namespace) {
 				: token;
 
 		wiki_API.query(action, function handle_result(data, error) {
-			error = error || (data ? data.error : new Error('No data get!'));
+			error = wiki_API.query.handle_error(data, error);
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.error('wikidata_merge: ['
+				library_namespace.error('wikidata_merge: '
 				// [failed-modify] Attempted modification of the item failed.
 				// (Conflicting descriptions for language zh)
-				+ error.code + '] ' + (error.info || error.message));
-				callback(undefined, error);
-				return;
+				+ error);
 			}
 
 			// Will create redirection.
@@ -5861,7 +5841,7 @@ function module_code(library_namespace) {
 			// data =
 			// {"success":1,"redirected":1,"from":{"id":"Q1","type":"item","lastrevid":1},"to":{"id":"Q2","type":"item","lastrevid":2}}
 			// {"success":1,"redirected":0,"from":{"id":"Q1","type":"item","lastrevid":1},"to":{"id":"Q2","type":"item","lastrevid":2}}
-			callback(data);
+			callback(data, error);
 		}, options, session);
 	}
 

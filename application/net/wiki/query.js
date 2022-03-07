@@ -911,15 +911,15 @@ function module_code(library_namespace) {
 		&& library_namespace.show_value)
 			library_namespace.show_value(data, 'wiki_API_query.handle_error');
 
+		if (!error && !data) {
+			error = new Error('No data get!');
+		}
+
 		if (error) {
 			if (typeof callback === 'function') {
 				callback(data, error);
 			}
-			return;
-		}
-
-		if (!data) {
-			return;
+			return error;
 		}
 
 		if (data.warnings) {
@@ -931,8 +931,11 @@ function module_code(library_namespace) {
 		}
 
 		// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
-		var error = data.error;
+		error = data.error;
 		if (!error) {
+			if (typeof callback === 'function') {
+				callback(data);
+			}
 			return;
 		}
 
@@ -944,10 +947,30 @@ function module_code(library_namespace) {
 				+ error.code + '] ' + error.info);
 			}
 
-			var message = '[' + error.code + ']';
-			if (error.info)
-				message += ' ' + error.info;
+			var message = '[' + error.code + '] '
+					+ (error.info || error.message);
+			/**
+			 * <code>
+
+			{"error":{"code":"failed-save","info":"The save has failed.","messages":[{"name":"wikibase-api-failed-save","parameters":[],"html":{"*":"The save has failed."}},{"name":"abusefilter-warning","parameters":["Adding non-latin script language description in latin script","48"],"html":{"*":"..."}}],"*":"See https://www.wikidata.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/postorius/lists/mediawiki-api-announce.lists.wikimedia.org/&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1377"}
+
+			</code>
+			 */
+			if (Array.isArray(error.messages)) {
+				error.messages.forEach(function(_message) {
+					message += ' [' + _message.name + ']';
+					if (_message.html && typeof _message.html['*'] === 'string'
+							&& _message.html['*'].length < 200) {
+						message += ' ' + _message.html['*'];
+					}
+					if (Array.isArray(_message.parameters)
+							&& _message.parameters.length > 0) {
+						message += ' ' + JSON.stringify(_message.parameters);
+					}
+				});
+			}
 			error = new Error(message);
+			error.data = data.error;
 			error.message = message;
 			error.code = data.error.code;
 		}

@@ -3353,8 +3353,8 @@ function module_code(library_namespace) {
 	// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance
 	// http://jsperf.com/levenshtein-distance-2
 	function Levenshtein_distance(string_1, string_2) {
-		string_1 = string_1.chars(true);
-		string_2 = string_2.chars(true);
+		string_1 = (string_1 || '').chars(true);
+		string_2 = (string_2 || '').chars(true);
 
 		var length_1 = string_1 && string_1.length || 0, length_2 = string_2
 				&& string_2.length || 0;
