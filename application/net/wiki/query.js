@@ -894,18 +894,21 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	if (false) {
-		// 注意: callback() 必須採用下列方法來測試是否出問題!
+		// 注意: callback 僅有在出錯時才會被執行!
+		// callback() 必須採用下列方法來測試是否出問題!
 		if (wiki_API.query.handle_error(data, error, callback)) {
 			return;
 		}
+		// ...
+		callback(data)
 	}
 
 	/**
 	 * 泛用先期處理程式。 response_handler(response)
 	 */
 	function handle_error(/* result of wiki_API.query() */data, error,
-			callback) {
-		// console.log([ data, error ]);
+			callback_only_on_error) {
+		// console.trace(arguments);
 		if (library_namespace.is_debug(3)
 		// .show_value() @ interact.DOM, application.debug
 		&& library_namespace.show_value)
@@ -916,8 +919,8 @@ function module_code(library_namespace) {
 		}
 
 		if (error) {
-			if (typeof callback === 'function') {
-				callback(data, error);
+			if (typeof callback_only_on_error === 'function') {
+				callback_only_on_error(data, error);
 			}
 			return error;
 		}
@@ -933,9 +936,7 @@ function module_code(library_namespace) {
 		// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
 		error = data.error;
 		if (!error) {
-			if (typeof callback === 'function') {
-				callback(data);
-			}
+			// No error, do not call callback_only_on_error()
 			return;
 		}
 
@@ -958,6 +959,8 @@ function module_code(library_namespace) {
 			 */
 			if (Array.isArray(error.messages)) {
 				error.messages.forEach(function(_message) {
+					if (!_message)
+						return;
 					message += ' [' + _message.name + ']';
 					if (_message.html && typeof _message.html['*'] === 'string'
 							&& _message.html['*'].length < 200) {
@@ -969,14 +972,15 @@ function module_code(library_namespace) {
 					}
 				});
 			}
+
 			error = new Error(message);
-			error.data = data.error;
 			error.message = message;
 			error.code = data.error.code;
+			error.data = data.error;
 		}
 
-		if (typeof callback === 'function') {
-			callback(data, error);
+		if (typeof callback_only_on_error === 'function') {
+			callback_only_on_error(data, error);
 		}
 		return error;
 	}
