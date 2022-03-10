@@ -207,5 +207,11 @@
 	"hybrid-solar-eclipse": "ecliss solar ìbrida",
 	"partial-solar-eclipse": "ecliss solar parsial",
 	"total-lunar-eclipse": "ecliss lunar total",
-	"partial-lunar-eclipse": "ecliss lunar parsial"
+	"partial-lunar-eclipse": "ecliss lunar parsial",
+	"penumbral-lunar-eclipse": "ecliss lunar ëd penombra",
+	"new-moon": "lun-a neuva",
+	"first-quarter": "prim quart",
+	"full-moon": "lun-a pien-a",
+	"last-quarter": "ùltim quart",
+	"sunrise-sunset": "alba / tramont"
 }
