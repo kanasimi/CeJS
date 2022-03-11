@@ -106,7 +106,7 @@ function module_code(library_namespace) {
 		} else if (!wikitext) {
 			if (wikitext === 0) {
 				wikitext = String(wikitext);
-			} else if (!is_valid_parameters_value(wikitext)) {
+			} else if (!wiki_API.is_valid_parameters_value(wikitext)) {
 				library_namespace.warn('page_parser: Null wikitext: '
 						+ wikitext);
 				// console.trace(wikitext);
@@ -1589,7 +1589,7 @@ function module_code(library_namespace) {
 					parsed);
 		}
 
-		if (!is_valid_parameters_value(token)) {
+		if (!wiki_API.is_valid_parameters_value(token)) {
 			// e.g., token === undefined
 			return;
 			throw new Error('insert_layout_token: Invalid token ' + token);
