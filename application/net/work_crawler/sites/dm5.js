@@ -802,8 +802,11 @@ function module_code(library_namespace) {
 				// 這段程式碼模仿 work_crawler 模組的行為。
 				// @see image_data.file @ CeL.application.net.work_crawler
 				function path_of(chapter_NO) {
-					return chapter_directory + work_data.id + '-' + chapter_NO
-							+ '_' + image_NO.pad(3) + '.'
+					return chapter_directory
+					//
+					+ work_data.id + '-' + chapter_NO + '_'
+					//
+					+ image_NO.pad(work_data.chapter_NO_pad_digits || 3) + '.'
 							+ _this.default_image_extension;
 				}
 

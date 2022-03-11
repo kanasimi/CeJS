@@ -1175,6 +1175,8 @@ function module_code(library_namespace) {
 					// 自 work_data.chapter_list 計算章節數量。
 					work_data.chapter_count = chapter_list.length;
 				}
+				work_data.chapter_NO_pad_digits = 1 + Math.floor(Math
+						.log10(work_data.chapter_count));
 
 				var last_chapter_data = chapter_list.at(-1),
 				//

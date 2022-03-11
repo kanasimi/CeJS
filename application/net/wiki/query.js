@@ -894,13 +894,36 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	if (false) {
+		// 1.
 		// 注意: callback 僅有在出錯時才會被執行!
 		// callback() 必須採用下列方法來測試是否出問題!
 		if (wiki_API.query.handle_error(data, error, callback)) {
 			return;
 		}
 		// ...
-		callback(data)
+		callback(data);
+
+		// 2.
+		error = wiki_API.query.handle_error(data, error);
+		if (error) {
+			// ...
+			callback(data, error);
+			return;
+		}
+		// ...
+		callback(data);
+
+		// TODO: 3.
+		wiki_API.query(action, wiki_API.query.handle_error.bind({
+			// on_error, on_OK 可省略。
+			on_error : function(error) {
+				library_namespace.error('function_name: ' + '...' + error);
+			},
+			on_OK : function(data) {
+				// ...
+			},
+			callback : callback
+		}));
 	}
 
 	/**

@@ -544,7 +544,7 @@ function module_code(library_namespace) {
 		// recover HTML tags
 		.replace(/\n/g, '<br />');
 
-		var file_title = chapter_NO.pad(3)
+		var file_title = chapter_NO.pad(work_data.chapter_NO_pad_digits || 3)
 				+ ' '
 				+ (part_title ? part_title
 						+ library_namespace.EPUB.prototype.title_separator : '')

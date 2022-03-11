@@ -590,6 +590,7 @@ function module_code(library_namespace) {
 			}
 			// 即使有錯誤，依然做 cache 紀錄，避免重複偵測操作。
 			cached_hash[language_and_key] = id;
+			// console.trace([ language_and_key, id ]);
 
 			// console.trace('' + callback);
 			if (callback)
@@ -2914,6 +2915,7 @@ function module_code(library_namespace) {
 								'normalize_next_value: get multiple values instead of just one value: ['
 										+ value + '] → '
 										+ JSON.stringify(normalized_value));
+								// console.trace(value);
 
 							} else if (false && normalized_value.error) {
 								// 之前應該已經在 normalize_wikidata_value() 顯示過錯誤訊息。

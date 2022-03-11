@@ -45,7 +45,7 @@ if (CeL.env.main_script)
 // --------------------------------------------------------------------------------------------
 
 CeL.env.ignore_COM_error = true;
-CeL.run(['application.storage', 'application.locale.encoding', 'data.date']);
+CeL.run(['application.storage', 'application.locale.encoding', 'data.date', 'interact.console', 'application.debug.log']);
 
 //const library_main_script_file_path = CeL.env.registry_path + library_main_script;
 const library_main_script_file_path = library_base_directory + library_main_script;
@@ -53,6 +53,22 @@ const library_main_script_file_path = library_base_directory + library_main_scri
 //console.log(require('fs').readFileSync(library_main_script_file_path).toString('utf16le'));
 
 
+/**
+ *  modify time stamp of npm package.json.
+ */
+function update_package_file_version() {
+	const package_file_path = library_base_directory + 'package.json';
+	let package_file_content = CeL.read_file(package_file_path).toString()
+		// version stamp
+		.replace(/("version"[\s\n]*:[\s\n]*")[^"]*(")/, function (all, header, footer) {
+			return header + CeL.version + footer;
+		});
+	CeL.write_file(package_file_path, package_file_content);
+}
+
+/**
+ * build main script.
+ */
 function build_main_script() {
 	const file_list = [main_structure_file];
 	let library_main_script_content = CeL.read_file(library_base_directory + main_structure_file).toString();
@@ -69,7 +85,7 @@ function build_main_script() {
 				.replace(/\/\*[\s\S]*?\*\//, '');
 		})
 
-		// Change version stamp
+		// Increase version stamp
 		.replace(/([\W]library_version[\s\n]*=[\s\n]*'v?)(\d+)\.(\d+)(\.(\d+))?(')/,
 			function (all, header, v1, v2, _v3, v3, footer) {
 				// [ all, v1, v2, _v3, v3 ] major.minor.patch
@@ -110,12 +126,109 @@ function build_main_script() {
 
 	CeL.remove_file(library_base_directory + backup_directory + library_main_script);
 	CeL.move_file(library_base_directory + library_main_script, library_base_directory + backup_directory + library_main_script);
-	return;
 
 	CeL.chmod(library_main_script_file_path, 0o600);
 	CeL.write_file(library_main_script_file_path, library_main_script_content, CeL.env.source_encoding);
 	CeL.chmod(library_main_script_file_path, 0o400);
 }
 
+// ---------------------------------------------------------------------//
+
+const message_to_localized_mapping = Object.create(null);
+const i18n_message_id_to_message = Object.create(null);
+const message_id_to_message = new Map;
+
+/**
+ * auto-build resources / locale message.
+ */
+function build_locale_messages(resources_path) {
+	resources_path = library_base_directory + resources_path + CeL.env.path_separator;
+
+	load_message_to_localized(resources_path, () => {
+		load_i18n_messages(resources_path, () => {
+			modify_source_files();
+			//CeL.log(`${build_locale_messages.name}: Done.`);
+		});
+	});
+}
+
+function load_message_to_localized(resources_path, callback) {
+	CeL.storage.traverse_file_system(resources_path, fso_path => {
+		const matched = fso_path.match(/[\\\/](\w+(?:-\w+)*)\.js$/);
+		if (!matched)
+			return;
+		//console.log(fso_path);
+		const contents = CeL.read_file(fso_path).toString().between('.set_text(', { tail: ',\n' });
+		let locale_data;
+		try {
+			locale_data = JSON.parse(contents);
+		} catch (e) {
+			CeL.warn(`${load_message_to_localized.name}: There are functions in the locale? ${fso_path}`);
+			try {
+				eval('locale_data = ' + contents);
+				//console.log(data);
+			} catch (e) {
+				CeL.error(`${fso_path}:`);
+				console.error(e);
+			}
+		}
+
+		if (!locale_data)
+			return;
+
+		const language_code = matched[1];
+		message_to_localized_mapping[language_code] = locale_data;
+	}, {
+		depth: 1,
+		callback
+	});
+}
+
+function load_i18n_messages(resources_path, callback) {
+	resources_path += 'i18n' + CeL.env.path_separator;
+
+	CeL.storage.traverse_file_system(resources_path, fso_path => {
+		const matched = fso_path.match(/[\\\/]([\w\-]+)\.js$/);
+		if (!matched)
+			return;
+		//console.log(fso_path);
+		const contents = CeL.read_file(fso_path).toString();
+		let locale_data;
+		try {
+			locale_data = JSON.parse(contents);
+		} catch (e) {
+			CeL.error(`${fso_path}:`);
+			console.error(e);
+		}
+
+		if (!locale_data)
+			return;
+
+		const language_code = matched[1];
+		i18n_message_id_to_message[language_code] = locale_data;
+
+		for (const [message_id, message] of Object.entries(locale_data)) {
+			if (!(message in message_to_localized_mapping['en-US']))
+				continue;
+
+			;
+		}
+	}, {
+		depth: 1,
+		callback
+	});
+}
+
+function modify_source_files() {
+	;
+}
+
+// ---------------------------------------------------------------------//
+
+build_locale_messages('application/locale/resources');
+
+/*
 build_main_script();
 
+update_package_file_version();
+*/

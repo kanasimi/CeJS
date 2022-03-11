@@ -1371,7 +1371,7 @@ function module_code(library_namespace) {
 		// The start index of layout elements
 		var layout_indices = Object.create(null);
 
-		var index = 0, BACKTRACKING_SPACES = {};
+		var index = 0, BACKTRACKING_SPACES = Object.create(null);
 		function set_index(layout_type, _index, force) {
 			if (_index === BACKTRACKING_SPACES) {
 				// 回溯上一個非空白的 token。
@@ -1481,6 +1481,10 @@ function module_code(library_namespace) {
 				// categories
 				set_index('footer', BACKTRACKING_SPACES);
 				set_index('categories');
+				break;
+
+			case 'comment':
+				// Skip comments
 				break;
 
 			default:

@@ -10,7 +10,7 @@
  */
 
 //	http://blogs.msdn.com/b/webdevtools/archive/2007/03/02/jscript-intellisense-in-orcas.aspx
-///	<reference path="../ce.js" />
+///	<reference path="../../ce.js" />
 /**
  * <code>
  TODO:

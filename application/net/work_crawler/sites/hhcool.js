@@ -192,8 +192,10 @@ function module_code(library_namespace) {
 			function for_each_chapter(run_next, NO, index) {
 				var url = URL.replace(/\/\d{1,3}\.html/, '/' + NO + '.html'),
 				//
-				save_to = work_data.cache_directory + chapter_NO.pad(3) + '-'
-						+ NO.pad(3) + '.html';
+				save_to = work_data.cache_directory
+						+ chapter_NO.pad(work_data.chapter_NO_pad_digits || 3)
+						+ '-' + NO.pad(work_data.chapter_NO_pad_digits || 3)
+						+ '.html';
 
 				function for_each_image_page(html, error) {
 					if (error) {

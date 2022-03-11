@@ -765,7 +765,9 @@ function module_code(library_namespace) {
 
 		var chapter_directory_name = (part || '')
 		// 檔名 NO 的基本長度（不足補零）。以 chapter_data.chapter_NO 可自定章節編號。
-		+ (chapter_data && chapter_data.chapter_NO || chapter_NO).pad(4)
+		+ (chapter_data && chapter_data.chapter_NO || chapter_NO)
+		//
+		.pad(work_data.chapter_NO_pad_digits || 3)
 		//
 		+ (chapter_title ? ' '
 		// 把網頁編碼還原成看得懂的文字。 crawler_namespace.get_label()
@@ -864,8 +866,9 @@ function module_code(library_namespace) {
 
 			// default: 置於 work_data.directory 下。
 			var chapter_file_name = work_data.directory
-					+ work_data.directory_name + ' ' + chapter_NO.pad(3) + '.'
-					+ Work_crawler.HTML_extension;
+					+ work_data.directory_name + ' '
+					+ chapter_NO.pad(work_data.chapter_NO_pad_digits || 3)
+					+ '.' + Work_crawler.HTML_extension;
 
 			function process_images(chapter_data, XMLHttp) {
 				// get chapter label, will used as chapter directory name.
@@ -970,9 +973,12 @@ function module_code(library_namespace) {
 				function normalize_image_data(image_data, index) {
 					// set image file path
 					function image_file_path_of_chapter_NO(chapter_NO) {
-						return chapter_directory + work_data.id + '-'
-								+ chapter_NO + '-' + (index + 1).pad(3) + '.'
-								+ file_extension;
+						return chapter_directory
+						//
+						+ work_data.id + '-' + chapter_NO + '-'
+						//
+						+ (index + 1).pad(work_data.chapter_NO_pad_digits || 3)
+								+ '.' + file_extension;
 					}
 
 					library_namespace.debug(chapter_label + ': ' + (index + 1)

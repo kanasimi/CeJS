@@ -644,11 +644,10 @@ function module_code(library_namespace) {
 			options[KEY_root_process] = true;
 		}
 
-		if (isNaN(depth)) {
-			depth = Infinity;
-		} else if (!(depth >= 1)) {
-			depth = options.depth | 0;
+		if (!(depth >= 0)) {
+			depth = isNaN(options.depth) ? Infinity : options.depth | 0;
 		}
+		// console.trace(depth);
 		if (!(depth-- >= 1)) {
 			// depth === 1: 僅到本層為止。
 			return;
