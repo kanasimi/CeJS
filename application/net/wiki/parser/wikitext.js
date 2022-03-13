@@ -2178,8 +2178,10 @@ function module_code(library_namespace) {
 			
 			</code>
 			 */
-			if (attributes.replace(/{{\s*=\s*(?:\|[\s\S]*?)?}}/g, '').includes(
-					'{{')) {
+			if (attributes.replace(
+			// TODO: allow all magic words
+			/{{\s*(?:=|ANCHORENCODE:[^{}\|]*)\s*(?:\|[\s\S]*?)?}}/ig, '')
+					.includes('{{')) {
 				library_namespace.debug('Skip tag attributes with template: '
 						+ attributes);
 				return attribute_hash;

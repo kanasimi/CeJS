@@ -8235,11 +8235,11 @@ function module_code(library_namespace) {
 		if (options.numeric) {
 			// decodeURIComponent()
 			unicode_text = unicode_text
+			// \d{2,8}: 比起所允許的7位數多一位數，預防在不是以 ";" 為結尾的情況下，有無效數字。
+			.replace(/&#0*(\d{2,8});?/g, convert_digital)
+			// ";?": Allow CeL.HTML_to_Unicode('&#32&#65&#66&#67')
+			.replace(/&#[xX]0*([a-fA-F\d]{2,6});?/g, convert_hex)
 			// .replace(): JScript 5.5~
-			.replace(/&#0*(\d{2,7});/g, convert_digital)
-			//
-			.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, convert_hex)
-			//
 			.replace(/%([a-fA-F\d]{2})/g, convert_hex);
 		}
 

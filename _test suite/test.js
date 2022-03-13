@@ -3545,7 +3545,7 @@ function test_wiki() {
 		assert(['tag_inner', parsed[1][1].type], 'wiki.parse: HTML tag #6');
 		(parsed = CeL.wiki.parser(wikitext)).each('tag_inner', function (token, index, parent) { return ''; }, true);
 		assert(['1<b style="color:#000"  ></b>2', parsed.toString()], 'wiki.parse: HTML tag #7');
-		wikitext = '<b style {{ = | a=1}} "color:red" id = "{{anchorencode:id1}}">bold</b>'; parsed = CeL.wiki.parse(wikitext);
+		wikitext = '<b style{{ = | a=1}}"color:red" id="{{anchorencode:id1}}">bold</b>'; parsed = CeL.wiki.parse(wikitext);
 		assert(['{{anchorencode:id1}}',	parsed.attributes.id	&& parsed.attributes.id.toString()], 'wiki.parse: HTML tag #8');
 		assert(['color:red',			parsed.attributes.style	&& parsed.attributes.style.toString()], 'wiki.parse: HTML tag #9');
 

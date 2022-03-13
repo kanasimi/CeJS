@@ -1175,8 +1175,11 @@ function module_code(library_namespace) {
 					// 自 work_data.chapter_list 計算章節數量。
 					work_data.chapter_count = chapter_list.length;
 				}
-				work_data.chapter_NO_pad_digits = 1 + Math.floor(Math
-						.log10(work_data.chapter_count));
+				work_data.chapter_NO_pad_digits = Math.max(
+				// 設定位數的最小值：漫畫3位數，小說4位數，預防常常因為更新而變動。
+				this.need_create_ebook ? 4 : 3,
+				//
+				1 + Math.floor(Math.log10(work_data.chapter_count)));
 
 				var last_chapter_data = chapter_list.at(-1),
 				//
