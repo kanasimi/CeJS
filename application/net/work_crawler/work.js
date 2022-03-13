@@ -1177,7 +1177,7 @@ function module_code(library_namespace) {
 				}
 				work_data.chapter_NO_pad_digits = Math.max(
 				// 設定位數的最小值：漫畫3位數，小說4位數，預防常常因為更新而變動。
-				this.need_create_ebook ? 4 : 3,
+				_this.need_create_ebook ? 4 : 3,
 				//
 				1 + Math.floor(Math.log10(work_data.chapter_count)));
 
