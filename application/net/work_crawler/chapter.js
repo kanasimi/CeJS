@@ -766,8 +766,9 @@ function module_code(library_namespace) {
 		var chapter_directory_name = (part || '')
 		// 檔名 NO 的基本長度（不足補零）。以 chapter_data.chapter_NO 可自定章節編號。
 		+ (chapter_data && chapter_data.chapter_NO || chapter_NO)
-		//
-		.pad(work_data.chapter_NO_pad_digits || 3)
+		// 一開始就該定一個不太需要改變的位數。
+		// 即使是小說，很少達到10000個章節。
+		.pad(/* work_data.chapter_NO_pad_digits || */4)
 		//
 		+ (chapter_title ? ' '
 		// 把網頁編碼還原成看得懂的文字。 crawler_namespace.get_label()
@@ -976,9 +977,9 @@ function module_code(library_namespace) {
 						return chapter_directory
 						//
 						+ work_data.id + '-' + chapter_NO + '-'
-						//
-						+ (index + 1).pad(work_data.chapter_NO_pad_digits || 3)
-								+ '.' + file_extension;
+						// 一開始就該定一個不太需要改變的位數。
+						// 一個章節很少到1000張圖片。
+						+ (index + 1).pad(3) + '.' + file_extension;
 					}
 
 					library_namespace.debug(chapter_label + ': ' + (index + 1)

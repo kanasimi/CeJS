@@ -134,9 +134,27 @@ function build_main_script() {
 
 // ---------------------------------------------------------------------//
 
+// message_to_localized_mapping['en-US'] = {"message":"localized_message"}
 const message_to_localized_mapping = Object.create(null);
+// i18n_message_id_to_message['en-US'] = {"message_id":"localized_message"}
 const i18n_message_id_to_message = Object.create(null);
+// message_id_to_message.get('message_id') = message
 const message_id_to_message = new Map;
+const message_with_id_Map = new Map;
+
+function en_message_to_message_id(en_message) {
+	var message_id = en_message.trim()
+		.replace(/[.!]+$/, '')
+		.replace(/[,;:'"\s\[\]\\\/]+/g, '-')
+		.replace(/[\-\s]+$|^[\-\s]+/g, '')
+		.replace(/-{2,}/, '-')
+		.replace(/%/g, '$')
+		.toLowerCase();
+	if (message_id.length > 200) {
+		message_id = message_id.slice(0, 200).replace(/-[^-]*$/, '');
+	}
+	return message_id;
+}
 
 /**
  * auto-build resources / locale message.
@@ -145,6 +163,7 @@ function build_locale_messages(resources_path) {
 	resources_path = library_base_directory + resources_path + CeL.env.path_separator;
 
 	load_message_to_localized(resources_path, () => {
+		//console.trace(resources_path);
 		load_i18n_messages(resources_path, () => {
 			modify_source_files();
 			//CeL.log(`${build_locale_messages.name}: Done.`);
@@ -155,9 +174,9 @@ function build_locale_messages(resources_path) {
 function load_message_to_localized(resources_path, callback) {
 	CeL.storage.traverse_file_system(resources_path, fso_path => {
 		const matched = fso_path.match(/[\\\/](\w+(?:-\w+)*)\.js$/);
+		//console.log([fso_path, matched]);
 		if (!matched)
 			return;
-		//console.log(fso_path);
 		const contents = CeL.read_file(fso_path).toString().between('.set_text(', { tail: ',\n' });
 		let locale_data;
 		try {
@@ -178,6 +197,8 @@ function load_message_to_localized(resources_path, callback) {
 
 		const language_code = matched[1];
 		message_to_localized_mapping[language_code] = locale_data;
+
+		Object.keys(locale_data).forEach(message => message_with_id_Map.set(message, null));
 	}, {
 		depth: 1,
 		callback
@@ -187,15 +208,23 @@ function load_message_to_localized(resources_path, callback) {
 function load_i18n_messages(resources_path, callback) {
 	resources_path += 'i18n' + CeL.env.path_separator;
 
+	//console.trace(resources_path);
 	CeL.storage.traverse_file_system(resources_path, fso_path => {
-		const matched = fso_path.match(/[\\\/]([\w\-]+)\.js$/);
+		const matched = fso_path.match(/[\\\/]([\w\-]+)\.json$/);
+		//console.log([fso_path, matched]);
 		if (!matched)
 			return;
-		//console.log(fso_path);
+		const language_code = matched[1] === 'qqq' ? matched[1] : CeL.gettext.to_standard(matched[1]);
+		if (!language_code) {
+			CeL.error(`${load_i18n_messages.name}: Unknown language code: ${matched[1]}`);
+			return;
+		}
 		const contents = CeL.read_file(fso_path).toString();
+
 		let locale_data;
 		try {
-			locale_data = JSON.parse(contents);
+			//console.log(contents);
+			locale_data = JSON.parse(contents.trim());
 		} catch (e) {
 			CeL.error(`${fso_path}:`);
 			console.error(e);
@@ -204,15 +233,8 @@ function load_i18n_messages(resources_path, callback) {
 		if (!locale_data)
 			return;
 
-		const language_code = matched[1];
 		i18n_message_id_to_message[language_code] = locale_data;
 
-		for (const [message_id, message] of Object.entries(locale_data)) {
-			if (!(message in message_to_localized_mapping['en-US']))
-				continue;
-
-			;
-		}
 	}, {
 		depth: 1,
 		callback
@@ -220,7 +242,18 @@ function load_i18n_messages(resources_path, callback) {
 }
 
 function modify_source_files() {
-	;
+	// Create message_id_to_message
+	for (const message of message_with_id_Map.keys()) {
+		let en_message = message_to_localized_mapping['en-US'][message];
+		if (!en_message || !(en_message = message) || /[^\w\s]/.test(en_message)) {
+			CeL.warn(`Cannot find the en_message of ${message}`);
+			continue;
+		}
+		const message_id = en_message_to_message_id(en_message);
+		message_id_to_message.set(message_id, message);
+	}
+
+	console.log(message_id_to_message);
 }
 
 // ---------------------------------------------------------------------//

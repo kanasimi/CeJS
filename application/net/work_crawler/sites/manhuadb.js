@@ -186,13 +186,15 @@ function module_code(library_namespace) {
 				// chapter_data.title = chapter_data.title.replace('文传', '文傳');
 				var old_directory = work_data.directory
 						+ work_data.chapter_list.length
-								.pad(work_data.chapter_NO_pad_digits || 3)
+						// 4: @see chapter_directory_name
+						// @ CeL.application.net.work_crawler.chapter
+						.pad(work_data.chapter_NO_pad_digits || 4)
 						+ ' '
 						+ (chapter_data.title.includes('[') ? chapter_data.title
 								: '[' + chapter_data.title + ']'),
 				//
 				new_directory = work_data.directory + part_title + ' '
-						+ NO_in_part.pad(work_data.chapter_NO_pad_digits || 3)
+						+ NO_in_part.pad(work_data.chapter_NO_pad_digits || 4)
 						+ ' ' + chapter_data.title;
 				if (CeL.directory_exists(old_directory)) {
 					CeL.move_fso(old_directory, new_directory);

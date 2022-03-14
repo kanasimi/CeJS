@@ -2005,7 +2005,29 @@ function module_code(library_namespace) {
 
 		'es-ES' : 'Español|es-ES|Spanish|西班牙語',
 
-		'pt-BR' : 'Português|pt-BR|Brazilian Portuguese|巴西葡萄牙語|葡萄牙語|Português brasileiro'
+		'pt-BR' : 'Português|pt-BR|Brazilian Portuguese|巴西葡萄牙語|葡萄牙語|Português brasileiro',
+
+		// Dutch language
+		'nl-NL' : 'Nederlands|nl-NL|Dutch|荷蘭語',
+
+		// Tuvan language tyv-RU-TY https://en.wikipedia.org/wiki/ISO_3166-2:RU
+		'tyv-RU' : 'Тыва дыл|tyv-RU|Tuvan|圖瓦語',
+
+		// Swedish language
+		'sv-SE' : 'Svenska|sv-SE|Swedish|瑞典語',
+
+		// Macedonian language
+		'mk-MK' : 'Македонски јазик|mk-MK|Macedonian|馬其頓語',
+
+		'kn-IN' : 'ಕನ್ನಡ|kn-IN|Kannada|康納達語',
+
+		// Gun language
+		'guw-BJ' : 'gungbe|guw-BJ|Gun|康納達語',
+
+		'lb-LU' : 'Lëtzebuergesch|lb-LU|Luxembourgish|盧森堡語',
+
+		// Piedmontese language
+		'pms-IT' : 'Piemontèis|pms-IT|Piedmontese|皮埃蒙特語'
 	};
 	gettext.set_alias(gettext.default_domain);
 

@@ -544,7 +544,9 @@ function module_code(library_namespace) {
 		// recover HTML tags
 		.replace(/\n/g, '<br />');
 
-		var file_title = chapter_NO.pad(work_data.chapter_NO_pad_digits || 3)
+		// 一開始就該定一個不太需要改變的位數。
+		// 不少小說超過1000個章節。
+		var file_title = chapter_NO.pad(work_data.chapter_NO_pad_digits || 4)
 				+ ' '
 				+ (part_title ? part_title
 						+ library_namespace.EPUB.prototype.title_separator : '')

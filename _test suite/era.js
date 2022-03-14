@@ -2660,7 +2660,7 @@ function affairs() {
 
 	CeL.toggle_display('input_panel', true);
 
-	_.create_menu('language_menu', [ 'TW', 'CN', 'ja', 'en' ], function() {
+	_.create_menu('language_menu', [ 'TW', 'CN', 'ja', 'en', 'fr' ], function() {
 		draw_era.redraw();
 	});
 

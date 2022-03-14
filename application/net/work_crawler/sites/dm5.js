@@ -805,9 +805,8 @@ function module_code(library_namespace) {
 					return chapter_directory
 					//
 					+ work_data.id + '-' + chapter_NO + '_'
-					//
-					+ image_NO.pad(work_data.chapter_NO_pad_digits || 3) + '.'
-							+ _this.default_image_extension;
+					// 一開始就該定一個不太需要改變的位數。
+					+ image_NO.pad(3) + '.' + _this.default_image_extension;
 				}
 
 				var image_file_path = path_of(chapter_data.NO_in_part >= 1
