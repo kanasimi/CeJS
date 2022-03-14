@@ -213,5 +213,8 @@
 	"first-quarter": "prim quart",
 	"full-moon": "lun-a pien-a",
 	"last-quarter": "ùltim quart",
-	"sunrise-sunset": "alba / tramont"
+	"new-moon-eve": "vilia ëd lun-a neuva",
+	"sunrise-sunset": "alba / tramont",
+	"sunrise": "alba",
+	"sunset": "tramont"
 }
