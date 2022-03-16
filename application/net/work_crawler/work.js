@@ -1176,6 +1176,7 @@ function module_code(library_namespace) {
 					work_data.chapter_count = chapter_list.length;
 				}
 				if (false) {
+					// https://github.com/kanasimi/work_crawler/issues/551
 					work_data.chapter_NO_pad_digits = Math.max(
 					// 設定位數的最小值：小說4位數，漫畫3位數，預防常常因為更新而變動。
 					_this.need_create_ebook ? 4 : 3,
