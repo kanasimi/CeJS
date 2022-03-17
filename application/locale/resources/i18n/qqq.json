@@ -12,7 +12,7 @@
 	"loading-$1$": "Loading message. e.g., Loading 20%... (scope: system)",
 	"initializing": "Loading message. (scope: system)",
 	"contents-of-$1": "Table of contents message. e.g., Contents of [title] (scope: interact.DOM: auto_TOC())",
-	"contents": "Table of contents message of web page and ebook. (scope: interact.DOM: auto_TOC(), CeL.application.storage.EPUB: generate_TOC())",
+	"contents": "Table of contents message of web page and ebook. (scope: interact.DOM: auto_TOC(), CeL.application.storage.EPUB: generate_TOC())\n\n{{Identical|Content}}",
 	"↑back-to-toc": "Table of contents message. (scope: interact.DOM: auto_TOC())",
 	"expand": "show/hide table of contents(顯示/隱藏, 表示/隠す) (scope: interact.DOM: auto_TOC())",
 	"collapse": "show/hide table of contents(顯示/隱藏, 表示/隠す) (scope: interact.DOM: auto_TOC())",
