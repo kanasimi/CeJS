@@ -1936,9 +1936,11 @@
 划着了	劃著了
 
 
-// 欲 慾
-// 好讀《沉思錄》	怎样才可以不起和她睡觉的欲念！ (~慾<parent.relate:mDEPD>v:念 ~慾<parent.relate:ePREC>v:摆脱 c:和+r:她+v:睡觉+u:的+d:欲+v:念)
-欲念	欲念
+// http://www.twowin.com.tw/news/chinese/talk/1111.htm
+// 作動詞時常用「欲」，作名詞時則用「慾」。
+// http://www.kwuntung.net/check/focus/focusdetail.php?focus_ID=15
+// 生理衝動與需求，只可用「慾」	想要滿足的意念、願望，則「欲」、「慾」皆可
+// 欲: 想、要、快要, 慾: 非分之想
 // 解析錯誤 @ 《烂柯棋缘》	(c:但+n:眼神+nd:中+r:那种+v:渴望+d:却+v:呼之欲+v:出+wp:。)
 呼之欲	呼之欲
 
@@ -2714,6 +2716,10 @@ https://beginneros.com/triviaDetail.php?trivia_id=298
 
 // 《随波逐流之一代军师》	就在这短短几拄香的时间，
 拄香	炷香
+
+
+// not 便簽 便籤?
+便签	便箋
 
 
 // 《我的一天有48小时》	那里的粘膜层开始脱落， (~黏膜層<SBV>v:脱落 r:那里+u:的+n:粘膜层+v:开始+v:脱落+wp:，)
