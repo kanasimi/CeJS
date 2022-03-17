@@ -390,6 +390,9 @@ function modify_source_files() {
 	const source_repositories = JSON.parse(CeL.read_file('source_repositories.json').toString());
 	//console.log(source_repositories);
 
+	// 增加在地化註記
+	add_localization_marks();
+
 	for (let [path, source_data] of Object.entries(source_repositories)) {
 		;
 	}

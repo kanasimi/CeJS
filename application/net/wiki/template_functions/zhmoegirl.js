@@ -65,8 +65,8 @@ function module_code(library_namespace) {
 	function expand_template_A(options) {
 		var parameters = this.parameters;
 		// {{a|显示文字|锚点名称}}
-		return '<span id="' + (parameters[2] || parameters[1]) + '">'
-				+ parameters[1] + '</span>';
+		return '<span id="' + parameters[1] + '">'
+				+ (parameters[2] || parameters[1]) + '</span>';
 	}
 
 	function parse_template_A(token, index, parent, options) {
