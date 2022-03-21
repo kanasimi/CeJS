@@ -49,6 +49,9 @@ if (CeL.env.main_script)
 CeL.env.ignore_COM_error = true;
 CeL.run(['application.storage', 'application.locale.encoding', 'data.date', 'interact.console', 'application.debug.log']);
 
+/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
+const NOT_FOUND = ''.indexOf('_');
+
 //const library_main_script_file_path = CeL.env.registry_path + library_main_script;
 const library_main_script_file_path = library_base_directory + library_main_script;
 // from utf16 big-endian: structure_content.swap16()
@@ -386,12 +389,47 @@ function create__qqq_data_Map() {
 	//console.trace(qqq_data_Map);
 }
 
+function add_localization_marks(script_file_path) {
+	let contents = CeL.read_file(script_file_path).toString();
+	let changed;
+
+	function add_localization_mark(message, message_id) {
+		if (message.length < 20)
+			message = '(' + message;
+		for (let index = 0; (index = contents.indexOf(message, index)) !== NOT_FOUND; index++) {
+			console.trace([message, index]);
+			let previous_index_of_new_line = contents.lastIndexOf('\n', index);
+			let spaces;
+			if (previous_index_of_new_line === NOT_FOUND) {
+				spaces = contents.match(/^(\s*)/);
+				previous_index_of_new_line = 0;
+			} else {
+				spaces = contents.slice(previous_index_of_new_line, index).match(/^(\s*)/);
+			}
+			contents = contents.slice(0, previous_index_of_new_line)
+				+ `\n${spaces}// gettext_config:${JSON.stringify({ id: message_id })}`
+				+ contents.slice(previous_index_of_new_line);
+			changed = true;
+		}
+	}
+
+
+	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
+		add_localization_mark("'" + qqq_data.message.replace(/'/g, "\\'") + "'", message_id);
+		add_localization_mark(JSON.stringify(qqq_data.message), message_id);
+	}
+
+	if (changed) {
+		CeL.write_file(script_file_path + '.bak', contents);
+	}
+}
+
 function modify_source_files() {
+	// 增加在地化註記。
+	add_localization_marks('../data/date.js');
+
 	const source_repositories = JSON.parse(CeL.read_file('source_repositories.json').toString());
 	//console.log(source_repositories);
-
-	// 增加在地化註記
-	add_localization_marks();
 
 	for (let [path, source_data] of Object.entries(source_repositories)) {
 		;

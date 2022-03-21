@@ -442,6 +442,12 @@ function module_code(library_namespace) {
 			this.pre_add_ebook_chapter(data/* , work_data, chapter_NO */);
 		}
 
+		if (typeof data === 'string') {
+			data = {
+				text : data
+			};
+		}
+
 		if (!data.sub_title) {
 			if ('title' in data) {
 				// throw '請將 parse_chapter_data() 中章節名稱設定在 sub_title 而非 title!';

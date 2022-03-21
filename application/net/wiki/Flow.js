@@ -381,7 +381,7 @@ function module_code(library_namespace) {
 			|| !(data = data['new-topic']) || data.status !== 'ok') {
 				// data = { flow: { 'new-topic': { status: 'ok',
 				// workflow: '', committed: {} } } }
-				error = 'edit_topic: Error status ['
+				error = 'edit_topic: Bad status ['
 				//
 				+ (data && data.status) + ']';
 				library_namespace.error(error);
