@@ -144,11 +144,13 @@ const message_to_localized_mapping = Object.create(null);
 // i18n_message_id_to_message['en-US'] = {"message_id":"localized message"}
 const i18n_message_id_to_message = Object.create(null);
 const qqq_data_file_name = 'qqq_data.json';
-// qqq_data.get('message_id') = {message: "original message in source", notes: "notes", scope: "source/", demo: "demo URL / application of the message", additional_notes: "additional notes"}
+// qqq_data.get('message_id') = {message: "original message in source", message_language_code: 'en-US|cmn-Hant-TW', notes: "notes", scope: "source/", demo: "demo URL / application of the message", additional_notes: "additional notes"}
 const qqq_data_Map = new Map;
-let all_message_Set = new Set(['%1/%2/%3']);
-// message_changed.get(from) = to
+let message_to_id_Map = new Map([['%1/%2/%3', null]]);
+/** message_changed.get(from message) = to message */
 const message_changed = new Map;
+/** message_id_changed.get(from message id) = to message id */
+const message_id_changed = new Map;
 
 const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s↑]/;
 
@@ -181,6 +183,8 @@ function build_locale_messages(resources_path) {
 
 			modify_source_files();
 			//CeL.log(`${build_locale_messages.name}: Done.`);
+
+			write_i18n_files();
 		});
 	});
 }
@@ -232,7 +236,7 @@ function load_message_to_localized(resources_path, callback) {
 		const language_code = matched[1];
 		message_to_localized_mapping[language_code] = locale_data;
 
-		Object.keys(locale_data).forEach(message => all_message_Set.add(message));
+		Object.keys(locale_data).forEach(message => message_to_id_Map.set(message, null));
 	}, {
 		depth: 1,
 		callback
@@ -278,7 +282,8 @@ function load_i18n_messages(resources_path, callback) {
 function parse_qqq(qqq) {
 	const qqq_data = {
 		message: null,
-		notes: null
+		notes: null,
+		references: []
 	};
 	let notes = [], additional_notes = [];
 	let start_additional_notes;
@@ -303,10 +308,11 @@ function parse_qqq(qqq) {
 	for (let matched; matched = notes.match(/\s*\(([^():]+):((?:\(\)|[^()])+)\)$/);) {
 		const property = matched[1].trim();
 		const value = matched[2].trim();
-		if (qqq_data[property]) {
-			CeL.warn(`${parse_qqq.name}: Skip duplicate property name: ${property}=${value}`);
-		} else {
+		if (!qqq_data[property]) {
 			qqq_data[property] = value;
+		} else if (property !== 'references') {
+			// 警告: 每次 .references 都會在 adapt_new_change() 中被重新設定!
+			CeL.warn(`${parse_qqq.name}: Skip duplicate property name: ${property}=${value}`);
 		}
 		notes = notes.slice(0, matched.index);
 	}
@@ -353,7 +359,7 @@ function create__qqq_data_Map() {
 	}
 
 	// Create qqq_data_Map
-	for (const message of all_message_Set.keys()) {
+	for (const message of message_to_id_Map.keys()) {
 		if (!message)
 			continue;
 		let en_message;
@@ -374,41 +380,61 @@ function create__qqq_data_Map() {
 		if (qqq_data.message && qqq_data.message !== message) {
 			CeL.info(`${create__qqq_data_Map.name}: original message changed: ${qqq_data.message}→${message}`);
 			message_changed.set(qqq_data.message, message);
+			message_to_id_Map.set(qqq_data.message, message_id);
 		}
 		qqq_data.message = message;
+		if (!qqq_data.message_language_code) {
+			// TODO: set qqq_data.message_language_code
+			for (const [language_code, locale_data] of Object.entries(message_to_localized_mapping)) {
+				//guess_language(message);
+			}
+		}
+		message_to_id_Map.set(message, message_id);
 	}
-
-	// free
-	all_message_Set = null;
 
 	//console.trace(Array.from(qqq_data_Map.keys()).join());
 	for (const message_id of qqq_data_Map.keys()) {
 		log_message_changed(message_id);
 	}
 
+	for (const [message, message_id] of message_to_id_Map.entries()) {
+		if (!message_id)
+			CeL.warn(`${create__qqq_data_Map.name}: No message id of message: ${message}`);
+	}
+
 	//console.trace(qqq_data_Map);
 }
 
+/**
+ * 	增加在地化註記。
+ * @param {String} script_file_path 原始檔路徑
+ */
 function add_localization_marks(script_file_path) {
 	let contents = CeL.read_file(script_file_path).toString();
 	let changed;
+	let new_line = contents.match(/\r?\n/);
+	new_line = new_line ? new_line[0] : '\n';
 
 	function add_localization_mark(message, message_id) {
 		if (message.length < 20)
 			message = '(' + message;
-		for (let index = 0; (index = contents.indexOf(message, index)) !== NOT_FOUND; index++) {
-			console.trace([message, index]);
-			let previous_index_of_new_line = contents.lastIndexOf('\n', index);
+		for (let index = 0; (index = contents.indexOf(message, index)) !== NOT_FOUND;) {
+			//console.trace([message, index]);
+			let previous_index_of_new_line = contents.lastIndexOf(new_line, index);
 			let spaces;
 			if (previous_index_of_new_line === NOT_FOUND) {
-				spaces = contents.match(/^(\s*)/);
+				spaces = contents.match(/^(\s*)/)[0];
 				previous_index_of_new_line = 0;
 			} else {
-				spaces = contents.slice(previous_index_of_new_line, index).match(/^(\s*)/);
+				spaces = contents.slice(previous_index_of_new_line, index).match(/^(\s*)/)[0];
+				//console.trace([message, index, spaces, contents.slice(previous_index_of_new_line, index)]);
 			}
+			CeL.info(`${adapt_new_change.name}: Add mark for [${message_id}] ${message}`);
+			const gettext_mark = `${spaces}// gettext_config:${JSON.stringify({ id: message_id })}`;
 			contents = contents.slice(0, previous_index_of_new_line)
-				+ `\n${spaces}// gettext_config:${JSON.stringify({ id: message_id })}`
+				+ gettext_mark
 				+ contents.slice(previous_index_of_new_line);
+			index += gettext_mark.length + message.length;
 			changed = true;
 		}
 	}
@@ -424,9 +450,112 @@ function add_localization_marks(script_file_path) {
 	}
 }
 
+function adapt_new_change(script_file_path, options) {
+	const contents = CeL.read_file(script_file_path).toString();
+	const content_lines = contents.split('\n');
+
+	for (let line_index = 0; line_index < content_lines.length - 1; line_index++) {
+		// matched: [ all line, prefix, gettext_config ]
+		const gettext_config_matched = content_lines[line_index++].match(/^(\s*\/\/\s*gettext_config\s*:\s*)({[\s\S]+)$/);
+		if (!gettext_config_matched)
+			continue;
+		let gettext_config;
+		try {
+			gettext_config = JSON.parse(gettext_config_matched[2]);
+		} catch {
+			CeL.error(`${adapt_new_change.name}: Invalid gettext_config: ${gettext_config_matched[2]}`);
+			continue;
+		}
+		//console.trace(gettext_config_matched.slice(1));
+
+		// [ all line, front, quote, message, tail ]
+		let message_line_matched = content_lines[line_index].match(/^(.*?)(')((?:\\'|[^'])+)'([\s\S]*?)$/);
+		let message;
+		if (message_line_matched) {
+			message = message_line_matched[3].replace(/"/g, '\\"');
+		} else if (message_line_matched = content_lines[line_index].match(/^(.*?)(")((?:\\"|[^"])+)"'(.*?)$/)) {
+			message = message_line_matched[3];
+		} else {
+			CeL.error(`${adapt_new_change.name}: No message get for gettext_config: ${gettext_config_matched[2]}`);
+		}
+
+		try {
+			message = JSON.parse('"' + message + '"');
+		} catch {
+			CeL.error(`${adapt_new_change.name}: Invalid message "${content_lines[line_index]}" for gettext_config: ${gettext_config_matched[2]}`);
+			continue;
+		}
+
+		let message_id = message_to_id_Map.get(message);
+		let qqq_data;
+		if (message_id) {
+			qqq_data = qqq_data_Map.get(message_id);
+		} else if (qqq_data = qqq_data_Map.get(message_id = gettext_config.id)) {
+			if (message_changed.get(qqq_data.message) && message_changed.get(qqq_data.message) !== message) {
+				throw new Error(`${adapt_new_change.name}: message 衝突:\n原 message	${JSON.stringify(qqq_data.message)}\n→ i18n或其他原始碼中的 message:	${JSON.stringify(message_changed.get(qqq_data.message))}\n→ [${script_file_path}]原始碼中的 message:${JSON.stringify(message)}`);
+			}
+			CeL.info(`${adapt_new_change.name}: 改變了[${script_file_path}]原始碼中的 message:\n	${JSON.stringify(qqq_data.message)}\n→	${JSON.stringify(message)}`);
+			message_changed.set(qqq_data.message, message);
+			qqq_data.message = message;
+		} else if (message_id) {
+			message_id = en_message_to_message_id(message_id);
+			if (gettext_config.id !== message_id) {
+				// assert: {id:'en message'}
+				i18n_message_id_to_message['en-US'][message_id] = gettext_config.id;
+				gettext_config.id = message_id;
+			}
+			CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中新增了 message: [${message_id}] ${JSON.stringify(message)}`);
+		} else {
+			throw new Error(`${adapt_new_change.name}: [${script_file_path}]原始碼中新增了 message，但未設定 message id: ${JSON.stringify(message)}`);
+		}
+
+		//console.trace([message, gettext_config, qqq_data_Map.get(message_id)]);
+		for (const [property, value] of Object.entries(gettext_config)) {
+			if (property === 'id') {
+				if (value === message_id) {
+					continue;
+				}
+				CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼改變了的 message id:\n	${JSON.stringify(message_id)}\n→	${JSON.stringify(gettext_config.id)}`);
+				message_id_changed.set(message_id, gettext_config.id);
+				message_id = gettext_config.id;
+				continue;
+			}
+
+			qqq_data[property] = value;
+		}
+
+		if (!Array.isArray(qqq_data.references)) qqq_data.references = qqq_data.references ? [qqq_data.references] : [];
+		if (options.base_GitHub_path) {
+			console.assert(script_file_path.startsWith(options.base_path + '/'));
+			qqq_data.references.push(`{{GitHub|${options.base_GitHub_path}/blob/master${script_file_path.slice(options.base_path.length)}#L${line_index + 1}}}`);
+		}
+
+		content_lines[line_index - 1] = gettext_config_matched[1] + JSON.stringify({
+			// 原始碼中僅留存 message id，其他全部移到 qqq_data。
+			id: message_id
+		});
+		if (message_line_matched[2] === '"') {
+			message = JSON.parse(message);
+		} else {
+			// assert: message_line_matched[2] === "'"
+			message = "'" + message.replace(/'/g, "\\'") + "'";
+		}
+		content_lines[line_index] = message_line_matched[1] + message + message_line_matched[4];
+		//console.trace(qqq_data);
+	}
+
+	const new_contents = content_lines.join('\n');
+	if (new_contents !== contents) {
+		CeL.write_file(script_file_path, new_contents);
+	}
+}
+
 function modify_source_files() {
-	// 增加在地化註記。
-	add_localization_marks('../data/date.js');
+	//add_localization_marks('../data/date.js');
+	adapt_new_change('../data/date.js.bak', {
+		base_path: '..',
+		base_GitHub_path: "kanasimi/CeJS"
+	});
 
 	const source_repositories = JSON.parse(CeL.read_file('source_repositories.json').toString());
 	//console.log(source_repositories);
@@ -434,6 +563,34 @@ function modify_source_files() {
 	for (let [path, source_data] of Object.entries(source_repositories)) {
 		;
 	}
+}
+
+
+// 順序
+const qqq_order = ['notes', 'demo', 'references'];
+const qqq_order_Set = new Set(qqq_order.append('additional_notes'));
+
+function write_i18n_files() {
+	const i18n_qqq_Object = i18n_message_id_to_message.qqq;
+	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
+		if (Array.isArray(qqq_data.references))
+			qqq_data.references = qqq_data.references.join('\n: ');
+		const qqq_value = [];
+		qqq_order.forEach((property, index) => {
+			const value = qqq_data[property];
+			if (value)
+				qqq_value.push(index === 0 ? value : `; ${property}: ${value}`);
+		});
+		for (const [property, value] of Object.entries(qqq_data)) {
+			if (qqq_order_Set.has(property))
+				continue;
+			qqq_value.push(`; ${property}: ${value}`);
+		}
+		if (qqq_data.additional_notes)
+			qqq_value.push(qqq_data.additional_notes);
+		i18n_qqq_Object[message_id] = qqq_value.join('\n');
+	}
+	console.trace(i18n_qqq_Object);
 }
 
 // ---------------------------------------------------------------------//
