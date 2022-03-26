@@ -1998,6 +1998,8 @@ function module_code(library_namespace) {
 
 		// Subtag: ru, Suppress-Script: Cyrl
 		'ru-RU' : 'Русский|ru-RU|Russian|俄語|rus-Cyrl-RU|ru-rus-Cyrl-RU|RU',
+		// Tuvan language tyv-RU-TY https://en.wikipedia.org/wiki/ISO_3166-2:RU
+		'tyv-RU' : 'Тыва дыл|tyv-RU-TY|Tuvan|圖瓦語',
 
 		'fr-FR' : 'Français|fr-FR|French|法語',
 
@@ -2010,9 +2012,6 @@ function module_code(library_namespace) {
 		// Dutch language
 		'nl-NL' : 'Nederlands|nl-NL|Dutch|荷蘭語',
 
-		// Tuvan language tyv-RU-TY https://en.wikipedia.org/wiki/ISO_3166-2:RU
-		'tyv-RU' : 'Тыва дыл|tyv-RU|Tuvan|圖瓦語',
-
 		// Swedish language
 		'sv-SE' : 'Svenska|sv-SE|Swedish|瑞典語',
 
@@ -2020,6 +2019,9 @@ function module_code(library_namespace) {
 		'mk-MK' : 'Македонски јазик|mk-MK|Macedonian|馬其頓語',
 
 		'kn-IN' : 'ಕನ್ನಡ|kn-IN|Kannada|康納達語',
+		// Kashmiri language
+		// https://en.wikipedia.org/wiki/Jammu_and_Kashmir_(union_territory)
+		'ks-IN' : 'کٲشِر|ks-IN-JK|Kashmiri|喀什米爾語',
 
 		// Gun language
 		'guw-BJ' : 'gungbe|guw-BJ|Gun|康納達語',

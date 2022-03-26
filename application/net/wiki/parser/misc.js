@@ -688,6 +688,10 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// [[w:ks:وِکیٖپیٖڈیا:وَقٕت تہٕ تأریٖخ]]
+	var ks_month_name = ',جَنؤری,فَرؤری,مارٕچ,اَپریل,مٔیی,جوٗن,جُلَے,اَگَست,سَتَمبَر,اَکتوٗبَر,نَوَمبَر,دَسَمبَر'
+			.split(',');
+
 	// 因應不同的 mediawiki projects 來處理日期。
 	// date_parser_config[language]
 	// = [ {RegExp}PATTERN, {Function}parser({Array}matched) : return {String},
@@ -709,13 +713,28 @@ function module_code(library_namespace) {
 				// [, time(hh:mm), d, m, Y, timezone ]
 				/([0-2]?\d:[0-6]?\d)[, ]+([0-3]?\d) ([a-z]{3,9}) ([12]\d{3})(?: \(([A-Z]{3})\))?/ig,
 				function(matched, options) {
-					return matched[2] + ' ' + matched[3] + ' ' + +matched[4]
+					return matched[2] + ' ' + matched[3] + ' ' + matched[4]
 							+ ' ' + matched[1] + ' ' + (matched[6] || 'UTC');
 				}, {
 					format : '%2H:%2M, %d %B %Y (UTC)',
 					// use UTC
 					zone : 0,
 					locale : 'en-US'
+				} ],
+
+		ks : [
+				// [, time(hh:mm), d, m, Y, timezone ]
+				/([0-2]?\d:[0-6]?\d)[, ]+([0-3]?\d) ([\u0624-\u06d2]{4,9}) ([12]\d{3})(?: \(([A-Z]{3})\))?/ig,
+				function(matched, options) {
+					matched[3] = ks_month_name.indexOf(matched[3]);
+					return matched[3] > 0 && matched[4] + '-'
+							+ matched[3].pad(2) + '-' + +matched[2].pad(2)
+							+ ' ' + matched[1] + ' ' + (matched[6] || 'UTC');
+				}, {
+					format : '%2H:%2M, %d %B %Y (UTC)',
+					// use UTC
+					zone : 0,
+					locale : 'ks-IN'
 				} ],
 
 		ja : [
