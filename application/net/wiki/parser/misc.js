@@ -699,6 +699,10 @@ function module_code(library_namespace) {
 	// 須注意當使用者特別設定時，在各維基計劃上可能採用不同語系的日期格式。
 	//
 	// to_String: 日期的模式, should match "~~~~~".
+	//
+	// @see
+	// https://www.mediawiki.org/wiki/Manual:$wgDefaultUserOptions#Available_preferences
+	// $wgDefaultUserOptions['date']
 	var date_parser_config = {
 		en : [
 				// e.g., "01:20, 9 September 2017 (UTC)"
@@ -713,6 +717,7 @@ function module_code(library_namespace) {
 					zone : 0,
 					locale : 'en-US'
 				} ],
+
 		ja : [
 				// e.g., "2017年9月5日 (火) 09:29 (UTC)"
 				// [, Y, m, d, week, time(hh:mm), timezone ]
