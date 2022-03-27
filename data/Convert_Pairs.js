@@ -522,7 +522,9 @@ function module_code(library_namespace) {
 		//
 		pair_Map = this.pair_Map;
 		pair_Map.forEach(function(value, key) {
-			if (!/[.(){}+*?\[\]\|\\\/]/.test(key)) {
+			var matched = key.match(/[.(){}+*?\[\]\|\\\/]+/);
+			// 排除掉 "(﹁﹁)" → "(﹁﹁)"
+			if (!matched || value.includes(matched[0])) {
 				normal_keys.push(key);
 				return;
 			}

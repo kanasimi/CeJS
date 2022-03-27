@@ -96,6 +96,9 @@ function module_code(library_namespace) {
 	 * @returns {String} style value
 	 */
 	function SGR_style_value(style_value, style_name) {
+		// TODO: using "brightred", "boldred"
+		// http://git-scm.com/docs/git-config#Documentation/git-config.txt-color
+
 		if (typeof style_value !== 'object'
 				&& (style_value in SGR_code.color_index)) {
 			if (typeof style_name !== 'string' || !(style_name in color_shift)) {
@@ -798,10 +801,11 @@ function module_code(library_namespace) {
 	 *            color name list
 	 */
 	function add_color_alias(color_list) {
-		if (Array.isArray(color_list))
+		if (Array.isArray(color_list)) {
 			color_list.forEach(function(color, index) {
 				SGR_code.color_index[color] = index;
 			});
+		}
 	}
 
 	/**
