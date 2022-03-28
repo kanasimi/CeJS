@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"GuoPC",
 			"Hzy980512",
 			"ShuyanW"
 		]
@@ -236,6 +237,8 @@
 	"modern-iranian-calendar": "现代伊朗历",
 	"hebrew-calendar": "希伯来历",
 	"long-count": "长纪历",
+	"maya-tzolk-in": "玛雅卓尔金历",
+	"maya-haab": "玛雅哈布历",
 	"dai-calendar": "傣历",
 	"myanmar-calendar": "缅历",
 	"yi-calendar": "彝历",
