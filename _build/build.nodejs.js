@@ -13,7 +13,7 @@
 
 // --------------------------------------------------------------------------------------------
 
-const library_base_directory = '../', backup_directory = 'old/';
+const library_base_directory_name = '../', backup_directory = 'old/';
 
 let library_main_script = 'ce.js';
 const structure_directory = '_structure/';
@@ -43,6 +43,7 @@ if (typeof CeL === 'undefined') {
 if (CeL.env.main_script)
 	library_main_script = CeL.env.main_script;
 
+const library_base_directory = CeL.simplify_path(CeL.env.script_base_path + library_base_directory_name);
 
 // --------------------------------------------------------------------------------------------
 
@@ -174,22 +175,27 @@ function en_message_to_message_id(en_message) {
 /**
  * auto-build resources / locale message.
  */
-function build_locale_messages(resources_path) {
+async function build_locale_messages(resources_path) {
 	resources_path = library_base_directory + resources_path + CeL.env.path_separator;
+	console.trace(CeL.env);
 
 	load_previous_qqq_data();
 
-	load_message_to_localized(resources_path, () => {
-		//console.trace(resources_path);
-		load_i18n_messages(resources_path, () => {
-			create__qqq_data_Map();
-
-			modify_source_files();
-			//CeL.log(`${build_locale_messages.name}: Done.`);
-
-			write_i18n_files(resources_path);
-		});
+	await new Promise((resolve, reject) => {
+		load_message_to_localized(resources_path, resolve);
 	});
+
+	await new Promise((resolve, reject) => {
+		//console.trace(resources_path);
+		load_i18n_messages(resources_path, resolve);
+	});
+
+	create__qqq_data_Map();
+
+	await modify_source_files();
+
+	//write_i18n_files(resources_path);
+	//CeL.log(`${build_locale_messages.name}: Done.`);
 }
 
 function load_previous_qqq_data(resources_path) {
@@ -447,7 +453,7 @@ function add_localization_marks(script_file_path) {
 				spaces = contents.slice(previous_index_of_new_line, index).match(/^(\s*)/)[0];
 				//console.trace([message, index, spaces, contents.slice(previous_index_of_new_line, index)]);
 			}
-			CeL.info(`${adapt_new_change.name}: Add mark for [${message_id}] ${message}`);
+			CeL.info(`${add_localization_marks.name}: Add mark for [${message_id}] ${message}`);
 			const gettext_mark = `${spaces}// gettext_config:${JSON.stringify({ id: message_id })}`;
 			contents = contents.slice(0, previous_index_of_new_line)
 				+ gettext_mark
@@ -550,8 +556,8 @@ function adapt_new_change(script_file_path, options) {
 
 		if (!Array.isArray(qqq_data.references)) qqq_data.references = qqq_data.references ? [qqq_data.references] : [];
 		if (options.base_GitHub_path) {
-			console.assert(script_file_path.startsWith(options.base_path + '/'));
-			qqq_data.references.push(`{{GitHub|${options.base_GitHub_path}/blob/master${script_file_path.slice(options.base_path.length)}#L${line_index + 1}}}`);
+			console.assert(script_file_path.startsWith(options.source_base_path + '/'));
+			qqq_data.references.push(`{{GitHub|${options.base_GitHub_path}/blob/master${script_file_path.slice(options.source_base_path.length)}#L${line_index + 1}}}`);
 		}
 
 		content_lines[line_index - 1] = gettext_config_matched[1] + JSON.stringify({
@@ -574,18 +580,36 @@ function adapt_new_change(script_file_path, options) {
 	}
 }
 
-function modify_source_files() {
-	//add_localization_marks('../data/date.js');
-	adapt_new_change('../data/date.js.bak', {
-		base_path: '..',
-		base_GitHub_path: "kanasimi/CeJS"
-	});
+async function modify_source_files() {
+	if (false) {
+		//add_localization_marks('../data/date.js');
+		adapt_new_change('../data/date.js.bak', {
+			source_base_path: '..',
+			base_GitHub_path: "kanasimi/CeJS"
+		});
+	}
 
-	const source_repositories = JSON.parse(CeL.read_file('source_repositories.json').toString());
+	const source_repositories = JSON.parse(CeL.read_file(CeL.env.script_base_path + 'source_repositories.json').toString());
 	//console.log(source_repositories);
 
-	for (let [path, source_data] of Object.entries(source_repositories)) {
-		;
+	for (let [source_base_path, source_data] of Object.entries(source_repositories)) {
+		await new Promise((resolve, reject) => {
+			source_base_path = CeL.simplify_path(CeL.env.script_base_path + source_base_path + '/');
+			//console.trace(source_base_path);
+			CeL.storage.traverse_file_system(source_base_path, fso_path => {
+				console.log(fso_path);
+				if (false) {
+					add_localization_marks(fso_path);
+					adapt_new_change(fso_path, {
+						source_base_path,
+						base_GitHub_path: "kanasimi/CeJS"
+					});
+				}
+			}, {
+				filter: /\.js$/i,
+				callback: resolve
+			});
+		});
 	}
 }
 
@@ -667,10 +691,13 @@ ${JSON.stringify(language_code)});`;
 
 // ---------------------------------------------------------------------//
 
-build_locale_messages('application/locale/resources');
+(async () => {
+	await build_locale_messages('application/locale/resources');
 
-/*
-build_main_script();
+	/*
+	build_main_script();
+	
+	update_package_file_version();
+	*/
+})();
 
-update_package_file_version();
-*/
