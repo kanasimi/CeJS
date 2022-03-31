@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"MirukuPC"
+			"MirukuPC",
+			"Yamagata Yusuke"
 		]
 	},
 	"loading": "読み込み中…",
@@ -140,6 +141,7 @@
 	"calendar-date": "年暦譜",
 	"$1-records": "%1 件",
 	"$1-years": "%1 件",
+	"$1-$2-$3": "%1/%2/%3",
 	"$1-bce": "前%1年",
 	"$1-ce": "%1年",
 	"era-date": "元号",
