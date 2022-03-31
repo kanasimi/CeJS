@@ -356,7 +356,7 @@ function log_message_changed(message_id) {
 		}
 		if (String(from_localized_message) === String(to_localized_message))
 			continue;
-		CeL.info(`${message}	[${language_code}] ${from_localized_message}→${to_localized_message}`);
+		CeL.info(`${log_message_changed.name}: ${message}	[${language_code}] ${from_localized_message}→${to_localized_message}`);
 	}
 }
 
