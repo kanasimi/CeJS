@@ -742,11 +742,11 @@ function module_code(library_namespace) {
 	// e.g., '/只/隻/i'
 	_.PATTERN_RegExp_replacement = new RegExp(
 	// [ all, pattern source, replace to, flags ]
-	/^\/((?:\\.|[^\/])+)\/((?:\\.|[^\/])+)\/([flags]*)$/.source.replace(
+	/^\/((?:\\.|[^\/])+)\/((?:\\.|[^\/])*)\/([flags]*)$/.source.replace(
 			'flags', _.PATTERN_RegExp_flags));
 
 	// CeL.PATTERN_RegExp_flags
-	_.PATTERN_RegExp_flags = new RegExp(/^flags+$/.source.replace('flags',
+	_.PATTERN_RegExp_flags = new RegExp(/^[flags]+$/.source.replace('flags',
 			_.PATTERN_RegExp_flags));
 
 	/**

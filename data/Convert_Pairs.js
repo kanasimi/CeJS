@@ -276,8 +276,16 @@ function module_code(library_namespace) {
 				return;
 			}
 			if (!value) {
-				library_namespace.warn('Convert_Pairs.add: 轉換時將刪除 key: '
-						+ JSON.stringify(key));
+				var matched = key
+						.match(library_namespace.PATTERN_RegExp_replacement);
+				if (matched) {
+					key = '/' + matched[1] + '/' + matched[3];
+					value = matched[2];
+				}
+				if (!value) {
+					library_namespace.warn('Convert_Pairs.add: 轉換時將刪除 '
+							+ JSON.stringify(key));
+				}
 			}
 
 			library_namespace.debug('adding [' + key + '] → ['
@@ -522,15 +530,15 @@ function module_code(library_namespace) {
 		//
 		pair_Map = this.pair_Map;
 		pair_Map.forEach(function(value, key) {
-			var matched = key.match(/[.(){}+*?\[\]\|\\\/]+/);
-			// 排除掉 "(﹁﹁)" → "(﹁﹁)"
-			if (!matched || value.includes(matched[0])) {
+			// 必須排除掉 "(﹁﹁)" → "(﹁﹁)"
+			if (!library_namespace.PATTERN_RegExp.test(key)) {
 				normal_keys.push(key);
 				return;
 			}
 
 			try {
-				special_keys_Map.set(key, [ new RegExp(key, flags), value ]);
+				// console.trace([ key.to_RegExp(flags), value ]);
+				special_keys_Map.set(key, [ key.to_RegExp(flags), value ]);
 			} catch (e) {
 				library_namespace.error('Convert_Pairs__pattern: '
 				// Error key?
