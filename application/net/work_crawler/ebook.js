@@ -249,6 +249,9 @@ function module_code(library_namespace) {
 			// 檢查辭典檔的規則。debug 用，會拖累效能。
 			// check_dictionary : true,
 
+			// 不檢查/跳過同義詞，通用詞彙不算錯誤。用於無法校訂原始文件的情況。
+			// skip_check_for_synonyms : true,
+
 			// 超過此長度才創建個別的 cache 檔案，否則會放在 .cache_file_for_short_sentences。
 			min_cache_length : 20
 		};
