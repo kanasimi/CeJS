@@ -687,12 +687,26 @@ function module_code(library_namespace) {
 		}
 
 		function process_next_fso(promise, fso_name) {
-			var full_path = path + fso_name,
+			var full_path = path + fso_name;
 			// https://nodejs.org/api/fs.html#fs_class_fs_stats
 			// maybe throw
-			fso_status = node_fs.lstatSync(full_path),
+			var fso_status;
+			try {
+				fso_status = node_fs.lstatSync(full_path);
+			} catch (error) {
+				if (error.code === 'ENOENT') {
+					// e.g., file name including "﯆񐠀"
+					library_namespace.error('traverse_file_system: Cannot access ' + full_path);
+					console.error(error);
+				} else {
+					return promise.then(function() {
+						return Promise.reject(error);
+					});
+				}
+				return promise;
+			}
 			// else: e.g., is file
-			is_directory = fso_status.isDirectory();
+			var is_directory = fso_status.isDirectory();
 
 			// 設定額外的屬性以供利用。
 			fso_status.name = fso_name;

@@ -177,7 +177,7 @@ function en_message_to_message_id(en_message) {
  */
 async function build_locale_messages(resources_path) {
 	resources_path = library_base_directory + resources_path + CeL.env.path_separator;
-	console.trace(CeL.env);
+	//console.trace(CeL.env);
 
 	load_previous_qqq_data();
 
