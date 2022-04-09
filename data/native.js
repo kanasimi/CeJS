@@ -3497,23 +3497,24 @@ function module_code(library_namespace) {
 	_.LCS_length = LCS_length;
 
 	if (false) {
-		var diff_list = library_namespace.LCS(old_text, new_text, {
+		diff_list = CeL.LCS(old_text, new_text, {
 			// line : true,
 			diff : true
 		});
 
-		diff_list.forEach(function(diff) {
+		diff_list.forEach(function(diff_pair) {
 			// added_text === inserted_text
 			// const [removed_text, added_text] = diff;
-			var removed_text = diff[0], added_text = diff[1];
+			var removed_text = diff_pair[0], added_text = diff_pair[1];
 		});
 	}
 
 	if (false) {
-		CeL.LCS('from A', 'from B', {
+		diff_list = CeL.LCS('from A', 'from B', {
 			diff : true
 		});
-		CeL.LCS('from A', 'from B', {
+
+		diff_list = CeL.LCS('from A', 'from B', {
 			with_diff : true
 		});
 	}
@@ -3933,6 +3934,79 @@ function module_code(library_namespace) {
 	}
 
 	_.LCS = LCS;
+
+	/**
+	 * <code>
+
+	from	*    *   *        *
+	index	012345678 9 10 11 12 13 14
+	text	_0123_456 7 8  9  a
+	text	 0123 456_7 8  9
+	index	 0123 45678 9  10    11 12
+	to
+
+	</code>
+	 */
+
+	// 取得 to 之與 from 相對應的索引。
+	// from[index_of_from] 相對應於
+	// to[CeL.LCS.corresponding_index(diff_list, index_of_from_text)]
+	function get_corresponding_index(diff_list, index_of_from_text,
+			is_index_of_to) {
+		if (diff_list.length === 0)
+			return index_of_from_text;
+
+		var FROM_INDEX = is_index_of_to ? 1 : 0, TO_INDEX = 1 - FROM_INDEX;
+		var diff_list_index = 0, latest_offset_delta = 0;
+		while (true) {
+			var diff_pair = diff_list[diff_list_index++];
+			var from_indexes = diff_pair.index[FROM_INDEX];
+			if (!from_indexes) {
+				from_indexes = diff_pair.last_index[FROM_INDEX] + 1;
+				from_indexes = [ from_indexes, from_indexes ];
+			}
+
+			if (index_of_from_text > from_indexes[1]) {
+				if (diff_list_index < diff_list.length) {
+					continue;
+				}
+				from_indexes = diff_pair.index[FROM_INDEX];
+				var to_indexes = diff_pair.index[TO_INDEX];
+				latest_offset_delta = (to_indexes ? to_indexes[1]
+						: diff_pair.last_index[TO_INDEX])
+						- (from_indexes ? from_indexes[1]
+								: diff_pair.last_index[FROM_INDEX]);
+				break;
+			}
+
+			if (index_of_from_text < from_indexes[0]) {
+				latest_offset_delta = diff_pair.last_index[TO_INDEX]
+						- diff_pair.last_index[FROM_INDEX];
+				break;
+			}
+
+			var to_indexes = diff_pair.index[TO_INDEX];
+			if (!to_indexes) {
+				to_indexes = diff_pair.last_index[TO_INDEX] + 1;
+				to_indexes = [ to_indexes, to_indexes ];
+			}
+
+			if (from_indexes[1] === from_indexes[0]
+					|| to_indexes[1] === to_indexes[0]) {
+				return diff_pair.index[FROM_INDEX] ? to_indexes[0]
+						: to_indexes[1] + 1;
+			}
+
+			return to_indexes[0] + (index_of_from_text - from_indexes[0])
+					* (to_indexes[1] - to_indexes[0])
+					/ (from_indexes[1] - from_indexes[0]);
+
+		}
+
+		return index_of_from_text + latest_offset_delta;
+	}
+
+	LCS.corresponding_index = get_corresponding_index;
 
 	// unfinished
 	function diff_with_Array(to, options) {
