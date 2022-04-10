@@ -179,7 +179,7 @@ async function build_locale_messages(resources_path) {
 	resources_path = library_base_directory + resources_path + CeL.env.path_separator;
 	//console.trace(CeL.env);
 
-	load_previous_qqq_data();
+	load_previous_qqq_data(resources_path);
 
 	await new Promise((resolve, reject) => {
 		load_message_to_localized(resources_path, resolve);
@@ -199,10 +199,12 @@ async function build_locale_messages(resources_path) {
 }
 
 function load_previous_qqq_data(resources_path) {
+	//console.trace(resources_path + qqq_data_file_name);
 	let contents = CeL.read_file(resources_path + qqq_data_file_name);
 	if (!contents) return;
 	contents = JSON.parse(contents.toString());
 	for (const [message_id, qqq_data] of Object.entries(contents)) {
+		//console.log([message_id, qqq_data]);
 		qqq_data_Map.set(message_id, qqq_data);
 	}
 }
@@ -429,13 +431,16 @@ function create__qqq_data_Map() {
 	//console.trace(qqq_data_Map);
 }
 
+/** {RegExp}在地化語言註記之模式。 */
+const PATTERN_gettext_config_line = /^(\s*\/\/\s*gettext_config\s*:\s*)({[\s\S]+)$/;
+
 /**
- * 	增加在地化註記。
+ * 	增加在地化語言註記。
  * @param {String} script_file_path 原始檔路徑
  */
 function add_localization_marks(script_file_path) {
 	let contents = CeL.read_file(script_file_path).toString();
-	let changed;
+	let changed_count = 0;
 	let new_line = contents.match(/\r?\n/);
 	new_line = new_line ? new_line[0] : '\n';
 
@@ -445,21 +450,33 @@ function add_localization_marks(script_file_path) {
 		for (let index = 0; (index = contents.indexOf(message, index)) !== NOT_FOUND;) {
 			//console.trace([message, index]);
 			let previous_index_of_new_line = contents.lastIndexOf(new_line, index);
-			let spaces;
+			let spaces, previous_text, post_text;
 			if (previous_index_of_new_line === NOT_FOUND) {
-				spaces = contents.match(/^(\s*)/)[0];
 				previous_index_of_new_line = 0;
+				previous_text = '';
+				post_text = contents;
+				spaces = contents.match(/^(\s*)/)[0];
 			} else {
-				spaces = contents.slice(previous_index_of_new_line, index).match(/^(\s*)/)[0];
+				previous_text = contents.slice(0, previous_index_of_new_line);
+				const previous_line = previous_text.match(/.+$/);
+				if (previous_line && PATTERN_gettext_config_line.test(previous_line[0])) {
+					// 跳過已經有標記的，避免多次添加在地化語言註記。
+					index += message.length;
+					continue;
+				}
+				// e.g., post_text = '\n  gettext("message")'
+				post_text = contents.slice(previous_index_of_new_line);
+				// /\s/.test('\n') === true
+				spaces = post_text.match(/^(\s*)/)[0];
 				//console.trace([message, index, spaces, contents.slice(previous_index_of_new_line, index)]);
 			}
-			CeL.info(`${add_localization_marks.name}: Add mark for [${message_id}] ${message}`);
+			//CeL.info(`${add_localization_marks.name}: Add mark for [${message_id}] ${message}`);
 			const gettext_mark = `${spaces}// gettext_config:${JSON.stringify({ id: message_id })}`;
-			contents = contents.slice(0, previous_index_of_new_line)
+			contents = previous_text
 				+ gettext_mark
-				+ contents.slice(previous_index_of_new_line);
+				+ post_text
 			index += gettext_mark.length + message.length;
-			changed = true;
+			changed_count++;
 		}
 	}
 
@@ -469,7 +486,8 @@ function add_localization_marks(script_file_path) {
 		add_localization_mark(JSON.stringify(qqq_data.message), message_id);
 	}
 
-	if (changed) {
+	if (changed_count > 0) {
+		CeL.info(`${add_localization_marks.name}: [${script_file_path}] Add ${changed_count} marks`);
 		CeL.write_file(script_file_path + '.bak', contents);
 	}
 }
@@ -480,7 +498,7 @@ function adapt_new_change(script_file_path, options) {
 
 	for (let line_index = 0; line_index < content_lines.length - 1; line_index++) {
 		// matched: [ all line, prefix, gettext_config ]
-		const gettext_config_matched = content_lines[line_index++].match(/^(\s*\/\/\s*gettext_config\s*:\s*)({[\s\S]+)$/);
+		const gettext_config_matched = content_lines[line_index++].match(PATTERN_gettext_config_line);
 		if (!gettext_config_matched)
 			continue;
 		let gettext_config;
@@ -581,10 +599,10 @@ function adapt_new_change(script_file_path, options) {
 }
 
 async function modify_source_files() {
+	add_localization_marks(CeL.env.script_base_path + '../data/date.js');
 	if (false) {
-		//add_localization_marks('../data/date.js');
-		adapt_new_change('../data/date.js.bak', {
-			source_base_path: '..',
+		adapt_new_change('data/date.js.bak', {
+			source_base_path: CeL.env.script_base_path,
 			base_GitHub_path: "kanasimi/CeJS"
 		});
 	}
@@ -599,7 +617,7 @@ async function modify_source_files() {
 			CeL.storage.traverse_file_system(source_base_path, fso_path => {
 				console.log(fso_path);
 				if (false) {
-					add_localization_marks(fso_path);
+					add_localization_marks(source_base_path + fso_path);
 					adapt_new_change(fso_path, {
 						source_base_path,
 						base_GitHub_path: "kanasimi/CeJS"

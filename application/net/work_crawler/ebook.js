@@ -314,11 +314,12 @@ function module_code(library_namespace) {
 		// ebook_file_path = ebook_file_path[0] + ebook_file_path[1];
 
 		if ((!Array.isArray(ebook_files) || !ebook_files.includes('mimetype'))
-				// 若是沒有cache，但是有舊的epub檔，那麼就將之解壓縮。
-				// 其用意是為了保留媒體檔案與好的舊章節，預防已經無法下載/獲取。
-				// 由於這個動作，當舊的電子書存在時將不會清場。若有必要清場（如太多冗贅），須自行將舊電子書刪除。
+				&& !this.discard_old_ebook_file
 				&& library_namespace.file_exists(ebook_file_path[0]
 						+ ebook_file_path[1])) {
+			// 若是沒有cache，但是有舊的epub檔，那麼就將之解壓縮。
+			// 其用意是為了保留媒體檔案與好的舊章節，預防已經無法下載/獲取。
+			// 由於這個動作，當舊的電子書存在時將不會清場。若有必要清場（如太多冗贅），須設定.discard_old_ebook_file或自行將舊電子書刪除。
 			var ebook_archive = new library_namespace.storage.archive(
 					ebook_file_path[0] + ebook_file_path[1]);
 			library_namespace.log_temporary(gettext(

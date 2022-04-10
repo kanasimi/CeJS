@@ -457,6 +457,8 @@ function module_code(library_namespace) {
 			vertical_writing : 'boolean|string',
 			// RTL_writing : 'boolean',
 			convert_to_language : 'string:TW;CN',
+			// 不解開原電子書的選項: 就算存在舊電子書檔案，也不解壓縮、利用舊資料。
+			discard_old_ebook_file : 'boolean',
 
 			user_agent : 'string',
 			// 代理伺服器 proxy_server: "username:password@hostname:port"

@@ -683,6 +683,44 @@ function test_native() {
 
 		assert(['ccdd,ffee', 'aabb\nbbcc\nccdd'.diff_with('bbcc\nffee\naabb').join(',')], '.diff_with()');
 
+		/**
+		 * <code>
+
+		from	*    *   *        *
+		index	012345678 9 10 11 12 13 14
+		text	_0123_456 7 8  9  a
+		text	 0123 456_7 8  9
+		index	 0123 45678 9  10    11 12
+		to
+
+		</code>
+		 */
+		var old_text = '_0123_456789a', new_text = '0123456_789', diff_list = diff_list = CeL.LCS(old_text, new_text, {
+			diff : true
+		});
+		//console.trace(diff_list);
+		assert([0, CeL.LCS.corresponding_index(diff_list, 0)], 'LCS.corresponding_index()');
+		assert([0, CeL.LCS.corresponding_index(diff_list, 1)], 'LCS.corresponding_index()');
+		assert([1, CeL.LCS.corresponding_index(diff_list, 2)], 'LCS.corresponding_index()');
+		assert([3, CeL.LCS.corresponding_index(diff_list, 4)], 'LCS.corresponding_index()');
+		assert([4, CeL.LCS.corresponding_index(diff_list, 5)], 'LCS.corresponding_index()');
+		assert([4, CeL.LCS.corresponding_index(diff_list, 6)], 'LCS.corresponding_index()');
+		assert([6, CeL.LCS.corresponding_index(diff_list, 8)], 'LCS.corresponding_index()');
+		assert([8, CeL.LCS.corresponding_index(diff_list, 9)], 'LCS.corresponding_index()');
+		assert([10, CeL.LCS.corresponding_index(diff_list, 11)], 'LCS.corresponding_index()');
+		assert([11, CeL.LCS.corresponding_index(diff_list, 12)], 'LCS.corresponding_index()');
+		assert([11, CeL.LCS.corresponding_index(diff_list, 13)], 'LCS.corresponding_index(,13)');
+		assert([12, CeL.LCS.corresponding_index(diff_list, 14)], 'LCS.corresponding_index(,14)');
+		assert([1, CeL.LCS.corresponding_index(diff_list, 0, true)], 'LCS.corresponding_index(,,true)');
+		assert([4, CeL.LCS.corresponding_index(diff_list, 3, true)], 'LCS.corresponding_index(,,true)');
+		assert([6, CeL.LCS.corresponding_index(diff_list, 4, true)], 'LCS.corresponding_index(,,true)');
+		assert([8, CeL.LCS.corresponding_index(diff_list, 6, true)], 'LCS.corresponding_index(,,true)');
+		assert([9, CeL.LCS.corresponding_index(diff_list, 7, true)], 'LCS.corresponding_index(,,true)');
+		assert([9, CeL.LCS.corresponding_index(diff_list, 8, true)], 'LCS.corresponding_index(,,true)');
+		assert([11, CeL.LCS.corresponding_index(diff_list, 10, true)], 'LCS.corresponding_index(,,true)');
+		assert([13, CeL.LCS.corresponding_index(diff_list, 11, true)], 'LCS.corresponding_index(,11,true)');
+		assert([14, CeL.LCS.corresponding_index(diff_list, 12, true)], 'LCS.corresponding_index(,12,true)');
+
 		assert([4, CeL.longest_common_starting_length(['1234', '1234'])], 'longest_common_starting_length() #1');
 		assert([3, CeL.longest_common_starting_length(['123', '123', '123'])], 'longest_common_starting_length() #2');
 		assert([3, CeL.longest_common_starting_length(['123', '1234', '123'])], 'longest_common_starting_length() #3');
