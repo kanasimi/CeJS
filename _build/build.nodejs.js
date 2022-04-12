@@ -185,6 +185,16 @@ async function build_locale_messages(resources_path) {
 		load_message_to_localized(resources_path, resolve);
 	});
 
+	// Localized messages in 紀年轉換工具。
+	await new Promise((resolve, reject) => {
+		load_message_to_localized(library_base_directory + '_test suite/resources/', resolve);
+	});
+
+	// Localized messages for CeJS 網路小說漫畫下載工具。
+	await new Promise((resolve, reject) => {
+		load_message_to_localized(library_base_directory + '../../program/work_crawler/resources/', resolve);
+	});
+
 	await new Promise((resolve, reject) => {
 		//console.trace(resources_path);
 		load_i18n_messages(resources_path, resolve);
@@ -233,7 +243,7 @@ function load_message_to_localized(resources_path, callback) {
 		if (!locale_data)
 			return;
 
-		// 訊息修正。
+		// 一次性訊息修正。
 		for (const [from_message, to_message] of Object.entries({
 			Espana: 'España',
 			'Calendrier republicain': 'Calendrier républicain',
@@ -710,6 +720,7 @@ ${JSON.stringify(language_code)});`;
 // ---------------------------------------------------------------------//
 
 (async () => {
+	// main messages of CeJS library
 	await build_locale_messages('application/locale/resources');
 
 	/*
