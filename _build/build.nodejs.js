@@ -24,8 +24,8 @@ const datestamp = new Date;
 
 const node_fs = require('fs');
 
-function error_recover(message) {
-	console.error(`${error_recover.name}: Try to recover main script file from backup!`);
+function error_recover_and_exit(message) {
+	console.error(`${error_recover_and_exit.name}: Try to recover main script file from backup!`);
 
 	//node_fs.cpSync(backup_directory + library_main_script, library_base_directory + library_main_script, { force: true });
 
@@ -36,7 +36,7 @@ require('../_for include/_CeL.loader.nodejs');
 
 if (typeof CeL === 'undefined') {
 	console.error("Can't load library!");
-	error_recover();
+	error_recover_and_exit();
 }
 
 
@@ -50,7 +50,10 @@ const library_base_directory = CeL.simplify_path(CeL.env.script_base_path + libr
 CeL.env.ignore_COM_error = true;
 CeL.run(['application.storage',
 	// Guess language of section title assigned in task file name.
-	'application.locale.encoding', 'data.date', 'interact.console', 'application.debug.log']);
+	'application.locale.encoding', 'data.date', 'interact.console', 'application.debug.log',
+	// CeL.parse_CSV()
+	'data.CSV',
+]);
 
 /** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 const NOT_FOUND = ''.indexOf('_');
@@ -156,10 +159,11 @@ const message_changed = new Map;
 /** message_id_changed.get(from message id) = to message id */
 const message_id_changed = new Map;
 
-const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s↑]/;
+const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s←↑→≠🆔]/;
 
 function en_message_to_message_id(en_message) {
 	var message_id = en_message.trim()
+		.replace(/🆔/g, 'ID')
 		.replace(/[.!]+$/, '')
 		.replace(/[,;:'"\s\[\]\\\/]+/g, '-')
 		.replace(/[\-\s]+$|^[\-\s]+/g, '')
@@ -186,14 +190,11 @@ async function build_locale_messages(resources_path) {
 	});
 
 	// Localized messages in 紀年轉換工具。
-	await new Promise((resolve, reject) => {
-		load_message_to_localized(library_base_directory + '_test suite/resources/', resolve);
-	});
+	//load_CSV_message_to_localized(library_base_directory + '_test suite/resources/locale.csv');
 
 	// Localized messages for CeJS 網路小說漫畫下載工具。
-	await new Promise((resolve, reject) => {
-		load_message_to_localized(library_base_directory + '../../program/work_crawler/resources/', resolve);
-	});
+	load_CSV_message_to_localized(library_base_directory + '../../program/work_crawler/resources/locale of work_crawler - locale.csv');
+	//console.trace(message_to_localized_mapping);
 
 	await new Promise((resolve, reject) => {
 		//console.trace(resources_path);
@@ -201,6 +202,10 @@ async function build_locale_messages(resources_path) {
 	});
 
 	create__qqq_data_Map();
+	if (message_to_localized_mapping.qqq) {
+		console.trace(message_to_localized_mapping.qqq);
+		delete message_to_localized_mapping.qqq;
+	}
 
 	await modify_source_files();
 
@@ -219,6 +224,80 @@ function load_previous_qqq_data(resources_path) {
 	}
 }
 
+/**
+ * Setup message_to_localized_mapping[language_code] and message_to_id_Map via *.csv
+ * 
+ * @param {String} resource_file_path 
+ */
+function load_CSV_message_to_localized(resource_file_path) {
+	const locale_messages = CeL.parse_CSV(CeL.get_file(resource_file_path), {
+		has_title: true
+	}), preserved_index = {
+		hide: NaN,
+		scope: NaN,
+		message: NaN,
+		note: NaN
+	}, language_code_to_index_hash = Object.create(null), heads = locale_messages.shift();
+
+	// CeL.debug(Array.isArray(heads));
+	// CeL.debug(heads.forEach);
+	// 預先掃描 title。
+	heads.forEach(function (title, index) {
+		let name;
+		if (title in preserved_index) {
+			preserved_index[title] = index;
+			if (title === 'note') {
+				language_code_to_index_hash.qqq = index;
+			}
+		} else if (name = CeL.gettext.to_standard(title))
+			language_code_to_index_hash[name] = index;
+		else
+			CeL.warn('Unknown language: ' + language);
+	});
+
+	// check.
+	for (let index in preserved_index) {
+		if (isNaN(preserved_index[index]))
+			CeL.warn('未提供欄位: ' + index);
+	}
+
+	const index_of = locale_messages.index;
+	//console.trace({ indexes_of, index_of_hide });
+	locale_messages.forEach(record => {
+		if (record[index_of.hide])
+			return;
+
+		/** 原訊息 */
+		const message = record[index_of.message];
+		if (!message)
+			return;
+		message_to_id_Map.set(message, null);
+		for (const [language_code, index] of Object.entries(language_code_to_index_hash)) {
+			let local_message = record[index];
+			if (language_code === 'qqq') {
+				local_message += `\n; scope: ${record[preserved_index.scope]}`;
+			}
+			if (!local_message) continue;
+			const localized_mapping = message_to_localized_mapping[language_code] || (message_to_localized_mapping[language_code] = Object.create(null));
+			const local_message_of_CSV = localized_mapping[message];
+			if (local_message_of_CSV) {
+				if (local_message.includes(local_message_of_CSV)) {
+					continue;
+				}
+				CeL.error(`${load_CSV_message_to_localized.name}: 設定相異的本地化翻譯 ${resource_file_path}\nmessage	${JSON.stringify(message)}\n原本地	${JSON.stringify(local_message)}	[${language_code}]\n新→	${typeof local_message_of_CSV === 'string' ? JSON.stringify(local_message_of_CSV) : local_message_of_CSV}`);
+				local_message = local_message.toString();
+			}
+			localized_mapping[message] = local_message;
+		}
+	});
+}
+
+/**
+ * Setup message_to_localized_mapping[language_code] and message_to_id_Map via *.js
+ * 
+ * @param {String} resources_path 
+ * @param {Function} callback 
+ */
 function load_message_to_localized(resources_path, callback) {
 	CeL.storage.traverse_file_system(resources_path, fso_path => {
 		const matched = fso_path.match(/[\\\/](\w+(?:-\w+)*)\.js$/);
@@ -314,10 +393,10 @@ function parse_qqq(qqq) {
 	};
 	let notes = [], additional_notes = [];
 	let start_additional_notes;
-	qqq.split(/\n/).forEach((line) => {
+	qqq.split(/\n/).forEach(line => {
 		line = line.trim();
 		if (!line) return;
-		const matched = line.match(/^;(.+):(.*)$/);
+		const matched = line.match(/^;([^:\n]+):(.*)$/);
 		if (matched) {
 			if (!start_additional_notes && notes.length > 0) start_additional_notes = true;
 			qqq_data[matched[1].trim()] = matched[2].trim();
@@ -361,9 +440,20 @@ function log_message_changed(message_id) {
 
 	for (const language_code of Object.keys(message_to_localized_mapping)) {
 		const from_localized_message = message_to_localized_mapping[language_code][message];
+		if (!i18n_message_id_to_message[language_code]) {
+			// e.g., get from load_CSV_message_to_localized()
+			CeL.info(`${log_message_changed.name}: New language code of i18n: ${language_code}`);
+			i18n_message_id_to_message[language_code] = Object.create(null);
+		}
 		const to_localized_message = i18n_message_id_to_message[language_code][message_id];
 		if (!from_localized_message) {
 			// New localized message
+			continue;
+		}
+		if (!to_localized_message) {
+			// New localized message. 
+			// e.g., get from load_CSV_message_to_localized()
+			i18n_message_id_to_message[language_code][message_id] = from_localized_message;
 			continue;
 		}
 		if (String(from_localized_message) === String(to_localized_message))
@@ -372,17 +462,24 @@ function log_message_changed(message_id) {
 	}
 }
 
+function set_qqq_data(message_id, qqq) {
+	if (!qqq || typeof qqq !== 'string')
+		return;
+	let qqq_data = parse_qqq(qqq);
+	if (qqq_data_Map.has(message_id)) {
+		const old_qqq_data = qqq_data_Map.get(message_id);
+		Object.assign(old_qqq_data, qqq_data);
+		qqq_data = old_qqq_data;
+	} else {
+		CeL.warn(`${set_qqq_data.name}: New message id in i18n: ${message_id}`);
+		qqq_data_Map.set(message_id, qqq_data);
+	}
+	return qqq_data;
+}
+
 function create__qqq_data_Map() {
 	for (const [message_id, qqq] of Object.entries(i18n_message_id_to_message.qqq)) {
-		if (typeof qqq !== 'string')
-			continue;
-		const qqq_data = parse_qqq(qqq);
-		if (qqq_data_Map.has(message_id)) {
-			Object.assign(qqq_data_Map.get(message_id), qqq_data);
-		} else {
-			CeL.warn(`New message id in i18n: ${message_id}`);
-			qqq_data_Map.set(message_id, qqq_data);
-		}
+		set_qqq_data(message_id, qqq);
 	}
 
 	// Create qqq_data_Map
@@ -392,20 +489,27 @@ function create__qqq_data_Map() {
 		let en_message;
 		if (!PATTERN_has_invalid_en_message_char.test(message)) {
 			en_message = message;
-		} else if (!(en_message = message_to_localized_mapping['en-US'][message]) || PATTERN_has_invalid_en_message_char.test(en_message = en_message.toString())) {
+		} else if (!(en_message = message_to_localized_mapping['en-US'][message])) {
 			CeL.warn(`${create__qqq_data_Map.name}: Cannot find the en_message of ${message}`);
+			continue;
+		} else if (PATTERN_has_invalid_en_message_char.test(en_message = en_message.toString())) {
+			CeL.warn(`${create__qqq_data_Map.name}: en_message of ${message} contains invalid char(s)! ${en_message}`);
 			continue;
 		}
 		if (message === 'Calendrier républicain') en_message = 'French Republican Calendar';
 		//console.log([message, en_message]);
 		const message_id = en_message_to_message_id(en_message);
-		const qqq_data = qqq_data_Map.get(message_id);
+		let qqq_data = qqq_data_Map.get(message_id);
+		//if (message === '作者') { console.trace({ message, message_id, qqq_data }); throw 456465; }
+		if (!qqq_data && message_to_localized_mapping.qqq && (qqq_data = set_qqq_data(message_id, message_to_localized_mapping.qqq[message]))) {
+			delete message_to_localized_mapping.qqq[message];
+		}
 		if (!qqq_data) {
 			CeL.error(`${create__qqq_data_Map.name}: No i18n qqq_data of message id: ${message_id} (message: ${message})`);
 			continue;
 		}
 		if (qqq_data.message && qqq_data.message !== message) {
-			CeL.info(`${create__qqq_data_Map.name}: original message changed: ${qqq_data.message}→${message}`);
+			CeL.info(`${create__qqq_data_Map.name}: original message changed:\nid:	${message_id}\n原	${qqq_data.message}\n新→	${message}`);
 			message_changed.set(qqq_data.message, message);
 			message_to_id_Map.set(qqq_data.message, message_id);
 		}
@@ -454,9 +558,20 @@ function add_localization_marks(script_file_path) {
 	let new_line = contents.match(/\r?\n/);
 	new_line = new_line ? new_line[0] : '\n';
 
-	function add_localization_mark(message, message_id) {
-		if (message.length < 20)
-			message = '(' + message;
+	function add_localization_mark(message, message_id, had_add_prefix) {
+		if (!had_add_prefix && message.length < 20) {
+			// 避免錯誤處理長度較短的訊息。改偵測像這樣的情況:
+			// gettext("message")
+			add_localization_mark('(' + message, message_id, true);
+			// {T:"message"}
+			add_localization_mark(' ' + message, message_id, true);
+			add_localization_mark(':' + message, message_id, true);
+			// ["message"]
+			add_localization_mark('[' + message, message_id, true);
+			// data-gettext="message"
+			add_localization_mark('=' + message, message_id, true);
+		}
+
 		for (let index = 0; (index = contents.indexOf(message, index)) !== NOT_FOUND;) {
 			//console.trace([message, index]);
 			let previous_index_of_new_line = contents.lastIndexOf(new_line, index);
@@ -729,4 +844,3 @@ ${JSON.stringify(language_code)});`;
 	update_package_file_version();
 	*/
 })();
-

@@ -1,4 +1,5 @@
 hide,scope,message,note,繁體中文,简体中文,English,日本語
+,請優先翻譯亮黃色背景儲存格，謝謝您。您在這邊所輸入的資料將會在下一次改版時匯入程式，不會馬上反映於程式中。,,,,,,
 ,title,紀年轉換工具,,紀年轉換工具,,Era Calendar Converter,紀年変換ツール
 ,title,紀年 %1,,紀年 %1,,Era %1,紀年 %1
 ,system,訊息提示與紀錄欄,,訊息提示與紀錄欄,,Log Console,メッセージや情報の記録帳
@@ -146,9 +147,9 @@ http://www.e-yakushiyo.net/Calendario_Maya_Dias.htm",儒略日數,,Julian Day Nu
 ,可選用的文字式年曆欄位: 分類: 曆法,伊斯蘭曆,,伊斯蘭曆,,Islamic calendar,ヒジュラ暦
 ,可選用的文字式年曆欄位: 分類: 曆法,گاه‌شماری هجری خورشیدی,,現代伊朗曆,,Modern Iranian calendar,イラン太陽暦
 ,可選用的文字式年曆欄位: 分類: 曆法,希伯來曆,,希伯來曆,,Hebrew calendar,ユダヤ暦
-,可選用的文字式年曆欄位: 分類: 曆法,長紀曆,The Mesoamerican Long Count calendar,長紀曆,,Long Count,マヤ長期暦
-,可選用的文字式年曆欄位: 分類: 曆法,Maya Tzolk'in,,,,Maya Tzolk'in,マヤ神聖暦
-,可選用的文字式年曆欄位: 分類: 曆法,Maya Haab',,,,Maya Haab',マヤ文化暦
+,可選用的文字式年曆欄位: 分類: 曆法,瑪雅長紀曆,The Mesoamerican Long Count calendar,瑪雅長紀曆,,Long Count,マヤ長期暦
+,可選用的文字式年曆欄位: 分類: 曆法,Maya Tzolk'in,,瑪雅神聖曆,,Maya Tzolk'in,マヤ神聖暦
+,可選用的文字式年曆欄位: 分類: 曆法,Maya Haab',,瑪雅文化曆,,Maya Haab',マヤ文化暦
 ,可選用的文字式年曆欄位: 分類: 曆法,傣曆,,傣曆,,Dai calendar,タイ暦
 ,可選用的文字式年曆欄位: 分類: 曆法,မြန်မာ ပြက္ခဒိန်,"(緬甸 日曆). 緬甸曆法, Burmese calendar, ミャンマー暦",緬曆,,Myanmar calendar,ビルマ暦
 ,可選用的文字式年曆欄位: 分類: 曆法,彝曆,,彝曆,,Yi calendar,彝暦
