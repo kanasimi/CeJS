@@ -2898,6 +2898,7 @@ function module_code(library_namespace) {
 		date_value_diff /= 1000;
 
 		if (date_value_diff < 1) {
+			// gettext_config:{"id":"now"}
 			return gettext('now');
 		}
 

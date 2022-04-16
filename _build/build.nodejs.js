@@ -553,8 +553,9 @@ function create__qqq_data_Map() {
 /** {RegExp}在地化語言註記之模式。 */
 const PATTERN_gettext_config_line = /^(\s*\/\/\s*gettext_config\s*:\s*)({[\s\S]+)$/;
 
-/** 省略容易混淆的訊息。 */
-const ignore_messages = new Set(['number', 'string', 'function', 'date']);
+/** 省略容易混淆出錯的訊息。 */
+const ignore_messages = new Set(['boolean', 'number', 'string', 'function', 'date', 'time', 'module', 'constructor', 'class',
+	'now', 'file', 'directory', 'Paste', 'Search', 'site', 'link', 'title', 'language', 'dark', 'light', 'default']);
 
 /**
  * 	增加在地化語言註記。
@@ -864,7 +865,9 @@ ${JSON.stringify(language_code)});`;
 	// main messages of CeJS library
 	await build_locale_messages('application/locale/resources');
 
+	/*
 	build_main_script();
 
 	update_package_file_version();
+	*/
 })();
