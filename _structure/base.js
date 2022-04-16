@@ -2252,7 +2252,18 @@ OS='UNIX'; // unknown
 		if (Array.isArray(nodes)) {
 			// nodes.forEach()
 			for (var index = 0; index < nodes.length; index++) {
-				nodes[index] = extract_message_from_nodes(nodes[index], style_array);
+				var node = nodes[index];
+				nodes[index] = extract_message_from_nodes(node, style_array);
+				if (_.gettext.append_message_tail_space && node && node.T) {
+					var inner = nodes[index + 1];
+					// 只是簡易處理，不完善。
+					// @see CeL.interact.DOM.new_node()
+					inner = _.gettext.apply(null, Array.isArray(inner) ? inner : [ inner ]);
+					nodes[index] = _.gettext.append_message_tail_space(nodes[index], {
+						no_more_convert : true,
+						next_sentence : inner
+					});
+				}
 			}
 			return nodes.join('');
 		}

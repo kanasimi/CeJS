@@ -132,7 +132,7 @@ function module_code(library_namespace) {
 		if (library_namespace.directory_exists(cache_directory)) {
 			library_namespace.info('extract_convert_cache_directory: '
 			// 語言轉換 TAG_text_converted
-			+ gettext('將覆寫繁簡轉換 cache 目錄 [%1] 中的檔案。', cache_directory));
+			+ gettext('將覆寫繁簡中文轉換 cache 目錄 [%1] 中的檔案。', cache_directory));
 		}
 
 		var cache_archive_file = cache_directory + '.7z';
@@ -146,7 +146,7 @@ function module_code(library_namespace) {
 		cache_archive_file = new library_namespace.storage.archive(
 				cache_archive_file);
 		return new Promise(function(resolve, reject) {
-			library_namespace.log_temporary(gettext('解開繁簡轉換 cache 檔案: [%1]。',
+			library_namespace.log_temporary(gettext('解壓縮繁簡中文轉換 cache 檔案: [%1]。',
 					cache_archive_file.archive_file_path));
 			cache_archive_file.extract({
 				// 解壓縮 "!short_sentences_word_list.json" 時會跳出 prompt。
@@ -166,7 +166,7 @@ function module_code(library_namespace) {
 		cache_archive_file = new library_namespace.storage.archive(
 				cache_archive_file);
 		return new Promise(function(resolve, reject) {
-			library_namespace.log_temporary(gettext('壓縮繁簡轉換 cache 檔案: [%1]。',
+			library_namespace.log_temporary(gettext('壓縮繁簡中文轉換 cache 檔案: [%1]。',
 					cache_archive_file.archive_file_path));
 			cache_archive_file.update(cache_directory, {
 				only_when_newer_exists : 'file',

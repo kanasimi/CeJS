@@ -328,6 +328,53 @@ function module_code(library_namespace) {
 	.language_tag = language_tag;
 
 	// -----------------------------------------------------------------------------------------------------------------
+	// 各個 domain 結尾標點符號的轉換。
+
+	var halfwidth_to_fullwidth_mapping = {
+		'.' : '。'
+	}, fullwidth_to_halfwidth_mapping = {
+		'、' : ',',
+		'。' : '.'
+	};
+
+	function convert_punctuation_mark(punctuation_mark, domain_name) {
+		// test domains_using_fullwidth_form
+		if (/^(?:cmn|yue|ja)-/.test(domain_name)) {
+			// 東亞標點符號。
+			if (punctuation_mark in halfwidth_to_fullwidth_mapping) {
+				return halfwidth_to_fullwidth_mapping[punctuation_mark];
+			}
+
+			if (/^\.{3,}$/.test(punctuation_mark)) {
+				return '…'.repeat(punctuation_mark.length > 6 ? Math
+						.ceil(punctuation_mark.length / 3) : 2);
+			}
+
+			if (/^ja-/.test(domain_name) && punctuation_mark === ',') {
+				return '、';
+			}
+
+			// https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)
+			return String.fromCharCode(punctuation_mark.charCodeAt(0) + 0xfee0);
+		}
+
+		if (/^[^\x20-\xfe]/.test(punctuation_mark)) {
+			if (punctuation_mark in fullwidth_to_halfwidth_mapping) {
+				return fullwidth_to_halfwidth_mapping[punctuation_mark];
+			}
+
+			if (/^…+$/.test(punctuation_mark)) {
+				return punctuation_mark.length > 2 ? '...'
+						.repeat(punctuation_mark.length) : '...';
+			}
+
+			return String.fromCharCode(punctuation_mark.charCodeAt(0) - 0xfee0);
+		}
+
+		return punctuation_mark;
+	}
+
+	// -----------------------------------------------------------------------------------------------------------------
 	// JavaScript 國際化 i18n (Internationalization) / 在地化 本土化 l10n (Localization)
 	// / 全球化 g11n (Globalization).
 
@@ -372,19 +419,38 @@ function module_code(library_namespace) {
 	 *      http://wiki.ecmascript.org/doku.php?id=strawman:string_format,
 	 *      http://wiki.ecmascript.org/doku.php?id=strawman:string_format_take_two
 	 */
-	function gettext(text_id/* , ...value_list */) {
+	function gettext(/* message */text_id/* , ...value_list */) {
 		// 轉換 / convert function.
 		function convert(text_id, domain_specified) {
 			// 未設定個別 domain 者，將以此訊息(text_id)顯示。
-			// text_id 一般應採用原文(original)，或最常用語言；亦可以代碼表示，但須設定所有可能使用的語言。
+			// text_id 一般應採用原文(message of original language)，
+			// 或最常用語言；亦可以代碼(message id)表示，但須設定所有可能使用的語言。
 			// console.log(text_id);
 
-			// 注意: 在 text_id 與所屬 domain 之 text 相同的情況下，domain 中不會有這一筆記錄。
+			var postfix;
+			if (library_namespace.is_debug(9)) {
+				console.trace(domain);
+			}
+
+			// 注意: 在 text_id 與所屬 domain 之 converted_text 相同的情況下，
+			// domain 中不會有這一筆記錄。
 			// 因此無法以 `text_id in domain` 來判別 fallback。
-			using_default = typeof text_id === 'function'
-					|| typeof text_id === 'object' || !(text_id in domain);
+			if (typeof text_id === 'function' || typeof text_id === 'object') {
+				using_default = true;
+			} else if (!(text_id in domain)) {
+				var matched = String(text_id).match(
+						/^([\s\S]+?)(\.{3,}|…+|[,;:.?!~、，；：。？！～])$/);
+				if (matched && (matched[1] in domain)) {
+					postfix = convert_punctuation_mark(matched[2], domain_name);
+					text_id = matched[1];
+				} else {
+					using_default = true;
+				}
+			}
 			if (!using_default) {
 				text_id = domain[text_id];
+				if (postfix)
+					text_id += postfix;
 			}
 
 			return typeof text_id === 'function' ? text_id(domain_name,
@@ -413,7 +479,7 @@ function module_code(library_namespace) {
 		// this: 本次轉換之特殊設定。
 		domain_name = this && this.domain_name || gettext_domain_name,
 		//
-		domain, text = try_domain(domain_name),
+		domain, converted_text = try_domain(domain_name),
 		// 強制轉換/必須轉換 force convert. e.g., 輸入 id，因此不能以 text_id 顯示。
 		force_convert = using_default && this && (this.force_convert
 		// for DOM
@@ -432,18 +498,19 @@ function module_code(library_namespace) {
 				var _text = try_domain(_domain_name, true);
 				if (!using_default) {
 					domain_name = _domain_name;
-					text = _text;
+					converted_text = _text;
 					// using the first matched
 					return true;
 				}
 			});
 		}
 
-		library_namespace.debug('Use domain_name: ' + domain_name, 6);
+		library_namespace
+				.debug('Use domain_name: ' + domain_name, 6, 'gettext');
 
 		if (length <= 1) {
-			// assert: {String}text
-			return text;
+			// assert: {String}converted_text
+			return converted_text;
 		}
 
 		var text_list = [], matched, last_index = 0,
@@ -462,7 +529,7 @@ function module_code(library_namespace) {
 		// 採用 local variable，因為可能有 multithreading 的問題。
 		conversion_pattern = /([\s\S]*?)%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?(\d{1,2})(\|\d)?)/g;
 
-		while (matched = conversion_pattern.exec(text)) {
+		while (matched = conversion_pattern.exec(converted_text)) {
 			if (matched[7]) {
 				// 回吐最後一個 \d
 				conversion_pattern.lastIndex--;
@@ -497,12 +564,12 @@ function module_code(library_namespace) {
 						// 避免 %0 形成 infinite loop。
 						var origin_domain = domain, origin_domain_name = domain_name;
 						library_namespace.debug('臨時改變 domain: ' + domain_name
-								+ '→' + domain_specified, 6);
+								+ '→' + domain_specified, 6, 'gettext');
 						domain_name = domain_specified;
 						domain = domain_used;
 						conversion = convert(value_list[NO], domain_specified);
 						library_namespace.debug('回存/回復 domain: ' + domain_name
-								+ '→' + origin_domain_name, 6);
+								+ '→' + origin_domain_name, 6, 'gettext');
 						domain_name = origin_domain_name;
 						domain = origin_domain;
 					} else {
@@ -534,7 +601,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		text_list.push(text.slice(last_index));
+		text_list.push(converted_text.slice(last_index));
 		return has_object ? text_list : text_list.join('');
 	}
 
@@ -575,22 +642,36 @@ function module_code(library_namespace) {
 		return converted_list;
 	}
 
+	// @see CeL.data.count_word()
+	// 這些標點符號和下一句中間可以不用接空白字元。
+	// /[\u4e00-\u9fa5]/: 匹配中文。
+	// https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)
+	// https://arc-tech.hatenablog.com/entry/2021/01/20/105620
+	var PATTERN_no_need_to_append_tail_space = /[\s—、，；：。？！()（）「」『』“”‘’«\u4e00-\u9fffぁ-んーァ-ヶ]$/;
+
 	function Sentence_combination__join(separator) {
 		var converted_list = this.converting();
-		if (separator)
+		if (separator || separator === '')
 			return converted_list.join(separator);
 
-		converted_list.forEach(function(converted, index) {
-			// @see CeL.data.count_word()
-			if (/[\s—…、，；。！？：()（）「」『』“”‘’]$/.test(converted)) {
-				// 這些標點符號和下一句中間可以不用接空白字元。
-				return;
+		for (var index = 0; index < converted_list.length;) {
+			var converted = converted_list[index];
+			if (!converted
+					|| PATTERN_no_need_to_append_tail_space.test(converted)) {
+				++index;
+				continue;
 			}
-			var next = converted_list[index + 1];
-			if (next && !/^\s/.test(next)) {
-				converted_list[index] += ' ';
+			var next_sentence, original_index = index;
+			while (++index < converted_list.length) {
+				next_sentence = converted_list[index];
+				if (next_sentence || next_sentence === 0) {
+					if (!/^\s/.test(next_sentence)) {
+						converted_list[original_index] += ' ';
+					}
+					break;
+				}
 			}
-		});
+		}
 		return converted_list.join('');
 	}
 
@@ -605,10 +686,30 @@ function module_code(library_namespace) {
 		toString : Sentence_combination__join
 	});
 
-	// messages = new gettext.Sentence_combination();
-	// messages.push([message]);
-	// messages.toString();
+	/**
+	 * @example<code>
+
+	messages = new gettext.Sentence_combination();
+	messages.push(message, [ message ], [ message, arg_1, arg_2 ]);
+	messages.toString();
+
+	</code>
+	 */
 	gettext.Sentence_combination = Sentence_combination;
+
+	function append_message_tail_space(text, options) {
+		if (!options || !options.no_more_convert)
+			text = gettext(text);
+		if (!text || PATTERN_no_need_to_append_tail_space.test(text)) {
+			return text;
+		}
+
+		var next_sentence = options && options.next_sentence;
+		return next_sentence && !/^\s/.test(next_sentence)
+				|| next_sentence === 0 ? text + ' ' : text;
+	}
+
+	gettext.append_message_tail_space = append_message_tail_space;
 
 	// ------------------------------------------------------------------------
 

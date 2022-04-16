@@ -326,20 +326,23 @@ function module_code(library_namespace) {
 							library_namespace.warn([ {
 								T : has_error ? contents
 								//
-								? '強制將非圖片檔儲存為圖片' : '強制將空內容儲存為圖片'
+								? '強制將非圖片檔儲存為圖片。' : '強制將空內容儲存為圖片。'
 								// assert: (!!verified_image===false)
 								// 圖檔損壞: e.g., Do not has EOI
-								: '強制儲存損壞的圖片'
+								: '強制儲存損壞的圖片。'
 							}, XMLHttp.status
 							// 狀態碼正常就不顯示。
 							&& (XMLHttp.status / 100 | 0) !== 2 ? {
-								T : [ ' (status %1)', XMLHttp.status ]
+								T : [ 'HTTP status code %1.', XMLHttp.status ]
 							} : '',
 							// 顯示 crawler 程式指定的錯誤。
 							image_data.is_bad ? {
-								T : [ ' (error: %1)', image_data.is_bad ]
+								// gettext_config:{"id":"error-$1"}
+								T : [ 'Error: %1.', image_data.is_bad ]
 							} : '', contents ? {
-								T : [ ' %1 bytes', contents.length ]
+								T : [ 'File size: %1.',
+								//
+								CeL.to_KiB(contents.length) ]
 							} : '',
 							//
 							': ' + image_data.file + '\n← ' + image_url ]);
@@ -470,7 +473,7 @@ function module_code(library_namespace) {
 				message = [ {
 					T : '無法成功取得圖片。'
 				}, XMLHttp.status ? {
-					T : [ 'HTTP 狀態碼 %1，', XMLHttp.status ]
+					T : [ 'HTTP status code %1.', XMLHttp.status ]
 				} : '', {
 					T : !contents ? '圖片無內容：' : [
 					//

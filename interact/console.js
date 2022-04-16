@@ -119,7 +119,7 @@ function module_code(library_namespace) {
 			if ((style_name in SGR_code.style_data)
 					&& SGR_code.style_data[style_name][style_value ? 0 : 1] === undefined) {
 				library_namespace.warn([ {
-					T : [ 'Invalid value [%1] of style: [%2]: ',
+					T : [ 'Invalid value [%1] of style: [%2]:',
 					//
 					style_value, style_name ]
 				}, {
@@ -132,7 +132,7 @@ function module_code(library_namespace) {
 
 		if (isNaN(style_value) || (style_value |= 0) < 0) {
 			library_namespace.warn([ {
-				T : [ 'Invalid value [%1] of style: [%2]: ',
+				T : [ 'Invalid value [%1] of style: [%2]:',
 				//
 				style_value, style_name ]
 			}, {
@@ -149,7 +149,7 @@ function module_code(library_namespace) {
 					style_value -= color_shift[style_name];
 			} else {
 				library_namespace.warn([ {
-					T : [ 'Invalid value [%1] of style: [%2]: ',
+					T : [ 'Invalid value [%1] of style: [%2]:',
 					//
 					style_value, style_name ]
 				}, {

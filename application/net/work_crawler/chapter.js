@@ -557,8 +557,6 @@ function module_code(library_namespace) {
 			T : [ '《%1》：', work_data.title || work_data.id, prompt ]
 		}, {
 			T : prompt
-		}, {
-			T : '建議設置 recheck=multi_parts_changed 選項來避免多次下載時，遇上缺話的情況。'
 		} ]);
 	}
 
@@ -606,7 +604,7 @@ function module_code(library_namespace) {
 
 		if (Array.isArray(chapter_data.chapter_list)) {
 			// assert: `chapter_data` is work data
-			confirm_recheck.call(this, chapter_data, '本作依章節標題來決定章節編號；');
+			confirm_recheck.call(this, chapter_data, '本作依章節標題來決定章節編號；建議設置 recheck=multi_parts_changed 選項來避免多次下載時，遇上缺話的情況。');
 			// input sorted work_data, use work_data.chapter_list
 			// latest_chapter_NO, start NO
 			default_NO |= 0;
@@ -735,7 +733,7 @@ function module_code(library_namespace) {
 			&& (Array.isArray(work_data.chapter_list)
 			// 當只有一個 part (分部) 的時候，預設不會添上 part 標題，除非設定了 this.add_part。
 			&& work_data.chapter_list.part_NO > 1 || this.add_part)) {
-				confirm_recheck.call(this, work_data, '本作存有不同的 part；');
+				confirm_recheck.call(this, work_data, '本作存有不同的 part；建議設置 recheck=multi_parts_changed 選項來避免多次下載時，遇上缺話的情況。');
 				part = chapter_data.NO_in_part | 0;
 				if (part >= 1) {
 					chapter_NO = part;
@@ -859,11 +857,9 @@ function module_code(library_namespace) {
 			var estimated_message = _this.estimated_message(work_data,
 					chapter_NO);
 			library_namespace.log_temporary(gettext(
-					'Getting data of chapter %1', chapter_NO
+					estimated_message ? 'Getting data of chapter %1, %2' : 'Getting data of chapter %1', chapter_NO
 							+ (typeof _this.pre_chapter_URL === 'function' ? ''
-									: '/' + work_data.chapter_count))
-					+ (estimated_message ? gettext(', %1', estimated_message)
-							: ''));
+									: '/' + work_data.chapter_count), estimated_message));
 
 			// default: 置於 work_data.directory 下。
 			var chapter_file_name = work_data.directory

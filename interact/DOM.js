@@ -1626,10 +1626,20 @@ function module_code(library_namespace) {
 	 * @return {HTMLElement} new node created
 	 * @since 2010/6/21 13:45:02
 	 */
-	function new_node(nodes, layer, ns) {
+	function new_node(nodes, layer, options) {
 		var node, for_each,
 		// parent: parent node of layer or layer.firstChild
 		parent, children = undefined, handler = new_node.handler;
+
+		if (typeof options === 'string') {
+			options = {
+				NS : options
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
+
+		var ns = options.NS;
 
 		if (false) {
 			if (!library_namespace.is_WWW(true)
@@ -1871,6 +1881,19 @@ function module_code(library_namespace) {
 						children = gettext(dataset(node, gettext.DOM_id_key,
 								children));
 					}
+
+					n = options.next_node;
+					// 只是簡易處理，不完善。
+					// @see extract_message_from_nodes() @ base.js
+					if (library_namespace.is_Object(n) && ('T' in n)) {
+						n = n.T;
+						n = Array.isArray(n) ? gettext.apply(null, typeof n)
+								: gettext(n);
+					}
+					children = gettext.append_message_tail_space(children, {
+						no_more_convert : true,
+						next_sentence : n
+					});
 				}
 
 				if ((n = 'R') in nodes) {
@@ -2068,7 +2091,11 @@ function module_code(library_namespace) {
 					} || null; i < l; i++) {
 				if (false)
 					alert('node[' + i + ']\n' + nodes[i]);
-				node.push(n = new_node(nodes[i], f, ns));
+				n = new_node(nodes[i], f, {
+					NS : ns,
+					next_node : nodes[i + 1]
+				});
+				node.push(n);
 				if (false) {
 					node.push(n = new_node(nodes[i], for_each));
 					if (for_each)

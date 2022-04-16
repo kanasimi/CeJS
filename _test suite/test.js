@@ -897,6 +897,17 @@ function test_locale() {
 	});
 
 
+	CeL.gettext.use_domain('en', true);
+	all_error_count += CeL.test('結尾標點符號的轉換。 zh → en', function (assert) {
+		assert([ 'China', CeL.gettext('中國') ], '結尾標點符號的轉換: zh → en');
+		assert([ 'China.', CeL.gettext('中國。') ], '結尾標點符號的轉換: zh → en .');
+		assert([ 'China!', CeL.gettext('中國！') ], '結尾標點符號的轉換: zh → en !');
+		assert([ 'China...', CeL.gettext('中國…') ], '結尾標點符號的轉換: zh → en …');
+		assert([ 'China...', CeL.gettext('中國……') ], '結尾標點符號的轉換: zh → en ……');
+		assert([ 'China.........', CeL.gettext('中國………') ], '結尾標點符號的轉換: zh → en ………');
+	});
+
+
 
 	//	###單數複數形式 Singular and plural nouns / Grammatical number test
 	all_error_count += CeL.test('單數複數形式 (plural)', function (assert) {
@@ -916,7 +927,7 @@ function test_locale() {
 			}
 		}, 'en');
 
-		CeL.gettext.use_domain('en', function () {
+		CeL.gettext.use_domain('en-US', function () {
 			assert(['No entry loaded.', CeL.gettext(message_id, 0)], '單數複數形式 (plural): 0');
 			assert(['One entry loaded.', CeL.gettext(message_id, 1)], '單數複數形式 (plural): 1');
 			assert(['2 entries loaded.', CeL.gettext(message_id, 2)], '單數複數形式 (plural): 2');
@@ -941,6 +952,16 @@ function test_locale() {
 	CeL.gettext.use_domain('zh-TW', function () {
 		// callback
 	}, true);
+
+	all_error_count += CeL.test('結尾標點符號的轉換。 en → zh', function (assert) {
+		assert([ '完成', CeL.gettext('finished') ], '結尾標點符號的轉換: en → zh');
+		assert([ '完成。', CeL.gettext('finished.') ], '結尾標點符號的轉換: en → zh 。');
+		assert([ '完成！', CeL.gettext('finished!') ], '結尾標點符號的轉換: en → zh ！');
+		assert([ '完成……', CeL.gettext('finished...') ], '結尾標點符號的轉換: en ... → zh ……');
+		assert([ '完成……', CeL.gettext('finished......') ], '結尾標點符號的轉換: en → zh ……');
+		assert([ '完成………', CeL.gettext('finished.........') ], '結尾標點符號的轉換: en → zh ………');
+	});
+
 
 	//	設定欲轉換的文字格式。
 	all_error_count += CeL.test('設定欲轉換的文字格式。', function (assert) {

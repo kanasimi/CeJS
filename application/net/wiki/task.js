@@ -814,7 +814,8 @@ function module_code(library_namespace) {
 							!_this.has_languagevariants ]);
 				}
 				if (next[3].no_languagevariants || !_this.has_languagevariants
-				// 匹配中文
+				// /[\u4e00-\u9fa5]/: 匹配中文。
+				// https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)
 				// || !/[\u4e00-\u9fa5]/.test(next[1])
 				) {
 					// next[2] : callback(root_page_data, error)

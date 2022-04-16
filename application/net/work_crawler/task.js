@@ -702,7 +702,8 @@ function module_code(library_namespace) {
 			// remove : [ work_data.title, work_data.id ]
 			}).parsed;
 
-			var last_marked_index, archived_prefix = '# ' + gettext('已封存: '), prefix = '# '
+			var last_marked_index, archived_prefix = '# '
+					+ gettext.append_message_tail_space('已封存：'), prefix = '# '
 					+ gettext(
 							// '封存日期：%1，作品完結時間：%2',
 							'封存日期：%1，最後一次於 %2 下載',
@@ -1023,9 +1024,12 @@ function module_code(library_namespace) {
 
 		if (!this.continue_arguments) {
 			// set flag to pause / cancel task
-			library_namespace.info([ this.id + ': ', {
-				T : quit ? '準備取消下載作業中，' : '準備暫停下載作業中，'
-			}, '將會在下載完本章節後生效。' ]);
+			library_namespace.info([
+					this.id + ': ',
+					{
+						T : quit ? '準備取消下載作業中，將會在下載完本章節後生效。'
+								: '準備暫停下載作業中，將會在下載完本章節後生效。'
+					} ]);
 			this.continue_arguments = [ quit ? QUIT_TASK : STOP_TASK ];
 			if (callback) {
 				this.continue_arguments.push(callback);

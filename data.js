@@ -409,7 +409,7 @@ function module_code(library_namespace) {
 	 * @return
 	 * @_memberOf _module_
 	 */
-	char_frequency = function(text) {
+	char_frequency = function char_frequency(text) {
 		var i, a, c = [], d, t = '' + text, l = t.length, used = '', unused = '', u1 = -1, u2 = u1;
 		for (i = 0; i < l; i++)
 			if (c[a = t.charCodeAt(i)])
@@ -476,7 +476,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @_memberOf _module_
 	 */
-	count_word = function(text, flag) {
+	count_word = function count_word(text, flag) {
 		var is_HTML = flag & 1;
 
 		// is HTML object
@@ -557,7 +557,7 @@ function module_code(library_namespace) {
 	</code>
 	 * @_memberOf _module_
 	 */
-	dec_to_bin = function(number, places) {
+	dec_to_bin = function dec_to_bin(number, places) {
 		if (places && number + 1 < (1 << places)) {
 			var h = '', b = number.toString(2), i = b.length;
 			for (; i < places; i++)
@@ -634,7 +634,7 @@ function module_code(library_namespace) {
 	 * @return
 	 * @_memberOf _module_
 	 */
-	set_Object_value = function(obj, value, type, mode) {
+	set_Object_value = function set_Object_value(obj, value, type, mode) {
 		if (!value || typeof obj !== 'string')
 			return;
 
@@ -749,7 +749,7 @@ function module_code(library_namespace) {
 	 * @since 2006/9/6 20:55, 2010/4/12 23:06:04
 	 * @_memberOf _module_
 	 */
-	split_String_to_Object = function(value_set, assignment_char, end_char) {
+	split_String_to_Object = function split_String_to_Object(value_set, assignment_char, end_char) {
 		if (typeof value_set !== 'string' || !value_set)
 			return {};
 
@@ -861,7 +861,7 @@ function module_code(library_namespace) {
 	 * @return
 	 * @_memberOf _module_
 	 */
-	same_length = function(s1, s2) {
+	same_length = function same_length(s1, s2) {
 		if (typeof m !== 'string' || typeof n !== 'string')
 			return;
 		if (!s1 || !s2)

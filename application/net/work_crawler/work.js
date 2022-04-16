@@ -62,6 +62,7 @@ function module_code(library_namespace) {
 
 		library_namespace.log('-'.repeat(70) + '\n');
 		library_namespace.info({
+			// gettext_config:{"id":"work-information"}
 			T : 'Work information:'
 		});
 
@@ -1263,12 +1264,13 @@ function module_code(library_namespace) {
 					warning += typeof work_data.removed === 'string' ? work_data.removed
 							: '作品不存在或已被刪除。';
 				} else {
-					warning += gettext('Can not get chapter count! ')
-					// (Did not set work_data.chapter_count)
-					+ gettext(_this.got_chapter_count ? '或許作品已被刪除或屏蔽？'
-					// No chapter got! 若是作品不存在就不會跑到這邊了
-					// 或者是特殊作品？
-					: '或許作品已被刪除或屏蔽，或者網站改版了？');
+					warning += gettext
+							.append_message_tail_space('Can not get chapter count!')
+							// (Did not set work_data.chapter_count)
+							+ gettext(_this.got_chapter_count ? '或許作品已被刪除或屏蔽？'
+							// No chapter got! 若是作品不存在就不會跑到這邊了
+							// 或者是特殊作品？
+							: '或許作品已被刪除或屏蔽，或者網站改版了？');
 				}
 				_this.onwarning(warning, work_data);
 

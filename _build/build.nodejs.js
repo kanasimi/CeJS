@@ -115,7 +115,7 @@ function build_main_script() {
 			})
 		// time stamp
 		.replace(/([\W]build_date[\s\n]*=[\s\n]*)[^;]+/, function ($0, $1) {
-			return $1 + 'new Date("' + datestamp + '")';
+			return $1 + 'new Date("' + datestamp.toISOString() + '")';
 		});
 
 
@@ -123,7 +123,7 @@ function build_main_script() {
 	library_main_script_content = `\ufeff
 /*
 	本檔案為自動生成，請勿手動編輯！
-	This file is auto created from _structure/${file_list.join(', ')}
+	This file is auto created from ${file_list.join(', ')}
 		by auto-generate tool: ${library_build_script_name}(.js) @ ${datestamp.format('%Y-%2m-%2d' && '%Y')}.
 */
 
@@ -164,8 +164,8 @@ const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s←↑→≠🆔]/;
 function en_message_to_message_id(en_message) {
 	var message_id = en_message.trim()
 		.replace(/🆔/g, 'ID')
-		.replace(/[.!]+$/, '')
-		.replace(/[,;:'"\s\[\]\\\/]+/g, '-')
+		.replace(/[,;:.?!~]+$/, '')
+		.replace(/[:,;'"\s\[\]\\\/]+/g, '-')
 		.replace(/[\-\s]+$|^[\-\s]+/g, '')
 		.replace(/-{2,}/, '-')
 		.replace(/%/g, '$')
@@ -203,14 +203,16 @@ async function build_locale_messages(resources_path) {
 
 	create__qqq_data_Map();
 	if (message_to_localized_mapping.qqq) {
-		console.trace(message_to_localized_mapping.qqq);
+		if (!CeL.is_empty_object(message_to_localized_mapping.qqq)) {
+			//console.trace(message_to_localized_mapping.qqq);
+		}
 		delete message_to_localized_mapping.qqq;
 	}
 
 	await modify_source_files();
 
-	//write_i18n_files(resources_path);
-	//CeL.log(`${build_locale_messages.name}: Done.`);
+	write_i18n_files(resources_path);
+	CeL.log(`${build_locale_messages.name}: Done.`);
 }
 
 function load_previous_qqq_data(resources_path) {
@@ -508,6 +510,9 @@ function create__qqq_data_Map() {
 			CeL.error(`${create__qqq_data_Map.name}: No i18n qqq_data of message id: ${message_id} (message: ${message})`);
 			continue;
 		}
+		if (message !== message.trim()) {
+			CeL.error(`${create__qqq_data_Map.name}: message is not trimmed: ${JSON.stringify(message)}`);
+		}
 		if (qqq_data.message && qqq_data.message !== message) {
 			CeL.info(`${create__qqq_data_Map.name}: original message changed:\nid:	${message_id}\n原	${qqq_data.message}\n新→	${message}`);
 			message_changed.set(qqq_data.message, message);
@@ -548,6 +553,9 @@ function create__qqq_data_Map() {
 /** {RegExp}在地化語言註記之模式。 */
 const PATTERN_gettext_config_line = /^(\s*\/\/\s*gettext_config\s*:\s*)({[\s\S]+)$/;
 
+/** 省略容易混淆的訊息。 */
+const ignore_messages = new Set(['number', 'string', 'function', 'date']);
+
 /**
  * 	增加在地化語言註記。
  * @param {String} script_file_path 原始檔路徑
@@ -558,21 +566,23 @@ function add_localization_marks(script_file_path) {
 	let new_line = contents.match(/\r?\n/);
 	new_line = new_line ? new_line[0] : '\n';
 
-	function add_localization_mark(message, message_id, had_add_prefix) {
-		if (!had_add_prefix && message.length < 20) {
+	function add_localization_mark(quoted_message, message_id, had_add_prefix) {
+		if (!had_add_prefix && quoted_message.length < 20) {
 			// 避免錯誤處理長度較短的訊息。改偵測像這樣的情況:
 			// gettext("message")
-			add_localization_mark('(' + message, message_id, true);
+			add_localization_mark('(' + quoted_message, message_id, true);
 			// {T:"message"}
-			add_localization_mark(' ' + message, message_id, true);
-			add_localization_mark(':' + message, message_id, true);
+			add_localization_mark(' ' + quoted_message, message_id, true);
+			add_localization_mark('\t' + quoted_message, message_id, true);
+			add_localization_mark(':' + quoted_message, message_id, true);
 			// ["message"]
-			add_localization_mark('[' + message, message_id, true);
+			add_localization_mark('[' + quoted_message, message_id, true);
 			// data-gettext="message"
-			add_localization_mark('=' + message, message_id, true);
+			add_localization_mark('=' + quoted_message, message_id, true);
+			return;
 		}
 
-		for (let index = 0; (index = contents.indexOf(message, index)) !== NOT_FOUND;) {
+		for (let index = 0; (index = contents.indexOf(quoted_message, index)) !== NOT_FOUND;) {
 			//console.trace([message, index]);
 			let previous_index_of_new_line = contents.lastIndexOf(new_line, index);
 			let spaces, previous_text, post_text;
@@ -586,7 +596,7 @@ function add_localization_marks(script_file_path) {
 				const previous_line = previous_text.match(/.+$/);
 				if (previous_line && PATTERN_gettext_config_line.test(previous_line[0])) {
 					// 跳過已經有標記的，避免多次添加在地化語言註記。
-					index += message.length;
+					index += quoted_message.length;
 					continue;
 				}
 				// e.g., post_text = '\n  gettext("message")'
@@ -595,20 +605,28 @@ function add_localization_marks(script_file_path) {
 				spaces = post_text.match(/^(\s*)/)[0];
 				//console.trace([message, index, spaces, contents.slice(previous_index_of_new_line, index)]);
 			}
+			if (PATTERN_gettext_config_line.test(post_text)) {
+				// 找到的這一行本身就是在地化語言註記。
+				index += quoted_message.length;
+				continue;
+			}
 			//CeL.info(`${add_localization_marks.name}: Add mark for [${message_id}] ${message}`);
 			const gettext_mark = `${spaces}// gettext_config:${JSON.stringify({ id: message_id })}`;
 			contents = previous_text
 				+ gettext_mark
-				+ post_text
-			index += gettext_mark.length + message.length;
+				+ post_text;
+			index += gettext_mark.length + quoted_message.length;
 			changed_count++;
 		}
 	}
 
 
 	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
-		add_localization_mark("'" + qqq_data.message.replace(/'/g, "\\'") + "'", message_id);
-		add_localization_mark(JSON.stringify(qqq_data.message), message_id);
+		const message = qqq_data.message;
+		if (ignore_messages.has(message))
+			continue;
+		add_localization_mark("'" + message.replace(/'/g, "\\'") + "'", message_id);
+		add_localization_mark(JSON.stringify(message), message_id);
 	}
 
 	if (changed_count > 0) {
@@ -697,7 +715,8 @@ function adapt_new_change(script_file_path, options) {
 			qqq_data[property] = value;
 		}
 
-		if (!Array.isArray(qqq_data.references)) qqq_data.references = qqq_data.references ? [qqq_data.references] : [];
+		if (!Array.isArray(qqq_data.references))
+			qqq_data.references = qqq_data.references ? [qqq_data.references] : [];
 		if (options.base_GitHub_path) {
 			console.assert(script_file_path.startsWith(options.source_base_path + '/'));
 			qqq_data.references.push(`{{GitHub|${options.base_GitHub_path}/blob/master${script_file_path.slice(options.source_base_path.length)}#L${line_index + 1}}}`);
@@ -725,8 +744,9 @@ function adapt_new_change(script_file_path, options) {
 
 async function modify_source_files() {
 	add_localization_marks(CeL.env.script_base_path + '../data/date.js');
+	add_localization_marks(CeL.env.script_base_path + '../../../program/work_crawler/gui_electron/gui_electron_functions.js');
 	if (false) {
-		adapt_new_change('data/date.js.bak', {
+		adapt_new_change(CeL.env.script_base_path + '../data/date.js.bak', {
 			source_base_path: CeL.env.script_base_path,
 			base_GitHub_path: "kanasimi/CeJS"
 		});
@@ -749,7 +769,7 @@ async function modify_source_files() {
 					});
 				}
 			}, {
-				filter: /\.js$/i,
+				filter: /\.(?:js|html?)$/i,
 				callback: resolve
 			});
 		});
@@ -770,8 +790,11 @@ function write_i18n_files(resources_path) {
 	let qqq_file_data = Object.create(null);
 	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
 		qqq_file_data[message_id] = qqq_data;
-		if (Array.isArray(qqq_data.references))
+		if (Array.isArray(qqq_data.references)) {
 			qqq_data.references = qqq_data.references.join('\n: ');
+		} else if (!qqq_data.references) {
+			CeL.warn(`${write_i18n_files.name}: 無任何引用的訊息: [${message_id}] ${qqq_data.message}`);
+		}
 		const qqq_value = [];
 		qqq_order.forEach((property, index) => {
 			const value = qqq_data[property];
@@ -791,6 +814,9 @@ function write_i18n_files(resources_path) {
 	CeL.write_file(resources_path + qqq_data_file_name, JSON.stringify(qqq_file_data));
 	// free
 	qqq_file_data = null;
+
+	console.trace(`debug`);
+	return;
 
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
 		// write_message_script_files()
@@ -838,9 +864,7 @@ ${JSON.stringify(language_code)});`;
 	// main messages of CeJS library
 	await build_locale_messages('application/locale/resources');
 
-	/*
 	build_main_script();
-	
+
 	update_package_file_version();
-	*/
 })();

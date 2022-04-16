@@ -1743,15 +1743,15 @@ function module_code(library_namespace) {
 				} else if (error.code === 'EPROTO'
 						&& require('tls').DEFAULT_MIN_VERSION === 'TLSv1.2'
 						&& library_namespace.platform('node', 12)) {
-					library_namespace.error([ 'get_URL_node: ', {
-						T : 'Node.js v12 and later versions '
-						//
-						+ 'disable TLS v1.0 and v1.1 by default. '
-					}, {
-						T : 'Please set tls.DEFAULT_MIN_VERSION = "TLSv1"'
-						//
-						+ ' first!'
-					}, ' [' + URL_to_fetch + ']' ]);
+					library_namespace
+							.error([
+									'get_URL_node: ',
+									{
+										T : 'Node.js v12 and later versions disable TLS v1.0 and v1.1 by default.'
+									},
+									{
+										T : 'Please set tls.DEFAULT_MIN_VERSION = "TLSv1" first!'
+									}, ' [' + URL_to_fetch + ']' ]);
 					/**
 					 * <code>
 					To solve:
@@ -1864,8 +1864,8 @@ function module_code(library_namespace) {
 				library_namespace.warn([
 						'get_URL_node: ',
 						{
-							T : [ '異常 HTTP 狀態碼 %1：%2', response.statusCode,
-									URL_to_fetch ]
+							T : [ 'Exception HTTP status code %1: %2',
+									response.statusCode, URL_to_fetch ]
 						} ]);
 			}
 

@@ -2948,8 +2948,9 @@ function module_code(library_namespace) {
 		// TODO: week, 周六
 
 		if (date_value_diff <= 35) {
-			return gettext(passed ? '%1 days ago' : '%1 days later', Math
-					.round(date_value_diff));
+			return gettext(passed ? '%1 days ago'
+			// gettext_config:{"id":"$1-days-later"}
+			: '%1 days later', Math.round(date_value_diff));
 		}
 
 		// ----------------------------
