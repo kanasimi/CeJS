@@ -916,7 +916,7 @@ ${JSON.stringify(language_code)});`;
 	let original_contents = CeL.read_file(fso_path);
 	if (!original_contents || (original_contents = original_contents.toString()) !== new_contents) {
 		CeL.info(`${write_message_script_file.name}: Create new message script: ${fso_path}`);
-		CeL.write_file(fso_path + '.bak', new_contents);
+		CeL.write_file(fso_path, new_contents);
 	}
 }
 
@@ -930,7 +930,7 @@ function write_i18n_data_file({ language_code, locale_data }) {
 		original_contents = JSON.stringify(JSON.parse(original_contents.toString().trim()));
 	const new_contents = JSON.stringify(locale_data);
 	if (original_contents !== new_contents) {
-		CeL.info(`${write_i18n_data_file.name}: Create new i18n file: ${fso_path}`);
+		CeL.info(`${write_i18n_data_file.name}: Create new i18n data file: ${fso_path}`);
 		CeL.write_file(fso_path + '.bak', new_contents);
 	}
 }
