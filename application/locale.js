@@ -356,8 +356,16 @@ function module_code(library_namespace) {
 				return '、';
 			}
 
+			if (punctuation_mark.length !== 1)
+				return punctuation_mark;
+
 			// https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)
-			return String.fromCharCode(punctuation_mark.charCodeAt(0) + 0xfee0);
+			var char_code = punctuation_mark.charCodeAt(0);
+			if (char_code < 0xff) {
+				return String.fromCharCode(char_code + 0xfee0);
+			}
+
+			return punctuation_mark;
 		}
 
 		if (/^[^\x20-\xfe]/.test(punctuation_mark)) {
@@ -370,7 +378,15 @@ function module_code(library_namespace) {
 						.repeat(punctuation_mark.length) : '...';
 			}
 
-			return String.fromCharCode(punctuation_mark.charCodeAt(0) - 0xfee0);
+			if (punctuation_mark.length !== 1)
+				return punctuation_mark;
+
+			var char_code = punctuation_mark.charCodeAt(0);
+			if (char_code > 0xfee0) {
+				return String.fromCharCode(char_code - 0xfee0);
+			}
+
+			return punctuation_mark;
 		}
 
 		return punctuation_mark;

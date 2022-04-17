@@ -898,7 +898,7 @@ function write_message_script_file({ resources_path, language_code, locale_data 
 	for (const [message_id, locale_message] of Object.entries(locale_data)) {
 		if (message_id === '@metadata') continue;
 		const qqq_data = qqq_data_Map.get(message_id);
-		const key_mark = JSON.stringify(message_id) + ':';
+		const key_mark = JSON.stringify(qqq_data.message) + ':';
 		if (/^function(?:\s|\()/.test(locale_message)) {
 			const original_function = message_to_localized_mapping[language_code] && message_to_localized_mapping[language_code][qqq_data.message];
 			if (String(original_function) === locale_message) {
