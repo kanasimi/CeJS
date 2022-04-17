@@ -1975,7 +1975,9 @@ function module_code(library_namespace) {
 
 		歲次 : guess_year_stem_branch,
 		// alias
+		// gettext_config:{"id":"year-of-the-sexagenary-cycle"}
 		年干支 : '歲次',
+		// gettext_config:{"id":"year-of-the-sexagenary-cycle"}
 		年柱 : '歲次',
 
 		日干支序 : date_stem_branch_index,
@@ -1985,6 +1987,7 @@ function module_code(library_namespace) {
 			return index_to_stem_branch(date_stem_branch_index(date_value,
 					options));
 		},
+		// gettext_config:{"id":"day-of-the-sexagenary-cycle"}
 		日柱 : '日干支',
 
 		// 時辰干支: 計算距離甲子共有幾個時辰，再於 index_to_stem_branch() 取模數。
@@ -2368,39 +2371,63 @@ function module_code(library_namespace) {
 	 * https://zh.wikipedia.org/wiki/%E6%A8%A1%E5%9D%97:CGroup/%E5%9C%B0%E5%90%8D
 	 */
 	var reform_by_region = {
+		// gettext_config:{"id":"italy"}
 		'Italy' : '1582/10/15',
+		// gettext_config:{"id":"poland"}
 		'Poland' : '1582/10/15',
+		// gettext_config:{"id":"portugal"}
 		'Portugal' : '1582/10/15',
+		// gettext_config:{"id":"spain"}
 		'Spain' : '1582/10/15',
+		// gettext_config:{"id":"france"}
 		'France' : '1582/12/20',
 		// 盧森堡 Source?
+		// gettext_config:{"id":"luxembourg"}
 		'Luxembourg' : '1583/1/1',
 		// Holland: 1583/1/12
+		// gettext_config:{"id":"netherlands"}
 		'Netherlands' : '1583/1/12',
 		// Source?
+		// gettext_config:{"id":"bavaria"}
 		'Bavaria' : '1583/10/16',
+		// gettext_config:{"id":"austria"}
 		'Austria' : '1584/1/17',
+		// gettext_config:{"id":"switzerland"}
 		'Switzerland' : '1584/1/22',
+		// gettext_config:{"id":"hungary"}
 		'Hungary' : '1587/11/1',
+		// gettext_config:{"id":"germany"}
 		'Germany' : '1700/3/1',
+		// gettext_config:{"id":"norway"}
 		'Norway' : '1700/3/1',
+		// gettext_config:{"id":"denmark"}
 		'Denmark' : '1700/3/1',
 		// Kingdom of Great Britain, 大不列顛王國, グレートブリテン王国, 英國
 		// https://en.wikipedia.org/wiki/Calendar_%28New_Style%29_Act_1750
+		// gettext_config:{"id":"great-britain"}
 		'Great Britain' : '1752/9/14',
+		// gettext_config:{"id":"sweden"}
 		'Sweden' : '1753/3/1',
+		// gettext_config:{"id":"finland"}
 		'Finland' : '1753/3/1',
 		// 日本
 		// 'Japan' : '1873/1/1',
 		// 中國
 		// 'China' : '1911/11/20',
+		// gettext_config:{"id":"bulgaria"}
 		'Bulgaria' : '1916/4/14',
 		// USSR, U.S.S.R., 蘇聯
+		// gettext_config:{"id":"soviet-union"}
 		'Soviet Union' : '1918/2/14',
+		// gettext_config:{"id":"serbia"}
 		'Serbia' : '1919/2/1',
+		// gettext_config:{"id":"romania"}
 		'Romania' : '1919/2/1',
+		// gettext_config:{"id":"greece"}
 		'Greece' : '1924/3/23',
+		// gettext_config:{"id":"turkey"}
 		'Turkey' : '1926/1/1',
+		// gettext_config:{"id":"egypt"}
 		'Egypt' : '1928/10/1'
 	// 之前使用伊斯蘭曆法。
 	// 'Saudi Arabia':'2016/10/1'
@@ -2789,10 +2816,12 @@ function module_code(library_namespace) {
 			difference = diff + diff2 / 12;
 			// diff = {String} format to show
 			if (options && options.月) {
+				// gettext_config:{"id":"$1-y-$2-m"}
 				diff = gettext('%1 Y %2 M', diff, Math.round(diff2));
 			} else {
 				// years 近一年, 一年多
 				// SI symbol: a (for Latin annus)
+				// gettext_config:{"id":"$1-y"}
 				diff = gettext('%1 Y', difference.to_fixed(to_fixed_digits));
 			}
 			if (options && options.歲) {
@@ -2815,26 +2844,32 @@ function module_code(library_namespace) {
 		}
 
 		if (diff2 >= 1) {
+			// gettext_config:{"id":"$1-m"}
 			return gettext('%1 M', diff2.to_fixed(to_fixed_digits));
 		}
 
 		if (difference < 1000) {
+			// gettext_config:{"id":"$1-ms"}
 			return gettext('%1 ms', difference | 0);
 		}
 
 		if ((difference /= 1000) < 60) {
+			// gettext_config:{"id":"$1-s"}
 			return gettext('%1 s', difference.to_fixed(to_fixed_digits));
 		}
 
 		if ((difference /= 60) < 60) {
+			// gettext_config:{"id":"$1-min"}
 			return gettext('%1 min', difference.to_fixed(to_fixed_digits));
 		}
 
 		if ((difference /= 60) < 24) {
+			// gettext_config:{"id":"$1-hr"}
 			return gettext('%1 hr', difference.to_fixed(to_fixed_digits));
 		}
 
 		// day
+		// gettext_config:{"id":"$1-d"}
 		return gettext('%1 d', (difference / 24).to_fixed(to_fixed_digits));
 
 		// TODO: weeks
@@ -2903,25 +2938,34 @@ function module_code(library_namespace) {
 		}
 
 		if (date_value_diff < 10) {
-			return gettext(passed ? 'several seconds ago' : 'soon');
+			// gettext_config:{"id":"several-seconds-ago"}
+			return gettext(passed ? 'several seconds ago'
+			// gettext_config:{"id":"soon"}
+			: 'soon');
 		}
 		if (date_value_diff < 60) {
-			return gettext(passed ? '%1 seconds ago' : '%1 seconds later', Math
-					.round(date_value_diff));
+			// gettext_config:{"id":"$1-seconds-ago"}
+			return gettext(passed ? '%1 seconds ago'
+			// gettext_config:{"id":"$1-seconds-later"}
+			: '%1 seconds later', Math.round(date_value_diff));
 		}
 
 		// → minutes
 		date_value_diff /= 60;
 		if (date_value_diff < 60) {
-			return gettext(passed ? '%1 minutes ago' : '%1 minutes later', Math
-					.round(date_value_diff));
+			// gettext_config:{"id":"$1-minutes-ago"}
+			return gettext(passed ? '%1 minutes ago'
+			// gettext_config:{"id":"$1-minutes-later"}
+			: '%1 minutes later', Math.round(date_value_diff));
 		}
 
 		// → hours
 		date_value_diff /= 60;
 		if (date_value_diff < 3) {
-			return gettext(passed ? '%1 hours ago' : '%1 hours later', Math
-					.round(date_value_diff));
+			// gettext_config:{"id":"$1-hours-ago"}
+			return gettext(passed ? '%1 hours ago'
+			// gettext_config:{"id":"$1-hours-later"}
+			: '%1 hours later', Math.round(date_value_diff));
 		}
 
 		// ----------------------------
@@ -2949,6 +2993,7 @@ function module_code(library_namespace) {
 		// TODO: week, 周六
 
 		if (date_value_diff <= 35) {
+			// gettext_config:{"id":"$1-days-ago"}
 			return gettext(passed ? '%1 days ago'
 			// gettext_config:{"id":"$1-days-later"}
 			: '%1 days later', Math.round(date_value_diff));
@@ -2957,8 +3002,10 @@ function module_code(library_namespace) {
 		// ----------------------------
 
 		if (false && date_value_diff < 30) {
-			return gettext(passed ? '%1 weeks ago' : '%1 weeks later', Math
-					.round(date_value_diff / 7));
+			// gettext_config:{"id":"$1-weeks-ago"}
+			return gettext(passed ? '%1 weeks ago'
+			// gettext_config:{"id":"$1-weeks-later"}
+			: '%1 weeks later', Math.round(date_value_diff / 7));
 		}
 
 		// ----------------------------

@@ -199,6 +199,7 @@ function module_code(library_namespace) {
 			if (index === NOT_FOUND
 			//
 			&& (index = text.indexOf('<div id="novel_honbun"')) === NOT_FOUND) {
+				// gettext_config:{"id":"unable-to-parse-chapter-data-and-get-chapter-content-text"}
 				throw new Error('無法解析章節資料並取得章節內容文字！');
 			}
 			text = text.slice(index);
@@ -236,6 +237,7 @@ function module_code(library_namespace) {
 						});
 					} else {
 						library_namespace.error({
+							// gettext_config:{"id":"unable-to-extract-image-url-from-link-in-chapter-content-$1"}
 							T : [ '無法從章節內容中之連結抽取出圖片網址：%1', url ]
 						});
 					}

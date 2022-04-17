@@ -73,6 +73,7 @@ CeL.env.era_data_load = function(country, queue) {
 	if (typeof country === 'object') {
 		// 第一次呼叫 callback。
 		// 在載入era模組之前設定好，可以用來篩選需要載入的國家。
+		// gettext_config:{"id":"china"}
 		queue.truncate().push('中國');
 		return;
 	}
@@ -580,6 +581,7 @@ function module_code(library_namespace) {
 	// 不使用 parser。
 	PASS_PARSER = [ 'PASS_PARSER' ],
 	// 標準時間分析器名稱（如公元）
+	// gettext_config:{"id":"common-era"}
 	standard_time_parser_name = '公元',
 	// 標準時間分析器（如公元紀年日期）, 標準紀年時間
 	standard_time_parser = 'CE',
@@ -2440,6 +2442,7 @@ function module_code(library_namespace) {
 
 							message = '因參照紀年[' + this.參照紀年
 									+ ']錯誤，本紀年顯示的是錯誤的日期！';
+							// gettext_config:{"id":"note"}
 							add_attribute(this, '注', message, true);
 
 							this.calendar = this.calendar.replace(/:.+/g, ':'
@@ -3714,6 +3717,7 @@ function module_code(library_namespace) {
 			month_index++;
 
 		switch (日) {
+		// gettext_config:{"id":"new-moon"}
 		case '朔':
 			// 警告:藏曆規定每月十五為望，所以初一可能並不是朔。伊斯蘭曆將新月初現定為每月的第一天，朔則在月末前三四天。
 			日 = 1;
@@ -4637,6 +4641,7 @@ function module_code(library_namespace) {
 			if (Array.isArray(era) && era.length === 1 && era[0].includes(
 			//
 			pack_era.month_separator))
+				// gettext_config:{"id":"era-name"}
 				era.unshift('紀年', '');
 			if (Array.isArray(era) && 1 < era.length) {
 				// 使 pack_era() 可採用 Era / 壓縮過的日期資料 為 input。
@@ -6114,6 +6119,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @example <code>
 
+	// gettext_config:{"id":"china"}
 	CeL.era.Date_of_CE_year(1850, 1, 1, '中國');
 	CeL.era.Date_of_CE_year(1850);
 
@@ -6125,8 +6131,8 @@ function module_code(library_namespace) {
 	 *            month of era. default: START_MONTH = 1.
 	 * @param {Integer}[日]
 	 *            date of era. default: START_DATE = 1.
-	 * @param {String}[era_key]
-	 *            e.g., '中國'
+	 * @param {String}[era_key] //
+	 *            gettext_config:{"id":"china"} e.g., '中國'
 	 * 
 	 * @returns {Date}
 	 * 
@@ -6157,6 +6163,7 @@ function module_code(library_namespace) {
 		return 日期;
 	}
 
+	// gettext_config:{"id":"china"}
 	get_Date_of_key_by_CE.default_key = '中國';
 
 	// ---------------------------------------------------------------------//
@@ -6189,8 +6196,9 @@ function module_code(library_namespace) {
 	 *            duration: [start_date, end_date]
 	 * @param {Object}[options]
 	 *            附加參數/設定特殊功能與選項. 此 options 可能會被變更!<br />
-	 *            {String|Date}.base: base date. 會選出最接近此日期之紀年。<br />
-	 *            {String}.range: 限定於此範圍內尋找紀年。e.g., '中國'<br />
+	 *            {String|Date}.base: base date. 會選出最接近此日期之紀年。<br /> //
+	 *            gettext_config:{"id":"china"} {String}.range:
+	 *            限定於此範圍內尋找紀年。e.g., '中國'<br />
 	 *            {Boolean}.get_era: 僅回傳所解析出之紀年 {Era}。<br />
 	 *            {Boolean}.get_era_list: 僅回傳所解析出之紀年 list: {Set}。<br />
 	 *            {Boolean}.get_range: 僅回傳所解析出之期間: [ "前", "後" ]。<br />
@@ -7079,6 +7087,7 @@ function module_code(library_namespace) {
 		}
 
 		if (!country)
+			// gettext_config:{"id":"china"}
 			country = '中國';
 		日 |= 0;
 		if (日 < START_DATE)
@@ -7204,6 +7213,7 @@ function module_code(library_namespace) {
 
 				if (library_namespace.is_debug())
 					library_namespace.info([ 'add_period: ', {
+						// gettext_config:{"id":"skip-$1-the-$2-is-for-reference-purpose-only"}
 						T : [ '跳過 [%1]：本[%2]僅供參照用。', o.toString(), 'period' ]
 					} ]);
 			});
@@ -7501,6 +7511,7 @@ function module_code(library_namespace) {
 			if (era.參照用 && !options.含參照用
 					&& !get_dates.no_limit_era.includes(era)) {
 				library_namespace.info([ 'get_dates: ', {
+					// gettext_config:{"id":"skip-$1-the-$2-is-for-reference-purpose-only"}
 					T : [ '跳過 [%1]：本[%2]僅供參照用。', era.toString(), '紀年' ]
 				} ]);
 				return;
@@ -8013,7 +8024,9 @@ function module_code(library_namespace) {
 		if (era_date.共存紀年) {
 			// old: ☼
 			date = '<br />⏳ ';
-			tmp.push('<hr />' + library_namespace.gettext('共存紀年') + '：' + date
+			tmp.push('<hr />'
+			// gettext_config:{"id":"contemporary-period"}
+			+ library_namespace.gettext('共存紀年') + '：' + date
 			//
 			+ era_date.共存紀年.map(function(era_date) {
 				var era_string = era_date.toString();
@@ -8463,17 +8476,21 @@ function module_code(library_namespace) {
 							options);
 		},
 		// 重新定義 (override) alias
+		// gettext_config:{"id":"year-of-the-sexagenary-cycle"}
 		年干支 : '歲次',
+		// gettext_config:{"id":"year-of-the-sexagenary-cycle"}
 		年柱 : '歲次',
 
 		// 星座 : '',
 
 		// 佔位:會引用 Date object 本身的屬性。
 		// see strftime()
+		// gettext_config:{"id":"month-of-the-sexagenary-cycle"}
 		月干支 : '月干支',
 		// 每年正月初一即改變干支，例如錢益謙在崇禎十五年除夕作「壬午除夕」、隔日作「癸未元日」
 		// 日干支:'干支紀日',
 		// 月干支:'干支紀月',
+		// gettext_config:{"id":"month-of-the-sexagenary-cycle"}
 		月柱 : '月干支',
 		閏月 : '(是否為閏月)',
 		大小月 : '(大小月)',

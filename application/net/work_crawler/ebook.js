@@ -80,7 +80,8 @@ function module_code(library_namespace) {
 		if (false) {
 			// 不採用插入的方法，直接改掉下一個章節。
 			library_namespace.info(library_namespace.display_align([
-					[ gettext('章節編號%1：', chapter_NO), next_chapter_url ],
+			// gettext_config:{"id":"chapter-$1"}
+			[ gettext('章節編號%1：', chapter_NO), next_chapter_url ],
 					[ '→ ', next_url ] ]));
 			next_chapter.url = next_url;
 		}
@@ -95,6 +96,7 @@ function module_code(library_namespace) {
 
 		var message = work_data.chapter_list[chapter_NO - 1];
 		message = [ 'check_next_chapter: ', {
+			// gettext_config:{"id":"insert-a-chapter-url-after-chapter-$1-$2"}
 			T : [ 'Insert a chapter url after chapter %1: %2', chapter_NO
 			//
 			+ (message && message.url ? ' (' + message.url + ')' : ''),
@@ -132,6 +134,7 @@ function module_code(library_namespace) {
 		if (library_namespace.directory_exists(cache_directory)) {
 			library_namespace.info('extract_convert_cache_directory: '
 			// 語言轉換 TAG_text_converted
+			// gettext_config:{"id":"overwrite-the-files-in-the-cache-directory-$1-for-traditional-and-simplified-chinese-conversions"}
 			+ gettext('將覆寫繁簡中文轉換 cache 目錄 [%1] 中的檔案。', cache_directory));
 		}
 
@@ -146,8 +149,11 @@ function module_code(library_namespace) {
 		cache_archive_file = new library_namespace.storage.archive(
 				cache_archive_file);
 		return new Promise(function(resolve, reject) {
-			library_namespace.log_temporary(gettext('解壓縮繁簡中文轉換 cache 檔案: [%1]。',
-					cache_archive_file.archive_file_path));
+			library_namespace.log_temporary(gettext(
+			// gettext_config:{"id":"decompress-the-cache-files-for-traditional-and-simplified-chinese-conversions-$1"}
+			'解壓縮繁簡中文轉換 cache 檔案: [%1]。',
+			//
+			cache_archive_file.archive_file_path));
 			cache_archive_file.extract({
 				// 解壓縮 "!short_sentences_word_list.json" 時會跳出 prompt。
 				yes : true,
@@ -166,6 +172,7 @@ function module_code(library_namespace) {
 		cache_archive_file = new library_namespace.storage.archive(
 				cache_archive_file);
 		return new Promise(function(resolve, reject) {
+			// gettext_config:{"id":"compress-the-cache-files-for-traditional-and-simplified-chinese-conversions-$1"}
 			library_namespace.log_temporary(gettext('壓縮繁簡中文轉換 cache 檔案: [%1]。',
 					cache_archive_file.archive_file_path));
 			cache_archive_file.update(cache_directory, {
@@ -211,6 +218,7 @@ function module_code(library_namespace) {
 		return work_data.last_update_Date;
 	}
 
+	// gettext_config:{"id":"language-conversion"}
 	var TAG_text_converted = '語言轉換';
 	function create_ebook(work_data, options) {
 		// var forced_recreate = options && options.forced_recreate;
@@ -324,6 +332,7 @@ function module_code(library_namespace) {
 					ebook_file_path[0] + ebook_file_path[1]);
 			library_namespace.log_temporary(gettext(
 			// ebook_archive.archive_file_path
+			// gettext_config:{"id":"extract-ebook-as-cache-$1"}
 			'Extract ebook as cache: [%1]', ebook_file_path[1]));
 			ebook_archive.extract({
 				output : ebook_directory
@@ -531,12 +540,16 @@ function module_code(library_namespace) {
 			part_title = this.convert_text_language(part_title);
 			chapter_title = this.convert_text_language(chapter_title);
 			library_namespace.log_temporary(gettext(
-					this.convert_to_language === 'TW' ? '將簡體中文轉換成繁體中文：《%1》'
-							: '将繁体中文转换成简体中文：《%1》', chapter_title));
-			process.title = gettext(
-					this.convert_to_language === 'TW' ? '繁化: %1' : '简化: %1',
-					chapter_title)
-					+ ' @ ' + this.id;
+					this.convert_to_language === 'TW'
+					// gettext_config:{"id":"convert-simplified-chinese-to-traditional-chinese-«$1»"}
+					? '將簡體中文轉換成繁體中文：《%1》'
+					// gettext_config:{"id":"convert-traditional-chinese-to-simplified-chinese-«$1»"}
+					: '将繁体中文转换成简体中文：《%1》', chapter_title));
+			process.title = gettext(this.convert_to_language === 'TW'
+			// gettext_config:{"id":"traditionalize-$1"}
+			? '繁化: %1'
+			// gettext_config:{"id":"simplify-$1"}
+			: '简化: %1', chapter_title) + ' @ ' + this.id;
 			data.original_text = data.text;
 			data.text = this.convert_text_language(data.text)
 			// TODO: 把半形標點符號轉換為全形標點符號
@@ -615,10 +628,11 @@ function module_code(library_namespace) {
 
 				if (contents.length < _this.MIN_CHAPTER_SIZE) {
 					crawler_namespace.set_work_status(work_data, '§'
-							+ chapter_NO
-							+ ': '
+							+ chapter_NO + ': '
+							// gettext_config:{"id":"too-few-words-($1-characters)"}
 							+ (contents.length ? gettext('字數過少（%1字元）',
-									contents.length) : '無內容'));
+							// gettext_config:{"id":"no-content"}
+							contents.length) : '無內容'));
 				}
 				return contents;
 			}
@@ -712,6 +726,7 @@ function module_code(library_namespace) {
 			if (!ebooks) {
 				// 照理來說應該在之前已經創建出來了。
 				library_namespace.warn({
+					// gettext_config:{"id":"there-is-no-directory-for-archive-files-$1"}
 					T : [ '不存在封存檔案用的目錄：%1', _this.ebook_archive_directory ]
 				});
 				return;
@@ -780,8 +795,9 @@ function module_code(library_namespace) {
 			// 不應再被納入檢測。
 			library_namespace.info(library_namespace.display_align([
 			// Set milestone: 日本小說網站有時會商業化，將之前的作品內容大幅刪除。這時若刪掉舊檔，就會失去這些內容。
+			// gettext_config:{"id":"preserve"}
 			[ gettext('保留舊檔：'), last_file ],
-			//
+			// gettext_config:{"id":"move-to-→"}
 			[ gettext('搬移至 →'), rename_to ] ]));
 			library_namespace.move_file(last_file, rename_to);
 		});
@@ -791,6 +807,7 @@ function module_code(library_namespace) {
 		for_each_old_ebook(this.ebook_archive_directory, function(last_file,
 				this_file) {
 			library_namespace.info([ {
+				// gettext_config:{"id":"removed-old-files"}
 				T : '移除舊檔案：'
 			},
 			// 新檔比較大。刪舊檔。
@@ -892,10 +909,12 @@ function module_code(library_namespace) {
 			});
 		}
 
+		// gettext_config:{"id":"archive-epub-ebook-$1"}
 		process.title = gettext('打包 epub 電子書：%1', work_data.title) + ' @ '
 				+ this.id;
 		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
 		library_namespace.debug({
+			// gettext_config:{"id":"archive-epub-ebook-$1"}
 			T : [ '打包 epub 電子書：%1', file_path[1] ]
 		}, 1, 'pack_ebook');
 

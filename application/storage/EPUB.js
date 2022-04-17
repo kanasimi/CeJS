@@ -137,6 +137,7 @@ function module_code(library_namespace) {
 			if (Array.isArray(rootfile)) {
 				library_namespace.error({
 					// <rootfile>
+					// gettext_config:{"id":"this-library-not-yet-support-multiple-rootfiles-(.opf)"}
 					T : '本函式庫尚不支援多 rootfile (.opf)！'
 				});
 				rootfile = rootfile.filter(function(root_file) {
@@ -209,6 +210,7 @@ function module_code(library_namespace) {
 			if (/^[a-z][a-z\d]*$/i.test(options.id_prefix)) {
 				this.id_prefix = options.id_prefix;
 			} else {
+				// gettext_config:{"id":"invalid-id-prefix-$1"}
 				throw new Error(gettext('Invalid id prefix: %1',
 						options.id_prefix));
 			}
@@ -216,6 +218,7 @@ function module_code(library_namespace) {
 
 		if (!this.root_directory_name) {
 			library_namespace.warn({
+				// gettext_config:{"id":"if-the-e-book-chapter-directory-is-not-set-all-chapter-content-will-be-placed-directly-under-the-e-book-root-directory"}
 				T : '未設定電子書章節目錄，將把所有章節內容直接放在電子書根目錄底下！'
 			});
 		}
@@ -336,6 +339,7 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.debug({
+			// gettext_config:{"id":"rebuild-index_of_id"}
 			T : '重建 index_of_id……'
 		}, 1, 'rebuild_index_of_id');
 		list.forEach(function(item, index) {
@@ -530,7 +534,8 @@ function module_code(library_namespace) {
 			}
 			if (!(index in resources)) {
 				library_namespace.warn({
-					T : [ '<spine> 中包含了重複的 id，將跳過之：', chapter.idref ]
+					// gettext_config:{"id":"<spine>-contains-a-duplicate-id-will-be-skipping-$1"}
+					T : [ '<spine> 中包含了重複的 id，將跳過之：%1', chapter.idref ]
 				});
 				return;
 			}
@@ -685,6 +690,7 @@ function module_code(library_namespace) {
 				if (element[tag_name] === value[tag_name]) {
 					library_namespace.debug(
 							{
+								// gettext_config:{"id":"duplicate-element-$1"}
 								T : [ 'Duplicate element: %1',
 										JSON.stringify(element) ]
 							}, 3);
@@ -720,6 +726,7 @@ function module_code(library_namespace) {
 			}
 			// set object
 			if (!value[required]) {
+				// gettext_config:{"id":"invalid-metadata-value-$1"}
 				throw new Error(gettext('Invalid metadata value: %1',
 				//
 				JSON.stringify(value)));
@@ -767,6 +774,7 @@ function module_code(library_namespace) {
 			if (item.id in this.resource_index_of_id) {
 				var index = this.resource_index_of_id[item.id];
 				library_namespace.error([ 'add_manifest_item: ', {
+					// gettext_config:{"id":"resources-with-the-same-id-already-exist-so-the-resources-that-follow-will-deleted"}
 					T : '已經存在相同 id 之資源，後面的資源將直接消失！'
 				} ]);
 				console.error(this.resources[index]);
@@ -784,6 +792,7 @@ function module_code(library_namespace) {
 			if (item.id in this.chapter_index_of_id) {
 				var index = this.chapter_index_of_id[item.id];
 				library_namespace.error([ 'add_manifest_item: ', {
+					// gettext_config:{"id":"resources-with-the-same-chapter-already-exist-so-the-resources-that-follow-will-deleted"}
 					T : '已經存在相同 id 之章節，後面的章節將直接消失！'
 				} ]);
 				console.error(this.chapters[index]);
@@ -903,6 +912,7 @@ function module_code(library_namespace) {
 	 */
 	function encode_identifier(string) {
 		if (typeof string !== 'string') {
+			// gettext_config:{"id":"unable-to-encode-invalid-id-$1"}
 			throw new Error(gettext('無法編碼無效的 id：%1', JSON.stringify(string)));
 		}
 
@@ -961,6 +971,7 @@ function module_code(library_namespace) {
 			return decodeURIComponent(identifier);
 		} catch (e) {
 			library_namespace.error([ 'decode_identifier: ', {
+				// gettext_config:{"id":"unable-to-decode-$1"}
 				T : [ '無法解碼：[%1]', identifier ]
 			} ]);
 			throw e;
@@ -1009,6 +1020,7 @@ function module_code(library_namespace) {
 
 		// 可能僅是在測試是否可以偵測得出 type。
 		library_namespace.debug({
+			// gettext_config:{"id":"unable-to-determine-the-type-of-file-for-$1"}
 			T : [ '無法判別檔案 [%1] 的類型。', file_name ]
 		});
 	}
@@ -1064,6 +1076,7 @@ function module_code(library_namespace) {
 		if (!id) {
 			if (!href) {
 				library_namespace.error({
+					// gettext_config:{"id":"invalid-item-data-$1"}
 					T : [ '項目資訊無效：%1', JSON.stringify(item_data) ]
 				});
 				console.error(item_data);
@@ -1109,6 +1122,7 @@ function module_code(library_namespace) {
 
 			// 若 id / href 已存在，可能是因為有重複的標題，這時應發出警告。
 			library_namespace.info([ 'normalize_item: ', {
+				// gettext_config:{"id":"this-id-already-exists-will-change-the-id-of-former-chapter"}
 				T : '先前已經存在相同 id 之章節，將更改後者之 id。'
 			}, '\n	',
 			//
@@ -1145,6 +1159,7 @@ function module_code(library_namespace) {
 		// ↑ 可能是placeholder，因此僅作debug。
 		&& !/^[a-z]+\/[a-z\d+]+$/.test(item['media-type'])) {
 			library_namespace.warn({
+				// gettext_config:{"id":"media-type-is-not-set-or-media-type-is-invalid-$1"}
 				T : [ '未設定 media-type，或 media-type 無效：%1',
 				//
 				JSON.stringify(item) ]
@@ -1236,6 +1251,7 @@ function module_code(library_namespace) {
 	// normailize_contents(normailize_contents(contents))
 	function normailize_contents(contents) {
 		library_namespace.debug({
+			// gettext_config:{"id":"formalizating-xhtml-chapter-content-$1"}
 			T : [ '正規化 XHTML 書籍章節內容：%1', contents ]
 		}, 6);
 		contents = contents
@@ -1293,6 +1309,7 @@ function module_code(library_namespace) {
 		// contents = contents.replace(/<script[^<>]*>[\s\S]*?<\/script>/g, '');
 
 		library_namespace.debug({
+			// gettext_config:{"id":"the-content-of-the-chapter-after-formalization-$1"}
 			T : [ '正規化後之章節內容：%1', contents ]
 		}, 6);
 		return contents;
@@ -1321,6 +1338,7 @@ function module_code(library_namespace) {
 
 		if (Array.isArray(item_data)) {
 			if (contents) {
+				// gettext_config:{"id":"set-multiple-files-to-the-same-content-$1"}
 				throw new Error(gettext('設定多個檔案為相同的內容：%1', item_data));
 			}
 			return item_data.map(function(_item_data) {
@@ -1362,6 +1380,7 @@ function module_code(library_namespace) {
 				// TODO: reget resource
 				// && item['media-type'] && item['media-type'] !== 'undefined'
 				) {
+					// gettext_config:{"id":"already-have-the-same-resource-file-$1-$2"}
 					var message = gettext('已經有相同的資源檔 [%1] %2。',
 					//
 					item['media-type'], resource[KEY_DATA].url);
@@ -1369,6 +1388,7 @@ function module_code(library_namespace) {
 					// 有手動設定.href
 					&& item_data.href !== resource.href) {
 						library_namespace.error([ message + '\n', {
+							// gettext_config:{"id":"but-.href-is-different-please-manually-fix-it-$1"}
 							T : [ '但 .href 不同，您必須手動修正：%1',
 							//
 							resource.href + '→' + item_data.href ]
@@ -1389,6 +1409,7 @@ function module_code(library_namespace) {
 			while (file_path in this.downloading) {
 				if (this.downloading[file_path].url === item_data.url) {
 					library_namespace.log([ 'add_chapter: ', {
+						// gettext_config:{"id":"the-file-is-already-in-the-download-queue-skipping-the-repeated-download-request-$1"}
 						T : [ '檔案已在下載隊列中，跳過重複下載動作：%1', file_path ]
 					} ]);
 					// console.log(this.downloading[file_path]);
@@ -1396,11 +1417,11 @@ function module_code(library_namespace) {
 				}
 
 				library_namespace.debug([ 'add_chapter: ', {
-					T : [ '下載隊列中存在相同檔名，卻有著不同網址的資源：'
+					T : [
+					// gettext_config:{"id":"there-are-resources-in-the-download-queue-that-have-the-same-file-name-but-different-urls-url-$1-in-the-download-queue-≠-url-$2-to-be-downloaded-try-to-change-to-another-file-name"}
+					'下載隊列中存在相同檔名，卻有著不同網址的資源：下載隊列中 URL [%1] ≠ 準備下載之 URL [%2]，嘗試改成另一個檔案名稱。'
 					//
-					+ '下載隊列中 URL [%1] ≠ 準備下載之 URL [%2]，嘗試改成另一個檔案名稱。',
-					//
-					this.downloading[file_path].url, item_data.url ]
+					, this.downloading[file_path].url, item_data.url ]
 				} ]);
 
 				file_path = file_path.replace(
@@ -1422,6 +1443,7 @@ function module_code(library_namespace) {
 			if (item_data.href && item_data.href !== item.href) {
 				// 有手動設定.href。
 				library_namespace.error([ 'add_chapter: ', {
+					// gettext_config:{"id":"to-update-changed-file-name-you-need-to-manually-change-the-original-file-name-from-the-original-folder"}
 					T : '儲存檔名改變，您需要自行修正原參照文件中之檔名：'
 				}, '\n', item_data.href + ' →\n' + item.href ]);
 			}
@@ -1439,6 +1461,7 @@ function module_code(library_namespace) {
 			if (item_data.id && item_data.id !== item.id) {
 				// 有手動設定.href
 				library_namespace.error([ 'add_chapter: ', {
+					// gettext_config:{"id":"the-id-changes-you-need-to-correct-the-file-name-in-the-original-folder"}
 					T : 'id 改變，您需要自行修正原參照文件中之檔名：'
 				}, '\n', item_data.id + ' →\n' + item.id ]);
 			}
@@ -1461,6 +1484,7 @@ function module_code(library_namespace) {
 			this.initialize();
 
 			library_namespace.log([ 'add_chapter: ', {
+				// gettext_config:{"id":"fetching-url-$1"}
 				T : [ '自網路取得 URL：%1', item_data.url ]
 			} ]);
 
@@ -1473,9 +1497,9 @@ function module_code(library_namespace) {
 					// 需要連接網站的重要原因之一是為了取得 media-type。
 					&& item['media-type'] !== XMLHttp.type) {
 						library_namespace.error([ 'add_chapter: ', {
-							T : [ '已取得之資源，其內容之媒體類型為 [%1]，'
-							//
-							+ '與從副檔名所得到的媒體類型 [%2] 不同！',
+							T : [
+							// gettext_config:{"id":"the-resource-that-has-been-obtained-has-a-media-type-of-$1-which-is-different-from-the-media-type-$2-obtained-from-the-extension-file"}
+							'已取得之資源，其內容之媒體類型為 [%1]，與從副檔名所得到的媒體類型 [%2] 不同！',
 							//
 							XMLHttp.type, item['media-type'] ]
 						} ]);
@@ -1485,6 +1509,7 @@ function module_code(library_namespace) {
 
 				} else if (!item['media-type']) {
 					library_namespace.error({
+						// gettext_config:{"id":"unable-to-identify-the-media-type-of-the-acquired-resource-$1"}
 						T : [ '無法判別已取得資源之媒體類型：%1', item_data.url ]
 					});
 				}
@@ -1492,6 +1517,7 @@ function module_code(library_namespace) {
 				// 基本檢測。
 				if (/text/i.test(item_data.type)) {
 					library_namespace.error({
+						// gettext_config:{"id":"the-resource-obtained-type-$1-is-not-a-image-file-$2"}
 						T : [ '所取得之資源，類型為[%1]，並非圖像檔：%2', item_data.type,
 								item_data.url ]
 					});
@@ -1499,6 +1525,7 @@ function module_code(library_namespace) {
 
 				// 已經取得資源：
 				library_namespace.log([ 'add_chapter: ', {
+					// gettext_config:{"id":"resource-acquired-$1-$2"}
 					T : [ '已取得資源：[%1] %2', item['media-type'],
 					//
 					item_data.url + '\n→ ' + item.href ]
@@ -1511,11 +1538,13 @@ function module_code(library_namespace) {
 					delete _this.downloading[item_data.file_path];
 				} else {
 					library_namespace.error({
+						// gettext_config:{"id":"the-file-is-not-in-the-download-queue-$1"}
 						T : [ '檔案並未在下載隊列中：%1', item_data.file_path ]
 					});
 				}
 				if (false) {
 					library_namespace.log([ 'add_chapter: ', {
+						// gettext_config:{"id":"still-downloading"}
 						T : '資源仍在下載中：'
 					} ]);
 					console.log(_this.downloading);
@@ -1525,6 +1554,7 @@ function module_code(library_namespace) {
 				// 在事後檢查.on_all_downloaded，看是不是有callback。
 				&& library_namespace.is_empty_object(_this.downloading)) {
 					library_namespace.debug({
+						// gettext_config:{"id":"all-resources-have-been-downloaded.-start-performing-subsequent-$1-register-jobs"}
 						T : [ '所有資源下載完畢。開始執行後續 %1 個已登記之作業。',
 						//
 						_this.add_listener('all_downloaded').length ]
@@ -1575,6 +1605,7 @@ function module_code(library_namespace) {
 		//
 		this.resources[this.resource_index_of_id[item.id]]))) {
 			library_namespace.debug({
+				// gettext_config:{"id":"already-have-the-same-chapter-or-resource-file-it-will-not-be-overwritten-$1"}
 				T : [ '已經有相同的篇章或資源檔，將不覆寫：%1',
 				//
 				item_data.file || decode_identifier.call(this, item.id) ]
@@ -1599,6 +1630,7 @@ function module_code(library_namespace) {
 				}
 				if (url.startsWith('.')) {
 					library_namespace.warn([ 'full_URL_of_path: ', {
+						// gettext_config:{"id":"invalid-url-$1"}
 						T : [ '網址無效：%1', url ]
 					} ]);
 				}
@@ -1620,8 +1652,10 @@ function module_code(library_namespace) {
 					if (/^\s*(data|mailto):/.test(url)) {
 						// https://en.wikipedia.org/wiki/Data_URI_scheme
 						library_namespace.log([ 'check_text: ', {
+							// gettext_config:{"id":"skip-data-uri-scheme-$1"}
 							T : [ '跳過資料 URI scheme：%1', url ]
 						}, '\n', {
+							// gettext_config:{"id":"of-file-$1"}
 							T : [ '檔案路徑：%1', item_data.file ]
 						} ]);
 						return all;
@@ -1631,6 +1665,7 @@ function module_code(library_namespace) {
 						url = decodeURI(url);
 					} catch (e) {
 						library_namespace.warn([ 'check_text: ', {
+							// gettext_config:{"id":"invalid-url-$1"}
 							T : [ '網址無效：%1', url ]
 						} ]);
 						return all;
@@ -1646,8 +1681,10 @@ function module_code(library_namespace) {
 					// skip web page, do not modify the link of web pages
 					&& (matched[3] || /\.html?$/i.test(matched[2]))) {
 						library_namespace.log([ 'check_text: ', {
+							// gettext_config:{"id":"skip-web-page-resource-$1"}
 							T : [ '跳過網頁資源：%1', url ]
 						}, '\n', {
+							// gettext_config:{"id":"of-file-$1"}
 							T : [ '檔案路徑：%1', item_data.file ]
 						} ]);
 						return all;
@@ -1763,6 +1800,7 @@ function module_code(library_namespace) {
 							'</h3>');
 				} else if (!contents.title) {
 					library_namespace.warn([ 'add_chapter: ', {
+						// gettext_config:{"id":"title-not-set-$1"}
 						T : [ '未設定標題：%1……',
 						//
 						String(contents.text).slice(0, 200) || '(無內容)' ]
@@ -1807,7 +1845,8 @@ function module_code(library_namespace) {
 				if (contents.length > 5e5) {
 					// 這長度到這邊往往已經耗費數十秒。
 					library_namespace.debug({
-						T : [ 'contents length: %1 bytes', contents.length ]
+						// gettext_config:{"id":"contents-length-$1-chars"}
+						T : [ 'contents length: %1 chars', contents.length ]
 					});
 				}
 				if (!(item_data.word_count > 0)) {
@@ -1815,7 +1854,8 @@ function module_code(library_namespace) {
 							contents, 1 + 2);
 					if (!(item_data.word_count > 0)) {
 						library_namespace.debug({
-							T : [ 'No content got: %1',
+							// gettext_config:{"id":"no-content-received-$1"}
+							T : [ 'No content received: %1',
 							//
 							item_data.title || item_data.id || item_data.url ]
 						});
@@ -1823,9 +1863,13 @@ function module_code(library_namespace) {
 				}
 				html.push('<p class="word_count">',
 				// 加入本章節之字數統計標示。
+				// gettext_config:{"id":"$1-words"}
 				gettext('%1 words', item_data.word_count)
 				// 從第一章到本章的文字總數。
-				+ (item_data.words_so_far > 0 ? ', ' + gettext('%1 words',
+				+ (item_data.words_so_far > 0 ? ', '
+				//
+				// gettext_config:{"id":"$1-words"}
+				+ gettext('%1 words',
 				// item_data.words_so_far: 本作品到前一個章節總計的字數。
 				item_data.words_so_far + item_data.word_count) : ''), '</p>');
 
@@ -1869,9 +1913,11 @@ function module_code(library_namespace) {
 
 			if (text) {
 				library_namespace.warn([ 'add_chapter: ', {
-					T : [ '因為欲設定的內容長度過短或者無內容，'
+					T : [
+					// gettext_config:{"id":"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-use-from-the-cache-file"}
+					'因為欲設定的內容長度過短或者無內容，將從 cache 檔案中取得舊的內容（%1 字元）：',
 					//
-					+ '將從 cache 檔案中取得舊的內容（%1 字元）：', contents.length ]
+					contents.length ]
 				}, ' \n',
 				//
 				(item_data.file || decode_identifier.call(this, item.id))
@@ -1879,6 +1925,7 @@ function module_code(library_namespace) {
 				+ (item_data.url ? ' (' + item_data.url + ')' : '') ]);
 			} else if (item_data.write_file !== false) {
 				library_namespace.debug({
+					// gettext_config:{"id":"writing-$1-chars-to-$2"}
 					T : [ 'Writing %1 chars to [%2]...', contents.length,
 							this.path.text + item.href ]
 				});
@@ -1889,6 +1936,7 @@ function module_code(library_namespace) {
 						contents);
 			} else {
 				library_namespace.debug({
+					// gettext_config:{"id":"only-the-project-data-index-is-set-and-the-file-$1-is-not-automatically-written.-you-need-to-do-this-yourself"}
 					T : [ '僅設定項目資料索引，未自動寫入檔案 [%1]，您需要自己完成這動作。',
 							this.path.text + item.href ]
 				});
@@ -1896,20 +1944,24 @@ function module_code(library_namespace) {
 
 		} else if (!item_data.force) {
 			library_namespace.info([ 'add_chapter: ', {
+				// gettext_config:{"id":"skip-content-that-is-too-short-($1-characters)"}
 				T : [ contents ? '跳過長度過短的內容（%1 字元）：'
 				//
+				// gettext_config:{"id":"skip-the-no-content-empty-chapter"}
 				: '跳過無內容/空章節：', contents && contents.length ]
 			},
 			//
 			(item_data.file || decode_identifier.call(this, item.id))
 			//
 			+ (item_data.url ? ' (' + item_data.url + ')' : '') ]);
+			// gettext_config:{"id":"too-short"}
 			item.error = gettext('too short');
 			return item;
 		}
 
 		if (item_data.TOC) {
 			library_namespace.debug({
+				// gettext_config:{"id":"if-this-chapter-already-exists-remove-it-first-$1"}
 				T : [ '若是已存在此章節則先移除：%1', item.id ]
 			}, 3);
 			remove_chapter.call(this, item.id);
@@ -1961,7 +2013,8 @@ function module_code(library_namespace) {
 		var language = set_meta_information.call(this, 'language');
 		if (language && (language = language[0])) {
 			library_namespace.debug({
-				T : [ 'Using language %1', language ]
+				// gettext_config:{"id":"using-language-$1"}
+				T : [ 'Using language: %1', language ]
 			});
 		}
 
@@ -2032,10 +2085,10 @@ function module_code(library_namespace) {
 			}
 		});
 
-		TOC_html.push(
+		TOC_html.push('<h2>',
 		// 作品資訊, 小説情報, 電子書籍紹介, 作品情報, book information
-		'<h2>', gettext('Work information'), '</h2>', '<div id="work_data">',
-				'<dl>');
+		// gettext_config:{"id":"work-information"}
+		gettext('Work information'), '</h2>', '<div id="work_data">', '<dl>');
 
 		/**
 		 * <code>
@@ -2120,10 +2173,12 @@ function module_code(library_namespace) {
 			}
 		});
 		if (total_word_count > 0) {
-			TOC_html.push('<dt>', gettext('word count'), '</dt>', '<dd>',
-			//
+			TOC_html.push('<dt>',
+			// gettext_config:{"id":"word-count"}
+			gettext('word count'), '</dt>', '<dd>',
+			// gettext_config:{"id":"$1-words"}
 			gettext('%1 words', total_word_count) + ' / '
-			//
+			// gettext_config:{"id":"$1-chapters"}
 			+ gettext('%1 chapters', this.chapters.length) + ' ≈ '
 			// 平均文字数
 			+ Math.round(total_word_count / this.chapters.length), '</dd>');
@@ -2132,9 +2187,10 @@ function module_code(library_namespace) {
 
 		// The toc nav element must occur exactly once in an EPUB
 		// Navigation Document.
-		TOC_html.push('<nav epub:type="toc" id="toc">',
+		TOC_html.push('<nav epub:type="toc" id="toc">', '<h2>',
 		// 作品目錄 目次 Table of contents
-		'<h2>', gettext('Contents'), '</h2>', '<ol>');
+		// gettext_config:{"id":"contents"}
+		gettext('Contents'), '</h2>', '<ol>');
 
 		// recovery
 		if (original_domain)
@@ -2286,6 +2342,7 @@ function module_code(library_namespace) {
 			this.add_listener('all_downloaded', write_chapters.bind(this,
 					callback));
 			library_namespace.debug([ 'write_chapters: ', {
+				// gettext_config:{"id":"waiting-for-all-resources-loaded"}
 				T : 'Waiting for all resources loaded...'
 			} ], 0);
 			// console.log(this.downloading);
@@ -2293,6 +2350,7 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.debug({
+			// gettext_config:{"id":"start-writing-e-book-materials"}
 			T : '開始寫入電子書資料……'
 		}, 2, 'write_chapters');
 		'identifier,title,language,dcterms:modified'.split(',')
@@ -2308,6 +2366,7 @@ function module_code(library_namespace) {
 			}
 			if (!container || !(container.length >= 1)) {
 				library_namespace.warn({
+					// gettext_config:{"id":"missing-resource-item-$1"}
 					T : [ '丟失資源項目 %1', item ]
 				});
 			}
@@ -2413,9 +2472,9 @@ function module_code(library_namespace) {
 				if (configured) {
 					info = JSON.stringify(info);
 					if (/%2D(?:-|%2D)|-%2D/.test(info)) {
-						library_namespace.error('所欲封入注釋的詮釋資料本身含有'
-						//
-						+ ' "%2D%2D" 或 "%2D-" 之類文字，將造成解碼時出現錯誤！');
+						library_namespace.error(
+						// gettext_config:{"id":"the-instructed-material-to-be-enclosed-in-the-comment-itself-contains-text-such-as-$2d$2d-or-$2d-which-will-cause-an-error-in-decoding"}
+						'所欲封入注釋的詮釋資料本身含有 "%2D%2D" 或 "%2D-" 之類文字，將造成解碼時出現錯誤！');
 						library_namespace.info(info);
 					}
 					this.raw_data_ptr.manifest.push('<!-- '
@@ -2454,6 +2513,7 @@ function module_code(library_namespace) {
 			this.add_listener('all_downloaded', archive_to_ZIP.bind(this,
 					target_file, remove, callback, file_list));
 			library_namespace.info([ 'archive_to_ZIP: ', {
+				// gettext_config:{"id":"waiting-for-all-resources-loaded"}
 				T : 'Waiting for all resources loaded...'
 			} ], 0);
 			return;
@@ -2471,6 +2531,7 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.debug({
+			// gettext_config:{"id":"start-building-e-books"}
 			T : '開始建構電子書……'
 		}, 2, 'archive_to_ZIP');
 		// check arguments
@@ -2511,6 +2572,7 @@ function module_code(library_namespace) {
 			fso_list = library_namespace.read_directory(directory);
 			if (!fso_list || fso_list.length === 0) {
 				library_namespace.debug({
+					// gettext_config:{"id":"removing-empty-directory-$1"}
 					T : [ '移除空目錄：%1', directory ]
 				}, 1, 'archive_to_ZIP');
 				library_namespace.remove_directory(directory);
@@ -2521,6 +2583,7 @@ function module_code(library_namespace) {
 		library_namespace.remove_file(target_file);
 
 		library_namespace.debug({
+			// gettext_config:{"id":"creating-an-ebook-with-7zip-$1"}
 			T : [ '以 7zip 創建電子書：%1……', target_file ]
 		}, 1, 'archive_to_ZIP');
 
@@ -2543,6 +2606,7 @@ function module_code(library_namespace) {
 		// characters.
 		if (Array.isArray(file_list) && file_list.join('" "').length > 7800) {
 			library_namespace.warn([ archive_to_ZIP.name + ': ', {
+				// gettext_config:{"id":"the-file-list-is-too-long-so-it-is-changed-to-compress-the-entire-directory"}
 				T : '檔案列表過長，改成壓縮整個目錄。'
 			} ]);
 			// 當 epub 電子書非本工具產生時，可能有不同的目錄，必須重新讀取。
@@ -2576,6 +2640,7 @@ function module_code(library_namespace) {
 		archive_file.rename([ mimetype_first_order_name, mimetype_filename ]);
 
 		library_namespace.debug({
+			// gettext_config:{"id":"the-e-book-is-created-$1"}
 			T : [ '電子書創建完畢：%1', target_file ]
 		}, 1, 'archive_to_ZIP');
 

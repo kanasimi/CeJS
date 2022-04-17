@@ -153,7 +153,9 @@ function module_code(library_namespace) {
 	// 查表對照轉換。
 	language_tag.convert = function() {
 		// TODO
-		throw new Error(1, 'language_tag.convert: Not Yet Implemented!');
+		throw new Error('language_tag.convert: '
+		// gettext_config:{"id":"not-yet-implemented"}
+		+ gettext('Not Yet Implemented!'));
 	};
 
 	/**
@@ -439,7 +441,7 @@ function module_code(library_namespace) {
 				using_default = true;
 			} else if (!(text_id in domain)) {
 				var matched = String(text_id).match(
-						/^([\s\S]+?)(\.{3,}|…+|[,;:.?!~、，；：。？！～])$/);
+						PATTERN_message_with_tail_punctuation_mark);
 				if (matched && (matched[1] in domain)) {
 					postfix = convert_punctuation_mark(matched[2], domain_name);
 					text_id = matched[1];
@@ -604,6 +606,10 @@ function module_code(library_namespace) {
 		text_list.push(converted_text.slice(last_index));
 		return has_object ? text_list : text_list.join('');
 	}
+
+	// matched: [ all, text_id / message, tail punctuation mark ]
+	var PATTERN_message_with_tail_punctuation_mark = /^([\s\S]+?)(\.{3,}|…+|[,;:.?!~、，；：。？！～])$/;
+	gettext.PATTERN_message_with_tail_punctuation_mark = PATTERN_message_with_tail_punctuation_mark;
 
 	// ------------------------------------------------------------------------
 
@@ -956,6 +962,7 @@ function module_code(library_namespace) {
 		if (is_loaded) {
 			gettext_domain_name = domain_name;
 			library_namespace.debug({
+				// gettext_config:{"id":"$1-is-loaded-setting-up-user-domain-resources-now"}
 				T : [ '已載入過 [%1]，直接設定使用者自訂資源。', domain_name ]
 			}, 2, 'gettext.use_domain');
 			gettext_check_resources(domain_name, 2, true);
@@ -967,9 +974,9 @@ function module_code(library_namespace) {
 				// 顯示使用 domain name 之訊息：此時執行，仍無法改採新 domain 顯示訊息。
 				library_namespace.debug({
 					T : [ domain_name === gettext_domain_name
-					//
+					// gettext_config:{"id":"force-loading-using-domain-locale-$2-($1)"}
 					? '強制再次載入/使用 [%2] (%1) 領域/語系。'
-					//
+					// gettext_config:{"id":"loading-using-domain-locale-$2-($1)"}
 					: '載入/使用 [%2] (%1) 領域/語系。', domain_name,
 							gettext.get_alias(domain_name) ]
 				}, 1, 'gettext.use_domain');
@@ -977,8 +984,7 @@ function module_code(library_namespace) {
 				library_namespace.debug(
 				// re-load
 				(domain_name === gettext_domain_name ? 'FORCE ' : '')
-				//
-				+ 'Loading/Using domain/locale ['
+						+ 'Loading/Using domain/locale ['
 						+ gettext.get_alias(domain_name) + '] (' + domain_name
 						+ ').', 1, 'gettext.use_domain');
 			}
@@ -997,12 +1003,14 @@ function module_code(library_namespace) {
 			if (domain_name) {
 				if (domain_name !== gettext_domain_name)
 					library_namespace.warn({
+						// gettext_config:{"id":"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag"}
 						T : [ '所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。',
 								domain_name ]
 					});
 
 			} else if (typeof callback === 'function'
 					&& library_namespace.is_debug())
+				// gettext_config:{"id":"unable-to-distinguish-domain-but-set-callback"}
 				library_namespace.warn('無法判別 domain，卻設定有 callback。');
 
 			// 無論如何還是執行 callback。
@@ -1204,6 +1212,7 @@ function module_code(library_namespace) {
 				alias_list = alias_list.split('|');
 			} else if (!Array.isArray(alias_list)) {
 				library_namespace.warn([ 'gettext.set_alias: ', {
+					// gettext_config:{"id":"illegal-domain-alias-list-$1"}
 					T : [ 'Illegal domain alias list: [%1]', alias_list ]
 				} ]);
 				continue;
@@ -1219,6 +1228,7 @@ function module_code(library_namespace) {
 				}
 
 				library_namespace.debug({
+					// gettext_config:{"id":"adding-domain-alias-$1-→-$2"}
 					T : [ 'Adding domain alias [%1] → [%2]...',
 					//
 					alias, norm ]
@@ -1309,6 +1319,7 @@ function module_code(library_namespace) {
 		// for fallback
 		while (true) {
 			library_namespace.debug({
+				// gettext_config:{"id":"testing-domain-alias-$1"}
 				T : [ 'Testing domain alias [%1]...', alias ]
 			}, 6, 'gettext.to_standard');
 			if (alias in gettext_aliases)
@@ -1438,6 +1449,7 @@ function module_code(library_namespace) {
 
 		} catch (e) {
 			library_namespace.warn([ 'gettext.translate_node: ', {
+				// gettext_config:{"id":"failed-to-extract-gettext-id"}
 				T : 'Failed to extract gettext id.'
 			} ]);
 		}
@@ -1457,11 +1469,13 @@ function module_code(library_namespace) {
 
 	gettext.adapt_domain = function(language, callback) {
 		library_namespace.debug({
+			// gettext_config:{"id":"loading-language-domain-$1"}
 			T : [ 'Loading language / domain [%1]...', language ]
 		}, 1, 'gettext.adapt_domain');
 
 		gettext.use_domain(language, function() {
 			library_namespace.debug({
+				// gettext_config:{"id":"language-domain-$1-loaded"}
 				T : [ 'Language / domain [%1] loaded.', language ]
 			}, 1, 'gettext.adapt_domain');
 			try {
@@ -1503,6 +1517,7 @@ function module_code(library_namespace) {
 		if (false) {
 			// TODO
 			library_namespace.error([ 'create_domain_menu: ', {
+				// gettext_config:{"id":"can-not-find-menu-node-$1"}
 				T : [ 'Can not find menu node: [%1]', node ]
 			} ]);
 		}
@@ -1558,6 +1573,7 @@ function module_code(library_namespace) {
 		library_namespace.new_node(menu, node);
 	}
 
+	// gettext_config:{"id":"language"}
 	create_domain_menu.tag = 'Language';
 	create_domain_menu.onchange = [];
 
@@ -1581,6 +1597,7 @@ function module_code(library_namespace) {
 	gettext.numeral = function(attribute, domain_name) {
 		domain_name = domain_name_for_conversion(domain_name, allow_Chinese);
 		library_namespace.debug({
+			// gettext_config:{"id":"convert-number-$1-to-$2-format"}
 			T : [ '轉換數字：[%1]成 %2 格式。', attribute, domain_name ]
 		}, 6);
 		switch (domain_name) {
@@ -1815,9 +1832,11 @@ function module_code(library_namespace) {
 		case 'cmn-Hans-CN':
 			// number to Chinese week name.
 			// 星期/週/禮拜
+			// gettext_config:{"id":"week-day"}
 			return (full_name ? '星期' : '') + week_name.cmn[ordinal];
 
 		case 'ja-JP':
+			// gettext_config:{"id":"week-day-(japanese)"}
 			return week_name[domain_name][ordinal] + (full_name ? '曜日' : '');
 
 		case 'en-US':
@@ -1968,6 +1987,7 @@ function module_code(library_namespace) {
 			if (number !== (number | 0)
 			//
 			|| number < 10 || 99 < number) {
+				// gettext_config:{"id":"unable-to-convert-number-$1"}
 				throw gettext('無法轉換數字 [%1]！', number);
 			}
 			number = to_positional_Chinese_numeral(number)

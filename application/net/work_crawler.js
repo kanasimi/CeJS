@@ -147,10 +147,12 @@ function module_code(library_namespace) {
 				}
 			}, this);
 			if (!this.id && !(this.id = this.id.match(/[^\\\/]*$/)[0])) {
+				// gettext_config:{"id":"can-not-detect-work-id-from-url-$1"}
 				library_namespace.error(gettext('無法從網址擷取作品 id：%1',
 						this.base_URL));
 			}
 		}
+		// gettext_config:{"id":"starting-$1"}
 		process.title = gettext('Starting %1', this.id);
 
 		if (library_namespace.is_digits(this.baidu_cse)) {
@@ -615,7 +617,8 @@ function module_code(library_namespace) {
 			}
 			if (url.startsWith('.')) {
 				library_namespace.warn('full_URL_of_path: '
-						+ gettext('網址無效：%1', url));
+				// gettext_config:{"id":"invalid-url-$1"}
+				+ gettext('網址無效：%1', url));
 			}
 			url = this.base_URL + url;
 		} else if (url.URL) {
@@ -680,9 +683,10 @@ function module_code(library_namespace) {
 				library_namespace.info([
 						'is_finished: ',
 						{
-							T : [ '《%1》已 %2 沒有更新，時間過久不再強制重新下載，'
-							//
-							+ '僅在章節數量有變化時才重新下載。', work_data.title,
+							T : [
+							// gettext_config:{"id":"«$1»-has-not-been-updated.-$2-is-no-longer-forced-to-re-download.-it-will-only-be-re-downloaded-if-the-number-of-chapters-changes"}
+							'《%1》已 %2 沒有更新，時間過久不再強制重新下載，僅在章節數量有變化時才重新下載。',
+									work_data.title,
 									library_namespace.age_of(date) ]
 						} ]);
 				work_data.recheck = 'changed';

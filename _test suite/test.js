@@ -888,8 +888,12 @@ function test_locale() {
 	//	###System message test
 	all_error_count += CeL.test('System message', function (assert) {
 		CeL.gettext.use_domain('TW', function () {
-			assert(['載入中…', CeL.gettext('Loading...')]);
-			assert(['已載入 20%…', CeL.gettext('Loading %1%...', 20)]);
+			assert(['載入中…',
+			// gettext_config:{"id":"loading"}
+			CeL.gettext('Loading...')]);
+			assert(['已載入 20%…',
+			// gettext_config:{"id":"loading-$1$"}
+			CeL.gettext('Loading %1%...', 20)]);
 			//CeL.info('System message test OK.');
 		},
 			// 強制使用此 domain。 forces to this domain.
@@ -912,8 +916,10 @@ function test_locale() {
 	//	###單數複數形式 Singular and plural nouns / Grammatical number test
 	all_error_count += CeL.test('單數複數形式 (plural)', function (assert) {
 		// CeL.gettext.use_domain('en', function() {}, true);
+		// gettext_config:{"id":"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}"}
 		var message_id = '已載入 %1 筆資料。';
 		CeL.gettext.set_text({
+			// gettext_config:{"id":"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}"}
 			'已載入 %1 筆資料。': function (domain_name, arg) {
 				// with error detection:
 				//return (arg[1] < 2 ? (arg[1] ? arg[1] === 1 ? 'One' : 'ERROR: %1' : 'No') + ' entry' : '%1 entries') + ' loaded.';
@@ -940,8 +946,14 @@ function test_locale() {
 	all_error_count += CeL.test('直接取得特定 domain 的文字。', function (assert) {
 		CeL.gettext.use_domain('zh-TW', function () {
 			CeL.gettext.use_domain('en', function () {
-				assert(['Loading...', CeL.gettext('Loading...')]);
-				assert(['載入中…', CeL.gettext.in_domain('TW', 'Loading...')], '不改變預設 domain，直接取得特定 domain 的轉換過的文字。');
+				// gettext_config:{"id":"loading"}
+				assert(['Loading...',
+				// gettext_config:{"id":"loading"}
+				CeL.gettext('Loading...')]);
+				assert(['載入中…',
+				CeL.gettext.in_domain('TW',
+				// gettext_config:{"id":"loading"}
+				'Loading...')], '不改變預設 domain，直接取得特定 domain 的轉換過的文字。');
 			}, true);
 		}, true);
 	});
@@ -954,7 +966,9 @@ function test_locale() {
 	}, true);
 
 	all_error_count += CeL.test('結尾標點符號的轉換。 en → zh', function (assert) {
-		assert([ '完成', CeL.gettext('finished') ], '結尾標點符號的轉換: en → zh');
+		assert([ '完成',
+		// gettext_config:{"id":"finished"}
+		CeL.gettext('finished') ], '結尾標點符號的轉換: en → zh');
 		assert([ '完成。', CeL.gettext('finished.') ], '結尾標點符號的轉換: en → zh 。');
 		assert([ '完成！', CeL.gettext('finished!') ], '結尾標點符號的轉換: en → zh ！');
 		assert([ '完成……', CeL.gettext('finished...') ], '結尾標點符號的轉換: en ... → zh ……');
@@ -1021,7 +1035,9 @@ function test_locale() {
 	]);
 
 	all_error_count += CeL.test('locale - system messages', function (assert) {
+		// gettext_config:{"id":"no-changes"}
 		var messages = new CeL.gettext.Sentence_combination('No changes.');
+		// gettext_config:{"id":"no-page-modified"}
 		messages.push('no page modified,', ['%1 elapsed.', ['%1 min', 2]]);
 
 		CeL.gettext.use_domain('zh', true);
@@ -1030,6 +1046,7 @@ function test_locale() {
 		CeL.gettext.use_domain('en', true);
 		assert(['No changes. no page modified, 2 min elapsed.', messages.toString()]);
 		messages.truncate(1);
+		// gettext_config:{"id":"no-changes"}
 		assert(['No changes.', messages.toString()]);
 
 		CeL.gettext.use_domain('zh', true);
@@ -1049,6 +1066,7 @@ function test_numeral() {
 		[['一百兆〇八億〇八百', CeL.to_Chinese_numeral(100000800000800)], '小寫中文數字'],
 		[['捌兆肆仟陸佰柒拾貳億捌仟柒佰參拾捌萬玖仟零肆拾柒', CeL.to_Chinese_numeral(8467287389047, true)], '大寫中文數字'],
 		[['新臺幣肆萬參拾伍圓參角肆分貳文參', CeL.to_TWD(40035.3423)], '貨幣/currency test'],
+		// gettext_config:{"id":"to-chinese-numerals"}
 		[[8467287389047, CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047, true))], '中文數字'],
 	]);
 	// 此步驟頗費時。
@@ -1072,6 +1090,7 @@ function test_numeral() {
 		}
 	});
 
+	// gettext_config:{"id":"to-chinese-numerals"}
 	all_error_count += CeL.test('中文數字', [
 		[["壬辰以來，至景初元年丁已歲，積4046，算上。", CeL.from_Chinese_numeral('壬辰以來，至景初元年丁已歲，積四千四十六，算上。')]],
 		[['40179字', CeL.from_Chinese_numeral('四萬百七十九字')]],
@@ -2695,6 +2714,7 @@ function test_check() {
 
 
 function test_astronomy() {
+	// gettext_config:{"id":"astronomy"}
 	all_error_count += CeL.test('astronomy', [
 		// http://songgz.iteye.com/blog/1571007
 		[[66, Math.round(CeL.deltaT(2008))], 'get ΔT of year 2008 in seconds'],

@@ -68,8 +68,10 @@ function module_code(library_namespace) {
 			}
 			// 注意: 此時 image_data 可能是 undefined
 			if (this.skip_error) {
+				// gettext_config:{"id":"unspecified-image-data"}
 				this.onwarning(gettext('未指定圖片資料'), image_data);
 			} else {
+				// gettext_config:{"id":"unspecified-image-data"}
 				this.onerror(gettext('未指定圖片資料'), image_data);
 			}
 			if (typeof callback === 'function')
@@ -113,6 +115,7 @@ function module_code(library_namespace) {
 				}
 			} else if (!Array.isArray(acceptable_types)) {
 				library_namespace.warn({
+					// gettext_config:{"id":"invalid-acceptable_types-$1"}
 					T : [ 'Invalid acceptable_types: %1', acceptable_types ]
 				});
 				acceptable_types = null;
@@ -188,6 +191,7 @@ function module_code(library_namespace) {
 		image_data.parsed_url = image_url;
 		if (!crawler_namespace.PATTERN_non_CJK.test(image_url)) {
 			library_namespace.warn({
+				// gettext_config:{"id":"invalid-url-must-encode-first-$1"}
 				T : [ '必須先將URL編碼：%1', image_url ]
 			});
 			if (!image_url.includes('%'))
@@ -245,6 +249,7 @@ function module_code(library_namespace) {
 			if (!has_error) {
 				image_data.file_length.push(contents.length);
 				library_namespace.debug({
+					// gettext_config:{"id":"completed-image-testing-$1"}
 					T : [ '測試圖片是否完整：%1', image_data.file ]
 				}, 2, 'get_image');
 				var file_type = library_namespace.file_type(contents);
@@ -257,12 +262,15 @@ function module_code(library_namespace) {
 						return extension in _this.image_types;
 					})) {
 						verified_image = false;
-						library_namespace.warn({
-							T : [
+						library_namespace
+								.warn({
+									T : [
+									// gettext_config:{"id":"unable-to-process-image-file-of-type-$2-$1"}
 									file_type.type ? '無法處理類型為 %2 之圖片檔：%1'
-											: '無法判別圖片檔之類型：%1', image_data.file,
-									file_type.type ]
-						});
+									// gettext_config:{"id":"unable-to-determine-the-type-of-image-file-$1"}
+									: '無法判別圖片檔之類型：%1', image_data.file,
+											file_type.type ]
+								});
 					}
 
 					var original_extension
@@ -295,6 +303,7 @@ function module_code(library_namespace) {
 				//
 				&& image_data.error_count === _this.MAX_ERROR_RETRY ]);
 				library_namespace.log({
+					// gettext_config:{"id":"number-of-errors-$1"}
 					T : [ '出錯次數：%1', image_data.error_count ]
 				});
 			}
@@ -325,14 +334,18 @@ function module_code(library_namespace) {
 						if (_this.preserve_bad_image) {
 							library_namespace.warn([ {
 								T : has_error ? contents
-								//
-								? '強制將非圖片檔儲存為圖片。' : '強制將空內容儲存為圖片。'
+								// gettext_config:{"id":"force-non-image-files-to-be-saved-as-images"}
+								? '強制將非圖片檔儲存為圖片。'
+								// gettext_config:{"id":"force-empty-content-to-be-saved-as-an-image"}
+								: '強制將空內容儲存為圖片。'
 								// assert: (!!verified_image===false)
 								// 圖檔損壞: e.g., Do not has EOI
+								// gettext_config:{"id":"force-storage-of-damaged-image"}
 								: '強制儲存損壞的圖片。'
 							}, XMLHttp.status
 							// 狀態碼正常就不顯示。
 							&& (XMLHttp.status / 100 | 0) !== 2 ? {
+								// gettext_config:{"id":"http-status-code-$1"}
 								T : [ 'HTTP status code %1.', XMLHttp.status ]
 							} : '',
 							// 顯示 crawler 程式指定的錯誤。
@@ -340,6 +353,7 @@ function module_code(library_namespace) {
 								// gettext_config:{"id":"error-$1"}
 								T : [ 'Error: %1.', image_data.is_bad ]
 							} : '', contents ? {
+								// gettext_config:{"id":"file-size-$1"}
 								T : [ 'File size: %1.',
 								//
 								CeL.to_KiB(contents.length) ]
@@ -356,6 +370,7 @@ function module_code(library_namespace) {
 						// pass, 過關了。
 						if (node_fs.existsSync(bad_file_path)) {
 							library_namespace.info({
+								// gettext_config:{"id":"delete-corrupted-old-image-file-$1"}
 								T : [ '刪除損壞的舊圖片檔：%1', bad_file_path ]
 							});
 							library_namespace.fs_remove(bad_file_path);
@@ -383,9 +398,9 @@ function module_code(library_namespace) {
 								&& old_archived_file.size < contents.length) {
 							library_namespace.warn({
 								T : [ _this.archive_images
-								//
+								// gettext_config:{"id":"the-quality-of-the-image-in-the-archive-is-better-than-in-the-directory-but-will-be-overwritten-after-downloading-$1"}
 								? '壓縮檔內的圖片品質比目錄中的更好，但在下載完後將可能在壓縮時被覆蓋：%1'
-								//
+								// gettext_config:{"id":"the-quality-of-the-image-in-the-archive-is-better-than-in-the-directory-$1"}
 								: '壓縮檔內的圖片品質比目錄中的更好：%1',
 								//
 								old_archived_file.path ]
@@ -409,6 +424,7 @@ function module_code(library_namespace) {
 
 						if (!image_data.has_error || _this.preserve_bad_image) {
 							library_namespace.debug({
+								// gettext_config:{"id":"save-image-data-to-your-hard-drive-$1"}
 								T : [ '保存圖片數據到硬碟上：%1', image_data.file ]
 							}, 1, 'get_image');
 							// TODO: 檢查舊的檔案是不是文字檔。例如有沒有包含 HTML 標籤。
@@ -418,24 +434,25 @@ function module_code(library_namespace) {
 												contents);
 							} catch (e) {
 								library_namespace.error(e);
+								// gettext_config:{"id":"unable-to-write-to-image-file-$1"}
 								var message = [ gettext('無法寫入圖片檔案 [%1]。',
 										image_data.file) ];
 								if (e.code === 'ENOENT') {
 									message.push(gettext(
 									// TODO: show chapter_directory 當前作品章節目錄：
+									// gettext_config:{"id":"it-may-be-because-the-download-directory-of-the-work-has-changed-and-the-cache-data-points-to-the-old-location-that-does-not-exist"}
 									'可能因為作品下載目錄改變了，而 cache 資料指向不存在的舊位置。'));
 								} else {
 									message.push(gettext(
-									//
+									// gettext_config:{"id":"it-may-be-because-the-work-information-cache-is-different-from-the-structure-of-the-work-chapter-on-the-current-website"}
 									'可能因為作品資訊 cache 與當前網站上之作品章節結構不同。'));
 								}
 								message.push(gettext(
-								//
-								'若您之前曾經下載過本作品的話，請封存原有作品目錄，'
 								// https://github.com/kanasimi/work_crawler/issues/278
-								+ '或將作品資訊 cache 檔（作品目錄下的 作品id.json）'
+								// gettext_config:{"id":"if-you-have-downloaded-this-work-before-please-save-the-original-work-catalog-or-rename-the-work-cache-file-(the-work-id.json-under-the-work-directory)-and-try-the-new-download"}
+								'若您之前曾經下載過本作品的話，請封存原有作品目錄，或將作品資訊 cache 檔（作品目錄下的 作品id.json）改名之後嘗試全新下載。'
 								//
-								+ '改名之後嘗試全新下載。'));
+								));
 								_this.onerror(message.join('\n'), image_data);
 								if (typeof callback === 'function') {
 									callback(image_data,
@@ -448,6 +465,7 @@ function module_code(library_namespace) {
 							&& old_file_status.size > contents.length) {
 						library_namespace.log({
 							T : [
+									// gettext_config:{"id":"there-is-a-large-old-file-($2)-that-will-not-be-overwritten-$1"}
 									'存在較大的舊檔 (%2)，將不覆蓋：%1',
 									image_data.file,
 									old_file_status.size + '>'
@@ -466,20 +484,26 @@ function module_code(library_namespace) {
 			if (verified_image === false) {
 				// 圖檔損壞: e.g., Do not has EOI
 				message = [ {
+					// gettext_config:{"id":"image-damaged"}
 					T : '圖檔損壞：'
 				} ];
 			} else {
 				// 圖檔沒資格驗證。
 				message = [ {
+					// gettext_config:{"id":"failed-to-get-image"}
 					T : '無法成功取得圖片。'
 				}, XMLHttp.status ? {
+					// gettext_config:{"id":"http-status-code-$1"}
 					T : [ 'HTTP status code %1.', XMLHttp.status ]
 				} : '', {
+					// gettext_config:{"id":"no-contents-found"}
 					T : !contents ? '圖片無內容：' : [
 					//
-					contents.length < _this.MIN_LENGTH ? '檔案過小，僅 %1 bytes：'
-					//
-					: '檔案僅 %1 bytes：', contents.length ]
+					contents.length < _this.MIN_LENGTH
+					// gettext_config:{"id":"$1-bytes-too-small"}
+					? '檔案過小，僅 %1 位元組：'
+					// gettext_config:{"id":"$1-bytes"}
+					: '檔案僅 %1 位元組：', contents.length ]
 				} ];
 			}
 			message.push(image_url + '\n→ ' + image_data.file);
@@ -492,7 +516,8 @@ function module_code(library_namespace) {
 				// throw new Error(_this.id + ': ' +
 				// gettext('MESSAGE_NEED_RE_DOWNLOAD'));
 				library_namespace.log(_this.id + ': '
-						+ gettext('MESSAGE_NEED_RE_DOWNLOAD'));
+				// gettext_config:{"id":"message_need_re_download"}
+				+ gettext('MESSAGE_NEED_RE_DOWNLOAD'));
 				// console.log('error count: ' + image_data.error_count);
 				if (contents && contents.length > 10
 				//
@@ -502,15 +527,13 @@ function module_code(library_namespace) {
 				// 就算圖像是完整的，只是比較小，HTTP status code 也應該是 2xx。
 				&& (XMLHttp.status / 100 | 0) === 2) {
 					library_namespace.warn([ {
+						// gettext_config:{"id":"perhaps-the-image-is-complete-just-too-small-and-not-up-to-standard-such-as-an-almost-blank-image"}
 						T : '或許圖片是完整的，只是過小而未達標，例如幾乎為空白之圖片。'
 					}, {
-						T : [ '您可設定 MIN_LENGTH，如 MIN_LENGTH=%1 '
+						// gettext_config:{"id":"work_crawler-skip-image-error-prompt"}
+						T : [ 'work_crawler-skip-image-error-prompt',
 						//
-						+ '表示允許最小為 %1 bytes 的圖片；'
-						//
-						+ '或者先設定 skip_error=true 來忽略圖片錯誤，待取得檔案後，自行更改檔名，'
-						//
-						+ '去掉錯誤檔名後綴%2以跳過此錯誤。', contents.length,
+						contents.length,
 						//
 						JSON.stringify(_this.EOI_error_postfix) ]
 					} ]);
@@ -518,8 +541,10 @@ function module_code(library_namespace) {
 				} else if (image_data.file_length.length > 1
 						&& !image_data.file_length.cardinal_1()) {
 					library_namespace.warn([ {
+						// gettext_config:{"id":"the-downloaded-image-is-different-in-size-$1"}
 						T : [ '下載所得的圖片大小不同：%1。', image_data.file_length ]
 					}, {
+						// gettext_config:{"id":"if-it-is-not-because-the-website-cuts-off-the-connection-early-then-you-may-need-to-increase-the-time-limit-to-provide-enough-time-to-download-the-image"}
 						T : '若非因網站提早截斷連線，那麼您或許需要增長時限來提供足夠的時間下載圖片？'
 					} ]);
 					// TODO: 提供續傳功能。
@@ -527,14 +552,18 @@ function module_code(library_namespace) {
 
 				} else if (!_this.skip_error) {
 					library_namespace.info([ {
+						// gettext_config:{"id":"if-the-error-persists-you-can-set-skip_error=true-to-ignore-the-image-error"}
 						T : '若錯誤持續發生，您可以設定 skip_error=true 來忽略圖片錯誤。'
 					}, {
+						// gettext_config:{"id":"you-must-set-the-skip_error-or-allow_eoi_error-option-to-store-corrupted-files"}
 						T : '您必須設定 skip_error 或 allow_EOI_error 選項，才會儲存損壞的檔案。'
 					}, {
+						// gettext_config:{"id":"if-you-need-to-re-download-the-section-that-failed-to-download-before-turn-on-the-recheck-option"}
 						T : '若您需要重新下載之前下載失敗的章節，請開啟 recheck 選項。'
 					} ]);
 				}
 
+				// gettext_config:{"id":"failed-to-download-image"}
 				_this.onerror(gettext('圖片下載錯誤'), image_data);
 				// image_data.done = false;
 				if (typeof callback === 'function')
@@ -546,6 +575,7 @@ function module_code(library_namespace) {
 
 			image_data.error_count = (image_data.error_count | 0) + 1;
 			library_namespace.log([ 'get_image: ', {
+				// gettext_config:{"id":"retry-$1-$2"}
 				T : [ 'Retry %1/%2',
 				//
 				image_data.error_count, _this.MAX_ERROR_RETRY ]
@@ -555,6 +585,7 @@ function module_code(library_namespace) {
 			}
 			if (image_data.time_interval > 0) {
 				library_namespace.log_temporary('get_image: '
+						// gettext_config:{"id":"waitting-for-$2-and-retake-the-image-$1"}
 						+ gettext('等待 %2 之後再重新取得圖片：%1', image_data.url,
 								library_namespace.age_of(0,
 										image_data.time_interval, {

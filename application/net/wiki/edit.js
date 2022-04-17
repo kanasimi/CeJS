@@ -580,12 +580,16 @@ function module_code(library_namespace) {
 		if (!data && (!options || !options.allow_empty)) {
 			action = [ 'empty', gettext(typeof data === 'string'
 			// 內容被清空。白紙化。
-			? 'Content is empty' : 'Content is not settled') ];
+			// gettext_config:{"id":"content-is-empty"}
+			? 'Content is empty'
+			// gettext_config:{"id":"content-is-not-settled"}
+			: 'Content is not settled') ];
 
 		} else if (Array.isArray(data) && data[0] === wiki_API_edit.cancel) {
 			action = data.slice(1);
 			if (action.length === 1) {
 				// error messages
+				// gettext_config:{"id":"abandon-change"}
 				action[1] = action[0] || gettext('Abandon change');
 			}
 			if (!action[0]) {
@@ -602,6 +606,7 @@ function module_code(library_namespace) {
 				// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
 				library_namespace.warn((caller || 'wiki_API_edit.check_data')
 						+ ': ' + wiki_API.title_link_of(title) + ': '
+						// gettext_config:{"id":"no-reason-provided"}
 						+ (action[1] || gettext('No reason provided')));
 			} else {
 				library_namespace.debug(

@@ -2964,6 +2964,7 @@ function module_code(library_namespace) {
 			valid_language[pair[1]] = true;
 	});
 
+	// gettext_config:{"id":"continue-key"}
 	var default_continue_key = 'Continue key';
 	/** {String}後續索引。後續檢索用索引值標記名稱。 */
 	wiki_API.prototype.continue_key = default_continue_key;

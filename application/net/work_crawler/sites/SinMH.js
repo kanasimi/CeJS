@@ -390,6 +390,7 @@ function module_code(library_namespace) {
 			if (this.try_to_get_blocked_work && chapter_id) {
 				library_namespace.info([ work_data.title || work_data.id, ': ',
 						{
+							// gettext_config:{"id":"trying-to-get-the-blocked-work"}
 							T : '嘗試取得被屏蔽的作品。'
 						} ]);
 				if (Array.isArray(latest_chapter_list)
@@ -401,6 +402,7 @@ function module_code(library_namespace) {
 					multi_parts_changed : true
 				})) {
 					library_namespace.info({
+						// gettext_config:{"id":"using-the-previous-cache-to-download-§$1"}
 						T : [ '使用之前的 cache，自 §%1 接續下載。',
 								latest_chapter_list.length ]
 					});
@@ -515,6 +517,7 @@ function module_code(library_namespace) {
 			// console.trace(chapter_data_code);
 			if (!chapter_data_code) {
 				library_namespace.warn({
+					// gettext_config:{"id":"unable-to-parse-chapter-data-for-«$1»-§$2"}
 					T : [ '無法解析《%1》§%2 之章節資料！', work_data.title, chapter_NO ]
 				});
 				return;
@@ -589,6 +592,7 @@ function module_code(library_namespace) {
 				work_data.chapter_filtered = true;
 				if (work_data.removed) {
 					library_namespace.info({
+						// gettext_config:{"id":"§$1-has-been-blocked-and-no-longer-attempts-to-resolve-other-chapters"}
 						T : [ '§%1 已被屏蔽，不再嘗試解析其他章節。', chapter_NO ]
 					});
 				} else {

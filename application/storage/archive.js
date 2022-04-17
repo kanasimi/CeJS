@@ -266,6 +266,7 @@ function module_code(library_namespace) {
 			library_namespace.error([
 					'Archive_file: ',
 					{
+						// gettext_config:{"id":"unknown-type-$1-please-install-$2"}
 						T : [ 'Unknown type: %1, please install %2',
 								this.program_type,
 								default_program_type || 'file archiver' ]
@@ -451,6 +452,7 @@ function module_code(library_namespace) {
 
 		command = command.join(' ');
 		library_namespace.debug({
+			// gettext_config:{"id":"working-directory-$1"}
 			T : [ 'Working directory: %1',
 					library_namespace.storage.working_directory() ]
 		}, 1, 'archive_file_execute');
@@ -470,9 +472,11 @@ function module_code(library_namespace) {
 				} catch (e) {
 					if (false) {
 						console.trace('archive_file_execute: '
+								// gettext_config:{"id":"callback-execution-error"}
 								+ 'Callback execution error!');
 					}
 					library_namespace.error([ 'archive_file_execute: ', {
+						// gettext_config:{"id":"callback-execution-error"}
 						T : 'Callback execution error!'
 					} ]);
 					if (library_namespace.platform.nodejs) {
@@ -493,6 +497,7 @@ function module_code(library_namespace) {
 						+ ' execution error!');
 			}
 			library_namespace.error([ 'archive_file_execute: ', {
+				// gettext_config:{"id":"$1-execution-error"}
 				T : [ '%1 execution error!', this.program_type ]
 			} ]);
 			if (library_namespace.platform.nodejs) {
@@ -846,6 +851,7 @@ function module_code(library_namespace) {
 				this.fso_status_list.push(FSO_data);
 				if (this.fso_path_hash[FSO_data.Path]) {
 					CeL.warn({
+						// gettext_config:{"id":"duplicate-fso-path-$1"}
 						T : [ 'Duplicate FSO path: %1', FSO_data.Path ]
 					});
 				}
@@ -881,6 +887,7 @@ function module_code(library_namespace) {
 
 		if (!default_switches[this.program_type][operation]) {
 			var error = {
+				// gettext_config:{"id":"$1-does-not-provide-this-feature-$2"}
 				T : [ '%1 未提供這種功能：%2', this.program_type, operation ]
 			};
 			if (operation !== 'rename') {
@@ -903,6 +910,7 @@ function module_code(library_namespace) {
 			var using_working_directory = options.cwd, using_archive_file;
 			if (is_Archive_file(using_working_directory)) {
 				library_namespace.debug({
+					// gettext_config:{"id":"operate-$1-in-the-directory-where-the-archive-is-located"}
 					T : [ '在壓縮檔所在目錄下操作 %1。', operation ]
 				}, 1, 'archive_file_operation');
 				using_archive_file = using_working_directory;
@@ -921,6 +929,7 @@ function module_code(library_namespace) {
 					original_working_directory = null;
 				} else {
 					library_namespace.debug({
+						// gettext_config:{"id":"changing-working-directory-$1-→-$2"}
 						T : [ 'Changing working directory: [%1]→[%2]',
 								original_working_directory,
 								using_working_directory ]

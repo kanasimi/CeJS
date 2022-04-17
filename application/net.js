@@ -713,6 +713,7 @@ function module_code(library_namespace) {
 			if (search_string) {
 				// Invalid search 無法處理之 parameters
 				library_namespace.debug({
+					// gettext_config:{"id":"enter-a-non-string-parameter-$1"}
 					T : [ '輸入了非字串之參數：[%1]', search_string ]
 				}, 1, 'Search_parameters');
 			}
@@ -896,6 +897,7 @@ function module_code(library_namespace) {
 				try {
 					library_namespace.debug({
 						T : [
+								// gettext_config:{"id":"set-$1-to-a-non-string-$2"}
 								'設定 %1 成非字串之參數：%2',
 								typeof JSON === 'object' ? JSON.stringify(key)
 										: String(key),
@@ -937,6 +939,7 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.debug([ {
+			// gettext_config:{"id":"a-total-of-$1-parameters"}
 			T : [ '共%1個參數：', search.length ]
 		}, '<br />\n', search.map(function(parameter) {
 			return parameter.length > 400 ? parameter.slice(0,

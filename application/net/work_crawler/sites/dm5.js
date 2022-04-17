@@ -680,6 +680,7 @@ function module_code(library_namespace) {
 			if (this.archive_old_works) {
 				// 本工具檔不會壓縮檔案。
 				library_namespace.warn([ this.id + ': ', {
+					// gettext_config:{"id":"this-website-does-not-support-the-function-of-archiving-old-works-(.archive_old_works)"}
 					T : '本網站不支援封存舊作品功能 (.archive_old_works)！'
 				} ]);
 				this.archive_old_works = false;

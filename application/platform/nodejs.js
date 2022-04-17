@@ -202,6 +202,9 @@ function module_code(library_namespace) {
 		}
 	} : fs_copySync;
 
+	// e.g., for node_fs_constants.R_OK
+	var node_fs_constants = node_fs.constants || node_fs;
+
 	/**
 	 * create directory / directories
 	 * 
@@ -221,42 +224,47 @@ function module_code(library_namespace) {
 		}
 		directories.forEach(function(directory_name) {
 			// directory_name = String(directory_name).replace(/[\\\/]+$/, '');
+			if (!directory_name) {
+				return;
+			}
 			try {
-				directory_name
-				//
-				&& node_fs.accessSync(directory_name, node_fs.F_OK
-				//
-				| node_fs.R_OK | node_fs.W_OK | node_fs.X_OK);
+				node_fs.accessSync(directory_name, node_fs_constants.F_OK
+						| node_fs_constants.R_OK | node_fs_constants.W_OK
+						| node_fs_constants.X_OK);
 				library_namespace.debug('Already existed: [' + directory_name
 						+ ']', 1, 'create_directory');
+				return;
 			} catch (e) {
-				library_namespace.debug('Create [' + directory_name + ']...',
-						1, 'create_directory');
-				try {
-					if (library_namespace.platform.is_Windows()
-							&& directory_name.endsWith('.')) {
-						library_namespace.warn({
-							T : [ '以點 "." 作為結尾的目錄名稱，將導致沒有辦法刪除或者複製：%1',
-									JSON.stringify(directory_name) ]
-						});
-					}
-					if (false && isNaN(mode)) {
-						// https://github.com/nodejs/node/pull/32499
-						// deprecate process.umask() with no arguments
-						mode = parseInt('700', 8)
-								| (parseInt('777', 8) ^ process.umask());
-					}
-					node_fs.mkdirSync(directory_name, options);
-				} catch (e) {
-					if (e.code !== 'EEXIST')
-						;
-					if (!options || !options.no_throw)
-						throw e;
-					library_namespace.warn([ 'create_directory: ', {
-						T : [ '創建目錄 [%1] 失敗：%2', directory_name, String(e) ]
-					} ]);
-					error++;
+			}
+
+			library_namespace.debug('Create [' + directory_name + ']...', 1,
+					'create_directory');
+			try {
+				if (library_namespace.platform.is_Windows()
+						&& directory_name.endsWith('.')) {
+					library_namespace.warn({
+						// gettext_config:{"id":"a-directory-name-ending-with-a-.-will-result-in-no-way-to-delete-or-copy-$1"}
+						T : [ '以點 "." 作為結尾的目錄名稱，將導致沒有辦法刪除或者複製：%1',
+								JSON.stringify(directory_name) ]
+					});
 				}
+				if (false && isNaN(mode)) {
+					// https://github.com/nodejs/node/pull/32499
+					// deprecate process.umask() with no arguments
+					mode = parseInt('700', 8)
+							| (parseInt('777', 8) ^ process.umask());
+				}
+				node_fs.mkdirSync(directory_name, options);
+			} catch (e) {
+				if (e.code !== 'EEXIST')
+					;
+				if (!options || !options.no_throw)
+					throw e;
+				library_namespace.warn([ 'create_directory: ', {
+					// gettext_config:{"id":"create-directory-$1-failed-$2"}
+					T : [ '創建目錄 [%1] 失敗：%2', directory_name, String(e) ]
+				} ]);
+				error++;
 			}
 		});
 		return error;
@@ -312,6 +320,7 @@ function module_code(library_namespace) {
 		try {
 			if (recursive) {
 				library_namespace.debug({
+					// gettext_config:{"id":"recursively-removing-subdirectories-of-$1"}
 					T : [ 'Recursively removing subdirectories of %1', path ]
 				}, 2, 'remove_fso');
 			}
@@ -328,6 +337,7 @@ function module_code(library_namespace) {
 
 		// `path` should be empty directory, or should set recursive flag.
 		library_namespace.debug({
+			// gettext_config:{"id":"removing-directory-$1"}
 			T : [ 'Removing directory: %1', path ]
 		}, 1, 'remove_fso');
 		// delete directory itself.
@@ -354,6 +364,7 @@ function module_code(library_namespace) {
 			// https://nodejs.org/api/fs.html#fs_class_fs_stats
 			if (!fso_status.isDirectory()) {
 				library_namespace.debug({
+					// gettext_config:{"id":"removing-file-$1"}
 					T : [ 'Removing file: %1', path ]
 				}, 1, 'remove_fso');
 				// delete file, link, ...
@@ -364,6 +375,7 @@ function module_code(library_namespace) {
 			// 設定 recursive/force 時才會遞迴操作。
 			if (recursive) {
 				library_namespace.debug({
+					// gettext_config:{"id":"recursively-removing-subdirectories-of-$1"}
 					T : [ 'Recursively removing subdirectories of %1', path ]
 				}, 2, 'remove_fso');
 
@@ -391,6 +403,7 @@ function module_code(library_namespace) {
 			}
 
 			library_namespace.debug({
+				// gettext_config:{"id":"removing-directory-$1"}
 				T : [ 'Removing directory: %1', path ]
 			}, 1, 'remove_fso');
 			// delete directory itself.
@@ -579,6 +592,7 @@ function module_code(library_namespace) {
 		} catch (e) {
 			if (library_namespace.is_debug()) {
 				library_namespace.error([ 'fs_writeFileSync: ', {
+					// gettext_config:{"id":"can-not-save-data-to-file-$1"}
 					T : [ 'Can not save data to file [%1]!', file_path ]
 				} ]);
 				library_namespace.error(e);
@@ -658,6 +672,7 @@ function module_code(library_namespace) {
 			list = node_fs.readdirSync(path);
 		} catch (e) {
 			library_namespace.debug({
+				// gettext_config:{"id":"no-file-or-directory-exists-$1"}
 				T : [ '不存在檔案或目錄：%1', path ]
 			});
 			return;
@@ -696,7 +711,9 @@ function module_code(library_namespace) {
 			} catch (error) {
 				if (error.code === 'ENOENT') {
 					// e.g., file name including "﯆񐠀"
-					library_namespace.error('traverse_file_system: Cannot access ' + full_path);
+					library_namespace
+							.error('traverse_file_system: Cannot access '
+									+ full_path);
 					console.error(error);
 				} else {
 					return promise.then(function() {
@@ -756,6 +773,7 @@ function module_code(library_namespace) {
 				callback(error);
 
 			library_namespace.debug({
+				// gettext_config:{"id":"processing-completed-$1"}
 				T : [ '處理完畢：%1', path ]
 			}, 2, 'traverse_file_system');
 		});
@@ -876,6 +894,7 @@ function module_code(library_namespace) {
 
 			if (matched[2].startsWith('-')) {
 				library_namespace.warn([ 'platform.nodejs: ', {
+					// gettext_config:{"id":"invalid-command-line-argument-$1"}
 					T : [ 'Invalid command-line argument: [%1]', arg ]
 				} ]);
 				this[arg] = true;
@@ -1079,6 +1098,7 @@ function module_code(library_namespace) {
 	function run_JScript(code, options) {
 		if (!library_namespace.platform('windows')) {
 			library_namespace.error([ 'run_JScript: ', {
+				// gettext_config:{"id":"jscript-files-can-only-be-executed-in-windows-environment"}
 				T : 'JScript 檔案只能在 Windows 環境下執行！'
 			} ]);
 			return;

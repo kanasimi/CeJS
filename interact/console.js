@@ -69,6 +69,7 @@ function module_code(library_namespace) {
 	 */
 	function SGR_style_name(style_name) {
 		library_namespace.debug({
+			// gettext_config:{"id":"search-style-name-$1-in-`sgr_code.style_name_alias`"}
 			T : [ 'Search style name [%1] in `SGR_code.style_name_alias`...',
 					style_name ]
 		}, min_debug, 'SGR_style_name');
@@ -79,6 +80,7 @@ function module_code(library_namespace) {
 		//
 		|| !(style_name in SGR_code.style_data))) {
 			library_namespace.warn([ 'SGR_style_name: ', {
+				// gettext_config:{"id":"unknown-style-name-$1"}
 				T : [ 'Unknown style name: [%1].', style_name ]
 			} ]);
 		}
@@ -104,6 +106,7 @@ function module_code(library_namespace) {
 			if (typeof style_name !== 'string' || !(style_name in color_shift)) {
 				// Expects value in color_shift.
 				library_namespace.warn([ 'SGR_style_value: ', {
+					// gettext_config:{"id":"invalid-name-of-color-$1"}
 					T : [ 'Invalid name of color: [%1].', style_name ]
 				} ]);
 				return;
@@ -119,10 +122,12 @@ function module_code(library_namespace) {
 			if ((style_name in SGR_code.style_data)
 					&& SGR_code.style_data[style_name][style_value ? 0 : 1] === undefined) {
 				library_namespace.warn([ {
+					// gettext_config:{"id":"invalid-value-$1-of-style-$2"}
 					T : [ 'Invalid value [%1] of style: [%2]:',
 					//
 					style_value, style_name ]
 				}, {
+					// gettext_config:{"id":"unable-to-convert-the-value-to-a-style"}
 					T : '無法將真偽值轉為樣式。'
 				} ]);
 				return;
@@ -132,10 +137,12 @@ function module_code(library_namespace) {
 
 		if (isNaN(style_value) || (style_value |= 0) < 0) {
 			library_namespace.warn([ {
+				// gettext_config:{"id":"invalid-value-$1-of-style-$2"}
 				T : [ 'Invalid value [%1] of style: [%2]:',
 				//
 				style_value, style_name ]
 			}, {
+				// gettext_config:{"id":"the-style-value-is-not-a-number"}
 				T : '欲設定的樣式值並非數字。'
 			} ]);
 			return;
@@ -149,10 +156,12 @@ function module_code(library_namespace) {
 					style_value -= color_shift[style_name];
 			} else {
 				library_namespace.warn([ {
+					// gettext_config:{"id":"invalid-value-$1-of-style-$2"}
 					T : [ 'Invalid value [%1] of style: [%2]:',
 					//
 					style_value, style_name ]
 				}, {
+					// gettext_config:{"id":"the-style-value-is-not-in-the-style-sheet-$1-that-can-be-set"}
 					T : [ '樣式值不在可設定的樣式資料[%1]中。',
 					//
 					SGR_code.style_data[style_name] ]
@@ -195,6 +204,7 @@ function module_code(library_namespace) {
 			return this;
 
 		library_namespace.debug({
+			// gettext_config:{"id":"searching-style-{$2}-$1-in-sgr_code.style_value_alias"}
 			T : [ 'Searching style {%2} [%1] in SGR_code.style_value_alias...',
 					typeof JSON === 'object' ? JSON.stringify(style) : style,
 					typeof style ]
@@ -202,6 +212,7 @@ function module_code(library_namespace) {
 		if (typeof style !== 'object')
 			while (style in SGR_code.style_value_alias) {
 				library_namespace.debug({
+					// gettext_config:{"id":"find-style-$1-normalized-to-→-$2"}
 					T : [ 'Find style [%1] normalized to → [%2]', style,
 							SGR_code.style_value_alias[style] ]
 				}, min_debug, 'SGR_style_add');
@@ -209,6 +220,7 @@ function module_code(library_namespace) {
 			}
 
 		library_namespace.debug({
+			// gettext_config:{"id":"parse-{$2}-$1-if-it-is-a-primitive-value"}
 			T : [ 'Parse {%2} [%1] if it is a primitive value.',
 					typeof JSON === 'object' ? JSON.stringify(style) : style,
 					typeof style ]
@@ -219,6 +231,7 @@ function module_code(library_namespace) {
 
 			} else if (isNaN(style)) {
 				library_namespace.debug({
+					// gettext_config:{"id":"test-if-$1-is-+-style-name"}
 					T : [ 'Test if [%1] is "[+-] style name".', style ]
 				}, min_debug, 'SGR_style_add');
 				// "+bright"
@@ -227,12 +240,14 @@ function module_code(library_namespace) {
 					matched[1] = matched[1] !== '-';
 					if (undefined === SGR_style_value(matched[1], matched[2]))
 						library_namespace.warn([ 'SGR_style_add: ', {
+							// gettext_config:{"id":"invalid-configuration-of-style-$1"}
 							T : [ 'Invalid configuration of style: [%1].',
 							// Expects integer.
 							matched[2] ]
 						} ]);
 					else {
 						library_namespace.debug({
+							// gettext_config:{"id":"set-style-$1-=-$2"}
 							T : [ 'Set style "%1" = %2.', matched[2],
 									matched[1] ]
 						}, min_debug, 'SGR_style_add');
@@ -243,9 +258,10 @@ function module_code(library_namespace) {
 
 				library_namespace.debug({
 					T : [
-							'Test if [%1] is "style name = '
-									+ 'style value (0, 1, false, true, ...)".',
-							style ]
+					// gettext_config:{"id":"test-if-$1-is-style-name-=-style-value-(0-1-false-true-...)"}
+					'Test if [%1] is "style name = style value (0, 1, false, true, ...)".'
+					//
+					, style ]
 				}, min_debug, 'SGR_style_add');
 				matched = style.match(/^([^=]+)=(.+)$/);
 				if (matched && (matched[1] = SGR_style_name(matched[1].trim()))) {
@@ -267,6 +283,7 @@ function module_code(library_namespace) {
 		if (library_namespace.is_Object(style) || style instanceof SGR_style) {
 			library_namespace.debug({
 				T : [
+						// gettext_config:{"id":"parse-{$2}-$1-if-it-is-a-object"}
 						'Parse {%2} [%1] if it is a object.',
 						typeof JSON === 'object' ? JSON.stringify(style)
 								: style, typeof style ]
@@ -288,6 +305,7 @@ function module_code(library_namespace) {
 							this[style_name] = style_value;
 						} else if (is_reset_style(style_value)) {
 							library_namespace.debug({
+								// gettext_config:{"id":"reset-style-{$2}-$1"}
 								T : [ 'Reset style {%2} [%1].', style,
 										typeof style ]
 							}, min_debug + 1, 'SGR_style_add');
@@ -307,11 +325,13 @@ function module_code(library_namespace) {
 			this.background = style;
 		} else if (is_reset_style(style)) {
 			library_namespace.debug({
+				// gettext_config:{"id":"reset-style-{$2}-$1"}
 				T : [ 'Reset style {%2} [%1].', style, typeof style ]
 			}, min_debug, 'SGR_style_add');
 			this.to_reset();
 		} else if (library_namespace.is_debug()) {
 			library_namespace.warn([ 'SGR_style_add: ', {
+				// gettext_config:{"id":"unknown-style-$1"}
 				T : [ 'Unknown style: [%1].', style ]
 			} ]);
 		}

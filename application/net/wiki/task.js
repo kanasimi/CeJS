@@ -2458,6 +2458,7 @@ function module_code(library_namespace) {
 						// 未經過 wiki 操作，於 wiki_API.edit 發現為[[WP:NULLEDIT|無改變]]的。
 						// 無更動 沒有變更 No modification made
 						nochange_count++;
+						// gettext_config:{"id":"no-change"}
 						error = gettext('no change');
 						result = 'nochange';
 					} else {
@@ -2473,7 +2474,8 @@ function module_code(library_namespace) {
 						error =
 						// {{font color}}
 						'<span style="color:red; background-color:#ff0;">'
-								+ gettext('finished: %1', error) + '</span>';
+						// gettext_config:{"id":"finished-$1"}
+						+ gettext('finished: %1', error) + '</span>';
 					}
 
 				} else if (!result || !result.edit) {
@@ -2499,16 +2501,19 @@ function module_code(library_namespace) {
 						// [[Special:Diff/prev/0]]
 						error = ' [[Special:Diff/' + result.edit.newrevid + '|'
 						// may use wiki_API.title_link_of()
+						// gettext_config:{"id":"finished"}
 						+ gettext('finished') + ']]';
 						result = 'succeed';
 					} else if ('nochange' in result.edit) {
 						// 經過 wiki 操作，發現為[[WP:NULLEDIT|無改變]]的。
 						nochange_count++;
+						// gettext_config:{"id":"no-change"}
 						error = gettext('no change');
 						result = 'nochange';
 					} else {
 						// 有時無 result.edit.newrevid。
 						library_namespace.error('無 result.edit.newrevid');
+						// gettext_config:{"id":"finished"}
 						error = gettext('finished');
 						result = 'succeed';
 					}
@@ -2520,6 +2525,7 @@ function module_code(library_namespace) {
 				// {Array}result = [ main error code, sub ]
 				? result.join('_') in log_item ? result.join('_') : result[0]
 						: result]) {
+					// gettext_config:{"id":"$1-elapsed-$3-at-$2"}
 					error = gettext('%1 elapsed, %3 at %2',
 					// 紀錄使用時間, 歷時, 費時, elapsed time
 					messages.last.age(new Date), (messages.last = new Date)
@@ -2604,8 +2610,9 @@ function module_code(library_namespace) {
 
 			if (!config.no_message) {
 				// 使用時間, 歷時, 費時, elapsed time
-				pages = gettext('First, use %1 to get %2 pages.', messages.last
-						.age(new Date), data.length);
+				// gettext_config:{"id":"first-it-takes-$1-to-get-$2-pages"}
+				pages = gettext('First, it takes %1 to get %2 pages.',
+						messages.last.age(new Date), data.length);
 				// 在「首先使用」之後才設定 .last，才能正確抓到「首先使用」。
 				messages.last = new Date;
 				if (log_item.get_pages) {
@@ -2897,18 +2904,21 @@ function module_code(library_namespace) {
 					}
 
 					count_summary = new gettext.Sentence_combination([
-							'%1 page(s) processed,', count_summary ]);
+					// gettext_config:{"id":"$1-page(s)-processed"}
+					'%1 page(s) processed,', count_summary ]);
 					// console.trace(count_summary);
 
 					if (log_item.report) {
 						if (nochange_count > 0) {
 							count_summary.push(done === nochange_count
 							// 未改變任何條目。 No pages have been changed
+							// gettext_config:{"id":"no-page-modified"}
 							? 'no page modified,' : [
-									'%1 page(s) have not changed,',
-									nochange_count ]);
+							// gettext_config:{"id":"$1-page(s)-have-not-changed"}
+							'%1 page(s) have not changed,', nochange_count ]);
 						}
 						// 使用時間, 歷時, 前後總共費時, elapsed time
+						// gettext_config:{"id":"$1-elapsed"}
 						count_summary.push([ '%1 elapsed.',
 								messages.start.age(new Date) ]);
 						messages.unshift(count_summary.toString());
@@ -2917,9 +2927,11 @@ function module_code(library_namespace) {
 					count_summary = count_summary.toString();
 					if (session.stopped) {
 						messages
-								.add(gettext("'''Stopped''', give up editing."));
+						// gettext_config:{"id":"stopped-give-up-editing"}
+						.add(gettext("'''Stopped''', give up editing."));
 					}
 					if (done === nochange_count && !config.no_edit) {
+						// gettext_config:{"id":"no-changes"}
 						messages.add(gettext('No changes.'));
 					}
 					if (log_item.title && config.summary) {

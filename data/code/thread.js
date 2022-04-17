@@ -486,6 +486,7 @@ function module_code(library_namespace) {
 
 		// 結束程序。
 		finish : function() {
+			// gettext_config:{"id":"finished"}
 			this.set('finished', true);
 			this.set('stopped', false);
 			// return this.package_thread();
@@ -508,6 +509,7 @@ function module_code(library_namespace) {
 		},
 
 		finished : function() {
+			// gettext_config:{"id":"finished"}
 			return this.get('finished');
 		},
 

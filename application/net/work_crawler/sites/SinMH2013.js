@@ -252,6 +252,7 @@ function module_code(library_namespace) {
 			}
 			if (!chapter_data) {
 				library_namespace.warn({
+					// gettext_config:{"id":"unable-to-parse-chapter-data-for-«$1»-§$2"}
 					T : [ '無法解析《%1》§%2 之章節資料！', work_data.title, chapter_NO ]
 				});
 				return;

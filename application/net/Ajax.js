@@ -516,7 +516,8 @@ function module_code(library_namespace) {
 				if (!chunk.content_length) {
 					console.log(chunk);
 					throw new Error(
-							'The chunk do not has regular .content_length!');
+					// gettext_config:{"id":"the-chunk-do-not-has-regular-.content_length"}
+					'The chunk do not has regular .content_length!');
 				}
 				content_length += chunk.content_length;
 			} else {
@@ -532,6 +533,7 @@ function module_code(library_namespace) {
 
 		if (!(content_length > 0)) {
 			console.log(this);
+			// gettext_config:{"id":"illegal-chunk.content_length"}
 			throw new Error('Illegal chunk.content_length!');
 		}
 
@@ -576,7 +578,9 @@ function module_code(library_namespace) {
 				}
 			}
 		}
-		throw new Error('give_boundary: ' + 'Retry too many times!');
+		throw new Error('give_boundary: '
+		// gettext_config:{"id":"retry-too-many-times"}
+		+ 'Retry too many times!');
 	}
 
 	var to_form_data_generated = {
@@ -652,6 +656,7 @@ function module_code(library_namespace) {
 				}
 				if (!content) {
 					library_namespace.error([ 'to_form_data: ', {
+						// gettext_config:{"id":"failed-to-get-file-$1"}
 						T : [ 'Failed to get file: [%1]', value ]
 					} ]);
 					// Skip this one.
@@ -672,6 +677,7 @@ function module_code(library_namespace) {
 			}
 
 			library_namespace.debug({
+				// gettext_config:{"id":"fetching-url-$1"}
 				T : [ '自網路取得 URL：%1', value ]
 			}, 1, 'to_form_data');
 			_.get_URL(value, function(XMLHttp, error) {
@@ -680,6 +686,7 @@ function module_code(library_namespace) {
 				}
 				if (error) {
 					library_namespace.error([ 'to_form_data: ', {
+						// gettext_config:{"id":"got-error-when-retrieving-$1-$2"}
 						T : [ 'Got error when retrieving [%1]: %2',
 						//
 						value, localize_error(error) ]
@@ -696,6 +703,7 @@ function module_code(library_namespace) {
 				// console.log(value);
 
 				library_namespace.debug({
+					// gettext_config:{"id":"got-url-from-the-network-$1-$2-bytes"}
 					T : [ '自網路取得 URL：%1，%2位元組。', value, XMLHttp.buffer.length ]
 				}, 1, 'to_form_data');
 				push_and_callback(XMLHttp.type, XMLHttp.buffer);
@@ -1245,6 +1253,7 @@ function module_code(library_namespace) {
 
 			} else {
 				library_namespace.warn([ 'merge_cookie: ', {
+					// gettext_config:{"id":"invalid-cookie"}
 					T : 'Invalid cookie?'
 				}, ' [' + piece + ']' ]);
 				// treat cookie piece as key
@@ -1260,6 +1269,7 @@ function module_code(library_namespace) {
 			if (key in cookie_index_of) {
 				// assert: (key in cookie_hash) === true
 				library_namespace.debug([ {
+					// gettext_config:{"id":"duplicate-cookie-name!-the-later-newcomer-will-prevail"}
 					T : 'cookie 名稱重複！以後來/新出現者為準。'
 				}, ' [' + last_cookie[cookie_index_of[key]]
 				//
@@ -1375,6 +1385,7 @@ function module_code(library_namespace) {
 		get_URL_node_requests++;
 		if (get_URL_node_connections >= get_URL_node.connects_limit) {
 			library_namespace.debug({
+				// gettext_config:{"id":"waiting-$1-$2-connections-$3"}
 				T : [ 'Waiting %1/%2 connections: %3',
 				// 避免同時開過多 connections 的機制。
 				get_URL_node_connections, get_URL_node_requests,
@@ -1563,6 +1574,7 @@ function module_code(library_namespace) {
 
 		} else if (URL_is_https) {
 			library_namespace.debug({
+				// gettext_config:{"id":"using-https-proxy-to-get-url-$1"}
 				T : [ 'Using HTTPS proxy to get URL: %1', URL_to_fetch ]
 			}, 2, 'get_URL_node');
 			// ... just add the special agent:
@@ -1583,6 +1595,7 @@ function module_code(library_namespace) {
 
 		} else {
 			library_namespace.debug({
+				// gettext_config:{"id":"using-http-proxy-to-get-url-$1"}
 				T : [ 'Using HTTP proxy to get URL: %1', URL_to_fetch ]
 			}, 2, 'get_URL_node');
 			// https://www.proxynova.com/proxy-server-list/country-tw/
@@ -1605,7 +1618,10 @@ function module_code(library_namespace) {
 
 		if (agent) {
 			library_namespace.debug({
-				T : agent === true ? '使用新 agent。' : '使用自定義 agent。'
+				// gettext_config:{"id":"using-new-agent"}
+				T : agent === true ? '使用新 agent。'
+				// gettext_config:{"id":"using-custom-agent"}
+				: '使用自定義 agent。'
 			}, 6, 'get_URL_node');
 			if (agent === true) {
 				// use new agent.
@@ -1615,6 +1631,7 @@ function module_code(library_namespace) {
 			// agent.protocol 可能是 undefined。
 			&& agent.protocol !== URL_options_to_fetch.protocol) {
 				var message = {
+					// gettext_config:{"id":"the-custom-agent-is-different-from-the-url-and-will-try-to-adopt-the-conforming-agreement-$1"}
 					T : [ '自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定：%1',
 					//
 					agent.protocol + ' !== ' + URL_options_to_fetch.protocol ]
@@ -1635,6 +1652,7 @@ function module_code(library_namespace) {
 				}
 			}
 		} else {
+			// gettext_config:{"id":"using-generic-agent"}
 			library_namespace.debug('採用泛用的 agent。', 6, 'get_URL_node');
 			agent = URL_is_https ? node_https_agent : node_http_agent;
 		}
@@ -1642,6 +1660,7 @@ function module_code(library_namespace) {
 		// console.log([ options.cookie, agent.last_cookie ]);
 		if (options.cookie && !agent.last_cookie) {
 			library_namespace.debug({
+				// gettext_config:{"id":"reset-the-cookie-to-$1"}
 				T : [ '重新設定 cookie 成：%1', options.cookie ]
 			}, 3, 'get_URL_node');
 			agent.last_cookie = options.cookie;
@@ -1717,6 +1736,7 @@ function module_code(library_namespace) {
 				options[KEY_URL] = URL_to_fetch;
 				// Failed to get [' + URL_to_fetch + '].
 				library_namespace.log([ 'get_URL_node: ', {
+					// gettext_config:{"id":"retry-$1-$2-$3"}
 					T : [ 'Retry %1/%2: %3', options.error_count,
 					//
 					options.error_retry, localize_error(error) ]
@@ -1738,6 +1758,7 @@ function module_code(library_namespace) {
 			&& error.code !== 'TIMEOUT') {
 				if (error.code === 'ENOTFOUND') {
 					library_namespace.error([ 'get_URL_node: ', {
+						// gettext_config:{"id":"url-not-found-$1"}
 						T : [ 'URL not found: [%1]', URL_to_fetch ]
 					} ]);
 				} else if (error.code === 'EPROTO'
@@ -1747,9 +1768,11 @@ function module_code(library_namespace) {
 							.error([
 									'get_URL_node: ',
 									{
+										// gettext_config:{"id":"node.js-v12-and-later-versions-disable-tls-v1.0-and-v1.1-by-default"}
 										T : 'Node.js v12 and later versions disable TLS v1.0 and v1.1 by default.'
 									},
 									{
+										// gettext_config:{"id":"please-set-tls.default_min_version-=-tlsv1-first"}
 										T : 'Please set tls.DEFAULT_MIN_VERSION = "TLSv1" first!'
 									}, ' [' + URL_to_fetch + ']' ]);
 					/**
@@ -1764,6 +1787,7 @@ function module_code(library_namespace) {
 					library_namespace.error([
 							'get_URL_node: ',
 							{
+								// gettext_config:{"id":"got-error-when-retrieving-$1-$2"}
 								T : [ 'Got error when retrieving [%1]: %2',
 										URL_to_fetch, localize_error(error) ]
 							} ]);
@@ -1826,6 +1850,7 @@ function module_code(library_namespace) {
 				options[KEY_URL] = new URL(response.headers.location,
 						URL_to_fetch);
 				library_namespace.debug({
+					// gettext_config:{"id":"$1-redirecting-to-$2-←-$3"}
 					T : [ '%1 Redirecting to [%2] ← [%3]', response.statusCode,
 							options[KEY_URL], URL_to_fetch ]
 				}, 1, 'get_URL_node');
@@ -1838,6 +1863,7 @@ function module_code(library_namespace) {
 			}
 
 			library_namespace.debug({
+				// gettext_config:{"id":"response-headers-$1"}
 				T : [ 'response HEADERS: %1',
 				//
 				JSON.stringify(response.headers) ]
@@ -1857,6 +1883,7 @@ function module_code(library_namespace) {
 			// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
 			if (options.onfail || (response.statusCode / 100 | 0) === 2) {
 				library_namespace.debug({
+					// gettext_config:{"id":"http-status-code-$1-$2"}
 					T : [ 'HTTP status code: %1 %2', response.statusCode,
 							URL_to_fetch ]
 				}, 2, 'get_URL_node');
@@ -1864,6 +1891,7 @@ function module_code(library_namespace) {
 				library_namespace.warn([
 						'get_URL_node: ',
 						{
+							// gettext_config:{"id":"exception-http-status-code-$1-$2"}
 							T : [ 'Exception HTTP status code %1: %2',
 									response.statusCode, URL_to_fetch ]
 						} ]);
@@ -1920,6 +1948,7 @@ function module_code(library_namespace) {
 							// matched = unescape(matched);
 						}
 						library_namespace.debug({
+							// gettext_config:{"id":"file-name-$1"}
 							T : [ '檔案名稱：%1', matched ]
 						}, 3, 'get_URL_node');
 					} catch (e) {
@@ -1939,6 +1968,7 @@ function module_code(library_namespace) {
 				library_namespace.warn([
 						'get_URL_node: ',
 						{
+							// gettext_config:{"id":"got-url-$1-but-there-is-no-listener"}
 							T : [ 'Got URL [%1], but there is no listener!',
 									URL_to_fetch ]
 						} ]);
@@ -1947,6 +1977,7 @@ function module_code(library_namespace) {
 			}
 
 			library_namespace.debug({
+				// gettext_config:{"id":"waiting-to-receive-data-transferred-back-from-url-$1"}
 				T : [ '等待接收從網址 [%1] 傳輸回的資料……', URL_to_fetch ]
 			}, 3, 'get_URL_node');
 
@@ -2131,6 +2162,7 @@ function module_code(library_namespace) {
 						break;
 					default:
 						library_namespace.warn([ 'get_URL_node: ', {
+							// gettext_config:{"id":"unknown-http-compression-method-$1"}
 							T : [ 'Unknown HTTP compression method: [%1]',
 							//
 							flow_encoding ]
@@ -2150,6 +2182,7 @@ function module_code(library_namespace) {
 					library_namespace.error([ 'get_URL_node: ', {
 						// https://github.com/Anorov/cloudflare-scrape
 						T : // TODO: https://github.com/codemanki/cloudscraper
+						// gettext_config:{"id":"you-need-to-bypass-the-ddos-protection-by-cloudflare"}
 						'You need to bypass the DDoS protection by Cloudflare!'
 					} ]);
 				}
@@ -2209,6 +2242,7 @@ function module_code(library_namespace) {
 							.slice(0, 256);
 					if (!options.no_warning) {
 						library_namespace.info([ 'get_URL_node: ', {
+							// gettext_config:{"id":"write-$2-bytes-to-file-$1-$3"}
 							T : [ 'Write %2 bytes to file [%1]: %3',
 							//
 							file_path, data.length, URL_to_fetch ]
@@ -2240,6 +2274,7 @@ function module_code(library_namespace) {
 						}
 					} catch (e) {
 						library_namespace.error([ 'get_URL_node: ', {
+							// gettext_config:{"id":"failed-to-write-$2-bytes-to-$1-$3"}
 							T : [ 'Failed to write %2 bytes to [%1]: %3',
 							//
 							file_path, data.length, URL_to_fetch ]
@@ -2405,7 +2440,8 @@ function module_code(library_namespace) {
 			// e.g., _http_client.js:52
 			if (false) {
 				throw new TypeError(
-						'Request path contains unescaped characters');
+				// gettext_config:{"id":"request-path-contains-unescaped-characters"}
+				'Request path contains unescaped characters');
 			}
 			_onfail(e);
 			return;
@@ -2441,6 +2477,7 @@ function module_code(library_namespace) {
 				request.write(_post_data);
 			} else {
 				library_namespace.error({
+					// gettext_config:{"id":"invalid-post-data-$1"}
 					T : [ 'Invalid POST data: %1', JSON.stringify(post_data) ]
 				});
 			}
@@ -2466,6 +2503,7 @@ function module_code(library_namespace) {
 			}
 			if (!options.no_warning) {
 				library_namespace.info([ 'get_URL_node: ', {
+					// gettext_config:{"id":"connection-timeout-for-$1-$2"}
 					T : [ 'Connection timeout for %1: [%2]',
 					//
 					time_message(timeout), URL_to_fetch ]
@@ -2492,11 +2530,13 @@ function module_code(library_namespace) {
 			// {Object}timeout_id @ node.js
 			timeout_id = setTimeout(_ontimeout, timeout);
 			library_namespace.debug({
+				// gettext_config:{"id":"add-timeout-$1-$2"}
 				T : [ 'Add timeout %1: [%2]', time_message(timeout),
 						URL_to_fetch ]
 			}, 2, 'get_URL_node');
 		} else if (timeout) {
 			library_namespace.warn([ 'get_URL_node: ', {
+				// gettext_config:{"id":"invalid-timeout-$1"}
 				T : [ 'Invalid timeout: %1', timeout ]
 			} ]);
 		}
@@ -2691,6 +2731,7 @@ function module_code(library_namespace) {
 		// 代理伺服器 proxy_server: "username:password@hostname:port"
 		proxy_server = library_namespace.URI(proxy_server);
 		if (!proxy_server) {
+			// gettext_config:{"id":"must-specify-proxy-server-hostname-port"}
 			throw new Error('Must specify proxy server: hostname:port')
 		}
 		this.proxy_server = proxy_server;
@@ -2910,6 +2951,7 @@ function module_code(library_namespace) {
 		}
 	} catch (e) {
 		library_namespace.debug([ this.id + ': ', {
+			// gettext_config:{"id":"there-is-no-`fs`-package-for-node.js-so-there-is-no-file-operation-function-for-node"}
 			T : '無 node.js 之 `fs` 套件，因此不具備 node 之檔案操作功能。'
 		} ]);
 		if (false) {
@@ -2981,6 +3023,7 @@ function module_code(library_namespace) {
 			}
 			file_name = library_namespace.to_file_name(file_name);
 			library_namespace.debug([ {
+				// gettext_config:{"id":"get-filename-from-url-$1"}
 				T : [ '自 URL 取得檔名：%1', URL ]
 			}, '\n→ ' + file_name ], 1, 'get_URL_cache_node');
 		}
@@ -2988,6 +3031,7 @@ function module_code(library_namespace) {
 			file_name = options.file_name_processor(file_name);
 		}
 		if (!file_name) {
+			// gettext_config:{"id":"no-file-name-specified"}
 			onload(undefined, new Error('No file name specified.'));
 			return;
 		}
@@ -3020,10 +3064,12 @@ function module_code(library_namespace) {
 
 		library_namespace.debug([
 				{
+					// gettext_config:{"id":"download-$1"}
 					T : [ '下載 %1', URL ]
 				},
 				'\n→ ',
 				{
+					// gettext_config:{"id":"$1-(file-encoding-$2-charset-$3)"}
 					T : [ '%1 (file encoding %2, charset %3)', file_name,
 							encoding, options.charset ]
 				} ], 1, 'get_URL_cache_node');
@@ -3051,6 +3097,7 @@ function module_code(library_namespace) {
 				// 若是容許空內容，應該特別指定 options.allow_empty。
 				&& (data || options.allow_empty)) {
 					library_namespace.debug({
+						// gettext_config:{"id":"using-cached-data"}
 						T : 'Using cached data.'
 					}, 3, 'get_URL_cache_node');
 					library_namespace.debug('Cached data: ['
@@ -3062,6 +3109,7 @@ function module_code(library_namespace) {
 				}
 
 				library_namespace.debug({
+					// gettext_config:{"id":"no-valid-cached-data.-try-to-get-data-(again)"}
 					T : 'No valid cached data. Try to get data (again)...'
 				}, 3, 'get_URL_cache_node');
 			}
@@ -3069,6 +3117,7 @@ function module_code(library_namespace) {
 			_.get_URL(URL, function(XMLHttp, error) {
 				if (error) {
 					library_namespace.error([ 'get_URL_cache_node.cache: ', {
+						// gettext_config:{"id":"got-error-when-retrieving-$1-$2"}
 						T : [ 'Got error when retrieving [%1]: %2',
 						//
 						URL, localize_error(error) ]
@@ -3104,16 +3153,17 @@ function module_code(library_namespace) {
 						library_namespace.info([
 								'get_URL_cache_node: ',
 								{
+									// gettext_config:{"id":"got-file-name-from-http-header-$1"}
 									T : [ 'Got file name from HTTP header: %1',
 											XMLHttp.filename ]
 								} ]);
 					} else if (!options.file_name.endsWith(XMLHttp.filename)) {
 						library_namespace.info([ 'get_URL_cache_node: ', {
-							T : [ 'Set file name: [%1], '
+							T : [
+							// gettext_config:{"id":"set-file-name-$1-file-name-from-header-$2"}
+							'Set file name: [%1], file name from header: [%2].'
 							//
-							+ 'file name from header: [%2].',
-							//
-							options.file_name, XMLHttp.filename ]
+							, options.file_name, XMLHttp.filename ]
 						} ]);
 					}
 				}
@@ -3144,6 +3194,7 @@ function module_code(library_namespace) {
 								library_namespace.info([
 										'get_URL_cache_node.cache: ',
 										{
+											// gettext_config:{"id":"find-that-the-file-exists-after-get-the-file-from-web-$1-.-do-not-overwrite-it"}
 											T : [ '重新獲取檔案後發現原檔案已存在，跳過不覆寫：[%1]',
 													file_name ]
 										} ]);
@@ -3158,10 +3209,12 @@ function module_code(library_namespace) {
 						library_namespace.info([
 								'get_URL_cache_node.cache: ',
 								{
+									// gettext_config:{"id":"write-data-to-cache-file-$1"}
 									T : [ 'Write data to cache file [%1].',
 											file_name ]
 								} ]);
 						library_namespace.debug({
+							// gettext_config:{"id":"the-data-to-cache-$1"}
 							T : [ 'The data to cache: %1...',
 							//
 							data && JSON.stringify(data).slice(0, 190) ]
@@ -3245,6 +3298,7 @@ function module_code(library_namespace) {
 
 					url = new URL(response.headers.location, url);
 					library_namespace.debug({
+						// gettext_config:{"id":"$1-redirecting-to-$2-←-$3"}
 						T : [ '%1 Redirecting to [%2] ← [%3]',
 								response.statusCode, url.toString(), input ]
 					}, 1, 'fetch');

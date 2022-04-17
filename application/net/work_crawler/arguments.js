@@ -145,6 +145,7 @@ function module_code(library_namespace) {
 
 		if (!(type in arg_type_data)) {
 			library_namespace.warn([ 'verify_arg: ', {
+				// gettext_config:{"id":"the-allowed-data-type-for-$1-is-$4-but-it-was-set-to-{$2}-$3"}
 				T : [ '"%1" 這個值所允許的數值類型為 %4，但現在被設定成 {%2} %3',
 				//
 				key, typeof value, value,
@@ -180,6 +181,7 @@ function module_code(library_namespace) {
 						}
 					})) {
 						library_namespace.warn([ 'verify_arg: ', {
+							// gettext_config:{"id":"some-$2-path(s)-specified-by-$1-do-not-exist-$3"}
 							T : [ '有些 "%1" 所指定的%2路徑不存在：%3',
 							//
 							key, gettext(fso_type), error_fso ]
@@ -211,6 +213,7 @@ function module_code(library_namespace) {
 		} else {
 			if (arg_type_data !== undefined) {
 				library_namespace.warn([ 'verify_arg: ', {
+					// gettext_config:{"id":"unable-to-process-$1-condition-with-value-type-$2"}
 					T : [ '無法處理 "%1" 在數值類型為 %2 時之條件！', key, arg_type_data ]
 				} ]);
 			}
@@ -219,6 +222,7 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.warn([ 'verify_arg: ', {
+			// gettext_config:{"id":"$1-is-set-to-the-problematic-value-{$2}-$3"}
 			T : [ '"%1" 被設定成了有問題的值：{%2} %3', key, typeof value, value ]
 		} ]);
 
@@ -249,6 +253,7 @@ function module_code(library_namespace) {
 	 */
 	function setup_value(key, value) {
 		if (!key)
+			// gettext_config:{"id":"key-value-not-given"}
 			return '未提供鍵值';
 
 		if (library_namespace.is_Object(key)) {
@@ -268,6 +273,7 @@ function module_code(library_namespace) {
 			// 使用代理伺服器 proxy_server
 			// TODO: check .proxy
 			library_namespace.info({
+				// gettext_config:{"id":"using-proxy-server-$1"}
 				T : [ 'Using proxy server: %1', value ]
 			});
 			this.get_URL_options.proxy = this[key] = value;
@@ -291,6 +297,7 @@ function module_code(library_namespace) {
 		case 'timeout':
 			value = library_namespace.to_millisecond(value);
 			if (!(value >= 0)) {
+				// gettext_config:{"id":"failed-to-parse-time"}
 				return '無法解析的時間';
 			}
 			this.get_URL_options.timeout = this[key] = value;
@@ -301,6 +308,7 @@ function module_code(library_namespace) {
 
 		case 'user_agent':
 			if (!value) {
+				// gettext_config:{"id":"user-agent-is-not-set"}
 				return '未設定 User-Agent。';
 			}
 			this.get_URL_options.headers['User-Agent'] = this[key] = value;
@@ -310,9 +318,11 @@ function module_code(library_namespace) {
 			if (!value
 			// value === '': Unset Referer
 			&& value !== '') {
+				// gettext_config:{"id":"referer-cannot-be-undefined"}
 				return 'Referer 不可為 undefined。';
 			}
 			library_namespace.debug({
+				// gettext_config:{"id":"configure-referer-$1"}
 				T : [ '設定 Referer：%1', JSON.stringify(value) ]
 			}, 2);
 			this.get_URL_options.headers.Referer = value;
@@ -335,6 +345,7 @@ function module_code(library_namespace) {
 					this.using_default_MIN_LENGTH = true;
 					value = this.allow_EOI_error ? 4e3 : 1e3;
 				} else
+					// gettext_config:{"id":"min-image-size-should-be-greater-than-0"}
 					return '最小圖片大小應大於等於零';
 			} else {
 				delete this.using_default_MIN_LENGTH;
@@ -384,6 +395,7 @@ function module_code(library_namespace) {
 					value = JSON.parse(value);
 				} catch (e) {
 					library_namespace.error('import_args: '
+							// gettext_config:{"id":"can-not-parse-$1"}
 							+ gettext('無法解析 %1', key + '=' + value));
 					continue;
 				}
@@ -392,11 +404,13 @@ function module_code(library_namespace) {
 			var old_value = this[key], error = this.setup_value(key, value);
 			if (error) {
 				library_namespace.error('import_args: '
+						// gettext_config:{"id":"unable-to-set-$1-$2"}
 						+ gettext('無法設定 %1：%2', key + '=' + old_value, error));
 			} else {
 				library_namespace.log(library_namespace.display_align([
 						[ key + ': ', old_value ],
 						// + ' ': 增加間隙。
+						// gettext_config:{"id":"from-command-line"}
 						[ gettext('由命令列') + ' → ', value ] ]));
 			}
 		}

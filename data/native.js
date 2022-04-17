@@ -215,12 +215,14 @@ function module_code(library_namespace) {
 			// JScript5 不能用 throw!
 			// http://www.oldversion.com/Internet-Explorer.html
 			// Syntax error!
+			// gettext_config:{"id":"syntax-error"}
 			throw new Error(1002, '語法錯誤！');
 		}
 
 		if (function_name != m[1]) {
 			// Function name unmatched.
 			library_namespace.warn({
+				// gettext_config:{"id":"function-name-unmatched"}
 				T : '函數名稱不相符，可能是用了 reference？'
 			});
 		}
@@ -509,6 +511,7 @@ function module_code(library_namespace) {
 				// pattern.trim()
 				if (pattern.charAt(0) === '/') {
 					library_namespace.debug({
+						// gettext_config:{"id":"treat-$1-as-regexp"}
 						T : [ 'Treat [%1] as RegExp.', pattern ]
 					}, 3, 'String_to_RegExp');
 					var matched = pattern.match(_.PATTERN_RegExp), replace_to;
@@ -537,6 +540,7 @@ function module_code(library_namespace) {
 									library_namespace.warn([
 									//
 									'String_to_RegExp: ', {
+										// gettext_config:{"id":"invalid-flags-$1"}
 										T : [ 'Invalid flags: [%1]', flags ]
 									} ]);
 								} else
@@ -545,12 +549,14 @@ function module_code(library_namespace) {
 								library_namespace.warn([
 								// Illegal pattern: /%1/
 								'String_to_RegExp: ', {
+									// gettext_config:{"id":"illegal-pattern-$1"}
 									T : [ 'Illegal pattern: [%1]', matched[1] ]
 								} ]);
 							}
 						}
 					} catch (e) {
 						library_namespace.debug({
+							// gettext_config:{"id":"conversion-mode-$1-error-invaild-regexp?-$2"}
 							T : [ '轉換模式 [%1] 出錯：並非 RegExp？ %2', pattern,
 									e.message ]
 						}, 2, 'String_to_RegExp');
@@ -570,9 +576,10 @@ function module_code(library_namespace) {
 						&& typeof library_namespace.wildcard_to_RegExp === 'function') {
 					library_namespace.debug({
 						T : [
-								'Treat pattern [%1] as '
-										+ 'Windows wildcard search string.',
-								pattern ]
+						// gettext_config:{"id":"treat-pattern-$1-as-windows-wildcard-search-string"}
+						'Treat pattern [%1] as Windows wildcard search string.'
+						//
+						, pattern ]
 					}, 3, 'String_to_RegExp');
 					pattern = new RegExp(library_namespace
 							.wildcard_to_RegExp(pattern));
@@ -587,6 +594,7 @@ function module_code(library_namespace) {
 					);
 				} catch (e) {
 					library_namespace.debug({
+						// gettext_config:{"id":"unable-to-convert-mode-$1"}
 						T : [ '無法轉換模式 [%1]！', pattern ]
 					}, 3, 'String_to_RegExp');
 				}

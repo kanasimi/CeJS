@@ -109,6 +109,7 @@ function module_code(library_namespace) {
 
 		} else {
 			throw new TypeError('extract_work_id_from_search_result_link: '
+					// gettext_config:{"id":"invalid-token-pattern-{$1}-$2"}
 					+ gettext('Invalid token pattern: {%1} %2',
 							typeof PATTERN_item_token, JSON
 									.stringify(PATTERN_item_token)));

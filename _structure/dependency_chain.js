@@ -2786,6 +2786,7 @@ if (typeof CeL === 'function')
 												library_namespace.warn([
 
 												'load_named: ', {
+													// gettext_config:{"id":"load-failed"}
 													T : 'Load failed'
 												}, ' (', {
 													T : 'timeout'

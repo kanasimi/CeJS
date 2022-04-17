@@ -9028,6 +9028,7 @@ _
 		if (list_array.length > 1) {
 			var TOC_list, id = set_attribute(content_node, 'id'),
 			//
+			// gettext_config:{"id":"↑back-to-toc"}
 			back_title = gettext('↑Back to TOC');
 
 			title = set_attribute(content_node, 'title');
@@ -9103,16 +9104,22 @@ _
 				// http://www.fileformat.info/info/emoji/list.htm
 				// http://codepoints.net/U+1F4D1
 				div : [ '📑', {
+					// gettext_config:{"id":"contents-of-$1"}
 					T : title ? [ 'Contents of [%1]', options.title_name
 					//
+					// gettext_config:{"id":"contents"}
 					&& options.title_name(title) || title ] : 'Contents'
 				} ],
 				C : auto_TOC.CSS_prefix + 'control',
+				// gettext_config:{"id":"expand"}
 				title : gettext('expand'),
 				onclick : function() {
 					var expand_now = toggle_display(TOC_list) !== 'none';
 					// show/hide (顯示/隱藏), 展開/收合目錄 click to expand
-					this.title = gettext(expand_now ? 'collapse' : 'expand');
+					// gettext_config:{"id":"collapse"}
+					this.title = gettext(expand_now ? 'collapse'
+					// gettext_config:{"id":"expand"}
+					: 'expand');
 					if (expand_now)
 						set_height();
 				}

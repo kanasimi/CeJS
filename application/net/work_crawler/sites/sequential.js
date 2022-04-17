@@ -122,6 +122,7 @@ function module_code(library_namespace) {
 			// console.log(latest_image_data);
 			if (!latest_image_data.has_error) {
 				library_namespace.debug([ work_data.id + ': ', {
+					// gettext_config:{"id":"the-previous-image-in-this-chapter-was-successfully-downloaded.-download-the-next-image-in-this-chapter"}
 					T : '本章節上一張圖片下載成功。下載本章節下一幅圖片。'
 				} ], 3);
 				image_list.push(this.get_image_url(work_data, chapter_NO,
@@ -131,6 +132,7 @@ function module_code(library_namespace) {
 
 			if (image_list.length === 1) {
 				library_namespace.debug([ work_data.id + ': ', {
+					// gettext_config:{"id":"the-first-image-failed-to-download.-ending-download-for-this-work"}
 					T : '第一張圖就下載失敗了。結束下載本作品。'
 				} ], 3);
 				return;

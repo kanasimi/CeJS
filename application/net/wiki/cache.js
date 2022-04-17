@@ -397,6 +397,7 @@ function module_code(library_namespace) {
 			('accept_empty_data' in _this
 			//
 			? _this.accept_empty_data : !using_JSON))) {
+				// gettext_config:{"id":"using-cached-data"}
 				library_namespace.debug('Using cached data.', 3,
 						'wiki_API_cache');
 				library_namespace.debug('Cached data: ['

@@ -744,6 +744,7 @@ addNum : function(_text, _left, _baseLine, _tW, style) {
 	if (_text) {
 		if(!/^\s*[+\-]?(?:\d+,)*\d*(?:\.\d+)?\s*$/.test(_text))
 			library_namespace.debug({
+				// gettext_config:{"id":"illegal-$1-$2"}
 				T: [ 'Illegal %1: [%2]', 'number', _text ]
 			}, 2, 'SVG.addNum');
 		

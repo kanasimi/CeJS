@@ -64,6 +64,7 @@ function module_code(library_namespace) {
 
 	var PATTERN_work_info = /<(p|div) class="[^<>"]+?__(author|(?:sub-)?description|meta)">([\s\S]+?)<\/\1>/g,
 	// assert: (NO_ticket_notified>=0) === false
+	// gettext_config:{"id":"no-read-volumes-are-available"}
 	NO_ticket_notified = '已無閱讀卷可用。', auto_use_ticket_notified,
 	// 可以用閱讀卷閱讀的章節。
 	READABLE_FLAG = 'W',
@@ -86,6 +87,7 @@ function module_code(library_namespace) {
 			adult : function(insert_id_list, get_label) {
 				// TW only: 此前被當作是一般作品。
 				library_namespace.info([ this.id + ': ', {
+					// gettext_config:{"id":"subsequent-titles-of-the-work-are-considered-to-be-web-limited-works"}
 					T : '此後的作品標題都被當作是網頁限定作品。'
 				} ]);
 				// webonly
@@ -141,6 +143,7 @@ function module_code(library_namespace) {
 				// 因為不會遍歷所有章節檔案，得到的是錯誤的 `work_data.last_file_modified_date`。
 				// 因此必須避免執行 check_and_archive_old_work()。
 				library_namespace.warn([ this.id + ': ', {
+					// gettext_config:{"id":"this-website-does-not-support-the-function-of-archiving-old-works-(.archive_old_works)"}
 					T : '本網站不支援封存舊作品功能 (.archive_old_works)！'
 				} ]);
 				this.archive_old_works = false;
@@ -229,6 +232,7 @@ function module_code(library_namespace) {
 			});
 			if (cmnData.time && cmnData.time.leftTime > 0) {
 				library_namespace.info({
+					// gettext_config:{"id":"the-next-time-you-receive-a-reading-voucher-you-will-need-$1"}
 					T : [ '下次收到閱讀券還要 %1。',
 					// レンタル券で無料 レンタル券が届きました（1日で回復）
 					// 作品を1話レンタルできます
@@ -296,6 +300,7 @@ function module_code(library_namespace) {
 			// console.log(recerse_count);
 			if (recerse_count > 0) {
 				library_namespace.info([ work_data.title + ': ', {
+					// gettext_config:{"id":"change-the-list-of-reversed-chapters-to-positive-order"}
 					T : '將倒序章節列表轉為正序。'
 				} ]);
 				work_data.chapter_list.reverse();
@@ -316,6 +321,7 @@ function module_code(library_namespace) {
 						if (!work_data.downloaded_chapter_list[index]
 								&& chapter_data.freeFlg === READABLE_FLAG) {
 							library_namespace.info([ work_data.title + ': ', {
+								// gettext_config:{"id":"there-are-still-$1-reading-volume-but-$2-$3-chapter-has-not-been-downloaded-yet.-so-checking-from-this-chapter"}
 								T : [ '還有%1張閱讀卷，且第 %2/%3 章還有沒下載過，從此章開始檢查。',
 								//
 								work_data.ticket_left, index,
@@ -344,11 +350,13 @@ function module_code(library_namespace) {
 			var chapter_data = work_data.chapter_list[chapter_NO - 1],
 			//
 			skip_chapter = !chapter_data.price || chapter_data.isPurchased && {
+				// gettext_config:{"id":"«$1»-has-been-purchased"}
 				T : [ '已付費購買章節《%1》。', chapter_data.title ]
 			};
 			// console.log(chapter_data);
 			if (!skip_chapter && chapter_data.expireDate > 0) {
 				skip_chapter = {
+					// gettext_config:{"id":"you-can-read-«$3»-in-this-section-before-$1-(and-$2)"}
 					T : [ '在 %1 之前（還有 %2）可以閱讀本章節《%3》。',
 					//
 					new Date(chapter_data.expireDate).format('%m/%d %H:%M'),
@@ -364,6 +372,7 @@ function module_code(library_namespace) {
 				// 或者有損壞檔案，
 				// 那麼就把 work_data.downloaded_chapter_list[index] 設成 false。
 				skip_chapter = {
+					// gettext_config:{"id":"the-section-«$1»-has-been-downloaded-before-and-will-not-be-re-purchased"}
 					T : [ '之前已下載過章節《%1》，不再重新購買。', chapter_data.title ]
 				};
 			}
@@ -375,6 +384,7 @@ function module_code(library_namespace) {
 					skip_chapter = true;
 				} else {
 					skip_chapter = {
+						// gettext_config:{"id":"the-status-of-this-chapter-is-unknown-($1).-skipping-$1-does-not-use-reading-volumes"}
 						T : [ '本章節狀況不明(%1)。跳過《%1》不採用閱讀卷。',
 								chapter_data.freeFlg, chapter_data.title ]
 					};
@@ -395,6 +405,7 @@ function module_code(library_namespace) {
 				skip_chapter = auto_use_ticket_notified ? true
 						// @see https://github.com/kanasimi/work_crawler
 						: {
+							// gettext_config:{"id":"the-tool-is-not-set-to-automatically-use-the-reading-volume.-if-you-are-not-using-the-installation-package-and-want-to-have-the-tool-automatically-use-the-reading-volume-please-open-the-file-manager"}
 							T : '未設定讓本工具自動使用閱讀卷。若您並非使用安裝包，並想要讓本工具自動使用閱讀卷，請打開檔案總管，到安裝本工具的目錄下（若是您使用安裝包，就不能夠設定帳號密碼了。），在 work_crawler.configuration.js 這個檔案中設定好帳號密碼資料，以及 "auto_use_ticket:true"。您可以參考 work_crawler.default_configuration.js 這個檔案來做設定。'
 						};
 				auto_use_ticket_notified = true;
@@ -414,6 +425,7 @@ function module_code(library_namespace) {
 
 			// http://www.comico.com.tw/notice/detail.nhn?no=751
 			library_namespace.info([ work_data.title + ': ', {
+				// gettext_config:{"id":"reading-«$1»-with-a-reading-voucher"}
 				T : [ '用閱讀券閱讀《%1》。', chapter_data.title ]
 			} ]);
 			var _this = this, html = XMLHttp.responseText;
@@ -541,6 +553,7 @@ function module_code(library_namespace) {
 					</code>
 					 */
 					!html.includes(' class="swiper-slide _swiperSlide')) {
+						// gettext_config:{"id":"web-page-revision?-unable-to-parse"}
 						var message = '網頁改版？無法解析！';
 						if (library_namespace.gettext)
 							message = library_namespace.gettext(message);
@@ -586,6 +599,7 @@ function module_code(library_namespace) {
 
 			} else {
 				console.log(html);
+				// gettext_config:{"id":"web-page-revision?-unable-to-parse"}
 				var message = '網頁改版？無法解析！';
 				if (library_namespace.gettext)
 					message = library_namespace.gettext(message);
@@ -616,7 +630,7 @@ function module_code(library_namespace) {
 					// 圖片都應該要有hash，且不該是縮圖。
 					&& (url.includes('.jp/tmb/') || /\.jpg$/.test(url))) {
 						var message = library_namespace.gettext
-						//
+						// gettext_config:{"id":"invalid-image-url-$1"}
 						? library_namespace.gettext('Invalid image url: %1',
 								url) : 'Invalid image url: ' + url;
 						throw new Error(work_data.title + ' §' + chapter_NO
@@ -666,6 +680,7 @@ function module_code(library_namespace) {
 
 		if (crawler.password && crawler.loginid) {
 			library_namespace.log([ (crawler.id || module_name) + ': ', {
+				// gettext_config:{"id":"login-as-$1"}
 				T : [ 'Login as [%1]', crawler.loginid ]
 			} ]);
 
@@ -712,6 +727,7 @@ function module_code(library_namespace) {
 			if (item_list.length > 0) {
 				// TODO: 顯示物品的資訊。
 				library_namespace.info({
+					// gettext_config:{"id":"$1-items-with-a-time-limit-have-been-received"}
 					T : [ '已收到%1項有期限的物品。', item_list.length ]
 				});
 			}

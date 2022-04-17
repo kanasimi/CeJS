@@ -128,6 +128,7 @@ function initializer() {
 		if (CeL.is_Object(country)) {
 			// console.info('Starting ' + queue);
 			var nodes = [ {
+				// gettext_config:{"id":"loading"}
 				T : 'Loading...'
 			} ], length = queue.length;
 			if (!length)
@@ -182,6 +183,7 @@ function Year_numbering(year_shift, year_only, has_year_0, reverse) {
 				// 本紀元前。
 				year--;
 			return {
+				// gettext_config:{"id":"c.-$1"}
 				T : [ '約%1年', year ]
 			};
 		};
@@ -221,6 +223,7 @@ function Year_numbering(year_shift, year_only, has_year_0, reverse) {
 // const, include [[en:Thai (Unicode block)]]
 var PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"\u0E00-\u0E7F]/i,
 //
+// gettext_config:{"id":"common-era"}
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '[前-]?\\d'), pin_column,
 // 可選用的文字式年曆欄位。
 selected_columns = {
@@ -230,6 +233,7 @@ selected_columns = {
 // 依特定國家自動增加這些欄。
 auto_add_column = {
 	中國 : [ 'Year naming/歲次', '曆注/月干支', '曆注/日干支' ],
+	// gettext_config:{"id":"myanmar"}
 	'မြန်မာ' : [ 'Gregorian reform/Great Britain', 'calendar/Myanmar' ],
 	'ไทย' : [ 'Year numbering/Thai_Buddhist', 'calendar/Dai' ],
 	India : [ 'calendar/Hindu' ],
@@ -244,6 +248,7 @@ calendar_columns, calendar_column_alias,
 //
 default_column = [
 		{
+			// gettext_config:{"id":"date-of-calendar-era"}
 			T : '朝代紀年日期',
 			R : 'date of calendar era: Y/m/d\nYear of ruler / month of the year / day of the month.'
 		}, {
@@ -255,11 +260,15 @@ default_column = [
 		} ];
 
 // 承襲中曆。
+// gettext_config:{"id":"vietnam"}
 auto_add_column.日本 = auto_add_column.한국 = auto_add_column['Việt Nam'] = auto_add_column.中國;
 
 function pin_text(gettext) {
 	// unfold / fold
-	var text = pin_column ? 'Unpin' : 'Pin';
+	// gettext_config:{"id":"unpin"}
+	var text = pin_column ? 'Unpin'
+	// gettext_config:{"id":"pin"}
+	: 'Pin';
 	if (gettext)
 		text = _(text);
 	return text;
@@ -363,6 +372,7 @@ function show_calendar(era_name) {
 			title.push({
 				th : [ j, ' ', {
 					span : '×',
+					// gettext_config:{"id":"remove-the-column"}
 					title : _('除去此欄') + ': ' + i,
 					C : 'remove_mark',
 					onclick : remove_calendar_column
@@ -391,6 +401,7 @@ function show_calendar(era_name) {
 				hidden_column.push([ {
 					hr : null
 				}, {
+					// gettext_config:{"id":"group"}
 					T : '分類'
 				}, ': ', {
 					T : group,
@@ -549,12 +560,15 @@ function show_calendar(era_name) {
 
 		conversion = fields[1].split('/');
 		if (conversion.length > 1) {
+			// gettext_config:{"id":"$1-$2-$3"}
 			紀年名_pattern = '%1/%2/%3';
 		} else if (conversion[0] < 0) {
 			// 轉正。
 			conversion[0] = -conversion[0];
+			// gettext_config:{"id":"$1-bce"}
 			紀年名_pattern = '%1 BCE';
 		} else {
+			// gettext_config:{"id":"$1-ce"}
 			紀年名_pattern = '%1 CE';
 		}
 		conversion.unshift(_(紀年名_pattern));
@@ -654,18 +668,23 @@ function show_calendar(era_name) {
 		C : 'to_select',
 		onclick : click_title_as_era
 	}, CeL.era.NEED_SPLIT_POSTFIX.test(era_caption) ? ' ' : '', {
-		T : is_年譜 ? '年譜' : '曆譜'
+		// gettext_config:{"id":"calendar-date"}
+		T : is_年譜 ? '年譜'
+		// gettext_config:{"id":"calendar-table"}
+		: '曆譜'
 	}, ' (', {
 		T : [ _('共有 %1 個' + (dates.type ? '時' : '年') + '段紀錄'), dates.length ]
 	}, ')' ]
 	//
 	: [ {
+		// gettext_config:{"id":"no-calendar-to-list"}
 		T : '無可供列出之曆譜！',
 		S : 'color:#f00;background-color:#ff3;'
 	}, /[\/年]/.test(era_name) ? '' : [ {
 		br : null
 	}, '→', {
 		a : {
+			// gettext_config:{"id":"try-to-append-date"}
 			T : '嘗試加注日期'
 		},
 		href : '#',
@@ -689,6 +708,7 @@ function show_calendar(era_name) {
 		hidden_column.unshift(': ');
 		title = [ {
 			div : [ {
+				// gettext_config:{"id":"remove-all"}
 				T : '全不選',
 				R : 'Remove all columns. 除去所有欄',
 				onclick : function() {
@@ -712,6 +732,7 @@ function show_calendar(era_name) {
 					span : '🔓',
 					id : 'pin_icon'
 				}, {
+					// gettext_config:{"id":"add-the-column"}
 					T : '增加此欄'
 				} ],
 				C : 'column_select_button',
@@ -1125,9 +1146,7 @@ add_tag.show_calendar = function() {
 };
 
 // add_tag.load('臺灣地震');
-/*
- * if(add_tag.load('臺灣地震',true)) return;
- */
+// if(add_tag.load('臺灣地震', true)) return;
 add_tag.load = function(id, callback) {
 	var data = add_tag.data_file[id];
 
@@ -1263,11 +1282,13 @@ add_tag.parse.draw_limit = 400;
 
 // 登錄預設可 include 之資料圖層
 add_tag.data_file = {
+	// gettext_config:{"id":"lifetime-of-chinese-rulers"}
 	'中國皇帝生卒' : [ CeL.env.domain_location + 'emperor.js',
 	// 資料來源 title, URL, memo
 	'中國皇帝壽命列表', 'https://zh.wikipedia.org/wiki/中国皇帝寿命列表', '僅列到年份，尚不夠精確。' ],
 
 	// 臺灣歷史地震時間軸視覺化（英文：Visulation）
+	// gettext_config:{"id":"taiwan-earthquakes"}
 	'臺灣地震' : [ CeL.env.domain_location + 'quake.js', '臺灣地震年表',
 			'http://921kb.sinica.edu.tw/history/quake_history.html' ],
 
@@ -1343,9 +1364,10 @@ function draw_era(hierarchy) {
 			if (!periods.added && periods.生 && periods.卒) {
 				periods.added = true;
 				add_tag(periods.生[0] + '－' + periods.卒[0], period_hierarchy,
-						'君主生卒', true, {
-							歲 : true
-						});
+				// gettext_config:{"id":"lifetime-of-rulers"}
+				'君主生卒', true, {
+					歲 : true
+				});
 			}
 		}
 
@@ -1560,6 +1582,7 @@ function draw_era(hierarchy) {
 		if (period_hierarchy = short_period.length > 0) {
 			short_period.unshift({
 				// 過短紀年
+				// gettext_config:{"id":"unobvious-periods"}
 				T : '難辨識時段：'
 			});
 			// 清理場地。
@@ -1584,6 +1607,7 @@ function draw_era(hierarchy) {
 					add_tag.show(data[period]);
 			periods.push({
 				b : [ group === draw_era.default_group ? [ '(', {
+					// gettext_config:{"id":"general-data-layer"}
 					T : 'general data layer'
 				}, ')' ] : {
 					T : group
@@ -1604,6 +1628,7 @@ function draw_era(hierarchy) {
 
 		if (period_hierarchy = periods.length > 0) {
 			periods.unshift({
+				// gettext_config:{"id":"data-layer"}
 				T : '資料圖層',
 				title : '點擊以設定資料圖層',
 				onclick : function() {
@@ -1662,9 +1687,11 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era, count_layers) {
 	var period_hierarchy = '',
 	//
 	navigation_list = [ {
+		// gettext_config:{"id":"navigation"}
 		T : '導覽列：'
 	}, {
 		a : {
+			// gettext_config:{"id":"all-countries"}
 			T : '所有國家'
 		},
 		href : '#',
@@ -1739,6 +1766,7 @@ draw_era.draw_navigation.count_title = [ '%1 eras', '%1 blocks', '%1 periods' ];
 
 draw_era.click_navigation_date = function() {
 	era_input_object.setValue(this.title);
+	// gettext_config:{"id":"contemporary-period"}
 	output_format_object.setValue('共存紀年');
 	translate_era();
 	return false;
@@ -1801,22 +1829,32 @@ draw_era.date_cache = Object.create(null);
 
 var last_selected, select_panels = {
 	// 查詢範例
+	// gettext_config:{"id":"example"}
 	example : '測試範例',
 	// 之前輸入資料
+	// gettext_config:{"id":"record"}
 	input_history : '輸入紀錄',
 
 	// concept:'工具說明',
 	// 使用技巧
+	// gettext_config:{"id":"concept"}
 	FAQ : '使用說明',
 
+	// gettext_config:{"id":"timeline"}
 	era_graph : '紀年線圖',
 	// 年表
+	// gettext_config:{"id":"calendar-table"}
 	calendar : '曆譜',
+	// gettext_config:{"id":"configuration"}
 	configuration : '設定',
 	// 整批轉換
+	// gettext_config:{"id":"batch"}
 	batch_processing : '批次轉換',
+	// gettext_config:{"id":"tagging"}
 	tag_text : '標注文本',
+	// gettext_config:{"id":"development"}
 	pack_data : '曆數處理',
+	// gettext_config:{"id":"feedback"}
 	comments : '問題回報'
 };
 
@@ -1857,13 +1895,19 @@ function click_panel(e) {
 var original_input, era_input_object, last_input, output_numeral, SVG_object, output_format_object,
 // 正解
 output_format_types = {
+	// gettext_config:{"id":"date-of-common-era"}
 	'公元日期' : CE_name + '%Y年%m月%d日',
+	// gettext_config:{"id":"date-of-calendar-era"}
 	'朝代紀年日期' : '%紀年名%年年%月月%日日',
+	// gettext_config:{"id":"contemporary-period"}
 	'共存紀年' : '共存紀年',
+	// gettext_config:{"id":"stem-branches"}
 	'年月日干支' : '%年干支年%月干支月%日干支日',
 	'年月日時干支' : '%年干支年%月干支月%日干支日%時干支時',
+	// gettext_config:{"id":"four-pillars"}
 	'四柱八字' : '%八字',
 	// 'Julian Day' : 'JD%JD',
+	// gettext_config:{"id":"julian-day-number"}
 	'Julian Day Number' : 'JDN%JDN'
 };
 
@@ -1906,6 +1950,7 @@ country_color = {
 	// '일제 강점기' : '#ccf',
 	// 조선주체연호 : '#ccf',
 
+	// gettext_config:{"id":"vietnam"}
 	'Việt Nam' : '#9f9',
 // 越南 : '#9f9',
 // 黎 : '#9f9',
@@ -1938,6 +1983,7 @@ function add_contemporary(era, output_numeral) {
 		href : '#',
 		target : '_self',
 		onclick : click_title_as_era,
+		// gettext_config:{"id":"contemporary-period"}
 		C : '共存紀年',
 	};
 	if (era[0] in country_color)
@@ -2053,8 +2099,11 @@ function translate_era(era) {
 		set_era_by_url_data(era);
 
 		output = date.曆法 || {
+			// gettext_config:{"id":"france"}
 			France : 'France',
+			// gettext_config:{"id":"great-britain"}
 			British : 'Great Britain',
+			// gettext_config:{"id":"spain"}
 			España : 'Spain'
 		}[date.國家];
 		if (output && !(output in had_inputted)) {
@@ -2083,6 +2132,7 @@ function translate_era(era) {
 					+ (date.精 === '年' ? '' : '%m月%d日'));
 		}
 
+		// gettext_config:{"id":"contemporary-period"}
 		if (format === '共存紀年')
 			if (Array.isArray(output = date.共存紀年))
 				output.forEach(function(era, index) {
@@ -2133,6 +2183,7 @@ function translate_era(era) {
 		});
 		// 📚
 		add_注('據', [ '📜', {
+			// gettext_config:{"id":"data-source"}
 			T : '出典'
 		} ]);
 
@@ -2142,15 +2193,20 @@ function translate_era(era) {
 		// 名字徽章 📛 🏷 🆔
 		// 👑
 		君主姓名_label = [ is_女性 ? '👸🏻' : '🤴🏻', {
+			// gettext_config:{"id":"personal-name"}
 			T : '君主名'
 		} ];
+		// gettext_config:{"id":"personal-name"}
 		add_注('君主名', 君主姓名_label, add_注_link);
 		if (date.ruler) {
 			add_注('君主', 君主姓名_label, add_注_link);
 			add_注('ruler', 君主姓名_label, add_注_link);
 		}
+		// gettext_config:{"id":"courtesy-name"}
 		add_注('表字');
+		// gettext_config:{"id":"art-name"}
 		add_注('君主號', null, add_注_link);
+		// gettext_config:{"id":"true-name"}
 		add_注('諱', [ is_女性 ? '👸🏻' : '🤴🏻', {
 			a : {
 				T : '諱'
@@ -2165,15 +2221,19 @@ function translate_era(era) {
 				(date.諡 = date.諡.slice()).unshift(date.name[1]);
 			else
 				date.諡 = date.諡 ? [ date.name[1], date.諡 ] : [ date.name[1] ];
+		// gettext_config:{"id":"posthumous-name"}
 		add_注('諡', [ is_女性 ? '👼🏻' : '👼🏻', {
 			a : {
 				// 諡號
+				// gettext_config:{"id":"posthumous-name"}
 				T : '諡'
 			},
 			href : 'https://zh.wikipedia.org/wiki/谥号'
 		} ], add_注_link);
+		// gettext_config:{"id":"temple-name"}
 		add_注('廟號', [ is_女性 ? '👸🏻' : '🤴🏻', {
 			a : {
+				// gettext_config:{"id":"temple-name"}
 				T : '廟號'
 			},
 			href : 'https://zh.wikipedia.org/wiki/庙号'
@@ -2183,6 +2243,7 @@ function translate_era(era) {
 		add_注('神號');
 		// 君主資料
 		add_注('生', [ '🎂', {
+			// gettext_config:{"id":"born"}
 			T : '出生'
 		} ], function(note) {
 			return {
@@ -2194,6 +2255,7 @@ function translate_era(era) {
 			};
 		});
 		add_注('卒', [ '⚰️', {
+			// gettext_config:{"id":"died"}
 			T : '逝世'
 		} ], function(note) {
 			return {
@@ -2206,7 +2268,9 @@ function translate_era(era) {
 		});
 		// TODO: 終年/享年/享壽/壽命/年齡
 
+		// gettext_config:{"id":"reign"}
 		add_注('在位', [ '👑', {
+			// gettext_config:{"id":"reign"}
 			T : '在位'
 		} ], function(note) {
 			return {
@@ -2223,8 +2287,10 @@ function translate_era(era) {
 		} ]);
 
 		if (Array.isArray(date.name)) {
+			// gettext_config:{"id":"timeline"}
 			add_注('紀年線圖', {
 				a : [ '📊', {
+					// gettext_config:{"id":"showing-timeline"}
 					T : '展示線圖'
 				} ],
 				D : {
@@ -2315,6 +2381,7 @@ function 批次轉換() {
 	period_end = CeL.set_text('batch_period_end') === '結束';
 	if (!format)
 		format = output_format_object.setValue('%Y/%m/%d');
+	// gettext_config:{"id":"contemporary-period"}
 	if (format !== '共存紀年')
 		format = {
 			parser : 'CE',
@@ -2329,6 +2396,7 @@ function 批次轉換() {
 			period_end : period_end
 		}))) {
 			count++;
+			// gettext_config:{"id":"contemporary-period"}
 			data[index] = format === '共存紀年' ? date.共存紀年 || '' : date
 					.format(format);
 		}
@@ -2395,6 +2463,7 @@ function set_era_by_url_data(era) {
 
 	if (typeof era === 'string') {
 		location.hash = '#era=' + era;
+		// gettext_config:{"id":"era-$1"}
 		document.title = _('紀年 %1', era);
 
 	} else {
@@ -2429,6 +2498,7 @@ function set_era_by_url_data(era) {
 		}
 
 		if (era) {
+			// gettext_config:{"id":"era-$1"}
 			document.title = _('紀年 %1', era);
 			click_title_as_era.call({
 				title : decodeURIComponent(era)
@@ -2655,14 +2725,16 @@ function affairs() {
 	}
 
 	CeL.log({
+		// gettext_config:{"id":"initializing"}
 		T : 'Initializing...'
 	}, true);
 
 	CeL.toggle_display('input_panel', true);
 
-	_.create_menu('language_menu', [ 'TW', 'CN', 'ja', 'en', 'fr' ], function() {
-		draw_era.redraw();
-	});
+	_.create_menu('language_menu', [ 'TW', 'CN', 'ja', 'en', 'fr' ],
+			function() {
+				draw_era.redraw();
+			});
 
 	// translate all nodes to show in specified language (or default domain).
 	_.translate_nodes();
@@ -2703,6 +2775,7 @@ function affairs() {
 	output_format_types = Object.create(null);
 	// 在地化的輸出格式。
 	if (_.is_domain_name('ja'))
+		// gettext_config:{"id":"6-luminaries"}
 		o['六曜'] = '%六曜';
 	for (i in o) {
 		output_format_types[_(i)] = v = o[i];
@@ -2833,9 +2906,11 @@ function affairs() {
 		// 設置選項
 		CeL.new_node([
 				{
+					// gettext_config:{"id":"options-of-timeline"}
 					T : '紀年線圖選項：'
 				},
 				{
+					// gettext_config:{"id":"markup-current-era"}
 					T : '標記正處理的紀年',
 					R : 'Markup current era. 標記當下正在處理的紀年。',
 					onclick : function() {
@@ -2853,6 +2928,7 @@ function affairs() {
 									: '')
 				},
 				{
+					// gettext_config:{"id":"combine-historical-periods"}
 					T : '合併歷史時期',
 					R : 'merge_periods\ne.g., 三國兩晉南北朝, 五代十國',
 					onclick : draw_era.change_option,
@@ -2861,6 +2937,7 @@ function affairs() {
 									: '')
 				},
 				{
+					// gettext_config:{"id":"adapt-lifetime-of-rulers"}
 					T : '擴張範圍至君主在世時段',
 					R : 'adapt_lifetime',
 					onclick : draw_era.change_option,
@@ -2872,9 +2949,11 @@ function affairs() {
 		// 資料圖層
 		list = [ {
 			h3 : {
+				// gettext_config:{"id":"data-layer"}
 				T : '資料圖層'
 			}
 		}, {
+			// gettext_config:{"id":"please-select-the-layer-you-want-to-load"}
 			T : '請選擇所欲載入之資料圖層。'
 		} ];
 
@@ -2900,6 +2979,7 @@ function affairs() {
 							}, [ this.parentNode, 1 ]);
 							this.className += ' loaded';
 							CeL.new_node([ ' ... ', {
+								// gettext_config:{"id":"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}"}
 								T : [ '已載入 %1 筆資料。',
 								//
 								add_tag.group_count[group] ],
@@ -2966,6 +3046,7 @@ function affairs() {
 	// -----------------------------
 
 	var data_load_message = {
+		// gettext_config:{"id":"data-will-be-presented-at-next-calculation"}
 		T : 'Data will be presented at next calculation.',
 		R : 'Data is not yet loaded.',
 		S : 'color:#888;font-size:.8em;'
@@ -3036,6 +3117,7 @@ function affairs() {
 	}, '因為採用了完整的 LEA-406'
 	//
 	+ CeL.LEA406.default_type + ' 來計算月亮位置，關於月亮位置之項目，例如「', {
+		// gettext_config:{"id":"lunar-phase"}
 		T : '月相'
 	}, '」欄每次執行常需耗費數秒至一兩分鐘，敬請見諒。您尚可' ].concat(method_nodes);
 
@@ -3135,6 +3217,7 @@ function affairs() {
 	list = {
 		week : [ {
 			a : {
+				// gettext_config:{"id":"week-day"}
 				T : '星期'
 			},
 			// 0: 周日/星期日/禮拜天, 1: 周一, 餘類推
@@ -3156,8 +3239,10 @@ function affairs() {
 
 		JDN : [ {
 			a : {
+				// gettext_config:{"id":"jdn"}
 				T : 'JDN'
 			},
+			// gettext_config:{"id":"julian-day-number"}
 			R : _('Julian Day Number')
 
 			+ '\n以 UTC 相同日期當天正午12時為準。\n因此 2000/1/1 轉為 2451545。',
@@ -3171,8 +3256,10 @@ function affairs() {
 
 		JD : [ {
 			a : {
+				// gettext_config:{"id":"jd"}
 				T : 'JD'
 			},
+			// gettext_config:{"id":"julian-date"}
 			R : _('Julian Date') + '\n以「紀元使用地真正之時間」相同日期當天凌晨零時為準。\n'
 			//
 			+ '因此對中國之朝代、紀年，2000/1/1 將轉為 2451544.1666... (2000/1/1 0:0 UTC+8)',
@@ -3202,6 +3289,7 @@ function affairs() {
 
 		ordinal_date : [ {
 			a : {
+				// gettext_config:{"id":"ordinal-date"}
 				T : '年日期'
 			},
 			R : '表示年內的天數。日期格式 YYYY-DDD',
@@ -3215,6 +3303,7 @@ function affairs() {
 
 		week_date : [ {
 			a : {
+				// gettext_config:{"id":"week-date"}
 				T : '週日期'
 			},
 			R : '表示年內的星期數天數，再加上星期內第幾天。',
@@ -3227,6 +3316,7 @@ function affairs() {
 
 		Unix : [ {
 			a : {
+				// gettext_config:{"id":"unix-time"}
 				T : 'Unix time'
 			},
 			R : 'Unix time (a.k.a. POSIX time or Epoch time), Unix時間戳記不考慮閏秒。',
@@ -3261,6 +3351,7 @@ function affairs() {
 
 		君主年歲 : [ {
 			a : {
+				// gettext_config:{"id":"age-of-ruler"}
 				T : '君主實歲'
 			},
 			R : '統治者年紀歲數，採周歲（又稱實歲、足歲）。未設定出生時間則無資料。\n'
@@ -3284,6 +3375,7 @@ function affairs() {
 		} ],
 
 		contemporary : [ {
+			// gettext_config:{"id":"contemporary-period"}
 			T : '共存紀年',
 			R : '本日/本年同時期存在之其他紀年。對未有詳實資料者，僅約略準確至所列日期！'
 		}, function(date) {
@@ -3291,6 +3383,7 @@ function affairs() {
 		} ],
 
 		adjacent_contemporary : [ {
+			// gettext_config:{"id":"contemporary-period-(same-country)"}
 			T : '同國共存紀年',
 			R : '本日/本年同時期相同國家存在之其他紀年。對未有詳實資料者，僅約略準確至所列日期！'
 		}, function(date) {
@@ -3307,6 +3400,7 @@ function affairs() {
 
 		precession : [ {
 			a : {
+				// gettext_config:{"id":"general-precession"}
 				T : 'general precession'
 			},
 			R : '紀元使用當地、當日零時綜合歲差，指赤道歲差加上黃道歲差 (Table B.1) 的綜合效果。'
@@ -3332,6 +3426,7 @@ function affairs() {
 
 		solarterms : [ {
 			a : {
+				// gettext_config:{"id":"solar-term-(astronomical)"}
 				T : '天文節氣'
 			},
 			R : '節氣 + 交節時刻(@當地時間)或七十二候。計算得出，非實曆。於 2015 CE 之誤差約前後一分鐘。\n'
@@ -3359,6 +3454,7 @@ function affairs() {
 
 		solarterm_days : [ {
 			a : {
+				// gettext_config:{"id":"solar-term-ages"}
 				T : '節氣經過日數'
 			},
 			R : '天文節氣 經過日數',
@@ -3380,6 +3476,7 @@ function affairs() {
 			a : {
 				// Sun's apparent position
 				// apparent longitude of the Sun
+				// gettext_config:{"id":"sun-s-apparent-longitude"}
 				T : "Sun's apparent longitude"
 			},
 			R : '紀元使用當地、當日零時，太陽的視黃經。\n'
@@ -3398,6 +3495,7 @@ function affairs() {
 
 		moon_longitude : [ {
 			a : {
+				// gettext_config:{"id":"moon-longitude"}
 				T : 'Moon longitude'
 			},
 			R : '紀元使用當地、當日零時，月亮的黃經。\n'
@@ -3419,6 +3517,7 @@ function affairs() {
 
 		moon_latitude : [ {
 			a : {
+				// gettext_config:{"id":"moon-latitude"}
 				T : 'Moon latitude'
 			},
 			R : '紀元使用當地、當日零時，月亮的黃緯。\n'
@@ -3441,6 +3540,7 @@ function affairs() {
 		moon_sun : [ {
 			a : {
 				// 月日視黃經差角
+				// gettext_config:{"id":"apparent-longitude-moon-sun"}
 				T : '月日視黃經差'
 			},
 			R : '紀元使用當地、當日零時，月亮的視黃經-太陽的視黃經\n'
@@ -3460,6 +3560,7 @@ function affairs() {
 
 		lunar_phase : [ {
 			a : {
+				// gettext_config:{"id":"lunar-phase"}
 				T : '月相'
 			},
 			R : 'lunar phase, 天文月相附加可能的日月食資訊。計算得出之紀元使用當地、當日零時月相，非實曆。'
@@ -3474,9 +3575,11 @@ function affairs() {
 			//
 			phase = CeL.lunar_phase_of_JD(JD, {
 				eclipse : true,
+				// gettext_config:{"id":"new-moon-eve"}
 				晦 : '晦日'
 			});
 			if (Array.isArray(phase)) {
+				// gettext_config:{"id":"new-moon"}
 				var is_solar = phase[0] === '朔',
 				//
 				eclipse_info = phase[2];
@@ -3495,6 +3598,7 @@ function affairs() {
 					a : {
 						T : eclipse_info.name
 					},
+					// gettext_config:{"id":"moon-latitude"}
 					R : _('Moon latitude') + ': '
 					//
 					+ CeL.format_degrees(eclipse_info.Δlongitude, 2),
@@ -3512,6 +3616,7 @@ function affairs() {
 				}, {
 					// 沙羅週期標示。
 					a : {
+						// gettext_config:{"id":"saros-$1"}
 						T : [ 'saros %1',
 						//
 						eclipse_info.saros[1] + '#' + eclipse_info.saros[2] ]
@@ -3570,6 +3675,7 @@ function affairs() {
 		sunrise_sunset : [ {
 			a : {
 				// 日出日沒
+				// gettext_config:{"id":"sunrise-sunset"}
 				T : '日出日落'
 			},
 			R : '所設定之地理座標當地當日之日出日落時刻。約有兩三分的精確度。',
@@ -3604,6 +3710,7 @@ function affairs() {
 
 		twilight : [ {
 			a : {
+				// gettext_config:{"id":"twilight"}
 				T : '曙暮光'
 			},
 			R : '所設定之地理座標當地當日之曙光暮光時刻。約有兩三分的精確度。',
@@ -3639,6 +3746,7 @@ function affairs() {
 
 		moon_rise_set : [ {
 			a : {
+				// gettext_config:{"id":"moonrise-moonset"}
 				T : '月出月落'
 			},
 			R : '所設定之地理座標當地當日之月出月落時刻。約有兩三分的精確度。',
@@ -3710,6 +3818,7 @@ function affairs() {
 
 		Gregorian : [ {
 			a : {
+				// gettext_config:{"id":"gregorian-calendar"}
 				T : 'Gregorian calendar'
 			},
 			R : 'proleptic Gregorian calendar WITH year 0.'
@@ -3725,6 +3834,7 @@ function affairs() {
 
 		Julian : [ {
 			a : {
+				// gettext_config:{"id":"julian-calendar"}
 				T : 'Julian calendar'
 			},
 			R : 'proleptic Julian calendar WITHOUT year 0,'
@@ -3741,6 +3851,7 @@ function affairs() {
 
 		Revised_Julian : [ {
 			a : {
+				// gettext_config:{"id":"revised-julian-calendar"}
 				T : 'Revised Julian calendar'
 			},
 			R : 'proleptic Revised Julian calendar WITHOUT year 0.'
@@ -3756,6 +3867,7 @@ function affairs() {
 
 		Tabular : [ {
 			a : {
+				// gettext_config:{"id":"islamic-calendar"}
 				T : '伊斯蘭曆'
 			},
 			R : 'Tabular Islamic calendar\n日落後為伊斯蘭曆隔日。',
@@ -3774,6 +3886,7 @@ function affairs() {
 
 		Solar_Hijri : [ {
 			a : {
+				// gettext_config:{"id":"modern-iranian-calendar"}
 				T : 'گاه‌شماری هجری خورشیدی'
 			},
 			R : 'Solar Hijri calendar / 現代伊朗曆/阿富汗曆(陽曆) / ヒジュラ太陽暦/アフガン暦/ジャラリ暦',
@@ -3792,6 +3905,7 @@ function affairs() {
 
 		Bangla : [ {
 			a : {
+				// gettext_config:{"id":"bangla-calendar"}
 				T : 'Bangla calendar'
 			},
 			R : 'revised Bengali Calendar or Bangla Calendar. 現行孟加拉曆.'
@@ -3808,6 +3922,7 @@ function affairs() {
 
 		Hebrew : [ {
 			a : {
+				// gettext_config:{"id":"hebrew-calendar"}
 				T : '希伯來曆'
 			},
 			R : 'Hebrew calendar, 猶太曆\n日落後為隔日。'
@@ -3824,6 +3939,7 @@ function affairs() {
 
 		Long_Count : [ {
 			a : {
+				// gettext_config:{"id":"long-count"}
 				T : '長紀曆'
 			},
 			R : 'Mesoamerican Long Count calendar / 中美洲馬雅長紀曆',
@@ -3841,6 +3957,7 @@ function affairs() {
 
 		Tzolkin : [ {
 			a : {
+				// gettext_config:{"id":"maya-tzolk-in"}
 				T : "Maya Tzolk'in"
 			},
 			R : "中美洲馬雅 Tzolk'in 曆",
@@ -3854,6 +3971,7 @@ function affairs() {
 
 		Haab : [ {
 			a : {
+				// gettext_config:{"id":"maya-haab"}
 				T : "Maya Haab'"
 			},
 			R : "中美洲馬雅 Haab' 曆",
@@ -3865,6 +3983,7 @@ function affairs() {
 
 		Dai : [ {
 			a : {
+				// gettext_config:{"id":"dai-calendar"}
 				T : '傣曆',
 			},
 			R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年（1352/3/28–）至3190年期間內。\n'
@@ -3878,6 +3997,7 @@ function affairs() {
 			|| isNaN((dai = date.to_Dai({
 			// format : 'serial'
 			}))[0]) ? {
+				// gettext_config:{"id":"c.-$1"}
 				T : [ '約%1年', date.to_Dai({
 					ignore_year_limit : true
 				})[0] ]
@@ -3888,6 +4008,7 @@ function affairs() {
 
 		Myanmar : [ {
 			a : {
+				// gettext_config:{"id":"myanmar-calendar"}
 				T : 'မြန်မာ ပြက္ခဒိန်',
 			},
 			R : '緬甸曆法. Myanmar calendar, Burmese calendar.\n'
@@ -3955,6 +4076,7 @@ function affairs() {
 
 		Yi : [ {
 			a : {
+				// gettext_config:{"id":"yi-calendar"}
 				T : '彝曆',
 			},
 			R : '彝族十月太陽曆。採歲末過年日以冬至起頭之法，而非採四年一閏法！\n'
@@ -3971,6 +4093,7 @@ function affairs() {
 			return isNaN((yi = date.to_Yi({
 			// format : 'serial'
 			}))[0]) ? {
+				// gettext_config:{"id":"c.-$1"}
 				T : [ '約%1年', date.to_Yi({
 					ignore_year_limit : true
 				})[0] ]
@@ -3983,6 +4106,7 @@ function affairs() {
 
 		Hindu : [ {
 			a : {
+				// gettext_config:{"id":"hindu-calendar"}
 				T : 'हिन्दू पंचांग',
 			},
 			R : 'Hindu calendar, 印度曆, 自日出起算。'
@@ -4026,6 +4150,7 @@ function affairs() {
 
 		Indian_national : [ {
 			a : {
+				// gettext_config:{"id":"indian-national-calendar"}
 				T : 'भारतीय राष्ट्रीय पंचांग'
 			},
 			R : '印度國定曆, Indian national calendar',
@@ -4056,6 +4181,7 @@ function affairs() {
 				if (date.getMonth() >= 4)
 					year++;
 				return {
+					// gettext_config:{"id":"c.-$1"}
 					T : [ '約%1年', year ]
 				};
 			}
@@ -4077,6 +4203,7 @@ function affairs() {
 
 		Nanakshahi : [ {
 			a : {
+				// gettext_config:{"id":"nanakshahi-calendar"}
 				T : 'ਨਾਨਕਸ਼ਾਹੀ'
 			},
 			R : 'Nanakshahi calendar, 印度錫克教日曆, ナーナク暦. ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ'
@@ -4093,6 +4220,7 @@ function affairs() {
 
 		Bahai : [ {
 			a : {
+				// gettext_config:{"id":"bahá-í-calendar"}
 				T : 'گاه‌شماری بهائی'
 			},
 			R : "Bahá'í / Badí‘ calendar, 巴哈伊曆",
@@ -4108,6 +4236,7 @@ function affairs() {
 
 		Coptic : [ {
 			a : {
+				// gettext_config:{"id":"coptic-calendar"}
 				T : '科普特曆'
 			},
 			R : 'Coptic calendar,'
@@ -4124,6 +4253,7 @@ function affairs() {
 
 		Ethiopian : [ {
 			a : {
+				// gettext_config:{"id":"ethiopian-calendar"}
 				T : '衣索比亞曆'
 			},
 			R : 'Ethiopian calendar',
@@ -4138,6 +4268,7 @@ function affairs() {
 
 		Armenian : [ {
 			a : {
+				// gettext_config:{"id":"armenian-calendar"}
 				T : '教會亞美尼亞曆'
 			},
 			R : 'year / month / date, weekday\n'
@@ -4156,6 +4287,7 @@ function affairs() {
 
 		Byzantine : [ {
 			a : {
+				// gettext_config:{"id":"byzantine-calendar"}
 				T : 'Byzantine calendar'
 			},
 			R : 'Byzantine Creation Era',
@@ -4171,6 +4303,7 @@ function affairs() {
 
 		Egyptian : [ {
 			a : {
+				// gettext_config:{"id":"egyptian-calendar"}
 				T : '古埃及曆'
 			},
 			R : 'Ancient civil Egyptian calendar. 每年皆為準確的365日。'
@@ -4184,6 +4317,7 @@ function affairs() {
 		}, function(date) {
 			if (date.精 === '年')
 				return {
+					// gettext_config:{"id":"c.-$1"}
 					T : [ '約%1年', date.to_Egyptian({
 						format : 'serial'
 					})[0] ]
@@ -4214,6 +4348,7 @@ function affairs() {
 
 		Republican : [ {
 			a : {
+				// gettext_config:{"id":"french-republican-calendar"}
 				T : 'Calendrier républicain'
 			},
 			R : 'Le calendrier républicain,'
@@ -4241,11 +4376,14 @@ function affairs() {
 		//
 		[ '夏、商、西周觀象授時，本工具於這些曆法採用天文演算，較耗時間。', {
 			b : [ '實際天象可選用上方「', {
+				// gettext_config:{"id":"solar-term-(astronomical)"}
 				T : '天文節氣'
 			}, '」、「', {
+				// gettext_config:{"id":"lunar-phase"}
 				T : '月相'
 			}, '」欄。' ]
 		}, '「', {
+			// gettext_config:{"id":"lunar-phase"}
 			T : '月相'
 		}, '」欄並附注可能之日月食。' ] ],
 
@@ -4339,6 +4477,7 @@ function affairs() {
 
 		月干支 : [ {
 			a : {
+				// gettext_config:{"id":"month-of-the-sexagenary-cycle"}
 				T : '月干支'
 			},
 			R : '月干支/大小月。此為推算所得，於部分非寅正起始之年分可能有誤！'
@@ -4353,6 +4492,7 @@ function affairs() {
 		日干支 : [ function(era_name) {
 			return era_name && era_name.includes('月') ? {
 				a : {
+					// gettext_config:{"id":"day-of-the-sexagenary-cycle"}
 					T : '日干支'
 				},
 				R : '警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
@@ -4360,7 +4500,9 @@ function affairs() {
 				S : 'font-size:.7em;'
 			} : {
 				T : '朔日',
-				R : '實曆每月初一之朔日。若欲求天文朔日，請採「' + _('月相') + '」欄。'
+				R : '實曆每月初一之朔日。若欲求天文朔日，請採「'
+				// gettext_config:{"id":"lunar-phase"}
+				+ _('月相') + '」欄。'
 			};
 		}, function(date) {
 			return /* !date.準 && */!date.精 && date.format({
@@ -4371,6 +4513,7 @@ function affairs() {
 
 		Chinese_solar_terms : [ {
 			a : {
+				// gettext_config:{"id":"solar-term-(chinese)"}
 				T : '明清節氣'
 			},
 			R : '明朝、清朝 (1516–1941 CE) 之中國傳統曆法實曆節氣 from 時間規範資料庫.\n'
@@ -4451,6 +4594,7 @@ function affairs() {
 		// https://sites.google.com/site/chailiong/home/zgxx/huangli/huandao
 		建除 : [ {
 			a : {
+				// gettext_config:{"id":"jianchu"}
 				T : '建除'
 			},
 			R : '中曆曆注、日本の暦注の一つ。(中段十二直)'
@@ -4548,6 +4692,7 @@ function affairs() {
 				}
 			}
 
+			// gettext_config:{"id":"china"}
 			if (date.國家 === '中國' && date.月 === 12 && date.日 === 8) {
 				return {
 					T : '臘八節',
@@ -4613,6 +4758,7 @@ function affairs() {
 
 		月の別名 : [ {
 			a : {
+				// gettext_config:{"id":"japanese-month-name"}
 				T : '月の別名'
 			},
 			R : '各月の別名',
@@ -4626,6 +4772,7 @@ function affairs() {
 
 		六曜 : [ {
 			a : {
+				// gettext_config:{"id":"6-luminaries"}
 				T : '六曜'
 			},
 			R : '日本の暦注の一つ。\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之六曜值可能是錯誤的！'
@@ -4639,6 +4786,7 @@ function affairs() {
 
 		七曜 : [ {
 			a : {
+				// gettext_config:{"id":"7-luminaries"}
 				T : '七曜'
 			},
 			R : '中曆曆注、日本の暦注の一つ。',
@@ -4651,6 +4799,7 @@ function affairs() {
 		// 暦注上段
 		曜日 : [ {
 			a : {
+				// gettext_config:{"id":"week-day-(japanese)"}
 				T : '曜日'
 			},
 			R : '日本の暦注の一つ, Japanese names of week day',
@@ -4658,6 +4807,7 @@ function affairs() {
 		}, function(date) {
 			var 七曜 = /* !date.準 && */!date.精 && CeL.era.七曜(date);
 			return 七曜 && {
+				// gettext_config:{"id":"week-day-(japanese)"}
 				span : 七曜 + '曜日',
 				S : 七曜 === '日' ? 'color:#f34'
 				//
@@ -4695,6 +4845,7 @@ function affairs() {
 		 */
 		二十八宿 : [ {
 			a : {
+				// gettext_config:{"id":"28-mansions"}
 				T : '二十八宿'
 			},
 			R : '中曆曆注、日本の暦注の一つ。又稱二十八舍、二十八星、禽星或日禽。見演禽訣。'
@@ -4709,6 +4860,7 @@ function affairs() {
 		// 27宿
 		二十七宿 : [ {
 			a : {
+				// gettext_config:{"id":"27-mansions"}
 				T : '二十七宿'
 			},
 			R : '日本の暦注の一つ\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！'
@@ -4804,6 +4956,7 @@ function affairs() {
 
 		astrological : [ {
 			a : {
+				// gettext_config:{"id":"zodiac-sign"}
 				T : 'zodiac sign'
 			},
 			R : 'Astrological signs, Western zodiac signs',
@@ -4826,10 +4979,12 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 紀年法/紀年方法。 Cyclic year, year recording/representation method
+		// gettext_config:{"id":"year-naming"}
 		'Year naming' : '區別與紀錄年份的方法，例如循環紀年。',
 
 		歲次 : [ {
 			a : {
+				// gettext_config:{"id":"year-of-the-sexagenary-cycle"}
 				T : '歲次'
 			},
 			R : '年干支/干支紀年'
@@ -4842,6 +4997,7 @@ function affairs() {
 
 		生肖 : [ {
 			a : {
+				// gettext_config:{"id":"chinese-zodiac"}
 				T : '生肖'
 			},
 			R : '十二生肖紀年，屬相',
@@ -4864,10 +5020,12 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 編年法/編年方法。
+		// gettext_config:{"id":"year-numbering"}
 		'Year numbering' : '以不重複數字計算年份的方法',
 
 		民國 : [ {
 			a : {
+				// gettext_config:{"id":"minguo"}
 				T : '民國'
 			},
 			R : '民國紀年',
@@ -4878,6 +5036,7 @@ function affairs() {
 		黃帝 : [
 				{
 					a : {
+						// gettext_config:{"id":"huangdi"}
 						T : '黃帝紀元'
 					},
 					R : '依據中華民國建國時官方認定的黃帝紀元，清末辛亥年（孔子紀元2462年，西元1911年）為黃帝紀元4609年，民國元年為黃帝紀元4610年。黃帝紀元比孔子紀元早2147年，比西元早2698年。',
@@ -4896,6 +5055,7 @@ function affairs() {
 		皇紀 : [
 				{
 					a : {
+						// gettext_config:{"id":"japanese-imperial-year"}
 						T : '皇紀'
 					},
 					R : '神武天皇即位紀元（じんむてんのうそくいきげん）。略称は皇紀（こうき）という。外にも、皇暦（すめらこよみ、こうれき）、神武暦（じんむれき）、神武紀元（じんむきげん）、日紀（にっき）などともいう。\n神武天皇即位紀元の元年は、キリスト紀元（西暦）前660年である。日本では明治6年（1873年）を紀元2533年と定め公式に使用した。',
@@ -4926,6 +5086,7 @@ function affairs() {
 
 		檀紀 : [ {
 			a : {
+				// gettext_config:{"id":"dangi"}
 				T : '단군기원'
 			},
 			R : '단군기원(檀君紀元) 또는 단기(檀紀)',
@@ -4941,6 +5102,7 @@ function affairs() {
 
 		Thai_Buddhist : [ {
 			a : {
+				// gettext_config:{"id":"thai-buddhist"}
 				T : '泰國佛曆'
 			},
 			R : '以佛曆紀年(佛滅紀元)之泰國曆',
@@ -4976,6 +5138,7 @@ function affairs() {
 
 		AUC : [ {
 			a : {
+				// gettext_config:{"id":"ab-urbe-condita"}
 				T : '羅馬建城'
 			},
 			R : 'AUC (Ab urbe condita), 羅馬建城紀年. 有採用0年。非精確時。',
@@ -4985,6 +5148,7 @@ function affairs() {
 
 		Seleucid : [ {
 			a : {
+				// gettext_config:{"id":"seleucid-era"}
 				T : 'Seleucid era'
 			},
 			R : 'Seleucid era or Anno Graecorum, 塞琉古紀元。非精確時，可能有最多前後一年的誤差。',
@@ -4994,6 +5158,7 @@ function affairs() {
 
 		BP : [ {
 			a : {
+				// gettext_config:{"id":"before-present"}
 				T : 'Before Present'
 			},
 			R : 'Before Present (BP) years, 距今。非精確時。usage: 2950±110 BP.',
@@ -5002,6 +5167,7 @@ function affairs() {
 
 		HE : [ {
 			a : {
+				// gettext_config:{"id":"holocene-calendar"}
 				T : 'Holocene calendar'
 			},
 			R : 'Holocene calendar, 全新世紀年或人類紀年。'
@@ -5023,6 +5189,7 @@ function affairs() {
 		else
 			calendar_columns[o = i] = Array.isArray(list[i]) ? list[i]
 					: [ list[i] ];
+		// gettext_config:{"id":"data-layer"}
 		if (i === '資料圖層') {
 			// 先行佔位
 			for (i in add_tag.data_file)
@@ -5030,6 +5197,7 @@ function affairs() {
 		}
 	}
 
+	// gettext_config:{"id":"gregorian-reform"}
 	v = 'Gregorian reform';
 	calendar_columns[v] = [
 			'各地啓用公曆之日期對照',
@@ -5110,6 +5278,7 @@ function affairs() {
 	// https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E9%A6%96%E9%83%BD
 	var place_nodes = [ '🗺️', {
 		// 常用地點
+		// gettext_config:{"id":"famous-places"}
 		T : '著名地點：'
 	} ], place_list = {
 		中國 : {
@@ -5130,6 +5299,7 @@ function affairs() {
 			// 首爾
 			서울 : '37° 34′ 0″ N, 126° 58′ 41″ E'
 		},
+		// gettext_config:{"id":"vietnam"}
 		'Việt Nam' : {
 			// 河內市
 			'Hà Nội' : '21°01′42.5″N 105°51′15.0″E'

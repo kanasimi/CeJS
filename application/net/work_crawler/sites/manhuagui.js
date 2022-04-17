@@ -249,6 +249,7 @@ function module_code(library_namespace) {
 					// 轉成由舊至新之順序。
 					if (chapter_list.some_without_id) {
 						library_namespace.warn({
+							// gettext_config:{"id":"some-chapter-url-names-are-not-numbers-$1"}
 							T : [ '有些篇章之URL檔名非數字：%1',
 							//
 							JSON.stringify(chapter_list.some_without_id) ]
@@ -352,6 +353,7 @@ function module_code(library_namespace) {
 					'</script>');
 			if (!chapter_data || !(chapter_data = decode(chapter_data))) {
 				library_namespace.warn({
+					// gettext_config:{"id":"unable-to-parse-chapter-data-for-«$1»-§$2"}
 					T : [ '無法解析《%1》§%2 之章節資料！', work_data.title, chapter_NO ]
 				});
 				return;

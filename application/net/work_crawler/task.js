@@ -127,7 +127,9 @@ function module_code(library_namespace) {
 
 	// for uncaught error. work_data 可能為 undefined/image_data
 	function onerror(error, work_data) {
-		process.title = this.id + ': ' + gettext('Error: %1', String(error));
+		process.title = this.id + ': '
+		// gettext_config:{"id":"error-$1"}
+		+ gettext('Error: %1', String(error));
 
 		// 直接丟出異常錯誤。
 		throw typeof error === 'object' ? error : new Error(this.id + ': '
@@ -155,7 +157,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	/**
-	 * 抽取出圖片伺服器列表
+	 * 抽取出圖片伺服器列表。
 	 * 
 	 * @param {Array|Function}server_URL
 	 *            Server URL(s) where images are stored
@@ -201,6 +203,7 @@ function module_code(library_namespace) {
 
 			if (_this.server_list.length > 0) {
 				library_namespace.log({
+					// gettext_config:{"id":"get-$2-servers-from-$1-$3"}
 					T : [ '從[%1]取得 %2 個圖片伺服器：%3', server_URL,
 							_this.server_list.length,
 							_this.server_list.join(', ') ]
@@ -212,7 +215,8 @@ function module_code(library_namespace) {
 			} else {
 				library_namespace.error([ 'set_server_list: ', {
 					// No server get from [%1]!
-					T : [ '無法從[%1]抽取出伺服器列表！', server_URL ]
+					// gettext_config:{"id":"unable-to-extract-the-image-server-list-from-$1"}
+					T : [ '無法從[%1]抽取出圖片伺服器列表！', server_URL ]
 				} ]);
 			}
 
@@ -225,6 +229,7 @@ function module_code(library_namespace) {
 	function start_downloading(work_id, callback) {
 		if (!work_id) {
 			library_namespace.log({
+				// gettext_config:{"id":"$1-work_id-not-given"}
 				T : [ '%1: 沒有輸入 work_id！', this.id ]
 			});
 			return;
@@ -259,6 +264,7 @@ function module_code(library_namespace) {
 		//
 		(new Date).format('%Y/%m/%d %H:%M:%S'), ' ', {
 			// 開始下載/處理
+			// gettext_config:{"id":"starting-«$1»-save-to-$2"}
 			T : [ '開始處理《%1》，儲存至 %2', work_id, this.main_directory ]
 		} ]);
 		// prepare work directory.
@@ -267,6 +273,7 @@ function module_code(library_namespace) {
 		// e.g., set "E:\directory\" but "E:\" do not exists.
 		if (!library_namespace.directory_exists(this.main_directory)) {
 			library_namespace.error({
+				// gettext_config:{"id":"can-not-create-base-directory-$1"}
 				T : [ 'Can not create base directory: %1',
 				//
 				this.main_directory ]
@@ -466,6 +473,7 @@ function module_code(library_namespace) {
 			} else if (work_title.startsWith('/*')) {
 				work_list.comments++;
 				if (matched[2] && (matched[2] = matched[2].trim())) {
+					// gettext_config:{"id":"$1-at-the-back-of-listed-work-with-*-will-be-ignored"}
 					library_namespace.warn(gettext('作品列表區塊注解 "*/" 後面的"%1"會被忽略',
 							matched[2]));
 				}
@@ -507,7 +515,8 @@ function module_code(library_namespace) {
 		if (!work_list) {
 			// 若是檔案不存在，.fs_read() 可能會回傳 undefined。
 			library_namespace.warn(this.id + ': '
-					+ gettext('無法讀取列表檔案：%1', favorite_list_file_path));
+			// gettext_config:{"id":"cannot-read-series-titles-$1"}
+			+ gettext('無法讀取列表檔案：%1', favorite_list_file_path));
 			return [];
 		}
 
@@ -516,7 +525,8 @@ function module_code(library_namespace) {
 		}
 		if (rearrange_list_file) {
 			library_namespace.debug(this.id + ': '
-					+ gettext('重新整理列表檔案：%1', favorite_list_file_path));
+			// gettext_config:{"id":"rearrange-series-titles-$1"}
+			+ gettext('重新整理列表檔案：%1', favorite_list_file_path));
 		}
 		work_list = parse_favorite_list(work_list.toString(), {
 			rearrange_list : rearrange_list_file
@@ -531,16 +541,17 @@ function module_code(library_namespace) {
 						+ ': '
 						+ gettext(typeof rearrange_list_file === 'function'
 						// rearrange_list_file 整合報告
+						// gettext_config:{"id":"processed-$2-series-titles-$1"}
 						? '重新整理列表檔案 [%1]，處理了%2個作品。'
-								: '重新整理列表檔案 [%1]，注解排除了%2個作品。',
-								favorite_list_file_path, work_list.duplicated));
+						// gettext_config:{"id":"commented-out-$2-series-titles-$1"}
+						: '重新整理列表檔案 [%1]，注解排除了%2個作品。', favorite_list_file_path,
+								work_list.duplicated));
 				library_namespace.write_file(favorite_list_file_path,
 						work_list.parsed);
 			} else {
-				library_namespace.debug(this.id
-						+ ': '
-						+ gettext('重新整理列表檔案 [%1]，未作改變。'
-								+ favorite_list_file_path));
+				library_namespace.debug(this.id + ': '
+				// gettext_config:{"id":"no-change-to-series-titles-$1"}
+				+ gettext('重新整理列表檔案 [%1]，未作改變。' + favorite_list_file_path));
 			}
 			// Release memory. 釋放被占用的記憶體。
 			delete work_list.parsed;
@@ -591,12 +602,14 @@ function module_code(library_namespace) {
 			}
 			if (/\.js$/i.test(work_id)) {
 				library_namespace.warn(this.id + ': '
-						+ gettext('您可能錯把下載工具檔當作了列表檔案：%1', work_id));
+				// gettext_config:{"id":"you-might-have-mistaken-the-download-tools-as-series-titles"}
+				+ gettext('您可能錯把下載工具檔當作了列表檔案：%1', work_id));
 				[ '.lst', '.txt' ].some(function(extension) {
 					var work_list_file = work_id.replace(/\.js$/i, extension);
 					if (library_namespace.storage.file_exists(work_list_file)) {
 						library_namespace.info(this.id + ': '
-								+ gettext('改採用列表檔案：%1', work_list_file));
+						// gettext_config:{"id":"using-series-titles-$1"}
+						+ gettext('改採用列表檔案：%1', work_list_file));
 						work_id = work_list_file;
 						return true;
 					}
@@ -624,6 +637,7 @@ function module_code(library_namespace) {
 
 		library_namespace.error([ 'parse_work_id: ', {
 			// Invalid work id: %1
+			// gettext_config:{"id":"invalid-work-id-$1"}
 			T : [ '作品 id 無效：%1', work_id ]
 		} ]);
 		typeof callback === 'function' && callback();
@@ -692,6 +706,7 @@ function module_code(library_namespace) {
 		&& work_list && work_list.path) {
 			// Also remove work title + work id from work list
 			library_namespace.info([ this.id + ': ', {
+				// gettext_config:{"id":"remove-the-archived-work-from-the-list-of-works-«$1»"}
 				T : [ '自作品列表中刪除將封存之作品：《%1》', work_data.title || work_data.id ]
 			} ]);
 
@@ -703,9 +718,11 @@ function module_code(library_namespace) {
 			}).parsed;
 
 			var last_marked_index, archived_prefix = '# '
-					+ gettext.append_message_tail_space('已封存：'), prefix = '# '
+			// gettext_config:{"id":"archived"}
+			+ gettext.append_message_tail_space('已封存：'), prefix = '# '
 					+ gettext(
 							// '封存日期：%1，作品完結時間：%2',
+							// gettext_config:{"id":"archived-date-$1-last-download-date-$2"}
 							'封存日期：%1，最後一次於 %2 下載',
 							(new Date).toISOString(),
 							library_namespace
@@ -730,6 +747,7 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.info([ this.id + ': ', {
+			// gettext_config:{"id":"acrchive-the-old-work-«$1»"}
 			T : [ '封存舊作品：《%1》', work_data.title || work_data.id ]
 		} ]);
 
@@ -782,7 +800,8 @@ function module_code(library_namespace) {
 		if (Array.isArray(this.work_list_now)
 				&& this.work_list_now !== work_list) {
 			library_namespace.error(gettext(
-					'警告：正下載以"%2"開始、長度 %1 的作品列表中。重複下載作品列表可能造成錯誤！',
+			// gettext_config:{"id":"warning-downloading-a-list-of-works-starting-with-$2-and-length-$1.-repeating-the-download-of-the-work-list-may-cause-an-error"}
+			'警告：正下載以"%2"開始、長度 %1 的作品列表中。重複下載作品列表可能造成錯誤！',
 					this.work_list_now.length, this.work_list_now[0]));
 		}
 
@@ -819,6 +838,7 @@ function module_code(library_namespace) {
 			var id_converter = this.convert_id && this.convert_id[work_title];
 
 			if (typeof id_converter === 'function') {
+				// gettext_config:{"id":"using-convert_id-$1"}
 				library_namespace.debug(gettext('Using convert_id[%1]',
 						work_title), 3, 'get_work_list');
 				// convert special work id:
@@ -835,6 +855,7 @@ function module_code(library_namespace) {
 				library_namespace.debug(
 				// 從指定網址 id_converter.url 得到網頁內容後，
 				// 丟給解析器 id_converter.parser 解析出作品列表。
+				// gettext_config:{"id":"using-convert_id-$1-via-url-$2"}
 				gettext('Using convert_id[%1] via url: %2', work_title,
 						id_converter.url), 3, 'get_work_list');
 				// convert_id:{id_type:{url:'',parser:function(html,get_label){...}}}
@@ -850,7 +871,8 @@ function module_code(library_namespace) {
 
 			if (id_converter) {
 				this.onerror('get_work_list: '
-						+ gettext('Invalid id converter for %1', work_title),
+				// gettext_config:{"id":"invalid-id-converter-for-$1"}
+				+ gettext('Invalid id converter for %1', work_title),
 						work_title);
 				typeof callback === 'function' && callback(all_work_status);
 				return Work_crawler.THROWED;
@@ -858,6 +880,7 @@ function module_code(library_namespace) {
 
 			work_count++;
 			library_namespace.log([ this.id, ': ', {
+				// gettext_config:{"id":"downloading-$1-$2"}
 				T : [ 'Downloading %1: %2', work_count
 				// 下載作品列表 %1：%2。
 				+ (work_count === this_index ? '' : '/' + this_index)
@@ -898,6 +921,7 @@ function module_code(library_namespace) {
 		}, function all_works_done() {
 			delete this.work_list_now;
 			library_namespace.log([ this.id + ': ', {
+				// gettext_config:{"id":"a-total-of-$1-works-have-been-downloaded"}
 				T : [ '共%1個作品下載完畢。', work_list.length ]
 			}, (new Date).format() ]);
 			var work_status_titles = Object.keys(all_work_status);
@@ -936,6 +960,7 @@ function module_code(library_namespace) {
 				library_namespace.info([
 						this.id + ': ',
 						{
+							// gettext_config:{"id":"$1-works-produced-special-conditions-recorded-in-$2"}
 							T : [ '共%1個作品出現特殊狀況，記錄於[%2]。',
 									work_status_titles.length, report_file ]
 						} ]);
@@ -945,26 +970,29 @@ function module_code(library_namespace) {
 					library_namespace.info(work_title + ': '
 							+ work_status.join(', '));
 					var work_status_report = work_status.map(function(status) {
+						var color;
 						switch (status) {
 						case 'not found':
-							status = '<b style="color:#f44;">'
-									+ gettext(status) + '</b>';
+							color = '#f44';
 							break;
 
 						case 'limited':
-							status = '<b style="color:#bb0;">'
-									+ gettext(status) + '</b>';
+							color = '#bb0';
 							break;
 
 						case 'finished':
-							status = '<b style="color:#88f;">'
-									+ gettext(status) + '</b>';
+							color = '#88f';
 							break;
 
 						default:
 							break;
 						}
 
+						if (color) {
+							status = '<b style="color:' + color + ';">'
+							//
+							+ gettext('work_status-' + status) + '</b>';
+						}
 						return status;
 					});
 					reports.push('<tr><td>'
@@ -1024,12 +1052,12 @@ function module_code(library_namespace) {
 
 		if (!this.continue_arguments) {
 			// set flag to pause / cancel task
-			library_namespace.info([
-					this.id + ': ',
-					{
-						T : quit ? '準備取消下載作業中，將會在下載完本章節後生效。'
-								: '準備暫停下載作業中，將會在下載完本章節後生效。'
-					} ]);
+			library_namespace.info([ this.id + ': ', {
+				// gettext_config:{"id":"ready-to-cancel-the-download-job.-it-will-take-effect-after-downloading-this-chapter"}
+				T : quit ? '準備取消下載作業中，將會在下載完本章節後生效。'
+				// gettext_config:{"id":"prepare-to-pause-the-download.-it-will-take-effect-after-downloading-this-chapter"}
+				: '準備暫停下載作業中，將會在下載完本章節後生效。'
+			} ]);
 			this.continue_arguments = [ quit ? QUIT_TASK : STOP_TASK ];
 			if (callback) {
 				this.continue_arguments.push(callback);
@@ -1093,6 +1121,7 @@ function module_code(library_namespace) {
 		delete this.continue_arguments;
 		callback && callback(work_data);
 		library_namespace.info([ this.id + ': ', {
+			// gettext_config:{"id":"continue-downloading-«$1»"}
 			T : [ '繼續下載《%1》。', work_data.title || work_data.id ]
 		} ]);
 		crawler_namespace.pre_get_chapter_data.apply(this, _arguments);
@@ -1118,6 +1147,7 @@ function module_code(library_namespace) {
 		if (!(1e3 < estimated_time && estimated_time < 1e15/* Infinity */)) {
 			return '';
 		}
+		// gettext_config:{"id":"estimated-$1-to-download"}
 		return gettext('預估還需 %1 下載完本作品。', library_namespace.age_of(0,
 				estimated_time, {
 					digits : 1
