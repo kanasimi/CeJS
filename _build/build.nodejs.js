@@ -938,7 +938,7 @@ function write_i18n_data_file({ language_code, locale_data }) {
 	const new_contents = JSON.stringify(locale_data, null, '\t');
 	if (original_contents !== new_contents) {
 		CeL.info(`${write_i18n_data_file.name}: Create new i18n data file: ${fso_path}`);
-		CeL.write_file(fso_path + '.bak', new_contents);
+		CeL.write_file(fso_path, new_contents);
 	}
 }
 
