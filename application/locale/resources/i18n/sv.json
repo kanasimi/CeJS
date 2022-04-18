@@ -80,7 +80,7 @@
 	"skip-$1-the-$2-is-for-reference-purpose-only": "Hoppa över [%1]: %2 ska bara användas för referenser.",
 	"era-$1": "Era %1",
 	"log-console": "Journalpanel",
-	"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}": "function (domain_name, arg) { return '%1 ' + (1 < arg[1] ? 'inlägg' : 'inlägg') + 'laddad.'; }",
+	"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}": "function (domain_name, arg) { return '%1 ' + (1 < arg[1] ? 'inlägg' : 'inlägg') + ' laddad.'; }",
 	"warning-only-for-developers": "VARNING: Endast för utvecklare.",
 	"c.-$1": "ungef. %1",
 	"china": "Kina",
