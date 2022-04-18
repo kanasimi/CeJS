@@ -880,7 +880,7 @@ function write_i18n_files(resources_path) {
 		i18n_qqq_Object[message_id] = qqq_value.join('\n');
 	}
 	//console.trace(i18n_qqq_Object);
-	CeL.write_file(resources_path + qqq_data_file_name, JSON.stringify(qqq_file_data));
+	CeL.write_file(resources_path + qqq_data_file_name, JSON.stringify(qqq_file_data, null, '\t'));
 	// free
 	qqq_file_data = null;
 	CeL.info(`${write_i18n_files.name}: 無任何引用的訊息: ${message_id_without_references.length}/${qqq_data_count}`);
@@ -914,7 +914,11 @@ function write_message_script_file({ resources_path, language_code, locale_data 
 	}
 	const new_contents = `/*	Localized messages of ${CeL.Class}.
 	This file is auto created by auto-generate tool: ${library_build_script_name}(.js) @ ${datestamp.format('%Y-%2m-%2d' && '%Y')}.
-*/'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({${escape_non_latin_chars(locale_message_data.join(','))}},
+*/'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
+	${escape_non_latin_chars(locale_message_data
+		// The same as JSON.stringify(, null, '\t')
+		.join(',\n\t'))}
+},
 ${JSON.stringify(language_code)});`;
 	let original_contents = CeL.read_file(fso_path);
 	if (!original_contents || (original_contents = original_contents.toString()) !== new_contents) {
@@ -930,8 +934,8 @@ function write_i18n_data_file({ language_code, locale_data }) {
 	//console.trace(i18n_language_code_data.fso_path);
 	let original_contents = CeL.read_file(fso_path);
 	if (original_contents)
-		original_contents = JSON.stringify(JSON.parse(original_contents.toString().trim()));
-	const new_contents = JSON.stringify(locale_data);
+		original_contents = JSON.stringify(JSON.parse(original_contents.toString().trim()), null, '\t');
+	const new_contents = JSON.stringify(locale_data, null, '\t');
 	if (original_contents !== new_contents) {
 		CeL.info(`${write_i18n_data_file.name}: Create new i18n data file: ${fso_path}`);
 		CeL.write_file(fso_path + '.bak', new_contents);
