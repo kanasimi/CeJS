@@ -901,7 +901,7 @@ function write_message_script_file({ resources_path, language_code, locale_data 
 	for (const [message_id, locale_message] of Object.entries(locale_data)) {
 		if (message_id === '@metadata') continue;
 		const qqq_data = qqq_data_Map.get(message_id);
-		const key_mark = JSON.stringify(qqq_data.message) + ':';
+		const key_mark = JSON.stringify(qqq_data.message, escape_non_latin_chars) + ':';
 		if (/^function(?:\s|\()/.test(locale_message)) {
 			const original_function = message_to_localized_mapping[language_code] && message_to_localized_mapping[language_code][qqq_data.message];
 			if (String(original_function) === locale_message) {
@@ -910,14 +910,14 @@ function write_message_script_file({ resources_path, language_code, locale_data 
 			}
 			CeL.error(`${write_message_script_file.name}: [${language_code}][${message_id}]: 原訊息與新函數不一致！您必須檢核此函數是否有安全疑慮，之後手動更改 [${fso_path}]！\n${locale_message}`);
 		}
-		locale_message_data.push(key_mark + JSON.stringify(locale_message));
+		locale_message_data.push(key_mark + JSON.stringify(locale_message, escape_non_latin_chars));
 	}
 	const new_contents = `/*	Localized messages of ${CeL.Class}.
 	This file is auto created by auto-generate tool: ${library_build_script_name}(.js) @ ${datestamp.format('%Y-%2m-%2d' && '%Y')}.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	${escape_non_latin_chars(locale_message_data
-		// The same as JSON.stringify(, null, '\t')
-		.join(',\n\t'))}
+	${locale_message_data
+			// The same as JSON.stringify(, null, '\t')
+			.join(',\n\t')}
 },
 ${JSON.stringify(language_code)});`;
 	let original_contents = CeL.read_file(fso_path);
