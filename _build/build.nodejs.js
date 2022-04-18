@@ -535,7 +535,7 @@ function create__qqq_data_Map() {
 			// matched: [ all, text_id / message, tail punctuation mark ]
 			const matched = message.match(CeL.gettext.PATTERN_message_with_tail_punctuation_mark);
 			if (!matched || qqq_data.message !== matched[1]) {
-				CeL.info(`${create__qqq_data_Map.name}: original message changed: (${qqq_data.references})\nid:	${message_id}\n原	${qqq_data.message}\n新→	${message}`);
+				CeL.info(`${create__qqq_data_Map.name}: original message changed: (references: ${qqq_data.references})\nid:	${message_id}\n原	${qqq_data.message}\n新→	${message}`);
 				message_changed.set(qqq_data.message, message);
 				message_to_id_Map.set(qqq_data.message, message_id);
 				qqq_data.message = message;

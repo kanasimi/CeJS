@@ -1,5 +1,4 @@
-/*	Localized messages in CeL.
-	\u672c\u6a94\u6848\u70ba\u81ea\u52d5\u751f\u6210\uff0c\u8acb\u52ff\u624b\u52d5\u7de8\u8f2f\uff01
-	This file is auto created by auto-generate tool: build(.js) @ 2022.
-*/'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({"Language":"\uc5b8\uc5b4"},
-'ko-KR');
+/*	Localized messages of CeL.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
+*/'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({"Loading...":"\ubd88\ub7ec\uc624\ub294 \uc911...","\u2191Back to TOC":"\u2191\ubaa9\ucc28\ub85c \ub3cc\uc544\uac00\uae30","module":"\ubaa8\ub4c8","Language":"\uc5b8\uc5b4","Abandon change":"\ubcc0\uacbd\uc0ac\ud56d \ubc84\ub9ac\uae30","soon":"\uace7","%1 hours ago":"%1\uc2dc\uac04 \uc804","%1 days ago":"%1\uc77c \uc804","%1 days later":"%1\uc77c \ud6c4","\u4e2d\u570b":"\uc911\uad6d","\u8f38\u51fa\u683c\u5f0f":"\ucd9c\ub825 \ud615\uc2dd","\u554f\u984c\u56de\u5831":"\ud53c\ub4dc\ubc31","\u5206\u985e":"\uadf8\ub8f9","Julian calendar":"\uc728\ub9ac\uc6b0\uc2a4\ub825","Unix time":"\uc720\ub2c9\uc2a4 \uc2dc\uac04","\u4e0a\u5f26":"1\ubd84\uae30","Italy":"\uc774\ud0c8\ub9ac\uc544","France":"\ud504\ub791\uc2a4","Norway":"\ub178\ub974\uc6e8\uc774","\u6240\u6709\u570b\u5bb6":"\ubaa8\ub4e0 \uad6d\uac00","\u7d00\u5e74\u7dda\u5716\u9078\u9805\uff1a":"\ud0c0\uc784\ub77c\uc778 \uc635\uc158:","\u6642\u5340\uff1a":"\uc2dc\uac04\ub300:","\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01":"There are currently %1 %2 messages that have not been translated. Welcome to translate with us!","untranslated message count":"711","local-language-name":"\ud55c\uad6d\uc5b4"},
+"ko-KR");
