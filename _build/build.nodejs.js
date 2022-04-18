@@ -535,7 +535,7 @@ function create__qqq_data_Map() {
 			// matched: [ all, text_id / message, tail punctuation mark ]
 			const matched = message.match(CeL.gettext.PATTERN_message_with_tail_punctuation_mark);
 			if (!matched || qqq_data.message !== matched[1]) {
-				CeL.info(`${create__qqq_data_Map.name}: original message changed:\nid:	${message_id}\n原	${qqq_data.message}\n新→	${message}`);
+				CeL.info(`${create__qqq_data_Map.name}: original message changed: (${qqq_data.references})\nid:	${message_id}\n原	${qqq_data.message}\n新→	${message}`);
 				message_changed.set(qqq_data.message, message);
 				message_to_id_Map.set(qqq_data.message, message_id);
 				qqq_data.message = message;
@@ -728,18 +728,21 @@ function adapt_new_change(script_file_path, options) {
 		if (message_id) {
 			qqq_data = qqq_data_Map.get(message_id);
 		} else if (qqq_data = qqq_data_Map.get(message_id = gettext_config.id)) {
-			if (message_changed.get(qqq_data.message) && message_changed.get(qqq_data.message) !== message) {
-				throw new Error(`${adapt_new_change.name}: message 衝突:\n原 message	${JSON.stringify(qqq_data.message)}\n→ i18n或其他原始碼中的 message:	${JSON.stringify(message_changed.get(qqq_data.message))}\n→ [${script_file_path}]原始碼中的 message:${JSON.stringify(message)}`);
+			if (message_changed.get(qqq_data.message)) {
+				if (message_changed.get(qqq_data.message) !== message) {
+					throw new Error(`${adapt_new_change.name}: message 衝突:\n原 message	${JSON.stringify(qqq_data.message)}\n→ i18n或其他原始碼中的 message:	${JSON.stringify(message_changed.get(qqq_data.message))}\n→ [${script_file_path}]原始碼中的 message:${JSON.stringify(message)}`);
+				}
+			} else if (qqq_data.message !== message) {
+				CeL.info(`${adapt_new_change.name}: 改變了[${script_file_path}]原始碼中的 message:\nid	${message_id}\n	${JSON.stringify(qqq_data.message)}\n→	${JSON.stringify(message)}`);
+				message_changed.set(qqq_data.message, message);
+				const locale_data = i18n_message_id_to_message[qqq_data.original_message_language_code];
+				if (locale_data) {
+					locale_data[message_id] = message;
+				}
+				//delete message_to_localized_mapping[qqq_data.original_message_language_code][qqq_data.message];
+				//message_to_localized_mapping[qqq_data.original_message_language_code][message] = message;
+				qqq_data.message = message;
 			}
-			CeL.info(`${adapt_new_change.name}: 改變了[${script_file_path}]原始碼中的 message:\nid	${message_id}\n	${JSON.stringify(qqq_data.message)}\n→	${JSON.stringify(message)}`);
-			message_changed.set(qqq_data.message, message);
-			const locale_data = i18n_message_id_to_message[qqq_data.original_message_language_code];
-			if (locale_data) {
-				locale_data[message_id] = message;
-			}
-			//delete message_to_localized_mapping[qqq_data.original_message_language_code][qqq_data.message];
-			//message_to_localized_mapping[qqq_data.original_message_language_code][message] = message;
-			qqq_data.message = message;
 		} else if (message_id) {
 			message_id = en_message_to_message_id(message_id);
 			if (gettext_config.id !== message_id) {
