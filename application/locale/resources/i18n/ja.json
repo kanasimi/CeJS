@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Kanashimi",
 			"MirukuPC",
 			"Yamagata Yusuke"
 		]
@@ -31,7 +32,7 @@
 	"log-type-debug": "デバッグ",
 	"log-type-trace": "トレース",
 	"language": "言語",
-	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": "指定されたドメイン [%1] はまだロードされていません。FORCE フラグを設定する必要がある場合があります。",
+	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": "指定されたドメイン [%1] はまだロードされていません。必要であれば、強制ロードのフラグを設定してください。",
 	"$1-elapsed-$3-at-$2": "%1 後、%2 %3",
 	"no-change": "無変更",
 	"finished": "完成",

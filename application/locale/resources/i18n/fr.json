@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Kanashimi",
 			"Verdy p"
 		]
 	},
@@ -81,7 +82,7 @@
 	"era-calendar-converter": "Convertisseur d’ères calendaires",
 	"era-$1": "Ère %1",
 	"log-console": "Console du journal",
-	"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}": "function (domain_name, arg) { return '%1 ' + (1 < arg[1] ? 'entrées chargées' : entrée chargée') + '.'; }",
+	"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}": "function (domain_name, arg) { return '%1 ' + (1 < arg[1] ? 'entrées chargées' : 'entrée chargée') + '.'; }",
 	"warning-only-for-developers": "AVERTISSSEMENT : seulement pour les développeurs.",
 	"c.-$1": "vers %1",
 	"china": "Chine",
