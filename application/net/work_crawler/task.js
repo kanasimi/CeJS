@@ -747,7 +747,7 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.info([ this.id + ': ', {
-			// gettext_config:{"id":"acrchive-the-old-work-«$1»"}
+			// gettext_config:{"id":"archive-the-old-work-«$1»"}
 			T : [ '封存舊作品：《%1》', work_data.title || work_data.id ]
 		} ]);
 

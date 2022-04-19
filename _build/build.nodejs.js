@@ -194,7 +194,7 @@ async function build_locale_messages(resources_path) {
 	//load_CSV_message_to_localized(library_base_directory + '_test suite/resources/locale.csv');
 
 	// Localized messages for CeJS 網路小說漫畫下載工具。
-	load_CSV_message_to_localized(library_base_directory + '../../program/work_crawler/resources/locale of work_crawler - locale.csv');
+	//load_CSV_message_to_localized(library_base_directory + '../../program/work_crawler/resources/locale of work_crawler - locale.csv');
 	//console.trace(message_to_localized_mapping);
 
 	await new Promise((resolve, reject) => {
@@ -327,18 +327,20 @@ function load_message_to_localized(resources_path, callback) {
 		if (!locale_data)
 			return;
 
-		// 一次性訊息修正。
-		for (const [from_message, to_message] of Object.entries({
-			Espana:
-				// gettext_config:{"id":"españa"}
-				'España',
-			'Calendrier republicain':
-				// gettext_config:{"id":"french-republican-calendar"}
-				'Calendrier républicain',
-		})) {
-			if ((from_message in locale_data) && !locale_data[to_message]) {
-				locale_data[to_message] = locale_data[from_message];
-				delete locale_data[from_message];
+		if (false) {
+			// 一次性訊息修正。
+			for (const [from_message, to_message] of Object.entries({
+				Espana:
+					// gettext_config:{"id":"españa"}
+					'España',
+				'Calendrier republicain':
+					// gettext_config:{"id":"french-republican-calendar"}
+					'Calendrier républicain',
+			})) {
+				if ((from_message in locale_data) && !locale_data[to_message]) {
+					locale_data[to_message] = locale_data[from_message];
+					delete locale_data[from_message];
+				}
 			}
 		}
 
@@ -373,7 +375,7 @@ function load_i18n_messages(resources_path, callback) {
 		let locale_data;
 		try {
 			//console.log(contents);
-			locale_data = JSON.parse(contents.trim());
+			locale_data = JSON.parse(contents);
 		} catch (e) {
 			CeL.error(`${fso_path}:`);
 			console.error(e);
@@ -385,7 +387,7 @@ function load_i18n_messages(resources_path, callback) {
 		i18n_message_id_to_message[language_code] = locale_data;
 		i18n_language_code_data_mapping.set(language_code, {
 			fso_path,
-			language_code: matched[1]
+			i18n_language_code: matched[1]
 		});
 
 	}, {
@@ -403,16 +405,30 @@ function parse_qqq(qqq) {
 	};
 	let notes = [], additional_notes = [];
 	let start_additional_notes;
+	let latest_attribute;
 	qqq.split(/\n/).forEach(line => {
 		line = line.trim();
 		if (!line) return;
-		const matched = line.match(/^;([^:\n]+):(.*)$/);
+		let matched = line.match(/^;([^:\n]+):(.*)$/);
 		if (matched) {
 			if (!start_additional_notes && notes.length > 0) start_additional_notes = true;
-			qqq_data[matched[1].trim()] = matched[2].trim();
+			qqq_data[latest_attribute = matched[1].trim()] = matched[2].trim();
 			return;
 		}
 
+		matched = line.match(/^:(.*)$/);
+		if (matched && latest_attribute) {
+			const value = matched[1].trim();
+			const original_value = qqq_data[latest_attribute];
+			if (Array.isArray(original_value)) {
+				qqq_data[latest_attribute].push(value);
+			} else {
+				qqq_data[latest_attribute] = original_value ? [original_value, value] : value;
+			}
+			return;
+		}
+
+		latest_attribute = null;
 		if (start_additional_notes)
 			additional_notes.push(line);
 		else
@@ -439,6 +455,10 @@ function parse_qqq(qqq) {
 	return qqq_data;
 }
 
+function function_to_message(function_message) {
+	return String(function_message).replace(/\\u([\da-f]{4})/g, (all_char, char_code) => String.fromCharCode(parseInt(char_code, 16)));
+}
+
 function log_message_changed(message_id) {
 	const qqq_data = qqq_data_Map.get(message_id);
 	//console.log([message_id, qqq_data]);
@@ -449,18 +469,21 @@ function log_message_changed(message_id) {
 	}
 
 	for (const language_code of Object.keys(message_to_localized_mapping)) {
-		const from_localized_message = message_to_localized_mapping[language_code][message];
-		if (!i18n_message_id_to_message[language_code]) {
+		// .hasOwnProperty(message): 避免 'constructor'
+		let from_localized_message = (!message_to_localized_mapping[language_code].hasOwnProperty || message_to_localized_mapping[language_code].hasOwnProperty(message)) && message_to_localized_mapping[language_code][message];
+		let locale_data = i18n_message_id_to_message[language_code];
+		if (!locale_data) {
 			// e.g., get from load_CSV_message_to_localized()
 			CeL.info(`${log_message_changed.name}: New language code of i18n: ${language_code}`);
-			i18n_message_id_to_message[language_code] = Object.create(null);
-			const _language_code = language_code.match(/^[^-]+/)[0];
+			locale_data = i18n_message_id_to_message[language_code] = Object.create(null);
+			const i18n_language_code = language_code.match(/^[^-]+/)[0];
 			i18n_language_code_data_mapping.set(language_code, {
-				fso_path: i18n_language_code_data_mapping.latest_resources_path + _language_code + '.json',
-				language_code: _language_code
+				fso_path: i18n_language_code_data_mapping.latest_resources_path + i18n_language_code + '.json',
+				i18n_language_code
 			});
 		}
-		const to_localized_message = i18n_message_id_to_message[language_code][message_id];
+		// .hasOwnProperty(message_id): 避免 'constructor'
+		const to_localized_message = locale_data.hasOwnProperty(message_id) && locale_data[message_id];
 		if (!from_localized_message) {
 			// New localized message
 			continue;
@@ -468,12 +491,18 @@ function log_message_changed(message_id) {
 		if (!to_localized_message) {
 			// New localized message. 
 			// e.g., get from load_CSV_message_to_localized()
-			i18n_message_id_to_message[language_code][message_id] = from_localized_message;
+			locale_data[message_id] = from_localized_message;
 			continue;
 		}
-		if (String(from_localized_message) === String(to_localized_message))
+		if (typeof from_localized_message === 'function') {
+			from_localized_message = function_to_message(from_localized_message);
+		}
+		if (from_localized_message === to_localized_message)
 			continue;
-		CeL.info(`${log_message_changed.name}: ${message}	[${language_code}] ${from_localized_message}→${to_localized_message}`);
+		if (from_localized_message.includes('\n'))
+			from_localized_message = '\n' + from_localized_message + '\n';
+		CeL.info(`${log_message_changed.name}: ${message}	[${language_code}] ${from_localized_message
+			}→${to_localized_message.includes('\n') ? '\n' + to_localized_message : to_localized_message}`);
 	}
 }
 
@@ -483,8 +512,9 @@ function set_qqq_data(message_id, qqq) {
 	let qqq_data = parse_qqq(qqq);
 	if (qqq_data_Map.has(message_id)) {
 		const old_qqq_data = qqq_data_Map.get(message_id);
-		Object.assign(old_qqq_data, qqq_data);
-		qqq_data = old_qqq_data;
+		// 捨棄舊的 .references 資訊，將在 adapt_new_change() 重新設定。
+		delete qqq_data.references;
+		qqq_data = Object.assign(old_qqq_data, qqq_data);
 	} else {
 		CeL.warn(`${set_qqq_data.name}: New message id in i18n: ${message_id}`);
 		qqq_data_Map.set(message_id, qqq_data);
@@ -857,23 +887,26 @@ function write_i18n_files(resources_path) {
 		qqq_data_count++;
 		qqq_file_data[message_id] = qqq_data;
 		if (Array.isArray(qqq_data.references) && qqq_data.references.length > 0) {
-			qqq_data.references = qqq_data.references.join('\n: ');
+			qqq_data.references = qqq_data.references.sort().join('\n: ');
 		} else {
 			message_id_without_references.push(message_id);
 			if (false && !qqq_data.references) {
 				CeL.warn(`${write_i18n_files.name}: 無任何引用的訊息: [${message_id}] ${qqq_data.message}`);
 			}
+			//if (Array.isArray(qqq_data.references)) delete qqq_data.references;
 		}
 		const qqq_value = [];
-		qqq_order.forEach((property, index) => {
-			const value = qqq_data[property];
-			if (value)
+		function add_value(property, value, index) {
+			if (value ? (value = value.toString()) : value === 0)
 				qqq_value.push(index === 0 ? value : `; ${property}: ${value}`);
+		}
+		qqq_order.forEach((property, index) => {
+			add_value(property, qqq_data[property], index);
 		});
 		for (const [property, value] of Object.entries(qqq_data)) {
 			if (qqq_order_Set.has(property))
 				continue;
-			qqq_value.push(`; ${property}: ${value}`);
+			add_value(property, value);
 		}
 		if (qqq_data.additional_notes)
 			qqq_value.push(qqq_data.additional_notes);
@@ -888,8 +921,10 @@ function write_i18n_files(resources_path) {
 		CeL.log(message_id_without_references.map(message_id => `[${message_id}]	${qqq_data_Map.get(message_id).message}`).join('\n'));
 
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
-		if (language_code !== 'qqq')
+		if (language_code !== 'qqq') {
+			// qqq will save to `qqq_data_file_name` above
 			write_message_script_file({ resources_path, language_code, locale_data });
+		}
 
 		write_i18n_data_file({ language_code, locale_data });
 	}
@@ -901,16 +936,16 @@ function write_message_script_file({ resources_path, language_code, locale_data 
 	for (const [message_id, locale_message] of Object.entries(locale_data)) {
 		if (message_id === '@metadata') continue;
 		const qqq_data = qqq_data_Map.get(message_id);
-		const key_mark = JSON.stringify(qqq_data.message, escape_non_latin_chars) + ':';
+		const key_mark = escape_non_latin_chars(JSON.stringify(qqq_data.message)) + ':';
 		if (/^function(?:\s|\()/.test(locale_message)) {
 			const original_function = message_to_localized_mapping[language_code] && message_to_localized_mapping[language_code][qqq_data.message];
-			if (String(original_function) === locale_message) {
+			if (function_to_message(original_function) === locale_message) {
 				locale_message_data.push(key_mark + locale_message);
 				continue;
 			}
-			CeL.error(`${write_message_script_file.name}: [${language_code}][${message_id}]: 原訊息與新函數不一致！您必須檢核此函數是否有安全疑慮，之後手動更改 [${fso_path}]！\n${locale_message}`);
+			CeL.error(`${write_message_script_file.name}: [${language_code}][${message_id}]: 原訊息與新函數不一致！您必須檢核此函數是否有安全疑慮，之後手動更改 [${fso_path}]！\n原	${original_function}\n新	${locale_message}`);
 		}
-		locale_message_data.push(key_mark + JSON.stringify(locale_message, escape_non_latin_chars));
+		locale_message_data.push(key_mark + escape_non_latin_chars(JSON.stringify(locale_message)));
 	}
 	const new_contents = `/*	Localized messages of ${CeL.Class}.
 	This file is auto created by auto-generate tool: ${library_build_script_name}(.js) @ ${datestamp.format('%Y-%2m-%2d' && '%Y')}.

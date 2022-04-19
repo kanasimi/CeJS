@@ -291,7 +291,7 @@
 	"remove-the-archived-work-from-the-list-of-works-«$1»": "Remova a série arquivada da lista de séries: «%1»",
 	"archived-date-$1-last-download-date-$2": "data de arquivamento:%1, data do último download:%2",
 	"archived": "Arquivado:",
-	"acrchive-the-old-work-«$1»": "Arquivar o trabalho antigo: «%1»",
+	"archive-the-old-work-«$1»": "Arquivar o trabalho antigo: «%1»",
 	"warning-downloading-a-list-of-works-starting-with-$2-and-length-$1.-repeating-the-download-of-the-work-list-may-cause-an-error": "Aviso: baixando uma lista de séries iniciados em \"%2\" até % 1. Repetir o download da lista de séries pode causar um erro!",
 	"using-convert_id-$1": "Usando o converter_id[%1]",
 	"using-convert_id-$1-via-url-$2": "Usando o converter_id[%1] via url: %2",

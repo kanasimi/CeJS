@@ -455,7 +455,7 @@
 	"remove-the-archived-work-from-the-list-of-works-«$1»": "自作品列表中删除将封存之作品：《%1》",
 	"archived-date-$1-last-download-date-$2": "封存日期：%1，最后一次于 %2 下载",
 	"archived": "已封存：",
-	"acrchive-the-old-work-«$1»": "封存旧作品：《%1》",
+	"archive-the-old-work-«$1»": "封存旧作品：《%1》",
 	"warning-downloading-a-list-of-works-starting-with-$2-and-length-$1.-repeating-the-download-of-the-work-list-may-cause-an-error": "警告：正下载以\"%2\"开始、长度 %1 的作品列表中。重复下载作品列表可能造成错误！",
 	"using-convert_id-$1": "使用解析器[%1]",
 	"using-convert_id-$1-via-url-$2": "使用解析器[%1]，从 %2 解析出作品列表。",
