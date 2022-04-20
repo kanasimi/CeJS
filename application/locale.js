@@ -1474,7 +1474,14 @@ function module_code(library_namespace) {
 			conversion = [ id ];
 			while ((key = gettext_DOM_id + ++i) in dataset)
 				conversion.push(dataset[key]);
-			library_namespace.set_text(node, gettext.apply(node, conversion));
+			if (node.on_language_changed)
+				node.on_language_changed(conversion);
+			else
+				library_namespace.set_text(node, gettext
+						.apply(node, conversion));
+		} else if (node.on_language_changed) {
+			// @see CeL.DOM.new_node()
+			node.on_language_changed(conversion);
 		}
 	};
 	// for DOM use.

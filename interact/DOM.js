@@ -1874,12 +1874,21 @@ function module_code(library_namespace) {
 					if (!(children = nodes[tag])) {
 						// 不改變 nodes，否則可能造成重複利用時出現問題。
 						// nodes[tag] =
-						children = gettext.apply(null, n);
+						if (nodes.on_language_changed) {
+							// @see gettext.translate_node()
+							nodes.on_language_changed.call(node, n);
+						} else {
+							children = gettext.apply(null, n);
+						}
 					} else if (typeof children === 'string'
 							|| typeof children === 'number') {
-						// nodes[tag] =
-						children = gettext(dataset(node, gettext.DOM_id_key,
-								children));
+						children = dataset(node, gettext.DOM_id_key, children);
+						if (nodes.on_language_changed) {
+							nodes.on_language_changed.call(node, [ children ]);
+						} else {
+							// nodes[tag] =
+							children = gettext(children);
+						}
 					}
 
 					n = options.next_node;

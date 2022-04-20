@@ -2066,7 +2066,19 @@ function module_code(library_namespace) {
 	function JSON_stringify(value, replacer, space) {
 		var object_Set = new Set;
 
-		function stringify(object, key, obj) {
+		if (!space) {
+			space = '';
+		} else if (typeof space === 'number') {
+			if (space > 10)
+				space = 10;
+			else if (space < 1)
+				space = 0;
+			space = ' '.repeat(space);
+		} else {
+			space = String(space).slice(0, 10);
+		}
+
+		function stringify(object, /* 累積的空格 */_spaces, key, obj) {
 			if (object && typeof object.toJSON === 'function') {
 				// e.g., {Date}
 				object = object.toJSON(key);
@@ -2088,6 +2100,8 @@ function module_code(library_namespace) {
 				return object;
 			}
 
+			var next_spaces = _spaces + space;
+
 			var output = [];
 			if (Array.isArray(object)) {
 				for (var index = 0; index < object.length; index++) {
@@ -2100,9 +2114,11 @@ function module_code(library_namespace) {
 					}
 					if (value === undefined)
 						value = null;
-					output.push(stringify(value, key, object));
+					output.push('\n' + next_spaces
+							+ stringify(value, next_spaces, key, object));
 				}
-				return '[' + output.join(',') + ']';
+				return '[' + output.join(',') + (space ? '\n' + _spaces : '')
+						+ ']';
 			}
 
 			var keys = Object.keys(object);
@@ -2114,13 +2130,14 @@ function module_code(library_namespace) {
 				}
 				if (value === undefined)
 					continue;
-				output.push(stringify(key) + ':'
-						+ stringify(value, key, object));
+				output.push('\n' + next_spaces + stringify(key, next_spaces)
+						+ (space ? ': ' : ':')
+						+ stringify(value, next_spaces, key, object));
 			}
-			return '{' + output.join(',') + '}';
+			return '{' + output.join(',') + (space ? '\n' + _spaces : '') + '}';
 		}
 
-		return stringify(value);
+		return stringify(value, '');
 	}
 
 	if (!globalThis.JSON) {
