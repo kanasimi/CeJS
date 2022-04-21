@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Brettchenweber",
-			"DraconicDark"
+			"DraconicDark",
+			"ZiqiLiang"
 		]
 	},
 	"loading": "Laden...",
@@ -94,5 +95,6 @@
 	"egypt": "Ägypten",
 	"all-countries": "Alle Länder",
 	"coordinates": "Koordinaten:",
-	"timezone": "Zeitzone:"
+	"timezone": "Zeitzone:",
+	"series-has-ended": "Serie ist beendet."
 }
