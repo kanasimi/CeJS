@@ -921,7 +921,20 @@ function write_i18n_files(resources_path) {
 		CeL.log(message_id_without_references.map(message_id => `[${message_id}]	${qqq_data_Map.get(message_id).message}`).join('\n'));
 
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
-		locale_data[en_message_to_message_id('untranslated message count')] = qqq_data_count - Object.keys(locale_data).length;
+		// cmn-Hant-TW: -1
+		const untranslated_message_count = Math.max(0, qqq_data_count - Object.keys(locale_data).length);
+		if (language_code === 'qqq') {
+			;
+		} else {
+			if (untranslated_message_count < 20) {
+				CeL.info(`${write_i18n_files.name}: 接近翻譯完畢的語言 (${untranslated_message_count}/${qqq_data_count} 未翻譯): ${language_code}`);
+			} else if (untranslated_message_count < 100) {
+				CeL.info(`${write_i18n_files.name}: 翻譯得差不多的語言 (${untranslated_message_count}/${qqq_data_count} 未翻譯): ${language_code}`);
+			} else if (untranslated_message_count < 550) {
+				CeL.info(`${write_i18n_files.name}: 可考慮列入選單的語言 (${untranslated_message_count}/${qqq_data_count} 未翻譯): ${language_code}`);
+			}
+			locale_data[en_message_to_message_id('untranslated message count')] = untranslated_message_count;
+		}
 		if (language_code !== 'qqq') {
 			// qqq will save to `qqq_data_file_name` above
 			write_message_script_file({ resources_path, language_code, locale_data });

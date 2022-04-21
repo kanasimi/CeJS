@@ -1051,6 +1051,6 @@
 	"no-longer-maintained": "現在はサポートされていません\n; references: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L166}}\n; scope: GUI: setup_download_sites()",
 	"let-s-<a>translate-the-interface<-a>-together": "Text inside <a></a> will be linked. 會以連結形式顯示。\n; references: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L490}}\n; scope: GUI: setup_initial_messages()",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "%1: untranslated message count, %2: language selected\n; references: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L429}}\n; scope: GUI: setup_initial_messages()",
-	"untranslated-message-count": -1,
+	"untranslated-message-count": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}\n; references: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L426}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L431}}\n; scope: GUI: setup_initial_messages()",
 	"local-language-name": "Language name in local language. Português: Português brasileiro ou português do Brasil\n; references: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L434}}\n; scope: GUI: setup_initial_messages()"
 }
