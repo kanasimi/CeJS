@@ -1708,7 +1708,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L340}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L547}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4352}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L340}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L552}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4352}}"
 	},
 	"month-of-the-sexagenary-cycle": {
 		"message": "月干支",

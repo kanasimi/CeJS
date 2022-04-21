@@ -160,7 +160,7 @@ const message_changed = new Map;
 /** message_id_changed.get(from message id) = to message id */
 const message_id_changed = new Map;
 
-const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s←↑→≠🆔]/;
+const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s←↑→≠🆔😘➕]/;
 
 function en_message_to_message_id(en_message) {
 	var message_id = en_message.trim()
@@ -533,21 +533,29 @@ function create__qqq_data_Map() {
 	for (const message of message_to_id_Map.keys()) {
 		if (!message)
 			continue;
-		let en_message;
-		if (!PATTERN_has_invalid_en_message_char.test(message)) {
+		// 首先採用原有訊息。
+		let en_message = message_to_localized_mapping['en-US'][message];
+		if (!en_message) {
+			if (PATTERN_has_invalid_en_message_char.test(message)) {
+				CeL.warn(`${create__qqq_data_Map.name}: Cannot find the en_message of ${message}`);
+				continue;
+			}
 			en_message = message;
-		} else if (!(en_message = message_to_localized_mapping['en-US'][message])) {
-			CeL.warn(`${create__qqq_data_Map.name}: Cannot find the en_message of ${message}`);
-			continue;
-		} else if (PATTERN_has_invalid_en_message_char.test(en_message = en_message.toString())) {
+		}
+		if (PATTERN_has_invalid_en_message_char.test(en_message = en_message.toString())) {
 			CeL.warn(`${create__qqq_data_Map.name}: en_message of ${message} contains invalid char(s)! ${en_message}`);
 			continue;
 		}
-		// gettext_config:{"id":"french-republican-calendar"}
-		if (message === 'Calendrier républicain')
-			en_message = 'French Republican Calendar';
+		if (false) {
+			// 一次性訊息修正。
+			// gettext_config:{"id":"french-republican-calendar"}
+			if (message === 'Calendrier républicain')
+				en_message = 'French Republican Calendar';
+		}
 		//console.log([message, en_message]);
-		const message_id = en_message_to_message_id(en_message);
+		const message_id = qqq_data_Map.has(message) ? message
+			: qqq_data_Map.has(en_message_to_message_id(message)) ? en_message_to_message_id(message)
+				: en_message_to_message_id(en_message);
 		let qqq_data = qqq_data_Map.get(message_id);
 		//if (message === '作者') { console.trace({ message, message_id, qqq_data }); throw 456465; }
 		if (!qqq_data && message_to_localized_mapping.qqq && (qqq_data = set_qqq_data(message_id, message_to_localized_mapping.qqq[message]))) {
@@ -877,10 +885,6 @@ async function modify_source_files() {
 const qqq_order = ['notes', 'demo', 'references'];
 const qqq_order_Set = new Set(qqq_order.concat(['message', 'original_message_language_code', 'additional_notes']));
 
-function escape_non_latin_chars(string) {
-	return string.replace(/[^\x20-\x7F]/g, char => '\\u' + char.charCodeAt(0).toString(16).padStart(4, 0));
-}
-
 function write_qqq_data(resources_path) {
 	const i18n_qqq_Object = i18n_message_id_to_message.qqq;
 	let qqq_file_data = Object.create(null);
@@ -948,6 +952,10 @@ function write_i18n_files(resources_path) {
 
 		write_i18n_data_file({ language_code, locale_data });
 	}
+}
+
+function escape_non_latin_chars(string) {
+	return string.replace(/[^\x20-\x7F]/g, char => '\\u' + char.charCodeAt(0).toString(16).padStart(4, 0));
 }
 
 function write_message_script_file({ resources_path, language_code, locale_data }) {
