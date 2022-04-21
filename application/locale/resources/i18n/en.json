@@ -1042,6 +1042,6 @@
 	"no-longer-maintained": "No longer maintained",
 	"let-s-<a>translate-the-interface<-a>-together": "Let's <a>translate the interface</a> together!",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated-message-count": "1",
+	"untranslated-message-count": 0,
 	"local-language-name": "English"
 }

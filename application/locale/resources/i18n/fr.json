@@ -515,5 +515,6 @@
 	"invalid-post-data-$1": "Données POST non valides : %1",
 	"invalid-timeout-$1": "Délai d’attente non valide : %1",
 	"not-yet-implemented": "Pas encore mis en œuvre !",
-	"treat-$1-as-regexp": "Traiter [%1] comme une expresssion régulière."
+	"treat-$1-as-regexp": "Traiter [%1] comme une expresssion régulière.",
+	"untranslated-message-count": 534
 }

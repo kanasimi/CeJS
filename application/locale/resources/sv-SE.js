@@ -148,6 +148,7 @@
 	"Julian Day Number":"Julianskt datumnummer",
 	"\u9031\u65e5\u671f":"Veckodatum",
 	"astronomy":"astronomi",
-	"calendar":"kalender"
+	"calendar":"kalender",
+	"untranslated message count":895
 },
 "sv-SE");

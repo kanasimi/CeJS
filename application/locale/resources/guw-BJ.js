@@ -91,6 +91,7 @@
 	"Egypt":"Egipti",
 	"\u516c\u5143":"Wh\u00e8 M\u00edt\u1ecdn",
 	"\u6240\u6709\u570b\u5bb6":"Ot\u00f2 l\u1eb9po",
-	"\u541b\u4e3b\u751f\u5352":"Gb\u1eb9wh\u1eb9nu g\u00e1ndut\u1ecd l\u1eb9 t\u1ecdn"
+	"\u541b\u4e3b\u751f\u5352":"Gb\u1eb9wh\u1eb9nu g\u00e1ndut\u1ecd l\u1eb9 t\u1ecdn",
+	"untranslated message count":952
 },
 "guw-BJ");

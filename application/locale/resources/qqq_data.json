@@ -32,34 +32,34 @@
 		"notes": "Table of contents message. e.g., Contents of [title]",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9108}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9117}}"
 	},
 	"contents": {
 		"message": "Contents",
 		"notes": "Table of contents message of web page and ebook. (scope: interact.DOM: auto_TOC(), CeL.application.storage.EPUB: generate_TOC())\n{{Identical|Content}}",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2193}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9111}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2193}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9120}}"
 	},
 	"↑back-to-toc": {
 		"message": "↑Back to TOC",
 		"notes": "Table of contents message.",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9032}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9041}}"
 	},
 	"expand": {
 		"message": "expand",
 		"notes": "show/hide table of contents(顯示/隱藏, 表示/隠す)",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9115}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9122}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1116}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9124}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9131}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1130}}"
 	},
 	"collapse": {
 		"message": "collapse",
 		"notes": "show/hide table of contents(顯示/隱藏, 表示/隠す)",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9120}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1114}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9129}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1128}}"
 	},
 	"number": {
 		"message": "number",
@@ -163,7 +163,7 @@
 		"scope": "CeL.application.locale: create_domain_menu.tag",
 		"additional_notes": "{{identical|Language}}",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1593}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1600}}"
 	},
 	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": {
 		"message": "所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。",
@@ -363,7 +363,7 @@
 	},
 	"$1-seconds-ago": {
 		"message": "%1 seconds ago",
-		"notes": "剛剛",
+		"notes": "just",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2948}}"
@@ -1077,7 +1077,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hans-CN",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test suite/era.js#L3221}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1852}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test suite/era.js#L3221}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1859}}"
 	},
 	"gregorian-calendar": {
 		"message": "Gregorian calendar",
@@ -1661,7 +1661,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test suite/era.js#L4803}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test suite/era.js#L4811}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1856}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test suite/era.js#L4803}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test suite/era.js#L4811}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1863}}"
 	},
 	"28-mansions": {
 		"message": "二十八宿",
@@ -2182,7 +2182,7 @@
 		"notes": "本工具標題名稱 title",
 		"scope": "gui_electron_functions.js, gui_electron.html",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L409}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L197}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L413}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L197}}"
 	},
 	"to-use-the-graphical-interface-please-execute-`$1`": {
 		"message": "欲採用圖形介面請執行 `%1`。",
@@ -2812,14 +2812,14 @@
 	},
 	"you-may-set-start_chapter_no=chapter-number-or-start_chapter_title=chapter-title-to-decide-where-to-start-downloading": {
 		"message": "您可指定 \"start_chapter_NO=章節編號數字\" 或 \"start_chapter_title=章節標題\" 來選擇要開始下載的章節。",
-		"notes": "work_crawler/work.js: show_work_data() part 1.",
+		"notes": "work_crawler/work.js: show_work_data() part 1, followed by {{msg-wm|Cejs-or-set-chapter filter&#x3D;3Dchapter-title-to-download-specific-chapter}}.",
 		"scope": "work_crawler/work.js: show_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L110}}"
 	},
 	"or-set-chapter_filter=chapter-title-to-download-specific-chapter": {
 		"message": "或指定 \"chapter_filter=章節標題\" 僅下載某個章節。",
-		"notes": "work_crawler/work.js: show_work_data() part 2 in a new line.",
+		"notes": "work_crawler/work.js: show_work_data() part 2 in a new line, following {{msg-wm|Cejs-you-may-set-start chapter no&#x3D;3Dchapter-number-or-start chapter title&#x3D;3Dchapter-title-to-decide-where-to-start-downloading}}.",
 		"scope": "work_crawler/work.js: show_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L114}}"
@@ -2987,13 +2987,13 @@
 	},
 	"work_status-not-found": {
 		"message": "work_status-not found",
-		"notes": "下載特殊狀況：作品不存在或已被刪除、被移動。不可包含\"&\"。一致する情報が見つかりませんでした。",
+		"notes": "Occurs in the following special situation: the work does not exist, or has been removed or moved to another location or another name. Does not include \"&\". No matching information was found.\n下載特殊狀況：作品不存在或已被刪除、被移動。不可包含\"&\"。一致する情報が見つかりませんでした。",
 		"scope": "work_crawler.js: get_work_list()",
 		"original_message_language_code": "en-US"
 	},
 	"work_status-limited": {
 		"message": "work_status-limited",
-		"notes": "下載特殊狀況：部份章節需要付費/被鎖住/被限制。不可包含\"&\"",
+		"notes": "Listed special situations: chapter requests with limited expenses / locked / limited to some systems. Not included \"&\".\n下載特殊狀況：部份章節需要付費/被鎖住/被限制。不可包含\"&\"",
 		"scope": "work_crawler.js: get_work_list()",
 		"original_message_language_code": "en-US"
 	},
@@ -4553,7 +4553,7 @@
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L520}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L534}}"
 	},
 	"start-downloading": {
 		"message": "開始下載",
@@ -4651,42 +4651,42 @@
 		"notes": "%1: \"file\" or \"directory\" or their plural type",
 		"scope": "GUI: setup_download_options()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L738}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L752}}"
 	},
 	"no-file-or-directory-selected": {
 		"message": "未選擇檔案或目錄。",
 		"notes": "",
 		"scope": "GUI: select_download_options_fso()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L923}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L937}}"
 	},
 	"path-of-$2-selected-$1": {
 		"message": "選擇了%2的路徑：%1",
 		"notes": "%1: \"file\" or \"directory\" or their plural type",
 		"scope": "GUI: select_download_options_fso()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L937}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L951}}"
 	},
 	"auto-save-download-options": {
 		"message": "自動儲存選項設定",
 		"notes": "",
 		"scope": "GUI: setup_download_options()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L784}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L798}}"
 	},
 	"auto-save-download-options-and-favorite-series-list": {
 		"message": "自動儲存選項設定與最愛作品清單",
 		"notes": "",
 		"scope": "GUI: setup_download_options()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L778}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L792}}"
 	},
 	"automatic-storage-setting-has-been-enabled": {
 		"message": "已設定自動儲存選項設定。",
 		"notes": "下載選項",
 		"scope": "GUI: setup_download_options()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L791}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L805}}"
 	},
 	"automatic-storage-setting-has-been-disabled": {
 		"message": "已設定不自動儲存選項設定。",
@@ -4694,42 +4694,42 @@
 		"scope": "GUI: setup_download_options()",
 		"additional_notes": "GUI: save_default_configuration()\nGUI: save_preference()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1228}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1252}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L793}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1242}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1266}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L807}}"
 	},
 	"reset-download-options": {
 		"message": "重設下載選項",
 		"notes": "",
 		"scope": "GUI: setup_download_options()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L807}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L821}}"
 	},
 	"reset-download-options-and-favorite-series-list": {
 		"message": "重設下載選項與最愛作品清單",
 		"notes": "",
 		"scope": "GUI: setup_download_options()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L803}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L817}}"
 	},
 	"download-options-reset": {
 		"message": "已重設下載選項。",
 		"notes": "",
 		"scope": "GUI: setup_download_options()::click_reset_download_option()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L991}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1005}}"
 	},
 	"updating-and-setting-up-download-website-for-$1-$2-→-$3": {
 		"message": "同時更改已手動設定下載目錄的網站 %1：%2 → %3",
 		"notes": "%1: crawler id (is also site id), %2 & %3: data_directory",
 		"scope": "GUI: change_data_directory()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1197}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1211}}"
 	},
 	"the-old-download-directory-$1-is-an-empty-directory-so-it-will-be-removed": {
 		"message": "舊下載目錄 \"%1\" 為空目錄，將之移除。",
 		"notes": "%1: old data_directory",
 		"scope": "GUI: change_data_directory()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1207}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1221}}"
 	},
 	"works-in-download": {
 		"message": "下載中的作品",
@@ -4754,14 +4754,14 @@
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html 訊息提示與紀錄欄: check_max_logs()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L306}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L310}}"
 	},
 	"do-not-limit-log-lines": {
 		"message": "不限制訊息行數",
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L308}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L312}}"
 	},
 	"open-devtools": {
 		"message": "開啟偵錯工具",
@@ -4858,161 +4858,161 @@
 		"notes": "分行 line separator",
 		"scope": "GUI: check_favorites_line_separator()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1277}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1291}}"
 	},
 	"there-may-be-garbled-characters-when-opening-the-file": {
 		"message": "開啟檔案時可能會有亂碼。",
 		"notes": "",
 		"scope": "GUI: check_favorites_line_separator()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1284}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1298}}"
 	},
 	"one-click-fix-file-wrap": {
 		"message": "一鍵修正檔案換行",
 		"notes": "",
 		"scope": "GUI: check_favorites_line_separator()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1288}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1302}}"
 	},
 	"modified-file-wrap.-you-must-save-a-list-of-favorite-works-to-take-effect": {
 		"message": "已修改檔案換行。您必須儲存最愛作品清單才能生效。",
 		"notes": "",
 		"scope": "GUI: check_favorites_line_separator()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1294}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1308}}"
 	},
 	"enter-one-series-title-or-id-per-line": {
 		"message": "請在每一行鍵入一個作品名稱或🆔：",
 		"notes": "Enter one series title or id per line",
 		"scope": "GUI: edit_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1336}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1350}}"
 	},
 	"save-favorite-series-list": {
 		"message": "儲存最愛作品清單",
 		"notes": "",
 		"scope": "GUI: edit_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1345}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1359}}"
 	},
 	"discard-editing-favorite-series-list": {
 		"message": "放棄編輯最愛作品清單",
 		"notes": "",
 		"scope": "GUI: edit_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1357}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1371}}"
 	},
 	"favorite-series-list-not-found-or-empty.-using-old-favorite-series-list": {
 		"message": "儲存最愛作品清單的檔案不存在或者沒有內容。採用舊有的最愛作品列表。",
 		"notes": "",
 		"scope": "GUI: get_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1438}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1452}}"
 	},
 	"series-has-ended": {
 		"message": "作品已完結。",
 		"notes": "The work is completed.",
 		"scope": "GUI: reset_favorites(); GUI: search_result_columns",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1561}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1993}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1575}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2007}}"
 	},
 	"remove-series-from-favorite-series-list": {
 		"message": "從最愛名單中注解掉本作品。",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1596}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1610}}"
 	},
 	"$1-ended-series-or-id-$2": {
 		"message": "%1 已完結的作品名稱或🆔：%2",
 		"notes": "%1: site_name, %2: finished_work_title_list",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1613}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1627}}"
 	},
 	"check-and-download-updates-of-all-favorite-series": {
 		"message": "檢查所有最愛作品之更新，並下載更新作品。",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1642}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1656}}"
 	},
 	"there-is-no-favorite-series-list": {
 		"message": "🈳 尚無最愛作品。",
 		"notes": "There are some comments, but no favorite work.",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1654}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1668}}"
 	},
 	"favorite-series-list-is-empty": {
 		"message": "🈳 尚未設定最愛作品。",
 		"notes": "Favorite work list is empty",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1657}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1671}}"
 	},
 	"edit-favorite-series-list": {
 		"message": "編輯最愛作品清單",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1662}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1676}}"
 	},
 	"delete-all-$1-annotations-$2-repetitions-and-$3-blank-lines": {
 		"message": "刪除所有%1個注解、%2個重複與%3個空白行。",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1674}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1688}}"
 	},
 	"there-are-$1-duplicate-titles-or-ids-in-the-list": {
 		"message": "列表檔案中有%1個重複作品名稱或 id。",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1687}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1701}}"
 	},
 	"annotate-duplicate-work-names-or-id": {
 		"message": "注解掉重複的作品名稱或🆔",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1693}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1707}}"
 	},
 	"delete-duplicate-work-names-or-id": {
 		"message": "刪除重複的作品名稱或🆔",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1706}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1720}}"
 	},
 	"commented-out-$1-finished-work-names-or-id": {
 		"message": "注解掉%1個已完結的作品名稱或🆔",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1721}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1735}}"
 	},
 	"reading-the-website-information-file-of-this-website-to-determine-whether-the-work-has-been-downloaded-and-completed": {
 		"message": "讀取本網站作品資訊檔案以判別作品是否已下載過、是否完結。",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1736}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1750}}"
 	},
 	"when-choosing-a-website-it-can-cause-few-seconds-of-unresponsiveness": {
 		"message": "選擇網站時，這可能造成幾十秒鐘無回應。",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1739}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1753}}"
 	},
 	"reading-the-work-information-from-all-websites": {
 		"message": "讀取所有網站之作品資訊檔案",
 		"notes": "",
 		"scope": "GUI: reset_favorites()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1750}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1764}}"
 	},
 	"imported-configuration-of-$1-$2": {
 		"message": "Imported configuration of %1: %2",
@@ -5031,511 +5031,511 @@
 		"notes": "作品平臺連結 (略稱)",
 		"scope": "GUI: prepare_crawler()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1873}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1876}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1887}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1890}}"
 	},
 	"work_crawler-search_result_columns-site": {
 		"message": "work_crawler-search_result_columns-site",
 		"notes": "",
 		"scope": "GUI: search_result_columns title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1891}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1905}}"
 	},
 	"work_crawler-search_result_columns-title": {
 		"message": "work_crawler-search_result_columns-title",
 		"notes": "作品標題",
 		"scope": "GUI: search_result_columns title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1906}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1920}}"
 	},
 	"only-if-the-title-of-the-obtained-work-is-special-and-different-from-the-title-of-the-work-in-question-will-it-be-marked": {
 		"message": "僅於所獲得之作品標題特殊，不同於所查詢之作品標題時，才會標示。",
 		"notes": "",
 		"scope": "GUI: search_result_columns",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1908}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1922}}"
 	},
 	"work_crawler-search_result_columns-author": {
 		"message": "work_crawler-search_result_columns-author",
 		"notes": "",
 		"scope": "GUI: search_result_columns title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1917}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1931}}"
 	},
 	"work_crawler-search_result_columns-favorite": {
 		"message": "work_crawler-search_result_columns-favorite",
 		"notes": "",
 		"scope": "GUI: search_result_columns title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1924}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1938}}"
 	},
 	"work_crawler-favorite_list_label": {
 		"message": "work_crawler-favorite_list_label",
 		"notes": "",
 		"scope": "GUI: search_result_columns",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1926}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1940}}"
 	},
 	"work_crawler-search_result_columns-chapters": {
 		"message": "work_crawler-search_result_columns-chapters",
 		"notes": "",
 		"scope": "GUI: search_result_columns title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1947}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1961}}"
 	},
 	"number-of-chapters": {
 		"message": "章節數量",
 		"notes": "",
 		"scope": "GUI: search_result_columns",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1949}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1963}}"
 	},
 	"work_crawler-search_result_columns-once-downloaded": {
 		"message": "work_crawler-search_result_columns-once-downloaded",
 		"notes": "",
 		"scope": "GUI: search_result_columns title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1955}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1969}}"
 	},
 	"mark-the-last-chapter-you-downloaded": {
 		"message": "當之前下載過時，標示上次下載到第幾章節。",
 		"notes": "",
 		"scope": "GUI: search_result_columns",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1957}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1971}}"
 	},
 	"work_crawler-search_result_columns-restricted": {
 		"message": "work_crawler-search_result_columns-restricted",
 		"notes": "",
 		"scope": "GUI: search_result_columns title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1983}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1997}}"
 	},
 	"some-chapters-need-to-be-paid-locked-restricted": {
 		"message": "部份章節需要付費/被鎖住/被限制",
 		"notes": "",
 		"scope": "GUI: search_result_columns",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1985}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1999}}"
 	},
 	"work_crawler-search_result_columns-completed": {
 		"message": "work_crawler-search_result_columns-completed",
 		"notes": "",
 		"scope": "GUI: search_result_columns title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1991}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2005}}"
 	},
 	"work_crawler-search_result_columns-status": {
 		"message": "work_crawler-search_result_columns-status",
 		"notes": "",
 		"scope": "GUI: search_result_columns title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1998}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2012}}"
 	},
 	"status-of-work": {
 		"message": "作品狀況",
 		"notes": "",
 		"scope": "GUI: search_result_columns",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2000}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2014}}"
 	},
 	"work_crawler-search_result_columns-lastest": {
 		"message": "work_crawler-search_result_columns-lastest",
 		"notes": "",
 		"scope": "GUI: search_result_columns title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2024}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2038}}"
 	},
 	"lastest-chapter": {
 		"message": "最新章節",
 		"notes": "",
 		"scope": "GUI: search_result_columns",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2026}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2040}}"
 	},
 	"information-from-the-list-of-chapters": {
 		"message": "資訊來自章節清單",
 		"notes": "",
 		"scope": "GUI: search_result_columns",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2034}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2048}}"
 	},
 	"click-on-the-website-name-to-download-this-work-on-this-website": {
 		"message": "點擊網站名稱可下載此網站之本作品。",
 		"notes": "",
 		"scope": "GUI: show_search_result()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2110}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2124}}"
 	},
 	"this-work-was-not-found-on-all-websites": {
 		"message": "所有網站都未能找到本作品。",
 		"notes": "",
 		"scope": "GUI: show_search_result()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2117}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2131}}"
 	},
 	"search-results-for-$1": {
 		"message": "搜尋作品[%1]之結果：",
 		"notes": "%1: work title",
 		"scope": "GUI: show_search_result()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2123}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2137}}"
 	},
 	"download-all-works-found-on-$1-websites": {
 		"message": "下載所有%1個網站找到的作品",
 		"notes": "",
 		"scope": "GUI: show_search_result()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2135}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2149}}"
 	},
 	"add-all-the-works-found-on-$1-websites-to-the-website-s-favorite-list": {
 		"message": "將所有%1個網站找到的作品全部加入網站各自之最愛清單",
 		"notes": "",
 		"scope": "GUI: show_search_result()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2156}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2170}}"
 	},
 	"download-all-work-from-favorite-lists": {
 		"message": "下載所有最愛清單中的本作品",
 		"notes": "",
 		"scope": "GUI: show_search_result()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2167}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2181}}"
 	},
 	"the-following-$1-websites-could-not-find-this-work": {
 		"message": "以下%1個網站未能找到本作品：",
 		"notes": "",
 		"scope": "GUI: show_search_result()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2196}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2210}}"
 	},
 	"error-reason": {
 		"message": "錯誤原因",
 		"notes": "",
 		"scope": "GUI: show_search_result()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2213}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2227}}"
 	},
 	"website-of-the-work": {
 		"message": "作品網站",
 		"notes": "",
 		"scope": "GUI: show_search_result()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2218}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2232}}"
 	},
 	"please-specify-the-category-of-the-item-you-want-to-search-in-the-online-production-area": {
 		"message": "請先在網路作品區指定要搜尋的作品類別。",
 		"notes": "",
 		"scope": "GUI: search_work_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2262}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2276}}"
 	},
 	"searching-for-$1-you-must-cancel-the-current-search-process-before-you-can-search-again": {
 		"message": "正在搜尋[%1]中，必須先取消當前的搜尋程序才能重新搜尋。",
 		"notes": "",
 		"scope": "GUI: search_work_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2277}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2291}}"
 	},
 	"the-language-used-by-title-seems-to-be-$1-but-it-was-set-to-$2": {
 		"message": "作品名稱之語言似乎為%1，但指定了%2。",
 		"notes": "%1, %2: language",
 		"scope": "GUI: search_work_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2287}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2301}}"
 	},
 	"searching-for-$1": {
 		"message": "正在搜尋[%1]中……",
 		"notes": "",
 		"scope": "GUI: search_work_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2295}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2309}}"
 	},
 	"there-are-no-website-returns-yet": {
 		"message": "尚無任何網站回傳結果……",
 		"notes": "",
 		"scope": "GUI: search_work_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2299}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2313}}"
 	},
 	"cancel-search": {
 		"message": "取消搜尋",
 		"notes": "",
 		"scope": "GUI: search_work_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2308}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2322}}"
 	},
 	"abandon-the-website-that-has-not-yet-completed-the-search": {
 		"message": "放棄還沒搜尋完成的網站",
 		"notes": "",
 		"scope": "GUI: search_work_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2320}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2334}}"
 	},
 	"this-website-is-forced-to-wait-too-long-and-is-not-searched-for-anti-blocking": {
 		"message": "本網站強制等待時間過長，為防封鎖不作搜尋。",
 		"notes": "",
 		"scope": "GUI: search_work_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2363}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2377}}"
 	},
 	"completed-$1": {
 		"message": "已完成 %1",
 		"notes": "",
 		"scope": "GUI: search_work_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2376}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2390}}"
 	},
 	"$1-sites-are-still-searching-$2": {
 		"message": "%1個網站仍在搜尋中：%2",
 		"notes": "",
 		"scope": "GUI: search_work_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2389}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2403}}"
 	},
 	"input-series-name-or-id-first": {
 		"message": "請先輸入作品名稱或🆔。",
 		"notes": "Input series name or ID first.",
 		"scope": "GUI 訊息提示與紀錄欄",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2568}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2822}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2582}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2836}}"
 	},
 	"input-series-name-first": {
 		"message": "請先輸入作品名稱。",
 		"notes": "僅能搜尋作品名稱，無法搜尋作品ID。Input series name first.",
 		"scope": "GUI 訊息提示與紀錄欄",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2270}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2284}}"
 	},
 	"please-specify-site-to-download-first": {
 		"message": "請先指定要下載的網站。",
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: get_crawler()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2411}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2425}}"
 	},
 	"current-path-$1": {
 		"message": "當前路徑：%1",
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: get_crawler()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2427}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2441}}"
 	},
 	"load-and-use-the-download-tool-$1": {
 		"message": "載入並使用下載工具 %1",
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: get_crawler()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2431}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2445}}"
 	},
 	"select-download-tool-$1": {
 		"message": "選擇下載工具：%1",
 		"notes": "%1: crawler id (is also site id)",
 		"scope": "GUI 訊息提示與紀錄欄: get_crawler()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2451}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2465}}"
 	},
 	"download-task-initialization-reading-work-information": {
 		"message": "下載任務初始化、讀取作品資訊中……",
 		"notes": "",
 		"scope": "GUI: Download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2469}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2483}}"
 	},
 	"stop": {
 		"message": "暫停",
 		"notes": "暫停下載 (略稱)",
 		"scope": "GUI: Download_job(), pause_resume_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2495}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2547}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2635}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2509}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2561}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2649}}"
 	},
 	"continue": {
 		"message": "繼續",
 		"notes": "恢復下載 (略稱), resume",
 		"scope": "GUI: Download_job(), pause_resume_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2554}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2568}}"
 	},
 	"pause-resume": {
 		"message": "暫停/恢復下載",
 		"notes": "",
 		"scope": "GUI: Download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2499}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2513}}"
 	},
 	"cancel": {
 		"message": "取消",
 		"notes": "取消下載 (略稱)",
 		"scope": "GUI: Download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2513}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2527}}"
 	},
 	"cancel-download": {
 		"message": "取消下載",
 		"notes": "",
 		"scope": "GUI: Download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2516}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2530}}"
 	},
 	"it-will-not-react-immediately-and-will-wait-until-the-current-chapter-is-processed": {
 		"message": "不會馬上反應，將等到當前的章節處理完畢才處理。",
 		"notes": "",
 		"scope": "GUI: Download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2501}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2518}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2515}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2532}}"
 	},
 	"open-download-folder": {
 		"message": "開啓作品下載目錄",
 		"notes": "",
 		"scope": "GUI: Download_job()",
 		"original_message_language_code": "ja-JP",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1544}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1971}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2525}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1558}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1985}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2539}}"
 	},
 	"downloading-«$2»-from-$1.-please-wait-until-the-download-is-complete-or-cancel-the-download-before-downloading-$3": {
 		"message": "正在從%1下載《%2》這個作品。將等到這個作品下載完畢，或者取消下載後，再下載 %3。",
 		"notes": "%1: crawler id (is also site id), %2: work title / id, %3: work id",
 		"scope": "GUI: add_new_download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2581}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2595}}"
 	},
 	"redownloading": {
 		"message": "重新下載",
 		"notes": "",
 		"scope": "GUI: destruct_download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2640}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2654}}"
 	},
 	"clearing-downloaded-record": {
 		"message": "清除本下載紀錄",
 		"notes": "",
 		"scope": "GUI: destruct_download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2655}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2669}}"
 	},
 	"(there-are-$1-errors-in-total)": {
 		"message": "（總共有%1個錯誤）",
 		"notes": "",
 		"scope": "GUI: destruct_download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2676}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2690}}"
 	},
 	"auto-updating-to-git-master-branch-version": {
 		"message": "自動更新非安裝包版本中……",
 		"notes": "git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2881}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2895}}"
 	},
 	"updating-tool-failed-$1": {
 		"message": "非安裝包版本更新失敗：%1",
 		"notes": "git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2894}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2899}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2908}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2913}}"
 	},
 	"git-master-branch-update-completed.-you-have-to-restart-the-application-to-use-the-new-version": {
 		"message": "非安裝包版本更新完畢。您需要重新啟動程式以使用新版本。",
 		"notes": "git master branch. 非安裝包版本更新完畢。您需要重新啟動程式或重新整理網頁以使用新版本。",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2905}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2919}}"
 	},
 	"update-completed": {
 		"message": "更新完畢。",
 		"notes": "part 1. git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2912}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2926}}"
 	},
 	"restart-the-program": {
 		"message": "重新啟動應用程式。",
 		"notes": "part 2. git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2915}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2929}}"
 	},
 	"all-current-jobs-will-be-interrupted": {
 		"message": "所有當前作業都會中斷！",
 		"notes": "part 3. git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2918}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2932}}"
 	},
 	"it-is-recommended-to-restart-the-application-to-use-the-fully-updated-program": {
 		"message": "建議重新啟動應用程式以使用完整更新後的程式。",
 		"notes": "git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2922}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2936}}"
 	},
 	"automatically-update-is-disabled": {
 		"message": "已設定不自動更新。",
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2940}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2954}}"
 	},
 	"checking-update": {
 		"message": "檢查更新中……",
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2953}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2959}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2967}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2973}}"
 	},
 	"update-available-$1": {
 		"message": "有新版本：%1",
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2999}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3009}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3013}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3023}}"
 	},
 	"great-you-re-updated": {
 		"message": "未發現新版本。",
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2974}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2988}}"
 	},
 	"unable-to-read-version-information-from-package.json": {
 		"message": "無法讀取版本資訊 package.json！",
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2987}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3001}}"
 	},
 	"update-checking-failed-$1": {
 		"message": "更新檢測失敗：%1",
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3026}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3040}}"
 	},
 	"update-failed": {
 		"message": "更新失敗！",
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3029}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3043}}"
 	},
 	"this-column-is-basically-for-debugging-purposes-only.-if-you-have-downloading-problems-please-feel-free-to-report-the-issue-thank-you": {
 		"message": "本欄基本上僅供調試使用。若您有下載功能方面的需求，煩請提報議題，謝謝。",
 		"notes": "",
 		"scope": "GUI: open_DevTools()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3082}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3096}}"
 	},
 	"invalid-theme-name-$1": {
 		"message": "Invalid theme name: %1",
 		"notes": "",
 		"scope": "GUI: select_theme()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L559}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L573}}"
 	},
 	"theme": {
 		"message": "布景主題：",
 		"notes": "",
 		"scope": "GUI: setup_theme_selecter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L591}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L605}}"
 	},
 	"light-theme": {
 		"message": "light theme",
@@ -6908,35 +6908,35 @@
 		"notes": "",
 		"scope": "CeL.application.locale: adapt_domain()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1489}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1496}}"
 	},
 	"language-domain-$1-loaded": {
 		"message": "Language / domain [%1] loaded.",
 		"notes": "",
 		"scope": "CeL.application.locale: adapt_domain()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1495}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1502}}"
 	},
 	"can-not-find-menu-node-$1": {
 		"message": "Can not find menu node: [%1]",
 		"notes": "%1: menu node id",
 		"scope": "CeL.application.locale: create_domain_menu()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1537}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1544}}"
 	},
 	"convert-number-$1-to-$2-format": {
 		"message": "轉換數字：[%1]成 %2 格式。",
 		"notes": "",
 		"scope": "CeL.application.locale: gettext.numeral()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1617}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1624}}"
 	},
 	"unable-to-convert-number-$1": {
 		"message": "無法轉換數字 [%1]！",
 		"notes": "",
 		"scope": "CeL.application.locale: 打折扣",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2007}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2014}}"
 	},
 	"syntax-error": {
 		"message": "語法錯誤！",
@@ -6999,35 +6999,35 @@
 		"notes": "GUI: setup_initial_messages()",
 		"scope": "CeL.application.storage.archive",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/archive.js#L456}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L467}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/archive.js#L456}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}"
 	},
 	"environment-variables-$1": {
 		"message": "所有環境變數：%1",
 		"notes": "系統變數",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L475}}"
 	},
 	"default-download-directory-$1": {
 		"message": "Default download directory: %1",
 		"notes": "%1: data_directory path",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L479}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L483}}"
 	},
 	"copy-and-paste-shortcuts": {
 		"message": "複製貼上快速鍵",
 		"notes": "",
 		"scope": "GUI: setup_initial_messages()::small_tips",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L504}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L518}}"
 	},
 	"copy-selected-items": {
 		"message": "複製選取的項目：",
 		"notes": "",
 		"scope": "GUI: setup_initial_messages()::small_tips",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L512}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L526}}"
 	},
 	"no-longer-maintained": {
 		"message": "不再維護",
@@ -7041,27 +7041,27 @@
 		"notes": "Text inside <a></a> will be linked. 會以連結形式顯示。",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L485}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L490}}"
 	},
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": {
 		"message": "現有%1條%2訊息尚未翻譯，歡迎您一同參與翻譯訊息！",
 		"notes": "%1: untranslated message count, %2: language selected",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L425}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L429}}"
 	},
 	"untranslated-message-count": {
 		"message": "untranslated message count",
-		"notes": "尚未翻譯的訊息數量。",
+		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L422}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L427}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L426}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L431}}"
 	},
 	"local-language-name": {
 		"message": "local-language-name",
-		"notes": "尚未翻譯的訊息數量。Português: Português brasileiro ou português do Brasil",
+		"notes": "Language name in local language. Português: Português brasileiro ou português do Brasil",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L430}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L434}}"
 	}
 }

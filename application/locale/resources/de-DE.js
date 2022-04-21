@@ -90,6 +90,8 @@
 	"Egypt":"\u00c4gypten",
 	"\u6240\u6709\u570b\u5bb6":"Alle L\u00e4nder",
 	"\u5730\u7406\u5ea7\u6a19\uff1a":"Koordinaten:",
-	"\u6642\u5340\uff1a":"Zeitzone:"
+	"\u6642\u5340\uff1a":"Zeitzone:",
+	"\u4f5c\u54c1\u5df2\u5b8c\u7d50\u3002":"Serie ist beendet.",
+	"untranslated message count":952
 },
 "de-DE");

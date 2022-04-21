@@ -399,6 +399,7 @@
 	"download_options.one_by_one":"Download the images one by one. Useful only for comics, not useful for novels. The chapters of the novel are downloaded one by one.",
 	"download_options.overwrite_old_file":"Overwrite the old novel file when the newly acquired novel file is larger.",
 	"download_options.convert_to_language":"Convert simplified Chinese novels to traditional Chinese novels or convert in turn.",
+	"download_options.discard_old_ebook_file":"Do not extract the original e-book. Even if the old e-book file exists, do not extract the file and use the extracted data.",
 	"download_options.vertical_writing":"Change the novel from horizontal to vertical.",
 	"download_options.main_directory":"The download location of the image file and the log file. After downloading the artwork on the website, it will be stored in this directory.",
 	"download_options.user_agent":"Browser identification. Always maintain the same browser recognition before and after the run, it should not affect the download.",
@@ -1043,7 +1044,7 @@
 	"\u4e0d\u518d\u7dad\u8b77":"No longer maintained",
 	"\u6b61\u8fce\u8207\u6211\u5011\u4e00\u540c<a>\u7ffb\u8b6f\u4ecb\u9762\u6587\u5b57</a>\uff01":"Let's <a>translate the interface</a> together!",
 	"\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01":"There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated message count":"1",
+	"untranslated message count":0,
 	"local-language-name":"English"
 },
 "en-US");
