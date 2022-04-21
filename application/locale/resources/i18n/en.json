@@ -397,6 +397,7 @@
 	"download_options.one_by_one": "Download the images one by one. Useful only for comics, not useful for novels. The chapters of the novel are downloaded one by one.",
 	"download_options.overwrite_old_file": "Overwrite the old novel file when the newly acquired novel file is larger.",
 	"download_options.convert_to_language": "Convert simplified Chinese novels to traditional Chinese novels or convert in turn.",
+	"download_options.discard_old_ebook_file": "Do not extract the original e-book. Even if the old e-book file exists, do not extract the file and use the extracted data.",
 	"download_options.vertical_writing": "Change the novel from horizontal to vertical.",
 	"download_options.main_directory": "The download location of the image file and the log file. After downloading the artwork on the website, it will be stored in this directory.",
 	"download_options.user_agent": "Browser identification. Always maintain the same browser recognition before and after the run, it should not affect the download.",

@@ -402,6 +402,7 @@
 	"download_options.one_by_one": "循序逐個、一個個下載圖片。僅對漫畫有用，對小說無用。小說章節皆為逐個下載。",
 	"download_options.overwrite_old_file": "當新獲取的小說檔案比較大時，覆寫舊的檔案。",
 	"download_options.convert_to_language": "將簡體小說轉換為繁體小說或者倒過來。",
+	"download_options.discard_old_ebook_file": "不解開原電子書。就算存在舊電子書檔案，也不解壓縮、利用舊資料。",
 	"download_options.vertical_writing": "將小說從橫書改成縱書。",
 	"download_options.main_directory": "圖片檔與紀錄檔的下載位置。下載網站上的作品檔案後，將儲存於此目錄下。",
 	"download_options.user_agent": "瀏覽器識別。運行前後始終維持相同的瀏覽器識別，應該就不會影響到下載。",

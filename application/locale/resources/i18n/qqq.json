@@ -406,6 +406,7 @@
 	"download_options.one_by_one": "; scope: work_crawler.js: import_arg_hash, GUI: download_options_set",
 	"download_options.overwrite_old_file": "; scope: work_crawler.js: import_arg_hash, GUI: download_options_set",
 	"download_options.convert_to_language": "Converte novels em chinês simplificado para novels em chinês tradicional.\n; scope: work_crawler.js: import_arg_hash, GUI: download_options_set",
+	"download_options.discard_old_ebook_file": "; scope: work_crawler.js: import_arg_hash, GUI: download_options_set",
 	"download_options.vertical_writing": "; scope: work_crawler.js: import_arg_hash, GUI: download_options_set",
 	"download_options.main_directory": "; scope: work_crawler.js: import_arg_hash, GUI: download_options_set",
 	"download_options.user_agent": "; scope: work_crawler.js: import_arg_hash, GUI: download_options_set",
