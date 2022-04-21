@@ -921,6 +921,7 @@ function write_i18n_files(resources_path) {
 		CeL.log(message_id_without_references.map(message_id => `[${message_id}]	${qqq_data_Map.get(message_id).message}`).join('\n'));
 
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
+		locale_data[en_message_to_message_id('untranslated message count')] = qqq_data_count - Object.keys(locale_data).length;
 		if (language_code !== 'qqq') {
 			// qqq will save to `qqq_data_file_name` above
 			write_message_script_file({ resources_path, language_code, locale_data });
