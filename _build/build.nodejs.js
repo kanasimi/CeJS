@@ -212,6 +212,8 @@ async function build_locale_messages(resources_path) {
 
 	await modify_source_files();
 
+	write_qqq_data(resources_path);
+
 	write_i18n_files(resources_path);
 	CeL.log(`${build_locale_messages.name}: Done.`);
 }
@@ -804,7 +806,7 @@ function adapt_new_change(script_file_path, options) {
 			qqq_data.references = qqq_data.references ? [qqq_data.references] : [];
 		if (options.base_GitHub_path) {
 			console.assert(script_file_path.startsWith(CeL.append_path_separator(options.source_base_path)), [options.source_base_path, script_file_path]);
-			qqq_data.references.push(`{{GitHub|${options.base_GitHub_path}/blob/master/${script_file_path.slice(CeL.append_path_separator(options.source_base_path).length).replace(/\\/g, '/')}#L${line_index + 1}}}`);
+			qqq_data.references.push(`{{GitHub|${encodeURI(`${options.base_GitHub_path}/blob/master/${script_file_path.slice(CeL.append_path_separator(options.source_base_path).length).replace(/\\/g, '/')}`)}#L${line_index + 1}}}`);
 		}
 
 		content_lines[line_index - 1] = gettext_config_matched[1] + JSON.stringify({
@@ -879,22 +881,30 @@ function escape_non_latin_chars(string) {
 	return string.replace(/[^\x20-\x7F]/g, char => '\\u' + char.charCodeAt(0).toString(16).padStart(4, 0));
 }
 
-function write_i18n_files(resources_path) {
+function write_qqq_data(resources_path) {
 	const i18n_qqq_Object = i18n_message_id_to_message.qqq;
 	let qqq_file_data = Object.create(null);
-	let message_id_without_references = [], qqq_data_count = 0;
+	let message_id_without_references = [];
 	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
-		qqq_data_count++;
 		qqq_file_data[message_id] = qqq_data;
 		if (Array.isArray(qqq_data.references) && qqq_data.references.length > 0) {
 			qqq_data.references = qqq_data.references.sort().join('\n: ');
 		} else {
 			message_id_without_references.push(message_id);
 			if (false && !qqq_data.references) {
-				CeL.warn(`${write_i18n_files.name}: 無任何引用的訊息: [${message_id}] ${qqq_data.message}`);
+				CeL.warn(`${write_qqq_data.name}: 無任何引用的訊息: [${message_id}] ${qqq_data.message}`);
 			}
 			//if (Array.isArray(qqq_data.references)) delete qqq_data.references;
 		}
+
+		if (!qqq_data.demo && qqq_data.references) {
+			if (/era(?:_data)?\.(?:js|htm)/.test(qqq_data.references)) {
+				qqq_data.demo = `[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]`;
+			} else if (/work_crawler/.test(qqq_data.references)) {
+				//qqq_data.demo = `{{GitHub|kanasimi/work_crawler}}`;
+			}
+		}
+
 		const qqq_value = [];
 		function add_value(property, value, index) {
 			if (value ? (value = value.toString()) : value === 0)
@@ -915,28 +925,24 @@ function write_i18n_files(resources_path) {
 	//console.trace(i18n_qqq_Object);
 	CeL.write_file(resources_path + qqq_data_file_name, JSON.stringify(qqq_file_data, null, '\t'));
 	// free
-	qqq_file_data = null;
-	CeL.info(`${write_i18n_files.name}: 無任何引用的訊息: ${message_id_without_references.length}/${qqq_data_count}`);
+	//qqq_file_data = null;
+	CeL.info(`${write_qqq_data.name}: 無任何引用的訊息: ${message_id_without_references.length}/${qqq_data_Map.size}`);
 	if (CeL.is_debug())
 		CeL.log(message_id_without_references.map(message_id => `[${message_id}]	${qqq_data_Map.get(message_id).message}`).join('\n'));
+}
 
+
+function write_i18n_files(resources_path) {
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
-		// cmn-Hant-TW: -1
-		const untranslated_message_count = Math.max(0, qqq_data_count - Object.keys(locale_data).length);
-		if (language_code === 'qqq') {
-			;
-		} else {
-			if (untranslated_message_count < 20) {
-				CeL.info(`${write_i18n_files.name}: 接近翻譯完畢的語言 (${untranslated_message_count}/${qqq_data_count} 未翻譯): ${language_code}`);
-			} else if (untranslated_message_count < 100) {
-				CeL.info(`${write_i18n_files.name}: 翻譯得差不多的語言 (${untranslated_message_count}/${qqq_data_count} 未翻譯): ${language_code}`);
-			} else if (untranslated_message_count < 550) {
-				CeL.info(`${write_i18n_files.name}: 可考慮列入選單的語言 (${untranslated_message_count}/${qqq_data_count} 未翻譯): ${language_code}`);
-			}
-			locale_data[en_message_to_message_id('untranslated message count')] = untranslated_message_count;
-		}
 		if (language_code !== 'qqq') {
-			// qqq will save to `qqq_data_file_name` above
+			// cmn-Hant-TW: -1
+			const untranslated_message_count = Math.max(0, qqq_data_Map.size - Object.keys(locale_data).length);
+			locale_data[en_message_to_message_id('untranslated message count')] = untranslated_message_count;
+			if (untranslated_message_count < 550) {
+				const comments = untranslated_message_count < 20 ? '接近翻譯完畢' : untranslated_message_count < 100 ? '翻譯得差不多' : '可考慮列入選單';
+				CeL.info(`${write_i18n_files.name}: ${comments}的語言 (${untranslated_message_count}/${qqq_data_Map.size} 未翻譯): ${language_code}`);
+			}
+			// qqq was saved to `qqq_data_file_name` @ write_qqq_data()
 			write_message_script_file({ resources_path, language_code, locale_data });
 		}
 
@@ -950,7 +956,7 @@ function write_message_script_file({ resources_path, language_code, locale_data 
 	for (const [message_id, locale_message] of Object.entries(locale_data)) {
 		if (message_id === '@metadata') continue;
 		const qqq_data = qqq_data_Map.get(message_id);
-		const key_mark = escape_non_latin_chars(JSON.stringify(qqq_data.message)) + ':';
+		const key_mark = escape_non_latin_chars(JSON.stringify(qqq_data.message)) + ': ';
 		if (/^function(?:\s|\()/.test(locale_message)) {
 			const original_function = message_to_localized_mapping[language_code] && message_to_localized_mapping[language_code][qqq_data.message];
 			if (function_to_message(original_function) === locale_message) {
