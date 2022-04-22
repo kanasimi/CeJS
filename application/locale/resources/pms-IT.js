@@ -336,6 +336,6 @@
 	"CeJS \u7db2\u8def\u5c0f\u8aaa\u6f2b\u756b\u4e0b\u8f09\u5de5\u5177": "D\u00ebscarior CeJS \u00ebd conte o fum\u00e8t an linia",
 	"\u6b32\u63a1\u7528\u5716\u5f62\u4ecb\u9762\u8acb\u57f7\u884c `%1`\u3002": "P\u00ebr dovr\u00e9 l'ant\u00ebrfassa gr\u00e0fica, ch'a fasa marc\u00e9 `%1`.",
 	"\u4e0b\u8f09\u7684\u6a94\u6848\u5c07\u653e\u5728\u9810\u8a2d\u76ee\u9304\u4e0b\u3002": "L'archivi d\u00ebscari\u00e0 a sar\u00e0 but\u00e0 ant \u00ebl dossi\u00e9 s\u00f2lit.",
-	"untranslated message count": 708
+	"untranslated message count": "708"
 },
 "pms-IT");

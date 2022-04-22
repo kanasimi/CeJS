@@ -438,6 +438,17 @@ function module_code(library_namespace) {
 					continue;
 				}
 
+				var more_tag_matched;
+				while (more_tag_matched = tag_matched[2].match(tag_pattern)) {
+					// e.g., for '<g><g></g></g>'
+					// 2 === '<'.length + '>'.length
+					more_tag_matched.index += 2 + matched[2].length
+							+ (tag_matched[1] ? tag_matched[1].length : 0);
+					tag_matched = more_tag_matched;
+				}
+				// free
+				more_tag_matched = null;
+
 				// assert: tail <= 0
 				var tail = matched[0].length - nodes[index].length;
 

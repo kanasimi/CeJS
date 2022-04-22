@@ -76,7 +76,7 @@
 	"work_status-finished": "\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e",
 	"\u300a%1\u300b\uff1a": "\u00ab%1\u00bb:",
 	"\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated message count": 967,
+	"untranslated message count": "967",
 	"local-language-name": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439"
 },
 "ru-RU");

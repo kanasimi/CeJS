@@ -510,6 +510,6 @@
 	"Invalid timeout: %1": "D\u00e9lai d\u2019attente non valide\u202f: %1",
 	"Not Yet Implemented!": "Pas encore mis en \u0153uvre\u202f!",
 	"Treat [%1] as RegExp.": "Traiter [%1] comme une expresssion r\u00e9guli\u00e8re.",
-	"untranslated message count": 534
+	"untranslated message count": "534"
 },
 "fr-FR");

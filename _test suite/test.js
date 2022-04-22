@@ -2147,6 +2147,10 @@ function test_XML() {
 			JSON.stringify(JSON.from_XML('<?xml version="1.0" encoding="UTF-8"?><root><t1 a1="a1"><c1 a2="a2"></c1><c2 a3="a3"/><c3 /></t1></root>', { numeralize: true })),
 			JSON.stringify({ "root": { "t1": [{ "c1": null, "a2": "a2" }, { "c2": null, "a3": "a3" }, { "c3": null }], "a1": "a1" } })
 		], 'XML to JSON #2'],
+		[[
+			JSON.stringify(JSON.from_XML('<g><g></g></g>')),
+			JSON.stringify({"g":{"g":null}})
+		], 'XML to JSON #3'],
 
 		[[
 			'<a b="34">12</a>',

@@ -523,6 +523,6 @@
 	"no-longer-maintained": "Não tem mais suporte",
 	"let-s-<a>translate-the-interface<-a>-together": "Vamos <a>traduzir a interface</a> juntos!",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "Atualmente tem %1 mensagens em %2 que não foram traduzidas. Você é bem-vindo a traduzir conosco!",
-	"untranslated-message-count": 523,
+	"untranslated-message-count": "523",
 	"local-language-name": "Português"
 }

@@ -66,10 +66,14 @@ if (false) {
 
 // ---------------------------------------------------------------------//
 
-// for i18n: define gettext() user domain resources path / location.
-// gettext() will auto load (CeL.env.domain_location + language + '.js').
-// e.g., resources/cmn-Hant-TW.js, resources/ja-JP.js
-CeL.env.domain_location = CeL.env.resources_directory_name + '/';
+// 2022/4/20 18:31:47 採用單一語系檔，轉移至系統語系檔: CeJS/application/locale/resources/*.js
+// 現在此處僅提供一個使用範例。
+if (false) {
+	// for i18n: define gettext() user domain resources path / location.
+	// gettext() will auto load (CeL.env.domain_location + language + '.js').
+	// e.g., resources/cmn-Hant-TW.js, resources/ja-JP.js
+	CeL.env.domain_location = CeL.env.resources_directory_name + '/';
+}
 // declaration for gettext()
 var _;
 

@@ -941,7 +941,7 @@ function write_i18n_files(resources_path) {
 		if (language_code !== 'qqq') {
 			// cmn-Hant-TW: -1
 			const untranslated_message_count = Math.max(0, qqq_data_Map.size - Object.keys(locale_data).length);
-			locale_data[en_message_to_message_id('untranslated message count')] = untranslated_message_count;
+			locale_data[en_message_to_message_id('untranslated message count')] = String(untranslated_message_count);
 			if (untranslated_message_count < 550) {
 				const comments = untranslated_message_count < 20 ? '接近翻譯完畢' : untranslated_message_count < 100 ? '翻譯得差不多' : '可考慮列入選單';
 				CeL.info(`${write_i18n_files.name}: ${comments}的語言 (${untranslated_message_count}/${qqq_data_Map.size} 未翻譯): ${language_code}`);
