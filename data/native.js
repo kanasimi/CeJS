@@ -556,7 +556,7 @@ function module_code(library_namespace) {
 						}
 					} catch (e) {
 						library_namespace.debug({
-							// gettext_config:{"id":"conversion-mode-$1-error-invaild-regexp?-$2"}
+							// gettext_config:{"id":"conversion-mode-$1-error-invalid-regexp?-$2"}
 							T : [ '轉換模式 [%1] 出錯：並非 RegExp？ %2', pattern,
 									e.message ]
 						}, 2, 'String_to_RegExp');

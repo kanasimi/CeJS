@@ -677,7 +677,10 @@ function show_calendar(era_name) {
 		// gettext_config:{"id":"calendar-table"}
 		: '曆譜'
 	}, ' (', {
-		T : [ _('共有 %1 個' + (dates.type ? '時' : '年') + '段紀錄'), dates.length ]
+		// gettext_config:{"id":"$1-records"}
+		T : [ dates.type ? '共有 %1 個時段紀錄'
+		// gettext_config:{"id":"$1-years"}
+		: '共有 %1 個年段紀錄', dates.length ]
 	}, ')' ]
 	//
 	: [ {

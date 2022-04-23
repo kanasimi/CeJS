@@ -912,7 +912,7 @@ function write_qqq_data(resources_path) {
 		const qqq_value = [];
 		function add_value(property, value, index) {
 			if (value ? (value = value.toString()) : value === 0)
-				qqq_value.push(index === 0 ? value : `; ${property}: ${value}`);
+				qqq_value.push(index === 0 ? value : `; ${property.toTitleCase()}: ${value}`);
 		}
 		qqq_order.forEach((property, index) => {
 			add_value(property, qqq_data[property], index);
@@ -941,10 +941,11 @@ function write_i18n_files(resources_path) {
 		if (language_code !== 'qqq') {
 			// cmn-Hant-TW: -1
 			const untranslated_message_count = Math.max(0, qqq_data_Map.size - Object.keys(locale_data).length);
+			// FuzzyBot 必須為 {String}?
 			locale_data[en_message_to_message_id('untranslated message count')] = String(untranslated_message_count);
 			if (untranslated_message_count < 550) {
-				const comments = untranslated_message_count < 20 ? '接近翻譯完畢' : untranslated_message_count < 100 ? '翻譯得差不多' : '可考慮列入選單';
-				CeL.info(`${write_i18n_files.name}: ${comments}的語言 (${untranslated_message_count}/${qqq_data_Map.size} 未翻譯): ${language_code}`);
+				const comments = untranslated_message_count < 20 ? '接近翻譯完畢的語言' : untranslated_message_count < 100 ? '翻譯得差不多的語言' : '可考慮列入選單的語言';
+				CeL.info(`${write_i18n_files.name}: ${comments} (${untranslated_message_count}/${qqq_data_Map.size} 未翻譯): ${language_code}`);
 			}
 			// qqq was saved to `qqq_data_file_name` @ write_qqq_data()
 			write_message_script_file({ resources_path, language_code, locale_data });

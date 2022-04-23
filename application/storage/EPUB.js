@@ -1914,7 +1914,7 @@ function module_code(library_namespace) {
 			if (text) {
 				library_namespace.warn([ 'add_chapter: ', {
 					T : [
-					// gettext_config:{"id":"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-use-from-the-cache-file"}
+					// gettext_config:{"id":"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-used-from-the-cache-file"}
 					'因為欲設定的內容長度過短或者無內容，將從 cache 檔案中取得舊的內容（%1 字元）：',
 					//
 					contents.length ]

@@ -669,7 +669,10 @@ function module_code(library_namespace) {
 	// /[\u4e00-\u9fa5]/: 匹配中文。
 	// https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)
 	// https://arc-tech.hatenablog.com/entry/2021/01/20/105620
-	var PATTERN_no_need_to_append_tail_space = /[\s—、，；：。？！()（）「」『』“”‘’«\u4e00-\u9fffぁ-んーァ-ヶ]$/;
+	// e.g., start quote marks
+	var PATTERN_no_need_to_append_tail_space = /[\s—、，；：。？！（）［］｛｝「」『』〔〕【】〖〗〈〉《》“”‘’§(\[<{⟨‹«\u4e00-\u9fffぁ-んーァ-ヶ]$/;
+	// e.g., end quote marks
+	var PATTERN_no_need_to_add_header_space = /^[\s)\]>}⟩›»）］｝」』〕】〗〉》”’‰‱]/;
 
 	function Sentence_combination__join(separator) {
 		var converted_list = this.converting();
@@ -687,7 +690,8 @@ function module_code(library_namespace) {
 			while (++index < converted_list.length) {
 				next_sentence = converted_list[index];
 				if (next_sentence || next_sentence === 0) {
-					if (!/^\s/.test(next_sentence)) {
+					if (!PATTERN_no_need_to_add_header_space
+							.test(next_sentence)) {
 						converted_list[original_index] += ' ';
 					}
 					break;
@@ -727,7 +731,8 @@ function module_code(library_namespace) {
 		}
 
 		var next_sentence = options && options.next_sentence;
-		return next_sentence && !/^\s/.test(next_sentence)
+		return next_sentence
+				&& !PATTERN_no_need_to_add_header_space.test(next_sentence)
 				|| next_sentence === 0 ? text + ' ' : text;
 	}
 

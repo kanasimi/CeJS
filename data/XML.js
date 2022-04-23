@@ -446,8 +446,7 @@ function module_code(library_namespace) {
 							+ (tag_matched[1] ? tag_matched[1].length : 0);
 					tag_matched = more_tag_matched;
 				}
-				// free
-				more_tag_matched = null;
+				// assert: more_tag_matched === null
 
 				// assert: tail <= 0
 				var tail = matched[0].length - nodes[index].length;

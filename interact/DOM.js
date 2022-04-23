@@ -1896,7 +1896,7 @@ function module_code(library_namespace) {
 					// @see extract_message_from_nodes() @ base.js
 					if (library_namespace.is_Object(n) && ('T' in n)) {
 						n = n.T;
-						n = Array.isArray(n) ? gettext.apply(null, typeof n)
+						n = Array.isArray(n) ? gettext.apply(null, n)
 								: gettext(n);
 					}
 					children = gettext.append_message_tail_space(children, {

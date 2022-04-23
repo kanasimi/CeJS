@@ -1164,11 +1164,19 @@ function module_code(library_namespace) {
 		} ],
 
 		// 取得有關使用者清單的資訊。
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Busers
 		users : [ 'us', , function(title_parameter) {
 			return title_parameter.replace(/^&ustitle=/, '&ususers=');
 		} ],
 
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bglobaluserinfo
+		globaluserinfo : [ 'gui', 'meta', function(title_parameter) {
+			// console.trace(title_parameter);
+			return title_parameter.replace(/^&title=/, '&guiuser=');
+		} ],
+
 		// .userinfo(['rights'])
+		// Get information about the current user.
 		userinfo : [ 'ui', 'meta', function(title_parameter) {
 			// console.trace(title_parameter);
 			return title_parameter.replace(/^&title=/, '&uiprop=');

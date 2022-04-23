@@ -512,7 +512,7 @@
 	"treat-$1-as-regexp": "Trate [%1] como RegExp",
 	"invalid-flags-$1": "Marcações inválidas: [%1]",
 	"illegal-pattern-$1": "Padrão ilegal: [%1]",
-	"conversion-mode-$1-error-invaild-regexp?-$2": "Modo de conversão [%1] Erro: RegExep Inválido? %2",
+	"conversion-mode-$1-error-invalid-regexp?-$2": "Modo de conversão [%1] Erro: RegExep Inválido? %2",
 	"treat-pattern-$1-as-windows-wildcard-search-string": "Trate o padrão [%1] como um termo curinga na pesquisa de texto do Windows.",
 	"unable-to-convert-mode-$1": "Incapaz de converter o modo [%1]!",
 	"working-directory-$1": "Diretório de trabalho: %1",
