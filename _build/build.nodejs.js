@@ -414,7 +414,7 @@ function parse_qqq(qqq) {
 		let matched = line.match(/^;([^:\n]+):(.*)$/);
 		if (matched) {
 			if (!start_additional_notes && notes.length > 0) start_additional_notes = true;
-			qqq_data[latest_attribute = matched[1].trim()] = matched[2].trim();
+			qqq_data[latest_attribute = matched[1].trim().replace(/^[A-Z]/, initial_char => initial_char.toLowerCase())] = matched[2].trim();
 			return;
 		}
 
@@ -942,6 +942,7 @@ function write_i18n_files(resources_path) {
 			// cmn-Hant-TW: -1
 			const untranslated_message_count = Math.max(0, qqq_data_Map.size - Object.keys(locale_data).length);
 			// FuzzyBot 必須為 {String}?
+			// gettext_config:{"id":"untranslated-message-count"}
 			locale_data[en_message_to_message_id('untranslated message count')] = String(untranslated_message_count);
 			if (untranslated_message_count < 550) {
 				const comments = untranslated_message_count < 20 ? '接近翻譯完畢的語言' : untranslated_message_count < 100 ? '翻譯得差不多的語言' : '可考慮列入選單的語言';
@@ -991,6 +992,11 @@ ${JSON.stringify(language_code)});`;
 	}
 }
 
+function data_to_i18n_contents(i18n_locale_data) {
+	if (typeof i18n_locale_data === 'string')
+		i18n_locale_data = JSON.parse(i18n_locale_data);
+	return JSON.stringify(i18n_locale_data, null, '\t') + '\n'
+}
 function write_i18n_data_file({ language_code, locale_data }) {
 	const i18n_language_code_data = i18n_language_code_data_mapping.get(language_code);
 	//console.trace({ language_code, i18n_language_code_data });
@@ -998,8 +1004,8 @@ function write_i18n_data_file({ language_code, locale_data }) {
 	//console.trace(i18n_language_code_data.fso_path);
 	let original_contents = CeL.read_file(fso_path);
 	if (original_contents)
-		original_contents = JSON.stringify(JSON.parse(original_contents.toString().trim()), null, '\t');
-	const new_contents = JSON.stringify(locale_data, null, '\t');
+		original_contents = data_to_i18n_contents(original_contents.toString());
+	const new_contents = data_to_i18n_contents(locale_data);
 	if (original_contents !== new_contents) {
 		CeL.info(`${write_i18n_data_file.name}: Create new i18n data file: ${fso_path}`);
 		CeL.write_file(fso_path, new_contents);
