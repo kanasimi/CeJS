@@ -892,8 +892,8 @@ function module_code(library_namespace) {
 
 		var search = [], key;
 		function append(value) {
-			if (typeof value !== 'string' && typeof value !== 'number'
-					&& value !== NO_EQUAL_SIGN) {
+			if (library_namespace.is_debug(9) && typeof value !== 'string'
+					&& typeof value !== 'number' && value !== NO_EQUAL_SIGN) {
 				try {
 					library_namespace.debug({
 						T : [
@@ -901,20 +901,22 @@ function module_code(library_namespace) {
 								'設定 %1 成非字串之參數：%2',
 								typeof JSON === 'object' ? JSON.stringify(key)
 										: String(key),
-								typeof JSON === 'object' ?
-								// TypeError:
-								// Converting circular structure to JSON
-								JSON.stringify(value) : String(value) ]
-					}, 9, 'parameters_toString');
+								typeof JSON === 'object' ? JSON
+										.stringify(value) : String(value) ]
+					}, 1, 'parameters_toString.append');
 				} catch (e) {
-					library_namespace.error(e);
-					console.error(e);
-					console.trace([ key, value ]);
+					// TypeError: Converting circular structure to JSON
 				}
 			}
 
-			search.push(value === NO_EQUAL_SIGN ? key : key + '='
-					+ encode_URI_component(String(value), charset));
+			try {
+				search.push(value === NO_EQUAL_SIGN ? key : key + '='
+						+ encode_URI_component(String(value), charset));
+			} catch (e) {
+				library_namespace.error(e);
+				console.error(e);
+				console.trace([ key, value ]);
+			}
 		}
 
 		// console.trace(this);
