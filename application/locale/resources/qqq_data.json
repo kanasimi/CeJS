@@ -907,7 +907,7 @@
 		"scope": "data.date.era: 文字式年曆 朝代紀年日期",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L157}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L568}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L155}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L568}}"
 	},
 	"$1-bce": {
 		"message": "%1 BCE",
@@ -1712,7 +1712,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L340}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L552}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4359}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L338}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L550}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4359}}"
 	},
 	"month-of-the-sexagenary-cycle": {
 		"message": "月干支",
@@ -1972,7 +1972,7 @@
 		"notes": "Country name.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L337}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L335}}"
 	},
 	"portugal": {
 		"message": "Portugal",
@@ -7206,7 +7206,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L946}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L426}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L431}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L962}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L426}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L431}}"
 	},
 	"local-language-name": {
 		"message": "local-language-name",

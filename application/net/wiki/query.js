@@ -153,7 +153,8 @@ function module_code(library_namespace) {
 			// 直到 .edit 動作才會出現 badtoken，
 			// 因此在 wiki_API.login 尚無法偵測是否 badtoken。
 			if ('retry_login' in session) {
-				if (++session.retry_login > 2) {
+				if (++session.retry_login > ('max_retry_login' in session ? session.max_retry_login
+						: 2)) {
 					throw new Error(
 					// 當錯誤 login 太多次時，直接跳出。
 					'check_session_badtoken: Too many failed login attempts: ['

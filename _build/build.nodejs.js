@@ -3,8 +3,6 @@
  * 
  * @fileoverview Tool to build CeJS library.
  * 
- * TODO: https://web.dev/text-fragments/
- * 
  * @since 2022/3/1 9:0:50
  */
 
@@ -716,6 +714,16 @@ function add_localization_marks(script_file_path) {
 	}
 }
 
+function GitHub_link(options) {
+	//this.base_GitHub_path = options.base_GitHub_path;
+	//this.line_index = options.line_index;
+	Object.assign(this, options);
+}
+
+GitHub_link.prototype.toString = function toString() {
+	return `{{GitHub|${encodeURI(`${this.base_GitHub_path}/blob/master/${this.script_file_path.slice(CeL.append_path_separator(this.source_base_path).length).replace(/\\/g, '/')}`)}#L${this.line_index + 1}}}`;
+};
+
 function adapt_new_change(script_file_path, options) {
 	const contents = CeL.read_file(script_file_path).toString();
 	const content_lines = contents.split('\n');
@@ -812,9 +820,17 @@ function adapt_new_change(script_file_path, options) {
 
 		if (!Array.isArray(qqq_data.references))
 			qqq_data.references = qqq_data.references ? [qqq_data.references] : [];
+		if (!qqq_data.references.script_file_path_hash)
+			qqq_data.references.script_file_path_hash = new Map;
 		if (options.base_GitHub_path) {
 			console.assert(script_file_path.startsWith(CeL.append_path_separator(options.source_base_path)), [options.source_base_path, script_file_path]);
-			qqq_data.references.push(`{{GitHub|${encodeURI(`${options.base_GitHub_path}/blob/master/${script_file_path.slice(CeL.append_path_separator(options.source_base_path).length).replace(/\\/g, '/')}`)}#L${line_index + 1}}}`);
+			// TODO: https://web.dev/text-fragments/
+			qqq_data.references.push(new GitHub_link({
+				...options,
+				script_file_path,
+				line_index,
+			}));
+			qqq_data.references.script_file_path_hash.set(script_file_path, options);
 		}
 
 		content_lines[line_index - 1] = gettext_config_matched[1] + JSON.stringify({
@@ -855,7 +871,7 @@ async function modify_source_files() {
 	//console.log(source_repositories);
 
 	for (let [source_base_path, source_data] of Object.entries(source_repositories)) {
-		const base_GitHub_path = typeof source_data === 'string' ? source_data : source_data.base_GitHub_path;
+		const base_GitHub_path = typeof source_data === 'object' ? source_data.base_GitHub_path : source_data;
 		await new Promise((resolve, reject) => {
 			source_base_path = CeL.simplify_path(CeL.append_path_separator(CeL.env.script_base_path + source_base_path));
 			//console.trace(source_base_path);
@@ -866,7 +882,7 @@ async function modify_source_files() {
 				}
 
 				// `${modify_source_files.name}: ${fso_path}`
-				CeL.log_temporary(`[${base_GitHub_path}] ${fso_path}	`);
+				CeL.log_temporary(`${base_GitHub_path ? `[${base_GitHub_path}]` : ``}	${fso_path}	`);
 				//add_localization_marks(fso_path);
 				adapt_new_change(fso_path, {
 					source_base_path,
@@ -892,7 +908,7 @@ function write_qqq_data(resources_path) {
 	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
 		qqq_file_data[message_id] = qqq_data;
 		if (Array.isArray(qqq_data.references) && qqq_data.references.length > 0) {
-			qqq_data.references = qqq_data.references.sort().join('\n: ');
+			qqq_data.references = qqq_data.references.map(reference => reference.toString()).sort().join('\n: ');
 		} else {
 			message_id_without_references.push(message_id);
 			if (false && !qqq_data.references) {
