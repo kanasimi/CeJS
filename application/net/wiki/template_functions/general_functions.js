@@ -72,6 +72,32 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// Not completed! Only for get_all_anchors()
+	// @ zh.moegirl [[FLOWERS(Innocent Grey)]]
+	function expand_template_Center(options) {
+		var parameters = this.parameters;
+		return parameters[1] ? parameters[1].toString() : '';
+	}
+
+	function parse_template_Center(token) {
+		token.expand = expand_template_Center;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// Not completed! Only for get_all_anchors()
+	// @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
+	function expand_template_Font(options) {
+		var parameters = this.parameters;
+		return parameters[1] ? parameters[1].toString() : '';
+	}
+
+	function parse_template_Font(token) {
+		token.expand = expand_template_Font;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// {{color|英文顏色名稱或是RGB 16進制編碼|文字}}
 	function expand_template_Color(options) {
 		var parameters = this.parameters;
@@ -81,6 +107,21 @@ function module_code(library_namespace) {
 
 	function parse_template_Color(token) {
 		token.expand = expand_template_Color;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// Not completed! Only for get_all_anchors()
+	// @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
+	function expand_template_Colored_link(options) {
+		var parameters = this.parameters;
+		// {{Colored link|顏色|頁面名稱|顯示名稱}}]
+		return '[[:' + parameters[2] + '|<span style="color:' + parameters[1]
+				+ '">' + (parameters[3] || parameters[2]) + '</span>]]';
+	}
+
+	function parse_template_Colored_link(token) {
+		token.expand = expand_template_Colored_link;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -237,16 +278,19 @@ function module_code(library_namespace) {
 	// 如 CeL.application.net.wiki.template_functions.jawiki 依賴於
 	// general_functions！
 	wiki_API.template_functions.functions_of_all_sites = {
+		Void : parse_template_Void,
+		Center : parse_template_Center,
+		Font : parse_template_Font,
+		Color : parse_template_Color,
+		'Colored link' : parse_template_Colored_link,
+
 		// 一些會添加 anchors 的特殊模板。
 		Anchor : parse_template_Anchor,
 		'Visible anchor' : parse_template_Visible_anchor,
 		Term : parse_template_Term,
 		Wikicite : parse_template_Wikicite,
-		SfnRef : parse_template_SfnRef,
 		// Sfn : parse_template_Sfn,
-
-		Void : parse_template_Void,
-		Color : parse_template_Color
+		SfnRef : parse_template_SfnRef
 	};
 
 	// --------------------------------------------------------------------------------------------

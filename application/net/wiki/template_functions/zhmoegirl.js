@@ -146,33 +146,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// Not completed! Only for get_all_anchors()
-	// @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
-	function expand_template_Font(options) {
-		var parameters = this.parameters;
-		return parameters[1] ? parameters[1].toString() : '';
-	}
-
-	function parse_template_Font(token) {
-		token.expand = expand_template_Font;
-	}
-
-	// --------------------------------------------------------------------------------------------
-
-	// Not completed! Only for get_all_anchors()
-	// @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
-	function expand_template_Coloredlink(options) {
-		var parameters = this.parameters;
-		return '[[:' + parameters[2] + '|<span style="color:' + parameters[1]
-				+ '">' + (parameters[3] || parameters[2]) + '</span>]]';
-	}
-
-	function parse_template_Coloredlink(token) {
-		token.expand = expand_template_Coloredlink;
-	}
-
-	// --------------------------------------------------------------------------------------------
-
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
@@ -183,10 +156,7 @@ function module_code(library_namespace) {
 
 		Lj : parse_template_Lj,
 
-		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon,
-
-		Font : parse_template_Font,
-		Coloredlink : parse_template_Coloredlink
+		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon
 	};
 
 	// library_namespace.info(module_site_name + ': 採用 zhwiki 的模板特設功能設定。');
