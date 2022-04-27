@@ -144,12 +144,12 @@ function build_main_script() {
 
 // ---------------------------------------------------------------------//
 
-// message_to_localized_mapping['en-US'] = {"original message in source":"localized message"}
+// message_to_localized_mapping['en-US'] = {"Original language message 原文訊息 in source":"localized message"}
 const message_to_localized_mapping = Object.create(null);
 // i18n_message_id_to_message['en-US'] = {"message_id":"localized message"}
 const i18n_message_id_to_message = Object.create(null);
 const qqq_data_file_name = 'qqq_data.json';
-// qqq_data.get('message_id') = {message: "original message in source", original_message_language_code: 'en-US|cmn-Hant-TW', notes: "notes", scope: "source/", demo: "demo URL / application of the message", additional_notes: "additional notes"}
+// qqq_data.get('message_id') = {message: "Original language message 原文訊息 in source", original_message_language_code: 'en-US|cmn-Hant-TW', notes: "notes", scope: "source/", demo: "demo URL / application of the message", additional_notes: "additional notes"}
 const qqq_data_Map = new Map;
 // gettext_config:{"id":"$1-$2-$3"}
 let message_to_id_Map = new Map([['%1/%2/%3', null]]);
@@ -188,8 +188,10 @@ async function build_locale_messages(resources_path) {
 		load_message_to_localized(resources_path, resolve);
 	});
 
-	// Localized messages in 紀年轉換工具。
-	//load_CSV_message_to_localized(library_base_directory + '_test suite/resources/locale.csv');
+	if (false) {
+		// 不可再用: 一次性匯入 Localized messages in 紀年轉換工具。
+		load_CSV_message_to_localized(library_base_directory + '_test suite/resources/locale.csv');
+	}
 
 	// Localized messages for CeJS 網路小說漫畫下載工具。
 	//load_CSV_message_to_localized(library_base_directory + '../../program/work_crawler/resources/locale of work_crawler - locale.csv');
@@ -540,7 +542,9 @@ function create__qqq_data_Map() {
 			}
 			en_message = message;
 		}
-		if (PATTERN_has_invalid_en_message_char.test(en_message = en_message.toString())) {
+		// e.g., {Function}
+		en_message = en_message.toString();
+		if (PATTERN_has_invalid_en_message_char.test(en_message)) {
 			CeL.warn(`${create__qqq_data_Map.name}: en_message of ${message} contains invalid char(s)! ${en_message}`);
 			continue;
 		}
@@ -568,12 +572,14 @@ function create__qqq_data_Map() {
 		}
 
 		if (!qqq_data.message) {
+			// set Original language message 原文訊息 qqq_data.message
 			qqq_data.message = message;
 		} else if (qqq_data.message !== message) {
 			// matched: [ all, text_id / message, tail punctuation mark ]
 			const matched = message.match(CeL.gettext.PATTERN_message_with_tail_punctuation_mark);
 			if (!matched || qqq_data.message !== matched[1]) {
-				CeL.info(`${create__qqq_data_Map.name}: original message changed: (references: ${qqq_data.references})\nid:	${message_id}\n原	${qqq_data.message}\n新→	${message}`);
+				// (references: ${qqq_data.references})
+				CeL.info(`${create__qqq_data_Map.name}: Original language message 原文訊息 changed in translatewiki:\nid:	${message_id}\n原	${qqq_data.message}\n新→	${message}`);
 				message_changed.set(qqq_data.message, message);
 				message_to_id_Map.set(qqq_data.message, message_id);
 				qqq_data.message = message;
@@ -582,7 +588,7 @@ function create__qqq_data_Map() {
 		}
 
 		if (!qqq_data.original_message_language_code) {
-			// set qqq_data.original_message_language_code
+			// set Original language message 原文訊息之語言代碼 qqq_data.original_message_language_code
 			let message_language_code;
 			Object.entries(i18n_message_id_to_message).some(([language_code, locale_data]) => {
 				if (locale_data[message_id] === qqq_data.message) {
@@ -770,19 +776,35 @@ function adapt_new_change(script_file_path, options) {
 			const matched = message.match(CeL.gettext.PATTERN_message_with_tail_punctuation_mark);
 			if (matched) {
 				message_id = message_to_id_Map.get(matched[1]);
+			} else if (!gettext_config.id && !PATTERN_has_invalid_en_message_char.test(message)) {
+				/**
+				 * 添加訊息的方法: 直接把 message 當英文訊息。
+				 * e.g., <code>
+	
+				插入 // gettext_config: {}
+				gettext('English message');
+	
+				</code> */
+				gettext_config.id = en_message_to_message_id(message);
 			}
 		}
 		let qqq_data;
 		if (message_id) {
 			qqq_data = qqq_data_Map.get(message_id);
-		} else if (qqq_data = qqq_data_Map.get(message_id = gettext_config.id)) {
-			if (message_changed.get(qqq_data.message)) {
+
+		} else if (!(message_id = gettext_config.id)) {
+			throw new Error(`${adapt_new_change.name}: [${script_file_path}]原始碼中新增了 message，但未設定且無法自動判別 message id: ${JSON.stringify(message)}`);
+
+		} else if (qqq_data = qqq_data_Map.get(message_id)) {
+			if (message_changed.has(qqq_data.message)) {
 				if (message_changed.get(qqq_data.message) !== message) {
 					throw new Error(`${adapt_new_change.name}: message 衝突:\n原 message	${JSON.stringify(qqq_data.message)}\n→ i18n或其他原始碼中的 message:	${JSON.stringify(message_changed.get(qqq_data.message))}\n→ [${script_file_path}]原始碼中的 message:${JSON.stringify(message)}`);
 				}
+
 			} else if (qqq_data.message !== message) {
 				CeL.info(`${adapt_new_change.name}: 改變了[${script_file_path}]原始碼中的 message:\nid	${message_id}\n	${JSON.stringify(qqq_data.message)}\n→	${JSON.stringify(message)}`);
 				message_changed.set(qqq_data.message, message);
+				qqq_data.need_to_recheck_all_sources = true;
 				const locale_data = i18n_message_id_to_message[qqq_data.original_message_language_code];
 				if (locale_data) {
 					locale_data[message_id] = message;
@@ -791,32 +813,53 @@ function adapt_new_change(script_file_path, options) {
 				//message_to_localized_mapping[qqq_data.original_message_language_code][message] = message;
 				qqq_data.message = message;
 			}
-		} else if (message_id) {
+
+		} else {
+			// assert: !!message_id === true
 			message_id = en_message_to_message_id(message_id);
 			if (gettext_config.id !== message_id) {
-				// assert: {id:'en message'}
+				/**
+				 * 添加訊息的方法: 直接把 message_id 當英文訊息。
+				 * e.g., <code>
+	
+				插入 // gettext_config: {id:"English message"}
+				gettext('Original language message 原文訊息');
+	
+				</code> */
 				i18n_message_id_to_message['en-US'][message_id] = gettext_config.id;
 				gettext_config.id = message_id;
 			}
 			CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中新增了 message: [${message_id}] ${JSON.stringify(message)}`);
-		} else {
-			throw new Error(`${adapt_new_change.name}: [${script_file_path}]原始碼中新增了 message，但未設定 message id: ${JSON.stringify(message)}`);
 		}
 
 		//console.trace([message, gettext_config, qqq_data_Map.get(message_id)]);
 		for (const [property, value] of Object.entries(gettext_config)) {
 			if (property === 'id') {
-				if (value === message_id) {
+				if (message_id === value) {
 					continue;
 				}
-				CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼改變了的 message id:\n	${JSON.stringify(message_id)}\n→	${JSON.stringify(gettext_config.id)}`);
-				message_id_changed.set(message_id, gettext_config.id);
-				message_id = gettext_config.id;
+				if (message_id_changed.has(message_id)) {
+					if (message_id_changed.get(message_id) !== value) {
+						throw new Error(`${adapt_new_change.name}: message id 衝突:\n原 message	id ${JSON.stringify(message_id)}\n→ 其他原始碼中的 message id:	${JSON.stringify(message_id_changed.get(message_id))}\n→ [${script_file_path}]原始碼中的 message:${JSON.stringify(value)}`);
+					}
+
+				} else {
+					CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼改變了的 message id:\n	${JSON.stringify(message_id)}\n→	${JSON.stringify(value)}`);
+					message_id_changed.set(message_id, value);
+					qqq_data.need_to_recheck_all_sources = true;
+					// 當原始碼中改變 message id 時，不會一同變更 qqq_data_Map, message_to_id_Map, i18n_message_id_to_message。唯一只會紀錄於 message_id_changed。
+					//qqq_data_Map.set(value, qqq_data);
+					//qqq_data_Map.delete(message_id);
+					//message_id = value;
+				}
 				continue;
 			}
 
 			qqq_data[property] = value;
 		}
+
+		if (message_id_changed.has(message_id))
+			message_id = message_id_changed.get(message_id);
 
 		if (!Array.isArray(qqq_data.references))
 			qqq_data.references = qqq_data.references ? [qqq_data.references] : [];
@@ -883,7 +926,8 @@ async function modify_source_files() {
 
 				// `${modify_source_files.name}: ${fso_path}`
 				CeL.log_temporary(`${base_GitHub_path ? `[${base_GitHub_path}]` : ``}	${fso_path}	`);
-				//add_localization_marks(fso_path);
+				if (CeL.env.arg_hash.add_mark)
+					add_localization_marks(fso_path);
 				adapt_new_change(fso_path, {
 					source_base_path,
 					base_GitHub_path
@@ -894,15 +938,52 @@ async function modify_source_files() {
 			});
 		});
 	}
+
+	// 重新檢查所有 message_change 的原始檔。
+	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
+		if (qqq_data.need_to_recheck_all_sources) {
+			delete qqq_data.need_to_recheck_all_sources;
+			for (const [script_file_path, options] of qqq_data.references.script_file_path_hash.entries()) {
+				adapt_new_change(script_file_path, options);
+			}
+		}
+		delete qqq_data.references.script_file_path_hash;
+	}
 }
 
 
-// 順序
+function adapt_message_id_changed_to_Map(map) {
+	for (const [old_message_id, new_message_id] of message_id_changed.entries()) {
+		if (!map.has(old_message_id))
+			continue;
+		if (map.has(new_message_id)) {
+			throw new Error(`${adapt_message_id_changed_to_Map.name}: 已經有此 message id，無法更名: ${JSON.stringify(new_message_id)} ← ${JSON.stringify(old_message_id)}`);
+		}
+		map.set(new_message_id, map.get(old_message_id));
+		map.delete(old_message_id);
+	}
+}
+
+function adapt_message_id_changed_to_Object(object) {
+	for (const [old_message_id, new_message_id] of message_id_changed.entries()) {
+		if (!object.hasOwnProperty(old_message_id))
+			continue;
+		if (object.hasOwnProperty(new_message_id)) {
+			throw new Error(`${adapt_message_id_changed_to_Object.name}: 已經有此 message id，無法更名: ${JSON.stringify(new_message_id)} ← ${JSON.stringify(old_message_id)}`);
+		}
+		object[new_message_id] = object[old_message_id];
+		delete object[old_message_id];
+	}
+}
+
+// qqq 展示順序。
 const qqq_order = ['notes', 'demo', 'references'];
 const qqq_order_Set = new Set(qqq_order.concat(['message', 'original_message_language_code', 'additional_notes']));
 
 function write_qqq_data(resources_path) {
 	const i18n_qqq_Object = i18n_message_id_to_message.qqq;
+	adapt_message_id_changed_to_Object(i18n_qqq_Object);
+	adapt_message_id_changed_to_Map(qqq_data_Map);
 	let qqq_file_data = Object.create(null);
 	let message_id_without_references = [];
 	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
@@ -912,7 +993,7 @@ function write_qqq_data(resources_path) {
 		} else {
 			message_id_without_references.push(message_id);
 			if (false && !qqq_data.references) {
-				CeL.warn(`${write_qqq_data.name}: 無任何引用的訊息: [${message_id}] ${qqq_data.message}`);
+				CeL.warn(`${write_qqq_data.name}: 原始碼中無明確引用的訊息: [${message_id}] ${qqq_data.message}`);
 			}
 			//if (Array.isArray(qqq_data.references)) delete qqq_data.references;
 		}
@@ -946,15 +1027,23 @@ function write_qqq_data(resources_path) {
 	CeL.write_file(resources_path + qqq_data_file_name, JSON.stringify(qqq_file_data, null, '\t'));
 	// free
 	//qqq_file_data = null;
-	CeL.info(`${write_qqq_data.name}: 無任何引用的訊息: ${message_id_without_references.length}/${qqq_data_Map.size}`);
-	if (CeL.is_debug())
-		CeL.log(message_id_without_references.map(message_id => `[${message_id}]	${qqq_data_Map.get(message_id).message}`).join('\n'));
+	CeL.info(`${write_qqq_data.name}: 原始碼中無明確引用的訊息: ${message_id_without_references.length}/${qqq_data_Map.size}`);
+	if (1 || CeL.is_debug()) {
+		CeL.log(message_id_without_references
+			.filter(message_id => !/^log-type-[a-z]+$/.test(message_id)
+				&& !/^(?:download_options|work_data)\.[a-z_]+$/.test(message_id)
+				&& !/^(?:toc)\.[a-z\-]+$/.test(message_id)
+				&& !/^(?:work_status|error)-[a-z\-$\d]+$/.test(message_id)
+			)
+			.map(message_id => `[${message_id}]	${qqq_data_Map.get(message_id).message}`).join('\n'));
+	}
 }
 
 
 function write_i18n_files(resources_path) {
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
 		if (language_code !== 'qqq') {
+			adapt_message_id_changed_to_Object(locale_data);
 			// cmn-Hant-TW: -1
 			const untranslated_message_count = Math.max(0, qqq_data_Map.size - Object.keys(locale_data).length);
 			// FuzzyBot 必須為 {String}?
