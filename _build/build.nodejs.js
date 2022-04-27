@@ -830,6 +830,10 @@ function adapt_new_change(script_file_path, options) {
 				gettext_config.id = message_id;
 			}
 			CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中新增了 message: [${message_id}] ${JSON.stringify(message)}`);
+			qqq_data = {
+				message,
+			};
+			qqq_data_Map.set(message_id, qqq_data);
 		}
 
 		//console.trace([message, gettext_config, qqq_data_Map.get(message_id)]);
@@ -926,7 +930,7 @@ async function modify_source_files() {
 
 				// `${modify_source_files.name}: ${fso_path}`
 				CeL.log_temporary(`${base_GitHub_path ? `[${base_GitHub_path}]` : ``}	${fso_path}	`);
-				if (CeL.env.arg_hash.add_mark)
+				if (CeL.env.arg_hash?.add_mark)
 					add_localization_marks(fso_path);
 				adapt_new_change(fso_path, {
 					source_base_path,
@@ -947,7 +951,7 @@ async function modify_source_files() {
 				adapt_new_change(script_file_path, options);
 			}
 		}
-		delete qqq_data.references.script_file_path_hash;
+		delete qqq_data.references?.script_file_path_hash;
 	}
 }
 

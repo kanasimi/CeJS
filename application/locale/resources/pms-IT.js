@@ -370,6 +370,6 @@
 	"\u7121\u6cd5\u8a2d\u5b9a %1\uff1a%2": "Imposs\u00ecbil defin\u00ec %1: %2",
 	"\u7531\u547d\u4ee4\u5217": "Da la linia \u00ebd comand",
 	"download_options.recheck": "Tuti ij cap\u00ectoj e le plance \u00ebd tuti ij travaj a son trov\u00e0. Ma la plancia termin\u00e0 a sar\u00e0 pa d\u00ebscari\u00e0 torna. Cand 'multi_parts_changes' a l'\u00e9 defin\u00ec, a sar\u00e0 torna verific\u00e0 MACH s'a-i saran v\u00e0ire part.",
-	"untranslated message count": "674"
+	"untranslated message count": "675"
 },
 "pms-IT");

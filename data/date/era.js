@@ -7399,6 +7399,7 @@ function module_code(library_namespace) {
 
 		if (!era_list || !date && era_list.size === 0) {
 			library_namespace.info([ 'get_dates: ', {
+				// gettext_config:{"id":"can-t-find-era-or-regnal-year-named-$1"}
 				T : [ '無年號或帝王紀年名稱作 [%1]！', era ]
 			} ]);
 			return;

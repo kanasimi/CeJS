@@ -74,6 +74,7 @@
 	"%1 weeks ago": "%1 weeks ago",
 	"%1 weeks later": "%1 weeks later",
 	"\u7121\u7d00\u5e74\u540d\u7a31\u4f5c [%1]\uff01": "Can't find era named [%1]!",
+	"\u7121\u5e74\u865f\u6216\u5e1d\u738b\u7d00\u5e74\u540d\u7a31\u4f5c [%1]\uff01": "Can't find era or regnal year named [%1]!",
 	"\u8df3\u904e [%1]\uff1a\u672c[%2]\u50c5\u4f9b\u53c3\u7167\u7528\u3002": "Skip [%1]: The %2 is for reference purpose only.",
 	"\u7d00\u5e74\u8f49\u63db\u5de5\u5177": "Era Calendar Converter",
 	"\u7d00\u5e74 %1": "Era %1",

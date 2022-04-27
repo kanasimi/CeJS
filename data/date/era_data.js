@@ -139,7 +139,8 @@ CeL.era.pass_on = {
  * data from <a href="http://sinocal.sinica.edu.tw/" accessdate="2013/3/17
  * 19:23">中央研究院 兩千年中西曆轉換</a>
  */
-(CeL.era.pass_on.countries.中國 = [
+// gettext_config:{"id":"china"}
+(CeL.era.pass_on.countries["中國"] = [
 		// Chinese: 中國傳統曆法。
 
 		// 共和元年(841 BCE)是中國歷史上有確切紀年的開始。
@@ -2011,7 +2012,8 @@ CeL.era.pass_on = {
 
 // ---------------------------------------------------------------------//
 
-(CeL.era.pass_on.countries.琉球 = [
+// gettext_config:{"id":"ryukyu"}
+(CeL.era.pass_on.countries["琉球"] = [
 		// 御主加那志、御主加那志前(御主/ウス)是琉球國中山王在國內的稱號。
 		// 外交文件《歷代寶案》, 正史《中山世鑑》, 蔡溫本《中山世譜》, 《球陽記事》
 
@@ -2085,7 +2087,8 @@ CeL.era.pass_on = {
 
 // ---------------------------------------------------------------------//
 
-(CeL.era.pass_on.countries.日本 = [
+// gettext_config:{"id":"japan"}
+(CeL.era.pass_on.countries["日本"] = [
 		// Japan: 中國農曆日期和韓國農曆日期也不一致。日本從1685年開始，就自行編製農曆，一直到明治六年。
 
 		'日本書紀|-660/2/18~|-660/=46i 59l 3qub505 3psr47m 59m 4g4o579 47m 4ok43oq 579 3qs147p 39zu42y 59h 3que47p 42y 4of659m 3quj579 47e 4ojs59m 579 3ql047o 4okc42y 591 3qu147p 42y 4o1359l 47p 3mmr46i 4oiz59m 505 3pso47m 59m 4g4l579 47m 4ok13oq 4mg959h 47p 39zq42y 59h 3qub47p 3mn047e 59m 3qug505 47e 4ojo59m 505 3qkx47o 4oka3oq 591 3qty47p 3oq 4o0y59l 3quj47p 46i 4oiw59m 47p 3psk47m 59m 3qu9579 3qsa47o 59m 4mg759h 47o 4ok342y 4off59l 47p 3mmw47e 59l 3qud505 47e 4oip59m 4g4p591 47m 4ok63oq 591 3qs347p 39zw46i 59h 3qug47p 46i 4of859m 47p 3psh47e 4oju59m 579 3qs647o 59m 4mg259h 3qu447p 42y 4ofd59l 47p 3mmt47e 59l 3qu9505 3ql647m 59m 4g4n591 47m 4ok33oq 4o1759h 47p 39zs46i 59h 3qud47p 46i 4of559m 3quh579 47e 4ojq59m 579 3qkz47o 4okc42y 591 3qu047p 42y 4o1059l 47p 3mmp46i 4oiy59m 505 3psm47m 59m 4g4j579 3qsc47p 3oq 4mg959h 47p 39zp42y 59h 3qu947p 3mmy47e 59m 3quf505 47e 4ojn59m 4g4r591 47o 4ok83oq 591 3qtx47p 3oq 4o0y59l 3qui47p 46i 4oiu59m 47p 3psj47m 4ojw59m 579 3qs847o 59m 4mg559h 47p 39zm42y 4ofe59m 47p 3mmu47e 59m 3qub505 3ql847o 59m 4g4p591 47o 4ok53oq 591 3qtt47p 39zu46i 59l 3quf47p 46i 4oir59m 3quj579 47m 4ojs59m 579 3qs547o 59m 4mg259h 3qu247p 42y 4ofa59l 47p 3mms47e 4oj059m 505 3ql447m 59m 4g4l591 47m 4ok23oq 4o1659h 47p 39zq46i 59h 3qub47p 3pss47e 59m 3quh579 47e 4ojp59m 579 3qkx47o 4oka42y 591 3qtz47p 42y 4o0z59l 3quj505 46i 4oiw59m 505 3psm47m 59m 4g4i579 3qsa47p 3oq 4mg759h 47p 39zo42y 4ofg59m 47p 3pso47e 59m 3qud579 47e 4ojm59m 4mgb591 47o 4ok742y 591 3qtv47p 3mn046i 59l 3quh505 46i 4oit59m 505 3psh47m 4oka3oq 579 3qs747p 3oq 4mg359h 3quj47p 42y 4ofd59m 47p 3mmu47e 59m 3qua505 3ql647o 59m 4g4n591 47o 4ok43oq 4o1859l 47p 39zs46i 59l 3qud47p 46i 4oiq59m 3quj579 47m 4ojr59m 579 3qs347o 4okc42y 59h 3qu147p 42y 4of959l 47p 3mmp47e 4oiz59m 505 3ql447m 59m 4g4k591 3qsc47p 3oq 4o1559h 47p 39zq46i 59h 3qua47p 3psq47e 59m 3quf579 47m 4ojo59m 4mgc59h 47o 4ok842y 59h 3qtx47p 42y 4of659l 3quj505 47e 4oiv59m 505 3qkz47m 4okc3oq 591 3qs947p 3oq 4o1159h 47p 39zm46i 4off59m 47p 3pso47e 59m 3quc579 3ql847o 59m 4mg9591 47o 4ok642y 591 3qtu47p 3mmy46i 59l 3quf505 46i 4ois59m 4g4s579 47m 4ok93oq 579 3qs547p 3oq 4mg259h 3quj47p 42y 4ofb59m 47p 3mms47e 59m 3qu9505 3ql547o 59m 4g4l591 47o 4ok23oq 4o1759l 47p 39zs46i 59l 3quc47p 3pss47m 59m 3quh579 47m 4ojq59m 579 3qs247p 39zu42y 59h 3quf47p 42y 4of859m 47p 3mmp47e 4ojt59m 505 3ql147o 59m 4g4j591 3qu347p 3oq 4o1359l 47p 39zo46i 59l 3qu947p 3psp47m 59m 3qud579 47m 4ojm59m 4mgb59h 47o 4ok842y 59h 3qtw47p 3mn047e 59l 3quh505 47e 4oiu59m 505 3qky47m 4oka3oq 591 3qs747p 3oq 4o1059h 47p 39zl46i 4ofd59m 47p 3psm47e 59m 3qub579 3ql747o 59m 4mg7591 47o 4ok442y 591 3qtt47p 3mmy46i 59l 3que505 46i 4oiq59m 4g4r579 47m 4ok83oq 579 3qs447n 39zw42y 59h 3quh47p 46i 4ofa59m 47p 3psi47e 4oju59m 579 3ql447o 59m 4mg5591 47o 4ok142y 4o1559l 47p 3mmu46i 59l 3qub505 3psr47m 59m 4g4n579 47m 4ok43oq 579 3qs147p 39zu42y 59h 3que47p 42y 4of659m 3quj505 47e 4ojs59m 505 3ql047o 4okc3oq 591 3qu147p 3oq 4o1259l 47p 39zn46i 4oiz59m 47p 3pso47m 59m 3qud579 47m 4ojl59m 4mg959h 47o 4ok642y 59h 3qtv47p 3mmz47e 59l 3quf505 47e 4ois59m 505 3qkx47m 4oka3oq 591 3qs647p 3oq 4o0y59h 3quj47p 46i 4ofc59m 47p 3psk47m 59m 3qu9579 3qsa47o 59m 4mg759h 47o 4ok342y 4off59l 47p 3mmw47e 59l 3qud505 47e 4oip59m 4g4p591 47m 4ok63oq 591 3qs347p 39zv46i 59h 3quf47p 46i 4of859m 47p 3psh47e 4oju59m 579 3ql247o 59m 4mg2591 3qu447p 42y 4o1459l 47p 3mms46i 59l 3qu9505 3psq47m 59m 4g4n579 47m 4ok33oq 4mgb59h 47p 39zs42y 59h 3qud47p 42y 4of559m 3quh505 47e 4ojq59m 505 3qkz47o 4okc3oq 591 3qu047p 3oq 4o1059l 47p 39zm46i 4oiy59m 47p 3psm47m 59m 3qub579 3qsc47p 3oq 4mg859h 47p 39zo42y 59h 3qu947p 3mmy47e 59m 3quf505 47e 4ojn59m 4g4r591 47o 4ok83oq 591 3qtx47p 3oq 4o0x59l 3quh47p 46i 4oiu59m 47p 3psj47m 4ojw59m 579 3qs847o 59m 4mg559h 47o 4ok242y 4ofe59l 47p 3mmu47e 59l 3qub505 3ql847m 59m 4g4o591 47m 4ok53oq 591 3qs147p 39zu46i 59h 3quf47p 46i 4of759m 3quj579 47e 4ojs59m 579 3ql147o 59m 4mg1591 3qu147p 42y 4o1359l 47p 3mms46i 4oj059m 505 3pso47m 59m 4g4l579 47m 4ok23oq 4mga59h 47p 39zq46i 59h 3qub47p 3pss47e 59m 3quh579 47e 4ojp59m 579 3qkx47o 4oka42y 591 3qtz47p 42y 4o0z59l 3quj505 46i 4oiw59m 505 3psl47m 59m 4g4h579 3qsa47p 3oq 4mg759h 47p 39zo42y 4ofg59m 47p 3mmw47e 59m 3qud505 47e 4ojm59m 4g4q591 47o 4ok63oq 591 3qtv47p 39zw46i 59l 3quh47p 46i 4oit59m 47p 3psh47m 4oju59m 579 3qs747o 59m 4mg359h 3qu447p 42y 4ofd59l 47p 3mmu47e 59l 3qua505 3ql647m 59m 4g4n591 47m 4ok43oq 4o1859h 47p 39zs46i 59h 3qud47p 42y 4of659m 3qui505 47e 4ojq59m 505 3qkz47o 4okc42y 591 3qu147p 42y 4o1159l 47p 3mmp46i 4oiz59m 505 3psn47m 59m 4g4j579 3qsc47p 3oq 4mg959h 47p 39zp42y 59h 3qu947p 3mmy47e 59m 3quf505 47e 4ojo59m 4g4s591 47o 4ok83oq 591 3qtx47p 3oq 4o0y59l 3qui47p 46i 4oiu59m 47p 3psj47m 4ojw59m 579 3qs947p 3oq 4mg559h 47p 39zm42y 4off59m 47p 3mmv47e 59m 3qub505 3ql847o 59m 4g4p591 47o 4ok53oq 591 3qtt47p 39zu46i 59l 3quf47p 46i 4ois59m 3quk579 47m 4ojs59m 579 3qs547o 59m 4mg259h 3qu247p 42y 4ofa59l 47p 3mms47e 4oj059m 505 3ql447m 59m 4g4l591 47o 4ok23oq 4o1759l 47p 39zr46i 59l 3qub47p 3pss47m|傳說|參照用|注=base: 日本書紀暦日原典 (内田正男)',
@@ -2643,7 +2646,8 @@ CeL.era.pass_on = {
 
 // ---------------------------------------------------------------------//
 
-(CeL.era.pass_on.countries.한국 = [
+// gettext_config:{"id":"korea"}
+(CeL.era.pass_on.countries["한국"] = [
 		// Korean
 
 		'衛滿朝鮮/衛滿|-194~-161||疑|國名=衛氏朝鮮|注=第二代王衛滿兒子，史失其名',
@@ -3136,7 +3140,8 @@ CeL.era.pass_on = {
 // ---------------------------------------------------------------------//
 // 泰國君主列表
 
-(CeL.era.pass_on.countries.ไทย = [
+// gettext_config:{"id":"thailand"}
+(CeL.era.pass_on.countries["ไทย"] = [
 		// 泰國陰陽曆: 依照這邊的設定，新年（換年分）大致比公元提早一兩個月。但實際應晚五個月，每年陰陽曆5/5新年。
 		// https://www.myhora.com/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99/
 		// 除了拉瑪九世之後，泰國佛曆與公元的新年同步之外，之前的王以陰陽曆為主。因為技術性原因，現在還沒有辦法僅僅以曆數資料配合函式庫，來表現出正確的年分。因此泰國佛曆必須以本紀年工具的所列出的日期，才能與達到與資料來源相同的表達。
@@ -3587,7 +3592,8 @@ CeL.era.pass_on = {
 // 印度年表, ancient India
 // https://en.wikipedia.org/wiki/List_of_Indian_monarchs
 
-(CeL.era.pass_on.countries.India = [
+// gettext_config:{"id":"india"}
+(CeL.era.pass_on.countries["India"] = [
 
 		// मगध (Magadha empire, c. 1200 BCE–322 BCE)
 		// https://en.wikipedia.org/wiki/Magadha
@@ -3709,7 +3715,8 @@ CeL.era.pass_on = {
 // Mesopotamian
 // https://en.wikipedia.org/wiki/List_of_Mesopotamian_dynasties
 
-(CeL.era.pass_on.countries.Mesopotamian = [
+// gettext_config:{"id":"mesopotamian"}
+(CeL.era.pass_on.countries["Mesopotamian"] = [
 
 		// https://en.wikipedia.org/wiki/Early_Dynastic_Period_(Mesopotamia)
 
@@ -4045,7 +4052,8 @@ CeL.era.pass_on = {
 // Ancient Greece 古希臘
 // https://en.wikipedia.org/wiki/Lists_of_rulers_of_Greece
 
-(CeL.era.pass_on.countries.Greece = [
+// gettext_config:{"id":"greece"}
+(CeL.era.pass_on.countries["Greece"] = [
 
 		// Ancient Greek: Athens
 		// https://en.wikipedia.org/wiki/List_of_kings_of_Athens
@@ -4172,7 +4180,8 @@ CeL.era.pass_on = {
  * @see http://www.trismegistos.org/top.php
  */
 
-(CeL.era.pass_on.countries.Egypt = [
+// gettext_config:{"id":"egypt"}
+(CeL.era.pass_on.countries["Egypt"] = [
 
 		// Joann Fletcher. (2016).
 		// The Story of Egypt: The Civilization that Shaped the World
@@ -4578,7 +4587,8 @@ CeL.era.pass_on = {
 
 // ---------------------------------------------------------------------//
 
-(CeL.era.pass_on.countries.Hittite = [
+// gettext_config:{"id":"hittite"}
+(CeL.era.pass_on.countries["Hittite"] = [
 
 		// Trevor Bryce. (2002).
 		// Life and society in the Hittite world. OUP Oxford.
@@ -4636,7 +4646,8 @@ CeL.era.pass_on = {
 
 // https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts
 // https://github.com/gtoubiana/acte
-(CeL.era.pass_on.countries.France = [
+// gettext_config:{"id":"france"}
+(CeL.era.pass_on.countries["France"] = [
 
 		// Clovis Iᵉʳ ˢᵗ
 		'Mérovingiens/Clovis Ier|481~|:CE|ruler=Clovis Iᵉʳ|朝代=Dynastie Mérovingienne;Merovingian dynasty|曆法=France',
@@ -4744,7 +4755,8 @@ CeL.era.pass_on = {
 // ---------------------------------------------------------------------//
 // 英國君主列表
 
-(CeL.era.pass_on.countries.British = [
+// gettext_config:{"id":"british"}
+(CeL.era.pass_on.countries["British"] = [
 		// https://en.wikipedia.org/wiki/List_of_monarchs_of_Wessex
 		// The Kingdom of the Gewissae
 		'Cerdicing dynasty/Cerdic|519~|:CE|時期=Wessex|精=年|準=年|注=Possibly Celtic, Brythonic, name.|曆法=Great Britain',
@@ -4805,7 +4817,8 @@ CeL.era.pass_on = {
 // ---------------------------------------------------------------------//
 // 西班牙君主列表
 
-(CeL.era.pass_on.countries.España = [
+// gettext_config:{"id":"españa"}
+(CeL.era.pass_on.countries["España"] = [
 		// TODO:
 		// https://es.wikipedia.org/wiki/Anexo:Monarcas_de_Arag%C3%B3n
 		// https://en.wikipedia.org/wiki/List_of_Aragonese_monarchs
@@ -4854,7 +4867,8 @@ CeL.era.pass_on = {
 // 瑪雅文明, pre-Columbian Maya civilization
 // https://en.wikipedia.org/wiki/Category:Maya_rulers
 
-(CeL.era.pass_on.countries.Maya = [
+// gettext_config:{"id":"maya"}
+(CeL.era.pass_on.countries["Maya"] = [
 		// http://www.mesoweb.com/palenque/resources/rulers/rulers_table.html
 		// http://research.famsi.org/whos_who/pm_index.php
 		// http://www.criscenzo.com/jaguarsun/dynasty.html
