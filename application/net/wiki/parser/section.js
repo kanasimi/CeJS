@@ -73,9 +73,28 @@ function module_code(library_namespace) {
 			// expand template, .expand_template(), .to_wikitext()
 			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 			token = wiki_API.parse(token.expand(options), options);
+			if (wiki_API.template_functions) {
+				// console.trace(options);
+				wiki_API.template_functions.adapt_function(token, null, null,
+						options);
+			}
+			// console.trace([ token, token.expand, options ]);
 		}
 
 		// ------------------------
+
+		if (token.type in {
+			plain : true,
+			tag_inner : true
+		}) {
+			for_each_token.call(token, function(sub_token, index, parent) {
+				// console.trace(sub_token);
+				sub_token = preprocess_section_link_token(sub_token, options);
+				// console.trace(sub_token);
+				return sub_token;
+			}, options);
+			return token;
+		}
 
 		if (token.type === 'comment') {
 			return '';
@@ -310,9 +329,7 @@ function module_code(library_namespace) {
 
 		if (token.type in {
 			convert : true,
-			url : true,
-			tag_inner : true,
-			plain : true
+			url : true
 		}) {
 			// 其他可處理的節點。
 			return token;
@@ -363,14 +380,7 @@ function module_code(library_namespace) {
 		options.modify = true;
 
 		// console.trace(tokens);
-		for_each_token.call(tokens, function(token, index, parent) {
-			// console.trace(token);
-			token = preprocess_section_link_token(token, options);
-			// console.trace(token);
-			return token;
-		}, options);
-		// console.trace(tokens);
-		return tokens;
+		return preprocess_section_link_token(tokens, options);
 	}
 
 	// TODO: The method now is NOT a good way!

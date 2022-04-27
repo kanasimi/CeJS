@@ -51,6 +51,11 @@ function module_code(library_namespace) {
 		return '';
 	}
 
+	function expand_template_get_parameter_1(options) {
+		var parameters = this.parameters;
+		return parameters[1] ? parameters[1].toString() : '';
+	}
+
 	function trim_param(param) {
 		return param.toString().trim();
 	}
@@ -74,26 +79,16 @@ function module_code(library_namespace) {
 
 	// Not completed! Only for get_all_anchors()
 	// @ zh.moegirl [[FLOWERS(Innocent Grey)]]
-	function expand_template_Center(options) {
-		var parameters = this.parameters;
-		return parameters[1] ? parameters[1].toString() : '';
-	}
-
 	function parse_template_Center(token) {
-		token.expand = expand_template_Center;
+		token.expand = expand_template_get_parameter_1;
 	}
 
 	// --------------------------------------------------------------------------------------------
 
 	// Not completed! Only for get_all_anchors()
 	// @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
-	function expand_template_Font(options) {
-		var parameters = this.parameters;
-		return parameters[1] ? parameters[1].toString() : '';
-	}
-
 	function parse_template_Font(token) {
-		token.expand = expand_template_Font;
+		token.expand = expand_template_get_parameter_1;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -115,7 +110,7 @@ function module_code(library_namespace) {
 	// @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_Colored_link(options) {
 		var parameters = this.parameters;
-		// {{Colored link|顏色|頁面名稱|顯示名稱}}]
+		// {{Colored link|顏色|頁面名稱鏈接|顯示名稱}}]
 		return '[[:' + parameters[2] + '|<span style="color:' + parameters[1]
 				+ '">' + (parameters[3] || parameters[2]) + '</span>]]';
 	}

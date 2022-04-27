@@ -146,6 +146,20 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// Not completed! Only for get_all_anchors()
+	// @ zh.moegirl [[FLOWERS(Innocent Grey)]]
+	function expand_template_Gradient_Text(options) {
+		var parameters = this.parameters;
+		// {{Gradient_Text|漸變色代碼|文字內容|title=鼠標懸停在文字上顯示的注釋}}
+		return parameters[2] || '';
+	}
+
+	function parse_template_Gradient_Text(token) {
+		token.expand = expand_template_Gradient_Text;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
@@ -156,7 +170,9 @@ function module_code(library_namespace) {
 
 		Lj : parse_template_Lj,
 
-		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon
+		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon,
+
+		'Gradient Text' : parse_template_Gradient_Text
 	};
 
 	// library_namespace.info(module_site_name + ': 採用 zhwiki 的模板特設功能設定。');
