@@ -98,6 +98,6 @@
 	"\u7d93\u5ea6\uff1a": "Breedegrad:",
 	"\u7def\u5ea6\uff1a": "L\u00e4ngegrad:",
 	"\u8457\u540d\u5730\u9ede\uff1a": "Bekannt Plazen:",
-	"untranslated message count": "947"
+	"untranslated message count": "948"
 },
 "lb-LU");

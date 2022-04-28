@@ -349,139 +349,147 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2937}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2952}}"
 	},
 	"several-seconds-ago": {
 		"message": "several seconds ago",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2942}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2957}}"
 	},
 	"soon": {
 		"message": "soon",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2944}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2959}}"
 	},
 	"$1-seconds-ago": {
 		"message": "%1 seconds ago",
 		"notes": "just",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2948}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2963}}"
 	},
 	"$1-seconds-later": {
 		"message": "%1 seconds later",
 		"notes": "after %1 seconds",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2950}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2965}}"
 	},
 	"$1-minutes-ago": {
 		"message": "%1 minutes ago",
 		"notes": "%1分鐘前",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2957}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2972}}"
 	},
 	"$1-minutes-later": {
 		"message": "%1 minutes later",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2959}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2974}}"
 	},
 	"$1-hours-ago": {
 		"message": "%1 hours ago",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2966}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2981}}"
 	},
 	"$1-hours-later": {
 		"message": "%1 hours later",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2968}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2983}}"
 	},
 	"2-days-before-yesterday-$h-$m": {
 		"message": "2 days before yesterday, %H:%M",
 		"notes": "+ごろ,時点で",
 		"scope": "data.date: indicate_date_time()",
-		"original_message_language_code": "en-US"
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2890}}"
 	},
 	"the-day-before-yesterday-$h-$m": {
 		"message": "the day before yesterday, %H:%M",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
-		"original_message_language_code": "en-US"
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2892}}"
 	},
 	"yesterday-$h-$m": {
 		"message": "yesterday, %H:%M",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
-		"original_message_language_code": "en-US"
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2894}}"
 	},
 	"today-$h-$m": {
 		"message": "today, %H:%M",
 		"notes": "%H點%M分",
 		"scope": "data.date: indicate_date_time()",
-		"original_message_language_code": "en-US"
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2896}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2907}}"
 	},
 	"tomorrow-$h-$m": {
 		"message": "tomorrow, %H:%M",
 		"notes": "+に or 以降に",
 		"scope": "data.date: indicate_date_time()",
-		"original_message_language_code": "en-US"
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2898}}"
 	},
 	"the-day-after-tomorrow-$h-$m": {
 		"message": "the day after tomorrow, %H:%M",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
-		"original_message_language_code": "en-US"
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2900}}"
 	},
 	"2-days-after-tomorrow-$h-$m": {
 		"message": "2 days after tomorrow, %H:%M",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
-		"original_message_language_code": "en-US"
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2902}}"
 	},
 	"3-days-after-tomorrow-$h-$m": {
 		"message": "3 days after tomorrow, %H:%M",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
-		"original_message_language_code": "en-US"
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2904}}"
 	},
 	"$1-days-ago": {
 		"message": "%1 days ago",
 		"notes": "%1>3",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2997}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3012}}"
 	},
 	"$1-days-later": {
 		"message": "%1 days later",
 		"notes": "%1>3",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2999}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3014}}"
 	},
 	"$1-weeks-ago": {
 		"message": "%1 weeks ago",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3006}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3021}}"
 	},
 	"$1-weeks-later": {
 		"message": "%1 weeks later",
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3008}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3023}}"
 	},
 	"can-t-find-era-named-$1": {
 		"message": "無紀年名稱作 [%1]！",
@@ -502,13 +510,14 @@
 		"notes": "Name of Era Calendar Converter tool.",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
 		"scope": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm#L1741}}",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"era-$1": {
 		"message": "紀年 %1",
 		"notes": "Message to show an era name.",
 		"scope": "data.date.era: title",
-		"original_message_language_code": "ja-JP",
+		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2476}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2511}}"
 	},
@@ -516,7 +525,9 @@
 		"message": "訊息提示與紀錄欄",
 		"notes": "Panel name",
 		"scope": "data.date.era: system",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}": {
 		"message": "已載入 %1 筆資料。",
@@ -530,7 +541,9 @@
 		"message": "請注意：本欄僅供開發人員使用。",
 		"notes": "Used as warning message.",
 		"scope": "data.date.era: system",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"c.-$1": {
 		"message": "約%1年",
@@ -774,26 +787,31 @@
 		"scope": "data.date.era: input_panel",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4645}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4645}}"
 	},
 	"output-format": {
 		"message": "輸出格式",
 		"notes": "Label for input.",
 		"scope": "data.date.era: input_panel",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"customize-output-format": {
 		"message": "自訂輸出格式",
 		"notes": "Label for input.",
 		"scope": "data.date.era: input_panel",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"to-chinese-numerals": {
 		"message": "中文數字",
 		"notes": "Label for input.",
 		"scope": "data.date.era: input_panel",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1070}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1094}}"
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1070}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1094}}"
 	},
 	"example": {
 		"message": "測試範例",
@@ -839,7 +857,7 @@
 	"configuration": {
 		"message": "設定",
 		"notes": "Panel name",
-		"original_message_language_code": "ja-JP",
+		"original_message_language_code": "cmn-Hant-TW",
 		"scope": "data.date.era: note_botton_layer",
 		"additional_notes": "{{Identical|Configuration}}",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
@@ -851,7 +869,7 @@
 		"scope": "data.date.era: note_botton_layer",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1859}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1859}}"
 	},
 	"tagging": {
 		"message": "標注文本",
@@ -923,7 +941,7 @@
 		"scope": "data.date.era: 文字式年曆 朝代紀年日期",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L155}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L568}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L161}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L568}}"
 	},
 	"$1-bce": {
 		"message": "%1 BCE",
@@ -1088,7 +1106,9 @@
 		"message": "前綴",
 		"notes": "Label for calendar options panel.",
 		"scope": "data.date.era: 文字式年曆欄位",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"add-the-column": {
 		"message": "增加此欄",
@@ -1133,7 +1153,7 @@
 	"group": {
 		"message": "分類",
 		"notes": "Label for calendar option.",
-		"original_message_language_code": "ja-JP",
+		"original_message_language_code": "cmn-Hant-TW",
 		"scope": "data.date.era: 文字式年曆欄位",
 		"additional_notes": "{{Identical|Group}}",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
@@ -1362,7 +1382,7 @@
 		"message": "月相",
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
-		"original_message_language_code": "ja-JP",
+		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3130}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3573}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4393}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4397}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4517}}"
 	},
@@ -1458,7 +1478,7 @@
 		"message": "晦日",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
-		"original_message_language_code": "ja-JP",
+		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3588}}"
 	},
@@ -1732,7 +1752,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L340}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L554}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4361}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L346}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L585}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4361}}"
 	},
 	"month-of-the-sexagenary-cycle": {
 		"message": "月干支",
@@ -1802,7 +1822,7 @@
 		"message": "二十八宿",
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
-		"original_message_language_code": "ja-JP",
+		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4860}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4863}}"
 	},
@@ -1810,7 +1830,7 @@
 		"message": "二十七宿",
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
-		"original_message_language_code": "ja-JP",
+		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4876}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4879}}"
 	},
@@ -1993,7 +2013,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L337}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4821}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L343}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4821}}"
 	},
 	"portugal": {
 		"message": "Portugal",
@@ -2161,13 +2181,20 @@
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2431}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4184}}"
 	},
+	"ce-year-and-chinese-calendar-month-day": {
+		"message": "公元年/中曆月日",
+		"notes": "Label for calendar.",
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
+	},
 	"date-of-common-era": {
 		"message": "公元日期",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 輸出格式",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1906}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1906}}"
 	},
 	"date-of-calendar-era": {
 		"message": "朝代紀年日期",
@@ -2175,7 +2202,7 @@
 		"scope": "data.date.era: 輸出格式",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1908}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L256}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1908}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L256}}"
 	},
 	"contemporary-period": {
 		"message": "共存紀年",
@@ -2277,25 +2304,33 @@
 		"message": "地理座標：",
 		"notes": "Option label to caculate date-time.",
 		"scope": "data.date.era: 設定/地理座標",
-		"original_message_language_code": "ja-JP"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"timezone": {
 		"message": "時區：",
 		"notes": "Option label to caculate date-time.",
 		"scope": "data.date.era: 設定/地理座標",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"latitude": {
 		"message": "經度：",
 		"notes": "Option label to caculate date-time.",
 		"scope": "data.date.era: 設定/地理座標",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"longitude": {
 		"message": "緯度：",
 		"notes": "Option label to caculate date-time.",
 		"scope": "data.date.era: 設定/地理座標",
-		"original_message_language_code": "ja-JP"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"famous-places": {
 		"message": "著名地點：",
@@ -2358,7 +2393,7 @@
 		"notes": "本工具標題名稱 title",
 		"scope": "gui_electron_functions.js, gui_electron.html",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L413}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L197}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L413}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L197}}"
 	},
 	"to-use-the-graphical-interface-please-execute-`$1`": {
 		"message": "欲採用圖形介面請執行 `%1`。",
@@ -4722,26 +4757,29 @@
 		"message": "作品名稱或🆔",
 		"notes": "Series title / id",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"paste": {
 		"message": "貼上",
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L534}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L534}}"
 	},
 	"start-downloading": {
 		"message": "開始下載",
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"search": {
 		"message": "搜尋",
 		"notes": "作品名で検索",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"searching-form-each-website-and-downloading-the-work": {
 		"message": "搜尋各網站並下載作品。",
@@ -4754,19 +4792,21 @@
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/comic.cmn-Hant-TW/cartoonmad.js#L49}}\n: {{GitHub|kanasimi/work_crawler/blob/master/comic.cmn-Hant-TW/comicbus.js#L123}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/comic.cmn-Hant-TW/cartoonmad.js#L49}}\n: {{GitHub|kanasimi/work_crawler/blob/master/comic.cmn-Hant-TW/comicbus.js#L123}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"open-the-download-directory": {
 		"message": "開啓下載目錄",
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "ja-JP"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"web-fictions-comics-sites": {
 		"message": "網路作品網站",
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html work type",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"traditional-chinese-webcomics": {
 		"message": "繁體字漫畫",
@@ -4814,13 +4854,15 @@
 		"message": "最愛作品清單",
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"download-options": {
 		"message": "下載選項",
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"select-$1-path": {
 		"message": "選擇%1路徑",
@@ -4911,19 +4953,22 @@
 		"message": "下載中的作品",
 		"notes": "Series downloading",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"clear-log": {
 		"message": "清除訊息",
 		"notes": "botton label",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"show-hidden-log": {
 		"message": "顯示/隱藏訊息",
 		"notes": "botton label",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"limit-log-lines": {
 		"message": "限制訊息行數",
@@ -4937,13 +4982,14 @@
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L312}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L312}}"
 	},
 	"open-devtools": {
 		"message": "開啟偵錯工具",
 		"notes": "botton label",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"start-release-updating": {
 		"message": "開始檢測並更新安裝包……",
@@ -5563,7 +5609,7 @@
 		"message": "開啓作品下載目錄",
 		"notes": "",
 		"scope": "GUI: Download_job()",
-		"original_message_language_code": "ja-JP",
+		"original_message_language_code": "cmn-Hant-TW",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1558}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1985}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2539}}"
 	},
 	"downloading-«$2»-from-$1.-please-wait-until-the-download-is-complete-or-cancel-the-download-before-downloading-$3": {
@@ -7231,7 +7277,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1055}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L426}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L431}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1150}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L426}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L431}}"
 	},
 	"local-language-name": {
 		"message": "local-language-name",

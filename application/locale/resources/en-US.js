@@ -309,6 +309,7 @@
 	"Greece": "Greece",
 	"Turkey": "Turkey",
 	"Egypt": "Egypt",
+	"\u516c\u5143\u5e74/\u4e2d\u66c6\u6708\u65e5": "CE year and Chinese calendar month day",
 	"\u516c\u5143\u65e5\u671f": "Date of Common Era",
 	"\u671d\u4ee3\u7d00\u5e74\u65e5\u671f": "Date of calendar era",
 	"\u5171\u5b58\u7d00\u5e74": "Contemporary Period",

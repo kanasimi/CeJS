@@ -2885,11 +2885,26 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
-	var recent_date_name = [ '2 days before yesterday',
-			'the day before yesterday', 'yesterday', 'today', 'tomorrow',
-			'the day after tomorrow', '2 days after tomorrow'
-	// , '3 days after tomorrow'
-	], recent_date_name_today_index = recent_date_name.indexOf('today');
+	var recent_date_name = [
+	// gettext_config:{"id":"2-days-before-yesterday-$h-$m"}
+	'2 days before yesterday, %H:%M',
+	// gettext_config:{"id":"the-day-before-yesterday-$h-$m"}
+	'the day before yesterday, %H:%M',
+	// gettext_config:{"id":"yesterday-$h-$m"}
+	'yesterday, %H:%M',
+	// gettext_config:{"id":"today-$h-$m"}
+	'today, %H:%M',
+	// gettext_config:{"id":"tomorrow-$h-$m"}
+	'tomorrow, %H:%M',
+	// gettext_config:{"id":"the-day-after-tomorrow-$h-$m"}
+	'the day after tomorrow, %H:%M',
+	// gettext_config:{"id":"2-days-after-tomorrow-$h-$m"}
+	'2 days after tomorrow, %H:%M',
+	// gettext_config:{"id":"3-days-after-tomorrow-$h-$m"}
+	'3 days after tomorrow, %H:%M' ];
+	var recent_date_name_today_index
+	// gettext_config:{"id":"today-$h-$m"}
+	= recent_date_name.indexOf('today, %H:%M');
 
 	// @see https://en.wikipedia.org/wiki/Wikipedia:Comments_in_Local_Time
 	// https://en.wikipedia.org/wiki/User:Gary/comments_in_local_time.js
@@ -2987,7 +3002,7 @@ function module_code(library_namespace) {
 				message -= date_value_diff.getDate();
 			}
 			message = recent_date_name[message];
-			return date.format(gettext(message + ', %H:%M'));
+			return date.format(gettext(message/* + ', %H:%M' */));
 		}
 
 		// TODO: week, 周六
