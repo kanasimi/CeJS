@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Kly"
+			"Kly",
+			"Winston Sung"
 		]
 	},
 	"loading": "載入中…",
@@ -9,7 +10,7 @@
 	"loading-$1$": "已載入 %1%…",
 	"initializing": "初始化中…",
 	"contents-of-$1": "[%1] 的目錄",
-	"contents": "目錄",
+	"contents": "目次",
 	"↑back-to-toc": "↑回到目錄",
 	"expand": "展開",
 	"collapse": "收合",
