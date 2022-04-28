@@ -40,6 +40,7 @@
 	"work_data.id": "\uc791\ud488 ID",
 	"work_data.url": "URL",
 	"work_data.directory": "\uc2a4\ud1a0\ub9ac\uc9c0 \ub514\ub809\ud130\ub9ac",
+	"\u7db2\u5740\u7121\u6548\uff1a%1": "\uc798\ubabb\ub41c URL: %1",
 	"Error: %1": "\uc624\ub958: %1",
 	"work_status-finished": "\uc644\ub8cc",
 	"\u300a%1\u300b\uff1a": "\u00ab%1\u00bb:",
@@ -66,6 +67,7 @@
 	"\u7e7c\u7e8c": "\uacc4\uc18d",
 	"\u53d6\u6d88": "\ucde8\uc18c",
 	"\u53d6\u6d88\u4e0b\u8f09": "\ub2e4\uc6b4\ub85c\ub4dc \ucde8\uc18c",
+	"\u66f4\u65b0\u5b8c\u7562\u3002": "\uc5c5\ub370\uc774\ud2b8 \uc644\ub8cc.",
 	"\u6aa2\u67e5\u66f4\u65b0\u4e2d\u2026\u2026": "\uc5c5\ub370\uc774\ud2b8 \ud655\uc778 \uc911...",
 	"\u6709\u65b0\u7248\u672c\uff1a%1": "\uc5c5\ub370\uc774\ud2b8 \uc0ac\uc6a9 \uac00\ub2a5: %1",
 	"dark theme": "\ub2e4\ud06c",
@@ -89,7 +91,7 @@
 	"\u8a9e\u6cd5\u932f\u8aa4\uff01": "\uad6c\ubb38 \uc624\ub958!",
 	"Illegal pattern: [%1]": "\uc798\ubabb\ub41c \ud328\ud134: [%1]",
 	"\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated message count": "956",
+	"untranslated message count": "954",
 	"local-language-name": "\ud55c\uad6d\uc5b4"
 },
 "ko-KR");

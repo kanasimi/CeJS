@@ -6,7 +6,7 @@
 	"Loading %1%...": "\u5df2\u8f09\u5165 %1%\u2026",
 	"Initializing...": "\u521d\u59cb\u5316\u4e2d\u2026",
 	"Contents of [%1]": "[%1] \u7684\u76ee\u9304",
-	"Contents": "\u76ee\u9304",
+	"Contents": "\u76ee\u6b21",
 	"\u2191Back to TOC": "\u2191\u56de\u5230\u76ee\u9304",
 	"expand": "\u5c55\u958b",
 	"collapse": "\u6536\u5408",

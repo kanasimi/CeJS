@@ -3090,8 +3090,31 @@ function affairs() {
 	// https://github.com/zealotrush/ben_rime/blob/master/symbols.yaml
 	ZODIAC_SYMBOLS = '♈♉♊♋♌♍♎♏♐♑♒♓'.split(''),
 	// 白羊宮,金牛宮,雙子宮,巨蟹宮,獅子宮,室女宮,天秤宮,天蠍宮,人馬宮,摩羯宮,寶瓶宮,雙魚宮
-	ZODIAC_SIGNS = ('Aries,Taurus,Gemini,Cancer,Leo,Virgo,Libra,'
-			+ 'Scorpio,Sagittarius,Capricorn,Aquarius,Pisces').split(','),
+	ZODIAC_SIGNS = [
+	// gettext_config:{"id":"aries"}
+	"Aries",
+	// gettext_config:{"id":"taurus"}
+	"Taurus",
+	// gettext_config:{"id":"gemini"}
+	"Gemini",
+	// gettext_config:{"id":"cancer"}
+	"Cancer",
+	// gettext_config:{"id":"leo"}
+	"Leo",
+	// gettext_config:{"id":"virgo"}
+	"Virgo",
+	// gettext_config:{"id":"libra"}
+	"Libra",
+	// gettext_config:{"id":"scorpio"}
+	"Scorpio",
+	// gettext_config:{"id":"sagittarius"}
+	"Sagittarius",
+	// gettext_config:{"id":"capricorn"}
+	"Capricorn",
+	// gettext_config:{"id":"aquarius"}
+	"Aquarius",
+	// gettext_config:{"id":"pisces"}
+	"Pisces" ],
 	// for 皇紀.
 	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset),
 	// for 泰國佛曆
@@ -4177,6 +4200,7 @@ function affairs() {
 		// Chinese Buddhist calendar
 		Buddhist : [ {
 			a : {
+				// gettext_config:{"id":"chinese-buddhist"}
 				T : '佛曆'
 			},
 			R : '佛紀，1911–。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。\n'

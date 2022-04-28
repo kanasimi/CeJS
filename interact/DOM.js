@@ -9116,8 +9116,9 @@ _
 					// gettext_config:{"id":"contents-of-$1"}
 					T : title ? [ 'Contents of [%1]', options.title_name
 					//
+					&& options.title_name(title) || title ]
 					// gettext_config:{"id":"contents"}
-					&& options.title_name(title) || title ] : 'Contents'
+					: 'Contents'
 				} ],
 				C : auto_TOC.CSS_prefix + 'control',
 				// gettext_config:{"id":"expand"}

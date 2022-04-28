@@ -493,7 +493,8 @@ function module_code(library_namespace) {
 	紀年名稱索引值 = {
 		era : 0,
 		紀年 : 0,
-		年號 : 0,
+		// gettext_config:{"id":"era-date"}
+		"年號" : 0,
 		// 紀年法: 日本年號, 元号/年号
 		元号 : 0,
 
@@ -4399,29 +4400,36 @@ function module_code(library_namespace) {
 		// 曆注, note
 		// 減輕負擔:要這些曆注的自己算。
 		notes : {
-			月建 : note_月建,
-			季 : note_季,
-			旬 : note_旬,
-			生肖 : note_生肖,
-			五行 : note_五行,
-			繞迥 : note_繞迥,
+			"月建" : note_月建,
+			"季" : note_季,
+			"旬" : note_旬,
+			// gettext_config:{"id":"chinese-zodiac"}
+			"生肖" : note_生肖,
+			// gettext_config:{"id":"wu-xing"}
+			"五行" : note_五行,
+			"繞迥" : note_繞迥,
 			// 紫白飛星
-			年九星 : note_年九星,
-			月九星 : note_月九星,
-			日家九星 : note_日家九星,
-			三元九運 : note_三元九運,
+			"年九星" : note_年九星,
+			"月九星" : note_月九星,
+			"日家九星" : note_日家九星,
+			"三元九運" : note_三元九運,
 
-			孟仲季 : note_孟仲季,
-			月律 : note_月律,
-			月の別名 : note_月の別名,
+			"孟仲季" : note_孟仲季,
+			"月律" : note_月律,
+			// gettext_config:{"id":"japanese-month-name"}
+			"月の別名" : note_月の別名,
 
-			反支 : note_反支,
-			血忌 : note_血忌,
-			七曜 : note_七曜,
-			六曜 : note_六曜,
-			納音 : note_納音,
-			二十八宿 : note_二十八宿,
-			二十七宿 : note_二十七宿
+			"反支" : note_反支,
+			"血忌" : note_血忌,
+			// gettext_config:{"id":"7-luminaries"}
+			"七曜" : note_七曜,
+			// gettext_config:{"id":"6-luminaries"}
+			"六曜" : note_六曜,
+			"納音" : note_納音,
+			// gettext_config:{"id":"28-mansions"}
+			"二十八宿" : note_二十八宿,
+			// gettext_config:{"id":"27-mansions"}
+			"二十七宿" : note_二十七宿
 		}
 	});
 
