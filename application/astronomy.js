@@ -233,7 +233,16 @@ function module_code(library_namespace) {
 	/**
 	 * 各種月相: 新月、上弦月、滿月、下弦月。
 	 */
-	LUNAR_PHASE_NAME = '朔,上弦,望,下弦'.split(','),
+	LUNAR_PHASE_NAME = [
+		// gettext_config:{"id":"new-moon"}
+		"朔",
+		// gettext_config:{"id":"first-quarter"}
+		"上弦",
+		// gettext_config:{"id":"full-moon"}
+		"望",
+		// gettext_config:{"id":"last-quarter"}
+		"下弦"
+	],
 	/**
 	 * 本地之 time zone / time offset (UTC offset by minutes)。<br />
 	 * e.g., UTC+8: 8 * 60 = +480<br />

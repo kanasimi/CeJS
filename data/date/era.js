@@ -4393,10 +4393,11 @@ function module_code(library_namespace) {
 
 	Object.assign(sign_note, {
 		// 預設會 copy 的紀年曆注。
+		// @see function translate_era(era) @ _test suite/era.js
 		// "精"會特別處理。
 		// 據: 依據/根據/出典/原始參考文獻/資料引用來源/典拠。
 		copy_attributes : to_list('據,準,疑,傳說,曆法,'
-				+ '君主名,表字,君主號,諱,諡,廟號,生,卒,君主性別,在位,年號'),
+				+ '君主名,表字,君主號,諱,諡,廟號,生,卒,君主性別,在位,年號,父,母,配偶'),
 		// 曆注, note
 		// 減輕負擔:要這些曆注的自己算。
 		notes : {
@@ -5722,6 +5723,12 @@ function module_code(library_namespace) {
 			if (i === 0) {
 				era_list.push(last_era_data);
 				return;
+			}
+
+			if (false&&起訖[0] - era_list[i - 1].end === 0
+			&& 紀年[1] !== era_list[i - 1].name[1]) {
+				last_era_data.前任 = era_list[i - 1].name;
+				era_list[i - 1].繼任 = 紀年;
 			}
 
 			var start = 起訖[0], start_JDN = last_era_data.start_JDN,

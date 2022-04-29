@@ -822,6 +822,31 @@ function adapt_new_change(script_file_path, options) {
 		}
 		//console.trace(gettext_config_matched.slice(1));
 
+		if (gettext_config.mark_type === 'next_non-comment-line') {
+			/**
+			 * 添加訊息的方法: 特殊型態標記: 將下一非註解的行當作標的，並且不檢查內容。
+			 * e.g., 組合型 message id <code>
+	
+			插入 // gettext_config: {id:"m1",mark_type:"next_non-comment-line"}
+			插入 // gettext_config: {id:"m2",mark_type:"next_non-comment-line"}
+			gettext(prefix + 'type' + postfix);
+	
+			</code> */
+			let qqq_data = qqq_data_Map.get(gettext_config.id);
+			if (!qqq_data) {
+				CeL.error(`${adapt_new_change.name}: 特殊型態標記 message id 無 qqq data: ${JSON.stringify(gettext_config.id)}`);
+				continue;
+			}
+
+			for (let _line_index = line_index; _line_index < content_lines.length; _line_index++) {
+				if (!/^\s*\/\//.test(content_lines[_line_index])) {
+					set_references({ qqq_data, script_file_path, options, line_index: _line_index });
+					break;
+				}
+			}
+			continue;
+		}
+
 		const message_line = content_lines[line_index];
 		// [ all line, front, quote, message, tail ]
 		let message_line_matched = message_line.match(/^([^"']*)(')((?:\\'|[^'])+)'([\s\S]*?)$/);

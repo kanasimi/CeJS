@@ -2018,6 +2018,7 @@ var national_flags = {},
 /** {Boolean}標記當下正在處理的紀年。 */
 translate_era.draw_recent_era = true;
 
+// @see copy_attributes @ CeL.data.date.era.sign_note
 function translate_era(era) {
 
 	// add 文字式年曆注解
@@ -2196,6 +2197,8 @@ function translate_era(era) {
 			T : '出典'
 		} ]);
 
+		// TODO: 前任, 繼任
+
 		var is_女性 = date.君主性別 && date.君主性別.includes('女'),
 		// 君主名號 👸 🤴 👸🏻 🤴🏻 👸🏼 🤴🏼 👸🏽 🤴🏽 👸🏾 🤴🏾 👸🏿 🤴🏿
 		// 👨 👩
@@ -2289,6 +2292,20 @@ function translate_era(era) {
 				onclick : click_title_as_era
 			};
 		});
+
+		add_注('父', [ '👨', {
+			// gettext_config:{"id":"father"}
+			T : '父親'
+		} ]);
+		add_注('母', [ '🤱', {
+			// gettext_config:{"id":"mother"}
+			T : '母親'
+		} ]);
+
+		add_注('配偶', [ is_女性 ? '🤵‍♂️' : '👰‍♀️', {
+			// gettext_config:{"id":"spouse"}
+			T : '配偶'
+		} ]);
 
 		// 📓
 		add_注('注', [ '📝', {
@@ -4493,6 +4510,7 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 列具曆注, 具注曆譜, calendar notes
+		// gettext_config:{"id":"calendar-note"}
 		"曆注" : '具注曆日/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
 		// TODO: http://www.bsm.org.cn/show_article.php?id=543
