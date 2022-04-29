@@ -3863,7 +3863,8 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 各國曆法 Historical calendar
-		calendar : '計算日期的方法。計算得出，不一定是實暦。',
+		// gettext_config:{"id":"calendar"}
+		"calendar" : '計算日期的方法。計算得出，不一定是實暦。',
 
 		Gregorian : [ {
 			a : {
