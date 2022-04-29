@@ -1173,12 +1173,10 @@ function write_qqq_data(resources_path) {
 	// free
 	//qqq_file_data = null;
 	CeL.info(`${write_qqq_data.name}: 原始碼中無明確引用的訊息: ${message_id_without_references.length}/${qqq_data_Map.size}`);
-	if (1 || CeL.is_debug()) {
-		CeL.log(message_id_without_references.map(message_id => {
-			const message = qqq_data_Map.get(message_id).message;
-			return message_id === message ? message : `[${message_id}]	${message}`;
-		}).join('\n'));
-	}
+	CeL.log(message_id_without_references.map(message_id => {
+		const message = qqq_data_Map.get(message_id).message;
+		return message_id === message ? message : `[${message_id}]	${message}`;
+	}).join('\n'));
 }
 
 

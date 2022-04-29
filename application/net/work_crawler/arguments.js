@@ -182,9 +182,12 @@ function module_code(library_namespace) {
 					})) {
 						library_namespace.warn([ 'verify_arg: ', {
 							// gettext_config:{"id":"some-$2-path(s)-specified-by-$1-do-not-exist-$3"}
-							T : [ '有些 "%1" 所指定的%2路徑不存在：%3',
-							//
-							key, gettext(fso_type), error_fso ]
+							T : [ '有些 "%1" 所指定的%2路徑不存在：%3', key,
+							// gettext_config:{"id":"file","mark_type":"combination_message_id"}
+							// gettext_config:{"id":"files","mark_type":"combination_message_id"}
+							// gettext_config:{"id":"directory","mark_type":"combination_message_id"}
+							// gettext_config:{"id":"directories","mark_type":"combination_message_id"}
+							gettext(fso_type), error_fso ]
 						} ]);
 						return true;
 					}
@@ -395,8 +398,8 @@ function module_code(library_namespace) {
 					value = JSON.parse(value);
 				} catch (e) {
 					library_namespace.error('import_args: '
-							// gettext_config:{"id":"can-not-parse-$1"}
-							+ gettext('無法解析 %1', key + '=' + value));
+					// gettext_config:{"id":"can-not-parse-$1"}
+					+ gettext('無法解析 %1', key + '=' + value));
 					continue;
 				}
 			}
@@ -404,8 +407,8 @@ function module_code(library_namespace) {
 			var old_value = this[key], error = this.setup_value(key, value);
 			if (error) {
 				library_namespace.error('import_args: '
-						// gettext_config:{"id":"unable-to-set-$1-$2"}
-						+ gettext('無法設定 %1：%2', key + '=' + old_value, error));
+				// gettext_config:{"id":"unable-to-set-$1-$2"}
+				+ gettext('無法設定 %1：%2', key + '=' + old_value, error));
 			} else {
 				library_namespace.log(library_namespace.display_align([
 						[ key + ': ', old_value ],
@@ -431,6 +434,15 @@ function module_code(library_namespace) {
 		// work_crawler/work_crawler_loader.js與gui_electron_functions.js各參考了import_arg_hash的可選參數。
 		// @see work_crawler/gui_electron/gui_electron_functions.js
 		// @see work_crawler/resource/locale of work_crawler - locale.csv
+
+		// gettext_config:{"id":"number","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"function","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"boolean","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"string","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"fso_file","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"fso_files","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"fso_directory","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"fso_directories","mark_type":"combination_message_id"}
 		import_arg_hash : {
 			// set download directory, fso:directory
 			main_directory : 'string:fso_directory',

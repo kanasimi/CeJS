@@ -1805,7 +1805,7 @@ function draw_long_division(dividend, divisor, decimal_places, SVG_object,
 	.addNum(divisor + (moved_places ? '.' : ''), margin_left, base_y,
 			text_width, style);
 
-	if (0)
+	if (false)
 		SVG_object.show(1).addNode(
 				'path',
 				{
@@ -1876,7 +1876,7 @@ function draw_long_division(dividend, divisor, decimal_places, SVG_object,
 		else {
 			// 本次除去之倍數。
 			multiple = remainder - next_remainder;
-			if (0) {
+			if (false) {
 				library_namespace.debug('<br />[' + left_align(multiple)
 						+ ']<br />[' + left_align(next_remainder) + ']');
 				library_namespace.assert(multiple / divisor_value < 10)
@@ -1927,7 +1927,7 @@ function draw_long_division(dividend, divisor, decimal_places, SVG_object,
 	}, 'remainder: [', remainder, ']' ], 2, 'draw_long_division');
 
 	// 驗算。
-	if (0)
+	if (false)
 		library_namespace
 				.debug(Number(dividend_decimal_places < dividend_value.length ? dividend_value
 						.slice(0, dividend_decimal_places)
