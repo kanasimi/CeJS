@@ -59,8 +59,17 @@ function module_code(library_namespace) {
 			if (matched) {
 				message = [ matched[1] + '%1', matched[2] ];
 			}
-			message = Array.isArray(message) ? library_namespace.gettext.apply(
-					null, message) : library_namespace.gettext(message);
+			message = Array.isArray(message)
+			// gettext_config:{"id":"error-connect-etimedout-$1","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"error-connect-econnrefused-$1","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"error-getaddrinfo-enotfound-$1","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"error-timeout-$1","mark_type":"combination_message_id"}
+			? library_namespace.gettext.apply(null, message)
+			// gettext_config:{"id":"error-socket-hang-up","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"error-read-econnreset","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"error-write-econnaborted","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"error-unexpected-end-of-file","mark_type":"combination_message_id"}
+			: library_namespace.gettext(message);
 		}
 		return message;
 	}

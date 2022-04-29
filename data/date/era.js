@@ -5725,8 +5725,8 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (false&&起訖[0] - era_list[i - 1].end === 0
-			&& 紀年[1] !== era_list[i - 1].name[1]) {
+			if (false && 起訖[0] - era_list[i - 1].end === 0
+					&& 紀年[1] !== era_list[i - 1].name[1]) {
 				last_era_data.前任 = era_list[i - 1].name;
 				era_list[i - 1].繼任 = 紀年;
 			}

@@ -2140,7 +2140,19 @@ function module_code(library_namespace) {
 				});
 			}
 
-			TOC_html.push('<dt>', gettext('TOC.' + key), '</dt>',
+			TOC_html.push('<dt>',
+			// gettext_config:{"id":"toc.identifier","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"toc.title","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"toc.language","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"toc.date","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"toc.creator","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"toc.subject","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"toc.description","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"toc.publisher","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"toc.source","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"toc.dcterms-modified","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"toc.calibre-series","mark_type":"combination_message_id"}
+			gettext('TOC.' + key), '</dt>',
 			//
 			'<dd>', values.join(', '), '</dd>');
 		}

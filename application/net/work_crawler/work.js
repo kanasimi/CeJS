@@ -40,7 +40,23 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// latest_chapter
-	var work_data_display_fields = 'title,id,author,status,chapter_count,last_update,last_download.date,last_download.chapter,tags,url,directory'
+	var work_data_display_fields
+	// gettext_config:{"id":"work_data.title","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.id","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.author","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.status","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.chapter_count","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.last_update","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.last_download.date","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.last_download.chapter","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.url","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.directory","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.description","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_data.chapter_list","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_status-not-found","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_status-limited","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"work_status-finished","mark_type":"combination_message_id"}
+	= 'title,id,author,status,chapter_count,last_update,last_download.date,last_download.chapter,tags,url,directory'
 			.split(',');
 	show_work_data.prefix = 'work_data.';
 

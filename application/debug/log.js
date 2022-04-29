@@ -1163,7 +1163,15 @@ function finish(name_space) {
 					src : icon_path + level + '.png',
 					alt : '[' + log_icon[level] + ']',
 					title : log_icon[level] + ' '
-							+ CeL.gettext('log-type-' + level)
+					// gettext_config:{"id":"log-type-fatal","mark_type":"combination_message_id"}
+					// gettext_config:{"id":"log-type-error","mark_type":"combination_message_id"}
+					// gettext_config:{"id":"log-type-warn","mark_type":"combination_message_id"}
+					// gettext_config:{"id":"log-type-em","mark_type":"combination_message_id"}
+					// gettext_config:{"id":"log-type-info","mark_type":"combination_message_id"}
+					// gettext_config:{"id":"log-type-log","mark_type":"combination_message_id"}
+					// gettext_config:{"id":"log-type-debug","mark_type":"combination_message_id"}
+					// gettext_config:{"id":"log-type-trace","mark_type":"combination_message_id"}
+					+ CeL.gettext('log-type-' + level)
 				};
 			}
 			return '';

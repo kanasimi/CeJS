@@ -73,7 +73,6 @@
 	"%1 days later": "dans %1 jours",
 	"%1 weeks ago": "il y a %1 semaines",
 	"%1 weeks later": "dans %1 semaines",
-	"\u7121\u7d00\u5e74\u540d\u7a31\u4f5c [%1]\uff01": "Impossible de trouver une \u00e8re nomm\u00e9e [%1]\u202f!",
 	"\u8df3\u904e [%1]\uff1a\u672c[%2]\u50c5\u4f9b\u53c3\u7167\u7528\u3002": "Sauter [%1]\u202f: la p\u00e9riode %2 n\u2019est l\u00e0 que pour r\u00e9f\u00e9rence.",
 	"\u7d00\u5e74\u8f49\u63db\u5de5\u5177": "Convertisseur d\u2019\u00e8res calendaires",
 	"\u7d00\u5e74 %1": "\u00c8re %1",

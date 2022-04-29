@@ -822,15 +822,21 @@ function adapt_new_change(script_file_path, options) {
 		}
 		//console.trace(gettext_config_matched.slice(1));
 
-		if (gettext_config.mark_type === 'next_non-comment-line') {
+		if (gettext_config.mark_type === 'combination_message_id'
+			//|| gettext_config.mark_type === 'next_non-comment-line'
+			// 字串的一部分 部分的字串
+			|| gettext_config.mark_type === 'part_of_string') {
 			/**
 			 * 添加訊息的方法: 特殊型態標記: 將下一非註解的行當作標的，並且不檢查內容。
 			 * e.g., 組合型 message id <code>
 	
-			插入 // gettext_config: {id:"m1",mark_type:"next_non-comment-line"}
-			插入 // gettext_config: {id:"m2",mark_type:"next_non-comment-line"}
-			gettext(prefix + 'type' + postfix);
+			插入 // gettext_config:{"id":"message_id_1","mark_type":"combination_message_id"}
+			插入 // gettext_config:{"id":"message_id_2","mark_type":"combination_message_id"}
+			gettext(prefix + 'message_id_type' + postfix);
 	
+			插入 // gettext_config:{"id":"message_id","mark_type":"part_of_string"}
+			'...|msg=message|...'.split('|');
+
 			</code> */
 			let qqq_data = qqq_data_Map.get(gettext_config.id);
 			if (!qqq_data) {
@@ -878,7 +884,7 @@ function adapt_new_change(script_file_path, options) {
 				 * 添加訊息的方法: 直接把 message 當英文訊息。
 				 * e.g., <code>
 	
-				插入 // gettext_config: {}
+				插入 // gettext_config:{}
 				gettext('English message');
 	
 				</code> */
@@ -937,7 +943,7 @@ function adapt_new_change(script_file_path, options) {
 					 * 添加訊息的方法: 直接把 Original language message 原文訊息當英文訊息。
 					 * e.g., <code>
 		
-					插入 // gettext_config: {id:"message-id"}
+					插入 // gettext_config:{"id":"message-id"}
 					gettext('English message');
 		
 					</code> */
@@ -952,7 +958,7 @@ function adapt_new_change(script_file_path, options) {
 				 * 添加訊息的方法: 直接把 message_id 當英文訊息。
 				 * e.g., <code>
 	
-				插入 // gettext_config: {id:"English message"}
+				插入 // gettext_config:{"id":"English message"}
 				gettext('Original language message 原文訊息');
 	
 				</code> */
@@ -1168,13 +1174,10 @@ function write_qqq_data(resources_path) {
 	//qqq_file_data = null;
 	CeL.info(`${write_qqq_data.name}: 原始碼中無明確引用的訊息: ${message_id_without_references.length}/${qqq_data_Map.size}`);
 	if (1 || CeL.is_debug()) {
-		CeL.log(message_id_without_references
-			.filter(message_id => !/^log-type-[a-z]+$/.test(message_id)
-				&& !/^(?:download_options|work_data)\.[a-z_]+$/.test(message_id)
-				&& !/^(?:toc)\.[a-z\-]+$/.test(message_id)
-				&& !/^(?:work_status|error)-[a-z\-$\d]+$/.test(message_id)
-			)
-			.map(message_id => `[${message_id}]	${qqq_data_Map.get(message_id).message}`).join('\n'));
+		CeL.log(message_id_without_references.map(message_id => {
+			const message = qqq_data_Map.get(message_id).message;
+			return message_id === message ? message : `[${message_id}]	${message}`;
+		}).join('\n'));
 	}
 }
 

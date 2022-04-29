@@ -45,7 +45,6 @@
 	"%1 days later": "%1 dias mais tarde",
 	"%1 weeks ago": "%1 semanas atr\u00e1s",
 	"%1 weeks later": "%1 semanas mais tarde",
-	"\u7121\u7d00\u5e74\u540d\u7a31\u4f5c [%1]\uff01": "N\u00e3o foi poss\u00edvel encontrar a era de nome [%1]!",
 	"\u7d00\u5e74\u8f49\u63db\u5de5\u5177": "Conversor de Calend\u00e1rio de Eras",
 	"\u7d00\u5e74 %1": "Era %1",
 	"\u8acb\u6ce8\u610f\uff1a\u672c\u6b04\u50c5\u4f9b\u958b\u767c\u4eba\u54e1\u4f7f\u7528\u3002": "AVISO: Somente para desenvolvedores.",

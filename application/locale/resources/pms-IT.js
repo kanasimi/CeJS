@@ -73,7 +73,6 @@
 	"%1 days later": "da-s\u00ec %1 di",
 	"%1 weeks ago": "%1 sman-e fa",
 	"%1 weeks later": "da-s\u00ec %1 sman-e",
-	"\u7121\u7d00\u5e74\u540d\u7a31\u4f5c [%1]\uff01": "Imposs\u00ecbil trov\u00e9 n'era dita [%1]!",
 	"\u7121\u5e74\u865f\u6216\u5e1d\u738b\u7d00\u5e74\u540d\u7a31\u4f5c [%1]\uff01": "Imposs\u00ecbil trov\u00e9 l'era o l'ann \u00ebd regn ciam\u00e0 [%1]!",
 	"\u8df3\u904e [%1]\uff1a\u672c[%2]\u50c5\u4f9b\u53c3\u7167\u7528\u3002": "Saut\u00e9 [%1]: \u00cbl %2 a l'\u00e9 mach p\u00ebr arferiment.",
 	"\u7d00\u5e74\u8f49\u63db\u5de5\u5177": "Convertidor d'ere calendarie",

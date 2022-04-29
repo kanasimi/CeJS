@@ -2904,6 +2904,7 @@ CeL.era.pass_on = {
 
 		// Bắc thuộc, Thời kỳ phong kiến phương Bắc đô hộ, 北屬時期, 北属期
 		// Thời phong kiến phương Bắc đô hộ
+		// gettext_config:{"id":"chinese-domination-of-vietnam","mark_type":"part_of_string"}
 		'南越/武帝|-208/11/25~|:中國|準=年|朝代=趙朝|君主名=趙佗|時期=Bắc thuộc|注=《欽定越史通鑑綱目·卷之一》67頁：「甲午趙武王元年秦二世三年」。該年當系趙佗成為南海郡太守的年份。|注=約前203年，趙佗以番禺為都城在嶺南地區建立南越國，自稱「南越武王」。|注=目前越南大部分學者亦不承認趙朝，僅有少數人堅持認為趙朝是越南的一個朝代。',
 		'/文王|-137~|:中國|準=年|君主名=趙眜;趙胡|注=「趙胡」係《史記》所載南越文王之名。據1983年發現的南越王墓中所發掘的文物，文王的真實名字應是「趙眜」。',
 		'/明王|-125~|:中國|準=年|君主名=趙嬰齊',
@@ -2927,6 +2928,7 @@ CeL.era.pass_on = {
 
 		// Thời kỳ độc lập, 獨立時期, 独立王朝時代
 
+		// gettext_config:{"id":"late-dynastic-epoch","mark_type":"part_of_string"}
 		'吳/前吳王|939/1/23~|:中國|準=年|君主名=吳權|時期=Thời kỳ độc lập',
 		'/楊三哥|945/2/15~|:中國|準=年|君主=楊平王|君主名=楊紹洪',
 		'/天策王|951/2/9~954|:中國|準=年|君主名=吳昌岌|注=與弟共治',
@@ -3150,6 +3152,8 @@ CeL.era.pass_on = {
 		// [[en:List of monarchs of Thailand]]
 		// 年份未按照實際歷史編排！
 		// [[th:รายพระนามพระมหากษัตริย์ไทย]]
+		// gettext_config:{"id":"phra-ruang-dynasty","mark_type":"part_of_string"}
+		// gettext_config:{"id":"sukhothai-kingdom","mark_type":"part_of_string"}
 		'ราชวงศ์พระร่วง/พ่อขุนศรีอินทราทิตย์|1238~||疑|準=年|時期=อาณาจักรสุโขทัย|君主=พ่อขุนบางกลางหาว;Pho Khun Sri Indraditya;Pho Khun Bang Klang Hao|生=1188|關係=First King of Sukhothai Ally with Pha Mueang defeating the Khmer.',
 		'/พ่อขุนบานเมือง|1270~||疑|準=年|君主=Pho Khun Ban Mueang|關係=Son of Sri Indraditya',
 		'/พ่อขุนรามคำแหงมหาราช|1279~||疑|準=年|君主=พ่อขุนรามราช;Pho Khun Ram Khamhaeng the Great the Great;Pho Khun Ram Racha|生=1237|關係=Younger brother of Ban Muang;Son of Sri Indraditya',
@@ -3160,6 +3164,7 @@ CeL.era.pass_on = {
 		'/มหาธรรมราชาที่ ๓|1400~||疑|準=年|君主=พระมหาธรรมราชาที่ 3;ไสลือไทย;Sai Lue Thai;Phaya Saileuthai;Phra Maha Thammaracha III|關係=Son of Leuthai',
 		'/มหาธรรมราชาที่ ๔|1419~1438||疑|準=年|君主=พระมหาธรรมราชาที่ 4;บรมปาล;Boromapan;Phaya Borommapan;Phra Maha Thammaracha IV|關係=Son of Saileuthai',
 
+		// gettext_config:{"id":"ayutthaya-kingdom","mark_type":"part_of_string"}
 		'ราชวงศ์อู่ทอง/รามาธิบดีที่ ๑|1350~||疑|準=年|時期=อาณาจักรอยุธยา|君主=สมเด็จพระรามาธิบดีที่ 1;พระเจ้าอู่ทอง;Somdet Phra Chao Uthong;Somdet Phra Ramathibodi I|生=1314|關係=First King of Ayutthaya',
 		'/สมเด็จพระราเมศวร|1369~||疑|準=年|君主=Somdet Phra Ramesuan;king of Ayutthaya|生=1339|卒=1395|關係=Son of Uthong',
 		'ราชวงศ์สุพรรณภูมิ/สมเด็จพระบรมราชาธิราชที่ ๑|1370~||疑|準=年|時期=อาณาจักรอยุธยา|君主=สมเด็จพระบรมราชาธิราชที่ 1;ขุนหลวงพะงั่ว;Somdet Phra Borommarachathirat I;Khun Luang Pha Ngua|關係=Husband of Uthong\'s older sister;Usurper;Former Lord of Suphanburi',
@@ -3197,8 +3202,13 @@ CeL.era.pass_on = {
 		'/สมเด็จพระเจ้าอุทุมพร|1758~1758||疑|君主=สมเด็จพระบรมราชาธิราชที่ 4;สมเด็จพระเจ้าอุทุมพร / ขุนหลวงหาวัด;Somdet Phra Chao Uthumphon;Somdet Phra Ramathibodi IV;Khun Luang Hawat|卒=1796|關係=Son of Boromakot',
 		'/สมเด็จพระที่นั่งสุริยาศน์อัมรินทร์|1758~1767/4/7||疑|君主=สมเด็จพระบรมราชาที่ 3;สมเด็จพระที่นั่งสุริยาศน์อัมรินทร์ / พระเจ้าเอกทัศ;Somdet Phra Chao Ekkathat;Somdet Phra Chao Yu Hua Phra Thinang Suriyat Amarin;Somdet Phra Borommaracha III|卒=1767/4/17|關係=Brother of Uthumphon;Usurper, Former Front Palace;Son of Boromakot',
 
+		// gettext_config:{"id":"thonburi-dynasty","mark_type":"part_of_string"}
+		// gettext_config:{"id":"taksin","mark_type":"part_of_string"}
+		// gettext_config:{"id":"thonburi-kingdom","mark_type":"part_of_string"}
 		'ราชวงศ์ธนบุรี/สมเด็จพระเจ้ากรุงธนบุรี|1767/11/6~||疑|時期=อาณาจักรธนบุรี|君主名=鄭昭;鄭信|君主=สมเด็จพระบรมราชาที่ 4;สมเด็จพระเจ้าตากสินมหาราช;Somdet Phra Chao Taksin the Great;Phra Chao Krung Thonburi;Somdet Phra Borommaracha IV|生=1734/4/17|卒=1782/4/7|關係=Only King of Thonburi',
 
+		// gettext_config:{"id":"chakri-dynasty","mark_type":"part_of_string"}
+		// gettext_config:{"id":"rattanakosin-kingdom","mark_type":"part_of_string"}
 		'ราชวงศ์จักรี/พระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช|1782/4/6~||疑|時期=อาณาจักรรัตนโกสินทร์|國名=ประเทศไทย;ราชอาณาจักรสยาม;ราชอาณาจักรไทย|君主=พระพุทธยอดฟ้าจุฬาโลก;รัชกาลที่ 1;Maha Chakri Borommanat;Phra Rama I;the Great;Rama I|生=1737/3/20|卒=1809/9/7|關係=First King of Rattanakosin',
 		'/พระบาทสมเด็จพระพุทธเลิศหล้านภาลัย|1809/9/7~||疑|君主=พระพุทธเลิศหล้านภาลัย;รัชกาลที่ 2;Maha Itsarasunthon;Phra Rama II of Siam;Rama II|生=1767/2/24|卒=1824/7/21|關係=Son of Rama I and Queen Amarindra',
 		'/พระบาทสมเด็จพระนั่งเกล้าเจ้าอยู่หัว|1824/7/21~||疑|君主=นั่งเกล้า;พระมหาเจษฎาราชเจ้า;รัชกาลที่ 3;Maha Rama III;Phra Nang Klao Chao Yu Hua;Rama III;Phra Maha Chetsadarat Chao|生=1788/3/31|卒=1851/4/2|關係=Son of Rama II and Princess Consort Sri Sulalai',
@@ -3296,6 +3306,7 @@ CeL.era.pass_on = {
 		// Moreover, Luce proposes that Naratheinga Uzana was king between 1231
 		// and 1235 but it too is not universally accepted.
 		// http://en.wikipedia.org/wiki/List_of_heirs_to_the_Burmese_thrones
+		// gettext_config:{"id":"pagan","mark_type":"part_of_string"}
 		'Pagan/Anawrahta|1044/8/11~|:ME|關係=Son of Kunhsaw Kyaunghpyu',
 		'/Sawlu|1077/4/11~|:ME|準=年|在位=11 April 1077–c. 21 April 1084|關係=Son',
 		'/Kyansittha|1084/4/21~|:ME|準=年|在位=21 April 1084–1112/13|關係=Half-brother',
@@ -3483,6 +3494,7 @@ CeL.era.pass_on = {
 
 		// http://en.wikipedia.org/wiki/List_of_Burmese_monarchs
 		// http://en.wikipedia.org/wiki/List_of_rulers_of_Toungoo
+		// gettext_config:{"id":"toungoo","mark_type":"part_of_string"}
 		'Toungoo/Thawun Gyi|1279/4/21~|:ME|準=年|在位=21 April 1279–1317|關係=Son of Thawun Letya|注=Vassal of Pagan (1279–1287); independent (1287–1317); assassinated',
 		'/Thawun Nge|1317~|:ME|準=年|關係=Brother|注=Independent (1317–1322); Vassal of Pinya (1322–1324)',
 		'/Saw Hnit|1324~|:ME|準=年|關係=Son|注=Vassal of Pinya; assassinated',
@@ -3541,6 +3553,7 @@ CeL.era.pass_on = {
 		'Restored Hanthawaddy/Smim Htaw Buddhaketi|1740/11/1~|:ME|準=年|在位=November 1740–December 1747|關係=Cousin of Mahadhammaraza Dipadi',
 		'/Binnya Dala|1747/12/1~1757/5/6|:ME|準=年|在位=December 1747–6 May 1757|關係=Elected',
 
+		// gettext_config:{"id":"konbaung","mark_type":"part_of_string"}
 		'ကုန်းဘောင်ခေတ်/Alaungpaya|1752/2/29~|:ME|關係=Founder',
 		'/Naungdawgyi|1760/5/11~|:ME|關係=Son',
 		'/Hsinbyushin|1763/11/28~|:ME|關係=Brother',
@@ -3582,6 +3595,7 @@ CeL.era.pass_on = {
 		'Late Union of Burma/=|1988/9/23~|:CE|時期=Military rule',
 		'Union of Myanmar/=|1989/6/18~|:CE|時期=Military rule|注=1989年6月18日緬甸軍人政府將緬甸的英文寫法「Burma」改為「Myanmar」。',
 		'/သန်းရွှေ|1992/4/23~|:CE|君主名=Than Shwe|注=1997年11月15日起改任國家和平與發展委員會主席(State Law and Order Restoration Council→State Peace and Development Council)',
+		// gettext_config:{"id":"republic-of-the-union-of-myanmar","mark_type":"part_of_string"}
 		'မြန်မာပြည်/=|2010/10/21~|:CE|國名=Republic of the Union of Myanmar|時期=Democratic reforms',
 		'/သိန်းစိန်|2011/3/30~' + CeL.era.pass_on.last_day
 				+ '|:CE|君主名=Thein Sein'
@@ -3803,6 +3817,7 @@ CeL.era.pass_on = {
 		// 亞述人統治巴比倫時期
 		// https://en.wikipedia.org/wiki/Neo-Assyrian_Empire
 		// https://en.wikipedia.org/wiki/List_of_Assyrian_kings#Neo-Assyrian_Period
+		// gettext_config:{"id":"neo-assyrian","mark_type":"part_of_string"}
 		'Neo-Assyrian/Adad-nirari II|-911~|:CE|精=年|準=年|時期=Assyrian',
 		'/Tukulti-Ninurta II|-891~|:CE|精=年|準=年',
 		'/Ashur-nasir-pal II|-883~|:CE|精=年|準=年|ruler=Ashurnasirpal II',
@@ -3858,6 +3873,8 @@ CeL.era.pass_on = {
 		//
 		// https://en.wikipedia.org/wiki/8th_century_BC
 		// February 26, 747 BC: Nabonassar becomes king of Babylon.
+		// gettext_config:{"id":"babylonian-dynasty-of-e","mark_type":"part_of_string"}
+		// gettext_config:{"id":"babylon","mark_type":"part_of_string"}
 		'Babylonian Dynasty of E/Nabonassar|-747~|:CE|精=年|準=年|時期=Babylon|ruler=Nabû-nāṣir',
 		'/Nabu-nadin-zeri|-734~|:CE|精=年|準=年|ruler=Nabû-nādin-zēri',
 		'/Nabu-suma-ukin II|-732~|:CE|精=年|準=年|ruler=Nabû-šuma-ukîn II|注=king of Babylon for one month and two days during 732 BC before he was swept aside by his successor, Nabû-mukin-zēri.',
@@ -3873,7 +3890,9 @@ CeL.era.pass_on = {
 				// In year 17 of 19-year cycle,
 				// the intercalary month was named Araḫ Ulūlu.
 				// @see https://en.wikipedia.org/wiki/Iranian_calendars
-				+ "|參照用|曆法=Babylonian calendar|據=Parker & Dubberstein (1971)|月名=Nisānu;Āru;Simanu;Dumuzu;Abu;Ulūlu;Tišritum;Samna;Kislimu;Ṭebētum;Šabaṭu;Addaru;Makaruša Addari",
+				+ "|參照用"
+				// gettext_config:{"id":"babylonian-calendar","mark_type":"part_of_string"}
+				+ "|曆法=Babylonian calendar|據=Parker & Dubberstein (1971)|月名=Nisānu;Āru;Simanu;Dumuzu;Abu;Ulūlu;Tišritum;Samna;Kislimu;Ṭebētum;Šabaṭu;Addaru;Makaruša Addari",
 
 		// Median dynasty, Medes, 米底王國
 		// https://en.wikipedia.org/wiki/List_of_rulers_of_the_pre-Achaemenid_kingdoms_of_Iran#Median_dynasty,_726%E2%80%93521_BC
@@ -3888,6 +3907,7 @@ CeL.era.pass_on = {
 		'/Ashur-uballit II|Babylonian-612~Babylonian-608|:Babylonian|疑|準=年',
 
 		// Dynasty XI of Babylon (Neo-Babylonian or Chaldean Dynasty)
+		// gettext_config:{"id":"neo-babylonian","mark_type":"part_of_string"}
 		'Neo-Babylonian/Nabopolassar|Babylonian-626~|:Babylonian|疑|準=年|時期=Babylon|ruler=Nabû-apla-uṣur',
 		'/Nebuchadnezzar II|Babylonian-605~|:Babylonian|疑|準=年|ruler=Nabû-kudurri-usur',
 		'/Amel-Marduk|Babylonian-562~|:Babylonian|疑|準=年|ruler=Amēl-Marduk',
@@ -3900,6 +3920,7 @@ CeL.era.pass_on = {
 		// King of Kings of Persia, Kings of Anshan
 		// should use Zoroastrian calendar?
 		// @see https://en.wikipedia.org/wiki/Iranian_calendars
+		// gettext_config:{"id":"persia","mark_type":"part_of_string"}
 		'Persia/Cyrus II|Babylonian-559~|:Babylonian|疑|準=年|ruler=𐎤𐎢𐎽𐎢𐏁;کوروش بزرگ;Kūruš;Cyrus the Great',
 		'/Cambyses II|Babylonian-530~|:Babylonian|疑|準=年|ruler=کمبوجيه دوم',
 		'/Bardiya|Babylonian-522~|:Babylonian|疑|準=年|ruler=𐎲𐎼𐎮𐎡𐎹;Bardia;Σμέρδις;Smerdis',
@@ -3920,6 +3941,7 @@ CeL.era.pass_on = {
 
 		// https://en.wikipedia.org/wiki/List_of_people_known_as_The_Great
 		// Ἀργεάδαι, Argead dynasty
+		// gettext_config:{"id":"macedon","mark_type":"part_of_string"}
 		'Μακεδονία/Alexander III|Babylonian-336/4~-323/6/10|:Babylonian|疑|準=年|ruler=Ἀλέξανδρος ὁ Μέγας;Alexander the Great|生=-356/7/20 or 21|卒=-323/6/10 or 11',
 		'/Philip III|-323/6/11~-317/12/25|:Babylonian|疑|準=年|ruler=Philip III Arrhidaeus;Φίλιππος Γ΄ ὁ Ἀρριδαῖος|卒=-317/12/25|注=reigned as king of Macedonia from after June 11, 323 BC until his death, December 25, 317 BC.',
 		'/Alexander IV|Babylonian-323/5~-309|:Babylonian|疑|準=年|ruler=Ἀλέξανδρος Δ΄;Alexander IV Aegus|生=-323/8',
@@ -3983,6 +4005,7 @@ CeL.era.pass_on = {
 		 */
 		'Seleucid era|Babylonian-311~76/3/24|:Babylonian|疑|準=年',
 		// Seleucid Empire
+		// gettext_config:{"id":"seleucid","mark_type":"part_of_string"}
 		'Σελευκιδών/Seleucus I|Babylonian-306~|:Babylonian|疑|準=年|ruler=Seleucus I Nicator;Σέλευκος Α΄ Νικάτωρ',
 		// he was assassinated by Ptolemy Keraunos near Lysimachia September
 		// (281 BC).
@@ -4059,6 +4082,7 @@ CeL.era.pass_on = {
 		// https://en.wikipedia.org/wiki/List_of_kings_of_Athens
 
 		// Erechtheid dynasty
+		// gettext_config:{"id":"classical-athens","mark_type":"part_of_string"}
 		'Erechtheid/Cecrops I|-1556~|:CE|傳說|精=年|準=年|時期=Ἀθῆναι',
 		'/Cranaus|-1506~|:CE|傳說|精=年|準=年',
 		'/Amphictyon|-1497~|:CE|傳說|精=年|準=年',
@@ -4084,6 +4108,7 @@ CeL.era.pass_on = {
 		// Ancient Greek: Sparta
 		// https://en.wikipedia.org/wiki/List_of_kings_of_Sparta
 		// Agiad dynasty
+		// gettext_config:{"id":"sparta","mark_type":"part_of_string"}
 		'Agiad/Eurysthenes|-930~|:CE|傳說|精=年|準=年|時期=Σπάρτη|注=Return of the Heracleidae',
 		'/Agis I|-930~|:CE|傳說|精=年|準=年|注=Subjugated the Helots',
 		'/Echestratus|-900~|:CE|傳說|精=年|準=年|注=Expelled the Cynurensians[n 4] that were in power.',
@@ -4875,6 +4900,7 @@ CeL.era.pass_on = {
 		// https://en.wikipedia.org/wiki/Palenque
 
 		// Birth - Accession - Period-ending - Death
+		// gettext_config:{"id":"palenque","mark_type":"part_of_string"}
 		"Palenque/K'uk' B'ahlam I|Maya:8.19.15.3.4 1 K'an 2 K'ayab'~|:CE|君主名=Bahlum-K'uk';Quetzal;Kuk|生=Maya:8.18.0.13.6 5 Kimi 14 K'ayab'",
 		'/"Casper"|Maya:8.19.19.11.17 2 Kab\'an 10 Xul~|:CE|君主名=11 Rabbit;Manatee|生=Maya:8.19.6.8.8 11 Lamat 6 Xul',
 		"/B'utz'aj Sak Chiik|Maya:9.2.12.6.18 3 Etz'nab' 11 Xul~|:CE|君主名=Butz'ah Sak Chik;Manik;Sak-Chik|生=Maya:9.1.4.5.0 12 Ahaw 13 Sak",

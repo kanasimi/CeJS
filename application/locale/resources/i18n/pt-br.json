@@ -48,7 +48,6 @@
 	"$1-days-later": "%1 dias mais tarde",
 	"$1-weeks-ago": "%1 semanas atrás",
 	"$1-weeks-later": "%1 semanas mais tarde",
-	"can-t-find-era-named-$1": "Não foi possível encontrar a era de nome [%1]!",
 	"era-calendar-converter": "Conversor de Calendário de Eras",
 	"era-$1": "Era %1",
 	"warning-only-for-developers": "AVISO: Somente para desenvolvedores.",

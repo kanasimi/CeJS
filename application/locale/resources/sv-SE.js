@@ -73,7 +73,6 @@
 	"%1 days later": "%1 dagar senare",
 	"%1 weeks ago": "%1 veckor sedan",
 	"%1 weeks later": "%1 veckor senare",
-	"\u7121\u7d00\u5e74\u540d\u7a31\u4f5c [%1]\uff01": "Hittade inte den namngivna eran [%1]!",
 	"\u8df3\u904e [%1]\uff1a\u672c[%2]\u50c5\u4f9b\u53c3\u7167\u7528\u3002": "Hoppa \u00f6ver [%1]: %2 ska bara anv\u00e4ndas f\u00f6r referenser.",
 	"\u7d00\u5e74 %1": "Era %1",
 	"\u8a0a\u606f\u63d0\u793a\u8207\u7d00\u9304\u6b04": "Journalpanel",

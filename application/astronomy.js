@@ -234,15 +234,14 @@ function module_code(library_namespace) {
 	 * 各種月相: 新月、上弦月、滿月、下弦月。
 	 */
 	LUNAR_PHASE_NAME = [
-		// gettext_config:{"id":"new-moon"}
-		"朔",
-		// gettext_config:{"id":"first-quarter"}
-		"上弦",
-		// gettext_config:{"id":"full-moon"}
-		"望",
-		// gettext_config:{"id":"last-quarter"}
-		"下弦"
-	],
+	// gettext_config:{"id":"new-moon"}
+	"朔",
+	// gettext_config:{"id":"first-quarter"}
+	"上弦",
+	// gettext_config:{"id":"full-moon"}
+	"望",
+	// gettext_config:{"id":"last-quarter"}
+	"下弦" ],
 	/**
 	 * 本地之 time zone / time offset (UTC offset by minutes)。<br />
 	 * e.g., UTC+8: 8 * 60 = +480<br />
@@ -5080,8 +5079,15 @@ function module_code(library_namespace) {
 		= mean_lunar_phase(year_month, phase, options);
 
 		if (eclipse_data.type) {
-			eclipse_data.name = eclipse_data.type + ' ' + eclipse_data.object
-					+ ' eclipse';
+			eclipse_data.name
+			// gettext_config:{"id":"total-solar-eclipse","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"annular-solar-eclipse","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"hybrid-solar-eclipse","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"partial-solar-eclipse","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"total-lunar-eclipse","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"partial-lunar-eclipse","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"penumbral-lunar-eclipse","mark_type":"combination_message_id"}
+			= eclipse_data.type + ' ' + eclipse_data.object + ' eclipse';
 			eclipse_data.Δlongitude
 			// eclipse conjunction 黃經衝 or 合(有相同的黃經)時之月黃緯
 			= lunar_coordinates(eclipse_data.TT).β
@@ -5108,6 +5114,8 @@ function module_code(library_namespace) {
 			return saros_data && {
 				TT : TT_JD,
 				object : phase === 0 ? 'solar' : 'lunar',
+				// gettext_config:{"id":"solar-eclipse","mark_type":"combination_message_id"}
+				// gettext_config:{"id":"lunar-eclipse","mark_type":"combination_message_id"}
 				name : (phase === 0 ? 'solar' : 'lunar') + ' eclipse',
 				Δlongitude :
 				// eclipse conjunction 黃經衝 or 合(有相同的黃經)時之月黃緯
@@ -5135,6 +5143,13 @@ function module_code(library_namespace) {
 			return Object.assign(eclipse_data, {
 				TT : TT,
 				object : phase === 0 ? 'solar' : 'lunar',
+				// gettext_config:{"id":"total-solar-eclipse","mark_type":"combination_message_id"}
+				// gettext_config:{"id":"annular-solar-eclipse","mark_type":"combination_message_id"}
+				// gettext_config:{"id":"hybrid-solar-eclipse","mark_type":"combination_message_id"}
+				// gettext_config:{"id":"partial-solar-eclipse","mark_type":"combination_message_id"}
+				// gettext_config:{"id":"total-lunar-eclipse","mark_type":"combination_message_id"}
+				// gettext_config:{"id":"partial-lunar-eclipse","mark_type":"combination_message_id"}
+				// gettext_config:{"id":"penumbral-lunar-eclipse","mark_type":"combination_message_id"}
 				name : eclipse_data.type + ' '
 						+ (phase === 0 ? 'solar' : 'lunar') + ' eclipse',
 				Δlongitude :
@@ -5195,6 +5210,8 @@ function module_code(library_namespace) {
 		return Object.assign(TT.data, {
 			TT : TT,
 			object : phase === 0 ? 'solar' : 'lunar',
+			// gettext_config:{"id":"solar-eclipse","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"lunar-eclipse","mark_type":"combination_message_id"}
 			name : (phase === 0 ? 'solar' : 'lunar') + ' eclipse',
 			Δlongitude :
 			// eclipse conjunction 黃經衝 or 合(有相同的黃經)時之月黃緯
@@ -5252,6 +5269,8 @@ function module_code(library_namespace) {
 		eclipse_data = {
 			TT : TT,
 			object : phase === 0 ? 'solar' : 'lunar',
+			// gettext_config:{"id":"solar-eclipse","mark_type":"combination_message_id"}
+			// gettext_config:{"id":"lunar-eclipse","mark_type":"combination_message_id"}
 			name : (phase === 0 ? 'solar' : 'lunar') + ' eclipse',
 			Δlongitude :
 			// eclipse conjunction 黃經衝 or 合(有相同的黃經)時之月黃緯
@@ -5358,6 +5377,8 @@ function module_code(library_namespace) {
 			eclipse_data = {
 				TT : TT,
 				object : phase === 0 ? 'solar' : 'lunar',
+				// gettext_config:{"id":"solar-eclipse","mark_type":"combination_message_id"}
+				// gettext_config:{"id":"lunar-eclipse","mark_type":"combination_message_id"}
 				name : (phase === 0 ? 'solar' : 'lunar') + ' eclipse',
 				Δlongitude :
 				// eclipse conjunction 黃經衝 or 合(有相同的黃經)時之月黃緯
@@ -6349,13 +6370,28 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	rise_set.type_name = 'lower culmination,rise,upper culmination,set'
-			.split(',');
+	rise_set.type_name = [
+	// gettext_config:{"id":"lower-culmination"}
+	"lower culmination",
+	// gettext_config:{"id":"sunrise","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"moonrise","mark_type":"combination_message_id"}
+	"rise",
+	// gettext_config:{"id":"upper-culmination"}
+	"upper culmination",
+	// gettext_config:{"id":"sunset","mark_type":"combination_message_id"}
+	// gettext_config:{"id":"moonset","mark_type":"combination_message_id"}
+	"set" ];
 
 	'astronomical,nautical,civil'.split(',')
 	//
 	.forEach(function(twilight, index) {
+		// gettext_config:{"id":"astronomical-twilight-begin","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"nautical-twilight-begin","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"civil-twilight-begin","mark_type":"combination_message_id"}
 		rise_set.type_name[4 + index] = twilight + ' twilight begin';
+		// gettext_config:{"id":"astronomical-twilight-end","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"nautical-twilight-end","mark_type":"combination_message_id"}
+		// gettext_config:{"id":"civil-twilight-end","mark_type":"combination_message_id"}
 		rise_set.type_name[9 - index] = twilight + ' twilight end';
 	});
 
