@@ -1040,5 +1040,6 @@
 	"let-s-<a>translate-the-interface<-a>-together": "Let's <a>translate the interface</a> together!",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
 	"untranslated-message-count": "0",
-	"local-language-name": "English"
+	"local-language-name": "English",
+	"treat-$1-as-language-$2": "Treat %1 as language: %2."
 }

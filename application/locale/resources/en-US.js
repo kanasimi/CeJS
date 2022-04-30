@@ -1042,6 +1042,7 @@
 	"\u6b61\u8fce\u8207\u6211\u5011\u4e00\u540c<a>\u7ffb\u8b6f\u4ecb\u9762\u6587\u5b57</a>\uff01": "Let's <a>translate the interface</a> together!",
 	"\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
 	"untranslated message count": "0",
-	"local-language-name": "English"
+	"local-language-name": "English",
+	"Treat %1 as language: %2.": "Treat %1 as language: %2."
 },
 "en-US");

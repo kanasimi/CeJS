@@ -549,9 +549,14 @@ function set_qqq_data(message_id, qqq) {
 	let qqq_data = parse_qqq(qqq);
 	if (qqq_data_Map.has(message_id)) {
 		const old_qqq_data = qqq_data_Map.get(message_id);
+		if (old_qqq_data) {
+			for (const key of Object.keys(qqq_data))
+				if (!qqq_data[key] && qqq_data[key] !== 0 && (key in old_qqq_data))
+					delete qqq_data[key];
+		}
+		qqq_data = Object.assign(old_qqq_data, qqq_data);
 		// 捨棄舊的 .references 資訊，將在 adapt_new_change() 重新設定。
 		delete qqq_data.references;
-		qqq_data = Object.assign(old_qqq_data, qqq_data);
 	} else {
 		CeL.warn(`${set_qqq_data.name}: New message id in i18n: ${message_id}`);
 		qqq_data_Map.set(message_id, qqq_data);
@@ -879,9 +884,8 @@ function adapt_new_change(script_file_path, options) {
 		if (!message_id) {
 			// matched: [ all, text_id / message, tail punctuation mark ]
 			const matched = message.match(CeL.gettext.PATTERN_message_with_tail_punctuation_mark);
-			if (matched) {
-				message_id = message_to_id_Map.get(matched[1]);
-			} else if (!gettext_config.id && !PATTERN_has_invalid_en_message_char.test(message)) {
+			if ((!matched || !(message_id = message_to_id_Map.get(matched[1])))
+				&& !gettext_config.id && !PATTERN_has_invalid_en_message_char.test(message)) {
 				/**
 				 * 添加訊息的方法: 直接把 message 當英文訊息。
 				 * e.g., <code>
@@ -938,9 +942,14 @@ function adapt_new_change(script_file_path, options) {
 
 			if (gettext_config.id === message_id) {
 				if (!language_code) {
-					CeL.error(`${adapt_new_change.name}: 無法判別 message 之語言! 無法匯入 translatewiki! ${JSON.stringify(message)}`);
-					//i18n_message_id_to_message['en-US'][message_id] = message;
-				} else if (language_code === 'en-US') {
+					if (PATTERN_has_invalid_en_message_char.test(message)) {
+						CeL.error(`${adapt_new_change.name}: 無法判別 message 之語言! 無法匯入 translatewiki!:\n[${message_id}] ${JSON.stringify(message)}`);
+					} else {
+						language_code = 'en-US';
+						CeL.error(`${adapt_new_change.name}: 無法判別 message 之語言，當作 ${language_code}:\n[${message_id}] ${JSON.stringify(message)}`);
+					}
+				}
+				if (language_code === 'en-US') {
 					/**
 					 * 添加訊息的方法: 直接把 Original language message 原文訊息當英文訊息。
 					 * e.g., <code>
