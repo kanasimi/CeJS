@@ -89,6 +89,6 @@
 	"\u5730\u7406\u5ea7\u6a19\uff1a": "Koordinaten:",
 	"\u6642\u5340\uff1a": "Zeitzone:",
 	"\u4f5c\u54c1\u5df2\u5b8c\u7d50\u3002": "Serie ist beendet.",
-	"untranslated message count": "953"
+	"untranslated message count": "954"
 },
 "de-DE");

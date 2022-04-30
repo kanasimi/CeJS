@@ -93,6 +93,6 @@
 	"syntax-error": "구문 오류!",
 	"illegal-pattern-$1": "잘못된 패턴: [%1]",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated-message-count": "951",
+	"untranslated-message-count": "952",
 	"local-language-name": "한국어"
 }

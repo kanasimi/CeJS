@@ -408,6 +408,11 @@ function load_i18n_messages(resources_path, callback) {
 	});
 }
 
+/**
+ * 解析 qqq 字串成為 qqq_data。
+ * @param {String} qqq 
+ * @returns {Object} qqq_data
+ */
 function parse_qqq(qqq) {
 	const qqq_data = {
 		message: null,
@@ -543,20 +548,30 @@ function log_message_changed(message_id) {
 	}
 }
 
-function set_qqq_data(message_id, qqq) {
+function set_qqq_data(message_id, qqq, options) {
 	if (!qqq || typeof qqq !== 'string')
 		return;
+
 	let qqq_data = parse_qqq(qqq);
-	if (qqq_data_Map.has(message_id)) {
-		const old_qqq_data = qqq_data_Map.get(message_id);
-		if (old_qqq_data) {
-			for (const key of Object.keys(qqq_data))
-				if (!qqq_data[key] && qqq_data[key] !== 0 && (key in old_qqq_data))
-					delete qqq_data[key];
-		}
-		qqq_data = Object.assign(old_qqq_data, qqq_data);
-		// 捨棄舊的 .references 資訊，將在 adapt_new_change() 重新設定。
+	const old_qqq_data = qqq_data_Map.get(message_id);
+	if (old_qqq_data) {
+		console.assert(CeL.is_Object(old_qqq_data));
+		// qqq_data.references 應該在 adapt_new_change() 設定。
 		delete qqq_data.references;
+		// Copy new properties from new qqq_data.
+		for (const property_name of Object.keys(qqq_data)) {
+			if ((qqq_data[property_name] || qqq_data[property_name] === 0 || (property_name in old_qqq_data))
+				&& old_qqq_data[property_name] !== qqq_data[property_name]) {
+				if (options?.show_change_message) {
+					CeL.info(`${set_qqq_data.name}: Set [${message_id}].${JSON.stringify(property_name)}:`);
+					CeL.log(CeL.display_align([
+						['原\t', old_qqq_data[property_name]],
+						['新→\t', qqq_data[property_name]]]));
+				}
+				old_qqq_data[property_name] = qqq_data[property_name];
+			}
+		}
+		qqq_data = old_qqq_data;
 	} else {
 		CeL.warn(`${set_qqq_data.name}: New message id in i18n: ${message_id}`);
 		qqq_data_Map.set(message_id, qqq_data);
@@ -566,7 +581,11 @@ function set_qqq_data(message_id, qqq) {
 
 function create__qqq_data_Map() {
 	for (const [message_id, qqq] of Object.entries(i18n_message_id_to_message.qqq)) {
-		set_qqq_data(message_id, qqq);
+		const qqq_data = set_qqq_data(message_id, qqq);
+		if (qqq_data) {
+			// reset qqq_data.references: 捨棄舊的 .references 資訊，將在 adapt_new_change() 重新設定。
+			delete qqq_data.references;
+		}
 	}
 
 	// Create qqq_data_Map
@@ -600,7 +619,7 @@ function create__qqq_data_Map() {
 				: en_message_to_message_id(en_message);
 		let qqq_data = qqq_data_Map.get(message_id);
 		//if (message === '作者') { console.trace({ message, message_id, qqq_data }); throw 456465; }
-		if (!qqq_data && message_to_localized_mapping.qqq && (qqq_data = set_qqq_data(message_id, message_to_localized_mapping.qqq[message]))) {
+		if (!qqq_data && message_to_localized_mapping.qqq && (qqq_data = set_qqq_data(message_id, message_to_localized_mapping.qqq[message], { show_change_message: true }))) {
 			delete message_to_localized_mapping.qqq[message];
 		}
 		if (!qqq_data) {
@@ -946,7 +965,7 @@ function adapt_new_change(script_file_path, options) {
 						CeL.error(`${adapt_new_change.name}: 無法判別 message 之語言! 無法匯入 translatewiki!:\n[${message_id}] ${JSON.stringify(message)}`);
 					} else {
 						language_code = 'en-US';
-						CeL.error(`${adapt_new_change.name}: 無法判別 message 之語言，當作 ${language_code}:\n[${message_id}] ${JSON.stringify(message)}`);
+						CeL.warn(`${adapt_new_change.name}: 無法判別 message 之語言，當作 ${language_code}:\n[${message_id}] ${JSON.stringify(message)}`);
 					}
 				}
 				if (language_code === 'en-US') {
@@ -994,32 +1013,60 @@ function adapt_new_change(script_file_path, options) {
 		}
 
 		//console.trace([message, gettext_config, qqq_data_Map.get(message_id)]);
-		for (const [property, value] of Object.entries(gettext_config)) {
-			if (property === 'id') {
-				if (message_id === value) {
-					continue;
-				}
-				if (message_id_changed.has(message_id)) {
-					if (message_id_changed.get(message_id) !== value) {
-						throw new Error(`${adapt_new_change.name}: message id 衝突:\n原 message	id ${JSON.stringify(message_id)}\n→ 其他原始碼中的 message id:	${JSON.stringify(message_id_changed.get(message_id))}\n→ [${script_file_path}]原始碼中的 message:${JSON.stringify(value)}`);
+		for (const [property_name, value] of Object.entries(gettext_config)) {
+			switch (property_name) {
+				case 'id':
+					if (message_id === value) {
+						continue;
 					}
+					if (message_id_changed.has(message_id)) {
+						if (message_id_changed.get(message_id) !== value) {
+							throw new Error(`${adapt_new_change.name}: message id 衝突:\n原 message	id ${JSON.stringify(message_id)}\n→ 其他原始碼中的 message id:	${JSON.stringify(message_id_changed.get(message_id))}\n→ [${script_file_path}]原始碼中的 message:${JSON.stringify(value)}`);
+						}
 
-				} else {
-					CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼改變了的 message id:`);
-					CeL.log(CeL.display_align([
-						['原\t', JSON.stringify(message_id)],
-						['新→\t', JSON.stringify(value)]]));
-					message_id_changed.set(message_id, value);
-					qqq_data.need_to_recheck_all_sources = true;
-					// 當原始碼中改變 message id 時，不會一同變更 qqq_data_Map, message_to_id_Map, i18n_message_id_to_message。唯一只會紀錄於 message_id_changed。
-					//qqq_data_Map.set(value, qqq_data);
-					//qqq_data_Map.delete(message_id);
-					//message_id = value;
-				}
-				continue;
+					} else {
+						CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中改變了 message id:`);
+						CeL.log(CeL.display_align([
+							['原\t', JSON.stringify(message_id)],
+							['新→\t', JSON.stringify(value)]]));
+						message_id_changed.set(message_id, value);
+						qqq_data.need_to_recheck_all_sources = true;
+						// 當原始碼中改變 message id 時，不會一同變更 qqq_data_Map, message_to_id_Map, i18n_message_id_to_message。唯一只會紀錄於 message_id_changed。
+						//qqq_data_Map.set(value, qqq_data);
+						//qqq_data_Map.delete(message_id);
+						//message_id = value;
+					}
+					continue;
+
+				case 'qqq':
+					set_qqq_data(message_id, gettext_config.qqq, { show_change_message: true });
+					continue;
 			}
 
-			qqq_data[property] = value;
+			if (/^[a-z]{2}$/.test(property_name)) {
+				const language_code = CeL.gettext.to_standard(property_name);
+				if (language_code) {
+					// assert: CeL.is_Object(i18n_message_id_to_message[language_code])
+					const old_value = i18n_message_id_to_message[language_code][message_id];
+					if (old_value || old_value === 0) {
+						CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中改變了 [${message_id}] 的 ${language_code} 訊息:`);
+						CeL.log(CeL.display_align([
+							['原\t', JSON.stringify(old_value)],
+							['新→\t', JSON.stringify(value)]]));
+					}
+					i18n_message_id_to_message[language_code][message_id] = value;
+					continue;
+				}
+			}
+
+			const old_value = qqq_data[property_name];
+			if (old_value || old_value === 0) {
+				CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中改變了 [${message_id}].${JSON.stringify(property_name)}:`);
+				CeL.log(CeL.display_align([
+					['原\t', JSON.stringify(old_value)],
+					['新→\t', JSON.stringify(value)]]));
+			}
+			qqq_data[property_name] = value;
 		}
 
 		if (message_id_changed.has(message_id))

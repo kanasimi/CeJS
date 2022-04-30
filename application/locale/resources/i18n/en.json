@@ -1041,5 +1041,6 @@
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
 	"untranslated-message-count": "0",
 	"local-language-name": "English",
-	"treat-$1-as-language-$2": "Treat %1 as language: %2."
+	"treat-$1-as-language-$2": "Treat %1 as language: %2.",
+	"cannot-detect-language-of-$1": "Cannot detect language of %1!"
 }
