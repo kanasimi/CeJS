@@ -27,7 +27,7 @@
 		"scope": "system",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2755}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2798}}"
 	},
 	"contents-of-$1": {
 		"message": "Contents of [%1]",
@@ -178,14 +178,14 @@
 		"scope": "CeL.application.locale: create_domain_menu.tag",
 		"additional_notes": "{{identical|Language}}",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1605}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1622}}"
 	},
 	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": {
 		"message": "所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。",
 		"notes": "Used as debugging message when selecting language. %1: domain_name",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1028}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1032}}"
 	},
 	"$1-elapsed-$3-at-$2": {
 		"message": "%1 elapsed, %3 at %2",
@@ -508,7 +508,7 @@
 		"notes": "",
 		"scope": "data.date.era: get_dates()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7418}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7426}}"
 	},
 	"skip-$1-the-$2-is-for-reference-purpose-only": {
 		"message": "跳過 [%1]：本[%2]僅供參照用。",
@@ -516,7 +516,7 @@
 		"scope": "data.date.era",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7232}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7531}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7240}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7539}}"
 	},
 	"era-calendar-converter": {
 		"message": "紀年轉換工具",
@@ -532,7 +532,7 @@
 		"scope": "data.date.era: title",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2493}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2528}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2536}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2571}}"
 	},
 	"log-console": {
 		"message": "訊息提示與紀錄欄",
@@ -540,7 +540,7 @@
 		"scope": "data.date.era: system",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/demo.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}": {
 		"message": "已載入 %1 筆資料。",
@@ -548,7 +548,7 @@
 		"scope": "data.date.era: system",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3009}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L920}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L923}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3052}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L920}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L923}}"
 	},
 	"warning-only-for-developers": {
 		"message": "請注意：本欄僅供開發人員使用。",
@@ -564,7 +564,7 @@
 		"scope": "data.date.era: system",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L191}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4051}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4147}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4236}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4372}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L191}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4094}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4190}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4279}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4415}}"
 	},
 	"china": {
 		"message": "中國",
@@ -572,7 +572,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4751}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L6138}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L6182}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7106}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L77}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L143}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4795}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L6146}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L6190}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7114}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L77}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L143}}"
 	},
 	"japan": {
 		"message": "日本",
@@ -580,7 +580,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L2091}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L2091}}\n: {{GitHub|kanasimi/CeJS/blob/master/external/encoding.training%20set/UTF-8/ja-JP/%E3%83%8F%E3%83%B3%E3%82%B0%E3%83%AB.html}}\n: {{GitHub|kanasimi/CeJS/blob/master/external/encoding.training%20set/UTF-8/ja-JP/%E3%83%8F%E3%83%B3%E3%82%B0%E3%83%AB.html}}"
 	},
 	"korea": {
 		"message": "한국",
@@ -604,7 +604,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1961}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L268}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5361}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L2899}}\n: {{GitHub|kanasimi/wikibot/blob/master/wikitech/era_note.js#L37}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1961}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L268}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5405}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L2899}}\n: {{GitHub|kanasimi/wikibot/blob/master/wikitech/era_note.js#L37}}"
 	},
 	"chinese-domination-of-vietnam": {
 		"message": "Bắc thuộc",
@@ -655,35 +655,35 @@
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3208}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3209}}"
 	},
 	"thonburi-dynasty": {
 		"message": "ราชวงศ์ธนบุรี",
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3208}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3209}}"
 	},
 	"taksin": {
 		"message": "สมเด็จพระเจ้ากรุงธนบุรี",
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3208}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3209}}"
 	},
 	"rattanakosin-kingdom": {
 		"message": "อาณาจักรรัตนโกสินทร์",
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3212}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3213}}"
 	},
 	"chakri-dynasty": {
 		"message": "ราชวงศ์จักรี",
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3212}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3213}}"
 	},
 	"india": {
 		"message": "India",
@@ -691,21 +691,21 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3610}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3611}}"
 	},
 	"myanmar": {
 		"message": "မြန်မာ",
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L241}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3231}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L241}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3232}}"
 	},
 	"republic-of-the-union-of-myanmar": {
 		"message": "မြန်မာပြည်",
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3599}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3600}}"
 	},
 	"pagan": {
 		"message": "Pagan",
@@ -713,7 +713,7 @@
 		"scope": "data.date.era_data: 紀年資料",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3310}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3311}}"
 	},
 	"toungoo": {
 		"message": "Toungoo",
@@ -721,14 +721,14 @@
 		"scope": "data.date.era_data: 紀年資料",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3498}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3499}}"
 	},
 	"konbaung": {
 		"message": "ကုန်းဘောင်ခေတ်",
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3557}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3558}}"
 	},
 	"maya": {
 		"message": "Maya",
@@ -736,7 +736,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4896}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4897}}"
 	},
 	"palenque": {
 		"message": "Palenque",
@@ -744,7 +744,7 @@
 		"scope": "data.date.era_data: 紀年資料",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4904}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4905}}"
 	},
 	"mesopotamian": {
 		"message": "Mesopotamian",
@@ -752,7 +752,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3733}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3734}}"
 	},
 	"babylonian-calendar": {
 		"message": "Babylonian calendar",
@@ -760,7 +760,7 @@
 		"scope": "data.date.era_data: 紀年資料",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3895}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3896}}"
 	},
 	"babylon": {
 		"message": "Babylon",
@@ -768,7 +768,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3878}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3879}}"
 	},
 	"babylonian-dynasty-of-e": {
 		"message": "Babylonian Dynasty of E",
@@ -776,7 +776,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3878}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3879}}"
 	},
 	"neo-babylonian": {
 		"message": "Neo-Babylonian",
@@ -784,7 +784,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3911}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3912}}"
 	},
 	"neo-assyrian": {
 		"message": "Neo-Assyrian",
@@ -792,7 +792,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3821}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3822}}"
 	},
 	"persia": {
 		"message": "Persia",
@@ -800,35 +800,35 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3924}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3925}}"
 	},
 	"classical-athens": {
 		"message": "Ἀθῆναι",
 		"notes": "city-state in ancient Greece",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4086}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4087}}"
 	},
 	"sparta": {
 		"message": "Σπάρτη",
 		"notes": "city-state in ancient Greece",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4112}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4113}}"
 	},
 	"macedon": {
 		"message": "Μακεδονία",
 		"notes": "Name of [[:en:Macedonia (ancient kingdom)]], Μακεδονικό βασίλειο",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3945}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3946}}"
 	},
 	"seleucid": {
 		"message": "Σελευκιδών",
 		"notes": "Name of [[:en:Seleucid Empire]]",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4009}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4010}}"
 	},
 	"hittite": {
 		"message": "Hittite",
@@ -836,13 +836,15 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4616}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4617}}"
 	},
 	"convert-an-era-name-to-the-specified-format": {
 		"message": "Convert an era name to the specified format",
 		"notes": "Used as alert message.",
 		"scope": "data.date.era: input_panel",
-		"original_message_language_code": "en-US"
+		"original_message_language_code": "en-US",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"era-name": {
 		"message": "紀年",
@@ -850,7 +852,7 @@
 		"scope": "data.date.era: input_panel",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4654}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4654}}"
 	},
 	"output-format": {
 		"message": "輸出格式",
@@ -858,7 +860,7 @@
 		"scope": "data.date.era: input_panel",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"customize-output-format": {
 		"message": "自訂輸出格式",
@@ -874,7 +876,7 @@
 		"scope": "data.date.era: input_panel",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1070}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1094}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1070}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1094}}"
 	},
 	"example": {
 		"message": "測試範例",
@@ -907,7 +909,7 @@
 		"scope": "data.date.era: note_botton_layer",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1851}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2317}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1851}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2360}}"
 	},
 	"calendar-table": {
 		"message": "曆譜",
@@ -1034,7 +1036,7 @@
 		"scope": "data.date.era: 文字式年曆注解",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2185}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2194}}"
 	},
 	"data-source": {
 		"message": "出典",
@@ -1042,7 +1044,7 @@
 		"scope": "data.date.era: 文字式年曆注解",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2197}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2206}}"
 	},
 	"note": {
 		"message": "注",
@@ -1057,7 +1059,7 @@
 		"scope": "data.date.era: 文字式年曆注解",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2320}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2363}}"
 	},
 	"personal-name": {
 		"message": "君主名",
@@ -1065,7 +1067,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2209}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2212}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2215}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2218}}"
 	},
 	"courtesy-name": {
 		"message": "表字",
@@ -1073,7 +1075,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2218}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2224}}"
 	},
 	"art-name": {
 		"message": "君主號",
@@ -1081,7 +1083,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2220}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2226}}"
 	},
 	"true-name": {
 		"message": "諱",
@@ -1089,7 +1091,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2222}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2228}}"
 	},
 	"posthumous-name": {
 		"message": "諡",
@@ -1097,7 +1099,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2237}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2241}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2243}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2247}}"
 	},
 	"temple-name": {
 		"message": "廟號",
@@ -1105,7 +1107,7 @@
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
 		"scope": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L518}}",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2246}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2249}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2252}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2255}}"
 	},
 	"born": {
 		"message": "出生",
@@ -1113,7 +1115,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2259}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2265}}"
 	},
 	"died": {
 		"message": "逝世",
@@ -1121,7 +1123,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2271}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2277}}"
 	},
 	"reign": {
 		"message": "在位",
@@ -1129,13 +1131,15 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2284}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2286}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2290}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2292}}"
 	},
 	"coronation": {
 		"message": "加冕",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
-		"original_message_language_code": "cmn-Hans-CN"
+		"original_message_language_code": "cmn-Hans-CN",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2303}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3209}}"
 	},
 	"father": {
 		"message": "父親",
@@ -1143,7 +1147,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2298}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2341}}"
 	},
 	"mother": {
 		"message": "母親",
@@ -1151,19 +1155,23 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2302}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2345}}"
 	},
 	"predecessor": {
 		"message": "前任",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
-		"original_message_language_code": "cmn-Hans-CN"
+		"original_message_language_code": "cmn-Hans-CN",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2309}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2314}}"
 	},
 	"successor": {
 		"message": "繼任",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2325}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2330}}"
 	},
 	"spouse": {
 		"message": "配偶",
@@ -1171,7 +1179,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2307}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2350}}"
 	},
 	"prefix": {
 		"message": "前綴",
@@ -1236,7 +1244,7 @@
 		"scope": "data.date.era: 文字式年曆欄位",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4515}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4559}}"
 	},
 	"week-day": {
 		"message": "星期",
@@ -1244,7 +1252,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3270}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1864}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3313}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1881}}"
 	},
 	"gregorian-calendar": {
 		"message": "Gregorian calendar",
@@ -1252,7 +1260,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3872}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3915}}"
 	},
 	"julian-calendar": {
 		"message": "Julian calendar",
@@ -1260,7 +1268,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3888}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3931}}"
 	},
 	"jd": {
 		"message": "JD",
@@ -1268,7 +1276,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3309}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3352}}"
 	},
 	"julian-date": {
 		"message": "Julian Date",
@@ -1276,7 +1284,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3312}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3355}}"
 	},
 	"jdn": {
 		"message": "JDN",
@@ -1284,7 +1292,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3292}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3335}}"
 	},
 	"julian-day-number": {
 		"message": "Julian Day Number",
@@ -1292,7 +1300,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1918}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3295}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1918}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3338}}"
 	},
 	"ordinal-date": {
 		"message": "年日期",
@@ -1300,7 +1308,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3342}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3385}}"
 	},
 	"week-date": {
 		"message": "週日期",
@@ -1308,7 +1316,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3356}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3399}}"
 	},
 	"astronomy": {
 		"message": "astronomy",
@@ -1323,7 +1331,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3867}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3910}}"
 	},
 	"east-asian-calendar": {
 		"message": "東亞陰陽曆",
@@ -1331,7 +1339,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4425}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4468}}"
 	},
 	"year-naming": {
 		"message": "Year naming",
@@ -1339,7 +1347,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5041}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5085}}"
 	},
 	"year-numbering": {
 		"message": "Year numbering",
@@ -1347,7 +1355,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5082}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5126}}"
 	},
 	"gregorian-reform": {
 		"message": "Gregorian reform",
@@ -1355,7 +1363,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5259}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5303}}"
 	},
 	"before-present": {
 		"message": "Before Present",
@@ -1363,7 +1371,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5220}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5264}}"
 	},
 	"holocene-calendar": {
 		"message": "Holocene calendar",
@@ -1371,7 +1379,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5229}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5273}}"
 	},
 	"unix-time": {
 		"message": "Unix time",
@@ -1379,7 +1387,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3369}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3412}}"
 	},
 	"age-of-ruler": {
 		"message": "君主實歲",
@@ -1387,7 +1395,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3404}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3447}}"
 	},
 	"general-precession": {
 		"message": "general precession",
@@ -1395,7 +1403,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3453}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3496}}"
 	},
 	"solar-term-(astronomical)": {
 		"message": "天文節氣",
@@ -1403,7 +1411,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3479}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4432}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3522}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4475}}"
 	},
 	"sun-s-apparent-longitude": {
 		"message": "Sun's apparent longitude",
@@ -1411,7 +1419,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3529}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3572}}"
 	},
 	"solar-term-ages": {
 		"message": "節氣經過日數",
@@ -1419,7 +1427,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3507}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3550}}"
 	},
 	"data-will-be-presented-at-next-calculation": {
 		"message": "Data will be presented at next calculation.",
@@ -1427,7 +1435,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3076}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3119}}"
 	},
 	"moon-longitude": {
 		"message": "Moon longitude",
@@ -1435,7 +1443,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3548}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3591}}"
 	},
 	"moon-latitude": {
 		"message": "Moon latitude",
@@ -1443,7 +1451,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3570}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3651}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3613}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3694}}"
 	},
 	"apparent-longitude-moon-sun": {
 		"message": "月日視黃經差",
@@ -1451,7 +1459,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3593}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3636}}"
 	},
 	"lunar-phase": {
 		"message": "月相",
@@ -1459,7 +1467,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3170}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3613}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4435}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4439}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4560}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3213}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3656}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4478}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4482}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4604}}"
 	},
 	"saros-$1": {
 		"message": "saros %1",
@@ -1467,7 +1475,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3669}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3712}}"
 	},
 	"solar-eclipse": {
 		"message": "solar eclipse",
@@ -1538,7 +1546,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3632}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L238}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L3722}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3675}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L238}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L3722}}"
 	},
 	"first-quarter": {
 		"message": "上弦",
@@ -1567,7 +1575,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3628}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3671}}"
 	},
 	"sunrise-sunset": {
 		"message": "日出日落",
@@ -1575,7 +1583,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3728}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3771}}"
 	},
 	"twilight": {
 		"message": "曙暮光",
@@ -1583,7 +1591,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3763}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3806}}"
 	},
 	"moonrise-moonset": {
 		"message": "月出月落",
@@ -1591,7 +1599,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3799}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3842}}"
 	},
 	"lower-culmination": {
 		"message": "lower culmination",
@@ -1677,11 +1685,13 @@
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6395}}"
 	},
-	"chinese-lunisolar": {
-		"message": "夏曆",
+	"astronomical-chinese-lunisolar": {
+		"message": "天文夏曆",
 		"notes": "Label for calendar: traditional Chinese lunisolar calendar",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4488}}"
 	},
 	"revised-julian-calendar": {
 		"message": "Revised Julian calendar",
@@ -1689,7 +1699,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3905}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3948}}"
 	},
 	"islamic-calendar": {
 		"message": "伊斯蘭曆",
@@ -1697,7 +1707,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3921}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3964}}"
 	},
 	"modern-iranian-calendar": {
 		"message": "گاه‌شماری هجری خورشیدی",
@@ -1705,7 +1715,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "arb-Arab",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3940}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3983}}"
 	},
 	"hebrew-calendar": {
 		"message": "希伯來曆",
@@ -1713,7 +1723,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3976}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4019}}"
 	},
 	"long-count": {
 		"message": "長紀曆",
@@ -1721,7 +1731,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3993}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4036}}"
 	},
 	"maya-tzolk-in": {
 		"message": "Maya Tzolk'in",
@@ -1729,7 +1739,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4011}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4054}}"
 	},
 	"maya-haab": {
 		"message": "Maya Haab'",
@@ -1737,7 +1747,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4025}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4068}}"
 	},
 	"dai-calendar": {
 		"message": "傣曆",
@@ -1745,14 +1755,14 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4037}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4080}}"
 	},
 	"myanmar-calendar": {
 		"message": "မြန်မာ ပြက္ခဒိန်",
 		"notes": "Label for calendar: [[:en:Burmese calendar]]",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4062}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4105}}"
 	},
 	"yi-calendar": {
 		"message": "彝曆",
@@ -1760,21 +1770,21 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4130}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4173}}"
 	},
 	"hindu-calendar": {
 		"message": "हिन्दू पंचांग",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4160}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4203}}"
 	},
 	"indian-national-calendar": {
 		"message": "भारतीय राष्ट्रीय पंचांग",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4204}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4247}}"
 	},
 	"bangla-calendar": {
 		"message": "Bangla calendar",
@@ -1782,7 +1792,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3959}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4002}}"
 	},
 	"chinese-buddhist": {
 		"message": "佛曆",
@@ -1790,7 +1800,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4222}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4265}}"
 	},
 	"bahá-í-calendar": {
 		"message": "گاه‌شماری بهائی",
@@ -1798,14 +1808,14 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "arb-Arab",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4275}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4318}}"
 	},
 	"nanakshahi-calendar": {
 		"message": "ਨਾਨਕਸ਼ਾਹੀ",
 		"notes": "Label for calendar: [[:en:Nanakshahi calendar]], ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4258}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4301}}"
 	},
 	"coptic-calendar": {
 		"message": "科普特曆",
@@ -1813,7 +1823,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4291}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4334}}"
 	},
 	"ethiopian-calendar": {
 		"message": "衣索比亞曆",
@@ -1821,7 +1831,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4308}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4351}}"
 	},
 	"armenian-calendar": {
 		"message": "教會亞美尼亞曆",
@@ -1829,7 +1839,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4323}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4366}}"
 	},
 	"byzantine-calendar": {
 		"message": "Byzantine calendar",
@@ -1837,7 +1847,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4342}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4385}}"
 	},
 	"egyptian-calendar": {
 		"message": "古埃及曆",
@@ -1845,7 +1855,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4358}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4401}}"
 	},
 	"french-republican-calendar": {
 		"message": "Calendrier républicain",
@@ -1853,7 +1863,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L350}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L589}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4403}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L350}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L589}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4446}}"
 	},
 	"month-of-the-sexagenary-cycle": {
 		"message": "月干支",
@@ -1861,7 +1871,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4532}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4535}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8505}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8510}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4576}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4579}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8513}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8518}}"
 	},
 	"day-of-the-sexagenary-cycle": {
 		"message": "日干支",
@@ -1869,7 +1879,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4547}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4551}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1991}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4591}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4595}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1991}}"
 	},
 	"solar-term-(chinese)": {
 		"message": "明清節氣",
@@ -1877,7 +1887,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4572}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4616}}"
 	},
 	"jianchu": {
 		"message": "建除",
@@ -1885,7 +1895,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4653}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4697}}"
 	},
 	"japanese-month-name": {
 		"message": "月の別名",
@@ -1893,7 +1903,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4815}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4818}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4421}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4859}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4862}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4421}}"
 	},
 	"6-luminaries": {
 		"message": "六曜",
@@ -1901,7 +1911,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2805}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4832}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4428}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2848}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4876}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4428}}"
 	},
 	"7-luminaries": {
 		"message": "七曜",
@@ -1909,7 +1919,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4846}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4426}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4890}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4426}}"
 	},
 	"week-day-(japanese)": {
 		"message": "曜日",
@@ -1917,7 +1927,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4859}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4867}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1868}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4903}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4911}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1885}}"
 	},
 	"28-mansions": {
 		"message": "二十八宿",
@@ -1925,7 +1935,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4903}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4906}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4431}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4947}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4950}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4431}}"
 	},
 	"27-mansions": {
 		"message": "二十七宿",
@@ -1933,7 +1943,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4919}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4922}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4433}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4963}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4966}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4433}}"
 	},
 	"zodiac-sign": {
 		"message": "zodiac sign",
@@ -1941,7 +1951,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5018}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5062}}"
 	},
 	"aries": {
 		"message": "Aries",
@@ -1949,7 +1959,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3112}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3155}}"
 	},
 	"taurus": {
 		"message": "Taurus",
@@ -1957,7 +1967,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3114}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3157}}"
 	},
 	"gemini": {
 		"message": "Gemini",
@@ -1965,7 +1975,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3116}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3159}}"
 	},
 	"cancer": {
 		"message": "Cancer",
@@ -1973,7 +1983,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3118}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3161}}"
 	},
 	"leo": {
 		"message": "Leo",
@@ -1981,7 +1991,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3120}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3163}}"
 	},
 	"virgo": {
 		"message": "Virgo",
@@ -1989,7 +1999,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3122}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3165}}"
 	},
 	"libra": {
 		"message": "Libra",
@@ -1997,7 +2007,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3124}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3167}}"
 	},
 	"scorpio": {
 		"message": "Scorpio",
@@ -2005,7 +2015,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3126}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3169}}"
 	},
 	"sagittarius": {
 		"message": "Sagittarius",
@@ -2013,7 +2023,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3128}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3171}}"
 	},
 	"capricorn": {
 		"message": "Capricorn",
@@ -2021,7 +2031,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3130}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3173}}"
 	},
 	"aquarius": {
 		"message": "Aquarius",
@@ -2029,7 +2039,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3132}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3175}}"
 	},
 	"pisces": {
 		"message": "Pisces",
@@ -2037,7 +2047,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3134}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3177}}"
 	},
 	"year-of-the-sexagenary-cycle": {
 		"message": "歲次",
@@ -2045,7 +2055,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5046}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1979}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1981}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8496}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8498}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1979}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1981}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8504}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8506}}"
 	},
 	"chinese-zodiac": {
 		"message": "生肖",
@@ -2053,7 +2063,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5059}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4408}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5103}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4408}}"
 	},
 	"wu-xing": {
 		"message": "五行",
@@ -2069,7 +2079,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5087}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5131}}"
 	},
 	"dangi": {
 		"message": "단군기원",
@@ -2077,7 +2087,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "ko-KR",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5148}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5192}}"
 	},
 	"huangdi": {
 		"message": "黃帝紀元",
@@ -2085,7 +2095,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5098}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5142}}"
 	},
 	"japanese-imperial-year": {
 		"message": "皇紀",
@@ -2093,7 +2103,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5117}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5161}}"
 	},
 	"thai-buddhist": {
 		"message": "泰國佛曆",
@@ -2101,7 +2111,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5164}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5208}}"
 	},
 	"ab-urbe-condita": {
 		"message": "羅馬建城",
@@ -2109,7 +2119,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5200}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5244}}"
 	},
 	"seleucid-era": {
 		"message": "Seleucid era",
@@ -2117,7 +2127,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5210}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5254}}"
 	},
 	"italy": {
 		"message": "Italy",
@@ -2132,7 +2142,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2115}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2381}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2124}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2381}}"
 	},
 	"españa": {
 		"message": "España",
@@ -2140,7 +2150,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L347}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4846}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L347}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4847}}"
 	},
 	"portugal": {
 		"message": "Portugal",
@@ -2162,7 +2172,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2111}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2383}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4675}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2120}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2383}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4676}}"
 	},
 	"luxembourg": {
 		"message": "Luxembourg",
@@ -2233,7 +2243,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2113}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2408}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2122}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2408}}"
 	},
 	"british": {
 		"message": "British",
@@ -2241,7 +2251,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4784}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4785}}"
 	},
 	"sweden": {
 		"message": "Sweden",
@@ -2291,7 +2301,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2427}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4079}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2427}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4080}}"
 	},
 	"turkey": {
 		"message": "Turkey",
@@ -2306,7 +2316,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2431}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4209}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2431}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4210}}"
 	},
 	"ce-year-and-chinese-calendar-month-day": {
 		"message": "公元年/中曆月日",
@@ -2337,7 +2347,7 @@
 		"scope": "data.date.era: 輸出格式+可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1777}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1910}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1994}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2144}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2411}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2426}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3428}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8045}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1777}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1910}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1994}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2153}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2454}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2469}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3471}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8053}}"
 	},
 	"contemporary-period-(same-country)": {
 		"message": "同國共存紀年",
@@ -2345,7 +2355,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3436}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3479}}"
 	},
 	"stem-branches": {
 		"message": "年月日干支",
@@ -2401,7 +2411,7 @@
 		"scope": "data.date.era: 紀年線圖選項",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2936}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2979}}"
 	},
 	"markup-current-era": {
 		"message": "標記正處理的紀年",
@@ -2409,7 +2419,7 @@
 		"scope": "data.date.era: 紀年線圖選項",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2940}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2983}}"
 	},
 	"combine-historical-periods": {
 		"message": "合併歷史時期",
@@ -2417,7 +2427,7 @@
 		"scope": "data.date.era: 紀年線圖選項",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2958}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3001}}"
 	},
 	"adapt-lifetime-of-rulers": {
 		"message": "擴張範圍至君主在世時段",
@@ -2425,7 +2435,7 @@
 		"scope": "data.date.era: 紀年線圖選項",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2967}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3010}}"
 	},
 	"coordinates": {
 		"message": "地理座標：",
@@ -2465,7 +2475,7 @@
 		"scope": "data.date.era: 設定/地理座標",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5340}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5384}}"
 	},
 	"data-layer": {
 		"message": "資料圖層",
@@ -2473,7 +2483,7 @@
 		"scope": "data.date.era: 設定/資料圖層",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1639}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2979}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5251}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1639}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3022}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5295}}"
 	},
 	"please-select-the-layer-you-want-to-load": {
 		"message": "請選擇所欲載入之資料圖層。",
@@ -2481,7 +2491,7 @@
 		"scope": "data.date.era: 設定/資料圖層",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2983}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3026}}"
 	},
 	"general-data-layer": {
 		"message": "general data layer",
@@ -4982,7 +4992,8 @@
 		"message": "搜尋各網站並下載作品。",
 		"notes": "",
 		"scope": "GUI: gui_electron/gui_electron.html",
-		"original_message_language_code": "cmn-Hant-TW"
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"search-results": {
 		"message": "搜尋結果",
@@ -5158,14 +5169,14 @@
 		"notes": "botton label",
 		"scope": "GUI: gui_electron/gui_electron.html",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/old/demo.2010.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.htm}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"show-hidden-log": {
 		"message": "顯示/隱藏訊息",
 		"notes": "botton label",
 		"scope": "GUI: gui_electron/gui_electron.html",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/old/demo.2010.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.htm}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}"
 	},
 	"limit-log-lines": {
 		"message": "限制訊息行數",
@@ -7293,91 +7304,91 @@
 		"notes": "%1: domain_name",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L987}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L991}}"
 	},
 	"force-loading-using-domain-locale-$2-($1)": {
 		"message": "強制再次載入/使用 [%2] (%1) 領域/語系。",
 		"notes": "Used as debugging message when selecting language. %1: domain_name, %2: alias of domain_name",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L999}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1003}}"
 	},
 	"loading-using-domain-locale-$2-($1)": {
 		"message": "載入/使用 [%2] (%1) 領域/語系。",
 		"notes": "Used as debugging message when selecting language. %1: domain_name, %2: alias of domain_name",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1001}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1005}}"
 	},
 	"unable-to-distinguish-domain-but-set-callback": {
 		"message": "無法判別 domain，卻設定有 callback。",
 		"notes": "無論如何還是執行 callback。",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1035}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1039}}"
 	},
 	"illegal-domain-alias-list-$1": {
 		"message": "Illegal domain alias list: [%1]",
 		"notes": "%1: domain alias list",
 		"scope": "CeL.application.locale: set_alias()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1237}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1241}}"
 	},
 	"adding-domain-alias-$1-→-$2": {
 		"message": "Adding domain alias [%1] → [%2]...",
 		"notes": "%1: domain alias, %2: normalized domain name",
 		"scope": "CeL.application.locale: set_alias()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1253}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1257}}"
 	},
 	"testing-domain-alias-$1": {
 		"message": "Testing domain alias [%1]...",
 		"notes": "%1: domain alias, %2: normalized domain name",
 		"scope": "CeL.application.locale: to_standard()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1344}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1348}}"
 	},
 	"failed-to-extract-gettext-id": {
 		"message": "Failed to extract gettext id.",
 		"notes": "",
 		"scope": "CeL.application.locale: translate_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1474}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1478}}"
 	},
 	"loading-language-domain-$1": {
 		"message": "Loading language / domain [%1]...",
 		"notes": "",
 		"scope": "CeL.application.locale: adapt_domain()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1501}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1518}}"
 	},
 	"language-domain-$1-loaded": {
 		"message": "Language / domain [%1] loaded.",
 		"notes": "",
 		"scope": "CeL.application.locale: adapt_domain()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1507}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1524}}"
 	},
 	"can-not-find-menu-node-$1": {
 		"message": "Can not find menu node: [%1]",
 		"notes": "%1: menu node id",
 		"scope": "CeL.application.locale: create_domain_menu()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1549}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1566}}"
 	},
 	"convert-number-$1-to-$2-format": {
 		"message": "轉換數字：[%1]成 %2 格式。",
 		"notes": "",
 		"scope": "CeL.application.locale: gettext.numeral()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1629}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1646}}"
 	},
 	"unable-to-convert-number-$1": {
 		"message": "無法轉換數字 [%1]！",
 		"notes": "",
 		"scope": "CeL.application.locale: 打折扣",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2019}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2036}}"
 	},
 	"syntax-error": {
 		"message": "語法錯誤！",
@@ -7496,7 +7507,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1191}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L476}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1193}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L476}}"
 	},
 	"local-language-name": {
 		"message": "local-language-name",

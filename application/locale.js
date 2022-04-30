@@ -481,8 +481,7 @@ function module_code(library_namespace) {
 			domain_name = _domain_name;
 			// 在不明環境，如 node.js 中執行時，((gettext_texts[domain_name])) 可能為
 			// undefined。
-			domain = this && this.domain || gettext_texts[domain_name]
-					|| Object.create(null);
+			domain = gettext_texts[domain_name] || Object.create(null);
 			var _text = String(convert(library_namespace.is_Object(text_id) ? text_id[domain_name]
 					: text_id));
 
@@ -961,6 +960,11 @@ function module_code(library_namespace) {
 	 * @returns {Object}當前使用之 domain。
 	 */
 	function use_domain(domain_name, callback, force) {
+		if (!domain_name) {
+			// return domain used now.
+			return gettext_texts[gettext_domain_name];
+		}
+
 		if (typeof callback === 'boolean' && force === undefined) {
 			// shift 掉 callback。
 			force = callback;
@@ -1473,6 +1477,19 @@ function module_code(library_namespace) {
 				// gettext_config:{"id":"failed-to-extract-gettext-id"}
 				T : 'Failed to extract gettext id.'
 			} ]);
+		}
+
+		if (!dataset)
+			return;
+
+		var gettext_DOM_title_id = gettext_DOM_id + '_element_title';
+		if (node.title && !dataset[gettext_DOM_title_id]
+				&& gettext_texts[gettext_domain_name]
+				&& (node.title in gettext_texts[gettext_domain_name])) {
+			dataset[gettext_DOM_title_id] = node.title;
+		}
+		if (dataset[gettext_DOM_title_id]) {
+			node.title = gettext(dataset[gettext_DOM_title_id]);
 		}
 
 		if (id) {
@@ -2064,7 +2081,14 @@ function module_code(library_namespace) {
 	// hans : ['cmn-Hans-CN'],
 	// hant : ['cmn-Hant-TW']
 	}
-			&& Object.create(null), gettext_texts = Object.create(null), gettext_domain_name,
+			&& Object.create(null),
+	/**
+	 * {Object}All domain data.<br />
+	 * gettext_texts[domain name] = {"message":"l10n message"}
+	 */
+	gettext_texts = Object.create(null),
+	/** {String}domain name used now */
+	gettext_domain_name,
 	// CeL.env.domain_location = CeL.env.resources_directory_name + '/';
 	// CeL.gettext.use_domain_location(CeL.env.resources_directory_name + '/');
 	gettext_domain_location = library_namespace.env.domain_location, gettext_resource = Object

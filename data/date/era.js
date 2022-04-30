@@ -4397,7 +4397,7 @@ function module_code(library_namespace) {
 		// "精"會特別處理。
 		// 據: 依據/根據/出典/原始參考文獻/資料引用來源/典拠。
 		copy_attributes : to_list('據,準,疑,傳說,曆法,'
-				+ '君主名,表字,君主號,諱,諡,廟號,生,卒,君主性別,在位,年號,父,母,配偶'),
+				+ '君主名,表字,君主號,諱,諡,廟號,生,卒,君主性別,在位,加冕,年號,父,母,配偶'),
 		// 曆注, note
 		// 減輕負擔:要這些曆注的自己算。
 		notes : {
@@ -5725,10 +5725,17 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (false && 起訖[0] - era_list[i - 1].end === 0
-					&& 紀年[1] !== era_list[i - 1].name[1]) {
-				last_era_data.前任 = era_list[i - 1].name;
-				era_list[i - 1].繼任 = 紀年;
+			if (起訖[0] - era_list[i - 1].end === 0) {
+				// assert: 本紀年接續著上一個紀年。
+				if (紀年[1] !== era_list[i - 1].name[1]) {
+					last_era_data.name.前任 = era_list[i - 1].name;
+					var _i = i, _前任 = era_list[i - 1].name[1];
+					while (_i-- > 0 && _前任 === era_list[_i].name[1]) {
+						era_list[_i].name.繼任 = 紀年;
+					}
+				} else if (era_list[i - 1].name.前任) {
+					last_era_data.name.前任 = era_list[i - 1].name.前任;
+				}
 			}
 
 			var start = 起訖[0], start_JDN = last_era_data.start_JDN,
@@ -5740,14 +5747,15 @@ function module_code(library_namespace) {
 			i -= 4;
 			// 因為輸入資料通常按照時間順序，
 			// 因此可以先檢查最後幾筆資料，以加快速度。
-			if (i < 9)
+			if (i < 9) {
 				i = 0;
-			else if (0 < era_list[i].start - start)
+			} else if (0 < era_list[i].start - start) {
 				i = era_list.search_sorted(last_era_data, {
 					comparator : compare_start_date,
 					found : true,
 					start : 0
 				});
+			}
 
 			// 這一段其實可以不要。下一段while()可以補充這一段的功能。但是使用`.start_JDN`應該會比`.start`快一點點。
 			while (i < era_list.length && era_list[i].start_JDN < start_JDN) {

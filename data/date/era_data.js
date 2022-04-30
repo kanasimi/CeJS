@@ -3205,11 +3205,12 @@ CeL.era.pass_on = {
 		// gettext_config:{"id":"thonburi-dynasty","mark_type":"part_of_string"}
 		// gettext_config:{"id":"taksin","mark_type":"part_of_string"}
 		// gettext_config:{"id":"thonburi-kingdom","mark_type":"part_of_string"}
-		'ราชวงศ์ธนบุรี/สมเด็จพระเจ้ากรุงธนบุรี|1767/11/6~||疑|時期=อาณาจักรธนบุรี|君主名=鄭昭;鄭信|君主=สมเด็จพระบรมราชาที่ 4;สมเด็จพระเจ้าตากสินมหาราช;Somdet Phra Chao Taksin the Great;Phra Chao Krung Thonburi;Somdet Phra Borommaracha IV|生=1734/4/17|卒=1782/4/7|關係=Only King of Thonburi',
+		// gettext_config:{"id":"coronation","mark_type":"part_of_string"}
+		'ราชวงศ์ธนบุรี/สมเด็จพระเจ้ากรุงธนบุรี|1767/11/6~||疑|時期=อาณาจักรธนบุรี|君主名=鄭昭;鄭信|君主=สมเด็จพระบรมราชาที่ 4;สมเด็จพระเจ้าตากสินมหาราช;Somdet Phra Chao Taksin the Great;Phra Chao Krung Thonburi;Somdet Phra Borommaracha IV|生=1734/4/17|卒=1782/4/7|關係=Only King of Thonburi|加冕=1768/12/28',
 
 		// gettext_config:{"id":"chakri-dynasty","mark_type":"part_of_string"}
 		// gettext_config:{"id":"rattanakosin-kingdom","mark_type":"part_of_string"}
-		'ราชวงศ์จักรี/พระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช|1782/4/6~||疑|時期=อาณาจักรรัตนโกสินทร์|國名=ประเทศไทย;ราชอาณาจักรสยาม;ราชอาณาจักรไทย|君主=พระพุทธยอดฟ้าจุฬาโลก;รัชกาลที่ 1;Maha Chakri Borommanat;Phra Rama I;the Great;Rama I|生=1737/3/20|卒=1809/9/7|關係=First King of Rattanakosin',
+		'ราชวงศ์จักรี/พระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช|1782/4/6~||疑|時期=อาณาจักรรัตนโกสินทร์|國名=ประเทศไทย;ราชอาณาจักรสยาม;ราชอาณาจักรไทย|君主=พระพุทธยอดฟ้าจุฬาโลก;รัชกาลที่ 1;Maha Chakri Borommanat;Phra Rama I;the Great;Rama I|生=1737/3/20|卒=1809/9/7|關係=First King of Rattanakosin|加冕=1782/6/13',
 		'/พระบาทสมเด็จพระพุทธเลิศหล้านภาลัย|1809/9/7~||疑|君主=พระพุทธเลิศหล้านภาลัย;รัชกาลที่ 2;Maha Itsarasunthon;Phra Rama II of Siam;Rama II|生=1767/2/24|卒=1824/7/21|關係=Son of Rama I and Queen Amarindra',
 		'/พระบาทสมเด็จพระนั่งเกล้าเจ้าอยู่หัว|1824/7/21~||疑|君主=นั่งเกล้า;พระมหาเจษฎาราชเจ้า;รัชกาลที่ 3;Maha Rama III;Phra Nang Klao Chao Yu Hua;Rama III;Phra Maha Chetsadarat Chao|生=1788/3/31|卒=1851/4/2|關係=Son of Rama II and Princess Consort Sri Sulalai',
 		'/พระบาทสมเด็จพระจอมเกล้าเจ้าอยู่หัว|1851/4/2~||疑|君主=มงกุฎ;รัชกาลที่ 4;Maha Mongkut;Phra Chom Klao Chao Yu Hua;Rama IV|生=1804/10/18|卒=1868/10/1|關係=Half-brother of Rama III;Son of Rama II and Queen Sri Suriyendra',
@@ -3220,7 +3221,7 @@ CeL.era.pass_on = {
 		'/พระบาทสมเด็จพระปรมินทรมหาภูมิพลอดุลยเดช|1946/6/9~|:CE|君主=ภูมิพลอดุลยเดช;สมเด็จพระภัทรมหาราช;รัชกาลที่ 9;Maha Bhumibol Adulyadej;the Great;Rama IX;Somdet Phra Phatthara Maharat|生=1927/12/5|卒=2016/10/13|關係=Younger brother of Rama VIII;Grandson of Rama V by Mahidol Adulyadej',
 		'/สมเด็จพระเจ้าอยู่หัวมหาวชิราลงกรณ บดินทรเทพยวรางกูร|2016/10/13~'
 				+ CeL.era.pass_on.last_day
-				+ '|:CE|君主=มหาวชิราลงกรณ;รัชกาลที่ 10;Somdet Phra Chao Yu Hua;Maha Vajiralongkorn;Bodindradebayavarangkun;Rama X|生=1952/7/28|關係=Only son of Rama IX and Queen Sirikit;2nd child of Rama IX|注=2016年10月13日 拉瑪九世 蒲美蓬·阿杜德過世；2016年12月1日 拉瑪十世 瑪哈·哇集拉隆功 正式加冕及登基'
+				+ '|:CE|君主=มหาวชิราลงกรณ;รัชกาลที่ 10;Somdet Phra Chao Yu Hua;Maha Vajiralongkorn;Bodindradebayavarangkun;Rama X|生=1952/7/28|關係=Only son of Rama IX and Queen Sirikit;2nd child of Rama IX|加冕=2019/5/4'
 
 ]).minute_offset = 7 * 60;
 

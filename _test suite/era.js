@@ -2032,19 +2032,22 @@ function translate_era(era) {
 			if (0 < index)
 				output.push(' ' + (index + 1));
 			if (note) {
-				note = note
-						.replace(/\n/g, '<br />')
-						.replace(
-								// @see PATTERN_URL_WITH_PROTOCOL_GLOBAL
-								// @ CeL.application.net.wiki
-								/\[((?:https?|ftp):\/\/(?:[^\0\s\|<>\[\]{}\/][^\0\s\|<>\[\]{}]*)) ([^\[\]]+)\]/ig,
-								function(all, URL, text) {
-									return '<a href="' + URL
-											+ '" target="_blank">'
-											+ text.trim() + '</a>';
-								});
+				if (typeof note === 'string') {
+					note = note
+							.replace(/\n/g, '<br />')
+							.replace(
+									// @see PATTERN_URL_WITH_PROTOCOL_GLOBAL
+									// @ CeL.application.net.wiki
+									/\[((?:https?|ftp):\/\/(?:[^\0\s\|<>\[\]{}\/][^\0\s\|<>\[\]{}]*)) ([^\[\]]+)\]/ig,
+									function(all, URL, text) {
+										return '<a href="' + URL
+												+ '" target="_blank">'
+												+ text.trim() + '</a>';
+									});
+				}
 				if (add_node) {
-					note = add_node(note);
+					note = typeof add_node === 'function' ? add_node(note)
+							: add_node;
 				}
 				output.push(':', {
 					span : ' ',
@@ -2054,6 +2057,12 @@ function translate_era(era) {
 					C : 'note'
 				});
 			}
+		}
+
+		if (key === true) {
+			if (!Array.isArray(output))
+				output = [ output ];
+			add_item(true);
 		}
 
 		if (date[key] || add_node === true) {
@@ -2197,13 +2206,10 @@ function translate_era(era) {
 			T : '出典'
 		} ]);
 
-		// TODO: 前任, 繼任
-
 		var is_女性 = date.君主性別 && date.君主性別.includes('女'),
 		// 君主名號 👸 🤴 👸🏻 🤴🏻 👸🏼 🤴🏼 👸🏽 🤴🏽 👸🏾 🤴🏾 👸🏿 🤴🏿
 		// 👨 👩
 		// 名字徽章 📛 🏷 🆔
-		// 👑
 		君主姓名_label = [ is_女性 ? '👸🏻' : '🤴🏻', {
 			// gettext_config:{"id":"personal-name"}
 			T : '君主名'
@@ -2292,6 +2298,43 @@ function translate_era(era) {
 				onclick : click_title_as_era
 			};
 		});
+		add_注('加冕', [ '👑', {
+			// gettext_config:{"id":"coronation"}
+			T : '加冕'
+		} ]);
+
+		if (date.前任) {
+			add_注('前任', [ '🔼', {
+				// gettext_config:{"id":"predecessor"}
+				T : '前任'
+			} ]);
+		} else if (date.name.前任) {
+			add_注(true, [ '🔼', {
+				// gettext_config:{"id":"predecessor"}
+				T : '前任'
+			} ], {
+				a : /* date.name.前任[2] + */date.name.前任[1],
+				href : '#',
+				title : date.name.前任.slice(1).reverse().join(''),
+				onclick : click_title_as_era
+			});
+		}
+		if (date.繼任) {
+			add_注('繼任', [ '🔽', {
+				// gettext_config:{"id":"successor"}
+				T : '繼任'
+			} ]);
+		} else if (date.name.繼任) {
+			add_注(true, [ '🔽', {
+				// gettext_config:{"id":"successor"}
+				T : '繼任'
+			} ], {
+				a : /* date.name.繼任[2] + */date.name.繼任[1],
+				href : '#',
+				title : date.name.繼任.slice(1).reverse().join(''),
+				onclick : click_title_as_era
+			});
+		}
 
 		add_注('父', [ '👨', {
 			// gettext_config:{"id":"father"}
@@ -4441,6 +4484,7 @@ function affairs() {
 
 		"天文夏曆" : [ {
 			a : {
+				// gettext_config:{"id":"astronomical-chinese-lunisolar"}
 				T : '天文夏曆'
 			},
 			R : 'traditional Chinese lunisolar calendar.'

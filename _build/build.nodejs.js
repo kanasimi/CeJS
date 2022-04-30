@@ -786,15 +786,17 @@ function set_references({ qqq_data, script_file_path, options, line_index }) {
 	}
 }
 
-const PATTERN_gettext_message_tag = /<[a-z\d]+\s[^<>]*(?<=\s)data-gettext="([^<>"]+)"/g;
+// matched: [ partly tag, attribute, message ]
+const PATTERN_gettext_message_of_tag = /<[a-z\d]+\s[^<>]*(?<=\s)(title|data-gettext)="([^<>"]+)"/g;
 function record_HTML_references(/*HTML_file_path*/script_file_path, options) {
 	const contents = CeL.read_file(script_file_path).toString();
 	let matched;
-	while (matched = PATTERN_gettext_message_tag.exec(contents)) {
-		const message = matched[1];
+	while (matched = PATTERN_gettext_message_of_tag.exec(contents)) {
+		const message = matched[2];
 		const message_id = message_to_id_Map.get(message);
 		if (!message_id) {
-			CeL.warn(`${record_HTML_references.name}: No message id get for message: ${JSON.stringify(message)}\n	File: ${script_file_path}`);
+			if (matched[1] === 'data-gettext')
+				CeL.warn(`${record_HTML_references.name}: No message id get for message: ${JSON.stringify(message)}\n	File: ${script_file_path}`);
 			continue;
 		}
 		const qqq_data = qqq_data_Map.get(message_id);

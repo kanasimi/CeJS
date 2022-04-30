@@ -231,7 +231,7 @@
 	"astronomical-twilight-end": "天文暮光",
 	"nautical-twilight-end": "航海暮光",
 	"civil-twilight-end": "民用暮光",
-	"chinese-lunisolar": "夏历",
+	"astronomical-chinese-lunisolar": "天文夏历",
 	"revised-julian-calendar": "儒略改革历",
 	"islamic-calendar": "伊斯兰历",
 	"modern-iranian-calendar": "现代伊朗历",

@@ -225,7 +225,6 @@
 	"astronomical twilight end": "fin du cr\u00e9puscule astronomique",
 	"nautical twilight end": "fin du cr\u00e9puscule nautique",
 	"civil twilight end": "fin du cr\u00e9puscule civil",
-	"\u590f\u66c6": "lunisolaire chinois",
 	"Revised Julian calendar": "calendrier julien r\u00e9vis\u00e9",
 	"\u4f0a\u65af\u862d\u66c6": "calendrier islamique",
 	"\u06af\u0627\u0647\u200c\u0634\u0645\u0627\u0631\u06cc \u0647\u062c\u0631\u06cc \u062e\u0648\u0631\u0634\u06cc\u062f\u06cc": "calendrier iranien moderne",
@@ -634,7 +633,7 @@
 	"\u4e0d\u518d\u7dad\u8b77": "D\u00e9sormais plus maintenu",
 	"\u6b61\u8fce\u8207\u6211\u5011\u4e00\u540c<a>\u7ffb\u8b6f\u4ecb\u9762\u6587\u5b57</a>\uff01": "<a>Traduisons l\u2019interface</a> tous ensembles\u202f!",
 	"\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01": "Il y a actuellement %1 messages en %2 qui n\u2019ont pas encore \u00e9t\u00e9 traduits. Ceux qui traduisent avec nous sont bienvenus\u202f!",
-	"untranslated message count": "410",
+	"untranslated message count": "411",
 	"local-language-name": "anglais"
 },
 "fr-FR");

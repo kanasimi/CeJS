@@ -226,7 +226,6 @@
 	"astronomical twilight end": "fin \u00ebd l'ambrun astron\u00f2mich",
 	"nautical twilight end": "fin \u00ebd l'ambrun n\u00e0utich",
 	"civil twilight end": "fin \u00ebd l'ambrun sivil",
-	"\u590f\u66c6": "lunissolar cin\u00e8is",
 	"Revised Julian calendar": "calendari giulian arv\u00ebdd\u00f9",
 	"\u4f0a\u65af\u862d\u66c6": "calensari isl\u00e0mich",
 	"\u06af\u0627\u0647\u200c\u0634\u0645\u0627\u0631\u06cc \u0647\u062c\u0631\u06cc \u062e\u0648\u0631\u0634\u06cc\u062f\u06cc": "calendari iranian modern",
@@ -386,6 +385,6 @@
 	"download_options.archive_images": "Comprime l'archivi \u00ebd plancia na vira d\u00ebscari\u00e0 \u00ebl fum\u00e8t.",
 	"download_options.archive_all_good_images_only": "Comprime l'archivi \u00ebd plancia sensa gnun eror.",
 	"download_options.remove_images_after_archive": "Apress la compression \u00ebd l'archivi \u00ebd plancia, d\u00ebscancel\u00e9 l'archivi \u00ebd plancia original.",
-	"untranslated message count": "659"
+	"untranslated message count": "660"
 },
 "pms-IT");

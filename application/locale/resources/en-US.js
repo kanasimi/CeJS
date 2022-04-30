@@ -226,7 +226,7 @@
 	"astronomical twilight end": "astronomical twilight end",
 	"nautical twilight end": "nautical twilight end",
 	"civil twilight end": "civil twilight end",
-	"\u590f\u66c6": "Chinese lunisolar",
+	"\u5929\u6587\u590f\u66c6": "Astronomical Chinese lunisolar",
 	"Revised Julian calendar": "Revised Julian calendar",
 	"\u4f0a\u65af\u862d\u66c6": "Islamic calendar",
 	"\u06af\u0627\u0647\u200c\u0634\u0645\u0627\u0631\u06cc \u0647\u062c\u0631\u06cc \u062e\u0648\u0631\u0634\u06cc\u062f\u06cc": "Modern Iranian calendar",
