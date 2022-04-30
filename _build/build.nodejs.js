@@ -560,7 +560,8 @@ function set_qqq_data(message_id, qqq, options) {
 		delete qqq_data.references;
 		// Copy new properties from new qqq_data.
 		for (const property_name of Object.keys(qqq_data)) {
-			if ((qqq_data[property_name] || qqq_data[property_name] === 0 || (property_name in old_qqq_data))
+			if ((qqq_data[property_name] || qqq_data[property_name] === 0
+				|| (property_name in old_qqq_data) && property_name !== 'notes')
 				&& old_qqq_data[property_name] !== qqq_data[property_name]) {
 				if (options?.show_change_message) {
 					CeL.info(`${set_qqq_data.name}: Set [${message_id}].${JSON.stringify(property_name)}:`);

@@ -1833,7 +1833,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L350}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L613}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4446}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L350}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L614}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4446}}"
 	},
 	"month-of-the-sexagenary-cycle": {
 		"message": "月干支",
@@ -7481,7 +7481,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1251}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1252}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}"
 	},
 	"local-language-name": {
 		"message": "local-language-name",
@@ -7493,13 +7493,13 @@
 	"treat-$1-as-language-$2": {
 		"message": "Treat %1 as language: %2.",
 		"original_message_language_code": "en-US",
-		"notes": "%1: section title, %2: language code.",
+		"notes": "%1: [[w:WP:SECTIONHEAD|section title]], %2: language code.",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L220}}"
 	},
 	"cannot-detect-language-of-$1": {
 		"message": "Cannot detect language of %1!",
 		"original_message_language_code": "en-US",
-		"notes": "",
+		"notes": "%1: [[w:WP:SECTIONHEAD|section title]]",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L225}}"
 	}
 }
