@@ -1070,7 +1070,7 @@ async function modify_source_files() {
 			source_base_path = CeL.simplify_path(CeL.append_path_separator(CeL.env.script_base_path + source_base_path));
 			//console.trace(source_base_path);
 			CeL.storage.traverse_file_system(source_base_path, fso_path => {
-				if (/[\\\/](?:resources|tongwen)[\\\/]/.test(fso_path)) {
+				if (/[\\\/](?:resources|encoding\.training|tongwen)/.test(fso_path)) {
 					// 跳過本地化語系檔本身。
 					return;
 				}
@@ -1145,7 +1145,7 @@ function write_qqq_data(resources_path) {
 	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
 		qqq_file_data[message_id] = qqq_data;
 		if (Array.isArray(qqq_data.references) && qqq_data.references.length > 0) {
-			qqq_data.references = qqq_data.references.map(reference => reference.toString()).sort().join('\n: ');
+			qqq_data.references = qqq_data.references.map(reference => reference.toString()).sort().unique().join('\n: ');
 		} else {
 			message_id_without_references.push(message_id);
 			if (false && !qqq_data.references) {

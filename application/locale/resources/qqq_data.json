@@ -89,69 +89,62 @@
 	"debug-level": {
 		"message": "debug level",
 		"notes": "Used as debugging message.",
-		"scope": "[https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log]",
+		"scope": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js}}",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/wiki%20loader.js#L278}}"
 	},
 	"log-type-fatal": {
 		"message": "log-type-fatal",
 		"notes": "Used as debugging message.",
-		"scope": "[https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log]",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}"
 	},
 	"log-type-error": {
 		"message": "log-type-error",
-		"notes": "Used as debugging message. (scope: [https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log])\n{{Identical|Error}}",
+		"notes": "Used as debugging message.",
 		"original_message_language_code": "en-US",
+		"additional_notes": "{{Identical|Error}}",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}"
 	},
 	"log-type-warn": {
 		"message": "log-type-warn",
 		"notes": "Used as debugging message.",
-		"scope": "[https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log]",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}"
 	},
 	"log-type-em": {
 		"message": "log-type-em",
 		"notes": "Used as debugging message, to express this is an emphasized message.",
-		"scope": "[https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log]",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}"
 	},
 	"log-type-info": {
 		"message": "log-type-info",
 		"notes": "Used as debugging message.",
-		"scope": "[https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log]",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}"
 	},
 	"log-type-log": {
 		"message": "log-type-log",
 		"notes": "Used as debugging message.",
-		"scope": "[https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log]",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}"
 	},
 	"log-type-debug": {
 		"message": "log-type-debug",
 		"notes": "Used as debugging message.",
-		"scope": "[https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log]",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}"
 	},
 	"log-type-trace": {
 		"message": "log-type-trace",
 		"notes": "Used as debugging message.",
-		"scope": "[https://github.com/kanasimi/CeJS/blob/master/application/debug/log.js application.debug.log]",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}"
 	},
 	"language": {
 		"message": "Language",
 		"notes": "Label used when selecting language.",
-		"scope": "CeL.application.locale: create_domain_menu.tag",
 		"additional_notes": "{{identical|Language}}",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1622}}"
@@ -498,9 +491,8 @@
 		"message": "紀年轉換工具",
 		"notes": "Name of Era Calendar Converter tool.",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"scope": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm#L1741}}",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"era-$1": {
 		"message": "紀年 %1",
@@ -556,7 +548,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L2091}}\n: {{GitHub|kanasimi/CeJS/blob/master/external/encoding.training%20set/UTF-8/ja-JP/%E3%83%8F%E3%83%B3%E3%82%B0%E3%83%AB.html}}\n: {{GitHub|kanasimi/CeJS/blob/master/external/encoding.training%20set/UTF-8/ja-JP/%E3%83%8F%E3%83%B3%E3%82%B0%E3%83%AB.html}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L2091}}"
 	},
 	"korea": {
 		"message": "한국",
@@ -836,7 +828,7 @@
 		"scope": "data.date.era: input_panel",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.htm}}"
 	},
 	"customize-output-format": {
 		"message": "自訂輸出格式",
@@ -1024,9 +1016,11 @@
 	},
 	"note": {
 		"message": "注",
-		"notes": "Label for calendar. (scope: data.date.era: 文字式年曆注解)\n{{identical|Note}}",
+		"notes": "Label for calendar.",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"scope": "data.date.era: 文字式年曆注解",
+		"additional_notes": "{{identical|Note}}",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L2447}}"
 	},
 	"showing-timeline": {
