@@ -1050,5 +1050,5 @@
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "%1: untranslated message count, %2: language selected\n; References: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L479}}\n; Scope: GUI: setup_initial_messages()",
 	"untranslated-message-count": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}\n; References: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1204}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}\n; Scope: GUI: setup_initial_messages()",
 	"local-language-name": "Language name in local language. Português: Português brasileiro ou português do Brasil\n; References: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L474}}\n; Scope: GUI: setup_initial_messages()",
-	"treat-$1-as-language-$2": "%1: section title, %2: language code.\n; References: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L217}}"
+	"treat-$1-as-language-$2": "%1: section title, %2: language code.\n; References: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L220}}"
 }

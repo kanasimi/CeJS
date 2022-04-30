@@ -7500,6 +7500,6 @@
 		"message": "Treat %1 as language: %2.",
 		"original_message_language_code": "en-US",
 		"notes": "%1: section title, %2: language code.",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L217}}"
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L220}}"
 	}
 }
