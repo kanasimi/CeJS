@@ -926,7 +926,7 @@ if (typeof CeL === 'function') {
 				&& navigator.userAgent.indexOf(' Gecko/2') !== -1) {
 					_.env.same_origin_policy = true;
 					var error = new Error(
-							'get_file: Can not parse UTF-32 encoding of ['
+							'get_file: Cannot parse UTF-32 encoding of ['
 									+ path + '] @ Firefox!');
 					// 於 load_name() 使用，避免顯示 '重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。'
 					error.type = 'encode';

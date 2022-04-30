@@ -286,7 +286,7 @@ function module_code(library_namespace) {
 										+ c[1]);
 									continue;
 								}
-								alert('add_code: Can not find end quota:\n' + b[j].slice(f));
+								alert('add_code: Cannot find end quota:\n' + b[j].slice(f));
 							}
 							if (false) alert(d + ',' + b[j].length + '\nsearch to ' + b[j].slice(d));
 

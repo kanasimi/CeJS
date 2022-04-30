@@ -170,8 +170,8 @@ function module_code(library_namespace) {
 			node_fs.writeFileSync(work_data.data_file, data_to_write);
 		} catch (e) {
 			library_namespace.error([ 'save_work_data_file: ', {
-				// Can not save work data of %1!
-				// gettext_config:{"id":"can-not-save-work-data-of-«$1»"}
+				// Cannot save work data of %1!
+				// gettext_config:{"id":"cannot-save-work-data-of-«$1»"}
 				T : [ '無法儲存作品《%1》之資訊至檔案！', work_data.title || work_data.id ]
 			} ]);
 			library_namespace.error(e);
@@ -1075,8 +1075,8 @@ function module_code(library_namespace) {
 			var html = XMLHttp.responseText;
 			if (!html && !_this.skip_get_work_page) {
 				var message = _this.id + ': '
-				// gettext_config:{"id":"can-not-get-chapter-list-page"}
-				+ gettext('Can not get chapter list page!');
+				// gettext_config:{"id":"cannot-get-chapter-list-page"}
+				+ gettext('Cannot get chapter list page!');
 				library_namespace.error(message);
 				_this.onerror(message, work_data);
 				typeof callback === 'function' && callback(work_data);
@@ -1113,6 +1113,7 @@ function module_code(library_namespace) {
 					work_data.process_status = work_data.process_status
 					// 之前每次都會添加新的資訊...
 					.filter(function(status) {
+						// gettext_config:{"id":"last-saved-date","mark_type":"part_of_string"}
 						if (!String(status).startsWith('last saved date: ')) {
 							return true;
 						}
@@ -1134,18 +1135,20 @@ function module_code(library_namespace) {
 				// work_data.some_limited 部份章節需要付費/被鎖住/被限制
 				if (work_data.last_update) {
 					crawler_namespace.set_work_status(work_data,
-							'last updated date: ' + work_data.last_update);
+					// gettext_config:{"id":"last-updated-date","mark_type":"part_of_string"}
+					'last updated date: ' + work_data.last_update);
 				}
 				if (work_data.last_saved
 				// 已完結的時間報告只記錄一次就夠了。
 				&& work_data.process_status.every(function(status) {
+					// gettext_config:{"id":"last-saved-date","mark_type":"part_of_string"}
 					return !String(status).startsWith('last saved date: ');
 				})) {
 					if (Date.parse(work_data.last_saved) > 0) {
 						work_data.last_saved = new Date(work_data.last_saved);
 					}
 					crawler_namespace.set_work_status(work_data,
-					//
+					// gettext_config:{"id":"last-saved-date","mark_type":"part_of_string"}
 					'last saved date: '
 					//
 					+ (library_namespace.is_Date(work_data.last_saved)
@@ -1331,8 +1334,8 @@ function module_code(library_namespace) {
 							: '作品不存在或已被刪除。';
 				} else {
 					warning += gettext
-					// gettext_config:{"id":"can-not-get-chapter-count"}
-					.append_message_tail_space('Can not get chapter count!')
+					// gettext_config:{"id":"cannot-get-chapter-count"}
+					.append_message_tail_space('Cannot get chapter count!')
 					// (Did not set work_data.chapter_count)
 					// gettext_config:{"id":"perhaps-the-work-has-been-deleted-or-blocked"}
 					+ gettext(_this.got_chapter_count ? '或許作品已被刪除或屏蔽？'

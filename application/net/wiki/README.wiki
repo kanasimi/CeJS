@@ -18,7 +18,7 @@ function CeL_initialization() {
 	// wiki.page('Wikipedia:Sandbox').edit(function(page_data) { return CeL.wiki.content_of(page_data) + '\ntest'; });
 }
 </code></pre>
-(At 2021, The JavaScript parser of MediaWiki loader can not read ECMAScript 2016 syntax.)
+(At 2021, The JavaScript parser of MediaWiki loader cannot read ECMAScript 2016 syntax.)
 
 Also refer to [https://kanasimi.github.io/CeJS/_test%20suite/wikitext_parser.html the wikitext parser examples].
 

@@ -1498,7 +1498,7 @@ function module_code(library_namespace) {
 		var data = library_namespace.get_file(path);
 		var status = Object.create(null);
 		if (!data || data.charAt(0) !== 'd') {
-			library_namespace.error((data ? 'Illegal' : 'Can not get')
+			library_namespace.error((data ? 'Illegal' : 'Cannot get')
 					+ ' torrent data of [' + path + ']!');
 			return;
 		}

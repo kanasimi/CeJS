@@ -366,7 +366,7 @@ function module_code(library_namespace) {
 			if (library_namespace.is_debug() && matched[1]) {
 				// check if data is valid.
 				library_namespace
-						.warn('parse_CSV: Can not parse data (無法辨識的資料): ['
+						.warn('parse_CSV: Cannot parse data (無法辨識的資料): ['
 								+ matched[1] + ']');
 			}
 
@@ -459,7 +459,7 @@ function module_code(library_namespace) {
 
 		if (library_namespace.is_debug() && last_index_of_data < data_length) {
 			library_namespace
-					.warn('parse_CSV: Can not parse data (無法/尚未辨識的資料): ('
+					.warn('parse_CSV: Cannot parse data (無法/尚未辨識的資料): ('
 							+ (data_length - last_index_of_data) + ')<br />\n['
 							+ data.slice(last_index_of_data) + ']');
 		}

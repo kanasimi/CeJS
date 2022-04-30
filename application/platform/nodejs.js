@@ -116,7 +116,7 @@ function module_code(library_namespace) {
 	function copy_attributes(source, target) {
 		var file_status;
 		try {
-			// TODO: fs.stat can not read a filename includes U+FBC6 "?"
+			// TODO: fs.stat cannot read a filename includes U+FBC6 "?"
 			file_status = node_fs.statSync(source);
 			node_fs.utimesSync(target, file_status.atime, file_status.mtime);
 		} catch (e) {
@@ -592,8 +592,8 @@ function module_code(library_namespace) {
 		} catch (e) {
 			if (library_namespace.is_debug()) {
 				library_namespace.error([ 'fs_writeFileSync: ', {
-					// gettext_config:{"id":"can-not-save-data-to-file-$1"}
-					T : [ 'Can not save data to file [%1]!', file_path ]
+					// gettext_config:{"id":"cannot-save-data-to-file-$1"}
+					T : [ 'Cannot save data to file [%1]!', file_path ]
 				} ]);
 				library_namespace.error(e);
 			}
@@ -991,7 +991,7 @@ function module_code(library_namespace) {
 				// TODO: using process.env.ProgramFiles
 				if (library_namespace.is_debug())
 					library_namespace
-							.warn('executable_file_path: Can not handle '
+							.warn('executable_file_path: Cannot handle '
 									+ file_name);
 				return file_name;
 			}

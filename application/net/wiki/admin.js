@@ -328,7 +328,7 @@ function module_code(library_namespace) {
 
 					callback(undefined,
 					//
-					'No user name specified and I can not guess it!');
+					'No user name specified and I cannot guess it!');
 					return;
 				}
 				wiki_API.rollback(options, callback);

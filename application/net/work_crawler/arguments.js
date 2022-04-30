@@ -398,7 +398,7 @@ function module_code(library_namespace) {
 					value = JSON.parse(value);
 				} catch (e) {
 					library_namespace.error('import_args: '
-					// gettext_config:{"id":"can-not-parse-$1"}
+					// gettext_config:{"id":"cannot-parse-$1"}
 					+ gettext('無法解析 %1', key + '=' + value));
 					continue;
 				}

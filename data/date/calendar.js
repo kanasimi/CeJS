@@ -3315,7 +3315,7 @@ Hindu_Date.conjunction = function(days, system, angle, next, no_recursion) {
 	}, days - 1, days + 1);
 
 	if (!Number.isFinite(days))
-		throw 'Hindu_Date.conjunction: Can not find days!';
+		throw 'Hindu_Date.conjunction: Cannot find days!';
 
 	// ** 在此計算 month, year 不能節省時間，純粹為了降低複雜度用。
 	longitude = longitude.mod(TURN_TO_DEGREES);

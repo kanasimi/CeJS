@@ -1456,7 +1456,7 @@ function finish(name_space) {
 					hiding = !hiding;
 				} catch (e) {
 					CeL
-							.log('The browser may not support <a href="http://www.w3.org/TR/DOM-Level-2-Style/css" target="_blank">Document Object Model CSS</a>? Can not toggle debug message: <em>'
+							.log('The browser may not support <a href="http://www.w3.org/TR/DOM-Level-2-Style/css" target="_blank">Document Object Model CSS</a>? Cannot toggle debug message: <em>'
 									+ e.message + '</em>');
 				}
 			return !hiding;

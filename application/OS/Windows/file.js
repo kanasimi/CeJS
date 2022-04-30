@@ -2633,7 +2633,7 @@ function cacher(cache_file, options) {
  */
 function cacher_log(new_path) {
 	if (!library_namespace.write_file) {
-		library_namespace.error('Can not write log!');
+		library_namespace.error('Cannot write log!');
 		return false;
 	}
 

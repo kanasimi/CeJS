@@ -147,7 +147,7 @@ function module_code(library_namespace) {
 				}
 			}, this);
 			if (!this.id && !(this.id = this.id.match(/[^\\\/]*$/)[0])) {
-				// gettext_config:{"id":"can-not-detect-work-id-from-url-$1"}
+				// gettext_config:{"id":"cannot-detect-work-id-from-url-$1"}
 				library_namespace.error(gettext('無法從網址擷取作品 id：%1',
 						this.base_URL));
 			}

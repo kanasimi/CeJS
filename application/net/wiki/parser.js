@@ -753,7 +753,7 @@ function module_code(library_namespace) {
 				&& ref_list_to_remove.includes(token.parameters['1'])) {
 					if (token.parameters['2']) {
 						library_namespace
-								.warn('for_each_token: Can not remove: '
+								.warn('for_each_token: Cannot remove: '
 										+ token.toString());
 					} else {
 						library_namespace.debug('Also remove: '
@@ -1572,7 +1572,7 @@ function module_code(library_namespace) {
 					parsed_index = parsed.length;
 				} else {
 					throw new Error(
-							'insert_layout_token: Can not insert token as '
+							'insert_layout_token: Cannot insert token as '
 									+ location);
 				}
 			}
@@ -1725,7 +1725,7 @@ function module_code(library_namespace) {
 							if (matched && matched[1] > 1) {
 								library_namespace.error(
 								// TODO
-								'We can not deal with rowspan yet.');
+								'We cannot deal with rowspan yet.');
 							}
 
 							// 去掉style

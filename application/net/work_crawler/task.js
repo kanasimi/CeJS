@@ -273,8 +273,8 @@ function module_code(library_namespace) {
 		// e.g., set "E:\directory\" but "E:\" do not exists.
 		if (!library_namespace.directory_exists(this.main_directory)) {
 			library_namespace.error({
-				// gettext_config:{"id":"can-not-create-base-directory-$1"}
-				T : [ 'Can not create base directory: %1',
+				// gettext_config:{"id":"cannot-create-base-directory-$1"}
+				T : [ 'Cannot create base directory: %1',
 				//
 				this.main_directory ]
 			});

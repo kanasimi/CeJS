@@ -1174,11 +1174,13 @@ function write_qqq_data(resources_path) {
 	CeL.write_file(resources_path + qqq_data_file_name, JSON.stringify(qqq_file_data, null, '\t'));
 	// free
 	//qqq_file_data = null;
-	CeL.info(`${write_qqq_data.name}: 原始碼中無明確引用的訊息: ${message_id_without_references.length}/${qqq_data_Map.size}`);
-	CeL.log(message_id_without_references.map(message_id => {
-		const message = qqq_data_Map.get(message_id).message;
-		return message_id === message ? message : `[${message_id}]	${message}`;
-	}).join('\n'));
+	if (message_id_without_references.length > 0) {
+		CeL.info(`${write_qqq_data.name}: 原始碼中無明確引用的訊息: ${message_id_without_references.length}/${qqq_data_Map.size}`);
+		CeL.log(message_id_without_references.map(message_id => {
+			const message = qqq_data_Map.get(message_id).message;
+			return message_id === message ? message : `[${message_id}]	${message}`;
+		}).join('\n'));
+	}
 }
 
 

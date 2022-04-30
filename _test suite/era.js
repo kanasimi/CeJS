@@ -5453,7 +5453,7 @@ function affairs() {
 				CeL.get_element('中曆月日轉紀年日期').title = 公元日期.era;
 				return false;
 			} else if (date) {
-				CeL.warn('Can not convert: [' + date + ']!');
+				CeL.warn('Cannot convert: [' + date + ']!');
 			}
 		}
 	};

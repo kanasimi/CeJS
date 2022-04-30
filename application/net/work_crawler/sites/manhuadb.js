@@ -294,7 +294,7 @@ function module_code(library_namespace) {
 
 			if (!(image_count >= 0)) {
 				throw work_data.title + ' #' + chapter_NO + ' '
-						+ chapter_data.title + ': Can not get image count!';
+						+ chapter_data.title + ': Cannot get image count!';
 			}
 
 			// 將過去的 chapter_data.image_list cache 於 work_data.image_list。

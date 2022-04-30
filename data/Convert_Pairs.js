@@ -208,7 +208,7 @@ function module_code(library_namespace) {
 				source = source.split(separator);
 			else {
 				library_namespace
-						.warn('Convert_Pairs.add: Can not determine the field separator! '
+						.warn('Convert_Pairs.add: Cannot determine the field separator! '
 								+ source);
 				source = [ source ];
 			}
@@ -453,7 +453,7 @@ function module_code(library_namespace) {
 			this.add(source, options);
 		} else {
 			library_namespace
-					.warn('Convert_Pairs.add_path: Can not get contents of ['
+					.warn('Convert_Pairs.add_path: Cannot get contents of ['
 							+ path + ']!');
 		}
 		return this;

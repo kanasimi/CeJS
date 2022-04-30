@@ -1562,8 +1562,8 @@ function module_code(library_namespace) {
 		if (false) {
 			// TODO
 			library_namespace.error([ 'create_domain_menu: ', {
-				// gettext_config:{"id":"can-not-find-menu-node-$1"}
-				T : [ 'Can not find menu node: [%1]', node ]
+				// gettext_config:{"id":"cannot-find-menu-node-$1"}
+				T : [ 'Cannot find menu node: [%1]', node ]
 			} ]);
 		}
 

@@ -654,7 +654,7 @@ function module_code(library_namespace) {
 						// get {Buffer}
 						content = node_fs.readFileSync(value);
 					} catch (e) {
-						// When we can not read, it will throw now.
+						// When we cannot read, it will throw now.
 						// e.g., Error: ENOENT: no such file or directory, open
 						// 'value'
 					}

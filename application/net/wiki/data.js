@@ -1544,7 +1544,7 @@ function module_code(library_namespace) {
 			value = this.claims && this.claims[value];
 		} else {
 			library_namespace
-					.error('wikidata_entity_value: Can not deal with property ['
+					.error('wikidata_entity_value: Cannot deal with property ['
 							+ property + ']');
 			return;
 		}

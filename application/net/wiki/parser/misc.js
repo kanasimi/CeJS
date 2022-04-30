@@ -1647,7 +1647,7 @@ function module_code(library_namespace) {
 
 		var matched = URL.match(PATTERN_WIKI_URL);
 		if (!matched) {
-			library_namespace.debug('Can not parse URL: [' + URL
+			library_namespace.debug('Cannot parse URL: [' + URL
 					+ ']. Not a wikipedia link?', 3, 'URL_to_wiki_link');
 			if (need_add_quote) {
 				if (PATTERN_URL_prefix.test(URL)) {
@@ -1978,7 +1978,7 @@ function module_code(library_namespace) {
 		try {
 			lua_code = JSON.parse(lua_code);
 		} catch (e) {
-			library_namespace.error('parse_lua_object_code: Can not parse: '
+			library_namespace.error('parse_lua_object_code: Cannot parse: '
 			//
 			+ JSON.stringify(lua_code
 			// .slice(0)

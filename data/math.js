@@ -621,7 +621,7 @@ function module_code(library_namespace) {
 		if (typeof value === 'number') {
 			number = Math.round(value);
 			if (!Number.isSafeInteger(number)) {
-				throw new RangeError('Can not convert number ' + value
+				throw new RangeError('Cannot convert number ' + value
 						+ ' to safe integer!');
 			}
 			cohandler && cohandler(true);
@@ -635,7 +635,7 @@ function module_code(library_namespace) {
 		}
 
 		if (!has_bigint)
-			throw new RangeError('Can not convert ' + number
+			throw new RangeError('Cannot convert ' + number
 					+ ' to safe integer!');
 
 		cohandler && cohandler(false);

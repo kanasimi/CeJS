@@ -12,9 +12,6 @@
 	"collapse": "samenvouwen",
 	"number": "getal",
 	"function": "functie",
-	"date": "datum",
-	"time": "tijd",
-	"module": "module",
 	"language": "Taal",
 	"no-change": "geen wijzigingen",
 	"finished": "voltooid",
@@ -94,5 +91,5 @@
 	"latitude": "Breedtegraad:",
 	"longitude": "Lengtegraad:",
 	"general-data-layer": "algemeen",
-	"untranslated-message-count": "954"
+	"untranslated-message-count": "953"
 }

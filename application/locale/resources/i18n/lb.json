@@ -15,9 +15,6 @@
 	"collapse": "zesummeklappen",
 	"number": "Zuel",
 	"function": "Funktioun",
-	"date": "Datum",
-	"time": "Zäit",
-	"module": "Modul",
 	"language": "Sprooch",
 	"no-change": "keng Ännerung",
 	"finished": "fäerdeg",
@@ -101,5 +98,5 @@
 	"latitude": "Breedegrad:",
 	"longitude": "Längegrad:",
 	"famous-places": "Bekannt Plazen:",
-	"untranslated-message-count": "947"
+	"untranslated-message-count": "946"
 }

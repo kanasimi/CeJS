@@ -8,9 +8,6 @@
 	"expand": "\u0440\u0430\u0437\u0432\u0435\u0440\u043d\u0443\u0442\u044c",
 	"number": "\u0447\u0438\u0441\u043b\u043e",
 	"function": "\u0444\u0443\u043d\u043a\u0446\u0438\u044f",
-	"date": "\u0434\u0430\u0442\u0430",
-	"time": "\u0432\u0440\u0435\u043c\u044f",
-	"module": "\u043c\u043e\u0434\u0443\u043b\u044c",
 	"log-type-error": "\u043e\u0448\u0438\u0431\u043a\u0430",
 	"Language": "\u042f\u0437\u044b\u043a",
 	"%1 s": "%1 \u0441",
@@ -95,7 +92,7 @@
 	"TOC.source": "\u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a",
 	"\u4e0b\u8f09 %1": "\u0421\u043a\u0430\u0447\u0430\u0442\u044c %1",
 	"\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated message count": "949",
+	"untranslated message count": "948",
 	"local-language-name": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439"
 },
 "ru-RU");

@@ -1057,7 +1057,7 @@ function module_code(library_namespace) {
 						node.appendChild(child_list);
 					} catch (e) {
 						library_namespace
-								.warn('add_node: Can not insert node!');
+								.warn('add_node: Cannot insert node!');
 						// show_node(node);
 						// e.g., 'HIERARCHY_REQUEST_ERR: DOM Exception 3'
 						// e.g.,
@@ -1354,7 +1354,7 @@ function module_code(library_namespace) {
 			else if (node.click)
 				node.click();
 			else
-				library_namespace.warn('fill_form: Can not submit [' + submit
+				library_namespace.warn('fill_form: Cannot submit [' + submit
 						+ ']');
 		} else if (!isNaN(submit)
 				&& _
@@ -1528,7 +1528,7 @@ function module_code(library_namespace) {
 					value = node.value;
 
 				} else {
-					library_namespace.warn('Can not set value of node!');
+					library_namespace.warn('Cannot set value of node!');
 					// 需要再處理. .text?
 					// return true;
 					value = node.innerHTML;
@@ -6170,7 +6170,7 @@ function module_code(library_namespace) {
 					// library_namespace.node_description() @
 					// application.debug.log
 					library_namespace
-							.debug('Can not get .ownerDocument.defaultView of '
+							.debug('Cannot get .ownerDocument.defaultView of '
 									+ (library_namespace.node_description ? library_namespace
 											.node_description(element)
 											: 'node') + ' !');
@@ -7543,7 +7543,7 @@ function module_code(library_namespace) {
 			if (target_element) {
 				if (false)
 					library_namespace
-							.warn('add_listener: Can not get element.addEventListener! element.attachEvent: '
+							.warn('add_listener: Cannot get element.addEventListener! element.attachEvent: '
 									+ target_element.attachEvent);
 			}
 			return target_element && (adder = target_element.attachEvent) ?

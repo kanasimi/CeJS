@@ -685,9 +685,9 @@ function module_code(library_namespace) {
 		// TODO: 特別編その2
 
 		library_namespace.warn([ {
-			// gettext_config:{"id":"can-not-determine-chapter-no-from-title-«$1»"}
+			// gettext_config:{"id":"cannot-determine-chapter-no-from-title-«$1»"}
 			T : title ? [ '無法從章節標題《%1》判斷章節序號。', title ] : [
-			// gettext_config:{"id":"can-not-determine-chapter-no-from-chapter-data-$1"}
+			// gettext_config:{"id":"cannot-determine-chapter-no-from-chapter-data-$1"}
 			'無法從章節資料判斷章節序號：%1。', JSON.stringify(chapter_data) ]
 		}, default_NO >= 0 ? {
 			// gettext_config:{"id":"set-the-chapter-no-to-$1-according-to-the-chapter-order"}

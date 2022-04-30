@@ -194,7 +194,7 @@ function module_code(library_namespace) {
 						type, no_year_0);
 			}
 
-			// throw new Error('Julian_day: Can not parse [' + date + ']');
+			// throw new Error('Julian_day: Cannot parse [' + date + ']');
 			if (library_namespace.is_debug(2)) {
 				library_namespace.error('Julian_day: 無法解析 [' + date + ']！');
 			}
@@ -3079,7 +3079,7 @@ function module_code(library_namespace) {
 				.match(PATTERN_ISO_8601_durations);
 		if (matched) {
 			if (false && (+matched[1] || +matched[2])) {
-				throw 'We can not handle year / month: ' + interval;
+				throw 'We cannot handle year / month: ' + interval;
 			}
 
 			// 這可以順便用來 parse:
@@ -3137,7 +3137,7 @@ function module_code(library_namespace) {
 				period[1] = matched[0] + period[1];
 			}
 		} else if (library_namespace.is_debug(2)) {
-			library_namespace.warn('parse_period: Can not parse period ['
+			library_namespace.warn('parse_period: Cannot parse period ['
 					+ period + ']');
 		}
 		return period;

@@ -7,8 +7,6 @@
 	"loading": "ತುಂಬಿಸಲಾಗುತ್ತಿದೆ....",
 	"contents": "ಪರಿವಿಡಿ",
 	"number": "ಸಂಖ್ಯೆ",
-	"date": "ದಿನಾಂಕ",
-	"time": "ಸಮಯ",
 	"log-type-error": "ದೋಷ",
 	"log-type-info": "ಮಾಹಿತಿ",
 	"log-type-log": "ದಾಖಲೆ",
@@ -116,5 +114,5 @@
 	"all-countries": "ಎಲ್ಲಾ ದೇಶಗಳು",
 	"timezone": "ಸಮಯ ವಲಯ:",
 	"taiwan-earthquakes": "ತೈವಾನ್ ಭೂಕಂಪಗಳು",
-	"untranslated-message-count": "932"
+	"untranslated-message-count": "930"
 }

@@ -952,7 +952,7 @@ function module_code(library_namespace) {
 	 * wiki_API.upload(file_path, token, options, callback);
 	 * 
 	 * TODO: https://commons.wikimedia.org/wiki/Commons:Structured_data<br />
-	 * 檔案資訊 添加/編輯 說明 (Must be plain text. Can not use wikitext!)
+	 * 檔案資訊 添加/編輯 說明 (Must be plain text. Cannot use wikitext!)
 	 * https://commons.wikimedia.org/w/api.php?action=help&modules=wbsetlabel
 	 * wikitext_to_plain_text(wikitext)
 	 * 

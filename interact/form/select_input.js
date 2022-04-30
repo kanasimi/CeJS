@@ -734,7 +734,7 @@ function module_code(library_namespace, load_arguments) {
 			if (o) {
 				layout.call(this, o);
 			} else if (false) {
-				throw new Error(1, 'Can not get document object' + (o ? ' [' + o + ']' : '') + '!');
+				throw new Error(1, 'Cannot get document object' + (o ? ' [' + o + ']' : '') + '!');
 				return;
 			}
 

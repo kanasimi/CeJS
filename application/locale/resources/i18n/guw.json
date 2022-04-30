@@ -10,8 +10,6 @@
 	"expand": "Dlẹn",
 	"number": "Sọha",
 	"function": "Yọn-na yizan",
-	"date": "Azan",
-	"time": "Whenu",
 	"language": "Ogbè",
 	"no-change": "Diọdo matin",
 	"no-changes": "Diọdo de matin",
@@ -97,5 +95,5 @@
 	"common-era": "Whè Mítọn",
 	"all-countries": "Otò lẹpo",
 	"lifetime-of-rulers": "Gbẹwhẹnu gándutọ lẹ tọn",
-	"untranslated-message-count": "953"
+	"untranslated-message-count": "951"
 }

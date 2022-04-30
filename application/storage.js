@@ -440,7 +440,7 @@ function module_code(library_namespace) {
 		} else {
 			// 應該不會到這邊來。
 			library_namespace
-					.warn('determin_download_directory: Can not determin main download directory!');
+					.warn('determin_download_directory: Cannot determin main download directory!');
 			download_directory = '.';
 		}
 

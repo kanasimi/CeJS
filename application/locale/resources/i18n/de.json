@@ -17,9 +17,6 @@
 	"collapse": "einklappen",
 	"number": "Zahl",
 	"function": "Funktion",
-	"date": "Datum",
-	"time": "Zeit",
-	"module": "Modul",
 	"log-type-error": "Fehler",
 	"language": "Sprache",
 	"no-change": "keine Änderung",
@@ -97,5 +94,5 @@
 	"coordinates": "Koordinaten:",
 	"timezone": "Zeitzone:",
 	"series-has-ended": "Serie ist beendet.",
-	"untranslated-message-count": "953"
+	"untranslated-message-count": "952"
 }

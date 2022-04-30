@@ -14,9 +14,6 @@
 	"expand": "развернуть",
 	"number": "число",
 	"function": "функция",
-	"date": "дата",
-	"time": "время",
-	"module": "модуль",
 	"log-type-error": "ошибка",
 	"language": "Язык",
 	"$1-s": "%1 с",
@@ -101,6 +98,6 @@
 	"toc.source": "источник",
 	"download-$1": "Скачать %1",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated-message-count": "949",
+	"untranslated-message-count": "948",
 	"local-language-name": "Русский"
 }

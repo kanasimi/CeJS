@@ -177,7 +177,7 @@ function module_code(library_namespace) {
 		} catch (e) {
 			library_namespace.error(
 			//
-			'parse_SQL_config: Can not read config file [ ' + file_name + ']!');
+			'parse_SQL_config: Cannot read config file [ ' + file_name + ']!');
 			return;
 		}
 

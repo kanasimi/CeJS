@@ -258,7 +258,7 @@ function module_code(library_namespace) {
 		URL = check_URL.normalize_URL(URL);
 		if (!URL || !/^([a-z]+:)?\/\//i.test(URL)
 				|| URL.startsWith(archive_org.URL_prefix)) {
-			library_namespace.warn('check_URL: Can not check [' + URL + ']');
+			library_namespace.warn('check_URL: Cannot check [' + URL + ']');
 			return;
 		}
 

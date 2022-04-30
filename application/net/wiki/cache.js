@@ -59,13 +59,13 @@ function module_code(library_namespace) {
 		node_fs = {
 			// library_namespace.storage.read_file()
 			readFile : function(file_path, options, callback) {
-				library_namespace.error('Can not read file ' + file_path);
+				library_namespace.error('Cannot read file ' + file_path);
 				if (typeof callback === 'function')
 					callback(true);
 			},
 			// library_namespace.storage.write_file()
 			writeFile : function(file_path, data, options, callback) {
-				library_namespace.error('Can not write to file ' + file_path);
+				library_namespace.error('Cannot write to file ' + file_path);
 				if (typeof options === 'function' && !callback)
 					callback = options;
 				if (typeof callback === 'function')
@@ -409,7 +409,7 @@ function module_code(library_namespace) {
 					} catch (e) {
 						library_namespace.error(
 						// error. e.g., "undefined"
-						'wiki_API_cache: Can not parse as JSON: ' + data);
+						'wiki_API_cache: Cannot parse as JSON: ' + data);
 						// 注意: 若中途 abort，此時可能需要手動刪除大小為 0 的 cache file！
 						data = undefined;
 					}

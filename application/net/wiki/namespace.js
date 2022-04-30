@@ -901,7 +901,7 @@ function module_code(library_namespace) {
 			// console.trace(matched);
 			// console.trace(session);
 			library_namespace.debug(language, 4, 'language_to_site_name');
-			// We can not get information from IP.
+			// We cannot get information from IP.
 			matched = library_namespace.is_IP(matched) ? [ matched.replace(
 					/\./g, '_') ] : matched.split('.');
 			/**
@@ -3019,7 +3019,7 @@ function module_code(library_namespace) {
 			wiki_API.API_URL = wiki_API.API_URL.toLowerCase().replace(/-.+$/,
 					'');
 			// e.g., 'cmn'
-			// Can not use `wiki_API.language_code_to_site_alias`
+			// Cannot use `wiki_API.language_code_to_site_alias`
 			if (wiki_API.API_URL in language_code_to_site_alias)
 				wiki_API.API_URL = language_code_to_site_alias[wiki_API.API_URL];
 		}

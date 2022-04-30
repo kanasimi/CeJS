@@ -390,7 +390,7 @@ function (globalThis) {
 		// Firefox/49.0 WebExtensions 可能 throw:
 		// Error: call to Function() blocked by CSP
 		_.global_eval = function(code) {
-			_.error('global_eval: Can not eval()!');
+			_.error('global_eval: Cannot eval()!');
 		};
 	}
 

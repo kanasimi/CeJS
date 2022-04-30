@@ -901,7 +901,7 @@ function module_code(library_namespace) {
 	// @see http://www.grammarbook.com/numbers/numbers.asp
 	function to_English_numeral(number) {
 		if (number != Math.floor(number)) {
-			library_namespace.error('Can not conver [' + number + ']!');
+			library_namespace.error('Cannot conver [' + number + ']!');
 		}
 
 		number = Math.floor(number);
