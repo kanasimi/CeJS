@@ -172,6 +172,7 @@ function en_message_to_message_id(en_message) {
 		.replace(/[,;:.?!~]+$/, '')
 		.replace(/[:,;'"\s\[\]\\\/#]+/g, '-')
 		.replace(/[\-\s]+$|^[\-\s]+/g, '')
+		.replace(/^[.\-]+/, '')
 		.replace(/-{2,}/, '-')
 		.replace(/%/g, '$')
 		.toLowerCase();
@@ -301,7 +302,8 @@ function load_CSV_message_to_localized(resource_file_path) {
 				CeL.warn(CeL.display_align([
 					[nmessage + '\t', JSON.stringify(message)],
 					['原本的\t', `${JSON.stringify(local_message)}	[${language_code}]`],
-					['新→\t', typeof local_message_of_CSV === 'string' ? JSON.stringify(local_message_of_CSV) : local_message_of_CSV]]));
+					['新→\t', typeof local_message_of_CSV === 'string' ? JSON.stringify(local_message_of_CSV) : local_message_of_CSV]
+				]));
 				local_message = local_message.toString();
 			}
 			localized_mapping[message] = local_message;
@@ -544,7 +546,8 @@ function log_message_changed(message_id) {
 		CeL.info(`${log_message_changed.name}: ${message}`);
 		CeL.log(CeL.display_align([
 			[language_code + '\t', from_localized_message],
-			['→\t', to_localized_message]]));
+			['→\t', to_localized_message]
+		]));
 	}
 }
 
@@ -567,7 +570,8 @@ function set_qqq_data(message_id, qqq, options) {
 					CeL.info(`${set_qqq_data.name}: Set [${message_id}].${JSON.stringify(property_name)}:`);
 					CeL.log(CeL.display_align([
 						['原\t', old_qqq_data[property_name]],
-						['新→\t', qqq_data[property_name]]]));
+						['新→\t', qqq_data[property_name]]
+					]));
 				}
 				old_qqq_data[property_name] = qqq_data[property_name];
 			}
@@ -643,7 +647,8 @@ function create__qqq_data_Map() {
 				CeL.log(CeL.display_align([
 					['id\t', message_id],
 					['原\t', qqq_data.message],
-					['新→\t', message]]));
+					['新→\t', message]
+				]));
 				message_changed.set(qqq_data.message, message);
 				message_to_id_Map.set(qqq_data.message, message_id);
 				qqq_data.message = message;
@@ -935,7 +940,8 @@ function adapt_new_change(script_file_path, options) {
 				CeL.log(CeL.display_align([
 					[id + '\t', message_id],
 					['\t', JSON.stringify(qqq_data.message)],
-					['→\t', JSON.stringify(message)]]));
+					['→\t', JSON.stringify(message)]
+				]));
 				message_changed.set(qqq_data.message, message);
 				qqq_data.need_to_recheck_all_sources = true;
 				const locale_data = i18n_message_id_to_message[qqq_data.original_message_language_code];
@@ -1029,7 +1035,8 @@ function adapt_new_change(script_file_path, options) {
 						CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中改變了 message id:`);
 						CeL.log(CeL.display_align([
 							['原\t', JSON.stringify(message_id)],
-							['新→\t', JSON.stringify(value)]]));
+							['新→\t', JSON.stringify(value)]
+						]));
 						message_id_changed.set(message_id, value);
 						qqq_data.need_to_recheck_all_sources = true;
 						// 當原始碼中改變 message id 時，不會一同變更 qqq_data_Map, message_to_id_Map, i18n_message_id_to_message。唯一只會紀錄於 message_id_changed。
@@ -1053,7 +1060,8 @@ function adapt_new_change(script_file_path, options) {
 						CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中改變了 [${message_id}] 的 ${language_code} 訊息:`);
 						CeL.log(CeL.display_align([
 							['原\t', JSON.stringify(old_value)],
-							['新→\t', JSON.stringify(value)]]));
+							['新→\t', JSON.stringify(value)]
+						]));
 					}
 					i18n_message_id_to_message[language_code][message_id] = value;
 					continue;
@@ -1065,7 +1073,8 @@ function adapt_new_change(script_file_path, options) {
 				CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中改變了 [${message_id}].${JSON.stringify(property_name)}:`);
 				CeL.log(CeL.display_align([
 					['原\t', JSON.stringify(old_value)],
-					['新→\t', JSON.stringify(value)]]));
+					['新→\t', JSON.stringify(value)]
+				]));
 			}
 			qqq_data[property_name] = value;
 		}
