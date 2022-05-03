@@ -144,6 +144,6 @@
 	"\u9031\u65e5\u671f": "Veckodatum",
 	"astronomy": "astronomi",
 	"calendar": "kalender",
-	"untranslated message count": "899"
+	"untranslated message count": "900"
 },
 "sv-SE");

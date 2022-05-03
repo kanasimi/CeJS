@@ -517,7 +517,7 @@
 	"\u4e0d\u518d\u7dad\u8b77": "N\u00e3o tem mais suporte",
 	"\u6b61\u8fce\u8207\u6211\u5011\u4e00\u540c<a>\u7ffb\u8b6f\u4ecb\u9762\u6587\u5b57</a>\uff01": "Vamos <a>traduzir a interface</a> juntos!",
 	"\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01": "Atualmente tem %1 mensagens em %2 que n\u00e3o foram traduzidas. Voc\u00ea \u00e9 bem-vindo a traduzir conosco!",
-	"untranslated message count": "525",
+	"untranslated message count": "526",
 	"local-language-name": "Portugu\u00eas"
 },
 "pt-BR");

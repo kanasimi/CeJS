@@ -545,6 +545,6 @@
 	"no-longer-maintained": "サポートされていません",
 	"let-s-<a>translate-the-interface<-a>-together": "一緒に<a>翻訳しましょう</a>！",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "現在、翻訳されていない%2のメッセージが%1件あります。一緒に訳しましょう！",
-	"untranslated-message-count": "503",
+	"untranslated-message-count": "504",
 	"local-language-name": "日本語"
 }

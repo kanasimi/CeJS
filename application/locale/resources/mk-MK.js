@@ -145,6 +145,6 @@
 	"\u7d93\u5ea6\uff1a": "\u0413.\u0428.",
 	"\u7def\u5ea6\uff1a": "\u0413.\u0414.",
 	"\u8457\u540d\u5730\u9ede\uff1a": "\u0417\u043d\u0430\u043c\u0435\u043d\u0438\u0442\u0438 \u043c\u0435\u0441\u0442\u0430:",
-	"untranslated message count": "898"
+	"untranslated message count": "899"
 },
 "mk-MK");

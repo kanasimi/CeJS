@@ -410,6 +410,9 @@ function load_i18n_messages(resources_path, callback) {
 	});
 }
 
+/** {Set}在新的qqq_data未設定這些屬性時，不覆蓋舊的。 */
+const do_not_overwrite_null_properities = new Set(['message', 'notes']);
+
 /**
  * 解析 qqq 字串成為 qqq_data。
  * @param {String} qqq 
@@ -564,7 +567,7 @@ function set_qqq_data(message_id, qqq, options) {
 		// Copy new properties from new qqq_data.
 		for (const property_name of Object.keys(qqq_data)) {
 			if ((qqq_data[property_name] || qqq_data[property_name] === 0
-				|| (property_name in old_qqq_data) && property_name !== 'notes')
+				|| old_qqq_data.hasOwnProperty(property_name) && !do_not_overwrite_null_properities.has(property_name))
 				&& old_qqq_data[property_name] !== qqq_data[property_name]) {
 				if (options?.show_change_message) {
 					CeL.info(`${set_qqq_data.name}: Set [${message_id}].${JSON.stringify(property_name)}:`);

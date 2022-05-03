@@ -381,6 +381,6 @@
 	"download_options.archive_images": "Comprime l'archivi \u00ebd plancia na vira d\u00ebscari\u00e0 \u00ebl fum\u00e8t.",
 	"download_options.archive_all_good_images_only": "Comprime l'archivi \u00ebd plancia sensa gnun eror.",
 	"download_options.remove_images_after_archive": "Apress la compression \u00ebd l'archivi \u00ebd plancia, d\u00ebscancel\u00e9 l'archivi \u00ebd plancia original.",
-	"untranslated message count": "662"
+	"untranslated message count": "663"
 },
 "pms-IT");

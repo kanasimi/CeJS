@@ -1044,6 +1044,7 @@
 	"untranslated message count": "0",
 	"local-language-name": "English",
 	"Treat %1 as language: %2.": "Treat %1 as language: %2.",
-	"Cannot detect language of %1!": "Cannot detect language of %1!"
+	"Cannot detect language of %1!": "Cannot detect language of %1!",
+	"Invalid task_configuration (should be %2): {%3} %1": "Invalid task_configuration (should be %2): {%3} %1"
 },
 "en-US");
