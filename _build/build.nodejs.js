@@ -328,12 +328,12 @@ function load_message_to_localized(resources_path, callback) {
 		try {
 			locale_data = JSON.parse(contents);
 		} catch (e) {
-			CeL.warn(`${load_message_to_localized.name}: There are functions in the locale? ${fso_path}`);
+			//CeL.warn(`${load_message_to_localized.name}: There are functions in the locale? ${fso_path}`);
 			try {
 				eval('locale_data = ' + contents);
 				//console.log(data);
 			} catch (e) {
-				CeL.error(`${fso_path}:`);
+				CeL.error(`${load_message_to_localized.name}: 無法解析在地化訊息檔案: ${fso_path}`);
 				console.error(e);
 			}
 		}
@@ -410,7 +410,7 @@ function load_i18n_messages(resources_path, callback) {
 	});
 }
 
-/** {Set}在新的qqq_data未設定這些屬性時，不覆蓋舊的。 */
+/** {Set}在新的 qqq_data 未設定這些屬性時，不覆蓋舊的。 */
 const do_not_overwrite_null_properities = new Set(['message', 'notes']);
 
 /**
@@ -862,7 +862,7 @@ function adapt_new_change(script_file_path, options) {
 			// 字串的一部分 部分的字串
 			|| gettext_config.mark_type === 'part_of_string') {
 			/**
-			 * 添加訊息的方法: 特殊型態標記: 將下一非註解的行當作標的，並且不檢查內容。
+			 * 添加訊息的方法: 特殊型態標記: 將下一非註解的行當作標的，並且不檢查內容。必須自己到 qqq.json 編寫 qqq!
 			 * e.g., 組合型 message id <code>
 	
 			插入 // gettext_config:{"id":"message_id_1","mark_type":"combination_message_id"}
@@ -918,7 +918,8 @@ function adapt_new_change(script_file_path, options) {
 				 * 添加訊息的方法: 直接把 message 當英文訊息。
 				 * e.g., <code>
 	
-				插入 // gettext_config:{}
+				插入 // gettext_config:{"qqq":""}
+				插入 // gettext_config:{"qqq":"","zh":""}
 				gettext('English message');
 	
 				</code> */
@@ -983,7 +984,8 @@ function adapt_new_change(script_file_path, options) {
 					 * 添加訊息的方法: 直接把 Original language message 原文訊息當英文訊息。
 					 * e.g., <code>
 		
-					插入 // gettext_config:{"id":"message-id"}
+					插入 // gettext_config:{"id":"message-id","qqq":"","zh":""}
+					插入 // gettext_config:{"id":"message-id","qqq":""}
 					gettext('English message');
 		
 					</code> */
@@ -998,7 +1000,7 @@ function adapt_new_change(script_file_path, options) {
 				 * 添加訊息的方法: 直接把 message_id 當英文訊息。
 				 * e.g., <code>
 	
-				插入 // gettext_config:{"id":"English message"}
+				插入 // gettext_config:{"id":"English message","qqq":""}
 				gettext('Original language message 原文訊息');
 	
 				</code> */
@@ -1059,7 +1061,7 @@ function adapt_new_change(script_file_path, options) {
 				if (language_code) {
 					// assert: CeL.is_Object(i18n_message_id_to_message[language_code])
 					const old_value = i18n_message_id_to_message[language_code][message_id];
-					if (old_value || old_value === 0) {
+					if (old_value/* || old_value === 0*/) {
 						CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中改變了 [${message_id}] 的 ${language_code} 訊息:`);
 						CeL.log(CeL.display_align([
 							['原\t', JSON.stringify(old_value)],

@@ -7481,7 +7481,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1264}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1266}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}"
 	},
 	"local-language-name": {
 		"message": "local-language-name",
@@ -7507,5 +7507,11 @@
 		"notes": "%1: task configuration, %2: need type, %3: type of task configuration",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L314}}"
+	},
+	"get-parameter-$1=$2-from-command-line": {
+		"message": "Get parameter %1=%2 from command line",
+		"original_message_language_code": "en-US",
+		"notes": "%1: parameter name, %2: parameter value",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L332}}"
 	}
 }
