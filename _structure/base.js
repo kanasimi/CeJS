@@ -2330,7 +2330,7 @@ OS='UNIX'; // unknown
 	}
 
 	/**
-	 * 預先處理 messages。
+	 * 預先處理 log messages。
 	 * 
 	 * TODO: 判別 console 是否具備 stylify/著色功能。
 	 * 
@@ -2341,7 +2341,7 @@ OS='UNIX'; // unknown
 	 * 
 	 * @returns {Array}styled messages
 	 */
-	function preprocess_messages(messages, type, from_styled_logger) {
+	function preprocess_log_messages(messages, type, from_styled_logger) {
 		// console.log(using_style);
 		// console.trace(messages);
 		if (!using_style) {
@@ -2408,6 +2408,8 @@ OS='UNIX'; // unknown
 		return _.to_SGR(messages);
 	}
 
+	_.preprocess_log_messages = preprocess_log_messages;
+
 	/**
 	 * 不能放在 if (has_console) {} 中 @ node.js v0.10.25:
 	 * 
@@ -2427,7 +2429,7 @@ OS='UNIX'; // unknown
 				console.clear();
 			// IE8 中，無法使用 console.log.apply()。
 			// return console[type].apply(console, arguments);
-			console[_type](preprocess_messages(messages, type));
+			console[_type](preprocess_log_messages(messages, type));
 		};
 
 		/**
@@ -2441,7 +2443,7 @@ OS='UNIX'; // unknown
 		_['s' + type] = function(messages, clear) {
 			if (clear && console.clear)
 				console.clear();
-			console[_type](preprocess_messages(messages, type, true));
+			console[_type](preprocess_log_messages(messages, type, true));
 		};
 	}
 
@@ -2482,7 +2484,7 @@ OS='UNIX'; // unknown
 				}
 			}
 			// console.trace()
-			console.log(preprocess_messages(messages, 'debug'));
+			console.log(preprocess_log_messages(messages, 'debug'));
 		};
 		// styled logger
 		_.sdebug = function (messages, level, caller) {
@@ -2495,7 +2497,7 @@ OS='UNIX'; // unknown
 				messages.unshift('fg=blue', _.get_function_name(caller) + ': ', 0);
 				messages = _.to_SGR(messages);
 			} else {
-				messages = preprocess_messages(messages, 'debug', true);
+				messages = preprocess_log_messages(messages, 'debug', true);
 			}
 			// console.trace()
 			console.log(messages);

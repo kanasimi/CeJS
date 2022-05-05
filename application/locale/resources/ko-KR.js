@@ -102,7 +102,7 @@
 	"Illegal pattern: [%1]": "\uc798\ubabb\ub41c \ud328\ud134: [%1]",
 	"Working directory: %1": "\uc791\uc5c5 \ub514\ub809\ud130\ub9ac: %1",
 	"\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated message count": "942",
+	"untranslated message count": "947",
 	"local-language-name": "\ud55c\uad6d\uc5b4"
 },
 "ko-KR");

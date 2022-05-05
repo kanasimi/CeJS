@@ -105,6 +105,6 @@
 	"illegal-pattern-$1": "잘못된 패턴: [%1]",
 	"working-directory-$1": "작업 디렉터리: %1",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated-message-count": "942",
+	"untranslated-message-count": "947",
 	"local-language-name": "한국어"
 }

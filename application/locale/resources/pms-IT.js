@@ -392,6 +392,6 @@
 	"download_options.skip_chapter_data_error": "Cand ij d\u00e0it d'un cap\u00ectol a son nen dispon\u00ecbij, ch'a preuva diretaman \u00ebl cap\u00ectol apress.",
 	"download_options.preserve_work_page": "A marca s'a venta goern\u00e9 ij d\u00e0it \u00ebd l'euvra an .cache_directory_name.",
 	"download_options.preserve_chapter_page": "A marca d'a venta goern\u00e9 la p\u00e0gina d\u00ebl cap\u00ectol. F\u00e0uss: nen arzerv\u00e0 esplicitaman, la p\u00e0gina d\u00ebl cap\u00ectol esistenta a sar\u00e0 d\u00ebscancel\u00e0. N\u00f2ta: Si .reget_chapter a l'\u00e9 nen defin\u00ec, preserve_chapter_page a dovr\u00eca nen serve.",
-	"untranslated message count": "653"
+	"untranslated message count": "658"
 },
 "pms-IT");

@@ -493,7 +493,8 @@ if (typeof CeL === 'function') {
 			if (_.platform.is_interactive) {
 				_.log_temporary = function log_temporary(message) {
 					// message + ' ...\r'
-					process.stdout.write('\r' + message + '  \r');
+					process.stdout.write('\r'
+							+ _.preprocess_log_messages(message) + '  \r');
 				};
 			}
 

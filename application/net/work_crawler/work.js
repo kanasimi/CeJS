@@ -709,13 +709,14 @@ function module_code(library_namespace) {
 			var chapter_time_interval = _this.get_chapter_time_interval(
 					work_URL, work_data);
 			if (chapter_time_interval > 0) {
-				library_namespace.log_temporary('get_work_page: '
-						// gettext_config:{"id":"wait-for-$2-and-then-acquiring-the-work-information-page-$1"}
-						+ gettext('等待 %2 之後取得作品資訊頁面：%1', work_URL,
-								library_namespace.age_of(0,
-										chapter_time_interval, {
-											digits : 1
-										})));
+				library_namespace.log_temporary([ 'get_work_page: ', {
+					// gettext_config:{"id":"wait-for-$2-and-then-acquiring-the-work-information-page-$1"}
+					T : [ '等待 %2 之後取得作品資訊頁面：%1', work_URL,
+					//
+					library_namespace.age_of(0, chapter_time_interval, {
+						digits : 1
+					}) ]
+				} ]);
 				setTimeout(function() {
 					_this.get_URL(work_URL, process_work_data);
 				}, chapter_time_interval);
@@ -781,17 +782,17 @@ function module_code(library_namespace) {
 					// 需要重新讀取頁面。e.g., 502
 					var chapter_time_interval = _this
 							.get_chapter_time_interval(work_URL, work_data);
-					library_namespace
-							.log_temporary('process_work_data: '
-									+ gettext(
-											// gettext_config:{"id":"wait-for-$2-and-re-acquiring-the-work-information-page-$1"}
-											chapter_time_interval > 0 ? '等待 %2 之後再重新取得作品資訊頁面：%1'
-													// gettext_config:{"id":"re-acquiring-the-work-information-page-$1"}
-													: '重新取得作品資訊頁面：%1',
-											work_URL, library_namespace.age_of(
-													0, chapter_time_interval, {
-														digits : 1
-													})));
+					library_namespace.log_temporary([ 'process_work_data: ', {
+						T : [ chapter_time_interval > 0
+						// gettext_config:{"id":"wait-for-$2-and-re-acquiring-the-work-information-page-$1"}
+						? '等待 %2 之後再重新取得作品資訊頁面：%1'
+						// gettext_config:{"id":"re-acquiring-the-work-information-page-$1"}
+						: '重新取得作品資訊頁面：%1', work_URL,
+						//
+						library_namespace.age_of(0, chapter_time_interval, {
+							digits : 1
+						}) ]
+					} ]);
 					if (chapter_time_interval > 0) {
 						setTimeout(get_work_page, chapter_time_interval);
 					} else {
@@ -1754,7 +1755,9 @@ function module_code(library_namespace) {
 			// 中的 this.convert_to_language() 可能是 async 形式，需要待其完成之後，再進行下個階段。
 			function waiting_for_create_ebook() {
 				library_namespace
-						.log_temporary('Waiting for connecting to language-converting server...');
+						.log_temporary({
+							T : 'Waiting for connecting to language-converting server...'
+						});
 				// Will wait for the get_URL() @ function get_LTP_data(options)
 				// @ Chinese_converter/Chinese_converter.js
 				Promise.resolve(ebook_promise).then(

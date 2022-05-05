@@ -584,13 +584,14 @@ function module_code(library_namespace) {
 				_this.get_image(image_data, callback, images_archive);
 			}
 			if (image_data.time_interval > 0) {
-				library_namespace.log_temporary('get_image: '
-						// gettext_config:{"id":"waitting-for-$2-and-retake-the-image-$1"}
-						+ gettext('等待 %2 之後再重新取得圖片：%1', image_data.url,
-								library_namespace.age_of(0,
-										image_data.time_interval, {
-											digits : 1
-										})));
+				library_namespace.log_temporary([ 'get_image: ', {
+					// gettext_config:{"id":"waitting-for-$2-and-retake-the-image-$1"}
+					T : [ '等待 %2 之後再重新取得圖片：%1', image_data.url,
+					//
+					library_namespace.age_of(0, image_data.time_interval, {
+						digits : 1
+					}) ]
+				} ]);
 				setTimeout(get_image_again, image_data.time_interval);
 			} else
 				get_image_again();

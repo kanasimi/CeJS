@@ -31,7 +31,7 @@ const node_fs = require('fs');
 function error_recover_and_exit(message) {
 	console.error(`${error_recover_and_exit.name}: Try to recover main script file from backup!`);
 
-	//node_fs.cpSync(backup_directory + library_main_script, library_base_directory + library_main_script, { force: true });
+	//node_fs.cpSync(backup_directory + library_main_script, library_main_script_file_path, { force: true });
 
 	process.exit(1);
 }
@@ -69,18 +69,10 @@ const library_main_script_file_path = library_base_directory + library_main_scri
 //console.log(require('fs').readFileSync(library_main_script_file_path).toString('utf16le'));
 
 
-/**
- *  modify time stamp of npm package.json.
- */
-function update_package_file_version() {
-	const package_file_path = library_base_directory + 'package.json';
-	let package_file_content = CeL.read_file(package_file_path).toString()
-		// version stamp
-		.replace(/("version"[\s\n]*:[\s\n]*")[^"]*(")/, function (all, header, footer) {
-			return header + CeL.version + footer;
-		});
-	CeL.write_file(package_file_path, package_file_content);
-}
+// matched: [ all, header, v1, v2, _v3, v3, footer ]
+const PATTERN_version_stamp = /([\W]library_version[\s\n]*=[\s\n]*'v?)(\d+)\.(\d+)(\.(\d+))?(')/;
+// matched: [ all, header, original stamp before ";" ]
+const PATTERN_build_date_stamp = /([\W]build_date[\s\n]*=[\s\n]*)[^;]+/;
 
 /**
  * build main script.
@@ -88,6 +80,7 @@ function update_package_file_version() {
 function build_main_script() {
 	const file_list = [main_structure_file];
 	let library_main_script_content = CeL.read_file(library_base_directory + main_structure_file).toString();
+	let new_build_version = CeL.version;
 	//console.log([CeL.env.source_encoding, main_structure_file, library_main_script_content]);
 	library_main_script_content = library_main_script_content
 		.replace(/\/\/([^\r\n]+)\r?\n/g, function ($0, $1) {
@@ -101,11 +94,11 @@ function build_main_script() {
 				.replace(/\/\*[\s\S]*?\*\//, '');
 		})
 
-		// Increase version stamp
-		.replace(/([\W]library_version[\s\n]*=[\s\n]*'v?)(\d+)\.(\d+)(\.(\d+))?(')/,
+		// Increase version stamp.
+		.replace(PATTERN_version_stamp,
 			function (all, header, v1, v2, _v3, v3, footer) {
 				// [ all, v1, v2, _v3, v3 ] major.minor.patch
-				var matched = CeL.version.match(/^v?(\d+)\.(\d+)(\.(\d+))?$/);
+				var matched = new_build_version.match(/^v?(\d+)\.(\d+)(\.(\d+))?$/);
 				if (v1 === matched[1] && v2 === matched[2]) {
 					// 自動增加 patch 版本號。
 					v3 = +matched[4] + 1;
@@ -113,12 +106,12 @@ function build_main_script() {
 					// 主要 major 版本號或 minor 版本號改變，重新設定 patch 版本號 v3 為 base.js 中的號碼。
 					;
 				}
-				// reset CeL.version to new version.
-				CeL.version = v1 + '.' + v2 + '.' + v3;
-				return header + CeL.version + footer;
+				// reset new_build_version to new version.
+				new_build_version = v1 + '.' + v2 + '.' + v3;
+				return header + new_build_version + footer;
 			})
-		// time stamp
-		.replace(/([\W]build_date[\s\n]*=[\s\n]*)[^;]+/, function ($0, $1) {
+		// Add time stamp.
+		.replace(PATTERN_build_date_stamp, function ($0, $1) {
 			return $1 + 'new Date("' + datestamp.toISOString() + '")';
 		});
 
@@ -135,17 +128,35 @@ function build_main_script() {
 	//console.log([CeL.env.source_encoding, main_structure_file, library_main_script_content]);
 
 	try {
-		if (library_main_script_content === CeL.read_file(library_main_script_file_path, 'auto'))
+		if (CeL.read_file(library_main_script_file_path, 'auto').trim().replace(PATTERN_version_stamp, '$1$6').replace(PATTERN_build_date_stamp, '$1')
+			=== library_main_script_content.trim().replace(PATTERN_version_stamp, '$1$6').replace(PATTERN_build_date_stamp, '$1')) {
 			return;
+		}
 	} catch { }
 
+	CeL.info(`${build_main_script.name}: Build new main script file: ${library_main_script_file_path}`);
+	CeL.version = new_build_version;
 
-	CeL.remove_file(library_base_directory + backup_directory + library_main_script);
-	CeL.move_file(library_base_directory + library_main_script, library_base_directory + backup_directory + library_main_script);
+	const backup_file_path = library_base_directory + backup_directory + library_main_script;
+	CeL.remove_file(backup_file_path);
+	CeL.move_file(library_main_script_file_path, backup_file_path);
 
 	CeL.chmod(library_main_script_file_path, 0o600);
 	CeL.write_file(library_main_script_file_path, library_main_script_content, CeL.env.source_encoding);
 	CeL.chmod(library_main_script_file_path, 0o400);
+}
+
+/**
+ *  modify time stamp of npm package.json.
+ */
+function update_package_file_version() {
+	const package_file_path = library_base_directory + 'package.json';
+	let package_file_content = CeL.read_file(package_file_path).toString()
+		// version stamp
+		.replace(/("version"[\s\n]*:[\s\n]*")[^"]*(")/, function (all, header, footer) {
+			return header + CeL.version + footer;
+		});
+	CeL.write_file(package_file_path, package_file_content);
 }
 
 // ---------------------------------------------------------------------//
@@ -569,7 +580,7 @@ function set_qqq_data(message_id, qqq, options) {
 			if ((qqq_data[property_name] || qqq_data[property_name] === 0
 				|| old_qqq_data.hasOwnProperty(property_name) && !do_not_overwrite_null_properities.has(property_name))
 				&& old_qqq_data[property_name] !== qqq_data[property_name]) {
-				if (options?.show_change_message) {
+				if (options?.show_change_message && old_qqq_data[property_name] !== undefined) {
 					CeL.info(`${set_qqq_data.name}: Set [${message_id}].${JSON.stringify(property_name)}:`);
 					CeL.log(CeL.display_align([
 						['原\t', old_qqq_data[property_name]],
@@ -931,16 +942,16 @@ function adapt_new_change(script_file_path, options) {
 			qqq_data = qqq_data_Map.get(message_id);
 
 		} else if (!(message_id = gettext_config.id)) {
-			throw new Error(`${adapt_new_change.name}: [${script_file_path}]原始碼中新增了 message，但未設定且無法自動判別 message id: ${JSON.stringify(message)}`);
+			throw new Error(`${adapt_new_change.name}: [${script_file_path}] 原始碼中新增了 message，但未設定且無法自動判別 message id: ${JSON.stringify(message)}`);
 
 		} else if (qqq_data = qqq_data_Map.get(message_id)) {
 			if (message_changed.has(qqq_data.message)) {
 				if (message_changed.get(qqq_data.message) !== message) {
-					throw new Error(`${adapt_new_change.name}: message 衝突:\n原 message	${JSON.stringify(qqq_data.message)}\n→ i18n或其他原始碼中的 message:	${JSON.stringify(message_changed.get(qqq_data.message))}\n→ [${script_file_path}]原始碼中的 message:${JSON.stringify(message)}`);
+					throw new Error(`${adapt_new_change.name}: message 衝突:\n原 message	${JSON.stringify(qqq_data.message)}\n→ i18n或其他原始碼中的 message:	${JSON.stringify(message_changed.get(qqq_data.message))}\n→ [${script_file_path}] 原始碼中的 message:${JSON.stringify(message)}`);
 				}
 
 			} else if (qqq_data.message !== message) {
-				CeL.info(`${adapt_new_change.name}: 改變了[${script_file_path}]原始碼中的 message:`);
+				CeL.info(`${adapt_new_change.name}: 改變了[${script_file_path}] 原始碼中的 message:`);
 				CeL.log(CeL.display_align([
 					[id + '\t', message_id],
 					['\t', JSON.stringify(qqq_data.message)],
@@ -958,7 +969,7 @@ function adapt_new_change(script_file_path, options) {
 			}
 
 		} else {
-			CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中新增了 message: [${message_id}] ${JSON.stringify(message)}`);
+			CeL.info(`${adapt_new_change.name}: [${script_file_path}] 原始碼中新增了 message: [${message_id}] ${JSON.stringify(message)}`);
 			// assert: !!message_id === true
 			message_id = en_message_to_message_id(message_id);
 			qqq_data = {
@@ -1033,11 +1044,11 @@ function adapt_new_change(script_file_path, options) {
 					}
 					if (message_id_changed.has(message_id)) {
 						if (message_id_changed.get(message_id) !== value) {
-							throw new Error(`${adapt_new_change.name}: message id 衝突:\n原 message	id ${JSON.stringify(message_id)}\n→ 其他原始碼中的 message id:	${JSON.stringify(message_id_changed.get(message_id))}\n→ [${script_file_path}]原始碼中的 message:${JSON.stringify(value)}`);
+							throw new Error(`${adapt_new_change.name}: message id 衝突:\n原 message	id ${JSON.stringify(message_id)}\n→ 其他原始碼中的 message id:	${JSON.stringify(message_id_changed.get(message_id))}\n→ [${script_file_path}] 原始碼中的 message:${JSON.stringify(value)}`);
 						}
 
 					} else {
-						CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中改變了 message id:`);
+						CeL.info(`${adapt_new_change.name}: [${script_file_path}] 原始碼中改變了 message id:`);
 						CeL.log(CeL.display_align([
 							['原\t', JSON.stringify(message_id)],
 							['新→\t', JSON.stringify(value)]
@@ -1062,7 +1073,7 @@ function adapt_new_change(script_file_path, options) {
 					// assert: CeL.is_Object(i18n_message_id_to_message[language_code])
 					const old_value = i18n_message_id_to_message[language_code][message_id];
 					if (old_value/* || old_value === 0*/) {
-						CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中改變了 [${message_id}] 的 ${language_code} 訊息:`);
+						CeL.info(`${adapt_new_change.name}: [${script_file_path}] 原始碼中改變了 [${message_id}] 的 ${language_code} 訊息:`);
 						CeL.log(CeL.display_align([
 							['原\t', JSON.stringify(old_value)],
 							['新→\t', JSON.stringify(value)]
@@ -1075,7 +1086,7 @@ function adapt_new_change(script_file_path, options) {
 
 			const old_value = qqq_data[property_name];
 			if (old_value || old_value === 0) {
-				CeL.info(`${adapt_new_change.name}: [${script_file_path}]原始碼中改變了 [${message_id}].${JSON.stringify(property_name)}:`);
+				CeL.info(`${adapt_new_change.name}: [${script_file_path}] 原始碼中改變了 [${message_id}].${JSON.stringify(property_name)}:`);
 				CeL.log(CeL.display_align([
 					['原\t', JSON.stringify(old_value)],
 					['新→\t', JSON.stringify(value)]
@@ -1242,7 +1253,15 @@ function write_qqq_data(resources_path) {
 		i18n_qqq_Object[message_id] = qqq_value.join('\n');
 	}
 	//console.trace(i18n_qqq_Object);
-	CeL.write_file(resources_path + qqq_data_file_name, JSON.stringify(qqq_file_data, null, '\t'));
+
+	let original_contents = CeL.read_file(resources_path + qqq_data_file_name);
+	const new_contents = JSON.stringify(qqq_file_data, null, '\t') + '\n';
+	if (!original_contents || (original_contents = original_contents.toString()) !== new_contents) {
+		const fso_path = resources_path + qqq_data_file_name;
+		CeL.info(`${write_qqq_data.name}: Create new qqq data cache: ${fso_path}`);
+		CeL.write_file(fso_path, new_contents);
+	}
+
 	// free
 	//qqq_file_data = null;
 	if (message_id_without_references.length > 0) {
@@ -1304,7 +1323,8 @@ function write_message_script_file({ resources_path, language_code, locale_data 
 			// The same as JSON.stringify(, null, '\t')
 			.join(',\n\t')}
 },
-${JSON.stringify(language_code)});`;
+${JSON.stringify(language_code)});
+`;
 	let original_contents = CeL.read_file(fso_path);
 	if (!original_contents || (original_contents = original_contents.toString()) !== new_contents) {
 		CeL.info(`${write_message_script_file.name}: Create new message script: ${fso_path}`);
@@ -1315,7 +1335,7 @@ ${JSON.stringify(language_code)});`;
 function data_to_i18n_contents(i18n_locale_data) {
 	if (typeof i18n_locale_data === 'string')
 		i18n_locale_data = JSON.parse(i18n_locale_data);
-	return JSON.stringify(i18n_locale_data, null, '\t') + '\n'
+	return JSON.stringify(i18n_locale_data, null, '\t') + '\n';
 }
 function write_i18n_data_file({ language_code, locale_data }) {
 	const i18n_language_code_data = i18n_language_code_data_mapping.get(language_code);
@@ -1338,9 +1358,7 @@ function write_i18n_data_file({ language_code, locale_data }) {
 	// main messages of CeJS library
 	await build_locale_messages('application/locale/resources');
 
-	/*
 	build_main_script();
 
 	update_package_file_version();
-	*/
 })();

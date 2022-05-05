@@ -175,7 +175,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L971}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2505}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2517}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1128}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1130}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L490}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L513}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L971}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2505}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2517}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1129}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1131}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L490}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L513}}"
 	},
 	"finished-$1": {
 		"message": "finished: %1",
@@ -974,7 +974,7 @@
 		"scope": "data.date.era: 文字式年曆 朝代紀年日期",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L161}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L568}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L172}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L568}}"
 	},
 	"$1-bce": {
 		"message": "%1 BCE",
@@ -1833,7 +1833,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L352}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L621}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4446}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L363}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L632}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4446}}"
 	},
 	"month-of-the-sexagenary-cycle": {
 		"message": "月干支",
@@ -2120,7 +2120,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L349}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4847}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L360}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4847}}"
 	},
 	"portugal": {
 		"message": "Portugal",
@@ -3284,7 +3284,7 @@
 		"notes": "Error occurred. 神仙打鼓有時錯，腳步踏差誰人無。\n仙人拍鼓有時錯，跤步踏差啥人無？\n客語 神仙打鼓有時錯，腳步踏差麼人無",
 		"scope": "work_crawler.js: crawler message",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1202}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L520}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L749}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1212}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L520}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L750}}"
 	},
 	"error-$1": {
 		"message": "Error: %1",
@@ -3599,14 +3599,14 @@
 		"notes": "%1: work_id, %2: error reason",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L740}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L741}}"
 	},
 	"no-content-found": {
 		"message": "取得空的內容",
 		"notes": "error reason: Got empty content",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L744}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L745}}"
 	},
 	"wait-for-$2-and-then-acquiring-the-work-information-page-$1": {
 		"message": "等待 %2 之後取得作品資訊頁面：%1",
@@ -3634,266 +3634,266 @@
 		"notes": "%1: work title, %2: work id",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L868}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L869}}"
 	},
 	"the-title-of-the-work-$1-(id-$2)-could-not-be-obtained-or-set": {
 		"message": "無法取得或未設定作品標題《%1》（id：%2）。",
 		"notes": "%1: work title, %2: work id",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L871}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L872}}"
 	},
 	"downloading-$1-table-of-contents-@-$2": {
 		"message": "下載%1 - 目次 @ %2",
 		"notes": "%1: work title, %2: crawler id",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L887}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L888}}"
 	},
 	"delete-existing-work-data-cache-$1": {
 		"message": "刪除已存在的作品資料快取：%1",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L935}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L936}}"
 	},
 	"new-information-→": {
 		"message": "新資料→",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1022}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1023}}"
 	},
 	"cannot-get-chapter-list-page": {
 		"message": "Cannot get chapter list page!",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1079}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1080}}"
 	},
 	"create-work_data.directory-$1": {
 		"message": "Create work_data.directory: %1",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1098}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1099}}"
 	},
 	"last-updated-date": {
 		"message": "last updated date",
 		"notes": "最近更新日期",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1139}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1140}}"
 	},
 	"last-saved-date": {
 		"message": "last saved date",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1117}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1145}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1152}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1118}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1146}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1153}}"
 	},
 	"«$2»-a-serious-error-occurred-during-execution-of-$1-which-was-aborted": {
 		"message": "《%2》：執行 %1 時發生嚴重錯誤，異常中斷。",
 		"notes": "throw error. %1: error spot, %2: work title",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1192}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1193}}"
 	},
 	"from-chapter-data-→": {
 		"message": "自章節資料→",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1266}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1267}}"
 	},
 	"enter-the-url-for-§$1-and-download-only-this-section": {
 		"message": "輸入 §%1 的網址，僅下載此一章節。",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1315}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1316}}"
 	},
 	"the-work-does-not-exist-or-has-been-deleted": {
 		"message": "作品不存在或已被刪除。",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1334}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1335}}"
 	},
 	"cannot-get-chapter-count": {
 		"message": "Cannot get chapter count!",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1338}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1339}}"
 	},
 	"perhaps-the-work-has-been-deleted-or-blocked": {
 		"message": "或許作品已被刪除或屏蔽？",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1341}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1342}}"
 	},
 	"perhaps-the-work-has-been-deleted-or-blocked-or-has-the-website-been-revised": {
 		"message": "或許作品已被刪除或屏蔽，或者網站改版了？",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1345}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1346}}"
 	},
 	"remove-chapter-list-page-$1": {
 		"message": "Remove chapter list page: %1",
 		"notes": "明確指定不保留，將刪除已存在的章節列表頁面(網頁)。",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1369}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1370}}"
 	},
 	"download-only-chapter-number-$1": {
 		"message": "僅下載章節編號：%1",
 		"notes": "%1: index list",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1408}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1409}}"
 	},
 	"manually-specified-not-to-download-any-chapters": {
 		"message": "手動指定了不下載任何章節！",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1406}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1407}}"
 	},
 	"the-.recheck-option-has-been-set-the-work-has-been-downloaded-before-and-the-catalogue-has-content": {
 		"message": "已設定 .recheck 選項，且之前曾下載過本作品，作品目錄有內容。",
 		"notes": "已設定 .recheck + 作品曾有內容 / 並非空作品目錄。",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1461}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1462}}"
 	},
 	"with-the-.recheck-option-set-setting-the-.reget_chapter-option-to-$1-will-have-no-effect": {
 		"message": "既已設定 .recheck 選項，則將 .reget_chapter 選項設定為 %1 將無作用！",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1479}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1480}}"
 	},
 	"it-will-automatically-turn-.reget_chapter-to-true-and-explicitly-specify-reget_chapter-to-re-acquire-the-chapter-content": {
 		"message": "將自動把 .reget_chapter 轉為 true，明確指定 reget_chapter 以重新取得章節內容。",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1485}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1486}}"
 	},
 	"the-work-has-been-changed-and-is-subject-to-the-conditions-that-need-to-be-updated": {
 		"message": "作品變更過，且符合需要更新的條件。",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1507}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1508}}"
 	},
 	"as-the-number-of-chapters-changes-all-chapters-will-be-re-downloaded-and-checked": {
 		"message": "因章節數量有變化，將重新下載並檢查所有章節內容：",
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1513}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1514}}"
 	},
 	"the-number-of-chapters-has-not-changed-total-$1-$2": {
 		"message": "章節數量無變化，共 %1 %2；",
 		"notes": "part 1: 二選一. %1: chapter_count, %2: chapter_unit",
 		"scope": "work_crawler/work.js: process_chapter_list_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1539}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1540}}"
 	},
 	"the-number-of-chapters-with-small-changes-(only-$1-$2)-but-it-will-not-be-re-downloaded": {
 		"message": "章節數量變化過小（僅差 %1 %2），因此不重新下載；",
 		"notes": "part 1: 二選一. %1: chapter_added, %2: chapter_unit",
 		"scope": "work_crawler/work.js: process_chapter_list_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1546}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1547}}"
 	},
 	"however-all-chapter-content-has-been-set-to-download": {
 		"message": "但已設定下載所有章節內容。",
 		"notes": "part 2: 三選一",
 		"scope": "work_crawler/work.js: process_chapter_list_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1551}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1552}}"
 	},
 	"rebuild-data-only-with-cache-(such-as-novels-e-books)-and-not-re-download-all-chapter-content": {
 		"message": "僅利用快取重建資料（如小說、電子書），不重新下載所有章節內容。",
 		"notes": "part 2: 三選一",
 		"scope": "work_crawler/work.js: process_chapter_list_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1555}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1556}}"
 	},
 	"skip-this-work-without-processing": {
 		"message": "跳過本作品不處理。",
 		"notes": "part 2: 三選一",
 		"scope": "work_crawler/work.js: process_chapter_list_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1557}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1558}}"
 	},
 	"previously-downloaded-to-the-newer-$2-$3-backtracked-by-specifying-start_chapter_title=$1": {
 		"message": "之前已下載到較新的第 %2 %3，因指定 start_chapter_title=%1 而回溯。",
 		"notes": "%1: start_chapter, %2: last_download.chapter, %3: chapter_unit",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1575}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1576}}"
 	},
 	"previously-downloaded-to-the-newer-$2-$3-backtracked-by-specifying-start_chapter_no=$1": {
 		"message": "之前已下載到較新的第 %2 %3，因指定 start_chapter_NO=%1 而回溯。",
 		"notes": "%1: start_chapter, %2: last_download.chapter, %3: chapter_unit",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1586}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1587}}"
 	},
 	"the-number-of-chapters-$1-is-less-than-the-start-continued-download-chapter-number-$2-perhaps-because-the-chapter-has-been-reorganized-or-the-chapter-has-been-added-or-deleted-midway-during-the-last": {
 		"message": "章節數量 %1 比將開始/接續之下載章節編號 %2 還少，或許因為章節有經過重整，或者上次下載時中途增刪過章節。",
 		"notes": "%1: chapter_count, %2: last_download.chapter",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1606}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1607}}"
 	},
 	"the-old-content-will-be-backed-up-the-directory-will-be-moved-and-then-re-downloaded-from-$1-$2": {
 		"message": "將先備份舊內容、移動目錄，而後重新自第 %1 %2下載！",
 		"notes": "%1: start_chapter_NO, %2: chapter_unit",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1620}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1621}}"
 	},
 	"it-will-be-re-downloaded-from-$1-$2": {
 		"message": "將從頭檢查、自第 %1 %2重新下載。",
 		"notes": "%1: start_chapter_NO, %2: chapter_unit",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1632}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1633}}"
 	},
 	"the-e-book-will-be-regenerated-from-$1$2": {
 		"message": "將從頭檢查、自第 %1 %2重新生成電子書。",
 		"notes": "%1: start_chapter_NO, %2: chapter_unit",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1652}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1653}}"
 	},
 	"skip-$1-without-processing": {
 		"message": "跳過 %1 不處理。",
 		"notes": "%1: work id",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1691}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1692}}"
 	},
 	"unknown": {
 		"message": "Unknown",
 		"notes": "後接 .chapter_unit (\"章\")",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1725}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1726}}"
 	},
 	"download-from-§$1": {
 		"message": "自 §%1 接續下載。",
 		"notes": "%1: chapter NO",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1737}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1738}}"
 	},
 	"ready-to-cancel-the-download-job.-it-will-take-effect-after-downloading-this-chapter": {
 		"message": "準備取消下載作業中，將會在下載完本章節後生效。",
@@ -4054,7 +4054,7 @@
 		"notes": "%1: work id + ' §' + chapter_NO",
 		"scope": "work_crawler.js: get_chapter_directory_name()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L781}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1287}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1307}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L781}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1288}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1308}}"
 	},
 	"unable-to-receive-web-address-of-§$1": {
 		"message": "無法取得 §%1 的網址。",
@@ -4068,287 +4068,287 @@
 		"notes": "%1:  chapter data",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L890}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L891}}"
 	},
 	"getting-data-of-chapter-$1-$2": {
 		"message": "Getting data of chapter %1, %2",
 		"notes": "%1:  chapter data, %2: estimated_message",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L888}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L889}}"
 	},
 	"creating-a-chapter-directory-$1": {
 		"message": "先創建章節目錄：%1",
 		"notes": "%1: chapter_directory",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L908}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L912}}"
 	},
 	"extracting-image-files-$1": {
 		"message": "解開圖片壓縮檔：%1",
 		"notes": "%1: images_archive",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L945}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L950}}"
 	},
 	"reading-image-archive-$1": {
 		"message": "讀取圖片壓縮檔：%1",
 		"notes": "%1: images_archive",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L954}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L960}}"
 	},
 	"deleting-image-from-chapter-$1": {
 		"message": "刪除章節內容頁面：%1",
 		"notes": "%1: images_archive",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1392}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L974}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1404}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L980}}"
 	},
 	"$1-$2-$3-images": {
 		"message": "%1 [%2] %3 images.",
 		"notes": "part 1. %1: chapter_NO, %2: chapter_label, %3: total images",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L981}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L987}}"
 	},
 	"(limited-access)": {
 		"message": "（本章為需要付費/被鎖住的章節）",
 		"notes": "part 2",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L990}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L996}}"
 	},
 	"file-extension-$1": {
 		"message": "File extension: %1",
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1070}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1076}}"
 	},
 	"$1-the-work-has-been-dispatched-and-the-images-are-downloaded-in-parallel": {
 		"message": "%1：已派發完工作，開始並行下載各圖片。",
 		"notes": "%1: chapter_label",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1123}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1129}}"
 	},
 	"download-image-$1": {
 		"message": "下載圖 %1",
 		"notes": "下載圖片時序號縮寫。%1: downloaded + \"/\" + total images",
 		"scope": "work_crawler.js: get_chapter_data()::normalize_image_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1137}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1145}}"
 	},
 	"waiting-for-$1-before-downloading-the-$2-image": {
 		"message": "下載第 %2 張圖前先等待 %1。",
 		"notes": "%1: time_interval, %2: index + \"/\" + length",
 		"scope": "work_crawler.js: get_chapter_data()::normalize_image_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1164}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1173}}"
 	},
 	"failed-to-get-data-of-chapter-$1": {
 		"message": "無法取得第 %1 章的內容。",
 		"notes": "%1: chapter_NO",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1189}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1199}}"
 	},
 	"skip-$1-§$2-and-continue-next-chapter": {
 		"message": "跳過 %1 §%2 並接著下載下一章。",
 		"notes": "%1: work title, %2: chapter_NO",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1195}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1205}}"
 	},
 	"retry-$1-$2": {
 		"message": "Retry %1/%2",
 		"notes": "%1: error_count, %2: max error allowed (MAX_ERROR_RETRY)",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1210}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L579}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L758}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1220}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L579}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L759}}"
 	},
 	"since-the-cache-file-is-broken-(for-example-an-empty-file)-chapter_url-will-be-retrieved-and-.reget_chapter-will-be-set": {
 		"message": "因 cache file 壞了（例如為空檔案），將重新取得 chapter_URL，設定 .reget_chapter。",
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1218}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1228}}"
 	},
 	"the-chapter-number-should-be-$1-in-order-but-the-number-cannot-be-obtained-from-the-chapter-content": {
 		"message": "章節編號依序應為 %1，但無法自章節內容取得編號。",
 		"notes": "%1: chapter_NO",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1252}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1262}}"
 	},
 	"the-chapter-numbers-are-inconsistent-the-order-should-be-$1-but-the-$2-is-taken-from-the-content": {
 		"message": "章節編號不一致：依序應為 %1，但從內容擷取出 %2。",
 		"notes": "%1: chapter_NO, %2: chapter_NO_text",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1254}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1264}}"
 	},
 	"waitting-for-$2-and-re-obtaining-the-chapter-content-page-$1": {
 		"message": "等待 %2 之後再重新取得章節內容頁面：%1",
 		"notes": "%1: URL, %2: time interval 下載URL前的等待時間。",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1287}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1297}}"
 	},
 	"re-acquiring-chapter-content-page-$1": {
 		"message": "重新取得章節內容頁面：%1",
 		"notes": "%1: URL",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1289}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1299}}"
 	},
 	"waiting-for-$2-and-then-get-the-chapter-content-page-$1": {
 		"message": "等待 %2 之後再取得章節內容頁面：%1",
 		"notes": "%1: URL, %2: time interval 下載URL前的等待時間。",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1291}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1301}}"
 	},
 	"get-the-chapter-content-page-$1": {
 		"message": "取得章節內容頁面：%1",
 		"notes": "%1: URL",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1293}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1303}}"
 	},
 	"parse-out-empty-page-information": {
 		"message": "解析出空的頁面資訊！",
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1315}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1327}}"
 	},
 	"an-error-occurred-while-parsing-the-chapter-page-it-is-interrupted-at-$1": {
 		"message": "解析章節頁面時發生錯誤，中斷跳出：%1",
 		"notes": "%1: chapter URL",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1321}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1333}}"
 	},
 	"this-chapter-is-a-chapter-that-requires-payment-locking": {
 		"message": "本章為需要付費/被鎖住的章節。",
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1372}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1384}}"
 	},
 	"did-not-get-any-image-from-this-chapter": {
 		"message": "本章節沒有獲取到任何圖片！",
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1374}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1386}}"
 	},
 	"the-number-of-registered-images-$1-is-different-from-the-length-of-the-images-list-$2": {
 		"message": "所登記的圖形數量%1與有圖形列表長度%2不同！",
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1407}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1419}}"
 	},
 	"the-original-chapter-data-have-sets-a-division-title-but-the-chapter-data-returned-by-.parse_chapter_data()-is-missing-the-division-title.-perhaps-you-can-use-the-original-chapter-data": {
 		"message": "原先的章節資料設定了分部標題，但 .parse_chapter_data() 傳回的章節資料缺少了分部標題。或許您可以沿用原先的章節資料。",
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1443}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1455}}"
 	},
 	"$1-image(s)-left": {
 		"message": "剩 %1 張圖...",
 		"notes": "下載圖片時序號縮寫。%1: images left",
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1569}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1572}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1583}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1588}}"
 	},
 	"waiting-for-the-image-file-that-has-not-been-downloaded-yet": {
 		"message": "等待尚未下載完成的圖片檔案：",
 		"notes": "Waiting for:",
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1584}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1601}}"
 	},
 	"$1-$2-image-download-error-recorded": {
 		"message": "%1：%2筆圖片下載錯誤紀錄",
 		"notes": "%1: chapter_label, %2: error image log count",
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1646}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1663}}"
 	},
 	"remove-$1-damaged-images-from-the-image-compression-file-that-successfully-downloaded-this-time-$2": {
 		"message": "從圖片壓縮檔刪除%1張本次下載成功、上次下載失敗的損壞圖片：%2",
 		"notes": "%1: error image count, %2: images_archive.file_name",
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1662}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1680}}"
 	},
 	"update-image-archive-$1": {
 		"message": "更新圖片壓縮檔：%1",
 		"notes": "%1: images_archive.file_name",
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1686}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1707}}"
 	},
 	"create-image-archive-$1": {
 		"message": "創建圖片壓縮檔：%1",
 		"notes": "%1: images_archive.file_name",
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1688}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1709}}"
 	},
 	"$2-jump-to-chapter-$1": {
 		"message": "%2: jump to chapter %1",
 		"notes": "%1: jump to chapter NO, %2: work title",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1747}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1769}}"
 	},
 	"if-you-want-to-dynamically-add-chapters-you-must-manually-increase-the-number-of-chapters-work_data.chapter_count++": {
 		"message": "若欲動態增加章節，必須手動增加章節數量: work_data.chapter_count++！",
 		"notes": "",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1761}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1783}}"
 	},
 	"(this-download-has-processed-a-total-of-$1-word)": {
 		"message": "（本次下載共處理%1個字）",
 		"notes": "(%1 words)",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1776}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1798}}"
 	},
 	"(this-download-has-processed-a-total-of-$1-image)": {
 		"message": "（本次下載共處理%1張圖）",
 		"notes": "(%1 images)",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1781}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1803}}"
 	},
 	"download-completed-for-$1": {
 		"message": "於 %1 下載完畢。",
 		"notes": "本作品下載作業結束。%1: datetime",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1784}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1806}}"
 	},
 	"some-are-paid-restricted-chapters": {
 		"message": "有些為付費/受限章節。",
 		"notes": "",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1789}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1811}}"
 	},
 	"$1-this-download-has-a-total-of-$2-image-download-errors": {
 		"message": "%1：本次下載作業，本作品共 %2張圖片下載錯誤。",
 		"notes": "",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1794}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1816}}"
 	},
 	"unspecified-image-data": {
 		"message": "未指定圖片資料",
@@ -4614,14 +4614,14 @@
 		"notes": "解開電子書壓縮檔 %1: ebook_file_path",
 		"scope": "work_crawler.js: create_ebook()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L336}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L100}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L59}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L338}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L100}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L59}}"
 	},
 	"language-conversion": {
 		"message": "語言轉換",
 		"notes": "注記本電子書已經過語言轉換（繁簡中文轉換，將簡體小說轉換為繁體小說）的標籤",
 		"scope": "work_crawler.js: create_ebook()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L222}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L224}}"
 	},
 	"overwrite-the-files-in-the-cache-directory-$1-for-traditional-and-simplified-chinese-conversions": {
 		"message": "將覆寫繁簡中文轉換 cache 目錄 [%1] 中的檔案。",
@@ -4642,84 +4642,84 @@
 		"notes": "%1: archive_file_path",
 		"scope": "work_crawler.js: archive_convert_cache_directory()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L176}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L177}}"
 	},
 	"convert-simplified-chinese-to-traditional-chinese-«$1»": {
 		"message": "將簡體中文轉換成繁體中文：《%1》",
 		"notes": "%1: chapter_title",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L545}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L548}}"
 	},
 	"convert-traditional-chinese-to-simplified-chinese-«$1»": {
 		"message": "将繁体中文转换成简体中文：《%1》",
 		"notes": "%1: chapter_title",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hans-CN",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L547}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L550}}"
 	},
 	"traditionalize-$1": {
 		"message": "繁化: %1",
 		"notes": "繁體化。%1: chapter_title",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L550}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L554}}"
 	},
 	"simplify-$1": {
 		"message": "简化: %1",
 		"notes": "簡體化。简化字。%1: chapter_title",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hans-CN",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L552}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L556}}"
 	},
 	"too-few-words-($1-characters)": {
 		"message": "字數過少（%1字元）",
 		"notes": "",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L633}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L637}}"
 	},
 	"no-content": {
 		"message": "無內容",
 		"notes": "",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L635}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}"
 	},
 	"there-is-no-directory-for-archive-files-$1": {
 		"message": "不存在封存檔案用的目錄：%1",
 		"notes": "",
 		"scope": "work_crawler.js: remove_old_ebooks()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L730}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L734}}"
 	},
 	"preserve": {
 		"message": "保留舊檔：",
 		"notes": "Set milestone: 日本小說網站有時會商業化，將之前的作品內容大幅刪除。這時若刪掉舊檔，就會失去這些內容。",
 		"scope": "work_crawler.js: remove_old_ebooks()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L799}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L803}}"
 	},
 	"move-to-→": {
 		"message": "搬移至 →",
 		"notes": "",
 		"scope": "work_crawler.js: remove_old_ebooks()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L801}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L805}}"
 	},
 	"removed-old-files": {
 		"message": "移除舊檔案：",
 		"notes": "",
 		"scope": "work_crawler.js: remove_old_ebooks()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L811}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L815}}"
 	},
 	"archive-epub-ebook-$1": {
 		"message": "打包 epub 電子書：%1",
 		"notes": "%1: work title / file path",
 		"scope": "work_crawler.js: remove_old_ebooks()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L913}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L918}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L917}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L922}}"
 	},
 	"no-read-volumes-are-available": {
 		"message": "已無閱讀卷可用。",
@@ -7481,7 +7481,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1266}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1285}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}"
 	},
 	"local-language-name": {
 		"message": "local-language-name",
@@ -7513,5 +7513,35 @@
 		"original_message_language_code": "en-US",
 		"notes": "%1: parameter name, %2: parameter value",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L332}}"
+	},
+	"get-section-title-from-command-line-argument-$1": {
+		"message": "Get section title from command line argument: %1",
+		"original_message_language_code": "en-US",
+		"notes": "%1: [[w:WP:SECTIONHEAD|section title]]",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L353}}"
+	},
+	"get-section-title-from-task-file-name-$1": {
+		"message": "Get section title from task file name: %1",
+		"original_message_language_code": "en-US",
+		"notes": "%1: [[w:WP:SECTIONHEAD|section title]]",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L364}}"
+	},
+	"change-section-title": {
+		"message": "Change section title:",
+		"original_message_language_code": "en-US",
+		"notes": "%1: [[w:WP:SECTIONHEAD|section title]]",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L416}}"
+	},
+	"get-$1-from-edit-summary-$2": {
+		"message": "Get %1 from edit summary: %2",
+		"original_message_language_code": "en-US",
+		"notes": "%1: data type (e.g., \"revision id\"). %2: section title link",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L463}}"
+	},
+	"revision-id": {
+		"message": "revision id",
+		"original_message_language_code": "en-US",
+		"notes": "[[w:Wikipedia:Revision id|revision id]]",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L465}}"
 	}
 }

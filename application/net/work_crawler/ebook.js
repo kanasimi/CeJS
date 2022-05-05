@@ -149,11 +149,11 @@ function module_code(library_namespace) {
 		cache_archive_file = new library_namespace.storage.archive(
 				cache_archive_file);
 		return new Promise(function(resolve, reject) {
-			library_namespace.log_temporary(gettext(
-			// gettext_config:{"id":"decompress-the-cache-files-for-traditional-and-simplified-chinese-conversions-$1"}
-			'解壓縮繁簡中文轉換 cache 檔案: [%1]。',
-			//
-			cache_archive_file.archive_file_path));
+			library_namespace.log_temporary({
+				// gettext_config:{"id":"decompress-the-cache-files-for-traditional-and-simplified-chinese-conversions-$1"}
+				T : [ '解壓縮繁簡中文轉換 cache 檔案: [%1]。',
+						cache_archive_file.archive_file_path ]
+			});
 			cache_archive_file.extract({
 				// 解壓縮 "!short_sentences_word_list.json" 時會跳出 prompt。
 				yes : true,
@@ -172,9 +172,11 @@ function module_code(library_namespace) {
 		cache_archive_file = new library_namespace.storage.archive(
 				cache_archive_file);
 		return new Promise(function(resolve, reject) {
-			// gettext_config:{"id":"compress-the-cache-files-for-traditional-and-simplified-chinese-conversions-$1"}
-			library_namespace.log_temporary(gettext('壓縮繁簡中文轉換 cache 檔案: [%1]。',
-					cache_archive_file.archive_file_path));
+			library_namespace.log_temporary({
+				// gettext_config:{"id":"compress-the-cache-files-for-traditional-and-simplified-chinese-conversions-$1"}
+				T : [ '壓縮繁簡中文轉換 cache 檔案: [%1]。',
+						cache_archive_file.archive_file_path ]
+			});
 			cache_archive_file.update(cache_directory, {
 				only_when_newer_exists : 'file',
 				level : 'max',
@@ -330,10 +332,11 @@ function module_code(library_namespace) {
 			// 由於這個動作，當舊的電子書存在時將不會清場。若有必要清場（如太多冗贅），須設定.discard_old_ebook_file或自行將舊電子書刪除。
 			var ebook_archive = new library_namespace.storage.archive(
 					ebook_file_path[0] + ebook_file_path[1]);
-			library_namespace.log_temporary(gettext(
-			// ebook_archive.archive_file_path
-			// gettext_config:{"id":"extract-ebook-as-cache-$1"}
-			'Extract ebook as cache: [%1]', ebook_file_path[1]));
+			library_namespace.log_temporary({
+				// ebook_archive.archive_file_path
+				// gettext_config:{"id":"extract-ebook-as-cache-$1"}
+				T : [ 'Extract ebook as cache: [%1]', ebook_file_path[1] ]
+			});
 			ebook_archive.extract({
 				output : ebook_directory
 			});
@@ -539,12 +542,13 @@ function module_code(library_namespace) {
 		if (this.convert_to_language) {
 			part_title = this.convert_text_language(part_title);
 			chapter_title = this.convert_text_language(chapter_title);
-			library_namespace.log_temporary(gettext(
-					this.convert_to_language === 'TW'
-					// gettext_config:{"id":"convert-simplified-chinese-to-traditional-chinese-«$1»"}
-					? '將簡體中文轉換成繁體中文：《%1》'
-					// gettext_config:{"id":"convert-traditional-chinese-to-simplified-chinese-«$1»"}
-					: '将繁体中文转换成简体中文：《%1》', chapter_title));
+			library_namespace.log_temporary({
+				T : [ this.convert_to_language === 'TW'
+				// gettext_config:{"id":"convert-simplified-chinese-to-traditional-chinese-«$1»"}
+				? '將簡體中文轉換成繁體中文：《%1》'
+				// gettext_config:{"id":"convert-traditional-chinese-to-simplified-chinese-«$1»"}
+				: '将繁体中文转换成简体中文：《%1》', chapter_title ]
+			});
 			process.title = gettext(this.convert_to_language === 'TW'
 			// gettext_config:{"id":"traditionalize-$1"}
 			? '繁化: %1'

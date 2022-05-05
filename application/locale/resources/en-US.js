@@ -1046,6 +1046,11 @@
 	"Treat %1 as language: %2.": "Treat %1 as language: %2.",
 	"Cannot detect language of %1!": "Cannot detect language of %1!",
 	"Invalid task_configuration (should be %2): {%3} %1": "Invalid task_configuration (should be %2): {%3} %1",
-	"Get parameter %1=%2 from command line": "Get parameter %1=%2 from command line"
+	"Get parameter %1=%2 from command line": "Get parameter %1=%2 from command line",
+	"Get section title from command line argument: %1": "Get section title from command line argument: %1",
+	"Get section title from task file name: %1": "Get section title from task file name: %1",
+	"Change section title:": "Change section title:",
+	"Get %1 from edit summary: %2": "Get %1 from edit summary: %2",
+	"revision id": "revision id"
 },
 "en-US");

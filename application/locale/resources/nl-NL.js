@@ -88,6 +88,6 @@
 	"\u7d93\u5ea6\uff1a": "Breedtegraad:",
 	"\u7def\u5ea6\uff1a": "Lengtegraad:",
 	"general data layer": "algemeen",
-	"untranslated message count": "957"
+	"untranslated message count": "962"
 },
 "nl-NL");

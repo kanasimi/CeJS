@@ -193,7 +193,7 @@
 	"TOC.source": "\u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a",
 	"\u4e0b\u8f09 %1": "\u0421\u043a\u0430\u0447\u0430\u0442\u044c %1",
 	"\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated message count": "851",
+	"untranslated message count": "856",
 	"local-language-name": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439"
 },
 "ru-RU");
