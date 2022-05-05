@@ -196,7 +196,7 @@ async function build_locale_messages(resources_path) {
 	});
 
 	if (false) {
-		// 不可再用: 一次性匯入 Localized messages in 紀年轉換工具。
+		// 不可再用: 一次性匯入 Localized messages in 紀年轉換工具。不再使用。
 		load_CSV_message_to_localized(library_base_directory + '_test suite/resources/locale.csv');
 	}
 
@@ -342,7 +342,7 @@ function load_message_to_localized(resources_path, callback) {
 			return;
 
 		if (false) {
-			// 一次性訊息修正。
+			// 一次性訊息修正。不再使用。
 			for (const [from_message, to_message] of Object.entries({
 				Espana:
 					// gettext_config:{"id":"españa"}
@@ -616,7 +616,7 @@ function create__qqq_data_Map() {
 			continue;
 		}
 		if (false) {
-			// 一次性訊息修正。
+			// 一次性訊息修正。不再使用。
 			// gettext_config:{"id":"french-republican-calendar"}
 			if (message === 'Calendrier républicain')
 				en_message = 'French Republican Calendar';
