@@ -222,6 +222,7 @@
 	"astronomical twilight end": "fin \u00ebd l'ambrun astron\u00f2mich",
 	"nautical twilight end": "fin \u00ebd l'ambrun n\u00e0utich",
 	"civil twilight end": "fin \u00ebd l'ambrun sivil",
+	"\u5929\u6587\u590f\u66c6": "lunissolar cin\u00e8is",
 	"Revised Julian calendar": "calendari giulian arv\u00ebdd\u00f9",
 	"\u4f0a\u65af\u862d\u66c6": "calensari isl\u00e0mich",
 	"\u06af\u0627\u0647\u200c\u0634\u0645\u0627\u0631\u06cc \u0647\u062c\u0631\u06cc \u062e\u0648\u0631\u0634\u06cc\u062f\u06cc": "calendari iranian modern",
@@ -303,6 +304,7 @@
 	"Greece": "Grecia",
 	"Turkey": "Turch\u00eca",
 	"Egypt": "Egit",
+	"\u516c\u5143\u5e74/\u4e2d\u66c6\u6708\u65e5": "Ann CE e di d\u00ebl m\u00e8is d\u00ebl calendari cin\u00e8is",
 	"\u516c\u5143\u65e5\u671f": "D\u00e0ita dl'era comun-a",
 	"\u671d\u4ee3\u7d00\u5e74\u65e5\u671f": "D\u00e0ita dl'era calendaria",
 	"\u5171\u5b58\u7d00\u5e74": "Per\u00ecod contemporani",
@@ -381,6 +383,15 @@
 	"download_options.archive_images": "Comprime l'archivi \u00ebd plancia na vira d\u00ebscari\u00e0 \u00ebl fum\u00e8t.",
 	"download_options.archive_all_good_images_only": "Comprime l'archivi \u00ebd plancia sensa gnun eror.",
 	"download_options.remove_images_after_archive": "Apress la compression \u00ebd l'archivi \u00ebd plancia, d\u00ebscancel\u00e9 l'archivi \u00ebd plancia original.",
-	"untranslated message count": "664"
+	"download_options.images_archive_extension": "L\u2019estension p\u00ebr j'archivi \u00ebd plance. P\u00ebr esempi, \u00abcbz\u00bb. P\u00ebr \u00ebst\u00e0ndard: \u00abzip\u00bb.",
+	"download_options.MAX_ERROR_RETRY": "N\u00f9mer \u00ebd tentativ neuv: \u00ebl n\u00f9mer dle vire che \u00ebl d\u00ebscariament a l'\u00e9 fal\u00ec e a l'\u00e9 st\u00e0it prov\u00e0 torna a f\u00e9 ma a l'\u00e9 rivaje n'eror. Si \u00ebl n\u00f9mer \u00ebd faliment p\u00ebr \u00ebl midem archivi a l'\u00e9 pi grand, cost'archivi-s\u00ec a sar\u00e0 saut\u00e0. Si \u00ebl valor a l'\u00e9 tr\u00f2p cit, a l'\u00e9 belf\u00e9 oten-e na plancia s-ciap\u00e0 su ch\u00e8ich sit an sl'aragn\u00e0.",
+	"download_options.allow_EOI_error": "Cand na plancia a l'ha gnun-a tich\u00ebtta EOI (fin \u00ebd plancia) o si cheic\u00f2s ch'a l'\u00e9 nen na plancia a l'\u00e9 trov\u00e0, l'archivi a resta coms\u00ebss\u00eca anmagasin\u00e0.",
+	"download_options.MIN_LENGTH": "Taja minimal d'archivi \u00ebd plancia (an bytes). Si \u00ebl valor a l'\u00e9 tr\u00f2p cit, la plancia s-ciap\u00e0 ch'a l'\u00e9 mand\u00e0 a podr\u00eca esse trat\u00e0 tanme na plancia normal sensa eror.",
+	"download_options.timeout": "Temp m\u00e0ssim (an ms) p\u00ebr d\u00ebscari\u00e9 na p\u00e0gina o na plancia da 'n sl'aragn\u00e0. Si \u00ebl temp a l'\u00e9 tr\u00f2p curt (p\u00ebr esempi 10 second), a l'\u00e9 f\u00e0cil che \u00ebl d\u00ebscariament \u00ebd n'archivi gr\u00f2ss a falissa.",
+	"download_options.skip_error": "Ignor\u00e9/saut\u00e9 j'eror an sle plance. Cand a-i \u00e9 n'eror 404 (la plancia a esist pa), l'archivi a l'\u00e9 tr\u00f2p cit o identific\u00e0 tanme nen na plancia (s'a-i \u00e9 gnun EOI), l'archivi a l'\u00e9 anmagasin\u00e0 istess.",
+	"download_options.skip_chapter_data_error": "Cand ij d\u00e0it d'un cap\u00ectol a son nen dispon\u00ecbij, ch'a preuva diretaman \u00ebl cap\u00ectol apress.",
+	"download_options.preserve_work_page": "A marca s'a venta goern\u00e9 ij d\u00e0it \u00ebd l'euvra an .cache_directory_name.",
+	"download_options.preserve_chapter_page": "A marca d'a venta goern\u00e9 la p\u00e0gina d\u00ebl cap\u00ectol. F\u00e0uss: nen arzerv\u00e0 esplicitaman, la p\u00e0gina d\u00ebl cap\u00ectol esistenta a sar\u00e0 d\u00ebscancel\u00e0. N\u00f2ta: Si .reget_chapter a l'\u00e9 nen defin\u00ec, preserve_chapter_page a dovr\u00eca nen serve.",
+	"untranslated message count": "653"
 },
 "pms-IT");

@@ -395,5 +395,5 @@
 	"download_options.skip_chapter_data_error": "Cand ij dàit d'un capìtol a son nen disponìbij, ch'a preuva diretaman ël capìtol apress.",
 	"download_options.preserve_work_page": "A marca s'a venta goerné ij dàit ëd l'euvra an .cache_directory_name.",
 	"download_options.preserve_chapter_page": "A marca d'a venta goerné la pàgina dël capìtol. Fàuss: nen arzervà esplicitaman, la pàgina dël capìtol esistenta a sarà dëscancelà. Nòta: Si .reget_chapter a l'é nen definì, preserve_chapter_page a dovrìa nen serve.",
-	"untranslated-message-count": "664"
+	"untranslated-message-count": "653"
 }
