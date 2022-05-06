@@ -439,6 +439,7 @@ function module_code(library_namespace) {
 				}
 
 				var more_tag_matched;
+				// TODO: using lookbehind search?
 				while (more_tag_matched = tag_matched[2].match(tag_pattern)) {
 					// e.g., for '<g><g></g></g>'
 					// 2 === '<'.length + '>'.length

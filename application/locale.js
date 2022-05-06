@@ -394,8 +394,12 @@ function module_code(library_namespace) {
 
 	// -----------------------------------------------------------------------------------------------------------------
 
-	// matched: [ all behavior switch, is NO, NO, parameters ]
-	var PATTERN_plural_switches = /\{\{PLURAL: *(%)?(\d+)\|([\s\S]+?)\}\}/g;
+	// matched: [ all behavior switch, is NO, NO ]
+	var PATTERN_plural_switch_header = /\{\{PLURAL: *(%)?(\d+) *\|/,
+	// matched: [ all behavior switch, previous, is NO, NO, parameters ]
+	PATTERN_plural_switches_global = new RegExp('('
+			+ PATTERN_plural_switch_header.source + ')'
+			+ /([\s\S]+?)\}\}/.source, 'g');
 
 	// 處理 {{PLURAL:%1|summary|summaries}}
 	// 處理 {{PLURAL:$1|1=you|$1 users including you}}
@@ -404,9 +408,27 @@ function module_code(library_namespace) {
 	// https://translatewiki.net/wiki/Plural
 	// https://docs.transifex.com/formats/gettext#plural-forms-in-a-po-file
 	function adapt_plural(converted_text, value_list) {
-		converted_text = converted_text.replace(PATTERN_plural_switches,
+		converted_text = converted_text.replace_till_stable(
 		//
-		function(all, is_NO, NO, parameters) {
+		PATTERN_plural_switches_global, function(all, _previous, is_NO, NO,
+				parameters) {
+			// https://translatewiki.net/wiki/Plural
+			// And you can nest it freely
+			// 自 end_mark 向前回溯。
+			// TODO: using lookbehind search?
+			var previous = '', nest_matched;
+			while (nest_matched = parameters
+					.match(PATTERN_plural_switch_header)) {
+				previous += _previous
+				//
+				+ parameters.slice(0, nest_matched.index);
+				_previous = nest_matched[0];
+				is_NO = nest_matched[1];
+				NO = nest_matched[2];
+				parameters = parameters.slice(nest_matched.index
+						+ _previous.length);
+			}
+
 			var value = is_NO ? value_list[NO] : +NO;
 			var converted, default_converted, delta = 1;
 			if (parameters.split('|').some(function(parameter, index) {
@@ -417,6 +439,13 @@ function module_code(library_namespace) {
 					parameter = matched[2];
 				} else {
 					index += delta;
+					/**
+					 * https://translatewiki.net/wiki/Plural
+					 * 
+					 * If the number of forms written is less than the number of
+					 * forms required by the plural rules of the language, the
+					 * last available form will be used for all missing forms.
+					 */
 					default_converted = parameter;
 				}
 				if (index == value) {
@@ -424,9 +453,9 @@ function module_code(library_namespace) {
 					return true;
 				}
 			})) {
-				return converted;
+				return previous + converted;
 			}
-			return default_converted;
+			return previous + default_converted;
 		});
 
 		return converted_text;
@@ -1002,11 +1031,6 @@ function module_code(library_namespace) {
 	 * @returns {Object}當前使用之 domain。
 	 */
 	function use_domain(domain_name, callback, force) {
-		if (!domain_name) {
-			// return domain used now.
-			return gettext_texts[gettext_domain_name];
-		}
-
 		if (typeof callback === 'boolean' && force === undefined) {
 			// shift 掉 callback。
 			force = callback;
@@ -1015,6 +1039,13 @@ function module_code(library_namespace) {
 
 		if (domain_name === 'GUESS') {
 			domain_name = guess_language();
+		}
+
+		if (!domain_name) {
+			domain_name = gettext_texts[gettext_domain_name];
+			typeof callback === 'function' && callback(domain_name);
+			// return domain used now.
+			return domain_name;
 		}
 
 		// 查驗 domain_name 是否已載入。

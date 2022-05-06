@@ -904,6 +904,10 @@ function test_locale() {
 		assert([ 'one', CeL.gettext('{{PLURAL:%1|one|others}}', 1) ], 'Plural: %1=1');
 		assert([ 'others', CeL.gettext('{{PLURAL:%1|one|others}}', 2) ], 'Plural: %1=2');
 		assert([ 'others', CeL.gettext('{{PLURAL:%1|one|others}}', 3) ], 'Plural: %1=3');
+
+		assert([ '_One_', CeL.gettext('{{PLURAL:2|one|_{{PLURAL:1|One|two}}_}}') ], 'Plural: nested #1');
+		assert([ '+_one_-', CeL.gettext('+{{PLURAL:2|One|_{{PLURAL:2|_one|{{PLURAL:1|one|two}}}}_}}-') ], 'Plural: nested #2');
+		assert([ '+_one_-', CeL.gettext('+{{PLURAL:%2|One|_{{PLURAL:%2|_one|{{PLURAL:%1|one|two}}}}_}}-', 1, 2) ], 'Plural: nested #3');
 	});
 
 
@@ -3145,12 +3149,14 @@ function test_wiki() {
 		[['2001: A Space Odyssey', CeL.wiki.normalize_title(':2001: A Space Odyssey')], 'normalize_title #16'],
 		[['en:2001: A Space Odyssey', CeL.wiki.normalize_title('en:2001: A Space Odyssey')], 'normalize_title #17'],
 		[['D［di:］;', CeL.wiki.normalize_title('D%EF%BC%BBdi:%EF%BC%BD%3B')], 'normalize_title #18'],
+		[["A 'n B", CeL.wiki.normalize_title('A &#39;n B')], 'normalize_title #19'],
 
 		[['[[User:Adam/test]]', CeL.wiki.title_link_of('User:Adam/test')], 'title_link_of #1'],
 
 		[['Adam', CeL.wiki.parse.user('[[User:Adam/test]]')], 'parse.user #1'],
 		[['Adam', CeL.wiki.parse.user('[[en:User:Adam/test]]')], 'parse.user #2: 連接到其他維基媒體站點上的用戶頁面'],
 		[[true, CeL.wiki.parse.user('[[User:Adam/test]]', 'adam')], 'parse.user #3'],
+		[["A 'n B", CeL.wiki.parse.user("CeL.wiki.parse.user('[[User:A &#39;n B]]')")], 'parse.user #4'],
 
 		[['enwiki', CeL.wiki.site_name('en')], 'site_name #1'],
 		[['zhwiki', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php')], 'site_name #2'],

@@ -1711,6 +1711,11 @@ function module_code(library_namespace) {
 		// true === /^\s$/.test('\uFEFF')
 
 		page_name = page_name.replace(/<!--[\s\S]*-->/g, '')
+
+		// [[A&quot;A]]→[[A"A]]
+		// fix "&#39;". 由於裡面包含"#"，所以必須在 PATTERN_anchor_of_page_title 之前處理。
+		page_name = library_namespace.HTML_to_Unicode(page_name);
+
 		// e.g., "Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-1 days +9 hours}}"
 		if (!options.keep_anchor/* .preserve_anchor */) {
 			// Warning: The anchor will be removed!
@@ -1726,10 +1731,7 @@ function module_code(library_namespace) {
 		}
 		// assert: /[#|{}]/.test(page_name)===false
 
-		// [[A&quot;A]]→[[A"A]]
-		// fix "&#39;"
-		page_name = library_namespace.HTML_to_Unicode(page_name)
-
+		page_name = page_name
 		// '\u200E', '\u200F' 在當作 title 時會被濾掉。
 		// 對於標題，無論前後加幾個"\u200E"(LEFT-TO-RIGHT MARK)都會被視為無物。
 		// "\u200F" 亦不被視作 /\s/，但經測試會被 wiki 忽視。
