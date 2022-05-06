@@ -1045,7 +1045,11 @@
 	"no-longer-maintained": "不再維護",
 	"let-s-<a>translate-the-interface<-a>-together": "歡迎與我們一同<a>翻譯介面文字</a>！",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "現有%1條%2訊息尚未翻譯，歡迎您一同參與翻譯訊息！",
-	"untranslated-message-count": "7",
+	"untranslated-message-count": "12",
 	"local-language-name": "繁體中文",
-	"get-parameter-$1=$2-from-command-line": "從命令列獲得參數 %1=%2"
+	"get-parameter-$1=$2-from-command-line": "從命令列獲得參數 %1=%2",
+	"get-$2-edit-summaries-of-$1": "取得%1的%2個編輯摘要",
+	"get-$2-revision(s)-of-$1": "取得%1的%2個版本",
+	"no-section-title-set": "未設置章節標題！",
+	"unable-to-extract-the-revision-difference-id-from-page-edit-summary-of-$1": "無法從%1的頁面編輯摘要中提取版本差異id!"
 }

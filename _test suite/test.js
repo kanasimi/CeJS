@@ -856,7 +856,7 @@ function test_console() {
 function test_locale() {
 
 	//	##i18n (Internationalization) / l10n (Localization)
-	all_error_count += CeL.test('將 domain 別名正規化，轉為正規/標準名稱。', [
+	all_error_count += CeL.test('locale - 將 domain 別名正規化，轉為正規/標準名稱。', [
 		[['cmn-Hant-TW', CeL.gettext.to_standard('zh')], 'gettext.to_standard(zh)'],
 		[['cmn-Hant-TW', CeL.gettext.to_standard('tw')], 'gettext.to_standard(tw)'],
 		[['cmn-Hant-TW', CeL.gettext.to_standard('zh-TW')], 'gettext.to_standard(zh-TW)'],
@@ -884,9 +884,31 @@ function test_locale() {
 	});
 
 
+	all_error_count += CeL.test('locale - 單數複數形式 (plural switches)', function (assert) {
+		assert([ '_The answer is 42_', CeL.gettext('_{{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}_') ], 'Plural: _42_');
+		assert([ 'The answer is 42', CeL.gettext('{{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 42');
+		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:0|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 0/42');
+		assert([ 'Wrong answer', CeL.gettext('{{PLURAL:1|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 1/42');
+		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:2|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 2/42');
+		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:3|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 3/42');
+
+		assert([ '_The answer is 42_', CeL.gettext('_{{PLURAL:42|Wrong answer|Wrong answers|42=The answer is 42}}_') ], 'Plural: _42_ #2');
+		assert([ 'The answer is 42', CeL.gettext('{{PLURAL:42|Wrong answer|Wrong answers|42=The answer is 42}}') ], 'Plural: 42 #2');
+		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:0|Wrong answer|Wrong answers|42=The answer is 42}}') ], 'Plural: 0/42 #2');
+		assert([ 'Wrong answer', CeL.gettext('{{PLURAL:1|Wrong answer|Wrong answers|42=The answer is 42}}') ], 'Plural: 1/42 #2');
+		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:2|Wrong answer|Wrong answers|42=The answer is 42}}') ], 'Plural: 2/42 #2');
+		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:3|Wrong answer|Wrong answers|42=The answer is 42}}') ], 'Plural: 3/42 #2');
+
+		assert([ '_others', CeL.gettext('_{{PLURAL:%1|one|others}}', 0) ], 'Plural: _%1=0');
+		assert([ 'others', CeL.gettext('{{PLURAL:%1|one|others}}', 0) ], 'Plural: %1=0');
+		assert([ 'one', CeL.gettext('{{PLURAL:%1|one|others}}', 1) ], 'Plural: %1=1');
+		assert([ 'others', CeL.gettext('{{PLURAL:%1|one|others}}', 2) ], 'Plural: %1=2');
+		assert([ 'others', CeL.gettext('{{PLURAL:%1|one|others}}', 3) ], 'Plural: %1=3');
+	});
+
 
 	//	###System message test
-	all_error_count += CeL.test('System message', function (assert) {
+	all_error_count += CeL.test('locale - System messages', function (assert) {
 		CeL.gettext.use_domain('TW', function () {
 			assert(['載入中…',
 			// gettext_config:{"id":"loading"}
@@ -902,7 +924,7 @@ function test_locale() {
 
 
 	CeL.gettext.use_domain('en', true);
-	all_error_count += CeL.test('結尾標點符號的轉換。 zh → en', function (assert) {
+	all_error_count += CeL.test('locale - 結尾標點符號的轉換。 zh → en', function (assert) {
 		assert([ 'China', CeL.gettext('中國') ], '結尾標點符號的轉換: zh → en');
 		assert([ 'China.', CeL.gettext('中國。') ], '結尾標點符號的轉換: zh → en .');
 		assert([ 'China!', CeL.gettext('中國！') ], '結尾標點符號的轉換: zh → en !');
@@ -914,7 +936,7 @@ function test_locale() {
 
 
 	//	###單數複數形式 Singular and plural nouns / Grammatical number test
-	all_error_count += CeL.test('單數複數形式 (plural)', function (assert) {
+	all_error_count += CeL.test('locale - 單數複數形式 (plural function)', function (assert) {
 		// CeL.gettext.use_domain('en', function() {}, true);
 		// gettext_config:{"id":"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}"}
 		var message_id = '已載入 %1 筆資料。';

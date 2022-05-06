@@ -393,6 +393,46 @@ function module_code(library_namespace) {
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------
+
+	// matched: [ all behavior switch, is NO, NO, parameters ]
+	var PATTERN_plural_switches = /\{\{PLURAL: *(%)?(\d+)\|([\s\S]+?)\}\}/g;
+
+	// 處理 {{PLURAL:%1|summary|summaries}}
+	// 處理 {{PLURAL:$1|1=you|$1 users including you}}
+	// 處理 {{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}
+	// TODO: 處理 {{PLURAL_GETTEXT:%1|summary|summaries}}
+	// https://translatewiki.net/wiki/Plural
+	// https://docs.transifex.com/formats/gettext#plural-forms-in-a-po-file
+	function adapt_plural(converted_text, value_list) {
+		converted_text = converted_text.replace(PATTERN_plural_switches,
+		//
+		function(all, is_NO, NO, parameters) {
+			var value = is_NO ? value_list[NO] : +NO;
+			var converted, default_converted, delta = 1;
+			if (parameters.split('|').some(function(parameter, index) {
+				var matched = parameter.match(/^(\d+)=([\s\S]*)$/);
+				if (matched) {
+					delta--;
+					index = +matched[1];
+					parameter = matched[2];
+				} else {
+					index += delta;
+					default_converted = parameter;
+				}
+				if (index == value) {
+					converted = parameter;
+					return true;
+				}
+			})) {
+				return converted;
+			}
+			return default_converted;
+		});
+
+		return converted_text;
+	}
+
+	// -----------------------------------------------------------------------------------------------------------------
 	// JavaScript 國際化 i18n (Internationalization) / 在地化 本土化 l10n (Localization)
 	// / 全球化 g11n (Globalization).
 
@@ -524,6 +564,8 @@ function module_code(library_namespace) {
 
 		library_namespace
 				.debug('Use domain_name: ' + domain_name, 6, 'gettext');
+
+		converted_text = adapt_plural(converted_text, value_list);
 
 		if (length <= 1) {
 			// assert: {String}converted_text

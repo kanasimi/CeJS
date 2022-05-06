@@ -121,7 +121,7 @@
 	"TOC.source": "Quell",
 	"Not Yet Implemented!": "Nach net \u00ebmgesat!",
 	"\u8a9e\u6cd5\u932f\u8aa4\uff01": "Syntax-Feeler!",
-	"untranslated message count": "928",
+	"untranslated message count": "937",
 	"local-language-name": "L\u00ebtzebuergesch"
 },
 "lb-LU");

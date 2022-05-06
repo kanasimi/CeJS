@@ -178,7 +178,12 @@ const message_id_changed = new Map;
 const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s←↑→≠🆔😘➕]/;
 
 function en_message_to_message_id(en_message) {
-	var message_id = en_message.trim()
+	var message_id = en_message.trim();
+	if (/\{\{PLURAL:/.test(message_id)) {
+		// Remove {{PLURAL:...}}
+		message_id = CeL.gettext(message_id);
+	}
+	message_id = message_id
 		.replace(/🆔/g, 'ID')
 		.replace(/[,;:.?!~]+$/, '')
 		.replace(/[:,;'"\s\[\]\\\/#]+/g, '-')
@@ -433,7 +438,7 @@ function parse_qqq(qqq) {
 	const qqq_data = {
 		message: null,
 		notes: null,
-		// Referenced by
+		// Referenced by, Occurrences
 		references: []
 	};
 	let notes = [], additional_notes = [];
@@ -930,7 +935,7 @@ function adapt_new_change(script_file_path, options) {
 				 * e.g., <code>
 	
 				插入 // gettext_config:{"qqq":""}
-				插入 // gettext_config:{"qqq":"","zh":""}
+				插入 // gettext_config:{"qqq":"","zh-tw":""}
 				gettext('English message');
 	
 				</code> */
@@ -995,7 +1000,7 @@ function adapt_new_change(script_file_path, options) {
 					 * 添加訊息的方法: 直接把 Original language message 原文訊息當英文訊息。
 					 * e.g., <code>
 		
-					插入 // gettext_config:{"id":"message-id","qqq":"","zh":""}
+					插入 // gettext_config:{"id":"message-id","qqq":"","zh-tw":""}
 					插入 // gettext_config:{"id":"message-id","qqq":""}
 					gettext('English message');
 		
@@ -1067,7 +1072,7 @@ function adapt_new_change(script_file_path, options) {
 					continue;
 			}
 
-			if (/^[a-z]{2}$/.test(property_name)) {
+			if (/^[a-z]{2}(-[a-z]{2})?$/.test(property_name)) {
 				const language_code = CeL.gettext.to_standard(property_name);
 				if (language_code) {
 					// assert: CeL.is_Object(i18n_message_id_to_message[language_code])
