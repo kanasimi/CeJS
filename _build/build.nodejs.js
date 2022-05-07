@@ -612,6 +612,12 @@ function create__qqq_data_Map() {
 		}
 	}
 
+	const old_message_to_id_Map = new Map;
+	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
+		if (qqq_data.message)
+			old_message_to_id_Map.set(qqq_data.message, message_id);
+	}
+
 	// Create qqq_data_Map
 	for (const message of message_to_id_Map.keys()) {
 		if (!message)
@@ -638,9 +644,14 @@ function create__qqq_data_Map() {
 				en_message = 'French Republican Calendar';
 		}
 		//console.log([message, en_message]);
-		const message_id = qqq_data_Map.has(message) ? message
-			: qqq_data_Map.has(en_message_to_message_id(message)) ? en_message_to_message_id(message)
-				: en_message_to_message_id(en_message);
+		const message_id =
+			// e.g., message id: "log-type-error"
+			qqq_data_Map.has(message) ? message
+				// e.g., message id: "some-$2-paths-specified-by-$1-do-not-exist-$3"
+				: old_message_to_id_Map.has(message) ? old_message_to_id_Map.get(message)
+					// e.g., some new messages
+					: qqq_data_Map.has(en_message_to_message_id(message)) ? en_message_to_message_id(message)
+						: en_message_to_message_id(en_message);
 		let qqq_data = qqq_data_Map.get(message_id);
 		//if (message === '作者') { console.trace({ message, message_id, qqq_data }); throw 456465; }
 		if (!qqq_data && message_to_localized_mapping.qqq && (qqq_data = set_qqq_data(message_id, message_to_localized_mapping.qqq[message], { show_change_message: true }))) {
