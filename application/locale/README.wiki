@@ -6,7 +6,7 @@
 ; 1. <b>IETF language tag</b>.js
 : 程式執行時實際採用的是 [https://github.com/kanasimi/CeJS/tree/master/application/locale/resources application/locale/resources]/<b>IETF language tag</b>.js，這些檔案將由 _build/build.nodejs.js 自動生成。
 ; 2. <b>ISO 639-1 language tag</b>.json
-; [https://translatewiki.net/w/i.php?title=Special:Translate&group=cejs cejs@translatewiki] 每個禮拜會匯入兩次本土化訊息至 [https://github.com/kanasimi/CeJS/tree/master/application/locale/resources/i18n application/locale/resources/i18n]/<b>ISO 639-1 language tag</b>.json 。[https://translatewiki.net/wiki/Special:Contributions/FuzzyBot FuzzyBot] 每一至三日會將原始碼的變更更新到 translatewiki 上。
+: [https://translatewiki.net/w/i.php?title=Special:Translate&group=cejs cejs@translatewiki] 每個禮拜會匯入兩次本土化訊息至 [https://github.com/kanasimi/CeJS/tree/master/application/locale/resources/i18n application/locale/resources/i18n]/<b>ISO 639-1 language tag</b>.json 。[https://translatewiki.net/wiki/Special:Contributions/FuzzyBot FuzzyBot] 每一至三日會將原始碼的變更更新到 translatewiki 上。
 ; 3. 原始程式碼中
 : 原始程式碼的訊息前，必須包含 <code>// gettext_config:{}</code> 標記，在換行之前的內容會被視為 JSON 解析。例如
 :: <code>// gettext_config:{"id":"message-id"}</code>

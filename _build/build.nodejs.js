@@ -1341,10 +1341,8 @@ function write_message_script_file({ resources_path, language_code, locale_data 
 },
 ${JSON.stringify(language_code)});
 `;
-	let original_contents = CeL.read_file(fso_path);
-	if (!original_contents || (original_contents = original_contents.toString()) !== new_contents) {
+	if (!CeL.write_file(fso_path, new_contents, { changed_only: true })) {
 		CeL.info(`${write_message_script_file.name}: Create new message script: ${fso_path}`);
-		CeL.write_file(fso_path, new_contents);
 	}
 }
 
