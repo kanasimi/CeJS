@@ -198,7 +198,7 @@
 	"toc.publisher": "издатель",
 	"toc.source": "источник",
 	"download-$1": "Скачать %1",
-	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
+	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "В настоящее время есть {{PLURAL:%1|%1 сообщение|%1 сообщения|%1 сообщений}}, которые не были переведены на %2. Добро пожаловать к нам на перевод!",
 	"untranslated-message-count": "865",
-	"local-language-name": "Русский"
+	"local-language-name": "русский"
 }

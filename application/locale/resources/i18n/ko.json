@@ -81,6 +81,7 @@
 	"update-failed": "업데이트 실패!",
 	"dark-theme": "다크",
 	"it-is-a-executable-or-dll-file": "실행 파일 또는 DLL 파일입니다.",
+	"cannot-read-directory-$1": "디렉터리를 읽을 수 없습니다: %1",
 	"remove-empty-directory-$1": "빈 디렉터리 제거: %1",
 	"target-exists-$1": "대상이 존재합니다: %1",
 	"changing-working-directory-$1-→-$2": "작업 디렉터리 변경: [%1]→[%2]",
@@ -106,5 +107,6 @@
 	"working-directory-$1": "작업 디렉터리: %1",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
 	"untranslated-message-count": "956",
-	"local-language-name": "한국어"
+	"local-language-name": "한국어",
+	"change-section-title": "문단 제목 바꾸기:"
 }

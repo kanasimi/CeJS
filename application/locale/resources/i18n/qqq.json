@@ -352,7 +352,7 @@
 	"cannot-detect-work-id-from-url-$1": "%1: URL\n; References: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L151}}\n; Scope: 執行時 console 訊息 work_crawler.js",
 	"starting-$1": "%1: crawler id (is also site id)\n; References: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L156}}\n; Scope: 執行時 console 訊息 work_crawler.js",
 	"the-allowed-data-type-for-$1-is-$4-but-it-was-set-to-{$2}-$3": "%1: key / option name, %2: type\n; References: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L149}}\n; Scope: 執行時 console 訊息 work_crawler.js: verify_arg()",
-	"some-$2-path(s)-specified-by-$1-do-not-exist-$3": "%1: key / option name, %2: \"file\" or \"directory\" or their plural type, %3: value\n; References: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L185}}\n; Scope: 執行時 console 訊息 work_crawler.js: verify_arg()",
+	"some-$2-path(s)-specified-by-$1-do-not-exist-$3": "{String} %1: key / option name, {String} %2: \"file\" or \"directory\" or their plural type, {String} %3: path of error file/directory\n; References: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L185}}\n; Scope: 執行時 console 訊息 work_crawler.js: verify_arg()",
 	"file": "; References: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L190}}\n; Scope: 執行時 console 訊息 work_crawler.js: verify_arg()",
 	"files": "; References: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L190}}\n; Scope: 執行時 console 訊息 work_crawler.js: verify_arg()",
 	"directory": "; References: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L190}}\n; Scope: 執行時 console 訊息 work_crawler.js: verify_arg()",
