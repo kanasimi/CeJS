@@ -1714,7 +1714,12 @@ function module_code(library_namespace) {
 
 		// [[A&quot;A]]→[[A"A]]
 		// fix "&#39;". 由於裡面包含"#"，所以必須在 PATTERN_anchor_of_page_title 之前處理。
-		page_name = library_namespace.HTML_to_Unicode(page_name);
+		page_name = library_namespace.HTML_to_Unicode(page_name, {
+			predefined : true,
+			entity : true,
+			numeric : true,
+			is_URI : true
+		});
 
 		// e.g., "Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-1 days +9 hours}}"
 		if (!options.keep_anchor/* .preserve_anchor */) {
@@ -2257,6 +2262,10 @@ function module_code(library_namespace) {
 		}
 
 		// TODO: [[s:zh:title]] instead of [[:zh:title]]
+
+		// e.g., for /{}/
+		// title = encodeURI(title);
+		// or: title = wiki_API.section_link(title); ...
 
 		if (need_escape) {
 			title = ':' + title;

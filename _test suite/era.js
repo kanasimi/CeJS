@@ -2800,10 +2800,10 @@ function affairs() {
 
 	CeL.toggle_display('input_panel', true);
 
-	_.create_menu('language_menu',
-			[ 'TW', 'CN', 'ja', 'en', 'fr', 'pt', 'pms' ], function() {
-				draw_era.redraw();
-			});
+	_.create_menu('language_menu', [ 'TW', 'CN', 'ja', 'ko', 'en', 'fr', 'pt',
+			'pms' ], function() {
+		draw_era.redraw();
+	});
 
 	// translate all nodes to show in specified language (or default domain).
 	_.translate_nodes();

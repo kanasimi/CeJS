@@ -399,8 +399,8 @@ function module_code(library_namespace) {
 
 	// --------------------------------
 
-	// 用在 summary 必須設定 is_uri !
-	function section_link_escape(text, is_uri) {
+	// 用在 summary 必須設定 is_URI !
+	function section_link_escape(text, is_URI) {
 		// escape wikitext control characters,
 		// including language conversion -{}-
 		if (true) {
@@ -408,13 +408,13 @@ function module_code(library_namespace) {
 			// 盡可能減少字元的使用量，因此僅處理開頭，不處理結尾。
 			// @see [[w:en:Help:Wikitext#External links]]
 			// @see PATTERN_page_name
-			is_uri ? /[\|{}<>\[\]]/g
+			is_URI ? /[\|{}<>\[\]%]/g
 			// 為了容許一些特定標籤能夠顯示格式，"<>"已經在preprocess_section_link_token(),section_link()裡面處理過了。
 			// display_text 在 "[[", "]]" 中，不可允許 "[]"
 			: /[\|{}<>]/g && /[\|{}\[\]]/g,
 			// 經測試 anchor 亦不可包含[\[\]{}\n�]。
 			function(character) {
-				if (is_uri) {
+				if (is_URI) {
 					return '%' + character.charCodeAt(0)
 					// 會比 '&#' 短一點。
 					.toString(16).toUpperCase();

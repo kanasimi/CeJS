@@ -3844,6 +3844,10 @@ function test_wiki() {
 		assert(["[[#A-%7B三宝颜共和国%7D-BB|A-{三宝颜共和国}-BB]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #3-2');
 		wikitext = "「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」";
 		assert(["[[#「-%7BXX-%7Bzh-hans:纳; zh-hant:納%7D-克%7D-→-%7BXX-%7B奈%7D-克%7D-」|「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #4-1');
+		wikitext = "==File:1.jpg#%7B%7Bint%3Afiledesc%7D%7D==\n"; parsed = CeL.wiki.parse(wikitext);
+		assert(["[[#File:1.jpg#%257B%257Bint%253Afiledesc%257D%257D|File:1.jpg#%7B%7Bint%3Afiledesc%7D%7D]]", parsed[0].link.toString()], 'wiki.section_link #5-1');
+		wikitext = "==File:1.jpg#&#123;&#123;int:filedesc&#125;&#125;==\n"; parsed = CeL.wiki.parse(wikitext);
+		assert(["[[#File:1.jpg#%7B%7Bint:filedesc%7D%7D|File:1.jpg#&#123;&#123;int:filedesc&#125;&#125;]]", parsed[0].link.toString()], 'wiki.section_link #5-2');
 
 		wikitext = '#1\n#2\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #1');

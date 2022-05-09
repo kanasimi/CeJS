@@ -34,7 +34,7 @@
 		"notes": "Table of contents message. e.g., Contents of [title]",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9117}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9124}}"
 	},
 	"contents": {
 		"message": "Contents",
@@ -42,28 +42,28 @@
 		"original_message_language_code": "en-US",
 		"scope": "interact.DOM: auto_TOC(), CeL.application.storage.EPUB: generate_TOC()",
 		"additional_notes": "{{Identical|Content}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2205}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9121}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2205}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9128}}"
 	},
 	"↑back-to-toc": {
 		"message": "↑Back to TOC",
 		"notes": "Table of contents message.",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9041}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9048}}"
 	},
 	"expand": {
 		"message": "expand",
 		"notes": "show/hide table of contents(顯示/隱藏, 表示/隠す)",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9125}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9132}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1180}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9132}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9139}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1180}}"
 	},
 	"collapse": {
 		"message": "collapse",
 		"notes": "show/hide table of contents(顯示/隱藏, 表示/隠す)",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9130}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1178}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9137}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1178}}"
 	},
 	"number": {
 		"message": "number",
@@ -238,7 +238,7 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2970}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2979}}"
 	},
 	"abandon-change": {
 		"message": "Abandon change",

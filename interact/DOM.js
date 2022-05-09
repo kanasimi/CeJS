@@ -1056,8 +1056,7 @@ function module_code(library_namespace) {
 						// [object SVGTextElement] 亦可 appendChild().
 						node.appendChild(child_list);
 					} catch (e) {
-						library_namespace
-								.warn('add_node: Cannot insert node!');
+						library_namespace.warn('add_node: Cannot insert node!');
 						// show_node(node);
 						// e.g., 'HIERARCHY_REQUEST_ERR: DOM Exception 3'
 						// e.g.,
@@ -8241,14 +8240,17 @@ function module_code(library_namespace) {
 		// match a back-reference
 		var unicode_text = HTML.valueOf();
 
-		try {
-			// 必須先採用 decodeURIComponent()，CeL.HTML_to_Unicode() 往後的程式碼僅為了解碼 &#*。
-			// 否則
-			// CeL.DOM.HTML_to_Unicode('%EF%BC%BB %EF%BC%BD')
-			// !== decodeURIComponent('%EF%BC%BB %EF%BC%BD')
-			unicode_text = decodeURIComponent(unicode_text);
-		} catch (e) {
-			// URIError: URI malformed
+		if (options.is_URI) {
+			try {
+				// 必須先採用 decodeURIComponent()，
+				// CeL.HTML_to_Unicode() 往後的程式碼僅為了解碼 &#*。
+				// 否則:
+				// CeL.DOM.HTML_to_Unicode('%EF%BC%BB %EF%BC%BD')
+				// !== decodeURIComponent('%EF%BC%BB %EF%BC%BD')
+				unicode_text = decodeURIComponent(unicode_text);
+			} catch (e) {
+				// URIError: URI malformed
+			}
 		}
 
 		// --------------------------------------
@@ -8274,9 +8276,14 @@ function module_code(library_namespace) {
 			// \d{2,8}: 比起所允許的7位數多一位數，預防在不是以 ";" 為結尾的情況下，有無效數字。
 			.replace(/&#0*(\d{2,8});?/g, convert_digital)
 			// ";?": Allow CeL.HTML_to_Unicode('&#32&#65&#66&#67')
-			.replace(/&#[xX]0*([a-fA-F\d]{2,6});?/g, convert_hex)
+			.replace(/&#[xX]0*([a-fA-F\d]{2,6});?/g, convert_hex);
 			// .replace(): JScript 5.5~
-			.replace(/%([a-fA-F\d]{2})/g, convert_hex);
+			if (false && options.is_URI) {
+				// 2022/5/10 6:22:20 一般HTML中的%dd不會被解碼。
+				// is_URI 已經在前面處理完了，看起來根本不需要這一段。
+				unicode_text = unicode_text.replace(/%([a-fA-F\d]{2})/g,
+						convert_hex);
+			}
 		}
 
 		// --------------------------------------
