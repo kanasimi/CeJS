@@ -1044,7 +1044,7 @@
 	"no-longer-maintained": "不再维护",
 	"let-s-<a>translate-the-interface<-a>-together": "欢迎与我们一同<a>翻译界面文字</a>！",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "现有%1条%2讯息尚未翻译，欢迎您一同参与翻译讯息！",
-	"untranslated-message-count": "21",
+	"untranslated-message-count": "17",
 	"local-language-name": "简体中文",
 	"treat-$1-as-language-$2": "将%1视作该语言：%2",
 	"cannot-detect-language-of-$1": "无法检测到%1的语言！",

@@ -10,6 +10,9 @@
 
 node build.nodejs.js add_mark
 
+TODO:
+Sorting message id by reference.
+
 */
 
 'use strict';
@@ -969,9 +972,9 @@ function adapt_new_change(script_file_path, options) {
 			} else if (qqq_data.message !== message) {
 				CeL.info(`${adapt_new_change.name}: 改變了[${script_file_path}] 原始碼中的 message:`);
 				CeL.log(CeL.display_align([
-					[id + '\t', message_id],
-					['\t', JSON.stringify(qqq_data.message)],
-					['→\t', JSON.stringify(message)]
+					['id\t', JSON.stringify(message_id)],
+					['原訊息\t', JSON.stringify(qqq_data.message)],
+					['新→\t', JSON.stringify(message)]
 				]));
 				message_changed.set(qqq_data.message, message);
 				qqq_data.need_to_recheck_all_sources = true;

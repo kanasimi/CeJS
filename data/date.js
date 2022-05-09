@@ -1973,7 +1973,8 @@ function module_code(library_namespace) {
 		// (new Date).format('%JD')
 		JD : Date_to_JD,
 
-		歲次 : guess_year_stem_branch,
+		// gettext_config:{"id":"year-of-the-sexagenary-cycle"}
+		"歲次" : guess_year_stem_branch,
 		// alias
 		// gettext_config:{"id":"year-of-the-sexagenary-cycle"}
 		年干支 : '歲次',
@@ -1983,7 +1984,8 @@ function module_code(library_namespace) {
 		日干支序 : date_stem_branch_index,
 		// 計算距離甲子共有幾日，再於 index_to_stem_branch() 取模數。
 		// 假定為不間斷之循環紀日。
-		日干支 : function(date_value, options) {
+		// gettext_config:{"id":"day-of-the-sexagenary-cycle"}
+		"日干支" : function(date_value, options) {
 			return index_to_stem_branch(date_stem_branch_index(date_value,
 					options));
 		},
@@ -2960,27 +2962,29 @@ function module_code(library_namespace) {
 		}
 		if (date_value_diff < 60) {
 			// gettext_config:{"id":"$1-seconds-ago"}
-			return gettext(passed ? '%1 seconds ago'
+			return gettext(passed ? '%1 {{PLURAL:%1|second|seconds}} ago'
 			// gettext_config:{"id":"$1-seconds-later"}
-			: '%1 seconds later', Math.round(date_value_diff));
+			: '%1 {{PLURAL:%1|second|seconds}} later', Math
+					.round(date_value_diff));
 		}
 
 		// → minutes
 		date_value_diff /= 60;
 		if (date_value_diff < 60) {
 			// gettext_config:{"id":"$1-minutes-ago"}
-			return gettext(passed ? '%1 minutes ago'
+			return gettext(passed ? '%1 {{PLURAL:%1|minute|minutes}} ago'
 			// gettext_config:{"id":"$1-minutes-later"}
-			: '%1 minutes later', Math.round(date_value_diff));
+			: '%1 {{PLURAL:%1|minute|minutes}} later', Math
+					.round(date_value_diff));
 		}
 
 		// → hours
 		date_value_diff /= 60;
 		if (date_value_diff < 3) {
 			// gettext_config:{"id":"$1-hours-ago"}
-			return gettext(passed ? '%1 hours ago'
+			return gettext(passed ? '%1 {{PLURAL:%1|hour|hours}} ago'
 			// gettext_config:{"id":"$1-hours-later"}
-			: '%1 hours later', Math.round(date_value_diff));
+			: '%1 {{PLURAL:%1|hour|hours}} later', Math.round(date_value_diff));
 		}
 
 		// ----------------------------
@@ -3009,18 +3013,19 @@ function module_code(library_namespace) {
 
 		if (date_value_diff <= 35) {
 			// gettext_config:{"id":"$1-days-ago"}
-			return gettext(passed ? '%1 days ago'
+			return gettext(passed ? '%1 {{PLURAL:%1|day|days}} ago'
 			// gettext_config:{"id":"$1-days-later"}
-			: '%1 days later', Math.round(date_value_diff));
+			: '%1 {{PLURAL:%1|day|days}} later', Math.round(date_value_diff));
 		}
 
 		// ----------------------------
 
 		if (false && date_value_diff < 30) {
 			// gettext_config:{"id":"$1-weeks-ago"}
-			return gettext(passed ? '%1 weeks ago'
+			return gettext(passed ? '%1 {{PLURAL:%1|week|weeks}} ago'
 			// gettext_config:{"id":"$1-weeks-later"}
-			: '%1 weeks later', Math.round(date_value_diff / 7));
+			: '%1 {PLURAL:%1|week|weeks}} later', Math
+					.round(date_value_diff / 7));
 		}
 
 		// ----------------------------

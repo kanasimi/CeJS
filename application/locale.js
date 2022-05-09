@@ -404,8 +404,8 @@ function module_code(library_namespace) {
 	// 處理 {{PLURAL:%1|summary|summaries}}
 	// 處理 {{PLURAL:$1|1=you|$1 users including you}}
 	// 處理 {{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}
-	// TODO: 處理 {{PLURAL_GETTEXT:%1|summary|summaries}}
-	// TODO: or 處理 {{PLURAL:GETTEXT:%1|summary|summaries}}
+	// TODO: 處理 {{PLURAL:GETTEXT:%1|summary|summaries}}
+	// https://raw.githubusercontent.com/wikimedia/mediawiki-extensions-Translate/master/data/plural-gettext.txt
 	// https://translatewiki.net/wiki/Plural
 	// https://docs.transifex.com/formats/gettext#plural-forms-in-a-po-file
 	function adapt_plural(converted_text, value_list) {

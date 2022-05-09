@@ -6,9 +6,9 @@
 	"Language": "\uc5b8\uc5b4",
 	"Abandon change": "\ubcc0\uacbd\uc0ac\ud56d \ubc84\ub9ac\uae30",
 	"soon": "\uace7",
-	"%1 hours ago": "%1\uc2dc\uac04 \uc804",
-	"%1 days ago": "%1\uc77c \uc804",
-	"%1 days later": "%1\uc77c \ud6c4",
+	"%1 {{PLURAL:%1|hour|hours}} ago": "%1\uc2dc\uac04 \uc804",
+	"%1 {{PLURAL:%1|day|days}} ago": "%1\uc77c \uc804",
+	"%1 {{PLURAL:%1|day|days}} later": "%1\uc77c \ud6c4",
 	"\u4e2d\u570b": "\uc911\uad6d",
 	"\u8f38\u51fa\u683c\u5f0f": "\ucd9c\ub825 \ud615\uc2dd",
 	"\u554f\u984c\u56de\u5831": "\ud53c\ub4dc\ubc31",
@@ -78,6 +78,7 @@
 	"\u66f4\u65b0\u5931\u6557\uff01": "\uc5c5\ub370\uc774\ud2b8 \uc2e4\ud328!",
 	"dark theme": "\ub2e4\ud06c",
 	"\u70ba\u53ef\u57f7\u884c\u6a94\u6216\u51fd\u5f0f\u5eab": "\uc2e4\ud589 \ud30c\uc77c \ub610\ub294 DLL \ud30c\uc77c\uc785\ub2c8\ub2e4.",
+	"Cannot read directory: %1": "\ub514\ub809\ud130\ub9ac\ub97c \uc77d\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4: %1",
 	"Remove empty directory: %1": "\ube48 \ub514\ub809\ud130\ub9ac \uc81c\uac70: %1",
 	"Target exists: %1": "\ub300\uc0c1\uc774 \uc874\uc7ac\ud569\ub2c8\ub2e4: %1",
 	"Changing working directory: [%1]\u2192[%2]": "\uc791\uc5c5 \ub514\ub809\ud130\ub9ac \ubcc0\uacbd: [%1]\u2192[%2]",
@@ -102,7 +103,8 @@
 	"Illegal pattern: [%1]": "\uc798\ubabb\ub41c \ud328\ud134: [%1]",
 	"Working directory: %1": "\uc791\uc5c5 \ub514\ub809\ud130\ub9ac: %1",
 	"\u73fe\u6709%1\u689d%2\u8a0a\u606f\u5c1a\u672a\u7ffb\u8b6f\uff0c\u6b61\u8fce\u60a8\u4e00\u540c\u53c3\u8207\u7ffb\u8b6f\u8a0a\u606f\uff01": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
-	"untranslated message count": "956",
-	"local-language-name": "\ud55c\uad6d\uc5b4"
+	"untranslated message count": "954",
+	"local-language-name": "\ud55c\uad6d\uc5b4",
+	"Change section title:": "\ubb38\ub2e8 \uc81c\ubaa9 \ubc14\uafb8\uae30:"
 },
 "ko-KR");

@@ -885,6 +885,13 @@ function test_locale() {
 
 
 	all_error_count += CeL.test('locale - 單數複數形式 (plural switches)', function (assert) {
+		assert([ 'maps', CeL.gettext('map{{PLURAL:%1||s}}', 0) ], 'Plural: 0 maps');
+		assert([ 'map', CeL.gettext('map{{PLURAL:%1||s}}', 1) ], 'Plural: 1 map');
+		assert([ 'maps', CeL.gettext('map{{PLURAL:%1||s}}', 2) ], 'Plural: 2 maps');
+		assert([ '頁', CeL.gettext('{{PLURAL:%1|頁}}', 0) ], 'Plural: 0 頁');
+		assert([ '頁', CeL.gettext('{{PLURAL:%1|頁}}', 1) ], 'Plural: 1 頁');
+		assert([ '頁', CeL.gettext('{{PLURAL:%1|頁}}', 2) ], 'Plural: 2 頁');
+
 		assert([ '_The answer is 42_', CeL.gettext('_{{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}_') ], 'Plural: _42_');
 		assert([ 'The answer is 42', CeL.gettext('{{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 42');
 		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:0|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 0/42');
