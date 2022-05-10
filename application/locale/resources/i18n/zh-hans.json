@@ -893,7 +893,6 @@
 	"of-file-$1": "档案路径：%1",
 	"skip-web-page-resource-$1": "跳过网页资源：%1",
 	"title-not-set-$1": "未设定标题：%1……",
-	"contents-length-$1-chars": "内容共长 %1 字元",
 	"no-content-received-$1": "未取得任何内容：%1",
 	"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-used-from-the-cache-file": "因为您要设置的内容长度过短或者无内容，将使用缓存文件中的已有内容（%1 个字符）：",
 	"writing-$1-chars-to-$2": "写入 %1 字元至档案 [%2]。",
@@ -1050,5 +1049,6 @@
 	"cannot-detect-language-of-$1": "无法检测到%1的语言！",
 	"invalid-task_configuration-(should-be-$2)-{$3}-$1": "无效的任务配置（应当为%2）：{%3} %1",
 	"revision-id": "版本ID",
-	"multiple-discussion-links-exist": "存在多个讨论链接："
+	"multiple-discussion-links-exist": "存在多个讨论链接：",
+	"content-length-$1-characters": "内容共长 %1 字元"
 }

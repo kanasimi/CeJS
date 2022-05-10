@@ -554,7 +554,6 @@
 	"of-file-$1": "du fichier %1",
 	"skip-web-page-resource-$1": "Sauter la ressource de page web : %1",
 	"title-not-set-$1": "Titre non défini : %1...",
-	"contents-length-$1-chars": "Longueur de contenu : %1 caractère(s)",
 	"no-content-received-$1": "Aucun contenu reçu : %1",
 	"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-used-from-the-cache-file": "Puisque le contenu que vous voulez définir est trop court ou n’a aucun contenu, l’ancien contenu (%1 caractères) sera utilisé depuis le fichier en cache :",
 	"writing-$1-chars-to-$2": "Écriture de %1 caractère(s) vers [%2]...",
@@ -659,5 +658,6 @@
 	"get-section-title-from-task-file-name-$1": "Obtient le titre de la section depuis le nom du fichier de tâche : %1",
 	"change-section-title": "Modifier le titre de la section :",
 	"get-$1-from-edit-summary-$2": "Obtient %1 depuis le résumé des modifications : %2",
-	"revision-id": "identifiant de révision"
+	"revision-id": "identifiant de révision",
+	"content-length-$1-characters": "Longueur de contenu : %1 caractère(s)"
 }

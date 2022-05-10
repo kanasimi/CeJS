@@ -1845,8 +1845,11 @@ function module_code(library_namespace) {
 				if (contents.length > 5e5) {
 					// 這長度到這邊往往已經耗費數十秒。
 					library_namespace.debug({
-						// gettext_config:{"id":"contents-length-$1-chars"}
-						T : [ 'contents length: %1 chars', contents.length ]
+						T : [
+						// gettext_config:{"id":"content-length-$1-characters"}
+						'Content Length: %1 {{PLURAL:%1|character|characters}}'
+						//
+						, contents.length ]
 					});
 				}
 				if (!(item_data.word_count > 0)) {
@@ -1864,12 +1867,11 @@ function module_code(library_namespace) {
 				html.push('<p class="word_count">',
 				// 加入本章節之字數統計標示。
 				// gettext_config:{"id":"$1-words"}
-				gettext('%1 words', item_data.word_count)
+				gettext('%1 {{PLURAL:%1|word|words}}', item_data.word_count)
 				// 從第一章到本章的文字總數。
 				+ (item_data.words_so_far > 0 ? ', '
-				//
 				// gettext_config:{"id":"$1-words"}
-				+ gettext('%1 words',
+				+ gettext('%1 {{PLURAL:%1|word|words}}',
 				// item_data.words_so_far: 本作品到前一個章節總計的字數。
 				item_data.words_so_far + item_data.word_count) : ''), '</p>');
 
@@ -1925,9 +1927,10 @@ function module_code(library_namespace) {
 				+ (item_data.url ? ' (' + item_data.url + ')' : '') ]);
 			} else if (item_data.write_file !== false) {
 				library_namespace.debug({
+					T : [
 					// gettext_config:{"id":"writing-$1-chars-to-$2"}
-					T : [ 'Writing %1 chars to [%2]...', contents.length,
-							this.path.text + item.href ]
+					'Writing %1 {{PLURAL:%1|character|characters}} to [%2]...',
+							contents.length, this.path.text + item.href ]
 				});
 				// 需要先準備好目錄結構。
 				this.initialize();
@@ -2189,9 +2192,11 @@ function module_code(library_namespace) {
 			// gettext_config:{"id":"word-count"}
 			gettext('word count'), '</dt>', '<dd>',
 			// gettext_config:{"id":"$1-words"}
-			gettext('%1 words', total_word_count) + ' / '
+			gettext('%1 {{PLURAL:%1|word|words}}', total_word_count) + ' / '
 			// gettext_config:{"id":"$1-chapters"}
-			+ gettext('%1 chapters', this.chapters.length) + ' ≈ '
+			+ gettext('%1 {{PLURAL:%1|chapter|chapters}}',
+			//
+			this.chapters.length) + ' ≈ '
 			// 平均文字数
 			+ Math.round(total_word_count / this.chapters.length), '</dd>');
 		}

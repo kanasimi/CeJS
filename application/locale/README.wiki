@@ -2,22 +2,56 @@
 = CeJS internationalization mechanism 國際化機制 =
 
 == Introduction 簡介 ==
-現行 CeJS 本土化訊息存放在三個地方。
+現行 CeJS 本土化訊息存放在4個地方。
 ; 1. <b>IETF language tag</b>.js
 : 程式執行時實際採用的是 [https://github.com/kanasimi/CeJS/tree/master/application/locale/resources application/locale/resources]/<b>IETF language tag</b>.js，這些檔案將由 _build/build.nodejs.js 自動生成。
 ; 2. <b>ISO 639-1 language tag</b>.json
-: [https://translatewiki.net/w/i.php?title=Special:Translate&group=cejs cejs@translatewiki] 每個禮拜會匯入兩次本土化訊息至 [https://github.com/kanasimi/CeJS/tree/master/application/locale/resources/i18n application/locale/resources/i18n]/<b>ISO 639-1 language tag</b>.json 。[https://translatewiki.net/wiki/Special:Contributions/FuzzyBot FuzzyBot] 每一至三日會將原始碼的變更更新到 translatewiki 上。
-; 3. 原始程式碼中
+: [https://translatewiki.net/wiki/Translating:Colorless_echo_JavaScript_kit cejs@translatewiki] 每個禮拜會匯入兩次本土化訊息至 [https://github.com/kanasimi/CeJS/tree/master/application/locale/resources/i18n application/locale/resources/i18n]/<b>ISO 639-1 language tag</b>.json 。[https://translatewiki.net/wiki/Special:Contributions/FuzzyBot FuzzyBot] 每一至三日會將原始碼的變更更新到 translatewiki 上。
+; 3. qqq_data.json
+: 這是紀錄 qqq.json 和原始訊息的cach檔。
+; 4. 原始程式碼中
 : 原始程式碼的訊息前，必須包含 <code>// gettext_config:{}</code> 標記，在換行之前的內容會被視為 JSON 解析。例如
 :: <code>// gettext_config:{"id":"message-id"}</code>
 : 在 <code>gettext_config</code> 標記之後緊接著一行，第一個字串會被視為原始訊息。採用 <code>// gettext_config:{"qqq":"notes"}</code> 會自動轉成 <code>// gettext_config:{}</code>。
 _build/build.nodejs.js 生成 application/locale/resources/ 下的 .js 檔時，會以原先的 resources/qqq_data.json, <b>IETF language tag</b>.js 為基礎、將之當作舊版本，參考 translatewiki 匯入的本土化訊息與原始碼的訊息來更新，將所有3處內容更新為後兩者修改過的訊息。在執行 build.nodejs.js 時，若 translatewiki 和原始碼有衝突，會跳出錯誤。[https://translatewiki.net/wiki/FAQ#Special_private_language_codes_qqq,_qqx 翻譯說明 qqq] 的產生模式可參考 resources/i18n/qqq.json, resources/qqq_data.json。
 
 
+== Translation Notes ==
+=== Plural form ===
+This project CeJS supports the [https://www.mediawiki.org/wiki/Help:Magic_words#Localization MediaWiki forms] <code><nowiki>{{PLURAL:%1|one|other}}</nowiki></code> and <code><nowiki>{{PLURAL:%1|1=one|2=two|other}}</nowiki></code> mentioned in [[Plural#Plural syntax in MediaWiki]]. It uses the plural rules listed [https://github.com/wikimedia/mediawiki-extensions-Translate/blob/master/data/plural-gettext.txt here].
+
+Please note: CeJS uses percentage symbol %1, %2 instead of string symbol $1.
+
+See also: [[Thread:Portal talk:Ru/Plural changes in many languages]]
+
+; The [[Plural#Plural in Gettext|"GETTEXT" forms]] is NOT supported: <s><code><nowiki>{{PLURAL:GETTEXT|%1 one|%1 two|%1 other}}</nowiki></code></s>. Please use the MediaWiki plural forms.
+
+==== Examples ====
+; en
+: <code><nowiki>{{PLURAL:1|page|pages}}</nowiki></code> → page
+: <code><nowiki>{{PLURAL:2|page|pages}}</nowiki></code> → pages
+; fr
+: <code><nowiki>{{PLURAL:0|one or zero|other}}</nowiki></code> → one or zero
+: <code><nowiki>{{PLURAL:1|one or zero|other}}</nowiki></code> → one or zero
+: <code><nowiki>{{PLURAL:2|one or zero|other}}</nowiki></code> → other
+: <code><nowiki>{{PLURAL:3|one or zero|other}}</nowiki></code> → other
+; zh
+: <code><nowiki>{{PLURAL:1|page|pages}}</nowiki></code> → page
+: Special case: <code><nowiki>{{PLURAL:2|page|pages}}</nowiki></code> → pages
+; [https://www.mediawiki.org/wiki/Help:Magic_words/ru#Локализация ru]
+: Special case: <code><nowiki>{{PLURAL:5|1=Категория|Категории}}</nowiki></code> → Категории
+: <code><nowiki>{{PLURAL:3|страница|страницы|страниц}}</nowiki></code> → страницы
+: <code><nowiki>{{PLURAL:5|страница|страницы|страниц}}</nowiki></code> → страниц
+: <code><nowiki>{{PLURAL:%1|%1 байт|%1 байта|%1 байтов}}</nowiki></code> for %1=0 → 0 байтов
+: <code><nowiki>{{PLURAL:%1|%1 байт|%1 байта|%1 байтов}}</nowiki></code> for %1=1 → 1 байт
+: <code><nowiki>{{PLURAL:%1|%1 байт|%1 байта|%1 байтов}}</nowiki></code> for %1=2 → 2 байта
+
+
 == Git push 更新方法 ==
 每次更新前必須 git pull --rebase 加上 stash。
 
 若忘了 pull 就直接 push，出現衝突，則需要 fetch + rebase (using git sync of TortoiseGit)。重新 git push --force-with-lease。
+
 
 == License 軟體授權條款 ==
 application/locale/resources/i18n/ 目錄中的翻譯由 translatewiki 提供，基於 [https://creativecommons.org/licenses/by/3.0/ CC BY 3.0]。

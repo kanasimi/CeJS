@@ -402,7 +402,10 @@ function module_code(library_namespace) {
 	gettext.set_plural_rules = function set_plural_rules(plural_rules_Object) {
 		for ( var language_code in plural_rules_Object) {
 			var plural_rule = plural_rules_Object[language_code];
-			plural_rules_of_language_code[gettext.to_standard(language_code)] = plural_rule;
+			language_code = gettext.to_standard(language_code);
+			if (language_code) {
+				plural_rules_of_language_code[language_code] = plural_rule;
+			}// else: 尚未支援的語言。
 		}
 	};
 
@@ -479,10 +482,11 @@ function module_code(library_namespace) {
 						converted = parameter;
 						// Do not return. Incase {{PLURAL:5|one|other|5=5}}
 					} else if (index === 2 && plural_count !== 2
-					// e.g., {{PLURAL:2||s}}
+					// Special case. e.g., {{PLURAL:2||s}}
 					// @ zh(plural_count=1), ru(3), NOT fr(2)
 					&& value != 1 && parameters.length === 2) {
 						converted = parameter;
+						// assert: Should be the last element of parameters.
 					} else {
 						default_converted = parameter;
 					}

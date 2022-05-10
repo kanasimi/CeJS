@@ -42,7 +42,7 @@
 		"original_message_language_code": "en-US",
 		"scope": "interact.DOM: auto_TOC(), CeL.application.storage.EPUB: generate_TOC()",
 		"additional_notes": "{{Identical|Content}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2205}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9128}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2210}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9128}}"
 	},
 	"↑back-to-toc": {
 		"message": "↑Back to TOC",
@@ -147,14 +147,14 @@
 		"notes": "Label used when selecting language.",
 		"additional_notes": "{{identical|Language}}",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1749}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1753}}"
 	},
 	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": {
 		"message": "所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。",
 		"notes": "Used as debugging message when selecting language. %1: domain_name",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1159}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1163}}"
 	},
 	"$1-elapsed-$3-at-$2": {
 		"message": "%1 elapsed, %3 at %2",
@@ -185,7 +185,7 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2478}}"
 	},
 	"first-it-takes-$1-to-get-$2-pages": {
-		"message": "First, it takes %1 to get %2 pages.",
+		"message": "First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.",
 		"notes": "Used as log message. Showing elapsed time. e.g., First, use 2 s to get 20 pages.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
@@ -1033,6 +1033,7 @@
 	},
 	"personal-name": {
 		"message": "君主名",
+		"message_is_id": "true",
 		"notes": "Label for calendar: Personal name, Full name",
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -1057,6 +1058,7 @@
 	},
 	"true-name": {
 		"message": "諱",
+		"message_is_id": "true",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -1222,7 +1224,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3313}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2008}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3313}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2012}}"
 	},
 	"gregorian-calendar": {
 		"message": "Gregorian calendar",
@@ -1833,7 +1835,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L423}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L698}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4446}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L423}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L703}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4446}}"
 	},
 	"month-of-the-sexagenary-cycle": {
 		"message": "月干支",
@@ -1897,7 +1899,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4903}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4911}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2012}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4903}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4911}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2016}}"
 	},
 	"28-mansions": {
 		"message": "二十八宿",
@@ -4106,7 +4108,7 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1404}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L980}}"
 	},
 	"$1-$2-$3-images": {
-		"message": "%1 [%2] %3 images.",
+		"message": "%1 [%2] %3 {{PLURAL:%3|image|images}}.",
 		"notes": "part 1. %1: chapter_NO, %2: chapter_label, %3: total images",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "en-US",
@@ -5970,144 +5972,144 @@
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L36}}"
 	},
 	"$3-$1-$2-files-directories-to-check": {
-		"message": "%3: %1: %2 files / directories to check.",
+		"message": "%3: %1: %2 {{PLURAL:%2|file|files}} / {{PLURAL:%2|directory|directories}} to check.",
 		"notes": "%1: target_directory, %2: fso_name_list.length, %3: script_name",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L46}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L48}}"
 	},
 	"create-directory-of-sub-catalog-$1": {
 		"message": "Create directory of sub-catalog [%1]:",
 		"notes": "%1: sub_catalog. 後接 sub_catalog_directory",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L201}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L203}}"
 	},
 	"invalid-catalog-$1": {
 		"message": "Invalid catalog: %1",
 		"notes": "%1: catalog",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L215}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L217}}"
 	},
 	"because-the-largest-file-has-$1-bytes-skipping-this-$2-directory-$3": {
 		"message": "因為最大的檔案有 %1 位元組，因此跳過這個%2的目錄：%3",
 		"notes": "biggest_file_size, message, directory_path",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L244}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L246}}"
 	},
 	"cannot-read-file-directory-$1": {
 		"message": "Cannot read file / directory: %1",
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L255}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L257}}"
 	},
 	"it-is-a-executable-or-dll-file": {
 		"message": "為可執行檔或函式庫",
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L267}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L269}}"
 	},
 	"cannot-read-directory-$1": {
 		"message": "Cannot read directory: %1",
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L279}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L281}}"
 	},
 	"empty-directory-$1": {
 		"message": "Empty directory: %1",
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L287}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L289}}"
 	},
 	"contains-$1-$2-executable-files-or-libraries": {
 		"message": "含有 %1/%2 個可執行檔或函式庫",
 		"notes": "exe_count, sub_sub_files_count",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L391}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L393}}"
 	},
 	"contains-$1-$2-images": {
 		"message": "含有 %1/%2 張圖片",
 		"notes": "image_count, sub_sub_files_count",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L402}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L404}}"
 	},
 	"subdirectory-contains-executable-files-or-libraries": {
 		"message": "次目錄中含有可執行檔或函式庫",
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L419}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L421}}"
 	},
 	"directory-to-be-checked-manually-$1": {
 		"message": "需要手動檢查的目錄：%1",
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L427}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L429}}"
 	},
 	"move-$1": {
 		"message": "Move %1:",
 		"notes": "ファイルを移動",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L454}}\n: {{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L456}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L456}}\n: {{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L458}}"
 	},
 	"remove-empty-directory-$1": {
 		"message": "Remove empty directory: %1",
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L684}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L686}}"
 	},
 	"directory-of-sub-catalog-$1-created-$2": {
 		"message": "Directory of sub-catalog [%1] created: %2",
 		"notes": "catalog, move_to_path",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L690}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L692}}"
 	},
 	"$2-$1-directories-to-compress": {
-		"message": "%2: %1 directories to compress.",
+		"message": "%2: %1 {{PLURAL:%1|directory|directories}} to compress.",
 		"notes": "process_queue.length, script_name",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L701}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L703}}"
 	},
 	"since-there-is-no-compression-(do_compress)-there-are-$1-files-or-folders-that-are-not-compressed": {
 		"message": "因為未設定要壓縮 (do_compress)，有 %1 個檔案或目錄沒有壓縮。",
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L719}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L721}}"
 	},
 	"$1-$2-compressing": {
 		"message": "%1/%2 compressing",
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L747}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L749}}"
 	},
 	"compress-$1": {
 		"message": "Compress %1:",
 		"notes": "%1: profile_name, 後接 profile.archive",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L751}}\n: {{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L763}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L753}}\n: {{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L765}}"
 	},
 	"target-exists-$1": {
 		"message": "Target exists: %1",
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L757}}"
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L759}}"
 	},
 	"unknown-type-$1-please-install-$2": {
 		"message": "Unknown type: %1, please install %2",
@@ -6410,243 +6412,236 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1804}}"
 	},
-	"contents-length-$1-chars": {
-		"message": "contents length: %1 chars",
-		"notes": "%1: contents length",
-		"scope": "CeL.application.storage.EPUB: add_chapter()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1849}}"
-	},
 	"no-content-received-$1": {
 		"message": "No content received: %1",
 		"notes": "%1: url",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1858}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1861}}"
 	},
 	"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-used-from-the-cache-file": {
 		"message": "因為欲設定的內容長度過短或者無內容，將從 cache 檔案中取得舊的內容（%1 字元）：",
 		"notes": "%1: contents.length",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1918}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1920}}"
 	},
 	"writing-$1-chars-to-$2": {
-		"message": "Writing %1 chars to [%2]...",
+		"message": "Writing %1 {{PLURAL:%1|character|characters}} to [%2]...",
 		"notes": "%1: contents.length, %2: file path",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1929}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1932}}"
 	},
 	"only-the-project-data-index-is-set-and-the-file-$1-is-not-automatically-written.-you-need-to-do-this-yourself": {
 		"message": "僅設定項目資料索引，未自動寫入檔案 [%1]，您需要自己完成這動作。",
 		"notes": "%1: file path",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1940}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1943}}"
 	},
 	"skip-content-that-is-too-short-($1-characters)": {
 		"message": "跳過長度過短的內容（%1 字元）：",
 		"notes": "%1: contents.length, %2: file path",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1948}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1951}}"
 	},
 	"skip-the-no-content-empty-chapter": {
 		"message": "跳過無內容/空章節：",
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1951}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1954}}"
 	},
 	"too-short": {
 		"message": "too short",
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1958}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1961}}"
 	},
 	"if-this-chapter-already-exists-remove-it-first-$1": {
 		"message": "若是已存在此章節則先移除：%1",
 		"notes": "%1: item.id",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1965}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1968}}"
 	},
 	"using-language-$1": {
 		"message": "Using language: %1",
 		"notes": "%1: language",
 		"scope": "CeL.application.storage.EPUB: setup_gettext()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2017}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2020}}"
 	},
 	"work-information": {
 		"message": "Work information",
 		"notes": "書籍紹介 Message of ebook, book information.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC(); work_crawler/work.js: show_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L82}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2091}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L82}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2094}}"
 	},
 	"toc.identifier": {
 		"message": "TOC.identifier",
 		"notes": "小説ID Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"toc.title": {
 		"message": "TOC.title",
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"toc.language": {
 		"message": "TOC.language",
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"toc.date": {
 		"message": "TOC.date",
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"toc.creator": {
 		"message": "TOC.creator",
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"toc.subject": {
 		"message": "TOC.subject",
 		"notes": "主題+狀態 類別 議題 Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"toc.description": {
 		"message": "TOC.description",
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"toc.publisher": {
 		"message": "TOC.publisher",
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"toc.source": {
 		"message": "TOC.source",
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"toc.dcterms-modified": {
 		"message": "TOC.dcterms:modified",
 		"notes": "更新時間 Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"toc.calibre-series": {
 		"message": "TOC.calibre:series",
 		"notes": "collection 叢書集 Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2155}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}"
 	},
 	"word-count": {
 		"message": "word count",
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2190}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2193}}"
 	},
 	"$1-words": {
-		"message": "%1 words",
+		"message": "%1 {{PLURAL:%1|word|words}}",
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1867}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1872}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2192}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1870}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1874}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2195}}"
 	},
 	"$1-chapters": {
-		"message": "%1 chapters",
+		"message": "%1 {{PLURAL:%1|chapter|chapters}}",
 		"notes": "章節 Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2194}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2197}}"
 	},
 	"waiting-for-all-resources-loaded": {
 		"message": "Waiting for all resources loaded...",
 		"notes": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"scope": "CeL.application.storage.EPUB: write_chapters()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2358}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2529}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2363}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2534}}"
 	},
 	"start-writing-e-book-materials": {
 		"message": "開始寫入電子書資料……",
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: write_chapters()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2366}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2371}}"
 	},
 	"missing-resource-item-$1": {
 		"message": "丟失資源項目 %1",
 		"notes": "%1: item",
 		"scope": "CeL.application.storage.EPUB: write_chapters()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2382}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2387}}"
 	},
 	"the-instructed-material-to-be-enclosed-in-the-comment-itself-contains-text-such-as-$2d$2d-or-$2d-which-will-cause-an-error-in-decoding": {
 		"message": "所欲封入注釋的詮釋資料本身含有 \"%2D%2D\" 或 \"%2D-\" 之類文字，將造成解碼時出現錯誤！",
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: write_chapters()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2489}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2494}}"
 	},
 	"start-building-e-books": {
 		"message": "開始建構電子書……",
 		"notes": "Packing up epub file",
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2547}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L152}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2552}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L152}}"
 	},
 	"removing-empty-directory-$1": {
 		"message": "移除空目錄：%1",
 		"notes": "%1: directory",
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2588}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2593}}"
 	},
 	"creating-an-ebook-with-7zip-$1": {
 		"message": "以 7zip 創建電子書：%1……",
 		"notes": "%1: target_file",
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2599}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2604}}"
 	},
 	"the-file-list-is-too-long-so-it-is-changed-to-compress-the-entire-directory": {
 		"message": "檔案列表過長，改成壓縮整個目錄。",
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2622}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2627}}"
 	},
 	"the-e-book-is-created-$1": {
 		"message": "電子書創建完畢：%1",
 		"notes": "%1: target_file",
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2656}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2661}}"
 	},
 	"set-$1-to-a-non-string-$2": {
 		"message": "設定 %1 成非字串之參數：%2",
@@ -6726,7 +6721,7 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1282}}"
 	},
 	"waiting-$1-$2-connections-$3": {
-		"message": "Waiting %1/%2 connections: %3",
+		"message": "Waiting %1/%2 {{PLURAL:%1|connection|connections}}: %3",
 		"notes": "%1: connections, %2: requests, %3: URL_to_fetch",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
@@ -6815,7 +6810,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"additional_notes": "CeL.application.net.Ajax: to_form_data()\nCeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1800}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3130}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L699}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1800}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3132}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L699}}"
 	},
 	"error-socket-hang-up": {
 		"message": "Error: socket hang up",
@@ -6879,7 +6874,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"additional_notes": "CeL.application.net.Ajax: fetch_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1863}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3311}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1863}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3313}}"
 	},
 	"http-status-code-$1-$2": {
 		"message": "HTTP status code: %1 %2",
@@ -6938,144 +6933,144 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2175}}"
 	},
 	"write-$2-bytes-to-file-$1-$3": {
-		"message": "Write %2 bytes to file [%1]: %3",
+		"message": "Write %2 {{PLURAL:%2|byte|bytes}} to file [%1]: %3",
 		"notes": "%1: file path, %2: data.length, %3: URL",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2255}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2256}}"
 	},
 	"failed-to-write-$2-bytes-to-$1-$3": {
-		"message": "Failed to write %2 bytes to [%1]: %3",
+		"message": "Failed to write %2 {{PLURAL:%2|byte|bytes}} to [%1]: %3",
 		"notes": "%1: file path, %2: data.length, %3: URL",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2287}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2289}}"
 	},
 	"request-path-contains-unescaped-characters": {
 		"message": "Request path contains unescaped characters",
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2453}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2455}}"
 	},
 	"invalid-post-data-$1": {
 		"message": "Invalid POST data: %1",
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2490}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2492}}"
 	},
 	"connection-timeout-for-$1-$2": {
 		"message": "Connection timeout for %1: [%2]",
 		"notes": "%1: time (e.g., \"30 s\"), %2: URL",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2516}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2518}}"
 	},
 	"add-timeout-$1-$2": {
 		"message": "Add timeout %1: [%2]",
 		"notes": "%1: time (e.g., \"30 s\"), %2: URL",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2543}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2545}}"
 	},
 	"invalid-timeout-$1": {
 		"message": "Invalid timeout: %1",
 		"notes": "%1: time (e.g., \"30 s\")",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2549}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2551}}"
 	},
 	"must-specify-proxy-server-hostname-port": {
 		"message": "Must specify proxy server: hostname:port",
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: HttpsProxyAgent()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2744}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2746}}"
 	},
 	"there-is-no-`fs`-package-for-node.js-so-there-is-no-file-operation-function-for-node": {
 		"message": "無 node.js 之 `fs` 套件，因此不具備 node 之檔案操作功能。",
 		"notes": "",
 		"scope": "CeL.application.net.Ajax",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2964}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2966}}"
 	},
 	"get-filename-from-url-$1": {
 		"message": "自 URL 取得檔名：%1",
 		"notes": "%1: URL",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3036}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3038}}"
 	},
 	"no-file-name-specified": {
 		"message": "No file name specified.",
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3044}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3046}}"
 	},
 	"download-$1": {
 		"message": "下載 %1",
 		"notes": "%1: URL",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3077}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3079}}"
 	},
 	"$1-(file-encoding-$2-charset-$3)": {
 		"message": "%1 (file encoding %2, charset %3)",
 		"notes": "%1: file path",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3082}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3084}}"
 	},
 	"using-cached-data": {
 		"message": "Using cached data.",
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3110}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/cache.js#L401}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3112}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/cache.js#L401}}"
 	},
 	"no-valid-cached-data.-try-to-get-data-(again)": {
 		"message": "No valid cached data. Try to get data (again)...",
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3122}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3124}}"
 	},
 	"got-file-name-from-http-header-$1": {
 		"message": "Got file name from HTTP header: %1",
 		"notes": "%1: file name",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3166}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3168}}"
 	},
 	"set-file-name-$1-file-name-from-header-$2": {
 		"message": "Set file name: [%1], file name from header: [%2].",
 		"notes": "%1, %2: file name",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3173}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3175}}"
 	},
 	"find-that-the-file-exists-after-get-the-file-from-web-$1-.-do-not-overwrite-it": {
 		"message": "重新獲取檔案後發現原檔案已存在，跳過不覆寫：[%1]",
 		"notes": "%1: file path",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3207}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3209}}"
 	},
 	"write-data-to-cache-file-$1": {
 		"message": "Write data to cache file [%1].",
 		"notes": "%1: file path",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3222}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3224}}"
 	},
 	"the-data-to-cache-$1": {
 		"message": "The data to cache: %1...",
 		"notes": "%1: file path",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3227}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3229}}"
 	},
 	"a-directory-name-ending-with-a-.-will-result-in-no-way-to-delete-or-copy-$1": {
 		"message": "以點 \".\" 作為結尾的目錄名稱，將導致沒有辦法刪除或者複製：%1",
@@ -7278,91 +7273,91 @@
 		"notes": "%1: domain_name",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1118}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1122}}"
 	},
 	"force-loading-using-domain-locale-$2-($1)": {
 		"message": "強制再次載入/使用 [%2] (%1) 領域/語系。",
 		"notes": "Used as debugging message when selecting language. %1: domain_name, %2: alias of domain_name",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1130}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1134}}"
 	},
 	"loading-using-domain-locale-$2-($1)": {
 		"message": "載入/使用 [%2] (%1) 領域/語系。",
 		"notes": "Used as debugging message when selecting language. %1: domain_name, %2: alias of domain_name",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1132}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1136}}"
 	},
 	"unable-to-distinguish-domain-but-set-callback": {
 		"message": "無法判別 domain，卻設定有 callback。",
 		"notes": "無論如何還是執行 callback。",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1166}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1170}}"
 	},
 	"illegal-domain-alias-list-$1": {
 		"message": "Illegal domain alias list: [%1]",
 		"notes": "%1: domain alias list",
 		"scope": "CeL.application.locale: set_alias()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1368}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1372}}"
 	},
 	"adding-domain-alias-$1-→-$2": {
 		"message": "Adding domain alias [%1] → [%2]...",
 		"notes": "%1: domain alias, %2: normalized domain name",
 		"scope": "CeL.application.locale: set_alias()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1384}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1388}}"
 	},
 	"testing-domain-alias-$1": {
 		"message": "Testing domain alias [%1]...",
 		"notes": "%1: domain alias, %2: normalized domain name",
 		"scope": "CeL.application.locale: to_standard()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1475}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1479}}"
 	},
 	"failed-to-extract-gettext-id": {
 		"message": "Failed to extract gettext id.",
 		"notes": "",
 		"scope": "CeL.application.locale: translate_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1605}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1609}}"
 	},
 	"loading-language-domain-$1": {
 		"message": "Loading language / domain [%1]...",
 		"notes": "",
 		"scope": "CeL.application.locale: adapt_domain()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1645}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1649}}"
 	},
 	"language-domain-$1-loaded": {
 		"message": "Language / domain [%1] loaded.",
 		"notes": "",
 		"scope": "CeL.application.locale: adapt_domain()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1651}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1655}}"
 	},
 	"cannot-find-menu-node-$1": {
 		"message": "Cannot find menu node: [%1]",
 		"notes": "%1: menu node id",
 		"scope": "CeL.application.locale: create_domain_menu()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1693}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1697}}"
 	},
 	"convert-number-$1-to-$2-format": {
 		"message": "轉換數字：[%1]成 %2 格式。",
 		"notes": "",
 		"scope": "CeL.application.locale: gettext.numeral()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1773}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1777}}"
 	},
 	"unable-to-convert-number-$1": {
 		"message": "無法轉換數字 [%1]！",
 		"notes": "",
 		"scope": "CeL.application.locale: 打折扣",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2163}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2167}}"
 	},
 	"syntax-error": {
 		"message": "語法錯誤！",
@@ -7481,7 +7476,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1356}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}"
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1384}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}"
 	},
 	"local-language-name": {
 		"message": "local-language-name",
@@ -7593,5 +7588,12 @@
 		"original_message_language_code": "en-US",
 		"notes": "%1: page link",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L689}}"
+	},
+	"content-length-$1-characters": {
+		"message": "Content Length: %1 {{PLURAL:%1|character|characters}}",
+		"notes": "%1: content length",
+		"scope": "CeL.application.storage.EPUB: add_chapter()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1850}}"
 	}
 }

@@ -893,7 +893,6 @@
 	"of-file-$1": "檔案路徑：%1",
 	"skip-web-page-resource-$1": "跳過網頁資源：%1",
 	"title-not-set-$1": "未設定標題：%1……",
-	"contents-length-$1-chars": "內容共長 %1 字元",
 	"no-content-received-$1": "未取得任何內容：%1",
 	"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-used-from-the-cache-file": "因為欲設定的內容長度過短或者無內容，將從 cache 檔案中取得舊的內容（%1 字元）：",
 	"writing-$1-chars-to-$2": "寫入 %1 字元至檔案 [%2]。",
@@ -1051,5 +1050,6 @@
 	"get-$2-edit-summaries-of-$1": "取得%1的%2個編輯摘要",
 	"get-$2-revision(s)-of-$1": "取得%1的%2個版本",
 	"no-section-title-set": "未設置章節標題！",
-	"unable-to-extract-the-revision-difference-id-from-page-edit-summary-of-$1": "無法從%1的頁面編輯摘要中提取版本差異id!"
+	"unable-to-extract-the-revision-difference-id-from-page-edit-summary-of-$1": "無法從%1的頁面編輯摘要中提取版本差異id!",
+	"content-length-$1-characters": "內容共長 %1 字元"
 }

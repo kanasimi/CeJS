@@ -1395,7 +1395,7 @@ function module_code(library_namespace) {
 		if (get_URL_node_connections >= get_URL_node.connects_limit) {
 			library_namespace.debug({
 				// gettext_config:{"id":"waiting-$1-$2-connections-$3"}
-				T : [ 'Waiting %1/%2 connections: %3',
+				T : [ 'Waiting %1/%2 {{PLURAL:%1|connection|connections}}: %3',
 				// 避免同時開過多 connections 的機制。
 				get_URL_node_connections, get_URL_node_requests,
 						String(URL_to_fetch) ]
@@ -2251,10 +2251,11 @@ function module_code(library_namespace) {
 							.slice(0, 256);
 					if (!options.no_warning) {
 						library_namespace.info([ 'get_URL_node: ', {
+							T : [
 							// gettext_config:{"id":"write-$2-bytes-to-file-$1-$3"}
-							T : [ 'Write %2 bytes to file [%1]: %3',
+							'Write %2 {{PLURAL:%2|byte|bytes}} to file [%1]: %3'
 							//
-							file_path, data.length, URL_to_fetch ]
+							, file_path, data.length, URL_to_fetch ]
 						} ]);
 					}
 					try {
@@ -2283,10 +2284,11 @@ function module_code(library_namespace) {
 						}
 					} catch (e) {
 						library_namespace.error([ 'get_URL_node: ', {
+							T : [
 							// gettext_config:{"id":"failed-to-write-$2-bytes-to-$1-$3"}
-							T : [ 'Failed to write %2 bytes to [%1]: %3',
+							'Failed to write %2 {{PLURAL:%2|byte|bytes}} to [%1]: %3'
 							//
-							file_path, data.length, URL_to_fetch ]
+							, file_path, data.length, URL_to_fetch ]
 						} ]);
 						console.error(e);
 					}

@@ -28,7 +28,7 @@
 	"no change": "gnun-a mod\u00ecfica",
 	"finished": "fin\u00ec",
 	"finished: %1": "fin\u00ec: %1",
-	"First, it takes %1 to get %2 pages.": "P\u00ebr ancamin\u00e9, a-i va %1 p\u00ebr oten-e %2 p\u00e0gine.",
+	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "P\u00ebr ancamin\u00e9, a-i va %1 p\u00ebr oten-e %2 p\u00e0gine.",
 	"%1 page(s) processed,": "%1 {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} trat\u00e0,",
 	"no page modified,": "gnun-a p\u00e0gina modific\u00e0,",
 	"%1 page(s) have not changed,": "%1 {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} a son nen cangi\u00e0,",

@@ -984,7 +984,7 @@ function module_code(library_namespace) {
 				}
 				var message = [ {
 					// gettext_config:{"id":"$1-$2-$3-images"}
-					T : [ '%1 [%2] %3 images.', chapter_NO
+					T : [ '%1 [%2] %3 {{PLURAL:%3|image|images}}.', chapter_NO
 					//
 					+ (typeof _this.pre_chapter_URL === 'function' ? ''
 					//

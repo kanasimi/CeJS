@@ -2611,7 +2611,7 @@ function module_code(library_namespace) {
 			if (!config.no_message) {
 				// 使用時間, 歷時, 費時, elapsed time
 				// gettext_config:{"id":"first-it-takes-$1-to-get-$2-pages"}
-				pages = gettext('First, it takes %1 to get %2 pages.',
+				pages = gettext('First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.',
 						messages.last.age(new Date), data.length);
 				// 在「首先使用」之後才設定 .last，才能正確抓到「首先使用」。
 				messages.last = new Date;

@@ -28,7 +28,7 @@
 	"no change": "ingen \u00e4ndring",
 	"finished": "klar",
 	"finished: %1": "klar: %1",
-	"First, it takes %1 to get %2 pages.": "F\u00f6rst tar den %1 och f\u00e5r %2 sidor.",
+	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "F\u00f6rst tar den %1 och f\u00e5r %2 sidor.",
 	"%1 page(s) processed,": "%1 sidor bearbetade.",
 	"no page modified,": "ingen sida modifierad,",
 	"%1 page(s) have not changed,": "%1 sidor har inte \u00e4ndrats,",
