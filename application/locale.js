@@ -394,21 +394,40 @@ function module_code(library_namespace) {
 
 	// -----------------------------------------------------------------------------------------------------------------
 
+	var plural_rules__domain_name = 'gettext_plural_rules';
+	// plural_rules[language_code]
+	// = [ #plural forms, function(){ return #plural form; } ]
+	var plural_rules_of_language_code = Object.create(null);
+
+	gettext.set_plural_rules = function set_plural_rules(plural_rules_Object) {
+		for ( var language_code in plural_rules_Object) {
+			var plural_rule = plural_rules_Object[language_code];
+			plural_rules_of_language_code[gettext.to_standard(language_code)] = plural_rule;
+		}
+	};
+
+	// ------------------------------------
+
 	// matched: [ all behavior switch, is NO, NO ]
 	var PATTERN_plural_switch_header = /\{\{PLURAL: *(%)?(\d+) *\|/,
 	// matched: [ all behavior switch, previous, is NO, NO, parameters ]
 	PATTERN_plural_switches_global = new RegExp('('
 			+ PATTERN_plural_switch_header.source + ')'
-			+ /([\s\S]+?)\}\}/.source, 'g');
+			+ /([\s\S]+?)\}\}/.source, 'ig');
 
 	// 處理 {{PLURAL:%1|summary|summaries}}
 	// 處理 {{PLURAL:$1|1=you|$1 users including you}}
 	// 處理 {{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}
-	// TODO: 處理 {{PLURAL:GETTEXT:%1|summary|summaries}}
 	// https://raw.githubusercontent.com/wikimedia/mediawiki-extensions-Translate/master/data/plural-gettext.txt
 	// https://translatewiki.net/wiki/Plural
 	// https://docs.transifex.com/formats/gettext#plural-forms-in-a-po-file
-	function adapt_plural(converted_text, value_list) {
+	function adapt_plural(converted_text, value_list, domain_name) {
+		var plural_count, plural_rule = plural_rules_of_language_code[domain_name];
+		if (Array.isArray(plural_rule)) {
+			plural_count = plural_rule[0];
+			plural_rule = plural_rule[1];
+		}
+
 		converted_text = converted_text.replace_till_stable(
 		//
 		PATTERN_plural_switches_global, function(all, _previous, is_NO, NO,
@@ -430,33 +449,63 @@ function module_code(library_namespace) {
 						+ _previous.length);
 			}
 
-			var value = is_NO ? value_list[NO] : +NO;
+			var value = is_NO ? value_list[NO] : NO;
+			if (value < 0)
+				value = -value;
+			var plural_NO = (typeof plural_rule === 'function'
+			//
+			? plural_rule(+value) : plural_rule) + 1;
+
 			var converted, default_converted, delta = 1;
-			if (parameters.split('|').some(function(parameter, index) {
+			parameters = parameters.split('|');
+			parameters.some(function(parameter, index) {
 				var matched = parameter.match(/^(\d+)=([\s\S]*)$/);
 				if (matched) {
 					delta--;
 					index = +matched[1];
 					parameter = matched[2];
-				} else {
-					index += delta;
-					/**
-					 * https://translatewiki.net/wiki/Plural
-					 * 
-					 * If the number of forms written is less than the number of
-					 * forms required by the plural rules of the language, the
-					 * last available form will be used for all missing forms.
-					 */
-					default_converted = parameter;
+					if (index == value) {
+						converted = parameter;
+						return true;
+					}
+					if (!default_converted)
+						default_converted = parameter;
+					return;
 				}
+
+				index += delta;
+				if (plural_NO >= 1) {
+					if (index === plural_NO) {
+						converted = parameter;
+						// Do not return. Incase {{PLURAL:5|one|other|5=5}}
+					} else if (index === 2 && plural_count !== 2
+					// e.g., {{PLURAL:2||s}}
+					// @ zh(plural_count=1), ru(3), NOT fr(2)
+					&& value != 1 && parameters.length === 2) {
+						converted = parameter;
+					} else {
+						default_converted = parameter;
+					}
+					return;
+				}
+
+				/**
+				 * https://translatewiki.net/wiki/Plural
+				 * 
+				 * If the number of forms written is less than the number of
+				 * forms required by the plural rules of the language, the last
+				 * available form will be used for all missing forms.
+				 */
+				default_converted = parameter;
 				if (index == value) {
 					converted = parameter;
 					return true;
 				}
-			})) {
-				return previous + converted;
-			}
-			return previous + default_converted;
+			});
+
+			return previous
+			//
+			+ (converted === undefined ? default_converted : converted);
 		});
 
 		return converted_text;
@@ -595,7 +644,7 @@ function module_code(library_namespace) {
 		library_namespace
 				.debug('Use domain_name: ' + domain_name, 6, 'gettext');
 
-		converted_text = adapt_plural(converted_text, value_list);
+		converted_text = adapt_plural(converted_text, value_list, domain_name);
 
 		if (length <= 1) {
 			// assert: {String}converted_text
@@ -939,7 +988,9 @@ function module_code(library_namespace) {
 
 	// force: 若 domain name 已經載入過，則再度載入。
 	function load_domain(domain_name, callback, force) {
-		if (!domain_name || !(domain_name = gettext.to_standard(domain_name))) {
+		var do_not_register = domain_name === plural_rules__domain_name;
+		if (!domain_name || !do_not_register
+				&& !(domain_name = gettext.to_standard(domain_name))) {
 			// using the default domain name.
 			domain_name = gettext.default_domain;
 		}
@@ -949,7 +1000,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (!(domain_name in gettext_texts)) {
+		if (!(domain_name in gettext_texts) && !!do_not_register) {
 			// initialization
 			gettext_texts[domain_name] = Object.create(null);
 		}
@@ -964,6 +1015,8 @@ function module_code(library_namespace) {
 			CeL.env.resources_directory_name + '/' + domain_name + '.js'),
 			//
 			function() {
+				if (do_not_register)
+					return;
 				library_namespace.debug('Resources of module included.', 2,
 						'gettext');
 				gettext_check_resources(domain_name, 1, true);
@@ -1242,7 +1295,7 @@ function module_code(library_namespace) {
 	 * @param {Boolean}[clean_and_replace]
 	 *            是否直接覆蓋掉原先之 domain。
 	 */
-	gettext.set_text = function(text_Object, domain, clean_and_replace) {
+	gettext.set_text = function set_text(text_Object, domain, clean_and_replace) {
 		if (!library_namespace.is_Object(text_Object))
 			return;
 
@@ -2288,6 +2341,8 @@ function module_code(library_namespace) {
 		// initialization 時，gettext 可能還沒 loaded。
 		// 因此設在 post action。e.g., @ HTA.
 		this.finish = function(name_space, waiting) {
+			load_domain(plural_rules__domain_name);
+
 			gettext.use_domain(gettext.default_domain, function() {
 				gettext.adapt_domain(gettext.default_domain, waiting);
 			}, true);

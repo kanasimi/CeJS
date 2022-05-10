@@ -8,7 +8,7 @@
 
 /*
 
-node build.nodejs.js add_mark
+node build.nodejs.js add_mark generate_plural_rules
 
 TODO:
 Sorting message id by reference.
@@ -60,10 +60,15 @@ CeL.run(['application.storage',
 	'application.locale.encoding', 'data.date', 'interact.console', 'application.debug.log',
 	// CeL.parse_CSV()
 	'data.CSV',
+	// CeL.fetch()
+	'application.net.Ajax',
 ]);
 
 /** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 const NOT_FOUND = ''.indexOf('_');
+
+if (!globalThis.fetch)
+	globalThis.fetch = CeL.fetch;
 
 const library_build_script_name = CeL.get_script_name() || 'library_build_script';
 //const library_main_script_file_path = CeL.env.registry_path + library_main_script;
@@ -180,6 +185,45 @@ const message_id_changed = new Map;
 
 const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s←↑→≠🆔😘➕]/;
 
+
+const gettext_plural_rules__file_name = 'gettext_plural_rules.js';
+async function get_gettext_plural_rules(resources_path) {
+	let rule_contents = await fetch('https://raw.githubusercontent.com/wikimedia/mediawiki-extensions-Translate/master/data/plural-gettext.txt');
+	rule_contents = await rule_contents.text();
+	rule_contents = rule_contents.trim().split('\n');
+	//console.trace(rule_contents);
+	const gettext_plural_rules = Object.create(null);
+	for (const line of rule_contents) {
+		const matched = line.match(/^([a-z\-]+)\tnplurals=(\d+); plural=(.+);$/);
+		if (!matched)
+			CeL.error(`${get_gettext_plural_rules.name}: Cannot parse: ${line}`);
+		//console.log(matched.slice(1));
+		matched[2] = +matched[2];
+		gettext_plural_rules[matched[1]] = [
+			matched[2],
+			// assert: (+true===1 && +false===0) @ all platform
+			matched[2] === 1 && CeL.is_digits(matched[3]) ? +matched[3]
+				: matched[2] === 2 ? `function(n){return +${/^\([^()]+\)$/.test(matched[3]) ? matched[3] : `(${matched[3]})`};}`
+					: `function(n){return ${matched[3]};}`,
+		];
+	}
+	//console.trace(gettext_plural_rules);
+
+	const new_contents = `/*	gettext plural rules of ${CeL.Class}.
+	This file is auto created by auto-generate tool: ${library_build_script_name}(.js) @ ${datestamp.format('%Y-%2m-%2d' && '%Y')}.
+*/'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_plural_rules({
+	${Object.entries(gettext_plural_rules).map(([language_code, rule]) => {
+		return `${/^[a-z]+$/.test(language_code) ? language_code : `"${language_code}"`}: [${rule.join(', ')}]`;
+	}).join(',\n	')}
+});
+`;
+	const fso_path = resources_path + gettext_plural_rules__file_name;
+	if (!CeL.write_file(fso_path, new_contents, { changed_only: true })) {
+		CeL.warn(`${get_gettext_plural_rules.name}: Create new gettext plural rules script: ${fso_path}`);
+	}
+}
+
+
 function en_message_to_message_id(en_message) {
 	var message_id = en_message.trim();
 	if (/\{\{PLURAL:/.test(message_id)) {
@@ -207,6 +251,9 @@ function en_message_to_message_id(en_message) {
 async function build_locale_messages(resources_path) {
 	resources_path = library_base_directory + resources_path + CeL.env.path_separator;
 	//console.trace(CeL.env);
+
+	if (CeL.env.arg_hash?.generate_plural_rules)
+		await get_gettext_plural_rules(resources_path);
 
 	load_previous_qqq_data(resources_path);
 
@@ -343,6 +390,10 @@ function load_message_to_localized(resources_path, callback) {
 		if (!matched)
 			return;
 		const contents = CeL.read_file(fso_path).toString().between('.set_text(', { tail: ',\n' });
+		if (!contents) {
+			// Not [IETF language tag].js
+			return;
+		}
 		let locale_data;
 		try {
 			locale_data = JSON.parse(contents);
@@ -350,8 +401,9 @@ function load_message_to_localized(resources_path, callback) {
 			//CeL.warn(`${load_message_to_localized.name}: There are functions in the locale? ${fso_path}`);
 			try {
 				eval('locale_data = ' + contents);
-				//console.log(data);
+				//console.log(contents);
 			} catch (e) {
+				//console.trace(JSON.stringify(contents));
 				CeL.error(`${load_message_to_localized.name}: 無法解析在地化訊息檔案: ${fso_path}`);
 				console.error(e);
 			}

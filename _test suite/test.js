@@ -884,6 +884,7 @@ function test_locale() {
 	});
 
 
+	CeL.gettext.use_domain('en', true);
 	all_error_count += CeL.test('locale - 單數複數形式 (plural switches)', function (assert) {
 		assert([ 'maps', CeL.gettext('map{{PLURAL:%1||s}}', 0) ], 'Plural: 0 maps');
 		assert([ 'map', CeL.gettext('map{{PLURAL:%1||s}}', 1) ], 'Plural: 1 map');
