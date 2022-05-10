@@ -884,8 +884,8 @@ function test_locale() {
 	});
 
 
-	CeL.gettext.use_domain('en', true);
 	all_error_count += CeL.test('locale - 單數複數形式 (plural switches)', function (assert) {
+		CeL.gettext.use_domain('en', true);
 		assert([ 'maps', CeL.gettext('map{{PLURAL:%1||s}}', 0) ], 'Plural: 0 maps');
 		assert([ 'map', CeL.gettext('map{{PLURAL:%1||s}}', 1) ], 'Plural: 1 map');
 		assert([ 'maps', CeL.gettext('map{{PLURAL:%1||s}}', 2) ], 'Plural: 2 maps');
@@ -916,6 +916,32 @@ function test_locale() {
 		assert([ '_One_', CeL.gettext('{{PLURAL:2|one|_{{PLURAL:1|One|two}}_}}') ], 'Plural: nested #1');
 		assert([ '+_one_-', CeL.gettext('+{{PLURAL:2|One|_{{PLURAL:2|_one|{{PLURAL:1|one|two}}}}_}}-') ], 'Plural: nested #2');
 		assert([ '+_one_-', CeL.gettext('+{{PLURAL:%2|One|_{{PLURAL:%2|_one|{{PLURAL:%1|one|two}}}}_}}-', 1, 2) ], 'Plural: nested #3');
+
+		CeL.gettext.use_domain('fr', true);
+		assert([ 'one or zero', CeL.gettext('{{PLURAL:0|one or zero|other}}') ], 'Plural: fr: 0');
+		assert([ 'one or zero', CeL.gettext('{{PLURAL:1|one or zero|other}}') ], 'Plural: fr: 1');
+		assert([ 'other', CeL.gettext('{{PLURAL:2|one or zero|other}}') ], 'Plural: fr: 2');
+		assert([ 'other', CeL.gettext('{{PLURAL:3|one or zero|other}}') ], 'Plural: fr: 3');
+
+		CeL.gettext.use_domain('zh', true);
+		assert([ 'pages', CeL.gettext('{{PLURAL:0|page|pages}}') ], 'Plural: zh: Special case: 0');
+		assert([ 'page', CeL.gettext('{{PLURAL:1|page|pages}}') ], 'Plural: zh: 1 page');
+		assert([ 'pages', CeL.gettext('{{PLURAL:2|page|pages}}') ], 'Plural: zh: Special case: 2');
+
+		CeL.gettext.use_domain('ru', true);
+		assert([ 'pages', CeL.gettext('{{PLURAL:0|page|pages}}') ], 'Plural: ru: Special case: 0');
+		assert([ 'page', CeL.gettext('{{PLURAL:1|page|pages}}') ], 'Plural: ru: 1 page');
+		assert([ 'pages', CeL.gettext('{{PLURAL:2|page|pages}}') ], 'Plural: ru: Special case: 2');
+
+		// https://www.mediawiki.org/wiki/Help:Magic_words/ru
+		assert([ 'Категории', CeL.gettext('{{PLURAL:5|1=Категория|Категории}}') ], 'Plural: ru: 5');
+		assert([ 'страницы', CeL.gettext('{{PLURAL:3|страница|страницы|страниц}}') ], 'Plural: ru: страницы');
+		assert([ 'страниц', CeL.gettext('{{PLURAL:5|страница|страницы|страниц}}') ], 'Plural: ru: страниц');
+
+		var message = '{{PLURAL:%1|%1 байт|%1 байта|%1 байтов}}';
+		assert([ '0 байтов', CeL.gettext(message, 0) ], 'Plural: ru: 0');
+		assert([ '1 байт', CeL.gettext(message, 1) ], 'Plural: ru: 1');
+		assert([ '2 байта', CeL.gettext(message, 2) ], 'Plural: ru: 2');
 	});
 
 
