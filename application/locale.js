@@ -340,6 +340,9 @@ function module_code(library_namespace) {
 	};
 
 	function convert_punctuation_mark(punctuation_mark, domain_name) {
+		if (!punctuation_mark)
+			return punctuation_mark;
+
 		// test domains_using_fullwidth_form
 		if (/^(?:cmn|yue|ja)-/.test(domain_name)) {
 			// 東亞標點符號。
@@ -347,7 +350,9 @@ function module_code(library_namespace) {
 				return halfwidth_to_fullwidth_mapping[punctuation_mark];
 			}
 
-			if (/^\.{3,}$/.test(punctuation_mark)) {
+			if (/^ *\.{3,} *$/.test(punctuation_mark)) {
+				// 中文預設標點符號前後無空白。
+				punctuation_mark = punctuation_mark.trim();
 				return '…'.repeat(punctuation_mark.length > 6 ? Math
 						.ceil(punctuation_mark.length / 3) : 2);
 			}
@@ -568,7 +573,7 @@ function module_code(library_namespace) {
 			// 或最常用語言；亦可以代碼(message id)表示，但須設定所有可能使用的語言。
 			// console.log(text_id);
 
-			var postfix;
+			var prefix, postfix;
 			if (library_namespace.is_debug(9)) {
 				console.trace(domain);
 			}
@@ -581,15 +586,18 @@ function module_code(library_namespace) {
 			} else if (!(text_id in domain)) {
 				var matched = String(text_id).match(
 						PATTERN_message_with_tail_punctuation_mark);
-				if (matched && (matched[1] in domain)) {
-					postfix = convert_punctuation_mark(matched[2], domain_name);
-					text_id = matched[1];
+				if (matched && (matched[2] in domain)) {
+					prefix = convert_punctuation_mark(matched[1], domain_name);
+					postfix = convert_punctuation_mark(matched[3], domain_name);
+					text_id = matched[2];
 				} else {
 					using_default = true;
 				}
 			}
 			if (!using_default) {
 				text_id = domain[text_id];
+				if (prefix)
+					text_id = prefix + text_id;
 				if (postfix)
 					text_id += postfix;
 			}
@@ -747,8 +755,9 @@ function module_code(library_namespace) {
 		return has_object ? text_list : text_list.join('');
 	}
 
-	// matched: [ all, text_id / message, tail punctuation mark ]
-	var PATTERN_message_with_tail_punctuation_mark = /^([\s\S]+?)(\.{3,}|…+|[,;:.?!~、，；：。？！～])$/;
+	// matched: [ all, header punctuation mark, text_id / message, tail
+	// punctuation mark ]
+	var PATTERN_message_with_tail_punctuation_mark = /^(\.{3,}\s*)?([\s\S]+?)(\.{3,}|…+|[,;:.?!~、，；：。？！～])$/;
 	gettext.PATTERN_message_with_tail_punctuation_mark = PATTERN_message_with_tail_punctuation_mark;
 
 	// ------------------------------------------------------------------------

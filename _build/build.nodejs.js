@@ -150,7 +150,7 @@ function build_main_script() {
 	CeL.move_file(library_main_script_file_path, backup_file_path);
 
 	CeL.chmod(library_main_script_file_path, 0o600);
-	CeL.write_file(library_main_script_file_path, library_main_script_content, CeL.env.source_encoding);
+	CeL.write_file(library_main_script_file_path, library_main_script_content, CeL.env.source_encoding, { changed_only: true });
 	CeL.chmod(library_main_script_file_path, 0o400);
 }
 
@@ -164,7 +164,7 @@ function update_package_file_version() {
 		.replace(/("version"[\s\n]*:[\s\n]*")[^"]*(")/, function (all, header, footer) {
 			return header + CeL.version + footer;
 		});
-	CeL.write_file(package_file_path, package_file_content);
+	CeL.write_file(package_file_path, package_file_content, { changed_only: true });
 }
 
 // ---------------------------------------------------------------------//
@@ -285,10 +285,10 @@ async function build_locale_messages(resources_path) {
 
 	await modify_source_files();
 
-	write_qqq_data(resources_path);
+	const message_id_order = write_qqq_data(resources_path);
 
-	write_i18n_files(resources_path);
-	CeL.log(`${build_locale_messages.name}: Done.`);
+	write_i18n_files(resources_path, message_id_order);
+	CeL.log(`${build_locale_messages.name}: ${new Date().format()} Done.`);
 }
 
 function load_previous_qqq_data(resources_path) {
@@ -729,9 +729,9 @@ function create__qqq_data_Map() {
 			// set Original language message 原文訊息 qqq_data.message
 			qqq_data.message = message;
 		} else if (qqq_data.message !== message) {
-			// matched: [ all, text_id / message, tail punctuation mark ]
+			// matched: [ all, header punctuation mark, text_id / message, tail punctuation mark ]
 			const matched = message.match(CeL.gettext.PATTERN_message_with_tail_punctuation_mark);
-			if (!matched || qqq_data.message !== matched[1]) {
+			if (!matched || qqq_data.message !== matched[2]) {
 				// (references: ${qqq_data.references})
 				CeL.info(`${create__qqq_data_Map.name}: Original language message 原文訊息 changed in translatewiki:`);
 				CeL.log(CeL.display_align([
@@ -964,11 +964,11 @@ function adapt_new_change_to_source(script_file_path, options) {
 			/**
 			 * 添加訊息的方法: 特殊型態標記: 將下一非註解的行當作標的，並且不檢查內容。必須自己到 qqq.json 編寫 qqq!
 			 * e.g., 組合型 message id <code>
-	
+
 			插入 // gettext_config:{"id":"message_id_1","mark_type":"combination_message_id"}
 			插入 // gettext_config:{"id":"message_id_2","mark_type":"combination_message_id"}
 			gettext(prefix + 'message_id_type' + postfix);
-	
+
 			插入 // gettext_config:{"id":"message_id","mark_type":"part_of_string"}
 			'...|msg=message|...'.split('|');
 
@@ -1010,18 +1010,18 @@ function adapt_new_change_to_source(script_file_path, options) {
 
 		let message_id = message_to_id_Map.get(message);
 		if (!message_id) {
-			// matched: [ all, text_id / message, tail punctuation mark ]
+			// matched: [ all, header punctuation mark, text_id / message, tail punctuation mark ]
 			const matched = message.match(CeL.gettext.PATTERN_message_with_tail_punctuation_mark);
-			if ((!matched || !(message_id = message_to_id_Map.get(matched[1])))
+			if ((!matched || !(message_id = message_to_id_Map.get(matched[2])))
 				&& !gettext_config.id && !PATTERN_has_invalid_en_message_char.test(message)) {
 				/**
 				 * 添加訊息的方法: 直接把 message 當英文訊息。
 				 * e.g., <code>
-	
+
 				插入 // gettext_config:{"qqq":""}
 				插入 // gettext_config:{"qqq":"","zh-tw":""}
 				gettext('English message');
-	
+
 				</code> */
 				gettext_config.id = en_message_to_message_id(message);
 			}
@@ -1083,11 +1083,11 @@ function adapt_new_change_to_source(script_file_path, options) {
 					/**
 					 * 添加訊息的方法: 直接把 Original language message 原文訊息當英文訊息。
 					 * e.g., <code>
-		
+
 					插入 // gettext_config:{"id":"message-id","qqq":"","zh-tw":""}
 					插入 // gettext_config:{"id":"message-id","qqq":""}
 					gettext('English message');
-		
+
 					</code> */
 					i18n_message_id_to_message['en-US'][message_id] = message;
 				} else {
@@ -1099,10 +1099,10 @@ function adapt_new_change_to_source(script_file_path, options) {
 				/**
 				 * 添加訊息的方法: 直接把 message_id 當英文訊息。
 				 * e.g., <code>
-	
+
 				插入 // gettext_config:{"id":"English message","qqq":""}
 				gettext('Original language message 原文訊息');
-	
+
 				</code> */
 				if (!language_code) {
 					CeL.warn(`${adapt_new_change_to_source.name}: 無法判別 message 之語言! ${JSON.stringify(message)}`);
@@ -1308,6 +1308,24 @@ const qqq_order = ['notes', 'demo', 'references'];
 const qqq_order_Set = new Set(qqq_order.concat(['message', 'original_message_language_code', 'additional_notes']));
 const qqq_ignore_attributes_Set = new Set(['message_is_id']);
 
+function sort_Object_by_order(object, key_order) {
+	if (!key_order)
+		return object;
+
+	const sorted_object = Object.create(null);
+	const key_Set = new Set(Object.keys(object));
+	key_order.forEach(key => {
+		if (key_Set.has(key)) {
+			key_Set.delete(key);
+			sorted_object[key] = object[key];
+		}
+	});
+
+	const keys_left = Array.from(key_Set.keys()).sort();
+	keys_left.forEach(key => sorted_object[key] = object[key]);
+	return sorted_object;
+}
+
 function write_qqq_data(resources_path) {
 	const i18n_qqq_Object = i18n_message_id_to_message.qqq;
 	adapt_message_id_changed_to_Object(i18n_qqq_Object);
@@ -1353,8 +1371,15 @@ function write_qqq_data(resources_path) {
 	}
 	//console.trace(i18n_qqq_Object);
 
+	const message_id_order = Array.from(qqq_data_Map.keys())
+		// 依照 References 排序 message id。
+		.sort((_1, _2) => CeL.general_ascending(qqq_data_Map.get(_1)?.references, qqq_data_Map.get(_2)?.references));
+	// 把 metadata 放在最前面。
+	message_id_order.unshift("@metadata");
+	//console.trace(message_id_order.slice(-5));
+
 	let original_contents = CeL.read_file(resources_path + qqq_data_file_name);
-	const new_contents = JSON.stringify(qqq_file_data, null, '\t') + '\n';
+	const new_contents = JSON.stringify(sort_Object_by_order(qqq_file_data, message_id_order), null, '\t') + '\n';
 	if (!original_contents || (original_contents = original_contents.toString()) !== new_contents) {
 		const fso_path = resources_path + qqq_data_file_name;
 		CeL.info(`${write_qqq_data.name}: Create new qqq data cache: ${fso_path}`);
@@ -1370,27 +1395,32 @@ function write_qqq_data(resources_path) {
 			return message_id === message ? message : `[${message_id}]	${message}`;
 		}).join('\n'));
 	}
+
+	return message_id_order;
 }
 
 
-function write_i18n_files(resources_path) {
+function write_i18n_files(resources_path, message_id_order) {
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
 		if (language_code !== 'qqq') {
 			adapt_message_id_changed_to_Object(locale_data);
 			// cmn-Hant-TW: -1
 			const untranslated_message_count = Math.max(0, qqq_data_Map.size - Object.keys(locale_data).length);
+			const untranslated_ratio = untranslated_message_count / qqq_data_Map.size;
 			// FuzzyBot 必須為 {String}?
 			// gettext_config:{"id":"untranslated-message-count"}
 			locale_data[en_message_to_message_id('untranslated message count')] = String(untranslated_message_count);
-			if (untranslated_message_count < 550) {
-				const comments = untranslated_message_count < 20 ? '接近翻譯完畢的語言' : untranslated_message_count < 100 ? '翻譯得差不多的語言' : '可考慮列入選單的語言';
+			if (untranslated_message_count < 500 || untranslated_ratio < .3) {
+				const comments = untranslated_message_count < 20 && untranslated_ratio < .01 ? '接近翻譯完畢的語言'
+					: untranslated_message_count < 100 && untranslated_ratio < .05 ? '翻譯得差不多的語言'
+						: '可考慮列入選單的語言';
 				CeL.info(`${write_i18n_files.name}: ${comments} (${untranslated_message_count}/${qqq_data_Map.size} 未翻譯): ${language_code}`);
 			}
 			// qqq was saved to `qqq_data_file_name` @ write_qqq_data()
-			write_message_script_file({ resources_path, language_code, locale_data });
+			write_message_script_file({ resources_path, language_code, locale_data, message_id_order });
 		}
 
-		write_i18n_data_file({ language_code, locale_data });
+		write_i18n_data_file({ language_code, locale_data, message_id_order });
 	}
 }
 
@@ -1398,10 +1428,10 @@ function escape_non_latin_chars(string) {
 	return string.replace(/[^\x20-\x7F]/g, char => '\\u' + char.charCodeAt(0).toString(16).padStart(4, 0));
 }
 
-function write_message_script_file({ resources_path, language_code, locale_data }) {
+function write_message_script_file({ resources_path, language_code, locale_data, message_id_order }) {
 	const fso_path = resources_path + language_code + '.js';
 	const locale_message_data = [];
-	for (const [message_id, locale_message] of Object.entries(locale_data)) {
+	for (const [message_id, locale_message] of Object.entries(sort_Object_by_order(locale_data, message_id_order))) {
 		if (message_id === '@metadata') continue;
 		const qqq_data = qqq_data_Map.get(message_id);
 		const key_mark = escape_non_latin_chars(JSON.stringify(qqq_data.message)) + ': ';
@@ -1429,12 +1459,12 @@ ${JSON.stringify(language_code)});
 	}
 }
 
-function data_to_i18n_contents(i18n_locale_data) {
+function data_to_i18n_contents(i18n_locale_data, message_id_order) {
 	if (typeof i18n_locale_data === 'string')
 		i18n_locale_data = JSON.parse(i18n_locale_data);
-	return JSON.stringify(i18n_locale_data, null, '\t') + '\n';
+	return JSON.stringify(sort_Object_by_order(i18n_locale_data, message_id_order), null, '\t') + '\n';
 }
-function write_i18n_data_file({ language_code, locale_data }) {
+function write_i18n_data_file({ language_code, locale_data, message_id_order }) {
 	const i18n_language_code_data = i18n_language_code_data_mapping.get(language_code);
 	//console.trace({ language_code, i18n_language_code_data });
 	const fso_path = i18n_language_code_data.fso_path;
@@ -1442,7 +1472,7 @@ function write_i18n_data_file({ language_code, locale_data }) {
 	let original_contents = CeL.read_file(fso_path);
 	if (original_contents)
 		original_contents = data_to_i18n_contents(original_contents.toString());
-	const new_contents = data_to_i18n_contents(locale_data);
+	const new_contents = data_to_i18n_contents(locale_data, message_id_order);
 	if (original_contents !== new_contents) {
 		CeL.info(`${write_i18n_data_file.name}: Create new i18n data file: ${fso_path}`);
 		CeL.write_file(fso_path, new_contents);

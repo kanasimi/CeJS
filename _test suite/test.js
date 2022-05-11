@@ -1034,6 +1034,7 @@ function test_locale() {
 		assert([ '完成……', CeL.gettext('finished...') ], '結尾標點符號的轉換: en ... → zh ……');
 		assert([ '完成……', CeL.gettext('finished......') ], '結尾標點符號的轉換: en → zh ……');
 		assert([ '完成………', CeL.gettext('finished.........') ], '結尾標點符號的轉換: en → zh ………');
+		assert([ '……完成。', CeL.gettext('... finished.') ], '標點符號的轉換: en → zh');
 	});
 
 

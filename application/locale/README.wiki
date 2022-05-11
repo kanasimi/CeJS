@@ -8,7 +8,7 @@
 ; 2. <b>ISO 639-1 language tag</b>.json
 : [https://translatewiki.net/wiki/Translating:Colorless_echo_JavaScript_kit cejs@translatewiki] 每個禮拜會匯入兩次本土化訊息至 [https://github.com/kanasimi/CeJS/tree/master/application/locale/resources/i18n application/locale/resources/i18n]/<b>ISO 639-1 language tag</b>.json 。[https://translatewiki.net/wiki/Special:Contributions/FuzzyBot FuzzyBot] 每一至三日會將原始碼的變更更新到 translatewiki 上。
 ; 3. qqq_data.json
-: 這是紀錄 qqq.json 和原始訊息的cach檔。
+: 這是紀錄 qqq.json 和原始訊息的 cache 檔。
 ; 4. 原始程式碼中
 : 原始程式碼的訊息前，必須包含 <code>// gettext_config:{}</code> 標記，在換行之前的內容會被視為 JSON 解析。例如
 :: <code>// gettext_config:{"id":"message-id"}</code>
