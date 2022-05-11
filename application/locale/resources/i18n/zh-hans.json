@@ -9,7 +9,7 @@
 			"Yining Chen"
 		]
 	},
-	"untranslated-message-count": "26",
+	"untranslated-message-count": "28",
 	"$1-$2-$3": "%1/%2/%3",
 	"españa": "西班牙",
 	"french-republican-calendar": "法国共和历",
@@ -820,6 +820,7 @@
 	"invalid-task_configuration-(should-be-$2)-{$3}-$1": "无效的任务配置（应当为%2）：{%3} %1",
 	"revision-id": "版本ID",
 	"multiple-discussion-links-exist": "存在多个讨论链接：",
+	"Comma-separator": "、",
 	"debug-level": "调试级别",
 	"create-directory-of-sub-catalog-$1": "创建子分类 %1 的目录：",
 	"invalid-catalog-$1": "子分类无效：%1",

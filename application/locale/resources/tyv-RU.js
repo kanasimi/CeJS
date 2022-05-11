@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "985",
+	"untranslated message count": "988",
 	"Calendrier r\u00e9publicain": "\u0424\u0440\u0430\u043d\u0446\u0443\u0437 \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430\u043d \u041a\u0430\u043b\u0435\u043d\u0434\u0430\u0440",
 	"\u7d00\u5e74\u8f49\u63db\u5de5\u5177": "\u042d\u0440\u0430 \u043a\u0430\u043b\u0435\u043d\u0434\u0430\u0440 \u043a\u043e\u043d\u0432\u0435\u0440\u0442\u0435\u0440\u0438",
 	"Loading...": "\u0427\u04af\u0434\u04af\u0440\u04af\u0433...",

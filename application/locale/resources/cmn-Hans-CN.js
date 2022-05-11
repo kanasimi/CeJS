@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "26",
+	"untranslated message count": "28",
 	"%1/%2/%3": "%1/%2/%3",
 	"Espa\u00f1a": "\u897f\u73ed\u7259",
 	"Calendrier r\u00e9publicain": "\u6cd5\u56fd\u5171\u548c\u5386",
@@ -812,6 +812,7 @@
 	"Invalid task_configuration (should be %2): {%3} %1": "\u65e0\u6548\u7684\u4efb\u52a1\u914d\u7f6e\uff08\u5e94\u5f53\u4e3a%2\uff09\uff1a{%3} %1",
 	"revision id": "\u7248\u672cID",
 	"Multiple discussion links exist:": "\u5b58\u5728\u591a\u4e2a\u8ba8\u8bba\u94fe\u63a5\uff1a",
+	"Comma-separator": "\u3001",
 	"debug level": "\u8c03\u8bd5\u7ea7\u522b",
 	"Create directory of sub-catalog [%1]:": "\u521b\u5efa\u5b50\u5206\u7c7b %1 \u7684\u76ee\u5f55\uff1a",
 	"Invalid catalog: %1": "\u5b50\u5206\u7c7b\u65e0\u6548\uff1a%1",

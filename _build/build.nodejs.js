@@ -1019,7 +1019,7 @@ function adapt_new_change_to_source(script_file_path, options) {
 				 * e.g., <code>
 
 				插入 // gettext_config:{"qqq":""}
-				插入 // gettext_config:{"qqq":"","zh-tw":""}
+				插入 // gettext_config:{"qqq":"","zh-tw":"","ja":""}
 				gettext('English message');
 
 				</code> */
@@ -1304,7 +1304,7 @@ function adapt_message_id_changed_to_Object(object) {
 }
 
 // qqq 展示順序。
-const qqq_order = ['notes', 'demo', 'references'];
+const qqq_order = ['notes', 'parameters', 'demo', 'references'];
 const qqq_order_Set = new Set(qqq_order.concat(['message', 'original_message_language_code', 'additional_notes']));
 const qqq_ignore_attributes_Set = new Set(['message_is_id']);
 
@@ -1432,7 +1432,8 @@ function write_message_script_file({ resources_path, language_code, locale_data,
 	const fso_path = resources_path + language_code + '.js';
 	const locale_message_data = [];
 	for (const [message_id, locale_message] of Object.entries(sort_Object_by_order(locale_data, message_id_order))) {
-		if (message_id === '@metadata') continue;
+		if (message_id === '@metadata')
+			continue;
 		const qqq_data = qqq_data_Map.get(message_id);
 		const key_mark = escape_non_latin_chars(JSON.stringify(qqq_data.message)) + ': ';
 		if (/^function(?:\s|\()/.test(locale_message)) {
