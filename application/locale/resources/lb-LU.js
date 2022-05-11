@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "949",
+	"untranslated message count": "950",
 	"Espa\u00f1a": "Spuenien",
 	"Load failed": "Lueden huet net funktion\u00e9iert",
 	"\u5730\u7406\u5ea7\u6a19\uff1a": "Koordinaten:",
