@@ -42,9 +42,9 @@ See also: [[Thread:Portal talk:Ru/Plural changes in many languages]]
 : Special case: <code><nowiki>{{PLURAL:5|1=Категория|Категории}}</nowiki></code> → Категории
 : <code><nowiki>{{PLURAL:3|страница|страницы|страниц}}</nowiki></code> → страницы
 : <code><nowiki>{{PLURAL:5|страница|страницы|страниц}}</nowiki></code> → страниц
-: <code><nowiki>{{PLURAL:%1|%1 байт|%1 байта|%1 байтов}}</nowiki></code> for %1=0 → 0 байтов
-: <code><nowiki>{{PLURAL:%1|%1 байт|%1 байта|%1 байтов}}</nowiki></code> for %1=1 → 1 байт
-: <code><nowiki>{{PLURAL:%1|%1 байт|%1 байта|%1 байтов}}</nowiki></code> for %1=2 → 2 байта
+: <code><nowiki>%1 {{PLURAL:%1|байт|байта|байтов}}</nowiki></code> for %1=0 → 0 байтов
+: <code><nowiki>%1 {{PLURAL:%1|байт|байта|байтов}}</nowiki></code> for %1=1 → 1 байт
+: <code><nowiki>%1 {{PLURAL:%1|байт|байта|байтов}}</nowiki></code> for %1=2 → 2 байта
 
 
 == Git push 更新方法 ==

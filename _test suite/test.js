@@ -938,7 +938,7 @@ function test_locale() {
 		assert([ 'страницы', CeL.gettext('{{PLURAL:3|страница|страницы|страниц}}') ], 'Plural: ru: страницы');
 		assert([ 'страниц', CeL.gettext('{{PLURAL:5|страница|страницы|страниц}}') ], 'Plural: ru: страниц');
 
-		var message = '{{PLURAL:%1|%1 байт|%1 байта|%1 байтов}}';
+		var message = '%1 {{PLURAL:%1|байт|байта|байтов}}';
 		assert([ '0 байтов', CeL.gettext(message, 0) ], 'Plural: ru: 0');
 		assert([ '1 байт', CeL.gettext(message, 1) ], 'Plural: ru: 1');
 		assert([ '2 байта', CeL.gettext(message, 2) ], 'Plural: ru: 2');

@@ -1040,12 +1040,27 @@ function adapt_new_change_to_source(script_file_path, options) {
 				}
 
 			} else if (qqq_data.message !== message) {
-				CeL.info(`${adapt_new_change_to_source.name}: 改變了[${script_file_path}] 原始碼中的 message:`);
-				CeL.log(CeL.display_align([
-					['id\t', JSON.stringify(message_id)],
-					['原訊息\t', JSON.stringify(qqq_data.message)],
-					['新→\t', JSON.stringify(message)]
-				]));
+				let new_message_language_code = CeL.encoding.guess_text_language(message);
+				if (!message_language_code && !PATTERN_has_invalid_en_message_char.test(message)) {
+					message_language_code = 'en-US';
+					CeL.warn(`${adapt_new_change_to_source.name}: 無法判別 message 之語言，當作 ${message_language_code}:\n[${message_id}] ${JSON.stringify(message)}`);
+				}
+				if (new_message_language_code && new_message_language_code !== qqq_data.original_message_language_code) {
+					CeL.warn(`${adapt_new_change_to_source.name}: 改變了[${script_file_path}] 原始碼中的訊息語言:`);
+					CeL.log(CeL.display_align([
+						['id\t', JSON.stringify(message_id)],
+						['原訊息\t', `[${qqq_data.original_message_language_code}] ${JSON.stringify(qqq_data.message)}`],
+						['新→\t', `[${new_message_language_code}] ${JSON.stringify(message)}`]
+					]));
+					qqq_data.original_message_language_code = new_message_language_code;
+				} else {
+					CeL.info(`${adapt_new_change_to_source.name}: 改變了[${script_file_path}] 原始碼中的 message:`);
+					CeL.log(CeL.display_align([
+						['id\t', JSON.stringify(message_id)],
+						['原訊息\t', JSON.stringify(qqq_data.message)],
+						['新→\t', JSON.stringify(message)]
+					]));
+				}
 				message_changed.set(qqq_data.message, message);
 				qqq_data.need_to_recheck_all_sources = true;
 				const locale_data = i18n_message_id_to_message[qqq_data.original_message_language_code];
