@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "524",
+	"untranslated message count": "535",
 	"Espa\u00f1a": "\u30b9\u30da\u30a4\u30f3",
 	"Calendrier r\u00e9publicain": "\u30d5\u30e9\u30f3\u30b9\u9769\u547d\u66a6",
 	"Load failed": "\u8aad\u307f\u8fbc\u307f\u306b\u5931\u6557\u3057\u307e\u3057\u305f",
@@ -234,13 +234,13 @@
 	"Error: socket hang up": "\u30ea\u30f3\u30af\u304c\u30c9\u30ed\u30c3\u30d7\u3055\u308c\u307e\u3059",
 	"Error: unexpected end of file": "\u4e0d\u5b8c\u5168\u306a\u30c7\u30fc\u30bf\u3092\u53d7\u4fe1\u3059\u308b",
 	"Error: write ECONNABORTED": "\u30bd\u30d5\u30c8\u30a6\u30a7\u30a2\u304c\u63a5\u7d9a\u306e\u4e2d\u6b62\u3092\u5f15\u304d\u8d77\u3053\u3057\u305f",
+	"No content": "\u672c\u6587\u306a\u3057",
 	"Content is empty": "\u5185\u5bb9\u306f\u30af\u30ea\u30a2\u3055\u308c\u307e\u3059",
 	"Content is not settled": "\u5185\u5bb9\u304c\u8a2d\u5b9a\u3055\u308c\u3066\u3044\u307e\u305b\u3093",
 	"Abandon change": "\u7de8\u96c6\u3092\u653e\u68c4\u3057\u305f",
 	"No reason provided": "\u8aac\u660e\u304c\u3042\u308a\u307e\u305b\u3093",
 	"Continue key": "\u5f8c\u7d9a\u306e\u7d22\u5f15",
 	"Comma-separator": "\u3001",
-	"No content": "\u672c\u6587\u306a\u3057",
 	"Does not exist": "\u5b58\u5728\u3057\u307e\u305b\u3093",
 	"no change": "\u7121\u5909\u66f4",
 	"finished: %1": "\u7d42\u4e86\uff1a%1",

@@ -1536,7 +1536,8 @@ function module_code(library_namespace) {
 		}
 
 		if (false) {
-			content = 'No contents set: ' + wiki_API.title_link_of(page_data)
+			// gettext_config:{"id":"no-content"}
+			content = gettext('No content: ') + wiki_API.title_link_of(page_data)
 			// or: 此頁面不存在/已刪除。
 			+ '! 沒有頁面內容！';
 		}

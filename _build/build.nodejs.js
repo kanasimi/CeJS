@@ -233,7 +233,7 @@ function en_message_to_message_id(en_message) {
 	message_id = message_id
 		.replace(/🆔/g, 'ID')
 		.replace(/[,;:.?!~]+$/, '')
-		.replace(/[:,;'"\s\[\]\\\/#]+/g, '-')
+		.replace(/[:,;'"|\s\[\]\\\/#]+/g, '-')
 		.replace(/[\-\s]+$|^[\-\s]+/g, '')
 		.replace(/^[.\-]+/, '')
 		.replace(/-{2,}/, '-')
@@ -1021,7 +1021,7 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 		let message_id = message_to_id_Map.get(message)
 			// 嘗試去掉標點符號之後找不找得到 message。
 			|| message_to_id_Map.get(CeL.trim_punctuation_marks(message));
-		if (!message_id && !gettext_config.id && !PATTERN_has_invalid_en_message_char.test(message)) {
+		if (!message_id && !gettext_config.id && !PATTERN_has_invalid_en_message_char.test(gettext_config.en || message)) {
 			/**
 			 * 添加訊息的方法: 直接把 message 當英文訊息。
 			 * e.g., <code>
@@ -1101,7 +1101,7 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 			if (gettext_config.id === message_id) {
 				if (!language_code) {
 					if (PATTERN_has_invalid_en_message_char.test(message)) {
-						CeL.error(`${adapt_new_change_to_source_file.name}: 無法判別 message 之語言! 無法匯入 translatewiki!:\n[${message_id}] ${JSON.stringify(message)}`);
+						CeL.error(`${adapt_new_change_to_source_file.name}: 無法判別 message 之語言!\n[${message_id}] ${JSON.stringify(message)}`);
 					} else {
 						language_code = 'en-US';
 						CeL.warn(`${adapt_new_change_to_source_file.name}: 無法判別 message 之語言，當作 ${language_code}:\n[${message_id}] ${JSON.stringify(message)}`);
@@ -1119,7 +1119,9 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 					</code> */
 					i18n_message_id_to_message['en-US'][message_id] = message;
 				} else {
-					CeL.error(`${adapt_new_change_to_source_file.name}: 原始碼中新增了非 en-US 之 message! 這會造成無法匯入 translatewiki! ${JSON.stringify(message)}`);
+					if (!gettext_config.en) {
+						CeL.error(`${adapt_new_change_to_source_file.name}: 原始碼中新增了非 en-US 之 message 卻未提供${CeL.gettext.get_alias('en-US')}訊息! 這會造成無法匯入 translatewiki! ${JSON.stringify(message)}`);
+					}
 					qqq_data.original_message_language_code = language_code;
 				}
 
@@ -1180,8 +1182,10 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 					continue;
 
 				case 'qqq':
-					if (value)
-						set_qqq_data(message_id, value, { show_change_message: true });
+					if (value) {
+						const qqq = /^%\d:/.test(value) ? '; Parameters: ' + value : value;
+						set_qqq_data(message_id, qqq, { show_change_message: true });
+					}
 					continue;
 			}
 

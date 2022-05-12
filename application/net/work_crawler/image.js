@@ -496,7 +496,7 @@ function module_code(library_namespace) {
 					// gettext_config:{"id":"http-status-code-$1"}
 					T : [ 'HTTP status code %1.', XMLHttp.status ]
 				} : '', {
-					// gettext_config:{"id":"no-contents-found"}
+					// gettext_config:{"id":"image-without-content"}
 					T : !contents ? '圖片無內容：' : [
 					//
 					contents.length < _this.MIN_LENGTH

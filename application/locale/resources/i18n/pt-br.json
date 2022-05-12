@@ -4,7 +4,7 @@
 			"YuriNikolai"
 		]
 	},
-	"untranslated-message-count": "569",
+	"untranslated-message-count": "580",
 	"españa": "Espanha",
 	"french-republican-calendar": "Calendário Francês Republicano",
 	"clear-log": "Limpar registro",
@@ -171,7 +171,7 @@
 	"error-$1": "Erro: %1",
 	"image-damaged": "Imagem danificada:",
 	"failed-to-get-image": "Falha em obter a imagem.",
-	"no-contents-found": "Nenhum conteúdo encontrado:",
+	"image-without-content": "Nenhum conteúdo encontrado:",
 	"$1-bytes-too-small": "%1 bytes, muito pequeno:",
 	"$1-bytes": "%1 bytes:",
 	"get-$2-servers-from-$1-$3": "Recendo %2 servidores de [%1]: %3",

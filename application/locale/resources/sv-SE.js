@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "943",
+	"untranslated message count": "954",
 	"Load failed": "Kunde inte ladda",
 	"\u8a0a\u606f\u63d0\u793a\u8207\u7d00\u9304\u6b04": "Journalpanel",
 	"\u8f38\u51fa\u683c\u5f0f": "Utmatningsformat",

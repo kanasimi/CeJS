@@ -36,8 +36,6 @@ typeof CeL === 'function' && CeL.run({
 	+ '|application.net.wiki.namespace.'
 	// for wiki_API.estimated_message()
 	// + '|application.net.wiki.task.'
-	// for CeL.gettext()
-	+ '|application.locale.'
 	//
 	+ '|application.net.wiki.query.|application.net.wiki.Flow.',
 
@@ -62,6 +60,10 @@ function module_code(library_namespace) {
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 	NOT_FOUND = ''.indexOf('_');
+
+	var gettext = library_namespace.cache_gettext(function(_) {
+		gettext = _;
+	});
 
 	// ------------------------------------------------------------------------
 
@@ -159,7 +161,7 @@ function module_code(library_namespace) {
 			// gettext_config:{"id":"found-$2-query-modules-$1"}
 			T : [ 'Found %2 query {{PLURAL:%1|module|modules}}: %1',
 			// gettext_config:{"id":"Comma-separator"}
-			wiki_API_page.query_modules.join(CeL.gettext('Comma-separator')),
+			wiki_API_page.query_modules.join(gettext('Comma-separator')),
 			//
 			wiki_API_page.query_modules.length ]
 		} ]);
@@ -627,7 +629,7 @@ function module_code(library_namespace) {
 						{"title":"","invalidreason":"The requested page title is empty or contains only the name of a namespace.","invalid":""}
 						</code>
 						 */
-						+ CeL.gettext('invalid' in page_data ? 'Invalid'
+						+ gettext('invalid' in page_data ? 'Invalid'
 						// 此頁面不存在/已刪除。Page does not exist. Deleted?
 						: 'missing' in page_data
 						// gettext_config:{"id":"does-not-exist"}
@@ -3292,7 +3294,7 @@ function module_code(library_namespace) {
 						if (!content) {
 							content =
 							// gettext_config:{"id":"no-content"}
-							CeL.gettext('No content: ')
+							gettext('No content: ')
 									+ CeL.wiki.title_link_of(page_data)
 									// or: 此頁面不存在/已刪除。
 									+ '! 沒有頁面內容！';
@@ -3323,8 +3325,9 @@ function module_code(library_namespace) {
 						// debug 用.
 						// check parser, test if parser working properly.
 						CeL.assert([ content, parsed.toString() ],
-								'wikitext parser check for '
-										+ CeL.wiki.title_link_of(page_data));
+						// gettext_config:{"id":"wikitext-parser-checking-$1"}
+						CeL.gettext('wikitext parser checking: %1', CeL.wiki
+								.title_link_of(page_data)));
 						if (CeL.wiki.content_of(page_data) !== parsed
 								.toString()) {
 							console.log(CeL.LCS(CeL.wiki.content_of(page_data),
