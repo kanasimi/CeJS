@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Bluehill",
 			"Ykhwong"
 		]
 	},
@@ -69,9 +70,9 @@
 	"italy": "이탈리아",
 	"norway": "노르웨이",
 	"soon": "곧",
-	"$1-hours-ago": "%1시간 전",
-	"$1-days-ago": "%1일 전",
-	"$1-days-later": "%1일 후",
+	"$1-hours-ago": "%1{{PLURAL:%1|시간}} 전",
+	"$1-days-ago": "%1{{PLURAL:%1|일}} 전",
+	"$1-days-later": "%1{{PLURAL:%1|일}} 후",
 	"syntax-error": "구문 오류!",
 	"illegal-pattern-$1": "잘못된 패턴: [%1]",
 	"↑back-to-toc": "↑목차로 돌아가기",

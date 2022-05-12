@@ -4,6 +4,7 @@
 			"Kanashimi",
 			"MathXplore",
 			"MirukuPC",
+			"Omotecho",
 			"Yamagata Yusuke"
 		]
 	},
@@ -284,7 +285,7 @@
 	"fso_directories": "フオルダの位置",
 	"retry-$1-$2": "再試行 %1/%2",
 	"skip-all-chapters": "全てのチャプターをスキップする",
-	"$1-image(s)-left": "残り%1枚の画像...",
+	"$1-image(s)-left": "%1件の{{PLURAL:%1|画像}}を処理中です……",
 	"$1-$2-image-download-error-recorded": "%1：%2画像ダウンロードエラーが記録されました",
 	"update-image-archive-$1": "画像アーカイブを更新：%1",
 	"create-image-archive-$1": "画像アーカイブを作成：%1",

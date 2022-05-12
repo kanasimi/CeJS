@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Kanashimi",
 			"Kly",
 			"Winston Sung"
 		]
@@ -820,6 +821,7 @@
 	"get-$2-revision(s)-of-$1": "取得%1的%2個版本",
 	"no-section-title-set": "未設置章節標題！",
 	"unable-to-extract-the-revision-difference-id-from-page-edit-summary-of-$1": "無法從%1的頁面編輯摘要中提取版本差異id!",
+	"wikitext-parser-checking-$1": "測試 wikitext 解析器：%1",
 	"syntax-error-in-the-interlanguage-link-template": "跨語言連結模板的語法錯誤。",
 	"no-registered-interwiki-link-templates-were-found": "未發現已登記之跨語言連結模板。",
 	"maybe-there-are-unregistered-interwiki-link-templates-or-some-transcluded-templates-articles-with-interwiki-link-templates-that-have-local-articles-(usually-in-the-last-section-of-the-page)": "也許有尚未登記的跨語言連結模板，或是被嵌入的文件/模板中存有已存在本地條目之跨語言連結模板（通常位於頁面最後一節）？",
