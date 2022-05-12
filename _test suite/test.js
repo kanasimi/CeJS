@@ -1035,6 +1035,9 @@ function test_locale() {
 		assert([ '完成……', CeL.gettext('finished......') ], '結尾標點符號的轉換: en → zh ……');
 		assert([ '完成………', CeL.gettext('finished.........') ], '結尾標點符號的轉換: en → zh ………');
 		assert([ '……完成。', CeL.gettext('... finished.') ], '標點符號的轉換: en → zh');
+
+		assert([ '載入失敗：A', CeL.gettext('Load failed: %1', 'A') ], '結尾標點符號的轉換: en → zh : %1');
+		assert([ '載入失敗：A', CeL.gettext('Load failed:%1', 'A') ], '結尾標點符號的轉換: en → zh :%1');
 	});
 
 

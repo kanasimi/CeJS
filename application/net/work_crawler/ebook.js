@@ -636,7 +636,7 @@ function module_code(library_namespace) {
 							// gettext_config:{"id":"too-few-words-($1-characters)"}
 							+ (contents.length ? gettext('字數過少（%1字元）',
 							// gettext_config:{"id":"no-content"}
-							contents.length) : '無內容'));
+							contents.length) : 'No content'));
 				}
 				return contents;
 			}

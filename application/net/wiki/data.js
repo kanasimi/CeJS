@@ -1569,16 +1569,9 @@ function module_code(library_namespace) {
 	// CeL.wiki.data.is_DAB(entity)
 	function is_DAB(entity, callback) {
 		var property = entity && entity.claims && entity.claims.P31;
-		if (property && wikidata_datavalue(property) === 'Q4167410') {
-			if (callback) {
-				callback(true, entity);
-				return;
-			}
-			return true;
-		}
-		if (!callback) {
-			return;
-		}
+		var entity_is_DAB = property ? wikidata_datavalue(property) === 'Q4167410'
+		//
+		: entity && /\((?:disambiguation|消歧義|消歧義|曖昧さ回避)\)$/.test(typeof entity === 'string' ? entity : entity.title);
 
 		// wikidata 的 item 或 Q4167410 需要手動加入，非自動連結。
 		// 因此不能光靠 Q4167410 準確判定是否為消歧義頁。其他屬性相同。
@@ -1597,7 +1590,11 @@ function module_code(library_namespace) {
 		// https://en.wikipedia.org/w/api.php?action=query&titles=title&prop=pageprops
 		// 看看是否 ('disambiguation' in page_data.pageprops)；
 		// 這方法即使在 wikipedia 沒 entity 時依然有效。
-		callback(null, entity);
+
+		if (callback) {
+			callback(entity_is_DAB, entity);
+		}
+		return entity_is_DAB;
 	}
 
 	// ------------------------------------------------------------------------

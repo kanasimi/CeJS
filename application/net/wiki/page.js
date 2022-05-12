@@ -36,6 +36,8 @@ typeof CeL === 'function' && CeL.run({
 	+ '|application.net.wiki.namespace.'
 	// for wiki_API.estimated_message()
 	// + '|application.net.wiki.task.'
+	// for CeL.gettext()
+	+ '|application.locale.'
 	//
 	+ '|application.net.wiki.query.|application.net.wiki.Flow.',
 
@@ -153,8 +155,14 @@ function module_code(library_namespace) {
 			var parameters = session.API_parameters.query[key];
 			return parameters.limit && parameters.submodules;
 		});
-		library_namespace.info('setup_query_modules: Get query modules: '
-				+ wiki_API_page.query_modules);
+		library_namespace.info([ 'setup_query_modules: ', {
+			// gettext_config:{"id":"found-$2-query-modules-$1"}
+			T : [ 'Found %2 query {{PLURAL:%1|module|modules}}: %1',
+			// gettext_config:{"id":"Comma-separator"}
+			wiki_API_page.query_modules.join(CeL.gettext('Comma-separator')),
+			//
+			wiki_API_page.query_modules.length ]
+		} ]);
 
 		wiki_API_page.apply(this, arguments);
 	}
@@ -619,13 +627,15 @@ function module_code(library_namespace) {
 						{"title":"","invalidreason":"The requested page title is empty or contains only the name of a namespace.","invalid":""}
 						</code>
 						 */
-						+ ('invalid' in page_data ? 'Invalid'
+						+ CeL.gettext('invalid' in page_data ? 'Invalid'
 						// 此頁面不存在/已刪除。Page does not exist. Deleted?
 						: 'missing' in page_data
-						// e.g., 'wiki_API_page: Not exists: [[title]]'
-						? 'Not exists' : 'No contents')
+						// gettext_config:{"id":"does-not-exist"}
+						? 'Does not exist: '
+						// gettext_config:{"id":"no-content"}
+						: 'No content: ')
 						//
-						+ ': ' + (page_data.title
+						+ (page_data.title
 						//
 						? wiki_API.title_link_of(page_data)
 						//
@@ -3280,7 +3290,9 @@ function module_code(library_namespace) {
 
 						// typeof content !== 'string'
 						if (!content) {
-							content = 'No contents: '
+							content =
+							// gettext_config:{"id":"no-content"}
+							CeL.gettext('No content: ')
 									+ CeL.wiki.title_link_of(page_data)
 									// or: 此頁面不存在/已刪除。
 									+ '! 沒有頁面內容！';
@@ -3299,7 +3311,9 @@ function module_code(library_namespace) {
 							// filter patterns
 
 						} else {
-							library_namespace.warn('* No contents: '
+							library_namespace.warn('* '
+							// gettext_config:{"id":"no-content"}
+							+ CeL.gettext('No content: ')
 									+ CeL.wiki.title_link_of(page_data)
 									+ '! 沒有頁面內容！');
 						}
@@ -3359,8 +3373,8 @@ function module_code(library_namespace) {
 							// 若不存在 dump_directory，則會在此出錯。
 							if (e.code === 'ENOENT') {
 								library_namespace.error('traversal_pages: '
-										+ 'You may need to create '
-										+ 'the dump directory yourself!');
+										+ 'You need to create '
+										+ 'the dump directory manually!');
 							}
 							throw e;
 						}

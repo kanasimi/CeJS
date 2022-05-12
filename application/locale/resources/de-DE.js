@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "983",
+	"untranslated message count": "998",
 	"Load failed": "Laden fehlgeschlagen",
 	"\u5730\u7406\u5ea7\u6a19\uff1a": "Koordinaten:",
 	"\u6642\u5340\uff1a": "Zeitzone:",
@@ -37,16 +37,16 @@
 	"No changes.": "Keine \u00c4nderungen.",
 	"Loading %1%...": "Laden %1%...",
 	"\u671b": "Vollmond",
-	"sunrise": "Sonnenaufgang",
 	"moonrise": "Mondaufgang",
-	"sunset": "Sonnenuntergang",
+	"sunrise": "Sonnenaufgang",
 	"moonset": "Monduntergang",
+	"sunset": "Sonnenuntergang",
 	"log-type-error": "Fehler",
 	"Language": "Sprache",
 	"Abandon change": "\u00c4nderung verwerfen",
 	"no change": "keine \u00c4nderung",
-	"number": "Zahl",
 	"function": "Funktion",
+	"number": "Zahl",
 	"Contents": "Inhalt",
 	"Italy": "Italien",
 	"Poland": "Polen",

@@ -339,12 +339,14 @@ function module_code(library_namespace) {
 		'。' : '.'
 	};
 
+	var PATTERN_language_code_is_CJK = /^(?:cmn|yue|ja)-/;
+
 	function convert_punctuation_mark(punctuation_mark, domain_name) {
 		if (!punctuation_mark)
 			return punctuation_mark;
 
 		// test domains_using_fullwidth_form
-		if (/^(?:cmn|yue|ja)-/.test(domain_name)) {
+		if (PATTERN_language_code_is_CJK.test(domain_name)) {
 			// 東亞標點符號。
 			if (punctuation_mark in halfwidth_to_fullwidth_mapping) {
 				return halfwidth_to_fullwidth_mapping[punctuation_mark];
@@ -361,19 +363,15 @@ function module_code(library_namespace) {
 				return '、';
 			}
 
-			if (punctuation_mark.length !== 1)
-				return punctuation_mark;
-
-			// https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)
-			var char_code = punctuation_mark.charCodeAt(0);
-			if (char_code < 0xff) {
-				return String.fromCharCode(char_code + 0xfee0);
+			if (punctuation_mark.length === 1) {
+				// https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)
+				var char_code = punctuation_mark.charCodeAt(0);
+				if (char_code < 0xff) {
+					return String.fromCharCode(char_code + 0xfee0);
+				}
 			}
 
-			return punctuation_mark;
-		}
-
-		if (/^[^\x20-\xfe]/.test(punctuation_mark)) {
+		} else if (/^[^\x20-\xfe]/.test(punctuation_mark)) {
 			if (punctuation_mark in fullwidth_to_halfwidth_mapping) {
 				return fullwidth_to_halfwidth_mapping[punctuation_mark];
 			}
@@ -383,15 +381,27 @@ function module_code(library_namespace) {
 						.repeat(punctuation_mark.length) : '...';
 			}
 
-			if (punctuation_mark.length !== 1)
-				return punctuation_mark;
-
-			var char_code = punctuation_mark.charCodeAt(0);
-			if (char_code > 0xfee0) {
-				return String.fromCharCode(char_code - 0xfee0);
+			if (punctuation_mark.length === 1) {
+				var char_code = punctuation_mark.charCodeAt(0);
+				if (char_code > 0xfee0) {
+					return String.fromCharCode(char_code - 0xfee0);
+				}
 			}
+		}
 
-			return punctuation_mark;
+		if (punctuation_mark.length > 1) {
+			// PATTERN_punctuation_marks
+			return punctuation_mark.replace(/%(\d)|(:)\s*|./g, function(p_m,
+					NO, p_m_with_spaces) {
+				if (NO)
+					return p_m;
+				if (p_m_with_spaces) {
+					if (!PATTERN_language_code_is_CJK.test(domain_name))
+						return p_m;
+					p_m = p_m_with_spaces;
+				}
+				return convert_punctuation_mark(p_m, domain_name);
+			});
 		}
 
 		return punctuation_mark;
@@ -757,8 +767,14 @@ function module_code(library_namespace) {
 
 	// matched: [ all, header punctuation mark, text_id / message, tail
 	// punctuation mark ]
-	var PATTERN_message_with_tail_punctuation_mark = /^(\.{3,}\s*)?([\s\S]+?)(\.{3,}|…+|[,;:.?!~、，；：。？！～])$/;
-	gettext.PATTERN_message_with_tail_punctuation_mark = PATTERN_message_with_tail_punctuation_mark;
+	var PATTERN_message_with_tail_punctuation_mark = /^(\.{3,}\s*)?([\s\S]+?)(\.{3,}|…+|:\s*(%\d)?|[,;:.?!~、，；：。？！～])$/;
+
+	function trim_punctuation_marks(text) {
+		var matched = text.match(PATTERN_message_with_tail_punctuation_mark);
+		return matched ? matched[2] : text;
+	}
+
+	_.trim_punctuation_marks = trim_punctuation_marks;
 
 	// ------------------------------------------------------------------------
 

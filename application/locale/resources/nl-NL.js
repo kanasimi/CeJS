@@ -1,13 +1,13 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "984",
-	"\u8acb\u6ce8\u610f\uff1a\u672c\u6b04\u50c5\u4f9b\u958b\u767c\u4eba\u54e1\u4f7f\u7528\u3002": "WAARSCHUWING: Alleen voor ontwikkelaars.",
-	"\u524d\u7db4": "voorvoegsel",
+	"untranslated message count": "999",
 	"\u5730\u7406\u5ea7\u6a19\uff1a": "Co\u00f6rdinaten:",
-	"\u6642\u5340\uff1a": "Tijdzone:",
 	"\u7d93\u5ea6\uff1a": "Breedtegraad:",
 	"\u7def\u5ea6\uff1a": "Lengtegraad:",
+	"\u524d\u7db4": "voorvoegsel",
+	"\u6642\u5340\uff1a": "Tijdzone:",
+	"\u8acb\u6ce8\u610f\uff1a\u672c\u6b04\u50c5\u4f9b\u958b\u767c\u4eba\u54e1\u4f7f\u7528\u3002": "WAARSCHUWING: Alleen voor ontwikkelaars.",
 	"Loading...": "Bezig met laden\u2026",
 	"general data layer": "algemeen",
 	"\u6240\u6709\u570b\u5bb6": "Alle landen",
@@ -53,8 +53,8 @@
 	"Language": "Taal",
 	"No reason provided": "Geen reden opgegeven",
 	"no change": "geen wijzigingen",
-	"number": "getal",
 	"function": "functie",
+	"number": "getal",
 	"Contents": "Inhoud",
 	"Italy": "Itali\u00eb",
 	"Poland": "Polen",
