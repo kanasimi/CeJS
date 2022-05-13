@@ -772,16 +772,18 @@ function module_code(library_namespace) {
 						return;
 					}
 
-					message += redirect_list.length === 1 ? 'No redirect'
-							: 'All ' + (redirect_list.length - 1)
-									+ ' redirect(s)';
+					message += gettext(redirect_list.length === 1
+					// gettext_config:{"id":"no-page-redirects-to-this-page"}
+					? '無頁面重定向至本頁'
+					// gettext_config:{"id":"total-$1-pages-redirected-to-this-page"}
+					: '共有%1個頁面重定向至本頁', redirect_list.length - 1);
 					if (1 < redirect_list.length && redirect_list.length < 6) {
 						message += ': '
 						//
 						+ redirect_list.slice(1).map(function(page_data) {
 							// return page_data.title;
 							return wiki_API.title_link_of(page_data);
-						}).join(', ');
+						}).join(gettext('Comma-separator'));
 					}
 					library_namespace.info(message);
 				}
@@ -2610,8 +2612,9 @@ function module_code(library_namespace) {
 
 			if (!config.no_message) {
 				// 使用時間, 歷時, 費時, elapsed time
+				pages = gettext(
 				// gettext_config:{"id":"first-it-takes-$1-to-get-$2-pages"}
-				pages = gettext('First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.',
+				'First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.',
 						messages.last.age(new Date), data.length);
 				// 在「首先使用」之後才設定 .last，才能正確抓到「首先使用」。
 				messages.last = new Date;
@@ -2693,8 +2696,9 @@ function module_code(library_namespace) {
 				}
 				if (!(page_index < pages.length)) {
 					if (false) {
-						// pages.length + ' 頁面處理完畢。'
-						console.trace(gettext('%1 page(s) processed.',
+						console.trace(
+						// gettext_config:{"id":"processed-$1-pages"}
+						gettext('Processed %1 {{PLURAL:%1|page|pages}}.',
 								pages.length));
 					}
 					// setTimeout(): 跳出exit
@@ -2784,17 +2788,18 @@ function module_code(library_namespace) {
 
 					// edit/process
 					if (!config.no_message) {
-						var _messages = [ 'wiki_API.work: edit '
-						//
-						+ page_index + '/' + pages.length + ' ' ];
+						var _messages = [ 'wiki_API.work: '
+						// gettext_config:{"id":"edit-$1"}
+						+ gettext('Edit %1', page_index + '/' + pages.length)
+								+ ' ' ];
 						if ('missing' in page_data) {
-							_messages.push(
-							//
-							'fg=yellow', 'missing page');
+							_messages.push('fg=yellow',
+							// gettext_config:{"id":"missing-page"}
+							'Missing page');
 						} else if ('invalid' in page_data) {
-							_messages.push(
-							//
-							'fg=yellow', 'invalid page title');
+							_messages.push('fg=yellow',
+							// gettext_config:{"id":"invalid-page-title"}
+							'Invalid page title');
 						} else {
 							_messages.push('', '[[', 'fg=yellow',
 							//
@@ -2821,9 +2826,9 @@ function module_code(library_namespace) {
 						if (typeof e === 'object') {
 							console.error(e);
 						} else {
-							library_namespace.error(
+							library_namespace.error('wiki_API.work: '
 							//
-							'wiki_API.work: Catched error: ' + e);
+							+ 'Catched error: ' + e);
 						}
 
 						// return [wiki_API.edit.cancel, 'skip'];
@@ -2863,9 +2868,10 @@ function module_code(library_namespace) {
 			// 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
 			function finish_up() {
 				if (false) {
-					console
-							.trace(gettext('%1 page(s) processed.',
-									pages.length));
+					console.trace(
+					// gettext_config:{"id":"$1-page(s)-processed"}
+					gettext('%1 {{PLURAL:%1|page|pages}} processed.',
+							pages.length));
 					console.log(pages[0].title);
 				}
 				if (!config.no_message) {
@@ -2905,7 +2911,7 @@ function module_code(library_namespace) {
 
 					count_summary = new gettext.Sentence_combination([
 					// gettext_config:{"id":"$1-page(s)-processed"}
-					'%1 page(s) processed,', count_summary ]);
+					'%1 {{PLURAL:%1|page|pages}} processed,', count_summary ]);
 					// console.trace(count_summary);
 
 					if (log_item.report) {

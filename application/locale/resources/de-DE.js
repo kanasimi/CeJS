@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "1009",
+	"untranslated message count": "1019",
 	"Load failed": "Laden fehlgeschlagen",
 	"\u5730\u7406\u5ea7\u6a19\uff1a": "Koordinaten:",
 	"\u6642\u5340\uff1a": "Zeitzone:",

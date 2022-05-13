@@ -1112,7 +1112,7 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 					 * 添加訊息的方法: 直接把 Original language message 原文訊息當英文訊息。
 					 * e.g., <code>
 
-					插入 // gettext_config:{"id":"message-id","qqq":"","zh-tw":""}
+					插入 // gettext_config:{"id":"message-id","qqq":"","zh-tw":"","ja":""}
 					插入 // gettext_config:{"id":"message-id","qqq":""}
 					gettext('English message');
 

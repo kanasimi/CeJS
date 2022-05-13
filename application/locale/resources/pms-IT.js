@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "697",
+	"untranslated message count": "707",
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
 	"Load failed": "Cariament fal\u00ec",
@@ -228,7 +228,7 @@
 	"finished: %1": "fin\u00ec: %1",
 	"%1 elapsed, %3 at %2": "%1 pass\u00e0, %3 ai %2",
 	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "P\u00ebr ancamin\u00e9, a-i va %1 p\u00ebr oten-e %2 {{PLURAL:%2|p\u00e0gina|p\u00e0gine}}.",
-	"%1 page(s) processed,": "%1 {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} trat\u00e0,",
+	"%1 {{PLURAL:%1|page|pages}} processed": "%1 {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} trat\u00e0,",
 	"%1 page(s) have not changed,": "%1 {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} a son nen cangi\u00e0,",
 	"%1 elapsed.": "%1 pass\u00e0.",
 	"'''Stopped''', give up editing.": "'''F\u00ebrm\u00e0''', mod\u00ecfica bandon\u00e0.",

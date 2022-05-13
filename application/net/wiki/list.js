@@ -48,6 +48,10 @@ function module_code(library_namespace) {
 	// @inner
 	var is_api_and_title = wiki_API.is_api_and_title, normalize_title_parameter = wiki_API.normalize_title_parameter, set_parameters = wiki_API.set_parameters;
 
+	var gettext = library_namespace.cache_gettext(function(_) {
+		gettext = _;
+	});
+
 	// ------------------------------------------------------------------------
 
 	var KEY_generator_title = typeof Symbol === 'function' ? Symbol('generator title')
@@ -1268,9 +1272,11 @@ function module_code(library_namespace) {
 					} else {
 						message += wiki_API.title_link_of(target);
 					}
-					message += ' ' + options[KEY_page_list].length
+					message += ' '
+					// gettext_config:{"id":"$1-results"}
+					+ gettext('%1 {{PLURAL:%1|result|results}}',
 					//
-					+ ' results: +' + pages.length;
+					options[KEY_page_list].length) + ': +' + pages.length;
 					if (pages.title && pages.length > 0) {
 						message += ' ' + wiki_API.title_link_of(
 						//

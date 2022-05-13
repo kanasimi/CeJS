@@ -3293,11 +3293,10 @@ function module_code(library_namespace) {
 						// typeof content !== 'string'
 						if (!content) {
 							content =
+							// e.g., 沒有頁面內容 or: 此頁面不存在/已刪除。
 							// gettext_config:{"id":"no-content"}
 							gettext('No content: ')
-									+ CeL.wiki.title_link_of(page_data)
-									// or: 此頁面不存在/已刪除。
-									+ '! 沒有頁面內容！';
+									+ CeL.wiki.title_link_of(page_data);
 							// CeL.log(content);
 							return [ CeL.wiki.edit.cancel, content ];
 						}
@@ -3316,8 +3315,7 @@ function module_code(library_namespace) {
 							library_namespace.warn('* '
 							// gettext_config:{"id":"no-content"}
 							+ CeL.gettext('No content: ')
-									+ CeL.wiki.title_link_of(page_data)
-									+ '! 沒有頁面內容！');
+									+ CeL.wiki.title_link_of(page_data));
 						}
 
 						/** {Array} parsed page content 頁面解析後的結構。 */

@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "443",
+	"untranslated message count": "453",
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
 	"Load failed": "\u00c9chec du chargement",
@@ -275,7 +275,7 @@
 	"finished: %1": "termin\u00e9\u202f: %1",
 	"%1 elapsed, %3 at %2": "%1 pass\u00e9, %3 \u00e0 %2",
 	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "D\u2019abord, cela prend %1 pour obtenir %2 page.",
-	"%1 page(s) processed,": "%1 page{{PLURAL:%1||s}} trait\u00e9e{{PLURAL:%1||s}},",
+	"%1 {{PLURAL:%1|page|pages}} processed": "%1 page{{PLURAL:%1||s}} trait\u00e9e{{PLURAL:%1||s}},",
 	"%1 page(s) have not changed,": "%1 page{{PLURAL:%1||s}} n\u2019{{PLURAL:%1|a|ont}} pas chang\u00e9,",
 	"%1 elapsed.": "%1 pass\u00e9.",
 	"'''Stopped''', give up editing.": "'''Arr\u00eat\u00e9''', modification abandonn\u00e9e.",

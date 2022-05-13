@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "954",
+	"untranslated message count": "964",
 	"Load failed": "Kunde inte ladda",
 	"\u8a0a\u606f\u63d0\u793a\u8207\u7d00\u9304\u6b04": "Journalpanel",
 	"\u8f38\u51fa\u683c\u5f0f": "Utmatningsformat",
@@ -88,7 +88,7 @@
 	"finished: %1": "klar: %1",
 	"%1 elapsed, %3 at %2": "%1 passerad, %3 vid %2",
 	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "F\u00f6rst tar den %1 och f\u00e5r %2 sidor.",
-	"%1 page(s) processed,": "%1 sidor bearbetade.",
+	"%1 {{PLURAL:%1|page|pages}} processed": "%1 sidor bearbetade.",
 	"%1 page(s) have not changed,": "%1 sidor har inte \u00e4ndrats,",
 	"%1 elapsed.": "%1 passerad.",
 	"'''Stopped''', give up editing.": "'''Stannade''', \u00f6verge redigering.",
