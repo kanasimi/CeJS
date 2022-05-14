@@ -2739,9 +2739,11 @@ function module_code(library_namespace) {
 						if (typeof e === 'object') {
 							console.error(e);
 						} else {
-							library_namespace.error(
-							//
-							'wiki_API.work: Catched error: ' + e);
+							library_namespace.error([ 'wiki_API.work: ', {
+								T : [
+								// gettext_config:{"id":"page-handling-function-error-$1"}
+								'Page handling function error: %1', String(e) ]
+							} ]);
 						}
 					}
 
@@ -2826,9 +2828,11 @@ function module_code(library_namespace) {
 						if (typeof e === 'object') {
 							console.error(e);
 						} else {
-							library_namespace.error('wiki_API.work: '
-							//
-							+ 'Catched error: ' + e);
+							library_namespace.error([ 'wiki_API.work: ', {
+								T : [
+								// gettext_config:{"id":"page-edit-function-error-$1"}
+								'Page edit function error: %1', String(e) ]
+							} ]);
 						}
 
 						// return [wiki_API.edit.cancel, 'skip'];
@@ -3013,9 +3017,9 @@ function module_code(library_namespace) {
 					// wiki_API.work() 添加網頁報告。
 					function(title, error, result) {
 						if (error) {
-							library_namespace.warn(
+							library_namespace.warn('wiki_API.work: '
 							//
-							'wiki_API.work: Cannot write log to '
+							+ 'Cannot write log to '
 							//
 							+ wiki_API.title_link_of(log_to)
 							//
@@ -3093,9 +3097,9 @@ function module_code(library_namespace) {
 
 				if (!config.no_message) {
 					session.run(function() {
-						library_namespace.log(
-						// 已完成作業
-						'wiki_API.work: 結束 .work() 作業'
+						library_namespace.log('wiki_API.work: '
+								// 已完成作業
+								+ '結束 .work() 作業'
 								+ (config.summary ? ' [' + config.summary + ']'
 										: '。'));
 					});

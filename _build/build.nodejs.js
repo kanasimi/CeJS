@@ -1452,9 +1452,14 @@ function write_i18n_files(resources_path, message_id_order) {
 			// cmn-Hant-TW: -1
 			const untranslated_message_count = Math.max(0, qqq_data_Map.size - Object.keys(locale_data).length);
 			const untranslated_ratio = untranslated_message_count / qqq_data_Map.size;
-			// FuzzyBot 必須為 {String}?
+			const number_digits = Math.floor(Math.log10(untranslated_message_count));
+			const number_base = 10 ** number_digits;
 			// gettext_config:{"id":"untranslated-message-count"}
-			locale_data[en_message_to_message_id('untranslated message count')] = String(untranslated_message_count);
+			locale_data[en_message_to_message_id('untranslated message count')] =
+				// String(): FuzzyBot 必須為 {String}?
+				number_base < 1 ? String(untranslated_message_count)
+					// 減少變更次數: 以數字位數為單位變更。
+					: Math.floor(untranslated_message_count / number_base) + '0'.repeat(number_digits) + '+';
 			if (untranslated_message_count < 500 || untranslated_ratio < .3) {
 				const comments = untranslated_message_count < 20 && untranslated_ratio < .01 ? '接近翻譯完畢的語言'
 					: untranslated_message_count < 100 && untranslated_ratio < .05 ? '翻譯得差不多的語言'

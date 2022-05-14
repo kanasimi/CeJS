@@ -6,7 +6,7 @@
 			"Winston Sung"
 		]
 	},
-	"untranslated-message-count": "27",
+	"untranslated-message-count": "20+",
 	"españa": "西班牙",
 	"french-republican-calendar": "法國共和曆",
 	"clear-log": "清除訊息",
@@ -317,9 +317,11 @@
 	"$1-elapsed-$3-at-$2": "隔 %1，%2 %3",
 	"first-it-takes-$1-to-get-$2-pages": "首先使用 %1 以取得 %2 個頁面內容。",
 	"processed-$1-pages": "處理了%1個頁面。",
+	"page-handling-function-error-$1": "頁面處理函數錯誤：%1",
 	"edit-$1": "編輯 %1",
 	"missing-page": "佚失頁面",
 	"invalid-page-title": "頁面標題錯誤",
+	"page-edit-function-error-$1": "頁面編輯函數錯誤：%1",
 	"$1-page(s)-processed": "完成 %1 條目。",
 	"$1-page(s)-have-not-changed": "%1 條目未作變更。",
 	"$1-elapsed": "共費時 %1。",

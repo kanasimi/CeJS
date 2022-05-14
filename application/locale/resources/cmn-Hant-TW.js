@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "27",
+	"untranslated message count": "20+",
 	"Espa\u00f1a": "\u897f\u73ed\u7259",
 	"Calendrier r\u00e9publicain": "\u6cd5\u570b\u5171\u548c\u66c6",
 	"\u6e05\u9664\u8a0a\u606f": "\u6e05\u9664\u8a0a\u606f",
@@ -312,9 +312,11 @@
 	"%1 elapsed, %3 at %2": "\u9694 %1\uff0c%2 %3",
 	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "\u9996\u5148\u4f7f\u7528 %1 \u4ee5\u53d6\u5f97 %2 \u500b\u9801\u9762\u5167\u5bb9\u3002",
 	"Processed %1 {{PLURAL:%1|page|pages}}.": "\u8655\u7406\u4e86%1\u500b\u9801\u9762\u3002",
+	"Page handling function error: %1": "\u9801\u9762\u8655\u7406\u51fd\u6578\u932f\u8aa4\uff1a%1",
 	"Edit %1": "\u7de8\u8f2f %1",
 	"Missing page": "\u4f5a\u5931\u9801\u9762",
 	"Invalid page title": "\u9801\u9762\u6a19\u984c\u932f\u8aa4",
+	"Page edit function error: %1": "\u9801\u9762\u7de8\u8f2f\u51fd\u6578\u932f\u8aa4\uff1a%1",
 	"%1 {{PLURAL:%1|page|pages}} processed": "\u5b8c\u6210 %1 \u689d\u76ee\u3002",
 	"%1 page(s) have not changed,": "%1 \u689d\u76ee\u672a\u4f5c\u8b8a\u66f4\u3002",
 	"%1 elapsed.": "\u5171\u8cbb\u6642 %1\u3002",
