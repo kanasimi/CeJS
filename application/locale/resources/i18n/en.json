@@ -294,6 +294,7 @@
 	"error-socket-hang-up": "Socket hang up",
 	"error-unexpected-end-of-file": "Receives incomplete data",
 	"error-write-econnaborted": "Software caused connection abort",
+	"you-may-need-to-set-$1-=-$2": "You may need to set %1 = %2!",
 	"no-content": "No content",
 	"content-is-empty": "Content is empty",
 	"content-is-not-settled": "Content is not settled",

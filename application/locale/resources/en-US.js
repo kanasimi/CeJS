@@ -296,6 +296,7 @@
 	"Error: socket hang up": "Socket hang up",
 	"Error: unexpected end of file": "Receives incomplete data",
 	"Error: write ECONNABORTED": "Software caused connection abort",
+	"You may need to set %1 = %2!": "You may need to set %1 = %2!",
 	"No content": "No content",
 	"Content is empty": "Content is empty",
 	"Content is not settled": "Content is not settled",

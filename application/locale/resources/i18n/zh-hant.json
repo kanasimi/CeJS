@@ -301,6 +301,7 @@
 	"error-socket-hang-up": "連線中斷",
 	"error-unexpected-end-of-file": "接收到的資料不完整",
 	"error-write-econnaborted": "服務器沒有正常的關閉連線",
+	"you-may-need-to-set-$1-=-$2": "您也許需要設定 %1 = %2",
 	"no-content": "無內容",
 	"content-is-empty": "內容被清空",
 	"content-is-not-settled": "未設定編輯內容",

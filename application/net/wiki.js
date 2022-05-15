@@ -230,9 +230,13 @@ function module_code(library_namespace) {
 			|| (host = new URL(this.API_URL).host)
 					&& host !== window.location.host
 					&& host !== this.general_parameters.origin) {
-				library_namespace
-						.warn('wiki_API: You may need to set .origin = "'
-								+ host + '"!');
+				library_namespace.warn([
+						'wiki_API: ',
+						{
+							// gettext_config:{"id":"you-may-need-to-set-$1-=-$2"}
+							T : [ 'You may need to set %1 = %2!', '.origin',
+									JSON.stringify(host) ]
+						} ]);
 			}
 		}
 

@@ -1193,6 +1193,12 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 				const language_code = CeL.gettext.to_standard(property_name);
 				if (language_code) {
 					// assert: CeL.is_Object(i18n_message_id_to_message[language_code])
+					if (!value) {
+						if (i18n_message_id_to_message['en-US'][message_id])
+							continue;
+						CeL.warn(`${adapt_new_change_to_source_file.name}: 設定 [${language_code}].[${message_id}] 為空字串。`);
+					}
+
 					const old_value = i18n_message_id_to_message[language_code][message_id];
 					if ((old_value/* || old_value === 0*/) && old_value !== value) {
 						CeL.info(`${adapt_new_change_to_source_file.name}: [${script_file_path}] 原始碼中改變了 [${message_id}] 的 ${language_code} 訊息:`);

@@ -296,6 +296,7 @@
 	"Error: socket hang up": "\u9023\u7dda\u4e2d\u65b7",
 	"Error: unexpected end of file": "\u63a5\u6536\u5230\u7684\u8cc7\u6599\u4e0d\u5b8c\u6574",
 	"Error: write ECONNABORTED": "\u670d\u52d9\u5668\u6c92\u6709\u6b63\u5e38\u7684\u95dc\u9589\u9023\u7dda",
+	"You may need to set %1 = %2!": "\u60a8\u4e5f\u8a31\u9700\u8981\u8a2d\u5b9a %1 = %2",
 	"No content": "\u7121\u5167\u5bb9",
 	"Content is empty": "\u5167\u5bb9\u88ab\u6e05\u7a7a",
 	"Content is not settled": "\u672a\u8a2d\u5b9a\u7de8\u8f2f\u5167\u5bb9",

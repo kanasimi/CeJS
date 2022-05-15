@@ -597,8 +597,8 @@ function module_code(library_namespace) {
 				var matched = String(text_id).match(
 						PATTERN_message_with_tail_punctuation_mark);
 				if (matched && (matched[2] in domain)) {
-					prefix = convert_punctuation_mark(matched[1], domain_name);
-					postfix = convert_punctuation_mark(matched[3], domain_name);
+					prefix = matched[1];
+					postfix = matched[3];
 					text_id = matched[2];
 				} else {
 					using_default = true;
@@ -606,10 +606,16 @@ function module_code(library_namespace) {
 			}
 			if (!using_default) {
 				text_id = domain[text_id];
-				if (prefix)
-					text_id = prefix + text_id;
-				if (postfix)
-					text_id += postfix;
+				if (prefix) {
+					text_id = convert_punctuation_mark(prefix, domain_name)
+							+ text_id;
+				}
+				if (postfix
+				// 預防翻譯後有結尾標點符號，但原文沒有的情況。但這情況其實應該警示。
+				// && !PATTERN_message_with_tail_punctuation_mark.test(text_id)
+				) {
+					text_id += convert_punctuation_mark(postfix, domain_name);
+				}
 			}
 
 			return typeof text_id === 'function' ? text_id(domain_name,
