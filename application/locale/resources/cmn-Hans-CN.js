@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "60+",
+	"untranslated message count": "70+",
 	"Espa\u00f1a": "\u897f\u73ed\u7259",
 	"Calendrier r\u00e9publicain": "\u6cd5\u56fd\u5171\u548c\u5386",
 	"\u6e05\u9664\u8a0a\u606f": "\u6e05\u9664\u4fe1\u606f",
@@ -306,7 +306,7 @@
 	"%1 elapsed, %3 at %2": "\u9694 %1\uff0c%2 %3",
 	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "\u9996\u5148\u4f7f\u7528 %1 \u4ee5\u53d6\u5f97 %2 \u4e2a\u9875\u9762\u5185\u5bb9\u3002",
 	"%1 {{PLURAL:%1|page|pages}} processed": "\u5df2\u5904\u7406 %1 \u4e2a{{PLURAL:%1|\u9875\u9762}}\uff0c",
-	"%1 page(s) have not changed,": "%1 \u4e2a{{PLURAL:%1|\u9875\u9762}}\u672a\u4f5c\u53d8\u66f4\uff0c",
+	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 \u4e2a{{PLURAL:%1|\u9875\u9762}}\u672a\u4f5c\u53d8\u66f4\uff0c",
 	"%1 elapsed.": "\u5171\u8d39\u65f6 %1\u3002",
 	"'''Stopped''', give up editing.": "'''\u5df2\u505c\u6b62\u4f5c\u4e1a'''\uff0c\u653e\u5f03\u7f16\u8f91\u3002",
 	"\u7121\u6cd5\u5f9e\u7db2\u5740\u64f7\u53d6\u4f5c\u54c1 id\uff1a%1": "\u65e0\u6cd5\u4ece\u4e0b\u5217 URL \u67e5\u8be2\u5230\u4f5c\u54c1 id\uff1a%1",

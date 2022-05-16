@@ -2925,7 +2925,8 @@ function module_code(library_namespace) {
 							// gettext_config:{"id":"no-page-modified"}
 							? 'no page modified,' : [
 							// gettext_config:{"id":"$1-page(s)-have-not-changed"}
-							'%1 page(s) have not changed,', nochange_count ]);
+							'%1 {{PLURAL:%1|page|pages}} have not changed,',
+									nochange_count ]);
 						}
 						// 使用時間, 歷時, 前後總共費時, elapsed time
 						// gettext_config:{"id":"$1-elapsed"}

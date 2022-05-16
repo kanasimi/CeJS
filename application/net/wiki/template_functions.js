@@ -605,7 +605,7 @@ function module_code(library_namespace) {
 				date : token.parameters[1],
 				result : result,
 				page : token.parameters.page,
-				// move to, merge to, redirect to
+				// move to, merge to, redirects to
 				target : token.parameters[3]
 			};
 			if (Array.isArray(options.additional_parameters)) {
@@ -718,7 +718,7 @@ function module_code(library_namespace) {
 					'2' : item.result,
 					page : (force_set_page || item.page !== page_title)
 							&& item.page,
-					// move to, merge to, redirect to
+					// move to, merge to, redirects to
 					'3' : item.target
 				};
 				additional_parameters.forEach(function(parameter_name) {

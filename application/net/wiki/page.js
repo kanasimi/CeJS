@@ -672,8 +672,8 @@ function module_code(library_namespace) {
 					page_data.original_title = page_data.redirect_from
 					// .from_title, .redirect_from_title
 					= redirect_from[page_data.title];
-					// e.g., "研究生教育" redirect to → "學士後"
-					// redirect to → "深造文憑"
+					// e.g., "研究生教育" redirects to → "學士後"
+					// redirects to → "深造文憑"
 					while (redirect_from[page_data.original_title]) {
 						page_data.original_title
 						//
@@ -1190,8 +1190,8 @@ function module_code(library_namespace) {
 	 * @param {String|Array}title
 	 *            title or [ {String}API_URL, {String}title or {Object}page_data ]
 	 * @param {Function}[callback]
-	 *            回調函數。 callback({String}title that redirect to or {Object}with
-	 *            redirect to what section, {Object}page_data, error)
+	 *            回調函數。 callback({String}title that redirects to or {Object}with
+	 *            redirects to what section, {Object}page_data, error)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
@@ -1213,7 +1213,7 @@ function module_code(library_namespace) {
 					// 可能是多重重定向？
 					// e.g., A→B→C
 					library_namespace.warn('wiki_API.redirect_to: Get '
-							+ redirect_data.length + ' redirect links for ['
+							+ redirect_data.length + ' redirected links for ['
 							// title.join(':')
 							+ title + ']!');
 					library_namespace.warn(redirect_data);

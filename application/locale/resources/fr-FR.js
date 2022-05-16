@@ -276,7 +276,7 @@
 	"%1 elapsed, %3 at %2": "%1 pass\u00e9, %3 \u00e0 %2",
 	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "D\u2019abord, cela prend %1 pour obtenir %2 page.",
 	"%1 {{PLURAL:%1|page|pages}} processed": "%1 page{{PLURAL:%1||s}} trait\u00e9e{{PLURAL:%1||s}},",
-	"%1 page(s) have not changed,": "%1 page{{PLURAL:%1||s}} n\u2019{{PLURAL:%1|a|ont}} pas chang\u00e9,",
+	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 page{{PLURAL:%1||s}} n\u2019{{PLURAL:%1|a|ont}} pas chang\u00e9,",
 	"%1 elapsed.": "%1 pass\u00e9.",
 	"'''Stopped''', give up editing.": "'''Arr\u00eat\u00e9''', modification abandonn\u00e9e.",
 	"\u7121\u6cd5\u5f9e\u7db2\u5740\u64f7\u53d6\u4f5c\u54c1 id\uff1a%1": "Impossible de d\u00e9tecter un id de travail dans l\u2019URL\u202f: %1",
