@@ -624,6 +624,12 @@ function module_code(library_namespace) {
 		try {
 			node_fs.renameSync(move_from_path, move_to_path);
 		} catch (e) {
+			library_namespace.error([ 'fs_renameSync: ', {
+				// gettext_config:{"id":"move-$1-to-$2-failed-$3"}
+				T : [ 'Move %1 to %2 failed: %3',
+				//
+				move_from_path, move_to_path, e.toString() ]
+			} ]);
 			return e;
 		}
 	}
@@ -1098,8 +1104,9 @@ function module_code(library_namespace) {
 	function run_JScript(code, options) {
 		if (!library_namespace.platform('windows')) {
 			library_namespace.error([ 'run_JScript: ', {
+				T :
 				// gettext_config:{"id":"jscript-files-can-only-be-executed-in-windows-environment"}
-				T : 'JScript 檔案只能在 Windows 環境下執行！'
+				'JScript 檔案只能在 Windows 環境下執行！'
 			} ]);
 			return;
 		}

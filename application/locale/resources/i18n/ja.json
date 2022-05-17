@@ -472,6 +472,7 @@
 	"revision-id": "版の識別子",
 	"the-requested-robot-task-begins": "Bot依頼の作業を始めます。",
 	"the-requested-robot-task-finished": "Bot依頼の作業が終了しました。",
+	"robot-task-completion-notification": "{{BOTREQ|完了}} 修正しなかった場合や好ましくない状況がありましたら、お知らせください。今後の参考にさせていただきます。全て問題無い場合は{{tl|確認}}でご確認をお願いします。",
 	"syntax-error-in-the-interlanguage-link-template": "言語間リンクテンプレートの構文エラー。",
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": "このリストは手動で修正する必要のある記事群です。リストはボットによって自動更新されます。",
 	"edit-mark": "編",

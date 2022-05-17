@@ -1570,8 +1570,11 @@ function module_code(library_namespace) {
 	function is_DAB(entity, callback) {
 		var property = entity && entity.claims && entity.claims.P31;
 		var entity_is_DAB = property ? wikidata_datavalue(property) === 'Q4167410'
-		//
-		: entity && /\((?:disambiguation|消歧義|消歧義|曖昧さ回避)\)$/.test(typeof entity === 'string' ? entity : entity.title);
+				//
+				: entity
+						&& /\((?:disambiguation|消歧義|消歧義|曖昧さ回避)\)$/
+								.test(typeof entity === 'string' ? entity
+										: entity.title);
 
 		// wikidata 的 item 或 Q4167410 需要手動加入，非自動連結。
 		// 因此不能光靠 Q4167410 準確判定是否為消歧義頁。其他屬性相同。
@@ -2868,6 +2871,179 @@ function module_code(library_namespace) {
 					return;
 				}
 
+				function normalize_wikidata_value__callback(normalized_value) {
+					// console.trace(options);
+					// console.trace(normalized_value);
+					if (typeof options.value_filter === 'function') {
+						normalized_value = options
+								.value_filter(normalized_value);
+					}
+
+					if (Array.isArray(normalized_value) && options.aoto_select) {
+						// 採用首個可用的，最有可能是目標的。
+						normalized_value.some(function(value) {
+							if (value && !value.error
+									&& value.datatype !== NOT_FOUND) {
+								normalized_value = value;
+								return true;
+							}
+						});
+					}
+
+					if (Array.isArray(normalized_value)
+							|| normalized_value.error
+							|| normalized_value.datatype === NOT_FOUND) {
+						// 將無法轉換的放在 .error。
+						if (properties.error) {
+							properties.error.push(property_data);
+						} else {
+							properties.error = [ property_data ];
+						}
+
+						if (Array.isArray(normalized_value)) {
+							library_namespace.error(
+							// 得到多個值而非單一值。
+							'normalize_next_value: get multiple values instead of just one value: ['
+									+ value + '] → '
+									+ JSON.stringify(normalized_value));
+							// console.trace(value);
+
+						} else if (false && normalized_value.error) {
+							// 之前應該已經在 normalize_wikidata_value() 顯示過錯誤訊息。
+							library_namespace.error('normalize_next_value: '
+									+ normalized_value.error);
+						}
+						// 因為之前應該已經顯示過錯誤訊息，因此這邊直接放棄作業，排除此 property。
+
+						properties.splice(--index, 1);
+						normalize_next_value();
+						return;
+					}
+
+					if (false) {
+						console.log('-'.repeat(60));
+						console.log(normalized_value);
+						console.trace(property_data.property + ': '
+						//
+						+ JSON.stringify(exists_property_hash
+						//
+						[property_data.property]));
+					}
+
+					var rank = get_property(property_data, 'rank');
+
+					var qualifiers = get_property(property_data, 'qualifiers');
+					/*
+					 * {Object|Array}property_data[KEY_property_options].references
+					 * 當作每個 properties 的參照。
+					 */
+					var references = get_property(property_data, 'references');
+
+					if (exists_property_hash[property_data.property]
+					// 二次篩選:因為已經轉換/取得了 entity id，可以再次做確認。
+					&& (normalized_value.datatype === 'wikibase-item'
+					// and 已經轉換了 date time
+					|| normalized_value.datatype === 'time')
+					//
+					&& wikidata_datavalue.get_index(
+					//
+					exists_property_hash[property_data.property],
+					//
+					normalized_value, 1)) {
+						if (!options.force_add_sub_properties || !rank
+								&& !qualifiers && !references) {
+							var message = '[' + value + ']';
+							if (value !==
+							//
+							wikidata_datavalue(normalized_value)) {
+								message += ' ('
+								//
+								+ wikidata_datavalue(normalized_value) + ')';
+							}
+							if (rank || qualifiers || references) {
+								library_namespace.warn([
+								//
+								'normalize_next_value: ', {
+									T : [
+									// gettext_config:{"id":"skip-the-$1-for-$2-and-do-not-set-them-because-the-values-already-exist-and-$3-is-not-set"}
+									'跳過 %2 之 %1 設定，因數值已存在且未設定 %3。'
+									//
+									, [ rank ? 'rank' : 0,
+									//
+									qualifiers ? 'qualifiers' : 0,
+									//
+									references ? 'references' : 0
+									//
+									].filter(function(v) {
+										return !!v;
+									}).join(', '),
+									//
+									property_data.property + ' = ' + message,
+									//
+									'options.force_add_sub_properties' ]
+								} ]);
+							} else {
+								library_namespace.debug('Skip exists value: '
+										+ message, 1, 'normalize_next_value');
+							}
+							properties.splice(--index, 1);
+							normalize_next_value();
+							return;
+						}
+
+						// TODO: 依舊增添 rank / qualifiers / references。
+						library_namespace.debug('Skip '
+								+ property_data.property + ': 此屬性已存在相同值 ['
+								+ value + '] ('
+								+ wikidata_datavalue(normalized_value)
+								+ ')，但依舊處理其 '
+								+ 'rank / qualifiers / references 設定。', 1,
+								'normalize_next_value');
+						// NG: property_data.exists_index = index - 1;
+						// console.trace(property_data);
+					}
+
+					if (false) {
+						// normalize property data value →
+						property_data[property_data.property]
+						//
+						= normalized_value;
+					}
+
+					// console.log('-'.repeat(60));
+					// console.log(normalized_value);
+					// 去掉殼 →
+					properties[index - 1] = normalized_value;
+					// 複製/搬移需要用到的屬性。
+					if (property_data.exists_index >= 0) {
+						normalized_value.exists_index
+						//
+						= property_data.exists_index;
+					}
+					if (property_data.language) {
+						normalized_value.language = property_data.language;
+					}
+					// console.trace(normalized_value);
+
+					if (rank) {
+						// {String}
+						normalized_value.rank = rank;
+					}
+
+					if (typeof qualifiers === 'object') {
+						// {Array|Object}
+						normalized_value.qualifiers = qualifiers;
+					}
+
+					if (typeof references === 'object') {
+						// {Array|Object}
+						normalized_value.references = references;
+					}
+
+					// console.trace(normalized_value);
+					normalize_next_value();
+				}
+
 				// get datatype of each property →
 				var language = get_property(property_data, 'language')
 						|| options_language,
@@ -2876,184 +3052,7 @@ function module_code(library_namespace) {
 				//
 				property_data[KEY_property_options], {
 					// multi : false,
-					callback : function(normalized_value) {
-						// console.trace(options);
-						// console.trace(normalized_value);
-						if (typeof options.value_filter === 'function') {
-							normalized_value = options
-									.value_filter(normalized_value);
-						}
-
-						if (Array.isArray(normalized_value)
-								&& options.aoto_select) {
-							// 採用首個可用的，最有可能是目標的。
-							normalized_value.some(function(value) {
-								if (value && !value.error
-										&& value.datatype !== NOT_FOUND) {
-									normalized_value = value;
-									return true;
-								}
-							});
-						}
-
-						if (Array.isArray(normalized_value)
-								|| normalized_value.error
-								|| normalized_value.datatype === NOT_FOUND) {
-							// 將無法轉換的放在 .error。
-							if (properties.error) {
-								properties.error.push(property_data);
-							} else {
-								properties.error = [ property_data ];
-							}
-
-							if (Array.isArray(normalized_value)) {
-								library_namespace.error(
-								// 得到多個值而非單一值。
-								'normalize_next_value: get multiple values instead of just one value: ['
-										+ value + '] → '
-										+ JSON.stringify(normalized_value));
-								// console.trace(value);
-
-							} else if (false && normalized_value.error) {
-								// 之前應該已經在 normalize_wikidata_value() 顯示過錯誤訊息。
-								library_namespace
-										.error('normalize_next_value: '
-												+ normalized_value.error);
-							}
-							// 因為之前應該已經顯示過錯誤訊息，因此這邊直接放棄作業，排除此 property。
-
-							properties.splice(--index, 1);
-							normalize_next_value();
-							return;
-						}
-
-						if (false) {
-							console.log('-'.repeat(60));
-							console.log(normalized_value);
-							console.trace(property_data.property + ': '
-							//
-							+ JSON.stringify(exists_property_hash
-							//
-							[property_data.property]));
-						}
-
-						var rank = get_property(property_data, 'rank');
-
-						var qualifiers = get_property(property_data,
-								'qualifiers');
-						/*
-						 * {Object|Array}property_data[KEY_property_options].references
-						 * 當作每個 properties 的參照。
-						 */
-						var references = get_property(property_data,
-								'references');
-
-						if (exists_property_hash[property_data.property]
-						// 二次篩選:因為已經轉換/取得了 entity id，可以再次做確認。
-						&& (normalized_value.datatype === 'wikibase-item'
-						// and 已經轉換了 date time
-						|| normalized_value.datatype === 'time')
-						//
-						&& wikidata_datavalue.get_index(
-						//
-						exists_property_hash[property_data.property],
-						//
-						normalized_value, 1)) {
-							if (!options.force_add_sub_properties || !rank
-									&& !qualifiers && !references) {
-								var message = '[' + value + ']';
-								if (value !==
-								//
-								wikidata_datavalue(normalized_value)) {
-									message += ' ('
-									//
-									+ wikidata_datavalue(normalized_value)
-											+ ')';
-								}
-								if (rank || qualifiers || references) {
-									library_namespace.warn(
-									//
-									'normalize_next_value: 跳過 '
-									//
-									+ property_data.property + ' = ' + message
-									//
-									+ ' 之 ' + [ rank ? 'rank' : 0,
-									//
-									qualifiers ? 'qualifiers' : 0,
-									//
-									references ? 'references' : 0
-									//
-									].filter(function(v) {
-										return !!v;
-									}).join(', ')
-									//
-									+ ' 設定，因數值已存在且未設定'
-									//
-									+ ' options.force_add_sub_properties'
-									//
-									);
-								} else {
-									library_namespace.debug(
-											'Skip exists value: ' + message, 1,
-											'normalize_next_value');
-								}
-								properties.splice(--index, 1);
-								normalize_next_value();
-								return;
-							}
-
-							// TODO: 依舊增添 rank / qualifiers / references。
-							library_namespace.debug('Skip '
-									+ property_data.property + ': 此屬性已存在相同值 ['
-									+ value + '] ('
-									+ wikidata_datavalue(normalized_value)
-									+ ')，但依舊處理其 '
-									+ 'rank / qualifiers / references 設定。', 1,
-									'normalize_next_value');
-							// NG: property_data.exists_index = index - 1;
-							// console.trace(property_data);
-						}
-
-						if (false) {
-							// normalize property data value →
-							property_data[property_data.property]
-							//
-							= normalized_value;
-						}
-
-						// console.log('-'.repeat(60));
-						// console.log(normalized_value);
-						// 去掉殼 →
-						properties[index - 1] = normalized_value;
-						// 複製/搬移需要用到的屬性。
-						if (property_data.exists_index >= 0) {
-							normalized_value.exists_index
-							//
-							= property_data.exists_index;
-						}
-						if (property_data.language) {
-							normalized_value.language = property_data.language;
-						}
-						// console.trace(normalized_value);
-
-						if (rank) {
-							// {String}
-							normalized_value.rank = rank;
-						}
-
-						if (typeof qualifiers === 'object') {
-							// {Array|Object}
-							normalized_value.qualifiers = qualifiers;
-						}
-
-						if (typeof references === 'object') {
-							// {Array|Object}
-							normalized_value.references = references;
-						}
-
-						// console.trace(normalized_value);
-						normalize_next_value();
-					},
+					callback : normalize_wikidata_value__callback,
 					property : property_data.property
 				});
 				if (language) {
