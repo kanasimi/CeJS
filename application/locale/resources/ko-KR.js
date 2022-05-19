@@ -23,6 +23,8 @@
 	"\u6a94\u6848\u540d\u7a31\uff1a%1": "\ud30c\uc77c \uc774\ub984: %1",
 	"Failed to get file: [%1]": "\ud30c\uc77c \uac00\uc838\uc624\uae30 \uc2e4\ud328: [%1]",
 	"Abandon change": "\ubcc0\uacbd\uc0ac\ud56d \ubc84\ub9ac\uae30",
+	"Edit %1": "%1 \ud3b8\uc9d1",
+	"Invalid page title": "\uc798\ubabb\ub41c \ubb38\uc11c \uc81c\ubaa9",
 	"\u7db2\u5740\u7121\u6548\uff1a%1": "\uc798\ubabb\ub41c URL: %1",
 	"directories": "\ub514\ub809\ud130\ub9ac",
 	"directory": "\ub514\ub809\ud130\ub9ac",

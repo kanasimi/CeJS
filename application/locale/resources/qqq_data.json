@@ -1558,7 +1558,7 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L676}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"$1-records": {
+	"total-$1-time-period-records": {
 		"message": "共有 %1 個時段紀錄",
 		"notes": "Used as log message.",
 		"scope": "data.date.era: 文字式年曆",
@@ -1567,7 +1567,7 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L681}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"$1-years": {
+	"total-$1-year-records": {
 		"message": "共有 %1 個年段紀錄",
 		"notes": "Used as log message.",
 		"scope": "data.date.era: 文字式年曆",
