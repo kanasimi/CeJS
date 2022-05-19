@@ -27,6 +27,8 @@
 	"file-name-$1": "파일 이름: %1",
 	"failed-to-get-file-$1": "파일 가져오기 실패: [%1]",
 	"abandon-change": "변경사항 버리기",
+	"edit-$1": "%1 편집",
+	"invalid-page-title": "잘못된 문서 제목",
 	"invalid-url-$1": "잘못된 URL: %1",
 	"directories": "디렉터리",
 	"directory": "디렉터리",

@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Mainframe98"
+			"Mainframe98",
+			"McDutchie"
 		]
 	},
 	"untranslated-message-count": "1000+",
@@ -82,11 +83,11 @@
 	"now": "zojuist",
 	"several-seconds-ago": "enkele seconden geleden",
 	"soon": "zodadelijk",
-	"$1-seconds-ago": "%1 seconden geleden",
-	"$1-minutes-ago": "%1 minuten geleden",
-	"$1-hours-ago": "%1 uur geleden",
-	"$1-days-ago": "%1 dagen geleden",
-	"$1-weeks-ago": "%1 weken geleden",
+	"$1-seconds-ago": "%1 seconde{{PLURAL:%1||n}} geleden",
+	"$1-minutes-ago": "%1 {{PLURAL:%1|minuut|minuten}} geleden",
+	"$1-hours-ago": "%1 uur{{PLURAL:%1|}} geleden",
+	"$1-days-ago": "%1 dag{{PLURAL:%1||en}} geleden",
+	"$1-weeks-ago": "%1 {{PLURAL:%1|week|weken}} geleden",
 	"note": "Opmerking",
 	"british": "Brits",
 	"↑back-to-toc": "↑Terug naar inhoudsopgave",

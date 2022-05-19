@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Kareyac",
+			"NR Deblocked",
 			"Okras",
 			"Pacha Tchernof",
 			"Tanzun"
@@ -100,9 +101,13 @@
 	"download-$1": "Скачать %1",
 	"content-is-empty": "Содержимое отсутствует",
 	"no-reason-provided": "Причина не указана",
+	"$1-results": "%1 {{PLURAL:%1|результат|результата|результатов}}",
 	"Comma-separator": ",",
+	"does-not-exist": "Не существует",
 	"no-change": "без изменений",
 	"finished-$1": "завершено: %1",
+	"edit-$1": "Редактировать %1",
+	"$1-page(s)-processed": "%1 {{PLURAL:%1|страница обработана|страницы обработаны|страниц обработаны}}",
 	"$1-page(s)-have-not-changed": "{{PLURAL:%1|%1 страница не была изменена|%1 страницы не были изменены|%1 страниц не было изменено}},",
 	"directories": "директории",
 	"directory": "директория",
@@ -110,6 +115,7 @@
 	"function": "функция",
 	"number": "число",
 	"string": "строка",
+	"waiting-for-$1-before-downloading-the-$2-image": "Ждём %1 перед загрузкой %2  {{PLURAL:%2|картинку|файлов}}",
 	"cancel-download-«$1»": "Отменить скачивание «%1».",
 	"skipping-this-section-without-downloading": "Пропустить этот раздел без скачивания.",
 	"«$1»": "«%1»:",
