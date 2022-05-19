@@ -2279,6 +2279,12 @@ function module_code(library_namespace) {
 
 			var cached_list = options.cached_list;
 			options = data && (data['continue'] || data['query-continue']);
+			if (data && !options && !('batchcomplete' in data)) {
+				callback(data, new Error(
+						'No batchcomplete and no continue in the API result! '
+								+ key));
+				return;
+			}
 			// var totalhits;
 			if (data && (data = data.query)) {
 				if (cached_list) {
