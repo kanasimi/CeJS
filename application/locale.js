@@ -879,8 +879,10 @@ function module_code(library_namespace) {
 	gettext.Sentence_combination = Sentence_combination;
 
 	function append_message_tail_space(text, options) {
-		if (!options || !options.no_more_convert)
-			text = gettext(text);
+		if (!options || typeof options === 'string' || !options.no_more_convert) {
+			// Treat `options` as an argument to gettext.
+			text = gettext.apply(null, arguments);
+		}
 		if (!text || PATTERN_no_need_to_append_tail_space.test(text)) {
 			return text;
 		}
