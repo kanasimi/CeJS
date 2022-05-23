@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Dnlweijers",
 			"Mainframe98",
 			"McDutchie"
 		]
@@ -59,6 +60,7 @@
 	"no-change": "geen wijzigingen",
 	"function": "functie",
 	"number": "getal",
+	"move-$1-to-$2-failed-$3": "Verplaatsing %1 naar %2 mislukt: %3",
 	"contents": "Inhoud",
 	"italy": "Italië",
 	"poland": "Polen",
