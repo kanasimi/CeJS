@@ -60,6 +60,10 @@ function module_code(library_namespace) {
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 	NOT_FOUND = ''.indexOf('_');
 
+	var gettext = library_namespace.cache_gettext(function(_) {
+		gettext = _;
+	});
+
 	// ------------------------------------------------------------------------
 
 	// 用來取得 entity value 之屬性名。 函數 : wikidata_entity_value
@@ -574,6 +578,7 @@ function module_code(library_namespace) {
 		// console.log(arguments);
 		wikidata_search(key, function(id, error) {
 			// console.log(language_and_key + ': ' + id);
+			// console.trace(options.search_without_cache);
 			if (!id) {
 				library_namespace
 						.error('wikidata_search.use_cache: Nothing found: ['
@@ -581,15 +586,18 @@ function module_code(library_namespace) {
 				// console.log(options);
 				// console.trace('wikidata_search.use_cache: Nothing found');
 
-			} else if (typeof id === 'string' && /^[PQ]\d{1,10}$/.test(id)) {
+			} else if (!options.search_without_cache && typeof id === 'string'
+					&& /^[PQ]\d{1,10}$/.test(id)) {
 				library_namespace.info('wikidata_search.use_cache: cache '
 				// 搜尋此類型的實體。 預設值：item
 				+ (options && options.type || 'item')
 				//
 				+ ' [' + language_and_key + '] → ' + id);
 			}
-			// 即使有錯誤，依然做 cache 紀錄，避免重複偵測操作。
-			cached_hash[language_and_key] = id;
+			if (!options.search_without_cache) {
+				// 即使有錯誤，依然做 cache 紀錄，避免重複偵測操作。
+				cached_hash[language_and_key] = id;
+			}
 			// console.trace([ language_and_key, id ]);
 
 			// console.trace('' + callback);
@@ -2960,7 +2968,10 @@ function module_code(library_namespace) {
 								//
 								+ wikidata_datavalue(normalized_value) + ')';
 							}
-							if (rank || qualifiers || references) {
+							if (!rank && !qualifiers && !references) {
+								library_namespace.debug('Skip exists value: '
+										+ message, 1, 'normalize_next_value');
+							} else if (!options.no_skip_attributes_note) {
 								library_namespace.warn([
 								//
 								'normalize_next_value: ', {
@@ -2976,15 +2987,14 @@ function module_code(library_namespace) {
 									//
 									].filter(function(v) {
 										return !!v;
-									}).join(', '),
+									})
+									// gettext_config:{"id":"Comma-separator"}
+									.join(gettext('Comma-separator')),
 									//
 									property_data.property + ' = ' + message,
 									//
 									'options.force_add_sub_properties' ]
 								} ]);
-							} else {
-								library_namespace.debug('Skip exists value: '
-										+ message, 1, 'normalize_next_value');
 							}
 							properties.splice(--index, 1);
 							normalize_next_value();

@@ -55,6 +55,7 @@
 	"no change": "geen wijzigingen",
 	"function": "functie",
 	"number": "getal",
+	"Move %1 to %2 failed: %3": "Verplaatsing %1 naar %2 mislukt: %3",
 	"Contents": "Inhoud",
 	"Italy": "Itali\u00eb",
 	"Poland": "Polen",

@@ -2580,8 +2580,15 @@
 		"message": "跳過 %2 之 %1 設定，因數值已存在且未設定 %3。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: claim items (qualifiers, references, rank). %2: \"property = value\". %3: property of options",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L2969}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L2980}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"Comma-separator": {
+		"message": "Comma-separator",
+		"original_message_language_code": "en-US",
+		"notes": "Used for separating lists of items. Should the same as <code>{{int:Comma-separator}}</code>. See also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L2992}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L164}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1542}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L622}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"no-content": {
 		"message": "No content",
@@ -2643,13 +2650,6 @@
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L162}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"Comma-separator": {
-		"message": "Comma-separator",
-		"original_message_language_code": "en-US",
-		"notes": "Used for separating lists of items. Should the same as <code>{{int:Comma-separator}}</code>. See also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L164}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1542}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L622}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"wikitext-parser-checking-$1": {
 		"message": "wikitext parser checking: %1",
