@@ -1343,6 +1343,25 @@ function adapt_message_id_changed_to_Object(object) {
 	}
 }
 
+// https://translatewiki.net/wiki/MediaWiki:Comma-separator/qqq
+function convert_plain_message(message) {
+	if (typeof message !== 'string' /*|| !/&#32;|&nbsp;|&#160;$/.test(message)*/) {
+		return message;
+	}
+	return message.replace(/&#32;/g, ' ').replace(/&nbsp;|&#160;/g, '\xA0');
+}
+
+function convert_plain_header_tail(message) {
+	if (typeof message !== 'string' /*|| !/&#32;|&nbsp;|&#160;$/.test(message)*/) {
+		return message;
+	}
+	const plain_message = message
+		.replace(/&#32;$/g, ' ').replace(/^&#32;/g, ' ')
+		.replace(/(?:&nbsp;|&#160;)$/g, '\xA0').replace(/^(?:&nbsp;|&#160;)/g, '\xA0')
+		;
+	return message === plain_message || /&#/.test(plain_message) ? message : plain_message;
+}
+
 // qqq 展示順序。
 const qqq_order = ['notes', 'parameters', 'demo', 'repositories', 'references'];
 const qqq_order_Set = new Set(qqq_order.concat(['message', 'original_message_language_code', 'additional_notes']));
@@ -1357,12 +1376,12 @@ function sort_Object_by_order(object, key_order) {
 	key_order.forEach(key => {
 		if (key_Set.has(key)) {
 			key_Set.delete(key);
-			sorted_object[key] = object[key];
+			sorted_object[key] = convert_plain_header_tail(object[key]);
 		}
 	});
 
 	const keys_left = Array.from(key_Set.keys()).sort();
-	keys_left.forEach(key => sorted_object[key] = object[key]);
+	keys_left.forEach(key => sorted_object[key] = convert_plain_header_tail(object[key]));
 	return sorted_object;
 }
 

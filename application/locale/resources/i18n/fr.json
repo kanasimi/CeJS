@@ -281,7 +281,7 @@
 	"error-socket-hang-up": "La « socket » s’est déconnectée",
 	"error-unexpected-end-of-file": "Données reçues incomplètes",
 	"error-write-econnaborted": "Le logiciel a causé un abandon de la connexion",
-	"Comma-separator": ",&#32;",
+	"Comma-separator": ", ",
 	"no-content": "Aucun contenu",
 	"content-is-empty": "Le contenu est vide",
 	"content-is-not-settled": "Le contenu n’est pas établi",

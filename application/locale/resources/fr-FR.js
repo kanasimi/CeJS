@@ -272,7 +272,7 @@
 	"Error: socket hang up": "La \u00ab\u202fsocket\u202f\u00bb s\u2019est d\u00e9connect\u00e9e",
 	"Error: unexpected end of file": "Donn\u00e9es re\u00e7ues incompl\u00e8tes",
 	"Error: write ECONNABORTED": "Le logiciel a caus\u00e9 un abandon de la connexion",
-	"Comma-separator": ",&#32;",
+	"Comma-separator": ", ",
 	"No content": "Aucun contenu",
 	"Content is empty": "Le contenu est vide",
 	"Content is not settled": "Le contenu n\u2019est pas \u00e9tabli",
