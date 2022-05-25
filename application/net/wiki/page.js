@@ -159,7 +159,7 @@ function module_code(library_namespace) {
 		});
 		library_namespace.info([ 'setup_query_modules: ', {
 			// gettext_config:{"id":"found-$2-query-modules-$1"}
-			T : [ 'Found %2 query {{PLURAL:%1|module|modules}}: %1',
+			T : [ 'Found %2 query {{PLURAL:%2|module|modules}}: %1',
 			// gettext_config:{"id":"Comma-separator"}
 			wiki_API_page.query_modules.join(gettext('Comma-separator')),
 			//

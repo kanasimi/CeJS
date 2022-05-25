@@ -2646,7 +2646,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
-		"message": "Found %2 query {{PLURAL:%1|module|modules}}: %1",
+		"message": "Found %2 query {{PLURAL:%2|module|modules}}: %1",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L162}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"

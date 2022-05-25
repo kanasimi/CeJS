@@ -306,7 +306,7 @@
 	"No reason provided": "\u672a\u63cf\u8ff0\u539f\u56e0",
 	"%1 {{PLURAL:%1|result|results}}": "%1\u7b46\u7d50\u679c",
 	"Continue key": "\u5f8c\u7e8c\u7d22\u5f15",
-	"Found %2 query {{PLURAL:%1|module|modules}}: %1": "\u5171\u6709%2\u7a2e\u67e5\u8a62\u6a21\u7d44\uff1a%1",
+	"Found %2 query {{PLURAL:%2|module|modules}}: %1": "\u5171\u6709%2\u7a2e\u67e5\u8a62\u6a21\u7d44\uff1a%1",
 	"wikitext parser checking: %1": "\u6e2c\u8a66 wikitext \u89e3\u6790\u5668\uff1a%1",
 	"Does not exist": "\u4e0d\u5b58\u5728",
 	"no change": "\u7121\u6539\u8b8a",
