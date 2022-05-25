@@ -7014,6 +7014,13 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/integrate/SVG.js#L748}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"cannot-move-to-$1": {
+		"message": "Cannot move to %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: move target",
+		"references": "{{GitHub|kanasimi/wikiapi/blob/master/Wikiapi.js#L598}}",
+		"repositories": "{{GitHub|kanasimi/wikiapi|wikiapi|link=hidden}}"
+	},
 	"automatically-replace-the-display-text-of-links-$1→$2": {
 		"message": "Automatically replace the display text of links: %1→%2",
 		"original_message_language_code": "en-US",

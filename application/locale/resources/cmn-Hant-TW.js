@@ -825,6 +825,7 @@
 	"Search style name [%1] in `SGR_code.style_name_alias`...": "\u5728 `SGR_code.style_name_alias` \u4e2d\u641c\u5c0b\u6a23\u5f0f\u540d\u7a31 [%1]\u2026\u2026",
 	"Unknown style name: [%1].": "\u672a\u77e5\u6a23\u5f0f\u540d\u7a31\uff1a[%1]\u3002",
 	"Illegal %1: [%2]": "\u6709\u554f\u984c\uff08\u7121\u6548\u6216\u4e0d\u5408\u7406\uff09\u7684%1\uff1a[%2]",
+	"Cannot move to %1": "\u7121\u6cd5\u79fb\u5230%1",
 	"Automatically replace the display text of links: %1\u2192%2": "\u81ea\u52d5\u66ff\u63db\u9023\u7d50\u986f\u793a\u6587\u5b57\uff1a%1\u2192%2",
 	"Get list of %1 from %2.": "\u5f9e %2 \u53d6\u5f97%1\u7684\u5217\u8868\u3002",
 	"List types: %1.": "\u5217\u8868\u7a2e\u985e\uff1a%1\u3002",
