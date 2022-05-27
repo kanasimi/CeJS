@@ -184,7 +184,7 @@ const message_changed = new Map;
 /** message_id_changed.get(from message id) = to message id */
 const message_id_changed = new Map;
 
-const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s←↑→≠🆔😘➕]/;
+const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s–←↑→≠🆔😘➕]/;
 
 
 const gettext_plural_rules__file_name = 'gettext_plural_rules.js';
@@ -237,7 +237,7 @@ function en_message_to_message_id(en_message) {
 		.replace(/[:,;'"|\s\[\]\\\/#]+/g, '-')
 		.replace(/[\-\s]+$|^[\-\s]+/g, '')
 		.replace(/^[.\-]+/, '')
-		.replace(/-{2,}/, '-')
+		.replace(/–|-{2,}/g, '-')
 		.replace(/%/g, '$')
 		.toLowerCase();
 	if (message_id.length > 200) {
@@ -776,7 +776,7 @@ function create__qqq_data_Map() {
 			});
 			if (!message_language_code)
 				message_language_code = CeL.encoding.guess_text_language(qqq_data.message);
-			if (!message_language_code && /^[\t\x20-\xfe]+$/.test(qqq_data.message))
+			if (!message_language_code && !PATTERN_has_invalid_en_message_char.test(qqq_data.message))
 				message_language_code = 'en-US';
 			qqq_data.original_message_language_code = message_language_code;
 		}
@@ -1022,7 +1022,7 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 		let message_id = message_to_id_Map.get(message)
 			// 嘗試去掉標點符號之後找不找得到 message。
 			|| message_to_id_Map.get(CeL.trim_punctuation_marks(message));
-		if (!message_id && !gettext_config.id && !PATTERN_has_invalid_en_message_char.test(gettext_config.en || message)) {
+		if (!message_id && !gettext_config.id && (gettext_config.en || !PATTERN_has_invalid_en_message_char.test(message))) {
 			/**
 			 * 添加訊息的方法: 直接把 message 當英文訊息。
 			 * e.g., <code>
@@ -1036,6 +1036,9 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 
 			</code> */
 			gettext_config.id = en_message_to_message_id(gettext_config.en || message);
+			if (PATTERN_has_invalid_en_message_char.test(gettext_config.id)) {
+				CeL.warn(`${adapt_new_change_to_source_file.name}: 自動生成的ID包含非英語字元: ${JSON.stringify(gettext_config.id)}`);
+			}
 		}
 		let qqq_data;
 		if (message_id) {

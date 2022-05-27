@@ -323,6 +323,7 @@
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 {{PLURAL:%1|page|pages}} have not changed,",
 	"%1 elapsed.": "%1 elapsed.",
 	"'''Stopped''', give up editing.": "'''Stopped''', give up editing.",
+	"\u8655\u7406\u5206\u584a %1\u2013%2": "Processing chunks %1\u2013%2",
 	"\u7121\u9801\u9762\u91cd\u5b9a\u5411\u81f3\u672c\u9801": "No page redirects to this page",
 	"\u5171\u6709%1\u500b\u9801\u9762\u91cd\u5b9a\u5411\u81f3\u672c\u9801": "Total %1 {{PLURAL:%1|page|pages}} redirected to this page",
 	"\u7121\u6cd5\u5f9e\u7db2\u5740\u64f7\u53d6\u4f5c\u54c1 id\uff1a%1": "Cannot detect work id from URL: %1",

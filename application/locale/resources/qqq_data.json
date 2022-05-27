@@ -4,7 +4,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}. See also: [[Translating:Colorless echo JavaScript kit#Translation statistics]]",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1484}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1487}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"españa": {
@@ -2678,7 +2678,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2480}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2477}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-elapsed-$3-at-$2": {
@@ -2767,6 +2767,13 @@
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2942}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"processing-chunks-$1-$2": {
+		"message": "處理分塊 %1–%2",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: start chunk NO, %2: end chunk NO",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3213}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-redirects-to-this-page": {

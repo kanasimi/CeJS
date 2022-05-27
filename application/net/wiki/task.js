@@ -2473,11 +2473,11 @@ function module_code(library_namespace) {
 						if (config.onerror)
 							config.onerror(error);
 						result = [ 'error', error ];
-						error =
+						// gettext_config:{"id":"finished-$1"}
+						error = gettext('finished: %1',
 						// {{font color}}
 						'<span style="color:red; background-color:#ff0;">'
-						// gettext_config:{"id":"finished-$1"}
-						+ gettext('finished: %1', error) + '</span>';
+								+ error + '</span>');
 					}
 
 				} else if (!result || !result.edit) {
@@ -3208,8 +3208,9 @@ function module_code(library_namespace) {
 							+ ' 個頁面之 revisions (page contents 頁面內容)。', 2,
 							'wiki_API.work');
 				} else {
-					// "Process %1"
-					done = '處理分塊 ' + (work_continue + 1) + '–' + (work_continue
+					done = gettext(
+					// gettext_config:{"id":"processing-chunks-$1-$2"}
+					'處理分塊 %1–%2', work_continue + 1, work_continue
 					// start–end/all
 					+ Math.min(max_size, initial_target_length)) + '/'
 							+ initial_target_length;

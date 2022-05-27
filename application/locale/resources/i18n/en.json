@@ -321,6 +321,7 @@
 	"$1-page(s)-have-not-changed": "%1 {{PLURAL:%1|page|pages}} have not changed,",
 	"$1-elapsed": "%1 elapsed.",
 	"stopped-give-up-editing": "'''Stopped''', give up editing.",
+	"processing-chunks-$1-$2": "Processing chunks %1–%2",
 	"no-page-redirects-to-this-page": "No page redirects to this page",
 	"total-$1-pages-redirected-to-this-page": "Total %1 {{PLURAL:%1|page|pages}} redirected to this page",
 	"cannot-detect-work-id-from-url-$1": "Cannot detect work id from URL: %1",

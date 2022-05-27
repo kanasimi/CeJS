@@ -251,7 +251,7 @@
 	"Node.js v12 and later versions disable TLS v1.0 and v1.1 by default.": "Node.js v12\u53ca\u66f4\u9ad8\u7248\u672c\u9ed8\u8a8d\u7981\u7528TLS v1.0\u548cv1.1\u3002",
 	"Please set tls.DEFAULT_MIN_VERSION = \"TLSv1\" first!": "\u8bf7\u5148\u8bbe\u7f6etls.DEFAULT_MIN_VERSION =\u201cTLSv1\u201d\uff01",
 	"Got error when retrieving [%1]: %2": "\u83b7\u53d6 [%1] \u51fa\u9519\uff1a%2",
-	"%1 Redirecting to [%2] \u2190 [%3]": "%1\u91cd\u5b9a\u5411\u5230 [%2]\u2190[%3]",
+	"%1 Redirecting to [%2] \u2190 [%3]": "%1\u91cd\u5b9a\u5411\u5230 [%2] \u2190 [%3]",
 	"response HEADERS: %1": "HTTP \u54cd\u5e94\u6807\u5934\u5b57\u6bb5\uff1a%1",
 	"HTTP status code: %1 %2": "HTTP \u72b6\u6001\u7801\uff1a%1 %2",
 	"Exception HTTP status code %1: %2": "\u5f02\u5e38 HTTP \u72b6\u6001\u7801 %1\uff1a%2",

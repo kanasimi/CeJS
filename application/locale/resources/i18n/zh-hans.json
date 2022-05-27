@@ -260,7 +260,7 @@
 	"node.js-v12-and-later-versions-disable-tls-v1.0-and-v1.1-by-default": "Node.js v12及更高版本默認禁用TLS v1.0和v1.1。",
 	"please-set-tls.default_min_version-=-tlsv1-first": "请先设置tls.DEFAULT_MIN_VERSION =“TLSv1”！",
 	"got-error-when-retrieving-$1-$2": "获取 [%1] 出错：%2",
-	"$1-redirecting-to-$2-←-$3": "%1重定向到 [%2]←[%3]",
+	"$1-redirecting-to-$2-←-$3": "%1重定向到 [%2] ← [%3]",
 	"response-headers-$1": "HTTP 响应标头字段：%1",
 	"http-status-code-$1-$2": "HTTP 状态码：%1 %2",
 	"exception-http-status-code-$1-$2": "异常 HTTP 状态码 %1：%2",

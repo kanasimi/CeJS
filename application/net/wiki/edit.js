@@ -468,7 +468,7 @@ function module_code(library_namespace) {
 					? 'Contains spam link 包含被列入黑名單的連結: '
 					//
 					+ data.edit.spamblacklist
-
+					//
 					: JSON.stringify(data.edit)),
 					toString : edit_error_toString
 				};
@@ -1537,9 +1537,10 @@ function module_code(library_namespace) {
 
 		if (false) {
 			// gettext_config:{"id":"no-content"}
-			content = gettext('No content: ') + wiki_API.title_link_of(page_data)
-			// or: 此頁面不存在/已刪除。
-			+ '! 沒有頁面內容！';
+			content = gettext('No content: ')
+					+ wiki_API.title_link_of(page_data)
+					// or: 此頁面不存在/已刪除。
+					+ '! 沒有頁面內容！';
 		}
 		content = 'Variable_Map__page_text_updater: '
 				+ wiki_API.title_link_of(page_data)

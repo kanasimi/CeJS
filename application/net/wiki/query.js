@@ -607,16 +607,18 @@ function module_code(library_namespace) {
 
 			if (response && response.error
 			// https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
-			&& response.error.code === 'maxlag') {
+			&& (response.error.code === 'maxlag'
+			//
+			|| response.error.code === 'ratelimited')) {
 				var waiting = response.error.info
 				// /Waiting for [^ ]*: [0-9.-]+ seconds? lagged/
 				.match(/([0-9.-]+) seconds? lagged/);
 				waiting = waiting && +waiting[1] * 1000 || edit_time_interval;
-				library_namespace.debug(
+				library_namespace.debug('The ' + response.error.code
 				// 請注意，由於上游服務器逾時，緩存層（Varnish 或 squid）也可能會生成帶有503狀態代碼的錯誤消息。
-				'The maxlag ' + maxlag + ' s hitted. Waiting '
+				+ (response.error.code === 'maxlag' ? ' ' + maxlag + ' s' : '')
 				// waiting + ' ms'
-				+ (library_namespace.age_of(0, waiting, {
+				+ ' hitted. Waiting ' + (library_namespace.age_of(0, waiting, {
 					digits : 1
 				})) + ' to re-run wiki_API.query().', 1, 'wiki_API_query');
 				// console.log([ original_action, POST_data ]);
