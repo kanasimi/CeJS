@@ -2946,7 +2946,8 @@ function module_code(library_namespace) {
 						messages.add(gettext('No changes.'));
 					}
 					if (log_item.title && config.summary) {
-						messages.unshift(summary_to_wikitext(config.summary));
+						messages.unshift(summary_to_wikitext(config.summary),
+								'');
 					}
 				}
 

@@ -2587,7 +2587,7 @@
 		"message": "Comma-separator",
 		"original_message_language_code": "en-US",
 		"notes": "Used for separating lists of items. Should the same as <code>{{int:Comma-separator}}</code>. See also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L2992}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L164}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1542}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L622}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L2992}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L164}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1544}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L622}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"no-content": {
@@ -2702,7 +2702,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "%1 個頁面處理完畢。",
 		"parameters": "%1: count of pages",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2701}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1525}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2701}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1527}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"page-handling-function-error-$1": {
@@ -2774,7 +2774,7 @@
 		"notes": "",
 		"parameters": "%1: start chunk NO, %2: end chunk NO",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3213}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3214}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-redirects-to-this-page": {
@@ -7033,35 +7033,35 @@
 		"message": "Automatically replace the display text of links: %1→%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: replace from, %2: replace to",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1449}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1451}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-list-of-$1-from-$2": {
 		"message": "Get list of %1 from %2.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: section title, or string to search. %2: wiki site name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1534}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1536}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"list-types-$1": {
 		"message": "List types: %1.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: list types",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1540}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1542}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"namespaces-$1": {
 		"message": "Namespaces: %1.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: list_options.namespace",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1545}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1547}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$1-pages-from-$2": {
 		"message": "Get %1 {{PLURAL:%1|page|pages}} from %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page count, %2: list label",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1604}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1606}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"treat-$1-as-language-$2": {
@@ -7473,21 +7473,21 @@
 	"archiving-operation": {
 		"message": "Archiving operation",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L255}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L249}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"append-$1-topics": {
 		"message": "Append %1 {{PLURAL:%1|topic|topics}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L266}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L260}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"remove-$1-topics": {
 		"message": "Remove %1 {{PLURAL:%1|topic|topics}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L279}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L273}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"debug-level": {

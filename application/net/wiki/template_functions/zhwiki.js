@@ -112,6 +112,7 @@ function module_code(library_namespace) {
 		});
 		return page_title_list;
 	}
+
 	// --------------------------------------------------------------------------------------------
 
 	function parse_template_不存檔(token, index, parent, options) {
@@ -257,6 +258,7 @@ function module_code(library_namespace) {
 		Al : parse_template_Al,
 
 		// {{Do not archive}}
+		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
 		不存檔 : parse_template_不存檔,
 
 		Lang : parse_template_Lang,

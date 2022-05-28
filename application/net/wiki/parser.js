@@ -283,7 +283,19 @@ function module_code(library_namespace) {
 			// → "\n==t==\n"
 			parent_token[next_index] = parent_token[next_index].replace(/^\n/,
 					'');
+
+		} else if ((index === 0 || /\n$/.test(parent_token[index - 1]))
+				&& /^\s/.test(parent_token[next_index])) {
+			// e.g., "\n{{t}} [[L]]" → "[[L]]"
+			if (index > 0) {
+				parent_token[index - 1] = parent_token[index - 1].replace(
+						/\n$/, '');
+			}
+			parent_token[next_index] = parent_token[next_index].replace(/^\s+/,
+					'');
 		}
+		// free
+		// next_index = undefined;
 
 		var list_token = parent_token.parent;
 		// assert: list_token.type === 'list'

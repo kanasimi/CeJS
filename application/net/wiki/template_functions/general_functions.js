@@ -267,6 +267,15 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function parse_template_Pin_message(token, index, parent, options) {
+		var parameters = token.parameters;
+		var expire_date = parameters[1]
+				&& wiki_API.parse.date(parameters[1], options);
+		token.message_expire_date = expire_date || Infinity;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 
 	// general_functions 必須在個別 wiki profiles 之前載入。
@@ -285,7 +294,10 @@ function module_code(library_namespace) {
 		Term : parse_template_Term,
 		Wikicite : parse_template_Wikicite,
 		// Sfn : parse_template_Sfn,
-		SfnRef : parse_template_SfnRef
+		SfnRef : parse_template_SfnRef,
+
+		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
+		'Pin message' : parse_template_Pin_message
 	};
 
 	// --------------------------------------------------------------------------------------------
