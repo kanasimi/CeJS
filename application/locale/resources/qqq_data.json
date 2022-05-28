@@ -7061,7 +7061,7 @@
 		"message": "Get %1 {{PLURAL:%1|page|pages}} from %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page count, %2: list label",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1603}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1604}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"treat-$1-as-language-$2": {
@@ -7468,6 +7468,26 @@
 		"message": "修正失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L911}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"archiving-operation": {
+		"message": "Archiving operation",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L255}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"append-$1-topics": {
+		"message": "Append %1 {{PLURAL:%1|topic|topics}}",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: count of topics",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L266}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"remove-$1-topics": {
+		"message": "Remove %1 {{PLURAL:%1|topic|topics}}",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: count of topics",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L279}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"debug-level": {

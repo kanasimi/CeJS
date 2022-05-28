@@ -867,6 +867,7 @@
 	"The corresponding foreign language page is a disambiguation page.": "\u6240\u5c0d\u61c9\u7684\u5916\u8a9e\u9801\u9762\u70ba\u6d88\u6b67\u7fa9\u9801\u3002",
 	"The corresponding foreign language page is redirected to a section.": "\u6240\u5c0d\u61c9\u7684\u5916\u8a9e\u9801\u9762\u91cd\u5b9a\u5411\u5230\u4e86\u689d\u76ee\u7ae0\u7bc0\u3002",
 	"Could not retrieve the foreign page. I will retry next time.": "\u7121\u6cd5\u53d6\u5f97\u6240\u5c0d\u61c9\u7684\u5916\u8a9e\u689d\u76ee\u3002\u5c07\u65bc\u4e0b\u6b21\u57f7\u884c\u6642\u518d\u505a\u5617\u8a66\u3002",
+	"Archiving operation": "\u6b78\u6a94\u5c01\u5b58\u4f5c\u696d",
 	"debug level": "\u5075\u932f\u5c64\u7d1a",
 	"Create directory of sub-catalog [%1]:": "\u5275\u5efa\u5b50\u5206\u985e %1 \u7684\u76ee\u9304\uff1a",
 	"Invalid catalog: %1": "\u5b50\u5206\u985e\u7121\u6548\uff1a%1",

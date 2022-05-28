@@ -502,6 +502,7 @@
 	"the-corresponding-foreign-language-page-is-a-disambiguation-page": "他言語版項目リンク先が曖昧さ回避ページです。",
 	"the-corresponding-foreign-language-page-is-redirected-to-a-section": "他言語版項目リンク先がセクションへ転送します。",
 	"could-not-retrieve-the-foreign-page.-i-will-retry-next-time": "他言語版項目を取得できないため、次回実行時に再試行します。",
+	"archiving-operation": "記録保存",
 	"debug-level": "デバッグレベル",
 	"move-$1": "移動 %1：",
 	"compress-$1": "圧縮 %1:",
