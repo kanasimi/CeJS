@@ -585,7 +585,7 @@ function module_code(library_namespace) {
 			}
 			if (image_data.time_interval > 0) {
 				library_namespace.log_temporary([ 'get_image: ', {
-					// gettext_config:{"id":"waitting-for-$2-and-retake-the-image-$1"}
+					// gettext_config:{"id":"waiting-for-$2-and-retake-the-image-$1"}
 					T : [ '等待 %2 之後再重新取得圖片：%1', image_data.url,
 					//
 					library_namespace.age_of(0, image_data.time_interval, {

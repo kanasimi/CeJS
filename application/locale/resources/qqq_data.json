@@ -2771,8 +2771,9 @@
 	},
 	"processing-chunks-$1-$2": {
 		"message": "處理分塊 %1–%2",
-		"original_message_language_code": "cmn-Hant-TW",
+		"notes": "",
 		"parameters": "%1: start chunk NO, %2: end chunk NO",
+		"original_message_language_code": "cmn-Hant-TW",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3213}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -3142,7 +3143,7 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1264}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"waitting-for-$2-and-re-obtaining-the-chapter-content-page-$1": {
+	"waiting-for-$2-and-re-obtaining-the-chapter-content-page-$1": {
 		"message": "等待 %2 之後再重新取得章節內容頁面：%1",
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
@@ -4028,7 +4029,7 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L567}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"waitting-for-$2-and-retake-the-image-$1": {
+	"waiting-for-$2-and-retake-the-image-$1": {
 		"message": "等待 %2 之後再重新取得圖片：%1",
 		"notes": "",
 		"scope": "work_crawler.js: get_image()",

@@ -1293,7 +1293,7 @@ function module_code(library_namespace) {
 										work_data);
 						var message = old_chapter_URL === chapter_URL
 						// 等待幾秒鐘 以重新獲取章節內容頁面網址
-						// gettext_config:{"id":"waitting-for-$2-and-re-obtaining-the-chapter-content-page-$1"}
+						// gettext_config:{"id":"waiting-for-$2-and-re-obtaining-the-chapter-content-page-$1"}
 						? chapter_time_interval > 0 ? '等待 %2 之後再重新取得章節內容頁面：%1'
 						// gettext_config:{"id":"re-acquiring-chapter-content-page-$1"}
 						: '重新取得章節內容頁面：%1'
