@@ -1128,6 +1128,7 @@ function module_code(library_namespace) {
 				library_namespace.error([
 						'initialize_session_template_functions: ',
 						{
+							// gettext_config:{"id":"must-rename-$1-to-$2-to-work"}
 							T : [ '%1 必須更名為 %2 才能起作用！',
 									JSON.stringify(template_name),
 									JSON.stringify(normalized_name) ]

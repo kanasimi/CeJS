@@ -271,6 +271,7 @@ function module_code(library_namespace) {
 		var parameters = token.parameters;
 		var expire_date = parameters[1]
 				&& wiki_API.parse.date(parameters[1], options);
+		// console.trace([ expire_date, parameters ]);
 		token.message_expire_date = expire_date || Infinity;
 	}
 

@@ -324,6 +324,7 @@
 	"processing-chunks-$1-$2": "Processing chunks %1–%2",
 	"no-page-redirects-to-this-page": "No page redirects to this page",
 	"total-$1-pages-redirected-to-this-page": "Total %1 {{PLURAL:%1|page|pages}} redirected to this page",
+	"must-rename-$1-to-$2-to-work": "Must rename %1 to %2 to work!",
 	"cannot-detect-work-id-from-url-$1": "Cannot detect work id from URL: %1",
 	"starting-$1": "Starting %1",
 	"invalid-url-$1": "Invalid URL: %1",
