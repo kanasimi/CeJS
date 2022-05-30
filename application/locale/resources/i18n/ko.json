@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Bluehill",
+			"Theshinster123",
 			"Ykhwong"
 		]
 	},
@@ -44,6 +45,7 @@
 	"fso_directory": "디렉터리 경로",
 	"fso_file": "파일 경로",
 	"fso_files": "파일 경로",
+	"(this-download-has-processed-a-total-of-$1-word)": "{이 다운은 총 %1 처리했습니다 {{PLURAL:1|word|words}})",
 	"«$1»": "«%1»:",
 	"http-status-code-$1": "HTTP 상태 코드 %1.",
 	"error-$1": "오류: %1",
@@ -82,8 +84,15 @@
 	"syntax-error": "구문 오류!",
 	"illegal-pattern-$1": "잘못된 패턴: [%1]",
 	"↑back-to-toc": "↑목차로 돌아가기",
+	"cannot-move-to-$1": "%1로 옴길 수 없음",
 	"namespaces-$1": "이름공간: %1.",
 	"change-section-title": "문단 제목 바꾸기:",
+	"the-requested-robot-task-begins": "요청한 로봇 작업을 시작합니다.",
+	"add-warning-messages": "경고 메시지를 추가합니다.",
+	"the-requested-robot-task-finished": "요청한 로봇 작업이 끝났습니다.",
+	"archiving-operation": "기구 아카이브 중",
+	"append-$1-topics": "%1 {{PLURAL:%1|topic|topics}} 추가",
+	"remove-$1-topics": "%1 {{PLURAL:%1|topic|topics}} 제거",
 	"it-is-a-executable-or-dll-file": "실행 파일 또는 DLL 파일입니다.",
 	"cannot-read-directory-$1": "디렉터리를 읽을 수 없습니다: %1",
 	"remove-empty-directory-$1": "빈 디렉터리 제거: %1",
@@ -92,6 +101,7 @@
 	"download-options": "다운로드 옵션",
 	"open-the-download-directory": "다운로드 디렉터리 열기",
 	"search": "검색",
+	"searching-from-each-website-and-downloading-the-work": "각 웹사이트에서 검색 및 work 다운 중",
 	"paste": "붙여넣기",
 	"checking-for-release-update": "릴리스 업데이트 확인 중...",
 	"release-update-available-$1": "사용 가능한 릴리스 업데이트: %1",
@@ -101,6 +111,7 @@
 	"error-reason": "오류 원인",
 	"website-of-the-work": "작품 웹사이트",
 	"cancel-search": "검색 취소",
+	"$1-sites-are-still-searching-$2": "%1 {{PLURAL:%1|site is|sites are}} 아직 검색 중 %2",
 	"current-path-$1": "현재 경로: %1",
 	"cancel": "취소",
 	"cancel-download": "다운로드 취소",
