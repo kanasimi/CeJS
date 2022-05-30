@@ -272,6 +272,7 @@ function module_code(library_namespace) {
 		}
 
 		var token = parent_token[index];
+		// 直接改成空字串而非 `parent_token.splice(index, 1)`，避免index跑掉。
 		parent_token[index] = '';
 
 		var next_index = remove_heading_spaces(parent_token, index + 1,
