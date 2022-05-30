@@ -618,7 +618,8 @@ function log_message_changed(message_id) {
 		}
 
 		const stringified__from_localized_message = typeof from_localized_message === 'function' ? function_to_message(from_localized_message) : from_localized_message;
-		if (stringified__from_localized_message === to_localized_message)
+		if (stringified__from_localized_message === to_localized_message
+			|| stringified__from_localized_message === convert_plain_header_tail(to_localized_message))
 			continue;
 		CeL.info(`${log_message_changed.name}: ${message}`);
 		CeL.log(CeL.display_align([
@@ -1346,25 +1347,6 @@ function adapt_message_id_changed_to_Object(object) {
 	}
 }
 
-// https://translatewiki.net/wiki/MediaWiki:Comma-separator/qqq
-function convert_plain_message(message) {
-	if (typeof message !== 'string' /*|| !/&#32;|&nbsp;|&#160;$/.test(message)*/) {
-		return message;
-	}
-	return message.replace(/&#32;/g, ' ').replace(/&nbsp;|&#160;/g, '\xA0');
-}
-
-function convert_plain_header_tail(message) {
-	if (typeof message !== 'string' /*|| !/&#32;|&nbsp;|&#160;$/.test(message)*/) {
-		return message;
-	}
-	const plain_message = message
-		.replace(/&#32;$/g, ' ').replace(/^&#32;/g, ' ')
-		.replace(/(?:&nbsp;|&#160;)$/g, '\xA0').replace(/^(?:&nbsp;|&#160;)/g, '\xA0')
-		;
-	return message === plain_message || /&#/.test(plain_message) ? message : plain_message;
-}
-
 // qqq 展示順序。
 const qqq_order = ['notes', 'parameters', 'demo', 'repositories', 'references'];
 const qqq_order_Set = new Set(qqq_order.concat(['message', 'original_message_language_code', 'additional_notes']));
@@ -1379,12 +1361,12 @@ function sort_Object_by_order(object, key_order) {
 	key_order.forEach(key => {
 		if (key_Set.has(key)) {
 			key_Set.delete(key);
-			sorted_object[key] = convert_plain_header_tail(object[key]);
+			sorted_object[key] = object[key];
 		}
 	});
 
 	const keys_left = Array.from(key_Set.keys()).sort();
-	keys_left.forEach(key => sorted_object[key] = convert_plain_header_tail(object[key]));
+	keys_left.forEach(key => sorted_object[key] = object[key]);
 	return sorted_object;
 }
 
@@ -1413,7 +1395,10 @@ function write_qqq_data(resources_path) {
 				// TODO: 對於只有特定 repository 引用的訊息，依照 repository 分割到不同 .js。 
 			}
 			qqq_data.repositories = qqq_data.repositories
-				.map(repository => `{{GitHub|${repository}|${repository.match(/[^/]+$/)[0]}|link=hidden}}`)
+				.map(repository => {
+					const repository_name = repository.match(/[^/]+$/)[0];
+					return `{{GitHub|${repository}|${repository_name}|link=hidden}}[[Category:CeJS-repository-${repository_name}]]`;
+				})
 				.join(', ');
 		}
 
@@ -1503,6 +1488,25 @@ function write_i18n_files(resources_path, message_id_order) {
 	}
 }
 
+// https://translatewiki.net/wiki/MediaWiki:Comma-separator/qqq
+function convert_plain_message(message) {
+	if (typeof message !== 'string' /*|| !/&#32;|&nbsp;|&#160;$/.test(message)*/) {
+		return message;
+	}
+	return message.replace(/&#32;/g, ' ').replace(/&nbsp;|&#160;/g, '\xA0');
+}
+
+function convert_plain_header_tail(message) {
+	if (typeof message !== 'string' /*|| !/&#32;|&nbsp;|&#160;$/.test(message)*/) {
+		return message;
+	}
+	const plain_message = message
+		.replace(/&#32;$/g, ' ').replace(/^&#32;/g, ' ')
+		.replace(/(?:&nbsp;|&#160;)$/g, '\xA0').replace(/^(?:&nbsp;|&#160;)/g, '\xA0')
+		;
+	return message === plain_message || /&#/.test(plain_message) ? message : plain_message;
+}
+
 function escape_non_latin_chars(string) {
 	return string.replace(/[^\x20-\x7F]/g, char => '\\u' + char.charCodeAt(0).toString(16).padStart(4, 0));
 }
@@ -1510,11 +1514,14 @@ function escape_non_latin_chars(string) {
 function write_message_script_file({ resources_path, language_code, locale_data, message_id_order }) {
 	const fso_path = resources_path + language_code + '.js';
 	const locale_message_data = [];
+	function convert_message(message) {
+		return escape_non_latin_chars(JSON.stringify(convert_plain_header_tail(message)));
+	}
 	for (const [message_id, locale_message] of Object.entries(sort_Object_by_order(locale_data, message_id_order))) {
 		if (message_id === '@metadata')
 			continue;
 		const qqq_data = qqq_data_Map.get(message_id);
-		const key_mark = escape_non_latin_chars(JSON.stringify(qqq_data.message)) + ': ';
+		const key_mark = convert_message(qqq_data.message) + ': ';
 		if (/^function(?:\s|\()/.test(locale_message)) {
 			const original_function = message_to_localized_mapping[language_code] && message_to_localized_mapping[language_code][qqq_data.message];
 			if (function_to_message(original_function) === locale_message) {
@@ -1523,7 +1530,7 @@ function write_message_script_file({ resources_path, language_code, locale_data,
 			}
 			CeL.error(`${write_message_script_file.name}: [${language_code}][${message_id}]: 原訊息與新函數不一致！您必須檢核此函數是否有安全疑慮，之後手動更改 [${fso_path}]！\n原	${original_function}\n新	${locale_message}`);
 		}
-		locale_message_data.push(key_mark + escape_non_latin_chars(JSON.stringify(locale_message)));
+		locale_message_data.push(key_mark + convert_message(locale_message));
 	}
 	const new_contents = `/*	Localized messages of ${CeL.Class}.
 	This file is auto created by auto-generate tool: ${library_build_script_name}(.js) @ ${datestamp.format('%Y-%2m-%2d' && '%Y')}.

@@ -107,20 +107,24 @@ function module_code(library_namespace) {
 			stopped = false, PATTERN;
 
 			if (!content) {
-				library_namespace.info([ {
-					T : [
-							'The page to stop operation is not found ([[%1]]). '
-									+ 'The operation will continue as usual.',
-							title ]
+				library_namespace.info([ 'wiki_API.check_stop: ', {
+					// gettext_config:{"id":"the-page-to-stop-the-operation-was-not-found-($1)"}
+					T : [ 'The page to stop the operation was not found (%1).',
+					//
+					wiki_API.title_link_of(title) ]
+				}, {
+					// gettext_config:{"id":"the-operation-will-proceed-as-usual"}
+					T : 'The operation will proceed as usual.'
 				} ]);
 
 			} else if (typeof options.checker === 'function') {
 				// 以 options.checker 的回傳來設定是否stopped。
 				stopped = options.checker(content);
 				if (stopped) {
-					library_namespace.warn(
-					//
-					'wiki_API.check_stop: 已設定停止編輯作業！');
+					library_namespace.warn([ 'wiki_API.check_stop: ', {
+						// gettext_config:{"id":"emergency-stop-edit-has-been-set"}
+						T : '已設定緊急停止編輯作業！'
+					} ]);
 				}
 				content = null;
 
@@ -148,8 +152,12 @@ function module_code(library_namespace) {
 				'wiki_API.check_stop: 採用 pattern: ' + PATTERN);
 				stopped = PATTERN.test(content, page_data);
 				if (stopped) {
-					library_namespace.warn('緊急停止頁面 '
-							+ wiki_API.title_link_of(title) + ' 有留言要停止編輯作業！');
+					library_namespace.warn([ 'wiki_API.check_stop: ', {
+						// gettext_config:{"id":"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation"}
+						T : [ '緊急停止頁面 %1 有留言要停止編輯作業！',
+						//
+						wiki_API.title_link_of(title) ]
+					} ]);
 				}
 			}
 
@@ -489,8 +497,9 @@ function module_code(library_namespace) {
 				} else if (data.error.code === 'no-direct-editing'
 				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 				&& options.section === 'new') {
-					library_namespace.debug('無法以正常方式編輯，嘗試當作 Flow 討論頁面。', 1,
-							'wiki_API_edit');
+					library_namespace.debug({
+						T : '無法以正常方式編輯，嘗試當作 Flow 討論頁面。'
+					}, 1, 'wiki_API_edit');
 					// console.log(options);
 					// edit_topic()
 					wiki_API.Flow.edit(title,
@@ -516,13 +525,20 @@ function module_code(library_namespace) {
 				 * 
 				 * 須注意是否有其他競相編輯的 bots。
 				 */
-				library_namespace.warn('wiki_API_edit: Error to edit '
-						+ wiki_API.title_link_of(title) + ': ' + error);
+				library_namespace.warn([ 'wiki_API_edit: ', {
+					// gettext_config:{"id":"failed-to-edit-the-page-$1-$2"}
+					T : [ 'Failed to edit the page %1: %2',
+					//
+					wiki_API.title_link_of(title), String(error) ]
+				} ]);
 			} else if (data.edit && ('nochange' in data.edit)) {
 				// 在極少的情況下，data.edit === undefined。
-				library_namespace.info('wiki_API_edit: '
-				// The contents are the same. Nothing changed. NG: no change
-				+ wiki_API.title_link_of(title) + ': no difference');
+				library_namespace.info([ 'wiki_API_edit: ', {
+					// gettext_config:{"id":"no-changes-to-page-content-$1"}
+					T : [ 'No changes to page content: %1',
+					//
+					wiki_API.title_link_of(title) ]
+				} ]);
 			}
 			if (typeof callback === 'function') {
 				// assert: wiki_API.is_page_data(title)

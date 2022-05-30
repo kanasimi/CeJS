@@ -1714,8 +1714,12 @@ function module_code(library_namespace) {
 				+ '更改的頁面。');
 
 		if (configuration_page_title) {
-			library_namespace.info('add_listener: Configuration page: '
-					+ wiki_API.title_link_of(configuration_page_title));
+			library_namespace.info([ 'add_listener: ', {
+				// gettext_config:{"id":"configuration-page-$1"}
+				T : [ 'Configuration page: %1',
+				//
+				wiki_API.title_link_of(configuration_page_title) ]
+			} ]);
 		}
 
 		if (false) {
