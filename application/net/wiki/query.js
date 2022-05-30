@@ -49,6 +49,10 @@ function module_code(library_namespace) {
 	// @inner
 	var setup_API_URL = wiki_API.setup_API_URL, BLANK_TOKEN = wiki_API.BLANK_TOKEN;
 
+	var gettext = library_namespace.cache_gettext(function(_) {
+		gettext = _;
+	});
+
 	// --------------------------------------------------------------------------------------------
 	// 以下皆泛用，無須 wiki_API instance。
 
@@ -82,26 +86,30 @@ function module_code(library_namespace) {
 				session.badtoken_count++;
 			else
 				session.badtoken_count = 1;
-			library_namespace.warn('check_session_badtoken: ' + (new Date)
-					+ ' ' + wiki_API.site_name(session)
-					+ ': It seems we lost the token. 似乎丟失了 token。 ('
-					+ session.badtoken_count + '/' + max_badtoken_count + ')');
+			library_namespace.warn([ 'check_session_badtoken: ',
+			//
+			+(new Date) + ' ' + wiki_API.site_name(session) + ': ', {
+				// gettext_config:{"id":"it-seems-that-the-token-is-lost"}
+				T : '似乎丟失了令牌。'
+			}, '(' + session.badtoken_count + '/' + max_badtoken_count + ')' ]);
 			// console.trace(options);
 			// console.trace(result);
 
 			if (session.badtoken_count >= (isNaN(session.max_badtoken_count) ? max_badtoken_count
 					// 設定 `session.max_badtoken_count = 0` ，那麼只要登入一出問題就直接跳出。
 					: session.max_badtoken_count)) {
-				throw new Error(
-						'check_session_badtoken: Too many badtoken errors! Please re-execute the program!');
+				throw new Error('check_session_badtoken: ' + gettext(
+				// gettext_config:{"id":"too-many-badtoken-errors!-please-re-execute-the-program"}
+				'Too many badtoken errors! Please re-execute the program!'));
 				// delete session.badtoken_count;
 			}
 
 			if (!library_namespace.platform.nodejs) {
-				// throw new Error('check_session_badtoken: Not using
-				// node.js!');
-				library_namespace
-						.warn('check_session_badtoken: Not using node.js!');
+				// throw new Error();
+				library_namespace.warn([ 'check_session_badtoken: ', {
+					// gettext_config:{"id":"not-using-node.js"}
+					T : 'Not using node.js!'
+				} ]);
 				callback(result);
 				return;
 			}
@@ -114,8 +122,9 @@ function module_code(library_namespace) {
 				// console.log(result);
 				// console.trace(session);
 				// 死馬當活馬醫，仍然嘗試重新取得 token... 沒有密碼無效。
-				throw new Error(
-						'check_session_badtoken: No password preserved!');
+				throw new Error('check_session_badtoken: ' + gettext(
+				// gettext_config:{"id":"no-password-preserved"}
+				'未保存密碼！'));
 			}
 
 			// console.log(result);
@@ -129,7 +138,9 @@ function module_code(library_namespace) {
 				// hack: 登入後重新執行
 				session.actions.unshift([ 'run', options.requery ]);
 			} else {
-				var message = 'check_session_badtoken: Did not set options.rollback_action()!';
+				var message = 'check_session_badtoken: ' + gettext(
+				// gettext_config:{"id":"did-not-set-$1"}
+				'Did not set %1!', 'options.rollback_action()');
 				throw new Error(message);
 				library_namespace.error(message);
 				console.trace(options);
@@ -155,10 +166,12 @@ function module_code(library_namespace) {
 			if ('retry_login' in session) {
 				if (++session.retry_login > ('max_retry_login' in session ? session.max_retry_login
 						: 2)) {
-					throw new Error(
 					// 當錯誤 login 太多次時，直接跳出。
-					'check_session_badtoken: Too many failed login attempts: ['
-							+ session.token.lgname + ']');
+					throw new Error('check_session_badtoken: '
+					// gettext_config:{"id":"too-many-failed-login-attempts-$1"}
+					+ gettext('Too many failed login attempts: %1',
+					//
+					'[' + session.token.lgname + ']'));
 				}
 				library_namespace.info('check_session_badtoken: Retry '
 						+ session.retry_login);
@@ -166,8 +179,10 @@ function module_code(library_namespace) {
 				session.retry_login = 0;
 			}
 
-			library_namespace.info('check_session_badtoken: '
-					+ 'Try to get token again. 嘗試重新取得 token。');
+			library_namespace.info([ 'check_session_badtoken: ', {
+				// gettext_config:{"id":"try-to-get-the-token-again"}
+				T : '嘗試重新取得令牌。'
+			} ]);
 			wiki_API.login(session.token.lgname,
 			//
 			session.token.lgpassword, {
@@ -253,8 +268,11 @@ function module_code(library_namespace) {
 				|| library_namespace.is_Object(action)) {
 			action = [ , action ];
 		} else if (!Array.isArray(action)) {
-			library_namespace.warn('wiki_API_query: Invalid URL? ['
-					+ typeof action + '] ' + action);
+			// Invalid URL?
+			library_namespace.warn([ 'wiki_API_query: ', {
+				// gettext_config:{"id":"invalid-url-$1"}
+				T : [ '網址無效：%1', '[' + typeof action + '] ' + action ]
+			} ]);
 			console.trace(action);
 		}
 		if (Array.isArray(action)) {
@@ -264,8 +282,13 @@ function module_code(library_namespace) {
 				if (typeof action[1] === 'string'
 				// https://www.mediawiki.org/w/api.php?action=help&modules=query
 				&& !/^[a-z]+=/.test(action[1]) && !options.post_data_only) {
-					library_namespace
-							.warn('wiki_API_query: Did not set action! Will auto add "action=".');
+					library_namespace.warn([ 'wiki_API_query: ', {
+						// gettext_config:{"id":"did-not-set-$1"}
+						T : [ 'Did not set %1!', 'action' ]
+					}, {
+						// gettext_config:{"id":"will-set-$1-automatically"}
+						T : [ '將自動設定 %1。', JSON.stringify('action=') ]
+					} ]);
 					console.trace(action);
 					action[1] = 'action=' + action[1];
 				}
@@ -332,8 +355,12 @@ function module_code(library_namespace) {
 
 		// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
 		if (to_wait > 0) {
-			library_namespace.debug('Waiting ' + to_wait + ' ms...', 2,
-					'wiki_API_query');
+			library_namespace.debug({
+				// gettext_config:{"id":"waiting-$1"}
+				T : [ 'Waiting %1...', library_namespace.age_of(0, to_wait, {
+					digits : 1
+				}) ]
+			}, 2, 'wiki_API_query');
 			setTimeout(function() {
 				wiki_API_query(action, callback, POST_data, options);
 			}, to_wait);
@@ -618,9 +645,9 @@ function module_code(library_namespace) {
 				// 請注意，由於上游服務器逾時，緩存層（Varnish 或 squid）也可能會生成帶有503狀態代碼的錯誤消息。
 				+ (response.error.code === 'maxlag' ? ' ' + maxlag + ' s' : '')
 				// waiting + ' ms'
-				+ ' hitted. Waiting ' + (library_namespace.age_of(0, waiting, {
+				+ ' hitted. Waiting ' + library_namespace.age_of(0, waiting, {
 					digits : 1
-				})) + ' to re-run wiki_API.query().', 1, 'wiki_API_query');
+				}) + ' to re-execute wiki_API.query().', 1, 'wiki_API_query');
 				// console.log([ original_action, POST_data ]);
 				setTimeout(wiki_API_query.bind(null, original_action, callback,
 						POST_data, options), waiting);
@@ -849,9 +876,10 @@ function module_code(library_namespace) {
 			pageid = page_data;
 
 		} else if (!page_data) {
-			library_namespace
-					.error('wiki_API_query.title_param: Invalid title: ['
-							+ page_data + ']');
+			library_namespace.error([ 'wiki_API_query.title_param: ', {
+				// gettext_config:{"id":"invalid-title-$1"}
+				T : [ 'Invalid title: %1', wiki_API.title_link_of(page_data) ]
+			} ]);
 			// console.warn(page_data);
 		}
 
@@ -887,9 +915,10 @@ function module_code(library_namespace) {
 		}
 
 		if (!page_data) {
-			library_namespace
-					.error('wiki_API_query.id_of_page: Invalid title: ['
-							+ page_data + ']');
+			library_namespace.error([ 'wiki_API_query.id_of_page: ', {
+				// gettext_config:{"id":"invalid-title-$1"}
+				T : [ 'Invalid title: %1', wiki_API.title_link_of(page_data) ]
+			} ]);
 		}
 		return page_data;
 	};

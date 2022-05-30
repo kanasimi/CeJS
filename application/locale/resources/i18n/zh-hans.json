@@ -10,7 +10,7 @@
 			"Yining Chen"
 		]
 	},
-	"untranslated-message-count": "80+",
+	"untranslated-message-count": "100+",
 	"españa": "西班牙",
 	"french-republican-calendar": "法国共和历",
 	"clear-log": "清除信息",
@@ -310,6 +310,7 @@
 	"abandon-change": "放弃编辑页面",
 	"no-reason-provided": "未描述原因",
 	"continue-key": "后续索引",
+	"invalid-url-$1": "无效的网址：%1",
 	"no-change": "无改变",
 	"finished-$1": "结束：%1",
 	"$1-elapsed-$3-at-$2": "隔 %1，%2 %3",
@@ -320,7 +321,6 @@
 	"stopped-give-up-editing": "'''已停止作业'''，放弃编辑。",
 	"cannot-detect-work-id-from-url-$1": "无法从下列 URL 查询到作品 id：%1",
 	"starting-$1": "载入 %1",
-	"invalid-url-$1": "无效的网址：%1",
 	"«$1»-has-not-been-updated.-$2-is-no-longer-forced-to-re-download.-it-will-only-be-re-downloaded-if-the-number-of-chapters-changes": "《%1》已 %2 没有更新，时间过久不再强制重新下载，仅在章节数量有变化时才重新下载。",
 	"the-allowed-data-type-for-$1-is-$4-but-it-was-set-to-{$2}-$3": "\"%1\" 这个值所允许的数值类型为 %4，但现在被设定为 {%2} %3",
 	"some-$2-path(s)-specified-by-$1-do-not-exist-$3": "由“%1”所指定的%2的至少一个路径不存在：%3",

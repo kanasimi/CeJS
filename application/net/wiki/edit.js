@@ -97,8 +97,10 @@ function module_code(library_namespace) {
 			callback();
 		}
 
-		library_namespace.debug('檢查緊急停止頁面 ' + wiki_API.title_link_of(title), 1,
-				'wiki_API.check_stop');
+		library_namespace.debug({
+			// gettext_config:{"id":"check-the-emergency-stop-page-$1"}
+			T : [ '檢查緊急停止頁面 %1', wiki_API.title_link_of(title) ]
+		}, 1, 'wiki_API.check_stop');
 
 		var session = options[KEY_SESSION] || this;
 		wiki_API.page([ session.API_URL, title ], function(page_data) {
@@ -108,8 +110,8 @@ function module_code(library_namespace) {
 
 			if (!content) {
 				library_namespace.info([ 'wiki_API.check_stop: ', {
-					// gettext_config:{"id":"the-page-to-stop-the-operation-was-not-found-($1)"}
-					T : [ 'The page to stop the operation was not found (%1).',
+					// gettext_config:{"id":"the-emergency-stop-page-was-not-found-($1)"}
+					T : [ 'The emergency stop page was not found (%1).',
 					//
 					wiki_API.title_link_of(title) ]
 				}, {
@@ -273,9 +275,9 @@ function module_code(library_namespace) {
 				if (false) {
 					console.trace(session.actions);
 					console.trace(session.actions[0]);
-					console
-							.trace('wiki_API_edit: Calling wiki_API.prototype.next() '
-									+ [ session.running, session.actions.length ]);
+					console.trace('wiki_API_edit: '
+							+ 'Calling wiki_API.prototype.next() '
+							+ [ session.running, session.actions.length ]);
 					text.then(function(text) {
 						console.trace(text);
 					});
@@ -498,6 +500,7 @@ function module_code(library_namespace) {
 				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 				&& options.section === 'new') {
 					library_namespace.debug({
+						// gettext_config:{"id":"unable-to-edit-in-the-normal-way-so-try-it-as-a-flow-discussion-page"}
 						T : '無法以正常方式編輯，嘗試當作 Flow 討論頁面。'
 					}, 1, 'wiki_API_edit');
 					// console.log(options);
