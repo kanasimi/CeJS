@@ -307,6 +307,7 @@
 	"the-emergency-stop-page-was-not-found-($1)": "未發現用來停止作業的頁面 %1。",
 	"the-operation-will-proceed-as-usual": "將如常進行作業。",
 	"no-content": "無內容",
+	"editing-of-$1-has-been-rejected-$2": "已被拒絕編輯 %1：%2",
 	"failed-to-edit-the-page-$1-$2": "編輯頁面失敗：%1。",
 	"no-changes-to-page-content-$1": "頁面內容無更動：%1。",
 	"content-is-empty": "內容被清空",

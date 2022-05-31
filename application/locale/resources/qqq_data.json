@@ -2622,7 +2622,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1559}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3302}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3321}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L638}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1578}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3302}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3321}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L638}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": {
@@ -2632,18 +2632,26 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L159}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
+	"editing-of-$1-has-been-rejected-$2": {
+		"message": "Editing of %1 has been rejected: %2",
+		"original_message_language_code": "en-US",
+		"notes": "Permission denied.",
+		"parameters": "%1: page link, %2: reason",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L342}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
+	},
 	"unable-to-edit-in-the-normal-way-so-try-it-as-a-flow-discussion-page": {
 		"message": "無法以正常方式編輯，嘗試當作 Flow 討論頁面。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "[[w:WP:Flow]]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L504}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L507}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"failed-to-edit-the-page-$1-$2": {
 		"message": "Failed to edit the page %1: %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link, %2: the error",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L533}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L536}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"no-changes-to-page-content-$1": {
@@ -2651,7 +2659,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "The contents are the same. Nothing changed.",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L541}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L544}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"content-is-empty": {
@@ -2659,7 +2667,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L603}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L606}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"content-is-not-settled": {
@@ -2667,7 +2675,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L605}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L608}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"abandon-change": {
@@ -2675,7 +2683,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L612}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L615}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"no-reason-provided": {
@@ -2683,7 +2691,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L629}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L632}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"$1-results": {

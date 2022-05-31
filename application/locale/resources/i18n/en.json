@@ -303,6 +303,7 @@
 	"emergency-stop-edit-has-been-set": "Emergency stop edit has been set!",
 	"no-content": "No content",
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": "There is a messages on the emergency stop page %1 to stop the editing operation!",
+	"editing-of-$1-has-been-rejected-$2": "Editing of %1 has been rejected: %2",
 	"unable-to-edit-in-the-normal-way-so-try-it-as-a-flow-discussion-page": "Unable to edit in the normal way, so try it as a Flow discussion page.",
 	"failed-to-edit-the-page-$1-$2": "Failed to edit the page %1: %2",
 	"no-changes-to-page-content-$1": "No changes to page content: %1",

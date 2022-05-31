@@ -69,10 +69,10 @@ function module_code(library_namespace) {
 		}
 		var matched = url.match(/\.([^.]+)$/i);
 		if (matched) {
-			if (/[a-z\d\-]+/.test(matched[1])) {
+			if (/[a-z\d\-]+/i.test(matched[1])) {
 				return matched[1];
 			}
-		} else if (/^[a-z\d\-]+$/.test(url)) {
+		} else if (/^[a-z\d\-]+$/i.test(url)) {
 			return url;
 		}
 	}

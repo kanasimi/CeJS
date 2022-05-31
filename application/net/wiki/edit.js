@@ -337,11 +337,14 @@ function module_code(library_namespace) {
 				// Please using {{bots|optout=notification_name}},
 				// the bot will skip this page.
 				options.notification_name))) {
-					library_namespace.warn(
-					// Permission denied
-					'wiki_API_edit: Denied to edit '
-							+ wiki_API.title_link_of(page_data) + ': '
-							+ options.notification_name);
+					library_namespace.warn([ 'wiki_API_edit: ', {
+						// gettext_config:{"id":"editing-of-$1-has-been-rejected-$2"}
+						T : [ 'Editing of %1 has been rejected: %2',
+						//
+						wiki_API.title_link_of(page_data),
+						//
+						options.notification_name ]
+					} ]);
 					callback(page_data, 'denied');
 
 				} else {
@@ -1178,6 +1181,20 @@ function module_code(library_namespace) {
 			.replace(/#/g, '-');
 			// https://www.mediawiki.org/wiki/Manual:$wgFileExtensions
 		}
+
+		if (!structured_data['media type']) {
+			var matched;
+			if (library_namespace.MIME_of) {
+				matched = library_namespace.MIME_of(post_data.filename);
+			} else if (matched = post_data.filename
+					.match(/\.(png|jpeg|gif|webp|bmp)$/i)) {
+				matched = 'image/' + matched[1].toLowerCase();
+			}
+			if (matched) {
+				structured_data['media type'] = matched;
+			}
+		}
+
 		var session = wiki_API.session_of_options(options);
 		if (options.show_message && post_data.file.url) {
 			library_namespace.log(file_path + '\nUpload to → '
@@ -1316,6 +1333,8 @@ function module_code(library_namespace) {
 		'file format' : 'P2701',
 		// TODO: 資料大小 (P3575)
 		'data size' : 'P3575',
+
+		'media type' : 'P1163',
 
 		// 成立或建立時間 (P571) [[Commons:Structured data/Modeling/Date]]
 		'created datetime' : 'P571',

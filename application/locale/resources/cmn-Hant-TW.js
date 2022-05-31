@@ -302,6 +302,7 @@
 	"The emergency stop page was not found (%1).": "\u672a\u767c\u73fe\u7528\u4f86\u505c\u6b62\u4f5c\u696d\u7684\u9801\u9762 %1\u3002",
 	"The operation will proceed as usual.": "\u5c07\u5982\u5e38\u9032\u884c\u4f5c\u696d\u3002",
 	"No content": "\u7121\u5167\u5bb9",
+	"Editing of %1 has been rejected: %2": "\u5df2\u88ab\u62d2\u7d55\u7de8\u8f2f %1\uff1a%2",
 	"Failed to edit the page %1: %2": "\u7de8\u8f2f\u9801\u9762\u5931\u6557\uff1a%1\u3002",
 	"No changes to page content: %1": "\u9801\u9762\u5167\u5bb9\u7121\u66f4\u52d5\uff1a%1\u3002",
 	"Content is empty": "\u5167\u5bb9\u88ab\u6e05\u7a7a",

@@ -305,6 +305,7 @@
 	"\u5df2\u8a2d\u5b9a\u7dca\u6025\u505c\u6b62\u7de8\u8f2f\u4f5c\u696d\uff01": "Emergency stop edit has been set!",
 	"No content": "No content",
 	"\u7dca\u6025\u505c\u6b62\u9801\u9762 %1 \u6709\u7559\u8a00\u8981\u505c\u6b62\u7de8\u8f2f\u4f5c\u696d\uff01": "There is a messages on the emergency stop page %1 to stop the editing operation!",
+	"Editing of %1 has been rejected: %2": "Editing of %1 has been rejected: %2",
 	"\u7121\u6cd5\u4ee5\u6b63\u5e38\u65b9\u5f0f\u7de8\u8f2f\uff0c\u5617\u8a66\u7576\u4f5c Flow \u8a0e\u8ad6\u9801\u9762\u3002": "Unable to edit in the normal way, so try it as a Flow discussion page.",
 	"Failed to edit the page %1: %2": "Failed to edit the page %1: %2",
 	"No changes to page content: %1": "No changes to page content: %1",
