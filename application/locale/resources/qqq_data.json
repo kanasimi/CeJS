@@ -4,7 +4,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}. See also: [[Translating:Colorless echo JavaScript kit#Translation statistics]]",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1472}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1481}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]], {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}[[Category:CeJS-repository-work_crawler]]"
 	},
 	"españa": {
@@ -2588,7 +2588,7 @@
 		"message": "Comma-separator",
 		"original_message_language_code": "en-US",
 		"notes": "Used for separating lists of items. Should the same as <bdi><code>{{int:Comma-separator}}</code></bdi>.\nBe careful to the presence of a trailing space when appropriate for your language (if it is needed, you can input it as <code>&amp;#32;</code> to avoid its trimming when editing this message.\nSee also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L2992}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L164}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1544}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L622}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L2992}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1300}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L164}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1544}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L622}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]], {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}[[Category:CeJS-repository-wikibot]]"
 	},
 	"check-the-emergency-stop-page-$1": {
@@ -2622,7 +2622,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1578}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3302}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3321}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L638}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1579}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3312}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L648}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": {
@@ -2720,7 +2720,21 @@
 		"message": "Configuration page: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1719}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1729}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
+	},
+	"invalid-parameter-$1": {
+		"message": "Invalid parameter: %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: parameter name",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L308}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L312}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
+	},
+	"invalid-title-$1": {
+		"message": "Invalid title: %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page link",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L881}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L920}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"wikitext-parser-checking-$1": {
@@ -2728,13 +2742,20 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3331}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3341}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]], {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}[[Category:CeJS-repository-wikibot]]"
+	},
+	"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages": {
+		"message": "調降取得頁面的上限，改成每次最多 %1 個頁面。",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: page count",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L453}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"does-not-exist": {
 		"message": "Does not exist",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L636}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L818}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L830}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L646}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L818}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L830}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]], {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}[[Category:CeJS-repository-wikibot]]"
 	},
 	"too-many-badtoken-errors!-please-re-execute-the-program": {
@@ -2793,13 +2814,6 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Time to wait. 需要等待的時間。",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L360}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
-	},
-	"invalid-title-$1": {
-		"message": "Invalid title: %1",
-		"original_message_language_code": "en-US",
-		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L881}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L920}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}[[Category:CeJS-repository-CeJS]]"
 	},
 	"it-seems-that-the-token-is-lost": {

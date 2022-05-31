@@ -1296,7 +1296,8 @@ function module_code(library_namespace) {
 				if (summary_list.length === 0)
 					return [ wiki_API.edit.cancel, 'skip' ];
 
-				this.summary += summary_list.join(', ');
+				// gettext_config:{"id":"Comma-separator"}
+				this.summary += summary_list.join(gettext('Comma-separator'));
 				return data;
 
 			}, {

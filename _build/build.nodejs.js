@@ -1127,6 +1127,8 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 					if (!gettext_config.en) {
 						CeL.error(`${adapt_new_change_to_source_file.name}: 原始碼中新增了非 en-US 之 message 卻未提供${CeL.gettext.get_alias('en-US')}訊息! 這會造成無法匯入 translatewiki! ${JSON.stringify(message)}`);
 					}
+					if (i18n_message_id_to_message[language_code])
+						i18n_message_id_to_message[language_code][message_id] = message;
 					qqq_data.original_message_language_code = language_code;
 				}
 
@@ -1377,6 +1379,12 @@ function write_qqq_data(resources_path) {
 	let qqq_file_data = Object.create(null);
 	let message_id_without_references = [];
 	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
+		const original_message_locale_data = i18n_message_id_to_message[qqq_data.original_message_language_code];
+		if (original_message_locale_data && !original_message_locale_data[message_id]) {
+			CeL.info(`${write_qqq_data.name}: 填補原語言 [${qqq_data.original_message_language_code}] 之訊息 [${message_id}] ${qqq_data.message}`);
+			original_message_locale_data[message_id] = qqq_data.message;
+		}
+
 		qqq_file_data[message_id] = qqq_data;
 		if (Array.isArray(qqq_data.references) && qqq_data.references.length > 0) {
 			qqq_data.references = qqq_data.references
@@ -1463,6 +1471,7 @@ function write_i18n_files(resources_path, message_id_order) {
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
 		if (language_code !== 'qqq') {
 			adapt_message_id_changed_to_Object(locale_data);
+
 			// cmn-Hant-TW: -1
 			const untranslated_message_count = Math.max(0, qqq_data_Map.size - Object.keys(locale_data).length);
 			const untranslated_ratio = untranslated_message_count / qqq_data_Map.size;
@@ -1475,11 +1484,12 @@ function write_i18n_files(resources_path, message_id_order) {
 					// 減少變更次數: 以數字位數為單位變更。
 					: Math.floor(untranslated_message_count / number_base) + '0'.repeat(number_digits) + '+';
 			if (untranslated_message_count < 500 || untranslated_ratio < .3) {
-				const comments = untranslated_message_count < 20 && untranslated_ratio < .01 ? '接近翻譯完畢的語言'
-					: untranslated_message_count < 100 && untranslated_ratio < .05 ? '翻譯得差不多的語言'
+				const comments = untranslated_message_count < 20 && untranslated_ratio < .01 ? '幾近翻譯完畢的語言'
+					: untranslated_message_count < 100 && untranslated_ratio < .05 ? '翻譯得快完成的語言'
 						: '可考慮列入選單的語言';
 				CeL.info(`${write_i18n_files.name}: ${comments} (${untranslated_message_count}/${qqq_data_Map.size} 未翻譯): ${language_code}`);
 			}
+
 			// qqq was saved to `qqq_data_file_name` @ write_qqq_data()
 			write_message_script_file({ resources_path, language_code, locale_data, message_id_order });
 		}

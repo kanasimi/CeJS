@@ -303,8 +303,13 @@ function module_code(library_namespace) {
 					query_props.push('revisions');
 				get_properties();
 			} else {
-				library_namespace.error('wiki_API_page: Invalid .query_props!');
-				throw new Error('wiki_API_page: Invalid .query_props');
+				library_namespace.error([ 'wiki_API_page: ', {
+					// gettext_config:{"id":"invalid-parameter-$1"}
+					T : [ 'Invalid parameter: %1', '.query_props' ]
+				} ]);
+				throw new Error('wiki_API_page: '
+				// gettext_config:{"id":"invalid-parameter-$1"}
+				+ gettext('Invalid parameter: %1', '.query_props'));
 			}
 			return;
 		}
@@ -313,13 +318,17 @@ function module_code(library_namespace) {
 		action = normalize_title_parameter(title, options);
 		// console.trace(action);
 		if (!action) {
-			library_namespace.error('wiki_API_page: Invalid title: '
-					+ JSON.stringify(title));
-			callback(undefined, 'Invalid title: '
-					+ wiki_API.title_link_of(title));
+			library_namespace.error([ 'wiki_API_page: ', {
+				// gettext_config:{"id":"invalid-title-$1"}
+				T : [ 'Invalid title: %1', wiki_API.title_link_of(title) ]
+			} ]);
+			// gettext_config:{"id":"invalid-title-$1"}
+			callback(undefined, gettext('Invalid title: %1', wiki_API
+					.title_link_of(title)));
 			return;
-			throw new Error('wiki_API_page: Invalid title: '
-					+ wiki_API.title_link_of(title));
+			throw new Error('wiki_API_page: '
+			// gettext_config:{"id":"invalid-title-$1"}
+			+ gettext('Invalid title: %1', wiki_API.title_link_of(title)));
 		}
 
 		// console.log(action);
@@ -440,6 +449,7 @@ function module_code(library_namespace) {
 					var session = wiki_API.session_of_options(options);
 					if (session && !(session.slow_query_limit < error.limit)) {
 						library_namespace.warn([ 'wiki_API_page: ', {
+							// gettext_config:{"id":"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages"}
 							T : [ '調降取得頁面的上限，改成每次最多 %1 個頁面。', error.limit ]
 						} ]);
 						// https://www.mediawiki.org/w/api.php
