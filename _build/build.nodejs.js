@@ -1405,7 +1405,8 @@ function write_qqq_data(resources_path) {
 			qqq_data.repositories = qqq_data.repositories
 				.map(repository => {
 					const repository_name = repository.match(/[^/]+$/)[0];
-					return `{{GitHub|${repository}|${repository_name}|link=hidden}}[[Category:CeJS-repository-${repository_name}]]`;
+					// [[Category:CeJS-repository-${repository_name}]]
+					return `{{GitHub|${repository}|${repository_name}|link=hidden}}`;
 				})
 				.join(', ');
 		}
