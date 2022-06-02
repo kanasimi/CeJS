@@ -1907,6 +1907,8 @@ function module_code(library_namespace) {
 				if ((n = 'R') in nodes) {
 					ignore[n] = null;
 					if (n = nodes[n]) {
+						// dataset(node, gettext.DOM_id_key + '_R', n);
+						n = gettext(n);
 						if (!('title' in nodes)) {
 							// nodes.title = n;
 							node.title = n;
@@ -8907,23 +8909,12 @@ _
 
 	// ↑for string encoding -----------------------------------------------
 
-	var is_Safari = library_namespace.is_WWW(true) && navigator.userAgent,
 	/** {Boolean}support CSS position sticky */
-	CSS_position_sticky;
-
-	if (is_Safari) {
-		is_Safari = is_Safari.toLowerCase();
-		is_Safari = is_Safari.indexOf('safari') !== -1
-				&& is_Safari.indexOf('chrome') === -1
-				&& is_Safari.indexOf('chromium') === -1;
-
-		// Warning: 未完善。
-		// Firefox (Gecko): 32.0~
-		CSS_position_sticky = is_Safari
-				|| /Firefox\/(?:[4-9]\d|3[2-9])/.test(navigator.userAgent)
-				// https://developer.mozilla.org/en-US/docs/Web/CSS/position#Browser_compatibility
-				|| /Chrome\/(?:[6-9]\d|5[6-9])/.test(navigator.userAgent);
-	}
+	var CSS_position_sticky = library_namespace.platform({
+		firefox : 32,
+		chrome : 56,
+		safari : 5
+	}), is_Safari = CSS_position_sticky;
 
 	/**
 	 * 動態[生成/顯示][目錄/目次]。<br>
@@ -9019,10 +9010,11 @@ _
 		// Chrome 22 在遇上 /p/cgi.cgi?_=_ 時，僅指定 href : #~ 會變成 /p/#~。因此需要
 		// workaround。
 		href = location.href.replace(/#.*$/, '') + '#';
-		if (is_Safari)
+		if (is_Safari) {
 			// encodeURI(): Safari 5.1.7 needs this.
 			// But Opera will broken on this.
 			href = encodeURI(href);
+		}
 
 		level |= 0;
 		level = new RegExp('^(h[1-' + (level >= 1 && level <= 6 ? level : 6)
@@ -9043,7 +9035,6 @@ _
 
 		if (list_array.length > 1) {
 			var TOC_list, id = set_attribute(content_node, 'id'),
-			//
 			// gettext_config:{"id":"↑back-to-toc"}
 			back_title = gettext('↑Back to TOC');
 
@@ -9101,7 +9092,8 @@ _
 						? '' : 'static') ? 'pin' : 'unpin'];
 						set_height();
 					},
-					R : 'Pin/unpin the contents.\n設定目錄為固定或相對定位。'
+					// gettext_config:{"id":"pin-unpin-the-toc"}
+					R : 'Pin/unpin the TOC'
 				}, {
 					span : auto_TOC.icon.right,
 					onclick : function() {
@@ -9111,7 +9103,8 @@ _
 						//
 						? '' : 'right') ? 'left' : 'right'];
 					},
-					R : 'Switch the position of the contents.\n設定目錄左右定位。'
+					// gettext_config:{"id":"set-toc-to-left-or-right"}
+					R : 'Set TOC to left or right'
 				} ],
 				C : auto_TOC.CSS_prefix + 'position_control'
 			}, {

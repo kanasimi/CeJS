@@ -5956,7 +5956,7 @@
 		"original_message_language_code": "en-US",
 		"scope": "interact.DOM: auto_TOC(), CeL.application.storage.EPUB: generate_TOC()",
 		"additional_notes": "{{Identical|Content}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2210}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9128}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2210}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9121}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"if-the-e-book-chapter-directory-is-not-set-all-chapter-content-will-be-placed-directly-under-the-e-book-root-directory": {
@@ -6994,7 +6994,20 @@
 		"notes": "Table of contents message.",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9048}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9039}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"pin-unpin-the-toc": {
+		"message": "Pin/unpin the TOC",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9096}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"set-toc-to-left-or-right": {
+		"message": "Set TOC to left or right",
+		"original_message_language_code": "en-US",
+		"notes": "Switch the position of the contents.",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9107}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"contents-of-$1": {
@@ -7002,7 +7015,7 @@
 		"notes": "Table of contents message. e.g., Contents of [title]",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9124}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9117}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"expand": {
@@ -7010,7 +7023,7 @@
 		"notes": "show/hide table of contents(顯示/隱藏, 表示/隠す)",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9132}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9139}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1180}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9125}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9132}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1180}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"collapse": {
@@ -7018,7 +7031,7 @@
 		"notes": "show/hide table of contents(顯示/隱藏, 表示/隠す)",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9137}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1178}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9130}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1178}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"invalid-name-of-color-$1": {
@@ -7554,11 +7567,12 @@
 		"message": "提醒移除%1個失效網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: count of anchors",
+		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1022}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1028}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"anchor-$1-links-to-a-specific-web-page-$2": {
-		"message": "網頁錨點 %1 連結到專屬頁面頁面：%2。",
+		"message": "網頁錨點 %1 連結到專屬頁面：%2。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "As a note phrase in talk pages.",
 		"parameters": "%1: link to a web anchor, %2: link to the target page",
@@ -7569,13 +7583,14 @@
 		"message": "此網頁錨點（%2）之前[[Special:Diff/%1|曾被其他用戶刪除過]]。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: revid, %2: anchor name",
+		"notes": "{{tl|Broken anchors}}の内で表示。",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1098}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-of-an-inactive-anchor": {
 		"message": "提醒失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
-		"notes": "Use in edit summaries. 用於編輯註解。",
+		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1103}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1112}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
@@ -7583,42 +7598,44 @@
 		"message": "更新指向存檔的連結%1：%2",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: percentage 百分比 e.g., \"42%\"; %2: links being processed 正在處理的連結",
+		"notes": "Use in edit summaries. 用於編輯註解。[[w:ja:Wikipedia:井戸端/subj/議論の過去ログのリンク修正はいかがでしょうか|過去ログリンク修正]]の編集の要約。",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1177}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"incorrect-capitalization-spaced-section-title": {
 		"message": "大小寫或空白相異的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
-		"notes": "Use in edit summaries. 用於編輯註解。 Too different to be considered as the same meaning.",
+		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。 Too different to be considered as the same meaning.",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1213}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"inconsistency-between-traditional-and-simplified-chinese": {
 		"message": "繁簡不符匹配而失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
-		"notes": "Use in edit summaries. 用於編輯註解。",
+		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1216}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"very-different": {
 		"message": "差異極大",
 		"original_message_language_code": "cmn-Hant-TW",
-		"notes": "Use in edit summaries to mark edits that need special attention. 用於編輯註解以標註特別需要注意的編輯。",
+		"notes": "Use in edit summaries to mark edits that need special attention. Too different to be regarded as the same meaning. 用於編輯註解以標註特別需要注意的編輯。編集の要約。",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1228}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"please-help-to-check-this-edit": {
 		"message": "請幫忙檢核此次編輯。",
 		"original_message_language_code": "cmn-Hant-TW",
-		"notes": "Use in edit summaries. 用於編輯註解。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1279}}",
+		"notes": "Use in edit summaries. 用於編輯註解。應採用不存在的頁面名稱，將用紅色連結顯示以突顯警告效果。編集の要約。",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1281}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1→most-alike-anchor-$2": {
 		"message": "%1→當前最近似的網頁錨點%2",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: original anchor, %2: target anchor",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1287}}",
+		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1289}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"fixing-broken-anchor": {

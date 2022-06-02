@@ -828,6 +828,8 @@
 	"treat-pattern-$1-as-windows-wildcard-search-string": "Treat pattern [%1] as Windows wildcard search string.",
 	"unable-to-convert-mode-$1": "Unable to convert mode [%1]!",
 	"↑back-to-toc": "↑Back to TOC",
+	"pin-unpin-the-toc": "Pin/unpin the TOC",
+	"set-toc-to-left-or-right": "Set TOC to left or right",
 	"contents-of-$1": "Contents of [%1]",
 	"expand": "expand",
 	"collapse": "collapse",
