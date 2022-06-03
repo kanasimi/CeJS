@@ -75,7 +75,7 @@
 	"Serbia": "Servi\u00eb",
 	"Romania": "Roemeni\u00eb",
 	"Greece": "Griekenland",
-	"Turkey": "Turkije",
+	"T\u00fcrkiye": "Turkije",
 	"Egypt": "Egypte",
 	"now": "zojuist",
 	"several seconds ago": "enkele seconden geleden",

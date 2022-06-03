@@ -958,6 +958,12 @@ function module_code(library_namespace) {
 		}));
 	}
 
+	function error_toString() {
+		return '[' + this.code + '] ' + (this.info || this.message);
+	}
+
+	wiki_API_query.error_toString = error_toString;
+
 	/**
 	 * 泛用先期處理程式。 response_handler(response)
 	 */
@@ -995,6 +1001,8 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		error.toString = error_toString;
+
 		// e.g., {code:'',info:'','*':''}
 		if (error.code) {
 			if (false) {
@@ -1003,8 +1011,7 @@ function module_code(library_namespace) {
 				+ error.code + '] ' + error.info);
 			}
 
-			var message = '[' + error.code + '] '
-					+ (error.info || error.message);
+			var message = error.toString();
 			/**
 			 * <code>
 

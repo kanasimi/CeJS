@@ -400,7 +400,7 @@
 	"Serbia": "\u30bb\u30eb\u30d3\u30a2",
 	"Romania": "\u30eb\u30fc\u30de\u30cb\u30a2",
 	"Greece": "\u30ae\u30ea\u30b7\u30e3",
-	"Turkey": "\u30c8\u30eb\u30b3",
+	"T\u00fcrkiye": "\u30c8\u30eb\u30b3",
 	"Egypt": "\u30a8\u30b8\u30d7\u30c8",
 	"%1 Y %2 M": "%1\u5e74%2\u30f6\u6708",
 	"%1 Y": "%1\u5e74",

@@ -353,7 +353,7 @@
 	"Serbia": "Serbia",
 	"Romania": "Roman\u00eca",
 	"Greece": "Grecia",
-	"Turkey": "Turch\u00eca",
+	"T\u00fcrkiye": "Turch\u00eca",
 	"Egypt": "Egit",
 	"%1 Y %2 M": "%1\u202fagn %2\u202fm\u00e8is",
 	"%1 Y": "%1\u202fagn",

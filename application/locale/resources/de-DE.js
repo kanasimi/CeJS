@@ -67,7 +67,7 @@
 	"Serbia": "Serbien",
 	"Romania": "Rum\u00e4nien",
 	"Greece": "Griechenland",
-	"Turkey": "T\u00fcrkei",
+	"T\u00fcrkiye": "T\u00fcrkei",
 	"Egypt": "\u00c4gypten",
 	"now": "jetzt",
 	"several seconds ago": "vor einigen Sekunden",

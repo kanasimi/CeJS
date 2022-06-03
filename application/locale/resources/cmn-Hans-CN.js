@@ -708,7 +708,7 @@
 	"Serbia": "\u585e\u5c14\u7ef4\u4e9a",
 	"Romania": "\u7f57\u9a6c\u5c3c\u4e9a",
 	"Greece": "\u5e0c\u814a",
-	"Turkey": "\u571f\u8033\u5176",
+	"T\u00fcrkiye": "\u571f\u8033\u5176",
 	"Egypt": "\u57c3\u53ca",
 	"%1 Y %2 M": "%1\u5e74%2\u4e2a\u6708",
 	"%1 Y": "%1\u5e74",

@@ -301,6 +301,7 @@
 	"the-emergency-stop-page-was-not-found-($1)": "The emergency stop page was not found (%1).",
 	"the-operation-will-proceed-as-usual": "The operation will proceed as usual.",
 	"emergency-stop-edit-has-been-set": "Emergency stop edit has been set!",
+	"the-text-between-update-comments-will-be-automatically-overwritten-by-the-bot": "The text between update comments will be automatically overwritten by the bot.",
 	"no-content": "No content",
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": "There is a messages on the emergency stop page %1 to stop the editing operation!",
 	"editing-of-$1-has-been-rejected-$2": "Editing of %1 has been rejected: %2",

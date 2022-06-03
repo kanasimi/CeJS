@@ -308,6 +308,7 @@
 	"the-emergency-stop-page-was-not-found-($1)": "未發現用來停止作業的頁面 %1。",
 	"the-operation-will-proceed-as-usual": "將如常進行作業。",
 	"emergency-stop-edit-has-been-set": "已設定緊急停止編輯作業！",
+	"the-text-between-update-comments-will-be-automatically-overwritten-by-the-bot": "機器人將自動覆寫更新註解間的文字。",
 	"no-content": "無內容",
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": "緊急停止頁面 %1 有留言要停止編輯作業！",
 	"editing-of-$1-has-been-rejected-$2": "已被拒絕編輯 %1：%2",

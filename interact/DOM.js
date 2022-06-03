@@ -5382,25 +5382,30 @@ function module_code(library_namespace) {
 					}
 
 				// 假如沒有oTxt.gText()，改成oTxt.replace(/<[^>]*>/g,'')之即可。這是為了預防HTML的情形。
-				var len = typeof oTxt == 'string' ? oTxt.length
+				var popup_length = typeof oTxt == 'string' ? oTxt.length
 				// :typeof oTxt=='object'&&oTxt.innerHTML?oTxt.innerHTML.length
 				: 0;
 				if (false)
-					alert(len + ',' + (len * .7) + ',' + oPos.innerHTML.length);
+					alert(popup_length + ',' + (popup_length * .7) + ','
+							+ oPos.innerHTML.length);
+				var inner_length = (typeof oPos.innerText == 'string' ? oPos.innerText
+						: _.HTML_to_Unicode(oPos.innerHTML
+						// .replace(/<[a-z][^<>]*>/g, '')
+						)).length;
 				if (typeof oPos == 'object'
 						&& (oPos.doneRuby || !oPos.innerHTML.match(/<\s*ruby/i)
-								&& (len < 60 && len * .7 - 9 < (typeof oPos.innerText == 'string' ? oPos.innerText
-										: _.HTML_to_Unicode(oPos.innerHTML
-										// .replace(/<[a-z][^<>]*>/g, '')
-										)).length))) {
+						// auto-detect the type to use.
+						&& popup_length < 60 && popup_length < 3 * inner_length
+								&& popup_length * .7 - 9 < inner_length)) {
 					// ruby的條件
 					popup_window_type = 'ruby';
-				} else if (sPopP.window && len < 300) {
+				} else if (sPopP.window && popup_length < 300) {
 					popup_window_type = 'popup';
 					if (typeof oPos == 'object' && oPos.title === oTxt)
 						oPos[sPopP.types[0]] = oTxt, oPos.title = '';
-				} else
+				} else {
 					popup_window_type = 'window';
+				}
 
 				// 設定oTxt 3/4 & type
 				if (typeof oPos == 'object' && (!oTxt || oTxt == 0))
@@ -5411,24 +5416,25 @@ function module_code(library_namespace) {
 			}
 
 			// 設定oTxt 4/4
-			if (!oTxt || oTxt == 0 && typeof oPos != 'object')
+			if (!oTxt || oTxt == 0 && typeof oPos != 'object') {
 				if ((oTxt = oPos[sPopP.types[popup_window_type]])
 						|| (oTxt = oPos[sPopP.types[0]]) || (oTxt = oPos.title))
 					useAutoTxt = true;
 				else
 					return;
+			}
 
 			// 設定className與position
 			// popup left,popup top初始值
 			sPopP.left = 0, sPopP.top = 20;
-			if (!oPos || typeof oPos != 'object')
+			if (!oPos || typeof oPos != 'object') {
 				// popup 在滑鼠指標處
 				// see: add_listener()
 				try {
 					sPopP.left += event.offsetX, sPopP.top += event.offsetY;
 				} catch (e) {
 				}
-			else if (!oPos.className && sPopP.DclassName[popup_window_type]) {
+			} else if (!oPos.className && sPopP.DclassName[popup_window_type]) {
 				if (!classN && (classN = document.body.className)
 						&& !sPopP.bgS[classN])
 					classN = 0;

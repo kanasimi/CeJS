@@ -2428,7 +2428,7 @@ function module_code(library_namespace) {
 		// gettext_config:{"id":"greece"}
 		'Greece' : '1924/3/23',
 		// gettext_config:{"id":"turkey"}
-		'Turkey' : '1926/1/1',
+		'Türkiye' : '1926/1/1',
 		// gettext_config:{"id":"egypt"}
 		'Egypt' : '1928/10/1'
 	// 之前使用伊斯蘭曆法。

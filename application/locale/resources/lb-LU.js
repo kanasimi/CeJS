@@ -96,7 +96,7 @@
 	"Serbia": "Serbien",
 	"Romania": "Rum\u00e4mnien",
 	"Greece": "Griicheland",
-	"Turkey": "Tierkei",
+	"T\u00fcrkiye": "Tierkei",
 	"now": "elo",
 	"several seconds ago": "virun e puer Sekonnen",
 	"soon": "geschw\u00ebnn",

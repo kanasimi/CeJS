@@ -199,10 +199,6 @@ function module_code(library_namespace) {
 		return '/* ' + section_title + ' */ ' + (summary || '');
 	}
 
-	function edit_error_toString() {
-		return '[' + this.code + '] ' + this.info;
-	}
-
 	/**
 	 * 編輯頁面。一次處理一個標題。<br />
 	 * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問！此時需要另外含入檢查機制！
@@ -459,7 +455,6 @@ function module_code(library_namespace) {
 			} else if (data.error) {
 				// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
 				error = data.error;
-				error.toString = edit_error_toString;
 			} else if (data.edit && data.edit.result !== 'Success') {
 				error = {
 					code : data.edit.result,
@@ -483,7 +478,7 @@ function module_code(library_namespace) {
 					+ data.edit.spamblacklist
 					//
 					: JSON.stringify(data.edit)),
-					toString : edit_error_toString
+					toString : wiki_API.query.error_toString
 				};
 			}
 
@@ -1491,7 +1486,10 @@ function module_code(library_namespace) {
 	function Variable_Map_format(variable_name, default_value) {
 		var start_mark = '<!-- update '
 				+ variable_name
-				+ ': Text inside update comments will be auto-replaced by bot -->';
+				+ ': '
+				// gettext_config:{"id":"the-text-between-update-comments-will-be-automatically-overwritten-by-the-bot"}
+				+ gettext('The text between update comments will be automatically overwritten by the bot.')
+				+ ' -->';
 		var end_mark = '<!-- update end: ' + variable_name + ' -->';
 		var value;
 		if (this.has(variable_name)) {
@@ -1508,7 +1506,7 @@ function module_code(library_namespace) {
 
 	// [ all_mark, start_mark, variable_name, original_value, end_mark ]
 	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)([\s\S]+?)(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)/g;
-	var Variable_Map__PATTERN_template_mark = /({{Auto-generate\s*\|([^{}|]+)}})([\s\S]+?)({{Auto-generate\s*\|\2\|end}})/;
+	var Variable_Map__PATTERN_template_mark = /({{Auto-generated\s*\|([^{}|]+)}})([\s\S]+?)({{Auto-generated\s*\|\2\|end}})/;
 
 	function Variable_Map_update(wikitext) {
 		var changed, variable_Map = this;
@@ -1540,8 +1538,10 @@ function module_code(library_namespace) {
 		}
 
 		// TODO:
-		wikitext = wikitext.replace(Variable_Map__PATTERN_template_mark,
-				replacer);
+		if (false) {
+			wikitext = wikitext.replace(Variable_Map__PATTERN_template_mark,
+					replacer);
+		}
 		wikitext = wikitext.replace(Variable_Map__PATTERN_mark, replacer);
 		// console.trace(changed);
 		if (!changed) {
@@ -1575,11 +1575,10 @@ function module_code(library_namespace) {
 		}
 
 		if (false) {
+			// or: 此頁面不存在/已刪除。
 			// gettext_config:{"id":"no-content"}
 			content = gettext('No content: ')
-					+ wiki_API.title_link_of(page_data)
-					// or: 此頁面不存在/已刪除。
-					+ '! 沒有頁面內容！';
+					+ wiki_API.title_link_of(page_data);
 		}
 		content = 'Variable_Map__page_text_updater: '
 				+ wiki_API.title_link_of(page_data)

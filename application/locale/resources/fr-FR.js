@@ -622,7 +622,7 @@
 	"Serbia": "Serbie",
 	"Romania": "Roumanie",
 	"Greece": "Gr\u00e8ce",
-	"Turkey": "Turquie",
+	"T\u00fcrkiye": "Turquie",
 	"Egypt": "\u00c9gypte",
 	"%1 Y %2 M": "%1\u202fan %2\u202fmois",
 	"%1 Y": "%1\u202fan",
