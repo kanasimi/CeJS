@@ -2628,7 +2628,7 @@
 		"notes": "沒有頁面內容。; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1580}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3312}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L648}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1580}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3319}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3338}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L654}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": {
@@ -2726,7 +2726,7 @@
 		"message": "Configuration page: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1729}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1736}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-parameter-$1": {
@@ -2740,7 +2740,7 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L881}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L920}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L648}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L881}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L920}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"wikitext-parser-checking-$1": {
@@ -2748,7 +2748,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3341}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3348}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages": {
@@ -2758,10 +2758,17 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L453}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"unknown-api-response-$1": {
+		"message": "Unknown API response: %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: API response",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L515}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
 	"does-not-exist": {
 		"message": "Does not exist",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L646}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L818}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L830}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L652}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L818}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L830}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"too-many-badtoken-errors!-please-re-execute-the-program": {
@@ -5962,7 +5969,7 @@
 		"original_message_language_code": "en-US",
 		"scope": "interact.DOM: auto_TOC(), CeL.application.storage.EPUB: generate_TOC()",
 		"additional_notes": "{{Identical|Content}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2210}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9127}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2210}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9128}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"if-the-e-book-chapter-directory-is-not-set-all-chapter-content-will-be-placed-directly-under-the-e-book-root-directory": {
@@ -6583,6 +6590,13 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3027}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"invalid-date-$1": {
+		"message": "Invalid date: %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: date",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3491}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
 	"note": {
 		"message": "注",
 		"notes": "Label for calendar.",
@@ -7000,7 +7014,7 @@
 		"notes": "Table of contents message.",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9045}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9044}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"pin-unpin-the-toc": {
@@ -7013,7 +7027,7 @@
 		"message": "Set TOC to left or right",
 		"original_message_language_code": "en-US",
 		"notes": "Switch the position of the contents.",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9113}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9114}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"contents-of-$1": {
@@ -7021,7 +7035,7 @@
 		"notes": "Table of contents message. e.g., Contents of [title]",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9123}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9124}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"expand": {
@@ -7029,7 +7043,7 @@
 		"notes": "show/hide table of contents(顯示/隱藏, 表示/隠す)",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9131}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9138}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1180}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9132}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9139}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1180}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"collapse": {
@@ -7037,7 +7051,7 @@
 		"notes": "show/hide table of contents(顯示/隱藏, 表示/隠す)",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9136}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1178}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9137}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1178}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"invalid-name-of-color-$1": {
@@ -7668,6 +7682,43 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L279}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"count-of-languages": {
+		"message": "語言數",
+		"original_message_language_code": "cmn-Hant-TW",
+		"notes": "Sitelinks 言語版数",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L644}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"average": {
+		"message": "平均",
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L649}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L799}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"sum": {
+		"message": "合計",
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L659}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L806}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"article-list": {
+		"message": "條目一覽",
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L677}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"see-also": {
+		"message": "See also",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L694}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"no-label": {
+		"message": "無標籤",
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L792}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"debug-level": {

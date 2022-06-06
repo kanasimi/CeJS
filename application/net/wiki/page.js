@@ -508,12 +508,16 @@ function module_code(library_namespace) {
 			if (!data || !data.query
 			// assert: data.cached_response && data.query.pages
 			|| !data.query.pages && !data.query.redirects) {
-				library_namespace.warn('wiki_API_page: Unknown response: ['
 				// e.g., 'wiki_API_page: Unknown response:
 				// [{"batchcomplete":""}]'
-				+ (typeof data === 'object' && typeof JSON !== 'undefined'
-				//
-				? JSON.stringify(data) : data) + ']');
+				library_namespace.warn([ 'wiki_API_page: ', {
+					// gettext_config:{"id":"unknown-api-response-$1"}
+					T : [ 'Unknown API response: %1', (typeof data === 'object'
+					//
+					&& typeof JSON !== 'undefined'
+					//
+					? JSON.stringify(data) : data) ]
+				} ]);
 				// library_namespace.set_debug(6);
 				if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
@@ -633,29 +637,32 @@ function module_code(library_namespace) {
 					}
 
 					if (need_warn) {
-						library_namespace.warn('wiki_API_page: '
 						/**
 						 * <code>
 						{"title":"","invalidreason":"The requested page title is empty or contains only the name of a namespace.","invalid":""}
 						</code>
 						 */
-						+ gettext('invalid' in page_data ? 'Invalid'
-						// 此頁面不存在/已刪除。Page does not exist. Deleted?
-						: 'missing' in page_data
-						// gettext_config:{"id":"does-not-exist"}
-						? 'Does not exist: '
-						// gettext_config:{"id":"no-content"}
-						: 'No content: ')
-						//
-						+ (page_data.title
-						//
-						? wiki_API.title_link_of(page_data)
-						//
-						: 'id ' + page_data.pageid)
-						//
-						+ (page_data.invalidreason
-						//
-						? '. ' + page_data.invalidreason : ''));
+						library_namespace.warn([ 'wiki_API_page: ', {
+							T : [ 'invalid' in page_data
+							// gettext_config:{"id":"invalid-title-$1"}
+							? 'Invalid title: %1'
+							// 此頁面不存在/已刪除。Page does not exist. Deleted?
+							: 'missing' in page_data
+							// gettext_config:{"id":"does-not-exist"}
+							? 'Does not exist: %1'
+							// gettext_config:{"id":"no-content"}
+							: 'No content: %1',
+							//
+							(page_data.title
+							//
+							? wiki_API.title_link_of(page_data)
+							//
+							: 'id ' + page_data.pageid)
+							//
+							+ (page_data.invalidreason
+							//
+							? '. ' + page_data.invalidreason : '') ]
+						} ]);
 					}
 
 				} else if (page_cache_prefix) {
@@ -820,7 +827,7 @@ function module_code(library_namespace) {
 						//
 						|| page_data.title;
 					}).join('|'));
-					throw new Error('re-sort page list');
+					throw new Error('Re-sort page list');
 				}
 
 				// 維持頁面的順序與輸入的相同。

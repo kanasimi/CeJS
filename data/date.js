@@ -3486,8 +3486,10 @@ function module_code(library_namespace) {
 		}
 		if (!is_Date(date) || !date.getTime()) {
 			if (date) {
-				library_namespace.error('generator_toString: Invalid date: '
-						+ date);
+				library_namespace.error([ 'generator_toString: ', {
+					// gettext_config:{"id":"invalid-date-$1"}
+					T : [ 'Invalid date: %1', date ]
+				} ]);
 			}
 			date = new Date;
 		}

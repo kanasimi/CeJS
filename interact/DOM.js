@@ -238,10 +238,9 @@ function module_code(library_namespace) {
 		// element_pattern 不能用在 DOCUMENT_NODE。
 		// return _.is_HTML_element_type(object, DOCUMENT_NODE);
 
-		if (false)
-			if (object)
-				library_namespace.debug('type: ' + get_object_type.call(object)
-						+ ', nodeType=' + object.nodeType);
+		if (false && object)
+			library_namespace.debug('type: ' + get_object_type.call(object)
+					+ ', nodeType=' + object.nodeType);
 		return get_object_type.call(object) === DOCUMENT_TYPE
 				&& object.nodeType === DOCUMENT_NODE;
 	};
@@ -269,8 +268,8 @@ function module_code(library_namespace) {
 		|| type === '[object HTMLCollection]';
 	};
 
-	// &nbsp;
-	var NBSP = '\u00a0';
+	// &nbsp; \u00a0
+	var NBSP = '\xa0';
 
 	_.NBSP = NBSP;
 
@@ -9091,11 +9090,12 @@ _
 				span : [ {
 					span : CSS_position_sticky ? auto_TOC.icon.unpin : '',
 					onclick : function() {
+						node.style.position = node.style.position
+						//
+						? '' : 'static';
 						this.innerHTML = auto_TOC.icon[
 						//
-						(node.style.position = node.style.position
-						//
-						? '' : 'static') ? 'pin' : 'unpin'];
+						node.style.position ? 'pin' : 'unpin'];
 						set_height();
 					},
 					// gettext_config:{"id":"pin-unpin-the-toc"}
@@ -9103,11 +9103,12 @@ _
 				}, {
 					span : auto_TOC.icon.right,
 					onclick : function() {
+						node.style.cssFloat = node.style.cssFloat
+						//
+						? '' : 'right';
 						this.innerHTML = auto_TOC.icon[
 						//
-						(node.style.cssFloat = node.style.cssFloat
-						//
-						? '' : 'right') ? 'left' : 'right'];
+						node.style.cssFloat ? 'left' : 'right'];
 					},
 					// gettext_config:{"id":"set-toc-to-left-or-right"}
 					R : 'Set TOC to left or right'
