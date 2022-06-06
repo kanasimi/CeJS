@@ -913,6 +913,7 @@
 	"$1→most-alike-anchor-$2": "%1→當前最近似的網頁錨點%2",
 	"fixing-broken-anchor": "修正失效的網頁錨點",
 	"archiving-operation": "歸檔封存作業",
+	"updating-$1": "更新%1",
 	"count-of-languages": "語言數",
 	"average": "平均",
 	"sum": "合計",

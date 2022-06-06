@@ -921,6 +921,7 @@
 	"archiving-operation": "Archiving operation",
 	"append-$1-topics": "Append %1 {{PLURAL:%1|topic|topics}}",
 	"remove-$1-topics": "Remove %1 {{PLURAL:%1|topic|topics}}",
+	"updating-$1": "Updating %1s",
 	"count-of-languages": "Count of languages",
 	"average": "Average",
 	"sum": "Sum",

@@ -923,6 +923,7 @@
 	"Archiving operation": "Archiving operation",
 	"Append %1 {{PLURAL:%1|topic|topics}}": "Append %1 {{PLURAL:%1|topic|topics}}",
 	"Remove %1 {{PLURAL:%1|topic|topics}}": "Remove %1 {{PLURAL:%1|topic|topics}}",
+	"\u66f4\u65b0%1": "Updating %1s",
 	"\u8a9e\u8a00\u6578": "Count of languages",
 	"\u5e73\u5747": "Average",
 	"\u5408\u8a08": "Sum",

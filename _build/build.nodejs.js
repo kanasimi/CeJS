@@ -1532,6 +1532,9 @@ function write_message_script_file({ resources_path, language_code, locale_data,
 		if (message_id === '@metadata')
 			continue;
 		const qqq_data = qqq_data_Map.get(message_id);
+		if (!qqq_data) {
+			CeL.error(`${write_message_script_file.name}: No qqq_data of ${JSON.stringify(message_id)} found!`);
+		}
 		const key_mark = convert_message(qqq_data.message) + ': ';
 		if (/^function(?:\s|\()/.test(locale_message)) {
 			const original_function = message_to_localized_mapping[language_code] && message_to_localized_mapping[language_code][qqq_data.message];

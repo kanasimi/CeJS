@@ -536,6 +536,7 @@
 	"$1→most-alike-anchor-$2": "%1→もっとも似ているアンカー%2",
 	"fixing-broken-anchor": "切れたアンカーリンクを修復",
 	"archiving-operation": "記録保存",
+	"updating-$1": "%1の更新",
 	"count-of-languages": "言語数",
 	"average": "平均",
 	"sum": "合計",
