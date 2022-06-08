@@ -2733,6 +2733,7 @@
 		"message": "Invalid parameter: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: parameter name",
+		"notes": "Parameter %1 is not valid.",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L308}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L312}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
