@@ -3,6 +3,7 @@
 		"authors": [
 			"Brettchenweber",
 			"DraconicDark",
+			"ThisCarthing",
 			"ZiqiLiang"
 		]
 	},
@@ -167,5 +168,6 @@
 	"contents-of-$1": "Inhalt von [%1]",
 	"expand": "ausklappen",
 	"collapse": "einklappen",
+	"count-of-languages": "Anzahl der Sprachen",
 	"series-has-ended": "Serie ist beendet."
 }

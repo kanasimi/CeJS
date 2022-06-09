@@ -325,6 +325,7 @@
 	"invalid-title-$1": "Tìtol nen bon: %1",
 	"wikitext-parser-checking-$1": "verìfica ëd l'analisator dël wikitest: %1",
 	"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages": "A sbassa ël nùmer màssim ëd pàgine për arcuperassion a 'n màssim ëd %1 pàgine.",
+	"unknown-api-response-$1": "Rispòsta API sconossùa: %1",
 	"does-not-exist": "A esist nen",
 	"too-many-badtoken-errors!-please-re-execute-the-program": "Tròpi eror ëd geton lòfio! Për piasì, ch'a fasa torna parte ël programa!",
 	"not-using-node.js": "As deuvra nen node.js!",

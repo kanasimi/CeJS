@@ -3,7 +3,8 @@
 		"authors": [
 			"Dnlweijers",
 			"Mainframe98",
-			"McDutchie"
+			"McDutchie",
+			"Vistaus"
 		]
 	},
 	"untranslated-message-count": "1000+",
@@ -57,6 +58,8 @@
 	"sunset": "zonsondergang",
 	"language": "Taal",
 	"no-reason-provided": "Geen reden opgegeven",
+	"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages": "Beperk het maximumaantal pagina's per keer tot %1 pagina's.",
+	"unknown-api-response-$1": "Onbekend api-antwoord: %1",
 	"no-change": "geen wijzigingen",
 	"function": "functie",
 	"number": "getal",
@@ -90,9 +93,16 @@
 	"$1-hours-ago": "%1 uur{{PLURAL:%1|}} geleden",
 	"$1-days-ago": "%1 dag{{PLURAL:%1||en}} geleden",
 	"$1-weeks-ago": "%1 {{PLURAL:%1|week|weken}} geleden",
+	"invalid-date-$1": "Ongeldige datum: %1",
 	"note": "Opmerking",
 	"british": "Brits",
 	"↑back-to-toc": "↑Terug naar inhoudsopgave",
 	"expand": "uitvouwen",
-	"collapse": "samenvouwen"
+	"collapse": "samenvouwen",
+	"count-of-languages": "Aantal talen",
+	"average": "Gemiddelde",
+	"sum": "Som",
+	"article-list": "Artikellijst",
+	"see-also": "Zie ook",
+	"no-label": "Geen label"
 }
