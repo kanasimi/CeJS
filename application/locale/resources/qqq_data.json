@@ -7245,6 +7245,7 @@
 		"message": "Namespaces: %1.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: list_options.namespace",
+		"notes": "{{Identical|Namespace}}",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1547}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
@@ -7427,7 +7428,8 @@
 	"robot-task-completion-notification": {
 		"message": "{{Done}} Please check the results and let me know if there is something wrong, thank you.",
 		"original_message_language_code": "en-US",
-		"notes": "e.g., {{利用者の投稿記録リンク|Example|50|20100820121030|4}}, {{BOTREQ|済}} こちらのリンクからご確認下さい",
+		"notes": "This message should be tuned for use on each Wikipedia edition, with appropriate templates such as {{Tl|Done}} (which shows \"{{Done}}\" on Translatewikinet, with an autotranslated message).",
+		"e.g. in Japanese<nowiki>": "</nowiki>,<code><nowiki>{{</nowiki>利用者の投稿記録リンク|Example|50|20100820121030|4<nowiki>}}</nowiki></code>, {{BOTREQ|済}} こちらのリンクからご確認下さい,where <code><nowiki>{{</nowiki>[[wikipedia:ja:Template:利用者の投稿記録リンク|利用者の投稿記録リンク]]|...<nowiki>}}</nowiki></code> on Japanese Wikipedia is an equivalent of <code><nowiki>{{</nowiki>[[wikipedia:en:Template:User contributions|User contributions]]|...<nowiki>}}</nowiki></code> on English Wikipedia. The {{Tl|BOTREQ|済}} template shows a status icon and the optional custom message for showing the completion status \"済\" (done).",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L818}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
@@ -7668,21 +7670,21 @@
 	"archiving-operation": {
 		"message": "Archiving operation",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L255}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L256}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"append-$1-topics": {
 		"message": "Append %1 {{PLURAL:%1|topic|topics}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L266}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L267}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"remove-$1-topics": {
 		"message": "Remove %1 {{PLURAL:%1|topic|topics}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L279}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L280}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"updating-$1": {

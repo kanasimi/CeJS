@@ -52,6 +52,8 @@
 	"sunset": "zonsondergang",
 	"Language": "Taal",
 	"No reason provided": "Geen reden opgegeven",
+	"\u8abf\u964d\u53d6\u5f97\u9801\u9762\u7684\u4e0a\u9650\uff0c\u6539\u6210\u6bcf\u6b21\u6700\u591a %1 \u500b\u9801\u9762\u3002": "Beperk het maximumaantal pagina's per keer tot %1 pagina's.",
+	"Unknown API response: %1": "Onbekend api-antwoord: %1",
 	"no change": "geen wijzigingen",
 	"function": "functie",
 	"number": "getal",
@@ -85,10 +87,17 @@
 	"%1 {{PLURAL:%1|hour|hours}} ago": "%1 uur{{PLURAL:%1|}} geleden",
 	"%1 {{PLURAL:%1|day|days}} ago": "%1 dag{{PLURAL:%1||en}} geleden",
 	"%1 {{PLURAL:%1|week|weeks}} ago": "%1 {{PLURAL:%1|week|weken}} geleden",
+	"Invalid date: %1": "Ongeldige datum: %1",
 	"\u6ce8": "Opmerking",
 	"British": "Brits",
 	"\u2191Back to TOC": "\u2191Terug naar inhoudsopgave",
 	"expand": "uitvouwen",
-	"collapse": "samenvouwen"
+	"collapse": "samenvouwen",
+	"\u8a9e\u8a00\u6578": "Aantal talen",
+	"\u5e73\u5747": "Gemiddelde",
+	"\u5408\u8a08": "Som",
+	"\u689d\u76ee\u4e00\u89bd": "Artikellijst",
+	"See also": "Zie ook",
+	"\u7121\u6a19\u7c64": "Geen label"
 },
 "nl-NL");

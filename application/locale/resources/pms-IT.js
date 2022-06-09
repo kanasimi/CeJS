@@ -322,6 +322,7 @@
 	"Invalid title: %1": "T\u00ectol nen bon: %1",
 	"wikitext parser checking: %1": "ver\u00ecfica \u00ebd l'analisator d\u00ebl wikitest: %1",
 	"\u8abf\u964d\u53d6\u5f97\u9801\u9762\u7684\u4e0a\u9650\uff0c\u6539\u6210\u6bcf\u6b21\u6700\u591a %1 \u500b\u9801\u9762\u3002": "A sbassa \u00ebl n\u00f9mer m\u00e0ssim \u00ebd p\u00e0gine p\u00ebr arcuperassion a 'n m\u00e0ssim \u00ebd %1 p\u00e0gine.",
+	"Unknown API response: %1": "Risp\u00f2sta API sconoss\u00f9a: %1",
 	"Does not exist": "A esist nen",
 	"Too many badtoken errors! Please re-execute the program!": "Tr\u00f2pi eror \u00ebd geton l\u00f2fio! P\u00ebr pias\u00ec, ch'a fasa torna parte \u00ebl programa!",
 	"Not using node.js!": "As deuvra nen node.js!",

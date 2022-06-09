@@ -1485,9 +1485,10 @@ function write_i18n_files(resources_path, message_id_order) {
 					// 減少變更次數: 以數字位數為單位變更。
 					: Math.floor(untranslated_message_count / number_base) + '0'.repeat(number_digits) + '+';
 			if (untranslated_message_count < 500 || untranslated_ratio < .3) {
-				const comments = untranslated_message_count < 20 && untranslated_ratio < .01 ? '幾近翻譯完畢的語言'
-					: untranslated_message_count < 100 && untranslated_ratio < .05 ? '翻譯得快完成的語言'
-						: '可考慮列入選單的語言';
+				const comments = untranslated_message_count === 0 ? '已翻譯完畢的語言'
+					: untranslated_message_count < 20 && untranslated_ratio < .01 ? '幾近翻譯完畢的語言'
+						: untranslated_message_count < 100 && untranslated_ratio < .05 ? '翻譯得快完成的語言'
+							: '可考慮列入選單的語言';
 				CeL.info(`${write_i18n_files.name}: ${comments} (${untranslated_message_count}/${qqq_data_Map.size} 未翻譯): ${language_code}`);
 			}
 

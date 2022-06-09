@@ -162,6 +162,7 @@
 	"Contents of [%1]": "Inhalt von [%1]",
 	"expand": "ausklappen",
 	"collapse": "einklappen",
+	"\u8a9e\u8a00\u6578": "Anzahl der Sprachen",
 	"\u4f5c\u54c1\u5df2\u5b8c\u7d50\u3002": "Serie ist beendet."
 },
 "de-DE");

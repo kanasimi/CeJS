@@ -241,7 +241,8 @@ function module_code(library_namespace) {
 
 	/**
 	 * 將 wiki_API.parse === parse_wikitext() 獲得之 template_token 中的指定 parameter
-	 * 換成 replace_to。 replace_template_parameter(), set_parameter()
+	 * 換成 replace_to。 replace_template_parameter(), set_parameter(),
+	 * modify_template()
 	 * 
 	 * WARNING: 若不改變 parameter name，只變更 value，<br />
 	 * 則應該使用 { value_only: true }，<br />

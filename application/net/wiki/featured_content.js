@@ -369,6 +369,7 @@ function module_code(library_namespace) {
 
 		var type_name = normalize_type_name(options.type);
 		var list_source = FC_configurations.list_source[type_name];
+		// console.trace([ FC_configurations, type_name, list_source ]);
 		if (!list_source) {
 			throw new Error('Unknown type: ' + options.type);
 		}
@@ -459,8 +460,9 @@ function module_code(library_namespace) {
 		var FC_configurations = this.get_featured_content_configurations();
 		var get_FC_function = FC_configurations && FC_configurations.get_FC;
 		if (!get_FC_function) {
-			library_namespace
-					.error('get_featured_content: Did not configured how to get featured content!');
+			library_namespace.error('get_featured_content: '
+					+ 'Did not configured how to get featured content! '
+					+ wiki_API.site_name(this));
 			return;
 		}
 

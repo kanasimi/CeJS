@@ -1540,6 +1540,7 @@ function module_code(library_namespace) {
 		return parsed.toString();
 	}
 
+	// insert_navigate_template
 	function insert_layout_token(token, options) {
 		/** {String}layout_type */
 		var location;
