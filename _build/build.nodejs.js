@@ -184,7 +184,7 @@ const message_changed = new Map;
 /** message_id_changed.get(from message id) = to message id */
 const message_id_changed = new Map;
 
-const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s–←↑→≠🆔😘➕]/;
+const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s–←↑→↔≠🆔😘➕]/;
 
 
 const gettext_plural_rules__file_name = 'gettext_plural_rules.js';

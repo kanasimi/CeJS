@@ -441,16 +441,16 @@ function module_code(library_namespace) {
 									message.push(gettext(
 									// TODO: show chapter_directory 當前作品章節目錄：
 									// gettext_config:{"id":"it-may-be-because-the-download-directory-of-the-work-has-changed-and-the-cache-data-points-to-the-old-location-that-does-not-exist"}
-									'可能因為作品下載目錄改變了，而 cache 資料指向不存在的舊位置。'));
+									'可能因為作品下載目錄改變了，而快取資料指向不存在的舊位置。'));
 								} else {
 									message.push(gettext(
 									// gettext_config:{"id":"it-may-be-because-the-work-information-cache-is-different-from-the-structure-of-the-work-chapter-on-the-current-website"}
-									'可能因為作品資訊 cache 與當前網站上之作品章節結構不同。'));
+									'可能因為作品資訊快取與當前網站上之作品章節結構不同。'));
 								}
 								message.push(gettext(
 								// https://github.com/kanasimi/work_crawler/issues/278
 								// gettext_config:{"id":"if-you-have-downloaded-this-work-before-please-save-the-original-work-catalog-or-rename-the-work-cache-file-(the-work-id.json-under-the-work-directory)-and-try-the-new-download"}
-								'若您之前曾經下載過本作品的話，請封存原有作品目錄，或將作品資訊 cache 檔（作品目錄下的 作品id.json）改名之後嘗試全新下載。'
+								'若您之前曾經下載過本作品的話，請封存原有作品目錄，或將作品資訊快取檔（作品目錄下的 作品id.json）改名之後嘗試全新下載。'
 								//
 								));
 								_this.onerror(message.join('\n'), image_data);

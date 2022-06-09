@@ -135,7 +135,7 @@ function module_code(library_namespace) {
 			library_namespace.info('extract_convert_cache_directory: '
 			// 語言轉換 TAG_text_converted
 			// gettext_config:{"id":"overwrite-the-files-in-the-cache-directory-$1-for-traditional-and-simplified-chinese-conversions"}
-			+ gettext('將覆寫繁簡中文轉換 cache 目錄 [%1] 中的檔案。', cache_directory));
+			+ gettext('將覆寫繁簡中文轉換快取目錄 [%1] 中的檔案。', cache_directory));
 		}
 
 		var cache_archive_file = cache_directory + '.7z';
@@ -151,7 +151,7 @@ function module_code(library_namespace) {
 		return new Promise(function(resolve, reject) {
 			library_namespace.log_temporary({
 				// gettext_config:{"id":"decompress-the-cache-files-for-traditional-and-simplified-chinese-conversions-$1"}
-				T : [ '解壓縮繁簡中文轉換 cache 檔案: [%1]。',
+				T : [ '解壓縮繁簡中文轉換快取檔案：[%1]。',
 						cache_archive_file.archive_file_path ]
 			});
 			cache_archive_file.extract({
@@ -174,7 +174,7 @@ function module_code(library_namespace) {
 		return new Promise(function(resolve, reject) {
 			library_namespace.log_temporary({
 				// gettext_config:{"id":"compress-the-cache-files-for-traditional-and-simplified-chinese-conversions-$1"}
-				T : [ '壓縮繁簡中文轉換 cache 檔案: [%1]。',
+				T : [ '壓縮繁簡中文轉換快取檔案：[%1]。',
 						cache_archive_file.archive_file_path ]
 			});
 			cache_archive_file.update(cache_directory, {

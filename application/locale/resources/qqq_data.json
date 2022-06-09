@@ -2628,7 +2628,7 @@
 		"notes": "沒有頁面內容。; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1580}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3319}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3338}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L654}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1580}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3350}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L659}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": {
@@ -2715,6 +2715,20 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2979}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"invalid-title-$1": {
+		"message": "Invalid title: %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page link",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L653}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L881}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L920}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"unknown-api-response-$1": {
+		"message": "Unknown API response: %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: API response",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1169}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L515}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
 	"found-$2-query-modules-$1": {
 		"message": "Found %2 query {{PLURAL:%2|module|modules}}: %1",
 		"original_message_language_code": "en-US",
@@ -2726,7 +2740,14 @@
 		"message": "Configuration page: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1736}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1745}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"the-configuration-page-$1-has-been-modified.-re-parse": {
+		"message": "設定頁面 %1 已變更。重新解析……",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: page link",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1928}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-parameter-$1": {
@@ -2737,19 +2758,12 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L308}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L312}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"invalid-title-$1": {
-		"message": "Invalid title: %1",
-		"original_message_language_code": "en-US",
-		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L648}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L881}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L920}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
 	"wikitext-parser-checking-$1": {
 		"message": "wikitext parser checking: %1",
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3348}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3360}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages": {
@@ -2759,18 +2773,24 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L453}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"unknown-api-response-$1": {
-		"message": "Unknown API response: %1",
+	"circular-redirect-$1↔$2": {
+		"message": "Circular redirect: %1↔%2",
 		"original_message_language_code": "en-US",
-		"parameters": "%1: API response",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L515}}",
+		"parameters": "%1: page link, %2: page link",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L582}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"does-not-exist": {
 		"message": "Does not exist",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L652}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L818}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L830}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L657}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L818}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L830}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"the-cache-file-is-saved": {
+		"message": "The cache file is saved.",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L688}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"too-many-badtoken-errors!-please-re-execute-the-program": {
 		"message": "Too many badtoken errors! Please re-execute the program!",
@@ -3281,7 +3301,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"since-the-cache-file-is-broken-(for-example-an-empty-file)-chapter_url-will-be-retrieved-and-.reget_chapter-will-be-set": {
-		"message": "因 cache file 壞了（例如為空檔案），將重新取得 chapter_URL，設定 .reget_chapter。",
+		"message": "因快取檔案壞了（例如為空檔案），將重新取得 chapter_URL，設定 .reget_chapter。",
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -3780,7 +3800,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"overwrite-the-files-in-the-cache-directory-$1-for-traditional-and-simplified-chinese-conversions": {
-		"message": "將覆寫繁簡中文轉換 cache 目錄 [%1] 中的檔案。",
+		"message": "將覆寫繁簡中文轉換快取目錄 [%1] 中的檔案。",
 		"notes": "",
 		"scope": "work_crawler.js: extract_convert_cache_directory()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -3789,7 +3809,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"decompress-the-cache-files-for-traditional-and-simplified-chinese-conversions-$1": {
-		"message": "解壓縮繁簡中文轉換 cache 檔案: [%1]。",
+		"message": "解壓縮繁簡中文轉換快取檔案：[%1]。",
 		"notes": "",
 		"scope": "work_crawler.js: extract_convert_cache_directory()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -3798,7 +3818,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"compress-the-cache-files-for-traditional-and-simplified-chinese-conversions-$1": {
-		"message": "壓縮繁簡中文轉換 cache 檔案: [%1]。",
+		"message": "壓縮繁簡中文轉換快取檔案：[%1]。",
 		"notes": "",
 		"scope": "work_crawler.js: archive_convert_cache_directory()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -4064,7 +4084,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-may-be-because-the-download-directory-of-the-work-has-changed-and-the-cache-data-points-to-the-old-location-that-does-not-exist": {
-		"message": "可能因為作品下載目錄改變了，而 cache 資料指向不存在的舊位置。",
+		"message": "可能因為作品下載目錄改變了，而快取資料指向不存在的舊位置。",
 		"notes": "",
 		"scope": "work_crawler.js: get_image()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -4072,7 +4092,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-may-be-because-the-work-information-cache-is-different-from-the-structure-of-the-work-chapter-on-the-current-website": {
-		"message": "可能因為作品資訊 cache 與當前網站上之作品章節結構不同。",
+		"message": "可能因為作品資訊快取與當前網站上之作品章節結構不同。",
 		"notes": "",
 		"scope": "work_crawler.js: get_image()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -4080,7 +4100,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"if-you-have-downloaded-this-work-before-please-save-the-original-work-catalog-or-rename-the-work-cache-file-(the-work-id.json-under-the-work-directory)-and-try-the-new-download": {
-		"message": "若您之前曾經下載過本作品的話，請封存原有作品目錄，或將作品資訊 cache 檔（作品目錄下的 作品id.json）改名之後嘗試全新下載。",
+		"message": "若您之前曾經下載過本作品的話，請封存原有作品目錄，或將作品資訊快取檔（作品目錄下的 作品id.json）改名之後嘗試全新下載。",
 		"notes": "",
 		"scope": "work_crawler.js: get_image()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -4234,7 +4254,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"using-the-previous-cache-to-download-§$1": {
-		"message": "使用之前的 cache，自 §%1 接續下載。",
+		"message": "使用之前的快取，自 §%1 接續下載。",
 		"notes": "",
 		"scope": "work_crawler.sites.SinMH",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -4407,7 +4427,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"maybe-the-downloaded-file-has-an-error?-you-can-try-to-download-it-later-or-use-the-.recheck-option-to-ignore-the-cache-and-re-download-the-page-for-each-image": {
-		"message": "或許是下載的檔案出現錯誤？您可嘗試過段時間再下載，或選用 .recheck 選項來忽略 cache、重新下載每個圖片的頁面。",
+		"message": "或許是下載的檔案出現錯誤？您可嘗試過段時間再下載，或選用 .recheck 選項來忽略快取、重新下載每個圖片的頁面。",
 		"notes": "",
 		"scope": "work_crawler.sites.hhcool",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -5637,7 +5657,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"to-update-changed-file-name-you-need-to-manually-change-the-original-file-name-from-the-original-folder": {
-		"message": "儲存檔名改變，您需要自行修正原參照文件中之檔名：",
+		"message": "儲存檔名改變，您需要自行修正原參照檔案中之檔名：",
 		"notes": "有手動設定.href。",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -5645,7 +5665,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-id-changes-you-need-to-correct-the-file-name-in-the-original-folder": {
-		"message": "id 改變，您需要自行修正原參照文件中之檔名：",
+		"message": "id 改變，您需要自行修正原參照檔案中之檔名：",
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -5783,7 +5803,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-used-from-the-cache-file": {
-		"message": "因為欲設定的內容長度過短或者無內容，將從 cache 檔案中取得舊的內容（%1 字元）：",
+		"message": "因為欲設定的內容長度過短或者無內容，將從快取檔案中取得舊的內容（%1 字元）：",
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -7461,7 +7481,7 @@
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"maybe-there-are-unregistered-interwiki-link-templates-or-some-transcluded-templates-articles-with-interwiki-link-templates-that-have-local-articles-(usually-in-the-last-section-of-the-page)": {
-		"message": "也許有尚未登記的跨語言連結模板，或是被嵌入的文件/模板中存有已存在本地條目之跨語言連結模板（通常位於頁面最後一節）？",
+		"message": "也許有尚未登記的跨語言連結模板，或是被嵌入的檔案/模板中存有已存在本地條目之跨語言連結模板（通常位於頁面最後一節）？",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L1074}}",

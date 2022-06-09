@@ -403,7 +403,7 @@ function module_code(library_namespace) {
 				})) {
 					library_namespace.info({
 						// gettext_config:{"id":"using-the-previous-cache-to-download-§$1"}
-						T : [ '使用之前的 cache，自 §%1 接續下載。',
+						T : [ '使用之前的快取，自 §%1 接續下載。',
 								latest_chapter_list.length ]
 					});
 					// 這可以保留 work_data.chapter_list 先前的屬性。

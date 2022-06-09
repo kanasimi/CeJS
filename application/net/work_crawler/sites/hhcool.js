@@ -224,7 +224,7 @@ function module_code(library_namespace) {
 								this_image_list[index], image_data[0] ]
 							}, '\n', {
 								// gettext_config:{"id":"maybe-the-downloaded-file-has-an-error?-you-can-try-to-download-it-later-or-use-the-.recheck-option-to-ignore-the-cache-and-re-download-the-page-for-each-image"}
-								T : '或許是下載的檔案出現錯誤？您可嘗試過段時間再下載，或選用 .recheck 選項來忽略 cache、重新下載每個圖片的頁面。'
+								T : '或許是下載的檔案出現錯誤？您可嘗試過段時間再下載，或選用 .recheck 選項來忽略快取、重新下載每個圖片的頁面。'
 							} ]);
 							run_next();
 							return;

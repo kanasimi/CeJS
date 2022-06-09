@@ -577,13 +577,18 @@ function module_code(library_namespace) {
 						if (data.query.pages.title ===
 						//
 						redirect_from[data.query.redirects[0].to]) {
-							library_namespace.warn(
-							//
-							'wiki_API_page: Redirect loop: '
-							//
-							+ data.query.pages.title + '↔'
-							//
-							+ data.query.redirects[0].to);
+							library_namespace.warn([ 'wiki_API_page: ', {
+								// gettext_config:{"id":"circular-redirect-$1↔$2"}
+								T : [ 'Circular redirect: %1↔%2',
+								//
+								wiki_API.title_link_of(
+								//
+								data.query.pages.title),
+								//
+								wiki_API.title_link_of(
+								//
+								data.query.redirects[0].to) ]
+							} ]);
 							data.query.pages.redirect_loop = true;
 						}
 						data.query.pages = {
@@ -677,9 +682,10 @@ function module_code(library_namespace) {
 					</code>
 					 */
 					JSON.stringify(pages), wiki_API.encoding, function() {
-						library_namespace.debug(
 						// 因為此動作一般說來不會影響到後續操作，因此採用同時執行。
-						'Write to cache file: done.', 1, 'wiki_API_page');
+						library_namespace.debug(
+						// gettext_config:{"id":"the-cache-file-is-saved"}
+						'The cache file is saved.', 1, 'wiki_API_page');
 					});
 				}
 
@@ -827,7 +833,7 @@ function module_code(library_namespace) {
 						//
 						|| page_data.title;
 					}).join('|'));
-					throw new Error('Re-sort page list');
+					throw new Error('Reorder the list of pages');
 				}
 
 				// 維持頁面的順序與輸入的相同。
@@ -1132,8 +1138,9 @@ function module_code(library_namespace) {
 	wiki_API.purge = function(title, callback, options) {
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
-			throw new Error('wiki_API.purge: Invalid title: '
-					+ wiki_API.title_link_of(title));
+			throw new Error('wiki_API.purge: '
+			// gettext_config:{"id":"invalid-title-$1"}
+			+ gettext('Invalid title: %1', wiki_API.title_link_of(title)));
 		}
 
 		// POST_parameters
@@ -1157,13 +1164,14 @@ function module_code(library_namespace) {
 			// {"batchcomplete":"","purge":[{"ns":0,"title":"Title","purged":""}]}
 
 			if (!data || !data.purge) {
-				library_namespace.warn(
-				//
-				'wiki_API.purge: Unknown response: ['
-				//
-				+ (typeof data === 'object' && typeof JSON !== 'undefined'
-				//
-				? JSON.stringify(data) : data) + ']');
+				library_namespace.warn([ 'wiki_API_purge: ', {
+					// gettext_config:{"id":"unknown-api-response-$1"}
+					T : [ 'Unknown API response: %1', (typeof data === 'object'
+					//
+					&& typeof JSON !== 'undefined'
+					//
+					? JSON.stringify(data) : data) ]
+				} ]);
 				if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
@@ -1229,8 +1237,8 @@ function module_code(library_namespace) {
 				if (redirect_data.length !== 1) {
 					// 可能是多重重定向？
 					// e.g., A→B→C
-					library_namespace.warn('wiki_API.redirect_to: Get '
-							+ redirect_data.length + ' redirected links for ['
+					library_namespace.warn('wiki_API.redirect_to: ' + 'Get '
+							+ redirect_data.length + ' redirects for ['
 							// title.join(':')
 							+ title + ']!');
 					library_namespace.warn(redirect_data);
@@ -1536,7 +1544,8 @@ function module_code(library_namespace) {
 			// normal
 		} else {
 			throw new Error(
-					'add_listener: assert: isNaN(options.max_page) || options.max_page >= 1');
+					'add_listener: '
+							+ 'assert: isNaN(options.max_page) || options.max_page >= 1');
 		}
 
 		if (!(options.limit > 0)) {
@@ -1914,9 +1923,12 @@ function module_code(library_namespace) {
 					});
 				}
 				if (configuration_row) {
-					library_namespace.info('add_listener: Configuration page '
-							+ wiki_API.title_link_of(configuration_page_title)
-							+ ' edited. Re-parse...');
+					library_namespace.info([ 'add_listener: ', {
+						// gettext_config:{"id":"the-configuration-page-$1-has-been-modified.-re-parse"}
+						T : [ '設定頁面 %1 已變更。重新解析……',
+						//
+						wiki_API.title_link_of(configuration_page_title) ]
+					} ]);
 				}
 
 				if (options.filter && rows.length > 0) {

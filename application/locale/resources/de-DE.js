@@ -1,7 +1,7 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
-	"untranslated message count": "900+",
+	"untranslated message count": "1000+",
 	"Load failed": "Laden fehlgeschlagen",
 	"\u5730\u7406\u5ea7\u6a19\uff1a": "Koordinaten:",
 	"\u81ea\u8a02\u8f38\u51fa\u683c\u5f0f": "Ausgabeformat anpassen",
@@ -107,8 +107,8 @@
 	"Abandon change": "\u00c4nderung verwerfen",
 	"No reason provided": "Es wurde kein Grund angegeben",
 	"%1 {{PLURAL:%1|result|results}}": "%1 {{PLURAL:%1|Ergebnis|Ergebnisse}}",
-	"Invalid parameter: %1": "Ung\u00fcltiger Parameter: %1",
 	"Invalid title: %1": "Ung\u00fcltiger Titel: %1",
+	"Invalid parameter: %1": "Ung\u00fcltiger Parameter: %1",
 	"Too many failed login attempts: %1": "Zu viele fehlgeschlagene Login-Versuche: %1",
 	"no change": "keine \u00c4nderung",
 	"Missing page": "Fehlende Seite",

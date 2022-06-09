@@ -1444,7 +1444,7 @@ function module_code(library_namespace) {
 				// 有手動設定.href。
 				library_namespace.error([ 'add_chapter: ', {
 					// gettext_config:{"id":"to-update-changed-file-name-you-need-to-manually-change-the-original-file-name-from-the-original-folder"}
-					T : '儲存檔名改變，您需要自行修正原參照文件中之檔名：'
+					T : '儲存檔名改變，您需要自行修正原參照檔案中之檔名：'
 				}, '\n', item_data.href + ' →\n' + item.href ]);
 			}
 
@@ -1462,7 +1462,7 @@ function module_code(library_namespace) {
 				// 有手動設定.href
 				library_namespace.error([ 'add_chapter: ', {
 					// gettext_config:{"id":"the-id-changes-you-need-to-correct-the-file-name-in-the-original-folder"}
-					T : 'id 改變，您需要自行修正原參照文件中之檔名：'
+					T : 'id 改變，您需要自行修正原參照檔案中之檔名：'
 				}, '\n', item_data.id + ' →\n' + item.id ]);
 			}
 
@@ -1917,7 +1917,7 @@ function module_code(library_namespace) {
 				library_namespace.warn([ 'add_chapter: ', {
 					T : [
 					// gettext_config:{"id":"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-used-from-the-cache-file"}
-					'因為欲設定的內容長度過短或者無內容，將從 cache 檔案中取得舊的內容（%1 字元）：',
+					'因為欲設定的內容長度過短或者無內容，將從快取檔案中取得舊的內容（%1 字元）：',
 					//
 					contents.length ]
 				}, ' \n',

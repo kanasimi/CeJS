@@ -1225,7 +1225,7 @@ function module_code(library_namespace) {
 						library_namespace
 								.warn({
 									// gettext_config:{"id":"since-the-cache-file-is-broken-(for-example-an-empty-file)-chapter_url-will-be-retrieved-and-.reget_chapter-will-be-set"}
-									T : '因 cache file 壞了（例如為空檔案），將重新取得 chapter_URL，設定 .reget_chapter。'
+									T : '因快取檔案壞了（例如為空檔案），將重新取得 chapter_URL，設定 .reget_chapter。'
 								});
 						work_data.reget_chapter = true;
 					}
