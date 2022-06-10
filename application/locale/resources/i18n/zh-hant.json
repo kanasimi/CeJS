@@ -778,6 +778,8 @@
 	"$1-hr": "%1小時",
 	"$1-days": "%1天",
 	"$1-d": "%1天",
+	"$1-weeks": "%1個禮拜",
+	"$1-w": "%1週",
 	"2-days-before-yesterday-$h-$m": "大前天%H時%M分",
 	"the-day-before-yesterday-$h-$m": "前天%H時%M分",
 	"yesterday-$h-$m": "昨天%H時%M分",

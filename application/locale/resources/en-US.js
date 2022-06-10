@@ -774,6 +774,8 @@
 	"%1 hr": "%1 hr",
 	"%1 {{PLURAL:%1|day|days}}": "%1 {{PLURAL:%1|day|days}}",
 	"%1 d": "%1 d",
+	"%1 {{PLURAL:%1|week|weeks}}": "%1 {{PLURAL:%1|week|weeks}}",
+	"%1 W": "%1 W",
 	"2 days before yesterday, %H:%M": "2 days before yesterday, %H:%M",
 	"the day before yesterday, %H:%M": "the day before yesterday, %H:%M",
 	"yesterday, %H:%M": "yesterday, %H:%M",

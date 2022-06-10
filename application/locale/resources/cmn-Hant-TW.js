@@ -773,6 +773,8 @@
 	"%1 hr": "%1\u5c0f\u6642",
 	"%1 {{PLURAL:%1|day|days}}": "%1\u5929",
 	"%1 d": "%1\u5929",
+	"%1 {{PLURAL:%1|week|weeks}}": "%1\u500b\u79ae\u62dc",
+	"%1 W": "%1\u9031",
 	"2 days before yesterday, %H:%M": "\u5927\u524d\u5929%H\u6642%M\u5206",
 	"the day before yesterday, %H:%M": "\u524d\u5929%H\u6642%M\u5206",
 	"yesterday, %H:%M": "\u6628\u5929%H\u6642%M\u5206",

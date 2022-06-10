@@ -2783,6 +2783,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function age_of(start, end, options) {
+		options = library_namespace.setup_options(options);
 		if (!end) {
 			// count till now.
 			end = end === 0 ? new Date(0) : new Date;
@@ -2810,17 +2811,17 @@ function module_code(library_namespace) {
 		diff2 = diff2.getMonth() + (diff2.getDate() - 1) / 30;
 
 		// 將數字四捨五入到指定的小數位數。 TODO: 把時間表示方式改為60進位。
-		var to_fixed_digits = options && (options.digits | 0) >= 0
+		var to_fixed_digits = (options.digits | 0) >= 0
 		// default: 0. e.g., {digits:0}
 		? options.digits | 0 : 0;
-		var long_format = options && options.long_format;
+		var long_format = options.long_format;
 
 		if (diff) {
 			// assert: {Integer}diff 年 {Float}diff2 月, diff > 0.
 			// → difference = {Float} 年（至小數）
 			difference = diff + diff2 / 12;
 			// diff = {String} format to show
-			if (options && options.月) {
+			if (options.月) {
 				diff = gettext(long_format ?
 				// gettext_config:{"id":"$1-years-and-$2-months"}
 				'%1 {{PLURAL:%1|year|years}} and %2 {{PLURAL:%2|month|months}}'
@@ -2835,7 +2836,7 @@ function module_code(library_namespace) {
 				// gettext_config:{"id":"$1-y"}
 				: '%1 Y', difference.to_fixed(to_fixed_digits));
 			}
-			if (options && options.歲) {
+			if (options.歲) {
 				// 計算年齡(虛歲)幾歲。
 				difference = end.getFullYear() - start.getFullYear()
 				// + 1: 一出生即虛歲一歲(YO, years old, "Y/O.")。之後過年長一歲。
@@ -2894,12 +2895,19 @@ function module_code(library_namespace) {
 			: '%1 hr', difference.to_fixed(to_fixed_digits));
 		}
 
-		// gettext_config:{"id":"$1-days"}
-		return gettext(long_format ? '%1 {{PLURAL:%1|day|days}}'
-		// gettext_config:{"id":"$1-d"}
-		: '%1 d', (difference / 24).to_fixed(to_fixed_digits));
+		if ((difference /= 24) < 7 || !options.weeks) {
+			return gettext(long_format ?
+			// gettext_config:{"id":"$1-days"}
+			'%1 {{PLURAL:%1|day|days}}'
+			// gettext_config:{"id":"$1-d"}
+			: '%1 d', difference.to_fixed(to_fixed_digits));
+		}
 
-		// TODO: weeks
+		return gettext(long_format ?
+		// gettext_config:{"id":"$1-weeks"}
+		'%1 {{PLURAL:%1|week|weeks}}'
+		// gettext_config:{"id":"$1-w"}
+		: '%1 W', (difference / 7).to_fixed(to_fixed_digits));
 	}
 
 	// 將在 data.date.era 更正。

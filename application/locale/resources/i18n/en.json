@@ -772,6 +772,8 @@
 	"$1-hr": "%1 hr",
 	"$1-days": "%1 {{PLURAL:%1|day|days}}",
 	"$1-d": "%1 d",
+	"$1-weeks": "%1 {{PLURAL:%1|week|weeks}}",
+	"$1-w": "%1 W",
 	"2-days-before-yesterday-$h-$m": "2 days before yesterday, %H:%M",
 	"the-day-before-yesterday-$h-$m": "the day before yesterday, %H:%M",
 	"yesterday-$h-$m": "yesterday, %H:%M",
