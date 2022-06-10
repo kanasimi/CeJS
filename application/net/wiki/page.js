@@ -1699,6 +1699,9 @@ function module_code(library_namespace) {
 				&& wiki_API.normalize_title(options.configuration_page)
 				|| session.task_configuration
 				&& session.task_configuration.configuration_page_title;
+		/** {Number}延遲 adapt 設定的時間: 預設為過5分鐘才 adapt configuration */
+		var delay_time_to_adapt_task_configurations = 'delay_time_to_adapt_task_configurations' in options ? options.delay_time_to_adapt_task_configurations
+				: session.delay_time_to_adapt_task_configurations;
 
 		if (!(delay_ms > 0))
 			delay_ms = 0;
@@ -1914,21 +1917,54 @@ function module_code(library_namespace) {
 				// 使 wiki.listen() 可隨時監視設定頁面與緊急停止頁面的變更。
 				// 警告: 對於設定頁面的監聽，僅限於設定頁面也在監聽範圍中時方起作用。
 				// 例如設定了 namespace，可能就監聽不到設定頁面的變更。
-				var configuration_row;
+				var configuration_row, configuration_adapter,
+				//
+				configuration_adapter__run;
 				if (configuration_page_title) {
 					// 檢測看看是否有 configuration_page_title
 					rows.forEach(function(row, index) {
-						if (row.title === configuration_page_title)
+						if (row.title === configuration_page_title) {
 							configuration_row = row;
+						}
 					});
 				}
 				if (configuration_row) {
-					library_namespace.info([ 'add_listener: ', {
-						// gettext_config:{"id":"the-configuration-page-$1-has-been-modified.-re-parse"}
-						T : [ '設定頁面 %1 已變更。重新解析……',
-						//
-						wiki_API.title_link_of(configuration_page_title) ]
-					} ]);
+					configuration_adapter__run = function() {
+						// clearTimeout(session.adapt_task_configurations_timer);
+						delete session.adapt_task_configurations_timer;
+						library_namespace.info([ 'add_listener: ', {
+							// gettext_config:{"id":"the-configuration-page-$1-has-been-modified.-re-parse"}
+							T : [ '設定頁面 %1 已變更。重新解析……',
+							//
+							wiki_API.title_link_of(configuration_page_title) ]
+						} ]);
+						session.adapt_task_configurations(configuration_row,
+								options.configuration_adapter, 'once');
+					};
+					if (delay_time_to_adapt_task_configurations >= 0) {
+						configuration_adapter = function() {
+							if (session.adapt_task_configurations_timer) {
+								clearTimeout(
+								//
+								session.adapt_task_configurations_timer);
+							}
+							library_namespace.info([ 'add_listener: ', {
+								// gettext_config:{"id":"wait-$1-to-apply-the-settings"}
+								T : [ '等待 %1 以應用設定。',
+								//
+								library_namespace.age_of(0,
+								//
+								delay_time_to_adapt_task_configurations) ]
+							} ]);
+							session.adapt_task_configurations_timer =
+							//
+							setTimeout(configuration_adapter__run,
+							//
+							delay_time_to_adapt_task_configurations);
+						};
+					} else {
+						configuration_adapter = configuration_adapter__run;
+					}
 				}
 
 				if (options.filter && rows.length > 0) {
@@ -2226,9 +2262,7 @@ function module_code(library_namespace) {
 								}
 
 								if (configuration_row === row) {
-									session.adapt_task_configurations(row,
-									//
-									options.configuration_adapter, 'once');
+									configuration_adapter();
 									run_next();
 									return;
 								}
@@ -2273,9 +2307,7 @@ function module_code(library_namespace) {
 								}
 								Object.assign(row, page_id_hash[row.pageid]);
 								if (configuration_row === row) {
-									session.adapt_task_configurations(row,
-									//
-									options.configuration_adapter, 'once');
+									configuration_adapter();
 									return;
 								}
 

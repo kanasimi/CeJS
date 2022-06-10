@@ -106,7 +106,7 @@
 	"%1 {{PLURAL:%1|hour|hours}} later": "%1 {{PLURAL:%1|Stonn|Stonne}} m\u00e9i sp\u00e9it",
 	"%1 {PLURAL:%1|week|weeks}} later": "%1 {{PLURAL:%1|Woch|Woche}} m\u00e9i sp\u00e9it",
 	"Invalid date: %1": "Net valabelen Datum: %1",
-	"\u6ce8": "Notiz",
+	"\u8a3b": "Notiz",
 	"\u7409\u7403": "Ryukyu",
 	"\u65e5\u672c": "Japan",
 	"\ud55c\uad6d": "Korea",

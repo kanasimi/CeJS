@@ -2934,6 +2934,13 @@ function module_code(library_namespace) {
 
 	wiki_API.prototype.adapt_task_configurations = adapt_task_configurations;
 
+	// @see function add_listener(listener, options) @
+	// CeL.application.net.wiki.page
+	// 延遲 adapt 設定的時間: 預設為過5分鐘才 adapt configuration
+	// lag_to_adapt_task_configurations
+	// library_namespace.to_millisecond('5 min')
+	wiki_API.prototype.delay_time_to_adapt_task_configurations = 5 * 60 * 1000;
+
 	// html to wikitext
 	// https://zh.wikipedia.org/w/api.php?action=help&modules=flow-parsoid-utils
 

@@ -4,7 +4,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}. See also: [[Translating:Colorless echo JavaScript kit#Translation statistics]]",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1482}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1483}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"españa": {
@@ -2628,7 +2628,7 @@
 		"notes": "沒有頁面內容。; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1580}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3350}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L659}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1580}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3363}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3382}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L659}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L639}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": {
@@ -2712,7 +2712,7 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2979}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2986}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-title-$1": {
@@ -2740,14 +2740,21 @@
 		"message": "Configuration page: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1745}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1748}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-configuration-page-$1-has-been-modified.-re-parse": {
 		"message": "設定頁面 %1 已變更。重新解析……",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1928}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1937}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"wait-$1-to-apply-the-settings": {
+		"message": "等待 %1 以應用設定。",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: time. e.g., \"5 min\"",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1953}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-parameter-$1": {
@@ -2763,7 +2770,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3360}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3392}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages": {
@@ -5460,7 +5467,7 @@
 		"notes": "Only executing under Windows!",
 		"scope": "CeL.application.platform.nodejs: traverse_file_system()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L1109}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L1111}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"a-directory-name-ending-with-a-.-will-result-in-no-way-to-delete-or-copy-$1": {
@@ -5539,7 +5546,7 @@
 		"scope": "CeL.application.platform.nodejs: traverse_file_system()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L783}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L785}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-command-line-argument-$1": {
@@ -5548,7 +5555,7 @@
 		"scope": "CeL.application.platform.nodejs",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: argument",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L904}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L906}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unable-to-determine-the-type-of-file-for-$1": {
@@ -5990,7 +5997,7 @@
 		"original_message_language_code": "en-US",
 		"scope": "interact.DOM: auto_TOC(), CeL.application.storage.EPUB: generate_TOC()",
 		"additional_notes": "{{Identical|Content}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2210}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9128}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2210}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9132}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"if-the-e-book-chapter-directory-is-not-set-all-chapter-content-will-be-placed-directly-under-the-e-book-root-directory": {
@@ -6379,7 +6386,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-y-$2-m": {
-		"message": "%1 Y %2 M",
+		"message": "%1 {{PLURAL:%1|year|years}} and %2 {{PLURAL:%2|month|months}}",
 		"notes": "",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
@@ -6388,7 +6395,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-y": {
-		"message": "%1 Y",
+		"message": "%1 {{PLURAL:%1|year|years}}",
 		"notes": "Year(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
@@ -6396,7 +6403,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-m": {
-		"message": "%1 M",
+		"message": "%1 {{PLURAL:%1|month|months}}",
 		"notes": "Month(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
@@ -6404,7 +6411,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-ms": {
-		"message": "%1 ms",
+		"message": "%1 {{PLURAL:%1|millisecond|milliseconds}}",
 		"notes": "millisecond(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
@@ -6412,7 +6419,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-s": {
-		"message": "%1 s",
+		"message": "%1 {{PLURAL:%1|second|seconds}}",
 		"notes": "seconds",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
@@ -6420,7 +6427,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-min": {
-		"message": "%1 min",
+		"message": "%1 {{PLURAL:%1|minute|minutes}}",
 		"notes": "minutes",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
@@ -6428,7 +6435,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-hr": {
-		"message": "%1 hr",
+		"message": "%1 {{PLURAL:%1|hour|hours}}",
 		"notes": "hours",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
@@ -6436,7 +6443,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-d": {
-		"message": "%1 d",
+		"message": "%1 {{PLURAL:%1|day|days}}",
 		"notes": "days",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
@@ -6619,7 +6626,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"note": {
-		"message": "注",
+		"message": "註",
 		"notes": "Label for calendar.",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
@@ -7035,20 +7042,20 @@
 		"notes": "Table of contents message.",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9044}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9048}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"pin-unpin-the-toc": {
 		"message": "Pin/unpin the TOC",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9102}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9106}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"set-toc-to-left-or-right": {
 		"message": "Set TOC to left or right",
 		"original_message_language_code": "en-US",
 		"notes": "Switch the position of the contents.",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9114}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9118}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"contents-of-$1": {
@@ -7056,7 +7063,7 @@
 		"notes": "Table of contents message. e.g., Contents of [title]",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9124}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9128}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"expand": {
@@ -7064,7 +7071,7 @@
 		"notes": "show/hide table of contents(顯示/隱藏, 表示/隠す)",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9132}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9139}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1180}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9136}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9143}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1180}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"collapse": {
@@ -7072,7 +7079,7 @@
 		"notes": "show/hide table of contents(顯示/隱藏, 表示/隠す)",
 		"scope": "interact.DOM: auto_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9137}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1178}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9141}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L1178}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"invalid-name-of-color-$1": {

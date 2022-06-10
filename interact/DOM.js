@@ -5297,6 +5297,10 @@ function module_code(library_namespace) {
 		safari : 5
 	});
 
+	// TODO: 點選文字後在下方出現全橫幅的layer以展示訊息，再點選可隱藏。
+	// e.g.,
+	// https://www.twreporter.org/a/bookreview-i-generation-discrimination-micro-aggression
+
 	// 主object(正文或主object，會從之取得正文與注釋)[, flag, text string or
 	// object(注釋,會蓋過從主object取得之text), 使用的class name]
 	// sPop[generateCode.dLK]='sPopP,sPopF,sPopInit,*sPopInit();';

@@ -88,7 +88,7 @@
 	"%1 {{PLURAL:%1|day|days}} ago": "%1 dag{{PLURAL:%1||en}} geleden",
 	"%1 {{PLURAL:%1|week|weeks}} ago": "%1 {{PLURAL:%1|week|weken}} geleden",
 	"Invalid date: %1": "Ongeldige datum: %1",
-	"\u6ce8": "Opmerking",
+	"\u8a3b": "Opmerking",
 	"British": "Brits",
 	"\u2191Back to TOC": "\u2191Terug naar inhoudsopgave",
 	"expand": "uitvouwen",

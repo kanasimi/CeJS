@@ -2444,7 +2444,7 @@ function module_code(library_namespace) {
 							message = '因參照紀年[' + this.參照紀年
 									+ ']錯誤，本紀年顯示的是錯誤的日期！';
 							// gettext_config:{"id":"note"}
-							add_attribute(this, '注', message, true);
+							add_attribute(this, '註', message, true);
 
 							this.calendar = this.calendar.replace(/:.+/g, ':'
 									+ standard_time_parser);

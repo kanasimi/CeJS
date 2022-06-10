@@ -1307,6 +1307,7 @@ async function modify_source_files() {
 				adapt_new_change_to_source_file(fso_path, _options);
 			}, {
 				filter: /\.(js|html?)$/i,
+				ignore_error: true,
 				callback: resolve
 			});
 		});

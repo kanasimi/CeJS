@@ -716,11 +716,13 @@ function module_code(library_namespace) {
 				fso_status = node_fs.lstatSync(full_path);
 			} catch (error) {
 				if (error.code === 'ENOENT') {
-					// e.g., file name including "﯆񐠀"
-					library_namespace
-							.error('traverse_file_system: Cannot access '
-									+ full_path);
-					console.error(error);
+					if (!options.ignore_error) {
+						// e.g., file name including "﯆񐠀"
+						library_namespace
+								.error('traverse_file_system: Cannot access '
+										+ full_path);
+						console.error(error);
+					}
 				} else {
 					return promise.then(function() {
 						return Promise.reject(error);
