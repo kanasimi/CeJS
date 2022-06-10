@@ -6385,69 +6385,134 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2433}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4210}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"$1-y-$2-m": {
+	"$1-years-and-$2-months": {
 		"message": "%1 {{PLURAL:%1|year|years}} and %2 {{PLURAL:%2|month|months}}",
 		"notes": "",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: {Number} years, %2: {Number} months",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2822}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2826}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"$1-y": {
+	"$1-y-$2-m": {
+		"message": "%1 Y %2 M",
+		"notes": "",
+		"parameters": "%1: {Number} years, %2: {Number} months",
+		"scope": "data.date: age_of()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2828}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-years": {
 		"message": "%1 {{PLURAL:%1|year|years}}",
 		"notes": "Year(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2827}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2834}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"$1-m": {
+	"$1-y": {
+		"message": "%1 Y",
+		"notes": "Year(s)",
+		"scope": "data.date: age_of()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2836}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-months": {
 		"message": "%1 {{PLURAL:%1|month|months}}",
 		"notes": "Month(s)",
-		"scope": "data.date: age_of()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2850}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"$1-ms": {
-		"message": "%1 {{PLURAL:%1|millisecond|milliseconds}}",
-		"notes": "millisecond(s)",
-		"scope": "data.date: age_of()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2855}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"$1-s": {
-		"message": "%1 {{PLURAL:%1|second|seconds}}",
-		"notes": "seconds",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2860}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"$1-min": {
-		"message": "%1 {{PLURAL:%1|minute|minutes}}",
-		"notes": "minutes",
+	"$1-m": {
+		"message": "%1 M",
+		"notes": "Month(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2865}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2862}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"$1-hr": {
-		"message": "%1 {{PLURAL:%1|hour|hours}}",
-		"notes": "hours",
+	"$1-milliseconds": {
+		"message": "%1 {{PLURAL:%1|millisecond|milliseconds}}",
+		"notes": "millisecond(s)",
+		"scope": "data.date: age_of()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2868}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-ms": {
+		"message": "%1 ms",
+		"notes": "millisecond(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2870}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"$1-d": {
+	"$1-seconds": {
+		"message": "%1 {{PLURAL:%1|second|seconds}}",
+		"notes": "seconds",
+		"scope": "data.date: age_of()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2876}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-s": {
+		"message": "%1 s",
+		"notes": "seconds",
+		"scope": "data.date: age_of()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2878}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-minutes": {
+		"message": "%1 {{PLURAL:%1|minute|minutes}}",
+		"notes": "minutes",
+		"scope": "data.date: age_of()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2884}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-min": {
+		"message": "%1 min",
+		"notes": "minutes",
+		"scope": "data.date: age_of()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2886}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-hours": {
+		"message": "%1 {{PLURAL:%1|hour|hours}}",
+		"notes": "hours",
+		"scope": "data.date: age_of()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2892}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-hr": {
+		"message": "%1 hr",
+		"notes": "hours",
+		"scope": "data.date: age_of()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2894}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-days": {
 		"message": "%1 {{PLURAL:%1|day|days}}",
 		"notes": "days",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2875}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2898}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-d": {
+		"message": "%1 d",
+		"notes": "days",
+		"scope": "data.date: age_of()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2900}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"2-days-before-yesterday-$h-$m": {
@@ -6455,7 +6520,7 @@
 		"notes": "+ごろ,時点で",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2892}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2917}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-day-before-yesterday-$h-$m": {
@@ -6463,7 +6528,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2894}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2919}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"yesterday-$h-$m": {
@@ -6471,7 +6536,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2896}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2921}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"today-$h-$m": {
@@ -6479,7 +6544,7 @@
 		"notes": "%H點%M分",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2898}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2909}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2923}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2934}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"tomorrow-$h-$m": {
@@ -6487,7 +6552,7 @@
 		"notes": "+に or 以降に",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2900}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2925}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-day-after-tomorrow-$h-$m": {
@@ -6495,7 +6560,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2902}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2927}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"2-days-after-tomorrow-$h-$m": {
@@ -6503,7 +6568,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2904}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2929}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"3-days-after-tomorrow-$h-$m": {
@@ -6511,7 +6576,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2906}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2931}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"now": {
@@ -6519,7 +6584,7 @@
 		"notes": "指當下時間。",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2954}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2979}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"several-seconds-ago": {
@@ -6527,7 +6592,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2959}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2984}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"soon": {
@@ -6535,7 +6600,7 @@
 		"notes": "指幾秒鐘後。",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2961}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2986}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-seconds-ago": {
@@ -6543,7 +6608,7 @@
 		"notes": "just",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2965}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2990}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-seconds-later": {
@@ -6551,7 +6616,7 @@
 		"notes": "after %1 seconds",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2967}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2992}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-minutes-ago": {
@@ -6559,7 +6624,7 @@
 		"notes": "%1分鐘前",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2975}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3000}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-minutes-later": {
@@ -6567,7 +6632,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2977}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3002}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-hours-ago": {
@@ -6575,7 +6640,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2985}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3010}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-hours-later": {
@@ -6583,7 +6648,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2987}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3012}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-days-ago": {
@@ -6591,7 +6656,7 @@
 		"notes": "%1>3",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3016}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3041}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-days-later": {
@@ -6599,7 +6664,7 @@
 		"notes": "%1>3",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3018}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3043}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-weeks-ago": {
@@ -6607,7 +6672,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3025}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3050}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-weeks-later": {
@@ -6615,14 +6680,14 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3027}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3052}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-date-$1": {
 		"message": "Invalid date: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: date",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3491}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3516}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"note": {

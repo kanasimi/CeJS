@@ -2808,23 +2808,32 @@ function module_code(library_namespace) {
 		diff = diff2.getFullYear() - /* 1970 */new Date(0).getFullYear();
 		// 計算兩者相差大概月分。
 		diff2 = diff2.getMonth() + (diff2.getDate() - 1) / 30;
+
 		// 將數字四捨五入到指定的小數位數。 TODO: 把時間表示方式改為60進位。
 		var to_fixed_digits = options && (options.digits | 0) >= 0
 		// default: 0. e.g., {digits:0}
 		? options.digits | 0 : 0;
+		var long_format = options && options.long_format;
+
 		if (diff) {
 			// assert: {Integer}diff 年 {Float}diff2 月, diff > 0.
 			// → difference = {Float} 年（至小數）
 			difference = diff + diff2 / 12;
 			// diff = {String} format to show
 			if (options && options.月) {
+				diff = gettext(long_format ?
+				// gettext_config:{"id":"$1-years-and-$2-months"}
+				'%1 {{PLURAL:%1|year|years}} and %2 {{PLURAL:%2|month|months}}'
 				// gettext_config:{"id":"$1-y-$2-m"}
-				diff = gettext('%1 {{PLURAL:%1|year|years}} and %2 {{PLURAL:%2|month|months}}', diff, Math.round(diff2));
+				: '%1 Y %2 M', diff, Math.round(diff2));
 			} else {
 				// years 近一年, 一年多
 				// SI symbol: a (for Latin annus)
+				diff = gettext(long_format ?
+				// gettext_config:{"id":"$1-years"}
+				'%1 {{PLURAL:%1|year|years}}'
 				// gettext_config:{"id":"$1-y"}
-				diff = gettext('%1 {{PLURAL:%1|year|years}}', difference.to_fixed(to_fixed_digits));
+				: '%1 Y', difference.to_fixed(to_fixed_digits));
 			}
 			if (options && options.歲) {
 				// 計算年齡(虛歲)幾歲。
@@ -2846,33 +2855,49 @@ function module_code(library_namespace) {
 		}
 
 		if (diff2 >= 1) {
+			return gettext(long_format ?
+			// gettext_config:{"id":"$1-months"}
+			'%1 {{PLURAL:%1|month|months}}'
 			// gettext_config:{"id":"$1-m"}
-			return gettext('%1 {{PLURAL:%1|month|months}}', diff2.to_fixed(to_fixed_digits));
+			: '%1 M', diff2.to_fixed(to_fixed_digits));
 		}
 
 		if (difference < 1000) {
+			return gettext(long_format ?
+			// gettext_config:{"id":"$1-milliseconds"}
+			'%1 {{PLURAL:%1|millisecond|milliseconds}}'
 			// gettext_config:{"id":"$1-ms"}
-			return gettext('%1 {{PLURAL:%1|millisecond|milliseconds}}', difference | 0);
+			: '%1 ms', difference | 0);
 		}
 
 		if ((difference /= 1000) < 60) {
+			return gettext(long_format ?
+			// gettext_config:{"id":"$1-seconds"}
+			'%1 {{PLURAL:%1|second|seconds}}'
 			// gettext_config:{"id":"$1-s"}
-			return gettext('%1 {{PLURAL:%1|second|seconds}}', difference.to_fixed(to_fixed_digits));
+			: '%1 s', difference.to_fixed(to_fixed_digits));
 		}
 
 		if ((difference /= 60) < 60) {
+			return gettext(long_format ?
+			// gettext_config:{"id":"$1-minutes"}
+			'%1 {{PLURAL:%1|minute|minutes}}'
 			// gettext_config:{"id":"$1-min"}
-			return gettext('%1 {{PLURAL:%1|minute|minutes}}', difference.to_fixed(to_fixed_digits));
+			: '%1 min', difference.to_fixed(to_fixed_digits));
 		}
 
 		if ((difference /= 60) < 24) {
+			return gettext(long_format ?
+			// gettext_config:{"id":"$1-hours"}
+			'%1 {{PLURAL:%1|hour|hours}}'
 			// gettext_config:{"id":"$1-hr"}
-			return gettext('%1 {{PLURAL:%1|hour|hours}}', difference.to_fixed(to_fixed_digits));
+			: '%1 hr', difference.to_fixed(to_fixed_digits));
 		}
 
-		// day
+		// gettext_config:{"id":"$1-days"}
+		return gettext(long_format ? '%1 {{PLURAL:%1|day|days}}'
 		// gettext_config:{"id":"$1-d"}
-		return gettext('%1 {{PLURAL:%1|day|days}}', (difference / 24).to_fixed(to_fixed_digits));
+		: '%1 d', (difference / 24).to_fixed(to_fixed_digits));
 
 		// TODO: weeks
 	}
