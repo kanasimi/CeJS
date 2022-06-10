@@ -573,8 +573,11 @@ function module_code(library_namespace) {
 		library_namespace.create_directory(favorite_list_file_path.replace(
 				/[^\\\/]+$/g, ''));
 		// backup old favorite list file 備份最後一次修改前的書籤，預防一不小心操作錯誤時還可以補救。
-		library_namespace.move_file(favorite_list_file_path,
-				favorite_list_file_path + '.' + this.backup_file_extension);
+		if (library_namespace.storage.file_exists(favorite_list_file_path)) {
+			library_namespace.move_file(favorite_list_file_path,
+			// e.g., 'favorite.txt.bak'
+			favorite_list_file_path + '.' + this.backup_file_extension);
+		}
 		library_namespace.write_file(favorite_list_file_path, work_list_text
 				.toString());
 	}
@@ -719,17 +722,19 @@ function module_code(library_namespace) {
 
 			var last_marked_index, archived_prefix = '# '
 			// gettext_config:{"id":"archived"}
-			+ gettext.append_message_tail_space('已封存：'), prefix = '# '
-					+ gettext(
-							// '封存日期：%1，作品完結時間：%2',
-							// gettext_config:{"id":"archived-date-$1-last-download-date-$2"}
-							'封存日期：%1，最後一次於 %2 下載',
-							(new Date).toISOString(),
-							library_namespace
-									.is_Date(work_data.last_file_modified_date) ? work_data.last_file_modified_date
-									.toISOString()
-									: work_data.last_file_modified_date)
-					+ new_work_list.line_separator + archived_prefix;
+			+ gettext.append_message_tail_space('已封存：'),
+			//
+			prefix = '# ' + gettext(
+			// '封存日期：%1，作品完結時間：%2',
+			// gettext_config:{"id":"archived-date-$1-last-download-date-$2"}
+			'封存日期：%1，最後一次於 %2 下載', (new Date).toISOString(),
+			//
+			library_namespace.is_Date(work_data.last_file_modified_date)
+			//
+			? work_data.last_file_modified_date.toISOString()
+			//
+			: work_data.last_file_modified_date) + new_work_list.line_separator
+					+ archived_prefix;
 			new_work_list.forEach(function(line, index) {
 				var work = line.trim();
 				if (work === work_data.input_title || work === work_data.title
