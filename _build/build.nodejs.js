@@ -234,7 +234,9 @@ function en_message_to_message_id(en_message) {
 	message_id = message_id
 		.replace(/🆔/g, 'ID')
 		.replace(/[,;:.?!~]+$/, '')
-		.replace(/[:,;'"|\s\[\]\\\/#]+/g, '-')
+		// "{{%1}}" → "template-%1"
+		.replace(/{{([^{}]+)}}/, 'template-$1')
+		.replace(/[:,;'"|\s\[\]\\\/#{}]+/g, '-')
 		.replace(/[\-\s]+$|^[\-\s]+/g, '')
 		.replace(/^[.\-]+/, '')
 		.replace(/–|-{2,}/g, '-')
@@ -1069,7 +1071,7 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 					CeL.log(CeL.display_align([
 						['id\t', JSON.stringify(message_id)],
 						['原訊息\t', `[${qqq_data.original_message_language_code}] ${message_changed ? JSON.stringify(qqq_data.message) + ` ([${new_message_language_code}] ${locale_data[message_id]})` : ''}`],
-						['新→\t', `[${new_message_language_code}] ${message_changed ? JSON.stringify(message) : ''}`]
+						['新→\t', `[${new_message_language_code}] ${message_changed ? JSON.stringify(message) + (message === message_id ? ' (當作為 message id)' : '') : ''}`]
 					]));
 					qqq_data.original_message_language_code = new_message_language_code;
 				} else {
@@ -1083,7 +1085,7 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 				message_changed.set(qqq_data.message, message);
 				qqq_data.need_to_recheck_all_sources = true;
 				const locale_data = i18n_message_id_to_message[qqq_data.original_message_language_code];
-				if (locale_data) {
+				if (locale_data && message !== message_id) {
 					locale_data[message_id] = message;
 				}
 				//delete message_to_localized_mapping[qqq_data.original_message_language_code][qqq_data.message];
@@ -1179,6 +1181,12 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 							['原\t', JSON.stringify(message_id)],
 							['新→\t', JSON.stringify(value)]
 						]));
+						if (!qqq_data_Map.has(message_id)) {
+							CeL.error(`${adapt_new_change_to_source_file.name}: 改變前之 message id 不存在: ${message_id}`);
+						}
+						if (qqq_data_Map.has(value)) {
+							throw new Error(`${adapt_new_change_to_source_file.name}: 改變後之 message id 已存在: ${value}`);
+						}
 						message_id_changed.set(message_id, value);
 						qqq_data.need_to_recheck_all_sources = true;
 						// 當原始碼中改變 message id 時，不會一同變更 qqq_data_Map, message_to_id_Map, i18n_message_id_to_message。唯一只會紀錄於 message_id_changed。
@@ -1330,7 +1338,8 @@ function adapt_message_id_changed_to_Map(map) {
 	for (const [old_message_id, new_message_id] of message_id_changed.entries()) {
 		if (!map.has(old_message_id))
 			continue;
-		if (map.has(new_message_id)) {
+		if (map.has(new_message_id) && map.get(new_message_id) !== map.get(old_message_id)) {
+			console.trace([map.get(new_message_id), map.get(old_message_id)]);
 			throw new Error(`${adapt_message_id_changed_to_Map.name}: 已經有此 message id，無法更名: ${JSON.stringify(new_message_id)} ← ${JSON.stringify(old_message_id)}`);
 		}
 		map.set(new_message_id, map.get(old_message_id));
@@ -1342,7 +1351,10 @@ function adapt_message_id_changed_to_Object(object) {
 	for (const [old_message_id, new_message_id] of message_id_changed.entries()) {
 		if (!object.hasOwnProperty(old_message_id))
 			continue;
-		if (object.hasOwnProperty(new_message_id)) {
+		if (object.hasOwnProperty(new_message_id)
+			// 更改 message id 後，會在先前就寫入 object[new_message_id]。
+			&& object[new_message_id] !== object[old_message_id]) {
+			console.trace([object[new_message_id], object[old_message_id]]);
 			throw new Error(`${adapt_message_id_changed_to_Object.name}: 已經有此 message id，無法更名: ${JSON.stringify(new_message_id)} ← ${JSON.stringify(old_message_id)}`);
 		}
 		object[new_message_id] = object[old_message_id];
