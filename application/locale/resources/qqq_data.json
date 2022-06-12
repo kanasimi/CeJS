@@ -7814,6 +7814,149 @@
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L993}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
+	"maybe-user-$1-edit-text-signed-by-$2-or-$1-help-correcting-the-text": {
+		"message": "Maybe user %1 edit text signed by %2, or %1 help correcting the text",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: user name, %2: user name list",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1000}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"it-seems-the-user-$1-did-not-signed-with-link": {
+		"message": "It seems the user %1 did not signed with link.",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: user name",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1025}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"the-user-may-have-appended-date-and-signature-but-it-is-not-clear.-still-need-to-append-signature-for-$1-$2": {
+		"message": "The user may have appended date and signature, but it is not clear. Still '''need to append signature for %1 %2'''",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: \"IP user\" or \"user\", %2: user name",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1048}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"need-to-append-signature-for-$1-$2": {
+		"message": "'''Need to append signature for %1 %2'''",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: \"IP user\" or \"user\", %2: user name",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1050}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"ip-user": {
+		"message": "IP user",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1053}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"user": {
+		"message": "user",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1055}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"($1-characters-modified)": {
+		"message": "(%1 {{PLURAL:%1|character|characters}} modified)",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: number of characters",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1103}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"(new-page)": {
+		"message": "(new page)",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1123}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"pages-that-are-not-linked-to-the-signature-such-as-$1.-thank-you-for-your-participation": {
+		"message": "Pages that are not linked to the signature, such as %1. Thank you for your participation.",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page list",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1182}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"hi-maybe-you-can-change-the-format-of-your-signature": {
+		"message": "Hi, maybe you can change the format of your signature",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1196}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"$1-remind-you-to-add-a-link-when-signing-such-as-the-$2-pages-listed-in-the-notification": {
+		"message": "[[%1|Remind you to add a link when signing]], such as the %2 {{PLURAL:%2|page|pages}} listed in the notification.",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: log to page, %2: number of pages",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1200}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"if-you-have-updated-your-past-messages-please-add-a-signature-at-the-end": {
+		"message": "If you have updated your past messages, please add a signature at the end.",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1204}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"$3-signing-special-diff-$1-comment-by-$2": {
+		"message": "[[%3|Signing]] [[Special:Diff/%1|comment by %2]].",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: revid, %2: user name, %3: log to page",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1228}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"this-tool-is-only-for-recording": {
+		"message": "This tool is only for recording.",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1232}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"you-may-re-edit-the-text-whatever-you-want": {
+		"message": "You may re-edit the text whatever you want.",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1234}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"pages-that-may-require-a-signature-such-as-$1.-thank-you-for-your-participation": {
+		"message": "Pages that may require a signature, such as %1. Thank you for your participation.",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page list",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1246}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"please-remember-to-sign-when-you-leave-messages": {
+		"message": "Please remember to sign when you leave messages",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1259}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"$1-remind-to-sign-such-as-the-$2-pages-listed-in-the-notification": {
+		"message": "[[%1|Remind to sign]], such as the %2 pages listed in the notification.",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: log to page, %2: number of pages",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1263}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"only-inserted-or-modified-templates-section-titles-non-specific-meaning-text": {
+		"message": "Only inserted or modified templates / section titles / non-specific-meaning-text",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L697}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"pre-existing-text": {
+		"message": "Pre-existing text",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L890}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"only-inserted-punctuation-symbols": {
+		"message": "Only inserted punctuation / symbols",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L897}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"skip-the-edit-for-including-wp-trans-transclusion-<code>&lt-$1&gt-<-code>": {
+		"message": "Skip the edit for including [[WP:TRANS|transclusion]] <code>&lt;%1&gt;</code>",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: tag name",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L924}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
 	"reminder-to-remove-$1-inactive-anchors": {
 		"message": "提醒移除%1個失效網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
