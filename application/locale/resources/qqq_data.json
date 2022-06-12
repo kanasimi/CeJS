@@ -8111,6 +8111,128 @@
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L797}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
+	"synchronizing-$1": {
+		"message": "Synchronizing %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page title",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L127}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"create-a-redirect-with-the-same-name-as-the-original-wiki-project-page-$1": {
+		"message": "Create a redirect with the same name as the original wiki project page: %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: redirect page data",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L194}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L399}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"$1-dependent-on-module-→-$2": {
+		"message": "%1 dependent on module → %2",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page link, %2: page link list.",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L212}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L257}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"$1-dependent-on-→-$2": {
+		"message": "%1 dependent on → %2",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page link, %2: page link list.",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L226}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"$1-does-not-start-with-$2": {
+		"message": "%1 does not start with %2",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page link, %2: prefix",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L239}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"the-latest-version-was-edited-in-$1-too-close-to-time-later-than-$2-skip-this-page": {
+		"message": "The latest version was edited in %1, too close to time, later than %2, skip this page.",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: time, %2: time",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L283}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"this-page-does-not-exist-skip-this-page": {
+		"message": "This page does not exist, skip this page.",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L285}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"the-page-$1-of-the-source-wiki-project-redirects-to-$2-but-the-same-page-of-the-target-wiki-project-redirects-to-$3-they-are-different!-skip-this-page": {
+		"message": "The page %1 of the source wiki project redirects to %2, but the same page of the target wiki project redirects to %3, they are different! Skip this page.",
+		"original_message_language_code": "en-US",
+		"notes": "%1, %2, %3: page links",
+		"parameters": "%1, %2, %3: page links",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L334}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"this-page-is-copied-from-$1-and-updated-regularly-by-the-robot.-please-edit-the-original-wiki-project-page-directly-or-edit-this-page-after-removing-it-from-$2-of-the-custom-page": {
+		"message": "This page is copied from %1 and updated regularly by the robot. Please edit the original wiki project page directly, or edit this page after removing it from %2 of the custom page.",
+		"original_message_language_code": "en-US",
+		"notes": "%1, %2: page links",
+		"parameters": "%1, %2: page links",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L342}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"template-documentation-to-assist-in-understanding": {
+		"message": "Template documentation to assist in understanding",
+		"original_message_language_code": "en-US",
+		"notes": "comments for /doc",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L347}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"required-template-style-file": {
+		"message": "Required template style file",
+		"original_message_language_code": "en-US",
+		"notes": "comments for /styles.css",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L356}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"overwrite-target-page-$1": {
+		"message": "Overwrite target page %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page link",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L375}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"revision-id-$1": {
+		"message": "Revision id %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: revid",
+		"notes": "Use in edit summaries. 用於編輯註解。",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L386}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"fine-tuned": {
+		"message": "Fine-tuned",
+		"original_message_language_code": "en-US",
+		"notes": "with patch",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L391}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"required-by-$1": {
+		"message": "Required by %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page link",
+		"notes": "\"is depended on by %1\", \"受 %1 所依賴\"\nUse in edit summaries. 用於編輯註解。",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L395}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"adding-sitelinks-when-synchronizing-common-pages-$1-→-$2": {
+		"message": "Adding sitelinks when synchronizing common pages: %1 → %2",
+		"original_message_language_code": "en-US",
+		"notes": "edit summary on wikidata.",
+		"parameters": "%1, %2: site names",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L435}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"synchronizing-common-pages": {
+		"message": "Synchronizing common pages",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L50}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
 	"debug-level": {
 		"message": "debug level",
 		"notes": "Used as debugging message.",
