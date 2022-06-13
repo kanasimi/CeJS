@@ -4,7 +4,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}. See also: [[Translating:Colorless echo JavaScript kit#Translation statistics]]",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1495}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1497}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L471}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L481}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"españa": {
@@ -700,7 +700,7 @@
 	},
 	"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}": {
 		"message": "已載入 %1 筆資料。",
-		"notes": "Used as log message.",
+		"notes": "Used as log message.\nAdapt this Javascript code to match the correct plural rules if the target language does not differentiate plural forms (so it does need to test the value in arg[1]), or if it has more then 2 plural forms.",
 		"scope": "data.date.era: system",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
@@ -5759,9 +5759,10 @@
 	},
 	"of-file-$1": {
 		"message": "檔案路徑：%1",
-		"notes": "part 2, following {{Msg-wm|Cejs-skip-web-page-resource-$1}}.\n%2: file path",
+		"notes": "part 2, following {{Msg-wm|Cejs-skip-web-page-resource-$1}}.",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: file path",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1659}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1688}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -7535,6 +7536,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "This message should be tuned for use on each Wikipedia edition, with appropriate templates such as {{Tl|Done}} (which shows \"{{Done}}\" on Translatewikinet, with an autotranslated message).",
 		"e.g. in Japanese<nowiki>": "</nowiki>,<code><nowiki>{{</nowiki>利用者の投稿記録リンク|Example|50|20100820121030|4<nowiki>}}</nowiki></code>, {{BOTREQ|済}} こちらのリンクからご確認下さい,where <code><nowiki>{{</nowiki>[[wikipedia:ja:Template:利用者の投稿記録リンク|利用者の投稿記録リンク]]|...<nowiki>}}</nowiki></code> on Japanese Wikipedia is an equivalent of <code><nowiki>{{</nowiki>[[wikipedia:en:Template:User contributions|User contributions]]|...<nowiki>}}</nowiki></code> on English Wikipedia. The {{Tl|BOTREQ|済}} template shows a status icon and the optional custom message for showing the completion status \"済\" (done).",
+		"additional_notes": "; E.g. in Japanese\n: <code><nowiki>{{</nowiki>利用者の投稿記録リンク|Example|50|20100820121030|4<nowiki>}}</nowiki></code>, {{BOTREQ|済}} こちらのリンクからご確認下さい\n: where\n:* <code><nowiki>{{</nowiki>[[wikipedia:ja:Template:利用者の投稿記録リンク|利用者の投稿記録リンク]]|...<nowiki>}}</nowiki></code> on Japanese Wikipedia is an equivalent of <code><nowiki>{{</nowiki>[[wikipedia:en:Template:User contributions|User contributions]]|...<nowiki>}}</nowiki></code> on English Wikipedia.\n:* The {{Tl|BOTREQ|済}} template shows a status icon and the optional custom message for showing the completion status \"済\" (done).",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L818}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},

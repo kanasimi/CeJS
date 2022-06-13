@@ -108,7 +108,7 @@ function build_main_script() {
 		.replace(PATTERN_version_stamp,
 			function (all, header, v1, v2, _v3, v3, footer) {
 				// [ all, v1, v2, _v3, v3 ] major.minor.patch
-				var matched = new_build_version.match(/^v?(\d+)\.(\d+)(\.(\d+))?$/);
+				const matched = new_build_version.match(/^v?(\d+)\.(\d+)(\.(\d+))?$/);
 				if (v1 === matched[1] && v2 === matched[2]) {
 					// 自動增加 patch 版本號。
 					v3 = +matched[4] + 1;
@@ -226,7 +226,7 @@ async function get_gettext_plural_rules(resources_path) {
 
 
 function en_message_to_message_id(en_message) {
-	var message_id = en_message.trim();
+	let message_id = en_message.trim();
 	if (/\{\{PLURAL:/.test(message_id)) {
 		// Remove {{PLURAL:...}}
 		message_id = CeL.gettext(message_id);
@@ -621,7 +621,7 @@ function log_message_changed(message_id) {
 
 		const stringified__from_localized_message = typeof from_localized_message === 'function' ? function_to_message(from_localized_message) : from_localized_message;
 		if (stringified__from_localized_message === to_localized_message
-			|| stringified__from_localized_message === convert_plain_header_tail(to_localized_message))
+			|| stringified__from_localized_message === normalize_plain_header_tail(to_localized_message))
 			continue;
 		CeL.info(`${log_message_changed.name}: ${message}`);
 		CeL.log(CeL.display_align([
@@ -1367,7 +1367,7 @@ const qqq_order = ['notes', 'parameters', 'demo', 'repositories', 'references'];
 const qqq_order_Set = new Set(qqq_order.concat(['message', 'original_message_language_code', 'additional_notes']));
 const qqq_ignore_attributes_Set = new Set(['message_is_id']);
 
-function sort_Object_by_order(object, key_order) {
+function sort_Object_by_order(object, key_order, value_converter) {
 	if (!key_order)
 		return object;
 
@@ -1376,12 +1376,14 @@ function sort_Object_by_order(object, key_order) {
 	key_order.forEach(key => {
 		if (key_Set.has(key)) {
 			key_Set.delete(key);
-			sorted_object[key] = object[key];
+			const value = object[key];
+			//if (value_converter && / $/.test(value)) console.trace([key, value, value_converter(value)]);
+			sorted_object[key] = value_converter ? value_converter(value) : value;
 		}
 	});
 
 	const keys_left = Array.from(key_Set.keys()).sort();
-	keys_left.forEach(key => sorted_object[key] = object[key]);
+	keys_left.forEach(key => sorted_object[key] = value_converter ? value_converter(object[key]) : object[key]);
 	return sorted_object;
 }
 
@@ -1514,22 +1516,22 @@ function write_i18n_files(resources_path, message_id_order) {
 }
 
 // https://translatewiki.net/wiki/MediaWiki:Comma-separator/qqq
-function convert_plain_message(message) {
+function normalize_plain_message(message) {
 	if (typeof message !== 'string' /*|| !/&#32;|&nbsp;|&#160;$/.test(message)*/) {
 		return message;
 	}
 	return message.replace(/&#32;/g, ' ').replace(/&nbsp;|&#160;/g, '\xA0');
 }
 
-function convert_plain_header_tail(message) {
-	if (typeof message !== 'string' /*|| !/&#32;|&nbsp;|&#160;$/.test(message)*/) {
-		return message;
+function normalize_plain_header_tail(i18n_message) {
+	if (typeof i18n_message !== 'string' /*|| !/&#32;|&nbsp;|&#160;$/.test(i18n_message)*/) {
+		return i18n_message;
 	}
-	const plain_message = message
+	const plain_message = i18n_message
 		.replace(/&#32;$/g, ' ').replace(/^&#32;/g, ' ')
 		.replace(/(?:&nbsp;|&#160;)$/g, '\xA0').replace(/^(?:&nbsp;|&#160;)/g, '\xA0')
 		;
-	return message === plain_message || /&#/.test(plain_message) ? message : plain_message;
+	return i18n_message === plain_message || /&#/.test(plain_message) ? i18n_message : plain_message;
 }
 
 function escape_non_latin_chars(string) {
@@ -1540,7 +1542,7 @@ function write_message_script_file({ resources_path, language_code, locale_data,
 	const fso_path = resources_path + language_code + '.js';
 	const locale_message_data = [];
 	function convert_message(message) {
-		return escape_non_latin_chars(JSON.stringify(convert_plain_header_tail(message)));
+		return escape_non_latin_chars(JSON.stringify(normalize_plain_header_tail(message)));
 	}
 	for (const [message_id, locale_message] of Object.entries(sort_Object_by_order(locale_data, message_id_order))) {
 		if (message_id === '@metadata')
@@ -1556,7 +1558,7 @@ function write_message_script_file({ resources_path, language_code, locale_data,
 				locale_message_data.push(key_mark + locale_message);
 				continue;
 			}
-			CeL.error(`${write_message_script_file.name}: [${language_code}][${message_id}]: 原訊息與新函數不一致！您必須檢核此函數是否有安全疑慮，之後手動更改 [${fso_path}]！\n原	${original_function}\n新	${locale_message}`);
+			CeL.error(`${write_message_script_file.name}: [${language_code}][${message_id}]: 原訊息與新函數不一致！您必須檢核此函數是否有安全疑慮，之後手動將之從字串改為函數 [${fso_path}]！\n原	${original_function}\n新	${locale_message}`);
 		}
 		locale_message_data.push(key_mark + convert_message(locale_message));
 	}
@@ -1574,10 +1576,25 @@ ${JSON.stringify(language_code)});
 	}
 }
 
+// The inverse operation of function normalize_plain_header_tail()
+function convert_i18n_plain_header_tail(plain_message) {
+	if (typeof plain_message !== 'string') {
+		return plain_message;
+	}
+	const i18n_message = plain_message
+		.replace(/ $/g, '&#32;').replace(/^ /g, '&#32;')
+		.replace(/\xA0$/g, '&nbsp;').replace(/^\xA0/g, '&nbsp;')
+		;
+	if (/&#/.test(plain_message) && plain_message !== i18n_message) {
+		CeL.warn(`${convert_i18n_plain_header_tail.name}: 於首尾有空格並且訊息中含"&#"。仍將強制轉換首尾有空格。`);
+	}
+	return plain_message === i18n_message ? plain_message : i18n_message;
+}
+
 function data_to_i18n_contents(i18n_locale_data, message_id_order) {
 	if (typeof i18n_locale_data === 'string')
 		i18n_locale_data = JSON.parse(i18n_locale_data);
-	return JSON.stringify(sort_Object_by_order(i18n_locale_data, message_id_order), null, '\t') + '\n';
+	return JSON.stringify(sort_Object_by_order(i18n_locale_data, message_id_order, message_id_order && convert_i18n_plain_header_tail), null, '\t') + '\n';
 }
 function write_i18n_data_file({ language_code, locale_data, message_id_order }) {
 	const i18n_language_code_data = i18n_language_code_data_mapping.get(language_code);

@@ -4,7 +4,7 @@
 			"Borichèt"
 		]
 	},
-	"untranslated-message-count": "700+",
+	"untranslated-message-count": "600+",
 	"españa": "Spagna",
 	"french-republican-calendar": "calendari republican fransèis",
 	"clear-log": "Polidé l'argistr",
@@ -222,7 +222,7 @@
 	"log-type-log": "argistr",
 	"log-type-trace": "pista",
 	"log-type-warn": "avertiment",
-	"$1-is-loaded-setting-up-user-domain-resources-now": " [%1] a l'é carià, preparassion adess ëd j'arsorse dël domini dl'utent.",
+	"$1-is-loaded-setting-up-user-domain-resources-now": "[%1] a l'é carià, preparassion adess ëd j'arsorse dël domini dl'utent.",
 	"force-loading-using-domain-locale-$2-($1)": "Forsadura dël cariament o dl'utilisassion dël domini o dla parametrisassion regional [%2] (%1).",
 	"loading-using-domain-locale-$2-($1)": "Cariament o utilisassion dël domini o parametrisassion regional [%2] (%1).",
 	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": "Ël domini spessificà [%1] a l'é pa ancor carià. A podrìa essje damanca ëd buté ël drapò FÒRSA.",

@@ -10,7 +10,7 @@
 			"Wladek92"
 		]
 	},
-	"untranslated-message-count": "200+",
+	"untranslated-message-count": "100+",
 	"españa": "Espagne",
 	"french-republican-calendar": "calendrier républicain français",
 	"clear-log": "Effacer le journal",
@@ -228,7 +228,7 @@
 	"log-type-log": "journal",
 	"log-type-trace": "trace",
 	"log-type-warn": "avertissement",
-	"$1-is-loaded-setting-up-user-domain-resources-now": " [%1] est chargé, préparation maintenant des ressources du domaine de l’utilisateur.",
+	"$1-is-loaded-setting-up-user-domain-resources-now": "[%1] est chargé, préparation maintenant des ressources du domaine de l’utilisateur.",
 	"force-loading-using-domain-locale-$2-($1)": "Forçage du chargement ou de l’utilisation du domaine ou du paramétrage régional et linguistique [%2] (%1).",
 	"loading-using-domain-locale-$2-($1)": "Chargement ou utilisation du domaine ou du paramétrage régional et linguistique : [%2] (%1).",
 	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": "Le domaine spécifié [%1] n’est pas encore chargé. Il peut être nécessaire de poser le drapeau FORCE.",
