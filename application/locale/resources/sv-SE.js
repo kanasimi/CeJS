@@ -88,7 +88,7 @@
 	"finished: %1": "klar: %1",
 	"%1 elapsed, %3 at %2": "%1 passerad, %3 vid %2",
 	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "F\u00f6rst tar den %1 och f\u00e5r %2 sidor.",
-	"%1 {{PLURAL:%1|page|pages}} processed": "%1 sidor bearbetade.",
+	"%1 {{PLURAL:%2|page|pages}} processed": "%1 sidor bearbetade",
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 sidor har inte \u00e4ndrats,",
 	"%1 elapsed.": "%1 passerad.",
 	"'''Stopped''', give up editing.": "'''Stannade''', \u00f6verge redigering.",

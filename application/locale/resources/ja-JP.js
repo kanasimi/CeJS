@@ -274,7 +274,7 @@
 	"Missing page": "",
 	"Invalid page title": "",
 	"Page edit function error: %1": "",
-	"%1 {{PLURAL:%1|page|pages}} processed": "%1 \u672c\u306e\u8a18\u4e8b\u51e6\u7406\u6e08\u307f",
+	"%1 {{PLURAL:%2|page|pages}} processed": "%1 \u672c\u306e\u8a18\u4e8b\u51e6\u7406\u6e08\u307f",
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 \u672c\u306e\u8a18\u4e8b\u5909\u66f4\u306a\u3057\u3001",
 	"%1 elapsed.": "\u7d4c\u904e\u6642\u9593 %1\u3002",
 	"'''Stopped''', give up editing.": "\u7de8\u96c6\u3092'''\u4e2d\u6b62\u3057\u305f'''\u3002",

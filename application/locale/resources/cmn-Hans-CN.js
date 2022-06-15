@@ -306,7 +306,7 @@
 	"finished: %1": "\u7ed3\u675f\uff1a%1",
 	"%1 elapsed, %3 at %2": "\u9694 %1\uff0c%2 %3",
 	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "\u9996\u5148\u4f7f\u7528 %1 \u4ee5\u53d6\u5f97 %2 \u4e2a{{PLURAL:%2|\u9875\u9762\u5185\u5bb9}}\u3002",
-	"%1 {{PLURAL:%1|page|pages}} processed": "\u5df2\u5904\u7406 %1 \u4e2a{{PLURAL:%1|\u9875\u9762}}",
+	"%1 {{PLURAL:%2|page|pages}} processed": "\u5df2\u5904\u7406 %1 \u4e2a{{PLURAL:%1|\u9875\u9762}}",
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 \u4e2a{{PLURAL:%1|\u9875\u9762}}\u672a\u4f5c\u53d8\u66f4\uff0c",
 	"%1 elapsed.": "\u5171\u8d39\u65f6 %1\u3002",
 	"'''Stopped''', give up editing.": "'''\u5df2\u505c\u6b62\u4f5c\u4e1a'''\uff0c\u653e\u5f03\u7f16\u8f91\u3002",

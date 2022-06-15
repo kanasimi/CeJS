@@ -347,7 +347,7 @@
 	"Missing page": "\u4f5a\u5931\u9801\u9762",
 	"Invalid page title": "\u9801\u9762\u6a19\u984c\u932f\u8aa4",
 	"Page edit function error: %1": "\u9801\u9762\u7de8\u8f2f\u51fd\u6578\u932f\u8aa4\uff1a%1",
-	"%1 {{PLURAL:%1|page|pages}} processed": "\u5b8c\u6210 %1 \u689d\u76ee\u3002",
+	"%1 {{PLURAL:%2|page|pages}} processed": "\u5b8c\u6210 %1 \u689d\u76ee",
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 \u689d\u76ee\u672a\u4f5c\u8b8a\u66f4\u3002",
 	"%1 elapsed.": "\u5171\u8cbb\u6642 %1\u3002",
 	"'''Stopped''', give up editing.": "'''\u5df2\u505c\u6b62\u4f5c\u696d'''\uff0c\u653e\u68c4\u7de8\u8f2f\u3002",

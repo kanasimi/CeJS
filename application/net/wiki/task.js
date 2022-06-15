@@ -2316,8 +2316,8 @@ function module_code(library_namespace) {
 		library_namespace.debug('wiki_API.work: 開始執行作業: 先作環境建構與初始設定。');
 		if (config.summary) {
 			// '開始處理 ' + config.summary + ' 作業'
-			library_namespace.sinfo([ 'wiki_API.work: Start the operation [', 'fg=yellow',
-					String(config.summary), '-fg', ']' ]);
+			library_namespace.sinfo([ 'wiki_API.work: Start the operation [',
+					'fg=yellow', String(config.summary), '-fg', ']' ]);
 		}
 
 		/**
@@ -2873,9 +2873,9 @@ function module_code(library_namespace) {
 			function finish_up() {
 				if (false) {
 					console.trace(
-					// gettext_config:{"id":"$1-page(s)-processed"}
-					gettext('%1 {{PLURAL:%1|page|pages}} processed.',
-							pages.length));
+					// gettext_config:{"id":"$1-pages-processed"}
+					gettext('%1 {{PLURAL:%2|page|pages}} processed',
+							pages.length, pages.length));
 					console.log(pages[0].title);
 				}
 				if (!config.no_message) {
@@ -2914,8 +2914,12 @@ function module_code(library_namespace) {
 					}
 
 					count_summary = new gettext.Sentence_combination([
-					// gettext_config:{"id":"$1-page(s)-processed"}
-					'%1 {{PLURAL:%1|page|pages}} processed,', count_summary ]);
+					// gettext_config:{"id":"$1-pages-processed"}
+					'%1 {{PLURAL:%2|page|pages}} processed'
+					//
+					+ (log_item.report ? ',' : ''),
+					//
+					count_summary, pages.length ]);
 					// console.trace(count_summary);
 
 					if (log_item.report) {
@@ -2924,7 +2928,7 @@ function module_code(library_namespace) {
 							// 未改變任何條目。 No pages have been changed
 							// gettext_config:{"id":"no-page-modified"}
 							? 'no page modified,' : [
-							// gettext_config:{"id":"$1-page(s)-have-not-changed"}
+							// gettext_config:{"id":"$1-pages-have-not-changed"}
 							'%1 {{PLURAL:%1|page|pages}} have not changed,',
 									nochange_count ]);
 						}

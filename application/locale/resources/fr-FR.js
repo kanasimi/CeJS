@@ -348,7 +348,7 @@
 	"Missing page": "Page manquante",
 	"Invalid page title": "Titre de page non valide",
 	"Page edit function error: %1": "Erreur de la fonction de modification de page\u202f: %1",
-	"%1 {{PLURAL:%1|page|pages}} processed": "%1 page{{PLURAL:%1||s}} trait\u00e9e{{PLURAL:%1||s}},",
+	"%1 {{PLURAL:%2|page|pages}} processed": "%1 page{{PLURAL:%1||s}} trait\u00e9e{{PLURAL:%1||s}}",
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 page{{PLURAL:%1||s}} n\u2019{{PLURAL:%1|a|ont}} pas chang\u00e9,",
 	"%1 elapsed.": "%1 pass\u00e9.",
 	"'''Stopped''', give up editing.": "'''Arr\u00eat\u00e9''', modification abandonn\u00e9e.",

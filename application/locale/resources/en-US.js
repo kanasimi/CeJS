@@ -348,7 +348,7 @@
 	"Missing page": "Missing page",
 	"Invalid page title": "Invalid page title",
 	"Page edit function error: %1": "Page edit function error: %1",
-	"%1 {{PLURAL:%1|page|pages}} processed": "%1 {{PLURAL:%1|page|pages}} processed",
+	"%1 {{PLURAL:%2|page|pages}} processed": "%1 {{PLURAL:%2|page|pages}} processed",
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 {{PLURAL:%1|page|pages}} have not changed,",
 	"%1 elapsed.": "%1 elapsed.",
 	"'''Stopped''', give up editing.": "'''Stopped''', give up editing.",

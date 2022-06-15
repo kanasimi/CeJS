@@ -348,7 +348,7 @@
 	"Missing page": "P\u00e0gina mancanta",
 	"Invalid page title": "T\u00ectol \u00ebd p\u00e0gina nen bon",
 	"Page edit function error: %1": "Eror dla fonsion \u00ebd mod\u00ecfica \u00ebd p\u00e0gina: %1",
-	"%1 {{PLURAL:%1|page|pages}} processed": "%1 {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} trat\u00e0",
+	"%1 {{PLURAL:%2|page|pages}} processed": "%1 {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} trat\u00e0",
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} a son nen cangi\u00e0,",
 	"%1 elapsed.": "%1 pass\u00e0.",
 	"'''Stopped''', give up editing.": "'''F\u00ebrm\u00e0''', mod\u00ecfica bandon\u00e0.",

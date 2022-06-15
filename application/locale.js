@@ -791,7 +791,17 @@ function module_code(library_namespace) {
 
 		var sentence_combination = this;
 		if (sentence) {
-			sentence_combination.push(sentence);
+			if (Array.isArray(sentence) && sentence.every(function(_sentence) {
+				return Array.isArray(_sentence);
+			})) {
+				// e.g., new CeL.gettext.Sentence_combination(
+				// [ [ 'message', p1 ], [ 'message' ] ])
+				sentence_combination.append(sentence);
+			} else {
+				// e.g., new CeL.gettext.Sentence_combination(
+				// [ 'message', p1, p2 ])
+				sentence_combination.push(sentence);
+			}
 		}
 	}
 
