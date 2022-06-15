@@ -7319,6 +7319,67 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/interact/integrate/SVG.js#L748}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"no-synonym-set-$1": {
+		"message": "未設定任何同義詞：%1",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: word",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1046}}",
+		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
+	},
+	"no-text-set-$1": {
+		"message": "未設定文字：%1",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: number of line",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1515}}",
+		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
+	},
+	"convertion-pairs-of-$1": {
+		"message": "%1轉換對",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: language",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L155}}",
+		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
+	},
+	"this-rule-seems-unnecessary": {
+		"message": "似為不需要的規則：%1",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: conversion rule",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1955}}",
+		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
+	},
+	"force-the-use-of-the-ltp-server-and-skip-the-test-of-the-ltp-server-whether-it-works-properly-or-not.-use-this-option-only-if-you-are-prepared-to-use-the-cache-throughout": {
+		"message": "強制使用 LTP server，跳過對 LTP server 的運作測試。請只在您準備全程使用 cache 的情況下才使用這個選項。",
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L212}}",
+		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
+	},
+	"generate-the-answer-file-for-$1": {
+		"message": "生成 %1 的解答檔",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: file path",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L238}}",
+		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
+	},
+	"skip-the-loaded-file-$1": {
+		"message": "跳過已載入的檔案：%1",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: file path",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L366}}",
+		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
+	},
+	"count-of-multiple-matches": {
+		"message": "多次匹配的計數：",
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L490}}",
+		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
+	},
+	"there-are-multiple-conversion-targets-$1": {
+		"message": "有多個轉換標的：%1",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: conditions of conversion",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L605}}",
+		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
+	},
 	"cannot-move-to-$1": {
 		"message": "Cannot move to %1",
 		"original_message_language_code": "en-US",

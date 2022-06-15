@@ -1984,7 +1984,7 @@ function module_code(library_namespace) {
 					}[escape_char];
 					if (!escaped) {
 						throw new SyntaxError('Unexpected token \\'
-						//
+						// Invalid JSON
 						+ escape_char + ' in JSON');
 					}
 					return escaped

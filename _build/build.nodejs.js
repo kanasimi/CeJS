@@ -34,7 +34,7 @@ const datestamp = new Date;
 const node_fs = require('fs');
 
 function error_recover_and_exit(message) {
-	console.error(`${error_recover_and_exit.name}: Try to recover main script file from backup!`);
+	console.error(`${error_recover_and_exit.name}: Try to restore the master script file from the backup!`);
 
 	//node_fs.cpSync(backup_directory + library_main_script, library_main_script_file_path, { force: true });
 
@@ -44,7 +44,7 @@ function error_recover_and_exit(message) {
 require('../_for include/_CeL.loader.nodejs');
 
 if (typeof CeL === 'undefined') {
-	console.error("Can't load library!");
+	console.error("Unable to load library!");
 	error_recover_and_exit();
 }
 
@@ -1034,7 +1034,7 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 			插入 // gettext_config:{"qqq":"","zh-tw":"","ja":""}
 			gettext('English message');
 
-			插入 // gettext_config:{"en":"English message","qqq":""}
+			插入 // gettext_config:{"en":"English_message","qqq":""}
 			gettext('Original language message 原文訊息');
 
 			</code> */
