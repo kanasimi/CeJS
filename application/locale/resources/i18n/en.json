@@ -870,7 +870,7 @@
 	"illegal-$1-$2": "Illegal %1: [%2]",
 	"no-synonym-set-$1": "No synonym set: %1",
 	"no-text-set-$1": "No text set: %1",
-	"convertion-pairs-of-$1": "Convertion pairs of %1:",
+	"conversion-pairs-of-$1": "Conversion pairs of %1:",
 	"this-rule-seems-unnecessary": "This rule seems unnecessary",
 	"force-the-use-of-the-ltp-server-and-skip-the-test-of-the-ltp-server-whether-it-works-properly-or-not.-use-this-option-only-if-you-are-prepared-to-use-the-cache-throughout": "Force the use of the LTP server and skip the test of the LTP server, whether it works properly or not. Use this option only if you are prepared to use the cache throughout.",
 	"generate-the-answer-file-for-$1": "Generate the answer file for %1",

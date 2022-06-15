@@ -3052,7 +3052,7 @@ function module_code(library_namespace) {
 				}
 
 				// --------------------
-				// 處理記憶體洩漏問題 @ 20191129.check_language_convention.js
+				// 處理記憶體洩漏問題 @ 20191129.check_language_conversion.js
 				// console.log(process.memoryUsage());
 				// delete session.last_pages;
 				// 警告: 預設處理程序會清理掉解析後的資料。這可能造成嚴重錯誤，例如頁面被清空！
@@ -3061,7 +3061,7 @@ function module_code(library_namespace) {
 					// console.log(pages[0]);
 					// free:
 					// 必須要主動清理 page_data.parsed 才能釋放記憶體。
-					// @ 20191129.check_language_convention.js
+					// @ 20191129.check_language_conversion.js
 					// 不曉得是哪個環節索引了 page_data。
 					pages.forEach(function(page_data, index) {
 						if (page_data.parsed) {

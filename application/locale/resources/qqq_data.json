@@ -7334,7 +7334,7 @@
 		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1515}}",
 		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
 	},
-	"convertion-pairs-of-$1": {
+	"conversion-pairs-of-$1": {
 		"message": "%1轉換對",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: language",

@@ -872,7 +872,7 @@
 	"Illegal %1: [%2]": "Illegal %1: [%2]",
 	"\u672a\u8a2d\u5b9a\u4efb\u4f55\u540c\u7fa9\u8a5e\uff1a%1": "No synonym set: %1",
 	"\u672a\u8a2d\u5b9a\u6587\u5b57\uff1a%1": "No text set: %1",
-	"%1\u8f49\u63db\u5c0d": "Convertion pairs of %1:",
+	"%1\u8f49\u63db\u5c0d": "Conversion pairs of %1:",
 	"\u4f3c\u70ba\u4e0d\u9700\u8981\u7684\u898f\u5247\uff1a%1": "This rule seems unnecessary",
 	"\u5f37\u5236\u4f7f\u7528 LTP server\uff0c\u8df3\u904e\u5c0d LTP server \u7684\u904b\u4f5c\u6e2c\u8a66\u3002\u8acb\u53ea\u5728\u60a8\u6e96\u5099\u5168\u7a0b\u4f7f\u7528 cache \u7684\u60c5\u6cc1\u4e0b\u624d\u4f7f\u7528\u9019\u500b\u9078\u9805\u3002": "Force the use of the LTP server and skip the test of the LTP server, whether it works properly or not. Use this option only if you are prepared to use the cache throughout.",
 	"\u751f\u6210 %1 \u7684\u89e3\u7b54\u6a94": "Generate the answer file for %1",
