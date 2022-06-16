@@ -327,6 +327,7 @@
 	"Circular redirect: %1\u2194%2": "\u5faa\u74b0\u91cd\u5b9a\u5411\uff1a%1\u2194%2",
 	"Does not exist": "\u4e0d\u5b58\u5728",
 	"The cache file is saved.": "\u5feb\u53d6\u6a94\u5df2\u5132\u5b58\u3002",
+	"There are more than one %1 in %2": "\u65bc%1\u6709\u591a\u65bc\u4e00\u500b%2",
 	"Too many badtoken errors! Please re-execute the program!": "\u592a\u591a badtoken \u932f\u8aa4\uff01\u8acb\u91cd\u65b0\u57f7\u884c\u7a0b\u5e8f\uff01",
 	"Not using node.js!": "\u975e\u4f7f\u7528 node.js\uff01",
 	"\u672a\u4fdd\u5b58\u5bc6\u78bc\uff01": "\u672a\u4fdd\u5b58\u5bc6\u78bc\uff01",

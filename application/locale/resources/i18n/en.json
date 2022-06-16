@@ -326,6 +326,7 @@
 	"circular-redirect-$1↔$2": "Circular redirect: %1↔%2",
 	"does-not-exist": "Does not exist",
 	"the-cache-file-is-saved": "The cache file is saved.",
+	"there-are-more-than-one-$1-in-$2": "There are more than one %1 in %2",
 	"too-many-badtoken-errors!-please-re-execute-the-program": "Too many badtoken errors! Please re-execute the program!",
 	"not-using-node.js": "Not using node.js!",
 	"no-password-preserved": "No password preserved!",

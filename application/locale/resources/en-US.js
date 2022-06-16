@@ -328,6 +328,7 @@
 	"Circular redirect: %1\u2194%2": "Circular redirect: %1\u2194%2",
 	"Does not exist": "Does not exist",
 	"The cache file is saved.": "The cache file is saved.",
+	"There are more than one %1 in %2": "There are more than one %1 in %2",
 	"Too many badtoken errors! Please re-execute the program!": "Too many badtoken errors! Please re-execute the program!",
 	"Not using node.js!": "Not using node.js!",
 	"\u672a\u4fdd\u5b58\u5bc6\u78bc\uff01": "No password preserved!",

@@ -332,6 +332,7 @@
 	"circular-redirect-$1↔$2": "循環重定向：%1↔%2",
 	"does-not-exist": "不存在",
 	"the-cache-file-is-saved": "快取檔已儲存。",
+	"there-are-more-than-one-$1-in-$2": "於%1有多於一個%2",
 	"too-many-badtoken-errors!-please-re-execute-the-program": "太多 badtoken 錯誤！請重新執行程序！",
 	"not-using-node.js": "非使用 node.js！",
 	"no-password-preserved": "未保存密碼！",

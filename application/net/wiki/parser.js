@@ -1405,11 +1405,12 @@ function module_code(library_namespace) {
 				return true;
 			}
 			if (single_layout_types.includes(layout_type)) {
-				library_namespace.error(
-				//
-				'analysis_layout_indices: There are more than one '
-				//
-				+ layout_type + ' in ' + wiki_API.title_link_of(parsed.page));
+				library_namespace.error([ 'analysis_layout_indices: ', {
+					// gettext_config:{"id":"there-are-more-than-one-$1-in-$2"}
+					T : [ 'There are more than one %1 in %2',
+					//
+					layout_type, wiki_API.title_link_of(parsed.page) ]
+				} ]);
 			}
 		}
 

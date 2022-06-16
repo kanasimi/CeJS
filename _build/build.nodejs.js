@@ -507,7 +507,11 @@ function parse_qqq(qqq) {
 	let latest_attribute;
 	qqq.split(/\n/).forEach(line => {
 		line = line.trim();
-		if (!line) return;
+		if (!line) {
+			// preserve new lines
+			notes.push(line);
+			return;
+		}
 		let matched = line.match(/^;([^:\n]+):(.*)$/);
 		if (matched) {
 			if (!start_additional_notes && notes.length > 0) start_additional_notes = true;
@@ -1488,15 +1492,14 @@ function write_i18n_files(resources_path, message_id_order) {
 		if (language_code !== 'qqq') {
 			adapt_message_id_changed_to_Object(locale_data);
 
-			// cmn-Hant-TW: -1
-			const untranslated_message_count = Math.max(0, qqq_data_Map.size - Object.keys(locale_data).length);
+			const untranslated_message_count = qqq_data_Map.size - Object.keys(locale_data).filter(message_id => qqq_data_Map.has(message_id)).length;
 			const untranslated_ratio = untranslated_message_count / qqq_data_Map.size;
 			const number_digits = Math.floor(Math.log10(untranslated_message_count));
 			const number_base = 10 ** number_digits;
 			// gettext_config:{"id":"untranslated-message-count"}
 			locale_data[en_message_to_message_id('untranslated message count')] =
 				// String(): FuzzyBot 必須為 {String}?
-				number_base < 1 ? String(untranslated_message_count)
+				number_digits < 1 ? String(untranslated_message_count)
 					// 減少變更次數: 以數字位數為單位變更。
 					: Math.floor(untranslated_message_count / number_base) + '0'.repeat(number_digits) + '+';
 			if (untranslated_message_count < 500 || untranslated_ratio < .3) {
