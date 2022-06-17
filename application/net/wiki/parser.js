@@ -86,8 +86,8 @@ function module_code(library_namespace) {
 	function page_parser(wikitext, options) {
 		// console.log(wikitext);
 		// console.log(wiki_API.is_page_data(wikitext));
-		if (typeof wikitext === 'string') {
-			wikitext = [ wikitext ];
+		if (typeof wikitext === 'string' || wikitext === 0) {
+			wikitext = [ String(wikitext) ];
 		} else if (wiki_API.is_page_data(wikitext)) {
 			// 可以用 "CeL.wiki.parser(page_data).parse();" 來設置 parser。
 			var page_data = wikitext;
@@ -104,10 +104,8 @@ function module_code(library_namespace) {
 				return page_data.parsed;
 			}
 		} else if (!wikitext) {
-			if (wikitext === 0) {
-				wikitext = String(wikitext);
-			} else if (!wiki_API.is_valid_parameters_value(wikitext)) {
-				library_namespace.warn('page_parser: Null wikitext: '
+			if (!wiki_API.is_valid_parameters_value(wikitext)) {
+				library_namespace.warn('page_parser: ' + 'Null wikitext: '
 						+ wikitext);
 				// console.trace(wikitext);
 			}
@@ -118,7 +116,7 @@ function module_code(library_namespace) {
 				return wikitext;
 		} else {
 			// console.trace(wikitext);
-			throw new Error('page_parser: Unknown wikitext: {'
+			throw new Error('page_parser: ' + 'Invalid wikitext type: {'
 					+ typeof wikitext + '} ' + JSON.stringify(wikitext) + '.');
 		}
 

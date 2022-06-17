@@ -2,6 +2,8 @@
 = CeJS internationalization mechanism 國際化機制 =
 
 == Introduction 簡介 ==
+本函式庫採用一支小工具 _build/build.nodejs.js 來同步原始碼以及 translatewiki 推送的本土化訊息 json 檔案。假如您也管理著 JavaScript 項目，非常歡迎您一同參與開發。
+
 現行 CeJS 本土化訊息存放在4個地方。
 ; 1. <b>IETF language tag</b>.js
 : 程式執行時實際採用的是 [https://github.com/kanasimi/CeJS/tree/master/application/locale/resources application/locale/resources]/<b>IETF language tag</b>.js，這些檔案將由 _build/build.nodejs.js 自動生成。
@@ -38,6 +40,8 @@ See also: [[Thread:Portal talk:Ru/Plural changes in many languages]]
 ; zh
 : <code><nowiki>{{PLURAL:1|page|pages}}</nowiki></code> → page
 : Special case: <code><nowiki>{{PLURAL:2|page|pages}}</nowiki></code> → pages
+: <code><nowiki>{{PLURAL:1|字}}</nowiki></code> → 字
+: <code><nowiki>{{PLURAL:2|字}}</nowiki></code> → 字
 ; [https://www.mediawiki.org/wiki/Help:Magic_words/ru#Локализация ru]
 : Special case: <code><nowiki>{{PLURAL:5|1=Категория|Категории}}</nowiki></code> → Категории
 : <code><nowiki>{{PLURAL:3|страница|страницы|страниц}}</nowiki></code> → страницы
