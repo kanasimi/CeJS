@@ -7636,7 +7636,7 @@
 		"message": "Categories added to the report",
 		"original_message_language_code": "en-US",
 		"notes": "Maintenance categories to be added to the report. 報表須添加的維護分類。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L152}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L504}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L152}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L506}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"normalize-template-$1": {
@@ -7644,7 +7644,7 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: template name",
 		"notes": "Use in edit summaries. 用於編輯註解。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L239}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L41}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L512}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L239}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L41}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L514}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"merge-$1-templates-into-template-$2": {
@@ -7675,7 +7675,7 @@
 		"message": "Total %1 {{PLURAL:%1|article|articles}}.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: number of articles",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L461}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L482}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L461}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L483}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"number-of-templates": {
@@ -7694,27 +7694,27 @@
 	"the-articles-containing-too-many-maintenance-templates-are-listed-below": {
 		"message": "The articles containing too many maintenance templates are listed below:",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L480}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L481}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-report-will-be-updated-weekly-by-the-robot": {
 		"message": "The report will be updated weekly by the robot.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L485}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L486}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"you-can-change-the-configuration-from-$1": {
 		"message": "You can change the configuration from %1.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: configuration page link",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L487}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L488}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-configuration-page": {
 		"message": "the configuration page",
 		"original_message_language_code": "en-US",
 		"notes": "combine with 'You can change the configuration from %1.'; Repositories: {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L490}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L491}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"generate-date-$1": {
@@ -7727,21 +7727,21 @@
 	"problematic-articles": {
 		"message": "Problematic articles",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L500}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L502}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"too-many-entries-with-maintenance-templates-in-the-record-$1-entries": {
 		"message": "Too many entries with maintenance templates in the record: %1 {{PLURAL:%1|entrie|entries}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: number of entries",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L514}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L516}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"minimum-number-of-templates-to-report-$1": {
 		"message": "Minimum number of templates to report: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: number of templates",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L516}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L518}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"syntax-error-in-the-interlanguage-link-template": {
