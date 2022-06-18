@@ -2,7 +2,7 @@
 = CeJS internationalization mechanism 國際化機制 =
 
 == Introduction 簡介 ==
-本函式庫採用一支小工具 _build/build.nodejs.js 來同步原始碼以及 translatewiki 推送的本土化訊息 json 檔案。假如您也管理著 JavaScript 項目，非常歡迎您一同參與開發。
+本函式庫採用一支小工具 [https://github.com/kanasimi/CeJS/blob/master/_build/build.nodejs.js _build/build.nodejs.js] 來同步原始碼以及 translatewiki 推送的本土化訊息 json 檔案。假如您也管理著 JavaScript 項目，非常歡迎您一同參與開發。
 
 現行 CeJS 本土化訊息存放在4個地方。
 ; 1. <b>IETF language tag</b>.js
