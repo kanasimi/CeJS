@@ -167,7 +167,7 @@
 	"HTTP status code %1.": "C\u00f3digo de status do HTTP %1.",
 	"Error: %1": "Erro: %1",
 	"\u5716\u6a94\u640d\u58de\uff1a": "Imagem danificada:",
-	"\u7121\u6cd5\u6210\u529f\u53d6\u5f97\u5716\u7247\u3002": "Falha em obter a imagem.",
+	"\u7121\u6cd5\u53d6\u5f97\u5716\u7247\u3002": "Falha em obter a imagem.",
 	"\u5716\u7247\u7121\u5167\u5bb9\uff1a": "Nenhum conte\u00fado encontrado:",
 	"\u6a94\u6848\u904e\u5c0f\uff0c\u50c5 %1 \u4f4d\u5143\u7d44\uff1a": "%1 bytes, muito pequeno:",
 	"\u6a94\u6848\u50c5 %1 \u4f4d\u5143\u7d44\uff1a": "%1 bytes:",

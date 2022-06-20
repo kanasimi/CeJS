@@ -971,6 +971,7 @@
 	"pre-existing-text": "Pre-existing text",
 	"only-inserted-punctuation-symbols": "Only inserted punctuation / symbols",
 	"skip-the-edit-for-including-wp-trans-transclusion-<code>&lt-$1&gt-<-code>": "Skip the edit for including [[WP:TRANS|transclusion]] <code>&lt;%1&gt;</code>",
+	"generate-topic-list-$1-topics": "Generate topic list: %1 {{PLURAL:%1|topic|topics}}",
 	"reminder-to-remove-$1-inactive-anchors": "Reminder to remove %1 inactive {{PLURAL:%1|anchor|anchors}}",
 	"anchor-$1-links-to-a-specific-web-page-$2": "Anchor %1 links to a specific web page: %2.",
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": "The anchor (%2) has been [[Special:Diff/%1|deleted by other users]] before.",

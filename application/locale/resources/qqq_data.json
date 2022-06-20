@@ -4140,7 +4140,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"failed-to-get-image": {
-		"message": "無法成功取得圖片。",
+		"message": "無法取得圖片。",
 		"notes": "後有接訊息",
 		"scope": "work_crawler.js: get_image()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -8025,6 +8025,14 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: tag name",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L924}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"generate-topic-list-$1-topics": {
+		"message": "Generate topic list: %1 {{PLURAL:%1|topic|topics}}",
+		"original_message_language_code": "en-US",
+		"notes": "Use in edit summaries. 用於編輯註解。",
+		"parameters": "%1: topic counts",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170915.topic_list.js#L1638}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-to-remove-$1-inactive-anchors": {

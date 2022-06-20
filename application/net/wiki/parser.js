@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL function for MediaWiki (Wikipedia / 維基百科): wikitext parser
+ * @name CeL function for MediaWiki (Wikipedia / 維基百科): wikitext parser 維基語法解析器
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用程式庫的子程式庫。
  * 

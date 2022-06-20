@@ -491,7 +491,7 @@ function module_code(library_namespace) {
 				// 圖檔沒資格驗證。
 				message = [ {
 					// gettext_config:{"id":"failed-to-get-image"}
-					T : '無法成功取得圖片。'
+					T : '無法取得圖片。'
 				}, XMLHttp.status ? {
 					// gettext_config:{"id":"http-status-code-$1"}
 					T : [ 'HTTP status code %1.', XMLHttp.status ]
