@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Funa-enpitu",
 			"Kanashimi",
 			"MathXplore",
 			"MirukuPC",
@@ -270,6 +271,7 @@
 	"configuration-page-$1": "設定画面：%1",
 	"invalid-parameter-$1": "無効なパラメーター:「%1」",
 	"does-not-exist": "存在しません",
+	"there-are-more-than-one-$1-in-$2": "%2 に複数の %1 が存在します。",
 	"invalid-url-$1": "無効なURL：%1",
 	"no-change": "無変更",
 	"finished-$1": "終了：%1",
@@ -507,6 +509,7 @@
 	"unknown-style-$1": "不明なスタイル：[%1]。",
 	"unknown-style-name-$1": "不明なスタイル名：[%1]。",
 	"illegal-$1-$2": "不正な%1：[%2]",
+	"conversion-pairs-of-$1": "%1の変換ペア。",
 	"revision-id": "版の識別子",
 	"the-requested-robot-task-begins": "Bot依頼の作業を始めます。",
 	"add-warning-messages": "警告メッセージを追加する。",

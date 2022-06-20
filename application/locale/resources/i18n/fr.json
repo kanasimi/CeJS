@@ -337,6 +337,7 @@
 	"circular-redirect-$1↔$2": "Redirection circulaire : %1 ↔ %2",
 	"does-not-exist": "N’existe pas",
 	"the-cache-file-is-saved": "Le fichier cache est enregistré.",
+	"there-are-more-than-one-$1-in-$2": "Il y a plus d’1 %1 dans %2.",
 	"too-many-badtoken-errors!-please-re-execute-the-program": "Trop d’erreurs de jetons erronés ! Veuillez relancer le programme !",
 	"not-using-node.js": "N’utilise pas « node.js » !",
 	"no-password-preserved": "Aucun mot de passe préservé !",
