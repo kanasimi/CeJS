@@ -1227,6 +1227,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String}title#section
 	 * @returns {Undefined}Not a redirect page.
+	 * 
+	 * @see all_revision_SQL: page_is_redirect
 	 */
 	function parse_redirect(page_data) {
 		var wikitext, is_page_data = wiki_API.is_page_data(page_data);

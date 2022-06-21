@@ -881,6 +881,7 @@
 	"\u591a\u6b21\u5339\u914d\u7684\u8a08\u6578\uff1a": "Count of multiple matches:",
 	"\u6709\u591a\u500b\u8f49\u63db\u6a19\u7684\uff1a%1": "There are multiple conversion targets: %1",
 	"Cannot move to %1": "Cannot move to %1",
+	"Close %1 {{PLURAL:%1|request|requests}}: %2": "Close %1 {{PLURAL:%1|request|requests}}: %2",
 	"Automatically replace the display text of links: %1\u2192%2": "Automatically replace the display text of links: %1\u2192%2",
 	"Get list of %1 from %2.": "Get list of %1 from %2.",
 	"List types: %1.": "List types: %1.",

@@ -455,6 +455,7 @@ function module_code(library_namespace) {
 			} else if (data.error) {
 				// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
 				error = data.error;
+				error.toString = wiki_API.query.error_toString;
 			} else if (data.edit && data.edit.result !== 'Success') {
 				error = {
 					code : data.edit.result,

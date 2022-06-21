@@ -879,6 +879,7 @@
 	"count-of-multiple-matches": "Count of multiple matches:",
 	"there-are-multiple-conversion-targets-$1": "There are multiple conversion targets: %1",
 	"cannot-move-to-$1": "Cannot move to %1",
+	"close-$1-requests-$2": "Close %1 {{PLURAL:%1|request|requests}}: %2",
 	"automatically-replace-the-display-text-of-links-$1→$2": "Automatically replace the display text of links: %1→%2",
 	"get-list-of-$1-from-$2": "Get list of %1 from %2.",
 	"list-types-$1": "List types: %1.",

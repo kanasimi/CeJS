@@ -885,6 +885,7 @@
 	"count-of-multiple-matches": "多次匹配的計數：",
 	"there-are-multiple-conversion-targets-$1": "有多個轉換標的：%1",
 	"cannot-move-to-$1": "無法移到%1",
+	"close-$1-requests-$2": "關閉%1個請求：%2",
 	"automatically-replace-the-display-text-of-links-$1→$2": "自動替換連結顯示文字：%1→%2",
 	"get-list-of-$1-from-$2": "從 %2 取得%1的列表。",
 	"list-types-$1": "列表種類：%1。",

@@ -600,7 +600,8 @@ function module_code(library_namespace) {
 			// library_namespace.log(library_namespace.HTML_to_Unicode(response));
 			if (response) {
 				try {
-					response = library_namespace.parse_JSON(response);
+					// response = library_namespace.parse_JSON(response);
+					response = JSON.parse(response);
 				} catch (e) {
 					// <title>414 Request-URI Too Long</title>
 					// <title>414 Request-URI Too Large</title>

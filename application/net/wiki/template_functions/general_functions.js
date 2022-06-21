@@ -6,7 +6,9 @@
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用程式庫的子程式庫。
  * 
- * TODO:<code>
+ * TODO: https://en.wikipedia.org/wiki/Module:Check_for_unknown_parameters
+ * 
+ * <code>
 
 </code>
  * 
