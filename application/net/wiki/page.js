@@ -1721,9 +1721,23 @@ function module_code(library_namespace) {
 				.to_millisecond(options.start)) > 0) {
 			// treat as time back to 回溯這麼多時間。
 			if (last_query_time > library_namespace.to_millisecond('31d')) {
-				library_namespace
-						.info('add_listener: 2017 CE 最多可回溯約 30天。您所指定的時間 ['
-								+ options.start + '] 似乎過長了。');
+				library_namespace.info([ 'add_listener: ', {
+					// gettext_config:{"id":"wikimedia-wikis-can-be-backtracked-up-to-about-$1"}
+					T : [ 'Wikimedia wikis 最多可回溯約 %1。',
+					// @see https://www.mediawiki.org/wiki/Manual:$wgRCMaxAge
+					library_namespace.age_of(
+					// 在 2017 CE 最多可回溯約 30天。
+					library_namespace.to_millisecond('30D'), {
+						max_unit : 'day'
+					}) ]
+				}, {
+					// gettext_config:{"id":"the-period-you-specified-$1-($2)-may-be-too-long"}
+					T : [ '您所指定的時間 [%1]（%2）恐怕過長。', options.start,
+					//
+					library_namespace.age_of(last_query_time, {
+						max_unit : 'day'
+					}) ]
+				} ]);
 			}
 			last_query_time = new Date(Date.now() - last_query_time);
 		} else {
@@ -1731,16 +1745,19 @@ function module_code(library_namespace) {
 			last_query_time = new Date;
 		}
 
-		library_namespace.info('add_listener: 開始以 '
-		//
-		+ (use_SQL ? 'SQL' : 'API') + ' 監視 / scan '
-		//
-		+ (session ? wiki_API.site_name(session) : wiki_API.language) + ' '
-		//
-		+ (Date.now() - last_query_time > 100 ?
-		//
-		library_namespace.age_of(last_query_time, Date.now()) + ' 前開始' : '最近')
-				+ '更改的頁面。');
+		library_namespace.info([ 'add_listener: ', {
+			T : [ Date.now() - last_query_time > 100 ?
+			// gettext_config:{"id":"start-monitoring-and-scanning-$2-pages-changed-since-$3-using-$1"}
+			'開始以 %1 監視、掃描 %2 自 %3 起更改的頁面。'
+			// gettext_config:{"id":"start-monitoring-and-scanning-the-recently-changed-pages-of-$2-using-$1"}
+			: '開始以 %1 監視、掃描 %2 最近更改的頁面。', use_SQL ? 'SQL' : 'API',
+			//
+			session ? wiki_API.site_name(session) : wiki_API.language,
+			//
+			library_namespace.indicate_date_time(last_query_time, {
+				base_date : Date.now()
+			}) ]
+		} ]);
 
 		if (configuration_page_title) {
 			library_namespace.info([ 'add_listener: ', {

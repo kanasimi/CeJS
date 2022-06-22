@@ -96,12 +96,25 @@ if (typeof CeL === 'function')
 			return this.apply(this_obj, Array_slice.call(arguments, 1));
 		}
 
-		function copy_properties(from, to) {
+		function copy_properties_keys(from, to) {
+			Object.keys(from).forEach(function(property) {
+				to[property] = from[property];
+			});
+			return to;
+		}
+		var copy_properties = library_namespace.copy_properties = function copy_properties_old(
+				from, to) {
+			if (Object.keys) {
+				copy_properties = library_namespace.copy_properties = copy_properties_keys;
+				return copy_properties(from, to);
+			}
+
 			for ( var property in from)
 				to[property] = from[property];
 			return to;
-		}
-		library_namespace.copy_properties = copy_properties;
+		};
+		// 有 Object.keys() 則使用 Object.keys()。
+		copy_properties(Object.create(null), Object.create(null));
 
 		/**
 		 * Function.prototype.bind();
@@ -416,8 +429,14 @@ if (typeof CeL === 'function')
 							var hash_map = {};
 							return [ hash_map,
 							// has_hash()
-							hash_map.hasOwnProperty ? function(key) {
-								return hash_map.hasOwnProperty(key);
+							Object.hasOwn ? function(key) {
+								return Object.hasOwn(hash_map, key);
+							} : Object.prototype.hasOwnProperty
+							//
+							? function(key) {
+								return Object.prototype.hasOwnProperty
+								//
+								.call(hash_map, key);
 							} : Object.prototype ? function(key) {
 								return key in hash_map
 								//

@@ -2855,7 +2855,7 @@ function module_code(library_namespace) {
 			return diff;
 		}
 
-		if (diff2 >= 1) {
+		if (diff2 >= 1 && options.max_unit !== 'day') {
 			return gettext(long_format ?
 			// gettext_config:{"id":"$1-months"}
 			'%1 {{PLURAL:%1|month|months}}'

@@ -1471,7 +1471,7 @@ function module_code(library_namespace) {
 								+ recheck_flag);
 					}
 					if (!_this.reget_chapter) {
-						if (_this.hasOwnProperty('reget_chapter')) {
+						if (Object.hasOwn(_this, 'reget_chapter')) {
 							library_namespace
 									.warn([
 											{
@@ -1528,7 +1528,7 @@ function module_code(library_namespace) {
 
 				} else {
 					// 不可用 ('reget_chapter' in _this)，會得到 .prototype 的屬性。
-					if (!_this.hasOwnProperty('reget_chapter')) {
+					if (!Object.hasOwn(_this, 'reget_chapter')) {
 						work_data.reget_chapter = false;
 					}
 					// 如果章節刪除與增加，重整結果數量相同，則檢查不到，必須採用 .recheck。

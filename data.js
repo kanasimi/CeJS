@@ -119,7 +119,7 @@ function module_code(library_namespace) {
 		var value, target = {};
 		for (key in object)
 			// 不加入非本 instance，為 prototype 的東西。
-			if (object.hasOwnProperty(key)) {
+			if (Object.hasOwn(object, key)) {
 				value = object[key];
 				// TODO: 預防 loop, 防止交叉參照/循環參照。
 				target[key] = deep ? clone(value, deep) : value;
@@ -749,7 +749,8 @@ function module_code(library_namespace) {
 	 * @since 2006/9/6 20:55, 2010/4/12 23:06:04
 	 * @_memberOf _module_
 	 */
-	split_String_to_Object = function split_String_to_Object(value_set, assignment_char, end_char) {
+	split_String_to_Object = function split_String_to_Object(value_set,
+			assignment_char, end_char) {
 		if (typeof value_set !== 'string' || !value_set)
 			return {};
 

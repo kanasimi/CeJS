@@ -3173,6 +3173,7 @@ function module_code(library_namespace) {
 		}, this) : [ page_title ];
 	}
 
+	// TODO: test for 'Module:Check for unknown parameters'
 	function is_template(template_name, token, options) {
 		options = Object.assign({
 			namespace : 'Template'

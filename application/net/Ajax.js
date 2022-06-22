@@ -16,6 +16,8 @@ typeof CeL === 'function' && CeL.run({
 
 	// Promise for fetch()
 	require : 'data.code.compatibility.'
+	// library_namespace.copy_properties()
+	+ '|data.native'
 	// MIME_of()
 	+ '|application.net.MIME.'
 	// for CeL.to_file_name(), CeL.URI, CeL.Search_parameters

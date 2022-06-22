@@ -138,9 +138,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('continue data: [' + matched[1] + ']',
 						2, 'get_continue');
 				if (!(done = /^{\s*}$/.test(matched[1])))
-					data = Object.assign(data,
-					//
-					library_namespace.parse_JSON(matched[1]));
+					data = Object.assign(data, JSON.parse(matched[1]));
 			}
 
 			// options.get_all: get all continue data.

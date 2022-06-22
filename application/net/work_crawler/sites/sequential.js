@@ -73,7 +73,7 @@ function module_code(library_namespace) {
 		},
 		// 解析出章節列表。
 		get_chapter_list : function(work_data, html, get_label) {
-			if (!Object.hasOwnProperty(this, 'start_chapter_NO')
+			if (!Object.hasOwn(this, 'start_chapter_NO')
 					&& work_data.last_download.chapter > this.start_chapter_NO) {
 				// 未設定 .start_chapter_NO 且之前下載過，則接續上一次的下載。
 				this.start_chapter_NO = work_data.last_download.chapter;

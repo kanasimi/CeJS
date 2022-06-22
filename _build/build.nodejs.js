@@ -22,7 +22,7 @@ Sorting message id by reference.
 
 // --------------------------------------------------------------------------------------------
 
-const library_base_directory_name = '../', backup_directory = 'old/';
+const library_base_directory_name = '../', backup_directory = '_build/old/';
 
 let library_main_script = 'ce.js';
 const structure_directory = '_structure/';
@@ -597,8 +597,8 @@ function log_message_changed(message_id) {
 	}
 
 	for (const language_code of Object.keys(message_to_localized_mapping)) {
-		// .hasOwnProperty(message): 避免 'constructor'
-		let from_localized_message = (!message_to_localized_mapping[language_code].hasOwnProperty || message_to_localized_mapping[language_code].hasOwnProperty(message)) && message_to_localized_mapping[language_code][message];
+		// Object.hasOwn(): 避免 'constructor'
+		let from_localized_message = Object.hasOwn(message_to_localized_mapping[language_code], message) && message_to_localized_mapping[language_code][message];
 		let locale_data = i18n_message_id_to_message[language_code];
 		if (!locale_data) {
 			// e.g., get from load_CSV_message_to_localized()
@@ -610,8 +610,8 @@ function log_message_changed(message_id) {
 				i18n_language_code
 			});
 		}
-		// .hasOwnProperty(message_id): 避免 'constructor'
-		const to_localized_message = locale_data.hasOwnProperty(message_id) && locale_data[message_id];
+		// Object.hasOwn(): 避免 'constructor'
+		const to_localized_message = Object.hasOwn(locale_data, message_id) && locale_data[message_id];
 		if (!from_localized_message) {
 			// New localized message
 			continue;
@@ -654,7 +654,7 @@ function set_qqq_data(message_id, qqq, options) {
 		// Copy new properties from new qqq_data.
 		for (const property_name of Object.keys(qqq_data)) {
 			if ((qqq_data[property_name] || qqq_data[property_name] === 0
-				|| old_qqq_data.hasOwnProperty(property_name) && !do_not_overwrite_null_properities.has(property_name))
+				|| Object.hasOwn(old_qqq_data, property_name) && !do_not_overwrite_null_properities.has(property_name))
 				&& old_qqq_data[property_name] !== qqq_data[property_name]) {
 				if (options?.show_change_message && old_qqq_data[property_name] !== undefined) {
 					CeL.info(`${set_qqq_data.name}: Set [${message_id}].${JSON.stringify(property_name)}:`);
@@ -1353,9 +1353,9 @@ function adapt_message_id_changed_to_Map(map) {
 
 function adapt_message_id_changed_to_Object(object) {
 	for (const [old_message_id, new_message_id] of message_id_changed.entries()) {
-		if (!object.hasOwnProperty(old_message_id))
+		if (!Object.hasOwn(object, old_message_id))
 			continue;
-		if (object.hasOwnProperty(new_message_id)
+		if (Object.hasOwn(object, new_message_id)
 			// 更改 message id 後，會在先前就寫入 object[new_message_id]。
 			&& object[new_message_id] !== object[old_message_id]) {
 			console.trace([object[new_message_id], object[old_message_id]]);

@@ -989,7 +989,9 @@ function module_code(library_namespace) {
 		// console.trace([site_name, functions_of_site, options]);
 
 		var template_name = typeof template === 'string' ? template : template
-				&& template.name;
+				&& (template.type === 'transclusion' ? template.name
+				// assert: template_token.type !== 'magic_word_function'
+				: 'Module:' + wiki_API.normalize_title(template.parameters[1]));
 
 		// template_processor
 		var template_parser;
@@ -1014,7 +1016,10 @@ function module_code(library_namespace) {
 	}
 
 	function adapt_function(template_token, index, parent, options) {
-		if (!template_token || template_token.type !== 'transclusion')
+		if (!template_token
+				|| template_token.type !== 'transclusion'
+				&& (template_token.type !== 'magic_word_function'
+						|| template_token.name !== 'invoke' || !template_token.parameters[1]))
 			return;
 
 		// template_processor()
@@ -1137,7 +1142,10 @@ function module_code(library_namespace) {
 		});
 		// assert: (function_name_list.length > 0),
 		// because template_functions.biographical_templates.length > 0
-		session.register_redirects(function_name_list, function() {
+		session.register_redirects(function_name_list.map(function(name) {
+			return session.is_namespace(name, 'Module') ? name : session
+					.to_namespace(name, 'Template');
+		}), function() {
 			session.biographical_templates
 			//
 			= session.redirect_target_of(
@@ -1145,7 +1153,7 @@ function module_code(library_namespace) {
 			template_functions.biographical_templates);
 			// console.trace(session.biographical_templates);
 		}, {
-			namespace : 'Template',
+			// namespace : 'Template',
 			no_message : true
 		});
 

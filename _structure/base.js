@@ -935,9 +935,10 @@ function (globalThis) {
 	.
 	is_empty_object = function is_empty_object(value) {
 		if (typeof value === 'object') {
-			// TODO: using value.hasOwnProperty()
 			for (var key in value) {
-				return false;
+				if (!Object.hasOwn || Object.hasOwn(value, key)) {
+					return false;
+				}
 			}
 			return true;
 		}

@@ -228,7 +228,7 @@ function module_code(library_namespace) {
 						value_String = is_Array ? '[ ' : '{ ';
 						for (key in value)
 							try {
-								if (value.hasOwnProperty(key)) {
+								if (Object.hasOwn(value, key)) {
 									if (!is_Array)
 										value_String += '' + key;
 									if ((val = '' + value[key]).length < 9) {
@@ -331,18 +331,16 @@ function module_code(library_namespace) {
 		}
 
 		try {
-			// IE 8, JScript 5.8.23141 中，DOM 可能沒有 .hasOwnProperty()。
-			proto = value.hasOwnProperty && [];
+			proto = [];
 			for (key in value) {
 				if (length && (key === '0' || key === 0))
 					// 代表已經遍歷過。
 					length = 0;
 				if (!filter || filter.test(key))
-					(!proto || value.hasOwnProperty(key) ? nodes : proto)
-							.push({
-								div : show_value_single(key, value, filter),
-								S : 'margin-left:1em;'
-							});
+					(Object.hasOwn(value, key) ? nodes : proto).push({
+						div : show_value_single(key, value, filter),
+						S : 'margin-left:1em;'
+					});
 			}
 
 			if (library_namespace.is_RegExp(value))

@@ -344,7 +344,7 @@ function module_code(library_namespace) {
 
 		// library_namespace.log('using CeL.application.storage.EPUB');
 		var ebook = new library_namespace.EPUB(ebook_directory, {
-			rebuild : this.hasOwnProperty('rebuild_ebook')
+			rebuild : Object.hasOwn(this, 'rebuild_ebook')
 			// rebuild: 重新創建, 不使用舊的.opf資料. start over, re-create
 			? work_data.rebuild_ebook : work_data.reget_chapter
 					|| work_data.regenerate,

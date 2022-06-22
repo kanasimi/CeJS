@@ -88,7 +88,7 @@ function module_code(library_namespace) {
 				session.badtoken_count = 1;
 			library_namespace.warn([ 'check_session_badtoken: ',
 			//
-			+(new Date) + ' ' + wiki_API.site_name(session) + ': ', {
+			+(new Date).format() + ' ' + wiki_API.site_name(session) + ': ', {
 				// gettext_config:{"id":"it-seems-that-the-token-is-lost"}
 				T : '似乎丟失了令牌。'
 			}, '(' + session.badtoken_count + '/' + max_badtoken_count + ')' ]);
@@ -600,7 +600,6 @@ function module_code(library_namespace) {
 			// library_namespace.log(library_namespace.HTML_to_Unicode(response));
 			if (response) {
 				try {
-					// response = library_namespace.parse_JSON(response);
 					response = JSON.parse(response);
 				} catch (e) {
 					// <title>414 Request-URI Too Long</title>

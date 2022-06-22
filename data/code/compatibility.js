@@ -246,16 +246,20 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// IE 8, JScript 5.8.23141 中，DOM 可能沒有 .hasOwnProperty()。
+	var hasOwnProperty = Object.prototype.hasOwnProperty
 	// Object.getOwnPropertyDescriptor(object, 'property')
-	function hasOwnProperty(key) {
+	|| function hasOwnProperty(key) {
 		try {
-			return (key in this)
 			// Object.getPrototypeOf() 返回給定對象的原型。
-			&& this[key] !== Object.getPrototypeOf(this)[key];
+			var prototype = Object.getPrototypeOf(this);
+			return (key in this)
+			//
+			&& (!(key in prototype) || this[key] !== prototype[key]);
 		} catch (e) {
 			// TODO: handle exception
 		}
-	}
+	};
 
 	// Object.keys(): get Object keys, 列出對象中所有可以枚舉的屬性 (Enumerable Only)
 	// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
@@ -263,19 +267,10 @@ function module_code(library_namespace) {
 	// cf. Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or
 	// non-enumerable)
 	function Object_keys(object) {
-		var key, keys = [], prototype;
-
+		var keys = [];
 		try {
-			prototype = Object.getPrototypeOf(object);
-		} catch (e) {
-		}
-
-		try {
-			if (!prototype)
-				prototype = Object.create(null);
-			for (key in object) {
-				// !hasOwnProperty(key)
-				if (!(key in prototype) || object[key] !== prototype[key])
+			for ( var key in object) {
+				if (Object.hasOwn(object, key))
 					keys.push(key);
 			}
 
@@ -286,14 +281,15 @@ function module_code(library_namespace) {
 		return keys;
 	}
 
+	/**
+	 * @deprecatred
+	 */
 	function getPropertyNames() {
 		return Object.keys(this);
 	}
 
 	function getOwnPropertyDescriptor(object, property) {
-		if ((property in object)
-		// !hasOwnProperty(property)
-		&& object[property] !== Object.getPrototypeOf(object)[property]) {
+		if (Object.hasOwn(object, property)) {
 			return {
 				configurable : true,
 				enumerable : true,
@@ -325,9 +321,7 @@ function module_code(library_namespace) {
 		}
 		return values;
 
-		return Object.keys(object)
-		//
-		.map(function(key) {
+		return Object.keys(object).map(function(key) {
 			return object[key];
 		});
 	}
@@ -342,9 +336,7 @@ function module_code(library_namespace) {
 		}
 		return entries;
 
-		return Object.keys(object)
-		//
-		.map(function(key) {
+		return Object.keys(object).map(function(key) {
 			// [ key, value ]
 			return [ key, object[key] ];
 		});
@@ -416,28 +408,26 @@ function module_code(library_namespace) {
 		values : Object_values,
 		entries : Object_entries,
 
+		// Object.hasOwn(object, property)
+		// https://github.com/tc39/proposal-accessible-object-hasownproperty
+		hasOwn : function hasOwn(object, property) {
+			return hasOwnProperty.call(object, property);
+		},
+
 		// Object.getOwnPropertyDescriptor()
 		getOwnPropertyDescriptor : getOwnPropertyDescriptor,
 		// Object.getOwnPropertyDescriptors()
 		getOwnPropertyDescriptors : getOwnPropertyDescriptors,
 		// Object.getOwnPropertyNames()
 		// 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or non-enumerable)
+		// 列出的比 Object.keys() 多
 		getOwnPropertyNames : Object_keys
 	});
-
-	function copy_properties(from, to) {
-		Object.keys(from).forEach(function(property) {
-			to[property] = from[property];
-		});
-		return to;
-	}
-	// 現在有 Object.keys() 了，使用 Object.keys() 來替代原有之 copy_properties()。
-	library_namespace.copy_properties = copy_properties;
 
 	// 會造成幾乎每個使用 for(.. in Object)，而不是使用 Object.keys() 的，都出現問題。
 	if (false)
 		set_method(Object.prototype, {
-			getPropertyNames : getPropertyNames,
+			// getPropertyNames : getPropertyNames,
 			hasOwnProperty : hasOwnProperty
 		});
 
@@ -683,9 +673,28 @@ function module_code(library_namespace) {
 						return index;
 			return NOT_FOUND;
 		},
-		// Array.prototype.findIndex()
+		// Array.prototype.find()
 		find : function find(predicate, thisArg) {
 			var index = this.findIndex(predicate, thisArg);
+			if (index !== NOT_FOUND)
+				return this[index];
+			// return undefined;
+		},
+		// https://github.com/tc39/proposal-array-find-from-last
+		// Array.prototype.findLastIndex()
+		findLastIndex : function findLastIndex(predicate, thisArg) {
+			for (var index = this.length; index > 0;)
+				if (--index in this)
+					if (thisArg ? predicate.call(thisArg, this[index], index,
+							this)
+					// 不採用 .call() 以加速執行。
+					: predicate(this[index], index, this))
+						return index;
+			return NOT_FOUND;
+		},
+		// Array.prototype.findLast()
+		findLast : function findLast(predicate, thisArg) {
+			var index = this.findLastIndex(predicate, thisArg);
 			if (index !== NOT_FOUND)
 				return this[index];
 			// return undefined;
@@ -1937,6 +1946,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 	// JSON polyfill
+	// 2021: library_namespace.parse_JSON() @ _structure/module.js
 
 	function JSON_parse(text, reviver) {
 

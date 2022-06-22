@@ -1059,20 +1059,6 @@ if (typeof CeL === 'function') {
 
 			return text;
 		}
-		_.parse_JSON = _.eval_parse = eval_parse;
-		if (typeof JSON === 'object' && JSON.parse)
-			(function() {
-				var t;
-				try {
-					t = JSON.parse('{"V":"1","v":1}');
-				} catch (e) {
-				}
-				if (_.is_Object(t) && t.V === '1' && t.v === 1)
-					_.parse_JSON = JSON.parse;
-				else
-					// 未正確作動。
-					_.error('It seems the JSON.parse() does not work properly');
-			})();
 
 		// see Array.from of dependency_chain.js
 		function tag_list_default(tag, context) {
@@ -1311,7 +1297,7 @@ if (typeof CeL === 'function') {
 						// that also matches script content restrictions.
 						if (matched = config.match(/\/\*([\s\S]+?)\*\//))
 							config = matched[1];
-						if (config = _.parse_JSON(config.replace(
+						if (config = (JSON.parse || eval_parse)(config.replace(
 								/[\s\r\n]*\/\//g, '')))
 							env.script_config = config;
 					}

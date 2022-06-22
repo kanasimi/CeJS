@@ -6,8 +6,6 @@
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用程式庫的子程式庫。
  * 
- * TODO: https://en.wikipedia.org/wiki/Module:Check_for_unknown_parameters
- * 
  * <code>
 
 </code>
@@ -279,6 +277,76 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// 有缺陷的簡易型 Lua patterns to JavaScript RegExp
+	function Lua_pattern_to_RegExp_pattern(pattern) {
+		return String(pattern).replace(/%l/g, 'a-z').replace(/%u/g, 'A-Z')
+		// e.g., %d, %s, %S, %w, %W
+		.replace(/%/g, '\\');
+	}
+
+	// https://en.wikipedia.org/wiki/Module:Check_for_unknown_parameters
+	function check_template_for_unknown_parameters(template_token, options) {
+		var valid_parameters = this.valid_parameters, valid_RegExp_parameters = this.valid_RegExp_parameters;
+		var invalid_parameters = Object.keys(template_token.parameters)
+		//
+		.filter(function() {
+			if (valid_parameters.has(parameter))
+				return;
+			return !valid_RegExp_parameters.some(function(pattern) {
+				return pattern.test(parameter);
+			});
+		}, this);
+
+		if (invalid_parameters.length === 0) {
+			return;
+		}
+
+		var return_value = {
+			invalid_parameters : invalid_parameters
+		};
+		var unknown_text = this.parameters.unknown || 'Found _VALUE_, ';
+		var preview_text = this.parameters.preview;
+		unknown_text = invalid_parameters.map(function(parameter) {
+			return unknown_text.replace(/_VALUE_/g, parameter);
+		}).join('').replace(/[,\s]+$/, '');
+		if (preview_text) {
+			preview_text = invalid_parameters.map(function(parameter) {
+				return preview_text.replace(/_VALUE_/g, parameter);
+			}).join('').replace(/[,\s]+$/, '');
+		}
+		return {
+			invalid_parameters : invalid_parameters,
+			preview_text : preview_text || unknown_text,
+			unknown_text : unknown_text
+		};
+	}
+
+	function parse_module_Check_for_unknown_parameters(token, index, parent,
+			options) {
+		var parameters = token.parameters, valid_parameters = token.valid_parameters = new Set, valid_RegExp_parameters = token.valid_RegExp_parameters = [];
+		// { 1: "check for unknown parameters", 2: "check" }
+		for (var index = 3; index < token.length; index++) {
+			var value = parameters[index];
+			if (value)
+				valid_parameters.add(String(value));
+			if (value = parameters['regexp' + index]) {
+				try {
+					value = new RegExp('^'
+							+ Lua_pattern_to_RegExp_pattern(value) + '$');
+					valid_RegExp_parameters.push(value);
+				} catch (e) {
+					library_namespace
+							.error('parse_module_Check_for_unknown_parameters: Cannot convert to RegExp pattern: '
+									+ value);
+				}
+			}
+		}
+		token.check_template = check_template_for_unknown_parameters
+				.bind(token);
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 
 	// general_functions 必須在個別 wiki profiles 之前載入。
@@ -300,7 +368,9 @@ function module_code(library_namespace) {
 		SfnRef : parse_template_SfnRef,
 
 		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
-		'Pin message' : parse_template_Pin_message
+		'Pin message' : parse_template_Pin_message,
+
+		'Module:Check for unknown parameters' : parse_module_Check_for_unknown_parameters
 	};
 
 	// --------------------------------------------------------------------------------------------
