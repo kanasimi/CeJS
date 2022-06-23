@@ -14,6 +14,7 @@ TODO:
 Sorting message id by reference.
 對於只有特定 repository 引用的訊息，依照 repository 分割到不同 .js。
 測試原文語翻譯訊息首尾的標點符號是否相符。
+特殊型態標記所有 qqq 以外的屬性必須手動添加
 
 */
 
@@ -989,17 +990,21 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 			 * 添加訊息的方法: 特殊型態標記: 將下一非註解的行當作標的，並且不檢查內容。必須自己到 qqq.json 編寫 qqq!
 			 * e.g., 組合型 message id <code>
 
-			插入 // gettext_config:{"id":"message_id_1","mark_type":"combination_message_id"}
-			插入 // gettext_config:{"id":"message_id_2","mark_type":"combination_message_id"}
+			插入 // gettext_config:{"id":"message_id_1","mark_type":"combination_message_id","message":"message"}
+			插入 // gettext_config:{"id":"message_id_2","mark_type":"combination_message_id","message":"message"}
 			gettext(prefix + 'message_id_type' + postfix);
 
-			插入 // gettext_config:{"id":"message_id","mark_type":"part_of_string"}
+			插入 // gettext_config:{"id":"message_id","mark_type":"part_of_string","message":"message"}
 			'...|msg=message|...'.split('|');
 
 			</code> */
 			let qqq_data = qqq_data_Map.get(gettext_config.id);
 			if (!qqq_data) {
-				CeL.warn(`${adapt_new_change_to_source_file.name}: 新的特殊型態標記 message id: ${JSON.stringify(gettext_config.id)}。所有 qqq 以外的屬性必須手動添加！`);
+				if (!gettext_config.message) {
+					CeL.warn(`${adapt_new_change_to_source_file.name}: 新的特殊型態標記 message id 未設定: ${JSON.stringify(gettext_config.id)}。您必須手動設定 message 屬性！`);
+					throw new Error('No "message" property provided!')
+				}
+				CeL.warn(`${adapt_new_change_to_source_file.name}: 新的特殊型態標記 message id: ${JSON.stringify(gettext_config.id)}。必須至個別 i18n .json 中手動添加所有 qqq 以外的屬性！`);
 				qqq_data = parse_qqq(gettext_config.qqq || '');
 				qqq_data_Map.set(gettext_config.id, qqq_data);
 			}

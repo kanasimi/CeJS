@@ -12,15 +12,15 @@
 
 typeof CeL === 'function' && CeL.run({
 	// module name
-	name: 'data.Number_range_set',
+	name : 'data.Number_range_set',
 
-	require: 'data.code.compatibility.|data.native.',
+	require : 'data.code.compatibility.|data.native.',
 
 	// 設定不匯出的子函式。
 	// no_extend: '*',
 
 	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
-	code: module_code
+	code : module_code
 });
 
 function module_code(library_namespace) {
@@ -31,7 +31,9 @@ function module_code(library_namespace) {
 
 	/**
 	 * 指定包括數字範圍的數字集合，並可測試指定數字是否在範圍集合內。
-	 * @param {String|Array} range_set 數字範圍集合。
+	 * 
+	 * @param {String|Array}
+	 *            range_set 數字範圍集合。
 	 * @param {Object}[options]
 	 *            附加參數/設定特殊功能與選項。
 	 */
@@ -49,21 +51,26 @@ function module_code(library_namespace) {
 		if (Array.isArray(range_set)) {
 			range_set.forEach(add_range, this);
 		} else {
-			library_namespace.error('Number_range_set: ' + 'Invalid number range set: ' + range_set);
+			library_namespace.error([ 'Number_range_set: ', {
+				// gettext_config:{"id":"invalid-set-of-number-ranges-$1"}
+				T : [ 'Invalid set of number ranges: %1', range_set ]
+			} ]);
 		}
 	}
 
 	/**
 	 * 添加數字範圍。
-	 * @param {String} range 數字範圍。
+	 * 
+	 * @param {String}
+	 *            range 數字範圍。
 	 * @param {Object}[options]
 	 *            附加參數/設定特殊功能與選項。
-	 * @returns 
+	 * @returns
 	 */
 	function add_range(range, options) {
 		if (library_namespace.is_digits(range)) {
 			range = +range;
-			//if (!is_in_the_range(range))
+			// if (!is_in_the_range(range))
 			this.number_Set.add(range);
 			return;
 		}
@@ -81,11 +88,14 @@ function module_code(library_namespace) {
 				lower = -Infinity;
 			if (isNaN(upper))
 				upper = Infinity;
-			if (lower === upper || !this.using_real && upper - lower < (options && options.max_split_size || 100)) {
+			if (lower === upper
+					|| !this.using_real
+					&& upper - lower < (options && options.max_split_size || 100)) {
 				for (var number = lower; number <= upper; number++) {
 					this.number_Set.add(number);
 				}
-			} else if (!this.range_start_Map.has(lower) || this.range_start_Map.get(lower) < upper) {
+			} else if (!this.range_start_Map.has(lower)
+					|| this.range_start_Map.get(lower) < upper) {
 				// TODO: 最佳化，剔除重複的範圍。
 				this.range_start_Map.set(lower, upper);
 				delete this.range_start_sorted;
@@ -93,12 +103,17 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.error('add_range: ' + 'Invalid number range: ' + range);
+		library_namespace.error([ 'add_range: ', {
+			// gettext_config:{"id":"invalid-number-range-$1"}
+			T : [ 'Invalid number range: %1', range ]
+		} ]);
 	}
 
 	/**
 	 * 測試指定數字是否在範圍集合內。
-	 * @param {Number} number 指定數字
+	 * 
+	 * @param {Number}
+	 *            number 指定數字
 	 * @returns {Boolean} 指定數字在範圍集合內。
 	 */
 	function is_in_the_range(number) {
@@ -107,10 +122,11 @@ function module_code(library_namespace) {
 			return true;
 
 		if (!this.range_start_sorted)
-			this.range_start_sorted = Array.from(this.range_start_Map.keys()).sort();
+			this.range_start_sorted = Array.from(this.range_start_Map.keys())
+					.sort();
 
 		var lower = this.range_start_sorted.search_sorted(number, {
-			near: true
+			near : true
 		});
 		lower = this.range_start_sorted[lower];
 		if (number < lower)
@@ -120,8 +136,8 @@ function module_code(library_namespace) {
 	}
 
 	library_namespace.set_method(Number_range_set.prototype, {
-		add_range: add_range,
-		is_in_the_range: is_in_the_range
+		add_range : add_range,
+		is_in_the_range : is_in_the_range
 	});
 
 	return Number_range_set;

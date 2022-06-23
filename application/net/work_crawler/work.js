@@ -18,7 +18,7 @@ if (typeof CeL === 'function') {
 		// module name
 		name : 'application.net.work_crawler.work',
 
-		require : 'application.net.work_crawler.',
+		require : 'application.net.work_crawler.' + '|data.Number_range_set.',
 
 		// 設定不匯出的子函式。
 		no_extend : 'this,*',
@@ -688,7 +688,9 @@ function module_code(library_namespace) {
 				// Reset start_chapter_NO to test all chapters
 				this.start_chapter_NO = 1;
 			}
-			this.chapter_NO_range = new library_namespace.Number_range_set(this.chapter_NO_range, {
+			this.chapter_NO_range = new library_namespace.Number_range_set(
+			//
+			this.chapter_NO_range, {
 				max_split_size : 1e4
 			});
 		}

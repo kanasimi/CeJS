@@ -81,13 +81,12 @@ function module_code(library_namespace) {
 				T : '跳過所有章節'
 			} ]);
 		} else {
-			library_namespace.log([
-					'check_downloaded_chapters: ',
-					{
-						// gettext_config:{"id":"check-only-$1-chapters-$2"}
-						T : [ '僅檢查%1個章節：%2', chapter_list_to_check.length,
-								chapter_list_to_check.join(', ') ]
-					} ]);
+			library_namespace.log([ 'check_downloaded_chapters: ', {
+				// gettext_config:{"id":"check-only-$1-chapters-$2"}
+				T : [ '僅檢查%1個章節：%2', chapter_list_to_check.length,
+				//
+				chapter_list_to_check.join(', ') ]
+			} ]);
 		}
 
 		// console.log(work_data.chapter_list);
@@ -138,13 +137,12 @@ function module_code(library_namespace) {
 					T : '跳過所有章節'
 				} ]);
 			} else {
-				library_namespace.log([
-						'check_downloaded_chapter_url: ',
-						{
-							// gettext_config:{"id":"check-only-$1-chapters-$2"}
-							T : [ '僅檢查%1個章節：%2', chapter_list_to_check.length,
-									chapter_list_to_check.join(', ') ]
-						} ]);
+				library_namespace.log([ 'check_downloaded_chapter_url: ', {
+					// gettext_config:{"id":"check-only-$1-chapters-$2"}
+					T : [ '僅檢查%1個章節：%2', chapter_list_to_check.length,
+					//
+					chapter_list_to_check.join(', ') ]
+				} ]);
 			}
 
 			// console.log(work_data.chapter_list);
@@ -252,8 +250,12 @@ function module_code(library_namespace) {
 		}
 
 		if (this.chapter_NO_range) {
-			while (chapter_NO < work_data.chapter_list.length && !this.chapter_NO_range.is_in_the_range(chapter_NO)) {
-				chapter_NO++;
+			while (!this.chapter_NO_range.is_in_the_range(chapter_NO)) {
+				if (++chapter_NO === work_data.chapter_list.length) {
+					continue_next_chapter.call(this, work_data, chapter_NO,
+							callback);
+					return;
+				}
 			}
 		}
 
@@ -272,7 +274,7 @@ function module_code(library_namespace) {
 			// console.log(chapter_directory_name);
 			if (!chapter_directory_name.toLowerCase().includes(
 					this.start_chapter_title)) {
-				CeL.debug({
+				library_namespace.debug({
 					T : [ '還沒到指定開始下載的章節標題 %2，跳過[%1]不下載。', chapter_data.title,
 							chapter_directory_name ]
 				});
