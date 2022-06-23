@@ -2418,7 +2418,7 @@ function module_code(library_namespace) {
 	function Object_is_empty(object) {
 		if (object !== null)
 			for ( var key in object) {
-				if (Object.hasOwn(object, key)) {
+				if (!Object.hasOwn || Object.hasOwn(object, key)) {
 					return false;
 				}
 			}
@@ -2451,7 +2451,7 @@ function module_code(library_namespace) {
 			return new_object;
 
 		for ( var key in object) {
-			if (Object.hasOwn(object, key)) {
+			if (!Object.hasOwn || Object.hasOwn(object, key)) {
 				new_object[object[key]] = key;
 			}
 		}
@@ -2477,7 +2477,7 @@ function module_code(library_namespace) {
 			return 0;
 		var count = 0;
 		for ( var key in object) {
-			if (Object.hasOwn(object, key)) {
+			if (!Object.hasOwn || Object.hasOwn(object, key)) {
 				count++;
 			}
 		}
@@ -4734,7 +4734,7 @@ function module_code(library_namespace) {
 
 	set_method(RegExp.prototype, {
 		clone : function() {
-			// TODO: Object.hasOwn(this, )
+			// TODO: using Object.getOwnPropertyNames() to copy others
 			return new RegExp(this.source, this.flags);
 		},
 		reflags : set_bind(renew_RegExp_flags)
@@ -4771,7 +4771,7 @@ function module_code(library_namespace) {
 	set_method(Array.prototype, {
 		// Array.prototype.clone
 		clone : function() {
-			// TODO: Object.hasOwn(this, )
+			// TODO: using Object.getOwnPropertyNames() to copy others
 			return this.slice();
 		},
 		remove_once : function(value) {
@@ -4964,7 +4964,7 @@ function module_code(library_namespace) {
 
 	set_method(Date.prototype, {
 		clone : function() {
-			// TODO: Object.hasOwn(this, )
+			// TODO: using Object.getOwnPropertyNames() to copy others
 			return new Date(this.getTime());
 		}
 	});

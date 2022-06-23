@@ -911,11 +911,17 @@ function GitHub_link(options) {
 	Object.assign(this, options);
 }
 
-GitHub_link.prototype.toString = function toString() {
-	return `{{GitHub|${encodeURI(`${this.base_GitHub_path}/blob/master/${this.script_file_path.slice(CeL.append_path_separator(this.source_base_path).length).replace(/\\/g, '/')}`)}${this.line_index >= 0 ? `#L${this.line_index + 1}` : ''}}}`;
+GitHub_link.prototype.toString = function toString(for_sort) {
+	const script_file_path = this.script_file_path.slice(CeL.append_path_separator(this.source_base_path).length).replace(/\\/g, '/');
+	if (for_sort) {
+		//if (this.mark_line_index) console.log([script_file_path, this.line_index, this.mark_line_index]);
+		// .pad(6): 最多容許 999999行。
+		return `${this.base_GitHub_path}	${script_file_path}	${this.line_index >= 0 ? this.line_index.pad(6) : ''}	${this.mark_line_index >= 0 ? this.mark_line_index.pad(6) : ''}`;
+	}
+	return `{{GitHub|${encodeURI(`${this.base_GitHub_path}/blob/master/${script_file_path}`)}${this.line_index >= 0 ? `#L${this.line_index + 1}` : ''}}}`;
 };
 
-function set_references({ qqq_data, script_file_path, options, line_index }) {
+function set_references({ qqq_data, script_file_path, options, line_index, mark_line_index }) {
 	if (!Array.isArray(qqq_data.references))
 		qqq_data.references = qqq_data.references ? [qqq_data.references] : [];
 	if (!Array.isArray(qqq_data.repositories))
@@ -930,7 +936,7 @@ function set_references({ qqq_data, script_file_path, options, line_index }) {
 		qqq_data.references.push(new GitHub_link({
 			...options,
 			script_file_path,
-			line_index,
+			line_index, mark_line_index,
 		}));
 		qqq_data.references.script_file_path_hash.set(script_file_path, options);
 		qqq_data.repositories.push(base_GitHub_path);
@@ -993,13 +999,14 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 			</code> */
 			let qqq_data = qqq_data_Map.get(gettext_config.id);
 			if (!qqq_data) {
-				CeL.error(`${adapt_new_change_to_source_file.name}: 特殊型態標記 message id 無 qqq data: ${JSON.stringify(gettext_config.id)}`);
-				continue;
+				CeL.warn(`${adapt_new_change_to_source_file.name}: 新的特殊型態標記 message id: ${JSON.stringify(gettext_config.id)}。所有 qqq 以外的屬性必須手動添加！`);
+				qqq_data = parse_qqq(gettext_config.qqq || '');
+				qqq_data_Map.set(gettext_config.id, qqq_data);
 			}
 
 			for (let _line_index = line_index; _line_index < content_lines.length; _line_index++) {
 				if (!/^\s*\/\//.test(content_lines[_line_index])) {
-					set_references({ qqq_data, script_file_path, options, line_index: _line_index });
+					set_references({ qqq_data, script_file_path, options, line_index: _line_index, mark_line_index: line_index });
 					break;
 				}
 			}
@@ -1397,6 +1404,7 @@ function write_qqq_data(resources_path) {
 	adapt_message_id_changed_to_Map(qqq_data_Map);
 	let qqq_file_data = Object.create(null);
 	let message_id_without_references = [];
+	const Symbol_sort_key = Symbol('sort key');
 	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
 		const original_message_locale_data = i18n_message_id_to_message[qqq_data.original_message_language_code];
 		if (original_message_locale_data && !original_message_locale_data[message_id]) {
@@ -1406,6 +1414,9 @@ function write_qqq_data(resources_path) {
 
 		qqq_file_data[message_id] = qqq_data;
 		if (Array.isArray(qqq_data.references) && qqq_data.references.length > 0) {
+			qqq_data[Symbol_sort_key] = qqq_data.references
+				.map(reference => reference.toString(true))
+				.sort().unique().join('\n: ');
 			qqq_data.references = qqq_data.references
 				.map(reference => reference.toString())
 				.sort().unique().join('\n: ');
@@ -1459,8 +1470,11 @@ function write_qqq_data(resources_path) {
 
 	const message_id_order = Array.from(qqq_data_Map.keys())
 		// 依照 References → message id 排序 message id。
-		.sort((_1, _2) => CeL.general_ascending(qqq_data_Map.get(_1)?.references, qqq_data_Map.get(_2)?.references)
+		.sort((_1, _2) => CeL.general_ascending(qqq_data_Map.get(_1) && qqq_data_Map.get(_1)[Symbol_sort_key], qqq_data_Map.get(_2) && qqq_data_Map.get(_2)[Symbol_sort_key])
 			|| CeL.general_ascending(_1, _2));
+	for (const qqq_data of qqq_data_Map.values()) {
+		delete qqq_data[Symbol_sort_key];
+	}
 	// 把 metadata 放在最前面。
 	message_id_order.unshift("@metadata");
 	//console.trace(message_id_order.slice(-5));

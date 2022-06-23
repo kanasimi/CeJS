@@ -381,7 +381,10 @@ function module_code(library_namespace) {
 		// --------------------------------------------------------------------
 
 		// Essential dependency chain
-		library_namespace.debug('載入操作維基百科的主要功能 / 必要的依賴鍊。', 1, 'wiki_API');
+		library_namespace.debug({
+			// gettext_config:{"id":"load-the-main-functions-and-necessary-dependencies-to-operate-mediawiki"}
+			T : 'Load the main functions and necessary dependencies to operate MediaWiki.'
+		}, 1, 'wiki_API');
 		// library_namespace.set_debug(2);
 		library_namespace.run(sub_modules_to_full_module_path(sub_modules),
 		//

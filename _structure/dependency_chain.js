@@ -104,6 +104,7 @@ if (typeof CeL === 'function')
 		}
 		var copy_properties = library_namespace.copy_properties = function copy_properties_old(
 				from, to) {
+			// TODO: using Object.getOwnPropertyNames() to copy others
 			if (Object.keys) {
 				copy_properties = library_namespace.copy_properties = copy_properties_keys;
 				return copy_properties(from, to);

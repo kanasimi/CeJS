@@ -755,6 +755,24 @@ function test_data() {
 		assert(['{"a":2,"b":[1,2,3,4,5],"c":{"a":1,"b":2,"c":3,"d":4},"d":"d","e":{"a":[1,2,3,4],"b":{"i":1,"j":2,"k":3,"l":4}},"f":4}', JSON.stringify(CeL.deep_merge_object({a:1,b:[1,2],c:{a:1,b:2},d:'d',e:{a:[1,2],b:{i:1,j:1}}},{a:2,b:[3,4,5],c:{c:3,d:4},e:{b:{j:2,k:3,l:4},a:[3,4]},f:4}))], 'CeL.deep_merge_object() #1');
 		assert(['{"k":{"a":"","b":4,"c":[1],"d":{"a":1}}}', JSON.stringify(CeL.deep_merge_object({k:{a:1,b:4}},{k:{a:'',c:[1],d:{a:1}}}))], 'CeL.deep_merge_object() #2');
 	});
+
+	all_error_count += CeL.test('CeL.data.Number_range_set', function (assert) {
+		var number_range = new CeL.Number_range_set('7-9,2,5,43-47,50-');
+		assert(!number_range.is_in_the_range(0), 'Number_range_set #0');
+		assert(!number_range.is_in_the_range(1), 'Number_range_set #1');
+		assert(number_range.is_in_the_range(2), 'Number_range_set #2');
+		assert(!number_range.is_in_the_range(3), 'Number_range_set #3');
+		assert(!number_range.is_in_the_range(4), 'Number_range_set #4');
+		assert(number_range.is_in_the_range(5), 'Number_range_set #5');
+		assert(!number_range.is_in_the_range(6), 'Number_range_set #6');
+		assert(number_range.is_in_the_range(7), 'Number_range_set #7');
+		assert(number_range.is_in_the_range(8), 'Number_range_set #8');
+		assert(number_range.is_in_the_range(9), 'Number_range_set #9');
+		assert(!number_range.is_in_the_range(10), 'Number_range_set #10');
+		assert(!number_range.is_in_the_range(49), 'Number_range_set #49');
+		assert(number_range.is_in_the_range(50), 'Number_range_set #50');
+		assert(number_range.is_in_the_range(51), 'Number_range_set #51');
+	});
 }
 
 
@@ -4587,7 +4605,7 @@ var all_test_items = {
 	base: test_base,
 	compatibility: test_compatibility,
 	native: ['data.native', test_native],
-	data: ['data', test_data],
+	data: [['data', 'data.Number_range_set'], test_data],
 	date: ['data.date', test_date],
 	character: ['data.character', test_character],
 	encoding: ['application.locale.encoding', test_encoding],

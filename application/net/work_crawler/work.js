@@ -683,6 +683,16 @@ function module_code(library_namespace) {
 		library_namespace.debug('work_URL: ' + work_URL, 2, 'get_work_data');
 		// console.log(work_URL);
 
+		if (this.chapter_NO_range) {
+			if (this.start_chapter_NO > 1) {
+				// Reset start_chapter_NO to test all chapters
+				this.start_chapter_NO = 1;
+			}
+			this.chapter_NO_range = new library_namespace.Number_range_set(this.chapter_NO_range, {
+				max_split_size : 1e4
+			});
+		}
+
 		if (this.start_chapter) {
 			if (library_namespace.is_digits(this.start_chapter)
 			// 已經超越預設的第1章節才作設定。

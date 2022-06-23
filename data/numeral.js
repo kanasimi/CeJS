@@ -1,6 +1,6 @@
 ﻿/**
  * @name CeL function for numeral systems
- * @fileoverview 本檔案包含了 numeral systems 用的 functions。
+ * @fileoverview 本檔案包含了記數系統用的 functions。
  * 
  * @since
  * 

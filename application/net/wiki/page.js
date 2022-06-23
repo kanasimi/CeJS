@@ -1746,9 +1746,9 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.info([ 'add_listener: ', {
-			T : [ Date.now() - last_query_time > 100 ?
+			T : [ Date.now() - last_query_time > 100
 			// gettext_config:{"id":"start-monitoring-and-scanning-$2-pages-changed-since-$3-using-$1"}
-			'開始以 %1 監視、掃描 %2 自 %3 起更改的頁面。'
+			? '開始以 %1 監視、掃描 %2 自 %3 起更改的頁面。'
 			// gettext_config:{"id":"start-monitoring-and-scanning-the-recently-changed-pages-of-$2-using-$1"}
 			: '開始以 %1 監視、掃描 %2 最近更改的頁面。', use_SQL ? 'SQL' : 'API',
 			//
@@ -2485,7 +2485,7 @@ function module_code(library_namespace) {
 		try {
 			node_fs.statSync(directory);
 		} catch (e) {
-			library_namespace.info('get_latest_dump: 存放 dump file 的目錄['
+			library_namespace.info('get_latest_dump: ' + '存放 dump file 的目錄['
 					+ directory + ']不存在/已刪除，嘗試創建之。');
 			node_fs.mkdirSync(directory, parseInt('777', 8));
 			node_fs.writeFileSync(directory
@@ -2510,7 +2510,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 
 		function extract() {
-			library_namespace.log('get_latest_dump.extract: Extracting ['
+			library_namespace.log('get_latest_dump.extract: ' + 'Extracting ['
 					+ source_directory + archive + '] to [' + directory
 					+ filepath + ']...');
 			// share the xml dump file. 應由 caller 自行設定。
@@ -2523,9 +2523,9 @@ function module_code(library_namespace) {
 				if (error) {
 					library_namespace.error(error);
 				} else {
-					library_namespace.log(
+					library_namespace.log('get_latest_dump.extract: '
 					//
-					'get_latest_dump.extract: Done. Running callback...');
+					+ 'Done. Running callback...');
 				}
 				callback(directory + filepath);
 			});
@@ -2566,7 +2566,7 @@ function module_code(library_namespace) {
 				+ archive + ']', 1, 'get_latest_dump');
 		try {
 			if (node_fs.statSync(source_directory + archive).size > 1e7) {
-				library_namespace.log('get_latest_dump: Archive ['
+				library_namespace.log('get_latest_dump: ' + 'Archive ['
 						+ source_directory + archive + '] exists.');
 				extract();
 				return;
@@ -2621,7 +2621,7 @@ function module_code(library_namespace) {
 
 		child.on('close', function(error_code) {
 			if (error_code) {
-				library_namespace.error('get_latest_dump: Error code '
+				library_namespace.error('get_latest_dump: ' + 'Error code '
 						+ error_code);
 				// 有時最新版本可能 dump 到一半，正等待中。
 				if (options.previous) {
@@ -2638,7 +2638,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			library_namespace.log('get_latest_dump: Got archive file ['
+			library_namespace.log('get_latest_dump: ' + 'Got archive file ['
 					+ source_directory + archive + '].');
 			extract();
 		});
@@ -2687,7 +2687,7 @@ function module_code(library_namespace) {
 		// || xml.indexOf('<model>wikitext</model>') === NOT_FOUND
 		) {
 			// 有 end_mark '</page>' 卻沒有 '<revision>'
-			library_namespace.error('parse_dump_xml: Bad data:\n'
+			library_namespace.error('parse_dump_xml: ' + 'Bad data:\n'
 					+ xml.slice(0, index));
 			return;
 		}
@@ -2827,7 +2827,7 @@ function module_code(library_namespace) {
 
 		if (typeof filepath !== 'string' || !filepath.endsWith('.xml')) {
 			if (filepath) {
-				library_namespace.log('read_dump: Invalid file path: ['
+				library_namespace.log('read_dump: ' + 'Invalid file path: ['
 						+ filepath + '], try to get the latest dump file...');
 			}
 			get_latest_dump(filepath, function(filepath) {
@@ -2908,7 +2908,9 @@ function module_code(library_namespace) {
 		file_stream.setEncoding(encoding);
 
 		file_stream.on('error', options.onerror || function(error) {
-			library_namespace.error('read_dump: Error occurred: ' + error);
+			library_namespace.error('read_dump: '
+			//
+			+ 'Error occurred: ' + error);
 		});
 
 		/**
@@ -2917,7 +2919,7 @@ function module_code(library_namespace) {
 		 * 此時 bytes 指向檔案中 start position of buffer，可用來設定錨/定位點。
 		 */
 
-		library_namespace.info('read_dump: Starting read dump file...');
+		library_namespace.info('read_dump: ' + 'Starting read dump file...');
 
 		/**
 		 * Parse Wikimedia dump xml file slice.
@@ -2933,8 +2935,8 @@ function module_code(library_namespace) {
 			// 回頭找 start mark '<page>'
 			var start_index = buffer.lastIndexOf('<page>', index);
 			if (start_index === NOT_FOUND) {
-				throw new Error(
-						'parse_buffer: We have end mark without start mark!');
+				throw new Error('parse_buffer: '
+						+ 'We have end mark without start mark!');
 			}
 
 			var page_data = parse_dump_xml(buffer, start_index, filter);
@@ -2962,8 +2964,8 @@ function module_code(library_namespace) {
 			// [ start position of file, length in bytes ]
 			page_anchor = [ bytes + start_pos, page_bytes ];
 			if (false && anchor && (pageid in anchor))
-				library_namespace.error('parse_buffer: Duplicated page id: '
-						+ pageid);
+				library_namespace.error('parse_buffer: '
+						+ 'Duplicated page id: ' + pageid);
 			if (anchor)
 				anchor[pageid] = page_anchor;
 			// 跳到下一筆紀錄。
@@ -2978,7 +2980,8 @@ function module_code(library_namespace) {
 			 */
 			for_each_page(page_data, bytes, page_anchor/* , file_status */)) {
 				// console.log(file_stream);
-				library_namespace.info('read_dump: Quit operation, 中途跳出作業...');
+				library_namespace.info('read_dump: '
+						+ 'Quit operation, 中途跳出作業...');
 				file_stream.end();
 				// Release memory. 釋放被占用的記憶體。
 				buffer = null;
@@ -3029,9 +3032,8 @@ function module_code(library_namespace) {
 
 			// 頁面大小系統上限 2,048 KB = 2 MB。
 			if (buffer.length > 3e6) {
-				library_namespace.error(
-				//
-				'read_dump: buffer too long (' + buffer.length
+				library_namespace.error('read_dump: ' + 'buffer too long ('
+						+ buffer.length
 						+ ' characters)! Paused! 有太多無法處理的 buffer，可能是格式錯誤？');
 				console.log(buffer.slice(0, 1e3) + '...');
 				file_stream.pause();
@@ -3107,9 +3109,8 @@ function module_code(library_namespace) {
 		}
 
 		if (config.use_dump_only) {
-			library_namespace.debug(
-					'use dump only: 僅僅使用 dump，不採用 API 取得最新頁面內容。', 1,
-					'traversal_pages');
+			library_namespace.debug('use dump only: '
+					+ '僅僅使用 dump，不採用 API 取得最新頁面內容。', 1, 'traversal_pages');
 			// @see process_dump.js
 			if (config.use_dump_only === true) {
 				// 這邊的 ((true)) 僅表示要使用，並採用預設值；不代表設定 dump file path。
@@ -3182,10 +3183,10 @@ function module_code(library_namespace) {
 				if (list.length === 3
 						&& JSON.stringify(list[0]) === JSON
 								.stringify(traversal_pages.id_mark)) {
-					library_namespace.info(
+					library_namespace.info('traversal_pages: '
 					// cache file 內容來自 The production replicas (database)，
 					// 為經過下方 generate_revision_list() 整理過之資料。
-					'traversal_pages: 此資料似乎為 page id，來自 production replicas: ['
+					+ '此資料似乎為 page id，來自 production replicas: ['
 							+ this.file_name + ']');
 					// Skip list[0] = traversal_pages.id_mark
 					rev_list = list[2];
@@ -3214,8 +3215,8 @@ function module_code(library_namespace) {
 				config.no_database = error;
 				delete config.list;
 			} else {
-				library_namespace.log('traversal_pages: All ' + rows.length
-						+ ' pages. 轉換中...');
+				library_namespace.log('traversal_pages: ' + 'All '
+						+ rows.length + ' pages. 轉換中...');
 				// console.log(rows.slice(0, 2));
 				var id_list = [], rev_list = [];
 				rows.forEach(function(row) {
@@ -3230,9 +3231,9 @@ function module_code(library_namespace) {
 			traversal_pages(config, for_each_page);
 		}
 		function generate_revision_list() {
-			library_namespace.info(
+			library_namespace.info('traversal_pages: '
 			// Wikimedia Toolforge database replicas.
-			'traversal_pages: 嘗試讀取 Wikimedia Toolforge 上之 database replication 資料，'
+			+ '嘗試讀取 Wikimedia Toolforge 上之 database replication 資料，'
 					+ '一次讀取完版本號 ' + latest_revid_of_dump
 					+ ' 之後，所有頁面最新修訂版本之版本號 rev_id...');
 			var SQL = is_id ? all_revision_SQL : all_revision_SQL.replace(
@@ -3272,7 +3273,7 @@ function module_code(library_namespace) {
 			//
 			|| new wiki_API(config.user, config.password, config.language);
 			// includes redirection 包含重新導向頁面.
-			library_namespace.log('traversal_pages: 開始遍歷所有 dump 頁面...');
+			library_namespace.log('traversal_pages: ' + '開始遍歷所有 dump 頁面...');
 
 			/**
 			 * 工作原理:<code>
@@ -3299,8 +3300,8 @@ function module_code(library_namespace) {
 
 				id_list.forEach(function(id, index) {
 					if (id in rev_of_id)
-						library_namespace.warn('traversal_pages: 存在重複之id: '
-								+ id);
+						library_namespace.warn('traversal_pages: '
+								+ '存在重複之id: ' + id);
 					rev_of_id[id] = rev_list[index];
 				});
 
@@ -3500,8 +3501,8 @@ function module_code(library_namespace) {
 						// e.g.,
 						// "All 1491092 pages in dump xml file, 198.165 s."
 						// includes redirection 包含重新導向頁面.
-						library_namespace.log('traversal_pages: All ' + count
-								+ '/' + all_articles
+						library_namespace.log('traversal_pages: ' + 'All '
+								+ count + '/' + all_articles
 								+ ' pages using dump xml file (' + percent
 								+ '%), '
 								+ ((Date.now() - start_read_time) / 1000 | 0)
@@ -3530,9 +3531,8 @@ function module_code(library_namespace) {
 				}
 
 				if (typeof config.filter === 'function')
-					library_namespace.log(
-					//
-					'traversal_pages: 開始讀取 production，執行 .work(): '
+					library_namespace.log('traversal_pages: '
+							+ '開始讀取 production，執行 .work(): '
 							+ (id_list && id_list.length) + ' pages...');
 				session.work({
 					is_id : id_list.is_id,
@@ -3832,10 +3832,9 @@ function module_code(library_namespace) {
 			if (!revid && (!(revid = wiki_API.content_of.revision(page_data))
 			/** {Natural}所取得之版本編號。 */
 			|| !(revid = revid.revid))) {
-				library_namespace.error(
+				library_namespace.error('revision_cacher.data_of: '
 				// 照理來說，會來到這裡的都應該是經過 .had() 確認，因此不該出現此情況。
-				'revision_cacher.data_of: No revision id (.revid): ('
-						+ (typeof page_data) + ') '
+				+ 'No revision id (.revid): (' + (typeof page_data) + ') '
 						+ JSON.stringify(page_data).slice(0, 800));
 				return;
 			}
@@ -4066,7 +4065,8 @@ function module_code(library_namespace) {
 				|| (options.download_derivatives ? 'videoinfo' : 'imageinfo');
 		if (options.download_derivatives && file_info_type !== 'videoinfo') {
 			library_namespace
-					.warn('wiki_API_download: You should set options.file_info_type = "videoinfo" for downloading derivatives!');
+					.warn('wiki_API_download: '
+							+ 'You should set options.file_info_type = "videoinfo" for downloading derivatives!');
 		}
 
 		var threads_now = 0;

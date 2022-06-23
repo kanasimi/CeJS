@@ -335,9 +335,15 @@ function module_code(library_namespace) {
 							+ Lua_pattern_to_RegExp_pattern(value) + '$');
 					valid_RegExp_parameters.push(value);
 				} catch (e) {
-					library_namespace
-							.error('parse_module_Check_for_unknown_parameters: Cannot convert to RegExp pattern: '
-									+ value);
+					library_namespace.error([
+					//
+					'parse_module_Check_for_unknown_parameters: ', {
+						T : [
+						// gettext_config:{"id":"cannot-convert-lua-pattern-to-regexp-pattern-$1"}
+						'Cannot convert Lua pattern to RegExp pattern: %1',
+						//
+						value ]
+					} ]);
 				}
 			}
 		}

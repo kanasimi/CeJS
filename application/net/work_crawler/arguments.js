@@ -458,6 +458,8 @@ function module_code(library_namespace) {
 			start_chapter : 'number:natural|string',
 			// 開始/接續下載的章節編號。
 			start_chapter_NO : 'number:natural',
+			// 下載此章節編號範圍。例如 "20-30,50-60"。
+			chapter_NO_range : 'string',
 			// 開始/接續下載的章節標題。
 			start_chapter_title : 'string',
 			// 指定了要開始下載的列表序號。將會跳過這個訊號之前的作品。

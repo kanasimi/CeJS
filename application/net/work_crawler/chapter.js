@@ -251,6 +251,12 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		if (this.chapter_NO_range) {
+			while (chapter_NO < work_data.chapter_list.length && !this.chapter_NO_range.is_in_the_range(chapter_NO)) {
+				chapter_NO++;
+			}
+		}
+
 		// 預防並列執行的時候出現交叉干擾。
 		this.running = true;
 
