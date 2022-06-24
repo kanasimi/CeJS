@@ -12,9 +12,8 @@ node build.nodejs.js add_mark generate_plural_rules
 
 TODO:
 Sorting message id by reference.
-對於只有特定 repository 引用的訊息，依照 repository 分割到不同 .js。
-測試原文語翻譯訊息首尾的標點符號是否相符。
-特殊型態標記所有 qqq 以外的屬性必須手動添加
+對於只有特定 repository 引用的訊息，依照儲存庫分割到不同 .js 檔案。
+測試原文與翻譯訊息首尾的標點符號是否相符。
 
 */
 
@@ -908,21 +907,21 @@ function add_localization_marks(script_file_path) {
 
 function GitHub_link(options) {
 	//this.base_GitHub_path = options.base_GitHub_path;
-	//this.line_index = options.line_index;
+	//this.message_line_index = options.message_line_index;
 	Object.assign(this, options);
 }
 
 GitHub_link.prototype.toString = function toString(for_sort) {
 	const script_file_path = this.script_file_path.slice(CeL.append_path_separator(this.source_base_path).length).replace(/\\/g, '/');
 	if (for_sort) {
-		//if (this.mark_line_index) console.log([script_file_path, this.line_index, this.mark_line_index]);
+		//if (this.mark_line_index) console.log([script_file_path, this.message_line_index, this.mark_line_index]);
 		// .pad(6): 最多容許 999999行。
-		return `${this.base_GitHub_path}	${script_file_path}	${this.line_index >= 0 ? this.line_index.pad(6) : ''}	${this.mark_line_index >= 0 ? this.mark_line_index.pad(6) : ''}`;
+		return `${this.base_GitHub_path}	${script_file_path}	${(this.message_line_index > 0 ? this.message_line_index : 0).pad(6)}	${(this.mark_line_index > 0 ? this.mark_line_index : 0).pad(6)}`;
 	}
-	return `{{GitHub|${encodeURI(`${this.base_GitHub_path}/blob/master/${script_file_path}`)}${this.line_index >= 0 ? `#L${this.line_index + 1}` : ''}}}`;
+	return `{{GitHub|${encodeURI(`${this.base_GitHub_path}/blob/master/${script_file_path}`)}${this.message_line_index >= 0 ? `#L${this.message_line_index + 1}` : ''}}}`;
 };
 
-function set_references({ qqq_data, script_file_path, options, line_index, mark_line_index }) {
+function set_references({ qqq_data, script_file_path, options, message_line_index, mark_line_index }) {
 	if (!Array.isArray(qqq_data.references))
 		qqq_data.references = qqq_data.references ? [qqq_data.references] : [];
 	if (!Array.isArray(qqq_data.repositories))
@@ -937,7 +936,7 @@ function set_references({ qqq_data, script_file_path, options, line_index, mark_
 		qqq_data.references.push(new GitHub_link({
 			...options,
 			script_file_path,
-			line_index, mark_line_index,
+			message_line_index, mark_line_index,
 		}));
 		qqq_data.references.script_file_path_hash.set(script_file_path, options);
 		qqq_data.repositories.push(base_GitHub_path);
@@ -968,8 +967,9 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 	let change_counts = 0;
 
 	for (let line_index = 0; line_index < content_lines.length - 1;) {
-		const gettext_config_line = content_lines[line_index++];
-		// matched: [ all line, front, gettext_config, tail ]
+		const mark_line_index = line_index++;
+		const gettext_config_line = content_lines[mark_line_index];
+		/** 原始程式碼 gettext_config 標記列匹配的模式。 matched: [ all line, front, gettext_config, tail ] */
 		const gettext_config_matched = gettext_config_line.match(PATTERN_gettext_config_line);
 		if (!gettext_config_matched)
 			continue;
@@ -982,65 +982,66 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 		}
 		//console.trace(gettext_config_matched.slice(1));
 
-		if (gettext_config.mark_type === 'combination_message_id'
-			//|| gettext_config.mark_type === 'next_non-comment-line'
-			// 字串的一部分 部分的字串
-			|| gettext_config.mark_type === 'part_of_string') {
-			/**
-			 * 添加訊息的方法: 特殊型態標記: 將下一非註解的行當作標的，並且不檢查內容。必須自己到 qqq.json 編寫 qqq!
-			 * e.g., 組合型 message id <code>
+		let message_line_index = line_index;
+		// 將下一非註解的行當作訊息標的。
+		while (message_line_index < content_lines.length && /^\s*\/\//.test(content_lines[message_line_index]))
+			message_line_index++;
 
+		/** {String}原始程式碼訊息列。 */
+		const message_line = content_lines[message_line_index];
+		/** 原始程式碼訊息列匹配的模式。 matched: [ all line, front, quote, message 訊息, tail ] */
+		let message_line_matched, qqq_data, message, message_id;
+		const is_mark_type_ignoring_message
+			= gettext_config.mark_type === 'combination_message_id'
+			//|| gettext_config.mark_type === 'next_non-comment-line'
+			|| gettext_config.mark_type === 'part_of_string';
+		if (is_mark_type_ignoring_message) {
+			/**
+			 * 添加訊息的方法: 特殊型態標記: 不檢查或採用訊息內容。
+			 * <code>
+
+			// 組合型 message id
 			插入 // gettext_config:{"id":"message_id_1","mark_type":"combination_message_id","message":"message"}
 			插入 // gettext_config:{"id":"message_id_2","mark_type":"combination_message_id","message":"message"}
 			gettext(prefix + 'message_id_type' + postfix);
 
+			// 字串的一部分 部分的字串
 			插入 // gettext_config:{"id":"message_id","mark_type":"part_of_string","message":"message"}
 			'...|msg=message|...'.split('|');
 
 			</code> */
-			let qqq_data = qqq_data_Map.get(gettext_config.id);
-			if (!qqq_data) {
-				if (!gettext_config.message) {
-					CeL.warn(`${adapt_new_change_to_source_file.name}: 新的特殊型態標記 message id 未設定: ${JSON.stringify(gettext_config.id)}。您必須手動設定 message 屬性！`);
-					throw new Error('No "message" property provided!')
-				}
-				CeL.warn(`${adapt_new_change_to_source_file.name}: 新的特殊型態標記 message id: ${JSON.stringify(gettext_config.id)}。必須至個別 i18n .json 中手動添加所有 qqq 以外的屬性！`);
-				qqq_data = parse_qqq(gettext_config.qqq || '');
-				qqq_data_Map.set(gettext_config.id, qqq_data);
+
+			//message_id = gettext_config.id;
+			//qqq_data = qqq_data_Map.get(gettext_config.id);
+			message = gettext_config.message || gettext_config.id && qqq_data_Map.get(gettext_config.id)?.message || gettext_config.en;
+			if (!message) {
+				CeL.warn(`${adapt_new_change_to_source_file.name}: 新的特殊型態標記 message id 未設定: ${JSON.stringify(gettext_config)}。您必須手動設定 en 或 message 屬性！`);
+				throw new Error('No "en" or "message" property provided in gettext_config!')
 			}
 
-			for (let _line_index = line_index; _line_index < content_lines.length; _line_index++) {
-				if (!/^\s*\/\//.test(content_lines[_line_index])) {
-					set_references({ qqq_data, script_file_path, options, line_index: _line_index, mark_line_index: line_index });
-					break;
-				}
-			}
-			continue;
-		}
-
-		const message_line = content_lines[line_index];
-		// [ all line, front, quote, message, tail ]
-		let message_line_matched = message_line.match(/^([^"']*)(')((?:\\'|[^'])+)'([\s\S]*?)$/);
-		let message;
-		// 警告: message 不可分割，否則會找不到。且本行的第一個字串就必須是 message，否則會導致誤判！
-		if (message_line_matched) {
-			message = message_line_matched[3].replace(/"/g, '\\"');
-		} else if (message_line_matched = message_line.match(/^([^"']*)(")((?:\\"|[^"])+)"([\s\S]*?)$/)) {
-			message = message_line_matched[3];
 		} else {
-			CeL.error(`${adapt_new_change_to_source_file.name}: No message get for gettext_config: ${gettext_config_matched[2]}\n	File: ${script_file_path}\n	[${line_index}] ${message_line}`);
+			message_line_matched = message_line.match(/^([^"']*)(')((?:\\'|[^'])+)'([\s\S]*?)$/);
+			if (message_line_matched) {
+				// 警告: message 不可分割，否則會找不到。且本行的第一個字串就必須是 message，否則會導致誤判！
+				message = message_line_matched[3].replace(/"/g, '\\"');
+			} else if (message_line_matched = message_line.match(/^([^"']*)(")((?:\\"|[^"])+)"([\s\S]*?)$/)) {
+				message = message_line_matched[3];
+			} else {
+				CeL.error(`${adapt_new_change_to_source_file.name}: No message get for gettext_config: ${gettext_config_matched[2]}\n	File: ${script_file_path}\n	[${message_line_index}] ${message_line}`);
+			}
+
+			try {
+				message = JSON.parse('"' + message + '"');
+			} catch {
+				CeL.error(`${adapt_new_change_to_source_file.name}: Invalid message "${message_line}" for gettext_config: ${gettext_config_matched[2]}`);
+				continue;
+			}
+
+			message_id = message_to_id_Map.get(message)
+				// 嘗試去掉標點符號之後找不找得到 message。
+				|| message_to_id_Map.get(CeL.trim_punctuation_marks(message));
 		}
 
-		try {
-			message = JSON.parse('"' + message + '"');
-		} catch {
-			CeL.error(`${adapt_new_change_to_source_file.name}: Invalid message "${message_line}" for gettext_config: ${gettext_config_matched[2]}`);
-			continue;
-		}
-
-		let message_id = message_to_id_Map.get(message)
-			// 嘗試去掉標點符號之後找不找得到 message。
-			|| message_to_id_Map.get(CeL.trim_punctuation_marks(message));
 		if (!message_id && !gettext_config.id && (gettext_config.en || !PATTERN_has_invalid_en_message_char.test(message))) {
 			/**
 			 * 添加訊息的方法: 直接把 message 當英文訊息。
@@ -1059,7 +1060,6 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 				CeL.warn(`${adapt_new_change_to_source_file.name}: 自動生成的ID包含非英語字元: ${JSON.stringify(gettext_config.id)}`);
 			}
 		}
-		let qqq_data;
 		if (message_id) {
 			qqq_data = qqq_data_Map.get(message_id);
 
@@ -1110,12 +1110,14 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 			}
 
 		} else {
-			CeL.info(`${adapt_new_change_to_source_file.name}: [${script_file_path}] 原始碼中新增了 message: [${message_id}] ${JSON.stringify(message)}`);
+			CeL.info(`${adapt_new_change_to_source_file.name}: [${script_file_path}] 原始碼中新增了${is_mark_type_ignoring_message ? '特殊型態標記' : ' message'}: [${message_id}] ${JSON.stringify(message)}`);
+			let language_code = CeL.encoding.guess_text_language(message);
 			// assert: !!message_id === true
 			if (!gettext_config.en) {
 				message_id = en_message_to_message_id(message_id);
+			} else if (!language_code && message === gettext_config.en) {
+				language_code = 'en-US';
 			}
-			let language_code = CeL.encoding.guess_text_language(message);
 			qqq_data = {
 				message,
 				original_message_language_code: language_code || 'en-US'
@@ -1244,7 +1246,7 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 			}
 
 			const old_value = qqq_data[property_name];
-			if (old_value || old_value === 0) {
+			if ((old_value || old_value === 0) && old_value !== value) {
 				CeL.info(`${adapt_new_change_to_source_file.name}: [${script_file_path}] 原始碼中改變了 [${message_id}].${JSON.stringify(property_name)}:`);
 				CeL.log(CeL.display_align([
 					['原\t', JSON.stringify(old_value)],
@@ -1257,13 +1259,16 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 		if (message_id_changed.has(message_id))
 			message_id = message_id_changed.get(message_id);
 
-		set_references({ qqq_data, script_file_path, options, line_index });
+		set_references({ qqq_data, script_file_path, options, message_line_index });
 
-		content_lines[line_index - 1] = gettext_config_matched[1] + JSON.stringify({
-			// 原始碼中僅留存 message id，其他全部移到 qqq_data。
+		// 原始碼中僅留存 message id, mark_type，其他全部移到 qqq_data。
+		gettext_config_matched[2] = {
 			id: message_id
-		}) + gettext_config_matched[3];
-		if (gettext_config_line !== content_lines[line_index - 1]) change_counts++;
+		};
+		if (gettext_config.mark_type)
+			gettext_config_matched[2].mark_type = gettext_config.mark_type;
+		content_lines[mark_line_index] = gettext_config_matched[1] + JSON.stringify(gettext_config_matched[2]) + gettext_config_matched[3];
+		if (gettext_config_line !== content_lines[mark_line_index]) change_counts++;
 
 		if (message_changed.has(message)) {
 			const new_message = message_changed.get(message);
@@ -1274,14 +1279,16 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 			]));
 			message = new_message;
 		}
-		if (message_line_matched[2] === '"') {
-			message = JSON.stringify(message);
-		} else {
-			// assert: message_line_matched[2] === "'"
-			message = "'" + message.replace(/'/g, "\\'") + "'";
+		if (!is_mark_type_ignoring_message) {
+			if (message_line_matched[2] === '"') {
+				message = JSON.stringify(message);
+			} else {
+				// assert: message_line_matched[2] === "'"
+				message = "'" + message.replace(/'/g, "\\'") + "'";
+			}
+			content_lines[message_line_index] = message_line_matched[1] + message + message_line_matched[4];
+			if (message_line !== content_lines[message_line_index]) change_counts++;
 		}
-		content_lines[line_index] = message_line_matched[1] + message + message_line_matched[4];
-		if (message_line !== content_lines[line_index]) change_counts++;
 		//console.trace(qqq_data);
 	}
 

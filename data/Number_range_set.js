@@ -39,8 +39,9 @@ function module_code(library_namespace) {
 	 */
 	function Number_range_set(range_set, options) {
 		options = library_namespace.setup_options(options);
-		if (typeof range_set === 'string')
-			range_set = range_set.split(/[,;]/);
+
+		// e.g., new CeL.Number_range_set(1)
+		range_set = String(range_set).split(/[,;]/);
 
 		if (options.using_real)
 			this.using_real = true;
@@ -75,7 +76,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var matched = range.trim().split(/^(\d*)[–-](\d*)$/);
+		var matched = range.trim().split(/^(\d*)\s*[–-]\s*(\d*)$/);
 		if (matched) {
 			var lower = matched[1] ? +matched[1] : -Infinity;
 			var upper = matched[2] ? +matched[2] : Infinity;

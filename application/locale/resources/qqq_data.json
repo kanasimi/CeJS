@@ -5,7 +5,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L426}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4847}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L425}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4847}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"french-republican-calendar": {
@@ -14,7 +14,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L429}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L717}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4446}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L428}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L716}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4446}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"untranslated-message-count": {
@@ -22,7 +22,7 @@
 		"notes": "尚未翻譯的訊息數量。 Will be filled by {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js}}. See also: [[Translating:Colorless echo JavaScript kit#Translation statistics]]",
 		"scope": "GUI: setup_initial_messages()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1519}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L473}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L483}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L1526}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L473}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L483}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"clear-log": {
@@ -677,6 +677,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2303}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3209}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1685,19 +1686,12 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L244}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"total-solar-eclipse": {
-		"message": "total solar eclipse",
-		"notes": "Label for calendar.",
-		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5153}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
 	"annular-solar-eclipse": {
 		"message": "annular solar eclipse",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5153}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1706,22 +1700,7 @@
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5153}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"partial-solar-eclipse": {
-		"message": "partial solar eclipse",
-		"notes": "Label for calendar.",
-		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5153}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"total-lunar-eclipse": {
-		"message": "total lunar eclipse",
-		"notes": "Label for calendar.",
-		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5153}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1730,6 +1709,16 @@
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5153}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"partial-solar-eclipse": {
+		"message": "partial solar eclipse",
+		"notes": "Label for calendar.",
+		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5153}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1738,15 +1727,26 @@
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5153}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"solar-eclipse": {
-		"message": "solar eclipse",
+	"total-lunar-eclipse": {
+		"message": "total lunar eclipse",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5119}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5215}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5274}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5382}}",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5153}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"total-solar-eclipse": {
+		"message": "total solar eclipse",
+		"notes": "Label for calendar.",
+		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5153}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"lunar-eclipse": {
@@ -1754,6 +1754,16 @@
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5119}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5215}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5274}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5382}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"solar-eclipse": {
+		"message": "solar eclipse",
+		"notes": "Label for calendar.",
+		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5119}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5215}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5274}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L5382}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1765,19 +1775,21 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6375}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"sunrise": {
-		"message": "sunrise",
-		"notes": "Label for calendar.",
-		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6378}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
 	"moonrise": {
 		"message": "moonrise",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6378}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"sunrise": {
+		"message": "sunrise",
+		"notes": "Label for calendar.",
+		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6378}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1789,19 +1801,21 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6380}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"sunset": {
-		"message": "sunset",
-		"notes": "Label for calendar.",
-		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6383}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
 	"moonset": {
 		"message": "moonset",
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6383}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"sunset": {
+		"message": "sunset",
+		"notes": "Label for calendar.",
+		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6383}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1810,14 +1824,7 @@
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6391}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"nautical-twilight-begin": {
-		"message": "nautical twilight begin",
-		"notes": "Label for calendar.",
-		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6391}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1826,6 +1833,16 @@
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6391}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"nautical-twilight-begin": {
+		"message": "nautical twilight begin",
+		"notes": "Label for calendar.",
+		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6391}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1834,14 +1851,7 @@
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6395}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"nautical-twilight-end": {
-		"message": "nautical twilight end",
-		"notes": "Label for calendar.",
-		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6395}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1850,13 +1860,32 @@
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6395}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"log-type-fatal": {
-		"message": "log-type-fatal",
+	"nautical-twilight-end": {
+		"message": "nautical twilight end",
+		"notes": "Label for calendar.",
+		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L6395}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"log-type-debug": {
+		"message": "log-type-debug",
 		"notes": "Used as debugging message.",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"log-type-em": {
+		"message": "log-type-em",
+		"notes": "Used as debugging message, to express this is an emphasized message.",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1865,20 +1894,15 @@
 		"notes": "Used as debugging message.",
 		"original_message_language_code": "en-US",
 		"additional_notes": "{{Identical|Error}}",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"log-type-warn": {
-		"message": "log-type-warn",
+	"log-type-fatal": {
+		"message": "log-type-fatal",
 		"notes": "Used as debugging message.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"log-type-em": {
-		"message": "log-type-em",
-		"notes": "Used as debugging message, to express this is an emphasized message.",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1886,6 +1910,7 @@
 		"message": "log-type-info",
 		"notes": "Used as debugging message.",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1893,13 +1918,7 @@
 		"message": "log-type-log",
 		"notes": "Used as debugging message.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"log-type-debug": {
-		"message": "log-type-debug",
-		"notes": "Used as debugging message.",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -1907,6 +1926,15 @@
 		"message": "log-type-trace",
 		"notes": "Used as debugging message.",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"log-type-warn": {
+		"message": "log-type-warn",
+		"notes": "Used as debugging message.",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js#L1174}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -2073,21 +2101,23 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L945}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"error-connect-etimedout-$1": {
-		"message": "Error: connect ETIMEDOUT %1",
-		"notes": "The error reason when failed to get URL.",
-		"scope": "CeL.application.net.Ajax: get_URL_node()",
-		"original_message_language_code": "en-US",
-		"parameters": "%1: \"IP:port\"",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L69}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
 	"error-connect-econnrefused-$1": {
 		"message": "Error: connect ECONNREFUSED %1",
 		"notes": "The error reason when failed to get URL.",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: \"IP:port\"",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L69}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"error-connect-etimedout-$1": {
+		"message": "Error: connect ETIMEDOUT %1",
+		"notes": "The error reason when failed to get URL.",
+		"scope": "CeL.application.net.Ajax: get_URL_node()",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: \"IP:port\"",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L69}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -2097,6 +2127,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: \"domain\"",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L69}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -2106,15 +2137,8 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: time (e.g., \"30 s\")",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L69}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"error-socket-hang-up": {
-		"message": "Error: socket hang up",
-		"notes": "The error reason when failed to get URL.",
-		"scope": "CeL.application.net.Ajax: get_URL_node()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L74}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"error-read-econnreset": {
@@ -2122,14 +2146,16 @@
 		"notes": "The error reason when failed to get URL.",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L74}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"error-write-econnaborted": {
-		"message": "Error: write ECONNABORTED",
+	"error-socket-hang-up": {
+		"message": "Error: socket hang up",
 		"notes": "The error reason when failed to get URL.",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L74}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -2138,6 +2164,16 @@
 		"notes": "node_zlib.gunzipSync(): The error reason when failed to get URL.",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L74}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"error-write-econnaborted": {
+		"message": "Error: write ECONNABORTED",
+		"notes": "The error reason when failed to get URL.",
+		"scope": "CeL.application.net.Ajax: get_URL_node()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L74}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -3089,19 +3125,12 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L185}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"file": {
-		"message": "file",
+	"directories": {
+		"message": "directories",
 		"notes": "",
 		"scope": "執行時 console 訊息 work_crawler.js: verify_arg()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L190}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"files": {
-		"message": "files",
-		"notes": "",
-		"scope": "執行時 console 訊息 work_crawler.js: verify_arg()",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L190}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -3110,14 +3139,25 @@
 		"notes": "",
 		"scope": "執行時 console 訊息 work_crawler.js: verify_arg()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L190}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"directories": {
-		"message": "directories",
+	"file": {
+		"message": "file",
 		"notes": "",
 		"scope": "執行時 console 訊息 work_crawler.js: verify_arg()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L190}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"files": {
+		"message": "files",
+		"notes": "",
+		"scope": "執行時 console 訊息 work_crawler.js: verify_arg()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L190}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -3222,59 +3262,12 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L417}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"number": {
-		"message": "number",
-		"notes": "Name of type/object. 資料型別。",
-		"scope": "CeL.interact.integrate.SVG.addNum; 執行時 console 訊息 @ work_crawler_loader.js",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"function": {
-		"message": "function",
-		"notes": "函式資料型別。",
-		"scope": "執行時 console 訊息 @ work_crawler_loader.js",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
 	"boolean": {
 		"message": "boolean",
 		"notes": "資料型別: 邏輯真假值",
 		"scope": "執行時 console 訊息 work_crawler_loader.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"string": {
-		"message": "string",
-		"notes": "資料型別",
-		"scope": "執行時 console 訊息 work_crawler_loader.js",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"fso_file": {
-		"message": "fso_file",
-		"notes": "",
-		"scope": "work_crawler_loader.js: option_type_token()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"fso_files": {
-		"message": "fso_files",
-		"notes": "",
-		"scope": "work_crawler_loader.js: option_type_token()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"fso_directory": {
-		"message": "fso_directory",
-		"notes": "",
-		"scope": "work_crawler_loader.js: option_type_token()",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
@@ -3283,6 +3276,61 @@
 		"notes": "",
 		"scope": "work_crawler_loader.js: option_type_token()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"fso_directory": {
+		"message": "fso_directory",
+		"notes": "",
+		"scope": "work_crawler_loader.js: option_type_token()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"fso_file": {
+		"message": "fso_file",
+		"notes": "",
+		"scope": "work_crawler_loader.js: option_type_token()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"fso_files": {
+		"message": "fso_files",
+		"notes": "",
+		"scope": "work_crawler_loader.js: option_type_token()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"function": {
+		"message": "function",
+		"notes": "函式資料型別。",
+		"scope": "執行時 console 訊息 @ work_crawler_loader.js",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"number": {
+		"message": "number",
+		"notes": "Name of type/object. 資料型別。",
+		"scope": "CeL.interact.integrate.SVG.addNum; 執行時 console 訊息 @ work_crawler_loader.js",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"string": {
+		"message": "string",
+		"notes": "資料型別",
+		"scope": "執行時 console 訊息 work_crawler_loader.js",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/arguments.js#L446}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L171}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
@@ -3291,7 +3339,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: check_downloaded_chapters()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L125}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L70}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L124}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L70}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skip-all-chapters": {
@@ -3299,7 +3347,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: check_downloaded_chapters()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L138}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L81}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L137}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L81}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"check-only-$1-chapters-$2": {
@@ -3308,7 +3356,7 @@
 		"scope": "work_crawler.js: check_downloaded_chapters()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: count of chapter_list_to_check, %2: chapter_list_to_check",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L145}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L88}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L142}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L86}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cancel-download-«$1»": {
@@ -3317,7 +3365,7 @@
 		"scope": "work_crawler.js: pre_get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title / id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L225}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L223}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"suspend-downloading-«$1»": {
@@ -3326,7 +3374,7 @@
 		"scope": "work_crawler.js: pre_get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title / id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L227}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L225}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skipping-this-section-without-downloading": {
@@ -3334,7 +3382,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: pre_get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L293}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L294}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"not-in-the-range-of-chapter_filter.-skipping-this-section-without-downloading": {
@@ -3342,7 +3390,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: pre_get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L310}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L311}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skipping-$1-not-processed-$2": {
@@ -3351,7 +3399,7 @@
 		"scope": "work_crawler.js: pre_get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: part_title + chapter title, %2: skip reason",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L321}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L322}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-for-$3-before-downloading-$1-$2": {
@@ -3360,7 +3408,7 @@
 		"scope": "work_crawler.js: pre_get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_NO, %2: chapter_unit, %3: time interval 下載URL前的等待時間。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L344}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L345}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"«$2»-§$3-a-serious-error-occurred-during-execution-of-$1-process-aborted": {
@@ -3369,7 +3417,7 @@
 		"scope": "work_crawler.js: pre_get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: error spot, %2: work title, %3: chapter_NO",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L372}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L373}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"there-is-a-conflict-with-setting-chapter_list.$1=$2-with-chapter_data.$1=$3": {
@@ -3377,7 +3425,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: add_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L452}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L470}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L453}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L471}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-serial-number-of-the-work-part-(no_in_part)-is-invalid-$1": {
@@ -3385,7 +3433,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: reverse_chapter_list_order()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L527}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L528}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"«$1»-sort-oldest-to-newest": {
@@ -3394,7 +3442,7 @@
 		"scope": "work_crawler.js: reverse_chapter_list_order()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L539}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L540}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"«$1»": {
@@ -3403,7 +3451,7 @@
 		"scope": "work_crawler.js: confirm_recheck()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title / id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L579}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L580}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"this-section-determines-the-chapter-number-according-to-the-chapter-title.-it-is-recommended-to-set-recheck=multi_parts_changed-option-to-avoid-a-missed-situation-when-downloading-multiple-times": {
@@ -3411,7 +3459,7 @@
 		"notes": "part 2: 二選一",
 		"scope": "work_crawler.js: set_chapter_NO_via_title()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L632}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L633}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"in-the-case-of-«$1»-the-chapter-number-is-inverted-$2": {
@@ -3420,7 +3468,7 @@
 		"scope": "work_crawler.js: set_chapter_NO_via_title()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter title, %2: status",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L649}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L650}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-determine-chapter-no-from-title-«$1»": {
@@ -3429,7 +3477,7 @@
 		"scope": "work_crawler.js: set_chapter_NO_via_title()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L696}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L697}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-determine-chapter-no-from-chapter-data-$1": {
@@ -3438,7 +3486,7 @@
 		"scope": "work_crawler.js: set_chapter_NO_via_title()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter data",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L698}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L699}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"set-the-chapter-no-to-$1-according-to-the-chapter-order": {
@@ -3447,7 +3495,7 @@
 		"scope": "work_crawler.js: set_chapter_NO_via_title()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: default_NO",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L701}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L702}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-tool-file-has-set-part_title-$1-but-it-seems-that-the-`work_data.chapter_list.part_no`?-(part_no-$2)-should-be-set": {
@@ -3456,7 +3504,7 @@
 		"scope": "work_crawler.js: get_chapter_directory_name()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: part_title, %2: part_NO",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L747}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L748}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"this-work-has-a-different-part.-it-is-recommended-to-set-recheck=multi_parts_changed-option-to-avoid-a-missed-situation-when-downloading-multiple-times": {
@@ -3464,7 +3512,7 @@
 		"notes": "part 2: 二選一",
 		"scope": "work_crawler.js: get_chapter_directory_name()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L768}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L769}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-chapter_data-$1": {
@@ -3473,7 +3521,7 @@
 		"scope": "work_crawler.js: get_chapter_directory_name()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: work id + ' §' + chapter_NO",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L788}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1300}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1320}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L789}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1300}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1320}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unable-to-receive-web-address-of-§$1": {
@@ -3481,7 +3529,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L842}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L843}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"getting-data-of-chapter-$1-$2": {
@@ -3490,7 +3538,7 @@
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: chapter data, %2: estimated_message",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L896}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L897}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"getting-data-of-chapter-$1": {
@@ -3498,7 +3546,7 @@
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: chapter data",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L898}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L899}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"creating-a-chapter-directory-$1": {
@@ -3507,7 +3555,7 @@
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_directory",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L919}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L920}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"extracting-image-files-$1": {
@@ -3516,7 +3564,7 @@
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: images_archive",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L957}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L958}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"reading-image-archive-$1": {
@@ -3525,7 +3573,7 @@
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: images_archive",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L967}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L968}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"deleting-image-from-chapter-$1": {
@@ -3534,7 +3582,7 @@
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: images_archive",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1411}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L987}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1412}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L988}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-$2-$3-images": {
@@ -3543,7 +3591,7 @@
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: chapter_NO, %2: chapter_label, %3: total images",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L994}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L995}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"(limited-access)": {
@@ -3551,7 +3599,7 @@
 		"notes": "part 2/2.",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1003}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1004}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"file-extension-$1": {
@@ -3559,7 +3607,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1083}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1084}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-the-work-has-been-dispatched-and-the-images-are-downloaded-in-parallel": {
@@ -3568,7 +3616,7 @@
 		"scope": "work_crawler.js: get_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_label",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1136}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1137}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"download-image-$1": {
@@ -3577,7 +3625,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::normalize_image_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: downloaded + \"/\" + total images",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1152}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1153}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-for-$1-before-downloading-the-$2-image": {
@@ -3586,7 +3634,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::normalize_image_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: time_interval, %2: index + \"/\" + length",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1180}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1181}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"failed-to-get-data-of-chapter-$1": {
@@ -3595,7 +3643,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_NO",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1206}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1207}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skip-$1-§$2-and-continue-next-chapter": {
@@ -3604,7 +3652,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title, %2: chapter_NO",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1212}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1213}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"message_need_re_download": {
@@ -3612,7 +3660,7 @@
 		"notes": "Error occurred. 神仙打鼓有時錯，腳步踏差誰人無。\n仙人拍鼓有時錯，跤步踏差啥人無？\n客語 神仙打鼓有時錯，腳步踏差麼人無",
 		"scope": "work_crawler.js: crawler message",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1219}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L520}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L762}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1220}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L520}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L762}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"retry-$1-$2": {
@@ -3621,7 +3669,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: error_count, %2: max error allowed (MAX_ERROR_RETRY)",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1227}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L579}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L771}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1228}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L579}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L771}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"since-the-cache-file-is-broken-(for-example-an-empty-file)-chapter_url-will-be-retrieved-and-.reget_chapter-will-be-set": {
@@ -3629,7 +3677,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1235}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1236}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-chapter-number-should-be-$1-in-order-but-the-number-cannot-be-obtained-from-the-chapter-content": {
@@ -3638,7 +3686,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_NO",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1269}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1270}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-chapter-numbers-are-inconsistent-the-order-should-be-$1-but-the-$2-is-taken-from-the-content": {
@@ -3647,7 +3695,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_NO, %2: chapter_NO_text",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1271}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1272}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-for-$2-and-re-obtaining-the-chapter-content-page-$1": {
@@ -3656,7 +3704,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: URL, %2: time interval 下載URL前的等待時間。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1304}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1305}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"re-acquiring-chapter-content-page-$1": {
@@ -3665,7 +3713,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1306}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1307}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-for-$2-and-then-get-the-chapter-content-page-$1": {
@@ -3674,7 +3722,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: URL, %2: time interval 下載URL前的等待時間。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1308}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1309}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"get-the-chapter-content-page-$1": {
@@ -3683,7 +3731,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1310}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1311}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"parse-out-empty-page-information": {
@@ -3691,7 +3739,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1334}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1335}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"an-error-occurred-while-parsing-the-chapter-page-it-is-interrupted-at-$1": {
@@ -3700,7 +3748,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1340}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1341}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"this-chapter-is-a-chapter-that-requires-payment-locking": {
@@ -3708,7 +3756,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1391}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1392}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"did-not-get-any-image-from-this-chapter": {
@@ -3716,7 +3764,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1393}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1394}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-number-of-registered-images-$1-is-different-from-the-length-of-the-images-list-$2": {
@@ -3724,7 +3772,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1426}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1427}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-original-chapter-data-have-sets-a-division-title-but-the-chapter-data-returned-by-.parse_chapter_data()-is-missing-the-division-title.-perhaps-you-can-use-the-original-chapter-data": {
@@ -3732,7 +3780,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1462}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1463}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-image(s)-left": {
@@ -3741,7 +3789,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: images left",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1590}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1595}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1591}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1596}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-for-the-image-file-that-has-not-been-downloaded-yet": {
@@ -3749,7 +3797,7 @@
 		"notes": "Waiting for:",
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1608}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1609}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-$2-image-download-error-recorded": {
@@ -3758,7 +3806,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_label, %2: error image log count",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1670}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1671}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"remove-$1-damaged-images-from-the-image-compression-file-that-successfully-downloaded-this-time-$2": {
@@ -3767,7 +3815,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: error image count, %2: images_archive.file_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1687}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1688}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"update-image-archive-$1": {
@@ -3776,7 +3824,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: images_archive.file_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1714}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1715}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"create-image-archive-$1": {
@@ -3785,7 +3833,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: images_archive.file_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1716}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1717}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$2-jump-to-chapter-$1": {
@@ -3794,7 +3842,7 @@
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: jump to chapter NO, %2: work title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1776}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1777}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"if-you-want-to-dynamically-add-chapters-you-must-manually-increase-the-number-of-chapters-work_data.chapter_count++": {
@@ -3802,7 +3850,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1790}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1791}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"(this-download-has-processed-a-total-of-$1-word)": {
@@ -3810,7 +3858,7 @@
 		"notes": "(%1 words)",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1805}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1806}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"(this-download-has-processed-a-total-of-$1-image)": {
@@ -3818,7 +3866,7 @@
 		"notes": "(%1 images)",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1810}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1811}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"download-completed-for-$1": {
@@ -3827,7 +3875,7 @@
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: datetime",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1813}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1814}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"some-are-paid-restricted-chapters": {
@@ -3835,7 +3883,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1818}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1819}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-this-download-has-a-total-of-$2-image-download-errors": {
@@ -3843,7 +3891,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1823}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1824}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"chapter-$1": {
@@ -4784,35 +4832,12 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/task.js#L1156}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"work_data.title": {
-		"message": "work_data.title",
-		"notes": "タイトル",
-		"scope": "work_crawler.js: start_downloading()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"work_data.id": {
-		"message": "work_data.id",
-		"notes": "",
-		"scope": "work_crawler.js: start_downloading()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
 	"work_data.author": {
 		"message": "work_data.author",
 		"notes": "",
 		"scope": "work_crawler.js: start_downloading()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"work_data.status": {
-		"message": "work_data.status",
-		"notes": "",
-		"scope": "work_crawler.js: start_downloading()",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -4821,54 +4846,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: start_downloading()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"work_data.last_update": {
-		"message": "work_data.last_update",
-		"notes": "",
-		"scope": "work_crawler.js: start_downloading()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"work_data.last_download.date": {
-		"message": "work_data.last_download.date",
-		"notes": "前次下載日期",
-		"scope": "work_crawler.js: start_downloading()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"work_data.last_download.chapter": {
-		"message": "work_data.last_download.chapter",
-		"notes": "前次下載章節",
-		"scope": "work_crawler.js: start_downloading()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"work_data.url": {
-		"message": "work_data.url",
-		"notes": "",
-		"scope": "work_crawler.js: start_downloading()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"work_data.directory": {
-		"message": "work_data.directory",
-		"notes": "",
-		"scope": "work_crawler.js: start_downloading()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"work_data.description": {
-		"message": "work_data.description",
-		"notes": "",
-		"scope": "work_crawler.js: start_downloading()",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -4877,22 +4855,88 @@
 		"notes": "",
 		"scope": "work_crawler.js: start_downloading()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"work_status-not-found": {
-		"message": "work_status-not found",
-		"notes": "Occurs in the following special situation: the work does not exist, or has been removed or moved to another location or another name. Does not include \"&\". No matching information was found.\n下載特殊狀況：作品不存在或已被刪除、被移動。不可包含\"&\"。一致する情報が見つかりませんでした。",
-		"scope": "work_crawler.js: get_work_list()",
+	"work_data.description": {
+		"message": "work_data.description",
+		"notes": "",
+		"scope": "work_crawler.js: start_downloading()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"work_status-limited": {
-		"message": "work_status-limited",
-		"notes": "Listed special situations: chapter requests with limited expenses / locked / limited to some systems. Not included \"&\".\n下載特殊狀況：部份章節需要付費/被鎖住/被限制。不可包含\"&\"",
-		"scope": "work_crawler.js: get_work_list()",
+	"work_data.directory": {
+		"message": "work_data.directory",
+		"notes": "",
+		"scope": "work_crawler.js: start_downloading()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"work_data.id": {
+		"message": "work_data.id",
+		"notes": "",
+		"scope": "work_crawler.js: start_downloading()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"work_data.last_download.chapter": {
+		"message": "work_data.last_download.chapter",
+		"notes": "前次下載章節",
+		"scope": "work_crawler.js: start_downloading()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"work_data.last_download.date": {
+		"message": "work_data.last_download.date",
+		"notes": "前次下載日期",
+		"scope": "work_crawler.js: start_downloading()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"work_data.last_update": {
+		"message": "work_data.last_update",
+		"notes": "",
+		"scope": "work_crawler.js: start_downloading()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"work_data.status": {
+		"message": "work_data.status",
+		"notes": "",
+		"scope": "work_crawler.js: start_downloading()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"work_data.title": {
+		"message": "work_data.title",
+		"notes": "タイトル",
+		"scope": "work_crawler.js: start_downloading()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"work_data.url": {
+		"message": "work_data.url",
+		"notes": "",
+		"scope": "work_crawler.js: start_downloading()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -4901,6 +4945,25 @@
 		"notes": "下載特殊狀況。不可包含\"&\"",
 		"scope": "work_crawler.js: get_work_list()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"work_status-limited": {
+		"message": "work_status-limited",
+		"notes": "Listed special situations: chapter requests with limited expenses / locked / limited to some systems. Not included \"&\".\n下載特殊狀況：部份章節需要付費/被鎖住/被限制。不可包含\"&\"",
+		"scope": "work_crawler.js: get_work_list()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"work_status-not-found": {
+		"message": "work_status-not found",
+		"notes": "Occurs in the following special situation: the work does not exist, or has been removed or moved to another location or another name. Does not include \"&\". No matching information was found.\n下載特殊狀況：作品不存在或已被刪除、被移動。不可包含\"&\"。一致する情報が見つかりませんでした。",
+		"scope": "work_crawler.js: get_work_list()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L59}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -5256,6 +5319,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1130}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1158}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1165}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -5264,6 +5328,7 @@
 		"notes": "最近更新日期",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1152}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6010,35 +6075,12 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2020}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"toc.identifier": {
-		"message": "TOC.identifier",
-		"notes": "小説ID Message of ebook in TOC file.",
+	"toc.calibre-series": {
+		"message": "TOC.calibre:series",
+		"notes": "collection 叢書集 Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"toc.title": {
-		"message": "TOC.title",
-		"notes": "Message of ebook in TOC file.",
-		"scope": "CeL.application.storage.EPUB: generate_TOC()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"toc.language": {
-		"message": "TOC.language",
-		"notes": "Message of ebook in TOC file.",
-		"scope": "CeL.application.storage.EPUB: generate_TOC()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"toc.date": {
-		"message": "TOC.date",
-		"notes": "Message of ebook in TOC file.",
-		"scope": "CeL.application.storage.EPUB: generate_TOC()",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6047,38 +6089,16 @@
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"toc.subject": {
-		"message": "TOC.subject",
-		"notes": "主題+狀態 類別 議題 Message of ebook in TOC file.",
-		"scope": "CeL.application.storage.EPUB: generate_TOC()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"toc.description": {
-		"message": "TOC.description",
+	"toc.date": {
+		"message": "TOC.date",
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"toc.publisher": {
-		"message": "TOC.publisher",
-		"notes": "Message of ebook in TOC file.",
-		"scope": "CeL.application.storage.EPUB: generate_TOC()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"toc.source": {
-		"message": "TOC.source",
-		"notes": "Message of ebook in TOC file.",
-		"scope": "CeL.application.storage.EPUB: generate_TOC()",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6087,14 +6107,70 @@
 		"notes": "更新時間 Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"toc.calibre-series": {
-		"message": "TOC.calibre:series",
-		"notes": "collection 叢書集 Message of ebook in TOC file.",
+	"toc.description": {
+		"message": "TOC.description",
+		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"toc.identifier": {
+		"message": "TOC.identifier",
+		"notes": "小説ID Message of ebook in TOC file.",
+		"scope": "CeL.application.storage.EPUB: generate_TOC()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"toc.language": {
+		"message": "TOC.language",
+		"notes": "Message of ebook in TOC file.",
+		"scope": "CeL.application.storage.EPUB: generate_TOC()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"toc.publisher": {
+		"message": "TOC.publisher",
+		"notes": "Message of ebook in TOC file.",
+		"scope": "CeL.application.storage.EPUB: generate_TOC()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"toc.source": {
+		"message": "TOC.source",
+		"notes": "Message of ebook in TOC file.",
+		"scope": "CeL.application.storage.EPUB: generate_TOC()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"toc.subject": {
+		"message": "TOC.subject",
+		"notes": "主題+狀態 類別 議題 Message of ebook in TOC file.",
+		"scope": "CeL.application.storage.EPUB: generate_TOC()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"toc.title": {
+		"message": "TOC.title",
+		"notes": "Message of ebook in TOC file.",
+		"scope": "CeL.application.storage.EPUB: generate_TOC()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6269,14 +6345,14 @@
 		"message": "Invalid set of number ranges: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: set of number ranges",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/Number_range_set.js#L56}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/Number_range_set.js#L57}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-number-range-$1": {
 		"message": "Invalid number range: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: number range",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/Number_range_set.js#L108}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/Number_range_set.js#L109}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"italy": {
@@ -6855,6 +6931,7 @@
 		"scope": "data.date.era_data: 紀年資料",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L2908}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6864,6 +6941,7 @@
 		"scope": "data.date.era_data: 紀年資料",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L2932}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6880,6 +6958,7 @@
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3157}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6888,6 +6967,7 @@
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3157}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6896,15 +6976,8 @@
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3168}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"thonburi-dynasty": {
-		"message": "ราชวงศ์ธนบุรี",
-		"notes": "Country name.",
-		"scope": "data.date.era_data: 紀年資料",
-		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3209}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"taksin": {
@@ -6912,6 +6985,16 @@
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3209}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"thonburi-dynasty": {
+		"message": "ราชวงศ์ธนบุรี",
+		"notes": "Country name.",
+		"scope": "data.date.era_data: 紀年資料",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3209}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6920,6 +7003,7 @@
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3209}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6928,6 +7012,7 @@
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3213}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6936,6 +7021,7 @@
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3213}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6945,6 +7031,7 @@
 		"scope": "data.date.era_data: 紀年資料",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3311}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6954,6 +7041,7 @@
 		"scope": "data.date.era_data: 紀年資料",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3499}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6962,6 +7050,7 @@
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 紀年資料",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3558}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6970,6 +7059,7 @@
 		"notes": "Country name.",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3600}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -6997,16 +7087,8 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3822}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"babylonian-dynasty-of-e": {
-		"message": "Babylonian Dynasty of E",
-		"notes": "ancient civilization name",
-		"scope": "data.date.era_data: 國家 country",
-		"original_message_language_code": "en-US",
-		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3879}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"babylon": {
@@ -7015,6 +7097,17 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3879}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"babylonian-dynasty-of-e": {
+		"message": "Babylonian Dynasty of E",
+		"notes": "ancient civilization name",
+		"scope": "data.date.era_data: 國家 country",
+		"original_message_language_code": "en-US",
+		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3879}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -7024,6 +7117,7 @@
 		"scope": "data.date.era_data: 紀年資料",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3896}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -7033,6 +7127,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3912}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -7042,6 +7137,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3925}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -7050,6 +7146,7 @@
 		"notes": "Name of [[:en:Macedonia (ancient kingdom)]], Μακεδονικό βασίλειο",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3946}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -7058,6 +7155,7 @@
 		"notes": "Name of [[:en:Seleucid Empire]]",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4010}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -7066,6 +7164,7 @@
 		"notes": "city-state in ancient Greece",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4087}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -7074,6 +7173,7 @@
 		"notes": "city-state in ancient Greece",
 		"scope": "data.date.era_data: 國家 country",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4113}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -7110,6 +7210,7 @@
 		"scope": "data.date.era_data: 紀年資料",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
+		"mark_type": "part_of_string",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4905}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
@@ -8845,115 +8946,12 @@
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L167}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
-	"download_options.recheck": {
-		"message": "download_options.recheck",
-		"notes": "重新擷取用的相關操作設定。本選項亮著的原因可能是因為設定成了 'changed'，此時請取消勾選後重新勾選可強制從頭檢測。",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.show_information_only": {
-		"message": "download_options.show_information_only",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.start_chapter": {
-		"message": "download_options.start_chapter",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.start_chapter_no": {
-		"message": "download_options.start_chapter_NO",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
 	"download_options.chapter_no_range": {
 		"message": "download_options.chapter_NO_range",
 		"notes": "",
 		"original_message_language_code": "qqq",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.start_chapter_title": {
-		"message": "download_options.start_chapter_title",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.start_list_serial": {
-		"message": "download_options.start_list_serial",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.rearrange_list_file": {
-		"message": "download_options.rearrange_list_file",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.regenerate": {
-		"message": "download_options.regenerate",
-		"notes": "重新擷取用的相關操作設定。漫畫不需要重建電子書檔案",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.reget_chapter": {
-		"message": "download_options.reget_chapter",
-		"notes": "重新擷取用的相關操作設定。",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.search_again": {
-		"message": "download_options.search_again",
-		"notes": "重新擷取用的相關操作設定。",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.cache_title_to_id": {
-		"message": "download_options.cache_title_to_id",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.chapter_time_interval": {
-		"message": "download_options.chapter_time_interval",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.chapter_filter": {
-		"message": "download_options.chapter_filter",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"download_options.acceptable_types": {
@@ -8961,46 +8959,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.archive_images": {
-		"message": "download_options.archive_images",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.archive_all_good_images_only": {
-		"message": "download_options.archive_all_good_images_only",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.remove_images_after_archive": {
-		"message": "download_options.remove_images_after_archive",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.images_archive_extension": {
-		"message": "download_options.images_archive_extension",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.max_error_retry": {
-		"message": "download_options.MAX_ERROR_RETRY",
-		"notes": "容許錯誤用的相關操作設定。",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
@@ -9009,150 +8968,25 @@
 		"notes": "容許錯誤用的相關操作設定。",
 		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
-	"download_options.min_length": {
-		"message": "download_options.MIN_LENGTH",
-		"notes": "容許錯誤用的相關操作設定。",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.timeout": {
-		"message": "download_options.timeout",
-		"notes": "容許錯誤用的相關操作設定。",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.skip_error": {
-		"message": "download_options.skip_error",
-		"notes": "容許錯誤用的相關操作設定。",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.skip_chapter_data_error": {
-		"message": "download_options.skip_chapter_data_error",
-		"notes": "容許錯誤用的相關操作設定。",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.preserve_work_page": {
-		"message": "download_options.preserve_work_page",
+	"download_options.archive_all_good_images_only": {
+		"message": "download_options.archive_all_good_images_only",
 		"notes": "",
 		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
-	"download_options.preserve_chapter_page": {
-		"message": "download_options.preserve_chapter_page",
+	"download_options.archive_images": {
+		"message": "download_options.archive_images",
 		"notes": "",
 		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.remove_ebook_directory": {
-		"message": "download_options.remove_ebook_directory",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.one_by_one": {
-		"message": "download_options.one_by_one",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.overwrite_old_file": {
-		"message": "download_options.overwrite_old_file",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.convert_to_language": {
-		"message": "download_options.convert_to_language",
-		"notes": "Converte novels em chinês simplificado para novels em chinês tradicional.",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.discard_old_ebook_file": {
-		"message": "download_options.discard_old_ebook_file",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.vertical_writing": {
-		"message": "download_options.vertical_writing",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.main_directory": {
-		"message": "download_options.main_directory",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.user_agent": {
-		"message": "download_options.user_agent",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.proxy": {
-		"message": "download_options.proxy",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.cookie": {
-		"message": "download_options.cookie",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.write_chapter_metadata": {
-		"message": "download_options.write_chapter_metadata",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.write_image_metadata": {
-		"message": "download_options.write_image_metadata",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
@@ -9161,46 +8995,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.modify_work_list_when_archive_old_works": {
-		"message": "download_options.modify_work_list_when_archive_old_works",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.save_preference": {
-		"message": "download_options.save_preference",
-		"notes": "",
-		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.data_directory": {
-		"message": "download_options.data_directory",
-		"notes": "GUI 特有下載選項",
-		"scope": "GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.preserve_download_work_layer": {
-		"message": "download_options.preserve_download_work_layer",
-		"notes": "GUI 特有下載選項",
-		"scope": "GUI: download_options_set",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
-	"download_options.play_finished_sound": {
-		"message": "download_options.play_finished_sound",
-		"notes": "GUI 特有下載選項",
-		"scope": "GUI: download_options_set",
-		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
@@ -9209,6 +9004,358 @@
 		"notes": "GUI 特有下載選項",
 		"scope": "GUI: download_options_set",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.cache_title_to_id": {
+		"message": "download_options.cache_title_to_id",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.chapter_filter": {
+		"message": "download_options.chapter_filter",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.chapter_time_interval": {
+		"message": "download_options.chapter_time_interval",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.convert_to_language": {
+		"message": "download_options.convert_to_language",
+		"notes": "Converte novels em chinês simplificado para novels em chinês tradicional.",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.cookie": {
+		"message": "download_options.cookie",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.data_directory": {
+		"message": "download_options.data_directory",
+		"notes": "GUI 特有下載選項",
+		"scope": "GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.discard_old_ebook_file": {
+		"message": "download_options.discard_old_ebook_file",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.images_archive_extension": {
+		"message": "download_options.images_archive_extension",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.main_directory": {
+		"message": "download_options.main_directory",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.max_error_retry": {
+		"message": "download_options.MAX_ERROR_RETRY",
+		"notes": "容許錯誤用的相關操作設定。",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.min_length": {
+		"message": "download_options.MIN_LENGTH",
+		"notes": "容許錯誤用的相關操作設定。",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.modify_work_list_when_archive_old_works": {
+		"message": "download_options.modify_work_list_when_archive_old_works",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.one_by_one": {
+		"message": "download_options.one_by_one",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.overwrite_old_file": {
+		"message": "download_options.overwrite_old_file",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.play_finished_sound": {
+		"message": "download_options.play_finished_sound",
+		"notes": "GUI 特有下載選項",
+		"scope": "GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.preserve_chapter_page": {
+		"message": "download_options.preserve_chapter_page",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.preserve_download_work_layer": {
+		"message": "download_options.preserve_download_work_layer",
+		"notes": "GUI 特有下載選項",
+		"scope": "GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.preserve_work_page": {
+		"message": "download_options.preserve_work_page",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.proxy": {
+		"message": "download_options.proxy",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.rearrange_list_file": {
+		"message": "download_options.rearrange_list_file",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.recheck": {
+		"message": "download_options.recheck",
+		"notes": "重新擷取用的相關操作設定。本選項亮著的原因可能是因為設定成了 'changed'，此時請取消勾選後重新勾選可強制從頭檢測。",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.regenerate": {
+		"message": "download_options.regenerate",
+		"notes": "重新擷取用的相關操作設定。漫畫不需要重建電子書檔案",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.reget_chapter": {
+		"message": "download_options.reget_chapter",
+		"notes": "重新擷取用的相關操作設定。",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.remove_ebook_directory": {
+		"message": "download_options.remove_ebook_directory",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.remove_images_after_archive": {
+		"message": "download_options.remove_images_after_archive",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.save_preference": {
+		"message": "download_options.save_preference",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.search_again": {
+		"message": "download_options.search_again",
+		"notes": "重新擷取用的相關操作設定。",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.show_information_only": {
+		"message": "download_options.show_information_only",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.skip_chapter_data_error": {
+		"message": "download_options.skip_chapter_data_error",
+		"notes": "容許錯誤用的相關操作設定。",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.skip_error": {
+		"message": "download_options.skip_error",
+		"notes": "容許錯誤用的相關操作設定。",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.start_chapter": {
+		"message": "download_options.start_chapter",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.start_chapter_no": {
+		"message": "download_options.start_chapter_NO",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.start_chapter_title": {
+		"message": "download_options.start_chapter_title",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.start_list_serial": {
+		"message": "download_options.start_list_serial",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.timeout": {
+		"message": "download_options.timeout",
+		"notes": "容許錯誤用的相關操作設定。",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.user_agent": {
+		"message": "download_options.user_agent",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.vertical_writing": {
+		"message": "download_options.vertical_writing",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.write_chapter_metadata": {
+		"message": "download_options.write_chapter_metadata",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"download_options.write_image_metadata": {
+		"message": "download_options.write_image_metadata",
+		"notes": "",
+		"scope": "work_crawler.js: import_arg_hash, GUI: download_options_set",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L295}}\n: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L315}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
@@ -9294,19 +9441,12 @@
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L654}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
-	"light-theme": {
-		"message": "light theme",
-		"notes": "淺色模式，淡色模式，亮色系布景主題",
-		"scope": "GUI: setup_theme_selecter()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L665}}",
-		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
-	},
 	"dark-theme": {
 		"message": "dark theme",
 		"notes": "深色模式，高對比、暗色系布景主題。ダークモード。",
 		"scope": "GUI: setup_theme_selecter()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L665}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
@@ -9315,6 +9455,16 @@
 		"notes": "預設模式布景主題",
 		"scope": "GUI: setup_theme_selecter()",
 		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L665}}",
+		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
+	},
+	"light-theme": {
+		"message": "light theme",
+		"notes": "淺色模式，淡色模式，亮色系布景主題",
+		"scope": "GUI: setup_theme_selecter()",
+		"original_message_language_code": "en-US",
+		"mark_type": "combination_message_id",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L665}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
@@ -9989,7 +10139,7 @@
 		"notes": "暫停下載 (略稱)",
 		"scope": "GUI: Download_job(), pause_resume_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2563}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2615}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2703}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2563}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2615}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"pause-resume": {
@@ -10037,7 +10187,7 @@
 		"notes": "Input series name or ID first.",
 		"scope": "GUI 訊息提示與紀錄欄",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2636}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2890}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2636}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2889}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"downloading-«$2»-from-$1.-please-wait-until-the-download-is-complete-or-cancel-the-download-before-downloading-$3": {
@@ -10054,7 +10204,7 @@
 		"notes": "",
 		"scope": "GUI: destruct_download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2708}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2707}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"clearing-downloaded-record": {
@@ -10062,7 +10212,7 @@
 		"notes": "",
 		"scope": "GUI: destruct_download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2723}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2722}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"(there-are-$1-errors-in-total)": {
@@ -10070,7 +10220,7 @@
 		"notes": "",
 		"scope": "GUI: destruct_download_job()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2744}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2743}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"auto-updating-to-git-master-branch-version": {
@@ -10078,7 +10228,7 @@
 		"notes": "git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2949}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2948}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"updating-tool-failed-$1": {
@@ -10086,7 +10236,7 @@
 		"notes": "git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2962}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2967}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2961}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2966}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"git-master-branch-update-completed.-you-have-to-restart-the-application-to-use-the-new-version": {
@@ -10094,7 +10244,7 @@
 		"notes": "git master branch. 非安裝包版本更新完畢。您需要重新啟動程式或重新整理網頁以使用新版本。",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2973}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2972}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"update-completed": {
@@ -10102,7 +10252,7 @@
 		"notes": "part 1. git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2980}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2979}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"restart-the-program": {
@@ -10110,7 +10260,7 @@
 		"notes": "part 2. git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2983}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2982}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"all-current-jobs-will-be-interrupted": {
@@ -10118,7 +10268,7 @@
 		"notes": "part 3. git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2986}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2985}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"it-is-recommended-to-restart-the-application-to-use-the-fully-updated-program": {
@@ -10126,7 +10276,7 @@
 		"notes": "git master branch",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2990}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L2989}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"automatically-update-is-disabled": {
@@ -10134,7 +10284,7 @@
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3008}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3007}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"checking-update": {
@@ -10142,7 +10292,7 @@
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3021}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3027}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3020}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3026}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"great-you-re-updated": {
@@ -10150,7 +10300,7 @@
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3042}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3041}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"unable-to-read-version-information-from-package.json": {
@@ -10158,7 +10308,7 @@
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3055}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3054}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"update-available-$1": {
@@ -10166,7 +10316,7 @@
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3067}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3077}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3066}}\n: {{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3076}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"update-checking-failed-$1": {
@@ -10174,7 +10324,7 @@
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3094}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3093}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"update-failed": {
@@ -10182,7 +10332,7 @@
 		"notes": "",
 		"scope": "GUI 訊息提示與紀錄欄: update",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3097}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3096}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"this-column-is-basically-for-debugging-purposes-only.-if-you-have-downloading-problems-please-feel-free-to-report-the-issue-thank-you": {
@@ -10190,7 +10340,7 @@
 		"notes": "",
 		"scope": "GUI: open_DevTools()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3150}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron_functions.js#L3149}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"warning-unable-to-access-the-storage-directory-$1": {
