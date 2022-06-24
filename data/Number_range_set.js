@@ -76,7 +76,8 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var matched = range.trim().split(/^(\d*)\s*[–-]\s*(\d*)$/);
+		// @see CeL.date.parse_period.PATTERN
+		var matched = range.trim().split(/^(\d*)\s*[\-–~－—─～〜﹣至]\s*(\d*)$/);
 		if (matched) {
 			var lower = matched[1] ? +matched[1] : -Infinity;
 			var upper = matched[2] ? +matched[2] : Infinity;

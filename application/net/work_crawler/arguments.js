@@ -57,9 +57,9 @@ function module_code(library_namespace) {
 			} else if (matched[3]) {
 				_condition = new RegExp(matched[3], matched[4]);
 
-			} else if (type === 'number'
-					&& (_condition = matched[2]
-							.match(/([+\-]?\d+(?:\.\d+)?)?[–~]([+\-]?\d+(?:\.\d+)?)?/))) {
+			} else if (type === 'number' && (_condition = matched[2].match(
+			// @see CeL.date.parse_period.PATTERN
+			/([+\-]?\d+(?:\.\d+)?)?\s*[–~－—─～〜﹣至]\s*([+\-]?\d+(?:\.\d+)?)?/))) {
 				_condition = {
 					min : _condition[1] && +_condition[1],
 					max : _condition[2] && +_condition[2]

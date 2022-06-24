@@ -3188,7 +3188,8 @@ function module_code(library_namespace) {
 	// "Maya:9.2.15.3.8 12 Lamat 6 Wo－Maya:9.6.11.0.16 7 Kib' 4 K'ayab'"
 	// →
 	// [, "Maya:9.2.15.3.8 12 Lamat 6 Wo", "Maya:9.6.11.0.16 7 Kib' 4 K'ayab'" ]
-	parse_period.PATTERN = /^(.+[^a-z]|[^\d]*\d.+)[\-–－—─~～〜﹣]\s*([^\-].+)$/i;
+	parse_period.PATTERN = /^(.+[^a-z]|[^\d]*\d.+)[\-–~－—─～〜﹣至]\s*([^\-].+)$/i;
+	// @see String_to_Date.parser_PATTERN
 
 	_.parse_period = parse_period;
 

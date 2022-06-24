@@ -941,7 +941,8 @@ function module_code(library_namespace) {
 		format = object.精 === '年' ? standard_year_format : standard_time_format;
 		name.push(' (', (is_Date(start) ? start : new Date(start))
 				.format(format),
-		// [\-–－—~～〜至]
+		// @see CeL.date.parse_period.PATTERN
+		// [\-–~－—─～〜﹣至]
 		'~', new Date(object.end
 		// 向前一天以取得最後一日。
 		// 並非萬全之法?
@@ -4469,8 +4470,8 @@ function module_code(library_namespace) {
 		if (typeof date === 'string' && (tmp = date.match(
 		// Must include PERIOD_DASH
 		// [ matched, parser, 起, 訖1, 訖2 ]
-		/^\s*(?:([^:]+):)?\s*([^–－—~～〜至:]*)(?:[–－—~～〜至]\s*(.*)|(\+\d+))\s*$/
-		// @see String_to_Date.parser_PATTERN
+		/^\s*(?:([^:]+):)?\s*([^–~－—─～〜﹣至:]*)(?:[–~－—─～〜﹣至]\s*(.*)|(\+\d+))\s*$/
+		// @see CeL.date.parse_period.PATTERN
 		)))
 			date = [ tmp[2], tmp[3] || tmp[4], tmp[1] ];
 
@@ -4480,9 +4481,9 @@ function module_code(library_namespace) {
 				tmp = date[0];
 				// 針對從下一筆紀年調來的資料。
 				if (typeof tmp === 'string' && (tmp = tmp
+				// @see CeL.date.parse_period.PATTERN
 				// Must include PERIOD_DASH
-				// @see String_to_Date.parser_PATTERN
-				.match(/^\s*(?:([^:]+):)?\s*([^–－—~～〜至:]*)/)))
+				.match(/^\s*(?:([^:]+):)?\s*([^–~－—─～〜﹣至:]*)/)))
 					date = [ tmp[2], date[1], tmp[1] ];
 			}
 
@@ -4664,9 +4665,10 @@ function module_code(library_namespace) {
 				era = {
 					紀年 : era[0],
 					起訖 : parse_duration(era[1], era[0])
+					// @see CeL.date.parse_period.PATTERN
 					// Must include PERIOD_DASH
 					// assert: 已經警示過了。
-					|| era[1].split(/[–－—~～〜至]/),
+					|| era[1].split(/[–~－—─～〜﹣至]/),
 					曆數 : era[2]
 				};
 			}

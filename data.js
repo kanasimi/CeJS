@@ -1602,8 +1602,9 @@ function module_code(library_namespace) {
 				_normalizer = import_options.filters[type][_normalizer];
 
 			} else if (type === 'number' && (matched = _normalizer.match(
+			// @see CeL.date.parse_period.PATTERN
 			// [ all, min, max ]
-			/([+\-]?\d+(?:\.\d+)?)?[–~]([+\-]?\d+(?:\.\d+)?)?/))) {
+			/([+\-]?\d+(?:\.\d+)?)?\s*[–~－—─～〜﹣至]\s*([+\-]?\d+(?:\.\d+)?)?/))) {
 				_normalizer = import_options.filters[type]
 				// this: [ min, max ]
 				.range.bind([ matched[1] && +matched[1],
