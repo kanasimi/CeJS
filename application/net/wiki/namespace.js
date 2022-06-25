@@ -3447,8 +3447,13 @@ function module_code(library_namespace) {
 				// session.get_storage(KEY_API_parameters) @
 				// need_get_API_parameters()
 				session.API_parameters);
-				library_namespace.info('get_API_parameters: Cache '
-						+ wiki_API.site_name(session) + ': path=' + path);
+				library_namespace.info([ 'get_API_parameters: ', {
+					T : [
+					// gettext_config:{"id":"cache-information-about-the-api-modules-of-$1-module-path=$2"}
+					"Cache information about the API modules of %1: module path=%2"
+					//
+					, wiki_API.site_name(session), path ]
+				} ]);
 				// console.trace(Object.keys(parameters));
 				// console.trace(session.API_parameters);
 			}

@@ -2757,6 +2757,13 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2986}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
+		"message": "Cache information about the API modules of %1: module path=%2",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3453}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
 	"found-$2-query-modules-$1": {
 		"message": "Found %2 query {{PLURAL:%2|module|modules}}: %1",
 		"original_message_language_code": "en-US",
@@ -8481,6 +8488,14 @@
 		"notes": "edit summary on wikidata.",
 		"parameters": "%1, %2: site names",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L435}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
+	"very-sorry.-undo-the-robot-s-wrong-edits.-($1)": {
+		"message": "Very Sorry. Undo the robot's wrong edits. (%1)",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: edit timestamp",
+		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/task/undo_edit.js#L31}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"debug-level": {

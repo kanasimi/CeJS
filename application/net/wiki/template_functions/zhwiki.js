@@ -254,6 +254,7 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
+		// 一些會用於章節標題的特殊模板。 for preprocess_section_link_token()
 		A : parse_template_A,
 		Al : parse_template_Al,
 

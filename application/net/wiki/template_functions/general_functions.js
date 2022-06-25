@@ -361,6 +361,8 @@ function module_code(library_namespace) {
 	wiki_API.template_functions.functions_of_all_sites = {
 		Void : parse_template_Void,
 		Center : parse_template_Center,
+
+		// 一些會用於章節標題的特殊模板。 for preprocess_section_link_token()
 		Font : parse_template_Font,
 		Color : parse_template_Color,
 		'Colored link' : parse_template_Colored_link,

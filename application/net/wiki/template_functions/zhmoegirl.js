@@ -107,6 +107,30 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// for preprocess_section_link_token()
+	function expand_template_Dead(options) {
+		var parameters = this.parameters;
+		return parameters[1];
+	}
+
+	function parse_template_Dead(token) {
+		token.expand = expand_template_Dead;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// for preprocess_section_link_token()
+	function expand_template_黑幕(options) {
+		var parameters = this.parameters;
+		return parameters[1];
+	}
+
+	function parse_template_黑幕(token) {
+		token.expand = expand_template_黑幕;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// for preprocess_section_link_token()
 	// {{Lj|...}} 是日語{{lang|ja|...}}的縮寫 @ zh.moegirl
 	function expand_template_Lj(options) {
 		var parameters = this.parameters;
@@ -168,10 +192,11 @@ function module_code(library_namespace) {
 		Ruby : parse_template_Ruby,
 		铁路车站名 : parse_template_铁路车站名,
 
+		// 一些會用於章節標題的特殊模板。 for preprocess_section_link_token()
+		Dead : parse_template_Dead,
+		黑幕 : parse_template_黑幕,
 		Lj : parse_template_Lj,
-
 		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon,
-
 		'Gradient Text' : parse_template_Gradient_Text
 	};
 
