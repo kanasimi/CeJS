@@ -648,9 +648,6 @@ function set_qqq_data(message_id, qqq, options) {
 	const old_qqq_data = qqq_data_Map.get(message_id);
 	if (old_qqq_data) {
 		console.assert(CeL.is_Object(old_qqq_data));
-		// qqq_data.references 應該在 adapt_new_change_to_source_file() 設定。
-		delete qqq_data.references;
-		delete qqq_data.repositories;
 		// Copy new properties from new qqq_data.
 		for (const property_name of Object.keys(qqq_data)) {
 			if ((qqq_data[property_name] || qqq_data[property_name] === 0
@@ -667,6 +664,11 @@ function set_qqq_data(message_id, qqq, options) {
 			}
 		}
 		qqq_data = old_qqq_data;
+		// qqq_data.references, qqq_data.repositories 應該在 adapt_new_change_to_source_file() 設定。
+		delete qqq_data.references;
+		delete qqq_data.repositories;
+		// 此屬性應由編程者決定。
+		delete qqq_data.mark_type;
 	} else {
 		CeL.warn(`${set_qqq_data.name}: New message id in i18n: ${message_id}`);
 		qqq_data_Map.set(message_id, qqq_data);

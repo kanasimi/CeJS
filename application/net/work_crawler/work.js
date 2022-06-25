@@ -697,14 +697,15 @@ function module_code(library_namespace) {
 
 		if (this.start_chapter) {
 			if (library_namespace.is_digits(this.start_chapter)
-			// 已經超越預設的第1章節才作設定。
-			&& this.start_chapter > 1
+			// 為正整數章節才作設定。預設第1章節。
+			&& this.start_chapter >= 1
 					&& this.start_chapter == (this.start_chapter | 0)) {
 				// {Natural}chapter_NO
 				this.start_chapter_NO = this.start_chapter | 0;
 			} else {
-				// 將這個當作指定開始下載的章節標題。
-				this.start_chapter_title = this.start_chapter.toLowerCase();
+				// 將 this.start_chapter 當作指定開始下載的章節標題。
+				this.start_chapter_title = this.start_chapter.toString()
+						.toLowerCase();
 			}
 			delete this.start_chapter;
 		}
