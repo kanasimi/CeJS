@@ -410,6 +410,7 @@
 	"the-serial-number-of-the-work-part-(no_in_part)-is-invalid-$1": "作品分部/分卷之序號無效：%1",
 	"«$1»-sort-oldest-to-newest": "《%1》：轉成由舊至新之順序。",
 	"«$1»": "《%1》：",
+	"the-next-download-will-be-started-from-$1-«$2»": "下次從 %1《%2》起下載。",
 	"this-section-determines-the-chapter-number-according-to-the-chapter-title.-it-is-recommended-to-set-recheck=multi_parts_changed-option-to-avoid-a-missed-situation-when-downloading-multiple-times": "本作依章節標題來決定章節編號；建議設置 recheck=multi_parts_changed 選項來避免多次下載時，遇上缺話的情況。",
 	"in-the-case-of-«$1»-the-chapter-number-is-inverted-$2": "《%1》出現章節編號倒置的情況：%2",
 	"cannot-determine-chapter-no-from-title-«$1»": "無法從章節標題《%1》判斷章節序號。",

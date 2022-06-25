@@ -406,6 +406,7 @@
 	"The serial number of the work part (NO_in_part) is invalid: %1": "The serial number of the work part (NO_in_part) is invalid: %1",
 	"\u300a%1\u300b\uff1a\u8f49\u6210\u7531\u820a\u81f3\u65b0\u4e4b\u9806\u5e8f\u3002": "\u00ab%1\u00bb: Sort oldest to newest.",
 	"\u300a%1\u300b\uff1a": "\u00ab%1\u00bb: ",
+	"\u4e0b\u6b21\u5f9e %1\u300a%2\u300b\u8d77\u4e0b\u8f09\u3002": "The next download will be started from %1 \u00ab%2\u00bb.",
 	"\u672c\u4f5c\u4f9d\u7ae0\u7bc0\u6a19\u984c\u4f86\u6c7a\u5b9a\u7ae0\u7bc0\u7de8\u865f\uff1b\u5efa\u8b70\u8a2d\u7f6e recheck=multi_parts_changed \u9078\u9805\u4f86\u907f\u514d\u591a\u6b21\u4e0b\u8f09\u6642\uff0c\u9047\u4e0a\u7f3a\u8a71\u7684\u60c5\u6cc1\u3002": "This section determines the chapter number according to the chapter title. It is recommended to set recheck=multi_parts_changed option to avoid a missed situation when downloading multiple times.",
 	"\u300a%1\u300b\u51fa\u73fe\u7ae0\u7bc0\u7de8\u865f\u5012\u7f6e\u7684\u60c5\u6cc1\uff1a%2": "In the case of \u00ab%1\u00bb, the chapter number is inverted: %2",
 	"\u7121\u6cd5\u5f9e\u7ae0\u7bc0\u6a19\u984c\u300a%1\u300b\u5224\u65b7\u7ae0\u7bc0\u5e8f\u865f\u3002": "Cannot determine chapter NO from title: \u00ab%1\u00bb.",

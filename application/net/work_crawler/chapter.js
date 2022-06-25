@@ -583,6 +583,28 @@ function module_code(library_namespace) {
 		} ]);
 	}
 
+	function set_start_chapter_NO_next_time(work_data, chapter_NO) {
+		var chapter_data = work_data.chapter_list[chapter_NO - 1];
+		if (/* chapter_data.limited || */work_data.start_chapter_NO_next_time) {
+			return;
+		}
+		library_namespace.info({
+			// gettext_config:{"id":"the-next-download-will-be-started-from-$1-«$2»"}
+			T : [ '下次從 %1《%2》起下載。',
+					chapter_NO + '/' + work_data.chapter_list.length,
+					chapter_data.title ]
+		});
+		if (!chapter_data.limited) {
+			library_namespace.warn({
+				T : [ '%1《%2》未設定 chapter_data.limited',
+						chapter_NO + '/' + work_data.chapter_list.length,
+						chapter_data.title ]
+			});
+		}
+		work_data.start_chapter_NO_next_time = chapter_NO;
+		// work_data.chapter_list.truncate(chapter_NO);
+	}
+
 	// 分析所有數字後的非數字，猜測章節的單位。
 	function guess_chapter_unit(title_list) {
 		var units = Object.create(null), PATTERN = /\d+([^\d])/g, matched;
@@ -1860,6 +1882,7 @@ function module_code(library_namespace) {
 		set_part : set_part_title,
 		add_chapter : add_chapter_data,
 		reverse_chapter_list_order : reverse_chapter_list_order,
+		set_start_chapter_NO_next_time : set_start_chapter_NO_next_time,
 		set_chapter_NO_via_title : set_chapter_NO_via_title,
 		get_chapter_directory_name : get_chapter_directory_name,
 

@@ -404,6 +404,7 @@
 	"the-serial-number-of-the-work-part-(no_in_part)-is-invalid-$1": "The serial number of the work part (NO_in_part) is invalid: %1",
 	"«$1»-sort-oldest-to-newest": "«%1»: Sort oldest to newest.",
 	"«$1»": "«%1»:&#32;",
+	"the-next-download-will-be-started-from-$1-«$2»": "The next download will be started from %1 «%2».",
 	"this-section-determines-the-chapter-number-according-to-the-chapter-title.-it-is-recommended-to-set-recheck=multi_parts_changed-option-to-avoid-a-missed-situation-when-downloading-multiple-times": "This section determines the chapter number according to the chapter title. It is recommended to set recheck=multi_parts_changed option to avoid a missed situation when downloading multiple times.",
 	"in-the-case-of-«$1»-the-chapter-number-is-inverted-$2": "In the case of «%1», the chapter number is inverted: %2",
 	"cannot-determine-chapter-no-from-title-«$1»": "Cannot determine chapter NO from title: «%1».",
