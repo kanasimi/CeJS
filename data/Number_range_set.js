@@ -59,6 +59,23 @@ function module_code(library_namespace) {
 		}
 	}
 
+	function is_Number_range_set(value) {
+		return value && value.constructor === Number_range_set;
+	}
+
+	Number_range_set.is_Number_range_set = is_Number_range_set;
+
+	function Number_range_set_toString() {
+		var value_list = Array.from(this.number_Set.values());
+		for (var list = Array.from(this.range_start_Map.keys()), index = 0, length = list.length; index < length; index++) {
+			var start = list[index];
+			value_list.push(start + '–' + this.range_start_Map.get(start));
+		}
+		return value_list.join(',');
+	}
+
+	Number_range_set.prototype.toString = Number_range_set_toString;
+
 	/**
 	 * 添加數字範圍。
 	 * 
@@ -123,9 +140,10 @@ function module_code(library_namespace) {
 		if (this.number_Set.has(number) || this.range_start_Map.has(number))
 			return true;
 
-		if (!this.range_start_sorted)
+		if (!this.range_start_sorted) {
 			this.range_start_sorted = Array.from(this.range_start_Map.keys())
 					.sort();
+		}
 
 		var lower = this.range_start_sorted.search_sorted(number, {
 			near : true

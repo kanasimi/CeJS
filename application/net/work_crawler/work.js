@@ -683,7 +683,9 @@ function module_code(library_namespace) {
 		library_namespace.debug('work_URL: ' + work_URL, 2, 'get_work_data');
 		// console.log(work_URL);
 
-		if (this.chapter_NO_range) {
+		if (this.chapter_NO_range
+				&& !library_namespace.Number_range_set
+						.is_Number_range_set(this.chapter_NO_range)) {
 			if (this.start_chapter_NO > 1) {
 				// Reset start_chapter_NO to test all chapters
 				this.start_chapter_NO = 1;
