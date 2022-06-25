@@ -981,46 +981,60 @@ function module_code(library_namespace) {
 		return options && options.site_name || wiki_API.site_name(session);
 	}
 
+	function token_is_invoke(token) {
+		return token.type === 'magic_word_function' && token.name === 'invoke'
+				&& token.parameters[1]
+	}
+
 	function get_function_of(template, options) {
+		if (!template)
+			return;
+
 		options = library_namespace.setup_options(options);
 		var session = wiki_API.session_of_options(options);
 		var site_name = template_functions_site_name(session, options);
 		var functions_of_site = template_functions.functions_of_site[site_name];
 		// console.trace([site_name, functions_of_site, options]);
 
-		var template_name = typeof template === 'string' ? template : template
-				&& (template.type === 'transclusion' ? template.name
-				// assert: template_token.type !== 'magic_word_function'
-				: 'Module:' + wiki_API.normalize_title(template.parameters[1]));
+		var is_invoke, template_name;
+		if (typeof template === 'string') {
+			is_invoke = session ? session.is_namespace(template, 'Module')
+					: /^Module:/i.test(template);
+			template_name = template;
+		} else {
+			is_invoke = token_is_invoke(template);
+			template_name = is_invoke ? 'Module:' + template.parameters[1]
+					: template.name;
+		}
 
-		// template_processor
-		var template_parser;
 		function get_template_parser() {
-			return template_parser = functions_of_site
-					&& functions_of_site[template_name]
+			return functions_of_site && functions_of_site[template_name]
 					|| template_functions.functions_of_all_sites[template_name];
 		}
 
-		if (get_template_parser())
+		// template_processor
+		var template_parser = get_template_parser();
+		if (template_parser)
 			return template_parser;
 
 		if (!session || options.no_normalize) {
 			return;
 		}
 
-		// normalize_template_name()
-		template_name = session.remove_namespace(session.redirect_target_of(
-				session.to_namespace(template_name, 'Template'), options),
-				options);
+		// normalize_template_name() to redirect target
+		if (!is_invoke)
+			template_name = session.to_namespace(template_name, 'Template');
+		template_name = session.redirect_target_of(template_name, options);
+		if (!is_invoke)
+			template_name = session.remove_namespace(template_name, options);
 		return get_template_parser();
 	}
 
 	function adapt_function(template_token, index, parent, options) {
-		if (!template_token
-				|| template_token.type !== 'transclusion'
-				&& (template_token.type !== 'magic_word_function'
-						|| template_token.name !== 'invoke' || !template_token.parameters[1]))
+		if (!template_token || template_token.type !== 'transclusion'
+				&& !token_is_invoke(template_token)) {
 			return;
+		}
 
 		// template_processor()
 		var template_parser = get_function_of(template_token, options);
@@ -1090,6 +1104,39 @@ function module_code(library_namespace) {
 		});
 	}
 
+	function to_full_template_name(template_name, options) {
+		var session = wiki_API.session_of_options(options);
+		return session.is_namespace(template_name, 'Module') ? template_name
+				: session.to_namespace(template_name, 'Template');
+	}
+
+	// 糾正 functions_of_site 之模板名稱至重定向標的。
+	function correct_template_name(functions_of_site, options) {
+		var session = wiki_API.session_of_options(options);
+		for (var template_name_list = Object.keys(functions_of_site), index = 0; index < template_name_list.length; index++) {
+			var template_name = template_name_list[index];
+			var full_name = to_full_template_name(template_name, options);
+			var target_full_name = session.redirect_target_of(full_name);
+			if (target_full_name === full_name)
+				continue;
+			if (session.is_namespace(full_name, 'Template')) {
+				target_full_name = session.remove_namespace(target_full_name,
+						options);
+			}
+			if (functions_of_site[target_full_name]) {
+				library_namespace.warn('correct_template_name: '
+						+ 'Copy configuration from [' + template_name
+						+ '] to [' + target_full_name
+						+ '] failed: Target exists.');
+				continue;
+			}
+			library_namespace.info('correct_template_name: '
+					+ 'Copy configuration from [' + template_name + '] to ['
+					+ target_full_name + ']');
+			functions_of_site[target_full_name] = functions_of_site[template_name];
+		}
+	}
+
 	// @inner
 	function initialize_session_template_functions(site_name, callback) {
 		var session = this;
@@ -1142,10 +1189,13 @@ function module_code(library_namespace) {
 		});
 		// assert: (function_name_list.length > 0),
 		// because template_functions.biographical_templates.length > 0
-		session.register_redirects(function_name_list.map(function(name) {
-			return session.is_namespace(name, 'Module') ? name : session
-					.to_namespace(name, 'Template');
-		}), function() {
+		function_name_list = function_name_list.map(function(name) {
+			return to_full_template_name(name, session);
+		});
+		session.register_redirects(function_name_list, function() {
+			correct_template_name(template_functions.functions_of_all_sites,
+					session);
+			correct_template_name(functions_of_site, session);
 			session.biographical_templates
 			//
 			= session.redirect_target_of(
