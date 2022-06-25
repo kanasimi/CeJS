@@ -2783,7 +2783,7 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L653}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L881}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L920}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L653}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L882}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L921}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages": {
@@ -2911,7 +2911,7 @@
 		"message": "Did not set %1!",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: options to set",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L287}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L290}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"too-many-failed-login-attempts-$1": {
@@ -2931,20 +2931,20 @@
 		"notes": "CeL.application.storage.EPUB: add_chapter()",
 		"scope": "執行時 console 訊息 work_crawler.js: full_URL_of_path()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L274}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L621}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1634}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1669}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L277}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L621}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1634}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1669}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"will-set-$1-automatically": {
 		"message": "將自動設定 %1。",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L290}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L293}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-$1": {
 		"message": "Waiting %1...",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Time to wait. 需要等待的時間。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L360}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L363}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-redirects-to-this-page": {

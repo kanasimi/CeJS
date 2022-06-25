@@ -5299,7 +5299,9 @@ function module_code(library_namespace) {
 
 		if (!entity && options['new']
 		// combine_edit_queries
+		// https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_changeop_serializations.html
 		|| options.wbeditentity_only) {
+			delete options.wbeditentity_only;
 			// 直接呼叫 wbeditentity
 			do_wbeditentity();
 			return;

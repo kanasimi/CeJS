@@ -207,6 +207,9 @@ function module_code(library_namespace) {
 		}
 	}
 
+	var need_to_wait_error_code = new Set([ 'maxlag', 'ratelimited',
+			'actionthrottledtext' ]);
+
 	/**
 	 * 實際執行 query 操作，直接 call API 之核心函數。 wiki_API.query()
 	 * 
@@ -634,9 +637,7 @@ function module_code(library_namespace) {
 
 			if (response && response.error
 			// https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
-			&& (response.error.code === 'maxlag'
-			//
-			|| response.error.code === 'ratelimited')) {
+			&& need_to_wait_error_code.has(response.error.code)) {
 				var waiting = response.error.info
 				// /Waiting for [^ ]*: [0-9.-]+ seconds? lagged/
 				.match(/([0-9.-]+) seconds? lagged/);
@@ -838,10 +839,10 @@ function module_code(library_namespace) {
 
 			} else {
 				if (library_namespace.is_Object(page_data)) {
-					library_namespace
-							.warn('wiki_API_query.title_param: 看似有些非正規之頁面資料。');
-					library_namespace
-							.info('wiki_API_query.title_param: 將採用 title 為主要查詢方法。');
+					library_namespace.warn('wiki_API_query.title_param: '
+							+ '看似有些非正規之頁面資料。');
+					library_namespace.info('wiki_API_query.title_param: '
+							+ '將採用 title 為主要查詢方法。');
 				}
 				// reset
 				pageid = page_data.map(function(page) {
