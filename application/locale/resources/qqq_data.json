@@ -3820,7 +3820,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_label, %2: error image log count",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1693}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1695}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"remove-$1-damaged-images-from-the-image-compression-file-that-successfully-downloaded-this-time-$2": {
@@ -3829,7 +3829,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: error image count, %2: images_archive.file_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1710}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1712}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"update-image-archive-$1": {
@@ -3838,7 +3838,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: images_archive.file_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1737}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1739}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"create-image-archive-$1": {
@@ -3847,7 +3847,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::check_if_done()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: images_archive.file_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1739}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1741}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$2-jump-to-chapter-$1": {
@@ -3856,7 +3856,7 @@
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: jump to chapter NO, %2: work title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1799}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1801}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"if-you-want-to-dynamically-add-chapters-you-must-manually-increase-the-number-of-chapters-work_data.chapter_count++": {
@@ -3864,7 +3864,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1813}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1815}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"(this-download-has-processed-a-total-of-$1-word)": {
@@ -3872,7 +3872,7 @@
 		"notes": "(%1 words)",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1828}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1830}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"(this-download-has-processed-a-total-of-$1-image)": {
@@ -3880,7 +3880,7 @@
 		"notes": "(%1 images)",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1833}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1835}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"download-completed-for-$1": {
@@ -3889,7 +3889,7 @@
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: datetime",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1836}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1838}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"some-are-paid-restricted-chapters": {
@@ -3897,7 +3897,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1841}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1843}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-this-download-has-a-total-of-$2-image-download-errors": {
@@ -3905,7 +3905,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: continue_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1846}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1848}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"chapter-$1": {

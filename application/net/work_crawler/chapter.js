@@ -1678,7 +1678,9 @@ function module_code(library_namespace) {
 					library_namespace.create_directory(
 					// 先創建記錄用目錄。
 					log_directory);
-					if (_this.recheck && error_log_file_backup) {
+					if (_this.recheck && error_log_file_backup
+					//
+					&& library_namespace.file_exists(error_log_file_backup)) {
 						// 當從頭開始檢查時，重新設定錯誤記錄檔案。
 						library_namespace.move_file(error_log_file,
 								error_log_file_backup);
