@@ -3111,7 +3111,7 @@
 		"scope": "work_crawler.js: is_finished()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title 本作品, %2: 未更新時間",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L688}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L687}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-allowed-data-type-for-$1-is-$4-but-it-was-set-to-{$2}-$3": {
@@ -4386,7 +4386,7 @@
 		"additional_notes": "work_crawler.sites.qTcms2017\nwork_crawler.sites.SinMH\nwork_crawler.sites.SinMH2013",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title, %2: chapter_NO",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/SinMH.js#L521}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/SinMH2013.js#L256}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/manhuagui.js#L357}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/qTcms2017.js#L310}}\n: {{GitHub|kanasimi/work_crawler/blob/master/comic.cmn-Hans-CN/zymk.js#L126}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/SinMH.js#L521}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/SinMH2013.js#L256}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/manhuagui.js#L357}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/qTcms2017.js#L310}}\n: {{GitHub|kanasimi/work_crawler/blob/master/comic.cmn-Hans-CN/zymk.js#L146}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"§$1-has-been-blocked-and-no-longer-attempts-to-resolve-other-chapters": {
@@ -4517,7 +4517,7 @@
 		"scope": "work_crawler.sites.comico",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: user name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/comico.js#L684}}\n: {{GitHub|kanasimi/work_crawler/blob/master/comic.ja-JP/nico_seiga.js#L198}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/comico.js#L684}}\n: {{GitHub|kanasimi/work_crawler/blob/master/comic.ja-JP/nico_seiga.js#L214}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"$1-items-with-a-time-limit-have-been-received": {

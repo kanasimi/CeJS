@@ -672,7 +672,9 @@ function module_code(library_namespace) {
 				// treat work_data as status
 				: work_data, date;
 		if (!status_list) {
-			if (this.recheck
+			if (!this.no_checking_of_long_time_no_updated
+					// 檢查是否久未更新。
+					&& this.recheck
 					&& !work_data.recheck
 					&& library_namespace.is_Object(work_data)
 					&& (Date.now()
@@ -680,15 +682,12 @@ function module_code(library_namespace) {
 					- (date = crawler_namespace.set_last_update_Date(work_data)))
 							// 因為沒有明確記載作品是否完結，10年沒更新就不再重新下載。
 							/ library_namespace.to_millisecond('1D') > (work_data.recheck_days || 10 * 366)) {
-				library_namespace.info([
-						'is_finished: ',
-						{
-							T : [
-							// gettext_config:{"id":"«$1»-has-not-been-updated.-$2-is-no-longer-forced-to-re-download.-it-will-only-be-re-downloaded-if-the-number-of-chapters-changes"}
-							'《%1》已 %2 沒有更新，時間過久不再強制重新下載，僅在章節數量有變化時才重新下載。',
-									work_data.title,
-									library_namespace.age_of(date) ]
-						} ]);
+				library_namespace.info([ 'is_finished: ', {
+					// gettext_config:{"id":"«$1»-has-not-been-updated.-$2-is-no-longer-forced-to-re-download.-it-will-only-be-re-downloaded-if-the-number-of-chapters-changes"}
+					T : [ '《%1》已 %2 沒有更新，時間過久不再強制重新下載，僅在章節數量有變化時才重新下載。'
+					//
+					, work_data.title, library_namespace.age_of(date) ]
+				} ]);
 				work_data.recheck = 'changed';
 			}
 
