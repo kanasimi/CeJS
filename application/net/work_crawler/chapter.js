@@ -444,17 +444,15 @@ function module_code(library_namespace) {
 			if (chapter_data.part_NO !== chapter_list.part_NO
 					&& chapter_list.part_NO >= 1) {
 				if (chapter_data.part_NO >= 1) {
-					library_namespace
-							.warn([
-									'add_chapter_data: ',
-									{
-										T : [
-												// gettext_config:{"id":"there-is-a-conflict-with-setting-chapter_list.$1=$2-with-chapter_data.$1=$3"}
-												'原已設定 chapter_list.%1=%2，後又設定 chapter_data.%1=%3，兩者相衝突！',
-												'part_NO',
-												chapter_list.part_NO,
-												chapter_data.part_NO ]
-									} ]);
+					library_namespace.warn([ 'add_chapter_data: ', {
+						T : [
+						// gettext_config:{"id":"there-is-a-conflict-with-setting-chapter_list.$1=$2-with-chapter_data.$1=$3"}
+						'原已設定 chapter_list.%1=%2，後又設定 chapter_data.%1=%3，兩者相衝突！'
+						//
+						, 'part_NO', chapter_list.part_NO,
+						//
+						chapter_data.part_NO ]
+					} ]);
 				} else if (chapter_list.add_part_NO !== false) {
 					chapter_data.part_NO = chapter_list.part_NO;
 				}
@@ -462,17 +460,15 @@ function module_code(library_namespace) {
 
 			if (chapter_data.part_title !== chapter_list.part_title) {
 				if (chapter_data.part_title) {
-					library_namespace
-							.warn([
-									'add_chapter_data: ',
-									{
-										T : [
-												// gettext_config:{"id":"there-is-a-conflict-with-setting-chapter_list.$1=$2-with-chapter_data.$1=$3"}
-												'原已設定 chapter_list.%1=%2，後又設定 chapter_data.%1=%3，兩者相衝突！',
-												'part_title',
-												chapter_list.part_title,
-												chapter_data.part_title ]
-									} ]);
+					library_namespace.warn([ 'add_chapter_data: ', {
+						T : [
+						// gettext_config:{"id":"there-is-a-conflict-with-setting-chapter_list.$1=$2-with-chapter_data.$1=$3"}
+						'原已設定 chapter_list.%1=%2，後又設定 chapter_data.%1=%3，兩者相衝突！'
+						//
+						, 'part_title', chapter_list.part_title,
+						//
+						chapter_data.part_title ]
+					} ]);
 				} else {
 					chapter_data.part_title = chapter_list.part_title;
 				}

@@ -715,7 +715,8 @@ function module_code(library_namespace) {
 
 				library_namespace.debug({
 					// gettext_config:{"id":"got-url-from-the-network-$1-$2-bytes"}
-					T : [ '自網路取得 URL：%1，%2位元組。', value, XMLHttp.buffer.length ]
+					T : [ '自網路取得 URL：%1，%2{{PLURAL:%2|位元組}}。', value,
+							XMLHttp.buffer.length ]
 				}, 1, 'to_form_data');
 				push_and_callback(XMLHttp.type, XMLHttp.buffer);
 			}, 'buffer');
@@ -1511,6 +1512,7 @@ function module_code(library_namespace) {
 
 		var URL_is_https = /^https:?$/i.test(URL_options_to_fetch.protocol);
 
+		// console.trace([ URL_to_fetch, URL_options_to_fetch.toString() ]);
 		URL_to_fetch = URL_options_to_fetch.toString();
 		// assert: {String}URL_to_fetch,
 		// library_namespace.is_URI(URL_options_to_fetch)
@@ -1775,17 +1777,15 @@ function module_code(library_namespace) {
 				} else if (error.code === 'EPROTO'
 						&& require('tls').DEFAULT_MIN_VERSION === 'TLSv1.2'
 						&& library_namespace.platform('node', 12)) {
-					library_namespace
-							.error([
-									'get_URL_node: ',
-									{
-										// gettext_config:{"id":"node.js-v12-and-later-versions-disable-tls-v1.0-and-v1.1-by-default"}
-										T : 'Node.js v12 and later versions disable TLS v1.0 and v1.1 by default.'
-									},
-									{
-										// gettext_config:{"id":"please-set-tls.default_min_version-=-tlsv1-first"}
-										T : 'Please set tls.DEFAULT_MIN_VERSION = "TLSv1" first!'
-									}, ' [' + URL_to_fetch + ']' ]);
+					library_namespace.error([ 'get_URL_node: ', {
+						T :
+						// gettext_config:{"id":"node.js-v12-and-later-versions-disable-tls-v1.0-and-v1.1-by-default"}
+						'Node.js v12 and later versions disable TLS v1.0 and v1.1 by default.'
+					}, {
+						T :
+						// gettext_config:{"id":"please-set-tls.default_min_version-=-tlsv1-first"}
+						'Please set tls.DEFAULT_MIN_VERSION = "TLSv1" first!'
+					}, ' [' + URL_to_fetch + ']' ]);
 					/**
 					 * <code>
 					To solve:
@@ -1795,13 +1795,12 @@ function module_code(library_namespace) {
 					</code>
 					 */
 				} else {
-					library_namespace.error([
-							'get_URL_node: ',
-							{
-								// gettext_config:{"id":"got-error-when-retrieving-$1-$2"}
-								T : [ 'Got error when retrieving [%1]: %2',
-										URL_to_fetch, localize_error(error) ]
-							} ]);
+					library_namespace.error([ 'get_URL_node: ', {
+						// gettext_config:{"id":"got-error-when-retrieving-$1-$2"}
+						T : [ 'Got error when retrieving [%1]: %2',
+						//
+						URL_to_fetch, localize_error(error) ]
+					} ]);
 					// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 					// console.error(error);
 					// console.error(options);
@@ -1899,13 +1898,12 @@ function module_code(library_namespace) {
 							URL_to_fetch ]
 				}, 2, 'get_URL_node');
 			} else if (!options.no_warning) {
-				library_namespace.warn([
-						'get_URL_node: ',
-						{
-							// gettext_config:{"id":"exception-http-status-code-$1-$2"}
-							T : [ 'Exception HTTP status code %1: %2',
-									response.statusCode, URL_to_fetch ]
-						} ]);
+				library_namespace.warn([ 'get_URL_node: ', {
+					// gettext_config:{"id":"exception-http-status-code-$1-$2"}
+					T : [ 'Exception HTTP status code %1: %2',
+					//
+					response.statusCode, URL_to_fetch ]
+				} ]);
 			}
 
 			// node.js會自動把headers轉成小寫。
@@ -1976,13 +1974,12 @@ function module_code(library_namespace) {
 			&& !options.write_to && !options.write_to_directory) {
 				// 照理unregister()應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				unregister();
-				library_namespace.warn([
-						'get_URL_node: ',
-						{
-							// gettext_config:{"id":"got-url-$1-but-there-is-no-listener"}
-							T : [ 'Got URL [%1], but there is no listener!',
-									URL_to_fetch ]
-						} ]);
+				library_namespace.warn([ 'get_URL_node: ', {
+					// gettext_config:{"id":"got-url-$1-but-there-is-no-listener"}
+					T : [ 'Got URL [%1], but there is no listener!',
+					//
+					URL_to_fetch ]
+				} ]);
 				// console.log(response);
 				return;
 			}
@@ -2442,6 +2439,7 @@ function module_code(library_namespace) {
 
 		// console.log(URL_options_to_fetch);
 		try {
+			// console.trace([ URL_to_fetch, URL_options_to_fetch ]);
 			// request scheme
 			request = URL_is_https ? node_https : node_http;
 

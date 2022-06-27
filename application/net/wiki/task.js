@@ -776,7 +776,7 @@ function module_code(library_namespace) {
 					// gettext_config:{"id":"no-page-redirects-to-this-page"}
 					? '無頁面重定向至本頁'
 					// gettext_config:{"id":"total-$1-pages-redirected-to-this-page"}
-					: '共有%1個頁面重定向至本頁', redirect_list.length - 1);
+					: '共有%1個{{PLURAL:%1|頁面}}重定向至本頁', redirect_list.length - 1);
 					if (1 < redirect_list.length && redirect_list.length < 6) {
 						message += ': '
 						//

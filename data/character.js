@@ -298,7 +298,7 @@ function module_code(library_namespace) {
 
 	// ===============================================================
 
-	// String.prototype.encode()
+	// String.prototype.encode(), string.encode()
 	function String_to_code(encoding, options) {
 		encoding = normalize_encoding_name(encoding);
 
@@ -501,6 +501,15 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------
 
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent
+	// /^[*\-._0-9A-Za-z]$/
+	var PATTERN_has_URI_component_invalid_character = /[^a-zA-Z0-9\-_.!~*'()]/;
+	// _.PATTERN_has_URI_component_invalid_character =
+	// PATTERN_has_URI_component_invalid_character;
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI
+	var PATTERN_has_URI_invalid_character = /[^a-zA-Z0-9;,/?:@&=+$\-_.!~*'()#]/;
+	// _.PATTERN_has_URI_invalid_character = PATTERN_has_URI_invalid_character;
+
 	/**
 	 * @see https://www.w3.org/TR/html5/forms.html#url-encoded-form-data
 	 */
@@ -509,9 +518,9 @@ function module_code(library_namespace) {
 	encode_URI_component_base_map[0x20] = '+';
 	(function() {
 		for (var code = 0x2A; code < 0x7A; code++) {
-			var char = String.fromCharCode(code);
-			if (/^[*\-._0-9A-Za-z]$/.test(char)) {
-				encode_URI_component_base_map[code] = char;
+			var character = String.fromCharCode(code);
+			if (!PATTERN_has_URI_component_invalid_character.test(character)) {
+				encode_URI_component_base_map[code] = character;
 			}
 		}
 	})();
@@ -524,7 +533,7 @@ function module_code(library_namespace) {
 	 */
 	function encode_URI_component(string, encoding) {
 		if (!encoding || /^UTF-?8$/i.test(encoding)) {
-			// fallback
+			// fallback: native methods are faster
 			return encodeURIComponent(string);
 		}
 		// charset
@@ -549,6 +558,29 @@ function module_code(library_namespace) {
 	}
 
 	_.encode_URI_component = encode_URI_component;
+
+	function encode_URI(string, encoding) {
+		if (!encoding || /^UTF-?8$/i.test(encoding)) {
+			// fallback: native methods are faster
+			return encodeURI(string);
+		}
+		// charset
+		encoding = normalize_encoding_name(encoding);
+
+		var encoded = '';
+		string.encode(encoding).forEach(function(byte) {
+			encoded += (byte in encode_URI_component_base_map)
+			//
+			&& !PATTERN_has_URI_invalid_character.test(byte)
+			//
+			? encode_URI_component_base_map[byte]
+			//
+			: '%' + byte.toString(0x10).toUpperCase();
+		});
+		return encoded;
+	}
+
+	_.encode_URI = encode_URI;
 
 	/**
 	 * @see http://qiita.com/weal/items/3b3ddfb8157047119554
@@ -587,6 +619,11 @@ function module_code(library_namespace) {
 	}
 
 	_.decode_URI_component = decode_URI_component;
+	// https://www.geeksforgeeks.org/difference-between-decodeuricomponent-and-decodeuri-functions-in-javascript/
+	// decodeURI(): It takes encodeURI(url) string so it cannot decoded
+	// characters (, / ? : @ & = + $ #)
+	// TODO: decodeURI("%26") === "%26" && decodeURIComponent("%26") === "&"
+	_.decode_URI = decode_URI_component;
 
 	// ---------------------------------------------------------------
 

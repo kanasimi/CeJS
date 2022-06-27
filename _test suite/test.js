@@ -964,7 +964,7 @@ function test_locale() {
 
 
 	//	###System message test
-	all_error_count += CeL.test('locale - System messages', function (assert) {
+	all_error_count += CeL.test('locale - System messages TW', function (assert) {
 		CeL.gettext.use_domain('TW', function () {
 			assert(['載入中…',
 			// gettext_config:{"id":"loading"}
@@ -2325,6 +2325,16 @@ function test_net() {
 		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #1 of ' + href);
 		assert([href, url.toString()], 'CeL.net.URI() #2 of ' + href);
 		assert(['hostname.wiki', uri.hostname], 'CeL.net.URI() #3 of ' + href);
+
+		href = 'http://hostname.org/測試編碼/'; url = new URL(href); uri = new CeL.URI(href);
+		assert([encodeURI(href), CeL.URI(href).toString()], 'CeL.net.URI() #1 of ' + href);
+		assert([encodeURI(href), url.toString()], 'CeL.net.URI() #2 of ' + href);
+		assert([encodeURI('/測試編碼/'), uri.pathname], 'CeL.net.URI() #3 of ' + href);
+
+		href = encodeURI('http://hostname.org/測試編碼/'); url = new URL(href); uri = new CeL.URI(href);
+		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #1 of ' + href);
+		assert([href, url.toString()], 'CeL.net.URI() #2 of ' + href);
+		assert([encodeURI('/測試編碼/'), uri.pathname], 'CeL.net.URI() #3 of ' + href);
 	});
 }
 

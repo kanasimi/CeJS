@@ -354,6 +354,7 @@ function module_code(library_namespace) {
 
 		// console.trace(url);
 		url = this.full_URL(url);
+		// console.trace(url);
 
 		// console.trace(this.get_URL_options);
 		if (get_URL_options === true) {
@@ -398,6 +399,7 @@ function module_code(library_namespace) {
 		delete get_URL_options.fetch_type;
 
 		// console.trace(this.get_URL_options);
+		// console.trace(url);
 
 		// callback(result_Object, error)
 		get_URL(url, callback && callback.bind(this)

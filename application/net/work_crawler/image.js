@@ -194,7 +194,7 @@ function module_code(library_namespace) {
 				// gettext_config:{"id":"invalid-url-must-encode-first-$1"}
 				T : [ '必須先將URL編碼：%1', image_url ]
 			});
-			if (!image_url.includes('%'))
+			if (!/%[\dA-F]{2}/i.test(image_url))
 				image_url = encodeURI(image_url);
 		}
 

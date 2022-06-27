@@ -28,6 +28,8 @@ function module_code(library_namespace) {
 	'use strict';
 
 	var module_name = this.id;
+	// @see PATTERN_has_URI_invalid_character @ library_namespace.character
+	var PATTERN_has_URI_invalid_character = /[^a-zA-Z0-9;,/?:@&=+$\-_.!~*'()#]/;
 	// 本函數亦使用於 CeL.application.net.work_crawler
 	// 本函式將使用之 encodeURIComponent()，包含對 charset 之處理。
 	// @see function_placeholder() @ module.js
@@ -41,16 +43,28 @@ function module_code(library_namespace) {
 		}
 		return encodeURIComponent(string);
 	};
+	var encode_URI = function(string, encoding) {
+		if (library_namespace.character) {
+			library_namespace.debug('採用 ' + library_namespace.Class
+			// 有則用之。 use CeL.data.character.encode_URI()
+			+ '.character.encode_URI', 1, module_name);
+			encode_URI = library_namespace.character.encode_URI;
+			return encode_URI(string, encoding);
+		}
+		return encodeURI(string);
+	};
 	var decode_URI_component = function(string, encoding) {
 		if (library_namespace.character) {
 			library_namespace.debug('採用 ' + library_namespace.Class
 			// 有則用之。 use CeL.data.character.decode_URI_component()
 			+ '.character.decode_URI_component', 1, module_name);
+			decode_URI = library_namespace.character.decode_URI;
 			decode_URI_component = library_namespace.character.decode_URI_component;
 			return decode_URI_component(string, encoding);
 		}
 		return decodeURIComponent(string);
 	};
+	var decode_URI = decode_URI_component;
 
 	// requiring
 	var KEY_not_native = library_namespace.env.not_native_keyword;
@@ -83,7 +97,7 @@ function module_code(library_namespace) {
 		// for IPv4 addresses
 		&& /^[12]?\d{1,2}(?:\.[12]?\d{1,2}){3}$/.test(host)
 		// for IPv6 addresses
-		|| /^[\da-f]{1,4}(?::[\da-f]{1,4}){7}$/i.test(host);
+		|| /^[\dA-F]{1,4}(?::[\dA-F]{1,4}){7}$/i.test(host);
 	}
 
 	_.is_IP = is_IP;
@@ -310,6 +324,15 @@ function module_code(library_namespace) {
 		}
 
 		var href = library_namespace.simplify_path(uri);
+		if (/%[\dA-F]{2}/i.test(uri)) {
+			try {
+				// console.trace([ href, decodeURI(href) ]);
+				// To get decoded path.
+				href = decode_URI(href);
+			} catch (e) {
+				// TODO: handle exception
+			}
+		}
 		if (/^\/\//.test(uri)) {
 			// CeL.simplify_path('//hostname') === '/hostname'
 			href = '/' + href;
@@ -481,6 +504,11 @@ function module_code(library_namespace) {
 			library_namespace.debug('pathname: [' + matched + ']', 9);
 			// pathname={path}filename
 			uri.pathname = matched[1] || '';
+			if (PATTERN_has_URI_invalid_character.test(uri.pathname)) {
+				// console.trace([ uri.pathname, encode_URI(uri.pathname,
+				// options.charset) ]);
+				uri.pathname = encode_URI(uri.pathname, options.charset);
+			}
 			// .directory_path 會隨不同 OS 之 local file 表示法作變動!
 			uri.directory_path = /^\/[A-Z]:/i.test(uri.pathname) ? matched[2]
 					.slice(1).replace(/\//g, '\\')
@@ -623,7 +651,9 @@ function module_code(library_namespace) {
 		return (uri.protocol ? uri.protocol + '//' : '')
 				+ (uri.username || uri.password ? uri.username
 						+ (uri.password ? ':' + uri.password : '') + '@' : '')
-				+ uri.host + encodeURI(uri.pathname) + uri.search + uri.hash;
+				+ uri.host
+				// assert: uri.pathname is encodeURI()-ed.
+				+ uri.pathname + uri.search + uri.hash;
 	}
 
 	// options: 'charset'

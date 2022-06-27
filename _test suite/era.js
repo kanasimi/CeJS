@@ -678,9 +678,9 @@ function show_calendar(era_name) {
 		: '曆譜'
 	}, ' (', {
 		// gettext_config:{"id":"total-$1-time-period-records"}
-		T : [ dates.type ? '共有 %1 個時段紀錄'
+		T : [ dates.type ? '共有 %1 個時段{{PLURAL:%1|紀錄}}'
 		// gettext_config:{"id":"total-$1-year-records"}
-		: '共有 %1 個年段紀錄', dates.length ]
+		: '共有 %1 個年段{{PLURAL:%1|紀錄}}', dates.length ]
 	}, ')' ]
 	//
 	: [ {
