@@ -112,6 +112,7 @@
 	"paste": "붙여넣기",
 	"checking-for-release-update": "릴리스 업데이트 확인 중...",
 	"release-update-available-$1": "사용 가능한 릴리스 업데이트: %1",
+	"download_options.proxy": "프록시 서버. 포맷: \"사용자이름:비밀번호@호스트이름:포트\"",
 	"local-language-name": "한국어",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "There are currently %1 %2 messages that have not been translated. Welcome to translate with us!",
 	"dark-theme": "다크",
