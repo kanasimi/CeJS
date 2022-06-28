@@ -991,8 +991,12 @@ function module_code(library_namespace) {
 				image_list : work_data.image_list[chapter_NO]
 				//
 				.map(function(url) {
+					url = library_namespace.HTML_to_Unicode(url);
+					// https://github.com/kanasimi/work_crawler/issues/536
+					if (url.includes('/images/war.jpg'))
+						return {};
 					return {
-						url : encodeURI(library_namespace.HTML_to_Unicode(url))
+						url : encodeURI(url)
 					}
 				})
 			};
