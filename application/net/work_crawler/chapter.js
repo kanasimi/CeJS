@@ -1210,9 +1210,11 @@ function module_code(library_namespace) {
 
 			function process_chapter_data(XMLHttp, error) {
 				XMLHttp = XMLHttp || Object.create(null);
-				// 因為隱私問題？有些瀏覽器似乎會隱藏網址，只要輸入host即可？
-				if (/(?:\.html?|\/)$/.test(XMLHttp.responseURL))
-					_this.setup_value('Referer', XMLHttp.responseURL);
+				if (/(?:\.html?|\/)$/.test(XMLHttp.responseURL)) {
+					_this.setup_value('Referer', XMLHttp.responseURL.replace(
+					// 因為隱私問題？有些瀏覽器似乎會隱藏網址，只要輸入host即可？
+					/(:\/\/[^/]+\/).+/, '$1'));
+				}
 				var html = XMLHttp.responseText;
 				if (!html
 						&& !_this.skip_get_chapter_page

@@ -2244,7 +2244,7 @@ function module_code(library_namespace) {
 							//
 							+ library_namespace.to_file_name(
 							//
-							URL_to_fetch.replace(/#.*/g, '').replace(
+							URL_to_fetch.replace(/#.*/, '').replace(
 									/[\\\/:*?"<>|]/g, '_')))
 							// 避免 Error: ENAMETOOLONG: name too long
 							.slice(0, 256);
@@ -2330,7 +2330,7 @@ function module_code(library_namespace) {
 
 			// https://developer.mozilla.org/zh-CN/docs/Glossary/Quality_values
 			Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
-					+ 'image/avif,' + 'image/webp,*/*;q=0.8'
+			// + 'image/avif,' + 'image/webp,*/*;q=0.8'
 			// + ',application/signed-exchange;v=b3;q=0.9'
 			,
 			// Accept : 'application/json, text/plain, */*',
@@ -2348,13 +2348,6 @@ function module_code(library_namespace) {
 			// 'sec-ch-ua-mobile' : '?0',
 			// 'sec-ch-ua-platform' : 'Windows',
 
-			// 為了順暢使用 Cloudflare，必須加上 Sec-Fetch-headers？ e.g., mymhh.js
-			// https://blog.kalan.dev/fetch-metadata-request-headers/
-			'Sec-Fetch-Dest' : 'document',
-			'Sec-Fetch-Mode' : 'navigate',
-			'Sec-Fetch-Site' : 'none',
-			'Sec-Fetch-User' : '?1',
-
 			// TE 請求型頭部用來指定用戶代理希望使用的傳輸編碼類型。
 			// 可以將其非正式稱為 Accept-Transfer-Encoding，這個名稱顯得更直觀一些。
 			// 當 TE 設置為 trailers 時，如果服務端支持並且返回了
@@ -2367,7 +2360,27 @@ function module_code(library_namespace) {
 			Pragma : 'no-cache',
 			// 'max-age=0'
 			'Cache-Control' : 'no-cache'
+		}, options.fetch_type === 'image' ? {
+			// /\.(jpg|png|webp)$/i.test(URL_to_fetch.replace(/[?#].*/, ''))
+			Accept :
+			// 每次請求重設這些標頭。
+			'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+			'Sec-Fetch-Dest' : 'image',
+			'Sec-Fetch-Mode' : 'no-cors',
+			'Sec-Fetch-Site' : 'cross-site',
+			'Sec-Fetch-User' : undefined
+		} : {
+			// 為了順暢使用 Cloudflare，必須加上 Sec-Fetch-headers？ e.g., mymhh.js
+			// https://blog.kalan.dev/fetch-metadata-request-headers/
+			'Sec-Fetch-Dest' : options.fetch_type || 'document',
+			'Sec-Fetch-Mode' : 'navigate',
+			'Sec-Fetch-Site' : 'none',
+			'Sec-Fetch-User' : '?1',
 		}, options.headers, URL_options_to_fetch.headers);
+		for ( var key in URL_options_to_fetch.headers) {
+			if (URL_options_to_fetch.headers[key] === undefined)
+				delete URL_options_to_fetch.headers[key];
+		}
 		// delete URL_options_to_fetch.headers.Referer;
 		// console.log(options.headers);
 

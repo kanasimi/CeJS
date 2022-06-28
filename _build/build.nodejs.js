@@ -12,7 +12,7 @@ node build.nodejs.js add_mark generate_plural_rules
 
 TODO:
 Sorting message id by reference.
-對於只有特定 repository 引用的訊息，依照儲存庫分割到不同 .js 檔案。
+對於只有特定 repository 引用的訊息，可依照儲存庫分割到不同 .js 檔案。
 測試原文與翻譯訊息首尾的標點符號是否相符。
 
 */
