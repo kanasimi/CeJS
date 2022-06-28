@@ -324,15 +324,6 @@ function module_code(library_namespace) {
 		}
 
 		var href = library_namespace.simplify_path(uri);
-		if (/%[\dA-F]{2}/i.test(uri)) {
-			try {
-				// console.trace([ href, decodeURI(href) ]);
-				// To get decoded path.
-				href = decode_URI(href);
-			} catch (e) {
-				// TODO: handle exception
-			}
-		}
 		if (/^\/\//.test(uri)) {
 			// CeL.simplify_path('//hostname') === '/hostname'
 			href = '/' + href;
@@ -383,6 +374,15 @@ function module_code(library_namespace) {
 		 */
 		href = matched[3] && matched[3].toLowerCase() || '';
 		path = matched[4] || '';
+		if (/%[\dA-F]{2}/i.test(path)) {
+			try {
+				// console.trace([ path, decodeURI(path) ]);
+				// To get decoded path.
+				// path = decode_URI(path);
+			} catch (e) {
+				// TODO: handle exception
+			}
+		}
 		// 可辨識出為 domain 的這個 hostname. e.g., gTLD
 		// https://en.wikipedia.org/wiki/Generic_top-level_domain
 		if (/(?:\w+\.)+(?:com|org|net|info)$/i.test(href)) {
