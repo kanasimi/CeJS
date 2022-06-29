@@ -1659,7 +1659,7 @@
 		"notes": "Label for astronomical calculations",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L2814}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L2824}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"first-quarter": {
@@ -2080,7 +2080,7 @@
 		"scope": "CeL.application.net: parse_search()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: parameters",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L747}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L759}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"set-$1-to-a-non-string-$2": {
@@ -2089,7 +2089,7 @@
 		"scope": "CeL.application.net: parameters_toString()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: key, %2: value",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L931}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L938}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"a-total-of-$1-parameters": {
@@ -2098,7 +2098,7 @@
 		"scope": "CeL.application.net: parameters_toString()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: length of parameters",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L975}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L982}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"error-connect-econnrefused-$1": {
@@ -2761,7 +2761,7 @@
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3453}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3455}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -2783,7 +2783,7 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L653}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L882}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L921}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L653}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L887}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L926}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages": {
@@ -2911,7 +2911,7 @@
 		"message": "Did not set %1!",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: options to set",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L290}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L289}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"too-many-failed-login-attempts-$1": {
@@ -2931,20 +2931,20 @@
 		"notes": "CeL.application.storage.EPUB: add_chapter()",
 		"scope": "執行時 console 訊息 work_crawler.js: full_URL_of_path()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L277}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L621}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1634}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1669}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L276}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L621}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1634}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1669}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"will-set-$1-automatically": {
 		"message": "將自動設定 %1。",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L293}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L292}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-$1": {
 		"message": "Waiting %1...",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Time to wait. 需要等待的時間。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L363}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L362}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-redirects-to-this-page": {
@@ -3077,7 +3077,7 @@
 		"message": "%1 必須更名為 %2 才能起作用！",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: input template name, %2: normalized template name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions.js#L1184}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions.js#L1187}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-convert-lua-pattern-to-regexp-pattern-$1": {

@@ -3326,8 +3326,10 @@ function module_code(library_namespace) {
 	function need_get_API_parameters(path, options, caller, caller_arguments) {
 		var session = wiki_API.session_of_options(options);
 		if (!session) {
-			library_namespace
-					.error('need_get_API_parameters: Must set session to check the necessity.');
+			// e.g., call `CeL.wiki.page();` directly with anonymous.
+			library_namespace.error('need_get_API_parameters: '
+					+ 'Must set session to check the necessity.');
+			// console.trace(options);
 			return;
 		}
 

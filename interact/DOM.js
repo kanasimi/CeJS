@@ -2196,7 +2196,7 @@ function module_code(library_namespace) {
 
 						if (n.indexOf('<') === -1
 						// e.g., "&CounterClockwiseContourIntegral;"
-						&& !/&(?:#\d{1,8}|#x[a-f\d]{4,8}|\w{1,50});/i.test(n)) {
+						&& !/&(?:#\d{1,8}|#x[\dA-F]{4,8}|\w{1,50});/i.test(n)) {
 							if (t === 'option' && !l.value)
 								l.value = n;
 							try {
@@ -8287,12 +8287,12 @@ function module_code(library_namespace) {
 			// \d{2,8}: 比起所允許的7位數多一位數，預防在不是以 ";" 為結尾的情況下，有無效數字。
 			.replace(/&#0*(\d{2,8});?/g, convert_digital)
 			// ";?": Allow CeL.HTML_to_Unicode('&#32&#65&#66&#67')
-			.replace(/&#[xX]0*([a-fA-F\d]{2,6});?/g, convert_hex);
+			.replace(/&#[xX]0*([\dA-Fa-f]{2,6});?/g, convert_hex);
 			// .replace(): JScript 5.5~
 			if (false && options.is_URI) {
 				// 2022/5/10 6:22:20 一般HTML中的%dd不會被解碼。
 				// is_URI 已經在前面處理完了，看起來根本不需要這一段。
-				unicode_text = unicode_text.replace(/%([a-fA-F\d]{2})/g,
+				unicode_text = unicode_text.replace(/%([\dA-Fa-f]{2})/g,
 						convert_hex);
 			}
 		}
@@ -8413,15 +8413,15 @@ _
 		var T = U.replace(/\\\\|\\u005[cC]|\\x5[cC]|\\134/g, "\0");
 		if (false) {
 			// way 1
-			T = T.replace(/\\u([a-fA-F\d]{4})/g, function($0, $1) {
+			T = T.replace(/\\u([\dA-Fa-f]{4})/g, function($0, $1) {
 				return String.fromCharCode(parseInt($1, 16));
-			}).replace(/\\x([a-fA-F\d]{2})/g, function($0, $1) {
+			}).replace(/\\x([\dA-Fa-f]{2})/g, function($0, $1) {
 				return String.fromCharCode(parseInt($1, 16));
 			}).replace(/\\([0-7]{1,3})/g, function($0, $1) {
 				return String.fromCharCode(parseInt($1, 16));
 			});
 			// way 2
-			T = T.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2})/g,
+			T = T.replace(/\\(u[\dA-Fa-f]{4}|x[\dA-Fa-f]{2})/g,
 					function($0, $1) {
 						return String.fromCharCode(parseInt($1.substr(1), 16));
 					}).replace(/\\([0-7]{1,3})/g, function($0, $1) {
@@ -8429,7 +8429,7 @@ _
 			});
 		}
 		// way 3
-		T = T.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2}|[0-7]{1,3})/g,
+		T = T.replace(/\\(u[\dA-Fa-f]{4}|x[\dA-Fa-f]{2}|[0-7]{1,3})/g,
 		//
 		function($0, $1) {
 			var t = $1.charAt(0);
@@ -8462,7 +8462,7 @@ _
 
 	function CSSToTxt(C) {
 		return C.replace(/\\\\|\\0{0,4}5[cC][ \t\r\n\f]?/g, "\0").replace(
-				/\\([a-fA-F\d]{1,6})[ \t\r\n\f]?/g, function($0, $1) {
+				/\\([\dA-Fa-f]{1,6})[ \t\r\n\f]?/g, function($0, $1) {
 					return String.fromCharCode(parseInt($1, 16));
 				}).replace(/\\(.)/g, "$1").replace(/\0/g, "\\");
 	}

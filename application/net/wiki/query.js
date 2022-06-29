@@ -207,8 +207,7 @@ function module_code(library_namespace) {
 		}
 	}
 
-	var need_to_wait_error_code = new Set([ 'maxlag', 'ratelimited',
-			'actionthrottledtext' ]);
+	var need_to_wait_error_code = new Set([ 'maxlag', 'ratelimited' ]);
 
 	/**
 	 * 實際執行 query 操作，直接 call API 之核心函數。 wiki_API.query()
@@ -637,7 +636,13 @@ function module_code(library_namespace) {
 
 			if (response && response.error
 			// https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
-			&& need_to_wait_error_code.has(response.error.code)) {
+			&& (need_to_wait_error_code.has(response.error.code)
+			//
+			|| Array.isArray(response.error.messages)
+			//
+			&& response.error.messages.some(function(message) {
+				return message.name === 'actionthrottledtext';
+			}))) {
 				var waiting = response.error.info
 				// /Waiting for [^ ]*: [0-9.-]+ seconds? lagged/
 				.match(/([0-9.-]+) seconds? lagged/);

@@ -72,7 +72,7 @@ console.assert(default_config.padding_character === '\t'
 
 (function main() {
 	var file_list = process.argv[2];
-	if (!file_list || /^[A-F\d]{0,2}$/i.test(file_list)) {
+	if (!file_list || /^[\dA-F]{0,2}$/i.test(file_list)) {
 		generate_original_map(file_list);
 		return;
 	}

@@ -2326,15 +2326,25 @@ function test_net() {
 		assert([href, url.toString()], 'CeL.net.URI() #2 of ' + href);
 		assert(['hostname.wiki', uri.hostname], 'CeL.net.URI() #3 of ' + href);
 
-		href = 'http://hostname.org/測試編碼/'; url = new URL(href); uri = new CeL.URI(href);
-		assert([encodeURI(href), CeL.URI(href).toString()], 'CeL.net.URI() #1 of ' + href);
-		assert([encodeURI(href), url.toString()], 'CeL.net.URI() #2 of ' + href);
+		href = 'http://hostname.org/測試編碼/?編=碼&!+%20%%26%3D=$%%26%3D*#a#$%^&'; url = new URL(href); uri = new CeL.URI(href);
+		assert([CeL.URI(href).toString(), CeL.URI(CeL.URI(href).toString()).toString()], 'CeL.net.URI() #1 of ' + href);
+		// assert([encodeURI(href), CeL.URI(href).toString()], 'CeL.net.URI() #1-2 of ' + href);
+		assert([url.toString(), new URL(url.toString()).toString()], 'CeL.net.URI() #2 of ' + href);
 		assert([encodeURI('/測試編碼/'), uri.pathname], 'CeL.net.URI() #3 of ' + href);
+		assert([url.pathname, uri.pathname], 'CeL.net.URI() #3-2 of ' + href);
+		assert(["#a#$%^&", uri.hash], 'CeL.net.URI() #4 of ' + href);
+		assert(["碼", uri.search_params.編], 'CeL.net.URI() #5 of ' + href);
+		assert(["$%&=*", uri.search_params['!  %&=']], 'CeL.net.URI() #6 of ' + href);
 
-		href = encodeURI('http://hostname.org/測試編碼/'); url = new URL(href); uri = new CeL.URI(href);
-		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #1 of ' + href);
-		assert([href, url.toString()], 'CeL.net.URI() #2 of ' + href);
+		href = encodeURI(href); url = new URL(href); uri = new CeL.URI(href);
+		assert([CeL.URI(href).toString(), CeL.URI(CeL.URI(href).toString()).toString()], 'CeL.net.URI() #1 of ' + href);
+		assert([url.toString(), new URL(url.toString()).toString()], 'CeL.net.URI() #2 of ' + href);
+		assert([href, url.toString()], 'CeL.net.URI() #2-2 of ' + href);
 		assert([encodeURI('/測試編碼/'), uri.pathname], 'CeL.net.URI() #3 of ' + href);
+		assert([url.pathname, uri.pathname], 'CeL.net.URI() #3-2 of ' + href);
+		assert(["#a#$%25%5E&", uri.hash], 'CeL.net.URI() #4 of ' + href);
+		assert(["碼", uri.search_params.編], 'CeL.net.URI() #5 of ' + href);
+		assert(["$%%26%3D*", uri.search_params['! %20%%26%3D']], 'CeL.net.URI() #6 of ' + href);
 	});
 }
 

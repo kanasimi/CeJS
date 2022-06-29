@@ -265,7 +265,7 @@ function module_code(library_namespace) {
 	→ .file_path:
 	D:\USB\cgi-bin\lib\JS\_test_suit\test.htm
 
-	eURI : /^((file|telnet|ftp|https?)\:\/\/|~?\/)?(\w+(:\w+)?@)?(([-\w]+\.)+([a-z]{2}|com|org|net))?(:\d{1,5})?(\/([-\w~!$+|.,=]|%[a-f\d]{2})*)?(\?(([-\w~!$+|.,*:]|%[a-f\d{2}])+(=([-\w~!$+|.,*:=]|%[a-f\d]{2})*)?&?)*)?(#([-\w~!$+|.,*:=]|%[a-f\d]{2})*)?$/i,
+	eURI : /^((file|telnet|ftp|https?)\:\/\/|~?\/)?(\w+(:\w+)?@)?(([-\w]+\.)+([a-z]{2}|com|org|net))?(:\d{1,5})?(\/([-\w~!$+|.,=]|%[\dA-F]{2})*)?(\?(([-\w~!$+|.,*:]|%[\dA-F]{2})+(=([-\w~!$+|.,*:=]|%[\dA-F]{2})*)?&?)*)?(#([-\w~!$+|.,*:=]|%[\dA-F]{2})*)?$/i,
 
 	TODO:
 	input [ host + path, search, hash ]
@@ -374,15 +374,6 @@ function module_code(library_namespace) {
 		 */
 		href = matched[3] && matched[3].toLowerCase() || '';
 		path = matched[4] || '';
-		if (/%[\dA-F]{2}/i.test(path)) {
-			try {
-				// console.trace([ path, decodeURI(path) ]);
-				// To get decoded path.
-				// path = decode_URI(path);
-			} catch (e) {
-				// TODO: handle exception
-			}
-		}
 		// 可辨識出為 domain 的這個 hostname. e.g., gTLD
 		// https://en.wikipedia.org/wiki/Generic_top-level_domain
 		if (/(?:\w+\.)+(?:com|org|net|info)$/i.test(href)) {
@@ -489,10 +480,10 @@ function module_code(library_namespace) {
 					9, 'URI');
 		}
 
-		// NG: /^([^%]+|%[a-f\d]{2})+$/
+		// NG: /^([^%]+|%[\dA-F]{2})+$/
 		// prevent catastrophic backtracking. e.g., '.'.repeat(300)+'%'
-		// Thanks for James Davis
-		if (path && !/^(?:[^%]|%[a-f\d]{2})+$/i.test(path)) {
+		// Thanks for James Davis.
+		if (false && path && !/^(?:[^%]|%[\dA-F]{2})+$/i.test(path)) {
 			library_namespace.warn('URI: encoding error: [' + path + ']');
 		}
 
@@ -504,6 +495,15 @@ function module_code(library_namespace) {
 			library_namespace.debug('pathname: [' + matched + ']', 9);
 			// pathname={path}filename
 			uri.pathname = matched[1] || '';
+			if (/%[\dA-F]{2}/i.test(uri.pathname)) {
+				try {
+					// console.trace([ uri.pathname, decodeURI(uri.pathname) ]);
+					// Try to get decoded path.
+					uri.pathname = decodeURI(uri.pathname);
+				} catch (e) {
+					// uri.pathname = decode_URI(uri.pathname, charset);
+				}
+			}
 			if (PATTERN_has_URI_invalid_character.test(uri.pathname)) {
 				// console.trace([ uri.pathname, encode_URI(uri.pathname,
 				// options.charset) ]);
@@ -685,6 +685,18 @@ function module_code(library_namespace) {
 		NO_EQUAL_SIGN : true
 	};
 
+	function decode_URI_component_no_throw(value, charset) {
+		try {
+			return decode_URI_component(value, charset);
+		} catch (e) {
+		}
+
+		// decode_URI_component() should be decodeURIComponent()
+		return value.replace(/%([\dA-F]{2})/g, function(encoded, code) {
+			return String.fromCharCode(parseInt(code, 16));
+		});
+	}
+
 	/**
 	 * parse_parameters({String}parameter) to hash
 	 * 
@@ -772,19 +784,14 @@ function module_code(library_namespace) {
 			// var index = parameter.indexOf('=');
 			if (matched = data[i].match(/^([^=]+)=(.*)$/)) {
 				name = matched[1];
-				value = matched[2];
-				try {
-					value = decode_URI_component(value, charset);
-				} catch (e) {
-					// TODO: handle exception
-				}
+				value = decode_URI_component_no_throw(matched[2]);
 			} else {
 				name = data[i];
 				value = 'default_value' in options ? options.default_value
 						: /* name */NO_EQUAL_SIGN;
 			}
 			try {
-				name = decode_URI_component(name, charset);
+				name = decode_URI_component_no_throw(name, charset);
 			} catch (e) {
 				// TODO: handle exception
 			}

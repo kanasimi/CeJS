@@ -1162,9 +1162,8 @@ function module_code(library_namespace) {
 		// --------------------------------------
 
 		if (library_namespace.is_debug()) {
-			library_namespace
-					.info('initialize_session_template_functions: register redirects of '
-							+ site_name);
+			library_namespace.info('initialize_session_template_functions: '
+					+ 'register redirects of ' + site_name);
 		}
 		var function_name_list = Object
 				.keys(template_functions.functions_of_all_sites);
@@ -1176,7 +1175,11 @@ function module_code(library_namespace) {
 		// console.trace(function_name_list);
 		function_name_list.forEach(function(template_name) {
 			var normalized_name = session.normalize_title(template_name);
-			if (template_name !== normalized_name) {
+			if (session.is_namespace(template_name, 'Template')
+			//
+			? template_name !== normalized_name : session
+					.remove_namespace(template_name) !== session
+					.remove_namespace(normalized_name)) {
 				library_namespace.error([
 						'initialize_session_template_functions: ',
 						{
