@@ -316,6 +316,7 @@
 	"The text between update comments will be automatically overwritten by the bot.": "\u6a5f\u5668\u4eba\u5c07\u81ea\u52d5\u8986\u5beb\u66f4\u65b0\u8a3b\u89e3\u9593\u7684\u6587\u5b57\u3002",
 	"No content": "\u7121\u5167\u5bb9",
 	"%1 {{PLURAL:%1|result|results}}": "%1\u7b46{{PLURAL:%1|\u7d50\u679c}}",
+	"%1 is not exist in %2.": "%2 \u4e2d\u7121 %1\u3002",
 	"Continue key": "\u5f8c\u7e8c\u7d22\u5f15",
 	"Cache information about the API modules of %1: module path=%2": "\u5feb\u53d6 %1 \u7684 API \u6a21\u7d44\u8cc7\u8a0a\uff1a\u6a21\u7d44\u8def\u5f91\u70ba %2",
 	"Found %2 query {{PLURAL:%2|module|modules}}: %1": "\u5171\u6709%2\u7a2e\u67e5\u8a62{{PLURAL:%2|\u6a21\u7d44}}\uff1a%1",

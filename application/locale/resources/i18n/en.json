@@ -314,6 +314,7 @@
 	"the-text-between-update-comments-will-be-automatically-overwritten-by-the-bot": "The text between update comments will be automatically overwritten by the bot.",
 	"no-content": "No content",
 	"$1-results": "%1 {{PLURAL:%1|result|results}}",
+	"$1-is-not-exist-in-$2": "%1 is not exist in %2.",
 	"continue-key": "Continue key",
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": "Cache information about the API modules of %1: module path=%2",
 	"found-$2-query-modules-$1": "Found %2 query {{PLURAL:%2|module|modules}}: %1",

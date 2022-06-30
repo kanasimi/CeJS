@@ -2439,9 +2439,9 @@ function module_code(library_namespace) {
 			error = data && data.error;
 			// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
 			if (error) {
-				library_namespace.error(
+				library_namespace.error('wiki_API.redirects_here: '
 				//
-				'wiki_API.redirects_here: [' + error.code + '] ' + error.info);
+				+ '[' + error.code + '] ' + error.info);
 				/**
 				 * e.g., Too many values supplied for parameter 'pageids': the
 				 * limit is 50
@@ -2457,9 +2457,9 @@ function module_code(library_namespace) {
 			}
 
 			if (!data || !data.query || !data.query.pages) {
-				library_namespace.warn(
+				library_namespace.warn('wiki_API.redirects_here: '
 				//
-				'wiki_API.redirects_here: Unknown response: ['
+				+ 'Unknown response: ['
 				//
 				+ (typeof data === 'object' && typeof JSON !== 'undefined'
 				//
@@ -2480,15 +2480,15 @@ function module_code(library_namespace) {
 				// 僅處理第一頁。
 				if (!wiki_API.content_of.page_exists(page)) {
 					// 此頁面不存在/已刪除。Page does not exist. Deleted?
-					library_namespace.warn(
-					//
-					'wiki_API.redirects_here: Not exists in '
-					//
-					+ wiki_API.site_name(session) + ': '
-					//
-					+ (page.title ? wiki_API.title_link_of(page)
-					//
-					: ' id ' + page.pageid));
+					library_namespace.warn([ 'wiki_API.redirects_here: ', {
+						// e.g., 中文維基中無此頁面
+						// gettext_config:{"id":"$1-is-not-exist-in-$2"}
+						T : [ '%1 is not exist in %2.',
+						//
+						(page.title ? wiki_API.title_link_of(page)
+						//
+						: ' id ' + page.pageid), wiki_API.site_name(session) ]
+					} ]);
 				}
 
 				// page 之 structure 將按照 wiki API 本身之 return！
@@ -2565,8 +2565,8 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.redirects_here.count = function(root_name_hash, embeddedin_list) {
 		if (!Array.isArray(embeddedin_list)) {
-			library_namespace
-					.warn('wiki_API.redirects_here.count: Invalid embeddedin list.');
+			library_namespace.warn('wiki_API.redirects_here.count: '
+					+ 'Invalid embeddedin list.');
 			return 0;
 		}
 		var name_hash = Object.create(null);

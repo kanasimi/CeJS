@@ -316,6 +316,7 @@
 	"The text between update comments will be automatically overwritten by the bot.": "The text between update comments will be automatically overwritten by the bot.",
 	"No content": "No content",
 	"%1 {{PLURAL:%1|result|results}}": "%1 {{PLURAL:%1|result|results}}",
+	"%1 is not exist in %2.": "%1 is not exist in %2.",
 	"Continue key": "Continue key",
 	"Cache information about the API modules of %1: module path=%2": "Cache information about the API modules of %1: module path=%2",
 	"Found %2 query {{PLURAL:%2|module|modules}}: %1": "Found %2 query {{PLURAL:%2|module|modules}}: %1",

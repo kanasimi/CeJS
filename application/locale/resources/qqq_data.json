@@ -2749,6 +2749,13 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L1275}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"$1-is-not-exist-in-$2": {
+		"message": "%1 is not exist in %2.",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page title, %2: site name,",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L2486}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
 	"continue-key": {
 		"message": "Continue key",
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
@@ -7548,14 +7555,14 @@
 		"message": "未設定文字：%1",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: number of line",
-		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1515}}",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1516}}",
 		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
 	},
 	"this-rule-seems-unnecessary": {
 		"message": "似為不需要的規則：%1",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: conversion rule",
-		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1955}}",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1956}}",
 		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
 	},
 	"cannot-move-to-$1": {

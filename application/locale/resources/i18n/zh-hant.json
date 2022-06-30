@@ -321,6 +321,7 @@
 	"the-text-between-update-comments-will-be-automatically-overwritten-by-the-bot": "機器人將自動覆寫更新註解間的文字。",
 	"no-content": "無內容",
 	"$1-results": "%1筆{{PLURAL:%1|結果}}",
+	"$1-is-not-exist-in-$2": "%2 中無 %1。",
 	"continue-key": "後續索引",
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": "快取 %1 的 API 模組資訊：模組路徑為 %2",
 	"found-$2-query-modules-$1": "共有%2種查詢{{PLURAL:%2|模組}}：%1",
