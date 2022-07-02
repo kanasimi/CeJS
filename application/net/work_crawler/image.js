@@ -217,7 +217,7 @@ function module_code(library_namespace) {
 
 			// 修正圖片結尾 tail 非正規格式之情況。
 			// TODO: 應該檢測刪掉後是正確的圖片檔，才刪掉 trailing new line。
-			if (_this.trim_trailing_newline && contents.length > 4
+			if (_this.trim_trailing_newline && contents && contents.length > 4
 			// 去掉最後的換行符號：有些圖片在檔案最後會添加上換行符號 "\r\n"，因此被判別為非正規圖片檔。
 			&& contents.at(-2) === 0x0D && contents.at(-1) === 0x0A) {
 				contents = contents.slice(0, -2);
@@ -227,7 +227,11 @@ function module_code(library_namespace) {
 				// 圖片前處理程序 預處理器 image pre-processing
 				// 例如修正圖片結尾非正規格式之情況。
 				// 必須自行確保不會 throw，需檢查 contents 是否非 {Buffer}。
-				contents = _this.image_preprocessor(contents, image_data);
+				try {
+					contents = _this.image_preprocessor(contents, image_data);
+				} catch (e) {
+					has_error = has_error || e;
+				}
 				// if _this.image_preprocessor() returns `false`,
 				// will treat as bad file.
 				if (contents === undefined)
