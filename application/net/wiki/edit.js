@@ -516,8 +516,8 @@ function module_code(library_namespace) {
 					// console.log(options);
 				}
 				/**
-				 * <s>遇到過長/超過限度的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />
-				 * [editconflict] Edit conflict detected</s>
+				 * <del>遇到過長/超過限度的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />
+				 * [editconflict] Edit conflict detected</del>
 				 * 
 				 * when edit:<br />
 				 * [contenttoobig] The content you supplied exceeds the article

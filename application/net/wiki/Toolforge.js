@@ -199,7 +199,7 @@ function module_code(library_namespace) {
 				// https://wikitech.wikimedia.org/wiki/Help:Toolforge/Database
 				// Wikimedia Toolforge
 				// 上之資料庫僅為正式上線版之刪節副本。資料並非最新版本(但誤差多於數分內)，也不完全，
-				// <s>甚至可能為其他 users 竄改過</s>。
+				// <del>甚至可能為其他 users 竄改過</del>。
 				+ 'replica.my.cnf');
 			}
 		} catch (e) {

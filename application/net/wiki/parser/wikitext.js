@@ -2271,7 +2271,7 @@ function module_code(library_namespace) {
 
 			var is_wiki_extensiontags = tag.toLowerCase() in extensiontag_hash;
 			// 在章節標題、表格 td/th 或 template parameter 結束時，
-			// e.g., "| t || <s>... || </s> ||", "{{t|p=v<s>...|p2=v}}</s>"
+			// e.g., "| t || <del>... || </del> || <s>... || </s> ||", "{{t|p=v<s>...|p2=v}}</s>"
 			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
 			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
 			// 此時同階的 table 尚未處理。
@@ -2358,7 +2358,8 @@ function module_code(library_namespace) {
 			// 在遍歷 tag inner 的子 node 時，真正需要的 .parent 是 all tag 而非 inner。
 			// e.g., `special page configuration.js`
 			// if (parent.type === 'tag_inner' && parent.parent.type === 'tag'
-			// && parent.parent.tag === 's') { ... }
+			// && (parent.parent.tag === 's' || parent.parent.tag === 'del'))
+			// { ... }
 			inner.parent = all;
 			// attributes.parent = all;
 			if (attributes && attributes.attributes) {
@@ -3111,7 +3112,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// [[Help:HTML in wikitext]]
 
-		// <s>不採用 global variable，預防 multitasking 並行處理。</s>
+		// <del>不採用 global variable，預防 multitasking 並行處理。</del>
 		// reset PATTERN index
 		// PATTERN_WIKI_TAG.lastIndex = 0;
 

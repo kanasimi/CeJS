@@ -687,7 +687,7 @@ function module_code(library_namespace) {
 		}
 
 		// match/去除一開始的維護模板/通知模板。
-		// <s>[[File:file|[[link]]...]] 因為不容易除盡，放棄處理。</s>
+		// <del>[[File:file|[[link]]...]] 因為不容易除盡，放棄處理。</del>
 		while (matched = wikitext.match(/^[\s\n]*({{|\[\[)/)) {
 			// 注意: 此處的 {{ / [[ 可能為中間的 token，而非最前面的一個。但若是沒有中間的 token，則一定是第一個。
 			matched = matched[1];

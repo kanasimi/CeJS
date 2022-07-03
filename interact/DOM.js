@@ -1161,7 +1161,9 @@ function module_code(library_namespace) {
 			// 分斷行 2003/1/25 22:40
 			// html → text
 			// <.+?> <[^>]+> <\s*\/?\s*[a-zA-Z](.*?)> <! 過慢?
-			text = text.replace(/<s>[^<]*<\/s>/gi, '').replace(/<w?br[^>]*>/gi,
+			text = text
+			// remove <s>...</s>, <del>...</del>
+			.replace(/<(s|del)>[^<]*<\/\1>/gi, '').replace(/<w?br[^>]*>/gi,
 					'\n').replace(/<\/?[A-Za-z][^>]*>/g, '');
 		}
 		return text;

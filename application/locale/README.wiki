@@ -26,7 +26,7 @@ Please note: CeJS uses percentage symbol %1, %2 instead of string symbol $1.
 
 See also: [[Thread:Portal talk:Ru/Plural changes in many languages]]
 
-; The [[Plural#Plural in Gettext|"GETTEXT" forms]] is NOT supported: <s><code><nowiki>{{PLURAL:GETTEXT|%1 one|%1 two|%1 other}}</nowiki></code></s>. Please use the MediaWiki plural forms.
+; The [[Plural#Plural in Gettext|"GETTEXT" forms]] is NOT supported: <del><code><nowiki>{{PLURAL:GETTEXT|%1 one|%1 two|%1 other}}</nowiki></code></del>. Please use the MediaWiki plural forms.
 
 ==== Examples ====
 ; en

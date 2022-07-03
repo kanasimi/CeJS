@@ -133,7 +133,7 @@ function module_code(library_namespace) {
 		// + '&intestactionsdetail=full'
 		});
 
-		// Get all summaries <s>and diffs</s>
+		// Get all summaries <del>and diffs</del>
 		wiki.page('Heed (cat)', function(page_data) {
 			console.log(page_data);
 		}, {

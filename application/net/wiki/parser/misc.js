@@ -903,8 +903,8 @@ function module_code(library_namespace) {
 			return date_list;
 		}
 
-		// <s>去掉</s>skip年分前之雜項。
-		// <s>去掉</s>skip星期與其後之雜項。
+		// <del>去掉</del>skip年分前之雜項。
+		// <del>去掉</del>skip星期與其後之雜項。
 		var date_parser = options.date_parser_config[1];
 		var PATTERN_date = options.date_parser_config[0], matched;
 		// console.log('Using PATTERN_date: ' + PATTERN_date);
