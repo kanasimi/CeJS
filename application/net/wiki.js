@@ -382,8 +382,9 @@ function module_code(library_namespace) {
 
 		// Essential dependency chain
 		library_namespace.debug({
+			T :
 			// gettext_config:{"id":"load-the-main-functions-and-necessary-dependencies-to-operate-mediawiki"}
-			T : 'Load the main functions and necessary dependencies to operate MediaWiki.'
+			'Load the main functions and necessary dependencies to operate MediaWiki.'
 		}, 1, 'wiki_API');
 		// library_namespace.set_debug(2);
 		library_namespace.run(sub_modules_to_full_module_path(sub_modules),
@@ -413,7 +414,10 @@ function module_code(library_namespace) {
 				// @see
 				// https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.Api
 			}
-			library_namespace.debug('All wiki modules loaded.', 1, 'wiki_API');
+			library_namespace.debug({
+				// gettext_config:{"id":"all-wiki-submodules-are-loaded"}
+				T : 'All wiki submodules are loaded.'
+			}, 1, 'wiki_API');
 		}, waiting);
 		return waiting;
 	};

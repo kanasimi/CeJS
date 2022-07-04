@@ -298,6 +298,7 @@
 	"The data to cache: %1...": "The data to cache: %1...",
 	"You may need to set %1 = %2!": "You may need to set %1 = %2!",
 	"Load the main functions and necessary dependencies to operate MediaWiki.": "Load the main functions and necessary dependencies to operate MediaWiki.",
+	"All wiki submodules are loaded.": "All wiki submodules are loaded.",
 	"\u8df3\u904e %2 \u4e4b %1 \u8a2d\u5b9a\uff0c\u56e0\u6578\u503c\u5df2\u5b58\u5728\u4e14\u672a\u8a2d\u5b9a %3\u3002": "Skip the %1 for %2 and do not set them because the values already exist and %3 is not set.",
 	"Comma-separator": ", ",
 	"\u6aa2\u67e5\u7dca\u6025\u505c\u6b62\u9801\u9762 %1": "Check the emergency stop page: %1",

@@ -296,6 +296,7 @@
 	"the-data-to-cache-$1": "The data to cache: %1...",
 	"you-may-need-to-set-$1-=-$2": "You may need to set %1 = %2!",
 	"load-the-main-functions-and-necessary-dependencies-to-operate-mediawiki": "Load the main functions and necessary dependencies to operate MediaWiki.",
+	"all-wiki-submodules-are-loaded": "All wiki submodules are loaded.",
 	"skip-the-$1-for-$2-and-do-not-set-them-because-the-values-already-exist-and-$3-is-not-set": "Skip the %1 for %2 and do not set them because the values already exist and %3 is not set.",
 	"Comma-separator": ",&#32;",
 	"check-the-emergency-stop-page-$1": "Check the emergency stop page: %1",

@@ -316,6 +316,7 @@
 	"The text between update comments will be automatically overwritten by the bot.": "Le texte entre les commentaires de mise \u00e0 jour sera automatiquement r\u00e9\u00e9crit par le robot.",
 	"No content": "Aucun contenu",
 	"%1 {{PLURAL:%1|result|results}}": "%1 r\u00e9sultat{{PLURAL:%1||s}}",
+	"%1 is not exist in %2.": "%1 n\u2019existe pas dans %2.",
 	"Continue key": "Cl\u00e9 de continuation",
 	"Cache information about the API modules of %1: module path=%2": "Mise en cache les informations  concernant les modules API de %1\u202f: chemin du module=%2",
 	"Found %2 query {{PLURAL:%2|module|modules}}: %1": "%2 {{PLURAL:%2|module|modules}} de requ\u00eate trouv\u00e9{{PLURAL:%2||s}}\u202f: %1",

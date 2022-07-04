@@ -2,11 +2,11 @@
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"untranslated message count": "1000+",
-	"\u5730\u7406\u5ea7\u6a19\uff1a": "Co\u00f6rdinaten:",
-	"\u7d93\u5ea6\uff1a": "Breedtegraad:",
-	"\u7def\u5ea6\uff1a": "Lengtegraad:",
+	"\u5730\u7406\u5ea7\u6a19\uff1a": "Co\u00f6rdinaten: ",
+	"\u7d93\u5ea6\uff1a": "Breedtegraad: ",
+	"\u7def\u5ea6\uff1a": "Lengtegraad: ",
 	"\u524d\u7db4": "voorvoegsel",
-	"\u6642\u5340\uff1a": "Tijdzone:",
+	"\u6642\u5340\uff1a": "Tijdzone: ",
 	"\u8acb\u6ce8\u610f\uff1a\u672c\u6b04\u50c5\u4f9b\u958b\u767c\u4eba\u54e1\u4f7f\u7528\u3002": "WAARSCHUWING: Alleen voor ontwikkelaars.",
 	"Loading...": "Bezig met laden\u2026",
 	"\u9664\u53bb\u6b64\u6b04": "Kolom verwijderen",

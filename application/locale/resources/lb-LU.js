@@ -56,6 +56,7 @@
 	"Abandon change": "\u00c4nnerung opginn",
 	"No reason provided": "Kee Grond uginn",
 	"No content": "Keen Inhalt",
+	"%1 is not exist in %2.": "%1 g\u00ebtt et net op %2.",
 	"Unknown API response: %1": "Onbekannt API \u00c4ntwert: %1",
 	"Does not exist": "G\u00ebtt et net",
 	"\u7121\u9801\u9762\u91cd\u5b9a\u5411\u81f3\u672c\u9801": "Keng S\u00e4it leed virun op d\u00ebs S\u00e4it",
