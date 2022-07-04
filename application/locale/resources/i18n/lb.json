@@ -59,6 +59,7 @@
 	"abandon-change": "Ännerung opginn",
 	"no-reason-provided": "Kee Grond uginn",
 	"no-content": "Keen Inhalt",
+	"$1-is-not-exist-in-$2": "%1 gëtt et net op %2.",
 	"unknown-api-response-$1": "Onbekannt API Äntwert: %1",
 	"does-not-exist": "Gëtt et net",
 	"no-page-redirects-to-this-page": "Keng Säit leed virun op dës Säit",

@@ -5,6 +5,7 @@
 			"Kanashimi",
 			"MathXplore",
 			"MirukuPC",
+			"Mugenpman",
 			"Omotecho",
 			"Yamagata Yusuke"
 		]
@@ -266,6 +267,7 @@
 	"abandon-change": "編集を放棄した",
 	"no-reason-provided": "説明がありません",
 	"no-content": "本文なし",
+	"$1-is-not-exist-in-$2": "%1は%2に存在しません。",
 	"continue-key": "後続の索引",
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": "%1 のAPIモジュールに関する情報をキャッシュする：モジュールパスは %2",
 	"found-$2-query-modules-$1": "クエリ・モジュールが %2 種類あります：%1",
