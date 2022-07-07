@@ -193,14 +193,16 @@ function module_code(library_namespace) {
 				login_mark : true
 			});
 
-		} else if (result && result.edit) {
-			if ('retry_login' in session) {
-				console.trace('已成功 edit，去除 retry flag。');
-				delete session.retry_login;
-			}
-			if ('badtoken_count' in session) {
-				console.trace('已成功 edit，去除 badtoken_count flag。');
-				delete session.badtoken_count;
+		} else {
+			if (result && result.edit) {
+				if ('retry_login' in session) {
+					console.trace('已成功 edit，去除 retry flag。');
+					delete session.retry_login;
+				}
+				if ('badtoken_count' in session) {
+					console.trace('已成功 edit，去除 badtoken_count flag。');
+					delete session.badtoken_count;
+				}
 			}
 			// run next action
 			callback(result);
