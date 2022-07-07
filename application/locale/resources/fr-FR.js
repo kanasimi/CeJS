@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -298,6 +298,7 @@
 	"The data to cache: %1...": "Les donn\u00e9es \u00e0 mettre en cache\u202f: %1...",
 	"You may need to set %1 = %2!": "Il vous faudrait peut-\u00eatre d\u00e9finir \u00ab\u202f%1 = %2\u202f\u00bb\u202f!",
 	"Load the main functions and necessary dependencies to operate MediaWiki.": "Charge les principale fonctions et les d\u00e9pendances n\u00e9cessaires pour faire fonctionner MediaWiki.",
+	"All wiki submodules are loaded.": "Tous les sous-modules du wiki sont charg\u00e9s.",
 	"\u8df3\u904e %2 \u4e4b %1 \u8a2d\u5b9a\uff0c\u56e0\u6578\u503c\u5df2\u5b58\u5728\u4e14\u672a\u8a2d\u5b9a %3\u3002": "Sauter les indications de %1 pour %2 et ne pas les d\u00e9finir parce que les valeurs existent d\u00e9j\u00e0 et %3 n\u2019est pas indiqu\u00e9.",
 	"Comma-separator": ", ",
 	"\u6aa2\u67e5\u7dca\u6025\u505c\u6b62\u9801\u9762 %1": "V\u00e9rifiez la page d\u2019arr\u00eat d\u2019urgence\u202f: %1",
