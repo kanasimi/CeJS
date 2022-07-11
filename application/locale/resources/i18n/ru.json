@@ -7,7 +7,8 @@
 			"Okras",
 			"Pacha Tchernof",
 			"Tanzun",
-			"Артём 13327"
+			"Артём 13327",
+			"Загребин Илья"
 		]
 	},
 	"españa": "Испания",
@@ -223,6 +224,7 @@
 	"archiving-operation": "Операция архивирования",
 	"append-$1-topics": "Добавить %1{{PLURAL:%1|тему|тем}}",
 	"remove-$1-topics": "Убрать %1 {{PLURAL:%1|тему|тем}}",
+	"very-sorry.-undo-the-robot-s-wrong-edits.-($1)": "Очень жаль. Отмените неправильные правки бота. (%1)",
 	"debug-level": "уровень отладки",
 	"contains-$1-$2-images": "Содержит %1/%2 {{PLURAL:%2|изображения|изображений}}",
 	"search": "Поиск",
