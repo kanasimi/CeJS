@@ -2594,6 +2594,7 @@ function module_code(library_namespace) {
 	};
 
 	// @see [[Special:Interwiki]] 跨維基資料 跨 wiki 字首
+	// @see https://noc.wikimedia.org/wiki.php?wiki=jawiktionary
 	function adapt_site_configurations(session, configurations) {
 		// console.log(configurations);
 		var site_configurations = session.configurations;
