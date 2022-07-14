@@ -2762,19 +2762,26 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L2486}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"invalid-title-$1": {
+		"message": "Invalid title: %1",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: page link",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L324}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L653}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L890}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L929}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
 	"continue-key": {
 		"message": "Continue key",
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2987}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2990}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3456}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3459}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -2790,13 +2797,6 @@
 		"parameters": "%1: parameter name",
 		"notes": "Parameter %1 is not valid.",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L308}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L312}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"invalid-title-$1": {
-		"message": "Invalid title: %1",
-		"original_message_language_code": "en-US",
-		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L653}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L890}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L929}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages": {

@@ -24,6 +24,7 @@
 	"HTTP status code: %1 %2": "HTTP \uc0c1\ud0dc \ucf54\ub4dc: %1 %2",
 	"\u6a94\u6848\u540d\u7a31\uff1a%1": "\ud30c\uc77c \uc774\ub984: %1",
 	"You may need to set %1 = %2!": "%1 = %2 \uc124\uc815\uc774 \ud544\uc694\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4!",
+	"All wiki submodules are loaded.": "\ubaa8\ub4e0 \uc704\ud0a4 \ud558\uc704 \ubaa8\ub4c8\uc774 \ub85c\ub4dc\ub429\ub2c8\ub2e4.",
 	"Comma-separator": ", ",
 	"Abandon change": "\ubcc0\uacbd\uc0ac\ud56d \ubc84\ub9ac\uae30",
 	"Does not exist": "\uc874\uc7ac\ud558\uc9c0 \uc54a\uc74c",

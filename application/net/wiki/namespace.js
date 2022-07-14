@@ -319,11 +319,14 @@ function module_code(library_namespace) {
 		// console.trace([ title, action ]);
 		if (!is_api_and_title(action, false, options)) {
 			// console.trace('normalize_title_parameter: Invalid title!');
-			library_namespace.warn(
-			//
-			'normalize_title_parameter: Invalid title! '
-					+ (wiki_API.title_link_of(title) || '(title: '
-							+ JSON.stringify(title) + ')'));
+			library_namespace.warn([ 'normalize_title_parameter: ', {
+				// gettext_config:{"id":"invalid-title-$1"}
+				T : [ 'Invalid title: %1',
+				//
+				wiki_API.title_link_of(title)
+				//
+				|| '(title: ' + JSON.stringify(title) + ')' ]
+			} ]);
 			// console.trace(JSON.stringify(title));
 			return;
 		}
