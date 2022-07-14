@@ -29,6 +29,7 @@
 	"http-status-code-$1-$2": "HTTP 상태 코드: %1 %2",
 	"file-name-$1": "파일 이름: %1",
 	"you-may-need-to-set-$1-=-$2": "%1 = %2 설정이 필요할 수 있습니다!",
+	"all-wiki-submodules-are-loaded": "모든 위키 하위 모듈이 로드됩니다.",
 	"Comma-separator": ",&#32;",
 	"abandon-change": "변경사항 버리기",
 	"does-not-exist": "존재하지 않음",
