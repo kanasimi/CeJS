@@ -617,9 +617,10 @@ function module_code(library_namespace) {
 				url = url.replace(/^\.\//, '');
 			}
 			if (url.startsWith('.')) {
-				library_namespace.warn('full_URL_of_path: '
-				// gettext_config:{"id":"invalid-url-$1"}
-				+ gettext('網址無效：%1', url));
+				library_namespace.warn([ 'full_URL_of_path: ', {
+					// gettext_config:{"id":"invalid-url-$1"}
+					T : [ '網址無效：%1', url ]
+				} ]);
 			}
 			url = this.base_URL + url;
 		} else if (url.URL) {

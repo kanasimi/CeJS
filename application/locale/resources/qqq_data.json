@@ -3124,7 +3124,7 @@
 		"scope": "work_crawler.js: is_finished()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title 本作品, %2: 未更新時間",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L688}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L689}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-allowed-data-type-for-$1-is-$4-but-it-was-set-to-{$2}-$3": {
