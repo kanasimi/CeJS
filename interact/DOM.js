@@ -8925,7 +8925,9 @@ _
 		firefox : 32,
 		chrome : 56,
 		safari : 5
-	}), is_Safari = CSS_position_sticky;
+	}), is_Safari = library_namespace.platform({
+		safari : 5
+	});
 
 	/**
 	 * 動態[生成/顯示][目錄/目次]。<br>
