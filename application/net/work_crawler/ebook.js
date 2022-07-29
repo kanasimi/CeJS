@@ -599,7 +599,9 @@ function module_code(library_namespace) {
 		var _this = this;
 		var language = work_data.language
 		// e.g., 'cmn-Hans-CN'
-		&& work_data.language.match(/^(ja|(?:zh-)?cmn)(?:$|[^a-z])/);
+		&& work_data.language.match(/^(ja|(?:zh-)?cmn)(?:$|[^a-z])/)
+		// e.g., xshuyaya.js
+		|| this.language && [ , this.language ];
 		if (language) {
 			language = language[1].replace(/^zh-cmn/, 'cmn');
 		}
@@ -610,6 +612,7 @@ function module_code(library_namespace) {
 			// contents
 			text : data.text,
 			post_processor : function(contents) {
+				// console.log([ language, contents ]);
 				// 正規化小說章節文字。
 				if (language === 'ja') {
 					contents = contents.replace(PATTERN_PARAGRAPH_START_JP,
@@ -618,6 +621,7 @@ function module_code(library_namespace) {
 				} else if (language) {
 					// assert: language: "cmn" (中文)
 					// TODO: 下載完畢後作繁簡轉換。
+					// TODO: 處理內縮。
 					contents = contents.replace(PATTERN_PARAGRAPH_START_CMN,
 					// 中文每段落開頭空兩個字。
 					'$1　　$2');
@@ -632,11 +636,12 @@ function module_code(library_namespace) {
 
 				if (contents.length < _this.MIN_CHAPTER_SIZE) {
 					crawler_namespace.set_work_status(work_data, '§'
-							+ chapter_NO + ': '
-							// gettext_config:{"id":"too-few-words-($1-characters)"}
-							+ (contents.length ? gettext('字數過少（%1字元）',
-							// gettext_config:{"id":"no-content"}
-							contents.length) : 'No content'));
+					//
+					+ chapter_NO + ': '
+					// gettext_config:{"id":"too-few-words-($1-characters)"}
+					+ (contents.length ? gettext('字數過少（%1字元）',
+					// gettext_config:{"id":"no-content"}
+					contents.length) : 'No content'));
 				}
 				return contents;
 			}
