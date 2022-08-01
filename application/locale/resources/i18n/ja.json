@@ -519,7 +519,7 @@
 	"no-title-found-for-$1": "",
 	"will-not-automatically-notify-the-task-begins": "",
 	"the-requested-robot-task-finished": "Bot依頼の作業が終了しました。",
-	"robot-task-completion-notification": "{{BOTREQ|完了}} 修正しなかった場合や好ましくない状況がありましたら、お知らせください。今後の参考にさせていただきます。全て問題無い場合は{{tl|確認}}でご確認をお願いします。",
+	"robot-task-completion-notification": "{{BOTREQ|完了}} 修正しなかった場合や好ましくない状況がありましたら、お知らせください。今後の参考にさせていただきます。全て問題無い場合は{{tl|確認}}の貼り付けをお願いします。",
 	"will-not-automatically-notify-the-task-finished": "",
 	"problematic-articles": "問題のある記事",
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": "このリストは手動で修正する必要のある記事群です。リストはボットによって自動更新されます。",
