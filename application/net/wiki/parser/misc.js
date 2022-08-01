@@ -693,7 +693,7 @@ function module_code(library_namespace) {
 	var ks_month_name = ',جَنؤری,فَرؤری,مارٕچ,اَپریل,مٔیی,جوٗن,جُلَے,اَگَست,سَتَمبَر,اَکتوٗبَر,نَوَمبَر,دَسَمبَر'
 			.split(',');
 
-	// 因應不同的 mediawiki projects 來處理日期。
+	// 因應不同的 mediawiki projects 來處理日期。機器人只識別標準時間格式，預防誤判。
 	// date_parser_config[language]
 	// = [ {RegExp}PATTERN, {Function}parser({Array}matched) : return {String},
 	// {Function}to_String({Date}date) : return {String} ]

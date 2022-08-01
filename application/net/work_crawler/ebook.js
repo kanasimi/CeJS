@@ -622,6 +622,7 @@ function module_code(library_namespace) {
 					// assert: language: "cmn" (中文)
 					// TODO: 下載完畢後作繁簡轉換。
 					// TODO: 處理內縮。
+					// TODO: 處理文章開頭的內縮。
 					contents = contents.replace(PATTERN_PARAGRAPH_START_CMN,
 					// 中文每段落開頭空兩個字。
 					'$1　　$2');
