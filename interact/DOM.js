@@ -5244,7 +5244,7 @@ function module_code(library_namespace) {
 		}
 		// popup window style
 		sPopP.popupS = "color:blue;padding:.5em;overflow:auto;position:absolute;top:0;left:0;width:100%;height:100%;scrollbar-face-color:khaki;scrollbar-arrow-color:teal;border:1px solid green;font:normal 10pt tahoma;filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#ffd700, EndColorStr=#ffffff);";
-		// chars to repeat(for ruby)
+		// chars to repeat(for ruby) 著重號（‧）
 		// https://ja.wikipedia.org/wiki/圏点
 		sPopP.RepeatC = '‧•◦．。ヽ﹅﹆○●◎◉☆★※＊＃▽▼△▲◆◇□■↓↑'
 		// .turnU()
