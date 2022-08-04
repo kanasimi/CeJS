@@ -385,7 +385,7 @@
 	"waiting-for-$1-before-downloading-the-$2-image": "下载第 %2 张{{PLURAL:%2|图片}}前先等待 %1。",
 	"failed-to-get-data-of-chapter-$1": "无法获取第 %1 章的内容。",
 	"skip-$1-§$2-and-continue-next-chapter": "跳过 %1 §%2 并接着下载下一章。",
-	"message_need_re_download": "仙人拍鼓有时错，跤步踏差啥人无？下载出错了，例如服务器暂时断线、档案阙失(404)。请确认排除错误或错误不再持续后，重新执行以接续下载。",
+	"message_need_re_download": "仙人拍鼓有时错，跤步踏差啥人无？下载出错了，例如服务器暂时断线、档案缺失(404)。请确认排除错误或错误不再持续后，重新执行以接续下载。",
 	"retry-$1-$2": "重试 %1/%2",
 	"since-the-cache-file-is-broken-(for-example-an-empty-file)-chapter_url-will-be-retrieved-and-.reget_chapter-will-be-set": "因 cache file 坏了（例如文件为空），将重新取得 chapter_URL，设定 .reget_chapter。",
 	"the-chapter-number-should-be-$1-in-order-but-the-number-cannot-be-obtained-from-the-chapter-content": "章节编号依序应为 %1，但无法自章节内容取得编号。",
