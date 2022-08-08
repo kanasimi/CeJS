@@ -831,7 +831,7 @@ function module_code(library_namespace) {
 
 	// @see CeL.data.count_word()
 	// 這些標點符號和下一句中間可以不用接空白字元。
-	// /[\u4e00-\u9fa5]/: 匹配中文。
+	// /[\u4e00-\u9fa5]/: 匹配中文 RegExp。
 	// https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)
 	// https://arc-tech.hatenablog.com/entry/2021/01/20/105620
 	// e.g., start quote marks
