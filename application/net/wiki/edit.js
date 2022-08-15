@@ -382,6 +382,11 @@ function module_code(library_namespace) {
 
 		// assert: typeof text === 'string'
 
+		if (options.discard_changes) {
+			// 手動放棄修改。
+			text = [ wiki_API_edit.cancel, text || options.discard_changes ];
+		}
+
 		var not_passed = !is_undo
 				&& wiki_API_edit.check_data(text, title, options,
 						'wiki_API_edit');

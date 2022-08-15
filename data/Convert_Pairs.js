@@ -115,34 +115,37 @@ function module_code(library_namespace) {
 		return value && value.constructor === Convert_Pairs;
 	}
 
+	/**
+	 * 排除/移除注解。 strip/remove javascript comments.
+	 * CeL.data.Convert_Pairs.remove_comments(text)
+	 * 
+	 * @see http://vrana.github.io/JsShrink/
+	 * @see http://trinithis.awardspace.com/commentStripper/stripper.html
+	 * @see http://upshots.org/javascript/javascript-regexp-to-remove-comments
+	 * @see http://marijnhaverbeke.nl//uglifyjs
+	 */
+	function remove_comments(text) {
+		// 僅作最簡單之處理，未考量: "// .. /*", "// .. */", "// /* .. */",
+		// 以及 RegExp, "", '' 中注解的情況!
+		return String(text)
+		// /* ... */
+		.replace(/\/\*[\s\S]*?\*\//g, '')
+		// // ...
+		.replace(/\/\/[^\r\n]*/g, '');
+
+		// text.replace(/<!--[\s\S]*?-->/g, '');
+
+		// TODO: /^#/
+	}
+
 	library_namespace.set_method(Convert_Pairs, {
+		remove_comments : remove_comments,
 		is_Convert_Pairs : is_Convert_Pairs,
 
 		KEY_REMOVE : typeof Symbol === 'function' ? Symbol('remove the key')
 				: {
 					KEY_REMOVE : true
-				},
-
-		// 排除/移除注解 (//, /* */)。
-		/**
-		 * strip/remove javascript comments.
-		 * CeL.data.Convert_Pairs.remove_comments(text)
-		 * 
-		 * @see http://vrana.github.io/JsShrink/
-		 * @see http://trinithis.awardspace.com/commentStripper/stripper.html
-		 * @see http://upshots.org/javascript/javascript-regexp-to-remove-comments
-		 * @see http://marijnhaverbeke.nl//uglifyjs
-		 */
-		remove_comments : function(text) {
-			// 僅作最簡單之處理，未考量: "// .. /*", "// .. */", "// /* .. */",
-			// 以及 RegExp, "", '' 中注解的情況!
-			return String(text).replace(/\/\*[\s\S]*?\*\//g, '').replace(
-					/\/\/[^\r\n]*/g, '');
-
-			// text.replace(/<!--[\s\S]*?-->/g, '');
-
-			// TODO: /^#/
-		}
+				}
 	});
 
 	// ----------------------------------------------------------------------------------

@@ -651,12 +651,96 @@ function module_code(library_namespace) {
 
 	// _.JSON_to_XML = JSON_to_XML;
 
+	// ------------------------------------------------------------------------
+
+	// TODO
+
+	function XML_parser(options) {
+		/**
+		 * <code>
+
+		xml_parser = new XML_parser(options);
+
+		// 維護一份堆疊
+		options.provide_stack = false
+
+		options.on_open_tag(tag, stack)
+		options.on_close_tag(tag, stack)
+		options.on_self_closing_tag(tag, stack)
+		options.on_error(error, stack)
+		options.on_end(tail, stack)
+
+		</code>
+		 */
+
+		Object.assign(this, options);
+	}
+
+	function XML_parser_parse(XML_text) {
+		var provide_stack = this.provide_stack;
+		var stack = [];
+
+		// matched:
+		// [ all tag, is_close_tag, tag_name, attributes, is_self_closing_tag ]
+		var PATTERN_next_tag = /<(\/?)([^<>\s"'=:]+)((?:\s+[^<>\s]+)*\s*)(\/?)>/g;
+		var matched, last_index = 0;
+		while (matched = PATTERN_next_tag.exec(XML_text)) {
+			if (!matched[4] && matched[3].endsWith('/')) {
+				matched[4] = '/';
+				matched[3] = matched[3].slice(0, -1);
+			}
+
+			// parse attributes
+			var attributes = Object.create(null);
+			TODO;
+
+			// https://github.com/lddubeau/saxes/blob/master/src/saxes.ts#L381
+			var tag = {
+				name : matched[2],
+				attributes : attributes,
+				prefix : XML_text.slice(last_index, matched.index),
+				is_self_closing : !!matched[4]
+			};
+			if (matched[1]) {
+				// Check the stack
+				TODO;
+
+				this.on_close_tag(tag, stack);
+			} else if (matched[4]) {
+				TODO;
+				this.on_self_closing_tag(tag, stack);
+			} else {
+				TODO;
+				if (matched) {
+					;
+				}
+
+				stack.push(provide_stack ? tag : tag_name);
+				this.on_open_tag(tag, stack);
+			}
+			last_index = matched.index + matched[0].length;
+		}
+
+		this.on_end(XML_text.slice(last_index), stack);
+	}
+
+	Object.assign(XML_parser.prototype, {
+		parse : XML_parser_parse
+	});
+
+	function parse_XML(XML_text) {
+		var xml_parser = new XML_parser(options);
+		xml_parser.parse(XML_text);
+	}
+
+	// ------------------------------------------------------------------------
+
+	// TODO: XML search
+
 	library_namespace.set_method(JSON, {
 		to_XML : JSON_to_XML,
 		from_XML : XML_to_JSON
 	});
-
-	// TODO: XML search
 
 	return (_// JSDT:_module_
 	);

@@ -12,8 +12,9 @@
 typeof CeL !== 'function' && (function() {
 	"use strict";
 
-	var full_root = module.filename
-	//
+	var full_root = module.filename /*  require('electron').app.getPath('userData') */
+	// TODO: https://www.electronjs.org/docs/latest/api/app#appgetpathname
+	// https://stackoverflow.com/questions/71365401/how-to-read-config-file-in-electronjs-app
 	&& module.filename.replace(/[^\\\/]+$/, ''),
 	// WARNING: repository_path_list_file should be an absolute path in some
 	// environment.
