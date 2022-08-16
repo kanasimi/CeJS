@@ -37,7 +37,7 @@ function module_code(library_namespace) {
 		if (library_namespace.character) {
 			library_namespace.debug('採用 ' + library_namespace.Class
 			// 有則用之。 use CeL.data.character.encode_URI_component()
-			+ '.character.encode_URI_component', 1, module_name);
+			+ '.character.encode_URI_component 編碼 ' + encoding, 1, module_name);
 			encode_URI_component = library_namespace.character.encode_URI_component;
 			return encode_URI_component(string, encoding);
 		}
@@ -47,7 +47,7 @@ function module_code(library_namespace) {
 		if (library_namespace.character) {
 			library_namespace.debug('採用 ' + library_namespace.Class
 			// 有則用之。 use CeL.data.character.encode_URI()
-			+ '.character.encode_URI', 1, module_name);
+			+ '.character.encode_URI 編碼 ' + encoding, 1, module_name);
 			encode_URI = library_namespace.character.encode_URI;
 			return encode_URI(string, encoding);
 		}
@@ -57,7 +57,7 @@ function module_code(library_namespace) {
 		if (library_namespace.character) {
 			library_namespace.debug('採用 ' + library_namespace.Class
 			// 有則用之。 use CeL.data.character.decode_URI_component()
-			+ '.character.decode_URI_component', 1, module_name);
+			+ '.character.decode_URI_component 解碼 ' + encoding, 1, module_name);
 			decode_URI = library_namespace.character.decode_URI;
 			decode_URI_component = library_namespace.character.decode_URI_component;
 			return decode_URI_component(string, encoding);
@@ -557,6 +557,10 @@ function module_code(library_namespace) {
 			uri.searchParams = new URLSearchParams(matched, _options);
 		} else {
 			// do not set uri.search_params directly.
+			_options = Object.assign({
+				URI : uri
+			}, _options);
+			// console.trace(_options);
 			uri.search_params = new Search_parameters(matched, _options);
 		}
 
@@ -784,7 +788,7 @@ function module_code(library_namespace) {
 			// var index = parameter.indexOf('=');
 			if (matched = data[i].match(/^([^=]+)=(.*)$/)) {
 				name = matched[1];
-				value = decode_URI_component_no_throw(matched[2]);
+				value = decode_URI_component_no_throw(matched[2], charset);
 			} else {
 				name = data[i];
 				value = 'default_value' in options ? options.default_value
@@ -872,15 +876,20 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function search_set_parameters(parameters, options) {
+		// console.trace([ this, parameters, options ]);
+		options = Object.assign({
+			charset : this.charset || this[KEY_URL] && this[KEY_URL].charset
+		}, options);
 		if (!library_namespace.is_Object(parameters))
-			parameters = Search_parameters(parameters);
+			parameters = Search_parameters(parameters, options);
+		// console.trace([ this, parameters, options ]);
 		// Object.keys() 不會取得 Search_parameters.prototype 的屬性。
 		Object.keys(parameters).forEach(function(key) {
 			if (!ignore_search_properties
 			// Warning: for old environment, may need ignore some keys
 			|| !(key in ignore_search_properties)) {
 				var value = parameters[key];
-				if (options && options.append) {
+				if (options.append) {
 					search_add_1_parameter.call(this,
 					//
 					key, value, options);
@@ -924,6 +933,7 @@ function module_code(library_namespace) {
 			charset = options.charset;
 		}
 		if (charset === undefined) {
+			// console.trace([ this, this[KEY_URL] ]);
 			charset = this.charset || this[KEY_URL] && this[KEY_URL].charset;
 		}
 
@@ -946,9 +956,11 @@ function module_code(library_namespace) {
 				}
 			}
 
+			// console.trace([ key, value ]);
 			try {
 				search.push(value === NO_EQUAL_SIGN ? key : key + '='
 						+ encode_URI_component(String(value), charset));
+				// console.trace(search);
 			} catch (e) {
 				library_namespace.error(e);
 				console.error(e);
@@ -956,7 +968,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		// console.trace(this);
+		// console.trace([ this, charset ]);
 		for (var index = 0, key_list = Object.keys(this); index < key_list.length; index++) {
 			key = key_list[index];
 			if (ignore_search_properties && (key in ignore_search_properties)) {
@@ -966,7 +978,7 @@ function module_code(library_namespace) {
 
 			var value = this[key];
 			key = encode_URI_component(key, charset);
-			// console.log(key + ' = ' + value);
+			// console.trace(key + ' = ' + value);
 			if (!Array.isArray(value)) {
 				append(value);
 			} else if (Object.getOwnPropertyDescriptor(value, 'toString')) {
