@@ -3262,9 +3262,9 @@ function test_wiki() {
 		[['jawikisource', CeL.wiki.site_name('ja:s:p ps')], 'site_name #13'],
 		[['enwikiversity', CeL.wiki.site_name('v:en:')], 'site_name #14'],
 		[['arwiki', CeL.wiki.site_name('w:ar')], 'site_name #15'],
-		[['dewikisource', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).site], 'site_name #16'],
-		[['s:de:', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).interwiki_prefix], 'site_name #17'],
-		[['dewikinews', CeL.wiki.site_name('de:ttt', { family : 'wikinews' })], 'site_name #18'],
+		Object.defineProperty[CeL.env.not_native_keyword] || [['dewikisource', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).site], 'site_name #16'],
+		Object.defineProperty[CeL.env.not_native_keyword] || [['s:de:', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).interwiki_prefix], 'site_name #17'],
+		Object.defineProperty[CeL.env.not_native_keyword] || [['dewikinews', CeL.wiki.site_name('de:ttt', { family : 'wikinews' })], 'site_name #18'],
 	]);
 
 	all_error_count += CeL.test('wiki: CeL.wiki.namespace', function (assert) {
