@@ -2326,7 +2326,7 @@ function test_net() {
 		assert([href, url.toString()], 'CeL.net.URI() #2 of ' + href);
 		assert(['hostname.wiki', uri.hostname], 'CeL.net.URI() #3 of ' + href);
 
-		href = 'http://hostname.org/測試編碼/?編=碼&!+%20%%26%3D=$%%26%3D*#a#$%^&'; url = new URL(href); uri = new CeL.URI(href);
+		href = 'http://hostname.org/測試編碼/?編=碼&!+%20%%26%3D=$%24%%25%26%3D*#a#$%^&'; url = new URL(href); uri = new CeL.URI(href);
 		assert([CeL.URI(href).toString(), CeL.URI(CeL.URI(href).toString()).toString()], 'CeL.net.URI() #1 of ' + href);
 		// assert([encodeURI(href), CeL.URI(href).toString()], 'CeL.net.URI() #1-2 of ' + href);
 		assert([url.toString(), new URL(url.toString()).toString()], 'CeL.net.URI() #2 of ' + href);
@@ -2334,17 +2334,27 @@ function test_net() {
 		assert([url.pathname, uri.pathname], 'CeL.net.URI() #3-2 of ' + href);
 		assert(["#a#$%^&", uri.hash], 'CeL.net.URI() #4 of ' + href);
 		assert(["碼", uri.search_params.編], 'CeL.net.URI() #5 of ' + href);
-		assert(["$%&=*", uri.search_params['!  %&=']], 'CeL.net.URI() #6 of ' + href);
+		assert(["$$%%&=*", uri.search_params['!  %&=']], 'CeL.net.URI() #6 of ' + href);
 
 		href = encodeURI(href); url = new URL(href); uri = new CeL.URI(href);
 		assert([CeL.URI(href).toString(), CeL.URI(CeL.URI(href).toString()).toString()], 'CeL.net.URI() #1 of ' + href);
 		assert([url.toString(), new URL(url.toString()).toString()], 'CeL.net.URI() #2 of ' + href);
-		assert([href, url.toString()], 'CeL.net.URI() #2-2 of ' + href);
+		var _href = url.toString();
+		if (URL[CeL.env.not_native_keyword]) {
+			CeL.log('跳過測試 CeL.net.URI() #2-2: 本 library 模擬之 URLSearchParams.prototype.toString 只能得到等價 href，不完全相同。');
+		} else {
+			assert([ _href, url.toString()], 'CeL.net.URI() #2-2 of ' + href);
+		}
 		assert([encodeURI('/測試編碼/'), uri.pathname], 'CeL.net.URI() #3 of ' + href);
 		assert([url.pathname, uri.pathname], 'CeL.net.URI() #3-2 of ' + href);
 		assert(["#a#$%25%5E&", uri.hash], 'CeL.net.URI() #4 of ' + href);
 		assert(["碼", uri.search_params.編], 'CeL.net.URI() #5 of ' + href);
-		assert(["$%%26%3D*", uri.search_params['! %20%%26%3D']], 'CeL.net.URI() #6 of ' + href);
+		assert(["$%24%%25%26%3D*", uri.search_params['! %20%%26%3D']], 'CeL.net.URI() #6 of ' + href);
+
+		href = 'http://a.b?道可道=非常道&a=1'; uri = new CeL.URI('http://a.b?道可道=非常道&a=1', null, { charset : 'big5' });
+		CeL.data.character.load("Big5");
+		assert(["http://a.b?%B9D%A5i%B9D=%ABD%B1%60%B9D&a=1", uri.toString()], 'CeL.net.URI() charset encoding ' + uri.charset);
+
 	});
 }
 
@@ -2451,17 +2461,18 @@ function test_date() {
 		[[20040000, CeL.to_millisecond('5:34')], 'time_interval_to_millisecond() #9'],
 		[[20067000, CeL.to_millisecond('5:34:27')], 'time_interval_to_millisecond() #10'],
 
-		[["1998/5/1", 'May–June 1998'.to_Date().format('%Y/%m/%d')]],
-		[["1998/7/1", 'May–June 1998'.to_Date({period_end:true}).format('%Y/%m/%d')]],
-		[["1998/5/1", '1998 May'.to_Date().format('%Y/%m/%d')]],
-		[["1998/6/1", '1998 May'.to_Date({period_end:true}).format('%Y/%m/%d')]],
-		[['1998 May UTC+3'.to_Date().getTime(), '1998 May'.to_Date({zone:3}).getTime()]],
-		[["2000/7/1 0:0:0.000", 'May–June 2000'.to_Date({ period_end: true }).format()]],
-		[["1998/6/1 0:0:0.000", 'June 1998'.to_Date().format()]],
-		[["month", 'June 1998'.to_Date().precision]],
-		[["month", 'May–June 1998'.to_Date().precision]],
-		[["month", '1998 June'.to_Date().precision]],
-		[["month", '1998 May-June'.to_Date().precision]],
+		[["1998/5/1", 'May–June 1998'.to_Date().format('%Y/%m/%d')], ".to_Date().format('%Y/%m/%d') #1"],
+		[["1998/7/1", 'May–June 1998'.to_Date({period_end:true}).format('%Y/%m/%d')], '.to_Date({period_end:true}) #1'],
+		[["1998/5/1", '1998 May'.to_Date().format('%Y/%m/%d')], ".to_Date().format('%Y/%m/%d') #2"],
+		[["1998/6/1", '1998 May'.to_Date({period_end:true}).format('%Y/%m/%d')], '.to_Date({period_end:true}) #2'],
+		[[new Date('1998 May UTC+3').getTime(), '1998 May UTC+3'.to_Date().getTime()], "'UTC+3'.to_Date()"],
+		new Date('1998 May UTC+8').getTime() === new Date('1998 May').getTime() ? [[new Date('1998 May UTC+3').getTime(), '1998 May'.to_Date({zone:3}).getTime()], '.to_Date({zone:3})'] : CeL.log('舊版 node.js 如 v0.10.48 無法解析 "1998 May UTC+8"'),
+		[["2000/7/1 0:0:0.000", 'May–June 2000'.to_Date({ period_end: true }).format()], '.to_Date({ period_end: true })'],
+		[["1998/6/1 0:0:0.000", 'June 1998'.to_Date().format()], '.to_Date().format()'],
+		[["month", 'June 1998'.to_Date().precision], '.precision #1'],
+		[["month", 'May–June 1998'.to_Date().precision], '.precision #2'],
+		[["month", '1998 June'.to_Date().precision], '.precision #3'],
+		[["month", '1998 May-June'.to_Date().precision], '.precision #4'],
 
 	]);
 
@@ -3985,19 +3996,21 @@ function test_wiki() {
 		assert(['<span style="color:red">text</span>', parsed[0].expand()], 'CeL.wiki.template_functions.functions_of_all_sites #1');
 	});
 
-	setup_test('CeL.wiki: asynchronous functions');
-
 	// 2021/11/10 6:21:45	nodejs v8.11.1 以及之前的版本皆有此問題。
 	if (!CeL.platform('node', 10)) {
-		CeL.error('test_wiki: 跳過舊版 node.js，測試環境中，不明原因出現 "certificate has expired" 問題。視為執行平臺環境問題，將不被視作 fatal error。');
+		CeL.error('test_wiki: 跳過舊版 node.js 之 wiki asynchronous functions 測試，測試環境中，不明原因出現 "certificate has expired" 問題。視為執行平臺環境問題，將不被視作 fatal error。');
 		return;
 	}
 
+	setup_test('CeL.wiki: asynchronous functions');
+
 	CeL.test('CeL.wiki: asynchronous functions', function (assert, _setup_test, _finish_test) {
+
 		//console.trace('Setup wiki tests...');
 		var enwiki = new CeL.wiki(null, null, 'en');
 		enwiki.run(function () {
-			_setup_test('wiki: namespace');
+			var test_name = 'wiki: namespace';
+			_setup_test(test_name);
 			assert(enwiki.is_talk_namespace(enwiki.to_talk_page('A: B')), 'wiki.is_talk_namespace() #1');
 			assert(['zhwiki', CeL.wiki.site_name('zh', enwiki)], 'site_name(, enwiki) #1');
 			assert(['zhwiki', CeL.wiki.site_name('zh', CeL.wiki.add_session_to_options(enwiki))], 'site_name(, enwiki) #2');
@@ -4025,11 +4038,13 @@ function test_wiki() {
 			assert(['[[:File:File name|ALT]]', CeL.wiki.title_link_of(link, 'ALT')], 'CeL.wiki.title_link_of(file link) #2');
 			assert(['[[w:en:File:File name|ALT]]', CeL.wiki.title_link_of(link, 'ALT', enwiki)], 'CeL.wiki.title_link_of(file link) #3');
 
-			_finish_test('wiki: namespace');
+			//console.trace(test_name);
+			_finish_test(test_name);
 		});
 
 		enwiki.run(function () {
-			_setup_test('wiki: site_name');
+			var test_name = 'wiki: site_name';
+			_setup_test(test_name);
 
 			assert(['enwiki', CeL.wiki.site_name(enwiki)], 'CeL.wiki.site_name() #1');
 			assert(['zhwiki', CeL.wiki.site_name('zh', enwiki)], 'CeL.wiki.site_name() #2');
@@ -4041,7 +4056,7 @@ function test_wiki() {
 			assert(['wikidatawiki', CeL.wiki.site_name('wikidata', { session: enwiki })], 'CeL.wiki.site_name() #8');
 			assert(['commonswiki', CeL.wiki.site_name('commons', { session: enwiki })], 'CeL.wiki.site_name() #9');
 
-			_finish_test('wiki: site_name');
+			_finish_test(test_name);
 		});
 
 		_setup_test('wiki: get_creation_Date');
@@ -4054,12 +4069,12 @@ function test_wiki() {
 		});
 
 
-		_setup_test('wiki: get categorymembers');
+		_setup_test('wiki: get categorymembers enwiki');
 		enwiki.categorymembers('Countries in North America', function (list) {
 			assert(list.some(function (page_data) {
 				return page_data.title === 'United States';
 			}), 'get categorymembers: [[Category:Countries in North America]]');
-			_finish_test('wiki: get categorymembers');
+			_finish_test('wiki: get categorymembers enwiki');
 		}, {
 			limit: 'max',
 			namespace: '0'
@@ -4068,20 +4083,21 @@ function test_wiki() {
 
 		var jawiki = new CeL.wiki(null, null, 'ja');
 
-		_setup_test('wiki: get categorymembers');
 		jawiki.run(function () {
-			_setup_test('wiki: jawiki template_functions');
+			var test_name = 'wiki: jawiki template_functions';
+			_setup_test(test_name);
 
 			assert(['文字列', CeL.wiki.wikitext_to_plain_text('{{JIS90フォント|文字}}列', CeL.wiki.add_session_to_options(jawiki))], 'jawiki template_functions #1');
 			assert(['⺬・𩙿・⻍ 吉', CeL.wiki.wikitext_to_plain_text('{{拡張漢字|部首|⺬}}・{{拡張漢字|B|&#x2967F;}}・{{拡張漢字|部首|⻍}} {{拡張漢字|吉}}', CeL.wiki.add_session_to_options(jawiki))], 'jawiki template_functions #2');
 
-			_finish_test('wiki: jawiki template_functions');
+			_finish_test(test_name);
 		});
 
 
 		var zhwiki = new CeL.wiki(null, null, 'zh');
 		zhwiki.run(function () {
-			_setup_test('wiki: template_functions');
+			var test_name = 'wiki: template_functions';
+			_setup_test(test_name);
 
 			assert(["Template:Tl", zhwiki.normalize_title('t:tl')], 'wiki.normalize_title() #1-1');
 			assert(["Wikipedia:小作品", zhwiki.normalize_title('WP:小作品')], 'wiki.normalize_title() #1-2');
@@ -4099,93 +4115,94 @@ function test_wiki() {
 			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, CeL.wiki.add_session_to_options(zhwiki)).toString()], 'wiki.section_link + template_functions #1-1');
 			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { site_name: 'zhwiki' }).toString()], 'wiki.section_link + template_functions #1-2');
 
-			_finish_test('wiki: template_functions');
+			_finish_test(test_name);
 		});
 
-		_setup_test('wiki: CeL.wiki.convert_Chinese()');
+		_setup_test('wiki: CeL.wiki.convert_Chinese() #1');
 		CeL.wiki.convert_Chinese('中国', function (text) {
-			var test_name = 'wiki: CeL.wiki.convert_Chinese() #1';
-			assert(['中國', text], test_name);
-			_finish_test(test_name);
+			assert(['中國', text], 'wiki: CeL.wiki.convert_Chinese() #1-1');
+			_finish_test('wiki: CeL.wiki.convert_Chinese() #1');
 		});
+		_setup_test('wiki: CeL.wiki.convert_Chinese() #2');
 		CeL.wiki.convert_Chinese('  </nowiki><!-- 简体 & " \' &lt;<nowiki> ', function (text) {
-			var test_name = 'wiki: CeL.wiki.convert_Chinese() #2';
-			assert(['  </nowiki><!-- 簡體 & " \' &lt;<nowiki> ', text], test_name);
-			_finish_test(test_name);
+			assert(['  </nowiki><!-- 簡體 & " \' &lt;<nowiki> ', text], 'wiki: CeL.wiki.convert_Chinese() #2-1');
+			_finish_test('wiki: CeL.wiki.convert_Chinese() #2');
 		});
+		_setup_test('wiki: CeL.wiki.convert_Chinese() #3');
 		CeL.wiki.convert_Chinese(' <!-- 轉換 --> &amp; < >-{華}-<nowiki>-{華}-</nowiki>  ', function (text) {
-			var test_name = 'wiki: CeL.wiki.convert_Chinese() #3';
-			assert([' <!-- 转换 --> &amp; < >-{华}-<nowiki>-{华}-</nowiki>  ', text], test_name);
-			_finish_test(test_name);
+			assert([' <!-- 转换 --> &amp; < >-{华}-<nowiki>-{华}-</nowiki>  ', text], 'wiki: CeL.wiki.convert_Chinese() #3-1');
+			_finish_test('wiki: CeL.wiki.convert_Chinese() #3');
 		}, 'zh-cn');
 
 		_setup_test('wiki: CeL.wiki.langlinks()');
 		CeL.wiki.langlinks(['zh', '文明'], function (title) {
-			var test_name = 'wiki: CeL.wiki.langlinks()';
-			assert(['Civilization', title], test_name);
-			_finish_test(test_name);
+			assert(['Civilization', title], 'wiki: CeL.wiki.langlinks() #1');
+			_finish_test('wiki: CeL.wiki.langlinks()');
 		}, 'en');
 
 		_setup_test('wiki: CeL.wiki.data.search()');
 		CeL.wiki.data.search('宇宙', function (data) {
-			var test_name = 'wiki: CeL.wiki.data.search()';
-			assert(['Q1', data && data[0]], test_name);
-			_finish_test(test_name);
+			assert(['Q1', data && data[0]], 'wiki: CeL.wiki.data.search() #1');
+			_finish_test('wiki: CeL.wiki.data.search()');
 		}, { get_id: true });
 
 		_setup_test('wiki: CeL.wiki.data.search() limit=1');
 		CeL.wiki.data.search('宇宙', function (entity) {
-			var test_name = 'wiki: CeL.wiki.data.search() limit=1';
-			assert(['Q1', entity], test_name);
-			_finish_test(test_name);
+			assert(['Q1', entity], 'wiki: CeL.wiki.data.search() limit=1 #1');
+			_finish_test('wiki: CeL.wiki.data.search() limit=1');
 		}, { get_id: true, limit: 1 });
 
 		_setup_test('wiki: CeL.wiki.data.search() property');
 		CeL.wiki.data.search('形狀', function (id) {
-			var test_name = 'wiki: CeL.wiki.data.search() property';
-			assert(['P1419', id], test_name);
-			_finish_test(test_name);
+			assert(['P1419', id], 'wiki: CeL.wiki.data.search() property #1');
+			_finish_test('wiki: CeL.wiki.data.search() property');
 		}, { get_id: true, type: 'property' });
 
 		_setup_test('wiki: CeL.wiki.data.search().use_cache');
 		CeL.wiki.data.search.use_cache('視訊', function (id) {
-			var test_name = 'wiki: CeL.wiki.data.search().use_cache';
-			assert(['P10', id], test_name);
-			_finish_test(test_name);
+			assert(['P10', id], 'wiki: CeL.wiki.data.search().use_cache #1');
+			_finish_test('wiki: CeL.wiki.data.search().use_cache');
 		});
 
 		_setup_test('wiki: CeL.wiki.data(basic), wikidata_entity()');
 		CeL.wiki.data('宇宙', '形狀', function (data, error) {
-			var test_name = 'wiki: CeL.wiki.data(basic)';
 			// console.log(data);
-			assert(Array.isArray(data) ? data.includes('宇宙的形狀') : [data, '宇宙的形狀'], test_name);
-			_finish_test(test_name);
+			assert(Array.isArray(data) ? data.includes('宇宙的形狀') : [data, '宇宙的形狀'], 'wiki: CeL.wiki.data(basic), wikidata_entity() #1');
+			_finish_test('wiki: CeL.wiki.data(basic), wikidata_entity()');
 		});
 
 		_setup_test('wiki: CeL.wiki.data(get property of item)');
-		var test_property_name = '性質';
-		CeL.wiki.data.search.use_cache(test_property_name, function (id_list) {
-			// Get the id of property '性質' first.
+		CeL.wiki.data.search.use_cache('性質', function (id_list) {
+			var test_property_name = '性質', page_title = '孔子';
+			// console.trace(id_list);
+
+			// Get the id of property `test_property_name` first.
 			// and here we get the id of '性質': "P31"
-			var test_name = 'wiki: CeL.wiki.data(get property of item)';
-			assert(['P31', id_list], 'get data id of 性質');
+			assert(['P31', id_list], 'get data id of ' + test_property_name);
 
 			// 執行剩下的程序. run rest codes.
 			var wiki = CeL.wiki.login(null, null, 'zh');
-			wiki.data('孔子', function (data_JSON) {
-				CeL.wiki.data.search.use_cache(test_property_name, function (id_list) {
+			//var wiki = new CeL.wiki('zh');
+			//CeL.set_debug(9);
+			wiki.data(page_title, after_get_data);
+
+			function after_get_data(data_JSON) {
+				function after_search_use_cache(id_list) {
 					data_JSON.value(test_property_name, {
 						// resolve wikibase-item
 						resolve_item: true
 					}, function (entity) {
-						assert(/human|person/i.test(entity.value('label', 'en')), 'get "' + test_property_name + '" id of 孔子');
-						_finish_test(test_name);
+						//console.trace(data_JSON);
+						assert(/human|person/i.test(entity.value('label', 'en')), 'get "' + test_property_name + '" id of ' + page_title);
+						_finish_test('wiki: CeL.wiki.data(get property of item)');
 					});
-				}, {
+				}
+
+				CeL.wiki.data.search.use_cache(test_property_name, after_search_use_cache, {
 					must_callback: true,
 					type: 'property'
 				});
-			});
+			}
 
 		}, {
 			must_callback: true,
@@ -4193,14 +4210,15 @@ function test_wiki() {
 		});
 
 	}, function (recorder, error_count, test_name) {
-		// console.log('CeL.wiki: asynchronous functions: ' + _error_count + ' errors');
+		 console.log('CeL.wiki: asynchronous functions: ' + error_count + ' errors');
 		all_error_count += error_count;
 		finish_test('CeL.wiki: asynchronous functions');
 	});
 
 	return;
 
-	// examples
+
+	// examples (not test cases)
 
 	// for debug: 'interact.DOM', 'application.debug',
 	//CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
@@ -4588,6 +4606,7 @@ function setup_test(type) {
 }
 
 function finish_test(type) {
+	//console.trace(all_error_count);
 	if (type && still_running[type]) {
 		delete still_running[type];
 		--still_running.left_count;
@@ -4638,7 +4657,7 @@ var all_test_items = {
 	XML: ['data.XML', test_XML],
 	DOM: ['interact.DOM', test_DOM],
 	numeral: ['data.numeral', test_numeral],
-	net: ['application.net', test_net],
+	net: ['data.character', 'application.net', test_net],
 	astronomy: ['application.astronomy', test_astronomy],
 	calendar: ['data.date.calendar', test_calendar],
 	era: ['data.date.era', test_era],

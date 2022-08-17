@@ -30,17 +30,26 @@ function module_code(library_namespace) {
 	var module_name = this.id;
 	// @see PATTERN_has_URI_invalid_character @ library_namespace.character
 	var PATTERN_has_URI_invalid_character = /[^a-zA-Z0-9;,/?:@&=+$\-_.!~*'()#]/;
+	var check_encoding = function(encoding) {
+		// console.trace(encoding);
+		if (encoding && !/^UTF-?8$/i.test(encoding)) {
+			library_namespace.warn('您必須先載入 CeL.! 這訊息只會顯示一次!');
+			check_encoding = null;
+		}
+	},
 	// 本函數亦使用於 CeL.application.net.work_crawler
 	// 本函式將使用之 encodeURIComponent()，包含對 charset 之處理。
 	// @see function_placeholder() @ module.js
-	var encode_URI_component = function(string, encoding) {
+	encode_URI_component = function(string, encoding) {
 		if (library_namespace.character) {
 			library_namespace.debug('採用 ' + library_namespace.Class
 			// 有則用之。 use CeL.data.character.encode_URI_component()
 			+ '.character.encode_URI_component 編碼 ' + encoding, 1, module_name);
 			encode_URI_component = library_namespace.character.encode_URI_component;
+			check_encoding = null;
 			return encode_URI_component(string, encoding);
 		}
+		check_encoding(encoding);
 		return encodeURIComponent(string);
 	};
 	var encode_URI = function(string, encoding) {
@@ -49,8 +58,10 @@ function module_code(library_namespace) {
 			// 有則用之。 use CeL.data.character.encode_URI()
 			+ '.character.encode_URI 編碼 ' + encoding, 1, module_name);
 			encode_URI = library_namespace.character.encode_URI;
+			check_encoding = null;
 			return encode_URI(string, encoding);
 		}
+		check_encoding(encoding);
 		return encodeURI(string);
 	};
 	var decode_URI_component = function(string, encoding) {
@@ -60,8 +71,10 @@ function module_code(library_namespace) {
 			+ '.character.decode_URI_component 解碼 ' + encoding, 1, module_name);
 			decode_URI = library_namespace.character.decode_URI;
 			decode_URI_component = library_namespace.character.decode_URI_component;
+			check_encoding = null;
 			return decode_URI_component(string, encoding);
 		}
+		check_encoding(encoding);
 		return decodeURIComponent(string);
 	};
 	var decode_URI = decode_URI_component;
@@ -596,6 +609,7 @@ function module_code(library_namespace) {
 				this[KEY_hash] = value;
 			}
 		},
+		// URI.prototype.search
 		search : {
 			enumerable : true,
 			get : search_getter,
@@ -608,6 +622,12 @@ function module_code(library_namespace) {
 				// search_params.clean_parameters();
 				search_clean_parameters(search_params);
 
+				// node.js v0.10.48 有 bug，需要取得 search_params 一次才不會造成
+				// ReferenceError: CeL is not defined
+				// @ URI.prototype.href.set
+				// @ site_name #17 @ _test suite/test.js
+				URL[KEY_not_native] && search_params && Math.abs(0);
+
 				value = String(value);
 				if (value.startsWith('?')) {
 					value = value.slice(1);
@@ -618,6 +638,7 @@ function module_code(library_namespace) {
 				}
 			}
 		},
+		// URI.prototype.href
 		href : {
 			enumerable : true,
 			get : Object.defineProperty[KEY_not_native] ? URI_toString
@@ -641,6 +662,7 @@ function module_code(library_namespace) {
 		}
 
 		var uri = this;
+		// console.trace([ uri, uri.searchParams ]);
 		var search = 'search_params' in uri
 		// function parameters_toString(options)
 		? uri.search_params.toString(options)
@@ -651,13 +673,15 @@ function module_code(library_namespace) {
 
 	function URI_href() {
 		var uri = this;
+		// console.trace([ uri, uri.search ]);
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
-		return (uri.protocol ? uri.protocol + '//' : '')
+		var href = (uri.protocol ? uri.protocol + '//' : '')
 				+ (uri.username || uri.password ? uri.username
 						+ (uri.password ? ':' + uri.password : '') + '@' : '')
 				+ uri.host
 				// assert: uri.pathname is encodeURI()-ed.
 				+ uri.pathname + uri.search + uri.hash;
+		return href;
 	}
 
 	// options: 'charset'
@@ -999,8 +1023,10 @@ function module_code(library_namespace) {
 		}).join('<br />\n') ], 9, 'parameters_toString');
 
 		search = search.join('&');
-		if (this[KEY_URL])
+		if (this[KEY_URL]) {
+			// @see URI.prototype.search
 			this[KEY_URL].search = search;
+		}
 
 		return search;
 	}
@@ -1137,10 +1163,13 @@ function module_code(library_namespace) {
 			return [ original_value ];
 		},
 
+		// 注意: 本 library 模擬之 URLSearchParams.prototype.toString 只能得到等價
+		// href，不完全相同。
 		toString : function toString() {
 			// defective_URLSearchParams.prototype.toString
 			var list = [];
 			this.forEach(function(value, key) {
+				// console.trace([ value, key ]);
 				key = encodeURIComponent(key) + '=';
 				if (Array.isArray(value)) {
 					value.forEach(function(v) {

@@ -281,7 +281,11 @@ function module_code(library_namespace) {
 		// 取得每一個章節的內容與各個影像資料。 get_chapter_data()
 		chapter_URL : function(work_data, chapter_NO) {
 			var url = work_data.chapter_list[chapter_NO - 1].url;
-			return url.startsWith('/') ? url : work_data.base_url + url;
+			// console.trace(url);
+			url = url.startsWith('/') || url.includes('://') ? url
+					: work_data.base_url + url;
+			// console.trace(url);
+			return url;
 		},
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
 			if (!html && this.skip_error === true) {

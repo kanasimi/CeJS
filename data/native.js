@@ -742,15 +742,15 @@ function module_code(library_namespace) {
 	// [ all, pattern source, flags ]
 	_.PATTERN_RegExp = new RegExp(
 	// /^\/(.+)\/([iugms]*)$/
-	// /^\/((?:\\.|[^\/])+)\/([gimsuy]*)$/
-	/^\/((?:\\.|[^\/])+)\/([flags]*)$/.source.replace('flags',
+	// /^\/((?:\\[\s\S]|[^\/])+)\/([gimsuy]*)$/
+	/^\/((?:\\[\s\S]|[^\/])+)\/([flags]*)$/.source.replace('flags',
 			_.PATTERN_RegExp_flags));
 
 	// CeL.PATTERN_RegExp_replacement
 	// e.g., '/只/隻/i'
 	_.PATTERN_RegExp_replacement = new RegExp(
 	// [ all, pattern source, replace to, flags ]
-	/^\/((?:\\.|[^\/])+)\/((?:\\.|[^\/])*)\/([flags]*)$/.source.replace(
+	/^\/((?:\\[\s\S]|[^\/])+)\/((?:\\[\s\S]|[^\/])*)\/([flags]*)$/.source.replace(
 			'flags', _.PATTERN_RegExp_flags));
 
 	// CeL.PATTERN_RegExp_flags

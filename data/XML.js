@@ -222,14 +222,16 @@ function module_code(library_namespace) {
 		}
 
 		var matched,
-		//
-		attribute_pattern = /([^\s=]+)\s*(?:=\s*(?:"((?:\\.|[^"\\]+)+)"|'((?:\\.|[^'\\]+)+)'|(\S+)))?/g;
+		// [ all attribute, name, "", '', no-quoted ]
+		attribute_pattern = /([^\s=]+)(?:=(?:"((?:\\[\s\S]|[^"\\])+)"|'((?:\\[\s\S]|[^'\\])+)'|(\S+)))?/g;
 		while (matched = attribute_pattern.exec(attributes)) {
+			// delete matched.input;
+			// console.log(matched);
 			var value = matched[2] || matched[3];
 			// unescape
 			// value ? value.replace(/\\(.)/g, '$1') : matched[4];
 			if (normalizer)
-				value = normalizer(value);
+				value = normalizer(value, matched[1]);
 			if (value || value === 0)
 				node[matched[1]] = value;
 		}
@@ -664,11 +666,12 @@ function module_code(library_namespace) {
 		// 維護一份堆疊
 		options.provide_stack = false
 
-		options.on_open_tag(tag, stack)
-		options.on_close_tag(tag, stack)
 		options.on_self_closing_tag(tag, stack)
+		options.on_open_tag(tag, stack)
+		options.on_close_tag(tag, stack, latest_tag)
 		options.on_error(error, stack)
 		options.on_end(tail, stack)
+		value = options.attribute_normalizer(value, key)
 
 		</code>
 		 */
@@ -676,15 +679,21 @@ function module_code(library_namespace) {
 		Object.assign(this, options);
 	}
 
-	function XML_parser_parse(XML_text) {
+	function XML_parser_parse(XML_text, options) {
 		var provide_stack = this.provide_stack;
 		var stack = [];
 
+		var attribute_normalizer = this.attribute_normalizer;
+
+		XML_text = String(XML_text);
+
 		// matched:
 		// [ all tag, is_close_tag, tag_name, attributes, is_self_closing_tag ]
-		var PATTERN_next_tag = /<(\/?)([^<>\s"'=:]+)((?:\s+[^<>\s]+)*\s*)(\/?)>/g;
+		var PATTERN_next_tag = /<(\/?)([^<>\s"'=:]+)((?:\s+[^<>\s=]+(?:="[^"]*"|='[^']*'|=[^<>\s=]*)?)*\s*)(\/?)>/g;
 		var matched, last_index = 0;
 		while (matched = PATTERN_next_tag.exec(XML_text)) {
+			// delete matched.input;
+			// console.log(matched);
 			if (!matched[4] && matched[3].endsWith('/')) {
 				matched[4] = '/';
 				matched[3] = matched[3].slice(0, -1);
@@ -692,7 +701,9 @@ function module_code(library_namespace) {
 
 			// parse attributes
 			var attributes = Object.create(null);
-			TODO;
+			// console.log(matched[3]);
+			set_attributes(attributes, matched[3], attribute_normalizer);
+			// console.log(attributes);
 
 			// https://github.com/lddubeau/saxes/blob/master/src/saxes.ts#L381
 			var tag = {
@@ -702,23 +713,51 @@ function module_code(library_namespace) {
 				is_self_closing : !!matched[4]
 			};
 			if (matched[1]) {
+				// close tag
+				var latest_tag = stack.pop();
+				if (!latest_tag
 				// Check the stack
-				TODO;
-
-				this.on_close_tag(tag, stack);
-			} else if (matched[4]) {
-				TODO;
-				this.on_self_closing_tag(tag, stack);
-			} else {
-				TODO;
-				if (matched) {
-					;
+				|| (provide_stack ? latest_tag.name : latest_tag) !== tag.name) {
+					var error = stack.clone();
+					if (latest_tag)
+						error.push(latest_tag);
+					error = error.map(function(tag) {
+						return '<' + (provide_stack ? tag.name : tag) + '>';
+					});
+					// error.push('<' + tag.name + '>?');
+					error = new Error('Close tag without open tag! '
+					//
+					+ error.join('') + '→' + matched[0] + '\n'
+					// + 'This piece: '
+					+ XML_text.slice(Math.max(0, last_index - 20),
+					//
+					matched.index + matched[0].length));
+					if (!this.on_error)
+						throw error;
+					this.on_error(error, stack, latest_tag);
 				}
 
+				this.on_close_tag(tag, stack, latest_tag);
+			} else if (matched[4]) {
+				// self-closing tag
+				// Do not push to stack.
+				this.on_self_closing_tag(tag, stack);
+			} else {
+				// open tag
 				stack.push(provide_stack ? tag : tag_name);
 				this.on_open_tag(tag, stack);
 			}
 			last_index = matched.index + matched[0].length;
+			library_namespace.debug(last_index + '/' + XML_text.length + ': '
+					+ XML_text.slice(last_index, last_index + 200), 2);
+		}
+
+		if (stack.length !== 0) {
+			var error = new Error('There are ' + stack.length
+					+ ' element(s) left!');
+			if (!this.on_error)
+				throw error;
+			this.on_error(error, stack);
 		}
 
 		this.on_end(XML_text.slice(last_index), stack);
@@ -728,9 +767,57 @@ function module_code(library_namespace) {
 		parse : XML_parser_parse
 	});
 
-	function parse_XML(XML_text) {
-		var xml_parser = new XML_parser(options);
+	var KEY_children = 'children';
+	// var KEY_TAGNAME = 0, KEY_ATTRIBUTES = 1, KEY_CHILDREN = 2;
+
+	function parse_XML(XML_text, options) {
+		function push_prefix(tag, stack) {
+			var prefix = tag.prefix;
+			delete tag.prefix;
+			var children_list = XML_stack.at(-1);
+			if (prefix)
+				children_list.push(prefix);
+			return children_list
+		}
+
+		function parse_XML__on_self_closing_tag(tag, stack) {
+			// console.trace(tag);
+			var children_list = push_prefix(tag, stack);
+			children_list.push(tag);
+		}
+
+		function parse_XML__on_open_tag(tag, stack) {
+			parse_XML__on_self_closing_tag(tag, stack);
+			XML_stack.push(tag[KEY_children] = []);
+		}
+
+		function parse_XML__on_close_tag(tag, stack, latest_tag) {
+			// console.trace(tag);
+			var children_list = push_prefix(tag, stack);
+			XML_stack.pop();
+		}
+
+		function parse_XML__on_end(tail, stack) {
+			// console.trace(tail);
+			if (XML_stack.length !== 1)
+				throw new Error('There are ' + (XML_stack.length - 1)
+						+ 'elements left!');
+			if (tail)
+				XML_stack[0].push(tail);
+		}
+
+		var XML_object = [], XML_stack = [ XML_object ];
+		var xml_parser = new XML_parser(Object.assign(Object.create(null), {
+			on_self_closing_tag : parse_XML__on_self_closing_tag,
+			on_open_tag : parse_XML__on_open_tag,
+			on_close_tag : parse_XML__on_close_tag,
+			// on_error(error, stack)
+			on_end : parse_XML__on_end,
+
+			provide_stack : true
+		}, options));
 		xml_parser.parse(XML_text);
+		return XML_object;
 	}
 
 	// ------------------------------------------------------------------------
@@ -740,6 +827,11 @@ function module_code(library_namespace) {
 	library_namespace.set_method(JSON, {
 		to_XML : JSON_to_XML,
 		from_XML : XML_to_JSON
+	});
+
+	Object.assign(_, {
+		XML_parser : XML_parser,
+		parse_XML : parse_XML
 	});
 
 	return (_// JSDT:_module_

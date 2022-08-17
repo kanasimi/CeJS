@@ -69,6 +69,17 @@ function module_code(library_namespace) {
 		// chapter_data.url
 		next_chapter_url = next_chapter && next_chapter.url;
 
+		if (next_chapter_url && !next_chapter_url.startsWith('/')
+		// e.g., '123.htm', '123/123.htm'
+		&& !next_chapter_url.includes('://')) {
+			next_chapter_url = this.chapter_URL(work_data, chapter_NO).replace(
+					/[^\/]*$/, next_chapter_url);
+		}
+
+		if (false) {
+			console.trace([ full_next_url, work_data.url, next_chapter_url,
+					this.full_URL(next_chapter_url) ]);
+		}
 		if (full_next_url === work_data.url
 		// 許多網站會把最新章節的下一頁設成章節列表，因此必須排除章節列表的網址。
 		|| full_next_url === work_data.chapter_list_URL

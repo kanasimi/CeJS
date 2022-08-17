@@ -210,9 +210,12 @@ function module_code(library_namespace) {
 			// If url is a string, it is automatically parsed with new URL(). If
 			// it is a URL object, it will be automatically converted to an
 			// ordinary options object.
+
+			// console.log(URL_to_fetch);
 			URL_to_fetch = library_namespace.URI(URL_to_fetch, null, {
 				charset : charset
 			});
+			// console.trace(URL_to_fetch);
 		}
 		// assert: library_namespace.is_URI(URL_to_fetch)
 		// console.trace(URL_to_fetch);

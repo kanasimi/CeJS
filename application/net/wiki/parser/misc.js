@@ -1814,7 +1814,7 @@ function module_code(library_namespace) {
 				'parse_lua_object_code');
 		lua_code = lua_code
 				.replace(
-						/("(?:\\.|[^\\\n"])*"|'(?:\\.|[^\\\n'])*')(?:\\t|[\s\n]|--[^\n]*\n)*(?:(\.\.)(?:\\t|[\s\n]|--[^\n]*\n)*)?/g,
+						/("(?:\\[\s\S]|[^\\\n"])*"|'(?:\\[\s\S]|[^\\\n'])*')(?:\\t|[\s\n]|--[^\n]*\n)*(?:(\.\.)(?:\\t|[\s\n]|--[^\n]*\n)*)?/g,
 						function(all, string, concatenation) {
 							string = eval_object(string);
 							return JSON.stringify(string)
@@ -1828,7 +1828,7 @@ function module_code(library_namespace) {
 							6, 'parse_lua_object_code');
 			lua_code = lua_code
 					.replace_till_stable(
-							/"((?:\\.|[^\\"])*)"(?:\\t|[\s\n])*(\.\.(?:\\t|[\s\n])*)?--[^\n]*/g,
+							/"((?:\\[\s\S]|[^\\"])*)"(?:\\t|[\s\n])*(\.\.(?:\\t|[\s\n])*)?--[^\n]*/g,
 							'$1$2');
 			// console.log(lua_code);
 		}
@@ -1838,13 +1838,13 @@ function module_code(library_namespace) {
 		// Lua denotes the string concatenation operator by " .. " (two dots).
 		lua_code = lua_code
 				.replace_till_stable(
-						/("(?:\\.|[^\\"])+)"(?:\\t|[\s\n])*\.\.(?:\\t|[\s\n])*"/g,
+						/("(?:\\[\s\S]|[^\\"])+)"(?:\\t|[\s\n])*\.\.(?:\\t|[\s\n])*"/g,
 						'$1');
 
 		// console.log(lua_code);
 
 		library_namespace.debug('轉存 `"string"`', 6, 'parse_lua_object_code');
-		lua_code = lua_code.replace(/"(?:\\.|[^\\\n"])*"/g, function(all) {
+		lua_code = lua_code.replace(/"(?:\\[\s\S]|[^\\\n"])*"/g, function(all) {
 			// library_namespace.log(all);
 			__strings.push(JSON.parse(all));
 			return "__strings[" + (__strings.length - 1) + "]";

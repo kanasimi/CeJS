@@ -445,6 +445,7 @@ function module_code(library_namespace) {
 			plural_count = plural_rule[0];
 			plural_rule = plural_rule[1];
 		}
+		// console.trace([ domain_name, plural_count, plural_rule ]);
 
 		converted_text = converted_text.replace_till_stable(
 		//
@@ -1090,6 +1091,7 @@ function module_code(library_namespace) {
 		}
 
 		if (need_to_load.length > 0) {
+			// console.trace(need_to_load);
 			library_namespace.debug('need_to_load: ' + need_to_load, 2,
 					'load_domain');
 			library_namespace.run(need_to_load, typeof callback === 'function'
@@ -1235,9 +1237,15 @@ function module_code(library_namespace) {
 
 		function exec(command, PATTERN, mapping) {
 			try {
+				// @see https://gist.github.com/kaizhu256/a4568cb7dac2912fc5ed
+				// synchronously run system command in nodejs <= 0.10.x
+				// https://github.com/gvarsanyi/sync-exec/blob/master/js/sync-exec.js
+				// if (!require('child_process').execSync) { return; }
+
 				var code = require('child_process').execSync(command, {
 					stdio : 'pipe'
 				}).toString();
+				// console.trace([ command, code ]);
 				if (PATTERN)
 					code = code.match(PATTERN)[1];
 				if (mapping)
@@ -1248,6 +1256,7 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// console.trace(library_namespace.platform.is_Windows());
 		if (library_namespace.platform.is_Windows()) {
 			// TODO:
 			// `REG QUERY HKLM\System\CurrentControlSet\Control\Nls\Language /v
@@ -2384,18 +2393,23 @@ function module_code(library_namespace) {
 	// setup default / current domain. ユーザーロケール(言語と地域)の判定。
 	gettext.default_domain = guess_language();
 	// console.log('setup default / current domain: ' + gettext.default_domain);
-	if (gettext.default_domain) {
-		// initialization 時，gettext 可能還沒 loaded。
-		// 因此設在 post action。e.g., @ HTA.
-		this.finish = function(name_space, waiting) {
-			load_domain(plural_rules__domain_name);
+	// initialization 時，gettext 可能還沒 loaded。
+	// 因此設在 post action。e.g., @ HTA.
+	this.finish = function(name_space, waiting) {
+		// 無論如何都該載入複數規則。
+		load_domain(plural_rules__domain_name);
 
-			gettext.use_domain(gettext.default_domain, function() {
-				gettext.adapt_domain(gettext.default_domain, waiting);
-			}, true);
-			return waiting;
-		};
-	}
+		// console.trace(gettext.default_domain);
+
+		if (!gettext.default_domain) {
+			return;
+		}
+
+		gettext.use_domain(gettext.default_domain, function() {
+			gettext.adapt_domain(gettext.default_domain, waiting);
+		}, true);
+		return waiting;
+	};
 
 	// console.log(gettext_aliases);
 

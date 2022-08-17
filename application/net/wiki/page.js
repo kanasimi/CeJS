@@ -333,7 +333,9 @@ function module_code(library_namespace) {
 
 		// console.log(action);
 
-		if (!wiki_API_page.query_modules.some(function(module) {
+		if (!wiki_API_page.query_modules
+		//
+		|| !wiki_API_page.query_modules.some(function(module) {
 			return options[module];
 		})) {
 			options.prop = 'revisions';

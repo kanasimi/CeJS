@@ -1426,9 +1426,11 @@ function module_code(library_namespace) {
 					this.next();
 				} else {
 					if (this.actions.length > 1) {
-						library_namespace.debug(method + ': 正在執行中('
-						//								
-						+ this.thread_count + ',' + this.actions.length + ')'
+						library_namespace.debug(method + ': 正在執行中 ('
+						//
+						+ this.thread_count + ', ' + this.actions.length
+						//
+						+ ', ' + this.running + ') '
 						// ，直接跳出。
 						+ this.actions.slice(0, 9).map(function(action) {
 							return action.slice(0, 1);

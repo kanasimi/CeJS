@@ -308,7 +308,7 @@ function module_code(library_namespace) {
 					+ 'Should input string but get ' + (typeof arg) + ':');
 			console.error(arg);
 		}
-		return /^"(\\.|[^\\\n])*"$/.test(arg) ? arg :
+		return /^"(\\[\s\S]|[^\\\n])*"$/.test(arg) ? arg :
 		// JSON.stringify()
 		'"' + String(arg).replace(/"/g, '\\"') + '"';
 	}

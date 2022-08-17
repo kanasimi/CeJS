@@ -709,7 +709,7 @@ function module_code(library_namespace) {
 			// 尚未發現有 '..."...' 的情況。
 			PATTERN_assignment =
 			// [ expression, variable name, value, quote ]
-			/\sDM5_([a-zA-Z\d_]+)\s*=\s*(\d+|true|false|(")(?:\\.|[^\\"]+)*")/g
+			/\sDM5_([a-zA-Z\d_]+)\s*=\s*(\d+|true|false|(")(?:\\[\s\S]|[^\\"]+)*")/g
 			// @see sfacg.js
 			;
 			// console.log(text);

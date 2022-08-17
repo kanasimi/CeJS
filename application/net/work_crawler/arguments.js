@@ -48,7 +48,7 @@ function module_code(library_namespace) {
 		if (library_namespace.is_Object(condition))
 			return condition;
 
-		var condition_data = Object.create(null), matched, PATTERN = /([a-z]+)(?::(\/(\\.|[^\/])+\/([i]*)|[^|]+))?(?:\||$)/g;
+		var condition_data = Object.create(null), matched, PATTERN = /([a-z]+)(?::(\/(\\[\s\S]|[^\/])+\/([i]*)|[^|]+))?(?:\||$)/g;
 		while (matched = PATTERN.exec(condition)) {
 			var type = matched[1], _condition = undefined;
 			if (!matched[2]) {

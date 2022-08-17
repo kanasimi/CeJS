@@ -2061,23 +2061,25 @@ function finish(name_space) {
 				conditions.forEach(handler);
 			} else {
 				var tests_count = 0,
-				//
+				// assert: tests_count === Object.keys(tests_left).length
 				tests_left = assert_proxy.tests_left = Object.create(null),
 				// assert: typeof conditions === 'function'
 				setup_test = function setup_test(sub_test_name, test_function) {
 					// need wait (pending)
 					assert_proxy.asynchronous = true;
-					tests_count++;
 					if (sub_test_name) {
 						assert_proxy.latest_sub_test_name = sub_test_name;
 						if (sub_test_name in tests_left) {
-							// 已登記過。
+							CeL.warn('已登記過任務組 [' + sub_test_name + ']。');
 							return true;
 						}
+						tests_count++;
 						tests_left[sub_test_name] = {
 							// sub_test_data
 							assert_count : 0
 						};
+						CeL.debug('增加任務組 [' + sub_test_name + ']。尚餘 '
+								+ tests_count + ' 個任務組測試中。', 1, 'CeL.log.test');
 					}
 					if (typeof test_function === 'function') {
 						try {
@@ -2089,17 +2091,23 @@ function finish(name_space) {
 							}
 							recorder.fatal.push(sub_test_name);
 						}
-						finish_test(sub_test_name);
+						if (sub_test_name)
+							finish_test(sub_test_name);
 					}
 				},
 				//
 				finish_test = function finish_test(sub_test_name) {
-					if (!(sub_test_name in tests_left)) {
+					if (sub_test_name in tests_left) {
+						delete tests_left[sub_test_name];
+						tests_count--;
+					} else {
 						// 重複呼叫?
+						CeL.warn('已登記過完成測試任務組 [' + sub_test_name + ']。');
 						return;
 					}
-					delete tests_left[sub_test_name];
-					tests_count--;
+					CeL.debug('完成測試 [' + sub_test_name + ']。尚餘 ' + tests_count
+							+ ' 個任務組測試中。', 1, 'CeL.log.test');
+					// console.trace([ tests_count, tests_left ]);
 					if (tests_count === 0
 					// && CeL.is_empty_object(tests_left)
 					) {
@@ -2133,6 +2141,13 @@ function finish(name_space) {
 							console.trace(e);
 							conditions_error(e);
 						});
+					} else {
+						assert_proxy.tests_loaded = true;
+					}
+					if (tests_count) {
+						// console.trace([ tests_count, tests_left ]);
+						CeL.debug('尚餘 ' + tests_count + ' 個任務組測試中。', 1,
+								'CeL.log.test');
 					}
 				} catch (e) {
 					// has_console

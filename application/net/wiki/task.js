@@ -3557,12 +3557,19 @@ function module_code(library_namespace) {
 			delete login_options.is_running;
 		} else {
 			// 初始化 session 與 agent。這裡 callback 當作 API_URL。
-			login_options.is_running = 'login';
+			if (user_name && password) {
+				login_options.is_running = 'login';
+			} else {
+				// 後面會直接 return
+			}
 			session = new wiki_API(user_name, password, login_options);
 		}
 		if (!user_name || !password) {
-			library_namespace
-					.warn('wiki_API.login: The user name or password is not provided. Abandon login attempt.');
+			library_namespace.warn('wiki_API.login: ' +
+			//
+			'The user name or password is not provided. Abandon login attempt.'
+			//		
+			);
 			// console.trace('Stop login');
 			callback && session.run(callback.bind(session));
 			return session;

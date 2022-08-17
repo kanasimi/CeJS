@@ -456,7 +456,16 @@ function module_code(library_namespace) {
 			crawler_namespace.regenerate_user_agent(this);
 		}
 
-		this.get_URL(search_URL_string, function(XMLHttp) {
+		var search_work_interval = this.search_work_interval;
+		if (search_work_interval) {
+			search_work_interval = library_namespace
+					.to_millisecond(search_work_interval);
+		}
+
+		function handler_search_response(XMLHttp) {
+			if (search_work_interval > 0)
+				this.latest_search_time = Date.now();
+
 			_this.setup_agent();
 			if (!XMLHttp.responseText) {
 				library_namespace.error([ 'get_work: ', {
@@ -603,9 +612,22 @@ function module_code(library_namespace) {
 				finish();
 			}
 
-		}, post_data, Object.assign({
-			error_retry : this.MAX_ERROR_RETRY
-		}, get_URL_options), search_url_data.charset);
+		}
+
+		function getch_search_result() {
+			// console.trace([ search_URL_string, search_url_data, post_data ]);
+			_this.get_URL(search_URL_string, handler_search_response,
+			//
+			post_data, Object.assign({
+				error_retry : _this.MAX_ERROR_RETRY
+			}, get_URL_options), search_url_data.charset);
+		}
+
+		if (search_work_interval > 0
+				&& Date.now() - this.latest_search_time < search_work_interval) {
+			setTimeout(getch_search_result, search_work_interval);
+		}
+		getch_search_result();
 	}
 
 	function extract_work_data(work_data, html, PATTERN_work_data, overwrite) {
