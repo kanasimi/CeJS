@@ -1,9 +1,11 @@
 ﻿/**
  * @name CeL module for downloading manhuadb comics.
  * 
- * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸漫畫網站 漫画DB 的工具。
+ * @fileoverview 本檔案包含了解析並處理、批量下載中國大陸漫畫網站 漫画DB 平臺 的工具。
  * 
  * modify from 9mdm.js→dagu.js
+ * 
+ * 由於 漫画DB 系列網站下載機制較複雜，下載圖片功能為獨立撰寫出來，不支援 achive_images 功能。
  * 
  * <code>
 
@@ -196,20 +198,21 @@ function module_code(library_namespace) {
 				new_directory = work_data.directory + part_title + ' '
 						+ NO_in_part.pad(work_data.chapter_NO_pad_digits || 4)
 						+ ' ' + chapter_data.title;
-				if (CeL.directory_exists(old_directory)) {
-					CeL.move_fso(old_directory, new_directory);
+				if (library_namespace.directory_exists(old_directory)) {
+					library_namespace.move_fso(old_directory, new_directory);
 				}
 
 				var old_archive = old_directory + '.'
 						+ this.images_archive_extension;
-				if (CeL.file_exists(old_archive)) {
-					CeL.log(old_archive + '\n→ ' + new_directory);
-					var images_archive = new CeL.storage.archive(old_archive);
+				if (library_namespace.file_exists(old_archive)) {
+					library_namespace.log(old_archive + '\n→ ' + new_directory);
+					var images_archive = new library_namespace.storage.archive(
+							old_archive);
 					images_archive.extract({
 						cwd : images_archive
 					});
-					CeL.move_fso(old_directory, new_directory);
-					CeL.remove_file(old_archive);
+					library_namespace.move_fso(old_directory, new_directory);
+					library_namespace.remove_file(old_archive);
 				}
 			}
 
@@ -302,15 +305,15 @@ function module_code(library_namespace) {
 				chapter_data.image_list = work_data.image_list[chapter_NO - 1];
 				if (!this.reget_image_page && chapter_data.image_list
 						&& chapter_data.image_list.length === image_count) {
-					CeL.debug(work_data.title + ' #' + chapter_NO + ' '
-							+ chapter_data.title + ': Already got '
+					library_namespace.debug(work_data.title + ' #' + chapter_NO
+							+ ' ' + chapter_data.title + ': Already got '
 							+ image_count + ' images.');
 					chapter_data.image_list = chapter_data.image_list
 					// .slice() 重建以節省記憶體用量。
 					.slice().map(function(image_data) {
 						// 僅保留網址資訊，節省記憶體用量。
 						return typeof image_data === 'string' ? image_data
-						// else assert: CeL.is_Object(image_data)
+						// else assert: library_namespace.is_Object(image_data)
 						: image_data.url;
 					});
 					callback();
@@ -325,8 +328,9 @@ function module_code(library_namespace) {
 				//
 				url = html.between('<img class="img-fluid"', '>').between(
 						' src="', '"');
-				CeL.debug('Add image ' + chapter_data.image_list.length + '/'
-						+ image_count + ': ' + url, 2, 'extract_image');
+				library_namespace.debug('Add image '
+						+ chapter_data.image_list.length + '/' + image_count
+						+ ': ' + url, 2, 'extract_image');
 				if (!url && !_this.skip_error) {
 					_this.onerror('No image url got: #'
 							+ chapter_data.image_list.length + '/'
@@ -340,14 +344,14 @@ function module_code(library_namespace) {
 			if (image_count > 0)
 				extract_image(XMLHttp);
 
-			CeL.run_serial(function(run_next, image_NO, index) {
+			library_namespace.run_serial(function(run_next, image_NO, index) {
 				var image_page_url
 				//
 				= _this.full_URL(image_page_list[index - 1].url);
 				// console.log('Get #' + index + ': ' + image_page_url);
-				CeL.log_temporary('Get image data page of §' + chapter_NO
-						+ ': ' + image_NO + '/' + image_count);
-				CeL.get_URL(image_page_url, function(XMLHttp) {
+				library_namespace.log_temporary('Get image data page of §'
+						+ chapter_NO + ': ' + image_NO + '/' + image_count);
+				library_namespace.get_URL(image_page_url, function(XMLHttp) {
 					extract_image(XMLHttp);
 					run_next();
 				}, _this.charset, null, Object.assign({

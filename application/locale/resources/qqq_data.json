@@ -2759,7 +2759,7 @@
 		"message": "%1 is not exist in %2.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page title, %2: site name,",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L2488}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L2490}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-title-$1": {
@@ -3090,7 +3090,7 @@
 		"message": "%1 必須更名為 %2 才能起作用！",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: input template name, %2: normalized template name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions.js#L1187}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions.js#L1190}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-convert-lua-pattern-to-regexp-pattern-$1": {
@@ -4431,7 +4431,7 @@
 		"notes": "work_crawler.sites.dm5",
 		"scope": "work_crawler.sites.comico",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/comico.js#L147}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/dm5.js#L684}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/comico.js#L147}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/sites/dm5.js#L688}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-next-time-you-receive-a-reading-voucher-you-will-need-$1": {

@@ -2432,7 +2432,7 @@ function module_code(library_namespace) {
 		if (!action[0])
 			action = action[1];
 
-		// console.trace(action);
+		// console.trace([ action, options ]);
 		wiki_API.query(action, typeof callback === 'function'
 		//
 		&& function(data, error) {
@@ -2480,7 +2480,9 @@ function module_code(library_namespace) {
 			for ( var pageid in data) {
 				var page = data[pageid];
 				// 僅處理第一頁。
-				if (!wiki_API.content_of.page_exists(page)) {
+				if (!options.no_message
+				//
+				&& !wiki_API.content_of.page_exists(page)) {
 					// 此頁面不存在/已刪除。Page does not exist. Deleted?
 					library_namespace.warn([ 'wiki_API.redirects_here: ', {
 						// e.g., 中文維基中無此頁面

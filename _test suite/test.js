@@ -2466,7 +2466,7 @@ function test_date() {
 		[["1998/5/1", '1998 May'.to_Date().format('%Y/%m/%d')], ".to_Date().format('%Y/%m/%d') #2"],
 		[["1998/6/1", '1998 May'.to_Date({period_end:true}).format('%Y/%m/%d')], '.to_Date({period_end:true}) #2'],
 		[[new Date('1998 May UTC+3').getTime(), '1998 May UTC+3'.to_Date().getTime()], "'UTC+3'.to_Date()"],
-		new Date('1998 May UTC+8').getTime() === new Date('1998 May').getTime() ? [[new Date('1998 May UTC+3').getTime(), '1998 May'.to_Date({zone:3}).getTime()], '.to_Date({zone:3})'] : CeL.log('舊版 node.js 如 v0.10.48 無法解析 "1998 May UTC+8"'),
+		new Date('1998 May UTC+8').getTime() === new Date('1998 May').getTime() ? [[new Date('1998 May UTC+3').getTime(), '1998 May'.to_Date({zone:3}).getTime()], '.to_Date({zone:3})'] : CeL.log('跳過測試 .to_Date({zone:3}): 舊版 node.js 如 v0.10.48 無法解析 "1998 May UTC+8"'),
 		[["2000/7/1 0:0:0.000", 'May–June 2000'.to_Date({ period_end: true }).format()], '.to_Date({ period_end: true })'],
 		[["1998/6/1 0:0:0.000", 'June 1998'.to_Date().format()], '.to_Date().format()'],
 		[["month", 'June 1998'.to_Date().precision], '.precision #1'],

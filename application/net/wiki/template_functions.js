@@ -1125,14 +1125,17 @@ function module_code(library_namespace) {
 			}
 			if (functions_of_site[target_full_name]) {
 				library_namespace.warn('correct_template_name: '
-						+ 'Copy configuration from [' + template_name
-						+ '] to [' + target_full_name
+						+ 'Copy configuration from ['
+						+ to_full_template_name(template_name, options)
+						+ '] to ['
+						+ to_full_template_name(target_full_name, options)
 						+ '] failed: Target exists.');
 				continue;
 			}
 			library_namespace.info('correct_template_name: '
-					+ 'Copy configuration from [' + template_name + '] to ['
-					+ target_full_name + ']');
+					+ 'Copy configuration from ['
+					+ to_full_template_name(template_name, options) + '] to ['
+					+ to_full_template_name(target_full_name, options) + ']');
 			functions_of_site[target_full_name] = functions_of_site[template_name];
 		}
 	}
@@ -1195,7 +1198,9 @@ function module_code(library_namespace) {
 		function_name_list = function_name_list.map(function(name) {
 			return to_full_template_name(name, session);
 		});
+		// console.trace([ site_name, function_name_list ]);
 		session.register_redirects(function_name_list, function() {
+			// console.trace(site_name);
 			correct_template_name(template_functions.functions_of_all_sites,
 					session);
 			correct_template_name(functions_of_site, session);

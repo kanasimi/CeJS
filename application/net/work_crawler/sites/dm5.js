@@ -1,7 +1,9 @@
 ﻿/**
  * @name CeL module for downloading dm5 comics.
  * 
- * @fileoverview 本檔案包含了解析並處理、批量下載 动漫屋网/漫画人 平台 的工具。
+ * @fileoverview 本檔案包含了解析並處理、批量下載 动漫屋网/漫画人 平臺 的工具。
+ * 
+ * 由於 动漫屋网/漫画人 系列網站下載機制較複雜，下載圖片功能為獨立撰寫出來，不支援 achive_images 功能。
  * 
  * <code>
 
@@ -611,7 +613,9 @@ function module_code(library_namespace) {
 			var iterator = image_count < this.parallel_limit ? library_namespace.run_parallel
 					: library_namespace.run_serial;
 			if (false) {
-				CeL.log(iterator === library_namespace.run_parallel
+				library_namespace.log(
+				//
+				iterator === library_namespace.run_parallel
 				//
 				? 'run_parallel' : 'run_serial');
 			}
@@ -877,7 +881,7 @@ function module_code(library_namespace) {
 
 			// --------------------------------------
 
-			// 從 dm5 網站獲得 token 通行碼
+			// 從 dm5 網站獲得 token 通行碼。
 			function get_token(image_NO, run_next) {
 				parameters.page = image_NO;
 				// library_namespace.set_debug(6);
