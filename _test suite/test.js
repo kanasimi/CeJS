@@ -3245,27 +3245,34 @@ function test_wiki() {
 		[[true, CeL.wiki.parse.user('[[User:Adam/test]]', 'adam')], 'parse.user #3'],
 		[["A 'n B", CeL.wiki.parse.user("CeL.wiki.parse.user('[[User:A &#39;n B]]')")], 'parse.user #4'],
 
-		[['enwiki', CeL.wiki.site_name('en')], 'site_name #1'],
-		[['zhwiki', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php')], 'site_name #2'],
-		[['zhmoegirl', CeL.wiki.site_name('https://zh.moegirl.org/api.php')], 'site_name #3'],
-		[['zhmoegirl', CeL.wiki.site_name('https://zh.moegirl.org.cn/api.php')], 'site_name #3.1'],
-		[['wikipedia', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php', { get_all_properties: true }).family], 'site_name #4'],
-		[['zh', CeL.wiki.site_name('https://zh.moegirl.org/api.php', { get_all_properties: true }).language], 'site_name #5'],
-		[['zh', CeL.wiki.site_name('https://zh.moegirl.org.cn/api.php', { get_all_properties: true }).language], 'site_name #5.1'],
-		[['zh', CeL.wiki.site_name('zh.moegirl', { get_all_properties: true }).language], 'site_name #6'],
-		[[CeL.wiki.site_name(), CeL.wiki.site_name('talk')], 'site_name #7'],
-		[['zhmoegirl', CeL.wiki.site_name('zh', 'moegirl')], 'site_name #8'],
-		[['wikidatawiki', CeL.wiki.site_name('wikidata')], 'site_name #9'],
-		[['commonswiki', CeL.wiki.site_name('commons')], 'site_name #10'],
-		[['localhostwiki', CeL.wiki.site_name('http://localhost/api.php')], 'site_name #11'],
-		[['zhwikinews', CeL.wiki.site_name('n:zh:qqq')], 'site_name #12'],
-		[['jawikisource', CeL.wiki.site_name('ja:s:p ps')], 'site_name #13'],
-		[['enwikiversity', CeL.wiki.site_name('v:en:')], 'site_name #14'],
-		[['arwiki', CeL.wiki.site_name('w:ar')], 'site_name #15'],
-		Object.defineProperty[CeL.env.not_native_keyword] || [['dewikisource', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).site], 'site_name #16'],
-		Object.defineProperty[CeL.env.not_native_keyword] || [['s:de:', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).interwiki_prefix], 'site_name #17'],
-		Object.defineProperty[CeL.env.not_native_keyword] || [['dewikinews', CeL.wiki.site_name('de:ttt', { family : 'wikinews' })], 'site_name #18'],
 	]);
+
+	if (Object.defineProperty[CeL.env.not_native_keyword]) {
+		CeL.log('跳過測試 wiki: CeL.wiki.normalize_title(): node.js v0.10.48 有 bug? See URI.prototype.search');
+	} else {
+		all_error_count += CeL.test('wiki: CeL.wiki.normalize_title()', [
+			[['enwiki', CeL.wiki.site_name('en')], 'site_name #1'],
+			[['zhwiki', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php')], 'site_name #2'],
+			[['zhmoegirl', CeL.wiki.site_name('https://zh.moegirl.org/api.php')], 'site_name #3'],
+			[['zhmoegirl', CeL.wiki.site_name('https://zh.moegirl.org.cn/api.php')], 'site_name #3.1'],
+			[['wikipedia', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php', { get_all_properties: true }).family], 'site_name #4'],
+			[['zh', CeL.wiki.site_name('https://zh.moegirl.org/api.php', { get_all_properties: true }).language], 'site_name #5'],
+			[['zh', CeL.wiki.site_name('https://zh.moegirl.org.cn/api.php', { get_all_properties: true }).language], 'site_name #5.1'],
+			[['zh', CeL.wiki.site_name('zh.moegirl', { get_all_properties: true }).language], 'site_name #6'],
+			[[CeL.wiki.site_name(), CeL.wiki.site_name('talk')], 'site_name #7'],
+			[['zhmoegirl', CeL.wiki.site_name('zh', 'moegirl')], 'site_name #8'],
+			[['wikidatawiki', CeL.wiki.site_name('wikidata')], 'site_name #9'],
+			[['commonswiki', CeL.wiki.site_name('commons')], 'site_name #10'],
+			[['localhostwiki', CeL.wiki.site_name('http://localhost/api.php')], 'site_name #11'],
+			[['zhwikinews', CeL.wiki.site_name('n:zh:qqq')], 'site_name #12'],
+			[['jawikisource', CeL.wiki.site_name('ja:s:p ps')], 'site_name #13'],
+			[['enwikiversity', CeL.wiki.site_name('v:en:')], 'site_name #14'],
+			[['arwiki', CeL.wiki.site_name('w:ar')], 'site_name #15'],
+			[['dewikisource', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).site], 'site_name #16'],
+			[['s:de:', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).interwiki_prefix], 'site_name #17'],
+			[['dewikinews', CeL.wiki.site_name('de:ttt', { family : 'wikinews' })], 'site_name #18'],
+		]);
+	}
 
 	all_error_count += CeL.test('wiki: CeL.wiki.namespace', function (assert) {
 		var href;

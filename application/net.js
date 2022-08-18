@@ -622,7 +622,7 @@ function module_code(library_namespace) {
 				// search_params.clean_parameters();
 				search_clean_parameters(search_params);
 
-				// node.js v0.10.48 有 bug，需要取得 search_params 一次才不會造成
+				// node.js v0.10.48 有 bug? 需要取得 search_params 一次才不會造成
 				// ReferenceError: CeL is not defined
 				// @ URI.prototype.href.set
 				// @ site_name #17 @ _test suite/test.js
