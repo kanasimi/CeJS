@@ -4186,7 +4186,7 @@ function test_wiki() {
 			// 執行剩下的程序. run rest codes.
 			var wiki = CeL.wiki.login(null, null, 'zh');
 			//var wiki = new CeL.wiki('zh');
-			//CeL.set_debug(9);
+			//CeL.set_debug(6);
 			wiki.data(page_title, after_get_data);
 
 			function after_get_data(data_JSON) {

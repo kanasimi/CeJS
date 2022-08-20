@@ -144,18 +144,20 @@ function module_code(library_namespace) {
 		if (API_URL && typeof API_URL === 'object') {
 			// session = new wiki_API(user_name, password, login_options);
 			login_options = API_URL;
-			API_URL = login_options.API_URL/* || login_options.project */;
+			API_URL = null;
 		} else if (!API_URL && !password && user_name
 				&& typeof user_name === 'object') {
 			// session = new wiki_API(login_options);
 			login_options = user_name;
+			user_name = null;
 			// console.log(login_options);
-			user_name = login_options.user_name;
-			password = login_options.password;
-			API_URL = login_options.API_URL/* || login_options.project */;
 		} else {
 			login_options = Object.create(null);
 		}
+
+		user_name = user_name || login_options.user_name;
+		password = password || login_options.password;
+		API_URL = API_URL || login_options.API_URL/* || login_options.project */;
 
 		// console.trace([ user_name, password, API_URL ]);
 		library_namespace.debug('URL of service endpoint: ' + API_URL
@@ -210,8 +212,12 @@ function module_code(library_namespace) {
 			wiki_API.setup_API_URL(this /* session */, API_URL);
 		}
 
-		if (login_options.site_name)
-			this.site_name = login_options.site_name;
+		[ 'site_name', 'data_API_URL', 'SPARQL_API_URL' ]
+		//
+		.forEach(function(property) {
+			if (property in login_options)
+				this[property] = login_options[property];
+		}, this);
 		// console.trace(this);
 
 		this.general_parameters = Object.clone(wiki_API.general_parameters);

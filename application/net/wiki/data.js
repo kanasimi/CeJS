@@ -88,10 +88,12 @@ function module_code(library_namespace) {
 		// library_namespace.debug('options:', 0, 'get_data_API_URL');
 		// console.trace(options);
 
-		var API_URL, session;
-		if (!options || (API_URL = options.data_API_URL)) {
-			;
-		} else if (wiki_API.is_wiki_API(session = options[KEY_SESSION])) {
+		var API_URL = options && options.data_API_URL, session;
+
+		if (API_URL) {
+		} else if (wiki_API.is_wiki_API(
+		//
+		session = wiki_API.session_of_options(options))) {
 			if (session.data_session) {
 				API_URL = session.data_session.API_URL;
 			}
@@ -99,14 +101,20 @@ function module_code(library_namespace) {
 				// is data session. e.g., https://test.wikidata.org/w/api.php
 				API_URL = session.API_URL;
 			}
+			if (!API_URL) {
+				// e.g., lingualibre
+				API_URL = session.data_API_URL;
+			}
 		} else {
 			API_URL = API_URL_of_options(options);
 		}
 
-		// console.trace(API_URL);
-		return API_URL || default_API_URL
-		// `wikidata_API_URL`
-		|| wiki_API.api_URL('wikidata');
+		if (!API_URL) {
+			API_URL = default_API_URL || wikidata_API_URL;
+		}
+
+		library_namespace.debug('API_URL: ' + API_URL, 3, 'get_data_API_URL');
+		return API_URL;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -214,12 +222,17 @@ function module_code(library_namespace) {
 			password : password || session.token.lgpassword,
 			// API_URL: host session
 			API_URL : typeof API_URL === 'string' && wiki_API.api_URL(API_URL)
-			//
-			|| wikidata_API_URL,
+					|| get_data_API_URL(session),
 			preserve_password : session.preserve_password
 		};
-		// console.trace(data_login_options);
-		if (data_login_options.user_name && data_login_options.password) {
+		// console.trace([ data_login_options, session.API_URL ]);
+		if (false && data_login_options.API_URL === session.API_URL) {
+			// TODO: test
+			// e.g., lingualibre
+			library_namespace.debug('設定 session 的 data_session 即為本身。', 2,
+					'setup_data_session');
+			session.data_session = session;
+		} else if (data_login_options.user_name && data_login_options.password) {
 			session.data_session = wiki_API.login(data_login_options);
 		} else {
 			// 警告: 可能需要設定 options.is_running
@@ -1182,10 +1195,6 @@ function module_code(library_namespace) {
 		}
 
 		var API_URL = get_data_API_URL(options);
-		if (false) {
-			console.log('wikidata_entity: get_data_API_URL API_URL : '
-					+ API_URL);
-		}
 
 		// ----------------------------
 		// convert property: title to id
@@ -5196,12 +5205,9 @@ function module_code(library_namespace) {
 			// console.trace(id);
 		}
 
-		var session;
-		if (KEY_SESSION in options) {
-			session = options[KEY_SESSION];
-			// set_claims() 中之 get_data_API_URL() 會用到 options[KEY_SESSION];
-			// delete options[KEY_SESSION];
-		}
+		var session = wiki_API.session_of_options(options);
+		// set_claims() 中之 get_data_API_URL() 會用到 options[KEY_SESSION];
+		// delete options[KEY_SESSION];
 
 		// edit 實體項目 entity
 		action = [
@@ -5816,9 +5822,8 @@ function module_code(library_namespace) {
 				// https://www.wikidata.org/wiki/Help:Statements
 				: 'description';
 
-		var session;
+		var session = wiki_API.session_of_options(options);
 		if (KEY_SESSION in options) {
-			session = options[KEY_SESSION];
 			delete options[KEY_SESSION];
 		}
 
@@ -5929,7 +5934,7 @@ function module_code(library_namespace) {
 				// 上限值為 50 (機器人為 500)。
 				library_namespace.debug('Get ' + items.length
 						+ ' items, more than 50.', 2, 'wikidata_query');
-				var session = options && options[KEY_SESSION];
+				var session = wiki_API.session_of_options(options);
 				// session && session.data(items, callback, options);
 				if (session && !session.data_session) {
 					// 得先登入。
@@ -5966,8 +5971,15 @@ function module_code(library_namespace) {
 	 *      https://www.wikidata.org/wiki/Wikidata:Data_access#SPARQL_endpoints
 	 */
 	function wikidata_SPARQL(query, callback, options) {
-		var action = [ options && options.API_URL || wikidata_SPARQL_API_URL,
-				'?query=', encodeURIComponent(query), '&format=json' ];
+		// options.API_URL: custom SPARQL endpoint
+		var action = options && options.API_URL;
+		if (!action) {
+			var session = wiki_API.session_of_options(options);
+			action = session && session.SPARQL_API_URL;
+		}
+		// console.trace(action);
+		action = [ action || wikidata_SPARQL_API_URL, '?query=',
+				encodeURIComponent(query), '&format=json' ];
 
 		get_URL(action.join(''), function(data, error) {
 			if (error) {
