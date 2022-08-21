@@ -5950,6 +5950,9 @@ function module_code(library_namespace) {
 
 	/** {String}API URL of Wikidata Query Service (SPARQL). */
 	var wikidata_SPARQL_API_URL = 'https://query.wikidata.org/bigdata/namespace/wdq/sparql';
+	// https://query.wikidata.org/sparql
+	// https://commons-query.wikimedia.org/sparql
+	// https://www.dictionnairedesfrancophones.org/sparql
 
 	/**
 	 * 查詢 Wikidata Query Service (SPARQL)。
