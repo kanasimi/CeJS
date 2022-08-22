@@ -212,7 +212,9 @@ function module_code(library_namespace) {
 			wiki_API.setup_API_URL(this /* session */, API_URL);
 		}
 
-		[ 'site_name', 'data_API_URL', 'SPARQL_API_URL' ]
+		[ 'site_name', 'data_API_URL', 'SPARQL_API_URL',
+		// Must after wiki_API.setup_API_language()!
+		'language' ]
 		//
 		.forEach(function(property) {
 			if (property in login_options)

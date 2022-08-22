@@ -879,7 +879,9 @@ function module_code(library_namespace) {
 			language = session.API_URL;
 		}
 
-		var site, project;
+		var site, project,
+		// 是為猜測的語言。
+		is_guessing_language;
 		matched = language
 		// e.g., 'zh-min-nan' → 'zh_min_nan'
 		.replace(/-/g, '_')
@@ -904,17 +906,27 @@ function module_code(library_namespace) {
 			// console.trace(matched);
 			// console.trace(session);
 			library_namespace.debug(language, 4, 'language_to_site_name');
-			// We cannot get information from IP.
-			matched = library_namespace.is_IP(matched) ? [ matched.replace(
-					/\./g, '_') ] : matched.split('.');
+			if (library_namespace.is_IP(matched)) {
+				// We cannot get information from IP.
+				matched = [ matched.replace(/\./g, '_') ];
+			} else {
+				matched = matched.split('.');
+				if (matched.length === 2) {
+					// e.g., "lingualibre.org"
+					matched.unshift('');
+				}
+			}
 			/**
 			 * 去掉 '.org' 之類。 language-code.wikipedia.org e.g.,
 			 * zh-classical.wikipedia.org
 			 */
 			family = family || matched[1];
 			// incase 'https://test.wikidata.org/w/api.php'
-			language = !/test|wik[it]/i.test(matched[0]) && matched[0]
-					|| wiki_API.language;
+			language = !/test|wik[it]/i.test(matched[0]) && matched[0];
+			if (!language) {
+				is_guessing_language = true;
+				language = wiki_API.language;
+			}
 
 		} else if (matched = language.match(/^([a-z\d\-_]+)\.([a-z\d\-_]+)/)) {
 			language = matched[1];
@@ -956,9 +968,10 @@ function module_code(library_namespace) {
 			// 'commonswiki'
 			site += 'wiki';
 		} else {
-			site = language.toLowerCase().replace(/-/g, '_')
+			site = is_guessing_language ? '' : language.toLowerCase().replace(
+					/-/g, '_');
 			// e.g., 'zh' + 'wikinews' → 'zhwikinews'
-			+ (family === 'wikipedia'
+			site += (family === 'wikipedia'
 			// using "commonswiki" instead of "commonswikimedia"
 			|| (language in wiki_API.api_URL.wikimedia) ? 'wiki' : family);
 		}
@@ -972,21 +985,25 @@ function module_code(library_namespace) {
 			// wikidata, commons: multilingual
 			language = 'multilingual';
 		} else {
-			project = language + '.' + family;
+			project = is_guessing_language ? family : language + '.' + family;
 		}
 
 		// throw site;
 		if (options && options.get_all_properties) {
 			var family_prefix = wiki_API.api_URL.shortcut_of_project[family];
+			// for API_URL==="https://lingualibre.org/api.php",
+			// is_guessing_language=true && family_prefix===undefined
 			site = {
 				// en, zh
 				language : language,
+				is_guessing_language : is_guessing_language,
 				// family: 'wikipedia' (default), 'wikimedia',
 				// wikibooks|wiktionary|wikiquote|wikisource|wikinews|wikiversity|wikivoyage
 				family : family,
 				family_prefix : family_prefix,
-				// interwikimap prefix
-				interwiki_prefix : family_prefix + ':' + language + ':',
+				// interwikimap prefix. 在像是 https://lingualibre.org/ 的情況下不設定
+				interwiki_prefix : (is_guessing_language ? undefined
+						: (family_prefix || family) + ':' + language + ':'),
 				// Wikimedia project name: wikidata, commons, zh.wikipedia
 				project : project,
 
