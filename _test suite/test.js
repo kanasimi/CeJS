@@ -3598,6 +3598,15 @@ function test_wiki() {
 		wikitext = '[[エヴァンゲリオン (架空の兵器)#Mark.09|Mark.09]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['Mark.09', parsed[0].anchor]);
+		wikitext = '[[T{{!}}t]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = '[[T{{\n! \n}}t{{ ! }}l]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['t{{ ! }}l', parsed[0][2].toString()], 'wikilink: display_text');
+		wikitext = '[[T{{ \n!\n }}t{{ \n!}}l]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['t{{ \n!}}l', parsed[0][2].toString()], 'wikilink: display_text');
+
 		wikitext = '--{{unsigned|user}}--'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['transclusion', parsed[1].type]);

@@ -91,14 +91,14 @@ function module_code(library_namespace) {
 	var PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}<>\n#�])+)/,
 	/**
 	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_anchor, page_name,
-	 * anchor / section_title, displayed_text ]
+	 * anchor / section_title, pipe_separator, displayed_text ]
 	 * 
 	 * 頁面標題不可包含無效的字元：[\n\[\]{}�]，經測試 anchor 亦不可包含[\n\[\]{}]，但 display text 可以包含
 	 * [\n]
 	 * 
 	 * @see PATTERN_link
 	 */
-	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}<>\n#�])+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([\s\S]+?))?\]\]/,
+	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}<>\n#�])+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:(\||{{\s*!\s*}})([\s\S]+?))?\]\]/,
 	//
 	PATTERN_wikilink_global = new RegExp(PATTERN_wikilink.source, 'g');
 

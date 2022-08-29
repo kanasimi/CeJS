@@ -292,14 +292,14 @@ function module_code(library_namespace) {
 	// 模板名#後的內容會忽略。
 	/** {RegExp}模板的匹配模式。 */
 	// var PATTERN_transclusion =
-	// /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g;
+	// /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:(\||{{\s*!\s*}})[^<>\[\]]*)*?)}}/g;
 	/**
 	 * {RegExp}wikilink內部連結的匹配模式。
 	 * 
 	 * @see PATTERN_wikilink
 	 */
 	// var PATTERN_link =
-	// /\[\[[\s\n]*([^\s\n\|{}<>\[\]�][^\|{}<>\[\]�]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g;
+	// /\[\[[\s\n]*([^\s\n\|{}<>\[\]�][^\|{}<>\[\]�]*)((?:(\||{{\s*!\s*}})[^\|{}<>\[\]]*)*)\]\]/g;
 	/**
 	 * Wikimedia projects 的 external link 匹配模式。
 	 * 
@@ -481,7 +481,7 @@ function module_code(library_namespace) {
 			// + (this[1] || '')
 			+ this[1] + (this.length > 2
 			// && this[2] !== undefined && this[2] !== null
-			? '|'
+			? this.pipe
 			// + (this[2] || '')
 			+ this[2] : '') + ']]';
 		},
@@ -1280,7 +1280,7 @@ function module_code(library_namespace) {
 		// TODO: 緊接在連結後面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分
 		// https://phabricator.wikimedia.org/T263266
 		function parse_wikilink(all_link, page_and_anchor, page_name, anchor,
-				display_text) {
+				pipe_separator, display_text) {
 			// 自 end_mark 向前回溯。
 			var previous;
 			if (display_text && display_text.includes('[[')) {
@@ -1292,7 +1292,8 @@ function module_code(library_namespace) {
 					// `{{NAMESPACE}}:{{PAGENAME}}`
 					page_name = index[2];
 					anchor = index[3];
-					display_text = index[4];
+					pipe_separator = index[4];
+					display_text = index[5];
 				} else {
 					// revert
 					all_link = previous + all_link;
@@ -1580,11 +1581,11 @@ function module_code(library_namespace) {
 				for (var index = 2; index < parameters.length; index++) {
 					// recover missed '|' before display_text
 					if (typeof parameters[index] === 'string') {
-						parameters[index] = '|' + parameters[index];
+						parameters[index] = pipe_separator + parameters[index];
 					} else if (parameters[index].type === 'plain') {
-						parameters[index].unshift('|');
+						parameters[index].unshift(pipe_separator);
 					} else {
-						parameters[index] = [ '|', parameters[index] ];
+						parameters[index] = [ pipe_separator, parameters[index] ];
 					}
 				}
 
@@ -1611,6 +1612,13 @@ function module_code(library_namespace) {
 				} else {
 					parameters.is_link = true;
 				}
+
+				if (false) {
+					pipe_separator = parse_wikitext(pipe_separator, options,
+							queue);
+				}
+				parameters.pipe = pipe_separator;
+
 				anchor = anchor.toString()
 				// remove prefix: '#'
 				.slice(1).trimEnd();
@@ -1649,7 +1657,8 @@ function module_code(library_namespace) {
 			}
 			// console.trace(parameters);
 
-			// [ page_name, anchor / section_title, display_text without '|' ]
+			// [ page_name, anchor / section_title,
+			// display_text without pipe_separator '|' ]
 			// anchor && anchor.startsWith('#')
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark;
@@ -2271,7 +2280,8 @@ function module_code(library_namespace) {
 
 			var is_wiki_extensiontags = tag.toLowerCase() in extensiontag_hash;
 			// 在章節標題、表格 td/th 或 template parameter 結束時，
-			// e.g., "| t || <del>... || </del> || <s>... || </s> ||", "{{t|p=v<s>...|p2=v}}</s>"
+			// e.g., "| t || <del>... || </del> || <s>... || </s> ||",
+			// "{{t|p=v<s>...|p2=v}}</s>"
 			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
 			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
 			// 此時同階的 table 尚未處理。

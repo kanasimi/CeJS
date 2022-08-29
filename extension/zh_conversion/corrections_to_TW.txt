@@ -400,7 +400,8 @@
 -數據報
 // 《中国历史那些事儿系列套装》	今止顺天门外置座听朝。 (~置<role.type:ARGM-TMP>今 ~置<role.type:ARGM-LOC>顺天门外 ~置<role.type:A1>座听 ~置<role.type:A2>朝 nt:今+v:止+ns:顺天门+nd:外+v:置+n:座+v:听+nz:朝+wp:。)
 -外置
-
+// 《玩家超正义》	天空已经变成了完全的、卷积着的灰。 (~捲積<ATT>n:灰 ~捲積<role.type:A1>灰 n:天空+d:已经+v:变成+u:了+a:完全+u:的+wp:、+v:卷积+u:着+u:的+n:灰+wp:。)
+-捲積
 
 // [TWPhrasesOther.txt]
 -通過
