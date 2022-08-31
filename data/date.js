@@ -20,7 +20,10 @@ typeof CeL === 'function' && CeL.run({
 	name : 'data.date',
 	// includes() @ CeL.data.code.compatibility.
 	require : 'data.code.compatibility.'
-	//
+
+	// for gettext()
+	// + '|application.locale'
+
 	+ '|data.native.set_bind|data.code.parse_escape|data.native.pad',
 
 	// 設定不匯出的子函式。

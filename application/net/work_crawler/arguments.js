@@ -428,9 +428,10 @@ function module_code(library_namespace) {
 		verify_arg : verify_arg,
 		setup_value : setup_value,
 		import_args : import_args,
-		// 命令列可以設定的選項之型態資料集。通常僅做測試微調用。
+		// 數值規範。命令列可以設定的選項之型態資料集。通常僅做測試微調用。
+		// GUI 選項於 work_crawler/gui_electron/gui_electron_functions.js 設定。
 		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
-		// 現在import_arg_hash之說明已經與I18n統合在一起。
+		// 現在 import_arg_hash 之說明已與 I18n 統合在一起。
 		// work_crawler/work_crawler_loader.js與gui_electron_functions.js各參考了import_arg_hash的可選參數。
 		// @see work_crawler/gui_electron/gui_electron_functions.js
 		// @see work_crawler/resource/locale of work_crawler - locale.csv
@@ -444,6 +445,8 @@ function module_code(library_namespace) {
 		// gettext_config:{"id":"fso_directory","mark_type":"combination_message_id"}
 		// gettext_config:{"id":"fso_directories","mark_type":"combination_message_id"}
 		import_arg_hash : {
+			// 預設值設定於 Work_crawler_prototype @ CeL.application.net.work_crawler
+
 			// set download directory, fso:directory
 			main_directory : 'string:fso_directory',
 
@@ -476,6 +479,8 @@ function module_code(library_namespace) {
 			allow_EOI_error : 'boolean',
 			skip_error : 'boolean',
 			skip_chapter_data_error : 'boolean',
+
+			directory_name_pattern : 'string',
 
 			preserve_work_page : 'boolean',
 			preserve_chapter_page : 'boolean',

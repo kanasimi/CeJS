@@ -2103,7 +2103,7 @@ function test_code() {
 		assert(['2A1B', CeL.extract_literals('${a}A${b}B', {
 			a : 2,
 			b : 1
-		})], 'extract_literals()');
+		})], 'extract_literals() #1');
 	});
 
 	all_error_count += CeL.test('Camel', function (assert) {

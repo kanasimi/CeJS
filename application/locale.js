@@ -693,6 +693,8 @@ function module_code(library_namespace) {
 		// gettest("%1||123", 321) === "321||123"
 		// TODO: 改成 %{index}, %{var_id}
 		//
+		// @see CeL.extract_literals()
+		//
 		// 採用 local variable，因為可能有 multithreading 的問題。
 		conversion_pattern = /([\s\S]*?)%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?(\d{1,2})(\|\d)?)/g;
 

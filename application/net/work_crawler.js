@@ -345,6 +345,7 @@ function module_code(library_namespace) {
 
 	Work_crawler.HTML_extension = 'htm';
 
+	// 數值規範設定於 import_arg_hash @ CeL.application.net.work_crawler.arguments
 	var Work_crawler_prototype = {
 		// 所有的子檔案要修訂注解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
@@ -371,6 +372,9 @@ function module_code(library_namespace) {
 		// 下載每個作品更換一次 user agent。
 		// regenerate_user_agent : 'work',
 		default_user_agent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+
+		// default directory_name_pattern 預設作品目錄名稱模式。
+		directory_name_pattern : '${id_title}${directory_name_extension}',
 
 		/**
 		 * {Natural|String}timeout for get_URL()

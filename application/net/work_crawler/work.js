@@ -18,7 +18,9 @@ if (typeof CeL === 'function') {
 		// module name
 		name : 'application.net.work_crawler.work',
 
-		require : 'application.net.work_crawler.' + '|data.Number_range_set.',
+		require : 'application.net.work_crawler.'
+		// library_namespace.extract_literals()
+		+ '|data.code.' + '|data.Number_range_set.',
 
 		// 設定不匯出的子函式。
 		no_extend : 'this,*',
@@ -928,17 +930,53 @@ function module_code(library_namespace) {
 			// gettext_config:{"id":"downloading-$1-table-of-contents-@-$2"}
 			process.title = gettext('下載%1 - 目次 @ %2', work_data.title, _this.id);
 			// console.log(work_data);
+			var variable_set = {
+				id : typeof work_data.directory_id === 'function'
+				// 自行指定作品放置目錄與 ebook 用的 work id。
+				&& work_data.directory_id() || work_data.id,
+				// this.skip_get_work_page 時， work_data.title === undefined
+				title : work_data.title || '',
+				// e.g., '.' + (new Date).format('%Y%2m%2d')
+				directory_name_extension : work_data.directory_name_extension
+						|| ''
+			};
+			variable_set.id_title = variable_set.id
+			//
+			+ (variable_set.title ? ' ' + variable_set.title : '');
+			if (this.directory_name_pattern
+			//
+			&& library_namespace.extract_literals(
+			//
+			this.directory_name_pattern, {
+				id : 'i1',
+				title : 't1',
+				id_title : 'it1'
+			}) === library_namespace.extract_literals(
+			//
+			this.directory_name_pattern, {
+				id : 'i2',
+				title : 't2',
+				id_title : 'it2'
+			})) {
+				library_namespace.error({
+					// gettext_config:{"id":"the-custom-directory_name_pattern-$1-gives-the-same-name-to-different-works-so-the-default-directory_name_pattern-is-used-instead"}
+					T : [ '自訂作品目錄名稱模式 %1 令不同作品產生相同名稱，改採預設作品目錄模式！',
+							JSON.stringify(this.directory_name_pattern) ]
+				});
+				delete this.directory_name_pattern;
+			}
 			work_data.directory_name = library_namespace.to_file_name(
 			// 允許自訂作品目錄名/命名資料夾。
 			work_data.directory_name
 			// default 作品目錄名/命名資料夾。
-			|| (typeof work_data.directory_id === 'function'
-			// 自行指定作品放置目錄與 ebook 用的 work id。
-			&& work_data.directory_id() || work_data.id)
-			// this.skip_get_work_page 時， work_data.title === undefined
-			+ (work_data.title ? ' ' + work_data.title : '')
-			// e.g., '.' + (new Date).format('%Y%2m%2d')
-			+ (work_data.directory_name_extension || ''));
+			|| library_namespace.extract_literals(
+			// 自定義 自訂作品目錄名稱模式。e.g., '${title}' 將只以作品標題為作品目錄，'${id}'
+			// 將只以作品id為作品目錄。
+			this.directory_name_pattern
+			// default directory_name_pattern 預設作品目錄名稱模式。
+			|| Work_crawler.prototype.directory_name_pattern,
+			//
+			variable_set));
 			// console.log(work_data.directory_name);
 			// full directory path of the work.
 			if (!work_data.directory) {
