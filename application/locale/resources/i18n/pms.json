@@ -627,6 +627,7 @@
 	"$1-(id-$2)-is-not-a-chinese-japanese-or-korean-title": "«%1» (id : %2) a l'é pa un tìtol an cinèis, giaponèis o corean.",
 	"the-title-of-the-work-$1-(id-$2)-could-not-be-obtained-or-set": "Ël tìtol ëd l'euvra «%1» (id : %2) a l'ha nen podù esse otnù o definì.",
 	"downloading-$1-table-of-contents-@-$2": "Dëscariament ëd %1 - Tàula a %2",
+	"the-custom-directory_name_pattern-$1-gives-the-same-name-to-different-works-so-the-default-directory_name_pattern-is-used-instead": "Ël directory_name_pattern %1 përsonalisà a dà l'istess nòm a vàire euvre, antlora al pòst a l'é dovrà ël directory_name_pattern stàndard!",
 	"delete-existing-work-data-cache-$1": "Dëscancelassion dla memòria local esistenta dij dàit ëd l'euvra: %1",
 	"new-information-→": "Neuve anformassion →",
 	"cannot-get-chapter-list-page": "Impossìbil oten-e la pàgina ëd lista dij capìtoj!",
