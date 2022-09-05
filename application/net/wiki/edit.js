@@ -771,7 +771,7 @@ function module_code(library_namespace) {
 
 			if (notification_name) {
 				if (typeof notification_name === 'string'
-				// optout 以半形逗號作間隔。
+				// 以 "|" 或半形逗號 "," 隔開 optout。
 				&& notification_name.includes(',')) {
 					notification_name = notification_name.split(',');
 				}
