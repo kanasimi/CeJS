@@ -458,14 +458,15 @@ function module_code(library_namespace) {
 			crawler_namespace.regenerate_user_agent(this);
 		}
 
-		var search_work_interval = this.search_work_interval;
-		if (search_work_interval) {
-			search_work_interval = library_namespace
-					.to_millisecond(search_work_interval);
+		var time_to_waiting = this.search_work_interval;
+		if (time_to_waiting) {
+			time_to_waiting = library_namespace.to_millisecond(time_to_waiting)
+					- (Date.now() - this.latest_search_time);
+			// console.trace([ this.search_work_interval, time_to_waiting ]);
 		}
 
 		function handler_search_response(XMLHttp) {
-			if (search_work_interval > 0)
+			if (this.search_work_interval)
 				this.latest_search_time = Date.now();
 
 			_this.setup_agent();
@@ -625,11 +626,18 @@ function module_code(library_namespace) {
 			}, get_URL_options), search_url_data.charset);
 		}
 
-		if (search_work_interval > 0
-				&& Date.now() - this.latest_search_time < search_work_interval) {
-			setTimeout(getch_search_result, search_work_interval);
+		if (time_to_waiting > 0) {
+			library_namespace.log_temporary({
+				// gettext_config:{"id":"waiting-$1"}
+				T : [ 'Waiting %1...',
+						library_namespace.age_of(0, time_to_waiting, {
+							digits : 1
+						}) ]
+			});
+			setTimeout(getch_search_result, time_to_waiting);
+		} else {
+			getch_search_result();
 		}
-		getch_search_result();
 	}
 
 	function extract_work_data(work_data, html, PATTERN_work_data, overwrite) {
