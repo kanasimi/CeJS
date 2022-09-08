@@ -968,6 +968,10 @@ function module_code(library_namespace) {
 	}
 
 	function error_toString() {
+		// TODO: 從 translatewiki 獲取翻譯。
+		// e.g., for (this.code==='protectedpage'),
+		// (this.info || this.message) ===
+		// https://translatewiki.net/wiki/MediaWiki:Protectedpagetext/en
 		return '[' + this.code + '] ' + (this.info || this.message);
 	}
 

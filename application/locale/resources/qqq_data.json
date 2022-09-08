@@ -1626,7 +1626,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1049}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2507}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2519}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1208}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1210}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L490}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L513}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1049}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2507}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2519}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1216}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1218}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L490}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L513}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-changes": {
@@ -2957,7 +2957,7 @@
 		"message": "Waiting %1...",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Time to wait. 需要等待的時間。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L365}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L365}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L632}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-redirects-to-this-page": {
@@ -3548,7 +3548,7 @@
 		"scope": "work_crawler.js: get_chapter_directory_name()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: work id + ' §' + chapter_NO",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L807}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1368}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1388}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L807}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1376}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1396}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unable-to-receive-web-address-of-§$1": {
@@ -3687,7 +3687,7 @@
 		"notes": "Error occurred. 神仙打鼓有時錯，腳步踏差誰人無。\n仙人拍鼓有時錯，跤步踏差啥人無？\n客語 神仙打鼓有時錯，腳步踏差麼人無",
 		"scope": "work_crawler.js: crawler message",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1240}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L524}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L795}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1240}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L524}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L803}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"retry-$1-$2": {
@@ -3696,7 +3696,7 @@
 		"scope": "work_crawler.js: get_chapter_data()::process_chapter_data()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: error_count, %2: max error allowed (MAX_ERROR_RETRY)",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1248}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L583}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L804}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L1248}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/image.js#L583}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L812}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"since-the-cache-file-is-broken-(for-example-an-empty-file)-chapter_url-will-be-retrieved-and-.reget_chapter-will-be-set": {
@@ -5143,7 +5143,7 @@
 		"scope": "work_crawler.js: get_work.parse_search_result",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L475}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L476}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-search-results.-is-the-site-temporarily-unavailable-or-redesigned": {
@@ -5151,7 +5151,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_work.parse_search_result",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L478}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L479}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-work-url-resolution-function-parse_search_result-has-not-returned-the-result": {
@@ -5159,7 +5159,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_work.parse_search_result",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L495}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L498}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L496}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L499}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-work-url-resolution-function-parse_search_result-did-not-return-the-regular-result": {
@@ -5167,7 +5167,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_work.parse_search_result",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L504}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L509}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L505}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L510}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unable-to-parse-the-result-of-searching-for-«$1»": {
@@ -5175,7 +5175,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_work.parse_search_result",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L517}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L518}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unable-to-parse-the-results-of-the-search-for-works": {
@@ -5183,7 +5183,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_work.parse_search_result",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L520}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L521}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"searching-«$1»-and-found-$2-work(s)-$3": {
@@ -5192,7 +5192,7 @@
 		"scope": "work_crawler.js: get_work.parse_search_result",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title, %2: id_list.length, %3: id_data",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L534}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L535}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-matches-were-found-for-«$1»": {
@@ -5201,7 +5201,7 @@
 		"scope": "work_crawler.js: get_work()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L576}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L577}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-matches-with-«$1»": {
@@ -5210,7 +5210,7 @@
 		"scope": "work_crawler.js: get_work()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title, %2: count of matched result",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L578}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L579}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"if-you-entered-the-work-id-please-infrom-the-tool-by-setting-extract_work_id()-to-avoid-misidentifying-of-work-id-as-work-title": {
@@ -5218,7 +5218,7 @@
 		"notes": "有些舊的CLI無法顯示\"🆔\"。",
 		"scope": "work_crawler.js: get_work()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L586}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L587}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"using-title": {
@@ -5226,7 +5226,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: get_work()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L598}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L599}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"download-$1-info-@-$2": {
@@ -5235,7 +5235,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work_title || work_id, %2: crawler id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L707}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L715}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"wait-for-$2-and-then-acquiring-the-work-information-page-$1": {
@@ -5244,7 +5244,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: URL, %2: time interval 下載URL前的等待時間。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L759}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L767}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unable-to-get-information-for-$1-s-$2": {
@@ -5253,7 +5253,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work_id, %2: error reason",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L786}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L794}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-content-found": {
@@ -5261,7 +5261,7 @@
 		"notes": "error reason: Got empty content",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L790}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L798}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"wait-for-$2-and-re-acquiring-the-work-information-page-$1": {
@@ -5270,7 +5270,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: URL, %2: time interval 下載URL前的等待時間。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L833}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L841}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"re-acquiring-the-work-information-page-$1": {
@@ -5279,7 +5279,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L835}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L843}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-(id-$2)-is-not-a-chinese-japanese-or-korean-title": {
@@ -5288,7 +5288,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title, %2: work id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L912}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L920}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-title-of-the-work-$1-(id-$2)-could-not-be-obtained-or-set": {
@@ -5297,7 +5297,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title, %2: work id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L914}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L922}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"downloading-$1-table-of-contents-@-$2": {
@@ -5306,13 +5306,13 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title, %2: crawler id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L931}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L939}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-custom-directory_name_pattern-$1-gives-the-same-name-to-different-works-so-the-default-directory_name_pattern-is-used-instead": {
 		"message": "自訂作品目錄名稱模式 %1 令不同作品產生相同名稱，改採預設作品目錄模式！",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L963}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L971}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"delete-existing-work-data-cache-$1": {
@@ -5320,7 +5320,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1015}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1023}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"new-information-→": {
@@ -5328,7 +5328,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1102}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1110}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-get-chapter-list-page": {
@@ -5336,7 +5336,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1159}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1167}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"create-work_data.directory-$1": {
@@ -5344,7 +5344,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1178}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1186}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"last-saved-date": {
@@ -5353,7 +5353,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
 		"mark_type": "part_of_string",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1197}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1225}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1232}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1205}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1233}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1240}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"last-updated-date": {
@@ -5362,7 +5362,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
 		"mark_type": "part_of_string",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1219}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1227}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"«$2»-a-serious-error-occurred-during-execution-of-$1-which-was-aborted": {
@@ -5371,7 +5371,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: error spot, %2: work title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1272}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1280}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"from-chapter-data-→": {
@@ -5379,7 +5379,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1347}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1355}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"enter-the-url-for-§$1-and-download-only-this-section": {
@@ -5387,7 +5387,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1396}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1404}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-work-does-not-exist-or-has-been-deleted": {
@@ -5395,7 +5395,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1415}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1423}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-get-chapter-count": {
@@ -5403,7 +5403,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1419}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1427}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"perhaps-the-work-has-been-deleted-or-blocked": {
@@ -5411,7 +5411,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1422}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1430}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"perhaps-the-work-has-been-deleted-or-blocked-or-has-the-website-been-revised": {
@@ -5419,7 +5419,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1426}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1434}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"remove-chapter-list-page-$1": {
@@ -5427,7 +5427,7 @@
 		"notes": "明確指定不保留，將刪除已存在的章節列表頁面(網頁)。",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1450}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1458}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"manually-specified-not-to-download-any-chapters": {
@@ -5435,7 +5435,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1487}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1495}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"download-only-chapter-number-$1": {
@@ -5444,7 +5444,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: index list",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1489}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1497}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-.recheck-option-has-been-set-the-work-has-been-downloaded-before-and-the-catalogue-has-content": {
@@ -5452,7 +5452,7 @@
 		"notes": "已設定 .recheck + 作品曾有內容 / 並非空作品目錄。",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1540}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1548}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"with-the-.recheck-option-set-setting-the-.reget_chapter-option-to-$1-will-have-no-effect": {
@@ -5460,7 +5460,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1556}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1564}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-will-automatically-turn-.reget_chapter-to-true-and-explicitly-specify-reget_chapter-to-re-acquire-the-chapter-content": {
@@ -5468,7 +5468,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1562}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1570}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-work-has-been-changed-and-is-subject-to-the-conditions-that-need-to-be-updated": {
@@ -5476,7 +5476,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1584}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1592}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"as-the-number-of-chapters-changes-all-chapters-will-be-re-downloaded-and-checked": {
@@ -5484,7 +5484,7 @@
 		"notes": "",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1588}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1596}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-number-of-chapters-has-not-changed-total-$1-$2": {
@@ -5493,7 +5493,7 @@
 		"scope": "work_crawler/work.js: process_chapter_list_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_count, %2: chapter_unit",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1616}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1624}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-number-of-chapters-with-small-changes-(only-$1-$2)-but-it-will-not-be-re-downloaded": {
@@ -5502,7 +5502,7 @@
 		"scope": "work_crawler/work.js: process_chapter_list_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_added, %2: chapter_unit",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1622}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1630}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"however-all-chapter-content-has-been-set-to-download": {
@@ -5510,7 +5510,7 @@
 		"notes": "part 2: 三選一",
 		"scope": "work_crawler/work.js: process_chapter_list_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1626}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1634}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"rebuild-data-only-with-cache-(such-as-novels-e-books)-and-not-re-download-all-chapter-content": {
@@ -5518,7 +5518,7 @@
 		"notes": "part 2: 三選一",
 		"scope": "work_crawler/work.js: process_chapter_list_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1630}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1638}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skip-this-work-without-processing": {
@@ -5526,7 +5526,7 @@
 		"notes": "part 2: 三選一",
 		"scope": "work_crawler/work.js: process_chapter_list_data()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1632}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1640}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"previously-downloaded-to-the-newer-$2-$3-backtracked-by-specifying-start_chapter_title=$1": {
@@ -5535,7 +5535,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: start_chapter, %2: last_download.chapter, %3: chapter_unit",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1650}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1658}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"previously-downloaded-to-the-newer-$2-$3-backtracked-by-specifying-start_chapter_no=$1": {
@@ -5544,7 +5544,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: start_chapter, %2: last_download.chapter, %3: chapter_unit",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1661}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1669}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-number-of-chapters-$1-is-less-than-the-start-continued-download-chapter-number-$2-perhaps-because-the-chapter-has-been-reorganized-or-the-chapter-has-been-added-or-deleted-midway-during-the-last": {
@@ -5553,7 +5553,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_count, %2: last_download.chapter",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1681}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1689}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-old-content-will-be-backed-up-the-directory-will-be-moved-and-then-re-downloaded-from-$1-$2": {
@@ -5562,7 +5562,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: start_chapter_NO, %2: chapter_unit",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1694}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1702}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-will-be-re-downloaded-from-$1-$2": {
@@ -5571,7 +5571,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: start_chapter_NO, %2: chapter_unit",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1705}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1713}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-e-book-will-be-regenerated-from-$1$2": {
@@ -5580,7 +5580,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: start_chapter_NO, %2: chapter_unit",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1725}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1733}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skip-$1-without-processing": {
@@ -5589,7 +5589,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1764}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1772}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unknown": {
@@ -5597,7 +5597,7 @@
 		"notes": "後接 .chapter_unit (\"章\")",
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1798}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1806}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"download-from-§$1": {
@@ -5606,7 +5606,7 @@
 		"scope": "work_crawler/work.js: get_work_data()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter NO",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1810}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1818}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"a-directory-name-ending-with-a-.-will-result-in-no-way-to-delete-or-copy-$1": {
@@ -8229,13 +8229,13 @@
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries. 用於編輯註解。",
 		"parameters": "%1: topic counts",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170915.topic_list.js#L1638}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170915.topic_list.js#L1640}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"fixing-broken-anchor": {
 		"message": "修正失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L906}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L911}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-to-remove-$1-inactive-anchors": {
@@ -8244,7 +8244,7 @@
 		"parameters": "%1: count of anchors",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
 		"fIXME": "https://github.com/kanasimi/CeJS/issues/33",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1015}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1021}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1020}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1026}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"anchor-$1-links-to-a-specific-web-page-$2": {
@@ -8252,7 +8252,7 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "As a note phrase in talk pages.",
 		"parameters": "%1: link to a web anchor, %2: link to the target page",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1084}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1239}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1089}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1243}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": {
@@ -8260,14 +8260,14 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: revid, %2: anchor name",
 		"notes": "{{tl|Broken anchors}}の内で表示。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1091}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1096}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-of-an-inactive-anchor": {
 		"message": "提醒失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1096}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1105}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1101}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1109}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"update-links-to-archived-section-$1-$2": {
@@ -8275,35 +8275,35 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: percentage 百分比 e.g., \"42%\"; %2: links being processed 正在處理的連結",
 		"notes": "Use in edit summaries. 用於編輯註解。[[w:ja:Wikipedia:井戸端/subj/議論の過去ログのリンク修正はいかがでしょうか|過去ログリンク修正]]の編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1170}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1174}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"incorrect-capitalization-spaced-section-title": {
 		"message": "大小寫或空白相異的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。 Too different to be considered as the same meaning.",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1206}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1210}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"inconsistency-between-traditional-and-simplified-chinese": {
 		"message": "繁簡不符匹配而失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1209}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1213}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"very-different": {
 		"message": "差異極大",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries to mark edits that need special attention. Too different to be regarded as the same meaning. 用於編輯註解以標註特別需要注意的編輯。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1221}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1225}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"please-help-to-check-this-edit": {
 		"message": "請幫忙檢核此次編輯。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。應採用不存在的頁面名稱，將用紅色連結顯示以突顯警告效果。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1274}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1278}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1→most-alike-anchor-$2": {
@@ -8311,7 +8311,7 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: original anchor, %2: target anchor",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1282}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1286}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"archiving-operation": {

@@ -94,6 +94,20 @@ function module_code(library_namespace) {
 						[ get_label(html.between('og:title" content="', '"')) ] ];
 			}
 
+			matched = html.match(/blockcontent">([\s\S]+)<\/div>/);
+			if (matched) {
+				/**
+				 * <code>
+
+				// xbiquge.cc.js:
+				<div class="blocktitle">出现错误！</div><div class="blockcontent"><div style="padding: 10px"><br /> 错误原因：对不起，两次搜索的间隔时间不得少于 30 秒<br /><br /> 请 <a href="javascript:history.back(1)">返 回</a> 并修正<br /><br /></div><div style="width: 100%; text-align: right; line-height: 200%; padding-right: 10px;">[<a href="javascript:window.close()">关闭本窗口</a>]</div></div>
+
+				</code>
+				 */
+				matched = get_label(matched[1]).replace(/\n[\s\S]*/, '');
+				library_namespace.error(matched);
+			}
+
 			// console.trace(html);
 			var id_list = [], id_data = [];
 			html.each_between('<li>', '</li>', function(text) {
