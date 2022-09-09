@@ -648,7 +648,7 @@ function module_code(library_namespace) {
 
 		if (PATTERN_PROJECT_CODE_i.test(language_code)
 				// 不包括 test2.wikipedia.org 之類。
-				&& !/test|wik[it]/i.test(language_code)
+				&& !/^test|wik[it]/i.test(language_code)
 				// 排除 'Talk', 'User', 'Help', 'File', ...
 				&& !(session.configurations.namespace_pattern || get_namespace.pattern)
 						.test(language_code)) {
@@ -922,7 +922,7 @@ function module_code(library_namespace) {
 			 */
 			family = family || matched[1];
 			// incase 'https://test.wikidata.org/w/api.php'
-			language = !/test|wik[it]/i.test(matched[0]) && matched[0];
+			language = !/^test|wik[it]/i.test(matched[0]) && matched[0];
 			if (!language) {
 				is_guessing_language = true;
 				language = wiki_API.language;
@@ -960,7 +960,7 @@ function module_code(library_namespace) {
 		//
 		|| (site = API_URL.match(/\/\/([\w]+)\./))
 		// e.g., API_URL === 'https://test.wikipedia.org/w/api.php'
-		&& /test/i.test(site = site[1])) {
+		&& /^test/i.test(site = site[1])) {
 			// e.g., @ console @ https://commons.wikimedia.org/
 			project = site;
 			// assert: (project in wiki_API.api_URL.wikimedia)
@@ -1026,8 +1026,14 @@ function module_code(library_namespace) {
 				API_URL : API_URL
 			};
 
-			if (session && session.site_name)
+			if (session && session.configurations
+			// e.g., for Fandom sites
+			&& session.configurations.sitename) {
+				site.sitename = session.configurations.sitename;
+			}
+			if (session && session.site_name) {
 				site.site_name = session.site_name;
+			}
 
 			var project = session && session.latest_site_configurations
 					&& session.latest_site_configurations.general.wikiid;

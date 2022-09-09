@@ -3396,13 +3396,14 @@ function module_code(library_namespace) {
 	// Should use session.login_user_info.name
 	wiki_API.extract_login_user_name = function(lgname) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=login
-		var matched = lgname.match(/@(.+)$/);
+		// 'Main account name@bot name'
+		var matched = lgname.match(/^([^@\n]+)@/);
 		// 機器人名稱： user name or pure bot name
 		return wiki_API.normalize_title(matched
 		// e.g., "alias_bot_name@main_bot_name" → "main_bot_name"
 		? matched[1].trim() : lgname);
 
-		return wiki_API.normalize_title(lgname.replace(/^[^@]+@/, '').trim());
+		return wiki_API.normalize_title(lgname.replace(/@[^@]+$/, '').trim());
 	};
 
 	// 登入認證用。
@@ -3420,6 +3421,10 @@ function module_code(library_namespace) {
 			if (session.actions[0] && session.actions[0][0] === 'login')
 				session.actions.shift();
 
+			if (false) {
+				console.trace([ session.login_user_info,
+						session.token.login_user_name ]);
+			}
 			if (!error && (!session.login_user_info
 			// get the user right to check 'apihighlimits'
 			|| session.login_user_info.name !== session.token.login_user_name)) {
