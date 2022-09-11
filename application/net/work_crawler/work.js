@@ -945,6 +945,7 @@ function module_code(library_namespace) {
 				// this.skip_get_work_page 時， work_data.title === undefined
 				title : work_data.title || '',
 				// e.g., '.' + (new Date).format('%Y%2m%2d')
+				// e.g., 騰訊動漫和起點中文限免作品的日期後綴。
 				directory_name_extension : work_data.directory_name_extension
 						|| ''
 			};

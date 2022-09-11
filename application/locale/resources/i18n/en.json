@@ -953,6 +953,8 @@
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "The local link target links back to the page itself. [[MOS:CIRCULAR]]?",
 	"the-local-page-is-too-new.-will-try-again-next-time": "The local page is too new. Will try again next time.",
 	"missing-converted-local-page-or-the-foreign-local-page-is-not-link-to-wikidata": "Missing converted local page, or the foreign / local page is not link to wikidata.",
+	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title": "The local title in the interlanguage template is same as the foreign language title",
+	"local-page-title-contains-the-local-title-in-the-interlanguage-template": "Local page title contains the local title in the interlanguage template",
 	"from-the-parameter-of-template": "From the parameter of template",
 	"from-foreign-language-title": "From foreign language title",
 	"the-local-title-is-different-from-the-one-given-by-the-template-parameters": "The local title is different from the one given by the template parameters.",
