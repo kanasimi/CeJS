@@ -1001,7 +1001,11 @@ function module_code(library_namespace) {
 			if (!next[2].page_to_edit) {
 				library_namespace
 						.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first! 另請注意: 您不能在 callback 中呼叫 .edit() 之類的 wiki 函數！請在 callback 執行完畢後再執行新的 wiki 函數！例如放在 setTimeout() 中。');
-				// console.trace([ this.actions.length, next ]);
+				if (typeof console === 'object' && console.trace) {
+					console.trace(this);
+					console.trace([ this.actions.length, next ]);
+				}
+				throw new Error('No page in the queue.');
 				// next[3] : callback
 				this.next(next[3], undefined, 'no page');
 				break;

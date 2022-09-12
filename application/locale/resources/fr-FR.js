@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "2",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -955,6 +955,8 @@
 	"The local link target links back to the page itself. [[MOS:CIRCULAR]]?": "La cible du lien local pointe vers la page elle-m\u00eame. [[MOS:CIRCULAR|Lien circulaire]]\u202f?",
 	"The local page is too new. Will try again next time.": "La page locale est trop r\u00e9cente. Essaiera \u00e0 nouveau plus tard.",
 	"\u5916\u8a9e\u689d\u76ee\u6c92\u6709\u76f8\u5c0d\u61c9\u7684\u4e2d\u6587\u689d\u76ee\uff0c\u6216\u61c9\u5c0d\u61c9\u7684\u4e2d\u6587\u689d\u76ee\u4e26\u6c92\u6709\u9023\u7d50\u5230\u6b63\u78ba\u7684Wikidata\u9805\u76ee\u3002": "La page locale convertie est manquante, ou bien la page \u00e9trang\u00e8re ou locale n\u2019est pas un lien vers Wikidata.",
+	"\u8de8\u8a9e\u8a00\u6a21\u677f\u7684\u672c\u5730\u6a19\u984c\u8207\u5916\u8a9e\u6a19\u984c\u76f8\u540c": "Le titre local dans le mod\u00e8le interlangue est le m\u00eame que le titre en langue \u00e9trang\u00e8re",
+	"Local page title contains the local title in the interlanguage template": "Le titre de la page locale contient le titre local dans le mod\u00e8le interlangue",
 	"From the parameter of template": "Depuis le param\u00e8tre de mod\u00e8le",
 	"From foreign language title": "Depuis le titre en langue \u00e9trang\u00e8re",
 	"The local title is different from the one given by the template parameters.": "Le titre local est diff\u00e9rent de celui donn\u00e9 dans les param\u00e8tres du mod\u00e8le.",
