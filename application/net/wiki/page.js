@@ -415,8 +415,18 @@ function module_code(library_namespace) {
 		library_namespace.debug('get url token: ' + action, 5, 'wiki_API_page');
 		// console.trace([ action, options ]);
 
-		var post_data;
-		// TODO: 將過長的標題列表改至 POST，預防 "414 Request-URI Too Long"。
+		var post_data = library_namespace.Search_parameters();
+		// 將<s>過長的</s>標題列表改至 POST，預防 "414 Request-URI Too Long"。
+		// https://github.com/kanasimi/wikibot/issues/32
+		// 不同 server 可能有不同 GET 請求長度限制。不如直接改成 POST。
+		if (Array.isArray(action[1].pageids)) {
+			post_data.pageids = action[1].pageids;
+			delete action[1].pageids;
+		}
+		if (Array.isArray(action[1].titles)) {
+			post_data.titles = action[1].titles;
+			delete action[1].titles;
+		}
 
 		// console.trace(wiki_API.session_of_options(options));
 		// console.trace(action);

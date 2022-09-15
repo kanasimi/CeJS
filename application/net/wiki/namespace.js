@@ -260,6 +260,9 @@ function module_code(library_namespace) {
 	 * @param {String|Array}title
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns {Array}action = [ {String}API_URL, {Search_parameters}parameters ]
+	 * 
 	 * @see api_URL
 	 */
 	function normalize_title_parameter(title, options) {
@@ -339,6 +342,7 @@ function module_code(library_namespace) {
 			action[1].redirects = 1;
 		}
 
+		// console.trace(action);
 		return action;
 	}
 

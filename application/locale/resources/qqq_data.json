@@ -871,7 +871,7 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L37060}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L50888}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L50927}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52267}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52270}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52275}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52599}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53089}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L324}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1145}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L655}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L890}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L929}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L37060}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L50888}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L50927}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52267}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52270}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52275}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52599}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53089}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L327}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1155}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L665}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L890}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L929}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -879,14 +879,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L39749}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3013}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L39749}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3017}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L40218}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3482}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L40218}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3486}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-redirects-to-this-page": {
@@ -1641,27 +1641,27 @@
 		"message": "調降取得頁面的上限，改成每次最多 %1 個頁面。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: page count",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52399}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L455}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52399}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L465}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unknown-api-response-$1": {
 		"message": "Unknown API response: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: API response",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52461}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53115}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1171}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L517}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52461}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53115}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1181}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L527}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"circular-redirect-$1↔$2": {
 		"message": "Circular redirect: %1↔%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link, %2: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52528}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L584}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52528}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L594}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"does-not-exist": {
 		"message": "Does not exist",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52603}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L659}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L866}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L878}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52603}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L669}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L866}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L878}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"no-content": {
@@ -1669,62 +1669,62 @@
 		"notes": "沒有頁面內容。; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52605}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L55327}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L55346}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L60601}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1586}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3383}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3402}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L661}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L656}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52605}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L55327}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L55346}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L60601}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1586}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3393}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3412}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L671}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L656}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-cache-file-is-saved": {
 		"message": "The cache file is saved.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52634}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L690}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52634}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L700}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"wikimedia-wikis-can-be-backtracked-up-to-about-$1": {
 		"message": "Wikimedia wikis 最多可回溯約 %1。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: time (e.g., \"3 days\")",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53672}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1728}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53672}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1738}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-period-you-specified-$1-($2)-may-be-too-long": {
 		"message": "您所指定的時間 [%1]（%2）恐怕過長。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "%1, %2: time (e.g., \"5 months\")",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53681}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1737}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53681}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1747}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"start-monitoring-and-scanning-$2-pages-changed-since-$3-using-$1": {
 		"message": "開始以 %1 監視、掃描 %2 自 %3 起更改的頁面。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: API / SQL, %2: site name, %3: time (e.g., \"3 days ago\")",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53697}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1753}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53697}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1763}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"start-monitoring-and-scanning-the-recently-changed-pages-of-$2-using-$1": {
 		"message": "開始以 %1 監視、掃描 %2 最近更改的頁面。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: API / SQL, %2: site name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53699}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1755}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53699}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1765}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"configuration-page-$1": {
 		"message": "Configuration page: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53711}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1767}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53711}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1777}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-configuration-page-$1-has-been-modified.-re-parse": {
 		"message": "設定頁面 %1 已變更。重新解析……",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53900}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1956}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53900}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1966}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"wait-$1-to-apply-the-settings": {
 		"message": "等待 %1 以應用設定。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: time. e.g., \"5 min\"",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53916}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1972}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53916}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1982}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"wikitext-parser-checking-$1": {
@@ -1732,7 +1732,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L55356}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3412}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L701}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L55356}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3422}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L701}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-results": {
