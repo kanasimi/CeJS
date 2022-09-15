@@ -33,7 +33,8 @@ function module_code(library_namespace) {
 				+ ': Not in Node.js?');
 		// library_namespace.set_debug();
 		library_namespace.debug('typeof process: ' + typeof process);
-		library_namespace.debug('process.title: ' + process.title);
+		if (typeof process !== 'undefined')
+			library_namespace.debug('process.title: ' + process.title);
 		library_namespace.debug('typeof global: ' + typeof global);
 		library_namespace.debug('typeof require: ' + typeof require);
 

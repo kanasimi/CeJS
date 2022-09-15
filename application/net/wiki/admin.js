@@ -191,6 +191,7 @@ function module_code(library_namespace) {
 			reason : false,
 			tags : false,
 			watchlist : false,
+			watchlistexpiry : false,
 			oldimage : false
 		}, options, callback);
 	};

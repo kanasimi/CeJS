@@ -1555,7 +1555,7 @@ function module_code(library_namespace) {
 				&& library_namespace.is_empty_object(_this.downloading)) {
 					library_namespace.debug({
 						// gettext_config:{"id":"all-resources-have-been-downloaded.-start-performing-subsequent-$1-register-jobs"}
-						T : [ '所有資源下載完畢。開始執行後續 %1 個已登記之作業。',
+						T : [ '所有資源下載完畢。開始執行後續 %1 個已登記之{{PLURAL:%1|作業}}。',
 						//
 						_this.add_listener('all_downloaded').length ]
 					}, 2, 'add_chapter');
@@ -1917,7 +1917,7 @@ function module_code(library_namespace) {
 				library_namespace.warn([ 'add_chapter: ', {
 					T : [
 					// gettext_config:{"id":"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-used-from-the-cache-file"}
-					'因為欲設定的內容長度過短或者無內容，將從快取檔案中取得舊的內容（%1 字元）：',
+					'因為欲設定的內容長度過短或者無內容，將從快取檔案中取得舊的內容（%1 個{{PLURAL:%1|字元}}）：',
 					//
 					contents.length ]
 				}, ' \n',
@@ -1948,7 +1948,7 @@ function module_code(library_namespace) {
 		} else if (!item_data.force) {
 			library_namespace.info([ 'add_chapter: ', {
 				// gettext_config:{"id":"skip-content-that-is-too-short-($1-characters)"}
-				T : [ contents ? '跳過長度過短的內容（%1 字元）：'
+				T : [ contents ? '跳過長度過短的內容（%1 個{{PLURAL:%1|字元}}）：'
 				//
 				// gettext_config:{"id":"skip-the-no-content-empty-chapter"}
 				: '跳過無內容/空章節：', contents && contents.length ]

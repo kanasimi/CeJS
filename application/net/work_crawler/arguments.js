@@ -182,7 +182,7 @@ function module_code(library_namespace) {
 					})) {
 						library_namespace.warn([ 'verify_arg: ', {
 							// gettext_config:{"id":"some-$2-path(s)-specified-by-$1-do-not-exist-$3"}
-							T : [ '有些 "%1" 所指定的%2路徑不存在：%3', key,
+							T : [ '至少一個由「%1」所指定的%2路徑不存在：%3', key,
 							// gettext_config:{"id":"file","mark_type":"combination_message_id"}
 							// gettext_config:{"id":"files","mark_type":"combination_message_id"}
 							// gettext_config:{"id":"directory","mark_type":"combination_message_id"}

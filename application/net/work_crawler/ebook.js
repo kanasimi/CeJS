@@ -651,7 +651,7 @@ function module_code(library_namespace) {
 					//
 					+ chapter_NO + ': '
 					// gettext_config:{"id":"too-few-words-($1-characters)"}
-					+ (contents.length ? gettext('字數過少（%1字元）',
+					+ (contents.length ? gettext('字數過少（%1{{PLURAL:%1|字元}}）',
 					// gettext_config:{"id":"no-content"}
 					contents.length) : 'No content'));
 				}

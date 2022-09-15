@@ -1484,7 +1484,36 @@ if (typeof CeL === 'function')
 		 * @ignore
 		 * @type {Object}
 		 */
-		var named_code = Object.create(null);
+		var named_code = Object.create(null),
+		// modules_loaded 獲得的是依相依性先後，不會有 require 的順序。
+		modules_loaded = new Set,
+		// modules_loading_now 僅用於當前載入的模組以 library_namespace.run() 載入其他資源的情況。
+		// ** 不包括因相依模組尚未載入完全而暫停載入的情況！
+		modules_loading_now;
+
+		/**
+		 * @example <code>
+
+		// Get all modules loaded
+		Object.values(CeL.get_named_code()).map(declaration => declaration.id);
+		</code>
+		 */
+		function get_named_code(id) {
+			if (!id) {
+				// TODO: return a duplicate.
+				return named_code;
+			}
+			return named_code[id];
+		}
+
+		// const modules_loaded = CeL.get_modules_loaded();
+		function get_modules_loaded() {
+			return Array.from(modules_loaded);
+		}
+
+		// export.
+		library_namespace.get_named_code = get_named_code;
+		library_namespace.get_modules_loaded = get_modules_loaded;
 
 		/**
 		 * 在 module 中稍後求值，僅對 function 有效。<br />
@@ -1816,7 +1845,7 @@ if (typeof CeL === 'function')
 							.create(null);
 
 					code_required.forEach(function(variable) {
-						// [ variable full name, modele name, variable name ]
+						// [ variable full name, module name, variable name ]
 						var matched = variable.match(/^(.+)\.([^.]*)$/);
 						if (matched && library_namespace
 						//
@@ -2456,6 +2485,10 @@ if (typeof CeL === 'function')
 											.pre_parse_local_code(
 													file_contents, URL, id);
 
+								if (modules_loading_now)
+									modules_loading_now.push(id);
+								else
+									modules_loading_now = [];
 								if (is_nodejs) {
 									if (typeof require === 'function') {
 										// console.trace(URL);
@@ -2486,6 +2519,18 @@ if (typeof CeL === 'function')
 							}
 
 							// 以 .get_file() 成功依序載入結束。
+							// console.trace(URL);
+							declaration.path = URL;
+							if (modules_loading_now) {
+								modules_loading_now.forEach(function(module) {
+									if (module !== id)
+										modules_loaded.add(module);
+								});
+								// All loaded. Reset modules_loading_now.
+								modules_loading_now = null;
+							}
+							modules_loaded.add(id);
+
 							if (!('included' in declaration) && !is_external())
 								library_namespace.warn(
 								//
@@ -3400,31 +3445,31 @@ if (typeof CeL === 'function')
 		 * TODO: auto test strict.
 		 * 
 		 * @example <code>
-		 * //	requires (inside module)
-		 * //	事先定義 @ 'use strict';
-		 * var split_String_to_Object;
-		 * //	之所以需要使用 eval 是因為要 extend 至當前 namespace 下。
-		 * //	若無法 load CeL.data，將會 throw
-		 * eval(this.use());
-		 * //	use it
-		 * split_String_to_Object();
-		 * 
-		 * //TODO
-		 * //	不用 eval 的方法 1: function 預設都會 extend 至當前 library_namespace 下。
-		 * library_namespace.use_function(this, 'data.split_String_to_Object');
-		 * library_namespace.use_function(this, 'data.split_String_to_Object', false);
-		 * //	若無法 load CeL.data，將會 throw
-		 * //	use it
-		 * library_namespace.split_String_to_Object();
-		 * 
-		 * //TODO
-		 * //	不用 eval 的方法 2: 設定 extend_to
-		 * var o={};
-		 * //	若無法 load CeL.data，將會 throw
-		 * library_namespace.use_function(this, 'data.split_String_to_Object', o);
-		 * //	use it
-		 * o.split_String_to_Object();
-		 * </code>
+		//	requires (inside module)
+		//	事先定義 @ 'use strict';
+		var split_String_to_Object;
+		//	之所以需要使用 eval 是因為要 extend 至當前 namespace 下。
+		//	若無法 load CeL.data，將會 throw
+		eval(this.use());
+		//	use it
+		split_String_to_Object();
+
+		//TODO
+		//	不用 eval 的方法 1: function 預設都會 extend 至當前 library_namespace 下。
+		library_namespace.use_function(this, 'data.split_String_to_Object');
+		library_namespace.use_function(this, 'data.split_String_to_Object', false);
+		//	若無法 load CeL.data，將會 throw
+		//	use it
+		library_namespace.split_String_to_Object();
+
+		//TODO
+		//	不用 eval 的方法 2: 設定 extend_to
+		var o={};
+		//	若無法 load CeL.data，將會 throw
+		library_namespace.use_function(this, 'data.split_String_to_Object', o);
+		//	use it
+		o.split_String_to_Object();
+		</code>
 		 * 
 		 * @param {Function|Object}extend_to
 		 *            把 variable extend 至 name-space extend_to
@@ -3813,6 +3858,9 @@ if (typeof CeL === 'function')
 										+ item.id
 										+ '] 中。推入排程開始蟄伏，waiting for callback。',
 										5, this.debug_id + '.run');
+								// 清空。請見定義說明。
+								modules_loading_now = null;
+								// 因無法即時載入，先行退出。
 								return result;
 							} else if (result === INCLUDE_FAILED)
 								library_namespace.debug('Error to include ['

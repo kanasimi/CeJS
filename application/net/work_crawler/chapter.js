@@ -83,7 +83,7 @@ function module_code(library_namespace) {
 		} else {
 			library_namespace.log([ 'check_downloaded_chapters: ', {
 				// gettext_config:{"id":"check-only-$1-chapters-$2"}
-				T : [ '僅檢查%1個章節：%2', chapter_list_to_check.length,
+				T : [ '僅檢查 %1個{{PLURAL:%1|章節}}：%2', chapter_list_to_check.length,
 				//
 				chapter_list_to_check.join(', ') ]
 			} ]);
@@ -139,7 +139,7 @@ function module_code(library_namespace) {
 			} else {
 				library_namespace.log([ 'check_downloaded_chapter_url: ', {
 					// gettext_config:{"id":"check-only-$1-chapters-$2"}
-					T : [ '僅檢查%1個章節：%2', chapter_list_to_check.length,
+					T : [ '僅檢查 %1個{{PLURAL:%1|章節}}：%2', chapter_list_to_check.length,
 					//
 					chapter_list_to_check.join(', ') ]
 				} ]);
@@ -1196,7 +1196,7 @@ function module_code(library_namespace) {
 
 						library_namespace.log_temporary([ 'process_images: ', {
 							// gettext_config:{"id":"waiting-for-$1-before-downloading-the-$2-image"}
-							T : [ '下載第 %2 張圖前先等待 %1。',
+							T : [ '下载第 %2 張{{PLURAL:%2|圖片}}前先等待 %1。',
 							//
 							library_namespace.age_of(0, image_time_interval, {
 								digits : 1
@@ -1608,12 +1608,12 @@ function module_code(library_namespace) {
 				if (library_namespace.is_debug(3)) {
 					library_namespace.debug([ chapter_label + ': ', {
 						// gettext_config:{"id":"$1-image(s)-left"}
-						T : [ '剩 %1 張圖...', left ]
+						T : [ '剩 %1 張{{PLURAL:%1|圖}}...', left ]
 					} ], 3, 'check_if_done');
 				} else {
 					library_namespace.log_temporary({
 						// gettext_config:{"id":"$1-image(s)-left"}
-						T : [ '剩 %1 張圖...', left ]
+						T : [ '剩 %1 張{{PLURAL:%1|圖}}...', left ]
 					});
 				}
 			}
@@ -1690,7 +1690,7 @@ function module_code(library_namespace) {
 					error_file_logs.join(library_namespace.env.line_separator));
 					crawler_namespace.set_work_status(work_data, gettext(
 					// gettext_config:{"id":"$1-$2-image-download-error-recorded"}
-					'%1：%2筆圖片下載錯誤紀錄', chapter_label, error_file_logs.length));
+					'%1：%2筆{{PLURAL:%2|圖片}}下載錯誤紀錄', chapter_label, error_file_logs.length));
 				}
 			}
 
@@ -1825,12 +1825,12 @@ function module_code(library_namespace) {
 			// 增加字數統計的訊息。
 			work_data.words_so_far > 0 ? {
 				// gettext_config:{"id":"(this-download-has-processed-a-total-of-$1-word)"}
-				T : [ '（本次下載共處理%1個字）', work_data.words_so_far ]
+				T : [ '（本次下載共處理 %1個{{PLURAL:%1|字}}）', work_data.words_so_far ]
 			} : '',
 			// 增加漫畫圖片數量的統計訊息。
 			work_data.image_count > 0 ? {
 				// gettext_config:{"id":"(this-download-has-processed-a-total-of-$1-image)"}
-				T : [ '（本次下載共處理%1張圖）', work_data.image_count ]
+				T : [ '（本次下載共處理 %1張{{PLURAL:%1|圖}}）', work_data.image_count ]
 			} : '', {
 				// gettext_config:{"id":"download-completed-for-$1"}
 				T : [ '於 %1 下載完畢。',
@@ -1843,7 +1843,7 @@ function module_code(library_namespace) {
 			if (work_data.error_images > 0) {
 				library_namespace.error([ this.id + ': ', {
 					// gettext_config:{"id":"$1-this-download-has-a-total-of-$2-image-download-errors"}
-					T : [ '%1：本次下載作業，本作品共 %2張圖片下載錯誤。',
+					T : [ '%1：本次下載作業，本作品共 %2張{{PLURAL:%2|圖片}}下載錯誤。',
 					//
 					work_data.directory_name, work_data.error_images ]
 				} ]);

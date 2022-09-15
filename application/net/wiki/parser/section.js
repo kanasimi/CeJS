@@ -965,6 +965,7 @@ function module_code(library_namespace) {
 				// section_list.title[{Number}index] = {String}section title
 				section_list.title[index] = section_title;
 				if (section_title in section_list) {
+					// 重複標題。
 					library_namespace.debug('重複 section title ['
 							+ section_title + '] 將僅取首個 section text。', 2,
 							'get_sections');
@@ -1165,6 +1166,7 @@ function module_code(library_namespace) {
 						section_title_link[1] += '_' + duplicate_NO;
 					// 用以獲得實際有效的 anchor 網頁錨點。 effect anchor
 					section_title_link.id = id;
+					// console.trace(section_title_token);
 				}
 			}
 			// 登記已有之 anchor。

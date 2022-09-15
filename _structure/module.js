@@ -929,7 +929,7 @@ if (typeof CeL === 'function') {
 					var error = new Error(
 							'get_file: Cannot parse UTF-32 encoding of ['
 									+ path + '] @ Firefox!');
-					// 於 load_name() 使用，避免顯示 '重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。'
+					// 於 load_named() 使用，避免顯示 '重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。'
 					error.type = 'encode';
 					throw error;
 				}
@@ -1537,6 +1537,7 @@ if (typeof CeL === 'function') {
 			if (typeof module_name === 'string') {
 				module_name = module_name
 				// .replace(/\.\.+|\\\\+|\/\/+/g, '.')
+				// '.': CeL.env.module_name_separator
 				.replace(/[\\\/]+/g, '.').split(/[.\\\/]|::/);
 			}
 

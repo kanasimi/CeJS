@@ -532,7 +532,7 @@ function module_code(library_namespace) {
 			if (id_list.length !== 1) {
 				library_namespace.warn({
 					// gettext_config:{"id":"searching-«$1»-and-found-$2-work(s)-$3"}
-					T : [ '搜尋《%1》找到%2個作品：%3', work_title, id_list.length,
+					T : [ '搜尋《%1》找到 %2個{{PLURAL:%2|作品}}：%3', work_title, id_list.length,
 							JSON.stringify(id_data) ]
 				});
 			}
