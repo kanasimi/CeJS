@@ -93,8 +93,8 @@ function module_code(library_namespace) {
 	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_anchor, page_name,
 	 * anchor / section_title, pipe_separator, displayed_text ]
 	 * 
-	 * 頁面標題不可包含無效的字元：[\n\[\]{}�]，經測試 anchor 亦不可包含[\n\[\]{}]，但 display text 可以包含
-	 * [\n]
+	 * 頁面標題不可包含無效的字元：[\n\[\]{}�]，經測試 anchor 亦不可包含[\n\[\]{}]，<br />
+	 * 但 display text 表達文字可以包含 [\n]
 	 * 
 	 * @see PATTERN_link
 	 */

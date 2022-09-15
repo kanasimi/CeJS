@@ -69,7 +69,7 @@
 	"several seconds ago": "\u5e7e\u79d2\u524d",
 	"soon": "\u99ac\u4e0a",
 	"%1 {{PLURAL:%1|second|seconds}} ago": "%1{{PLURAL:%1|\u79d2}}\u524d",
-	"%1 {{PLURAL:%1|second|seconds}} later": "%1{{PLURAL:%1|\u79d2}}\u540e",
+	"%1 {{PLURAL:%1|second|seconds}} later": "%1{{PLURAL:%1|\u79d2}}\u5f8c",
 	"%1 {{PLURAL:%1|minute|minutes}} ago": "%1{{PLURAL:%1|\u5206}}\u524d",
 	"%1 {{PLURAL:%1|minute|minutes}} later": "%1{{PLURAL:%1|\u5206}}\u5f8c",
 	"%1 {{PLURAL:%1|hour|hours}} ago": "%1{{PLURAL:%1|\u5c0f\u6642}}\u524d",

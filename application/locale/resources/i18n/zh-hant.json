@@ -75,7 +75,7 @@
 	"several-seconds-ago": "幾秒前",
 	"soon": "馬上",
 	"$1-seconds-ago": "%1{{PLURAL:%1|秒}}前",
-	"$1-seconds-later": "%1{{PLURAL:%1|秒}}后",
+	"$1-seconds-later": "%1{{PLURAL:%1|秒}}後",
 	"$1-minutes-ago": "%1{{PLURAL:%1|分}}前",
 	"$1-minutes-later": "%1{{PLURAL:%1|分}}後",
 	"$1-hours-ago": "%1{{PLURAL:%1|小時}}前",
