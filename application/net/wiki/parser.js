@@ -1568,6 +1568,7 @@ function module_code(library_namespace) {
 		// 僅有當無法取得準確的 layout token 時，才會尋覽應插入之點，
 		// 並設定插入於 default_layout_order[layout_index] 之前。
 		layout_index;
+
 		if (!(parsed_index >= 0)) {
 			layout_index = default_layout_order.indexOf(location);
 			if (layout_index >= 0) {
@@ -1610,6 +1611,26 @@ function module_code(library_namespace) {
 			// e.g., token === undefined
 			return;
 			throw new Error('insert_layout_token: Invalid token ' + token);
+		}
+
+		if (token.type === 'category') {
+			var has_token;
+			// 一個 category 只加一次。
+			parsed.each('Category', function(category_token) {
+				if (token.name !== category_token.name) {
+					return;
+				}
+				if (token.sort_key && !category_token.sort_key) {
+					// 除非本來就有設定 sort key，否則設定成新的 sort key。
+					category_token[2] = token.sort_key;
+					has_token = 'changed';
+				} else {
+					has_token = true;
+				}
+				return parsed.each.exit;
+			});
+			if (has_token)
+				return has_token === 'changed';
 		}
 
 		// ----------------------------

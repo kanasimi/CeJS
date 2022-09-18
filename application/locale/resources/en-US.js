@@ -440,6 +440,7 @@
 	"log-type-trace": "trace",
 	"log-type-warn": "warn",
 	"\u8df3\u904e %2 \u4e4b %1 \u8a2d\u5b9a\uff0c\u56e0\u6578\u503c\u5df2\u5b58\u5728\u4e14\u672a\u8a2d\u5b9a %3\u3002": "Skip the %1 for %2 and do not set them because the values already exist and %3 is not set.",
+	"No user name or password provided. The login attempt was abandoned.": "No user name or password provided. The login attempt was abandoned.",
 	"%1 \u5fc5\u9808\u66f4\u540d\u70ba %2 \u624d\u80fd\u8d77\u4f5c\u7528\uff01": "Must rename %1 to %2 to work!",
 	"Cannot convert Lua pattern to RegExp pattern: %1": "Cannot convert Lua pattern to RegExp pattern: %1",
 	"\u7121\u6cd5\u5f9e\u7db2\u5740\u64f7\u53d6\u4f5c\u54c1 id\uff1a%1": "Cannot detect work id from URL: %1",

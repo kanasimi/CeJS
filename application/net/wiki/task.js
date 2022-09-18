@@ -2109,7 +2109,9 @@ function module_code(library_namespace) {
 
 	/**
 	 * 輸入 URI component list，得出自 [0] 至 [邊際index-1] 以 encodeURIComponent()
-	 * 串聯起來，長度不超過 limit_length。
+	 * 串聯起來，長度不超過 limit_length。<br />
+	 * 
+	 * 用於避免 HTTP status 414: Request-URI Too Long
 	 * 
 	 * @param {Array}piece_list
 	 *            URI component list: page id / title / data
@@ -2132,6 +2134,8 @@ function module_code(library_namespace) {
 		// e.g.,
 		// "https://zh.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content|timestamp&titles=...&format=json&utf8=1"
 		if (!(limit_length > 0)) {
+			// https://github.com/kanasimi/wikibot/issues/32
+			// 不同 server 可能有不同 GET 請求長度限制。不如直接改成 POST。
 			limit_length = 8000;
 		}
 		if (false && !(limit > 0)) {
@@ -3573,12 +3577,13 @@ function module_code(library_namespace) {
 			}
 			session = new wiki_API(user_name, password, login_options);
 		}
+		// console.trace([ user_name, password ]);
 		if (!user_name || !password) {
-			library_namespace.warn('wiki_API.login: ' +
-			//
-			'The user name or password is not provided. Abandon login attempt.'
-			//		
-			);
+			library_namespace.warn([ 'wiki_API.login: ', {
+				T :
+				// gettext_config:{"id":"no-user-name-or-password-provided.-the-login-attempt-was-abandoned"}
+				'No user name or password provided. The login attempt was abandoned.'
+			} ]);
 			// console.trace('Stop login');
 			callback && session.run(callback.bind(session));
 			return session;

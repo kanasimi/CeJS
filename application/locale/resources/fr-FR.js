@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "1",
+	"untranslated message count": "2",
 	"Load failed": "\u00c9chec du chargement",
 	"\u8a9e\u6cd5\u932f\u8aa4\uff01": "Erreur de syntaxe\u202f!",
 	"\u51fd\u6578\u540d\u7a31\u4e0d\u76f8\u7b26\uff0c\u53ef\u80fd\u662f\u7528\u4e86 reference\uff1f": "Nom de fonction sans correspondance.",
