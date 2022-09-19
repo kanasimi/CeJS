@@ -650,6 +650,7 @@ function module_code(library_namespace) {
 				// /Waiting for [^ ]*: [0-9.-]+ seconds? lagged/
 				.match(/([0-9.-]+) seconds? lagged/);
 				waiting = waiting && +waiting[1] * 1000 || edit_time_interval;
+				// console.trace(response);
 				library_namespace.debug('The ' + response.error.code
 				// 請注意，由於上游服務器逾時，緩存層（Varnish 或 squid）也可能會生成帶有503狀態代碼的錯誤消息。
 				+ (response.error.code === 'maxlag' ? ' ' + maxlag + ' s' : '')

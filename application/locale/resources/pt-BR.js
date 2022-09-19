@@ -240,7 +240,7 @@
 	"\u7121\u6cd5\u53d6\u5f97\u5716\u7247\u3002": "Falha em obter a imagem.",
 	"\u5716\u7247\u7121\u5167\u5bb9\uff1a": "Nenhum conte\u00fado encontrado:",
 	"\u6a94\u6848\u904e\u5c0f\uff0c\u50c5 %1 \u4f4d\u5143\u7d44\uff1a": "%1 bytes, muito pequeno:",
-	"\u6a94\u6848\u50c5 %1 \u4f4d\u5143\u7d44\uff1a": "%1 bytes:",
+	"\u6a94\u6848\u50c5 %1 {{PLURAL:$1|\u4f4d\u5143\u7d44}}\uff1a": "%1 bytes:",
 	"\u5f9e[%1]\u53d6\u5f97 %2 \u500b\u5716\u7247\u4f3a\u670d\u5668\uff1a%3": "Recendo %2 servidores de [%1]: %3",
 	"\u7121\u6cd5\u5f9e[%1]\u62bd\u53d6\u51fa\u5716\u7247\u4f3a\u670d\u5668\u5217\u8868\uff01": "N\u00e3o foi poss\u00edvel extrair a lista de servidores de imagem de [%1]!",
 	"%1: \u6c92\u6709\u8f38\u5165 work_id\uff01": "%1: work_id n\u00e3o fornecido!",

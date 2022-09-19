@@ -351,7 +351,7 @@ function module_code(library_namespace) {
 			//
 			skip_chapter = !chapter_data.price || chapter_data.isPurchased && {
 				// gettext_config:{"id":"«$1»-has-been-purchased"}
-				T : [ '已付費購買章節《%1》。', chapter_data.title ]
+				T : [ '已購買章節《%1》。', chapter_data.title ]
 			};
 			// console.log(chapter_data);
 			if (!skip_chapter && chapter_data.expireDate > 0) {

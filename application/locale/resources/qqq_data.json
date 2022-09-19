@@ -871,7 +871,7 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L37060}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L50888}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L50927}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52267}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52270}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52275}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52599}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53089}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L327}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1155}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L665}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L890}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L929}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L37060}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L50888}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L50927}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52267}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52270}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52275}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L52599}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L53089}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L327}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1155}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L323}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L326}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L665}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L891}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L930}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -1548,7 +1548,7 @@
 		"message": "There are more than one %1 in %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: layout type, %2: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L49464}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1408}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/combined/wikiapi/cejs_wiki.js#L49464}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1419}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-seems-that-the-token-is-lost": {
@@ -4902,7 +4902,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-bytes": {
-		"message": "檔案僅 %1 位元組：",
+		"message": "檔案僅 %1 {{PLURAL:$1|位元組}}：",
 		"notes": "三選一，後有接訊息",
 		"scope": "work_crawler.js: get_image()",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -5073,7 +5073,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"«$1»-has-been-purchased": {
-		"message": "已付費購買章節《%1》。",
+		"message": "已購買章節《%1》。",
 		"notes": "",
 		"scope": "work_crawler.sites.comico",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -7577,7 +7577,7 @@
 		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
 	},
 	"this-rule-seems-unnecessary": {
-		"message": "似為不需要的規則：%1",
+		"message": "這條規則似乎沒有必要",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: conversion rule",
 		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1959}}",
@@ -8266,7 +8266,7 @@
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-to-remove-$1-inactive-anchors": {
-		"message": "提醒移除%1個失效網頁錨點",
+		"message": "提醒移除%1個失效網頁{{PLURAL:%1|錨點}}",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: count of anchors",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
@@ -8344,21 +8344,21 @@
 	"archiving-operation": {
 		"message": "Archiving operation",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L258}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L263}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"append-$1-topics": {
 		"message": "Append %1 {{PLURAL:%1|topic|topics}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L269}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L274}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"remove-$1-topics": {
 		"message": "Remove %1 {{PLURAL:%1|topic|topics}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L282}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L287}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"updating-$1": {
@@ -8589,7 +8589,7 @@
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"because-the-largest-file-has-$1-bytes-skipping-this-$2-directory-$3": {
-		"message": "因為最大的檔案有 %1 位元組，因此跳過這個%2的目錄：%3",
+		"message": "因為最大的檔案有 %1 {{PLURAL:%1|位元組}}，因此跳過這個%2的目錄：%3",
 		"notes": "biggest_file_size, message, directory_path",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -8637,7 +8637,7 @@
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"contains-$1-$2-images": {
-		"message": "含有 %1/%2 張圖片",
+		"message": "含有 %1/%2 張{{PLURAL:%1|圖片}}",
 		"notes": "image_count, sub_sub_files_count",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "cmn-Hant-TW",
