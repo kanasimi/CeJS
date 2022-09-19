@@ -891,11 +891,22 @@ function module_code(library_namespace) {
 	function find_template(template_name, options) {
 		var template_token;
 
-		// TODO: using session.remove_namespace()
-		template_name = template_name.replace(/^Template:/i, '');
+		// console.trace(this);
+		var session = wiki_API.session_of_options(options)
+				|| wiki_API.session_of_options(this);
+		// console.trace(session);
+		if (session) {
+			template_name = session.remove_namespace(template_name);
+		} else {
+			template_name = template_name.replace(/^Template:/i, '');
+		}
+		template_name = 'Template:' + template_name;
 
-		this.each('Template:' + template_name, function(token) {
+		this.each(template_name, function(token, index, parent) {
 			template_token = token;
+			template_token.index = index;
+			template_token.parent = parent;
+			// Find the first matched.
 			return for_each_token.exit;
 		}, options);
 
