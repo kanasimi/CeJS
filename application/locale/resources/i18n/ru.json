@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Deltaspace",
 			"Gulka.nik",
 			"Kareyac",
 			"NR Deblocked",
@@ -174,6 +175,7 @@
 	"log-type-log": "журнал",
 	"log-type-trace": "след",
 	"log-type-warn": "предупреждение",
+	"no-user-name-or-password-provided.-the-login-attempt-was-abandoned": "Имя пользователя или пароль не указаны. Попытка входа была прервана.",
 	"must-rename-$1-to-$2-to-work": "Переименуйте %1 в %2 для работы!",
 	"directories": "директории",
 	"directory": "директория",
@@ -218,8 +220,11 @@
 	"persia": "Персия",
 	"illegal-$1-$2": "нелегально %1: [%2]",
 	"skip-the-loaded-file-$1": "Пропустить загружающийся файл: %1",
+	"duplicate-task-name-$1!-will-overwrite-old-task-with-new-task-$2→$3": "Повторяющееся имя задачи %1! Будет перезаписана старая задача новой задачей: %2→%3",
 	"number-of-templates": "#",
 	"edit-mark": "И",
+	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title": "Местное название в межъязыковом шаблоне совпадает с названием на иностранном языке.",
+	"local-page-title-contains-the-local-title-in-the-interlanguage-template": "Локальный заголовок страницы содержит локальный заголовок в межъязыковом шаблоне",
 	"(new-page)": "(новая страница)",
 	"archiving-operation": "Операция архивирования",
 	"append-$1-topics": "Добавить %1{{PLURAL:%1|тему|тем}}",
