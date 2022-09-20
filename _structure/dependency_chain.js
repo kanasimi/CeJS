@@ -1486,10 +1486,7 @@ if (typeof CeL === 'function')
 		 */
 		var named_code = Object.create(null),
 		// modules_loaded 獲得的是依相依性先後，不會有 require 的順序。
-		modules_loaded = new Set,
-		// modules_loading_now 僅用於當前載入的模組以 library_namespace.run() 載入其他資源的情況。
-		// ** 不包括因相依模組尚未載入完全而暫停載入的情況！
-		modules_loading_now;
+		modules_loaded = new Set;
 
 		/**
 		 * @example <code>
@@ -2150,6 +2147,7 @@ if (typeof CeL === 'function')
 							'準備嵌入 (include) [<b style="color:#F2a;background-color:#EF0;">'
 									+ id + '</b>]。執行 module 初始設定函式。', 2,
 							'load_named');
+					modules_loaded.add(id);
 
 					var initializer, error_Object;
 					if (library_namespace.env.no_catch) {
@@ -2423,14 +2421,24 @@ if (typeof CeL === 'function')
 
 				} else {
 
+					var file_contents,
+					// URL is `skip_loading_modules` here.
+					// 只是為了省下一個變數而重複利用。
+					URL = library_namespace.get_old_namespace();
+					URL = URL && URL.skip_loading_modules;
+					if (Array.isArray(URL) && URL.includes(id)) {
+						library_namespace.debug('Skip loading module: ' + id);
+						return PROCESSED;
+					}
+
 					// ---------------------------------------
 					// loading code.
 					// TODO: 拆開。
 
-					var file_contents, URL = declaration.URL
-							|| library_namespace.get_module_path(id),
+					URL = declaration.URL
+							|| library_namespace.get_module_path(id);
 					// external_directory_name 下可以放置外部 library/resource files.
-					is_external = function(failed) {
+					var is_external = function(failed) {
 						var external = external_RegExp.test(id);
 						if (external) {
 							declaration.included = !failed;
@@ -2485,10 +2493,6 @@ if (typeof CeL === 'function')
 											.pre_parse_local_code(
 													file_contents, URL, id);
 
-								if (modules_loading_now)
-									modules_loading_now.push(id);
-								else
-									modules_loading_now = [];
 								if (is_nodejs) {
 									if (typeof require === 'function') {
 										// console.trace(URL);
@@ -2520,16 +2524,7 @@ if (typeof CeL === 'function')
 
 							// 以 .get_file() 成功依序載入結束。
 							// console.trace(URL);
-							declaration.path = URL;
-							if (modules_loading_now) {
-								modules_loading_now.forEach(function(module) {
-									if (module !== id)
-										modules_loaded.add(module);
-								});
-								// All loaded. Reset modules_loading_now.
-								modules_loading_now = null;
-							}
-							modules_loaded.add(id);
+							declaration.URL = URL;
 
 							if (!('included' in declaration) && !is_external())
 								library_namespace.warn(
@@ -2849,7 +2844,7 @@ if (typeof CeL === 'function')
 													|| library_namespace
 															.is_debug())
 												library_namespace.warn([
-
+												//
 												'load_named: ', {
 													// gettext_config:{"id":"load-failed"}
 													T : 'Load failed'
@@ -3858,8 +3853,6 @@ if (typeof CeL === 'function')
 										+ item.id
 										+ '] 中。推入排程開始蟄伏，waiting for callback。',
 										5, this.debug_id + '.run');
-								// 清空。請見定義說明。
-								modules_loading_now = null;
 								// 因無法即時載入，先行退出。
 								return result;
 							} else if (result === INCLUDE_FAILED)

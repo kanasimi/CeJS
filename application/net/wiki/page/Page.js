@@ -63,7 +63,7 @@ function module_code(library_namespace) {
 
 		// TODO:
 
-		typeof await(page.content() || page.read()) === 'string';
+		// typeof await(page.content() || page.read()) === 'string';
 
 		typeof page.wikitext === 'string';
 
@@ -71,7 +71,7 @@ function module_code(library_namespace) {
 
 		// page.revisions() is asyncIterator
 
-		typeof await(page.is_biography()) === 'boolean';
+		// typeof await(page.is_biography()) === 'boolean';
 	}
 
 	function Page(page_title, options, session) {
