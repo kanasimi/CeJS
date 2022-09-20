@@ -2426,8 +2426,15 @@ if (typeof CeL === 'function')
 					// 只是為了省下一個變數而重複利用。
 					URL = library_namespace.get_old_namespace();
 					URL = URL && URL.skip_loading_modules;
-					if (Array.isArray(URL) && URL.includes(id)) {
-						library_namespace.debug('Skip loading module: ' + id);
+					if (Array.isArray(URL) && (URL.includes(id)
+					// id 為相對路徑。
+					|| id.slice(0, library_base_path.length)
+					// e.g., https://github.com/kanasimi/CeJS_wiki
+					=== library_base_path
+					//
+					&& URL.includes(id.slice(library_base_path.length)))) {
+						library_namespace.debug('Skip loading module/path: '
+								+ id);
 						return PROCESSED;
 					}
 

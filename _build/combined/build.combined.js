@@ -21,8 +21,8 @@ require('./_CeL.loader.nodejs.js');
 // --------------------------------------------------------------------------------------------
 
 const profiles = {
-	cejs_wiki: {
-		combined_script_file_path: 'cejs_wiki/cejs_wiki.js',
+	CeJS_wiki: {
+		combined_script_file_path: 'CeJS_wiki/CeJS_wiki.js',
 		exclude_modules: new Set(['application.platform.nodejs', 'data.code.compatibility',]),
 		// 載入操作維基百科的主要功能。
 		include_modules: [['application.net.wiki',], () => {
@@ -31,9 +31,11 @@ const profiles = {
 	}
 }
 
-const profile = profiles.cejs_wiki;
+const profile = profiles.CeJS_wiki;
 
 // --------------------------------------------------------------------------------------------
+
+const library_build_script_name = CeL.get_script_name();
 
 CeL.run(profile.include_modules, build_standalone_version);
 
@@ -45,7 +47,13 @@ function build_standalone_version() {
 	//console.log(CeL.Class);
 	//console.trace(Object.keys(named_codes_loaded));
 	//console.trace(CeL.get_module_path());
-	combined_file_contents.push(`// Main script file: ${profile.combined_script_file_path}`, CeL.get_file(CeL.get_module_path()));
+	combined_file_contents.push(`
+/*
+	本檔案為自動生成，請勿手動編輯！
+	The main script file: ${profile.combined_script_file_path}
+		is auto created by auto-generate tool: ${library_build_script_name}(.js) @ ${new Date}.
+*/
+`, CeL.get_file(CeL.get_module_path()));
 
 	function add_code_of_id(id) {
 		const declaration = all_named_code_data[id];
@@ -94,8 +102,8 @@ function build_standalone_version() {
 	}
 
 	combined_file_contents.splice(1, 0, `
-(function(){
-	const _golbal = typeof globalThis ==='object' ? globalThis : golbal;
+(function () {
+	const _golbal = typeof globalThis === 'object' ? globalThis : golbal;
 	_golbal.CeL = _golbal.CeL || {};
 	if (_golbal.CeL.initializer) {
 		_golbal.CeL._initializer = _golbal.CeL.initializer;
@@ -112,3 +120,4 @@ CeL.run(CeL.get_old_namespace()?._initializer);
 	const node_fs = require('fs');
 	node_fs.writeFileSync(profile.combined_script_file_path, combined_file_contents.join('\n') + '\n' + external_file_contents.join('\n'));
 }
+
