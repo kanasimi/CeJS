@@ -3430,6 +3430,11 @@ function module_code(library_namespace) {
 		}, function(modules, error, data) {
 			console.log([ modules, error ]);
 		});
+
+		// 檢測有沒有此項參數 @ function wiki_API_page()
+		if (!session || session.API_parameters['query+revisions'].slots) {
+			// ...
+		}
 	}
 
 	// Must be {String} for localStorage

@@ -197,6 +197,10 @@ function module_code(library_namespace) {
 	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 	 */
 	function wiki_API_page(title, callback, options) {
+		if (wiki_API.need_get_API_parameters('query+revisions', options,
+				wiki_API_page, arguments)) {
+			return;
+		}
 		var action = {
 			action : 'query'
 		};
@@ -345,10 +349,13 @@ function module_code(library_namespace) {
 		// {String|Array}
 		&& options.prop.includes('revisions');
 		if (get_content) {
+			var session = wiki_API.session_of_options(options);
 			// 2019 API:
 			// https://www.mediawiki.org/wiki/Manual:Slot
 			// https://www.mediawiki.org/wiki/API:Revisions
-			action[1].rvslots = options.rvslots || 'main';
+			if (!session || session.API_parameters['query+revisions'].slots) {
+				action[1].rvslots = options.rvslots || 'main';
+			}
 
 			// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query
