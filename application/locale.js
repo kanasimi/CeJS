@@ -2393,7 +2393,10 @@ function module_code(library_namespace) {
 
 	// 初始化偏好的語言/優先言語。
 	// setup default / current domain. ユーザーロケール(言語と地域)の判定。
-	gettext.default_domain = guess_language();
+	gettext.default_domain = library_namespace.env.default_domain
+	// 預先手動強制設定。
+	&& gettext.to_standard(library_namespace.env.default_domain)
+			|| guess_language();
 	// console.log('setup default / current domain: ' + gettext.default_domain);
 	// initialization 時，gettext 可能還沒 loaded。
 	// 因此設在 post action。e.g., @ HTA.

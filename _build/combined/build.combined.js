@@ -3,17 +3,23 @@
  * 
  * @fileoverview Tool to build standalone version of CeJS library.
  * 
- * @since 2022/9/14 16:37:38
+ * @since 2022/9/14 16:37:38, 2022/9/21 12:16:1
  */
 
 /*
 
-node build.combined.js
+node build.combined.js __profile_name__
 
 */
 
 'use strict';
 // 'use asm';
+
+const default_language = 'en';
+
+globalThis.CeL = {
+	env: { default_domain: default_language }
+};
 
 require('./_CeL.loader.nodejs.js');
 //console.log(CeL);
@@ -23,15 +29,22 @@ require('./_CeL.loader.nodejs.js');
 const profiles = {
 	CeJS_wiki: {
 		combined_script_file_path: 'CeJS_wiki/CeJS_wiki.js',
-		exclude_modules: new Set(['application.platform.nodejs', 'data.code.compatibility',]),
+		exclude_modules: new Set(['application.platform.nodejs', 'data.code.compatibility', 'application/locale/resources/cmn-Hant-TW.js']),
 		// 載入操作維基百科的主要功能。
 		include_modules: [['application.net.wiki',], () => {
-			CeL.gettext.load_domain('de', true);
+			CeL.gettext.load_domain(default_language, true);
 		}]
 	}
 }
 
-const profile = profiles.CeJS_wiki;
+const profile = profiles[process.argv[2]
+	// default profile name
+	|| 'CeJS_wiki'];
+
+if (!profile) {
+	console.error(`No valid profile name provided.`);
+	process.exit(1);
+}
 
 // --------------------------------------------------------------------------------------------
 
@@ -109,15 +122,16 @@ function build_standalone_version() {
 		_golbal.CeL._initializer = _golbal.CeL.initializer;
 		delete _golbal.CeL.initializer;
 	}
+	_golbal.CeL.env = { default_domain : ${JSON.stringify(CeL.gettext.default_domain)} };
 	_golbal.CeL.skip_loading_modules = ${JSON.stringify(named_codes_loaded)};
 })();
 `);
 
 	external_file_contents.push(`
+CeL.gettext.load_domain(${JSON.stringify(CeL.gettext.default_domain)});
 CeL.run(CeL.get_old_namespace()?._initializer);
 `);
 
 	const node_fs = require('fs');
 	node_fs.writeFileSync(profile.combined_script_file_path, combined_file_contents.join('\n') + '\n' + external_file_contents.join('\n'));
 }
-

@@ -1315,7 +1315,9 @@ async function modify_source_files() {
 	//console.log(source_repositories);
 
 	for (let [source_base_path, source_data] of Object.entries(source_repositories)) {
-		const base_GitHub_path = typeof source_data === 'object' ? source_data.base_GitHub_path : source_data;
+		if (typeof source_data !== 'object')
+			source_data = { base_GitHub_path: source_data };
+		const base_GitHub_path = source_data.base_GitHub_path;
 		await new Promise((resolve, reject) => {
 			source_base_path = CeL.simplify_path(CeL.append_path_separator(CeL.env.script_base_path + source_base_path));
 			//console.trace(source_base_path);

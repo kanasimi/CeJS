@@ -74,7 +74,7 @@ typeof CeL !== 'function' && (function() {
 			if (!/[^\\\/]$/.test(path)) {
 				path += require('path').sep;
 			}
-			if (typeof global.CeL !== 'object') {
+			if (typeof global.CeL !== 'function' && (typeof global.CeL !== 'object' || !CeL)) {
 				global.CeL = {};
 			}
 			CeL.library_path = path + 'ce.js';

@@ -5657,6 +5657,8 @@ https://blog.udn.com/glwang/130670390
 多呆一会儿	多待一會兒
 // 《第一序列》	所以他每天只来呆一会儿， (~待<VOB>v:来 ~待<role.type:ARGM-DIS>所以 ~待<role.type:A0>他 ~待<role.type:ARGM-ADV>每天 ~待<role.type:ARGM-ADV>只 ~待<role.type:ARGM-ADV>一会儿 c:所以+r:他+r:每天+d:只+v:来+v:呆+m:一会儿+wp:，)
 来呆一会儿	來待一會兒
+// 《女主从书里跑出来了怎么办》	外来人总要有地方呆吧？ (~待<COO>v:有 ~待<role.type:A0>外来人 ~待<role.type:ARGM-ADV>总 n:外来人+d:总+v:要+v:有+n:地方+v:呆+u:吧+wp:？)
+有地方呆吧	有地方待吧
 // 《开局奖励一亿条命》	妈妈我们在外面呆得好难受， (~待<role.type:A0>我们 ~待<role.type:A1>在外面 ~待<role.type:ARGM-EXT>好难受 n:妈妈+r:我们+p:在+nd:外面+v:呆+u:得+d:好+a:难受+wp:，) (~待<COO>v:说 ~待<role.type:A0>妈妈我们 ~待<role.type:A1>在外面 ~待<role.type:ARGM-ADV>好难受 n:妈妈+r:我们+p:在+nd:外面+v:呆+u:得+d:好+a:难受+wp:，)
 在外面呆得	在外面待得
 // 《从红月开始》	这一次不会在外面呆太久, (~待<COO>v:注定 ~待<role.type:ARGM-DIR>向着自己 ~待<role.type:ARGM-ADV>这一次 ~待<role.type:A1>在外面 r:这+m:一+q:次+d:不会+p:在+nd:外面+v:呆+d:太+a:久+wp:,)

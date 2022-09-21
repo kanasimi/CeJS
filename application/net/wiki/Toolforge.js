@@ -753,6 +753,7 @@ function module_code(library_namespace) {
 
 			// https://phabricator.wikimedia.org/T223406
 			// TODO: 舊版上 `actor`, `comment` 這兩個資料表不存在會出錯，需要先偵測。
+			// TODO: use JSON: https://phabricator.wikimedia.org/T299417
 			var fields = [
 					'*',
 					// https://www.mediawiki.org/wiki/Manual:Actor_table#actor_id

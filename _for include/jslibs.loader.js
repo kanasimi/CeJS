@@ -14,7 +14,7 @@
 
 try {
 
-	if (typeof CeL === 'undefined')
+	if (typeof CeL !== 'function' && (typeof CeL !== 'object' || !CeL))
 		Function('return this')().CeL = {};
 
 	// main lib path relative to the loader script.

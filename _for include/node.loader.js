@@ -20,14 +20,16 @@ require("./path/to/node.loader.js");
 
 // ---------------------------------------------------------------------//
 
+//console.trace(global.CeL);
+
 try {
 	// http://nodejs.org/api/globals.html
 	// node.js requires this method to setup REALLY global various:
 	// require isn't actually a global but rather local to each module.
-	Function('return this')().CeL = {
-		// main lib path relative to the loader script.
-		library_path : '../ce.js'
-	};
+	if (typeof CeL !== 'function' && (typeof CeL !== 'object' || !CeL))
+		Function('return this')().CeL = {};
+	// main lib path relative to the loader script.
+	CeL.library_path = '../ce.js';
 	if (false && !globalThis.require && typeof require === 'funtion')
 		globalThis.require = require;
 
