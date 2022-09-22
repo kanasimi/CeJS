@@ -10,6 +10,9 @@
 
 node build.combined.js __profile_name__
 
+TODO:
+https://kinsta.com/blog/minify-javascript/
+
 */
 
 'use strict';
@@ -29,7 +32,11 @@ require('./_CeL.loader.nodejs.js');
 const profiles = {
 	CeJS_wiki: {
 		combined_script_file_path: 'CeJS_wiki/CeJS_wiki.js',
-		exclude_modules: new Set(['application.platform.nodejs', 'data.code.compatibility', 'application/locale/resources/cmn-Hant-TW.js']),
+		exclude_modules: new Set(['application.platform.nodejs',
+			// at least on older Chrome Browser additional dependancies failed to load
+			// https://github.com/kanasimi/CeJS/issues/37#issuecomment-1254476627
+			//'data.code.compatibility',
+			'application/locale/resources/cmn-Hant-TW.js']),
 		// 載入操作維基百科的主要功能。
 		include_modules: [['application.net.wiki',], () => {
 			CeL.gettext.load_domain(default_language, true);

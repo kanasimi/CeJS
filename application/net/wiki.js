@@ -396,7 +396,8 @@ function module_code(library_namespace) {
 		}, 1, 'wiki_API');
 		// library_namespace.set_debug(2);
 		library_namespace.run(sub_modules_to_full_module_path(sub_modules),
-		//
+		// The `wiki_API.mw_web_session` is a session that operates in a web
+		// environment. For example, the Wikipedia widget.
 		function() {
 			if (wiki_API.mw_web_session) {
 				wiki_API.mw_web_session = new wiki_API({

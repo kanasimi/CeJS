@@ -273,10 +273,10 @@ function module_code(library_namespace) {
 		// e.g., set "E:\directory\" but "E:\" do not exists.
 		if (!library_namespace.directory_exists(this.main_directory)) {
 			library_namespace.error({
+				T : [
 				// gettext_config:{"id":"cannot-create-base-directory-$1"}
-				T : [ 'Cannot create base directory: %1',
-				//
-				this.main_directory ]
+				'Cannot create the base directory for downloading files: %1',
+						this.main_directory ]
 			});
 			return;
 		}
@@ -553,10 +553,10 @@ function module_code(library_namespace) {
 						+ gettext(typeof rearrange_list_file === 'function'
 						// rearrange_list_file 整合報告
 						// gettext_config:{"id":"processed-$2-series-titles-$1"}
-						? '重新整理列表檔案 [%1]，處理了%2個作品。'
+						? '重新整理列表檔案 [%1]，處理了%2個{{PLURAL:%2|作品}}。'
 						// gettext_config:{"id":"commented-out-$2-series-titles-$1"}
-						: '重新整理列表檔案 [%1]，注解排除了%2個作品。', favorite_list_file_path,
-								work_list.duplicated));
+						: '重新整理列表檔案 [%1]，注解/排除了%2個{{PLURAL:%2|作品}}。',
+								favorite_list_file_path, work_list.duplicated));
 				library_namespace.write_file(favorite_list_file_path,
 						work_list.parsed);
 			} else {

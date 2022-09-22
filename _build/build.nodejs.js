@@ -10,6 +10,8 @@
 
 node build.nodejs.js add_mark generate_plural_rules
 
+各原始碼庫設定檔: source_repositories.json
+
 TODO:
 Sorting message id by reference.
 對於只有特定 repository 引用的訊息，可依照儲存庫分割到不同 .js 檔案。
@@ -27,6 +29,10 @@ const library_base_directory_name = '../', backup_directory = '_build/old/';
 let library_main_script = 'ce.js';
 const structure_directory = '_structure/';
 const main_structure_file = structure_directory + 'structure.js';
+
+/** {RegExp} 跳過這些檔案不處理。跳過本地化語系檔本身。 */
+const default_PATTERN_ignore_file_path = /\/(?:resources)\//;
+
 
 // timestamp
 const datestamp = new Date;
@@ -1147,7 +1153,7 @@ function adapt_new_change_to_source_file(script_file_path, options) {
 					i18n_message_id_to_message['en-US'][message_id] = message;
 				} else {
 					if (!gettext_config.en) {
-						CeL.error(`${adapt_new_change_to_source_file.name}: 原始碼中新增了非 en-US 之 message 卻未提供${CeL.gettext.get_alias('en-US')}訊息! 這會造成無法匯入 translatewiki! ${JSON.stringify(message)}`);
+						CeL.error(`${adapt_new_change_to_source_file.name}: 原始碼中新增了非 en-US 之 message 卻未提供 ${CeL.gettext.get_alias('en-US')} 訊息! 這會造成無法匯入 translatewiki! ${JSON.stringify(message)}`);
 					}
 					if (i18n_message_id_to_message[language_code])
 						i18n_message_id_to_message[language_code][message_id] = message;
@@ -1311,6 +1317,7 @@ async function modify_source_files() {
 		});
 	}
 
+	// 各原始碼庫設定檔。
 	const source_repositories = JSON.parse(CeL.read_file(CeL.env.script_base_path + 'source_repositories.json').toString());
 	//console.log(source_repositories);
 
@@ -1318,13 +1325,18 @@ async function modify_source_files() {
 		if (typeof source_data !== 'object')
 			source_data = { base_GitHub_path: source_data };
 		const base_GitHub_path = source_data.base_GitHub_path;
+		let ignore_file_paths = source_data.ignore_file_paths || [];
 		await new Promise((resolve, reject) => {
 			source_base_path = CeL.simplify_path(CeL.append_path_separator(CeL.env.script_base_path + source_base_path));
 			//console.trace(source_base_path);
 			CeL.storage.traverse_file_system(source_base_path, fso_path => {
-				if (/[\\\/](?:resources|encoding\.training|tongwen)/.test(fso_path)) {
-					// 跳過本地化語系檔本身。
+				const normalized_fso_path = fso_path.replace(/\\/g, '/');
+				if (default_PATTERN_ignore_file_path.test(normalized_fso_path)) {
 					return;
+				}
+				for (const path_pattern of ignore_file_paths) {
+					if (normalized_fso_path.includes(path_pattern))
+						return;
 				}
 
 				// `${modify_source_files.name}: ${fso_path}`

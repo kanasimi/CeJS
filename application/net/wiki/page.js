@@ -353,6 +353,7 @@ function module_code(library_namespace) {
 			// 2019 API:
 			// https://www.mediawiki.org/wiki/Manual:Slot
 			// https://www.mediawiki.org/wiki/API:Revisions
+			// 檢測有沒有此項參數。
 			if (!session || session.API_parameters['query+revisions'].slots) {
 				action[1].rvslots = options.rvslots || 'main';
 			}

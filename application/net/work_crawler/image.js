@@ -505,7 +505,7 @@ function module_code(library_namespace) {
 					//
 					contents.length < _this.MIN_LENGTH
 					// gettext_config:{"id":"$1-bytes-too-small"}
-					? '檔案過小，僅 %1 位元組：'
+					? '檔案過小，僅 %1 {{PLURAL:%1|位元組}}：'
 					// gettext_config:{"id":"$1-bytes"}
 					: '檔案僅 %1 {{PLURAL:$1|位元組}}：', contents.length ]
 				} ];

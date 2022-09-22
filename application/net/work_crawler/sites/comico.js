@@ -322,7 +322,7 @@ function module_code(library_namespace) {
 								&& chapter_data.freeFlg === READABLE_FLAG) {
 							library_namespace.info([ work_data.title + ': ', {
 								// gettext_config:{"id":"there-are-still-$1-reading-volume-but-$2-$3-chapter-has-not-been-downloaded-yet.-so-checking-from-this-chapter"}
-								T : [ '還有%1張閱讀卷，且第 %2/%3 章還有沒下載過，從此章開始檢查。',
+								T : [ '還有%1張{{PLURAL:%1|閱讀卷}}，且第 %2/%3 章還有沒下載過，從此章開始檢查。',
 								//
 								work_data.ticket_left, index,
 								//
