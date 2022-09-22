@@ -21,7 +21,13 @@ https://kinsta.com/blog/minify-javascript/
 const default_language = 'en';
 
 globalThis.CeL = {
-	env: { default_domain: default_language }
+	env: {
+		default_domain: default_language,
+		// at least on older Chrome Browser additional dependancies failed to load
+		// https://github.com/kanasimi/CeJS/issues/37#issuecomment-1254476627
+		// Forced loading of compatibility modules. 強制載入相容性模組。
+		force_including_compatibility_module: true,
+	}
 };
 
 require('./_CeL.loader.nodejs.js');
@@ -32,11 +38,7 @@ require('./_CeL.loader.nodejs.js');
 const profiles = {
 	CeJS_wiki: {
 		combined_script_file_path: 'CeJS_wiki/CeJS_wiki.js',
-		exclude_modules: new Set(['application.platform.nodejs',
-			// at least on older Chrome Browser additional dependancies failed to load
-			// https://github.com/kanasimi/CeJS/issues/37#issuecomment-1254476627
-			//'data.code.compatibility',
-			'application/locale/resources/cmn-Hant-TW.js']),
+		exclude_modules: new Set(['application.platform.nodejs', 'application/locale/resources/cmn-Hant-TW.js']),
 		// 載入操作維基百科的主要功能。
 		include_modules: [['application.net.wiki',], () => {
 			CeL.gettext.load_domain(default_language, true);
@@ -71,7 +73,7 @@ function build_standalone_version() {
 /*
 	本檔案為自動生成，請勿手動編輯！
 	The main script file: ${profile.combined_script_file_path}
-		is auto created by auto-generate tool: ${library_build_script_name}(.js) @ ${new Date}.
+		is auto created by auto-generate tool: ${library_build_script_name}(.js) @ ${(new Date).toISOString()}.
 */
 `, CeL.get_file(CeL.get_module_path()));
 

@@ -4044,8 +4044,14 @@ if (typeof CeL === 'function')
 		// export.
 		library_namespace.get_module_path = get_module_path;
 
+		// Forced loading of compatibility modules. 強制載入相容性模組。
+		if (!library_namespace.env.force_including_compatibility_module
 		// check from newer to older
-		if (has_native_Set
+		// node 4 does not has Array.prototype.includes()
+		// node 16 does not has Array.prototype.at()
+		&& Array.prototype.at
+		//
+		&& has_native_Set
 		// node 10.19.0 does not has `globalThis`
 		&& typeof globalThis !== 'undefined' && globalThis
 		//
@@ -4058,9 +4064,6 @@ if (typeof CeL === 'function')
 		&& String.prototype.trimEnd && String.prototype.padEnd
 		// node 6.2.2 does not has Object.values(), Object.entries()
 		&& Object.entries
-		// node 4 does not has Array.prototype.includes()
-		// node 16 does not has Array.prototype.at()
-		&& Array.prototype.at
 		// Chrome/73.0.3683.20, Firefox/67.0 has .matchAll(),
 		// node 11.9 DO NOT has .matchAll().
 		&& String.prototype.matchAll) {
