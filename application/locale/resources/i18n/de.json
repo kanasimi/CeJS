@@ -3,6 +3,7 @@
 		"authors": [
 			"Brettchenweber",
 			"DraconicDark",
+			"Justman10000",
 			"ThisCarthing",
 			"ZiqiLiang"
 		]
@@ -61,6 +62,7 @@
 	"missing-page": "Fehlende Seite",
 	"invalid-page-title": "Ungültiger Seitenname",
 	"no-changes": "Keine Änderungen.",
+	"no-user-name-or-password-provided.-the-login-attempt-was-abandoned": "Kein Benutzername oder Passwort angegeben. Der Anmeldeversuch wurde abgebrochen.",
 	"too-many-failed-login-attempts-$1": "Zu viele fehlgeschlagene Login-Versuche: %1",
 	"Comma-separator": ",&#32;",
 	"invalid-parameter-$1": "Ungültiger Parameter: %1",
@@ -170,6 +172,7 @@
 	"korea": "Korea",
 	"thailand": "Thailand",
 	"india": "Indien",
+	"duplicate-task-name-$1!-will-overwrite-old-task-with-new-task-$2→$3": "Doppelter Aufgabenname %1! Überschreibt die alte Aufgabe mit der neuen Aufgabe: %2→%3",
 	"user": "Benutzer",
 	"count-of-languages": "Anzahl der Sprachen",
 	"series-has-ended": "Serie ist beendet."

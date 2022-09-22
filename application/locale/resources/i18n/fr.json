@@ -651,7 +651,7 @@
 	"using-convert_id-$1": "Utilisation de « convert_id[%1] »",
 	"using-convert_id-$1-via-url-$2": "Utilisation de « convert_id[%1] » via l’URL : %2",
 	"invalid-id-converter-for-$1": "Identifiant de convertisseur non valide pour %1",
-	"downloading-$1-$2": "Téléchargement de %1 : « %2 »",
+	"downloading-$1-$2": "Téléchargement de « %1 » : %2",
 	"a-total-of-$1-works-have-been-downloaded": "Au total, %1 œuvres ont été téléchargées.",
 	"$1-works-produced-special-conditions-recorded-in-$2": "%1 œuvres ont produit des conditions spéciales, enregistrées dans [%2].",
 	"ready-to-cancel-the-download-job.-it-will-take-effect-after-downloading-this-chapter": "Prêt à annuler la tâche de téléchargement. Cela prendra effet après le téléchargement de ce chapitre.",

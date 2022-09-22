@@ -8,6 +8,7 @@
 			"ShuyanW",
 			"Stang",
 			"StarrySky",
+			"Willy1018",
 			"Yining Chen",
 			"星海"
 		]
@@ -861,6 +862,7 @@
 	"invalid-task_configuration-(should-be-$2)-{$3}-$1": "无效的任务配置（应当为%2）：{%3} %1",
 	"revision-id": "版本ID",
 	"multiple-discussion-links-exist": "存在多个讨论链接：",
+	"add-warning-messages": "添加警告信息。",
 	"update-links-to-archived-section-$1-$2": "更新链接至存档节 %1: %2",
 	"please-help-to-check-this-edit": "请帮助检查此编辑。",
 	"debug-level": "调试级别",
