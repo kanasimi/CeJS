@@ -481,7 +481,7 @@ function module_code(library_namespace) {
 			// + (this[1] || '')
 			+ this[1] + (this.length > 2
 			// && this[2] !== undefined && this[2] !== null
-			? this.pipe
+			? (this.pipe || '|')
 			// + (this[2] || '')
 			+ this[2] : '') + ']]';
 		},
