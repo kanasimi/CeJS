@@ -409,6 +409,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('依 options.write_to 寫入至 '
 					+ wiki_API.title_link_of(title), 1, 'wiki_API_edit');
 		}
+		// console.trace(options);
 
 		// 造出可 modify 的 options。
 		if (options) {

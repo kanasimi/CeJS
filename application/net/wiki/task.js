@@ -2358,7 +2358,9 @@ function module_code(library_namespace) {
 			allow_empty : false,
 			// 採用 skip_nochange 可以跳過實際 edit 的動作。
 			// 對於大部分不會改變頁面的作業，能大幅加快速度。
-			skip_nochange : true
+			skip_nochange : true,
+			// For `{{bots|optout=n1,n2}}`
+			notification_name : ''
 		}, callback,
 		/** {ℕ⁰:Natural+0}全無變更頁面數。 */
 		nochange_count = 0;
@@ -2393,6 +2395,7 @@ function module_code(library_namespace) {
 			// e.g., write_to
 			for (callback in options) {
 				if (callback in config) {
+					// 主要是 edit 用的 options。
 					if (!config[callback] && (callback in {
 						nocreate : 1,
 						minor : 1,
@@ -2407,6 +2410,7 @@ function module_code(library_namespace) {
 				}
 			}
 		}
+		// console.trace([ config, options ]);
 
 		if (each[1]) {
 			// library_namespace.info('wiki_API.work: Set append_to_this:');
