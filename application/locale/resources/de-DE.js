@@ -166,6 +166,8 @@
 	"expand": "ausklappen",
 	"collapse": "einklappen",
 	"Duplicate task name %1! Will overwrite old task with new task: %2\u2192%3": "Doppelter Aufgabenname %1! \u00dcberschreibt die alte Aufgabe mit der neuen Aufgabe: %2\u2192%3",
+	"\u8de8\u8a9e\u8a00\u6a21\u677f\u7684\u672c\u5730\u6a19\u984c\u8207\u5916\u8a9e\u6a19\u984c\u76f8\u540c": "Der lokale Titel in der interlingualen Vorlage ist derselbe wie der fremdsprachige Titel",
+	"Local page title contains the local title in the interlanguage template": "Lokaler Seitentitel enth\u00e4lt den lokalen Titel in der Interlanguage-Vorlage",
 	"user": "Benutzer",
 	"\u8a9e\u8a00\u6578": "Anzahl der Sprachen",
 	"\u4f5c\u54c1\u5df2\u5b8c\u7d50\u3002": "Serie ist beendet."

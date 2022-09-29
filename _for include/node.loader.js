@@ -20,7 +20,7 @@ require("./path/to/node.loader.js");
 
 // ---------------------------------------------------------------------//
 
-//console.trace(global.CeL);
+// console.trace(global.CeL);
 
 try {
 	// http://nodejs.org/api/globals.html

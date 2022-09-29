@@ -3475,8 +3475,8 @@
 		"message": "《%1》：",
 		"notes": "part 1.",
 		"scope": "work_crawler.js: confirm_recheck()",
-		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title / id",
+		"original_message_language_code": "cmn-Hant-TW",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/chapter.js#L576}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
