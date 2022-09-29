@@ -8,6 +8,7 @@
 			"Okras",
 			"Pacha Tchernof",
 			"Tanzun",
+			"UniCollab",
 			"Артём 13327",
 			"Загребин Илья"
 		]
@@ -142,6 +143,7 @@
 	"work_status-finished": "Завершено",
 	"work_status-not-found": "Не найдено",
 	"downloading-$1-table-of-contents-@-$2": "%1 скачивается — Содержание @ %2",
+	"the-e-book-will-be-regenerated-from-$1$2": "Электронная книга будет сгенерирована заново с %1 %2.",
 	"download-from-§$1": "Скачать из §%1.",
 	"of-file-$1": "&#32; файла %1",
 	"toc.description": "описание",
