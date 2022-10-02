@@ -409,7 +409,11 @@ function module_code(library_namespace) {
 			library_namespace.debug('依 options.write_to 寫入至 '
 					+ wiki_API.title_link_of(title), 1, 'wiki_API_edit');
 		}
-		// console.trace(options);
+		// 暫時debug [[Template:Bulletin]]
+		if (title === 'Template:Bulletin') {
+			console.trace(options);
+			throw new Error('Edit Template:Bulletin!');
+		}
 
 		// 造出可 modify 的 options。
 		if (options) {
