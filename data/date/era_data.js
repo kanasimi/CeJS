@@ -4835,7 +4835,7 @@ CeL.era.pass_on = {
 		'House of Windsor/George V|1910/5/6~|:CE|配偶=1893/7/6 Mary of Teck|注=House of Windsor since 1917|時期=British',
 		'/Edward VIII|1936/1/20~|:CE|配偶=1937/6/3 Wallis Simpson',
 		'/George VI|1936/12/11~|:CE|配偶=1923/4/26 Queen Elizabeth The Queen Mother',
-		'/Elizabeth II|1952/2/6~|:CE|生=1926/4/21|卒=2022/9/8 15:30 UTC|君主性別=女|配偶=1947/11/20 Prince Philip, Duke of Edinburgh',
+		'/Elizabeth II|1952/2/6~|:CE|生=1926/4/21|卒=2022/9/8 15:10 UTC+1|君主性別=女|配偶=1947/11/20 Prince Philip, Duke of Edinburgh',
 		'/Charles III|2022/9/8~'
 				+ CeL.era.pass_on.last_day
 				+ '|:CE|生=1948/11/14|配偶=1981/7/29–1996 Diana Spencer; 2005/4/9 Camilla Parker Bowles'

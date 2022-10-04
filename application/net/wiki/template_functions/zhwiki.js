@@ -121,6 +121,18 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function expand_template_楷體(options) {
+		var parameters = this.parameters;
+		return '<span class="template-kai">' + (parameters[1] || '楷体')
+				+ '</span>';
+	}
+
+	function parse_template_楷體(token, index, parent, options) {
+		token.expand = expand_template_楷體;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// {{Lang|ja|參數值}} → -{參數值}-
 	function expand_template_Lang(options) {
 		var parameters = this.parameters;
@@ -129,9 +141,7 @@ function module_code(library_namespace) {
 	}
 
 	function parse_template_Lang(token, index, parent, options) {
-		Object.assign(token, {
-			expand : expand_template_Lang
-		});
+		token.expand = expand_template_Lang;
 	}
 
 	// --------------------------------------------------------------------------------------------

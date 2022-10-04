@@ -878,6 +878,7 @@ function module_code(library_namespace) {
 			if (parsed
 			// for parsed === undefined (missing: '')
 			&& (!Array.isArray(parsed) || parsed.type !== 'plain')) {
+				// this.truncate();
 				this[0] = parsed;
 			}
 			this.parsed = true;

@@ -10,6 +10,8 @@
 
 </code>
  * 
+ * @see [[Special:MostTranscludedPages]], [[Template:High-use]]
+ * 
  * @since 2021/1/24 16:6:50
  */
 
@@ -102,6 +104,18 @@ function module_code(library_namespace) {
 
 	function parse_template_Color(token) {
 		token.expand = expand_template_Color;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// {{color|英文顏色名稱或是RGB 16進制編碼|文字}}
+	function expand_template_At(options) {
+		var parameters = this.parameters;
+		return '[[File:At_sign.svg|' + (parameters[1] || 15) + 'px|link=]]';
+	}
+
+	function parse_template_At(token) {
+		token.expand = expand_template_At;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -366,6 +380,8 @@ function module_code(library_namespace) {
 		Font : parse_template_Font,
 		Color : parse_template_Color,
 		'Colored link' : parse_template_Colored_link,
+
+		'@' : parse_template_At,
 
 		// 一些會添加 anchors 的特殊模板。
 		Anchor : parse_template_Anchor,

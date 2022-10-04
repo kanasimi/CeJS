@@ -379,7 +379,40 @@ function module_code(library_namespace) {
 			}));
 	wiki_extensiontags = wiki_extensiontags.to_hash();
 
-	function evaluate_parser_function(options) {
+	// ----------------------------------------------------
+
+	// TODO:
+	function expand_parser_function_parameter(parameter_token, parameters) {
+		if (parameter_token.type === 'parameter') {
+			var value = parameter_token[0].toString().trim();
+			if (parameters[value]) {
+				value = expand_parser_function_parameter(parameters[value],
+						parameters);
+			}
+
+			if (!value) {
+				value = expand_parser_function_parameter(parameter_token[1],
+						parameters);
+			}
+
+			if (value)
+				return value;
+		}
+
+		// w.g., '{{{1}}}' and no parameters[1]
+		return parameter_token.toString().trim();
+	}
+
+	var parser_function_evaluater = {
+		len : function(parameters, options) {
+			return expand_parser_function_parameter(parameters[1], parameters).length;
+		}
+	};
+
+	function evaluate_parser_function(parameters, options) {
+	}
+
+	function evaluate_parser_function_token(options) {
 		var argument_1 = this.parameters[1] && this.parameters[1].toString();
 		var argument_2 = this.parameters[2] && this.parameters[2].toString();
 		var argument_3 = this.parameters[3] && this.parameters[3].toString();
@@ -2036,7 +2069,7 @@ function module_code(library_namespace) {
 				parameters.name = matched[2];
 				// 若指定 .valueOf = function()，
 				// 會造成 '' + token 執行 .valueOf()。
-				parameters.evaluate = evaluate_parser_function;
+				parameters.evaluate = evaluate_parser_function_token;
 
 			} else {
 				// console.trace(parameters[0]);
@@ -2078,12 +2111,25 @@ function module_code(library_namespace) {
 
 					if (parameters.length === 1
 							&& typeof parameters[0] === 'string') {
-						var matched = parameters[0].match(/^(\w+:)([\s\S]*)$/);
+						matched = parameters[0].match(/^(\w+:)([\s\S]*)$/);
 						if (matched) {
+							// 保持 parameters[0] 為 magic word。
 							parameters[0] = matched[1];
 							parameters.push(matched[2]);
 						}
+					} else if (Array.isArray(parameters[0])
+					// e.g., `{{safesubst:#if:{{{2|}}}}}`
+					// e.g., `{{safesubst:#if:{{{2|}}}|{{{2}}}|{{{1}}}}}`
+					&& typeof parameters[0][0] === 'string') {
+						matched = parameters[0][0].match(/^(\w+:)([\s\S]*)$/);
+						if (matched) {
+							parameters[0][0] = matched[2];
+							// 保持 parameters[0] 為 magic word。
+							parameters.unshift(matched[1]);
+						}
 					}
+
+					// assert: !!matched === true
 
 				} else {
 					if (namespace[0]) {
@@ -2196,16 +2242,31 @@ function module_code(library_namespace) {
 				return attribute_hash;
 			}
 
+			var _options = options;
+			if (options.target_array) {
+				/**
+				 * <code>
+
+				`value = parse_wikitext(value, options);` 會錯誤的寫入 options.target_array
+				e.g.,
+				wikitext = `<span id="修改[[WP:命名常規#地名|命名常規#地名]]一節"></span>`; parsed = CeL.wiki.parser(wikitext).parse();
+
+				</code>
+				 */
+				_options = library_namespace.new_options(options);
+				delete _options.target_array;
+			}
+
 			var attributes_list = [], matched;
 			while ((matched = PATTERN_tag_attribute.exec(attributes))
 					&& matched[0]) {
 				// console.trace(matched);
-				attributes_list.push(parse_wikitext(matched[0], options));
+				attributes_list.push(parse_wikitext(matched[0], _options));
 				var name = matched[1];
 				if (!name) {
 					// console.assert(!!matched[4]);
 					if (matched[4]) {
-						name = parse_wikitext(matched[4], options);
+						name = parse_wikitext(matched[4], _options);
 						// assert: name.toString() === matched[4]
 						attribute_hash[/* name.toString() */matched[4]] = name;
 					}
@@ -2213,13 +2274,13 @@ function module_code(library_namespace) {
 				}
 
 				// parse attributes
-				// name = parse_wikitext(name, options);
+				// name = parse_wikitext(name, _options);
 				var value = matched[3]
 				// 去掉 "", ''
 				|| matched[2].slice(1, -1);
 				if (wiki_API.HTML_to_wikitext)
 					value = wiki_API.HTML_to_wikitext(value);
-				value = parse_wikitext(value, options);
+				value = parse_wikitext(value, _options);
 				attribute_hash[name] = value;
 			}
 			if (false) {

@@ -60,6 +60,10 @@ function module_code(library_namespace) {
 	// @inner
 	function preprocess_section_link_token(token, options) {
 		// console.trace(token);
+		if (!token) {
+			// e.g., CeL.wiki.parse('=={{lang|en}}==')
+			return token;
+		}
 
 		// 前置作業: 處理模板之類特殊節點。
 		if (typeof options.preprocess_section_link_token === 'function') {
@@ -98,6 +102,10 @@ function module_code(library_namespace) {
 
 		if (token.type === 'comment') {
 			return '';
+		}
+
+		if (token.type === 'hr') {
+			return token.toString();
 		}
 
 		// console.log(token);
@@ -250,10 +258,10 @@ function module_code(library_namespace) {
 				return token;
 			}
 
-			if (token.name in {
+			if ((token.name in {
 				// {{lang|語言標籤|內文}}
 				Lang : true
-			}) {
+			}) && token.parameters[2]) {
 				return preprocess_section_link_token(token.parameters[2],
 						options);
 			}
@@ -1611,10 +1619,14 @@ function module_code(library_namespace) {
 		var anchor_hash = Object.create(null);
 		function register_anchor(anchor, token) {
 			anchor = normalize_anchor(anchor);
-			if (typeof anchor === 'string' && anchor.length > 1000) {
-				// console.trace(token);
-				// console.trace(anchor);
-				throw new Error('Invalid anchor!');
+			if (typeof anchor === 'string' && anchor.length > 1024) {
+				Error.stackTraceLimit = Infinity;
+				console.trace([ anchor, token.toString() ]);
+				console.trace(token);
+				throw new Error('Invalid anchor! (' + anchor.length
+						+ ' characters)');
+				// 經過測試只會取前1024字元。 [[w:zh:Special:Diff/51003951]]
+				anchor = anchor.slice(0, 1024);
 			}
 			// 以首個出現的為準。
 			if (anchor && !(anchor in anchor_hash)) {
@@ -1627,10 +1639,13 @@ function module_code(library_namespace) {
 		/** {Array} parsed page content 頁面解析後的結構。 */
 		var parsed = wiki_API.parser(wikitext, options).parse();
 		if (false) {
-			library_namespace.assert([ wikitext, parsed.toString() ],
-					'wikitext parser check for wikitext');
-			console.log(parsed);
+			library_namespace.assert
+					&& library_namespace.assert(
+							[ wikitext, parsed.toString() ],
+							'wikitext parser check for wikitext');
+			console.trace(parsed);
 		}
+		// console.trace(parsed[0][0].attributes.id);
 
 		var session = wiki_API.session_of_options(options);
 		// console.log(wiki_API.site_name(session));
@@ -1751,6 +1766,9 @@ function module_code(library_namespace) {
 					if (anchor.type !== 'plain') {
 						// token = _set_wiki_type([ token ], 'plain');
 						anchor = [ anchor ];
+						anchor.toString
+						//
+						= wiki_API.parse.wiki_token_toString.plain;
 					}
 					// e.g., {{Wikicite|ref={{sfnref|...}} }} .expand() 之後，
 					// 解析 id="{{sfnref|...}}"
@@ -1760,6 +1778,8 @@ function module_code(library_namespace) {
 						if (template_token.expand)
 							parent[index] = template_token.expand();
 					}, _options);
+					// preserve old properties
+					var toString = anchor.toString;
 					anchor = anchor.map(function(token) {
 						if (token.type === 'magic_word_function'
 						// && token.is_magic_word
@@ -1768,6 +1788,8 @@ function module_code(library_namespace) {
 						}
 						return token;
 					});
+					// recover
+					anchor.toString = toString;
 				}
 				if (false && /{{/.test(normalize_anchor(anchor))) {
 					// Should not go to here.

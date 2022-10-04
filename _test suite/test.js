@@ -3496,7 +3496,25 @@ function test_wiki() {
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{今日}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert(['transclusion', parsed.type], 'template in template name #2-1');
 		assert(['transclusion', parsed[0][1].type], 'template in template name #2-2');
+
 		wikitext = '{{#ifexpr: {{{1}}} > 0 and {{{1}}} < 1.0 or {{#ifeq:{{{decimal}}}| yes}} |is decimal |not decimal}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['magic_word_function', parsed.type]);
+		// [[mw:Help:Substitution]]
+		wikitext = '{{subst:msgnw:foo}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['magic_word_function', parsed.type]);
+		wikitext = '{{safesubst:#if:{{{2|}}}|{{{2}}}|{{{1}}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['magic_word_function', parsed.type]);
+		wikitext = '{{subst:UC:{{subst:tc}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['magic_word_function', parsed.type]);
+		wikitext = '{{subst:ns:{{subst:#expr:2*3}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['magic_word_function', parsed.type]);
+		wikitext = '{{ns:{{subst:#expr:2*3}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
 		assert(['magic_word_function', parsed.type]);
 
 		// https://test.wikipedia.org/wiki/L
@@ -3756,8 +3774,9 @@ function test_wiki() {
 		(parsed = CeL.wiki.parser(wikitext)).each('tag_inner', function (token, index, parent) { return ''; }, true);
 		assert(['1<b style="color:#000"  ></b>2', parsed.toString()], 'wiki.parse: HTML tag #7');
 		wikitext = '<b style{{ = | a=1}}"color:red" id="{{anchorencode:id1}}">bold</b>'; parsed = CeL.wiki.parse(wikitext);
-		assert(['{{anchorencode:id1}}',	parsed.attributes.id	&& parsed.attributes.id.toString()], 'wiki.parse: HTML tag #8');
-		assert(['color:red',			parsed.attributes.style	&& parsed.attributes.style.toString()], 'wiki.parse: HTML tag #9');
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #8');
+		assert(['{{anchorencode:id1}}',	parsed.attributes.id	&& parsed.attributes.id.toString()], 'wiki.parse: HTML tag #9');
+		assert(['color:red',			parsed.attributes.style	&& parsed.attributes.style.toString()], 'wiki.parse: HTML tag #10');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #1');
@@ -3818,6 +3837,11 @@ function test_wiki() {
 		wikitext = '{{t|p=<gallery>\na.png|text\n</gallery>}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{t|<gallery>}} #1');
 		assert(['<gallery>\na.png|text\n</gallery>', parsed.parameters.p.toString()], 'wiki.parse: {{t|<gallery>}} #2');
+
+		// [[w:zh:Special:Diff/69965200/69964851]]
+		wikitext = '<span id="修改[[WP:命名常規#地名|命名常規#地名]]一節"></span>'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: <span id="[[]]"> #1');
+		assert(["修改[[WP:命名常規#地名|命名常規#地名]]一節", CeL.wiki.parse.anchor(wikitext).join()], 'wiki.parse.anchor: <span id="[[]]"> #1');
 
 		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', p2: 'vp2' })], 'template_object_to_wikitext: #1');
 		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
