@@ -358,10 +358,15 @@ function module_code(library_namespace) {
 	// allow "<br/>"
 	+ ')(\/|\\s[^<>]*)?>', 'ig');
 
-	// 在其內部的 wikitext 不會被 parse。允許內部採用 table 語法的 tags。例如
-	// [[mw:Manual:Extensions]]
-	// configurations.extensiontags
-	var wiki_extensiontags = 'pre|nowiki|gallery|indicator|langconvert|timeline|hiero|imagemap|source|syntaxhighlight|poem|quiz|score|templatestyles|templatedata|graph|maplink|mapframe|charinsert|ref|references|inputbox|categorytree|section|math|ce|chem';
+	// 優先權高低: <onlyinclude> → ‎<nowiki> → ‎ <noinclude>, ‎<includeonly>
+	// [[mw:Transclusion#Partial transclusion markup]]
+	// <noinclude>, ‎<includeonly> 在解析模板時優先權必須高於其他 tags。
+	var wiki_extensiontags = 'includeonly|noinclude|'
+			// 在其內部的 wikitext 不會被 parse。允許內部採用 table 語法的 tags。例如
+			// [[mw:Manual:Extensions]]
+			// configurations.extensiontags
+			+ 'pre|nowiki|gallery|indicator|langconvert|timeline|hiero|imagemap|source|syntaxhighlight|poem|quiz|score|templatestyles|templatedata|graph|maplink|mapframe|charinsert|ref|references|inputbox|categorytree|section|math|ce|chem';
+
 	/**
 	 * {RegExp}HTML tags 的匹配模式 of <nowiki>。這些 tag 就算中間置入 "<!--" 也不會被當作
 	 * comments，必須在 "<!--" 之前解析。 PATTERN_WIKI_TAG_of_wiki_extensiontags
@@ -381,63 +386,175 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
-	// TODO:
-	function expand_parser_function_parameter(parameter_token, parameters) {
-		if (parameter_token.type === 'parameter') {
-			var value = parameter_token[0].toString().trim();
-			if (parameters[value]) {
-				value = expand_parser_function_parameter(parameters[value],
-						parameters);
-			}
+	function convert_parameter(wikitext, parameters, options) {
+		if (!parameters)
+			parameters = Object.create(null);
 
-			if (!value) {
-				value = expand_parser_function_parameter(parameter_token[1],
-						parameters);
-			}
+		var parsed = wikitext;
+		if (typeof wikitext === 'string') {
+			parsed = wiki_API.parser(wikitext, options).parse();
+		}
+		// console.trace([ wikitext, options ]);
+		// console.trace(parsed);
 
+		var have_parameters, has_complex_parameter_name;
+		wiki_API.parser.parser_prototype.each.call(parsed, 'parameter',
+		//
+		function(token) {
+			have_parameters = true;
+			var value = token[0];
+			if (typeof value !== 'string') {
+				// e.g., `{{{{{{foo}}}}}}`, `{{{ {{{parameter_name}}} | ... }}}`
+				has_complex_parameter_name = true;
+				// Skip this parameter token
+				return;
+			}
+			value = parameters[value];
 			if (value)
 				return value;
+
+			if (token.length < 2) {
+				// e.g., `{{{1}}}` without parameter 1, return `{{{1}}}` itself.
+				return;
+			}
+
+			token = [ token[1] ];
+			convert_parameter(token, parameters, options);
+			return token[0];
+		}, true);
+
+		if (has_complex_parameter_name) {
+			has_complex_parameter_name = parsed.toString();
+			if (!wikitext || wikitext !== has_complex_parameter_name) {
+				// Re-parse again
+				parsed = convert_parameter(has_complex_parameter_name,
+						parameters, options);
+			} else if (wikitext) {
+				// assert: wikitext === has_complex_parameter_name
+				parsed.has_complex_parameter_name = true;
+			}
 		}
 
-		// w.g., '{{{1}}}' and no parameters[1]
-		return parameter_token.toString().trim();
+		if (have_parameters)
+			parsed.have_parameters = true;
+		return parsed;
 	}
 
-	var parser_function_evaluater = {
-		len : function(parameters, options) {
-			return expand_parser_function_parameter(parameters[1], parameters).length;
+	function evaluate_parsed(parsed, options) {
+		if (!parsed)
+			return parsed === undefined ? '' : /* 0 || '' */parsed;
+
+		if (parsed.evaluate) {
+			return parsed.evaluate(options);
 		}
-	};
 
-	function evaluate_parser_function(parameters, options) {
+		if (parsed.type === 'magic_word_function') {
+			return evaluate_parser_function_token.call(parsed, options);
+		}
+
+		var promise = wiki_API.parser.parser_prototype.each.call(parsed,
+		//
+		'magic_word_function', function(token) {
+			return evaluate_parsed(token, options);
+		}, true);
+
+		// console.trace(parsed);
+		return promise || parsed;
 	}
+
+	function expand_transclusion(wikitext, parameters, options, level) {
+		// 優先權高低: <onlyinclude> → ‎<nowiki> → ‎ <noinclude>, ‎<includeonly>
+		// [[mw:Transclusion#Partial transclusion markup]]
+		var matched = wikitext
+				.match(/<onlyinclude(\s[^<>]*)?>[\s\S]*?<\/onlyinclude>/g);
+		if (matched) {
+			wikitext = matched.join('').replace(/<onlyinclude(\/|\s[^<>]*)?>/g,
+					'').replace(/<\/onlyinclude>/g, '');
+		}
+
+		var parsed = wiki_API.parser(wikitext, options).parse();
+		parsed.each('tag', function(token) {
+			if (token.tag === 'noinclude')
+				return '';
+			if (token.tag === 'includeonly')
+				return token.join('');
+		}, true);
+		wikitext = parsed.toString();
+		// console.trace(wikitext);
+
+		parsed = convert_parameter(wikitext, parameters, options);
+		if (!parsed.have_parameters) {
+			// TODO:
+		}
+		wikitext = parsed.toString();
+		// console.trace(wikitext);
+
+		if (!level)
+			level = 1;
+		else
+			level++;
+
+		parsed = wiki_API.parser(wikitext, options).parse();
+		var promise = parsed.each('magic_word_function', function(token) {
+			if (token.name !== 'SAFESUBST' && token.name !== 'SUBST')
+				return;
+			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
+			var parsed = wiki_API.parse(wikitext, options);
+			if (parsed.type !== 'transclusion')
+				return parsed;
+			// TODO: expand template
+			// return new Promise();
+			return parsed.toString();
+		}, true);
+
+		function resolve_magic_word_function() {
+			var wikitext = parsed.toString();
+			// console.trace([ wikitext ]);
+			parsed = wiki_API.parser(wikitext, options).parse();
+			var promise = evaluate_parsed(parsed, options);
+			return promise || parsed;
+		}
+
+		if (promise)
+			return promise.then(resolve_magic_word_function);
+
+		return resolve_magic_word_function();
+	}
+
+	wiki_API.expand_transclusion = expand_transclusion;
+
+	// ----------------------------------------------------
 
 	function evaluate_parser_function_token(options) {
-		var argument_1 = this.parameters[1] && this.parameters[1].toString();
-		var argument_2 = this.parameters[2] && this.parameters[2].toString();
-		var argument_3 = this.parameters[3] && this.parameters[3].toString();
+		var token = this;
+		function get_parameter_String(NO) {
+			return evaluate_parsed(token.parameters[NO], options).toString();
+		}
 
-		switch (this.name) {
+		switch (token.name) {
 		case 'len':
 			// {{#len:string}}
 
 			// TODO: ags such as <nowiki> and other tag extensions will always
 			// have a length of zero, since their content is hidden from the
 			// parser.
-			return argument_1.length;
+			return get_parameter_String(1).length;
 
 		case 'sub':
 			// {{#sub:string|start|length}}
-			return argument_3 ? argument_1.substring(argument_2, argument_3)
-					: argument_1.slice(argument_2);
+			return get_parameter_String(3) ? get_parameter_String(1).substring(
+					get_parameter_String(2), get_parameter_String(3))
+					: get_parameter_String(1).slice(get_parameter_String(2));
 
 		case 'time':
 			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##time
 			// {{#time: format string | date/time object | language code | local
 			// }}
+			var argument_2 = get_parameter_String(2);
 			if (!argument_2 || argument_2 === 'now') {
 				argument_2 = new Date;
-				return argument_1.replace(/Y/g, argument_2.getUTCFullYear())
+				return get_parameter_String(1).replace(/Y/g,
+						argument_2.getUTCFullYear())
 				//
 				.replace(/n/g, argument_2.getUTCMonth() + 1)
 				//
@@ -448,14 +565,40 @@ function module_code(library_namespace) {
 				.replace(/d/g, argument_2.getUTCDate().pad(2));
 				// TODO
 			}
+			break;
 
 		case 'if':
-			// TODO: parse output of {{#if:text|...}}, {{#if:text||...}}
+			token = token.parameters[get_parameter_String(1) ? 2 : 3];
+			// console.trace(token);
+			break;
 
-			// TODO
+		case 'ifeq':
+			token = token.parameters[get_parameter_String(1) === get_parameter_String(2) ? 3
+					: 4];
+			// console.trace(token);
+			break;
+
+		case 'titleparts':
+			var title = get_parameter_String(1).split('/');
+			var start = +get_parameter_String(3);
+			start = start ? start > 0 ? start - 1 : start : 0;
+			var end = +get_parameter_String(2);
+			end = end ? end > 0 ? start + end : end : 0;
+			return (end ? title.slice(start, end) : title.slice(start))
+					.join('/');
+
+		case 'FULLPAGENAME':
+			return options && wiki_API.normalize_title(options.page, options)
+					|| '';
+
+		default:
+			library_namespace.warn('evaluate_parser_function_token: 尚未加入演算 {{'
+					+ token.name + '}} 的代碼: ' + token);
+			// 直接回傳，避免 evaluate_parsed() 重複呼叫。
+			return token;
 		}
 
-		return this;
+		return evaluate_parsed(token, options);
 	}
 
 	/**
@@ -1754,10 +1897,9 @@ function module_code(library_namespace) {
 				return index === 0
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 				&& !token.includes(include_mark)
-				//
-				? _set_wiki_type(
-				//
-				token.split(normalize ? /\s*:\s*/ : ':'), 'page_title')
+				// parameter name passed
+				// https://www.mediawiki.org/wiki/Help:Templates
+				? normalize ? token.trim() : token
 				// 經過改變，需再進一步處理。
 				: parse_wikitext(token, options, queue);
 			});
@@ -2086,7 +2228,9 @@ function module_code(library_namespace) {
 				// console.trace(parameters.name);
 				// 後面不允許空白。 must / *DEFAULTSORT:/
 				parameters.name = parameters.name.trimStart();
-				var namespace = parameters.name.match(/^([^:]+):([\s\S]*)$/);
+				// whitespace between the opening braces and the "subst:"
+				var PATTERN_MAGIC_WORD = /^([^:]+):([\s\S]*)$/;
+				var namespace = parameters.name.match(PATTERN_MAGIC_WORD);
 				// console.trace([ parameters.name, namespace ]);
 				if (!namespace)
 					namespace = [ , parameters.name ];
@@ -2109,24 +2253,36 @@ function module_code(library_namespace) {
 					// 此時以 parameters[0].slice(1) 可獲得首 parameter。
 					parameters.is_magic_word = true;
 
-					if (parameters.length === 1
-							&& typeof parameters[0] === 'string') {
-						matched = parameters[0].match(/^(\w+:)([\s\S]*)$/);
+					// assert: !!matched === false
+
+					// e.g., `{{safesubst:#if:|{{{1}}}|user}}`
+					if (typeof parameters[0] === 'string') {
+						matched = parameters[0].match(PATTERN_MAGIC_WORD);
 						if (matched) {
+							parameters[0] = matched[2];
 							// 保持 parameters[0] 為 magic word。
-							parameters[0] = matched[1];
-							parameters.push(matched[2]);
+							parameters.unshift(matched[1] + ':');
 						}
 					} else if (Array.isArray(parameters[0])
 					// e.g., `{{safesubst:#if:{{{2|}}}}}`
 					// e.g., `{{safesubst:#if:{{{2|}}}|{{{2}}}|{{{1}}}}}`
 					&& typeof parameters[0][0] === 'string') {
-						matched = parameters[0][0].match(/^(\w+:)([\s\S]*)$/);
+						matched = parameters[0][0].match(PATTERN_MAGIC_WORD);
 						if (matched) {
 							parameters[0][0] = matched[2];
 							// 保持 parameters[0] 為 magic word。
-							parameters.unshift(matched[1]);
+							parameters.unshift(matched[1] + ':');
 						}
+					}
+
+					if (!matched) {
+						// e.g., {{FULLPAGENAME}}
+						// https://en.wikipedia.org/wiki/Help:Magic_words#Variables
+						if (parameters.length > 1) {
+							// e.g., `{{ = | a=1}}`
+							parameters.splice(1, 0, '');
+						}
+						matched = true;
 					}
 
 					// assert: !!matched === true

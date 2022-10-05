@@ -3504,10 +3504,13 @@ function test_wiki() {
 		wikitext = '{{subst:msgnw:foo}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		assert(['magic_word_function', parsed.type]);
-		wikitext = '{{safesubst:#if:{{{2|}}}|{{{2}}}|{{{1}}}}}'; parsed = CeL.wiki.parse(wikitext);
+		wikitext = '{{safesubst:#if:|{{{1}}}|user}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		assert(['magic_word_function', parsed.type]);
-		wikitext = '{{subst:UC:{{subst:tc}}}}'; parsed = CeL.wiki.parse(wikitext);
+		wikitext = '{{ safesubst:#if:{{{2|}}}|{{{2}}}|{{{1}}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['magic_word_function', parsed.type]);
+		wikitext = '{{  subst:UC:{{subst:tc}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		assert(['magic_word_function', parsed.type]);
 		wikitext = '{{subst:ns:{{subst:#expr:2*3}}}}'; parsed = CeL.wiki.parse(wikitext);
@@ -3516,6 +3519,20 @@ function test_wiki() {
 		wikitext = '{{ns:{{subst:#expr:2*3}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		assert(['magic_word_function', parsed.type]);
+
+		// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##titleparts
+		assert(['Talk:Foo/bar/baz/quok',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok }}').evaluate()], '{{#titleparts}} #1');
+		assert(['Talk:Foo',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | 1 }}').evaluate()], '{{#titleparts}} #2');
+		assert(['Talk:Foo/bar',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | 2 }}').evaluate()], '{{#titleparts}} #3');
+		assert(['bar/baz',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | 2 | 2 }}').evaluate()], '{{#titleparts}} #4');
+		assert(['bar/baz/quok',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | | 2 }}').evaluate()], '{{#titleparts}} #5');
+		assert(['',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | | 5 }}').evaluate()], '{{#titleparts}} #6');
+		assert(['Talk:Foo/bar/baz',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 }}').evaluate()], '{{#titleparts}} #7');
+		assert(['',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -4 }}').evaluate()], '{{#titleparts}} #8');
+		assert(['',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -5 }}').evaluate()], '{{#titleparts}} #9');
+		assert(['quok',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | | -1 }}').evaluate()], '{{#titleparts}} #11');
+		assert(['bar/baz',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 | 2 }}').evaluate()], '{{#titleparts}} #12');
+		assert(['baz',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 | -2 }}').evaluate()], '{{#titleparts}} #1');
 
 		// https://test.wikipedia.org/wiki/L
 		wikitext = '{{L|=__1|p2|link 1=L_1 | link  1=L__1  | link   1=   L___1   |link2<!-- l2=2 -->=L2|<!-- l3 -->link3=L3|<!-- l4 --> link4 <!-- l4 --> =L4}}'; parsed = CeL.wiki.parser(wikitext).parse();

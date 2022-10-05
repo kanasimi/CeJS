@@ -1620,11 +1620,13 @@ function module_code(library_namespace) {
 		function register_anchor(anchor, token) {
 			anchor = normalize_anchor(anchor);
 			if (typeof anchor === 'string' && anchor.length > 1024) {
-				Error.stackTraceLimit = Infinity;
-				console.trace([ anchor, token.toString() ]);
-				console.trace(token);
-				throw new Error('Invalid anchor! (' + anchor.length
-						+ ' characters)');
+				if (false) {
+					Error.stackTraceLimit = Infinity;
+					console.trace([ anchor, token.toString() ]);
+					console.trace(token);
+					throw new Error('Invalid anchor! (' + anchor.length
+							+ ' characters)');
+				}
 				// 經過測試只會取前1024字元。 [[w:zh:Special:Diff/51003951]]
 				anchor = anchor.slice(0, 1024);
 			}

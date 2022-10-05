@@ -2743,7 +2743,9 @@ function module_code(library_namespace) {
 
 		// --------------------------------------------------------------------
 
-		var extensiontag_list = [];
+		// @see wiki_extensiontags @ CeL.application.net.wiki.parser.wikitext
+		// <noinclude>, ‎<includeonly> 在解析模板時優先權必須高於其他 tags。
+		var extensiontag_list = [ 'includeonly', 'noinclude' ];
 
 		configurations.extensiontags
 		//
