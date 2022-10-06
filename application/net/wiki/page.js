@@ -1026,7 +1026,7 @@ function module_code(library_namespace) {
 					'Only {Function}filter to search for .search_diff=true!');
 		}
 
-		function search(revision, old_revision) {
+		function do_search(revision, old_revision) {
 			var value = revision.revid ? wiki_API.revision_content(revision)
 					: revision;
 
@@ -1050,23 +1050,44 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			var index = 0, revisions = page_data.revisions;
-			if (!newer_revision) {
-				newer_revision = revisions[index++];
+			var revision_index = 0, revisions = page_data.revisions;
+			if (!newer_revision && revisions.length > 0) {
+				newer_revision = revisions[revision_index++];
 				newer_revision.lines = wiki_API
 						.revision_content(newer_revision).split('\n');
 				// console.trace([search(newer_revision),options]);
-				if (!options.search_diff && !options.search_deleted
-						&& !search(newer_revision)) {
-					// 最新版本就已經不符合需求。
-					callback(null, page_data);
-					return;
+				if (!options.search_diff && !options.search_deleted) {
+					var result = do_search(newer_revision);
+					if (!result) {
+						// 最新版本就已經不符合需求。
+						callback(null, page_data);
+						return;
+					}
+					if (library_namespace.is_thenable(result)) {
+						result.then(function(result) {
+							if (!result) {
+								// 最新版本就已經不符合需求。
+								callback(null, page_data);
+								return;
+							}
+							search_next_revision();
+						});
+						return;
+					}
 				}
 			}
 
 			// console.log(revisions.length);
-			while (index < revisions.length) {
-				var this_revision = revisions[index++];
+			search_next_revision();
+
+			function search_next_revision() {
+				// console.trace(revision_index + '/' + revisions.length);
+				if (revision_index === revisions.length) {
+					finish_search();
+					return;
+				}
+
+				var this_revision = revisions[revision_index++];
 				// MediaWiki using line-diff
 				this_revision.lines = wiki_API.revision_content(this_revision)
 						.split('\n');
@@ -1089,64 +1110,110 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				var found = diff_list.some(function(diff) {
+				var found, diff_index = 0;
+
+				search_next_diff();
+
+				function search_next_diff() {
+					// console.trace(diff_index + '/' + diff_list.length);
+					var result = undefined;
+					if (diff_index === diff_list.length) {
+						if (options.revision_post_processor) {
+							result = options
+									.revision_post_processor(newer_revision);
+						}
+						if (library_namespace.is_thenable(result)) {
+							result.then(finish_search_revision);
+						} else {
+							finish_search_revision();
+						}
+						return;
+					}
+
+					var diff = diff_list[diff_index++];
 					// console.trace(diff);
 					if (options.search_diff) {
-						return to_search(diff, newer_revision, this_revision);
+						result = to_search(diff, newer_revision, this_revision);
+					} else {
+						// var removed_text = diff[0], added_text = diff[1];
+						result =
+						// 警告：在 line_mode，"A \n"→"A\n" 的情況下，
+						// "A" 會同時出現在增加與刪除的項目中，此時必須自行檢測排除。
+						do_search(diff[options.search_deleted ? 0 : 1])
+						//
+						&& !do_search(diff[options.search_deleted ? 1 : 0]);
 					}
-					// var removed_text = diff[0], added_text = diff[1];
-					return search(diff[options.search_deleted ? 0 : 1])
-					// 警告：在 line_mode，"A \n"→"A\n" 的情況下，
-					// "A" 會同時出現在增加與刪除的項目中，此時必須自行檢測排除。
-					&& !search(diff[options.search_deleted ? 1 : 0]);
-				});
-				if (options.revision_post_processor) {
-					options.revision_post_processor(newer_revision);
+
+					if (library_namespace.is_thenable(result)) {
+						result.then(search_next_diff);
+					} else {
+						search_next_diff();
+					}
 				}
-				delete newer_revision.lines;
-				// console.trace([this_revision.revid,found,search(this_revision)])
-				if (found) {
-					delete this_revision.lines;
-					// console.log(diff_list);
-					callback(newer_revision, page_data);
+
+				function finish_search_revision(page_data, error) {
+					delete newer_revision.lines;
+					// console.trace([this_revision.revid,found,search(this_revision)])
+					if (found) {
+						delete this_revision.lines;
+						// console.log(diff_list);
+						callback(newer_revision, page_data);
+						return;
+					}
+					newer_revision = this_revision;
+
+					if (revision_index === revisions.length) {
+						delete this_revision.lines;
+					}
+					search_next_revision();
+				}
+			}
+
+			function finish_search() {
+				revision_count += page_data.revisions;
+				if (revision_count > options.limit) {
+					// not found
+					callback(null, page_data);
 					return;
 				}
-				newer_revision = this_revision;
+
+				// console.trace(page_data.response);
+				// console.trace(page_data.response['continue']);
+				var rvcontinue = page_data.response['continue'];
+				if (rvcontinue) {
+					options.rvcontinue = rvcontinue.rvcontinue;
+
+					// console.trace(options);
+					library_namespace.debug('tracking_revisions: search next '
+							+ options.rvlimit
+							+ (options.limit > 0 ? '/' + options.limit : '')
+							+ ' revisions...', 2);
+					get_pages();
+					return;
+				}
+
+				// assert: 'batchcomplete' in page_data.response
+
+				// if no .rvcontinue, append a null revision,
+				// and do not search continued revisions.
+				var result = !options.search_deleted
+						&& do_search(newer_revision);
+				if (library_namespace.is_thenable(result)) {
+					result.then(do_callback);
+				} else {
+					do_callback(result);
+				}
+
+				function do_callback(result) {
+					if (result) {
+						callback(newer_revision, page_data);
+					} else {
+						// not found
+						callback(null, page_data);
+					}
+				}
 			}
-			delete this_revision.lines;
 
-			revision_count += page_data.revisions;
-			if (revision_count > options.limit) {
-				// not found
-				callback(null, page_data);
-				return;
-			}
-
-			// console.trace(page_data.response);
-			// console.trace(page_data.response['continue']);
-			var rvcontinue = page_data.response['continue'];
-			if (rvcontinue) {
-				options.rvcontinue = rvcontinue.rvcontinue;
-
-				// console.trace(options);
-				library_namespace.debug('tracking_revisions: search next '
-						+ options.rvlimit
-						+ (options.limit > 0 ? '/' + options.limit : '')
-						+ ' revisions...', 2);
-				get_pages();
-				return;
-			}
-
-			// assert: 'batchcomplete' in page_data.response
-
-			// if no .rvcontinue, append a null revision,
-			// and do not search continued revisions.
-			if (!options.search_deleted && search(newer_revision)) {
-				callback(newer_revision, page_data);
-			} else {
-				// not found
-				callback(null, page_data);
-			}
 		}
 
 		function get_pages() {
