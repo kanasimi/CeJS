@@ -108,7 +108,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// {{color|英文顏色名稱或是RGB 16進制編碼|文字}}
 	function expand_template_At(options) {
 		var parameters = this.parameters;
 		return '[[File:At_sign.svg|' + (parameters[1] || 15) + 'px|link=]]';
@@ -116,6 +115,18 @@ function module_code(library_namespace) {
 
 	function parse_template_At(token) {
 		token.expand = expand_template_At;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	function expand_template_User_link(options) {
+		var parameters = this.parameters;
+		return '[[User:' + (parameters[1]) + '|'
+				+ (parameters[2] || parameters[1]) + ']]';
+	}
+
+	function parse_template_User_link(token) {
+		token.expand = expand_template_User_link;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -143,10 +154,14 @@ function module_code(library_namespace) {
 		for (/* let */var index = 1; index < this.length; index++) {
 			var anchor = parameters[index];
 			if (typeof anchor !== 'string') {
+				// e.g., `{{Anchor|{{u|Emojibot}}}}` @ zhwiki
+
 				// old jawiki {{Anchor}}
 				// e.g., [[終着駅シリーズ]]: {{Anchor|[[牛尾正直]]}}
 				// {{Anchor|A[[B]]}} → "AB"
 				// anchor = wiki_API.wikitext_to_plain_text(anchor);
+				library_namespace.error('無法處理 anchor: ' + anchor);
+				console.trace(anchor);
 			}
 			if (anchor) {
 				// 多空格、斷行會被轉成單一 " "。
@@ -382,6 +397,7 @@ function module_code(library_namespace) {
 		'Colored link' : parse_template_Colored_link,
 
 		'@' : parse_template_At,
+		'User link' : parse_template_User_link,
 
 		// 一些會添加 anchors 的特殊模板。
 		Anchor : parse_template_Anchor,

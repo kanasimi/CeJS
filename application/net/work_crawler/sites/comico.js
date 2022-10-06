@@ -406,7 +406,7 @@ function module_code(library_namespace) {
 						// @see https://github.com/kanasimi/work_crawler
 						: {
 							// gettext_config:{"id":"the-tool-is-not-set-to-automatically-use-the-reading-volume.-if-you-are-not-using-the-installation-package-and-want-to-have-the-tool-automatically-use-the-reading-volume-please-open-the-file-manager"}
-							T : '未設定讓本工具自動使用閱讀卷。若您並非使用安裝包，並想要讓本工具自動使用閱讀卷，請打開檔案總管，到安裝本工具的目錄下（若是您使用安裝包，就不能夠設定帳號密碼了。），在 work_crawler.configuration.js 這個檔案中設定好帳號密碼資料，以及 "auto_use_ticket:true"。您可以參考 work_crawler.default_configuration.js 這個檔案來做設定。'
+							T : '未設定讓本工具自動使用閱讀卷。若您並非使用安裝包，並想要讓本工具自動使用閱讀卷，請打開檔案總管，到安裝本工具的目錄下（若是您使用安裝包，就不能夠設定帳號密碼了。），在「work_crawler.configuration.js」這個 .js 組態檔案中設定好帳號密碼資料，並設定「auto_use_ticket:true」。您可以參考 work_crawler.default_configuration.js 這個檔案來做設定。'
 						};
 				auto_use_ticket_notified = true;
 			}
@@ -728,7 +728,7 @@ function module_code(library_namespace) {
 				// TODO: 顯示物品的資訊。
 				library_namespace.info({
 					// gettext_config:{"id":"$1-items-with-a-time-limit-have-been-received"}
-					T : [ '已收到%1項有期限的物品。', item_list.length ]
+					T : [ '已收到 %1 個有期限的{{PLURAL:%1|項目}}。', item_list.length ]
 				});
 			}
 

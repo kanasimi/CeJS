@@ -527,7 +527,7 @@ function module_code(library_namespace) {
 			// 若是檔案不存在，.fs_read() 可能會回傳 undefined。
 			library_namespace.warn(this.id + ': '
 			// gettext_config:{"id":"cannot-read-series-titles-$1"}
-			+ gettext('無法讀取列表檔案：%1', favorite_list_file_path));
+			+ gettext('無法讀取作品清單檔案：%1', favorite_list_file_path));
 			return [];
 		}
 
@@ -537,7 +537,7 @@ function module_code(library_namespace) {
 		if (rearrange_list_file) {
 			library_namespace.debug(this.id + ': '
 			// gettext_config:{"id":"rearrange-series-titles-$1"}
-			+ gettext('重新整理列表檔案：%1', favorite_list_file_path));
+			+ gettext('重新整理作品清單檔案：%1', favorite_list_file_path));
 		}
 		work_list = parse_favorite_list(work_list.toString(), {
 			rearrange_list : rearrange_list_file
@@ -553,7 +553,7 @@ function module_code(library_namespace) {
 						+ gettext(typeof rearrange_list_file === 'function'
 						// rearrange_list_file 整合報告
 						// gettext_config:{"id":"processed-$2-series-titles-$1"}
-						? '重新整理列表檔案 [%1]，處理了%2個{{PLURAL:%2|作品}}。'
+						? '重新整理作品清單檔案 [%1]，處理了 %2 個作品{{PLURAL:%2|標題}}。'
 						// gettext_config:{"id":"commented-out-$2-series-titles-$1"}
 						: '重新整理列表檔案 [%1]，注解/排除了%2個{{PLURAL:%2|作品}}。',
 								favorite_list_file_path, work_list.duplicated));
@@ -562,7 +562,7 @@ function module_code(library_namespace) {
 			} else {
 				library_namespace.debug(this.id + ': '
 				// gettext_config:{"id":"no-change-to-series-titles-$1"}
-				+ gettext('重新整理列表檔案 [%1]，未作改變。' + favorite_list_file_path));
+				+ gettext('作品清單檔案未作改變：[%1]' + favorite_list_file_path));
 			}
 			// Release memory. 釋放被占用的記憶體。
 			delete work_list.parsed;
@@ -623,7 +623,7 @@ function module_code(library_namespace) {
 					if (library_namespace.storage.file_exists(work_list_file)) {
 						library_namespace.info(this.id + ': '
 						// gettext_config:{"id":"using-series-titles-$1"}
-						+ gettext('改採用列表檔案：%1', work_list_file));
+						+ gettext('改為採用作品清單檔案：%1', work_list_file));
 						work_id = work_list_file;
 						return true;
 					}

@@ -76,15 +76,11 @@ function module_code(library_namespace) {
 
 	function expand_template_A(options) {
 		var parameters = this.parameters;
-		return '[[' + parameters[1]
+		return (parameters.name ? '<span id="' + parameters.name
 		//
-		+ (parameters.name ? '#' + parameters.name : '')
+		+ '"></span>' : '') + '[[' + parameters[1]
 		//
 		+ (parameters[2] ? '|' + parameters[2] : '') + ']]';
-	}
-
-	function parse_template_A(token, index, parent, options) {
-		token.expand = expand_template_A;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -265,7 +261,11 @@ function module_code(library_namespace) {
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
 		// 一些會用於章節標題的特殊模板。 for preprocess_section_link_token()
-		A : parse_template_A,
+		A : {
+			properties : {
+				expand : expand_template_A
+			}
+		},
 		Al : parse_template_Al,
 
 		// {{Do not archive}}

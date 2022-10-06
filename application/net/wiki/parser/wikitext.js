@@ -386,6 +386,7 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// 演算/轉換 wikitext 中的所有 {{{parameter}}}。
 	function convert_parameter(wikitext, parameters, options) {
 		if (!parameters)
 			parameters = Object.create(null);
@@ -397,11 +398,11 @@ function module_code(library_namespace) {
 		// console.trace([ wikitext, options ]);
 		// console.trace(parsed);
 
-		var have_parameters, has_complex_parameter_name;
+		var have_template_parameters, has_complex_parameter_name;
 		wiki_API.parser.parser_prototype.each.call(parsed, 'parameter',
 		//
 		function(token) {
-			have_parameters = true;
+			have_template_parameters = true;
 			var value = token[0];
 			if (typeof value !== 'string') {
 				// e.g., `{{{{{{foo}}}}}}`, `{{{ {{{parameter_name}}} | ... }}}`
@@ -409,9 +410,10 @@ function module_code(library_namespace) {
 				// Skip this parameter token
 				return;
 			}
-			value = parameters[value];
-			if (value)
-				return value;
+			// 取決於參數的定義性
+			// https://en.wikipedia.org/wiki/Help:Conditional_expressions
+			if (value in parameters)
+				return parameters[value];
 
 			if (token.length < 2) {
 				// e.g., `{{{1}}}` without parameter 1, return `{{{1}}}` itself.
@@ -435,11 +437,12 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (have_parameters)
-			parsed.have_parameters = true;
+		if (have_template_parameters)
+			parsed.have_template_parameters = true;
 		return parsed;
 	}
 
+	// 演算 wikitext 中的所有 magic word。
 	function evaluate_parsed(parsed, options) {
 		if (!parsed)
 			return parsed === undefined ? '' : /* 0 || '' */parsed;
@@ -448,25 +451,31 @@ function module_code(library_namespace) {
 			return parsed.evaluate(options);
 		}
 
+		var promise;
 		if (parsed.type === 'magic_word_function') {
-			return evaluate_parser_function_token.call(parsed, options);
+			promise = evaluate_parser_function_token.call(parsed, options);
+		} else {
+			promise = wiki_API.parser.parser_prototype.each.call(parsed,
+			//
+			'magic_word_function', function(token) {
+				return evaluate_parser_function_token.call(token, options);
+			}, true);
+
 		}
 
-		var promise = wiki_API.parser.parser_prototype.each.call(parsed,
-		//
-		'magic_word_function', function(token) {
-			return evaluate_parsed(token, options);
-		}, true);
-
 		// console.trace(parsed);
-		return promise || parsed;
+		return library_namespace.is_thenable(promise)
+		//
+		? promise.then(function return_parsed() {
+			return parsed;
+		}) : parsed;
 	}
 
-	function expand_transclusion(wikitext, parameters, options, level) {
+	function template_preprocessor(wikitext, options) {
+		var matched = wikitext
 		// 優先權高低: <onlyinclude> → ‎<nowiki> → ‎ <noinclude>, ‎<includeonly>
 		// [[mw:Transclusion#Partial transclusion markup]]
-		var matched = wikitext
-				.match(/<onlyinclude(\s[^<>]*)?>[\s\S]*?<\/onlyinclude>/g);
+		.match(/<onlyinclude(\s[^<>]*)?>[\s\S]*?<\/onlyinclude>/g);
 		if (matched) {
 			wikitext = matched.join('').replace(/<onlyinclude(\/|\s[^<>]*)?>/g,
 					'').replace(/<\/onlyinclude>/g, '');
@@ -482,9 +491,53 @@ function module_code(library_namespace) {
 		wikitext = parsed.toString();
 		// console.trace(wikitext);
 
-		parsed = convert_parameter(wikitext, parameters, options);
-		if (!parsed.have_parameters) {
-			// TODO:
+		return wikitext;
+	}
+
+	function generate_expand_template_function(transclusion_config) {
+		// 利用語境 context。
+		return function general_expand_template(options) {
+			// console.trace(transclusion_config);
+			var wikitext = transclusion_config.simplified_template_wikitext;
+			return transclusion_config.need_evaluate ? simplify_transclusion(
+					wikitext, this.parameters, options) : wikitext;
+		};
+	}
+
+	// 演算/簡化要 transclusion 的模板 wikitext。
+	function simplify_transclusion(wikitext, parameters, options, level) {
+		var page_data, transclusion_config;
+		if (wiki_API.is_page_data(wikitext)) {
+			page_data = wikitext;
+			wikitext = wiki_API.content_of(page_data);
+		}
+		wikitext = template_preprocessor(wikitext, options);
+
+		var parsed = convert_parameter(wikitext, parameters, options);
+		if (page_data) {
+			// cache
+			var session = wiki_API.session_of_options(options);
+			if (session) {
+				var template_name = session
+						.remove_namespace(page_data, options);
+				// delete page_data.revisions;
+				// console.trace(page_data);
+				transclusion_config = {
+					title : page_data.title,
+					// page_data : page_data,
+					need_evaluate : parsed.have_template_parameters,
+					simplified_template_wikitext : wikitext
+				};
+				wiki_API.template_functions.set_proto_properties(template_name,
+				//
+				{
+					expand :
+					//
+					generate_expand_template_function(transclusion_config)
+				}, options);
+				if (transclusion_config.need_evaluate)
+					transclusion_config = null;
+			}
 		}
 		wikitext = parsed.toString();
 		// console.trace(wikitext);
@@ -496,15 +549,19 @@ function module_code(library_namespace) {
 
 		parsed = wiki_API.parser(wikitext, options).parse();
 		var promise = parsed.each('magic_word_function', function(token) {
-			if (token.name !== 'SAFESUBST' && token.name !== 'SUBST')
+			if (token.name !== 'SAFESUBST' && token.name !== 'SUBST') {
+				if (transclusion_config && !transclusion_config.need_evaluate) {
+					transclusion_config.need_evaluate = true;
+					transclusion_config = null;
+				}
 				return;
+			}
 			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
-			var parsed = wiki_API.parse(wikitext, options);
-			if (parsed.type !== 'transclusion')
+			var parsed = wiki_API.parser(wikitext, options).parse();
+			if (level > 3 || !parsed[0] || parsed[0].type !== 'transclusion')
 				return parsed;
-			// TODO: expand template
-			// return new Promise();
-			return parsed.toString();
+			// expand template
+			return expand_transclusion(parsed, options, level);
 		}, true);
 
 		function resolve_magic_word_function() {
@@ -521,10 +578,107 @@ function module_code(library_namespace) {
 		return resolve_magic_word_function();
 	}
 
+	// 循環展開模板節點。
+	function repeatedly_expand_template_token(token, options) {
+		while (token.type === 'transclusion'
+				&& typeof token.expand === 'function') {
+			// console.trace(options);
+			// expand template, .expand_template(), .to_wikitext()
+			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
+			token = wiki_API.parse(token.expand(options), options);
+			if (wiki_API.template_functions) {
+				// console.trace(options);
+				wiki_API.template_functions.adapt_function(token, null, null,
+						options);
+			}
+			// console.trace([ token, token.expand, options ]);
+		}
+
+		return token;
+	}
+
+	// 類似 wiki_API_expandtemplates()
+	// ** 僅能提供簡單的演算功能，但提供 cache。
+	// [[Special:ExpandTemplates]]
+	function expand_transclusion(wikitext, options, level) {
+		var parsed;
+		if (typeof options === 'string') {
+			// temp
+			parsed = options;
+			options = {
+				set_not_evaluated : true
+			};
+			options[KEY_page_title_option] = parsed;
+		} else {
+			// .new_options(): 會設定 options.something_not_evaluated，避免污染。
+			options = Object.assign({
+				set_not_evaluated : true
+			}, options);
+		}
+
+		if (typeof wikitext === 'string') {
+			parsed = wiki_API.parser(wikitext, options).parse();
+		} else {
+			parsed = wikitext;
+		}
+
+		var session = wiki_API.session_of_options(options);
+		var page_options = Object.assign({
+			redirects : 1
+		}, options);
+
+		var promise = parsed.each('transclusion', function(token) {
+			token = repeatedly_expand_template_token(token, options);
+			// console.trace(token);
+			if (!token || token.type !== 'transclusion')
+				return token;
+
+			return new Promise(function(resolve, reject) {
+				function evaluate(page_data, error) {
+					if (error) {
+						// e.g. 頁面不存在，不做更改。
+						resolve();
+						return;
+					}
+					resolve(simplify_transclusion(page_data, token.parameters,
+							options, level));
+				}
+
+				var page_title = token.page_title.toString();
+
+				if (!session) {
+					page_title = wiki_API.to_namespace(page_title, 'Template');
+					wiki_API.page(page_title, evaluate, page_options);
+					return;
+				}
+
+				page_title = session.to_namespace(page_title, 'Template');
+				session.register_redirects(page_title,
+				//
+				function(page_data) {
+					// console.trace(page_data);
+					session.page(page_data, evaluate, page_options);
+				}, {
+					// namespace : 'Template',
+					no_message : true
+				});
+			});
+		}, true);
+
+		return library_namespace.is_thenable(promise)
+		//
+		? promise.then(function return_parsed() {
+			return parsed;
+		}) : parsed;
+	}
+
 	wiki_API.expand_transclusion = expand_transclusion;
 
 	// ----------------------------------------------------
 
+	var KEY_page_title_option = 'page_title';
+
+	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 	function evaluate_parser_function_token(options) {
 		var token = this;
 		function get_parameter_String(NO) {
@@ -573,7 +727,8 @@ function module_code(library_namespace) {
 			break;
 
 		case 'ifeq':
-			token = token.parameters[get_parameter_String(1) === get_parameter_String(2) ? 3
+			token = token.parameters[get_parameter_String(1) === get_parameter_String(2)
+					|| +get_parameter_String(1) === +get_parameter_String(2) ? 3
 					: 4];
 			// console.trace(token);
 			break;
@@ -588,13 +743,18 @@ function module_code(library_namespace) {
 					.join('/');
 
 		case 'FULLPAGENAME':
-			return options && wiki_API.normalize_title(options.page, options)
-					|| '';
+			return options
+					&& wiki_API.normalize_title(options[KEY_page_title_option],
+							options) || '';
 
 		default:
 			library_namespace.warn('evaluate_parser_function_token: 尚未加入演算 {{'
-					+ token.name + '}} 的代碼: ' + token);
+					+ token.name + '}} 的功能: ' + token);
 			// 直接回傳，避免 evaluate_parsed() 重複呼叫。
+			if (options && options.set_not_evaluated
+					&& !options.something_not_evaluated)
+				options.something_not_evaluated = true;
+			token.not_evaluated = true;
 			return token;
 		}
 
@@ -3701,6 +3861,8 @@ function module_code(library_namespace) {
 	});
 
 	Object.assign(wiki_API, {
+		repeatedly_expand_template_token : repeatedly_expand_template_token,
+
 		// {Object} file option hash
 		file_options : file_options,
 

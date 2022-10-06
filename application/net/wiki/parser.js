@@ -585,12 +585,14 @@ function module_code(library_namespace) {
 					var result = processor(token, index, parent_token, depth);
 					// console.log(modify_by_return);
 					// console.trace(result);
-					if (false && token.toString().includes('Internetquelle'))
+					if (false && token.toString().includes('Internetquelle')) {
 						console.trace([ index + '/' + length + ' ' + token,
 								result, promise ]);
+					}
 					if (check_if_result_is_thenable(result) || promise) {
 						set_promise(function _check_result(
 								result_after_promise_resolved) {
+							// console.trace(result_after_promise_resolved);
 							if (false && token.toString().includes(
 									'Internetquelle'))
 								console.trace([
@@ -602,9 +604,13 @@ function module_code(library_namespace) {
 								result_after_promise_resolved,
 								//
 								promise, depth, exit ]);
-							check_result(token, result_after_promise_resolved);
+							check_result(
+									token,
+									library_namespace.is_thenable(result) ? result_after_promise_resolved
+											: result);
 						});
 					} else {
+						// console.trace(result);
 						// assert: !promise || (promise is resolved)
 						// if (promise) console.trace(promise);
 						check_result(token, result);
@@ -658,6 +664,8 @@ function module_code(library_namespace) {
 					}
 
 				} else if (modify_by_return) {
+					// console.trace([ index, result, parent_token ]);
+
 					// 換掉整個 parent[index] token 的情況。
 					// `return undefined;` 不會替換，應該 return
 					// .each.remove_token; 以清空。
@@ -667,11 +675,15 @@ function module_code(library_namespace) {
 						// {String}wikitext to ( {Object}element or '' )
 						result = wiki_API.parse(result, options, []);
 					}
+					// console.trace([ result && result.toString(), index,
+					// parent_token.toString() ]);
 					if (typeof result === 'string'
 					//
 					|| Array.isArray(result)) {
 						// 將指定類型節點替換作此回傳值。
 						parent_token[index] = token = result;
+						// console.trace([ result.toString(),
+						// parent_token.toString() ]);
 					}
 				}
 

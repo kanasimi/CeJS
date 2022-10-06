@@ -976,6 +976,7 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// 模板處理功能。尤其是採用Lua的。
 
 	function template_functions_site_name(session, options) {
 		return options && options.site_name || wiki_API.site_name(session);
@@ -986,7 +987,7 @@ function module_code(library_namespace) {
 				&& token.parameters[1]
 	}
 
-	function get_function_of(template, options) {
+	function get_function_config_of(template, options) {
 		if (!template)
 			return;
 
@@ -1007,15 +1008,15 @@ function module_code(library_namespace) {
 					: template.name;
 		}
 
-		function get_template_parser() {
+		function get_function_config() {
 			return functions_of_site && functions_of_site[template_name]
 					|| template_functions.functions_of_all_sites[template_name];
 		}
 
 		// template_processor
-		var template_parser = get_template_parser();
-		if (template_parser)
-			return template_parser;
+		var function_config = get_function_config();
+		if (function_config)
+			return function_config;
 
 		if (!session || options.no_normalize) {
 			return;
@@ -1024,12 +1025,17 @@ function module_code(library_namespace) {
 		// normalize_template_name() to redirect target
 		if (!is_invoke)
 			template_name = session.to_namespace(template_name, 'Template');
-		template_name = session.redirect_target_of(template_name, options);
+		var redirect_target = template_name = session.redirect_target_of(
+				template_name, options);
+		if (redirect_target !== template_name && template.type) {
+			// template.redirect_target = redirect_target;
+		}
 		if (!is_invoke)
 			template_name = session.remove_namespace(template_name, options);
-		return get_template_parser();
+		return get_function_config();
 	}
 
+	// TODO: use adopter, adopt_function
 	function adapt_function(template_token, index, parent, options) {
 		if (!template_token || template_token.type !== 'transclusion'
 				&& !token_is_invoke(template_token)) {
@@ -1037,9 +1043,49 @@ function module_code(library_namespace) {
 		}
 
 		// template_processor()
-		var template_parser = get_function_of(template_token, options);
-		if (template_parser)
-			return template_parser(template_token, index, parent, options);
+		var function_config = get_function_config_of(template_token, options);
+		// console.trace(function_config);
+		if (!function_config) {
+			return;
+		}
+
+		if (function_config.properties) {
+			// 為 template_token 加上 template_functions 的屬性。
+			// e.g., token.expand()
+			Object.assign(template_token, function_config.properties);
+		}
+
+		if (function_config.adapter) {
+			function_config = function_config.adapter;
+		}
+		if (typeof function_config === 'function')
+			return function_config(template_token, index, parent, options);
+	}
+
+	function set_proto_properties(template_name, template_properties, options) {
+		options = library_namespace.setup_options(options);
+		var session = wiki_API.session_of_options(options);
+		var site_name = template_functions_site_name(session, options);
+		var functions_of_site = template_functions.functions_of_site[site_name];
+		if (!functions_of_site)
+			template_functions.functions_of_site[site_name] = functions_of_site = Object
+					.create(null);
+
+		var function_config = functions_of_site[template_name];
+		if (!function_config) {
+			functions_of_site[template_name] = function_config = Object
+					.create(null);
+		} else if (typeof function_config === 'function') {
+			functions_of_site[template_name] = function_config = {
+				adapter : function_config
+			};
+		}
+
+		// assert: library_namespace.is_Object(function_config)
+		if (!function_config.properties) {
+			function_config.properties = Object.create(null);
+		}
+		Object.assign(function_config.properties, template_properties);
 	}
 
 	// ------------------------------------------
@@ -1304,15 +1350,31 @@ function module_code(library_namespace) {
 
 	Object.assign(template_functions, {
 		/**
-		 * <code>
+		 * functions configuration of site <code>
 		functions_of_site[site_name] = {
-			template_name : parse_template_token(template_token, index, parsent, options) {
+			template_name : __template_configuration__
+		}
+
+		__template_configuration__ = function adapter() {};
+		// 將會轉成:
+		__template_configuration__ = { adapter : function adapter() {} };
+
+		// 一般性:
+		__template_configuration__ = {
+			// TODO: 切分 adapter,m parser
+			// adapter 兼 parser
+			adapter : function parse_template_token(template_token, index, parsent, options) {
 				// parse and create corresponding attributes
 				token.property = ...
 				// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 				token.expand = expandtemplates
+			},
+			// @see adapt_function
+			properties : {
+				expand : function expand(options) {}
 			}
-		}
+		};
+
 		<code>
 		 */
 		functions_of_site : Object.create(null),
@@ -1322,6 +1384,8 @@ function module_code(library_namespace) {
 		// 必須是模板名稱不可能使用到的 key 值。
 		KEY_dependent_on : KEY_dependent_on,
 		adapt_function : adapt_function,
+
+		set_proto_properties : set_proto_properties,
 
 		// ----------------------------
 

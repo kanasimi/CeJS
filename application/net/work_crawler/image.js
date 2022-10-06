@@ -306,9 +306,10 @@ function module_code(library_namespace) {
 				_this.MIN_LENGTH, has_error, _this.skip_error
 				//
 				&& image_data.error_count === _this.MAX_ERROR_RETRY ]);
+				// 出錯次數
 				library_namespace.log({
 					// gettext_config:{"id":"number-of-errors-$1"}
-					T : [ '出錯次數：%1', image_data.error_count ]
+					T : [ '{{PLURAL:%1|%1}} 次錯誤', image_data.error_count ]
 				});
 			}
 			if (verified_image || image_data.is_bad || _this.skip_error

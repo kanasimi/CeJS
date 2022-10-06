@@ -1070,16 +1070,24 @@ function module_code(library_namespace) {
 				// MediaWiki using line-diff
 				this_revision.lines = wiki_API.revision_content(this_revision)
 						.split('\n');
-				var diff_list = newer_revision.diff_list
-				//
-				= library_namespace.LCS(this_revision.lines,
-				//
-				newer_revision.lines, {
-					diff : true,
-					// MediaWiki using line-diff
-					line : true,
-					treat_as_String : true
-				});
+				var diff_list;
+				try {
+					diff_list = newer_revision.diff_list
+					//
+					= library_namespace.LCS(this_revision.lines,
+					//
+					newer_revision.lines, {
+						diff : true,
+						// MediaWiki using line-diff
+						line : true,
+						treat_as_String : true
+					});
+				} catch (e) {
+					// e.g., RangeError: Maximum call stack size exceeded @
+					// backtrack()
+					callback(null, page_data, e);
+					return;
+				}
 
 				var found = diff_list.some(function(diff) {
 					// console.trace(diff);

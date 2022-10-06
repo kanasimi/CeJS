@@ -71,19 +71,7 @@ function module_code(library_namespace) {
 		}
 		// console.log(token);
 
-		while (token.type === 'transclusion'
-				&& typeof token.expand === 'function') {
-			// console.trace(options);
-			// expand template, .expand_template(), .to_wikitext()
-			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
-			token = wiki_API.parse(token.expand(options), options);
-			if (wiki_API.template_functions) {
-				// console.trace(options);
-				wiki_API.template_functions.adapt_function(token, null, null,
-						options);
-			}
-			// console.trace([ token, token.expand, options ]);
-		}
+		token = wiki_API.repeatedly_expand_template_token(token, options);
 
 		// ------------------------
 
@@ -1686,15 +1674,19 @@ function module_code(library_namespace) {
 			if (template_token.expand) {
 				// 處理包括 {{Anchor}}, {{Anchors}}, {{Visible anchor}}, {{term}}
 				// const
-				var anchor = template_token.expand();
-				if (!anchor || typeof anchor.toString !== 'function')
+				template_token = wiki_API.repeatedly_expand_template_token(
+						template_token, options);
+				if (!template_token
+						|| typeof template_token.toString !== 'function')
 					return;
-				anchor = get_all_anchors(anchor.toString(), _options);
+				var anchor = get_all_anchors(template_token.toString(),
+						_options);
 				// console.trace(anchor);
 				anchor.forEach(function(anchor) {
 					register_anchor(anchor, template_token);
 				});
-				return;
+				if (template_token.type !== 'transclusion')
+					return;
 			}
 
 			// e.g., {{Cite book|...|ref=anchor}} @ [[日本の原子爆弾開発]]
