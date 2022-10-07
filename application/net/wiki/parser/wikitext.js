@@ -473,7 +473,7 @@ function module_code(library_namespace) {
 
 	function template_preprocessor(wikitext, options) {
 		var matched = wikitext
-		// 優先權高低: <onlyinclude> → ‎<nowiki> → ‎ <noinclude>, ‎<includeonly>
+		// 優先權高低: <onlyinclude> → <nowiki> → <noinclude>, <includeonly>
 		// [[mw:Transclusion#Partial transclusion markup]]
 		.match(/<onlyinclude(\s[^<>]*)?>[\s\S]*?<\/onlyinclude>/g);
 		if (matched) {
@@ -569,6 +569,7 @@ function module_code(library_namespace) {
 			// console.trace([ wikitext ]);
 			parsed = wiki_API.parser(wikitext, options).parse();
 			var promise = evaluate_parsed(parsed, options);
+			// console.trace([ promise ]);
 			return promise || parsed;
 		}
 
@@ -608,7 +609,7 @@ function module_code(library_namespace) {
 			options = {
 				set_not_evaluated : true
 			};
-			options[KEY_page_title_option] = parsed;
+			options[KEY_on_page_title_option] = parsed;
 		} else {
 			// .new_options(): 會設定 options.something_not_evaluated，避免污染。
 			options = Object.assign({
@@ -637,6 +638,7 @@ function module_code(library_namespace) {
 				function evaluate(page_data, error) {
 					if (error) {
 						// e.g. 頁面不存在，不做更改。
+						library_namespace.error(error);
 						resolve();
 						return;
 					}
@@ -667,16 +669,17 @@ function module_code(library_namespace) {
 
 		return library_namespace.is_thenable(promise)
 		//
-		? promise.then(function return_parsed() {
-			return parsed;
-		}) : parsed;
+		? promise.then(function() {
+			// console.trace(parsed);
+			return evaluate_parsed(parsed, options);
+		}) : evaluate_parsed(parsed, options);
 	}
 
 	wiki_API.expand_transclusion = expand_transclusion;
 
 	// ----------------------------------------------------
 
-	var KEY_page_title_option = 'page_title';
+	var KEY_on_page_title_option = 'on_page_title';
 
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 	function evaluate_parser_function_token(options) {
@@ -686,7 +689,7 @@ function module_code(library_namespace) {
 		}
 
 		switch (token.name) {
-		case 'len':
+		case '#len':
 			// {{#len:string}}
 
 			// TODO: ags such as <nowiki> and other tag extensions will always
@@ -694,13 +697,13 @@ function module_code(library_namespace) {
 			// parser.
 			return get_parameter_String(1).length;
 
-		case 'sub':
+		case '#sub':
 			// {{#sub:string|start|length}}
 			return get_parameter_String(3) ? get_parameter_String(1).substring(
 					get_parameter_String(2), get_parameter_String(3))
 					: get_parameter_String(1).slice(get_parameter_String(2));
 
-		case 'time':
+		case '#time':
 			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##time
 			// {{#time: format string | date/time object | language code | local
 			// }}
@@ -721,19 +724,19 @@ function module_code(library_namespace) {
 			}
 			break;
 
-		case 'if':
+		case '#if':
 			token = token.parameters[get_parameter_String(1) ? 2 : 3];
 			// console.trace(token);
 			break;
 
-		case 'ifeq':
+		case '#ifeq':
 			token = token.parameters[get_parameter_String(1) === get_parameter_String(2)
 					|| +get_parameter_String(1) === +get_parameter_String(2) ? 3
 					: 4];
 			// console.trace(token);
 			break;
 
-		case 'titleparts':
+		case '#titleparts':
 			var title = get_parameter_String(1).split('/');
 			var start = +get_parameter_String(3);
 			start = start ? start > 0 ? start - 1 : start : 0;
@@ -743,9 +746,16 @@ function module_code(library_namespace) {
 					.join('/');
 
 		case 'FULLPAGENAME':
-			return options
-					&& wiki_API.normalize_title(options[KEY_page_title_option],
-							options) || '';
+			return options && wiki_API.normalize_title(
+			//
+			options[KEY_on_page_title_option], options) || '';
+
+		case '#invoke':
+			if (token.expand) {
+				token = token.expand(options);
+				token = wiki_API.parse(token, options);
+				break;
+			}
 
 		default:
 			library_namespace.warn('evaluate_parser_function_token: 尚未加入演算 {{'
@@ -2119,7 +2129,7 @@ function module_code(library_namespace) {
 
 			// matched: [ all, functionname token, functionname, argument 1 ]
 			var matched = parameters[0]
-					.match(/^([\s\n]*#([a-z]+):)([\s\S]*)$/i);
+					.match(/^([\s\n]*(#[a-z]+):)([\s\S]*)$/i);
 
 			// if not [[mw:Help:Extension:ParserFunctions]]
 			if (!matched) {
@@ -2558,20 +2568,20 @@ function module_code(library_namespace) {
 				return attribute_hash;
 			}
 
-			var _options = options;
-			if (options.target_array) {
-				/**
-				 * <code>
+			/**
+			 * <code>
 
-				`value = parse_wikitext(value, options);` 會錯誤的寫入 options.target_array
-				e.g.,
-				wikitext = `<span id="修改[[WP:命名常規#地名|命名常規#地名]]一節"></span>`; parsed = CeL.wiki.parser(wikitext).parse();
+			`value = parse_wikitext(value, options);` 會錯誤的寫入 options.target_array
+			e.g.,
+			wikitext = `<span id="修改[[WP:命名常規#地名|命名常規#地名]]一節"></span>`; parsed = CeL.wiki.parser(wikitext).parse();
 
-				</code>
-				 */
-				_options = library_namespace.new_options(options);
-				delete _options.target_array;
-			}
+			</code>
+			 */
+			var _options = options.target_array
+			// 重新造一個 options 以避免污染。
+			? Object.assign(Object.clone(options), {
+				target_array : null
+			}) : options;
 
 			var attributes_list = [], matched;
 			while ((matched = PATTERN_tag_attribute.exec(attributes))

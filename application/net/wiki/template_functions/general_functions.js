@@ -151,9 +151,17 @@ function module_code(library_namespace) {
 	function expand_template_Anchor(options) {
 		var parameters = this.parameters;
 		var wikitext = [];
-		for (/* let */var index = 1; index < this.length; index++) {
+		for (/* let */var index = this.type === 'magic_word_function' ? 2 : 1; index < this.length; index++) {
 			var anchor = parameters[index];
-			if (typeof anchor !== 'string') {
+			if (!anchor) {
+				continue;
+			}
+			if (typeof anchor === 'string') {
+				// 多空格、斷行會被轉成單一 " "。
+				anchor = anchor.replace(/[\s\n]{2,}/g, ' ');
+				if (library_namespace.HTML_to_wikitext)
+					anchor = library_namespace.HTML_to_wikitext(anchor);
+			} else {
 				// e.g., `{{Anchor|{{u|Emojibot}}}}` @ zhwiki
 
 				// old jawiki {{Anchor}}
@@ -163,14 +171,8 @@ function module_code(library_namespace) {
 				library_namespace.error('無法處理 anchor: ' + anchor);
 				console.trace(anchor);
 			}
-			if (anchor) {
-				// 多空格、斷行會被轉成單一 " "。
-				anchor = anchor.replace(/[\s\n]{2,}/g, ' ');
-				if (library_namespace.HTML_to_wikitext)
-					anchor = library_namespace.HTML_to_wikitext(anchor);
-				// class="anchor"
-				wikitext.push('<span id="' + anchor + '"></span>');
-			}
+			// class="anchor"
+			wikitext.push('<span id="' + anchor + '"></span>');
 		}
 		return wikitext.join('');
 	}
@@ -401,6 +403,7 @@ function module_code(library_namespace) {
 
 		// 一些會添加 anchors 的特殊模板。
 		Anchor : parse_template_Anchor,
+		'Module:Anchor' : parse_template_Anchor,
 		'Visible anchor' : parse_template_Visible_anchor,
 		Term : parse_template_Term,
 		Wikicite : parse_template_Wikicite,

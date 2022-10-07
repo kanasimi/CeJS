@@ -1641,165 +1641,214 @@ function module_code(library_namespace) {
 		// console.log(wiki_API.site_name(session));
 
 		parsed.each_section();
-		parsed.each('section_title', function(section_title_token) {
+		var promise
+		//
+		= parsed.each('section_title', function(section_title_token) {
 			// console.log(section_title_token);
 			// const
 			var section_title_link = section_title_token.link;
 			// TODO: 忽略包含不合理元素的編輯，例如 url。
-			if (!section_title_link.imprecise_tokens) {
-				// console.log(section_title_link);
-				// `section_title_token.title` will not transfer "[", "]"
-				register_anchor(section_title_link.id, section_title_token);
+			// .imprecise_tokens 是在 .parse() 時即已設定。
 
-			} else if (section_title_link.tokens_maybe_handlable) {
-				// exclude "=={{T}}=="
-				library_namespace.warn('Title maybe handlable 請檢查是否可處理此標題: '
-						+ section_title_token.title);
-				console.log(section_title_link.tokens_maybe_handlable);
-				console.trace(section_title_token);
-			} else {
-				library_namespace
-						.warn('若包含的是模板，請檢查是否可於 template_functions 添加此標題中的模板: '
-								+ section_title_token.title);
-				console.trace(section_title_link);
+			if (section_title_link.imprecise_tokens
+			// 嘗試展開模板。
+			&& options.try_to_expand_templates) {
+				var promise = wiki_API.expand_transclusion(section_title_token
+						.toString(), options);
+				console.trace([ promise, section_title_token.toString() ]);
+				if (library_namespace.is_thenable(promise)) {
+					// re-generate link token.
+					promise.then(function(parsed) {
+						section_title_link = wiki_API.section_link(parsed
+								.toString());
+						if (false) {
+							console.trace([ parsed.toString(),
+									section_title_link ]);
+						}
+						for_converted_section_title();
+					});
+					return;
+				}
+			}
+
+			for_converted_section_title();
+
+			function for_converted_section_title() {
+				if (!section_title_link.imprecise_tokens) {
+					// console.log(section_title_link);
+					// `section_title_token.title` will not transfer "[", "]"
+					register_anchor(
+					//
+					section_title_link.id, section_title_token);
+
+				} else if (section_title_link.tokens_maybe_handlable) {
+					// exclude "=={{T}}=="
+					library_namespace
+							.warn('Title maybe handlable 請檢查是否可處理此標題: '
+									+ section_title_token.title);
+					console.log(section_title_link.tokens_maybe_handlable);
+					console.trace(section_title_token);
+				} else {
+					library_namespace.warn(
+					//
+					'若包含的是模板，請檢查是否可於 template_functions 添加此標題中的模板: '
+							+ section_title_token.title);
+					console.trace(section_title_link);
+				}
 			}
 		});
 
 		var _options = Object.clone(options);
 		if (options)
 			delete _options.print_anchors;
-		// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
-		parsed.each('transclusion', function(template_token) {
-			// console.trace([ template_token.name, template_token.expand ]);
-			if (template_token.expand) {
-				// 處理包括 {{Anchor}}, {{Anchors}}, {{Visible anchor}}, {{term}}
-				// const
-				template_token = wiki_API.repeatedly_expand_template_token(
-						template_token, options);
-				if (!template_token
-						|| typeof template_token.toString !== 'function')
-					return;
-				var anchor = get_all_anchors(template_token.toString(),
-						_options);
-				// console.trace(anchor);
-				anchor.forEach(function(anchor) {
-					register_anchor(anchor, template_token);
-				});
-				if (template_token.type !== 'transclusion')
-					return;
-			}
 
-			// e.g., {{Cite book|...|ref=anchor}} @ [[日本の原子爆弾開発]]
-			// {{Cite journal|...|ref=anchor}}
-			if (/^Cite \w+/.test(template_token.name) || (session || wiki_API)
-			// {{Citation|...|ref=anchor}}
-			.is_template('Citation', template_token, options)) {
-				// console.trace(JSON.stringify(template_token.name));
-				var parameters = template_token.parameters;
-				var anchor = parameters.ref;
-				// console.trace(JSON.stringify(anchor));
-				if (anchor) {
-					if (anchor !== 'none') {
-						// e.g., {{SfnRef|...}}
-						anchor = wiki_API.wikitext_to_plain_text(anchor);
+		return promise ? promise.then(parse_template_anchors)
+				: parse_template_anchors();
+
+		function parse_template_anchors() {
+			// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
+			var promise = parsed.each('transclusion', function(template_token) {
+				// console.trace([ template_token.name, template_token.expand
+				// ]);
+				if (template_token.expand) {
+					// 處理包括 {{Anchor}}, {{Anchors}}, {{Visible anchor}},
+					// {{term}}
+					// const
+					template_token = wiki_API.repeatedly_expand_template_token(
+							template_token, options);
+					if (!template_token
+							|| typeof template_token.toString !== 'function')
+						return;
+					var anchor = get_all_anchors(template_token.toString(),
+							_options);
+					// console.trace(anchor);
+					anchor.forEach(function(anchor) {
 						register_anchor(anchor, template_token);
+					});
+					if (template_token.type !== 'transclusion')
+						return;
+				}
+
+				// e.g., {{Cite book|...|ref=anchor}} @ [[日本の原子爆弾開発]]
+				// {{Cite journal|...|ref=anchor}}
+				if (/^Cite \w+/.test(template_token.name)
+						|| (session || wiki_API)
+						// {{Citation|...|ref=anchor}}
+						.is_template('Citation', template_token, options)) {
+					// console.trace(JSON.stringify(template_token.name));
+					var parameters = template_token.parameters;
+					var anchor = parameters.ref;
+					// console.trace(JSON.stringify(anchor));
+					if (anchor) {
+						if (anchor !== 'none') {
+							// e.g., {{SfnRef|...}}
+							anchor = wiki_API.wikitext_to_plain_text(anchor);
+							register_anchor(anchor, template_token);
+						}
+						return;
 					}
+
+					// https://en.wikipedia.org/wiki/Template:Citation/doc#Anchors_for_Harvard_referencing_templates
+					anchor = '';
+					if (parameters.last)
+						anchor += parameters.last.toString().trim();
+					// @see [[w:en:Module:Citation/CS1]]
+					// local function make_citeref_id (namelist, year)
+					for (var index = 1; index <= 4; index++) {
+						if (parameters['last' + index])
+							anchor += parameters['last' + index].toString()
+									.trim();
+					}
+
+					var year = parameters.year;
+					if (!year) {
+						year = parameters.date;
+						// TODO: extract year
+						year = year && year.toString().match(/[12]\d{3}/);
+						if (year)
+							year = year[0];
+					}
+					if (year)
+						anchor += year.toString().trim();
+
+					if (anchor)
+						register_anchor('CITEREF' + anchor, template_token);
 					return;
 				}
 
-				// https://en.wikipedia.org/wiki/Template:Citation/doc#Anchors_for_Harvard_referencing_templates
-				anchor = '';
-				if (parameters.last)
-					anchor += parameters.last.toString().trim();
-				// @see [[w:en:Module:Citation/CS1]]
-				// local function make_citeref_id (namelist, year)
-				for (var index = 1; index <= 4; index++) {
-					if (parameters['last' + index])
-						anchor += parameters['last' + index].toString().trim();
+				if (false && options && options.print_anchors) {
+					library_namespace
+							.warn('get_all_anchors: Cannot expand template: '
+									+ template_token);
 				}
+			});
 
-				var year = parameters.year;
-				if (!year) {
-					year = parameters.date;
-					// TODO: extract year
-					year = year && year.toString().match(/[12]\d{3}/);
-					if (year)
-						year = year[0];
-				}
-				if (year)
-					anchor += year.toString().trim();
-
-				if (anchor)
-					register_anchor('CITEREF' + anchor, template_token);
-				return;
-			}
-
-			if (false && options && options.print_anchors) {
-				library_namespace
-						.warn('get_all_anchors: Cannot expand template: '
-								+ template_token);
-			}
-		});
-
-		// 處理 <span class="anchor" id="anchor"></span>, <ref name="anchor">,
-		// id in table cell attribute
-		parsed.each('tag_attributes', function(attribute_token, index, parent) {
-			// console.log(parent);
-			// console.trace(attribute_token);
-			// console.log(attribute_token.attributes);
-			// const
-			var anchor = attribute_token.attributes.id
-					|| attribute_token.attributes.name;
-			// console.trace(anchor);
-			// <ref name="..."> 會轉成 id="cite_re-..."
-			if (parent.tag ? parent.tag.toLowerCase() !== 'ref'
-			// e.g., @ [[w:en:Daniel Ricciardo]]
-			: parent.type === 'table_attributes') {
-				// e.g., <span id="anchor">, <div id="anchor">
-				if (Array.isArray(anchor)) {
-					if (anchor.type !== 'plain') {
-						// token = _set_wiki_type([ token ], 'plain');
-						anchor = [ anchor ];
-						anchor.toString
-						//
-						= wiki_API.parse.wiki_token_toString.plain;
-					}
-					// e.g., {{Wikicite|ref={{sfnref|...}} }} .expand() 之後，
-					// 解析 id="{{sfnref|...}}"
-					for_each_token.call(anchor, 'transclusion', function(
-							template_token, index, parent) {
-						// replace by expanded text
-						if (template_token.expand)
-							parent[index] = template_token.expand();
-					}, _options);
-					// preserve old properties
-					var toString = anchor.toString;
-					anchor = anchor.map(function(token) {
-						if (token.type === 'magic_word_function'
-						// && token.is_magic_word
-						&& token.name === 'ANCHORENCODE') {
-							return token[1];
-						}
-						return token;
-					});
-					// recover
-					anchor.toString = toString;
-				}
-				if (false && /{{/.test(normalize_anchor(anchor))) {
-					// Should not go to here.
-					console.trace([ anchor, attribute_token ]);
-				}
-				register_anchor(anchor, attribute_token);
-			}
-		});
-
-		var anchor_list = Object.keys(anchor_hash);
-		if (options && options.print_anchors) {
-			library_namespace.info('get_all_anchors: anchors:');
-			console.trace(anchor_list.length > 100 ? JSON
-					.stringify(anchor_list) : anchor_list);
+			return promise ? promise.then(parse_other_token_anchors)
+					: parse_other_token_anchors();
 		}
-		return anchor_list;
+
+		function parse_other_token_anchors() {
+			// 處理 <span class="anchor" id="anchor"></span>, <ref name="anchor">,
+			// id in table cell attribute
+			parsed.each('tag_attributes', function(attribute_token, index,
+					parent) {
+				// console.log(parent);
+				// console.trace(attribute_token);
+				// console.log(attribute_token.attributes);
+				// const
+				var anchor = attribute_token.attributes.id
+						|| attribute_token.attributes.name;
+				// console.trace(anchor);
+				// <ref name="..."> 會轉成 id="cite_re-..."
+				if (parent.tag ? parent.tag.toLowerCase() !== 'ref'
+				// e.g., @ [[w:en:Daniel Ricciardo]]
+				: parent.type === 'table_attributes') {
+					// e.g., <span id="anchor">, <div id="anchor">
+					if (Array.isArray(anchor)) {
+						if (anchor.type !== 'plain') {
+							// token = _set_wiki_type([ token ], 'plain');
+							anchor = [ anchor ];
+							anchor.toString
+							//
+							= wiki_API.parse.wiki_token_toString.plain;
+						}
+						// e.g., {{Wikicite|ref={{sfnref|...}} }} .expand() 之後，
+						// 解析 id="{{sfnref|...}}"
+						for_each_token.call(anchor, 'transclusion', function(
+								template_token, index, parent) {
+							// replace by expanded text
+							if (template_token.expand)
+								parent[index] = template_token.expand();
+						}, _options);
+						// preserve old properties
+						var toString = anchor.toString;
+						anchor = anchor.map(function(token) {
+							if (token.type === 'magic_word_function'
+							// && token.is_magic_word
+							&& token.name === 'ANCHORENCODE') {
+								return token[1];
+							}
+							return token;
+						});
+						// recover
+						anchor.toString = toString;
+					}
+					if (false && /{{/.test(normalize_anchor(anchor))) {
+						// Should not go to here.
+						console.trace([ anchor, attribute_token ]);
+					}
+					register_anchor(anchor, attribute_token);
+				}
+			});
+
+			var anchor_list = Object.keys(anchor_hash);
+			if (options && options.print_anchors) {
+				library_namespace.info('get_all_anchors: anchors:');
+				console.trace(anchor_list.length > 100 ? JSON
+						.stringify(anchor_list) : anchor_list);
+			}
+			return anchor_list;
+		}
 	}
 
 	// CeL.wiki.parse.anchor.essential_templates

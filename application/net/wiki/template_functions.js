@@ -983,7 +983,7 @@ function module_code(library_namespace) {
 	}
 
 	function token_is_invoke(token) {
-		return token.type === 'magic_word_function' && token.name === 'invoke'
+		return token.type === 'magic_word_function' && token.name === '#invoke'
 				&& token.parameters[1]
 	}
 
