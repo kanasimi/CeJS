@@ -3433,7 +3433,15 @@ function test_wiki() {
 		parsed.each('link', function (token, index, parent) { return '{{t}}'; }, true);
 		assert(['a{{t}}b', parsed.toString()]);
 
+		wikitext = '[[a|a{{!}}b]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #1');
+		assert(['a{{!}}b', parsed[0].display_text.toString()], 'wiki.parse.link #1-1');
+		wikitext = '[[a|a{{!}}b|c]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #2');
+		assert(['a{{!}}b|c', parsed[0].display_text.toString()], 'wiki.parse.link #2-1');
+
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #1');
 		assert(['file', parsed[0].type], 'wiki.parse.file #1-1');
 		assert(['A.svg', parsed[0].name], 'wiki.parse.file #1-2');
 		assert(['b{{c|d[[e]]f}}', parsed[0][4].toString()], 'wiki.parse.file #1-3');
@@ -3453,6 +3461,14 @@ function test_wiki() {
 		wikitext = '[[:File:a.jpg|a]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #4-1');
 		assert(parsed.is_link, 'wiki.parse.file #4-2');
+		// [[Wikipedia:投票/突破25万条目所用标志]]
+		wikitext = '[[File:Wikipedia-logo-zh.png{{!}}135px]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #5-1');
+		wikitext = '[[File:p.png{{!}}1px|alt]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #6-1');
+		wikitext = '[[file:bot.svg|20px{{!}}right|alt]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #7-1');
+		assert(['right', parsed.location], 'wiki.parse.file #7-2');
 
 		wikitext = '[[:Category:cat|sort_key]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.category #1-1');
@@ -3831,6 +3847,46 @@ function test_wiki() {
 
 		wikitext = '{{ns:1} {{ucfirst:102}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{function}} #1');
+
+		wikitext = '{{{t|{{u}}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{{parameter}}} #1');
+		assert(['parameter', parsed.type], 'wiki.parse: {{{parameter}}} #1-1');
+
+		wikitext = '{{{t|{{u}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{{invalid}} #1');
+		assert(['{', parsed[0]], 'wiki.parse: {{{invalid}} #1-1');
+		assert(['T', parsed[1].name], 'wiki.parse: {{{invalid}} #1-2');
+		assert(['transclusion', parsed[1].type], 'wiki.parse: {{{invalid}} #1-3');
+		wikitext = '{{{t}}{{t|{{u}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{{invalid}} #2');
+		assert(['T', parsed[1].name], 'wiki.parse: {{{invalid}} #2-2');
+		assert(['{', parsed[0]], 'wiki.parse: {{{invalid}} #2-1');
+		assert(['transclusion', parsed[1].type], 'wiki.parse: {{{invalid}} #2-3');
+		wikitext = '{{{t}}\n{{t|{{u|v}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{{invalid}} #3');
+		assert(['{', parsed[0]], 'wiki.parse: {{{invalid}} #3-1');
+		assert(['T', parsed[1].name], 'wiki.parse: {{{invalid}} #3-2');
+		assert(['transclusion', parsed[1].type], 'wiki.parse: {{{invalid}} #3-3');
+		wikitext = '{{{t}}\n{{t|{{u|a{b}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{{invalid}} #4');
+		assert(['{', parsed[0]], 'wiki.parse: {{{invalid}} #4-1');
+		assert(['T', parsed[1].name], 'wiki.parse: {{{invalid}} #4-2');
+		assert(['transclusion', parsed[1].type], 'wiki.parse: {{{invalid}} #4-3');
+		wikitext = '{{{t}}\n{{t|{{u|a}b}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{{invalid}} #5');
+		assert(['{', parsed[0]], 'wiki.parse: {{{invalid}} #5-1');
+		assert(['T', parsed[1].name], 'wiki.parse: {{{invalid}} #5-2');
+		assert(['transclusion', parsed[1].type], 'wiki.parse: {{{invalid}} #5-3');
+		wikitext = '{{{t}}\n{{t|{{u|v} }}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{{invalid}} #6');
+		assert(['{', parsed[0]], 'wiki.parse: {{{invalid}} #6-1');
+		assert(['T', parsed[1].name], 'wiki.parse: {{{invalid}} #6-2');
+		assert(['transclusion', parsed[1].type], 'wiki.parse: {{{invalid}} #6-3');
+		wikitext = '{{{t}}\n{{t|{{u|-{v}-}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{{invalid}} #7');
+		assert(['{', parsed[0]], 'wiki.parse: {{{invalid}} #7-1');
+		assert(['T', parsed[1].name], 'wiki.parse: {{{invalid}} #7-2');
+		assert(['transclusion', parsed[1].type], 'wiki.parse: {{{invalid}} #7-3');
 
 		wikitext = '{{t{{T}}<nowiki>{{{</nowiki>{-{}-{T|1}}{{T|2}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #1');

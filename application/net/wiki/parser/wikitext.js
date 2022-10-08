@@ -807,11 +807,15 @@ function module_code(library_namespace) {
 		},
 		// link 的變體。但可採用 .name 取得 file name。
 		file : function() {
-			return '[[' + this[0]
+			var wikitext = '[[' + this[0]
 			// anchor 網頁錨點
-			+ this[1]
-			//
-			+ (this.length > 2 ? '|' + this.slice(2).join('|') : '') + ']]';
+			+ this[1];
+			if (this.length > 2) {
+				for (var index = 2; index < this.length; index++) {
+					wikitext += (this.pipe[index - 2] || '|') + this[index];
+				}
+			}
+			return wikitext + ']]';
 		},
 		// link 的變體。但可採用 .name 取得 category name。
 		category : function() {
@@ -819,7 +823,9 @@ function module_code(library_namespace) {
 			// anchor 網頁錨點
 			+ this[1]
 			//
-			+ (this.length > 2 ? '|' + this.slice(2).join('|') : '') + ']]';
+			+ (this.length > 2 ? (this.pipe || '|')
+			//
+			+ this[2] : '') + ']]';
 		},
 		// 內部連結 (wikilink / internal link) + interwiki link
 		link : function() {
@@ -1364,7 +1370,10 @@ function module_code(library_namespace) {
 
 		function parse_language_conversion(all, parameters) {
 			// -{...}- 自 end_mark 向前回溯。
-			var index = parameters.lastIndexOf('-{'), previous;
+			var index = parameters.lastIndexOf('-{'),
+			// 在先的，在前的，前面的； preceding
+			// (previous 反義詞 following, preceding 反義詞 exceeds)
+			previous;
 			if (index > 0) {
 				previous = '-{' + parameters.slice(0, index);
 				parameters = parameters.slice(index + '}-'.length);
@@ -1733,6 +1742,10 @@ function module_code(library_namespace) {
 					// !== [[File:a.svg|NG caption|thumb|]]
 					// === [[File:a.svg|thumb|NG caption|]]
 
+					// 避免下面的 parse_wikitext() 處理掉 {{!}}。
+					display_text = display_text.replace(/{{(\s*!\s*)}}/g,
+							include_mark + '$1' + end_mark);
+
 					// 先處理掉裏面的功能性代碼。 e.g.,
 					// [[File:a.svg|alt=alt_of_{{tl|t}}|NG_caption|gykvg=56789{{tl|t}}|{{#ifexist:abc|alt|link}}=abc|{{#ifexist:abc|left|456}}|{{#expr:100+300}}px|thumb]]
 					// e.g., [[File:a.svg|''a''|caption]]
@@ -1740,13 +1753,18 @@ function module_code(library_namespace) {
 						no_resolve : true
 					}, queue);
 
+					// recover {{!}}
+					display_text = display_text.replace(new RegExp(include_mark
+							+ /(\s*!\s*)/.source + end_mark, 'g'), '{{$1}}');
+
 					parameters.index_of = Object.create(null);
+					pipe_separator = [ pipe_separator ];
 
 					// [ file namespace, anchor / section_title,
 					// parameters 1, parameters 2, parameters..., caption ]
 					var token, file_option,
 					// parameters 有分大小寫與繁簡體，並且各種類會以首先符合的為主。
-					PATTERN = /([^\|]*?)(\||$)/ig;
+					PATTERN = /([^\|]*?)(\||{{\s*!\s*}}|$)/ig;
 					// assert: 這會將剩下來的全部分完。
 					while (token = PATTERN.exec(display_text)) {
 						var matched = token[1].match(
@@ -1786,6 +1804,7 @@ function module_code(library_namespace) {
 							if (!token[2]) {
 								break;
 							}
+							pipe_separator.push(token[2]);
 							continue;
 						}
 
@@ -1902,6 +1921,7 @@ function module_code(library_namespace) {
 						if (!token[2]) {
 							break;
 						}
+						pipe_separator.push(token[2]);
 					}
 
 				} else {
@@ -1921,17 +1941,22 @@ function module_code(library_namespace) {
 			}
 
 			if (page_name.oddly === 'link_inside_link') {
+				// e.g., `[[File:a[[b]].jpg|thumb|t]]`
 				// console.trace(parameters);
 				// parameters.is_link = false;
 
 				for (var index = 2; index < parameters.length; index++) {
 					// recover missed '|' before display_text
+					var this_pipe_separator = Array.isArray(pipe_separator) ? pipe_separator[index - 2]
+							: pipe_separator;
 					if (typeof parameters[index] === 'string') {
-						parameters[index] = pipe_separator + parameters[index];
+						parameters[index] = this_pipe_separator
+								+ parameters[index];
 					} else if (parameters[index].type === 'plain') {
-						parameters[index].unshift(pipe_separator);
+						parameters[index].unshift(this_pipe_separator);
 					} else {
-						parameters[index] = [ pipe_separator, parameters[index] ];
+						parameters[index] = [ this_pipe_separator,
+								parameters[index] ];
 					}
 				}
 
@@ -1940,6 +1965,7 @@ function module_code(library_namespace) {
 				parameters.push(']]');
 				join_string_of_array(parameters);
 				_set_wiki_type(parameters, 'plain');
+
 			} else {
 				if (file_matched || category_matched) {
 					// shown by link, is a linking to a file
@@ -1960,6 +1986,7 @@ function module_code(library_namespace) {
 				}
 
 				if (false) {
+					// NG: Array.isArray(pipe_separator) for file
 					pipe_separator = parse_wikitext(pipe_separator, options,
 							queue);
 				}
@@ -2050,15 +2077,24 @@ function module_code(library_namespace) {
 			return include_mark + (queue.length - 1) + end_mark;
 		}
 
+		// (|...): allow "{{{}}}", e.g., [[w:zh:Template:Policy]]
+		var PATTERN_for_template_parameter = /{{{(|[^{}][\s\S]*?)}}}/g;
 		function parse_template_parameter(all, parameters) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('{{{'), previous;
 			if (index > 0) {
 				previous = '{{{' + parameters.slice(0, index);
-				parameters = parameters.slice(index + '}}}'.length);
+				parameters = parameters.slice(index + '{{{'.length);
 			} else {
 				previous = '';
 			}
+
+			index = parameters.lastIndexOf('{{');
+			if (index > 0 && !parameters.slice(index).includes('}}')) {
+				// e.g., `{{{T}}{{t|{{u}}}}`
+				return all;
+			}
+
 			library_namespace.debug(previous + ' + ' + parameters, 4,
 					'parse_wikitext.parameter');
 
@@ -2101,26 +2137,31 @@ function module_code(library_namespace) {
 		// or use ((PATTERN_transclusion))
 		// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
 		// PATTERN_template
-		var PATTERN_for_transclusion = /{{([^{}][\s\S]*?)}}/g;
-		function parse_transclusion(all, parameters) {
+		var PATTERN_for_transclusion = /(^|[\s\S]){{([^{}][\s\S]*?)}}($|[\s\S])/g;
+		function parse_transclusion(all, previous, parameters, following) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('{{'),
-			// 在先的，在前的，前面的； preceding
-			// (previous 反義詞 following, preceding 反義詞 exceeds)
-			previous,
 			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
 			// token.parameters[{String}key] = {String}value
 			_parameters = Object.create(null),
 			// token.index_of[{String}key] = {Integer}index
 			parameter_index_of = Object.create(null);
 			if (index > 0) {
-				previous = '{{' + parameters.slice(0, index);
-				parameters = parameters.slice(index + '}}'.length);
-			} else {
-				previous = '';
+				previous += '{{' + parameters.slice(0, index);
+				parameters = parameters.slice(index + '{{'.length);
 			}
-			library_namespace.debug(
-					'[' + previous + '] + [' + parameters + ']', 4,
+
+			if (following === '}' && previous.endsWith('{')) {
+				previous = previous.slice(0, -1);
+				// Should be previous + '{{{...}}}'
+				return previous
+						+ all.slice(previous.length).replace(
+								PATTERN_for_template_parameter,
+								parse_template_parameter);
+			}
+
+			library_namespace.debug('[' + previous + '] + [' + parameters
+					+ '] + [' + following + ']', 4,
 					'parse_wikitext.transclusion');
 
 			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
@@ -2530,7 +2571,8 @@ function module_code(library_namespace) {
 					: 'transclusion');
 			queue.push(parameters);
 			// TODO: parameters.parameters = []
-			return previous + include_mark + (queue.length - 1) + end_mark;
+			return previous + include_mark + (queue.length - 1) + end_mark
+					+ following;
 		}
 
 		// parser 標籤中的空屬性現根據HTML5規格進行解析。
@@ -3042,8 +3084,8 @@ function module_code(library_namespace) {
 			return include_mark + (queue.length - 1) + end_mark;
 		}
 
-		function parse_apostrophe_type(all, apostrophes, parameters, postfix) {
-			// console.log([ all, apostrophes, parameters, postfix ]);
+		function parse_apostrophe_type(all, apostrophes, parameters, following) {
+			// console.log([ all, apostrophes, parameters, following ]);
 			var index = parameters.lastIndexOf(apostrophes), previous = '';
 			if (index !== NOT_FOUND) {
 				previous = apostrophes + parameters.slice(0, index);
@@ -3062,14 +3104,14 @@ function module_code(library_namespace) {
 				type = apostrophes === "''" ? 'italic' : 'bold';
 			}
 			parameters = _set_wiki_type(parameters, type);
-			if (apostrophes === postfix) {
-				postfix = '';
+			if (apostrophes === following) {
+				following = '';
 			} else {
 				parameters.no_end = true;
 			}
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark
-					+ postfix;
+					+ following;
 		}
 
 		function parse_section(all, previous, section_level, parameters,
@@ -3486,12 +3528,12 @@ function module_code(library_namespace) {
 				parse_external_link);
 
 		// ----------------------------------------------------
-		// {{{...}}} 需在 {{...}} 之前解析。
 		// [[w:zh:Help:模板]]
 		// 在模板頁面中，用三個大括弧可以讀取參數。
+
+		// {{{...}}} 需在 {{...}} 之前解析。
 		// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
-		// allow "{{{}}}", e.g., [[w:zh:Template:Policy]]
-		wikitext = wikitext.replace_till_stable(/{{{(|[^{}][\s\S]*?)}}}/g,
+		wikitext = wikitext.replace_till_stable(PATTERN_for_template_parameter,
 				parse_template_parameter);
 
 		// ----------------------------------------------------
