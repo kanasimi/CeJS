@@ -741,8 +741,10 @@ function module_code(library_namespace) {
 				// console.trace([index, length, depth]);
 				// 最起碼必須執行一次 `traversal_next_sibling()`
 				traversal_next_sibling();
-				if (promise)
+				if (promise) {
+					// Waiting for promise resolved.
 					break;
+				}
 				index++;
 			}
 		}

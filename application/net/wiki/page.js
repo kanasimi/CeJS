@@ -326,6 +326,7 @@ function module_code(library_namespace) {
 				// gettext_config:{"id":"invalid-title-$1"}
 				T : [ 'Invalid title: %1', wiki_API.title_link_of(title) ]
 			} ]);
+			// console.trace(title);
 			// gettext_config:{"id":"invalid-title-$1"}
 			callback(undefined, gettext('Invalid title: %1', wiki_API
 					.title_link_of(title)));
@@ -1055,7 +1056,7 @@ function module_code(library_namespace) {
 				newer_revision = revisions[revision_index++];
 				newer_revision.lines = wiki_API
 						.revision_content(newer_revision).split('\n');
-				// console.trace([search(newer_revision),options]);
+				// console.trace([do_search(newer_revision),options]);
 				if (!options.search_diff && !options.search_deleted) {
 					var result = do_search(newer_revision);
 					if (!result) {
@@ -1127,6 +1128,10 @@ function module_code(library_namespace) {
 						} else {
 							finish_search_revision();
 						}
+						// console.trace(result);
+						// var session = wiki_API.session_of_options(options);
+						// console.trace(session);
+						// console.trace(session && session.actions);
 						return;
 					}
 
@@ -1153,7 +1158,7 @@ function module_code(library_namespace) {
 
 				function finish_search_revision(page_data, error) {
 					delete newer_revision.lines;
-					// console.trace([this_revision.revid,found,search(this_revision)])
+					// console.trace([this_revision.revid,found,do_search(this_revision)])
 					if (found) {
 						delete this_revision.lines;
 						// console.log(diff_list);

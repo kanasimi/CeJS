@@ -1037,9 +1037,11 @@ function module_code(library_namespace) {
 	 * 將數字轉為 K, M, G 等 metric prefix / SI prefix 表示方式，例如 6458 轉成 6.31 K。
 	 * 
 	 * @example <code>
-	 * CeL.to_1000_prefix(12343454345);
-	 * CeL.to_1000_prefix('12,343,454,345');
-	 * </code>
+
+	CeL.to_1000_prefix(12343454345);
+	CeL.to_1000_prefix('12,343,454,345');
+
+	</code>
 	 * 
 	 * @returns
 	 * @see <a href="http://en.wikipedia.org/wiki/Metric_prefix"
@@ -1062,8 +1064,10 @@ function module_code(library_namespace) {
 	 * 將數字轉為 Ki, Mi, Gi 等 binary prefix 表示方式，例如 1024 轉成 1Ki。
 	 * 
 	 * @example <code>
-	 CeL.to_1024_prefix(12343454345);
-	 </code>
+
+	CeL.to_1024_prefix(12343454345);
+
+	</code>
 	 * 
 	 * @returns
 	 * @see <a

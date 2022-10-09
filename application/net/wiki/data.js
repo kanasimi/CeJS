@@ -3832,54 +3832,7 @@ function module_code(library_namespace) {
 			// console.trace(POST_data);
 
 			wiki_API.query(claim_action, function handle_result(_data, error) {
-				function process_references() {
-					if (property_data.references) {
-						// _data =
-						// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
-
-						library_namespace.debug(
-								'設定完主要數值 / rank / qualifiers，接著設定 references。',
-								1, 'set_next_claim');
-						set_references(_data.claim.id, property_data,
-								shift_to_next, POST_data, claim_action[0],
-								session);
-
-					} else {
-						shift_to_next();
-					}
-				}
-
-				function process_qualifiers(result, error) {
-					if (!error && result && result.claim)
-						_data.claim = result.claim;
-					if (property_data.qualifiers) {
-						library_namespace.debug(
-								'設定完主要數值 / rank，接著設定 qualifiers。', 1,
-								'set_next_claim');
-						set_qualifiers(_data.claim.id, property_data,
-								process_references, POST_data, claim_action[0],
-								session);
-
-					} else {
-						process_references();
-					}
-				}
-
-				function process_rank() {
-					if (property_data.rank
-							&& property_data.rank !== _data.claim.rank) {
-						library_namespace.debug('設定完主要數值，接著設定 rank。', 1,
-								'set_next_claim');
-						set_rank(_data.claim, property_data,
-								process_qualifiers, POST_data, claim_action[0],
-								session);
-
-					} else {
-						process_qualifiers();
-					}
-				}
-
-				error = wiki_API.query.handle_error(data, error);
+				error = wiki_API.query.handle_error(_data, error);
 				// console.trace([ error, property_data ]);
 				// console.trace(data);
 				POST_data.language = data.language;
@@ -3906,6 +3859,53 @@ function module_code(library_namespace) {
 				}
 
 				process_rank();
+
+				function process_rank() {
+					if (property_data.rank
+							&& property_data.rank !== _data.claim.rank) {
+						library_namespace.debug('設定完主要數值，接著設定 rank。', 1,
+								'set_next_claim');
+						set_rank(_data.claim, property_data,
+								process_qualifiers, POST_data, claim_action[0],
+								session);
+
+					} else {
+						process_qualifiers();
+					}
+				}
+
+				function process_qualifiers(result, error) {
+					if (!error && result && result.claim)
+						_data.claim = result.claim;
+					if (property_data.qualifiers) {
+						library_namespace.debug(
+								'設定完主要數值 / rank，接著設定 qualifiers。', 1,
+								'set_next_claim');
+						set_qualifiers(_data.claim.id, property_data,
+								process_references, POST_data, claim_action[0],
+								session);
+
+					} else {
+						process_references();
+					}
+				}
+
+				function process_references() {
+					if (property_data.references) {
+						// _data =
+						// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
+
+						library_namespace.debug(
+								'設定完主要數值 / rank / qualifiers，接著設定 references。',
+								1, 'set_next_claim');
+						set_references(_data.claim.id, property_data,
+								shift_to_next, POST_data, claim_action[0],
+								session);
+
+					} else {
+						shift_to_next();
+					}
+				}
 
 			}, POST_data, session);
 			// console.log('set_next_claim: Waiting for ' + claim_action);

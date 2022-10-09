@@ -980,6 +980,8 @@ function module_code(library_namespace) {
 
 	/**
 	 * 泛用先期處理程式。 response_handler(response)
+	 * 
+	 * wiki_API.query.handle_error(data, error)
 	 */
 	function handle_error(/* result of wiki_API.query() */data, error,
 			callback_only_on_error) {

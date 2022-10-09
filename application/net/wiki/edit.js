@@ -258,7 +258,7 @@ function module_code(library_namespace) {
 		// console.log(text);
 		if (library_namespace.is_thenable(text)) {
 			// console.trace(text);
-			text.then(function(text) {
+			text = text.then(function(text) {
 				// console.trace(text);
 				wiki_API_edit(title, text, token, options, callback,
 				//
@@ -278,7 +278,7 @@ function module_code(library_namespace) {
 						console.trace(text);
 					});
 				}
-				session.next(text);
+				session.next(/* promise */text);
 			}
 			return;
 		}
@@ -410,7 +410,7 @@ function module_code(library_namespace) {
 					+ wiki_API.title_link_of(title), 1, 'wiki_API_edit');
 		}
 		// 暫時debug [[Template:Bulletin]]
-		if (title === 'Template:Bulletin') {
+		if (false && title === 'Template:Bulletin') {
 			console.trace(options);
 			throw new Error('Edit Template:Bulletin!');
 		}

@@ -472,6 +472,11 @@ function module_code(library_namespace) {
 	}
 
 	function template_preprocessor(wikitext, options) {
+		if (!wikitext) {
+			// e.g., 標題無效
+			return wikitext;
+		}
+
 		var matched = wikitext
 		// 優先權高低: <onlyinclude> → <nowiki> → <noinclude>, <includeonly>
 		// [[mw:Transclusion#Partial transclusion markup]]
@@ -512,11 +517,17 @@ function module_code(library_namespace) {
 			wikitext = wiki_API.content_of(page_data);
 		}
 		wikitext = template_preprocessor(wikitext, options);
+		if (!wikitext)
+			return wikitext;
 
 		var parsed = convert_parameter(wikitext, parameters, options);
 		if (page_data) {
 			// cache
 			var session = wiki_API.session_of_options(options);
+			// 只在第一次執行時(!!page_data=true)顯示訊息。
+			options = Object.assign({
+				show_NYI_message : true
+			}, options);
 			if (session) {
 				var template_name = session
 						.remove_namespace(page_data, options);
@@ -586,7 +597,24 @@ function module_code(library_namespace) {
 			// console.trace(options);
 			// expand template, .expand_template(), .to_wikitext()
 			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
-			token = wiki_API.parse(token.expand(options), options);
+			var promise = token.expand(options);
+			if (library_namespace.is_thenable(promise)) {
+				// e.g., general_expand_template()
+				if (options && options.allow_promise) {
+					return promise.then(function() {
+						return repeatedly_expand_template_token(
+						//
+						token, options);
+					});
+				}
+				library_namespace
+						.error('repeatedly_expand_template_token: Using async function + options.allow_promise to expand: '
+								+ token);
+				// console.trace(token);
+				// delete token.expand;
+				break;
+			}
+			token = wiki_API.parse(promise, options);
 			if (wiki_API.template_functions) {
 				// console.trace(options);
 				wiki_API.template_functions.adapt_function(token, null, null,
@@ -634,11 +662,15 @@ function module_code(library_namespace) {
 			if (!token || token.type !== 'transclusion')
 				return token;
 
+			// console.trace(token);
 			return new Promise(function(resolve, reject) {
 				function evaluate(page_data, error) {
 					if (error) {
 						// e.g. 頁面不存在，不做更改。
-						library_namespace.error(error);
+						library_namespace.error('expand_transclusion: '
+								+ wiki_API.title_link_of(page_title) + ': '
+								+ error);
+						// reject(error);
 						resolve();
 						return;
 					}
@@ -655,11 +687,13 @@ function module_code(library_namespace) {
 				}
 
 				page_title = session.to_namespace(page_title, 'Template');
+				// console.trace(page_title);
 				session.register_redirects(page_title,
 				//
-				function(page_data) {
-					// console.trace(page_data);
-					session.page(page_data, evaluate, page_options);
+				function(page_data, error) {
+					// console.trace(page_data || page_title);
+					session.page(page_data || page_title, evaluate,
+							page_options);
 				}, {
 					// namespace : 'Template',
 					no_message : true
@@ -684,11 +718,44 @@ function module_code(library_namespace) {
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 	function evaluate_parser_function_token(options) {
 		var token = this;
+		function NYI() {
+			if (options) {
+				if (options.show_NYI_message) {
+					library_namespace.warn('evaluate_parser_function_token: '
+							+ '尚未加入演算 {{' + token.name + '}} 的功能: ' + token);
+				}
+				// 直接回傳，避免 evaluate_parsed() 重複呼叫。
+				if (options.set_not_evaluated
+						&& !options.something_not_evaluated) {
+					options.something_not_evaluated = true;
+				}
+			}
+			// delete token.expand;
+			token.not_evaluated = true;
+			return token;
+		}
+
 		function get_parameter_String(NO) {
 			return evaluate_parsed(token.parameters[NO], options).toString();
 		}
 
+		function get_page_title(remove_namespace) {
+			var title = options
+			// [[mw:Help:Magic words#Page names]]
+			&& wiki_API.normalize_title(get_parameter_String(1)
+			//
+			|| options[KEY_on_page_title_option], options) || '';
+			return remove_namespace ? wiki_API.remove_namespace(title, options)
+					: title;
+		}
+
 		switch (token.name) {
+
+		case '!':
+			return '|';
+
+			// ----------------------------------------------------------------
+
 		case '#len':
 			// {{#len:string}}
 
@@ -702,6 +769,42 @@ function module_code(library_namespace) {
 			return get_parameter_String(3) ? get_parameter_String(1).substring(
 					get_parameter_String(2), get_parameter_String(3))
 					: get_parameter_String(1).slice(get_parameter_String(2));
+
+			// ----------------------------------------------------------------
+
+			// [[mw:Help:Magic words#Date and time]]
+
+		case 'CURRENTYEAR':
+			return (new Date).getUTCFullYear();
+
+		case 'CURRENTMONTH':
+			return ((new Date).getUTCMonth() + 1).toString().padStart(2, 0);
+
+		case 'CURRENTMONTH1':
+			return (new Date).getUTCMonth() + 1;
+
+		case 'CURRENTDAY':
+			return (new Date).getUTCDate();
+
+		case 'CURRENTDAY2':
+			return (new Date).getUTCDate().toString().padStart(2, 0);
+
+		case 'CURRENTDAY':
+			return (new Date).getUTCDate();
+
+		case 'CURRENTDOW':
+			return (new Date).getUTCDay();
+
+		case 'CURRENTHOUR':
+			return (new Date).getUTCHours().toString().padStart(2, 0);
+
+		case 'CURRENTTIME':
+			return (new Date).getUTCHours().toString().padStart(2, 0) + ':'
+					+ (new Date).getUTCMinutes().toString().padStart(2, 0);
+
+		case 'CURRENTTIMESTAMP':
+			return (new Date).toISOString().replace(/[\-:TZ]/g, '').replace(
+					/\.\d+$/, '');
 
 		case '#time':
 			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##time
@@ -722,7 +825,9 @@ function module_code(library_namespace) {
 				.replace(/d/g, argument_2.getUTCDate().pad(2));
 				// TODO
 			}
-			break;
+			return NYI();
+
+			// ----------------------------------------------------------------
 
 		case '#if':
 			token = token.parameters[get_parameter_String(1) ? 2 : 3];
@@ -745,10 +850,58 @@ function module_code(library_namespace) {
 			return (end ? title.slice(start, end) : title.slice(start))
 					.join('/');
 
+			// ----------------------------------------------------------------
+
 		case 'FULLPAGENAME':
-			return options && wiki_API.normalize_title(
-			//
-			options[KEY_on_page_title_option], options) || '';
+			return get_page_title();
+
+		case 'PAGENAME':
+			return get_page_title(true);
+
+		case 'BASEPAGENAME':
+			return get_page_title(true).replace(/\/[^\/]+$/, '');
+
+		case 'ROOTPAGENAME':
+			return get_page_title(true).replace(/\/.*$/, '');
+
+		case 'SUBPAGENAME':
+			return get_page_title(true).match(/([^\/]*)\/?$/)[1];
+
+		case 'SUBJECTPAGENAME':
+		case 'ARTICLEPAGENAME':
+			return wiki_API.talk_page_to_main(get_page_title(), options);
+
+		case 'TALKPAGENAME':
+			return wiki_API.to_talk_page(get_page_title(), options);
+
+			// ----------------------------------------------------------------
+
+			// [[mw:Help:Magic words#Namespaces]]
+
+		case 'NAMESPACENUMBER':
+			return wiki_API.namespace(get_page_title(), options);
+
+		case 'NAMESPACE':
+			return wiki_API.namespace(get_page_title(), Object.assign(Object
+					.clone(options), {
+				get_name : true
+			}));
+
+		case 'SUBJECTSPACE':
+		case 'ARTICLESPACE':
+			return wiki_API.namespace(wiki_API.talk_page_to_main(
+					get_page_title(), options), Object.assign(Object
+					.clone(options), {
+				get_name : true
+			}));
+
+		case 'TALKSPACE':
+			return wiki_API.namespace(wiki_API.to_talk_page(get_page_title(),
+					options), Object.assign(Object.clone(options), {
+				get_name : true
+			}));
+
+			// ----------------------------------------------------------------
 
 		case '#invoke':
 			if (token.expand) {
@@ -757,17 +910,13 @@ function module_code(library_namespace) {
 				break;
 			}
 
+			// ----------------------------------------------------------------
+
 		default:
-			library_namespace.warn('evaluate_parser_function_token: 尚未加入演算 {{'
-					+ token.name + '}} 的功能: ' + token);
-			// 直接回傳，避免 evaluate_parsed() 重複呼叫。
-			if (options && options.set_not_evaluated
-					&& !options.something_not_evaluated)
-				options.something_not_evaluated = true;
-			token.not_evaluated = true;
-			return token;
+			return NYI();
 		}
 
+		// console.trace(token.toString());
 		return evaluate_parsed(token, options);
 	}
 

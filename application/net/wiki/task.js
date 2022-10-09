@@ -492,7 +492,9 @@ function module_code(library_namespace) {
 				_this.last_page
 				// 正常情況。確保this.last_page為單頁面。需要使用callback以取得result。
 				= Array.isArray(page_data) ? page_data[0] : page_data;
-				// console.trace(next[2] + '', page_data, error);
+				if (!page_data) {
+					// console.trace([ '' + next[2], page_data, error ]);
+				}
 				// console.trace(_this.actions);
 				// next[2] : callback
 				_this.next(next[2], page_data, error);
@@ -2742,28 +2744,36 @@ function module_code(library_namespace) {
 					library_namespace.log_temporary(page_index + '/'
 							+ pages.length + ' '
 							+ wiki_API.title_link_of(page_data));
-					var result;
-					try {
-						result = each.call(config, page_data, messages, config);
-					} catch (e) {
+
+					function handle_page_error(error) {
 						// console.trace([ error_to_return, error ]);
-						error_to_return = error_to_return || e;
-						if (typeof e === 'object') {
-							console.error(e);
+						error_to_return = error_to_return || error;
+						if (typeof error === 'object') {
+							console.error(error);
 						} else {
 							library_namespace.error([ 'wiki_API.work: ', {
 								T : [
 								// gettext_config:{"id":"page-handling-function-error-$1"}
-								'Page handling function error: %1', String(e) ]
+								'Page handling function error: %1',
+								//
+								String(error) ]
 							} ]);
 						}
 					}
 
+					var result;
+					try {
+						result = each.call(config, page_data, messages, config);
+					} catch (error) {
+						handle_page_error(error);
+					}
+
 					if (library_namespace.is_thenable(result)) {
-						result.then(function() {
+						result = result.then(function() {
 							session.run(process_next_page);
 						}, function(error) {
-							error_to_return = error_to_return || error;
+							// console.trace([ result, error ]);
+							handle_page_error(error);
 							session.run(process_next_page);
 						});
 					} else {
@@ -2791,6 +2801,7 @@ function module_code(library_namespace) {
 				var work_options = Object.clone(options);
 				// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 				work_options.task_page_data = page;
+				// console.trace(page.title||page);
 				// console.trace(work_options);
 				// 編輯頁面內容。
 				session.edit(function(page_data) {
@@ -2827,6 +2838,26 @@ function module_code(library_namespace) {
 						//
 						+ wiki_API.title_link_of(page_data));
 					}
+
+					function handle_edit_error(error) {
+						// console.trace([ error_to_return, error ]);
+						// console.log([ 'session.running = ' +
+						// session.running,
+						// session.actions.length ]);
+						// `error_to_return` will record the first error.
+
+						error_to_return = error_to_return || error;
+						if (typeof error === 'object') {
+							console.error(error);
+						} else {
+							library_namespace.error([ 'wiki_API.work: ', {
+								T : [
+								// gettext_config:{"id":"page-edit-function-error-$1"}
+								'Page edit function error: %1', String(error) ]
+							} ]);
+						}
+					}
+
 					// 以 each() 的回傳作為要改變成什麼內容。
 					var content;
 					try {
@@ -2835,32 +2866,16 @@ function module_code(library_namespace) {
 						// 注意: this !== work_config === `config`
 						// @see wiki_API.edit()
 						this, page_data, messages, config);
-					} catch (e) {
-						error_to_return = error_to_return || e;
-						if (typeof e === 'object') {
-							console.error(e);
-						} else {
-							library_namespace.error([ 'wiki_API.work: ', {
-								T : [
-								// gettext_config:{"id":"page-edit-function-error-$1"}
-								'Page edit function error: %1', String(e) ]
-							} ]);
+
+						// check_result_and_process_next(content);
+						if (library_namespace.is_thenable(content)) {
+							return content.then(function(content) {
+								return content;
+							}, handle_edit_error);
 						}
-
+					} catch (error) {
+						handle_edit_error(error);
 						// return [wiki_API.edit.cancel, 'skip'];
-					}
-
-					// check_result_and_process_next(content);
-					if (library_namespace.is_thenable(content)) {
-						content.then(library_namespace.null_function, function(
-								error) {
-							// console.trace([ error_to_return, error ]);
-							// console.log([ 'session.running = ' +
-							// session.running,
-							// session.actions.length ]);
-							// `error_to_return` will record the first error.
-							error_to_return = error_to_return || error;
-						});
 					}
 
 					// console.trace(content);

@@ -108,7 +108,7 @@ function module_code(library_namespace) {
 			// 容許一些特定標籤能夠顯示格式。以繼承原標題的粗體斜體和顏色等等格式。
 			// @see markup_tags
 			if (token.tag in {
-				// style
+				// 展現格式用的 tags
 				b : true,
 				i : true,
 				q : true,
@@ -168,6 +168,7 @@ function module_code(library_namespace) {
 
 		if (token.type === 'tag_single') {
 			if (token.tag in {
+				templatestyles : true,
 				// For {{#lst}}, {{#section:}}
 				// [[w:en:Help:Labeled section transclusion]]
 				// e.g., @ [[w:en:Island Line, Isle of Wight]]
@@ -1655,20 +1656,23 @@ function module_code(library_namespace) {
 			&& options.try_to_expand_templates) {
 				var promise = wiki_API.expand_transclusion(section_title_token
 						.toString(), options);
-				console.trace([ promise, section_title_token.toString() ]);
+				// console.trace([ promise, section_title_token.toString() ]);
 				if (library_namespace.is_thenable(promise)) {
-					// re-generate link token.
-					promise.then(function(parsed) {
+					// console.trace('re-generate link token.');
+					promise = promise.then(function(parsed) {
+						// console.trace(parsed);
 						section_title_link = wiki_API.section_link(parsed
-								.toString());
+								.toString(), options);
 						if (false) {
 							console.trace([ parsed.toString(),
 									section_title_link ]);
 						}
 						for_converted_section_title();
 					});
-					return;
+					return promise;
 				}
+				section_title_link = wiki_API.section_link(promise.toString(),
+						options);
 			}
 
 			for_converted_section_title();
@@ -1686,8 +1690,13 @@ function module_code(library_namespace) {
 					library_namespace
 							.warn('Title maybe handlable 請檢查是否可處理此標題: '
 									+ section_title_token.title);
-					console.log(section_title_link.tokens_maybe_handlable);
-					console.trace(section_title_token);
+					console.log(section_title_link.tokens_maybe_handlable
+					//
+					.map(function(token) {
+						// if (token.type === 'transclusion') return token;
+						return token.toString();
+					}));
+					console.trace(section_title_token.toString());
 				} else {
 					library_namespace.warn(
 					//
@@ -1698,14 +1707,28 @@ function module_code(library_namespace) {
 			}
 		});
 
-		var _options = Object.clone(options);
-		if (options)
-			delete _options.print_anchors;
+		var _options = options && Object.assign(Object.clone(options), {
+			print_anchors : false
+		});
 
-		return promise ? promise.then(parse_template_anchors)
-				: parse_template_anchors();
+		// console.trace(promise);
+		if (!promise) {
+			return parse_template_anchors();
+		}
+
+		promise = promise.then(parse_template_anchors);
+		// @see function wiki_API_edit()
+		var session = wiki_API.session_of_options(options);
+		if (session && session.running) {
+			// console.trace(session && session.actions);
+			session.next(promise);
+		}
+		return promise;
+
+		// ------------------------------------------------
 
 		function parse_template_anchors() {
+			// console.trace(parsed.toString());
 			// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
 			var promise = parsed.each('transclusion', function(template_token) {
 				// console.trace([ template_token.name, template_token.expand
@@ -1714,15 +1737,21 @@ function module_code(library_namespace) {
 					// 處理包括 {{Anchor}}, {{Anchors}}, {{Visible anchor}},
 					// {{term}}
 					// const
-					template_token = wiki_API.repeatedly_expand_template_token(
+					var anchors = wiki_API.repeatedly_expand_template_token(
 							template_token, options);
+					if (template_token === anchors) {
+						// e.g., repeatedly_expand_template_token()
+						// returns {Promise}
+						return;
+					}
+					template_token = anchors;
 					if (!template_token
 							|| typeof template_token.toString !== 'function')
 						return;
-					var anchor = get_all_anchors(template_token.toString(),
+					anchors = get_all_anchors(template_token.toString(),
 							_options);
-					// console.trace(anchor);
-					anchor.forEach(function(anchor) {
+					// console.trace(anchors);
+					anchors.forEach(function(anchor) {
 						register_anchor(anchor, template_token);
 					});
 					if (template_token.type !== 'transclusion')

@@ -2171,7 +2171,7 @@ OS='UNIX'; // unknown
 
 	var
 	/** {RegExp}是否具有 caller。能辨識紀錄之 caller。須排除"C:\"之類。 */
-	PATTERN_log_caller = /^([a-z_\d.]{2,}:\s*)(.+)$/i,
+	PATTERN_log_caller = /^([a-z_\d.]{2,}:\s*)([\s\S]+)$/i,
 	/** {Boolean}使用 styled 紀錄。 */
 	using_style = !_.env.no_log_style,
 	/** {Object}default style of console. */
