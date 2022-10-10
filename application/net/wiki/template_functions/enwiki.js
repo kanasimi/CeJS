@@ -61,20 +61,8 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	function expand_template_Tl(options) {
-		var parameters = this.parameters;
-		return '&#123;&#123;[[Template:' + parameters[1] + '|' + parameters[1]
-				+ ']]&#125;&#125;';
-	}
-
-	function parse_template_Tl(token, index, parent, options) {
-		token.expand = expand_template_Tl;
-	}
-
-	// --------------------------------------------------------------------------------------------
-
 	function parse_template_Pin_message(token, index, parent, options) {
-		var parameters = this.parameters, message_expire_date;
+		var parameters = token.parameters, message_expire_date;
 		if (parameters[1]) {
 			options = library_namespace.new_options(options);
 			options.get_timevalue = true;
@@ -108,9 +96,7 @@ function module_code(library_namespace) {
 		'Pin message' : parse_template_Pin_message,
 
 		// 一些會添加 anchors 的特殊模板。
-		'Football box' : parse_template_Football_box,
-
-		Tl : parse_template_Tl
+		'Football box' : parse_template_Football_box
 	};
 
 	// --------------------------------------------------------------------------------------------

@@ -4034,9 +4034,15 @@ function test_wiki() {
 		wikitext = "「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」";
 		assert(["[[#「-%7BXX-%7Bzh-hans:纳; zh-hant:納%7D-克%7D-→-%7BXX-%7B奈%7D-克%7D-」|「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #4-1');
 		wikitext = "==File:1.jpg#%7B%7Bint%3Afiledesc%7D%7D==\n"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.section_link #5-1-1');
 		assert(["[[#File:1.jpg#%257B%257Bint%253Afiledesc%257D%257D|File:1.jpg#%7B%7Bint%3Afiledesc%7D%7D]]", parsed[0].link.toString()], 'wiki.section_link #5-1');
 		wikitext = "==File:1.jpg#&#123;&#123;int:filedesc&#125;&#125;==\n"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.section_link #5-2-1');
 		assert(["[[#File:1.jpg#%7B%7Bint:filedesc%7D%7D|File:1.jpg#&#123;&#123;int:filedesc&#125;&#125;]]", parsed[0].link.toString()], 'wiki.section_link #5-2');
+		wikitext = "== -{{{1}}}- -{{{1|a}}}- -{{t|u}}- ==\n"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.section_link #6-1');
+		// TODO:
+		//assert(["[[#-%7B%7B%7B1%7D%7D%7D- -a- -%7B%7Bu%7D%7D-|-{{{1}}}- -{{{1|a}}}- -&#123;&#123;u&#125;&#125;-]]", parsed[0].link.toString()], 'wiki.section_link #6-2');
 
 		wikitext = '#1\n#2\nf'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #1');

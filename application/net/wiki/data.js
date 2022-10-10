@@ -3832,10 +3832,18 @@ function module_code(library_namespace) {
 			// console.trace(POST_data);
 
 			wiki_API.query(claim_action, function handle_result(_data, error) {
+				/**
+				 * e.g., <code>
+				_data: { pageinfo: { lastrevid: 000 }, success: 1, claim: { mainsnak: { ... }, type: 'statement', id: 'Q...', rank: 'normal' } }
+				</code>
+				 */
+				// console.trace(_data);
 				error = wiki_API.query.handle_error(_data, error);
 				// console.trace([ error, property_data ]);
 				// console.trace(data);
-				POST_data.language = data.language;
+				if (data.language)
+					POST_data.language = data.language;
+				// console.trace(POST_data);
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					/**

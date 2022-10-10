@@ -1494,6 +1494,7 @@ function module_code(library_namespace) {
 		return value && value.constructor === Variable_Map;
 	};
 
+	// @see https://en.wikipedia.org/wiki/User:DrTrigonBot/Subster
 	function Variable_Map_format(variable_name, default_value) {
 		var start_mark = '<!-- update '
 				+ variable_name

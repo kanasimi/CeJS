@@ -1027,13 +1027,19 @@ function module_code(library_namespace) {
 		// normalize_template_name() to redirect target
 		if (!is_invoke)
 			template_name = session.to_namespace(template_name, 'Template');
-		var redirect_target = template_name = session.redirect_target_of(
-				template_name, options);
+		var redirect_target = session
+				.redirect_target_of(template_name, options);
+		if (false && template_name === 'Template:T') {
+			console.trace([ redirect_target, template_name, function_config,
+					site_name, functions_of_site,
+					template_functions.functions_of_all_sitesoptions ]);
+		}
 		if (redirect_target !== template_name && template.type) {
 			// template.redirect_target = redirect_target;
 		}
-		if (!is_invoke)
-			template_name = session.remove_namespace(template_name, options);
+		template_name = is_invoke ? redirect_target : session.remove_namespace(
+				redirect_target, options);
+		// console.trace([ template_name, get_function_config() ]);
 		return get_function_config();
 	}
 
@@ -1047,6 +1053,9 @@ function module_code(library_namespace) {
 		// template_processor()
 		var function_config = get_function_config_of(template_token, options);
 		// console.trace(function_config);
+		if (false && template_token.name === 'T') {
+			console.trace([ template_token, function_config ]);
+		}
 		if (!function_config) {
 			return;
 		}
@@ -1172,12 +1181,24 @@ function module_code(library_namespace) {
 						options);
 			}
 			if (functions_of_site[target_full_name]) {
-				library_namespace.warn('correct_template_name: '
-						+ 'Copy configuration from ['
-						+ to_full_template_name(template_name, options)
-						+ '] to ['
-						+ to_full_template_name(target_full_name, options)
-						+ '] failed: Target exists.');
+				if (functions_of_site[target_full_name] !== functions_of_site[template_name]) {
+					library_namespace.warn('correct_template_name: '
+							+ 'Copy configuration from ['
+							+ to_full_template_name(template_name, options)
+							+ '] to ['
+							+ to_full_template_name(target_full_name, options)
+							+ '] failed: Target exists.');
+					if (false) {
+						console
+								.trace([
+										to_full_template_name(template_name,
+												options),
+										functions_of_site[template_name],
+										to_full_template_name(target_full_name,
+												options),
+										functions_of_site[target_full_name] ]);
+					}
+				}
 				continue;
 			}
 			library_namespace.info('correct_template_name: '

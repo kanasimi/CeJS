@@ -1641,7 +1641,7 @@ function module_code(library_namespace) {
 			}, 6, 'get_URL_node');
 			if (agent === true) {
 				// use new agent.
-				agent = URL_is_https ? new node_https.Agent
+				options.agent = agent = URL_is_https ? new node_https.Agent
 						: new node_http.Agent;
 			} else if (agent.protocol
 			// agent.protocol 可能是 undefined。
@@ -2332,10 +2332,10 @@ function module_code(library_namespace) {
 			'User-Agent' : get_URL_node.default_user_agent,
 
 			// https://developer.mozilla.org/zh-CN/docs/Glossary/Quality_values
-			Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9,'
-			// + 'image/avif,' + 'image/webp,*/*;q=0.8'
-			// + ',application/signed-exchange;v=b3;q=0.9'
-			,
+			Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9'
+			// 少了 '*/*' CrossRef API 會回應 406 "No acceptable resource available."
+			+ ',image/avif,' + 'image/webp,image/apng,*/*;q=0.8'
+					+ ',application/signed-exchange;v=b3;q=0.9',
 			// Accept : 'application/json, text/plain, */*',
 
 			// 為了防止 Cloudflare bot protection(?) 阻擋，必須加上 Accept-Language。
@@ -3495,7 +3495,9 @@ function module_code(library_namespace) {
 			// CloudFlare 必須設定好 headers 才能才會才允許回傳資料。
 			// get_URL() 可自動設定 headers。
 			_.get_URL(input, callback, null, init && init.body, Object.assign({
-				onfail : reject
+				// headers : { 'User-Agent' : '' },
+				onfail : reject,
+				agent : true
 			}, init));
 		}
 

@@ -384,6 +384,34 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function expand_module_IPAddress(options) {
+		var parameters = this.parameters;
+		if (parameters[2] === 'isIp') {
+			// [ , 'IPAddress', 'isIp', '...' ]
+			var is_IP = library_namespace.is_IP(parameters[3]);
+			return is_IP ? String(is_IP) : '';
+		}
+		// TODO:
+	}
+
+	function parse_module_IPAddress(token, index, parent, options) {
+		token.expand = expand_module_IPAddress;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	function expand_template_Template_link(options) {
+		var parameters = this.parameters;
+		return '&#123;&#123;[[Template:' + parameters[1] + '|' + parameters[1]
+				+ ']]&#125;&#125;';
+	}
+
+	function parse_template_Template_link(token, index, parent, options) {
+		token.expand = expand_template_Template_link;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 
 	// general_functions 必須在個別 wiki profiles 之前載入。
@@ -413,7 +441,12 @@ function module_code(library_namespace) {
 		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
 		'Pin message' : parse_template_Pin_message,
 
-		'Module:Check for unknown parameters' : parse_module_Check_for_unknown_parameters
+		'Module:Check for unknown parameters' : parse_module_Check_for_unknown_parameters,
+
+		'Module:IPAddress' : parse_module_IPAddress,
+
+		// 'Template link'
+		Tl : parse_template_Template_link
 	};
 
 	// --------------------------------------------------------------------------------------------

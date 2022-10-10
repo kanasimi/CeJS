@@ -472,9 +472,8 @@ function module_code(library_namespace) {
 	}
 
 	function template_preprocessor(wikitext, options) {
-		if (!wikitext) {
-			// e.g., 標題無效
-			return wikitext;
+		if (!wikitext.match) {
+			console.trace(wikitext);
 		}
 
 		var matched = wikitext
@@ -662,7 +661,36 @@ function module_code(library_namespace) {
 			if (!token || token.type !== 'transclusion')
 				return token;
 
+			var page_title = token.page_title.toString();
+			if (/\||{{|}}/.test(page_title)) {
+				// e.g., `{{ {{t|a|b}}|b|d}}`
+				// console.trace(token);
+				var _promise = expand_transclusion(token[0].toString(),
+						options, level);
+				if (library_namespace.is_thenable(_promise)) {
+					return _promise.then(function(parsed) {
+						token[0] = parsed;
+						token = wiki_API.parse(token.toString(), options);
+						return fetch_and_resolve_template(token);
+					});
+				}
+
+				token[0] = _promise;
+				token = wiki_API.parse(token.toString(), options);
+			}
+
+			return fetch_and_resolve_template(token);
+		}, true);
+
+		function fetch_and_resolve_template(token) {
 			// console.trace(token);
+			var page_title = token.page_title.toString();
+			if (/\||{{|}}/.test(page_title)) {
+				library_namespace.warn('expand_transclusion: Cannot expand '
+						+ token);
+				return token;
+			}
+
 			return new Promise(function(resolve, reject) {
 				function evaluate(page_data, error) {
 					if (error) {
@@ -677,8 +705,6 @@ function module_code(library_namespace) {
 					resolve(simplify_transclusion(page_data, token.parameters,
 							options, level));
 				}
-
-				var page_title = token.page_title.toString();
 
 				if (!session) {
 					page_title = wiki_API.to_namespace(page_title, 'Template');
@@ -699,7 +725,7 @@ function module_code(library_namespace) {
 					no_message : true
 				});
 			});
-		}, true);
+		}
 
 		return library_namespace.is_thenable(promise)
 		//
@@ -852,6 +878,11 @@ function module_code(library_namespace) {
 
 			// ----------------------------------------------------------------
 
+		case 'URLENCODE':
+			return encodeURIComponent(get_parameter_String(1));
+
+			// ----------------------------------------------------------------
+
 		case 'FULLPAGENAME':
 			return get_page_title();
 
@@ -905,10 +936,24 @@ function module_code(library_namespace) {
 
 		case '#invoke':
 			if (token.expand) {
-				token = token.expand(options);
-				token = wiki_API.parse(token, options);
+				var promise = token.expand(options);
+				if (promise === undefined || promise === token) {
+					return NYI();
+				}
+				if (library_namespace.is_thenable(promise)) {
+					library_namespace
+							.error('evaluate_parser_function_token: Using async function to evaluate: '
+									+ token);
+					token.not_evaluated = true;
+					return token;
+				}
+				token = wiki_API.parse(promise, options);
 				break;
 			}
+
+			// ----------------------------------------------------------------
+
+			// case 'INT':
 
 			// ----------------------------------------------------------------
 
@@ -1517,6 +1562,7 @@ function module_code(library_namespace) {
 		// ------------------------------------------------------------------------
 		// parse functions
 
+		var PATTERN_language_conversion = /-{(|[^\n{].*?)}-/g;
 		function parse_language_conversion(all, parameters) {
 			// -{...}- 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('-{'),
@@ -2301,7 +2347,7 @@ function module_code(library_namespace) {
 			}
 
 			if (following === '}' && previous.endsWith('{')) {
-				previous = previous.slice(0, -1);
+				previous = previous.slice(0, -'{'.length);
 				// Should be previous + '{{{...}}}'
 				return previous
 						+ all.slice(previous.length).replace(
@@ -3647,7 +3693,7 @@ function module_code(library_namespace) {
 		// TODO:
 		// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
 
-		wikitext = wikitext.replace_till_stable(/-{(|[^{].*?)}-/g,
+		wikitext = wikitext.replace_till_stable(PATTERN_language_conversion,
 				parse_language_conversion);
 
 		// ----------------------------------------------------

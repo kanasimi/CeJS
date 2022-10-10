@@ -108,9 +108,9 @@ function module_code(library_namespace) {
 	function is_IP(host, IPv6_only) {
 		return !IPv6_only
 		// for IPv4 addresses
-		&& /^[12]?\d{1,2}(?:\.[12]?\d{1,2}){3}$/.test(host)
+		&& /^[12]?\d{1,2}(?:\.[12]?\d{1,2}){3}$/.test(host) && 4
 		// for IPv6 addresses
-		|| /^[\dA-F]{1,4}(?::[\dA-F]{1,4}){7}$/i.test(host);
+		|| /^[\dA-F]{1,4}(?::[\dA-F]{1,4}){7}$/i.test(host) && 6;
 	}
 
 	_.is_IP = is_IP;
