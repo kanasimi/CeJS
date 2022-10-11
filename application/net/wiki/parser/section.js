@@ -1696,12 +1696,14 @@ function module_code(library_namespace) {
 						// if (token.type === 'transclusion') return token;
 						return token.toString();
 					}));
-					console.trace(section_title_token.toString());
+					// Also show .imprecise_tokens
+					console.trace(section_title_token);
 				} else {
 					library_namespace.warn(
 					//
 					'若包含的是模板，請檢查是否可於 template_functions 添加此標題中的模板: '
 							+ section_title_token.title);
+					// Also show .imprecise_tokens
 					console.trace(section_title_link);
 				}
 			}

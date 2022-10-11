@@ -24,7 +24,7 @@ https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.parser.wikitext',
-
+	// for_each_token
 	require : 'application.net.wiki.parser.',
 
 	// 設定不匯出的子函式。
@@ -37,7 +37,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.application.net.wiki;
+	var wiki_API = library_namespace.application.net.wiki, for_each_token = wiki_API.parser.parser_prototype.each;
 	// @inner
 	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
 
@@ -352,7 +352,9 @@ function module_code(library_namespace) {
 			// For {{#lst}}, {{#section:}}
 			// [[w:en:Help:Labeled section transclusion]]
 			// TODO: 標簽（tag）現在可以本地化
-			+ '|section';
+			+ '|section'
+			// Allow `<noinclude />`
+			+ '|noinclude';
 	/** {RegExp}HTML self closed tags 的匹配模式。 */
 	var PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_close_tags
 	// allow "<br/>"
@@ -393,15 +395,13 @@ function module_code(library_namespace) {
 
 		var parsed = wikitext;
 		if (typeof wikitext === 'string') {
-			parsed = wiki_API.parser(wikitext, options).parse();
+			parsed = wiki_API.parse(wikitext, options);
 		}
 		// console.trace([ wikitext, options ]);
 		// console.trace(parsed);
 
 		var have_template_parameters, has_complex_parameter_name;
-		wiki_API.parser.parser_prototype.each.call(parsed, 'parameter',
-		//
-		function(token) {
+		for_each_token.call(parsed, 'parameter', function(token) {
 			have_template_parameters = true;
 			var value = token[0];
 			if (typeof value !== 'string') {
@@ -451,13 +451,14 @@ function module_code(library_namespace) {
 			return parsed.evaluate(options);
 		}
 
+		// console.trace(parsed.toString());
 		var promise;
 		if (parsed.type === 'magic_word_function') {
 			promise = evaluate_parser_function_token.call(parsed, options);
 		} else {
-			promise = wiki_API.parser.parser_prototype.each.call(parsed,
+			promise = for_each_token.call(parsed, 'magic_word_function',
 			//
-			'magic_word_function', function(token) {
+			function(token) {
 				return evaluate_parser_function_token.call(token, options);
 			}, true);
 
@@ -486,6 +487,12 @@ function module_code(library_namespace) {
 		}
 
 		var parsed = wiki_API.parser(wikitext, options).parse();
+		parsed.each('tag_single', function(token) {
+			if (token.tag === 'noinclude') {
+				// Allow `<noinclude />`
+				return '';
+			}
+		}, true);
 		parsed.each('tag', function(token) {
 			if (token.tag === 'noinclude')
 				return '';
@@ -567,11 +574,16 @@ function module_code(library_namespace) {
 				return;
 			}
 			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
-			var parsed = wiki_API.parser(wikitext, options).parse();
-			if (level > 3 || !parsed[0] || parsed[0].type !== 'transclusion')
-				return parsed;
+			var parsed = wiki_API.parse(wikitext, options);
+			if (level > 3 || !parsed || parsed.type !== 'transclusion') {
+				// `page_data ?`: 為了維持cache與第一次執行的輸出相同。
+				// 例如在 `await CeL.wiki.expand_transclusion(
+				// '{{Namespace detect|main=Article text}}')`
+				return page_data ? token : parsed;
+			}
 			// expand template
-			return expand_transclusion(parsed, options, level);
+			parsed = expand_transclusion(parsed, options, level);
+			return parsed;
 		}, true);
 
 		function resolve_magic_word_function() {
@@ -634,20 +646,26 @@ function module_code(library_namespace) {
 			// temp
 			parsed = options;
 			options = {
+				allow_promise : true,
 				set_not_evaluated : true
 			};
 			options[KEY_on_page_title_option] = parsed;
 		} else {
 			// .new_options(): 會設定 options.something_not_evaluated，避免污染。
 			options = Object.assign({
+				allow_promise : true,
 				set_not_evaluated : true
 			}, options);
 		}
 
-		if (typeof wikitext === 'string') {
-			parsed = wiki_API.parser(wikitext, options).parse();
-		} else {
+		if (Array.isArray(wikitext)) {
 			parsed = wikitext;
+			if (parsed.type !== 'plain') {
+				parsed = [ parsed ];
+				parsed.is_shell = true;
+			}
+		} else {
+			parsed = wiki_API.parser(wikitext, options).parse();
 		}
 
 		var session = wiki_API.session_of_options(options);
@@ -655,34 +673,61 @@ function module_code(library_namespace) {
 			redirects : 1
 		}, options);
 
-		var promise = parsed.each('transclusion', function(token) {
+		// console.trace(parsed);
+		var promise = for_each_token.call(parsed, 'transclusion', function(
+				token) {
 			token = repeatedly_expand_template_token(token, options);
 			// console.trace(token);
 			if (!token || token.type !== 'transclusion')
 				return token;
 
-			var page_title = token.page_title.toString();
-			if (/\||{{|}}/.test(page_title)) {
-				// e.g., `{{ {{t|a|b}}|b|d}}`
-				// console.trace(token);
-				var _promise = expand_transclusion(token[0].toString(),
-						options, level);
-				if (library_namespace.is_thenable(_promise)) {
-					return _promise.then(function(parsed) {
-						token[0] = parsed;
-						token = wiki_API.parse(token.toString(), options);
-						return fetch_and_resolve_template(token);
-					});
-				}
-
-				token[0] = _promise;
-				token = wiki_API.parse(token.toString(), options);
+			token = expand_template_name(token);
+			if (library_namespace.is_thenable(token)) {
+				return token.then(fetch_and_resolve_template);
 			}
 
+			// console.trace(token);
 			return fetch_and_resolve_template(token);
 		}, true);
 
+		function expand_template_name(token) {
+			// console.trace(token[0]);
+			var template_name = token[0].toString();
+			var promise = expand_transclusion(token[0], options, level);
+			if (!library_namespace.is_thenable(promise)) {
+				// console.trace([ token, token[0], promise ]);
+				if (template_name !== token[0].toString()) {
+					// re-parse
+					token[0] = promise;
+					token = wiki_API.parse(token.toString(), options);
+					if (wiki_API.template_functions) {
+						// console.trace(token);
+						wiki_API.template_functions.adapt_function(token, null,
+								null, options);
+						// console.trace(token);
+					}
+					token = repeatedly_expand_template_token(token, options);
+					if (token.type === 'plain' && token.length === 1)
+						token = token[0];
+					// console.trace(token);
+				}
+				return token;
+			}
+
+			// e.g., `{{ {{t|a|b}}|b|d}}`
+			return promise.then(function(template_name) {
+				var _token = wiki_API.parse('{{' + template_name + '}}',
+						options);
+				// console.trace(_token);
+				token[0] = _token[0];
+				token.page_title = _token.page_title;
+				return expand_template_name(token);
+			});
+		}
+
 		function fetch_and_resolve_template(token) {
+			if (!token || token.type !== 'transclusion')
+				return token;
 			// console.trace(token);
 			var page_title = token.page_title.toString();
 			if (/\||{{|}}/.test(page_title)) {
@@ -727,12 +772,15 @@ function module_code(library_namespace) {
 			});
 		}
 
-		return library_namespace.is_thenable(promise)
-		//
-		? promise.then(function() {
-			// console.trace(parsed);
+		function return_evaluated() {
+			// console.trace(parsed.toString());
+			if (parsed.is_shell)
+				parsed = parsed[0];
 			return evaluate_parsed(parsed, options);
-		}) : evaluate_parsed(parsed, options);
+		}
+
+		return library_namespace.is_thenable(promise) ? promise
+				.then(return_evaluated) : return_evaluated();
 	}
 
 	wiki_API.expand_transclusion = expand_transclusion;
@@ -749,6 +797,9 @@ function module_code(library_namespace) {
 				if (options.show_NYI_message) {
 					library_namespace.warn('evaluate_parser_function_token: '
 							+ '尚未加入演算 {{' + token.name + '}} 的功能: ' + token);
+					// console.trace(options);
+					// Error.stackTraceLimit = 60;
+					// console.trace(token.name);
 				}
 				// 直接回傳，避免 evaluate_parsed() 重複呼叫。
 				if (options.set_not_evaluated
@@ -762,7 +813,9 @@ function module_code(library_namespace) {
 		}
 
 		function get_parameter_String(NO) {
-			return evaluate_parsed(token.parameters[NO], options).toString();
+			var parameter = token.parameters[NO];
+			return parameter
+					&& expand_transclusion(parameter, options).toString() || '';
 		}
 
 		function get_page_title(remove_namespace) {
@@ -773,6 +826,34 @@ function module_code(library_namespace) {
 			|| options[KEY_on_page_title_option], options) || '';
 			return remove_namespace ? wiki_API.remove_namespace(title, options)
 					: title;
+		}
+
+		function get_interface_message(message_id) {
+			if (!message_id || !(message_id = String(message_id).trim()))
+				return message_id;
+			var session = wiki_API.session_of_options(options);
+			if (!session.interface_messages)
+				session.interface_messages = new Map;
+			if (session.interface_messages.has(message_id))
+				return session.interface_messages.get(message_id);
+
+			return new Promise(function(resolve, reject) {
+				session.page('MediaWiki:' + message_id, function(page_data,
+						error) {
+					if (error) {
+						reject(error);
+						return;
+					}
+					var content = wiki_API.content_of(page_data)
+							|| ('⧼' + page_data.title + '⧽');
+					library_namespace.info(
+					//
+					'get_interface_message: Cache interface message: ['
+							+ message_id + '] = ' + JSON.stringify(content));
+					session.interface_messages.set(message_id, content);
+					resolve(content);
+				});
+			});
 		}
 
 		switch (token.name) {
@@ -856,6 +937,7 @@ function module_code(library_namespace) {
 			// ----------------------------------------------------------------
 
 		case '#if':
+			// console.trace([ token, get_parameter_String(1) ]);
 			token = token.parameters[get_parameter_String(1) ? 2 : 3];
 			// console.trace(token);
 			break;
@@ -867,6 +949,36 @@ function module_code(library_namespace) {
 			// console.trace(token);
 			break;
 
+		case '#ifexist':
+			var page_title = get_parameter_String(1);
+			if (page_title.includes('|')) {
+				// e.g., `a|b {{#ifexist: a{{!}}b | exists | doesn't exist }}`
+				return get_parameter_String(3);
+			}
+			if (!options || !options.allow_promise) {
+				return NYI();
+			}
+			var session = wiki_API.session_of_options(options);
+			if (!session) {
+				return NYI();
+			}
+			return new Promise(function(resolve, reject) {
+				// console.trace(page_title);
+				session.page(page_title, function(page_data, error) {
+					if (error) {
+						reject(error);
+						return;
+					}
+
+					// console.trace(page_data);
+					resolve(get_parameter_String(('missing' in page_data)
+							|| ('invalid' in page_data) ? 3 : 2));
+				}, {
+					rvprop : 'ids',
+					rvlimit : 1
+				});
+			});
+
 		case '#titleparts':
 			var title = get_parameter_String(1).split('/');
 			var start = +get_parameter_String(3);
@@ -877,6 +989,8 @@ function module_code(library_namespace) {
 					.join('/');
 
 			// ----------------------------------------------------------------
+
+			// https://www.mediawiki.org/wiki/Help:Magic_words#URL_data
 
 		case 'URLENCODE':
 			return encodeURIComponent(get_parameter_String(1));
@@ -950,10 +1064,24 @@ function module_code(library_namespace) {
 				token = wiki_API.parse(promise, options);
 				break;
 			}
+			return NYI();
 
 			// ----------------------------------------------------------------
 
-			// case 'INT':
+		case 'INT':
+			var session = wiki_API.session_of_options(options);
+			if (!session) {
+				return NYI();
+			}
+			var page_title = expand_transclusion(token[1], options);
+			page_title = library_namespace.is_thenable(page_title) ? page_title
+					.then(get_interface_message)
+					: get_interface_message(page_title);
+			if (library_namespace.is_thenable(page_title)
+					&& (!options || !options.allow_promise)) {
+				return NYI();
+			}
+			return page_title;
 
 			// ----------------------------------------------------------------
 
@@ -962,7 +1090,7 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(token.toString());
-		return evaluate_parsed(token, options);
+		return expand_transclusion(token, options);
 	}
 
 	/**

@@ -406,8 +406,9 @@ function module_code(library_namespace) {
 	 * @see page_parser.type_alias
 	 */
 	function for_each_token(type, processor, modify_by_return, max_depth) {
-		if (!this) {
-			return;
+		if (!Array.isArray(this)) {
+			// console.trace(this);
+			return this;
 		}
 
 		if (typeof type === 'function' && max_depth === undefined) {
@@ -498,10 +499,6 @@ function module_code(library_namespace) {
 			// 因為本函數為 CeL.wiki.parser(content) 最常使用者，
 			// 因此放在這少一道 .parse() 工序。
 			this.parse();
-		}
-
-		if (!Array.isArray(this)) {
-			return;
 		}
 
 		// ----------------------------------------------------------
