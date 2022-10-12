@@ -573,6 +573,8 @@ function module_code(library_namespace) {
 				}
 				return;
 			}
+
+			// token = evaluate_parsed(token, options);
 			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
 			var parsed = wiki_API.parse(wikitext, options);
 			if (level > 3 || !parsed || parsed.type !== 'transclusion') {
@@ -580,6 +582,11 @@ function module_code(library_namespace) {
 				// 例如在 `await CeL.wiki.expand_transclusion(
 				// '{{Namespace detect|main=Article text}}')`
 				return page_data ? token : parsed;
+			}
+			if (wiki_API.template_functions) {
+				// console.trace(options);
+				wiki_API.template_functions.adapt_function(token, null, null,
+						options);
 			}
 			// expand template
 			parsed = expand_transclusion(parsed, options, level);
@@ -590,6 +597,9 @@ function module_code(library_namespace) {
 			var wikitext = parsed.toString();
 			// console.trace([ wikitext ]);
 			parsed = wiki_API.parser(wikitext, options).parse();
+			if (/{{/.test(parsed)) {
+				// console.trace(page_data && page_data.title || wikitext);
+			}
 			var promise = evaluate_parsed(parsed, options);
 			// console.trace([ promise ]);
 			return promise || parsed;
@@ -641,6 +651,9 @@ function module_code(library_namespace) {
 	// ** 僅能提供簡單的演算功能，但提供 cache。
 	// [[Special:ExpandTemplates]]
 	function expand_transclusion(wikitext, options, level) {
+		if (!wikitext)
+			return wikitext;
+
 		var parsed;
 		if (typeof options === 'string') {
 			// temp
@@ -667,11 +680,6 @@ function module_code(library_namespace) {
 		} else {
 			parsed = wiki_API.parser(wikitext, options).parse();
 		}
-
-		var session = wiki_API.session_of_options(options);
-		var page_options = Object.assign({
-			redirects : 1
-		}, options);
 
 		// console.trace(parsed);
 		var promise = for_each_token.call(parsed, 'transclusion', function(
@@ -751,6 +759,11 @@ function module_code(library_namespace) {
 							options, level));
 				}
 
+				var session = wiki_API.session_of_options(options);
+				var page_options = Object.assign({
+					redirects : 1
+				}, options);
+
 				if (!session) {
 					page_title = wiki_API.to_namespace(page_title, 'Template');
 					wiki_API.page(page_title, evaluate, page_options);
@@ -798,8 +811,6 @@ function module_code(library_namespace) {
 					library_namespace.warn('evaluate_parser_function_token: '
 							+ '尚未加入演算 {{' + token.name + '}} 的功能: ' + token);
 					// console.trace(options);
-					// Error.stackTraceLimit = 60;
-					// console.trace(token.name);
 				}
 				// 直接回傳，避免 evaluate_parsed() 重複呼叫。
 				if (options.set_not_evaluated
@@ -814,8 +825,9 @@ function module_code(library_namespace) {
 
 		function get_parameter_String(NO) {
 			var parameter = token.parameters[NO];
-			return parameter
-					&& expand_transclusion(parameter, options).toString() || '';
+			if (parameter)
+				parameter = expand_transclusion(parameter, options).toString();
+			return parameter;
 		}
 
 		function get_page_title(remove_namespace) {
@@ -1048,7 +1060,29 @@ function module_code(library_namespace) {
 
 			// ----------------------------------------------------------------
 
+		case 'SUBST':
+		case 'SAFESUBST':
+			if (!options || !options.allow_promise) {
+				return NYI();
+			}
+			var session = wiki_API.session_of_options(options);
+			if (!session) {
+				return NYI();
+			}
+			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
+			var parsed = wiki_API.parse(wikitext, options);
+			if (wiki_API.template_functions) {
+				// console.trace(options);
+				wiki_API.template_functions.adapt_function(parsed, null, null,
+						options);
+			}
+			// expand template
+			return expand_transclusion(parsed, options);
+
+			// ----------------------------------------------------------------
+
 		case '#invoke':
+			// console.trace(token);
 			if (token.expand) {
 				var promise = token.expand(options);
 				if (promise === undefined || promise === token) {
@@ -1133,8 +1167,10 @@ function module_code(library_namespace) {
 			// anchor 網頁錨點
 			+ this[1];
 			if (this.length > 2) {
+				var pipe = this.pipe;
 				for (var index = 2; index < this.length; index++) {
-					wikitext += (this.pipe[index - 2] || '|') + this[index];
+					// `pipe &&`: for .file.call([])
+					wikitext += (pipe && pipe[index - 2] || '|') + this[index];
 				}
 			}
 			return wikitext + ']]';

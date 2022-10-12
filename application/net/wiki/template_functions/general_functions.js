@@ -168,8 +168,9 @@ function module_code(library_namespace) {
 				// e.g., [[終着駅シリーズ]]: {{Anchor|[[牛尾正直]]}}
 				// {{Anchor|A[[B]]}} → "AB"
 				// anchor = wiki_API.wikitext_to_plain_text(anchor);
-				library_namespace.error('無法處理 anchor: ' + anchor);
-				console.trace(anchor);
+				library_namespace.warn('expand_template_Anchor: 特殊 anchor: #'
+						+ anchor);
+				// console.trace(anchor);
 			}
 			// class="anchor"
 			wikitext.push('<span id="' + anchor + '"></span>');
@@ -386,6 +387,7 @@ function module_code(library_namespace) {
 
 	function expand_module_IPAddress(options) {
 		var parameters = this.parameters;
+		// console.trace(parameters);
 		if (parameters[2] === 'isIp') {
 			// [ , 'IPAddress', 'isIp', '...' ]
 			var is_IP = library_namespace.is_IP(parameters[3]);

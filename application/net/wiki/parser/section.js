@@ -1709,7 +1709,10 @@ function module_code(library_namespace) {
 			}
 		});
 
-		var _options = options && Object.assign(Object.clone(options), {
+		options = Object.assign({
+			allow_promise : options && options.try_to_expand_templates
+		}, options);
+		var _options = Object.assign(Object.clone(options), {
 			print_anchors : false
 		});
 
