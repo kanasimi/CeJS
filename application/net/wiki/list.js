@@ -1401,6 +1401,13 @@ function module_code(library_namespace) {
 				}
 				this.actions.push(args);
 				// console.trace([ this.running, this.actions.length, args ]);
+				if (false
+						&& method === 'edit'
+						&& (!args[2] || !args[2].page_to_edit
+								&& !args[2].task_page_data)) {
+					console.trace('No options.page_to_edit set!');
+					console.log(this.actions);
+				}
 
 				// TODO: 不應該僅以this.running判定，
 				// 因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。

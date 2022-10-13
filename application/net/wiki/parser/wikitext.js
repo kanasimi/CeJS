@@ -412,8 +412,31 @@ function module_code(library_namespace) {
 			}
 			// 取決於參數的定義性
 			// https://en.wikipedia.org/wiki/Help:Conditional_expressions
-			if (value in parameters)
-				return parameters[value];
+			if (value in parameters) {
+				// 先將 parsed 充作 parent 使用。
+				var parsed = token;
+				// 預防循環參照。
+				// e.g., parameters[1] = `{{{1}}}`
+				while (parsed = parsed.parent) {
+					// console.trace(parsed);
+					if (parsed.parameter_NO === value)
+						return;
+				}
+
+				// 避免污染原 parameter。
+				parsed = wiki_API.parse(parameters[value].toString(), options);
+				if (Array.isArray(parsed)) {
+					// 預防循環參照。
+					parsed.parameter_NO = value;
+					for_each_token.call(parsed,
+					//
+					library_namespace.null_function, {
+						add_index : true
+					});
+				}
+				// console.trace(parsed);
+				return parsed;
+			}
 
 			if (token.length < 2) {
 				// e.g., `{{{1}}}` without parameter 1, return `{{{1}}}` itself.
@@ -459,6 +482,7 @@ function module_code(library_namespace) {
 			promise = for_each_token.call(parsed, 'magic_word_function',
 			//
 			function(token) {
+				// console.trace(token);
 				return evaluate_parser_function_token.call(token, options);
 			}, true);
 
@@ -589,6 +613,10 @@ function module_code(library_namespace) {
 						options);
 			}
 			// expand template
+			if (options.parameters !== parameters) {
+				options = Object.clone(options);
+				options.parameters = parameters;
+			}
 			parsed = expand_transclusion(parsed, options, level);
 			return parsed;
 		}, true);
@@ -631,6 +659,7 @@ function module_code(library_namespace) {
 				library_namespace
 						.error('repeatedly_expand_template_token: Using async function + options.allow_promise to expand: '
 								+ token);
+				// Error.stackTraceLimit = Infinity;
 				// console.trace(token);
 				// delete token.expand;
 				break;
@@ -680,6 +709,9 @@ function module_code(library_namespace) {
 		} else {
 			parsed = wiki_API.parser(wikitext, options).parse();
 		}
+
+		if (options.parameters)
+			parsed = convert_parameter(parsed, options.parameters, options);
 
 		// console.trace(parsed);
 		var promise = for_each_token.call(parsed, 'transclusion', function(
@@ -741,6 +773,7 @@ function module_code(library_namespace) {
 			if (/\||{{|}}/.test(page_title)) {
 				library_namespace.warn('expand_transclusion: Cannot expand '
 						+ token);
+				// console.trace('' + token);
 				return token;
 			}
 
@@ -805,6 +838,7 @@ function module_code(library_namespace) {
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 	function evaluate_parser_function_token(options) {
 		var token = this;
+
 		function NYI() {
 			if (options) {
 				if (options.show_NYI_message) {
@@ -824,9 +858,26 @@ function module_code(library_namespace) {
 		}
 
 		function get_parameter_String(NO) {
-			var parameter = token.parameters[NO];
-			if (parameter)
-				parameter = expand_transclusion(parameter, options).toString();
+			function return_parameter(parameter) {
+				parameter = String(parameter || '');
+				// console.trace([ '' + token, token ]);
+				if (!is_parser_function)
+					parameter = parameter.trim();
+				return parameter;
+			}
+
+			var is_parser_function = token.name.startsWith('#');
+			var parameter = is_parser_function ? token.parameters[NO]
+					: token[NO];
+			// console.trace([ parameter, '' + token, token ]);
+			if (parameter) {
+				parameter = expand_transclusion(parameter, options);
+				if (library_namespace.is_thenable(parameter)) {
+					parameter = parameter.then(return_parameter);
+				} else {
+					parameter = return_parameter(parameter);
+				}
+			}
 			return parameter;
 		}
 
@@ -889,6 +940,12 @@ function module_code(library_namespace) {
 					get_parameter_String(2), get_parameter_String(3))
 					: get_parameter_String(1).slice(get_parameter_String(2));
 
+		case 'LC':
+			return get_parameter_String(1).toLowerCase();
+
+		case 'UC':
+			return get_parameter_String(1).toUpperCase();
+
 			// ----------------------------------------------------------------
 
 			// [[mw:Help:Magic words#Date and time]]
@@ -949,7 +1006,7 @@ function module_code(library_namespace) {
 			// ----------------------------------------------------------------
 
 		case '#if':
-			// console.trace([ token, get_parameter_String(1) ]);
+			// console.trace([ '#if%', token, get_parameter_String(1) ]);
 			token = token.parameters[get_parameter_String(1) ? 2 : 3];
 			// console.trace(token);
 			break;
@@ -1107,7 +1164,7 @@ function module_code(library_namespace) {
 			if (!session) {
 				return NYI();
 			}
-			var page_title = expand_transclusion(token[1], options);
+			var page_title = get_parameter_String(1);
 			page_title = library_namespace.is_thenable(page_title) ? page_title
 					.then(get_interface_message)
 					: get_interface_message(page_title);

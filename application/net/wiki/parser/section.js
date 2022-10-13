@@ -1722,11 +1722,17 @@ function module_code(library_namespace) {
 		}
 
 		promise = promise.then(parse_template_anchors);
-		// @see function wiki_API_edit()
 		var session = wiki_API.session_of_options(options);
-		if (session && session.running) {
+		if (session && session.actions && session.actions[0]) {
+			/**
+			 * <code>
+			e.g., for
+			node 20201008.fix_anchor.js use_project=en "check_page=WABC (AM)"
+			</code>
+			 */
 			// console.trace(session && session.actions);
-			session.next(promise);
+			if (!session.actions[0].waiting_for_previous_combination_operation)
+				session.next(promise);
 		}
 		return promise;
 

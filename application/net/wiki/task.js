@@ -292,6 +292,7 @@ function module_code(library_namespace) {
 			type = 'list';
 		}
 		// this.current_action = next;
+		// console.trace(next);
 
 		if (library_namespace.is_debug(3)) {
 			library_namespace.debug(
@@ -467,6 +468,11 @@ function module_code(library_namespace) {
 			// wiki.page().edit(,()=>wiki.page().edit(,))
 			delete this.last_page;
 
+			if (this.actions[0] && this.actions[0][0] === 'edit') {
+				// page-edit 組合式操作。設定等待先前的取得頁面操作中。
+				this.actions[0].waiting_for_previous_combination_operation = true;
+			}
+
 			// this.page(title, callback, options)
 			// next[1] : title
 			// next[3] : options
@@ -475,6 +481,7 @@ function module_code(library_namespace) {
 					next[1] ],
 			//
 			function wiki_API_next_page_callback(page_data, error) {
+				// console.trace([ page_data, error ]);
 				if (false) {
 					if (Array.isArray(page_data)) {
 						console.trace(page_data.length
@@ -1019,12 +1026,12 @@ function module_code(library_namespace) {
 			&& next[2] && next[2].section !== 'new'
 			//
 			&& !wiki_API.content_of.had_fetch_content(next[2].page_to_edit)) {
-				console.log(next);
+				console.trace(this);
+				console.trace([ this.actions.length, next ]);
 				throw new Error(
 						'wiki_API.prototype.next: There are multiple threads competing with each other? 有多個執行緒互相競爭？');
 				library_namespace
 						.warn('wiki_API.prototype.next: 有多個執行緒互相競爭？本執行緒將會直接跳出，等待另一個取得頁面內容的執行緒完成後，由其處理。');
-				console.trace(next);
 				break;
 			}
 
@@ -1042,6 +1049,10 @@ function module_code(library_namespace) {
 					// assert: wiki.page().edit().edit()
 					// e.g., 20160906.archive_moegirl.js
 					// Should reget page
+					if (false) {
+						console.trace('Get page: '
+								+ wiki_API.title_link_of(next[2].page_to_edit));
+					}
 					_this.actions
 							.unshift([ 'page', next_action[2].page_to_edit ]);
 				}
@@ -1234,9 +1245,11 @@ function module_code(library_namespace) {
 			&& next[1] === wiki_API.content_of(next[2].page_to_edit)) {
 				// console.log(next[2]);
 				// console.trace(next[2].page_to_edit.title);
-				library_namespace.debug('Skip [' + next[2].page_to_edit.title
+				library_namespace.debug('Skip '
+				//
+				+ wiki_API.title_link_of(next[2].page_to_edit)
 				// 'nochange', no change
-				+ ']: The same contents.', 1, 'wiki_API.prototype.next');
+				+ ': The same contents.', 1, 'wiki_API.prototype.next');
 				check_next(typeof next[3] === 'function'
 				// next[3] : callback
 				&& next[3].call(this, next[2].page_to_edit.title, 'nochange'));
@@ -1244,7 +1257,10 @@ function module_code(library_namespace) {
 			}
 
 			next[2].rollback_action = function rollback_action() {
-				// rollback action
+				if (false) {
+					console.trace('rollback action: '
+							+ wiki_API.title_link_of(next[2].page_to_edit));
+				}
 				_this.actions.unshift(
 				// 重新登入以後，編輯頁面之前再取得一次頁面內容。
 				[ 'page', next[2].page_to_edit.title ], next);
@@ -2698,9 +2714,9 @@ function module_code(library_namespace) {
 
 			var page_index = 0;
 			// for each page: 主要機制是一頁頁處理。
-			function process_next_page() {
+			function process_next_task_page() {
 				if (false)
-					console.trace('process_next_page: ' + page_index + '/'
+					console.trace('process_next_task_page: ' + page_index + '/'
 							+ pages.length);
 				if (messages.quit_operation) {
 					// 警告: 直接清空 .actions 不安全！
@@ -2733,7 +2749,7 @@ function module_code(library_namespace) {
 				if (!page) {
 					// nochange_count++;
 					// Skip invalid page. 預防如 .work(['']) 的情況。
-					process_next_page();
+					process_next_task_page();
 					return;
 				}
 
@@ -2770,16 +2786,17 @@ function module_code(library_namespace) {
 
 					if (library_namespace.is_thenable(result)) {
 						result = result.then(function() {
-							session.run(process_next_page);
+							session.run(process_next_task_page);
 						}, function(error) {
 							// console.trace([ result, error ]);
 							handle_page_error(error);
-							session.run(process_next_page);
+							session.run(process_next_task_page);
 						});
 					} else {
-						// console.trace('session.run(process_next_page) ');
+						// console.trace('session.run(process_next_task_page)
+						// ');
 						setTimeout(function() {
-							session.run(process_next_page);
+							session.run(process_next_task_page);
 						}, 0);
 					}
 					return result;
@@ -2889,12 +2906,12 @@ function module_code(library_namespace) {
 					// console.trace(arguments);
 					// nomally call do_batch_work_summary()
 					callback.apply(session, arguments);
-					session.run(process_next_page);
+					session.run(process_next_task_page);
 				});
 
 			}
 
-			process_next_page();
+			process_next_task_page();
 
 			// 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
 			function finish_up() {
