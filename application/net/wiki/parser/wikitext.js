@@ -2693,10 +2693,10 @@ function module_code(library_namespace) {
 				// assert: Array.isArray(token) && token.type === 'plain'
 
 				var matched = undefined;
-				// scan
+				// scan for `key=value`
 				token.some(function(t, index) {
 					if (typeof t !== 'string') {
-						return t.type !== 'comment';
+						return t && t.type !== 'comment';
 					}
 					// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
 					if (t.includes('=')) {
