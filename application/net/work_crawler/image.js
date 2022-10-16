@@ -190,10 +190,12 @@ function module_code(library_namespace) {
 		}
 		image_data.parsed_url = image_url;
 		if (!crawler_namespace.PATTERN_non_CJK.test(image_url)) {
+			// 工具檔應先編碼URL。
 			library_namespace.warn({
 				// gettext_config:{"id":"invalid-url-must-encode-first-$1"}
 				T : [ '必須先將URL編碼：%1', image_url ]
 			});
+			// console.trace(image_url);
 			if (!/%[\dA-F]{2}/i.test(image_url))
 				image_url = encodeURI(image_url);
 		}

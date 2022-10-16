@@ -750,8 +750,8 @@ function module_code(library_namespace) {
 	// e.g., '/只/隻/i'
 	_.PATTERN_RegExp_replacement = new RegExp(
 	// [ all, pattern source, replace to, flags ]
-	/^\/((?:\\[\s\S]|[^\/])+)\/((?:\\[\s\S]|[^\/])*)\/([flags]*)$/.source.replace(
-			'flags', _.PATTERN_RegExp_flags));
+	/^\/((?:\\[\s\S]|[^\/])+)\/((?:\\[\s\S]|[^\/])*)\/([flags]*)$/.source
+			.replace('flags', _.PATTERN_RegExp_flags));
 
 	// CeL.PATTERN_RegExp_flags
 	_.PATTERN_RegExp_flags = new RegExp(/^[flags]+$/.source.replace('flags',
@@ -3582,7 +3582,9 @@ function module_code(library_namespace) {
 		// get diff as well
 		get_diff = !!(options.diff || options.with_diff),
 		// get diff ONLY
-		diff_only = get_diff && !get_all && !options.with_diff;
+		diff_only = get_diff && !get_all && !options.with_diff,
+		//
+		try_to_merge_diff = !!options.try_to_merge_diff;
 
 		// ---------------------------------------
 		// 工具函數。
@@ -3624,6 +3626,25 @@ function module_code(library_namespace) {
 			return treat_as_String ? _unique.join(separator) : _unique;
 		}
 
+		function generate_diff_pair(from_index, to_index) {
+			var diff_pair = [ normalize_unique(from_unique, from),
+					normalize_unique(to_unique, to) ];
+			if (false && to_unique) {
+				diff_pair.push(normalize_unique(to_unique, to));
+			}
+			// Array.isArray(to_unique) && from_unique===undefined 代表本段落為新增文字。
+			// diff_pair.index: 本次差異開始的 index。
+			// diff_pair.index = [ from_index, to_index ];
+			// _index = [ start_index, end_index ]
+			// .indexes
+			diff_pair.index = [ from_unique, to_unique ];
+			// diff_pair.last_index: 上一個相同元素的 index。
+			// 警告: diff_pair.last_index 在 _unique 最初的一個 index 可能不準確!
+			diff_pair.last_index = [ from_index, to_index ];
+
+			return diff_pair;
+		}
+
 		function add_to_diff_list(from_index, to_index) {
 			if (!get_diff || (!from_unique && !to_unique)) {
 				// assert: 連續相同元素時
@@ -3635,19 +3656,46 @@ function module_code(library_namespace) {
 						from_unique, to_unique ]), 3, 'add_to_diff_list');
 			}
 
-			var diff_pair = [ normalize_unique(from_unique, from),
-					normalize_unique(to_unique, to) ];
-			if (false && to_unique) {
-				diff_pair.push(normalize_unique(to_unique, to));
+			var diff_pair = generate_diff_pair(from_index, to_index);
+
+			if (try_to_merge_diff && diff_list.length > 0) {
+				var previous_diff_of_start = (to_index === NOT_FOUND ? 0
+				// 本次不同內容開始的 index 差異。
+				: to_index) - (from_index === NOT_FOUND ? 0 : from_index);
+				for (var index = 0; index < diff_list.length
+				// && 1: 只檢測文字交換。 e.g., "品質" → "質量"，避免太多差異被合併在一起。
+				&& 1; index++) {
+					var _diff_pair = diff_list[index];
+					// 到 _diff_pair 為止，from 之不同內容最後的 index 差異。
+					var last_index_0 = _diff_pair.index[0] ? _diff_pair.index[0][1]
+							: _diff_pair.last_index[0];
+					// 到 _diff_pair 為止，to 之不同內容最後的 index 差異。
+					var last_index_1 = _diff_pair.index[1] ? _diff_pair.index[1][1]
+							: _diff_pair.last_index[1];
+					// 到 _diff_pair 為止，不同內容最後的 index 差異。
+					var following_diff_of_start = last_index_1 - last_index_0;
+					if (following_diff_of_start !== previous_diff_of_start) {
+						continue;
+					}
+
+					diff_list.splice(0, index + 1);
+					if (!from_unique) {
+						from_unique = [ to_unique[0] ];
+						if (from_index === NOT_FOUND)
+							from_index = 0;
+					}
+					from_unique[1] = last_index_0;
+					if (!to_unique) {
+						to_unique = [ from_unique[0] ];
+						if (to_index === NOT_FOUND)
+							to_index = 0;
+					}
+					to_unique[1] = last_index_1;
+					diff_pair = generate_diff_pair(from_index, to_index);
+					break;
+				}
 			}
-			// Array.isArray(to_unique) && from_unique===undefined 代表本段落為新增文字。
-			// diff_pair.index = [ from_index, to_index ];
-			// _index = [ start_index, end_index ]
-			// .indexes
-			diff_pair.index = [ from_unique, to_unique ];
-			// diff_pair.last_index: 上一個相同元素的 index。
-			// 警告: diff_pair.last_index 在 _unique 最初的一個 index 可能不準確!
-			diff_pair.last_index = [ from_index, to_index ];
+
 			diff_list.unshift(diff_pair);
 			// reset indexes.
 			from_unique = to_unique = undefined;

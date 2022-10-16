@@ -710,6 +710,7 @@ function module_code(library_namespace) {
 			wiki_API.redirects_here(next[1], function(root_page_data,
 					redirect_list, error) {
 				if (error) {
+					// console.trace(error);
 					// next[2] : callback(root_page_data, error)
 					_this.next(next[2], null, error);
 					return;

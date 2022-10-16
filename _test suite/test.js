@@ -658,6 +658,12 @@ function test_native() {
 		assert(CeL.LCS('a1b2c3d', '1a2b3c4d', 'with_diff').diff.join(';').includes(',1;1,2;2,3;3,4'), 'LCS() #3');
 		assert(CeL.LCS('a1b2c3d', '1a2b3c4d', 'diff').join(';').includes(',1;1,2;2,3;3,4'), 'LCS() #4');
 
+		assert(['品質,質量', CeL.LCS('品質', '質量', { diff : true, try_to_merge_diff : true }).join(';')], 'LCS() try_to_merge_diff #1');
+		assert(['品質,質量', CeL.LCS('1品質', '1質量', { diff : true, try_to_merge_diff : true }).join(';')], 'LCS() try_to_merge_diff #2');
+		assert(['品質,質量', CeL.LCS('品質2', '質量2', { diff : true, try_to_merge_diff : true }).join(';')], 'LCS() try_to_merge_diff #3');
+		assert(['品質,質量', CeL.LCS('是品質檢測', '是質量檢測', { diff : true, try_to_merge_diff : true }).join(';')], 'LCS() try_to_merge_diff #4');
+		assert(['品質質,質質量', CeL.LCS('是品質質檢測', '是質質量檢測', { diff : true, try_to_merge_diff : true }).join(';')], 'LCS() try_to_merge_diff #5');
+
 		assert(['AC'.length, CeL.LCS_length('AGCAT', 'GAC')], 'LCS_length() #1');
 		assert(['abc', CeL.LCS('a1b2c3', '1a2b3c')], 'LCS() #5');
 		assert(['abc'.length, CeL.LCS_length('a1b2c3', '1a2b3c')], 'LCS_length() #2');
@@ -3469,6 +3475,9 @@ function test_wiki() {
 		wikitext = '[[file:bot.svg|20px{{!}}right|alt]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #7-1');
 		assert(['right', parsed.location], 'wiki.parse.file #7-2');
+		wikitext = '[[File:i.JPG|{{t|a{{!}}b|c}}]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #8-1');
+		assert(['{{t|a{{!}}b|c}}', parsed.caption.toString()], 'wiki.parse.file #8-2');
 
 		wikitext = '[[:Category:cat|sort_key]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.category #1-1');

@@ -123,11 +123,13 @@ function module_code(library_namespace) {
 				del : true,
 				strike : true,
 				strong : true,
+				mark : true,
 				font : true,
 				code : true,
 				ruby : true,
 				rb : true,
 				rt : true,
+				center : true,
 				// container
 				span : true,
 				div : true,
@@ -1744,23 +1746,17 @@ function module_code(library_namespace) {
 			var promise = parsed.each('transclusion', function(template_token) {
 				// console.trace([ template_token.name, template_token.expand
 				// ]);
-				if (template_token.expand) {
+
+				var anchors = wiki_API.repeatedly_expand_template_token(
+						template_token, options);
+				if (template_token !== anchors) {
 					// 處理包括 {{Anchor}}, {{Anchors}}, {{Visible anchor}},
 					// {{term}}
-					// const
-					var anchors = wiki_API.repeatedly_expand_template_token(
-							template_token, options);
-					if (template_token === anchors) {
-						// e.g., repeatedly_expand_template_token()
-						// returns {Promise}
+					if (!anchors || typeof anchors.toString !== 'function')
 						return;
-					}
+
 					template_token = anchors;
-					if (!template_token
-							|| typeof template_token.toString !== 'function')
-						return;
-					anchors = get_all_anchors(template_token.toString(),
-							_options);
+					anchors = get_all_anchors(anchors.toString(), _options);
 					// console.trace(anchors);
 					anchors.forEach(function(anchor) {
 						register_anchor(anchor, template_token);

@@ -231,11 +231,59 @@ function module_code(library_namespace) {
 	 * 
 	 * @see parse_wikitext()
 	 */
-	function resolve_escaped(queue, include_mark, end_mark) {
+	function resolve_escaped(queue, include_mark, end_mark, options) {
 		if (false) {
 			library_namespace.debug('queue: ' + queue.join('\n--- '), 4,
 					'resolve_escaped');
 			console.log('resolve_escaped: ' + JSON.stringify(queue));
+		}
+
+		var resolve_filter = options && options.resolve_filter;
+
+		function resolving_item(item) {
+			// result queue
+			var result = [];
+
+			item.split(include_mark).forEach(function(piece, index) {
+				if (index === 0) {
+					if (piece) {
+						result.push(piece);
+					}
+					return;
+				}
+
+				index = piece.indexOf(end_mark);
+				var token;
+				if (index === NOT_FOUND || index === 0
+				//
+				|| !((token = +piece.slice(0, index)) in queue)) {
+					result.push(include_mark + piece);
+					return;
+				}
+				token = queue[token];
+				if (resolve_filter && !resolve_filter(token)) {
+					result.push(include_mark + piece);
+					return;
+				}
+				result.push(token);
+				if (piece = piece.slice(index + end_mark.length))
+					result.push(piece);
+			});
+
+			if (result.length > 1) {
+				// console.log(result);
+				set_wiki_type(result, 'plain');
+			} else {
+				result = result[0];
+			}
+			if (!resolve_filter && result.includes(include_mark)) {
+				throw new Error('resolve_escaped: 仍有 include mark 殘留！');
+			}
+			return result;
+		}
+
+		if (options && ('resolve_item' in options)) {
+			return resolving_item(options.resolve_item);
 		}
 
 		var length = queue.length;
@@ -250,38 +298,11 @@ function module_code(library_namespace) {
 				continue;
 			}
 
-			// result queue
-			var result = [];
-
-			item.split(include_mark).forEach(function(token, index) {
-				if (index === 0) {
-					if (token) {
-						result.push(token);
-					}
-					return;
-				}
-				index = token.indexOf(end_mark);
-				if (index === 0) {
-					result.push(include_mark);
-					return;
-				}
-				result.push(queue[+token.slice(0, index)]);
-				if (token = token.slice(index + end_mark.length))
-					result.push(token);
-			});
-
-			if (result.length > 1) {
-				// console.log(result);
-				set_wiki_type(result, 'plain');
-			} else {
-				result = result[0];
-			}
-			if (result.includes(include_mark)) {
-				throw new Error('resolve_escaped: 仍有 include mark 殘留！');
-			}
+			var result = resolving_item(item);
 			queue[index] = result;
 		}
-		queue.last_resolved_length = length;
+		if (!resolve_filter)
+			queue.last_resolved_length = length;
 		// console.log('resolve_escaped end: '+JSON.stringify(queue));
 	}
 
@@ -474,7 +495,9 @@ function module_code(library_namespace) {
 			return parsed.evaluate(options);
 		}
 
-		// console.trace(parsed.toString());
+		// Error.stackTraceLimit = Infinity;
+		// console.trace([ parsed.toString(), parsed ]);
+		// Error.stackTraceLimit = 10;
 		var promise;
 		if (parsed.type === 'magic_word_function') {
 			promise = evaluate_parser_function_token.call(parsed, options);
@@ -488,7 +511,9 @@ function module_code(library_namespace) {
 
 		}
 
-		// console.trace(parsed);
+		// Error.stackTraceLimit = Infinity;
+		// console.trace([ parsed.toString(), parsed, promise ]);
+		// Error.stackTraceLimit = 10;
 		return library_namespace.is_thenable(promise)
 		//
 		? promise.then(function return_parsed() {
@@ -581,7 +606,7 @@ function module_code(library_namespace) {
 			}
 		}
 		wikitext = parsed.toString();
-		// console.trace(wikitext);
+		// console.trace([ wikitext, page_data ]);
 
 		if (!level)
 			level = 1;
@@ -607,11 +632,6 @@ function module_code(library_namespace) {
 				// '{{Namespace detect|main=Article text}}')`
 				return page_data ? token : parsed;
 			}
-			if (wiki_API.template_functions) {
-				// console.trace(options);
-				wiki_API.template_functions.adapt_function(token, null, null,
-						options);
-			}
 			// expand template
 			if (options.parameters !== parameters) {
 				options = Object.clone(options);
@@ -623,7 +643,7 @@ function module_code(library_namespace) {
 
 		function resolve_magic_word_function() {
 			var wikitext = parsed.toString();
-			// console.trace([ wikitext ]);
+			// console.trace([ wikitext, page_data ]);
 			parsed = wiki_API.parser(wikitext, options).parse();
 			if (/{{/.test(parsed)) {
 				// console.trace(page_data && page_data.title || wikitext);
@@ -641,8 +661,20 @@ function module_code(library_namespace) {
 
 	// 循環展開模板節點。
 	function repeatedly_expand_template_token(token, options) {
-		while (token.type === 'transclusion'
-				&& typeof token.expand === 'function') {
+		while (token.type === 'transclusion') {
+			if (typeof token.expand !== 'function') {
+				if (wiki_API.template_functions) {
+					// console.trace(options);
+					wiki_API.template_functions.adapt_function(token, null,
+							null, options);
+					// console.trace([ token, token.expand, options ]);
+				}
+				if (typeof token.expand !== 'function') {
+					break;
+				}
+			}
+
+			// console.trace(token);
 			// console.trace(options);
 			// expand template, .expand_template(), .to_wikitext()
 			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
@@ -665,12 +697,6 @@ function module_code(library_namespace) {
 				break;
 			}
 			token = wiki_API.parse(promise, options);
-			if (wiki_API.template_functions) {
-				// console.trace(options);
-				wiki_API.template_functions.adapt_function(token, null, null,
-						options);
-			}
-			// console.trace([ token, token.expand, options ]);
 		}
 
 		return token;
@@ -704,7 +730,7 @@ function module_code(library_namespace) {
 			parsed = wikitext;
 			if (parsed.type !== 'plain') {
 				parsed = [ parsed ];
-				parsed.is_shell = true;
+				parsed.has_shell = true;
 			}
 		} else {
 			parsed = wiki_API.parser(wikitext, options).parse();
@@ -714,10 +740,16 @@ function module_code(library_namespace) {
 			parsed = convert_parameter(parsed, options.parameters, options);
 
 		// console.trace(parsed);
+		// Error.stackTraceLimit = Infinity;
+		// console.trace(parsed.toString());
+		// Error.stackTraceLimit = 10;
 		var promise = for_each_token.call(parsed, 'transclusion', function(
 				token) {
+			// Error.stackTraceLimit = Infinity;
+			// console.trace(token);
 			token = repeatedly_expand_template_token(token, options);
 			// console.trace(token);
+			// Error.stackTraceLimit = 10;
 			if (!token || token.type !== 'transclusion')
 				return token;
 
@@ -735,17 +767,16 @@ function module_code(library_namespace) {
 			var template_name = token[0].toString();
 			var promise = expand_transclusion(token[0], options, level);
 			if (!library_namespace.is_thenable(promise)) {
-				// console.trace([ token, token[0], promise ]);
+				if (false) {
+					Error.stackTraceLimit = Infinity;
+					console.trace([ token, token[0], token[0].toString(),
+							template_name, promise ]);
+					Error.stackTraceLimit = 10;
+				}
 				if (template_name !== token[0].toString()) {
-					// re-parse
 					token[0] = promise;
+					// console.trace('re-parse ' + token[0]);
 					token = wiki_API.parse(token.toString(), options);
-					if (wiki_API.template_functions) {
-						// console.trace(token);
-						wiki_API.template_functions.adapt_function(token, null,
-								null, options);
-						// console.trace(token);
-					}
 					token = repeatedly_expand_template_token(token, options);
 					if (token.type === 'plain' && token.length === 1)
 						token = token[0];
@@ -766,9 +797,24 @@ function module_code(library_namespace) {
 		}
 
 		function fetch_and_resolve_template(token) {
-			if (!token || token.type !== 'transclusion')
+			if (!token || token.type !== 'transclusion') {
+				// Error.stackTraceLimit = Infinity;
+				// console.trace(token);
+				// Error.stackTraceLimit = 10;
 				return token;
-			// console.trace(token);
+			}
+			if (false) {
+				console.trace(token);
+				var some_sub_token_not_evaluated;
+				for_each_token.call(token, 'magic_word_function', function(
+						magic_word_function) {
+					if (magic_word_function.not_evaluated) {
+						some_sub_token_not_evaluated = true;
+						return for_each_token.exit;
+					}
+				});
+				console.trace(some_sub_token_not_evaluated);
+			}
 			var page_title = token.page_title.toString();
 			if (/\||{{|}}/.test(page_title)) {
 				library_namespace.warn('expand_transclusion: Cannot expand '
@@ -804,13 +850,36 @@ function module_code(library_namespace) {
 				}
 
 				page_title = session.to_namespace(page_title, 'Template');
+
+				// 盡量避免網路操作。
+				if (!session.templates_now_fetching)
+					session.templates_now_fetching = Object.create(null);
+				if (page_title in session.templates_now_fetching) {
+					session.templates_now_fetching[page_title].push(evaluate);
+					if (false) {
+						console.trace([ session.templates_now_fetching
+						//
+						[page_title].length, page_title ]);
+					}
+					return;
+				}
+				session.templates_now_fetching[page_title] = [ evaluate ];
+
 				// console.trace(page_title);
 				session.register_redirects(page_title,
 				//
 				function(page_data, error) {
-					// console.trace(page_data || page_title);
-					session.page(page_data || page_title, evaluate,
-							page_options);
+					// console.trace([ page_data, page_title, error ]);
+					session.page(page_data || page_title, function(page_data,
+							error) {
+						var evaluate_list
+						//
+						= session.templates_now_fetching[page_title];
+						delete session.templates_now_fetching[page_title];
+						evaluate_list.forEach(function(evaluate) {
+							evaluate(page_data, error);
+						});
+					}, page_options);
 				}, {
 					// namespace : 'Template',
 					no_message : true
@@ -820,7 +889,7 @@ function module_code(library_namespace) {
 
 		function return_evaluated() {
 			// console.trace(parsed.toString());
-			if (parsed.is_shell)
+			if (parsed.has_shell)
 				parsed = parsed[0];
 			return evaluate_parsed(parsed, options);
 		}
@@ -845,6 +914,7 @@ function module_code(library_namespace) {
 					library_namespace.warn('evaluate_parser_function_token: '
 							+ '尚未加入演算 {{' + token.name + '}} 的功能: ' + token);
 					// console.trace(options);
+					// console.trace(token);
 				}
 				// 直接回傳，避免 evaluate_parsed() 重複呼叫。
 				if (options.set_not_evaluated
@@ -1128,11 +1198,6 @@ function module_code(library_namespace) {
 			}
 			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
 			var parsed = wiki_API.parse(wikitext, options);
-			if (wiki_API.template_functions) {
-				// console.trace(options);
-				wiki_API.template_functions.adapt_function(parsed, null, null,
-						options);
-			}
 			// expand template
 			return expand_transclusion(parsed, options);
 
@@ -1724,7 +1789,7 @@ function module_code(library_namespace) {
 			if (!wikitext.replace) {
 				if (Array.isArray(wikitext) && wikitext.type) {
 					library_namespace.debug('Treat [' + wikitext
-							+ '] as parsed token anf return directly!', 1,
+							+ '] as parsed token and return directly!', 1,
 							'parse_wikitext');
 					return wikitext;
 				}
@@ -2158,10 +2223,6 @@ function module_code(library_namespace) {
 					// !== [[File:a.svg|NG caption|thumb|]]
 					// === [[File:a.svg|thumb|NG caption|]]
 
-					// 避免下面的 parse_wikitext() 處理掉 {{!}}。
-					display_text = display_text.replace(/{{(\s*!\s*)}}/g,
-							include_mark + '$1' + end_mark);
-
 					// 先處理掉裏面的功能性代碼。 e.g.,
 					// [[File:a.svg|alt=alt_of_{{tl|t}}|NG_caption|gykvg=56789{{tl|t}}|{{#ifexist:abc|alt|link}}=abc|{{#ifexist:abc|left|456}}|{{#expr:100+300}}px|thumb]]
 					// e.g., [[File:a.svg|''a''|caption]]
@@ -2169,9 +2230,14 @@ function module_code(library_namespace) {
 						no_resolve : true
 					}, queue);
 
+					display_text = resolve_escaped(
 					// recover {{!}}
-					display_text = display_text.replace(new RegExp(include_mark
-							+ /(\s*!\s*)/.source + end_mark, 'g'), '{{$1}}');
+					queue, include_mark, end_mark, {
+						resolve_item : display_text,
+						resolve_filter : function(token) {
+							return token.is_magic_word && token.name === '!';
+						}
+					}).toString();
 
 					parameters.index_of = Object.create(null);
 					pipe_separator = [ pipe_separator ];

@@ -1965,7 +1965,8 @@ function module_code(library_namespace) {
 	.source.replace('Tag', library_namespace
 			.ignore_case_pattern(PATTERN_file_prefix));
 
-	// [ all, ":", file name without "File:" or ":File" ]
+	// matched: [ all token[0], prefix ":"s before "File:",
+	// file name without "File:" or ":File" ]
 	PATTERN_file_prefix = new RegExp('^ *(: *)?(?:' + PATTERN_file_prefix
 			+ ') *: *' + PATTERN_page_name.source, 'i');
 

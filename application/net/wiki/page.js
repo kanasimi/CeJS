@@ -392,6 +392,8 @@ function module_code(library_namespace) {
 			if (!wiki_API_page.auto_converttitles
 					.includes(options.converttitles)) {
 				delete options.converttitles;
+			} else {
+				options.converttitles = 1;
 			}
 		}
 

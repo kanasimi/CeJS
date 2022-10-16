@@ -570,6 +570,8 @@ function module_code(library_namespace) {
 						token.parent = parent_token;
 					}
 
+					// 警告: 應該在 processor()) 中使用
+					// token = repeatedly_expand_template_token(token, options);
 					if (wiki_API.template_functions) {
 						// console.trace(options);
 						wiki_API.template_functions.adapt_function(token,
