@@ -2086,6 +2086,9 @@ function module_code(library_namespace) {
 					}
 				}
 
+				rows.forEach(function(row) {
+					row.last_query_time = last_query_time;
+				});
 				if (options.filter && rows.length > 0) {
 					// @see CeL.data.fit_filter()
 					// TODO: 把篩選功能放到 get_recent()，減少資料處理的成本。
@@ -2142,7 +2145,7 @@ function module_code(library_namespace) {
 						if (run_next) {
 							// 先執行完本頁面再執行下一個頁面。
 							result.then(run_next, function(error) {
-								console.error(error);
+								library_namespace.error(error);
 								run_next();
 							});
 						} else {
@@ -2199,8 +2202,10 @@ function module_code(library_namespace) {
 								return;
 							}
 
-							library_namespace.debug('Get page: ' + index + '/'
-									+ rows.length + ' revid=' + row.revid, 2,
+							library_namespace.debug(
+									'Get page: ' + (index + 1) + '/'
+											+ rows.length + ' revid='
+											+ row.revid, 2,
 									'add_listener.with_diff');
 
 							var page_options = {
@@ -2231,9 +2236,16 @@ function module_code(library_namespace) {
 								Object.assign(page_options, options.with_diff);
 							}
 
-							session.page(row.pageid,
-							//
-							function(page_data, error) {
+							session.page(row, function(page_data, error) {
+								library_namespace.log_temporary(
+								// 'Get '
+								+(index + 1) + '/' + rows.length + ' '
+										+ wiki_API.title_link_of(row) + ' ('
+										+ library_namespace
+										//
+										.indicate_date_time(last_query_time)
+										//
+										+ ')');
 								if (quit_listening || !page_data || error) {
 									if (error)
 										console.error(error);

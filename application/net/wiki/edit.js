@@ -410,8 +410,10 @@ function module_code(library_namespace) {
 					+ wiki_API.title_link_of(title), 1, 'wiki_API_edit');
 		}
 		// 暫時debug [[Template:Bulletin]]
-		if (false && title === 'Template:Bulletin') {
+		if (title === 'Template:Bulletin') {
+			Error.stackTraceLimit = Infinity;
 			console.trace(options);
+			Error.stackTraceLimit = 10;
 			throw new Error('Edit Template:Bulletin!');
 		}
 

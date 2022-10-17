@@ -558,6 +558,7 @@ function module_code(library_namespace) {
 		// 利用語境 context。
 		return function general_expand_template(options) {
 			// console.trace(transclusion_config);
+			transclusion_config.usage_times++;
 			var wikitext = transclusion_config.simplified_template_wikitext;
 			return transclusion_config.need_evaluate ? simplify_transclusion(
 					wikitext, this.parameters, options) : wikitext;
@@ -581,7 +582,8 @@ function module_code(library_namespace) {
 			var session = wiki_API.session_of_options(options);
 			// 只在第一次執行時(!!page_data=true)顯示訊息。
 			options = Object.assign({
-				show_NYI_message : true
+				show_NYI_message : true,
+				transclusion_from_page : page_data
 			}, options);
 			if (session) {
 				var template_name = session
@@ -592,7 +594,10 @@ function module_code(library_namespace) {
 					title : page_data.title,
 					// page_data : page_data,
 					need_evaluate : parsed.have_template_parameters,
-					simplified_template_wikitext : wikitext
+					simplified_template_wikitext : wikitext,
+					// 引用次數
+					usage_times : 1,
+					fetch_date : Date.now()
 				};
 				wiki_API.template_functions.set_proto_properties(template_name,
 				//
@@ -909,21 +914,55 @@ function module_code(library_namespace) {
 		var token = this;
 
 		function NYI() {
-			if (options) {
-				if (options.show_NYI_message) {
-					library_namespace.warn('evaluate_parser_function_token: '
-							+ '尚未加入演算 {{' + token.name + '}} 的功能: ' + token);
-					// console.trace(options);
-					// console.trace(token);
-				}
-				// 直接回傳，避免 evaluate_parsed() 重複呼叫。
-				if (options.set_not_evaluated
-						&& !options.something_not_evaluated) {
-					options.something_not_evaluated = true;
-				}
-			}
 			// delete token.expand;
 			token.not_evaluated = true;
+			if (!options) {
+				return token;
+			}
+
+			// 標記並直接回傳，避免 evaluate_parsed() 重複呼叫。
+			if (options.set_not_evaluated && !options.something_not_evaluated) {
+				options.something_not_evaluated = true;
+			}
+
+			if (options.show_NYI_message) {
+				var message_name = token.name;
+				if (message_name === '#invoke') {
+					var template_name = get_parameter_String(1);
+					if (library_namespace.is_thenable(get_parameter_String(1))) {
+						template_name = String(token.parameters[1] || '')
+								.trim();
+					}
+					message_name += ':' + template_name;
+				}
+				var transclusion_message = '';
+				var transclusion_from_page = options.transclusion_from_page;
+				if (wiki_API.is_page_data(transclusion_from_page)) {
+					transclusion_message = '（自 '
+							+ wiki_API.title_link_of(transclusion_from_page)
+							+ ' 嵌入）';
+					// 已顯示的訊息。
+					var showed_evaluate_messages = transclusion_from_page.showed_evaluate_messages;
+					if (!showed_evaluate_messages) {
+						showed_evaluate_messages = transclusion_from_page.showed_evaluate_messages = Object
+								.create(null);
+					}
+					// 避免重複顯示訊息。
+					if (showed_evaluate_messages[message_name]) {
+						message_name = null;
+					} else {
+						showed_evaluate_messages[message_name] = true;
+					}
+				}
+				if (message_name) {
+					library_namespace.warn('evaluate_parser_function_token: '
+							+ '尚未加入演算 {{' + message_name + '}} 的功能'
+							+ transclusion_message + ': ' + token);
+				}
+				// console.trace(options);
+				// console.trace(token);
+			}
+
 			return token;
 		}
 
@@ -1077,14 +1116,15 @@ function module_code(library_namespace) {
 
 		case '#if':
 			// console.trace([ '#if%', token, get_parameter_String(1) ]);
-			token = token.parameters[get_parameter_String(1) ? 2 : 3];
+			token = token.parameters[get_parameter_String(1) ? 2 : 3] || '';
 			// console.trace(token);
 			break;
 
 		case '#ifeq':
 			token = token.parameters[get_parameter_String(1) === get_parameter_String(2)
 					|| +get_parameter_String(1) === +get_parameter_String(2) ? 3
-					: 4];
+					: 4]
+					|| '';
 			// console.trace(token);
 			break;
 
