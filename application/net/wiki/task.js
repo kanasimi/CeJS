@@ -231,29 +231,47 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (typeof callback_result_relying_on_this === 'function') {
-			this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this] = true;
+		// ------------------------------------------------
 
-			// console.trace(Array.prototype.slice.call(arguments, 1));
-			try {
-				callback_result_relying_on_this = callback_result_relying_on_this
-				// this.next(callback, ...callback_arguments);
-				.apply(this, Array.prototype.slice.call(arguments, 1));
-			} catch (e) {
-				if (library_namespace.env.has_console)
-					console.error(e);
-				else
-					library_namespace.error(e);
-			}
-
-			delete this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this];
-		}
+		var _this = this;
 
 		if (callback_result_relying_on_this) {
-			this.set_promise_relying(callback_result_relying_on_this);
-			// reset
-			callback_result_relying_on_this = null;
+			var process_callback = function process_callback(callback) {
+				if (typeof callback !== 'function') {
+					_this.set_promise_relying(callback);
+					return;
+				}
+
+				// run this.next() after callback() finished.
+				_this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this] = true;
+
+				try {
+					callback = callback
+					// _this.next(callback, ...callback_arguments);
+					.apply(_this, process_callback.args);
+				} catch (e) {
+					if (library_namespace.env.has_console)
+						console.error(e);
+					else
+						library_namespace.error(e);
+				}
+
+				delete _this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this];
+
+				if (callback)
+					_this.set_promise_relying(callback);
+			};
+			process_callback.args = Array.prototype.slice.call(arguments, 1);
+			// console.trace(process_callback.args);
+
+			if (Array.isArray(callback_result_relying_on_this))
+				callback_result_relying_on_this.forEach(process_callback);
+			else
+				process_callback(callback_result_relying_on_this);
+			// free / reset
+			process_callback = callback_result_relying_on_this = null;
 		}
+
 		// assert: false ===
 		// library_namespace.is_thenable(callback_result_relying_on_this)
 
@@ -317,8 +335,6 @@ function module_code(library_namespace) {
 		}
 
 		// ------------------------------------------------
-
-		var _this = this;
 
 		// 若需改變，需同步更改 wiki_API.prototype.next.methods
 		switch (type) {
@@ -443,6 +459,19 @@ function module_code(library_namespace) {
 				break;
 			}
 
+			if (this.last_page_title === next[1]
+					&& this.last_page_options === next[3]) {
+				// 這必須防範改動頁面之後重新取得。
+				library_namespace.debug('採用前次的回傳以避免重複取得頁面。', 2,
+						'wiki_API.prototype.next');
+				// console.trace('採用前次的回傳以避免重複取得頁面: ' + next[1]);
+				// next[2] : callback
+				this.next(next[2], this.last_page,
+				// @see "合併取得頁面的操作"
+				this.last_page_error);
+				break;
+			}
+
 			// ----------------------------------
 
 			if (typeof next[1] === 'function') {
@@ -473,6 +502,8 @@ function module_code(library_namespace) {
 				this.actions[0].waiting_for_previous_combination_operation = true;
 			}
 
+			// console.trace(next[1]);
+
 			// this.page(title, callback, options)
 			// next[1] : title
 			// next[3] : options
@@ -499,9 +530,15 @@ function module_code(library_namespace) {
 				_this.last_page
 				// 正常情況。確保this.last_page為單頁面。需要使用callback以取得result。
 				= Array.isArray(page_data) ? page_data[0] : page_data;
+				// 用於合併取得頁面的操作。 e.g.,
+				// node 20201008.fix_anchor.js use_language=zh archives
+				_this.last_page_title = next[1];
+				_this.last_page_options = next[3];
+				_this.last_page_error = error;
 				if (!page_data) {
 					// console.trace([ '' + next[2], page_data, error ]);
 				}
+
 				// console.trace(_this.actions);
 				// next[2] : callback
 				_this.next(next[2], page_data, error);
@@ -993,8 +1030,15 @@ function module_code(library_namespace) {
 			if (!next[2].page_to_edit) {
 				// console.trace([ next, this.last_page ]);
 				// e.g., page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
+				if (false) {
+					console.trace('Set .page_to_edit: '
+							+ wiki_API.title_link_of(this.last_page
+									|| next[2].task_page_data) + ' ('
+							+ wiki_API.title_link_of(next[2].page_to_edit)
+							+ ')');
+					// console.trace(next[2]);
+				}
 				next[2].page_to_edit = this.last_page || next[2].task_page_data;
-				// console.trace(next[2]);
 			}
 			// console.trace(next[2]);
 			// console.trace(next);
@@ -1028,11 +1072,12 @@ function module_code(library_namespace) {
 			//
 			&& !wiki_API.content_of.had_fetch_content(next[2].page_to_edit)) {
 				console.trace(this);
-				console.trace([ this.actions.length, next ]);
+				console.trace(next);
+				console.trace(this.actions);
 				throw new Error(
 						'wiki_API.prototype.next: There are multiple threads competing with each other? 有多個執行緒互相競爭？');
 				library_namespace
-						.warn('wiki_API.prototype.next: 有多個執行緒互相競爭？本執行緒將會直接跳出，等待另一個取得頁面內容的執行緒完成後，由其處理。');
+						.error('wiki_API.prototype.next: 有多個執行緒互相競爭？本執行緒將會直接跳出，等待另一個取得頁面內容的執行緒完成後，由其處理。');
 				break;
 			}
 
@@ -2759,8 +2804,9 @@ function module_code(library_namespace) {
 					// console.trace([ error_to_return, error ]);
 					// console.log([ page_data, config.page_options ]);
 					library_namespace.log_temporary(page_index + '/'
-							+ pages.length + ' '
-							+ wiki_API.title_link_of(page_data));
+							+ pages.length + ' ('
+							+ (100 * page_index / pages.length).to_fixed(1)
+							+ '%) ' + wiki_API.title_link_of(page_data));
 
 					function handle_page_error(error) {
 						// console.trace([ error_to_return, error ]);
@@ -2819,6 +2865,8 @@ function module_code(library_namespace) {
 				var work_options = Object.clone(options);
 				// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 				work_options.task_page_data = page;
+				// 紀錄進度。
+				work_options.progress = work_continue / initial_target_length;
 				// console.trace(page.title||page);
 				// console.trace(work_options);
 				// 編輯頁面內容。
@@ -2850,11 +2898,10 @@ function module_code(library_namespace) {
 						}
 						library_namespace.sinfo(_messages);
 					} else {
-						library_namespace.log_temporary(
-						//
-						page_index + '/' + pages.length + ' '
-						//
-						+ wiki_API.title_link_of(page_data));
+						library_namespace.log_temporary(page_index + '/'
+								+ pages.length + ' ('
+								+ (100 * page_index / pages.length).to_fixed(1)
+								+ '%) ' + wiki_API.title_link_of(page_data));
 					}
 
 					function handle_edit_error(error) {

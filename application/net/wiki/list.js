@@ -1409,6 +1409,18 @@ function module_code(library_namespace) {
 					console.log(this.actions);
 				}
 
+				if (method === 'page' && typeof args[1] === 'string' && args[3]
+						&& args[3].page_title_to_edit
+						&& args[1] !== args[3].page_title_to_edit) {
+					library_namespace.warn('wiki_API_prototype_methods: '
+							+ 'Different page title: ' + args[1] + '→'
+							+ args[3].page_title_to_edit);
+					Error.stackTraceLimit = Infinity;
+					console.trace(args);
+					Error.stackTraceLimit = 10;
+					console.log(args[3]);
+				}
+
 				// TODO: 不應該僅以this.running判定，
 				// 因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
 				if (!this.running && !this.actions[

@@ -1420,7 +1420,7 @@ function module_code(library_namespace) {
 			error = wiki_API.query.handle_error(data, error);
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				if (data.error && data.error.code === 'param-missing') {
+				if (data && data.error && data.error.code === 'param-missing') {
 					library_namespace.error(
 					/**
 					 * 可能是錯把 "category" 之類當作 sites name??

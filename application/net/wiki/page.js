@@ -1151,6 +1151,7 @@ function module_code(library_namespace) {
 						&& !do_search(diff[options.search_deleted ? 1 : 0]);
 					}
 
+					// console.trace(library_namespace.is_thenable(result));
 					if (library_namespace.is_thenable(result)) {
 						result.then(search_next_diff);
 					} else {

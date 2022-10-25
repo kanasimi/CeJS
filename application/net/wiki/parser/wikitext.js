@@ -39,7 +39,7 @@ function module_code(library_namespace) {
 	// requiring
 	var wiki_API = library_namespace.application.net.wiki, for_each_token = wiki_API.parser.parser_prototype.each;
 	// @inner
-	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
+	var PATTERN_invalid_page_name_characters = wiki_API.PATTERN_invalid_page_name_characters, PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -744,6 +744,10 @@ function module_code(library_namespace) {
 		if (options.parameters)
 			parsed = convert_parameter(parsed, options.parameters, options);
 
+		var session = wiki_API.session_of_options(options);
+		var is_running_at_start = session
+				// @see function wiki_API_prototype_method()
+				&& (session.running || session.actions[wiki_API.KEY_waiting_callback_result_relying_on_this]);
 		// console.trace(parsed);
 		// Error.stackTraceLimit = Infinity;
 		// console.trace(parsed.toString());
@@ -821,10 +825,13 @@ function module_code(library_namespace) {
 				console.trace(some_sub_token_not_evaluated);
 			}
 			var page_title = token.page_title.toString();
-			if (/\||{{|}}/.test(page_title)) {
+			// @see PATTERN_page_name @ CeL.application.net.wiki.namespace
+			if (PATTERN_invalid_page_name_characters.test(page_title)) {
 				library_namespace.warn('expand_transclusion: Cannot expand '
 						+ token);
-				// console.trace('' + token);
+				// Error.stackTraceLimit = Infinity;
+				// console.trace(token);
+				// Error.stackTraceLimit = 10;
 				return token;
 			}
 
@@ -843,7 +850,7 @@ function module_code(library_namespace) {
 							options, level));
 				}
 
-				var session = wiki_API.session_of_options(options);
+				// var session = wiki_API.session_of_options(options);
 				var page_options = Object.assign({
 					redirects : 1
 				}, options);
@@ -870,7 +877,16 @@ function module_code(library_namespace) {
 				}
 				session.templates_now_fetching[page_title] = [ evaluate ];
 
-				// console.trace(page_title);
+				if (false) {
+					console.trace(page_title);
+					Error.stackTraceLimit = Infinity;
+					console.trace([ session.running, session.actions.length,
+					//
+					session.actions[
+					//
+					wiki_API.KEY_waiting_callback_result_relying_on_this] ]);
+					Error.stackTraceLimit = 10;
+				}
 				session.register_redirects(page_title,
 				//
 				function(page_data, error) {
@@ -896,11 +912,29 @@ function module_code(library_namespace) {
 			// console.trace(parsed.toString());
 			if (parsed.has_shell)
 				parsed = parsed[0];
-			return evaluate_parsed(parsed, options);
+			parsed = evaluate_parsed(parsed, options);
+			// console.trace(parsed.toString());
+			return parsed;
 		}
 
-		return library_namespace.is_thenable(promise) ? promise
-				.then(return_evaluated) : return_evaluated();
+		if (!library_namespace.is_thenable(promise))
+			return return_evaluated();
+
+		promise = promise.then(return_evaluated);
+		if (is_running_at_start) {
+			if (false) {
+				Error.stackTraceLimit = Infinity;
+				console.trace(session.actions);
+				console.trace([ session.running, session.actions.length,
+				//
+				session.actions[
+				//
+				wiki_API.KEY_waiting_callback_result_relying_on_this] ]);
+				Error.stackTraceLimit = 10;
+			}
+			session.next(promise);
+		}
+		return promise;
 	}
 
 	wiki_API.expand_transclusion = expand_transclusion;
@@ -908,6 +942,10 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	var KEY_on_page_title_option = 'on_page_title';
+	var ifexist_page_options = {
+		rvprop : 'ids',
+		rvlimit : 1
+	};
 
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 	function evaluate_parser_function_token(options) {
@@ -1142,7 +1180,7 @@ function module_code(library_namespace) {
 				return NYI();
 			}
 			return new Promise(function(resolve, reject) {
-				// console.trace(page_title);
+				// console.trace([ page_title, token.toString() ]);
 				session.page(page_title, function(page_data, error) {
 					if (error) {
 						reject(error);
@@ -1152,10 +1190,7 @@ function module_code(library_namespace) {
 					// console.trace(page_data);
 					resolve(get_parameter_String(('missing' in page_data)
 							|| ('invalid' in page_data) ? 3 : 2));
-				}, {
-					rvprop : 'ids',
-					rvlimit : 1
-				});
+				}, ifexist_page_options);
 			});
 
 		case '#titleparts':
@@ -1829,7 +1864,7 @@ function module_code(library_namespace) {
 			if (!wikitext.replace) {
 				if (Array.isArray(wikitext) && wikitext.type) {
 					library_namespace.debug('Treat [' + wikitext
-							+ '] as parsed token and return directly!', 1,
+							+ '] as parsed token and return directly!', 3,
 							'parse_wikitext');
 					return wikitext;
 				}
@@ -3128,7 +3163,7 @@ function module_code(library_namespace) {
 			/{{\s*(?:=|ANCHORENCODE:[^{}\|]*)\s*(?:\|[\s\S]*?)?}}/ig, '')
 					.includes('{{')) {
 				library_namespace.debug('Skip tag attributes with template: '
-						+ attributes);
+						+ attributes, 3);
 				return attribute_hash;
 			}
 

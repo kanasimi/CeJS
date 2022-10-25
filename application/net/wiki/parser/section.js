@@ -1642,6 +1642,8 @@ function module_code(library_namespace) {
 
 		var session = wiki_API.session_of_options(options);
 		// console.log(wiki_API.site_name(session));
+		// var was_running = session.running;
+		// var latest_action_count = session.actions && session.actions.length;
 
 		parsed.each_section();
 		var promise
@@ -1724,17 +1726,26 @@ function module_code(library_namespace) {
 		}
 
 		promise = promise.then(parse_template_anchors);
-		var session = wiki_API.session_of_options(options);
-		if (session && session.actions && session.actions[0]) {
+		if (false && session && session.actions && session.actions[0]) {
 			/**
 			 * <code>
 			e.g., for
 			node 20201008.fix_anchor.js use_project=en "check_page=WABC (AM)"
 			</code>
 			 */
-			// console.trace(session && session.actions);
-			if (!session.actions[0].waiting_for_previous_combination_operation)
-				session.next(promise);
+			console
+					.trace([
+							session.running,
+							session.actions.length,
+							session.actions[0].waiting_for_previous_combination_operation,
+							session.actions, wikitext ]);
+			console.trace([ latest_action_count, session.actions.length,
+					was_running, session.running ]);
+			if (latest_action_count > 0 && was_running) {
+				console.trace(session.actions[0]);
+				session.actions[0].waiting_for_previous_promise = true;
+				// session.next(promise);
+			}
 		}
 		return promise;
 

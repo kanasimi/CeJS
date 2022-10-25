@@ -510,6 +510,7 @@ function module_code(library_namespace) {
 		}
 		function check_if_result_is_thenable(result) {
 			if (library_namespace.is_thenable(result)) {
+				// console.trace(result);
 				promise = promise ? promise.then(function() {
 					return result;
 				}) : result;

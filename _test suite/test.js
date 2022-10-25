@@ -4121,7 +4121,7 @@ function test_wiki() {
 	});
 
 	// 2021/11/10 6:21:45	nodejs v8.11.1 以及之前的版本皆有此問題。
-	if (!CeL.platform('node', 10)) {
+	if (CeL.env.argv.length === 2 && !CeL.platform('node', 10)) {
 		CeL.error('test_wiki: 跳過舊版 node.js 之 wiki asynchronous functions 測試，測試環境中，不明原因出現 "certificate has expired" 問題。視為執行平臺環境問題，將不被視作 fatal error。');
 		return;
 	}

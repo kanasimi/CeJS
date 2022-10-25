@@ -87,8 +87,10 @@ function module_code(library_namespace) {
 		&& session.language;
 	}
 
+	// https://meta.wikimedia.org/wiki/Help:Page_name#Special_characters
+	var PATTERN_invalid_page_name_characters = /[\[\]\|{}<>\n#�]/,
 	// https://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_(technical_restrictions)#Forbidden_characters
-	var PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}<>\n#�])+)/,
+	PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}<>\n#�])+)/,
 	/**
 	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_anchor, page_name,
 	 * anchor / section_title, pipe_separator, displayed_text ]
@@ -1134,7 +1136,7 @@ function module_code(library_namespace) {
 					//
 					+ n + '] @ namespace list ' + namespace,
 					//
-					1, 'get_namespace');
+					2, 'get_namespace');
 					// console.trace(arguments);
 				} else {
 					list.push(is_page_title === false
@@ -3791,6 +3793,9 @@ function module_code(library_namespace) {
 		language_code_to_site_alias : language_code_to_site_alias,
 
 		PATTERN_URL_prefix : PATTERN_URL_prefix,
+		PATTERN_invalid_page_name_characters
+		//
+		: PATTERN_invalid_page_name_characters,
 		PATTERN_wikilink : PATTERN_wikilink,
 		PATTERN_wikilink_global : PATTERN_wikilink_global,
 		PATTERN_file_prefix : PATTERN_file_prefix,

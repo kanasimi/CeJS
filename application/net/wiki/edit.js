@@ -345,6 +345,14 @@ function module_code(library_namespace) {
 
 				} else {
 					// @see wiki_API.prototype.next()
+					if (false) {
+						console.trace('Set .page_to_edit: '
+								+ wiki_API.title_link_of(page_data) + ' ('
+								+ title + ')' + ' ('
+								+ wiki_API.title_link_of(options.page_to_edit)
+								+ ')');
+						console.trace(options);
+					}
 					options.page_to_edit = page_data;
 					if (undo_count) {
 						delete options.undo_count;
