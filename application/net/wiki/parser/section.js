@@ -450,7 +450,7 @@ function module_code(library_namespace) {
 
 	// 用來保留 display_text 中的 language conversion -{}-，
 	// 必須是標題裡面不會存在的字串，並且也不會被section_link_escape()轉換。
-	var section_link_START_CONVERT = '\0\x01', section_link_END_CONVERT = '\0\x02',
+	var section_link_START_CONVERT = '\x00\x01', section_link_END_CONVERT = '\x00\x02',
 	//
 	section_link_START_CONVERT_reg = new RegExp(library_namespace
 			.to_RegExp_pattern(section_link_START_CONVERT), 'g'),
@@ -534,7 +534,7 @@ function module_code(library_namespace) {
 		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
 		.replace(/([ _]){2,}/g, '$1').replace(/&/g, '&amp;'), true);
 
-		var session = wiki_API.session_of_options(options);
+		// var session = wiki_API.session_of_options(options);
 		// TODO: for zhwiki, the anchor should NOT includes "-{", "}-"
 
 		// console.log(parsed_title);
@@ -542,7 +542,7 @@ function module_code(library_namespace) {
 			if (token.type === 'convert') {
 				// @see wiki_API.parse.wiki_token_toString.convert
 				// return token.join(';');
-				token.toString = function() {
+				token.toString = function convert_for_recursion() {
 					var converted = this.converted;
 					if (converted === undefined) {
 						// e.g., get display_text of
@@ -559,10 +559,12 @@ function module_code(library_namespace) {
 						// recover language conversion -{}-
 						.replace(section_link_START_CONVERT_reg, '-{').replace(
 								section_link_END_CONVERT_reg, '}-');
-						var _options = Object.clone(options);
-						// recursion, self-calling, 遞迴呼叫
-						_options.is_recursive = true;
-						converted = section_link(converted, _options)[2];
+						converted = section_link(converted, Object.assign(
+						//
+						Object.clone(options), {
+							// recursion, self-calling, 遞迴呼叫
+							is_recursive : true
+						}))[2];
 					}
 					return section_link_START_CONVERT
 					// + this.join(';')
@@ -596,7 +598,9 @@ function module_code(library_namespace) {
 				.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g,
 						'&quot;').replace(/'/g, "&apos;");
 			}
-		}, true);
+		}, Object.assign(Object.clone(options), {
+			modify : true
+		}));
 		// console.log(parsed_title);
 		// console.trace(parsed_title.toString().trim());
 
@@ -622,8 +626,20 @@ function module_code(library_namespace) {
 			link.imprecise_tokens = parsed_title.imprecise_tokens;
 			// section_title_token.link.tokens_maybe_handlable
 			if (parsed_title.tokens_maybe_handlable
-					&& parsed_title.tokens_maybe_handlable.length > 0)
-				link.tokens_maybe_handlable = parsed_title.tokens_maybe_handlable;
+					&& parsed_title.tokens_maybe_handlable.length > 0) {
+				link.tokens_maybe_handlable = parsed_title.tokens_maybe_handlable
+						.unique();
+				link.tokens_maybe_handlable.forEach(function(parsed) {
+					for_each_token.call(parsed, function(token, index, parent) {
+						if (token.type === 'convert') {
+							token.toString
+							// recover .toString of token.type === 'convert'
+							// @see convert_for_recursion()
+							= wiki_API.parse.wiki_token_toString[token.type];
+						}
+					});
+				});
+			}
 		}
 		Object.assign(link, {
 			// link.id = {String}id
@@ -1670,6 +1686,8 @@ function module_code(library_namespace) {
 						if (false) {
 							console.trace([ parsed.toString(),
 									section_title_link ]);
+							console.trace(parsed);
+							console.trace(options);
 						}
 						for_converted_section_title();
 					});
@@ -1853,11 +1871,8 @@ function module_code(library_namespace) {
 					// e.g., <span id="anchor">, <div id="anchor">
 					if (Array.isArray(anchor)) {
 						if (anchor.type !== 'plain') {
-							// token = _set_wiki_type([ token ], 'plain');
-							anchor = [ anchor ];
-							anchor.toString
-							//
-							= wiki_API.parse.wiki_token_toString.plain;
+							anchor = wiki_API.parse.set_wiki_type([ anchor ],
+									'plain');
 						}
 						// e.g., {{Wikicite|ref={{sfnref|...}} }} .expand() 之後，
 						// 解析 id="{{sfnref|...}}"

@@ -88,19 +88,19 @@ function module_code(library_namespace) {
 	}
 
 	// https://meta.wikimedia.org/wiki/Help:Page_name#Special_characters
-	var PATTERN_invalid_page_name_characters = /[\[\]\|{}<>\n#�]/,
+	var PATTERN_invalid_page_name_characters = /[{}\[\]\|<>\n#�]/,
 	// https://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_(technical_restrictions)#Forbidden_characters
-	PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}<>\n#�])+)/,
+	PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\n#�])+)/,
 	/**
 	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_anchor, page_name,
 	 * anchor / section_title, pipe_separator, displayed_text ]
 	 * 
-	 * 頁面標題不可包含無效的字元：[\n\[\]{}�]，經測試 anchor 亦不可包含[\n\[\]{}]，<br />
-	 * 但 display text 表達文字可以包含 [\n]
+	 * 頁面標題不可包含無效的字元：PATTERN_invalid_page_name_characters，<br />
+	 * 經測試 anchor 亦不可包含[\n\[\]{}]，但 display text 表達文字可以包含 [\n]
 	 * 
 	 * @see PATTERN_link
 	 */
-	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^\[\]\|{}<>\n#�])+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:(\||{{\s*!\s*}})([\s\S]+?))?\]\]/,
+	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\n#�])+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:(\||{{\s*!\s*}})([\s\S]+?))?\]\]/,
 	//
 	PATTERN_wikilink_global = new RegExp(PATTERN_wikilink.source, 'g');
 
@@ -1525,7 +1525,7 @@ function module_code(library_namespace) {
 		// assert: namespace === undefined
 
 		var matched = page_title
-				.match(/^([^\[\]\|{}<>\n#�:]+):(\S.*)$/ && /^([a-z_ ]+):(.+)$/i);
+				.match(/^([^{}\[\]\|<>\n#�:]+):(\S.*)$/ && /^([a-z_ ]+):(.+)$/i);
 		// console.log([matched,page_title]);
 		if (!matched
 				|| /^[a-z _]+$/i.test(namespace = matched[1])
@@ -1977,9 +1977,9 @@ function module_code(library_namespace) {
 	// TODO: using PATTERN_page_name
 	var
 	// [ all_category_text, category_name, sort_order, post_space ]
-	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}<>\n�]+)(?:\s*\|\s*([^\[\]\|�]*))?\]\](\s*\n?)/ig,
+	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ|분류) *: *([^{}\[\]\|<>\n�]+)(?:\s*\|\s*([^\[\]\|�]*))?\]\](\s*\n?)/ig,
 	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
-	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ|분류) *: *([^\[\]\|{}<>\n�]+)/i;
+	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ|분류) *: *([^{}\[\]\|<>\n�]+)/i;
 
 	// ------------------------------------------------------------------------
 

@@ -519,7 +519,7 @@ function test_native() {
 
 	all_error_count += CeL.test('data.native misc', function (assert) {
 		assert(Object.is_empty({}), 'Object.is_empty() #1');
-		assert(!Object.is_empty({a:1}), 'Object.is_empty() #2');
+		assert(!Object.is_empty({ a: 1 }), 'Object.is_empty() #2');
 
 		assert(Object.the_same_content(1, 1), 'Object.the_same_content() #1');
 		assert(Object.the_same_content(0, -0), 'Object.the_same_content() #2');
@@ -528,14 +528,14 @@ function test_native() {
 		assert(Object.the_same_content(null, null), 'Object.the_same_content() #5');
 		assert(Object.the_same_content(undefined, undefined), 'Object.the_same_content() #6');
 		assert(Object.the_same_content(NaN, NaN), 'Object.the_same_content() #7');
-		assert(Object.the_same_content([1,2], [1,2]), 'Object.the_same_content() #8');
-		assert(!Object.the_same_content([1,2], [2,1]), 'Object.the_same_content() #9');
-		assert(Object.the_same_content({a:1,b:2}, {a:1,b:2}), 'Object.the_same_content() #10');
-		assert(!Object.the_same_content({a:1,b:2,c:undefined}, {a:1,b:2,v:4}), 'Object.the_same_content() #11');
-		assert(Object.the_same_content({a:1,b:2}, {b:2,a:1}), 'Object.the_same_content() #12');
-		assert(Object.the_same_content({a:{a:1,b:2},b:3}, {b:3,a:{b:2,a:1}}), 'Object.the_same_content() #13');
-		assert(!Object.the_same_content({a:{a:1,b:2},b:3}, {b:3,a:{b:2,a:1,f:{}}}), 'Object.the_same_content() #14');
-		assert(Object.the_same_content([1,2,{a:4}], [1,2,{a:4}]), 'Object.the_same_content() #15');
+		assert(Object.the_same_content([1, 2], [1, 2]), 'Object.the_same_content() #8');
+		assert(!Object.the_same_content([1, 2], [2, 1]), 'Object.the_same_content() #9');
+		assert(Object.the_same_content({ a: 1, b: 2 }, { a: 1, b: 2 }), 'Object.the_same_content() #10');
+		assert(!Object.the_same_content({ a: 1, b: 2, c: undefined }, { a: 1, b: 2, v: 4 }), 'Object.the_same_content() #11');
+		assert(Object.the_same_content({ a: 1, b: 2 }, { b: 2, a: 1 }), 'Object.the_same_content() #12');
+		assert(Object.the_same_content({ a: { a: 1, b: 2 }, b: 3 }, { b: 3, a: { b: 2, a: 1 } }), 'Object.the_same_content() #13');
+		assert(!Object.the_same_content({ a: { a: 1, b: 2 }, b: 3 }, { b: 3, a: { b: 2, a: 1, f: {} } }), 'Object.the_same_content() #14');
+		assert(Object.the_same_content([1, 2, { a: 4 }], [1, 2, { a: 4 }]), 'Object.the_same_content() #15');
 
 		assert([49, (49.4).to_fixed(0)], 'to_fixed() #1');
 		assert([50, (49.5).to_fixed(0)], 'to_fixed() #2');
@@ -658,11 +658,11 @@ function test_native() {
 		assert(CeL.LCS('a1b2c3d', '1a2b3c4d', 'with_diff').diff.join(';').includes(',1;1,2;2,3;3,4'), 'LCS() #3');
 		assert(CeL.LCS('a1b2c3d', '1a2b3c4d', 'diff').join(';').includes(',1;1,2;2,3;3,4'), 'LCS() #4');
 
-		assert(['品質,質量', CeL.LCS('品質', '質量', { diff : true, try_to_merge_diff : true }).join(';')], 'LCS() try_to_merge_diff #1');
-		assert(['品質,質量', CeL.LCS('1品質', '1質量', { diff : true, try_to_merge_diff : true }).join(';')], 'LCS() try_to_merge_diff #2');
-		assert(['品質,質量', CeL.LCS('品質2', '質量2', { diff : true, try_to_merge_diff : true }).join(';')], 'LCS() try_to_merge_diff #3');
-		assert(['品質,質量', CeL.LCS('是品質檢測', '是質量檢測', { diff : true, try_to_merge_diff : true }).join(';')], 'LCS() try_to_merge_diff #4');
-		assert(['品質質,質質量', CeL.LCS('是品質質檢測', '是質質量檢測', { diff : true, try_to_merge_diff : true }).join(';')], 'LCS() try_to_merge_diff #5');
+		assert(['品質,質量', CeL.LCS('品質', '質量', { diff: true, try_to_merge_diff: true }).join(';')], 'LCS() try_to_merge_diff #1');
+		assert(['品質,質量', CeL.LCS('1品質', '1質量', { diff: true, try_to_merge_diff: true }).join(';')], 'LCS() try_to_merge_diff #2');
+		assert(['品質,質量', CeL.LCS('品質2', '質量2', { diff: true, try_to_merge_diff: true }).join(';')], 'LCS() try_to_merge_diff #3');
+		assert(['品質,質量', CeL.LCS('是品質檢測', '是質量檢測', { diff: true, try_to_merge_diff: true }).join(';')], 'LCS() try_to_merge_diff #4');
+		assert(['品質質,質質量', CeL.LCS('是品質質檢測', '是質質量檢測', { diff: true, try_to_merge_diff: true }).join(';')], 'LCS() try_to_merge_diff #5');
 
 		assert(['AC'.length, CeL.LCS_length('AGCAT', 'GAC')], 'LCS_length() #1');
 		assert(['abc', CeL.LCS('a1b2c3', '1a2b3c')], 'LCS() #5');
@@ -702,7 +702,7 @@ function test_native() {
 		</code>
 		 */
 		var old_text = '_0123_456789a', new_text = '0123456_789', diff_list = diff_list = CeL.LCS(old_text, new_text, {
-			diff : true
+			diff: true
 		});
 		//console.trace(diff_list);
 		assert([0, CeL.LCS.corresponding_index(diff_list, 0)], 'LCS.corresponding_index()');
@@ -757,9 +757,9 @@ function test_data() {
 	]);
 
 	all_error_count += CeL.test('CeL.data', function (assert) {
-		assert(['{"a":1,"b":2}', JSON.stringify(Object.clone({a:1,b:2}))], 'Object.clone()');
-		assert(['{"a":2,"b":[1,2,3,4,5],"c":{"a":1,"b":2,"c":3,"d":4},"d":"d","e":{"a":[1,2,3,4],"b":{"i":1,"j":2,"k":3,"l":4}},"f":4}', JSON.stringify(CeL.deep_merge_object({a:1,b:[1,2],c:{a:1,b:2},d:'d',e:{a:[1,2],b:{i:1,j:1}}},{a:2,b:[3,4,5],c:{c:3,d:4},e:{b:{j:2,k:3,l:4},a:[3,4]},f:4}))], 'CeL.deep_merge_object() #1');
-		assert(['{"k":{"a":"","b":4,"c":[1],"d":{"a":1}}}', JSON.stringify(CeL.deep_merge_object({k:{a:1,b:4}},{k:{a:'',c:[1],d:{a:1}}}))], 'CeL.deep_merge_object() #2');
+		assert(['{"a":1,"b":2}', JSON.stringify(Object.clone({ a: 1, b: 2 }))], 'Object.clone()');
+		assert(['{"a":2,"b":[1,2,3,4,5],"c":{"a":1,"b":2,"c":3,"d":4},"d":"d","e":{"a":[1,2,3,4],"b":{"i":1,"j":2,"k":3,"l":4}},"f":4}', JSON.stringify(CeL.deep_merge_object({ a: 1, b: [1, 2], c: { a: 1, b: 2 }, d: 'd', e: { a: [1, 2], b: { i: 1, j: 1 } } }, { a: 2, b: [3, 4, 5], c: { c: 3, d: 4 }, e: { b: { j: 2, k: 3, l: 4 }, a: [3, 4] }, f: 4 }))], 'CeL.deep_merge_object() #1');
+		assert(['{"k":{"a":"","b":4,"c":[1],"d":{"a":1}}}', JSON.stringify(CeL.deep_merge_object({ k: { a: 1, b: 4 } }, { k: { a: '', c: [1], d: { a: 1 } } }))], 'CeL.deep_merge_object() #2');
 	});
 
 	all_error_count += CeL.test('CeL.data.Number_range_set', function (assert) {
@@ -910,62 +910,62 @@ function test_locale() {
 
 	all_error_count += CeL.test('locale - 單數複數形式 (plural switches)', function (assert) {
 		CeL.gettext.use_domain('en', true);
-		assert([ 'maps', CeL.gettext('map{{PLURAL:%1||s}}', 0) ], 'Plural: 0 maps');
-		assert([ 'map', CeL.gettext('map{{PLURAL:%1||s}}', 1) ], 'Plural: 1 map');
-		assert([ 'maps', CeL.gettext('map{{PLURAL:%1||s}}', 2) ], 'Plural: 2 maps');
-		assert([ '頁', CeL.gettext('{{PLURAL:%1|頁}}', 0) ], 'Plural: 0 頁');
-		assert([ '頁', CeL.gettext('{{PLURAL:%1|頁}}', 1) ], 'Plural: 1 頁');
-		assert([ '頁', CeL.gettext('{{PLURAL:%1|頁}}', 2) ], 'Plural: 2 頁');
+		assert(['maps', CeL.gettext('map{{PLURAL:%1||s}}', 0)], 'Plural: 0 maps');
+		assert(['map', CeL.gettext('map{{PLURAL:%1||s}}', 1)], 'Plural: 1 map');
+		assert(['maps', CeL.gettext('map{{PLURAL:%1||s}}', 2)], 'Plural: 2 maps');
+		assert(['頁', CeL.gettext('{{PLURAL:%1|頁}}', 0)], 'Plural: 0 頁');
+		assert(['頁', CeL.gettext('{{PLURAL:%1|頁}}', 1)], 'Plural: 1 頁');
+		assert(['頁', CeL.gettext('{{PLURAL:%1|頁}}', 2)], 'Plural: 2 頁');
 
-		assert([ '_The answer is 42_', CeL.gettext('_{{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}_') ], 'Plural: _42_');
-		assert([ 'The answer is 42', CeL.gettext('{{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 42');
-		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:0|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 0/42');
-		assert([ 'Wrong answer', CeL.gettext('{{PLURAL:1|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 1/42');
-		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:2|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 2/42');
-		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:3|42=The answer is 42|Wrong answer|Wrong answers}}') ], 'Plural: 3/42');
+		assert(['_The answer is 42_', CeL.gettext('_{{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}_')], 'Plural: _42_');
+		assert(['The answer is 42', CeL.gettext('{{PLURAL:42|42=The answer is 42|Wrong answer|Wrong answers}}')], 'Plural: 42');
+		assert(['Wrong answers', CeL.gettext('{{PLURAL:0|42=The answer is 42|Wrong answer|Wrong answers}}')], 'Plural: 0/42');
+		assert(['Wrong answer', CeL.gettext('{{PLURAL:1|42=The answer is 42|Wrong answer|Wrong answers}}')], 'Plural: 1/42');
+		assert(['Wrong answers', CeL.gettext('{{PLURAL:2|42=The answer is 42|Wrong answer|Wrong answers}}')], 'Plural: 2/42');
+		assert(['Wrong answers', CeL.gettext('{{PLURAL:3|42=The answer is 42|Wrong answer|Wrong answers}}')], 'Plural: 3/42');
 
-		assert([ '_The answer is 42_', CeL.gettext('_{{PLURAL:42|Wrong answer|Wrong answers|42=The answer is 42}}_') ], 'Plural: _42_ #2');
-		assert([ 'The answer is 42', CeL.gettext('{{PLURAL:42|Wrong answer|Wrong answers|42=The answer is 42}}') ], 'Plural: 42 #2');
-		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:0|Wrong answer|Wrong answers|42=The answer is 42}}') ], 'Plural: 0/42 #2');
-		assert([ 'Wrong answer', CeL.gettext('{{PLURAL:1|Wrong answer|Wrong answers|42=The answer is 42}}') ], 'Plural: 1/42 #2');
-		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:2|Wrong answer|Wrong answers|42=The answer is 42}}') ], 'Plural: 2/42 #2');
-		assert([ 'Wrong answers', CeL.gettext('{{PLURAL:3|Wrong answer|Wrong answers|42=The answer is 42}}') ], 'Plural: 3/42 #2');
+		assert(['_The answer is 42_', CeL.gettext('_{{PLURAL:42|Wrong answer|Wrong answers|42=The answer is 42}}_')], 'Plural: _42_ #2');
+		assert(['The answer is 42', CeL.gettext('{{PLURAL:42|Wrong answer|Wrong answers|42=The answer is 42}}')], 'Plural: 42 #2');
+		assert(['Wrong answers', CeL.gettext('{{PLURAL:0|Wrong answer|Wrong answers|42=The answer is 42}}')], 'Plural: 0/42 #2');
+		assert(['Wrong answer', CeL.gettext('{{PLURAL:1|Wrong answer|Wrong answers|42=The answer is 42}}')], 'Plural: 1/42 #2');
+		assert(['Wrong answers', CeL.gettext('{{PLURAL:2|Wrong answer|Wrong answers|42=The answer is 42}}')], 'Plural: 2/42 #2');
+		assert(['Wrong answers', CeL.gettext('{{PLURAL:3|Wrong answer|Wrong answers|42=The answer is 42}}')], 'Plural: 3/42 #2');
 
-		assert([ '_others', CeL.gettext('_{{PLURAL:%1|one|others}}', 0) ], 'Plural: _%1=0');
-		assert([ 'others', CeL.gettext('{{PLURAL:%1|one|others}}', 0) ], 'Plural: %1=0');
-		assert([ 'one', CeL.gettext('{{PLURAL:%1|one|others}}', 1) ], 'Plural: %1=1');
-		assert([ 'others', CeL.gettext('{{PLURAL:%1|one|others}}', 2) ], 'Plural: %1=2');
-		assert([ 'others', CeL.gettext('{{PLURAL:%1|one|others}}', 3) ], 'Plural: %1=3');
+		assert(['_others', CeL.gettext('_{{PLURAL:%1|one|others}}', 0)], 'Plural: _%1=0');
+		assert(['others', CeL.gettext('{{PLURAL:%1|one|others}}', 0)], 'Plural: %1=0');
+		assert(['one', CeL.gettext('{{PLURAL:%1|one|others}}', 1)], 'Plural: %1=1');
+		assert(['others', CeL.gettext('{{PLURAL:%1|one|others}}', 2)], 'Plural: %1=2');
+		assert(['others', CeL.gettext('{{PLURAL:%1|one|others}}', 3)], 'Plural: %1=3');
 
-		assert([ '_One_', CeL.gettext('{{PLURAL:2|one|_{{PLURAL:1|One|two}}_}}') ], 'Plural: nested #1');
-		assert([ '+_one_-', CeL.gettext('+{{PLURAL:2|One|_{{PLURAL:2|_one|{{PLURAL:1|one|two}}}}_}}-') ], 'Plural: nested #2');
-		assert([ '+_one_-', CeL.gettext('+{{PLURAL:%2|One|_{{PLURAL:%2|_one|{{PLURAL:%1|one|two}}}}_}}-', 1, 2) ], 'Plural: nested #3');
+		assert(['_One_', CeL.gettext('{{PLURAL:2|one|_{{PLURAL:1|One|two}}_}}')], 'Plural: nested #1');
+		assert(['+_one_-', CeL.gettext('+{{PLURAL:2|One|_{{PLURAL:2|_one|{{PLURAL:1|one|two}}}}_}}-')], 'Plural: nested #2');
+		assert(['+_one_-', CeL.gettext('+{{PLURAL:%2|One|_{{PLURAL:%2|_one|{{PLURAL:%1|one|two}}}}_}}-', 1, 2)], 'Plural: nested #3');
 
 		CeL.gettext.use_domain('fr', true);
-		assert([ 'one or zero', CeL.gettext('{{PLURAL:0|one or zero|other}}') ], 'Plural: fr: 0');
-		assert([ 'one or zero', CeL.gettext('{{PLURAL:1|one or zero|other}}') ], 'Plural: fr: 1');
-		assert([ 'other', CeL.gettext('{{PLURAL:2|one or zero|other}}') ], 'Plural: fr: 2');
-		assert([ 'other', CeL.gettext('{{PLURAL:3|one or zero|other}}') ], 'Plural: fr: 3');
+		assert(['one or zero', CeL.gettext('{{PLURAL:0|one or zero|other}}')], 'Plural: fr: 0');
+		assert(['one or zero', CeL.gettext('{{PLURAL:1|one or zero|other}}')], 'Plural: fr: 1');
+		assert(['other', CeL.gettext('{{PLURAL:2|one or zero|other}}')], 'Plural: fr: 2');
+		assert(['other', CeL.gettext('{{PLURAL:3|one or zero|other}}')], 'Plural: fr: 3');
 
 		CeL.gettext.use_domain('zh', true);
-		assert([ 'pages', CeL.gettext('{{PLURAL:0|page|pages}}') ], 'Plural: zh: Special case: 0');
-		assert([ 'page', CeL.gettext('{{PLURAL:1|page|pages}}') ], 'Plural: zh: 1 page');
-		assert([ 'pages', CeL.gettext('{{PLURAL:2|page|pages}}') ], 'Plural: zh: Special case: 2');
+		assert(['pages', CeL.gettext('{{PLURAL:0|page|pages}}')], 'Plural: zh: Special case: 0');
+		assert(['page', CeL.gettext('{{PLURAL:1|page|pages}}')], 'Plural: zh: 1 page');
+		assert(['pages', CeL.gettext('{{PLURAL:2|page|pages}}')], 'Plural: zh: Special case: 2');
 
 		CeL.gettext.use_domain('ru', true);
-		assert([ 'pages', CeL.gettext('{{PLURAL:0|page|pages}}') ], 'Plural: ru: Special case: 0');
-		assert([ 'page', CeL.gettext('{{PLURAL:1|page|pages}}') ], 'Plural: ru: 1 page');
-		assert([ 'pages', CeL.gettext('{{PLURAL:2|page|pages}}') ], 'Plural: ru: Special case: 2');
+		assert(['pages', CeL.gettext('{{PLURAL:0|page|pages}}')], 'Plural: ru: Special case: 0');
+		assert(['page', CeL.gettext('{{PLURAL:1|page|pages}}')], 'Plural: ru: 1 page');
+		assert(['pages', CeL.gettext('{{PLURAL:2|page|pages}}')], 'Plural: ru: Special case: 2');
 
 		// https://www.mediawiki.org/wiki/Help:Magic_words/ru
-		assert([ 'Категории', CeL.gettext('{{PLURAL:5|1=Категория|Категории}}') ], 'Plural: ru: 5');
-		assert([ 'страницы', CeL.gettext('{{PLURAL:3|страница|страницы|страниц}}') ], 'Plural: ru: страницы');
-		assert([ 'страниц', CeL.gettext('{{PLURAL:5|страница|страницы|страниц}}') ], 'Plural: ru: страниц');
+		assert(['Категории', CeL.gettext('{{PLURAL:5|1=Категория|Категории}}')], 'Plural: ru: 5');
+		assert(['страницы', CeL.gettext('{{PLURAL:3|страница|страницы|страниц}}')], 'Plural: ru: страницы');
+		assert(['страниц', CeL.gettext('{{PLURAL:5|страница|страницы|страниц}}')], 'Plural: ru: страниц');
 
 		var message = '%1 {{PLURAL:%1|байт|байта|байтов}}';
-		assert([ '0 байтов', CeL.gettext(message, 0) ], 'Plural: ru: 0');
-		assert([ '1 байт', CeL.gettext(message, 1) ], 'Plural: ru: 1');
-		assert([ '2 байта', CeL.gettext(message, 2) ], 'Plural: ru: 2');
+		assert(['0 байтов', CeL.gettext(message, 0)], 'Plural: ru: 0');
+		assert(['1 байт', CeL.gettext(message, 1)], 'Plural: ru: 1');
+		assert(['2 байта', CeL.gettext(message, 2)], 'Plural: ru: 2');
 	});
 
 
@@ -973,11 +973,11 @@ function test_locale() {
 	all_error_count += CeL.test('locale - System messages TW', function (assert) {
 		CeL.gettext.use_domain('TW', function () {
 			assert(['載入中…',
-			// gettext_config:{"id":"loading"}
-			CeL.gettext('Loading...')]);
+				// gettext_config:{"id":"loading"}
+				CeL.gettext('Loading...')]);
 			assert(['已載入 20%…',
-			// gettext_config:{"id":"loading-$1$"}
-			CeL.gettext('Loading %1%...', 20)]);
+				// gettext_config:{"id":"loading-$1$"}
+				CeL.gettext('Loading %1%...', 20)]);
 			//CeL.info('System message test OK.');
 		},
 			// 強制使用此 domain。 forces to this domain.
@@ -987,12 +987,12 @@ function test_locale() {
 
 	CeL.gettext.use_domain('en', true);
 	all_error_count += CeL.test('locale - 結尾標點符號的轉換。 zh → en', function (assert) {
-		assert([ 'China', CeL.gettext('中國') ], '結尾標點符號的轉換: zh → en');
-		assert([ 'China.', CeL.gettext('中國。') ], '結尾標點符號的轉換: zh → en .');
-		assert([ 'China!', CeL.gettext('中國！') ], '結尾標點符號的轉換: zh → en !');
-		assert([ 'China...', CeL.gettext('中國…') ], '結尾標點符號的轉換: zh → en …');
-		assert([ 'China...', CeL.gettext('中國……') ], '結尾標點符號的轉換: zh → en ……');
-		assert([ 'China.........', CeL.gettext('中國………') ], '結尾標點符號的轉換: zh → en ………');
+		assert(['China', CeL.gettext('中國')], '結尾標點符號的轉換: zh → en');
+		assert(['China.', CeL.gettext('中國。')], '結尾標點符號的轉換: zh → en .');
+		assert(['China!', CeL.gettext('中國！')], '結尾標點符號的轉換: zh → en !');
+		assert(['China...', CeL.gettext('中國…')], '結尾標點符號的轉換: zh → en …');
+		assert(['China...', CeL.gettext('中國……')], '結尾標點符號的轉換: zh → en ……');
+		assert(['China.........', CeL.gettext('中國………')], '結尾標點符號的轉換: zh → en ………');
 	});
 
 
@@ -1032,12 +1032,12 @@ function test_locale() {
 			CeL.gettext.use_domain('en', function () {
 				// gettext_config:{"id":"loading"}
 				assert(['Loading...',
-				// gettext_config:{"id":"loading"}
-				CeL.gettext('Loading...')]);
+					// gettext_config:{"id":"loading"}
+					CeL.gettext('Loading...')]);
 				assert(['載入中…',
-				CeL.gettext.in_domain('TW',
-				// gettext_config:{"id":"loading"}
-				'Loading...')], '不改變預設 domain，直接取得特定 domain 的轉換過的文字。');
+					CeL.gettext.in_domain('TW',
+						// gettext_config:{"id":"loading"}
+						'Loading...')], '不改變預設 domain，直接取得特定 domain 的轉換過的文字。');
 			}, true);
 		}, true);
 	});
@@ -1050,18 +1050,18 @@ function test_locale() {
 	}, true);
 
 	all_error_count += CeL.test('結尾標點符號的轉換。 en → zh', function (assert) {
-		assert([ '完成',
-		// gettext_config:{"id":"finished"}
-		CeL.gettext('finished') ], '結尾標點符號的轉換: en → zh');
-		assert([ '完成。', CeL.gettext('finished.') ], '結尾標點符號的轉換: en → zh 。');
-		assert([ '完成！', CeL.gettext('finished!') ], '結尾標點符號的轉換: en → zh ！');
-		assert([ '完成……', CeL.gettext('finished...') ], '結尾標點符號的轉換: en ... → zh ……');
-		assert([ '完成……', CeL.gettext('finished......') ], '結尾標點符號的轉換: en → zh ……');
-		assert([ '完成………', CeL.gettext('finished.........') ], '結尾標點符號的轉換: en → zh ………');
-		assert([ '……完成。', CeL.gettext('... finished.') ], '標點符號的轉換: en → zh');
+		assert(['完成',
+			// gettext_config:{"id":"finished"}
+			CeL.gettext('finished')], '結尾標點符號的轉換: en → zh');
+		assert(['完成。', CeL.gettext('finished.')], '結尾標點符號的轉換: en → zh 。');
+		assert(['完成！', CeL.gettext('finished!')], '結尾標點符號的轉換: en → zh ！');
+		assert(['完成……', CeL.gettext('finished...')], '結尾標點符號的轉換: en ... → zh ……');
+		assert(['完成……', CeL.gettext('finished......')], '結尾標點符號的轉換: en → zh ……');
+		assert(['完成………', CeL.gettext('finished.........')], '結尾標點符號的轉換: en → zh ………');
+		assert(['……完成。', CeL.gettext('... finished.')], '標點符號的轉換: en → zh');
 
-		assert([ '載入失敗：A', CeL.gettext('Load failed: %1', 'A') ], '結尾標點符號的轉換: en → zh : %1');
-		assert([ '載入失敗：A', CeL.gettext('Load failed:%1', 'A') ], '結尾標點符號的轉換: en → zh :%1');
+		assert(['載入失敗：A', CeL.gettext('Load failed: %1', 'A')], '結尾標點符號的轉換: en → zh : %1');
+		assert(['載入失敗：A', CeL.gettext('Load failed:%1', 'A')], '結尾標點符號的轉換: en → zh :%1');
 	});
 
 
@@ -2107,8 +2107,8 @@ function test_code() {
 
 	all_error_count += CeL.test('extract_literals', function (assert) {
 		assert(['2A1B', CeL.extract_literals('${a}A${b}B', {
-			a : 2,
-			b : 1
+			a: 2,
+			b: 1
 		})], 'extract_literals() #1');
 	});
 
@@ -2237,7 +2237,7 @@ function test_XML() {
 		], 'XML to JSON #2'],
 		[[
 			JSON.stringify(JSON.from_XML('<g><g></g></g>')),
-			JSON.stringify({"g":{"g":null}})
+			JSON.stringify({ "g": { "g": null } })
 		], 'XML to JSON #3'],
 
 		[[
@@ -2349,7 +2349,7 @@ function test_net() {
 		if (URL[CeL.env.not_native_keyword]) {
 			CeL.log('跳過測試 CeL.net.URI() #2-2: 本 library 模擬之 URLSearchParams.prototype.toString 只能得到等價 href，不完全相同。');
 		} else {
-			assert([ _href, url.toString()], 'CeL.net.URI() #2-2 of ' + href);
+			assert([_href, url.toString()], 'CeL.net.URI() #2-2 of ' + href);
 		}
 		assert([encodeURI('/測試編碼/'), uri.pathname], 'CeL.net.URI() #3 of ' + href);
 		assert([url.pathname, uri.pathname], 'CeL.net.URI() #3-2 of ' + href);
@@ -2357,7 +2357,7 @@ function test_net() {
 		assert(["碼", uri.search_params.編], 'CeL.net.URI() #5 of ' + href);
 		assert(["$%24%%25%26%3D*", uri.search_params['! %20%%26%3D']], 'CeL.net.URI() #6 of ' + href);
 
-		href = 'http://a.b?道可道=非常道&a=1'; uri = new CeL.URI('http://a.b?道可道=非常道&a=1', null, { charset : 'big5' });
+		href = 'http://a.b?道可道=非常道&a=1'; uri = new CeL.URI('http://a.b?道可道=非常道&a=1', null, { charset: 'big5' });
 		CeL.data.character.load("Big5");
 		assert(["http://a.b?%B9D%A5i%B9D=%ABD%B1%60%B9D&a=1", uri.toString()], 'CeL.net.URI() charset encoding ' + uri.charset);
 
@@ -2373,25 +2373,25 @@ function test_date() {
 	CeL.run('data.date');
 
 	all_error_count += CeL.test('get_date_range_via_cutting_month', function (assert) {
-		assert(['2001/3/1–2001/3/10', CeL.get_date_range_via_cutting_month([2001,3,5],3,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1-1');
-		assert(['2001/3/21–2001/3/31', CeL.get_date_range_via_cutting_month([2001,3,25],3,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1-2');
-		assert(['2001/2/1–2001/2/14', CeL.get_date_range_via_cutting_month([2001,2,14],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1-3');
-		assert(['2001/2/15–2001/2/28', CeL.get_date_range_via_cutting_month([2001,2,15],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1-4');
-		assert(['2001/1/16–2001/1/31', CeL.get_date_range_via_cutting_month([2001,1,31],2,{get_full_date:true}).map(function(date){return date.join('/')}).join('–')], 'get_date_range_via_cutting_month() #1-5');
-		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,30],30).join('–')], 'get_date_range_via_cutting_month() #1-6');
-		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,31],30).join('–')], 'get_date_range_via_cutting_month() #1-7');
-		assert(['30–30', CeL.get_date_range_via_cutting_month([2001,1,30],31).join('–')], 'get_date_range_via_cutting_month() #1-8');
-		assert(['31–31', CeL.get_date_range_via_cutting_month([2001,1,31],31).join('–')], 'get_date_range_via_cutting_month() #1-9');
-		assert(['30–30', CeL.get_date_range_via_cutting_month([2001,1,30],32).join('–')], 'get_date_range_via_cutting_month() #1-10');
-		assert(['31–31', CeL.get_date_range_via_cutting_month([2001,1,31],32).join('–')], 'get_date_range_via_cutting_month() #1-11');
+		assert(['2001/3/1–2001/3/10', CeL.get_date_range_via_cutting_month([2001, 3, 5], 3, { get_full_date: true }).map(function (date) { return date.join('/') }).join('–')], 'get_date_range_via_cutting_month() #1-1');
+		assert(['2001/3/21–2001/3/31', CeL.get_date_range_via_cutting_month([2001, 3, 25], 3, { get_full_date: true }).map(function (date) { return date.join('/') }).join('–')], 'get_date_range_via_cutting_month() #1-2');
+		assert(['2001/2/1–2001/2/14', CeL.get_date_range_via_cutting_month([2001, 2, 14], 2, { get_full_date: true }).map(function (date) { return date.join('/') }).join('–')], 'get_date_range_via_cutting_month() #1-3');
+		assert(['2001/2/15–2001/2/28', CeL.get_date_range_via_cutting_month([2001, 2, 15], 2, { get_full_date: true }).map(function (date) { return date.join('/') }).join('–')], 'get_date_range_via_cutting_month() #1-4');
+		assert(['2001/1/16–2001/1/31', CeL.get_date_range_via_cutting_month([2001, 1, 31], 2, { get_full_date: true }).map(function (date) { return date.join('/') }).join('–')], 'get_date_range_via_cutting_month() #1-5');
+		assert(['30–31', CeL.get_date_range_via_cutting_month([2001, 1, 30], 30).join('–')], 'get_date_range_via_cutting_month() #1-6');
+		assert(['30–31', CeL.get_date_range_via_cutting_month([2001, 1, 31], 30).join('–')], 'get_date_range_via_cutting_month() #1-7');
+		assert(['30–30', CeL.get_date_range_via_cutting_month([2001, 1, 30], 31).join('–')], 'get_date_range_via_cutting_month() #1-8');
+		assert(['31–31', CeL.get_date_range_via_cutting_month([2001, 1, 31], 31).join('–')], 'get_date_range_via_cutting_month() #1-9');
+		assert(['30–30', CeL.get_date_range_via_cutting_month([2001, 1, 30], 32).join('–')], 'get_date_range_via_cutting_month() #1-10');
+		assert(['31–31', CeL.get_date_range_via_cutting_month([2001, 1, 31], 32).join('–')], 'get_date_range_via_cutting_month() #1-11');
 
-		assert(['28–31', CeL.get_date_range_via_cutting_month([2001,1,30],10).join('–')], 'get_date_range_via_cutting_month() #1-12');
-		assert(['28–28', CeL.get_date_range_via_cutting_month([2001,2,28],10).join('–')], 'get_date_range_via_cutting_month() #1-13');
-		assert(['29–31', CeL.get_date_range_via_cutting_month([2001,1,30],15).join('–')], 'get_date_range_via_cutting_month() #1-14');
-		assert(['27–28', CeL.get_date_range_via_cutting_month([2001,2,28],15).join('–')], 'get_date_range_via_cutting_month() #1-15');
-		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,30],30).join('–')], 'get_date_range_via_cutting_month() #1-16');
-		assert(['30–31', CeL.get_date_range_via_cutting_month([2001,1,31],30).join('–')], 'get_date_range_via_cutting_month() #1-17');
-		assert(['28–28', CeL.get_date_range_via_cutting_month([2001,2,28],30).join('–')], 'get_date_range_via_cutting_month() #1-18');
+		assert(['28–31', CeL.get_date_range_via_cutting_month([2001, 1, 30], 10).join('–')], 'get_date_range_via_cutting_month() #1-12');
+		assert(['28–28', CeL.get_date_range_via_cutting_month([2001, 2, 28], 10).join('–')], 'get_date_range_via_cutting_month() #1-13');
+		assert(['29–31', CeL.get_date_range_via_cutting_month([2001, 1, 30], 15).join('–')], 'get_date_range_via_cutting_month() #1-14');
+		assert(['27–28', CeL.get_date_range_via_cutting_month([2001, 2, 28], 15).join('–')], 'get_date_range_via_cutting_month() #1-15');
+		assert(['30–31', CeL.get_date_range_via_cutting_month([2001, 1, 30], 30).join('–')], 'get_date_range_via_cutting_month() #1-16');
+		assert(['30–31', CeL.get_date_range_via_cutting_month([2001, 1, 31], 30).join('–')], 'get_date_range_via_cutting_month() #1-17');
+		assert(['28–28', CeL.get_date_range_via_cutting_month([2001, 2, 28], 30).join('–')], 'get_date_range_via_cutting_month() #1-18');
 
 		var date_range = CeL.get_date_range_via_cutting_month(new Date('2021-08-31'), 2, { get_Date: true });
 		assert(['2021-08-16–2021-08-31', date_range[0].format({ format: '%Y-%2m-%2d', zone: 0 }) + '–' + date_range[1].format({ format: '%Y-%2m-%2d', zone: 0 })], 'get_date_range_via_cutting_month() #2-1');
@@ -2468,11 +2468,11 @@ function test_date() {
 		[[20067000, CeL.to_millisecond('5:34:27')], 'time_interval_to_millisecond() #10'],
 
 		[["1998/5/1", 'May–June 1998'.to_Date().format('%Y/%m/%d')], ".to_Date().format('%Y/%m/%d') #1"],
-		[["1998/7/1", 'May–June 1998'.to_Date({period_end:true}).format('%Y/%m/%d')], '.to_Date({period_end:true}) #1'],
+		[["1998/7/1", 'May–June 1998'.to_Date({ period_end: true }).format('%Y/%m/%d')], '.to_Date({period_end:true}) #1'],
 		[["1998/5/1", '1998 May'.to_Date().format('%Y/%m/%d')], ".to_Date().format('%Y/%m/%d') #2"],
-		[["1998/6/1", '1998 May'.to_Date({period_end:true}).format('%Y/%m/%d')], '.to_Date({period_end:true}) #2'],
+		[["1998/6/1", '1998 May'.to_Date({ period_end: true }).format('%Y/%m/%d')], '.to_Date({period_end:true}) #2'],
 		[[new Date('1998 May UTC+3').getTime(), '1998 May UTC+3'.to_Date().getTime()], "'UTC+3'.to_Date()"],
-		new Date('1998 May UTC+8').getTime() === new Date('1998 May').getTime() ? [[new Date('1998 May UTC+3').getTime(), '1998 May'.to_Date({zone:3}).getTime()], '.to_Date({zone:3})'] : CeL.log('跳過測試 .to_Date({zone:3}): 舊版 node.js 如 v0.10.48 無法解析 "1998 May UTC+8"'),
+		new Date('1998 May UTC+8').getTime() === new Date('1998 May').getTime() ? [[new Date('1998 May UTC+3').getTime(), '1998 May'.to_Date({ zone: 3 }).getTime()], '.to_Date({zone:3})'] : CeL.log('跳過測試 .to_Date({zone:3}): 舊版 node.js 如 v0.10.48 無法解析 "1998 May UTC+8"'),
 		[["2000/7/1 0:0:0.000", 'May–June 2000'.to_Date({ period_end: true }).format()], '.to_Date({ period_end: true })'],
 		[["1998/6/1 0:0:0.000", 'June 1998'.to_Date().format()], '.to_Date().format()'],
 		[["month", 'June 1998'.to_Date().precision], '.precision #1'],
@@ -2487,14 +2487,14 @@ function test_date() {
 
 	all_error_count += CeL.test('date name', [
 		[['20年', CeL.date.age_of(new Date(2000, 1, 1), new Date(2020, 1, 1))]],
-		[['20分', CeL.date.age_of(-20*60*1000, 0)]],
-		[['18小時', CeL.date.age_of(0, 18*60*60*1000)]],
+		[['20分', CeL.date.age_of(-20 * 60 * 1000, 0)]],
+		[['18小時', CeL.date.age_of(0, 18 * 60 * 60 * 1000)]],
 
-		[['30分前', CeL.date.indicate_date_time(0, { base_date : 30*60*1000 })]],
-		[['大後天0時0分', CeL.date.indicate_date_time(new Date(2000,1,4), { base_date : new Date(2000,1,1) })]],
-		[['後天20時3分', CeL.date.indicate_date_time(new Date(2000,1,3,20,3), { base_date : new Date(2000,1,1) })]],
-		[['47秒後', CeL.date.indicate_date_time(47*1000, { base_date : 0 })]],
-		[['47分後', CeL.date.indicate_date_time(47*60*1000, { base_date : 0 })]],
+		[['30分前', CeL.date.indicate_date_time(0, { base_date: 30 * 60 * 1000 })]],
+		[['大後天0時0分', CeL.date.indicate_date_time(new Date(2000, 1, 4), { base_date: new Date(2000, 1, 1) })]],
+		[['後天20時3分', CeL.date.indicate_date_time(new Date(2000, 1, 3, 20, 3), { base_date: new Date(2000, 1, 1) })]],
+		[['47秒後', CeL.date.indicate_date_time(47 * 1000, { base_date: 0 })]],
+		[['47分後', CeL.date.indicate_date_time(47 * 60 * 1000, { base_date: 0 })]],
 	]);
 
 
@@ -2522,13 +2522,13 @@ function test_date() {
 	]);
 
 	all_error_count += CeL.test('detect serial pattern', function (assert) {
-		assert(['A7', CeL.detect_serial_pattern(['A1','A2'])[0].generator(7)], 'detect_serial_pattern: A1');
-		assert(['A200', CeL.detect_serial_pattern(['filler 1', 'A5','A6'])[0].generator(200)], 'detect_serial_pattern: A5');
-		assert(['A8000K', CeL.detect_serial_pattern(['filler', 'A1K','A2K'])[0].generator(8000)], 'detect_serial_pattern: A1K');
-		assert(['A1B12', CeL.detect_serial_pattern(['A1B1','A1B2', 'filler 1 ABC'])[0].generator(12)], 'detect_serial_pattern: A1B1');
-		assert(['2100', CeL.detect_serial_pattern(['filler 1 ABC 1', 1999,2010])[0].generator(0, '2100/1/1')], 'detect_serial_pattern: year');
-		assert(['2100/8', CeL.detect_serial_pattern(['1 filler', '1999/1','2010/12'])[0].generator(0, '2100/8/1')], 'detect_serial_pattern: %Y/%m');
-		assert(['2100/08', CeL.detect_serial_pattern(['1999/12','2010/01', '22 filler'])[0].generator(0, '2100/8/1')], 'detect_serial_pattern: %Y/%2m');
+		assert(['A7', CeL.detect_serial_pattern(['A1', 'A2'])[0].generator(7)], 'detect_serial_pattern: A1');
+		assert(['A200', CeL.detect_serial_pattern(['filler 1', 'A5', 'A6'])[0].generator(200)], 'detect_serial_pattern: A5');
+		assert(['A8000K', CeL.detect_serial_pattern(['filler', 'A1K', 'A2K'])[0].generator(8000)], 'detect_serial_pattern: A1K');
+		assert(['A1B12', CeL.detect_serial_pattern(['A1B1', 'A1B2', 'filler 1 ABC'])[0].generator(12)], 'detect_serial_pattern: A1B1');
+		assert(['2100', CeL.detect_serial_pattern(['filler 1 ABC 1', 1999, 2010])[0].generator(0, '2100/1/1')], 'detect_serial_pattern: year');
+		assert(['2100/8', CeL.detect_serial_pattern(['1 filler', '1999/1', '2010/12'])[0].generator(0, '2100/8/1')], 'detect_serial_pattern: %Y/%m');
+		assert(['2100/08', CeL.detect_serial_pattern(['1999/12', '2010/01', '22 filler'])[0].generator(0, '2100/8/1')], 'detect_serial_pattern: %Y/%2m');
 
 		assert(['AA 3 KK', CeL.detect_serial_pattern.parse_generator('AA %1 KK')(3)], 'parse_generator: %1');
 		assert([(new Date('2014/8/9')).format('* %Y/%2m'), CeL.detect_serial_pattern.parse_generator('* %Y/%2m')(0, '2014/8/9')], 'parse_generator: %Y/%2m');
@@ -3271,9 +3271,9 @@ function test_wiki() {
 		[['jawikisource', CeL.wiki.site_name('ja:s:p ps')], 'site_name #13'],
 		[['enwikiversity', CeL.wiki.site_name('v:en:')], 'site_name #14'],
 		[['arwiki', CeL.wiki.site_name('w:ar')], 'site_name #15'],
-		[['dewikisource', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).site], 'site_name #16'],
-		[['s:de:', CeL.wiki.site_name('de:s:ttt', { get_all_properties : true }).interwiki_prefix], 'site_name #17'],
-		[['dewikinews', CeL.wiki.site_name('de:ttt', { family : 'wikinews' })], 'site_name #18'],
+		[['dewikisource', CeL.wiki.site_name('de:s:ttt', { get_all_properties: true }).site], 'site_name #16'],
+		[['s:de:', CeL.wiki.site_name('de:s:ttt', { get_all_properties: true }).interwiki_prefix], 'site_name #17'],
+		[['dewikinews', CeL.wiki.site_name('de:ttt', { family: 'wikinews' })], 'site_name #18'],
 	]);
 
 	all_error_count += CeL.test('wiki: CeL.wiki.namespace', function (assert) {
@@ -3485,23 +3485,23 @@ function test_wiki() {
 
 		wikitext = '[[Category:cat0]][[Category:Cat1|sort_key1]]\n==t=='; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(parsed.get_categories().some(function(category_token){return category_token.name==='Cat1'&&category_token.sort_key==='sort_key1';}), 'wiki.parse.category #2-1');
+		assert(parsed.get_categories().some(function (category_token) { return category_token.name === 'Cat1' && category_token.sort_key === 'sort_key1'; }), 'wiki.parse.category #2-1');
 		parsed.append_category('cat0|key0');
 		parsed.append_category('cat1|key1-1');
 		parsed.append_category('cat2');
 		parsed.append_category('cat3|sort3');
 		//console.trace(parsed);
-		assert(parsed.get_categories().some(function(category_token){return category_token.name==='Cat2';}), 'wiki.parse.category #2-2');
-		assert(parsed.get_categories().some(function(category_token){return category_token.name==='Cat3'&&category_token.sort_key==='sort3';}), 'wiki.parse.category #2-3');
-		assert(parsed.get_categories().some(function(category_token){return category_token.name==='Cat0'&&category_token.sort_key==='key0';}), 'wiki.parse.category #2-4');
-		assert(parsed.get_categories().some(function(category_token){return category_token.name==='Cat1'&&category_token.sort_key==='key1-1';}), 'wiki.parse.category #2-5');
+		assert(parsed.get_categories().some(function (category_token) { return category_token.name === 'Cat2'; }), 'wiki.parse.category #2-2');
+		assert(parsed.get_categories().some(function (category_token) { return category_token.name === 'Cat3' && category_token.sort_key === 'sort3'; }), 'wiki.parse.category #2-3');
+		assert(parsed.get_categories().some(function (category_token) { return category_token.name === 'Cat0' && category_token.sort_key === 'key0'; }), 'wiki.parse.category #2-4');
+		assert(parsed.get_categories().some(function (category_token) { return category_token.name === 'Cat1' && category_token.sort_key === 'key1-1'; }), 'wiki.parse.category #2-5');
 
 		wikitext = '{{c|d[[e]]f}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		parsed.each('link', function (token, index, parent) { return ''; }, true);
 		assert(['{{c|df}}', parsed.toString()], 'search all links');
 		(parsed = CeL.wiki.parser(wikitext)).each('link', function (token, index, parent) { return ''; }, true, 1);
-		assert(['{{c|d[[e]]f}}',parsed.toString()], 'only links of level 1');
+		assert(['{{c|d[[e]]f}}', parsed.toString()], 'only links of level 1');
 		assert(['file', CeL.wiki.parse('[[FiLe:a]]').type]);
 		assert(['Ab', CeL.wiki.parse('[[FiLe:ab]]').name]);
 		// TODO: 當前解析為 'link', 應為 'text'
@@ -3546,18 +3546,18 @@ function test_wiki() {
 		assert(['magic_word_function', parsed.type]);
 
 		// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##titleparts
-		assert(['Talk:Foo/bar/baz/quok',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok }}').evaluate()], '{{#titleparts}} #1');
-		assert(['Talk:Foo',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | 1 }}').evaluate()], '{{#titleparts}} #2');
-		assert(['Talk:Foo/bar',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | 2 }}').evaluate()], '{{#titleparts}} #3');
-		assert(['bar/baz',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | 2 | 2 }}').evaluate()], '{{#titleparts}} #4');
-		assert(['bar/baz/quok',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | | 2 }}').evaluate()], '{{#titleparts}} #5');
-		assert(['',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | | 5 }}').evaluate()], '{{#titleparts}} #6');
-		assert(['Talk:Foo/bar/baz',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 }}').evaluate()], '{{#titleparts}} #7');
-		assert(['',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -4 }}').evaluate()], '{{#titleparts}} #8');
-		assert(['',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -5 }}').evaluate()], '{{#titleparts}} #9');
-		assert(['quok',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | | -1 }}').evaluate()], '{{#titleparts}} #11');
-		assert(['bar/baz',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 | 2 }}').evaluate()], '{{#titleparts}} #12');
-		assert(['baz',	CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 | -2 }}').evaluate()], '{{#titleparts}} #1');
+		assert(['Talk:Foo/bar/baz/quok', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok }}').evaluate()], '{{#titleparts}} #1');
+		assert(['Talk:Foo', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | 1 }}').evaluate()], '{{#titleparts}} #2');
+		assert(['Talk:Foo/bar', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | 2 }}').evaluate()], '{{#titleparts}} #3');
+		assert(['bar/baz', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | 2 | 2 }}').evaluate()], '{{#titleparts}} #4');
+		assert(['bar/baz/quok', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | | 2 }}').evaluate()], '{{#titleparts}} #5');
+		assert(['', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | | 5 }}').evaluate()], '{{#titleparts}} #6');
+		assert(['Talk:Foo/bar/baz', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 }}').evaluate()], '{{#titleparts}} #7');
+		assert(['', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -4 }}').evaluate()], '{{#titleparts}} #8');
+		assert(['', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -5 }}').evaluate()], '{{#titleparts}} #9');
+		assert(['quok', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | | -1 }}').evaluate()], '{{#titleparts}} #11');
+		assert(['bar/baz', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 | 2 }}').evaluate()], '{{#titleparts}} #12');
+		assert(['baz', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 | -2 }}').evaluate()], '{{#titleparts}} #1');
 
 		// https://test.wikipedia.org/wiki/L
 		wikitext = '{{L|=__1|p2|link 1=L_1 | link  1=L__1  | link   1=   L___1   |link2<!-- l2=2 -->=L2|<!-- l3 -->link3=L3|<!-- l4 --> link4 <!-- l4 --> =L4}}'; parsed = CeL.wiki.parser(wikitext).parse();
@@ -3817,8 +3817,8 @@ function test_wiki() {
 		assert(['1<b style="color:#000"  ></b>2', parsed.toString()], 'wiki.parse: HTML tag #7');
 		wikitext = '<b style{{ = | a=1}}"color:red" id="{{anchorencode:id1}}">bold</b>'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #8');
-		assert(['{{anchorencode:id1}}',	parsed.attributes.id	&& parsed.attributes.id.toString()], 'wiki.parse: HTML tag #9');
-		assert(['color:red',			parsed.attributes.style	&& parsed.attributes.style.toString()], 'wiki.parse: HTML tag #10');
+		assert(['{{anchorencode:id1}}', parsed.attributes.id && parsed.attributes.id.toString()], 'wiki.parse: HTML tag #9');
+		assert(['color:red', parsed.attributes.style && parsed.attributes.style.toString()], 'wiki.parse: HTML tag #10');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #1');
@@ -3839,7 +3839,7 @@ function test_wiki() {
 
 		wikitext = "aa<br>\nbb</br>\ncc"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: self_close_tags: br #1');
-		assert(parsed.includes('bb') , 'wiki.parse: self_close_tags: br #2');
+		assert(parsed.includes('bb'), 'wiki.parse: self_close_tags: br #2');
 
 		wikitext = '1<!--<nowiki><!--</nowiki>2-->3'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: comments #1');
@@ -3971,7 +3971,7 @@ function test_wiki() {
 		assert(['{{t|a=1|b=2|1||3}}', CeL.wiki.parse.replace_parameter(token, 2, KEY_remove_parameter) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #1');
 		assert(['{{t|a=1|b=2|1}}', CeL.wiki.parse.replace_parameter(token, 3, KEY_remove_parameter) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #2');
 		assert(['{{t|b=2|1}}', CeL.wiki.parse.replace_parameter(token, 'a', KEY_remove_parameter) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #3');
-		assert(['{{t|1}}', CeL.wiki.parse.replace_parameter(token, {b:KEY_remove_parameter}, {parameter_name_only:true}) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #4');
+		assert(['{{t|1}}', CeL.wiki.parse.replace_parameter(token, { b: KEY_remove_parameter }, { parameter_name_only: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #4');
 
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{#parserfunctions:}} #1');
@@ -4228,7 +4228,7 @@ function test_wiki() {
 
 			var wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
 			var parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();
-			parsed.each('tempLate:NoteTA', function(token) {
+			parsed.each('tempLate:NoteTA', function (token) {
 				// console.log(token.conversion_list);
 				assert(["-{A|zh-cn:巴颜喀拉山脉;zh-hk:巴顏喀拉山脈;zh-tw:巴顏喀喇山}-", token.conversion_list.toString()], 'template_functions: remove spaces');
 				assert(["巴顏喀拉山脈", token.conversion_list[0].toString('zh-hk')], "template_functions: .toString('zh-hk')");
@@ -4334,7 +4334,7 @@ function test_wiki() {
 		});
 
 	}, function (recorder, error_count, test_name) {
-		 console.log('CeL.wiki: asynchronous functions: ' + error_count + ' errors');
+		console.log('CeL.wiki: asynchronous functions: ' + error_count + ' errors');
 		all_error_count += error_count;
 		finish_test('CeL.wiki: asynchronous functions');
 	});

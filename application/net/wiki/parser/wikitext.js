@@ -687,7 +687,9 @@ function module_code(library_namespace) {
 			if (library_namespace.is_thenable(promise)) {
 				// e.g., general_expand_template()
 				if (options && options.allow_promise) {
-					return promise.then(function() {
+					return promise.then(function(token) {
+						// console.log([ token, options ]);
+						// console.trace(token.toString());
 						return repeatedly_expand_template_token(
 						//
 						token, options);
@@ -747,7 +749,8 @@ function module_code(library_namespace) {
 		var session = wiki_API.session_of_options(options);
 		var is_running_at_start = session
 				// @see function wiki_API_prototype_method()
-				&& (session.running || session.actions[wiki_API.KEY_waiting_callback_result_relying_on_this]);
+				&& (session.running || session.actions[wiki_API.KEY_waiting_callback_result_relying_on_this])
+				&& session.actions.length;
 		// console.trace(parsed);
 		// Error.stackTraceLimit = Infinity;
 		// console.trace(parsed.toString());
@@ -917,15 +920,22 @@ function module_code(library_namespace) {
 			return parsed;
 		}
 
+		// Error.stackTraceLimit = Infinity;
+		// console.trace(promise);
+		// Error.stackTraceLimit = 10;
 		if (!library_namespace.is_thenable(promise))
 			return return_evaluated();
 
 		promise = promise.then(return_evaluated);
 		if (is_running_at_start) {
-			if (false) {
+			// e.g.,
+			// node 20201008.fix_anchor.js use_language=zh archives
+			if (library_namespace.is_debug(3)) {
 				Error.stackTraceLimit = Infinity;
 				console.trace(session.actions);
-				console.trace([ session.running, session.actions.length,
+				console.trace([ is_running_at_start,
+				//
+				session.running, session.actions.length,
 				//
 				session.actions[
 				//
@@ -1015,7 +1025,8 @@ function module_code(library_namespace) {
 
 			var is_parser_function = token.name.startsWith('#');
 			var parameter = is_parser_function ? token.parameters[NO]
-					: token[NO];
+			// token.parameters[NO] === token[NO + 1]
+			: token[NO];
 			// console.trace([ parameter, '' + token, token ]);
 			if (parameter) {
 				parameter = expand_transclusion(parameter, options);
@@ -1168,7 +1179,7 @@ function module_code(library_namespace) {
 
 		case '#ifexist':
 			var page_title = get_parameter_String(1);
-			if (page_title.includes('|')) {
+			if (PATTERN_invalid_page_name_characters.test(page_title)) {
 				// e.g., `a|b {{#ifexist: a{{!}}b | exists | doesn't exist }}`
 				return get_parameter_String(3);
 			}
@@ -1183,12 +1194,17 @@ function module_code(library_namespace) {
 				// console.trace([ page_title, token.toString() ]);
 				session.page(page_title, function(page_data, error) {
 					if (error) {
+						// console.trace(error);
 						reject(error);
 						return;
 					}
 
+					if (!page_data) {
+						console.error(token.toString());
+					}
 					// console.trace(page_data);
-					resolve(get_parameter_String(('missing' in page_data)
+					resolve(get_parameter_String(!page_data
+							|| ('missing' in page_data)
 							|| ('invalid' in page_data) ? 3 : 2));
 				}, ifexist_page_options);
 			});
@@ -1833,19 +1849,20 @@ function module_code(library_namespace) {
 		/**
 		 * 解析用之起始特殊標記。<br />
 		 * 需找出一個文件中不可包含，亦不會被解析的字串，作為解析用之起始特殊標記。<br />
-		 * e.g., '\u0000'.<br />
+		 * e.g., '\u0000' === '\0'.<br />
 		 * include_mark + ({ℕ⁰:Natural+0}index of queue) + end_mark
 		 * 
 		 * assert: /\s/.test(include_mark) === false
 		 * 
 		 * @type {String}
 		 */
-		include_mark = options.include_mark || '\u0000',
+		include_mark = options.include_mark || '\x00',
 		/**
 		 * {String}結束之特殊標記。 end of include_mark. 不可為數字 (\d) 或
-		 * include_mark，不包含會被解析的字元如 /;/。應為 wikitext 所不容許之字元。
+		 * include_mark，不包含會被解析的字元如 /;/。應為 wikitext 所不容許之字元。<br />
+		 * e.g., '\u0001'.<br />
 		 */
-		end_mark = options.end_mark || '\u0001',
+		end_mark = options.end_mark || '\x01',
 		/** {Boolean}是否順便作正規化。預設不會規範頁面內容。 */
 		normalize = options.normalize,
 		/** {Array}是否需要初始化。 [ {String}prefix added, {String}postfix added ] */
@@ -2720,6 +2737,12 @@ function module_code(library_namespace) {
 			library_namespace.debug('[' + previous + '] + [' + parameters
 					+ '] + [' + following + ']', 4,
 					'parse_wikitext.transclusion');
+
+			// e.g., for `{{#if:|''[[{{T}}|D]]''|}}`
+			parameters = parse_wikitext(parameters, {
+				inside_transclusion : true,
+				no_resolve : true
+			}, queue);
 
 			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
 			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
@@ -4158,6 +4181,12 @@ function module_code(library_namespace) {
 
 		// ''''b''''' → <i><b>b</b></i>
 		// 因此先從<b>開始找。
+
+		// 再解析一次。
+		// e.g., for `[[{{T|P}}]]`, `[[{{#if:A|A|B}}]]`
+		wikitext = wikitext.replace_till_stable(
+		// or use ((PATTERN_link))
+		PATTERN_wikilink_global, parse_wikilink);
 
 		// '''~''' 不能跨行！ 注意: '''{{font color}}''', '''{{tsl}}'''
 		// ''~'' 不能跨行！

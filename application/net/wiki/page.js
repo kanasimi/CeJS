@@ -2239,13 +2239,17 @@ function module_code(library_namespace) {
 
 							session.page(row, function(page_data, error) {
 								library_namespace.log_temporary(
-								// 'Get '
-								+(index + 1) + '/' + rows.length + ' '
+								// 'Get ' +
+								(index + 1)
+										+ '/'
+										+ rows.length
+										+ ' ('
+										+ (100 * (index + 1) / rows.length)
+												.to_fixed(1) + '%) '
 										+ wiki_API.title_link_of(row) + ' ('
 										+ library_namespace
 										//
 										.indicate_date_time(last_query_time)
-										//
 										+ ')');
 								if (quit_listening || !page_data || error) {
 									if (error)
