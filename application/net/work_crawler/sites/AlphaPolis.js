@@ -95,7 +95,8 @@ function module_code(library_namespace) {
 			var work_data = {
 				// 必要屬性：須配合網站平台更改。
 				// 2019/8/16 19:0 改版。
-				title : get_label(html.between('<h2 class="title">', '</h2>')),
+				title : get_label(html.between('<h1 class="title">', '</h1>')
+						|| html.between('<h2 class="title">', '</h1>')),
 
 				// 選擇性屬性：須配合網站平台更改。
 				// e.g., 连载中, 連載中
