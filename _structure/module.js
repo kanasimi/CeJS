@@ -1297,8 +1297,8 @@ if (typeof CeL === 'function') {
 						// that also matches script content restrictions.
 						if (matched = config.match(/\/\*([\s\S]+?)\*\//))
 							config = matched[1];
-						if (config = (JSON.parse || eval_parse)(config.replace(
-								/[\s\r\n]*\/\//g, '')))
+						if (config = (typeof JSON === 'object' && JSON.parse || eval_parse)
+								(config.replace(/[\s\r\n]*\/\//g, '')))
 							env.script_config = config;
 					}
 				} catch (e) {

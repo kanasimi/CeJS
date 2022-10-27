@@ -420,9 +420,10 @@ function module_code(library_namespace) {
 		// 暫時debug [[Template:Bulletin]]
 		if (title === 'Template:Bulletin') {
 			Error.stackTraceLimit = Infinity;
+			console.trace('Edit Template:Bulletin!');
 			console.trace(options);
 			Error.stackTraceLimit = 10;
-			throw new Error('Edit Template:Bulletin!');
+			// throw new Error('Edit Template:Bulletin!');
 		}
 
 		// 造出可 modify 的 options。

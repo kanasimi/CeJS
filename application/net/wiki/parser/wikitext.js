@@ -959,7 +959,7 @@ function module_code(library_namespace) {
 
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 	function evaluate_parser_function_token(options) {
-		var token = this;
+		var token = this, allow_promise = options && options.allow_promise;
 
 		function NYI() {
 			// delete token.expand;
@@ -976,12 +976,9 @@ function module_code(library_namespace) {
 			if (options.show_NYI_message) {
 				var message_name = token.name;
 				if (message_name === '#invoke') {
-					var template_name = get_parameter_String(1);
-					if (library_namespace.is_thenable(get_parameter_String(1))) {
-						template_name = String(token.parameters[1] || '')
-								.trim();
-					}
-					message_name += ':' + template_name;
+					message_name += ':'
+					// template_name
+					+ get_parameter_String(1).trim();
 				}
 				var transclusion_message = '';
 				var transclusion_from_page = options.transclusion_from_page;
@@ -1014,27 +1011,35 @@ function module_code(library_namespace) {
 			return token;
 		}
 
-		function get_parameter_String(NO) {
-			function return_parameter(parameter) {
-				parameter = String(parameter || '');
-				// console.trace([ '' + token, token ]);
-				if (!is_parser_function)
-					parameter = parameter.trim();
-				return parameter;
-			}
-
+		function get_parameter(NO) {
 			var is_parser_function = token.name.startsWith('#');
 			var parameter = is_parser_function ? token.parameters[NO]
 			// token.parameters[NO] === token[NO + 1]
 			: token[NO];
 			// console.trace([ parameter, '' + token, token ]);
-			if (parameter) {
-				parameter = expand_transclusion(parameter, options);
-				if (library_namespace.is_thenable(parameter)) {
-					parameter = parameter.then(return_parameter);
-				} else {
-					parameter = return_parameter(parameter);
-				}
+
+			// if (parameter === 0) return '0';
+			return parameter || '';
+		}
+
+		function get_parameter_String(NO, allow_thenable) {
+			function return_parameter(parameter) {
+				parameter = String(parameter || '');
+				// console.trace([ '' + token, token ]);
+				var is_parser_function = token.name.startsWith('#');
+				if (!is_parser_function)
+					parameter = parameter.trim();
+				return parameter;
+			}
+
+			var parameter = get_parameter(NO);
+			var _parameter = expand_transclusion(parameter, options);
+			if (!library_namespace.is_thenable(_parameter)) {
+				parameter = return_parameter(_parameter);
+			} else if (allow_thenable) {
+				parameter = _parameter.then(return_parameter);
+			} else {
+				parameter = return_parameter(parameter);
 			}
 			return parameter;
 		}
@@ -1061,11 +1066,11 @@ function module_code(library_namespace) {
 			return new Promise(function(resolve, reject) {
 				session.page('MediaWiki:' + message_id, function(page_data,
 						error) {
-					if (error) {
+					if (false && error) {
 						reject(error);
 						return;
 					}
-					var content = wiki_API.content_of(page_data)
+					var content = !error && wiki_API.content_of(page_data)
 							|| ('⧼' + page_data.title + '⧽');
 					library_namespace.info(
 					//
@@ -1164,7 +1169,8 @@ function module_code(library_namespace) {
 			// ----------------------------------------------------------------
 
 		case '#if':
-			// console.trace([ '#if%', token, get_parameter_String(1) ]);
+			// console.trace([ '#if%', token, get_parameter_String(1)
+			// ]);
 			token = token.parameters[get_parameter_String(1) ? 2 : 3] || '';
 			// console.trace(token);
 			break;
@@ -1178,35 +1184,47 @@ function module_code(library_namespace) {
 			break;
 
 		case '#ifexist':
-			var page_title = get_parameter_String(1);
-			if (PATTERN_invalid_page_name_characters.test(page_title)) {
+			var page_title = get_parameter_String(1, true);
+			if (!library_namespace.is_thenable(page_title)
+					&& PATTERN_invalid_page_name_characters.test(page_title)
+					&& !library_namespace.is_thenable(get_parameter_String(3,
+							true))) {
 				// e.g., `a|b {{#ifexist: a{{!}}b | exists | doesn't exist }}`
-				return get_parameter_String(3);
+				// return get_parameter_String(3, true);
+				return token.parameters[3] || '';
 			}
-			if (!options || !options.allow_promise) {
+			if (!allow_promise) {
 				return NYI();
 			}
 			var session = wiki_API.session_of_options(options);
 			if (!session) {
 				return NYI();
 			}
-			return new Promise(function(resolve, reject) {
-				// console.trace([ page_title, token.toString() ]);
-				session.page(page_title, function(page_data, error) {
-					if (error) {
-						// console.trace(error);
-						reject(error);
-						return;
-					}
+			return Promise.resolve(page_title).then(function(page_title) {
+				if (PATTERN_invalid_page_name_characters.test(page_title)) {
+					return token.parameters[3] || '';
+				}
+				return new Promise(function(resolve, reject) {
+					// console.trace([ page_title, token.toString() ]);
+					session.page(page_title, function(page_data, error) {
+						if (error) {
+							return token.parameters[3] || '';
+							// console.trace(error);
+							reject(error);
+							return;
+						}
 
-					if (!page_data) {
-						console.error(token.toString());
-					}
-					// console.trace(page_data);
-					resolve(get_parameter_String(!page_data
-							|| ('missing' in page_data)
-							|| ('invalid' in page_data) ? 3 : 2));
-				}, ifexist_page_options);
+						// console.trace(page_data);
+						if (!page_data) {
+							console.error(token.toString());
+						}
+						resolve(token.parameters[!page_data
+						//
+						|| ('missing' in page_data)
+						//
+						|| ('invalid' in page_data) ? 3 : 2] || '');
+					}, ifexist_page_options);
+				});
 			});
 
 		case '#titleparts':
@@ -1280,7 +1298,7 @@ function module_code(library_namespace) {
 
 		case 'SUBST':
 		case 'SAFESUBST':
-			if (!options || !options.allow_promise) {
+			if (!allow_promise) {
 				return NYI();
 			}
 			var session = wiki_API.session_of_options(options);
@@ -1320,12 +1338,11 @@ function module_code(library_namespace) {
 			if (!session) {
 				return NYI();
 			}
-			var page_title = get_parameter_String(1);
+			var page_title = get_parameter_String(1, true);
 			page_title = library_namespace.is_thenable(page_title) ? page_title
 					.then(get_interface_message)
 					: get_interface_message(page_title);
-			if (library_namespace.is_thenable(page_title)
-					&& (!options || !options.allow_promise)) {
+			if (library_namespace.is_thenable(page_title) && !allow_promise) {
 				return NYI();
 			}
 			return page_title;
@@ -2272,13 +2289,17 @@ function module_code(library_namespace) {
 						console.log([ all_link, page_and_anchor, page_name,
 								anchor, display_text ]);
 					}
-					if (page_name.some(function(token) {
+					if (
+					// e.g., [[[[T]]]]
+					page_name.is_link
+					// e.g., [[:[[Portal:中國大陸新聞動態|中国大陆新闻]] 3月16日新闻]]
+					// [[[[t|l]], t|l]]
+					|| page_name.some(function(token) {
 						return token.is_link;
 					})) {
-						// e.g., [[:[[Portal:中國大陸新聞動態|中国大陆新闻]] 3月16日新闻]]
-						// [[[[t|l]], t|l]]
 						// console.trace(page_name);
-						page_name.oddly = 'link_inside_link';
+						// page_name.oddly = 'link_inside_link';
+						return all_link;
 					} else {
 						page_name.oddly = true;
 					}
@@ -2514,7 +2535,9 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (page_name.oddly === 'link_inside_link') {
+			if (false
+			// 前面已經直接 return。
+			&& page_name.oddly === 'link_inside_link') {
 				// e.g., `[[File:a[[b]].jpg|thumb|t]]`
 				// console.trace(parameters);
 				// parameters.is_link = false;

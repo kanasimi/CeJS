@@ -3445,6 +3445,15 @@ function test_wiki() {
 		wikitext = '[[a|a{{!}}b|c]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse.link #2');
 		assert(['a{{!}}b|c', parsed[0].display_text.toString()], 'wiki.parse.link #2-1');
+		wikitext = '[[[[T]]]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #3');
+		assert(['[[', parsed[0]], 'wiki.parse.link #3-1');
+		assert(['link', parsed[1].type], 'wiki.parse.link #3-2');
+		assert([']]', parsed[2]], 'wiki.parse.link #3-3');
+		wikitext = '[[{{T}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #4');
+		assert(['link', parsed[0].type], 'wiki.parse.link #4-1');
+		assert(['transclusion', parsed[0] && parsed[0][0] && parsed[0][0][0].type], 'wiki.parse.link #4-2');
 
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #1');
