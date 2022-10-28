@@ -151,7 +151,7 @@ function module_code(library_namespace) {
 	function expand_template_Anchor(options) {
 		var parameters = this.parameters;
 		var wikitext = [];
-		for (/* let */var index = this.type === 'magic_word_function' ? 2 : 1; index < this.length; index++) {
+		for (/* let */var index = 1; index < this.length; index++) {
 			var anchor = parameters[index];
 			if (!anchor) {
 				continue;
@@ -356,8 +356,7 @@ function module_code(library_namespace) {
 	function parse_module_Check_for_unknown_parameters(token, index, parent,
 			options) {
 		var parameters = token.parameters, valid_parameters = token.valid_parameters = new Set, valid_RegExp_parameters = token.valid_RegExp_parameters = [];
-		// { 1: "check for unknown parameters", 2: "check" }
-		for (var index = 3; index < token.length; index++) {
+		for (var index = 1; index < token.length; index++) {
 			var value = parameters[index];
 			if (value)
 				valid_parameters.add(String(value));
@@ -386,11 +385,12 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function expand_module_IPAddress(options) {
+		// console.trace(this);
 		var parameters = this.parameters;
 		// console.trace(parameters);
-		if (parameters[2] === 'isIp') {
+		if (this.function_name === 'isIp') {
 			// [ , 'IPAddress', 'isIp', '...' ]
-			var is_IP = library_namespace.is_IP(parameters[3]);
+			var is_IP = library_namespace.is_IP(parameters[1]);
 			return is_IP ? String(is_IP) : '';
 		}
 		// TODO:

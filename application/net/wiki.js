@@ -360,7 +360,7 @@ function module_code(library_namespace) {
 	this.finish = function(name_space, waiting, sub_modules_to_full_module_path) {
 		var sub_modules = [ 'namespace', 'parser', 'query', 'page',
 				'page.Page', 'Flow', 'list', 'edit', 'task', 'parser.wikitext',
-				'parser.section', 'parser.misc' ];
+				'parser.section', 'parser.misc', 'parser.evaluate' ];
 
 		// ------------------------------------------------------------------------
 		// auto import SQL 相關函數 @ Toolforge。

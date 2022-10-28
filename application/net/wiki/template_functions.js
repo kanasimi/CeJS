@@ -986,7 +986,7 @@ function module_code(library_namespace) {
 		return token.type === 'magic_word_function' && token.name === '#invoke'
 		// {{#invoke:Template:Delete2|CSD_reason|parent=yes}}
 		// using [[Module:Template:Delete2]]
-		&& token.parameters[1];
+		&& token.module_name;
 	}
 
 	function get_function_config_of(template, options) {
@@ -1006,7 +1006,7 @@ function module_code(library_namespace) {
 			template_name = template;
 		} else {
 			is_invoke = token_is_invoke(template);
-			template_name = is_invoke ? 'Module:' + template.parameters[1]
+			template_name = is_invoke ? 'Module:' + template.module_name
 					: template.name;
 		}
 

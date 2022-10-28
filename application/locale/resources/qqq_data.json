@@ -3103,7 +3103,7 @@
 		"message": "Cannot convert Lua pattern to RegExp pattern: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Lua pattern",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions/general_functions.js#L375}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions/general_functions.js#L374}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-detect-work-id-from-url-$1": {
