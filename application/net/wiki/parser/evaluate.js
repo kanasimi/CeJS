@@ -947,6 +947,10 @@ function module_code(library_namespace) {
 
 		case '#invoke':
 			if (!token.expand && wiki_API.template_functions) {
+				// TODO: normalize .module_name, .function_name
+				// e.g., `{{#in<!-- -->voke:IP<!-- -->Address|is<!--
+				// -->{{#if:1|Ip}}|8.8.8.8}}`
+
 				wiki_API.template_functions.adapt_function(token, null, null,
 						options);
 			}

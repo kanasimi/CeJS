@@ -39,7 +39,7 @@ function module_code(library_namespace) {
 	// requiring
 	var wiki_API = library_namespace.application.net.wiki;
 	// @inner
-	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
+	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix, PATTERN_invalid_page_name_characters = wiki_API.PATTERN_invalid_page_name_characters;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -1827,46 +1827,7 @@ function module_code(library_namespace) {
 			var invoke_properties;
 
 			// if not [[mw:Help:Extension:ParserFunctions]]
-			if (!matched) {
-				parameters[0].each_between(include_mark, end_mark, function(
-						index) {
-					if (index && queue[index = +index]
-					//
-					&& !(queue[index].type in {
-						// incase:
-						// {{Wikipedia:削除依頼/ログ/{{今日}}}}
-						transclusion : true,
-						// incase:
-						// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日
-						// |-7 days +9 hours}}}}
-						magic_word_function : true,
-						// {{tl{{{1|}}}|p}}
-						parameter : true,
-
-						// allow {{tl<!-- t= -->}}
-						comment : true
-					})) {
-						// console.log(queue[index]);
-						matched = true;
-					}
-				});
-
-				if (matched
-				// {{t<!-- -->{|p}}
-				|| /[{}]/.test(parameters[0])) {
-					// console.log(parameters);
-
-					// e.g., `{{ {{tl|t}} | p }}` is incalid:
-					// → `{{ {{t}} | p }}`
-					return all;
-				}
-
-				// console.log(JSON.stringify(parameters[0]));
-
-				// e.g., token.name ===
-				// 'Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}'
-
-			} else {
+			if (matched) {
 				// console.log(matched);
 
 				// 有特殊 elements 置入其中。
@@ -2097,6 +2058,13 @@ function module_code(library_namespace) {
 					Object.assign(parameters, invoke_properties);
 
 			} else {
+				// console.log(JSON.stringify(parameters[0]));
+
+				// e.g., token.name ===
+				// 'Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}'
+
+				// ----------------------------------------
+
 				// console.trace(parameters[0]);
 				if (typeof parameters[0] === 'string') {
 					parameters.name = parameters[0];
@@ -2171,6 +2139,37 @@ function module_code(library_namespace) {
 					// assert: !!matched === true
 
 				} else {
+					if ((Array.isArray(parameters[0]) ? parameters[0]
+							: [ parameters[0] ]).some(function(token) {
+						if (typeof token === 'string') {
+							// {{t<!-- -->{|p}}
+							return PATTERN_invalid_page_name_characters
+									.test(token);
+						}
+						return !(token.type in {
+							// incase:
+							// {{Wikipedia:削除依頼/ログ/{{今日}}}}
+							transclusion : true,
+							// incase:
+							// {{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日
+							// |-7 days +9 hours}}}}
+							magic_word_function : true,
+							// {{tl{{{1|}}}|p}}
+							parameter : true,
+
+							// allow {{tl<!-- t= -->}}
+							comment : true
+						});
+					})) {
+						// console.log(parameters);
+
+						// e.g., `{{ {{tl|t}} | p }}` is invalid:
+						// → `{{ {{t}} | p }}`
+						return all;
+					}
+
+					// ------------------------------------
+
 					if (namespace[0]) {
 						parameters.name = namespace[2];
 						namespace = namespace[1];

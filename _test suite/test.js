@@ -3924,6 +3924,15 @@ function test_wiki() {
 		wikitext = '{{tl{{{1|}}}|p}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #6');
 		assert(['transclusion', parsed.type], 'wiki.parse: {{invalid}} #6-1');
+		wikitext = '{{T:A{}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #7');
+		assert([wikitext, parsed], 'wiki.parse: {{invalid}} #7-1');
+		wikitext = '{{UC:A{}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #8');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: {{invalid}} #8-1');
+		wikitext = "{{DISPLAYTITLE:List of ''Cars'' characters}}"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #9');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: {{invalid}} #9-1');
 
 		wikitext = '{{t|p=<gallery>\na.png|text\n</gallery>}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{t|<gallery>}} #1');

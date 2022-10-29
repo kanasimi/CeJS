@@ -2863,10 +2863,6 @@ function module_code(library_namespace) {
 				// clone() 是為了能個別改變 summary。
 				// 例如: each() { options.summary += " -- ..."; }
 				var work_options = Object.clone(options);
-				// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
-				work_options.task_page_data = page;
-				// 紀錄進度。
-				work_options.progress = work_continue / initial_target_length;
 				// console.trace(page.title||page);
 				// console.trace(work_options);
 				// 編輯頁面內容。
@@ -2922,6 +2918,11 @@ function module_code(library_namespace) {
 							} ]);
 						}
 					}
+
+					// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
+					this.task_page_data = page;
+					// 紀錄進度。
+					this.progress = work_continue / initial_target_length;
 
 					// 以 each() 的回傳作為要改變成什麼內容。
 					var content;
