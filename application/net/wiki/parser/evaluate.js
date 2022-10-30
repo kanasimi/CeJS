@@ -585,8 +585,7 @@ function module_code(library_namespace) {
 
 	var KEY_on_page_title_option = 'on_page_title';
 	var ifexist_page_options = {
-		rvprop : 'ids',
-		rvlimit : 1
+		prop : ''
 	};
 
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
@@ -635,10 +634,10 @@ function module_code(library_namespace) {
 							+ '尚未加入演算 {{' + message_name + '}} 的功能'
 							+ transclusion_message + ': ' + token);
 				}
-				Error.stackTraceLimit = Infinity;
+				// Error.stackTraceLimit = Infinity;
 				// console.trace(options);
-				console.trace(token);
-				Error.stackTraceLimit = 10;
+				// console.trace(token);
+				// Error.stackTraceLimit = 10;
 			}
 
 			return token;

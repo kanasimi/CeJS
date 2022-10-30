@@ -336,12 +336,13 @@ function module_code(library_namespace) {
 			+ gettext('Invalid title: %1', wiki_API.title_link_of(title)));
 		}
 
-		// console.log(action);
+		// console.trace(action);
+		// console.trace(options);
 
 		if (!wiki_API_page.query_modules
 		//
 		|| !wiki_API_page.query_modules.some(function(module) {
-			return options[module];
+			return module in options;
 		})) {
 			options.prop = 'revisions';
 		}
