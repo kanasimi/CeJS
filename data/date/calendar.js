@@ -5122,7 +5122,7 @@ var SOLAR_TERMS = ["春分","清明","穀雨","立夏","小滿","芒種","夏至
  */
 var 年節氣數 = SOLAR_TERMS.length;
 
-// 程式處理時，應在可精確處理的範圍內盡量減少工序。因此不須時時作 mod 演算以降低數字大小。
+// 程式處理時，應在可精準處理的範圍內盡量減少工序。因此不須時時作 mod 演算以降低數字大小。
 
 /**
  * 指定曆數後，產出平氣平朔、無中置閏復原曆法(厯法)之曆算推步方法。實際應為「需要置閏時，置閏於首個無中月」，而非「無中月必置閏」。
@@ -6250,7 +6250,7 @@ Solar_Hijri_weekday_name = ''
 Solar_Hijri_year_starts = function(year) {
 	if (library_namespace.solar_term_calendar)
 		return (Solar_Hijri_year_starts
-				// 透過從德黑蘭（或東經52.5度子午線）和喀布爾精確的天文觀測，確定每年的第一天（納吾肉孜節）由春分開始。
+				// 透過從德黑蘭（或東經52.5度子午線）和喀布爾精準的天文觀測，確定每年的第一天（納吾肉孜節）由春分開始。
 				// the first noon is on the last day of one calendar year and the second
 				// noon is on the first day (Nowruz) of the next year.
 				// 如果春分點在連續兩個正午之間，那第一個正午落在上一年的最後一天，第二個正午落在下一年的第一天。

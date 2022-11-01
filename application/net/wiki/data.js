@@ -642,7 +642,7 @@ function module_code(library_namespace) {
 	 */
 	var time_unit = 'gigayear,100 megayear,10 megayear,megayear,100 kiloyear,10 kiloyear,millennium,century,decade,year,month,day,hour,minute,second,microsecond'
 			.split(','),
-	// 精確至日: 11。
+	// 精密度至日: 11。
 	INDEX_OF_PRECISION = time_unit.to_hash();
 	// 千紀: 一千年, https://en.wikipedia.org/wiki/Kyr
 	time_unit.zh = '十億年,億年,千萬年,百萬年,十萬年,萬年,千紀,世紀,年代,年,月,日,時,分,秒,毫秒,微秒,納秒'

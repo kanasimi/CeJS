@@ -2660,7 +2660,7 @@ function module_code(library_namespace) {
 		(1 + 0.0334 * Math.cos(W) + 0.0007 * Math.cos(2 * W));
 
 		// λ: 太陽黃經☉是Date黃道分點座標(瞬時黃道/當日黃道?)的真幾何黃經。
-		// 要取得視黃經λ，還應加上精確的黃經章動及光行差。
+		// 要取得視黃經λ，還應加上精準的黃經章動及光行差。
 		// TODO: 黃經周年光行差修正量：-20″.161 (公式(24.10)), 黃經章動效果：Δψ =
 		// -12″.965
 		// (詳見第22章), 轉到 FK5 系統的修正值(-0″.09033) (公式(24.9))
@@ -6158,7 +6158,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 計算天體的升（出:星面頂之緯度負→正）、上中天（該天體正經過當地子午圈，但與緯度最高點的位置當有些微差別）、降（沒:星面底之緯度正→負）時刻。
-	 * 天体の出没 e.g., 日出正午日落,太陽升降。 約有兩三分的精確度?
+	 * 天体の出没 e.g., 日出正午日落,太陽升降。 約有兩三分的精準度?
 	 * 
 	 * Reference 資料來源/資料依據:<br />
 	 * Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版<br />
@@ -6925,7 +6925,7 @@ function module_code(library_namespace) {
 				polynomial_value(lunar_perigee_apogee_F, T), T ],
 		// the time of the mean perigee or apogee
 		// 計算近點或遠點時刻
-		// 與ELP-2000/82理論的精確結果比較，最大誤差如下：
+		// 與ELP-2000/82理論的精準結果比較，最大誤差如下：
 		// 時間的誤差：近地點31分，遠地點3分
 		// 視差的誤差：近地點0″.124，遠地點0″.051
 		// 相應的距離誤差分別是：12km和6km

@@ -916,8 +916,10 @@ function module_code(library_namespace) {
 			template_name = template_name.replace(/^Template:/i, '');
 		}
 		template_name = 'Template:' + template_name;
+		// console.trace(template_name);
 
 		this.each(template_name, function(token, index, parent) {
+			// console.trace(template_token);
 			template_token = token;
 			template_token.index = index;
 			template_token.parent = parent;

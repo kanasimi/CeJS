@@ -702,6 +702,21 @@ function module_code(library_namespace) {
 			if (next[3].namespace)
 				next[1] = this.to_namespace(next[1], next[3].namespace);
 			next[1] = this.normalize_title(next[1]);
+			if (!next[1]) {
+				library_namespace.error([
+				//
+				'wiki_API.prototype.next.register_redirects: ', {
+					// gettext_config:{"id":"invalid-title-$1"}
+					T : [ 'Invalid title: %1',
+					//
+					wiki_API.title_link_of(next[1]) ]
+				} ]);
+				// next[2] : callback(root_page_data, error)
+				this.next(next[2], next[1], new Error(gettext(
+				// gettext_config:{"id":"invalid-title-$1"}
+				'Invalid title: %1', wiki_API.title_link_of(next[1]))));
+				break;
+			}
 
 			if (next[3].reget) {
 			} else if (Array.isArray(next[1])) {

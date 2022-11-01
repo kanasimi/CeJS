@@ -401,7 +401,7 @@ function module_code(library_namespace) {
 	.
 	/**
 	 * The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction),
-	 * 取近似值. c.f., 調日法 在分子或分母小於下一個漸進分數的分數中，其值是最接近精確值的近似值。
+	 * 取近似值. c.f., 調日法 在分子或分母小於下一個漸進分數的分數中，其值是最接近精準值的近似值。
 	 * 
 	 * @param {Number}number
 	 *            number
@@ -2757,7 +2757,7 @@ function module_code(library_namespace) {
 		while (error < Math.abs(y2 - y) && count-- > 0
 		// 分母不應為 0 或 NaN。
 		&& (y0 -= y1)
-		// 測試已達極限，已經得到相當好的效果。無法取得更精確值。
+		// 測試已達極限，已經得到相當好的效果。無法取得更精準值。
 		// assert: else: x0===x, 可能是因為誤差已過小。
 		&& ((x2 = x1 - (x1 - x0) * (y - y1) / y0) !== x1 || x1 !== x0)) {
 			// evaluate result

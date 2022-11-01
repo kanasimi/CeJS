@@ -1170,6 +1170,7 @@ function module_code(library_namespace) {
 	// 糾正 functions_of_site 之模板名稱至重定向標的。
 	function correct_template_name(functions_of_site, options) {
 		var session = wiki_API.session_of_options(options);
+		// console.trace(functions_of_site);
 		for (var template_name_list = Object.keys(functions_of_site), index = 0; index < template_name_list.length; index++) {
 			var template_name = template_name_list[index];
 			var full_name = to_full_template_name(template_name, options);
@@ -1267,12 +1268,13 @@ function module_code(library_namespace) {
 		function_name_list = function_name_list.map(function(name) {
 			return to_full_template_name(name, session);
 		});
-		// console.trace([ site_name, function_name_list ]);
+		// console.trace([ site_name, function_name_list, functions_of_site ]);
 		session.register_redirects(function_name_list, function() {
 			// console.trace(site_name);
 			correct_template_name(template_functions.functions_of_all_sites,
 					session);
-			correct_template_name(functions_of_site, session);
+			if (functions_of_site)
+				correct_template_name(functions_of_site, session);
 			session.biographical_templates
 			//
 			= session.redirect_target_of(

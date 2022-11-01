@@ -2140,11 +2140,13 @@ function module_code(library_namespace) {
 
 				} else {
 					if ((Array.isArray(parameters[0]) ? parameters[0]
-							: [ parameters[0] ]).some(function(token) {
+							: [ parameters[0] ]).some(function(token, index,
+							list) {
 						if (typeof token === 'string') {
 							// {{t<!-- -->{|p}}
 							return PATTERN_invalid_page_name_characters
-									.test(token);
+									.test(index === list.length - 1 ? token
+											.replace(/\n+$/, '') : token);
 						}
 						return !(token.type in {
 							// incase:

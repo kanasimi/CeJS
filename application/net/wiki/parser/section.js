@@ -147,7 +147,7 @@ function module_code(library_namespace) {
 
 			// console.trace(token);
 
-			// 其他 HTML tag 大多無法精確轉換。
+			// 其他 HTML tag 大多無法準確轉換。
 			options.root_token_list.imprecise_tokens.push(token);
 
 			if (token.tag in untextify_tags) {
@@ -1377,6 +1377,15 @@ function module_code(library_namespace) {
 					this_user = null;
 				}
 
+				if (section.dates.length === 0) {
+					section.dates = wiki_API.parse.date(section.toString(),
+					// 一些通知只能取得日期，文中未指定用戶名。
+					Object.assign({
+						get_date_list : true
+					}, options));
+					section.dates.need_to_clean = true;
+				}
+
 				var min_timevalue, max_timevalue;
 				// console.trace(section.dates);
 				section.dates.forEach(function(date) {
@@ -1388,6 +1397,8 @@ function module_code(library_namespace) {
 					else if (!(max_timevalue >= date))
 						max_timevalue = date;
 				});
+				if (section.dates.need_to_clean)
+					section.dates = [];
 				// console.trace([ min_timevalue, max_timevalue ]);
 				if (min_timevalue) {
 					section.dates.min_timevalue = min_timevalue;

@@ -3600,6 +3600,10 @@ function test_wiki() {
 		assert(['Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-1 days +9 hours}}', parsed.page_title], 'wiki.parse.transclusion #4-3');
 		wikitext = '{{#time:n月j日|2020-09-15|{{PAGELANGUAGE}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #5-1');
+		wikitext = '{{t\n| p=v\n}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #6-1');
+		assert(['T', parsed.name], 'wiki.parse.transclusion #6-2');
+		assert(['v', parsed.parameters && parsed.parameters.p], 'wiki.parse.transclusion #6-3');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);

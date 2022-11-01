@@ -7714,7 +7714,7 @@ function module_code(library_namespace) {
 
 		if (cancel) {
 			// cancelBubble 在IE下有效，stopPropagation 在 Firefox 下有效。
-			// 停止冒泡，事件不會上升，我們就可以獲取精確的鼠標進入元素。 http://realazy.org/lab/bubble/
+			// 停止冒泡，事件不會上升，我們就可以獲取準確的鼠標進入元素。 http://realazy.org/lab/bubble/
 			if (typeof event.stopPropagation === 'function') {
 				// IE9 & Other Browsers
 				event.stopPropagation();

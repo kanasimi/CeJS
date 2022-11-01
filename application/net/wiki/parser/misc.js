@@ -872,7 +872,7 @@ function module_code(library_namespace) {
 		//language : 'en',
 		session : session,
 		get_timevalue : true,
-		get_all_list : true
+		get_date_list : true
 	});
 
 	</code>
@@ -895,8 +895,8 @@ function module_code(library_namespace) {
 		options = normalize_parse_date_options(options);
 
 		var date_list;
-		if (options.get_all_list) {
-			// 若設定 options.get_all_list，須保證回傳 {Array}。
+		if (options.get_date_list) {
+			// get all dates. 若設定 options.get_date_list，須保證回傳 {Array}。
 			date_list = [];
 		}
 		if (!wikitext) {
@@ -944,7 +944,7 @@ function module_code(library_namespace) {
 			if (!options.get_timevalue) {
 				date = new Date(date);
 			}
-			if (!options.get_all_list) {
+			if (!options.get_date_list) {
 				return date;
 			}
 			date_list.push(date);

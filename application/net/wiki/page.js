@@ -327,9 +327,9 @@ function module_code(library_namespace) {
 				T : [ 'Invalid title: %1', wiki_API.title_link_of(title) ]
 			} ]);
 			// console.trace(title);
+			callback(undefined, new Error(gettext(
 			// gettext_config:{"id":"invalid-title-$1"}
-			callback(undefined, gettext('Invalid title: %1', wiki_API
-					.title_link_of(title)));
+			'Invalid title: %1', wiki_API.title_link_of(title))));
 			return;
 			throw new Error('wiki_API_page: '
 			// gettext_config:{"id":"invalid-title-$1"}
@@ -671,6 +671,7 @@ function module_code(library_namespace) {
 						{"title":"","invalidreason":"The requested page title is empty or contains only the name of a namespace.","invalid":""}
 						</code>
 						 */
+						// console.trace(page_data);
 						library_namespace.warn([ 'wiki_API_page: ', {
 							T : [ 'invalid' in page_data
 							// gettext_config:{"id":"invalid-title-$1"}

@@ -158,7 +158,7 @@ if (typeof CeL === 'function')
 			HEX_RADIX = parseInt('0x10'),
 			PATTERN_HEX = new RegExp('^0x([0-9a-f]{' + Number.MAX_SAFE_INTEGER.toString(HEX_RADIX).length + ',})$', 'i'),
 
-			// 數字過大，parseInt() 無法獲得精確數值時使用 DEFAULT_DIGITS。不分大小寫。應與 parseInt() 一致。
+			// 數字過大，parseInt() 無法獲得精密數值時使用 DEFAULT_DIGITS。不分大小寫。應與 parseInt() 一致。
 			// assert: DEFAULT_DIGITS.length === MAX_RADIX
 			// assert: DEFAULT_DIGITS.toLowerCase() === DEFAULT_DIGITS
 			DEFAULT_DIGITS = '',

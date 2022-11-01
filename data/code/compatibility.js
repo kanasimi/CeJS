@@ -1071,7 +1071,7 @@ function module_code(library_namespace) {
 			if (Math.abs(value) > expm1_error)
 				return Math.exp(value) - 1;
 
-			// 提高精確度。
+			// 提高精準度。
 			// x = 1e-6; Math.expm1(x) > Math.exp(x) - 1
 
 			// http://www.wolframalpha.com/input/?i=e^x-1
@@ -1117,7 +1117,7 @@ function module_code(library_namespace) {
 				return value > 0 ? 1 : -1;
 			var e = Math.exp(value), me = Math.exp(-value);
 			return (Math.abs(value) < expm1_error
-			// 提高精確度。
+			// 提高精準度。
 			? Math.expm1(value) - Math.expm1(-value) : e - me) / (e + me);
 		},
 
