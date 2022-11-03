@@ -1026,7 +1026,7 @@
 	"$1-dependent-on-module-→-$2": "%1 依賴於 module → %2",
 	"$1-dependent-on-→-$2": "%1 依賴於 → %2",
 	"$1-does-not-start-with-$2": "%1 並非以 %2 為開頭",
-	"the-latest-version-was-edited-in-$1-too-close-to-time-later-than-$2-skip-this-page": "最新版本於%1編輯，時間過近，晚於%2，跳過此頁面。",
+	"the-latest-version-was-edited-in-$1-too-close-to-time-later-than-$2-skip-this-page": "最新版本於%1編輯，時間過近，不到%2，跳過此頁面。",
 	"this-page-does-not-exist-skip-this-page": "不存在此頁面，跳過此頁面。",
 	"the-page-$1-of-the-source-wiki-project-redirects-to-$2-but-the-same-page-of-the-target-wiki-project-redirects-to-$3-they-are-different!-skip-this-page": "來源維基項目 %1 重定向至→ %2，但目標維基項目重定向至→ %3，兩者不同！跳過此頁面。",
 	"this-page-is-copied-from-$1-and-updated-regularly-by-the-robot.-please-edit-the-original-wiki-project-page-directly-or-edit-this-page-after-removing-it-from-$2-of-the-custom-page": "本頁面複製自%1，由機器人定期更新。請直接編輯原維基項目頁面，或自設定頁面%2去除本頁面之後再編輯。",

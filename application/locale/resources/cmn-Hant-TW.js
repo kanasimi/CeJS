@@ -1020,7 +1020,7 @@
 	"%1 dependent on module \u2192 %2": "%1 \u4f9d\u8cf4\u65bc module \u2192 %2",
 	"%1 dependent on \u2192 %2": "%1 \u4f9d\u8cf4\u65bc \u2192 %2",
 	"%1 does not start with %2": "%1 \u4e26\u975e\u4ee5 %2 \u70ba\u958b\u982d",
-	"The latest version was edited in %1, too close to time, later than %2, skip this page.": "\u6700\u65b0\u7248\u672c\u65bc%1\u7de8\u8f2f\uff0c\u6642\u9593\u904e\u8fd1\uff0c\u665a\u65bc%2\uff0c\u8df3\u904e\u6b64\u9801\u9762\u3002",
+	"The latest version was edited in %1, too close to time, later than %2, skip this page.": "\u6700\u65b0\u7248\u672c\u65bc%1\u7de8\u8f2f\uff0c\u6642\u9593\u904e\u8fd1\uff0c\u4e0d\u5230%2\uff0c\u8df3\u904e\u6b64\u9801\u9762\u3002",
 	"This page does not exist, skip this page.": "\u4e0d\u5b58\u5728\u6b64\u9801\u9762\uff0c\u8df3\u904e\u6b64\u9801\u9762\u3002",
 	"The page %1 of the source wiki project redirects to %2, but the same page of the target wiki project redirects to %3, they are different! Skip this page.": "\u4f86\u6e90\u7dad\u57fa\u9805\u76ee %1 \u91cd\u5b9a\u5411\u81f3\u2192 %2\uff0c\u4f46\u76ee\u6a19\u7dad\u57fa\u9805\u76ee\u91cd\u5b9a\u5411\u81f3\u2192 %3\uff0c\u5169\u8005\u4e0d\u540c\uff01\u8df3\u904e\u6b64\u9801\u9762\u3002",
 	"This page is copied from %1 and updated regularly by the robot. Please edit the original wiki project page directly, or edit this page after removing it from %2 of the custom page.": "\u672c\u9801\u9762\u8907\u88fd\u81ea%1\uff0c\u7531\u6a5f\u5668\u4eba\u5b9a\u671f\u66f4\u65b0\u3002\u8acb\u76f4\u63a5\u7de8\u8f2f\u539f\u7dad\u57fa\u9805\u76ee\u9801\u9762\uff0c\u6216\u81ea\u8a2d\u5b9a\u9801\u9762%2\u53bb\u9664\u672c\u9801\u9762\u4e4b\u5f8c\u518d\u7de8\u8f2f\u3002",

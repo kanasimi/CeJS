@@ -3027,6 +3027,8 @@ function module_code(library_namespace) {
 					count_summary, pages.length ]);
 					// console.trace(count_summary);
 
+					// TODO: auto add section title @ summary
+
 					if (log_item.report) {
 						if (nochange_count > 0) {
 							count_summary.push(done === nochange_count
@@ -3044,7 +3046,9 @@ function module_code(library_namespace) {
 						messages.unshift(count_summary.toString());
 						count_summary.truncate(1);
 					}
-					count_summary = count_summary.toString();
+					count_summary = count_summary.toString()
+					// 手動剪掉非完結的標點符號。
+					.replace(/[,，、]$/, '');
 					if (session.stopped) {
 						messages
 						// gettext_config:{"id":"stopped-give-up-editing"}
