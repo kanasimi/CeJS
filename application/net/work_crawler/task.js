@@ -374,38 +374,19 @@ function module_code(library_namespace) {
 			get_URL_options = this.get_URL_options;
 		}
 
-		var fetch_type = get_URL_options.fetch_type, headers = get_URL_options.headers
-				|| (get_URL_options.headers = Object.create(null));
-		// e.g., mymhh.js
-		if (fetch_type ? fetch_type === 'image'
+		var fetch_type = get_URL_options.fetch_type;
+		if (!fetch_type && (new RegExp('\.(?:'
 		// e.g., /(?:jpg|png)(?:$|\?)/i
-		: (new RegExp('\.(?:' + Object.keys(this.image_types).join('|')
-				+ ')(?:$|\\?)', 'i')).test(url)) {
-			Object.assign(headers, {
-				Accept :
-				//
-				'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
-				//
-				,
-				'Sec-Fetch-Dest' : fetch_type,
-				'Sec-Fetch-Mode' : 'no-cors',
-				'Sec-Fetch-Site' : 'cross-site',
-				'Sec-Fetch-User' : undefined
-			});
+		+ Object.keys(this.image_types).join('|') + ')(?:$|\\?)', 'i'))
+		//
+		.test(url)) {
+			// treat as image
+			get_URL_options.fetch_type = 'image';
+			// Will set headers @ function get_URL_node()
 		} else if (fetch_type && fetch_type !== 'document') {
 			library_namespace.error('this_get_URL: Invalid fetch_type: '
 					+ fetch_type);
-		} else {
-			Object.assign(headers, {
-				Accept :
-				// 每次請求重設這些標頭。
-				'text/html,application/xhtml+xml,application/xml;q=0.9',
-				'Sec-Fetch-Dest' : fetch_type || 'document',
-				'Sec-Fetch-Mode' : 'navigate',
-				'Sec-Fetch-Site' : 'none'
-			});
 		}
-		delete get_URL_options.fetch_type;
 
 		// console.trace(this.get_URL_options);
 		// console.trace(url);

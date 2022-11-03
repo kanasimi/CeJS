@@ -2322,6 +2322,8 @@ function module_code(library_namespace) {
 
 		// --------------------------------------------------------------------
 
+		// console.trace([ options.headers, URL_options_to_fetch.headers ]);
+
 		// https://fetch.spec.whatwg.org/#forbidden-header-name
 		// 必要的 headers: User-Agent, Accept-Language。其他是為了模擬得更真實點。
 		URL_options_to_fetch.headers = Object.assign({
@@ -2334,7 +2336,7 @@ function module_code(library_namespace) {
 			// https://developer.mozilla.org/zh-CN/docs/Glossary/Quality_values
 			Accept : 'text/html,application/xhtml+xml,application/xml;q=0.9'
 			// 少了 '*/*' CrossRef API 會回應 406 "No acceptable resource available."
-			+ ',image/avif,' + 'image/webp,image/apng,*/*;q=0.8'
+			+ ',image/avif' + ',image/webp,image/apng,*/*;q=0.8'
 					+ ',application/signed-exchange;v=b3;q=0.9',
 			// Accept : 'application/json, text/plain, */*',
 
@@ -2368,7 +2370,7 @@ function module_code(library_namespace) {
 			Accept :
 			// 每次請求重設這些標頭。
 			'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-			'Sec-Fetch-Dest' : 'image',
+			'Sec-Fetch-Dest' : /* options.fetch_type || */'image',
 			'Sec-Fetch-Mode' : 'no-cors',
 			'Sec-Fetch-Site' : 'cross-site',
 			'Sec-Fetch-User' : undefined
