@@ -375,7 +375,7 @@ function module_code(library_namespace) {
 		}
 
 		var fetch_type = get_URL_options.fetch_type;
-		if (!fetch_type && (new RegExp('\.(?:'
+		if (!fetch_type && this.image_types && (new RegExp('\.(?:'
 		// e.g., /(?:jpg|png)(?:$|\?)/i
 		+ Object.keys(this.image_types).join('|') + ')(?:$|\\?)', 'i'))
 		//
@@ -383,7 +383,8 @@ function module_code(library_namespace) {
 			// treat as image
 			get_URL_options.fetch_type = 'image';
 			// Will set headers @ function get_URL_node()
-		} else if (fetch_type && fetch_type !== 'document') {
+		} else if (fetch_type && fetch_type !== 'document'
+				&& fetch_type !== 'image') {
 			library_namespace.error('this_get_URL: Invalid fetch_type: '
 					+ fetch_type);
 		}
