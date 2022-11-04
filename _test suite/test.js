@@ -3951,6 +3951,8 @@ function test_wiki() {
 		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
 		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function (text_array) { return text_array.filter(function (text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');
 
+		assert(['STRING', CeL.wiki.expand_transclusion('{{uc:string}}').toString()], 'expand_transclusion: {{uc:}}');
+
 		var token;
 		token = CeL.wiki.parse('{{t|1}}');
 		assert([0, CeL.wiki.parse.replace_parameter(token, 2, 'aa') && token.toString()], 'wiki.parse.replace_parameter: #0');
@@ -4241,7 +4243,7 @@ function test_wiki() {
 
 
 		var zhwiki = new CeL.wiki(null, null, 'zh');
-		zhwiki.run(function () {
+		zhwiki.run(function test_template_functions() {
 			var test_name = 'wiki: template_functions';
 			_setup_test(test_name);
 
@@ -4262,6 +4264,80 @@ function test_wiki() {
 			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { site_name: 'zhwiki' }).toString()], 'wiki.section_link + template_functions #1-2');
 
 			_finish_test(test_name);
+		});
+
+		zhwiki.run(function test_expand_transclusion() {
+			var test_name = 'wiki: expand_transclusion';
+			_setup_test(test_name);
+
+			var options = CeL.wiki.add_session_to_options(zhwiki, { on_page_title: 'Wikipedia:頁面存廢討論/123', allow_promise: true });
+			var promise = Promise.resolve();
+
+			promise = promise.then(function () {
+				return CeL.wiki.expand_transclusion('{{a|條目|顯示文字|name=錨點名稱}}', options);
+			}).then(function (parsed) {
+				//console.trace(parsed);
+				assert(['<span id="錨點名稱"></span>[[條目|顯示文字]]', parsed.toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions');
+			});
+
+			promise = promise.then(function () {
+				return CeL.wiki.expand_transclusion('{{Kai|指引}}改为{{Kai|论述}}', options);
+			}).then(function (parsed) {
+				assert(['<templatestyles src="Template:楷體/styles.css" /><span class="template-kai">指引</span>改为<templatestyles src="Template:楷體/styles.css" /><span class="template-kai">论述</span>', parsed.toString()], 'CeL.wiki.expand_transclusion() fetch page #1');
+			});
+
+			promise = promise.then(function () {
+				return CeL.wiki.expand_transclusion('{{U|user}}\n', options);
+			}).then(function (parsed) {
+				assert(['[[User:user|user]]\n', parsed.toString()], 'CeL.wiki.expand_transclusion() fetch page #2');
+			});
+
+			promise = promise.then(function () {
+				assert(['[[User:user222|user222]]\n', CeL.wiki.expand_transclusion('{{U|user222}}\n', options).toString()], 'CeL.wiki.expand_transclusion() Cached #1');
+			});
+
+			promise = promise.then(function () {
+				return CeL.wiki.expand_transclusion('{{支持}}\n{{新增條文|條文}}\n{{反对}}', options);
+			}).then(function (parsed) {
+				assert(["<span style=\"font-weight:bold;background:lightgreen;color:green;\">(＋)</span>'''<span class=\"zhwpVoteSupport\">-{支持}-</span>'''\n<span style=\"background-color: #cfc;\">條文</span>\n<span class=\"zhwpVoteOppose\" style=\"font-weight:bold;background:pink;color:red;\">(－)</span>'''反对'''", parsed.toString()], 'CeL.wiki.expand_transclusion() fetch multiple pages');
+			});
+
+			promise = promise.then(function () {
+				assert(['<span id="anchor_1"></span>', CeL.wiki.expand_transclusion('{{#invoke:anchor|main|anchor_1}}', options).toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{#invoke}}');
+			});
+
+			promise = promise.then(function () {
+				return CeL.wiki.expand_transclusion('{{ {{ifIP|name=user_name|IPvandal|Userblock}}|user_name|hidename=}}', options);
+			}).then(function (parsed) {
+				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\" style=\"color:#002bb8\">[[User:user_name|user_name]]<span style=\"color:black\">（</span>[[User talk:user_name|討論]]&nbsp;'''·'''&#32; [[Special:Contributions/user_name|貢獻]]&nbsp;'''·'''&#32; [{{fullurl:Special:Log/block|page=User:user_name}} <span style=\"color:#002bb8\">封禁日誌</span>]&nbsp;'''·'''&#32;[[Special:CentralAuth/user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]<span style=\"color:black\">）</span></span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }}');
+			});
+
+			promise = promise.then(function () {
+				assert(['Userblock', CeL.wiki.expand_transclusion('{{ifIP|name=Discovery-Zhuanru|IPvandal|Userblock}}', options).toString()], 'CeL.wiki.expand_transclusion() {{ifIP}}');
+				assert(['8.8.8.8 is IP, User name is not IP', CeL.wiki.expand_transclusion('8.8.8.8 is {{#if:{{isIP|8.8.8.8}}|IP|not IP}}, User name is {{#if:{{isIP|User name}}|IP|not IP}}', options).toString()], 'CeL.wiki.expand_transclusion() {{#if:{{isIP}} }}');
+			});
+
+			promise = promise.then(function () {
+				return CeL.wiki.expand_transclusion("ABC {{#ifexist: ABC | exists | doesn't exist }}, __NOT_EXIST_PAGE {{#ifexist: __NOT_EXIST_PAGE | exists | doesn't exist }}, A#C {{#ifexist: A#C | exists | doesn't exist }}, A[C {{#ifexist: A[C | exists | doesn't exist }}, a{|b {{#ifexist: a{{{!}}b | exists | doesn't exist }}", options);
+			}).then(function (parsed) {
+				assert(["ABC exists, __NOT_EXIST_PAGE doesn't exist, A#C doesn't exist, A[C doesn't exist, a{|b doesn't exist", parsed.toString()], 'CeL.wiki.expand_transclusion() {{#ifexist:}}');
+			});
+
+			promise = promise.then(function () {
+				return CeL.wiki.expand_transclusion("{{#ifexist:A|''[[{{#if:A|A|B}}|D]]''|B}}", options);
+			}).then(function (parsed) {
+				assert(["''[[A|D]]''", parsed.toString()], 'CeL.wiki.expand_transclusion() {{#ifexist:A}}');
+			});
+
+			promise = promise.then(function () {
+				assert(['4', CeL.wiki.expand_transclusion('{{#invoke:IP<!-- -->Address|is<!-- -->{{#if:1|Ip}}|8.8.8.8}}', options).toString()], 'CeL.wiki.expand_transclusion() {{#invoke}} #1');
+				assert(['4', CeL.wiki.expand_transclusion('{{<!-- -->#<!-- -->in<!-- -->voke<!-- -->:IP<!-- -->Address|is<!-- -->{{#if:1|Ip}}|8.8.8.8}}', options).toString()], 'CeL.wiki.expand_transclusion() {{#invoke}} #2');
+				assert(['4', CeL.wiki.expand_transclusion('{{<!-- -->#<!-- -->in<!-- -->{{#if:1|voke}}<!-- -->:IP<!-- -->Address|is<!-- -->{{#if:1|Ip}}|8.8.8.8}}', options).toString()], 'CeL.wiki.expand_transclusion() {{#invoke}} #3');
+			});
+
+			return promise.then(function (parsed) {
+				_finish_test(test_name);
+			});
 		});
 
 		_setup_test('wiki: CeL.wiki.convert_Chinese() #1');

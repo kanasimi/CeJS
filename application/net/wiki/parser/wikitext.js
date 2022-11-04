@@ -812,6 +812,35 @@ function module_code(library_namespace) {
 		return Array.isArray(value) && value.type;
 	}
 
+	// 可算 function preprocess_section_link_token(token, options) 的簡化版
+	function wiki_token_to_key(token) {
+		if (!Array.isArray(token))
+			return token;
+
+		var has_no_string;
+		// key token must accept '\n'. e.g., "key_ \n _key = value"
+		var _token = token.filter(function(t) {
+			if (t.type === 'plain')
+				t = wiki_token_to_key(t);
+
+			if (!Array.isArray(t))
+				return t;
+
+			// 去除註解 comments。
+			if (t.type === 'comment') {
+				return;
+			}
+
+			has_no_string = true;
+			return true;
+		});
+
+		// console.trace([ has_no_string, _token ]);
+		if (token.type === 'plain' && !has_no_string)
+			return _token.join('');
+		return set_wiki_type(_token, token.type);
+	}
+
 	/**
 	 * parse The MediaWiki markup language (wikitext). 解析維基語法。
 	 * 
@@ -1821,30 +1850,49 @@ function module_code(library_namespace) {
 			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
 			parameters = parameters.split('|');
 
-			// matched: [ all, functionname token, functionname, argument 1 ]
+			// matched: [ all, function name token, function name, argument 1 ]
 			var matched = parameters[0]
-					.match(/^([\s\n]*(#[a-z]+):)([\s\S]*)$/i);
+			/**
+			 * <code>
+
+			{{<!-- -->#<!-- -->in<!-- -->{{#if:1|voke}}<!-- -->:IP<!-- -->Address|is<!-- -->{{#if:1|Ip}}|8.8.8.8}}
+
+			</code>
+			 */
+			.match(/^([\s\n]*([^:]+):)([\s\S]*)$/i);
 			var invoke_properties;
 
-			// if not [[mw:Help:Extension:ParserFunctions]]
+			// if is parse function
+			// [[mw:Help:Extension:ParserFunctions]]
+			// [[mw:Extension:StringFunctions]]
+			// [[mw:Help:Magic words#Parser_functions]]
+			// [[w:en:Help:Conditional expressions]]
 			if (matched) {
 				// console.log(matched);
 
-				// 有特殊 elements 置入其中。
-				// e.g., {{ #expr: {{CURRENTHOUR}}+8}}
+				// parse function name
+				matched.pfn = wiki_token_to_key(
+				//
+				parse_wikitext(matched[2], Object.assign({
+					inside_transclusion : true
+				}, options), queue));
+				if (/^ *#/.test(matched.pfn)) {
+					if (typeof matched.pfn === 'string')
+						matched.pfn = matched.pfn.trim();
 
-				// [[mw:Help:Extension:ParserFunctions]]
-				// [[mw:Extension:StringFunctions]]
-				// [[mw:Help:Magic words#Parser_functions]]
-				// [[w:en:Help:Conditional expressions]]
-
-				// TODO: allow {{#in<!-- -->voke:...}}
-				invoke_properties = matched[2] === '#invoke'
-						&& Object.create(null);
-				// will set latter
-				parameters[0] = '';
-				parameters.splice(1, 0, matched[3]);
+					// allow {{#in<!-- -->voke:...}}
+					invoke_properties = /^ *#invoke *$/.test(matched.pfn)
+							&& Object.create(null);
+					// will set later
+					parameters[0] = '';
+					// ParserFunctions 可能會有特殊 elements 置入其中。
+					// e.g., {{ #expr: {{CURRENTHOUR}}+8}}
+					parameters.splice(1, 0, matched[3]);
+				} else {
+					matched = null;
+				}
 			}
+			// assert: !!matched === token is parse function
 
 			// parameter serial starts from 1.
 			index = 1;
@@ -1945,11 +1993,13 @@ function module_code(library_namespace) {
 						// frame.args[index] @ Lua module codes
 						// === token.parameters[index]
 						if (invoke_properties && _index === 1) {
+							invoke_properties.module_name
 							// token[1]: module name 模組名稱
-							invoke_properties.module_name = value;
+							= wiki_token_to_key(value, options);
 						} else if (invoke_properties && _index === 2) {
+							invoke_properties.function_name
 							// token[2]: lua function name 函式名稱
-							invoke_properties.function_name = value;
+							= wiki_token_to_key(value, options);
 						} else {
 							token.key = index;
 							parameter_index_of[index] = _index;
@@ -1988,7 +2038,7 @@ function module_code(library_namespace) {
 				}
 				// key token must accept '\n'. e.g., "key_ \n _key = value"
 				token.key = token[0].filter(function(t) {
-					// 去除 comments
+					// 去除註解 comments。
 					// e.g., '{{L|p<!-- -->=v}}'
 					// assert: token[0].type === 'plain'
 					return typeof t === 'string';
@@ -2048,9 +2098,11 @@ function module_code(library_namespace) {
 
 			// console.trace(matched);
 			if (matched) {
-				// assert: matched[1] 不用再 parse。
-				parameters[0] = matched[1];
-				parameters.name = matched[2];
+				// 預防經過改變，需再進一步處理。
+				parameters[0] = parse_wikitext(matched[1], Object.assign({
+					inside_transclusion : true
+				}, options), queue);
+				parameters.name = matched.pfn;
 				// 若指定 .valueOf = function()，
 				// 會造成 '' + token 執行 .valueOf()。
 				parameters.evaluate = wiki_API.evaluate_parser_function_token;
@@ -3587,6 +3639,7 @@ function module_code(library_namespace) {
 
 	Object.assign(parse_wikitext, {
 		wiki_token_toString : wiki_token_toString,
+		wiki_token_to_key : wiki_token_to_key,
 
 		set_wiki_type : set_wiki_type
 	});

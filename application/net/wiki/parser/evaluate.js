@@ -714,6 +714,26 @@ function module_code(library_namespace) {
 			});
 		}
 
+		function reparse_token(name) {
+			// 避免汙染。
+			// console.trace(token.toString());
+			token = wiki_API.parse(token.toString(), options);
+			token[0] = name + ':';
+			// console.trace(token.toString());
+			token = wiki_API.parse(token.toString(), options);
+			// console.trace(token);
+			return evaluate_parser_function_token.call(token, options);
+		}
+
+		if (Array.isArray(token.name)) {
+			var promise = wiki_API.parse.wiki_token_to_key(expand_transclusion(
+					token.name, options));
+			if (library_namespace.is_thenable(promise)) {
+				return promise.then(reparse_token);
+			}
+			return reparse_token(promise);
+		}
+
 		switch (token.name) {
 
 		case '!':
@@ -945,11 +965,46 @@ function module_code(library_namespace) {
 			// ----------------------------------------------------------------
 
 		case '#invoke':
-			if (!token.expand && wiki_API.template_functions) {
-				// TODO: normalize .module_name, .function_name
-				// e.g., `{{#in<!-- -->voke:IP<!-- -->Address|is<!--
-				// -->{{#if:1|Ip}}|8.8.8.8}}`
+			// console.trace(token);
+			// normalize .module_name, .function_name
+			/**
+			 * e.g., <code>
 
+			{{<!-- -->#<!-- -->in<!-- -->{{#if:1|voke}}<!-- -->:IP<!-- -->Address|is<!-- -->{{#if:1|Ip}}|8.8.8.8}}
+
+			</code>
+			 */
+			if (Array.isArray(token.module_name)) {
+				var promise = wiki_API.parse
+						.wiki_token_to_key(expand_transclusion(
+								token.module_name, options));
+				if (library_namespace.is_thenable(promise)) {
+					return promise.then(function(name) {
+						token.module_name = name;
+					})
+					//
+					.then(evaluate_parser_function_token.bind(token, options));
+				}
+				// console.trace(promise);
+				token.module_name = promise;
+			}
+
+			if (Array.isArray(token.function_name)) {
+				var promise = wiki_API.parse
+						.wiki_token_to_key(expand_transclusion(
+								token.function_name, options));
+				if (library_namespace.is_thenable(promise)) {
+					return promise.then(function(name) {
+						token.function_name = name;
+					})
+					//
+					.then(evaluate_parser_function_token.bind(token, options));
+				}
+				// console.trace(promise);
+				token.function_name = promise;
+			}
+
+			if (!token.expand && wiki_API.template_functions) {
 				wiki_API.template_functions.adapt_function(token, null, null,
 						options);
 			}

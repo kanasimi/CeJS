@@ -3107,7 +3107,10 @@ function module_code(library_namespace) {
 							&& PATTERN_BOT_NAME
 									.test(session.token.login_user_name) ? session.token.login_user_name
 							: 'Robot')
-							+ ': ' + config.summary + count_summary,
+							+ ': '
+							+ config.summary
+							+ (/[\s.。]$/.test(config.summary) ? '' : ' ')
+							+ count_summary,
 					// prevent creating new pages
 					// Throw an error if the page doesn't exist.
 					// 若頁面不存在/已刪除，則產生錯誤。

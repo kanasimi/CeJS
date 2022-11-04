@@ -1937,6 +1937,7 @@ function module_code(library_namespace) {
 		extract_introduction : extract_introduction,
 		// sections : deprecated_get_sections,
 
+		// preprocess_section_link_tokens : preprocess_section_link_tokens,
 		section_link : section_link,
 		section_link_escape : section_link_escape,
 
