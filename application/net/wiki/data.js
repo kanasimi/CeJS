@@ -2083,7 +2083,7 @@ function module_code(library_namespace) {
 
 		case 'time':
 			datavalue_type = datatype;
-			var precision = value.precision || options.precision;
+			var precision = value && value.precision || options.precision;
 			// 規範日期。
 			if (!library_namespace.is_Date(value)) {
 				var date_value;

@@ -714,24 +714,51 @@ function module_code(library_namespace) {
 			});
 		}
 
-		function reparse_token(name) {
+		function reparse_token_name(name) {
 			// 避免汙染。
 			// console.trace(token.toString());
 			token = wiki_API.parse(token.toString(), options);
 			token[0] = name + ':';
 			// console.trace(token.toString());
 			token = wiki_API.parse(token.toString(), options);
+			if (Array.isArray(token.name)) {
+				token.name.evaluated = true;
+			}
 			// console.trace(token);
 			return evaluate_parser_function_token.call(token, options);
 		}
 
-		if (Array.isArray(token.name)) {
-			var promise = wiki_API.parse.wiki_token_to_key(expand_transclusion(
-					token.name, options));
-			if (library_namespace.is_thenable(promise)) {
-				return promise.then(reparse_token);
+		function check_token_key(attribute_name, setter) {
+			var token_key = token[attribute_name];
+			if (!Array.isArray(token_key) || token_key.evaluated) {
+				return;
 			}
-			return reparse_token(promise);
+
+			function set_attribute(key) {
+				if (Array.isArray(key)) {
+					// 避免循環設定。
+					key.evaluated = true;
+				}
+				token[attribute_name] = key;
+			}
+
+			var promise = wiki_API.parse.wiki_token_to_key(expand_transclusion(
+					token_key, options));
+			if (library_namespace.is_thenable(promise)) {
+				if (setter)
+					return promise.then(setter);
+				return promise.then(set_attribute).then(
+						evaluate_parser_function_token.bind(token, options));
+			}
+			// console.trace(promise);
+			if (setter) {
+				return setter(promise);
+			}
+			set_attribute(promise);
+		}
+
+		if (Array.isArray(token.name) && !token.name.evaluated) {
+			return check_token_key('name', reparse_token_name);
 		}
 
 		switch (token.name) {
@@ -974,35 +1001,10 @@ function module_code(library_namespace) {
 
 			</code>
 			 */
-			if (Array.isArray(token.module_name)) {
-				var promise = wiki_API.parse
-						.wiki_token_to_key(expand_transclusion(
-								token.module_name, options));
-				if (library_namespace.is_thenable(promise)) {
-					return promise.then(function(name) {
-						token.module_name = name;
-					})
-					//
-					.then(evaluate_parser_function_token.bind(token, options));
-				}
-				// console.trace(promise);
-				token.module_name = promise;
-			}
-
-			if (Array.isArray(token.function_name)) {
-				var promise = wiki_API.parse
-						.wiki_token_to_key(expand_transclusion(
-								token.function_name, options));
-				if (library_namespace.is_thenable(promise)) {
-					return promise.then(function(name) {
-						token.function_name = name;
-					})
-					//
-					.then(evaluate_parser_function_token.bind(token, options));
-				}
-				// console.trace(promise);
-				token.function_name = promise;
-			}
+			var promise = check_token_key('module_name')
+					|| check_token_key('function_name');
+			if (promise)
+				return promise;
 
 			if (!token.expand && wiki_API.template_functions) {
 				wiki_API.template_functions.adapt_function(token, null, null,

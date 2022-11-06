@@ -3011,7 +3011,7 @@ function module_code(library_namespace) {
 						count_summary += ' '
 						//
 						+ work_continue + '/' + initial_target_length + ' ('
-						// 紀錄整體進度。
+						// 紀錄整體作業進度 overall progress。
 						+ (100 * work_continue / initial_target_length | 0)
 								+ '%)';
 					} else {
@@ -3227,7 +3227,7 @@ function module_code(library_namespace) {
 		};
 
 		var target = pages,
-		// const 可用來紀錄整體進度。
+		// const 可用來紀錄整體作業進度 overall progress。因為這個作業耗時較長 標註進度可讓人知道已經做了多少
 		initial_target_length = config.initial_target_length = target.length,
 		//
 		slice_size = max_slice_size(this, config),
