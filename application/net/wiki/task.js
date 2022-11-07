@@ -3009,11 +3009,13 @@ function module_code(library_namespace) {
 
 					if (work_continue && work_continue < initial_target_length) {
 						count_summary += ' '
-						//
-						+ work_continue + '/' + initial_target_length + ' ('
 						// 紀錄整體作業進度 overall progress。
-						+ (100 * work_continue / initial_target_length | 0)
-								+ '%)';
+						+ work_continue + '/' + initial_target_length + ' ('
+						// gettext_config:{"id":"the-bot-operation-is-completed-$1$-in-total"}
+						+ gettext('本次bot作業共完成%1%',
+						//
+						(100 * work_continue / initial_target_length | 0))
+								+ ')';
 					} else {
 						count_summary += initial_target_length;
 					}

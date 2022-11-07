@@ -358,6 +358,7 @@
 	"invalid-page-title": "Invalid page title",
 	"page-edit-function-error-$1": "Page edit function error: %1",
 	"$1-pages-processed": "%1 {{PLURAL:%2|page|pages}} processed",
+	"the-bot-operation-is-completed-$1$-in-total": "The bot operation is completed %1% in total",
 	"$1-pages-have-not-changed": "%1 {{PLURAL:%1|page|pages}} have not changed,",
 	"$1-elapsed": "%1 elapsed.",
 	"stopped-give-up-editing": "'''Stopped''', give up editing.",
