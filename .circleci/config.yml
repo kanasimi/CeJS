@@ -19,7 +19,7 @@ jobs:
   test-LTS: &test-template
     docker:
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
-      - image: cimg/node:lts-stretch
+      - image: circleci/node:lts-stretch
 
     steps:
       - checkout
@@ -36,8 +36,8 @@ jobs:
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
       # 2020/10-12: failed with image: circleci/node:current-stretch
       ## npm ERR! EISDIR: illegal operation on a directory, copyfile '/usr/local/lib/node_modules/npm' -> '/usr/local/lib/node_modules/.npm-i9nnxROI'
-      - image: cimg/node:current-stretch
-      #- image: cimg/node:lts-stretch
+      - image: circleci/node:current-stretch
+      #- image: circleci/node:lts-stretch
 
     steps:
       - checkout
@@ -63,17 +63,17 @@ jobs:
     #<<: *test-template
     docker:
       # NG: old Wikimedia Tool Labs: v0.10.25
-      #- image: cimg/node:0.10.25
+      #- image: circleci/node:0.10.25
 
       # certificate has expired:
-      #- image: cimg/node:4.8.7
+      #- image: circleci/node:4.8.7
 
       # 2020 or 2021? Wikimedia Tool Labs: `/usr/bin/node -v`: v8.11.1
       # certificate has expired:
-      #- image: cimg/node:8.11.1
+      #- image: circleci/node:8.11.1
 
       # OK:
-      - image: cimg/node:12.22.7
+      - image: circleci/node:12.22.7
 
       # NG:
       # https://github.com/anmonteiro/lumo/blob/master/.circleci/config.yml
