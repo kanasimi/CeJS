@@ -424,6 +424,9 @@ function module_code(library_namespace) {
 
 		action[1].action = 'query';
 
+		// TODO:
+		// wiki_API.extract_parameters(options, action, true);
+
 		library_namespace.debug('get url token: ' + action, 5, 'wiki_API_page');
 		// console.trace([ action, options ]);
 

@@ -10,6 +10,7 @@
 
 TODO:
 [[w:en:Wikipedia:Database reports/Templates transcluded on the most pages]]
+[[w:en:Wikipedia:High-risk templates]]
 
 </code>
  * 

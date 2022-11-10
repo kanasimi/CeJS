@@ -389,7 +389,7 @@ function module_code(library_namespace) {
 					+ fetch_type);
 		}
 
-		// console.trace(this.get_URL_options);
+		// console.trace(get_URL_options);
 		// console.trace(url);
 
 		// callback(result_Object, error)

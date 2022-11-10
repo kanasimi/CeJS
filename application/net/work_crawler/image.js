@@ -611,11 +611,9 @@ function module_code(library_namespace) {
 			incase "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added. Use emitter.setMaxListeners() to increase limit"
 			</code>
 			 */
-			max_listeners : 300
-		}, Object.assign({
+			max_listeners : 300,
 			fetch_type : 'image'
-		}, 'get_URL_options' in image_data ? image_data.get_URL_options
-				: this.get_URL_options), image_data.get_URL_options), 'buffer');
+		}, this.get_URL_options, image_data.get_URL_options), 'buffer');
 	}
 
 	// --------------------------------------------------------------------------------------------
