@@ -19,7 +19,9 @@ jobs:
   test-LTS: &test-template
     docker:
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
-      - image: circleci/node:lts-stretch
+      #- image: circleci/node:lts-stretch
+      # https://hub.docker.com/r/cimg/node/tags
+      - image: cimg/node:lts
 
     steps:
       - checkout
@@ -36,8 +38,10 @@ jobs:
       # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/node/images
       # 2020/10-12: failed with image: circleci/node:current-stretch
       ## npm ERR! EISDIR: illegal operation on a directory, copyfile '/usr/local/lib/node_modules/npm' -> '/usr/local/lib/node_modules/.npm-i9nnxROI'
-      - image: circleci/node:current-stretch
+      #- image: circleci/node:current-stretch
       #- image: circleci/node:lts-stretch
+      # https://hub.docker.com/r/cimg/node/tags
+      - image: cimg/node:current
 
     steps:
       - checkout

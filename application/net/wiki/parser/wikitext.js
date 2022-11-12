@@ -1418,9 +1418,9 @@ function module_code(library_namespace) {
 					// 先處理掉裏面的功能性代碼。 e.g.,
 					// [[File:a.svg|alt=alt_of_{{tl|t}}|NG_caption|gykvg=56789{{tl|t}}|{{#ifexist:abc|alt|link}}=abc|{{#ifexist:abc|left|456}}|{{#expr:100+300}}px|thumb]]
 					// e.g., [[File:a.svg|''a''|caption]]
-					display_text = parse_wikitext(display_text, {
+					display_text = parse_wikitext(display_text, Object.assign({
 						no_resolve : true
-					}, queue);
+					}, options), queue);
 
 					display_text = resolve_escaped(
 					// recover {{!}}
@@ -1841,10 +1841,10 @@ function module_code(library_namespace) {
 					'parse_wikitext.transclusion');
 
 			// e.g., for `{{#if:|''[[{{T}}|D]]''|}}`
-			parameters = parse_wikitext(parameters, {
+			parameters = parse_wikitext(parameters, Object.assign({
 				inside_transclusion : true,
 				no_resolve : true
-			}, queue);
+			}, options), queue);
 
 			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
 			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
@@ -2432,29 +2432,37 @@ function module_code(library_namespace) {
 			library_namespace.debug(previous + ' + <' + tag + '>', 4,
 					'parse_wikitext.tag');
 
-			var is_wiki_extensiontags = tag.toLowerCase() in extensiontag_hash;
+			// var is_wiki_extensiontags = tag.toLowerCase() in
+			// extensiontag_hash;
+			if (false
 			// 在章節標題、表格 td/th 或 template parameter 結束時，
 			// e.g., "| t || <del>... || </del> || <s>... || </s> ||",
 			// "{{t|p=v<s>...|p2=v}}</s>"
 			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
 			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
 			// 此時同階的 table 尚未處理。
-			if (!is_wiki_extensiontags && /\n[|!]|[|!]{2}/.test(inner.replace(
+			&& !is_wiki_extensiontags && /\n[|!]|[|!]{2}/.test(inner.replace(
 			// PATTERN_extensiontags 正在使用中，避免污染。
 			PATTERN_extensiontags_duplicated, ''))) {
-				// TODO: 應確認此時真在表格中。
-				if (library_namespace.is_debug(3)) {
-					library_namespace.warn('parse_wikitext.tag: <' + tag + '>'
-					//
-					+ ' 在表格 td/th 或 template parameter 中，'
-					//
-					+ '此時視為一般 text，當作未匹配 match HTML tag 成功。\n' + previous);
-					library_namespace.info(attributes);
-					library_namespace.log(inner);
-					console.trace(new RegExp('^([\\s\\S]*)<(' + tag
-							+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)$', 'i'));
+				inner = parse_wikitext(inner, Object.assign({
+					no_resolve : true
+				}, options), queue);
+				// TODO: 確認此時真在表格中。
+				if (/\n[|!]|[|!]{2}/.test(inner)) {
+					if (library_namespace.is_debug(3)) {
+						library_namespace.warn('parse_wikitext.tag: <' + tag
+						//
+						+ '>' + ' 在表格 td/th 或 template parameter 中，'
+						//
+						+ '此時視為一般 text，當作未匹配 match HTML tag 成功。\n' + previous);
+						library_namespace.info(attributes);
+						library_namespace.log(inner);
+						console.trace(new RegExp('^([\\s\\S]*)<('
+						//
+						+ tag + ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)$', 'i'));
+					}
+					return all;
 				}
-				return all;
 			}
 
 			if (library_namespace.is_debug(3)) {
@@ -3269,6 +3277,17 @@ function module_code(library_namespace) {
 		PATTERN_for_transclusion, parse_transclusion);
 
 		// ----------------------------------------------------
+		// table: \n{| ... \n|}
+		// TODO: 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]]
+		// 因為 table 中較可能包含 {{Template}}，但 {{Template}} 少包含 table，
+		// 因此先處理 {{Template}} 再處理 table。
+		// {|表示表格開始，|}表示表格結束。
+
+		wikitext = wikitext.replace_till_stable(
+		// [[Help:Table]]
+		/\n{\|([\s\S]*?)\n\|}/g, parse_table);
+
+		// ----------------------------------------------------
 
 		// 由於 <tag>... 可能被 {{Template}} 截斷，因此先處理 {{Template}} 再處理 <t></t>。
 		// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
@@ -3305,17 +3324,6 @@ function module_code(library_namespace) {
 			wikitext = wikitext.replace_till_stable(
 					/<(\/)?([a-z]+)(\s[^<>]*\/)?>/ig, parse_single_tag);
 		}
-
-		// ----------------------------------------------------
-		// table: \n{| ... \n|}
-		// TODO: 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]]
-		// 因為 table 中較可能包含 {{Template}}，但 {{Template}} 少包含 table，
-		// 因此先處理 {{Template}} 再處理 table。
-		// {|表示表格開始，|}表示表格結束。
-
-		wikitext = wikitext.replace_till_stable(
-		// [[Help:Table]]
-		/\n{\|([\s\S]*?)\n\|}/g, parse_table);
 
 		// ----------------------------------------------------
 

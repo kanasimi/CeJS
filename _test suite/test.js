@@ -3832,6 +3832,20 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #8');
 		assert(['{{anchorencode:id1}}', parsed.attributes.id && parsed.attributes.id.toString()], 'wiki.parse: HTML tag #9');
 		assert(['color:red', parsed.attributes.style && parsed.attributes.style.toString()], 'wiki.parse: HTML tag #10');
+		wikitext = '<div>\n{|\n!T\n|}</div>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #11');
+		assert(['tag', parsed.type], 'wiki.parse: HTML tag #11-1');
+		wikitext = "<s>s||t</s>"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #12');
+		assert(['tag', parsed.type], 'wiki.parse: HTML tag #12-1');
+		wikitext = "<div>\n{|\n!T!!T2\n|-\n|<s>s||'''t</s>\n|}</div>"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #13');
+		assert(['tag', parsed.type], 'wiki.parse: HTML tag #13-1');
+		wikitext = "{|\n|<s>s||'''t</s>\n|}"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #14');
+		assert(['table', parsed.type], 'wiki.parse: HTML tag #14-1');
+		// TODO: parse <s>s||
+		//assert(['tag', parsed[0][0][0].type], 'wiki.parse: HTML tag #14-2');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #1');

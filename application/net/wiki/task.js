@@ -3011,11 +3011,11 @@ function module_code(library_namespace) {
 						count_summary += ' '
 						// 紀錄整體作業進度 overall progress。
 						+ work_continue + '/' + initial_target_length + ' ('
+						// do NOT using:
 						// gettext_config:{"id":"the-bot-operation-is-completed-$1$-in-total"}
-						+ gettext('本次bot作業共完成%1%',
-						//
-						(100 * work_continue / initial_target_length | 0))
-								+ ')';
+						// gettext('本次bot作業共完成%1%', ...);
+						+ (100 * work_continue / initial_target_length | 0)
+								+ '%)';
 					} else {
 						count_summary += initial_target_length;
 					}
