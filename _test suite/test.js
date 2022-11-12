@@ -3837,15 +3837,26 @@ function test_wiki() {
 		assert(['tag', parsed.type], 'wiki.parse: HTML tag #11-1');
 		wikitext = "<s>s||t</s>"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #12');
-		assert(['tag', parsed.type], 'wiki.parse: HTML tag #12-1');
+		assert(['s', parsed.tag], 'wiki.parse: HTML tag #12-1');
 		wikitext = "<div>\n{|\n!T!!T2\n|-\n|<s>s||'''t</s>\n|}</div>"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #13');
-		assert(['tag', parsed.type], 'wiki.parse: HTML tag #13-1');
-		wikitext = "{|\n|<s>s||'''t</s>\n|}"; parsed = CeL.wiki.parse(wikitext);
+		assert(['div', parsed.tag], 'wiki.parse: HTML tag #13-1');
+		wikitext = "{|\n|<s>S||'''B</s>\n|}"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #14');
 		assert(['table', parsed.type], 'wiki.parse: HTML tag #14-1');
-		// TODO: parse "<s>s"
-		//assert(['tag', parsed[0][0][0].type], 'wiki.parse: HTML tag #14-2');
+		assert(['tag', parsed[0][0][0].type], 'wiki.parse: HTML tag #14-2');
+		// TODO: parse parsed[0][1]
+		wikitext = "<s>S<s>_</s>T</s>"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #15');
+		assert(['s', parsed.tag], 'wiki.parse: HTML tag #15-1');
+		assert(['s', parsed[1][0][1].tag], 'wiki.parse: HTML tag #15-2');
+		wikitext = "<s>S"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #16');
+		assert(['s', parsed.tag], 'wiki.parse: HTML tag #16-1');
+		wikitext = "<nowiki><s>S"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #17');
+		assert(['<nowiki>', parsed[0]], 'wiki.parse: HTML tag #17-1');
+		assert(['s', parsed[1].tag], 'wiki.parse: HTML tag #17-2');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #1');
@@ -3865,8 +3876,8 @@ function test_wiki() {
 		assert(['<nowiki><!--</nowiki>', parsed[1].toString()], 'wiki.parse: nowiki #6');
 
 		wikitext = "aa<br>\nbb</br>\ncc"; parsed = CeL.wiki.parser(wikitext).parse();
-		assert([wikitext, parsed.toString()], 'wiki.parse: self_close_tags: br #1');
-		assert(parsed.includes('bb'), 'wiki.parse: self_close_tags: br #2');
+		assert([wikitext, parsed.toString()], 'wiki.parse: self-closed HTML tags: br #1');
+		assert(parsed.includes('bb'), 'wiki.parse: self-closed HTML tags: br #2');
 
 		wikitext = '1<!--<nowiki><!--</nowiki>2-->3'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: comments #1');

@@ -2613,12 +2613,13 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	function get_PATTERN_full_tag(tags) {
+	function get_PATTERN_full_tag(tags, must_end_tag) {
 		if (Array.isArray(tags))
 			tags = tags.join('|');
 		return new RegExp('<(' + tags
-		//
-		+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)<\\/(\\1(?:\\s[^<>]*)?)>', 'ig');
+				+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)('
+				+ (must_end_tag ? '' : '$|') + '<\\/(\\1(?:\\s[^<>]*)?)>)',
+				'ig');
 	}
 
 	// default_site_configurations

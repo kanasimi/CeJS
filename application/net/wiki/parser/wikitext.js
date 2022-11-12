@@ -359,27 +359,30 @@ function module_code(library_namespace) {
 
 			// [[w:en:Template:Term]]
 			+ '|li|dt|dd',
-	// MediaWiki 可接受的 HTML void elements 標籤.
+	// MediaWiki 可接受的 HTML void elements 標籤. self-closed HTML tags
 	// NO b|span|sub|sup|li|dt|dd|center|small
 	// 包含可使用，亦可不使用 self-closing 的 tags。
 	// self-closing: void elements + foreign elements
 	// https://www.w3.org/TR/html5/syntax.html#void-elements
 	// @see [[phab:T134423]]
 	// https://www.mediawiki.org/wiki/Manual:OutputPage.php
-	//
-	// templatestyles: https://www.mediawiki.org/wiki/Extension:TemplateStyles
-	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr|templatestyles'
-			// Parser extension tags @ [[Special:Version]]
-			// For {{#lst}}, {{#section:}}
-			// [[w:en:Help:Labeled section transclusion]]
-			// TODO: 標簽（tag）現在可以本地化
-			+ '|section'
-			// Allow `<noinclude />`
+	// https://www.mediawiki.org/wiki/Help:Lint_errors/self-closed-tag
+	self_closed_tags = 'area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr'
+			// Allow `<noinclude>`
 			+ '|noinclude';
 	/** {RegExp}HTML self closed tags 的匹配模式。 */
-	var PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_close_tags
+	var PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_closed_tags
 	// allow "<br/>"
 	+ ')(\/|\\s[^<>]*)?>', 'ig');
+	// "<nowiki />", "<nowiki>...<nowiki>" are valid,
+	// but "<nowiki> without end tag" is invalid.
+	// 必須要寫成 <nowiki/>
+
+	// Parser extension tags @ [[Special:Version]]
+	// For {{#lst}}, {{#section:}}
+	// [[w:en:Help:Labeled section transclusion]]
+	// TODO: 標簽（tag）現在可以本地化
+	// templatestyles: https://www.mediawiki.org/wiki/Extension:TemplateStyles
 
 	// 優先權高低: <onlyinclude> → ‎<nowiki> → ‎ <noinclude>, ‎<includeonly>
 	// [[mw:Transclusion#Partial transclusion markup]]
@@ -646,8 +649,8 @@ function module_code(library_namespace) {
 			// 欲取得 .tagName，請用 this.tag.toLowerCase();
 			// 欲取得 .inner nodes，請用 this[1];
 			// 欲取得 .innerHTML，請用 this[1].toString();
-			return '<' + this.tag + (this[0] || '') + '>' + this[1] + '</'
-					+ (this.end_tag || this.tag) + '>';
+			return '<' + this.tag + (this[0] || '') + '>' + this[1]
+					+ ('ending' in this ? this.ending : '</' + this.tag + '>');
 		},
 		tag_attributes : function() {
 			return this.join('');
@@ -2400,13 +2403,23 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------
 
-		function parse_HTML_tag(all, tag, attributes, inner, end_tag) {
+		function parse_HTML_tag(all, tag, attributes, inner, ending, end_tag) {
 			// console.log('queue start:');
 			// console.log(queue);
 			// console.trace(arguments);
 
+			// '<code>...' is OK.
+			if (!ending && tag.toLowerCase() in {
+				syntaxhighlight : true,
+				nowiki : true
+			}) {
+				// e.g., '<syntaxhighlight>...'
+				return all;
+			}
+
+			var matched = tag.toLowerCase() !== 'nowiki'
 			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
-			var matched = tag !== 'nowiki' && inner.match(new RegExp(
+			&& inner.match(new RegExp(
 			// 但這種回溯搜尋不包含 <nowiki>
 			// @see console.log(parser[418]);
 			// https://zh.moegirl.org.cn/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
@@ -2416,16 +2429,24 @@ function module_code(library_namespace) {
 			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)$', 'i')), previous;
 			if (matched) {
 				previous = all.slice(0, matched[1].length - matched[0].length
-				// length of </end_tag>
-				- end_tag.length - 3);
+						- ending.length);
+				// 大小寫可能不同。
 				tag = matched[2];
 				attributes = matched[3];
 				inner = matched[4];
 			} else {
 				previous = '';
 			}
-			library_namespace.debug(previous + ' + <' + tag + '>', 4,
-					'parse_wikitext.tag');
+
+			var following;
+			if (!ending && initialized_fix
+			// 這一段是本函數加上去的。
+			&& inner.endsWith(initialized_fix[1])) {
+				following = initialized_fix[1];
+				inner = inner.slice(0, -following.length);
+			} else {
+				following = '';
+			}
 
 			// assert: 此時不在表格 td/th 或 template parameter 中。
 
@@ -2447,7 +2468,7 @@ function module_code(library_namespace) {
 			inner = parse_wikitext(inner, options, queue);
 
 			// 處理特殊 tags。
-			if (tag === 'nowiki' && Array.isArray(inner)) {
+			if (tag.toLowerCase() === 'nowiki' && Array.isArray(inner)) {
 				library_namespace.debug('-'.repeat(70)
 						+ '\n<nowiki> 中僅留 -{}- 有效用。', 3,
 						'parse_wikitext.transclusion');
@@ -2477,7 +2498,7 @@ function module_code(library_namespace) {
 			if (normalize) {
 				tag = tag.toLowerCase();
 			} else if (tag !== end_tag) {
-				all.end_tag = end_tag;
+				all.ending = ending;
 			}
 			all.tag = tag;
 			// {String}Element.tagName
@@ -2498,7 +2519,8 @@ function module_code(library_namespace) {
 			queue.push(all);
 			// console.log('queue end:');
 			// console.log(queue);
-			return previous + include_mark + (queue.length - 1) + end_mark;
+			return previous + include_mark + (queue.length - 1) + end_mark
+					+ following;
 		}
 
 		function parse_single_tag(all, slash, tag, attributes) {
@@ -2541,7 +2563,7 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 
 		function parse_table(all, parameters) {
-			// 經測試，table 不會向前回溯。
+			// 經測試，table 無須向前回溯。
 
 			function append_table_cell(table_cell, delimiter, table_row_token) {
 				if (!table_cell && !delimiter) {
@@ -2576,8 +2598,11 @@ function module_code(library_namespace) {
 					&& table_cell_attributes.attributes['data-sort-type'];
 				}
 
-				var table_cell_token = _set_wiki_type(
-						shallow_resolve_escaped(table_cell), 'table_cell');
+				// e.g., "{|\n|<s>S||'''B</s>\n|}"
+				var table_cell_token = parse_wikitext(table_cell, options,
+						queue);
+				table_cell_token = _set_wiki_type(table_cell_token,
+						'table_cell');
 				if (table_row_token.type === 'caption') {
 					table_cell_token.caption = table_cell_token.toString()
 							.trim();
