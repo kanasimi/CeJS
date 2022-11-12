@@ -3844,7 +3844,7 @@ function test_wiki() {
 		wikitext = "{|\n|<s>s||'''t</s>\n|}"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #14');
 		assert(['table', parsed.type], 'wiki.parse: HTML tag #14-1');
-		// TODO: parse <s>s||
+		// TODO: parse "<s>s"
 		//assert(['tag', parsed[0][0][0].type], 'wiki.parse: HTML tag #14-2');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parsed = CeL.wiki.parser(wikitext).parse();

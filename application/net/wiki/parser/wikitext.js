@@ -1801,11 +1801,6 @@ function module_code(library_namespace) {
 		var PATTERN_extensiontags = session
 				&& session.configurations.PATTERN_extensiontags
 				|| PATTERN_wiki_extensiontags;
-		// PATTERN_extensiontags 正在使用中，避免污染。
-		// For old version:
-		// new RegExp(PATTERN_extensiontags.source,
-		// PATTERN_extensiontags.flags || 'ig')
-		var PATTERN_extensiontags_duplicated = new RegExp(PATTERN_extensiontags);
 		var PATTERN_non_extensiontags = session
 				&& session.configurations.PATTERN_non_extensiontags
 				|| PATTERN_non_wiki_extensiontags;
@@ -2432,38 +2427,7 @@ function module_code(library_namespace) {
 			library_namespace.debug(previous + ' + <' + tag + '>', 4,
 					'parse_wikitext.tag');
 
-			// var is_wiki_extensiontags = tag.toLowerCase() in
-			// extensiontag_hash;
-			if (false
-			// 在章節標題、表格 td/th 或 template parameter 結束時，
-			// e.g., "| t || <del>... || </del> || <s>... || </s> ||",
-			// "{{t|p=v<s>...|p2=v}}</s>"
-			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
-			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
-			// 此時同階的 table 尚未處理。
-			&& !is_wiki_extensiontags && /\n[|!]|[|!]{2}/.test(inner.replace(
-			// PATTERN_extensiontags 正在使用中，避免污染。
-			PATTERN_extensiontags_duplicated, ''))) {
-				inner = parse_wikitext(inner, Object.assign({
-					no_resolve : true
-				}, options), queue);
-				// TODO: 確認此時真在表格中。
-				if (/\n[|!]|[|!]{2}/.test(inner)) {
-					if (library_namespace.is_debug(3)) {
-						library_namespace.warn('parse_wikitext.tag: <' + tag
-						//
-						+ '>' + ' 在表格 td/th 或 template parameter 中，'
-						//
-						+ '此時視為一般 text，當作未匹配 match HTML tag 成功。\n' + previous);
-						library_namespace.info(attributes);
-						library_namespace.log(inner);
-						console.trace(new RegExp('^([\\s\\S]*)<('
-						//
-						+ tag + ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)$', 'i'));
-					}
-					return all;
-				}
-			}
+			// assert: 此時不在表格 td/th 或 template parameter 中。
 
 			if (library_namespace.is_debug(3)) {
 				library_namespace.info('parse_wikitext.tag: <' + tag
@@ -2502,13 +2466,6 @@ function module_code(library_namespace) {
 					inner = inner[0];
 				}
 				// console.log(inner);
-			}
-			// 若為 <pre> 之內，則不再變換。
-			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
-			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
-			// 因此應避免 <pre> 內有 <pre>。
-			if (false && !is_wiki_extensiontags) {
-				inner = inner.toString();
 			}
 
 			// [ ... ]: 在 inner 為 Template 之類時，
@@ -3288,6 +3245,12 @@ function module_code(library_namespace) {
 		/\n{\|([\s\S]*?)\n\|}/g, parse_table);
 
 		// ----------------------------------------------------
+
+		// 在章節標題、表格 td/th 或 template parameter 結束時，
+		// e.g., "| t || <del>... || </del> || <s>... || </s> ||",
+		// "{{t|p=v<s>...|p2=v}}</s>"
+		// HTML font style tag 會被表格截斷，自動重設屬性，不會延續下去。
+		// 所以要先處理表格再處理 HTML tag。
 
 		// 由於 <tag>... 可能被 {{Template}} 截斷，因此先處理 {{Template}} 再處理 <t></t>。
 		// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
