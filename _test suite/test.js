@@ -3742,12 +3742,24 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()]);
 		assert(['italic', parsed[0].type], "'''''t''''' will render as <i><b>t</b></i>");
 		assert(['bold', parsed[0][0].type]);
-		wikitext = "'''''''t'''''''"; parsed = CeL.wiki.parser(wikitext).parse();
+		wikitext = "'''''''t'''''''"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		assert(["''", parsed[0]]);
 		assert(['italic', parsed[1].type], "'''''''t''''''' will render as ''<i><b>t''</b></i>");
 		assert(['bold', parsed[1][0].type]);
 		assert(["t''", parsed[1][0][0]]);
+		wikitext = "'''b"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: bold without ending #1');
+		assert(['bold', parsed.type], 'wiki.parse: bold without ending-1 #1');
+		wikitext = "''i"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: italic without ending #1');
+		assert(['italic', parsed.type], 'wiki.parse: italic without ending-1 #1');
+		wikitext = "'''''bi"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: bold-italic without ending #1');
+		assert(['italic', parsed.type], 'wiki.parse: bold-italic without ending #1-1');
+		wikitext = "'''''bi\nt"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: bold-italic without ending #2');
+		assert(['italic', parsed[0].type], 'wiki.parse: bold-italic without ending #2-1');
 		wikitext = "a '''''b''''' c's ''d'' e ''f'' g ''h''."; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[t|\'\'\' <span>T</span>\'\'\']].'; parsed = CeL.wiki.parser(wikitext).parse();
@@ -3845,7 +3857,8 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #14');
 		assert(['table', parsed.type], 'wiki.parse: HTML tag #14-1');
 		assert(['tag', parsed[0][0][0].type], 'wiki.parse: HTML tag #14-2');
-		// TODO: parse parsed[0][1]
+		assert(['bold', parsed[0][1][0].type], 'wiki.parse: HTML tag #14-3');
+		assert(['s', parsed[0][1][0][1].tag], 'wiki.parse: HTML tag #14-4: invalid end tag');
 		wikitext = "<s>S<s>_</s>T</s>"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #15');
 		assert(['s', parsed.tag], 'wiki.parse: HTML tag #15-1');

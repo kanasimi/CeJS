@@ -2617,9 +2617,9 @@ function module_code(library_namespace) {
 		if (Array.isArray(tags))
 			tags = tags.join('|');
 		return new RegExp('<(' + tags
-				+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)('
-				+ (must_end_tag ? '' : '$|') + '<\\/(\\1(?:\\s[^<>]*)?)>)',
-				'ig');
+		// <s/>s</s> 會被正常解析為 <s>s</s>。
+		+ ')([\\s/][^<>]*)?>([\\s\\S]*?)(' + (must_end_tag ? '' : '$|')
+				+ '<\\/(\\1(?:\\s[^<>]*)?)>)', 'ig');
 	}
 
 	// default_site_configurations

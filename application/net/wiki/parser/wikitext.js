@@ -359,6 +359,10 @@ function module_code(library_namespace) {
 
 			// [[w:en:Template:Term]]
 			+ '|li|dt|dd',
+	// @see function get_PATTERN_full_tag()
+	PATTERN_invalid_end_tag = new RegExp('<(/)(' + markup_tags
+			+ ')([\\s/][^<>]*)?>', 'ig'),
+
 	// MediaWiki 可接受的 HTML void elements 標籤. self-closed HTML tags
 	// NO b|span|sub|sup|li|dt|dd|center|small
 	// 包含可使用，亦可不使用 self-closing 的 tags。
@@ -369,11 +373,12 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/wiki/Help:Lint_errors/self-closed-tag
 	self_closed_tags = 'area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr'
 			// Allow `<noinclude>`
-			+ '|noinclude';
+			+ '|noinclude',
 	/** {RegExp}HTML self closed tags 的匹配模式。 */
-	var PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_closed_tags
+	PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_closed_tags
 	// allow "<br/>"
-	+ ')(\/|\\s[^<>]*)?>', 'ig');
+	+ ')(\/|\\s[^<>]*)?>', 'ig'),
+
 	// "<nowiki />", "<nowiki>...<nowiki>" are valid,
 	// but "<nowiki> without end tag" is invalid.
 	// 必須要寫成 <nowiki/>
@@ -387,28 +392,27 @@ function module_code(library_namespace) {
 	// 優先權高低: <onlyinclude> → ‎<nowiki> → ‎ <noinclude>, ‎<includeonly>
 	// [[mw:Transclusion#Partial transclusion markup]]
 	// <noinclude>, ‎<includeonly> 在解析模板時優先權必須高於其他 tags。
-	var wiki_extensiontags = 'includeonly|noinclude|'
+	wiki_extensiontags = 'includeonly|noinclude|'
 			// 在其內部的 wikitext 不會被 parse。允許內部採用 table 語法的 tags。例如
 			// [[mw:Manual:Extensions]]
 			// configurations.extensiontags
-			+ 'pre|nowiki|gallery|indicator|langconvert|timeline|hiero|imagemap|source|syntaxhighlight|poem|quiz|score|templatestyles|templatedata|graph|maplink|mapframe|charinsert|ref|references|inputbox|categorytree|section|math|ce|chem';
-
+			+ 'pre|nowiki|gallery|indicator|langconvert|timeline|hiero|imagemap|source|syntaxhighlight|poem|quiz|score|templatestyles|templatedata|graph|maplink|mapframe|charinsert|ref|references|inputbox|categorytree|section|math|ce|chem',
 	/**
 	 * {RegExp}HTML tags 的匹配模式 of <nowiki>。這些 tag 就算中間置入 "<!--" 也不會被當作
 	 * comments，必須在 "<!--" 之前解析。 PATTERN_WIKI_TAG_of_wiki_extensiontags
 	 */
-	var PATTERN_wiki_extensiontags = wiki_API
+	PATTERN_wiki_extensiontags = wiki_API
 			.get_PATTERN_full_tag(wiki_extensiontags);
+
 	/** {RegExp}HTML tags 的匹配模式。 */
 	// var PATTERN_WIKI_TAG = wiki_API.get_PATTERN_full_tag(markup_tags);
-	wiki_extensiontags = wiki_extensiontags.split('|');
+	wiki_extensiontags = wiki_extensiontags.split('|').to_hash();
 	markup_tags = markup_tags.split('|');
 	/** {RegExp}HTML tags 的匹配模式 without <nowiki>。 */
 	var PATTERN_non_wiki_extensiontags = wiki_API
 			.get_PATTERN_full_tag(markup_tags.filter(function(tag) {
-				return !wiki_extensiontags.includes(tag);
+				return !(tag in wiki_extensiontags);
 			}));
-	wiki_extensiontags = wiki_extensiontags.to_hash();
 
 	/**
 	 * .toString() of wiki elements: wiki_token_toString[token.type]<br />
@@ -661,6 +665,7 @@ function module_code(library_namespace) {
 		tag_single : function() {
 			// this: [ {String}attributes ].tag
 			// 欲取得 .tagName，請用 this.tag.toLowerCase();
+			// 有 .slash 代表 invalid tag。
 			return '<' + (this.slash || '') + this.tag + this.join('') + '>';
 		},
 
@@ -2425,8 +2430,8 @@ function module_code(library_namespace) {
 			// https://zh.moegirl.org.cn/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
 			// <nowiki>{{subst:unwiki|<nowiki>{{黑幕|黑幕内容}}</nowiki&gt;}}</nowiki>
 			'([\\s\\S]*)<(' + tag
-			//
-			+ ')(\\s(?:[^<>]*[^<>/])?)?>([\\s\\S]*?)$', 'i')), previous;
+			// @see function get_PATTERN_full_tag()
+			+ ')([\\s/][^<>]*)?>([\\s\\S]*?)$', 'i')), previous;
 			if (matched) {
 				previous = all.slice(0, matched[1].length - matched[0].length
 						- ending.length);
@@ -2439,7 +2444,7 @@ function module_code(library_namespace) {
 			}
 
 			var following;
-			if (!ending && initialized_fix
+			if (!ending && initialized_fix && initialized_fix[1]
 			// 這一段是本函數加上去的。
 			&& inner.endsWith(initialized_fix[1])) {
 				following = initialized_fix[1];
@@ -2799,8 +2804,8 @@ function module_code(library_namespace) {
 			return include_mark + (queue.length - 1) + end_mark;
 		}
 
-		function parse_apostrophe_type(all, apostrophes, parameters, following) {
-			// console.log([ all, apostrophes, parameters, following ]);
+		function parse_apostrophe_type(all, apostrophes, parameters, ending) {
+			// console.log([ all, apostrophes, parameters, ending ]);
 			var index = parameters.lastIndexOf(apostrophes), previous = '';
 			if (index !== NOT_FOUND) {
 				previous = apostrophes + parameters.slice(0, index);
@@ -2810,18 +2815,30 @@ function module_code(library_namespace) {
 			parameters = parse_wikitext(parameters, options, queue);
 			// console.log(parameters);
 			// 注意: parameters.length 可能大於1
-			var type;
+			var type = parameters && parameters.type;
+			if (apostrophes !== ending
+			// 這樣下面 `_set_wiki_type(parameters, type)` 時會出錯。
+			&& (type === 'bold' || type === 'italic')) {
+				// e.g., "'''''''t'''''''"
+				return all;
+			}
 			if (apostrophes === "'''''") {
 				// e.g., "''''''t''''''"
-				parameters = [ _set_wiki_type(parameters, 'bold') ];
+				parameters = _set_wiki_type(parameters, 'bold');
+				if (apostrophes !== ending)
+					parameters.no_end = true;
+				parameters = [ parameters ];
 				type = 'italic';
 			} else {
 				type = apostrophes === "''" ? 'italic' : 'bold';
 			}
 			parameters = _set_wiki_type(parameters, type);
-			if (apostrophes === following) {
+			var following;
+			if (apostrophes === ending) {
 				following = '';
 			} else {
+				following = ending;
+				// assert: ending === '' || ending === '\n'
 				parameters.no_end = true;
 			}
 			queue.push(parameters);
@@ -3308,10 +3325,8 @@ function module_code(library_namespace) {
 				parse_single_tag);
 		// 處理有明確標示為 simgle tag 的。
 		// 但 MediaWiki 現在會將 <b /> 轉成 <b>，因此不再處理這部分。
-		if (false) {
-			wikitext = wikitext.replace_till_stable(
-					/<(\/)?([a-z]+)(\s[^<>]*\/)?>/ig, parse_single_tag);
-		}
+		wikitext = wikitext.replace_till_stable(PATTERN_invalid_end_tag,
+				parse_single_tag);
 
 		// ----------------------------------------------------
 
@@ -3333,12 +3348,11 @@ function module_code(library_namespace) {
 		// ''~'' 不能跨行！
 		wikitext = wikitext.replace_till_stable(
 				/('''''|'''?)([^'\n].*?'*)(\1)/g, parse_apostrophe_type);
-		if (false) {
-			// \n, $ 都會截斷 italic, bold
-			// <tag> 不會截斷 italic, bold
-			wikitext = wikitext.replace_till_stable(
-					/('''''|'''?)([^'\n].*?)($|\n)/g, parse_apostrophe_type);
-		}
+		// \n, $ 都會截斷 italic, bold
+		// <tag> 不會截斷 italic, bold
+		wikitext = wikitext.replace_till_stable(
+		// '\n': initialized_fix[1]
+		/('''''|'''?)([^'\n].*?)(\n|$)/g, parse_apostrophe_type);
 		// '', ''' 似乎會經過微調: [[n:zh:Special:Permalink/120676]]
 
 		// ~~~, ~~~~, ~~~~~: 不應該出現

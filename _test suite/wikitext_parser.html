@@ -115,6 +115,13 @@ text 2
 
 // ----------------------------------------------------------------------------
 
+function stringify(value) {
+	value = JSON.stringify(value);
+	return typeof value === 'string' ? value.replace(/</g, '&lt;')
+	// &nbsp;
+	.replace(/ /g, '\xa0') : value;
+}
+
 function add_parser_sample(wikitext, title, panel) {
 	let node_list = [];
 
@@ -134,10 +141,10 @@ function add_parser_sample(wikitext, title, panel) {
 			div: `Error: ${title ? title + ': ' : ''}Failed to rebuild wikitext! Please report the wikitext!`,
 			C: 'error'
 		}, { T: 'original: ', S: 'display: inline-block; width: 3.5em;' }, {
-			code: JSON.stringify(wikitext).replace(/</g, '&lt;').slice(1, -1)
+			code: stringify(wikitext).slice(1, -1)
 		}, { br: null },
 			{ T: 'parsed: ', S: 'display: inline-block; width: 3.5em;' }, {
-			code: JSON.stringify(parsed.toString()).replace(/</g, '&lt;').slice(1, -1)
+			code: stringify(parsed.toString()).slice(1, -1)
 		});
 	}
 	CeL.new_node(node_list, [panel || 'parser_sample_panel', 2]);
@@ -145,9 +152,7 @@ function add_parser_sample(wikitext, title, panel) {
 
 function generate_wiki_parser_token(token, wikitext) {
 	if (!Array.isArray(token)){
-		return JSON.stringify(token).replace(/</g, '&lt;​')
-		// &nbsp;
-		.replace(/ /g, '\xa0');
+		return stringify(token);
 	}
 
 	function push_pair(name, value, sub_document) {
@@ -194,14 +199,14 @@ function generate_wiki_parser_token(token, wikitext) {
 	} else {
 		document.push({
 			// "[]"
-			div: JSON.stringify(token)
+			div: stringify(token)
 		});
 	}
 
 	sub_document = [];
 	for (const property_name in token) {
 		if (isNaN(property_name) && property_name !== 'toString') {
-			push_pair(property_name, JSON.stringify(token[property_name]), sub_document);
+			push_pair(property_name, stringify(token[property_name]), sub_document);
 		}
 	}
 	document.push('additional properties' + (wikitext ? ' of result:' : ':'), { table: sub_document, C: "property_pairs" });
