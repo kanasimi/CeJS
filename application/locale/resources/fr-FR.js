@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -360,6 +360,7 @@
 	"Invalid page title": "Titre de page non valide",
 	"Page edit function error: %1": "Erreur de la fonction de modification de page\u202f: %1",
 	"%1 {{PLURAL:%2|page|pages}} processed": "%1 page{{PLURAL:%2||s}} trait\u00e9e{{PLURAL:%2||s}}",
+	"\u672c\u6b21bot\u4f5c\u696d\u5df2\u9032\u884c%1%": "L\u2019op\u00e9ration du robot est termin\u00e9e \u00e0 %1% au total",
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 page{{PLURAL:%1||s}} n\u2019{{PLURAL:%1|a|ont}} pas chang\u00e9,",
 	"%1 elapsed.": "%1 pass\u00e9.",
 	"'''Stopped''', give up editing.": "'''Arr\u00eat\u00e9''', modification abandonn\u00e9e.",

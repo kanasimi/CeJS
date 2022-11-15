@@ -246,10 +246,14 @@ function module_code(library_namespace) {
 			// console.trace([ image_url, XMLHttp.responseURL ]);
 			if (!image_data.is_bad
 			// image_data.is_bad may be set by _this.image_preprocessor()
-			&& typeof _this.is_limited_image_url === 'function'
-			// 處理特殊圖片: 檢查是否下載到 padding 用的 404 檔案。
-			&& _this.is_limited_image_url(XMLHttp.responseURL, image_data)) {
-				image_data.is_bad = 'is limited image';
+			&& typeof _this.is_limited_image_url === 'function') {
+				// 處理特殊圖片: 檢查是否下載到 padding 用的 404 檔案。
+				image_data.is_bad = _this.is_limited_image_url(
+						XMLHttp.responseURL, image_data);
+				if (!image_data.is_bad)
+					delete image_data.is_bad;
+				else if (image_data.is_bad === true)
+					image_data.is_bad = 'is limited image';
 			}
 
 			if (!has_error) {

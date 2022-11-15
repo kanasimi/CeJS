@@ -115,7 +115,7 @@ function module_code(library_namespace) {
 		return sort_key;
 	}
 
-	// TODO: check the sort_key is the same as page title or DEFAULTSORT
+	// TODO: check if the sort_key is the same as page title or DEFAULTSORT
 	function set_sort_key_of_category(sort_key) {
 		if (typeof sort_key === 'undefined' || sort_key === null)
 			return;
@@ -338,6 +338,7 @@ function module_code(library_namespace) {
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=protocols&utf8&format=json
 	 */
 	var PATTERN_external_link_global = /\[((?:https?:|ftps?:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:([^\S\r\n]+)([^\]]*))?\]/ig,
+
 	// 若包含 br|hr| 會導致 "aa<br>\nbb</br>\ncc" 解析錯誤！
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
 	markup_tags = 'bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark'
@@ -363,22 +364,6 @@ function module_code(library_namespace) {
 	PATTERN_invalid_end_tag = new RegExp('<(/)(' + markup_tags
 			+ ')([\\s/][^<>]*)?>', 'ig'),
 
-	// MediaWiki 可接受的 HTML void elements 標籤. self-closed HTML tags
-	// NO b|span|sub|sup|li|dt|dd|center|small
-	// 包含可使用，亦可不使用 self-closing 的 tags。
-	// self-closing: void elements + foreign elements
-	// https://www.w3.org/TR/html5/syntax.html#void-elements
-	// @see [[phab:T134423]]
-	// https://www.mediawiki.org/wiki/Manual:OutputPage.php
-	// https://www.mediawiki.org/wiki/Help:Lint_errors/self-closed-tag
-	self_closed_tags = 'area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr'
-			// Allow `<noinclude>`
-			+ '|noinclude',
-	/** {RegExp}HTML self closed tags 的匹配模式。 */
-	PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_closed_tags
-	// allow "<br/>"
-	+ ')(\/|\\s[^<>]*)?>', 'ig'),
-
 	// "<nowiki />", "<nowiki>...<nowiki>" are valid,
 	// but "<nowiki> without end tag" is invalid.
 	// 必須要寫成 <nowiki/>
@@ -389,9 +374,9 @@ function module_code(library_namespace) {
 	// TODO: 標簽（tag）現在可以本地化
 	// templatestyles: https://www.mediawiki.org/wiki/Extension:TemplateStyles
 
-	// 優先權高低: <onlyinclude> → ‎<nowiki> → ‎ <noinclude>, ‎<includeonly>
+	// 優先權高低: <onlyinclude> → <nowiki> → <noinclude>, <includeonly>
 	// [[mw:Transclusion#Partial transclusion markup]]
-	// <noinclude>, ‎<includeonly> 在解析模板時優先權必須高於其他 tags。
+	// <noinclude>, <includeonly> 在解析模板時優先權必須高於其他 tags。
 	wiki_extensiontags = 'includeonly|noinclude|'
 			// 在其內部的 wikitext 不會被 parse。允許內部採用 table 語法的 tags。例如
 			// [[mw:Manual:Extensions]]
@@ -401,8 +386,25 @@ function module_code(library_namespace) {
 	 * {RegExp}HTML tags 的匹配模式 of <nowiki>。這些 tag 就算中間置入 "<!--" 也不會被當作
 	 * comments，必須在 "<!--" 之前解析。 PATTERN_WIKI_TAG_of_wiki_extensiontags
 	 */
-	PATTERN_wiki_extensiontags = wiki_API
-			.get_PATTERN_full_tag(wiki_extensiontags);
+	PATTERN_wiki_extensiontags = wiki_API.get_PATTERN_full_tag(
+			wiki_extensiontags, true),
+
+	// MediaWiki 可接受的 HTML void elements 標籤. self-closed HTML tags
+	// NO b|span|sub|sup|li|dt|dd|center|small
+	// 包含可使用，亦可不使用 self-closing 的 tags。
+	// self-closing: void elements + foreign elements
+	// https://www.w3.org/TR/html5/syntax.html#void-elements
+	// @see [[phab:T134423]]
+	// https://www.mediawiki.org/wiki/Manual:OutputPage.php
+	// https://www.mediawiki.org/wiki/Help:Lint_errors/self-closed-tag
+	self_closed_tags = 'area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr',
+	/** {RegExp}HTML self closed tags 的匹配模式。 */
+	PATTERN_WIKI_TAG_VOID = new RegExp('<(\/)?(' + self_closed_tags
+	// [[w:en:Help:Labeled section transclusion]]
+	// Allow `<section begin=chapter1 />`
+	+ '|' + wiki_extensiontags
+	// allow "<br/>"
+	+ ')(\/|\\s[^<>]*)?>', 'ig');
 
 	/** {RegExp}HTML tags 的匹配模式。 */
 	// var PATTERN_WIKI_TAG = wiki_API.get_PATTERN_full_tag(markup_tags);
@@ -711,8 +713,6 @@ function module_code(library_namespace) {
 	('DISPLAYTITLE|DEFAULTSORT|デフォルトソート'
 			+ '|ns|nse|lc|lcfirst|uc|ucfirst|urlencode|anchorencode'
 			+ '|LOCALURL|FULLURL|FILEPATH'
-			// TODO: [[mw:Help:Substitution]]
-			// {{subst:FULLPAGENAME}} {{safesubst:FULLPAGENAME}}
 
 			// https://www.mediawiki.org/wiki/Help:Magic_words#Transclusion_modifiers
 			// https://en.wikipedia.org/wiki/Help:Transclusion#Transclusion_modifiers
@@ -858,11 +858,7 @@ function module_code(library_namespace) {
 	[[俄羅斯公民簽證要求]]: [[File:Visa requirements for Russian citizens.png|Visa requirements for Russian citizens|thumb|800px|center|俄罗斯护照持有人可免签证或落地签证前往的国家或地区 
 	{{legend|#042E9B|[[俄罗斯]]}}{{legend|#2196f3|[[克里米亚]]}}{{legend|#ffc726|[[:en:Internal_passport_of_Russia|内部护照]]|]]}}{{legend|#22b14c|免签证}}{{legend|#B5E61D|落地签证}}{{legend|#61c09a|电子签证}}{{legend|#79D343|需电子签证或预先在互联网注册}}{{legend|#A8ACAB|需要申请签证}}]]
 
-	parse 嵌入section內文 [[mw:Extension:Labeled_Section_Transclusion]]:
-	{{#lsth:page_title|section begin in wikitext|section end in wikitext}}, {{#section-h:page_title}} 語意上相當於 {{page_title#section}}。如果有多個相同名稱的section，僅轉換第一個。The matching is case insensitive
-	TODO: parse <section begin=chapter1 />, {{#lst:page_title|section begin|section end}}, {{#lstx:page_title|section|replacement_text}}
-
-	提高效率。e.g., [[三国杀武将列表]], [[世界大桥列表]], [[三国杀武将列表]]<br />
+	提高效率。e.g., [[三国杀武将列表]], [[世界大桥列表]]<br />
 	可能為模板參數特殊設計？有些 template 內含不完整的起始或結尾，使 parameter 亦未首尾對應。
 
 	{{L<!-- -->L}} .valueOf() === '{{LL}}'
@@ -2414,10 +2410,7 @@ function module_code(library_namespace) {
 			// console.trace(arguments);
 
 			// '<code>...' is OK.
-			if (!ending && tag.toLowerCase() in {
-				syntaxhighlight : true,
-				nowiki : true
-			}) {
+			if (!ending && tag.toLowerCase() in extensiontag_hash) {
 				// e.g., '<syntaxhighlight>...'
 				return all;
 			}
@@ -2529,6 +2522,12 @@ function module_code(library_namespace) {
 		}
 
 		function parse_single_tag(all, slash, tag, attributes) {
+			if ((tag.toLowerCase() in extensiontag_hash)
+					&& !(attributes && attributes.endsWith('/'))) {
+				// e.g., '<nowiki><s>S'
+				return all;
+			}
+
 			if (attributes) {
 				if (normalize) {
 					attributes = attributes.replace(/[\s\/]*$/, ' /');

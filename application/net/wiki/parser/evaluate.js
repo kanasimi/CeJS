@@ -253,6 +253,17 @@ function module_code(library_namespace) {
 			level++;
 
 		parsed = wiki_API.parser(wikitext, options).parse();
+		/**
+		 * TODO:<code>
+
+		parse 嵌入section內文 [[mw:Extension:Labeled_Section_Transclusion]]:
+		{{#lsth:page_title|section begin in wikitext|section end in wikitext}}, {{#section-h:page_title}} 語意上相當於 {{page_title#section}}。如果有多個相同名稱的section，僅轉換第一個。The matching is case insensitive
+		TODO: parse <section begin=chapter1 />, {{#lst:page_title|section begin|section end}}, {{#lstx:page_title|section|replacement_text}}
+
+		</code>
+		*/
+		// [[mw:Help:Substitution]]
+		// {{subst:FULLPAGENAME}} {{safesubst:FULLPAGENAME}}
 		var promise = parsed.each('magic_word_function', function(token) {
 			if (token.name !== 'SAFESUBST' && token.name !== 'SUBST') {
 				if (transclusion_config && !transclusion_config.need_evaluate) {

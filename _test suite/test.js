@@ -3870,6 +3870,27 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #17');
 		assert(['<nowiki>', parsed[0]], 'wiki.parse: HTML tag #17-1');
 		assert(['s', parsed[1].tag], 'wiki.parse: HTML tag #17-2');
+		wikitext = "<nowiki/><s>S"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #18');
+		assert(['nowiki', parsed[0].tag], 'wiki.parse: HTML tag #18-1');
+		assert(['s', parsed[1].tag], 'wiki.parse: HTML tag #18-2');
+		wikitext = "<templatestyles /><noinclude></noinclude>"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #19');
+		assert(['templatestyles', parsed[0].tag], 'wiki.parse: HTML tag #19-1');
+		assert(['noinclude', parsed[1].tag], 'wiki.parse: HTML tag #19-2');
+		assert([2, parsed.length], 'wiki.parse: HTML tag #19-3');
+		wikitext = "<templatestyles><noinclude></noinclude>"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #20');
+		assert(['<templatestyles>', parsed[0]], 'wiki.parse: HTML tag #20-1');
+		wikitext = "<code><s>S"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #21');
+		assert(['code', parsed.tag], 'wiki.parse: HTML tag #21-1');
+
+		wikitext = '<section begin=chapter1 />...'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag section #1');
+		assert(['plain', parsed.type], 'wiki.parse: HTML tag section #1-1');
+		assert(['section', parsed[0].tag], 'wiki.parse: HTML tag section #1-2');
+		assert(['...', parsed[1]], 'wiki.parse: HTML tag section #1-3');
 
 		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #1');

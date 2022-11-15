@@ -360,7 +360,7 @@
 	"Invalid page title": "Invalid page title",
 	"Page edit function error: %1": "Page edit function error: %1",
 	"%1 {{PLURAL:%2|page|pages}} processed": "%1 {{PLURAL:%2|page|pages}} processed",
-	"\u672c\u6b21bot\u4f5c\u696d\u5171\u5b8c\u6210%1%": "The bot operation is completed %1% in total",
+	"\u672c\u6b21bot\u4f5c\u696d\u5df2\u9032\u884c%1%": "The bot operation is completed %1% in total",
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 {{PLURAL:%1|page|pages}} have not changed,",
 	"%1 elapsed.": "%1 elapsed.",
 	"'''Stopped''', give up editing.": "'''Stopped''', give up editing.",

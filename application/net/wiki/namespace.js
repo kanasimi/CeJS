@@ -2761,7 +2761,7 @@ function module_code(library_namespace) {
 		site_configurations.extensiontag_hash = extensiontag_list.to_hash();
 
 		site_configurations.PATTERN_extensiontags = wiki_API
-				.get_PATTERN_full_tag(extensiontag_list);
+				.get_PATTERN_full_tag(extensiontag_list, true);
 
 		site_configurations.PATTERN_non_extensiontags = wiki_API
 				.get_PATTERN_full_tag(wiki_API.markup_tags
