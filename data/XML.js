@@ -81,7 +81,7 @@ function module_code(library_namespace) {
 
 	 TODO:
 	 可參考 JKL.ParseXML, http://doctype.googlecode.com/svn/trunk/goog/dom/xml.js
-	 postXML()和parseXML(text/HTML object/array)方法
+	 postXML()和parseXML(text/HTML application/xhtml+xml object/array)方法
 	 MSXML2.XSLTemplate
 
 	 libXmlRequest Library

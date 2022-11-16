@@ -100,7 +100,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see PATTERN_link
 	 */
-	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\n#�])+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:(\||{{\s*!\s*}})([\s\S]+?))?\]\]/,
+	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\n#�])+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]*)(?:(\||{{\s*!\s*}})([\s\S]+?))?\]\]/,
 	//
 	PATTERN_wikilink_global = new RegExp(PATTERN_wikilink.source, 'g');
 

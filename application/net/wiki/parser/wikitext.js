@@ -371,7 +371,7 @@ function module_code(library_namespace) {
 	// Parser extension tags @ [[Special:Version]]
 	// For {{#lst}}, {{#section:}}
 	// [[w:en:Help:Labeled section transclusion]]
-	// TODO: 標簽（tag）現在可以本地化
+	// TODO: 標籤（tag）現在可以本地化 [[mw:Extension:Labeled_Section_Transclusion/zh]]
 	// templatestyles: https://www.mediawiki.org/wiki/Extension:TemplateStyles
 
 	// 優先權高低: <onlyinclude> → <nowiki> → <noinclude>, <includeonly>
@@ -567,14 +567,14 @@ function module_code(library_namespace) {
 			language = language.trim().toLowerCase();
 			if (Array.isArray(flag)) {
 				if (!flag.includes(language)) {
-					// 單純顯示不繁簡轉換的文字
+					// 單純顯示不繁簡轉換的文字。
 					return this.join(';');
 				}
-				// TODO: 顯示繁簡轉換後的文字
+				// TODO: 顯示繁簡轉換後的文字。
 				return this.join(';');
 			}
 
-			// TODO: 後援語種 fallback language variant
+			// TODO: 後援語種 fallback language variant。
 
 			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general%7Cnamespaces%7Cnamespacealiases%7Cstatistics
 			// language fallbacks: [[mw:Localisation statistics]]
@@ -858,16 +858,7 @@ function module_code(library_namespace) {
 	[[俄羅斯公民簽證要求]]: [[File:Visa requirements for Russian citizens.png|Visa requirements for Russian citizens|thumb|800px|center|俄罗斯护照持有人可免签证或落地签证前往的国家或地区 
 	{{legend|#042E9B|[[俄罗斯]]}}{{legend|#2196f3|[[克里米亚]]}}{{legend|#ffc726|[[:en:Internal_passport_of_Russia|内部护照]]|]]}}{{legend|#22b14c|免签证}}{{legend|#B5E61D|落地签证}}{{legend|#61c09a|电子签证}}{{legend|#79D343|需电子签证或预先在互联网注册}}{{legend|#A8ACAB|需要申请签证}}]]
 
-	提高效率。e.g., [[三国杀武将列表]], [[世界大桥列表]]<br />
-	可能為模板參數特殊設計？有些 template 內含不完整的起始或結尾，使 parameter 亦未首尾對應。
-
-	{{L<!-- -->L}} .valueOf() === '{{LL}}'
 	<p<!-- -->re>...</pre>
-	CeL.wiki.page('上海外国语大学',function(page_data){CeL.wiki.parser(page_data).parse();})
-	[https://a.b <a>a</a><!-- -->]
-	[[<a>a</a>]]
-	CeL.wiki.parser('a[[未來日記-ANOTHER:WORLD-]]b').parse()[1]
-	<nowiki>...<!-- -->...</nowiki> 中的註解不應被削掉!
 
 	parse {{Template:Single chart}}
 
@@ -1305,7 +1296,7 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
-		// TODO: 緊接在連結後面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分
+		// TODO: 緊接在連結後面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分。
 		// https://phabricator.wikimedia.org/T263266
 		function parse_wikilink(all_link, page_and_anchor, page_name, anchor,
 				pipe_separator, display_text) {
@@ -1333,7 +1324,7 @@ function module_code(library_namespace) {
 
 			if (/\n=+[^=]=+/.test(display_text)) {
 				// incase '[[A|B]\n==T==\n<code>[[]]</code>'
-				// TODO: fix '[[A|B]<code>]]'
+				// TODO: fix '[[A|B]<code>]]still code'
 				return all_link;
 			}
 
@@ -1346,6 +1337,9 @@ function module_code(library_namespace) {
 				page_name = '';
 				// anchor, fragment, section_title
 				anchor = page_and_anchor;
+			} else if (!page_name.trim()) {
+				// e.g., "[[ ]]", "[[ #...]]"
+				return all_link;
 			} else {
 				if (!anchor) {
 					anchor = '';
@@ -1387,8 +1381,22 @@ function module_code(library_namespace) {
 						page_name.oddly = true;
 					}
 				} else {
-					// TODO: normalize 對 [[文章名稱 : 次名稱]] 可能出現問題。
-					page_name = page_name.split(normalize ? /\s*:\s*/ : ':');
+					var matched = (session || wiki_API).namespace(page_name, {
+						get_name : true
+					});
+					page_name = [ page_name ];
+					page_name.namespace = matched;
+					if (matched
+							&& (matched = page_name[0]
+									.match(/^([^:]+):([\s\S]*)$/))) {
+						page_name[0] = matched[1];
+						page_name[1] = matched[2];
+					} else {
+						// e.g., [[File]]
+						page_name.namespace = '';
+						// page_name = page_name.split(normalize ? /\s*:\s*/ :
+						// ':');
+					}
 				}
 				page_name = _set_wiki_type(page_name, 'namespaced_title');
 			}
@@ -2147,7 +2155,7 @@ function module_code(library_namespace) {
 				&& (magic_words_hash[namespace[1]] === false
 				// 這些需要指定數值。 has ":"
 				|| namespace[0])) {
-					// TODO: {{ {{UCFIRST:T}} }}
+					// TODO: {{ {{UCFIRST:T}} | tl }}
 					// TODO: {{ :{{UCFIRST:T}} }}
 					// console.log(parameters);
 
@@ -2322,7 +2330,7 @@ function module_code(library_namespace) {
 			|}
 
 			可能把整個模板內容全部當作 attributes。
-			
+
 			</code>
 			 */
 			if (attributes.replace(
@@ -2475,7 +2483,6 @@ function module_code(library_namespace) {
 					// 當 inner 本身就是特殊 token 時，先把它包裝起來。
 					inner = _set_wiki_type([ inner ], 'plain');
 				}
-				// TODO: <nowiki><b>-{...}-</b></nowiki>
 				inner.forEach(function(token, index) {
 					// 處理每個子 token。 經測試，<nowiki>中 -{}- 也無效。
 					if (token.type /* && token.type !== 'convert' */)
@@ -3167,8 +3174,8 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// comments: <!-- ... -->
 
-		// TODO: <nowiki> 之優先度更高！置於 <nowiki> 中，
-		// 如 "<nowiki><!-- --></nowiki>" 則雖無功用，但會當作一般文字顯示，而非註解。
+		// <nowiki> 之優先度高於 "<!-- -->"。
+		// 置於 <nowiki> 中，如 "<nowiki><!-- --></nowiki>" 則雖無功用，但會當作一般文字顯示，而非註解。
 
 		// "<\": for Eclipse JSDoc.
 		if (initialized_fix) {
@@ -3244,7 +3251,6 @@ function module_code(library_namespace) {
 		// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
 		// 可以解析成圖片, Caption: "{{tl|t}}"
 
-		// TODO: bug: 正常情況下 "[[ ]]" 不會被 parse，但是本函數還是會 parse 成 link。
 		// TODO: [[::zh:title]] would be rendered as plaintext
 
 		wikitext = wikitext.replace_till_stable(

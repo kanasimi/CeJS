@@ -3014,7 +3014,7 @@ function module_code(library_namespace) {
 						//
 						+ (100 * work_continue / initial_target_length | 0)
 								+ '%)';
-						// do NOT using:
+						// do NOT use:
 						// gettext_config:{"id":"the-bot-operation-is-completed-$1$-in-total"}
 						false && gettext('本次bot作業已進行%1%', '...%');
 
