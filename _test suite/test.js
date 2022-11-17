@@ -3462,6 +3462,17 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.link #6');
 		assert(['namespaced_title', parsed[0].type], 'wiki.parse.link #6-1');
 		assert(['Wikipedia', parsed[0].namespace], 'wiki.parse.link #6-1');
+		wikitext = '[[::title]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #7');
+		assert([wikitext, parsed], 'wiki.parse.link #7-1');
+		wikitext = '[[::zh:title]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse.link #8-1');
+		wikitext = '[[ ::zh:title]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse.link #9-1');
+		wikitext = '[[: :zh:title]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse.link #10-1');
+		wikitext = '[[ : :zh:title]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse.link #11-1');
 
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #1');
@@ -3619,6 +3630,12 @@ function test_wiki() {
 		wikitext = '{{L<!-- -->L}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #7');
 		assert(['LL', parsed.name], 'wiki.parse.transclusion #7-1');
+		wikitext = '{{tl|1<nowiki />=t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #8');
+		assert([, parsed.parameters[1]], 'wiki.parse.transclusion #8-1');
+		wikitext = '{{tl|<nowiki>1</nowiki>=t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #9');
+		assert([, parsed.parameters[1]], 'wiki.parse.transclusion #9-1');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -3785,6 +3802,9 @@ function test_wiki() {
 		wikitext = '-{ <nowiki>dd}-<b></nowiki> }-<nowiki> ff</b></nowiki>'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['-{ <nowiki>dd}-<b></nowiki> }-', parsed[0].toString()]);
+		wikitext = '<source>-{...}-</source>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['-{...}-', parsed[1][0]]);
 		// language conversion -{}- 以後來使用的為主。
 		wikitext = '-{}-'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -3935,6 +3955,17 @@ function test_wiki() {
 		wikitext = '<nowiki><b>-{...}-</b></nowiki>'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #7');
 		assert(['<b>-{...}-</b>', parsed[1].toString()], 'wiki.parse: nowiki #7-1: <nowiki> 中的註解不應被削掉');
+		wikitext = '<nowiki>[[a]]<nowiki></nowiki>'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #8');
+		assert(['[[a]]<nowiki>', parsed[0][1].toString()], 'wiki.parse: nowiki #8-1');
+		wikitext = '<nowiki/>[[a]]<nowiki></nowiki>'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #9');
+		assert(['link', parsed[1].type], 'wiki.parse: nowiki #9-1');
+		wikitext = '<nowiki a=b/>[[a]]<nowiki>[[a]]<nowiki></nowiki>'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #10');
+		assert(['link', parsed[1].type], 'wiki.parse: nowiki #10-1');
+		assert(['nowiki', parsed[2].tag], 'wiki.parse: nowiki #10-2');
+		assert(['[[a]]<nowiki>', parsed[2][1].toString()], 'wiki.parse: nowiki #10-3');
 
 		wikitext = "aa<br>\nbb</br>\ncc"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: self-closed HTML tags: br #1');
@@ -3959,6 +3990,9 @@ function test_wiki() {
 		wikitext = '{{{t|{{u}}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{{parameter}}} #1');
 		assert(['parameter', parsed.type], 'wiki.parse: {{{parameter}}} #1-1');
+		wikitext = '{{{q|{{w|{{{t|{{u}}}}}}}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{{parameter}}} #2');
+		assert(['parameter', parsed.type], 'wiki.parse: {{{parameter}}} #2-1');
 
 		wikitext = '{{{t|{{u}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{{invalid}} #1');
@@ -4023,6 +4057,9 @@ function test_wiki() {
 		wikitext = "{{DISPLAYTITLE:List of ''Cars'' characters}}"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #9');
 		assert(['magic_word_function', parsed.type], 'wiki.parse: {{invalid}} #9-1');
+		wikitext = '{{tl<nowiki />|t}}{{tl|t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #10');
+		assert(['transclusion', parsed.at(-1).type], 'wiki.parse: {{invalid}} #10-1');
 
 		wikitext = '{{t|p=<gallery>\na.png|text\n</gallery>}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{t|<gallery>}} #1');
@@ -4037,7 +4074,32 @@ function test_wiki() {
 		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
 		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function (text_array) { return text_array.filter(function (text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');
 
-		assert(['STRING', CeL.wiki.expand_transclusion('{{uc:string}}').toString()], 'expand_transclusion: {{uc:}}');
+		assert(['STRING', CeL.wiki.expand_transclusion('{{uc:string}}').toString()], 'wiki.expand_transclusion: {{UC:}}');
+		assert(['String', CeL.wiki.expand_transclusion('{{UCFIRST:string}}').toString()], 'wiki.expand_transclusion: {{UCFIRST:}}');
+
+		assert(['預設結果', CeL.wiki.expand_transclusion('{{#switch:\n|結果\n|預設結果\n}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #1');
+		assert(['vvv', CeL.wiki.expand_transclusion('{{#switch:1<!-- -->23\n|12<!-- -->3\n|key=vvv\n|預設結果\n}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #2');
+		assert(['預設結果', CeL.wiki.expand_transclusion('{{#switch:比較值\n|比較值\n|#default = 預設結果\n}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #3');
+		assert(['預設2', CeL.wiki.expand_transclusion('{{#switch:比較值\n|比較\n|#default = 預設1\n|#default = 預設2\n}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #4');
+		assert(['預設3', CeL.wiki.expand_transclusion('{{#switch:\n|#default = 預設1\n|#default = 預設2\n|預設3\n}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #5');
+		assert(['ab', CeL.wiki.expand_transclusion('a{{#switch:\n}}b').toString()], 'wiki.expand_transclusion: {{#switch:}} #6');
+		assert(['ab', CeL.wiki.expand_transclusion('a{{#switch:\n|預設\n|\n}}b').toString()], 'wiki.expand_transclusion: {{#switch:}} #7');
+		assert(['4', CeL.wiki.expand_transclusion('{{#switch:1\n|2=3\n|1=4\n}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #8');
+		assert(['ab', CeL.wiki.expand_transclusion('a{{#switch:3\n|2=3\n|1=4\n}}b').toString()], 'wiki.expand_transclusion: {{#switch:}} #9');
+		assert(['ab', CeL.wiki.expand_transclusion('a{{#switch:3}}b').toString()], 'wiki.expand_transclusion: {{#switch:}} #10');
+		assert(['23', CeL.wiki.expand_transclusion('{{#switch:3{{uc:v}}|3V=23}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #11');
+		assert(['v', CeL.wiki.expand_transclusion('{{#switch:A{{uc:b}}|{{uc:a}}B = v}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #12');
+		assert(['v', CeL.wiki.expand_transclusion('{{#switch: A{{uc:b}}|{{uc:a|p=q}}B=v }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #13');
+		assert(['c', CeL.wiki.expand_transclusion('{{#switch:a{{=}}b|a{{=}}b=c}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #14');
+		assert(['c', CeL.wiki.expand_transclusion('{{#switch:a=b|a{{=}}b=c|d}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #15');
+		assert(['d', CeL.wiki.expand_transclusion('{{#switch:a=b|a=b=c|d}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #16');
+		assert(['ab', CeL.wiki.expand_transclusion('{{#switch:ab|ab}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #17');
+		assert(['ab', CeL.wiki.expand_transclusion('{{#switch: |=ab}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #18');
+		assert(['', CeL.wiki.expand_transclusion('{{#switch:a<nowiki />b|ab=cd|a<nowiki />b=ef}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #19');
+		assert(['', CeL.wiki.expand_transclusion('{{#switch:a<nowiki>b</nowiki>|ab=cd|a<nowiki>b</nowiki>=ef}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #20');
+		assert(['[[a]]', CeL.wiki.expand_transclusion('{{#switch:1<!-- -->23|12<!-- -->3=[[a]]}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #21');
+		assert(['t', CeL.wiki.expand_transclusion('{{#switch:|#de<!-- -->fault = t}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #22');
+		assert(['c', CeL.wiki.expand_transclusion('{{#switch:<b>B</b>|B=a|<b>B</b>=c}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #23');
 
 		var token;
 		token = CeL.wiki.parse('{{t|1}}');
@@ -4394,7 +4456,7 @@ function test_wiki() {
 			promise = promise.then(function () {
 				return CeL.wiki.expand_transclusion('{{支持}}\n{{新增條文|條文}}\n{{反对}}', options);
 			}).then(function (parsed) {
-				assert(["<span style=\"font-weight:bold;background:lightgreen;color:green;\">(＋)</span>'''<span class=\"zhwpVoteSupport\">-{支持}-</span>'''\n<span style=\"background-color: #cfc;\">條文</span>\n<span class=\"zhwpVoteOppose\" style=\"font-weight:bold;background:pink;color:red;\">(－)</span>'''反对'''", parsed.toString()], 'CeL.wiki.expand_transclusion() fetch multiple pages');
+				assert(["<span style=\"font-weight:bold;\">(＋)</span>'''<span class=\"zhwpVoteSupport\">-{支持}-</span>'''\n<span style=\"background-color: #cfc;\">條文</span>\n<span class=\"zhwpVoteOppose\" style=\"font-weight:bold;\">(－)</span>'''反对'''", parsed.toString()], 'CeL.wiki.expand_transclusion() fetch multiple pages');
 			});
 
 			promise = promise.then(function () {

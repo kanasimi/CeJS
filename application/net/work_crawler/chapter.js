@@ -81,12 +81,15 @@ function module_code(library_namespace) {
 				T : '跳過所有章節'
 			} ]);
 		} else {
-			library_namespace.log([ 'check_downloaded_chapters: ', {
-				// gettext_config:{"id":"check-only-$1-chapters-$2"}
-				T : [ '僅檢查 %1個{{PLURAL:%1|章節}}：%2', chapter_list_to_check.length,
-				//
-				chapter_list_to_check.join(', ') ]
-			} ]);
+			library_namespace.log([
+					'check_downloaded_chapters: ',
+					{
+						// gettext_config:{"id":"check-only-$1-chapters-$2"}
+						T : [ '僅檢查 %1個{{PLURAL:%1|章節}}：%2',
+								chapter_list_to_check.length,
+								//
+								chapter_list_to_check.join(', ') ]
+					} ]);
 		}
 
 		// console.log(work_data.chapter_list);
@@ -137,12 +140,15 @@ function module_code(library_namespace) {
 					T : '跳過所有章節'
 				} ]);
 			} else {
-				library_namespace.log([ 'check_downloaded_chapter_url: ', {
-					// gettext_config:{"id":"check-only-$1-chapters-$2"}
-					T : [ '僅檢查 %1個{{PLURAL:%1|章節}}：%2', chapter_list_to_check.length,
-					//
-					chapter_list_to_check.join(', ') ]
-				} ]);
+				library_namespace.log([
+						'check_downloaded_chapter_url: ',
+						{
+							// gettext_config:{"id":"check-only-$1-chapters-$2"}
+							T : [ '僅檢查 %1個{{PLURAL:%1|章節}}：%2',
+									chapter_list_to_check.length,
+									//
+									chapter_list_to_check.join(', ') ]
+						} ]);
 			}
 
 			// console.log(work_data.chapter_list);
@@ -1690,7 +1696,8 @@ function module_code(library_namespace) {
 					error_file_logs.join(library_namespace.env.line_separator));
 					crawler_namespace.set_work_status(work_data, gettext(
 					// gettext_config:{"id":"$1-$2-image-download-error-recorded"}
-					'%1：%2筆{{PLURAL:%2|圖片}}下載錯誤紀錄', chapter_label, error_file_logs.length));
+					'%1：%2筆{{PLURAL:%2|圖片}}下載錯誤紀錄', chapter_label,
+							error_file_logs.length));
 				}
 			}
 
@@ -1858,6 +1865,73 @@ function module_code(library_namespace) {
 					work_data, chapter_NO, callback));
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------
+
+	var PATTERN_AD_cfwx
+	// xshuyaya.js
+	// http://www.shuyy8.com/read/1242/1276125.html
+	// http://www.shuyy8.com/read/1242/1276140.html
+	// http://www.shuyy8.com/read/1242/1276147.html
+	// http://www.shuyy8.com/read/1242/1276151.html
+	// http://www.shuyy8.com/read/1242/1276151.html
+	// http://www.shuyy8.com/read/1242/1276152.html
+	// http://www.shuyy8.com/read/1242/1276155.html
+	// http://www.shuyy8.com/read/1242/1276163.html
+	// http://www.shuyy8.com/read/1242/1276167.html
+	// http://www.shuyy8.com/read/1242/1276168.html
+	// http://www.shuyy8.com/read/1242/1276179.html
+	// http://www.shuyy8.com/read/1242/1276184.html
+	// http://www.shuyy8.com/read/1242/1276237.html
+	// http://www.shuyy8.com/read/1242/1276191.html
+	// http://www.shuyy8.com/read/1242/1276131.html
+	// http://www.shuyy8.com/read/1242/1276134.html
+	// http://www.shuyy8.com/read/1242/1276143.html
+	// http://www.shuyy8.com/read/1242/1276156.html
+	// piaotian.js
+	// https://www.ptwxz.com/html/6/6682/3908558.html
+	= /([\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀]*)长[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀]{0,20}风[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀]{0,20}文[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀]{0,20}学｀?[\u0020-\u00ff—＋＝　]*/g;
+
+	/**
+	 * 去除廣告。 Calling inside parse_chapter_data()
+	 * 
+	 * @example<code>
+	text = CeL.work_crawler.fix_general_ADs(text);
+	</code>
+	 */
+	function fix_general_ADs(text) {
+		// http://www.shuyy8.com/read/1242/1276110.html
+		text = text.replace(
+		// <br /><br />&nbsp;&nbsp;&nbsp;&nbsp;看最仙遊最新章节到长风文学
+		/(?:<br[^<>]*>)*(?:&nbsp;)*看[^\s\n<>]+?最新章节到[^\s\n<>]+?文学\s*/, '');
+
+		text = text.replace(PATTERN_AD_cfwx, function(all, previous) {
+			/**
+			 * e.g., http://www.shuyy8.com/read/1242/1276134.html<code>
+			<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;｜长｜风｜文学 [c][f][w][x].net<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;
+			</code> 必須保留前面的換行。
+			 */
+			var matched = previous.match(/[\s\S]+&nbsp;/);
+			return matched ? matched[0] : '';
+		});
+		if (false) {
+			// 长风文学网 http://www.cfwx.org/
+			text = text.replace(/(..)长\1风\1文\1?学\s*/g, '').replace(
+					/(.)长\1风\1文\1?学\s*/g, '');
+		}
+
+		// e.g.,
+		// xshuyaya.js
+		// http://www.shuyyw.com/read/24334/16566634.html
+		// piaotian.js
+		// https://www.ptwxz.com/html/14/14466/10115811.html
+		// 女主从书里跑出来了怎么办 第四百三十三章 复更
+		text = text.replace(/\.asxs\./g, '起点');
+
+		return text;
+	}
+
+	Work_crawler.fix_general_ADs = fix_general_ADs;
 
 	// --------------------------------------------------------------------------------------------
 

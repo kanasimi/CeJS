@@ -115,6 +115,7 @@
 	"no change": "keine \u00c4nderung",
 	"Missing page": "Fehlende Seite",
 	"Invalid page title": "Ung\u00fcltiger Seitenname",
+	"\u672c\u6b21bot\u4f5c\u696d\u5df2\u9032\u884c%1%": "Die Bot-Operation ist zu insgesamt %1% abgeschlossen",
 	"No user name or password provided. The login attempt was abandoned.": "Kein Benutzername oder Passwort angegeben. Der Anmeldeversuch wurde abgebrochen.",
 	"file": "Datei",
 	"files": "Dateien",

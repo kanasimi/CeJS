@@ -32,6 +32,7 @@
 	"Edit %1": "%1 \ud3b8\uc9d1",
 	"Missing page": "\ubb38\uc11c \uc5c6\uc74c",
 	"Invalid page title": "\uc798\ubabb\ub41c \ubb38\uc11c \uc81c\ubaa9",
+	"\u672c\u6b21bot\u4f5c\u696d\u5df2\u9032\u884c%1%": "\ubd07 \uc791\uc5c5\uc774 \ucd1d %1% \uc644\ub8cc\ub418\uc5c8\uc2b5\ub2c8\ub2e4",
 	"directories": "\ub514\ub809\ud130\ub9ac",
 	"directory": "\ub514\ub809\ud130\ub9ac",
 	"file": "\ud30c\uc77c",

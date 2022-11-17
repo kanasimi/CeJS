@@ -374,6 +374,7 @@ function module_code(library_namespace) {
 	// TODO: 標籤（tag）現在可以本地化 [[mw:Extension:Labeled_Section_Transclusion/zh]]
 	// templatestyles: https://www.mediawiki.org/wiki/Extension:TemplateStyles
 
+	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=extensiontags&utf8&format=json
 	// 優先權高低: <onlyinclude> → <nowiki> → <noinclude>, <includeonly>
 	// [[mw:Transclusion#Partial transclusion markup]]
 	// <noinclude>, <includeonly> 在解析模板時優先權必須高於其他 tags。
@@ -1358,6 +1359,10 @@ function module_code(library_namespace) {
 					// console.trace(file_matched);
 					file_matched = null;
 				}
+				// [[::zh:title]] would be rendered as plaintext
+				if (/^\s*:\s*:/.test(page_name)) {
+					return all_link;
+				}
 				if (page_name.includes(include_mark)) {
 					// console.trace(page_name);
 					// 預防有特殊 elements 置入link其中。
@@ -1820,8 +1825,8 @@ function module_code(library_namespace) {
 		// or use ((PATTERN_transclusion))
 		// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
 		// PATTERN_template
-		var PATTERN_for_transclusion = /(^|[\s\S]){{([^{}][\s\S]*?)}}($|[\s\S])/g;
-		function parse_transclusion(all, previous, parameters, following) {
+		var PATTERN_for_transclusion = /{{([^{}][\s\S]*?)}}/g;
+		function parse_transclusion(all, parameters, offset, original_string) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('{{'),
 			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
@@ -1829,12 +1834,23 @@ function module_code(library_namespace) {
 			_parameters = Object.create(null),
 			// token.index_of[{String}key] = {Integer}index
 			parameter_index_of = Object.create(null);
+			var previous = '';
+			if (!(offset >= 0)) {
+				offset = original_string.indexOf(all,
+						PATTERN_for_transclusion.lastIndex);
+			}
+			// assert: offset >= 0
+			var _previous = offset > 0 ? original_string.slice(offset - 1,
+					offset) : '';
 			if (index > 0) {
-				previous += '{{' + parameters.slice(0, index);
+				previous = _previous = '{{' + parameters.slice(0, index);
 				parameters = parameters.slice(index + '{{'.length);
 			}
 
-			if (following === '}' && previous.endsWith('{')) {
+			var _following = offset + all.length;
+			_following = original_string.slice(_following, _following + 1);
+			if (_following === '}' && _previous.endsWith('{')) {
+				return all;
 				previous = previous.slice(0, -'{'.length);
 				// Should be previous + '{{{...}}}'
 				return previous
@@ -1844,7 +1860,7 @@ function module_code(library_namespace) {
 			}
 
 			library_namespace.debug('[' + previous + '] + [' + parameters
-					+ '] + [' + following + ']', 4,
+					+ '] + [' + _following + ']', 4,
 					'parse_wikitext.transclusion');
 
 			// e.g., for `{{#if:|''[[{{T}}|D]]''|}}`
@@ -1954,7 +1970,8 @@ function module_code(library_namespace) {
 				// scan for `key=value`
 				token.some(function(t, index) {
 					if (typeof t !== 'string') {
-						return t && t.type !== 'comment';
+						return;
+						// return t && t.type !== 'comment';
 					}
 					// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
 					if (t.includes('=')) {
@@ -2009,6 +2026,7 @@ function module_code(library_namespace) {
 							= wiki_token_to_key(value, options);
 						} else {
 							token.key = index;
+							// token.value = value;
 							parameter_index_of[index] = _index;
 							_parameters[index++] = value;
 						}
@@ -2044,14 +2062,21 @@ function module_code(library_namespace) {
 					token[0].push(token[1].slice(0, matched.index));
 				}
 				// key token must accept '\n'. e.g., "key_ \n _key = value"
+				// assert: token[0].type === 'plain'
 				token.key = token[0].filter(function(t) {
+					if (typeof t === 'string')
+						return true;
 					// 去除註解 comments。
 					// e.g., '{{L|p<!-- -->=v}}'
-					// assert: token[0].type === 'plain'
-					return typeof t === 'string';
+					if (t.type !== 'comment') {
+						matched.has_non_string = true;
+						return true;
+					}
 				});
 				matched.k = token.key.join('');
-				if (token.key.length === token[0].length) {
+				if (!matched.has_non_string
+				// 合併 parameter name。
+				&& token.key.length === token[0].length) {
 					// token[0]: all {String}
 					token[0] = matched.k;
 				} else {
@@ -2097,7 +2122,7 @@ function module_code(library_namespace) {
 				// parser 調用超過一個Template中參數的值，只會使用最後指定的值。
 
 				// parameter_index_of[token.key] = _index;
-				_parameters[token.key] = value;
+				_parameters[token.key] = token.value = value;
 				return token;
 			});
 
@@ -2139,7 +2164,9 @@ function module_code(library_namespace) {
 				// 後面不允許空白。 must / *DEFAULTSORT:/
 				parameters.name = parameters.name.trimStart();
 				// whitespace between the opening braces and the "subst:"
-				var PATTERN_MAGIC_WORD = /^([^:]+):([\s\S]*)$/;
+				// [^...]: incase `{{ {{UCFIRST:T}} | tl }}`
+				// @see PATTERN_invalid_page_name_characters
+				var PATTERN_MAGIC_WORD = /^([^{}\[\]\|<>\n#�:]+):([\s\S]*)$/;
 				var namespace = parameters.name.match(PATTERN_MAGIC_WORD);
 				// console.trace([ parameters.name, namespace ]);
 				if (!namespace)
@@ -2303,8 +2330,7 @@ function module_code(library_namespace) {
 					: 'transclusion');
 			queue.push(parameters);
 			// TODO: parameters.parameters = []
-			return previous + include_mark + (queue.length - 1) + end_mark
-					+ following;
+			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
 		// parser 標籤中的空屬性現根據HTML5規格進行解析。
@@ -2417,22 +2443,27 @@ function module_code(library_namespace) {
 			// console.log(queue);
 			// console.trace(arguments);
 
+			var matched = tag.toLowerCase() in extensiontag_hash, previous;
 			// '<code>...' is OK.
-			if (!ending && tag.toLowerCase() in extensiontag_hash) {
+			if (!ending && matched) {
 				// e.g., '<syntaxhighlight>...'
 				return all;
 			}
 
-			var matched = tag.toLowerCase() !== 'nowiki'
+			matched = (tag.toLowerCase() !== 'nowiki'
+			// 假如是 <nowiki /> 則需要搜尋是否有 <nowiki>。
+			|| attributes && attributes.endsWith('/'))
 			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
 			&& inner.match(new RegExp(
 			// 但這種回溯搜尋不包含 <nowiki>
 			// @see console.log(parser[418]);
 			// https://zh.moegirl.org.cn/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
 			// <nowiki>{{subst:unwiki|<nowiki>{{黑幕|黑幕内容}}</nowiki&gt;}}</nowiki>
-			'([\\s\\S]*)<(' + tag
+			'([\\s\\S]*' + (matched ? '?' : '') + ')<(' + tag
 			// @see function get_PATTERN_full_tag()
-			+ ')([\\s/][^<>]*)?>([\\s\\S]*?)$', 'i')), previous;
+			+ ')([\\s/][^<>]*)?>([\\s\\S]*'
+			//
+			+ (matched ? '' : '?') + ')$', 'i'));
 			if (matched) {
 				previous = all.slice(0, matched[1].length - matched[0].length
 						- ending.length);
@@ -2474,7 +2505,15 @@ function module_code(library_namespace) {
 			inner = parse_wikitext(inner, options, queue);
 
 			// 處理特殊 tags。
-			if (tag.toLowerCase() === 'nowiki' && Array.isArray(inner)) {
+			// <source>-{...}-</source>內之-{}-與<nowiki>-{...}-</nowiki>一樣無效。
+			if ((tag.toLowerCase() in {
+				// Should be `tag.toLowerCase() in extensiontag_hash`
+				// without includeonly|noinclude|onlyinclude
+				// TODO: `<pre><nowiki>-{...}-</nowiki><!-- --></pre>`
+				syntaxhighlight : true,
+				source : true,
+				nowiki : true
+			}) && Array.isArray(inner)) {
 				library_namespace.debug('-'.repeat(70)
 						+ '\n<nowiki> 中僅留 -{}- 有效用。', 3,
 						'parse_wikitext.transclusion');
@@ -3232,7 +3271,6 @@ function module_code(library_namespace) {
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/data/ZhConversion.php
 		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
 		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
-		// TODO: <source></source>內之-{}-無效。
 		// TODO:
 		// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
 
@@ -3251,8 +3289,6 @@ function module_code(library_namespace) {
 		// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
 		// 可以解析成圖片, Caption: "{{tl|t}}"
 
-		// TODO: [[::zh:title]] would be rendered as plaintext
-
 		wikitext = wikitext.replace_till_stable(
 		// or use ((PATTERN_link))
 		PATTERN_wikilink_global, parse_wikilink);
@@ -3268,17 +3304,27 @@ function module_code(library_namespace) {
 		// [[w:zh:Help:模板]]
 		// 在模板頁面中，用三個大括弧可以讀取參數。
 
-		// {{{...}}} 需在 {{...}} 之前解析。
-		// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
-		wikitext = wikitext.replace_till_stable(PATTERN_for_template_parameter,
-				parse_template_parameter);
+		// 有些需要反覆解析。
+		// e.g., '{{{t|{{u}}}}}', '{{{q|{{w|{{{t|{{u}}}}}}}}}}'
+		while (true) {
+			var original_wikitext = wikitext;
 
-		// ----------------------------------------------------
-		// 模板（英語：Template，又譯作「樣板」、「範本」）
-		// {{Template name|}}
-		wikitext = wikitext.replace_till_stable(
-		//
-		PATTERN_for_transclusion, parse_transclusion);
+			// {{{...}}} 需在 {{...}} 之前解析。
+			// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}}
+			// }} }}
+			wikitext = wikitext.replace_till_stable(
+					PATTERN_for_template_parameter, parse_template_parameter);
+
+			// ----------------------------------------------------
+			// 模板（英語：Template，又譯作「樣板」、「範本」）
+			// {{Template name|}}
+			wikitext = wikitext.replace_till_stable(
+			//
+			PATTERN_for_transclusion, parse_transclusion);
+
+			if (original_wikitext === wikitext)
+				break;
+		}
 
 		// ----------------------------------------------------
 		// table: \n{| ... \n|}
@@ -3664,6 +3710,7 @@ function module_code(library_namespace) {
 		file_options : file_options,
 
 		markup_tags : markup_tags,
+		wiki_extensiontags : wiki_extensiontags,
 
 		DEFINITION_LIST : DEFINITION_LIST,
 

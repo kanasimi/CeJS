@@ -261,7 +261,7 @@ function module_code(library_namespace) {
 		TODO: parse <section begin=chapter1 />, {{#lst:page_title|section begin|section end}}, {{#lstx:page_title|section|replacement_text}}
 
 		</code>
-		*/
+		 */
 		// [[mw:Help:Substitution]]
 		// {{subst:FULLPAGENAME}} {{safesubst:FULLPAGENAME}}
 		var promise = parsed.each('magic_word_function', function(token) {
@@ -656,35 +656,65 @@ function module_code(library_namespace) {
 
 		function get_parameter(NO) {
 			var is_parser_function = token.name.startsWith('#');
-			var parameter = is_parser_function ? token.parameters[NO]
+			var parameter =
+			// is_parser_function ? token.parameters[NO] :
 			// token.parameters[NO] === token[NO + 1]
-			: token[NO];
+			token[NO];
 			// console.trace([ parameter, '' + token, token ]);
 
 			// if (parameter === 0) return '0';
 			return parameter || '';
 		}
 
-		function get_parameter_String(NO, allow_thenable) {
-			function return_parameter(parameter) {
-				parameter = String(parameter || '');
+		function value_to_String(value, allow_thenable, as_key) {
+			function return_parameter(value) {
+				if (Array.isArray(value)) {
+					for_each_token.call(value, 'comment', function() {
+						return for_each_token.remove_token;
+					});
+					if (as_key) {
+						var session = wiki_API.session_of_options(options);
+						var extensiontag_hash = session
+								&& session.configurations.extensiontag_hash
+								|| wiki_API.wiki_extensiontags;
+						for_each_token.call(value, function(token) {
+							if ((token.type === 'tag'
+							//
+							|| token.type === 'tag_single')
+							//
+							&& (token.tag.toLowerCase() in extensiontag_hash)) {
+								value.has_extensiontag = true;
+								return for_each_token.exit;
+							}
+						});
+						if (value.has_extensiontag)
+							return value;
+					}
+				}
+				value = String(value || '');
 				// console.trace([ '' + token, token ]);
-				var is_parser_function = token.name.startsWith('#');
-				if (!is_parser_function)
-					parameter = parameter.trim();
-				return parameter;
+				// var is_parser_function = token.name.startsWith('#');
+				// if (!is_parser_function)
+				value = value.trim();
+				return value;
 			}
 
-			var parameter = get_parameter(NO);
-			var _parameter = expand_transclusion(parameter, options);
-			if (!library_namespace.is_thenable(_parameter)) {
-				parameter = return_parameter(_parameter);
+			// console.trace(value);
+			var _value =
+			// /[{}]/.test(value) &&
+			expand_transclusion(value, options);
+			if (!library_namespace.is_thenable(_value)) {
+				value = return_parameter(_value);
 			} else if (allow_thenable) {
-				parameter = _parameter.then(return_parameter);
+				value = _value.then(return_parameter);
 			} else {
-				parameter = return_parameter(parameter);
+				value = return_parameter(value);
 			}
-			return parameter;
+			return value;
+		}
+
+		function get_parameter_String(NO, allow_thenable, as_key) {
+			return value_to_String(get_parameter(NO), allow_thenable, as_key);
 		}
 
 		function get_page_title(remove_namespace) {
@@ -777,6 +807,9 @@ function module_code(library_namespace) {
 		case '!':
 			return '|';
 
+		case '=':
+			return '=';
+
 			// ----------------------------------------------------------------
 
 		case '#len':
@@ -798,6 +831,16 @@ function module_code(library_namespace) {
 
 		case 'UC':
 			return get_parameter_String(1).toUpperCase();
+
+		case 'LCFIRST':
+			return get_parameter_String(1).replace(/^./, function(fc) {
+				return fc.toLowerCase();
+			});
+
+		case 'UCFIRST':
+			return get_parameter_String(1).replace(/^./, function(fc) {
+				return fc.toUpperCase();
+			});
 
 			// ----------------------------------------------------------------
 
@@ -925,6 +968,46 @@ function module_code(library_namespace) {
 			end = end ? end > 0 ? start + end : end : 0;
 			return (end ? title.slice(start, end) : title.slice(start))
 					.join('/');
+
+			// ----------------------------------------------------------------
+
+		case '#switch':
+			var key = get_parameter_String(1, true, true), default_value = '';
+			if (library_namespace.is_thenable(key)) {
+				return NYI();
+			}
+			for (var index = 2, found; index < token.length; index++) {
+				// var parameter = get_parameter_String(index);
+				var parameter = token[index];
+				if ('value' in parameter) {
+					// assert: 'key=value'
+					if (typeof parameter.key !== 'number') {
+						parameter.key = value_to_String(parameter.key, true,
+								true);
+					}
+					parameter.value = value_to_String(parameter.value, true);
+					if (library_namespace.is_thenable(parameter.key)
+							|| library_namespace.is_thenable(parameter.value)) {
+						return NYI();
+					}
+					if (found || key === parameter.key)
+						return parameter.value;
+					if (parameter.key === '#default')
+						default_value = parameter.value;
+				} else {
+					// assert: 'value'
+					default_value = index;
+					parameter = get_parameter_String(index, true);
+					if (library_namespace.is_thenable(parameter)) {
+						return NYI();
+					}
+					if (key === parameter) {
+						found = true;
+					}
+				}
+			}
+			return typeof default_value === 'number' ? get_parameter_String(
+					default_value, true) : default_value;
 
 			// ----------------------------------------------------------------
 

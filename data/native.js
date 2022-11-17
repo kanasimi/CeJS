@@ -4442,6 +4442,12 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace
+	var has_replacement_offset;
+	'ab'.replace(/b/g, function(all, offset, string) {
+		has_replacement_offset = offset === 1 && string === 'ab';
+	});
+
 	/**
 	 * 持續執行 .replace()，直到處理至穩定平衡無變動為止。
 	 * 
@@ -4460,11 +4466,24 @@ function module_code(library_namespace) {
 					'replace_till_stable');
 		for (var original; original !== text;) {
 			original = text;
-			text = original.replace(pattern, replace_to);
-			if (false)
+			if (has_replacement_offset) {
+				text = original.replace(pattern, replace_to);
+			} else {
+				text = original.replace(pattern, function(all) {
+					var args = Array.from(arguments);
+					args.push(original.indexOf(all, pattern.lastIndex || 0),
+					// original_string 原字串。
+					original,
+					// 缺乏 group 的代表非常舊的 JavaScript 引擎版本，只能模擬一個代替。
+					Object.create(null));
+					replace_to.apply(undefined, args);
+				});
+			}
+			if (false) {
 				library_namespace.debug('[' + original + '] '
 						+ (original === text ? 'done.' : '→ [' + text + ']'),
 						6, 'replace_till_stable');
+			}
 		}
 		return text;
 	}
