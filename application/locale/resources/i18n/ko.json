@@ -37,6 +37,7 @@
 	"edit-$1": "%1 편집",
 	"missing-page": "문서 없음",
 	"invalid-page-title": "잘못된 문서 제목",
+	"the-bot-operation-is-completed-$1$-in-total": "봇 작업이 총 %1% 완료되었습니다",
 	"directories": "디렉터리",
 	"directory": "디렉터리",
 	"file": "파일",
