@@ -1246,8 +1246,13 @@ function module_code(library_namespace) {
 		// [[MediaWiki:title]]
 		mediawiki : 8,
 		'mediawiki talk' : 9,
-		// 模板
+
+		模板 : 10,
+		テンプレート : 10,
+		plantilla : 10,
+		틀 : 10,
 		template : 10,
+
 		'template talk' : 11,
 		// [[Help:title]], [[使用說明:title]]
 		// H : 12,

@@ -3339,9 +3339,7 @@ function test_wiki() {
 		[['Wikipedia:NAME', CeL.wiki.talk_page_to_main('Wikipedia:NAME')], 'wiki.talk_page_to_main #5'],
 		[['Wikipedia:NAME', CeL.wiki.talk_page_to_main('Wikipedia talk:NAME')], 'wiki.talk_page_to_main #6'],
 
-		[['!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
-			//
-			.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3')], 'file_pattern'],
+		[['!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3')], 'file_pattern'],
 
 		[[undefined, CeL.wiki.parse.template('a{temp}b', '')], '不包含模板'],
 		[[undefined, CeL.wiki.parse.template('a{{t}}b', 'temp')], '不包含此模板'],
@@ -3506,6 +3504,15 @@ function test_wiki() {
 		wikitext = '[[File:i.JPG|{{t|a{{!}}b|c}}]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #8-1');
 		assert(['{{t|a{{!}}b|c}}', parsed.caption.toString()], 'wiki.parse.file #8-2');
+		// [[俄羅斯公民簽證要求]]
+		wikitext = '[[File:i.png|\n{{t|]]}}\n]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #9-1 允許換行');
+		assert(['file', parsed.type], 'wiki.parse.file #9-2');
+		assert(['{{t|]]}}', parsed.caption && parsed.caption.toString()], 'wiki.parse.file #9-3');
+		wikitext = '[[File:i.png|||\n{{t|[[a]]|]]}}\n]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #9-1');
+		assert(['file', parsed.type], 'wiki.parse.file #9-2');
+		assert(['{{t|[[a]]|]]}}', parsed.caption && parsed.caption.toString()], 'wiki.parse.file #9-3');
 
 		wikitext = '[[:Category:cat|sort_key]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.category #1-1');
@@ -3636,6 +3643,28 @@ function test_wiki() {
 		wikitext = '{{tl|<nowiki>1</nowiki>=t}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #9');
 		assert([, parsed.parameters[1]], 'wiki.parse.transclusion #9-1');
+		wikitext = '{{tl|t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #10');
+		assert(['Template:Tl', parsed.page_title], 'wiki.parse.transclusion #10-1');
+		wikitext = '{{:tl|t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #11');
+		assert(['Tl', parsed.page_title], 'wiki.parse.transclusion #11-1');
+		wikitext = '{{::tl|t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #12');
+		assert(['{{::tl|t}}', parsed], 'wiki.parse.transclusion #12-1');
+		wikitext = '{{ {{UCFIRST:T}} | tl }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #13');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #13-1');
+		assert([' tl ', parsed[1].toString()], 'wiki.parse.transclusion #13-2');
+		wikitext = '{{ :{{UCFIRST:T}} }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #14');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #14-1');
+		assert([parsed.name, parsed.page_title], 'wiki.parse.transclusion #14-2');
+		wikitext = '{{ :template:{{UCFIRST:T}} }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #15');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #15-1');
+		assert([parsed.name, parsed.page_title], 'wiki.parse.transclusion #15-2');
+		assert(parsed.page_title.startsWith('Template:'), 'wiki.parse.transclusion #15-3');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -3939,7 +3968,28 @@ function test_wiki() {
 		assert([' class="c"', parsed[1][0].toString()], 'wiki.parse: HTML tag pre #3');
 		assert(['\n==t==\nw\n', parsed[1][1].toString()], 'wiki.parse: HTML tag pre #4');
 		wikitext = '<pre> <!-- a --></pre class>'; parsed = CeL.wiki.parse(wikitext);
-		assert([' <!-- a -->', parsed[1][0]], 'wiki.parse: HTML tag pre #5');
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #5');
+		assert([' <!-- a -->', parsed[1][0]], 'wiki.parse: HTML tag pre #5-1');
+		wikitext = '<pre><nowiki>-{zh-cn:这;zh-tw:這}-</nowiki></pre>'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #6');
+		var wanted_token = null; parsed.each('convert', function (token) { wanted_token = token; return parsed.each.exit; });
+		assert(!!wanted_token, 'wiki.parse: HTML tag pre #6-1');
+		wikitext = '<pre><nowiki>-{zh-cn:这;zh-tw:這}-[[a]]<!--_--></nowiki><!--_--></pre>'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #7');
+		wanted_token = null; parsed.each('convert', function (token) { wanted_token = token; return parsed.each.exit; });
+		assert(!!wanted_token, 'wiki.parse: HTML tag pre #7-1');
+		wikitext = '<pre><nowiki /><nowiki></nowiki><nowiki><source></source><b>[[a|{{t|-{zh-cn:这;zh-tw:這}-}}]]</b>[[a]]<!--_--></nowiki><!--_--></pre>'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #8');
+		wanted_token = null; parsed.each('convert', function (token) { wanted_token = token; return parsed.each.exit; });
+		assert(!!wanted_token, 'wiki.parse: HTML tag pre #8-1');
+		wikitext = '<nowiki>-{zh-cn:这;zh-tw:這}-[[a]]<!-- --></nowiki>'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #9');
+		wanted_token = null; parsed.each('convert', function (token) { wanted_token = token; return parsed.each.exit; });
+		assert(!wanted_token, 'wiki.parse: HTML tag pre #9-1');
+		wikitext = '<source><nowiki>-{zh-cn:这;zh-tw:這}-[[a]]<!-- --></nowiki><!-- --></source>'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #10');
+		wanted_token = null; parsed.each('convert', function (token) { wanted_token = token; return parsed.each.exit; });
+		assert(!wanted_token, 'wiki.parse: HTML tag pre #10-1');
 
 		wikitext = '1<nowiki>\n==t==\nw\n</nowiki>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #1');
@@ -3966,6 +4016,18 @@ function test_wiki() {
 		assert(['link', parsed[1].type], 'wiki.parse: nowiki #10-1');
 		assert(['nowiki', parsed[2].tag], 'wiki.parse: nowiki #10-2');
 		assert(['[[a]]<nowiki>', parsed[2][1].toString()], 'wiki.parse: nowiki #10-3');
+		wikitext = '[[L<nowiki />L]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #11');
+		assert(['[[L', parsed[0]], 'wiki.parse: nowiki #11-1: <nowiki /> 能斷開如 [[L<nowiki />L]]');
+		wikitext = '{{t|b<nowiki>|p=</nowiki>c}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #12');
+		assert(['b<nowiki>|p=</nowiki>c', parsed[1].toString()], 'wiki.parse: nowiki #12-1: <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割');
+		wikitext = '{{t|b<math>|p=</math>c}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #13');
+		assert(['b<math>|p=</math>c', parsed[1].toString()], 'wiki.parse: nowiki #13-1: <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割');
+		wikitext = '{{t|b<b>|p=</b>c}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #14');
+		assert(['b<b>', parsed[1].toString()], 'wiki.parse: nowiki #14-1: <b>|p=</b> 會被分割成不同 parameters');
 
 		wikitext = "aa<br>\nbb</br>\ncc"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: self-closed HTML tags: br #1');
@@ -4074,6 +4136,7 @@ function test_wiki() {
 		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
 		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function (text_array) { return text_array.filter(function (text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');
 
+		// [[Special:ExpandTemplates]]
 		assert(['STRING', CeL.wiki.expand_transclusion('{{uc:string}}').toString()], 'wiki.expand_transclusion: {{UC:}}');
 		assert(['String', CeL.wiki.expand_transclusion('{{UCFIRST:string}}').toString()], 'wiki.expand_transclusion: {{UCFIRST:}}');
 
@@ -4184,6 +4247,13 @@ function test_wiki() {
 		assert(['==t2==  ', parsed.each_section().sections[2].section_title.toString()], 'wiki.parse: section_title #2-4');
 		assert(['==t3== <!--c--> ', parsed.each_section().sections[3].section_title.toString()], 'wiki.parse: section_title #2-5');
 		assert(['t4', parsed.each_section().sections[4].section_title.title], 'wiki.parse: section_title #2-6');
+
+		wikitext = '== <b>B =='; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: section_title #3-1');
+		assert(['section_title', parsed.type], 'wiki.parse: section_title #3-2');
+		wikitext = '== <code>code<code> =='; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: section_title #4-1');
+		assert(['section_title', parsed.type], 'wiki.parse: section_title #4-2');
 
 		wikitext = '\nabc\n123\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([undefined, parsed.each_section().sections[0].section_title], 'wiki.parser.each_section #1-1: 沒有章節標題的文章');
@@ -4423,6 +4493,7 @@ function test_wiki() {
 			_finish_test(test_name);
 		});
 
+		// [[Special:ExpandTemplates]]
 		zhwiki.run(function test_expand_transclusion() {
 			var test_name = 'wiki: expand_transclusion';
 			_setup_test(test_name);
@@ -4466,7 +4537,7 @@ function test_wiki() {
 			promise = promise.then(function () {
 				return CeL.wiki.expand_transclusion('{{ {{ifIP|name=user_name|IPvandal|Userblock}}|user_name|hidename=}}', options);
 			}).then(function (parsed) {
-				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\" style=\"color:#002bb8\">[[User:user_name|user_name]]<span style=\"color:black\">（</span>[[User talk:user_name|討論]]&nbsp;'''·'''&#32; [[Special:Contributions/user_name|貢獻]]&nbsp;'''·'''&#32; [{{fullurl:Special:Log/block|page=User:user_name}} <span style=\"color:#002bb8\">封禁日誌</span>]&nbsp;'''·'''&#32;[[Special:CentralAuth/user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]<span style=\"color:black\">）</span></span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }}');
+				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\" style=\"color:#002bb8\">[[User:user_name|user_name]]<span style=\"color:black\">（</span>[[User talk:user_name|討論]] '''·'''  [[Special:Contributions/user_name|貢獻]] '''·'''  [//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name <span style=\"color:#002bb8\">封禁日誌</span>] '''·''' [[Special:CentralAuth/user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]<span style=\"color:black\">）</span></span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }}');
 			});
 
 			promise = promise.then(function () {

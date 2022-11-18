@@ -855,10 +855,6 @@ function module_code(library_namespace) {
 	 * 
 	 * TODO:<code>
 
-	parse error: [[File:]] 可以允許換行
-	[[俄羅斯公民簽證要求]]: [[File:Visa requirements for Russian citizens.png|Visa requirements for Russian citizens|thumb|800px|center|俄罗斯护照持有人可免签证或落地签证前往的国家或地区 
-	{{legend|#042E9B|[[俄罗斯]]}}{{legend|#2196f3|[[克里米亚]]}}{{legend|#ffc726|[[:en:Internal_passport_of_Russia|内部护照]]|]]}}{{legend|#22b14c|免签证}}{{legend|#B5E61D|落地签证}}{{legend|#61c09a|电子签证}}{{legend|#79D343|需电子签证或预先在互联网注册}}{{legend|#A8ACAB|需要申请签证}}]]
-
 	<p<!-- -->re>...</pre>
 
 	parse {{Template:Single chart}}
@@ -945,6 +941,8 @@ function module_code(library_namespace) {
 		 * include_mark + ({ℕ⁰:Natural+0}index of queue) + end_mark
 		 * 
 		 * assert: /\s/.test(include_mark) === false
+		 * 
+		 * @see [[mw:Strip marker]]
 		 * 
 		 * @type {String}
 		 */
@@ -1329,6 +1327,12 @@ function module_code(library_namespace) {
 				return all_link;
 			}
 
+			var matched = display_text && display_text.match(/{{([\s\S]+)$/);
+			if (matched && !matched[1].includes('}}')) {
+				// e.g., `[[File:i.png|\n{{t|]]}}\n]]`
+				return all_link;
+			}
+
 			library_namespace.debug('[' + previous + '] + [' + all_link + ']',
 					4, 'parse_wikitext.link');
 
@@ -1377,7 +1381,9 @@ function module_code(library_namespace) {
 					// e.g., [[:[[Portal:中國大陸新聞動態|中国大陆新闻]] 3月16日新闻]]
 					// [[[[t|l]], t|l]]
 					|| page_name.some(function(token) {
-						return token.is_link;
+						return token.is_link || token.tag
+						// <nowiki /> 能斷開如 [[L<nowiki />L]]
+						&& token.tag.toLowerCase() in extensiontag_hash;
 					})) {
 						// console.trace(page_name);
 						// page_name.oddly = 'link_inside_link';
@@ -1869,8 +1875,6 @@ function module_code(library_namespace) {
 				no_resolve : true
 			}, options), queue);
 
-			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
-			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
 			parameters = parameters.split('|');
 
 			// matched: [ all, function name token, function name, argument 1 ]
@@ -2182,8 +2186,6 @@ function module_code(library_namespace) {
 				&& (magic_words_hash[namespace[1]] === false
 				// 這些需要指定數值。 has ":"
 				|| namespace[0])) {
-					// TODO: {{ {{UCFIRST:T}} | tl }}
-					// TODO: {{ :{{UCFIRST:T}} }}
 					// console.log(parameters);
 
 					parameters.name = namespace[1];
@@ -2258,40 +2260,43 @@ function module_code(library_namespace) {
 
 					// ------------------------------------
 
-					if (namespace[0]) {
-						parameters.name = namespace[2];
-						namespace = namespace[1];
-					} else {
-						namespace = null;
+					namespace = parameters.name.match(/^:(\s*:)?/);
+					if (namespace && namespace[1]) {
+						// e.g., {{::T}}
+						return all;
 					}
 					// 正規化 template name。
 					// 'ab/cd' → 'Ab/cd'
-					parameters.name = wiki_API.normalize_title(parameters.name);
+					parameters.name = wiki_API.normalize_title(parameters.name,
+							options);
 					// console.log(parameters.name);
 
 					// parameters.name: template without "Template:" prefix.
-					// parameters.page_title: page title with "Template:"
-					// prefix.
+					// parameters.page_title (.page_name): page title with
+					// "Template:" prefix.
 
-					var PATTERN_template_namespaces = /^(?:Template|模板|テンプレート|Plantilla|틀)/i;
-					var not_template_name = namespace
-					// 預防 {{Template:name|...}}
-					&& !PATTERN_template_namespaces.test(namespace)
+					if (!namespace) {
+						namespace = wiki_API.namespace(parameters.name,
+						// {{:T}}嵌入[[T]]
+						Object.assign({
+							is_page_title : true
+						}, options));
+					}
 					// wiki_API.namespace.hash using lower case
-					&& (namespace.toLowerCase() in wiki_API.namespace.hash);
-
-					// {{T}}嵌入[[Template:T]]
-					// {{Template:T}}嵌入[[Template:T]]
-					// {{:T}}嵌入[[T]]
-					// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
-					parameters.page_title
-					// .page_name
-					= wiki_API.normalize_title((not_template_name ? namespace
-							: 'Template')
-							+ ':' + parameters.name);
-
-					if (not_template_name) {
-						parameters.name = parameters.page_title;
+					if (namespace === wiki_API.namespace.hash.template) {
+						// e.g., {{Template:name|...}}
+						parameters.page_title = parameters.name;
+						parameters.name = wiki_API.remove_namespace(
+								parameters.name, options);
+					} else if (namespace === wiki_API.namespace.hash.main) {
+						parameters.page_title
+						// {{T}}嵌入[[Template:T]]
+						// {{Template:T}}嵌入[[Template:T]]
+						= wiki_API.to_namespace(parameters.name, 'Template',
+								options);
+					} else {
+						// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
+						parameters.page_title = parameters.name;
 					}
 
 					if (true) {
@@ -2329,7 +2334,6 @@ function module_code(library_namespace) {
 			_set_wiki_type(parameters, matched ? 'magic_word_function'
 					: 'transclusion');
 			queue.push(parameters);
-			// TODO: parameters.parameters = []
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
@@ -2438,10 +2442,51 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------
 
-		function parse_HTML_tag(all, tag, attributes, inner, ending, end_tag) {
+		// <pre> 中的 -{...}-, <nowiki></nowiki> 可作用。
+		// 揀選有作用的節點。
+		function pick_functional_tokens_for_pre(token) {
+			if (!Array.isArray(token))
+				return;
+			if (token.type === 'convert' || token.type === 'tag'
+					&& token.tag === 'nowiki') {
+				token.has_functional_sub_token = true;
+			}
+			for (var index = 0; index < token.length; index++) {
+				var sub_token = token[index];
+				if (sub_token.type === 'tag_inner'
+				// e.g., `<nowiki>-{zh-cn:这;zh-tw:這}-</nowiki>` inside <pre>
+				// re-parse for finding functional tokens
+				&& token.has_functional_sub_token) {
+					sub_token[0] = parse_wikitext(sub_token[0].toString(),
+							Object.assign(Object.clone(options), {
+								// 重新造一個 options 以避免污染。
+								target_array : null
+							}));
+				}
+				pick_functional_tokens_for_pre(sub_token);
+				if (sub_token.has_functional_sub_token) {
+					token.has_functional_sub_token = true;
+				} else if (sub_token.type && !(sub_token.type in {
+					tag_attributes : true,
+					tag_inner : true
+				})) {
+					token[index] = sub_token.toString();
+				}
+			}
+		}
+
+		function parse_HTML_tag(all, tag, attributes, inner, ending, end_tag,
+				offset, original_string) {
 			// console.log('queue start:');
 			// console.log(queue);
 			// console.trace(arguments);
+
+			if (!ending && /=.*\n/.test(inner)
+			// "\n== <code>code<code> =="會被當作title。
+			// [[w:zh:Special:Diff/46814116]]
+			&& /\n=.*/.test(original_string.slice(0, offset))) {
+				return all;
+			}
 
 			var matched = tag.toLowerCase() in extensiontag_hash, previous;
 			// '<code>...' is OK.
@@ -2507,26 +2552,36 @@ function module_code(library_namespace) {
 			// 處理特殊 tags。
 			// <source>-{...}-</source>內之-{}-與<nowiki>-{...}-</nowiki>一樣無效。
 			if ((tag.toLowerCase() in {
+				pre : true,
 				// Should be `tag.toLowerCase() in extensiontag_hash`
 				// without includeonly|noinclude|onlyinclude
-				// TODO: `<pre><nowiki>-{...}-</nowiki><!-- --></pre>`
 				syntaxhighlight : true,
 				source : true,
 				nowiki : true
 			}) && Array.isArray(inner)) {
 				library_namespace.debug('-'.repeat(70)
-						+ '\n<nowiki> 中僅留 -{}- 有效用。', 3,
+						+ '\n<pre> 中僅留 -{}-, <nowiki> 有效用。', 3,
 						'parse_wikitext.transclusion');
 				// console.log(inner);
 				if (inner.type && inner.type !== 'plain') {
 					// 當 inner 本身就是特殊 token 時，先把它包裝起來。
 					inner = _set_wiki_type([ inner ], 'plain');
 				}
-				inner.forEach(function(token, index) {
-					// 處理每個子 token。 經測試，<nowiki>中 -{}- 也無效。
-					if (token.type /* && token.type !== 'convert' */)
-						inner[index] = inner[index].toString();
-				});
+				if (tag.toLowerCase() === 'pre') {
+					pick_functional_tokens_for_pre(inner);
+
+				} else {
+					inner.forEach(function(sub_token, index) {
+						// 處理每個子 token。 經測試，<nowiki>中 -{}- 也無效。
+						if (!sub_token.type || sub_token.type in {
+							tag_attributes : true,
+							tag_inner : true
+						}) {
+							return;
+						}
+						inner[index] = sub_token.toString();
+					});
+				}
 				if (inner.length <= 1) {
 					inner = inner[0];
 				}
@@ -3296,7 +3351,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// external link
 		// [http://... ...]
-		// TODO: [{{}} ...]
+		// TODO: [{{URL template}} ...]
 		wikitext = wikitext.replace_till_stable(PATTERN_external_link_global,
 				parse_external_link);
 
@@ -3328,7 +3383,9 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// table: \n{| ... \n|}
-		// TODO: 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]]
+		// TODO: 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]],
+		// [[w:zh:世界大桥列表]]
+
 		// 因為 table 中較可能包含 {{Template}}，但 {{Template}} 少包含 table，
 		// 因此先處理 {{Template}} 再處理 table。
 		// {|表示表格開始，|}表示表格結束。
@@ -3361,12 +3418,15 @@ function module_code(library_namespace) {
 
 		// HTML tags that must be closed.
 		// <pre>...</pre>, <code>int f()</code>
-		wikitext = wikitext.replace_till_stable(PATTERN_non_extensiontags,
-				parse_HTML_tag);
+		// 像是 <b>|p=</b> 會被分割成不同 parameters，
+		// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
+		if (!options.inside_transclusion) {
+			wikitext = wikitext.replace_till_stable(PATTERN_non_extensiontags,
+					parse_HTML_tag);
+		}
 
 		// ----------------------------------------------------
 		// single tags. e.g., <hr />
-		// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
 
 		// reset PATTERN index
 		// PATTERN_WIKI_TAG_VOID.lastIndex = 0;
@@ -3410,9 +3470,6 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// parse_wikitext.section_title
-
-		// TODO: 經測試，"\n== <code>code<code> =="會被當作title，但採用本函數將會解析錯誤。
-		// [[w:zh:Special:Diff/46814116]]
 
 		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
 

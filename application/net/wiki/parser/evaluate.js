@@ -655,7 +655,7 @@ function module_code(library_namespace) {
 		}
 
 		function get_parameter(NO) {
-			var is_parser_function = token.name.startsWith('#');
+			// var is_parser_function = token.name.startsWith('#');
 			var parameter =
 			// is_parser_function ? token.parameters[NO] :
 			// token.parameters[NO] === token[NO + 1]
@@ -743,8 +743,9 @@ function module_code(library_namespace) {
 						reject(error);
 						return;
 					}
-					var content = !error && wiki_API.content_of(page_data)
-							|| ('⧼' + page_data.title + '⧽');
+					var content = library_namespace.HTML_to_Unicode(!error
+							&& wiki_API.content_of(page_data)
+							|| ('⧼' + page_data.title + '⧽'));
 					library_namespace.info(
 					//
 					'get_interface_message: Cache interface message: ['
@@ -797,6 +798,25 @@ function module_code(library_namespace) {
 			}
 			set_attribute(promise);
 		}
+
+		function fullurl(is_localurl) {
+			var session = wiki_API.session_of_options(options);
+			var query = get_parameter_String(2);
+			var url = encodeURI(get_parameter_String(1));
+			url = query ? (session ? session.latest_site_configurations.general.script
+					: '/w/index.php')
+					+ '?title=' + url + '&' + query
+					: (session ? session.latest_site_configurations.general.articlepath
+							: '/wiki/$1').replace('$1', url);
+			if (!is_localurl) {
+				if (!session)
+					return NYI();
+				url = session.latest_site_configurations.general.server + url;
+			}
+			return url;
+		}
+
+		// --------------------------------------------------------------------
 
 		if (Array.isArray(token.name) && !token.name.evaluated) {
 			return check_token_key('name', reparse_token_name);
@@ -960,15 +980,6 @@ function module_code(library_namespace) {
 				});
 			});
 
-		case '#titleparts':
-			var title = get_parameter_String(1).split('/');
-			var start = +get_parameter_String(3);
-			start = start ? start > 0 ? start - 1 : start : 0;
-			var end = +get_parameter_String(2);
-			end = end ? end > 0 ? start + end : end : 0;
-			return (end ? title.slice(start, end) : title.slice(start))
-					.join('/');
-
 			// ----------------------------------------------------------------
 
 		case '#switch':
@@ -1014,7 +1025,13 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/Help:Magic_words#URL_data
 
 		case 'URLENCODE':
-			return encodeURIComponent(get_parameter_String(1));
+			return encodeURI(get_parameter_String(1));
+
+		case 'LOCALURL':
+			return fullurl(true);
+
+		case 'FULLURL':
+			return fullurl();
 
 			// ----------------------------------------------------------------
 
@@ -1040,7 +1057,23 @@ function module_code(library_namespace) {
 		case 'TALKPAGENAME':
 			return wiki_API.to_talk_page(get_page_title(), options);
 
+		case '#titleparts':
+			var title = get_parameter_String(1).split('/');
+			var start = +get_parameter_String(3);
+			start = start ? start > 0 ? start - 1 : start : 0;
+			var end = +get_parameter_String(2);
+			end = end ? end > 0 ? start + end : end : 0;
+			return (end ? title.slice(start, end) : title.slice(start))
+					.join('/');
+
 			// ----------------------------------------------------------------
+
+		case 'NS':
+			return wiki_API.namespace(get_parameter_String(1), Object.assign({
+				get_name : true
+			}, options))
+			// e.g., '{{ns:talk2}}'
+			|| '[[:Template:Ns:' + get_parameter_String(1) + ']]';
 
 			// [[mw:Help:Magic words#Namespaces]]
 
