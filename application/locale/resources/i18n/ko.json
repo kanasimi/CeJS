@@ -76,6 +76,7 @@
 	"toc.language": "언어",
 	"toc.subject": "태그",
 	"word-count": "단어 수",
+	"contents": "목차",
 	"waiting-for-all-resources-loaded": "모든 리소스가 로드되기를 기다리는 중...",
 	"removing-empty-directory-$1": "빈 디렉터리를 제거하는 중: %1",
 	"working-directory-$1": "작업 디렉터리: %1",
