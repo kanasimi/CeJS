@@ -1869,28 +1869,60 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	var PATTERN_AD_cfwx
+	/**
+	 * <code>
+
 	// xshuyaya.js
-	// http://www.shuyy8.com/read/1242/1276125.html
-	// http://www.shuyy8.com/read/1242/1276140.html
-	// http://www.shuyy8.com/read/1242/1276147.html
-	// http://www.shuyy8.com/read/1242/1276151.html
-	// http://www.shuyy8.com/read/1242/1276151.html
-	// http://www.shuyy8.com/read/1242/1276152.html
-	// http://www.shuyy8.com/read/1242/1276155.html
-	// http://www.shuyy8.com/read/1242/1276163.html
-	// http://www.shuyy8.com/read/1242/1276167.html
-	// http://www.shuyy8.com/read/1242/1276168.html
-	// http://www.shuyy8.com/read/1242/1276179.html
-	// http://www.shuyy8.com/read/1242/1276184.html
-	// http://www.shuyy8.com/read/1242/1276237.html
-	// http://www.shuyy8.com/read/1242/1276191.html
-	// http://www.shuyy8.com/read/1242/1276131.html
-	// http://www.shuyy8.com/read/1242/1276134.html
-	// http://www.shuyy8.com/read/1242/1276143.html
-	// http://www.shuyy8.com/read/1242/1276156.html
+	http://www.shuyy8.com/read/1242/1276110.html
+	<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;看最仙遊最新章节到长风文学
+	http://www.shuyy8.com/read/1242/1276134.html
+	<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;｜长｜风｜文学 [c][f][w][x].net<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;
+	http://www.shuyy8.com/read/1242/1276125.html
+	抓起手边血曜石就跑，**长**风**文学 女子吐口献血，
+	http://www.shuyy8.com/read/1242/1276140.html
+	而这两百人—长—风—文学 {c}{f}{w}{x}.net中，
+	http://www.shuyy8.com/read/1242/1276147.html
+	你们两位牛鼻子就;长;风;文学 cf＋在这里歇息片刻，
+	http://www.shuyy8.com/read/1242/1276151.html
+	我刚才长风文学<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;摸了什么……
+	http://www.shuyy8.com/read/1242/1276152.html
+	你需。长.风。文学 要做几件事。
+	http://www.shuyy8.com/read/1242/1276155.html
+	这？长？风？文学 cfwx. net才是林烦最大的优点。
+	http://www.shuyy8.com/read/1242/1276163.html
+	离开了木屋，—长—风—文学 {c}{f}{w}{x}.net回到迷雾之中。
+	http://www.shuyy8.com/read/1242/1276167.html
+	竹剑堂御剑一%长%风%文学　百单八口，
+	http://www.shuyy8.com/read/1242/1276168.html
+	三三＊长＊风＊文学 真人反问：
+	http://www.shuyy8.com/read/1242/1276179.html
+	我就先打《长〈风《文学　死你，
+	http://www.shuyy8.com/read/1242/1276184.html
+	入紫箫／长／风／文学 殿者，
+	http://www.shuyy8.com/read/1242/1276237.html
+	来此地［长][风］文学 斩妖除魔。
+	http://www.shuyy8.com/read/1242/1276191.html
+	五人｛长}{风｝文学 www{cf][wx}net用了隐身术从云端落下，
+	http://www.shuyy8.com/read/1242/1276131.html
+	没｀长｀风｀文学｀有神通，
+	http://www.shuyy8.com/read/1242/1276134.html
+	所以属于前者。”<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;｜长｜风｜文学 [c][f][w][x].net<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;“另外一种最厉害，
+	http://www.shuyy8.com/read/1242/1276143.html
+	在供奉们的要求之下&lt;长&gt;&lt;风&gt;文学 ，
+	http://www.shuyy8.com/read/1242/1276156.html
+	你和他单对单的话＝长＝风＝文学＝www＝cfwx＝net？
+
 	// piaotian.js
-	// https://www.ptwxz.com/html/6/6682/3908558.html
-	= /([\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀]*)长[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀]{0,20}风[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀]{0,20}文[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀]{0,20}学｀?[\u0020-\u00ff—＋＝　]*/g;
+	https://www.ptwxz.com/html/6/6682/3908558.html
+	<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;!长!风!文学“来了。”天恒旗杀毒虫效率高，
+	https://www.ptwxz.com/html/6/6682/3976684.html
+	斜风子不能出现在十面埋～≯长～≯风～≯文～≯学，w⊥↓＋et伏中，
+	https://www.ptwxz.com/html/6/6682/4007822.html
+	不能怪6长6风6文6学，w↘□□et她，
+
+	</code>
+	 */
+	= /([\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀～≯]*)长[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀～≯]{0,20}风[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀～≯]{0,20}文[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀～≯]{0,20}学(?:，[\u0020-\u00ff—＋＝　⊥↓↘□]+?et|｀?[\u0020-\u00ff—＋＝　]*)/g;
 
 	/**
 	 * 去除廣告。 Calling inside parse_chapter_data()
@@ -1900,17 +1932,12 @@ function module_code(library_namespace) {
 	</code>
 	 */
 	function fix_general_ADs(text) {
-		// http://www.shuyy8.com/read/1242/1276110.html
 		text = text.replace(
-		// <br /><br />&nbsp;&nbsp;&nbsp;&nbsp;看最仙遊最新章节到长风文学
-		/(?:<br[^<>]*>)*(?:&nbsp;)*看[^\s\n<>]+?最新章节到[^\s\n<>]+?文学\s*/, '');
+				/(?:<br[^<>]*>)*(?:&nbsp;)*看[^\s\n<>]+?最新章节到[^\s\n<>]+?文学\s*/,
+				'');
 
 		text = text.replace(PATTERN_AD_cfwx, function(all, previous) {
-			/**
-			 * e.g., http://www.shuyy8.com/read/1242/1276134.html<code>
-			<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;｜长｜风｜文学 [c][f][w][x].net<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;
-			</code> 必須保留前面的換行。
-			 */
+			// 必須保留前面的換行。 e.g., http://www.shuyy8.com/read/1242/1276134.html
 			var matched = previous.match(/[\s\S]+&nbsp;/);
 			return matched ? matched[0] : '';
 		});

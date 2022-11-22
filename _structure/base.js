@@ -2836,7 +2836,7 @@ OS='UNIX'; // unknown
 	 * @param {Object}[attributes]
 	 *            attributes used in Object.defineProperty()
 	 * @returns target name-space
-	 * @see
+	 * @see https://www.audero.it/blog/2016/12/05/monkey-patching-javascript/
 	 * @since 2014/5/5<br />
 	 *        2014/5/6 refactoring 重構
 	 */

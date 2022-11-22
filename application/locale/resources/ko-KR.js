@@ -71,6 +71,7 @@
 	"TOC.language": "\uc5b8\uc5b4",
 	"TOC.subject": "\ud0dc\uadf8",
 	"word count": "\ub2e8\uc5b4 \uc218",
+	"Contents": "\ubaa9\ucc28",
 	"Waiting for all resources loaded...": "\ubaa8\ub4e0 \ub9ac\uc18c\uc2a4\uac00 \ub85c\ub4dc\ub418\uae30\ub97c \uae30\ub2e4\ub9ac\ub294 \uc911...",
 	"\u79fb\u9664\u7a7a\u76ee\u9304\uff1a%1": "\ube48 \ub514\ub809\ud130\ub9ac\ub97c \uc81c\uac70\ud558\ub294 \uc911: %1",
 	"Working directory: %1": "\uc791\uc5c5 \ub514\ub809\ud130\ub9ac: %1",

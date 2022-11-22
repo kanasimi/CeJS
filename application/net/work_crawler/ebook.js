@@ -48,8 +48,15 @@ function module_code(library_namespace) {
 		var next_url = html && html.match(PATTERN_next_chapter ||
 		// PTCMS default. e.g., "下一章 →" /下一章[：: →]*/
 		// PATTERN_next_chapter: [ all, next chapter url ]
-		// e.g., <a href="//read.qidian.com/chapter/abc123">下一章</a>
-		/ href=["']([^<>"']+)["'][^<>]*>(?:<button[^<>]*>)?下一[章页]/);
+		/**
+		 * <code>
+		<a href="//read.qidian.com/chapter/abc123">下一章</a>
+
+		https://www.fxnzw.com/fxnread/45100_8000445.html
+		<a hidefocus href="/fxnread/45100_8000446.html" title="第二章 正一宗 最仙遊">【下一章】</a>
+		</code>
+		 */
+		/ href=["']([^<>"']+)["'][^<>]*>(?:<button[^<>]*>)?【?下一[章页]/);
 		// console.log(chapter_NO + ': ' + next_url[1]);
 
 		if (!next_url)
@@ -105,12 +112,14 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var message = work_data.chapter_list[chapter_NO - 1];
-		message = [ 'check_next_chapter: ', {
+		var this_chapter_data = work_data.chapter_list[chapter_NO - 1];
+		var message = [ 'check_next_chapter: ', {
 			// gettext_config:{"id":"insert-a-chapter-url-after-chapter-$1-$2"}
 			T : [ 'Insert a chapter url after chapter %1: %2', chapter_NO
 			//
-			+ (message && message.url ? ' (' + message.url + ')' : ''),
+			+ (this_chapter_data && this_chapter_data.url
+			//
+			? ' (' + this_chapter_data.url + ')' : ''),
 			//
 			next_url ]
 		},
@@ -124,11 +133,18 @@ function module_code(library_namespace) {
 			library_namespace.debug(message);
 		}
 
-		// 動態增加章節。
-		work_data.chapter_list.splice(chapter_NO, 0, {
+		// 動態插入章節。
+		var chapter_data_to_insert = {
 			// title : '',
 			url : next_url
+		};
+		// Copy attributes
+		[ 'part_title' ].forEach(function(key) {
+			var value = this_chapter_data[key];
+			if (value)
+				chapter_data_to_insert[key] = value;
 		});
+		work_data.chapter_list.splice(chapter_NO, 0, chapter_data_to_insert);
 		// 重新設定章節數量。
 		work_data.chapter_count = work_data.chapter_list.length;
 		return true;

@@ -1327,7 +1327,9 @@ function module_code(library_namespace) {
 				return all_link;
 			}
 
-			var matched = display_text && display_text.match(/{{([\s\S]+)$/);
+			var matched = display_text
+			// @see PATTERN_for_transclusion
+			&& display_text.match(/{{([^{}][\s\S]*?)$/);
 			if (matched && !matched[1].includes('}}')) {
 				// e.g., `[[File:i.png|\n{{t|]]}}\n]]`
 				return all_link;

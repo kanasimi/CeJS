@@ -12,6 +12,7 @@
  * More examples: see /_test suite/test.js
  * 
  * @since
+ * @see https://www.audero.it/blog/2016/12/05/monkey-patching-javascript/
  * @see https://tc39.es/proposal-collection-methods/
  * @see https://github.com/tc39/proposals
  * @see https://github.com/Financial-Times/polyfill-library/tree/master/polyfills
