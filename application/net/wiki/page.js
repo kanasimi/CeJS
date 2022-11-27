@@ -2092,8 +2092,10 @@ function module_code(library_namespace) {
 					}
 				}
 
+				rows.query_delay = Date.now() - Date.parse(last_query_time);
 				rows.forEach(function(row) {
-					row.last_query_time = last_query_time;
+					// row.last_query_time = last_query_time;
+					row.query_delay = rows.query_delay;
 				});
 				if (options.filter && rows.length > 0) {
 					// @see CeL.data.fit_filter()
@@ -2190,6 +2192,11 @@ function module_code(library_namespace) {
 				};
 
 				if (rows.length > 0) {
+					library_namespace
+							.log_temporary('add_listener.with_diff: Get '
+									+ rows.length + ' page(s) starting from '
+									+ wiki_API.title_link_of(rows[0]));
+
 					library_namespace.debug('Get ' + rows.length
 							+ ' recent pages:\n' + rows.map(function(row) {
 								return row.revid;
@@ -2197,22 +2204,26 @@ function module_code(library_namespace) {
 
 					// 比較頁面修訂差異。
 					if (options.with_diff || options.with_content >= 2) {
+						// console.trace([ rows[0].query_delay, rows.length ]);
 						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 						// rvdiffto=prev 已經 parsed，因此仍須自行解析。
 						// TODO: test
 						// 因為採用.run_serial(.page())，因此約一秒會跑一頁面。
 						rows.run_serial(function(run_next, row, index, list) {
 							// console.log(row);
+							if (false) {
+								console.trace([ index + '/' + rows.length,
+										row.title ]);
+							}
 							if (!row.pageid) {
 								run_next();
 								return;
 							}
 
-							library_namespace.debug(
-									'Get page: ' + (index + 1) + '/'
-											+ rows.length + ' revid='
-											+ row.revid, 2,
-									'add_listener.with_diff');
+							library_namespace.debug('Get page: ' + (index + 1)
+									+ '/' + rows.length + ' '
+									+ wiki_API.title_link_of(row) + ' revid='
+									+ row.revid, 2, 'add_listener.with_diff');
 
 							var page_options = {
 								// 這裡的rvstartid指的是新→舊。
