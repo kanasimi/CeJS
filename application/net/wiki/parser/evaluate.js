@@ -361,6 +361,12 @@ function module_code(library_namespace) {
 		if (!wikitext)
 			return wikitext;
 
+		if (library_namespace.is_thenable(wikitext)) {
+			return wikitext.then(function(wikitext) {
+				return expand_transclusion(wikitext, options, level);
+			});
+		}
+
 		var parsed;
 		if (typeof options === 'string') {
 			// temp

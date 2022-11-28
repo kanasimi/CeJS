@@ -3000,6 +3000,9 @@ function module_code(library_namespace) {
 		cmn : 'zh',
 		// gsw : 'als',
 		// hbs : 'sh',
+		// TODO: https://phabricator.wikimedia.org/T30443
+		// https://github.com/wikimedia/mediawiki/blob/3f08cd7/includes/language/LanguageCode.php#L47
+		// 建議棄用zh-classical、改用lzh。
 		lzh : 'zh-classical',
 		nan : 'zh-min-nan',
 		nb : 'no',
