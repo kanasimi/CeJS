@@ -532,8 +532,8 @@ function module_code(library_namespace) {
 			if (id_list.length !== 1) {
 				library_namespace.warn({
 					// gettext_config:{"id":"searching-«$1»-and-found-$2-work(s)-$3"}
-					T : [ '搜尋《%1》找到 %2個{{PLURAL:%2|作品}}：%3', work_title, id_list.length,
-							JSON.stringify(id_data) ]
+					T : [ '搜尋《%1》找到 %2個{{PLURAL:%2|作品}}：%3', work_title,
+							id_list.length, JSON.stringify(id_data) ]
 				});
 			}
 
@@ -952,17 +952,17 @@ function module_code(library_namespace) {
 			variable_set.id_title = variable_set.id
 			//
 			+ (variable_set.title ? ' ' + variable_set.title : '');
-			if (this.directory_name_pattern
+			if (_this.directory_name_pattern
 			//
 			&& library_namespace.extract_literals(
 			//
-			this.directory_name_pattern, {
+			_this.directory_name_pattern, {
 				id : 'i1',
 				title : 't1',
 				id_title : 'it1'
 			}) === library_namespace.extract_literals(
 			//
-			this.directory_name_pattern, {
+			_this.directory_name_pattern, {
 				id : 'i2',
 				title : 't2',
 				id_title : 'it2'
@@ -970,9 +970,9 @@ function module_code(library_namespace) {
 				library_namespace.error({
 					// gettext_config:{"id":"the-custom-directory_name_pattern-$1-gives-the-same-name-to-different-works-so-the-default-directory_name_pattern-is-used-instead"}
 					T : [ '自訂作品目錄名稱模式 %1 令不同作品產生相同名稱，改採預設作品目錄模式！',
-							JSON.stringify(this.directory_name_pattern) ]
+							JSON.stringify(_this.directory_name_pattern) ]
 				});
-				delete this.directory_name_pattern;
+				delete _this.directory_name_pattern;
 			}
 			work_data.directory_name = library_namespace.to_file_name(
 			// 允許自訂作品目錄名/命名資料夾。
@@ -981,7 +981,7 @@ function module_code(library_namespace) {
 			|| library_namespace.extract_literals(
 			// 自定義 自訂作品目錄名稱模式。e.g., '${title}' 將只以作品標題為作品目錄，'${id}'
 			// 將只以作品id為作品目錄。
-			this.directory_name_pattern
+			_this.directory_name_pattern
 			// default directory_name_pattern 預設作品目錄名稱模式。
 			|| Work_crawler.prototype.directory_name_pattern,
 			//
@@ -993,7 +993,7 @@ function module_code(library_namespace) {
 				if (work_data.base_directory_name) {
 					// 允許自訂作品目錄，將作品移至特殊目錄下。
 					// @see qq.js, qidian.js
-					// set base directory name below this.main_directory
+					// set base directory name below _this.main_directory
 					work_base_directory += library_namespace
 							.append_path_separator(work_data.base_directory_name);
 					// 特殊目錄可能還不存在。
