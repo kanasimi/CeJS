@@ -3219,7 +3219,7 @@ function module_code(library_namespace) {
 	}
 
 	// TODO: test for 'Module:Check for unknown parameters'
-	function is_template(template_name, token, options) {
+	function is_template(template_name_to_test, template_token, options) {
 		options = Object.assign({
 			namespace : 'Template'
 		}, options);
@@ -3227,25 +3227,35 @@ function module_code(library_namespace) {
 		var session = wiki_API.session_of_options(options)
 				|| wiki_API.is_wiki_API(this) && this;
 
-		if (token.type === 'transclusion') {
-			// treat `token` as template token
-			// assert: token.name is normalized
-			token = token.name;
+		if (template_token.type === 'transclusion') {
+			// treat `template_token` as template token
+			// assert: template_token.name is normalized
+			template_token = template_token.name;
+		}
+
+		if (template_name_to_test.type === 'transclusion') {
+			// e.g., wiki.is_template(template_token, template_name_to_test);
+			template_name_to_test = template_name_to_test.name;
 		}
 
 		if (session) {
 			// normalize template name
-			template_name = session.redirect_target_of(template_name, options);
-			token = session.redirect_target_of(token, options);
+			template_name_to_test = session.redirect_target_of(
+					template_name_to_test, options);
+			template_token = session
+					.redirect_target_of(template_token, options);
 		} else {
-			template_name = wiki_API.normalize_title(template_name, options);
-			token = wiki_API.normalize_title(token, options);
+			template_name_to_test = wiki_API.normalize_title(
+					template_name_to_test, options);
+			template_token = wiki_API.normalize_title(template_token, options);
 		}
 
-		// console.trace([ template_name, token ]);
-		return Array.isArray(template_name) ? template_name.includes(token)
-				: Array.isArray(token) ? token.includes(template_name)
-						: template_name === token;
+		// console.trace([ template_name_to_test, template_token ]);
+		return Array.isArray(template_name_to_test) ? template_name_to_test
+				.includes(template_token)
+				: Array.isArray(template_token) ? template_token
+						.includes(template_name_to_test)
+						: template_name_to_test === template_token;
 	}
 
 	// --------------------------------------------------------------------------------------------

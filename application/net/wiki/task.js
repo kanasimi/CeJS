@@ -730,8 +730,10 @@ function module_code(library_namespace) {
 				}
 
 			} else if (next[1] in this.redirects_data) {
-				// 已處理過。
-				// have registered
+				if (false) {
+					console.trace('已處理過 have registered, use cache: ' + next[1]
+							+ '→' + this.redirects_data[next[1]]);
+				}
 				// next[2] : callback(root_page_data, error)
 				this.next(next[2]);
 				break;

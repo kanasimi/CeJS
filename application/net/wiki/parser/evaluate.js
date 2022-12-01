@@ -233,13 +233,15 @@ function module_code(library_namespace) {
 					usage_times : 1,
 					fetch_date : Date.now()
 				};
-				wiki_API.template_functions.set_proto_properties(template_name,
-				//
-				{
-					expand :
+				if (wiki_API.template_functions) {
+					wiki_API.template_functions.set_proto_properties(
 					//
-					generate_expand_template_function(transclusion_config)
-				}, options);
+					template_name, {
+						expand :
+						//
+						generate_expand_template_function(transclusion_config)
+					}, options);
+				}
 				if (transclusion_config.need_evaluate)
 					transclusion_config = null;
 			}
@@ -357,6 +359,7 @@ function module_code(library_namespace) {
 	// 類似 wiki_API_expandtemplates()
 	// ** 僅能提供簡單的演算功能，但提供 cache。
 	// [[Special:ExpandTemplates]]
+	// 使用上注意: 應設定 options[KEY_on_page_title_option]
 	function expand_transclusion(wikitext, options, level) {
 		if (!wikitext)
 			return wikitext;
