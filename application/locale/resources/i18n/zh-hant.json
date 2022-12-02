@@ -512,7 +512,7 @@
 	"failed-to-get-image": "無法取得圖片。",
 	"image-without-content": "圖片無內容：",
 	"$1-bytes-too-small": "檔案過小，僅 %1 {{PLURAL:%1|位元組}}：",
-	"$1-bytes": "檔案僅 %1 {{PLURAL:$1|位元組}}：",
+	"$1-bytes": "檔案僅 %1 {{PLURAL:%1|位元組}}：",
 	"perhaps-the-image-is-complete-just-too-small-and-not-up-to-standard-such-as-an-almost-blank-image": "或許圖片是完整的，只是過小而未達標，例如幾乎為空白之圖片。",
 	"work_crawler-skip-image-error-prompt": "您可設定 MIN_LENGTH，如 MIN_LENGTH=%1 表示允許最小為 %1 位元組的圖片；或者先設定 skip_error=true 來忽略圖片錯誤，待取得檔案後，自行更改檔名，去掉錯誤檔名後綴 %2 以跳過此錯誤。",
 	"the-downloaded-image-is-different-in-size-$1": "下載所得的圖片大小不同：%1。",

@@ -506,7 +506,7 @@
 	"\u7121\u6cd5\u53d6\u5f97\u5716\u7247\u3002": "Failed to get image. ",
 	"\u5716\u7247\u7121\u5167\u5bb9\uff1a": "Image without content:",
 	"\u6a94\u6848\u904e\u5c0f\uff0c\u50c5 %1 {{PLURAL:%1|\u4f4d\u5143\u7d44}}\uff1a": "%1 {{PLURAL:%1|byte|bytes}}, too small:",
-	"\u6a94\u6848\u50c5 %1 {{PLURAL:$1|\u4f4d\u5143\u7d44}}\uff1a": "%1 {{PLURAL:%1|byte|bytes}}:",
+	"\u6a94\u6848\u50c5 %1 {{PLURAL:%1|\u4f4d\u5143\u7d44}}\uff1a": "%1 {{PLURAL:%1|byte|bytes}}:",
 	"\u6216\u8a31\u5716\u7247\u662f\u5b8c\u6574\u7684\uff0c\u53ea\u662f\u904e\u5c0f\u800c\u672a\u9054\u6a19\uff0c\u4f8b\u5982\u5e7e\u4e4e\u70ba\u7a7a\u767d\u4e4b\u5716\u7247\u3002": "Perhaps the image is complete, just too small and not up to standard, such as an almost blank image.",
 	"work_crawler-skip-image-error-prompt": "You can set MIN_LENGTH. For example, MIN_LENGTH=%1 means to allow a image with a minimum of %1 bytes; or set skip_error=true to ignore the image error. After the file is obtained, change the file name yourself and remove the error file name suffix %2 to skip this error.",
 	"\u4e0b\u8f09\u6240\u5f97\u7684\u5716\u7247\u5927\u5c0f\u4e0d\u540c\uff1a%1\u3002": "The downloaded image is different in size: %1.",

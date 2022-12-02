@@ -514,7 +514,7 @@ function module_code(library_namespace) {
 					// gettext_config:{"id":"$1-bytes-too-small"}
 					? '檔案過小，僅 %1 {{PLURAL:%1|位元組}}：'
 					// gettext_config:{"id":"$1-bytes"}
-					: '檔案僅 %1 {{PLURAL:$1|位元組}}：', contents.length ]
+					: '檔案僅 %1 {{PLURAL:%1|位元組}}：', contents.length ]
 				} ];
 			}
 			message.push(image_url + '\n→ ' + image_data.file);

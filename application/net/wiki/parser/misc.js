@@ -250,6 +250,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
+	// remove parameter
+	CeL.wiki.parse.replace_parameter(template_token, parameter_name, CeL.wiki.parse.replace_parameter.KEY_remove_parameter);
+
 	// replace value only
 	token = CeL.wiki.parse('{{t|parameter_name=12|parameter_name_2=32}}');
 	changed_count = CeL.wiki.parse.replace_parameter(token, {

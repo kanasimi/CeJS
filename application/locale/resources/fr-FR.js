@@ -506,7 +506,7 @@
 	"\u7121\u6cd5\u53d6\u5f97\u5716\u7247\u3002": "\u00c9chec d\u2019obtention de l\u2019image. ",
 	"\u5716\u7247\u7121\u5167\u5bb9\uff1a": "Image sans contenu\u202f:",
 	"\u6a94\u6848\u904e\u5c0f\uff0c\u50c5 %1 {{PLURAL:%1|\u4f4d\u5143\u7d44}}\uff1a": "%1\u00a0octet{{PLURAL:%1||s}}, trop petit\u202f:",
-	"\u6a94\u6848\u50c5 %1 {{PLURAL:$1|\u4f4d\u5143\u7d44}}\uff1a": "%1\u00a0octet{{PLURAL:%1||s}}\u202f:",
+	"\u6a94\u6848\u50c5 %1 {{PLURAL:%1|\u4f4d\u5143\u7d44}}\uff1a": "%1\u00a0octet{{PLURAL:%1||s}}\u202f:",
 	"\u6216\u8a31\u5716\u7247\u662f\u5b8c\u6574\u7684\uff0c\u53ea\u662f\u904e\u5c0f\u800c\u672a\u9054\u6a19\uff0c\u4f8b\u5982\u5e7e\u4e4e\u70ba\u7a7a\u767d\u4e4b\u5716\u7247\u3002": "L\u2019image est peut-\u00eatre compl\u00e8te, juste trop petite et pas align\u00e9e \u00e0 la norme, par exemple une image presque vierge.",
 	"work_crawler-skip-image-error-prompt": "Vous pouvez d\u00e9finir MIN_LENGTH, par exemple MIN_LENGTH=%1 signifie permettre une image ayant un minimum de %1 octets\u202f; ou bien d\u00e9finissez \u00ab\u202fskip_error=true\u202f\u00bb pour ignorer l\u2019erreur sur l\u2019image. Une fois le fichier obtenu, changez le nom de fichier vous-m\u00eame et enlevez le suffixe %2 du nom de fichier d\u2019erreur pour sauter cette erreur.",
 	"\u4e0b\u8f09\u6240\u5f97\u7684\u5716\u7247\u5927\u5c0f\u4e0d\u540c\uff1a%1\u3002": "L\u2018image t\u00e9l\u00e9charg\u00e9e a une taille diff\u00e9rente\u202f: %1",

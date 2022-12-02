@@ -506,7 +506,7 @@
 	"\u7121\u6cd5\u53d6\u5f97\u5716\u7247\u3002": "Fal\u00ec a oten-e la plancia. ",
 	"\u5716\u7247\u7121\u5167\u5bb9\uff1a": "Plancia sensa contn\u00f9:",
 	"\u6a94\u6848\u904e\u5c0f\uff0c\u50c5 %1 {{PLURAL:%1|\u4f4d\u5143\u7d44}}\uff1a": "%1 {{PLURAL:%1|otet|}}, tr\u00f2p cit:",
-	"\u6a94\u6848\u50c5 %1 {{PLURAL:$1|\u4f4d\u5143\u7d44}}\uff1a": "%1 {{PLURAL:$2|otet}}:",
+	"\u6a94\u6848\u50c5 %1 {{PLURAL:%1|\u4f4d\u5143\u7d44}}\uff1a": "%1 {{PLURAL:$2|otet}}:",
 	"\u6216\u8a31\u5716\u7247\u662f\u5b8c\u6574\u7684\uff0c\u53ea\u662f\u904e\u5c0f\u800c\u672a\u9054\u6a19\uff0c\u4f8b\u5982\u5e7e\u4e4e\u70ba\u7a7a\u767d\u4e4b\u5716\u7247\u3002": "Peul desse che la plancia a l'\u00e9 completa, mach tr\u00f2p cita e nen conforma a l\u00eb st\u00e0ndard, tanme na plancia scasi veuida.",
 	"work_crawler-skip-image-error-prompt": "A peul defin\u00ec chiel MIN_LENGTH. P\u00ebr esempi, MIN_LENGTH=%1 a veul d\u00ec p\u00ebrm\u00ebtte na plancia con un m\u00ecn\u00ecm \u00ebd %1 otet; o ch'a definissa skip_error=true p\u00ebr ignor\u00e9 l'eror an sla plancia. Na vira otn\u00f9 l'archivi, ch'a mod\u00ecfica dasp\u00ebrchiel \u00ebl n\u00f2m \u00ebd l'archivi e ch'a gava \u00ebl sufiss %2 dal n\u00f2m d'archivi d'eror p\u00ebr saut\u00e9 cost eror.",
 	"\u4e0b\u8f09\u6240\u5f97\u7684\u5716\u7247\u5927\u5c0f\u4e0d\u540c\uff1a%1\u3002": "La plancia d\u00ebscari\u00e0 a l'ha na taja diferenta: %1.",
