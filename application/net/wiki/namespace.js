@@ -2470,8 +2470,9 @@ function module_code(library_namespace) {
 		return library_namespace.is_Object(page_data)
 		// treat as page data. Try to get page contents:
 		// revision_content(page.revisions[0])
+		&& page_data.revisions
 		// 一般說來應該是由新排到舊，[0] 為最新的版本 last revision。
-		&& page_data.revisions && page_data.revisions[revision_index || 0];
+		&& page_data.revisions[revision_index >= 1 ? revision_index | 0 : 0];
 	};
 
 	get_page_content.page_exists = function(page_data) {
@@ -2485,13 +2486,14 @@ function module_code(library_namespace) {
 		//
 		&& (('missing' in page_data)
 		// {title:'%2C',invalidreason:
-		// 'The requested page title contains invalid characters: "%2C".'
+		// 'The requested page title contains invalid characters:
+		// "%2C".'
 		// ,invalid:''}
 		|| ('invalid' in page_data)
 		//
-		|| typeof revision_content(
+		|| 'string' === typeof revision_content(
 		//
-		get_page_content.revision(page_data), true) === 'string');
+		get_page_content.revision(page_data, revision_index), true));
 	};
 
 	// CeL.wiki.content_of.edit_time(page_data) -
@@ -2519,8 +2521,8 @@ function module_code(library_namespace) {
 	 * @returns {Boolean} the page_data has / do not has contents.
 	 * @returns {Undefined} the page_data do not has contents.
 	 */
-	get_page_content.has_content = function(page_data) {
-		var revision = get_page_content.revision(page_data);
+	get_page_content.has_content = function(page_data, revision_index) {
+		var revision = get_page_content.revision(page_data, revision_index);
 		return !!revision_content(revision);
 	};
 

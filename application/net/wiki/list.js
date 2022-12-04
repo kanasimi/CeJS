@@ -2489,7 +2489,7 @@ function module_code(library_namespace) {
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
 					library_namespace.show_value(data);
-				callback();
+				callback(null, null, data);
 				return;
 			}
 

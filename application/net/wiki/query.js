@@ -986,6 +986,7 @@ function module_code(library_namespace) {
 	function handle_error(/* result of wiki_API.query() */data, error,
 			callback_only_on_error) {
 		// console.trace(arguments);
+		// console.log(JSON.stringify(data));
 		if (library_namespace.is_debug(3)
 		// .show_value() @ interact.DOM, application.debug
 		&& library_namespace.show_value)
@@ -1001,6 +1002,8 @@ function module_code(library_namespace) {
 			}
 			return error;
 		}
+
+		// assert: data && !error
 
 		if (data.warnings) {
 			for ( var action in data.warnings) {
@@ -1019,8 +1022,9 @@ function module_code(library_namespace) {
 
 		error.toString = error_toString;
 
+		if (// library_namespace.is_Object(error) &&
 		// e.g., {code:'',info:'','*':''}
-		if (error.code) {
+		error.code) {
 			if (false) {
 				library_namespace.error('wiki_API_query: ['
 				//
@@ -1054,7 +1058,13 @@ function module_code(library_namespace) {
 			error = new Error(message);
 			error.message = message;
 			error.code = data.error.code;
+			// error.info = data.error.info;
 			error.data = data.error;
+
+		} else if (typeof error === 'string') {
+			error = new Error(error);
+		} else {
+			// error = new Error(JSON.stringify(error));
 		}
 
 		if (typeof callback_only_on_error === 'function') {

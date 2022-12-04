@@ -657,6 +657,7 @@ function test_native() {
 		assert(['abcd', String(CeL.LCS('a1b2c3d', '1a2b3c4d', 'with_diff'))], 'LCS() #2');
 		assert(CeL.LCS('a1b2c3d', '1a2b3c4d', 'with_diff').diff.join(';').includes(',1;1,2;2,3;3,4'), 'LCS() #3');
 		assert(CeL.LCS('a1b2c3d', '1a2b3c4d', 'diff').join(';').includes(',1;1,2;2,3;3,4'), 'LCS() #4');
+		assert(['2,;5,4', CeL.LCS('1\n2\n3\n5\n', '1\n3\n4\n', { LCS: true, line: true, diff: true }).join(';')], 'LCS() #5');
 
 		assert(['品質,質量', CeL.LCS('品質', '質量', { diff: true, try_to_merge_diff: true }).join(';')], 'LCS() try_to_merge_diff #1');
 		assert(['品質,質量', CeL.LCS('1品質', '1質量', { diff: true, try_to_merge_diff: true }).join(';')], 'LCS() try_to_merge_diff #2');

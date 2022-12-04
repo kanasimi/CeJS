@@ -991,6 +991,7 @@ function module_code(library_namespace) {
 			}
 			if (options.titles_buffer)
 				page_list = options.titles_buffer.append(page_list);
+			page_list.revisions_parameters = action[1];
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
 			callback(page_list);
@@ -1715,7 +1716,12 @@ function module_code(library_namespace) {
 			}
 			// console.log(recent_options);
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
-			Object.assign(recent_options.parameters, {
+			recent_options.parameters = Object.assign({
+				// 盡可能多取一點以減少查詢次數。
+				rclimit : 'max'
+			}, recent_options.parameters, {
+				// 這些必須強制設定，否則演算法會出問題。
+
 				// List newest first (default).
 				// Note: rcstart has to be later than rcend.
 				// rcdir : 'older',
@@ -1953,6 +1959,7 @@ function module_code(library_namespace) {
 			}
 
 			get_recent(function process_rows(rows) {
+				// console.trace(rows);
 				if (!rows) {
 					library_namespace.warn((new Date).toISOString()
 							+ ': No rows get.');
@@ -2253,6 +2260,7 @@ function module_code(library_namespace) {
 								Object.assign(page_options, options.with_diff);
 							}
 
+							// console.trace([ row, page_options ]);
 							session.page(row, function(page_data, error) {
 								library_namespace.log_temporary(
 								// 'Get ' +
@@ -2276,6 +2284,7 @@ function module_code(library_namespace) {
 
 								// console.log(wiki_API.title_link_of(page_data));
 								var revisions = page_data.revisions;
+								// console.trace([ page_options, revisions ]);
 								if (latest_only && (!revisions || !revisions[0]
 								// 確定是最新版本 revisions[0].revid。
 								|| revisions[0].revid !== row.revid)) {
@@ -2404,6 +2413,7 @@ function module_code(library_namespace) {
 									}
 
 									if (options.with_diff.LCS) {
+										// console.trace([ from, to ]);
 										row.diff = library_namespace.LCS(from,
 												to, options.with_diff);
 

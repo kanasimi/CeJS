@@ -440,24 +440,35 @@ function module_code(library_namespace) {
 				next.splice(2, 0, null);
 			}
 
+			var revisions_parameters = next[1] && next[1].revisions_parameters
+					|| Object.create(null);
 			// → 此法會採用所輸入之 page data 作為 this.last_page，不再重新擷取 page。
 			if (wiki_API.is_page_data(next[1])
+			// 檢查是否非 cached 的內容。
+			&& (!next[3] || (!next[3].rvprop
+			//
+			|| next[3].rvprop === revisions_parameters.rvprop))
 			// 必須有頁面內容，要不可能僅有資訊。有時可能已經擷取過卻發生錯誤而沒有頁面內容，此時依然會再擷取一次。
-			&& (wiki_API.content_of.has_content(next[1])
+			&& (wiki_API.content_of.has_content(next[1],
+			//
+			next[3] && next[3].rvlimit - 1)
 			// 除非剛剛才取得，同一個執行緒中不需要再度取得內容。
 			|| next[3] && next[3].allow_missing
 			// 確認真的是不存在的頁面。預防一次擷取的頁面內容太多，或者其他出錯情況，實際上沒能成功取得頁面內容，
 			// next[1].revisions:[]
-			&& ('missing' in next[1]))) {
+			&& (('missing' in next[1]) || ('invalid' in next[1])))) {
 				library_namespace.debug('採用所輸入之 '
 						+ wiki_API.title_link_of(next[1])
 						+ ' 作為 this.last_page。', 2, 'wiki_API.prototype.next');
+				// console.trace(next);
 				this.last_page = next[1];
 				// console.trace(next[1]);
 				// next[2] : callback
 				this.next(next[2], next[1]);
 				break;
 			}
+			// free
+			revisions_parameters = null;
 
 			if (this.last_page_title === next[1]
 					&& this.last_page_options === next[3]) {

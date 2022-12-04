@@ -157,20 +157,10 @@ function module_code(library_namespace) {
 			action : action
 		}, function(response, error) {
 			// console.log(JSON.stringify(response));
-			error = error || response && response.error;
-			if (error) {
-				if (typeof error === 'string') {
-					error = new Error(error);
-				} else if (library_namespace.is_Object(error)) {
-					if (error.code && error.info)
-						error = new Error(error.code + ': ' + error.info);
-					else
-						error = new Error(JSON.stringify(error));
-				}
-				callback(response, error);
-			} else {
-				callback(response[action]);
+			if (wiki_API.query.handle_error(response, error, callback)) {
+				return;
 			}
+			callback(response[action]);
 		}, parameters, options);
 	}
 

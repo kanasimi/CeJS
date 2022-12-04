@@ -103,7 +103,7 @@ function module_code(library_namespace) {
 				//
 				&& data.warnings.query && data.warnings.query['*'])
 					library_namespace.warn(data.warnings.query['*']);
-				callback();
+				callback(data, error);
 				return;
 			}
 
@@ -119,7 +119,7 @@ function module_code(library_namespace) {
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
 					library_namespace.show_value(data);
-				callback();
+				callback(null, data);
 				return;
 			}
 
