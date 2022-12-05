@@ -255,7 +255,7 @@
 	"error-socket-hang-up": "La « socket » s’est déconnectée",
 	"error-unexpected-end-of-file": "Données reçues incomplètes",
 	"error-write-econnaborted": "Le logiciel a causé un abandon de la connexion",
-	"the-chunk-do-not-has-regular-.content_length": "Le morceau n’a pas une valeur entière normale pour sa longueur de contenu (« content_length ») !",
+	"the-chunk-do-not-has-regular-.content_length": "Le tronçon n’a pas une valeur entière normale pour sa longueur de contenu (« content_length ») !",
 	"illegal-chunk.content_length": "Valeur illégale pour la longueur de contenu du fragment (« chunk.content_length ») !",
 	"retry-too-many-times": "Nouvelles tentatives trop nombreuses !",
 	"failed-to-get-file-$1": "Échec d’obtention du fichier : [%1]",
