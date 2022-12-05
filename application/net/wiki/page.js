@@ -2043,8 +2043,9 @@ function module_code(library_namespace) {
 				}).join(', ') : ''), 1);
 				library_namespace.log_temporary('add_listener: '
 						+ last_query_time + ' ('
-						+ library_namespace.indicate_date_time(last_query_time)
-						+ ')');
+						+ library_namespace.indicate_date_time(
+						//
+						last_query_time) + ')');
 
 				// 使 wiki.listen() 可隨時監視設定頁面與緊急停止頁面的變更。
 				// 警告: 對於設定頁面的監聽，僅限於設定頁面也在監聽範圍中時方起作用。
@@ -2199,15 +2200,15 @@ function module_code(library_namespace) {
 				};
 
 				if (rows.length > 0) {
-					library_namespace
-							.log_temporary('add_listener.with_diff: Get '
-									+ rows.length + ' page(s) starting from '
-									+ wiki_API.title_link_of(rows[0]));
+					library_namespace.log_temporary('add_listener.with_diff: '
+							+ 'Fetching ' + rows.length
+							+ ' page(s) starting from '
+							+ wiki_API.title_link_of(rows[0]));
 
-					library_namespace.debug('Get ' + rows.length
+					library_namespace.debug('Fetching ' + rows.length
 							+ ' recent pages:\n' + rows.map(function(row) {
 								return row.revid;
-							}), 2, 'add_listener');
+							}), 2, 'add_listener.with_diff');
 
 					// 比較頁面修訂差異。
 					if (options.with_diff || options.with_content >= 2) {
@@ -2222,7 +2223,8 @@ function module_code(library_namespace) {
 								console.trace([ index + '/' + rows.length,
 										row.title ]);
 							}
-							if (!row.pageid) {
+							// 應該不會出現這種狀況。
+							if (false && !row.pageid) {
 								run_next();
 								return;
 							}
@@ -2261,6 +2263,14 @@ function module_code(library_namespace) {
 							}
 
 							// console.trace([ row, page_options ]);
+							library_namespace.log_temporary(
+							//
+							'add_listener.with_diff: ' + 'Fetching '
+									+ (index + 1) + '/' + rows.length + ': '
+									+ wiki_API.title_link_of(row) + ' ('
+									+ library_namespace.indicate_date_time(
+									//
+									last_query_time) + ')');
 							session.page(row, function(page_data, error) {
 								library_namespace.log_temporary(
 								// 'Get ' +
@@ -2271,10 +2281,9 @@ function module_code(library_namespace) {
 										+ (100 * (index + 1) / rows.length)
 												.to_fixed(1) + '%) '
 										+ wiki_API.title_link_of(row) + ' ('
-										+ library_namespace
-										//
-										.indicate_date_time(last_query_time)
-										+ ')');
+										+ library_namespace.indicate_date_time(
+										// Date.parse(wiki_API.content_of.revision(page_data).timestamp)
+										last_query_time) + ')');
 								if (quit_listening || !page_data || error) {
 									if (error)
 										console.error(error);
@@ -2440,9 +2449,7 @@ function module_code(library_namespace) {
 					// use options.with_content as the options of wiki.page()
 					if (options.with_content || configuration_row) {
 						// TODO: 考慮所傳回之內容過大，i.e. 回傳超過 limit (12 MB)，被截斷之情形。
-						session.page(rows.map(function(row) {
-							return row.pageid;
-						}), function(page_list, error) {
+						session.page(rows, function(page_list, error) {
 							if (error || !Array.isArray(page_list)) {
 								// e.g., 還原編輯
 								// wiki_API.page: Unknown response:
@@ -2484,7 +2491,7 @@ function module_code(library_namespace) {
 							// Deprecated: rvdiffto, rvcontentformat
 							// rvdiffto : 'prev',
 							// rvcontentformat : 'text/javascript',
-							is_id : true,
+							// is_id : true,
 							multi : true
 						}, options.with_content));
 						return;

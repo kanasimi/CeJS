@@ -246,7 +246,7 @@
 	"Error: socket hang up": "La \u00ab\u202fsocket\u202f\u00bb s\u2019est d\u00e9connect\u00e9e",
 	"Error: unexpected end of file": "Donn\u00e9es re\u00e7ues incompl\u00e8tes",
 	"Error: write ECONNABORTED": "Le logiciel a caus\u00e9 un abandon de la connexion",
-	"The chunk do not has regular .content_length!": "Le morceau n\u2019a pas une valeur enti\u00e8re normale pour sa longueur de contenu (\u00ab\u202fcontent_length\u202f\u00bb)\u202f!",
+	"The chunk do not has regular .content_length!": "Le tron\u00e7on n\u2019a pas une valeur enti\u00e8re normale pour sa longueur de contenu (\u00ab\u202fcontent_length\u202f\u00bb)\u202f!",
 	"Illegal chunk.content_length!": "Valeur ill\u00e9gale pour la longueur de contenu du fragment (\u00ab\u202fchunk.content_length\u202f\u00bb)\u202f!",
 	"Retry too many times!": "Nouvelles tentatives trop nombreuses\u202f!",
 	"Failed to get file: [%1]": "\u00c9chec d\u2019obtention du fichier\u202f: [%1]",
