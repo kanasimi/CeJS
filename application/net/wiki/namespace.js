@@ -1421,7 +1421,9 @@ function module_code(library_namespace) {
 		// console.trace(page_title);
 
 		function to_namespace(page_title) {
-			return namespace + remove_page_title_namespace(page_title, options);
+			return page_title || page_title === 0 ? namespace
+					+ remove_page_title_namespace(page_title, options)
+					: page_title;
 		}
 
 		if (Array.isArray(page_title)) {

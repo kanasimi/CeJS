@@ -4082,7 +4082,8 @@ function module_code(library_namespace) {
 
 	_.sort_periods = sort_periods;
 
-	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
+	// ---------------------------------------------------------------------//
+	// export 導出.
 
 	library_namespace.set_method(String.prototype, {
 		to_Date : set_bind(String_to_Date)

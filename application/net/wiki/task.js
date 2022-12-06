@@ -712,6 +712,7 @@ function module_code(library_namespace) {
 			// next[1]: page_title
 			if (next[3].namespace)
 				next[1] = this.to_namespace(next[1], next[3].namespace);
+			// console.trace(next[1]);
 			next[1] = this.normalize_title(next[1]);
 			if (!next[1]) {
 				library_namespace.error([
@@ -732,7 +733,7 @@ function module_code(library_namespace) {
 			if (next[3].reget) {
 			} else if (Array.isArray(next[1])) {
 				next[1] = next[1].filter(function(page_title) {
-					return !(page_title in _this.redirects_data);
+					return page_title && !(page_title in _this.redirects_data);
 				}).unique();
 				if (next[1].length === 0) {
 					// next[2] : callback(root_page_data, error)

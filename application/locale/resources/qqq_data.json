@@ -1626,7 +1626,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1056}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2611}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2623}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1217}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1219}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L490}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L513}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1056}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2612}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2624}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1217}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1219}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L490}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L513}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-changes": {
@@ -1634,7 +1634,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1128}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1139}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3076}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1128}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1139}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3077}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-modified": {
@@ -1642,7 +1642,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1130}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3054}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1130}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3055}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"to-chinese-numerals": {
@@ -2766,7 +2766,7 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L329}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1252}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L327}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L332}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L336}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L681}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L891}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L930}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L721}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L728}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L329}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1252}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L327}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L332}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L336}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L681}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L891}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L930}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L722}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L729}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2774,14 +2774,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3033}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3035}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3517}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3519}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -2963,14 +2963,14 @@
 	"no-page-redirects-to-this-page": {
 		"message": "無頁面重定向至本頁",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L852}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L853}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"total-$1-pages-redirected-to-this-page": {
 		"message": "共有%1個{{PLURAL:%1|頁面}}重定向至本頁",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: count of pages",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L854}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L855}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-change": {
@@ -2978,7 +2978,7 @@
 		"notes": "Used as log message. 無更動 沒有變更 No modification made",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2568}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2617}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2569}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2618}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"finished-$1": {
@@ -2986,7 +2986,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2581}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2582}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-elapsed-$3-at-$2": {
@@ -2994,7 +2994,7 @@
 		"notes": "Used as log message. e.g., 2 s elapsed, finished at 20010101T0000",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2635}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2636}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"first-it-takes-$1-to-get-$2-pages": {
@@ -3002,7 +3002,7 @@
 		"notes": "Used as log message. Showing elapsed time. e.g., First, use 2 s to get 20 pages.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2721}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2722}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"processed-$1-pages": {
@@ -3010,38 +3010,38 @@
 		"original_message_language_code": "en-US",
 		"notes": "%1 個頁面處理完畢。",
 		"parameters": "%1: count of pages",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2805}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1554}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2806}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1554}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"page-handling-function-error-$1": {
 		"message": "Page handling function error: %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2848}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2849}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"edit-$1": {
 		"message": "Edit %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: {String}}NO/total page count",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2910}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2911}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"missing-page": {
 		"message": "Missing page",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2915}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2916}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-page-title": {
 		"message": "Invalid page title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2919}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2920}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"page-edit-function-error-$1": {
 		"message": "Page edit function error: %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2947}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2948}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-pages-processed": {
@@ -3050,14 +3050,14 @@
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: {String}count summary, e.g., \"18/20\". %2: page count",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2995}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3040}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2996}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3041}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-bot-operation-is-completed-$1$-in-total": {
 		"message": "本次bot作業已進行%1%",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Overall progress. 整體作業進度。用在編輯摘要時通常放在最後面，預防擠掉更重要的內容。; Repositories: {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3032}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L648}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L161}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3033}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L648}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L162}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-pages-have-not-changed": {
@@ -3066,7 +3066,7 @@
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page count",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3056}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3057}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-elapsed": {
@@ -3074,7 +3074,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3061}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3062}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"stopped-give-up-editing": {
@@ -3082,7 +3082,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3072}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3073}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"processing-chunks-$1-$2": {
@@ -3090,13 +3090,13 @@
 		"notes": "",
 		"parameters": "%1: start chunk NO, %2: end chunk NO",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3347}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3348}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-user-name-or-password-provided.-the-login-attempt-was-abandoned": {
 		"message": "No user name or password provided. The login attempt was abandoned.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3706}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3707}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"must-rename-$1-to-$2-to-work": {
@@ -8269,7 +8269,7 @@
 	"fixing-broken-anchor": {
 		"message": "修正失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L976}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L977}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-to-remove-$1-inactive-anchors": {
@@ -8278,7 +8278,7 @@
 		"parameters": "%1: count of anchors",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
 		"fIXME": "https://github.com/kanasimi/CeJS/issues/33",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1088}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1094}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1089}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1095}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"anchor-$1-links-to-a-specific-web-page-$2": {
@@ -8286,7 +8286,7 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "As a note phrase in talk pages.",
 		"parameters": "%1: link to a web anchor, %2: link to the target page",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1167}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1334}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1168}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1335}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": {
@@ -8294,14 +8294,14 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: revid, %2: anchor name",
 		"notes": "{{tl|Broken anchors}}の内で表示。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1174}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1175}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-of-an-inactive-anchor": {
 		"message": "提醒失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1179}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1188}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1180}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1189}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"update-links-to-archived-section-$1-$2": {
@@ -8309,35 +8309,35 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: percentage 百分比 e.g., \"42%\"; %2: links being processed 正在處理的連結",
 		"notes": "Use in edit summaries. 用於編輯註解。[[w:ja:Wikipedia:井戸端/subj/議論の過去ログのリンク修正はいかがでしょうか|過去ログリンク修正]]の編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1263}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1264}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"incorrect-capitalization-spaced-section-title": {
 		"message": "大小寫或空白相異的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。 Too different to be considered as the same meaning.",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1301}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1302}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"inconsistency-between-traditional-and-simplified-chinese": {
 		"message": "繁簡不符匹配而失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1304}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1305}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"very-different": {
 		"message": "差異極大",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries to mark edits that need special attention. Too different to be regarded as the same meaning. 用於編輯註解以標註特別需要注意的編輯。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1316}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1317}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"please-help-to-check-this-edit": {
 		"message": "請幫忙檢核此次編輯。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。應採用不存在的頁面名稱，將用紅色連結顯示以突顯警告效果。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1369}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1370}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1→most-alike-anchor-$2": {
@@ -8345,7 +8345,7 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: original anchor, %2: target anchor",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1377}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1378}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"archiving-operation": {

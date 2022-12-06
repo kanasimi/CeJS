@@ -677,14 +677,15 @@ function module_code(library_namespace) {
 		// @see
 		// https://github.com/tongwentang/tongwen-core/blob/master/src/converter/map/convert-phrase.ts
 		for (var index = 0, length = text.length; index < length;) {
+			// 本次要測試的文字。
 			var text_to_convert = text.slice(index, Math.min(length, index
 					+ max_key_length));
 
-			var text_to_convert_length;
+			var text_to_convert_length = text_to_convert.length;
 			while (true) {
-				text_to_convert_length = text_to_convert.length;
 				var map = pair_Map_by_length[text_to_convert_length];
 				if (map && map.has(text_to_convert)) {
+					// Found.
 					if (show_matched) {
 						library_namespace.info(text_to_convert + '→'
 								+ map.get(text_to_convert));
@@ -700,7 +701,9 @@ function module_code(library_namespace) {
 				}
 
 				// 長先短後 詞先字後
-				text_to_convert = text_to_convert.slice(0, -1);
+				text_to_convert = text_to_convert.slice(0,
+				// 截短1字元再做下一輪測試。
+				--text_to_convert_length);
 			}
 
 			// console.log(index + '→' + (index + text_to_convert_length));
@@ -709,6 +712,7 @@ function module_code(library_namespace) {
 				continue;
 			}
 
+			// 依照分界點分割 converted_text_slice。
 			while (true) {
 				// 先計算還不夠的長度。
 				var _length = demarcation_points[converted_text_list.length]
@@ -979,6 +983,9 @@ function module_code(library_namespace) {
 		// assert: key_1 !== key_2
 		: key_1 < key_2 ? -1 : 1;
 	}
+
+	// ---------------------------------------------------------------------//
+	// export 導出.
 
 	library_namespace.set_method(Convert_Pairs.prototype, {
 		get_value : Convert_Pairs__get_value,
