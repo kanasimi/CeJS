@@ -2497,6 +2497,14 @@ function module_code(library_namespace) {
 				return all;
 			}
 
+			// HTML tags that must be closed.
+			// <pre>...</pre>, <code>int f()</code>
+			// 像是 <b>|p=</b> 會被分割成不同 parameters，
+			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
+			if (!matched && options.inside_transclusion && inner.includes('|')) {
+				return all;
+			}
+
 			matched = (tag.toLowerCase() !== 'nowiki'
 			// 假如是 <nowiki /> 則需要搜尋是否有 <nowiki>。
 			|| attributes && attributes.endsWith('/'))
@@ -3418,14 +3426,8 @@ function module_code(library_namespace) {
 		// console.trace(PATTERN_non_extensiontags);
 		// console.trace(wikitext);
 
-		// HTML tags that must be closed.
-		// <pre>...</pre>, <code>int f()</code>
-		// 像是 <b>|p=</b> 會被分割成不同 parameters，
-		// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
-		if (!options.inside_transclusion) {
-			wikitext = wikitext.replace_till_stable(PATTERN_non_extensiontags,
-					parse_HTML_tag);
-		}
+		wikitext = wikitext.replace_till_stable(PATTERN_non_extensiontags,
+				parse_HTML_tag);
 
 		// ----------------------------------------------------
 		// single tags. e.g., <hr />

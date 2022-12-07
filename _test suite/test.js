@@ -3666,6 +3666,18 @@ function test_wiki() {
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #15-1');
 		assert([parsed.name, parsed.page_title], 'wiki.parse.transclusion #15-2');
 		assert(parsed.page_title.startsWith('Template:'), 'wiki.parse.transclusion #15-3');
+		wikitext = '{{t|<sup>s</sup>}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #16');
+		assert(['sup', parsed.parameters[1].tag], 'wiki.parse.transclusion #16-1');
+		assert(['s', parsed.parameters[1][1].toString()], 'wiki.parse.transclusion #16-2');
+		wikitext = '{{t|p=a<sup>s</sup>}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #17');
+		assert(['sup', parsed.parameters.p[1].tag], 'wiki.parse.transclusion #17-1');
+		assert(['s', parsed.parameters.p[1][1].toString()], 'wiki.parse.transclusion #17-2');
+		wikitext = '{{t|p=a<sup>s</sup>b<sup>t</sup>c}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #18');
+		assert(['sup', parsed.parameters.p[1].tag], 'wiki.parse.transclusion #18-1');
+		assert(['s', parsed.parameters.p[1][1].toString()], 'wiki.parse.transclusion #18-2');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -5088,7 +5100,7 @@ function finish_test(type) {
 	}
 }
 
-var all_test_items = {
+var all_test_groups = {
 	console: ['interact.console', test_console],
 	locale: ['application.locale', test_locale],
 	// 基本的功能先作測試。
@@ -5128,27 +5140,27 @@ function do_test() {
 	CeL.Log.interval = 0;
 
 	//console.log(CeL.env.argv);
-	var test_items = [];
+	var test_groups = [];
 	if (CeL.env.argv.length === 2) {
-		for (var item in all_test_items)
-			test_items.push(item);
+		for (var group in all_test_groups)
+			test_groups.push(group);
 	} else {
 		//`node "_test suite\test.js" wiki`
 		for (var index = 2; index < CeL.env.argv.length; index++) {
-			var item = CeL.env.argv[index], matched;
-			if (item in all_test_items) {
-				test_items.push(item);
-			} else if (matched = item.match(/^(?:set_)?debug=(\d)$/)) {
+			var group = CeL.env.argv[index], matched;
+			if (group in all_test_groups) {
+				test_groups.push(group);
+			} else if (matched = group.match(/^(?:set_)?debug=(\d)$/)) {
 				CeL.set_debug(+matched[1]);
 			}
 		}
 	}
 
-	console.log('do_test: ' + test_items.length + ' item(s) to test: ' + test_items.join(', '));
+	console.log('do_test: ' + test_groups.length + ' group(s) to test: ' + test_groups.join(', '));
 
-	for (var index = 0; index < test_items.length; index++) {
-		var item = test_items[index];
-		test_items[index] = all_test_items[item];
+	for (var index = 0; index < test_groups.length; index++) {
+		var group = test_groups[index];
+		test_groups[index] = all_test_groups[group];
 	}
 
 	CeL.run(
@@ -5157,7 +5169,7 @@ function do_test() {
 		//
 		//function () { CeL.set_debug(0); },
 		//
-		test_items,
+		test_groups,
 		//
 		function () {
 			still_running.all_configured = true;

@@ -1394,8 +1394,9 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
 			// <source lang="cpp">
 			.replace(/<\/?(?:nowiki|code|syntaxhighlight)>/g, '')
-			// link → page title
-			.replace(/^\[\[([^{}\[\]\|<>\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/, '$1')
+			// wikilink → page title
+			.replace(/^\[\[ *:?([^{}\[\]\|<>\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/,
+					'$1')
 			// Remove comments
 			.replace(/<!--[\s\S]*?-->/g, '');
 			try {

@@ -2137,14 +2137,16 @@ function finish(name_space) {
 										+ Object.keys(tests_left));
 							}
 							report();
-						}, function(e) {
-							console.trace(e);
-							conditions_error(e);
+						}, function(error) {
+							console.trace(error);
+							conditions_error(error);
 						});
-					} else {
-						assert_proxy.tests_loaded = true;
+						// Waiting...
+						return;
 					}
-					if (tests_count) {
+
+					assert_proxy.tests_loaded = true;
+					if (tests_count > 0) {
 						// console.trace([ tests_count, tests_left ]);
 						CeL.debug('尚餘 ' + tests_count + ' 個任務組測試中。', 1,
 								'CeL.log.test');

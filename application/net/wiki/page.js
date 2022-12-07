@@ -2217,6 +2217,7 @@ function module_code(library_namespace) {
 						// rvdiffto=prev 已經 parsed，因此仍須自行解析。
 						// TODO: test
 						// 因為採用.run_serial(.page())，因此約一秒會跑一頁面。
+						// TODO: 改 .shift()
 						rows.run_serial(function(run_next, row, index, list) {
 							// console.log(row);
 							if (false) {
