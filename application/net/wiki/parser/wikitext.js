@@ -821,7 +821,8 @@ function module_code(library_namespace) {
 		return Array.isArray(value) && value.type;
 	}
 
-	// 可算 function preprocess_section_link_token(token, options) 的簡化版
+	// 可算 function preprocess_section_link_token(token, options) 的簡化版。
+	// 可能保留 "\n" 必須自己 .trim()。
 	function wiki_token_to_key(token) {
 		if (!Array.isArray(token))
 			return token;
@@ -3332,8 +3333,11 @@ function module_code(library_namespace) {
 		// [[mw:Help:Magic words]], [[mw:Writing systems/LanguageConverter]]
 		// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageConverter_8php_source.html
 		// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
+
+		// https://phabricator.wikimedia.org/source/mediawiki/browse/master/includes/languages/data/ZhConversion.php
+		// https://github.com/wikimedia/mediawiki/blob/master/includes/languages/data/ZhConversion.php
 		// https://doc.wikimedia.org/mediawiki-core/master/php/ZhConversion_8php_source.html
-		// https://github.com/wikimedia/mediawiki/blob/master/languages/data/ZhConversion.php
+
 		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
 		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
 		// TODO:
@@ -3759,6 +3763,7 @@ function module_code(library_namespace) {
 
 	// export 導出.
 
+	// CeL.wiki.parse.*
 	Object.assign(parse_wikitext, {
 		wiki_token_toString : wiki_token_toString,
 		wiki_token_to_key : wiki_token_to_key,

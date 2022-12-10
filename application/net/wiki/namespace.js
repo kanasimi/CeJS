@@ -1362,11 +1362,19 @@ function module_code(library_namespace) {
 	 */
 	function remove_page_title_namespace(page_title, options) {
 		page_title = wiki_API.normalize_title(page_title, options);
+		// console.trace(page_title);
+		if (Array.isArray(page_title)) {
+			return page_title.map(function(_page_title) {
+				return remove_page_title_namespace(_page_title, options);
+			});
+		}
+
 		if (typeof page_title !== 'string') {
 			library_namespace.debug(page_title, 5,
 					'remove_page_title_namespace');
 			return page_title;
 		}
+
 		var session = session_of_options(options);
 		var namespace_pattern = session
 				&& session.configurations.namespace_pattern
@@ -2213,7 +2221,7 @@ function module_code(library_namespace) {
 
 		if (typeof page_data === 'string') {
 			// 例外處理: ':zh:title' → 'zh:title'
-			page_data = page_data.replace(/^[\s:]+/, '')
+			page_data = normalize_page_name(page_data.replace(/^[\s:]+/, ''))
 		} else {
 			// e.g., page_data === undefined
 		}

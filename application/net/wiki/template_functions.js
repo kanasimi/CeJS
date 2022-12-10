@@ -199,7 +199,7 @@ function module_code(library_namespace) {
 	// const
 	// var NS_MediaWiki = wiki_API.namespace('MediaWiki');
 	var NS_Module = wiki_API.namespace('Module');
-	// var NS_Template = wiki_API.namespace('Template');
+	var NS_Template = wiki_API.namespace('Template');
 
 	var PATTERN_Item_function = /(\W)Item\s*\(arg,arg(?:,arg)?\)/g;
 	PATTERN_Item_function = new RegExp(PATTERN_Item_function.source.replace(
@@ -219,12 +219,22 @@ function module_code(library_namespace) {
 	// 汲取 page_data 中所有全局轉換（全頁面語言轉換），並交給 processor 處理。
 	// processor({type: 'item', rule: '', original: ''})
 	// Warning: Will modify `page_data.parsed`
+	// @see routine/20191129.check_language_conversion.js
 	function parse_conversions(page_data, options) {
 		var conversion_list = [];
 		if (!page_data)
 			return conversion_list;
 
 		if (page_data.ns === NS_Module) {
+			var matched = page_data.title.match(/\/(list|doc|temp|sandbox)$/i);
+			if (matched) {
+				library_namespace
+						.info('parse_conversions: Skip document / temporary / list page: '
+								+ wiki_API.title_link_of(page_data));
+				conversion_list.skipped = matched[1];
+				return conversion_list;
+			}
+
 			if (false) {
 				library_namespace.info('parse_conversions: ' + page_data.title);
 			}
@@ -248,6 +258,21 @@ function module_code(library_namespace) {
 					return prefix + "{type='item',original=" + original
 							+ ",rule=" + rule + "}";
 				});
+			} else if ((matched = object
+					// e.g., Module:CGroup/C Module:CGroup/HalfLife
+					.match(/^(?:--.*\n)*[\s\n]*return\s+(require)\s*\(\s*(['"])([^\n]+?)\2\s*\)\s*;?/))
+					|| (matched = object
+							// e.g., Module:CGroup/Mythology
+							.match(/^(?:--.*\n)*[\s\n]*return\s+{\s*(name)\s*=\s*(['"])([^\n]+?)\2\s*}\s*;?/))) {
+				matched = (matched[1] === 'name' ? 'Module:CGroup/' : '')
+						+ matched[3];
+				library_namespace.info('parse_conversions: 公共轉換組模塊 '
+						+ wiki_API.title_link_of(page_data)
+						// 重定向
+						+ ' 重新導向至: ' + wiki_API.title_link_of(matched));
+				conversion_list.skipped = 'redirected';
+				conversion_list.redirect_to = matched;
+				return conversion_list;
 			}
 			object = wiki_API.parse.lua_object(object);
 
@@ -256,6 +281,7 @@ function module_code(library_namespace) {
 				library_namespace
 						.error('parse_conversions: Invalid conversion group: '
 								+ wiki_API.title_link_of(page_data));
+				conversion_list.skipped = 'invalid';
 				return conversion_list;
 			}
 			// console.log(object);
@@ -265,13 +291,24 @@ function module_code(library_namespace) {
 			return conversion_list;
 		}
 
+		// ----------------------------------------------------------
 		// console.log(page_data);
 
-		var parsed;
+		var parsed = wiki_API.content_of(page_data), redirect_to = wiki_API.parse
+				.redirect(parsed);
+		if (redirect_to) {
+			library_namespace.info('parse_conversions: 公共轉換組模塊 '
+					+ wiki_API.title_link_of(page_data)
+					// 重定向
+					+ ' 重新導向至: ' + wiki_API.title_link_of(redirect_to));
+			conversion_list.skipped = 'redirected';
+			conversion_list.redirect_to = redirect_to;
+			return conversion_list;
+		}
+
 		if (page_data.title
 				&& page_data.title.startsWith('MediaWiki:Conversiontable/')) {
 			// assert: page_data.ns === NS_MediaWiki
-			parsed = wiki_API.content_of(page_data);
 			parsed = wiki_API.parser(parsed.replace(
 			//
 			/-{([\s\S]+?)}-/g, function(all, inner) {
@@ -352,8 +389,15 @@ function module_code(library_namespace) {
 				break;
 			}
 
-			if (!item.rule)
+			if (!item.rule) {
+				var matched = token.name.match(/^CGroup\/([^\/]+)/);
+				if (matched) {
+					if (!conversion_list.transclusions)
+						conversion_list.transclusions = [];
+					conversion_list.transclusions.push(matched[1]);
+				}
 				return;
+			}
 
 			if (Array.isArray(item.rule)) {
 				item.rule.forEach(function(token, index) {
@@ -364,7 +408,7 @@ function module_code(library_namespace) {
 
 					</code>
 					 */
-					if (token.type === 'transclusion' && token.name === '=')
+					if (token.is_magic_word && token.name === '=')
 						item.rule[index] = '=';
 				});
 			}
@@ -373,6 +417,17 @@ function module_code(library_namespace) {
 		}
 
 		parsed.each('template', for_each_template);
+
+		if (conversion_list.transclusions) {
+			library_namespace.info('parse_conversions: '
+			//
+			+ (page_data.ns === NS_Module
+			//
+			|| page_data.ns === NS_Template ? '公共轉換組模塊' : '頁面 ')
+					+ wiki_API.title_link_of(page_data) + ' 內嵌轉換組: '
+					+ conversion_list.transclusions.join(', '));
+			conversion_list.categories = parsed.get_categories();
+		}
 
 		return conversion_list;
 	}

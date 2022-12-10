@@ -391,14 +391,30 @@ function module_code(library_namespace) {
 					continue;
 				}
 
-				var skip_replacement;
+				var skip_replacement = undefined;
 				if (options.value_only
 						&& (typeof replace_to === 'string' || typeof replace_to === 'number')) {
 					var this_parameter = template_token[template_token.index_of[replace_from]];
-					// keep spaces and parameter name.
+					var parameters = template_token.parameters;
+
+					// using this_parameter[2] to keep spaces and parameter
+					// name.
 					// e.g., "| key<!---->=1 |" → "| key<!---->=2 |"
 					// NOT: "| key<!---->=1 |" → "| key=2 |"
-					this_parameter[2] = replace_to;
+					if (parameters && parameters[replace_from]) {
+						this_parameter[2] = this_parameter[2].toString()
+						// 留下註解之類。
+						.replace(parameters[replace_from], function(all) {
+							skip_replacement = 1;
+							return replace_to;
+						});
+					}
+					if (!skip_replacement)
+						this_parameter[2] = replace_to;
+					if (parameters) {
+						// Also update parameters
+						parameters[replace_from] = replace_to;
+					}
 					skip_replacement = 1;
 
 					// @deprecated:
@@ -1785,10 +1801,12 @@ function module_code(library_namespace) {
 	// object = CeL.wiki.parse.lua_object(page_data.wikitext);
 	// @see https://www.lua.org/manual/5.3/manual.html#3.1
 	// TODO: secutity check
-	function parse_lua_object_code(lua_code) {
+	function parse_lua_object_code(lua_code, options) {
+		options = library_namespace.setup_options(options);
 		lua_code = wiki_API.content_of(lua_code);
-		if (!/^[;\s\n]*return[\s\n]*{/.test(lua_code.replace(
-				/(\n|^)[;\s]*--[^\n]*/g, ''))) {
+		if (!options.force_parse
+				&& !/^[;\s\n]*return[\s\n]*{/.test(lua_code.replace(
+						/(\n|^)[;\s]*--[^\n]*/g, ''))) {
 			library_namespace.warn('parse_lua_object_code: Invalid lua code? '
 			//
 			+ (typeof lua_code === 'string' && lua_code.length > 200
@@ -1812,10 +1830,10 @@ function module_code(library_namespace) {
 			return "__strings[" + (__strings.length - 1) + "]";
 		});
 
-		// console.log(lua_code);
 		library_namespace.debug(
 				"Convert `\"string\"`, `'string'` to \"string\"", 6,
 				'parse_lua_object_code');
+		// console.trace(lua_code);
 		lua_code = lua_code
 				.replace(
 						/("(?:\\[\s\S]|[^\\\n"])*"|'(?:\\[\s\S]|[^\\\n'])*')(?:\\t|[\s\n]|--[^\n]*\n)*(?:(\.\.)(?:\\t|[\s\n]|--[^\n]*\n)*)?/g,
@@ -1824,35 +1842,66 @@ function module_code(library_namespace) {
 							return JSON.stringify(string)
 									+ (concatenation || '');
 						});
-		// console.log(lua_code);
+		// console.trace(lua_code);
 		if (false) {
 			library_namespace
 					.debug(
 							"remove comments after / between strings: `''..\\n--\\n''` , ``''--`",
 							6, 'parse_lua_object_code');
+			// console.trace(lua_code);
 			lua_code = lua_code
 					.replace_till_stable(
 							/"((?:\\[\s\S]|[^\\"])*)"(?:\\t|[\s\n])*(\.\.(?:\\t|[\s\n])*)?--[^\n]*/g,
 							'$1$2');
-			// console.log(lua_code);
 		}
 
-		library_namespace.debug('concat `"string".."`', 6,
+		// --------------------------------------
+
+		// prevent patch fieldsep ::= ‘,’ | ‘;’ below
+		// 必須是在富源乾不會被更動的代碼!
+		var MARK_as_object = '\0as_object';
+		// console.trace([ lua_code.slice(0, 800), lua_code.slice(-800) ]);
+
+		// e.g., parse
+		// https://raw.githubusercontent.com/wikimedia/mediawiki/master/includes/languages/data/ZhConversion.php
+		lua_code = lua_code.replace(
+		// e.g., ["A"=>"B","C"=>"D",]
+		/\[\s*((?:"[^"]*"\s*=>\s*"[^"]*"\s*(?:,\s*)?)+)\]/g,
+		// → {"A":"B","C":"D",}
+		function(all, inner) {
+			if (false) {
+				console.trace([ inner.length, inner.slice(0, 800),
+						inner.slice(-800) ]);
+			}
+			inner = inner.replace(/("[^"]*")\s*=>\s*("[^"]*")/g, function(all,
+					from, to) {
+				return from + ':' + to;
+			});
+			return MARK_as_object + inner.replace(/,\s*$/, '') + '}';
+		});
+
+		// --------------------------------------
+
+		library_namespace.debug('concat `"string".."string"`', 6,
 				'parse_lua_object_code');
 		// Lua denotes the string concatenation operator by " .. " (two dots).
 		lua_code = lua_code.replace_till_stable(
 				/("(?:\\[\s\S]|[^\\"])+)"(?:\\t|[\s\n])*\.\.(?:\\t|[\s\n])*"/g,
 				'$1');
 
-		// console.log(lua_code);
+		// --------------------------------------
 
 		library_namespace.debug('轉存 `"string"`', 6, 'parse_lua_object_code');
+		// console.trace(lua_code);
 		lua_code = lua_code.replace(/"(?:\\[\s\S]|[^\\\n"])*"/g, function(all) {
 			// library_namespace.log(all);
 			__strings.push(JSON.parse(all));
 			return "__strings[" + (__strings.length - 1) + "]";
 		});
-		// console.log(lua_code);
+
+		// --------------------------------------
+
+		// 必須先處理完字串才能消掉 comments，預防有 "--a--"。
 
 		// fix `-- comments` → `// comments`
 		// lua_code = lua_code.replace(/([\n\s]|^)\s*--/g, '$1//');
@@ -1860,14 +1909,14 @@ function module_code(library_namespace) {
 		// lua_code = lua_code.replace(/([\n\s]|^)\s*--[^\n]*/g, '$1');
 		library_namespace.debug('remove all -- comments', 6,
 				'parse_lua_object_code');
+		// console.trace(lua_code);
 		lua_code = lua_code.replace(/--[^\n]*/g, '');
-
-		// console.log(lua_code);
 
 		// --------------------------------------
 		var __table_values = [];
 		library_namespace.debug('patch fieldsep ::= ‘,’ | ‘;’', 6,
 				'parse_lua_object_code');
+		// console.trace(lua_code);
 		lua_code = lua_code.replace_till_stable(/{([^{}]+)}/g, function(all,
 				fieldlist) {
 			// console.log(fieldlist);
@@ -1925,7 +1974,15 @@ function module_code(library_namespace) {
 
 			return '__table_values[' + (__table_values.length - 1) + ']';
 		});
-		// console.log(lua_code);
+
+		// --------------------------------------
+
+		// Recover MARK_as_object
+		// console.trace([ lua_code.slice(0, 800), lua_code.slice(-800) ]);
+		lua_code = lua_code.replace(new RegExp(MARK_as_object, 'g'), '{');
+		// console.trace([ lua_code.slice(0, 800), lua_code.slice(-800) ]);
+
+		// --------------------------------------
 
 		function recovery_code(code) {
 			if (!code) {
@@ -1954,11 +2011,12 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.debug('recovery_code...', 6, 'parse_lua_object_code');
+		// console.trace(lua_code);
 		lua_code = recovery_code(lua_code);
-		// console.log(lua_code);
 
 		// --------------------------------------
 
+		// console.trace(lua_code);
 		lua_code = lua_code.replace_till_stable(/([\W])nil([\W])/g, '$1null$2');
 
 		// TODO: or, and
@@ -1984,15 +2042,16 @@ function module_code(library_namespace) {
 		try {
 			lua_code = JSON.parse(lua_code);
 		} catch (e) {
-			library_namespace.error('parse_lua_object_code: Cannot parse: '
-			//
-			+ JSON.stringify(lua_code
-			// .slice(0)
-			));
+			library_namespace
+					.error('parse_lua_object_code: Cannot parse code as JSON: '
+					//
+					+ JSON.stringify(lua_code
+					// .slice(0)
+					));
 			// TODO: handle exception
 			return;
 		}
-		// console.log(lua_code);
+		// console.trace(lua_code);
 
 		return lua_code;
 	}

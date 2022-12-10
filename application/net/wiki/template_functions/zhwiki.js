@@ -149,6 +149,7 @@ function module_code(library_namespace) {
 			// fixed : [],
 
 			// 公共轉換組
+			group_data : [],
 			groups : []
 		});
 
@@ -181,10 +182,24 @@ function module_code(library_namespace) {
 
 		// [[w:zh:Module:NoteTA]]
 		for (index = 1; index < token.length; index++) {
-			value = token.parameters['G' + index];
+			var parameter_name = 'G' + index;
+			value = token.parameters[parameter_name];
 			if (!value)
 				continue;
-			conversion_list.groups.push(value);
+			value = wiki_API.parse.wiki_token_to_key(value);
+			// console.trace(value);
+			if (typeof value === 'string') {
+				value = value.replace(/_/g, ' ').trim();
+			} else {
+				library_namespace.warn('parse_template_NoteTA: 非字串之公共轉換組名稱: ['
+						+ value + '] @ ' + token);
+			}
+			conversion_list.groups.push(value.toString());
+			conversion_list.group_data[value.toString()] = {
+				parameter_name : parameter_name,
+				group_name : value,
+				index : token.index_of[parameter_name]
+			};
 			// TODO
 		}
 
