@@ -1531,8 +1531,8 @@ function module_code(library_namespace) {
 	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)([\s\S]+?)(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)/g;
 	var Variable_Map__PATTERN_template_mark = /({{Auto-generated\s*\|([^{}|]+)}})([\s\S]+?)({{Auto-generated\s*\|\2\|end}})/;
 
-	function Variable_Map_update(wikitext) {
-		var changed, variable_Map = this;
+	function Variable_Map_update(wikitext, options) {
+		var changed = options && options.force_change, variable_Map = this;
 		// console.trace(variable_Map);
 
 		function replacer(all_mark, start_mark, variable_name, original_value,
@@ -1569,7 +1569,7 @@ function module_code(library_namespace) {
 		// console.trace(changed);
 		if (!changed) {
 			return [ wiki_API.edit.cancel,
-					'Variable_Map_update: Nothing to update' ];
+					'Variable_Map_update: ' + 'Nothing to update' ];
 		}
 		// console.trace(wikitext);
 		return wikitext;
@@ -1585,16 +1585,22 @@ function module_code(library_namespace) {
 		var content = wiki_API.content_of(page_data);
 		// console.trace(content);
 
-		if (!content) {
+		var force_change;
+		if (!content || !content.trim()) {
 			content = this.template;
 			if (typeof content === 'function')
 				content = this.template(page_data);
+			force_change = !!content;
 		}
 
 		if (content) {
 			// console.trace(content);
-			// console.trace(this.update(content))
-			return this.update(content);
+			// console.trace(this.update(content));
+
+			// using function Variable_Map_update(wikitext)
+			return this.update(content, {
+				force_change : force_change
+			});
 		}
 
 		if (false) {

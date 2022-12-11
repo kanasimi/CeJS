@@ -226,11 +226,13 @@ function module_code(library_namespace) {
 			return conversion_list;
 
 		if (page_data.ns === NS_Module) {
-			var matched = page_data.title.match(/\/(list|doc|temp|sandbox)$/i);
+			var matched = page_data.title
+			// [[w:zh:Wikipedia:字詞轉換處理/公共轉換組#Lua版建立]]
+			.match(/\/(list|doc|temp|sandbox|preload|editintro)$/i);
 			if (matched) {
-				library_namespace
-						.info('parse_conversions: Skip document / temporary / list page: '
-								+ wiki_API.title_link_of(page_data));
+				library_namespace.info('parse_conversions: '
+				// document / temporary / list
+				+ 'Skip special page: ' + wiki_API.title_link_of(page_data));
 				conversion_list.skipped = matched[1];
 				return conversion_list;
 			}

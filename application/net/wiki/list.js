@@ -698,6 +698,14 @@ function module_code(library_namespace) {
 			}
 
 			if (!data || !data.query) {
+				if (('batchcomplete' in data) && Array.isArray(title)
+						&& title.length === 0) {
+					library_namespace.debug('No page input for ' + type, 3,
+							'get_list');
+					callback(pages);
+					return;
+				}
+
 				library_namespace.error('get_list: Unknown response: ['
 						+ (typeof data === 'object'
 								&& typeof JSON !== 'undefined' ? JSON
