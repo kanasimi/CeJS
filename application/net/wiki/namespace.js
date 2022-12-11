@@ -2183,7 +2183,7 @@ function module_code(library_namespace) {
 	 * @see wiki_API.query.id_of_page
 	 * @see wiki_API.query.title_param()
 	 */
-	function get_page_title(page_data) {
+	function get_page_title(page_data, options) {
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (Array.isArray(page_data)) {
 			if (wiki_API.is_page_data(page_data[0])) {
@@ -2194,7 +2194,7 @@ function module_code(library_namespace) {
 			}
 			// assert: page_data =
 			// [ {String}API_URL, {String}title || {Object}page_data ]
-			return get_page_title(page_data[1]);
+			return get_page_title(page_data[1], options);
 		}
 
 		if (library_namespace.is_Object(page_data)) {
@@ -2221,7 +2221,11 @@ function module_code(library_namespace) {
 
 		if (typeof page_data === 'string') {
 			// 例外處理: ':zh:title' → 'zh:title'
-			page_data = normalize_page_name(page_data.replace(/^[\s:]+/, ''))
+			page_data = page_data.replace(/^[\s:]+/, '');
+			// normalize_page_name() 會去掉 anchor。
+			page_data = page_data.match(/^([^#]*)(#[\s\S]*)?$/);
+			page_data = normalize_page_name(page_data[1], options)
+					+ (page_data[2] || '');
 		} else {
 			// e.g., page_data === undefined
 		}

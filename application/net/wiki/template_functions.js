@@ -283,7 +283,7 @@ function module_code(library_namespace) {
 				library_namespace
 						.error('parse_conversions: Invalid conversion group: '
 								+ wiki_API.title_link_of(page_data));
-				conversion_list.skipped = 'invalid';
+				conversion_list.error = 'invalid';
 				return conversion_list;
 			}
 			// console.log(object);
