@@ -3678,6 +3678,14 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #18');
 		assert(['sup', parsed.parameters.p[1].tag], 'wiki.parse.transclusion #18-1');
 		assert(['s', parsed.parameters.p[1][1].toString()], 'wiki.parse.transclusion #18-2');
+		wikitext = '{{t|1=no use|111|222|4=444|333}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #19');
+		assert(['111', parsed.parameters[1]], 'wiki.parse.transclusion #19-1');
+		assert([2, parsed.index_of[1]], 'wiki.parse.transclusion #19-2');
+		assert(['333', parsed.parameters[3]], 'wiki.parse.transclusion #19-3');
+		assert([5, parsed.index_of[3]], 'wiki.parse.transclusion #19-4');
+		assert(['444', parsed.parameters[4]], 'wiki.parse.transclusion #19-5');
+		assert([4, parsed.index_of[4]], 'wiki.parse.transclusion #19-6');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);

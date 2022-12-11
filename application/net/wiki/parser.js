@@ -642,7 +642,18 @@ function module_code(library_namespace) {
 
 				// `return parsed.each.remove_token;`
 				if (result === for_each_token.remove_token) {
-					if (parent_token.type === 'list') {
+					// 重新確認 index，預防中途做過了插入或者刪除操作。
+					var _index;
+					if (parent_token[index] !== token) {
+						_index = scan_token_index(token, index, parent_token);
+						if (_index !== NOT_FOUND)
+							index = _index;
+					}
+					if (_index === NOT_FOUND) {
+						library_namespace
+								.warn('token 已不存在 parent_token 中，無法刪除！ '
+										+ token);
+					} else if (parent_token.type === 'list') {
 						// for <ol>, <ul>: 直接消掉整個 item token。
 						// index--: 刪除完後，本 index 必須再遍歷一次。
 						parent_token.splice(index--, 1);
@@ -845,6 +856,41 @@ function module_code(library_namespace) {
 		ref_name_templates : [ 'R' ]
 	});
 
+	// 在 parent_token 中搜索 token 的 index。
+	function scan_token_index(token, index, parent_token) {
+		if (!parent_token) {
+			if (Array.isArray(index)) {
+				parent_token = index;
+				index = undefined;
+			} else
+				parent_token = token.parent;
+			if (!parent_token) {
+				library_namespace.error('scan_token_index: '
+						+ 'No parent_token specified!');
+				return NOT_FOUND;
+			}
+		}
+
+		if (!index)
+			index = token.index;
+		if (typeof index !== 'number' || !(index >= 0))
+			index = 0;
+
+		if (parent_token[index] !== token) {
+			for (index = 0; index < parent_token.length; index++) {
+				if (parent_token[index] === token) {
+					break;
+				}
+			}
+			if (index === parent_token.length)
+				return NOT_FOUND;
+		}
+
+		token.index = index;
+		token.parent = parent_token;
+		return index;
+	}
+
 	// 兩 token 都必須先有 .index, .parent!
 	// token.parent[token.index] === token
 	// @see options.add_index @ function for_each_token()
@@ -902,6 +948,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// search_template
 	// TODO: templates
 	function find_template(template_name, options) {
 		var template_token;
@@ -1970,10 +2017,13 @@ function module_code(library_namespace) {
 
 	// export 導出.
 	// @static
+
+	// CeL.wiki.*
 	Object.assign(wiki_API, {
 		KEY_page_data : typeof Symbol === 'function' ? Symbol('page data')
 				: 'page data',
 
+		scan_token_index : scan_token_index,
 		switch_token : switch_token,
 
 		// parse_table(), parse_wikitable()

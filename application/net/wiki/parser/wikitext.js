@@ -1925,7 +1925,7 @@ function module_code(library_namespace) {
 			// assert: !!matched === token is parse function
 
 			// parameter serial starts from 1.
-			index = 1;
+			var parameter_serial = 1;
 			parameters = parameters.map(function(token, _index) {
 				// trimEnd() of value, will push spaces in token[3].
 				var tail_spaces = token.match(/[\s\n]*$/)[0];
@@ -2032,10 +2032,19 @@ function module_code(library_namespace) {
 							// token[2]: lua function name 函式名稱
 							= wiki_token_to_key(value, options);
 						} else {
-							token.key = index;
+							// 警告: 不該尋找下一個可用的 parameter serial。
+							// 無名parameters有自己一套計數，不因具名parameters而跳過。
+							// Only the last value provided will be used.
+							if (false) {
+								while (parameter_index_of[parameter_serial]) {
+									// 尋找下一個可用的 parameter_serial。
+									parameter_serial++;
+								}
+							}
+							token.key = parameter_serial;
 							// token.value = value;
-							parameter_index_of[index] = _index;
-							_parameters[index++] = value;
+							parameter_index_of[parameter_serial] = _index;
+							_parameters[parameter_serial++] = value;
 						}
 					}
 					return token;
