@@ -159,7 +159,7 @@ function module_code(library_namespace) {
 			conversion_list.title = value;
 		}
 
-		// TODO: {{NoteTA}} 使用「1=」可以同時轉換標題和正文？
+		// TODO: {{NoteTA}} 使用「1=」可以同時轉換標題和正文(T=)？
 		for (index = 1; index < token.length; index++) {
 			value = token.parameters[index];
 			if (!value)

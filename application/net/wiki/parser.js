@@ -368,7 +368,7 @@ function module_code(library_namespace) {
 		parsed.toString();
 	});
 
-	// 注意: 必須配合 `parsed.each(, {add_index : 'all'})` 使用
+	// 注意: 必須配合 `parsed.each(, {add_index : 'all'})` 使用。
 	function token_is_children_of(token, parent_filter) {
 		var parent;
 		while (token && (parent = token.parent)) {
@@ -857,6 +857,7 @@ function module_code(library_namespace) {
 	});
 
 	// 在 parent_token 中搜索 token 的 index。
+	// 注意: 必須配合 `parsed.each(, {add_index : 'all'})` 使用。
 	function scan_token_index(token, index, parent_token) {
 		if (!parent_token) {
 			if (Array.isArray(index)) {
@@ -871,7 +872,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (!index)
+		if (typeof index !== 'number')
 			index = token.index;
 		if (typeof index !== 'number' || !(index >= 0))
 			index = 0;
@@ -891,6 +892,38 @@ function module_code(library_namespace) {
 		return index;
 	}
 
+	if (false) {
+		// re-generate token:
+		// Set token.index, token.parent first, and then
+		new_token = CeL.wiki.replace_token(token, token.toString(), options);
+	}
+
+	// 注意: 必須配合 `parsed.each(, {add_index : 'all'})` 使用。
+	function replace_token(replace_from_token, replace_to, options) {
+		var index = replace_from_token.index;
+		var parent_token = replace_from_token.parent;
+
+		index = scan_token_index(replace_from_token, index, parent_token);
+		if (index === NOT_FOUND) {
+			library_namespace.error('replace_token: ' + 'Skip replace: '
+					+ replace_from_token + '→' + replace_to);
+			return;
+		}
+
+		if (!Array.isArray(replace_to)) {
+			replace_to = wiki_API.parse(replace_to, options);
+			// Create properties of token.
+			wiki_API.template_functions.adapt_function(replace_to, index,
+					parent_token, options);
+		}
+
+		replace_to.index = index;
+		replace_to.parent = parent_token;
+		parent_token[index] = replace_to;
+		return replace_to;
+	}
+
+	// 注意: 必須配合 `parsed.each(, {add_index : 'all'})` 使用。
 	// 兩 token 都必須先有 .index, .parent!
 	// token.parent[token.index] === token
 	// @see options.add_index @ function for_each_token()
@@ -2024,6 +2057,7 @@ function module_code(library_namespace) {
 				: 'page data',
 
 		scan_token_index : scan_token_index,
+		replace_token : replace_token,
 		switch_token : switch_token,
 
 		// parse_table(), parse_wikitable()

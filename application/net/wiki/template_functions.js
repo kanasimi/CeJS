@@ -1102,6 +1102,13 @@ function module_code(library_namespace) {
 
 	// TODO: use adopter, adopt_function
 	function adapt_function(template_token, index, parent, options) {
+		if (!parent && !options && typeof index === 'object') {
+			// CeL.wiki.template_functions.adapt_function(token, options);
+			options = index;
+			index = template_token.index;
+			parent = template_token.parent;
+		}
+
 		if (!template_token || template_token.type !== 'transclusion'
 				&& !token_is_invoke(template_token)) {
 			return;

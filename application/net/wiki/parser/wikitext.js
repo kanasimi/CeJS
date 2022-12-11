@@ -1099,7 +1099,7 @@ function module_code(library_namespace) {
 			parameters = parameters.split(';');
 			parameters.forEach(function(converted, index) {
 				if (normalize) {
-					// remove spaces
+					// remove tail spaces
 					converted = converted.trim();
 				}
 				if (PATTERN_conversion_slice.test(converted)
@@ -1246,7 +1246,7 @@ function module_code(library_namespace) {
 				// console.log(JSON.stringify(token));
 				return token;
 			});
-			if (options.normalize) {
+			if (normalize) {
 				// 正規化後可以不保留 -{...;}- 最後的 ';'
 				conversion_list = conversion_list.filter(function(token) {
 					return !!token;
