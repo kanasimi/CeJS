@@ -104,8 +104,9 @@ function module_code(library_namespace) {
 			// assert: promise 依賴於本 wiki_API action thread。
 			library_namespace.debug('設定依賴於本 wiki_API action 的 promise。', 3,
 					'set_promise_relying');
-			// console.trace(promise);
-			// console.trace([this.running,this.actions]);
+			if (library_namespace.is_debug(3)) {
+				console.trace([ this.running, promise, this.actions ]);
+			}
 			this.actions.promise_relying = library_namespace
 					.is_thenable(this.actions.promise_relying) ? this.actions.promise_relying
 					.then(promise)
@@ -297,6 +298,15 @@ function module_code(library_namespace) {
 
 		library_namespace.debug('剩餘 ' + this.actions.length + ' action(s)', 2,
 				'wiki_API.prototype.next');
+		if (library_namespace.is_debug(3)) {
+			console
+					.trace([
+							this.running,
+							this.actions.length,
+							this.actions.promise_relying,
+							this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this],
+							next ]);
+		}
 		if (library_namespace.is_debug(3)
 		// .show_value() @ interact.DOM, application.debug
 		&& library_namespace.show_value)
@@ -1082,11 +1092,29 @@ function module_code(library_namespace) {
 			}
 
 			if (!next[2].page_to_edit) {
+				if (this.actions.promise_relying
+						&& next.waiting_for_previous_combination_operation) {
+					// e.g., `await wiki.edit_page(wiki.to_talk_page(page_data)`
+					// @ routine/20191129.check_language_conversion.js
+					if (library_namespace.is_debug()) {
+						library_namespace
+								.warn('wiki_API.prototype.next: 可能是 .page() 之後，.edit() 受到 this.actions.promise_relying 觸發，造成雙重執行？直接跳出，嘗試等待其他執行緒回來執行。');
+					}
+					this.actions.unshift(next);
+					break;
+				}
+
 				library_namespace
 						.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first! 另請注意: 您不能在 callback 中呼叫 .edit() 之類的 wiki 函數！請在 callback 執行完畢後再執行新的 wiki 函數！例如放在 setTimeout() 中。');
 				if (typeof console === 'object' && console.trace) {
 					console.trace(this);
-					console.trace([ this.actions.length, next ]);
+					console
+							.trace([
+									this.running,
+									this.actions.length,
+									this.actions.promise_relying,
+									this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this],
+									next ]);
 				}
 				throw new Error('No page in the queue.');
 				// next[3] : callback

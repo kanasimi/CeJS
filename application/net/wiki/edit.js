@@ -257,7 +257,8 @@ function module_code(library_namespace) {
 		// console.trace(title);
 		// console.log(text);
 		if (library_namespace.is_thenable(text)) {
-			// console.trace(text);
+			if (library_namespace.is_debug(3))
+				console.trace(text);
 			text = text.then(function(text) {
 				// console.trace(text);
 				wiki_API_edit(title, text, token, options, callback,
