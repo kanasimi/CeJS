@@ -68,7 +68,7 @@
 	"mother": "Мать",
 	"spouse": "Супруг/Супруга",
 	"initializing": "Инициализируется…",
-	"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}": "function (domain_name, arg) { var c = arg[1] % 100, d = c % 10; return '%1 ' + (d < 5 && (c < 10 || c > 20) ? d == 1 ? 'запись загружена' : 'записи загружены' : 'записей загружено') + '.'; }",
+	"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}": "function (domain_name, arg) { var c, d; return '%1 ' +  ((d = (c = arg[1] % 100) % 10) < 5 && (c < 10 || c > 20) ? d == 1 ? 'запись загружена' : 'записи загружены' : 'записей загружено') + '.'; }",
 	"aries": "Овен",
 	"taurus": "Телец",
 	"gemini": "Близнецы",
