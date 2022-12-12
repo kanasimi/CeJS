@@ -991,6 +991,8 @@
 	"You may re-edit the text whatever you want.": "A peul modifich\u00e9 torna \u00ebl test coma ch'a veul.",
 	"Pages that may require a signature, such as %1. Thank you for your participation.": "P\u00e0gine che a peulo ciam\u00e9 na signatura, tanme %1. Mers\u00ec p\u00ebr soa partissipassion.",
 	"Please remember to sign when you leave messages": "P\u00ebr pias\u00ec, ch'as visa \u00ebd sot-sign\u00e9 cand a lasa dij m\u00ebssagi",
+	"[[%1|Remind to sign]], such as the %2 pages listed in the notification.": "[[%1|Ch'as visa \u00ebd sot-sign\u00e9]], p\u00ebr esempi ant le %2 p\u00e0gina list\u00e0 ant la not\u00ecfica.",
+	"Generate topic list: %1 {{PLURAL:%1|topic|topics}}": "Gener\u00e9 na lista d'argoment: %1 {{PLURAL:%1|argoment}}",
 	"debug level": "livel \u00ebd disanfestassion",
 	"CeJS \u7db2\u8def\u5c0f\u8aaa\u6f2b\u756b\u4e0b\u8f09\u5de5\u5177": "D\u00ebscarior CeJS \u00ebd conte o fum\u00e8t an linia",
 	"download_options.acceptable_types": "S\u00f2rt \u00ebd plance acet\u00e0bij (estension). Separ\u00e0 da dij car\u00e0ter \u00ab|\u00bb, p\u00ebr esempi \u00abwebp|jpg|jpeg|png\u00bb. Gnun par\u00e0meter a sar\u00e0 verific\u00e0. But\u00e9 \u00abplance\u00bb p\u00ebr acet\u00e9 tute le s\u00f2rt \u00ebd plance. Si la plancia d\u00ebscari\u00e0 a fa nen part \u00ebd le s\u00f2rt \u00ebspessific\u00e0, a sar\u00e0 consider\u00e0 coma n'eror. St'utiss-s\u00ec a peul mach d\u00ebscari\u00e9 ch\u00e8iche s\u00f2rt \u00ebd plance. Costa opsion a serv mach a verifich\u00e9 le plance, nen a selession\u00e9 le s\u00f2rt \u00ebd plance che chiel a veul d\u00ebscari\u00e9.",
