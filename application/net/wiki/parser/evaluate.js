@@ -312,14 +312,20 @@ function module_code(library_namespace) {
 	}
 
 	// 循環展開模板節點。
+	// 可考慮是否採用 CeL.wiki.wikitext_to_plain_text()
 	function repeatedly_expand_template_token(token, options) {
-		while (token.type === 'transclusion') {
+		while (token && token.type === 'transclusion') {
 			if (typeof token.expand !== 'function') {
 				if (wiki_API.template_functions) {
 					// console.trace(options);
 					wiki_API.template_functions.adapt_function(token, null,
 							null, options);
 					// console.trace([ token, token.expand, options ]);
+				} else {
+					library_namespace
+							.debug(
+									'建議 include application.net.wiki.template_functions',
+									1, 'repeatedly_expand_template_token');
 				}
 				if (typeof token.expand !== 'function') {
 					break;
@@ -360,6 +366,7 @@ function module_code(library_namespace) {
 	// ** 僅能提供簡單的演算功能，但提供 cache。
 	// [[Special:ExpandTemplates]]
 	// 使用上注意: 應設定 options[KEY_on_page_title_option]
+	// 可考慮是否採用 CeL.wiki.wikitext_to_plain_text()
 	function expand_transclusion(wikitext, options, level) {
 		if (!wikitext)
 			return wikitext;

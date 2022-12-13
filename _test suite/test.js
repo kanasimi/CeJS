@@ -3302,6 +3302,7 @@ function test_wiki() {
 		assert([href, CeL.wiki.api_URL(href)], 'CeL.wiki.api_URL(): ' + href);
 	});
 
+	// Please use CeL.wiki.wikitext_to_plain_text() instead!
 	all_error_count += CeL.test('wiki: CeL.wiki.plain_text() basic test', [
 		[['エアポート快特', CeL.wiki.plain_text('<font lang="ja">エアポート快特</font>')]],
 		[["卡斯蒂利亞王后 凱瑟琳", CeL.wiki.plain_text("卡斯蒂利亞王后'''凱瑟琳'''")]],
@@ -3686,6 +3687,9 @@ function test_wiki() {
 		assert([5, parsed.index_of[3]], 'wiki.parse.transclusion #19-4');
 		assert(['444', parsed.parameters[4]], 'wiki.parse.transclusion #19-5');
 		assert([4, parsed.index_of[4]], 'wiki.parse.transclusion #19-6');
+		wikitext = '{{t\n|p=1\n |q=2}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #20');
+		assert(['2', parsed.parameters.q], 'wiki.parse.transclusion #20-1');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);

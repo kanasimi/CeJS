@@ -1614,7 +1614,8 @@ function module_code(library_namespace) {
 	// wikitext to plain text
 	// CeL.wiki.plain_text(wikitext)
 	// @seealso function get_label(html) @ work_crawler.js
-	function wikitext_to_plain_text(wikitext) {
+	// Please use CeL.wiki.wikitext_to_plain_text() instead!
+	function simple_wikitext_to_plain_text(wikitext) {
 		if (!wikitext || !(wikitext = wikitext.trim())) {
 			// 一般 template 中之 parameter 常有設定空值的狀況，因此首先篩選以加快速度。
 			return wikitext;
@@ -3870,7 +3871,8 @@ function module_code(library_namespace) {
 
 		file_pattern : file_pattern,
 
-		plain_text : wikitext_to_plain_text,
+		// Please use CeL.wiki.wikitext_to_plain_text() instead!
+		plain_text : simple_wikitext_to_plain_text,
 
 		template_text : to_template_wikitext,
 

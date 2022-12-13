@@ -478,8 +478,8 @@ function module_code(library_namespace) {
 		// 內部連結 (wikilink / internal link) + interwiki link
 		link : function() {
 			return '[[' + this[0]
-			// + (this[1] || '')
-			+ this[1] + (this.length > 2
+			//
+			+ (this[1] || '') + (this.length > 2
 			// && this[2] !== undefined && this[2] !== null
 			? (this.pipe || '|')
 			// + (this[2] || '')
@@ -544,6 +544,19 @@ function module_code(library_namespace) {
 			if (language === 'rule') {
 				// gets the rule of conversion only
 				return this.join(';');
+			}
+
+			if (false && language === 'normalized rule') {
+				return parse_wikitext('-{A|'
+				// .toString('rule')
+				+ this.join(';') + '}-', {
+					normalize : true,
+				})
+				// .toString('rule')
+				.join(';')
+				// 通用的轉換式不該為連結。
+				.replace(/:\[\[([^\[\]]+)\]\]($|;)/g, ':$1$2').replace(
+						/^\[\[([^\[\]]+)\]\]$/g, '$1');
 			}
 
 			var flag = this.flag;
@@ -1633,8 +1646,8 @@ function module_code(library_namespace) {
 					// [[w:en:Wikipedia:Piped link]] the displayed text
 					: 'display_text'] = parsed_display_text
 					if (false && !category_matched) {
-						parameters.plain_display_text = wikitext_to_plain_text(
-								display_text, options);
+						parameters.plain_display_text = wiki_API
+								.wikitext_to_plain_text(display_text, options);
 					}
 					parameters.push(parsed_display_text);
 				}
@@ -3534,65 +3547,65 @@ function module_code(library_namespace) {
 				queue.push(all);
 				return previous + include_mark + (queue.length - 1) + end_mark;
 			});
+
+			// ----------------------------------------------------
+			// 處理 / parse list @ wikitext
+			// @see [[w:en:MOS:LIST]], [[w:en:Help:Wikitext#Lists]]
+			// 注意: 這裡僅處理在原wikitext中明確指示列表的情況，無法處理以模板型式表現的列表。
+
+			// 列表層級。 e.g., ['#','*','#',':']
+			var list_prefixes_now = [], list_now = [],
+			//
+			lines_without_style = [],
+			//
+			list_conversion = {
+				';' : DEFINITION_LIST,
+				':' : DEFINITION_LIST
+			};
+
+			// console.log('12: ' + JSON.stringify(wikitext));
+			// console.log(queue);
+
+			wikitext = wikitext.split('\n');
+			// e.g., for "<b>#ccc</b>"
+			var first_line = !initialized_fix && wikitext.shift();
+
+			wikitext.forEach(parse_list_line);
+			wikitext = lines_without_style;
+
+			// ----------------------------------------------------
+			// parse horizontal rule, line, HTML <hr /> element: ----, -{4,}
+			// @see [[w:en:Help:Wikitext#Horizontal rule]]
+			// Their use in Wikipedia articles is deprecated.
+			// They should never appear in regular article prose.
+
+			// reset
+			lines_without_style = [];
+
+			wikitext.forEach(parse_hr_tag);
+			wikitext = lines_without_style;
+
+			// ----------------------------------------------------
+			// parse preformatted text, HTML <pre> element: \n + space
+			// @seealso [[w:en:Help:Wikitext#Pre]]
+
+			// reset
+			lines_without_style = [];
+			// pre_list
+			list_now = null;
+
+			wikitext.forEach(parse_preformatted);
+			wikitext = lines_without_style;
+
+			// Release memory. 釋放被占用的記憶體。
+			lines_without_style = null;
+
+			if (!initialized_fix) {
+				// recover
+				wikitext.unshift(first_line);
+			}
+			wikitext = wikitext.join('\n');
 		}
-
-		// ----------------------------------------------------
-		// 處理 / parse list @ wikitext
-		// @see [[w:en:MOS:LIST]], [[w:en:Help:Wikitext#Lists]]
-		// 注意: 這裡僅處理在原wikitext中明確指示列表的情況，無法處理以模板型式表現的列表。
-
-		// 列表層級。 e.g., ['#','*','#',':']
-		var list_prefixes_now = [], list_now = [],
-		//
-		lines_without_style = [],
-		//
-		list_conversion = {
-			';' : DEFINITION_LIST,
-			':' : DEFINITION_LIST
-		};
-
-		// console.log('12: ' + JSON.stringify(wikitext));
-		// console.log(queue);
-
-		wikitext = wikitext.split('\n');
-		// e.g., for "<b>#ccc</b>"
-		var first_line = !initialized_fix && wikitext.shift();
-
-		wikitext.forEach(parse_list_line);
-		wikitext = lines_without_style;
-
-		// ----------------------------------------------------
-		// parse horizontal rule, line, HTML <hr /> element: ----, -{4,}
-		// @see [[w:en:Help:Wikitext#Horizontal rule]]
-		// Their use in Wikipedia articles is deprecated.
-		// They should never appear in regular article prose.
-
-		// reset
-		lines_without_style = [];
-
-		wikitext.forEach(parse_hr_tag);
-		wikitext = lines_without_style;
-
-		// ----------------------------------------------------
-		// parse preformatted text, HTML <pre> element: \n + space
-		// @seealso [[w:en:Help:Wikitext#Pre]]
-
-		// reset
-		lines_without_style = [];
-		// pre_list
-		list_now = null;
-
-		wikitext.forEach(parse_preformatted);
-		wikitext = lines_without_style;
-
-		// Release memory. 釋放被占用的記憶體。
-		lines_without_style = null;
-
-		if (!initialized_fix) {
-			// recover
-			wikitext.unshift(first_line);
-		}
-		wikitext = wikitext.join('\n');
 
 		// ↑ parse sequence finished *EXCEPT FOR* paragraph
 		// ------------------------------------------------------------------------

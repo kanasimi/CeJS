@@ -458,6 +458,7 @@ function module_code(library_namespace) {
 			crawler_namespace.regenerate_user_agent(this);
 		}
 
+		// delay time
 		var time_to_waiting = this.search_work_interval;
 		if (time_to_waiting) {
 			time_to_waiting = library_namespace.to_millisecond(time_to_waiting)
@@ -617,7 +618,7 @@ function module_code(library_namespace) {
 
 		}
 
-		function getch_search_result() {
+		function get_search_result() {
 			// console.trace([ search_URL_string, search_url_data, post_data ]);
 			_this.get_URL(search_URL_string, handler_search_response,
 			//
@@ -634,9 +635,9 @@ function module_code(library_namespace) {
 							digits : 1
 						}) ]
 			});
-			setTimeout(getch_search_result, time_to_waiting);
+			setTimeout(get_search_result, time_to_waiting);
 		} else {
-			getch_search_result();
+			get_search_result();
 		}
 	}
 

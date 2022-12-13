@@ -92,6 +92,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_to_display_language(options) {
+		// console.trace(this.toString());
 		var parameters = this.parameters;
 		return parameters[1];
 	}

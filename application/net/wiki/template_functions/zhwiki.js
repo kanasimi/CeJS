@@ -193,6 +193,7 @@ function module_code(library_namespace) {
 			} else {
 				library_namespace.warn('parse_template_NoteTA: 非字串之公共轉換組名稱: ['
 						+ value + '] @ ' + token);
+				console.trace(value);
 			}
 			conversion_list.groups.push(value.toString());
 			conversion_list.group_data[value.toString()] = {
