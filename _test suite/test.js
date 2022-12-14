@@ -3245,6 +3245,10 @@ function test_wiki() {
 		[['D［di:］;', CeL.wiki.normalize_title('D%EF%BC%BBdi:%EF%BC%BD%3B')], 'normalize_title #18'],
 		[["A 'n B", CeL.wiki.normalize_title('A &#39;n B')], 'normalize_title #19'],
 
+		// Should use CeL.wiki.title_of(page_data, options);
+		[['Wikipedia:ABC', CeL.wiki.title_of('Wikipedia:ABC')], 'title_of #1'],
+		[['Wikinews:ABC', CeL.wiki.title_of('Wikinews:ABC')], 'title_of #2'],
+
 		[['[[User:Adam/test]]', CeL.wiki.title_link_of('User:Adam/test')], 'title_link_of #1'],
 
 		[['Adam', CeL.wiki.parse.user('[[User:Adam/test]]')], 'parse.user #1'],

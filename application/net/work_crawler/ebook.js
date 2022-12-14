@@ -37,6 +37,10 @@ function module_code(library_namespace) {
 	/** node.js file system module */
 	node_fs = library_namespace.platform.nodejs && require('fs');
 
+	var
+	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
+	NOT_FOUND = ''.indexOf('_');
+
 	// --------------------------------------------------------------------------------------------
 
 	// 在下載/獲取小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
@@ -214,6 +218,25 @@ function module_code(library_namespace) {
 			});
 		});
 	}
+
+	// ----------------------------------------------------
+
+	// 當文章內文以章節標題起始時，去除章節標題的部分。
+	function trim_start_title(text, chapter_data) {
+		var title = chapter_data.title || chapter_data;
+
+		var index = text.indexOf(title);
+		if (index === NOT_FOUND)
+			return text;
+
+		var previous = library_namespace.HTML_to_Unicode(text.slice(0, index));
+		previous = previous.replace(/<\/?\w[^<>]*>|[\s]+/g, '');
+		// console.trace(previous);
+		return previous ? text : text.slice(index + title.length);
+	}
+
+	// CeL.work_crawler.trim_start_title()
+	Work_crawler.trim_start_title = trim_start_title;
 
 	// ----------------------------------------------------
 

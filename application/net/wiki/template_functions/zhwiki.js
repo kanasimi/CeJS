@@ -165,7 +165,8 @@ function module_code(library_namespace) {
 			if (!value)
 				continue;
 			// [[w:zh:模組:NoteTA]]
-			// @see function item_to_conversion(item)
+			// @see function item_to_conversion(item) @
+			// CeL.application.net.wiki
 			value = wiki_API.parse('-{A|' + value + '}-', {
 				normalize : true,
 				with_properties : true

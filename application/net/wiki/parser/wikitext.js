@@ -546,17 +546,26 @@ function module_code(library_namespace) {
 				return this.join(';');
 			}
 
-			if (false && language === 'normalized rule') {
-				return parse_wikitext('-{A|'
+			if (language === 'normalized rule') {
+				// @see function item_to_conversion(item) @
+				// CeL.application.net.wiki
+				var rule = parse_wikitext('-{A|'
 				// .toString('rule')
 				+ this.join(';') + '}-', {
 					normalize : true,
 				})
 				// .toString('rule')
-				.join(';')
-				// 通用的轉換式不該為連結。
-				.replace(/:\[\[([^\[\]]+)\]\]($|;)/g, ':$1$2').replace(
-						/^\[\[([^\[\]]+)\]\]$/g, '$1');
+				.join(';');
+				if (lang_fallbacks) {
+					// as 通用的轉換式
+					// function normalized_general_rule(token)
+					// const rule = token.toString('normalized rule', true);
+
+					// 通用的轉換式不該為連結。
+					rule = rule.replace(/:\[\[([^\[\]]+)\]\]($|;)/g, ':$1$2')
+							.replace(/^\[\[([^\[\]]+)\]\]$/g, '$1');
+				}
+				return rule;
 			}
 
 			var flag = this.flag;

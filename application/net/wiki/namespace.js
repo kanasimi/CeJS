@@ -2173,7 +2173,8 @@ function module_code(library_namespace) {
 	 * get title of page.
 	 * 
 	 * @example <code>
-	   var title = CeL.wiki.title_of(page_data);
+	var title = wiki.title_of(page_data);
+	var title = CeL.wiki.title_of(page_data, options);
 	 * </code>
 	 * 
 	 * @param {Object}page_data
@@ -2223,10 +2224,16 @@ function module_code(library_namespace) {
 		if (typeof page_data === 'string') {
 			// 例外處理: ':zh:title' → 'zh:title'
 			page_data = page_data.replace(/^[\s:]+/, '');
-			// normalize_page_name() 會去掉 anchor。
-			page_data = page_data.match(/^([^#]*)(#[\s\S]*)?$/);
-			page_data = normalize_page_name(page_data[1], options)
-					+ (page_data[2] || '');
+			var session = wiki_API.session_of_options(options)
+					|| page_data.parsed && page_data.parsed[KEY_SESSION];
+			// 警告: 若無 session 就直接執行 normalize_page_name()，
+			// 可能在非 Wikipedia 項目解析 Project:，如 [[Wikinews:ABC]] 時出問題!
+			if (session) {
+				// normalize_page_name() 會去掉 anchor。
+				page_data = page_data.match(/^([^#]*)(#[\s\S]*)?$/);
+				page_data = session.normalize_title(page_data[1], options)
+						+ (page_data[2] || '');
+			}
 		} else {
 			// e.g., page_data === undefined
 		}
@@ -3791,6 +3798,11 @@ function module_code(library_namespace) {
 		talk_page_to_main : function wiki_API_talk_page_to_main(page_title,
 				options) {
 			return talk_page_to_main(page_title, add_session_to_options(this,
+					options));
+		},
+
+		title_of : function wiki_API_get_page_title(page_data, options) {
+			return get_page_title(page_data, add_session_to_options(this,
 					options));
 		},
 
