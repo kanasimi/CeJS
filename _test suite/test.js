@@ -4463,11 +4463,13 @@ function test_wiki() {
 			_finish_test(test_name);
 		});
 
-		_setup_test('wiki: get_creation_Date');
-		enwiki.page('Wikipedia:Sandbox', function (page_data) {
+		_setup_test('wiki: get_creation_Date and others');
+		enwiki.page('wikipedia:sandbox', function (page_data) {
+			assert(['Wikipedia:Sandbox', enwiki.title_of(page_data)], 'wiki.title_of() #1');
+			assert(['Abc', enwiki.title_of('abc')], 'wiki.title_of() #2');
 			// {Date}page_data.creation_Date
 			assert(['2002-12-20T21:50:14.000Z', page_data && page_data.creation_Date.toISOString()], 'get_creation_Date: [[Wikipedia:Sandbox]]');
-			_finish_test('wiki: get_creation_Date');
+			_finish_test('wiki: get_creation_Date and others');
 		}, {
 			get_creation_Date: true
 		});
