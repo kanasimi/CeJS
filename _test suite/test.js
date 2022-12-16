@@ -1124,6 +1124,7 @@ function test_locale() {
 	]);
 
 	all_error_count += CeL.test('locale - system messages', function (assert) {
+
 		// gettext_config:{"id":"no-changes"}
 		var messages = new CeL.gettext.Sentence_combination('No changes.');
 		// gettext_config:{"id":"no-page-modified"}
@@ -1140,6 +1141,25 @@ function test_locale() {
 
 		CeL.gettext.use_domain('zh', true);
 		assert(['全無變更。', messages.toString()]);
+
+		// ------------------------------------------------
+
+		// CeL.application.storage.EPUB
+		messages = new CeL.gettext.Sentence_combination(
+			// gettext_config:{"id":"$1-word(s)-in-this-chapter"}
+			['本章%1字', 2345]
+		);
+		CeL.gettext.use_domain('zh', true);
+		assert(['本章2345字', messages.toString()]);
+
+		messages.push(',',
+			// gettext_config:{"id":"$1-word(s)-accumulated"}
+			['累計%1字', 5678]);
+		assert(['本章2345字，累計5678字', messages.toString()]);
+
+		messages.push('.');
+		assert(['本章2345字，累計5678字。', messages.toString()]);
+
 	});
 
 

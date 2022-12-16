@@ -948,7 +948,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3313}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2066}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3313}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2073}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"jdn": {
@@ -1448,7 +1448,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4903}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4911}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2070}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4903}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4911}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2077}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"28-mansions": {
@@ -1634,7 +1634,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1128}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1139}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3105}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1129}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1140}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3105}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-modified": {
@@ -1642,7 +1642,19 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1130}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3083}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1131}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3083}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-word(s)-in-this-chapter": {
+		"message": "本章%1字",
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1150}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1870}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-word(s)-accumulated": {
+		"message": "累計%1字",
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1157}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1877}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"to-chinese-numerals": {
@@ -1651,7 +1663,7 @@
 		"scope": "data.date.era: input_panel",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1159}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1183}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1179}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1203}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"astronomy": {
@@ -1659,7 +1671,7 @@
 		"notes": "Label for astronomical calculations",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L2842}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L2862}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"first-quarter": {
@@ -1952,7 +1964,7 @@
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: domain_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1169}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1176}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"force-loading-using-domain-locale-$2-($1)": {
@@ -1961,7 +1973,7 @@
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: domain_name, %2: alias of domain_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1181}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1188}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"loading-using-domain-locale-$2-($1)": {
@@ -1970,7 +1982,7 @@
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: domain_name, %2: alias of domain_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1183}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1190}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": {
@@ -1979,7 +1991,7 @@
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: domain_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1210}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1217}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unable-to-distinguish-domain-but-set-callback": {
@@ -1987,7 +1999,7 @@
 		"notes": "無論如何還是執行 callback。",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1217}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1224}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"illegal-domain-alias-list-$1": {
@@ -1996,7 +2008,7 @@
 		"scope": "CeL.application.locale: set_alias()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: domain alias list",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1426}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1433}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"adding-domain-alias-$1-→-$2": {
@@ -2005,7 +2017,7 @@
 		"scope": "CeL.application.locale: set_alias()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: domain alias, %2: normalized domain name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1442}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1449}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"testing-domain-alias-$1": {
@@ -2014,7 +2026,7 @@
 		"scope": "CeL.application.locale: to_standard()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: domain alias, %2: normalized domain name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1533}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1540}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"failed-to-extract-gettext-id": {
@@ -2022,7 +2034,7 @@
 		"notes": "",
 		"scope": "CeL.application.locale: translate_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1663}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1670}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"loading-language-domain-$1": {
@@ -2030,7 +2042,7 @@
 		"notes": "",
 		"scope": "CeL.application.locale: adapt_domain()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1703}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1710}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"language-domain-$1-loaded": {
@@ -2038,7 +2050,7 @@
 		"notes": "",
 		"scope": "CeL.application.locale: adapt_domain()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1709}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1716}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-find-menu-node-$1": {
@@ -2047,7 +2059,7 @@
 		"scope": "CeL.application.locale: create_domain_menu()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: menu node id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1751}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1758}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"language": {
@@ -2055,7 +2067,7 @@
 		"notes": "Label used when selecting language.",
 		"additional_notes": "{{identical|Language}}",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1807}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1814}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"convert-number-$1-to-$2-format": {
@@ -2063,7 +2075,7 @@
 		"notes": "",
 		"scope": "CeL.application.locale: gettext.numeral()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1831}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1838}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unable-to-convert-number-$1": {
@@ -2071,7 +2083,7 @@
 		"notes": "",
 		"scope": "CeL.application.locale: 打折扣",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2221}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2228}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"enter-a-non-string-parameter-$1": {
@@ -5012,7 +5024,7 @@
 		"notes": "書籍紹介 Message of ebook, book information.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC(); work_crawler/work.js: show_work_data()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L84}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2094}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L84}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2100}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"work_data.chapter_no": {
@@ -6043,21 +6055,13 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1861}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
-	"$1-words": {
-		"message": "%1 {{PLURAL:%1|word|words}}",
-		"notes": "Message of ebook in TOC file.",
-		"scope": "CeL.application.storage.EPUB: generate_TOC()",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1870}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1874}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2195}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
 	"because-the-content-you-want-to-set-is-too-short-or-has-no-content-the-old-content-($1-characters)-will-be-used-from-the-cache-file": {
 		"message": "因為欲設定的內容長度過短或者無內容，將從快取檔案中取得舊的內容（%1 個{{PLURAL:%1|字元}}）：",
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: contents.length",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1920}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1926}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"writing-$1-chars-to-$2": {
@@ -6066,7 +6070,7 @@
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: contents.length, %2: file path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1932}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1938}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"only-the-project-data-index-is-set-and-the-file-$1-is-not-automatically-written.-you-need-to-do-this-yourself": {
@@ -6075,7 +6079,7 @@
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: file path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1943}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1949}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skip-content-that-is-too-short-($1-characters)": {
@@ -6084,7 +6088,7 @@
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: contents.length, %2: file path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1951}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1957}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skip-the-no-content-empty-chapter": {
@@ -6092,7 +6096,7 @@
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1954}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1960}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"too-short": {
@@ -6100,7 +6104,7 @@
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1961}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1967}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"if-this-chapter-already-exists-remove-it-first-$1": {
@@ -6109,7 +6113,7 @@
 		"scope": "CeL.application.storage.EPUB: add_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: item.id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1968}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1974}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"using-language-$1": {
@@ -6118,7 +6122,7 @@
 		"scope": "CeL.application.storage.EPUB: setup_gettext()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: language",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2020}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2026}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.calibre-series": {
@@ -6127,7 +6131,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.creator": {
@@ -6136,7 +6140,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.date": {
@@ -6145,7 +6149,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.dcterms-modified": {
@@ -6154,7 +6158,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.description": {
@@ -6163,7 +6167,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.identifier": {
@@ -6172,7 +6176,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.language": {
@@ -6181,7 +6185,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.publisher": {
@@ -6190,7 +6194,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.source": {
@@ -6199,7 +6203,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.subject": {
@@ -6208,7 +6212,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"toc.title": {
@@ -6217,7 +6221,7 @@
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
 		"mark_type": "combination_message_id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2158}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"word-count": {
@@ -6225,7 +6229,15 @@
 		"notes": "Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2193}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2200}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"$1-words": {
+		"message": "%1 {{PLURAL:%1|word|words}}",
+		"notes": "Message of ebook in TOC file.",
+		"scope": "CeL.application.storage.EPUB: generate_TOC()",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2202}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-chapters": {
@@ -6233,7 +6245,7 @@
 		"notes": "章節 Message of ebook in TOC file.",
 		"scope": "CeL.application.storage.EPUB: generate_TOC()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2197}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2204}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"contents": {
@@ -6242,7 +6254,7 @@
 		"original_message_language_code": "en-US",
 		"scope": "interact.DOM: auto_TOC(), CeL.application.storage.EPUB: generate_TOC()",
 		"additional_notes": "{{Identical|Content}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2210}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9136}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2217}}\n: {{GitHub|kanasimi/CeJS/blob/master/interact/DOM.js#L9136}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-for-all-resources-loaded": {
@@ -6250,7 +6262,7 @@
 		"notes": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"scope": "CeL.application.storage.EPUB: write_chapters()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2363}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2534}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2370}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2541}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"start-writing-e-book-materials": {
@@ -6258,7 +6270,7 @@
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: write_chapters()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2371}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2378}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"missing-resource-item-$1": {
@@ -6267,7 +6279,7 @@
 		"scope": "CeL.application.storage.EPUB: write_chapters()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: item",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2387}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2394}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-instructed-material-to-be-enclosed-in-the-comment-itself-contains-text-such-as-$2d$2d-or-$2d-which-will-cause-an-error-in-decoding": {
@@ -6275,7 +6287,7 @@
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: write_chapters()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2494}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2501}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"start-building-e-books": {
@@ -6283,7 +6295,7 @@
 		"notes": "Packing up epub file",
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2552}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L152}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2559}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L152}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"removing-empty-directory-$1": {
@@ -6292,7 +6304,7 @@
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: directory",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2593}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2600}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"creating-an-ebook-with-7zip-$1": {
@@ -6301,7 +6313,7 @@
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: target_file",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2604}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2611}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-file-list-is-too-long-so-it-is-changed-to-compress-the-entire-directory": {
@@ -6309,7 +6321,7 @@
 		"notes": "",
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2627}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2634}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-e-book-is-created-$1": {
@@ -6318,7 +6330,7 @@
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: target_file",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2661}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2668}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unknown-type-$1-please-install-$2": {

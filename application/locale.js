@@ -774,6 +774,7 @@ function module_code(library_namespace) {
 		return has_object ? text_list : text_list.join('');
 	}
 
+	var PATTERN_is_punctuation_mark = /^[,;:.?!~、，；：。？！～]$/;
 	// matched: [ all, header punctuation mark, text_id / message, tail
 	// punctuation mark ]
 	var PATTERN_message_with_tail_punctuation_mark = /^(\.{3,}\s*)?([\s\S]+?)(\.{3,}|…+|:\s*(%\d)?|[,;:.?!~、，；：。？！～])$/;
@@ -810,7 +811,12 @@ function module_code(library_namespace) {
 
 	function deep_convert(text) {
 		if (!Array.isArray(text)) {
-			return gettext(text);
+			var converted = gettext(text);
+			if (converted === text && PATTERN_is_punctuation_mark.test(text)) {
+				// e.g., text === ','
+				converted = convert_punctuation_mark(text, gettext_domain_name);
+			}
+			return converted;
 		}
 
 		// e.g., [ '%1 elapsed.', ['%1 s', 2] ]
@@ -855,6 +861,7 @@ function module_code(library_namespace) {
 				continue;
 			}
 			var next_sentence, original_index = index;
+			// 找出下一個（非空內容的）文字，檢查是否該在本token中結尾加上空白字元。
 			while (++index < converted_list.length) {
 				next_sentence = converted_list[index];
 				if (next_sentence || next_sentence === 0) {
