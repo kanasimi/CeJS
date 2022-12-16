@@ -1,0 +1,4 @@
+Please puts the dictionary files of ·s¦P¤å°ó here.
+
+You may generate the files via:
+https://github.com/tongwentang/tongwen-dict

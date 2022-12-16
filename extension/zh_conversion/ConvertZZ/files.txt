@@ -1,0 +1,14 @@
+Please puts the dictionary files of ConvertZZ here.
+
+You may download the files at:
+https://github.com/flier268/ConvertZZ/blob/master/ConvertZZ/Dictionary.csv
+
+格式可見 public static async Task<List<Line>> Load(string CSV_Filename)
+@ https://github.com/flier268/ConvertZZ/blob/master/ConvertZZ/Moudle/DictionaryFile_Helper.cs
+
+Enable = array_line[0] == "True" ? true : false,
+Type = array_line[1],
+SimplifiedChinese = array_line[2],
+SimplifiedChinese_Priority = int.Parse(array_line[3]),
+TraditionalChinese = array_line[4],
+TraditionalChinese_Priority = int.Parse(array_line[5])

@@ -1866,6 +1866,7 @@ function module_code(library_namespace) {
 				}
 				html.push('<p class="word_count">',
 				// 加入本章節之字數統計標示。
+				// TODO: 本章節幾個字，累計幾個字
 				// gettext_config:{"id":"$1-words"}
 				gettext('%1 {{PLURAL:%1|word|words}}', item_data.word_count)
 				// 從第一章到本章的文字總數。
@@ -2188,6 +2189,7 @@ function module_code(library_namespace) {
 			}
 		});
 		if (total_word_count > 0) {
+			// TODO: 總共幾個字，平均每章節幾個字
 			TOC_html.push('<dt>',
 			// gettext_config:{"id":"word-count"}
 			gettext('word count'), '</dt>', '<dd>',

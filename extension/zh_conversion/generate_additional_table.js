@@ -14,7 +14,15 @@ require('../../_for include/node.loader.js');
 // 在非 Windows 平台上避免 fatal 錯誤。
 CeL.env.ignore_COM_error = true;
 
-CeL.run(['extension.zh_conversion', 'data.CSV', 'application.storage',]);
+CeL.run(['application.storage',]);
+// move additional.to_TW.auto-generated.txt
+
+const convert_type = process.argv[2] in files_config ? process.argv[2] : 'to_TW';
+const target_additional_dictionary_file = `OpenCC/additional.${convert_type}.auto-generated.txt`;
+// 存在此檔案的情況下，含入 extension.zh_conversion 會造成干擾。
+CeL.move_file(target_additional_dictionary_file, target_additional_dictionary_file.replace(/(\.\w+)$/, '.old$1'));
+
+CeL.run(['extension.zh_conversion', 'data.CSV',]);
 //console.log(CeL.TW_to_CN('當日糧草便是從各地徵調過來的。'));
 //console.log(CeL.TW_to_CN('規'));
 
@@ -31,7 +39,6 @@ let files_config = {
 	},
 };
 
-const convert_type = process.argv[2] in files_config ? process.argv[2] : 'to_TW';
 files_config = files_config[convert_type];
 
 const base_dictionary = CeL.get_module_path('extension.zh_conversion', '');
@@ -53,7 +60,8 @@ function add_tongwen_table(file_name) {
 	}
 }
 files_config.tongwen.forEach(add_tongwen_table);
-//console.log(tongwen_Map)
+//console.log(tongwen_Map);
+//console.log(tongwen_Map.get('痺'));
 
 
 const convertZZ_Map = new Map;
@@ -87,6 +95,7 @@ function process_conversion_Map(conversion_Map) {
 
 function process_from_to(to, from, map) {
 	const converted = CeL[files_config.method](from);
+	//if (to === '痹') console.trace([to, converted, from, pair_Map.has(from), additional_Map.has(from)])
 	if (converted === to)
 		return;
 
@@ -115,7 +124,7 @@ CeL.write_file('additional_table.full.tsv', additional_table.join('\n'));
 if (recommend_Map.size > 0) {
 	additional_table = [];
 	recommend_Map.forEach((to, from, map) => additional_table.push(from + '	' + to));
-	CeL.write_file(`additional.${convert_type}.auto-generated.txt`, additional_table.join('\n'));
+	CeL.write_file(target_additional_dictionary_file, additional_table.join('\n'));
 }
 additional_table = null;
 
