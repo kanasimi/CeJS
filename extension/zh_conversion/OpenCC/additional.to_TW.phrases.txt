@@ -658,7 +658,7 @@
 死一拼	死一拚
 // 《随波逐流之一代军师》	就随本座舍命一拼吧。
 命一拼	命一拚
-// 《最仙遊》   所以尽力一拼， (~拚<COO>v:知道 ~拚<role.type:ARGM-DIS>所以 ~拚<role.type:ARGM-ADV>尽力 ~拚<role.type:ARGM-ADV>一 ~拚<role.type:ARGM-DIS>那 ~拚<role.type:ARGM-ADV>必然 c:所以+d:尽力+d:一+v:拼+wp:，)
+// 《最仙遊》	所以尽力一拼， (~拚<COO>v:知道 ~拚<role.type:ARGM-DIS>所以 ~拚<role.type:ARGM-ADV>尽力 ~拚<role.type:ARGM-ADV>一 ~拚<role.type:ARGM-DIS>那 ~拚<role.type:ARGM-ADV>必然 c:所以+d:尽力+d:一+v:拼+wp:，)
 力一拼	力一拚
 // 解析錯誤 @ 《平平无奇大师兄》	年轻就要醒着拼， (~拚<COO>v:醒 ~拚<parent.relate:eSUCC>v:醒 v:醒+u:着+v:拼)	若是不拼，这辈子也就如此了。 (c:若是+d:不+v:拼+wp:，)
 醒着拼	醒著拚
