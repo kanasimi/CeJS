@@ -5,6 +5,7 @@
 			"Kly",
 			"Willy1018",
 			"Winston Sung",
+			"列维劳德",
 			"捍粵者"
 		]
 	},
@@ -192,8 +193,8 @@
 	"finished": "完成",
 	"no-changes": "全無變更。",
 	"no-page-modified": "未改變任何條目。",
-	"$1-word(s)-in-this-chapter": "本章%1字",
-	"$1-word(s)-accumulated": "累計%1字",
+	"$1-word(s)-in-this-chapter": "本章共 %1 {{PLURAL:1|個字}}",
+	"$1-word(s)-accumulated": "累計 %1 {{PLURAL:1|個字}}",
 	"to-chinese-numerals": "中文數字",
 	"astronomy": "天文",
 	"first-quarter": "上弦",
