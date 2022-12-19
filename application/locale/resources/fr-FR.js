@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "2",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -185,6 +185,8 @@
 	"finished": "termin\u00e9",
 	"No changes.": "Aucune modification.",
 	"no page modified,": "aucune page modifi\u00e9e,",
+	"\u672c\u7ae0\u5171 %1 {{PLURAL:1|\u500b\u5b57}}": "%1 mot{{PLURAL:1| |s}} dans ce chapitre",
+	"\u7d2f\u8a08 %1 {{PLURAL:1|\u500b\u5b57}}": "%1 mot{{PLURAL:1| |s}} accumul\u00e9{{PLURAL:1| |s}}",
 	"\u4e2d\u6587\u6578\u5b57": "En num\u00e9raux chinois",
 	"astronomy": "astronomie",
 	"\u4e0a\u5f26": "premier quartier",

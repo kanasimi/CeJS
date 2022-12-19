@@ -513,7 +513,8 @@ function module_code(library_namespace) {
 		// [[Help:Table]]
 		table : function() {
 			// this: [ table style, row, row, ... ]
-			return '{|' + this.join('') + '\n|}';
+			return '{|' + this.join('')
+					+ ('ending' in this ? this.ending : '\n|}');
 		},
 		// table attributes / styles, old name before 2021/1/24: table_style
 		table_attributes : function() {
@@ -2554,7 +2555,7 @@ function module_code(library_namespace) {
 			+ ')([\\s/][^<>]*)?>', 'ig')));
 			if (matched && matched.length > 0) {
 				if (tag.toLowerCase() !== 'nowiki') {
-					// get last ccurrence
+					// get last ccurrence. cf. .lastIndexOf()
 					matched = matched.at(-1);
 				} else {
 					// 搜尋第一個非 <nowiki .../> 者
@@ -2727,8 +2728,17 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------
 
-		function parse_table(all, parameters) {
-			// 經測試，table 無須向前回溯。
+		function parse_table(all, parameters, ending) {
+
+			var index = all.lastIndexOf('\n{|');
+			var previous;
+			if (index > 0) {
+				previous = all.slice(0, index);
+				parameters = all.slice(index + '\n-{'.length,
+						ending ? -ending.length : all.length);
+			} else {
+				previous = '';
+			}
 
 			function append_table_cell(table_cell, delimiter, table_row_token) {
 				if (!table_cell && !delimiter) {
@@ -2908,6 +2918,8 @@ function module_code(library_namespace) {
 			}
 
 			var table_token = _set_wiki_type([], 'table');
+			if (ending !== '\n|}')
+				table_token.ending = ending;
 			// 添加新行由一個豎線和連字符 "|-" 組成。
 			var PATTERN_table_row = /([\s\S]*?)(\n\|[\-+]|$)/g;
 			// default: table_row. try `{|\n||1||2\n|-\n|3\n|}`
@@ -2945,8 +2957,10 @@ function module_code(library_namespace) {
 			}
 
 			queue.push(table_token);
-			// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
-			return '\n' + include_mark + (queue.length - 1) + end_mark;
+			// 因為 "\n" 在 wikitext parser 中為重要標記，可能是 initialized_fix 加入的，
+			// 因此 wiki_token_toString.table() 不包括開頭的 "\n"，並須 restore 之。
+			return previous + '\n' + include_mark + (queue.length - 1)
+					+ end_mark;
 		}
 
 		function parse_behavior_switch(all, switch_word) {
@@ -3455,7 +3469,7 @@ function module_code(library_namespace) {
 
 		wikitext = wikitext.replace_till_stable(
 		// [[Help:Table]]
-		/\n{\|([\s\S]*?)\n\|}/g, parse_table);
+		/\n{\|([\s\S]*?)($|\n\|})/g, parse_table);
 
 		// ----------------------------------------------------
 

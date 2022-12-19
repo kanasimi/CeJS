@@ -1147,18 +1147,18 @@ function test_locale() {
 		// CeL.application.storage.EPUB
 		messages = new CeL.gettext.Sentence_combination(
 			// gettext_config:{"id":"$1-word(s)-in-this-chapter"}
-			['本章%1字', 2345]
+			['本章共 %1 {{PLURAL:1|個字}}', 2345]
 		);
 		CeL.gettext.use_domain('zh', true);
-		assert(['本章2345字', messages.toString()]);
+		assert(['本章共 2345 個字', messages.toString()]);
 
 		messages.push(',',
 			// gettext_config:{"id":"$1-word(s)-accumulated"}
-			['累計%1字', 5678]);
-		assert(['本章2345字，累計5678字', messages.toString()]);
+			['累計 %1 {{PLURAL:1|個字}}', 5678]);
+		assert(['本章共 2345 個字，累計 5678 個字', messages.toString()]);
 
 		messages.push('.');
-		assert(['本章2345字，累計5678字。', messages.toString()]);
+		assert(['本章共 2345 個字，累計 5678 個字。', messages.toString()]);
 
 	});
 
@@ -4412,6 +4412,12 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #1');
 		wikitext = '{|\n!{{t}}|t\n|}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #2');
+		wikitext = '{|\n|-\n| text\n|\n{| class="wikitable"\n|-\n| Text\n|}\n\n|}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: table #3');
+		assert(['|\n{| class="wikitable"\n|-\n| Text\n|}', parsed[0][1].toString().trim()], 'wiki.parse: table #3-1: nested table');
+		wikitext = '{|\n|-\n| text\n'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: table #4');
+		assert(['table', parsed.type], 'wiki.parse: table #4-1: end-lacked table');
 
 		wikitext = ' <span id="{{anchorencode:id_abc}}">ABC</span> <span id{{=}}"{{anchorencode:id 123}}">ABC</span> ';
 		assert(['id abc,id 123', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #1');

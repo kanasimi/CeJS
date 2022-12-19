@@ -1867,14 +1867,14 @@ function module_code(library_namespace) {
 
 				var messages = new gettext.Sentence_combination(
 				// gettext_config:{"id":"$1-word(s)-in-this-chapter"}
-				[ '本章%1字', item_data.word_count ]);
+				[ '本章共 %1 {{PLURAL:1|個字}}', item_data.word_count ]);
 				// item_data.words_so_far: 本作品到前一個章節總計的字數。
 				// @see function count_words_so_far(item) @
 				// CeL.application.net.work_crawler.ebook
 				if (item_data.words_so_far > 0) {
 					messages.push(',',
 					// gettext_config:{"id":"$1-word(s)-accumulated"}
-					[ '累計%1字', item_data.words_so_far + item_data.word_count ]);
+					[ '累計 %1 {{PLURAL:1|個字}}', item_data.words_so_far + item_data.word_count ]);
 				}
 
 				// 加入本章節之字數統計標示。
