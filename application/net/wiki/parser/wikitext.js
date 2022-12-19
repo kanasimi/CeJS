@@ -417,6 +417,9 @@ function module_code(library_namespace) {
 				return !(tag in wiki_extensiontags);
 			}));
 
+	var PATTERN_HTML_tag = wiki_API
+			.get_PATTERN_full_tag('[^<>\\s]+', null, 'i');
+
 	/**
 	 * .toString() of wiki elements: wiki_token_toString[token.type]<br />
 	 * parse_wikitext() 將把 wikitext 解析為各 {Array} 組成之結構。當以 .toString() 結合時，將呼叫
@@ -2541,23 +2544,38 @@ function module_code(library_namespace) {
 			// 假如是 <nowiki /> 則需要搜尋是否有 <nowiki>。
 			|| attributes && attributes.endsWith('/'))
 			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
-			&& inner.match(new RegExp(
+			&& Array.from(inner.matchAll(new RegExp(
 			// 但這種回溯搜尋不包含 <nowiki>
 			// @see console.log(parser[418]);
 			// https://zh.moegirl.org.cn/index.php?title=Talk:%E6%8F%90%E9%97%AE%E6%B1%82%E5%8A%A9%E5%8C%BA&oldid=3704938
 			// <nowiki>{{subst:unwiki|<nowiki>{{黑幕|黑幕内容}}</nowiki&gt;}}</nowiki>
-			'([\\s\\S]*' + (matched ? '?' : '') + ')<(' + tag
+			'<(' + tag
 			// @see function get_PATTERN_full_tag()
-			+ ')([\\s/][^<>]*)?>([\\s\\S]*'
-			//
-			+ (matched ? '' : '?') + ')$', 'i'));
+			+ ')([\\s/][^<>]*)?>', 'ig')));
+			if (matched && matched.length > 0) {
+				if (tag.toLowerCase() !== 'nowiki') {
+					// get last ccurrence
+					matched = matched.at(-1);
+				} else {
+					// 搜尋第一個非 <nowiki .../> 者
+					if (!matched.some(function(tag_matched) {
+						if (!tag_matched[0].endsWith('/>')) {
+							matched = tag_matched;
+							return true;
+						}
+					})) {
+						matched = null;
+					}
+				}
+			}
 			if (matched) {
-				previous = all.slice(0, matched[1].length - matched[0].length
-						- ending.length);
+				matched = matched.index - inner.length - ending.length;
+				previous = all.slice(0, matched);
+				matched = all.slice(matched).match(PATTERN_HTML_tag);
 				// 大小寫可能不同。
-				tag = matched[2];
-				attributes = matched[3];
-				inner = matched[4];
+				tag = matched[1];
+				attributes = matched[2];
+				inner = matched[3];
 			} else {
 				previous = '';
 			}

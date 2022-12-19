@@ -4317,7 +4317,10 @@ function test_wiki() {
 		assert(['==t1==', parsed.each_section().sections[1].section_title.toString()], 'wiki.parser.each_section #3-3: 正常文章');
 		wikitext = 'aaa<ref>a[[b]]c</ref>bbb<ref name="r2">111</ref>ccc<ref name="r2" />'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parser.ref #1');
-		assert(['r2', parsed[3].attributes.name], 'wiki.parser.ref #2: .name');
+		assert(['r2', parsed[3].attributes.name], 'wiki.parser.ref #1-2: .name');
+		wikitext = '<ref name=a /><ref name=b /><ref>R</ref>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parser.ref #2');
+		assert(['<ref name=b />', parsed[1].toString()], 'wiki.parser.ref #2-1');
 
 		// [[n:zh:Special:Permalink/121433]]
 		wikitext = " <> >< <title> '''<试>'''  ''ii'' <i>iii</i> <b>bbb</b>   [[File:YesCheck_BlueLinear.svg|20px]] [[:Category:中国]] & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos; <nowiki>  & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos;  '''bbb''' <b>bbb</b> <i>iii</i> <ref /> {{VOA}} {{tl|VOA}}</nowiki> '''[[abc]]'''  <b>[[w:abc]]</b>  '''<i>[[w :  123   #  cba]]</i>''' [[ABC|ab'c]] [[ABC|ab''c'']] __NOINDEX__ ____  ___ __ __  _ {{tl|VOA}} [[template:VOA]] [https://zh.wikipedia.org zh''wiki''] __TOC__ -{}- C-{樂}-D A-{  这  }-B  '''<nowiki>''< nowiki>''</nowiki>'''  <span style=\"color:green\">green</span> ";

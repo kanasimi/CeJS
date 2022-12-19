@@ -2642,13 +2642,14 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	function get_PATTERN_full_tag(tags, must_end_tag) {
+	// [ all, tag, attributes, inner, ending, end_tag ]
+	function get_PATTERN_full_tag(tags, must_end_tag, flags) {
 		if (Array.isArray(tags))
 			tags = tags.join('|');
 		return new RegExp('<(' + tags
 		// <s/>s</s> 會被正常解析為 <s>s</s>。
 		+ ')([\\s/][^<>]*)?>([\\s\\S]*?)(' + (must_end_tag ? '' : '$|')
-				+ '<\\/(\\1(?:\\s[^<>]*)?)>)', 'ig');
+				+ '<\\/(\\1(?:\\s[^<>]*)?)>)', flags || 'ig');
 	}
 
 	// default_site_configurations
