@@ -228,7 +228,8 @@ function module_code(library_namespace) {
 		if (page_data.ns === NS_Module) {
 			var matched = page_data.title
 			// [[w:zh:Wikipedia:字詞轉換處理/公共轉換組#Lua版建立]]
-			.match(/\/(list|doc|temp|sandbox|preload|editintro)$/i);
+			// core: [[Module:CGroup/core]]
+			.match(/\/(list|doc|temp|sandbox|preload|editintro|core)$/i);
 			if (matched) {
 				library_namespace.info('parse_conversions: '
 				// document / temporary / list

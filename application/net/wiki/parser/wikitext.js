@@ -2918,8 +2918,12 @@ function module_code(library_namespace) {
 			}
 
 			var table_token = _set_wiki_type([], 'table');
-			if (ending !== '\n|}')
-				table_token.ending = ending;
+			if (ending !== '\n|}') {
+				// ending 可能是 '\n'
+				table_token.ending = '';
+			} else {
+				ending = '';
+			}
 			// 添加新行由一個豎線和連字符 "|-" 組成。
 			var PATTERN_table_row = /([\s\S]*?)(\n\|[\-+]|$)/g;
 			// default: table_row. try `{|\n||1||2\n|-\n|3\n|}`
@@ -2960,7 +2964,7 @@ function module_code(library_namespace) {
 			// 因為 "\n" 在 wikitext parser 中為重要標記，可能是 initialized_fix 加入的，
 			// 因此 wiki_token_toString.table() 不包括開頭的 "\n"，並須 restore 之。
 			return previous + '\n' + include_mark + (queue.length - 1)
-					+ end_mark;
+					+ end_mark + ending;
 		}
 
 		function parse_behavior_switch(all, switch_word) {
@@ -3469,7 +3473,7 @@ function module_code(library_namespace) {
 
 		wikitext = wikitext.replace_till_stable(
 		// [[Help:Table]]
-		/\n{\|([\s\S]*?)($|\n\|})/g, parse_table);
+		/\n{\|([\s\S]*?)(\n?$|\n\|})/g, parse_table);
 
 		// ----------------------------------------------------
 

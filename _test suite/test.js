@@ -4418,6 +4418,10 @@ function test_wiki() {
 		wikitext = '{|\n|-\n| text\n'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #4');
 		assert(['table', parsed.type], 'wiki.parse: table #4-1: end-lacked table');
+		wikitext = '{{t}}\n{| class="wikitable"\n{{t\n|p\n}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: table #5');
+		wikitext = '{| class="wikitable"\n{{t\n|p\n}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: table #6');
 
 		wikitext = ' <span id="{{anchorencode:id_abc}}">ABC</span> <span id{{=}}"{{anchorencode:id 123}}">ABC</span> ';
 		assert(['id abc,id 123', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #1');
