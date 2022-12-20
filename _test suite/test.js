@@ -4415,7 +4415,7 @@ function test_wiki() {
 		wikitext = '{|\n|-\n| text\n|\n{| class="wikitable"\n|-\n| Text\n|}\n\n|}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #3');
 		assert(['|\n{| class="wikitable"\n|-\n| Text\n|}', parsed[0][1].toString().trim()], 'wiki.parse: table #3-1: nested table');
-		wikitext = '{|\n|-\n| text\n'; parsed = CeL.wiki.parse(wikitext);
+		wikitext = '{|\n|-\n| text'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #4');
 		assert(['table', parsed.type], 'wiki.parse: table #4-1: end-lacked table');
 		wikitext = '{{t}}\n{| class="wikitable"\n{{t\n|p\n}}'; parsed = CeL.wiki.parse(wikitext);
