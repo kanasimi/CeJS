@@ -759,6 +759,9 @@ function module_code(library_namespace) {
 		default_magic_words_hash[magic_word.toUpperCase()] = false;
 	});
 
+	// matched: [ all, inner parameters ]
+	var PATTERN_language_conversion = /-{(|[^\n{].*?)}-/g;
+
 	// parse 手動轉換語法的轉換標籤的語法
 	// 經測試，":"前面與後面不可皆有空白。
 	// (\s{2,}): 最後的單一/\s/會被轉換為"&#160;"
@@ -1057,7 +1060,6 @@ function module_code(library_namespace) {
 		// ------------------------------------------------------------------------
 		// parse functions
 
-		var PATTERN_language_conversion = /-{(|[^\n{].*?)}-/g;
 		function parse_language_conversion(all, parameters) {
 			// -{...}- 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('-{'),
@@ -3846,6 +3848,8 @@ function module_code(library_namespace) {
 		wiki_extensiontags : wiki_extensiontags,
 
 		DEFINITION_LIST : DEFINITION_LIST,
+
+		PATTERN_language_conversion : PATTERN_language_conversion,
 
 		page_title_to_sort_key : page_title_to_sort_key,
 

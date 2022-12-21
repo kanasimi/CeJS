@@ -313,8 +313,8 @@ function module_code(library_namespace) {
 				&& page_data.title.startsWith('MediaWiki:Conversiontable/')) {
 			// assert: page_data.ns === NS_MediaWiki
 			parsed = wiki_API.parser(parsed.replace(
-			//
-			/-{([\s\S]+?)}-/g, function(all, inner) {
+			// TODO: 處理 "-{H|zh-cn:俄-{匊}-斯;zh-tw:俄-{匊}-斯;zh-hk:俄-{匊}-斯;}- "
+			wiki_API.PATTERN_language_conversion, function(all, inner) {
 				return '-{H|' + inner
 				// trim any trailling comments starting with '//'
 				.replace(/\/\/[^\n]+/g, '')
