@@ -1096,7 +1096,7 @@ function module_code(library_namespace) {
 						&& next.waiting_for_previous_combination_operation) {
 					// e.g., `await wiki.edit_page(wiki.to_talk_page(page_data)`
 					// @ routine/20191129.check_language_conversion.js
-					if (library_namespace.is_debug()) {
+					if (library_namespace.is_debug(0)) {
 						library_namespace
 								.warn('wiki_API.prototype.next: 可能是 .page() 之後，.edit() 受到 this.actions.promise_relying 觸發，造成雙重執行？直接跳出，嘗試等待其他執行緒回來執行。');
 					}
@@ -1130,6 +1130,7 @@ function module_code(library_namespace) {
 			&& !wiki_API.content_of.had_fetch_content(next[2].page_to_edit)) {
 				console.trace(this);
 				console.trace(next);
+				console.trace(next[2].page_to_edit);
 				console.trace(this.actions);
 				throw new Error(
 						'wiki_API.prototype.next: There are multiple threads competing with each other? 有多個執行緒互相競爭？');

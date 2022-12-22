@@ -3849,7 +3849,7 @@ function module_code(library_namespace) {
 
 		DEFINITION_LIST : DEFINITION_LIST,
 
-		PATTERN_language_conversion : PATTERN_language_conversion,
+		// PATTERN_language_conversion : PATTERN_language_conversion,
 
 		page_title_to_sort_key : page_title_to_sort_key,
 
