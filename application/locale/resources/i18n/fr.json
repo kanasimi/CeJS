@@ -460,7 +460,7 @@
 	"this-chapter-is-a-chapter-that-requires-payment-locking": "Ce chapitre exige un paiement ou est verrouillé.",
 	"did-not-get-any-image-from-this-chapter": "Image non obtenue depuis ce chapitre !",
 	"the-number-of-registered-images-$1-is-different-from-the-length-of-the-images-list-$2": "Le nombre d’image inscrites (%1) est différent de la longueur de la liste des images (%2) !",
-	"the-original-chapter-data-have-sets-a-division-title-but-the-chapter-data-returned-by-.parse_chapter_data()-is-missing-the-division-title.-perhaps-you-can-use-the-original-chapter-data": "Les données du chapitre original définissent un titre de division, mais le titre de division est absent des données du chapitre retournées par « .parse_chapter_data() ». Peut-être vous pouvez utiliser les données du chapitre original.",
+	"the-original-chapter-data-have-sets-a-division-title-but-the-chapter-data-returned-by-.parse_chapter_data()-is-missing-the-division-title.-perhaps-you-can-use-the-original-chapter-data": "Les données du chapitre original définissent un titre de division, mais le titre de division manque dans les données du chapitre retournées par « .parse_chapter_data() ». Vous pouvez peut-être utiliser les données du chapitre original.",
 	"$1-image(s)-left": "%1 image{{PLURAL:%1||s}} restante{{PLURAL:%1||s}}...",
 	"waiting-for-the-image-file-that-has-not-been-downloaded-yet": "Attente du fichier image qui n’a pas encore été téléchargé :",
 	"$1-$2-image-download-error-recorded": "%1 : erreur de téléchargement de %2 image{{PLURAL:%2||s}} enregistrée",
