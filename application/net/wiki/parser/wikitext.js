@@ -881,7 +881,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * parse The MediaWiki markup language (wikitext). 解析維基語法。
+	 * parse The MediaWiki markup language (wikitext). 解析維基語法。 維基語法解析器
 	 * 
 	 * TODO:<code>
 
@@ -1324,6 +1324,12 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
+		function is_invalid_page_name(page_name) {
+			return page_name.is_link || page_name.tag
+			// <nowiki /> 能斷開如 [[L<nowiki />L]]
+			&& page_name.tag.toLowerCase() in extensiontag_hash;
+		}
+
 		// TODO: 緊接在連結後面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分。
 		// https://phabricator.wikimedia.org/T263266
 		function parse_wikilink(all_link, page_and_anchor, page_name, anchor,
@@ -1334,7 +1340,8 @@ function module_code(library_namespace) {
 				var index = all_link.lastIndexOf('[[');
 				previous = all_link.slice(0, index);
 				all_link = all_link.slice(index);
-				if (index = all_link.match(PATTERN_wikilink)) {
+				index = all_link.match(PATTERN_wikilink);
+				if (index) {
 					page_and_anchor = index[1];
 					// `{{NAMESPACE}}:{{PAGENAME}}`
 					page_name = index[2];
@@ -1350,10 +1357,10 @@ function module_code(library_namespace) {
 				previous = '';
 			}
 
-			if (/\n=+[^=]=+/.test(display_text)) {
+			if (display_text && /\n=+[^=]=+/.test(display_text)) {
 				// incase '[[A|B]\n==T==\n<code>[[]]</code>'
 				// TODO: fix '[[A|B]<code>]]still code'
-				return all_link;
+				return previous + all_link;
 			}
 
 			var matched = display_text
@@ -1361,7 +1368,7 @@ function module_code(library_namespace) {
 			&& display_text.match(/{{([^{}][\s\S]*?)$/);
 			if (matched && !matched[1].includes('}}')) {
 				// e.g., `[[File:i.png|\n{{t|]]}}\n]]`
-				return all_link;
+				return previous + all_link;
 			}
 
 			library_namespace.debug('[' + previous + '] + [' + all_link + ']',
@@ -1375,7 +1382,7 @@ function module_code(library_namespace) {
 				anchor = page_and_anchor;
 			} else if (!page_name.trim()) {
 				// e.g., "[[ ]]", "[[ #...]]"
-				return all_link;
+				return previous + all_link;
 			} else {
 				if (!anchor) {
 					anchor = '';
@@ -1396,7 +1403,7 @@ function module_code(library_namespace) {
 				}
 				// [[::zh:title]] would be rendered as plaintext
 				if (/^\s*:\s*:/.test(page_name)) {
-					return all_link;
+					return previous + all_link;
 				}
 				if (page_name.includes(include_mark)) {
 					// console.trace(page_name);
@@ -1406,22 +1413,24 @@ function module_code(library_namespace) {
 						console.log([ all_link, page_and_anchor, page_name,
 								anchor, display_text ]);
 					}
-					if (
+					var matched = /* !display_text && */previous
+					// e.g., [[file:a.JPG|thumb|[[<ref>a</ref>]] ]]
+					&& PATTERN_file_prefix.test(previous.slice(2))
+							&& 'link_inside_file';
+					// matched: will be extracted later via resolve_filter
+					if (!matched
 					// e.g., [[[[T]]]]
-					page_name.is_link
+					// e.g., '[[<ref>a</ref>|b]]'
+					&& (is_invalid_page_name(page_name)
 					// e.g., [[:[[Portal:中國大陸新聞動態|中国大陆新闻]] 3月16日新闻]]
 					// [[[[t|l]], t|l]]
-					|| page_name.some(function(token) {
-						return token.is_link || token.tag
-						// <nowiki /> 能斷開如 [[L<nowiki />L]]
-						&& token.tag.toLowerCase() in extensiontag_hash;
-					})) {
+					|| page_name.some(is_invalid_page_name))) {
 						// console.trace(page_name);
 						// page_name.oddly = 'link_inside_link';
-						return all_link;
-					} else {
-						page_name.oddly = true;
+						return previous + all_link;
 					}
+					page_name = [ page_name ];
+					page_name.oddly = matched || true;
 				} else {
 					var matched = (session || wiki_API).namespace(page_name, {
 						get_name : true
@@ -1481,7 +1490,11 @@ function module_code(library_namespace) {
 					queue, include_mark, end_mark, {
 						resolve_item : display_text,
 						resolve_filter : function(token) {
-							return token.is_magic_word && token.name === '!';
+							return token.is_magic_word && token.name === '!'
+							// e.g., '[[file:a.JPG|thumb|[[<ref>a</ref>|b]] ]]'
+							|| token.type === 'plain'
+							//
+							&& token.oddly === 'link_inside_file';
 						}
 					}).toString();
 
@@ -1753,8 +1766,18 @@ function module_code(library_namespace) {
 						.normalize_anchor(anchor);
 				// TODO: [[Special:]]
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
-				_set_wiki_type(parameters, file_matched ? 'file'
-						: category_matched ? 'category' : 'link');
+				if (page_name.oddly === 'link_inside_file') {
+					// @see wiki_token_toString.link
+					if (parameters.length > 2)
+						parameters.splice(2, 0, parameters.pipe || '|');
+					parameters.unshift('[[');
+					parameters.push(']]');
+					_set_wiki_type(parameters, 'plain');
+					parameters.oddly = page_name.oddly;
+				} else {
+					_set_wiki_type(parameters, file_matched ? 'file'
+							: category_matched ? 'category' : 'link');
+				}
 				if (category_matched)
 					parameters.set_sort_key = set_sort_key_of_category;
 			}

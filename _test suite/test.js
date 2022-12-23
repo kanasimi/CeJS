@@ -3539,6 +3539,18 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #9-1');
 		assert(['file', parsed.type], 'wiki.parse.file #9-2');
 		assert(['{{t|[[a]]|]]}}', parsed.caption && parsed.caption.toString()], 'wiki.parse.file #9-3');
+		// [[w:ja:国道487号]]
+		wikitext = '[[file:a.JPG|thumb|[[<ref>a</ref>]] ]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #10');
+		assert(['[[<ref>a</ref>]] ', parsed[3].toString()], 'wiki.parse.file #10-1');
+		wikitext = '[[file:a.JPG|thumb|[[<ref>a</ref><ref>b</ref>]] ]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #11');
+		wikitext = '[[ファイル:01.JPG|thumb|[[江田島市]]（[[<ref name="encho">{{Cite web|publisher=[[道路局]]}}</ref><ref group="注釈" name="encho">現在</ref>]]）]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #12');
+		wikitext = '[[file:a.JPG|thumb|[[<ref>a</ref>|b]] ]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #13');
+		wikitext = '[[<ref>a</ref>|b]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #14');
 
 		wikitext = '[[:Category:cat|sort_key]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.category #1-1');

@@ -3374,10 +3374,10 @@ function module_code(library_namespace) {
 				} else {
 					done = gettext(
 					// gettext_config:{"id":"processing-chunks-$1-$2"}
-					'處理分塊 %1–%2', work_continue + 1, work_continue
+					'處理分塊 %1–%2', work_continue + 1, (work_continue
 					// start–end/all
 					+ Math.min(max_size, initial_target_length)) + '/'
-							+ initial_target_length;
+							+ initial_target_length);
 					// Add percentage message.
 					if (initial_target_length > 1e4
 					// 數量太大或執行時間過長時，就顯示剩餘時間訊息。
