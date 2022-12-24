@@ -4089,6 +4089,10 @@ function test_wiki() {
 		wikitext = '{{t|b<b>|p=</b>c}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #14');
 		assert(['b<b>', parsed[1].toString()], 'wiki.parse: nowiki #14-1: <b>|p=</b> 會被分割成不同 parameters');
+		// [[w:en:List of the youngest state legislators in the United States]]
+		// | <!--{{age in years and days|X, 1998|Jan 4, 2023}}-</nowiki>-> 24 years
+		wikitext = '<nowiki/></nowiki>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #15');
 
 		wikitext = "aa<br>\nbb</br>\ncc"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: self-closed HTML tags: br #1');

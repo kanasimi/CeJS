@@ -160,22 +160,23 @@ function module_code(library_namespace) {
 			if (!anchor) {
 				continue;
 			}
-			if (typeof anchor === 'string') {
-				// 多空格、斷行會被轉成單一 " "。
-				anchor = anchor.replace(/[\s\n]{2,}/g, ' ');
-				if (library_namespace.HTML_to_wikitext)
-					anchor = library_namespace.HTML_to_wikitext(anchor);
-			} else {
+
+			if (typeof anchor !== 'string') {
 				// e.g., `{{Anchor|{{u|Emojibot}}}}` @ zhwiki
 
-				// old jawiki {{Anchor}}
-				// e.g., [[終着駅シリーズ]]: {{Anchor|[[牛尾正直]]}}
-				// {{Anchor|A[[B]]}} → "AB"
-				// anchor = wiki_API.wikitext_to_plain_text(anchor);
 				library_namespace.warn('expand_template_Anchor: 特殊 anchor: #'
 						+ anchor);
 				// console.trace(anchor);
+
+				// old jawiki {{Anchor}}
+				// e.g., [[終着駅シリーズ]]: {{Anchor|[[牛尾正直]]}}
+				// {{Anchor|A[[B|C]]}} → "AC"
+				anchor = wiki_API.wikitext_to_plain_text(anchor.toString());
 			}
+
+			// 多空格、斷行會被轉成單一 " "。
+			anchor = anchor.replace(/[\s\n]{2,}/g, ' ');
+
 			// class="anchor"
 			wikitext.push('<span id="' + anchor + '"></span>');
 		}

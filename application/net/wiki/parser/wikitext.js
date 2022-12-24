@@ -1713,7 +1713,7 @@ function module_code(library_namespace) {
 				if (file_matched || category_matched) {
 					// shown by link, is a linking to a file
 					// e.g., token[0][0].trim() === "File"; token[0]: namespace
-					parameters.is_link = page_name[0].trim() === '';
+					parameters.is_link = page_name[0].toString().trim() === '';
 
 					if (file_matched) {
 						parameters.name
@@ -2567,7 +2567,7 @@ function module_code(library_namespace) {
 			}
 
 			matched = (tag.toLowerCase() !== 'nowiki'
-			// 假如是 <nowiki /> 則需要搜尋是否有 <nowiki>。
+			// 假如 start tag 是 <nowiki />，則需要自 inner 搜尋是否有 <nowiki>。
 			|| attributes && attributes.endsWith('/'))
 			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
 			&& Array.from(inner.matchAll(new RegExp(
@@ -2578,22 +2578,23 @@ function module_code(library_namespace) {
 			'<(' + tag
 			// @see function get_PATTERN_full_tag()
 			+ ')([\\s/][^<>]*)?>', 'ig')));
-			if (matched && matched.length > 0) {
-				if (tag.toLowerCase() !== 'nowiki') {
-					// get last ccurrence. cf. .lastIndexOf()
-					matched = matched.at(-1);
-				} else {
-					// 搜尋第一個非 <nowiki .../> 者
-					if (!matched.some(function(tag_matched) {
-						if (!tag_matched[0].endsWith('/>')) {
-							matched = tag_matched;
-							return true;
-						}
-					})) {
-						matched = null;
-					}
+			if (!matched) {
+			} else if (matched.length === 0) {
+				// e.g., '<nowiki/></nowiki>'
+				matched = null;
+			} else if (tag.toLowerCase() !== 'nowiki') {
+				// 非 <nowiki>: get last ccurrence. cf. .lastIndexOf()
+				matched = matched.at(-1);
+			} else if (!matched.some(function(tag_matched) {
+				// ↑ 搜尋第一個非 <nowiki .../> 者
+				if (!tag_matched[0].endsWith('/>')) {
+					matched = tag_matched;
+					return true;
 				}
+			})) {
+				matched = null;
 			}
+
 			if (matched) {
 				matched = matched.index - inner.length - ending.length;
 				previous = all.slice(0, matched);

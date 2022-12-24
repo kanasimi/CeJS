@@ -862,6 +862,9 @@ function module_code(library_namespace) {
 					get_parameter_String(2), get_parameter_String(3))
 					: get_parameter_String(1).slice(get_parameter_String(2));
 
+			// case 'PADLEFT':
+			// case 'PADRIGHT':
+
 		case 'LC':
 			return get_parameter_String(1).toLowerCase();
 
@@ -1042,6 +1045,14 @@ function module_code(library_namespace) {
 
 		case 'URLENCODE':
 			return encodeURI(get_parameter_String(1));
+
+		case 'ANCHORENCODE':
+			return encodeURI(wiki_API.wikitext_to_plain_text(
+			// {{anchorencode:A[[B]]C/D}} === encodeURI('ABC/D')
+			// {{anchorencode:A[B]C/D}} === encodeURI('A[B]C/D')
+			get_parameter_String(1))
+			// 多空格、斷行會被轉成單一 " "。
+			.replace(/[\s\n]{2,}/g, ' '));
 
 		case 'LOCALURL':
 			return fullurl(true);
