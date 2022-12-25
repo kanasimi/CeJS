@@ -326,7 +326,7 @@ function module_code(library_namespace) {
 				delete _options.rollback_action;
 			}
 
-			wiki_API.page(title, function(page_data) {
+			wiki_API.page(title, function(page_data, error) {
 				if (options && (!options.ignore_denial
 				// TODO: 每經過固定時間，或者編輯特定次數之後，就再檢查一次。
 				&& wiki_API_edit.denied(page_data, options.bot_id,
@@ -354,20 +354,24 @@ function module_code(library_namespace) {
 								+ ')');
 						console.trace(options);
 					}
-					options.page_to_edit = page_data;
-					if (undo_count) {
-						delete options.undo_count;
-						// page_data =
-						// {pageid:0,ns:0,title:'',revisions:[{revid:0,parentid:0,user:'',timestamp:''},...]}
-						var revision = wiki_API.content_of.revision(page_data);
-						if (revision) {
-							timestamp = revision.timestamp;
-							// 指定 rev_id 版本編號。
-							options.undo = revision.revid;
+					if (options) {
+						options.page_to_edit = page_data;
+						options.last_page_error = error;
+						if (undo_count) {
+							delete options.undo_count;
+							// page_data =
+							// {pageid:0,ns:0,title:'',revisions:[{revid:0,parentid:0,user:'',timestamp:''},...]}
+							var revision = wiki_API.content_of
+									.revision(page_data);
+							if (revision) {
+								timestamp = revision.timestamp;
+								// 指定 rev_id 版本編號。
+								options.undo = revision.revid;
+							}
+							options.undoafter = page_data.revisions
+							// get the oldest revision
+							.at(-1).parentid;
 						}
-						options.undoafter = page_data.revisions
-						// get the oldest revision
-						.at(-1).parentid;
 					}
 
 					// 這裡不直接指定 text，是為了使(回傳要編輯資料的)設定值函數能即時依page_data變更 options。

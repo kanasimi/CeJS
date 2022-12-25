@@ -556,6 +556,17 @@ function module_code(library_namespace) {
 				_this.last_page_title = next[1];
 				_this.last_page_options = next[3];
 				_this.last_page_error = error;
+
+				var _next = _this.actions[0];
+				if (_next && _next[0] === 'edit'
+				// _next[2]: options
+				&& typeof _next[2] === 'object') {
+					// 手動指定要編輯的頁面。避免多執行續打亂 wiki.last_page。
+					_next[2].page_to_edit = page_data;
+					_next[2].page_title_to_edit = next[1];
+					_next[2].last_page_error = error;
+				}
+
 				if (!page_data) {
 					// console.trace([ '' + next[2], page_data, error ]);
 				}
@@ -1066,7 +1077,7 @@ function module_code(library_namespace) {
 			// console.trace(next[2]);
 			next[2] = library_namespace.setup_options(next[2]);
 			// `next[2].page_to_edit`: 手動指定要編輯的頁面。
-			if (!next[2].page_to_edit) {
+			if (!next[2].page_to_edit && !next[2].last_page_error) {
 				// console.trace([ next, this.last_page ]);
 				// e.g., page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 				if (false) {
@@ -1101,6 +1112,25 @@ function module_code(library_namespace) {
 								.warn('wiki_API.prototype.next: 可能是 .page() 之後，.edit() 受到 this.actions.promise_relying 觸發，造成雙重執行？直接跳出，嘗試等待其他執行緒回來執行。');
 					}
 					this.actions.unshift(next);
+					break;
+				}
+
+				if (next[2].last_page_error || this.last_page_error) {
+					library_namespace
+							.warn('wiki_API.prototype.next: 無法取得頁面，跳出編輯: '
+									+ next[2].page_title_to_edit);
+					library_namespace.error(next[2].last_page_error
+							|| this.last_page_error);
+					this.next(next[3], undefined, 'page fetch error',
+							next[2].last_page_error && next[2] || this);
+					break;
+				}
+
+				if (false && next[2].page_title_to_edit) {
+					library_namespace.warn('wiki_API.prototype.next: 嘗試先取得頁面: '
+							+ next[2].page_title_to_edit);
+					this.actions.unshift([ 'page', next[2].page_title_to_edit,
+							next[2] ], next);
 					break;
 				}
 
