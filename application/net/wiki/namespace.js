@@ -1613,8 +1613,9 @@ function module_code(library_namespace) {
 
 	// wikitext to plain text
 	// CeL.wiki.plain_text(wikitext)
-	// @seealso function get_label(html) @ work_crawler.js
 	// Please use CeL.wiki.wikitext_to_plain_text() instead!
+	// @see [[Module:Plain text]],
+	// @seealso function get_label(html) @ work_crawler.js
 	function simple_wikitext_to_plain_text(wikitext) {
 		if (!wikitext || !(wikitext = wikitext.trim())) {
 			// 一般 template 中之 parameter 常有設定空值的狀況，因此首先篩選以加快速度。

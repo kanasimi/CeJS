@@ -63,7 +63,7 @@ function module_code(library_namespace) {
 	}
 
 	function trim_param(param) {
-		return param.toString().trim();
+		return param && param.toString().trim();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -304,6 +304,65 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// @see createEpisodeNumberCellSecondary() @ [[Module:Episode list]]
+	var EpisodeNumbers = [ 'EpisodeNumber', 'EpisodeNumber2', 'EpisodeNumber3' ];
+
+	function expand_template_Episode_list(options) {
+		// console.trace(this);
+		var parameters = this.parameters;
+		var anchor_prefix = this.anchor_prefix || '';
+		var wikitext = [];
+		for (var index = 0; index < EpisodeNumbers.length; index++) {
+			var anchor = trim_param(parameters[EpisodeNumbers[index]]);
+			// console.trace([ EpisodeNumbers[index], anchor ]);
+			// @see getEpisodeText() @ [[Module:Episode list]]
+			var matched = anchor && anchor.match(/^\w+/);
+			if (matched) {
+				anchor = matched[0];
+				// 極度簡化版。
+				wikitext.push('<th id="' + anchor_prefix + 'ep' + anchor
+						+ '"></th>');
+			}
+		}
+
+		// @see createProductionCodeCell() @ [[Module:Episode list]]
+		var anchor = trim_param(parameters.ProdCode);
+		if (anchor) {
+			wikitext.push('<td id="' + 'pc' + anchor + '"></td>');
+		}
+
+		// console.trace(wikitext);
+		return wikitext.join('');
+	}
+
+	function parse_template_Episode_list(token, index, parent, options) {
+		token.expand = expand_template_Episode_list;
+	}
+
+	function expand_template_Episode_table(options) {
+	}
+
+	function parse_template_Episode_table(token, index, parent, options) {
+		// token.expand = expand_template_Episode_table;
+		var parameters = token.parameters;
+		var episodes = parameters.episodes;
+		var anchor_prefix = trim_param(parameters.anchor);
+		// console.trace(anchor_prefix);
+		if (anchor_prefix && episodes) {
+			var session = wiki_API.session_of_options(options) || wiki_API;
+			wiki_API.parser.parser_prototype.each.call(episodes,
+			//
+			'transclusion', function(token) {
+				if (session.is_template(token, [ 'Episode list',
+						'Episode list/sublist' ])) {
+					token.anchor_prefix = anchor_prefix;
+				}
+			}, options);
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	function parse_template_Pin_message(token, index, parent, options) {
 		var parameters = token.parameters;
 		var expire_date = parameters[1]
@@ -437,6 +496,8 @@ function module_code(library_namespace) {
 		'User link' : parse_template_User_link,
 
 		// 一些會添加 anchors 的特殊模板。
+		// 會生成網頁錨點的模板或模組。
+		// Templates or modules that generate web anchors
 		Anchor : parse_template_Anchor,
 		'Module:Anchor' : parse_template_Anchor,
 		'Visible anchor' : parse_template_Visible_anchor,
@@ -444,6 +505,9 @@ function module_code(library_namespace) {
 		Wikicite : parse_template_Wikicite,
 		// Sfn : parse_template_Sfn,
 		SfnRef : parse_template_SfnRef,
+		'Episode table' : parse_template_Episode_table,
+		'Episode list' : parse_template_Episode_list,
+		'Episode list/sublist' : parse_template_Episode_list,
 
 		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
 		'Pin message' : parse_template_Pin_message,

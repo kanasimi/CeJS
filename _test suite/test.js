@@ -3726,6 +3726,15 @@ function test_wiki() {
 		wikitext = '{{t\n|p=1\n |q=2}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #20');
 		assert(['2', parsed.parameters.q], 'wiki.parse.transclusion #20-1');
+		wikitext = '{{t|p=\n*i\n}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #21');
+		assert(['list', parsed.parameters.p.type], 'wiki.parse.transclusion #21-1');
+		wikitext = '{{t|p=\n*i|q=2}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #22');
+		assert(['list', parsed.parameters.p.type], 'wiki.parse.transclusion #22-1');
+		wikitext = '{{t|p=\n t\n p|q=2}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #23');
+		assert(['pre', parsed.parameters.p[1].type], 'wiki.parse.transclusion #23-1');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -4441,7 +4450,8 @@ function test_wiki() {
 
 		wikitext = ' <span id="{{anchorencode:id_abc}}">ABC</span> <span id{{=}}"{{anchorencode:id 123}}">ABC</span> ';
 		assert(['id abc,id 123', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #1');
-
+		wikitext = '{{Episode table|anchor=Minisodes|episodes={{Episode list|EpisodeNumber=2|ProdCode=22}}{{Episode list|EpisodeNumber=3|ProdCode=33}}}}';
+		assert(['Minisodesep2,pc22,Minisodesep3,pc33', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #2');
 
 		wikitext = '{{color|red|text}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		// Create template_token.expand()

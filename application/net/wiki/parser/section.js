@@ -1798,6 +1798,7 @@ function module_code(library_namespace) {
 						return;
 
 					template_token = anchors;
+					// console.trace(anchors);
 					anchors = get_all_anchors(anchors.toString(), _options);
 					// console.trace(anchors);
 					anchors.forEach(function(anchor) {

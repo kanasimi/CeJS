@@ -48,8 +48,9 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// CeL.wiki.HTML_to_wikitext(HTML)
+	// Please use CeL.wiki.wikitext_to_plain_text() instead!
 	// TODO: 應該 parse HTML。
-	// @see
+	// @see [[Module:Plain text]],
 	// https://www.mediawiki.org/w/api.php?action=help&modules=flow-parsoid-utils
 	// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
@@ -341,7 +342,7 @@ function module_code(library_namespace) {
 
 	// 若包含 br|hr| 會導致 "aa<br>\nbb</br>\ncc" 解析錯誤！
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
-	markup_tags = 'bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark'
+	markup_tags = 'bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|thead|tbody|tr|th|td|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark'
 			// [[Help:Parser tag]], [[Help:Extension tag]]
 			+ '|includeonly|noinclude|onlyinclude'
 			// https://phabricator.wikimedia.org/T263082
@@ -1925,6 +1926,7 @@ function module_code(library_namespace) {
 
 			// e.g., for `{{#if:|''[[{{T}}|D]]''|}}`
 			parameters = parse_wikitext(parameters, Object.assign({
+				// inside_transclusion: 尚未切分 "|"
 				inside_transclusion : true,
 				no_resolve : true
 			}, options), queue);
@@ -1954,9 +1956,7 @@ function module_code(library_namespace) {
 				// parse function name
 				matched.pfn = wiki_token_to_key(
 				//
-				parse_wikitext(matched[2], Object.assign({
-					inside_transclusion : true
-				}, options), queue));
+				parse_wikitext(matched[2], options, queue));
 				if (/^ *#/.test(matched.pfn)) {
 					if (typeof matched.pfn === 'string')
 						matched.pfn = matched.pfn.trim();
@@ -1984,9 +1984,7 @@ function module_code(library_namespace) {
 					token = token.slice(0, -tail_spaces.length);
 				}
 				// 預防經過改變，需再進一步處理。
-				token = parse_wikitext(token, Object.assign({
-					inside_transclusion : true
-				}, options), queue);
+				token = parse_wikitext(token, options, queue);
 
 				if (_index === 0) {
 					// console.log(token);
@@ -2198,9 +2196,7 @@ function module_code(library_namespace) {
 			// console.trace(matched);
 			if (matched) {
 				// 預防經過改變，需再進一步處理。
-				parameters[0] = parse_wikitext(matched[1], Object.assign({
-					inside_transclusion : true
-				}, options), queue);
+				parameters[0] = parse_wikitext(matched[1], options, queue);
 				parameters.name = matched.pfn;
 				// 若指定 .valueOf = function()，
 				// 會造成 '' + token 執行 .valueOf()。
@@ -3877,6 +3873,7 @@ function module_code(library_namespace) {
 
 		page_title_to_sort_key : page_title_to_sort_key,
 
+		// Please use CeL.wiki.wikitext_to_plain_text() instead!
 		HTML_to_wikitext : HTML_to_wikitext,
 		// wikitext_to_plain_text : wikitext_to_plain_text,
 
