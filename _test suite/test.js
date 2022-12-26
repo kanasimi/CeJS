@@ -4212,7 +4212,19 @@ function test_wiki() {
 
 		// [[Special:ExpandTemplates]]
 		assert(['STRING', CeL.wiki.expand_transclusion('{{uc:string}}').toString()], 'wiki.expand_transclusion: {{UC:}}');
+		assert(['string', CeL.wiki.expand_transclusion('{{lc:STRING}}').toString()], 'wiki.expand_transclusion: {{LC:}}');
 		assert(['String', CeL.wiki.expand_transclusion('{{UCFIRST:string}}').toString()], 'wiki.expand_transclusion: {{UCFIRST:}}');
+		assert(['sTRING', CeL.wiki.expand_transclusion('{{LCFIRST:STRING}}').toString()], 'wiki.expand_transclusion: {{LCFIRST:}}');
+		assert(['00xyz', CeL.wiki.expand_transclusion('{{padleft:xyz|5}}').toString()], 'wiki.expand_transclusion: {{padleft:xyz|stringlength}}');
+		assert(['__xyz', CeL.wiki.expand_transclusion('{{padleft:xyz|5|_}}').toString()], 'wiki.expand_transclusion: {{padleft:xyz|strlen|char}}');
+		assert(['abxyz', CeL.wiki.expand_transclusion('{{padleft:xyz|5|abc}}').toString()], 'wiki.expand_transclusion: {{padleft:xyz|strlen|string}}');
+		assert(['xyz', CeL.wiki.expand_transclusion('{{padleft:xyz|2}}').toString()], 'wiki.expand_transclusion: {{padleft:xyz|stringlength}} #2');
+		assert(['x', CeL.wiki.expand_transclusion('{{padleft:|1|xyz}}').toString()], 'wiki.expand_transclusion: {{padleft:xyz|strlen|string}} #2');
+		assert(['xyz00', CeL.wiki.expand_transclusion('{{padright:xyz|5}}').toString()], 'wiki.expand_transclusion: {{padright:xyz|stringlength}}');
+		assert(['xyz__', CeL.wiki.expand_transclusion('{{padright:xyz|5|_}}').toString()], 'wiki.expand_transclusion: {{padright:xyz|strlen|char}}');
+		assert(['xyzab', CeL.wiki.expand_transclusion('{{padright:xyz|5|abc}}').toString()], 'wiki.expand_transclusion: {{padright:xyz|strlen|string}}');
+		assert(['xyz', CeL.wiki.expand_transclusion('{{padright:xyz|2}}').toString()], 'wiki.expand_transclusion: {{padright:xyz|stringlength}} #2');
+		assert(['x', CeL.wiki.expand_transclusion('{{padright:|1|xyz}}').toString()], 'wiki.expand_transclusion: {{padright:xyz|strlen|string}} #2');
 
 		assert(['預設結果', CeL.wiki.expand_transclusion('{{#switch:\n|結果\n|預設結果\n}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #1');
 		assert(['vvv', CeL.wiki.expand_transclusion('{{#switch:1<!-- -->23\n|12<!-- -->3\n|key=vvv\n|預設結果\n}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #2');

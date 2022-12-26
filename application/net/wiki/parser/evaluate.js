@@ -838,6 +838,8 @@ function module_code(library_namespace) {
 			return check_token_key('name', reparse_token_name);
 		}
 
+		// All (token.name)s MUST in default_magic_words_hash
+		// @ CeL.application.net.wiki.parser.wikitext
 		switch (token.name) {
 
 		case '!':
@@ -862,9 +864,6 @@ function module_code(library_namespace) {
 					get_parameter_String(2), get_parameter_String(3))
 					: get_parameter_String(1).slice(get_parameter_String(2));
 
-			// case 'PADLEFT':
-			// case 'PADRIGHT':
-
 		case 'LC':
 			return get_parameter_String(1).toLowerCase();
 
@@ -880,6 +879,28 @@ function module_code(library_namespace) {
 			return get_parameter_String(1).replace(/^./, function(fc) {
 				return fc.toUpperCase();
 			});
+
+		case 'PADLEFT':
+			return get_parameter_String(1).padStart(get_parameter_String(2),
+					get_parameter_String(3) || '0');
+		case 'PADRIGHT':
+			return get_parameter_String(1).padEnd(get_parameter_String(2),
+					get_parameter_String(3) || '0');
+			if (false) {
+				// native的更好用
+				// console.trace(token);
+				var string = get_parameter_String(1);
+				var length = get_parameter_String(2) - string.length;
+				if (length > 0) {
+					var padding = get_parameter_String(3) || '0';
+					padding = padding
+							.repeat(Math.ceil(length / padding.length)).slice(
+									0, length);
+					string = token.name === 'PADLEFT' ? padding + string
+							: string + padding;
+				}
+				return string;
+			}
 
 			// ----------------------------------------------------------------
 

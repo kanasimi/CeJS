@@ -1089,6 +1089,7 @@ function module_code(library_namespace) {
 					// console.trace(next[2]);
 				}
 				next[2].page_to_edit = this.last_page || next[2].task_page_data;
+				next[2].last_page_error = this.last_page_error;
 			}
 			// console.trace(next[2]);
 			// console.trace(next);
