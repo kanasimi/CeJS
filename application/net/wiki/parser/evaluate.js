@@ -886,21 +886,6 @@ function module_code(library_namespace) {
 		case 'PADRIGHT':
 			return get_parameter_String(1).padEnd(get_parameter_String(2),
 					get_parameter_String(3) || '0');
-			if (false) {
-				// native的更好用
-				// console.trace(token);
-				var string = get_parameter_String(1);
-				var length = get_parameter_String(2) - string.length;
-				if (length > 0) {
-					var padding = get_parameter_String(3) || '0';
-					padding = padding
-							.repeat(Math.ceil(length / padding.length)).slice(
-									0, length);
-					string = token.name === 'PADLEFT' ? padding + string
-							: string + padding;
-				}
-				return string;
-			}
 
 			// ----------------------------------------------------------------
 

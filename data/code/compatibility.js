@@ -1427,7 +1427,8 @@ function module_code(library_namespace) {
 	// ---------------------------------------------------------------------------
 	// http://tc39.github.io/proposal-string-pad-start-end/
 	// https://github.com/tc39/proposal-string-pad-start-end
-	function pad_String(maxLength, fillString) {
+	function pad_String(/* targetLength */maxLength, /* padString */
+	fillString) {
 		if (!(this.length < maxLength)) {
 			return '';
 		}
@@ -1438,15 +1439,15 @@ function module_code(library_namespace) {
 		}
 
 		maxLength -= this.length;
-		if (fillString.length === maxLength) {
-			return fillString;
-		}
 
 		if (fillString.length < maxLength) {
 			fillString = fillString.repeat(Math.ceil(maxLength
 					/ fillString.length));
 		}
-		return fillString.slice(0, maxLength);
+
+		return fillString.length === maxLength ? fillString
+		// assert: fillString.length > maxLength
+		: fillString.slice(0, maxLength);
 	}
 
 	// ---------------------------------------------------------------------------
@@ -1561,11 +1562,11 @@ function module_code(library_namespace) {
 		trimStart : trimStart,
 		trimEnd : trimEnd,
 		// String.prototype.padStart()
-		padStart : function padStart() {
+		padStart : function padStart(maxLength, fillString) {
 			return pad_String.call(this, maxLength, fillString) + this;
 		},
 		// String.prototype.padEnd()
-		padEnd : function padEnd() {
+		padEnd : function padEnd(maxLength, fillString) {
 			return this + pad_String.call(this, maxLength, fillString);
 		},
 		// String.prototype.includes()
