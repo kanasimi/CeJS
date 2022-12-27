@@ -901,7 +901,8 @@ function module_code(library_namespace) {
 			// TODO: 此為有缺陷的極精簡版。
 			if (type === 'R' || type === 'NOSEP')
 				return number.replace(/,/g, '');
-			return (+number).toLocaleString('en');
+			number = number.match(/^([\s\S]+?)(\..+)?$/);
+			return (+number[1]).toLocaleString('en') + (number[2] || '');
 
 			// ----------------------------------------------------------------
 
@@ -939,26 +940,37 @@ function module_code(library_namespace) {
 			return (new Date).toISOString().replace(/[\-:TZ]/g, '').replace(
 					/\.\d+$/, '');
 
-		case 'DATEFORMAT':
-		case 'FORMATDATE':
+		case '#dateformat':
+		case '#formatdate':
 			var date = new Date(get_parameter_String(1));
 			var type = get_parameter_String(2);
-			if (type === 'ISO 8601')
-				return date.format('%Y-%2m-%2d');
+			// console.trace([ date, type ]);
+
 			// TODO: 此為有缺陷的極精簡版。
-			if (type === 'ymd')
-				return date.format('%Y %B %d', {
-					locale : 'en'
-				});
-			if (type === 'dmy')
-				return date.format('%d %B %Y', {
-					locale : 'en'
-				});
-			if (type === 'mdy')
-				return date.format('%B %d, %Y', {
-					locale : 'en'
-				});
-			return NYI();
+			switch (type) {
+			case 'ISO 8601':
+				return date.format('%Y-%2m-%2d');
+
+			case 'ymd':
+				type = '%Y %B %d';
+				break;
+
+			case 'dmy':
+				type = '%d %B %Y';
+				break;
+
+			case 'mdy':
+				type = '%B %d, %Y';
+				break;
+
+			default:
+				// TODO: 未指定日期格式時，會自動判別，並且輸出格式化過的完整日期。
+				return get_parameter_String(1);
+			}
+			return date.format({
+				format : type,
+				locale : 'en'
+			});
 
 		case '#time':
 			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##time

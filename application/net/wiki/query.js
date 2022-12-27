@@ -733,12 +733,20 @@ function module_code(library_namespace) {
 
 	wiki_API_query.get_URL_options = {
 		headers : {
-			// https://meta.wikimedia.org/wiki/User-Agent_policy
-			// CeL.wiki.query.get_URL_options.headers['User-Agent']='testbot/1.0'
-			// 'User-Agent' : '',
-
 			// for mw_web_session use
-			'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8'
+			'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8',
+
+			/**
+			 * By default, using the user agent get_URL_node.default_user_agent
+			 * set in Ajax.js. To set another user agent:<code>
+
+			CeL.wiki.query.get_URL_options.headers['User-Agent']='testbot/1.0'
+			
+			</code>
+			 * 
+			 * @see https://meta.wikimedia.org/wiki/User-Agent_policy
+			 */
+			'User-Agent' : CeL.net.Ajax.get_URL.default_user_agent
 		},
 		// default error retry 連線逾期/失敗時再重新取得頁面之重試次數。
 		error_retry : 4,

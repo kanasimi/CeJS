@@ -4225,6 +4225,20 @@ function test_wiki() {
 		assert(['xyzab', CeL.wiki.expand_transclusion('{{padright:xyz|5|abc}}').toString()], 'wiki.expand_transclusion: {{padright:xyz|strlen|string}}');
 		assert(['xyz', CeL.wiki.expand_transclusion('{{padright:xyz|2}}').toString()], 'wiki.expand_transclusion: {{padright:xyz|stringlength}} #2');
 		assert(['x', CeL.wiki.expand_transclusion('{{padright:|1|xyz}}').toString()], 'wiki.expand_transclusion: {{padright:xyz|strlen|string}} #2');
+		assert(['987,654,321.654321', CeL.wiki.expand_transclusion('{{formatnum:987654321.654321}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #1');
+		assert(['987654321.654321', CeL.wiki.expand_transclusion('{{formatnum:987,654,321.654321|R}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #2');
+		assert(['987654321.654321', CeL.wiki.expand_transclusion('{{formatnum:{{formatnum:987654321.654321}}|R}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #3');
+		assert(['987654321.654321', CeL.wiki.expand_transclusion('{{formatnum:987654321.654321 |NOSEP}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #4');
+		assert(['2009 December 25', CeL.wiki.expand_transclusion('{{#dateformat:25 dec 2009|ymd}}').toString()], 'wiki.expand_transclusion: {{formatdate:}} #1');
+		assert(['25 December 2009', CeL.wiki.expand_transclusion('{{#formatdate:dec 25,2009|dmy}}').toString()], 'wiki.expand_transclusion: {{formatdate:}} #2');
+		assert(['December 25, 2009', CeL.wiki.expand_transclusion('{{#dateformat:2009-12-25|mdy}}').toString()], 'wiki.expand_transclusion: {{formatdate:}} #3');
+		assert(['2009-12-25', CeL.wiki.expand_transclusion('{{#formatdate:2009 dec 25|ISO 8601}}').toString()], 'wiki.expand_transclusion: {{formatdate:}} #4');
+		//assert(['December 25', CeL.wiki.expand_transclusion('{{#dateformat:25 decEmber|mdy}}').toString()], 'wiki.expand_transclusion: {{formatdate:}} #5');
+		assert(['2009-12-25', CeL.wiki.expand_transclusion('{{#dateformat:2009-12-25}}').toString()], 'wiki.expand_transclusion: {{formatdate:}} #6');
+		// assert(['25 December 2009', CeL.wiki.expand_transclusion('{{#dateformat:25 dec 2009}}').toString()], 'wiki.expand_transclusion: {{formatdate:}} #7');
+		// assert(['December 25, 2009', CeL.wiki.expand_transclusion('{{#formatdate:dec 25,2009}}').toString()], 'wiki.expand_transclusion: {{formatdate:}} #8');
+		// assert(['December 25, 2009', CeL.wiki.expand_transclusion('{{#dateformat:2009-12-25}}').toString()], 'wiki.expand_transclusion: {{formatdate:}} #9');
+		// assert(['2009 December 25', CeL.wiki.expand_transclusion('{{#formatdate:2009 dec 25}}').toString()], 'wiki.expand_transclusion: {{formatdate:}} #10');
 
 		assert(['預設結果', CeL.wiki.expand_transclusion('{{#switch:\n|結果\n|預設結果\n}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #1');
 		assert(['vvv', CeL.wiki.expand_transclusion('{{#switch:1<!-- -->23\n|12<!-- -->3\n|key=vvv\n|預設結果\n}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #2');

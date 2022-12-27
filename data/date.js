@@ -1879,10 +1879,19 @@ function module_code(library_namespace) {
 			return 1 + date_value.getMonth();
 		},
 		// 寫完整月名，例如 October。
-		B : function(date_value, options) {
+		B : function full_month_name(date_value, options) {
+			// console.trace(options);
 			return gettext_date.month(1 +
 			// (options && options.original_Date || date_value)
 			date_value.getMonth(), options.locale);
+		},
+		// 寫縮略月名，例如 Oct （本地環境依賴）。
+		b : function(date_value, options) {
+			var month_name = strftime.default_conversion.B.apply(this,
+					arguments);
+			if (/^en/.test(options.locale))
+				month_name = month_name.slice(0, 3);
+			return month_name;
 		},
 
 		// 月中的第幾天 (1-31) 以十進制數寫月的第幾日（範圍[01,31]）。
