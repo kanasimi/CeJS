@@ -738,9 +738,9 @@ function module_code(library_namespace) {
 	var default_magic_words_hash = Object.create(null);
 	// https://www.mediawiki.org/wiki/Help:Magic_words
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=functionhooks&utf8&format=json
-	('DISPLAYTITLE|DEFAULTSORT|デフォルトソート' + '|ns|nse|lc|lcfirst|uc|ucfirst'
-			+ '|padleft|padright' + '|urlencode|anchorencode'
-			+ '|localurl|fullurl|filepath'
+	('DISPLAYTITLE|DEFAULTSORT|DEFAULTSORTKEY|DEFAULTCATEGORYSORT|デフォルトソート' + '|ns|nse|lc|lcfirst|uc|ucfirst'
+			+ '|padleft|padright' + '|formatnum' + '|urlencode|anchorencode'
+			+ '|localurl|fullurl|filepath' + '|dateformat|formatdate'
 
 			// https://www.mediawiki.org/wiki/Help:Magic_words#Transclusion_modifiers
 			// https://en.wikipedia.org/wiki/Help:Transclusion#Transclusion_modifiers

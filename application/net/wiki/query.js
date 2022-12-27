@@ -432,6 +432,7 @@ function module_code(library_namespace) {
 				setup_API_URL(session, true);
 			}
 			Object.assign(get_URL_options, session.get_URL_options);
+			// console.trace([ get_URL_options, session.get_URL_options ]);
 		}
 
 		if (options.form_data) {
@@ -731,7 +732,11 @@ function module_code(library_namespace) {
 	}
 
 	wiki_API_query.get_URL_options = {
-		head : {
+		headers : {
+			// https://meta.wikimedia.org/wiki/User-Agent_policy
+			// CeL.wiki.query.get_URL_options.headers['User-Agent']='testbot/1.0'
+			// 'User-Agent' : '',
+
 			// for mw_web_session use
 			'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8'
 		},

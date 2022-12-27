@@ -409,12 +409,12 @@ function module_code(library_namespace) {
 			// TODO: 處理有 onload 下之 timeout 逾時ms數
 			// Ajax 程式應該考慮到 server 沒有回應時之處置
 
-			if (library_namespace.is_Object(options.head)
+			if (library_namespace.is_Object(options.headers)
 			// https://developer.mozilla.org/zh-TW/docs/Web/API/XMLHttpRequest/setRequestHeader
 			// `!!XMLHttp.setRequestHeader` will throw @ HTA (HTML Application)
 			&& ('setRequestHeader' in XMLHttp)) {
-				Object.keys(options.head).forEach(function(key) {
-					XMLHttp.setRequestHeader(key, options.head[key]);
+				Object.keys(options.headers).forEach(function(key) {
+					XMLHttp.setRequestHeader(key, options.headers[key]);
 				});
 			}
 
@@ -873,9 +873,9 @@ function module_code(library_namespace) {
 	function handle_function(error){..}
 	代為處理	handle_function=[d_func,0: responseText,1: responseXML]:
 	responseXML:	http://msdn2.microsoft.com/en-us/library/ms757878.aspx
-	function d_func(content,head[,XMLHttp,URL]){
-		if(head){
-			//	content,head各為XMLHttp.responseText內容及XMLHttp.getAllResponseHeaders()，其他皆可由XMLHttp取得。
+	function d_func(content,headers[,XMLHttp,URL]){
+		if(headers){
+			//	content,headers各為XMLHttp.responseText內容及XMLHttp.getAllResponseHeaders()，其他皆可由XMLHttp取得。
 		}else{
 			//	content為error
 		}
@@ -1131,12 +1131,13 @@ function module_code(library_namespace) {
 
 	/**
 	 * agent content handle function<br />
-	 * 有head時content包含回應，否則content表error
+	 * 有headers時content包含回應，否則content表error
 	 */
-	deprecated_get_URL.HandleContent = function(content, head, _oXMLHttp, URL) {
-		if (head) {
+	deprecated_get_URL.HandleContent = function(content, headers, _oXMLHttp,
+			URL) {
+		if (headers) {
 			// _oXMLHttp.getResponseHeader("Content-Length")
-			alert("URL:	" + URL + "\nHead:\n"
+			alert("URL:	" + URL + "\nHeaders:\n"
 					+ _oXMLHttp.getAllResponseHeaders()
 					+ "\n------------------------\nLastModified: "
 					+ _oXMLHttp.getResponseHeader("Last-Modified")
@@ -2784,7 +2785,7 @@ function module_code(library_namespace) {
 					'HttpsProxyAgent.createConnection');
 			request = node_http.request(request);
 
-			request.on('connect', function(response, socket, head) {
+			request.on('connect', function(response, socket, headers) {
 				var tls = require('tls');
 				// https://github.com/nodejs/node/issues/27384
 				// node.js v12 disable TLS v1.0 and v1.1 by default

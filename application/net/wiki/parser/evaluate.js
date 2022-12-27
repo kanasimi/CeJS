@@ -832,6 +832,12 @@ function module_code(library_namespace) {
 			return url;
 		}
 
+		function PAGENAMEE_encoding(page_title) {
+			if (!token.name.endsWith('EE'))
+				return page_title;
+			return encodeURI(page_title.replace(/ /g, '_'));
+		}
+
 		// --------------------------------------------------------------------
 
 		if (Array.isArray(token.name) && !token.name.evaluated) {
@@ -889,6 +895,16 @@ function module_code(library_namespace) {
 
 			// ----------------------------------------------------------------
 
+		case 'FORMATNUM':
+			var number = get_parameter_String(1);
+			var type = get_parameter_String(2);
+			// TODO: 此為有缺陷的極精簡版。
+			if (type === 'R' || type === 'NOSEP')
+				return number.replace(/,/g, '');
+			return (+number).toLocaleString('en');
+
+			// ----------------------------------------------------------------
+
 			// [[mw:Help:Magic words#Date and time]]
 
 		case 'CURRENTYEAR':
@@ -922,6 +938,27 @@ function module_code(library_namespace) {
 		case 'CURRENTTIMESTAMP':
 			return (new Date).toISOString().replace(/[\-:TZ]/g, '').replace(
 					/\.\d+$/, '');
+
+		case 'DATEFORMAT':
+		case 'FORMATDATE':
+			var date = new Date(get_parameter_String(1));
+			var type = get_parameter_String(2);
+			if (type === 'ISO 8601')
+				return date.format('%Y-%2m-%2d');
+			// TODO: 此為有缺陷的極精簡版。
+			if (type === 'ymd')
+				return date.format('%Y %B %d', {
+					locale : 'en'
+				});
+			if (type === 'dmy')
+				return date.format('%d %B %Y', {
+					locale : 'en'
+				});
+			if (type === 'mdy')
+				return date.format('%B %d, %Y', {
+					locale : 'en'
+				});
+			return NYI();
 
 		case '#time':
 			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##time
@@ -1050,6 +1087,7 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/Help:Magic_words#URL_data
 
 		case 'URLENCODE':
+			// TODO: https://www.mediawiki.org/wiki/Manual:PAGENAMEE_encoding
 			return encodeURI(get_parameter_String(1));
 
 		case 'ANCHORENCODE':
@@ -1066,29 +1104,45 @@ function module_code(library_namespace) {
 		case 'FULLURL':
 			return fullurl();
 
+			// TODO:
+			// case 'CANONICALURL':
+			// case 'FILEPATH':
+
 			// ----------------------------------------------------------------
 
 		case 'FULLPAGENAME':
-			return get_page_title();
+		case 'FULLPAGENAMEE':
+			return PAGENAMEE_encoding(get_page_title());
 
 		case 'PAGENAME':
-			return get_page_title(true);
+		case 'PAGENAMEE':
+			return PAGENAMEE_encoding(get_page_title(true));
 
 		case 'BASEPAGENAME':
-			return get_page_title(true).replace(/\/[^\/]+$/, '');
+		case 'BASEPAGENAMEE':
+			return PAGENAMEE_encoding(get_page_title(true).replace(/\/[^\/]+$/,
+					''));
 
 		case 'ROOTPAGENAME':
-			return get_page_title(true).replace(/\/.*$/, '');
+		case 'ROOTPAGENAMEE':
+			return PAGENAMEE_encoding(get_page_title(true).replace(/\/.*$/, ''));
 
 		case 'SUBPAGENAME':
-			return get_page_title(true).match(/([^\/]*)\/?$/)[1];
+		case 'SUBPAGENAMEE':
+			return PAGENAMEE_encoding(get_page_title(true)
+					.match(/([^\/]*)\/?$/)[1]);
 
 		case 'SUBJECTPAGENAME':
+		case 'SUBJECTPAGENAMEE':
 		case 'ARTICLEPAGENAME':
-			return wiki_API.talk_page_to_main(get_page_title(), options);
+		case 'ARTICLEPAGENAMEE':
+			return PAGENAMEE_encoding(wiki_API.talk_page_to_main(
+					get_page_title(), options));
 
 		case 'TALKPAGENAME':
-			return wiki_API.to_talk_page(get_page_title(), options);
+		case 'TALKPAGENAMEE':
+			return PAGENAMEE_encoding(wiki_API.to_talk_page(get_page_title(),
+					options));
 
 		case '#titleparts':
 			var title = get_parameter_String(1).split('/');
@@ -1114,24 +1168,29 @@ function module_code(library_namespace) {
 			return wiki_API.namespace(get_page_title(), options);
 
 		case 'NAMESPACE':
-			return wiki_API.namespace(get_page_title(), Object.assign(Object
-					.clone(options), {
-				get_name : true
-			}));
+		case 'NAMESPACEE':
+			return PAGENAMEE_encoding(wiki_API.namespace(get_page_title(),
+					Object.assign(Object.clone(options), {
+						get_name : true
+					})));
 
 		case 'SUBJECTSPACE':
+		case 'SUBJECTSPACEE':
 		case 'ARTICLESPACE':
-			return wiki_API.namespace(wiki_API.talk_page_to_main(
+		case 'ARTICLESPACEE':
+			return PAGENAMEE_encoding(wiki_API.namespace(wiki_API
+					.talk_page_to_main(get_page_title(), options), Object
+					.assign(Object.clone(options), {
+						get_name : true
+					})));
+
+		case 'TALKSPACE':
+		case 'TALKSPACEE':
+			return PAGENAMEE_encoding(wiki_API.namespace(wiki_API.to_talk_page(
 					get_page_title(), options), Object.assign(Object
 					.clone(options), {
 				get_name : true
-			}));
-
-		case 'TALKSPACE':
-			return wiki_API.namespace(wiki_API.to_talk_page(get_page_title(),
-					options), Object.assign(Object.clone(options), {
-				get_name : true
-			}));
+			})));
 
 			// ----------------------------------------------------------------
 
