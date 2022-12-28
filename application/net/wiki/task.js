@@ -469,7 +469,7 @@ function module_code(library_namespace) {
 			&& (('missing' in next[1]) || ('invalid' in next[1])))) {
 				library_namespace.debug('採用所輸入之 '
 						+ wiki_API.title_link_of(next[1])
-						+ ' 作為 this.last_page。', 0, 'wiki_API.prototype.next');
+						+ ' 作為 this.last_page。', 2, 'wiki_API.prototype.next');
 				// console.trace(next);
 				this.last_page = next[1];
 				// console.trace(next[1]);

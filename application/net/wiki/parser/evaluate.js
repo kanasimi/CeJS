@@ -195,12 +195,28 @@ function module_code(library_namespace) {
 			transclusion_config.usage_times++;
 			var wikitext = transclusion_config.simplified_template_wikitext;
 			return transclusion_config.need_evaluate ? simplify_transclusion(
-					wikitext, this.parameters, options) : wikitext;
+					wikitext, this, options) : wikitext;
 		};
 	}
 
-	// 演算/簡化要 transclusion 的模板 wikitext。
-	function simplify_transclusion(wikitext, parameters, options, level) {
+	/**
+	 * 演算/簡化要 transclusion 的模板 wikitext。
+	 * 
+	 * @param {String}wikitext
+	 *            模板 wikitext。
+	 * @param {Array}template_token_called
+	 *            正呼叫此模板的 template token。 The template token being called.
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * @param {Number}[level]
+	 *            迭代呼叫層數。
+	 * 
+	 * @returns {Promise|Array} 簡化過且解析過的 wiki syntax。
+	 */
+	function simplify_transclusion(wikitext, template_token_called, options,
+			level) {
+		// console.trace(template_token_called);
+		var parameters = template_token_called.parameters;
 		var page_data, transclusion_config;
 		if (wiki_API.is_page_data(wikitext)) {
 			page_data = wikitext;
@@ -255,6 +271,13 @@ function module_code(library_namespace) {
 			level++;
 
 		parsed = wiki_API.parser(wikitext, options).parse();
+
+		if (options.template_token_called !== template_token_called) {
+			options = Object.clone(options);
+			// 紀錄正呼叫的 template token。
+			options.template_token_called = template_token_called;
+		}
+
 		/**
 		 * TODO:<code>
 
@@ -285,10 +308,6 @@ function module_code(library_namespace) {
 				return page_data ? token : parsed;
 			}
 			// expand template
-			if (options.parameters !== parameters) {
-				options = Object.clone(options);
-				options.parameters = parameters;
-			}
 			parsed = expand_transclusion(parsed, options, level);
 			return parsed;
 		}, true);
@@ -363,7 +382,7 @@ function module_code(library_namespace) {
 	}
 
 	// 類似 wiki_API_expandtemplates()
-	// ** 僅能提供簡單的演算功能，但提供 cache。
+	// ** 僅能提供簡單的演算功能，但提供 cache，不必每次傳輸資料回伺服器。
 	// [[Special:ExpandTemplates]]
 	// 使用上注意: 應設定 options[KEY_on_page_title_option]
 	// 可考慮是否採用 CeL.wiki.wikitext_to_plain_text()
@@ -404,8 +423,9 @@ function module_code(library_namespace) {
 			parsed = wiki_API.parser(wikitext, options).parse();
 		}
 
-		if (options.parameters)
-			parsed = convert_parameter(parsed, options.parameters, options);
+		if (options.template_token_called)
+			parsed = convert_parameter(parsed,
+					options.template_token_called.parameters, options);
 
 		var session = wiki_API.session_of_options(options);
 		var is_running_at_start = session
@@ -510,8 +530,8 @@ function module_code(library_namespace) {
 						resolve();
 						return;
 					}
-					resolve(simplify_transclusion(page_data, token.parameters,
-							options, level));
+					resolve(simplify_transclusion(page_data, token, options,
+							level));
 				}
 
 				// var session = wiki_API.session_of_options(options);

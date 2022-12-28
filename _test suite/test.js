@@ -4571,6 +4571,25 @@ function test_wiki() {
 			namespace: '0'
 		});
 
+		enwiki.run(function test_expand_transclusion_enwiki() {
+			var test_name = 'enwiki: expand_transclusion';
+			_setup_test(test_name);
+
+			var options = CeL.wiki.add_session_to_options(enwiki, { on_page_title: 'ABC', allow_promise: true });
+			var promise = Promise.resolve();
+
+			promise = promise.then(function () {
+				return CeL.wiki.expand_transclusion('{{w|ABC}}', options);
+			}).then(function (parsed) {
+				//console.trace(parsed);
+				assert(['[[ABC|ABC]]', parsed.toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{w}}');
+			});
+
+			return promise.then(function (parsed) {
+				_finish_test(test_name);
+			});
+		});
+
 
 		var jawiki = new CeL.wiki(null, null, 'ja');
 
@@ -4610,8 +4629,8 @@ function test_wiki() {
 		});
 
 		// [[Special:ExpandTemplates]]
-		zhwiki.run(function test_expand_transclusion() {
-			var test_name = 'wiki: expand_transclusion';
+		zhwiki.run(function test_expand_transclusion_zhwiki() {
+			var test_name = 'zhwiki: expand_transclusion';
 			_setup_test(test_name);
 
 			var options = CeL.wiki.add_session_to_options(zhwiki, { on_page_title: 'Wikipedia:頁面存廢討論/123', allow_promise: true });
@@ -4621,7 +4640,7 @@ function test_wiki() {
 				return CeL.wiki.expand_transclusion('{{a|條目|顯示文字|name=錨點名稱}}', options);
 			}).then(function (parsed) {
 				//console.trace(parsed);
-				assert(['<span id="錨點名稱"></span>[[條目|顯示文字]]', parsed.toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions');
+				assert(['<span id="錨點名稱"></span>[[條目|顯示文字]]', parsed.toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{a}}');
 			});
 
 			promise = promise.then(function () {

@@ -135,6 +135,27 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function expand_module_If_empty(options) {
+		/* const */var token = options && options.template_token_called
+				|| this;
+		/* const */var parameters = token.parameters;
+		// Error.stackTraceLimit = Infinity;
+		// console.trace([ this, parameters, options ]);
+		// console.trace(options && options.template_token_called);
+		for (/* let */var index = 0; index < token.length; index++) {
+			var value = parameters[index];
+			if (value)
+				return value;
+		}
+		return '';
+	}
+
+	function parse_module_If_empty(token) {
+		token.expand = expand_module_If_empty;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// Not completed! Only for get_all_anchors()
 	// @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_Colored_link(options) {
@@ -494,6 +515,8 @@ function module_code(library_namespace) {
 
 		'@' : parse_template_At,
 		'User link' : parse_template_User_link,
+
+		'Module:If empty' : parse_module_If_empty,
 
 		// 一些會添加 anchors 的特殊模板。
 		// 會生成網頁錨點的模板或模組。
