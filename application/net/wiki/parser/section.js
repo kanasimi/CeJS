@@ -1679,8 +1679,26 @@ function module_code(library_namespace) {
 		//
 		= parsed.each('section_title', function(section_title_token) {
 			// console.log(section_title_token);
-			// const
-			var section_title_link = section_title_token.link;
+			/* const */var section_title_link = section_title_token.link;
+
+			// 忽略 <ref> 之類非固定的元素。
+			if (options.skip_variable_anchors) {
+				var first_imprecise_token = undefined;
+				for_each_token.call(section_title_token, function(token, index,
+						parent) {
+					// console.trace(sub_token);
+					if (token.tag === 'ref') {
+						first_imprecise_token = token;
+						return for_each_token.exit;
+					}
+				});
+				if (first_imprecise_token) {
+					library_namespace.log('get_all_anchors: 跳過包含不固定錨點的章節標題: '
+							+ section_title_token);
+					return;
+				}
+			}
+
 			// TODO: 忽略包含不合理元素的編輯，例如 url。
 			// .imprecise_tokens 是在 .parse() 時即已設定。
 

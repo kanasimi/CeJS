@@ -382,7 +382,7 @@ function module_code(library_namespace) {
 	page_parser.token_is_children_of = token_is_children_of;
 
 	/**
-	 * 對所有指定類型 type，皆執行特定作業 processor。
+	 * 對所有指定類型 type 的元素(tokens)，皆執行特定作業 processor。
 	 * 
 	 * TODO: 可中途跳出。
 	 * 

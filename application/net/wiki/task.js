@@ -469,7 +469,7 @@ function module_code(library_namespace) {
 			&& (('missing' in next[1]) || ('invalid' in next[1])))) {
 				library_namespace.debug('採用所輸入之 '
 						+ wiki_API.title_link_of(next[1])
-						+ ' 作為 this.last_page。', 2, 'wiki_API.prototype.next');
+						+ ' 作為 this.last_page。', 0, 'wiki_API.prototype.next');
 				// console.trace(next);
 				this.last_page = next[1];
 				// console.trace(next[1]);
@@ -2951,7 +2951,8 @@ function module_code(library_namespace) {
 
 				// clone() 是為了能個別改變 summary。
 				// 例如: each() { options.summary += " -- ..."; }
-				var work_options = Object.clone(options);
+				// 採用 single_page_options 以利用 options，避免 session.page().edit() 被插斷。
+				var work_options = Object.assign(single_page_options, options);
 				// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 				work_options.task_page_data = page;
 				// console.trace(page.title||page);
@@ -3206,7 +3207,7 @@ function module_code(library_namespace) {
 				|| config.log_nochange)) {
 					// console.trace(log_to);
 					// CeL.set_debug(6);
-					session.page(log_to)
+					session.page(log_to, options)
 					// 將 robot 運作記錄、log summary 報告結果寫入 log 頁面。
 					// TODO: 以表格呈現。
 					.edit(messages.join('\n'), options,
@@ -3231,7 +3232,7 @@ function module_code(library_namespace) {
 							// TODO: bug: 當分批時，只會寫入最後一次。
 							session.page('User:'
 							//
-							+ session.token.login_user_name)
+							+ session.token.login_user_name, options)
 							//
 							.edit(messages.join('\n'), options);
 						}

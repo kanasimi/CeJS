@@ -549,7 +549,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2120}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2388}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4676}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2120}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2397}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4676}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"great-britain": {
@@ -558,7 +558,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2122}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2413}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2122}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2422}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"spain": {
@@ -567,7 +567,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2124}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2386}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2124}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2395}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"calendar-used": {
@@ -1394,7 +1394,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4591}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4595}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1991}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1996}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4591}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4595}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2000}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2005}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"solar-term-(chinese)": {
@@ -1493,7 +1493,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1980}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1983}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1985}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8506}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8508}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5090}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1989}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1992}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L1994}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8506}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8508}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"chinese-zodiac": {
@@ -1634,7 +1634,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1129}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1140}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3137}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1129}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1140}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3138}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-modified": {
@@ -1642,7 +1642,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1131}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3115}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1131}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3116}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-word(s)-in-this-chapter": {
@@ -2239,7 +2239,7 @@
 		"additional_notes": "CeL.application.net.Ajax: to_form_data()\nCeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: URL, %2: error reason",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1803}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3150}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L704}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1804}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3151}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L704}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"got-url-from-the-network-$1-$2-bytes": {
@@ -2256,7 +2256,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: merge_cookie()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1272}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1273}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"duplicate-cookie-name!-the-later-newcomer-will-prevail": {
@@ -2264,7 +2264,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: merge_cookie()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1288}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1289}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-$1-$2-connections-$3": {
@@ -2273,7 +2273,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: connections, %2: requests, %3: URL_to_fetch",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1404}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1405}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"using-https-proxy-to-get-url-$1": {
@@ -2282,7 +2282,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1594}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1595}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"using-http-proxy-to-get-url-$1": {
@@ -2291,7 +2291,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1615}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1616}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"using-new-agent": {
@@ -2299,7 +2299,7 @@
 		"notes": "nodejs HTTPS/HTTP agent",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1638}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1639}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"using-custom-agent": {
@@ -2307,7 +2307,7 @@
 		"notes": "nodejs HTTPS/HTTP agent",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1640}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1641}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-custom-agent-is-different-from-the-url-and-will-try-to-adopt-the-conforming-agreement-$1": {
@@ -2316,7 +2316,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: description",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1651}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1652}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"using-generic-agent": {
@@ -2324,7 +2324,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1672}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1673}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"reset-the-cookie-to-$1": {
@@ -2332,7 +2332,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1680}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1681}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"retry-$1-$2-$3": {
@@ -2341,7 +2341,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: error_count, %2: max error allowed, %3: error reason",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1756}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1757}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"url-not-found-$1": {
@@ -2350,7 +2350,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1778}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1779}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"node.js-v12-and-later-versions-disable-tls-v1.0-and-v1.1-by-default": {
@@ -2358,7 +2358,7 @@
 		"notes": "part 1/2",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1786}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1787}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"please-set-tls.default_min_version-=-tlsv1-first": {
@@ -2366,7 +2366,7 @@
 		"notes": "part 2/2. Following the previous statement. 接續前一個語句。",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1790}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1791}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-redirecting-to-$2-←-$3": {
@@ -2376,7 +2376,7 @@
 		"additional_notes": "CeL.application.net.Ajax: fetch_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: HTTP status code (e.g., 301), %2 and %3: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1867}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3331}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1868}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3332}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"response-headers-$1": {
@@ -2384,7 +2384,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1880}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1881}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"http-status-code-$1-$2": {
@@ -2393,7 +2393,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: HTTP status code, %2: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1900}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1901}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"exception-http-status-code-$1-$2": {
@@ -2402,7 +2402,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: HTTP status code, %2: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1906}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1907}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"file-name-$1": {
@@ -2410,7 +2410,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1964}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1965}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"got-url-$1-but-there-is-no-listener": {
@@ -2419,7 +2419,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1982}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1983}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-to-receive-data-transferred-back-from-url-$1": {
@@ -2428,7 +2428,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1992}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L1993}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unknown-http-compression-method-$1": {
@@ -2436,7 +2436,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2177}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2178}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"you-need-to-bypass-the-ddos-protection-by-cloudflare": {
@@ -2444,7 +2444,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2197}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2198}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"write-$2-bytes-to-file-$1-$3": {
@@ -2453,7 +2453,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: file path, %2: data.length, %3: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2258}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2259}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"failed-to-write-$2-bytes-to-$1-$3": {
@@ -2462,7 +2462,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: file path, %2: data.length, %3: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2291}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2292}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"request-path-contains-unescaped-characters": {
@@ -2470,7 +2470,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2473}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2474}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-post-data-$1": {
@@ -2478,7 +2478,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2510}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2511}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"connection-timeout-for-$1-$2": {
@@ -2487,7 +2487,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: time (e.g., \"30 s\"), %2: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2536}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2537}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"add-timeout-$1-$2": {
@@ -2496,7 +2496,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: time (e.g., \"30 s\"), %2: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2563}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2564}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-timeout-$1": {
@@ -2505,7 +2505,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: time (e.g., \"30 s\")",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2569}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2570}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"must-specify-proxy-server-hostname-port": {
@@ -2513,7 +2513,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: HttpsProxyAgent()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2764}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2765}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"there-is-no-`fs`-package-for-node.js-so-there-is-no-file-operation-function-for-node": {
@@ -2521,7 +2521,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2984}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L2985}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"get-filename-from-url-$1": {
@@ -2530,7 +2530,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3056}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3057}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-file-name-specified": {
@@ -2538,7 +2538,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3064}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3065}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"download-$1": {
@@ -2547,7 +2547,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: URL",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3097}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3098}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-(file-encoding-$2-charset-$3)": {
@@ -2556,7 +2556,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: file path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3102}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3103}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"using-cached-data": {
@@ -2564,7 +2564,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3130}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/cache.js#L401}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3131}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/cache.js#L401}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-valid-cached-data.-try-to-get-data-(again)": {
@@ -2572,7 +2572,7 @@
 		"notes": "",
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3142}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3143}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"got-file-name-from-http-header-$1": {
@@ -2581,7 +2581,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: file name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3186}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3187}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"set-file-name-$1-file-name-from-header-$2": {
@@ -2590,7 +2590,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1, %2: file name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3193}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3194}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"find-that-the-file-exists-after-get-the-file-from-web-$1-.-do-not-overwrite-it": {
@@ -2599,7 +2599,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: file path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3227}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3228}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"write-data-to-cache-file-$1": {
@@ -2608,7 +2608,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: file path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3242}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3243}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-data-to-cache-$1": {
@@ -2617,7 +2617,7 @@
 		"scope": "CeL.application.net.Ajax: get_URL_cache_node()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: file path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3247}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/Ajax.js#L3248}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"you-may-need-to-set-$1-=-$2": {
@@ -2650,7 +2650,7 @@
 		"message": "Comma-separator",
 		"original_message_language_code": "en-US",
 		"notes": "Used for separating lists of items. Should the same as <bdi><code>{{int:Comma-separator}}</code></bdi> ([[translatewiki:MediaWiki:Comma-separator]]).\nBe careful to the presence of a trailing space when appropriate for your language (if it is needed, you can input it as <code>&amp;#32;</code> to avoid its trimming when editing this message.\nSee also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3001}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1322}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L164}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1573}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L646}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L618}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3001}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1322}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L164}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1575}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L646}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L618}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"check-the-emergency-stop-page-$1": {
@@ -2780,7 +2780,7 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L329}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1252}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L327}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L332}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L336}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L681}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L891}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L930}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L743}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L750}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L329}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1252}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L327}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L332}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L336}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L681}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L904}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L943}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L743}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L750}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2900,7 +2900,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3563}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/20221103.%E5%8D%8F%E5%8A%A9%E5%88%86%E7%A6%BB%7B%7Btl%E5%AD%A6%E5%90%8D%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D%E8%87%AA%7B%7Btl%E9%9D%9E%E4%B8%AD%E6%96%87%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L713}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3563}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/20221103.%E5%8D%8F%E5%8A%A9%E5%88%86%E7%A6%BB%7B%7Btl%E5%AD%A6%E5%90%8D%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D%E8%87%AA%7B%7Btl%E9%9D%9E%E4%B8%AD%E6%96%87%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L715}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"there-are-more-than-one-$1-in-$2": {
@@ -3024,7 +3024,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "%1 個頁面處理完畢。",
 		"parameters": "%1: count of pages",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2866}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1556}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2866}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1558}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"page-handling-function-error-$1": {
@@ -3037,25 +3037,25 @@
 		"message": "Edit %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: {String}}NO/total page count",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2971}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2972}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"missing-page": {
 		"message": "Missing page",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2976}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2977}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-page-title": {
 		"message": "Invalid page title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2980}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L2981}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"page-edit-function-error-$1": {
 		"message": "Page edit function error: %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3008}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3009}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-pages-processed": {
@@ -3064,14 +3064,14 @@
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: {String}count summary, e.g., \"18/20\". %2: page count",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3056}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3101}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3057}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3102}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-bot-operation-is-completed-$1$-in-total": {
 		"message": "本次機械人作業已完成%1%",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Overall progress. 整體作業進度。用在編輯摘要時通常放在最後面，預防擠掉更重要的內容。; Repositories: {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3093}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L648}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L981}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L173}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3094}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L648}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L981}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L174}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-pages-have-not-changed": {
@@ -3080,7 +3080,7 @@
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page count",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3117}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3118}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-elapsed": {
@@ -3088,7 +3088,7 @@
 		"notes": "Used as log message at report. Elapsed time.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3122}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3123}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"stopped-give-up-editing": {
@@ -3096,7 +3096,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3133}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3134}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"processing-chunks-$1-$2": {
@@ -3104,13 +3104,13 @@
 		"notes": "",
 		"parameters": "%1: start chunk NO, %2: end chunk NO",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3408}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3409}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-user-name-or-password-provided.-the-login-attempt-was-abandoned": {
 		"message": "No user name or password provided. The login attempt was abandoned.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3767}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3768}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"must-rename-$1-to-$2-to-work": {
@@ -3124,7 +3124,7 @@
 		"message": "Cannot convert Lua pattern to RegExp pattern: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Lua pattern",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions/general_functions.js#L438}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions/general_functions.js#L459}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-detect-work-id-from-url-$1": {
@@ -5694,7 +5694,7 @@
 		"message": "Move %1 to %2 failed: %3",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: move from, %2: move to, %3: error reason",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L630}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1165}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L630}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1167}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"no-file-or-directory-exists-$1": {
@@ -6420,7 +6420,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2380}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2389}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"poland": {
@@ -6428,7 +6428,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2382}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2391}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"portugal": {
@@ -6436,7 +6436,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "de-DE",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2384}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2393}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"luxembourg": {
@@ -6444,7 +6444,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2391}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2400}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"netherlands": {
@@ -6452,7 +6452,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2394}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2403}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"bavaria": {
@@ -6460,7 +6460,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2397}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2406}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"austria": {
@@ -6468,7 +6468,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2399}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2408}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"switzerland": {
@@ -6476,7 +6476,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2401}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2410}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"hungary": {
@@ -6484,7 +6484,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2403}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2412}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"germany": {
@@ -6492,7 +6492,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2405}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2414}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"norway": {
@@ -6500,7 +6500,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2407}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2416}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"denmark": {
@@ -6508,7 +6508,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2409}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2418}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"sweden": {
@@ -6516,7 +6516,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2415}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2424}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"finland": {
@@ -6524,7 +6524,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2417}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2426}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"bulgaria": {
@@ -6532,7 +6532,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2423}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2432}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"soviet-union": {
@@ -6540,7 +6540,7 @@
 		"notes": "Label for calendar option: USSR, U.S.S.R.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2426}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2435}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"serbia": {
@@ -6548,7 +6548,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2428}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2437}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"romania": {
@@ -6556,7 +6556,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2430}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2439}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"greece": {
@@ -6565,7 +6565,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2432}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4080}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2441}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4080}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"turkey": {
@@ -6573,7 +6573,7 @@
 		"notes": "Label for calendar option.",
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2434}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2443}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"egypt": {
@@ -6582,7 +6582,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2436}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4210}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2445}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4210}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-years-and-$2-months": {
@@ -6591,7 +6591,7 @@
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: {Number} years, %2: {Number} months",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2830}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2839}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-y-$2-m": {
@@ -6600,7 +6600,7 @@
 		"parameters": "%1: {Number} years, %2: {Number} months",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2832}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2841}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-years": {
@@ -6608,7 +6608,7 @@
 		"notes": "Year(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2838}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2847}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-y": {
@@ -6616,7 +6616,7 @@
 		"notes": "Short format of year(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2840}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2849}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-months": {
@@ -6624,7 +6624,7 @@
 		"notes": "Month(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2864}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2873}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-m": {
@@ -6632,7 +6632,7 @@
 		"notes": "Short format of month(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2866}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2875}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-milliseconds": {
@@ -6640,7 +6640,7 @@
 		"notes": "millisecond(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2872}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2881}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-ms": {
@@ -6648,7 +6648,7 @@
 		"notes": "Short format of millisecond(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2874}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2883}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-seconds": {
@@ -6656,7 +6656,7 @@
 		"notes": "seconds",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2880}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2889}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-s": {
@@ -6664,7 +6664,7 @@
 		"notes": "Short format of second(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2882}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2891}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-minutes": {
@@ -6672,7 +6672,7 @@
 		"notes": "minutes",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2888}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2897}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-min": {
@@ -6680,7 +6680,7 @@
 		"notes": "Short format of minute(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2890}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2899}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-hours": {
@@ -6688,7 +6688,7 @@
 		"notes": "hours",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2896}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2905}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-hr": {
@@ -6696,7 +6696,7 @@
 		"notes": "Short format of hour(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2898}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2907}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-days": {
@@ -6704,7 +6704,7 @@
 		"notes": "days",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2904}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2913}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-d": {
@@ -6712,20 +6712,20 @@
 		"notes": "Short format of day(s)",
 		"scope": "data.date: age_of()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2906}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2915}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-weeks": {
 		"message": "%1 {{PLURAL:%1|week|weeks}}",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2911}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2920}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-w": {
 		"message": "%1 W",
 		"original_message_language_code": "en-US",
 		"notes": "Short format of week(s); Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2913}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2922}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"2-days-before-yesterday-$h-$m": {
@@ -6733,7 +6733,7 @@
 		"notes": "+ごろ,時点で",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2928}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2937}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-day-before-yesterday-$h-$m": {
@@ -6741,7 +6741,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2930}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2939}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"yesterday-$h-$m": {
@@ -6749,7 +6749,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2932}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2941}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"today-$h-$m": {
@@ -6757,7 +6757,7 @@
 		"notes": "%H點%M分",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2934}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2945}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2943}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2954}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"tomorrow-$h-$m": {
@@ -6765,7 +6765,7 @@
 		"notes": "+に or 以降に",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2936}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2945}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-day-after-tomorrow-$h-$m": {
@@ -6773,7 +6773,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2938}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2947}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"2-days-after-tomorrow-$h-$m": {
@@ -6781,7 +6781,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2940}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2949}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"3-days-after-tomorrow-$h-$m": {
@@ -6789,7 +6789,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2942}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2951}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"now": {
@@ -6797,7 +6797,7 @@
 		"notes": "指當下時間。",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2990}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2999}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"several-seconds-ago": {
@@ -6805,7 +6805,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2995}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3004}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"soon": {
@@ -6813,7 +6813,7 @@
 		"notes": "指幾秒鐘後。",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2997}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3006}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-seconds-ago": {
@@ -6821,7 +6821,7 @@
 		"notes": "just",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3001}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3010}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-seconds-later": {
@@ -6829,7 +6829,7 @@
 		"notes": "after %1 seconds",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3003}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3012}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-minutes-ago": {
@@ -6837,7 +6837,7 @@
 		"notes": "%1分鐘前",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3011}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3020}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-minutes-later": {
@@ -6845,7 +6845,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3013}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3022}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-hours-ago": {
@@ -6853,7 +6853,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3021}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3030}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-hours-later": {
@@ -6861,7 +6861,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3023}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3032}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-days-ago": {
@@ -6869,7 +6869,7 @@
 		"notes": "%1>3",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3052}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3061}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-days-later": {
@@ -6877,7 +6877,7 @@
 		"notes": "%1>3",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3054}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3063}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-weeks-ago": {
@@ -6885,7 +6885,7 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3061}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3070}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-weeks-later": {
@@ -6893,14 +6893,14 @@
 		"notes": "",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3063}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3072}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-date-$1": {
 		"message": "Invalid date: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: date",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3528}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3537}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"era-date": {
@@ -7624,7 +7624,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: [[w:WP:SECTIONHEAD|section title]], %2: language code.",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L228}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L230}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"cannot-detect-language-of-$1": {
@@ -7632,7 +7632,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: [[w:WP:SECTIONHEAD|section title]]",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L233}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L235}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"invalid-task_configuration-(should-be-$2)-{$3}-$1": {
@@ -7640,7 +7640,7 @@
 		"notes": "",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: task configuration, %2: need type, %3: type of task configuration",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L325}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L327}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-parameter-$1=$2-from-command-line": {
@@ -7648,7 +7648,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: parameter name, %2: parameter value",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L343}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L345}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-section-title-from-command-line-argument-$1": {
@@ -7656,7 +7656,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: [[w:WP:SECTIONHEAD|section title]]",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L364}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L366}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-section-title-from-task-file-name-$1": {
@@ -7664,7 +7664,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: [[w:WP:SECTIONHEAD|section title]]",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L375}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L377}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"change-section-title": {
@@ -7672,7 +7672,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: [[w:WP:SECTIONHEAD|section title]]",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L427}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L429}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$1-from-edit-summary-$2": {
@@ -7680,14 +7680,14 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: data type (e.g., \"revision id\"). %2: section title link",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L475}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L477}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"revision-id": {
 		"message": "revision id",
 		"original_message_language_code": "en-US",
 		"notes": "[[w:Wikipedia:Revision id|revision id]]",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L477}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L479}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$2-edit-summaries-of-$1": {
@@ -7695,7 +7695,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link, %2: count of edit summary/summaries",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L494}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L496}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$2-revision(s)-of-$1": {
@@ -7703,14 +7703,14 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link, %2: count of revision(s)",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L510}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L512}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"no-section-title-set": {
 		"message": "No section title set!",
 		"original_message_language_code": "en-US",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L526}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L528}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"unable-to-extract-the-revision-difference-id-from-page-edit-summary-of-$1": {
@@ -7718,35 +7718,35 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L532}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L534}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"multiple-discussion-links-exist": {
 		"message": "Multiple discussion links exist:",
 		"original_message_language_code": "en-US",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L552}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L554}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"not-json-try-eval()-$1": {
 		"message": "Not JSON, try eval(): %1",
 		"original_message_language_code": "en-US",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L625}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L627}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"not-json-you-may-want-to-set-allow_eval=true-$1": {
 		"message": "Not JSON, you may want to set \"allow_eval=true\": %1",
 		"original_message_language_code": "en-US",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L632}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L634}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"duplicate-task-name-$1!-will-overwrite-old-task-with-new-task-$2→$3": {
 		"message": "Duplicate task name %1! Will overwrite old task with new task: %2→%3",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: task name, %2: old task configuration, %3, new task configuration",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L2607}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L681}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L2609}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L683}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$1-task(s)-from-$2": {
@@ -7754,86 +7754,86 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: count of task(s), %2: page link",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L697}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L699}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-requested-robot-task-begins": {
 		"message": "The requested robot task begins.",
 		"original_message_language_code": "en-US",
 		"notes": "Bot作業を着手します。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L747}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L749}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"already-reminded-that-the-operation-is-in-progress-$1": {
 		"message": "Already reminded that the operation is in progress: %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L770}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L772}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"add-warning-messages": {
 		"message": "Add warning messages.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L804}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L806}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"no-title-found-for-$1": {
 		"message": "No title found for %1.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L816}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L818}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"will-not-automatically-notify-the-task-begins": {
 		"message": "Will not automatically notify the task begins!",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L819}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L821}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-requested-robot-task-finished": {
 		"message": "The requested robot task finished.",
 		"original_message_language_code": "en-US",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L829}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L831}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"robot-task-completion-notification": {
 		"message": "{{Done}} Please check the results and let me know if there is something wrong, thank you.",
 		"original_message_language_code": "en-US",
 		"notes": "This message should be tuned for use on each Wikipedia edition, with appropriate templates such as {{Tl|Done}} (which shows \"{{Done}}\" on Translatewikinet, with an autotranslated message).\n\nE.g. in Japanese\n: <code><nowiki>{{</nowiki>利用者の投稿記録リンク|Example|50|20100820121030|4<nowiki>}}</nowiki></code>, {{BOTREQ|済}} こちらのリンクからご確認下さい\n: where\n:* <code><nowiki>{{</nowiki>[[wikipedia:ja:Template:利用者の投稿記録リンク|利用者の投稿記録リンク]]|...<nowiki>}}</nowiki></code> on Japanese Wikipedia is an equivalent of <code><nowiki>{{</nowiki>[[wikipedia:en:Template:User contributions|User contributions]]|...<nowiki>}}</nowiki></code> on English Wikipedia.\n:* The {{Tl|BOTREQ|済}} template shows a status icon and the optional custom message for showing the completion status \"済\" (done).",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L837}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L839}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"already-notified-that-the-task-is-finished-$1": {
 		"message": "Already notified that the task is finished: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: section title",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L842}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L844}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"will-not-automatically-notify-the-task-finished": {
 		"message": "Will not automatically notify the task finished!",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L859}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L861}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"automatically-replace-the-display-text-of-links-$1→$2": {
 		"message": "Automatically replace the display text of links: %1→%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: replace from, %2: replace to",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1480}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1482}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-list-of-$1-from-$2": {
 		"message": "Get list of %1 from %2.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: section title, or string to search. %2: wiki site name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1565}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1567}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"list-types-$1": {
 		"message": "List types: %1.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: list types",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1571}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1573}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"namespaces-$1": {
@@ -7841,14 +7841,14 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: list_options.namespace",
 		"notes": "{{Identical|Namespace}}",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1576}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1578}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$1-pages-from-$2": {
 		"message": "Get %1 {{PLURAL:%1|page|pages}} from %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page count, %2: list label",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1635}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1637}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"normalize-template-$1": {
@@ -8283,7 +8283,7 @@
 	"fixing-broken-anchor": {
 		"message": "修正失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L994}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L995}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-to-remove-$1-inactive-anchors": {
@@ -8292,7 +8292,7 @@
 		"parameters": "%1: count of anchors",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
 		"fIXME": "https://github.com/kanasimi/CeJS/issues/33",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1109}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1115}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1111}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1117}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"anchor-$1-links-to-a-specific-web-page-$2": {
@@ -8300,7 +8300,7 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "As a note phrase in talk pages.",
 		"parameters": "%1: link to a web anchor, %2: link to the target page",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1188}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1359}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1190}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1361}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": {
@@ -8308,14 +8308,14 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: revid, %2: anchor name",
 		"notes": "{{tl|Broken anchors}}の内で表示。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1195}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1197}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-of-an-inactive-anchor": {
 		"message": "提醒失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1200}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1209}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1202}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1211}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"update-links-to-archived-section-$1-$2": {
@@ -8323,35 +8323,35 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: percentage 百分比 e.g., \"42%\"; %2: links being processed 正在處理的連結",
 		"notes": "Use in edit summaries. 用於編輯註解。[[w:ja:Wikipedia:井戸端/subj/議論の過去ログのリンク修正はいかがでしょうか|過去ログリンク修正]]の編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1284}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1286}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"incorrect-capitalization-spaced-section-title": {
 		"message": "大小寫或空白相異的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。 Too different to be considered as the same meaning.",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1322}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1324}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"inconsistency-between-traditional-and-simplified-chinese": {
 		"message": "繁簡不符匹配而失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1325}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1327}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"very-different": {
 		"message": "差異極大",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries to mark edits that need special attention. Too different to be regarded as the same meaning. 用於編輯註解以標註特別需要注意的編輯。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1341}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1343}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"please-help-to-check-this-edit": {
 		"message": "請幫忙檢核此次編輯。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。應採用不存在的頁面名稱，將用紅色連結顯示以突顯警告效果。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1394}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1396}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1→most-alike-anchor-$2": {
@@ -8359,7 +8359,7 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: original anchor, %2: target anchor",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1402}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1404}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"archiving-operation": {

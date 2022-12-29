@@ -571,6 +571,8 @@ function module_code(library_namespace) {
 					wiki_API.KEY_waiting_callback_result_relying_on_this] ]);
 					Error.stackTraceLimit = 10;
 				}
+				library_namespace.log_temporary('fetch_and_resolve_template: '
+						+ wiki_API.title_link_of(page_title));
 				session.register_redirects(page_title,
 				//
 				function(page_data, error) {
