@@ -581,7 +581,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 放棄編輯頁面用。<br />
+	 * 放棄編輯頁面用。 CeL.wiki.edit.cancel<br />
 	 * assert: true === !!wiki_API_edit.cancel
 	 * 
 	 * @type any

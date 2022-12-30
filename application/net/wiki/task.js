@@ -1421,6 +1421,13 @@ function module_code(library_namespace) {
 			add_session_to_options(this, next[2]),
 			//
 			function wiki_API_next_edit_callback(title, error, result) {
+				// 刪掉自己加的東西。
+				// e.g., 重複利用當過 .edit() 的 options，必須先 `delete
+				// options.rollback_action`。
+				delete next[2].rollback_action;
+				// next[2].page_to_edit = true;
+				// delete next[2].page_to_edit;
+
 				// next[3] : callback
 				if (typeof next[3] === 'function') {
 					callback_result_relying_on_this = next[3].apply(_this,
@@ -2950,22 +2957,25 @@ function module_code(library_namespace) {
 					return result;
 				}
 
+				// clone() 是為了能個別改變 summary。以及其他會利用 work_options 的操作。
+				// 例如: each() { options.summary += " -- ..."; }
+				var work_options =
+				// 採用 single_page_options 以利用 options，
+				// 避免 session.page().edit() 被插斷。
+				Object.clone(single_page_options);
+
 				// console.trace([ page ]);
 				// console.trace('session.running = ' + session.running);
 				// 設定頁面內容。
 				session.page(page, config.no_edit && work_page_callback,
-						single_page_options);
+						work_options);
 
 				if (config.no_edit) {
 					// 不作編輯作業。
 					return;
 				}
 
-				// clone() 是為了能個別改變 summary。
-				// 例如: each() { options.summary += " -- ..."; }
-				// 採用 single_page_options 以利用 options，
-				// 避免 session.page().edit() 被插斷。
-				var work_options = Object.assign(single_page_options, options);
+				Object.assign(work_options, options);
 				// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 				work_options.page_to_edit = page;
 				// console.trace(page.title||page);
@@ -3180,7 +3190,7 @@ function module_code(library_namespace) {
 				// e.g., 480 : UTC+8
 				timezone = session.configurations.timeoffset / 60,
 				// options for summary.
-				options = {
+				log_options = {
 					// new section. append 章節/段落 after all, at bottom.
 					section : 'new',
 					// 新章節的標題。章節標題盡量使用可被引用的格式。
@@ -3216,17 +3226,19 @@ function module_code(library_namespace) {
 
 				if (config.no_message) {
 					;
-				} else if (log_to && (done !== nochange_count
+				} else if (log_to && messages.join('\n')
+				//
+				&& (done !== nochange_count
 				// 若全無變更，則預設僅從 console 提示，不寫入 log 頁面。因此無變更者將不顯示。
 				|| config.log_nochange)) {
 					// console.trace(log_to);
 					// CeL.set_debug(6);
 					// @see set_page_to_edit(options, page_data)
-					options.page_to_edit = true;
-					session.page(log_to, options)
+					log_options.page_to_edit = true;
+					session.page(log_to, log_options)
 					// 將 robot 運作記錄、log summary 報告結果寫入 log 頁面。
 					// TODO: 以表格呈現。
-					.edit(messages.join('\n'), options,
+					.edit(messages.join('\n'), log_options,
 					// wiki_API.work() 添加網頁報告。
 					function(title, error, result) {
 						if (error) {
@@ -3244,13 +3256,18 @@ function module_code(library_namespace) {
 							library_namespace.log('\nlog:<br />\n'
 							//
 							+ messages.join('<br />\n'));
+							// console.trace([ log_options, messages ]);
+
+							// @see set_page_to_edit(log_options, page_data)
+							log_options.page_to_edit = true;
+
 							// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
 							// TODO: bug: 當分批時，只會寫入最後一次。
 							session.page('User:'
 							//
-							+ session.token.login_user_name, options)
+							+ session.token.login_user_name, log_options)
 							//
-							.edit(messages.join('\n'), options);
+							.edit(messages.join('\n'), log_options);
 						}
 					});
 				} else {
@@ -3263,7 +3280,7 @@ function module_code(library_namespace) {
 				// console.log(process.memoryUsage());
 				// delete session.last_pages;
 				// 警告: 預設處理程序會清理掉解析後的資料。這可能造成嚴重錯誤，例如頁面被清空！
-				if (!options.do_not_clean_parsed && Array.isArray(pages)) {
+				if (!log_options.do_not_clean_parsed && Array.isArray(pages)) {
 					// console.trace('主動清理 page_data.parsed 以釋放記憶體。');
 					// console.log(pages[0]);
 					// free:
@@ -3305,7 +3322,7 @@ function module_code(library_namespace) {
 				// 改變適合之函數名。
 				if (typeof config.last === 'function') {
 					// last(error)
-					session.run(config.last.bind(options, error_to_return));
+					session.run(config.last.bind(log_options, error_to_return));
 				}
 
 				if (!config.no_message) {

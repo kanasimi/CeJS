@@ -72,9 +72,9 @@ function module_code(library_namespace) {
 		? result.error.code === 'badtoken'
 		// The "token" parameter must be set.
 		|| result.error.code === 'notoken'
-		// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
-		: options.rollback_action && !options.get_page_before_undo
 		//
+		: options.rollback_action && !options.get_page_before_undo
+		// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
 		&& (!result.edit
 		// flow:
 		// {status:'ok',workflow:'...',committed:{topiclist:{...}}}
