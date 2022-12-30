@@ -188,6 +188,12 @@ function module_code(library_namespace) {
 	};
 
 	// @inner
+	function set_page_to_edit(options, page_data) {
+		if (options && options.page_to_edit === true)
+			options.page_to_edit = page_data;
+	}
+
+	// @inner
 	wiki_API.KEY_waiting_callback_result_relying_on_this = typeof Symbol === 'function' ? Symbol('waiting callback_result_relying_on_this')
 			: '\0waiting callback_result_relying_on_this';
 
@@ -473,6 +479,7 @@ function module_code(library_namespace) {
 				// console.trace(next);
 				this.last_page = next[1];
 				// console.trace(next[1]);
+				set_page_to_edit(next[3], next[1]);
 				// next[2] : callback
 				this.next(next[2], next[1]);
 				break;
@@ -486,6 +493,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('採用前次的回傳以避免重複取得頁面。', 2,
 						'wiki_API.prototype.next');
 				// console.trace('採用前次的回傳以避免重複取得頁面: ' + next[1]);
+				set_page_to_edit(next[3], next[1]);
 				// next[2] : callback
 				this.next(next[2], this.last_page,
 				// @see "合併取得頁面的操作"
@@ -497,6 +505,7 @@ function module_code(library_namespace) {
 
 			if (typeof next[1] === 'function') {
 				// this.page(callback): callback(last_page)
+				set_page_to_edit(next[3], next[1]);
 				// next[1] : callback
 				this.next(next[1], this.last_page);
 				break;
@@ -557,10 +566,14 @@ function module_code(library_namespace) {
 				_this.last_page_options = next[3];
 				_this.last_page_error = error;
 
+				set_page_to_edit(next[3], next[1]);
+
 				var _next = _this.actions[0];
 				if (_next && _next[0] === 'edit'
 				// _next[2]: options
-				&& typeof _next[2] === 'object') {
+				&& typeof _next[2] === 'object'
+				//
+				&& !_next[2].page_to_edit) {
 					// 手動指定要編輯的頁面。避免多執行續打亂 wiki.last_page。
 					_next[2].page_to_edit = page_data;
 					_next[2].page_title_to_edit = next[1];
@@ -1082,13 +1095,12 @@ function module_code(library_namespace) {
 				// e.g., page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 				if (false) {
 					console.trace('Set .page_to_edit: '
-							+ wiki_API.title_link_of(this.last_page
-									|| next[2].task_page_data) + ' ('
+							+ wiki_API.title_link_of(this.last_page) + ' ('
 							+ wiki_API.title_link_of(next[2].page_to_edit)
 							+ ')');
 					// console.trace(next[2]);
 				}
-				next[2].page_to_edit = this.last_page || next[2].task_page_data;
+				next[2].page_to_edit = this.last_page;
 				next[2].last_page_error = this.last_page_error;
 			}
 			// console.trace(next[2]);
@@ -2938,7 +2950,7 @@ function module_code(library_namespace) {
 					return result;
 				}
 
-				// console.log(page);
+				// console.trace([ page ]);
 				// console.trace('session.running = ' + session.running);
 				// 設定頁面內容。
 				session.page(page, config.no_edit && work_page_callback,
@@ -2951,10 +2963,11 @@ function module_code(library_namespace) {
 
 				// clone() 是為了能個別改變 summary。
 				// 例如: each() { options.summary += " -- ..."; }
-				// 採用 single_page_options 以利用 options，避免 session.page().edit() 被插斷。
+				// 採用 single_page_options 以利用 options，
+				// 避免 session.page().edit() 被插斷。
 				var work_options = Object.assign(single_page_options, options);
 				// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
-				work_options.task_page_data = page;
+				work_options.page_to_edit = page;
 				// console.trace(page.title||page);
 				// console.trace(work_options);
 				// 編輯頁面內容。
@@ -2965,6 +2978,7 @@ function module_code(library_namespace) {
 						// return [ wiki_API.edit.cancel, 'skip' ];
 					}
 
+					// console.trace([ page, page_data, work_options ]);
 					// edit/process
 					if (!config.no_message) {
 						var _messages = [ 'wiki_API.work: '
@@ -3207,6 +3221,8 @@ function module_code(library_namespace) {
 				|| config.log_nochange)) {
 					// console.trace(log_to);
 					// CeL.set_debug(6);
+					// @see set_page_to_edit(options, page_data)
+					options.page_to_edit = true;
 					session.page(log_to, options)
 					// 將 robot 運作記錄、log summary 報告結果寫入 log 頁面。
 					// TODO: 以表格呈現。

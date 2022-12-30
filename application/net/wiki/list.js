@@ -1409,10 +1409,8 @@ function module_code(library_namespace) {
 				}
 				this.actions.push(args);
 				// console.trace([ this.running, this.actions.length, args ]);
-				if (false
-						&& method === 'edit'
-						&& (!args[2] || !args[2].page_to_edit
-								&& !args[2].task_page_data)) {
+				if (false && method === 'edit'
+						&& (!args[2] || !args[2].page_to_edit)) {
 					console.trace('No options.page_to_edit set!');
 					console.log(this.actions);
 				}

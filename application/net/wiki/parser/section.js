@@ -491,12 +491,14 @@ function module_code(library_namespace) {
 	 * 
 	 * @example <code>
 
-	CeL.wiki.section_link(section_title)
+	// for '== section_title ==',
+	CeL.wiki.section_link('section_title')
 
 	</code>
 	 * 
 	 * @param {String}section_title
-	 *            section title in wikitext. 章節標題。 節のタイトル。
+	 *            section title in wikitext inside "==" (without '=='s). 章節標題。
+	 *            節のタイトル。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
@@ -1650,6 +1652,9 @@ function module_code(library_namespace) {
 				// 經過測試只會取前1024字元。 [[w:zh:Special:Diff/51003951]]
 				anchor = anchor.slice(0, 1024);
 			}
+			if (false && /^===/.test(anchor)) {
+				console.trace([ anchor, token ]);
+			}
 			// 以首個出現的為準。
 			if (anchor && !(anchor in anchor_hash)) {
 				anchor_hash[anchor] = token;
@@ -1707,32 +1712,41 @@ function module_code(library_namespace) {
 			&& options.try_to_expand_templates) {
 				var promise = wiki_API.expand_transclusion(section_title_token
 						.toString(), options);
+				var set_section_title_link = function(parsed) {
+					if (library_namespace.assert) {
+						library_namespace.assert(parsed.type === 'plain'
+								&& parsed[0].type === 'section_title');
+					}
+					section_title_link = wiki_API.section_link(parsed[0]
+					// @see wiki_token_toString.section_title @
+					// CeL.application.net.wiki.parser.wikitext
+					.join(''), options);
+					if (false) {
+						console
+								.trace([ section_title_token.toString(),
+										parsed, parsed.toString(),
+										section_title_link, options ]);
+					}
+					// free
+					set_section_title_link = null;
+				};
 				// console.trace([ promise, section_title_token.toString() ]);
 				if (library_namespace.is_thenable(promise)) {
 					// console.trace('re-generate link token.');
 					promise = promise.then(function(parsed) {
-						// console.trace(parsed);
-						section_title_link = wiki_API.section_link(parsed
-								.toString(), options);
-						if (false) {
-							console.trace([ parsed.toString(),
-									section_title_link ]);
-							console.trace(parsed);
-							console.trace(options);
-						}
+						set_section_title_link(parsed);
 						for_converted_section_title();
 					});
 					return promise;
 				}
-				section_title_link = wiki_API.section_link(promise.toString(),
-						options);
+				set_section_title_link(promise);
 			}
 
 			for_converted_section_title();
 
 			function for_converted_section_title() {
 				if (!section_title_link.imprecise_tokens) {
-					// console.log(section_title_link);
+					// console.trace(section_title_link);
 					// `section_title_token.title` will not transfer "[", "]"
 					register_anchor(
 					//
