@@ -1687,7 +1687,7 @@ function module_code(library_namespace) {
 			/* const */var section_title_link = section_title_token.link;
 
 			// 忽略 <ref> 之類非固定的元素。
-			if (options.skip_variable_anchors) {
+			if (options.ignore_variable_anchors) {
 				var first_imprecise_token = undefined;
 				for_each_token.call(section_title_token, function(token, index,
 						parent) {
