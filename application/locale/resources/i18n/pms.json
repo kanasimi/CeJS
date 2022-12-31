@@ -999,7 +999,7 @@
 	"$1-remind-to-sign-such-as-the-$2-pages-listed-in-the-notification": "[[%1|Ch'as visa ëd sot-signé]], për esempi ant le %2 pàgina listà ant la notìfica.",
 	"generate-topic-list-$1-topics": "Generé na lista d'argoment: %1 {{PLURAL:%1|argoment}}",
 	"fixing-broken-anchor": "Coression ëd l'ancra rota",
-	"reminder-to-remove-$1-inactive-anchors": "Ch'as visa ëd gavé %1 {{PLURAL:%1|ancra inativa|ancre inative}}",
+	"remove-$1-non-defunct-anchors": "Ch'as visa ëd gavé %1 {{PLURAL:%1|ancra inativa|ancre inative}}",
 	"anchor-$1-links-to-a-specific-web-page-$2": "L’ancra %1 a l'é lijà a na pàgina spessìfica an sl'aragnà : %2.",
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": "L'àncora (%2) a l'é stàita [[Special:Diff/%1|gavà da d'àutri utent]] già prima.",
 	"reminder-of-an-inactive-anchor": "Arciam ëd n'àncora inativa",

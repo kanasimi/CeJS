@@ -544,7 +544,7 @@
 	"user": "利用者",
 	"(new-page)": "(新しいページ)",
 	"fixing-broken-anchor": "切れたアンカーリンクを修復",
-	"reminder-to-remove-$1-inactive-anchors": "切れたアンカーの告知を%1個削除しました",
+	"remove-$1-non-defunct-anchors": "切れたアンカーの告知を%1個削除しました",
 	"anchor-$1-links-to-a-specific-web-page-$2": "アンカー %1 は、専属のページ %2 にリンクしています。",
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": "このアンカー（%2）は[[Special:Diff/%1|他の編集者によって削除されました]]。",
 	"reminder-of-an-inactive-anchor": "切れたアンカーの告知",

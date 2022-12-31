@@ -1686,7 +1686,7 @@ function module_code(library_namespace) {
 			// console.log(section_title_token);
 			/* const */var section_title_link = section_title_token.link;
 
-			// 忽略 <ref> 之類非固定的元素。
+			// 忽略 <ref> 之類非固定的元素。不深入解開 <ref> 內模板可節省許多時間。
 			if (options.ignore_variable_anchors) {
 				var first_imprecise_token = undefined;
 				for_each_token.call(section_title_token, function(token, index,

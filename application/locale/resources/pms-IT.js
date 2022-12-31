@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2023.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
@@ -996,7 +996,7 @@
 	"[[%1|Remind to sign]], such as the %2 pages listed in the notification.": "[[%1|Ch'as visa \u00ebd sot-sign\u00e9]], p\u00ebr esempi ant le %2 p\u00e0gina list\u00e0 ant la not\u00ecfica.",
 	"Generate topic list: %1 {{PLURAL:%1|topic|topics}}": "Gener\u00e9 na lista d'argoment: %1 {{PLURAL:%1|argoment}}",
 	"\u4fee\u6b63\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede": "Coression \u00ebd l'ancra rota",
-	"\u63d0\u9192\u79fb\u9664%1\u500b\u5931\u6548\u7db2\u9801{{PLURAL:%1|\u9328\u9ede}}": "Ch'as visa \u00ebd gav\u00e9 %1 {{PLURAL:%1|ancra inativa|ancre inative}}",
+	"\u79fb\u9664%1\u500b\u975e\u5931\u6548\u7db2\u9801{{PLURAL:%1|\u9328\u9ede}}": "Ch'as visa \u00ebd gav\u00e9 %1 {{PLURAL:%1|ancra inativa|ancre inative}}",
 	"\u7db2\u9801\u9328\u9ede %1 \u9023\u7d50\u5230\u5c08\u5c6c\u9801\u9762\uff1a%2\u3002": "L\u2019ancra %1 a l'\u00e9 lij\u00e0 a na p\u00e0gina spess\u00ecfica an sl'aragn\u00e0\u202f: %2.",
 	"\u6b64\u7db2\u9801\u9328\u9ede\uff08%2\uff09\u4e4b\u524d[[Special:Diff/%1|\u66fe\u88ab\u5176\u4ed6\u7528\u6236\u522a\u9664\u904e]]\u3002": "L'\u00e0ncora (%2) a l'\u00e9 st\u00e0ita [[Special:Diff/%1|gav\u00e0 da d'\u00e0utri utent]] gi\u00e0 prima.",
 	"\u63d0\u9192\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede": "Arciam \u00ebd n'\u00e0ncora inativa",

@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2023.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
@@ -996,7 +996,7 @@
 	"[[%1|Remind to sign]], such as the %2 pages listed in the notification.": "[[%1|Rappel pour signer]], par exemple dans les %2 pages list\u00e9es dans la notification.",
 	"Generate topic list: %1 {{PLURAL:%1|topic|topics}}": "G\u00e9n\u00e9rer une liste de sujets\u202f: %1 sujet{{PLURAL:%1||s}}",
 	"\u4fee\u6b63\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede": "Correction de l\u2019ancre rompue",
-	"\u63d0\u9192\u79fb\u9664%1\u500b\u5931\u6548\u7db2\u9801{{PLURAL:%1|\u9328\u9ede}}": "Rappel pour supprimer %1 ancre{{PLURAL:%1||s}} inactive{{PLURAL:%1||s}}",
+	"\u79fb\u9664%1\u500b\u975e\u5931\u6548\u7db2\u9801{{PLURAL:%1|\u9328\u9ede}}": "Rappel pour supprimer %1 ancre{{PLURAL:%1||s}} inactive{{PLURAL:%1||s}}",
 	"\u7db2\u9801\u9328\u9ede %1 \u9023\u7d50\u5230\u5c08\u5c6c\u9801\u9762\uff1a%2\u3002": "L\u2019ancre %1 est li\u00e9e \u00e0 une page web sp\u00e9cifique\u202f: %2.",
 	"\u6b64\u7db2\u9801\u9328\u9ede\uff08%2\uff09\u4e4b\u524d[[Special:Diff/%1|\u66fe\u88ab\u5176\u4ed6\u7528\u6236\u522a\u9664\u904e]]\u3002": "L\u2019ancre (%2) a \u00e9t\u00e9 [[Special:Diff/%1|supprim\u00e9e par d\u2019autres utilisateurs]] auparavant.",
 	"\u63d0\u9192\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede": "Rappel d\u2018une ancre inactive",

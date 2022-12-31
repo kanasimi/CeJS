@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2022.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2023.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espa\u00f1a",
 	"Calendrier r\u00e9publicain": "French Republican Calendar",
@@ -996,7 +996,7 @@
 	"[[%1|Remind to sign]], such as the %2 pages listed in the notification.": "[[%1|Remind to sign]], such as the %2 pages listed in the notification.",
 	"Generate topic list: %1 {{PLURAL:%1|topic|topics}}": "Generate topic list: %1 {{PLURAL:%1|topic|topics}}",
 	"\u4fee\u6b63\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede": "Fixing broken anchor",
-	"\u63d0\u9192\u79fb\u9664%1\u500b\u5931\u6548\u7db2\u9801{{PLURAL:%1|\u9328\u9ede}}": "Reminder to remove %1 inactive {{PLURAL:%1|anchor|anchors}}",
+	"\u79fb\u9664%1\u500b\u975e\u5931\u6548\u7db2\u9801{{PLURAL:%1|\u9328\u9ede}}": "Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}",
 	"\u7db2\u9801\u9328\u9ede %1 \u9023\u7d50\u5230\u5c08\u5c6c\u9801\u9762\uff1a%2\u3002": "Anchor %1 links to a specific web page: %2.",
 	"\u6b64\u7db2\u9801\u9328\u9ede\uff08%2\uff09\u4e4b\u524d[[Special:Diff/%1|\u66fe\u88ab\u5176\u4ed6\u7528\u6236\u522a\u9664\u904e]]\u3002": "The anchor (%2) has been [[Special:Diff/%1|deleted by other users]] before.",
 	"\u63d0\u9192\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede": "Reminder of an inactive anchor",
