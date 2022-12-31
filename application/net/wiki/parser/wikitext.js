@@ -1,5 +1,6 @@
 ﻿/**
- * @name CeL function for MediaWiki (Wikipedia / 維基百科): parse wikitext 解析維基語法
+ * @name CeL function for MediaWiki (Wikipedia / 維基百科): parse wikitext /
+ *       wikicode 解析維基語法
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用程式庫的子程式庫。
  * 
@@ -420,6 +421,19 @@ function module_code(library_namespace) {
 
 	var PATTERN_HTML_tag = wiki_API
 			.get_PATTERN_full_tag('[^<>\\s]+', null, 'i');
+
+	/**
+	 * Test if the section title is old dot-encoded.
+	 * 
+	 * e.g.,<code>
+	[[臺灣話#.E5.8F.97.E6.97.A5.E6.9C.AC.E8.AA.9E.E5.BD.B1.E9.9F.BF.E8.80.85|(其他參考資料)]]
+	[[Kingdom of Italy#Fascist regime .281922.E2.80.931943.29|Fascist Italy]]
+	</code>
+	 * 
+	 * @see [[w:en:Help:Link#Section linking (anchors)]], [[w:en:WP:ANCHOR]]
+	 *      https://en.wikipedia.org/wiki/Percent-encoding#Types_of_URI_characters
+	 */
+	var PATTERN_is_dot_encoded = /^([\w\s\-~!*'();:@&=+$,/?#\[\]]|\.[\dA-F]{2})+$/;
 
 	/**
 	 * .toString() of wiki elements: wiki_token_toString[token.type]<br />
@@ -883,7 +897,8 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * parse The MediaWiki markup language (wikitext). 解析維基語法。 維基語法解析器
+	 * parse The MediaWiki markup language (wikitext / wikicode). 解析維基語法。
+	 * 維基語法解析器
 	 * 
 	 * TODO:<code>
 
@@ -1741,18 +1756,14 @@ function module_code(library_namespace) {
 				// remove prefix: '#'
 				.slice(1).trimEnd();
 				var original_hash = anchor;
-				// https://en.wikipedia.org/wiki/Percent-encoding#Types_of_URI_characters
-				if (/^([\w\-~!*'();:@&=+$,/?#\[\]]|\.[\dA-F]{2})+$/
-				// [[w:en:Help:Link#Section linking (anchors)]], section_title
-				// e.g.,
-				// [[臺灣話#.E5.8F.97.E6.97.A5.E6.9C.AC.E8.AA.9E.E5.BD.B1.E9.9F.BF.E8.80.85|(其他參考資料)]]
-				.test(anchor)) {
+				if (PATTERN_is_dot_encoded.test(anchor)) {
+					// Change to [[percent-encoding]].
 					anchor = anchor.replace(/\.([\dA-F]{2})/g, '%$1');
 				}
 				// console.log([ original_hash, anchor ]);
 				try {
 					// if
-					// (/^([\w\-.~!*'();:@&=+$,/?#\[\]]|%[\dA-F]{2})+$/.test(anchor))
+					// (/^([\w\s\-.~!*'();:@&=+$,/?#\[\]]|%[\dA-F]{2})+$/.test(anchor))
 					anchor = decodeURIComponent(anchor);
 					if (/[\x00-\x1F\x7F]/.test(anchor)) {
 						// e.g. [[w:ja:エヴァンゲリオン (架空の兵器)#Mark.09]]
@@ -1981,7 +1992,7 @@ function module_code(library_namespace) {
 			parameters = parameters.map(function(token, _index) {
 				// trimEnd() of value, will push spaces in token[3].
 				var tail_spaces = token.match(/[\s\n]*$/)[0];
-				if (_index > 0 && tail_spaces) {
+				if (tail_spaces) {
 					token = token.slice(0, -tail_spaces.length);
 				}
 				// 預防經過改變，需再進一步處理。
@@ -1989,6 +2000,17 @@ function module_code(library_namespace) {
 
 				if (_index === 0) {
 					// console.log(token);
+					if (tail_spaces) {
+						if (typeof token === 'string') {
+							token += tail_spaces;
+						} else {
+							// assert: Array.isArray(token)
+							if (token.type !== 'plain') {
+								token = _set_wiki_type([ token ], 'plain');
+							}
+							token.push(tail_spaces);
+						}
+					}
 
 					if (false && typeof token === 'string') {
 						return _set_wiki_type(token.split(normalize ? /\s*:\s*/
@@ -2294,7 +2316,8 @@ function module_code(library_namespace) {
 							// {{t<!-- -->{|p}}
 							return PATTERN_invalid_page_name_characters
 									.test(index === list.length - 1 ? token
-											.replace(/\n+$/, '') : token);
+									// e.g., '{{t\n |p}}'
+									.replace(/\s+$/, '') : token);
 						}
 						return !(token.type in {
 							// incase:

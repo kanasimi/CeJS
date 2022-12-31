@@ -475,7 +475,7 @@ function module_code(library_namespace) {
 			&& (('missing' in next[1]) || ('invalid' in next[1])))) {
 				library_namespace.debug('採用所輸入之 '
 						+ wiki_API.title_link_of(next[1])
-						+ ' 作為 this.last_page。', 0, 'wiki_API.prototype.next');
+						+ ' 作為 this.last_page。', 2, 'wiki_API.prototype.next');
 				// console.trace(next);
 				this.last_page = next[1];
 				// console.trace(next[1]);
@@ -2975,9 +2975,10 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				Object.assign(work_options, options);
-				// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
-				work_options.page_to_edit = page;
+				Object.assign(work_options, options, {
+					// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
+					page_to_edit : page
+				});
 				// console.trace(page.title||page);
 				// console.trace(work_options);
 				// 編輯頁面內容。

@@ -3497,6 +3497,10 @@ function test_wiki() {
 		assert([wikitext, parsed], 'wiki.parse.link #10-1');
 		wikitext = '[[ : :zh:title]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed], 'wiki.parse.link #11-1');
+		wikitext = '[[Kingdom of Italy#Fascist regime .281922.E2.80.931943.29|Fascist Italy]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #12');
+		assert(["Fascist regime (1922–1943)", parsed.anchor], 'wiki.parse.link #12-1');
+		assert(["Fascist Italy", parsed.display_text], 'wiki.parse.link #12-2');
 
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #1');
@@ -3735,6 +3739,12 @@ function test_wiki() {
 		wikitext = '{{t|p=\n t\n p|q=2}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #23');
 		assert(['pre', parsed.parameters.p[1].type], 'wiki.parse.transclusion #23-1');
+		wikitext = '{{t\n |p}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #24');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #24-1');
+		wikitext = '{{t\n |p\n}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #25');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #25-1');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);

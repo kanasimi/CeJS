@@ -813,7 +813,8 @@ function module_code(library_namespace) {
 		}
 
 		if (options.use_global_index) {
-			if (!slice && this[wiki_API.KEY_page_data].parsed) {
+			if (!slice && this[wiki_API.KEY_page_data]
+					&& this[wiki_API.KEY_page_data].parsed) {
 				slice = [ this.range[0], this.range[1] ];
 				if (slice[0] > 0) {
 					// 加入 .section_title。
@@ -827,8 +828,9 @@ function module_code(library_namespace) {
 		// console.trace([ this, type ]);
 		// var parsed = this;
 		traversal_tokens(
-				options.use_global_index ? this[wiki_API.KEY_page_data].parsed
-						: this, 0, finish_up);
+				options.use_global_index ? this[wiki_API.KEY_page_data]
+						&& this[wiki_API.KEY_page_data].parsed : this, 0,
+				finish_up);
 
 		if (!promise) {
 			return check_ref_list_to_remove();

@@ -1696,6 +1696,11 @@ function module_code(library_namespace) {
 						first_imprecise_token = token;
 						return for_each_token.exit;
 					}
+					// e.g., [https://url ]
+					if (token.type === 'external_link' && !token[2]) {
+						first_imprecise_token = token;
+						return for_each_token.exit;
+					}
 				});
 				if (first_imprecise_token) {
 					library_namespace.log('get_all_anchors: 跳過包含不固定錨點的章節標題: '
@@ -1818,8 +1823,11 @@ function module_code(library_namespace) {
 			// console.trace(parsed.toString());
 			// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
 			var promise = parsed.each('transclusion', function(template_token) {
-				// console.trace([ template_token.name, template_token.expand
-				// ]);
+				if (false && template_token.name === 'template_token') {
+					console.trace([ template_token.name,
+					//
+					template_token.expand ]);
+				}
 
 				var anchors = wiki_API.repeatedly_expand_template_token(
 						template_token, options);

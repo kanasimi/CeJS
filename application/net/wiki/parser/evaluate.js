@@ -854,6 +854,7 @@ function module_code(library_namespace) {
 			return url;
 		}
 
+		// TODO: https://www.mediawiki.org/wiki/Manual:PAGENAMEE_encoding
 		function PAGENAMEE_encoding(page_title) {
 			if (!token.name.endsWith('EE'))
 				return page_title;
