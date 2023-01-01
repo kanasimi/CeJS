@@ -993,7 +993,7 @@
 	"please-remember-to-sign-when-you-leave-messages": "Please remember to sign when you leave messages",
 	"$1-remind-to-sign-such-as-the-$2-pages-listed-in-the-notification": "[[%1|Remind to sign]], such as the %2 pages listed in the notification.",
 	"generate-topic-list-$1-topics": "Generate topic list: %1 {{PLURAL:%1|topic|topics}}",
-	"$1-pages-modified": "%1 {{PLURAL:1|page|pages}} modified",
+	"$1-pages-modified": "%1 {{PLURAL:%1|page|pages}} modified",
 	"fixing-broken-anchor": "Fixing broken anchor",
 	"remove-$1-non-defunct-anchors": "Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}",
 	"anchor-$1-links-to-a-specific-web-page-$2": "Anchor %1 links to a specific web page: %2.",

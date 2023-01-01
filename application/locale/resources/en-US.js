@@ -995,7 +995,7 @@
 	"Please remember to sign when you leave messages": "Please remember to sign when you leave messages",
 	"[[%1|Remind to sign]], such as the %2 pages listed in the notification.": "[[%1|Remind to sign]], such as the %2 pages listed in the notification.",
 	"Generate topic list: %1 {{PLURAL:%1|topic|topics}}": "Generate topic list: %1 {{PLURAL:%1|topic|topics}}",
-	"%1 {{PLURAL:1|page|pages}} modified": "%1 {{PLURAL:1|page|pages}} modified",
+	"%1 {{PLURAL:%1|page|pages}} modified": "%1 {{PLURAL:%1|page|pages}} modified",
 	"\u4fee\u6b63\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede": "Fixing broken anchor",
 	"\u79fb\u9664%1\u500b\u975e\u5931\u6548\u7db2\u9801{{PLURAL:%1|\u9328\u9ede}}": "Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}",
 	"\u7db2\u9801\u9328\u9ede %1 \u9023\u7d50\u5230\u5c08\u5c6c\u9801\u9762\uff1a%2\u3002": "Anchor %1 links to a specific web page: %2.",
