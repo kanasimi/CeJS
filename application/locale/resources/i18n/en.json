@@ -182,7 +182,7 @@
 	"loading-$1$": "Loading %1%...",
 	"finished": "finished",
 	"no-changes": "No changes.",
-	"no-page-modified": "no page modified,",
+	"no-page-modified": "No page modified",
 	"$1-word(s)-in-this-chapter": "%1 {{PLURAL:1|word|words}} in this chapter",
 	"$1-word(s)-accumulated": "%1 {{PLURAL:1|word|words}} accumulated",
 	"to-chinese-numerals": "To Chinese numerals",

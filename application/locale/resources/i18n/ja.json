@@ -193,7 +193,7 @@
 	"loading-$1$": "読み込み中 %1%…",
 	"finished": "完成",
 	"no-changes": "全て変更なし。",
-	"no-page-modified": "全記事変更なし。",
+	"no-page-modified": "全記事変更なし",
 	"to-chinese-numerals": "漢数字",
 	"astronomy": "天文",
 	"first-quarter": "上弦",

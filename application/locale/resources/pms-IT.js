@@ -184,7 +184,7 @@
 	"Loading %1%...": "Cariament \u00ebd %1%...",
 	"finished": "fin\u00ec",
 	"No changes.": "Gnun-e mod\u00ecfiche.",
-	"no page modified,": "gnun-a p\u00e0gina modific\u00e0,",
+	"No page modified": "gnun-a p\u00e0gina modific\u00e0",
 	"\u672c\u7ae0\u5171 %1 {{PLURAL:1|\u500b\u5b57}}": "%1 {{PLURAL:1|par\u00f2la|par\u00f2le}} an cost cap\u00ectol",
 	"\u7d2f\u8a08 %1 {{PLURAL:1|\u500b\u5b57}}": "%1 {{PLURAL:1|par\u00f2la|par\u00f2le}} anmugi\u00e0",
 	"\u4e2d\u6587\u6578\u5b57": "An numeraj cin\u00e8is",

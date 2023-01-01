@@ -184,7 +184,7 @@
 	"Loading %1%...": "\u8aad\u307f\u8fbc\u307f\u4e2d %1%\u2026",
 	"finished": "\u5b8c\u6210",
 	"No changes.": "\u5168\u3066\u5909\u66f4\u306a\u3057\u3002",
-	"no page modified,": "\u5168\u8a18\u4e8b\u5909\u66f4\u306a\u3057\u3002",
+	"No page modified": "\u5168\u8a18\u4e8b\u5909\u66f4\u306a\u3057",
 	"\u4e2d\u6587\u6578\u5b57": "\u6f22\u6570\u5b57",
 	"astronomy": "\u5929\u6587",
 	"\u4e0a\u5f26": "\u4e0a\u5f26",

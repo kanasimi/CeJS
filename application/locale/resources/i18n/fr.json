@@ -193,7 +193,7 @@
 	"loading-$1$": "Chargement de %1%...",
 	"finished": "terminé",
 	"no-changes": "Aucune modification.",
-	"no-page-modified": "aucune page modifiée,",
+	"no-page-modified": "aucune page modifiée",
 	"$1-word(s)-in-this-chapter": "%1 mot{{PLURAL:1| |s}} dans ce chapitre",
 	"$1-word(s)-accumulated": "%1 mot{{PLURAL:1| |s}} accumulé{{PLURAL:1| |s}}",
 	"to-chinese-numerals": "En numéraux chinois",

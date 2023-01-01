@@ -43,7 +43,7 @@
 	"Loading %1%...": "Lueden %1%...",
 	"finished": "f\u00e4erdeg",
 	"No changes.": "Keng \u00c4nnerungen.",
-	"no page modified,": "keng S\u00e4it ge\u00e4nnert,",
+	"No page modified": "keng S\u00e4it ge\u00e4nnert",
 	"astronomy": "Astronomie",
 	"\u671b": "Vollmound",
 	"partial solar eclipse": "deelweis Sonnefinsternis",

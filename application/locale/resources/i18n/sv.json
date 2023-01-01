@@ -101,7 +101,7 @@
 	"loading-$1$": "Laddar %1%...",
 	"finished": "klar",
 	"no-changes": "Inga ändringar.",
-	"no-page-modified": "ingen sida modifierad,",
+	"no-page-modified": "ingen sida modifierad",
 	"to-chinese-numerals": "Till kinesiska siffror",
 	"astronomy": "astronomi",
 	"log-type-debug": "felsökning",

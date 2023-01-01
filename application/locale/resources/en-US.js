@@ -184,7 +184,7 @@
 	"Loading %1%...": "Loading %1%...",
 	"finished": "finished",
 	"No changes.": "No changes.",
-	"no page modified,": "no page modified,",
+	"No page modified": "No page modified",
 	"\u672c\u7ae0\u5171 %1 {{PLURAL:1|\u500b\u5b57}}": "%1 {{PLURAL:1|word|words}} in this chapter",
 	"\u7d2f\u8a08 %1 {{PLURAL:1|\u500b\u5b57}}": "%1 {{PLURAL:1|word|words}} accumulated",
 	"\u4e2d\u6587\u6578\u5b57": "To Chinese numerals",

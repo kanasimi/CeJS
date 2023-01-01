@@ -97,7 +97,7 @@
 	"Loading %1%...": "Laddar %1%...",
 	"finished": "klar",
 	"No changes.": "Inga \u00e4ndringar.",
-	"no page modified,": "ingen sida modifierad,",
+	"No page modified": "ingen sida modifierad",
 	"\u4e2d\u6587\u6578\u5b57": "Till kinesiska siffror",
 	"astronomy": "astronomi",
 	"log-type-debug": "fels\u00f6kning",

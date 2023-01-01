@@ -1128,13 +1128,13 @@ function test_locale() {
 		// gettext_config:{"id":"no-changes"}
 		var messages = new CeL.gettext.Sentence_combination('No changes.');
 		// gettext_config:{"id":"no-page-modified"}
-		messages.push('no page modified,', ['%1 elapsed.', ['%1 min', 2]]);
+		messages.push('No page modified' + ',', ['%1 elapsed.', ['%1 min', 2]]);
 
 		CeL.gettext.use_domain('zh', true);
-		assert(['全無變更。未改變任何條目。共費時 2分。', messages.toString()]);
+		assert(['全無變更。未改變任何條目，共費時 2分。', messages.toString()]);
 
 		CeL.gettext.use_domain('en', true);
-		assert(['No changes. no page modified, 2 min elapsed.', messages.toString()]);
+		assert(['No changes. No page modified, 2 min elapsed.', messages.toString()]);
 		messages.truncate(1);
 		// gettext_config:{"id":"no-changes"}
 		assert(['No changes.', messages.toString()]);
@@ -1160,6 +1160,19 @@ function test_locale() {
 		messages.push('.');
 		assert(['本章共 2345 個字，累計 5678 個字。', messages.toString()]);
 
+		// ------------------------------------------------
+
+		messages = new CeL.gettext.Sentence_combination(['test number: %1.', 123]);
+		//console.trace(messages);
+		messages.append([
+			['test 2: %1,', 456],
+			['Test 3: %1, ', 789],
+			['Test 4: %1,', '012'],
+			[' Test 5: %1, ', 345],
+			[' Test 6: %1,', 678]
+		]);
+
+		assert(['test number: 123. Test 2: 456, test 3: 789, test 4: 012, test 5: 345,  test 6: 678,', messages.toString()]);
 	});
 
 

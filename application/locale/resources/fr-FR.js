@@ -184,7 +184,7 @@
 	"Loading %1%...": "Chargement de %1%...",
 	"finished": "termin\u00e9",
 	"No changes.": "Aucune modification.",
-	"no page modified,": "aucune page modifi\u00e9e,",
+	"No page modified": "aucune page modifi\u00e9e",
 	"\u672c\u7ae0\u5171 %1 {{PLURAL:1|\u500b\u5b57}}": "%1 mot{{PLURAL:1| |s}} dans ce chapitre",
 	"\u7d2f\u8a08 %1 {{PLURAL:1|\u500b\u5b57}}": "%1 mot{{PLURAL:1| |s}} accumul\u00e9{{PLURAL:1| |s}}",
 	"\u4e2d\u6587\u6578\u5b57": "En num\u00e9raux chinois",

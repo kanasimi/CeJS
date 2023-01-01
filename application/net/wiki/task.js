@@ -3138,7 +3138,7 @@ function module_code(library_namespace) {
 							count_summary.push(done === nochange_count
 							// 未改變任何條目。 No pages have been changed
 							// gettext_config:{"id":"no-page-modified"}
-							? 'no page modified,' : [
+							? 'No page modified' + ',' : [
 							// gettext_config:{"id":"$1-pages-have-not-changed"}
 							'%1 {{PLURAL:%1|page|pages}} have not changed,',
 									nochange_count ]);

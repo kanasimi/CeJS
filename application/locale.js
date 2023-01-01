@@ -849,31 +849,66 @@ function module_code(library_namespace) {
 	var PATTERN_no_need_to_add_header_space = /^[\s)\]>}⟩›»）］｝」』〕】〗〉》”’‰‱]/;
 
 	function Sentence_combination__join(separator) {
+		// console.trace(this);
 		var converted_list = this.converting();
 		if (separator || separator === '')
 			return converted_list.join(separator);
 
 		for (var index = 0; index < converted_list.length;) {
 			var converted = converted_list[index];
+			// console.trace([ index, converted ]);
 			if (!converted
-					|| PATTERN_no_need_to_append_tail_space.test(converted)) {
+			// 要處理首字母大小寫轉換，所以不直接跳出。
+			// || PATTERN_no_need_to_append_tail_space.test(converted)
+			) {
 				++index;
 				continue;
 			}
-			var next_sentence, original_index = index;
-			// 找出下一個（非空內容的）文字，檢查是否該在本token中結尾加上空白字元。
+
+			var next_sentence, original_index = index, must_lower_case = /[,;、，；]\s*$/
+					.test(converted) ? true
+					: /[.?!。？！]\s*$/.test(converted) ? false : undefined;
 			while (++index < converted_list.length) {
 				next_sentence = converted_list[index];
+				// console.trace([ converted, next_sentence, must_lower_case ]);
+				// 處理首字母大小寫轉換。
+				if (next_sentence && typeof must_lower_case === 'boolean') {
+					var leading_spaces = next_sentence.match(/^\s+/);
+					if (leading_spaces) {
+						leading_spaces = leading_spaces[0];
+						next_sentence = next_sentence
+								.slice(leading_spaces.length);
+					}
+					var first_char = next_sentence.charAt(0);
+					if (must_lower_case
+							^ (first_char === first_char.toLowerCase())) {
+						next_sentence = (must_lower_case ? first_char
+								.toLowerCase() : first_char.toUpperCase())
+								+ next_sentence.slice(1);
+					}
+					if (leading_spaces) {
+						next_sentence = leading_spaces + next_sentence;
+					}
+					converted_list[index] = next_sentence;
+				}
+
+				// 增加子句間的空格。
+				// 找出下一個（非空內容的）文字，檢查是否該在本token(converted_list[original_index])結尾加上空白字元。
 				if (next_sentence || next_sentence === 0) {
-					if (!PATTERN_no_need_to_add_header_space
-							.test(next_sentence)) {
+					if (!PATTERN_no_need_to_append_tail_space.test(converted)
+					//
+					&& !PATTERN_no_need_to_add_header_space.test(next_sentence)) {
 						converted_list[original_index] += ' ';
 					}
 					break;
 				}
 			}
+			// console.trace([ index, converted_list[index] ]);
 		}
-		return converted_list.join('');
+
+		converted_list = converted_list.join('');
+		// TODO: upper-case the first char
+		return converted_list;
 	}
 
 	// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Object/create

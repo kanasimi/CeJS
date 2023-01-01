@@ -183,7 +183,7 @@
 	"Loading %1%...": "\u5df2\u52a0\u8f7d %1%\u2026",
 	"finished": "\u5b8c\u6210",
 	"No changes.": "\u5168\u65e0\u53d8\u66f4\u3002",
-	"no page modified,": "\u672a\u6539\u53d8\u4efb\u4f55\u6761\u76ee\u3002",
+	"No page modified": "\u672a\u6539\u53d8\u4efb\u4f55\u6761\u76ee",
 	"\u4e2d\u6587\u6578\u5b57": "\u4e2d\u6587\u6570\u5b57",
 	"astronomy": "\u5929\u6587",
 	"\u4e0a\u5f26": "\u4e0a\u5f26",

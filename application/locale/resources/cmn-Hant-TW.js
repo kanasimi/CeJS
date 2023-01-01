@@ -184,7 +184,7 @@
 	"Loading %1%...": "\u5df2\u8f09\u5165 %1%\u2026",
 	"finished": "\u5b8c\u6210",
 	"No changes.": "\u5168\u7121\u8b8a\u66f4\u3002",
-	"no page modified,": "\u672a\u6539\u8b8a\u4efb\u4f55\u689d\u76ee\u3002",
+	"No page modified": "\u672a\u6539\u8b8a\u4efb\u4f55\u689d\u76ee",
 	"\u672c\u7ae0\u5171 %1 {{PLURAL:1|\u500b\u5b57}}": "\u672c\u7ae0\u5171 %1 {{PLURAL:1|\u500b\u5b57}}",
 	"\u7d2f\u8a08 %1 {{PLURAL:1|\u500b\u5b57}}": "\u7d2f\u8a08 %1 {{PLURAL:1|\u500b\u5b57}}",
 	"\u4e2d\u6587\u6578\u5b57": "\u4e2d\u6587\u6578\u5b57",
