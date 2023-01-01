@@ -704,6 +704,7 @@ function module_code(library_namespace) {
 			return this.join('');
 		},
 		tag_inner : function() {
+			// console.trace(this);
 			return this.join('');
 		},
 		tag_single : function() {
@@ -2534,17 +2535,23 @@ function module_code(library_namespace) {
 					&& token.tag === 'nowiki') {
 				token.has_functional_sub_token = true;
 			}
+			var _options;
 			for (var index = 0; index < token.length; index++) {
 				var sub_token = token[index];
 				if (sub_token.type === 'tag_inner'
 				// e.g., `<nowiki>-{zh-cn:这;zh-tw:這}-</nowiki>` inside <pre>
 				// re-parse for finding functional tokens
 				&& token.has_functional_sub_token) {
-					sub_token[0] = parse_wikitext(sub_token[0].toString(),
-							Object.assign(Object.clone(options), {
-								// 重新造一個 options 以避免污染。
-								target_array : null
-							}));
+					sub_token.forEach(function(_sub_token, index) {
+						_options = _options
+						// 重新造一個 options 以避免污染。
+						|| Object.assign(Object.clone(options), {
+							target_array : null
+						});
+						sub_token[index] = parse_wikitext(
+						// re-parse {String} sub tokens
+						_sub_token.toString(), _options);
+					});
 				}
 				pick_functional_tokens_for_pre(sub_token);
 				if (sub_token.has_functional_sub_token) {
@@ -2571,7 +2578,7 @@ function module_code(library_namespace) {
 				return all;
 			}
 
-			var matched = tag.toLowerCase() in extensiontag_hash, previous;
+			var matched = tag.toLowerCase() in extensiontag_hash;
 			// '<code>...' is OK.
 			if (!ending && matched) {
 				// e.g., '<syntaxhighlight>...'
@@ -2584,6 +2591,23 @@ function module_code(library_namespace) {
 			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
 			if (!matched && options.inside_transclusion && inner.includes('|')) {
 				return all;
+			}
+
+			var previous = '', following = '';
+			if ((tag.toLowerCase() in {
+				tr : true,
+				th : true,
+				td : true
+			})
+			// 這幾個 tags 比較特殊:
+			&& (matched = inner.match(
+			// `<th>a<td>b` 會被直接截斷，視為 `<th>a</th><td>b</td>`
+			new RegExp('<(' + (/^t[hd]$/i.test(tag) ? 'th|td' : tag)
+			// 而非 `<th>a<td>b</td></th>`。
+			+ ')([\\s/][^<>]*)?>', 'i')))) {
+				following = inner.slice(matched.index) + ending + following;
+				inner = inner.slice(0, matched.index);
+				ending = end_tag = '';
 			}
 
 			matched = (tag.toLowerCase() !== 'nowiki'
@@ -2617,24 +2641,19 @@ function module_code(library_namespace) {
 
 			if (matched) {
 				matched = matched.index - inner.length - ending.length;
-				previous = all.slice(0, matched);
+				previous += all.slice(0, matched);
 				matched = all.slice(matched).match(PATTERN_HTML_tag);
 				// 大小寫可能不同。
 				tag = matched[1];
 				attributes = matched[2];
 				inner = matched[3];
-			} else {
-				previous = '';
 			}
 
-			var following;
 			if (!ending && initialized_fix && initialized_fix[1]
 			// 這一段是本函數加上去的。
 			&& inner.endsWith(initialized_fix[1])) {
-				following = initialized_fix[1];
-				inner = inner.slice(0, -following.length);
-			} else {
-				following = '';
+				following = initialized_fix[1] + following;
+				inner = inner.slice(0, -initialized_fix[1].length);
 			}
 
 			// assert: 此時不在表格 td/th 或 template parameter 中。
@@ -2698,7 +2717,9 @@ function module_code(library_namespace) {
 			// [ ... ]: 在 inner 為 Template 之類時，
 			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
 			// 但仍需要設定 type=tag_inner 以應 for_each_token() 之需，因此多層[]包覆。
-			inner = _set_wiki_type([ inner || '' ], 'tag_inner');
+			inner = _set_wiki_type(Array.isArray(inner)
+			// 僅有一個 plain 的話就直接採用其內容，減少多層嵌套。
+			&& inner.type === 'plain' ? inner : [ inner || '' ], 'tag_inner');
 			all = [ attributes, inner ];
 
 			if (normalize) {

@@ -633,9 +633,6 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	var KEY_on_page_title_option = 'on_page_title';
-	var ifexist_page_options = {
-		prop : ''
-	};
 
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 	function evaluate_parser_function_token(options) {
@@ -1073,7 +1070,9 @@ function module_code(library_namespace) {
 						|| ('missing' in page_data)
 						//
 						|| ('invalid' in page_data) ? 3 : 2] || '');
-					}, ifexist_page_options);
+					}, /* ifexist_page_options */{
+						prop : ''
+					});
 				});
 			});
 

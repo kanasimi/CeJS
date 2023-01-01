@@ -4019,7 +4019,8 @@ function test_wiki() {
 		wikitext = "<s>S<s>_</s>T</s>"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #15');
 		assert(['s', parsed.tag], 'wiki.parse: HTML tag #15-1');
-		assert(['s', parsed[1][0][1].tag], 'wiki.parse: HTML tag #15-2');
+		// parsed[1]: parsed[inner]
+		assert(['s', parsed[1][1] && parsed[1][1].tag], 'wiki.parse: HTML tag #15-2');
 		wikitext = "<s>S"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #16');
 		assert(['s', parsed.tag], 'wiki.parse: HTML tag #16-1');
@@ -4048,6 +4049,15 @@ function test_wiki() {
 		wikitext = '<a>a</a>'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #23');
 		assert([wikitext, parsed], 'wiki.parse: HTML tag #23-1');
+		wikitext = '<table><tr><th>h<tr><td>d</table>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #24');
+		// parsed[1]: parsed[inner]
+		assert([2, parsed[1] && parsed[1].length], 'wiki.parse: HTML tag #24-1');
+		assert(['tr', parsed[1] && parsed[1][1] && parsed[1][1].tag], 'wiki.parse: HTML tag #24-2');
+		wikitext = '<table><tr><tr></tr></table>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #25');
+		assert([2, parsed[1] && parsed[1].length], 'wiki.parse: HTML tag #25-1');
+		assert(['tr', parsed[1] && parsed[1][1] && parsed[1][1].tag], 'wiki.parse: HTML tag #25-2');
 
 		wikitext = '<section begin=chapter1 />...'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag section #1');

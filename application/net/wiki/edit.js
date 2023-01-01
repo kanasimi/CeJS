@@ -355,6 +355,12 @@ function module_code(library_namespace) {
 						console.trace(options);
 					}
 					if (options) {
+						if (!page_data && !error) {
+							console.trace('No page_data or error set!');
+							throw new Error('wiki_API_edit: '
+							//
+							+ 'No page_data or error set!');
+						}
 						options.page_to_edit = page_data;
 						options.last_page_error = error;
 						if (undo_count) {

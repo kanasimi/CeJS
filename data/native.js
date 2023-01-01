@@ -4467,8 +4467,10 @@ function module_code(library_namespace) {
 		for (var original; original !== text;) {
 			original = text;
 			if (has_replacement_offset) {
+				// new browsers
 				text = original.replace(pattern, replace_to);
 			} else {
+				// old browsers
 				text = original.replace(pattern, function(all) {
 					var args = Array.from(arguments);
 					args.push(original.indexOf(all, pattern.lastIndex || 0),
