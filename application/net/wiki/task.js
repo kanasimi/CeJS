@@ -122,7 +122,7 @@ function module_code(library_namespace) {
 		this.running = true;
 
 		var _this = this;
-		function status_of_thenable(fulfilled, this_thenable) {
+		function status_handler(fulfilled, this_thenable) {
 			if (this_thenable !== _this.actions.promise_relying) {
 				library_namespace.debug(
 						'有其他執行緒鑽空隙，執行了 .set_promise_relying()。需要再檢測一次。', 3,
@@ -184,7 +184,7 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.status_of_thenable(this.actions.promise_relying,
-				status_of_thenable);
+				status_handler);
 	};
 
 	// @inner
@@ -573,7 +573,11 @@ function module_code(library_namespace) {
 				// _next[2]: options
 				&& typeof _next[2] === 'object'
 				//
-				&& !_next[2].page_to_edit) {
+				&& !_next[2].page_to_edit
+				//
+				&& (!_next[2].page_title_to_edit
+				//
+				|| _next[2].page_title_to_edit === next[1])) {
 					// 手動指定要編輯的頁面。避免多執行續打亂 wiki.last_page。
 					_next[2].page_to_edit = page_data;
 					_next[2].page_title_to_edit = next[1];
