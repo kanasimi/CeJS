@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"HellojoeAoPS",
 			"Kanashimi",
 			"Kly",
 			"Willy1018",
@@ -192,7 +193,7 @@
 	"loading-$1$": "已載入 %1%…",
 	"finished": "完成",
 	"no-changes": "全無變更。",
-	"no-page-modified": "未改變任何條目",
+	"no-page-modified": "沒有修改頁面",
 	"$1-word(s)-in-this-chapter": "本章共 %1 {{PLURAL:1|個字}}",
 	"$1-word(s)-accumulated": "累計 %1 {{PLURAL:1|個字}}",
 	"to-chinese-numerals": "中文數字",
@@ -1003,6 +1004,7 @@
 	"please-remember-to-sign-when-you-leave-messages": "請記得在留言時署名",
 	"$1-remind-to-sign-such-as-the-$2-pages-listed-in-the-notification": "[[%1|提醒記得簽名]]，例如在文中所列的 %2 個頁面。",
 	"generate-topic-list-$1-topics": "生成議題列表：%1個{{PLURAL:%1|議題}}",
+	"$1-pages-modified": "%1 {{PLURAL:%1|頁|頁}}已修改",
 	"fixing-broken-anchor": "修正失效的網頁錨點",
 	"remove-$1-non-defunct-anchors": "移除%1個非失效網頁{{PLURAL:%1|錨點}}",
 	"anchor-$1-links-to-a-specific-web-page-$2": "網頁錨點 %1 連結到專屬頁面：%2。",
