@@ -57,6 +57,11 @@ function module_code(library_namespace) {
 		math : true
 	};
 
+	// Is {String} and will not used in normal wikitext or parse_wikitext().
+	var element_placeholder = '__element_placeholder__',
+	//
+	PATTERN_element_placeholder = new RegExp(element_placeholder, 'g');
+
 	// @inner
 	function preprocess_section_link_token(token, options) {
 		// console.trace(token);
@@ -208,7 +213,7 @@ function module_code(library_namespace) {
 		if ((token.type === 'file' || token.type === 'category')
 				&& !token.is_link) {
 			// 顯示時，TOC 中的圖片、分類會被消掉，圖片在內文中才會顯現。
-			return '';
+			return options.use_element_placeholder ? element_placeholder : '';
 		}
 
 		// TODO: interlanguage links will be treated as normal link!
@@ -413,7 +418,7 @@ function module_code(library_namespace) {
 			// 為了容許一些特定標籤能夠顯示格式，"<>"已經在preprocess_section_link_token(),section_link()裡面處理過了。
 			// display_text 在 "[[", "]]" 中，不可允許 "[]"
 			: /[\|{}<>]/g && /[\|{}\[\]]/g,
-			// 經測試 anchor 亦不可包含[\[\]{}\n�]。
+			// 經測試 anchor 亦不可包含[\[\]{}\t\n�]。
 			function(character) {
 				if (is_URI) {
 					return '%' + character.charCodeAt(0)
@@ -520,7 +525,8 @@ function module_code(library_namespace) {
 				callback : options
 			};
 		} else {
-			options = library_namespace.setup_options(options);
+			options = library_namespace.new_options(options);
+			options.use_element_placeholder = true;
 		}
 
 		// console.trace(wiki_API.parse(section_title, null, []));
@@ -530,7 +536,10 @@ function module_code(library_namespace) {
 		parsed_title = preprocess_section_link_tokens(parsed_title, options);
 
 		// 注意: 當這空白字字出現在功能性token中時，可能會出錯。
-		var id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
+		var id = parsed_title.toString().trim().replace(
+				PATTERN_element_placeholder, '')
+		//
+		.replace(/[ \n]{2,}/g, ' '),
 		// anchor 網頁錨點: 可以直接拿來做 wikilink anchor 的章節標題。
 		// 有多個完全相同的 anchor 時，後面的會加上"_2", "_3",...。
 		// 這個部分的處理請見 function for_each_section()
@@ -609,7 +618,8 @@ function module_code(library_namespace) {
 		// console.trace(parsed_title.toString().trim());
 
 		// display_text 應該是對已經正規化的 section_title 再作的變化。
-		var display_text = parsed_title.toString().trim();
+		var display_text = parsed_title.toString().replace(
+				PATTERN_element_placeholder, '').trim();
 		display_text = section_link_escape(display_text);
 		if (!options.is_recursive) {
 			// recover language conversion -{}-
@@ -1602,15 +1612,21 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// CeL.wiki.parse.anchor.normalize_anchor()
-	function normalize_anchor(anchor) {
-		return anchor
-		// '&#39;' → "'"
-		&& library_namespace.HTML_to_Unicode(anchor.toString())
-		// 警告: 實際上的網頁錨點應該要 .replace(/ /g, '_')
-		// 但由於 wiki 頁面中使用[[#P Q]]與[[#P_Q]]效果相同，都會產生<a href="#P_Q">，因此採用"P Q"。
-		.replace(/_/g, ' ')
-		// " a " → "a"
-		.trim();
+	function normalize_anchor(anchor, preserve_spaces) {
+		if (anchor) {
+			anchor =
+			// '&#39;' → "'"
+			library_namespace.HTML_to_Unicode(anchor.toString())
+			// 警告: 實際上的網頁錨點應該要 .replace(/ /g, '_')
+			// 但由於 wiki 頁面中使用[[#P Q]]與[[#P_Q]]效果相同，
+			// 都會產生<a href="#P_Q">，因此採用"P Q"。
+			.replace(/[_\xa0]/g, ' ');
+			if (!preserve_spaces) {
+				// " a " → "a"
+				anchor = anchor.trim();
+			}
+		}
+		return anchor;
 	}
 	get_all_anchors.normalize_anchor = normalize_anchor;
 
@@ -1639,8 +1655,8 @@ function module_code(library_namespace) {
 
 		// const
 		var anchor_hash = Object.create(null);
-		function register_anchor(anchor, token) {
-			anchor = normalize_anchor(anchor);
+		function register_anchor(anchor, token, preserve_spaces) {
+			anchor = normalize_anchor(anchor, preserve_spaces);
 			if (typeof anchor === 'string' && anchor.length > 1024) {
 				if (false) {
 					Error.stackTraceLimit = Infinity;
@@ -1680,6 +1696,7 @@ function module_code(library_namespace) {
 		// var latest_action_count = session.actions && session.actions.length;
 
 		parsed.each_section();
+		options = library_namespace.setup_options(options);
 		var promise
 		//
 		= parsed.each('section_title', function(section_title_token) {
@@ -1755,7 +1772,7 @@ function module_code(library_namespace) {
 					// `section_title_token.title` will not transfer "[", "]"
 					register_anchor(
 					//
-					section_title_link.id, section_title_token);
+					section_title_link.id, section_title_token, true);
 
 				} else if (section_title_link.tokens_maybe_handlable) {
 					// exclude "=={{T}}=="

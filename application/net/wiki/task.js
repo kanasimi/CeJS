@@ -566,22 +566,43 @@ function module_code(library_namespace) {
 				_this.last_page_options = next[3];
 				_this.last_page_error = error;
 
-				set_page_to_edit(next[3], next[1]);
+				set_page_to_edit(next[3], page_data);
 
+				var original_title = next[1];
+				// assert: typeof original_title === 'string'
 				var _next = _this.actions[0];
 				if (_next && _next[0] === 'edit'
 				// _next[2]: options
 				&& typeof _next[2] === 'object'
 				//
-				&& !_next[2].page_to_edit
-				//
-				&& (!_next[2].page_title_to_edit
-				//
-				|| _next[2].page_title_to_edit === next[1])) {
-					// 手動指定要編輯的頁面。避免多執行續打亂 wiki.last_page。
-					_next[2].page_to_edit = page_data;
-					_next[2].page_title_to_edit = next[1];
-					_next[2].last_page_error = error;
+				&& !_next[2].page_to_edit) {
+					if (!_next[2].page_title_to_edit
+					//
+					|| _next[2].page_title_to_edit === original_title) {
+						if (original_title !== page_data.title) {
+							library_namespace.info(
+							//
+							'wiki_API.prototype.next.page: ' + '所取得頁面的標題改變: '
+									+ wiki_API.title_link_of(original_title)
+									+ '→'
+									+ wiki_API.title_link_of(page_data.title));
+						}
+						// 手動指定要編輯的頁面。避免多執行續打亂 wiki.last_page。
+						_next[2].page_to_edit = page_data;
+						_next[2].page_title_to_edit = original_title;
+						_next[2].last_page_options = next[3];
+						_next[2].last_page_error = error;
+					} else {
+						library_namespace.error(
+						//
+						'wiki_API.prototype.next.page: ' + '無法設定欲編輯的頁面資訊: '
+								+ wiki_API.title_link_of(original_title) + '→'
+								+ wiki_API.title_link_of(page_data.title)
+								+ ' 不等於 ' + wiki_API.title_link_of(
+								//
+								_next[2].page_title_to_edit));
+						console.trace([ next, _next ]);
+					}
 				}
 
 				if (!page_data) {
@@ -1094,7 +1115,8 @@ function module_code(library_namespace) {
 			// console.trace(next[2]);
 			next[2] = library_namespace.setup_options(next[2]);
 			// `next[2].page_to_edit`: 手動指定要編輯的頁面。
-			if (!next[2].page_to_edit && !next[2].last_page_error) {
+			if (!next[2].page_to_edit && !next[2].last_page_error
+					&& (this.last_page || this.last_page_error)) {
 				// console.trace([ next, this.last_page ]);
 				// e.g., page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 				if (false) {
@@ -1105,6 +1127,7 @@ function module_code(library_namespace) {
 					// console.trace(next[2]);
 				}
 				next[2].page_to_edit = this.last_page;
+				next[2].last_page_options = this.last_page_options;
 				next[2].last_page_error = this.last_page_error;
 			}
 			// console.trace(next[2]);

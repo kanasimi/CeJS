@@ -1547,6 +1547,7 @@ function module_code(library_namespace) {
 				} else if (/^(?:(?:About|For|Further|Main|Other|Redirect|See)(?:\w+|([\s\-]?\w+)+)?|Distinguish|Qnote)$/
 				// [[Category:Hatnote templates]]
 				.test(token.name)) {
+					// TODO: 若 [[w:zh:Template:DYKEntry/archive]] 這種自包含章節標題的模板放在首段，插入時會出錯。
 					set_index('hatnote_templates');
 				} else if (/^(?:Db-\w+)$|^(?:Proposed deletion|Article for deletion)/
 						.test(token.name)) {

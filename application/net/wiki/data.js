@@ -6150,7 +6150,7 @@ function module_code(library_namespace) {
 			PATTERN =
 			// [ all, title, sitelink, miscellaneous ]
 			// TODO: use PATTERN_wikilink
-			/\n\|\s*\[\[([^{}\[\]\|<>\n�]+)\|([^\[\]\n]*?)\]\]\s*\|\|([^\n]+)/g
+			/\n\|\s*\[\[([^{}\[\]\|<>\t\n�]+)\|([^\[\]\t\n]*?)\]\]\s*\|\|([^\t\n]+)/g
 			//
 			;
 			while (matched = PATTERN.exec(data)) {
@@ -6169,7 +6169,7 @@ function module_code(library_namespace) {
 				}
 				if ((matched = miscellaneous[4])
 				// @see function to_talk_page(page_title, options)
-				&& (matched = matched.match(/\[\[:d:([^{}\[\]\|<>\n#�:]+)/))) {
+				&& (matched = matched.match(/\[\[:d:([^{}\[\]\|<>\t\n#�:]+)/))) {
 					item.wikidata = matched[1];
 				}
 				items.push(item);

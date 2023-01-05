@@ -985,7 +985,7 @@ function module_code(library_namespace) {
 		/**
 		 * 解析用之起始特殊標記。<br />
 		 * 需找出一個文件中不可包含，亦不會被解析的字串，作為解析用之起始特殊標記。<br />
-		 * e.g., '\u0000' === '\0'.<br />
+		 * e.g., '\u0000' === '\x00' === '\0'.<br />
 		 * include_mark + ({ℕ⁰:Natural+0}index of queue) + end_mark
 		 * 
 		 * assert: /\s/.test(include_mark) === false
@@ -998,7 +998,7 @@ function module_code(library_namespace) {
 		/**
 		 * {String}結束之特殊標記。 end of include_mark. 不可為數字 (\d) 或
 		 * include_mark，不包含會被解析的字元如 /;/。應為 wikitext 所不容許之字元。<br />
-		 * e.g., '\u0001'.<br />
+		 * e.g., '\x01' === '\u0001'.<br />
 		 */
 		end_mark = options.end_mark || '\x01',
 		/** {Boolean}是否順便作正規化。預設不會規範頁面內容。 */
@@ -1776,8 +1776,10 @@ function module_code(library_namespace) {
 				}
 				// console.log(anchor);
 				// wikilink_token.anchor without "#" 網頁錨點 section_title
-				parameters.anchor = wiki_API.parse.anchor
-						.normalize_anchor(anchor);
+				parameters.anchor = wiki_API.parse.anchor.normalize_anchor(
+						anchor, true)
+				// 只去除結尾的空白，保留前面的一個。
+				.replace(/^\s+/, ' ').trimEnd();
 				// TODO: [[Special:]]
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
 				if (page_name.oddly === 'link_inside_file') {
@@ -2253,7 +2255,7 @@ function module_code(library_namespace) {
 				// whitespace between the opening braces and the "subst:"
 				// [^...]: incase `{{ {{UCFIRST:T}} | tl }}`
 				// @see PATTERN_invalid_page_name_characters
-				var PATTERN_MAGIC_WORD = /^([^{}\[\]\|<>\n#�:]+):([\s\S]*)$/;
+				var PATTERN_MAGIC_WORD = /^([^{}\[\]\|<>\t\n#�:]+):([\s\S]*)$/;
 				var namespace = parameters.name.match(PATTERN_MAGIC_WORD);
 				// console.trace([ parameters.name, namespace ]);
 				if (!namespace)

@@ -3833,6 +3833,9 @@ function test_wiki() {
 		wikitext = '[[T{{ \n!\n }}t{{ \n!}}l]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['t{{ \n!}}l', parsed[0][2].toString()], 'wikilink: display_text');
+		wikitext = '[[a\ta]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert([wikitext, parsed], 'invalid wikilink: No \\t allowed. Using preview to check.');
 
 		wikitext = '--{{unsigned|user}}--'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -4238,6 +4241,12 @@ function test_wiki() {
 		wikitext = '<span id="修改[[WP:命名常規#地名|命名常規#地名]]一節"></span>'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: <span id="[[]]"> #1');
 		assert(["修改[[WP:命名常規#地名|命名常規#地名]]一節", CeL.wiki.parse.anchor(wikitext).join()], 'wiki.parse.anchor: <span id="[[]]"> #1');
+		wikitext = '==[[file:a.jpg|20px]]&nbsp;t ==\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'CeL.wiki.parse.anchor: #2');
+		assert([" t", CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor: #2-1');
+		wikitext = '== t&nbsp;[[file:a.jpg|20px]]==\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'CeL.wiki.parse.anchor: #3');
+		assert(["t ", CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor: #3-1');
 
 		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', p2: 'vp2' })], 'template_object_to_wikitext: #1');
 		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');

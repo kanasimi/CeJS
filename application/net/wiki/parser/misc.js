@@ -1046,10 +1046,10 @@ function module_code(library_namespace) {
 	// https://phabricator.wikimedia.org/T183711
 	// Doesn't conflict with any language code or other interwiki link.
 	// https://gerrit.wikimedia.org/r/#/c/400267/4/wmf-config/InitialiseSettings.php
-	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\n#�\/])+)/i,
+	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?|UT?) *: *((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\t\n#�\/])+)/i,
 	// [[特殊:功績]]: zh-classical, [[特別:投稿記録]]: ja
 	// matched: [ all, " user name " ]
-	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊|特別) *: *(?:Contributions|Contribs|使用者貢獻|用戶貢獻|(?:用户)?贡献|投稿記録|功績)\/((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\n#�\/])+)/i,
+	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊|特別) *: *(?:Contributions|Contribs|使用者貢獻|用戶貢獻|(?:用户)?贡献|投稿記録|功績)\/((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\t\n#�\/])+)/i,
 	//
 	PATTERN_user_link_all = new RegExp(PATTERN_user_link.source, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
 			PATTERN_user_contributions_link.source, 'ig');
@@ -1215,7 +1215,7 @@ function module_code(library_namespace) {
 	 *      https://en.wikipedia.org/wiki/Help:Redirect
 	 *      https://phabricator.wikimedia.org/T68974
 	 */
-	var PATTERN_redirect = /^[\s\n]*#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^{}\[\]\|<>\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i;
+	var PATTERN_redirect = /^[\s\n]*#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^{}\[\]\|<>\t\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i;
 
 	/**
 	 * parse redirect page. 解析重定向資訊，或判斷頁面是否為重定向頁面。<br />
@@ -1411,7 +1411,7 @@ function module_code(library_namespace) {
 			// <source lang="cpp">
 			.replace(/<\/?(?:nowiki|code|syntaxhighlight)>/g, '')
 			// wikilink → page title
-			.replace(/^\[\[ *:?([^{}\[\]\|<>\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/,
+			.replace(/^\[\[ *:?([^{}\[\]\|<>\t\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/,
 					'$1')
 			// Remove comments
 			.replace(/<!--[\s\S]*?-->/g, '');
