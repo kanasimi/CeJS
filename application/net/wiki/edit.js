@@ -95,6 +95,7 @@ function module_code(library_namespace) {
 		}
 		if (!title && !(title = wiki_API.check_stop.title(options.token))) {
 			callback();
+			return;
 		}
 
 		library_namespace.debug({

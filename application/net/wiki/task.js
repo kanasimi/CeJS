@@ -188,9 +188,14 @@ function module_code(library_namespace) {
 	};
 
 	// @inner
-	function set_page_to_edit(options, page_data) {
-		if (options && options.page_to_edit === true)
-			options.page_to_edit = page_data;
+	function set_page_to_edit(options, page_data, error, page_title) {
+		if (!options || options.page_to_edit !== true)
+			return;
+		if (page_title)
+			options.page_title_to_edit = page_title;
+		options.page_to_edit = page_data;
+		options.last_page_error = error;
+		// options.last_page_options = options;
 	}
 
 	// @inner
@@ -479,7 +484,8 @@ function module_code(library_namespace) {
 				// console.trace(next);
 				this.last_page = next[1];
 				// console.trace(next[1]);
-				set_page_to_edit(next[3], next[1]);
+				set_page_to_edit(next[3], next[1], this.last_page,
+						this.last_page_error);
 				// next[2] : callback
 				this.next(next[2], next[1]);
 				break;
@@ -493,7 +499,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('採用前次的回傳以避免重複取得頁面。', 2,
 						'wiki_API.prototype.next');
 				// console.trace('採用前次的回傳以避免重複取得頁面: ' + next[1]);
-				set_page_to_edit(next[3], next[1]);
+				set_page_to_edit(next[3], next[1], this.last_page_error);
 				// next[2] : callback
 				this.next(next[2], this.last_page,
 				// @see "合併取得頁面的操作"
@@ -505,9 +511,9 @@ function module_code(library_namespace) {
 
 			if (typeof next[1] === 'function') {
 				// this.page(callback): callback(last_page)
-				set_page_to_edit(next[3], next[1]);
+				set_page_to_edit(next[3], this.last_page, this.last_page_error);
 				// next[1] : callback
-				this.next(next[1], this.last_page);
+				this.next(next[1], this.last_page, this.last_page_error);
 				break;
 			}
 
@@ -566,7 +572,7 @@ function module_code(library_namespace) {
 				_this.last_page_options = next[3];
 				_this.last_page_error = error;
 
-				set_page_to_edit(next[3], page_data);
+				set_page_to_edit(next[3], page_data, error, next[1]);
 
 				var original_title = next[1];
 				// assert: typeof original_title === 'string'

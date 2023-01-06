@@ -992,6 +992,9 @@ function module_code(library_namespace) {
 			if (options.titles_buffer)
 				page_list = options.titles_buffer.append(page_list);
 			page_list.revisions_parameters = action[1];
+			// console.trace(page_list);
+			// console.trace(options);
+
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
 			callback(page_list);
