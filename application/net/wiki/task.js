@@ -187,12 +187,19 @@ function module_code(library_namespace) {
 				status_handler);
 	};
 
+	/** 代表欲自動設定 options.page_to_edit */
+	wiki_API.VALUE_set_page_to_edit = true;
+
 	// @inner
 	function set_page_to_edit(options, page_data, error, page_title) {
-		if (!options || options.page_to_edit !== true)
+		if (!options
+				|| options.page_to_edit !== wiki_API.VALUE_set_page_to_edit) {
 			return;
+		}
+
 		if (page_title)
 			options.page_title_to_edit = page_title;
+
 		options.page_to_edit = page_data;
 		options.last_page_error = error;
 		// options.last_page_options = options;
@@ -465,10 +472,16 @@ function module_code(library_namespace) {
 					|| Object.create(null);
 			// → 此法會採用所輸入之 page data 作為 this.last_page，不再重新擷取 page。
 			if (wiki_API.is_page_data(next[1])
+
 			// 檢查是否非 cached 的內容。
 			&& (!next[3] || (!next[3].rvprop
 			//
 			|| next[3].rvprop === revisions_parameters.rvprop))
+
+			&& (!next[3]
+			// 重複編輯同一個頁面？
+			|| next[3].page_to_edit !== wiki_API.VALUE_set_page_to_edit)
+
 			// 必須有頁面內容，要不可能僅有資訊。有時可能已經擷取過卻發生錯誤而沒有頁面內容，此時依然會再擷取一次。
 			&& (wiki_API.content_of.has_content(next[1],
 			//
@@ -1205,9 +1218,9 @@ function module_code(library_namespace) {
 			//
 			&& !wiki_API.content_of.had_fetch_content(next[2].page_to_edit)) {
 				console.trace(this);
-				console.trace(next);
-				console.trace(next[2].page_to_edit);
-				console.trace(this.actions);
+				console.trace('next: ', next);
+				console.trace('page_to_edit: ', next[2].page_to_edit);
+				console.trace('this.actions: ', this.actions);
 				throw new Error(
 						'wiki_API.prototype.next: There are multiple threads competing with each other? 有多個執行緒互相競爭？');
 				library_namespace
@@ -1458,7 +1471,7 @@ function module_code(library_namespace) {
 				// e.g., 重複利用當過 .edit() 的 options，必須先 `delete
 				// options.rollback_action`。
 				delete next[2].rollback_action;
-				// next[2].page_to_edit = true;
+				// next[2].page_to_edit = wiki_API.VALUE_set_page_to_edit;
 				// delete next[2].page_to_edit;
 
 				// next[3] : callback
@@ -3267,8 +3280,7 @@ function module_code(library_namespace) {
 				|| config.log_nochange)) {
 					// console.trace(log_to);
 					// CeL.set_debug(6);
-					// @see set_page_to_edit(options, page_data)
-					log_options.page_to_edit = true;
+					log_options.page_to_edit = wiki_API.VALUE_set_page_to_edit;
 					session.page(log_to, log_options)
 					// 將 robot 運作記錄、log summary 報告結果寫入 log 頁面。
 					// TODO: 以表格呈現。
@@ -3292,8 +3304,9 @@ function module_code(library_namespace) {
 							+ messages.join('<br />\n'));
 							// console.trace([ log_options, messages ]);
 
-							// @see set_page_to_edit(log_options, page_data)
-							log_options.page_to_edit = true;
+							log_options.page_to_edit
+							//
+							= wiki_API.VALUE_set_page_to_edit;
 
 							// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
 							// TODO: bug: 當分批時，只會寫入最後一次。
