@@ -546,12 +546,16 @@ function module_code(library_namespace) {
 			// wiki.page().edit(,()=>wiki.page().edit(,))
 			delete this.last_page;
 
-			if (this.actions[0] && this.actions[0][0] === 'edit') {
+			if (false && this.actions[0] && this.actions[0][0] === 'edit') {
 				// page-edit 組合式操作。設定等待先前的取得頁面操作中。
 				this.actions[0].waiting_for_previous_combination_operation = true;
 			}
 
 			// console.trace(next[1]);
+
+			// 設定個僅 debug 用、無功能的註記。
+			// next[3] : options
+			next[3].actions_when_fetching_page = [ next ].append(this.actions);
 
 			// this.page(title, callback, options)
 			// next[1] : title
@@ -585,12 +589,13 @@ function module_code(library_namespace) {
 				_this.last_page_options = next[3];
 				_this.last_page_error = error;
 
+				// next[3] : options
 				set_page_to_edit(next[3], page_data, error, next[1]);
 
 				var original_title = next[1];
 				// assert: typeof original_title === 'string'
 				var _next = _this.actions[0];
-				if (_next && _next[0] === 'edit'
+				if (false && _next && _next[0] === 'edit'
 				// _next[2]: options
 				&& typeof _next[2] === 'object'
 				//
@@ -1127,6 +1132,10 @@ function module_code(library_namespace) {
 
 			// console.trace(next, this.last_page);
 
+			// Warning: 複雜操作時，應該以 options 來承載編輯頁面資訊，
+			// 不該以 .page().edit() 依賴預設的 .last_page。
+			// 因為在 .page() 與 .edit() 間可能插入其他操作，改變 .last_page。
+
 			// 在多執行緒的情況下，例如下面
 			// `next[1] = next[1].call(next[2], next[2].page_to_edit)`
 			// 的時候，this.last_page 可能會被改變，因此先作個 cache。
@@ -1135,11 +1144,12 @@ function module_code(library_namespace) {
 			next[2] = library_namespace.setup_options(next[2]);
 			// `next[2].page_to_edit`: 手動指定要編輯的頁面。
 			if (!next[2].page_to_edit && !next[2].last_page_error
-					&& (this.last_page || this.last_page_error)) {
+			// && next[2].page_to_edit !== wiki_API.VALUE_set_page_to_edit
+			&& (this.last_page || this.last_page_error)) {
 				// console.trace([ next, this.last_page ]);
 				// e.g., page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 				if (false) {
-					console.trace('Set .page_to_edit: '
+					console.trace('Set .page_to_edit:'
 							+ wiki_API.title_link_of(this.last_page) + ' ('
 							+ wiki_API.title_link_of(next[2].page_to_edit)
 							+ ')');
@@ -1155,14 +1165,16 @@ function module_code(library_namespace) {
 			// TODO: {String|RegExp|Array}filter
 
 			if (false && next[2].page_to_edit !== this.last_page) {
-				console.trace('session.edit: '
+				console.trace('session.edit:'
 						+ (next[2].page_to_edit && next[2].page_to_edit.title));
-				console.log('last_page: '
+				console.log('last_page:'
 						+ (this.last_page && this.last_page.title));
 			}
 
-			if (!next[2].page_to_edit) {
-				if (this.actions.promise_relying
+			if (!next[2].page_to_edit
+			// && next[2].page_to_edit !== wiki_API.VALUE_set_page_to_edit
+			) {
+				if (false && this.actions.promise_relying
 						&& next.waiting_for_previous_combination_operation) {
 					// e.g., `await wiki.edit_page(wiki.to_talk_page(page_data)`
 					// @ routine/20191129.check_language_conversion.js
@@ -1218,13 +1230,14 @@ function module_code(library_namespace) {
 			//
 			&& !wiki_API.content_of.had_fetch_content(next[2].page_to_edit)) {
 				console.trace(this);
-				console.trace('next: ', next);
-				console.trace('page_to_edit: ', next[2].page_to_edit);
-				console.trace('this.actions: ', this.actions);
+				console.trace('next:', next);
+				console.trace('page_to_edit:', next[2].page_to_edit);
+				console.trace('this.actions:', this.actions);
 				throw new Error(
 						'wiki_API.prototype.next: There are multiple threads competing with each other? 有多個執行緒互相競爭？');
 				library_namespace
 						.error('wiki_API.prototype.next: 有多個執行緒互相競爭？本執行緒將會直接跳出，等待另一個取得頁面內容的執行緒完成後，由其處理。');
+				this.actions.unshift(next);
 				break;
 			}
 

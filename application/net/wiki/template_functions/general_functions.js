@@ -539,6 +539,9 @@ function module_code(library_namespace) {
 
 		'Module:IPAddress' : parse_module_IPAddress,
 
+		// TODO
+		// 'Module:Unsubst' : parse_module_Unsubst,
+
 		// 'Template link'
 		Tl : parse_template_Template_link
 	};

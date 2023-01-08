@@ -1822,7 +1822,7 @@ function module_code(library_namespace) {
 					.trace([
 							session.running,
 							session.actions.length,
-							session.actions[0].waiting_for_previous_combination_operation,
+							// session.actions[0].waiting_for_previous_combination_operation,
 							session.actions, wikitext ]);
 			console.trace([ latest_action_count, session.actions.length,
 					was_running, session.running ]);
