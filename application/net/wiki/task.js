@@ -553,9 +553,12 @@ function module_code(library_namespace) {
 
 			// console.trace(next[1]);
 
-			// 設定個僅 debug 用、無功能的註記。
 			// next[3] : options
-			next[3].actions_when_fetching_page = [ next ].append(this.actions);
+			if (next[3]) {
+				// 設定個僅 debug 用、無功能的註記。
+				next[3].actions_when_fetching_page = [ next ]
+						.append(this.actions);
+			}
 
 			// this.page(title, callback, options)
 			// next[1] : title
@@ -1230,6 +1233,8 @@ function module_code(library_namespace) {
 			//
 			&& !wiki_API.content_of.had_fetch_content(next[2].page_to_edit)) {
 				console.trace(this);
+				console.trace('actions_when_fetching_page:',
+						next[2].actions_when_fetching_page);
 				console.trace('next:', next);
 				console.trace('page_to_edit:', next[2].page_to_edit);
 				console.trace('this.actions:', this.actions);

@@ -1409,11 +1409,24 @@ function module_code(library_namespace) {
 				}
 				this.actions.push(args);
 				// console.trace([ this.running, this.actions.length, args ]);
-				if (false && method === 'edit'
-						&& (!args[2] || !args[2].page_to_edit)) {
-					console.trace('No options.page_to_edit set!');
-					console.log(this.actions);
+				if (method === 'edit'
+						&& (!args[2] || !('page_to_edit' in args[2]))) {
+					//console.trace('No options.page_to_edit set!');
+					//console.log(this.actions);
+					if (!args[2])
+						args[2] = Object.create(null);
+					// 自動配給一個。
+					// @see set_page_to_edit(options, page_data)
+					args[2].page_to_edit = true;
 				}
+				if (method === 'edit' && this.actions.at(-1)
+				// next[3] : options
+				&& !this.actions.at(-1)[3]) {
+					// 自動配給一個。
+					this.actions[this.actions.length - 1][3] = {
+						page_to_edit : true
+					};
+				} 
 
 				if (method === 'page' && typeof args[1] === 'string' && args[3]
 						&& args[3].page_title_to_edit
