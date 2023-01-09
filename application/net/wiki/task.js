@@ -1175,9 +1175,8 @@ function module_code(library_namespace) {
 			}
 
 			if (!next[2].page_to_edit
-			// && next[2].page_to_edit !== wiki_API.VALUE_set_page_to_edit
-			) {
-				if (false && this.actions.promise_relying
+					|| next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit) {
+				if (this.actions.promise_relying
 						&& next.waiting_for_previous_combination_operation) {
 					// e.g., `await wiki.edit_page(wiki.to_talk_page(page_data)`
 					// @ routine/20191129.check_language_conversion.js

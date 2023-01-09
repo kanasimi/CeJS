@@ -1131,7 +1131,7 @@ function test_locale() {
 		messages.push('No page modified' + ',', ['%1 elapsed.', ['%1 min', 2]]);
 
 		CeL.gettext.use_domain('zh', true);
-		assert(['全無變更。沒有修改頁面，共費時 2分。', messages.toString()]);
+		assert(['全無變更。未修改任何頁面，共費時 2分。', messages.toString()]);
 
 		CeL.gettext.use_domain('en', true);
 		assert(['No changes. No page modified, 2 min elapsed.', messages.toString()]);
