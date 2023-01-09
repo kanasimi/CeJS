@@ -193,7 +193,7 @@
 	"loading-$1$": "已載入 %1%…",
 	"finished": "完成",
 	"no-changes": "全無變更。",
-	"no-page-modified": "沒有修改頁面",
+	"no-page-modified": "未修改任何頁面",
 	"$1-word(s)-in-this-chapter": "本章共 %1 {{PLURAL:1|個字}}",
 	"$1-word(s)-accumulated": "累計 %1 {{PLURAL:1|個字}}",
 	"to-chinese-numerals": "中文數字",
