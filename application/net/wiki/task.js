@@ -602,7 +602,9 @@ function module_code(library_namespace) {
 				// _next[2]: options
 				&& typeof _next[2] === 'object'
 				//
-				&& !_next[2].page_to_edit) {
+				&& (!_next[2].page_to_edit
+				//
+				|| _next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit)) {
 					if (!_next[2].page_title_to_edit
 					//
 					|| _next[2].page_title_to_edit === original_title) {
@@ -1146,9 +1148,9 @@ function module_code(library_namespace) {
 			// console.trace(next[2]);
 			next[2] = library_namespace.setup_options(next[2]);
 			// `next[2].page_to_edit`: 手動指定要編輯的頁面。
-			if (!next[2].page_to_edit && !next[2].last_page_error
-			// && next[2].page_to_edit !== wiki_API.VALUE_set_page_to_edit
-			&& (this.last_page || this.last_page_error)) {
+			if ((!next[2].page_to_edit || next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit)
+					&& !next[2].last_page_error
+					&& (this.last_page || this.last_page_error)) {
 				// console.trace([ next, this.last_page ]);
 				// e.g., page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 				if (false) {
@@ -1246,8 +1248,10 @@ function module_code(library_namespace) {
 			}
 
 			var check_and_delete_revisions = function() {
-				if (!next[2].page_to_edit)
+				if (!next[2].page_to_edit
+						|| next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit) {
 					return;
+				}
 				var next_action = _this.actions[0];
 				if (next_action && next_action[0] === 'edit'
 				// 明確指定內容時，只要知道標題即可，不必特地檢查是否有內容。
