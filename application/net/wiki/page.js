@@ -1471,33 +1471,26 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	if (false) {
-		CeL.wiki.convert_Chinese('中国', function(converted_text) {
-			converted_text === "中國";
-		});
-
-		CeL.wiki.convert_Chinese([ '繁體', '簡體' ], function(converted_hans) {
-			converted_hans[0] === "繁体";
-		}, {
-			uselang : 'zh-hans'
-		});
-	}
-
-	// wiki API 繁簡轉換
-	wiki_API.convert_Chinese = function convert_Chinese(text, callback, options) {
+	// wiki_session.convert_languages()
+	function get_language_variants(text, uselang, callback, options) {
 		if (!text) {
 			// String(test)
 			callback(text === 0 ? '0' : '');
 			return;
 		}
 
-		if (typeof options === 'string') {
-			options = {
-				uselang : options
-			};
-		} else {
-			options = library_namespace.setup_options(options);
+		if (!uselang) {
+			callback(text, new Error('get_language_variants: '
+					+ 'No uselang specified!'));
+			return;
 		}
+
+		if (wiki_API.need_get_API_parameters('parse', options,
+				get_language_variants, arguments)) {
+			return;
+		}
+
+		options = library_namespace.setup_options(options);
 
 		var is_JSON;
 		if (typeof text === 'object') {
@@ -1520,7 +1513,7 @@ function module_code(library_namespace) {
 			// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
 			contentmodel : 'wikitext',
 			// 'zh-hans'
-			uselang : options.uselang || 'zh-hant',
+			uselang : uselang,
 			// prop=text|links
 			prop : 'text',
 			text : text
@@ -1529,8 +1522,10 @@ function module_code(library_namespace) {
 		var session = wiki_API.session_of_options(options);
 
 		// 由於用 [[link]] 也不會自動 redirect，因此直接轉換即可。
-		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
-		wiki_API.query([ session && session.API_URL || wiki_API.api_URL('zh'),
+		wiki_API.query([
+				session && session.API_URL
+						|| wiki_API.api_URL(uselang.replace(/\-.*$/, '')),
+				// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 				{
 					action : 'parse'
 				} ], function(data, error) {
@@ -1558,11 +1553,31 @@ function module_code(library_namespace) {
 					}
 				}
 			} catch (e) {
-				callback(undefined, e);
+				callback(text, e);
 				return;
 			}
 			callback(data);
 		}, post_data);
+	}
+
+	if (false) {
+		CeL.wiki.convert_Chinese('中国', function(converted_text) {
+			converted_text === "中國";
+		});
+
+		CeL.wiki.convert_Chinese([ '繁體', '簡體' ], function(converted_hans) {
+			converted_hans[0] === "繁体";
+		}, {
+			uselang : 'zh-hans'
+		});
+	}
+
+	// wiki API 繁簡轉換
+	wiki_API.convert_Chinese = function convert_Chinese(text, callback, options) {
+		var uselang = typeof options === 'string' ? options : options
+				&& options.uselang;
+
+		get_language_variants(text, uselang || 'zh-hant', callback, options);
 	};
 
 	// ------------------------------------------------------------------------

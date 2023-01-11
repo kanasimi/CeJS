@@ -197,8 +197,16 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (page_title)
+		if (page_title && !options.page_title_to_edit) {
 			options.page_title_to_edit = page_title;
+		}
+		if (options.page_title_to_edit
+				&& options.page_title_to_edit !== (page_data.original_title || page_data.title)) {
+			library_namespace.info('set_page_to_edit: ' + '所取得頁面的標題改變: '
+					+ wiki_API.title_link_of(options.page_title_to_edit) + '→'
+					+ wiki_API.title_link_of(page_data.title));
+			console.trace(options);
+		}
 
 		options.page_to_edit = page_data;
 		options.last_page_error = error;
@@ -597,17 +605,21 @@ function module_code(library_namespace) {
 
 				var original_title = next[1];
 				// assert: typeof original_title === 'string'
-				var _next = _this.actions[0];
-				if (false && _next && _next[0] === 'edit'
-				// _next[2]: options
-				&& typeof _next[2] === 'object'
+				var next_action = _this.actions[0];
+				if (false && next_action
 				//
-				&& (!_next[2].page_to_edit
+				&& next_action[0] === 'edit'
+				// next_action[2]: options
+				&& typeof next_action[2] === 'object'
 				//
-				|| _next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit)) {
-					if (!_next[2].page_title_to_edit
+				&& (!next_action[2].page_to_edit
+				//
+				|| next_action[2].page_to_edit
+				//
+				=== wiki_API.VALUE_set_page_to_edit)) {
+					if (!next_action[2].page_title_to_edit
 					//
-					|| _next[2].page_title_to_edit === original_title) {
+					|| next_action[2].page_title_to_edit === original_title) {
 						if (original_title !== page_data.title) {
 							library_namespace.info(
 							//
@@ -617,10 +629,10 @@ function module_code(library_namespace) {
 									+ wiki_API.title_link_of(page_data.title));
 						}
 						// 手動指定要編輯的頁面。避免多執行續打亂 wiki.last_page。
-						_next[2].page_to_edit = page_data;
-						_next[2].page_title_to_edit = original_title;
-						_next[2].last_page_options = next[3];
-						_next[2].last_page_error = error;
+						next_action[2].page_to_edit = page_data;
+						next_action[2].page_title_to_edit = original_title;
+						next_action[2].last_page_options = next[3];
+						next_action[2].last_page_error = error;
 					} else {
 						library_namespace.error(
 						//
@@ -629,8 +641,8 @@ function module_code(library_namespace) {
 								+ wiki_API.title_link_of(page_data.title)
 								+ ' 不等於 ' + wiki_API.title_link_of(
 								//
-								_next[2].page_title_to_edit));
-						console.trace([ next, _next ]);
+								next_action[2].page_title_to_edit));
+						console.trace([ next, next_action ]);
 					}
 				}
 
@@ -1275,7 +1287,9 @@ function module_code(library_namespace) {
 				// 預防連續編輯採用相同編輯選項。 var edit_options;
 				// wiki.page(A).edit(,edit_options);
 				// wiki.page(B).edit(,edit_options);
-				delete next[2].page_to_edit;
+
+				// delete next[2].page_to_edit;
+				next[2].page_to_edit = wiki_API.VALUE_set_page_to_edit;
 			};
 
 			if (!('stopped' in this)) {

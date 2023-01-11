@@ -3408,8 +3408,8 @@ function module_code(library_namespace) {
 		var session = wiki_API.session_of_options(options);
 		if (!session) {
 			// e.g., call `CeL.wiki.page();` directly with anonymous.
-			library_namespace.error('need_get_API_parameters: '
-					+ 'Must set session to check the necessity.');
+			library_namespace.debug('Must set session to check the necessity.',
+					1, 'need_get_API_parameters');
 			// console.trace(options);
 			return;
 		}
@@ -3491,7 +3491,9 @@ function module_code(library_namespace) {
 	var KEY_API_parameters_prefix = '\0API parameters prefix';
 	function get_API_parameters(path, options, callback) {
 		path = extract_path_from_parameters(path);
+		// Error.stackTraceLimit = Infinity;
 		// console.trace([ path, options ]);
+		// Error.stackTraceLimit = 10;
 		// https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo
 		wiki_API.query([ , {
 			action : 'paraminfo',
