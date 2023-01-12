@@ -144,7 +144,7 @@ function module_code(library_namespace) {
 	// 3 * ONE_DAY_LENGTH_VALUE === CeL.date.to_millisecond('3D')
 
 	/** {Number}一分鐘的 time 值(in milliseconds)。should be 60 * 1000 = 60000. */
-	ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
+	ONE_MINUTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
 	/** {Number}一整時辰的 time 值。should be 2 * 60 * 60 * 1000 = 7200000. */
 	ONE_時辰_LENGTH_VALUE = new Date(0, 0, 0, 2) - new Date(0, 0, 0, 0),
 
@@ -208,7 +208,7 @@ function module_code(library_namespace) {
 			// offset: convert local to UTC+0.
 			var offset;
 			if (is_Date(date)) {
-				offset = date.getTimezoneOffset() * ONE_MINTE_LENGTH_VALUE;
+				offset = date.getTimezoneOffset() * ONE_MINUTE_LENGTH_VALUE;
 				date = date.getTime();
 			} else {
 				offset = Julian_day.default_offset;
@@ -492,7 +492,7 @@ function module_code(library_namespace) {
 	 * @type {Integer}
 	 */
 	Julian_day.default_offset = present_local_minute_offset
-			* ONE_MINTE_LENGTH_VALUE;
+			* ONE_MINUTE_LENGTH_VALUE;
 
 	// Get the epoch of Julian date, i.e., -4713/11/24 12:0
 	(function() {
@@ -937,7 +937,7 @@ function module_code(library_namespace) {
 			//
 			&& !isNaN(minute_offset) && minute_offset !== DEFAULT_TIME_ZONE) {
 				date_value -= (present_local_minute_offset + minute_offset)
-						* ONE_MINTE_LENGTH_VALUE;
+						* ONE_MINUTE_LENGTH_VALUE;
 			}
 			date_value = new Date(date_value);
 			if (period_end) {
@@ -1382,7 +1382,7 @@ function module_code(library_namespace) {
 			accuracy = date;
 		} else if (!isNaN(matched = Date.parse(date))) {
 			date = new Date(matched + String_to_Date.default_offset
-					* ONE_MINTE_LENGTH_VALUE).toISOString()
+					* ONE_MINUTE_LENGTH_VALUE).toISOString()
 			//
 			.match(/^\d+-\d+-\d+/)[0].replace(/^0+/, '').replace(/(\d)-0*/g,
 					'$1\/');
@@ -1584,7 +1584,7 @@ function module_code(library_namespace) {
 		// to this minute offset. UTC+8: 8 * 60 = +480
 		// or using options.minute_offset?
 		if (!isNaN(options.offset)) {
-			date_value = new Date(date_value.getTime() + ONE_MINTE_LENGTH_VALUE
+			date_value = new Date(date_value.getTime() + ONE_MINUTE_LENGTH_VALUE
 					* (options.offset - String_to_Date.default_offset));
 		}
 
@@ -2359,7 +2359,7 @@ function module_code(library_namespace) {
 		});
 		Julian_Date_epoch = Julian_Date_epoch.getTime()
 				+ (present_local_minute_offset - (Julian_Date_epoch
-						.getTimezoneOffset() || 0)) * ONE_MINTE_LENGTH_VALUE;
+						.getTimezoneOffset() || 0)) * ONE_MINUTE_LENGTH_VALUE;
 	}
 
 	// 預設的 Gregorian calendar 改曆日期:
@@ -2516,7 +2516,7 @@ function module_code(library_namespace) {
 		var index = Math.floor((date_value - DATE_STEM_BRANCH_EPOCH
 		// 修正不同年代時刻間的時區差。
 		- (date_value.getTimezoneOffset() - DATE_STEM_BRANCH_minute_offset)
-				* ONE_MINTE_LENGTH_VALUE)
+				* ONE_MINUTE_LENGTH_VALUE)
 				/ ONE_DAY_LENGTH_VALUE);
 		// 針對需要子初分日者特別處理:直接算入下一天。
 		if (Date_to_String['子初分日'] && date_value.getHours() === 23) {
@@ -2535,7 +2535,7 @@ function module_code(library_namespace) {
 		date_value = date_value - HOUR_STEM_BRANCH_epoch
 		// 修正不同年代時刻間的時區差。
 		- (date_value.getTimezoneOffset() - HOUR_STEM_BRANCH_minute_offset)
-				* ONE_MINTE_LENGTH_VALUE;
+				* ONE_MINUTE_LENGTH_VALUE;
 		return date_value / ONE_時辰_LENGTH_VALUE;
 	}
 
@@ -3388,7 +3388,7 @@ function module_code(library_namespace) {
 			if (!a && isNaN(a = format_date.UTC_offset)) {
 				// input UTC 時之差距(milliseconds)
 				// .getTimezoneOffset() is in minute.
-				a = format_date.UTC_offset = ONE_MINTE_LENGTH_VALUE
+				a = format_date.UTC_offset = ONE_MINUTE_LENGTH_VALUE
 						* present_local_minute_offset;
 			}
 

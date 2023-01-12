@@ -215,7 +215,7 @@ function module_code(library_namespace) {
 	/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 	/** {Number}一分鐘的 time 值(in milliseconds)。should be 60 * 1000 = 60000. */
-	ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
+	ONE_MINUTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
 
 	CE_REFORM_YEAR = library_namespace.Gregorian_reform_date.getFullYear(),
 
@@ -3764,13 +3764,24 @@ function module_code(library_namespace) {
 		if (!this.year_start)
 			this.initialize();
 
-		var 歲序 = this.year_start.search_sorted(date, {
+		var date_value;
+		if (is_Date(date)) {
+			date_value = date.getTime()
+			// 有些古老時代，例如"西漢哀帝元壽2年6月26日"，這兩個數值有差異，必須修正。
+			- (date.getTimezoneOffset() - present_local_minute_offset)
+					* ONE_MINUTE_LENGTH_VALUE;
+		} else {
+			date_value = +date;
+		}
+
+		var 歲序 = this.year_start.search_sorted(date_value, {
 			found : true
 		}),
 		//
 		month_data = this.calendar[歲序], 月序 = 0, days,
 		//
-		日序 = Math.floor((date - this.year_start[歲序]) / ONE_DAY_LENGTH_VALUE);
+		日序 = Math.floor((date_value - this.year_start[歲序])
+				/ ONE_DAY_LENGTH_VALUE);
 
 		if (!month_data) {
 			if (accept_end && 日序 === 0)
@@ -5889,7 +5900,7 @@ function module_code(library_namespace) {
 	 */
 	function add_contemporary(date, 指定紀年, options) {
 		var tmp, date_index, time_offset = date.getTimezoneOffset()
-				* ONE_MINTE_LENGTH_VALUE,
+				* ONE_MINUTE_LENGTH_VALUE,
 		// 以當日為單位而非採用精準時間
 		use_whole_day = options && ('use_whole_day' in options)
 		//
@@ -6040,7 +6051,7 @@ function module_code(library_namespace) {
 				if (date_index = era.Date_to_date_index(date
 				// 轉成目標共存紀年的當日零時。
 				- time_offset + (era[MINUTE_OFFSET_KEY] || 0)
-						* ONE_MINTE_LENGTH_VALUE)) {
+						* ONE_MINUTE_LENGTH_VALUE)) {
 					// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
 					date_index = era.日名(date_index[2], date_index[1],
 							date_index[0]).reverse();
@@ -6088,9 +6099,7 @@ function module_code(library_namespace) {
 	}
 
 	// e.g., UTC+8: -8 * 60 = -480
-	var present_local_minute_offset = (new Date).getTimezoneOffset() || 0,
-	//
-	ONE_MINUTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 1) - new Date(0, 0, 1, 0, 0);
+	var present_local_minute_offset = (new Date).getTimezoneOffset() || 0;
 
 	function offseted_value(minute_offset) {
 		if (minute_offset === undefined)
