@@ -1300,6 +1300,38 @@ function module_code(library_namespace) {
 
 			// ----------------------------------------------------------------
 
+		case '#expr':
+			var expression = get_parameter_String(1, true);
+			function eval_expr(expression) {
+				expression = expression.replace(
+				//
+				/(\d+(?:\.\d+)?)\s*([+\-*/])\s*(\d+(?:\.\d+)?)/g,
+				//
+				function(all, _1, op, _2) {
+					_1 = +_1;
+					_2 = +_2;
+					switch (op) {
+					case '+':
+						return _1 + _2;
+					case '-':
+						return _1 - _2;
+					case '*':
+						return _1 * _2;
+					case '/':
+						return _1 / _2;
+					}
+				}).replace(/\(\s*(\d+(?:\.\d+)?)\s*\)/g, '$1').trim();
+				if (/^\d+(?:\.\d+)?$/.test(expression))
+					return +expression;
+				return NYI();
+			}
+			if (library_namespace.is_thenable(expression)) {
+				return expression.then(eval_expr);
+			}
+			return eval_expr(expression);
+
+			// ----------------------------------------------------------------
+
 		default:
 			return NYI();
 		}

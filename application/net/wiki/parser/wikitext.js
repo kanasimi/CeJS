@@ -435,6 +435,9 @@ function module_code(library_namespace) {
 	 */
 	var PATTERN_is_dot_encoded = /^([\w\s\-~!*'();:@&=+$,/?#\[\]]|\.[\dA-F]{2})+$/;
 
+	// [[MediaWiki:Converter-manual-rule-error]]: 在手动语言转换规则中检测到错误
+	var VALUE_converter_rule_error = 'converter-manual-rule-error';
+
 	/**
 	 * .toString() of wiki elements: wiki_token_toString[token.type]<br />
 	 * parse_wikitext() 將把 wikitext 解析為各 {Array} 組成之結構。當以 .toString() 結合時，將呼叫
@@ -650,11 +653,14 @@ function module_code(library_namespace) {
 					convert_to = this.conversion[language];
 			}
 
-			return convert_to
-			//
-			|| typeof this.converted === 'string' && this.converted
-			// [[MediaWiki:Converter-manual-rule-error]]: 在手动语言转换规则中检测到错误
-			|| 'converter-manual-rule-error';
+			if (convert_to)
+				return convert_to;
+			if (typeof this.converted === 'string' && this.converted)
+				return this.converted;
+
+			// e.g., "-{zh-cn:下划线; zh-tw:底線}-" .toString('zh')
+			// console.trace([ this, arguments ]);
+			return VALUE_converter_rule_error;
 		},
 
 		// Behavior switches
@@ -1335,7 +1341,9 @@ function module_code(library_namespace) {
 				parameters.converted = parameters[0];
 			} else if (options.language) {
 				// TODO: 先檢測當前使用的語言，然後轉成在當前環境下轉換過、會顯示出的結果。
-				parameters.converted = parameters.toString(options.language);
+				var converted = parameters.toString(options.language);
+				if (converted !== VALUE_converter_rule_error)
+					parameters.converted = converted;
 			}
 
 			queue.push(parameters);

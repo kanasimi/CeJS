@@ -1713,6 +1713,11 @@ function module_code(library_namespace) {
 						first_imprecise_token = token;
 						return for_each_token.exit;
 					}
+					if (false && token.type === 'transclusion'
+							&& /^Cite \w+/.test(template_token.name)) {
+						first_imprecise_token = token;
+						return for_each_token.exit;
+					}
 					// e.g., [https://url ]
 					if (token.type === 'external_link' && !token[2]) {
 						first_imprecise_token = token;
@@ -1818,12 +1823,9 @@ function module_code(library_namespace) {
 			node 20201008.fix_anchor.js use_project=en "check_page=WABC (AM)"
 			</code>
 			 */
-			console
-					.trace([
-							session.running,
-							session.actions.length,
-							// session.actions[0].waiting_for_previous_combination_operation,
-							session.actions, wikitext ]);
+			console.trace([ session.running, session.actions.length,
+			// session.actions[0].waiting_for_previous_combination_operation,
+			session.actions, wikitext ]);
 			console.trace([ latest_action_count, session.actions.length,
 					was_running, session.running ]);
 			if (latest_action_count > 0 && was_running) {

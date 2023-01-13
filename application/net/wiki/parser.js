@@ -1478,11 +1478,11 @@ function module_code(library_namespace) {
 			'authority_control_templates', 'featured_template', 'DEFAULTSORT' ];
 
 	// TODO: analysis wiki page layout 定位版面布局元素
+	// [[w:en:Wikipedia:Talk page layout#Talk page layout]]
 	// search anchor tokens of elements @ [[WP:LAY]],
 	// [[w:en:Wikipedia:Manual of Style/Layout#Order of article elements]],
 	// [[w:en:Wikipedia:Manual of Style/Lead section]]
 	// [[w:zh:Wikipedia:格式手冊/版面佈局#導言]]
-	// [[w:en:Wikipedia:Talk page layout]]
 	// location: 'hatnote', 'maintenance tag', 'navigation template'
 	function analysis_layout_indices(options) {
 		var parsed = this;
@@ -1547,7 +1547,8 @@ function module_code(library_namespace) {
 				} else if (/^(?:(?:About|For|Further|Main|Other|Redirect|See)(?:\w+|([\s\-]?\w+)+)?|Distinguish|Qnote)$/
 				// [[Category:Hatnote templates]]
 				.test(token.name)) {
-					// TODO: 若 [[w:zh:Template:DYKEntry/archive]] 這種自包含章節標題的模板放在首段，插入時會出錯。
+					// TODO: 若 [[w:zh:Template:DYKEntry/archive]]
+					// 這種自包含章節標題的模板放在首段，插入時會出錯。
 					set_index('hatnote_templates');
 				} else if (/^(?:Db-\w+)$|^(?:Proposed deletion|Article for deletion)/
 						.test(token.name)) {
@@ -1591,6 +1592,7 @@ function module_code(library_namespace) {
 			case 'section_title':
 				// 第一個有標題的段落亦可算作 content。
 				set_index('content');
+				// 機器人是看標題與起始 hatnote templates 來判斷。若這個模板之前還有其他章節標題的話，就不會出錯了。
 				set_index('lead_section_end', BACKTRACKING_SPACES);
 				break;
 
